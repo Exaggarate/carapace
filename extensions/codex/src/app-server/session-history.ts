@@ -1,16 +1,16 @@
 /** Reads model context separately from full-fidelity Codex mirror evidence. */
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
 import {
   getSessionEntry,
   parseSqliteSessionFileMarker,
   resolveTranscriptSessionKeyBySessionId,
   type SqliteSessionFileMarker,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import type {
   TranscriptTurnAdmission,
   SessionTranscriptTargetParams,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
 import {
   consumeCodexHistory,
   readCodexNativeHistory,

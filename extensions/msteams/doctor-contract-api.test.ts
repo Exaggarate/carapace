@@ -6,12 +6,12 @@ import path from "node:path";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginDoctorStateMigrationContext,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   legacyConfigRules,
@@ -80,8 +80,8 @@ describe("msteams doctor state migration", () => {
 
   beforeEach(async () => {
     resetPluginStateStoreForTests();
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-msteams-doctor-"));
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-msteams-doctor-"));
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   });
 
   afterEach(async () => {

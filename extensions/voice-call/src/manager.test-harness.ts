@@ -3,11 +3,11 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { onTestFinished } from "vitest";
 import { VoiceCallConfigSchema } from "./config.js";
 import { CallManager } from "./manager.js";
@@ -83,7 +83,7 @@ export class FakeProvider implements VoiceCallProvider {
 }
 
 export function createTestStorePath(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-voice-call-test-"));
+  return fs.mkdtempSync(path.join(os.tmpdir(), "carapace-voice-call-test-"));
 }
 
 function createVoiceCallStateRuntimeForTests(): VoiceCallStateRuntime["state"] {
@@ -250,7 +250,7 @@ export function createEventManagerHarness() {
   }
 
   function createContext(overrides: Partial<CallManagerContext> = {}): CallManagerContext {
-    const storePath = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-voice-call-events-test-"));
+    const storePath = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-voice-call-events-test-"));
     const ctx: CallManagerContext = {
       activeCalls: new Map(),
       providerCallIdMap: new Map(),

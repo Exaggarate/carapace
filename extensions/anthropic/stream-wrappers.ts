@@ -2,16 +2,16 @@
  * Anthropic stream wrappers. They add beta headers, service tier/fast-mode
  * payload fields, and thinking-prefill cleanup around provider stream functions.
  */
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { streamSimple } from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   resolveProviderEndpoint,
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
   supportsClaude1MContext,
   supportsClaudeFastMode,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   applyAnthropicPayloadPolicyToParams,
   composeProviderStreamWrappers,
@@ -20,13 +20,13 @@ import {
   isAnthropicOAuthApiKey,
   resolveAnthropicPayloadPolicy,
   resolveAnthropicServerCompactionPlan,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/provider-stream-shared";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
 import {
   normalizeFastMode,
   normalizeLowercaseStringOrEmpty,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const log = createSubsystemLogger("anthropic-stream");
 
@@ -34,14 +34,14 @@ const ANTHROPIC_CONTEXT_1M_BETA_LEGACY = "context-1m-2025-08-07";
 const ANTHROPIC_COMPACTION_BETA = "compact-2026-01-12";
 const ANTHROPIC_FAST_MODE_BETA = "fast-mode-2026-02-01";
 const ANTHROPIC_FAST_MODE_COST_MULTIPLIER = 2;
-const OPENCLAW_DEFAULT_ANTHROPIC_BETAS = [
+const CARAPACE_DEFAULT_ANTHROPIC_BETAS = [
   "fine-grained-tool-streaming-2025-05-14",
   "interleaved-thinking-2025-05-14",
 ] as const;
-const OPENCLAW_OAUTH_ANTHROPIC_BETAS = [
+const CARAPACE_OAUTH_ANTHROPIC_BETAS = [
   "claude-code-20250219",
   "oauth-2025-04-20",
-  ...OPENCLAW_DEFAULT_ANTHROPIC_BETAS,
+  ...CARAPACE_DEFAULT_ANTHROPIC_BETAS,
 ] as const;
 
 type AnthropicServiceTier = "auto" | "standard_only";
@@ -76,7 +76,7 @@ function mergeAnthropicBetaHeader(
   return merged;
 }
 
-export { isAnthropicOAuthApiKey } from "openclaw/plugin-sdk/provider-stream-shared";
+export { isAnthropicOAuthApiKey } from "carapace/plugin-sdk/provider-stream-shared";
 
 function resolveAnthropicFastServiceTier(enabled: boolean): AnthropicServiceTier {
   return enabled ? "auto" : "standard_only";
@@ -166,7 +166,7 @@ export function resolveAnthropicBetas(
   return betas.size > 0 ? [...betas] : undefined;
 }
 
-/** Wrap a stream function to merge OpenClaw and configured Anthropic beta headers. */
+/** Wrap a stream function to merge Carapace and configured Anthropic beta headers. */
 export function createAnthropicBetaHeadersWrapper(
   baseStreamFn: StreamFn | undefined,
   betas: string[],
@@ -176,10 +176,10 @@ export function createAnthropicBetaHeadersWrapper(
     const isOauth = isAnthropicOAuthApiKey(options?.apiKey);
     const effectiveBetas = betas.filter((beta) => beta !== ANTHROPIC_CONTEXT_1M_BETA_LEGACY);
 
-    const openClawBetas = isOauth
-      ? (OPENCLAW_OAUTH_ANTHROPIC_BETAS as readonly string[])
-      : (OPENCLAW_DEFAULT_ANTHROPIC_BETAS as readonly string[]);
-    const allBetas = [...new Set([...openClawBetas, ...effectiveBetas])];
+    const carapaceBetas = isOauth
+      ? (CARAPACE_OAUTH_ANTHROPIC_BETAS as readonly string[])
+      : (CARAPACE_DEFAULT_ANTHROPIC_BETAS as readonly string[]);
+    const allBetas = [...new Set([...carapaceBetas, ...effectiveBetas])];
     return underlying(model, context, {
       ...options,
       headers: mergeAnthropicBetaHeader(options?.headers, allBetas),

@@ -7,9 +7,9 @@ import type {
   CliBackendLiveSessionCloseReason,
   CliBackendLiveSessionHandle,
   CliBackendToolPermissionResult,
-} from "openclaw/plugin-sdk/cli-backend";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/cli-backend";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { hasClaudeRawToolInvocation } from "./cli-output.js";
 import type { ClaudeCliSecretInput } from "./cli-process.js";
 import { prepareClaudeCliTransportArgs } from "./cli-runtime-args.js";
@@ -69,7 +69,7 @@ async function authorizeTool(
   if (!turn || signal.aborted || typeof toolName !== "string" || !isRecord(input)) {
     return {
       behavior: "deny",
-      message: "The OpenClaw run or native tool input is no longer valid.",
+      message: "The Carapace run or native tool input is no longer valid.",
     };
   }
   const toolUseId = typeof request.tool_use_id === "string" ? request.tool_use_id : undefined;
@@ -87,11 +87,11 @@ async function authorizeTool(
           });
     // An operator decision can outlive its turn. Revalidate immediately before granting it.
     if (activeTurn(session) !== turn || abortSignal.aborted) {
-      return { behavior: "deny", message: "The OpenClaw run is no longer active." };
+      return { behavior: "deny", message: "The Carapace run is no longer active." };
     }
     return decision;
   } catch {
-    return { behavior: "deny", message: "OpenClaw could not authorize this tool call." };
+    return { behavior: "deny", message: "Carapace could not authorize this tool call." };
   }
 }
 
@@ -128,7 +128,7 @@ async function handleRequest(
       turn &&
       !signal.aborted &&
       typeof input.tool_name === "string" &&
-      input.tool_name.startsWith("mcp__openclaw__")
+      input.tool_name.startsWith("mcp__carapace__")
     ) {
       return { continue: true };
     }
@@ -325,7 +325,7 @@ export async function* executeClaudeCli(
             if (admittedTurn && activeTurn(session) === admittedTurn && !signal.aborted) {
               return response;
             }
-            const message = "The OpenClaw run is no longer active.";
+            const message = "The Carapace run is no longer active.";
             if (request.subtype === "can_use_tool") {
               return { behavior: "deny", message, toolUseID: request.tool_use_id };
             }

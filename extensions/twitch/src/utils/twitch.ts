@@ -1,5 +1,5 @@
 // Twitch plugin module implements twitch behavior.
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 /**
  * Twitch-specific utility functions

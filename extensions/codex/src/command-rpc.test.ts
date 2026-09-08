@@ -5,18 +5,18 @@ import {
   clearRuntimeAuthProfileStoreSnapshots,
   replaceRuntimeAuthProfileStoreSnapshots,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createEmptyPluginRegistry,
   getActivePluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   clearSessionStoreCacheForTest,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { withCodexAppServerJsonClient } from "./app-server/request.js";
 import { createClientHarness } from "./app-server/test-support.js";
@@ -34,7 +34,7 @@ vi.mock("./app-server/request.js", async (importOriginal) => ({
 describe("Codex command RPC helpers", () => {
   let tempDir: string;
   let agentDir: string;
-  let config: OpenClawConfig;
+  let config: CarapaceConfig;
   let harness: ReturnType<typeof createClientHarness>;
   let previousPluginRegistry: ReturnType<typeof getActivePluginRegistry>;
   const sessionKey = "agent:main:control";
@@ -72,9 +72,9 @@ describe("Codex command RPC helpers", () => {
       source: "test",
     });
     setActivePluginRegistry(registry);
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-control-auth-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-control-auth-"));
     agentDir = path.join(tempDir, "agents", "main", "agent");
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDir);
     vi.stubEnv("OPENAI_API_KEY", undefined);
     vi.stubEnv("CODEX_API_KEY", undefined);
     config = { agents: { defaults: { model: { primary: "openai/gpt-5.5" } } } };

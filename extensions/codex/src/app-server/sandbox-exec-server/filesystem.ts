@@ -1,9 +1,9 @@
 /**
  * Implements filesystem JSON-RPC handlers for the Codex sandbox exec-server
- * with OpenClaw sandbox policy checks before every bridge operation.
+ * with Carapace sandbox policy checks before every bridge operation.
  */
 import { posix as pathPosix } from "node:path";
-import type { SandboxFsStat } from "openclaw/plugin-sdk/sandbox";
+import type { SandboxFsStat } from "carapace/plugin-sdk/sandbox";
 import type { JsonObject, JsonValue } from "../protocol.js";
 import {
   assertFsSandboxAccess,
@@ -23,7 +23,7 @@ import {
   requireString,
 } from "./json-rpc.js";
 import { resolveExecServerPath } from "./path-uri.js";
-import type { DirectoryEntry, OpenClawExecServer, ResolvedFsSandboxPolicy } from "./types.js";
+import type { DirectoryEntry, CarapaceExecServer, ResolvedFsSandboxPolicy } from "./types.js";
 
 const CODEX_SANDBOX_EXEC_SERVER_MAX_READ_FILE_BYTES = 512 * 1024 * 1024;
 const CODEX_SANDBOX_EXEC_SERVER_MAX_OPEN_FILE_READS = 128;
@@ -45,7 +45,7 @@ export type CodexSandboxFileReadHandles = Map<string, CodexSandboxFileReadHandle
 
 /** Opens a policy-checked sandbox file under a bounded, connection-owned handle. */
 export async function openFile(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   handles: CodexSandboxFileReadHandles,
   params: JsonValue | undefined,
 ): Promise<JsonObject> {
@@ -221,7 +221,7 @@ function requireFileReadHandleId(value: unknown): string {
 
 /** Reads a sandbox file as base64 after read-policy and size checks. */
 export async function readFile(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<JsonObject> {
   const record = requireObject(params, "fs/readFile params");
@@ -242,7 +242,7 @@ export async function readFile(
 
 /** Writes base64 data to an existing sandbox directory after write-policy checks. */
 export async function writeFile(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<void> {
   const record = requireObject(params, "fs/writeFile params");
@@ -262,7 +262,7 @@ export async function writeFile(
 
 /** Creates a sandbox directory, respecting recursive and parent-directory semantics. */
 export async function createDirectory(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<void> {
   const record = requireObject(params, "fs/createDirectory params");
@@ -286,7 +286,7 @@ export async function createDirectory(
 
 /** Returns normalized metadata for a sandbox path. */
 export async function getMetadata(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<JsonObject> {
   const record = requireObject(params, "fs/getMetadata params");
@@ -303,7 +303,7 @@ export async function getMetadata(
 
 /** Lists sandbox directory entries visible under the resolved filesystem policy. */
 export async function readDirectory(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<JsonObject> {
   const record = requireObject(params, "fs/readDirectory params");
@@ -315,7 +315,7 @@ export async function readDirectory(
 }
 
 async function listDirectoryEntries(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   filePath: string,
   fsSandboxPolicy: ResolvedFsSandboxPolicy | undefined,
 ): Promise<DirectoryEntry[]> {
@@ -349,7 +349,7 @@ async function listDirectoryEntries(
 
 /** Removes a sandbox path after rejecting writes outside policy or under read-only descendants. */
 export async function removePath(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<void> {
   const record = requireObject(params, "fs/remove params");
@@ -368,7 +368,7 @@ export async function removePath(
 
 /** Copies sandbox files or recursive directories while enforcing source and destination policy. */
 export async function copyPath(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: JsonValue | undefined,
 ): Promise<void> {
   const record = requireObject(params, "fs/copy params");
@@ -394,7 +394,7 @@ export async function copyPath(
 }
 
 async function copySandboxPath(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   params: {
     sourcePath: string;
     destinationPath: string;

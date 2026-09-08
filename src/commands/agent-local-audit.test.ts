@@ -18,7 +18,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("agent local audit writer", () => {
   it("persists runtime receipts for an opted-in direct CLI run and clears its sink", async () => {
-    const root = tempDirs.make("openclaw-agent-exec-audit-");
+    const root = tempDirs.make("carapace-agent-exec-audit-");
     const admittedAt = Date.now();
     let modelAdmission: PreparedAgentRunAdmission | undefined;
     let admittedRunContext: AdmittedRunContext | undefined;
@@ -108,7 +108,7 @@ describe("agent local audit writer", () => {
         }),
       ).toBe(false);
       const token = requireToken();
-      const database = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"), {
+      const database = new DatabaseSync(path.join(root, "state", "carapace.sqlite"), {
         readOnly: true,
       });
       try {

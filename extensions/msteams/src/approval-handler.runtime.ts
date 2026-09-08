@@ -1,7 +1,7 @@
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { createChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import { createChannelApprovalNativeRuntimeAdapter } from "carapace/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "carapace/plugin-sdk/approval-native-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
 import { msTeamsApprovalControls } from "./approval-card-actions.js";
 import {
   buildMSTeamsExpiredApprovalCard,

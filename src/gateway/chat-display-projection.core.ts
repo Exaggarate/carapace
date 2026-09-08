@@ -1,6 +1,6 @@
-import { GATEWAY_ASSISTANT_ERROR_FALLBACK_TEXT } from "@openclaw/gateway-protocol/gateway-error-details";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty as normalizeErrorSignal } from "@openclaw/normalization-core/string-coerce";
+import { GATEWAY_ASSISTANT_ERROR_FALLBACK_TEXT } from "@carapace/gateway-protocol/gateway-error-details";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty as normalizeErrorSignal } from "@carapace/normalization-core/string-coerce";
 import { renderAssistantRequestFailureCopy } from "../agents/failover/assistant-request-failure-copy.js";
 import { isContextOverflowError } from "../agents/failover/classify.js";
 import { STREAM_ERROR_FALLBACK_TEXT } from "../agents/stream-message-shared.js";
@@ -12,7 +12,7 @@ import {
 } from "../sessions/nested-tool-activity.js";
 import { readSessionTranscriptRunId } from "../sessions/transcript-events.js";
 import { formatProviderRefusalText } from "../shared/assistant-error-format.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../shared/transcript-only-openclaw-assistant.js";
+import { isTranscriptOnlyCarapaceAssistantMessage } from "../shared/transcript-only-carapace-assistant.js";
 import {
   DEFAULT_CHAT_HISTORY_TEXT_MAX_CHARS,
   extractAssistantTextForSilentCheck,
@@ -60,7 +60,7 @@ export function createCurrentUserProfileMessageProjector(
     if (message.role !== "user") {
       return message;
     }
-    const metadata = asOptionalRecord(message["__openclaw"]);
+    const metadata = asOptionalRecord(message["__carapace"]);
     if (!metadata) {
       return message;
     }
@@ -85,7 +85,7 @@ export function createCurrentUserProfileMessageProjector(
     }
     return {
       ...message,
-      __openclaw: {
+      __carapace: {
         ...metadata,
         senderIdentity: { type: "profile", id: display.profileId },
         senderProfileAvatarUrl: display.avatarUrl,
@@ -301,7 +301,7 @@ function projectRecoveredAssistantErrors(
     unseenPending = false;
     const completedRunId =
       (message.stopReason === "stop" || message.stopReason === "length") &&
-      !isTranscriptOnlyOpenClawAssistantMessage(message)
+      !isTranscriptOnlyCarapaceAssistantMessage(message)
         ? readSessionTranscriptRunId(message)
         : undefined;
     pendingIndexes = pendingIndexes.filter((pendingIndex) => {
@@ -382,8 +382,8 @@ export function projectChatDisplayMessagesWithState(
       runId: activity.details.runId,
       // The entry dedupe key identifies a nested call, not its owning run.
       // Publish validated ownership where history and live clients read it.
-      __openclaw: {
-        ...asOptionalRecord(asOptionalRecord(message)?.["__openclaw"]),
+      __carapace: {
+        ...asOptionalRecord(asOptionalRecord(message)?.["__carapace"]),
         runId: activity.details.runId,
       },
       content: [call, sanitized],

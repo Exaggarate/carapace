@@ -1,12 +1,12 @@
 /** CLI runner for node-host stdin/stdout command dispatch. */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { CloudflareAccessCredentials } from "../../packages/gateway-client/src/cloudflare-access.js";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
 } from "../../packages/gateway-protocol/src/client-info.js";
 import { ConnectErrorDetailCodes } from "../../packages/gateway-protocol/src/connect-error-details.js";
-import { getRuntimeConfig, type OpenClawConfig } from "../config/config.js";
+import { getRuntimeConfig, type CarapaceConfig } from "../config/config.js";
 import { copyConfigResolutionFactsExcept } from "../config/resolution-facts.js";
 import { startGatewayClientWhenEventLoopReady } from "../gateway/client-start-readiness.js";
 import { GatewayClientRequestError, type GatewayReconnectPausedInfo } from "../gateway/client.js";
@@ -45,7 +45,7 @@ type NodeHostRunOptions = {
   forceWorkerRuns?: boolean;
   /** Disposable cloud host: computer control stays on the private environment carrier. */
   ephemeral?: boolean;
-  /** Optional WebSocket context path (e.g. "/openclaw-gw"). */
+  /** Optional WebSocket context path (e.g. "/carapace-gw"). */
   gatewayContextPath?: string;
   nodeId?: string;
   displayName?: string;
@@ -100,7 +100,7 @@ function handleNodeHostReconnectPaused(
 }
 
 async function resolveNodeHostGatewayCredentials(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<{ token?: string; password?: string }> {
   const mode = params.config.gateway?.mode === "remote" ? "remote" : "local";
@@ -115,7 +115,7 @@ async function resolveNodeHostGatewayCredentials(params: {
   });
 }
 
-function buildNodeHostLocalAuthConfig(config: OpenClawConfig): OpenClawConfig {
+function buildNodeHostLocalAuthConfig(config: CarapaceConfig): CarapaceConfig {
   if (!config.gateway?.remote?.token && !config.gateway?.remote?.password) {
     return config;
   }

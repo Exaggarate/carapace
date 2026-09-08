@@ -104,7 +104,7 @@ describe("Checkout chip state", () => {
           state: { label: worktree ? "New worktree from main" : "feature" },
           remotePlacement,
           repository,
-          folderLabel: "OpenClaw",
+          folderLabel: "Carapace",
           worktree,
           worktreeAvailable: true,
           branches: { repoRoot: "/repo", branches: [], headBranch: "feature" },
@@ -135,7 +135,7 @@ describe("Checkout chip state", () => {
         inputs[0]!.dispatchEvent(new Event("input"));
         expect(onBaseRefInput).toHaveBeenCalledWith("release/next");
         expect(container.textContent).toContain(
-          "Clones OpenClaw on the selected runner. No Gateway checkout is created.",
+          "Clones Carapace on the selected runner. No Gateway checkout is created.",
         );
         return;
       }
@@ -176,12 +176,12 @@ describe("Checkout chip state", () => {
         expect(onBaseRefInput).toHaveBeenCalledWith("release");
         expect(onWorktreeNameInput).toHaveBeenCalledWith("checkout-proof");
         expect(container.textContent).toContain(
-          "Creates branch openclaw/<name> in a separate checkout.",
+          "Creates branch carapace/<name> in a separate checkout.",
         );
       } else {
         expect(container.querySelector(".new-session-page__menu-note")).toBeNull();
       }
-      expect(container.textContent?.includes("Syncs OpenClaw to the selected runner")).toBe(
+      expect(container.textContent?.includes("Syncs Carapace to the selected runner")).toBe(
         remotePlacement,
       );
     },

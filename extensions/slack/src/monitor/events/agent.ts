@@ -1,6 +1,6 @@
 // Slack plugin module handles Agent View lifecycle events.
 import type { AllMiddlewareArgs } from "@slack/bolt";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { resolveSlackAccount } from "../../accounts.js";
 import { getSlackRuntime } from "../../runtime.js";
 import { markSlackStreamsStopped } from "../../streaming.js";

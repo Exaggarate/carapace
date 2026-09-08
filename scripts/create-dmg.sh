@@ -117,7 +117,7 @@ mkdir -p "$OUT_DIR"
 
 echo "Creating DMG: $OUT_PATH"
 
-DMG_TEMP="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-dmg.XXXXXX")"
+DMG_TEMP="$(mktemp -d "${TMPDIR:-/tmp}/carapace-dmg.XXXXXX")"
 DMG_SOURCE="$DMG_TEMP/source"
 MOUNT_POINT="$DMG_TEMP/mount"
 DMG_RW_PATH="$DMG_TEMP/image-rw.dmg"
@@ -185,7 +185,7 @@ if [[ "${SKIP_DMG_STYLE:-0}" != "1" ]]; then
   fi
 
   # Volume icon: reuse the app icon if available.
-  ICON_SRC="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/OpenClaw.icns"
+  ICON_SRC="$ROOT_DIR/apps/macos/Sources/Carapace/Resources/Carapace.icns"
   if [[ -f "$ICON_SRC" ]]; then
     cp "$ICON_SRC" "$MOUNT_POINT/.VolumeIcon.icns"
     if command -v SetFile >/dev/null 2>&1; then
@@ -240,7 +240,7 @@ if [[ "$MIN_SECTORS" =~ ^[0-9]+$ ]] && [[ "$DMG_EXTRA_SECTORS" =~ ^[0-9]+$ ]]; t
   hdiutil resize -sectors "$TARGET_SECTORS" "$DMG_RW_PATH" >/dev/null 2>&1 || true
 fi
 
-DMG_OUTPUT_TEMP="$(mktemp -d "$(dirname "$OUT_PATH")/.openclaw-dmg.XXXXXX")"
+DMG_OUTPUT_TEMP="$(mktemp -d "$(dirname "$OUT_PATH")/.carapace-dmg.XXXXXX")"
 DMG_FINAL_PATH="$DMG_OUTPUT_TEMP/final.dmg"
 
 hdiutil convert "$DMG_RW_PATH" -format ULMO -o "$DMG_FINAL_PATH" -ov

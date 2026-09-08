@@ -87,7 +87,7 @@ describe("settled post-tool turn finalization context", () => {
       expect(context).toBeUndefined();
       return;
     }
-    if (context?.source !== "openclaw-transcript") {
+    if (context?.source !== "carapace-transcript") {
       throw new Error("Expected the built-in settled transcript context");
     }
     expect(context.messages.some((message) => message.role === "toolResult")).toBe(true);

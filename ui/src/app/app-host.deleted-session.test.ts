@@ -46,7 +46,7 @@ function createSessionRecoveryShell(params: {
 }) {
   const replace = vi.fn();
   const setSessionKey = vi.fn();
-  const shell = document.createElement("openclaw-app-shell") as unknown as DeletedSessionShell;
+  const shell = document.createElement("carapace-app-shell") as unknown as DeletedSessionShell;
   shell.runtime = {
     context: {
       basePath: "",
@@ -90,7 +90,7 @@ afterEach(() => {
   resetAppHostTestGlobals();
 });
 
-describe("OpenClaw shell deleted-session recovery", () => {
+describe("Carapace shell deleted-session recovery", () => {
   it.each(["rejection", "batch interruption", "different-client batch rejection"] as const)(
     "navigates on delete intent and visibly reports %s without replacing newer navigation",
     async (failure) => {
@@ -114,7 +114,7 @@ describe("OpenClaw shell deleted-session recovery", () => {
         sessions,
       });
       const stop = sessions.subscribe((state) => shell.recoverDeletedActiveSession(state));
-      const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+      const toast = document.body.appendChild(document.createElement("carapace-toast-host"));
       try {
         const operation =
           failure === "rejection"
@@ -198,7 +198,7 @@ describe("OpenClaw shell deleted-session recovery", () => {
         sessions,
       });
       const stop = sessions.subscribe((state) => shell.recoverDeletedActiveSession(state));
-      const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+      const toast = document.body.appendChild(document.createElement("carapace-toast-host"));
       const operation = sessions.delete(deletedKey, { expectedSessionId: "predecessor" });
       try {
         expect(shell.activeSessionKey).toBe(deletedKey);
@@ -350,7 +350,7 @@ describe("OpenClaw shell deleted-session recovery", () => {
         },
       }),
     );
-    const shell = document.createElement("openclaw-app-shell") as unknown as DeletedSessionShell;
+    const shell = document.createElement("carapace-app-shell") as unknown as DeletedSessionShell;
     const deletedSessions = [
       { key: deletedKey, agentId: "main", retireBeforeRevision: Date.now() },
     ];
@@ -371,7 +371,7 @@ describe("OpenClaw shell deleted-session recovery", () => {
         },
       } as unknown as ApplicationContext,
     };
-    const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+    const toast = document.body.appendChild(document.createElement("carapace-toast-host"));
 
     shell.observeDeletedSessions({
       ...state,
@@ -384,7 +384,7 @@ describe("OpenClaw shell deleted-session recovery", () => {
 
     await vi.waitFor(() => {
       expect(
-        storage.getItem(`openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`),
+        storage.getItem(`carapace.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`),
       ).toBeNull();
       const stored = readStoredOutboxStore(storage, storageTargetForGateway(gatewayUrl));
       const scopeKey = storedChatOutboxScopeKey({ sessionKey: deletedKey, agentId: "main" });

@@ -8,7 +8,7 @@ import type { PublishedModelCatalogOwnerCandidate } from "../agents/prepared-mod
 import { setPreparedModelRuntimeAuthLoader } from "../agents/prepared-model-runtime-auth.js";
 import { PreparedModelRuntimePublicationSupersededError } from "../agents/prepared-model-runtime.errors.js";
 import { markPreparedModelCatalogFull } from "../agents/prepared-model-runtime.full-catalog.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
 import {
   loadDeferredCatalog,
@@ -26,7 +26,7 @@ const snapshot: ModelCatalogSnapshot = {
   routeVariants: [],
 };
 
-function ownerConfig(agentId = "main", extra: OpenClawConfig = {}): OpenClawConfig {
+function ownerConfig(agentId = "main", extra: CarapaceConfig = {}): CarapaceConfig {
   return {
     ...extra,
     agents: {
@@ -44,7 +44,7 @@ function ownerConfig(agentId = "main", extra: OpenClawConfig = {}): OpenClawConf
 }
 
 function ownerSnapshot(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   modelCatalog: ModelCatalogSnapshot = snapshot,
   agentId?: string,
 ): PublishedModelCatalogOwnerCandidate {
@@ -71,7 +71,7 @@ describe("gateway prepared model catalog", () => {
     const input = {
       config: {},
       agentDir: "/tmp/raw-catalog-state/agents/main/agent",
-      env: { OPENCLAW_STATE_DIR: "/tmp/raw-catalog-state", OPENCLAW_HOME: "/tmp/raw-catalog-home" },
+      env: { CARAPACE_STATE_DIR: "/tmp/raw-catalog-state", CARAPACE_HOME: "/tmp/raw-catalog-home" },
     };
     expect(preparePublishedModelCatalogOwnerIdentity(input)).toMatchObject({ agentId: "main" });
     expect(
@@ -452,7 +452,7 @@ describe("gateway prepared model catalog", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const loadPublishedPreparedModelCatalogOwnerSnapshot = vi.fn(async () => ownerSnapshot(config));
 
     await expect(

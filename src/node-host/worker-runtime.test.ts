@@ -12,7 +12,7 @@ import { testing as execApprovalsStoreTesting } from "../infra/exec-approvals-st
 import { saveExecApprovals } from "../infra/exec-approvals.js";
 import { clearExecutablePathCache } from "../infra/executable-path.js";
 import { NODE_HOST_STATS_EVENT, NODE_HOST_STATS_INTERVAL_MS } from "../shared/node-host-stats.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import type { ExecEventPayload } from "./invoke-types.js";
@@ -35,7 +35,7 @@ vi.mock("node:readline", () => ({ createInterface: () => fixture.input }));
 vi.mock("./startup-state-migrations.js", () => ({ runStartupMigrations: async () => {} }));
 vi.mock("./config.js", () => ({ loadNodeHostConfig: async () => ({}) }));
 vi.mock("./runtime.js", () => ({ prepareNodeHostRuntime: fixture.prepare }));
-vi.mock("../infra/path-env.js", () => ({ ensureOpenClawCliOnPath: vi.fn() }));
+vi.mock("../infra/path-env.js", () => ({ ensureCarapaceCliOnPath: vi.fn() }));
 vi.mock("../infra/terminal-file-upload.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../infra/terminal-file-upload.js")>()),
   ensureTerminalUploadCleanup: async () => {},
@@ -225,17 +225,17 @@ it.runIf(process.platform !== "win32").each([
   { scenario: "replacement after cache TTL", target: "b", elapsedMs: 90_001, rejectRefresh: false },
   { scenario: "replacement refresh failure", target: "b", elapsedMs: 90_001, rejectRefresh: true },
 ])("scopes skill-authorized execution to the worker connection: $scenario", async (scenario) => {
-  await withTestDir({ prefix: "openclaw-skill-exec-" }, async (dir) => {
+  await withTestDir({ prefix: "carapace-skill-exec-" }, async (dir) => {
     await withEnvAsync(
       {
-        OPENCLAW_HOME: dir,
-        OPENCLAW_STATE_DIR: path.join(dir, "state"),
-        OPENCLAW_NODE_EXEC_HOST: undefined,
-        OPENCLAW_NODE_EXEC_FALLBACK: "0",
+        CARAPACE_HOME: dir,
+        CARAPACE_STATE_DIR: path.join(dir, "state"),
+        CARAPACE_NODE_EXEC_HOST: undefined,
+        CARAPACE_NODE_EXEC_FALLBACK: "0",
         PATH: "/usr/bin:/bin",
       },
       async () => {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         execApprovalsStoreTesting.reset();
         const now = Date.now;
         let elapsedMs = 0;
@@ -438,7 +438,7 @@ it.runIf(process.platform !== "win32").each([
           } finally {
             fixture.handleInvoke.mockReset();
             execApprovalsStoreTesting.reset();
-            closeOpenClawStateDatabaseForTest();
+            closeCarapaceStateDatabaseForTest();
             clearRuntimeConfigSnapshot();
             clearExecutablePathCache();
           }

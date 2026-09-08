@@ -28,7 +28,7 @@ export {
   type OpenAiCompatibleSpeechProviderOptions,
 } from "../tts/openai-compatible-speech-provider.js";
 
-export { MAX_AUDIO_BYTES } from "@openclaw/media-core/constants";
+export { MAX_AUDIO_BYTES } from "@carapace/media-core/constants";
 
 export { retryAsync } from "../infra/retry.js";
-export { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+export { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";

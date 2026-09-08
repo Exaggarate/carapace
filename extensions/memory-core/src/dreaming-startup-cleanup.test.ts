@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi, OpenClawPluginService } from "openclaw/plugin-sdk/plugin-entry";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { getSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi, CarapacePluginService } from "carapace/plugin-sdk/plugin-entry";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { getSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
   appendSqliteSessionTranscriptEventForTest,
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerShortTermPromotionDreaming } from "./dreaming.js";
 
@@ -22,15 +22,15 @@ let stateDir: string;
 let stopGateway: (() => Promise<void>) | undefined;
 
 beforeEach(async () => {
-  stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-dreaming-startup-"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-dreaming-startup-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 });
 
 afterEach(async () => {
   await stopGateway?.();
   stopGateway = undefined;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
@@ -56,9 +56,9 @@ function createGateway(
       },
     },
     ...(params.sessionStore ? { session: { store: params.sessionStore } } : {}),
-  } as OpenClawConfig;
-  const onMock = vi.fn<OpenClawPluginApi["on"]>();
-  const services: OpenClawPluginService[] = [];
+  } as CarapaceConfig;
+  const onMock = vi.fn<CarapacePluginApi["on"]>();
+  const services: CarapacePluginService[] = [];
   const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
   const cron = {
     list: vi.fn(async () => {
@@ -77,7 +77,7 @@ function createGateway(
     pluginConfig: {},
     logger,
     on: onMock,
-    registerService: (service: OpenClawPluginService) => services.push(service),
+    registerService: (service: CarapacePluginService) => services.push(service),
   });
   Object.assign(api.runtime, { config: { current: () => config } });
   registerShortTermPromotionDreaming(api);

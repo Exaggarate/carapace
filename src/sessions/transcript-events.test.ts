@@ -19,11 +19,11 @@ afterEach(() => {
 
 describe("transcript events", () => {
   it.each(["assistant", "toolResult"])("persists normalized run ownership on %s rows", (role) => {
-    const message = { role, content: [], __openclaw: { seq: 2 } };
+    const message = { role, content: [], __carapace: { seq: 2 } };
 
     expect(attachSessionTranscriptRunId(message, "  run-owned  ")).toEqual({
       ...message,
-      __openclaw: { seq: 2, runId: "run-owned" },
+      __carapace: { seq: 2, runId: "run-owned" },
     });
     expect(attachSessionTranscriptRunId(message, "  ")).toBe(message);
   });
@@ -37,10 +37,10 @@ describe("transcript events", () => {
   it.each([
     [
       "attached assistant row",
-      { role: "assistant", __openclaw: { runId: "run-owned" } },
+      { role: "assistant", __carapace: { runId: "run-owned" } },
       "run-owned",
     ],
-    ["blank attached run id", { role: "assistant", __openclaw: { runId: "  " } }, undefined],
+    ["blank attached run id", { role: "assistant", __carapace: { runId: "  " } }, undefined],
     ["row without the marker", { role: "assistant", content: [] }, undefined],
   ])("reads back stored run ownership from %s", (_name, message, expected) => {
     expect(readSessionTranscriptRunId(message)).toBe(expected);

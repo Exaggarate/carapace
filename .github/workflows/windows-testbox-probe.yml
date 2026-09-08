@@ -192,14 +192,14 @@ jobs:
           if ($ok) {
             "wsl2_ok=true" >> $env:GITHUB_OUTPUT
             "wsl2_restart_required=false" >> $env:GITHUB_OUTPUT
-            "OPENCLAW_WSL2_PROBE_OK=true" >> $env:GITHUB_ENV
-            "OPENCLAW_WSL2_RESTART_REQUIRED=false" >> $env:GITHUB_ENV
+            "CARAPACE_WSL2_PROBE_OK=true" >> $env:GITHUB_ENV
+            "CARAPACE_WSL2_RESTART_REQUIRED=false" >> $env:GITHUB_ENV
             Write-Host "wsl2_ok=true"
           } else {
             "wsl2_ok=false" >> $env:GITHUB_OUTPUT
             "wsl2_restart_required=$($restartRequired.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
-            "OPENCLAW_WSL2_PROBE_OK=false" >> $env:GITHUB_ENV
-            "OPENCLAW_WSL2_RESTART_REQUIRED=$($restartRequired.ToString().ToLowerInvariant())" >> $env:GITHUB_ENV
+            "CARAPACE_WSL2_PROBE_OK=false" >> $env:GITHUB_ENV
+            "CARAPACE_WSL2_RESTART_REQUIRED=$($restartRequired.ToString().ToLowerInvariant())" >> $env:GITHUB_ENV
             Write-Warning "wsl2_ok=false"
           }
 
@@ -233,7 +233,7 @@ jobs:
         run: |
           set -euo pipefail
           source .github/actions/setup-pnpm-store-cache/ensure-node.sh
-          openclaw_ensure_node "$REQUESTED_NODE_VERSION"
+          carapace_ensure_node "$REQUESTED_NODE_VERSION"
 
       - &windows_pnpm
         name: Setup pnpm
@@ -282,8 +282,8 @@ jobs:
         env:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
-          OPENCLAW_TEST_SKIP_FULL_EXTENSIONS_SHARD: 1
-          OPENCLAW_VITEST_MAX_WORKERS: 1
+          CARAPACE_TEST_SKIP_FULL_EXTENSIONS_SHARD: 1
+          CARAPACE_VITEST_MAX_WORKERS: 1
         run: |
           set -euo pipefail
           export PATH="$NODE_BIN:$PATH"
@@ -309,8 +309,8 @@ jobs:
       - name: Enforce WSL2 requirement
         if: ${{ always() && !cancelled() && inputs.require_wsl2 }}
         run: |
-          if ($env:OPENCLAW_WSL2_PROBE_OK -ne "true") {
-            if ($env:OPENCLAW_WSL2_RESTART_REQUIRED -eq "true") {
+          if ($env:CARAPACE_WSL2_PROBE_OK -ne "true") {
+            if ($env:CARAPACE_WSL2_RESTART_REQUIRED -eq "true") {
               Write-Error "WSL2 probe enabled required Windows features, but the runner needs a reboot before WSL2 can start."
               exit 1
             }
@@ -352,8 +352,8 @@ jobs:
               "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "AWS_WEB_IDENTITY_TOKEN_FILE",
               "AZURE_CLIENT_SECRET", "AZURE_FEDERATED_TOKEN_FILE", "ARM_CLIENT_SECRET", "GOOGLE_APPLICATION_CREDENTIALS",
               "SSH_AUTH_SOCK", "NODE_OPTIONS", "NODE_EXTRA_CA_CERTS",
-              "OPENCLAW_HOME", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH",
-              "OPENCLAW_GATEWAY_TOKEN", "OPENCLAW_GATEWAY_PASSWORD", "OPENCLAW_SUPERVISOR_MODE"
+              "CARAPACE_HOME", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH",
+              "CARAPACE_GATEWAY_TOKEN", "CARAPACE_GATEWAY_PASSWORD", "CARAPACE_SUPERVISOR_MODE"
             ) | Where-Object { -not [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($_)) }
             $credentialNames = @($credentialNames)
             $evidence.forwardedCredentialCount = $credentialNames.Count
@@ -441,7 +441,7 @@ jobs:
         shell: bash
         env:
           CI_WINDOWS_SCHTASKS_PROOF_PATH: ${{ github.workspace }}\.artifacts\windows-schtasks\proof.json
-          CI_WINDOWS_SCHTASKS_ROOT: ${{ runner.temp }}\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}
+          CI_WINDOWS_SCHTASKS_ROOT: ${{ runner.temp }}\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}
           CI_WINDOWS_SCHTASKS_TEST_ID: ${{ github.run_id }}-${{ github.run_attempt }}
           EXPECTED_HEAD: ${{ inputs.target_ref }}
         run: |
@@ -467,13 +467,13 @@ jobs:
         shell: pwsh
         env:
           TEST_ID: ${{ github.run_id }}-${{ github.run_attempt }}
-          TEST_ROOT: ${{ runner.temp }}\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}
+          TEST_ROOT: ${{ runner.temp }}\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           $ErrorActionPreference = "Continue"
           $cleanupErrors = @()
           $profile = "schtasks-int-$env:TEST_ID"
-          $taskName = "OpenClaw Gateway ($profile)"
-          $stateDir = Join-Path $env:USERPROFILE ".openclaw-$profile"
+          $taskName = "Carapace Gateway ($profile)"
+          $stateDir = Join-Path $env:USERPROFILE ".carapace-$profile"
           New-Item -ItemType Directory -Force -Path $env:TEST_ROOT | Out-Null
           schtasks.exe /End /TN $taskName 2>$null
           Start-Sleep -Milliseconds 200
@@ -561,9 +561,9 @@ jobs:
           path: |
             .artifacts/windows-schtasks/proof.json
             ${{ runner.temp }}\windows-schtasks-isolation.json
-            ${{ runner.temp }}\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}\runs.txt.hosted-stop
-            ${{ runner.temp }}\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}\failure-diagnostics.json
-            ${{ runner.temp }}\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}\cleanup-summary.txt
+            ${{ runner.temp }}\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}\runs.txt.hosted-stop
+            ${{ runner.temp }}\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}\failure-diagnostics.json
+            ${{ runner.temp }}\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}\cleanup-summary.txt
           if-no-files-found: warn
           retention-days: 7
 
@@ -572,8 +572,8 @@ jobs:
         shell: pwsh
         env:
           TEST_ID: ${{ github.run_id }}-${{ github.run_attempt }}
-          TEST_ROOT: ${{ runner.temp }}\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}
+          TEST_ROOT: ${{ runner.temp }}\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           $profile = "schtasks-int-$env:TEST_ID"
-          Remove-Item -LiteralPath (Join-Path $env:USERPROFILE ".openclaw-$profile") -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -LiteralPath (Join-Path $env:USERPROFILE ".carapace-$profile") -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item -LiteralPath $env:TEST_ROOT -Recurse -Force -ErrorAction SilentlyContinue

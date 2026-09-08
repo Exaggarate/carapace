@@ -3,7 +3,7 @@ import { resolveGlobalSet } from "../shared/global-singleton.js";
 type GatewaySessionResetListener = (sessionKey: string, agentId?: string) => void;
 
 const listeners = resolveGlobalSet<GatewaySessionResetListener>(
-  Symbol.for("openclaw.gatewaySessionResetListeners"),
+  Symbol.for("carapace.gatewaySessionResetListeners"),
   "close-and-restart",
 );
 

@@ -1,13 +1,13 @@
-# Vercel AI Gateway OpenClaw provider
+# Vercel AI Gateway Carapace provider
 
-Official OpenClaw provider plugin for Vercel AI Gateway.
+Official Carapace provider plugin for Vercel AI Gateway.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/vercel-ai-gateway-provider
+carapace plugins install @carapace/vercel-ai-gateway-provider
 ```
 
 ## Docs
 
-See `docs/providers/vercel-ai-gateway.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/vercel-ai-gateway`.
+See `docs/providers/vercel-ai-gateway.md` in the Carapace repository, or the published docs at `../../docs/providers/vercel-ai-gateway.md`.

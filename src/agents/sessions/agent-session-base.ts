@@ -1,4 +1,4 @@
-import { cleanupSessionResources } from "@openclaw/ai/internal/runtime";
+import { cleanupSessionResources } from "@carapace/ai/internal/runtime";
 import { applyAssistantDeliveryDirectives } from "../../config/sessions/transcript-assistant-delivery.js";
 import { getStreamLlmRuntime } from "../../llm/model-runtime-binding.js";
 import type { AssistantMessage, Model } from "../../llm/types.js";

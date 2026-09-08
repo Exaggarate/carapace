@@ -184,7 +184,7 @@ describe("explicit auth state ownership", () => {
         seedRoot("second"),
         seedRoot(currentKey),
       ]);
-      const agentDir = tempDirs.make("openclaw-auth-owner-rebound-agent-");
+      const agentDir = tempDirs.make("carapace-auth-owner-rebound-agent-");
       if (mode === "rollback") {
         await persistAuthProfileBatch({
           stateDir: first.stateDir,
@@ -242,7 +242,7 @@ describe("explicit auth state ownership", () => {
       if (mode !== "rollback") {
         withEnv(third.env, () => setRuntimeAuthProfileStoreSnapshot(store(currentKey), agentDir));
       }
-      vi.stubEnv("OPENCLAW_STATE_DIR", third.stateDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", third.stateDir);
       if (mode === "graft") {
         const prepared = prepare(first);
         graftActiveSecretsRuntimeAuthState(prepared.snapshot);
@@ -286,7 +286,7 @@ describe("explicit auth state ownership", () => {
   it("rejects a prepared snapshot after a scope-only owner transition", async () => {
     const first = await seedRoot("same");
     const second = await seedRoot("same");
-    const agentDir = tempDirs.make("openclaw-auth-owner-stale-preparation-");
+    const agentDir = tempDirs.make("carapace-auth-owner-stale-preparation-");
     withEnv(first.env, () => setRuntimeAuthProfileStoreSnapshot(store("same"), agentDir));
     const prepared = prepareSecretsRuntimeFastPathSnapshot({
       config: {},
@@ -304,7 +304,7 @@ describe("explicit auth state ownership", () => {
   });
 
   it("hydrates a complete cold worker snapshot without reading unrelated outer SQLite", () => {
-    const agentDir = tempDirs.make("openclaw-auth-owner-cold-worker-");
+    const agentDir = tempDirs.make("carapace-auth-owner-cold-worker-");
     const assertOuterUnchanged = unreadableOuter("future");
     expect(() =>
       replaceRuntimeAuthProfileStoreSnapshots([{ agentDir, store: store("hydrated") }]),
@@ -354,7 +354,7 @@ describe("explicit auth state ownership", () => {
       return { baseline, owned, revision: getActiveSecretsRuntimeSnapshotRevisionState() };
     });
     expect(snapshotAt(first.agentPath)).toBeUndefined();
-    vi.stubEnv("OPENCLAW_STATE_DIR", second.stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", second.stateDir);
     expect(
       restoreSecretsRuntimeSnapshotStateIfCurrent({
         snapshot: captured.baseline,
@@ -380,10 +380,10 @@ describe("explicit auth state ownership", () => {
   });
 
   it("preserves ambient agent relocation for writes without an explicit state root", async () => {
-    const stateDir = tempDirs.make("openclaw-auth-owner-ambient-");
-    const agentDir = tempDirs.make("openclaw-auth-owner-relocated-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_AGENT_DIR", agentDir);
+    const stateDir = tempDirs.make("carapace-auth-owner-ambient-");
+    const agentDir = tempDirs.make("carapace-auth-owner-relocated-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_AGENT_DIR", agentDir);
     writePersistedAuthProfileStoreRaw(store("initial"), agentDir);
     setRuntimeAuthProfileStoreSnapshot(loadAuthProfileStoreWithoutExternalProfiles());
     await updateAuthProfileStoreWithLock({
@@ -403,8 +403,8 @@ describe("explicit auth state ownership", () => {
 
   it("ignores agent relocation when the selected shared owner is the state database", async () => {
     const root = await seedRoot("first");
-    const relocated = tempDirs.make("openclaw-auth-owner-irrelevant-relocation-");
-    withEnv({ ...root.env, OPENCLAW_AGENT_DIR: relocated }, () => {
+    const relocated = tempDirs.make("carapace-auth-owner-irrelevant-relocation-");
+    withEnv({ ...root.env, CARAPACE_AGENT_DIR: relocated }, () => {
       setRuntimeAuthProfileStoreSnapshot(
         loadAuthProfileStoreWithoutExternalProfiles(root.agentDir),
         root.agentDir,
@@ -423,11 +423,11 @@ describe("explicit auth state ownership", () => {
   });
 
   it("keeps same-root legacy shared owners separate across agent relocation", () => {
-    const stateDir = tempDirs.make("openclaw-auth-owner-legacy-root-");
+    const stateDir = tempDirs.make("carapace-auth-owner-legacy-root-");
     const roots = ["first", "second"].map((key) => {
-      const sharedDir = tempDirs.make("openclaw-auth-owner-legacy-shared-");
-      const agentDir = tempDirs.make("openclaw-auth-owner-legacy-derived-");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_AGENT_DIR: sharedDir };
+      const sharedDir = tempDirs.make("carapace-auth-owner-legacy-shared-");
+      const agentDir = tempDirs.make("carapace-auth-owner-legacy-derived-");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir, CARAPACE_AGENT_DIR: sharedDir };
       withEnv(env, () => {
         writePersistedAuthProfileStoreRaw(store(key), sharedDir);
         setRuntimeAuthProfileStoreSnapshot(loadAuthProfileStoreWithoutExternalProfiles());
@@ -462,7 +462,7 @@ describe("explicit auth state ownership", () => {
 
   it("rejects a save whose explicit state root disagrees with the captured owner", async () => {
     const root = await seedRoot("first");
-    const otherStateDir = tempDirs.make("openclaw-auth-owner-mismatch-");
+    const otherStateDir = tempDirs.make("carapace-auth-owner-mismatch-");
     const baseline = captureAuthProfileStorePersistenceSnapshot(undefined, {
       stateDir: root.stateDir,
     });
@@ -480,7 +480,7 @@ describe("explicit auth state ownership", () => {
 
   it("rejects rollback whose explicit state root disagrees with the committed owner", async () => {
     const root = await seedRoot("first");
-    const otherStateDir = tempDirs.make("openclaw-auth-owner-mismatch-");
+    const otherStateDir = tempDirs.make("carapace-auth-owner-mismatch-");
     const baseline = captureAuthProfileStorePersistenceSnapshot(undefined, {
       stateDir: root.stateDir,
     });
@@ -515,7 +515,7 @@ describe("explicit auth state ownership", () => {
       (entry) =>
         entry.databasePath === second.sharedPath || entry.databasePath === second.agentPath,
     );
-    vi.stubEnv("OPENCLAW_STATE_DIR", second.stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", second.stateDir);
     await updateAuthProfileStoreWithLock({
       stateDir: first.stateDir,
       saveOptions,
@@ -653,7 +653,7 @@ describe("explicit auth state ownership", () => {
       stateDir: second.stateDir,
       profiles: [{ profileId: "oauth", credential: oauth }],
     });
-    vi.stubEnv("OPENCLAW_STATE_DIR", second.stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", second.stateDir);
     await persistAuthProfileBatch({
       stateDir: first.stateDir,
       agentDir: first.agentDir,
@@ -664,7 +664,7 @@ describe("explicit auth state ownership", () => {
       stateDir: first.stateDir,
       profiles: [{ profileId: "oauth", credential: oauth }],
     });
-    const freshAgentDir = tempDirs.make("openclaw-auth-owner-fresh-agent-");
+    const freshAgentDir = tempDirs.make("carapace-auth-owner-fresh-agent-");
     await updateAuthProfileStoreWithLock({
       stateDir: first.stateDir,
       agentDir: freshAgentDir,

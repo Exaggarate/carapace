@@ -2,14 +2,14 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   getMemoryCapabilityRegistration,
   listActiveMemoryPublicArtifacts,
   type MemoryPluginPublicArtifact,
-} from "openclaw/plugin-sdk/memory-host-core";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import type { OpenClawConfig } from "../api.js";
+} from "carapace/plugin-sdk/memory-host-core";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
+import type { CarapaceConfig } from "../api.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import {
   createWikiPageFilename,
@@ -228,8 +228,8 @@ async function writeBridgeSourcePage(params: {
           renderMarkdownFence(raw, contentLanguage),
           "",
           "## Notes",
-          "<!-- openclaw:human:start -->",
-          "<!-- openclaw:human:end -->",
+          "<!-- carapace:human:start -->",
+          "<!-- carapace:human:end -->",
           "",
         ].join("\n"),
       });
@@ -239,7 +239,7 @@ async function writeBridgeSourcePage(params: {
 
 export async function syncMemoryWikiBridgeSources(params: {
   config: ResolvedMemoryWikiConfig;
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   signal?: AbortSignal;
 }): Promise<BridgeMemoryWikiResult> {
   resolveMemoryWikiVaultAgentId(params.config);

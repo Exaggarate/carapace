@@ -1,4 +1,4 @@
-import { resolveProviderIdForAuth } from "openclaw/plugin-sdk/provider-auth-aliases";
+import { resolveProviderIdForAuth } from "carapace/plugin-sdk/provider-auth-aliases";
 import type { CodexModelBackedReviewerContext } from "./config-contracts.js";
 import { canUseCodexModelBackedApprovalsReviewerForModel as canUseModelBackedReviewer } from "./config-reviewer-policy.js";
 

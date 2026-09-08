@@ -1,5 +1,5 @@
-import { ErrorCodes } from "@openclaw/gateway-client/browser";
-import { err as failure, ok, type Result } from "@openclaw/normalization-core/result";
+import { ErrorCodes } from "@carapace/gateway-client/browser";
+import { err as failure, ok, type Result } from "@carapace/normalization-core/result";
 import { GatewayRequestError, type GatewayBrowserClient } from "../../api/gateway.ts";
 import type { ConfigSchemaResponse, ConfigSnapshot } from "../../api/types.ts";
 import { t } from "../../i18n/index.ts";
@@ -68,7 +68,7 @@ export async function refreshDraft(
  * Gateway contract: requireConfigBaseHash in
  * src/gateway/server-methods/config.ts rejects writes whose baseHash no
  * longer matches the file with exactly this message. A conflict means another
- * writer changed openclaw.json; retrying the whole-form draft would clobber
+ * writer changed carapace.json; retrying the whole-form draft would clobber
  * their edit, so callers surface a reload affordance instead.
  */
 function isConfigBaseHashConflictError(err: unknown): boolean {

@@ -1,5 +1,5 @@
 // Provides shared JSON schema helpers for generated config metadata.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import type { ConfigSchemaResponse as ProtocolConfigSchemaResponse } from "../../packages/gateway-protocol/src/schema/config.js";
 import type { ConfigUiHints } from "../shared/config-ui-hints-types.js";
 

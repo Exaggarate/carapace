@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { resolveControlUiAssetHealth } from "./control-ui-assets.js";
 import { hasErrnoCode } from "./errno.js";
@@ -32,7 +32,7 @@ import type {
 
 const PREFLIGHT_MAX_COMMITS = 10;
 const PREFLIGHT_TEMP_PREFIX =
-  process.platform === "win32" ? "ocu-pf-" : ".openclaw-update-preflight-";
+  process.platform === "win32" ? "ocu-pf-" : ".carapace-update-preflight-";
 const PREFLIGHT_WORKTREE_DIRNAME = process.platform === "win32" ? "wt" : "worktree";
 const PREFLIGHT_CLEANUP_TIMEOUT_MS = 60_000;
 const WINDOWS_PREFLIGHT_BASE_DIR = "ocu";
@@ -441,7 +441,7 @@ async function testPreflightCandidate(params: {
       candidateCommand.env,
       path.join(params.gitRoot, ".artifacts", "build-all-cache"),
     );
-    const configArgs = managerScriptArgs(manager.manager, "openclaw", [
+    const configArgs = managerScriptArgs(manager.manager, "carapace", [
       "config",
       "validate",
       "--json",

@@ -273,8 +273,8 @@ describe("docs-link-audit", () => {
         "docs/image space.svg": "<svg />",
       },
       redirects: [
-        { source: "/via", destination: "https://docs.openclaw.ai/caf%C3%A9#known" },
-        { source: "/invalid", destination: "https://docs.openclaw.ai/bad%" },
+        { source: "/via", destination: "https://github.com/Exaggarate/carapace#known" },
+        { source: "/invalid", destination: "https://github.com/Exaggarate/carapace" },
         { source: "/raw", destination: "/café.md#known" },
         { source: "/outside", destination: "https://example.test/page#external-section" },
       ],
@@ -296,7 +296,7 @@ describe("docs-link-audit", () => {
         "",
         '<img src="/bad%2" />',
         "",
-        '<CTA primaryHref="/bad%zz" secondaryHref="https://docs.openclaw.ai/bad%" />',
+        '<CTA primaryHref="/bad%zz" secondaryHref="https://github.com/Exaggarate/carapace" />',
         "",
         "[markdown](/bad%FF)",
         "[reference][bad]",
@@ -329,7 +329,7 @@ describe("docs-link-audit", () => {
         "[legacy](#agents-defaults-cwd)",
         "[canonical](#agents.defaults.cwd)",
         "[component](#connection)",
-        "[nested](https://docs.openclaw.ai/page#nested)",
+        "[nested](https://github.com/Exaggarate/carapace#nested)",
         "[absent](#missing)",
         "[relative](./page.mdx#connection)",
         "[raw Markdown](/page.md#connection)",
@@ -402,7 +402,7 @@ describe("docs-link-audit", () => {
               HOME: home,
               USERPROFILE: home,
               TSX_TSCONFIG_PATH: fileURLToPath(new URL("../../tsconfig.json", import.meta.url)),
-              OPENCLAW_DOCS_SYNC_CLAWHUB_REPO: clawHubRoot,
+              CARAPACE_DOCS_SYNC_CLAWHUB_REPO: clawHubRoot,
             },
             timeout: 30_000,
           },
@@ -602,7 +602,7 @@ describe("docs-link-audit", () => {
     const docsRoot = path.join(fixtureRoot, "docs");
     fs.mkdirSync(docsRoot, { recursive: true });
 
-    const before = tempEntries("openclaw-docs-link-audit-");
+    const before = tempEntries("carapace-docs-link-audit-");
     try {
       const mirroredDocsDir = prepareMirroredDocsDir(docsRoot);
       expect(mirroredDocsDir).toEqual({
@@ -611,7 +611,7 @@ describe("docs-link-audit", () => {
         mirroredClawHub: false,
       });
       mirroredDocsDir.cleanup();
-      const after = tempEntries("openclaw-docs-link-audit-");
+      const after = tempEntries("carapace-docs-link-audit-");
       expect([...after].filter((entry) => !before.has(entry))).toEqual([]);
     } finally {
       cleanupTempDirs(tempDirs);
@@ -619,7 +619,7 @@ describe("docs-link-audit", () => {
   });
 
   it("cleans mirrored docs copies when ClawHub sync fails", () => {
-    const before = tempEntries("openclaw-docs-link-audit-");
+    const before = tempEntries("carapace-docs-link-audit-");
 
     expect(() =>
       prepareMirroredDocsDir(undefined, {
@@ -632,7 +632,7 @@ describe("docs-link-audit", () => {
       }),
     ).toThrow("sync failed");
 
-    const after = tempEntries("openclaw-docs-link-audit-");
+    const after = tempEntries("carapace-docs-link-audit-");
     expect([...after].filter((entry) => !before.has(entry))).toEqual([]);
   });
 });

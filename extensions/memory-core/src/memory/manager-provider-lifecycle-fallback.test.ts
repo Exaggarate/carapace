@@ -292,7 +292,7 @@ describe("memory index", () => {
         embed: vi.fn(async () => [1, 0, 0, 0]),
         embedBatch: vi.fn(async (texts: string[]) => texts.map(() => [1, 0, 0, 0])),
       };
-      Object.defineProperty(provider, Symbol.for("openclaw.localEmbeddingRuntimeFacts"), {
+      Object.defineProperty(provider, Symbol.for("carapace.localEmbeddingRuntimeFacts"), {
         value: getRuntimeFacts,
       });
       const fields = manager as unknown as {

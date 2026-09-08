@@ -1,5 +1,5 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { OpenClawPluginApi } from "./api.js";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { CarapacePluginApi } from "./api.js";
 import type { MemoryConfig } from "./config.js";
 import {
   type Embeddings,
@@ -35,7 +35,7 @@ type AutoRecallHookEvent = {
 };
 
 export function createAutoRecallHook(params: {
-  logger: OpenClawPluginApi["logger"];
+  logger: CarapacePluginApi["logger"];
   db: MemoryDB;
   embeddings: Embeddings;
   resolveCurrentConfig: () => MemoryConfig;

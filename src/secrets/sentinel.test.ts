@@ -76,7 +76,7 @@ describe("secret sentinels", () => {
   it.each(["off", " OFF ", "0", "false", "False"])(
     "preserves provider plaintext compatibility when the switch is %s",
     (value) => {
-      vi.stubEnv("OPENCLAW_SECRET_SENTINELS", value);
+      vi.stubEnv("CARAPACE_SECRET_SENTINELS", value);
       expect(mintSecretSentinel("kill-switch-secret", { label: "model-auth:test" })).toBe(
         "kill-switch-secret",
       );

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 type AcpxPackageManifest = {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  openclaw?: {
+  carapace?: {
     install?: {
       requiredPlatformPackages?: string[];
     };
@@ -25,7 +25,7 @@ const packageJson = JSON.parse(
 ) as AcpxPackageManifest;
 
 const pluginJson = JSON.parse(
-  fs.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf8"),
+  fs.readFileSync(new URL("../carapace.plugin.json", import.meta.url), "utf8"),
 ) as AcpxPluginManifest;
 
 describe("acpx package manifest", () => {
@@ -39,7 +39,7 @@ describe("acpx package manifest", () => {
   });
 
   it("declares the transitive native platform packages required by ACP adapters", () => {
-    expect(packageJson.openclaw?.install?.requiredPlatformPackages).toEqual([
+    expect(packageJson.carapace?.install?.requiredPlatformPackages).toEqual([
       "@anthropic-ai/claude-agent-sdk-linux-x64",
       "@anthropic-ai/claude-agent-sdk-linux-arm64",
       "@anthropic-ai/claude-agent-sdk-linux-x64-musl",

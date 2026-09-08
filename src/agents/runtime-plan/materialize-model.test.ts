@@ -1,10 +1,10 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   createPluginMetadataSnapshot,
   makeRegistry,
 } from "../../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { materializePreparedRuntimeModel } from "./materialize-model.js";
 import type { AgentRuntimeAuthPlan } from "./types.js";
 
@@ -58,7 +58,7 @@ describe("materializePreparedRuntimeModel", () => {
         modelRoute: { ...plan.modelRoute!, modelId: model.id, baseUrl: model.baseUrl },
       };
       const resolveModel = vi.fn(async () => ({ model }));
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             openai: {
@@ -84,7 +84,7 @@ describe("materializePreparedRuntimeModel", () => {
         }),
       ).rejects.toMatchObject({
         reason: "model_not_found",
-        message: expect.stringContaining("openclaw doctor --fix"),
+        message: expect.stringContaining("carapace doctor --fix"),
       });
       expect(resolveModel).toHaveBeenCalledTimes(mode === "resolved" ? 1 : 0);
 
@@ -180,7 +180,7 @@ describe("materializePreparedRuntimeModel", () => {
         },
         provider: "clawrouter",
         modelId: "private-model",
-        config: {} as OpenClawConfig,
+        config: {} as CarapaceConfig,
         model,
         forceResolve: true,
         resolveModel,
@@ -207,7 +207,7 @@ describe("materializePreparedRuntimeModel", () => {
         plan,
         provider: "openai",
         modelId: "gpt-5.5",
-        config: { models: { providers: {} } } as OpenClawConfig,
+        config: { models: { providers: {} } } as CarapaceConfig,
         model: {
           provider: "openai",
           id: "gpt-5.5",
@@ -297,7 +297,7 @@ describe("materializePreparedRuntimeModel", () => {
         plan: completionsPlan,
         provider: "openai",
         modelId: "gpt-5.5",
-        config: { models: { providers: {} } } as OpenClawConfig,
+        config: { models: { providers: {} } } as CarapaceConfig,
         model: {
           provider: "openai",
           id: "gpt-5.5",

@@ -1,10 +1,10 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, test } from "vitest";
 import { WebSocket } from "ws";
 import {
-  closeOpenClawStateDatabaseForTest,
-  isOpenClawStateDatabaseOpen,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  isCarapaceStateDatabaseOpen,
+} from "../state/carapace-state-db.js";
 import {
   createOperatorIdentityFixture,
   REMOTE_BOOTSTRAP_HEADERS,
@@ -43,8 +43,8 @@ export function registerControlUiMobileReconnectSuite(): void {
   test("reconnects persisted mobile role tokens through shared and explicit fields after restart", async () => {
     type GatewayServer = Awaited<ReturnType<typeof startTestGatewayServer>>;
     const previousAuth = testState.gatewayAuth;
-    const previousToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    const previousPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
+    const previousToken = process.env.CARAPACE_GATEWAY_TOKEN;
+    const previousPassword = process.env.CARAPACE_GATEWAY_PASSWORD;
     let bootstrapServer: GatewayServer | undefined;
     let restartedServer: GatewayServer | undefined;
     let bootstrapWs: WebSocket | undefined;
@@ -52,7 +52,7 @@ export function registerControlUiMobileReconnectSuite(): void {
 
     try {
       testState.gatewayAuth = { mode: "password", password: "secret" };
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+      delete process.env.CARAPACE_GATEWAY_TOKEN;
 
       const started = await startProxiedControlUiServer();
       bootstrapServer = started.server;
@@ -62,10 +62,10 @@ export function registerControlUiMobileReconnectSuite(): void {
         await import("../shared/device-bootstrap-profile.js");
       const { getPairedDevice, listDevicePairing } = await import("../infra/device-pairing.js");
       const { identityPath, identity } = await createOperatorIdentityFixture(
-        "openclaw-mobile-reconnect-",
+        "carapace-mobile-reconnect-",
       );
       const nodeClient = {
-        id: "openclaw-ios",
+        id: "carapace-ios",
         version: "2026.8.10",
         platform: "iOS 26.6.1",
         mode: "node" as const,
@@ -115,8 +115,8 @@ export function registerControlUiMobileReconnectSuite(): void {
       bootstrapWs = undefined;
       await bootstrapServer.close();
       bootstrapServer = undefined;
-      closeOpenClawStateDatabaseForTest();
-      expect(isOpenClawStateDatabaseOpen()).toBe(false);
+      closeCarapaceStateDatabaseForTest();
+      expect(isCarapaceStateDatabaseOpen()).toBe(false);
 
       restartedServer = await startTestGatewayServer(port, { controlUiEnabled: true });
 
@@ -207,13 +207,13 @@ export function registerControlUiMobileReconnectSuite(): void {
       bootstrapWs?.close();
       await restartedServer?.close();
       await bootstrapServer?.close();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       testState.gatewayAuth = previousAuth;
       restoreGatewayToken(previousToken);
       if (previousPassword === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.CARAPACE_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = previousPassword;
+        process.env.CARAPACE_GATEWAY_PASSWORD = previousPassword;
       }
     }
   });

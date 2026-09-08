@@ -1,13 +1,13 @@
 /**
  * Runtime-config-backed provider auth that does not require plugin activation.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   findActiveDegradedSecretOwner,
   SecretSurfaceUnavailableError,
@@ -18,7 +18,7 @@ import type { ResolvedProviderAuth } from "./model-auth-runtime-shared.js";
 
 /** Reads a runtime-resolved credential for a SecretRef-backed provider entry. */
 export function resolveManagedSecretRefRuntimeProviderAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   secretSentinels?: boolean;
 }): ResolvedProviderAuth | undefined {
@@ -65,7 +65,7 @@ export function resolveManagedSecretRefRuntimeProviderAuth(params: {
 }
 
 export function assertRuntimeProviderSecretOwnerAvailable(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
 }): void {
   const provider = normalizeProviderId(params.provider);

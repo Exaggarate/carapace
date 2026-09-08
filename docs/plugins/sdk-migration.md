@@ -3,12 +3,12 @@ summary: "Migrate from the legacy backwards-compatibility layer to the modern pl
 title: "Plugin SDK migration"
 sidebarTitle: "Migrate to SDK"
 read_when:
-  - You used api.registerEmbeddedExtensionFactory before OpenClaw 2026.4.25
+  - You used api.registerEmbeddedExtensionFactory before Carapace 2026.4.25
   - You are updating a plugin to the modern plugin architecture
-  - You maintain an external OpenClaw plugin
+  - You maintain an external Carapace plugin
 ---
 
-OpenClaw replaced a broad backwards-compatibility layer with a modern plugin
+Carapace replaced a broad backwards-compatibility layer with a modern plugin
 architecture built from small, focused imports. If your plugin predates that
 change, this guide gets it onto the current contracts.
 
@@ -17,17 +17,17 @@ change, this guide gets it onto the current contracts.
 Several wide-open import surfaces used to let plugins reach almost anything
 from a single entry point:
 
-- **`openclaw/plugin-sdk`** and **`openclaw/plugin-sdk/compat`** - re-exported
+- **`carapace/plugin-sdk`** and **`carapace/plugin-sdk/compat`** - re-exported
   dozens of helpers while the focused SDK was being built. Both roots are now
   removed; import a documented subpath instead.
-- **`openclaw/plugin-sdk/infra-runtime`** - a broad barrel mixing system
+- **`carapace/plugin-sdk/infra-runtime`** - a broad barrel mixing system
   events, heartbeat state, delivery queues, fetch/proxy helpers, file helpers,
   approval types, and unrelated utilities.
-- **`openclaw/plugin-sdk/config-runtime`** - a broad config barrel retained
+- **`carapace/plugin-sdk/config-runtime`** - a broad config barrel retained
   for compatibility, including deprecated direct `loadConfig` and
   `writeConfigFile` exports. Those methods were removed from the injected
   plugin runtime, not from this retained facade.
-- **`openclaw/extension-api`** - a removed bridge that gave plugins direct
+- **`carapace/extension-api`** - a removed bridge that gave plugins direct
   access to host-side helpers like the embedded agent runner.
 - **`api.registerEmbeddedExtensionFactory(...)`** - a removed embedded-runner-only
   hook that observed embedded-runner events such as `tool_result`. Use agent
@@ -43,7 +43,7 @@ separately recorded later windows; new plugins should use focused subpaths.
   load. Follow the mappings below before upgrading.
 </Warning>
 
-OpenClaw does not remove or reinterpret documented plugin behavior in the same
+Carapace does not remove or reinterpret documented plugin behavior in the same
 change that introduces a replacement. Breaking contract changes go through a
 compatibility adapter, diagnostics, docs, and a deprecation window first. That
 applies to SDK imports, manifest fields, setup APIs, hooks, and runtime
@@ -91,7 +91,7 @@ External-plugin compatibility work follows this order:
 
 ### Retained helper contracts
 
-Discord and llama.cpp retain their declared OpenClaw 2026.9.2 host support.
+Discord and llama.cpp retain their declared Carapace 2026.9.2 host support.
 They use the newer prepared-expiry, DM-policy refinement, and live-catalog outcome
 helpers when those exports are available, with plugin-local fallbacks for the
 2026.9.2 SDK. The fallbacks preserve Discord's timestamp validation, idle-first
@@ -121,8 +121,8 @@ need to provide it.
 
 ### Harness attempt result migration
 
-In OpenClaw 2026.8.1, `EmbeddedRunAttemptResult` from
-`openclaw/plugin-sdk/agent-harness-runtime` requires the canonical `terminal`
+In Carapace 2026.8.1, `EmbeddedRunAttemptResult` from
+`carapace/plugin-sdk/agent-harness-runtime` requires the canonical `terminal`
 field. Source written against the 2026.7 direct alias must migrate when it
 constructs results with legacy fields such as `aborted`, `timedOut`, and
 `promptError`; retaining the alias name does not make those old constructors
@@ -137,7 +137,7 @@ the union must narrow the result before reading it. The current
 
 ### Model-provider result compatibility
 
-`openclaw/plugin-sdk/models-provider-runtime` preserves the `ModelsProviderData`
+`carapace/plugin-sdk/models-provider-runtime` preserves the `ModelsProviderData`
 construction shape and `buildModelsProviderData` return signature published in
 `v2026.7.1-2`, including typed adapters that return that shape. These contracts
 remain supported until an explicitly approved SDK-breaking boundary.
@@ -164,7 +164,7 @@ next Plugin SDK major.
 ### Config record migrations
 
 Use `mergeMissing(canonical, legacy)` from
-`openclaw/plugin-sdk/runtime-doctor-migrations` to fill undefined fields without
+`carapace/plugin-sdk/runtime-doctor-migrations` to fill undefined fields without
 replacing authored values. It fills existing nested records in place and keeps
 authored arrays, nulls, and scalars. Missing values are assigned by reference;
 callers own any cloning needed to isolate the migration from its input.
@@ -176,7 +176,7 @@ newly assigned subtrees.
 ### Plugin state migration declarations
 
 Bundled plugins should list every migration under
-`doctorContract.stateMigrations` in `openclaw.plugin.json` and export the
+`doctorContract.stateMigrations` in `carapace.plugin.json` and export the
 matching `stateMigrations` array from their doctor-contract artifact. Keep the
 IDs, order, `doctorOnly` flags, and phases identical. Read-only Doctor planning
 uses candidate-bundled descriptors to record exact plugin owners without
@@ -190,7 +190,7 @@ their dynamic contract for non-planning Doctor flows.
 
 Plan-based migrations can use
 `definePluginDoctorMigrationFromPlans(...)` from
-`openclaw/plugin-sdk/runtime-doctor-migrations` to preserve existing move, copy, preview,
+`carapace/plugin-sdk/runtime-doctor-migrations` to preserve existing move, copy, preview,
 and plugin-state import behavior.
 
 For single-file imports, `defineLegacyJsonStateMigration(...)` skips missing
@@ -212,14 +212,14 @@ The setup-entry `legacyStateMigrations` option and feature flag,
 `BundledChannelLegacyStateMigrationDetector`, and
 `ChannelPlugin.lifecycle.detectLegacyStateMigrations` remain supported through
 one doctor-pipeline adapter for external plugins, but are deprecated. Removal
-plan: remove that adapter after OpenClaw 2027.1 only when a published-plugin
+plan: remove that adapter after Carapace 2027.1 only when a published-plugin
 reader sweep finds no remaining users.
 
 ### AuthStorage SQLite migration
 
 `AuthStorage.forAgent(agentDir)` is the canonical constructor for host session
 storage. It persists provider-default credentials through the agent's
-`openclaw-agent.sqlite` auth-profile rows and never creates `auth.json`.
+`carapace-agent.sqlite` auth-profile rows and never creates `auth.json`.
 Harness plugins receive the prepared storage instance as `params.authStorage`.
 
 `AuthStorage.create(authPath)` remains as a named deprecated adapter for
@@ -231,7 +231,7 @@ the adapter reads and writes SQLite, not the named JSON file. Migrate to
 
 `FileAuthStorageBackend` is an internal SQLite-backed adapter, not an exported
 Plugin SDK backend. It is not available as a named import from
-`openclaw/plugin-sdk/agent-sessions`. Harness plugins should use the
+`carapace/plugin-sdk/agent-sessions`. Harness plugins should use the
 host-prepared `params.authStorage`; host code that constructs storage should
 use `AuthStorage.forAgent(agentDir)`. The internal adapter emits
 `FILE_AUTH_STORAGE_BACKEND_DEPRECATED` and never reads or writes the legacy
@@ -261,10 +261,10 @@ review date; removal still requires the reader condition in the final column.
 
 Slack, Discord, Signal, and Microsoft Teams packages published through
 `2026.7.1` import channel-specific config schemas from
-`openclaw/plugin-sdk/bundled-channel-config-schema`. The published Slack and
+`carapace/plugin-sdk/bundled-channel-config-schema`. The published Slack and
 Discord packages also import `createLegacyCompatChannelDmPolicy` and
 `promptLegacyChannelAllowFromForAccount` from
-`openclaw/plugin-sdk/setup-runtime`.
+`carapace/plugin-sdk/setup-runtime`.
 
 Those exports remain available as deprecated runtime compatibility adapters.
 New and republished plugins should own their config schemas and setup policy
@@ -279,7 +279,7 @@ permanently. Channel-specific fields remain typed in a deprecated compatibility
 tier so existing external plugins still compile while plugin authors move those
 fields into plugin-local setup input types.
 
-OpenClaw does not ship major releases. A registry sweep on 2026-07-22 inspected
+Carapace does not ship major releases. A registry sweep on 2026-07-22 inspected
 426 published out-of-tree channel plugins and removed 21 fields with no readers.
 The 22 retained fields each have a known published reader. Each further field is
 deleted as soon as no published plugin reads it; the retained set shrinks as
@@ -305,7 +305,7 @@ key at a time.
 #### Verifying readers
 
 1. Page through `https://clawhub.ai/api/v1/packages?family=code-plugin&limit=100` with each `nextCursor`, and keep packages whose `categories` include `channels`.
-2. Add npm candidates from `npm search --json --searchlimit=1000 "openclaw channel plugin"`. Add source-only candidates from GitHub code searches for `openclaw/plugin-sdk/channel-setup`, `openclaw/plugin-sdk/setup`, and `openclaw/plugin-sdk/core`.
+2. Add npm candidates from `npm search --json --searchlimit=1000 "carapace channel plugin"`. Add source-only candidates from GitHub code searches for `carapace/plugin-sdk/channel-setup`, `carapace/plugin-sdk/setup`, and `carapace/plugin-sdk/core`.
 3. Resolve each candidate's latest published version. Run `npm pack <package>@<version> --json --pack-destination <temp-dir>`, unpack it, and inspect shipped `dist` JavaScript and declarations for direct or destructured field reads. Download the ClawHub artifact when a package has no npm release.
 4. Record package, version, field or promotion key, and matching file. A field or key is deletable only when no published plugin artifact reads it. Keep the reader names in the code comments beside the retained field and key lists synchronized with the sweep.
 
@@ -349,7 +349,7 @@ after the facts-first replacements shipped). Removal additionally requires a
 clean published-plugin artifact sweep at that time; migrate before the date.
 
 The unused `buildChannelTurnMediaPayload` alias has been removed from
-`openclaw/plugin-sdk/channel-inbound`. Its canonical
+`carapace/plugin-sdk/channel-inbound`. Its canonical
 `buildChannelInboundMediaPayload` export remains available for the compatibility
 window above. New ingress code should pass ordered media facts directly.
 
@@ -359,7 +359,7 @@ For channel ingress, replace singular/plural `MediaPath`, `MediaUrl`,
 facts:
 
 ```ts
-import { toInboundMediaFacts } from "openclaw/plugin-sdk/channel-inbound";
+import { toInboundMediaFacts } from "carapace/plugin-sdk/channel-inbound";
 
 const media = toInboundMediaFacts([
   { path: saved.path, url: nativeUrl, contentType: saved.contentType, messageId },
@@ -381,8 +381,8 @@ and `{{MediaDir}}` with `{{AttachmentPath}}`, `{{AttachmentUrl}}`,
 
 For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
 `getAgentScopedMediaLocalRootsForSources(...)` from
-`openclaw/plugin-sdk/media-local-roots`. The
-`openclaw/plugin-sdk/agent-media-payload` facade and its
+`carapace/plugin-sdk/media-local-roots`. The
+`carapace/plugin-sdk/agent-media-payload` facade and its
 `buildAgentMediaPayload(...)` projection are deprecated.
 
 ## How to migrate
@@ -424,22 +424,22 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     must receive config from their boundary, and long-lived runtime modules
     allow zero ambient `loadConfig()` calls.
 
-    New plugin code should avoid the broad `openclaw/plugin-sdk/config-runtime`
+    New plugin code should avoid the broad `carapace/plugin-sdk/config-runtime`
     barrel. Use the narrow subpath for the job:
 
     | Need | Import |
     | --- | --- |
-    | Config types such as `OpenClawConfig` | `openclaw/plugin-sdk/config-contracts` |
+    | Config types such as `CarapaceConfig` | `carapace/plugin-sdk/config-contracts` |
     | Plugin-entry config lookup | `api.pluginConfig` |
     | Config merging | Plugin-local logic at the config boundary |
-    | Current runtime snapshot reads | `openclaw/plugin-sdk/runtime-config-snapshot` |
-    | Config writes | `openclaw/plugin-sdk/config-mutation` |
-    | Session store helpers | `openclaw/plugin-sdk/session-store-runtime` |
+    | Current runtime snapshot reads | `carapace/plugin-sdk/runtime-config-snapshot` |
+    | Config writes | `carapace/plugin-sdk/config-mutation` |
+    | Session store helpers | `carapace/plugin-sdk/session-store-runtime` |
     | Markdown table config | `api.runtime.channel.text.resolveMarkdownTableMode` |
-    | Channel group policy, mention requirements, and sender tool policy | `openclaw/plugin-sdk/channel-policy` |
-    | Provider-default group-policy fallback helpers | `openclaw/plugin-sdk/runtime-group-policy` |
-    | Secret input resolution | `openclaw/plugin-sdk/secret-input-runtime` |
-    | Model/session overrides | `openclaw/plugin-sdk/model-session-runtime` |
+    | Channel group policy, mention requirements, and sender tool policy | `carapace/plugin-sdk/channel-policy` |
+    | Provider-default group-policy fallback helpers | `carapace/plugin-sdk/runtime-group-policy` |
+    | Secret input resolution | `carapace/plugin-sdk/secret-input-runtime` |
+    | Model/session overrides | `carapace/plugin-sdk/model-session-runtime` |
 
     `api.pluginConfig` is registration-scoped, not a live getter. Replacing
     `resolveLivePluginConfigObject(...)` requires preserving freshness through
@@ -469,14 +469,14 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     runtime-neutral middleware:
 
     ```typescript
-    // OpenClaw runtime tools and Codex runtime dynamic tools (result may be
+    // Carapace runtime tools and Codex runtime dynamic tools (result may be
     // transformed). Codex-native tool results are also relayed for observation,
     // but their transformed output never reaches the model: the Codex
     // PostToolUse hook contract cannot replace a native tool response.
     api.registerAgentToolResultMiddleware(async (event) => {
       return compactToolResult(event);
     }, {
-      runtimes: ["openclaw", "codex"],
+      runtimes: ["carapace", "codex"],
     });
     ```
 
@@ -485,7 +485,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     ```json
     {
       "contracts": {
-        "agentToolResultMiddleware": ["openclaw", "codex"]
+        "agentToolResultMiddleware": ["carapace", "codex"]
       }
     }
     ```
@@ -512,7 +512,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     - `plugin.auth` remains for channel login/logout flows only; core no
       longer reads approval auth hooks there.
     - Register channel-owned runtime objects (clients, tokens, Bolt apps)
-      through `openclaw/plugin-sdk/channel-runtime-context`.
+      through `carapace/plugin-sdk/channel-runtime-context`.
     - Do not send plugin-owned reroute notices from native approval handlers;
       core owns routed-elsewhere notices from actual delivery results.
     - When passing `channelRuntime` into `createChannelManager(...)`, provide a
@@ -525,7 +525,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
   </Step>
 
   <Step title="Audit Windows wrapper fallback behavior">
-    If your plugin uses `openclaw/plugin-sdk/windows-spawn`, unresolved Windows
+    If your plugin uses `carapace/plugin-sdk/windows-spawn`, unresolved Windows
     `.cmd`/`.bat` wrappers now fail closed unless you explicitly pass
     `allowShellFallback: true`:
 
@@ -552,7 +552,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     grep -r "plugin-sdk/compat" my-plugin/
     grep -r "plugin-sdk/infra-runtime" my-plugin/
     grep -r "plugin-sdk/config-runtime" my-plugin/
-    grep -r "openclaw/extension-api" my-plugin/
+    grep -r "carapace/extension-api" my-plugin/
     ```
   </Step>
 
@@ -566,13 +566,13 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     import {
       createChannelReplyPipeline,
       createPluginRuntimeStore,
-    } from "openclaw/plugin-sdk/compat";
+    } from "carapace/plugin-sdk/compat";
 
     // After (modern focused imports)
     import {
       createChannelMessageReplyPipeline as createChannelReplyPipeline,
-    } from "openclaw/plugin-sdk/channel-outbound";
-    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+    } from "carapace/plugin-sdk/channel-outbound";
+    import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
     ```
 
     The explicit alias preserves existing `createChannelReplyPipeline(...)`
@@ -585,7 +585,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
 
     ```typescript
     // Before (deprecated extension-api bridge)
-    import { runEmbeddedAgent } from "openclaw/extension-api";
+    import { runEmbeddedAgent } from "carapace/extension-api";
     const result = await runEmbeddedAgent({ sessionId, prompt });
 
     // After (injected runtime)
@@ -607,7 +607,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
   </Step>
 
   <Step title="Replace broad infra-runtime imports">
-    `openclaw/plugin-sdk/infra-runtime` still exists for external
+    `carapace/plugin-sdk/infra-runtime` still exists for external
     compatibility, but new code should use the supported surface it actually
     needs:
 
@@ -616,14 +616,14 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     | New system event producers | `api.runtime.system.enqueueSystemEvent` |
     | Heartbeat wake requests | `api.runtime.system.requestHeartbeat` |
     | Channel activity telemetry | `api.runtime.channel.activity.record` and `.get` |
-    | `createDedupeCache`, `resolveGlobalDedupeCache` | `openclaw/plugin-sdk/dedupe-runtime` |
-    | Safe local-file/media paths, regular-file checks, and symlink-parent checks | `openclaw/plugin-sdk/security-runtime` (itself a deprecated broad barrel) |
-    | `fetchWithSsrFGuard`, pinned-dispatcher helpers, `LookupFn`, `SsrFPolicy` | `openclaw/plugin-sdk/ssrf-runtime` |
-    | Approval request/resolution types | `openclaw/plugin-sdk/approval-runtime` |
-    | Approval reply payload and command helpers | `openclaw/plugin-sdk/approval-reply-runtime` |
-    | `collectErrorGraphCandidates`, `extractErrorCode`, `formatErrorMessage`, `formatUncaughtError`, `readErrorName`, `toErrorObject` | `openclaw/plugin-sdk/error-runtime` |
-    | `generateSecureToken`, `generateSecureUuid` | `openclaw/plugin-sdk/core` |
-    | `parseFiniteNumber`, `parseStrictFiniteNumber`, `parseStrictInteger`, `parseStrictNonNegativeInteger`, `parseStrictPositiveInteger` | `openclaw/plugin-sdk/string-coerce-runtime` |
+    | `createDedupeCache`, `resolveGlobalDedupeCache` | `carapace/plugin-sdk/dedupe-runtime` |
+    | Safe local-file/media paths, regular-file checks, and symlink-parent checks | `carapace/plugin-sdk/security-runtime` (itself a deprecated broad barrel) |
+    | `fetchWithSsrFGuard`, pinned-dispatcher helpers, `LookupFn`, `SsrFPolicy` | `carapace/plugin-sdk/ssrf-runtime` |
+    | Approval request/resolution types | `carapace/plugin-sdk/approval-runtime` |
+    | Approval reply payload and command helpers | `carapace/plugin-sdk/approval-reply-runtime` |
+    | `collectErrorGraphCandidates`, `extractErrorCode`, `formatErrorMessage`, `formatUncaughtError`, `readErrorName`, `toErrorObject` | `carapace/plugin-sdk/error-runtime` |
+    | `generateSecureToken`, `generateSecureUuid` | `carapace/plugin-sdk/core` |
+    | `parseFiniteNumber`, `parseStrictFiniteNumber`, `parseStrictInteger`, `parseStrictNonNegativeInteger`, `parseStrictPositiveInteger` | `carapace/plugin-sdk/string-coerce-runtime` |
 
     These are symbol-specific mappings, not replacements for the whole barrel.
     Private-local entries such as `heartbeat-runtime`, `delivery-queue-runtime`,
@@ -649,7 +649,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     Keep unsupported retained imports until their public contract is resolved.
 
     System event snapshot inspection and consume helpers remain available only
-    through the deprecated `openclaw/plugin-sdk/infra-runtime` compatibility
+    through the deprecated `carapace/plugin-sdk/infra-runtime` compatibility
     surface; there is no modern public replacement. Current snapshots carry an
     opaque `id` for one queued occurrence. Preserve it through copies and
     serialization when returning a snapshot to consume. Legacy ID-less callers
@@ -667,7 +667,7 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
   </Step>
 
   <Step title="Migrate channel route helpers">
-    New channel route code uses `openclaw/plugin-sdk/channel-route`. The older
+    New channel route code uses `carapace/plugin-sdk/channel-route`. The older
     route-key names remain as compatibility aliases:
 
     | Old helper | Modern helper |
@@ -715,7 +715,7 @@ import.
 Reserved bundled-plugin helper seams have been retired from the public SDK
 export map except for explicitly documented compatibility facades such as the
 deprecated `plugin-sdk/discord` shim retained for external plugins that still
-import the published `@openclaw/discord` package directly. Owner-specific
+import the published `@carapace/discord` package directly. Owner-specific
 helpers live inside the owning plugin package; shared host behavior moves
 through generic SDK contracts such as `plugin-sdk/gateway-runtime`,
 `plugin-sdk/security-runtime`, and the injected plugin API.
@@ -729,8 +729,8 @@ contract should own it.
 The retained channel facades are not interchangeable with `channel-outbound`.
 Migrate each function and type separately.
 
-For `openclaw/plugin-sdk/channel-reply-pipeline`, use these exports from
-`openclaw/plugin-sdk/channel-outbound`:
+For `carapace/plugin-sdk/channel-reply-pipeline`, use these exports from
+`carapace/plugin-sdk/channel-outbound`:
 
 | Legacy export                                                                   | Modern export                                  |
 | ------------------------------------------------------------------------------- | ---------------------------------------------- |
@@ -743,12 +743,12 @@ types do not all move with them: `channel-outbound` does not export
 `ChannelReplyPipeline`, `CreateTypingCallbacksParams`, `ReplyPrefixContext`,
 `ReplyPrefixContextBundle`, `ReplyPrefixOptions`, or `TypingCallbacks`.
 `SourceReplyDeliveryMode` is available from the typed-public
-`openclaw/plugin-sdk/reply-runtime` subpath. Callers that still need the other
+`carapace/plugin-sdk/reply-runtime` subpath. Callers that still need the other
 named imports must retain their compatibility type imports until an SDK owner
 approves a public replacement; do not import the internal `channel-reply-core`
 source file.
 
-From `openclaw/plugin-sdk/channel-lifecycle`, these functions move unchanged to
+From `carapace/plugin-sdk/channel-lifecycle`, these functions move unchanged to
 `channel-outbound`: `createAccountStatusSink`, `createChannelRunQueue`,
 `keepHttpServerTaskAlive`, `runPassiveAccountLifecycle`, `waitUntilAbort`,
 `createDraftStreamLoop`, `createFinalizableDraftLifecycle`,
@@ -772,9 +772,9 @@ finalizer annotations recommending them. Keep needed compatibility type imports;
 inferred factory results are not necessarily identical to caller-implemented
 legacy interfaces.
 
-For `openclaw/plugin-sdk/channel-message`, move outbound exports unchanged to
+For `carapace/plugin-sdk/channel-message`, move outbound exports unchanged to
 `channel-outbound`, but migrate its three dispatch aliases to
-`openclaw/plugin-sdk/channel-inbound`:
+`carapace/plugin-sdk/channel-inbound`:
 
 | Legacy export                      | Modern inbound export               |
 | ---------------------------------- | ----------------------------------- |
@@ -796,7 +796,7 @@ plugin runtimes. Neither provides typed third-party SDK access.
 ### Process-global API-provider publication
 
 `registerApiProvider(...)` and `unregisterApiProviders(...)` were removed from
-`openclaw/plugin-sdk/llm`. They published API transports into process-global
+`carapace/plugin-sdk/llm`. They published API transports into process-global
 state, which lifecycle-owned model runtimes then had to copy into each prepared
 registry.
 
@@ -824,7 +824,7 @@ api.on("gateway_stop", async (event, ctx) => {
 
 ### Private testing barrel
 
-`openclaw/plugin-sdk/testing` was repo-local and excluded from shipped package
+`carapace/plugin-sdk/testing` was repo-local and excluded from shipped package
 artifacts, so it was removed before its 2026-07-28 `removeAfter` date. Repository
 tests use focused subpaths such as `plugin-sdk/plugin-test-runtime`,
 `plugin-sdk/channel-test-helpers`, `plugin-sdk/channel-target-testing`,
@@ -839,19 +839,19 @@ timeline for current status.
 
 <AccordionGroup>
   <Accordion title="command-auth help builders -> command-status">
-    **Old (`openclaw/plugin-sdk/command-auth`)**: `buildCommandsMessage`,
+    **Old (`carapace/plugin-sdk/command-auth`)**: `buildCommandsMessage`,
     `buildCommandsMessagePaginated`, `buildHelpMessage`.
 
-    **New (`openclaw/plugin-sdk/command-status`)**: same signatures, imported
+    **New (`carapace/plugin-sdk/command-status`)**: same signatures, imported
     from the narrower subpath. The `command-auth` compatibility re-exports
     have been removed.
 
     ```typescript
     // Before
-    import { buildHelpMessage } from "openclaw/plugin-sdk/command-auth";
+    import { buildHelpMessage } from "carapace/plugin-sdk/command-auth";
 
     // After
-    import { buildHelpMessage } from "openclaw/plugin-sdk/command-status";
+    import { buildHelpMessage } from "carapace/plugin-sdk/command-status";
     ```
 
   </Accordion>
@@ -859,8 +859,8 @@ timeline for current status.
   <Accordion title="Mention gating helpers -> resolveInboundMentionDecision">
     **Old**: `resolveMentionGating(params)` and
     `resolveMentionGatingWithBypass(params)` from
-    `openclaw/plugin-sdk/channel-inbound` or
-    `openclaw/plugin-sdk/channel-mention-gating`.
+    `carapace/plugin-sdk/channel-inbound` or
+    `carapace/plugin-sdk/channel-mention-gating`.
 
     **New**: `resolveInboundMentionDecision({ facts, policy })` - one decision
     object instead of two split call shapes.
@@ -872,11 +872,11 @@ timeline for current status.
   </Accordion>
 
   <Accordion title="Channel runtime shim and channel actions helpers">
-    `openclaw/plugin-sdk/channel-runtime` has been removed. Use
-    `openclaw/plugin-sdk/channel-runtime-context` for registering runtime
+    `carapace/plugin-sdk/channel-runtime` has been removed. Use
+    `carapace/plugin-sdk/channel-runtime-context` for registering runtime
     objects.
 
-    The native message schema helpers in `openclaw/plugin-sdk/channel-actions`
+    The native message schema helpers in `carapace/plugin-sdk/channel-actions`
     were removed alongside raw "actions" channel exports. Expose capabilities
     through the semantic `presentation` surface instead - channel plugins
     declare what they render (cards, buttons, selects) rather than which raw
@@ -885,10 +885,10 @@ timeline for current status.
   </Accordion>
 
   <Accordion title="Web search provider tool() helper -> createTool() on the plugin">
-    **Old**: `tool()` factory from `openclaw/plugin-sdk/provider-web-search`.
+    **Old**: `tool()` factory from `carapace/plugin-sdk/provider-web-search`.
 
     **New**: implement `createTool(...)` directly on the provider plugin.
-    OpenClaw no longer needs the SDK helper to register the tool wrapper.
+    Carapace no longer needs the SDK helper to register the tool wrapper.
 
   </Accordion>
 
@@ -961,7 +961,7 @@ timeline for current status.
 
     **New**: a single `resolveThinkingProfile(ctx)` that returns a
     `ProviderThinkingProfile` with the canonical `id`, optional `label`, and a
-    ranked level list. OpenClaw downgrades stale stored values by profile rank
+    ranked level list. Carapace downgrades stale stored values by profile rank
     automatically.
 
     The context includes `provider`, `modelId`, optional merged `reasoning`,
@@ -1079,14 +1079,14 @@ timeline for current status.
     active sessions.
 
     Official plugins released with `v2026.7.1-beta.5` imported the four
-    deprecated helpers above. `openclaw/plugin-sdk/session-store-runtime` keeps
+    deprecated helpers above. `carapace/plugin-sdk/session-store-runtime` keeps
     that exact bridge through 2026-10-12; new plugins must use the replacements.
     `resolveStorePath(...)` remains a supported SDK helper and is not part of
     this deprecation.
 
-    `openclaw plugins inspect --all --runtime` reports non-bundled plugins whose
+    `carapace plugins inspect --all --runtime` reports non-bundled plugins whose
     load errors or diagnostics still reference these removed file APIs. The
-    `@openclaw/plugin-inspector` advisory sweep must use version `0.3.17` or
+    `@carapace/plugin-inspector` advisory sweep must use version `0.3.17` or
     newer so external package scans also flag whole-store session helpers,
     session file-path helpers, legacy transcript file targets, and low-level
     transcript helpers before release.
@@ -1099,7 +1099,7 @@ timeline for current status.
     `AgentHarnessSideQuestionParamsV2`. The V2 parameter types require
     `hostCapabilities`, matching what core supplies at the selected-harness
     boundary. A plugin that adopts these V2 contracts must declare
-    `openclaw.compat.pluginApi: ">=2026.8.1"` (or a newer floor) in its package
+    `carapace.compat.pluginApi: ">=2026.8.1"` (or a newer floor) in its package
     manifest so an older host rejects the plugin before loading it.
 
     Existing plugins may continue implementing `AgentHarness` and constructing
@@ -1140,15 +1140,15 @@ timeline for current status.
     in `contracts.agentToolResultMiddleware`.
   </Accordion>
 
-  <Accordion title="OpenClawSchemaType alias -> OpenClawConfig">
-    The `OpenClawSchemaType` root-SDK alias was removed. Use the canonical
-    `OpenClawConfig` name.
+  <Accordion title="CarapaceSchemaType alias -> CarapaceConfig">
+    The `CarapaceSchemaType` root-SDK alias was removed. Use the canonical
+    `CarapaceConfig` name.
 
     ```typescript
     // Before
-    import type { OpenClawSchemaType } from "openclaw/plugin-sdk";
+    import type { CarapaceSchemaType } from "carapace/plugin-sdk";
     // After
-    import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+    import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
     ```
 
   </Accordion>
@@ -1165,11 +1165,11 @@ deprecation comments in that barrel before upgrading.
 ## Talk and realtime voice migration
 
 Realtime voice, telephony, meeting, and browser Talk code shares one Talk
-session controller exported by `openclaw/plugin-sdk/realtime-voice`. The
+session controller exported by `carapace/plugin-sdk/realtime-voice`. The
 controller owns the common Talk event envelope, active turn state, capture
 state, output-audio state, recent event history, and stale-turn rejection.
 Provider plugins own vendor-specific realtime sessions. Browser-meeting plugins
-use `openclaw/plugin-sdk/meeting-runtime` for session, browser, audio, node-host,
+use `carapace/plugin-sdk/meeting-runtime` for session, browser, audio, node-host,
 agent-consult, and voice-call mechanics, then implement `MeetingPlatformAdapter`
 for URL rules, DOM scripts, manual-action mapping, captions, creation, and dial-in
 plans. Platform REST APIs, OAuth, artifacts, selectors, and wire names remain in
@@ -1238,7 +1238,7 @@ the common Gateway-managed surface for gateway-relay realtime, gateway-relay
 transcription, and managed-room native STT/TTS sessions.
 
 Legacy configs that place realtime selectors beside `talk.provider` /
-`talk.providers` should be repaired with `openclaw doctor --fix`; runtime Talk
+`talk.providers` should be repaired with `carapace doctor --fix`; runtime Talk
 does not reinterpret speech/TTS provider config as realtime provider config.
 
 The supported `talk.session.create` combinations are intentionally small:

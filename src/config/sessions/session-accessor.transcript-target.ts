@@ -1,6 +1,6 @@
 import { resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
-import { resolveOpenClawAgentSqlitePath } from "../../state/openclaw-agent-db.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import { resolveCarapaceAgentSqlitePath } from "../../state/carapace-agent-db.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { resolveSessionEntrySelection } from "./session-accessor.entry.js";
 import { resolveSessionKeyBySessionId } from "./session-accessor.sqlite-entry.js";
 import {
@@ -18,7 +18,7 @@ import { resolveSessionStorePathForScope } from "./session-store-path.js";
 /** Binds runtime storage without changing keys that raw ownership checks and read fences validate. */
 export function bindSessionTranscriptStoreScope<
   T extends Pick<SessionTranscriptReadScope, "agentId" | "env" | "sessionKey" | "storePath">,
->(scope: T, config?: OpenClawConfig): T & { storePath: string } {
+>(scope: T, config?: CarapaceConfig): T & { storePath: string } {
   return {
     ...scope,
     storePath: resolveSessionStorePathForScope(
@@ -31,7 +31,7 @@ export function bindSessionTranscriptStoreScope<
 /** Resolves the canonical SQLite identity for runtime transcript access. */
 export async function resolveSessionTranscriptRuntimeTarget(
   scope: SessionTranscriptRuntimeScope,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): Promise<SessionTranscriptRuntimeTarget> {
   const agentId = scope.agentId ?? resolveAgentIdFromSessionKey(scope.sessionKey);
   if (!agentId) {
@@ -69,7 +69,7 @@ export function resolveSessionTranscriptDatabasePath(
   target: SessionTranscriptRuntimeTarget,
 ): string {
   const resolved = resolveSqliteTranscriptScope(target);
-  return resolveOpenClawAgentSqlitePath(toDatabaseOptions(resolved));
+  return resolveCarapaceAgentSqlitePath(toDatabaseOptions(resolved));
 }
 
 export function resolveSessionTranscriptReadTarget(

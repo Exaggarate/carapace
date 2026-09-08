@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { createAgentDeletionDatabaseCleanup } from "../state/agent-deletion-cleanup.js";
@@ -18,14 +18,14 @@ import {
   type AgentDeletionJournalEntry,
 } from "../state/agent-deletion-journal.js";
 import { readAgentProvenance, type AgentProvenance } from "../state/agent-provenance.js";
-import { assertNoOpenClawAgentDatabaseLeases } from "../state/openclaw-agent-db-lease.js";
+import { assertNoCarapaceAgentDatabaseLeases } from "../state/carapace-agent-db-lease.js";
 import type {
-  OpenClawStateDatabase,
-  OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db-contract.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+  CarapaceStateDatabase,
+  CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db-contract.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 import { resolveAgentConfig } from "./agent-scope-config.js";
 
 export class AgentDeletionAuthorityRollbackError extends AggregateError {}
@@ -57,12 +57,12 @@ type AgentDeletionInput = Omit<
 
 export type AgentDeletionOperation = {
   entry: AgentDeletionJournalEntry;
-  assertCurrent: (database?: OpenClawStateDatabase) => void;
+  assertCurrent: (database?: CarapaceStateDatabase) => void;
   runDatabaseCleanup: ReturnType<typeof createAgentDeletionDatabaseCleanup>;
   fenceDatabasePaths: (paths: readonly string[]) => void;
   fenceCleanupPaths: (paths: readonly AgentDeletionJournalCleanupPath[]) => void;
   finish: () => void;
-  completeInTransaction: (database: OpenClawStateDatabase) => void;
+  completeInTransaction: (database: CarapaceStateDatabase) => void;
   rollback: () => void;
 };
 
@@ -72,14 +72,14 @@ const log = createSubsystemLogger("agents/lifecycle");
 export function withAgentDeletion<T>(
   agentId: string,
   run: (begin: (entry: AgentDeletionInput) => AgentDeletionOperation) => Promise<T>,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<T> {
   const id = normalizeAgentId(agentId);
   const statePath = path.resolve(
-    options.path ?? resolveOpenClawStateSqlitePath(options.env ?? process.env),
+    options.path ?? resolveCarapaceStateSqlitePath(options.env ?? process.env),
   );
   const stateOptions = { ...options, path: statePath, env: { ...(options.env ?? process.env) } };
-  return withOpenClawStateLease(
+  return withCarapaceStateLease(
     {
       scope: "core:agent-deletion",
       key: id,
@@ -101,7 +101,7 @@ export function withAgentDeletion<T>(
           }
           begun = true;
           const operationId = crypto.randomUUID();
-          const journal = runOpenClawStateWriteTransaction((database) => {
+          const journal = runCarapaceStateWriteTransaction((database) => {
             lease.assertOwnedInTransaction(database.db);
             return beginAgentDeletionJournal(
               { ...entry, agentId: id, operationId, deleteFiles: entry.deleteFiles !== false },
@@ -114,7 +114,7 @@ export function withAgentDeletion<T>(
               AgentDeletionJournalEntry,
               "agentId" | "operationId" | "cleanupCompleted"
             >[],
-            database?: OpenClawStateDatabase,
+            database?: CarapaceStateDatabase,
           ) => {
             if (
               closed ||
@@ -135,7 +135,7 @@ export function withAgentDeletion<T>(
             }
             return id;
           };
-          const assertCurrent = (database?: OpenClawStateDatabase) => {
+          const assertCurrent = (database?: CarapaceStateDatabase) => {
             const current = closed
               ? undefined
               : database
@@ -144,11 +144,11 @@ export function withAgentDeletion<T>(
             assertJournal(database?.path ?? statePath, current ? [current] : [], database);
           };
           const mutateJournal = <Result>(mutate: () => Result): Result =>
-            runOpenClawStateWriteTransaction((database) => {
+            runCarapaceStateWriteTransaction((database) => {
               assertCurrent(database);
               return mutate();
             }, stateOptions);
-          const completeInTransaction = (database: OpenClawStateDatabase) => {
+          const completeInTransaction = (database: CarapaceStateDatabase) => {
             assertCurrent(database);
             if (!completeAgentDeletionJournalInDatabase(database, id, operationId)) {
               throw new Error(`Failed to complete deletion journal for agent ${id}.`);
@@ -160,7 +160,7 @@ export function withAgentDeletion<T>(
             assertCurrent,
             runDatabaseCleanup: createAgentDeletionDatabaseCleanup({
               statePath,
-              assertAdmission: () => assertNoOpenClawAgentDatabaseLeases(id, stateOptions),
+              assertAdmission: () => assertNoCarapaceAgentDatabaseLeases(id, stateOptions),
               assertCurrent,
               assertJournal,
               withCommit: (commit) => {
@@ -207,7 +207,7 @@ export function withAgentDeletion<T>(
                 journal.cleanupPaths = [...paths];
               }),
             completeInTransaction,
-            finish: () => runOpenClawStateWriteTransaction(completeInTransaction, stateOptions),
+            finish: () => runCarapaceStateWriteTransaction(completeInTransaction, stateOptions),
             rollback: () =>
               mutateJournal(() => {
                 if (!removeAgentDeletionJournal(id, operationId, stateOptions)) {
@@ -228,7 +228,7 @@ export function withAgentDeletion<T>(
 export function claimCompletedAgentDeletion(
   agentId: string,
   operationId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   return claimCompletedAgentDeletionJournal(normalizeAgentId(agentId), operationId, options);
 }
@@ -236,16 +236,16 @@ export function claimCompletedAgentDeletion(
 /** Return whether this process must refuse new authority for an agent id. */
 export function isAgentDeletionBlocked(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   return Boolean(readAgentDeletionJournal(normalizeAgentId(agentId), options));
 }
 
 /** Captures the exact durable incarnation of an existing, deletion-safe agent. */
 export function captureAgentLifecycleBinding(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): AgentLifecycleBinding | undefined {
   const id = normalizeAgentId(agentId);
   if (!resolveAgentConfig(config, id) || isAgentDeletionBlocked(id, options)) {
@@ -259,9 +259,9 @@ export function captureAgentLifecycleBinding(
 
 /** Revalidates an agent binding against both the roster and lifecycle owner. */
 export function matchesAgentLifecycleBinding(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   binding: AgentLifecycleBinding,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   const id = normalizeAgentId(binding.agentId);
   return (

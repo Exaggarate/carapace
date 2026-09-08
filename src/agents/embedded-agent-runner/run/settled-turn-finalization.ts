@@ -485,7 +485,7 @@ function buildSettledToolFallbackAttemptResult(input: {
   const assistant = {
     ...sourceAssistant,
     content: [{ type: "text" as const, text: SETTLED_TOOL_FINALIZATION_FALLBACK_TEXT }],
-    openclawDelivery: undefined,
+    carapaceDelivery: undefined,
     stopReason: "stop" as const,
     errorMessage: undefined,
     errorCode: undefined,

@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { backupRestoreCommand } from "../commands/backup-restore.js";
 import { CONFIG_AUDIT_MAX_ENTRIES, CONFIG_AUDIT_SCOPE } from "../config/io.audit.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createBackupArchive } from "./backup-create.js";
 import * as backupSqliteSnapshot from "./backup-sqlite-snapshot.js";
 import { createSqliteAuditRecordStore } from "./sqlite-audit-record-store.js";
@@ -16,14 +16,14 @@ describe("backup legacy audit capture boundary", () => {
   it.each(["lease-duration overrun", "concurrent audit migration"] as const)(
     "restores audit records exactly once after %s during the SQLite snapshot",
     async (scenario) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", prefix: "backup-audit-boundary-", scenario: "minimal" },
         async (state) => {
           const record = {
             ts: "2026-07-01T00:00:00.000Z",
             source: "config-io",
             event: "config.write",
-            argv: ["openclaw", "config", "set", "safe", "preserved-audit-record"],
+            argv: ["carapace", "config", "set", "safe", "preserved-audit-record"],
             execArgv: [],
           };
           await state.writeText("logs/config-audit.jsonl", `${JSON.stringify(record)}\n`);
@@ -86,13 +86,13 @@ describe("backup legacy audit capture boundary", () => {
             const records = createSqliteAuditRecordStore({
               scope: CONFIG_AUDIT_SCOPE,
               maxEntries: CONFIG_AUDIT_MAX_ENTRIES,
-              env: { ...state.env, OPENCLAW_STATE_DIR: restoredStateDir },
+              env: { ...state.env, CARAPACE_STATE_DIR: restoredStateDir },
             }).entries();
             expect(records.map((entry) => entry.value)).toEqual([record]);
           } finally {
             clock.mockRestore();
             snapshot.mockRestore();
-            closeOpenClawStateDatabase();
+            closeCarapaceStateDatabase();
           }
         },
       );
@@ -100,7 +100,7 @@ describe("backup legacy audit capture boundary", () => {
   );
 
   it("fails closed after bounded retries when the legacy source keeps changing", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "backup-audit-retry-", scenario: "minimal" },
       async (state) => {
         const sourcePath = path.join(state.stateDir, "logs/config-audit.jsonl");
@@ -111,7 +111,7 @@ describe("backup legacy audit capture boundary", () => {
             ts: "2026-07-01T00:00:00.000Z",
             source: "config-io",
             event: "config.write",
-            argv: ["openclaw", "config", "set", "safe", "initial"],
+            argv: ["carapace", "config", "set", "safe", "initial"],
             execArgv: [],
           })}\n`,
         );
@@ -127,7 +127,7 @@ describe("backup legacy audit capture boundary", () => {
                 ts: `2026-07-01T00:00:0${snapshotAttempts}.000Z`,
                 source: "config-io",
                 event: "config.write",
-                argv: ["openclaw", "config", "set", "safe", `append-${snapshotAttempts}`],
+                argv: ["carapace", "config", "set", "safe", `append-${snapshotAttempts}`],
                 execArgv: [],
               })}\n`,
             );
@@ -141,7 +141,7 @@ describe("backup legacy audit capture boundary", () => {
           await expect(fs.access(outputPath)).rejects.toMatchObject({ code: "ENOENT" });
         } finally {
           snapshot.mockRestore();
-          closeOpenClawStateDatabase();
+          closeCarapaceStateDatabase();
         }
       },
     );

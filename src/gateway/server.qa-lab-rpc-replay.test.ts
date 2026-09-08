@@ -118,8 +118,8 @@ async function holdReconnect() {
 }
 
 beforeAll(async () => {
-  vi.stubEnv("OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
-  vi.stubEnv("OPENCLAW_LIVE_SETUP_TOKEN_VALUE", undefined);
+  vi.stubEnv("CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
+  vi.stubEnv("CARAPACE_LIVE_SETUP_TOKEN_VALUE", undefined);
   const root = dirs.make("qa-rpc-replay-");
   recordPath = path.join(root, "proxy-events.jsonl");
   const backendPort = await getGatewayTestPort();
@@ -142,7 +142,7 @@ beforeAll(async () => {
     onListening: async (context) => {
       token = context.token;
       testState.gatewayAuth = { mode: "token", token };
-      vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", token);
+      vi.stubEnv("CARAPACE_GATEWAY_TOKEN", token);
       backend = await startTestGatewayServer(backendPort, { auth: { mode: "token", token } });
     },
   });
@@ -158,7 +158,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   testState.gatewayAuth = { mode: "token", token };
-  vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", token);
+  vi.stubEnv("CARAPACE_GATEWAY_TOKEN", token);
   await control("reset");
 });
 

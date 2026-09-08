@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
-export function resolveDiscordCommandOwnerEntries(cfg: OpenClawConfig): string[] | undefined {
+export function resolveDiscordCommandOwnerEntries(cfg: CarapaceConfig): string[] | undefined {
   // Doctor owns channel:user:id repair. Bare targets (user:, pk:, mentions) are
   // shipped owner config; keep their matcher without re-reading the retired envelope.
   // An unrepaired Discord override stays empty instead of inheriting channel access.
@@ -10,7 +10,7 @@ export function resolveDiscordCommandOwnerEntries(cfg: OpenClawConfig): string[]
   return entries.length > 0 ? entries.filter((entry) => !/^discord:user:/i.test(entry)) : undefined;
 }
 
-export function resolveDiscordCommandOwnerAllowFrom(cfg: OpenClawConfig): string[] | undefined {
+export function resolveDiscordCommandOwnerAllowFrom(cfg: CarapaceConfig): string[] | undefined {
   return resolveDiscordCommandOwnerEntries(cfg)
     ?.map((entry) => entry.replace(/^discord:/i, "").trim())
     .filter(Boolean);

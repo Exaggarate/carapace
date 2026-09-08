@@ -1,6 +1,6 @@
 // Gateway RPC handlers for DM sender access requests on pairing-policy channels.
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -18,7 +18,7 @@ import { listChannelPlugins } from "../../channels/plugins/index.js";
 import { notifyPairingApproved } from "../../channels/plugins/pairing.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import { hasConfiguredCommandOwners } from "../../commands/doctor-command-owner.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { bootstrapCommandOwnerFromPairing } from "../../pairing/command-owner.js";
 import {
   approveChannelPairingRequest,
@@ -48,7 +48,7 @@ function normalizeFilter(value: string | undefined): string | undefined {
 
 function resolvePairingPolicy(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   account: unknown;
 }): string | undefined {
@@ -68,7 +68,7 @@ function resolvePairingPolicy(params: {
   });
 }
 
-function resolvePairingAccountLabel(plugin: ChannelPlugin, account: unknown, cfg: OpenClawConfig) {
+function resolvePairingAccountLabel(plugin: ChannelPlugin, account: unknown, cfg: CarapaceConfig) {
   const described = plugin.config.describeAccount?.(account, cfg);
   return (
     normalizeOptionalString(described?.name) ?? normalizeOptionalString(asRecord(account)?.name)
@@ -76,7 +76,7 @@ function resolvePairingAccountLabel(plugin: ChannelPlugin, account: unknown, cfg
 }
 
 async function listPairingAccounts(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string;
   accountId?: string;
 }): Promise<PairingAccount[]> {
@@ -118,7 +118,7 @@ async function listPairingAccounts(params: {
 }
 
 async function resolvePairingAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId: string;
 }): Promise<PairingAccount | null> {
@@ -256,7 +256,7 @@ export const channelPairingHandlers: GatewayRequestHandlers = {
       return;
     }
     const parsed = params as ChannelsPairingApproveParams;
-    let cfg: OpenClawConfig;
+    let cfg: CarapaceConfig;
     let account: PairingAccount | null;
     try {
       cfg = resolveGatewayPluginConfig({ config: context.getRuntimeConfig() });

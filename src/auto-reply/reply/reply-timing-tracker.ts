@@ -1,5 +1,5 @@
 /** Lightweight reply-stage profiler for slow-turn diagnostics. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isDiagnosticFlagEnabled } from "../../infra/diagnostic-flags.js";
 import {
   createStageTimingTracker,
@@ -28,7 +28,7 @@ type ReplyTimingTracker<TLogParams extends object = ReplyTimingLogParams> = {
 
 /** Checks config/env diagnostic flags for reply profiling. */
 export function isReplyProfilerEnabled(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): boolean {
   const cfg = params?.config;
@@ -42,7 +42,7 @@ export function isReplyProfilerEnabled(params?: {
 /** Keeps slow replies diagnosable; profiling lowers the warning thresholds. */
 export function createReplyTimingTracker<TLogParams extends object = ReplyTimingLogParams>(params: {
   log: { warn: (message: string, details?: Record<string, unknown>) => void };
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   enabled?: boolean;
   totalWarnMs?: number;

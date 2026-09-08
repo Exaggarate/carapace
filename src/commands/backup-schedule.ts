@@ -14,9 +14,9 @@ import { shortenHomePath } from "../utils.js";
 import { GIT_BACKUP_PUSH_CREDENTIAL_WARNING } from "./backup-git.js";
 import { resolveRequiredBackupPath } from "./backup-shared.js";
 
-const BACKUP_CRON_JOB_NAME = "openclaw-backup-scheduled";
+const BACKUP_CRON_JOB_NAME = "carapace-backup-scheduled";
 const LOCAL_GATEWAY_REQUIRED_ERROR =
-  "backup enable manages backups on the Gateway host and currently requires a local Gateway. Create the cron job manually with openclaw cron add for remote Gateways.";
+  "backup enable manages backups on the Gateway host and currently requires a local Gateway. Create the cron job manually with carapace cron add for remote Gateways.";
 
 type BackupScheduleOptions = GatewayRpcOpts & {
   repository?: string;
@@ -63,7 +63,7 @@ function buildScheduledArgv(
       )
     : undefined;
   return [
-    "openclaw",
+    "carapace",
     "backup",
     "git",
     "create",
@@ -115,7 +115,7 @@ export async function backupEnableCommand(
     const origin = await executeGitCommand(repositoryPath, ["remote", "get-url", "origin"]);
     if (origin.code !== 0) {
       throw new Error(
-        `--push requires an origin remote. Run: openclaw backup git init --repository ${shortenHomePath(repositoryPath)} --remote <url>`,
+        `--push requires an origin remote. Run: carapace backup git init --repository ${shortenHomePath(repositoryPath)} --remote <url>`,
       );
     }
     if (!redactSecrets) {

@@ -49,12 +49,12 @@ switch (scenario) {
     expectEqual("gateway.auth.mode", cfg?.gateway?.auth?.mode, "token");
     expectEqual("gateway.auth.token.source", cfg?.gateway?.auth?.token?.source, "env");
     expectEqual("gateway.auth.token.provider", cfg?.gateway?.auth?.token?.provider, "default");
-    expectEqual("gateway.auth.token.id", cfg?.gateway?.auth?.token?.id, "OPENCLAW_GATEWAY_TOKEN");
+    expectEqual("gateway.auth.token.id", cfg?.gateway?.auth?.token?.id, "CARAPACE_GATEWAY_TOKEN");
     break;
   case "local-password":
     assertLocalWizard();
     expectEqual("gateway.auth.mode", cfg?.gateway?.auth?.mode, "password");
-    if (cfg?.gateway?.auth?.password !== "openclaw-onboard-password-e2e") {
+    if (cfg?.gateway?.auth?.password !== "carapace-onboard-password-e2e") {
       errors.push("gateway.auth.password mismatch");
     }
     break;
@@ -69,12 +69,12 @@ switch (scenario) {
     expectEqual(
       "agents.entries.main.workspace",
       cfg?.agents?.entries?.main?.workspace,
-      "/tmp/openclaw-main-workspace",
+      "/tmp/carapace-main-workspace",
     );
     expectEqual(
       "agents.entries.ops.workspace",
       cfg?.agents?.entries?.ops?.workspace,
-      "/tmp/openclaw-ops-workspace",
+      "/tmp/carapace-ops-workspace",
     );
     break;
   case "remote-non-interactive":

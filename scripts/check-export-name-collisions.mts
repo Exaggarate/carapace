@@ -490,8 +490,8 @@ export function collectModuleExportNames(content: string, fileName = "source.ts"
       ![
         "src/shared/lazy-runtime.js",
         "src/plugin-sdk/lazy-runtime.js",
-        "openclaw/plugin-sdk/lazy-runtime",
-        "@openclaw/plugin-sdk/lazy-runtime",
+        "carapace/plugin-sdk/lazy-runtime",
+        "@carapace/plugin-sdk/lazy-runtime",
       ].includes(source)
     ) {
       continue;

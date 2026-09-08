@@ -2,10 +2,10 @@ import { spawnSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabases,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabases,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { mergeProcessEnv } from "./process-env.js";
 
 const SESSION_COUNT = 2_640;
@@ -22,7 +22,7 @@ function migrationChildEnv(stateDir: string): NodeJS.ProcessEnv {
   return mergeProcessEnv([
     process.env,
     {
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_STATE_DIR: stateDir,
       TMPDIR: loaderTempDir,
       TMP: loaderTempDir,
       TEMP: loaderTempDir,
@@ -33,9 +33,9 @@ function migrationChildEnv(stateDir: string): NodeJS.ProcessEnv {
 const CHILD_SCRIPT = String.raw`
   import { createHash } from "node:crypto";
   import { DatabaseSync } from "node:sqlite";
-  import { resolveOpenClawAgentSqlitePath } from "./src/state/openclaw-agent-db.ts";
+  import { resolveCarapaceAgentSqlitePath } from "./src/state/carapace-agent-db.ts";
   import { migrateLegacyMediaPersistence } from "./src/infra/state-migrations.media-persistence.ts";
-  const path = resolveOpenClawAgentSqlitePath({ agentId: "main", env: process.env });
+  const path = resolveCarapaceAgentSqlitePath({ agentId: "main", env: process.env });
   let db = new DatabaseSync(path, { readOnly: true });
   const read = (session, seq) => db.prepare(
     "SELECT event_json FROM transcript_events WHERE session_id=? AND seq=?",
@@ -61,12 +61,12 @@ const CHILD_SCRIPT = String.raw`
     events: count("transcript_events"),
     trajectoryEvents: count("trajectory_runtime_events"),
     firstIdentity: [first.type, first.id, first.parentId],
-    firstMediaPath: first.message.__openclaw?.media?.[0]?.path,
+    firstMediaPath: first.message.__carapace?.media?.[0]?.path,
     firstHasLegacyCarrier: Object.hasOwn(first.message, "MediaPath"),
-    boundaryMediaPath: boundary.message.__openclaw?.media?.[0]?.path,
+    boundaryMediaPath: boundary.message.__carapace?.media?.[0]?.path,
     boundaryHasLegacyCarrier: Object.hasOwn(boundary.message, "MediaPath"),
     trajectoryBoundaryMediaPath:
-      trajectoryBoundary.data.messagesSnapshot[0].__openclaw?.media?.[0]?.path,
+      trajectoryBoundary.data.messagesSnapshot[0].__carapace?.media?.[0]?.path,
     trajectoryBoundaryHasLegacyCarrier: Object.hasOwn(
       trajectoryBoundary.data.messagesSnapshot[0],
       "MediaPath",
@@ -77,9 +77,9 @@ const CHILD_SCRIPT = String.raw`
   db.close();
 `;
 const SESSION_WINDOW_CHILD_SCRIPT = String.raw`
-  import { resolveOpenClawAgentSqlitePath } from "./src/state/openclaw-agent-db.ts";
+  import { resolveCarapaceAgentSqlitePath } from "./src/state/carapace-agent-db.ts";
   import { migrateLegacyMediaPersistence } from "./src/infra/state-migrations.media-persistence.ts";
-  const path = resolveOpenClawAgentSqlitePath({ agentId: "main", env: process.env });
+  const path = resolveCarapaceAgentSqlitePath({ agentId: "main", env: process.env });
   const migration = await migrateLegacyMediaPersistence({
     configuredAgentDatabaseTargets: [{ agentId: "main", path }], env: process.env,
   });
@@ -87,7 +87,7 @@ const SESSION_WINDOW_CHILD_SCRIPT = String.raw`
 `;
 const SPARSE_EVENT_CHILD_SCRIPT = String.raw`
   import { DatabaseSync } from "node:sqlite";
-  import { resolveOpenClawAgentSqlitePath } from "./src/state/openclaw-agent-db.ts";
+  import { resolveCarapaceAgentSqlitePath } from "./src/state/carapace-agent-db.ts";
   const originalPrepare = DatabaseSync.prototype.prepare;
   const cursorSelects = new Set();
   let mediaSelects = 0;
@@ -107,7 +107,7 @@ const SPARSE_EVENT_CHILD_SCRIPT = String.raw`
   const { migrateLegacyMediaPersistence } = await import(
     "./src/infra/state-migrations.media-persistence.ts"
   );
-  const path = resolveOpenClawAgentSqlitePath({ agentId: "main", env: process.env });
+  const path = resolveCarapaceAgentSqlitePath({ agentId: "main", env: process.env });
   const migration = await migrateLegacyMediaPersistence({
     configuredAgentDatabaseTargets: [{ agentId: "main", path }], env: process.env,
   });
@@ -130,10 +130,10 @@ const SPARSE_EVENT_CHILD_SCRIPT = String.raw`
     changeCount: migration.changes.length,
     cursorPlanDetails,
     migrationSelects,
-    transcriptMediaPath: transcript.message.__openclaw?.media?.[0]?.path,
+    transcriptMediaPath: transcript.message.__carapace?.media?.[0]?.path,
     transcriptHasLegacyCarrier: Object.hasOwn(transcript.message, "MediaPath"),
     trajectoryMediaPath:
-      trajectory.data.messagesSnapshot[0].__openclaw?.media?.[0]?.path,
+      trajectory.data.messagesSnapshot[0].__carapace?.media?.[0]?.path,
     trajectoryHasLegacyCarrier: Object.hasOwn(
       trajectory.data.messagesSnapshot[0],
       "MediaPath",
@@ -143,9 +143,9 @@ const SPARSE_EVENT_CHILD_SCRIPT = String.raw`
 `;
 
 function createCorpus(stateDir: string): void {
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   database.db.exec("BEGIN");
   database.db
@@ -185,13 +185,13 @@ function createCorpus(stateDir: string): void {
           ELSE json_object('role','user','content','trajectory') END))), seq+1 FROM e`)
     .run(EVENTS_PER_SESSION);
   database.db.exec("COMMIT; UPDATE session_nodes SET entry_valid=1");
-  closeOpenClawAgentDatabases();
+  closeCarapaceAgentDatabases();
 }
 
 function createSessionWindowCorpus(stateDir: string): void {
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   database.db.exec("BEGIN");
   database.db
@@ -208,13 +208,13 @@ function createSessionWindowCorpus(stateDir: string): void {
     SELECT 'window-'||i, 'agent:main:window-'||i, i+1, i+1 FROM n`)
     .run(SESSION_WINDOW_COUNT);
   database.db.exec("COMMIT; UPDATE session_nodes SET entry_valid=1");
-  closeOpenClawAgentDatabases();
+  closeCarapaceAgentDatabases();
 }
 
 function createSparseEventCorpus(stateDir: string): void {
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   database.db.exec("BEGIN");
   database.db
@@ -251,12 +251,12 @@ function createSparseEventCorpus(stateDir: string): void {
           ELSE json_object('role','user','content','sparse') END))), i+1 FROM n`)
     .run(SPARSE_EVENT_SESSION_COUNT, SPARSE_EVENT_SESSION_COUNT - 1);
   database.db.exec("COMMIT; UPDATE session_nodes SET entry_valid=1");
-  closeOpenClawAgentDatabases();
+  closeCarapaceAgentDatabases();
 }
 
 describe("legacy media persistence large corpus", () => {
   it("does not materialize every session window under a 128 MiB old-space cap", () => {
-    const stateDir = tempDir.make("openclaw-media-session-windows-");
+    const stateDir = tempDir.make("carapace-media-session-windows-");
     try {
       createSessionWindowCorpus(stateDir);
       const result = spawnSync(
@@ -279,13 +279,13 @@ describe("legacy media persistence large corpus", () => {
       expect(result.status, result.stderr).toBe(0);
       expect(JSON.parse(result.stdout)).toEqual({ changes: [], warnings: [] });
     } finally {
-      closeOpenClawAgentDatabases();
-      closeOpenClawStateDatabase();
+      closeCarapaceAgentDatabases();
+      closeCarapaceStateDatabase();
     }
   }, 130_000);
 
   it("rewrites bounded batches under a 256 MiB old-space cap", () => {
-    const stateDir = tempDir.make("openclaw-media-corpus-");
+    const stateDir = tempDir.make("carapace-media-corpus-");
     try {
       createCorpus(stateDir);
       const result = spawnSync(
@@ -317,13 +317,13 @@ describe("legacy media persistence large corpus", () => {
         lastPreserved: true,
       });
     } finally {
-      closeOpenClawAgentDatabases();
-      closeOpenClawStateDatabase();
+      closeCarapaceAgentDatabases();
+      closeCarapaceStateDatabase();
     }
   }, 130_000);
 
   it("bounds SQLite crossings across many event-bearing sessions", () => {
-    const stateDir = tempDir.make("openclaw-media-sparse-events-");
+    const stateDir = tempDir.make("carapace-media-sparse-events-");
     try {
       createSparseEventCorpus(stateDir);
       const result = spawnSync(
@@ -364,8 +364,8 @@ describe("legacy media persistence large corpus", () => {
       ).toBe(true);
       expect(output.migrationSelects).toBeLessThan(1_000);
     } finally {
-      closeOpenClawAgentDatabases();
-      closeOpenClawStateDatabase();
+      closeCarapaceAgentDatabases();
+      closeCarapaceStateDatabase();
     }
   }, 130_000);
 });

@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Telegram channel plugin."
+summary: "Carapace Telegram channel plugin."
 read_when:
   - You are installing, configuring, or auditing the telegram plugin
 title: "Telegram plugin reference"
@@ -7,15 +7,15 @@ title: "Telegram plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw Telegram channel plugin.
+Carapace Telegram channel plugin.
 
 ## Distribution
 
-- Package: `@openclaw/telegram`
-- Install route: included in OpenClaw
+- Package: `@carapace/telegram`
+- Install route: included in Carapace
 
 ## Surface
 

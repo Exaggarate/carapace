@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createProviderApiKeyResolver,
   createProviderAuthResolver,
@@ -46,7 +46,7 @@ describe("provider catalog auth order", () => {
         },
       },
     };
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       auth: {
         order: {
           openai: [profileB, profileA],
@@ -78,7 +78,7 @@ describe("provider catalog auth order", () => {
         cooldownModel: "gpt-5.5",
       },
     };
-    const cooldownConfig: OpenClawConfig = {
+    const cooldownConfig: CarapaceConfig = {
       auth: {
         order: {
           openai: [profileA, profileB],
@@ -105,7 +105,7 @@ describe("provider catalog auth order", () => {
       });
     }
 
-    const aliasConfig: OpenClawConfig = {
+    const aliasConfig: CarapaceConfig = {
       auth: {
         order: {
           "proof-alias": [profileB, profileA],
@@ -160,10 +160,10 @@ describe("provider catalog auth order", () => {
         baseUrl: "https://api.openai.com/v1",
         models: [],
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: { providers: { openai: provider } },
       };
-      const envConfig: OpenClawConfig = {
+      const envConfig: CarapaceConfig = {
         models: {
           providers: {
             openai: {
@@ -202,7 +202,7 @@ describe("provider catalog auth order", () => {
             refresh: "",
             expires: 0,
             oauthRef: {
-              source: "openclaw-credentials",
+              source: "carapace-credentials",
               provider: "openai-codex",
               id: "00000000000000000000000000000000",
             },

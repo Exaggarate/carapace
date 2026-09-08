@@ -8,8 +8,8 @@ import { describe, expect, it } from "vitest";
 const AUTH_MONITOR_PATH = "scripts/auth-monitor.sh";
 const MOBILE_REAUTH_PATH = "scripts/mobile-reauth.sh";
 const SETUP_AUTH_SYSTEM_PATH = "scripts/setup-auth-system.sh";
-const AUTH_MONITOR_SERVICE_PATH = "scripts/systemd/openclaw-auth-monitor.service";
-const AUTH_MONITOR_TIMER_PATH = "scripts/systemd/openclaw-auth-monitor.timer";
+const AUTH_MONITOR_SERVICE_PATH = "scripts/systemd/carapace-auth-monitor.service";
+const AUTH_MONITOR_TIMER_PATH = "scripts/systemd/carapace-auth-monitor.timer";
 const TERMUX_WIDGET_PATHS = [
   "scripts/termux-auth-widget.sh",
   "scripts/termux-quick-auth.sh",
@@ -21,11 +21,11 @@ function readScript(path: string): string {
 }
 
 function createAuthMonitorHarness() {
-  const home = mkdtempSync(join(tmpdir(), "openclaw-auth-monitor-"));
+  const home = mkdtempSync(join(tmpdir(), "carapace-auth-monitor-"));
   const binDir = join(home, "bin");
   const curlLog = join(home, "curl.log");
-  const openclawLog = join(home, "openclaw.log");
-  const stateFile = join(home, ".openclaw", "auth-monitor-state");
+  const carapaceLog = join(home, "carapace.log");
+  const stateFile = join(home, ".carapace", "auth-monitor-state");
   mkdirSync(binDir);
   writeFileSync(
     join(binDir, "curl"),
@@ -33,14 +33,14 @@ function createAuthMonitorHarness() {
     { mode: 0o755 },
   );
   writeFileSync(
-    join(binDir, "openclaw"),
+    join(binDir, "carapace"),
     [
       "#!/bin/sh",
       'if [ "$1" = "models" ]; then',
       "  exit 1",
       "fi",
-      'printf "called\\n" >> "$FAKE_OPENCLAW_LOG"',
-      'exit "$FAKE_OPENCLAW_EXIT_CODE"',
+      'printf "called\\n" >> "$FAKE_CARAPACE_LOG"',
+      'exit "$FAKE_CARAPACE_EXIT_CODE"',
       "",
     ].join("\n"),
     { mode: 0o755 },
@@ -49,19 +49,19 @@ function createAuthMonitorHarness() {
   return {
     curlLog,
     home,
-    openclawLog,
+    carapaceLog,
     stateFile,
     cleanup: () => rmSync(home, { recursive: true, force: true }),
     enablePhoneAuth: () => {
       const expiresAt = Date.now() + 90 * 60 * 1000;
       mkdirSync(join(home, ".claude"), { recursive: true });
-      mkdirSync(join(home, ".openclaw", "agents", "main", "agent"), { recursive: true });
+      mkdirSync(join(home, ".carapace", "agents", "main", "agent"), { recursive: true });
       writeFileSync(
         join(home, ".claude", ".credentials.json"),
         JSON.stringify({ claudeAiOauth: { expiresAt } }),
       );
       writeFileSync(
-        join(home, ".openclaw", "agents", "main", "agent", "auth-profiles.json"),
+        join(home, ".carapace", "agents", "main", "agent", "auth-profiles.json"),
         JSON.stringify({
           profiles: { "anthropic:default": { expires: expiresAt, provider: "anthropic" } },
         }),
@@ -71,12 +71,12 @@ function createAuthMonitorHarness() {
       curlExitCode = 0,
       notifyNtfy = "test-topic",
       notifyPhone = "",
-      openclawExitCode = 0,
+      carapaceExitCode = 0,
     }: {
       curlExitCode?: number;
       notifyNtfy?: string;
       notifyPhone?: string;
-      openclawExitCode?: number;
+      carapaceExitCode?: number;
     } = {}) =>
       spawnSync("bash", [AUTH_MONITOR_PATH], {
         cwd: process.cwd(),
@@ -85,8 +85,8 @@ function createAuthMonitorHarness() {
           ...process.env,
           FAKE_CURL_EXIT_CODE: String(curlExitCode),
           FAKE_CURL_LOG: curlLog,
-          FAKE_OPENCLAW_EXIT_CODE: String(openclawExitCode),
-          FAKE_OPENCLAW_LOG: openclawLog,
+          FAKE_CARAPACE_EXIT_CODE: String(carapaceExitCode),
+          FAKE_CARAPACE_LOG: carapaceLog,
           HOME: home,
           NOTIFY_NTFY: notifyNtfy,
           NOTIFY_PHONE: notifyPhone,
@@ -103,7 +103,7 @@ describe("auth monitoring scripts", () => {
     const service = readScript(AUTH_MONITOR_SERVICE_PATH);
     const timer = readScript(AUTH_MONITOR_TIMER_PATH);
 
-    expect(service).toContain("ExecStart=@OPENCLAW_AUTH_MONITOR_PATH@");
+    expect(service).toContain("ExecStart=@CARAPACE_AUTH_MONITOR_PATH@");
     expect(setup).toContain('AUTH_MONITOR_PATH="$SCRIPT_DIR/auth-monitor.sh"');
     expect(setup).toContain(
       'RENDERED_EXEC_START="ExecStart=$(systemd_quote_arg "$AUTH_MONITOR_PATH")"',
@@ -121,12 +121,12 @@ describe("auth monitoring scripts", () => {
 
     expect(joined).not.toContain(privateHomePath);
     expect(joined).not.toContain(privateHostAlias);
-    expect(joined).toContain("Run on the OpenClaw host: ${SCRIPT_DIR}/mobile-reauth.sh");
+    expect(joined).toContain("Run on the Carapace host: ${SCRIPT_DIR}/mobile-reauth.sh");
     for (const script of TERMUX_WIDGET_PATHS.map(readScript)) {
-      expect(script).toContain('SERVER="${OPENCLAW_SERVER:-openclaw-host}"');
+      expect(script).toContain('SERVER="${CARAPACE_SERVER:-carapace-host}"');
     }
     expect(readScript("scripts/termux-sync-widget.sh")).toContain(
-      "'$HOME/openclaw/scripts/sync-claude-code-auth.sh'",
+      "'$HOME/carapace/scripts/sync-claude-code-auth.sh'",
     );
   });
 
@@ -187,7 +187,7 @@ describe("auth monitoring scripts", () => {
         notifyPhone: "+15550000000",
       });
       expect(throttled.stdout).toContain("Skipping notification (sent recently)");
-      expect(readFileSync(harness.openclawLog, "utf8").trim().split("\n")).toHaveLength(1);
+      expect(readFileSync(harness.carapaceLog, "utf8").trim().split("\n")).toHaveLength(1);
       expect(readFileSync(harness.curlLog, "utf8").trim().split("\n")).toHaveLength(1);
     } finally {
       harness.cleanup();
@@ -202,7 +202,7 @@ describe("auth monitoring scripts", () => {
       const failed = harness.run({
         curlExitCode: 22,
         notifyPhone: "+15550000000",
-        openclawExitCode: 1,
+        carapaceExitCode: 1,
       });
       expect(failed.status).toBe(0);
       expect(existsSync(harness.stateFile)).toBe(false);
@@ -211,10 +211,10 @@ describe("auth monitoring scripts", () => {
       const retry = harness.run({
         curlExitCode: 22,
         notifyPhone: "+15550000000",
-        openclawExitCode: 1,
+        carapaceExitCode: 1,
       });
       expect(retry.stdout).not.toContain("Skipping notification (sent recently)");
-      expect(readFileSync(harness.openclawLog, "utf8").trim().split("\n")).toHaveLength(2);
+      expect(readFileSync(harness.carapaceLog, "utf8").trim().split("\n")).toHaveLength(2);
       expect(readFileSync(harness.curlLog, "utf8").trim().split("\n")).toHaveLength(2);
     } finally {
       harness.cleanup();
@@ -229,6 +229,6 @@ describe("auth monitoring scripts", () => {
     expect(script).toContain('"$SCRIPT_DIR/claude-auth-status.sh" full');
     expect(script).toContain("https://console.anthropic.com/settings/api-keys");
     expect(script).toContain("claude setup-token");
-    expect(script).toContain("systemctl --user restart openclaw");
+    expect(script).toContain("systemctl --user restart carapace");
   });
 });

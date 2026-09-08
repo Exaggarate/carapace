@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveExecutableFromPathEnv } from "../infra/executable-path.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { runExec } from "../process/exec.js";
@@ -30,9 +30,9 @@ const DEFAULT_NODE_WORKER_CONTAINER_IMAGE = "node:24.19.0-slim";
 // fail-closed without treating temporary daemon contention as an unavailable engine.
 const CONTAINER_REVALIDATION_TIMEOUT_MS = 30_000;
 
-const HOST_LABEL = "openclaw.node-worker.host";
-const GATEWAY_LABEL = "openclaw.node-worker.gateway";
-const LAUNCH_LABEL = "openclaw.node-worker.launch";
+const HOST_LABEL = "carapace.node-worker.host";
+const GATEWAY_LABEL = "carapace.node-worker.gateway";
+const LAUNCH_LABEL = "carapace.node-worker.launch";
 const CONTAINER_NODE_EXECUTABLE = "node";
 const CONTAINER_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
 const CONTAINER_ID_PATTERN = /^[a-f0-9]{64}$/u;
@@ -256,7 +256,7 @@ export async function createNodeWorkerContainer(
     .update(`${params.gatewayNamespace}\0${params.launchId}`)
     .digest("hex")
     .slice(0, 32);
-  const containerName = `openclaw-node-worker-${namespace.slice(0, 12)}-${launchHash}`;
+  const containerName = `carapace-node-worker-${namespace.slice(0, 12)}-${launchHash}`;
   const args = [
     "create",
     "--interactive",
@@ -308,7 +308,7 @@ export async function createNodeWorkerContainer(
     }
   }
   if (containerEnv.NODE_COMPILE_CACHE !== undefined) {
-    containerEnv.NODE_COMPILE_CACHE = "/tmp/openclaw-node-worker-compile-cache";
+    containerEnv.NODE_COMPILE_CACHE = "/tmp/carapace-node-worker-compile-cache";
   }
   for (const [key, value] of Object.entries(containerEnv).toSorted(([left], [right]) =>
     left.localeCompare(right),

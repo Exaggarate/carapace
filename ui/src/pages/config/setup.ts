@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing } from "lit";
 import { renderNode } from "../../components/config-form.node.ts";
 import { hintForPath, humanize, type JsonSchema } from "../../components/config-form.shared.ts";

@@ -5,11 +5,11 @@ import { inspect } from "node:util";
 import {
   resolveRuntimeWorkerArgv,
   resolveRuntimeWorkerUrl,
-} from "openclaw/plugin-sdk/process-runtime";
+} from "carapace/plugin-sdk/process-runtime";
 import {
-  openOpenClawAgentDatabase,
-  openOpenClawStateDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  openCarapaceAgentDatabase,
+  openCarapaceStateDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { qaGatewayCleanupRuntimeEntrypoint } from "./gateway-child-artifacts-runtime.test-support.js";
 import { cleanupQaGatewayTempRoots } from "./gateway-child-artifacts.js";
@@ -49,10 +49,10 @@ describe("cleanupQaGatewayTempRoots", () => {
         SystemRoot: process.env.SystemRoot,
         HOME: home,
         USERPROFILE: home,
-        OPENCLAW_HOME: home,
-        OPENCLAW_STATE_DIR: path.join(home, "state"),
+        CARAPACE_HOME: home,
+        CARAPACE_STATE_DIR: path.join(home, "state"),
         // Reserve stderr for errors; slow-open warnings depend on host load.
-        OPENCLAW_LOG_LEVEL: "error",
+        CARAPACE_LOG_LEVEL: "error",
         XDG_CONFIG_HOME: path.join(home, "config"),
         XDG_CACHE_HOME: path.join(home, "cache"),
         XDG_DATA_HOME: path.join(home, "data"),
@@ -81,19 +81,19 @@ describe("cleanupQaGatewayTempRoots", () => {
       const stagedBundledPluginsRoot = await dirs.makeTempDir("qa-cleanup-store-plugins-");
       const stateDir = path.join(tempRoot, "state");
       const agentDir = path.join(stateDir, "agents", "qa", "agent");
-      const env = { OPENCLAW_STATE_DIR: stateDir };
+      const env = { CARAPACE_STATE_DIR: stateDir };
       await writeQaAuthProfiles({
         agentId: "qa",
         stateDir,
         profiles: { fake: { type: "api_key", provider: "openai", key: "qa-synthetic" } },
       });
       readQaAuthProfiles(agentDir);
-      const agent = openOpenClawAgentDatabase({
+      const agent = openCarapaceAgentDatabase({
         agentId: "qa",
         env,
-        path: path.join(agentDir, "openclaw-agent.sqlite"),
+        path: path.join(agentDir, "carapace-agent.sqlite"),
       });
-      const shared = openOpenClawStateDatabase({ env });
+      const shared = openCarapaceStateDatabase({ env });
       const failed = failedStore === "agent" ? agent : shared;
       const close = vi.spyOn(failed.db, "close").mockImplementationOnce(() => {
         throw new Error("close failed apiKey=synthetic-close-secret", {

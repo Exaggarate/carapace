@@ -1,4 +1,4 @@
-import type { UiCommandParams } from "@openclaw/gateway-protocol";
+import type { UiCommandParams } from "@carapace/gateway-protocol";
 import type { GatewayBrowserClient, GatewayEventFrame } from "../api/gateway.ts";
 import type { GatewayAgentRow } from "../api/types.ts";
 import type { RouteId } from "../app-routes.ts";

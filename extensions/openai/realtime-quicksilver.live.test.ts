@@ -2,8 +2,8 @@ import { createServer, type Server } from "node:http";
 import {
   readCodexCliCredentialsCached,
   resolveOpenAICodexAuthIdentity,
-} from "openclaw/plugin-sdk/provider-auth";
-import { REALTIME_VOICE_AGENT_CONSULT_TOOL } from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/provider-auth";
+import { REALTIME_VOICE_AGENT_CONSULT_TOOL } from "carapace/plugin-sdk/realtime-voice";
 import type { Page } from "playwright";
 import { describe, expect, it } from "vitest";
 import { resolveOpenAIChatGptSubscriptionAuth } from "./realtime-auth.js";
@@ -19,13 +19,13 @@ import { buildOpenAIRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 import { OPENAI_REALTIME_INPUT_TRANSCRIPTION_MODEL } from "./realtime-voice-session-policy.js";
 
 const LIVE_ENABLED =
-  process.env.OPENCLAW_LIVE_TEST === "1" && process.env.OPENCLAW_LIVE_GPT_LIVE === "1";
+  process.env.CARAPACE_LIVE_TEST === "1" && process.env.CARAPACE_LIVE_GPT_LIVE === "1";
 const describeLive = LIVE_ENABLED ? describe : describe.skip;
 const LIVE_TIMEOUT_MS = 60_000;
 const LIVE_MILESTONE_TIMEOUT_MS = 30_000;
 
 type BrowserWithGptLivePeer = typeof globalThis & {
-  openclawGptLivePeer?: RTCPeerConnection;
+  carapaceGptLivePeer?: RTCPeerConnection;
 };
 
 async function createBrowserOffer(page: Page, includeDataChannel = true): Promise<string> {
@@ -42,14 +42,14 @@ async function createBrowserOffer(page: Page, includeDataChannel = true): Promis
       peer.close();
       throw new Error("Chromium did not produce a GPT-Live SDP offer");
     }
-    (globalThis as BrowserWithGptLivePeer).openclawGptLivePeer = peer;
+    (globalThis as BrowserWithGptLivePeer).carapaceGptLivePeer = peer;
     return sdp;
   }, includeDataChannel);
 }
 
 async function applyBrowserAnswer(page: Page, sdp: string): Promise<void> {
   await page.evaluate(async (answerSdp) => {
-    const peer = (globalThis as BrowserWithGptLivePeer).openclawGptLivePeer;
+    const peer = (globalThis as BrowserWithGptLivePeer).carapaceGptLivePeer;
     if (!peer) {
       throw new Error("GPT-Live browser peer is unavailable");
     }
@@ -87,8 +87,8 @@ async function waitForLiveMilestone(
 async function closeBrowserPeer(page: Page): Promise<void> {
   await page.evaluate(() => {
     const target = globalThis as BrowserWithGptLivePeer;
-    target.openclawGptLivePeer?.close();
-    delete target.openclawGptLivePeer;
+    target.carapaceGptLivePeer?.close();
+    delete target.carapaceGptLivePeer;
   });
 }
 
@@ -105,7 +105,7 @@ async function resolveLiveOAuthProfile(): Promise<
       throw error;
     }
   }
-  // The live probe may run while an older local OpenClaw profile awaits Doctor.
+  // The live probe may run while an older local Carapace profile awaits Doctor.
   // Codex CLI OAuth proves the same bearer/account wire without changing runtime fallback rules.
   const credential = readCodexCliCredentialsCached({ allowKeychainPrompt: false, ttlMs: 0 });
   if (!credential) {
@@ -197,7 +197,7 @@ describeLive("OpenAI GA Gateway-controlled WebRTC", () => {
       const server = createServer((req, res) => {
         if (req.url === "/") {
           res.statusCode = 200;
-          res.end("<!doctype html><title>OpenClaw GA sideband proof</title>");
+          res.end("<!doctype html><title>Carapace GA sideband proof</title>");
           return;
         }
         if (req.url === OPENAI_QUICKSILVER_OFFER_PATH) {
@@ -248,7 +248,7 @@ describeLive("OpenAI GA Gateway-controlled WebRTC", () => {
           model: "gpt-realtime-2.1",
           voice: "marin",
           instructions:
-            "When the user asks for a check, call openclaw_agent_consult exactly once, then speak its result.",
+            "When the user asks for a check, call carapace_agent_consult exactly once, then speak its result.",
           tools: [REALTIME_VOICE_AGENT_CONSULT_TOOL],
           gatewayControl: {
             bindBridge: (bridge) => {
@@ -260,7 +260,7 @@ describeLive("OpenAI GA Gateway-controlled WebRTC", () => {
               try {
                 void Promise.resolve(
                   controlBridge?.submitToolResult(event.callId, {
-                    result: "OpenClaw GA sideband live proof passed.",
+                    result: "Carapace GA sideband live proof passed.",
                   }),
                 ).catch((error: unknown) =>
                   rejectFunctionOutputAdded(
@@ -333,8 +333,8 @@ describeLive("OpenAI GA Gateway-controlled WebRTC", () => {
         expect(brokerResponse.status).toBe(201);
         await applyBrowserAnswer(page, brokerResponse.answerSdp);
         expect(sessionPolicyReady).toBe(true);
-        controlBridge?.sendUserMessage?.("Run the requested OpenClaw verification.", {
-          toolChoice: { type: "function", name: "openclaw_agent_consult" },
+        controlBridge?.sendUserMessage?.("Run the requested Carapace verification.", {
+          toolChoice: { type: "function", name: "carapace_agent_consult" },
         });
         await waitForLiveMilestone(toolObserved, "tool call", eventClasses);
         await waitForLiveMilestone(functionOutputAdded, "function output added", eventClasses);
@@ -370,7 +370,7 @@ describeLive("OpenAI OAuth WebRTC", () => {
     async ({ skip }) => {
       const auth = await resolveLiveOAuthProfile();
       if (!auth) {
-        skip("No OpenClaw ChatGPT OAuth profile is available");
+        skip("No Carapace ChatGPT OAuth profile is available");
         return;
       }
 
@@ -385,7 +385,7 @@ describeLive("OpenAI OAuth WebRTC", () => {
         if (req.url === "/") {
           res.statusCode = 200;
           res.setHeader("content-type", "text/html; charset=utf-8");
-          res.end("<!doctype html><title>OpenClaw realtime live proof</title>");
+          res.end("<!doctype html><title>Carapace realtime live proof</title>");
           return;
         }
         if (req.url === OPENAI_QUICKSILVER_OFFER_PATH) {
@@ -467,7 +467,7 @@ describeLive("OpenAI OAuth WebRTC", () => {
             await expect(
               page.evaluate(
                 () =>
-                  (globalThis as BrowserWithGptLivePeer).openclawGptLivePeer?.remoteDescription
+                  (globalThis as BrowserWithGptLivePeer).carapaceGptLivePeer?.remoteDescription
                     ?.type,
               ),
               model,

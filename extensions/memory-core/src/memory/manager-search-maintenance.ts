@@ -1,5 +1,5 @@
 // Memory Core owns detached search-time index maintenance lifecycle.
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
 import { MemoryIndexRevisionConflictError } from "./manager-db.js";
 
 type MemorySearchMaintenanceManager<DirtyGeneration> = {

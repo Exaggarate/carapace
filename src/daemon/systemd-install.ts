@@ -58,8 +58,8 @@ import {
 } from "./systemd-unit.js";
 
 const SYSTEMD_GATEWAY_CREDENTIAL_KEYS = new Set([
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_PASSWORD",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_GATEWAY_PASSWORD",
 ]);
 
 function restrictSystemdArtifactMode(mode: number | undefined): number {
@@ -155,7 +155,7 @@ function sanitizeSystemdUnitBackupContent(params: {
   fileManagedKeys: ReadonlySet<string>;
 }): string {
   // Gateway credentials are never useful in a recovery artifact. File-managed
-  // values are also omitted after OpenClaw moves them to the generated env file.
+  // values are also omitted after Carapace moves them to the generated env file.
   return removeSystemdInlineEnvironmentKeys(
     params.content,
     new Set([...params.fileManagedKeys, ...SYSTEMD_GATEWAY_CREDENTIAL_KEYS]),
@@ -164,7 +164,7 @@ function sanitizeSystemdUnitBackupContent(params: {
 
 function removeLegacyGatewayVersionMetadata(content: string): string {
   const description =
-    /^Description=OpenClaw Gateway \((?:(profile: [^,)\r\n]+), )?v([^)\r\n]+)\)$/mu.exec(content);
+    /^Description=Carapace Gateway \((?:(profile: [^,)\r\n]+), )?v([^)\r\n]+)\)$/mu.exec(content);
   if (!description) {
     return content;
   }
@@ -189,20 +189,20 @@ function removeLegacyGatewayVersionMetadata(content: string): string {
     }
   }
   if (
-    inlineEnvironment.get("OPENCLAW_SERVICE_MARKER") !== GATEWAY_SERVICE_MARKER ||
-    inlineEnvironment.get("OPENCLAW_SERVICE_KIND") !== GATEWAY_SERVICE_KIND ||
-    inlineEnvironment.get("OPENCLAW_SERVICE_VERSION") !== description[2]
+    inlineEnvironment.get("CARAPACE_SERVICE_MARKER") !== GATEWAY_SERVICE_MARKER ||
+    inlineEnvironment.get("CARAPACE_SERVICE_KIND") !== GATEWAY_SERVICE_KIND ||
+    inlineEnvironment.get("CARAPACE_SERVICE_VERSION") !== description[2]
   ) {
     return content;
   }
   const replacement = description[1]
-    ? `Description=OpenClaw Gateway (${description[1]})`
-    : "Description=OpenClaw Gateway";
+    ? `Description=Carapace Gateway (${description[1]})`
+    : "Description=Carapace Gateway";
   const refreshed =
     content.slice(0, description.index) +
     replacement +
     content.slice(description.index + description[0].length);
-  return removeSystemdInlineEnvironmentKeys(refreshed, new Set(["OPENCLAW_SERVICE_VERSION"]));
+  return removeSystemdInlineEnvironmentKeys(refreshed, new Set(["CARAPACE_SERVICE_VERSION"]));
 }
 
 /** Removes obsolete install-time version stamps without restarting the service. */
@@ -447,7 +447,7 @@ async function removeNodeSystemdManagedEnvironmentKeys(env: GatewayServiceEnv): 
   } catch {
     return;
   }
-  const managedKeys = new Set(["OPENCLAW_GATEWAY_TOKEN", "OPENCLAW_GATEWAY_PASSWORD"]);
+  const managedKeys = new Set(["CARAPACE_GATEWAY_TOKEN", "CARAPACE_GATEWAY_PASSWORD"]);
   const remaining = Object.fromEntries(
     Object.entries(existingFile.environment).filter(([key, value]) => {
       const normalized = normalizeServiceEnvKey(key);

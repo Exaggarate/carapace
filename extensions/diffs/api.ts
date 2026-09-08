@@ -1,11 +1,11 @@
 // Diffs API module exposes the plugin public contract.
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+export type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 export {
   definePluginEntry,
   type AnyAgentTool,
-  type OpenClawPluginApi,
-  type OpenClawPluginConfigSchema,
-  type OpenClawPluginToolContext,
+  type CarapacePluginApi,
+  type CarapacePluginConfigSchema,
+  type CarapacePluginToolContext,
   type PluginLogger,
-} from "openclaw/plugin-sdk/plugin-entry";
-export { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/plugin-entry";
+export { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";

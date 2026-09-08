@@ -34,7 +34,7 @@ function presentConfirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
     const title = options.title ?? t("common.confirm");
     render(() => {
       return html`
-        <openclaw-modal-dialog
+        <carapace-modal-dialog
           label=${title}
           description=${options.message}
           @modal-cancel=${() => finish(false)}
@@ -84,7 +84,7 @@ function presentConfirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
               </button>
             </div>
           </div>
-        </openclaw-modal-dialog>
+        </carapace-modal-dialog>
       `;
     });
   });

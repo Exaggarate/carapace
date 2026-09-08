@@ -8,12 +8,12 @@ const writeCache = vi.fn();
 const assertPluginCapabilitySecretAvailable = vi.fn();
 const resolveTavilyBaseUrl = vi.fn(() => "https://api.tavily.com");
 
-vi.mock("openclaw/plugin-sdk/secret-input-runtime", () => ({
+vi.mock("carapace/plugin-sdk/secret-input-runtime", () => ({
   assertPluginCapabilitySecretAvailable,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-web-search", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-web-search")>()),
+vi.mock("carapace/plugin-sdk/provider-web-search", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-web-search")>()),
   DEFAULT_CACHE_TTL_MINUTES: 5,
   normalizeCacheKey: (k: string) => k,
   postTrustedWebToolsJson,
@@ -98,12 +98,12 @@ describe("tavily client X-Client-Source header", () => {
     expect(postTrustedWebToolsJson.mock.calls[1]?.[0]?.url).toBe("https://api.tavily.com/extract");
   });
 
-  it("runTavilySearch sends X-Client-Source: openclaw", async () => {
+  it("runTavilySearch sends X-Client-Source: carapace", async () => {
     await runTavilySearch({ query: "test query" });
 
     expect(postTrustedWebToolsJson).toHaveBeenCalledOnce();
     const params = postTrustedWebToolsJson.mock.calls[0]?.[0];
-    expect(params.extraHeaders).toEqual({ "X-Client-Source": "openclaw" });
+    expect(params.extraHeaders).toEqual({ "X-Client-Source": "carapace" });
   });
 
   it("runTavilySearch reports malformed JSON with a stable provider error", async () => {
@@ -263,12 +263,12 @@ describe("tavily client X-Client-Source header", () => {
     expect(jsonSpy).not.toHaveBeenCalled();
   });
 
-  it("runTavilyExtract sends X-Client-Source: openclaw", async () => {
+  it("runTavilyExtract sends X-Client-Source: carapace", async () => {
     await runTavilyExtract({ urls: ["https://example.com"] });
 
     expect(postTrustedWebToolsJson).toHaveBeenCalledOnce();
     const params = postTrustedWebToolsJson.mock.calls[0]?.[0];
-    expect(params.extraHeaders).toEqual({ "X-Client-Source": "openclaw" });
+    expect(params.extraHeaders).toEqual({ "X-Client-Source": "carapace" });
   });
 
   it("runTavilyExtract reports malformed JSON with a stable provider error", async () => {

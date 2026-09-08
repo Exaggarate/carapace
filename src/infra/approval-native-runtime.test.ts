@@ -1,5 +1,5 @@
 // Covers native approval runtime delivery and resolution.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChannelApprovalNativeAdapter } from "../channels/plugins/types.adapters.js";
 import {
@@ -194,7 +194,7 @@ describe("createChannelNativeApprovalRuntime", () => {
     await runtime.handleRequested({
       id: "system-agent:native-1",
       request: {
-        title: "OpenClaw change",
+        title: "Carapace change",
         description: "restart the Gateway",
         command: "restart the Gateway",
         proposalHash: "a".repeat(64),

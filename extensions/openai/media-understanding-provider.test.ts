@@ -1,18 +1,18 @@
 // Openai tests cover media understanding provider plugin behavior.
 import { inspect } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+import { expectDefined } from "@carapace/normalization-core";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import {
   createAuthCaptureJsonFetch,
   createRequestCaptureJsonFetch,
   installPinnedHostnameTestHooks,
-} from "openclaw/plugin-sdk/test-media-understanding";
+} from "carapace/plugin-sdk/test-media-understanding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { openaiMediaUnderstandingProvider } from "./media-understanding-provider.js";
 
 const authMocks = vi.hoisted(() => ({ resolve: vi.fn() }));
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth-runtime")>()),
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-auth-runtime")>()),
   resolveApiKeyForProvider: authMocks.resolve,
 }));
 
@@ -100,9 +100,9 @@ describe("provider-owned audio transcription", () => {
           { withPluginRuntimeRegistryScope },
           { default: plugin },
         ] = await Promise.all([
-          import("openclaw/plugin-sdk/plugin-test-contracts"),
-          import("openclaw/plugin-sdk/plugin-test-runtime"),
-          import("openclaw/plugin-sdk/channel-test-helpers"),
+          import("carapace/plugin-sdk/plugin-test-contracts"),
+          import("carapace/plugin-sdk/plugin-test-runtime"),
+          import("carapace/plugin-sdk/channel-test-helpers"),
           import("./index.js"),
         ]);
         const cfg = {
@@ -129,8 +129,8 @@ describe("provider-owned audio transcription", () => {
           registerMediaUnderstandingProvider: api.registerMediaUnderstandingProvider,
         });
         const realAuth = await vi.importActual<
-          typeof import("openclaw/plugin-sdk/provider-auth-runtime")
-        >("openclaw/plugin-sdk/provider-auth-runtime");
+          typeof import("carapace/plugin-sdk/provider-auth-runtime")
+        >("carapace/plugin-sdk/provider-auth-runtime");
         authMocks.resolve.mockImplementation((params) =>
           realAuth.resolveApiKeyForProvider({
             ...params,

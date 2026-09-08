@@ -6,7 +6,7 @@ import {
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderCreateOptions,
   type RemoteEmbeddingClient,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import { MISTRAL_BASE_URL } from "./model-definitions.js";
 
 export const DEFAULT_MISTRAL_EMBEDDING_MODEL = "mistral-embed";

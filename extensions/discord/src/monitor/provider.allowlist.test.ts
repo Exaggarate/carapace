@@ -1,6 +1,6 @@
 // Discord tests cover provider.allowlist plugin behavior.
-import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createNonExitingRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { createNonExitingRuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as resolveChannelsModule from "../resolve-channels.js";
 import * as resolveUsersModule from "../resolve-users.js";

@@ -1,4 +1,4 @@
-import type { EnvironmentSummary, SystemInfoResult } from "@openclaw/gateway-protocol";
+import type { EnvironmentSummary, SystemInfoResult } from "@carapace/gateway-protocol";
 // Devices page view contracts.
 import type { PresenceEntry } from "../../api/types.ts";
 import type {

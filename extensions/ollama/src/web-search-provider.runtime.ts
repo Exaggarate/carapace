@@ -1,14 +1,14 @@
 // Ollama web-search runtime implements provider integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   isNonSecretApiKeyMarker,
   normalizeOptionalSecretInput,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveEnvApiKey } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveEnvApiKey } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   readProviderJsonResponse,
   redactProviderResponseErrorText,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   readPositiveIntegerParam,
   readResponseText,
@@ -20,10 +20,10 @@ import {
   truncateText,
   wrapWebContent,
   type WebSearchProviderPlugin,
-} from "openclaw/plugin-sdk/provider-web-search";
-import { coerceSecretRef } from "openclaw/plugin-sdk/secret-input";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-web-search";
+import { coerceSecretRef } from "carapace/plugin-sdk/secret-input";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { OLLAMA_CLOUD_BASE_URL, OLLAMA_DEFAULT_BASE_URL } from "./defaults.js";
 import { readProviderBaseUrl } from "./provider-base-url.js";
 import {
@@ -93,7 +93,7 @@ function createOllamaWebSearchCredentialError(ref: { source: string; id: string 
 // Delegate configured-key resolution (literal value or env-backed SecretRef) to the shared
 // web-search resolver, then apply Ollama's marker filter so persisted non-secret placeholders
 // (e.g. the OAuth/signin marker) fall through to the ambient OLLAMA_API_KEY instead of being sent.
-function resolveConfiguredOllamaWebSearchApiKey(config?: OpenClawConfig): string | undefined {
+function resolveConfiguredOllamaWebSearchApiKey(config?: CarapaceConfig): string | undefined {
   const credentialValue = config?.models?.providers?.ollama?.apiKey;
   const credentialRef = coerceSecretRef(credentialValue);
   const resolvedValue = normalizeOllamaWebSearchApiKey(
@@ -111,7 +111,7 @@ function resolveConfiguredOllamaWebSearchApiKey(config?: OpenClawConfig): string
   return resolvedValue;
 }
 
-function resolveOllamaWebSearchBaseUrl(config?: OpenClawConfig): string {
+function resolveOllamaWebSearchBaseUrl(config?: CarapaceConfig): string {
   const pluginBaseUrl = normalizeOptionalString(
     resolveProviderWebSearchPluginConfig(config, "ollama")?.baseUrl,
   );
@@ -177,7 +177,7 @@ function buildOllamaWebSearchAttempts(params: {
 }
 
 async function runOllamaWebSearch(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   query: string;
   count?: number;
   signal?: AbortSignal;
@@ -297,11 +297,11 @@ async function runOllamaWebSearch(params: {
 }
 
 async function warnOllamaWebSearchPrereqs(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   prompter: {
     note: (message: string, title?: string) => Promise<void>;
   };
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const baseUrl = resolveOllamaWebSearchBaseUrl(params.config);
   if (isOllamaCloudBaseUrl(baseUrl)) {
     if (

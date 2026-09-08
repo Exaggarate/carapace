@@ -5,7 +5,7 @@ import {
   selectPlanChecklistSteps,
   type ChannelProgressDraftCompositorLine,
   type ChannelProgressDraftCompositorSnapshot,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import type { TelegramDraftPreview } from "./draft-stream.js";
 import { escapeTelegramHtml, renderTelegramHtmlText } from "./format.js";
 import {

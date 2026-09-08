@@ -11,7 +11,7 @@ type GatewayFixtureOwner = { state: GatewayFixtureState };
 
 // Module reset and another Gateway's normal close must not erase retained owners.
 // This singleton deliberately has no production lifecycle reset callback.
-const registry = resolveGlobalSingleton(Symbol.for("openclaw.gatewayFixtureLifetime"), () => ({
+const registry = resolveGlobalSingleton(Symbol.for("carapace.gatewayFixtureLifetime"), () => ({
   active: new Set<GatewayFixtureOwner>(),
   owners: new WeakMap<GatewayServer, GatewayFixtureOwner>(),
 }));

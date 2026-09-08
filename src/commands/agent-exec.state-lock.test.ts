@@ -36,8 +36,8 @@ function createGatewayLockOptions(
     allowInTests: true,
     env: {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_STATE_DIR: stateDir,
     },
     lockDir: path.join(stateDir, "gateway-locks"),
     timeoutMs: 100,
@@ -74,9 +74,9 @@ describe("agent exec retained-state ownership", () => {
   it.each([false, true])(
     "retains state after uncertain runtime cleanup (retained=%s)",
     async (retained) => {
-      const root = tempDirs.make("openclaw-agent-exec-uncertain-cleanup-");
+      const root = tempDirs.make("carapace-agent-exec-uncertain-cleanup-");
       const lockOptions = createGatewayLockOptions(root);
-      const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+      const previousStateDir = process.env.CARAPACE_STATE_DIR;
       const cleanupScope = createAgentCleanupScope();
       let runStateDir: string | undefined;
       try {
@@ -84,7 +84,7 @@ describe("agent exec retained-state ownership", () => {
           agentExecCommand("inspect", retained ? { stateDir: root } : {}, createRuntime().runtime, {
             gatewayLockOptions: lockOptions,
             runAgent: async () => {
-              runStateDir = process.env.OPENCLAW_STATE_DIR;
+              runStateDir = process.env.CARAPACE_STATE_DIR;
               if (!runStateDir) {
                 throw new Error("Expected the command's state directory");
               }
@@ -96,7 +96,7 @@ describe("agent exec retained-state ownership", () => {
         );
         expect.soft(result.exitCode).toBe(1);
         expect.soft(cleanupScope.outcome).toBe("uncertain");
-        expect.soft(process.env.OPENCLAW_STATE_DIR).toBe(previousStateDir);
+        expect.soft(process.env.CARAPACE_STATE_DIR).toBe(previousStateDir);
         expect(runStateDir).toBeDefined();
         await expect(fs.readFile(path.join(runStateDir!, "owned-work"), "utf8")).resolves.toBe(
           "still owned",
@@ -116,7 +116,7 @@ describe("agent exec retained-state ownership", () => {
   );
 
   it("refuses a state directory owned by a live Gateway", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-exec-gateway-owner-");
+    const stateDir = tempDirs.make("carapace-agent-exec-gateway-owner-");
     const lockOptions = createGatewayLockOptions(stateDir, {
       readProcessStartTime: () => 123_456,
     });
@@ -136,7 +136,7 @@ describe("agent exec retained-state ownership", () => {
       expect(result.exitCode).toBe(1);
       expect(runAgent).not.toHaveBeenCalled();
       expect(error).toHaveBeenCalledWith(
-        `A Gateway is running for this state directory (pid ${process.pid}, port 28789). Omit --state-dir to use isolated temporary state, or stop the Gateway first (openclaw gateway stop).`,
+        `A Gateway is running for this state directory (pid ${process.pid}, port 28789). Omit --state-dir to use isolated temporary state, or stop the Gateway first (carapace gateway stop).`,
       );
     } finally {
       await gatewayLock.release();
@@ -144,7 +144,7 @@ describe("agent exec retained-state ownership", () => {
   });
 
   it("holds and releases the embedded state lock around the run", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-exec-lock-owner-");
+    const stateDir = tempDirs.make("carapace-agent-exec-lock-owner-");
     const lockOptions = createGatewayLockOptions(stateDir);
     const stateLockPath = path.join(lockOptions.lockDir!, "gateway.state.lock");
 
@@ -164,7 +164,7 @@ describe("agent exec retained-state ownership", () => {
   });
 
   it("releases the embedded state lock when SIGTERM aborts the run", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-exec-signal-owner-");
+    const stateDir = tempDirs.make("carapace-agent-exec-signal-owner-");
     const lockOptions = createGatewayLockOptions(stateDir);
     const stateLockPath = path.join(lockOptions.lockDir!, "gateway.state.lock");
     const signals = createSignalProcess();

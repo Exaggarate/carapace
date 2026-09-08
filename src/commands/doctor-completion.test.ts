@@ -21,7 +21,7 @@ import {
 
 const originalEnv = captureEnv([
   "HOME",
-  "OPENCLAW_STATE_DIR",
+  "CARAPACE_STATE_DIR",
   "SHELL",
   "XDG_CONFIG_HOME",
   "ZDOTDIR",
@@ -39,7 +39,7 @@ function status(overrides: Partial<ShellCompletionStatus> = {}): ShellCompletion
     shell: "zsh",
     profileInstalled: true,
     cacheExists: true,
-    cachePath: "/tmp/openclaw.zsh",
+    cachePath: "/tmp/carapace.zsh",
     usesSlowPattern: false,
     ...overrides,
   };
@@ -47,22 +47,22 @@ function status(overrides: Partial<ShellCompletionStatus> = {}): ShellCompletion
 
 describe("shell completion health mapping", () => {
   it("recognizes cached Bash completion from the documented login profile", async () => {
-    const homeDir = tempDirs.make("openclaw-bash-profile-home-");
-    const stateDir = tempDirs.make("openclaw-bash-profile-state-");
+    const homeDir = tempDirs.make("carapace-bash-profile-home-");
+    const stateDir = tempDirs.make("carapace-bash-profile-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/bash");
 
-    const cachePath = path.join(stateDir, "completions", "openclaw.bash");
+    const cachePath = path.join(stateDir, "completions", "carapace.bash");
     await fs.mkdir(path.dirname(cachePath), { recursive: true });
-    await fs.writeFile(cachePath, "complete -W 'status' openclaw\n", "utf-8");
+    await fs.writeFile(cachePath, "complete -W 'status' carapace\n", "utf-8");
     await fs.writeFile(
       path.join(homeDir, ".bash_profile"),
-      `# OpenClaw Completion\n[ -f "${cachePath}" ] && source "${cachePath}"\n`,
+      `# Carapace Completion\n[ -f "${cachePath}" ] && source "${cachePath}"\n`,
       "utf-8",
     );
 
-    await expect(checkShellCompletionStatus("openclaw", { shell: "bash" })).resolves.toEqual({
+    await expect(checkShellCompletionStatus("carapace", { shell: "bash" })).resolves.toEqual({
       shell: "bash",
       profileInstalled: true,
       cacheExists: true,
@@ -72,44 +72,44 @@ describe("shell completion health mapping", () => {
   });
 
   it("reports slow dynamic Bash completion from the documented login profile", async () => {
-    const homeDir = tempDirs.make("openclaw-bash-slow-profile-home-");
-    const stateDir = tempDirs.make("openclaw-bash-slow-profile-state-");
+    const homeDir = tempDirs.make("carapace-bash-slow-profile-home-");
+    const stateDir = tempDirs.make("carapace-bash-slow-profile-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/bash");
 
     await fs.writeFile(
       path.join(homeDir, ".bash_profile"),
-      "source <(openclaw completion --shell bash)\n",
+      "source <(carapace completion --shell bash)\n",
       "utf-8",
     );
 
-    await expect(checkShellCompletionStatus("openclaw", { shell: "bash" })).resolves.toEqual({
+    await expect(checkShellCompletionStatus("carapace", { shell: "bash" })).resolves.toEqual({
       shell: "bash",
       profileInstalled: true,
       cacheExists: false,
-      cachePath: path.join(stateDir, "completions", "openclaw.bash"),
+      cachePath: path.join(stateDir, "completions", "carapace.bash"),
       usesSlowPattern: true,
     });
   });
 
   it("reports an orphaned shell-completion marker as uninstalled", async () => {
-    const homeDir = tempDirs.make("openclaw-bash-orphaned-profile-home-");
-    const stateDir = tempDirs.make("openclaw-bash-orphaned-profile-state-");
+    const homeDir = tempDirs.make("carapace-bash-orphaned-profile-home-");
+    const stateDir = tempDirs.make("carapace-bash-orphaned-profile-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/bash");
 
-    const cachePath = path.join(stateDir, "completions", "openclaw.bash");
+    const cachePath = path.join(stateDir, "completions", "carapace.bash");
     await fs.mkdir(path.dirname(cachePath), { recursive: true });
-    await fs.writeFile(cachePath, "complete -W 'status' openclaw\n", "utf-8");
+    await fs.writeFile(cachePath, "complete -W 'status' carapace\n", "utf-8");
     await fs.writeFile(
       path.join(homeDir, ".bash_profile"),
-      "# OpenClaw Completion\nexport IMPORTANT=keep\n",
+      "# Carapace Completion\nexport IMPORTANT=keep\n",
       "utf-8",
     );
 
-    await expect(checkShellCompletionStatus("openclaw", { shell: "bash" })).resolves.toEqual({
+    await expect(checkShellCompletionStatus("carapace", { shell: "bash" })).resolves.toEqual({
       shell: "bash",
       profileInstalled: false,
       cacheExists: true,
@@ -119,16 +119,16 @@ describe("shell completion health mapping", () => {
   });
 
   it("checks an explicit shell instead of the detected environment shell", async () => {
-    const homeDir = tempDirs.make("openclaw-completion-home-");
-    const stateDir = tempDirs.make("openclaw-completion-state-");
+    const homeDir = tempDirs.make("carapace-completion-home-");
+    const stateDir = tempDirs.make("carapace-completion-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/zsh");
 
-    const current = await checkShellCompletionStatus("openclaw", { shell: "fish" });
+    const current = await checkShellCompletionStatus("carapace", { shell: "fish" });
 
     expect(current.shell).toBe("fish");
-    expect(current.cachePath).toBe(path.join(stateDir, "completions", "openclaw.fish"));
+    expect(current.cachePath).toBe(path.join(stateDir, "completions", "carapace.fish"));
     expect(current.profileInstalled).toBe(false);
     expect(current.cacheExists).toBe(false);
   });
@@ -147,7 +147,7 @@ describe("shell completion health mapping", () => {
       {
         kind: "state",
         action: "would-generate-completion-cache",
-        target: "/tmp/openclaw.zsh",
+        target: "/tmp/carapace.zsh",
         dryRunSafe: true,
       },
       {
@@ -166,14 +166,14 @@ describe("shell completion health mapping", () => {
       expect.objectContaining({
         severity: "info",
         message: expect.stringContaining("cache is missing"),
-        fixHint: expect.stringContaining("openclaw doctor --fix"),
+        fixHint: expect.stringContaining("carapace doctor --fix"),
       }),
     ]);
     expect(shellCompletionStatusToRepairEffects(current)).toEqual([
       {
         kind: "state",
         action: "would-regenerate-completion-cache",
-        target: "/tmp/openclaw.zsh",
+        target: "/tmp/carapace.zsh",
         dryRunSafe: true,
       },
     ]);
@@ -218,22 +218,22 @@ function mockPrompter(confirmValue = true) {
 }
 
 async function setupDoctorCompletionTest(usesSlowPattern: boolean) {
-  const homeDir = tempDirs.make("openclaw-doctor-home-");
-  const stateDir = tempDirs.make("openclaw-doctor-state-");
+  const homeDir = tempDirs.make("carapace-doctor-home-");
+  const stateDir = tempDirs.make("carapace-doctor-state-");
   setTestEnvValue("HOME", homeDir);
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   setTestEnvValue("SHELL", "/bin/bash");
 
   const profilePath = path.join(homeDir, usesSlowPattern ? ".bashrc" : ".bash_profile");
   if (usesSlowPattern) {
     await fs.writeFile(
       profilePath,
-      '# test bashrc\n[ -f "/tmp/nonexistent" ] && source <(openclaw completion bash)\n',
+      '# test bashrc\n[ -f "/tmp/nonexistent" ] && source <(carapace completion bash)\n',
       "utf-8",
     );
     const cacheDir = path.join(stateDir, "completions");
     await fs.mkdir(cacheDir, { recursive: true });
-    await fs.writeFile(path.join(cacheDir, "openclaw.bash"), "# completion cache\n", "utf-8");
+    await fs.writeFile(path.join(cacheDir, "carapace.bash"), "# completion cache\n", "utf-8");
   }
   return profilePath;
 }
@@ -259,7 +259,7 @@ describe("doctorShellCompletion", () => {
 
     await doctorShellCompletion({} as never, mockPrompter());
 
-    expect(installCompletionMock).toHaveBeenCalledWith("bash", true, "openclaw");
+    expect(installCompletionMock).toHaveBeenCalledWith("bash", true, "carapace");
     expect(noteSpy).toHaveBeenCalledWith(
       expect.stringContaining("source ~/.bash_profile"),
       "Shell completion",
@@ -274,11 +274,11 @@ describe("doctorShellCompletion", () => {
       profile: path.join("fish", "config.fish"),
     },
   ])("reports the configured $shell startup profile after installation", async (testCase) => {
-    const homeDir = tempDirs.make("openclaw-doctor-custom-profile-home-");
-    const stateDir = tempDirs.make("openclaw-doctor-custom-profile-state-");
-    const configDir = tempDirs.make(`openclaw doctor ${testCase.shell} profile-`);
+    const homeDir = tempDirs.make("carapace-doctor-custom-profile-home-");
+    const stateDir = tempDirs.make("carapace-doctor-custom-profile-state-");
+    const configDir = tempDirs.make(`carapace doctor ${testCase.shell} profile-`);
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", `/bin/${testCase.shell}`);
     setTestEnvValue(testCase.variable, configDir);
     installCompletionMock.mockResolvedValue(undefined);
@@ -286,7 +286,7 @@ describe("doctorShellCompletion", () => {
 
     await doctorShellCompletion({} as never, mockPrompter());
 
-    expect(installCompletionMock).toHaveBeenCalledWith(testCase.shell, true, "openclaw");
+    expect(installCompletionMock).toHaveBeenCalledWith(testCase.shell, true, "carapace");
     expect(noteSpy).toHaveBeenCalledWith(
       expect.stringContaining(`source '${path.join(configDir, testCase.profile)}'`),
       "Shell completion",
@@ -299,12 +299,12 @@ describe("doctorShellCompletion", () => {
   ])(
     "uses explicit $generationMode cache generation even with an ambient skip guard",
     async ({ generationMode, expectedSkipValue }) => {
-      const stateDir = tempDirs.make("openclaw-doctor-state-");
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      const stateDir = tempDirs.make("carapace-doctor-state-");
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       setTestEnvValue(COMPLETION_SKIP_PLUGIN_COMMANDS_ENV, "1");
 
       await expect(
-        ensureCompletionCacheExists("openclaw", {
+        ensureCompletionCacheExists("carapace", {
           shell: "powershell",
           generationMode,
         }),
@@ -340,7 +340,7 @@ describe("doctorShellCompletion", () => {
 
     const command = formatCompletionReloadCommand(
       "bash",
-      resolveCompletionCachePath("bash", "openclaw"),
+      resolveCompletionCachePath("bash", "carapace"),
     );
     expect(noteSpy).toHaveBeenCalledWith(expect.stringContaining(command), "Shell completion");
     expect(noteSpy).toHaveBeenCalledWith(

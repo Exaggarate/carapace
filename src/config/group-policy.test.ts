@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseConcreteConfigPath } from "../shared/dot-path.js";
 import { resolveMergedAccountConfig } from "./channel-account-config.js";
 import { setConfigValueAtPath } from "./config-paths.js";
-import type { OpenClawConfig } from "./config.js";
+import type { CarapaceConfig } from "./config.js";
 import {
   resolveChannelGroupPolicy,
   resolveChannelGroupRequireMention,
@@ -28,7 +28,7 @@ describe("resolveChannelGroupPolicy", () => {
           groupPolicy: "allowlist",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -50,7 +50,7 @@ describe("resolveChannelGroupPolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -72,7 +72,7 @@ describe("resolveChannelGroupPolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -95,7 +95,7 @@ describe("resolveChannelGroupPolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -115,7 +115,7 @@ describe("resolveChannelGroupPolicy", () => {
           groupPolicy: "allowlist",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -135,7 +135,7 @@ describe("resolveChannelGroupPolicy", () => {
           groupPolicy: "allowlist",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -157,7 +157,7 @@ describe("resolveChannelGroupPolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveChannelGroupRequireMention({
@@ -189,7 +189,7 @@ describe("resolveChannelGroupPolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const policy = resolveChannelGroupPolicy({
       cfg,
@@ -218,7 +218,7 @@ describe("resolveChannelGroupPolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveChannelGroupPolicy({
@@ -270,7 +270,7 @@ describe("resolveChannelGroupsConfigPath", () => {
             accounts: { [accountKey]: accountGroups ? { groups: accountGroups } : {} },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const groups = resolveChannelGroups(cfg, "imessage", accountId);
       const groupsPath = resolveChannelGroupsConfigPath({
         cfg,
@@ -319,7 +319,7 @@ describe("resolveChannelGroupsConfigPath", () => {
       groups: { sibling: { requireMention: false } },
       accounts: { Work: { groups: {} }, ...(multiple ? { Other: {} } : {}) },
     };
-    const cfg = { channels: { line: channelConfig } } satisfies OpenClawConfig;
+    const cfg = { channels: { line: channelConfig } } satisfies CarapaceConfig;
     const groups = shallow
       ? resolveMergedAccountConfig<{ groups?: Record<string, { requireMention?: boolean }> }>({
           channelConfig,
@@ -341,7 +341,7 @@ describe("resolveChannelGroupsConfigPath", () => {
     ({ accountId, expected }) => {
       const cfg = {
         channels: { signal: { accounts: { Work: {}, default: {} } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       expect(
         resolveChannelGroupsConfigPath({ cfg, channel: "signal", accountId, groups: undefined }),
       ).toBe(expected);
@@ -352,7 +352,7 @@ describe("resolveChannelGroupsConfigPath", () => {
     const account = { groups: {} };
     const cfg = {
       channels: { signal: { accounts: { Work: account, work: account } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     expect(
       resolveChannelGroupsConfigPath({
         cfg,
@@ -540,7 +540,7 @@ describe("resolveToolsBySender", () => {
     expect(warningSpy).toHaveBeenCalledTimes(1);
     const [warningMessage, warningMeta] = firstWarningCall(warningSpy);
     expect(String(warningMessage)).toContain(`toolsBySender key "${legacyKey}"`);
-    expect(warningMeta?.code).toBe("OPENCLAW_TOOLS_BY_SENDER_UNTYPED_KEY");
+    expect(warningMeta?.code).toBe("CARAPACE_TOOLS_BY_SENDER_UNTYPED_KEY");
   });
 
   describe("legacy key warning dedupe cache", () => {

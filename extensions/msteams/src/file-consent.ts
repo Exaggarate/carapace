@@ -9,10 +9,10 @@
  */
 
 import { lookup } from "node:dns/promises";
-import { bufferToBlobPart } from "openclaw/plugin-sdk/blob-runtime";
-import { isPrivateIpAddress } from "openclaw/plugin-sdk/ssrf-policy";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { fetchWithTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { bufferToBlobPart } from "carapace/plugin-sdk/blob-runtime";
+import { isPrivateIpAddress } from "carapace/plugin-sdk/ssrf-policy";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { fetchWithTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveMSTeamsSharePointUploadTimeoutMs } from "./request-timeout.js";
 import { buildUserAgent } from "./user-agent.js";
 

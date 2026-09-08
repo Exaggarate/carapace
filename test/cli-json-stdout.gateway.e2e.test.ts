@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -87,7 +87,7 @@ describe("cli json stdout contract", () => {
   ])("renders Gateway query failures through the Gateway owner for $name", async (testCase) => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "missing-openclaw.json");
+        const configPath = path.join(tempHome, "missing-carapace.json");
         const stateDir = path.join(tempHome, "isolated-state");
         const gatewayError = "AUTOQA_INJECTED_GATEWAY_FAILURE";
         const preload = Buffer.from(
@@ -99,7 +99,7 @@ describe("cli json stdout contract", () => {
                   'import fs from "node:fs";',
                   "const originalExistsSync = fs.existsSync;",
                   "fs.existsSync = function (target, ...args) {",
-                  '  if (String(target) === process.env.OPENCLAW_CONFIG_PATH && new Error().stack?.includes("readNonObservingHealthConfig")) {',
+                  '  if (String(target) === process.env.CARAPACE_CONFIG_PATH && new Error().stack?.includes("readNonObservingHealthConfig")) {',
                   `    throw new Error(${JSON.stringify(testCase.message)});`,
                   "  }",
                   "  return originalExistsSync.call(this, target, ...args);",
@@ -116,10 +116,10 @@ describe("cli json stdout contract", () => {
         ).toString("base64");
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { FORCE_COLOR: "1", NO_COLOR: undefined } : {}),
         });
 
@@ -161,7 +161,7 @@ describe("cli json stdout contract", () => {
         await expect(fs.stat(stateDir)).rejects.toMatchObject({ code: "ENOENT" });
         await expect(fs.stat(configPath)).rejects.toMatchObject({ code: "ENOENT" });
       },
-      { prefix: "openclaw-gateway-query-json-failure-e2e-" },
+      { prefix: "carapace-gateway-query-json-failure-e2e-" },
     );
   });
 
@@ -196,10 +196,10 @@ describe("cli json stdout contract", () => {
           'Object.defineProperty(process.stdout, "isTTY", { value: true, configurable: true }); Object.defineProperty(process.stderr, "isTTY", { value: true, configurable: true });',
         )}`;
         const result = runBuiltCli(tempHome, testCase.args, {
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-          OPENCLAW_GATEWAY_PORT: "29791",
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+          CARAPACE_GATEWAY_PORT: "29791",
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { NODE_OPTIONS: `--import=${preload}`, FORCE_COLOR: "1" } : {}),
         });
         const message = "--timeout must be a positive integer (milliseconds)";
@@ -216,7 +216,7 @@ describe("cli json stdout contract", () => {
           expect(result.stderr).toContain("\u001B[?25h");
         }
       },
-      { prefix: "openclaw-status-health-json-timeout-e2e-" },
+      { prefix: "carapace-status-health-json-timeout-e2e-" },
     );
   });
 
@@ -289,10 +289,10 @@ describe("cli json stdout contract", () => {
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--permission --allow-fs-read=* --import=data:text/javascript;base64,${denyNetwork}`,
           NODE_DISABLE_COMPILE_CACHE: "1",
-          OPENCLAW_NO_RESPAWN: "1",
-          OPENCLAW_LOG_LEVEL: "silent",
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
+          CARAPACE_NO_RESPAWN: "1",
+          CARAPACE_LOG_LEVEL: "silent",
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
         });
 
         expect(result.status, result.stderr).toBe(1);
@@ -311,7 +311,7 @@ describe("cli json stdout contract", () => {
         expect(result.stderr).toContain(testCase.message);
         expect(result.stderr).not.toContain("AUTOQA_NETWORK_FORBIDDEN");
       },
-      { prefix: "openclaw-nodes-json-failure-e2e-" },
+      { prefix: "carapace-nodes-json-failure-e2e-" },
     );
   });
 });

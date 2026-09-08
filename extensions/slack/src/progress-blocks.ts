@@ -7,7 +7,7 @@ import {
   type ChannelProgressDraftLine,
   formatChannelProgressDraftDiffStat,
   formatPlanChecklistLines,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import { SLACK_MAX_BLOCKS } from "./blocks-input.js";
 import { normalizeSlackOutboundText } from "./format.js";
 import { escapeSlackMrkdwn } from "./monitor/mrkdwn.js";
@@ -23,7 +23,7 @@ const SLACK_PROGRESS_TASK_TITLE_MAX = 120;
 const SLACK_PROGRESS_PLAN_FALLBACK_TITLE = "Thinking";
 const SLACK_PROGRESS_LINE_DELTA_RE = /(?:^|\s)\+(\d+)\s+[−-](\d+)(?=\s|$)/u;
 // Work IDs cannot contain hyphens; this namespace marks transient attention.
-const SLACK_ATTENTION_TASK_PREFIX = "openclaw-attention-";
+const SLACK_ATTENTION_TASK_PREFIX = "carapace-attention-";
 
 type SlackPlanTaskStatus = TaskUpdateChunk["status"];
 type SlackPlanTask = Pick<TaskUpdateChunk, "id" | "title" | "status" | "details" | "output">;
@@ -31,7 +31,7 @@ type SlackProgressDiffStat = NonNullable<ChannelProgressDraftCompositorSnapshot[
 
 function buildSessionSources(url: string): NonNullable<TaskUpdateChunk["sources"]> {
   // The live Slack API requires url_source; @slack/types 3.0.0 still declares the old `url` tag.
-  return [{ type: "url_source", url, text: "Open in OpenClaw" }] as unknown as NonNullable<
+  return [{ type: "url_source", url, text: "Open in Carapace" }] as unknown as NonNullable<
     TaskUpdateChunk["sources"]
   >;
 }
@@ -285,7 +285,7 @@ export function buildSlackProgressStreamChunks(params: {
     // Native rows cannot be removed, so the quiet card owns one replaceable
     // summary row for the whole turn; detailed cards add it only as a receipt.
     tasks.push({
-      id: "openclaw_summary",
+      id: "carapace_summary",
       title: params.summaryRow ? compactTitle(title) : "Completed",
       status: params.finalInProgressStatus ?? (params.summaryRow ? "in_progress" : "complete"),
     });
@@ -295,7 +295,7 @@ export function buildSlackProgressStreamChunks(params: {
     params.finalInProgressStatus === "error" &&
     !tasks.some((task) => task.status === "in_progress" || task.status === "error")
   ) {
-    tasks.push({ id: "openclaw_attention", title: "Failed", status: "error" });
+    tasks.push({ id: "carapace_attention", title: "Failed", status: "error" });
   }
   if (!headline && tasks.length === 0) {
     return undefined;
@@ -415,7 +415,7 @@ export function buildSlackProgressCardBlocks(params: {
         {
           type: "button",
           action_id: SLACK_SESSION_LINK_ACTION_ID,
-          text: { type: "plain_text", text: "Open in OpenClaw" },
+          text: { type: "plain_text", text: "Open in Carapace" },
           url: params.sessionUrl,
         },
       ],

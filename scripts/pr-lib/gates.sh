@@ -108,13 +108,13 @@ mark_pr_operation_side_effects_if_available() {
 pin_worktree_bundled_plugins_dir() {
   # Nested .worktrees/<pr> checkouts resolve vitest tooling from the primary
   # checkout's node_modules; pin bundled plugin discovery to this worktree so
-  # PR branches without the openclaw-root node_modules-boundary fix still test
+  # PR branches without the carapace-root node_modules-boundary fix still test
   # their own extensions instead of the primary checkout's stale trees.
-  export OPENCLAW_BUNDLED_PLUGINS_DIR="${OPENCLAW_BUNDLED_PLUGINS_DIR:-$PWD/extensions}"
+  export CARAPACE_BUNDLED_PLUGINS_DIR="${CARAPACE_BUNDLED_PLUGINS_DIR:-$PWD/extensions}"
 }
 
 resolve_pr_gates_remote_mode() {
-  case "${OPENCLAW_PR_GATES_REMOTE:-}" in
+  case "${CARAPACE_PR_GATES_REMOTE:-}" in
     "")
       printf 'local\n'
       ;;
@@ -125,7 +125,7 @@ resolve_pr_gates_remote_mode() {
       printf 'crabbox-aws\n'
       ;;
     *)
-      echo "Unsupported OPENCLAW_PR_GATES_REMOTE=${OPENCLAW_PR_GATES_REMOTE} (supported: testbox, crabbox-aws)." >&2
+      echo "Unsupported CARAPACE_PR_GATES_REMOTE=${CARAPACE_PR_GATES_REMOTE} (supported: testbox, crabbox-aws)." >&2
       return 1
       ;;
   esac
@@ -146,7 +146,7 @@ run_remote_testbox_full_test_gate() {
   run_quiet_logged "$label" "$log_file" \
     node scripts/crabbox-wrapper.mjs run \
     --provider blacksmith-testbox \
-    --blacksmith-org openclaw \
+    --blacksmith-org carapace \
     --blacksmith-workflow .github/workflows/ci-check-testbox.yml \
     --blacksmith-job check \
     --blacksmith-ref main \
@@ -154,7 +154,7 @@ run_remote_testbox_full_test_gate() {
     --ttl 240m \
     --timing-json \
     --label "$lease_label" \
-    -- env CI=1 OPENCLAW_TESTBOX_REMOTE_RUN=1 PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false corepack pnpm test
+    -- env CI=1 CARAPACE_TESTBOX_REMOTE_RUN=1 PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false corepack pnpm test
 }
 
 read_remote_testbox_gate_stamp() {
@@ -176,7 +176,7 @@ read_remote_testbox_gate_run_url() {
   local expected_repo="${pr_url#https://github.com/}"
   expected_repo="${expected_repo%%/pull/*}"
   if [ -z "$expected_repo" ] || [ "$expected_repo" = "$pr_url" ]; then
-    expected_repo="openclaw/openclaw"
+    expected_repo="carapace/carapace"
   fi
   local url_prefix="https://github.com/$expected_repo/actions/runs/"
   local marker="GitHub Actions run: $url_prefix"
@@ -212,10 +212,10 @@ require_remote_testbox_gate_stamp() {
 require_active_org_admin_for_crabbox_gate() {
   local actor membership
   actor=$(gh_plain api graphql -f 'query=query { viewer { login } }' --jq .data.viewer.login) || return
-  membership=$(gh_plain api "orgs/openclaw/memberships/$actor" -H 'Cache-Control: max-age=0') || return
+  membership=$(gh_plain api "orgs/carapace/memberships/$actor" -H 'Cache-Control: max-age=0') || return
   if [ "$(printf '%s\n' "$membership" | jq -r .state)" != "active" ] ||
     [ "$(printf '%s\n' "$membership" | jq -r .role)" != "admin" ]; then
-    echo "OPENCLAW_PR_GATES_REMOTE=crabbox-aws requires an active openclaw organization admin." >&2
+    echo "CARAPACE_PR_GATES_REMOTE=crabbox-aws requires an active carapace organization admin." >&2
     return 1
   fi
   printf '%s\n' "$actor"
@@ -265,7 +265,7 @@ finalize_remote_crabbox_aws_gate() {
           and .headSha == $headSha
           and ((.runId // "") | startswith("run_"))
           and ((.leaseId // "") | startswith("cbx_"))
-          and ((.actionsRunUrl // "") | startswith("https://github.com/openclaw/openclaw/actions/runs/"))
+          and ((.actionsRunUrl // "") | startswith("https://github.com/Exaggarate/carapace/actions/runs/"))
         )
     ' "$log_file" | tail -n 1)
   if [ -z "$stamp" ]; then
@@ -340,8 +340,8 @@ prepare_gates() {
   local pr="$1"
   local gates_remote_mode
   gates_remote_mode=$(resolve_pr_gates_remote_mode)
-  if [ "$gates_remote_mode" != "local" ] && [ "${OPENCLAW_TESTBOX:-}" = "1" ]; then
-    echo "OPENCLAW_PR_GATES_REMOTE=$gates_remote_mode conflicts with OPENCLAW_TESTBOX=1; hosted PR gates already own remote proof."
+  if [ "$gates_remote_mode" != "local" ] && [ "${CARAPACE_TESTBOX:-}" = "1" ]; then
+    echo "CARAPACE_PR_GATES_REMOTE=$gates_remote_mode conflicts with CARAPACE_TESTBOX=1; hosted PR gates already own remote proof."
     exit 2
   fi
 
@@ -393,7 +393,7 @@ prepare_gates() {
     remote_record=$(read_pr_view_json "$pr" "headRefName,headRefOid,isCrossRepository,title,baseRefName") || return 1
     if ! changelog_mode=$(root_changelog_update_allowed_for_pr "$remote_record"); then
       echo "CHANGELOG.md is release-owned; normal PRs should put release-note context in the PR body or commit message."
-      echo "Use release/<version>-main-closeout with the documented title and only that origin-tagged version section, or set OPENCLAW_ALLOW_ROOT_CHANGELOG_PR=1 for explicit release automation."
+      echo "Use release/<version>-main-closeout with the documented title and only that origin-tagged version section, or set CARAPACE_ALLOW_ROOT_CHANGELOG_PR=1 for explicit release automation."
       exit 1
     fi
     # Published closeout text is immutable; normalizing PR references can move it
@@ -434,7 +434,7 @@ prepare_gates() {
   local gates_mode="full"
   local hosted_gates_head=""
   local reuse_gates=false
-  if [ "${OPENCLAW_TESTBOX:-}" != "1" ] && [ "$docs_only" = "true" ] && [ -n "$previous_last_verified_head" ] && git merge-base --is-ancestor "$previous_last_verified_head" HEAD 2>/dev/null; then
+  if [ "${CARAPACE_TESTBOX:-}" != "1" ] && [ "$docs_only" = "true" ] && [ -n "$previous_last_verified_head" ] && git merge-base --is-ancestor "$previous_last_verified_head" HEAD 2>/dev/null; then
     local delta_since_verified
     delta_since_verified=$(git diff --name-only "$previous_last_verified_head"..HEAD)
     if [ -z "$delta_since_verified" ] || file_list_is_docsish_only "$delta_since_verified"; then
@@ -442,7 +442,7 @@ prepare_gates() {
     fi
   fi
 
-  if [ "${OPENCLAW_TESTBOX:-}" = "1" ]; then
+  if [ "${CARAPACE_TESTBOX:-}" = "1" ]; then
     gates_mode="hosted_exact_or_recent_parent"
     remote_gates_provider=""
     remote_gates_run_id=""
@@ -480,7 +480,7 @@ prepare_gates() {
       echo "Docs-only change detected with high confidence; skipping pnpm test."
     elif [ "$gates_remote_mode" = "testbox" ]; then
       gates_mode="remote_testbox"
-      echo "Running pnpm test on Blacksmith Testbox (OPENCLAW_PR_GATES_REMOTE=testbox)."
+      echo "Running pnpm test on Blacksmith Testbox (CARAPACE_PR_GATES_REMOTE=testbox)."
       run_remote_testbox_full_test_gate \
         "pnpm test (blacksmith-testbox)" \
         ".local/gates-test.log" \
@@ -495,12 +495,12 @@ prepare_gates() {
       previous_full_gates_head="$current_head"
     else
       gates_mode="full"
-      if [ -n "${OPENCLAW_VITEST_MAX_WORKERS:-}" ]; then
-        echo "Running pnpm test with OPENCLAW_VITEST_MAX_WORKERS=$OPENCLAW_VITEST_MAX_WORKERS."
+      if [ -n "${CARAPACE_VITEST_MAX_WORKERS:-}" ]; then
+        echo "Running pnpm test with CARAPACE_VITEST_MAX_WORKERS=$CARAPACE_VITEST_MAX_WORKERS."
         run_quiet_logged \
           "pnpm test" \
           ".local/gates-test.log" \
-          env OPENCLAW_VITEST_MAX_WORKERS="$OPENCLAW_VITEST_MAX_WORKERS" pnpm test
+          env CARAPACE_VITEST_MAX_WORKERS="$CARAPACE_VITEST_MAX_WORKERS" pnpm test
       else
         echo "Running pnpm test with host-aware scheduling defaults."
         run_quiet_logged "pnpm test" ".local/gates-test.log" pnpm test

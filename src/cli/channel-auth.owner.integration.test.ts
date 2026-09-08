@@ -2,11 +2,11 @@
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPluginCatalogEntry } from "../channels/plugins/catalog.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { registerChannelsCli } from "./channels-cli.js";
 
 const fixture = vi.hoisted(() => ({
-  config: {} as OpenClawConfig,
+  config: {} as CarapaceConfig,
   registered: true,
   login: vi.fn(),
   logout: vi.fn(async () => ({ cleared: false })),
@@ -23,7 +23,7 @@ vi.mock("../commands/config-validation.js", () => ({
   }),
 }));
 vi.mock("../config/plugin-auto-enable.js", () => ({
-  applyPluginAutoEnable: ({ config }: { config: OpenClawConfig }) => ({ config, changes: [] }),
+  applyPluginAutoEnable: ({ config }: { config: CarapaceConfig }) => ({ config, changes: [] }),
 }));
 vi.mock("../channels/plugins/catalog.js", () => ({
   listRawChannelPluginCatalogEntries: fixture.catalog,
@@ -61,11 +61,11 @@ const plugin = {
 async function runAuth(mode: string, parent: string[] = [], leaf: string[] = []) {
   const args = ["channels", ...parent, mode, ...leaf, "--channel", plugin.id, "--account", "work"];
   const program = new Command()
-    .name("openclaw")
+    .name("carapace")
     .enablePositionalOptions()
     .exitOverride()
     .configureOutput({ writeErr: () => undefined });
-  await registerChannelsCli(program, ["node", "openclaw", ...args]);
+  await registerChannelsCli(program, ["node", "carapace", ...args]);
   await program.parseAsync(args, { from: "user" });
 }
 

@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { detectMime, normalizeMimeType } from "@openclaw/media-core/mime";
+import { detectMime, normalizeMimeType } from "@carapace/media-core/mime";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import {
   GATEWAY_CLIENT_MODES,
@@ -27,7 +27,7 @@ import {
 } from "../../agents/simple-completion-runtime.js";
 import { normalizeThinkLevel, type ThinkLevel } from "../../auto-reply/thinking.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { callGateway, randomIdempotencyKey } from "../../gateway/call.js";
 import { ADMIN_SCOPE } from "../../gateway/operator-scopes.js";
 import { convertHeicToJpeg } from "../../media/media-services.js";
@@ -50,7 +50,7 @@ import {
   resolveTransport,
 } from "./shared.js";
 
-const LOCAL_MODEL_RUN_SYSTEM_PROMPT = "You are a personal assistant running inside OpenClaw.";
+const LOCAL_MODEL_RUN_SYSTEM_PROMPT = "You are a personal assistant running inside Carapace.";
 const HEIC_MODEL_RUN_MIMES = new Set([
   "image/heic",
   "image/heic-sequence",
@@ -58,7 +58,7 @@ const HEIC_MODEL_RUN_MIMES = new Set([
   "image/heif-sequence",
 ]);
 
-async function loadModelCatalogForInspection(cfg: OpenClawConfig, agentId?: string) {
+async function loadModelCatalogForInspection(cfg: CarapaceConfig, agentId?: string) {
   const prepared = await loadPreparedModelCatalog({ config: cfg, agentId, readOnly: true });
   const metadataSnapshot = loadManifestMetadataSnapshot({ config: cfg, env: process.env });
   const manifest = planEffectiveModelCatalogRows({
@@ -79,7 +79,7 @@ async function loadModelCatalogForInspection(cfg: OpenClawConfig, agentId?: stri
 
 async function canonicalizeModelRunRef(params: {
   raw: string | undefined;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   preserveAuthProfile: boolean;
 }): Promise<string | undefined> {
   return await canonicalizeCaseOnlyCatalogModelRef({

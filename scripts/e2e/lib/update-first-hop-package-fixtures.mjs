@@ -84,7 +84,7 @@ function packTransformedFixture(candidateTarball, outputTarball, transform) {
   if (source === output || fs.existsSync(output)) {
     throw new Error("future fixture output must be a new tarball path");
   }
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-future-update-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-future-update-"));
   try {
     execFileSync("tar", ["-xzf", source, "-C", root]);
     const packageRoot = path.join(root, "package");
@@ -117,24 +117,24 @@ function packFutureRuntimeFixture(candidateTarball, outputTarball, sequence = 0)
   const version = futureFixtureVersion(sequence);
   return {
     method: "candidate-same-schema-runtime-fixture",
-    name: "@openclaw/codex",
+    name: "@carapace/codex",
     ...packTransformedFixture(candidateTarball, outputTarball, (root) => {
       const manifestPath = path.join(root, "package.json");
       const manifest = readJson(manifestPath);
-      if (manifest.name !== "@openclaw/codex") {
-        throw new Error("future runtime fixture requires the @openclaw/codex package");
+      if (manifest.name !== "@carapace/codex") {
+        throw new Error("future runtime fixture requires the @carapace/codex package");
       }
       if (
         typeof manifest.version !== "string" ||
         !/^\d{4}\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[a-z0-9]+(?:[.-][a-z0-9]+)*)?$/iu.test(
           manifest.version,
         ) ||
-        manifest.openclaw?.build?.openclawVersion !== manifest.version
+        manifest.carapace?.build?.carapaceVersion !== manifest.version
       ) {
-        throw new Error("runtime package version and OpenClaw build cohort must match");
+        throw new Error("runtime package version and Carapace build cohort must match");
       }
       manifest.version = version;
-      manifest.openclaw.build.openclawVersion = version;
+      manifest.carapace.build.carapaceVersion = version;
       writeJson(manifestPath, manifest);
     }),
   };

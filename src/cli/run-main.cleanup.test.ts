@@ -24,11 +24,11 @@ vi.mock("../entry.esm-resolve-fast-path.js", () => ({ installDistEsmResolveFastP
 vi.mock("../entry.version-fast-path.js", () => ({ tryHandleRootVersionFastPath: () => false }));
 vi.mock("../entry.compile-cache.js", () => ({
   resolveEntryInstallRoot: () => process.cwd(),
-  enableOpenClawCompileCache() {},
-  respawnWithoutOpenClawCompileCacheIfNeeded: async () => false,
+  enableCarapaceCompileCache() {},
+  respawnWithoutCarapaceCompileCacheIfNeeded: async () => false,
 }));
 vi.mock("../entry.respawn.js", () => ({ buildCliRespawnPlan: () => null }));
-vi.mock("../infra/openclaw-exec-env.js", () => ({ ensureOpenClawExecMarkerOnProcess() {} }));
+vi.mock("../infra/carapace-exec-env.js", () => ({ ensureCarapaceExecMarkerOnProcess() {} }));
 vi.mock("../infra/warning-filter.js", () => ({ installProcessWarningFilter() {} }));
 vi.mock("../infra/unhandled-rejections.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../infra/unhandled-rejections.js")>()),
@@ -39,7 +39,7 @@ vi.mock("../logging/console.js", async (importOriginal) => ({
   enableConsoleCapture() {},
   routeLogsToStderr() {},
 }));
-vi.mock("../infra/path-env.js", () => ({ ensureOpenClawCliOnPath() {} }));
+vi.mock("../infra/path-env.js", () => ({ ensureCarapaceCliOnPath() {} }));
 vi.mock("./dotenv.js", () => ({ loadCliDotEnv() {} }));
 vi.mock("../config/io.js", () => ({ readBestEffortConfig: async () => ({}) }));
 vi.mock("../infra/net/proxy/proxy-lifecycle.js", () => ({
@@ -142,7 +142,7 @@ function resourceHarness(id: string, gate?: Deferred) {
 
 const argv = [
   "node",
-  "openclaw",
+  "carapace",
   "onboard",
   "--non-interactive",
   "--accept-risk",
@@ -317,7 +317,7 @@ describe("CLI process harness cleanup", () => {
           }
           process.argv = [
             "node",
-            "openclaw",
+            "carapace",
             "gateway",
             ...(mode === "gateway-run" ? ["run"] : []),
           ];

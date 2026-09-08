@@ -1,21 +1,21 @@
 {
-  "name": "@openclaw/crabbox-provider",
+  "name": "@carapace/crabbox-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw cloud worker provider backed by the Crabbox CLI",
+  "description": "Carapace cloud worker provider backed by the Crabbox CLI",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "build": {
       "staticAssets": [
         {
-          "source": "./assets/openclaw-worker-wallpaper.png",
-          "output": "assets/openclaw-worker-wallpaper.png"
+          "source": "./assets/carapace-worker-wallpaper.png",
+          "output": "assets/carapace-worker-wallpaper.png"
         }
       ]
     }

@@ -1,5 +1,5 @@
 // Slack plugin module implements channel type behavior.
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SlackMessageEvent } from "../types.js";
 
 type SlackChatType = "direct" | "group" | "channel";

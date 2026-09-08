@@ -1,11 +1,11 @@
 // Verifies session tool-result guard inserts, truncates, and repairs tool results.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import { expectDefined } from "@carapace/normalization-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
-import { createOpenClawReadTool } from "./agent-tools.read.js";
+import { createCarapaceReadTool } from "./agent-tools.read.js";
 import { createAssistantErrorTranscript } from "./assistant-error-transcript.js";
 import { buildExecForegroundResult } from "./bash-tools.exec-support.js";
 import { installSessionToolResultGuard } from "./session-tool-result-guard.js";
@@ -787,7 +787,7 @@ describe("installSessionToolResultGuard", () => {
   it("persists env reads only after owner-context redaction", async () => {
     const credential = "persisted-env-credential-1234567890";
     const text = `api_key: ${credential}`;
-    const readTool = createOpenClawReadTool({
+    const readTool = createCarapaceReadTool({
       name: "read",
       label: "read",
       description: "test read",

@@ -3,13 +3,13 @@ import { Worker, type WorkerOptions } from "node:worker_threads";
 import { afterEach, expect, it } from "vitest";
 import { createDeferred, withTestTimeout } from "../../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { assertNoOpenClawAgentDatabaseLeases } from "../../state/openclaw-agent-db-lease.js";
+import { assertNoCarapaceAgentDatabaseLeases } from "../../state/carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import {
   persistSessionTranscriptTurn,
@@ -111,11 +111,11 @@ const cases = [
 it.each(cases)(
   "joins queued $stage on native exit (scheduled=$scheduled, replacement=$replace)",
   async ({ stage, scheduled, replace }) => {
-    const stateDir = tempDirs.make("openclaw-native-worker-exit-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-native-worker-exit-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const fence = createQueuedProjectionFence(stage, () => {
         if (replace) {
-          runOpenClawAgentWriteTransaction((database) => {
+          runCarapaceAgentWriteTransaction((database) => {
             // The canonical replacement publishes a new projection and revokes the old claim.
             replaceSqliteTranscriptEventsInTransaction(database, scope, [
               {
@@ -135,7 +135,7 @@ it.each(cases)(
           messages: [{ eventId: "seed", message: { role: "user", content: "synthetic seed" } }],
           touchSessionEntry: false,
         });
-        const database = openOpenClawAgentDatabase(databaseOptions);
+        const database = openCarapaceAgentDatabase(databaseOptions);
         database.db
           .prepare(
             "UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?",
@@ -214,14 +214,14 @@ it.each(cases)(
           expect.objectContaining({ id: replace ? "replacement" : "seed" }),
         ]);
         await fence.cleanup();
-        closeOpenClawAgentDatabasesForTest();
-        expect(() => assertNoOpenClawAgentDatabaseLeases(databaseOptions.agentId)).not.toThrow();
+        closeCarapaceAgentDatabasesForTest();
+        expect(() => assertNoCarapaceAgentDatabaseLeases(databaseOptions.agentId)).not.toThrow();
       } finally {
         await fence.cleanup();
         await outcome;
         await drain;
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     });
   },

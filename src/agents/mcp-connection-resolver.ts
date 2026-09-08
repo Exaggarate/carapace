@@ -3,9 +3,9 @@
  * Resolved url/headers are credentials — never log, fingerprint, or persist them.
  */
 import crypto from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { resolveOpenClawMcpTransportAlias } from "../config/mcp-config-normalize.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { resolveCarapaceMcpTransportAlias } from "../config/mcp-config-normalize.js";
 import { logWarn } from "../logger.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import { getActivePluginRegistry } from "../plugins/runtime.js";
@@ -13,12 +13,12 @@ import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-
 import type {
   McpServerConnectionResolved,
   McpServerConnectionResolveContext,
-  OpenClawPluginMcpServerConnectionResolver,
+  CarapacePluginMcpServerConnectionResolver,
 } from "../plugins/types.js";
 
 export type { McpServerConnectionResolved };
 
-type McpServerConnectionResolverEntry = OpenClawPluginMcpServerConnectionResolver & {
+type McpServerConnectionResolverEntry = CarapacePluginMcpServerConnectionResolver & {
   pluginId: string;
 };
 
@@ -281,9 +281,9 @@ export function applyMcpConnectionOverride(
   // BEFORE stripping `type`, so SSE-only servers keep sse (including case variants).
   const fromTransport =
     typeof base.transport === "string"
-      ? resolveOpenClawMcpTransportAlias(base.transport)
+      ? resolveCarapaceMcpTransportAlias(base.transport)
       : undefined;
-  const fromType = resolveOpenClawMcpTransportAlias(base.type);
+  const fromType = resolveCarapaceMcpTransportAlias(base.type);
   base.transport = fromTransport ?? fromType ?? "streamable-http";
   // Resolver-supplied headers are the auth surface; strip static OAuth so the
   // transport layer does not drop Authorization from overrides.

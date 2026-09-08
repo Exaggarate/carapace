@@ -1,17 +1,17 @@
-import { isCloudModelRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import { isCloudModelRef } from "@carapace/model-catalog-core/model-catalog-refs";
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@carapace/model-catalog-core/provider-id";
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderNormalizeResolvedModelContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import type {
   ModelProviderConfig,
   ProviderToolSearchPolicyContext,
-} from "openclaw/plugin-sdk/provider-model-types";
+} from "carapace/plugin-sdk/provider-model-types";
 import {
   OLLAMA_CLOUD_PROVIDER_ID,
   isOllamaCloudOrigin,

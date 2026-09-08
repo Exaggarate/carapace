@@ -1,4 +1,4 @@
-// Scope script supports OpenClaw repository automation.
+// Scope script supports Carapace repository automation.
 import fs from "node:fs";
 import path from "node:path";
 import { BUNDLED_PLUGIN_PATH_PREFIX } from "../bundled-plugin-paths.mjs";
@@ -125,9 +125,9 @@ export function createPluginSdkScope(_repoRoot: string): TopologyScope {
   const entrypoints = publicPluginSdkEntrypoints.map((entrypoint) => ({
     entrypoint,
     sourcePath: `src/plugin-sdk/${entrypoint}.ts`,
-    importSpecifier: `openclaw/plugin-sdk/${entrypoint}`,
+    importSpecifier: `carapace/plugin-sdk/${entrypoint}`,
   }));
-  return buildScopeFromEntrypoints("plugin-sdk", "OpenClaw plugin-sdk public surface", entrypoints);
+  return buildScopeFromEntrypoints("plugin-sdk", "Carapace plugin-sdk public surface", entrypoints);
 }
 
 export function createFilesystemPublicSurfaceScope(

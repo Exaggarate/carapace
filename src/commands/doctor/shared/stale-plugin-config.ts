@@ -1,9 +1,9 @@
 // Doctor scanner and repair for plugin/channel config that references missing plugins.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
 import { resolveAgentWorkspaceDir, tryResolveDefaultAgentId } from "../../../agents/agent-scope.js";
 import { CHANNEL_IDS } from "../../../channels/ids.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   isExplicitPluginDisableMarker,
   isRetiredPluginId,
@@ -40,7 +40,7 @@ type StalePluginRegistryState = {
 };
 
 function collectPluginRegistryState(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): StalePluginRegistryState {
   const environment = env ?? process.env;
@@ -97,7 +97,7 @@ function collectPluginRegistryState(
 
 /** Return true when plugin discovery errors should pause stale-plugin auto-removal. */
 export function isStalePluginAutoRepairBlocked(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): boolean {
   if (cfg.plugins?.enabled === false) {
@@ -108,7 +108,7 @@ export function isStalePluginAutoRepairBlocked(
 
 /** Scan plugin/channel config surfaces for ids no longer present in manifests or installs. */
 export function scanStalePluginConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): StalePluginConfigHit[] {
   if (cfg.plugins?.enabled === false) {
@@ -119,7 +119,7 @@ export function scanStalePluginConfig(
 }
 
 function scanStalePluginConfigWithState(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   registryState: StalePluginRegistryState,
 ): StalePluginConfigHit[] {
   const plugins = asNullableRecord(cfg.plugins);
@@ -215,7 +215,7 @@ function scanStalePluginConfigWithState(
 }
 
 function collectDanglingChannelIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   registryState: StalePluginRegistryState;
   staleEvidenceIds: ReadonlySet<string>;
 }): string[] {
@@ -245,7 +245,7 @@ function collectDanglingChannelIds(params: {
 }
 
 function collectDependentChannelConfigHits(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channelIds: readonly string[],
 ): StalePluginConfigHit[] {
   if (channelIds.length === 0) {
@@ -353,14 +353,14 @@ export function collectStalePluginConfigWarnings(params: {
 
 /** Remove stale plugin ids and dangling channel references when discovery is healthy. */
 export function maybeRepairStalePluginConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
   params?: {
     preservePluginIds?: Iterable<string>;
     surfacePreservePluginIds?: Partial<Record<StalePluginSurface, Iterable<string>>>;
   },
 ): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changes: string[];
 } {
   if (cfg.plugins?.enabled === false) {
@@ -482,7 +482,7 @@ export function maybeRepairStalePluginConfig(
   return { config: next, changes };
 }
 
-function removeDanglingChannelReferences(config: OpenClawConfig, channelIds: readonly string[]) {
+function removeDanglingChannelReferences(config: CarapaceConfig, channelIds: readonly string[]) {
   const staleChannelIds = new Set(channelIds.map((channelId) => normalizePluginId(channelId)));
   const channels = asNullableRecord(config.channels);
   if (channels) {

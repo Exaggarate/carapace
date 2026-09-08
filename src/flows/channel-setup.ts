@@ -26,7 +26,7 @@ import {
 } from "../commands/channel-setup/trusted-catalog.js";
 import type { ChannelChoice } from "../commands/onboard-types.js";
 import { isChannelConfigured } from "../config/channel-configured.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resolveBundledPluginSources } from "../plugins/bundled-sources.js";
 import { enablePluginWithCapabilityConsent } from "../plugins/enable.js";
@@ -62,7 +62,7 @@ export function createChannelSetupTransaction(params: {
   beforePersistentEffect?: () => Promise<void>;
 }) {
   const hooks = new Map<string, ChannelOnboardingPostWriteHook>();
-  const runPostWriteHooks = async (cfg: OpenClawConfig) => {
+  const runPostWriteHooks = async (cfg: CarapaceConfig) => {
     await runCollectedChannelOnboardingPostWriteHooks({
       hooks: [...hooks.values()],
       cfg,
@@ -78,9 +78,9 @@ export function createChannelSetupTransaction(params: {
       hooks.set(`${hook.channel}:${hook.accountId}`, hook);
     },
     async commit(
-      nextConfig: OpenClawConfig,
-      write: (config: OpenClawConfig) => Promise<OpenClawConfig>,
-    ): Promise<OpenClawConfig> {
+      nextConfig: CarapaceConfig,
+      write: (config: CarapaceConfig) => Promise<CarapaceConfig>,
+    ): Promise<CarapaceConfig> {
       await params.beforePersistentEffect?.();
       const committedConfig = await write(nextConfig);
       await runPostWriteHooks(committedConfig);
@@ -92,7 +92,7 @@ export function createChannelSetupTransaction(params: {
 
 export async function runCollectedChannelOnboardingPostWriteHooks(params: {
   hooks: ChannelOnboardingPostWriteHook[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   beforePersistentEffect?: () => Promise<void>;
 }): Promise<void> {
@@ -113,7 +113,7 @@ export function createChannelOnboardingPostWriteHook(params: {
   accountId?: string;
   adapter?: Pick<ChannelSetupWizardAdapter, "afterConfigWritten">;
   channel: ChannelChoice;
-  previousCfg: OpenClawConfig;
+  previousCfg: CarapaceConfig;
 }): ChannelOnboardingPostWriteHook | undefined {
   if (!params.accountId || !params.adapter?.afterConfigWritten) {
     return undefined;
@@ -134,11 +134,11 @@ export function createChannelOnboardingPostWriteHook(params: {
 // Channel-specific prompts moved into setup flow adapters.
 
 export async function setupChannels(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
   options?: SetupChannelsOptions,
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   let next = cfg;
   const deferStatusUntilSelection = options?.deferStatusUntilSelection === true;
   const forceAllowFromChannels = new Set(options?.forceAllowFromChannels ?? []);
@@ -421,7 +421,7 @@ export async function setupChannels(
         t("wizard.channels.disabledDuringSetup", {
           channel,
           hint: disabledHint,
-          command: formatCliCommand("openclaw channels add"),
+          command: formatCliCommand("carapace channels add"),
         }),
         t("wizard.channels.setupTitle"),
       );
@@ -433,7 +433,7 @@ export async function setupChannels(
         t("wizard.channels.pluginEnableFailed", {
           channel,
           reason: result.reason ?? "plugin disabled",
-          command: formatCliCommand("openclaw plugins list"),
+          command: formatCliCommand("carapace plugins list"),
         }),
         t("wizard.channels.setupTitle"),
       );
@@ -446,8 +446,8 @@ export async function setupChannels(
         await prompter.note(
           t("wizard.channels.pluginMissingRecoverable", {
             channel,
-            listCommand: formatCliCommand("openclaw plugins list"),
-            enableCommand: formatCliCommand("openclaw plugins enable " + channel),
+            listCommand: formatCliCommand("carapace plugins list"),
+            enableCommand: formatCliCommand("carapace plugins enable " + channel),
           }),
           t("wizard.channels.setupTitle"),
         );
@@ -510,7 +510,7 @@ export async function setupChannels(
         selectionHint: "status unavailable",
       });
       await prompter.note(
-        `Status unavailable (${detail}).\nRetry: ${formatCliCommand(`openclaw channels status --channel ${channel}`)}`,
+        `Status unavailable (${detail}).\nRetry: ${formatCliCommand(`carapace channels status --channel ${channel}`)}`,
         t("wizard.channels.statusTitle"),
       );
     }
@@ -553,7 +553,7 @@ export async function setupChannels(
       await prompter.note(
         t("wizard.channels.noInteractiveSetup", {
           channel,
-          command: formatCliCommand(`openclaw channels add --channel ${channel} --help`),
+          command: formatCliCommand(`carapace channels add --channel ${channel} --help`),
         }),
         t("wizard.channels.setupTitle"),
       );
@@ -728,7 +728,7 @@ export async function setupChannels(
               enabled: true,
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         resumingDisabledChannel = true;
       } else if (deferredDisabledHint === "plugin disabled") {
         const resume =
@@ -747,7 +747,7 @@ export async function setupChannels(
             t("wizard.channels.pluginEnableFailed", {
               channel,
               reason: result.reason ?? "plugin disabled",
-              command: formatCliCommand("openclaw plugins list"),
+              command: formatCliCommand("carapace plugins list"),
             }),
             t("wizard.channels.setupTitle"),
           );
@@ -976,7 +976,7 @@ export async function setupChannels(
             value: skipValue,
             label: t("common.skipForNow"),
             hint: t("wizard.channels.skipLaterHint", {
-              command: formatCliCommand("openclaw channels add"),
+              command: formatCliCommand("carapace channels add"),
             }),
           },
           ...resolveChannelSetupSelectionContributions({

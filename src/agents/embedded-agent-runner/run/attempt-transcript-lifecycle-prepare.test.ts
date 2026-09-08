@@ -14,8 +14,8 @@ import type { InternalSessionEntry } from "../../../config/sessions/types.js";
 import { getAgentRunLifecycleGeneration } from "../../../infra/agent-run-registry.js";
 import { onSessionIdentityMutation } from "../../../sessions/session-lifecycle-events.js";
 import { createUserTurnTranscriptRecorder } from "../../../sessions/user-turn-transcript.js";
-import { runOpenClawAgentWriteTransaction } from "../../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { runCarapaceAgentWriteTransaction } from "../../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import {
   prepareSystemAgentRunAdmission,
   type PreparedAgentRunAdmission,
@@ -48,14 +48,14 @@ async function withInitialWriter(
   run: (fixture: InitialWriterFixture) => Promise<void | (() => Promise<void>)>,
   options: { existing?: boolean } = {},
 ) {
-  await withOpenClawTestState({ label: "initial-session-writer" }, async (state) => {
+  await withCarapaceTestState({ label: "initial-session-writer" }, async (state) => {
     const sessionId = randomUUID();
     const runId = randomUUID();
     const target = {
       agentId: "main",
       sessionId,
       sessionKey: `agent:main:${sessionId}`,
-      storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
     };
     const controller = new AbortController();
     const admission = prepareSystemAgentRunAdmission({}, runId, "main", "initial-writer-test");
@@ -298,7 +298,7 @@ describe("admitted lazy session writer", () => {
       });
       try {
         expect(() =>
-          runOpenClawAgentWriteTransaction(
+          runCarapaceAgentWriteTransaction(
             () => {
               manager.appendMessage(userMessage);
               expect(promptState.sessionWriterFence).toBeUndefined();

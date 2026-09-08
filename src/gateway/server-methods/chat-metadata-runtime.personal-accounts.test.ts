@@ -4,7 +4,7 @@ import {
   clearUserProfileAuthLink,
   listUserProfileAuthLinks,
 } from "../../state/user-model-accounts.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   connectChatMetadataAccount,
   createDraftChatMetadataScope,
@@ -16,7 +16,7 @@ describe("gateway chat metadata personal accounts", () => {
   test.each(["metadata", "startup"] as const)(
     "keeps persisted-session %s separate from personal defaults and draft previews",
     async (surface) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", prefix: "personal-chat-metadata-", env: WITHOUT_OPENAI_ENV_AUTH },
         async () => {
           const { harness, owner, alice, bob, aliceScope, bobScope } =
@@ -105,7 +105,7 @@ describe("gateway chat metadata personal accounts", () => {
   test.each(["user", "user-link"] as const)(
     "keeps a %s personal session pin available outside shared auth order",
     async (source) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", prefix: "personal-pinned-metadata-", env: WITHOUT_OPENAI_ENV_AUTH },
         async () => {
           const { harness, owner, alice, bobScope } = await createPersonalChatMetadataFixture();

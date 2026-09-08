@@ -1,5 +1,5 @@
 /** Text-command routing decisions for surfaces that may also support native commands. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { getLoadedChannelPluginById } from "../channels/plugins/registry-loaded.js";
 import type { ShouldHandleTextCommandsParams } from "./commands-registry.types.js";
 

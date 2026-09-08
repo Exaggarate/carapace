@@ -33,7 +33,7 @@ async function gatewayCall(method, params) {
   assert(remainingMs > 0, "volume Gateway probe exceeded its two-minute budget");
   try {
     const result = await run(
-      "openclaw",
+      "carapace",
       [
         "gateway",
         "call",
@@ -91,7 +91,7 @@ for (const index of indexes) {
   }
   const actual = history.messages.map((message) => ({
     // eslint-disable-next-line no-underscore-dangle -- Public Gateway transcript metadata field.
-    id: message.__openclaw?.id,
+    id: message.__carapace?.id,
     role: message.role,
     content: message.content,
   }));

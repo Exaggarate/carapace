@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB } from "./openclaw-state-db.generated.js";
+import type { DB } from "./carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "./carapace-state-db.paths.js";
 
 type ClawPackageAdoption = {
   kind: "skill" | "plugin";
@@ -18,15 +18,15 @@ type ClawPackageAdoption = {
 /** Records an explicit non-Claw claim through the canonical package owner. */
 export function markClawPackageIndependentlyOwned(
   artifact: ClawPackageAdoption,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: CarapaceStateDatabaseOptions & { nowMs?: number } = {},
 ): number {
-  const databasePath = options.path ?? resolveOpenClawStateSqlitePath(options.env ?? process.env);
+  const databasePath = options.path ?? resolveCarapaceStateSqlitePath(options.env ?? process.env);
   if (!existsSync(databasePath)) {
     return 0;
   }
   const nowMs = options.nowMs ?? Date.now();
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runCarapaceStateWriteTransaction(({ db }) => {
       const kysely = getNodeSqliteKysely<Pick<DB, "claw_package_refs" | "claw_installs">>(db);
       let query = kysely
         .updateTable("claw_package_refs")

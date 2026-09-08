@@ -1,18 +1,18 @@
 // Github Copilot plugin module implements embeddings behavior.
-import { redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
+import { redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
 import {
   buildRemoteBaseUrlPolicy,
   sanitizeAndNormalizeEmbedding,
   withRemoteHttpResponse,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderAdapter,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 import { resolveFirstGithubToken } from "./auth.js";
 import { resolveGithubCopilotDomain } from "./domain.js";
 import { COPILOT_MODELS_LIST_DEFAULT_TIMEOUT_MS } from "./models.js";

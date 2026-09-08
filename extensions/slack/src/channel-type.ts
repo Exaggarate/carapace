@@ -1,11 +1,11 @@
 // Slack plugin module implements channel type behavior.
 import { createHash } from "node:crypto";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveSlackAccount, resolveSlackOperationToken } from "./accounts.js";
 import { createSlackReadClient, createSlackWebClient } from "./client.js";
 import { assertSlackDetachedTargetAllowed } from "./detached-target-admission.js";
@@ -72,7 +72,7 @@ function resolveConfiguredSlackConversationInfo(params: {
 }
 
 export async function resolveSlackConversationInfo(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   channelId: string;
   teamId?: string;
@@ -152,7 +152,7 @@ export async function resolveSlackConversationInfo(params: {
 }
 
 export async function resolveSlackChannelType(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   channelId: string;
   teamId?: string;

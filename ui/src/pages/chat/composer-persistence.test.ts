@@ -24,8 +24,8 @@ type ComposerState = Parameters<typeof persistChatComposerState>[0] & {
   selectedChatSessionIncognito: boolean;
 };
 
-const LEGACY_STORAGE_KEY_PREFIX = "openclaw.control.chatComposer.v1:";
-const STORAGE_KEY_PREFIX = "openclaw.control.chatComposer.v4:";
+const LEGACY_STORAGE_KEY_PREFIX = "carapace.control.chatComposer.v1:";
+const STORAGE_KEY_PREFIX = "carapace.control.chatComposer.v4:";
 
 function gatewayOwner(gatewayUrl: string | null | undefined): string {
   return gatewayUrl?.trim() || "default";

@@ -1,5 +1,5 @@
-import { isContextOverflow } from "@openclaw/ai/internal/runtime";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isContextOverflow } from "@carapace/ai/internal/runtime";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { capCompactionSummary } from "../../../packages/agent-core/src/harness/compaction/compaction.js";
 import { InvalidSummaryOutputError } from "../../../packages/agent-core/src/harness/types.js";
 import type { AssistantMessage } from "../../llm/types.js";
@@ -53,12 +53,12 @@ function compactionErrorMessage(error: unknown, fallback: string): string {
 
 /** @internal */
 export const agentSessionAutomaticCompaction: unique symbol = Symbol.for(
-  "openclaw.agent-session.automatic-compaction",
+  "carapace.agent-session.automatic-compaction",
 );
 
 /** Installs a synchronous callback for model-context replacement during compaction. */
 export const agentSessionSetContextReplacementHook: unique symbol = Symbol.for(
-  "openclaw.agent-session.set-context-replacement-hook",
+  "carapace.agent-session.set-context-replacement-hook",
 );
 
 export abstract class AgentSessionCompaction extends AgentSessionInspection {

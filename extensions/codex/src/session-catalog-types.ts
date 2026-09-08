@@ -41,7 +41,7 @@ export type CodexSessionCatalogSession = {
   modelProvider?: string;
   cliVersion?: string;
   gitBranch?: string;
-  /** Existing locked OpenClaw chat already mapped to this native source thread. */
+  /** Existing locked Carapace chat already mapped to this native source thread. */
   sessionKey?: string;
   archived: boolean;
 };
@@ -125,7 +125,7 @@ export type CodexSessionTranscriptPage = {
   hostId: string;
   label: string;
   threadId: string;
-  items: import("openclaw/plugin-sdk/session-catalog").SessionCatalogTranscriptItem[];
+  items: import("carapace/plugin-sdk/session-catalog").SessionCatalogTranscriptItem[];
   nextCursor?: string;
 };
 

@@ -1,6 +1,6 @@
 // Google Meet tests cover oauth plugin behavior.
 import { createServer, type Server } from "node:http";
-import * as providerAuthRuntime from "openclaw/plugin-sdk/provider-auth-runtime";
+import * as providerAuthRuntime from "carapace/plugin-sdk/provider-auth-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildGoogleMeetAuthUrl,

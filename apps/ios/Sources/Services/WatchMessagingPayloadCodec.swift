@@ -1,9 +1,9 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 enum WatchMessagingInboundEvent: Sendable {
-    case chatDeliveryCommand(OpenClawWatchChatDeliveryCommand)
-    case chatDeliveryReceiptAck(OpenClawWatchChatDeliveryReceiptAck)
+    case chatDeliveryCommand(CarapaceWatchChatDeliveryCommand)
+    case chatDeliveryReceiptAck(CarapaceWatchChatDeliveryReceiptAck)
     case legacyChat
     case execApprovalResolve(WatchExecApprovalResolveEvent)
     case execApprovalSnapshotRequest(WatchExecApprovalSnapshotRequestEvent)
@@ -13,8 +13,8 @@ enum WatchMessagingInboundEvent: Sendable {
 
 enum WatchMessagingPayloadCodec {
     private static let durableSnapshotTypes = [
-        OpenClawWatchPayloadType.appSnapshot.rawValue,
-        OpenClawWatchPayloadType.execApprovalSnapshot.rawValue,
+        CarapaceWatchPayloadType.appSnapshot.rawValue,
+        CarapaceWatchPayloadType.execApprovalSnapshot.rawValue,
     ]
 
     static func nowMs() -> Int64 {
@@ -33,16 +33,16 @@ enum WatchMessagingPayloadCodec {
 
     static func encodeNotificationPayload(
         id: String,
-        params: OpenClawWatchNotifyParams,
+        params: CarapaceWatchNotifyParams,
         gatewayStableID: String?,
-        chatDeliveryContext: OpenClawWatchChatDeliveryContext? = nil) -> [String: Any]
+        chatDeliveryContext: CarapaceWatchChatDeliveryContext? = nil) -> [String: Any]
     {
         var payload: [String: Any] = [
-            "type": OpenClawWatchPayloadType.notify.rawValue,
+            "type": CarapaceWatchPayloadType.notify.rawValue,
             "id": id,
             "title": params.title,
             "body": params.body,
-            "priority": params.priority?.rawValue ?? OpenClawNotificationPriority.active.rawValue,
+            "priority": params.priority?.rawValue ?? CarapaceNotificationPriority.active.rawValue,
             "sentAtMs": self.nowMs(),
         ]
         if let promptId = nonEmpty(params.promptId) {
@@ -55,7 +55,7 @@ enum WatchMessagingPayloadCodec {
             payload["gatewayStableID"] = gatewayStableID
         }
         if let chatDeliveryContext,
-           let context = try? OpenClawWatchChatDeliveryCodec.encode(chatDeliveryContext)
+           let context = try? CarapaceWatchChatDeliveryCodec.encode(chatDeliveryContext)
         {
             payload["sessionKey"] = chatDeliveryContext.sessionKey
             payload["gatewayStableID"] = chatDeliveryContext.gatewayStableID
@@ -90,13 +90,13 @@ enum WatchMessagingPayloadCodec {
 
     static func encodeDirectNodeSetupPayload(setupCode: String) -> [String: Any] {
         [
-            "type": OpenClawWatchPayloadType.directNodeSetup.rawValue,
+            "type": CarapaceWatchPayloadType.directNodeSetup.rawValue,
             "setupCode": setupCode,
             "sentAtMs": self.nowMs(),
         ]
     }
 
-    static func encodeExecApprovalItem(_ item: OpenClawWatchExecApprovalItem) -> [String: Any] {
+    static func encodeExecApprovalItem(_ item: CarapaceWatchExecApprovalItem) -> [String: Any] {
         var payload: [String: Any] = [
             "id": item.id,
             "commandText": item.commandText,
@@ -130,10 +130,10 @@ enum WatchMessagingPayloadCodec {
     }
 
     static func encodeExecApprovalPromptPayload(
-        _ message: OpenClawWatchExecApprovalPromptMessage) -> [String: Any]
+        _ message: CarapaceWatchExecApprovalPromptMessage) -> [String: Any]
     {
         var payload: [String: Any] = [
-            "type": OpenClawWatchPayloadType.execApprovalPrompt.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalPrompt.rawValue,
             "approval": self.encodeExecApprovalItem(message.approval),
         ]
         if let sentAtMs = message.sentAtMs {
@@ -146,10 +146,10 @@ enum WatchMessagingPayloadCodec {
     }
 
     static func encodeExecApprovalResolvedPayload(
-        _ message: OpenClawWatchExecApprovalResolvedMessage) -> [String: Any]
+        _ message: CarapaceWatchExecApprovalResolvedMessage) -> [String: Any]
     {
         var payload: [String: Any] = [
-            "type": OpenClawWatchPayloadType.execApprovalResolved.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalResolved.rawValue,
             "approvalId": message.approvalId,
         ]
         if let gatewayStableID = GatewayStableIdentifier.exact(message.gatewayStableID) {
@@ -174,10 +174,10 @@ enum WatchMessagingPayloadCodec {
     }
 
     static func encodeExecApprovalExpiredPayload(
-        _ message: OpenClawWatchExecApprovalExpiredMessage) -> [String: Any]
+        _ message: CarapaceWatchExecApprovalExpiredMessage) -> [String: Any]
     {
         var payload: [String: Any] = [
-            "type": OpenClawWatchPayloadType.execApprovalExpired.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalExpired.rawValue,
             "approvalId": message.approvalId,
             "reason": message.reason.rawValue,
         ]
@@ -191,10 +191,10 @@ enum WatchMessagingPayloadCodec {
     }
 
     static func encodeExecApprovalSnapshotPayload(
-        _ message: OpenClawWatchExecApprovalSnapshotMessage) -> [String: Any]
+        _ message: CarapaceWatchExecApprovalSnapshotMessage) -> [String: Any]
     {
         var payload: [String: Any] = [
-            "type": OpenClawWatchPayloadType.execApprovalSnapshot.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalSnapshot.rawValue,
             "approvals": message.approvals.map(self.encodeExecApprovalItem),
         ]
         if let gatewayStableID = GatewayStableIdentifier.exact(message.gatewayStableID) {
@@ -216,10 +216,10 @@ enum WatchMessagingPayloadCodec {
     }
 
     static func encodeAppSnapshotPayload(
-        _ message: OpenClawWatchAppSnapshotMessage) -> [String: Any]
+        _ message: CarapaceWatchAppSnapshotMessage) -> [String: Any]
     {
         var payload: [String: Any] = [
-            "type": OpenClawWatchPayloadType.appSnapshot.rawValue,
+            "type": CarapaceWatchPayloadType.appSnapshot.rawValue,
             "gatewayStatus": self.encodeAppStatus(message.gatewayStatus),
             "gatewayStatusText": message.gatewayStatusText,
             "gatewayConnected": message.gatewayConnected,
@@ -267,14 +267,14 @@ enum WatchMessagingPayloadCodec {
             payload["snapshotId"] = snapshotId
         }
         if let context = message.chatDeliveryContext,
-           let encoded = try? OpenClawWatchChatDeliveryCodec.encode(context)
+           let encoded = try? CarapaceWatchChatDeliveryCodec.encode(context)
         {
             payload["chatDeliveryContext"] = encoded
         }
         return payload
     }
 
-    private static func encodeAppStatus(_ status: OpenClawWatchAppStatus) -> [String: Any] {
+    private static func encodeAppStatus(_ status: CarapaceWatchAppStatus) -> [String: Any] {
         var payload: [String: Any] = ["code": status.code.rawValue]
         if let localizationKey = exactNonEmpty(status.localizationKey) {
             payload["localizationKey"] = localizationKey
@@ -318,23 +318,23 @@ enum WatchMessagingPayloadCodec {
         transport: String) throws -> WatchMessagingInboundEvent?
     {
         switch payload["type"] as? String {
-        case OpenClawWatchPayloadType.chatDeliveryCommand.rawValue:
-            try .chatDeliveryCommand(OpenClawWatchChatDeliveryCodec.decodeCommandStructure(payload))
-        case OpenClawWatchPayloadType.chatDeliveryReceiptAck.rawValue:
-            try .chatDeliveryReceiptAck(OpenClawWatchChatDeliveryCodec.decodeReceiptAck(payload))
-        case OpenClawWatchPayloadType.reply.rawValue:
+        case CarapaceWatchPayloadType.chatDeliveryCommand.rawValue:
+            try .chatDeliveryCommand(CarapaceWatchChatDeliveryCodec.decodeCommandStructure(payload))
+        case CarapaceWatchPayloadType.chatDeliveryReceiptAck.rawValue:
+            try .chatDeliveryReceiptAck(CarapaceWatchChatDeliveryCodec.decodeReceiptAck(payload))
+        case CarapaceWatchPayloadType.reply.rawValue:
             .legacyChat
-        case OpenClawWatchPayloadType.execApprovalResolve.rawValue:
+        case CarapaceWatchPayloadType.execApprovalResolve.rawValue:
             self.parseExecApprovalResolvePayload(payload, transport: transport)
                 .map(WatchMessagingInboundEvent.execApprovalResolve)
-        case OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue:
+        case CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue:
             self.parseExecApprovalSnapshotRequestPayload(payload, transport: transport)
                 .map(WatchMessagingInboundEvent.execApprovalSnapshotRequest)
-        case OpenClawWatchPayloadType.appSnapshotRequest.rawValue:
+        case CarapaceWatchPayloadType.appSnapshotRequest.rawValue:
             self.parseAppSnapshotRequestPayload(payload, transport: transport)
                 .map(WatchMessagingInboundEvent.appSnapshotRequest)
-        case OpenClawWatchPayloadType.appCommand.rawValue:
-            if self.nonEmpty(payload["command"] as? String) == OpenClawWatchAppCommand.sendChat.rawValue {
+        case CarapaceWatchPayloadType.appCommand.rawValue:
+            if self.nonEmpty(payload["command"] as? String) == CarapaceWatchAppCommand.sendChat.rawValue {
                 .legacyChat
             } else {
                 self.parseAppCommandPayload(payload, transport: transport)
@@ -349,12 +349,12 @@ enum WatchMessagingPayloadCodec {
         _ payload: [String: Any],
         transport: String) -> WatchExecApprovalResolveEvent?
     {
-        guard (payload["type"] as? String) == OpenClawWatchPayloadType.execApprovalResolve.rawValue else {
+        guard (payload["type"] as? String) == CarapaceWatchPayloadType.execApprovalResolve.rawValue else {
             return nil
         }
         guard let approvalId = ExecApprovalIdentifier.exact(payload["approvalId"] as? String),
               let rawDecision = nonEmpty(payload["decision"] as? String),
-              let decision = OpenClawWatchExecApprovalDecision(rawValue: rawDecision)
+              let decision = CarapaceWatchExecApprovalDecision(rawValue: rawDecision)
         else {
             return nil
         }
@@ -374,7 +374,7 @@ enum WatchMessagingPayloadCodec {
         _ payload: [String: Any],
         transport: String) -> WatchExecApprovalSnapshotRequestEvent?
     {
-        guard (payload["type"] as? String) == OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue else {
+        guard (payload["type"] as? String) == CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue else {
             return nil
         }
         // Version-skew compat: shipped Watch binaries request snapshots without requestId or
@@ -423,7 +423,7 @@ enum WatchMessagingPayloadCodec {
         _ payload: [String: Any],
         transport: String) -> WatchAppSnapshotRequestEvent?
     {
-        guard (payload["type"] as? String) == OpenClawWatchPayloadType.appSnapshotRequest.rawValue else {
+        guard (payload["type"] as? String) == CarapaceWatchPayloadType.appSnapshotRequest.rawValue else {
             return nil
         }
         let requestId = self.nonEmpty(payload["requestId"] as? String) ?? UUID().uuidString
@@ -438,11 +438,11 @@ enum WatchMessagingPayloadCodec {
         _ payload: [String: Any],
         transport: String) -> WatchAppCommandEvent?
     {
-        guard (payload["type"] as? String) == OpenClawWatchPayloadType.appCommand.rawValue else {
+        guard (payload["type"] as? String) == CarapaceWatchPayloadType.appCommand.rawValue else {
             return nil
         }
         guard let rawCommand = nonEmpty(payload["command"] as? String),
-              let command = OpenClawWatchAppCommand(rawValue: rawCommand)
+              let command = CarapaceWatchAppCommand(rawValue: rawCommand)
         else {
             return nil
         }

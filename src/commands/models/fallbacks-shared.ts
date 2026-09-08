@@ -3,7 +3,7 @@ import { formatCliCommand } from "../../cli/command-format.js";
 import { logConfigUpdated } from "../../config/logging.js";
 import { resolveAgentModelFallbackValues, toAgentModelListLike } from "../../config/model-input.js";
 import type { AgentModelEntryConfig } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { type RuntimeEnv, writeRuntimeJson, writeRuntimeStdout } from "../../runtime.js";
 import { loadModelsConfig } from "./load-config.js";
 import {
@@ -23,14 +23,14 @@ function listCommandForFallbackKey(key: DefaultsFallbackKey): string {
   return key === "imageModel" ? "models image-fallbacks list" : "models fallbacks list";
 }
 
-function getFallbacks(cfg: OpenClawConfig, key: DefaultsFallbackKey): string[] {
+function getFallbacks(cfg: CarapaceConfig, key: DefaultsFallbackKey): string[] {
   return resolveAgentModelFallbackValues(cfg.agents?.defaults?.[key]);
 }
 
 function patchDefaultsFallbacks(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: { key: DefaultsFallbackKey; fallbacks: string[]; models?: Record<string, unknown> },
-): OpenClawConfig {
+): CarapaceConfig {
   const existing = toAgentModelListLike(cfg.agents?.defaults?.[params.key]);
   return {
     ...cfg,
@@ -145,7 +145,7 @@ export async function removeFallbackCommand(
 
       if (filtered.length === existing.length) {
         throw new Error(
-          `${params.notFoundLabel} not found: ${targetKey}. Run ${formatCliCommand(`openclaw ${listCommandForFallbackKey(params.key)}`)} to see configured fallbacks.`,
+          `${params.notFoundLabel} not found: ${targetKey}. Run ${formatCliCommand(`carapace ${listCommandForFallbackKey(params.key)}`)} to see configured fallbacks.`,
         );
       }
 

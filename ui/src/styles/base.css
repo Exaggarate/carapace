@@ -299,7 +299,7 @@
      the calc() above — the tokens stay usable by consumers that must not
      inherit the widened surface treatment (excluded selectors, the tokens
      exported to embedded MCP apps in mcp-app-theme.ts). */
-  --openclaw-corner-radius-scale: 1;
+  --carapace-corner-radius-scale: 1;
 
   /* Menu items stay optically parallel to their panel edge: radius 6 + padding 4
      = panel radius 10. Shared knobs keep transient menus from drifting again. */
@@ -351,7 +351,7 @@
    flattens the ends of anything fully rounded, and pills, circles, avatars and
    status dots are a third of this app's corners. Add new shared surfaces to
    the list below; leaving one out only keeps its current corner.
-   --openclaw-corner-radius-scale flips to 1.25 at :root — that part is a
+   --carapace-corner-radius-scale flips to 1.25 at :root — that part is a
    harmless capability signal, not a radius: nothing in the canonical
    --radius-* chain reads it, so it cannot widen an unrelated consumer.
    Every rule below sets border-radius directly instead of redeclaring a
@@ -374,7 +374,7 @@
    !important of its own. */
 @supports (corner-shape: superellipse(1.5)) {
   :root {
-    --openclaw-corner-radius-scale: 1.25;
+    --carapace-corner-radius-scale: 1.25;
   }
 
   .exec-approval-card.exec-approval-card,
@@ -384,7 +384,7 @@
   .card.card,
   .settings-group.settings-group,
   .option-card__choice.option-card__choice {
-    border-radius: calc(14px * var(--openclaw-corner-radius-scale));
+    border-radius: calc(14px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 
@@ -399,12 +399,12 @@
   .btn.btn,
   .settings-input.settings-input,
   .field.field :is(input, textarea, select) {
-    border-radius: calc(10px * var(--openclaw-corner-radius-scale));
+    border-radius: calc(10px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 
   .code-block-wrapper.code-block-wrapper {
-    border-radius: calc(14px * var(--openclaw-corner-radius-scale));
+    border-radius: calc(14px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 
@@ -413,7 +413,7 @@
      superellipse flattens a fully rounded end. */
   .option-card.option-card,
   .agent-chat__input.agent-chat__input {
-    border-radius: calc(20px * var(--openclaw-corner-radius-scale));
+    border-radius: calc(20px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 
@@ -426,8 +426,8 @@
      .card's own squircle corner at the seam, so they need the same shape,
      not just the same radius, to actually match it. */
   .agent-chat__search-bar.agent-chat__search-bar {
-    border-radius: 0 0 calc(14px * var(--openclaw-corner-radius-scale))
-      calc(14px * var(--openclaw-corner-radius-scale));
+    border-radius: 0 0 calc(14px * var(--carapace-corner-radius-scale))
+      calc(14px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 
@@ -435,12 +435,12 @@
      their home rule (components.css); only the --radius-xl portion scales,
      matching that intent. */
   .md-preview-dialog__panel.md-preview-dialog__panel {
-    border-radius: calc(20px * var(--openclaw-corner-radius-scale) + 6px);
+    border-radius: calc(20px * var(--carapace-corner-radius-scale) + 6px);
     corner-shape: superellipse(1.5);
   }
 
   .md-preview-dialog__reader.md-preview-dialog__reader {
-    border-radius: calc(20px * var(--openclaw-corner-radius-scale) + 2px);
+    border-radius: calc(20px * var(--carapace-corner-radius-scale) + 2px);
     corner-shape: superellipse(1.5);
   }
 
@@ -450,7 +450,7 @@
   .slash-menu.slash-menu,
   .chat-reply-context-menu.chat-reply-context-menu,
   .chat-selection-popup.chat-selection-popup {
-    border-radius: calc(10px * var(--openclaw-corner-radius-scale));
+    border-radius: calc(10px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 
@@ -461,7 +461,7 @@
   .slash-menu-item.slash-menu-item,
   .chat-reply-context-menu.chat-reply-context-menu button,
   .chat-selection-popup.chat-selection-popup button {
-    border-radius: calc(10px * var(--openclaw-corner-radius-scale) - 4px);
+    border-radius: calc(10px * var(--carapace-corner-radius-scale) - 4px);
     corner-shape: superellipse(1.5);
   }
 
@@ -478,7 +478,7 @@
   wa-dropdown,
   wa-popover,
   wa-select {
-    --menu-radius: calc(10px * var(--openclaw-corner-radius-scale));
+    --menu-radius: calc(10px * var(--carapace-corner-radius-scale));
     --menu-item-radius: calc(var(--menu-radius) - var(--menu-padding));
   }
 
@@ -494,7 +494,7 @@
   wa-popover::part(body),
   wa-select::part(listbox),
   wa-select::part(combobox) {
-    border-radius: calc(10px * var(--openclaw-corner-radius-scale)) !important;
+    border-radius: calc(10px * var(--carapace-corner-radius-scale)) !important;
     corner-shape: superellipse(1.5);
   }
 }
@@ -789,7 +789,7 @@ html.theme-transition::view-transition-new(theme) {
   }
 }
 
-openclaw-app {
+carapace-app {
   display: block;
   position: relative;
   z-index: 1;
@@ -797,7 +797,7 @@ openclaw-app {
 }
 
 /* Empty contribution hosts must not add layout boxes before the plugin runtime loads. */
-openclaw-plugin-contributions {
+carapace-plugin-contributions {
   display: contents;
 }
 

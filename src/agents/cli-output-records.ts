@@ -1,7 +1,7 @@
-import { extractBalancedJsonFragments, safeParseJsonRecord } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { extractBalancedJsonFragments, safeParseJsonRecord } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { CliBackendConfig } from "../plugins/cli-backend.types.js";
 import type { CliOutput, CliTerminalFailure, CliUsage } from "./cli-output-contracts.js";
 import { normalizeUsage, type UsageLike } from "./usage.js";

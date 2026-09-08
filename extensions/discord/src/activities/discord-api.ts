@@ -1,5 +1,5 @@
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 
 export const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
 export const DISCORD_USER_URL = "https://discord.com/api/v10/users/@me";

@@ -219,7 +219,7 @@ describe("canonical session message recovery", () => {
         message: {
           role: "user",
           content: [{ type: "text", text: "Incomplete imported prompt" }],
-          __openclaw: { importedFrom: "claude-cli", externalId: "source-local-user" },
+          __carapace: { importedFrom: "claude-cli", externalId: "source-local-user" },
         },
       },
     });
@@ -240,14 +240,14 @@ describe("canonical session message recovery", () => {
         message: {
           role: "user",
           content: [{ type: "text", text: "Persisted imported prompt" }],
-          __openclaw: { importedFrom: "claude-cli", externalId: "source-local-user", seq: 3 },
+          __carapace: { importedFrom: "claude-cli", externalId: "source-local-user", seq: 3 },
         },
       },
     });
 
     expect(state.chatMessages).toHaveLength(1);
     expect(state.chatMessages[0]).toMatchObject({
-      __openclaw: { importedFrom: "claude-cli", externalId: "source-local-user", seq: 3 },
+      __carapace: { importedFrom: "claude-cli", externalId: "source-local-user", seq: 3 },
     });
   });
 
@@ -276,12 +276,12 @@ describe("canonical session message recovery", () => {
             role: "assistant",
             content: [{ type: "text", text }],
             idempotencyKey: `codex-app-server:thread:turn:commentary:${itemId}`,
-            __openclaw: {
+            __carapace: {
               mirrorOrigin: "codex-app-server",
               ...(ownerRunId ? { runId: ownerRunId } : {}),
             },
             timestamp: 1,
-            openclawStreamFallback: {
+            carapaceStreamFallback: {
               replacementText: text,
               source: "segment",
               itemId,
@@ -458,7 +458,7 @@ describe("canonical session message recovery", () => {
             message: {
               role: "assistant",
               content: [{ type: "text", text }],
-              __openclaw: { id: "durable-answer", seq: 2, runId },
+              __carapace: { id: "durable-answer", seq: 2, runId },
             },
           },
         });
@@ -583,7 +583,7 @@ describe("canonical session message recovery", () => {
             role: "assistant",
             content: [{ type: "text", text }],
             ...(itemId
-              ? { openclawStreamFallback: { itemId, source: "segment", replacementText: text } }
+              ? { carapaceStreamFallback: { itemId, source: "segment", replacementText: text } }
               : {}),
           },
         },
@@ -608,7 +608,7 @@ describe("canonical session message recovery", () => {
       role: "user",
       content: [{ type: "text", text: "Original prompt" }],
       timestamp: 100,
-      __openclaw: {
+      __carapace: {
         id: "original-user",
         idempotencyKey: `${activeRunId}:user`,
         seq: 1,
@@ -649,7 +649,7 @@ describe("canonical session message recovery", () => {
         role: "user",
         content: [{ type: "text", text: "Steer prompt" }],
         timestamp: 50,
-        __openclaw: { idempotencyKey: `${steerRunId}:user` },
+        __carapace: { idempotencyKey: `${steerRunId}:user` },
       },
     });
     state.chatRunId = steerRunId;
@@ -667,7 +667,7 @@ describe("canonical session message recovery", () => {
           role: "user",
           content: [{ type: "text", text: "Steer prompt" }],
           timestamp: 50,
-          __openclaw: {
+          __carapace: {
             id: "persisted-steer-user",
             idempotencyKey: `${steerRunId}:user`,
             seq: 2,
@@ -769,16 +769,16 @@ describe("canonical session message recovery", () => {
     const prompt = {
       role: "user",
       content: [{ type: "text", text: "Original prompt" }],
-      __openclaw: { id: "original-user", idempotencyKey: `${activeRunId}:user`, seq: 1 },
+      __carapace: { id: "original-user", idempotencyKey: `${activeRunId}:user`, seq: 1 },
     };
     const persistedReply = {
       role: "assistant",
       content: [{ type: "text", text: replyText }],
-      __openclaw: persistedReplyIdentity,
+      __carapace: persistedReplyIdentity,
       ...(scenario.aborted
         ? {
             idempotencyKey: `${activeRunId}:assistant`,
-            openclawAbort: { aborted: true, origin: "placement-abandon", runId: activeRunId },
+            carapaceAbort: { aborted: true, origin: "placement-abandon", runId: activeRunId },
           }
         : {}),
     };
@@ -840,7 +840,7 @@ describe("canonical session message recovery", () => {
     // so the transcript itself has to hold exactly one copy of the reply.
     const canonicalReply = {
       ...persistedReply,
-      __openclaw: {
+      __carapace: {
         ...persistedReplyIdentity,
         ...(scenario.producerOwned ? { runId: activeRunId } : {}),
         ...(scenario.aborted ? { idempotencyKey: `${activeRunId}:assistant` } : {}),
@@ -863,7 +863,7 @@ describe("canonical session message recovery", () => {
       role: "user",
       content: [{ type: "text", text: "Continue interrupted work 2." }],
       timestamp: 1_700_000_000_000,
-      __openclaw: {
+      __carapace: {
         id: "placement-user-2",
         idempotencyKey: "abandoned-placement-run-2:user",
         seq: 1,
@@ -873,9 +873,9 @@ describe("canonical session message recovery", () => {
       role: "assistant",
       content: [{ type: "text", text: "Gateway-synced device response 2." }],
       timestamp: 1_700_000_000_001,
-      __openclaw: { id: "placement-aborted-assistant-2", seq: 2 },
+      __carapace: { id: "placement-aborted-assistant-2", seq: 2 },
       idempotencyKey: "abandoned-placement-run-2:assistant",
-      openclawAbort: {
+      carapaceAbort: {
         aborted: true,
         origin: "placement-abandon",
         runId: "abandoned-placement-run-2",
@@ -886,14 +886,14 @@ describe("canonical session message recovery", () => {
       role: "user",
       content: [{ type: "text", text: promptText }],
       timestamp: 1_700_000_000_002,
-      __openclaw: { id: "placement-local-user-2", idempotencyKey: `${runId}:user`, seq: 3 },
+      __carapace: { id: "placement-local-user-2", idempotencyKey: `${runId}:user`, seq: 3 },
     };
     const localFinalIdentity = { id: "placement-local-final-2", seq: 4 };
     const localFinal = {
       role: "assistant",
       content: [{ type: "text", text: replyText }],
       timestamp: 1_700_000_000_003,
-      __openclaw: localFinalIdentity,
+      __carapace: localFinalIdentity,
     };
     // Begin at the settled abandonment snapshot; the new prompt still belongs
     // to the outbox, not history. Keep the original fixture's Gateway timestamps.
@@ -991,13 +991,13 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Finish the dashboard task" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const persistedReply = {
         role: "assistant",
         content: [{ type: "text", text: replyText }],
         stopReason: "stop",
-        __openclaw: { id: "reply-1", runId, seq: 2 },
+        __carapace: { id: "reply-1", runId, seq: 2 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt, persistedReply],
@@ -1073,13 +1073,13 @@ describe("canonical session message recovery", () => {
     const prompt = {
       role: "user",
       content: [{ type: "text", text: "Finish after the tool call" }],
-      __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+      __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
     };
     const persistedReply = {
       role: "assistant",
       content: [{ type: "text", text: "The durable final arrived after the snapshot." }],
       stopReason: "stop",
-      __openclaw: { id: "reply-1", runId, seq: 2 },
+      __carapace: { id: "reply-1", runId, seq: 2 },
     };
     const request = vi.fn().mockResolvedValue({
       messages: [prompt, persistedReply],
@@ -1123,13 +1123,13 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Show the generated image" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const persistedReply = {
         role: "assistant",
         content: [{ type: "image", url: "data:image/png;base64,aW1hZ2U=" }],
         stopReason: "stop",
-        __openclaw: { id: "reply-1", runId, seq: 2 },
+        __carapace: { id: "reply-1", runId, seq: 2 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt, persistedReply],
@@ -1173,7 +1173,7 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Finish without persisting a reply" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt],
@@ -1227,7 +1227,7 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Finish before I switch sessions" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt],
@@ -1271,7 +1271,7 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Finish before I switch global agents" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt],
@@ -1329,7 +1329,7 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Finish before the next run starts" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt],
@@ -1374,7 +1374,7 @@ describe("canonical session message recovery", () => {
       const prompt = {
         role: "user",
         content: [{ type: "text", text: "Finish before the next run completes" }],
-        __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const request = vi.fn().mockResolvedValue({
         messages: [prompt],
@@ -1414,7 +1414,7 @@ describe("canonical session message recovery", () => {
           message: {
             role: "assistant",
             content: [{ type: "text", text: "Replacement finished." }],
-            __openclaw: { id: "replacement-reply", runId: replacementRunId, seq: 2 },
+            __carapace: { id: "replacement-reply", runId: replacementRunId, seq: 2 },
           },
         },
       });
@@ -1438,17 +1438,17 @@ describe("canonical session message recovery", () => {
         const prompt = {
           role: "user",
           content: [{ type: "text", text: "Finish after loading older history" }],
-          __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 2 },
+          __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 2 },
         };
         const historicalReply = {
           role: "assistant",
           content: [{ type: "text", text: "An older durable reply." }],
-          __openclaw: { id: "historical-reply", runId: historicalRunId, seq: 1 },
+          __carapace: { id: "historical-reply", runId: historicalRunId, seq: 1 },
         };
         // Public history projects tool blocks, not the stored empty-content activity fact.
         const nestedActivity = {
           role: "custom",
-          customType: "openclaw.nested-tool.v1",
+          customType: "carapace.nested-tool.v1",
           display: true,
           excludeFromContext: true,
           runId,
@@ -1479,7 +1479,7 @@ describe("canonical session message recovery", () => {
               content: [{ type: "text", text: "Nested read completed." }],
             },
           ],
-          __openclaw: { id: "nested-activity-1", seq: 3 },
+          __carapace: { id: "nested-activity-1", seq: 3 },
         };
         const precedingRow = historyKind === "another-run" ? historicalReply : nestedActivity;
         const beforeFinal =
@@ -1489,7 +1489,7 @@ describe("canonical session message recovery", () => {
           role: "assistant",
           content: [{ type: "text", text: replyText }],
           stopReason: "stop",
-          __openclaw: { id: "current-reply", runId, seq: historyKind === "another-run" ? 3 : 4 },
+          __carapace: { id: "current-reply", runId, seq: historyKind === "another-run" ? 3 : 4 },
         };
         const sessionInfo = {
           key: "agent:main:main",
@@ -1549,13 +1549,13 @@ describe("canonical session message recovery", () => {
     const prompt = {
       role: "user",
       content: [{ type: "text", text: "Finish after the stale snapshot" }],
-      __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+      __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
     };
     const persistedReply = {
       role: "assistant",
       content: [{ type: "text", text: "The post-final snapshot contains this reply." }],
       stopReason: "stop",
-      __openclaw: { id: "reply-1", runId, seq: 2 },
+      __carapace: { id: "reply-1", runId, seq: 2 },
     };
     const staleHistory = createDeferred<ChatHistoryResult>();
     const freshHistory = createDeferred<ChatHistoryResult>();
@@ -1667,7 +1667,7 @@ describe("canonical session message recovery", () => {
     const prompt = {
       role: "user",
       content: [{ type: "text", text: "Finish the dashboard task" }],
-      __openclaw: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
+      __carapace: { id: "prompt-1", idempotencyKey: `${runId}:user`, seq: 1 },
     };
     const request = vi.fn();
     const { state } = createSessionEventState({
@@ -1708,7 +1708,7 @@ describe("canonical session message recovery", () => {
     const olderReply = {
       role: "assistant",
       content: [{ type: "text", text: "Answer from the older run." }],
-      __openclaw: { id: "older-reply", seq: 2 },
+      __carapace: { id: "older-reply", seq: 2 },
     };
     const { state } = createSessionEventState({
       chatMessages: [],
@@ -1757,7 +1757,7 @@ describe("canonical session message recovery", () => {
     const originalPrompt = {
       role: "user",
       content: [{ type: "text", text: "Original prompt" }],
-      __openclaw: {
+      __carapace: {
         id: "original-user",
         idempotencyKey: `${activeRunId}:user`,
         seq: 1,
@@ -1798,7 +1798,7 @@ describe("canonical session message recovery", () => {
         message: {
           role: "user",
           content: [{ type: "text", text: "Queued follow-up" }],
-          __openclaw: {
+          __carapace: {
             id: "ordinary-queued-user",
             idempotencyKey: "queued-run:user",
             seq: 2,
@@ -1854,7 +1854,7 @@ describe("canonical session message recovery", () => {
         message: {
           role: "user",
           content: "Steer A",
-          __openclaw: {
+          __carapace: {
             id: "steer-b",
             idempotencyKey: "run-b:user",
             seq: 1,
@@ -1875,7 +1875,7 @@ describe("canonical session message recovery", () => {
       role: "user",
       content: [{ type: "text", text: "Original prompt" }],
       timestamp: 100,
-      __openclaw: {
+      __carapace: {
         id: "original-user",
         idempotencyKey: `${activeRunId}:user`,
         seq: 1,
@@ -1916,7 +1916,7 @@ describe("canonical session message recovery", () => {
           role: "user",
           content: [{ type: "text", text: "Queued follow-up" }],
           timestamp: 200,
-          __openclaw: {
+          __carapace: {
             id: "ordinary-queued-user",
             idempotencyKey: "queued-run:user",
             seq: 2,
@@ -1937,7 +1937,7 @@ describe("canonical session message recovery", () => {
           role: "user",
           content: [{ type: "text", text: "Steer prompt" }],
           timestamp: 300,
-          __openclaw: {
+          __carapace: {
             id: "persisted-steer-user",
             idempotencyKey: "steer-run:user",
             seq: 3,
@@ -1974,17 +1974,17 @@ describe("canonical session message recovery", () => {
     const previousUser = {
       role: "user",
       content: [{ type: "text", text: "What are groups?" }],
-      __openclaw: { id: "previous-user", idempotencyKey: "previous-run:user", seq: 1 },
+      __carapace: { id: "previous-user", idempotencyKey: "previous-run:user", seq: 1 },
     };
     const currentUser = {
       role: "user",
       content: [{ type: "text", text: "Why were my sessions missing?" }],
-      __openclaw: { id: "current-user", idempotencyKey: "current-run:user", seq: 3 },
+      __carapace: { id: "current-user", idempotencyKey: "current-run:user", seq: 3 },
     };
     const persistedFinal = {
       role: "assistant",
       content: [{ type: "text", text: "Groups organize conversations." }],
-      __openclaw: { id: "previous-final", seq: 2 },
+      __carapace: { id: "previous-final", seq: 2 },
     };
     const { state } = createSessionEventState({
       chatMessages: [previousUser, currentUser],
@@ -2012,7 +2012,7 @@ describe("canonical session message recovery", () => {
     ]);
     expect(state.chatMessages[1]).toMatchObject({
       content: persistedFinal.content,
-      __openclaw: { id: "previous-final", seq: 2 },
+      __carapace: { id: "previous-final", seq: 2 },
     });
 
     handlePageGatewayEvent(state, {
@@ -2042,7 +2042,7 @@ describe("canonical session message recovery", () => {
     const currentUser = {
       role: "user",
       content: [{ type: "text", text: "Current prompt" }],
-      __openclaw: { id: "current-user", idempotencyKey: "current-run:user", seq: 1 },
+      __carapace: { id: "current-user", idempotencyKey: "current-run:user", seq: 1 },
     };
     const { state } = createSessionEventState({
       chatMessages: [currentUser],
@@ -2062,7 +2062,7 @@ describe("canonical session message recovery", () => {
         message: {
           role: "assistant",
           content: [{ type: "text", text: "Current final reply" }],
-          __openclaw: { id: "current-final", seq: 2 },
+          __carapace: { id: "current-final", seq: 2 },
         },
       },
     });
@@ -2103,7 +2103,7 @@ describe("canonical session message recovery", () => {
           message: {
             role: "user",
             content: [{ type: "text", text: "shared prompt" }],
-            __openclaw: {
+            __carapace: {
               id: `canonical-${client}-same-text`,
               idempotencyKey: `${client}-same-text-run:user`,
               seq: index + 1,
@@ -2129,8 +2129,8 @@ describe("canonical session message recovery", () => {
 
     expect(request).toHaveBeenCalledOnce();
     expect(state.chatMessages).toMatchObject([
-      { __openclaw: { id: "canonical-web-same-text", seq: 1 } },
-      { __openclaw: { id: "canonical-tui-same-text", seq: 2 } },
+      { __carapace: { id: "canonical-web-same-text", seq: 1 } },
+      { __carapace: { id: "canonical-tui-same-text", seq: 2 } },
     ]);
   });
 
@@ -2139,7 +2139,7 @@ describe("canonical session message recovery", () => {
     const pendingUser = {
       role: "user",
       content: [{ type: "text", text: "Pending before reset" }],
-      __openclaw: { idempotencyKey: "pre-reset-pending:user" },
+      __carapace: { idempotencyKey: "pre-reset-pending:user" },
     };
     const { state } = createSessionEventState({
       connected: false,
@@ -2157,7 +2157,7 @@ describe("canonical session message recovery", () => {
           message: {
             role: "user",
             content: [{ type: "text", text }],
-            __openclaw: { id, idempotencyKey: `${id}:user`, seq: 1 },
+            __carapace: { id, idempotencyKey: `${id}:user`, seq: 1 },
           },
         },
       });
@@ -2180,7 +2180,7 @@ describe("canonical session message recovery", () => {
     deliverUser("post-reset-live", "Live after reset");
     expect(state.chatMessages).toHaveLength(1);
     expect(state.chatMessages[0]).toMatchObject({
-      __openclaw: { id: "post-reset-live", seq: 1 },
+      __carapace: { id: "post-reset-live", seq: 1 },
     });
   });
 
@@ -2189,7 +2189,7 @@ describe("canonical session message recovery", () => {
     const selectedUser = {
       role: "user",
       content: [{ type: "text", text: "Keep this agent's conversation" }],
-      __openclaw: { id: "selected-user", seq: 1 },
+      __carapace: { id: "selected-user", seq: 1 },
     };
     const { state } = createSessionEventState({
       connected: false,
@@ -2309,7 +2309,7 @@ describe("canonical session message recovery", () => {
     const selectedUser = {
       role: "user",
       content: [{ type: "text", text: "Keep this pending transcript" }],
-      __openclaw: { idempotencyKey: "still-pending:user" },
+      __carapace: { idempotencyKey: "still-pending:user" },
     };
     const { state } = createSessionEventState({
       connected: false,
@@ -2440,7 +2440,7 @@ describe("canonical session message recovery", () => {
           message: {
             role: "assistant",
             content: [{ type: "text", text: "Finished" }],
-            __openclaw: { id: "terminal-message", seq: 2 },
+            __carapace: { id: "terminal-message", seq: 2 },
           },
         },
       },
@@ -3129,26 +3129,26 @@ describe("ChatStateController render lifecycle", () => {
     expect(refreshSessionPullRequests).not.toHaveBeenCalled();
 
     // Issue links never carry chips.
-    delta("see https://github.com/openclaw/openclaw/issues/42 ");
+    delta("see https://github.com/Exaggarate/carapace/issues/42 ");
     expect(refreshSessionPullRequests).not.toHaveBeenCalled();
 
-    delta("opened https://github.com/openclaw/openclaw/pull/113840 for review ");
+    delta("opened https://github.com/Exaggarate/carapace/pull/113840 for review ");
     expect(refreshSessionPullRequests).toHaveBeenCalledTimes(1);
     expect(refreshSessionPullRequests).toHaveBeenCalledWith({ refresh: true });
 
     // One refresh reloads all of the branch's PRs; further links in the same
     // run must not spend more GitHub quota.
-    delta("also https://github.com/openclaw/openclaw/pull/113900 ");
+    delta("also https://github.com/Exaggarate/carapace/pull/113900 ");
     expect(refreshSessionPullRequests).toHaveBeenCalledTimes(1);
 
     // Streaming may split a URL across chunks; the rolling tail rejoins it.
-    delta("continuing https://github.com/openclaw/openclaw/pu", "run-2");
+    delta("continuing https://github.com/Exaggarate/carapace/pu", "run-2");
     expect(refreshSessionPullRequests).toHaveBeenCalledTimes(1);
     delta("ll/113901 done", "run-2");
     expect(refreshSessionPullRequests).toHaveBeenCalledTimes(2);
 
     // A later run announcing the same PR (e.g. its merge) refreshes again.
-    delta("merged https://github.com/openclaw/openclaw/pull/113840 at last", "run-3");
+    delta("merged https://github.com/Exaggarate/carapace/pull/113840 at last", "run-3");
     expect(refreshSessionPullRequests).toHaveBeenCalledTimes(3);
   });
 
@@ -3423,12 +3423,12 @@ describe("session pull request refresh", () => {
   it.each([
     {
       name: "requests an authoritative refresh after a final assistant PR link",
-      text: "Opened `https://github.com/openclaw/openclaw/pull/111532`.",
+      text: "Opened `https://github.com/Exaggarate/carapace/pull/111532`.",
       refresh: true,
     },
     {
       name: "refreshes for a visible same-session final from another run",
-      text: "Opened https://github.com/openclaw/openclaw/pull/111532",
+      text: "Opened https://github.com/Exaggarate/carapace/pull/111532",
       activeRunId: "active-run",
       runId: "announcement-run",
       refresh: true,
@@ -3438,17 +3438,17 @@ describe("session pull request refresh", () => {
       text: "Finished the background task.",
       activeRunId: "active-run",
       runId: "announcement-run",
-      stream: "Opened https://github.com/openclaw/openclaw/pull/111532",
+      stream: "Opened https://github.com/Exaggarate/carapace/pull/111532",
       refresh: false,
     },
     {
       name: "does not refresh for an issue link",
-      text: "Tracked in https://github.com/openclaw/openclaw/issues/111532.",
+      text: "Tracked in https://github.com/Exaggarate/carapace/issues/111532.",
       refresh: false,
     },
     {
       name: "does not refresh for another session's PR announcement",
-      text: "Opened https://github.com/openclaw/openclaw/pull/111532",
+      text: "Opened https://github.com/Exaggarate/carapace/pull/111532",
       sessionKey: "agent:main:other",
       refresh: false,
     },
@@ -3518,7 +3518,7 @@ describe("image lightbox lifecycle", () => {
       ),
       container,
     );
-    const player = container.querySelector("openclaw-chat-video-player") as HTMLElement & {
+    const player = container.querySelector("carapace-chat-video-player") as HTMLElement & {
       onExpand: (src: string) => void;
     };
     player.onExpand(source);

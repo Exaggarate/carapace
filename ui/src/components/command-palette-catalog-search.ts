@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
 import type {
   AgentsListResult,
@@ -167,7 +167,7 @@ function getCommandPaletteBaseItems(
       ? [
           {
             id: "panel-custodian",
-            label: t("nav.askOpenClaw"),
+            label: t("nav.askCarapace"),
             icon: "lobster" as const,
             category: "navigation" as const,
             action: "panel:custodian",

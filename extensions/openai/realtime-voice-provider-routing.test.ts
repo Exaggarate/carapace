@@ -26,12 +26,12 @@ vi.mock("ws", () => ({
   default: mocks.FakeWebSocket,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: mocks.fetchWithSsrFGuardMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth")>();
+vi.mock("carapace/plugin-sdk/provider-auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/provider-auth")>();
   return {
     ...actual,
     isProviderAuthProfileConfigured: mocks.isProviderAuthProfileConfiguredMock,
@@ -255,7 +255,7 @@ describe("OpenAI realtime voice provider routing", () => {
   });
 
   it("does not resolve keychain refs during configured checks", () => {
-    vi.stubEnv("OPENAI_API_KEY", "keychain:openclaw:OPENAI_REALTIME_CONFIGURED_TEST");
+    vi.stubEnv("OPENAI_API_KEY", "keychain:carapace:OPENAI_REALTIME_CONFIGURED_TEST");
     const provider = buildOpenAIRealtimeVoiceProvider();
 
     expect(provider.isConfigured({ providerConfig: {} })).toBe(true);
@@ -309,7 +309,7 @@ describe("OpenAI realtime voice provider routing", () => {
       providerConfig: { apiKey: "test-api-key-platform" },
       model: "gpt-live-1",
       agentId: "main",
-      workspaceDir: "/tmp/openclaw-agent-workspace",
+      workspaceDir: "/tmp/carapace-agent-workspace",
       initialItems: [],
       runAgentConsult: vi.fn(async () => ({ text: "Done" })),
     };
@@ -463,7 +463,7 @@ describe("OpenAI realtime voice provider routing", () => {
       providerConfig: { apiKey: "test-api-key-platform" },
       model: "gpt-live-1-mini",
       agentId: "main",
-      workspaceDir: "/tmp/openclaw-agent-workspace",
+      workspaceDir: "/tmp/carapace-agent-workspace",
       initialItems: [],
       runAgentConsult: vi.fn(async () => ({ text: "Done" })),
     };
@@ -510,7 +510,7 @@ describe("OpenAI realtime voice provider routing", () => {
       providerConfig: { apiKey: "test-api-key-platform" },
       model: OPAQUE_REALTIME_MODEL,
       agentId: "main",
-      workspaceDir: "/tmp/openclaw-agent-workspace",
+      workspaceDir: "/tmp/carapace-agent-workspace",
       initialItems: [],
       runAgentConsult: vi.fn(async () => ({ text: "Done" })),
     } as never);
@@ -540,7 +540,7 @@ describe("OpenAI realtime voice provider routing", () => {
       providerConfig: { apiKey: "test-api-key-platform" },
       model: "gpt-live-1-codex",
       agentId: "main",
-      workspaceDir: "/tmp/openclaw-agent-workspace",
+      workspaceDir: "/tmp/carapace-agent-workspace",
       initialItems: [],
       runAgentConsult: vi.fn(async () => ({ text: "Done" })),
     };
@@ -610,7 +610,7 @@ describe("OpenAI realtime voice provider routing", () => {
   it("advertises GA Gateway control from the requested agent's Platform auth", () => {
     isProviderAuthProfileConfiguredMock.mockImplementation(
       ({ agentDir, profileTypes }: { agentDir?: string; profileTypes?: readonly string[] }) =>
-        agentDir === "/tmp/openclaw-molty-agent" && profileTypes?.includes("api_key") === true,
+        agentDir === "/tmp/carapace-molty-agent" && profileTypes?.includes("api_key") === true,
     );
     const { broker } = createQuicksilverBrowserBrokerFixture();
     const provider = buildOpenAIRealtimeVoiceProvider({
@@ -619,8 +619,8 @@ describe("OpenAI realtime voice provider routing", () => {
     const cfg = {
       agents: {
         list: [
-          { id: "helper", agentDir: "/tmp/openclaw-helper-agent" },
-          { id: "molty", agentDir: "/tmp/openclaw-molty-agent" },
+          { id: "helper", agentDir: "/tmp/carapace-helper-agent" },
+          { id: "molty", agentDir: "/tmp/carapace-molty-agent" },
         ],
       },
     } as never;
@@ -673,9 +673,9 @@ describe("OpenAI realtime voice provider routing", () => {
       prefixPaddingMs: 240,
       silenceDurationMs: 620,
       reasoningEffort: "low",
-      tools: [createRealtimeTool("openclaw_agent_consult")],
+      tools: [createRealtimeTool("carapace_agent_consult")],
       agentId: "main",
-      workspaceDir: "/tmp/openclaw-agent-workspace",
+      workspaceDir: "/tmp/carapace-agent-workspace",
       initialItems: [],
     };
 
@@ -714,7 +714,7 @@ describe("OpenAI realtime voice provider routing", () => {
             },
             output: { voice: "cedar" },
           },
-          tools: [createRealtimeTool("openclaw_agent_consult")],
+          tools: [createRealtimeTool("carapace_agent_consult")],
           tool_choice: "auto",
           reasoning: { effort: "low" },
         },
@@ -758,7 +758,7 @@ describe("OpenAI realtime voice provider routing", () => {
       }),
       instructions: "Always address the caller as Captain.",
       agentId: "voice-agent",
-      workspaceDir: "/tmp/openclaw-agent-workspace",
+      workspaceDir: "/tmp/carapace-agent-workspace",
       initialItems: [],
       runAgentConsult: vi.fn(async () => ({ text: "Done" })),
     } as never);
@@ -771,7 +771,7 @@ describe("OpenAI realtime voice provider routing", () => {
       createBrowserSession.mock.calls[0]?.[0],
       "quicksilver request",
     );
-    expect(quicksilverRequest.instructions).toMatch(/^You are OpenClaw's realtime voice layer\./);
+    expect(quicksilverRequest.instructions).toMatch(/^You are Carapace's realtime voice layer\./);
     expect(quicksilverRequest.instructions).toContain(
       "Context on the commentary channel is silent background",
     );
@@ -809,7 +809,7 @@ describe("OpenAI realtime voice provider routing", () => {
         providerConfig,
         model: requestedModel,
         agentId: "main",
-        workspaceDir: "/tmp/openclaw-agent-workspace",
+        workspaceDir: "/tmp/carapace-agent-workspace",
         initialItems: [],
         runAgentConsult: vi.fn(async () => ({ text: "Done" })),
       } as never);

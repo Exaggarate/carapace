@@ -7,13 +7,13 @@ import {
 import { wrapToolWithBeforeToolCallHook } from "../agents/agent-tools.before-tool-call.js";
 import { createStubTool } from "../agents/test-helpers/agent-tool-stubs.js";
 import { getRuntimeConfigSnapshot } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getProcessSupervisor } from "../process/supervisor/index.js";
 import type { ManagedRun } from "../process/supervisor/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { agentExecCommand } from "./agent-exec.js";
 
-const baseConfig: OpenClawConfig = {
+const baseConfig: CarapaceConfig = {
   agents: {
     defaults: { systemAgent: { agentId: "operator" } },
     entries: { operator: {}, assistant: {} },

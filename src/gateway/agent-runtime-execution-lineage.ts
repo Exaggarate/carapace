@@ -52,7 +52,7 @@ type ExecutionLineageHandoff = Readonly<{
 }>;
 
 const executionLineageHandoffs = resolveGlobalMap<string, ExecutionLineageHandoff>(
-  Symbol.for("openclaw.agentRuntimeExecutionLineageHandoffs"),
+  Symbol.for("carapace.agentRuntimeExecutionLineageHandoffs"),
   (handoffs) => handoffs.clear(),
 );
 

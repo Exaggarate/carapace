@@ -96,7 +96,7 @@ describe("createApplicationGateway connection phase", () => {
 
   it("passes native client identity and bounded scopes to the gateway client", () => {
     const clientOptions = {
-      clientName: "openclaw-ios" as const,
+      clientName: "carapace-ios" as const,
       mode: "ui" as const,
       platform: "iOS 27.0.0",
       deviceFamily: "iPhone",
@@ -112,14 +112,14 @@ describe("createApplicationGateway connection phase", () => {
 
   it("retires a completed native handoff while keeping stale hello operations fenced", () => {
     const { gateway, current } = createStore({
-      clientOptions: { clientName: "openclaw-ios", mode: "ui" },
+      clientOptions: { clientName: "carapace-ios", mode: "ui" },
     });
     gateway.connect({ bootstrapToken: "synthetic-native-bootstrap", bootstrapProfile: "owner" });
 
     current().opts.onHello?.({
       ...HELLO,
       server: { version: "2026.7.19", buildId: "replacement-build", connId: "native-conn" },
-      pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/hello" },
+      pluginSurfaceUrls: { canvas: "https://canvas.test/__carapace__/cap/hello" },
     });
 
     expect(gateway.snapshot.phase).toBe("reconnecting");
@@ -151,7 +151,7 @@ describe("createApplicationGateway connection phase", () => {
         }),
       );
       const { gateway, current } = createStore({
-        clientOptions: { clientName: "openclaw-ios", mode: "ui" },
+        clientOptions: { clientName: "carapace-ios", mode: "ui" },
       });
       gateway.connect({ bootstrapToken: "synthetic-native-bootstrap", bootstrapProfile: "owner" });
       if (stage === "snapshot") {
@@ -175,7 +175,7 @@ describe("createApplicationGateway connection phase", () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(stage === "probe" ? 1 : 0);
       expect(replace).not.toHaveBeenCalled();
-      expect(sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId")).toBeNull();
+      expect(sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId")).toBeNull();
       gateway.stop();
     },
   );
@@ -249,12 +249,12 @@ describe("createApplicationGateway connection phase", () => {
     current().opts.onHello?.({
       ...HELLO,
       pluginSurfaceUrls: {
-        canvas: "https://canvas.test/__openclaw__/cap/hello",
+        canvas: "https://canvas.test/__carapace__/cap/hello",
       },
     });
 
     expect(gateway.snapshot.canvasPluginSurfaceUrl).toBe(
-      "https://canvas.test/__openclaw__/cap/hello",
+      "https://canvas.test/__carapace__/cap/hello",
     );
 
     current().opts.onClose?.({ code: 1006, reason: "socket lost", willRetry: true });
@@ -272,7 +272,7 @@ describe("createApplicationGateway connection phase", () => {
     first.request.mockReturnValueOnce(firstRefresh);
     first.opts.onHello?.({
       ...HELLO,
-      pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/first" },
+      pluginSurfaceUrls: { canvas: "https://canvas.test/__carapace__/cap/first" },
     });
     await vi.dynamicImportSettled();
     expect(first.request).toHaveBeenCalledOnce();
@@ -280,17 +280,17 @@ describe("createApplicationGateway connection phase", () => {
     gateway.connect();
     current().opts.onHello?.({
       ...HELLO,
-      pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/current" },
+      pluginSurfaceUrls: { canvas: "https://canvas.test/__carapace__/cap/current" },
     });
     resolveRefresh({
       surface: "canvas",
-      pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/stale-refresh" },
+      pluginSurfaceUrls: { canvas: "https://canvas.test/__carapace__/cap/stale-refresh" },
       expiresAtMs: Date.now() + 60_000,
     });
     await vi.dynamicImportSettled();
 
     expect(gateway.snapshot.canvasPluginSurfaceUrl).toBe(
-      "https://canvas.test/__openclaw__/cap/current",
+      "https://canvas.test/__carapace__/cap/current",
     );
     gateway.stop();
   });
@@ -382,7 +382,7 @@ describe("createApplicationGateway connection phase", () => {
   it("restores the newly selected Gateway's saved agent", () => {
     const otherGateway = "wss://other-gateway.example.test";
     localStorage.setItem(
-      `openclaw.control.settings.v1:${otherGateway}`,
+      `carapace.control.settings.v1:${otherGateway}`,
       JSON.stringify({
         gatewayUrl: otherGateway,
         sessionsByGateway: {
@@ -395,7 +395,7 @@ describe("createApplicationGateway connection phase", () => {
       }),
     );
     const { gateway } = createStore({
-      settings: { ...loadSettings(), selectedAgentId: "openclaw" },
+      settings: { ...loadSettings(), selectedAgentId: "carapace" },
     });
 
     gateway.connect({ gatewayUrl: otherGateway });
@@ -410,7 +410,7 @@ describe("createApplicationGateway connection phase", () => {
 
   it("does not carry an agent selection into an unsaved Gateway", () => {
     const { gateway } = createStore({
-      settings: { ...loadSettings(), selectedAgentId: "openclaw" },
+      settings: { ...loadSettings(), selectedAgentId: "carapace" },
     });
 
     gateway.connect({ gatewayUrl: "wss://fresh-gateway.example.test" });
@@ -1095,8 +1095,8 @@ describe("createApplicationGateway connection phase", () => {
   it("does not copy selected-remote settings into an ephemeral document Gateway", () => {
     const pageGateway = "ws://127.0.0.1:18789";
     const remoteGateway = "wss://saved-remote.example.test";
-    const pageSettingsKey = `openclaw.control.settings.v1:${pageGateway}`;
-    const selectionKey = `openclaw.control.currentGateway.v1:${pageGateway}`;
+    const pageSettingsKey = `carapace.control.settings.v1:${pageGateway}`;
+    const selectionKey = `carapace.control.currentGateway.v1:${pageGateway}`;
     const storedPageSettings = JSON.stringify({
       gatewayUrl: pageGateway,
       theme: "claw",
@@ -1131,8 +1131,8 @@ describe("createApplicationGateway connection phase", () => {
     const pageGateway = "ws://127.0.0.1:18789";
     const remoteGateway = "wss://saved-remote.example.test";
     const otherGateway = "wss://other-remote.example.test";
-    const pageSettingsKey = `openclaw.control.settings.v1:${pageGateway}`;
-    const selectionKey = `openclaw.control.currentGateway.v1:${pageGateway}`;
+    const pageSettingsKey = `carapace.control.settings.v1:${pageGateway}`;
+    const selectionKey = `carapace.control.currentGateway.v1:${pageGateway}`;
     const settings = {
       ...loadSettings(),
       gatewayUrl: pageGateway,

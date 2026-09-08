@@ -1,8 +1,8 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 export type GatewayRunRuntimeHooks = {
   releaseManagedProxy?: () => Promise<void> | void;
-  refreshManagedProxy?: (config: OpenClawConfig["proxy"]) => Promise<void> | void;
+  refreshManagedProxy?: (config: CarapaceConfig["proxy"]) => Promise<void> | void;
 };
 
 let activeGatewayRunRuntimeHooks: GatewayRunRuntimeHooks = {};

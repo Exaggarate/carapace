@@ -1,4 +1,4 @@
-/** Tests merging user OpenClaw MCP server config into Claude bundle-MCP overlays. */
+/** Tests merging user Carapace MCP server config into Claude bundle-MCP overlays. */
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
@@ -106,9 +106,9 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
     authMocks.resolveMcpOAuthAccessToken.mockReset();
   });
 
-  it("merges user-configured mcp.servers from OpenClaw config", async () => {
+  it("merges user-configured mcp.servers from Carapace config", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-user-servers-",
+      "carapace-cli-bundle-mcp-user-servers-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -143,9 +143,9 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
     await prepared.cleanup?.();
   });
 
-  it("translates OpenClaw transport field on user mcp.servers into Claude type", async () => {
+  it("translates Carapace transport field on user mcp.servers into Claude type", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-user-servers-transport-",
+      "carapace-cli-bundle-mcp-user-servers-transport-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -191,7 +191,7 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
 
   it("preserves explicit type and still strips transport on user mcp.servers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-user-servers-transport-explicit-",
+      "carapace-cli-bundle-mcp-user-servers-transport-explicit-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -235,7 +235,7 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
     const sessionId = "claude-unavailable-oauth-policy";
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-user-servers-oauth-",
+      "carapace-cli-bundle-mcp-user-servers-oauth-",
     );
     const config = {
       plugins: { enabled: false },
@@ -346,7 +346,7 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
       });
       expect(raw.mcpServers?.docs?.auth).toBeUndefined();
       expect(raw.mcpServers?.docs?.oauth).toBeUndefined();
-      expect(proof.authorizationHeaders.some((value) => value?.includes("OPENCLAW_MCP_AUTH"))).toBe(
+      expect(proof.authorizationHeaders.some((value) => value?.includes("CARAPACE_MCP_AUTH"))).toBe(
         false,
       );
     } finally {
@@ -357,10 +357,10 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
   });
 
   it("user mcp.servers do not override the loopback additionalConfig", async () => {
-    // The OpenClaw loopback server is generated runtime state and must win over
+    // The Carapace loopback server is generated runtime state and must win over
     // user config with the same server name.
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-user-servers-loopback-",
+      "carapace-cli-bundle-mcp-user-servers-loopback-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -375,7 +375,7 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
         plugins: { enabled: false },
         mcp: {
           servers: {
-            openclaw: {
+            carapace: {
               type: "http",
               url: "https://example.com/malicious",
             },
@@ -384,10 +384,10 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
       },
       additionalConfig: {
         mcpServers: {
-          openclaw: {
+          carapace: {
             type: "http",
             url: "http://127.0.0.1:23119/mcp",
-            headers: { Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}" },
+            headers: { Authorization: "Bearer ${CARAPACE_MCP_TOKEN}" },
           },
         },
       },
@@ -397,14 +397,14 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
     const raw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { url?: string }>;
     };
-    expect(raw.mcpServers?.openclaw?.url).toBe("http://127.0.0.1:23119/mcp");
+    expect(raw.mcpServers?.carapace?.url).toBe("http://127.0.0.1:23119/mcp");
 
     await prepared.cleanup?.();
   });
 
   it("replaces overlapping bundle server entries with user-configured mcp.servers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-user-servers-replace-",
+      "carapace-cli-bundle-mcp-user-servers-replace-",
     );
     await writeClaudeBundleManifest({
       homeDir: cliBundleMcpHarness.bundleProbeHomeDir,
@@ -413,7 +413,7 @@ describe("prepareCliBundleMcpConfig user mcp.servers", () => {
     });
     const pluginDir = path.join(
       cliBundleMcpHarness.bundleProbeHomeDir,
-      ".openclaw",
+      ".carapace",
       "extensions",
       "omi",
     );

@@ -6,7 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core";
+import { safeParseJson } from "@carapace/normalization-core";
 import { resolveStateDir } from "../../config/paths.js";
 import { sha256HexPrefixCore } from "../../infra/crypto-digest.js";
 import {
@@ -21,21 +21,21 @@ import { isPathInside } from "../../infra/path-guards.js";
 import { resolveSqliteDatabaseFilePaths } from "../../infra/sqlite-files.js";
 import { readSqliteUserVersion } from "../../infra/sqlite-user-version.js";
 import { registerSqliteCacheExitClose } from "../../infra/sqlite-wal.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+  deferCarapaceAgentPostCommitPublication,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  CARAPACE_SQLITE_BUSY_TIMEOUT_MS,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { resolveUserPath } from "../../utils.js";
 import { resolveRegisteredAgentIdForDir } from "../agent-dir-registry.js";
 import {
@@ -46,11 +46,11 @@ import {
 import { prepareFreshSharedAuthStoreWrite } from "./shared-store-bootstrap.js";
 
 type AgentAuthProfileDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "auth_profile_store" | "auth_profile_state"
 >;
-type SharedAuthProfileDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
-export type AuthProfileDatabase = OpenClawAgentDatabase | OpenClawStateDatabase;
+type SharedAuthProfileDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
+export type AuthProfileDatabase = CarapaceAgentDatabase | CarapaceStateDatabase;
 
 /** Internal prepared ownership, carried through commit publication and compensation. */
 export type AuthProfileStoreOwner = {
@@ -81,7 +81,7 @@ export function resolveAuthProfileStoreOwner(
 }
 
 function prepareAuthProfileSharedOwner(env: NodeJS.ProcessEnv) {
-  const preparedEnv = { ...env, OPENCLAW_STATE_DIR: resolveStateDir(env) };
+  const preparedEnv = { ...env, CARAPACE_STATE_DIR: resolveStateDir(env) };
   return {
     env: preparedEnv,
     sharedDatabasePath: resolveSharedAuthStorePath(preparedEnv),
@@ -153,7 +153,7 @@ export function deferAuthProfilePostCommitPublication(
   publish: () => void,
 ): boolean {
   if ("agentId" in database) {
-    return deferOpenClawAgentPostCommitPublication(database, publish);
+    return deferCarapaceAgentPostCommitPublication(database, publish);
   }
   const publications = authProfileTransactions.get(database)?.publications;
   if (!publications) {
@@ -174,7 +174,7 @@ function inferAgentIdFromDir(agentDir: string): string {
   return `custom-${sha256HexPrefixCore(normalized, 12)}`;
 }
 
-// The auth database lives in the agent dir and shares the openclaw-agent schema
+// The auth database lives in the agent dir and shares the carapace-agent schema
 // so auth store/state can move with the rest of agent-local durable state.
 function resolveAuthProfileDatabaseOptions(
   agentDir?: string,
@@ -198,7 +198,7 @@ function resolveAuthProfileDatabaseOptions(
 /** Filename-only consumers do not need reverse agent ownership discovery. */
 export function resolveAuthProfileDatabasePath(agentDir: string): string {
   return agentDir
-    ? path.join(resolveUserPath(agentDir), "openclaw-agent.sqlite")
+    ? path.join(resolveUserPath(agentDir), "carapace-agent.sqlite")
     : resolveSharedAuthStorePath();
 }
 
@@ -402,8 +402,8 @@ function acquireAuthProfileReadDatabase(
     enableNodeSqliteKyselyStatementCache(db);
     // The pooled reader bypasses canonical agent DB bootstrap, but it shares
     // the same busy policy and validates the process-stable schema on open.
-    db.exec(`PRAGMA busy_timeout = ${OPENCLAW_SQLITE_BUSY_TIMEOUT_MS};`);
-    if (readSqliteUserVersion(db) > OPENCLAW_AGENT_SCHEMA_VERSION) {
+    db.exec(`PRAGMA busy_timeout = ${CARAPACE_SQLITE_BUSY_TIMEOUT_MS};`);
+    if (readSqliteUserVersion(db) > CARAPACE_AGENT_SCHEMA_VERSION) {
       clearNodeSqliteKyselyCacheForDatabase(db);
       db.close();
       return { status: "unreadable" };
@@ -425,7 +425,7 @@ export function inspectAuthProfileJsonCellReadOnly(
   if (databaseTarget.kind === "shared-state") {
     try {
       return (
-        withExistingOpenClawStateDatabaseReadOnly(
+        withExistingCarapaceStateDatabaseReadOnly(
           ({ db }) => inspectAuthProfileJsonCell(db, target, "shared-state"),
           { path: databaseTarget.path },
         ) ?? { status: "missing", reason: "database" }
@@ -685,7 +685,7 @@ export function runAuthProfileWriteTransaction<T>(
   const env = {
     ...(options.env ?? process.env),
     ...(!options.env && options.stateDir
-      ? { OPENCLAW_STATE_DIR: options.stateDir, OPENCLAW_AGENT_DIR: undefined }
+      ? { CARAPACE_STATE_DIR: options.stateDir, CARAPACE_AGENT_DIR: undefined }
       : {}),
   };
   const sharedStoreWrite = prepareFreshSharedAuthStoreWrite({
@@ -700,7 +700,7 @@ export function runAuthProfileWriteTransaction<T>(
   // Shared-owner discovery may inspect another database; complete it before BEGIN.
   const sharedOwner = prepareAuthProfileSharedOwner(env);
   if (databaseTarget.kind === "agent") {
-    return runOpenClawAgentWriteTransaction((database) => {
+    return runCarapaceAgentWriteTransaction((database) => {
       const previous = authProfileTransactions.get(database);
       const context = previous ?? {
         owner: { ...sharedOwner, databasePath: database.path },
@@ -717,7 +717,7 @@ export function runAuthProfileWriteTransaction<T>(
     }, databaseTarget);
   }
 
-  const database = openOpenClawStateDatabase({ env, path: databaseTarget.path });
+  const database = openCarapaceStateDatabase({ env, path: databaseTarget.path });
   const enteredNestedTransaction = database.db.isTransaction;
   const previous = authProfileTransactions.get(database);
   const context = previous ?? {
@@ -731,7 +731,7 @@ export function runAuthProfileWriteTransaction<T>(
   let result: T;
   try {
     const owner = context.owner;
-    result = runOpenClawStateWriteTransaction((transaction) => operation(transaction, owner), {
+    result = runCarapaceStateWriteTransaction((transaction) => operation(transaction, owner), {
       env,
       database,
     });

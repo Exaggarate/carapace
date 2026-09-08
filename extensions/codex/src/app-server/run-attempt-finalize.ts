@@ -4,9 +4,9 @@ import {
   embeddedAgentLog,
   formatErrorMessage,
   runAgentHarnessLlmOutputHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { appendSessionYieldContext } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { appendSessionYieldContext } from "carapace/plugin-sdk/session-transcript-runtime";
 import { classifyCodexModelCallFailureKind } from "./attempt-diagnostics.js";
 import {
   buildCodexAppServerPromptTimeoutOutcome,

@@ -89,8 +89,8 @@ flow:
                 params: [ctx]
                 expr: |-
                   (async () => {
-                    const sessionStore = await qaImport('openclaw/plugin-sdk/session-store-runtime');
-                    const transcript = await qaImport('openclaw/plugin-sdk/session-transcript-runtime');
+                    const sessionStore = await qaImport('carapace/plugin-sdk/session-store-runtime');
+                    const transcript = await qaImport('carapace/plugin-sdk/session-transcript-runtime');
                     const storePath = sessionStore.resolveStorePath(undefined, {
                       agentId: 'qa',
                       env: ctx.runtimeEnv,

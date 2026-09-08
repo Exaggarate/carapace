@@ -1,5 +1,5 @@
 // Verifies package transports consume the route generation prepared on the model.
-import { getAiTransportHost } from "@openclaw/ai";
+import { getAiTransportHost } from "@carapace/ai";
 import { describe, expect, it } from "vitest";
 import type { PluginMetadataSnapshotOwnerMaps } from "../plugins/plugin-metadata-snapshot.types.js";
 import "./ai-transport-runtime-host.js";
@@ -65,7 +65,7 @@ describe("AI transport prepared provider routes", () => {
       transport: "stream",
     });
 
-    expect(headers).toMatchObject({ originator: "openclaw" });
+    expect(headers).toMatchObject({ originator: "carapace" });
     expect(capabilities).toMatchObject({
       endpointClass: "openai-public",
       knownProviderFamily: "prepared-openai-family",

@@ -7,11 +7,11 @@ import net from "node:net";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { resolveExecApprovalsPath } from "./exec-approvals-config.js";
 import { ExecApprovalsMigrationRequiredError } from "./exec-approvals-migration-gate.js";
@@ -31,13 +31,13 @@ import {
   migrateLegacyExecApprovals,
 } from "./state-migrations.exec-approvals.js";
 
-type MigrationDatabase = Pick<OpenClawStateKyselyDatabase, "migration_runs" | "migration_sources">;
+type MigrationDatabase = Pick<CarapaceStateKyselyDatabase, "migration_runs" | "migration_sources">;
 
 describe("legacy exec approvals migration", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       execApprovalsStoreTesting.reset();
       envSnapshot.restore();
       cleanup();
@@ -45,8 +45,8 @@ describe("legacy exec approvals migration", () => {
   });
 
   function useStateDir(): { env: NodeJS.ProcessEnv; stateDir: string; sourcePath: string } {
-    const stateDir = tempDirs.make("openclaw-exec-approvals-migration-");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-exec-approvals-migration-");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     return { env, stateDir, sourcePath: resolveExecApprovalsPath(env) };
   }
 
@@ -72,7 +72,7 @@ describe("legacy exec approvals migration", () => {
   }
 
   function database(env: NodeJS.ProcessEnv) {
-    return openOpenClawStateDatabase({ env }).db;
+    return openCarapaceStateDatabase({ env }).db;
   }
 
   function receipt(env: NodeJS.ProcessEnv) {
@@ -131,7 +131,7 @@ describe("legacy exec approvals migration", () => {
       },
     };
     await writeLegacy(sourcePath, expected);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     execApprovalsStoreTesting.reset();
     expect(() => loadExecApprovals()).toThrow(ExecApprovalsMigrationRequiredError);
 
@@ -211,7 +211,7 @@ describe("legacy exec approvals migration", () => {
       const originalRow = readExecApprovalsConfigRow(database(env));
       await writeLegacy(claimed ? `${sourcePath}.doctor-importing` : sourcePath, stub);
       const original = await fsp.readFile(claimed ? `${sourcePath}.doctor-importing` : sourcePath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       expect(() => loadExecApprovals()).toThrow(ExecApprovalsMigrationRequiredError);
 
       const result = await migrate({ env, stateDir });
@@ -244,7 +244,7 @@ describe("legacy exec approvals migration", () => {
     "keeps a running exec peer authenticated after retiring an empty socket stub",
     async () => {
       const stateDir = tempDirs.make("oc-ea-", "/tmp");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const sourcePath = resolveExecApprovalsPath(env);
       const socketPath = path.join(stateDir, "exec-approvals.sock");
       const originalToken = "synthetic-stable-socket-token";
@@ -297,7 +297,7 @@ describe("legacy exec approvals migration", () => {
           agents: {},
           socket: { path: socketPath, token: originalToken },
         });
-        setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+        setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
         expect((await migrate({ env, stateDir })).warnings).toEqual([]);
         const resolved = resolveExecApprovals(undefined, { requireSocket: true });
         await expect(
@@ -451,7 +451,7 @@ describe("legacy exec approvals migration", () => {
       const { env, stateDir, sourcePath } = useStateDir();
       const original = Buffer.from(raw);
       await fsp.writeFile(sourcePath, original);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       expect(() => loadExecApprovals()).toThrow(ExecApprovalsMigrationRequiredError);
 
       const result = await migrate({ env, stateDir });
@@ -644,7 +644,7 @@ describe("legacy exec approvals migration", () => {
   it("keeps store APIs blocked until Doctor completes the import", async () => {
     const { env, stateDir, sourcePath } = useStateDir();
     await writeLegacy(sourcePath, { version: 1, defaults: { security: "deny" }, agents: {} });
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     execApprovalsStoreTesting.reset();
     expect(() => loadExecApprovals()).toThrow(ExecApprovalsMigrationRequiredError);
 

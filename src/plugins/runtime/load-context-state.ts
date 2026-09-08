@@ -8,7 +8,7 @@ export type PluginRuntimeLoadContextState = {
 
 // Keep private config/env out of diagnostic traversal while registry spreads
 // preserve the exact owning context across source and built readers.
-const pluginRuntimeLoadContext = Symbol.for("openclaw.pluginRuntimeLoadContext");
+const pluginRuntimeLoadContext = Symbol.for("carapace.pluginRuntimeLoadContext");
 type ContextCarrier = { [pluginRuntimeLoadContext]?: () => PluginRuntimeLoadContextState };
 
 export function bindPluginRuntimeLoadContextState(

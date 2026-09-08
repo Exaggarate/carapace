@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cleanupBackgroundHarnesses,
@@ -236,7 +236,7 @@ describe("commanded existing document navigation", () => {
     await vi.waitFor(() => expect(h.debuggerSendCommand.mock.calls.length).toBe(2));
     h.socket.send.mockClear();
     h.socket.close();
-    h.alarmListener({ name: "openclaw-relay-watchdog" });
+    h.alarmListener({ name: "carapace-relay-watchdog" });
     await vi.waitFor(() => expect(h.relaySockets).toHaveLength(2));
     const replacement = h.relaySockets[1];
     assert(replacement);

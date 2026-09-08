@@ -1,10 +1,10 @@
 import { performance } from "node:perf_hooks";
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
 import { isDeepStrictEqual } from "node:util";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import pLimit from "p-limit";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runAbortableTimeout } from "../node-host/with-timeout.js";
 import { resolveInstalledManifestRegistryIndexFingerprint } from "../plugins/manifest-registry-installed.js";
 import { prepareModelCatalogThinkingPolicies } from "../plugins/provider-thinking.js";
@@ -387,7 +387,7 @@ async function buildSnapshotBatch(
   const loadInboundPluginRegistry = createPreparedInboundRegistryLoader();
   // Config objects can change between publications. Share this projection only
   // inside the current build batch so every later publication reads fresh config.
-  const configuredHarnessRuntimesByConfig = new Map<OpenClawConfig, readonly string[]>();
+  const configuredHarnessRuntimesByConfig = new Map<CarapaceConfig, readonly string[]>();
   let runtimePluginMs = 0;
   let pluginMetadataMs = 0;
   let staticProviderCatalogMs = 0;

@@ -1,14 +1,14 @@
 // Covers `models auth order get/set/clear`: read targeting, store writes, and gateway refresh.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
 const mocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(),
   setAuthProfileOrder: vi.fn(),
   loadModelsConfig: vi.fn(),
-  resolveModelsTargetAgent: vi.fn((_cfg: OpenClawConfig, rawAgentId?: string) => ({
+  resolveModelsTargetAgent: vi.fn((_cfg: CarapaceConfig, rawAgentId?: string) => ({
     agentId: rawAgentId ?? "main",
     agentDir: `/tmp/agent-${rawAgentId ?? "main"}`,
   })),
@@ -68,7 +68,7 @@ function storeWith(profileIds: string[], order?: string[]): AuthProfileStore {
 describe("models auth order", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.loadModelsConfig.mockResolvedValue({} as OpenClawConfig);
+    mocks.loadModelsConfig.mockResolvedValue({} as CarapaceConfig);
     mocks.ensureAuthProfileStore.mockReturnValue(
       storeWith(["anthropic:a", "anthropic:b"], ["anthropic:a"]),
     );

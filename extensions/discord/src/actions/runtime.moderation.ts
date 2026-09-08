@@ -1,8 +1,8 @@
 // Discord plugin module implements runtime.moderation behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import type { ActionGate } from "openclaw/plugin-sdk/channel-actions";
-import { jsonResult, readStringParam } from "openclaw/plugin-sdk/channel-actions";
-import type { DiscordActionConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import type { ActionGate } from "carapace/plugin-sdk/channel-actions";
+import { jsonResult, readStringParam } from "carapace/plugin-sdk/channel-actions";
+import type { DiscordActionConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { discordModerationActionRuntime } from "./runtime-deps.js";
 import {
   isDiscordModerationAction,
@@ -16,7 +16,7 @@ async function verifySenderModerationPermission(params: {
   senderUserId?: string;
   requiredPermission: bigint;
   accountId?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }) {
   // CLI/manual flows may not have sender context; enforce only when present.
   if (!params.senderUserId) {
@@ -37,7 +37,7 @@ export async function handleDiscordModerationAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: ActionGate<DiscordActionConfig>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<AgentToolResult<unknown>> {
   if (!isDiscordModerationAction(action)) {
     throw new Error(`Unknown action: ${action}`);

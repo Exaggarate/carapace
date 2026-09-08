@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { stripInternalRuntimeContext } from "../agents/internal-runtime-context.js";
 import { splitTrailingDirective } from "../auto-reply/reply/streaming-directives.js";
 import {

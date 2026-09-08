@@ -1,5 +1,5 @@
 // Telegram plugin module implements button types behavior.
-import { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { parseExecApprovalCommandText } from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   legacyInteractiveReplyToPresentation,
   isMessagePresentationInteractiveBlock,
@@ -9,11 +9,11 @@ import {
   resolveMessagePresentationButtonAction,
   type MessagePresentation,
   type MessagePresentationButton,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import {
   resolveAskUserQuestionOptionIndex,
   type AskUserQuestionOptionIndices,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/reply-payload";
 import {
   buildTelegramApprovalCallbackData,
   TELEGRAM_CALLBACK_DATA_MAX_BYTES,

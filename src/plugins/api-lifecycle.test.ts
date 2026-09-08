@@ -1,14 +1,14 @@
 // Plugin API lifecycle guard: registration-only methods stop working once
 // register() returns, while runtime methods remain callable from hooks and tools.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildPluginApi } from "./api-builder.js";
 import { isLateCallablePluginApiMethod } from "./api-lifecycle.js";
 import { runPluginRegisterSyncInRegistry } from "./loader-module-runtime.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
 import type { PluginRuntime } from "./runtime/types.js";
-import type { OpenClawPluginApi } from "./types.js";
+import type { CarapacePluginApi } from "./types.js";
 
 function createPluginApi(handlers: Parameters<typeof buildPluginApi>[0]["handlers"] = {}) {
   return buildPluginApi({
@@ -16,7 +16,7 @@ function createPluginApi(handlers: Parameters<typeof buildPluginApi>[0]["handler
     name: "Late Call Fixture",
     source: "test",
     registrationMode: "full",
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     runtime: {} as PluginRuntime,
     logger: { info() {}, warn() {}, error() {}, debug() {} },
     resolvePath: (input) => input,
@@ -26,7 +26,7 @@ function createPluginApi(handlers: Parameters<typeof buildPluginApi>[0]["handler
 
 function captureRegisteredPluginApi(handlers: Parameters<typeof buildPluginApi>[0]["handlers"]) {
   const api = createPluginApi(handlers);
-  let captured: OpenClawPluginApi | undefined;
+  let captured: CarapacePluginApi | undefined;
   runPluginRegisterSyncInRegistry(
     (pluginApi) => {
       captured = pluginApi;
@@ -71,8 +71,8 @@ describe("plugin api lifecycle", () => {
 
   it("keeps inherited handlers, undefined defaults, and one captured CLI lookup", () => {
     const reads: string[] = [];
-    const registerCli = vi.fn<OpenClawPluginApi["registerCli"]>();
-    const registerHook = vi.fn<OpenClawPluginApi["registerHook"]>();
+    const registerCli = vi.fn<CarapacePluginApi["registerCli"]>();
+    const registerHook = vi.fn<CarapacePluginApi["registerHook"]>();
     class InheritedHandlers {
       get registerCli() {
         reads.push("cli");
@@ -88,8 +88,8 @@ describe("plugin api lifecycle", () => {
       }
     }
     const api = createPluginApi(new InheritedHandlers());
-    const hook: Parameters<OpenClawPluginApi["registerHook"]>[1] = () => {};
-    const registrar: Parameters<OpenClawPluginApi["registerCli"]>[0] = () => {};
+    const hook: Parameters<CarapacePluginApi["registerHook"]>[1] = () => {};
+    const registrar: Parameters<CarapacePluginApi["registerCli"]>[0] = () => {};
 
     const toolFactory = vi.fn(() => null);
     expect(api.registerTool(toolFactory)).toBeUndefined();

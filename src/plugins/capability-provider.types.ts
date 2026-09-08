@@ -126,7 +126,7 @@ type WorkerNodeBootstrapAccess = {
     token: string;
     sha256: string;
     bytes: number;
-    openclawVersion: string;
+    carapaceVersion: string;
     enabledPluginIds: readonly string[];
     tlsFingerprint?: string;
   };
@@ -149,7 +149,7 @@ export type WorkerNodeRuntimePreparation = WorkerNodeBootstrapAccess & {
 
 /** Replay-safe node enrollment prepared only after a provider has allocated its machine. */
 export type WorkerNodeEnrollment = WorkerNodeBootstrapAccess & {
-  openclawVersion: string;
+  carapaceVersion: string;
   displayName: string;
   waitForDeviceId: () => Promise<string>;
 } & (

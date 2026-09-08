@@ -1,11 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { isLiveTestEnabled } from "../../agents/live-test-helpers.js";
 import { resolveDefaultModelForAgent } from "../../agents/model-selection-config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import type { SkillHistoryScanPromptSession } from "./history-scan-prompt.js";
 import { runSkillHistoryScanReview } from "./history-scan-review.js";
@@ -14,15 +14,15 @@ import { HISTORY_SCAN_MAX_PROPOSAL_MUTATIONS } from "./review-outcome.js";
 import { listSkillProposals } from "./service.js";
 
 const LIVE =
-  isLiveTestEnabled(["OPENCLAW_LIVE_SKILL_HISTORY_SCAN"]) &&
+  isLiveTestEnabled(["CARAPACE_LIVE_SKILL_HISTORY_SCAN"]) &&
   Boolean(process.env.OPENAI_API_KEY?.trim());
 const describeLive = LIVE ? describe : describe.skip;
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let workspaceDir = "";
 
-function liveConfig(): OpenClawConfig {
-  const modelId = process.env.OPENCLAW_LIVE_SKILL_HISTORY_MODEL ?? "gpt-5.6-luna";
+function liveConfig(): CarapaceConfig {
+  const modelId = process.env.CARAPACE_LIVE_SKILL_HISTORY_MODEL ?? "gpt-5.6-luna";
   return {
     // This eval needs only OpenAI and the built-in Workshop tool.
     plugins: { allow: ["openai"] },
@@ -30,7 +30,7 @@ function liveConfig(): OpenClawConfig {
       providers: {
         openai: {
           api: "openai-responses",
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           apiKey: { source: "env", provider: "default", id: "OPENAI_API_KEY" },
           baseUrl: "https://api.openai.com/v1",
           models: [
@@ -38,7 +38,7 @@ function liveConfig(): OpenClawConfig {
               id: modelId,
               name: modelId,
               api: "openai-responses",
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               input: ["text"],
               reasoning: true,
               contextWindow: 1_047_576,
@@ -54,7 +54,7 @@ function liveConfig(): OpenClawConfig {
         model: { primary: `openai/${modelId}` },
         models: {
           [`openai/${modelId}`]: {
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
             params: { maxTokens: 3_000 },
           },
         },
@@ -87,11 +87,11 @@ function session(
 
 describeLive("Skill Workshop history scan live OpenAI eval", () => {
   beforeAll(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-live-skill-history-state-",
+      prefix: "carapace-live-skill-history-state-",
     });
-    workspaceDir = await tempDirs.make("openclaw-live-skill-history-workspace-");
+    workspaceDir = await tempDirs.make("carapace-live-skill-history-workspace-");
   });
 
   afterAll(async () => {

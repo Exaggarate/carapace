@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-onboard";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-onboard";
 import { describe, expect, it } from "vitest";
 import {
   applyQwenConfig,
@@ -16,20 +16,20 @@ describe.each([
   {
     name: "Token Plan global",
     provider: "qwen-token-plan",
-    apply: (cfg: OpenClawConfig) => applyQwenTokenPlanConfig(cfg, "global"),
+    apply: (cfg: CarapaceConfig) => applyQwenTokenPlanConfig(cfg, "global"),
     rows: 8,
   },
   {
     name: "Token Plan China",
     provider: "qwen-token-plan",
-    apply: (cfg: OpenClawConfig) => applyQwenTokenPlanConfig(cfg, "cn"),
+    apply: (cfg: CarapaceConfig) => applyQwenTokenPlanConfig(cfg, "cn"),
     rows: 8,
   },
 ])("Qwen $name setup", ({ provider, apply, rows }) => {
   it.each([undefined, "merge"] as const)(
     "leaves ordinary %s rows runtime-owned and retains aliases",
     (mode) => {
-      const input: OpenClawConfig = {
+      const input: CarapaceConfig = {
         models: { mode },
         agents: {
           defaults: {

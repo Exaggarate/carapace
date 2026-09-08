@@ -8,7 +8,7 @@ import type {
 import {
   parseStrictPositiveInteger,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 
 export type WhatsAppSocketTimingOptions = {
   keepAliveIntervalMs?: number;

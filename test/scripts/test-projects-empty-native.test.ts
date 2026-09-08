@@ -166,9 +166,9 @@ describe("project runner native empty-file policy", () => {
         SystemRoot: process.env.SystemRoot,
         HOME: path.join(root, "home"),
         USERPROFILE: path.join(root, "home"),
-        OPENCLAW_HOME: path.join(root, "home"),
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(root, "state/openclaw.json"),
+        CARAPACE_HOME: path.join(root, "home"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_CONFIG_PATH: path.join(root, "state/carapace.json"),
         TMPDIR: path.join(root, "tmp"),
         TMP: path.join(root, "tmp"),
         TEMP: path.join(root, "tmp"),
@@ -182,16 +182,16 @@ describe("project runner native empty-file policy", () => {
         CI: "1",
         NO_COLOR: "1",
         FORCE_COLOR: "0",
-        OPENCLAW_TEST_PROJECTS_TIMINGS: "0",
-        OPENCLAW_VITEST_MAX_WORKERS: "1",
-        OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "module-cache"),
-        OPENCLAW_VITEST_NO_OUTPUT_RETRY: "0",
-        ...(scenario.parallel ? { OPENCLAW_TEST_PROJECTS_PARALLEL: "2" } : {}),
+        CARAPACE_TEST_PROJECTS_TIMINGS: "0",
+        CARAPACE_VITEST_MAX_WORKERS: "1",
+        CARAPACE_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "module-cache"),
+        CARAPACE_VITEST_NO_OUTPUT_RETRY: "0",
+        ...(scenario.parallel ? { CARAPACE_TEST_PROJECTS_PARALLEL: "2" } : {}),
       };
       for (const name of ["home", "state", "tmp", "cache", "config"]) {
         fs.mkdirSync(path.join(root, name));
       }
-      fs.writeFileSync(env.OPENCLAW_CONFIG_PATH!, "{}");
+      fs.writeFileSync(env.CARAPACE_CONFIG_PATH!, "{}");
       const runFixtureCommand = (bin: string, commandArgs: string[]) =>
         lifetime.track(
           runManagedCommand({

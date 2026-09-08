@@ -117,8 +117,8 @@ export function registerMantisCli(qa: Command) {
     .description("Verify the Mantis Discord bot can see the guild/channel, post, and react")
     .option("--repo-root <path>", "Repository root to target when running from a neutral cwd")
     .option("--output-dir <path>", "Mantis Discord smoke artifact directory")
-    .option("--guild-id <id>", "Override OPENCLAW_QA_DISCORD_GUILD_ID")
-    .option("--channel-id <id>", "Override OPENCLAW_QA_DISCORD_CHANNEL_ID")
+    .option("--guild-id <id>", "Override CARAPACE_QA_DISCORD_GUILD_ID")
+    .option("--channel-id <id>", "Override CARAPACE_QA_DISCORD_CHANNEL_ID")
     .option("--token-env <name>", "Env var containing the Mantis Discord bot token")
     .option("--token-file <path>", "File containing the Mantis Discord bot token")
     .option("--token-file-env <name>", "Env var containing the Mantis Discord bot token file path")
@@ -205,7 +205,7 @@ export function registerMantisCli(qa: Command) {
     .option("--ttl <duration>", "Crabbox maximum lease lifetime")
     .option("--keep-lease", "Keep a lease created by this run after a passing smoke")
     .option("--no-keep-lease", "Stop a lease created by this run after a passing smoke")
-    .option("--gateway-setup", "Start a persistent OpenClaw Slack gateway inside the VNC VM")
+    .option("--gateway-setup", "Start a persistent Carapace Slack gateway inside the VNC VM")
     .option(
       "--approval-checkpoints",
       "Run Slack approval scenarios with visual checkpoint screenshot acknowledgements",

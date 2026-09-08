@@ -2,15 +2,15 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { clearRuntimeAuthProfileStoreSnapshots } from "openclaw/plugin-sdk/agent-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { MODEL_SELECTION_LOCKED_MESSAGE } from "openclaw/plugin-sdk/model-session-runtime";
-import { upsertAuthProfile } from "openclaw/plugin-sdk/provider-auth";
+import { clearRuntimeAuthProfileStoreSnapshots } from "carapace/plugin-sdk/agent-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { MODEL_SELECTION_LOCKED_MESSAGE } from "carapace/plugin-sdk/model-session-runtime";
+import { upsertAuthProfile } from "carapace/plugin-sdk/provider-auth";
 import {
   getSessionEntry,
   resolveStorePath,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildCodexSupervisionTestConnectionFingerprint,
@@ -106,8 +106,8 @@ vi.mock("./app-server/shared-client.js", () => ({
 describe("codex conversation controls", () => {
   beforeEach(async () => {
     resetCodexTestBindingStore();
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-control-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDir);
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-control-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDir);
     sharedClientMocks.getSharedCodexAppServerClient.mockReset();
     sharedClientMocks.releaseLeasedSharedCodexAppServerClient.mockReset();
   });

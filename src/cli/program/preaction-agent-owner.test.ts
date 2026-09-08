@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { tryResolveLegacyCompatibilityAgentId } from "../../agents/agent-scope-config.js";
 import { createDoctorConfigSnapshot } from "../../commands/doctor-config-snapshot.test-helpers.js";
 import type { ConfigFileSnapshot } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 const mocks = vi.hoisted(() => ({
   ensureConfigReady:
@@ -28,7 +28,7 @@ const originalArgv = [...process.argv];
 const originalTitle = process.title;
 
 function createProgram(): Command {
-  const program = new Command().name("openclaw").enablePositionalOptions();
+  const program = new Command().name("carapace").enablePositionalOptions();
   const models = program.command("models").option("--agent <id>");
   const auth = models.command("auth").option("--agent <id>");
   auth
@@ -65,14 +65,14 @@ describe("preaction migration agent owner", () => {
     async (_label, argv, expected) => {
       const config = {
         agents: { ownership: "explicit", entries: { main: {}, work: {} } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       mocks.ensureConfigReady.mockImplementationOnce(async (options) => {
         await options.beforeStateMigrations?.(createDoctorConfigSnapshot({ config }));
       });
       const program = createProgram();
       const { registerPreActionHooks } = await import("./preaction.js");
       registerPreActionHooks(program, "test");
-      process.argv = ["node", "openclaw", ...argv];
+      process.argv = ["node", "carapace", ...argv];
 
       await program.parseAsync(process.argv);
 

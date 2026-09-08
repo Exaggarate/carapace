@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import type { ModelRef } from "../agents/model-ref-shared.js";
 import type { AgentWaitResult } from "../agents/run-wait.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizePluginsConfig } from "../plugins/config-state.js";
 import { compileModelAllowlist, type CompiledModelAllowlist } from "../plugins/model-allowlist.js";
 import { getActivePluginRegistry } from "../plugins/runtime.js";
@@ -45,7 +45,7 @@ type PluginSubagentOverridePolicy = CompiledModelAllowlist & {
 export type PluginSubagentOverridePolicies = Record<string, PluginSubagentOverridePolicy>;
 
 export function resolvePluginSubagentOverridePolicies(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): PluginSubagentOverridePolicies {
   const normalized = normalizePluginsConfig(cfg.plugins);
   const policies: PluginSubagentOverridePolicies = {};
@@ -86,7 +86,7 @@ function resolveFallbackModelOverridePolicy(params: {
   if (!policy?.allowModelOverride) {
     throw new Error(
       `plugin "${pluginId}" is not trusted for fallback provider/model override requests. ` +
-        "See https://docs.openclaw.ai/plugins/sdk-runtime#api-runtime-subagent and search for: " +
+        "See https://github.com/Exaggarate/carapace#api-runtime-subagent and search for: " +
         "plugins.entries.<id>.subagent.allowModelOverride",
     );
   }

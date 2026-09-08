@@ -2,8 +2,8 @@
  * Geolocation plugin entry. It exposes one authenticated lookup route and keeps
  * the database download lazy, so an install that nobody queries costs nothing.
  */
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import { resolveGeolocationSettings } from "./src/config.js";
 import { createGeolocationDatabaseStore } from "./src/database-store.js";
 import { createGeolocationLookupHandler } from "./src/lookup-route.js";

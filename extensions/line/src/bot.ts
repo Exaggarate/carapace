@@ -1,17 +1,17 @@
 // Line plugin module implements bot behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_GROUP_HISTORY_LIMIT, type HistoryEntry } from "openclaw/plugin-sdk/reply-history";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { DEFAULT_GROUP_HISTORY_LIMIT, type HistoryEntry } from "carapace/plugin-sdk/reply-history";
 import {
   getRuntimeConfig,
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   createNonExitingRuntime,
   logVerbose,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/runtime-env";
 import { resolveLineAccount } from "./accounts.js";
 import { handleLineWebhookEvents } from "./bot-handlers.js";
 import type { LineInboundContext } from "./bot-message-context.js";
@@ -20,7 +20,7 @@ import { createLineWebhookSpool, type LineWebhookTurnAdoptionLifecycle } from ".
 
 const DEFAULT_MEDIA_MAX_MB = 10;
 type BuildChannelInboundContext =
-  typeof import("openclaw/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
+  typeof import("carapace/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
 
 interface LineBotOptions {
   channelAccessToken: string;
@@ -28,12 +28,12 @@ interface LineBotOptions {
   accountId?: string;
   runtime?: RuntimeEnv;
   buildContext?: BuildChannelInboundContext;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   mediaMaxMb?: number;
   onMessage?: (
     ctx: LineInboundContext,
     control: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       turnAdoptionLifecycle?: LineWebhookTurnAdoptionLifecycle;
     },
   ) => Promise<void>;
@@ -65,7 +65,7 @@ export function createLineBot(opts: LineBotOptions): LineBot {
         runtimeConfig: startupRuntimeConfig,
         runtimeSourceConfig: startupRuntimeSourceConfig,
       }) === startupRuntimeConfig);
-  const resolveTurnConfig = (): OpenClawConfig =>
+  const resolveTurnConfig = (): CarapaceConfig =>
     (followsRuntimeConfig ? getRuntimeConfigSnapshot() : undefined) ?? startupConfig;
   // `channels.line` changes restart the monitor, so account credentials and settings
   // remain startup-prepared facts.

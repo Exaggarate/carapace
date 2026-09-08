@@ -65,7 +65,7 @@ const NO_MEMORY_LIMIT = {
   cgroupMemoryLimitPaths: [],
   constrainedMemoryBytes: 0,
   physicalMemoryBytes: TEST_PHYSICAL_MEMORY_BYTES,
-  procMeminfoPath: "/openclaw-test-missing-proc-meminfo",
+  procMeminfoPath: "/carapace-test-missing-proc-meminfo",
 };
 
 function createMemoryFileSystem(
@@ -182,7 +182,7 @@ describe("resolveTsdownBuildInvocation", () => {
   });
 
   it.each([
-    ["environment", [], { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" }],
+    ["environment", [], { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" }],
     ["CLI", ["--no-dts"], {}],
   ])("keeps %s no-DTS builds in one main invocation", (_source, args, env) => {
     const results = resolveTsdownBuildInvocations({
@@ -205,13 +205,13 @@ describe("resolveTsdownBuildInvocation", () => {
       platform: "linux",
       nodeExecPath: "/usr/bin/node",
       npmExecPath: "/tmp/pnpm.cjs",
-      env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" },
+      env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" },
       ...NO_MEMORY_LIMIT,
     });
 
     expect(results).toHaveLength(3 + TSDOWN_UNIFIED_DTS_CONFIG_GROUPS.length);
-    expect(results[1]?.args).toEqual(expect.arrayContaining(["--filter", "openclaw-packages"]));
-    expect(results[2]?.args).toEqual(expect.arrayContaining(["--filter", "openclaw-unified"]));
+    expect(results[1]?.args).toEqual(expect.arrayContaining(["--filter", "carapace-packages"]));
+    expect(results[2]?.args).toEqual(expect.arrayContaining(["--filter", "carapace-unified"]));
     expect(results.at(-1)?.args).toEqual(
       expect.arrayContaining(["--filter", TSDOWN_UNIFIED_DTS_CONFIG_GROUPS.at(-1)]),
     );
@@ -311,7 +311,7 @@ describe("resolveTsdownBuildInvocation", () => {
         "--config",
         "tsdown.config.ts",
         "--filter",
-        "openclaw-dts-base",
+        "carapace-dts-base",
         "--filter",
         TSDOWN_PACKAGE_CONFIG_GROUP,
       ],
@@ -324,14 +324,14 @@ describe("resolveTsdownBuildInvocation", () => {
         const filterIndex = result.args.indexOf("--filter");
         return result.args[filterIndex + 1];
       }),
-    ).toEqual([TSDOWN_PACKAGE_CONFIG_GROUP, "openclaw-dts-base"]);
+    ).toEqual([TSDOWN_PACKAGE_CONFIG_GROUP, "carapace-dts-base"]);
   });
 
   it.each([
-    ["long filter", ["--filter", "openclaw-unified"]],
-    ["long assigned filter", ["--filter=openclaw-unified"]],
-    ["short filter", ["-F", "openclaw-unified"]],
-    ["short assigned filter", ["-F=openclaw-unified"]],
+    ["long filter", ["--filter", "carapace-unified"]],
+    ["long assigned filter", ["--filter=carapace-unified"]],
+    ["short filter", ["-F", "carapace-unified"]],
+    ["short assigned filter", ["-F=carapace-unified"]],
   ])("keeps a caller-provided %s in one main invocation", (_label, args) => {
     const results = resolveTsdownBuildInvocations({
       args,
@@ -652,7 +652,7 @@ describe("resolveTsdownBuildInvocation", () => {
   });
 
   it.each([
-    ["Docker default", [], { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" }],
+    ["Docker default", [], { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" }],
     ["CLI override", ["--no-dts"], {}],
   ])("applies the unified-runtime threshold to a %s plan", (_label, args, env) => {
     const result = resolveTsdownBuildPlan({
@@ -672,7 +672,7 @@ describe("resolveTsdownBuildInvocation", () => {
   it("restores declaration-build admission when --dts overrides the Docker default", () => {
     const result = resolveTsdownBuildPlan({
       args: ["--dts"],
-      env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" },
+      env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" },
       cgroupMemoryLimitBytes: 2 * 1024 * 1024 * 1024,
     });
 
@@ -680,7 +680,7 @@ describe("resolveTsdownBuildInvocation", () => {
   });
 
   it("routes Windows tsdown builds through the pnpm runner instead of shell=true", () => {
-    const rootDir = createTempDir("openclaw-pnpm-runner-");
+    const rootDir = createTempDir("carapace-pnpm-runner-");
     const npmExecPath = path.join(rootDir, "pnpm.cjs");
     fs.writeFileSync(npmExecPath, "console.log('pnpm');\n");
 
@@ -787,7 +787,7 @@ describe("resolveTsdownBuildInvocation", () => {
       cgroupMemoryLimitPaths: ["/test/memory.max"],
       physicalMemoryBytes: 16 * 1024 * 1024 * 1024,
       processResidentMemoryBytes: 64 * 1024 * 1024,
-      procMeminfoPath: "/openclaw-test-missing-proc-meminfo",
+      procMeminfoPath: "/carapace-test-missing-proc-meminfo",
       fs: fsFixture,
     });
 
@@ -806,7 +806,7 @@ describe("resolveTsdownBuildInvocation", () => {
       cgroupMemoryLimitPaths: ["/test/memory.max"],
       physicalMemoryBytes: 16 * 1024 * 1024 * 1024,
       processResidentMemoryBytes: 64 * 1024 * 1024,
-      procMeminfoPath: "/openclaw-test-missing-proc-meminfo",
+      procMeminfoPath: "/carapace-test-missing-proc-meminfo",
       fs: fsFixture,
     });
     expect(isolated.maxOldSpaceMb).toBe(4352);
@@ -821,8 +821,8 @@ describe("resolveTsdownBuildInvocation", () => {
     });
 
     expect(shortfall?.fatal).toBe(true);
-    expect(shortfall?.message).toContain("resolved OpenClaw build heap is 732MB");
-    expect(shortfall?.message).toContain("OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB=<MB>");
+    expect(shortfall?.message).toContain("resolved Carapace build heap is 732MB");
+    expect(shortfall?.message).toContain("CARAPACE_TSDOWN_MAX_OLD_SPACE_MB=<MB>");
   });
 
   it("refuses a host whose slice cannot hold the whole-build peak", () => {
@@ -836,13 +836,13 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("points Docker refusals at the public build heap override", () => {
     const shortfall = describeInsufficientTsdownHeap({
-      env: { OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: "" },
+      env: { CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: "" },
       cgroupMemoryLimitBytes: 4 * 1024 * 1024 * 1024,
     });
 
     expect(shortfall?.fatal).toBe(true);
-    expect(shortfall?.message).toContain("set OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=<MB>");
-    expect(shortfall?.message).not.toContain("set OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB=<MB>");
+    expect(shortfall?.message).toContain("set CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=<MB>");
+    expect(shortfall?.message).not.toContain("set CARAPACE_TSDOWN_MAX_OLD_SPACE_MB=<MB>");
   });
 
   it("admits the smallest slice measured to complete a full build", () => {
@@ -853,13 +853,13 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("uses an explicit heap override as the operator's opt-in for the complete plan", () => {
     const plan = resolveTsdownBuildPlan({
-      env: { OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "4096" },
+      env: { CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "4096" },
       cgroupMemoryLimitBytes: 4 * 1024 * 1024 * 1024,
     });
 
     expect(plan.heapShortfall?.fatal).toBe(false);
     expect(plan.heapShortfall?.message).toContain(
-      "Continuing because OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB explicitly requests 4096MB",
+      "Continuing because CARAPACE_TSDOWN_MAX_OLD_SPACE_MB explicitly requests 4096MB",
     );
     for (const invocation of plan.invocations) {
       expect(invocation.options.env.NODE_OPTIONS).toBe("--max-old-space-size=4096");
@@ -881,7 +881,7 @@ describe("resolveTsdownBuildInvocation", () => {
     const optedInCleanup = vi.fn();
     const optedInPlan = prepareTsdownBuildExecution(
       {
-        env: { OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "4096" },
+        env: { CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "4096" },
         cgroupMemoryLimitBytes: 4 * 1024 * 1024 * 1024,
       },
       { cleanup: optedInCleanup },
@@ -935,7 +935,7 @@ describe("resolveTsdownBuildInvocation", () => {
     ["bare long filter", ["--filter"]],
     ["bare short filter", ["-F"]],
     ["empty assigned filter", ["--filter="]],
-    ["missing repeated filter", ["--filter", "openclaw-packages", "-F", "--watch"]],
+    ["missing repeated filter", ["--filter", "carapace-packages", "-F", "--watch"]],
   ])("rejects %s before cleanup", (_label, args) => {
     const cleanup = vi.fn();
 
@@ -999,7 +999,7 @@ describe("resolveTsdownBuildInvocation", () => {
       constrainedMemoryBytes: 0,
       cgroupMemoryLimitPaths: [],
       availableMemoryBytes: 4 * 1024 * 1024 * 1024,
-      procMeminfoPath: "/openclaw-test-missing-proc-meminfo",
+      procMeminfoPath: "/carapace-test-missing-proc-meminfo",
       physicalMemoryBytes: 4 * 1024 * 1024 * 1024,
     });
 
@@ -1013,7 +1013,7 @@ describe("resolveTsdownBuildInvocation", () => {
       env: {},
       cgroupMemoryLimitPaths: [],
       constrainedMemoryBytes: 0,
-      procMeminfoPath: "/openclaw-test-missing-proc-meminfo",
+      procMeminfoPath: "/carapace-test-missing-proc-meminfo",
       physicalMemoryBytes: 16 * 1024 * 1024 * 1024,
     });
 
@@ -1055,7 +1055,7 @@ describe("resolveTsdownBuildInvocation", () => {
     const result = resolveTsdownBuildPlan({
       env: {},
       cgroupMemoryLimitBytes: 64 * 1024 * 1024 * 1024,
-      procMeminfoPath: "/openclaw-test-missing-proc-meminfo",
+      procMeminfoPath: "/carapace-test-missing-proc-meminfo",
       physicalMemoryBytes: 4 * 1024 * 1024 * 1024,
     });
 
@@ -1068,7 +1068,7 @@ describe("resolveTsdownBuildInvocation", () => {
     // Only the ancestor slice carries a budget; the leaf unit and the v2 root
     // are unlimited, which is what a systemd-managed build actually looks like.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", `0::${slicePath}/app.slice/openclaw-main-update.service\n`],
+      ["/proc/self/cgroup", `0::${slicePath}/app.slice/carapace-main-update.service\n`],
       [`/sys/fs/cgroup${slicePath}/memory.high`, `${5 * 1024 * 1024 * 1024}\n`],
     ]);
 
@@ -1081,7 +1081,7 @@ describe("resolveTsdownBuildInvocation", () => {
   });
 
   it("uses the tightest finite cgroup ancestor when the leaf is also bounded", () => {
-    const leafPath = "/user.slice/openclaw.service";
+    const leafPath = "/user.slice/carapace.service";
     const cgroupFiles = new Map([
       ["/proc/self/cgroup", `0::${leafPath}\n`],
       [`/sys/fs/cgroup${leafPath}/memory.max`, `${6 * 1024 * 1024 * 1024}\n`],
@@ -1100,7 +1100,7 @@ describe("resolveTsdownBuildInvocation", () => {
     // A legacy/hybrid host publishes the budget through the v1 memory controller, and the
     // unified record carries no controllers, so only the v1 walk can find this limit.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", `0::/\n7:memory:${slicePath}/openclaw-main-update.service\n`],
+      ["/proc/self/cgroup", `0::/\n7:memory:${slicePath}/carapace-main-update.service\n`],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 /.. /sys/fs/cgroup/unified rw,nosuid - cgroup2 cgroup2 rw\n" +
@@ -1127,7 +1127,7 @@ describe("resolveTsdownBuildInvocation", () => {
   it("uses host memory when hybrid v1 memory is visibly unlimited and v2 is inherited", () => {
     const slicePath = "/user.slice/user-999.slice";
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", `0::/\n7:memory:${slicePath}/openclaw-main-update.service\n`],
+      ["/proc/self/cgroup", `0::/\n7:memory:${slicePath}/carapace-main-update.service\n`],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 /.. /sys/fs/cgroup/unified rw,nosuid - cgroup2 cgroup2 rw\n" +
@@ -1186,7 +1186,7 @@ describe("resolveTsdownBuildInvocation", () => {
     expect(cleanup).not.toHaveBeenCalled();
 
     const optedIn = resolveTsdownBuildPlan({
-      env: { OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "4096" },
+      env: { CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "4096" },
       fs: fsFixture,
     });
     expect(optedIn.maxOldSpaceMb).toBe(4096);
@@ -1195,7 +1195,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses cleanup when a cgroup record has no readable controller mount", () => {
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "0::/hidden.slice/openclaw.service\n"],
+      ["/proc/self/cgroup", "0::/hidden.slice/carapace.service\n"],
       ["/proc/self/mountinfo", ""],
       ["/proc/meminfo", `MemTotal:       ${16 * 1024 * 1024} kB\n`],
     ]);
@@ -1262,13 +1262,13 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("uses host memory when an observed v2 hierarchy disables the memory controller", () => {
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "0::/user.slice/openclaw.service\n"],
+      ["/proc/self/cgroup", "0::/user.slice/carapace.service\n"],
       ["/proc/self/mountinfo", "30 25 0:26 / /sys/fs/cgroup rw,nosuid - cgroup2 cgroup2 rw\n"],
       [
         "/proc/meminfo",
         `MemTotal:       ${16 * 1024 * 1024} kB\nMemAvailable:   ${16 * 1024 * 1024} kB\n`,
       ],
-      ["/sys/fs/cgroup/user.slice/openclaw.service/cgroup.controllers", "cpu io\n"],
+      ["/sys/fs/cgroup/user.slice/carapace.service/cgroup.controllers", "cpu io\n"],
     ]);
 
     const plan = resolveTsdownBuildPlan({
@@ -1283,11 +1283,11 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("does not treat an unreadable v2 limit as a disabled memory controller", () => {
     const cgroupFiles = new Map<string, string | Error>([
-      ["/proc/self/cgroup", "0::/user.slice/openclaw.service\n"],
+      ["/proc/self/cgroup", "0::/user.slice/carapace.service\n"],
       ["/proc/self/mountinfo", "30 25 0:26 / /sys/fs/cgroup rw,nosuid - cgroup2 cgroup2 rw\n"],
-      ["/sys/fs/cgroup/user.slice/openclaw.service/cgroup.controllers", "cpu io\n"],
+      ["/sys/fs/cgroup/user.slice/carapace.service/cgroup.controllers", "cpu io\n"],
       [
-        "/sys/fs/cgroup/user.slice/openclaw.service/memory.max",
+        "/sys/fs/cgroup/user.slice/carapace.service/memory.max",
         Object.assign(new Error("EACCES: memory.max"), { code: "EACCES" }),
       ],
     ]);
@@ -1303,7 +1303,7 @@ describe("resolveTsdownBuildInvocation", () => {
   });
 
   it("fails closed when one applicable cgroup limit is readable and another is not", () => {
-    const cgroupDir = "/sys/fs/cgroup/openclaw.service";
+    const cgroupDir = "/sys/fs/cgroup/carapace.service";
     const memoryMaxPath = `${cgroupDir}/memory.max`;
     const memoryHighPath = `${cgroupDir}/memory.high`;
     const cgroupFiles = new Map<string, string | Error>([
@@ -1324,7 +1324,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses a default heap when a v1 memory record has no matching visible mount", () => {
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "7:memory:/hidden.slice/openclaw.service\n"],
+      ["/proc/self/cgroup", "7:memory:/hidden.slice/carapace.service\n"],
       [
         "/proc/self/mountinfo",
         "31 25 0:27 /other.slice /sys/fs/cgroup/memory rw,nosuid - cgroup cgroup rw,memory\n",
@@ -1396,7 +1396,7 @@ describe("resolveTsdownBuildInvocation", () => {
     // The kernel escapes a space in the mount point as \040. Matching the field
     // verbatim misses this mount, and heap sizing silently falls back to host memory.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", `0::${slicePath}/app.slice/openclaw-main-update.service\n`],
+      ["/proc/self/cgroup", `0::${slicePath}/app.slice/carapace-main-update.service\n`],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 / /sys/fs/cgroup\\040dir rw,nosuid - cgroup2 cgroup2 rw\n",
@@ -1414,12 +1414,12 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("translates an octal-escaped cgroup mount root before reading the limit", () => {
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "0::/user.slice/user 999.slice/openclaw.service\n"],
+      ["/proc/self/cgroup", "0::/user.slice/user 999.slice/carapace.service\n"],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 /user.slice/user\\040999.slice /sys/fs/cgroup rw,nosuid - cgroup2 cgroup2 rw\n",
       ],
-      ["/sys/fs/cgroup/openclaw.service/memory.high", `${5 * 1024 * 1024 * 1024}\n`],
+      ["/sys/fs/cgroup/carapace.service/memory.high", `${5 * 1024 * 1024 * 1024}\n`],
     ]);
 
     const nodeOptions = resolveTestNodeOptions({
@@ -1434,7 +1434,7 @@ describe("resolveTsdownBuildInvocation", () => {
     // Co-mounted v1 puts memory.limit_in_bytes under the slice directly, with no
     // per-controller directory, so the mount point has to come from mountinfo.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", `2:memory,cpu,cpuacct:${slicePath}/openclaw-main-update.service\n`],
+      ["/proc/self/cgroup", `2:memory,cpu,cpuacct:${slicePath}/carapace-main-update.service\n`],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 / /sys/fs/cgroup rw,nosuid - cgroup cgroup rw,memory,cpu,cpuacct\n",
@@ -1454,7 +1454,7 @@ describe("resolveTsdownBuildInvocation", () => {
   it("ignores a co-mounted cgroup-v1 soft limit when the hard limit is unbounded", () => {
     const slicePath = "/user.slice/user-999.slice";
     const cgroupFiles = new Map([
-      [`/proc/self/cgroup`, `2:memory,cpu:${slicePath}/openclaw-main-update.service\n`],
+      [`/proc/self/cgroup`, `2:memory,cpu:${slicePath}/carapace-main-update.service\n`],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 / /sys/fs/cgroup rw,nosuid - cgroup cgroup rw,memory,cpu\n",
@@ -1479,7 +1479,7 @@ describe("resolveTsdownBuildInvocation", () => {
   it("preserves process rlimits while ignoring a cgroup-v1 soft limit", () => {
     const slicePath = "/user.slice/user-999.slice";
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", `2:memory:${slicePath}/openclaw-main-update.service\n`],
+      ["/proc/self/cgroup", `2:memory:${slicePath}/carapace-main-update.service\n`],
       ["/proc/self/mountinfo", "30 25 0:26 / /sys/fs/cgroup rw,nosuid - cgroup cgroup rw,memory\n"],
       [
         "/proc/self/limits",
@@ -1558,12 +1558,12 @@ describe("resolveTsdownBuildInvocation", () => {
     // A container mount roots cgroupfs at the container's own cgroup, so /proc/self/cgroup
     // records stay host-absolute and only translate to a visible path via the mount root.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "0::/docker/abc123/openclaw-main-update.service\n"],
+      ["/proc/self/cgroup", "0::/docker/abc123/carapace-main-update.service\n"],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 /docker/abc123 /sys/fs/cgroup rw,nosuid - cgroup2 cgroup2 rw\n",
       ],
-      ["/sys/fs/cgroup/openclaw-main-update.service/memory.max", `${5 * 1024 * 1024 * 1024}\n`],
+      ["/sys/fs/cgroup/carapace-main-update.service/memory.max", `${5 * 1024 * 1024 * 1024}\n`],
     ]);
 
     const nodeOptions = resolveTestNodeOptions({
@@ -1577,13 +1577,13 @@ describe("resolveTsdownBuildInvocation", () => {
     // Several mounts can expose one hierarchy; only the first covers this process here, so
     // retaining just the last-seen view would lose the budget entirely.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "0::/docker/abc123/openclaw-main-update.service\n"],
+      ["/proc/self/cgroup", "0::/docker/abc123/carapace-main-update.service\n"],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 /docker/abc123 /sys/fs/cgroup rw - cgroup2 cgroup2 rw\n" +
           "31 25 0:26 /other/branch /mnt/peer-cgroup rw - cgroup2 cgroup2 rw\n",
       ],
-      ["/sys/fs/cgroup/openclaw-main-update.service/memory.max", `${5 * 1024 * 1024 * 1024}\n`],
+      ["/sys/fs/cgroup/carapace-main-update.service/memory.max", `${5 * 1024 * 1024 * 1024}\n`],
       ["/test/meminfo", "MemTotal: 7340032 kB\n"],
     ]);
 
@@ -1599,7 +1599,7 @@ describe("resolveTsdownBuildInvocation", () => {
     // An inherited namespace can leave a mount whose subtree holds someone else's cgroup.
     // The process's real limit is hidden, so neither that subtree nor host RAM is authoritative.
     const cgroupFiles = new Map([
-      ["/proc/self/cgroup", "0::/other/branch/openclaw-main-update.service\n"],
+      ["/proc/self/cgroup", "0::/other/branch/carapace-main-update.service\n"],
       [
         "/proc/self/mountinfo",
         "30 25 0:26 /docker/abc123 /sys/fs/cgroup rw,nosuid - cgroup2 cgroup2 rw\n",
@@ -1630,32 +1630,32 @@ describe("resolveTsdownBuildInvocation", () => {
     expect(nodeOptions).toBe("--trace-warnings --max-old-space-size=6400");
   });
 
-  it("honors OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB over platform and memory defaults", () => {
+  it("honors CARAPACE_TSDOWN_MAX_OLD_SPACE_MB over platform and memory defaults", () => {
     const nodeOptions = resolveTestNodeOptions({
-      env: { OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "3072" },
+      env: { CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "3072" },
       cgroupMemoryLimitBytes: 7 * 1024 * 1024 * 1024,
     });
 
     expect(nodeOptions).toBe("--max-old-space-size=3072");
   });
 
-  it("keeps memory detection when OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB is blank", () => {
+  it("keeps memory detection when CARAPACE_TSDOWN_MAX_OLD_SPACE_MB is blank", () => {
     const nodeOptions = resolveTestNodeOptions({
-      env: { OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "  " },
+      env: { CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "  " },
       cgroupMemoryLimitBytes: 7 * 1024 * 1024 * 1024,
     });
 
     expect(nodeOptions).toBe("--max-old-space-size=6400");
   });
 
-  it("uses OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB to normalize inherited NODE_OPTIONS", () => {
+  it("uses CARAPACE_TSDOWN_MAX_OLD_SPACE_MB to normalize inherited NODE_OPTIONS", () => {
     const result = resolveTsdownBuildInvocation({
       platform: "win32",
       nodeExecPath: "C:\\Program Files\\nodejs\\node.exe",
       npmExecPath: "C:\\repo\\pnpm.cjs",
       env: {
         NODE_OPTIONS: "--trace-warnings --max-old-space-size=12288",
-        OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "4096",
+        CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "4096",
       },
       ...NO_MEMORY_LIMIT,
     });
@@ -1663,16 +1663,16 @@ describe("resolveTsdownBuildInvocation", () => {
     expect(result.options.env.NODE_OPTIONS).toBe("--trace-warnings --max-old-space-size=4096");
   });
 
-  it("rejects malformed OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB values", () => {
+  it("rejects malformed CARAPACE_TSDOWN_MAX_OLD_SPACE_MB values", () => {
     for (const value of ["0", "-1", "1.5", "1e3", "4096mb", "9007199254740992"]) {
       expect(() =>
         resolveTsdownBuildInvocation({
           nodeExecPath: "/usr/bin/node",
           npmExecPath: "/tmp/pnpm.cjs",
-          env: { OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: value },
+          env: { CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: value },
           ...NO_MEMORY_LIMIT,
         }),
-      ).toThrow("OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB must be");
+      ).toThrow("CARAPACE_TSDOWN_MAX_OLD_SPACE_MB must be");
     }
   });
 
@@ -1695,7 +1695,7 @@ describe("resolveTsdownBuildInvocation", () => {
     const result = resolveTsdownBuildInvocation({
       platform: "linux",
       nodeExecPath: "/usr/bin/node",
-      env: { OPENCLAW_BUILD_ALL_NO_PNPM: "1" },
+      env: { CARAPACE_BUILD_ALL_NO_PNPM: "1" },
       ...NO_MEMORY_LIMIT,
     });
 
@@ -1715,7 +1715,7 @@ describe("resolveTsdownBuildInvocation", () => {
         windowsVerbatimArguments: undefined,
         env: {
           NODE_OPTIONS: "--max-old-space-size=12288",
-          OPENCLAW_BUILD_ALL_NO_PNPM: "1",
+          CARAPACE_BUILD_ALL_NO_PNPM: "1",
         },
       },
     });
@@ -1730,13 +1730,13 @@ describe("resolveTsdownBuildInvocation", () => {
         "--config",
         "tsdown.config.ts",
         "--filter",
-        "openclaw-packages",
+        "carapace-packages",
       ]),
     ).toEqual(expect.arrayContaining(["packages/agent-core/dist", "packages/net-policy/dist"]));
     expect(
-      resolveTsdownCleanOutputRoots(["--config=tsdown.config.ts", "--filter=openclaw-packages"]),
+      resolveTsdownCleanOutputRoots(["--config=tsdown.config.ts", "--filter=carapace-packages"]),
     ).not.toContain("packages/ai/dist");
-    expect(resolveTsdownCleanOutputRoots(["-c=tsdown.config.ts", "-F=openclaw-unified"])).toEqual([
+    expect(resolveTsdownCleanOutputRoots(["-c=tsdown.config.ts", "-F=carapace-unified"])).toEqual([
       "dist",
       "dist-runtime",
     ]);
@@ -1751,7 +1751,7 @@ describe("resolveTsdownBuildInvocation", () => {
         "--config",
         "configs/tsdown.config.ts",
         "--filter",
-        "openclaw-packages",
+        "carapace-packages",
       ]),
     ).toEqual(listTsdownOutputRoots());
     expect(resolveTsdownCleanOutputRoots(["--format", "esm"])).toEqual(listTsdownOutputRoots());
@@ -1759,7 +1759,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("prunes stale hashed root chunk files but keeps stable aliases and nested assets", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-build-");
+      const rootDir = createTempDir("carapace-tsdown-build-");
       const distDir = path.join(rootDir, "dist");
       const distRuntimeDir = path.join(rootDir, "dist-runtime");
       await fsPromises.mkdir(path.join(distDir, "control-ui"), { recursive: true });
@@ -1814,7 +1814,7 @@ describe("resolveTsdownBuildInvocation", () => {
     "preserves separately owned outputs during $label cleanup",
     ({ args, skipDts, preserveMetadata }) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-tsdown-clean-");
+        const rootDir = createTempDir("carapace-tsdown-clean-");
         const sourceDependencies = await createSourcePluginDependenciesFixture(rootDir);
         sourceDependencies.assertResolution();
         const retainedFiles = [
@@ -1847,7 +1847,7 @@ describe("resolveTsdownBuildInvocation", () => {
           "dist/control-ui-old/index.html",
           "dist/extensions/demo/src/index.js",
           "dist/extensions/demo/node_modules/staged/index.js",
-          "dist/extensions/node_modules/openclaw/plugin-sdk/core.js",
+          "dist/extensions/node_modules/carapace/plugin-sdk/core.js",
           "dist-runtime/stale.js",
           "dist-runtime/stale.js.map",
           "dist-runtime/control-ui/index.html",
@@ -1886,8 +1886,8 @@ describe("resolveTsdownBuildInvocation", () => {
             encoding: "utf8",
             env: {
               ...process.env,
-              OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: skipDts,
-              OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: preserveMetadata,
+              CARAPACE_RUN_NODE_SKIP_DTS_BUILD: skipDts,
+              CARAPACE_PRESERVE_CLI_STARTUP_METADATA: preserveMetadata,
             },
           },
         );
@@ -1927,7 +1927,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("cleans only selected tsdown output roots", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-selected-clean-");
+      const rootDir = createTempDir("carapace-tsdown-selected-clean-");
       const aiFile = path.join(rootDir, "packages", "ai", "dist", "stale.js");
       const coreFile = path.join(rootDir, "dist", "keep.js");
       await fsPromises.mkdir(path.dirname(aiFile), { recursive: true });
@@ -1943,7 +1943,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("sanitizes only the declaration roots selected by a direct AI build", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-selected-sanitize-");
+      const rootDir = createTempDir("carapace-tsdown-selected-sanitize-");
       const aiDeclaration = path.join(rootDir, "packages", "ai", "dist", "index.d.ts");
       const rootDeclaration = path.join(rootDir, "dist", "index.d.ts");
       const malformed = "export { __exportAll, publicApi };\n";
@@ -1962,7 +1962,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses to sanitize a symlinked direct-build output root", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-sanitize-symlink-");
+      const rootDir = createTempDir("carapace-tsdown-sanitize-symlink-");
       const targetDir = path.join(rootDir, "target");
       const declaration = path.join(targetDir, "index.d.ts");
       const malformed = "export { __exportAll, publicApi };\n";
@@ -1980,7 +1980,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses to sanitize a direct-build output root behind an intermediate symlink", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-sanitize-parent-symlink-");
+      const rootDir = createTempDir("carapace-tsdown-sanitize-parent-symlink-");
       const targetPackages = path.join(rootDir, "target-packages");
       const declaration = path.join(targetPackages, "ai", "dist", "index.d.ts");
       const malformed = "export { __exportAll, publicApi };\n";
@@ -2000,7 +2000,7 @@ describe("resolveTsdownBuildInvocation", () => {
     { code: 1, expectedAi: "export { __exportAll, publicApi };\n", label: "failed" },
   ])("sanitizes selected declarations only after a $label direct build", ({ code, expectedAi }) =>
     fixture.run(async () => {
-      const rootDir = createTempDir(`openclaw-tsdown-runner-sanitize-${code}-`);
+      const rootDir = createTempDir(`carapace-tsdown-runner-sanitize-${code}-`);
       const aiDeclaration = path.join(rootDir, "packages", "ai", "dist", "index.d.ts");
       const rootDeclaration = path.join(rootDir, "dist", "index.d.ts");
       const malformed = "export { __exportAll, publicApi };\n";
@@ -2020,11 +2020,11 @@ describe("resolveTsdownBuildInvocation", () => {
     }),
   );
 
-  it.each(["OpenClaw.app", "candidates/OpenClaw.app"])(
+  it.each(["Carapace.app", "candidates/Carapace.app"])(
     "keeps the packaged Mac app intact at %s while rebuilding its replacement runtime",
     (appPath) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-tsdown-app-pairing-");
+        const rootDir = createTempDir("carapace-tsdown-app-pairing-");
         const appFile = path.join(rootDir, "dist", appPath, "Contents", "Resources", "worker.js");
         const staleFile = path.join(rootDir, "dist", "stale.js");
         await fsPromises.mkdir(path.dirname(appFile), { recursive: true });
@@ -2042,7 +2042,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("cleans an absolute explicit output directory without rebasing it under cwd", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-absolute-clean-");
+      const rootDir = createTempDir("carapace-tsdown-absolute-clean-");
       const outputDir = path.join(rootDir, "custom-dist");
       const staleFile = path.join(outputDir, "stale.js");
       await fsPromises.mkdir(outputDir, { recursive: true });
@@ -2057,7 +2057,7 @@ describe("resolveTsdownBuildInvocation", () => {
     "refuses an output root containing checkout artifact ownership from %s",
     (directory) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-tsdown-owner-clean-");
+        const rootDir = createTempDir("carapace-tsdown-owner-clean-");
         const cwd = path.join(rootDir, directory);
         const owner = path.join(rootDir, ".artifacts/dist-artifacts.lock/owner.json");
         await fsPromises.mkdir(path.dirname(owner), { recursive: true });
@@ -2073,7 +2073,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses to clean the working directory and leaves it intact", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-cwd-clean-");
+      const rootDir = createTempDir("carapace-tsdown-cwd-clean-");
       const keepFile = path.join(rootDir, "keep.js");
       await fsPromises.writeFile(keepFile, "keep\n");
 
@@ -2086,7 +2086,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses to clean a working-directory ancestor and leaves it intact", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-ancestor-clean-");
+      const rootDir = createTempDir("carapace-tsdown-ancestor-clean-");
       const checkoutDir = path.join(rootDir, "checkout");
       const keepFile = path.join(rootDir, "keep.js");
       await fsPromises.mkdir(checkoutDir);
@@ -2107,7 +2107,7 @@ describe("resolveTsdownBuildInvocation", () => {
     try {
       expect(() =>
         cleanTsdownOutputRoots({
-          cwd: "C:\\openclaw",
+          cwd: "C:\\carapace",
           pathImpl: path.win32,
           roots: [outputRoot],
         }),
@@ -2120,7 +2120,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses a symlinked output root with preserved children and leaves the target unchanged", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-clean-symlink-");
+      const rootDir = createTempDir("carapace-tsdown-clean-symlink-");
       const targetDir = path.join(rootDir, "gateway-dist");
       const targetFile = path.join(targetDir, "chunk-abc123.js");
       const metadataFile = path.join(targetDir, "cli-startup-metadata.json");
@@ -2134,7 +2134,7 @@ describe("resolveTsdownBuildInvocation", () => {
         cleanTsdownOutputRoots({
           cwd: rootDir,
           roots: ["dist"],
-          env: { OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1" },
+          env: { CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1" },
         }),
       ).toThrow(/symbolic link/u);
 
@@ -2157,7 +2157,7 @@ describe("resolveTsdownBuildInvocation", () => {
       cleanTsdownOutputRoots({
         cwd: "/workspace",
         roots: ["dist"],
-        env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" },
+        env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" },
         fs: fsImpl,
       }),
     ).toThrow(/symbolic link/u);
@@ -2166,7 +2166,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("validates every clean root before mutating any output", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-clean-roots-");
+      const rootDir = createTempDir("carapace-tsdown-clean-roots-");
       const firstRootFile = path.join(rootDir, "dist", "keep.js");
       const targetDir = path.join(rootDir, "gateway-runtime");
       await fsPromises.mkdir(path.dirname(firstRootFile), { recursive: true });
@@ -2186,7 +2186,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses a symlinked output root even without protected children", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-clean-symlink-plain-");
+      const rootDir = createTempDir("carapace-tsdown-clean-symlink-plain-");
       const targetDir = path.join(rootDir, "gateway-dist");
       const targetFile = path.join(targetDir, "stale.js");
       await fsPromises.mkdir(targetDir, { recursive: true });
@@ -2204,7 +2204,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses an output root behind an intermediate symlink", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-clean-parent-symlink-");
+      const rootDir = createTempDir("carapace-tsdown-clean-parent-symlink-");
       const checkoutDir = path.join(rootDir, "checkout");
       const targetDir = path.join(rootDir, "external", "dist");
       const targetFile = path.join(targetDir, "keep.js");
@@ -2222,7 +2222,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses to prune stale root chunks through a symlinked output root", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-prune-symlink-");
+      const rootDir = createTempDir("carapace-tsdown-prune-symlink-");
       const targetDir = path.join(rootDir, "gateway-dist");
       const hashedFile = path.join(targetDir, "delegate-BPjCe4gC.js");
       await fsPromises.mkdir(targetDir, { recursive: true });
@@ -2238,7 +2238,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("validates every chunk root before pruning any output", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-prune-roots-");
+      const rootDir = createTempDir("carapace-tsdown-prune-roots-");
       const firstRootFile = path.join(rootDir, "dist", "delegate-OldHash.js");
       const targetDir = path.join(rootDir, "gateway-runtime");
       await fsPromises.mkdir(path.dirname(firstRootFile), { recursive: true });
@@ -2253,7 +2253,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("refuses to prune runtime overlay symlinks through a symlinked output root", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-runtime-symlink-");
+      const rootDir = createTempDir("carapace-tsdown-runtime-symlink-");
       const targetDir = path.join(rootDir, "gateway-dist");
       const pluginNodeModules = path.join(targetDir, "extensions", "telegram", "node_modules");
       await fsPromises.mkdir(pluginNodeModules, { recursive: true });
@@ -2270,7 +2270,7 @@ describe("resolveTsdownBuildInvocation", () => {
 
   it("prunes untracked generated declaration files that shadow source entries", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-tsdown-source-dts-");
+      const rootDir = createTempDir("carapace-tsdown-source-dts-");
       const signalDir = path.join(rootDir, "extensions", "signal");
       const signalSrcDir = path.join(signalDir, "src");
       await fsPromises.mkdir(signalSrcDir, { recursive: true });
@@ -2322,7 +2322,7 @@ describe("createTsdownOutputScanner", () => {
     scanner.append("[UNRESOLVED_IMPORT] extensions/telegram/src/index.ts\n");
     scanner.append("[UNRESOLVED_IMPORT] node_modules/example/index.js\n");
     scanner.append(
-      "[UNRESOLVED_IMPORT] ../../../../tmp/openclaw-pnpm-node-modules/baileys/lib/Utils/messages-media.js\n",
+      "[UNRESOLVED_IMPORT] ../../../../tmp/carapace-pnpm-node-modules/baileys/lib/Utils/messages-media.js\n",
     );
 
     expect(scanner.finish().fatalUnresolvedImport).toBeNull();
@@ -2387,8 +2387,8 @@ describe("runTsdownBuildInvocation", () => {
         stderr: output.sink,
         env: {
           ...process.env,
-          OPENCLAW_TSDOWN_HEARTBEAT_MS: "0",
-          OPENCLAW_TSDOWN_TIMEOUT_MS: "250",
+          CARAPACE_TSDOWN_HEARTBEAT_MS: "0",
+          CARAPACE_TSDOWN_TIMEOUT_MS: "250",
         },
       },
     );
@@ -2484,7 +2484,7 @@ describe("runTsdownBuildInvocation", () => {
         {
           stdout: output.sink,
           stderr: output.sink,
-          env: { ...process.env, OPENCLAW_TSDOWN_HEARTBEAT_MS: "0" },
+          env: { ...process.env, CARAPACE_TSDOWN_HEARTBEAT_MS: "0" },
         },
       );
 
@@ -2498,7 +2498,7 @@ describe("runTsdownBuildInvocation", () => {
     (mode, { signal }) =>
       fixture.run(async () => {
         const native = mode === "native declarations";
-        const rootDir = fs.realpathSync(createTempDir("openclaw-tsdown-syntax-"));
+        const rootDir = fs.realpathSync(createTempDir("carapace-tsdown-syntax-"));
         const sourcePath = path.join(rootDir, "index.ts");
         const outputPath = path.join(rootDir, "dist", native ? "index.d.ts" : "index.js");
         fs.writeFileSync(path.join(rootDir, "package.json"), '{"type":"module"}\n');
@@ -2570,7 +2570,7 @@ describe("runTsdownBuildInvocation", () => {
       }),
   );
 
-  it("rejects malformed OPENCLAW_TSDOWN_TIMEOUT_MS values", () =>
+  it("rejects malformed CARAPACE_TSDOWN_TIMEOUT_MS values", () =>
     fixture.run(async () => {
       const invocation = {
         command: process.execPath,
@@ -2587,14 +2587,14 @@ describe("runTsdownBuildInvocation", () => {
           runTsdownBuildInvocation(invocation, {
             env: {
               ...process.env,
-              OPENCLAW_TSDOWN_TIMEOUT_MS: value,
+              CARAPACE_TSDOWN_TIMEOUT_MS: value,
             },
           }),
-        ).rejects.toThrow("OPENCLAW_TSDOWN_TIMEOUT_MS must be");
+        ).rejects.toThrow("CARAPACE_TSDOWN_TIMEOUT_MS must be");
       }
     }));
 
-  it("rejects malformed OPENCLAW_TSDOWN_HEARTBEAT_MS values", () =>
+  it("rejects malformed CARAPACE_TSDOWN_HEARTBEAT_MS values", () =>
     fixture.run(async () => {
       const invocation = {
         command: process.execPath,
@@ -2611,14 +2611,14 @@ describe("runTsdownBuildInvocation", () => {
           runTsdownBuildInvocation(invocation, {
             env: {
               ...process.env,
-              OPENCLAW_TSDOWN_HEARTBEAT_MS: value,
+              CARAPACE_TSDOWN_HEARTBEAT_MS: value,
             },
           }),
-        ).rejects.toThrow("OPENCLAW_TSDOWN_HEARTBEAT_MS must be");
+        ).rejects.toThrow("CARAPACE_TSDOWN_HEARTBEAT_MS must be");
       }
     }));
 
-  it("terminates the child when OPENCLAW_TSDOWN_TIMEOUT_MS elapses", () =>
+  it("terminates the child when CARAPACE_TSDOWN_TIMEOUT_MS elapses", () =>
     fixture.run(async () => {
       const output = createWriteSink();
       const result = await runTsdownBuildInvocation(
@@ -2636,8 +2636,8 @@ describe("runTsdownBuildInvocation", () => {
           stderr: output.sink,
           env: {
             ...process.env,
-            OPENCLAW_TSDOWN_HEARTBEAT_MS: "0",
-            OPENCLAW_TSDOWN_TIMEOUT_MS: "50",
+            CARAPACE_TSDOWN_HEARTBEAT_MS: "0",
+            CARAPACE_TSDOWN_TIMEOUT_MS: "50",
           },
         },
       );
@@ -2652,7 +2652,7 @@ describe("runTsdownBuildInvocation", () => {
     "kills timed-out tsdown process groups when the wrapper exits first",
     ({ signal }) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-tsdown-timeout-");
+        const rootDir = createTempDir("carapace-tsdown-timeout-");
         const childPidPath = path.join(rootDir, "child.pid");
         const parentPidPath = path.join(rootDir, "parent.pid");
         const termPath = path.join(rootDir, "child.term");
@@ -2707,7 +2707,7 @@ describe("runTsdownBuildInvocation", () => {
     "preserves timeout grace when descendant processes exit cleanly",
     ({ signal }) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-tsdown-timeout-clean-");
+        const rootDir = createTempDir("carapace-tsdown-timeout-clean-");
         const cleanupPath = path.join(rootDir, "child.cleanup");
         const termPath = path.join(rootDir, "child.term");
         const releasePath = path.join(rootDir, "child.release");
@@ -2817,7 +2817,7 @@ describe("runTsdownBuildInvocation", () => {
     "cleans process-group descendants before forwarding parent SIGTERM",
     () =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-tsdown-parent-signal-");
+        const rootDir = createTempDir("carapace-tsdown-parent-signal-");
         const childPidPath = path.join(rootDir, "child.pid");
         const readyPath = path.join(rootDir, "child.ready");
         const scriptUrl = pathToFileURL(path.resolve("scripts/tsdown-build.mts")).href;
@@ -2843,7 +2843,7 @@ describe("runTsdownBuildInvocation", () => {
             `import { runTsdownBuildInvocation } from ${JSON.stringify(scriptUrl)};`,
             "const result = await runTsdownBuildInvocation(",
             `  { command: process.execPath, args: ['-e', ${JSON.stringify(parentScript)}], options: { stdio: ['ignore', 'pipe', 'pipe'], shell: false, env: process.env } },`,
-            "  { env: { ...process.env, OPENCLAW_TSDOWN_HEARTBEAT_MS: '0' } },",
+            "  { env: { ...process.env, CARAPACE_TSDOWN_HEARTBEAT_MS: '0' } },",
             "); process.exitCode = result.status ?? 1;",
           ].join("\n");
 

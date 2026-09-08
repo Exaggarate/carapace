@@ -1,8 +1,8 @@
 // Resolves and packages install sources for plugin installs.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   gt as gtSemver,
   satisfies as satisfiesSemver,
@@ -15,7 +15,7 @@ import { pathExists } from "./fs-safe.js";
 import { applyNpmFreshnessBypassEnv, type NpmProjectInstallEnvOptions } from "./npm-install-env.js";
 import { isExactSemverVersion, resolveNpmJsonEntries } from "./npm-registry-spec.js";
 import { withTempWorkspace } from "./private-temp-workspace.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
 export function formatNpmCommandFailureOutput(result: SpawnResult): string {
   const detail = result.stderr.trim() || result.stdout.trim();
@@ -43,7 +43,7 @@ export type NpmSpecResolution = {
   integrity?: string;
   shasum?: string;
   resolvedAt?: string;
-  packageOpenClaw?: Record<string, unknown>;
+  packageCarapace?: Record<string, unknown>;
 };
 
 /** Flattened npm resolution fields stored on install results and diagnostics. */
@@ -162,7 +162,7 @@ function normalizeNpmViewMetadata(value: unknown, spec: string): NpmSpecResoluti
     integrity:
       normalizeOptionalString(rec["dist.integrity"]) ?? normalizeOptionalString(dist.integrity),
     shasum: normalizeOptionalString(rec["dist.shasum"]) ?? normalizeOptionalString(dist.shasum),
-    ...(isRecord(rec.openclaw) ? { packageOpenClaw: rec.openclaw } : {}),
+    ...(isRecord(rec.carapace) ? { packageCarapace: rec.carapace } : {}),
   };
 }
 
@@ -193,7 +193,7 @@ export async function resolveNpmSpecMetadata(params: {
       "version",
       "dist.integrity",
       "dist.shasum",
-      "openclaw",
+      "carapace",
       "--json",
     ],
     {
@@ -208,7 +208,7 @@ export async function resolveNpmSpecMetadata(params: {
     if (/E404|is not in this registry/i.test(raw)) {
       return {
         ok: false,
-        error: `Package not found on npm: ${params.spec}. See https://docs.openclaw.ai/tools/plugin for installable plugins.`,
+        error: `Package not found on npm: ${params.spec}. See https://github.com/Exaggarate/carapace for installable plugins.`,
       };
     }
     return { ok: false, error: `npm view failed: ${raw}`, category: "metadata-env" };
@@ -249,7 +249,7 @@ export async function withInstallWorkspace<T>(
   fn: (tmpDir: string) => Promise<T>,
   options?: { rootDir?: string },
 ): Promise<T> {
-  const rootDir = options?.rootDir ?? resolvePreferredOpenClawTmpDir();
+  const rootDir = options?.rootDir ?? resolvePreferredCarapaceTmpDir();
   return await withTempWorkspace({ rootDir, prefix }, async (tmp) => fn(tmp.dir));
 }
 
@@ -406,7 +406,7 @@ export async function packNpmSpecToArchive(params: {
     if (/E404|is not in this registry/i.test(raw)) {
       return {
         ok: false,
-        error: `Package not found on npm: ${params.spec}. See https://docs.openclaw.ai/tools/plugin for installable plugins.`,
+        error: `Package not found on npm: ${params.spec}. See https://github.com/Exaggarate/carapace for installable plugins.`,
       };
     }
     return { ok: false, error: `npm pack failed: ${raw}` };

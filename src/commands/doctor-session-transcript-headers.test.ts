@@ -8,18 +8,18 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { readTranscriptStorageRows } from "../config/sessions/session-accessor.sqlite-read.js";
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import * as agentDatabase from "../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import * as agentDatabase from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 
 const note = vi.hoisted(() => vi.fn());
 
@@ -34,9 +34,9 @@ const SESSION_KEY = "agent:main:headerless-session";
 const SPAWNED_CWD = "/workspace/headerless-child";
 
 describe("doctor SQLite session transcript header repair", () => {
-  let state: OpenClawTestState;
-  let cfg: OpenClawConfig;
-  let transcriptDatabaseOptions: OpenClawAgentDatabaseOptions;
+  let state: CarapaceTestState;
+  let cfg: CarapaceConfig;
+  let transcriptDatabaseOptions: CarapaceAgentDatabaseOptions;
   let scope: {
     agentId: string;
     env: NodeJS.ProcessEnv;
@@ -47,9 +47,9 @@ describe("doctor SQLite session transcript header repair", () => {
 
   beforeEach(async () => {
     note.mockClear();
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-doctor-transcript-headers-",
+      prefix: "carapace-doctor-transcript-headers-",
     });
     cfg = {
       agents: { list: [{ id: AGENT_ID, workspace: state.workspaceDir }] },
@@ -67,8 +67,8 @@ describe("doctor SQLite session transcript header repair", () => {
   afterEach(async () => {
     vi.restoreAllMocks();
     await waitForSessionTranscriptIndexReconcile(transcriptDatabaseOptions);
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   });
 
@@ -93,7 +93,7 @@ describe("doctor SQLite session transcript header repair", () => {
 
   it("repairs headerless history with legacy projection and unchanged event bytes", async () => {
     const userText =
-      "Please quote <<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>> literally.\r\n  Keep spacing.";
+      "Please quote <<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>> literally.\r\n  Keep spacing.";
     await seedTranscript([
       {
         type: "model_change",
@@ -119,9 +119,9 @@ describe("doctor SQLite session transcript header repair", () => {
       },
     ]);
     const databaseOptions = { agentId: AGENT_ID, env: state.env };
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     const beforeRows = readTranscriptStorageRows(database, SESSION_ID);
-    agentDatabase.runOpenClawAgentWriteTransaction((transactionDatabase) => {
+    agentDatabase.runCarapaceAgentWriteTransaction((transactionDatabase) => {
       transactionDatabase.db
         .prepare(
           "UPDATE session_windows SET transcript_updated_at = ?, transcript_observed_at = ? WHERE session_id = ?",
@@ -138,7 +138,7 @@ describe("doctor SQLite session transcript header repair", () => {
     ).resolves.toEqual({ found: 1, repaired: 0 });
     expect(readTranscriptStorageRows(database, SESSION_ID)).toEqual(beforeRows);
     expect(note).toHaveBeenCalledWith(
-      '- Found 1 canonical session transcript without a header.\n- Run "openclaw doctor --fix" to repair it before resuming the session.',
+      '- Found 1 canonical session transcript without a header.\n- Run "carapace doctor --fix" to repair it before resuming the session.',
       "Session transcript headers",
     );
 
@@ -231,7 +231,7 @@ describe("doctor SQLite session transcript header repair", () => {
           message: { role: "user", content: "Existing history" },
         },
       ]);
-      const database = openOpenClawAgentDatabase({ agentId: AGENT_ID, env: state.env });
+      const database = openCarapaceAgentDatabase({ agentId: AGENT_ID, env: state.env });
       const before = readTranscriptStorageRows(database, SESSION_ID);
       await expect(
         noteSessionTranscriptHeaderHealth({ cfg, env: state.env, shouldRepair: true }),
@@ -251,10 +251,10 @@ describe("doctor SQLite session transcript header repair", () => {
       },
     ]);
     const databaseOptions = { agentId: AGENT_ID, env: state.env };
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     const before = readTranscriptStorageRows(database, SESSION_ID);
-    const transaction = agentDatabase.runOpenClawAgentWriteTransaction;
-    vi.spyOn(agentDatabase, "runOpenClawAgentWriteTransaction").mockImplementationOnce(
+    const transaction = agentDatabase.runCarapaceAgentWriteTransaction;
+    vi.spyOn(agentDatabase, "runCarapaceAgentWriteTransaction").mockImplementationOnce(
       (write, options, transactionOptions) => {
         transaction((db) => {
           db.db
@@ -287,7 +287,7 @@ describe("doctor SQLite session transcript header repair", () => {
       { type: "message", message: { role: "user", content: "legacy message" } },
       { type: "message", message: { role: "hookMessage", content: "legacy hook" } },
     ]);
-    const database = openOpenClawAgentDatabase({ agentId: AGENT_ID, env: state.env });
+    const database = openCarapaceAgentDatabase({ agentId: AGENT_ID, env: state.env });
     const before = readTranscriptStorageRows(database, SESSION_ID);
 
     await expect(
@@ -334,7 +334,7 @@ describe("doctor SQLite session transcript header repair", () => {
     },
   ])("does not repair $name", async ({ events }) => {
     await seedTranscript(events);
-    const database = openOpenClawAgentDatabase({ agentId: AGENT_ID, env: state.env });
+    const database = openCarapaceAgentDatabase({ agentId: AGENT_ID, env: state.env });
     const before = readTranscriptStorageRows(database, SESSION_ID);
 
     await expect(
@@ -366,8 +366,8 @@ describe("doctor SQLite session transcript header repair", () => {
       },
     ]);
     const databaseOptions = { agentId: AGENT_ID, env: state.env };
-    const database = openOpenClawAgentDatabase(databaseOptions);
-    agentDatabase.runOpenClawAgentWriteTransaction((transactionDatabase) => {
+    const database = openCarapaceAgentDatabase(databaseOptions);
+    agentDatabase.runCarapaceAgentWriteTransaction((transactionDatabase) => {
       const duplicate = {
         type: "message",
         id: "user-1",
@@ -395,7 +395,7 @@ describe("doctor SQLite session transcript header repair", () => {
       if (shared) {
         const storePath = state.path("shared.sqlite");
         transcriptDatabaseOptions = { agentId: "alpha", env: state.env, path: storePath };
-        openOpenClawAgentDatabase(transcriptDatabaseOptions);
+        openCarapaceAgentDatabase(transcriptDatabaseOptions);
         cfg = {
           agents: { entries: { beta: { workspace: state.workspaceDir } } },
           session: { store: storePath },
@@ -419,7 +419,7 @@ describe("doctor SQLite session transcript header repair", () => {
         noteSessionTranscriptHeaderHealth({ cfg, env: state.env, shouldRepair: true }),
       ).resolves.toEqual({ found: 1, repaired: 1 });
 
-      const database = openOpenClawAgentDatabase(transcriptDatabaseOptions);
+      const database = openCarapaceAgentDatabase(transcriptDatabaseOptions);
       const header = JSON.parse(readTranscriptStorageRows(database, SESSION_ID)[0]!.eventJson);
       expect(header).toMatchObject({ type: "session", cwd: state.workspaceDir });
     },
@@ -436,7 +436,7 @@ describe("doctor SQLite session transcript header repair", () => {
       },
     ]);
     const databaseOptions = { agentId: AGENT_ID, env: state.env };
-    agentDatabase.runOpenClawAgentWriteTransaction((database) => {
+    agentDatabase.runCarapaceAgentWriteTransaction((database) => {
       database.db
         .prepare(
           "UPDATE session_nodes SET current_session_id = ?, entry_json = ? WHERE session_key = ?",
@@ -452,7 +452,7 @@ describe("doctor SQLite session transcript header repair", () => {
       noteSessionTranscriptHeaderHealth({ cfg, env: state.env, shouldRepair: true }),
     ).resolves.toEqual({ found: 1, repaired: 1 });
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     const header = JSON.parse(readTranscriptStorageRows(database, SESSION_ID)[0]!.eventJson);
     expect(header).toMatchObject({ type: "session", cwd: state.workspaceDir });
   });

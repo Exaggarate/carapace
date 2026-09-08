@@ -22,8 +22,8 @@ import {
   tryBeginGatewaySuspendAdmission,
 } from "../../process/gateway-work-admission.js";
 import { getActiveSessionWorkAdmissionCount } from "../../sessions/session-lifecycle-admission.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   authorizeClientVoiceConfirmation,
   checkClientVoiceToolConfirmationPolicy,
@@ -78,7 +78,7 @@ vi.mock("../../agents/realtime-bootstrap-context.js", () => ({
   resolveRealtimeBootstrapContextInstructions: async () => undefined,
 }));
 
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 const sessionKey = "agent:main:main";
 const sessionId = "voice-transcript-session";
 let tempDir: string;
@@ -103,7 +103,7 @@ function configureDelegatedBrowserProvider(
     capabilities: { transports: ["webrtc"], handlesAgentConsult: true, supportsToolCalls: false },
     createBrowserSession,
   };
-  Object.defineProperty(provider, Symbol.for("openclaw.internal.realtime-voice-provider.v1"), {
+  Object.defineProperty(provider, Symbol.for("carapace.internal.realtime-voice-provider.v1"), {
     value: { isBrowserSessionConfigured: () => true, cancelBrowserSession },
   });
   voiceMocks.resolveConfiguredRealtimeVoiceProvider.mockReturnValue({
@@ -229,9 +229,9 @@ describe("talk.client.transcript", () => {
     resetGatewayWorkAdmission();
     ownedVoiceSessionId = undefined;
     tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-talk-transcript-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-talk-transcript-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     await replaceSessionEntry(
       { agentId: "main", sessionKey },
       { sessionId, updatedAt: Date.now() },
@@ -256,8 +256,8 @@ describe("talk.client.transcript", () => {
     clientVoiceSessionTesting.reset();
     resetClientVoiceConfirmationStateForTest();
     vi.useRealTimers();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     await fs.rm(tempDir, { recursive: true, force: true });
     expect(remainingRootWork).toBe(0);

@@ -1,11 +1,11 @@
 import { createServer } from "node:http";
-import { buildChannelInboundEventContext } from "openclaw/plugin-sdk/channel-inbound";
+import { buildChannelInboundEventContext } from "carapace/plugin-sdk/channel-inbound";
 import {
   createPluginRuntimeMock,
   createStartAccountContext,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createReplyDispatcher, settleReplyDispatcher } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createReplyDispatcher, settleReplyDispatcher } from "carapace/plugin-sdk/reply-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   injectQaBusInboundMessage,

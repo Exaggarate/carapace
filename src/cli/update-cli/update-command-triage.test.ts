@@ -10,7 +10,7 @@ import { POST_CORE_UPDATE_ENV } from "../../infra/update-post-core-context.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { defaultRuntime, ExitError } from "../../runtime.js";
 import { withEnvAsync } from "../../test-utils/env.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { resolveAutomaticUpdateTriage, UpdateCommandFailure } from "./update-command-result.js";
 import { withUpdateFailureTriage, type UpdateTriageTarget } from "./update-command-triage.js";
 
@@ -142,7 +142,7 @@ it.each<{
 });
 
 async function createInstalledTriage(exitCode = 0) {
-  const root = await fs.realpath(tempDirs.make("openclaw-update-triage-"));
+  const root = await fs.realpath(tempDirs.make("carapace-update-triage-"));
   await fs.mkdir(path.join(root, "dist"));
   // The real child consumes the failure export and environment after the caller unwinds.
   await fs.writeFile(
@@ -155,10 +155,10 @@ async function createInstalledTriage(exitCode = 0) {
     fs.writeFileSync(path.join(${JSON.stringify(root)}, "receipt.json"), JSON.stringify({
       args,
       failure: JSON.parse(fs.readFileSync(input, "utf8")),
-      stateDir: process.env.OPENCLAW_STATE_DIR,
-      configPath: process.env.OPENCLAW_CONFIG_PATH,
-      updateInProgress: process.env.OPENCLAW_UPDATE_IN_PROGRESS,
-      serviceMarker: process.env.OPENCLAW_SERVICE_MARKER,
+      stateDir: process.env.CARAPACE_STATE_DIR,
+      configPath: process.env.CARAPACE_CONFIG_PATH,
+      updateInProgress: process.env.CARAPACE_UPDATE_IN_PROGRESS,
+      serviceMarker: process.env.CARAPACE_SERVICE_MARKER,
       released: fs.existsSync(path.join(${JSON.stringify(root)}, "released")),
     }));
     process.stdout.write(args.includes("--json")
@@ -173,10 +173,10 @@ async function createInstalledTriage(exitCode = 0) {
     env: {
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_STATE_DIR: path.join(root, "named-state"),
-      OPENCLAW_CONFIG_PATH: path.join(root, "custom-config.json"),
-      OPENCLAW_UPDATE_IN_PROGRESS: "1",
-      OPENCLAW_SERVICE_MARKER: "openclaw",
+      CARAPACE_STATE_DIR: path.join(root, "named-state"),
+      CARAPACE_CONFIG_PATH: path.join(root, "custom-config.json"),
+      CARAPACE_UPDATE_IN_PROGRESS: "1",
+      CARAPACE_SERVICE_MARKER: "carapace",
     },
   } satisfies UpdateTriageTarget;
 }
@@ -207,7 +207,7 @@ async function createManagedTriageTarget() {
     }),
   );
   Object.assign(target.env, {
-    OPENCLAW_UPDATE_RUN_HANDOFF: "1",
+    CARAPACE_UPDATE_RUN_HANDOFF: "1",
     [CONTROL_PLANE_UPDATE_SENTINEL_META_ENV]: metaPath,
   });
   return { target, contextPath };
@@ -243,8 +243,8 @@ describe("update failure triage boundary", () => {
       const receipt = await readReceipt(target);
       expect(receipt).toMatchObject({
         released: true,
-        stateDir: target.env.OPENCLAW_STATE_DIR,
-        configPath: target.env.OPENCLAW_CONFIG_PATH,
+        stateDir: target.env.CARAPACE_STATE_DIR,
+        configPath: target.env.CARAPACE_CONFIG_PATH,
         failure: {
           result: { mode: "npm", reason: "global-install-failed", before: { version: "2026.8.1" } },
         },
@@ -427,7 +427,7 @@ describe("update failure triage boundary", () => {
 
   it.each([
     { name: "preview", opts: { dryRun: true }, env: {} },
-    { name: "managed helper child", opts: {}, env: { OPENCLAW_UPDATE_RUN_HANDOFF: "1" } },
+    { name: "managed helper child", opts: {}, env: { CARAPACE_UPDATE_RUN_HANDOFF: "1" } },
     { name: "post-core child", opts: {}, env: { [POST_CORE_UPDATE_ENV]: "1" } },
   ])("leaves triage to the owner for $name", async ({ opts, env }) => {
     const target = await createInstalledTriage();
@@ -440,7 +440,7 @@ describe("update failure triage boundary", () => {
     await expect(fs.stat(path.join(target.root, "receipt.json"))).rejects.toMatchObject({
       code: "ENOENT",
     });
-    await expect(fs.stat(target.env.OPENCLAW_STATE_DIR)).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(fs.stat(target.env.CARAPACE_STATE_DIR)).rejects.toMatchObject({ code: "ENOENT" });
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
   });
 
@@ -488,7 +488,7 @@ describe("update failure triage boundary", () => {
 
   it("keeps reporting in the admitted run's state scope", async () => {
     const target = await createInstalledTriage();
-    const env = { ...target.env, OPENCLAW_STATE_DIR: path.join(target.root, "admitted-state") };
+    const env = { ...target.env, CARAPACE_STATE_DIR: path.join(target.root, "admitted-state") };
     const opts = { run: { runId: "b89e301f-2df4-4dd8-a7ea-4f4b4e10b6f3", env } };
     runInteractiveUpdateFailureAction.mockResolvedValue("handled");
 
@@ -565,13 +565,13 @@ describe("update failure triage boundary", () => {
     expect(defaultRuntime.error).toHaveBeenCalledWith(
       expect.stringContaining("Saved update failure:"),
     );
-    expect(defaultRuntime.error).toHaveBeenCalledWith(expect.stringContaining("openclaw triage"));
+    expect(defaultRuntime.error).toHaveBeenCalledWith(expect.stringContaining("carapace triage"));
     expect(defaultRuntime.writeJson).not.toHaveBeenCalled();
   });
 
   it("preserves the original failure when diagnostics cannot be written", async () => {
     const target = await createInstalledTriage();
-    await fs.writeFile(target.env.OPENCLAW_STATE_DIR, "not a directory");
+    await fs.writeFile(target.env.CARAPACE_STATE_DIR, "not a directory");
     const failure = new Error("Original update failure");
     await expect(
       withUpdateFailureTriage({}, target, async () => {
@@ -601,7 +601,7 @@ describe("update failure triage boundary", () => {
       vi.mocked(defaultRuntime.exit).mockImplementation((code) => {
         throw new ExitError(code);
       });
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const invocationCwd = state.path("operator-shell");
         const brokenStateDir = state.path("unusable-state");
         const receiptPath = state.path("agent-receipts.jsonl");
@@ -626,12 +626,12 @@ describe("update failure triage boundary", () => {
               `fs.appendFileSync(${JSON.stringify(receiptPath)}, JSON.stringify({\n` +
               `  cwd: fs.realpathSync(process.cwd()),\n` +
               `  home: process.env.HOME,\n` +
-              `  stateDir: process.env.OPENCLAW_STATE_DIR,\n` +
-              `  configPath: process.env.OPENCLAW_CONFIG_PATH,\n` +
-              `  workspaceDir: process.env.OPENCLAW_WORKSPACE_DIR,\n` +
+              `  stateDir: process.env.CARAPACE_STATE_DIR,\n` +
+              `  configPath: process.env.CARAPACE_CONFIG_PATH,\n` +
+              `  workspaceDir: process.env.CARAPACE_WORKSPACE_DIR,\n` +
               `  path: process.env.PATH,\n` +
               `  nodeOptions: process.env.NODE_OPTIONS,\n` +
-              `  updateInProgress: process.env.OPENCLAW_UPDATE_IN_PROGRESS,\n` +
+              `  updateInProgress: process.env.CARAPACE_UPDATE_IN_PROGRESS,\n` +
               `  released: fs.existsSync(${JSON.stringify(releasedPath)}),\n` +
               `  prompt: process.argv[2],\n` +
               `}) + "\\n");\n` +
@@ -644,7 +644,7 @@ describe("update failure triage boundary", () => {
               NODE_OPTIONS: "--no-warnings",
               HOME: state.home,
               USERPROFILE: state.home,
-              OPENCLAW_WORKSPACE_DIR: state.workspaceDir,
+              CARAPACE_WORKSPACE_DIR: state.workspaceDir,
             },
             () =>
               withTriageTerminal(true, async () => {
@@ -661,8 +661,8 @@ describe("update failure triage boundary", () => {
                         HOME: state.path("service-home"),
                         PATH: state.path("service-tools"),
                         NODE_OPTIONS: "--trace-warnings",
-                        OPENCLAW_STATE_DIR: brokenStateDir,
-                        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+                        CARAPACE_STATE_DIR: brokenStateDir,
+                        CARAPACE_UPDATE_IN_PROGRESS: "1",
                       };
                       process.env.HOME = state.path("later-home");
                       process.env.USERPROFILE = state.path("later-home");
@@ -681,7 +681,7 @@ describe("update failure triage boundary", () => {
                           steps: [
                             {
                               name: "doctor",
-                              command: "openclaw doctor --fix",
+                              command: "carapace doctor --fix",
                               cwd: target.root,
                               durationMs: 1,
                               exitCode: 1,

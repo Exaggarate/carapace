@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginActivationSource, normalizePluginsConfig } from "../plugins/config-state.js";
 import { setCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata.test-support.js";
 import { resolveInstalledPluginIndexPolicyHash } from "../plugins/installed-plugin-index-policy.js";
@@ -25,9 +25,9 @@ import {
 import { createPluginSdkTestHarness } from "./test-helpers.js";
 
 const { createTempDirSync } = createPluginSdkTestHarness();
-const originalBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-const originalDisableBundledPlugins = process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
-const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalBundledPluginsDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+const originalDisableBundledPlugins = process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
+const originalStateDir = process.env.CARAPACE_STATE_DIR;
 const trustedBundledFixturesRoot = path.resolve("dist-runtime", "extensions");
 const trustedBundledFixtureDirs: string[] = [];
 type SnapshotPluginRecord = PluginMetadataSnapshot["manifestRegistry"]["plugins"][number];
@@ -50,7 +50,7 @@ function writePluginPackageJson(
   type: "commonjs" | "module" = "module",
 ): void {
   writeJsonFile(path.join(pluginDir, "package.json"), {
-    name: `@openclaw/plugin-${name}`,
+    name: `@carapace/plugin-${name}`,
     version: "0.0.0",
     type,
   });
@@ -70,7 +70,7 @@ function createBundledPluginDir(prefix: string, marker: string): string {
 }
 
 function useBundledPluginDirOverrideForTest(dir: string): void {
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = dir;
+  process.env.CARAPACE_BUNDLED_PLUGINS_DIR = dir;
 }
 
 function createThrowingPluginDir(prefix: string): string {
@@ -87,9 +87,9 @@ function createThrowingPluginDir(prefix: string): string {
 }
 
 beforeEach(() => {
-  delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-  delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
-  delete process.env.OPENCLAW_STATE_DIR;
+  delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+  delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
+  delete process.env.CARAPACE_STATE_DIR;
 });
 
 afterEach(() => {
@@ -102,28 +102,28 @@ afterEach(() => {
   resetFacadeRuntimeStateForTest();
   vi.doUnmock("../plugins/manifest-registry.js");
   if (originalBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
   }
   if (originalDisableBundledPlugins === undefined) {
-    delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+    delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
   } else {
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = originalDisableBundledPlugins;
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = originalDisableBundledPlugins;
   }
   if (originalStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalStateDir;
+    process.env.CARAPACE_STATE_DIR = originalStateDir;
   }
 });
 
 describe("plugin-sdk facade runtime", () => {
   it("refreshes browser SDK surfaces only when the plugin cache generation changes", async () => {
-    const dir = createTrustedBundledFixtureRoot("openclaw-browser-generation-");
+    const dir = createTrustedBundledFixtureRoot("carapace-browser-generation-");
     const pluginDir = path.join(dir, "browser");
     writePluginPackageJson(pluginDir, "browser", "commonjs");
-    writeJsonFile(path.join(pluginDir, "openclaw.plugin.json"), {
+    writeJsonFile(path.join(pluginDir, "carapace.plugin.json"), {
       id: "browser",
       enabledByDefault: true,
     });
@@ -169,7 +169,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("reuses successful facade locations without repeating filesystem probes", () => {
-    const dir = createBundledPluginDir("openclaw-facade-location-cache-", "cached");
+    const dir = createBundledPluginDir("carapace-facade-location-cache-", "cached");
     useBundledPluginDirOverrideForTest(dir);
     const existsSync = vi.spyOn(fs, "existsSync");
     const params = {
@@ -190,8 +190,8 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("honors trusted bundled plugin dir overrides", () => {
-    const overrideA = createBundledPluginDir("openclaw-facade-runtime-a-", "override-a");
-    const overrideB = createBundledPluginDir("openclaw-facade-runtime-b-", "override-b");
+    const overrideA = createBundledPluginDir("carapace-facade-runtime-a-", "override-a");
+    const overrideB = createBundledPluginDir("carapace-facade-runtime-b-", "override-b");
 
     useBundledPluginDirOverrideForTest(overrideA);
     const fromA = testing.resolveFacadeModuleLocation({
@@ -215,7 +215,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("falls back to package source surfaces when an override dir is partial", () => {
-    const overrideDir = createTrustedBundledFixtureRoot("openclaw-facade-runtime-empty-");
+    const overrideDir = createTrustedBundledFixtureRoot("carapace-facade-runtime-empty-");
     useBundledPluginDirOverrideForTest(overrideDir);
 
     const resolved = testing.resolveFacadeModuleLocation({
@@ -230,8 +230,8 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("does not fall back to package source surfaces when bundled plugins are disabled", () => {
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
     testing.setFacadeActivationCheckRuntimeForTest({
       resolveRegistryPluginModuleLocation: () => null,
     } as never);
@@ -245,7 +245,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("does not reuse enabled facade locations when bundled plugins are disabled", () => {
-    const dir = createBundledPluginDir("openclaw-facade-location-disabled-", "enabled");
+    const dir = createBundledPluginDir("carapace-facade-location-disabled-", "enabled");
     useBundledPluginDirOverrideForTest(dir);
     const params = {
       dirName: "demo",
@@ -257,7 +257,7 @@ describe("plugin-sdk facade runtime", () => {
       boundaryRoot: dir,
     });
 
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
     testing.setFacadeActivationCheckRuntimeForTest({
       resolveRegistryPluginModuleLocation: () => null,
     } as never);
@@ -267,15 +267,15 @@ describe("plugin-sdk facade runtime", () => {
 
   it("does not reuse installed facade locations across custom environment profiles", () => {
     const profileA: NodeJS.ProcessEnv = {
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(path.sep, "openclaw-facade-profile-a"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(path.sep, "carapace-facade-profile-a"),
     };
     const profileB: NodeJS.ProcessEnv = {
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(path.sep, "openclaw-facade-profile-b"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(path.sep, "carapace-facade-profile-b"),
     };
     const resolveRegistryPluginModuleLocation = vi.fn(({ env }: { env?: NodeJS.ProcessEnv }) => {
-      const stateDir = env?.OPENCLAW_STATE_DIR;
+      const stateDir = env?.CARAPACE_STATE_DIR;
       if (!stateDir) {
         return null;
       }
@@ -290,8 +290,8 @@ describe("plugin-sdk facade runtime", () => {
     } as never);
 
     const params = { dirName: "demo", artifactBasename: "api.js" };
-    const profileARoot = path.join(profileA.OPENCLAW_STATE_DIR!, "plugins", "demo");
-    const profileBRoot = path.join(profileB.OPENCLAW_STATE_DIR!, "plugins", "demo");
+    const profileARoot = path.join(profileA.CARAPACE_STATE_DIR!, "plugins", "demo");
+    const profileBRoot = path.join(profileB.CARAPACE_STATE_DIR!, "plugins", "demo");
 
     expect(testing.resolveFacadeModuleLocation({ ...params, env: profileA })).toEqual({
       modulePath: path.join(profileARoot, "api.js"),
@@ -313,7 +313,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("memoizes missing facade locations until the plugin lifecycle clears", () => {
-    const dir = createTrustedBundledFixtureRoot("openclaw-facade-location-retry-");
+    const dir = createTrustedBundledFixtureRoot("carapace-facade-location-retry-");
     useBundledPluginDirOverrideForTest(dir);
     let registryProbes = 0;
     testing.setFacadeActivationCheckRuntimeForTest({
@@ -350,7 +350,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("invalidates cached facade locations when plugin metadata changes", () => {
-    const dir = createBundledPluginDir("openclaw-facade-location-invalidation-", "original");
+    const dir = createBundledPluginDir("carapace-facade-location-invalidation-", "original");
     useBundledPluginDirOverrideForTest(dir);
     const params = {
       dirName: "demo",
@@ -375,7 +375,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("returns the same object identity on repeated calls (sentinel consistency)", () => {
-    const dir = createBundledPluginDir("openclaw-facade-identity-", "identity-check");
+    const dir = createBundledPluginDir("carapace-facade-identity-", "identity-check");
     useBundledPluginDirOverrideForTest(dir);
     const location = {
       modulePath: path.join(dir, "demo", "api.js"),
@@ -400,7 +400,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("breaks circular facade re-entry during module evaluation", () => {
-    const dir = createBundledPluginDir("openclaw-facade-circular-", "circular-ok");
+    const dir = createBundledPluginDir("carapace-facade-circular-", "circular-ok");
     const location = {
       modulePath: path.join(dir, "demo", "api.js"),
       boundaryRoot: dir,
@@ -428,7 +428,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("back-fills the sentinel before post-load facade tracking re-enters", () => {
-    const dir = createBundledPluginDir("openclaw-facade-post-load-", "post-load-ok");
+    const dir = createBundledPluginDir("carapace-facade-post-load-", "post-load-ok");
     const location = {
       modulePath: path.join(dir, "demo", "api.js"),
       boundaryRoot: dir,
@@ -458,7 +458,7 @@ describe("plugin-sdk facade runtime", () => {
     expect(loader).toHaveBeenCalledTimes(1);
   });
   it("clears the cache on load failure so retries re-execute", () => {
-    const dir = createThrowingPluginDir("openclaw-facade-throw-");
+    const dir = createThrowingPluginDir("carapace-facade-throw-");
     useBundledPluginDirOverrideForTest(dir);
 
     expect(() =>
@@ -514,7 +514,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("allows runtime-api facade loads when the bundled plugin is explicitly enabled", () => {
-    const dir = createTempDirSync("openclaw-facade-runtime-enabled-");
+    const dir = createTempDirSync("carapace-facade-runtime-enabled-");
     fs.mkdirSync(path.join(dir, "discord"), { recursive: true });
     fs.writeFileSync(
       path.join(dir, "discord", "runtime-api.js"),
@@ -564,7 +564,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("rejects hardlinked artifacts under installed plugin roots", () => {
-    const installedDir = createTempDirSync("openclaw-facade-hardlink-");
+    const installedDir = createTempDirSync("carapace-facade-hardlink-");
     const originalPath = path.join(installedDir, "original.js");
     fs.writeFileSync(originalPath, 'export const marker = "hardlinked";\n', "utf8");
     const artifactPath = path.join(installedDir, "runtime-api.js");
@@ -581,7 +581,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("keeps hardlinked artifacts loadable under core-shipped roots", () => {
-    const rootDir = createTrustedBundledFixtureRoot("openclaw-facade-hardlink-bundled-");
+    const rootDir = createTrustedBundledFixtureRoot("carapace-facade-hardlink-bundled-");
     const pluginDir = path.join(rootDir, "demo");
     fs.mkdirSync(pluginDir, { recursive: true });
     const originalPath = path.join(pluginDir, "original.js");
@@ -599,7 +599,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("resolves a globally-installed plugin whose rootDir basename matches the dirName", () => {
-    const lineDir = createTempDirSync("openclaw-facade-global-line-");
+    const lineDir = createTempDirSync("carapace-facade-global-line-");
     fs.mkdirSync(lineDir, { recursive: true });
     fs.writeFileSync(
       path.join(lineDir, "runtime-api.js"),
@@ -609,9 +609,9 @@ describe("plugin-sdk facade runtime", () => {
     fs.writeFileSync(
       path.join(lineDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/line",
+        name: "@carapace/line",
         version: "0.0.0",
-        openclaw: {
+        carapace: {
           extensions: ["./runtime-api.js"],
           channel: { id: "line" },
         },
@@ -619,7 +619,7 @@ describe("plugin-sdk facade runtime", () => {
       "utf8",
     );
     fs.writeFileSync(
-      path.join(lineDir, "openclaw.plugin.json"),
+      path.join(lineDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "line",
         channels: ["line"],
@@ -647,7 +647,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("resolves a globally-installed plugin public surface from package dist", () => {
-    const lineDir = createTempDirSync("openclaw-facade-global-line-dist-");
+    const lineDir = createTempDirSync("carapace-facade-global-line-dist-");
     fs.mkdirSync(path.join(lineDir, "dist"), { recursive: true });
     fs.writeFileSync(
       path.join(lineDir, "dist", "runtime-api.js"),
@@ -657,10 +657,10 @@ describe("plugin-sdk facade runtime", () => {
     fs.writeFileSync(
       path.join(lineDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/line",
+        name: "@carapace/line",
         version: "0.0.0",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.ts"],
           runtimeExtensions: ["./dist/index.js"],
           channel: { id: "line" },
@@ -669,7 +669,7 @@ describe("plugin-sdk facade runtime", () => {
       "utf8",
     );
     fs.writeFileSync(
-      path.join(lineDir, "openclaw.plugin.json"),
+      path.join(lineDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "line",
         channels: ["line"],
@@ -697,7 +697,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("resolves a globally-installed plugin with an encoded scoped rootDir basename", () => {
-    const encodedDir = createTempDirSync("openclaw-facade-encoded-line-");
+    const encodedDir = createTempDirSync("carapace-facade-encoded-line-");
     fs.mkdirSync(encodedDir, { recursive: true });
     fs.writeFileSync(
       path.join(encodedDir, "runtime-api.js"),
@@ -707,9 +707,9 @@ describe("plugin-sdk facade runtime", () => {
     fs.writeFileSync(
       path.join(encodedDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/line",
+        name: "@carapace/line",
         version: "0.0.0",
-        openclaw: {
+        carapace: {
           extensions: ["./runtime-api.js"],
           channel: { id: "line" },
         },
@@ -717,7 +717,7 @@ describe("plugin-sdk facade runtime", () => {
       "utf8",
     );
     fs.writeFileSync(
-      path.join(encodedDir, "openclaw.plugin.json"),
+      path.join(encodedDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "line",
         channels: ["line"],
@@ -777,7 +777,7 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("prefers the source runtime snapshot for facade activation checks", () => {
-    const dir = createTempDirSync("openclaw-facade-source-snapshot-");
+    const dir = createTempDirSync("carapace-facade-source-snapshot-");
     fs.mkdirSync(path.join(dir, "demo"), { recursive: true });
     fs.writeFileSync(
       path.join(dir, "demo", "runtime-api.js"),
@@ -785,7 +785,7 @@ describe("plugin-sdk facade runtime", () => {
       "utf8",
     );
     fs.writeFileSync(
-      path.join(dir, "demo", "openclaw.plugin.json"),
+      path.join(dir, "demo", "carapace.plugin.json"),
       JSON.stringify({
         id: "demo",
       }),
@@ -824,19 +824,19 @@ describe("plugin-sdk facade runtime", () => {
   });
 
   it("validates current snapshot against facade boundary config and ignores on mismatch", () => {
-    const dir = createTempDirSync("openclaw-facade-snapshot-validate-");
+    const dir = createTempDirSync("carapace-facade-snapshot-validate-");
     fs.mkdirSync(path.join(dir, "demo"), { recursive: true });
     fs.writeFileSync(
       path.join(dir, "demo", "runtime-api.js"),
       'export const marker = "snapshot-validate";\n',
       "utf8",
     );
-    // Do NOT write openclaw.plugin.json on disk to force fallback to registry scan
+    // Do NOT write carapace.plugin.json on disk to force fallback to registry scan
     useBundledPluginDirOverrideForTest(dir);
 
     function createTestSnapshot(
       params: {
-        config?: OpenClawConfig;
+        config?: CarapaceConfig;
         plugins?: SnapshotPluginRecord[];
       } = {},
     ): PluginMetadataSnapshot {
@@ -893,7 +893,7 @@ describe("plugin-sdk facade runtime", () => {
           demo: { enabled: true },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const matchedSnapshot = createTestSnapshot({
       config: configWithPaths,
       plugins: [
@@ -901,7 +901,7 @@ describe("plugin-sdk facade runtime", () => {
           id: "demo-snapshot",
           rootDir: path.join(dir, "demo"),
           source: path.join(dir, "demo", "runtime-api.js"),
-          manifestPath: path.join(dir, "demo", "openclaw.plugin.json"),
+          manifestPath: path.join(dir, "demo", "carapace.plugin.json"),
           channels: ["demo"],
           providers: [],
           cliBackends: [],

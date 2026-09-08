@@ -1,7 +1,7 @@
 // Tests ACP dispatch delivery routing and visible reply handoff.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { PlatformMessageNotDispatchedError } from "../../infra/outbound/deliver-types.js";
 import { createAcpDispatchDeliveryCoordinator } from "./dispatch-acp-delivery.js";
 import { createReplyDispatcher } from "./reply-dispatcher.js";
@@ -134,7 +134,7 @@ async function raceWithTimeoutResult<T>(
 }
 
 function createVisibleChatAcpCoordinator(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   dispatcher: ReplyDispatcher = createDispatcher(),
 ) {
   return createAcpDispatchDeliveryCoordinator({
@@ -153,7 +153,7 @@ function createVisibleChatAcpCoordinator(
 }
 
 async function expectVisibleChatBlockRoutesToAccount(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string | undefined,
 ): Promise<void> {
   const coordinator = createVisibleChatAcpCoordinator(cfg);
@@ -1015,7 +1015,7 @@ describe("createAcpDispatchDeliveryCoordinator", () => {
   });
 
   it("routes ACP replies when cfg.channels is missing", async () => {
-    await expectVisibleChatBlockRoutesToAccount({} as OpenClawConfig, "default");
+    await expectVisibleChatBlockRoutesToAccount({} as CarapaceConfig, "default");
   });
 
   it("treats routed plugin-owned block text as visible", async () => {

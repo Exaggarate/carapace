@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { html, render, type LitElement } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
@@ -1040,7 +1040,7 @@ describe("chat run error", () => {
         {
           role: "user",
           content: "original prompt",
-          __openclaw: { idempotencyKey: "initial:user" },
+          __carapace: { idempotencyKey: "initial:user" },
         },
       ],
       placementStartup: {
@@ -1309,7 +1309,7 @@ describe("cloud workspace conflict notice", () => {
       "src/path-5.ts",
       "src/path-6.ts",
     ],
-    stagedResultRef: "refs/openclaw/worker-results/claim-123",
+    stagedResultRef: "refs/carapace/worker-results/claim-123",
     totalCount: 9,
   };
 
@@ -1339,8 +1339,8 @@ describe("cloud workspace conflict notice", () => {
       (element) => element.textContent,
     );
     expect(commands).toEqual([
-      "git show 'refs/openclaw/worker-results/claim-123:src/[path]-1.ts'",
-      "git checkout 'refs/openclaw/worker-results/claim-123' -- ':(top,literal)src/[path]-1.ts'",
+      "git show 'refs/carapace/worker-results/claim-123:src/[path]-1.ts'",
+      "git checkout 'refs/carapace/worker-results/claim-123' -- ':(top,literal)src/[path]-1.ts'",
     ]);
     expect(
       notice.querySelector<HTMLButtonElement>('[aria-label="Copy cloud inspect command"]'),
@@ -1373,7 +1373,7 @@ describe("cloud workspace conflict notice", () => {
         customType: "cloud-workspace-conflict",
         details: {
           paths: [entryPath],
-          stagedResultRef: "refs/openclaw/worker-results/claim-unsafe",
+          stagedResultRef: "refs/carapace/worker-results/claim-unsafe",
         },
       });
       expect(normalizedConflict).toBeDefined();
@@ -1392,7 +1392,7 @@ describe("cloud workspace conflict notice", () => {
       customType: "cloud-workspace-conflict",
       details: {
         paths: ["src/unsafe\nname.ts", "src/safe.ts"],
-        stagedResultRef: "refs/openclaw/worker-results/claim-mixed",
+        stagedResultRef: "refs/carapace/worker-results/claim-mixed",
       },
     });
     const container = renderChatView({ workspaceConflict: normalizedConflict });
@@ -1400,8 +1400,8 @@ describe("cloud workspace conflict notice", () => {
       (element) => element.textContent,
     );
     expect(commands).toEqual([
-      "git show 'refs/openclaw/worker-results/claim-mixed:src/safe.ts'",
-      "git checkout 'refs/openclaw/worker-results/claim-mixed' -- ':(top,literal)src/safe.ts'",
+      "git show 'refs/carapace/worker-results/claim-mixed:src/safe.ts'",
+      "git checkout 'refs/carapace/worker-results/claim-mixed' -- ':(top,literal)src/safe.ts'",
     ]);
   });
 
@@ -1413,7 +1413,7 @@ describe("cloud workspace conflict notice", () => {
       customType: "cloud-workspace-conflict",
       details: {
         paths: ["src/first.ts", "src/second.ts"],
-        stagedResultRef: "refs/openclaw/worker-results/claim-per-row",
+        stagedResultRef: "refs/carapace/worker-results/claim-per-row",
       },
     });
     const container = renderChatView({ workspaceConflict: normalizedConflict });
@@ -1423,7 +1423,7 @@ describe("cloud workspace conflict notice", () => {
     await Promise.resolve();
 
     expect(writeText).toHaveBeenCalledWith(
-      "git checkout 'refs/openclaw/worker-results/claim-per-row' -- ':(top,literal)src/second.ts'",
+      "git checkout 'refs/carapace/worker-results/claim-per-row' -- ':(top,literal)src/second.ts'",
     );
   });
 });
@@ -1809,7 +1809,7 @@ describe("chat code-block copy", () => {
     { name: "keeps legacy raw data-code payloads copyable", payload: "legacy text" },
     {
       name: "does not decode unmarked raw data-code payloads that start with the block-art prefix",
-      payload: 'openclaw:block-art-code:"literal"',
+      payload: 'carapace:block-art-code:"literal"',
     },
   ])("$name", async ({ payload }) => {
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -2048,7 +2048,7 @@ describe("chat transcript rendering", () => {
             message: {
               role: "user",
               content: "Send the attachment",
-              __openclaw: {
+              __carapace: {
                 id: "user:attachment-run",
                 idempotencyKey: "attachment-run:user",
               },
@@ -2147,7 +2147,7 @@ describe("chat transcript rendering", () => {
           message: {
             role: "user",
             content: "Start",
-            __openclaw: { id: "user:announcement", idempotencyKey: "run-announcement:user" },
+            __carapace: { id: "user:announcement", idempotencyKey: "run-announcement:user" },
           },
         },
       ],
@@ -3017,14 +3017,14 @@ describe("chat loading skeleton", () => {
     {
       name: "shows the skeleton while the initial history load has no rendered content",
       props: { loading: true },
-      present: { "openclaw-panel-loading-skeleton": null },
+      present: { "carapace-panel-loading-skeleton": null },
       absent: [".agent-chat__welcome"],
-      counts: { "openclaw-panel-loading-skeleton": 1 },
+      counts: { "carapace-panel-loading-skeleton": 1 },
     },
     {
       name: "shows the loading skeleton for an active run with no stream",
       props: { canAbort: true, loading: true },
-      present: { "openclaw-panel-loading-skeleton": null },
+      present: { "carapace-panel-loading-skeleton": null },
       absent: [".agent-chat__welcome"],
       counts: { ".chat-reading-indicator": 0 },
     },
@@ -3065,18 +3065,18 @@ describe("chat loading skeleton", () => {
         messages: [{ role: "assistant", content: "Already loaded answer", timestamp: 1 }],
       },
       present: { ".chat-group": "Already loaded answer" },
-      absent: ["openclaw-panel-loading-skeleton"],
+      absent: ["carapace-panel-loading-skeleton"],
     },
     {
       name: "keeps active stream content visible without the skeleton during a background reload",
       props: { loading: true, stream: "Partial streamed answer", streamStartedAt: 1 },
       present: { ".chat-stream": "Partial streamed answer" },
-      absent: ["openclaw-panel-loading-skeleton"],
+      absent: ["carapace-panel-loading-skeleton"],
     },
     {
       name: "keeps the reading indicator visible without the skeleton before stream text arrives",
       props: { loading: true, stream: "", streamStartedAt: 1 },
-      absent: ["openclaw-panel-loading-skeleton"],
+      absent: ["carapace-panel-loading-skeleton"],
       counts: { ".chat-reading-indicator": 1 },
     },
   ] satisfies Array<{
@@ -3313,7 +3313,7 @@ describe("chat loading skeleton", () => {
             role: "user",
             content: "Start the work.",
             timestamp: 0,
-            __openclaw: { id: "user:run-composed", idempotencyKey: `${runId}:user` },
+            __carapace: { id: "user:run-composed", idempotencyKey: `${runId}:user` },
           },
         },
       ],
@@ -3397,7 +3397,7 @@ describe("chat loading skeleton", () => {
               role: "user",
               content: "Start the work.",
               timestamp: 0,
-              __openclaw: { id: "user:run-composed", idempotencyKey: `${runId}:user` },
+              __carapace: { id: "user:run-composed", idempotencyKey: `${runId}:user` },
             },
           },
         ],
@@ -3827,7 +3827,7 @@ describe("chat voice controls", () => {
   it.each([
     ["connecting", "Connecting voice input..."],
     ["listening", "Listening..."],
-    ["thinking", "Asking OpenClaw..."],
+    ["thinking", "Asking Carapace..."],
   ] as const)("renders %s voice activity with the appropriate status region", (status, label) => {
     const inputLevel = new RealtimeTalkLevelSignal();
     inputLevel.set(0.64);
@@ -3931,7 +3931,7 @@ describe("chat voice controls", () => {
     );
     const tooltip = talkButton.parentElement as (HTMLElement & { content?: string }) | null;
     expect(talkButton.getAttribute("title")).toBeNull();
-    expect(tooltip?.localName).toBe("openclaw-tooltip");
+    expect(tooltip?.localName).toBe("carapace-tooltip");
     expect(tooltip?.content).toBe(t("chat.composer.voiceGestureHint"));
     expect(talkButton.textContent?.trim()).toBe(startTalkLabel);
     requireElement(
@@ -5675,8 +5675,8 @@ describe("chat slash menu accessibility", () => {
         category: "session",
       },
       {
-        key: "openclaw",
-        name: "openclaw",
+        key: "carapace",
+        name: "carapace",
         description: "Run the setup and repair helper.",
         tier: "essential",
         category: "tools",
@@ -5689,7 +5689,7 @@ describe("chat slash menu accessibility", () => {
       Array.from(container.querySelectorAll<HTMLElement>(".slash-menu [role='option']")).map(
         (option) => option.querySelector(".slash-menu-name")?.textContent?.trim(),
       ),
-    ).toEqual(["/pair", "/pair-device", "/openclaw"]);
+    ).toEqual(["/pair", "/pair-device", "/carapace"]);
     expect(
       Array.from(container.querySelectorAll(".slash-menu-group__label")).map((label) =>
         label.textContent?.trim(),
@@ -6136,7 +6136,7 @@ describe("chat attachment picker", () => {
     chat.dispatchEvent(createDragEvent("dragleave"));
     expect(chat.hasAttribute("data-attachment-drop-active")).toBe(false);
 
-    chat.dispatchEvent(createDragEvent("dragenter", ["application/x-openclaw-session"]));
+    chat.dispatchEvent(createDragEvent("dragenter", ["application/x-carapace-session"]));
     expect(chat.hasAttribute("data-attachment-drop-active")).toBe(false);
   });
 
@@ -6819,7 +6819,7 @@ describe("chat welcome", () => {
 
     const clawd = container.querySelector(".agent-chat__welcome-clawd");
     expect(clawd).not.toBeNull();
-    expect(clawd?.querySelector("openclaw-mascot")?.getAttribute("mood")).toBe("idle");
+    expect(clawd?.querySelector("carapace-mascot")?.getAttribute("mood")).toBe("idle");
     expect(container.querySelector(".agent-chat__badge")).toBeNull();
   });
 
@@ -6843,7 +6843,7 @@ describe("chat welcome", () => {
       canSend: false,
       disabledBanner: {
         kind: "composer-replacement",
-        text: "We couldn't find a provider and model configured for this agent. Choose a supported connection; OpenClaw will test it before enabling chat.",
+        text: "We couldn't find a provider and model configured for this agent. Choose a supported connection; Carapace will test it before enabling chat.",
         actionLabel: "Connect an AI provider",
         onAction: () => undefined,
       },
@@ -6859,7 +6859,7 @@ describe("chat welcome", () => {
     const welcome = requireElement(container, ".agent-chat__welcome", "welcome screen");
     const mascot = requireElement(
       container,
-      ".agent-chat__welcome-clawd openclaw-mascot",
+      ".agent-chat__welcome-clawd carapace-mascot",
       "welcome mascot",
     ) as HTMLElement & { tease: boolean; catchOnce: () => void };
     const catchOnce = vi.spyOn(mascot, "catchOnce");
@@ -7611,7 +7611,7 @@ describe("chat model controls", () => {
     expect(onFastModeSelect).toHaveBeenCalledWith("on", "main");
   });
 
-  describe.each(["codex", "openclaw", "claude-cli", undefined])(
+  describe.each(["codex", "carapace", "claude-cli", undefined])(
     "locked model labels with runtime %s",
     (runtimeId) => {
       it.each([
@@ -7764,7 +7764,7 @@ describe("chat model controls", () => {
       "[data-chat-model-provider-settings]",
     );
     expect(providerSettings?.getAttribute("aria-label")).toBe("Configure models");
-    expect(providerSettings?.closest("openclaw-tooltip")).toBeNull();
+    expect(providerSettings?.closest("carapace-tooltip")).toBeNull();
     expect(providerSettings?.closest('[role="listbox"]')).toBeNull();
     expect(
       Array.from(container.querySelectorAll<HTMLElement>('[role="option"]')).every(
@@ -7974,7 +7974,7 @@ describe("chat model controls", () => {
           name: "GPT-5.6 Sol",
           provider: "openai",
           contextWindow: 1_050_000,
-          agentRuntime: { id: "openclaw", source: "model" },
+          agentRuntime: { id: "carapace", source: "model" },
         },
       ],
     });
@@ -7985,7 +7985,7 @@ describe("chat model controls", () => {
         updatedAt: 1,
         model: "gpt-5.6-sol",
         modelProvider: "openai",
-        agentRuntime: { id: "openclaw", source: "model" },
+        agentRuntime: { id: "carapace", source: "model" },
         contextTokens: 1_000_000,
       },
     ]);
@@ -7995,11 +7995,11 @@ describe("chat model controls", () => {
     );
 
     expect(modelOption?.querySelector(".chat-controls__model-option-meta")?.textContent).toBe(
-      "1M active · 1M max · OpenClaw",
+      "1M active · 1M max · Carapace",
     );
     expect(modelOption?.textContent).not.toContain("700k");
     expect(getChatModelSelect(container).querySelector(".chat-controls__trigger-meta")).toBeNull();
-    expect(modelOption?.closest("openclaw-tooltip")).toBeNull();
+    expect(modelOption?.closest("carapace-tooltip")).toBeNull();
   });
 
   it("uses the default selection runtime for an implicit Codex model", () => {
@@ -8064,7 +8064,7 @@ describe("chat model controls", () => {
         updatedAt: 1,
         model: "gpt-5.6-sol",
         modelProvider: "openai",
-        agentRuntime: { id: "openclaw", source: "session" },
+        agentRuntime: { id: "carapace", source: "session" },
         contextTokens: 272_000,
       },
     ]);
@@ -8094,7 +8094,7 @@ describe("chat model controls", () => {
     {
       name: "a different session runtime",
       modelSwitching: false,
-      sessionRuntimeId: "openclaw",
+      sessionRuntimeId: "carapace",
       optionRuntimeId: "codex",
     },
     {
@@ -8184,7 +8184,7 @@ describe("chat model controls", () => {
           name: "GPT-5.6",
           provider: "openai",
           contextWindow: 1_000_000,
-          agentRuntime: { id: "openclaw", source: "model" },
+          agentRuntime: { id: "carapace", source: "model" },
         },
         {
           id: "gpt-5.6-sol",
@@ -8212,7 +8212,7 @@ describe("chat model controls", () => {
           name: "GPT-5.6 Terra",
           provider: "openai",
           contextWindow: 1_000_000,
-          agentRuntime: { id: "openclaw", source: "implicit" },
+          agentRuntime: { id: "carapace", source: "implicit" },
         },
       ],
     });
@@ -8222,7 +8222,7 @@ describe("chat model controls", () => {
         `[data-chat-model-option="${value}"] .chat-controls__model-option-meta`,
       )?.textContent;
 
-    expect(metaFor("openai/gpt-5.6")).toBe("1M · OpenClaw");
+    expect(metaFor("openai/gpt-5.6")).toBe("1M · Carapace");
     expect(metaFor("openai/gpt-5.6")).not.toContain("Codex");
     expect(metaFor("openai/gpt-5.6-sol")).toBe("1M · Codex");
     // Known CLI runtime ids map to their product labels, not capitalized ids.
@@ -8410,14 +8410,14 @@ describe("chat model controls", () => {
         id: "google/gemma-4-26b-a4b-it",
         name: "Gemma 4",
         provider: "google",
-        agentRuntime: { id: "openclaw", source: "implicit" },
+        agentRuntime: { id: "carapace", source: "implicit" },
       },
       {
         id: "google/gemma-4-26b-a4b-it",
         name: "Gemma 4",
         provider: "openrouter",
         contextWindow: 1_000_000,
-        agentRuntime: { id: "openclaw", source: "implicit" },
+        agentRuntime: { id: "carapace", source: "implicit" },
       },
     ];
     state.sessionsResult = createSessionsListResult({
@@ -8427,7 +8427,7 @@ describe("chat model controls", () => {
       defaultsProvider: "openrouter",
     });
     state.sessionsResult.sessions[0]!.agentRuntime = {
-      id: "openclaw",
+      id: "carapace",
       source: "implicit",
     };
     state.sessionsResult.sessions[0]!.contextTokens = 272_000;
@@ -9313,7 +9313,7 @@ describe("right-click Reply", () => {
     const confirmationTrigger = document.createElement("button");
     confirmationOwner.appendChild(confirmationTrigger);
     section.appendChild(confirmationOwner);
-    window.localStorage.removeItem("openclaw:skip-rewind-confirm");
+    window.localStorage.removeItem("carapace:skip-rewind-confirm");
     chatMessage.openChatRewindConfirmation(confirmationTrigger, vi.fn());
     const confirmation = document.querySelector<HTMLElement>(".chat-confirm-popover");
     const { bubble } = appendChatBubble(container, { text: "open message actions" });
@@ -9341,7 +9341,7 @@ describe("right-click Reply", () => {
 
     expect(getContextMenuAction("Rewind to here").disabled).toBe(true);
     expect(getContextMenuAction("Fork from here").disabled).toBe(true);
-    expect(getContextMenuAction("Rewind to here").closest("openclaw-tooltip")?.content).toBe(
+    expect(getContextMenuAction("Rewind to here").closest("carapace-tooltip")?.content).toBe(
       "Rewind is unavailable while the agent is working",
     );
   });

@@ -103,7 +103,7 @@ function createPairingShell(params: {
     sessions: { state: { result: null } },
     theme: { mode: "system", settings: loadSettings() },
   } as unknown as ApplicationContext;
-  const shell = document.createElement("openclaw-app-shell") as PairingShell;
+  const shell = document.createElement("carapace-app-shell") as PairingShell;
   shell.runtime = { context, router: {} } as ApplicationRuntime;
   shell.routeState = {
     routeId: "chat",
@@ -116,7 +116,7 @@ function createPairingShell(params: {
 
   const renderSidebar = () => {
     render(shell.render(), container);
-    const sidebar = container.querySelector<PairingSidebar>("openclaw-app-sidebar");
+    const sidebar = container.querySelector<PairingSidebar>("carapace-app-sidebar");
     if (!sidebar) {
       throw new Error("Expected the application shell to render its navigation sidebar");
     }

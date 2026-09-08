@@ -16,7 +16,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let artifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -34,7 +34,7 @@ function connectParams(value: unknown) {
 
 const onboardingWelcome = {
   sessionId: "e2e-first-run",
-  reply: "Your model is ready. Let's finish setting up OpenClaw.",
+  reply: "Your model is ready. Let's finish setting up Carapace.",
   action: "none",
 };
 
@@ -44,7 +44,7 @@ function detection(modelRef: string) {
     manualProviders: [],
     configuredModel: modelRef,
     setupComplete: true,
-    workspace: "/tmp/openclaw-e2e",
+    workspace: "/tmp/carapace-e2e",
   };
 }
 
@@ -63,21 +63,21 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
             "wizard.next",
-            "openclaw.setup.verify",
-            "openclaw.chat",
+            "carapace.setup.verify",
+            "carapace.chat",
           ],
           methodResponses: {
-            "openclaw.chat": onboardingWelcome,
-            "openclaw.setup.detect": {
+            "carapace.chat": onboardingWelcome,
+            "carapace.setup.detect": {
               ...detection(modelRef),
               configuredModel: undefined,
               setupComplete: false,
               manualProviders: [{ id: "openai", label: "OpenAI" }],
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
@@ -88,7 +88,7 @@ suite.define(() => {
               error: "401: invalid test API key",
               activationRejection: { disposition: "rejected-before-promotion", status: "auth" },
             },
-            "openclaw.setup.verify": pendingVerification,
+            "carapace.setup.verify": pendingVerification,
           },
         });
 
@@ -104,10 +104,10 @@ suite.define(() => {
         await page.getByRole("button", { name: "Connect & verify" }).click();
         await page.getByText("401: invalid test API key").waitFor();
         expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
-        expect(await gateway.getRequests("openclaw.setup.verify")).toHaveLength(0);
+        expect(await gateway.getRequests("carapace.setup.verify")).toHaveLength(0);
 
         await page
-          .locator("openclaw-modal-dialog")
+          .locator("carapace-modal-dialog")
           .getByRole("button", { name: "Close", exact: true })
           .click();
         await gateway.setMethodResponse("wizard.next", {
@@ -124,18 +124,18 @@ suite.define(() => {
         await expect
           .poll(async () => (await gateway.getRequests("config.get")).length)
           .toBeGreaterThan(initialRefreshes);
-        await gateway.setMethodResponse("openclaw.setup.detect", detection(modelRef));
+        await gateway.setMethodResponse("carapace.setup.detect", detection(modelRef));
         let destination = page;
         let reconnectedGateway = gateway;
         if (restart === "reopen") {
           await page.close();
           destination = await context.newPage();
           reconnectedGateway = await installMockGateway(destination, {
-            featureMethods: ["openclaw.setup.detect", "openclaw.setup.verify", "openclaw.chat"],
+            featureMethods: ["carapace.setup.detect", "carapace.setup.verify", "carapace.chat"],
             methodResponses: {
-              "openclaw.chat": onboardingWelcome,
-              "openclaw.setup.detect": detection(modelRef),
-              "openclaw.setup.verify": pendingVerification,
+              "carapace.chat": onboardingWelcome,
+              "carapace.setup.detect": detection(modelRef),
+              "carapace.setup.verify": pendingVerification,
             },
           });
           await destination.goto(
@@ -151,17 +151,17 @@ suite.define(() => {
         } else {
           await gateway.closeLatest(1012, "first-run activation restart");
         }
-        await reconnectedGateway.waitForRequest("openclaw.setup.verify");
+        await reconnectedGateway.waitForRequest("carapace.setup.verify");
         await destination.getByText(pendingVerification.error, { exact: false }).waitFor();
         expect(new URL(destination.url()).pathname).toBe("/settings/model-setup");
-        expect(await reconnectedGateway.getRequests("openclaw.chat")).toHaveLength(0);
+        expect(await reconnectedGateway.getRequests("carapace.chat")).toHaveLength(0);
         if (captureUiProofEnabled) {
           await destination.screenshot({
             animations: "disabled",
             path: path.join(artifactDir, `manual-first-run-${restart}-pending.png`),
           });
         }
-        await reconnectedGateway.setMethodResponse("openclaw.setup.verify", {
+        await reconnectedGateway.setMethodResponse("carapace.setup.verify", {
           ok: true,
           modelRef,
           latencyMs: 31,
@@ -169,7 +169,7 @@ suite.define(() => {
         await destination.getByRole("button", { name: "Verify & use selected model" }).click();
         await expect.poll(() => new URL(destination.url()).pathname).toBe("/custodian");
         if (restart === "reconnect") {
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(2);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(2);
           const connections = await gateway.getRequests("connect");
           expect(connectParams(connections.at(-1)?.params).auth).toMatchObject({
             deviceToken: "e2e-device-token",
@@ -179,11 +179,11 @@ suite.define(() => {
           );
         } else {
           expect(
-            await reconnectedGateway.getRequests("openclaw.setup.activate.start"),
+            await reconnectedGateway.getRequests("carapace.setup.activate.start"),
           ).toHaveLength(0);
         }
         await destination.getByText(onboardingWelcome.reply, { exact: true }).waitFor();
-        const welcomeRequest = await reconnectedGateway.waitForRequest("openclaw.chat");
+        const welcomeRequest = await reconnectedGateway.waitForRequest("carapace.chat");
         expect(welcomeRequest.params).toMatchObject({ welcomeVariant: "onboarding" });
         if (captureUiProofEnabled) {
           await destination.locator(".custodian__header--minimal").waitFor();
@@ -205,17 +205,17 @@ suite.define(() => {
         const activation = { modelRef, gatewayRestartRequired: true };
         const gateway = await installMockGateway(page, {
           featureMethods: [
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
-            "openclaw.setup.verify",
-            "openclaw.setup.auth.start",
-            "openclaw.setup.prepare.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
+            "carapace.setup.verify",
+            "carapace.setup.auth.start",
+            "carapace.setup.prepare.start",
             "wizard.next",
-            "openclaw.chat",
+            "carapace.chat",
           ],
           methodResponses: {
-            "openclaw.chat": onboardingWelcome,
-            "openclaw.setup.detect": {
+            "carapace.chat": onboardingWelcome,
+            "carapace.setup.detect": {
               ...detection(modelRef),
               configuredModel: undefined,
               setupComplete: false,
@@ -237,17 +237,17 @@ suite.define(() => {
                 { id: "provider-login", label: "Provider login", kind: "oauth", featured: true },
               ],
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
             },
-            "openclaw.setup.auth.start": {
+            "carapace.setup.auth.start": {
               sessionId: "auth-session",
               done: false,
               status: "running",
             },
-            "openclaw.setup.prepare.start": {
+            "carapace.setup.prepare.start": {
               sessionId: "prepare-session",
               done: false,
               status: "running",
@@ -260,7 +260,7 @@ suite.define(() => {
                 { done: true, status: "done", modelActivation: activation },
               ],
             },
-            "openclaw.setup.verify": { ok: true, modelRef, latencyMs: 31 },
+            "carapace.setup.verify": { ok: true, modelRef, latencyMs: 31 },
           },
         });
         await page.goto(`${suite.server.baseUrl}settings/model-setup?firstRun=1`);
@@ -269,7 +269,7 @@ suite.define(() => {
         // activation response so only that mutation's refresh is interrupted.
         let refreshes = (await gateway.getRequests("config.get")).length;
         if (entry === "prepared model") {
-          await gateway.deferNext("openclaw.setup.activate.start");
+          await gateway.deferNext("carapace.setup.activate.start");
         } else {
           await gateway.deferNext("config.get");
         }
@@ -281,27 +281,27 @@ suite.define(() => {
           await page.locator('[data-auth-choice="provider-login"] button').click();
         }
         if (entry === "prepared model") {
-          await gateway.waitForRequest("openclaw.setup.activate.start");
+          await gateway.waitForRequest("carapace.setup.activate.start");
           await gateway.deferNext("config.get");
           refreshes = (await gateway.getRequests("config.get")).length;
         }
         if (entry === "prepared model") {
-          await gateway.resolveDeferred("openclaw.setup.activate.start");
+          await gateway.resolveDeferred("carapace.setup.activate.start");
         } else {
           await gateway.waitForRequest(
-            entry === "clicked candidate" ? "openclaw.setup.activate.start" : "wizard.next",
+            entry === "clicked candidate" ? "carapace.setup.activate.start" : "wizard.next",
           );
         }
         await expect
           .poll(async () => (await gateway.getRequests("config.get")).length)
           .toBeGreaterThan(refreshes);
-        await gateway.setMethodResponse("openclaw.setup.detect", detection(modelRef));
+        await gateway.setMethodResponse("carapace.setup.detect", detection(modelRef));
         await gateway.closeLatest(1012, "activation refresh restart");
-        await gateway.waitForRequest("openclaw.setup.verify");
+        await gateway.waitForRequest("carapace.setup.verify");
         await expect.poll(() => new URL(page.url()).pathname).toBe("/custodian");
         expect(new URL(page.url()).searchParams.get("onboarding")).toBe("1");
         await page.getByText(onboardingWelcome.reply, { exact: true }).waitFor();
-        expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(
+        expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(
           entry === "provider sign-in" ? 0 : 1,
         );
       });
@@ -313,17 +313,17 @@ suite.define(() => {
       const pageErrors: string[] = [];
       page.on("pageerror", (error) => pageErrors.push(String(error)));
       const gateway = await installMockGateway(page, {
-        featureMethods: ["openclaw.setup.detect"],
-        methodResponses: { "openclaw.setup.detect": detection("provider/original-model") },
+        featureMethods: ["carapace.setup.detect"],
+        methodResponses: { "carapace.setup.detect": detection("provider/original-model") },
       });
 
       const response = await page.goto(`${suite.server.baseUrl}settings/model-setup`);
       expect(response?.status()).toBe(200);
       await page.getByText("original-model", { exact: true }).waitFor();
-      const initialDetections = (await gateway.getRequests("openclaw.setup.detect")).length;
+      const initialDetections = (await gateway.getRequests("carapace.setup.detect")).length;
       const initialConnections = (await gateway.getRequests("connect")).length;
       await gateway.setMethodResponse(
-        "openclaw.setup.detect",
+        "carapace.setup.detect",
         detection("provider/reconnected-model"),
       );
       await gateway.deferNext("connect");
@@ -336,13 +336,13 @@ suite.define(() => {
         .toBeGreaterThan(initialConnections);
       await gateway.resolveDeferred("connect");
       await expect
-        .poll(async () => (await gateway.getRequests("openclaw.setup.detect")).length)
+        .poll(async () => (await gateway.getRequests("carapace.setup.detect")).length)
         .toBe(initialDetections + 1);
       await page.getByText("reconnected-model", { exact: true }).waitFor();
       expect(pageErrors).toEqual([]);
 
       if (captureUiProofEnabled) {
-        await page.locator("openclaw-model-setup-page").screenshot({
+        await page.locator("carapace-model-setup-page").screenshot({
           animations: "disabled",
           path: path.join(artifactDir, "00-reconnected-model-visible.png"),
         });

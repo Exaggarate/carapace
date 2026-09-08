@@ -1,5 +1,5 @@
 // Lobster plugin module implements lobster taskflow behavior.
-import type { OpenClawPluginApi } from "../runtime-api.js";
+import type { CarapacePluginApi } from "../runtime-api.js";
 import type { LobsterEnvelope, LobsterRunner, LobsterRunnerParams } from "./lobster-runner.js";
 
 export type JsonLike =
@@ -13,7 +13,7 @@ export type JsonLike =
     };
 
 export type BoundTaskFlow = ReturnType<
-  NonNullable<OpenClawPluginApi["runtime"]>["tasks"]["managedFlows"]["bindSession"]
+  NonNullable<CarapacePluginApi["runtime"]>["tasks"]["managedFlows"]["bindSession"]
 >;
 
 type FlowRecord = NonNullable<ReturnType<BoundTaskFlow["tryCreateManaged"]>>;
@@ -31,7 +31,7 @@ type LobsterApprovalWaitState = {
 
 type RunManagedLobsterFlowParams = {
   taskFlow: BoundTaskFlow;
-  config: OpenClawPluginApi["config"];
+  config: CarapacePluginApi["config"];
   runner: LobsterRunner;
   runnerParams: LobsterRunnerParams;
   controllerId: string;
@@ -43,7 +43,7 @@ type RunManagedLobsterFlowParams = {
 
 type ResumeManagedLobsterFlowParams = {
   taskFlow: BoundTaskFlow;
-  config: OpenClawPluginApi["config"];
+  config: CarapacePluginApi["config"];
   runner: LobsterRunner;
   runnerParams: LobsterRunnerParams & {
     action: "resume";

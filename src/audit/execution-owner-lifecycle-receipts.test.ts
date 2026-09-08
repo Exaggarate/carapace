@@ -6,46 +6,46 @@ import type { ExecutionIdentityContextV1 } from "../../packages/gateway-protocol
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { AdmittedRunContext } from "../agents/admitted-run-context.js";
 import { bindCronRunReceiptExecution } from "../cron/store/run-receipt-store.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { tableHasColumn, tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { tableHasColumn, tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import { bindTaskFlowExecution } from "../tasks/task-flow-registry.store.sqlite.js";
 import { bindTaskRunExecution } from "../tasks/task-registry.store.sqlite.js";
 import { presentExecutionDecisionReceipts } from "./execution-decision-receipts.js";
 import { createExecutionIdentityAdmissionToken } from "./execution-identity-admission.js";
 import { pageOwnerLifecycleReceipts } from "./execution-owner-lifecycle-receipts.js";
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function oldSchemaSql(): string {
-  const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf(
+  const start = CARAPACE_STATE_SCHEMA_SQL.indexOf(
     "CREATE TABLE IF NOT EXISTS execution_owner_lifecycle_bindings (",
   );
   const endMarker = ") STRICT;";
-  const end = OPENCLAW_STATE_SCHEMA_SQL.indexOf(endMarker, start);
+  const end = CARAPACE_STATE_SCHEMA_SQL.indexOf(endMarker, start);
   if (start < 0 || end < start) {
     throw new Error("owner lifecycle binding schema marker is missing");
   }
-  return `${OPENCLAW_STATE_SCHEMA_SQL.slice(0, start)}${OPENCLAW_STATE_SCHEMA_SQL.slice(end + endMarker.length)}`;
+  return `${CARAPACE_STATE_SCHEMA_SQL.slice(0, start)}${CARAPACE_STATE_SCHEMA_SQL.slice(end + endMarker.length)}`;
 }
 
 function createOldOwnerDatabase() {
-  const pathname = path.join(tempDirs.make("owner-lifecycle-"), "openclaw.sqlite");
+  const pathname = path.join(tempDirs.make("owner-lifecycle-"), "carapace.sqlite");
   const oldReader = new DatabaseSync(pathname);
   oldReader.exec(oldSchemaSql());
-  oldReader.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION}`);
+  oldReader.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION}`);
   oldReader
     .prepare(
       `INSERT INTO schema_meta (
          meta_key, role, schema_version, created_at, updated_at
        ) VALUES ('primary', 'global', ?, 1, 1)`,
     )
-    .run(OPENCLAW_STATE_SCHEMA_VERSION);
+    .run(CARAPACE_STATE_SCHEMA_VERSION);
   oldReader
     .prepare(
       `INSERT INTO cron_run_receipts (
@@ -128,7 +128,7 @@ const receiptHandle = {
 describe("owner-native execution lifecycle receipts", () => {
   it("lazily binds exact owner rows while disabled collection allocates nothing", () => {
     const options = createOldOwnerDatabase();
-    const current = openOpenClawStateDatabase(options).db;
+    const current = openCarapaceStateDatabase(options).db;
     expect(tableExists(current, "execution_owner_lifecycle_bindings")).toBe(false);
     for (const table of ["cron_run_receipts", "task_runs", "flow_runs"]) {
       expect(tableHasColumn(current, table, "context_id")).toBe(false);
@@ -179,7 +179,7 @@ describe("owner-native execution lifecycle receipts", () => {
     current.prepare("UPDATE task_runs SET status = 'succeeded'").run();
     current.prepare("UPDATE flow_runs SET status = 'succeeded', ended_at = 70").run();
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const oldReader = new DatabaseSync(options.path);
     expect(
       oldReader.prepare("SELECT status FROM task_runs WHERE task_id = ?").get("task-1"),
@@ -189,9 +189,9 @@ describe("owner-native execution lifecycle receipts", () => {
     oldReader.prepare("UPDATE task_runs SET status = ? WHERE task_id = ?").run("failed", "task-1");
     oldReader.close();
 
-    const reopened = openOpenClawStateDatabase(options).db;
+    const reopened = openCarapaceStateDatabase(options).db;
     expect(reopened.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     expect(
       reopened
@@ -243,7 +243,7 @@ describe("owner-native execution lifecycle receipts", () => {
     bindCronRunReceiptExecution({ admitted: admitted(), handle: receiptHandle, options });
     bindTaskRunExecution({ admitted: admitted(), taskId: "task-1", options });
     bindTaskFlowExecution({ admitted: admitted(), flowId: "flow-1", options });
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
     db.prepare("UPDATE cron_run_receipts SET status = 'ok', finished_at_ms = 70").run();
     db.prepare("UPDATE task_runs SET status = 'succeeded'").run();
     db.prepare("UPDATE flow_runs SET status = 'succeeded', ended_at = 70").run();
@@ -423,7 +423,7 @@ describe("owner-native execution lifecycle receipts", () => {
     ({ cursor, bindFirst, addSuccessor, deleteAnchor }) => {
       const options = createOldOwnerDatabase();
       expect(bindFirst(options)).toBe("bound");
-      const db = openOpenClawStateDatabase(options).db;
+      const db = openCarapaceStateDatabase(options).db;
       addSuccessor(db);
       const firstPage = presentExecutionDecisionReceipts({
         context: executionContext(),
@@ -451,7 +451,7 @@ describe("owner-native execution lifecycle receipts", () => {
     expect(
       bindCronRunReceiptExecution({ admitted: admitted(), handle: receiptHandle, options }),
     ).toBe("bound");
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
     deletedAnchorCases[0].addSuccessor(db);
     const firstPage = presentExecutionDecisionReceipts({
       context: executionContext(),
@@ -476,7 +476,7 @@ describe("owner-native execution lifecycle receipts", () => {
     expect(
       bindCronRunReceiptExecution({ admitted: admitted(), handle: receiptHandle, options }),
     ).toBe("bound");
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
     deletedAnchorCases[0].addSuccessor(db);
     const firstPage = presentExecutionDecisionReceipts({
       context: executionContext(),
@@ -486,7 +486,7 @@ describe("owner-native execution lifecycle receipts", () => {
     });
     expect(firstPage.nextDecisionCursor).toMatch(/^c:[1-9]\d*:[1-9]\d*$/);
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     rmSync(options.path);
 
     expect(() =>
@@ -501,7 +501,7 @@ describe("owner-native execution lifecycle receipts", () => {
 
   it("rejects a reused owner rowid whose binding belongs to another execution", () => {
     const options = createOldOwnerDatabase();
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
     db.prepare("DELETE FROM cron_run_receipts WHERE receipt_id = 'cron-1'").run();
     db.prepare(
       `INSERT INTO cron_run_receipts (
@@ -574,7 +574,7 @@ describe("owner-native execution lifecycle receipts", () => {
     bindTaskRunExecution({ admitted: admitted(), taskId: "task-1", options });
     bindTaskFlowExecution({ admitted: admitted(), flowId: "flow-1", options });
     const context = executionContext();
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
 
     for (const status of ["ok", "error", "skipped", "interrupted", "superseded"]) {
       db.prepare(

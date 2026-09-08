@@ -2,14 +2,14 @@
 // managed-service handoff, restart scheduling, and delivery context preservation.
 
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { resolveDefaultSessionStorePath } from "../../config/sessions/paths.js";
 import {
   loadTranscriptEvents,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RestartSentinelPayload } from "../../infra/restart-sentinel.js";
 import {
   getUpdateRun,
@@ -47,7 +47,7 @@ import {
 async function invokeUpdateRun(
   params: Record<string, unknown>,
   respond?: (ok: boolean, response?: unknown) => void,
-  runtimeConfig: OpenClawConfig = { update: {} },
+  runtimeConfig: CarapaceConfig = { update: {} },
 ) {
   const { updateHandlers } = await import("./update.js");
   const onRespond = respond ?? (() => {});
@@ -63,7 +63,7 @@ async function invokeUpdateRun(
 
 async function captureUpdateRunPayload(
   params: Record<string, unknown> = {},
-  runtimeConfig?: OpenClawConfig,
+  runtimeConfig?: CarapaceConfig,
 ): Promise<UpdateRunPayload | undefined> {
   let payload: UpdateRunPayload | undefined;
   await invokeUpdateRun(
@@ -96,15 +96,15 @@ function readCapturedPayload(): RestartSentinelPayload {
 
 function mockGlobalInstallSurface() {
   initializeGatewayUpdateStatusMock.mockResolvedValueOnce({
-    root: "/tmp/openclaw-global",
-    status: { root: "/tmp/openclaw-global", installKind: "package", packageManager: "npm" },
+    root: "/tmp/carapace-global",
+    status: { root: "/tmp/carapace-global", installKind: "package", packageManager: "npm" },
     installReceipt: null,
   });
   resolveUpdateInstallSurfaceMock.mockResolvedValueOnce({
     kind: "global",
     mode: "npm",
-    root: "/tmp/openclaw-global",
-    packageRoot: "/tmp/openclaw-global",
+    root: "/tmp/carapace-global",
+    packageRoot: "/tmp/carapace-global",
   });
 }
 
@@ -190,7 +190,7 @@ describe("update.run acknowledgement", () => {
           channel: "slack",
           to: "slack:C0123ABC",
           threadId: "1234567890.123456",
-          message: `⬆️ Updating OpenClaw 1.0.0 → ${managed ? "2.0.0" : "the latest release"}. The gateway stays available while the update is validated; you'll get a message here when it finishes.`,
+          message: `⬆️ Updating Carapace 1.0.0 → ${managed ? "2.0.0" : "the latest release"}. The gateway stays available while the update is validated; you'll get a message here when it finishes.`,
           deliveryIntentId: expect.stringMatching(/^update-run-ack:/),
         }),
       );
@@ -216,7 +216,7 @@ describe("update.run acknowledgement", () => {
     expect(sendGatewayLifecycleNoticeMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         to: "slack:C0456DEF",
-        message: expect.stringContaining("⚠️ OpenClaw update failed: build-failed."),
+        message: expect.stringContaining("⚠️ Carapace update failed: build-failed."),
       }),
     );
   });
@@ -451,7 +451,7 @@ describe("update.run restart scheduling", () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
     mockGlobalInstallSurface();
 
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload({}, {}),
     );
 
@@ -459,14 +459,14 @@ describe("update.run restart scheduling", () => {
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledTimes(1);
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        root: "/tmp/openclaw-global",
+        root: "/tmp/carapace-global",
         restartDrainTimeoutMs: 300_000,
         restartDelayMs: 0,
         handoffId: expect.any(String),
         supervisor: "launchd",
         meta: expect.objectContaining({
           handoffId: expect.any(String),
-          root: "/tmp/openclaw-global",
+          root: "/tmp/carapace-global",
         }),
       }),
     );
@@ -481,7 +481,7 @@ describe("update.run restart scheduling", () => {
     expect(transferManagedServiceUpdateHandoffMock).toHaveBeenCalledExactlyOnceWith({
       kind: "managed-update-handoff",
       handoffId,
-      installRoot: "/tmp/openclaw-global",
+      installRoot: "/tmp/carapace-global",
     });
     expect(recordLatestUpdateRestartSentinelMock.mock.invocationCallOrder[0]).toBeLessThan(
       transferManagedServiceUpdateHandoffMock.mock.invocationCallOrder[0]!,
@@ -494,7 +494,7 @@ describe("update.run restart scheduling", () => {
     expect(payload?.handoff).toEqual({
       status: "started",
       pid: 12345,
-      command: "openclaw update --yes --timeout 1800",
+      command: "carapace update --yes --timeout 1800",
     });
     expect(payload?.sentinel?.persisted).toBe(true);
     const sentinel = readCapturedPayload();
@@ -523,12 +523,12 @@ describe("update.run restart scheduling", () => {
     startManagedServiceUpdateHandoffMock.mockResolvedValueOnce({
       status: "joined",
       pid: 12345,
-      command: "openclaw update --yes --timeout 1800",
-      logPath: "/tmp/openclaw-update-run-handoff/handoff.log",
+      command: "carapace update --yes --timeout 1800",
+      logPath: "/tmp/carapace-update-run-handoff/handoff.log",
       handoffId: "handoff-existing",
     });
 
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload({
         sessionKey: "agent:main:webchat:dm:user-123",
         continuationMessage: "Report the update result after restart.",
@@ -554,7 +554,7 @@ describe("update.run restart scheduling", () => {
     });
     expect(payload?.handoff).toEqual({
       status: "already-running",
-      command: "openclaw update --yes --timeout 1800",
+      command: "carapace update --yes --timeout 1800",
       message: "Another managed update is already running; retry after it completes.",
     });
     expect(payload?.sentinel?.persisted).toBe(false);
@@ -572,7 +572,7 @@ describe("update.run restart scheduling", () => {
     expect(run).toMatchObject({ status: "failed", reason: "unexpected-error" });
     expect(payload?.message).toBe(run?.origin.nextAction);
     expect(summarizeUpdateRunResponse(payload).next).toContain(
-      "Run openclaw update status after the gateway restarts.",
+      "Run carapace update status after the gateway restarts.",
     );
   });
 
@@ -597,7 +597,7 @@ describe("update.run restart scheduling", () => {
       expect(cancelManagedServiceUpdateHandoffMock).toHaveBeenCalledExactlyOnceWith({
         kind: "managed-update-handoff",
         handoffId: started?.handoffId,
-        installRoot: "/tmp/openclaw-global",
+        installRoot: "/tmp/carapace-global",
       });
       expect(transferManagedServiceUpdateHandoffMock).toHaveBeenCalledTimes(
         failure === "sentinel-write" ? 0 : 1,
@@ -612,7 +612,7 @@ describe("update.run restart scheduling", () => {
       expect(sendGatewayLifecycleNoticeMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           message: expect.stringContaining(
-            "OpenClaw update failed: managed-service-handoff-failed",
+            "Carapace update failed: managed-service-handoff-failed",
           ),
         }),
       );
@@ -626,7 +626,7 @@ describe("update.run restart scheduling", () => {
       Object.assign(new Error("spawn ENOENT"), { code: "ENOENT" }),
     );
 
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload(),
     );
 
@@ -673,7 +673,7 @@ describe("update.run restart scheduling", () => {
       throw Object.assign(new Error("uv_cwd"), { code: "ENOENT", syscall: "uv_cwd" });
     });
     try {
-      await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+      await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
         invokeUpdateRun({}),
       );
     } finally {
@@ -683,32 +683,32 @@ describe("update.run restart scheduling", () => {
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledTimes(1);
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        root: "/tmp/openclaw-global",
+        root: "/tmp/carapace-global",
       }),
     );
   });
 
   it("preflights supervised git/dev updates before handing them to the CLI path", async () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
-    mockGitInstallSurface("/tmp/openclaw-git");
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    mockGitInstallSurface("/tmp/carapace-git");
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload(),
     );
 
     expect(runGatewayUpdatePreflightMock).toHaveBeenCalledWith(
-      "/tmp/openclaw-git",
+      "/tmp/carapace-git",
       undefined,
       undefined,
     );
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledTimes(1);
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        root: "/tmp/openclaw-git",
+        root: "/tmp/carapace-git",
         handoffId: expect.any(String),
         supervisor: "launchd",
         meta: expect.objectContaining({
           handoffId: expect.any(String),
-          root: "/tmp/openclaw-git",
+          root: "/tmp/carapace-git",
         }),
       }),
     );
@@ -721,24 +721,24 @@ describe("update.run restart scheduling", () => {
     expect(payload?.handoff).toEqual({
       status: "started",
       pid: 12345,
-      command: "openclaw update --yes --timeout 1800",
+      command: "carapace update --yes --timeout 1800",
     });
     expect(readCapturedPayload().status).toBe("skipped");
   });
 
   it("keeps the serving gateway when managed git target preflight rejects active config", async () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
-    mockGitInstallSurface("/tmp/openclaw-git");
+    mockGitInstallSurface("/tmp/carapace-git");
     runGatewayUpdatePreflightMock.mockResolvedValueOnce({
       status: "error",
       mode: "git",
-      root: "/tmp/openclaw-git",
+      root: "/tmp/carapace-git",
       reason: "preflight-no-good-commit",
       steps: [
         {
           name: "preflight config validate (target)",
-          command: "openclaw config validate --json",
-          cwd: "/tmp/openclaw-candidate",
+          command: "carapace config validate --json",
+          cwd: "/tmp/carapace-candidate",
           durationMs: 1,
           exitCode: 1,
           stderrTail: "target rejected the active config",
@@ -747,7 +747,7 @@ describe("update.run restart scheduling", () => {
       durationMs: 1,
     });
 
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload(),
     );
 
@@ -761,12 +761,12 @@ describe("update.run restart scheduling", () => {
 
   it("hands Windows fallback gateways to the CLI path before doctor activation", async () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("schtasks");
-    mockGitInstallSurface("C:\\openclaw");
+    mockGitInstallSurface("C:\\carapace");
 
     const payload = await withEnvAsync(
       {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       },
       () => captureUpdateRunPayload(),
     );
@@ -785,9 +785,9 @@ describe("update.run restart scheduling", () => {
   it("does not pass the stored stable channel to supervised git handoff CLI", async () => {
     normalizeUpdateChannelMock.mockReturnValueOnce("stable");
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
-    mockGitInstallSurface("/tmp/openclaw-git");
+    mockGitInstallSurface("/tmp/carapace-git");
 
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload(),
     );
 
@@ -800,9 +800,9 @@ describe("update.run restart scheduling", () => {
   it("rejects stored extended-stable on Git without starting a handoff or mutation", async () => {
     normalizeUpdateChannelMock.mockReturnValueOnce("extended-stable");
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
-    mockGitInstallSurface("/tmp/openclaw-git");
+    mockGitInstallSurface("/tmp/carapace-git");
 
-    const payload = await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    const payload = await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload(),
     );
 
@@ -822,7 +822,7 @@ describe("update.run restart scheduling", () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
     mockGlobalInstallSurface();
 
-    await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, () =>
+    await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, () =>
       captureUpdateRunPayload(),
     );
 
@@ -839,7 +839,7 @@ describe("update.run restart scheduling", () => {
       steps: [],
       durationMs: 100,
     });
-    mockGitInstallSurface("/tmp/openclaw-git");
+    mockGitInstallSurface("/tmp/carapace-git");
 
     const payload = await captureUpdateRunPayload();
 
@@ -854,11 +854,11 @@ describe("update.run restart scheduling", () => {
 
   it("hands systemd-supervised git/dev updates to handoff from the durable unit identity", async () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("systemd");
-    mockGitInstallSurface("/tmp/openclaw-git");
+    mockGitInstallSurface("/tmp/carapace-git");
 
     const payload = await withEnvAsync(
       {
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
         INVOCATION_ID: "8a77e69a8f604bf0b7984879b9f17a7c",
       },
       () => captureUpdateRunPayload(),
@@ -868,7 +868,7 @@ describe("update.run restart scheduling", () => {
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledTimes(1);
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        root: "/tmp/openclaw-git",
+        root: "/tmp/carapace-git",
         supervisor: "systemd",
       }),
     );
@@ -881,20 +881,20 @@ describe("update.run restart scheduling", () => {
 
   it("hands marker-only systemd git/dev updates to the helper for exact ownership verification", async () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("systemd");
-    mockGitInstallSurface("/tmp/openclaw-git");
+    mockGitInstallSurface("/tmp/carapace-git");
 
     const payload = await withEnvAsync(
       {
-        OPENCLAW_SYSTEMD_UNIT: undefined,
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SYSTEMD_UNIT: undefined,
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       },
       () => captureUpdateRunPayload(),
     );
 
     expect(runGatewayUpdateMock).not.toHaveBeenCalled();
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
-      expect.objectContaining({ root: "/tmp/openclaw-git", supervisor: "systemd" }),
+      expect.objectContaining({ root: "/tmp/carapace-git", supervisor: "systemd" }),
     );
     expect(scheduleGatewaySigusr1RestartMock).not.toHaveBeenCalled();
     expect(transferManagedServiceUpdateHandoffMock).toHaveBeenCalledOnce();
@@ -919,10 +919,10 @@ describe("update.run restart scheduling", () => {
     expect(payload?.result?.reason).toBe("managed-service-handoff-unavailable");
     expect(payload?.handoff).toEqual({
       status: "unavailable",
-      command: "openclaw update --yes --timeout 1800",
+      command: "carapace update --yes --timeout 1800",
       message:
-        "OpenClaw updates cannot safely run inside the live gateway process without a managed-service handoff.\n" +
-        "Stop the foreground Gateway, run `openclaw update --yes --timeout 1800` from a shell, then launch the Gateway again. For a managed deployment, use its host's stop, update, and restart workflow.",
+        "Carapace updates cannot safely run inside the live gateway process without a managed-service handoff.\n" +
+        "Stop the foreground Gateway, run `carapace update --yes --timeout 1800` from a shell, then launch the Gateway again. For a managed deployment, use its host's stop, update, and restart workflow.",
     });
   });
 
@@ -947,8 +947,8 @@ describe("update.run restart scheduling", () => {
 
     const payload = await withEnvAsync(
       {
-        OPENCLAW_SUPERVISOR_MODE: "external",
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+        CARAPACE_SUPERVISOR_MODE: "external",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
       },
       () => captureUpdateRunPayload(),
     );
@@ -982,9 +982,9 @@ describe("update.run post-core plugin finalize", () => {
   it("resumes official plugin convergence after a git/source core update", async () => {
     runPostCoreFinalizeAfterGatewayUpdateMock.mockResolvedValueOnce({
       status: "ok",
-      entrypoint: "/tmp/openclaw-git/dist/index.mjs",
+      entrypoint: "/tmp/carapace-git/dist/index.mjs",
     });
-    mockGitOkUpdate("/tmp/openclaw-git");
+    mockGitOkUpdate("/tmp/carapace-git");
 
     const payload = await captureUpdateRunPayload();
 
@@ -1007,9 +1007,9 @@ describe("update.run post-core plugin finalize", () => {
           enabled: true,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     readConfigFileSnapshotMock.mockResolvedValueOnce({
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       exists: true,
       raw: JSON.stringify(preUpdateConfig),
       parsed: preUpdateConfig,
@@ -1024,9 +1024,9 @@ describe("update.run post-core plugin finalize", () => {
     });
     runPostCoreFinalizeAfterGatewayUpdateMock.mockResolvedValueOnce({
       status: "ok",
-      entrypoint: "/tmp/openclaw-git/dist/index.mjs",
+      entrypoint: "/tmp/carapace-git/dist/index.mjs",
     });
-    mockGitOkUpdate("/tmp/openclaw-git");
+    mockGitOkUpdate("/tmp/carapace-git");
 
     await captureUpdateRunPayload();
 
@@ -1040,11 +1040,11 @@ describe("update.run post-core plugin finalize", () => {
     runPostCoreFinalizeAfterGatewayUpdateMock.mockResolvedValueOnce({
       status: "error",
       reason: "nonzero-exit",
-      entrypoint: "/tmp/openclaw-git/dist/index.mjs",
+      entrypoint: "/tmp/carapace-git/dist/index.mjs",
       exitCode: 1,
       message: "convergence failed",
     });
-    mockGitOkUpdate("/tmp/openclaw-git");
+    mockGitOkUpdate("/tmp/carapace-git");
 
     const payload = await captureUpdateRunPayload();
 

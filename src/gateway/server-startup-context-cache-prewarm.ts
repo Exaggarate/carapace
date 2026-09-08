@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { scheduleGatewayIdleTask, type GatewayIdleTaskHandle } from "./server-idle-task.js";
 
@@ -10,7 +10,7 @@ type StartupTrace = {
 };
 
 export function scheduleContextCachePrewarm(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   startupTrace?: StartupTrace;
   log: { warn: (msg: string) => void };
 }): GatewayIdleTaskHandle {

@@ -6,12 +6,12 @@ import { setImmediate as checkpoint } from "node:timers/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred, withTestTimeout } from "../../test/helpers/promise.js";
 import * as commandExec from "../process/exec.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { nodeFilePath } from "../test-utils/node-file-path.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resetLegacyWorkspaceStateCheckForTest } from "./workspace-legacy-state.test-support.js";
 import * as workspaceState from "./workspace-state-store.js";
 import {
@@ -21,14 +21,14 @@ import {
   ensureAgentWorkspace,
 } from "./workspace.js";
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 let disposeGitCohort: (() => Promise<void>) | undefined;
 
 beforeEach(async () => {
   resetLegacyWorkspaceStateCheckForTest();
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workspace-provisioning-",
+    prefix: "carapace-workspace-provisioning-",
   });
 });
 
@@ -37,7 +37,7 @@ afterEach(async () => {
     await disposeGitCohort?.();
   } finally {
     disposeGitCohort = undefined;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetLegacyWorkspaceStateCheckForTest();
     await testState?.cleanup();
     testState = undefined;
@@ -109,7 +109,7 @@ function startGitProvisioning(directories: string[], retryAfterFailure = false) 
       parent && initGates.has(parent)
         ? parent
         : parent &&
-            path.basename(parent).startsWith("openclaw-bootstrap-") &&
+            path.basename(parent).startsWith("carapace-bootstrap-") &&
             initGates.has(path.dirname(parent))
           ? path.dirname(parent)
           : undefined;

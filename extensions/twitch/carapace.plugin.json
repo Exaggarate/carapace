@@ -1,0 +1,14 @@
+{
+  "id": "twitch",
+  "name": "Twitch",
+  "description": "Carapace Twitch channel plugin for chat and moderation workflows.",
+  "activation": {
+    "onStartup": false
+  },
+  "channels": ["twitch"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

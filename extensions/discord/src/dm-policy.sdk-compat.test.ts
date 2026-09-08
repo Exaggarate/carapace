@@ -6,8 +6,8 @@ const sdk = vi.hoisted((): { available: boolean; calls: number; failure?: Error 
   calls: 0,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-config-schema", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-config-schema")>();
+vi.mock("carapace/plugin-sdk/channel-config-schema", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-config-schema")>();
   return {
     ...actual,
     get refineChannelDmPolicy() {

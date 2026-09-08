@@ -60,7 +60,7 @@ describe("scheduled task runtime derivation", () => {
     );
     return await readScheduledTaskRuntime({
       USERPROFILE: "C:\\Users\\test",
-      OPENCLAW_PROFILE: "default",
+      CARAPACE_PROFILE: "default",
     });
   }
 
@@ -81,7 +81,7 @@ describe("scheduled task runtime derivation", () => {
     });
     const runtime = await readRuntimeFromQueryOutput(
       [
-        "Aufgabenname: \\OpenClaw Gateway",
+        "Aufgabenname: \\Carapace Gateway",
         `Status: ${task.label}`,
         "Letzte Laufzeit: 02.08.2026 14:00:00",
         "Letztes Ergebnis: 0",
@@ -106,8 +106,8 @@ describe("scheduled task runtime derivation", () => {
       state: task.name,
       lastRunResult: String(task.result),
     });
-    expect(probeScheduledTaskExists("OpenClaw Gateway")).toBe(true);
-    expect(isScheduledTaskDefinitelyNotRunning("OpenClaw Gateway")).toBe(
+    expect(probeScheduledTaskExists("Carapace Gateway")).toBe(true);
+    expect(isScheduledTaskDefinitelyNotRunning("Carapace Gateway")).toBe(
       task.expected === "stopped",
     );
   });
@@ -122,8 +122,8 @@ describe("scheduled task runtime derivation", () => {
       status: "stopped",
       state: "Ready",
     });
-    expect(probeScheduledTaskExists("OpenClaw Gateway")).toBe(true);
-    expect(isScheduledTaskDefinitelyNotRunning("OpenClaw Gateway")).toBe(true);
+    expect(probeScheduledTaskExists("Carapace Gateway")).toBe(true);
+    expect(isScheduledTaskDefinitelyNotRunning("Carapace Gateway")).toBe(true);
   });
 
   it.each([null, "3", 5])(
@@ -131,8 +131,8 @@ describe("scheduled task runtime derivation", () => {
     async (state) => {
       spawnSync.mockReturnValue({ status: 0, stdout: JSON.stringify({ state }) });
       await expect(readRuntimeFromQueryOutput("")).resolves.toMatchObject({ status: "unknown" });
-      expect(probeScheduledTaskExists("OpenClaw Gateway")).toBe(true);
-      expect(isScheduledTaskDefinitelyNotRunning("OpenClaw Gateway")).toBe(false);
+      expect(probeScheduledTaskExists("Carapace Gateway")).toBe(true);
+      expect(isScheduledTaskDefinitelyNotRunning("Carapace Gateway")).toBe(false);
     },
   );
 
@@ -144,8 +144,8 @@ describe("scheduled task runtime derivation", () => {
         status: "stopped",
         missingUnit: true,
       });
-      expect(probeScheduledTaskExists("OpenClaw Gateway")).toBe(false);
-      expect(isScheduledTaskDefinitelyNotRunning("OpenClaw Gateway")).toBe(false);
+      expect(probeScheduledTaskExists("Carapace Gateway")).toBe(false);
+      expect(isScheduledTaskDefinitelyNotRunning("Carapace Gateway")).toBe(false);
     },
   );
 
@@ -165,7 +165,7 @@ describe("scheduled task runtime derivation", () => {
       missingUnit: false,
       inspectionFailure: { code: "service-runtime-inspection-failed" },
     });
-    expect(probeScheduledTaskExists("OpenClaw Gateway")).toBeNull();
+    expect(probeScheduledTaskExists("Carapace Gateway")).toBeNull();
   });
 
   it("requires current Scheduler running state before retiring the Startup owner", async () => {
@@ -183,36 +183,36 @@ describe("scheduled task runtime derivation", () => {
 describe("resolveTaskScriptPath", () => {
   it.each([
     {
-      name: "uses default path when OPENCLAW_PROFILE is unset",
+      name: "uses default path when CARAPACE_PROFILE is unset",
       env: { USERPROFILE: "C:\\Users\\test" },
-      expected: path.join("C:\\Users\\test", ".openclaw", "gateway.cmd"),
+      expected: path.join("C:\\Users\\test", ".carapace", "gateway.cmd"),
     },
     {
-      name: "uses profile-specific path when OPENCLAW_PROFILE is set to a custom value",
-      env: { USERPROFILE: "C:\\Users\\test", OPENCLAW_PROFILE: "jbphoenix" },
-      expected: path.join("C:\\Users\\test", ".openclaw-jbphoenix", "gateway.cmd"),
+      name: "uses profile-specific path when CARAPACE_PROFILE is set to a custom value",
+      env: { USERPROFILE: "C:\\Users\\test", CARAPACE_PROFILE: "jbphoenix" },
+      expected: path.join("C:\\Users\\test", ".carapace-jbphoenix", "gateway.cmd"),
     },
     {
-      name: "prefers OPENCLAW_STATE_DIR over profile-derived defaults",
+      name: "prefers CARAPACE_STATE_DIR over profile-derived defaults",
       env: {
         USERPROFILE: "C:\\Users\\test",
-        OPENCLAW_PROFILE: "rescue",
-        OPENCLAW_STATE_DIR: "C:\\State\\openclaw",
+        CARAPACE_PROFILE: "rescue",
+        CARAPACE_STATE_DIR: "C:\\State\\carapace",
       },
-      expected: path.join("C:\\State\\openclaw", "gateway.cmd"),
+      expected: path.join("C:\\State\\carapace", "gateway.cmd"),
     },
     {
       name: "falls back to HOME when USERPROFILE is not set",
-      env: { HOME: "/home/test", OPENCLAW_PROFILE: "default" },
-      expected: path.join("/home/test", ".openclaw", "gateway.cmd"),
+      env: { HOME: "/home/test", CARAPACE_PROFILE: "default" },
+      expected: path.join("/home/test", ".carapace", "gateway.cmd"),
     },
     {
       name: "uses a custom task script file name inside the state directory",
       env: {
         USERPROFILE: "C:\\Users\\test",
-        OPENCLAW_TASK_SCRIPT_NAME: "gateway-node.cmd",
+        CARAPACE_TASK_SCRIPT_NAME: "gateway-node.cmd",
       },
-      expected: path.join("C:\\Users\\test", ".openclaw", "gateway-node.cmd"),
+      expected: path.join("C:\\Users\\test", ".carapace", "gateway-node.cmd"),
     },
   ])("$name", ({ env, expected }) => {
     expect(resolveTaskScriptPath(env)).toBe(expected);
@@ -228,9 +228,9 @@ describe("resolveTaskScriptPath", () => {
     expect(() =>
       resolveTaskScriptPath({
         USERPROFILE: "C:\\Users\\test",
-        OPENCLAW_TASK_SCRIPT_NAME: scriptName,
+        CARAPACE_TASK_SCRIPT_NAME: scriptName,
       }),
-    ).toThrow("OPENCLAW_TASK_SCRIPT_NAME must be a file name only");
+    ).toThrow("CARAPACE_TASK_SCRIPT_NAME must be a file name only");
   });
 });
 
@@ -245,12 +245,12 @@ describe("readScheduledTaskCommand", () => {
     },
     run: (env: Record<string, string | undefined>) => Promise<void>,
   ) {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-schtasks-test-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-schtasks-test-"));
     try {
       const extraEnv = typeof options.env === "function" ? options.env(tmpDir) : options.env;
       const env = {
         USERPROFILE: tmpDir,
-        OPENCLAW_PROFILE: "default",
+        CARAPACE_PROFILE: "default",
         ...extraEnv,
       };
       if (options.scriptLines) {
@@ -290,13 +290,13 @@ describe("readScheduledTaskCommand", () => {
   it("reads legacy UTF-8 scripts with CJK paths written before the encoding fix", async () => {
     await withScheduledTaskScript(
       {
-        scriptLines: ["@echo off", 'cd /d "C:\\Users\\苗振\\.openclaw"', "node gateway.js"],
+        scriptLines: ["@echo off", 'cd /d "C:\\Users\\苗振\\.carapace"', "node gateway.js"],
       },
       async (env) => {
         const result = await readScheduledTaskCommand(env);
         expect(result).toEqual({
           programArguments: ["node", "gateway.js"],
-          workingDirectory: "C:\\Users\\苗振\\.openclaw",
+          workingDirectory: "C:\\Users\\苗振\\.carapace",
           sourcePath: resolveTaskScriptPath(env),
         });
       },
@@ -306,14 +306,14 @@ describe("readScheduledTaskCommand", () => {
   it("reads marked ANSI scripts with CJK paths under a CJK code page (#107416)", async () => {
     await withScheduledTaskScript(
       {
-        scriptLines: ["@echo off", 'cd /d "C:\\Users\\苗振\\.openclaw"', "node gateway.js"],
+        scriptLines: ["@echo off", 'cd /d "C:\\Users\\苗振\\.carapace"', "node gateway.js"],
         scriptEncoding: "gbk",
       },
       async (env) => {
         const result = await readScheduledTaskCommand(env);
         expect(result).toEqual({
           programArguments: ["node", "gateway.js"],
-          workingDirectory: "C:\\Users\\苗振\\.openclaw",
+          workingDirectory: "C:\\Users\\苗振\\.carapace",
           sourcePath: resolveTaskScriptPath(env),
         });
       },
@@ -325,14 +325,14 @@ describe("readScheduledTaskCommand", () => {
     // from sniffing these bytes as UTF-8 and parsing a corrupted path.
     await withScheduledTaskScript(
       {
-        scriptLines: ["@echo off", 'cd /d "C:\\Users\\隆\\.openclaw"', "node gateway.js"],
+        scriptLines: ["@echo off", 'cd /d "C:\\Users\\隆\\.carapace"', "node gateway.js"],
         scriptEncoding: "gbk",
       },
       async (env) => {
         const result = await readScheduledTaskCommand(env);
         expect(result).toEqual({
           programArguments: ["node", "gateway.js"],
-          workingDirectory: "C:\\Users\\隆\\.openclaw",
+          workingDirectory: "C:\\Users\\隆\\.carapace",
           sourcePath: resolveTaskScriptPath(env),
         });
       },
@@ -361,10 +361,10 @@ describe("readScheduledTaskCommand", () => {
       {
         scriptLines: [
           "@echo off",
-          "rem OpenClaw Gateway",
-          "cd /d C:\\Projects\\openclaw",
+          "rem Carapace Gateway",
+          "cd /d C:\\Projects\\carapace",
           "set NODE_ENV=production",
-          "set OPENCLAW_PORT=18789",
+          "set CARAPACE_PORT=18789",
           "node gateway.js --verbose",
         ],
       },
@@ -372,14 +372,14 @@ describe("readScheduledTaskCommand", () => {
         const result = await readScheduledTaskCommand(env);
         expect(result).toEqual({
           programArguments: ["node", "gateway.js", "--verbose"],
-          workingDirectory: "C:\\Projects\\openclaw",
+          workingDirectory: "C:\\Projects\\carapace",
           environment: {
             NODE_ENV: "production",
-            OPENCLAW_PORT: "18789",
+            CARAPACE_PORT: "18789",
           },
           environmentValueSources: {
             NODE_ENV: "inline",
-            OPENCLAW_PORT: "inline",
+            CARAPACE_PORT: "inline",
           },
           sourcePath: resolveTaskScriptPath(env),
         });
@@ -392,7 +392,7 @@ describe("readScheduledTaskCommand", () => {
       {
         scriptLines: [
           "@echo off",
-          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js gateway --port 18789',
+          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js gateway --port 18789',
         ],
       },
       async (env) => {
@@ -400,7 +400,7 @@ describe("readScheduledTaskCommand", () => {
         expect(result).toEqual({
           programArguments: [
             "C:\\Program Files\\nodejs\\node.exe",
-            "C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+            "C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
             "gateway",
             "--port",
             "18789",
@@ -416,15 +416,15 @@ describe("readScheduledTaskCommand", () => {
       {
         scriptLines: [
           "@echo off",
-          '"\\\\fileserver\\OpenClaw Share\\node.exe" "\\\\fileserver\\OpenClaw Share\\dist\\index.js" gateway --port 18789',
+          '"\\\\fileserver\\Carapace Share\\node.exe" "\\\\fileserver\\Carapace Share\\dist\\index.js" gateway --port 18789',
         ],
       },
       async (env) => {
         const result = await readScheduledTaskCommand(env);
         expect(result).toEqual({
           programArguments: [
-            "\\\\fileserver\\OpenClaw Share\\node.exe",
-            "\\\\fileserver\\OpenClaw Share\\dist\\index.js",
+            "\\\\fileserver\\Carapace Share\\node.exe",
+            "\\\\fileserver\\Carapace Share\\dist\\index.js",
             "gateway",
             "--port",
             "18789",
@@ -435,10 +435,10 @@ describe("readScheduledTaskCommand", () => {
     );
   });
 
-  it("reads script from OPENCLAW_STATE_DIR override", async () => {
+  it("reads script from CARAPACE_STATE_DIR override", async () => {
     await withScheduledTaskScript(
       {
-        env: (tmpDir) => ({ OPENCLAW_STATE_DIR: path.join(tmpDir, "custom-state") }),
+        env: (tmpDir) => ({ CARAPACE_STATE_DIR: path.join(tmpDir, "custom-state") }),
         scriptLines: ["@echo off", "node gateway.js --from-state-dir"],
       },
       async (env) => {

@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { mergeProcessEnv } from "../infra/process-env.js";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
+import type { CarapacePluginNodeHostCommandIo } from "../plugins/types.js";
 import { spawnTerminalPty } from "../process/terminal-pty.js";
 
 export type NodePtyCommandResult = { exitCode: number; signal?: number };
@@ -140,7 +140,7 @@ export async function runNodePtyCommand(
     cols: number;
     rows: number;
   },
-  io: OpenClawPluginNodeHostCommandIo,
+  io: CarapacePluginNodeHostCommandIo,
   spawn: typeof spawnTerminalPty = spawnTerminalPty,
 ): Promise<NodePtyCommandResult> {
   if (io.signal.aborted) {
@@ -150,7 +150,7 @@ export async function runNodePtyCommand(
     process.env,
     params.env,
     params.pathEnv ? { PATH: params.pathEnv } : undefined,
-    { OPENCLAW_TERMINAL: "1" },
+    { CARAPACE_TERMINAL: "1" },
   ]);
   const pty = await spawn({
     file: params.file,

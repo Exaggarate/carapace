@@ -7,7 +7,7 @@
  * 3. Sessions matching the default model correctly inherit defaults
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { expect, test, vi } from "vitest";
 import { formatThinkingLevels } from "../auto-reply/thinking.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
@@ -95,7 +95,7 @@ async function listMainSessionWithThinking(params: {
   primaryModel: string;
   sessionModelProvider: string;
   sessionModel: string;
-  agentRuntime?: "codex" | "openclaw";
+  agentRuntime?: "codex" | "carapace";
   selectedByOverride?: boolean;
   thinkingLevel?: string;
   readPreparedGatewayModelCatalog?: GatewayRequestContext["readPreparedGatewayModelCatalog"];

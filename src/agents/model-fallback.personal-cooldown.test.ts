@@ -4,7 +4,7 @@ import {
   updateUserModelAuthProfile,
 } from "../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { ensureAuthProfileStore } from "./auth-profiles/store-runtime.js";
 import { isFallbackSummaryError } from "./model-fallback-attempt.js";
 import { runWithModelFallback } from "./model-fallback-runner.js";
@@ -13,7 +13,7 @@ describe("personal account fallback cooldown summaries", () => {
   it.each([false, true])(
     "refreshes selected cooldown with authored order=%s",
     async (authoredOrder) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "home", prefix: "fallback-personal-expiry-" },
         async (state) => {
           const person = ensureProfileForEmail("alice@example.test");

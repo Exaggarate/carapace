@@ -1,6 +1,6 @@
 // QA Lab Slack native approval observation and resolution.
 import { randomUUID } from "node:crypto";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 import { assertApprovalDecisionResult } from "../shared/live-approval-result.js";
 import {
   writeSlackApprovalCheckpoint,

@@ -1,21 +1,21 @@
 {
-  "name": "@openclaw/llama-cpp-provider",
+  "name": "@carapace/llama-cpp-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw provider for managed and external llama.cpp servers",
+  "description": "Carapace provider for managed and external llama.cpp servers",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/llama-cpp-provider",
+      "npmSpec": "@carapace/llama-cpp-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.2"
     },
@@ -23,7 +23,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "bundleRuntimeDependencies": false,

@@ -14,7 +14,7 @@ type AcpActiveTurnState = {
   activeTurnKeys: Set<string>;
 };
 
-const ACP_ACTIVE_TURN_STATE_KEY = Symbol.for("openclaw.acp.activeTurns");
+const ACP_ACTIVE_TURN_STATE_KEY = Symbol.for("carapace.acp.activeTurns");
 
 function getAcpActiveTurnState(): AcpActiveTurnState {
   return resolveGlobalSingleton<AcpActiveTurnState>(ACP_ACTIVE_TURN_STATE_KEY, () => ({

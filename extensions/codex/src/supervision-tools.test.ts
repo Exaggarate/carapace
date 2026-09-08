@@ -2,7 +2,7 @@
 import {
   clearRuntimeAuthProfileStoreSnapshots,
   replaceRuntimeAuthProfileStoreSnapshots,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexAppServerAuthProfileIdForAgent } from "./app-server/auth-profile.js";
 import { resolveCodexSupervisionAppServerRuntimeOptions } from "./app-server/config-runtime.js";
@@ -20,10 +20,10 @@ function createTestSupervisionTools(
   });
 }
 
-const LEGACY_CODEX_SUPERVISOR_ENDPOINTS_ENV = "OPENCLAW_CODEX_SUPERVISOR_ENDPOINTS";
+const LEGACY_CODEX_SUPERVISOR_ENDPOINTS_ENV = "CARAPACE_CODEX_SUPERVISOR_ENDPOINTS";
 const LEGACY_CODEX_SUPERVISOR_RAW_TRANSCRIPTS_ENV =
-  "OPENCLAW_CODEX_SUPERVISOR_ALLOW_RAW_TRANSCRIPTS";
-const LEGACY_CODEX_SUPERVISOR_WRITE_CONTROLS_ENV = "OPENCLAW_CODEX_SUPERVISOR_ALLOW_WRITE_CONTROLS";
+  "CARAPACE_CODEX_SUPERVISOR_ALLOW_RAW_TRANSCRIPTS";
+const LEGACY_CODEX_SUPERVISOR_WRITE_CONTROLS_ENV = "CARAPACE_CODEX_SUPERVISOR_ALLOW_WRITE_CONTROLS";
 
 const requestCodexAppServerJsonMock = vi.hoisted(() => vi.fn());
 

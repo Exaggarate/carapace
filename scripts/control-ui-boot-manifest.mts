@@ -125,7 +125,7 @@ function manifestKeysForChunks(chunkPaths: Iterable<string>, distDir: string): s
 }
 
 async function main(): Promise<void> {
-  const distDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-control-ui-boot-"));
+  const distDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-control-ui-boot-"));
   try {
     const config = controlUiViteConfig({ outDir: distDir });
     await build({

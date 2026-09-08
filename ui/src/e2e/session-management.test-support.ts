@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Locator, Page } from "playwright";
 import { expect } from "vitest";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
@@ -17,15 +17,15 @@ import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts"
 
 export { controlUiSessionPath, controlUiSessionUrl, installMockGateway, waitForConfirmModal };
 
-export const collapsedSessionSectionsStorageKey = "openclaw:sidebar:sessions:collapsed-sections";
-export const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+export const collapsedSessionSectionsStorageKey = "carapace:sidebar:sessions:collapsed-sections";
+export const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 export function createSessionManagementE2eSuite(source = false) {
   return createControlUiE2eSuite({
     name: "Control UI session management mocked Gateway E2E",
     ...(source ? { startServer: () => startControlUiE2eServer(undefined, { source: true }) } : {}),
     unavailableMessage: (executablePath) =>
-      `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+      `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
   });
 }
 
@@ -143,7 +143,7 @@ export async function openSessionMenuSubmenu(page: Page, name: string): Promise<
     .poll(() =>
       page
         .locator(
-          ":is(openclaw-session-menu, openclaw-chat-header-session-menu) > wa-dropdown > wa-dropdown-item:focus",
+          ":is(carapace-session-menu, carapace-chat-header-session-menu) > wa-dropdown > wa-dropdown-item:focus",
         )
         .count(),
     )
@@ -161,7 +161,7 @@ export async function openSessionMenuSubmenu(page: Page, name: string): Promise<
 
 /** Fills the owned input dialog and submits it the way Enter does. */
 export async function submitInputDialog(page: Page, value: string): Promise<void> {
-  const field = page.locator("openclaw-modal-dialog input");
+  const field = page.locator("carapace-modal-dialog input");
   await field.waitFor({ state: "visible" });
   await field.fill(value);
   await field.press("Enter");

@@ -17,8 +17,8 @@ describe("resolveGatewayCredentialsForUrlEdit", () => {
   it("preserves credentials for same normalized gateway endpoint edits", () => {
     expect(
       resolveGatewayCredentialsForUrlEdit(
-        "wss://gateway.example/openclaw",
-        " wss://gateway.example/openclaw/ ",
+        "wss://gateway.example/carapace",
+        " wss://gateway.example/carapace/ ",
         { token: "abc123", password: "secret" },
       ),
     ).toEqual({ token: "abc123", password: "secret" });
@@ -27,14 +27,14 @@ describe("resolveGatewayCredentialsForUrlEdit", () => {
   it("loads a scoped token and clears the password when the gateway endpoint changes", () => {
     vi.stubGlobal("sessionStorage", createStorageMock());
     sessionStorage.setItem(
-      "openclaw.control.token.v1:wss://other-gateway.example/openclaw",
+      "carapace.control.token.v1:wss://other-gateway.example/carapace",
       "other-token",
     );
 
     expect(
       resolveGatewayCredentialsForUrlEdit(
-        "wss://gateway.example/openclaw",
-        "wss://other-gateway.example/openclaw/",
+        "wss://gateway.example/carapace",
+        "wss://other-gateway.example/carapace/",
         { token: "abc123", password: "secret" },
       ),
     ).toEqual({ token: "other-token", password: "" });
@@ -45,8 +45,8 @@ describe("resolveGatewayCredentialsForUrlEdit", () => {
 
     expect(
       resolveGatewayCredentialsForUrlEdit(
-        "wss://gateway.example/openclaw",
-        "wss://other-gateway.example/openclaw",
+        "wss://gateway.example/carapace",
+        "wss://other-gateway.example/carapace",
         { token: "abc123", password: "secret" },
       ),
     ).toEqual({ token: "", password: "" });
@@ -55,8 +55,8 @@ describe("resolveGatewayCredentialsForUrlEdit", () => {
   it("preserves the token but clears the password when only the query scope changes", () => {
     expect(
       resolveGatewayCredentialsForUrlEdit(
-        "wss://gateway.example/openclaw?tenant=first",
-        "wss://gateway.example/openclaw?tenant=second",
+        "wss://gateway.example/carapace?tenant=first",
+        "wss://gateway.example/carapace?tenant=second",
         { token: "abc123", password: "secret" },
       ),
     ).toEqual({ token: "abc123", password: "" });
@@ -66,17 +66,17 @@ describe("resolveGatewayCredentialsForUrlEdit", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal("sessionStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw.control.settings.v1",
+      "carapace.control.settings.v1",
       JSON.stringify({
-        gatewayUrl: "wss://other-gateway.example/openclaw",
+        gatewayUrl: "wss://other-gateway.example/carapace",
         token: "gateway-token",
       }),
     );
 
     expect(
       resolveGatewayCredentialsForUrlEdit(
-        "wss://gateway.example/openclaw",
-        "wss://other-gateway.example/openclaw",
+        "wss://gateway.example/carapace",
+        "wss://other-gateway.example/carapace",
         { token: "abc123", password: "secret" },
       ),
     ).toEqual({ token: "", password: "" });

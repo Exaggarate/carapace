@@ -4,7 +4,7 @@ import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createTranscriptsTool } from "../agents/tools/transcripts-tool.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "../plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createTranscriptsAutoStartService } from "./auto-start.js";
 import type { TranscriptSourceProvider, TranscriptStartRequest } from "./provider-types.js";
 import { TranscriptsStore } from "./store.js";
@@ -12,7 +12,7 @@ import { TranscriptsStore } from "./store.js";
 const tempDirs = createTempDirTracker();
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -69,7 +69,7 @@ describe("transcript provider cleanup custody", () => {
       const tool = createTranscriptsTool(ctx);
       const service = createTranscriptsAutoStartService(ctx);
       const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const replacementStop = vi.fn<NonNullable<TranscriptSourceProvider["stop"]>>(
         async ({ sessionId }) => ({ ok: true, sessionId }),

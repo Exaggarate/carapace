@@ -1,4 +1,4 @@
-import { isRecord, isStringRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord, isStringRecord } from "@carapace/normalization-core/record-coerce";
 import type { TerminalPtySpawnParams } from "./terminal-pty.js";
 
 export type TerminalPtyControl =

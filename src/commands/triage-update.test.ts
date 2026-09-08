@@ -11,14 +11,14 @@ describe("update failure triage diagnostics", () => {
   it.each(["package-post-install-doctor", "candidate-runtime-unavailable"] as const)(
     "writes bounded sanitized failure evidence without changing the result (%s)",
     async (advisoryKind) => {
-      const home = tempDirs.make("openclaw-update-triage-");
-      const stateDir = path.join(home, ".openclaw");
-      const env = { HOME: home, OPENCLAW_STATE_DIR: stateDir };
+      const home = tempDirs.make("carapace-update-triage-");
+      const stateDir = path.join(home, ".carapace");
+      const env = { HOME: home, CARAPACE_STATE_DIR: stateDir };
       const secret = "sk-test-update-triage-secret-1234567890";
       const result: UpdateRunResult = {
         status: "error",
         mode: "npm",
-        root: path.join(home, "npm", "openclaw"),
+        root: path.join(home, "npm", "carapace"),
         reason: "Package install failed",
         before: { version: "2026.8.1" },
         recovery: {
@@ -75,8 +75,8 @@ describe("update failure triage diagnostics", () => {
   );
 
   it("preserves a post-install activation error even when the core update succeeded", async () => {
-    const stateDir = tempDirs.make("openclaw-update-triage-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-update-triage-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const failure = {
       result: {
         status: "ok" as const,
@@ -95,14 +95,14 @@ describe("update failure triage diagnostics", () => {
   });
 
   it("retains package rollback proof without promoting restart safety", async () => {
-    const stateDir = tempDirs.make("openclaw-update-triage-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-update-triage-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const outputPath = await writeTriageUpdateFailure(
       {
         result: {
           status: "error",
           mode: "npm",
-          reason: "openclaw doctor",
+          reason: "carapace doctor",
           before: { version: "2026.8.1" },
           after: { version: "2026.8.1" },
           steps: [],
@@ -130,8 +130,8 @@ describe("update failure triage diagnostics", () => {
   });
 
   it("retains actual plugin sync and npm errors after a successful core replacement", async () => {
-    const stateDir = tempDirs.make("openclaw-update-triage-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-update-triage-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const failure = {
       result: {
         status: "error" as const,
@@ -172,8 +172,8 @@ describe("update failure triage diagnostics", () => {
   });
 
   it("retains fresh Doctor failure warnings through repeated diagnostic handoffs", async () => {
-    const stateDir = tempDirs.make("openclaw-update-triage-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-update-triage-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const failure = {
       result: {
         status: "error" as const,
@@ -214,8 +214,8 @@ describe("update failure triage diagnostics", () => {
   });
 
   it("reserves the terminal plugin warning before earlier errors exhaust the diagnostic budget", async () => {
-    const stateDir = tempDirs.make("openclaw-update-triage-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-update-triage-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const outputPath = await writeTriageUpdateFailure(
       {
         result: {
@@ -254,8 +254,8 @@ describe("update failure triage diagnostics", () => {
   it.each(["dirty", "no-upstream", "not-git"])(
     "accepts skipped %s attempts classified as failures",
     async (reason) => {
-      const stateDir = tempDirs.make("openclaw-update-triage-");
-      const env = { OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = tempDirs.make("carapace-update-triage-");
+      const env = { CARAPACE_STATE_DIR: stateDir };
       const failure = {
         result: { status: "skipped" as const, mode: "git" as const, reason, steps: [] },
       };
@@ -279,7 +279,7 @@ describe("update failure triage diagnostics", () => {
       error: "expected a failed result or error",
     },
   ])("rejects $name diagnostic input", async ({ input, error }) => {
-    const stateDir = tempDirs.make("openclaw-update-triage-");
+    const stateDir = tempDirs.make("carapace-update-triage-");
     const inputPath = path.join(stateDir, "failure.json");
     await fs.writeFile(inputPath, input);
 

@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import {
-  ensureOpenClawAgentStandingIntentsSchema,
+  ensureCarapaceAgentStandingIntentsSchema,
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
-  openOpenClawAgentDatabase,
+  openCarapaceAgentDatabase,
   runSqliteImmediateTransactionSync,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
 
 export const DEFAULT_INTENT_COOLDOWN_SECONDS = 24 * 60 * 60;
 export const DEFAULT_INTENT_MAX_FIRES = 3;
@@ -74,8 +74,8 @@ type StoredChannelScope = ["v1", "channel" | "conversation", string, string, str
 type StoredSenderScope = ["v1", string, string, string];
 
 function withStandingIntentDatabase<T>(agentId: string, callback: (db: DatabaseSync) => T): T {
-  const db = openOpenClawAgentDatabase({ agentId }).db;
-  ensureOpenClawAgentStandingIntentsSchema(db);
+  const db = openCarapaceAgentDatabase({ agentId }).db;
+  ensureCarapaceAgentStandingIntentsSchema(db);
   return callback(db);
 }
 

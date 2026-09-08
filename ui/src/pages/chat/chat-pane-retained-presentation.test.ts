@@ -314,7 +314,7 @@ describe("chat pane retained presentation lifecycle", () => {
   });
 
   it("ignores an open dropdown in an inactive retained pane", () => {
-    const app = document.body.appendChild(document.createElement("openclaw-app"));
+    const app = document.body.appendChild(document.createElement("carapace-app"));
     const activePane = app.appendChild(document.createElement("section"));
     const composer = document.createElement("div");
     composer.className = "agent-chat__composer-combobox";

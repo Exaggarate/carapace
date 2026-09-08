@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   hashText,
   INVALID_PROJECT_ANNOTATION_KEY,
@@ -10,14 +10,14 @@ import {
   MEMORY_INDEX_CHUNK_PROVENANCE_TABLE,
   type MemorySessionSyncTarget,
   type MemorySyncParams,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { deleteSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { resolveOpenClawAgentSqlitePath } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { deleteSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { resolveCarapaceAgentSqlitePath } from "carapace/plugin-sdk/sqlite-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { describe, expect, it, vi } from "vitest";
 import {
   createManagerIndexFixture,
@@ -130,7 +130,7 @@ describe("memory index", () => {
     );
     await fs.writeFile(
       path.join(fixture.paths.memory, "2026-01-12.md"),
-      "- Daily note. <!-- trigger: should not inject --> <!-- importance: 10 --> <!-- project: github.com/openclaw/openclaw -->\n",
+      "- Daily note. <!-- trigger: should not inject --> <!-- importance: 10 --> <!-- project: github.com/Exaggarate/carapace -->\n",
     );
     await fs.writeFile(
       path.join(fixture.paths.memory, "2026-01-13.md"),
@@ -210,7 +210,7 @@ describe("memory index", () => {
       expect(rows.find((row) => row.path === "memory/2026-01-12.md")).toMatchObject({
         importance: null,
         triggers: null,
-        projectKey: "github.com/openclaw/openclaw",
+        projectKey: "github.com/Exaggarate/carapace",
         originClass: "agent",
       });
       expect(rows.find((row) => row.path === "memory/2026-01-13.md")).toMatchObject({
@@ -290,7 +290,7 @@ describe("memory index", () => {
   );
 
   it("round-trips mixed-case project keys through indexed recall consumers", async () => {
-    const projectKey = "github.com/OpenClaw/OpenClaw";
+    const projectKey = "github.com/Carapace/Carapace";
     await fs.writeFile(
       path.join(fixture.paths.workspace, "MEMORY.md"),
       `- Follow the kraken deploy ritual. <!-- trigger: kraken deploy ritual --> <!-- importance: 8 --> <!-- project: ${projectKey} -->\n`,
@@ -358,7 +358,7 @@ describe("memory index", () => {
   });
 
   it("keeps quarantined curated memory searchable but out of automatic candidates", async () => {
-    const projectKey = "github.com/openclaw/openclaw";
+    const projectKey = "github.com/Exaggarate/carapace";
     await fs.writeFile(
       path.join(fixture.paths.workspace, "MEMORY.md"),
       `- Quarantined release instruction. <!-- trigger: release instruction --> <!-- project: ${projectKey} -->\n`,
@@ -403,7 +403,7 @@ describe("memory index", () => {
   });
 
   it("withholds legacy curated candidates until background provenance repair succeeds", async () => {
-    const projectKey = "github.com/openclaw/openclaw";
+    const projectKey = "github.com/Exaggarate/carapace";
     await fs.writeFile(
       path.join(fixture.paths.workspace, "MEMORY.md"),
       `- Preserve legacy preference. <!-- trigger: legacy preference --> <!-- project: ${projectKey} -->\n`,
@@ -696,12 +696,12 @@ describe("memory index", () => {
   it("reindexes memory tables in place without deleting unrelated agent rows", async () => {
     const stateDir = path.join(fixture.paths.workspace, "managed-memory-state");
     fixture.setStateDir(stateDir);
-    const agentDbPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
-    const agentDb = openOpenClawAgentDatabase({ agentId: "main" });
+    const agentDbPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
+    const agentDb = openCarapaceAgentDatabase({ agentId: "main" });
     agentDb.db
       .prepare("INSERT INTO cache_entries (scope, key, value_json, updated_at) VALUES (?, ?, ?, ?)")
       .run("test", "keep-me", JSON.stringify({ value: "keep-me" }), 1);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const manager = await getFreshManager(createCfg({}));
     try {
@@ -711,7 +711,7 @@ describe("memory index", () => {
       await manager.close?.();
     }
 
-    const reopened = openOpenClawAgentDatabase({ agentId: "main" });
+    const reopened = openCarapaceAgentDatabase({ agentId: "main" });
     expect(
       reopened.db
         .prepare("SELECT value_json FROM cache_entries WHERE scope = ? AND key = ?")
@@ -725,7 +725,7 @@ describe("memory index", () => {
     const manager = await getFreshManager(createCfg({}));
     await manager.close?.();
 
-    const agentDb = openOpenClawAgentDatabase({ agentId: "main" });
+    const agentDb = openCarapaceAgentDatabase({ agentId: "main" });
     expect(
       agentDb.db.prepare("SELECT role, agent_id FROM schema_meta WHERE meta_key = 'primary'").get(),
     ).toEqual({
@@ -737,8 +737,8 @@ describe("memory index", () => {
   it("reports an uninitialized status without creating agent or registry databases", async () => {
     const stateDir = path.join(fixture.paths.workspace, "missing-status-state");
     fixture.setStateDir(stateDir);
-    const agentPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
-    const statePath = path.join(stateDir, "state", "openclaw.sqlite");
+    const agentPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
+    const statePath = path.join(stateDir, "state", "carapace.sqlite");
 
     const result = await getMemorySearchManager({
       cfg: createCfg({}),
@@ -768,7 +768,7 @@ describe("memory index", () => {
     await indexingManager.sync({ reason: "test", force: true });
     await indexingManager.close?.();
 
-    const agentPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    const agentPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
     const writer = new DatabaseSync(agentPath);
     let statusManager: MemoryIndexManager | undefined;
     try {
@@ -1365,7 +1365,7 @@ describe("memory index", () => {
         status: "missing",
         reason: "index metadata is missing",
         code: "metadata_missing",
-        owner: "openclaw",
+        owner: "carapace",
       });
 
       const results = await nextManager.search("alpha");
@@ -1461,7 +1461,7 @@ describe("memory index", () => {
         status: "missing",
         reason: "index metadata is missing",
         code: "metadata_missing",
-        owner: "openclaw",
+        owner: "carapace",
       });
       const row = db.prepare("SELECT model FROM memory_index_chunks LIMIT 1").get();
       expect(row?.model).toBe("semantic-embed");
@@ -1552,7 +1552,7 @@ describe("memory index", () => {
           status: "missing",
           reason: "index metadata is missing",
           code: "metadata_missing",
-          owner: "openclaw",
+          owner: "carapace",
         });
       } finally {
         await nextManager.close?.();
@@ -1593,7 +1593,7 @@ describe("memory index", () => {
         });
       }
 
-      const dbPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+      const dbPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
       lock = new DatabaseSync(dbPath);
       lock.exec("PRAGMA busy_timeout = 0");
       lock.exec("BEGIN EXCLUSIVE");
@@ -1876,7 +1876,7 @@ describe("memory index", () => {
         progress: recoveryProgress,
       });
 
-      const dbPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+      const dbPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
       const observer = new DatabaseSync(dbPath, { readOnly: true });
       try {
         const indexedCount = (marker: string) =>
@@ -2513,7 +2513,7 @@ describe("memory index", () => {
         storeAvailable: undefined,
       });
 
-      const writer = new DatabaseSync(resolveOpenClawAgentSqlitePath({ agentId: "main" }));
+      const writer = new DatabaseSync(resolveCarapaceAgentSqlitePath({ agentId: "main" }));
       try {
         writer
           .prepare("UPDATE memory_index_meta SET value = '1' WHERE key = ?")
@@ -2761,7 +2761,7 @@ describe("memory index", () => {
         initial.search("ORBIT-DELETE-91", { minScore: 0, sources: ["sessions"] }),
       ).resolves.not.toEqual([]);
       await initial.close?.();
-      const agentDb = new DatabaseSync(resolveOpenClawAgentSqlitePath({ agentId: "main" }));
+      const agentDb = new DatabaseSync(resolveCarapaceAgentSqlitePath({ agentId: "main" }));
       agentDb.exec("DELETE FROM memory_embedding_cache");
       agentDb.close();
       providerFixture.embedBatchCalls = 0;

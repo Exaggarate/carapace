@@ -31,7 +31,7 @@ describe("config cli integration", () => {
     const secretRefId = "CONFIG_GET_TEST_TOKEN";
     const schemaOnlySecrets = ["first-private-route", "second-private-route"];
     await withConfigFileHarness(
-      "openclaw-config-cli-get-redaction-",
+      "carapace-config-cli-get-redaction-",
       `${JSON.stringify(
         {
           channels: {
@@ -110,7 +110,7 @@ describe("config cli integration", () => {
     },
   ])("fails closed before config get emits values when $name", async (testCase) => {
     await withConfigFileHarness(
-      "openclaw-config-cli-get-fail-closed-",
+      "carapace-config-cli-get-fail-closed-",
       "{ gateway: { port: 19001 } }\n",
       async () => {
         await testCase.installFailure();
@@ -137,7 +137,7 @@ describe("config cli integration", () => {
       const migrated = configForExec({ mode: "ask" });
       const migratedRaw = JSON.stringify(migrated) + "\n";
       await withConfigFileHarness(
-        "openclaw-config-cli-patch-exec-mode-migrated-",
+        "carapace-config-cli-patch-exec-mode-migrated-",
         migratedRaw,
         async ({ configPath, tempDir }) => {
           const patchPath = path.join(tempDir, "patch.json5");
@@ -175,7 +175,7 @@ describe("config cli integration", () => {
 
   it("conflicts when a top-level include changes after config set starts", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-include-conflict-",
+      "carapace-config-cli-include-conflict-",
       '{ gateway: { $include: "./gateway.json5" } }\n',
       async ({ configPath, tempDir }) => {
         const includePath = path.join(tempDir, "gateway.json5");
@@ -208,7 +208,7 @@ describe("config cli integration", () => {
   it("preserves exact JSON5 bytes when setting an authored value to itself", async () => {
     const raw =
       '{\n  // preserve this comment and order\n  gateway: { port: 18789 },\n  logging: { level: "info" },\n}\n';
-    await withConfigFileHarness("openclaw-config-cli-noop-", raw, async ({ configPath }) => {
+    await withConfigFileHarness("carapace-config-cli-noop-", raw, async ({ configPath }) => {
       const output = createTestRuntime();
 
       await runConfigSet({
@@ -226,7 +226,7 @@ describe("config cli integration", () => {
 
   it("accepts absent and exact authored expectations", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-conditional-success-",
+      "carapace-config-cli-conditional-success-",
       "{ gateway: { port: 18789 } }\n",
       async ({ configPath }) => {
         const absentOutput = createTestRuntime();
@@ -255,7 +255,7 @@ describe("config cli integration", () => {
 
   it("rejects a conditional set when the authored value changed before CLI load", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-conditional-preload-conflict-",
+      "carapace-config-cli-conditional-preload-conflict-",
       "{ gateway: { port: 19002 } }\n",
       async ({ configPath }) => {
         const before = fs.readFileSync(configPath, "utf8");
@@ -283,7 +283,7 @@ describe("config cli integration", () => {
 
   it("keeps the snapshot hash guard after a matching conditional preflight", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-conditional-postload-race-",
+      "carapace-config-cli-conditional-postload-race-",
       "{ gateway: { port: 18789 } }\n",
       async ({ configPath }) => {
         const concurrentRaw = "{ gateway: { port: 19002 } }\n";
@@ -314,7 +314,7 @@ describe("config cli integration", () => {
     const raw =
       '{\n  // preserve this comment and order\n  gateway: { port: 18789 },\n  logging: { level: "info" },\n}\n';
     await withConfigFileHarness(
-      "openclaw-config-cli-missing-unset-",
+      "carapace-config-cli-missing-unset-",
       raw,
       async ({ configPath }) => {
         const output = createTestRuntime();
@@ -326,7 +326,7 @@ describe("config cli integration", () => {
         expect(fs.readFileSync(configPath, "utf8")).toBe(raw);
         expect(output.logs).toStrictEqual([]);
         expect(output.errors.join("\n")).toContain(
-          "Config path not found: gateway.bind. Nothing was changed. Run openclaw config get <path> first if you are unsure of the path.",
+          "Config path not found: gateway.bind. Nothing was changed. Run carapace config get <path> first if you are unsure of the path.",
         );
       },
     );
@@ -335,7 +335,7 @@ describe("config cli integration", () => {
   it("writes an absent key even when its value equals the resolved default", async () => {
     const raw = "{\n  // the default is not authored yet\n  gateway: {},\n}\n";
     await withConfigFileHarness(
-      "openclaw-config-cli-default-equal-write-",
+      "carapace-config-cli-default-equal-write-",
       raw,
       async ({ configPath }) => {
         const output = createTestRuntime();
@@ -357,12 +357,12 @@ describe("config cli integration", () => {
 
   it("accepts plugin hook conversation-access policy via config set", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-plugin-hooks-",
+      "carapace-config-cli-plugin-hooks-",
       "{ gateway: { port: 18789 } }\n",
       async ({ configPath }) => {
         const output = createTestRuntime();
         await runConfigSet({
-          path: "plugins.entries.openclaw-mem0.hooks.allowConversationAccess",
+          path: "plugins.entries.carapace-mem0.hooks.allowConversationAccess",
           value: "true",
           cliOptions: {},
           runtime: output.runtime,
@@ -370,7 +370,7 @@ describe("config cli integration", () => {
 
         expect(output.errors).toStrictEqual([]);
         const afterWrite = JSON5.parse(fs.readFileSync(configPath, "utf8"));
-        expect(afterWrite.plugins?.entries?.["openclaw-mem0"]?.hooks).toEqual({
+        expect(afterWrite.plugins?.entries?.["carapace-mem0"]?.hooks).toEqual({
           allowConversationAccess: true,
         });
       },

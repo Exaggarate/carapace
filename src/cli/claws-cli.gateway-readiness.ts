@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { sleep } from "../utils/sleep.js";
 import { callGatewayFromCli } from "./gateway-rpc.js";
 
@@ -11,7 +11,7 @@ export async function waitUntilGatewayAgentAvailable(agentId: string): Promise<v
   while (Date.now() < deadline) {
     try {
       const response = (await callGatewayFromCli("config.get", { timeout: "5000" }, {})) as {
-        config?: OpenClawConfig;
+        config?: CarapaceConfig;
         configRevisionHash?: unknown;
         appliedConfigHash?: unknown;
       };

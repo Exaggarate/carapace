@@ -223,10 +223,10 @@ describe("QA gateway fixture error composition", () => {
       }
       for (const key of [
         "HOME",
-        "OPENCLAW_HOME",
-        "OPENCLAW_STATE_DIR",
-        "OPENCLAW_CONFIG_PATH",
-        "OPENCLAW_OAUTH_DIR",
+        "CARAPACE_HOME",
+        "CARAPACE_STATE_DIR",
+        "CARAPACE_CONFIG_PATH",
+        "CARAPACE_OAUTH_DIR",
         "XDG_CONFIG_HOME",
         "XDG_DATA_HOME",
         "XDG_CACHE_HOME",

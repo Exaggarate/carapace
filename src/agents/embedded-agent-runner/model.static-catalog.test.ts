@@ -8,7 +8,7 @@ const repoRoot = path.resolve(import.meta.dirname, "../../..");
 
 const manifestMocks = vi.hoisted(() => ({
   getCurrentPluginMetadataSnapshot: vi.fn(),
-  listOpenClawPluginManifestMetadata: vi.fn(),
+  listCarapacePluginManifestMetadata: vi.fn(),
   loadPluginManifest: vi.fn(),
   loadPluginManifestRegistryCore: vi.fn(),
 }));
@@ -22,7 +22,7 @@ const providerMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../../plugins/manifest-metadata-scan.js", () => ({
-  listOpenClawPluginManifestMetadata: manifestMocks.listOpenClawPluginManifestMetadata,
+  listCarapacePluginManifestMetadata: manifestMocks.listCarapacePluginManifestMetadata,
 }));
 
 vi.mock("../../plugins/current-plugin-metadata-snapshot.js", async (importOriginal) => ({
@@ -74,7 +74,7 @@ function setManifestPlugins(plugins: unknown[]) {
       return [`/fixtures/${id}`, plugin];
     }),
   );
-  manifestMocks.listOpenClawPluginManifestMetadata.mockReturnValue(
+  manifestMocks.listCarapacePluginManifestMetadata.mockReturnValue(
     [...byPluginDir].map(([pluginDir, plugin]) => ({
       pluginDir,
       manifest: plugin,
@@ -85,7 +85,7 @@ function setManifestPlugins(plugins: unknown[]) {
     const plugin = byPluginDir.get(pluginDir);
     return plugin
       ? { ok: true, manifest: plugin }
-      : { ok: false, error: "missing manifest", manifestPath: `${pluginDir}/openclaw.plugin.json` };
+      : { ok: false, error: "missing manifest", manifestPath: `${pluginDir}/carapace.plugin.json` };
   });
 }
 
@@ -130,7 +130,7 @@ function createMistralManifestPlugin(overrides?: {
 beforeEach(() => {
   clearPluginMetadataLifecycleCaches();
   manifestMocks.getCurrentPluginMetadataSnapshot.mockReset();
-  manifestMocks.listOpenClawPluginManifestMetadata.mockReset();
+  manifestMocks.listCarapacePluginManifestMetadata.mockReset();
   manifestMocks.loadPluginManifest.mockReset();
   manifestMocks.loadPluginManifestRegistryCore.mockReset();
   providerMocks.normalizePluginDiscoveryResult.mockReset();
@@ -180,7 +180,7 @@ describe("resolveBundledStaticCatalogModel", () => {
       "mistral-medium-3-5",
     );
     expect(resolveModel({ provider: "mistral", modelId: "missing" })).toBeUndefined();
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).toHaveBeenCalledTimes(1);
+    expect(manifestMocks.listCarapacePluginManifestMetadata).toHaveBeenCalledTimes(1);
   });
 
   it.each([false, true])(
@@ -312,7 +312,7 @@ describe("resolveBundledStaticCatalogModel", () => {
     // api/baseUrl or rows normalize to openai-responses with an empty
     // endpoint (breaking Google completion/compaction fallbacks).
     const manifest = JSON.parse(
-      fs.readFileSync(path.join(repoRoot, "extensions/google/openclaw.plugin.json"), "utf8"),
+      fs.readFileSync(path.join(repoRoot, "extensions/google/carapace.plugin.json"), "utf8"),
     ) as {
       id: string;
       providers: string[];

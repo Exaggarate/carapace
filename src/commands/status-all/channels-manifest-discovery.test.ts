@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeEach, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginCache, withPluginCache } from "../../plugins/plugin-cache.js";
 
 const counters = vi.hoisted(() => ({
@@ -26,13 +26,13 @@ vi.mock("../../plugins/installed-plugin-index.js", async (importOriginal) => {
 
 const { buildChannelsTable } = await import("./channels.js");
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-status-all-discovery-"));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-status-all-discovery-"));
 const OWNERLESS_CHANNEL_IDS = ["feishu", "googlechat", "matrix", "twitch"] as const;
 
-function configFor(channelIds: readonly string[]): OpenClawConfig {
+function configFor(channelIds: readonly string[]): CarapaceConfig {
   return {
     channels: Object.fromEntries(channelIds.map((channelId) => [channelId, { enabled: true }])),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 async function runStatusChannels(channelIds: readonly string[]) {
@@ -45,18 +45,18 @@ async function runStatusChannels(channelIds: readonly string[]) {
 }
 
 beforeEach(() => {
-  vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-  vi.stubEnv("OPENCLAW_DISABLE_UPDATE_CHECK", "1");
-  vi.stubEnv("OPENCLAW_HOME", path.join(tempRoot, "home"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", path.join(tempRoot, "state"));
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(tempRoot, "openclaw.json"));
+  vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+  vi.stubEnv("CARAPACE_DISABLE_UPDATE_CHECK", "1");
+  vi.stubEnv("CARAPACE_HOME", path.join(tempRoot, "home"));
+  vi.stubEnv("CARAPACE_STATE_DIR", path.join(tempRoot, "state"));
+  vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(tempRoot, "carapace.json"));
   vi.stubEnv("FEISHU_APP_ID", "");
   vi.stubEnv("FEISHU_APP_SECRET", "");
   vi.stubEnv("GOOGLE_CHAT_SERVICE_ACCOUNT", "");
   vi.stubEnv("GOOGLE_CHAT_SERVICE_ACCOUNT_FILE", "");
   vi.stubEnv("MATRIX_HOMESERVER", "");
   vi.stubEnv("MATRIX_ACCESS_TOKEN", "");
-  vi.stubEnv("OPENCLAW_TWITCH_ACCESS_TOKEN", "");
+  vi.stubEnv("CARAPACE_TWITCH_ACCESS_TOKEN", "");
 });
 
 afterAll(() => {

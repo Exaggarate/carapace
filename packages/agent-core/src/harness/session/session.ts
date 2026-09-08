@@ -1,4 +1,4 @@
-import { stripCompactionReplayCheckpoint } from "@openclaw/ai/transports";
+import { stripCompactionReplayCheckpoint } from "@carapace/ai/transports";
 import type { AgentMessage } from "../../types.js";
 import {
   asAgentMessage,
@@ -9,7 +9,7 @@ import {
 import type { SessionContext, SessionTreeEntry } from "../types.js";
 import { selectResetKeptEntries } from "./tool-result-pairing.js";
 
-const SESSION_HISTORY_PRELUDE = Symbol.for("openclaw.sessionHistoryPrelude");
+const SESSION_HISTORY_PRELUDE = Symbol.for("carapace.sessionHistoryPrelude");
 
 /** The same semantic cut is used before payload acquisition and when building messages. */
 function resolveSessionContextWindow(

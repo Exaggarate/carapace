@@ -1,13 +1,13 @@
 // Line plugin module implements status behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import {
   buildTokenChannelStatusSummary,
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
   createDependentCredentialStatusIssueCollector,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 import { hasLineCredentials } from "./account-helpers.js";
 import type { LineProbeResult, ResolvedLineAccount } from "./types.js";
 

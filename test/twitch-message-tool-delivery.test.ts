@@ -15,7 +15,7 @@ import { sendMessage } from "../src/infra/outbound/message.js";
 import { setActivePluginRegistry } from "../src/plugins/runtime.js";
 import { onSessionTranscriptUpdate } from "../src/sessions/transcript-events.js";
 import { createTestRegistry } from "../src/test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../src/test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../src/test-utils/carapace-test-state.js";
 
 afterEach(() => setActivePluginRegistry(createTestRegistry([])));
 
@@ -84,7 +84,7 @@ describe("Twitch message-tool delivery", () => {
   ])(
     "sends $name",
     async ({ explicit, message, expected, singleAccount, bareTarget, sameSource }) => {
-      await withOpenClawTestState({ prefix: "twitch-message-delivery-" }, async (state) => {
+      await withCarapaceTestState({ prefix: "twitch-message-delivery-" }, async (state) => {
         manager.sendMessage.mockReset();
         const accountId = singleAccount
           ? "default"
@@ -272,7 +272,7 @@ describe("Twitch message-tool delivery", () => {
 
 describe("Twitch core send defaults and failures", () => {
   it.each([undefined, "other"])("uses the configured channel for account %s", async (accountId) => {
-    await withOpenClawTestState({ prefix: "twitch-default-send-" }, async (state) => {
+    await withCarapaceTestState({ prefix: "twitch-default-send-" }, async (state) => {
       const account = {
         username: "fixture-bot",
         clientId: "fixture-client",
@@ -315,7 +315,7 @@ describe("Twitch core send defaults and failures", () => {
   });
 
   it("keeps transport failures actionable instead of reporting delivery", async () => {
-    await withOpenClawTestState({ prefix: "twitch-send-error-" }, async () => {
+    await withCarapaceTestState({ prefix: "twitch-send-error-" }, async () => {
       const cfg = {
         channels: {
           twitch: {

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildWorkspaceSkillStatus } from "../../skills/discovery/status.js";
 import { loadWorkspaceSkills } from "../../skills/loading/workspace-skill-loader.js";
 import { buildSkillSnapshot } from "../../skills/loading/workspace-skill-prompt.js";
@@ -33,7 +33,7 @@ const RETIRED_SKILL_PATTERNS = [
   { pattern: /## 备用方案（直接使用 `cron` 工具）/u, replacement: "qqbot_remind only" },
   {
     pattern: /github\.com\/steipete\/wacli\/cmd\/wacli@latest/u,
-    replacement: "github.com/openclaw/wacli/cmd/wacli@latest",
+    replacement: "github.com/Exaggarate/carapace/wacli/cmd/wacli@latest",
   },
 ] as const;
 
@@ -43,7 +43,7 @@ function listRepositoryOwnedChannelSkillFiles(): string[] {
   const skillFiles = new Set<string>();
 
   for (const manifestPath of trackedFiles.filter((file) =>
-    /^extensions\/[^/]+\/openclaw\.plugin\.json$/u.test(file),
+    /^extensions\/[^/]+\/carapace\.plugin\.json$/u.test(file),
   )) {
     const manifest = JSON.parse(
       readFileSync(resolve(process.cwd(), manifestPath), "utf8"),
@@ -76,7 +76,7 @@ describe("bundled channel-provider skill contracts", () => {
   it.each<{
     label: string;
     pluginId: "discord" | "slack";
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     eligible: boolean;
     disabled?: boolean;
   }>([

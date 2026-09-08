@@ -5,7 +5,7 @@ import { i18n } from "../../i18n/index.ts";
 import { createStorageMock } from "../../test-helpers/storage.ts";
 import { waitForFast } from "../../test-helpers/wait-for.ts";
 import type { TerminalGatewayClient } from "./terminal-connection.ts";
-import { OpenClawTerminalPanel } from "./terminal-panel.ts";
+import { CarapaceTerminalPanel } from "./terminal-panel.ts";
 
 const TERMINAL_UPLOAD_RETENTION_MS = 24 * 60 * 60 * 1000;
 
@@ -43,9 +43,9 @@ type CreateGhosttyTerminalMock = Mock<
 >;
 
 const createGhosttyTerminalMock: CreateGhosttyTerminalMock = vi.fn();
-const TERMINAL_PANEL_ELEMENT_NAME = `test-openclaw-terminal-panel-upload-${crypto.randomUUID()}`;
+const TERMINAL_PANEL_ELEMENT_NAME = `test-carapace-terminal-panel-upload-${crypto.randomUUID()}`;
 
-class TestTerminalPanel extends OpenClawTerminalPanel {
+class TestTerminalPanel extends CarapaceTerminalPanel {
   override createTerminalController = createGhosttyTerminalMock as unknown as TerminalFactory;
 }
 
@@ -79,7 +79,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-describe("OpenClawTerminalPanel upload lifecycle", () => {
+describe("CarapaceTerminalPanel upload lifecycle", () => {
   beforeEach(async () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal("sessionStorage", createStorageMock());
@@ -106,13 +106,13 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
           return terminalOpenResult("session-1") as T;
         }
         if (method === "terminal.upload") {
-          return { path: "/tmp/openclaw upload/scan final.pdf", size: 3 } as T;
+          return { path: "/tmp/carapace upload/scan final.pdf", size: 3 } as T;
         }
         return {} as T;
       },
       addEventListener: () => () => {},
     };
-    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as OpenClawTerminalPanel;
+    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as CarapaceTerminalPanel;
     panel.client = client;
     panel.available = true;
     document.body.append(panel);
@@ -142,7 +142,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
         },
       });
     });
-    expect(controller.terminal.paste).toHaveBeenCalledWith("'/tmp/openclaw upload/scan final.pdf'");
+    expect(controller.terminal.paste).toHaveBeenCalledWith("'/tmp/carapace upload/scan final.pdf'");
     expect(controller.terminal.paste).not.toHaveBeenCalledWith(expect.stringContaining("\n"));
   });
 
@@ -172,19 +172,19 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
         if (method === "terminal.upload") {
           const name = (params as { name: string }).name;
           if (name === "scan final.pdf") {
-            return { path: "/tmp/openclaw upload/scan final.pdf", size: 3 } as T;
+            return { path: "/tmp/carapace upload/scan final.pdf", size: 3 } as T;
           }
           notesAttempts += 1;
           if (notesAttempts === 1) {
             return (await failedUpload.promise) as T;
           }
-          return { path: "/tmp/openclaw upload/notes.txt", size: 4 } as T;
+          return { path: "/tmp/carapace upload/notes.txt", size: 4 } as T;
         }
         return {} as T;
       },
       addEventListener: () => () => {},
     };
-    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as OpenClawTerminalPanel;
+    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as CarapaceTerminalPanel;
     panel.client = client;
     panel.available = true;
     document.body.append(panel);
@@ -230,7 +230,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
     };
     if (recovery === "expired-completion") {
       elapsedMs = TERMINAL_UPLOAD_RETENTION_MS;
-      failedUpload.resolve({ path: "/tmp/openclaw upload/notes.txt", size: 4 });
+      failedUpload.resolve({ path: "/tmp/carapace upload/notes.txt", size: 4 });
       await expectExpiredBatch();
       return;
     }
@@ -274,7 +274,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
       });
       if (recovery === "insert") {
         expect(controller.terminal.paste).toHaveBeenCalledExactlyOnceWith(
-          "'/tmp/openclaw upload/scan final.pdf'",
+          "'/tmp/carapace upload/scan final.pdf'",
         );
       } else {
         expect(controller.terminal.paste).not.toHaveBeenCalled();
@@ -286,7 +286,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
 
     await waitForFast(() => {
       expect(controller.terminal.paste).toHaveBeenCalledWith(
-        "'/tmp/openclaw upload/scan final.pdf' '/tmp/openclaw upload/notes.txt'",
+        "'/tmp/carapace upload/scan final.pdf' '/tmp/carapace upload/notes.txt'",
       );
       expect(panel.renderRoot.querySelector(".tp-upload-card")).toBeNull();
     });
@@ -316,7 +316,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
       },
       addEventListener: () => () => {},
     };
-    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as OpenClawTerminalPanel;
+    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as CarapaceTerminalPanel;
     panel.client = client;
     panel.available = true;
     document.body.append(panel);
@@ -346,7 +346,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
     expect(panel.renderRoot.querySelector(".tp-upload-card")).toBeNull();
     expect(panel.renderRoot.querySelector<HTMLButtonElement>(".tp-upload")?.disabled).toBe(false);
 
-    pendingUpload.resolve({ path: "/tmp/openclaw upload/archive.zip", size: 3 });
+    pendingUpload.resolve({ path: "/tmp/carapace upload/archive.zip", size: 3 });
     await Promise.resolve();
     await Promise.resolve();
     expect(controller.terminal.paste).not.toHaveBeenCalled();
@@ -377,7 +377,7 @@ describe("OpenClawTerminalPanel upload lifecycle", () => {
       },
       addEventListener: () => () => {},
     };
-    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as OpenClawTerminalPanel;
+    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as CarapaceTerminalPanel;
     panel.client = client;
     panel.available = true;
     document.body.append(panel);

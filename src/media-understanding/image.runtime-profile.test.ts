@@ -1,9 +1,9 @@
 // Image runtime tests cover model-backed image routing, auth/profile handling,
 // provider payload transforms, and MiniMax/Copilot special paths.
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEmptyPluginMetadataSnapshot } from "../agents/test-helpers/embedded-agent-runner-e2e-mocks.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   looksLikeSecretSentinel,
   mintSecretSentinel,
@@ -39,7 +39,7 @@ vi.mock("../plugins/provider-hook-runtime.js", async () => ({
   resolveProviderRuntimePluginHandle: resolveProviderRuntimePluginHandleMock,
 }));
 const MODEL_PROVIDER_RUNTIME_PLUGIN_HANDLE_SYMBOL = Symbol.for(
-  "openclaw.modelProviderRuntimePluginHandle",
+  "carapace.modelProviderRuntimePluginHandle",
 );
 type AuthRequestCall = {
   profileId?: string;
@@ -95,7 +95,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "google",
       model: "gemini-3.1-flash-preview",
       profile: "google:default",
@@ -150,7 +150,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "google",
       model: "gemini-3.1-flash-lite",
       profile: "google:default",
@@ -209,7 +209,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "github-copilot",
       model: "gpt-5.6-sol",
       profile: "github-copilot:preferred",
@@ -263,7 +263,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "github-copilot",
       model: "gemini-3.1-pro-preview",
       buffer: Buffer.from("png-bytes"),
@@ -348,7 +348,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "github-copilot",
       model: "gpt-4.1",
       buffer: Buffer.from("png-bytes"),
@@ -387,7 +387,7 @@ describe("describeImageWithModelCore", () => {
     await expect(
       describeImageWithModelCore({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "github-copilot",
         model: "gemini-3.1-pro-preview",
         buffer: Buffer.from("png-bytes"),
@@ -424,7 +424,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-4o",
       buffer: Buffer.from("png-bytes"),
@@ -470,7 +470,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "agent-plan",
       model: "doubao-seed-2.0-pro",
       buffer: Buffer.from("png-bytes"),
@@ -507,7 +507,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "fake",
       model: "small-vlm",
       buffer: Buffer.from("png-bytes"),
@@ -544,8 +544,8 @@ describe("describeImageWithModelCore", () => {
         list: [
           {
             id: "vision-agent",
-            agentDir: "/tmp/openclaw-agent",
-            workspace: "/tmp/openclaw-workspace",
+            agentDir: "/tmp/carapace-agent",
+            workspace: "/tmp/carapace-workspace",
           },
         ],
       },
@@ -554,7 +554,7 @@ describe("describeImageWithModelCore", () => {
     await describeImageWithModelCore({
       cfg,
       agentId: "vision-agent",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "google",
       model: "gemini-2.5-flash",
       buffer: Buffer.alloc(1),
@@ -566,7 +566,7 @@ describe("describeImageWithModelCore", () => {
 
     expect(acquireAgentRunPreparedModelRuntimeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        workspaceDir: "/tmp/openclaw-workspace",
+        workspaceDir: "/tmp/carapace-workspace",
         loadRuntimePlugins: true,
         runtimePluginSelections: [
           { provider: "google", modelId: "gemini-2.5-flash", agentId: "vision-agent" },
@@ -577,15 +577,15 @@ describe("describeImageWithModelCore", () => {
     expect(resolveModelAsyncMock).toHaveBeenCalledWith(
       "google",
       "gemini-2.5-flash",
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       cfg,
-      expect.objectContaining({ workspaceDir: "/tmp/openclaw-workspace" }),
+      expect.objectContaining({ workspaceDir: "/tmp/carapace-workspace" }),
     );
   });
 
   it("uses one committed prepared generation for image setup and streaming", async () => {
-    const requestedCfg: OpenClawConfig = { logging: { level: "info" } };
-    const committedCfg: OpenClawConfig = { logging: { level: "debug" } };
+    const requestedCfg: CarapaceConfig = { logging: { level: "info" } };
+    const committedCfg: CarapaceConfig = { logging: { level: "debug" } };
     const metadataSnapshot = createEmptyPluginMetadataSnapshot("/tmp/committed-workspace");
     const providerRuntimeHandle = {
       provider: "google",
@@ -667,7 +667,7 @@ describe("describeImageWithModelCore", () => {
   });
 
   it("reuses a parent run generation without acquiring another image lease", async () => {
-    const cfg: OpenClawConfig = { logging: { level: "info" } };
+    const cfg: CarapaceConfig = { logging: { level: "info" } };
     discoverModelsMock.mockReturnValue({
       find: vi.fn(() => ({
         provider: "google",

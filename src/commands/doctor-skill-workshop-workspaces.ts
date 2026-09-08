@@ -21,11 +21,11 @@ import {
   resolveLegacyMigrationSourceKey,
 } from "../infra/state-migrations.receipts.js";
 import { readSkillProposalTargetTreeSha256 } from "../skills/workshop/proposal-bundle.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 
 const MIGRATION_KIND = WORKSPACE_CONTENT_RELOCATION_MIGRATION_KIND;
 const absolutePathSchema = z
@@ -110,7 +110,7 @@ export async function prepareWorkshopWorkspaceRelocation(
   env: NodeJS.ProcessEnv,
 ): Promise<void> {
   const sourceKey = resolveLegacyMigrationSourceKey(MIGRATION_KIND, workspaceDir);
-  const database = openOpenClawStateDatabase({ env });
+  const database = openCarapaceStateDatabase({ env });
   const kysely = getNodeSqliteKysely<Pick<DB, "migration_sources">>(database.db);
   const existing = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -159,7 +159,7 @@ export async function prepareWorkshopWorkspaceRelocation(
     return;
   }
   const reportJson = JSON.stringify(captured);
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const current = executeSqliteQueryTakeFirstSync(
         db,
@@ -197,7 +197,7 @@ export async function prepareWorkshopWorkspaceRelocation(
 
 /** Retire only obsolete skill-only evidence; missing, changed, and refreshed workspaces stay guarded. */
 export async function finishWorkshopWorkspaceRelocations(env: NodeJS.ProcessEnv): Promise<void> {
-  const database = openOpenClawStateDatabase({ env });
+  const database = openCarapaceStateDatabase({ env });
   const kysely = getNodeSqliteKysely<Pick<DB, "migration_sources">>(database.db);
   const receipts = executeSqliteQuerySync(
     database.db,
@@ -229,7 +229,7 @@ export async function finishWorkshopWorkspaceRelocations(env: NodeJS.ProcessEnv)
     if (complete) {
       complete = (await directoryIdentity(captured.workspaceDir)) === captured.directoryIdentity;
     }
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       (writeDatabase) => {
         const { db } = writeDatabase;
         const current = executeSqliteQueryTakeFirstSync(

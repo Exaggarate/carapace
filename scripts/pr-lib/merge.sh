@@ -322,12 +322,12 @@ merge_verify() {
       # green at the prepared head and GitHub's mergeable state still blocks
       # true conflicts. The hard fail serialized every landing behind a full
       # CI cycle per merged sibling, which collapses under multi-session
-      # traffic. Set OPENCLAW_PR_STRICT_DRIFT=1 to restore the hard gate.
-      if [ "${OPENCLAW_PR_STRICT_DRIFT:-}" = "1" ]; then
+      # traffic. Set CARAPACE_PR_STRICT_DRIFT=1 to restore the hard gate.
+      if [ "${CARAPACE_PR_STRICT_DRIFT:-}" = "1" ]; then
         echo "Merge verify failed: mainline drift is relevant to this PR; run scripts/pr prepare-sync-head $pr before merge."
         exit 1
       fi
-      echo "Merge verify: WARNING — mainline drift is relevant to this PR; proceeding (OPENCLAW_PR_STRICT_DRIFT=1 restores the hard gate)."
+      echo "Merge verify: WARNING — mainline drift is relevant to this PR; proceeding (CARAPACE_PR_STRICT_DRIFT=1 restores the hard gate)."
     else
       echo "Merge verify: continuing without prep-head sync because behind-main drift is unrelated."
     fi
@@ -445,7 +445,7 @@ merge_run() {
   # Capture before gates or cwd changes; retained outcomes above reconcile even
   # when the original operator file no longer exists.
   if [ -n "$body_path" ]; then
-    [ "${OPENCLAW_PR_MERGE_METHOD:-squash}" = squash ] || {
+    [ "${CARAPACE_PR_MERGE_METHOD:-squash}" = squash ] || {
       echo "--body-file requires squash merge." >&2; return 2;
     }
     captured_body=$(snapshot_merge_body "$body_path") || return 1
@@ -491,7 +491,7 @@ merge_run() {
   # shellcheck disable=SC1091
   source .local/prep.env
 
-  local merge_method="${OPENCLAW_PR_MERGE_METHOD:-squash}"
+  local merge_method="${CARAPACE_PR_MERGE_METHOD:-squash}"
   if [ -n "$recovery_oid" ] && ! printf '%s\n' "$recovery_record" | jq -e \
     --arg head "$PREP_HEAD_SHA" --arg method "$merge_method" --arg replacement "$replacement_head" \
     '(.head == $head or ($replacement == $head and $replacement != "")) and .method == $method' >/dev/null; then
@@ -510,7 +510,7 @@ merge_run() {
       merge_flag="--rebase"
       ;;
     *)
-      echo "Invalid OPENCLAW_PR_MERGE_METHOD: $merge_method (expected squash, merge, or rebase)."
+      echo "Invalid CARAPACE_PR_MERGE_METHOD: $merge_method (expected squash, merge, or rebase)."
       exit 2
       ;;
   esac
@@ -547,7 +547,7 @@ merge_run() {
   fi
 
   if [ "$auto_merge_requested" = "true" ] && [ "$merge_method" != "squash" ]; then
-    echo "Auto-merge requires squash; unset OPENCLAW_PR_MERGE_METHOD or set it to squash."
+    echo "Auto-merge requires squash; unset CARAPACE_PR_MERGE_METHOD or set it to squash."
     exit 2
   fi
 
@@ -719,7 +719,7 @@ merge_run() {
     crabbox_check_url=$(jq -r .crabboxCheckUrl .local/merge-crabbox-bypass.json)
     ci_gate_url=$(jq -r .ciGateUrl .local/merge-crabbox-bypass.json)
     printf -v comment_body \
-      '%s\n- Alternate gate: [openclaw/crabbox-gate](%s)\n- Hosted CI infrastructure failure: [openclaw/ci-gate](%s)\n- Landing parent audit: %s (expected `%s`, actual `%s`)' \
+      '%s\n- Alternate gate: [carapace/crabbox-gate](%s)\n- Hosted CI infrastructure failure: [carapace/ci-gate](%s)\n- Landing parent audit: %s (expected `%s`, actual `%s`)' \
       "$comment_body" \
       "$crabbox_check_url" \
       "$ci_gate_url" \

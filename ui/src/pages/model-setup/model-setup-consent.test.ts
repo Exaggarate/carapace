@@ -16,7 +16,7 @@ describe("ModelSetupPage activation consent", () => {
   beforeEach(async () => {
     vi.stubGlobal("localStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw-device-identity-v1",
+      "carapace-device-identity-v1",
       JSON.stringify({ version: 1, privateKey: "test-device-key" }),
     );
     await i18n.setLocale("en");
@@ -34,7 +34,7 @@ describe("ModelSetupPage activation consent", () => {
       const answers: unknown[] = [];
       let activeSession: string | undefined;
       request.mockImplementation(async (method, params) => {
-        if (method === "openclaw.setup.activate.start") {
+        if (method === "carapace.setup.activate.start") {
           activeSession = (params as { sessionId: string }).sessionId;
           return { sessionId: activeSession, done: false, status: "running" };
         }
@@ -98,7 +98,7 @@ describe("ModelSetupPage activation consent", () => {
       await waitForFast(() => expect(page.textContent).toContain("Review model setup"));
       expect(context.navigate).not.toHaveBeenCalled();
       const button = (label: string) =>
-        [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")].find(
+        [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")].find(
           (element) => element.textContent?.trim() === label,
         )!;
       button("Continue").click();
@@ -113,7 +113,7 @@ describe("ModelSetupPage activation consent", () => {
         expect(answers.at(-1)).toEqual({ stepId: "consent", value: true });
       } else {
         await waitForFast(() =>
-          expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull(),
+          expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull(),
         );
         expect(context.navigate).not.toHaveBeenCalled();
         if (decision === "decline") {
@@ -127,9 +127,9 @@ describe("ModelSetupPage activation consent", () => {
         }
       }
       expect(
-        request.mock.calls.filter(([method]) => method === "openclaw.setup.activate.start"),
+        request.mock.calls.filter(([method]) => method === "carapace.setup.activate.start"),
       ).toHaveLength(1);
-      expect(request.mock.calls.some(([method]) => method === "openclaw.setup.activate")).toBe(
+      expect(request.mock.calls.some(([method]) => method === "carapace.setup.activate")).toBe(
         false,
       );
     },

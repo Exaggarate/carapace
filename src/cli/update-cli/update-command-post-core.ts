@@ -4,8 +4,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTriageUpdateFailure } from "../../commands/triage-update.js";
 import { resolveStateDir } from "../../config/paths.js";
 import {
@@ -110,7 +110,7 @@ export async function readPostCorePluginInstallRecordsFile(
       return undefined;
     }
     throw new Error(
-      `Unable to read plugin install records file: ${filePath}. Run openclaw doctor to inspect and repair plugin installation state.`,
+      `Unable to read plugin install records file: ${filePath}. Run carapace doctor to inspect and repair plugin installation state.`,
       { cause: err },
     );
   }
@@ -119,7 +119,7 @@ export async function readPostCorePluginInstallRecordsFile(
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `Malformed JSON in plugin install records file: ${filePath}. Run openclaw doctor to inspect and repair plugin installation state.`,
+      `Malformed JSON in plugin install records file: ${filePath}. Run carapace doctor to inspect and repair plugin installation state.`,
       { cause: err },
     );
   }
@@ -127,7 +127,7 @@ export async function readPostCorePluginInstallRecordsFile(
     return normalizePluginInstallRecordMap(parsed);
   } catch (err) {
     throw new Error(
-      `Invalid plugin install records in handoff file: ${filePath}. Run openclaw doctor to inspect and repair plugin installation state.`,
+      `Invalid plugin install records in handoff file: ${filePath}. Run carapace doctor to inspect and repair plugin installation state.`,
       { cause: err },
     );
   }
@@ -317,7 +317,7 @@ export async function continuePostCoreUpdateInFreshProcess(params: {
   if (params.opts.timeout) {
     argv.push("--timeout", params.opts.timeout);
   }
-  const resultDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-post-core-"));
+  const resultDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-post-core-"));
   const resultPath = path.join(resultDir, "plugins.json");
   const installRecordsPath = path.join(resultDir, "plugin-install-records.json");
   const sourceConfigPath = path.join(resultDir, "source-config.json");
@@ -369,7 +369,7 @@ export async function continuePostCoreUpdateInFreshProcess(params: {
       stdio: childStdio,
       env: {
         ...handoffEnv,
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
         ...(params.opts.run ? { [UPDATE_RUN_ID_ENV]: params.opts.run.runId } : {}),
         [POST_CORE_UPDATE_ENV]: "1",
         [POST_CORE_UPDATE_CHANNEL_ENV]: params.channel,

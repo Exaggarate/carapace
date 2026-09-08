@@ -1,16 +1,16 @@
 // Logging config helpers read and normalize logger configuration.
 import fs from "node:fs";
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isObjectRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveConfigEnvVars } from "../config/env-substitution.js";
 import { resolveConfigIncludes, resolveConfigIncludesForTopLevelKey } from "../config/includes.js";
 import { resolveConfigPath, resolveIncludeRoots } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { tryProcessCwd } from "../infra/safe-cwd.js";
 import { parseJsonWithJson5Fallback } from "../utils/parse-json-compat.js";
 import { APPLIED_LOGGING_CONFIG_UNOWNED, loggingState } from "./state.js";
 
 // Lightweight logging-config reader used before the full config runtime is safe to load.
-type LoggingConfig = NonNullable<OpenClawConfig["logging"]>;
+type LoggingConfig = NonNullable<CarapaceConfig["logging"]>;
 
 let cachedLoggingConfig:
   | {
@@ -26,17 +26,17 @@ export function invalidateLoggingConfigCache(): void {
 function resolveLoggingConfigSelector(): string {
   const env = process.env;
   return [
-    env.OPENCLAW_CONFIG_PATH,
-    env.OPENCLAW_STATE_DIR,
-    env.OPENCLAW_HOME,
-    env.OPENCLAW_PROFILE,
+    env.CARAPACE_CONFIG_PATH,
+    env.CARAPACE_STATE_DIR,
+    env.CARAPACE_HOME,
+    env.CARAPACE_PROFILE,
     env.HOME,
     env.USERPROFILE,
     env.HOMEDRIVE,
     env.HOMEPATH,
     env.PREFIX,
     env.ANDROID_DATA,
-    env.OPENCLAW_TEST_FAST,
+    env.CARAPACE_TEST_FAST,
     tryProcessCwd() ?? "",
   ]
     .map((value) => value ?? "")

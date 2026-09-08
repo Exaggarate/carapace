@@ -12,14 +12,14 @@ export function testApiLifecycleFixtureFiles(repoRoot: string): Record<string, s
         ? `
 // Check during collection before imports can overwrite the previous generation.
 const remainingKeys = [
-  "openclaw.beforeToolCallBlockedErrorTestApi",
-  "openclaw.staleAuthOrderTestApi",
-  "openclaw.bashProcessRegistryTestApi",
-  "openclaw.diagnosticRunActivityTestApi",
+  "carapace.beforeToolCallBlockedErrorTestApi",
+  "carapace.staleAuthOrderTestApi",
+  "carapace.bashProcessRegistryTestApi",
+  "carapace.diagnosticRunActivityTestApi",
 ].filter((key) => Object.hasOwn(globalThis, Symbol.for(key)));
 expect(remainingKeys, "completed-file test API publications").toEqual([]);
-expect(Object.hasOwn(globalThis, "openclawOpenAIResponsesTransportTestApi")).toBe(false);
-for (const key of [Symbol.for("fixture.foreignTestApi"), Symbol.for("openclaw.google.vertexAdcTestApi"), "openclaw.staleAuthOrderTestApi"]) {
+expect(Object.hasOwn(globalThis, "carapaceOpenAIResponsesTransportTestApi")).toBe(false);
+for (const key of [Symbol.for("fixture.foreignTestApi"), Symbol.for("carapace.google.vertexAdcTestApi"), "carapace.staleAuthOrderTestApi"]) {
   expect(Reflect.get(globalThis, key)).toBe("foreign");
   Reflect.deleteProperty(globalThis, key);
 }
@@ -36,14 +36,14 @@ const { testing: responses } = await import(${sourcePath("agents/openai-transpor
 const registry = await import(${sourcePath("agents/bash-process-registry.ts")});
 const { resetProcessRegistryForTests } = await import(${sourcePath("agents/bash-process-registry.test-support.ts")});
 const { createProcessSessionFixture } = await import(${sourcePath("agents/bash-process-registry.test-helpers.ts")});
-const registryKey = Symbol.for("openclaw.bashProcessRegistryTestApi");
+const registryKey = Symbol.for("carapace.bashProcessRegistryTestApi");
 const capturedRegistryApi = Reflect.get(globalThis, registryKey);
 const replacement = await import(${sourcePath("agents/bash-process-registry.ts?lifetime-replacement")});
 const replacementApi = Reflect.get(globalThis, registryKey);
 expect(replacementApi).not.toBe(capturedRegistryApi);
 const nativeCron = await import(${sourcePath("cron/service/active-run-cancellation.ts")});
 const native = createRequire(import.meta.url)("./native-cron.cjs");
-expect(Reflect.get(globalThis, Symbol.for("openclaw.activeCronTaskRunTestApi"))).toBe(native.api);
+expect(Reflect.get(globalThis, Symbol.for("carapace.activeCronTaskRunTestApi"))).toBe(native.api);
 expect(nativeCron.registerActiveCronTaskRun).toBe(native.register);
 const { resetDiagnosticRunActivityForTest, getDiagnosticSessionActivitySnapshot } = await import(${sourcePath("logging/diagnostic-run-activity.ts")});
 const { markDiagnosticToolStartedForTest } = await import(${sourcePath("logging/diagnostic-run-activity.test-support.ts")});
@@ -88,7 +88,7 @@ describe("${generation} test API consumers", () => {
   resolveGlobalSingleton(cleanupKey, () => ({}), async () => {
     try {
       await verifyConsumers("resource teardown");
-      const key = Symbol.for("openclaw.diagnosticRunActivityTestApi");
+      const key = Symbol.for("carapace.diagnosticRunActivityTestApi");
       const priorApi = Reflect.get(globalThis, key);
       resetDiagnosticRunActivityForTest();
       expect(Reflect.get(globalThis, key)).not.toBe(priorApi);
@@ -97,7 +97,7 @@ describe("${generation} test API consumers", () => {
       console.info("test API lifecycle: ${generation} resource teardown passed");
     } finally {
       // Release this fixture's own lifecycle registration, including its captured consumers.
-      Reflect.get(globalThis, Symbol.for("openclaw.globalSingletonLifecycleResets")).delete(cleanupKey);
+      Reflect.get(globalThis, Symbol.for("carapace.globalSingletonLifecycleResets")).delete(cleanupKey);
       Reflect.deleteProperty(globalThis, cleanupKey);
     }
   });
@@ -107,10 +107,10 @@ ${generation === "producer" ? 'await import("./foreign/extensions/google/vertex-
   }
   files["native-cron.cjs"] = `
 const cron = require(${sourcePath("cron/service/active-run-cancellation.ts")});
-module.exports = { register: cron.registerActiveCronTaskRun, api: globalThis[Symbol.for("openclaw.activeCronTaskRunTestApi")] };
+module.exports = { register: cron.registerActiveCronTaskRun, api: globalThis[Symbol.for("carapace.activeCronTaskRunTestApi")] };
 `;
   files["foreign/extensions/google/vertex-adc.ts"] = `
-for (const key of [Symbol.for("fixture.foreignTestApi"), Symbol.for("openclaw.google.vertexAdcTestApi"), "openclaw.staleAuthOrderTestApi"]) {
+for (const key of [Symbol.for("fixture.foreignTestApi"), Symbol.for("carapace.google.vertexAdcTestApi"), "carapace.staleAuthOrderTestApi"]) {
   Reflect.set(globalThis, key, "foreign");
 }
 `;
@@ -122,7 +122,7 @@ it.skip("collects a publisher without running its suite", () => {});
   files["09-g-test-api-skipped-observer.test.ts"] = `
 import { expect, it } from "vitest";
 it("retires the skipped file publication", () => {
-  expect(Object.hasOwn(globalThis, Symbol.for("openclaw.diagnosticRunActivityTestApi"))).toBe(false);
+  expect(Object.hasOwn(globalThis, Symbol.for("carapace.diagnosticRunActivityTestApi"))).toBe(false);
 });
 `;
   files["09-h-test-api-partial-mock.test.ts"] = `
@@ -143,11 +143,11 @@ const native = createRequire(import.meta.url)("./native-cron.cjs");
 const workspace = await import(${sourcePath("agents/workspace-legacy-state.ts")});
 const { resetLegacyWorkspaceStateCheckForTest } = await import(${sourcePath("agents/workspace-legacy-state.test-support.ts")});
 function verifyPartialMock() {
-  expect(workspace.LEGACY_WORKSPACE_STATE_DIRNAME).toBe(".openclaw");
+  expect(workspace.LEGACY_WORKSPACE_STATE_DIRNAME).toBe(".carapace");
   expect(vi.isMockFunction(workspace.prepareLegacyWorkspaceStateReset)).toBe(true);
   expect(() => resetLegacyWorkspaceStateCheckForTest()).not.toThrow();
   expect(nativeCron.registerActiveCronTaskRun).toBe(native.register);
-  expect(Reflect.get(globalThis, Symbol.for("openclaw.activeCronTaskRunTestApi"))).toBe(native.api);
+  expect(Reflect.get(globalThis, Symbol.for("carapace.activeCronTaskRunTestApi"))).toBe(native.api);
 }
 it("uses the real source API behind a partial manual mock", verifyPartialMock);
 afterAll(() => {
@@ -158,12 +158,12 @@ afterAll(() => {
   files["09-i-test-api-partial-mock-observer.test.ts"] = `
 import { createRequire } from "node:module";
 import { expect, it } from "vitest";
-expect(Object.hasOwn(globalThis, Symbol.for("openclaw.workspaceLegacyStateTestApi")), "partial mock source publication retired").toBe(false);
+expect(Object.hasOwn(globalThis, Symbol.for("carapace.workspaceLegacyStateTestApi")), "partial mock source publication retired").toBe(false);
 const { resetLegacyWorkspaceStateCheckForTest } = await import(${sourcePath("agents/workspace-legacy-state.test-support.ts")});
 it("loads a fresh real source after the partial mock retires", () => {
   expect(() => resetLegacyWorkspaceStateCheckForTest()).not.toThrow();
   const native = createRequire(import.meta.url)("./native-cron.cjs");
-  expect(Reflect.get(globalThis, Symbol.for("openclaw.activeCronTaskRunTestApi"))).toBe(native.api);
+  expect(Reflect.get(globalThis, Symbol.for("carapace.activeCronTaskRunTestApi"))).toBe(native.api);
 });
 `;
   files["09-j-test-api-mock-only.test.ts"] = `
@@ -173,7 +173,7 @@ vi.mock(${sourcePath("agents/workspace-legacy-state.ts")}, () => ({ LEGACY_WORKS
 const workspace = await import(${sourcePath("agents/workspace-legacy-state.ts")});
 it("does not execute the source behind a mock-only import", () => {
   expect(workspace.LEGACY_WORKSPACE_STATE_DIRNAME).toBe("mock-only");
-  const key = Symbol.for("openclaw.workspaceLegacyStateTestApi");
+  const key = Symbol.for("carapace.workspaceLegacyStateTestApi");
   expect(Object.hasOwn(globalThis, key)).toBe(false);
   Reflect.set(globalThis, key, "foreign");
 });
@@ -182,7 +182,7 @@ it("does not execute the source behind a mock-only import", () => {
 /* @vitest-environment jsdom */
 import { expect, it } from "vitest";
 it("preserves a foreign slot when only a prior generation executed its known source", () => {
-  const key = Symbol.for("openclaw.workspaceLegacyStateTestApi");
+  const key = Symbol.for("carapace.workspaceLegacyStateTestApi");
   expect(Reflect.get(globalThis, key)).toBe("foreign");
   Reflect.deleteProperty(globalThis, key);
 });

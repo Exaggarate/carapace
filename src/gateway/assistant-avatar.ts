@@ -5,7 +5,7 @@ import {
   type OpenedLocalAgentAvatarFile,
 } from "../agents/identity-avatar-file.js";
 import type { AgentAvatarResolution } from "../agents/identity-avatar.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isRenderableAvatarImageDataUrl } from "../shared/avatar-limits.js";
 import {
   hasAvatarUriScheme,
@@ -70,7 +70,7 @@ function resolveSameOriginAvatarUrl(
  * A projection with `openedFile` transfers fd ownership to the caller.
  */
 export function openGatewayAssistantAvatar(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   identity: GatewayAssistantIdentity;
 }): OpenGatewayAssistantAvatarProjection {
   const { cfg, identity } = params;
@@ -106,7 +106,7 @@ export function openGatewayAssistantAvatar(params: {
 
 /** Resolve one selected identity avatar and its matching public metadata. */
 export function resolveGatewayAssistantAvatar(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   identity: GatewayAssistantIdentity;
   /** Browser clients use authenticated images; native/CLI RPC retains inline avatars. */
   httpBasePath?: string;

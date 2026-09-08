@@ -1,6 +1,6 @@
 import type { Event } from "nostr-tools";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+import { retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 
 const CURSOR_WRITE_RETRY_MS = [0, 100, 300] as const;
 const CURSOR_RECOVERY_RETRY_MS = 1_000;

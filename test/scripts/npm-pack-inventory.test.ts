@@ -10,7 +10,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function createPackageFixture(): { packageRoot: string; root: string } {
-  const root = tempDirs.make("openclaw-npm-pack-inventory-test-");
+  const root = tempDirs.make("carapace-npm-pack-inventory-test-");
   const packageRoot = join(root, "package");
   mkdirSync(packageRoot);
   writeFileSync(
@@ -61,7 +61,7 @@ describe("npm pack inventory", () => {
       root,
       [
         "import fs from 'node:fs';",
-        "fs.appendFileSync(process.env.OPENCLAW_TEST_CAPTURE, JSON.stringify({",
+        "fs.appendFileSync(process.env.CARAPACE_TEST_CAPTURE, JSON.stringify({",
         "  args: process.argv.slice(2),",
         "  cwd: process.cwd(),",
         "  home: process.env.HOME,",
@@ -71,7 +71,7 @@ describe("npm pack inventory", () => {
         "process.stdout.write(JSON.stringify([{ files: [{ path: 'package.json' }] }]));",
       ].join("\n"),
     );
-    npm.sourceEnv.OPENCLAW_TEST_CAPTURE = capturePath;
+    npm.sourceEnv.CARAPACE_TEST_CAPTURE = capturePath;
     npm.sourceEnv.npm_config_registry = "https://example.invalid";
     npm.sourceEnv.NPM_CONFIG_SCRIPT_SHELL = "forbidden-shell";
 
@@ -177,13 +177,13 @@ describe("npm pack inventory", () => {
           "const packIndex = process.argv.indexOf('pack');",
           "const packageRoot = process.argv[packIndex + 1];",
           "const packageJson = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));",
-          "fs.writeFileSync(process.env.OPENCLAW_TEST_CAPTURE, JSON.stringify({ hasScripts: Object.hasOwn(packageJson, 'scripts') }));",
+          "fs.writeFileSync(process.env.CARAPACE_TEST_CAPTURE, JSON.stringify({ hasScripts: Object.hasOwn(packageJson, 'scripts') }));",
           exitCode === 0
             ? "process.stdout.write(JSON.stringify([{ files: [{ path: 'package.json' }] }]));"
             : `process.stderr.write('simulated npm 10 failure\\n'); process.exit(${exitCode});`,
         ].join("\n"),
       );
-      npm.sourceEnv.OPENCLAW_TEST_CAPTURE = capturePath;
+      npm.sourceEnv.CARAPACE_TEST_CAPTURE = capturePath;
 
       if (exitCode === 0) {
         expect(collectNpmPackInventory(packageRoot, { ...npm, timeoutMs: 2_000 })).toMatchObject({

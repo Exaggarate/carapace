@@ -2,25 +2,25 @@
 import type {
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { LiveModelCatalogFetchGuard } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ProviderCatalogOutcome } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-entry";
+} from "carapace/plugin-sdk/plugin-entry";
+import type { LiveModelCatalogFetchGuard } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogOutcome } from "carapace/plugin-sdk/provider-catalog-shared";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-entry";
 import {
   buildFamilyForwardCompatModel,
   buildManifestModelProviderConfig,
   DEFAULT_CONTEXT_TOKENS,
   normalizeProviderId,
-} from "openclaw/plugin-sdk/provider-model-metadata";
+} from "carapace/plugin-sdk/provider-model-metadata";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
   ProviderPlugin,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   OPENAI_CODEX_RESPONSES_BASE_URL,
   classifyOpenAIBaseUrl,
@@ -57,7 +57,7 @@ import {
   buildOpenAIChatGPTAuthMethodRuns,
   buildOpenAICodexProviderHooks,
 } from "./openai-chatgpt-provider.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { createOpenAIProvider } from "./provider-contract-api.js";
 import { resolveAuthoredOpenAIProviderConfig } from "./provider-policy-api.js";
 import {
@@ -70,7 +70,7 @@ import {
 import { resolveUnifiedOpenAIThinkingProfile } from "./thinking-policy.js";
 
 type OpenAILiveModelReaders = Pick<
-  typeof import("openclaw/plugin-sdk/provider-catalog-live-runtime"),
+  typeof import("carapace/plugin-sdk/provider-catalog-live-runtime"),
   | "readLiveModelCatalogBooleanField"
   | "readLiveModelCatalogPositiveSafeIntegerField"
   | "readLiveModelCatalogStringField"
@@ -273,8 +273,8 @@ async function buildOpenAILiveProviderConfig(
     { getCachedLiveProviderModelRows, LiveModelCatalogHttpError },
     { isNonSecretApiKeyMarker },
   ] = await Promise.all([
-    import("openclaw/plugin-sdk/provider-catalog-live-runtime"),
-    import("openclaw/plugin-sdk/provider-auth"),
+    import("carapace/plugin-sdk/provider-catalog-live-runtime"),
+    import("carapace/plugin-sdk/provider-auth"),
   ]);
   const rejectionScope =
     params.apiKey && !params.discoveryApiKey && isNonSecretApiKeyMarker(params.apiKey)
@@ -569,7 +569,7 @@ async function buildOpenAICodexLiveProviderConfig(params: {
   fetchGuard?: LiveModelCatalogFetchGuard;
   signal?: AbortSignal;
 }): Promise<OpenAILiveProviderCatalog> {
-  const catalogRuntime = await import("openclaw/plugin-sdk/provider-catalog-live-runtime");
+  const catalogRuntime = await import("carapace/plugin-sdk/provider-catalog-live-runtime");
   const { getCachedLiveProviderModelRows, LiveModelCatalogHttpError } = catalogRuntime;
   try {
     const rows = await getCachedLiveProviderModelRows({
@@ -806,7 +806,7 @@ function buildOpenAIUnknownModelHint(modelId: string): string | undefined {
   if (normalized !== OPENAI_GPT_53_CODEX_SPARK_MODEL_ID) {
     return undefined;
   }
-  return "gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.";
+  return "gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.";
 }
 
 const OPENAI_GPT_FORWARD_COMPAT_CASES = [
@@ -952,8 +952,8 @@ export function buildOpenAIProvider(): ProviderPlugin {
           { resolveApiKeyForProvider, resolveProviderAuthProfileMetadata },
           { isNonSecretApiKeyMarker },
         ] = await Promise.all([
-          import("openclaw/plugin-sdk/provider-auth-runtime"),
-          import("openclaw/plugin-sdk/provider-auth"),
+          import("carapace/plugin-sdk/provider-auth-runtime"),
+          import("carapace/plugin-sdk/provider-auth"),
         ]);
         let runtimeAuth: Awaited<ReturnType<typeof resolveApiKeyForProvider>> | undefined;
         if (auth.profileId || auth.mode === "none") {

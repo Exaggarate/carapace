@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { isForegroundRestrictedPluginNodeCommand } from "../node-command-policy.js";
 
 /** Queues only commands that iOS explicitly rejected as requiring the foreground. */

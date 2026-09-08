@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildModelsListResult,
   createGatewayAgentModelCatalogProjector,
 } from "../gateway/server-methods/models-list-result.js";
 import type { GatewayRequestContext } from "../gateway/server-methods/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createPreparedModelCatalogWorkerInput } from "./prepared-model-catalog-worker.js";
 import { runPreparedModelCatalogWorkerRequest } from "./prepared-model-catalog.worker.js";
 import { prepareWorkspaceBuildGroup } from "./prepared-model-runtime.facts.js";
@@ -20,7 +20,7 @@ vi.mock("node:worker_threads", async (importOriginal) => ({
 }));
 
 describe("ClawRouter cold prepared catalog", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   afterEach(async () => {
     vi.unstubAllGlobals();
@@ -44,21 +44,21 @@ describe("ClawRouter cold prepared catalog", () => {
       refreshedAuth: true,
     },
   ])("$label", async ({ sibling, refreshedAuth }) => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "clawrouter-catalog",
       env: {
         CLAWROUTER_API_KEY: refreshedAuth ? undefined : "catalog-test-key",
         OPENAI_API_KEY: undefined,
         CODEX_API_KEY: undefined,
         CODEX_HOME: undefined,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
       },
     });
     // Distinct catalog URLs keep each scenario cold across plugin module loaders.
     const scope = refreshedAuth ? "refreshed" : sibling ? "mixed" : "single";
     const baseUrl = `https://${scope}.example.test/private`;
-    const agentId = "private-openclaw";
-    const config: OpenClawConfig = {
+    const agentId = "private-carapace";
+    const config: CarapaceConfig = {
       plugins: {
         slots: { memory: "none" },
         allow: sibling ? ["clawrouter", "openai"] : ["clawrouter"],
@@ -80,7 +80,7 @@ describe("ClawRouter cold prepared catalog", () => {
                     id: "CLAWROUTER_API_KEY",
                   },
                 }),
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
             models: [],
           },
         },
@@ -92,8 +92,8 @@ describe("ClawRouter cold prepared catalog", () => {
           models: {
             ...(refreshedAuth
               ? {}
-              : { "clawrouter/codex-latest": { agentRuntime: { id: "openclaw" } } }),
-            ...(sibling ? { "openai/codex-latest": { agentRuntime: { id: "openclaw" } } } : {}),
+              : { "clawrouter/codex-latest": { agentRuntime: { id: "carapace" } } }),
+            ...(sibling ? { "openai/codex-latest": { agentRuntime: { id: "carapace" } } } : {}),
           },
           modelPolicy: { allow: ["clawrouter/codex-latest"] },
         },

@@ -1,9 +1,9 @@
 /**
- * Bridges OpenClaw runtime tools into Codex app-server dynamic tool specs and
+ * Bridges Carapace runtime tools into Codex app-server dynamic tool specs and
  * tool-call responses.
  */
 import { createHash } from "node:crypto";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
 import {
   consumeAdjustedParamsForToolCall,
   consumePreExecutionBlockedToolCall,
@@ -40,32 +40,32 @@ import {
   type MessagingToolSend,
   type MessagingToolSourceReplyPayload,
   wrapToolWithBeforeToolCallHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   consumeTrustedToolNoStartError,
   copyInternalToolResultState,
   getCoreTtsToolResultMediaUrls,
-} from "openclaw/plugin-sdk/agent-harness-tool-runtime";
-import { emitTrustedDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+} from "carapace/plugin-sdk/agent-harness-tool-runtime";
+import { emitTrustedDiagnosticEvent } from "carapace/plugin-sdk/diagnostic-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   type JsonSchemaObject,
   validateJsonSchemaValue,
-} from "openclaw/plugin-sdk/json-schema-runtime";
-import type { ImageContent, TextContent } from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/json-schema-runtime";
+import type { ImageContent, TextContent } from "carapace/plugin-sdk/llm";
 import {
   asNonArrayRecord,
   asOptionalRecord,
   isRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEFAULT_MAX_LIVE_TOOL_RESULT_CHARS,
   estimateToolResultTextChars,
   resolveLiveToolResultMaxChars,
   sliceToolResultTextToBudget,
   sliceUtf16Safe,
-} from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/text-utility-runtime";
 import type { CodexDynamicToolsLoading } from "./config.js";
 import { finalizeCodexToolAvailability } from "./dynamic-tool-availability.js";
 import {
@@ -117,7 +117,7 @@ type CodexToolResultHookContext = Omit<CodexDynamicToolHookContext, "config">;
 
 type ProjectedCodexDynamicTool = ProjectedTool<AnyAgentTool>;
 
-const INTERNAL_TOOL_EXECUTION_VALIDATION = Symbol.for("openclaw.internalToolExecutionValidation");
+const INTERNAL_TOOL_EXECUTION_VALIDATION = Symbol.for("carapace.internalToolExecutionValidation");
 const MAX_CODEX_DYNAMIC_TOOL_VALIDATION_ERRORS = 4;
 const MAX_CODEX_DYNAMIC_TOOL_VALIDATION_ERROR_CHARS = 160;
 const CODEX_DYNAMIC_TOOL_VALIDATION_TRUNCATED_SUFFIX = " [detail truncated]";
@@ -490,7 +490,7 @@ function invalidateComputerFrame(contextEpoch: {
 }
 
 /**
- * Creates dynamic tool specs and a call handler that executes OpenClaw tools,
+ * Creates dynamic tool specs and a call handler that executes Carapace tools,
  * applies hooks/middleware, and records delivery/media telemetry.
  */
 export function createCodexDynamicToolBridge(params: {
@@ -641,8 +641,8 @@ export function createCodexDynamicToolBridge(params: {
       if (!toolEntry) {
         const executedArguments = asNonArrayRecord(call.arguments);
         const message = registeredToolNames.has(call.tool)
-          ? `OpenClaw tool is not available for this turn: ${call.tool}`
-          : `Unknown OpenClaw tool: ${call.tool}`;
+          ? `Carapace tool is not available for this turn: ${call.tool}`
+          : `Unknown Carapace tool: ${call.tool}`;
         finalizeToolTerminalPresentation({
           toolCallId: call.callId,
           runId: toolResultHookContext.runId,
@@ -957,7 +957,7 @@ export function createCodexDynamicToolBridge(params: {
             : resolveToolExecutionErrorKind(error));
         const errorMessage = formatToolExecutionErrorMessage(
           error,
-          "OpenClaw dynamic tool call failed.",
+          "Carapace dynamic tool call failed.",
         );
         executionPrevented =
           executionPrevented ||
@@ -1450,7 +1450,7 @@ function convertToolContents(
   if (totalTextBudget <= maxChars) {
     return content.flatMap(convertToolContent);
   }
-  const noticeText = `...(OpenClaw truncated dynamic tool result: original ${totalTextChars} chars, weighted budget ${maxChars}; rerun with narrower args.)`;
+  const noticeText = `...(Carapace truncated dynamic tool result: original ${totalTextChars} chars, weighted budget ${maxChars}; rerun with narrower args.)`;
   const notice = `\n${noticeText}`;
   const noticeChars = estimateToolResultTextChars(notice);
   const textBudget = Math.max(0, maxChars - noticeChars);

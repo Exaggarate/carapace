@@ -2,18 +2,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { pluginDoctorContractRegistryLoaderState } from "../plugins/doctor-contract-registry-loader-state.js";
 import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surfaces.types.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   autoMigrateLegacyState,
@@ -40,33 +40,33 @@ function linkBundledCandidateRoot(candidateRoot: string): void {
 }
 
 async function makeFixture() {
-  const root = await tempDirs.make("openclaw-doctor-caller-mode-");
+  const root = await tempDirs.make("carapace-doctor-caller-mode-");
   const homeDir = path.join(root, "home");
   const stateDir = path.join(root, "copied-state");
-  const configPath = path.join(root, "copied-openclaw.json");
+  const configPath = path.join(root, "copied-carapace.json");
   fs.mkdirSync(homeDir, { recursive: true });
   fs.mkdirSync(stateDir, { recursive: true });
   linkBundledCandidateRoot(root);
   linkBundledCandidateRoot(path.join(root, "candidate"));
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     plugins: { entries: { "candidate-plugin": { enabled: true } } },
   };
   fs.writeFileSync(configPath, `${JSON.stringify(cfg)}\n`);
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: homeDir,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
   };
   return { root, homeDir, stateDir, configPath, env };
 }
 
 afterEach(async () => {
   pluginDoctorContractRegistryLoaderState.moduleLoaderFactory = undefined;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
   vi.restoreAllMocks();
 });
@@ -74,24 +74,24 @@ afterEach(async () => {
 describe("legacy state migration caller storage", () => {
   it("binds WAL-backed shared-auth and meeting-transcript inputs as SQLite", async () => {
     const fixture = await makeFixture();
-    const cfg: OpenClawConfig = { agents: { list: [{ id: "main", default: true }] } };
+    const cfg: CarapaceConfig = { agents: { list: [{ id: "main", default: true }] } };
     fs.writeFileSync(fixture.configPath, `${JSON.stringify(cfg)}\n`);
     const agentDatabasePath = path.join(
       fixture.stateDir,
       "agents",
       "main",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
-    const stateDatabasePath = resolveOpenClawStateSqlitePath(fixture.env);
-    openOpenClawStateDatabase({ env: fixture.env });
-    openOpenClawAgentDatabase({
+    const stateDatabasePath = resolveCarapaceStateSqlitePath(fixture.env);
+    openCarapaceStateDatabase({ env: fixture.env });
+    openCarapaceAgentDatabase({
       agentId: "main",
       env: fixture.env,
       path: agentDatabasePath,
     });
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     const agentDatabase = new DatabaseSync(agentDatabasePath);
     const stateDatabase = new DatabaseSync(stateDatabasePath);
     let plan: LegacyStateMigrationPlan | undefined;
@@ -186,7 +186,7 @@ describe("legacy state migration caller storage", () => {
 
   it("plans managed-worktree owners that remain after state-schema repair", async () => {
     const fixture = await makeFixture();
-    const stateDatabase = openOpenClawStateDatabase({ env: fixture.env });
+    const stateDatabase = openCarapaceStateDatabase({ env: fixture.env });
     stateDatabase.db
       .prepare(`
         INSERT INTO worktrees (
@@ -199,14 +199,14 @@ describe("legacy state migration caller storage", () => {
         "legacy-fingerprint",
         fixture.root,
         path.join(fixture.stateDir, "worktrees", "legacy-after-schema"),
-        "openclaw/legacy-after-schema",
+        "carapace/legacy-after-schema",
         "HEAD",
         "session",
         1,
         1,
       );
     const stateDatabasePath = stateDatabase.path;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const legacy = new DatabaseSync(stateDatabasePath);
     try {
       legacy.exec("PRAGMA user_version = 1;");

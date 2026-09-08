@@ -4,14 +4,14 @@ import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import codexPlugin from "../../extensions/codex/index.js";
 import { createAgentHarnessCatalogEvaluator } from "../../src/agents/harness/model-catalog-readiness.js";
 import type { AgentHarness } from "../../src/agents/harness/types.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import {
   buildModelsListResult,
   createGatewayAgentModelCatalogProjector,
@@ -33,23 +33,23 @@ import {
   setActivePluginRegistry,
 } from "../../src/plugins/runtime.js";
 import { withEnvAsync } from "../../src/test-utils/env.js";
-import { withOpenClawTestState } from "../../src/test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../src/test-utils/carapace-test-state.js";
 
-vi.mock("openclaw/plugin-sdk/simple-completion-runtime", () => ({
+vi.mock("carapace/plugin-sdk/simple-completion-runtime", () => ({
   runHostPreparedIsolatedCompletion: vi.fn(),
 }));
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", () => ({
   AgentHarnessPreflightError: class extends Error {},
   embeddedAgentLog: { debug: vi.fn(), warn: vi.fn() },
   formatErrorMessage: String,
-  OPENCLAW_VERSION: "test",
+  CARAPACE_VERSION: "test",
 }));
 
 describe("models.list native account catalog", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("makes a native user-home API-key catalog selectable without a ChatGPT route", async (ctx) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "native-catalog-" },
       async (state) => {
         await withEnvAsync(
@@ -96,7 +96,7 @@ describe("models.list native account catalog", () => {
                 if (request.id !== undefined) {
                   const result =
                     request.method === "initialize"
-                      ? { userAgent: "openclaw/0.149.1 (test)" }
+                      ? { userAgent: "carapace/0.149.1 (test)" }
                       : request.method === "account/read"
                         ? { account, requiresOpenaiAuth: true }
                         : request.method === "model/list"
@@ -126,7 +126,7 @@ describe("models.list native account catalog", () => {
             });
             httpServer.listen(socketPath);
             await once(server, "listening");
-            const config: OpenClawConfig = {
+            const config: CarapaceConfig = {
               agents: {
                 defaults: {
                   workspace: state.workspaceDir,
@@ -292,7 +292,7 @@ describe("models.list native account catalog", () => {
                   observed.mode ? { accountType: observed.mode } : undefined,
                 );
               }
-              const hostRoutes: OpenClawConfig["models"][] = [
+              const hostRoutes: CarapaceConfig["models"][] = [
                 {
                   providers: {
                     openai: {

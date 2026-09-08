@@ -9,7 +9,7 @@ import {
   isRecord,
   type ResolverContext,
   type SecretDefaults,
-} from "openclaw/plugin-sdk/channel-secret-basic-runtime";
+} from "carapace/plugin-sdk/channel-secret-basic-runtime";
 
 export const secretTargetRegistryEntries = createChannelSecretTargetRegistryEntries({
   channelKey: "irc",

@@ -42,7 +42,7 @@ function statsWithUid<T extends Awaited<ReturnType<typeof fs.lstat>>>(info: T, u
 
 describe.runIf(process.platform !== "win32")("extension install ownership policy", () => {
   it("allows only explicit read-only root-owned inputs", async () => {
-    const target = "/opt/openclaw/native-host-entry.js";
+    const target = "/opt/carapace/native-host-entry.js";
     const getuidSpy = vi.spyOn(process, "getuid").mockReturnValue(1000);
     const lstatSpy = vi.spyOn(fs, "lstat").mockResolvedValue({
       isDirectory: () => false,
@@ -70,7 +70,7 @@ describe.runIf(process.platform !== "win32")("extension install ownership policy
     { label: "root-owned group-writable input", uid: 0, mode: 0o100660, allowRootOwner: true },
     { label: "user-owned world-writable input", uid: 1000, mode: 0o100602, allowRootOwner: false },
   ])("rejects $label", async ({ uid, mode, allowRootOwner }) => {
-    const target = "/opt/openclaw/unsafe";
+    const target = "/opt/carapace/unsafe";
     const getuidSpy = vi.spyOn(process, "getuid").mockReturnValue(1000);
     const lstatSpy = vi.spyOn(fs, "lstat").mockResolvedValue({
       isDirectory: () => false,
@@ -145,8 +145,8 @@ describe("stable extension copy", () => {
     await installStableChromeExtension(value.bundledDir, value.deps);
 
     expect(await fs.readFile(path.join(installed, "background.js"), "utf8")).toContain("updated");
-    expect(await fs.readFile(path.join(installed, ".openclaw-owned.json"), "utf8")).toContain(
-      '"owner":"openclaw"',
+    expect(await fs.readFile(path.join(installed, ".carapace-owned.json"), "utf8")).toContain(
+      '"owner":"carapace"',
     );
     expect(await fs.readdir(path.join(installed, "modules"))).toEqual(["runtime.js"]);
     expect(await fs.readdir(installed)).not.toContain("sidepanel.html");
@@ -198,8 +198,8 @@ describe("deterministic unpacked extension ID", () => {
   });
 
   it("normalizes only a lowercase Windows drive letter", () => {
-    expect(generateChromeExtensionIdForPath("c:\\OpenClaw\\extension", "win32")).toBe(
-      generateChromeExtensionIdForPath("C:\\OpenClaw\\extension", "win32"),
+    expect(generateChromeExtensionIdForPath("c:\\Carapace\\extension", "win32")).toBe(
+      generateChromeExtensionIdForPath("C:\\Carapace\\extension", "win32"),
     );
   });
 });
@@ -219,13 +219,13 @@ describe.each(["Preferences", "Secure Preferences"] as const)("%s discovery", (f
       userDataDir: chrome.userDataDir,
       profile: "Default",
       entries: {
-        [installedId]: { location: 4, path: installed, manifest: { name: "Not OpenClaw" } },
+        [installedId]: { location: 4, path: installed, manifest: { name: "Not Carapace" } },
         [FOUNDATION_STORE_ID]: {
           location: 1,
           from_webstore: true,
           path: path.join(value.root, "foreign-store-lookalike"),
         },
-        ["p".repeat(32)]: { location: 1, path: installed, manifest: { name: "OpenClaw" } },
+        ["p".repeat(32)]: { location: 1, path: installed, manifest: { name: "Carapace" } },
       },
     });
     await writeChromePreferences({
@@ -409,7 +409,7 @@ describe.each(["Preferences", "Secure Preferences"] as const)("%s discovery", (f
 
     expect(status.discovered).toEqual([]);
     expect(status.manualSetupRequired).toBe(true);
-    expect(status.issues.join("\n")).toContain("not OpenClaw-owned");
+    expect(status.issues.join("\n")).toContain("not Carapace-owned");
   });
 });
 

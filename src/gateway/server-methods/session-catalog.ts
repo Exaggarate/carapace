@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   ErrorCodes,
   errorShape,
@@ -15,7 +15,7 @@ import {
   validateSessionsCatalogListParams,
   validateSessionsCatalogReadParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import {
   capturePluginLifecycleAuthority,
@@ -99,7 +99,7 @@ type ProviderCreateTargetResolution =
   | { ok: false; message: string };
 
 const providerCreateTargetsByConfig = new WeakMap<
-  OpenClawConfig,
+  CarapaceConfig,
   WeakMap<SessionCatalogProvider, Map<string, ProviderCreateTargetResolution>>
 >();
 
@@ -117,12 +117,12 @@ type CatalogListCacheState = {
   entries: Map<string, CatalogListCacheEntry>;
 };
 
-const catalogListsByConfig = new WeakMap<OpenClawConfig, CatalogListCacheState>();
+const catalogListsByConfig = new WeakMap<CarapaceConfig, CatalogListCacheState>();
 const catalogCallerIds = new WeakMap<GatewayClient, number>();
 let nextCatalogCallerId = 0;
 
 function providerCreateTargetCache(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: SessionCatalogProvider,
 ): Map<string, ProviderCreateTargetResolution> {
   let byProvider = providerCreateTargetsByConfig.get(config);
@@ -141,7 +141,7 @@ function providerCreateTargetCache(
 function resolveProviderCreateTarget(
   provider: SessionCatalogProvider,
   agentId: string,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): ProviderCreateTargetResolution {
   const cache = providerCreateTargetCache(config, provider);
   const cached = cache.get(agentId);
@@ -172,7 +172,7 @@ function resolveProviderCreateTarget(
 export function resolveRegisteredCatalogCreateTarget(
   catalogId: string,
   agentId: string,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): SessionCatalogCreateTargetResolution {
   const registration = catalogRegistrationSnapshot().registrations.find(
     (entry) => entry.provider.id === catalogId,
@@ -227,7 +227,7 @@ function sessionCatalogListKey(params: {
 }
 
 function catalogListCache(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   registrationSnapshot: CatalogRegistrationSnapshot,
 ): Map<string, CatalogListCacheEntry> {
   let state = catalogListsByConfig.get(config);

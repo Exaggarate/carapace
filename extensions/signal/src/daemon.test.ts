@@ -10,8 +10,8 @@ import { assertSignalDaemonEndpointAvailable, spawnSignalDaemon } from "./daemon
 const spawnMock = vi.hoisted(() => vi.fn());
 const ensurePortAvailableMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/security-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/security-runtime")>();
+vi.mock("carapace/plugin-sdk/security-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/security-runtime")>();
   ensurePortAvailableMock.mockImplementation(actual.ensurePortAvailable);
   return {
     ...actual,
@@ -102,7 +102,7 @@ describe("spawnSignalDaemon", () => {
   it("expands home-relative configPath before passing it to signal-cli", () => {
     spawnSignalDaemon({
       cliPath: "signal-cli",
-      configPath: "~/.openclaw/signal-cli",
+      configPath: "~/.carapace/signal-cli",
       httpHost: "127.0.0.1",
       httpPort: 8080,
     });
@@ -111,7 +111,7 @@ describe("spawnSignalDaemon", () => {
       "signal-cli",
       [
         "--config",
-        path.join(os.homedir(), ".openclaw/signal-cli"),
+        path.join(os.homedir(), ".carapace/signal-cli"),
         "daemon",
         "--http",
         "127.0.0.1:8080",

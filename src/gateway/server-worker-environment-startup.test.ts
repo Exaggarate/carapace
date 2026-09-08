@@ -13,7 +13,7 @@ import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { markPluginRegistryActive } from "../plugins/registry-lifecycle.js";
 import type { WorkerProvider } from "../plugins/types.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { createNodeDesktopStreamBroker } from "./desktop/node-stream-broker.js";
 import { createDesktopSessionRegistry } from "./desktop/session-registry.js";
@@ -35,19 +35,19 @@ const DEVICE_ID = "revoked-device";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
 });
 
 describe("gateway worker environment startup", () => {
   it("cleans transfer scratch before serving and removes it on shutdown", async () => {
-    const stateDir = tempDirs.make("openclaw-worker-transfer-startup-");
+    const stateDir = tempDirs.make("carapace-worker-transfer-startup-");
     const transferRoot = path.join(stateDir, "tmp", "node-workspace-transfer");
     const staleRoot = path.join(transferRoot, "context-stale");
     await fs.mkdir(staleRoot, { recursive: true });
     await fs.writeFile(path.join(staleRoot, "base.pack"), "stale");
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const startup = await loadGatewayWorkerEnvironmentStartupState();
       const registry = createEmptyPluginRegistry();
       const runtime = await createGatewayWorkerEnvironmentRuntime({
@@ -72,8 +72,8 @@ describe("gateway worker environment startup", () => {
   });
 
   it("composes idle provider maintenance and drains it during shutdown", async () => {
-    const stateDir = tempDirs.make("openclaw-worker-maintenance-startup-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-worker-maintenance-startup-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       type MaintenanceContext = Parameters<NonNullable<WorkerProvider["maintain"]>>[0];
       const entered = createDeferredCore<MaintenanceContext>();
       const aborted = createDeferredCore();
@@ -153,9 +153,9 @@ describe("gateway worker environment startup", () => {
   });
 
   it("binds device revocation to the persisted profile settings", async () => {
-    const stateDir = tempDirs.make("openclaw-worker-startup-");
+    const stateDir = tempDirs.make("carapace-worker-startup-");
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const startup = await loadGatewayWorkerEnvironmentStartupState();
         startup.store.createIntent({
           environmentId: "device-environment",
@@ -180,7 +180,7 @@ describe("gateway worker environment startup", () => {
             sharedHost: true,
             bootstrapReceipt: {
               bundleHash: "a".repeat(64),
-              openclawVersion: "2026.8.14",
+              carapaceVersion: "2026.8.14",
               protocolFeatures: ["worker-heartbeat-v1"],
               installKind: "bundle",
             },
@@ -225,13 +225,13 @@ describe("gateway worker environment startup", () => {
         }
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 
   it("composes node desktop control into the worker environment runtime", async () => {
-    const stateDir = tempDirs.make("openclaw-worker-node-desktop-startup-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-worker-node-desktop-startup-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       setRuntimeConfigSnapshot({ cloudWorkers: { desktop: true } });
       const startup = await loadGatewayWorkerEnvironmentStartupState();
       const intent = startup.store.createIntent({
@@ -260,7 +260,7 @@ describe("gateway worker environment startup", () => {
           desktop: { protocol: "rfb", port: 5900, apps: [app] },
           bootstrapReceipt: {
             bundleHash: "a".repeat(64),
-            openclawVersion: "2026.8.14",
+            carapaceVersion: "2026.8.14",
             protocolFeatures: ["worker-heartbeat-v1"],
             installKind: "bundle",
           },

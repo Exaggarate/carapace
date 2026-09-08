@@ -2,12 +2,12 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { assertWorkspaceStateMigrationReady } from "../agents/workspace-legacy-state.js";
 import { resolveCanonicalWorkspacePath } from "../agents/workspace-state-identity.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { pathExists } from "../infra/fs-safe.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
 import { isPathStrictlyInside } from "../infra/path-guards.js";
@@ -22,7 +22,7 @@ import { parseSkillProposalRow } from "../skills/workshop/store-sqlite-record.js
 import { openSkillWorkshopStore } from "../skills/workshop/store-sqlite-schema.js";
 import { resolveSkillProposalTarget } from "../skills/workshop/store.js";
 
-const LEGACY_COLLECTION_BACKUP_SCHEMA = "openclaw.skill-collection-backup.v1";
+const LEGACY_COLLECTION_BACKUP_SCHEMA = "carapace.skill-collection-backup.v1";
 const MAX_BACKUP_MANIFEST_BYTES = 1024 * 1024;
 
 type LegacyCollectionBackupRoot =
@@ -35,7 +35,7 @@ type LegacyCollectionBackupRoot =
   | { legacyRoot: string; warning: string };
 
 export async function listPendingLegacyCollectionBackupRoots(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): Promise<LegacyCollectionBackupRoot[]> {
   const backupRoot = path.join(resolveStateDir(env), "skill-workshop", "collection-backups");
@@ -97,7 +97,7 @@ type LegacyCollectionBackup = {
 };
 
 export function inferWorkspaceOwnerAgentId(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   workspaceDir: string,
 ): string | undefined {
@@ -177,7 +177,7 @@ function readLegacyCollectionBackupManifest(
     workspaceDir,
     sourceDirs,
     manifest: {
-      schema: "openclaw.skill-collection-backup.v2",
+      schema: "carapace.skill-collection-backup.v2",
       id: backupId,
       createdAt: record.createdAt,
       skillDirs: [...new Set(skillDirs)].map((relativeDir) => convertedDirs.get(relativeDir)!),
@@ -237,7 +237,7 @@ async function hasNewerUnrelatedCollectionBackup(
           JSON.parse(await fs.readFile(path.join(backupRoot, entry.name, "manifest.json"), "utf8")),
         );
         return (
-          record?.schema === "openclaw.skill-collection-backup.v2" &&
+          record?.schema === "carapace.skill-collection-backup.v2" &&
           typeof record.restoreUnavailableReason !== "string" &&
           typeof record.createdAt === "string" &&
           record.createdAt.localeCompare(newestLegacy) >= 0
@@ -253,7 +253,7 @@ async function isHistoryOnlyBackup(backupDir: string): Promise<boolean> {
       JSON.parse(await fs.readFile(path.join(backupDir, "manifest.json"), "utf8")),
     );
     return (
-      record?.schema === "openclaw.skill-collection-backup.v2" &&
+      record?.schema === "carapace.skill-collection-backup.v2" &&
       record.id === path.basename(backupDir) &&
       typeof record.restoreUnavailableReason === "string"
     );
@@ -282,7 +282,7 @@ async function readLegacyBackupSkillKey(
 
 async function findUnownedLegacyCollectionBackupDirs(
   backup: LegacyCollectionBackup,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   ownerAgentId: string,
 ): Promise<string[]> {
@@ -381,7 +381,7 @@ async function verifyLegacyCollectionBackupCopy(
 async function publishLegacyCollectionBackup(
   backup: LegacyCollectionBackup,
   destinationRoot: string,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   ownerAgentId: string,
   newerBackupExists: boolean,
@@ -446,7 +446,7 @@ async function publishLegacyCollectionBackup(
 }
 
 export async function migrateLegacyCollectionBackups(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): Promise<{ migrated: number; warnings: string[] }> {
   const roots = await listPendingLegacyCollectionBackupRoots(config, env);

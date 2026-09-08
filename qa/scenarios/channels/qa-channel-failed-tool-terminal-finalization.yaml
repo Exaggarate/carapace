@@ -7,7 +7,7 @@ scenario:
     primary: [channels.qa-channel-final-reply]
     secondary: [agent-runtime.failure-recovery-retry-policy]
   regressionRefs:
-    - openclaw/openclaw#118274
+    - carapace/carapace#118274
   gatewayConfigPatch:
     tools:
       codeMode:
@@ -65,7 +65,7 @@ flow:
               kind: group
             senderId: qa-driver
             senderName: QA Driver
-            text: "@openclaw Failed tool terminal recovery QA check: read the missing workspace file, then respond with exact marker: `QA-FAILED-TOOL-FINALIZED-OK`."
+            text: "@carapace Failed tool terminal recovery QA check: read the missing workspace file, then respond with exact marker: `QA-FAILED-TOOL-FINALIZED-OK`."
           saveAs: inbound
         - set: inboundEvents
           value:

@@ -23,14 +23,14 @@ import { execPlainGh } from "./lib/plain-gh.mjs";
 import { parseReleaseContextRef, resolveReleaseContextIdentity } from "./lib/release-context.mjs";
 import { validatePackageSourceRef } from "./package-source-preflight.mjs";
 
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const WORKFLOW = "full-release-validation.yml";
 const TRUSTED_WORKFLOW_PATH = `.github/workflows/${WORKFLOW}`;
 const RELEASE_ISOLATION_TOOLING_CONTRACT = "2";
 const RELEASE_ISOLATION_TOOLING_CONTRACT_ENV = "RELEASE_ISOLATION_TOOLING_CONTRACT";
 const RELEASE_EVIDENCE_VERIFIER_PATHS = [
   "scripts/release-ci-summary.mjs",
-  ".agents/skills/release-openclaw-ci/scripts/release-ci-summary.mjs",
+  ".agents/skills/release-carapace-ci/scripts/release-ci-summary.mjs",
 ];
 const GH_READ_TIMEOUT_MS = 60_000;
 export const FULL_RELEASE_WAIT_TIMEOUT_MINUTES = 720;
@@ -411,7 +411,7 @@ export function parseArgs(argv: string[]) {
   }
   const targetContext = parseReleaseContextRef(args.targetRef);
   if (args.targetRef && !targetContext) {
-    throw new Error("--target-ref must be a canonical OpenClaw release branch or tag");
+    throw new Error("--target-ref must be a canonical Carapace release branch or tag");
   }
   args.targetRef = targetContext?.ref ?? args.targetRef;
   if (
@@ -445,7 +445,7 @@ export function resolveRemoteTargetRefSha(
 ) {
   const context = parseReleaseContextRef(targetRef);
   if (!context) {
-    throw new Error("Target ref must be a canonical OpenClaw release branch or tag");
+    throw new Error("Target ref must be a canonical Carapace release branch or tag");
   }
   if (context.kind !== "release tag") {
     return (
@@ -478,7 +478,7 @@ export function verifyTargetRef(
   }
   const identity = resolveReleaseContextIdentity(targetRef, targetVersion);
   if (!identity) {
-    throw new Error("Target ref must be a canonical OpenClaw release branch or tag");
+    throw new Error("Target ref must be a canonical Carapace release branch or tag");
   }
   const remoteSha = resolveRemoteSha(targetRef);
   if (!remoteSha) {
@@ -515,7 +515,7 @@ function fetchTargetRef(targetRef: string) {
   }
   const context = parseReleaseContextRef(targetRef);
   if (!context) {
-    throw new Error("Target ref must be a canonical OpenClaw release branch or tag");
+    throw new Error("Target ref must be a canonical Carapace release branch or tag");
   }
   const sourceRef = `refs/${context.kind === "release tag" ? "tags" : "heads"}/${context.ref}`;
   run("git", ["fetch", "--no-tags", "origin", sourceRef], {
@@ -717,7 +717,7 @@ export function tryReadReleaseDecision(
   ) => runGhStatus(args, options),
 ) {
   const artifactName = `full-release-decision-${parentRunId}-${parentRunAttempt}`;
-  const downloadDir = mkdtempSync(join(tmpdir(), "openclaw-release-decision-"));
+  const downloadDir = mkdtempSync(join(tmpdir(), "carapace-release-decision-"));
   try {
     const result = runStatusImpl(
       "gh",
@@ -856,7 +856,7 @@ function waitForWorkflowRun(parentRunId: string, workflowSha: string) {
         const releaseDecision = tryReadReleaseDecision(parentRunId, attempt, workflowSha);
         if (releaseDecision && releaseDecisionStopsForeground(releaseDecision.state)) {
           throw new Error(
-            `${formatReleaseStateOutcome(releaseDecision)}\nhttps://github.com/openclaw/openclaw/actions/runs/${parentRunId}`,
+            `${formatReleaseStateOutcome(releaseDecision)}\nhttps://github.com/Exaggarate/carapace/actions/runs/${parentRunId}`,
           );
         }
         // The workflow uploads one immutable decision per attempt; final success
@@ -871,7 +871,7 @@ function waitForWorkflowRun(parentRunId: string, workflowSha: string) {
         return suite;
       }
       throw new Error(
-        `Full Release Validation concluded ${stringValue(suite.conclusion, "unknown").toLowerCase()}: https://github.com/openclaw/openclaw/actions/runs/${parentRunId}`,
+        `Full Release Validation concluded ${stringValue(suite.conclusion, "unknown").toLowerCase()}: https://github.com/Exaggarate/carapace/actions/runs/${parentRunId}`,
       );
     }
     const now = Date.now();
@@ -904,7 +904,7 @@ function waitForWorkflowRun(parentRunId: string, workflowSha: string) {
     );
   }
   throw new Error(
-    `Timed out after ${FULL_RELEASE_WAIT_TIMEOUT_MINUTES} minutes waiting for Full Release Validation: https://github.com/openclaw/openclaw/actions/runs/${parentRunId}`,
+    `Timed out after ${FULL_RELEASE_WAIT_TIMEOUT_MINUTES} minutes waiting for Full Release Validation: https://github.com/Exaggarate/carapace/actions/runs/${parentRunId}`,
   );
 }
 
@@ -1029,7 +1029,7 @@ function verifyReleaseEvidence(
   workflowSha: string,
   trustedWorkflowRef: string,
 ) {
-  const verifierWorktree = mkdtempSync(join(tmpdir(), "openclaw-release-verifier-"));
+  const verifierWorktree = mkdtempSync(join(tmpdir(), "carapace-release-verifier-"));
   try {
     run("git", ["worktree", "add", "--detach", verifierWorktree, workflowSha], {
       stdio: ["ignore", "ignore", "inherit"],
@@ -1156,12 +1156,12 @@ function main() {
         throw new Error("Could not determine Full Release Validation run id.");
       }
     } else {
-      console.log(`Parent run: https://github.com/openclaw/openclaw/actions/runs/${parentRunId}`);
+      console.log(`Parent run: https://github.com/Exaggarate/carapace/actions/runs/${parentRunId}`);
       const completedRun = waitForWorkflowRun(parentRunId, workflowSha);
       parentConclusion = stringValue(completedRun.conclusion);
       if (parentConclusion !== "success") {
         throw new Error(
-          `Full Release Validation concluded ${parentConclusion.toLowerCase() || "without a conclusion"}: https://github.com/openclaw/openclaw/actions/runs/${parentRunId}`,
+          `Full Release Validation concluded ${parentConclusion.toLowerCase() || "without a conclusion"}: https://github.com/Exaggarate/carapace/actions/runs/${parentRunId}`,
         );
       }
       verifyReleaseEvidence(parentRunId, workflowSha, args.trustedWorkflowRef);

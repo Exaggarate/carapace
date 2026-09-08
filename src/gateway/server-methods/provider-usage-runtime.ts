@@ -15,7 +15,7 @@ import {
 import { resolveLegacyInheritedAuthAgentId } from "../../agents/legacy-inherited-auth-dir.js";
 import { resolveEnvApiKey } from "../../agents/model-auth-env.js";
 import { resolveUsableCustomProviderApiKey } from "../../agents/model-auth.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { UsageProviderId } from "../../infra/provider-usage.types.js";
 import {
   listProviderUsagePluginDescriptors,
@@ -28,7 +28,7 @@ type ResolvedDirectApiKey = { apiKey: string; source: string };
 type ProviderUsageRuntimeSnapshot = {
   agentDir: string;
   agentId: string;
-  configRef: OpenClawConfig;
+  configRef: CarapaceConfig;
   credentialKey: string;
   descriptors: ProviderUsagePluginDescriptor[];
   directApiKeys: ReadonlyMap<string, ResolvedDirectApiKey>;
@@ -48,7 +48,7 @@ function sortedRecordEntries<T>(value: Record<string, T> | undefined) {
 }
 
 function fingerprintProviderUsageCredentials(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   directApiKeys: ReadonlyMap<string, ResolvedDirectApiKey>;
   providerIds: readonly UsageProviderId[];
   store: AuthProfileStore;
@@ -84,7 +84,7 @@ function fingerprintProviderUsageCredentials(params: {
 }
 
 function resolveDirectApiKeys(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   providerIds: readonly UsageProviderId[],
 ): Map<string, ResolvedDirectApiKey> {
   const directApiKeys = new Map<string, ResolvedDirectApiKey>();
@@ -105,7 +105,7 @@ export function clearProviderUsageRuntimeSnapshot(): void {
 }
 
 export function getProviderUsageRuntimeSnapshot(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir?: string;
   agentId?: string;
   store?: AuthProfileStore;

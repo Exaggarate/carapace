@@ -3,7 +3,7 @@ import path from "node:path";
 import { Command } from "commander";
 import { afterAll, afterEach, expect, it } from "vitest";
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createPluginCliLoadSession,
   loadPluginCliDescriptors,
@@ -28,12 +28,12 @@ it.each(["retained-agent", "install-roots", "install-state"] as const)(
     for (const id of ["alpha", "beta"]) {
       writePlugin({
         id,
-        dir: path.join(root, id, ".openclaw", "extensions", id),
+        dir: path.join(root, id, ".carapace", "extensions", id),
         filename: "index.cjs",
         body: `module.exports = { id: ${JSON.stringify(id)}, register(api) { api.registerCli(({ program }) => program.command(${JSON.stringify(id)}), { descriptors: [{ name: ${JSON.stringify(id)}, description: "Scope", hasSubcommands: false }] }); } };`,
       });
     }
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: {
@@ -45,12 +45,12 @@ it.each(["retained-agent", "install-roots", "install-state"] as const)(
     };
     const env = {
       HOME: root,
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
     if (kind === "install-state") {
       for (const id of ["alpha", "beta"]) {
-        const installPath = path.join(root, id, ".openclaw", "extensions", id);
+        const installPath = path.join(root, id, ".carapace", "extensions", id);
         writePersistedInstalledPluginIndexInstallRecordsSync(
           { [id]: { source: "path", installPath, sourcePath: installPath } },
           { config: cfg, env, stateDir: path.join(root, id, "state") },
@@ -99,7 +99,7 @@ it.each(["retained-agent", "install-roots", "install-state"] as const)(
             extensionsDir: path.join(
               root,
               kind === "install-state" ? "shared" : id,
-              ".openclaw",
+              ".carapace",
               "extensions",
             ),
             gitDir: path.join(root, "shared", "git"),
@@ -120,8 +120,8 @@ it("retains the exact new config object when a fresh read has identical serializ
   const root = fs.realpathSync(makePluginLoaderTempDir());
   const env = {
     HOME: root,
-    OPENCLAW_STATE_DIR: path.join(root, "state"),
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: path.join(root, "state"),
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
   };
   const cfg = { plugins: { enabled: false } };
   const fresh = { ...cfg };

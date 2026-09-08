@@ -14,7 +14,7 @@ import {
 } from "../config/config.js";
 import { resetConfigOverrides, setConfigOverride } from "../config/runtime-overrides.js";
 import type { GatewayAuthConfig, GatewayTailscaleConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadDeviceAuthToken } from "../infra/device-auth-store.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { getPairedDevice } from "../infra/device-pairing.js";
@@ -59,10 +59,10 @@ async function writeWorkspacePlugin(params: {
   body: string;
   activation?: { onStartup?: boolean };
 }): Promise<void> {
-  const pluginDir = path.join(params.workspaceDir, ".openclaw", "extensions", params.id);
+  const pluginDir = path.join(params.workspaceDir, ".carapace", "extensions", params.id);
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: params.id,
@@ -118,15 +118,15 @@ describe("gateway e2e", () => {
 
   it("pairs the local CLI before a runtime-token loopback gateway becomes ready", async () => {
     const { envSnapshot, tempHome } = await setupGatewayTempHome({
-      prefix: "openclaw-gw-runtime-token-cli-pairing-",
+      prefix: "carapace-gw-runtime-token-cli-pairing-",
       minimalGateway: true,
     });
     let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
     try {
-      deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
+      deleteTestEnvValue("CARAPACE_GATEWAY_TOKEN");
       const configPath = await createGatewayConfigPath(tempHome);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      const initialConfig: OpenClawConfig = {
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      const initialConfig: CarapaceConfig = {
         gateway: { mode: "local", bind: "loopback" },
         logging: { level: "info" },
       };
@@ -147,7 +147,7 @@ describe("gateway e2e", () => {
         }),
       ).resolves.toEqual(expect.any(Object));
 
-      const persisted = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+      const persisted = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
       expect(persisted.gateway?.auth?.token).toBeUndefined();
       const identity = loadOrCreateDeviceIdentity();
       expect(loadDeviceAuthToken({ deviceId: identity.deviceId, role: "operator" })).toMatchObject({
@@ -170,15 +170,15 @@ describe("gateway e2e", () => {
     "preserves %s auth across a safe direct gateway reload",
     async (authSource) => {
       const { envSnapshot, tempHome } = await setupGatewayTempHome({
-        prefix: "openclaw-gw-direct-reload-",
+        prefix: "carapace-gw-direct-reload-",
       });
       let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
       let client: Awaited<ReturnType<typeof connectGatewayClient>> | undefined;
       try {
-        deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
+        deleteTestEnvValue("CARAPACE_GATEWAY_TOKEN");
         const fileToken = nextGatewayId("direct-file-token");
         const overrideToken = nextGatewayId("direct-override-token");
-        const initialConfig: OpenClawConfig = {
+        const initialConfig: CarapaceConfig = {
           ...(authSource !== "generated"
             ? {
                 gateway: {
@@ -189,7 +189,7 @@ describe("gateway e2e", () => {
                         ? {
                             source: "env" as const,
                             provider: "default",
-                            id: "OPENCLAW_TEST_MISSING_DISK_TOKEN",
+                            id: "CARAPACE_TEST_MISSING_DISK_TOKEN",
                           }
                         : fileToken,
                   },
@@ -202,21 +202,21 @@ describe("gateway e2e", () => {
           logging: { level: "info" },
         };
         const configPath = await createGatewayConfigPath(tempHome);
-        setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+        setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
         const configIO = createConfigIO({ configPath });
         await configIO.writeConfigFile(initialConfig);
         if (authSource === "secret-ref-override") {
-          setTestEnvValue("OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN", overrideToken);
+          setTestEnvValue("CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN", overrideToken);
         }
         if (authSource === "runtime-overrides") {
-          deleteTestEnvValue("OPENCLAW_SKIP_CHANNELS");
-          deleteTestEnvValue("OPENCLAW_SKIP_PROVIDERS");
-          setTestEnvValue("OPENCLAW_TEST_RUNTIME_OVERRIDE_TOKEN", overrideToken);
+          deleteTestEnvValue("CARAPACE_SKIP_CHANNELS");
+          deleteTestEnvValue("CARAPACE_SKIP_PROVIDERS");
+          setTestEnvValue("CARAPACE_TEST_RUNTIME_OVERRIDE_TOKEN", overrideToken);
           expect(
             setConfigOverride("gateway.auth.token", {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_TEST_RUNTIME_OVERRIDE_TOKEN",
+              id: "CARAPACE_TEST_RUNTIME_OVERRIDE_TOKEN",
             }).ok,
           ).toBe(true);
           expect(
@@ -236,7 +236,7 @@ describe("gateway e2e", () => {
                   token: {
                     source: "env",
                     provider: "default",
-                    id: "OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN",
+                    id: "CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN",
                   },
                 }
               : undefined;
@@ -276,7 +276,7 @@ describe("gateway e2e", () => {
         const nextLoggingSource = {
           ...sourceBeforeLoggingEdit,
           logging: { ...sourceBeforeLoggingEdit.logging, level: "debug" },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         const loggingChanges = new Set<string>();
         collectChangedPaths(sourceBeforeLoggingEdit, nextLoggingSource, "", loggingChanges);
         expect([...loggingChanges]).toEqual(["logging.level"]);
@@ -303,11 +303,11 @@ describe("gateway e2e", () => {
                 dmPolicy: "disabled",
               },
             },
-          } satisfies OpenClawConfig;
+          } satisfies CarapaceConfig;
           await writeConfigFile(nextPolicySource);
           const persistedPolicyEdit = JSON.parse(
             await fs.readFile(configPath, "utf-8"),
-          ) as OpenClawConfig;
+          ) as CarapaceConfig;
           expect(persistedPolicyEdit.channels?.whatsapp?.dmPolicy).toBe("disabled");
           expect(getRuntimeConfig().channels?.whatsapp?.dmPolicy).toBe("open");
 
@@ -315,11 +315,11 @@ describe("gateway e2e", () => {
           const nextUnrelatedSource = {
             ...sourceBeforeUnrelatedWrite,
             ui: { seamColor: "#123456" },
-          } satisfies OpenClawConfig;
+          } satisfies CarapaceConfig;
           await writeConfigFile(nextUnrelatedSource);
           const persistedAfterUnrelatedWrite = JSON.parse(
             await fs.readFile(configPath, "utf-8"),
-          ) as OpenClawConfig;
+          ) as CarapaceConfig;
           expect(persistedAfterUnrelatedWrite.channels?.whatsapp?.dmPolicy).toBe("disabled");
           expect(persistedAfterUnrelatedWrite.ui?.seamColor).toBe("#123456");
         }
@@ -345,16 +345,16 @@ describe("gateway e2e", () => {
 
   it("refreshes direct hook target policy after hot reload", async () => {
     const { envSnapshot, tempHome } = await setupGatewayTempHome({
-      prefix: "openclaw-gw-hook-policy-reload-",
+      prefix: "carapace-gw-hook-policy-reload-",
     });
     let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
     try {
       const configPath = await createGatewayConfigPath(tempHome);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
       const gatewayToken = nextGatewayId("hook-policy-gateway-token");
       const hookToken = nextGatewayId("hook-policy-token");
-      const fixedSessionStore = path.join(tempHome, ".openclaw", "sessions.json");
-      const initialConfig: OpenClawConfig = {
+      const fixedSessionStore = path.join(tempHome, ".carapace", "sessions.json");
+      const initialConfig: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           defaults: { sessionStore: { agentId: "old" } },
@@ -389,7 +389,7 @@ describe("gateway e2e", () => {
           { timeout: 5_000, interval: 50 },
         )
         .toBe("active");
-      const writeConfigAtomically = async (config: OpenClawConfig) => {
+      const writeConfigAtomically = async (config: CarapaceConfig) => {
         const stagedConfigPath = `${configPath}.next`;
         await fs.writeFile(stagedConfigPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
         await fs.rename(stagedConfigPath, configPath);
@@ -419,7 +419,7 @@ describe("gateway e2e", () => {
         body: { error: 'unknown agentId "new"' },
       });
 
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...initialConfig,
         agents: {
           ownership: "explicit",
@@ -461,13 +461,13 @@ describe("gateway e2e", () => {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome } = await setupGatewayTempHome({
-        prefix: "openclaw-gw-startup-auth-ref-",
+        prefix: "carapace-gw-startup-auth-ref-",
       });
       let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
       let oldClient: Awaited<ReturnType<typeof connectGatewayClient>> | undefined;
       try {
         const configPath = await createGatewayConfigPath(tempHome);
-        setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+        setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
         const configIO = createConfigIO({ configPath });
         const fileToken = nextGatewayId("startup-auth-file-token");
         const oldToken = nextGatewayId("startup-auth-ref-old");
@@ -476,7 +476,7 @@ describe("gateway e2e", () => {
           gateway: { auth: { mode: "token", token: fileToken } },
           logging: { level: "info" },
         });
-        setTestEnvValue("OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN", oldToken);
+        setTestEnvValue("CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN", oldToken);
         const port = await getGatewayE2ePortBlock();
         server = await startGatewayServer(port, {
           bind: "loopback",
@@ -485,7 +485,7 @@ describe("gateway e2e", () => {
             token: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN",
+              id: "CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN",
             },
           },
           controlUiEnabled: false,
@@ -496,7 +496,7 @@ describe("gateway e2e", () => {
           clientDisplayName: "vitest-startup-auth-ref-old",
         });
 
-        setTestEnvValue("OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN", newToken);
+        setTestEnvValue("CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN", newToken);
         const reload = await oldClient
           .request<{ ok?: boolean }>("secrets.reload", {})
           .catch((error: unknown) => (error instanceof Error ? error : new Error(String(error))));
@@ -534,13 +534,13 @@ describe("gateway e2e", () => {
 
   it("preserves runtime-seeded Control UI origins across a safe direct reload", async () => {
     const { envSnapshot, tempHome } = await setupGatewayTempHome({
-      prefix: "openclaw-gw-direct-origins-",
+      prefix: "carapace-gw-direct-origins-",
     });
     const token = nextGatewayId("direct-origins-token");
     const configPath = await createGatewayConfigPath(tempHome);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
     const configIO = createConfigIO({ configPath });
-    const initialConfig: OpenClawConfig = {
+    const initialConfig: CarapaceConfig = {
       gateway: { auth: { mode: "token", token } },
       logging: { level: "info" },
     };
@@ -599,13 +599,13 @@ describe("gateway e2e", () => {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome, workspaceDir } = await setupGatewayTempHome({
-        prefix: "openclaw-gw-mock-home-",
+        prefix: "carapace-gw-mock-home-",
       });
       const { baseUrl: openaiBaseUrl, restore } = installOpenAiResponsesMock();
 
       try {
         const token = nextGatewayId("test-token");
-        setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
+        setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
 
         const configPath = await createGatewayConfigPath(tempHome);
         const mockProvider = buildMockOpenAiResponsesProvider(openaiBaseUrl);
@@ -693,11 +693,11 @@ describe("gateway e2e", () => {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome, workspaceDir } = await setupGatewayTempHome({
-        prefix: "openclaw-gw-http-tools-home-",
+        prefix: "carapace-gw-http-tools-home-",
       });
 
       const token = nextGatewayId("http-tools-token");
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
       const registerCountPath = path.join(tempHome, "workspace-plugin-register-count.txt");
       await writeWorkspacePlugin({
         workspaceDir,
@@ -730,7 +730,7 @@ module.exports = {
         gateway: { auth: { token } },
       };
       await fs.writeFile(configPath, `${JSON.stringify(cfg, null, 2)}\n`);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
 
       const { port, server } = await startLoopbackTokenGateway(token);
 
@@ -772,13 +772,13 @@ module.exports = {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome } = await setupGatewayTempHome({
-        prefix: "openclaw-wizard-home-",
+        prefix: "carapace-wizard-home-",
         minimalGateway: true,
       });
-      deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
+      deleteTestEnvValue("CARAPACE_GATEWAY_TOKEN");
 
       const configPath = await createGatewayConfigPath(tempHome);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
       clearRuntimeConfigSnapshot();
       clearConfigCache();
 
@@ -894,7 +894,7 @@ module.exports = {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome } = await setupGatewayTempHome({
-        prefix: "openclaw-wizard-channel-target-home-",
+        prefix: "carapace-wizard-channel-target-home-",
         minimalGateway: true,
       });
       const configPath = await createGatewayConfigPath(tempHome);
@@ -914,7 +914,7 @@ module.exports = {
           expect(result).toMatchObject({
             done: true,
             status: "error",
-            error: `Error: Unknown channel "${expectedChannel}". Run \`openclaw channels list --all\` to see configured and installable channels.`,
+            error: `Error: Unknown channel "${expectedChannel}". Run \`carapace channels list --all\` to see configured and installable channels.`,
           });
           expect(result.step).toBeUndefined();
         }
@@ -936,24 +936,24 @@ module.exports = {
     async () => {
       const envSnapshot = captureEnv([...GATEWAY_TEST_ENV_KEYS, "DISCORD_BOT_TOKEN"]);
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-minimal-gateway-home-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-minimal-gateway-home-"));
       const configPath = await createGatewayConfigPath(tempHome);
-      const bundledPluginsDir = path.join(tempHome, "openclaw-test-no-bundled-extensions");
+      const bundledPluginsDir = path.join(tempHome, "carapace-test-no-bundled-extensions");
       setTestEnvValue("HOME", tempHome);
-      setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempHome, ".openclaw"));
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-      setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-      setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-      setTestEnvValue("OPENCLAW_SKIP_PROVIDERS", "1");
-      setTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledPluginsDir);
-      setTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY", "1");
+      setTestEnvValue("CARAPACE_STATE_DIR", path.join(tempHome, ".carapace"));
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_SKIP_CHANNELS", "1");
+      setTestEnvValue("CARAPACE_SKIP_GMAIL_WATCHER", "1");
+      setTestEnvValue("CARAPACE_SKIP_CRON", "1");
+      setTestEnvValue("CARAPACE_SKIP_CANVAS_HOST", "1");
+      setTestEnvValue("CARAPACE_SKIP_BROWSER_CONTROL_SERVER", "1");
+      setTestEnvValue("CARAPACE_SKIP_PROVIDERS", "1");
+      setTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR", bundledPluginsDir);
+      setTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY", "1");
       setTestEnvValue("DISCORD_BOT_TOKEN", "discord-test-token");
 
       const token = nextGatewayId("minimal-token");
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
       await fs.mkdir(bundledPluginsDir, { recursive: true });
       await fs.writeFile(
         configPath,

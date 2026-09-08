@@ -5,25 +5,25 @@ import { SqliteBoardStore } from "../../boards/sqlite-board-store.js";
 import { replaceSessionEntrySync } from "../../config/sessions/session-accessor.entry.js";
 import { resetPluginRuntimeStateForTest } from "../../plugins/runtime.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createBoardHarness } from "./board.test-support.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
   resetPluginRuntimeStateForTest();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it("serializes in-flight generated-name collisions and reuses both names after reload", async () => {
   resetPluginRuntimeStateForTest();
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-board-generated-race-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-board-generated-race-") };
   const sessionKey = "agent:main:generated-race";
-  const database = openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env });
   replaceSessionEntrySync(
     { agentId: "main", sessionKey, storePath: database.path },
     { sessionId: "generated-race", updatedAt: Date.now() },
@@ -88,8 +88,8 @@ it("serializes in-flight generated-name collisions and reuses both names after r
     broadcast.mock.calls.map(([, event]) => (event as { widget?: string }).widget).filter(Boolean),
   ).toEqual(expect.arrayContaining(committedNames));
 
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   const reloaded = createBoardHarness(undefined, {}, new SqliteBoardStore(options));
   const get = await reloaded.invoke("board.get", { sessionKey });
   const snapshot = get.mock.calls[0]?.[1] as BoardSnapshot;

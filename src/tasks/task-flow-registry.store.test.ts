@@ -5,11 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AdmittedRunContext } from "../agents/admitted-run-context.js";
 import { createExecutionIdentityAdmissionToken } from "../audit/execution-identity-admission.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createInMemoryTaskFlowRegistryStore } from "../test-utils/task-registry-store.js";
 import {
   createManagedTaskFlow as createManagedTaskFlowOrNull,
@@ -45,7 +45,7 @@ function createManagedTaskFlow(
   return flow;
 }
 
-type TaskFlowRegistryTestDatabase = Pick<OpenClawStateKyselyDatabase, "flow_runs">;
+type TaskFlowRegistryTestDatabase = Pick<CarapaceStateKyselyDatabase, "flow_runs">;
 
 function createStoredFlow(): TaskFlowRecord {
   return {
@@ -70,14 +70,14 @@ function createStoredFlow(): TaskFlowRecord {
 }
 
 async function withFlowRegistryTempDir<T>(run: (root: string) => Promise<T>): Promise<T> {
-  return await withOpenClawTestState(
+  return await withCarapaceTestState(
     {
       layout: "state-only",
-      prefix: "openclaw-task-flow-store-",
+      prefix: "carapace-task-flow-store-",
     },
     async (state) => {
       const root = state.stateDir;
-      process.env.OPENCLAW_STATE_DIR = root;
+      process.env.CARAPACE_STATE_DIR = root;
       resetTaskFlowRegistryForTests({ persist: false });
       try {
         return await run(root);
@@ -88,13 +88,13 @@ async function withFlowRegistryTempDir<T>(run: (root: string) => Promise<T>): Pr
   );
 }
 
-const ORIGINAL_STATE_DIR = process.env.OPENCLAW_STATE_DIR;
+const ORIGINAL_STATE_DIR = process.env.CARAPACE_STATE_DIR;
 
 function restoreOriginalStateDir(): void {
   if (ORIGINAL_STATE_DIR === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = ORIGINAL_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = ORIGINAL_STATE_DIR;
   }
 }
 
@@ -110,12 +110,12 @@ describe("task-flow-registry store runtime", () => {
   });
 
   it("does not create shared state for a read-only flow snapshot", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-flow-store-readonly-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-flow-store-readonly-" },
       async (state) => {
-        process.env.OPENCLAW_STATE_DIR = state.stateDir;
+        process.env.CARAPACE_STATE_DIR = state.stateDir;
         resetTaskFlowRegistryForTests({ persist: false });
-        const statePath = resolveOpenClawStateSqlitePath();
+        const statePath = resolveCarapaceStateSqlitePath();
         expect(() => statSync(statePath)).toThrow();
 
         expect(loadTaskFlowRegistryStateFromSqliteReadOnly().flows.size).toBe(0);
@@ -183,7 +183,7 @@ describe("task-flow-registry store runtime", () => {
         status: "running",
       });
 
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       const db = getNodeSqliteKysely<TaskFlowRegistryTestDatabase>(database.db);
       executeSqliteQuerySync(
         database.db,
@@ -211,7 +211,7 @@ describe("task-flow-registry store runtime", () => {
         },
       });
 
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       const db = getNodeSqliteKysely<TaskFlowRegistryTestDatabase>(database.db);
       executeSqliteQuerySync(
         database.db,
@@ -342,13 +342,13 @@ describe("task-flow-registry store runtime", () => {
       };
 
       expect(
-        tableExists(openOpenClawStateDatabase().db, "execution_owner_lifecycle_bindings"),
+        tableExists(openCarapaceStateDatabase().db, "execution_owner_lifecycle_bindings"),
       ).toBe(false);
       expect(bindTaskFlowExecution({ admitted, flowId: managedTerminal.flowId })).toBe("missing");
       expect(bindTaskFlowExecution({ admitted, flowId: mirroredTerminal.flowId })).toBe("missing");
       expect(bindTaskFlowExecution({ admitted, flowId: managedCancelling.flowId })).toBe("missing");
       expect(
-        tableExists(openOpenClawStateDatabase().db, "execution_owner_lifecycle_bindings"),
+        tableExists(openCarapaceStateDatabase().db, "execution_owner_lifecycle_bindings"),
       ).toBe(false);
       expect(bindTaskFlowExecution({ admitted, flowId: managed.flowId })).toBe("bound");
       expect(bindTaskFlowExecution({ admitted, flowId: mirrored.flowId })).toBe("bound");
@@ -358,7 +358,7 @@ describe("task-flow-registry store runtime", () => {
       expect(bindTaskFlowExecution({ admitted, flowId: managed.flowId })).toBe("missing");
       expect(bindTaskFlowExecution({ admitted, flowId: mirrored.flowId })).toBe("missing");
       expect(
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare(
             `SELECT owner_id
              FROM execution_owner_lifecycle_bindings
@@ -380,7 +380,7 @@ describe("task-flow-registry store runtime", () => {
       );
       expect(loadTaskFlowRegistryStateFromSqliteReadOnly()).toEqual(restored);
       expect(
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare(
             "SELECT owner_id FROM execution_owner_lifecycle_bindings WHERE owner_kind = 'flow'",
           )
@@ -404,9 +404,9 @@ describe("task-flow-registry store runtime", () => {
         waitJson: { kind: "task", taskId: "task-secured" },
       });
 
-      const databasePath = resolveOpenClawStateSqlitePath(process.env);
+      const databasePath = resolveCarapaceStateSqlitePath(process.env);
       const registryDir = path.dirname(databasePath);
-      expect(databasePath.endsWith(path.join("state", "openclaw.sqlite"))).toBe(true);
+      expect(databasePath.endsWith(path.join("state", "carapace.sqlite"))).toBe(true);
       expect(statSync(registryDir).mode & 0o777).toBe(0o700);
       expect(statSync(databasePath).mode & 0o777).toBe(0o600);
     });

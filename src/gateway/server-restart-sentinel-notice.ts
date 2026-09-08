@@ -2,7 +2,7 @@ import { sendDurableMessageBatchCore } from "../channels/message/runtime.js";
 // Durable outbound notice ownership for restart-sentinel recovery.
 import { getChannelPlugin, normalizeChannelId } from "../channels/plugins/index.js";
 import type { CliDeps } from "../cli/deps.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   findPlatformMessageRejectedError,
   isProvenDeliveryNotSentError,
@@ -60,14 +60,14 @@ type RestartSentinelNoticeRoute = {
 };
 
 type GatewayLifecycleNotice = RestartSentinelNoticeRoute & {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   message: string;
   sessionKey?: string;
 };
 
 /** Resolve once before an update can replace lazily loaded channel modules. */
 export function resolveGatewayLifecycleNoticeRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deliveryContext?: DeliveryContext;
   threadId?: string;
 }): RestartSentinelNoticeRoute | undefined {
@@ -248,7 +248,7 @@ async function waitForRecoveryDrain(): Promise<void> {
 }
 
 async function drainFailedRestartSentinelNotice(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   queueId: string;
   sessionKey: string;
   summary: string;

@@ -1,18 +1,18 @@
 // Nostr plugin module implements channel behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
 import {
   createScopedDmSecurityResolver,
   createTopLevelChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import { missingTargetError } from "openclaw/plugin-sdk/channel-feedback";
-import { createChannelMessageAdapterFromOutbound } from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import { createChatChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import { missingTargetError } from "carapace/plugin-sdk/channel-feedback";
+import { createChannelMessageAdapterFromOutbound } from "carapace/plugin-sdk/channel-outbound";
 import {
   buildPassiveChannelStatusSummary,
   buildTrafficStatusSummary,
-} from "openclaw/plugin-sdk/extension-shared";
-import { createComputedAccountStatusAdapter } from "openclaw/plugin-sdk/status-helpers";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/extension-shared";
+import { createComputedAccountStatusAdapter } from "carapace/plugin-sdk/status-helpers";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildChannelConfigSchema,
   collectStatusIssuesFromLastError,

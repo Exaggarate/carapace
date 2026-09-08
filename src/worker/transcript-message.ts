@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core";
 import type {
   WorkerTranscriptCommitRequestFrame,
   WorkerTranscriptMessage,

@@ -9,7 +9,7 @@ import {
   enqueueExecutionIdentityContextAtAdmission,
 } from "../../audit/execution-identity-admission.js";
 import { startAgentLocalAuditWriter } from "../../commands/agent-local-audit.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { GatewayCredentialsRequiredError } from "../../gateway/call.js";
 import { GatewayClientRequestError } from "../../gateway/client.js";
 import {
@@ -46,7 +46,7 @@ beforeEach(() => {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const AUDIT_REF_RE = /^hmac-sha256:v1:[a-f0-9]{32}:[a-f0-9]{64}$/u;
 
-function makeConfig(overrides: Partial<OpenClawConfig> = {}): OpenClawConfig {
+function makeConfig(overrides: Partial<CarapaceConfig> = {}): CarapaceConfig {
   return overrides;
 }
 
@@ -56,7 +56,7 @@ describe("resolveSessionToolsVisibility", () => {
     expect(
       resolveSessionToolsVisibility({
         tools: { sessions: { visibility: "invalid" } },
-      } as unknown as OpenClawConfig),
+      } as unknown as CarapaceConfig),
     ).toBe("all");
   });
 
@@ -64,7 +64,7 @@ describe("resolveSessionToolsVisibility", () => {
     expect(
       resolveSessionToolsVisibility({
         tools: { sessions: { visibility: "ALL" } },
-      } as unknown as OpenClawConfig),
+      } as unknown as CarapaceConfig),
     ).toBe("all");
   });
 });
@@ -575,8 +575,8 @@ describe("createSessionVisibilityGuard", () => {
 
   it("persists unknown ownership evidence with an opaque target through the local writer", async () => {
     const now = Date.now();
-    const stateDir = tempDirs.make("openclaw-session-access-audit-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-session-access-audit-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const stopWriter = startAgentLocalAuditWriter({ stateDir });
     if (!stopWriter) {
       throw new Error("expected an isolated direct-local audit writer");
@@ -878,7 +878,7 @@ describe("createSessionVisibilityGuard", () => {
     });
     if (!access.allowed) {
       expect(formatSessionToolAccessDenial(access, { action: "history" })).toBe(
-        "Session history denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect OpenClaw logs.",
+        "Session history denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect Carapace logs.",
       );
     }
     expect(gateway.mock.calls.map(([request]) => request.method)).toEqual([
@@ -948,14 +948,14 @@ describe("createSessionVisibilityGuard", () => {
       target: "agent:codex:acp:child-1",
       visibility: "tree" as const,
       error:
-        "Session history denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect OpenClaw logs.",
+        "Session history denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect Carapace logs.",
     },
     {
       name: "cross-agent ACP child under all visibility",
       target: "agent:codex:acp:child-1",
       visibility: "all" as const,
       error:
-        "Session history denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect OpenClaw logs.",
+        "Session history denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect Carapace logs.",
     },
     {
       name: "malformed agent key",
@@ -1031,7 +1031,7 @@ describe("createSessionVisibilityGuard", () => {
       callGateway: vi.fn(async () => {
         throw new GatewayCredentialsRequiredError({
           method: "sessions.list",
-          configPath: "/tmp/openclaw.json",
+          configPath: "/tmp/carapace.json",
         });
       }) as never,
     });
@@ -1062,7 +1062,7 @@ describe("createSessionVisibilityGuard", () => {
       allowed: false,
       status: "forbidden",
       error:
-        "Session history denied because spawned-session ownership lookup failed; ask the operator to inspect OpenClaw logs.",
+        "Session history denied because spawned-session ownership lookup failed; ask the operator to inspect Carapace logs.",
     });
     expect(result.allowed ? "" : result.error).not.toMatch(/credentials|retry/i);
   });
@@ -1080,7 +1080,7 @@ describe("createSessionVisibilityGuard", () => {
       allowed: false,
       status: "forbidden",
       error:
-        "Session history denied because spawned-session ownership lookup failed; ask the operator to inspect OpenClaw logs.",
+        "Session history denied because spawned-session ownership lookup failed; ask the operator to inspect Carapace logs.",
     });
   });
 });

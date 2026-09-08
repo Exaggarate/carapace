@@ -31,8 +31,8 @@ describe("write-unified-entry-dts", () => {
         "scripts/windows-cmd-helpers.mjs",
         "packages/normalization-core/src/mountinfo-path.ts",
         "extensions/memory-core/src/memory/manager-search-knn-entrypoint.ts",
-        "src/state/openclaw-state-schema.sql",
-        "src/state/openclaw-agent-schema.sql",
+        "src/state/carapace-state-schema.sql",
+        "src/state/carapace-agent-schema.sql",
       ]),
     );
     expect(closure).not.toContain("scripts/lib/ci-node-test-plan.mts");
@@ -262,7 +262,7 @@ describe("write-unified-entry-dts", () => {
     );
     expect(changedCacheGroups.size).toBe(1);
     const mixedGeneration = treeHashes(path.join(root, "dist"));
-    const cold = runUnifiedWriter(root, { OPENCLAW_BUILD_CACHE: "0" });
+    const cold = runUnifiedWriter(root, { CARAPACE_BUILD_CACHE: "0" });
     expect(cold.status, cold.stdout + cold.stderr).toBe(0);
     expect(
       (cold.stdout + cold.stderr).match(/\[tsdown-build\] invocation \d\/6 finished/gu),
@@ -273,7 +273,7 @@ describe("write-unified-entry-dts", () => {
 
   it("records successful empty partitions for a bounded plugin selection", () => {
     const { root } = createFixture(TSDOWN_NON_SDK_DTS_CONFIG_GROUPS);
-    const env = { OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "fixture-a" };
+    const env = { CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "fixture-a" };
     const initial = runUnifiedWriter(root, env);
     expect(initial.status, initial.stdout + initial.stderr).toBe(0);
     for (const group of TSDOWN_NON_SDK_DTS_CONFIG_GROUPS) {
@@ -309,7 +309,7 @@ describe("write-unified-entry-dts", () => {
     let cached: Record<string, string> = {};
     const last = TSDOWN_NON_SDK_DTS_CONFIG_GROUPS.at(-1)!;
     if (failure === "last compiler failure") {
-      write(declarations[last]![0]!, 'export type { Missing } from "@openclaw/llm-core";');
+      write(declarations[last]![0]!, 'export type { Missing } from "@carapace/llm-core";');
     } else {
       write(
         "tsdown.config.ts",

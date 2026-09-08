@@ -8,7 +8,7 @@ import { listAgentEntries } from "../../agents/agent-scope-config.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { resolveGatewayPort } from "../../config/config.js";
 import { logConfigUpdated } from "../../config/logging.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveGatewayAuthToken } from "../../gateway/auth-token-resolution.js";
 import { resolveConfiguredSecretInputWithFallback } from "../../gateway/resolve-configured-secret-input-string.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -92,7 +92,7 @@ async function collectGatewayHealthFailureDiagnostics(): Promise<
 
 /** Resolves the auth material used by the post-setup gateway health probe. */
 async function resolveGatewayHealthProbeToken(
-  nextConfig: OpenClawConfig,
+  nextConfig: CarapaceConfig,
 ): Promise<{ token?: string; password?: string; unresolvedRefReason?: string }> {
   if (nextConfig.gateway?.auth?.mode === "password") {
     // Password mode uses the configured password directly; token fallback must
@@ -103,7 +103,7 @@ async function resolveGatewayHealthProbeToken(
       value: nextConfig.gateway.auth.password,
       path: "gateway.auth.password",
       unresolvedReasonStyle: "detailed",
-      readFallback: () => process.env.OPENCLAW_GATEWAY_PASSWORD,
+      readFallback: () => process.env.CARAPACE_GATEWAY_PASSWORD,
     });
     return {
       password: resolved.value,
@@ -128,7 +128,7 @@ async function resolveGatewayHealthProbeToken(
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.onboardNonInteractiveLocalTestApi")
+    Symbol.for("carapace.onboardNonInteractiveLocalTestApi")
   ] = {
     resolveGatewayHealthProbeToken,
   };
@@ -146,8 +146,8 @@ function formatGatewayHealthFailureDetail(params: {
 export async function runNonInteractiveLocalSetup(params: {
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
-  sourceConfigBeforeMigrations: OpenClawConfig;
+  baseConfig: CarapaceConfig;
+  sourceConfigBeforeMigrations: CarapaceConfig;
   baseHash?: string;
 }) {
   const { opts, runtime, baseConfig, sourceConfigBeforeMigrations, baseHash } = params;
@@ -171,12 +171,12 @@ export async function runNonInteractiveLocalSetup(params: {
         "Warning: existing agents keep their current workspace during non-interactive onboarding.",
         `Current workspace: ${workspaceConflict.currentWorkspaceDir}`,
         `Requested workspace: ${workspaceConflict.requestedWorkspaceDir}`,
-        `Run \`${formatCliCommand("openclaw onboard --classic")}\` to confirm moving the existing agent fleet.`,
+        `Run \`${formatCliCommand("carapace onboard --classic")}\` to confirm moving the existing agent fleet.`,
       ].join("\n"),
     );
   }
 
-  let nextConfig: OpenClawConfig = applyLocalSetupWorkspaceConfig(
+  let nextConfig: CarapaceConfig = applyLocalSetupWorkspaceConfig(
     baseConfig,
     requestedWorkspaceDir,
     { allowWorkspaceChange: !hasAuthoredRoster && !workspaceConflict },
@@ -331,9 +331,9 @@ export async function runNonInteractiveLocalSetup(params: {
           daemonInstall.skippedReason === "systemd-user-unavailable"
             ? [
                 "Fix: rerun without `--install-daemon` for one-shot setup, or enable a working user-systemd session and retry.",
-                "If your auth profile uses env-backed refs, keep those env vars set in the shell that runs `openclaw gateway run` or `openclaw agent --local`.",
+                "If your auth profile uses env-backed refs, keep those env vars set in the shell that runs `carapace gateway run` or `carapace agent --local`.",
               ]
-            : [`Run \`${formatCliCommand("openclaw gateway status --deep")}\` for more detail.`],
+            : [`Run \`${formatCliCommand("carapace gateway status --deep")}\` for more detail.`],
       });
       runtime.exit(1);
       return;
@@ -395,13 +395,13 @@ export async function runNonInteractiveLocalSetup(params: {
           diagnostics,
           hints: !opts.installDaemon
             ? [
-                "Non-interactive local setup only waits for an already-running gateway unless you pass `--install-daemon` to `openclaw onboard`.",
-                `Fix: start \`${formatCliCommand("openclaw gateway run")}\`, re-run \`${formatCliCommand("openclaw onboard --install-daemon")}\`, or use \`${formatCliCommand("openclaw onboard --skip-health")}\`.`,
+                "Non-interactive local setup only waits for an already-running gateway unless you pass `--install-daemon` to `carapace onboard`.",
+                `Fix: start \`${formatCliCommand("carapace gateway run")}\`, re-run \`${formatCliCommand("carapace onboard --install-daemon")}\`, or use \`${formatCliCommand("carapace onboard --skip-health")}\`.`,
                 process.platform === "win32"
                   ? "Native Windows managed gateway install tries Scheduled Tasks first and falls back to a per-user Startup-folder login item when task creation is denied."
                   : undefined,
               ].filter((value): value is string => Boolean(value))
-            : [`Run \`${formatCliCommand("openclaw gateway status --deep")}\` for more detail.`],
+            : [`Run \`${formatCliCommand("carapace gateway status --deep")}\` for more detail.`],
           informational: explicitlySkippedAbsentGateway,
         });
       }
@@ -454,7 +454,7 @@ export async function runNonInteractiveLocalSetup(params: {
           installDaemon: Boolean(opts.installDaemon),
           daemonInstall: daemonInstallStatus,
           daemonRuntime: opts.installDaemon ? daemonRuntimeRaw : undefined,
-          hints: [`Run \`${formatCliCommand("openclaw health")}\` for full diagnostics.`],
+          hints: [`Run \`${formatCliCommand("carapace health")}\` for full diagnostics.`],
         });
         runtime.exit(1);
         return;
@@ -484,7 +484,7 @@ export async function runNonInteractiveLocalSetup(params: {
 
   if (!opts.json) {
     runtime.log(
-      `Tip: run \`${formatCliCommand("openclaw configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.openclaw.ai/tools/web`,
+      `Tip: run \`${formatCliCommand("carapace configure --section web")}\` to store your Brave API key for web_search. Docs: https://github.com/Exaggarate/carapace`,
     );
   }
 }

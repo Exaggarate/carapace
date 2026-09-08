@@ -1,6 +1,6 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import type { MatrixClient } from "../sdk.js";
-import { MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY } from "../send/types.js";
+import { MATRIX_CARAPACE_FINALIZED_PREVIEW_KEY } from "../send/types.js";
 
 export type MatrixDraftStreamHandle = ReturnType<
   typeof import("../draft-stream.js").createMatrixDraftStream
@@ -18,17 +18,17 @@ export async function redactMatrixDraftEvent(
 }
 
 export function buildMatrixFinalizedPreviewContent(): Record<string, unknown> {
-  return { [MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]: true };
+  return { [MATRIX_CARAPACE_FINALIZED_PREVIEW_KEY]: true };
 }
 
 export const loadMatrixSendModule = createLazyRuntimeModule(() => import("../send.js"));
 
 export const loadAcpBindingRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/acp-binding-runtime"),
+  () => import("carapace/plugin-sdk/acp-binding-runtime"),
 );
 
 export const loadSessionBindingRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/session-binding-runtime"),
+  () => import("carapace/plugin-sdk/session-binding-runtime"),
 );
 
 export const loadMatrixReactionEvents = createLazyRuntimeModule(

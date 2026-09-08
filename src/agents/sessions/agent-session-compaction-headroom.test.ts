@@ -1,4 +1,4 @@
-import type { Context, Model, SimpleStreamOptions } from "openclaw/plugin-sdk/llm";
+import type { Context, Model, SimpleStreamOptions } from "carapace/plugin-sdk/llm";
 import { expect, it, vi } from "vitest";
 import type { PersistedUserTurnMessage } from "../../sessions/user-turn-transcript.types.js";
 import { buildRuntimeContextCustomMessage } from "../embedded-agent-runner/run/runtime-context-prompt.js";

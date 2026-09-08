@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { dispatchInboundMessageWithDispatcher } from "../auto-reply/dispatch.js";
 import { createHeartbeatToolResponsePayload } from "../auto-reply/heartbeat-tool-response.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
@@ -28,7 +28,7 @@ it.each(["before_dispatch", "reply_dispatch"] as const)(
         messages: { visibleReplies: "automatic" },
         channels: { telegram: { enabled: true, token: "test", allowFrom: ["owner"] } },
         session: { store: storePath },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const sessionKey = await seedMainSessionStore(storePath, cfg, {
         lastChannel: "telegram",
         lastProvider: "telegram",

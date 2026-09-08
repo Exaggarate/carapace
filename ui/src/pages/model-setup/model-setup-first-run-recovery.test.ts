@@ -21,7 +21,7 @@ describe("ModelSetupPage first-run application recovery", () => {
   beforeEach(async () => {
     vi.stubGlobal("localStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw-device-identity-v1",
+      "carapace-device-identity-v1",
       JSON.stringify({ version: 1, privateKey: "durable-device-private-key-for-testing" }),
     );
     await i18n.setLocale("en");
@@ -96,7 +96,7 @@ describe("ModelSetupPage first-run application recovery", () => {
       expect(original.request).toHaveBeenCalledOnce();
       expect(relaunched.request).toHaveBeenCalledOnce();
       expect(relaunched.request).toHaveBeenCalledWith(
-        "openclaw.setup.verify",
+        "carapace.setup.verify",
         { agentId: "main" },
         { timeoutMs: MODEL_SETUP_VERIFY_TIMEOUT_MS, signal: expect.any(AbortSignal) },
       );
@@ -128,13 +128,13 @@ describe("ModelSetupPage first-run application recovery", () => {
 
     const relaunched = createFirstRunContext();
     relaunched.request.mockImplementation(async (method) => {
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return {
           ...detection,
           candidates: [candidate("openai-api-key", "openai/relaunch", true)],
         };
       }
-      if (method === "openclaw.setup.activate.start") {
+      if (method === "carapace.setup.activate.start") {
         return { done: true, status: "done", modelActivation: { modelRef: "openai/relaunch" } };
       }
       throw new Error(`Unexpected method ${method}`);
@@ -160,14 +160,14 @@ describe("ModelSetupPage first-run application recovery", () => {
     page.querySelector<HTMLButtonElement>(".model-setup__intro .btn")?.click();
     await waitForFast(() => expect(page.querySelector(".model-setup__loading")).toBeNull());
     expect(relaunched.request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.setup.detect",
+      "carapace.setup.detect",
     ]);
     await clickCandidate(page, "openai-api-key");
 
     await waitForFast(() => {
       expect(relaunched.request.mock.calls.map(([method]) => method)).toEqual([
-        "openclaw.setup.detect",
-        "openclaw.setup.activate.start",
+        "carapace.setup.detect",
+        "carapace.setup.activate.start",
       ]);
       expect(relaunched.context.navigate).toHaveBeenCalledWith("custodian", {
         search: "?onboarding=1",

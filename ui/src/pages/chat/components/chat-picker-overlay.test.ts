@@ -22,7 +22,7 @@ describe("chat picker overlay", () => {
     const trigger = document.createElement("summary");
     const field = document.createElement("input");
     field.value = "Retained choice";
-    const tooltip = document.createElement("openclaw-tooltip");
+    const tooltip = document.createElement("carapace-tooltip");
     tooltip.content = "Choice details";
     tooltip.anchor = field;
     picker.append(trigger, field, tooltip);
@@ -33,7 +33,7 @@ describe("chat picker overlay", () => {
     await tooltip.updateComplete;
     const popup = tooltip.shadowRoot!.querySelector("wa-tooltip")!;
     const dismissInvocations = vi.fn();
-    composer.addEventListener("openclaw-composer-dismiss-invocations", dismissInvocations);
+    composer.addEventListener("carapace-composer-dismiss-invocations", dismissInvocations);
 
     // First opening precedes the composer's one-time listener installation.
     // Reopening registers the tooltip after that same composer listener.

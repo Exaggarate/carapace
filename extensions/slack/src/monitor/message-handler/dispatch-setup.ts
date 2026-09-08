@@ -3,18 +3,18 @@ import {
   logAckFailure,
   logTypingFailure,
   type StatusReactionAdapter,
-} from "openclaw/plugin-sdk/channel-feedback";
+} from "carapace/plugin-sdk/channel-feedback";
 import {
   createChannelMessageReplyPipeline,
   resolveAgentOutboundIdentity,
   resolveChannelMessageSourceReplyDeliveryMode,
   resolveChannelStreamingBlockEnabled,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveInboundLastRouteSessionKey } from "openclaw/plugin-sdk/routing";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { getGlobalHookRunner } from "carapace/plugin-sdk/plugin-runtime";
+import { resolveInboundLastRouteSessionKey } from "carapace/plugin-sdk/routing";
+import { danger, logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "carapace/plugin-sdk/security-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { reactSlackMessage, removeSlackReaction } from "../../actions.js";
 import { formatSlackError } from "../../errors.js";
 import { resolveSlackStreamingConfig } from "../../stream-mode.js";

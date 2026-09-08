@@ -3,18 +3,18 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
 import {
   createEmptyPluginRegistry,
   createRuntimeEnv,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime } from "../runtime-api.js";
+import type { CarapaceConfig, PluginRuntime } from "../runtime-api.js";
 import type { ResolvedZaloAccount } from "./accounts.js";
 
 const getWebhookInfoMock = vi.fn(async () => ({ ok: true, result: { url: "" } }));
@@ -43,7 +43,7 @@ const TEST_ACCOUNT = {
   config: {},
 } as unknown as ResolvedZaloAccount;
 
-const TEST_CONFIG = {} as OpenClawConfig;
+const TEST_CONFIG = {} as CarapaceConfig;
 let testStateDir: string | undefined;
 let previousStateDir: string | undefined;
 
@@ -80,10 +80,10 @@ async function startLifecycleMonitor(
 
 describe("monitorZaloProvider lifecycle", () => {
   beforeEach(async () => {
-    const createdDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-zalo-monitor-"));
+    const createdDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-zalo-monitor-"));
     testStateDir = await fs.realpath(createdDir);
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = testStateDir;
+    previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = testStateDir;
     const core = createPluginRuntimeMock();
     core.state.openChannelIngressQueue = (<T>(options: { accountId?: string }) =>
       createChannelIngressQueueForTests<T>({
@@ -101,16 +101,16 @@ describe("monitorZaloProvider lifecycle", () => {
     setActivePluginRegistry(createEmptyPluginRegistry());
     // Agent close releases leases through shared state; closing shared state first
     // can reopen it during teardown and leave Windows handles under the state dir.
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     if (testStateDir) {
       await fs.rm(testStateDir, { recursive: true, force: true, maxRetries: 20, retryDelay: 25 });
       testStateDir = undefined;
     }
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
       previousStateDir = undefined;
     }
   });

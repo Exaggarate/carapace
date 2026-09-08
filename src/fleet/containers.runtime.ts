@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { isRecord, isStringRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord, isStringRecord } from "@carapace/normalization-core/record-coerce";
 import { withContainerEnvFile } from "../infra/container-env-file.js";
 import { attachChildProcessBridge } from "../process/child-process-bridge.js";
 import { runCommandWithTimeout } from "../process/exec.js";

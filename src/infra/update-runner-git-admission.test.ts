@@ -14,7 +14,7 @@ import type { CommandRunner, UpdateRunnerOptions } from "./update-runner-types.j
 const temporary = useAutoCleanupTempDirTracker(afterEach);
 
 function fixture(relativeRemote = false) {
-  const root = temporary.make("openclaw-git-admission-test-");
+  const root = temporary.make("carapace-git-admission-test-");
   const source = path.join(root, "remote with spaces");
   const install = path.join(root, "installed");
   const globalConfig = path.join(root, "empty-config");
@@ -37,15 +37,15 @@ function fixture(relativeRemote = false) {
   git(source, "config", "user.name", "Update fixture");
   git(source, "config", "user.email", "fixture@example.invalid");
   fs.writeFileSync(path.join(source, ".gitignore"), "node_modules/\ndist/\n.artifacts/\n");
-  fs.writeFileSync(path.join(source, "openclaw.mjs"), "export {};\n");
+  fs.writeFileSync(path.join(source, "carapace.mjs"), "export {};\n");
   const commit = (version: string, agentSchema: number) => {
     fs.writeFileSync(
       path.join(source, "package.json"),
       JSON.stringify({
-        name: "openclaw",
+        name: "carapace",
         version,
         packageManager: "pnpm@12.1.0",
-        openclaw: { schemaVersions: { state: 5, agent: agentSchema } },
+        carapace: { schemaVersions: { state: 5, agent: agentSchema } },
       }),
     );
     git(source, "add", ".");

@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createChannelIngressDrain } from "./ingress-drain.js";
 import {
   createTestIngressQueue,
@@ -19,7 +19,7 @@ describe("channel ingress drain cancellation", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("cancels unadopted work without changing its retry facts", async () => {

@@ -1,5 +1,5 @@
 ---
-summary: "Install and use the OpenClaw macOS menu bar app"
+summary: "Install and use the Carapace macOS menu bar app"
 read_when:
   - Installing the macOS app
   - Deciding between local and remote Gateway mode on macOS
@@ -7,7 +7,7 @@ read_when:
 title: "macOS app"
 ---
 
-The macOS app is the OpenClaw **menu bar companion**: native tray UI, macOS
+The macOS app is the Carapace **menu bar companion**: native tray UI, macOS
 permission prompts, notifications, WebChat, voice input, a hosted-widget panel,
 and Mac-hosted node tools such as `system.run`.
 
@@ -22,8 +22,8 @@ Only need the CLI and Gateway? Start with [Getting started](/start/getting-start
 
 ## Requirements
 
-**OpenClaw.app requires macOS 15.0 (Sequoia) or later.** This also applies to
-its native `openclaw-mac` helper. [Voice Wake and push-to-talk](/platforms/mac/voicewake#requirements)
+**Carapace.app requires macOS 15.0 (Sequoia) or later.** This also applies to
+its native `carapace-mac` helper. [Voice Wake and push-to-talk](/platforms/mac/voicewake#requirements)
 require macOS 26 or later.
 
 The Node-based CLI and Gateway need a [supported Node version](/install/node)
@@ -36,11 +36,11 @@ Building from source also requires the toolchain listed in
 
 ## Download
 
-Get macOS app builds from [OpenClaw GitHub releases](https://github.com/openclaw/openclaw/releases).
+Get macOS app builds from [Carapace GitHub releases](https://github.com/Exaggarate/carapace/releases).
 When a release ships macOS app assets, look for:
 
-- `OpenClaw-<version>.dmg` (preferred)
-- `OpenClaw-<version>.zip`
+- `Carapace-<version>.dmg` (preferred)
+- `Carapace-<version>.zip`
 
 Some releases only ship CLI, evidence, or Windows assets. If the newest release
 has no macOS app asset, use the newest one that does, or build from source with
@@ -48,7 +48,7 @@ has no macOS app asset, use the newest one that does, or build from source with
 
 ## First run
 
-1. Install and launch **OpenClaw.app**.
+1. Install and launch **Carapace.app**.
 2. Pick **This Mac** for a local Gateway, or **Connect to an existing Gateway**
    to enter its address and sign in. A saved Gateway opens its dashboard after
    connection and completes first-run setup without changing the Mac's primary
@@ -59,7 +59,7 @@ has no macOS app asset, use the newest one that does, or build from source with
 4. Choose the AI connection you want. Detection only presents available
    connections; selecting one starts its live model check. An existing configured
    route appears as **Current model**.
-5. Finish. The app opens the dashboard, where OpenClaw guides the rest of the
+5. Finish. The app opens the dashboard, where Carapace guides the rest of the
    setup (memory import, channels, permissions) in one conversation. Grant
    macOS permissions any time from **Dashboard → Settings → This Mac → Permissions**.
 
@@ -95,7 +95,7 @@ Choose **Connection…** to open the small native window even when the Gateway
 is unreachable. Its **Connection** tab contains local Gateway status, remote/SSH
 options, Tailscale, and discovery; **Gateways** manages saved Gateway profiles.
 A **Debug** tab appears while the developer toggle in **This Mac → Developer**
-is enabled. **About OpenClaw** opens the standard macOS About panel with the app
+is enabled. **About Carapace** opens the standard macOS About panel with the app
 version, build information, and credits.
 
 App-local settings (permissions, Quick Chat, voice, updates) live in
@@ -113,7 +113,7 @@ If the primary Gateway connection rejects the app's protocol version, the app
 shows an update alert and keeps the explanation in its connection status.
 Remote setup and connection probes show the same guidance inline. The message names the app
 release and both protocol versions, and tells you which side needs updating:
-run `openclaw update` on an older Gateway host, or install a newer Mac app from
+run `carapace update` on an older Gateway host, or install a newer Mac app from
 the [download options](#download). A rejected handshake may not report the
 Gateway's release version; the app marks that information as unavailable.
 Different release numbers alone do not trigger this alert.
@@ -181,7 +181,7 @@ Use the tab strip to select or close a page, the URL bar to navigate, and the ba
 
 The titlebar controls follow the app sidebar: while it is expanded, back/forward sit at its right edge next to the sidebar toggle; while it is collapsed, they make way for a search button (opens the command palette) and a new-session button.
 
-Drag the empty header space or title in the docked OpenClaw chat panel to move the app window. Its dock-position and close buttons remain clickable.
+Drag the empty header space or title in the docked Carapace chat panel to move the app window. Its dock-position and close buttons remain clickable.
 
 Right-click an external link in the dashboard to choose **Open in Browser Panel**, **Open in Default Browser**, or **Copy Link**. Modified clicks still open the default browser. New-window links inside a Mac tab open another Mac tab; pointer-activated downloads hand off to the default browser. Responses WebKit cannot display hand off only for pointer-activated main-frame navigation; other non-displayable responses are cancelled silently. Regular browser-hosted Control UI pages keep their normal link and context-menu behavior unless you enable the Browser panel link preference.
 
@@ -197,7 +197,7 @@ Open **Dashboard → Settings → This Mac → Browser**. Cookie sync is **off b
 
 If a pending addition would restore a domain removed in another Dashboard window, it is discarded. Review the updated list and add the intended domains again.
 
-While enabled, the app supervises the [`openclaw browser cookie-sync --watch`](/cli/browser#cookie-sync-to-a-remote-gateway) command against the connected Gateway. Cookies are decrypted locally on this Mac (one macOS Keychain or Touch ID prompt per session) and pushed to the remote profile over the app's existing encrypted Gateway connection; only the domains on the allowlist are ever sent, and cookie values are never written to logs. An empty allowlist syncs nothing. As with import, some Google sessions use device-bound session credentials (DBSC) that stay tied to this Mac and may still require re-authentication after sync; for those sites, drive the browser on the Mac itself through the [browser node proxy](/cli/browser#remote-browser-control-node-host-proxy) instead.
+While enabled, the app supervises the [`carapace browser cookie-sync --watch`](/cli/browser#cookie-sync-to-a-remote-gateway) command against the connected Gateway. Cookies are decrypted locally on this Mac (one macOS Keychain or Touch ID prompt per session) and pushed to the remote profile over the app's existing encrypted Gateway connection; only the domains on the allowlist are ever sent, and cookie values are never written to logs. An empty allowlist syncs nothing. As with import, some Google sessions use device-bound session credentials (DBSC) that stay tied to this Mac and may still require re-authentication after sync; for those sites, drive the browser on the Mac itself through the [browser node proxy](/cli/browser#remote-browser-control-node-host-proxy) instead.
 
 ## Choose a Gateway mode
 

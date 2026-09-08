@@ -10,9 +10,9 @@ import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../src/utils/message
 import { acquireGatewayTestClient } from "./helpers/gateway-client.js";
 import { writeOpenAiResponsesText } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 import { runQaGatewayFixture } from "./helpers/qa-gateway-cleanup.js";
 
 it("opens New Agent through the real Gateway and runner using a protected provider key", async () => {
@@ -44,7 +44,7 @@ it("opens New Agent through the real Gateway and runner using a protected provid
       });
     });
   });
-  let instance: OpenClawTestInstance | undefined;
+  let instance: CarapaceTestInstance | undefined;
   let client: GatewayClient | undefined;
   await runQaGatewayFixture(
     async () => {
@@ -53,13 +53,13 @@ it("opens New Agent through the real Gateway and runner using a protected provid
         provider.listen(0, "127.0.0.1", resolve);
       });
       const port = (provider.address() as AddressInfo).port;
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "system-agent-managed-auth",
         env: {
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-          OPENCLAW_TEST_FAST: "1",
-          OPENCLAW_SECRET_SENTINELS: "1",
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_TEST_FAST: "1",
+          CARAPACE_SECRET_SENTINELS: "1",
           OPENAI_API_KEY: undefined,
           OPENAI_OAUTH_TOKEN: undefined,
           ANTHROPIC_API_KEY: undefined,
@@ -123,7 +123,7 @@ it("opens New Agent through the real Gateway and runner using a protected provid
       // credential resolver, config reader, or Gateway handler is replaced.
       const sessionId = randomUUID();
       const result = await client.request(
-        "openclaw.chat",
+        "carapace.chat",
         { sessionId, welcomeVariant: "new-agent" },
         { timeoutMs: 60_000 },
       );
@@ -140,7 +140,7 @@ it("opens New Agent through the real Gateway and runner using a protected provid
       ]);
 
       const reply = await client.request(
-        "openclaw.chat",
+        "carapace.chat",
         { sessionId, message: "Please reply with OK and make no changes." },
         { timeoutMs: 60_000 },
       );
@@ -159,11 +159,11 @@ it("opens New Agent through the real Gateway and runner using a protected provid
       });
       expect(rotation).toMatchObject({ ok: true, reloaded: true });
       await expect(
-        client.request("openclaw.chat", { sessionId, message: "Reply with OK again." }),
-      ).rejects.toThrow("OpenClaw could not reach working inference");
+        client.request("carapace.chat", { sessionId, message: "Reply with OK again." }),
+      ).rejects.toThrow("Carapace could not reach working inference");
       expect(requests).toHaveLength(2);
       const freshSessionId = randomUUID();
-      const fresh = await client.request("openclaw.chat", {
+      const fresh = await client.request("carapace.chat", {
         sessionId: freshSessionId,
         welcomeVariant: "new-agent",
       });

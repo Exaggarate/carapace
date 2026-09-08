@@ -3,7 +3,7 @@ import {
   buildMutableAllowEntryDetector,
   collectStandardAllowlistLists,
   createDangerousNameMatchingMutableAllowlistWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-policy";
 
 const isMSTeamsMutableAllowEntry = buildMutableAllowEntryDetector({
   prefixes: ["msteams:", "user:"],

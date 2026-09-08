@@ -1,5 +1,5 @@
 // Line plugin module implements channel.setup behavior.
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
 import { lineChannelPluginCommon } from "./channel-shared.js";
 import { lineSetupContract } from "./setup-core.js";
 import { lineSetupWizard } from "./setup-surface.js";

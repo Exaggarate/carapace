@@ -15,9 +15,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let artifactDir: string;
 beforeEach(() => {
   if (captureProof) {
@@ -74,25 +74,25 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
                 "chat.startup",
                 "chat.history",
                 "chat.send",
-                "openclaw.chat",
-                "openclaw.chat.history",
+                "carapace.chat",
+                "carapace.chat.history",
               ],
               methodResponses: {
                 "sessions.list": {
                   cases: [
                     // Main is the only session and does not match this palette query.
                     {
-                      match: { search: "Ask OpenClaw" },
+                      match: { search: "Ask Carapace" },
                       response: { count: 0, sessions: [] },
                     },
                   ],
                 },
-                "openclaw.chat": {
+                "carapace.chat": {
                   sessionId: "table-proof",
                   reply: "Ready to help.",
                   action: "none",
                 },
-                "openclaw.chat.history": {
+                "carapace.chat.history": {
                   turns: [{ role: "assistant", text: wideTable, at: 1_700_000_101_000 }],
                 },
               },
@@ -103,7 +103,7 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
             role: "assistant",
             content: [{ type: "text", text: wideTable }],
             timestamp: Date.now(),
-            __openclaw: { id: "assistant-table", seq: 1 },
+            __carapace: { id: "assistant-table", seq: 1 },
           },
         ],
       });
@@ -112,8 +112,8 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
         await page.goto(`${server.baseUrl}chat`);
         if (surface === "assistant panel") {
           await page.locator(".sidebar-brand__search").click();
-          await page.getByPlaceholder("Search chats and commands…").fill("Ask OpenClaw");
-          await page.getByRole("option", { name: "Ask OpenClaw", exact: true }).click();
+          await page.getByPlaceholder("Search chats and commands…").fill("Ask Carapace");
+          await page.getByRole("option", { name: "Ask Carapace", exact: true }).click();
         }
         const bubble = page.locator(
           surface === "chat" ? '[data-entry-id="assistant-table"]' : ".custodian__messages",
@@ -275,7 +275,7 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
                   },
                 ],
                 timestamp: 1,
-                __openclaw: { id, seq: 1 },
+                __carapace: { id, seq: 1 },
               },
             ],
           },
@@ -286,14 +286,14 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
       await page.goto(controlUiSessionUrl(server.baseUrl, alphaKey));
       const alpha = page.locator('[data-entry-id="history-alpha"]');
       await alpha.waitFor({ state: "visible" });
-      const alphaPane = await alpha.evaluateHandle((entry) => entry.closest("openclaw-chat-pane"));
+      const alphaPane = await alpha.evaluateHandle((entry) => entry.closest("carapace-chat-pane"));
       const timeOrigin = await page.evaluate(() => performance.timeOrigin);
 
       await alpha.locator(`a[data-session-key="${betaKey}"]`).click();
       await page.waitForURL(controlUiSessionUrl(server.baseUrl, betaKey));
       const beta = page.locator('[data-entry-id="history-beta"]');
       await beta.waitFor({ state: "visible" });
-      const betaPane = await beta.evaluateHandle((entry) => entry.closest("openclaw-chat-pane"));
+      const betaPane = await beta.evaluateHandle((entry) => entry.closest("carapace-chat-pane"));
       const expectRetainedPanes = async (activeIndex: number) => {
         const states = await Promise.all(
           [alphaPane, betaPane].map((pane) =>
@@ -386,7 +386,7 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
             },
           ],
           timestamp: 1,
-          __openclaw: { id: "retained-table", seq: 1 },
+          __carapace: { id: "retained-table", seq: 1 },
         },
       ],
     });
@@ -401,7 +401,7 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
       expect(await shell.getAttribute("class")).not.toContain("can-scroll-right");
 
       const retained = await page
-        .locator("openclaw-chat-pane")
+        .locator("carapace-chat-pane")
         .first()
         .evaluate((pane) => {
           const table = pane.querySelector(".markdown-table");
@@ -466,8 +466,8 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
           "chat.history",
           "chat.send",
           "progressCard.get",
-          "openclaw.chat",
-          "openclaw.chat.history",
+          "carapace.chat",
+          "carapace.chat.history",
         ],
         sessions: [
           { key: sourceKey, label: "Table links" },
@@ -485,7 +485,7 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
                   },
                 ],
                 timestamp: 1,
-                __openclaw: { id: "table-links", seq: 1 },
+                __carapace: { id: "table-links", seq: 1 },
               },
             ],
           },
@@ -495,14 +495,14 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
                 role: "assistant",
                 content: [{ type: "text", text: "Linked task reached." }],
                 timestamp: 2,
-                __openclaw: { id: "linked-task", seq: 1 },
+                __carapace: { id: "linked-task", seq: 1 },
               },
             ],
           },
         },
         methodResponses: {
-          "openclaw.chat": { sessionId: "table-links", reply: "Ready to help.", action: "none" },
-          "openclaw.chat.history": {
+          "carapace.chat": { sessionId: "table-links", reply: "Ready to help.", action: "none" },
+          "carapace.chat.history": {
             turns: [{ role: "assistant", text: table, at: 1_700_000_101_000 }],
           },
           "progressCard.get": { card: null },
@@ -548,8 +548,8 @@ describeControlUiE2e("Control UI Markdown table interactions", () => {
         if (surface === "assistant panel") {
           await page.locator(".sidebar-footer-bar__home").click();
           await page
-            .locator("openclaw-assistant-panel")
-            .getByRole("button", { name: "Ask OpenClaw", exact: true })
+            .locator("carapace-assistant-panel")
+            .getByRole("button", { name: "Ask Carapace", exact: true })
             .click();
         }
       };

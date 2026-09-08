@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 /** Normalizes a docs route by stripping query, hash, and edge slashes. */
 export function normalizeRoute(p: string) {

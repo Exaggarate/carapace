@@ -1,5 +1,5 @@
-import type { HumanMention } from "@openclaw/gateway-protocol";
-import type { MediaKind } from "@openclaw/media-core/constants";
+import type { HumanMention } from "@carapace/gateway-protocol";
+import type { MediaKind } from "@carapace/media-core/constants";
 /**
  * Chat message types for the UI layer.
  */

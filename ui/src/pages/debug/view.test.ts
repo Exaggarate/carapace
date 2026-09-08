@@ -47,7 +47,7 @@ type TestSparkline = LitElement & { samples: readonly SparklineSample[] };
 
 async function updateOverlayVitals(overlay: TestDebugOverlay): Promise<void> {
   await overlay.updateComplete;
-  for (const tile of overlay.querySelectorAll<TestSparkline>("openclaw-debug-sparkline")) {
+  for (const tile of overlay.querySelectorAll<TestSparkline>("carapace-debug-sparkline")) {
     await tile.updateComplete;
   }
 }
@@ -87,7 +87,7 @@ function createDebugApplicationContext(
 async function mountDebugPage(
   request: (method: string) => Promise<unknown>,
 ): Promise<TestDebugPage> {
-  const page = document.createElement("openclaw-debug-page") as TestDebugPage;
+  const page = document.createElement("carapace-debug-page") as TestDebugPage;
   page.context = createDebugApplicationContext(request);
   document.body.append(page);
   await vi.waitFor(() => expect(page.debugStatus).not.toBeNull());
@@ -243,7 +243,7 @@ describe("renderDebug", () => {
         chinese.get("debug.security.info")?.replace("{count}", "2"),
       ].join(" · "),
     );
-    expect(command.textContent).toBe("openclaw security audit --deep");
+    expect(command.textContent).toBe("carapace security audit --deep");
   });
 
   it("does not render Invalid Date for Date-invalid event timestamps", () => {
@@ -311,7 +311,7 @@ describe("renderDebug", () => {
 describe("DebugPage", () => {
   it("does not report a transient Gateway reconnect as offline", async () => {
     const request = vi.fn(async (method: string) => diagnosticResponse(method));
-    const page = document.createElement("openclaw-debug-page") as TestDebugPage;
+    const page = document.createElement("carapace-debug-page") as TestDebugPage;
     page.context = createDebugApplicationContext(request, "reconnecting");
     document.body.append(page);
     await page.updateComplete;
@@ -475,7 +475,7 @@ describe("DebugOverlay", () => {
       }
       return diagnosticResponse(method);
     });
-    const overlay = document.createElement("openclaw-debug-overlay") as TestDebugOverlay;
+    const overlay = document.createElement("carapace-debug-overlay") as TestDebugOverlay;
     overlay.context = createDebugApplicationContext(request);
     document.body.append(overlay);
 
@@ -621,7 +621,7 @@ describe("DebugOverlay", () => {
           listener(snapshot);
         }
       };
-      const overlay = document.createElement("openclaw-debug-overlay") as TestDebugOverlay;
+      const overlay = document.createElement("carapace-debug-overlay") as TestDebugOverlay;
       overlay.context = { ...context, gateway };
       document.body.append(overlay);
       try {

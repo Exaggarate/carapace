@@ -1,9 +1,9 @@
 // Shares plugin config normalization helpers across control-plane paths.
-import { asSafeIntegerInRange } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeArrayBackedTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { asSafeIntegerInRange } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeArrayBackedTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { normalizeChatChannelId } from "../channels/ids.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeSlotValue, resolveSlotSelection } from "./slots.js";
 
 /** Canonical plugin config shape consumed by runtime policy and loaders. */
@@ -209,7 +209,7 @@ function normalizePluginEntries(
 
 /** Normalizes plugin config while allowing callers to resolve aliases first. */
 export function normalizePluginsConfigWithResolverCore(
-  config?: OpenClawConfig["plugins"],
+  config?: CarapaceConfig["plugins"],
   normalizePluginId: NormalizePluginId = identityNormalizePluginId,
 ): NormalizedPluginsConfig {
   const memorySlot = resolveSlotSelection("memory", config?.slots?.memory);
@@ -231,7 +231,7 @@ export function normalizePluginsConfigWithResolverCore(
  * Unspecified channels leave the plugin's own activation policy in control.
  */
 export function resolveChannelConfigEnablement(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   pluginId: string,
   channelIds: readonly string[] = [],
 ): boolean | undefined {

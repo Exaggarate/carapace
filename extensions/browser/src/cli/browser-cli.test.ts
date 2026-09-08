@@ -5,13 +5,13 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("../control-service.js", () => {
   throw new Error("Browser CLI registration must not load browser control services");
 });
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", () => {
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", () => {
   throw new Error("Browser CLI registration must not load agent runtime");
 });
-vi.mock("openclaw/plugin-sdk/media-understanding-runtime", () => {
+vi.mock("carapace/plugin-sdk/media-understanding-runtime", () => {
   throw new Error("Browser CLI registration must not load media understanding runtime");
 });
-vi.mock("openclaw/plugin-sdk/media-runtime", () => {
+vi.mock("carapace/plugin-sdk/media-runtime", () => {
   throw new Error("Browser CLI registration must not load media runtime");
 });
 
@@ -19,7 +19,7 @@ describe("Browser CLI import boundary", () => {
   it("registers root help without loading browser services or agent/media runtime", async () => {
     const { registerBrowserCli } = await import("./browser-cli.js");
     const program = new Command();
-    registerBrowserCli(program, ["node", "openclaw", "browser", "--help"]);
+    registerBrowserCli(program, ["node", "carapace", "browser", "--help"]);
     const browser = program.commands[0];
     expect(browser?.helpInformation()).toContain("--browser-profile");
     expect(browser?.commands.map((command) => command.name())).toContain("extension");

@@ -1,7 +1,7 @@
 // Qa Lab tests cover bus server plugin behavior.
 import { Agent, createServer, request } from "node:http";
 import { setTimeout as sleep } from "node:timers/promises";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeQaHttpServer, startQaBusServer } from "./bus-server.js";
 import { createQaBusState } from "./bus-state.js";

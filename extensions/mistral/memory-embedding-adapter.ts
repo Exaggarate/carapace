@@ -4,7 +4,7 @@ import {
   isMissingEmbeddingApiKeyError,
   sanitizeEmbeddingCacheHeaders,
   type MemoryEmbeddingProviderAdapter,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   createMistralEmbeddingProvider,
   DEFAULT_MISTRAL_EMBEDDING_MODEL,

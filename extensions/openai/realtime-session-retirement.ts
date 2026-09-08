@@ -1,5 +1,5 @@
-import type { PluginLogger } from "openclaw/plugin-sdk/plugin-entry";
-import type { RealtimeVoiceCloseDisposition } from "openclaw/plugin-sdk/realtime-voice";
+import type { PluginLogger } from "carapace/plugin-sdk/plugin-entry";
+import type { RealtimeVoiceCloseDisposition } from "carapace/plugin-sdk/realtime-voice";
 import type { RawData } from "ws";
 import type { OpenAIQuicksilverSocket } from "./realtime-quicksilver-sideband.js";
 

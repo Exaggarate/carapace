@@ -10,11 +10,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import * as agentDatabase from "../state/openclaw-agent-db-readonly.js";
+import * as agentDatabase from "../state/carapace-agent-db-readonly.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resolveAgentDir } from "./agent-scope.js";
 import { loadPersistedPluginModelCatalogsReadOnly } from "./plugin-model-catalog.js";
 import {
@@ -37,9 +37,9 @@ import {
 
 const mocks = getPreparedModelRuntimeMocks();
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+  state = await createCarapaceTestState({ label: "prepared-model-runtime" });
   await resetPreparedModelRuntimeHarness(state);
 });
 afterEach(async ({ task }) => {
@@ -62,8 +62,8 @@ describe("prepared fixture containment", () => {
       }
       return readFileSync(...args);
     });
-    const readDatabase = agentDatabase.withOpenClawAgentDatabaseReadOnly;
-    vi.spyOn(agentDatabase, "withOpenClawAgentDatabaseReadOnly").mockImplementation(
+    const readDatabase = agentDatabase.withCarapaceAgentDatabaseReadOnly;
+    vi.spyOn(agentDatabase, "withCarapaceAgentDatabaseReadOnly").mockImplementation(
       (operation, options, behavior) => {
         // Guard before delegation: the reader may reuse a handle before probing the file.
         assertOwnedPath(options.path!);
@@ -87,9 +87,9 @@ describe("prepared fixture containment", () => {
 
   it("contains the native read-only catalog boundary", () => {
     expect(loadPersistedPluginModelCatalogsReadOnly(resolveAgentDir({}, "default"))).toEqual([]);
-    expect(agentDatabase.withOpenClawAgentDatabaseReadOnly).toHaveBeenCalledWith(
+    expect(agentDatabase.withCarapaceAgentDatabaseReadOnly).toHaveBeenCalledWith(
       expect.any(Function),
-      { agentId: "default", path: path.join(state.agentDir("default"), "openclaw-agent.sqlite") },
+      { agentId: "default", path: path.join(state.agentDir("default"), "carapace-agent.sqlite") },
     );
   });
 });
@@ -111,7 +111,7 @@ describe("prepared catalog owner lifecycle", () => {
       const auth = createDeferred<{ agentDir: string; wrote: false }>();
       const started = createDeferred();
       const authStarted = createDeferred();
-      mocks.ensureOpenClawModelsJson
+      mocks.ensureCarapaceModelsJson
         .mockImplementationOnce(async () => {
           started.resolve();
           return await source.promise;
@@ -189,7 +189,7 @@ describe("prepared catalog owner lifecycle", () => {
     const freshInput = { ...input, config: { plugins: {} } };
     const source = createDeferred<{ agentDir: string; wrote: false }>();
     const started = createDeferred();
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async () => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async () => {
       started.resolve();
       return await source.promise;
     });
@@ -237,7 +237,7 @@ describe("prepared catalog owner lifecycle", () => {
     expect(() => resolvePublishedModelCatalogOwner(refreshed)).toThrow(
       "did not identify one configured agent",
     );
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 });
 
@@ -315,7 +315,7 @@ describe("prepared build candidate lifetime", () => {
   it("fails a timed-out publication without overlapping its late build with a retry", async () => {
     getPreparedModelRuntimeTestApi().setModelRuntimeBuildTimeoutMsForTest(1);
     const source = createDeferred<{ agentDir: string; wrote: false }>();
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async () => await source.promise);
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async () => await source.promise);
     const input = { config: {}, agentDir: state.agentDir("timeout") };
     const builds = vi.spyOn(runtimeBuild, "startSerializedSnapshotBuildBatch");
     try {
@@ -328,7 +328,7 @@ describe("prepared build candidate lifetime", () => {
       await expect(publishPreparedModelRuntimeSnapshot(input)).rejects.toThrow(
         "prepared model runtime publication (agent catalog sources) timed out",
       );
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
 
       source.resolve({ agentDir: input.agentDir, wrote: false });
       // The timeout settles admission before capture finishes; join the native build, not discovery.
@@ -337,7 +337,7 @@ describe("prepared build candidate lifetime", () => {
       await expect(publishPreparedModelRuntimeSnapshot(input)).resolves.toMatchObject({
         agentDir: input.agentDir,
       });
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
     } finally {
       source.resolve({ agentDir: input.agentDir, wrote: false });
       await Promise.all(builds.mock.results.map((result) => result.value.completion));
@@ -347,7 +347,7 @@ describe("prepared build candidate lifetime", () => {
 
   it("serializes workspace replacements for one agent-owned catalog", async () => {
     const finishFirstGate = createDeferred();
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       await finishFirstGate.promise;
       return { agentDir: String(targetDir), wrote: false };
     });
@@ -362,7 +362,7 @@ describe("prepared build candidate lifetime", () => {
         agentDir,
         workspaceDir: "/tmp/workspace-old",
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce());
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce());
       requestDuringFirstGeneration = prepareModelRuntimeSnapshot({
         config,
         agentDir,
@@ -375,14 +375,14 @@ describe("prepared build candidate lifetime", () => {
         workspaceDir: "/tmp/workspace-new",
       });
       await Promise.resolve();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
 
       finishFirstGate.resolve();
       const firstSnapshot = await first;
       const replacementSnapshot = await replacement;
       expect(await requestDuringFirstGeneration).toBe(firstSnapshot);
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenLastCalledWith(
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenLastCalledWith(
         config,
         agentDir,
         expect.objectContaining({ workspaceDir: "/tmp/workspace-new" }),
@@ -406,7 +406,7 @@ describe("prepared build candidate lifetime", () => {
     const secondConfig = {};
     const finishFirstBuildGate = createDeferred();
     let finishFirstBuild!: () => void;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       finishFirstBuild = () => finishFirstBuildGate.resolve();
       await finishFirstBuildGate.promise;
       return { agentDir: String(targetDir), wrote: false };
@@ -419,21 +419,21 @@ describe("prepared build candidate lifetime", () => {
         config: firstConfig,
         agentDir,
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce());
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce());
       secondActivation = activateStandalonePreparedModelRuntime({
         config: secondConfig,
         agentDir,
       });
 
       await Promise.resolve();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
       finishFirstBuild();
 
       const [first, second] = await Promise.all([firstActivation, secondActivation]);
       expect(first?.config).toBe(firstConfig);
       expect(second?.config).toBe(secondConfig);
       expect(first).not.toBe(second);
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
     } finally {
       finishFirstBuildGate.resolve();
       await Promise.allSettled([firstActivation, secondActivation]);

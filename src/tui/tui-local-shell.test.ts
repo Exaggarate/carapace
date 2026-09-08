@@ -150,7 +150,7 @@ describe("createLocalShellRunner", () => {
     expect(harness.closeOverlay).toHaveBeenCalledWith(harness.overlayHandle);
   });
 
-  it("sets OPENCLAW_SHELL when running local shell commands", async () => {
+  it("sets CARAPACE_SHELL when running local shell commands", async () => {
     const spawn = createSettlingSpawn({});
 
     const harness = createShellHarness({
@@ -168,7 +168,7 @@ describe("createLocalShellRunner", () => {
     expect(spawn).toHaveBeenCalledTimes(1);
     const input = spawn.mock.calls[0]?.[0];
     expect(input?.mode).toBe("anchored-shell");
-    expect(input?.env?.OPENCLAW_SHELL).toBe("tui-local");
+    expect(input?.env?.CARAPACE_SHELL).toBe("tui-local");
     expect(input?.env?.PATH).toBe("/tmp/bin");
     expect(harness.messages).toContain("local shell: enabled for this session");
   });

@@ -1,5 +1,5 @@
 ---
-summary: "Adds Ollama, Ollama Cloud model provider support to OpenClaw."
+summary: "Adds Ollama, Ollama Cloud model provider support to Carapace."
 read_when:
   - You are installing, configuring, or auditing the ollama plugin
 title: "Ollama plugin reference"
@@ -7,15 +7,15 @@ title: "Ollama plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Adds Ollama, Ollama Cloud model provider support to OpenClaw.
+Adds Ollama, Ollama Cloud model provider support to Carapace.
 
 ## Distribution
 
-- Package: `@openclaw/ollama-provider`
-- Install route: included in OpenClaw
+- Package: `@carapace/ollama-provider`
+- Install route: included in Carapace
 
 ## Surface
 

@@ -21,7 +21,7 @@ describe("loadVitestPerformanceConfig", () => {
     expect(
       loadVitestPerformanceConfig(
         {
-          OPENCLAW_VITEST_FS_MODULE_CACHE: "1",
+          CARAPACE_VITEST_FS_MODULE_CACHE: "1",
         },
         "linux",
       ),
@@ -35,13 +35,13 @@ describe("loadVitestPerformanceConfig", () => {
     expect(
       loadVitestPerformanceConfig(
         {
-          OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: "/tmp/openclaw-vitest-cache",
+          CARAPACE_VITEST_FS_MODULE_CACHE_PATH: "/tmp/carapace-vitest-cache",
         },
         "linux",
       ),
     ).toEqual({
       fsModuleCache: true,
-      fsModuleCachePath: "/tmp/openclaw-vitest-cache",
+      fsModuleCachePath: "/tmp/carapace-vitest-cache",
     });
   });
 
@@ -53,7 +53,7 @@ describe("loadVitestPerformanceConfig", () => {
     expect(
       loadVitestPerformanceConfig(
         {
-          OPENCLAW_VITEST_FS_MODULE_CACHE: "1",
+          CARAPACE_VITEST_FS_MODULE_CACHE: "1",
         },
         "win32",
       ),
@@ -67,7 +67,7 @@ describe("loadVitestPerformanceConfig", () => {
     expect(
       loadVitestPerformanceConfig(
         {
-          OPENCLAW_VITEST_FS_MODULE_CACHE: "0",
+          CARAPACE_VITEST_FS_MODULE_CACHE: "0",
         },
         "linux",
       ),
@@ -78,8 +78,8 @@ describe("loadVitestPerformanceConfig", () => {
     expect(
       loadVitestPerformanceConfig(
         {
-          OPENCLAW_VITEST_IMPORT_DURATIONS: "true",
-          OPENCLAW_VITEST_PRINT_IMPORT_BREAKDOWN: "1",
+          CARAPACE_VITEST_IMPORT_DURATIONS: "true",
+          CARAPACE_VITEST_PRINT_IMPORT_BREAKDOWN: "1",
         },
         "linux",
       ),
@@ -328,8 +328,8 @@ export default {
     );
     const cacheConfig = loadVitestPerformanceConfig({}, "linux", root);
     const env = {
-      OPENCLAW_VITEST_FS_MODULE_CACHE: "1",
-      OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: cacheConfig.fsModuleCachePath,
+      CARAPACE_VITEST_FS_MODULE_CACHE: "1",
+      CARAPACE_VITEST_FS_MODULE_CACHE_PATH: cacheConfig.fsModuleCachePath,
     };
     const reporterGenerations: string[] = [];
     const check = (projects: string[], expected: [number, number, number], args: string[] = []) => {

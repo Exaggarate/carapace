@@ -1,12 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { WorkerProfile, WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
+import type { WorkerProfile, WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { SpawnResult } from "carapace/plugin-sdk/process-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, vi } from "vitest";
 import { createNodeBootstrapFixture } from "./crabbox-worker-node-enrollment.test-support.js";
 import { operationLeaseId } from "./crabbox-worker-profile.js";
@@ -23,7 +23,7 @@ export const NODE_RUNTIME_IDENTITY = {
   executionMode: "worker-turn" as const,
 };
 const WALLPAPER_PATH = fileURLToPath(
-  new URL("../assets/openclaw-worker-wallpaper.png", import.meta.url),
+  new URL("../assets/carapace-worker-wallpaper.png", import.meta.url),
 );
 export const tempDirs: ReturnType<typeof useAutoCleanupTempDirTracker> =
   useAutoCleanupTempDirTracker(afterEach);
@@ -69,14 +69,14 @@ export function checkpointResult(
 
 export function createWarmProvider(
   command?: (call: CommandCall) => SpawnResult | Promise<SpawnResult | undefined> | undefined,
-  stateDir = tempDirs.make("openclaw-crabbox-warm-image-"),
+  stateDir = tempDirs.make("carapace-crabbox-warm-image-"),
   dependencies: Pick<Parameters<typeof createCrabboxWorkerProvider>[0], "sleep"> = {},
 ) {
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   const calls: CommandCall[] = [];
   const warn = vi.fn();
   const provider = createCrabboxWorkerProvider({
-    openclawRoot: path.resolve(path.sep, "workspace", "openclaw"),
+    carapaceRoot: path.resolve(path.sep, "workspace", "carapace"),
     pathEnv: "",
     isExecutable: () => false,
     wallpaperPath: WALLPAPER_PATH,
@@ -158,7 +158,7 @@ export async function provisionWarmProfile(
         mode: "connect",
         setupCode: "setup-code",
         setupId: "setup-id",
-        openclawVersion: "2026.8.1",
+        carapaceVersion: "2026.8.1",
         nodeBootstrap: createNodeBootstrapFixture(),
         displayName: "Warm cloud worker",
         waitForDeviceId: async () => "device-1",

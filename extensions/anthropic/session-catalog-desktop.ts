@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { SessionCatalogPullRequestSummary } from "openclaw/plugin-sdk/session-catalog";
+import type { SessionCatalogPullRequestSummary } from "carapace/plugin-sdk/session-catalog";
 import {
   asPositiveSafeInteger as pullRequestNumber,
   isRecord,
   normalizeBoundedOptionalString as readBoundedString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { readClaudeDesktopCustomGroups } from "./claude-desktop-groups.js";
 import {
   childDirectories,

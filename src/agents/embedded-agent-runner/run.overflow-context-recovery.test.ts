@@ -1,6 +1,6 @@
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import { buildContextEngineRuntimeSettings } from "../../context-engine/runtime-settings.js";
 import type { AssistantMessage } from "../../llm/types.js";
 import { SessionManager } from "../sessions/session-manager.js";
@@ -149,7 +149,7 @@ function makeInput(overrides: RecoveryInputOverrides = {}): RecoveryInput {
             sessionId: session.id,
             sessionKey: session.target?.sessionKey ?? input.resolvedSessionKey,
             storePath:
-              session.target?.storePath ?? path.join(input.workspaceDir, "openclaw-agent.sqlite"),
+              session.target?.storePath ?? path.join(input.workspaceDir, "carapace-agent.sqlite"),
           },
         },
         assertActive,
@@ -201,7 +201,7 @@ function makeInput(overrides: RecoveryInputOverrides = {}): RecoveryInput {
     resolveContextEnginePluginId: () => undefined,
     buildRuntimeSettings: ({ tokenBudget, degradedReason }) =>
       buildContextEngineRuntimeSettings({
-        contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        contextEngineHost: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
         provider: input.provider,
         requestedModel: input.modelId,
         resolvedModel: input.modelId,

@@ -1,5 +1,5 @@
 // Msteams tests cover graph upload plugin behavior.
-import { withFetchPreconnect, withServer } from "openclaw/plugin-sdk/test-env";
+import { withFetchPreconnect, withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildTeamsFileInfoCard } from "./graph-chat.js";
 import { requireMSTeamsSharePointSiteId, uploadAndShareSharePoint } from "./graph-upload.js";
@@ -33,7 +33,7 @@ function expectGraphUploadFetch(
   expect(init?.method).toBe("PUT");
   expect(init?.headers?.Authorization).toBe("Bearer graph-token");
   expect(init?.headers?.["Content-Type"]).toBe(contentType);
-  expect(init?.headers?.["User-Agent"]).toMatch(/^teams\.ts\[apps\]\/.+ OpenClaw\/.+$/);
+  expect(init?.headers?.["User-Agent"]).toMatch(/^teams\.ts\[apps\]\/.+ Carapace\/.+$/);
 }
 
 function bodyOnlyErrorResponse(body: string, status = 500): Response {
@@ -260,7 +260,7 @@ describe("graph upload helpers", () => {
 
       expectGraphUploadFetch(
         fetchFn,
-        "https://graph.microsoft.com/v1.0/sites/site-123/drive/root:/OpenClawShared/b.txt:/content?@microsoft.graph.conflictBehavior=rename",
+        "https://graph.microsoft.com/v1.0/sites/site-123/drive/root:/CarapaceShared/b.txt:/content?@microsoft.graph.conflictBehavior=rename",
         contentType,
       );
       expect(result).toEqual({
@@ -272,7 +272,7 @@ describe("graph upload helpers", () => {
   );
 
   it("uploads with conflictBehavior=rename and surfaces the name SharePoint assigns", async () => {
-    // Regression: openclaw-runtime image assets reuse names (image-1.png). Graph's default
+    // Regression: carapace-runtime image assets reuse names (image-1.png). Graph's default
     // replace overwrote the prior file and Teams (caching cards by driveItem URL) showed the
     // stale image; rename mints a distinct item, so callers use the returned name, not the request.
     const fetchFn = vi.fn(async () =>
@@ -287,7 +287,7 @@ describe("graph upload helpers", () => {
 
     expectGraphUploadFetch(
       fetchFn,
-      "https://graph.microsoft.com/v1.0/sites/site-123/drive/root:/OpenClawShared/image-1.png:/content?@microsoft.graph.conflictBehavior=rename",
+      "https://graph.microsoft.com/v1.0/sites/site-123/drive/root:/CarapaceShared/image-1.png:/content?@microsoft.graph.conflictBehavior=rename",
     );
     expect(result.name).toBe("image-1 1.png");
   });

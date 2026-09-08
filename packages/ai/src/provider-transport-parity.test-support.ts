@@ -1,5 +1,5 @@
-import type { Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { Context, Model } from "@carapace/llm-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterAll, afterEach, beforeAll, expect, vi } from "vitest";
 import { configureAiTransportHost, getAiTransportHost } from "./host.js";
 

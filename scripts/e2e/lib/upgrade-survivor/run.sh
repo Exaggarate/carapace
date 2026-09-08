@@ -4,35 +4,35 @@ set -Eeuo pipefail
 # final summary location cannot corrupt a command artifact when the run is interrupted.
 exec 3>&1
 
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/carapace-e2e-instance.sh
 source scripts/e2e/lib/prepublish-plugin-registry.sh
 source scripts/e2e/lib/upgrade-survivor/plugin-dependency-fixtures.sh
 
-SCENARIO="${OPENCLAW_UPGRADE_SURVIVOR_SCENARIO:-base}"
+SCENARIO="${CARAPACE_UPGRADE_SURVIVOR_SCENARIO:-base}"
 
 export npm_config_loglevel=error
 export npm_config_fund=false
 export npm_config_audit=false
 export CI=true
-export OPENCLAW_NO_ONBOARD=1
-export OPENCLAW_NO_PROMPT=1
-export OPENCLAW_SKIP_PROVIDERS=1
-export OPENCLAW_SKIP_CHANNELS=1
-export OPENCLAW_DISABLE_BONJOUR=1
-LIVE_OPENAI="${OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI:-0}"
+export CARAPACE_NO_ONBOARD=1
+export CARAPACE_NO_PROMPT=1
+export CARAPACE_SKIP_PROVIDERS=1
+export CARAPACE_SKIP_CHANNELS=1
+export CARAPACE_DISABLE_BONJOUR=1
+LIVE_OPENAI="${CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI:-0}"
 LIVE_OPENAI_API_KEY=""
 case "$LIVE_OPENAI" in
   0)
     ;;
   1)
     if [ -z "${OPENAI_API_KEY:-}" ]; then
-      echo "OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI=1 requires OPENAI_API_KEY" >&2
+      echo "CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI=1 requires OPENAI_API_KEY" >&2
       exit 2
     fi
     LIVE_OPENAI_API_KEY="$OPENAI_API_KEY"
     ;;
   *)
-    echo "OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI must be 0 or 1; got: $LIVE_OPENAI" >&2
+    echo "CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI must be 0 or 1; got: $LIVE_OPENAI" >&2
     exit 2
     ;;
 esac
@@ -45,7 +45,7 @@ fi
 if [ "$SCENARIO" = "watchos-direct-node" ] || [ "$SCENARIO" = "mobile-pairing-reconnect" ]; then
   unset OPENAI_API_KEY DISCORD_BOT_TOKEN TELEGRAM_BOT_TOKEN
 else
-  export OPENAI_API_KEY="sk-openclaw-upgrade-survivor"
+  export OPENAI_API_KEY="sk-carapace-upgrade-survivor"
   export DISCORD_BOT_TOKEN="upgrade-survivor-discord-token"
   export TELEGRAM_BOT_TOKEN="123456:upgrade-survivor-telegram-token"
 fi
@@ -57,46 +57,46 @@ if [ "$SCENARIO" = "configured-plugin-installs" ] || [ "$SCENARIO" = "sqlite-vol
   export BRAVE_API_KEY="BSA_upgrade_survivor_brave_key"
 fi
 
-ARTIFACT_ROOT="$(dirname "${OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON:-/tmp/openclaw-upgrade-survivor-artifacts/summary.json}")"
-export OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT="$ARTIFACT_ROOT"
-export OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT="${OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT:-/tmp/openclaw-upgrade-survivor-runtime}"
-RUNTIME_ROOT="$OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT"
-STATE_HOME_ROOT="${OPENCLAW_UPGRADE_SURVIVOR_STATE_HOME_ROOT:-$RUNTIME_ROOT/state-home}"
+ARTIFACT_ROOT="$(dirname "${CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON:-/tmp/carapace-upgrade-survivor-artifacts/summary.json}")"
+export CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT="$ARTIFACT_ROOT"
+export CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT="${CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT:-/tmp/carapace-upgrade-survivor-runtime}"
+RUNTIME_ROOT="$CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT"
+STATE_HOME_ROOT="${CARAPACE_UPGRADE_SURVIVOR_STATE_HOME_ROOT:-$RUNTIME_ROOT/state-home}"
 mkdir -p "$ARTIFACT_ROOT"
 mkdir -p "$RUNTIME_ROOT"
 chmod 700 "$RUNTIME_ROOT"
-export TMPDIR="${OPENCLAW_UPGRADE_SURVIVOR_TMPDIR:-$RUNTIME_ROOT/tmp}"
-export OPENCLAW_TEST_STATE_TMPDIR="${OPENCLAW_UPGRADE_SURVIVOR_TEST_STATE_TMPDIR:-$RUNTIME_ROOT/state-tmp}"
-mkdir -p "$TMPDIR" "$OPENCLAW_TEST_STATE_TMPDIR"
+export TMPDIR="${CARAPACE_UPGRADE_SURVIVOR_TMPDIR:-$RUNTIME_ROOT/tmp}"
+export CARAPACE_TEST_STATE_TMPDIR="${CARAPACE_UPGRADE_SURVIVOR_TEST_STATE_TMPDIR:-$RUNTIME_ROOT/state-tmp}"
+mkdir -p "$TMPDIR" "$CARAPACE_TEST_STATE_TMPDIR"
 if [ "$SCENARIO" = "legacy-operator-state" ]; then
   export npm_config_prefix="$RUNTIME_ROOT/npm-prefix"
 else
   export npm_config_prefix="$ARTIFACT_ROOT/npm-prefix"
 fi
 export NPM_CONFIG_PREFIX="$npm_config_prefix"
-export npm_config_cache="${OPENCLAW_UPGRADE_SURVIVOR_NPM_CACHE:-$OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT/npm-cache}"
+export npm_config_cache="${CARAPACE_UPGRADE_SURVIVOR_NPM_CACHE:-$CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT/npm-cache}"
 export NPM_CONFIG_CACHE="$npm_config_cache"
 export npm_config_tmp="$TMPDIR"
 mkdir -p "$npm_config_prefix" "$npm_config_cache"
 chmod 700 "$npm_config_cache" || true
 export PATH="$npm_config_prefix/bin:$PATH"
 
-SUMMARY_JSON="${OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON:-$ARTIFACT_ROOT/summary.json}"
+SUMMARY_JSON="${CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON:-$ARTIFACT_ROOT/summary.json}"
 PHASE_LOG="$ARTIFACT_ROOT/phases.jsonl"
-BASELINE_RAW="${OPENCLAW_UPGRADE_SURVIVOR_BASELINE:?missing OPENCLAW_UPGRADE_SURVIVOR_BASELINE}"
-CANDIDATE_KIND="${OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_KIND:-tarball}"
-CANDIDATE_SPEC="${OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_SPEC:-${OPENCLAW_CURRENT_PACKAGE_TGZ:-}}"
-UPDATE_RESTART_MODE="${OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE:-manual}"
-OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL="stable"
+BASELINE_RAW="${CARAPACE_UPGRADE_SURVIVOR_BASELINE:?missing CARAPACE_UPGRADE_SURVIVOR_BASELINE}"
+CANDIDATE_KIND="${CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_KIND:-tarball}"
+CANDIDATE_SPEC="${CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_SPEC:-${CARAPACE_CURRENT_PACKAGE_TGZ:-}}"
+UPDATE_RESTART_MODE="${CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE:-manual}"
+CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL="stable"
 if [ "$SCENARIO" = "prerelease-plugin-registry" ] ||
   { [ "$UPDATE_RESTART_MODE" = "auto-auth" ] &&
-    [ -n "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] &&
-    [[ "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:-}" =~ -(alpha|beta)\.[1-9][0-9]*$ ]]; }; then
-  OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL="beta"
+    [ -n "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] &&
+    [[ "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:-}" =~ -(alpha|beta)\.[1-9][0-9]*$ ]]; }; then
+  CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL="beta"
 fi
-export OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL
-ROOT_MANAGED_VPS="${OPENCLAW_UPGRADE_SURVIVOR_ROOT_MANAGED_VPS:-0}"
-COMMAND_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"
+export CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL
+ROOT_MANAGED_VPS="${CARAPACE_UPGRADE_SURVIVOR_ROOT_MANAGED_VPS:-0}"
+COMMAND_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"
 CURRENT_PHASE="setup"
 FAILURE_PHASE=""
 FAILURE_MESSAGE=""
@@ -186,37 +186,37 @@ MOBILE_PAIRING_CANDIDATE_FIRST_EVIDENCE="$ARTIFACT_ROOT/mobile-pairing-candidate
 MOBILE_PAIRING_CANDIDATE_RESTART_EVIDENCE="$ARTIFACT_ROOT/mobile-pairing-candidate-restart.json"
 MOBILE_PAIRING_FINAL_EVIDENCE="$ARTIFACT_ROOT/mobile-pairing-final.json"
 HISTORICAL_PACKAGE_REPLACEMENT_EVIDENCE="$ARTIFACT_ROOT/historical-package-replacement.json"
-export OPENCLAW_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON="$CONFIG_COVERAGE_JSON"
+export CARAPACE_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON="$CONFIG_COVERAGE_JSON"
 rm -f "$SUMMARY_JSON" "$CONFIG_COVERAGE_JSON"
 : >"$PHASE_LOG"
 
 validate_baseline_package_spec() {
   local spec="$1"
-  if [[ "$spec" =~ ^openclaw@(alpha|beta|latest|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(-[1-9][0-9]*|-(alpha|beta)\.[1-9][0-9]*)?)$ ]]; then
+  if [[ "$spec" =~ ^carapace@(alpha|beta|latest|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(-[1-9][0-9]*|-(alpha|beta)\.[1-9][0-9]*)?)$ ]]; then
     return 0
   fi
-  echo "OPENCLAW_UPGRADE_SURVIVOR_BASELINE must be openclaw@latest, openclaw@beta, openclaw@alpha, an exact OpenClaw release version, or a bare release version; got: $spec" >&2
+  echo "CARAPACE_UPGRADE_SURVIVOR_BASELINE must be carapace@latest, carapace@beta, carapace@alpha, an exact Carapace release version, or a bare release version; got: $spec" >&2
   return 1
 }
 
 normalize_baseline() {
   local raw="${BASELINE_RAW//[[:space:]]/}"
   if [ -z "$raw" ]; then
-    echo "OPENCLAW_UPGRADE_SURVIVOR_BASELINE cannot be empty" >&2
+    echo "CARAPACE_UPGRADE_SURVIVOR_BASELINE cannot be empty" >&2
     return 1
   fi
   case "$raw" in
-    openclaw@*)
+    carapace@*)
       baseline_spec="$raw"
-      baseline_version="${raw#openclaw@}"
+      baseline_version="${raw#carapace@}"
       ;;
     *@*)
-      echo "OPENCLAW_UPGRADE_SURVIVOR_BASELINE must be openclaw@<version> or a bare version" >&2
+      echo "CARAPACE_UPGRADE_SURVIVOR_BASELINE must be carapace@<version> or a bare version" >&2
       return 1
       ;;
     *)
       baseline_version="$raw"
-      baseline_spec="openclaw@$raw"
+      baseline_spec="carapace@$raw"
       ;;
   esac
   case "$baseline_version" in
@@ -225,7 +225,7 @@ normalize_baseline() {
       baseline_version_expected="0"
       ;;
     dev | main | "")
-      echo "OPENCLAW_UPGRADE_SURVIVOR_BASELINE must be openclaw@latest, openclaw@beta, openclaw@alpha, openclaw@<version>, or a bare version" >&2
+      echo "CARAPACE_UPGRADE_SURVIVOR_BASELINE must be carapace@latest, carapace@beta, carapace@alpha, carapace@<version>, or a bare version" >&2
       return 1
       ;;
     *)
@@ -240,7 +240,7 @@ validate_update_restart_mode() {
     manual | auto-auth)
       ;;
     *)
-      echo "OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE must be manual or auto-auth; got: $UPDATE_RESTART_MODE" >&2
+      echo "CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE must be manual or auto-auth; got: $UPDATE_RESTART_MODE" >&2
       return 1
       ;;
   esac
@@ -318,8 +318,8 @@ const summary = {
   },
   scenario: process.env.SUMMARY_SCENARIO || "base",
   candidate: {
-    kind: process.env.OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_KIND || null,
-    spec: process.env.OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_SPEC || process.env.OPENCLAW_CURRENT_PACKAGE_TGZ || null,
+    kind: process.env.CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_KIND || null,
+    spec: process.env.CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_SPEC || process.env.CARAPACE_CURRENT_PACKAGE_TGZ || null,
     version: process.env.SUMMARY_CANDIDATE_VERSION || null,
   },
   installedVersion: process.env.SUMMARY_INSTALLED_VERSION || null,
@@ -347,7 +347,7 @@ const summary = {
     ? {
         contract: {
           signature: "v3",
-          clientId: "openclaw-watchos",
+          clientId: "carapace-watchos",
           clientMode: "node",
           protocolRange: [4, 4],
           stableInstanceId: "watchos-upgrade-survivor",
@@ -386,15 +386,15 @@ NODE
 
 stop_gateway() {
   if [ -s "$SYSTEMCTL_SHIM_PID_FILE" ]; then
-    systemctl --user stop openclaw-gateway.service >/dev/null 2>&1 || true
+    systemctl --user stop carapace-gateway.service >/dev/null 2>&1 || true
   fi
-  openclaw_e2e_terminate_gateways "${gateway_pid:-}"
+  carapace_e2e_terminate_gateways "${gateway_pid:-}"
   gateway_pid=""
   if [ -s "$SYSTEMCTL_SHIM_PID_FILE" ]; then
     local shim_pid
     shim_pid="$(cat "$SYSTEMCTL_SHIM_PID_FILE" 2>/dev/null || true)"
     if [[ "$shim_pid" =~ ^[0-9]+$ ]] && [ "$shim_pid" -gt 1 ]; then
-      openclaw_e2e_terminate_gateways "$shim_pid"
+      carapace_e2e_terminate_gateways "$shim_pid"
     fi
   fi
   rm -f "$SYSTEMCTL_SHIM_PID_FILE"
@@ -404,7 +404,7 @@ watchos_gateway_call() {
   local method="$1"
   local params="$2"
   local output="$3"
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw gateway call "$method" \
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace gateway call "$method" \
     --url "$WATCH_GATEWAY_WS_URL" \
     --token "$GATEWAY_AUTH_TOKEN_REF" \
     --params "$params" \
@@ -442,7 +442,7 @@ watchos_connect() {
   if [ "$mode" = "bootstrap" ]; then
     args+=(--credential "$credential")
   fi
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" \
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" \
     node "${args[@]}"
 }
 
@@ -470,11 +470,11 @@ watchos_reconnect_restarted_candidate() {
 
 cleanup() {
   stop_gateway
-  openclaw_e2e_stop_process "${plugin_registry_pid:-}"
-  openclaw_e2e_stop_process "${clawhub_fixture_pid:-}"
-  openclaw_e2e_stop_process "${mock_openai_pid:-}"
-  openclaw_e2e_stop_process "${restart_mock_pid:-}"
-  openclaw_e2e_stop_process "${restart_registry_pid:-}"
+  carapace_e2e_stop_process "${plugin_registry_pid:-}"
+  carapace_e2e_stop_process "${clawhub_fixture_pid:-}"
+  carapace_e2e_stop_process "${mock_openai_pid:-}"
+  carapace_e2e_stop_process "${restart_mock_pid:-}"
+  carapace_e2e_stop_process "${restart_registry_pid:-}"
 }
 
 on_error() {
@@ -551,17 +551,17 @@ run_plugin_fixture_phase() {
 }
 
 package_root() {
-  printf '%s/lib/node_modules/openclaw\n' "$npm_config_prefix"
+  printf '%s/lib/node_modules/carapace\n' "$npm_config_prefix"
 }
 
 legacy_runtime_deps_symlink_plugin() {
-  local plugin="${OPENCLAW_UPGRADE_SURVIVOR_LEGACY_RUNTIME_DEPS_SYMLINK:-}"
+  local plugin="${CARAPACE_UPGRADE_SURVIVOR_LEGACY_RUNTIME_DEPS_SYMLINK:-}"
   if [ -z "$plugin" ]; then
     return 1
   fi
   case "$plugin" in
     *[!A-Za-z0-9._-]*)
-      echo "OPENCLAW_UPGRADE_SURVIVOR_LEGACY_RUNTIME_DEPS_SYMLINK must be a plugin id, got: $plugin" >&2
+      echo "CARAPACE_UPGRADE_SURVIVOR_LEGACY_RUNTIME_DEPS_SYMLINK must be a plugin id, got: $plugin" >&2
       return 2
       ;;
   esac
@@ -570,7 +570,7 @@ legacy_runtime_deps_symlink_plugin() {
 
 legacy_runtime_deps_symlink_target() {
   local plugin="$1"
-  printf '%s/@openclaw-upgrade-survivor/%s-runtime-dep\n' "$(dirname "$(package_root)")" "$plugin"
+  printf '%s/@carapace-upgrade-survivor/%s-runtime-dep\n' "$(dirname "$(package_root)")" "$plugin"
 }
 
 legacy_runtime_deps_symlink_source() {
@@ -591,20 +591,20 @@ source_only_plugin_shadow_enabled() {
 seed_source_only_plugin_shadow() {
   source_only_plugin_shadow_enabled || return 0
 
-  local shadow_root="$OPENCLAW_STATE_DIR/extensions/opik-openclaw"
+  local shadow_root="$CARAPACE_STATE_DIR/extensions/opik-carapace"
   mkdir -p "$shadow_root/src"
   cat >"$shadow_root/package.json" <<'JSON'
 {
-  "name": "@opik/opik-openclaw",
+  "name": "@opik/opik-carapace",
   "version": "0.0.0-upgrade-survivor",
-  "openclaw": {
+  "carapace": {
     "extensions": ["./src/index.ts"]
   }
 }
 JSON
-  cat >"$shadow_root/openclaw.plugin.json" <<'JSON'
+  cat >"$shadow_root/carapace.plugin.json" <<'JSON'
 {
-  "id": "opik-openclaw",
+  "id": "opik-carapace",
   "activation": {
     "onStartup": false
   },
@@ -617,7 +617,7 @@ JSON
 JSON
   cat >"$shadow_root/src/index.ts" <<'TS'
 export default {
-  id: "opik-openclaw",
+  id: "opik-carapace",
   name: "Source-only Opik shadow",
   register() {},
 };
@@ -629,33 +629,33 @@ wait_for_fixture_port() {
   local pid="$1" port_file="$2" log_file="$3" label="$4"
   for _ in $(seq 1 100); do
     [ -s "$port_file" ] && return 0
-    openclaw_e2e_process_alive "$pid" || break
+    carapace_e2e_process_alive "$pid" || break
     sleep 0.1
   done
-  openclaw_e2e_print_log "$log_file" >&2
+  carapace_e2e_print_log "$log_file" >&2
   echo "Timed out waiting for upgrade survivor $label." >&2
   return 1
 }
 
 configure_clawhub_fixture() {
-  unset OPENCLAW_CLAWHUB_URL CLAWHUB_URL
-  [ -z "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] && return 0
+  unset CARAPACE_CLAWHUB_URL CLAWHUB_URL
+  [ -z "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] && return 0
   local fixture_root="$ARTIFACT_ROOT/clawhub-fixture" port_file log_file
   port_file="$fixture_root/port"
   log_file="$fixture_root/server.log"
   mkdir -p "$fixture_root" && rm -f "$port_file"
-  node "${OPENCLAW_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER:-scripts/e2e/lib/clawhub-fixture-server.cjs}" \
+  node "${CARAPACE_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER:-scripts/e2e/lib/clawhub-fixture-server.cjs}" \
     prepublish-artifacts "$port_file" \
-    "$OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR/prepublish-plugin-registry.json" >"$log_file" 2>&1 &
+    "$CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR/prepublish-plugin-registry.json" >"$log_file" 2>&1 &
   clawhub_fixture_pid="$!"
   wait_for_fixture_port "$clawhub_fixture_pid" "$port_file" "$log_file" "ClawHub fixture"
-  export OPENCLAW_CLAWHUB_URL="http://127.0.0.1:$(cat "$port_file")"
+  export CARAPACE_CLAWHUB_URL="http://127.0.0.1:$(cat "$port_file")"
 }
 
 assert_prepublish_fixture_idle() {
-  [ -n "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] || return 0
-  node "${OPENCLAW_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER:-scripts/e2e/lib/clawhub-fixture-server.cjs}" \
-    assert-no-requests "$OPENCLAW_CLAWHUB_URL"
+  [ -n "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] || return 0
+  node "${CARAPACE_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER:-scripts/e2e/lib/clawhub-fixture-server.cjs}" \
+    assert-no-requests "$CARAPACE_CLAWHUB_URL"
 }
 
 assert_prepublish_plugin_install() {
@@ -666,7 +666,7 @@ assert_prepublish_plugin_install() {
   elif configured_plugin_installs_enabled; then
     plugin_id="matrix"
   fi
-  help="$(openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw plugins install --help)" || return "$?"
+  help="$(carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace plugins install --help)" || return "$?"
   consent="$(printf '%s' "$help" | node scripts/e2e/lib/package-compat.mjs fixture-consent)" || return "$?"
   [ -z "$consent" ] || consent_supported=1
   if [ "$allow_pending" = "1" ] && [ "$update_repair_required" = "1" ]; then
@@ -675,7 +675,7 @@ assert_prepublish_plugin_install() {
   # A served npm primary must match the prepared artifact. An empty ClawHub ledger alone
   # cannot prove installation; explicit ClawHub companion installs have their own audit.
   node scripts/e2e/lib/upgrade-survivor/assertions.mjs \
-    assert-npm-plugin-install "$plugin_id" "@openclaw/$plugin_id" "$candidate_version" \
+    assert-npm-plugin-install "$plugin_id" "@carapace/$plugin_id" "$candidate_version" \
     "$consent_supported" ${pending_args[@]+"${pending_args[@]}"} || return "$?"
   [ "$SCENARIO" = "legacy-operator-state" ] && return 0
   assert_prepublish_fixture_idle
@@ -685,23 +685,23 @@ configure_plugin_registry() {
   local stage="${1:-candidate}"
   local fixture_root="$ARTIFACT_ROOT/plugin-registry"
   local package_dir="$fixture_root/package"
-  local tarball="$fixture_root/openclaw-brave-plugin-${candidate_version}.tgz"
+  local tarball="$fixture_root/carapace-brave-plugin-${candidate_version}.tgz"
   local registry_args=()
-  local registry_dist_tags="${OPENCLAW_NPM_REGISTRY_DIST_TAGS-}"
+  local registry_dist_tags="${CARAPACE_NPM_REGISTRY_DIST_TAGS-}"
 
   if [ "$SCENARIO" = "legacy-operator-state" ]; then
     if [ "$stage" = "baseline" ]; then
       mkdir -p "$fixture_root/baseline"
       # A moving selector preserves ordinary plugin updates; an exact spec is a pin.
       local baseline_tarball
-      baseline_tarball="$(npm pack "@openclaw/discord@$baseline_version" \
+      baseline_tarball="$(npm pack "@carapace/discord@$baseline_version" \
         --registry=https://registry.npmjs.org --pack-destination "$fixture_root/baseline" --silent)"
-      registry_args+=("@openclaw/discord" "$baseline_version" "$fixture_root/baseline/$baseline_tarball")
+      registry_args+=("@carapace/discord" "$baseline_version" "$fixture_root/baseline/$baseline_tarball")
       registry_dist_tags="latest=$baseline_version,beta=$baseline_version"
     else
       registry_dist_tags="latest=$candidate_version,beta=$candidate_version"
     fi
-    registry_args+=("openclaw" "$candidate_version" "$CANDIDATE_SPEC")
+    registry_args+=("carapace" "$candidate_version" "$CANDIDATE_SPEC")
   fi
 
   if configured_plugin_installs_enabled; then
@@ -719,16 +719,16 @@ fs.writeFileSync(
   path.join(root, "package.json"),
   `${JSON.stringify(
     {
-      name: "@openclaw/brave-plugin",
+      name: "@carapace/brave-plugin",
       version,
-      openclaw: { extensions: ["./index.js"] },
+      carapace: { extensions: ["./index.js"] },
     },
     null,
     2,
   )}\n`,
 );
 fs.writeFileSync(
-  path.join(root, "openclaw.plugin.json"),
+  path.join(root, "carapace.plugin.json"),
   `${JSON.stringify(
     {
       id: "brave",
@@ -761,21 +761,21 @@ fs.writeFileSync(
 );
 NODE
     tar -czf "$tarball" -C "$fixture_root" package
-    registry_args+=("@openclaw/brave-plugin" "$candidate_version" "$tarball")
+    registry_args+=("@carapace/brave-plugin" "$candidate_version" "$tarball")
   fi
 
   if [ "${#registry_args[@]}" -eq 0 ]; then
-    [ -n "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] || return 0
+    [ -n "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ] || return 0
   fi
 
   if [ "$SCENARIO" = "legacy-operator-state" ]; then
-    export OPENCLAW_NPM_REGISTRY_DIST_TAGS="$registry_dist_tags"
+    export CARAPACE_NPM_REGISTRY_DIST_TAGS="$registry_dist_tags"
   fi
-  openclaw_prepublish_plugin_registry_start \
-    "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" \
-    "${OPENCLAW_DOCKER_E2E_SELECTED_SHA:-}" \
+  carapace_prepublish_plugin_registry_start \
+    "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" \
+    "${CARAPACE_DOCKER_E2E_SELECTED_SHA:-}" \
     "$candidate_version" \
-    "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:-}" \
+    "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:-}" \
     "$fixture_root" \
     plugin_registry_pid \
     "${registry_args[@]}"
@@ -802,7 +802,7 @@ seed_legacy_runtime_deps_symlink() {
   target_dir="$(legacy_runtime_deps_symlink_target "$plugin")"
   mkdir -p "$source_dir"
   mkdir -p "$(dirname "$target_dir")"
-  printf '{"name":"openclaw-upgrade-survivor-legacy-runtime-deps","version":"0.0.0"}\n' \
+  printf '{"name":"carapace-upgrade-survivor-legacy-runtime-deps","version":"0.0.0"}\n' \
     >"$source_dir/package.json"
   rm -rf "$target_dir"
   ln -s "$source_dir" "$target_dir"
@@ -855,21 +855,21 @@ rm_rf_retry() {
 }
 
 reset_run_state() {
-  rm_rf_retry "$npm_config_prefix" "$TMPDIR" "$OPENCLAW_TEST_STATE_TMPDIR" "$STATE_HOME_ROOT"
+  rm_rf_retry "$npm_config_prefix" "$TMPDIR" "$CARAPACE_TEST_STATE_TMPDIR" "$STATE_HOME_ROOT"
   rm -f "$SYSTEMCTL_SHIM_PID_FILE" "$SYSTEMCTL_SHIM_DAEMON_LOG"
-  mkdir -p "$npm_config_prefix" "$npm_config_cache" "$TMPDIR" "$OPENCLAW_TEST_STATE_TMPDIR"
+  mkdir -p "$npm_config_prefix" "$npm_config_cache" "$TMPDIR" "$CARAPACE_TEST_STATE_TMPDIR"
 }
 
 install_baseline() {
   normalize_baseline
   echo "Installing baseline package: $baseline_spec"
-  if ! openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix "$npm_config_prefix" "$baseline_spec" --no-fund --no-audit >"$BASELINE_INSTALL_LOG" 2>&1; then
+  if ! carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix "$npm_config_prefix" "$baseline_spec" --no-fund --no-audit >"$BASELINE_INSTALL_LOG" 2>&1; then
     echo "baseline npm install failed" >&2
-    openclaw_e2e_print_log "$BASELINE_INSTALL_LOG" >&2
+    carapace_e2e_print_log "$BASELINE_INSTALL_LOG" >&2
     return 1
   fi
-  if ! command -v openclaw >/dev/null; then
-    echo "baseline install did not expose openclaw on PATH" >&2
+  if ! command -v carapace >/dev/null; then
+    echo "baseline install did not expose carapace on PATH" >&2
     echo "PATH=$PATH" >&2
     find "$npm_config_prefix" -maxdepth 3 -type f -o -type l >&2 || true
     return 1
@@ -882,13 +882,13 @@ install_baseline() {
   fi
   baseline_version="$installed_version"
   local version_output
-  if ! version_output="$(openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw --version 2>&1)"; then
-    echo "baseline openclaw --version failed" >&2
+  if ! version_output="$(carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace --version 2>&1)"; then
+    echo "baseline carapace --version failed" >&2
     echo "$version_output" >&2
     return 1
   fi
   if [[ "$version_output" != *"$baseline_version"* ]]; then
-    echo "baseline openclaw --version mismatch: expected output to include $baseline_version" >&2
+    echo "baseline carapace --version mismatch: expected output to include $baseline_version" >&2
     echo "$version_output" >&2
     return 1
   fi
@@ -896,16 +896,16 @@ install_baseline() {
 
 initialize_state() {
   local account_home=""
-  openclaw_e2e_eval_test_state_from_b64 "${OPENCLAW_TEST_STATE_FUNCTION_B64:?missing OPENCLAW_TEST_STATE_FUNCTION_B64}"
+  carapace_e2e_eval_test_state_from_b64 "${CARAPACE_TEST_STATE_FUNCTION_B64:?missing CARAPACE_TEST_STATE_FUNCTION_B64}"
   if [ "$ROOT_MANAGED_VPS" = "1" ]; then
     if [ "$(id -u)" -ne 0 ]; then
       echo "root-managed VPS survivor mode must run as uid 0" >&2
       return 1
     fi
-    rm -rf /root/.openclaw /root/workspace
-    openclaw_test_state_create /root minimal
+    rm -rf /root/.carapace /root/workspace
+    carapace_test_state_create /root minimal
   else
-    openclaw_test_state_create "$STATE_HOME_ROOT" minimal
+    carapace_test_state_create "$STATE_HOME_ROOT" minimal
   fi
   if [ "$UPDATE_RESTART_MODE" = "auto-auth" ]; then
     account_home="$(getent passwd "$(id -u)" | cut -d: -f6)"
@@ -915,11 +915,11 @@ initialize_state() {
     fi
     export HOME="$account_home"
     export USERPROFILE="$account_home"
-    unset OPENCLAW_HOME
-    export OPENCLAW_STATE_DIR="$account_home/.openclaw"
-    export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
+    unset CARAPACE_HOME
+    export CARAPACE_STATE_DIR="$account_home/.carapace"
+    export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"
   fi
-  export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION="$baseline_version"
+  export CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION="$baseline_version"
 }
 
 seed_state() {
@@ -932,22 +932,22 @@ apply_baseline_config_recipe() {
     return
   fi
   # Source recipes need the runner's native tsx, not a host dependency mount.
-  openclaw_e2e_run_script_entrypoint \
+  carapace_e2e_run_script_entrypoint \
     scripts/e2e/lib/upgrade-survivor/config-recipe apply \
     --summary "$CONFIG_COVERAGE_JSON" \
     --baseline-version "$baseline_version"
 }
 
 install_companion_plugins() {
-  openclaw_e2e_fixture_plugin_command openclaw -- \
-    plugins install "@openclaw/discord@latest"
+  carapace_e2e_fixture_plugin_command carapace -- \
+    plugins install "@carapace/discord@latest"
   node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-baseline-plugin "$baseline_version"
 }
 
 seed_legacy_operator_gateway() {
   export MOCK_REQUEST_LOG="$ARTIFACT_ROOT/legacy-operator-requests.jsonl"
-  mock_openai_pid="$(openclaw_e2e_start_mock_openai 44081 "$ARTIFACT_ROOT/legacy-operator-mock.log")"
-  openclaw_e2e_wait_mock_openai 44081
+  mock_openai_pid="$(carapace_e2e_start_mock_openai 44081 "$ARTIFACT_ROOT/legacy-operator-mock.log")"
+  carapace_e2e_wait_mock_openai 44081
   start_gateway
   node scripts/e2e/lib/upgrade-survivor/assertions.mjs seed-legacy-operator-default-cron
   stop_gateway
@@ -964,8 +964,8 @@ prepare_schema_expectation() {
     return 1
   fi
   node scripts/e2e/lib/upgrade-survivor/schema-expectation.mjs \
-    prepare "$baseline_version" "$CANDIDATE_SPEC" "$OPENCLAW_STATE_DIR" \
-    "$ARTIFACT_ROOT/schema-before.json" "$OPENCLAW_CONFIG_PATH"
+    prepare "$baseline_version" "$CANDIDATE_SPEC" "$CARAPACE_STATE_DIR" \
+    "$ARTIFACT_ROOT/schema-before.json" "$CARAPACE_CONFIG_PATH"
 }
 
 assert_schema_outcome() {
@@ -977,7 +977,7 @@ assert_schema_outcome() {
 assert_legacy_operator_update_noop() {
   # An explicit tarball requests a refresh; the registry's exact candidate
   # version exercises the operator's already-current path without a reinstall.
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw update \
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace update \
     --tag "$candidate_version" --yes --no-restart --json \
     >"$ARTIFACT_ROOT/update-noop.json" 2>"$ARTIFACT_ROOT/update-noop.err"
   node --input-type=module - "$ARTIFACT_ROOT/update-noop.json" <<'NODE'
@@ -996,7 +996,7 @@ NODE
 }
 
 assert_legacy_operator_doctor_clean() {
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw doctor --lint --json \
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace doctor --lint --json \
     >"$ARTIFACT_ROOT/doctor-lint.json" 2>"$ARTIFACT_ROOT/doctor-lint.err"
   node --input-type=module - "$ARTIFACT_ROOT/doctor-lint.json" "$STATUS_JSON" "$candidate_version" <<'NODE'
 import assert from "node:assert/strict";
@@ -1027,7 +1027,7 @@ configure_watchos_tls_fixture() {
   mkdir -p "$WATCH_TLS_ROOT"
   chmod 700 "$WATCH_TLS_ROOT"
   openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 1 \
-    -subj "/CN=OpenClaw watchOS survivor CA" \
+    -subj "/CN=Carapace watchOS survivor CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" \
     -keyout "$WATCH_TLS_CA_KEY" \
@@ -1063,20 +1063,20 @@ configure_watchos_tls_fixture() {
       }));
     ' "$WATCH_TLS_SERVER_CERT" "$WATCH_TLS_SERVER_KEY"
   )"
-  openclaw config set gateway.tls "$tls_config" --strict-json >/dev/null
+  carapace config set gateway.tls "$tls_config" --strict-json >/dev/null
   export NODE_EXTRA_CA_CERTS="$WATCH_TLS_CA_CERT"
 }
 
 validate_baseline_config() {
-  if ! openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw config validate >"$BASELINE_CONFIG_VALIDATE_LOG" 2>&1; then
+  if ! carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace config validate >"$BASELINE_CONFIG_VALIDATE_LOG" 2>&1; then
     echo "generated baseline config failed baseline validation" >&2
-    openclaw_e2e_print_log "$BASELINE_CONFIG_VALIDATE_LOG" >&2
+    carapace_e2e_print_log "$BASELINE_CONFIG_VALIDATE_LOG" >&2
     return 1
   fi
 }
 
 run_mobile_pairing_client() {
-  openclaw_e2e_run_script_entrypoint \
+  carapace_e2e_run_script_entrypoint \
     scripts/e2e/lib/upgrade-survivor/mobile-pairing-client \
     "$@"
 }
@@ -1091,8 +1091,8 @@ bootstrap_mobile_pairing() {
   : >"$MOBILE_PAIRING_QR_ERR"
   chmod 600 "$MOBILE_PAIRING_QR_JSON" "$MOBILE_PAIRING_QR_ERR"
   local qr_status=0
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" \
-    openclaw qr --json --url ws://127.0.0.1:18789 \
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" \
+    carapace qr --json --url ws://127.0.0.1:18789 \
     >"$MOBILE_PAIRING_QR_JSON" 2>"$MOBILE_PAIRING_QR_ERR" || qr_status=$?
   if [ "$qr_status" -ne 0 ]; then
     rm -f "$MOBILE_PAIRING_QR_JSON" "$MOBILE_PAIRING_QR_ERR"
@@ -1159,25 +1159,25 @@ verify_mobile_pairing_once() {
 }
 
 source scripts/e2e/lib/upgrade-survivor/update-restart-auth.sh
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$SYSTEMCTL_SHIM_LOG"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$SYSTEMCTL_SHIM_PID_FILE"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$SYSTEMCTL_SHIM_DAEMON_LOG"
-export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON="$BASELINE_SERVICE_INSTALL_JSON"
-export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR="$BASELINE_SERVICE_INSTALL_ERR"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$SYSTEMCTL_SHIM_LOG"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$SYSTEMCTL_SHIM_PID_FILE"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$SYSTEMCTL_SHIM_DAEMON_LOG"
+export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON="$BASELINE_SERVICE_INSTALL_JSON"
+export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR="$BASELINE_SERVICE_INSTALL_ERR"
 
 write_update_restart_service_env() {
-  mkdir -p "$OPENCLAW_STATE_DIR"
-  local dotenv_path="$OPENCLAW_STATE_DIR/.env"
+  mkdir -p "$CARAPACE_STATE_DIR"
+  local dotenv_path="$CARAPACE_STATE_DIR/.env"
   local tmp_path="$dotenv_path.tmp.$$"
   if [ -f "$dotenv_path" ]; then
-    grep -Ev '^(GATEWAY_AUTH_TOKEN_REF|OPENCLAW_CLAWHUB_URL)=' "$dotenv_path" >"$tmp_path" || true
+    grep -Ev '^(GATEWAY_AUTH_TOKEN_REF|CARAPACE_CLAWHUB_URL)=' "$dotenv_path" >"$tmp_path" || true
   else
     : >"$tmp_path"
   fi
   # Managed restarts resolve auth and fixture routing from service-owned durable env.
   printf 'GATEWAY_AUTH_TOKEN_REF=%s\n' "$GATEWAY_AUTH_TOKEN_REF" >>"$tmp_path"
-  if [ -n "${OPENCLAW_CLAWHUB_URL:-}" ]; then
-    printf 'OPENCLAW_CLAWHUB_URL=%s\n' "$OPENCLAW_CLAWHUB_URL" >>"$tmp_path"
+  if [ -n "${CARAPACE_CLAWHUB_URL:-}" ]; then
+    printf 'CARAPACE_CLAWHUB_URL=%s\n' "$CARAPACE_CLAWHUB_URL" >>"$tmp_path"
   fi
   chmod 600 "$tmp_path"
   mv "$tmp_path" "$dotenv_path"
@@ -1190,12 +1190,12 @@ prepare_update_restart_probe() {
   echo "Preparing configured-auth gateway for automatic update restart."
   install_update_restart_systemctl_shim
   local probe_status=0 restore_status=0
-  local authored_config="$RUNTIME_ROOT/baseline-authored-openclaw.json"
-  local parking_helper="${OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER:-scripts/e2e/lib/upgrade-survivor/config-parking.mjs}"
+  local authored_config="$RUNTIME_ROOT/baseline-authored-carapace.json"
+  local parking_helper="${CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER:-scripts/e2e/lib/upgrade-survivor/config-parking.mjs}"
   # Bootstrap only service auth; authored plugins must reach the actual updater unchanged.
   # The canonical path stays installed in the unit, with reload off until update owns restart.
   node "$parking_helper" \
-    park-restart-probe "$OPENCLAW_CONFIG_PATH" "$authored_config" 18789 || probe_status=$?
+    park-restart-probe "$CARAPACE_CONFIG_PATH" "$authored_config" 18789 || probe_status=$?
   if [ "$probe_status" -eq 0 ]; then
     write_update_restart_service_env || probe_status=$?
   fi
@@ -1207,14 +1207,14 @@ prepare_update_restart_probe() {
     check_gateway_status || probe_status=$?
   fi
   if [ "$probe_status" -eq 0 ]; then
-    if [ -n "${OPENCLAW_CLAWHUB_URL:-}" ]; then
+    if [ -n "${CARAPACE_CLAWHUB_URL:-}" ]; then
       assert_prepublish_fixture_idle || probe_status=$?
     fi
   fi
   # The installed baseline must be offline before restoring authored config or seeding state.
   stop_update_restart_probe_gateway "$COMMAND_TIMEOUT" || return "$?"
   if [ -e "$authored_config" ]; then
-    node "$parking_helper" restore "$OPENCLAW_CONFIG_PATH" "$authored_config" || restore_status=$?
+    node "$parking_helper" restore "$CARAPACE_CONFIG_PATH" "$authored_config" || restore_status=$?
   fi
   if [ "$restore_status" -ne 0 ]; then
     return "$restore_status"
@@ -1225,17 +1225,17 @@ prepare_update_restart_probe() {
 }
 
 assert_baseline_state() {
-  OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE=baseline \
+  CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE=baseline \
     node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-exec-approvals || return "$?"
-  OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE=baseline \
+  CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE=baseline \
     node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-config || return "$?"
-  OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE=baseline \
+  CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE=baseline \
     node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-state || return "$?"
 }
 
 resolve_candidate_version() {
   if [ -z "$CANDIDATE_SPEC" ]; then
-    echo "missing OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_SPEC" >&2
+    echo "missing CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_SPEC" >&2
     return 1
   fi
   case "$CANDIDATE_KIND" in
@@ -1262,10 +1262,10 @@ resolve_candidate_version() {
     echo "could not resolve candidate version from $CANDIDATE_KIND:$CANDIDATE_SPEC" >&2
     return 1
   fi
-  OPENCLAW_PACKAGE_ACCEPTANCE_LEGACY_COMPAT="$(
+  CARAPACE_PACKAGE_ACCEPTANCE_LEGACY_COMPAT="$(
     node scripts/e2e/lib/package-compat.mjs "$candidate_version"
   )"
-  export OPENCLAW_PACKAGE_ACCEPTANCE_LEGACY_COMPAT
+  export CARAPACE_PACKAGE_ACCEPTANCE_LEGACY_COMPAT
 }
 
 resolve_candidate_install_mode() {
@@ -1273,7 +1273,7 @@ resolve_candidate_install_mode() {
   if [ "$SCENARIO" = "mobile-pairing-reconnect" ] &&
     [ "$baseline_version" = "2026.7.1" ] &&
     [ "$candidate_version" = "2026.8.1" ] &&
-    [ "${OPENCLAW_DOCKER_E2E_SELECTED_SHA:-}" = "$HISTORICAL_MOBILE_PAIRING_CANDIDATE_SHA" ]; then
+    [ "${CARAPACE_DOCKER_E2E_SELECTED_SHA:-}" = "$HISTORICAL_MOBILE_PAIRING_CANDIDATE_SHA" ]; then
     candidate_install_mode="historical-package-replacement"
   fi
 }
@@ -1286,14 +1286,14 @@ prepare_candidate_tarball() {
   fi
   local package_dir
   package_dir="$(mktemp -d "$RUNTIME_ROOT/candidate-package.XXXXXX")" || return "$?"
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" npm pack "$CANDIDATE_SPEC" \
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" npm pack "$CANDIDATE_SPEC" \
     --ignore-scripts --json --pack-destination "$package_dir" >"$package_dir/pack.json" || return "$?"
   candidate_tarball="$(node - "$package_dir" "$candidate_version" <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
 const [dir, expected] = process.argv.slice(2);
 const result = JSON.parse(fs.readFileSync(path.join(dir, "pack.json"), "utf8"));
-if (!Array.isArray(result) || result.length !== 1 || result[0].name !== "openclaw" || result[0].version !== expected || typeof result[0].filename !== "string" || !result[0].filename.endsWith(".tgz") || path.basename(result[0].filename) !== result[0].filename) {
+if (!Array.isArray(result) || result.length !== 1 || result[0].name !== "carapace" || result[0].version !== expected || typeof result[0].filename !== "string" || !result[0].filename.endsWith(".tgz") || path.basename(result[0].filename) !== result[0].filename) {
   throw new Error("Packed candidate identity differs from the selected release");
 }
 process.stdout.write(path.join(dir, result[0].filename));
@@ -1352,9 +1352,9 @@ update_candidate() {
   local update_args=(update --tag "$update_spec" --yes --json)
   local update_env=(
     env
-    -u OPENCLAW_GATEWAY_TOKEN
-    -u OPENCLAW_GATEWAY_PASSWORD
-    -u OPENCLAW_ALLOW_ROOT
+    -u CARAPACE_GATEWAY_TOKEN
+    -u CARAPACE_GATEWAY_PASSWORD
+    -u CARAPACE_ALLOW_ROOT
   )
   # Historical updaters can restart before reporting denied capabilities.
   # Prove migrations first; only the current updater performs the auth restart.
@@ -1364,22 +1364,22 @@ update_candidate() {
     update_start="$(node -e "process.stdout.write(String(Date.now()))")"
   fi
   if [ "$ROOT_MANAGED_VPS" != "1" ]; then
-    update_env+=(OPENCLAW_ALLOW_ROOT=1)
+    update_env+=(CARAPACE_ALLOW_ROOT=1)
   fi
   update_env+=(
-    "OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT=$observation_root"
+    "CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT=$observation_root"
     "NODE_OPTIONS=${NODE_OPTIONS:+$NODE_OPTIONS }--import=$PWD/scripts/e2e/lib/upgrade-survivor/diagnostics.mjs"
   )
   local update_status=0
   if [ "$SCENARIO" = "recovery-cleanup" ]; then
     # Keep sampler output outside the old updater's JSON and join its process group.
-    openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" node scripts/e2e/lib/plugin-lifecycle-matrix/measure.mjs \
+    carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" node scripts/e2e/lib/plugin-lifecycle-matrix/measure.mjs \
       "$ARTIFACT_ROOT/recovery-resources.tsv" update -- bash -c \
       'out="$1"; err="$2"; shift 2; exec "$@" >"$out" 2>"$err"' recovery-update \
-      "$update_json" "$update_err" "${update_env[@]}" openclaw "${update_args[@]}" \
+      "$update_json" "$update_err" "${update_env[@]}" carapace "${update_args[@]}" \
       >"$ARTIFACT_ROOT/recovery-update-metrics.log" 2>&1 || update_status=$?
   else
-    openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${update_env[@]}" openclaw "${update_args[@]}" >"$update_json" 2>"$update_err" || update_status=$?
+    carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${update_env[@]}" carapace "${update_args[@]}" >"$update_json" 2>"$update_err" || update_status=$?
   fi
   # The package swap can precede a failed Doctor. Observe installed bytes before
   # classifying the result; an unreadable package must not retain the baseline.
@@ -1393,14 +1393,14 @@ update_candidate() {
     assert-successful-update-json "$update_json" "$expected_version" "$observation_root"; then
     update_outcome="success"
   else
-    echo "openclaw update failed before the recoverable post-core boundary" >&2
+    echo "carapace update failed before the recoverable post-core boundary" >&2
     local validate_status=0
-    openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw config validate --json >"$POST_UPDATE_VALIDATE_JSON" 2>"$POST_UPDATE_VALIDATE_ERR" || validate_status=$?
+    carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace config validate --json >"$POST_UPDATE_VALIDATE_JSON" 2>"$POST_UPDATE_VALIDATE_ERR" || validate_status=$?
     echo "post-update config validation probe status=$validate_status" >&2
-    openclaw_e2e_print_log "$POST_UPDATE_VALIDATE_ERR" >&2 || true
-    openclaw_e2e_print_log "$POST_UPDATE_VALIDATE_JSON" >&2 || true
-    openclaw_e2e_print_log "$update_err" >&2 || true
-    openclaw_e2e_print_log "$update_json" >&2 || true
+    carapace_e2e_print_log "$POST_UPDATE_VALIDATE_ERR" >&2 || true
+    carapace_e2e_print_log "$POST_UPDATE_VALIDATE_JSON" >&2 || true
+    carapace_e2e_print_log "$update_err" >&2 || true
+    carapace_e2e_print_log "$update_json" >&2 || true
     [ "$update_status" -ne 0 ] || update_status=1
     return "$update_status"
   fi
@@ -1433,17 +1433,17 @@ replace_historical_mobile_pairing_candidate() {
   npm_prefix="$(dirname "$(dirname "$(dirname "$live_package")")")"
   local install_status=0
 
-  if [ "$live_package" != "$npm_prefix/lib/node_modules/openclaw" ]; then
+  if [ "$live_package" != "$npm_prefix/lib/node_modules/carapace" ]; then
     echo "historical package replacement could not derive the npm prefix" >&2
     return 1
   fi
   echo "Replacing baseline $baseline_spec with candidate $CANDIDATE_KIND:$update_spec through npm without updater or Doctor"
-  openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" \
+  carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" \
     npm install -g --prefix "$npm_prefix" "$update_spec" --no-fund --no-audit \
     >"$UPDATE_ERR" 2>&1 || install_status=$?
   if [ "$install_status" -ne 0 ]; then
     echo "historical mobile pairing package replacement failed" >&2
-    openclaw_e2e_print_log "$UPDATE_ERR" >&2
+    carapace_e2e_print_log "$UPDATE_ERR" >&2
     return "$install_status"
   fi
 
@@ -1484,7 +1484,7 @@ update_candidate_for_install_mode() {
 }
 
 assert_historical_package_replacement_prestart() {
-  CONFIG_PATH="$OPENCLAW_CONFIG_PATH" \
+  CONFIG_PATH="$CARAPACE_CONFIG_PATH" \
     UPDATE_PATH="$UPDATE_JSON" \
     EVIDENCE_PATH="$HISTORICAL_PACKAGE_REPLACEMENT_EVIDENCE" \
     BASELINE_VERSION="$baseline_version" \
@@ -1522,7 +1522,7 @@ NODE
 }
 
 assert_historical_package_replacement_startup_repair() {
-  CONFIG_PATH="$OPENCLAW_CONFIG_PATH" \
+  CONFIG_PATH="$CARAPACE_CONFIG_PATH" \
     EVIDENCE_PATH="$HISTORICAL_PACKAGE_REPLACEMENT_EVIDENCE" \
     node <<'NODE'
 const fs = require("node:fs");
@@ -1547,18 +1547,18 @@ assert_root_managed_vps_cli_usable() {
   fi
   local root_cli_env=(
     env
-    -u OPENCLAW_GATEWAY_TOKEN
-    -u OPENCLAW_GATEWAY_PASSWORD
-    -u OPENCLAW_ALLOW_ROOT
+    -u CARAPACE_GATEWAY_TOKEN
+    -u CARAPACE_GATEWAY_PASSWORD
+    -u CARAPACE_ALLOW_ROOT
   )
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${root_cli_env[@]}" openclaw config file >"$ARTIFACT_ROOT/root-vps-config-file.out" 2>"$ARTIFACT_ROOT/root-vps-config-file.err"
-  openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${root_cli_env[@]}" openclaw plugins >"$ARTIFACT_ROOT/root-vps-plugins.out" 2>"$ARTIFACT_ROOT/root-vps-plugins.err"
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${root_cli_env[@]}" carapace config file >"$ARTIFACT_ROOT/root-vps-config-file.out" 2>"$ARTIFACT_ROOT/root-vps-config-file.err"
+  carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${root_cli_env[@]}" carapace plugins >"$ARTIFACT_ROOT/root-vps-plugins.out" 2>"$ARTIFACT_ROOT/root-vps-plugins.err"
 }
 
 run_doctor() {
-  if ! openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw doctor --fix --non-interactive >"$DOCTOR_LOG" 2>&1; then
-    echo "openclaw doctor failed" >&2
-    openclaw_e2e_print_log "$DOCTOR_LOG" >&2
+  if ! carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace doctor --fix --non-interactive >"$DOCTOR_LOG" 2>&1; then
+    echo "carapace doctor failed" >&2
+    carapace_e2e_print_log "$DOCTOR_LOG" >&2
     return 1
   fi
 }
@@ -1570,8 +1570,8 @@ prepare_restart_inference() {
     return 0
   fi
   restart_mock_pid="$(MOCK_REQUEST_LOG="$ARTIFACT_ROOT/restart-model-requests.jsonl" \
-    openclaw_e2e_start_mock_openai 44213 "$ARTIFACT_ROOT/restart-model.log")" || return "$?"
-  openclaw_e2e_wait_mock_openai 44213 || return "$?"
+    carapace_e2e_start_mock_openai 44213 "$ARTIFACT_ROOT/restart-model.log")" || return "$?"
+  carapace_e2e_wait_mock_openai 44213 || return "$?"
   node scripts/e2e/lib/release-scenarios/assertions.mjs configure-mock-openai 44213 || return "$?"
   restart_inference="mock-openai"
 }
@@ -1587,13 +1587,13 @@ prepare_restart_fixture() {
   mv "$fixture_dir/receipt.json" "$ARTIFACT_ROOT/restart-fixture.json" || return "$?"
   restart_fixture_evidence="$ARTIFACT_ROOT/restart-fixture.json"
   restart_fixture_package="$fixture_package"
-  runtime_source="$(node - "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:?managed restart requires the candidate plugin registry}" "$candidate_version" <<'NODE'
+  runtime_source="$(node - "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:?managed restart requires the candidate plugin registry}" "$candidate_version" <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const [root, version] = process.argv.slice(2);
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "prepublish-plugin-registry.json"), "utf8"));
-const entry = manifest.packages.find((item) => item.name === "@openclaw/codex" && item.version === version);
+const entry = manifest.packages.find((item) => item.name === "@carapace/codex" && item.version === version);
 if (!entry) throw new Error("Sealed candidate registry is missing its matching Codex runtime");
 const file = path.resolve(root, entry.tarball);
 if (crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex") !== entry.sha256) {
@@ -1608,13 +1608,13 @@ NODE
   restart_runtime_evidence="$ARTIFACT_ROOT/restart-runtime-fixture.json"
   # The runtime is version-bound to its host. Serve the matching synthetic
   # cohort without changing the sealed candidate registry or its identity.
-  OPENCLAW_NPM_REGISTRY_UPSTREAM="$NPM_CONFIG_REGISTRY" \
-    openclaw_prepublish_plugin_registry_start \
-      "$OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR" \
-      "${OPENCLAW_DOCKER_E2E_SELECTED_SHA:-}" "$candidate_version" \
-      "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:-}" \
+  CARAPACE_NPM_REGISTRY_UPSTREAM="$NPM_CONFIG_REGISTRY" \
+    carapace_prepublish_plugin_registry_start \
+      "$CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR" \
+      "${CARAPACE_DOCKER_E2E_SELECTED_SHA:-}" "$candidate_version" \
+      "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:-}" \
       "$fixture_dir/registry" restart_registry_pid \
-      "@openclaw/codex" "$restart_fixture_version" "$fixture_dir/codex.tgz" || return "$?"
+      "@carapace/codex" "$restart_fixture_version" "$fixture_dir/codex.tgz" || return "$?"
 }
 
 repair_update_restart_auth() {
@@ -1655,11 +1655,11 @@ repair_fixture_plugin_consent() {
   if [ "$update_repair_required" = "1" ]; then
     # Migration assertions run first: explicit fixture consent must not conceal a
     # broken doctor migration. The candidate owns staged-artifact acceptance.
-    if ! openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw update repair \
+    if ! carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace update repair \
       --accept-capabilities --yes --no-restart --json >"$REPAIR_JSON" 2>"$ARTIFACT_ROOT/repair.err"; then
-      echo "openclaw update repair failed" >&2
-      openclaw_e2e_print_log "$ARTIFACT_ROOT/repair.err" >&2
-      openclaw_e2e_print_log "$REPAIR_JSON" >&2
+      echo "carapace update repair failed" >&2
+      carapace_e2e_print_log "$ARTIFACT_ROOT/repair.err" >&2
+      carapace_e2e_print_log "$REPAIR_JSON" >&2
       return 1
     fi
     node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-repair-json "$REPAIR_JSON" || return "$?"
@@ -1668,7 +1668,7 @@ repair_fixture_plugin_consent() {
     assert_survival || return "$?"
   fi
   repair_update_restart_auth || return "$?"
-  if [ -n "${OPENCLAW_CLAWHUB_URL:-}" ]; then
+  if [ -n "${CARAPACE_CLAWHUB_URL:-}" ]; then
     phase assert-prepublish-recovery-requests assert_prepublish_plugin_install
   fi
 }
@@ -1676,26 +1676,26 @@ repair_fixture_plugin_consent() {
 assert_volume_idempotence() {
   local started_at budget
   started_at="$(date +%s)"
-  if ! openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw doctor --fix --non-interactive >>"$DOCTOR_LOG" 2>&1; then
-    echo "openclaw idempotence doctor failed" >&2
-    openclaw_e2e_print_log "$DOCTOR_LOG" >&2
+  if ! carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace doctor --fix --non-interactive >>"$DOCTOR_LOG" 2>&1; then
+    echo "carapace idempotence doctor failed" >&2
+    carapace_e2e_print_log "$DOCTOR_LOG" >&2
     return 1
   fi
   idempotence_seconds=$(($(date +%s) - started_at))
-  budget="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_VOLUME_IDEMPOTENCE_BUDGET_SECONDS 60)"
+  budget="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_VOLUME_IDEMPOTENCE_BUDGET_SECONDS 60)"
   echo "SQLite volume idempotence doctor completed in ${idempotence_seconds}s (budget ${budget}s)."
   if [ "$idempotence_seconds" -gt "$budget" ]; then
     echo "SQLite volume idempotence exceeded budget: ${idempotence_seconds}s > ${budget}s" >&2
     return 1
   fi
-  OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE="$survival_assert_stage" \
+  CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE="$survival_assert_stage" \
     node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-state
 }
 
 validate_post_doctor_config() {
-  if ! openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw config validate >>"$DOCTOR_LOG" 2>&1; then
+  if ! carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace config validate >>"$DOCTOR_LOG" 2>&1; then
     echo "post-doctor config validation failed" >&2
-    openclaw_e2e_print_log "$DOCTOR_LOG" >&2
+    carapace_e2e_print_log "$DOCTOR_LOG" >&2
     return 1
   fi
 }
@@ -1703,7 +1703,7 @@ validate_post_doctor_config() {
 assert_survival() {
   node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-exec-approvals || return "$?"
   node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-config || return "$?"
-  OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE="$survival_assert_stage" \
+  CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE="$survival_assert_stage" \
     node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-state || return "$?"
   installed_version="$(read_installed_version)" || return "$?"
   if [ "$baseline_version" = "2026.9.2" ] && [ "$candidate_version" = "2026.9.3" ]; then
@@ -1732,10 +1732,10 @@ probe_gateway_endpoint() {
     --path "$path"
     --expect "$expect_kind"
   )
-  if [ -n "${OPENCLAW_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING:-}" ]; then
-    args+=(--allow-failing "$OPENCLAW_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING")
+  if [ -n "${CARAPACE_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING:-}" ]; then
+    args+=(--allow-failing "$CARAPACE_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING")
   fi
-  if [ "${OPENCLAW_UPGRADE_SURVIVOR_READYZ_ALLOW_DEGRADED:-}" = "1" ]; then
+  if [ "${CARAPACE_UPGRADE_SURVIVOR_READYZ_ALLOW_DEGRADED:-}" = "1" ]; then
     args+=(--allow-degraded-ready)
   fi
   args+=(--out "$out_file")
@@ -1749,22 +1749,22 @@ probe_gateway_endpoint() {
 start_gateway() {
   local port=18789
   local budget
-  budget="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"
+  budget="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"
   local start_epoch
   local ready_epoch
   start_epoch="$(node -e "process.stdout.write(String(Date.now()))")"
-  env -u OPENCLAW_GATEWAY_TOKEN -u OPENCLAW_GATEWAY_PASSWORD openclaw gateway --port "$port" --bind loopback --allow-unconfigured >"$GATEWAY_LOG" 2>&1 &
+  env -u CARAPACE_GATEWAY_TOKEN -u CARAPACE_GATEWAY_PASSWORD carapace gateway --port "$port" --bind loopback --allow-unconfigured >"$GATEWAY_LOG" 2>&1 &
   gateway_pid="$!"
   local readiness_mode="strict"
   if [ "${SCENARIO:-}" = "watchos-direct-node" ]; then
     readiness_mode="legacy-ready-log-ok"
   fi
-  openclaw_e2e_wait_gateway_ready "$gateway_pid" "$GATEWAY_LOG" 360 "$port" "$readiness_mode" || return "$?"
+  carapace_e2e_wait_gateway_ready "$gateway_pid" "$GATEWAY_LOG" 360 "$port" "$readiness_mode" || return "$?"
   ready_epoch="$(node -e "process.stdout.write(String(Date.now()))")"
   start_seconds=$(((ready_epoch - start_epoch + 999) / 1000))
   if [ "$start_seconds" -gt "$budget" ]; then
     echo "gateway startup exceeded survivor budget: ${start_seconds}s > ${budget}s" >&2
-    openclaw_e2e_print_log "$GATEWAY_LOG" >&2
+    carapace_e2e_print_log "$GATEWAY_LOG" >&2
     return 1
   fi
 }
@@ -1788,7 +1788,7 @@ check_gateway_status() {
     gateway_ws_url="$WATCH_GATEWAY_WS_URL"
   fi
   local budget
-  budget="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"
+  budget="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"
   local status_start
   local status_end
   status_start="$(node -e "process.stdout.write(String(Date.now()))")"
@@ -1796,36 +1796,36 @@ check_gateway_status() {
   if [ "$SCENARIO" = "mobile-pairing-reconnect" ]; then
     auth_args=(--password "$GATEWAY_AUTH_PASSWORD_REF")
   fi
-  if ! openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw gateway status --url "$gateway_ws_url" "${auth_args[@]}" --require-rpc --timeout 30000 --json >"$STATUS_JSON" 2>"$STATUS_ERR"; then
+  if ! carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace gateway status --url "$gateway_ws_url" "${auth_args[@]}" --require-rpc --timeout 30000 --json >"$STATUS_JSON" 2>"$STATUS_ERR"; then
     echo "gateway status failed" >&2
-    openclaw_e2e_print_log "$STATUS_ERR" >&2
-    openclaw_e2e_print_log "$GATEWAY_LOG" >&2
+    carapace_e2e_print_log "$STATUS_ERR" >&2
+    carapace_e2e_print_log "$GATEWAY_LOG" >&2
     return 1
   fi
   status_end="$(node -e "process.stdout.write(String(Date.now()))")"
   status_seconds=$(((status_end - status_start + 999) / 1000))
   if [ "$status_seconds" -gt "$budget" ]; then
     echo "gateway status exceeded survivor budget: ${status_seconds}s > ${budget}s" >&2
-    openclaw_e2e_print_log "$STATUS_JSON" >&2
+    carapace_e2e_print_log "$STATUS_JSON" >&2
     return 1
   fi
   node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-status-json "$STATUS_JSON"
 }
 
 run_live_openai() {
-  local marker="OPENCLAW_UPGRADE_SURVIVOR_LIVE_OK"
-  local model="${OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI_MODEL:-openai/gpt-5.5}"
+  local marker="CARAPACE_UPGRADE_SURVIVOR_LIVE_OK"
+  local model="${CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI_MODEL:-openai/gpt-5.5}"
   local timeout_seconds
   local status=0
   timeout_seconds="$(
-    openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI_TIMEOUT_SECONDS 180
+    carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI_TIMEOUT_SECONDS 180
   )"
   stop_gateway
   (
-    unset OPENCLAW_SKIP_PROVIDERS
+    unset CARAPACE_SKIP_PROVIDERS
     export OPENAI_API_KEY="$LIVE_OPENAI_API_KEY"
-    openclaw_e2e_maybe_timeout "${timeout_seconds}s" \
-      openclaw agent \
+    carapace_e2e_maybe_timeout "${timeout_seconds}s" \
+      carapace agent \
       --local \
       --agent main \
       --session-id upgrade-survivor-live-openai \
@@ -1837,8 +1837,8 @@ run_live_openai() {
   ) >"$LIVE_OPENAI_JSON" 2>"$LIVE_OPENAI_ERR" || status=$?
   if [ "$status" -ne 0 ]; then
     echo "live OpenAI survivor turn failed" >&2
-    openclaw_e2e_print_log "$LIVE_OPENAI_ERR" >&2
-    openclaw_e2e_print_log "$LIVE_OPENAI_JSON" >&2
+    carapace_e2e_print_log "$LIVE_OPENAI_ERR" >&2
+    carapace_e2e_print_log "$LIVE_OPENAI_JSON" >&2
     return "$status"
   fi
   node --input-type=module - "$marker" "$LIVE_OPENAI_JSON" <<'NODE'
@@ -1866,7 +1866,7 @@ phase validate-baseline-config validate_baseline_config
 phase resolve-candidate resolve_candidate_version
 phase resolve-candidate-install-mode resolve_candidate_install_mode
 if companion_survivor_scenario || [ "$SCENARIO" = "legacy-operator-state" ]; then
-  unset OPENCLAW_CLAWHUB_URL CLAWHUB_URL
+  unset CARAPACE_CLAWHUB_URL CLAWHUB_URL
 else
   phase configure-clawhub-fixture configure_clawhub_fixture
 fi
@@ -1879,7 +1879,7 @@ if [ "$SCENARIO" = "legacy-operator-state" ]; then
   phase configure-baseline-plugin-registry configure_plugin_registry baseline
   phase install-companion-plugin install_companion_plugins
   phase seed-legacy-operator-gateway seed_legacy_operator_gateway
-  openclaw_e2e_stop_process "$plugin_registry_pid"
+  carapace_e2e_stop_process "$plugin_registry_pid"
   phase configure-candidate-plugin-registry configure_plugin_registry
 fi
 run_plugin_fixture_phase install-baseline-plugin-dependencies install_baseline_plugin_dependencies
@@ -1921,7 +1921,7 @@ fi
 phase update-candidate update_candidate_for_install_mode
 if [ "$SCENARIO" = "legacy-operator-state" ]; then
   phase assert-formerly-bundled-plugin node scripts/e2e/lib/upgrade-survivor/assertions.mjs \
-    assert-npm-plugin-install duckduckgo @openclaw/duckduckgo-plugin "$candidate_version" 1
+    assert-npm-plugin-install duckduckgo @carapace/duckduckgo-plugin "$candidate_version" 1
   phase assert-formerly-bundled-plugin-config node scripts/e2e/lib/upgrade-survivor/assertions.mjs \
     assert-legacy-operator-external-plugin "$candidate_version"
   phase assert-candidate-schemas assert_schema_outcome
@@ -1952,7 +1952,7 @@ phase mobile-pairing-candidate-restart verify_mobile_pairing_once \
 if [ "$SCENARIO" = "recovery-cleanup" ]; then
   phase assert-recovery-migration node scripts/e2e/lib/upgrade-survivor/recovery-cleanup.mjs migrated
 fi
-if [ -n "${OPENCLAW_CLAWHUB_URL:-}" ]; then
+if [ -n "${CARAPACE_CLAWHUB_URL:-}" ]; then
   run_plugin_fixture_phase assert-prepublish-requests assert_prepublish_plugin_install 1
 fi
 phase root-managed-vps-cli-usable assert_root_managed_vps_cli_usable

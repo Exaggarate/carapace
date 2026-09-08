@@ -47,7 +47,7 @@ describe("provider setup cold imports", () => {
       expect(
         source,
         `${file} must not load credential runtime for a provider-owned constant`,
-      ).not.toMatch(/from\s+["']openclaw\/plugin-sdk\/provider-auth["']/);
+      ).not.toMatch(/from\s+["']carapace\/plugin-sdk\/provider-auth["']/);
     }
 
     const policySource = fs.readFileSync(

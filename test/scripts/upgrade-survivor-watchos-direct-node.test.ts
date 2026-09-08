@@ -32,7 +32,7 @@ function createTlsFixture(root: string) {
       "-days",
       "1",
       "-subj",
-      "/CN=OpenClaw watchOS survivor test CA",
+      "/CN=Carapace watchOS survivor test CA",
       "-addext",
       "basicConstraints=critical,CA:TRUE",
       "-addext",
@@ -246,7 +246,7 @@ describe.skipIf(process.platform === "win32")(
         minProtocol: 4,
         maxProtocol: 4,
         client: {
-          id: "openclaw-watchos",
+          id: "carapace-watchos",
           version: "2026.8.10",
           platform: "watchOS 11.5.0",
           deviceFamily: "Apple Watch",
@@ -261,7 +261,7 @@ describe.skipIf(process.platform === "win32")(
         auth: { bootstrapToken },
       });
       expect(reconnect).toMatchObject({
-        client: { id: "openclaw-watchos", mode: "node", instanceId: "watchos-upgrade-survivor" },
+        client: { id: "carapace-watchos", mode: "node", instanceId: "watchos-upgrade-survivor" },
         auth: { deviceToken },
         device: { id: bootstrap.device.id, publicKey: bootstrap.device.publicKey },
       });
@@ -310,7 +310,7 @@ describe.skipIf(process.platform === "win32")(
           transport: "https",
           protocol: 4,
           protocolRange: [4, 4],
-          clientId: "openclaw-watchos",
+          clientId: "carapace-watchos",
           clientMode: "node",
           instanceId: "watchos-upgrade-survivor",
           endpointSource: index === 0 ? "setupCode" : "persistedState",
@@ -337,7 +337,7 @@ describe.skipIf(process.platform === "win32")(
           nodes: [
             {
               nodeId: "watch-device",
-              clientId: "openclaw-watchos",
+              clientId: "carapace-watchos",
               clientMode: "node",
             },
           ],
@@ -373,7 +373,7 @@ describe.skipIf(process.platform === "win32")(
         pendingTotal: 0,
         pendingForWatch: 0,
         pairedForWatch: 1,
-        clientId: "openclaw-watchos",
+        clientId: "carapace-watchos",
         clientMode: "node",
         nodeId: "watch-device",
         instanceId: "watchos-upgrade-survivor",

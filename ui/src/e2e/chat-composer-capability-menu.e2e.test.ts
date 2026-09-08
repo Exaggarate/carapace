@@ -17,8 +17,8 @@ function skill(
     name,
     description: `${name} skill`,
     source: "test",
-    filePath: `/tmp/openclaw-e2e/skills/${name}/SKILL.md`,
-    baseDir: `/tmp/openclaw-e2e/skills/${name}`,
+    filePath: `/tmp/carapace-e2e/skills/${name}/SKILL.md`,
+    baseDir: `/tmp/carapace-e2e/skills/${name}`,
     skillKey: name.toLowerCase(),
     always: false,
     disabled: options.disabled ?? false,
@@ -199,8 +199,8 @@ suite.define(() => {
             webSearch: false,
           }),
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [
               skill("Docs"),
               skill("Deploy", { disabled: true }),
@@ -583,8 +583,8 @@ suite.define(() => {
           "config.get": configResponse({ github: { url: "https://mcp.example.test" } }),
           "sessions.list": sessionsList({ webSearch: false }),
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [skill("Docs")],
           },
         },
@@ -645,8 +645,8 @@ suite.define(() => {
             ],
           },
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [skill("Docs")],
           },
         },
@@ -692,8 +692,8 @@ suite.define(() => {
           "config.get": configResponse({}, false),
           "sessions.list": sessionsList(),
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [],
           },
         },
@@ -718,8 +718,8 @@ suite.define(() => {
           "config.get": configResponse({}, false),
           "sessions.list": sessionsList({ skills: { docs: false } }),
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [],
           },
         },
@@ -732,7 +732,7 @@ suite.define(() => {
       await menu.getByRole("menuitem", { name: /Add MCP server/ }).click();
 
       const dialog = page.getByRole("dialog", { name: "Add MCP server" });
-      const modal = page.locator("openclaw-modal-dialog").filter({ hasText: "Add MCP server" });
+      const modal = page.locator("carapace-modal-dialog").filter({ hasText: "Add MCP server" });
       await expect.poll(() => dialog.isVisible()).toBe(true);
       const sessionScope = modal.locator('wa-radio[value="session"]');
       await expect
@@ -798,7 +798,7 @@ suite.define(() => {
       await menu.getByRole("menuitem", { name: /Add MCP server/ }).click();
 
       const everywhereDialog = page
-        .locator("openclaw-modal-dialog")
+        .locator("carapace-modal-dialog")
         .filter({ hasText: "Add MCP server" });
       await everywhereDialog.locator('wa-radio[value="everywhere"]').click();
       await everywhereDialog.getByLabel("Name").fill("global-docs");

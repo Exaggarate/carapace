@@ -1,5 +1,5 @@
 import path from "node:path";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import {
   afterAll,
   beforeAll,
@@ -67,7 +67,7 @@ afterAll(async () => {
 });
 
 async function openOperator(device: string, scopes = ["operator.write"]) {
-  const deviceIdentityPath = path.join(process.env.OPENCLAW_STATE_DIR!, `${device}.sqlite`);
+  const deviceIdentityPath = path.join(process.env.CARAPACE_STATE_DIR!, `${device}.sqlite`);
   const client = await harness.openClient({
     scopes,
     deviceIdentityPath,

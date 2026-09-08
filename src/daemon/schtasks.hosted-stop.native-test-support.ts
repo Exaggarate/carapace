@@ -92,7 +92,7 @@ export async function runHostedStopNativeProbe(params: {
               );
               assert.equal(result.applied, true);
               assert(lines.includes("Scheduled Gateway stop"));
-              assert(lines.includes("[openclaw] done: gateway.stop"));
+              assert(lines.includes("[carapace] done: gateway.stop"));
               const audits = createSqliteAuditRecordStore<SystemAgentAuditEntry>({
                 scope: SYSTEM_AGENT_AUDIT_SCOPE,
                 maxEntries: SYSTEM_AGENT_AUDIT_MAX_ENTRIES,

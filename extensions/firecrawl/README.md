@@ -1,12 +1,12 @@
-# OpenClaw Firecrawl Plugin
+# Carapace Firecrawl Plugin
 
-Official OpenClaw plugin for Firecrawl.
+Official Carapace plugin for Firecrawl.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/firecrawl-plugin
-openclaw gateway restart
+carapace plugins install @carapace/firecrawl-plugin
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/firecrawl> for setup and configuration.
+See <../../docs/tools/firecrawl.md> for setup and configuration.

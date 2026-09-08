@@ -20,6 +20,6 @@ export const page = definePage({
     import("./model-setup-page.ts").then(() => ({
       header: true,
       render: (data: ModelSetupRouteData | undefined) =>
-        html`<openclaw-model-setup-page .routeData=${data}></openclaw-model-setup-page>`,
+        html`<carapace-model-setup-page .routeData=${data}></carapace-model-setup-page>`,
     })),
 });

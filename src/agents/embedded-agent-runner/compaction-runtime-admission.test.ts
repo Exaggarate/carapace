@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeEach, expect, it } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadAndActivateRootPluginRegistry } from "../../plugins/loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
@@ -12,9 +12,9 @@ import {
 } from "../../plugins/loader.test-fixtures.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import {
   acquireAgentRunPreparedModelRuntime,
   getPreparedModelRuntimeSnapshot,
@@ -23,10 +23,10 @@ import {
 import { resetPreparedModelRuntimeSnapshotsForTest } from "../prepared-model-runtime.test-support.js";
 import { resolveCompactionRuntimeSelection } from "./compaction-runtime-preparation.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 beforeEach(async () => {
   await resetPreparedModelRuntimeSnapshotsForTest();
-  state = await createOpenClawTestState({ label: "compaction-provider-owner" });
+  state = await createCarapaceTestState({ label: "compaction-provider-owner" });
   useNoBundledPlugins();
 });
 afterEach(async () => {
@@ -59,7 +59,7 @@ it.each([
           };`,
         });
         await fs.writeFile(
-          path.join(plugin.dir, "openclaw.plugin.json"),
+          path.join(plugin.dir, "carapace.plugin.json"),
           JSON.stringify({
             id,
             providers: [id],
@@ -74,7 +74,7 @@ it.each([
     const requestWorkspace = path.join(state.root, "requested-workspace");
     const agentDir = state.agentDir("main");
     await fs.mkdir(requestWorkspace, { recursive: true });
-    const config = (summaryProvider?: string): OpenClawConfig => ({
+    const config = (summaryProvider?: string): CarapaceConfig => ({
       agents: {
         ownership: "explicit",
         entries: { main: { agentDir, workspace: gatewayWorkspace } },
@@ -105,7 +105,7 @@ it.each([
     });
     const publication = { gatewayLifecycle: true, catalogMode: "static" as const };
     await refreshPreparedModelRuntimeSnapshots(previousConfig, publication);
-    const requested = { provider: "caller-provider", modelId: "model", runtime: "openclaw" };
+    const requested = { provider: "caller-provider", modelId: "model", runtime: "carapace" };
     const extra = { ...requested, provider: "requested-extra" };
     const input = {
       config: previousConfig,
@@ -128,7 +128,7 @@ it.each([
         config: admittedConfig,
         metadataSnapshot,
       }: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         metadataSnapshot: PluginMetadataSnapshot;
       }) => {
         const selection = resolveCompactionRuntimeSelection({
@@ -138,7 +138,7 @@ it.each([
           manifestPlugins: metadataSnapshot,
           allowPluginNormalization: false,
         });
-        return [{ provider: selection.provider, modelId: selection.modelId, runtime: "openclaw" }];
+        return [{ provider: selection.provider, modelId: selection.modelId, runtime: "carapace" }];
       },
     };
     const pending = acquireAgentRunPreparedModelRuntime(input, admissionOptions);

@@ -109,9 +109,9 @@ describe("PluginsPage icon routing", () => {
       });
     const result = {
       plugins: [
-        catalogPlugin("@openclaw/brave-plugin", "Brave Search"),
-        catalogPlugin("@openclaw/deepseek-provider", "DeepSeek"),
-        catalogPlugin("@openclaw/discord", "Discord"),
+        catalogPlugin("@carapace/brave-plugin", "Brave Search"),
+        catalogPlugin("@carapace/deepseek-provider", "DeepSeek"),
+        catalogPlugin("@carapace/discord", "Discord"),
         catalogPlugin("@vendor/brave-plugin", "Vendor Brave", "registry"),
       ],
       diagnostics: [],
@@ -129,16 +129,16 @@ describe("PluginsPage icon routing", () => {
 
     await waitForFast(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
-      "/__openclaw__/plugin-icon/%40vendor%2Fbrave-plugin",
+      "/__carapace__/plugin-icon/%40vendor%2Fbrave-plugin",
     ]);
     expect(
-      page.querySelector('[data-plugin-id="@openclaw/brave-plugin"] img')?.getAttribute("src"),
+      page.querySelector('[data-plugin-id="@carapace/brave-plugin"] img')?.getAttribute("src"),
     ).toBe("/plugin-art/brave.webp");
     expect(
-      page.querySelector('[data-plugin-id="@openclaw/deepseek-provider"] img')?.getAttribute("src"),
+      page.querySelector('[data-plugin-id="@carapace/deepseek-provider"] img')?.getAttribute("src"),
     ).toBe("/plugin-art/deepseek.webp");
     expect(
-      page.querySelector('[data-plugin-id="@openclaw/discord"] img')?.getAttribute("src"),
+      page.querySelector('[data-plugin-id="@carapace/discord"] img')?.getAttribute("src"),
     ).toBe("/plugin-art/discord.webp");
   });
 

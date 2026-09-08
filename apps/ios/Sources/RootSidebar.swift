@@ -1,5 +1,5 @@
-import OpenClawChatUI
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceProtocol
 import SwiftUI
 
 struct RootSidebar: View {
@@ -17,7 +17,7 @@ struct RootSidebar: View {
     let isDrawerLayout: Bool
     let isDismissButtonEnabled: Bool
     let selectDestination: (RootTabs.SidebarDestination) -> Void
-    let selectSession: (OpenClawChatSessionEntry) -> Void
+    let selectSession: (CarapaceChatSessionEntry) -> Void
     let hideSidebar: () -> Void
 
     var body: some View {
@@ -42,8 +42,8 @@ struct RootSidebar: View {
             }
             self.footer
         }
-        .foregroundStyle(OpenClawSidebarPalette.text)
-        .background(OpenClawSidebarPalette.background)
+        .foregroundStyle(CarapaceSidebarPalette.text)
+        .background(CarapaceSidebarPalette.background)
         .sheet(isPresented: self.$showsPagesEditor) {
             RootSidebarPagesEditor(
                 destinations: RootTabs.pinnableSidebarPages.filter(self.isDestinationAvailable),
@@ -83,11 +83,11 @@ struct RootSidebar: View {
     private var brandHeader: some View {
         HStack(spacing: 4) {
             HStack(spacing: 8) {
-                OpenClawProMark(size: 26, shadowRadius: 2)
+                CarapaceProMark(size: 26, shadowRadius: 2)
                     .accessibilityHidden(true)
-                Text(String(localized: "OpenClaw"))
-                    .font(OpenClawType.headline)
-                    .foregroundStyle(OpenClawSidebarPalette.textStrong)
+                Text(String(localized: "Carapace"))
+                    .font(CarapaceType.headline)
+                    .foregroundStyle(CarapaceSidebarPalette.textStrong)
                     .lineLimit(1)
             }
             .padding(.leading, 6)
@@ -109,7 +109,7 @@ struct RootSidebar: View {
             }
 
             if self.isDrawerLayout {
-                OpenClawSidebarControlButton(action: self.dismissAction)
+                CarapaceSidebarControlButton(action: self.dismissAction)
                     .allowsHitTesting(self.isDismissButtonEnabled)
                     .accessibilityHidden(!self.isDismissButtonEnabled)
             }
@@ -117,12 +117,12 @@ struct RootSidebar: View {
         .padding(.leading, 8)
         .padding(.trailing, 8)
         .padding(.vertical, 8)
-        .background(OpenClawSidebarPalette.background)
+        .background(CarapaceSidebarPalette.background)
         .overlay(alignment: .bottom) { self.separator }
     }
 
-    private var dismissAction: OpenClawSidebarHeaderAction {
-        OpenClawSidebarHeaderAction(
+    private var dismissAction: CarapaceSidebarHeaderAction {
+        CarapaceSidebarHeaderAction(
             systemName: "sidebar.leading",
             accessibilityLabel: .localized("Hide Sidebar"),
             accessibilityIdentifier: self.isDismissButtonEnabled
@@ -144,7 +144,7 @@ struct RootSidebar: View {
                         ForEach(self.selectableAgents, id: \.id) { agent in
                             Label {
                                 Text(verbatim: Self.agentDisplayName(agent))
-                                    .font(OpenClawType.subheadSemiBold)
+                                    .font(CarapaceType.subheadSemiBold)
                             } icon: {
                                 self.agentMenuAvatarImage(agent)
                                     .renderingMode(.original)
@@ -182,28 +182,28 @@ struct RootSidebar: View {
             ZStack(alignment: .bottomTrailing) {
                 self.agentAvatarBadge(agent, size: 28)
                 Circle()
-                    .fill(OpenClawBrand.ok)
+                    .fill(CarapaceBrand.ok)
                     .frame(width: 8, height: 8)
-                    .overlay(Circle().stroke(OpenClawSidebarPalette.background, lineWidth: 1.5))
+                    .overlay(Circle().stroke(CarapaceSidebarPalette.background, lineWidth: 1.5))
             }
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(verbatim: Self.agentDisplayName(agent))
-                    .font(OpenClawType.subheadSemiBold)
-                    .foregroundStyle(OpenClawSidebarPalette.textStrong)
+                    .font(CarapaceType.subheadSemiBold)
+                    .foregroundStyle(CarapaceSidebarPalette.textStrong)
                     .lineLimit(1)
                 if let model = Self.agentModelLabel(agent) {
                     Text(verbatim: model)
-                        .font(OpenClawType.caption2Medium)
-                        .foregroundStyle(OpenClawSidebarPalette.muted)
+                        .font(CarapaceType.caption2Medium)
+                        .foregroundStyle(CarapaceSidebarPalette.muted)
                         .lineLimit(1)
                 }
             }
             Spacer(minLength: 4)
             Image(systemName: "chevron.up.chevron.down")
-                .font(OpenClawType.captionSemiBold)
-                .foregroundStyle(OpenClawSidebarPalette.muted)
+                .font(CarapaceType.captionSemiBold)
+                .foregroundStyle(CarapaceSidebarPalette.muted)
                 .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
@@ -218,17 +218,17 @@ struct RootSidebar: View {
         } label: {
             Label {
                 Text(String(localized: "New Chat"))
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             } icon: {
                 Image(systemName: "plus.bubble")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             .padding(.horizontal, 10)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(OpenClawSidebarPalette.accent)
+        .foregroundStyle(CarapaceSidebarPalette.accent)
         .disabled(!self.appModel.isOperatorGatewayConnected)
         .accessibilityLabel(String(localized: "New Chat"))
     }
@@ -253,12 +253,12 @@ struct RootSidebar: View {
     {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
                 .frame(width: 40, height: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(OpenClawSidebarPalette.text)
+        .foregroundStyle(CarapaceSidebarPalette.text)
         .accessibilityLabel(label)
     }
 
@@ -282,15 +282,15 @@ struct RootSidebar: View {
     private func agentAvatarBadge(_ agent: AgentSummary, size: CGFloat) -> some View {
         ZStack {
             Circle()
-                .fill(OpenClawSidebarPalette.elevated)
+                .fill(CarapaceSidebarPalette.elevated)
             Text(verbatim: Self.agentBadge(name: Self.agentDisplayName(agent), identity: agent.identity))
-                .font(OpenClawType.caption2Bold)
-                .foregroundStyle(OpenClawSidebarPalette.textStrong)
+                .font(CarapaceType.caption2Bold)
+                .foregroundStyle(CarapaceSidebarPalette.textStrong)
                 .minimumScaleFactor(0.65)
                 .lineLimit(1)
         }
         .frame(width: size, height: size)
-        .overlay(Circle().strokeBorder(OpenClawSidebarPalette.hairline, lineWidth: 1))
+        .overlay(Circle().strokeBorder(CarapaceSidebarPalette.hairline, lineWidth: 1))
         .accessibilityHidden(true)
     }
 
@@ -307,19 +307,19 @@ struct RootSidebar: View {
     private var searchField: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .font(OpenClawType.captionSemiBold)
-                .foregroundStyle(OpenClawSidebarPalette.muted)
+                .font(CarapaceType.captionSemiBold)
+                .foregroundStyle(CarapaceSidebarPalette.muted)
                 .accessibilityHidden(true)
             ZStack(alignment: .leading) {
                 if self.searchText.isEmpty {
                     Text(String(localized: "Search sessions"))
-                        .font(OpenClawType.subhead)
-                        .foregroundStyle(OpenClawSidebarPalette.muted)
+                        .font(CarapaceType.subhead)
+                        .foregroundStyle(CarapaceSidebarPalette.muted)
                         .accessibilityHidden(true)
                 }
                 TextField("", text: self.$searchText)
-                    .font(OpenClawType.subhead)
-                    .foregroundStyle(OpenClawSidebarPalette.textStrong)
+                    .font(CarapaceType.subhead)
+                    .foregroundStyle(CarapaceSidebarPalette.textStrong)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .focused(self.$isSearchFocused)
@@ -330,8 +330,8 @@ struct RootSidebar: View {
                     self.searchText = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(OpenClawType.subhead)
-                        .foregroundStyle(OpenClawSidebarPalette.muted)
+                        .font(CarapaceType.subhead)
+                        .foregroundStyle(CarapaceSidebarPalette.muted)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(String(localized: "Clear session search"))
@@ -339,8 +339,8 @@ struct RootSidebar: View {
         }
         .frame(minHeight: 44)
         .padding(.horizontal, 12)
-        .background(OpenClawSidebarPalette.elevated, in: RoundedRectangle(
-            cornerRadius: OpenClawProMetric.controlRadius,
+        .background(CarapaceSidebarPalette.elevated, in: RoundedRectangle(
+            cornerRadius: CarapaceProMetric.controlRadius,
             style: .continuous))
         .padding(.horizontal, 10)
         .padding(.bottom, 4)
@@ -355,8 +355,8 @@ struct RootSidebar: View {
         VStack(alignment: .leading, spacing: 6) {
             if let sessionErrorText = self.model.sessionErrorText {
                 Text(verbatim: sessionErrorText)
-                    .font(OpenClawType.captionMedium)
-                    .foregroundStyle(OpenClawBrand.warn)
+                    .font(CarapaceType.captionMedium)
+                    .foregroundStyle(CarapaceBrand.warn)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 10)
             }
@@ -365,16 +365,16 @@ struct RootSidebar: View {
                 HStack(spacing: 9) {
                     ProgressView().controlSize(.small)
                     Text(String(localized: "Loading sessions"))
-                        .font(OpenClawType.captionMedium)
-                        .foregroundStyle(OpenClawSidebarPalette.muted)
+                        .font(CarapaceType.captionMedium)
+                        .foregroundStyle(CarapaceSidebarPalette.muted)
                 }
                 .frame(minHeight: 44)
                 .padding(.horizontal, 10)
             } else if sections.isEmpty, !hasPinnedSessions {
                 self.sectionTitle(String(localized: "Sessions"))
                 Text(String(localized: "No sessions"))
-                    .font(OpenClawType.captionMedium)
-                    .foregroundStyle(OpenClawSidebarPalette.muted)
+                    .font(CarapaceType.captionMedium)
+                    .foregroundStyle(CarapaceSidebarPalette.muted)
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .padding(.horizontal, 10)
             } else {
@@ -394,17 +394,17 @@ struct RootSidebar: View {
             } label: {
                 Label {
                     Text(String(localized: "All Sessions…"))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 } icon: {
                     Image(systemName: "rectangle.stack")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .padding(.horizontal, 10)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(OpenClawSidebarPalette.accent)
+            .foregroundStyle(CarapaceSidebarPalette.accent)
         }
     }
 
@@ -417,12 +417,12 @@ struct RootSidebar: View {
                     self.showsPagesEditor = true
                 } label: {
                     Image(systemName: "square.and.pencil")
-                        .font(OpenClawType.captionSemiBold)
+                        .font(CarapaceType.captionSemiBold)
                         .frame(width: 40, height: 32)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(OpenClawSidebarPalette.muted)
+                .foregroundStyle(CarapaceSidebarPalette.muted)
                 .accessibilityLabel(String(localized: "Edit Pages"))
             }
             self.homeRow
@@ -448,19 +448,19 @@ struct RootSidebar: View {
         } label: {
             HStack(spacing: 9) {
                 Image(systemName: "house")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                     .frame(width: 18)
                 Text(String(localized: "Home"))
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                     .lineLimit(1)
                 Spacer(minLength: 4)
                 if mainSession?.hasActiveRun == true {
                     ProgressView()
                         .controlSize(.mini)
-                        .tint(OpenClawSidebarPalette.accent)
+                        .tint(CarapaceSidebarPalette.accent)
                 } else if mainSession?.unread == true {
                     Circle()
-                        .fill(OpenClawSidebarPalette.accent)
+                        .fill(CarapaceSidebarPalette.accent)
                         .frame(width: 7, height: 7)
                         .accessibilityHidden(true)
                 }
@@ -470,13 +470,13 @@ struct RootSidebar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isSelected ? OpenClawSidebarPalette.accent : OpenClawSidebarPalette.text)
-        .background(isSelected ? OpenClawSidebarPalette.selection : Color.clear, in: RoundedRectangle(
-            cornerRadius: OpenClawProMetric.controlRadius,
+        .foregroundStyle(isSelected ? CarapaceSidebarPalette.accent : CarapaceSidebarPalette.text)
+        .background(isSelected ? CarapaceSidebarPalette.selection : Color.clear, in: RoundedRectangle(
+            cornerRadius: CarapaceProMetric.controlRadius,
             style: .continuous))
         .accessibilityIdentifier("RootTabs.Sidebar.Destination.chat")
         .overlay(alignment: .leading) {
-            OpenClawSessionColorStripe(color: mainSession?.color)
+            CarapaceSessionColorStripe(color: mainSession?.color)
         }
         .accessibilityValue(mainSession?.unread == true ? String(localized: "Unread") : "")
     }
@@ -499,7 +499,7 @@ struct RootSidebar: View {
                                 .accessibilityHidden(true)
                         }
                         Text(verbatim: self.gatewayName)
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                             .lineLimit(1)
                     }
                     .frame(minHeight: 44, alignment: .leading)
@@ -507,7 +507,7 @@ struct RootSidebar: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(OpenClawSidebarPalette.text)
+                .foregroundStyle(CarapaceSidebarPalette.text)
                 .accessibilityValue(self.gatewayStatusTitle)
 
                 Spacer(minLength: 4)
@@ -524,12 +524,12 @@ struct RootSidebar: View {
         .padding(.horizontal, 10)
         .padding(.bottom, 8)
         .fixedSize(horizontal: false, vertical: true)
-        .background(OpenClawSidebarPalette.background)
+        .background(CarapaceSidebarPalette.background)
     }
 
     /// Alias-aware main lookup: rosters may return namespaced keys
     /// ("agent:<id>:main"), so raw comparison would drop Home's badges.
-    private var mainSessionEntry: OpenClawChatSessionEntry? {
+    private var mainSessionEntry: CarapaceChatSessionEntry? {
         self.model.sessions.first { $0.key == self.resolvedMainSessionKey }
     }
 
@@ -578,9 +578,9 @@ struct RootSidebar: View {
         CommandSessionGrouping.categories(from: self.model.sessions, knownGroups: SessionGroupStore.load())
     }
 
-    private var sessionGroups: [OpenClawChatSessionGroup] {
+    private var sessionGroups: [CarapaceChatSessionGroup] {
         self.sessionCategories.enumerated().map { offset, name in
-            OpenClawChatSessionGroup(name: name, position: offset)
+            CarapaceChatSessionGroup(name: name, position: offset)
         }
     }
 
@@ -614,23 +614,23 @@ struct RootSidebar: View {
                     if node.badges.runningCount > 0 {
                         ProgressView()
                             .controlSize(.mini)
-                            .tint(OpenClawSidebarPalette.accent)
+                            .tint(CarapaceSidebarPalette.accent)
                     } else {
                         Image(systemName: "bubble.left")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(CarapaceType.captionSemiBold)
                             .foregroundStyle(isSelected
-                                ? OpenClawSidebarPalette.accent
-                                : OpenClawSidebarPalette.muted)
+                                ? CarapaceSidebarPalette.accent
+                                : CarapaceSidebarPalette.muted)
                     }
                 }
                 .frame(width: 18)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: CommandCenterTab.sessionTitle(session))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .foregroundStyle(isSelected
-                            ? OpenClawSidebarPalette.accent
-                            : OpenClawSidebarPalette.textStrong)
+                            ? CarapaceSidebarPalette.accent
+                            : CarapaceSidebarPalette.textStrong)
                         .lineLimit(1)
                     // Web-parity subtitle: the work line (repo/branch) names the
                     // session; recency moves to the trailing metadata slot.
@@ -639,8 +639,8 @@ struct RootSidebar: View {
                         workSubtitle: ChatSessionSidebarModel.workSubtitle(for: session))
                     {
                         Text(verbatim: subtitle)
-                            .font(OpenClawType.caption2Medium)
-                            .foregroundStyle(OpenClawSidebarPalette.muted)
+                            .font(CarapaceType.caption2Medium)
+                            .foregroundStyle(CarapaceSidebarPalette.muted)
                             .lineLimit(1)
                     }
                 }
@@ -648,17 +648,17 @@ struct RootSidebar: View {
                 Spacer(minLength: 4)
                 if session.pinned == true {
                     Image(systemName: "pin.fill")
-                        .font(OpenClawType.caption2Medium)
-                        .foregroundStyle(OpenClawSidebarPalette.accent)
+                        .font(CarapaceType.caption2Medium)
+                        .foregroundStyle(CarapaceSidebarPalette.accent)
                         .accessibilityHidden(true)
                 }
                 Text(verbatim: CommandCenterTab.sessionDetail(session))
-                    .font(OpenClawType.caption2Medium)
-                    .foregroundStyle(OpenClawSidebarPalette.muted)
+                    .font(CarapaceType.caption2Medium)
+                    .foregroundStyle(CarapaceSidebarPalette.muted)
                     .lineLimit(1)
                 if session.unread == true {
                     Circle()
-                        .fill(OpenClawSidebarPalette.accent)
+                        .fill(CarapaceSidebarPalette.accent)
                         .frame(width: 7, height: 7)
                         .accessibilityHidden(true)
                 }
@@ -668,11 +668,11 @@ struct RootSidebar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .background(isSelected ? OpenClawSidebarPalette.selection : Color.clear, in: RoundedRectangle(
-            cornerRadius: OpenClawProMetric.controlRadius,
+        .background(isSelected ? CarapaceSidebarPalette.selection : Color.clear, in: RoundedRectangle(
+            cornerRadius: CarapaceProMetric.controlRadius,
             style: .continuous))
         .overlay(alignment: .leading) {
-            OpenClawSessionColorStripe(color: session.color)
+            CarapaceSessionColorStripe(color: session.color)
         }
         .commandSessionActions(
             session: session,
@@ -718,20 +718,20 @@ struct RootSidebar: View {
             HStack(spacing: 0) {
                 Label {
                     Text(destination.sidebarTitle)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .lineLimit(1)
                 } icon: {
                     Image(systemName: destination.systemImage)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 Spacer(minLength: 6)
                 if badgeCount > 0 {
                     Text(verbatim: badgeCount.formatted())
-                        .font(OpenClawType.caption2Bold)
+                        .font(CarapaceType.caption2Bold)
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 6)
                         .frame(minWidth: 18, minHeight: 18)
-                        .background(OpenClawSidebarPalette.accent, in: Capsule())
+                        .background(CarapaceSidebarPalette.accent, in: Capsule())
                         .accessibilityLabel(String(localized: "Attention"))
                 }
             }
@@ -740,9 +740,9 @@ struct RootSidebar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isSelected ? OpenClawSidebarPalette.accent : OpenClawSidebarPalette.text)
-        .background(isSelected ? OpenClawSidebarPalette.selection : Color.clear, in: RoundedRectangle(
-            cornerRadius: OpenClawProMetric.controlRadius,
+        .foregroundStyle(isSelected ? CarapaceSidebarPalette.accent : CarapaceSidebarPalette.text)
+        .background(isSelected ? CarapaceSidebarPalette.selection : Color.clear, in: RoundedRectangle(
+            cornerRadius: CarapaceProMetric.controlRadius,
             style: .continuous))
         .accessibilityIdentifier("RootTabs.Sidebar.Destination.\(destination.rawValue)")
     }
@@ -759,15 +759,15 @@ struct RootSidebar: View {
 
     private func sectionTitle(_ title: String) -> some View {
         Text(verbatim: title.uppercased())
-            .font(OpenClawType.caption2Bold)
-            .foregroundStyle(OpenClawSidebarPalette.muted)
+            .font(CarapaceType.caption2Bold)
+            .foregroundStyle(CarapaceSidebarPalette.muted)
             .tracking(0.5)
             .padding(.horizontal, 10)
     }
 
     private var separator: some View {
         Rectangle()
-            .fill(OpenClawSidebarPalette.hairline)
+            .fill(CarapaceSidebarPalette.hairline)
             .frame(height: 1 / self.displayScale)
     }
 
@@ -800,15 +800,15 @@ struct RootSidebar: View {
 
     private var gatewayStatusColor: Color {
         switch GatewayStatusBuilder.build(appModel: self.appModel) {
-        case .connected: OpenClawBrand.ok
-        case .connecting: OpenClawBrand.accent
-        case .error: OpenClawBrand.warn
-        case .disconnected: OpenClawSidebarPalette.muted
+        case .connected: CarapaceBrand.ok
+        case .connecting: CarapaceBrand.accent
+        case .error: CarapaceBrand.warn
+        case .disconnected: CarapaceSidebarPalette.muted
         }
     }
 
     private func patchSession(
-        _ session: OpenClawChatSessionEntry,
+        _ session: CarapaceChatSessionEntry,
         label: String?? = nil,
         category: String?? = nil,
         color: String?? = nil,
@@ -837,7 +837,7 @@ struct RootSidebar: View {
         }
     }
 
-    private func deleteSession(_ session: OpenClawChatSessionEntry) {
+    private func deleteSession(_ session: CarapaceChatSessionEntry) {
         Task {
             do {
                 try await self.appModel.makeChatTransport().deleteSession(key: session.key)
@@ -851,7 +851,7 @@ struct RootSidebar: View {
         }
     }
 
-    private func forkSession(_ session: OpenClawChatSessionEntry) {
+    private func forkSession(_ session: CarapaceChatSessionEntry) {
         Task {
             do {
                 let key = try await self.appModel.makeChatTransport().forkSession(
@@ -896,7 +896,7 @@ struct RootSidebarPagesEditor: View {
                     }
                 } footer: {
                     Text("Pinned pages stay in the sidebar. Home is always shown.")
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                 }
             }
             .navigationTitle(String(localized: "Pages"))
@@ -907,12 +907,12 @@ struct RootSidebarPagesEditor: View {
                         self.dismiss()
                     } label: {
                         Text(String(localized: "Done"))
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                     }
                 }
             }
         }
-        .openClawSheetChrome()
+        .carapaceSheetChrome()
     }
 
     private func pageRow(_ destination: RootTabs.SidebarDestination) -> some View {
@@ -923,7 +923,7 @@ struct RootSidebarPagesEditor: View {
             } label: {
                 Label {
                     Text(destination.sidebarTitle)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 } icon: {
                     Image(systemName: destination.systemImage)
                 }
@@ -936,8 +936,8 @@ struct RootSidebarPagesEditor: View {
                 self.onTogglePin(destination)
             } label: {
                 Image(systemName: isPinned ? "pin.fill" : "pin")
-                    .font(OpenClawType.subheadSemiBold)
-                    .foregroundStyle(isPinned ? OpenClawBrand.accent : Color.secondary)
+                    .font(CarapaceType.subheadSemiBold)
+                    .foregroundStyle(isPinned ? CarapaceBrand.accent : Color.secondary)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }

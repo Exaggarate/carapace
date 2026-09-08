@@ -24,9 +24,9 @@ import type {
   SetSessionModeRequest,
   SetSessionModeResponse,
 } from "@agentclientprotocol/sdk";
-import { createInMemorySessionStore, type AcpSessionStore } from "@openclaw/acp-core/session";
-import type { AcpServerOptions } from "@openclaw/acp-core/types";
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { createInMemorySessionStore, type AcpSessionStore } from "@carapace/acp-core/session";
+import type { AcpServerOptions } from "@carapace/acp-core/types";
+import { resolveIntegerOption } from "@carapace/normalization-core/number-coercion";
 import type { EventFrame } from "../../packages/gateway-protocol/src/index.js";
 import type { GatewayClient } from "../gateway/client.js";
 import { createFixedWindowBudget } from "../infra/fixed-window-rate-limit.js";
@@ -49,7 +49,7 @@ type AcpGatewayAgentOptions = AcpServerOptions & {
   sessionStore?: AcpSessionStore;
 };
 
-/** ACP Agent implementation backed by the OpenClaw Gateway and replay ledger. */
+/** ACP Agent implementation backed by the Carapace Gateway and replay ledger. */
 export class AcpGatewayAgent implements Agent {
   private readonly sessionUpdates: AcpTranslatorSessionUpdates;
   private readonly promptStream: AcpTranslatorPromptStream;

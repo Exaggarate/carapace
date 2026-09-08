@@ -1,5 +1,5 @@
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { extractBalancedJsonFragments, stableStringify } from "@openclaw/normalization-core";
+import { estimateBase64DecodedBytes } from "@carapace/media-core/base64";
+import { extractBalancedJsonFragments, stableStringify } from "@carapace/normalization-core";
 import { parseRetryAfterHeadersSeconds } from "../internal/retry-after.js";
 
 const NON_CREDENTIAL_FIELD_NAMES = new Set([

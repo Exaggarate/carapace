@@ -33,7 +33,7 @@ function runAssertion(args: string[], env?: NodeJS.ProcessEnv) {
 }
 
 function writeAuthProfileStoreSqlite(stateDir: string, store: unknown) {
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   mkdirSync(path.dirname(databasePath), { recursive: true });
   const db = new DatabaseSync(databasePath);
   try {
@@ -66,7 +66,7 @@ describe("release scenario assertions", () => {
   });
 
   it("scans large files when checking release scenario output text", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const outputPath = path.join(root, "output.log");
 
     try {
@@ -91,7 +91,7 @@ describe("release scenario assertions", () => {
   });
 
   it("bounds release output text assertion diagnostics", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const outputPath = path.join(root, "output.log");
 
     try {
@@ -113,8 +113,8 @@ describe("release scenario assertions", () => {
   });
 
   it("reports bounded onboarding hook diagnostics without leaking unrelated config", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
-    const configPath = path.join(root, "openclaw.json");
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
+    const configPath = path.join(root, "carapace.json");
     const secretSentinel = "release-diagnostic-secret-sentinel";
 
     try {
@@ -134,13 +134,13 @@ describe("release scenario assertions", () => {
         },
         env: {
           vars: {
-            OPENCLAW_TEST_SECRET: secretSentinel,
+            CARAPACE_TEST_SECRET: secretSentinel,
           },
         },
       });
 
       const result = runAssertion(["assert-session-memory-hook-enabled"], {
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_CONFIG_PATH: configPath,
       });
 
       expect(result.status).not.toBe(0);
@@ -155,13 +155,13 @@ describe("release scenario assertions", () => {
   });
 
   it("permits a selected interactive-onboarding target without a default session-memory hook", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
-    const configPath = path.join(root, "openclaw.json");
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
+    const configPath = path.join(root, "carapace.json");
     try {
       writeJson(configPath, { wizard: { lastRunCommand: "onboard" } });
       const result = runAssertion(["assert-session-memory-hook-enabled"], {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_FROZEN_TARGET_ONBOARD_SESSION_MEMORY_HOOK_MODE: "interactive",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_FROZEN_TARGET_ONBOARD_SESSION_MEMORY_HOOK_MODE: "interactive",
       });
       expect(result.status).toBe(0);
       expect(result.stdout).toContain("unavailable in selected interactive onboarding");
@@ -171,7 +171,7 @@ describe("release scenario assertions", () => {
   });
 
   it("scans large request logs for image describe responses", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const outputPath = path.join(root, "describe.json");
     const requestLogPath = path.join(root, "requests.jsonl");
 
@@ -179,7 +179,7 @@ describe("release scenario assertions", () => {
       writeJson(outputPath, {
         capability: "image.describe",
         ok: true,
-        outputs: [{ provider: "openai", text: "OPENCLAW_E2E_OK describe" }],
+        outputs: [{ provider: "openai", text: "CARAPACE_E2E_OK describe" }],
       });
       const endpointPrefix = "/v1/res";
       writeFileSync(
@@ -198,7 +198,7 @@ describe("release scenario assertions", () => {
   });
 
   it("rejects oversized JSON artifacts before parsing release scenario outputs", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const outputPath = path.join(root, "describe.json");
     const requestLogPath = path.join(root, "requests.jsonl");
 
@@ -223,7 +223,7 @@ describe("release scenario assertions", () => {
   });
 
   it("scans large request logs for image generation requests", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const outputPath = path.join(root, "generate.json");
     const requestLogPath = path.join(root, "requests.jsonl");
     const imagePath = path.join(root, "generated.png");
@@ -253,10 +253,10 @@ describe("release scenario assertions", () => {
   });
 
   it("accepts OpenAI env refs from the SQLite auth profile store", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const home = path.join(root, "home");
-    const stateDir = path.join(home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(home, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
 
     try {
       writeJson(configPath, {
@@ -279,14 +279,14 @@ describe("release scenario assertions", () => {
 
       const result = runAssertion(["assert-openai-env-ref", "sk-test-raw-key"], {
         HOME: home,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
       });
 
       expect(result.status).toBe(0);
       expect(result.stderr).toBe("");
       expect(
-        existsSync(path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite")),
+        existsSync(path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite")),
       ).toBe(false);
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -294,10 +294,10 @@ describe("release scenario assertions", () => {
   });
 
   it("rejects SQLite auth profile stores without a usable OpenAI env ref", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const home = path.join(root, "home");
-    const stateDir = path.join(home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(home, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
 
     try {
       writeJson(configPath, {
@@ -316,8 +316,8 @@ describe("release scenario assertions", () => {
 
       const result = runAssertion(["assert-openai-env-ref", "sk-test-raw-key"], {
         HOME: home,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
       });
 
       expect(result.status).not.toBe(0);
@@ -328,10 +328,10 @@ describe("release scenario assertions", () => {
   });
 
   it("rejects inline OpenAI keys in the SQLite auth profile store", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const home = path.join(root, "home");
-    const stateDir = path.join(home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(home, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
 
     try {
       writeJson(configPath, {
@@ -354,8 +354,8 @@ describe("release scenario assertions", () => {
 
       const result = runAssertion(["assert-openai-env-ref", "sk-test-raw-key"], {
         HOME: home,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
       });
 
       expect(result.status).not.toBe(0);
@@ -366,10 +366,10 @@ describe("release scenario assertions", () => {
   });
 
   it("rejects raw OpenAI keys leaked outside the SQLite auth profile store", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
     const home = path.join(root, "home");
-    const stateDir = path.join(home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(home, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
 
     try {
       writeJson(configPath, {
@@ -397,8 +397,8 @@ describe("release scenario assertions", () => {
 
       const result = runAssertion(["assert-openai-env-ref", "sk-test-raw-key"], {
         HOME: home,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
       });
 
       expect(result.status).not.toBe(0);
@@ -409,12 +409,12 @@ describe("release scenario assertions", () => {
   });
 
   it("passes when the installed package version matches the candidate version", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
-    const packageRoot = path.join(root, "openclaw");
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
+    const packageRoot = path.join(root, "carapace");
 
     try {
       writeJson(path.join(packageRoot, "package.json"), {
-        name: "openclaw",
+        name: "carapace",
         version: "2026.5.26",
       });
 
@@ -433,12 +433,12 @@ describe("release scenario assertions", () => {
   });
 
   it("fails when the global install still points at the baseline version", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-scenarios-"));
-    const packageRoot = path.join(root, "openclaw");
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-scenarios-"));
+    const packageRoot = path.join(root, "carapace");
 
     try {
       writeJson(path.join(packageRoot, "package.json"), {
-        name: "openclaw",
+        name: "carapace",
         version: "2026.5.22",
       });
 

@@ -157,8 +157,8 @@ export function installEmbeddedRunnerBaseE2eMocks(options?: {
   vi.doMock("../prepared-model-runtime.js", () => {
     const acquire = async (input: PreparedModelRuntimeInput) => {
       if (!input.readOnly) {
-        const { ensureOpenClawModelsJson } = await import("../models-config.js");
-        await ensureOpenClawModelsJson(
+        const { ensureCarapaceModelsJson } = await import("../models-config.js");
+        await ensureCarapaceModelsJson(
           input.config,
           input.agentDir,
           input.workspaceDir !== undefined ? { workspaceDir: input.workspaceDir } : {},
@@ -213,12 +213,12 @@ export function installEmbeddedRunnerFastRunE2eMocks(
     };
   };
   vi.doMock("../harness/selection.js", () => ({
-    agentHarnessBuildsOpenClawTools: vi.fn(
+    agentHarnessBuildsCarapaceTools: vi.fn(
       (harnessId: string) => harnessId === "codex" || harnessId === "copilot",
     ),
     selectAgentHarness: vi.fn(createMockAgentHarness),
     selectAgentHarnessForPreparedModelProviders: vi.fn(createMockAgentHarness),
-    resolveAgentHarnessPolicy: vi.fn(() => ({ runtime: "openclaw" })),
+    resolveAgentHarnessPolicy: vi.fn(() => ({ runtime: "carapace" })),
     runAgentHarnessAttempt: (params: EmbeddedRunAttemptParams) =>
       options.runEmbeddedAttempt(params),
   }));
@@ -401,12 +401,12 @@ function resolveMockHarnessId(params: {
   provider?: string;
   agentHarnessId?: string;
   agentHarnessRuntimeOverride?: string;
-}): "codex" | "openclaw" {
+}): "codex" | "carapace" {
   return params.provider === "codex-cli" ||
     params.agentHarnessId === "codex" ||
     params.agentHarnessRuntimeOverride === "codex"
     ? "codex"
-    : "openclaw";
+    : "carapace";
 }
 
 /** Installs deterministic backoff mocks for retry/timeout E2E tests. */

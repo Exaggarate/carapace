@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig, OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig, CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 
 function registerProvider() {
-  const registerProviderMock = vi.fn<OpenClawPluginApi["registerProvider"]>();
+  const registerProviderMock = vi.fn<CarapacePluginApi["registerProvider"]>();
   plugin.register(createTestPluginApi({ registerProvider: registerProviderMock }));
   return expectDefined(registerProviderMock.mock.calls[0]?.[0], "Copilot provider registration");
 }
@@ -62,7 +62,7 @@ describe("GitHub Copilot usage credential routing", () => {
           enterpriseUrl: testCase.credentialDomain,
         })
       : "durable-token";
-    const config: OpenClawConfig = testCase.configuredDomain
+    const config: CarapaceConfig = testCase.configuredDomain
       ? {
           models: {
             providers: {
@@ -106,8 +106,8 @@ describe("GitHub Copilot usage credential routing", () => {
   });
 
   it.each([
-    "openclaw-github-copilot-oauth:v1:invalid-json",
-    'openclaw-github-copilot-oauth:v1:{"token":"durable-token","githubDomain":"attacker.example"}',
+    "carapace-github-copilot-oauth:v1:invalid-json",
+    'carapace-github-copilot-oauth:v1:{"token":"durable-token","githubDomain":"attacker.example"}',
   ])("rejects invalid credential metadata before sending a request", async (token) => {
     const provider = registerProvider();
     const fetchFn = vi.fn<typeof fetch>();

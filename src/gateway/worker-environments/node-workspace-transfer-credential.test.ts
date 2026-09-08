@@ -63,7 +63,7 @@ describe("node workspace credential revocation", () => {
             environmentId: record.environmentId,
             sessionId: "session-transfer",
             generation: 1,
-            argv: ["openclaw-internal-workspace-transfer"],
+            argv: ["carapace-internal-workspace-transfer"],
           };
           const downloaded = await runtime.exec(
             {
@@ -127,7 +127,7 @@ describe("node workspace credential revocation", () => {
         expect(service.isAuthorizationCurrent(authorization)).toBe(false);
         expect(service.snapshot(authorization)).toBeUndefined();
         const response = await fetch(
-          `${server.gatewayUrl.replace(/^ws/u, "http")}/__openclaw__/worker-transfer/v1/environments/${record.environmentId}/snapshots/${prepared.snapshot.manifestRef.slice(7)}/manifest`,
+          `${server.gatewayUrl.replace(/^ws/u, "http")}/__carapace__/worker-transfer/v1/environments/${record.environmentId}/snapshots/${prepared.snapshot.manifestRef.slice(7)}/manifest`,
           {
             headers: { authorization: `Bearer ${prepared.token}` },
           },

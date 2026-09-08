@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { defaultGatewayBindMode, resolveGatewayRequiredListenHosts } from "../gateway/net.js";
 import { isContainerEnvironment } from "../infra/container-environment.js";
 import { LOOPBACK_PORT_PROBE_HOSTS } from "../infra/ports-probe.js";
@@ -19,7 +19,7 @@ export async function resolveGatewayServiceProbeHosts(params: {
     suppressFutureVersionWarning: true,
   })
     .readBestEffortConfig()
-    .catch((): OpenClawConfig => ({}));
+    .catch((): CarapaceConfig => ({}));
   const bindMode =
     cfg.gateway?.bind ?? defaultGatewayBindMode(cfg.gateway?.tailscale?.mode ?? "off");
   const bindHost =

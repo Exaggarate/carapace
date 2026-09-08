@@ -1,6 +1,6 @@
-# @openclaw/teams-meetings
+# @carapace/teams-meetings
 
-Official Microsoft Teams browser meeting participant plugin for OpenClaw.
+Official Microsoft Teams browser meeting participant plugin for Carapace.
 
 This plugin registers the `teams_meetings` tool so agents can join Microsoft
 Teams meetings as a Chrome browser guest.
@@ -8,7 +8,7 @@ Teams meetings as a Chrome browser guest.
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/teams-meetings
+carapace plugins install @carapace/teams-meetings
 ```
 
 Restart the Gateway after installing or updating the plugin.
@@ -18,11 +18,11 @@ Restart the Gateway after installing or updating the plugin.
 Follow the Teams meetings guide for Chrome profiles, paired nodes, audio
 routing, and guest join setup:
 
-- https://docs.openclaw.ai/plugins/teams-meetings
+- ../../docs/plugins/teams-meetings.md
 
 ## Package
 
 - Plugin id: `teams-meetings`
 - Tool: `teams_meetings`
-- Package: `@openclaw/teams-meetings`
-- Minimum OpenClaw host: `2026.7.2`
+- Package: `@carapace/teams-meetings`
+- Minimum Carapace host: `2026.7.2`

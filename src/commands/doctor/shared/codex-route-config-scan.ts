@@ -1,7 +1,7 @@
-import { AGENT_MODEL_CONFIG_KEYS } from "@openclaw/model-catalog-core/configured-model-refs";
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { AGENT_MODEL_CONFIG_KEYS } from "@carapace/model-catalog-core/configured-model-refs";
+import { asOptionalRecord as asMutableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { listMutableCodexRouteAgentEntries } from "./codex-route-agent-entries.js";
 import {
   asAgentRuntimePolicyConfig,
@@ -140,7 +140,7 @@ function collectAgentModelRefs(params: {
 }
 
 export function collectConfigModelRefs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>,
 ): CodexRouteHit[] {
   const hits: CodexRouteHit[] = [];
@@ -214,7 +214,7 @@ export function collectConfigModelRefs(
 }
 
 export function collectDisabledCodexPluginRouteHits(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): CodexRuntimeRouteHit[] {
   if (!isCodexPluginUnavailableByConfig(cfg)) {
@@ -225,7 +225,7 @@ export function collectDisabledCodexPluginRouteHits(
 
 /** Find effective configured model routes that select the Codex runtime. */
 export function collectCodexRuntimeRouteHits(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): CodexRuntimeRouteHit[] {
   const defaults = cfg.agents?.defaults;
@@ -323,7 +323,7 @@ export function collectCodexRuntimeRouteHits(
 
 /** Find Codex-routed model refs that require the Codex plugin while it is disabled. */
 export function collectDisabledCodexPluginRouteIssues(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): DisabledCodexPluginRouteIssue[] {
   const repairBlocked = codexPluginRepairIsBlocked(cfg);
@@ -336,9 +336,9 @@ export function collectDisabledCodexPluginRouteIssues(
 }
 
 export function enableCodexPluginForRequiredRoutes(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   routeHits: CodexRuntimeRouteHit[];
-}): { cfg: OpenClawConfig; changes: string[] } {
+}): { cfg: CarapaceConfig; changes: string[] } {
   // Explicit user opt-out wins over managed-harness repair; doctor warns instead.
   if (params.routeHits.length === 0 || codexPluginRepairIsBlocked(params.cfg)) {
     return { cfg: params.cfg, changes: [] };
@@ -373,18 +373,18 @@ export function enableCodexPluginForRequiredRoutes(params: {
   return { cfg, changes };
 }
 
-function codexPluginIsBlockedOutsideEntry(cfg: OpenClawConfig): boolean {
+function codexPluginIsBlockedOutsideEntry(cfg: CarapaceConfig): boolean {
   return cfg.plugins?.enabled === false || pluginIdListIncludes(cfg.plugins?.deny, "codex");
 }
 
-export function codexPluginRepairIsBlocked(cfg: OpenClawConfig): boolean {
+export function codexPluginRepairIsBlocked(cfg: CarapaceConfig): boolean {
   return (
     codexPluginIsBlockedOutsideEntry(cfg) ||
     asMutableRecord(asMutableRecord(cfg.plugins?.entries)?.codex)?.enabled === false
   );
 }
 
-function isCodexPluginUnavailableByConfig(cfg: OpenClawConfig): boolean {
+function isCodexPluginUnavailableByConfig(cfg: CarapaceConfig): boolean {
   if (codexPluginRepairIsBlocked(cfg)) {
     return true;
   }
@@ -437,7 +437,7 @@ function hasAgentPrimaryModelConfig(agent: unknown): boolean {
 }
 
 function collectChannelAgentRuntimeModelRefs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Array<{ path: string; modelRef: string }> {
   const refs: Array<{ path: string; modelRef: string }> = [];
   const channelsModelByChannel = asMutableRecord(cfg.channels?.modelByChannel);

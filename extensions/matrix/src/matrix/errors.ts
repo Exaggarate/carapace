@@ -1,6 +1,6 @@
 // Matrix plugin module implements errors behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export function formatMatrixErrorReason(err: unknown): string {
   return normalizeLowercaseStringOrEmpty(formatErrorMessage(err));

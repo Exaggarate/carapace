@@ -5,7 +5,7 @@ import type { SlackMonitorContext } from "./context.js";
 const participantDescriptors = vi.hoisted(
   () =>
     [] as Array<
-      import("openclaw/plugin-sdk/channel-ingress-runtime").ChannelIngressIdentityDescriptor
+      import("carapace/plugin-sdk/channel-ingress-runtime").ChannelIngressIdentityDescriptor
     >,
 );
 const readChannelIngressStoreAllowFromForDmPolicyMock = vi.hoisted(() => vi.fn());
@@ -27,17 +27,17 @@ beforeAll(async () => {
 
 beforeEach(() => {
   readChannelIngressStoreAllowFromForDmPolicyMock.mockReset();
-  delete process.env.OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
+  delete process.env.CARAPACE_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
 });
 
 afterEach(() => {
-  delete process.env.OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
+  delete process.env.CARAPACE_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
 });
 
-vi.mock("openclaw/plugin-sdk/channel-ingress-runtime", async () => {
+vi.mock("carapace/plugin-sdk/channel-ingress-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-ingress-runtime")
-  >("openclaw/plugin-sdk/channel-ingress-runtime");
+    typeof import("carapace/plugin-sdk/channel-ingress-runtime")
+  >("carapace/plugin-sdk/channel-ingress-runtime");
   return {
     ...actual,
     defineStableChannelIngressIdentity: (
@@ -307,7 +307,7 @@ describe("authorizeSlackSystemEventSender", () => {
     [
       "ignores non-decimal channel member cache ttl env values",
       () => {
-        process.env.OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS = "0x0";
+        process.env.CARAPACE_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS = "0x0";
       },
       1,
     ],

@@ -6,13 +6,13 @@ import {
   type ChannelIngressStateInput,
   createChannelIngressResolver,
   readChannelIngressStoreAllowFromForDmPolicy,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/number-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { collectSlackCursorPages } from "../cursor-pages.js";
 import {
   allowListMatches,
@@ -149,7 +149,7 @@ async function resolveSlackChannelMemberIds(
   const cache = getChannelMembersCache(ctx);
   const key = `${ctx.accountId}:${eventScope ? `${eventScope.teamId}:` : ""}${channelId}`;
   const ttlMs = readSlackCacheTtlMs(
-    "OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS",
+    "CARAPACE_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS",
     DEFAULT_CHANNEL_MEMBERS_CACHE_TTL_MS,
   );
   const rawNowMs = Date.now();

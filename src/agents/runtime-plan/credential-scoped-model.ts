@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { shouldPreferProviderRuntimeResolvedModel } from "../../plugins/provider-runtime.js";
 import { getOrCreatePromise } from "../../shared/lazy-promise.js";
@@ -29,7 +29,7 @@ type RuntimeModelAuthSelection =
 export function providerUsesCredentialScopedModelMetadata(params: {
   provider: string;
   modelId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
@@ -182,7 +182,7 @@ function routeModelMemoKey(
 export function createPreparedRuntimeModelMaterializer<Model extends RuntimeRouteModel>(params: {
   provider: string;
   modelId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   metadataSnapshot?: PluginMetadataSnapshot;
   getModel(): Model;
@@ -194,7 +194,7 @@ export function createPreparedRuntimeModelMaterializer<Model extends RuntimeRout
   /** Optional generation-owned memo; omit to keep run-local caching only. */
   generationRouteModelMemo?: Map<string, Promise<Model>>;
   resolveModel(request: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     authProfileId?: string;
     authProfileMode?: ProviderModelRouteMaterializationAuthMode;
   }): Promise<{ model?: Model | null; error?: string }>;

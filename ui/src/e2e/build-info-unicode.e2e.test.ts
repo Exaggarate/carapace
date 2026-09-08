@@ -24,10 +24,10 @@ const suite = createControlUiE2eSuite({
     }),
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -56,7 +56,7 @@ function containsBrokenSurrogate(value: string): boolean {
 }
 
 async function openBuildDetails(page: Page) {
-  const sidebar = page.locator("openclaw-app-sidebar");
+  const sidebar = page.locator("carapace-app-sidebar");
   await sidebar.getByRole("button", { name: /^Identity and app menu for / }).click();
   const buildLink = sidebar.getByRole("link", { name: "Control UI build details", exact: true });
   await buildLink.waitFor();
@@ -66,13 +66,13 @@ async function openBuildDetails(page: Page) {
   expect(containsBrokenSurrogate(compactText)).toBe(false);
 
   await buildLink.hover();
-  const tooltip = sidebar.locator("openclaw-sidebar-build-chip openclaw-tooltip wa-tooltip");
+  const tooltip = sidebar.locator("carapace-sidebar-build-chip carapace-tooltip wa-tooltip");
   await expect.poll(() => tooltip.evaluate((element) => element.hasAttribute("open"))).toBe(true);
   const buildLinkHandle = await buildLink.elementHandle();
   if (!buildLinkHandle) {
     throw new Error("Expected the identity-menu build link to be attached");
   }
-  const afterHideMarker = "data-openclaw-test-after-hide";
+  const afterHideMarker = "data-carapace-test-after-hide";
   await tooltip.evaluate((element, marker) => {
     element.removeAttribute(marker);
     element.addEventListener("wa-after-hide", () => element.setAttribute(marker, ""), {

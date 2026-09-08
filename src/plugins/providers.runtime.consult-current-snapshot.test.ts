@@ -1,6 +1,6 @@
 // Verifies provider runtime uses current plugin metadata snapshots.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   makePluginMetadataIndex as makeIndex,
   makePluginMetadataManifestRegistry,
@@ -67,7 +67,7 @@ function makeManifestRegistry(pluginId = "demo"): PluginManifestRegistry {
 // Build a snapshot from a provided index (no disk) and register it as the
 // process-current snapshot, then clear the loader spies so later assertions only
 // see calls triggered by the function under test.
-function registerCurrentSnapshot(config: OpenClawConfig, workspaceDir = WORKSPACE) {
+function registerCurrentSnapshot(config: CarapaceConfig, workspaceDir = WORKSPACE) {
   const index = makeIndex();
   index.policyHash = resolveInstalledPluginIndexPolicyHash(config);
   loadPluginRegistrySnapshotWithMetadata.mockReturnValue({
@@ -107,7 +107,7 @@ describe("provider runtime consults the current plugin metadata snapshot", () =>
 
   describe("isPluginProvidersLoadInFlight", () => {
     it("reuses a compatible current snapshot without a direct disk load", () => {
-      const config: OpenClawConfig = {};
+      const config: CarapaceConfig = {};
       registerCurrentSnapshot(config);
 
       isPluginProvidersLoadInFlight({ config, env: {}, workspaceDir: WORKSPACE });
@@ -153,7 +153,7 @@ describe("provider runtime consults the current plugin metadata snapshot", () =>
 
   describe("resolvePluginProvidersCore", () => {
     it("keeps prepared provider discovery scoped to its exact generation and requested owners", () => {
-      const config: OpenClawConfig = { plugins: { entries: { demo: { enabled: true } } } };
+      const config: CarapaceConfig = { plugins: { entries: { demo: { enabled: true } } } };
       const metadataSnapshot = registerCurrentSnapshot(config);
       const pluginRegistry = createEmptyPluginRegistry();
       pluginRegistry.providers = ["demo", "unrelated"].map((pluginId) => ({
@@ -190,7 +190,7 @@ describe("provider runtime consults the current plugin metadata snapshot", () =>
     });
 
     it("reuses a compatible current snapshot without a direct disk load", () => {
-      const config: OpenClawConfig = {};
+      const config: CarapaceConfig = {};
       registerCurrentSnapshot(config);
 
       // onlyPluginIds:[] short-circuits provider materialization after the
@@ -225,7 +225,7 @@ describe("provider runtime consults the current plugin metadata snapshot", () =>
 
   describe("resolveExternalAuthProfilesWithPlugins", () => {
     it("reuses a compatible current snapshot without a direct disk load", () => {
-      const config: OpenClawConfig = {};
+      const config: CarapaceConfig = {};
       registerCurrentSnapshot(config);
 
       // The demo manifest declares no external-auth contracts, so resolution

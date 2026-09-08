@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { readInstalledPackageManifest } from "../infra/package-update-utils.js";
 import { resolveUserPath } from "../utils.js";
@@ -49,7 +49,7 @@ export function stageDuplicateNpmPluginAlias(params: {
 }
 
 async function hasRunnableRecordedPayload(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginId: string,
 ): Promise<boolean> {
   const record = config.plugins?.installs?.[pluginId];
@@ -69,14 +69,14 @@ async function hasRunnableRecordedPayload(
 }
 
 export async function reconcileDuplicateNpmPluginAliases(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   aliases: ReadonlyMap<string, string>;
   completedCanonicalUpdates: ReadonlySet<string>;
   skipIds?: ReadonlySet<string>;
   dryRun?: boolean;
   outcomes: PluginUpdateOutcome[];
   installOwnerMigrations: Record<string, string>;
-}): Promise<{ config: OpenClawConfig; changed: boolean }> {
+}): Promise<{ config: CarapaceConfig; changed: boolean }> {
   let config = params.config;
   let changed = false;
   for (const [aliasPluginId, canonicalPluginId] of params.aliases) {

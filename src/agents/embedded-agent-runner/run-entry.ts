@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ContextEngineHostSupport } from "../../context-engine/host-compat.js";
 import { requireActivePluginRegistry } from "../../plugins/runtime.js";
 import { buildAgentRunTerminalOutcomeFromLifecycleEvent } from "../agent-run-terminal-outcome.js";
@@ -106,7 +106,7 @@ type EmbeddedAgentRunEntryResult<T extends EmbeddedAgentRunResult> = {
 
 type EmbeddedAgentRunEntryParams<T extends EmbeddedAgentRunResult> = {
   selection: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     provider: string;
     model: string;
     requestedRouteResolution?: ModelFallbackRouteResolution;

@@ -1,4 +1,4 @@
-/** CLI entrypoint for `openclaw gateway probe`. */
+/** CLI entrypoint for `carapace gateway probe`. */
 import { isRich } from "../../packages/terminal-core/src/theme.js";
 import { parseGatewayPortOption } from "../cli/gateway-port-option.js";
 import { parseTimeoutMsWithFallback } from "../cli/parse-timeout.js";

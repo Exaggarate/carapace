@@ -4,7 +4,7 @@ import type { PrepareAssistantTranscriptMessage } from "../config/sessions/trans
  *
  * Installs message-write hooks, input provenance handling, and pending tool-result flush behavior once per manager.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import {
   applyInputProvenanceToUserMessage,
@@ -63,7 +63,7 @@ export function guardSessionManager(
     runId?: string;
     prepareAssistantTranscriptMessage?: PrepareAssistantTranscriptMessage;
     sessionKey?: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     contextWindowTokens?: number;
     inputProvenance?: InputProvenance;
     allowSyntheticToolResults?: boolean;
@@ -147,13 +147,13 @@ export function guardSessionManager(
     ) {
       const preparedMessage =
         message.role === "user"
-          ? { ...message, __openclaw: { ...Reflect.get(message, "__openclaw") } }
+          ? { ...message, __carapace: { ...Reflect.get(message, "__carapace") } }
           : undefined;
-      if (preparedMessage?.["__openclaw"].humanMentions !== undefined) {
+      if (preparedMessage?.["__carapace"].humanMentions !== undefined) {
         // Hooks may mutate text and spans in place; compare against the submitted selection.
         preparedMessage.content = structuredClone(preparedMessage.content);
-        preparedMessage["__openclaw"].humanMentions = structuredClone(
-          preparedMessage["__openclaw"].humanMentions,
+        preparedMessage["__carapace"].humanMentions = structuredClone(
+          preparedMessage["__carapace"].humanMentions,
         );
       }
       const next = runAgentHarnessBeforeMessageWriteHook({

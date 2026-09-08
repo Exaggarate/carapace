@@ -9,12 +9,12 @@ import { createNativeDeviceSettingsSnapshot } from "../test-helpers/native-devic
 // WEB-1 uses the existing device contract; its macOS snapshot remains unchanged.
 export async function installExistingNativeDeviceSettings(page: Page): Promise<void> {
   await page.addInitScript((snapshot) => {
-    Object.assign(window, { __OPENCLAW_NATIVE_DEVICE_SETTINGS__: snapshot });
+    Object.assign(window, { __CARAPACE_NATIVE_DEVICE_SETTINGS__: snapshot });
     Object.defineProperty(window, "webkit", {
       configurable: true,
       value: {
         messageHandlers: {
-          openclawDeviceSettings: {
+          carapaceDeviceSettings: {
             postMessage() {
               return Promise.resolve(snapshot);
             },

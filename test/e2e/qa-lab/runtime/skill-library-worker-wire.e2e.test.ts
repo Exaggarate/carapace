@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import { buildQaGatewayConfig } from "../../../../extensions/qa-lab/api.js";
 import type {
@@ -83,7 +83,7 @@ describe("skill library mock-provider E2E through real Gateway and node worker",
           published = await createPublishedWireWorkspace(instance.state.root);
           const authConfig = JSON.parse(
             await fs.readFile(instance.configPath, "utf8"),
-          ) as OpenClawConfig;
+          ) as CarapaceConfig;
           const config = buildQaGatewayConfig({
             bind: "loopback",
             gatewayPort: instance.port,

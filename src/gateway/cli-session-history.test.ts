@@ -44,7 +44,7 @@ function readRecord(value: unknown): Record<string, unknown> {
 }
 
 function expectCliSessionMarker(message: unknown, sessionId: string): void {
-  expectFields(readRecord(message)["__openclaw"], { cliSessionId: sessionId });
+  expectFields(readRecord(message)["__carapace"], { cliSessionId: sessionId });
 }
 
 function augmentBoundClaudeHistory(params: {
@@ -55,7 +55,7 @@ function augmentBoundClaudeHistory(params: {
 }) {
   return resolveChatHistoryWithCliSessionImports({
     entry: {
-      sessionId: "openclaw-session",
+      sessionId: "carapace-session",
       updatedAt: Date.now(),
       cliSessionBindings: {
         "claude-cli": {
@@ -71,7 +71,7 @@ function augmentBoundClaudeHistory(params: {
 
 function buildLegacyReseedPrompt(current = "current"): string {
   return [
-    "Continue this conversation using the OpenClaw transcript below as prior session history.",
+    "Continue this conversation using the Carapace transcript below as prior session history.",
     "Treat it as authoritative context for this fresh CLI session.",
     "",
     "<conversation_history>",
@@ -100,7 +100,7 @@ function createClaudeHistoryLines(sessionId: string) {
       message: {
         role: "user",
         content:
-          'Sender: ⟦openclaw:ctx⟧\n```json\n{"label":"openclaw-control-ui"}\n```\n\n[Thu 2026-03-26 16:29 GMT] hi',
+          'Sender: ⟦carapace:ctx⟧\n```json\n{"label":"carapace-control-ui"}\n```\n\n[Thu 2026-03-26 16:29 GMT] hi',
       },
     }),
     JSON.stringify({
@@ -183,7 +183,7 @@ function createClaudeTextHistoryLines(
 async function withClaudeProjectsDir<T>(
   run: (params: { homeDir: string; sessionId: string; filePath: string }) => Promise<T>,
 ): Promise<T> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-claude-history-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-claude-history-"));
   const homeDir = path.join(root, "home");
   const sessionId = "5b8b202c-f6bb-4046-9475-d2f15fd07530";
   const projectsDir = path.join(homeDir, ".claude", "projects", "demo-workspace");
@@ -206,7 +206,7 @@ describe("cli session history", () => {
         role: "user",
       });
       expect(String(messages[0]?.content)).toContain("[Thu 2026-03-26 16:29 GMT] hi");
-      expectFields(messages[0]?.["__openclaw"], {
+      expectFields(messages[0]?.["__carapace"], {
         id: "user-1",
         importedFrom: "claude-cli",
         externalId: "user-1",
@@ -223,7 +223,7 @@ describe("cli session history", () => {
         output: 7,
         cacheRead: 22,
       });
-      expectFields(messages[1]?.["__openclaw"], {
+      expectFields(messages[1]?.["__carapace"], {
         id: "assistant-1",
         importedFrom: "claude-cli",
         externalId: "assistant-1",
@@ -255,7 +255,7 @@ describe("cli session history", () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId, filePath }) => {
       const params = {
         entry: {
-          sessionId: "openclaw-session",
+          sessionId: "carapace-session",
           updatedAt: Date.now(),
           cliSessionBindings: { "claude-cli": { sessionId } },
         },
@@ -300,7 +300,7 @@ describe("cli session history", () => {
       );
       const appended = await read();
       expect(appended.messages).toHaveLength(4);
-      expect(appended.messages.map((message) => readRecord(message)["__openclaw"])).toContainEqual(
+      expect(appended.messages.map((message) => readRecord(message)["__carapace"])).toContainEqual(
         expect.objectContaining({ externalId: "appended-user" }),
       );
 
@@ -313,7 +313,7 @@ describe("cli session history", () => {
       );
       const replaced = await read();
       expect(replaced.messages).toHaveLength(1);
-      expectFields(readRecord(replaced.messages[0])["__openclaw"], {
+      expectFields(readRecord(replaced.messages[0])["__carapace"], {
         externalId: "replacement-assistant",
       });
 
@@ -342,7 +342,7 @@ describe("cli session history", () => {
       try {
         const messages = await readChatHistoryCliSessionImportSnapshot({
           entry: {
-            sessionId: "openclaw-session",
+            sessionId: "carapace-session",
             updatedAt: Date.now(),
             cliSessionBindings: { "claude-cli": { sessionId } },
           },
@@ -352,11 +352,11 @@ describe("cli session history", () => {
         });
 
         expect(messages).toHaveLength(2);
-        expectFields(readRecord(messages[0])["__openclaw"], {
+        expectFields(readRecord(messages[0])["__carapace"], {
           externalId: "oversized-user",
         });
         expect(readRecord(messages[0]).content).toContain("exceeded 1 MiB");
-        expectFields(readRecord(messages[1])["__openclaw"], {
+        expectFields(readRecord(messages[1])["__carapace"], {
           externalId: "visible-after-oversized",
         });
         expect(
@@ -411,7 +411,7 @@ describe("cli session history", () => {
       );
 
       const importedId = (message: Record<string, unknown> | undefined) =>
-        (message?.["__openclaw"] as { id?: string } | undefined)?.id;
+        (message?.["__carapace"] as { id?: string } | undefined)?.id;
       const first = readClaudeCliSessionMessages({ cliSessionId: sessionId, homeDir });
       const second = readClaudeCliSessionMessages({ cliSessionId: sessionId, homeDir });
       expect(importedId(first[0])).toBe(`claude-cli:${sessionId}:line:1`);
@@ -493,8 +493,8 @@ describe("cli session history", () => {
 
   it("preserves CLI-injected image mentions until merge-time correlation", async () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId, filePath }) => {
-      const workspaceMention = "@/Users/demo/workspace/.openclaw-cli-images/cafe01.png";
-      const tmpMention = "@/tmp/openclaw/openclaw-cli-images/cafe02.jpg";
+      const workspaceMention = "@/Users/demo/workspace/.carapace-cli-images/cafe01.png";
+      const tmpMention = "@/tmp/carapace/carapace-cli-images/cafe02.jpg";
       await fs.writeFile(
         filePath,
         [
@@ -539,7 +539,7 @@ describe("cli session history", () => {
 
   it("preserves image mentions inside text blocks before history merge", async () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId, filePath }) => {
-      const mention = "@/Users/demo/workspace/.openclaw-cli-images/cafe03.png";
+      const mention = "@/Users/demo/workspace/.carapace-cli-images/cafe03.png";
       await fs.writeFile(
         filePath,
         [
@@ -596,7 +596,7 @@ describe("cli session history", () => {
           timestamp: "2026-03-26T16:29:54.800Z",
           message: {
             role: "user",
-            content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/Users/demo/workspace/.openclaw-cli-images/cafe04.png`,
+            content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/Users/demo/workspace/.carapace-cli-images/cafe04.png`,
           },
         }),
         "utf-8",
@@ -606,7 +606,7 @@ describe("cli session history", () => {
           role: "user",
           content: "look at this",
           timestamp: Date.parse("2026-03-26T16:29:54.800Z"),
-          __openclaw: {
+          __carapace: {
             id: localEntryId,
             media: [{ kind: "image", contentType: "image/png", path: "/media/inbound/cafe04.png" }],
           },
@@ -634,7 +634,7 @@ describe("cli session history", () => {
     async (_label, localTimestamp, importedTimestamp) => {
       await withClaudeProjectsDir(async ({ homeDir, sessionId, filePath }) => {
         const localEntryId = "local-captioned-image";
-        const mention = "@/Users/demo/workspace/.openclaw-cli-images/cafe05.png";
+        const mention = "@/Users/demo/workspace/.carapace-cli-images/cafe05.png";
         await fs.writeFile(
           filePath,
           JSON.stringify({
@@ -653,7 +653,7 @@ describe("cli session history", () => {
             role: "user",
             content: "look at this",
             ...(localTimestamp === undefined ? {} : { timestamp: localTimestamp }),
-            __openclaw: {
+            __carapace: {
               id: localEntryId,
               media: [
                 { kind: "image", contentType: "image/png", path: "/media/inbound/cafe05.png" },
@@ -670,7 +670,7 @@ describe("cli session history", () => {
         });
 
         expect(merged).toHaveLength(1);
-        expect(readRecord(readRecord(merged[0])["__openclaw"]).media).toHaveLength(1);
+        expect(readRecord(readRecord(merged[0])["__carapace"]).media).toHaveLength(1);
       });
     },
   );
@@ -684,9 +684,9 @@ describe("cli session history", () => {
         .slice(0, localCount + 1)
         .map((externalId, index) => ({
           role: "user",
-          content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/Users/demo/workspace/.openclaw-cli-images/cafe0${index + 5}.png`,
+          content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/Users/demo/workspace/.carapace-cli-images/cafe0${index + 5}.png`,
           timestamp: timestamp + index * 60_000,
-          __openclaw: {
+          __carapace: {
             importedFrom: "claude-cli",
             cliSessionId: "session-1",
             externalId,
@@ -696,7 +696,7 @@ describe("cli session history", () => {
         role: "user",
         content: "look at this",
         timestamp,
-        __openclaw: {
+        __carapace: {
           id: localEntryId,
           media: [{ kind: "image", contentType: "image/png", path: "/media/inbound/cafe05.png" }],
         },
@@ -714,9 +714,9 @@ describe("cli session history", () => {
     const timestamp = Date.parse("2026-03-26T16:29:54.500Z");
     const importedMessage = {
       role: "user",
-      content: "@/Users/demo/workspace/.openclaw-cli-images/cafe06.png",
+      content: "@/Users/demo/workspace/.carapace-cli-images/cafe06.png",
       timestamp: timestamp + 60_000,
-      __openclaw: {
+      __carapace: {
         importedFrom: "claude-cli",
         cliSessionId: "session-1",
         externalId: "orphaned-image-user",
@@ -726,7 +726,7 @@ describe("cli session history", () => {
       role: "user",
       content: "",
       timestamp,
-      __openclaw: {
+      __carapace: {
         media: [{ kind: "image", contentType: "image/png", path: "/media/inbound/other.png" }],
       },
     };
@@ -743,9 +743,9 @@ describe("cli session history", () => {
     const timestamp = Date.parse("2026-03-26T16:29:54.500Z");
     const importedMessage = {
       role: "user",
-      content: "look at this\n\n@/Users/demo/workspace/.openclaw-cli-images/cafe06.png",
+      content: "look at this\n\n@/Users/demo/workspace/.carapace-cli-images/cafe06.png",
       timestamp: timestamp + 60_000,
-      __openclaw: {
+      __carapace: {
         importedFrom: "claude-cli",
         cliSessionId: "session-1",
         externalId: "legacy-captioned-image-user",
@@ -755,7 +755,7 @@ describe("cli session history", () => {
       role: "user",
       content: "look at this",
       timestamp,
-      __openclaw: {
+      __carapace: {
         id: "local-captioned-image",
         media: [{ kind: "image", contentType: "image/png", path: "/media/inbound/cafe06.png" }],
       },
@@ -774,9 +774,9 @@ describe("cli session history", () => {
     const localEntryId = "local-image-b";
     const orphanedImport = {
       role: "user",
-      content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId("local-image-a"))}\n\n@/tmp/openclaw/openclaw-cli-images/${"a".repeat(64)}.png`,
+      content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId("local-image-a"))}\n\n@/tmp/carapace/carapace-cli-images/${"a".repeat(64)}.png`,
       timestamp,
-      __openclaw: {
+      __carapace: {
         importedFrom: "claude-cli",
         cliSessionId: "session-1",
         externalId: "image-a",
@@ -784,9 +784,9 @@ describe("cli session history", () => {
     };
     const matchedImport = {
       role: "user",
-      content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/tmp/openclaw/openclaw-cli-images/${"b".repeat(64)}.png`,
+      content: `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/tmp/carapace/carapace-cli-images/${"b".repeat(64)}.png`,
       timestamp: timestamp + 60_000,
-      __openclaw: {
+      __carapace: {
         importedFrom: "claude-cli",
         cliSessionId: "session-1",
         externalId: "image-b",
@@ -796,7 +796,7 @@ describe("cli session history", () => {
       role: "user",
       content: "look at this",
       timestamp: timestamp + 60_000,
-      __openclaw: {
+      __carapace: {
         id: localEntryId,
         media: [{ kind: "image", contentType: "image/png", path: "/media/inbound/b.png" }],
       },
@@ -816,16 +816,16 @@ describe("cli session history", () => {
       role: "user",
       content: "",
       timestamp: Date.parse("2026-03-26T16:29:54.500Z"),
-      __openclaw: {
+      __carapace: {
         id: localEntryId,
         media: [{ kind: "image", contentType: "image/png", path: "/media/inbound/a.png" }],
       },
     };
     const importedMessage = {
       role: "user",
-      content: `${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/tmp/openclaw/openclaw-cli-images/${"a".repeat(64)}.png`,
+      content: `${formatCliImageTurnContext(hashCliImageTurnEntryId(localEntryId))}\n\n@/tmp/carapace/carapace-cli-images/${"a".repeat(64)}.png`,
       timestamp: Date.parse("2026-03-26T16:29:54.800Z"),
-      __openclaw: {
+      __carapace: {
         importedFrom: "claude-cli",
         cliSessionId: "session-1",
         externalId: "image-only",
@@ -842,7 +842,7 @@ describe("cli session history", () => {
 
   it("retains mention-only imported rows when no local media-bearing turn survives", async () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId, filePath }) => {
-      const mention = "@/Users/demo/workspace/.openclaw-cli-images/cafe06.png";
+      const mention = "@/Users/demo/workspace/.carapace-cli-images/cafe06.png";
       await fs.writeFile(
         filePath,
         [
@@ -879,8 +879,8 @@ describe("cli session history", () => {
 
   it("retains captioned image mentions when no local media-bearing turn survives", async () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId, filePath }) => {
-      const content = "look at this\n\n@/Users/demo/workspace/.openclaw-cli-images/cafe07.png";
-      const importedContent = `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId("missing-local-turn"))}\n\n@/Users/demo/workspace/.openclaw-cli-images/cafe07.png`;
+      const content = "look at this\n\n@/Users/demo/workspace/.carapace-cli-images/cafe07.png";
+      const importedContent = `look at this\n\n${formatCliImageTurnContext(hashCliImageTurnEntryId("missing-local-turn"))}\n\n@/Users/demo/workspace/.carapace-cli-images/cafe07.png`;
       await fs.writeFile(
         filePath,
         [
@@ -1012,11 +1012,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "openclaw-session",
+        localSessionId: "carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(transformedPrompt),
-          localSessionId: "openclaw-session",
+          localSessionId: "carapace-session",
           userTurnDisposition: "omitted",
         },
       });
@@ -1052,11 +1052,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "openclaw-session",
+        localSessionId: "carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(transformedPrompt),
-          localSessionId: "openclaw-session",
+          localSessionId: "carapace-session",
           userTurnDisposition: "persisted",
         },
       });
@@ -1082,11 +1082,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "new-openclaw-session",
+        localSessionId: "new-carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(transformedPrompt),
-          localSessionId: "old-openclaw-session",
+          localSessionId: "old-carapace-session",
           userTurnDisposition: "persisted",
         },
       });
@@ -1152,11 +1152,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "openclaw-session",
+        localSessionId: "carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(transformedPrompt),
-          localSessionId: "openclaw-session",
+          localSessionId: "carapace-session",
           userTurnDisposition: "persisted",
         },
       });
@@ -1197,11 +1197,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "openclaw-session",
+        localSessionId: "carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(transformedPrompt),
-          localSessionId: "openclaw-session",
+          localSessionId: "carapace-session",
           userTurnDisposition: "persisted",
         },
       });
@@ -1244,11 +1244,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "openclaw-session",
+        localSessionId: "carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(transformedPrompt),
-          localSessionId: "openclaw-session",
+          localSessionId: "carapace-session",
           userTurnDisposition: "persisted",
         },
       });
@@ -1393,11 +1393,11 @@ describe("cli session history", () => {
       const messages = readClaudeCliSessionMessages({
         cliSessionId: sessionId,
         homeDir,
-        localSessionId: "openclaw-session",
+        localSessionId: "carapace-session",
         reseedReceipt: {
           version: 1,
           promptHash: hashCliReseedPrompt(expectedPrompt),
-          localSessionId: "openclaw-session",
+          localSessionId: "carapace-session",
           userTurnDisposition: "persisted",
         },
       });
@@ -1447,9 +1447,9 @@ describe("cli session history", () => {
       {
         role: "user",
         content:
-          'Sender: ⟦openclaw:ctx⟧\n```json\n{"label":"openclaw-control-ui"}\n```\n\n[Thu 2026-03-26 16:29 GMT] hi',
+          'Sender: ⟦carapace:ctx⟧\n```json\n{"label":"carapace-control-ui"}\n```\n\n[Thu 2026-03-26 16:29 GMT] hi',
         timestamp: Date.parse("2026-03-26T16:29:54.800Z"),
-        __openclaw: {
+        __carapace: {
           importedFrom: "claude-cli",
           externalId: "user-1",
           cliSessionId: "session-1",
@@ -1459,7 +1459,7 @@ describe("cli session history", () => {
         role: "assistant",
         content: [{ type: "text", text: "hello from Claude" }],
         timestamp: Date.parse("2026-03-26T16:29:55.500Z"),
-        __openclaw: {
+        __carapace: {
           importedFrom: "claude-cli",
           externalId: "assistant-1",
           cliSessionId: "session-1",
@@ -1469,7 +1469,7 @@ describe("cli session history", () => {
         role: "user",
         content: "[Thu 2026-03-26 16:31 GMT] follow-up",
         timestamp: Date.parse("2026-03-26T16:31:00.000Z"),
-        __openclaw: {
+        __carapace: {
           importedFrom: "claude-cli",
           externalId: "user-2",
           cliSessionId: "session-1",
@@ -1482,7 +1482,7 @@ describe("cli session history", () => {
     expectFields(merged[2], {
       role: "user",
     });
-    expectFields(readRecord(merged[2])["__openclaw"], {
+    expectFields(readRecord(merged[2])["__carapace"], {
       importedFrom: "claude-cli",
       externalId: "user-2",
     });
@@ -1568,7 +1568,7 @@ describe("cli session history", () => {
         await expect(
           readChatHistoryCliSessionImportSnapshot({
             entry: {
-              sessionId: "openclaw-session",
+              sessionId: "carapace-session",
               updatedAt: Date.now(),
               cliSessionBindings: { "claude-cli": { sessionId } },
             },
@@ -1607,7 +1607,7 @@ describe("cli session history", () => {
 
       expect(messages).toHaveLength(2);
       expect(
-        messages.map((message) => readRecord(readRecord(message)["__openclaw"]).externalId),
+        messages.map((message) => readRecord(readRecord(message)["__carapace"]).externalId),
       ).toEqual(externalIds);
     });
   });
@@ -1626,7 +1626,7 @@ describe("cli session history", () => {
         {
           role: "user",
           content: "edited local text",
-          __openclaw: {
+          __carapace: {
             importedFrom: "claude-cli",
             externalId,
             cliSessionId: sessionId,
@@ -1677,7 +1677,7 @@ describe("cli session history", () => {
       {
         role: "user",
         content: "hello from first session",
-        __openclaw: {
+        __carapace: {
           importedFrom: "claude-cli",
           externalId: "same-id",
           cliSessionId: "session-1",
@@ -1688,7 +1688,7 @@ describe("cli session history", () => {
       {
         role: "user",
         content: "hello from second session",
-        __openclaw: {
+        __carapace: {
           importedFrom: "claude-cli",
           externalId: "same-id",
           cliSessionId: "session-2",
@@ -1781,7 +1781,7 @@ describe("cli session history", () => {
 
       const messages = resolveChatHistoryWithCliSessionImports({
         entry: {
-          sessionId: "openclaw-session",
+          sessionId: "carapace-session",
           updatedAt: Date.now(),
           cliSessionBindings: {
             "claude-cli": {
@@ -1789,7 +1789,7 @@ describe("cli session history", () => {
               reseedReceipt: {
                 version: 1,
                 promptHash: hashCliReseedPrompt(syntheticPrompt),
-                localSessionId: "openclaw-session",
+                localSessionId: "carapace-session",
                 userTurnDisposition: "persisted",
               },
             },
@@ -1800,7 +1800,7 @@ describe("cli session history", () => {
           {
             role: "user",
             content: "current recovered ask",
-            __openclaw: { id: "local-user-1" },
+            __carapace: { id: "local-user-1" },
           },
         ],
         homeDir,
@@ -1838,7 +1838,7 @@ describe("cli session history", () => {
         const record = readRecord(message);
         return (
           record.role === "user" &&
-          (record["__openclaw"] as { cliSessionId?: unknown } | undefined)?.cliSessionId ===
+          (record["__carapace"] as { cliSessionId?: unknown } | undefined)?.cliSessionId ===
             sessionId
         );
       });
@@ -1873,7 +1873,7 @@ describe("cli session history", () => {
       const localMessages = readClaudeCliSessionMessages({ cliSessionId: sessionId, homeDir });
       const result = resolveChatHistoryWithCliSessionImports({
         entry: {
-          sessionId: "openclaw-session",
+          sessionId: "carapace-session",
           updatedAt: Date.now(),
           cliSessionBindings: { "claude-cli": { sessionId } },
         },
@@ -1891,7 +1891,7 @@ describe("cli session history", () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId }) => {
       const messages = resolveChatHistoryWithCliSessionImports({
         entry: {
-          sessionId: "openclaw-session",
+          sessionId: "carapace-session",
           updatedAt: Date.now(),
           cliSessionIds: {
             "claude-cli": sessionId,
@@ -1913,7 +1913,7 @@ describe("cli session history", () => {
     await withClaudeProjectsDir(async ({ homeDir, sessionId }) => {
       const messages = resolveChatHistoryWithCliSessionImports({
         entry: {
-          sessionId: "openclaw-session",
+          sessionId: "carapace-session",
           updatedAt: Date.now(),
           claudeCliSessionId: sessionId,
         },
@@ -1937,7 +1937,7 @@ describe("readClaudeCliFallbackSeed", () => {
   const SESSION_ID = "fallback-seed-session";
 
   beforeEach(async () => {
-    tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-fallback-seed-"));
+    tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-fallback-seed-"));
     homeDir = path.join(tmpRoot, "home");
     projectsDir = path.join(homeDir, ".claude", "projects", "demo-workspace");
     await fs.mkdir(projectsDir, { recursive: true });

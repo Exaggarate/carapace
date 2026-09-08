@@ -3,9 +3,9 @@ import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { MatrixQaScenarioContext } from "./scenario-runtime-shared.js";
 
 const MATRIX_SYNC_STORE_FILENAME = "bot-storage.json";
@@ -175,7 +175,7 @@ async function readMatrixSyncCacheCursorsFromSqlite(
   params: MatrixStateIdentity & { stateDir: string },
 ): Promise<MatrixSyncStoreCursor[]> {
   const databasePaths = await findFilesByName({
-    filename: "openclaw.sqlite",
+    filename: "carapace.sqlite",
     rootDir: params.stateDir,
     maxDepth: 10,
   });
@@ -389,7 +389,7 @@ async function readMatrixStorageMetadata(
   const legacyMetadataPath = path.join(storageRootDir, "storage-meta.json");
   try {
     if (!db) {
-      const databasePath = path.join(storageRootDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(storageRootDir, "state", "carapace.sqlite");
       try {
         await fs.access(databasePath);
       } catch (error) {
@@ -494,7 +494,7 @@ async function hasPersistedMatrixPluginStateDedupeEntry(params: {
   // matching keeps the probe independent of the runtime account id.
   const expectedKeySuffix = `\0${params.roomId.trim()}\0${params.eventId.trim()}`;
   const databasePaths = await findFilesByName({
-    filename: "openclaw.sqlite",
+    filename: "carapace.sqlite",
     rootDir: params.stateDir,
     maxDepth: 10,
   });

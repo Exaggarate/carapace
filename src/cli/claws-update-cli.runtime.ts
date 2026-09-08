@@ -11,7 +11,7 @@ import {
 import { buildClawUpdatePlan, CLAW_UPDATE_PLAN_SCHEMA_VERSION } from "../claws/update-plan.js";
 import { listConfiguredMcpServers } from "../config/mcp-config.js";
 import { defaultRuntime, writeRuntimeJson, type RuntimeEnv } from "../runtime.js";
-import { openExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db.js";
+import { openExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db.js";
 import {
   emitClawFailure,
   formatClawDiagnostics,
@@ -64,7 +64,7 @@ export async function runClawsUpdateCommand(
 
   let source = opts.from;
   if (!source) {
-    const database = await openExistingOpenClawStateDatabaseReadOnly();
+    const database = await openExistingCarapaceStateDatabaseReadOnly();
     let status: Awaited<ReturnType<typeof readClawStatus>> | { records: never[] } = {
       records: [],
     };
@@ -143,7 +143,7 @@ export async function runClawsUpdateCommand(
     agentId: target,
     targetManifest: loaded.manifest,
     targetClawMarkdownBody: loaded.clawMarkdownBody,
-    targetOpenClawProfile: loaded.openClawProfile,
+    targetCarapaceProfile: loaded.carapaceProfile,
     targetSource: loaded.source,
     config,
     sourceMcpServers: listedMcpServers.mcpServers,
@@ -173,7 +173,7 @@ export async function runClawsUpdateCommand(
       {
         targetManifest: loaded.manifest,
         targetClawMarkdownBody: loaded.clawMarkdownBody,
-        targetOpenClawProfile: loaded.openClawProfile,
+        targetCarapaceProfile: loaded.carapaceProfile,
         targetSource: loaded.source,
       },
       {

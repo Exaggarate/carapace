@@ -97,7 +97,7 @@ describe("qa test file scenario runner", () => {
             await fs.writeFile(
               evidencePath,
               JSON.stringify({
-                kind: "openclaw.qa.evidence-summary",
+                kind: "carapace.qa.evidence-summary",
                 schemaVersion: 2,
                 generatedAt: new Date().toISOString(),
                 evidenceMode: "full",
@@ -174,7 +174,7 @@ describe("qa test file scenario runner", () => {
         });
         return { exitCode: 0, stdout: "script pass\n", stderr: "" };
       },
-      env: { OPENCLAW_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
     });
 
     expect(result.executionKind).toBe("script");
@@ -241,7 +241,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        CARAPACE_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -264,7 +264,7 @@ describe("qa test file scenario runner", () => {
         });
         return { exitCode: 1, stdout: "", stderr: "script failed\n" };
       },
-      env: { OPENCLAW_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
     });
 
     expect(result.results[0]).toMatchObject({
@@ -323,7 +323,7 @@ describe("qa test file scenario runner", () => {
         });
         return { exitCode: 1, stdout: "", stderr: "script failed\n" };
       },
-      env: { OPENCLAW_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
     });
 
     expect(result.results[0]).toMatchObject({ status: "fail" });
@@ -448,7 +448,7 @@ describe("qa test file scenario runner", () => {
         });
         return { exitCode: 0, stdout: "script pass\n", stderr: "" };
       },
-      env: { OPENCLAW_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
     });
 
     expect(result.results[0]).toMatchObject({
@@ -490,7 +490,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        CARAPACE_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -532,7 +532,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        CARAPACE_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -590,7 +590,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        CARAPACE_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -685,8 +685,8 @@ describe("qa test file scenario runner", () => {
         return { exitCode: 0, stdout: "script pass\n", stderr: "" };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
-        OPENCLAW_QA_PROFILE: "smoke-ci",
+        CARAPACE_QA_REF: "scenario-ref",
+        CARAPACE_QA_PROFILE: "smoke-ci",
       } as NodeJS.ProcessEnv,
     });
 
@@ -709,7 +709,7 @@ describe("qa test file scenario runner", () => {
         });
         return { exitCode: 0, stdout: "script pass\n", stderr: "" };
       },
-      env: { OPENCLAW_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
     });
 
     const artifactPath = result.evidence.entries[0]?.execution?.artifacts[0]?.path;
@@ -763,7 +763,7 @@ describe("qa test file scenario runner", () => {
       ...QA_TEST_RUNNER_DEFAULTS,
       scenarios: [infrastructureFixture],
       commandTimeoutMs: 20_000,
-      env: { OPENCLAW_QA_REF: "temporary-script-fixture" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_QA_REF: "temporary-script-fixture" } as NodeJS.ProcessEnv,
     });
 
     expect(result.executionKind).toBe("script");

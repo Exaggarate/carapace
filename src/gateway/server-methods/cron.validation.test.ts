@@ -1,14 +1,14 @@
 // Cron validation tests cover channel target validation against plugin
 // prefixes/aliases and runtime config for cron delivery destinations.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createOperationalRunInstanceRef } from "../../agents/admitted-run-context.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
 import type { SessionCreatedActor } from "../../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { CronRuntimeAuthority } from "../../cron/runtime-authority.js";
 import { CronService } from "../../cron/service.js";
 import { createCronStoreHarness, createNoopLogger } from "../../cron/service.test-harness.js";
@@ -35,7 +35,7 @@ const cronLogger = createNoopLogger();
 const { makeStorePath } = createCronStoreHarness({ prefix: "cron-gateway-validation-" });
 
 const getRuntimeConfig = vi.hoisted(() =>
-  vi.fn<() => OpenClawConfig>(() => ({}) as OpenClawConfig),
+  vi.fn<() => CarapaceConfig>(() => ({}) as CarapaceConfig),
 );
 const loadGatewaySessionEntry = vi.hoisted(() =>
   vi.fn(
@@ -448,17 +448,17 @@ function telegramDeliveryWithSlackFailure(overrides: Partial<CronDelivery> = {})
   };
 }
 
-function setRuntimeConfig(config: OpenClawConfig): void {
+function setRuntimeConfig(config: CarapaceConfig): void {
   getRuntimeConfig.mockReturnValue(config);
 }
 
-function pluginEntries(...ids: string[]): OpenClawConfig["plugins"] {
+function pluginEntries(...ids: string[]): CarapaceConfig["plugins"] {
   return {
     entries: Object.fromEntries(ids.map((id) => [id, { enabled: true }])),
   };
 }
 
-function telegramConfig(): OpenClawConfig {
+function telegramConfig(): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -466,10 +466,10 @@ function telegramConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("telegram"),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function telegramSlackConfig(params: { includeMainSession?: boolean } = {}): OpenClawConfig {
+function telegramSlackConfig(params: { includeMainSession?: boolean } = {}): CarapaceConfig {
   return {
     ...(params.includeMainSession ? { session: { mainKey: "main" } } : {}),
     channels: {
@@ -482,10 +482,10 @@ function telegramSlackConfig(params: { includeMainSession?: boolean } = {}): Ope
       },
     },
     plugins: pluginEntries("telegram", "slack"),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function telegramDisabledAccountConfig(): OpenClawConfig {
+function telegramDisabledAccountConfig(): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -496,10 +496,10 @@ function telegramDisabledAccountConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("telegram"),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function msteamsConfig(): OpenClawConfig {
+function msteamsConfig(): CarapaceConfig {
   return {
     channels: {
       msteams: {
@@ -507,10 +507,10 @@ function msteamsConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("msteams"),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function slackSynologyConfig(): OpenClawConfig {
+function slackSynologyConfig(): CarapaceConfig {
   return {
     channels: {
       slack: {
@@ -522,10 +522,10 @@ function slackSynologyConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("slack", "synology-chat"),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function slackConfig(params: { includeMainSession?: boolean } = {}): OpenClawConfig {
+function slackConfig(params: { includeMainSession?: boolean } = {}): CarapaceConfig {
   return {
     ...(params.includeMainSession ? { session: { mainKey: "main" } } : {}),
     channels: {
@@ -535,7 +535,7 @@ function slackConfig(params: { includeMainSession?: boolean } = {}): OpenClawCon
       },
     },
     plugins: pluginEntries("slack"),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function agentTurnCronParams(overrides: Record<string, unknown> = {}) {
@@ -696,7 +696,7 @@ describe("cron method validation", () => {
     },
   );
   beforeEach(() => {
-    getRuntimeConfig.mockReset().mockReturnValue({} as OpenClawConfig);
+    getRuntimeConfig.mockReset().mockReturnValue({} as CarapaceConfig);
     cronTaskRunHistoryPageOverride.mockReset().mockReturnValue(undefined);
     resolveCronDeliveryPreview
       .mockReset()
@@ -2959,7 +2959,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries("slack"),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -2984,7 +2984,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries("slack"),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -3005,7 +3005,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries(),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -3088,7 +3088,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       channels: { twitch: { accounts: { main: { accessToken: "t" } } } },
       plugins: pluginEntries("twitch"),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -3119,7 +3119,7 @@ describe("cron method validation", () => {
         twitch: { enabled: false, accounts: { main: { accessToken: "t" } } },
       },
       plugins: pluginEntries("twitch"),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -3152,7 +3152,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries("telegram"),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -3185,7 +3185,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries("msteams"),
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -3348,9 +3348,9 @@ describe("cron method validation", () => {
   } as const;
 
   function globalFailureAlertConfig(
-    config: OpenClawConfig,
-    failureAlert: NonNullable<OpenClawConfig["cron"]>["failureAlert"],
-  ): OpenClawConfig {
+    config: CarapaceConfig,
+    failureAlert: NonNullable<CarapaceConfig["cron"]>["failureAlert"],
+  ): CarapaceConfig {
     return { ...config, cron: { failureAlert } };
   }
 
@@ -3366,7 +3366,7 @@ describe("cron method validation", () => {
     title: string,
     patch: Record<string, unknown>,
     currentJob: CronJob = createCronJob(),
-    config: OpenClawConfig = telegramSlackConfig(),
+    config: CarapaceConfig = telegramSlackConfig(),
   ): void {
     it(title, async () => {
       setRuntimeConfig(config);
@@ -3380,7 +3380,7 @@ describe("cron method validation", () => {
     title: string,
     patch: Record<string, unknown>,
     currentJob: CronJob = createCronJob(),
-    config: OpenClawConfig = telegramSlackConfig(),
+    config: CarapaceConfig = telegramSlackConfig(),
   ): void {
     it(title, async () => {
       setRuntimeConfig(config);
@@ -3393,7 +3393,7 @@ describe("cron method validation", () => {
   function failureAlertAddAccepted(
     title: string,
     params: Record<string, unknown>,
-    config: OpenClawConfig = telegramSlackConfig(),
+    config: CarapaceConfig = telegramSlackConfig(),
   ): void {
     it(title, async () => {
       setRuntimeConfig(config);
@@ -3406,7 +3406,7 @@ describe("cron method validation", () => {
   function failureAlertAddRejected(
     title: string,
     params: Record<string, unknown>,
-    config: OpenClawConfig,
+    config: CarapaceConfig,
   ): void {
     it(title, async () => {
       setRuntimeConfig(config);
@@ -3980,7 +3980,7 @@ describe("cron method validation", () => {
           slack: { enabled: true },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const context = createCronContext(createCronJob());
     context.cron.getJob.mockReturnValue(undefined);

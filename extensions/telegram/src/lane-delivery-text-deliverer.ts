@@ -4,14 +4,14 @@ import {
   isPotentialTruncatedFinal,
   selectLongerFinalText,
   type MessageReceipt,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   buildTtsSupplementMediaPayload,
   getReplyPayloadTtsSupplement,
   resolveSendableOutboundReplyParts,
   type ReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-import { asNonArrayRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/reply-payload";
+import { asNonArrayRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { TelegramInlineButtons } from "./button-types.js";
 import type { TelegramDraftStream } from "./draft-stream.js";
 import type { TelegramPromptContextProjectionSequence } from "./prompt-context-projection.js";

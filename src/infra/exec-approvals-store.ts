@@ -6,12 +6,12 @@ import {
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { normalizeAgentId, normalizeAgentIdStrict } from "../routing/session-key.js";
 import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db-contract.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db-contract.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { formatErrorMessage } from "./errors.js";
 import {
   createFailClosedExecApprovalsFallback,
@@ -63,7 +63,7 @@ function warnFailClosed(message: string, error?: unknown): void {
 }
 
 function snapshotFromExecApprovalsDatabase(
-  db: ReturnType<typeof openOpenClawStateDatabase>["db"],
+  db: ReturnType<typeof openCarapaceStateDatabase>["db"],
 ): ExecApprovalsSnapshot {
   return snapshotFromExecApprovalsRow({
     path: resolveExecApprovalsDisplayPath(),
@@ -74,16 +74,16 @@ function snapshotFromExecApprovalsDatabase(
 }
 
 function readExecApprovalsSnapshotFromDatabase(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): ExecApprovalsSnapshot {
   assertNoPendingLegacyExecApprovals();
-  return snapshotFromExecApprovalsDatabase(openOpenClawStateDatabase(options).db);
+  return snapshotFromExecApprovalsDatabase(openCarapaceStateDatabase(options).db);
 }
 
 function readExecApprovalsSnapshotFromDatabaseReadOnly(): ExecApprovalsSnapshot {
   assertNoPendingLegacyExecApprovals();
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => snapshotFromExecApprovalsDatabase(db)) ??
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => snapshotFromExecApprovalsDatabase(db)) ??
     snapshotFromExecApprovalsRow({
       path: resolveExecApprovalsDisplayPath(),
       row: undefined,
@@ -92,7 +92,7 @@ function readExecApprovalsSnapshotFromDatabaseReadOnly(): ExecApprovalsSnapshot 
 }
 
 function readExecApprovalsSnapshotWithOptions(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): ExecApprovalsSnapshot {
   try {
     return readExecApprovalsSnapshotFromDatabase(options);
@@ -171,10 +171,10 @@ type InternalExecApprovalsUpdate = ExecApprovalsUpdate & {
 
 function updateExecApprovalsInTransaction(
   params: InternalExecApprovalsUpdate,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): ExecApprovalsSnapshot | null {
   assertNoPendingLegacyExecApprovals();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const current = snapshotFromExecApprovalsRow({
         path: resolveExecApprovalsDisplayPath(),
@@ -228,7 +228,7 @@ export async function updateExecApprovals(
 export async function withAgentExecApprovalsRemoved<T>(
   agentId: string,
   commit: () => Promise<T>,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<T> {
   const key = normalizeAgentId(agentId);
   const snapshot = readExecApprovalsSnapshotWithOptions(options);
@@ -259,7 +259,7 @@ export async function withAgentExecApprovalsRemoved<T>(
       throw new Error("Exec approvals changed while deleting agent; retry deletion.");
     }
   } else {
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runCarapaceStateWriteTransaction(({ db }) => {
       assertExecApprovalsMutationAuthority(db, {
         action: "remove",
         agentId: key,
@@ -298,7 +298,7 @@ export async function withAgentExecApprovalsRemoved<T>(
 }
 
 function restoreExecApprovalsSnapshotInTransaction(snapshot: ExecApprovalsSnapshot): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const current = snapshotFromExecApprovalsRow({
         path: resolveExecApprovalsDisplayPath(),
@@ -327,7 +327,7 @@ export async function restoreExecApprovalsSnapshotLocked(
   baseHash: string,
 ): Promise<boolean> {
   assertNoPendingLegacyExecApprovals();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const current = snapshotFromExecApprovalsRow({
         path: resolveExecApprovalsDisplayPath(),
@@ -392,6 +392,6 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.execApprovalsStoreTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.execApprovalsStoreTestApi")] =
     testing;
 }

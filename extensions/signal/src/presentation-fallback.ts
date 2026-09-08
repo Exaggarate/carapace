@@ -1,13 +1,13 @@
 // Signal plugin module materializes portable presentations into sendable text.
-import { getExecApprovalReplyMetadata } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { getExecApprovalReplyMetadata } from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   isMessagePresentationInteractiveBlock,
   normalizeMessagePresentation,
   renderMessagePresentationFallbackText,
   type MessagePresentation,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
+import { questionGatewayRuntime } from "carapace/plugin-sdk/question-gateway-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 
 /** Materialize presentation content once before Signal's text-only delivery funnels. */
 export function materializeSignalPresentationFallback(

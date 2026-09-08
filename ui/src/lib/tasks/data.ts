@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString as optionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString as optionalString } from "@carapace/normalization-core/string-coerce";
 import { Value } from "typebox/value";
 import {
   TasksCancelResultSchema,

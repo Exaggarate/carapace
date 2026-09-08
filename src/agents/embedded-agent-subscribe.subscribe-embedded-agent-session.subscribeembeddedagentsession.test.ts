@@ -3,13 +3,13 @@ import os from "node:os";
 import path from "node:path";
 // End-to-end subscription tests cover usage, lifecycle, tool logging,
 // messaging/media side effects, and replay-state behavior for embedded runs.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   AssistantMessageEventStream,
   type AssistantMessage,
   type Message,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { HEARTBEAT_RESPONSE_TOOL_NAME } from "../auto-reply/heartbeat-tool-response.js";
@@ -309,8 +309,8 @@ describe("subscribeEmbeddedAgentSession", () => {
   async function captureToolLifecycleLogSubsystems(messageChannel?: string): Promise<string[]> {
     // Use a temporary file-backed logger so subsystem attribution is verified
     // against real serialized log lines.
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tool-log-attribution-"));
-    const logFile = path.join(tempDir, "openclaw.log");
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-tool-log-attribution-"));
+    const logFile = path.join(tempDir, "carapace.log");
     try {
       setLoggerOverride({
         level: "debug",
@@ -506,7 +506,7 @@ describe("subscribeEmbeddedAgentSession", () => {
   it.each([
     ["telegram", "gateway/channels/telegram"],
     [undefined, "agent/embedded"],
-    ["openclaw", "agent/embedded"],
+    ["carapace", "agent/embedded"],
     ["not a channel", "agent/embedded"],
   ] as const)(
     "attributes tool lifecycle logs for channel=%s",

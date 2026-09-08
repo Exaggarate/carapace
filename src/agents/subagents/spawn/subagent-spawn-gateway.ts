@@ -1,5 +1,5 @@
 import { setTimeout as delay } from "node:timers/promises";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { AgentRuntimeIdentity } from "../../../gateway/agent-runtime-identity-token.js";
 import { withInProcessAgentRuntimeIdentity } from "../../../gateway/in-process-agent-runtime-identity.js";
 import type { GatewayContextResolver } from "../../../gateway/server-methods/types.js";

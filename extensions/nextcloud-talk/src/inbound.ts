@@ -1,21 +1,21 @@
-import { resolveChannelInboundRouteEnvelope } from "openclaw/plugin-sdk/channel-inbound";
+import { resolveChannelInboundRouteEnvelope } from "carapace/plugin-sdk/channel-inbound";
 // Nextcloud Talk plugin module implements inbound behavior.
 import {
   channelIngressRoutes,
   resolveStableChannelMessageIngress,
   type ChannelIngressContextBinding,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   bindIngressLifecycleToReplyOptions,
   resolveChannelStreamingBlockEnabled,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   isRecord,
   normalizeOptionalString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
-import { safeParseJson } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
+import { safeParseJson } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   GROUP_POLICY_BLOCKED_LABEL,
   resolveAllowlistProviderRuntimeGroupPolicy,
@@ -25,7 +25,7 @@ import {
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
   type GroupPolicy,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type OutboundReplyPayload,
   type RuntimeEnv,
 } from "../runtime-api.js";
@@ -167,7 +167,7 @@ export async function handleNextcloudTalkInbound(params: {
   });
   const roomConfig = roomMatch.roomConfig;
   const allowTextCommands = core.channel.commands.shouldHandleTextCommands({
-    cfg: config as OpenClawConfig,
+    cfg: config as CarapaceConfig,
     surface: CHANNEL_ID,
   });
   // Talk encodes message text and rich parameters inside object.content. Keep
@@ -180,11 +180,11 @@ export async function handleNextcloudTalkInbound(params: {
   const commandBody = structuredText?.startsWith("/") ? structuredText : rawBody;
   const hasControlCommand = core.channel.text.hasControlCommand(
     commandBody,
-    config as OpenClawConfig,
+    config as CarapaceConfig,
   );
   const shouldRequireMention = isGroup
     ? resolveNextcloudTalkGroupRequireMention({
-        cfg: config as OpenClawConfig,
+        cfg: config as CarapaceConfig,
         accountId: account.accountId,
         groupId: roomToken,
       })
@@ -195,7 +195,7 @@ export async function handleNextcloudTalkInbound(params: {
         ((config.channels as Record<string, unknown> | undefined)?.[CHANNEL_ID] ?? undefined) !==
         undefined,
       groupPolicy: account.config.groupPolicy,
-      defaultGroupPolicy: resolveDefaultGroupPolicy(config as OpenClawConfig),
+      defaultGroupPolicy: resolveDefaultGroupPolicy(config as CarapaceConfig),
     });
   const allowFrom = normalizeStringEntries(account.config.allowFrom);
   const outerGroupAllowFrom = account.config.groupAllowFrom?.length
@@ -215,7 +215,7 @@ export async function handleNextcloudTalkInbound(params: {
         sensitivity: "pii",
         entryIdPrefix: "nextcloud-talk-entry",
       },
-      cfg: config as OpenClawConfig,
+      cfg: config as CarapaceConfig,
       readStoreAllowFrom: async () =>
         await pairing.readStoreForDmPolicy(CHANNEL_ID, account.accountId),
       subject: { stableId: senderId },
@@ -320,12 +320,12 @@ export async function handleNextcloudTalkInbound(params: {
     return;
   }
 
-  const mentionRegexes = core.channel.mentions.buildMentionRegexes(config as OpenClawConfig);
+  const mentionRegexes = core.channel.mentions.buildMentionRegexes(config as CarapaceConfig);
   const wasMentioned = mentionRegexes.length
     ? core.channel.mentions.matchesMentionPatterns(rawBody, mentionRegexes)
     : false;
   const { route, buildEnvelope } = resolveChannelInboundRouteEnvelope({
-    cfg: config as OpenClawConfig,
+    cfg: config as CarapaceConfig,
     channel: CHANNEL_ID,
     accountId: account.accountId,
     peer: {
@@ -392,7 +392,7 @@ export async function handleNextcloudTalkInbound(params: {
   });
 
   await core.channel.inbound.dispatch({
-    cfg: config as OpenClawConfig,
+    cfg: config as CarapaceConfig,
     channel: CHANNEL_ID,
     accountId: account.accountId,
     route: { agentId: route.agentId, sessionKey: route.sessionKey },

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import JSON5 from "json5";
 import {
   loadPluginMetadataSnapshot,
@@ -8,7 +8,7 @@ import {
 } from "../plugins/plugin-metadata-snapshot.js";
 import { resolveRepoBundledPluginEnv } from "./repo-bundled-plugin-env.js";
 import { validateConfigObjectRaw, validateConfigObjectRawWithPlugins } from "./validation.js";
-import { OpenClawSchemaShape } from "./zod-schema.root-shape.js";
+import { CarapaceSchemaShape } from "./zod-schema.root-shape.js";
 
 type DocsConfigFinding = {
   filePath: string;
@@ -45,7 +45,7 @@ type DocsConfigValidationContext = {
   pluginMetadataSnapshot: Pick<PluginMetadataSnapshot, "manifestRegistry">;
 };
 
-const ROOT_CONFIG_KEYS = new Set(Object.keys(OpenClawSchemaShape));
+const ROOT_CONFIG_KEYS = new Set(Object.keys(CarapaceSchemaShape));
 
 function emptyStats(filesScanned = 0): DocsConfigStats {
   return {

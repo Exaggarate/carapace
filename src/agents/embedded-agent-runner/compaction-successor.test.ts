@@ -11,7 +11,7 @@ import {
   resetGatewayWorkAdmission,
   tryBeginGatewayRootWorkAdmission,
 } from "../../process/gateway-work-admission.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { PreparedAgentRunAdmission } from "../admitted-run-context.js";
 import type {
   AcceptedCompactionSuccessor,
@@ -48,7 +48,7 @@ async function withAcceptanceFixture(
     writeLegacyArtifact: () => Promise<string>;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "compaction-successor", scenario: "minimal" },
     async (state) => {
       const {
@@ -72,7 +72,7 @@ async function withAcceptanceFixture(
         agentId: "main",
         sessionId: randomUUID(),
         sessionKey: `agent:main:${randomUUID()}`,
-        storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
       };
       await replaceSessionEntry(target, {
         sessionId: target.sessionId,

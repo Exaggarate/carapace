@@ -1,39 +1,39 @@
 ---
 summary: "Run GGUF chat with managed or existing llama.cpp servers and managed local embeddings"
 read_when:
-  - You want OpenClaw to install and manage a local llama.cpp server
+  - You want Carapace to install and manage a local llama.cpp server
   - You want a local model recommendation for your Gateway hardware
-  - You want OpenClaw to connect to an existing llama-server
+  - You want Carapace to connect to an existing llama-server
   - You want memory search embeddings from a local GGUF model
   - You are configuring memory.search.provider = "local"
 title: "llama.cpp Provider"
 sidebarTitle: "llama.cpp Provider"
 ---
 
-The `llama-cpp` plugin provides one `llama-cpp` model provider. OpenClaw can
+The `llama-cpp` plugin provides one `llama-cpp` model provider. Carapace can
 manage a local `llama-server` or connect to one that you operate. Both choices
 use `llama-cpp/<model>` references and the OpenAI-compatible transport.
 
 ```bash
-openclaw plugins install @openclaw/llama-cpp-provider
-openclaw onboard
+carapace plugins install @carapace/llama-cpp-provider
+carapace onboard
 ```
 
 ## Choose server ownership
 
 | Setup choice          | Process owner                 | Local embeddings |
 | --------------------- | ----------------------------- | ---------------- |
-| Managed local server  | OpenClaw                      | Yes              |
+| Managed local server  | Carapace                      | Yes              |
 | Existing llama-server | You or an external supervisor | No               |
 
 `models.providers.llama-cpp.localService` is the ownership discriminator. If
-it exists, OpenClaw manages the process. Without it, `baseUrl` identifies an
+it exists, Carapace manages the process. Without it, `baseUrl` identifies an
 existing endpoint. Switching choices rewrites ownership-specific state on the
 same provider; it never creates another provider namespace.
 
 ## Managed local server
 
-Choose **Managed local server** when OpenClaw should install, start, and stop
+Choose **Managed local server** when Carapace should install, start, and stop
 the server. Setup reads the **Gateway host's** hardware and recommends a model
 from its available memory, GPU capability, and free disk space. A browser
 connected to a remote Gateway installs and runs the model on that Gateway,
@@ -43,7 +43,7 @@ Review the named host, execution backend, model, and download size, then confirm
 the download. Setup verifies pinned model files and the llama.cpp build,
 prepares a loopback endpoint, and checks inference before saving the new
 default. Guided activation also asks the model to read a temporary file through
-an OpenClaw tool and return its contents. The tool check uses an isolated
+an Carapace tool and return its contents. The tool check uses an isolated
 workspace without your agent's bootstrap instructions. A plain text reply alone
 does not pass that check. Each verification check has a 90-second deadline;
 changing `agents.defaults.timeoutSeconds` does not extend setup verification.
@@ -123,7 +123,7 @@ a fresh preset.
 ### Set up only local embeddings
 
 When `memory.search.provider` is `local` and chat setup cannot proceed or is
-declined, OpenClaw offers a separate embedding-only setup. It installs only the
+declined, Carapace offers a separate embedding-only setup. It installs only the
 managed server and the configured embedding model after explicit consent. It
 does not add a llama.cpp chat model or change the current chat model. Setup discovery remains
 read-only and never installs or downloads anything.
@@ -131,7 +131,7 @@ read-only and never installs or downloads anything.
 If the llama.cpp provider has any configured chat models, embedding-only setup
 leaves it unchanged. Move any chat routes to another provider and remove those
 model entries before retrying. An existing external llama.cpp server config
-must also be removed before OpenClaw can manage embeddings.
+must also be removed before Carapace can manage embeddings.
 
 ### Use another managed GGUF
 
@@ -157,7 +157,7 @@ Add a model under `models.providers.llama-cpp.models`, select its
 
 `modelPath` accepts local paths, cache-relative filenames, full `hf:` file
 URIs, and HTTPS GGUF URLs that publish a SHA-256 response digest. The default
-cache is `~/.openclaw/models/llama.cpp`; a configured `modelCacheDir` remains
+cache is `~/.carapace/models/llama.cpp`; a configured `modelCacheDir` remains
 authoritative for managed setup.
 
 ## Existing llama-server
@@ -178,21 +178,21 @@ manager, or machine owns the process.
     ```
 
   </Step>
-  <Step title="Configure OpenClaw">
-    Run `openclaw onboard`, choose **Existing llama-server**, and enter the
+  <Step title="Configure Carapace">
+    Run `carapace onboard`, choose **Existing llama-server**, and enter the
     endpoint. Enable API-key authentication only when the server or proxy
     requires it.
 
   </Step>
   <Step title="Select the model">
     ```bash
-    openclaw models list --provider llama-cpp
-    openclaw models set llama-cpp/my-model
+    carapace models list --provider llama-cpp
+    carapace models set llama-cpp/my-model
     ```
   </Step>
 </Steps>
 
-OpenClaw reads `/health`, `/models` (falling back to `/v1/models`), and
+Carapace reads `/health`, `/models` (falling back to `/v1/models`), and
 `/props`. Router property probes use `autoload=false`; discovery never loads,
 wakes, unloads, downloads, or reloads models. Explicit configured model rows
 remain authoritative over discovered rows with the same ID.
@@ -214,7 +214,7 @@ URLs containing a username or password are rejected.
 
 ```bash
 export LLAMA_SERVER_API_KEY="<API_KEY>"
-openclaw onboard
+carapace onboard
 ```
 
 When the endpoint changes, setup does not send the old endpoint's environment,
@@ -225,7 +225,7 @@ and the managed request timeout before discovery.
 For non-interactive setup:
 
 ```bash
-openclaw onboard \
+carapace onboard \
   --non-interactive \
   --accept-risk \
   --auth-choice llama-cpp-existing-server \
@@ -265,7 +265,7 @@ declarations](/gateway/config-tools#custom-provider-capability-declarations).
 
 ## Requests and local embeddings
 
-Both ownership choices use OpenClaw's normal chat, image, streaming, and tool
+Both ownership choices use Carapace's normal chat, image, streaming, and tool
 transport. The llama.cpp compatibility family cleans unsupported tool-schema
 constraints, maps thinking-off requests to the Qwen chat-template flag, and
 adapts JSON Schema requests for older llama-server builds.
@@ -286,12 +286,12 @@ Local memory embeddings require managed mode:
 ```
 
 The plugin preserves the historical `local` embedding provider and index
-identity. Run `openclaw memory status --index` after intentionally changing the
+identity. Run `carapace memory status --index` after intentionally changing the
 embedding model.
 
 ## Troubleshooting
 
-- Managed setup: run `openclaw doctor` and `openclaw memory status --deep`.
+- Managed setup: run `carapace doctor` and `carapace memory status --deep`.
 - Existing server: inspect `/health`, `/models`, and `/props`; HTTP 503 means
   the model is still loading.
 - Missing tools: verify both tool capability flags in `/props` and use a
@@ -303,7 +303,7 @@ embedding model.
   another model.
 - Platforms without a verified managed build should use an existing server.
 
-OpenClaw does not auto-select ROCm, SYCL, OpenVINO, or Vulkan archives.
+Carapace does not auto-select ROCm, SYCL, OpenVINO, or Vulkan archives.
 
 ## Related
 

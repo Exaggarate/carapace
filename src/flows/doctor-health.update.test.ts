@@ -1,9 +1,9 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { UpdateRunResult } from "../infra/update-runner.js";
 import { ExitError } from "../runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { DoctorHealthFlowContext } from "./doctor-health-contributions.js";
 import { runDoctorHealthFlow } from "./doctor-health.js";
 
@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   runGatewayUpdate: vi.fn<typeof import("../infra/update-runner.js").runGatewayUpdate>(),
   triageCommand: vi.fn(async () => undefined),
   outro: vi.fn(),
-  config: vi.fn<() => OpenClawConfig>(),
+  config: vi.fn<() => CarapaceConfig>(),
   runContributions: vi.fn<(ctx: DoctorHealthFlowContext) => Promise<void>>(),
   service: vi.fn(),
   packageRoot: vi.fn<() => string | undefined>(),
@@ -28,9 +28,9 @@ vi.mock("../commands/doctor-prompter.js", () => ({
   createDoctorPrompter: () => ({ confirm: async () => true }),
 }));
 
-vi.mock("../infra/openclaw-root.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../infra/openclaw-root.js")>()),
-  resolveOpenClawPackageRoot: async () => mocks.packageRoot(),
+vi.mock("../infra/carapace-root.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../infra/carapace-root.js")>()),
+  resolveCarapacePackageRoot: async () => mocks.packageRoot(),
 }));
 
 vi.mock("../daemon/service.js", async (importOriginal) => ({
@@ -109,7 +109,7 @@ vi.mock("../commands/doctor-config-flow.js", () => ({
 
 vi.mock("../config/config.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../config/config.js")>()),
-  CONFIG_PATH: "/tmp/openclaw.json",
+  CONFIG_PATH: "/tmp/carapace.json",
 }));
 
 vi.mock("./doctor-health-contributions.js", () => ({
@@ -121,7 +121,7 @@ describe("runDoctorHealthFlow update outcomes", () => {
 
   beforeEach(() => {
     // Exercise only the isolated fixture manager, independent of the host policy.
-    vi.stubEnv("OPENCLAW_SERVICE_REPAIR_POLICY", undefined);
+    vi.stubEnv("CARAPACE_SERVICE_REPAIR_POLICY", undefined);
     mocks.offerUpdate.mockReset().mockResolvedValue({ updated: false });
     mocks.runGatewayUpdate.mockReset();
     mocks.triageCommand.mockReset().mockResolvedValue(undefined);
@@ -164,11 +164,11 @@ describe("runDoctorHealthFlow update outcomes", () => {
         Object.defineProperty(stream, "isTTY", { configurable: true, value: true });
       }
       try {
-        await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+        await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
           const skipped = outcome === "dirty" || outcome === "already-current";
           const noop = outcome === "already-current";
           const recovered = outcome === "recovered-update-error";
-          const cfg: OpenClawConfig = { gateway: { mode: "local" } };
+          const cfg: CarapaceConfig = { gateway: { mode: "local" } };
           await state.writeConfig(cfg);
           mocks.config.mockReturnValue(cfg);
           const packageRoot = process.cwd();
@@ -186,12 +186,12 @@ describe("runDoctorHealthFlow update outcomes", () => {
             readCommand: async () => ({
               programArguments: [
                 process.execPath,
-                path.join(packageRoot, "openclaw.mjs"),
+                path.join(packageRoot, "carapace.mjs"),
                 "gateway",
               ],
               environment: {
-                OPENCLAW_STATE_DIR: state.stateDir,
-                OPENCLAW_CONFIG_PATH: state.configPath,
+                CARAPACE_STATE_DIR: state.stateDir,
+                CARAPACE_CONFIG_PATH: state.configPath,
               },
             }),
             readRuntime: async () => ({ status: running ? "running" : "stopped" }),

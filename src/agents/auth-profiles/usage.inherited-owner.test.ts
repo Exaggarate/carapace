@@ -4,8 +4,8 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { resetFileLockStateForTest } from "../../infra/file-lock.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   connectUserModelAccount,
   readUserModelAuthProfile,
@@ -64,7 +64,7 @@ function createMainStore(): AuthProfileStore {
 }
 
 describe("inherited auth-profile usage persistence", () => {
-  const env = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_AGENT_DIR"]);
+  const env = captureEnv(["CARAPACE_STATE_DIR", "CARAPACE_AGENT_DIR"]);
   let rootDir: string;
   let mainAgentDir: string;
   let childAgentDir: string;
@@ -76,15 +76,15 @@ describe("inherited auth-profile usage persistence", () => {
     childAgentDir = path.join(rootDir, "agents", "child", "agent");
     fs.mkdirSync(mainAgentDir, { recursive: true });
     fs.mkdirSync(childAgentDir, { recursive: true });
-    setTestEnvValue("OPENCLAW_STATE_DIR", rootDir);
-    setTestEnvValue("OPENCLAW_AGENT_DIR", mainAgentDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", rootDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", mainAgentDir);
     clearRuntimeAuthProfileStoreSnapshots();
   });
 
   afterEach(() => {
     clearRuntimeAuthProfileStoreSnapshots();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetFileLockStateForTest();
     env.restore();
   });
@@ -191,7 +191,7 @@ describe("inherited auth-profile usage persistence", () => {
         lastGood: contaminated.lastGood,
         usageStats: contaminated.usageStats,
       });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       const expectSharedOnly = (store: AuthProfileStore | null | undefined) => {
         expect(store?.profiles).toEqual(shared.profiles);
@@ -210,7 +210,7 @@ describe("inherited auth-profile usage persistence", () => {
         preserveOrderProfileIds: [profileId, missingId],
         preserveStateProfileIds: [profileId, missingId],
       });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expectSharedOnly(loadPersistedAuthProfileStore(mainAgentDir));
       setRuntimeAuthProfileStoreSnapshot(contaminated, mainAgentDir);
       expectSharedOnly(ensureAuthProfileStore(mainAgentDir));

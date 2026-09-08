@@ -12,11 +12,11 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { clearRuntimeAuthProfileStoreSnapshots } from "./auth-profiles/runtime-snapshots.js";
 import type { AuthProfileStore } from "./auth-profiles/types.js";
 import { NON_ENV_SECRETREF_MARKER } from "./model-auth-markers.js";
@@ -34,9 +34,9 @@ vi.mock("node:worker_threads", async (importOriginal) => ({
 }));
 
 const provider = "worker-secret-fixture";
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "catalog-worker-secrets" });
+  state = await createCarapaceTestState({ label: "catalog-worker-secrets" });
   await state.writeAuthProfiles({ version: 1, profiles: {} });
 });
 afterEach(async () => {
@@ -122,7 +122,7 @@ module.exports = {
 };
 `,
         );
-        await state.writeJson("catalog-plugin/openclaw.plugin.json", {
+        await state.writeJson("catalog-plugin/carapace.plugin.json", {
           id: provider,
           providers: [provider],
           providerCatalogEntry: "./index.cjs",
@@ -170,8 +170,8 @@ module.exports = {
               },
             },
           },
-        } satisfies OpenClawConfig;
-        let runtime: OpenClawConfig = {
+        } satisfies CarapaceConfig;
+        let runtime: CarapaceConfig = {
           ...source,
           models: {
             providers: {
@@ -189,7 +189,7 @@ module.exports = {
           PENDING_KEY: undefined,
           ...loader?.env,
         };
-        let runtimeSource: OpenClawConfig = source;
+        let runtimeSource: CarapaceConfig = source;
         if (loader) {
           await state.writeConfig(source);
           const snapshot = await readConfigFileSnapshotFromContext(
@@ -254,7 +254,7 @@ module.exports = {
         const serialized = structuredClone(createPreparedModelCatalogWorkerInput(params));
         let alternativeFingerprint: string | undefined;
         if (owner === "config" && !loader?.pending) {
-          const alternativeSource: OpenClawConfig = {
+          const alternativeSource: CarapaceConfig = {
             ...source,
             models: {
               providers: {
@@ -297,10 +297,10 @@ module.exports = {
         // Workers inherit neither the parent's source snapshot nor its WeakMap resolution facts.
         clearRuntimeConfigSnapshot();
         clearRuntimeAuthProfileStoreSnapshots();
-        const plans: Array<Awaited<ReturnType<typeof modelsConfig.planOpenClawModelsJsonSource>>> =
+        const plans: Array<Awaited<ReturnType<typeof modelsConfig.planCarapaceModelsJsonSource>>> =
           [];
-        const plan = modelsConfig.planOpenClawModelsJsonSource;
-        vi.spyOn(modelsConfig, "planOpenClawModelsJsonSource").mockImplementation(
+        const plan = modelsConfig.planCarapaceModelsJsonSource;
+        vi.spyOn(modelsConfig, "planCarapaceModelsJsonSource").mockImplementation(
           async (...args) => {
             const result = await plan(...args);
             plans.push(result);

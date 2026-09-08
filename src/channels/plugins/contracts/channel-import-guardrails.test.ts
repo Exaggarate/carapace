@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { classifyBundledExtensionSourcePath } from "../../../../scripts/lib/extension-source-classifier.mts";
 import { GUARDED_EXTENSION_PUBLIC_SURFACE_BASENAMES } from "../../../plugin-sdk/test-helpers/public-artifacts.js";
@@ -86,14 +86,14 @@ const SAME_CHANNEL_SDK_GUARDS: GuardedSource[] = [
       pluginId === "signal" ? ["src/shared.ts", "runtime-api.ts"] : ["src/shared.ts"];
     return relativePaths.map((relativePath) =>
       createGuardedSource(pluginId, relativePath, [
-        new RegExp(`["']openclaw/plugin-sdk/${pluginId}["']`),
+        new RegExp(`["']carapace/plugin-sdk/${pluginId}["']`),
         new RegExp(`plugin-sdk-internal/${pluginId}`),
       ]),
     );
   }),
   ...["src/account-inspect.ts", "src/accounts.ts", "src/token.ts"].map((relativePath) =>
     createGuardedSource("telegram", relativePath, [
-      /["']openclaw\/plugin-sdk\/account-resolution["']/,
+      /["']carapace\/plugin-sdk\/account-resolution["']/,
     ]),
   ),
   ...[
@@ -142,7 +142,7 @@ const SETUP_BARREL_GUARDS: GuardedSource[] = [
 const CHANNEL_CONFIG_SCHEMA_GUARDS: GuardedSource[] = [
   {
     path: bundledPluginFile("tlon", "src/config-schema.ts"),
-    forbiddenPatterns: [/["']openclaw\/plugin-sdk\/core["']/],
+    forbiddenPatterns: [/["']carapace\/plugin-sdk\/core["']/],
   },
 ];
 
@@ -542,10 +542,10 @@ function expectNoCrossPluginSdkFacadeImports(file: string, imports: string[]): v
     return;
   }
   for (const specifier of imports) {
-    if (!specifier.startsWith("openclaw/plugin-sdk/")) {
+    if (!specifier.startsWith("carapace/plugin-sdk/")) {
       continue;
     }
-    const targetSubpath = specifier.slice("openclaw/plugin-sdk/".length);
+    const targetSubpath = specifier.slice("carapace/plugin-sdk/".length);
     const targetExtensionId =
       BUNDLED_EXTENSION_IDS.find(
         (extensionId) =>
@@ -623,10 +623,10 @@ describe("channel import guardrails", () => {
   it("keeps bundled extension source files off root and compat plugin-sdk imports", () => {
     expect(
       collectExtensionForbiddenImportMatches([
-        `"openclaw/plugin-sdk"`,
-        `'openclaw/plugin-sdk'`,
-        `"openclaw/plugin-sdk/compat"`,
-        `'openclaw/plugin-sdk/compat'`,
+        `"carapace/plugin-sdk"`,
+        `'carapace/plugin-sdk'`,
+        `"carapace/plugin-sdk/compat"`,
+        `'carapace/plugin-sdk/compat'`,
       ]),
     ).toEqual([]);
   });
@@ -705,7 +705,7 @@ describe("channel import guardrails", () => {
         expect(
           text,
           `${normalized} should import ${extensionId} helpers via the local api barrel`,
-        ).not.toMatch(new RegExp(`["']openclaw/plugin-sdk/${extensionId}(?:["'/])`, "u"));
+        ).not.toMatch(new RegExp(`["']carapace/plugin-sdk/${extensionId}(?:["'/])`, "u"));
       }
     }
   });

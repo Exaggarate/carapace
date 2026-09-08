@@ -2,9 +2,9 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { isPidAlive } from "openclaw/plugin-sdk/process-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { isPidAlive } from "carapace/plugin-sdk/process-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import { CodexAppServerClient } from "./client.js";
@@ -65,7 +65,7 @@ describe("Codex one-shot cleanup receipts", () => {
     async (completion) => {
       let terminalTerminated = false;
       const results: Record<string, unknown> = {
-        initialize: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
+        initialize: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
         "thread/start": threadStartResult(),
         "turn/start": turnStartResult(),
       };
@@ -131,7 +131,7 @@ describe("Codex one-shot cleanup receipts", () => {
         const initialize = await waitForHarnessRequest(harness, "initialize");
         harness.send({
           id: initialize.id,
-          result: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
+          result: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
         });
         const thread = await waitForHarnessRequest(harness, "thread/start");
         harness.send({ id: thread.id, result: threadStartResult() });
@@ -201,7 +201,7 @@ const descendant = spawn(process.execPath, ${shutdown === "retired-command" ? `[
 ${shutdown === "retired-command" ? 'await new Promise(resolve => descendant.once("exit", resolve));' : "writeFileSync(descendantPidPath, String(descendant.pid));"}
 descendant.unref();
 const results = ${JSON.stringify({
-          initialize: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
+          initialize: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
           "config/read": { config: {}, origins: {}, layers: [] },
           "configRequirements/read": { requirements: null },
           "thread/start": threadStartResult(),

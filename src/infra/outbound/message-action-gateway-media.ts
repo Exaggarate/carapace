@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { ReplyPayload } from "../../auto-reply/reply-payload.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import { resolveOutboundMediaMaxBytes } from "../../media/configured-max-bytes.js";
 import type { OutboundMediaAccess } from "../../media/load-options.js";
@@ -9,7 +9,7 @@ import { resolveLocalMediaPath } from "../../media/local-media-path.js";
 import { resolveOutboundAttachmentFromUrl } from "../../media/outbound-attachment.js";
 
 export async function stageGatewayWorkspaceMedia(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
   payload: ReplyPayload;

@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 // Use the installed CLI after normal onboarding; a source-tree API would hide missing package surfaces.
 for (const only of [undefined, "codex/managed-app-server"]) {
   const args = ["doctor", "--lint", "--json", ...(only ? ["--only", only] : [])];
-  const result = spawnSync("openclaw", args, { encoding: "utf8", timeout: 120_000 });
+  const result = spawnSync("carapace", args, { encoding: "utf8", timeout: 120_000 });
   if (result.error || (result.status !== 0 && result.status !== 1)) {
     throw new Error(
       `doctor failed before producing findings: ${result.error?.message ?? result.stderr}`,

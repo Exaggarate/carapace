@@ -1,5 +1,5 @@
 // Google tests cover provider registration plugin behavior.
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildGoogleProvider } from "./provider-registration.js";
 

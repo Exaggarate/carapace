@@ -7,10 +7,10 @@ import {
   markMigrationItemError,
   markMigrationItemSkipped,
   MIGRATION_REASON_MISSING_SOURCE_OR_TARGET,
-} from "openclaw/plugin-sdk/migration";
-import type { MigrationItem } from "openclaw/plugin-sdk/plugin-entry";
-import { appendRegularFile, pathExists } from "openclaw/plugin-sdk/security-runtime";
-import { asNonArrayRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/migration";
+import type { MigrationItem } from "carapace/plugin-sdk/plugin-entry";
+import { appendRegularFile, pathExists } from "carapace/plugin-sdk/security-runtime";
+import { asNonArrayRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { parse as parseYaml } from "yaml";
 
 const HOME_SHORTHAND_RE = /^~(?=$|[\\/])/u;

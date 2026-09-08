@@ -1,11 +1,11 @@
 import type { DatabaseSync } from "node:sqlite";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sql } from "kysely";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/openclaw-agent-db-additive-columns.js";
+import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/carapace-agent-db-additive-columns.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 import type { SessionActor } from "./session-entry-provenance.js";
 import type { SessionEntry } from "./types.js";

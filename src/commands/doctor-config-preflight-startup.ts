@@ -5,7 +5,7 @@ import { createConfigIO } from "../config/io.factory.js";
 import { readConfigFileSnapshot, type ConfigSnapshotReadMeasure } from "../config/io.js";
 import type { PreparedConfigRecovery } from "../config/io.types.js";
 import type { ConfigFileSnapshot } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type {
   MigrationCheckpointIdentity,
@@ -22,7 +22,7 @@ import type {
 } from "../infra/state-migrations.types.js";
 import { setActiveDegradedPlugins } from "../plugins/runtime-degraded-state.js";
 import { ExitError } from "../runtime.js";
-import { withArtifactPreservingStateReads } from "../state/openclaw-state-db-readonly.js";
+import { withArtifactPreservingStateReads } from "../state/carapace-state-db-readonly.js";
 import {
   migrationCheckpointIdentitiesMatch,
   resolveMigrationCheckpointIdentity,
@@ -103,7 +103,7 @@ export async function readStartupMigrationSnapshot(params: {
       }
       const repair = read.snapshot.valid ? null : params.planRepair(read);
       if (!read.snapshot.valid && !repair) {
-        throw new Error('OpenClaw config is invalid; run "openclaw doctor --fix" before startup.');
+        throw new Error('Carapace config is invalid; run "carapace doctor --fix" before startup.');
       }
       await params.validateConfig?.(repair?.snapshot ?? read.snapshot);
       if (params.beforeStateMigrations && !(await params.beforeStateMigrations(read.snapshot))) {
@@ -130,11 +130,11 @@ function assertStartupConfigUnchanged(before: ConfigFileSnapshot, after: ConfigF
 
 /** Admission runs before lease acquisition: even acquiring a lease commits SQLite writes. */
 async function assertStartupStateMigrationReady(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): Promise<void> {
-  const { assertOpenClawDatabasesReady } = await import("../state/openclaw-database-preflight.js");
-  await assertOpenClawDatabasesReady({
+  const { assertCarapaceDatabasesReady } = await import("../state/carapace-database-preflight.js");
+  await assertCarapaceDatabasesReady({
     env: params.env,
     config: params.cfg,
     operation: "gateway-startup",
@@ -143,11 +143,11 @@ async function assertStartupStateMigrationReady(params: {
     await import("../config/sessions/startup-migration.js");
   const { resolveAllAgentSessionStoreCandidateTargetsSync } =
     await import("../config/sessions/targets.js");
-  const { inspectOpenClawRegisteredAgentDatabases } =
-    await import("../state/openclaw-agent-db-registry.js");
+  const { inspectCarapaceRegisteredAgentDatabases } =
+    await import("../state/carapace-agent-db-registry.js");
   const targets = resolveAllAgentSessionStoreCandidateTargetsSync(params.cfg, {
     env: params.env,
-    registeredDatabases: inspectOpenClawRegisteredAgentDatabases({
+    registeredDatabases: inspectCarapaceRegisteredAgentDatabases({
       env: params.env,
       includeIncompatibleSchemaVersions: true,
     }),
@@ -172,7 +172,7 @@ type MigrationCheckpoint = {
 
 /** Settle package repairs before state migrations select their plugin owners. */
 export async function prepareStartupMigrationPlugins(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   measure?: ConfigSnapshotReadMeasure;
   converge: boolean;
@@ -241,7 +241,7 @@ export async function completeStartupMigrationPreflight(params: {
   ) {
     throw params.startupMigrationHeartbeatError instanceof Error
       ? params.startupMigrationHeartbeatError
-      : new Error("OpenClaw startup migration lease heartbeat failed.");
+      : new Error("Carapace startup migration lease heartbeat failed.");
   }
   if (
     params.shouldRecordStateCheckpoint &&
@@ -251,7 +251,7 @@ export async function completeStartupMigrationPreflight(params: {
     snapshot.valid
   ) {
     if (!params.migrationCheckpoint) {
-      throw new Error("OpenClaw state migration checkpoint module was not loaded.");
+      throw new Error("Carapace state migration checkpoint module was not loaded.");
     }
     params.migrationCheckpoint.recordSuccessfulStateMigrations({
       env: params.startupMigrationEnv,
@@ -281,7 +281,7 @@ export async function completeStartupMigrationPreflight(params: {
   // Advisory findings allow service, but must not certify unfinished migration work.
   if (params.shouldRecordStartupCheckpoint && params.startupMigrationWarnings.length === 0) {
     if (!params.migrationCheckpoint) {
-      throw new Error("OpenClaw startup migration checkpoint module was not loaded.");
+      throw new Error("Carapace startup migration checkpoint module was not loaded.");
     }
     params.migrationCheckpoint.recordSuccessfulStartupMigrations({
       env: params.startupMigrationEnv,
@@ -293,7 +293,7 @@ export async function completeStartupMigrationPreflight(params: {
 }
 
 export async function assertDoctorPreflightMigrationsComplete(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   stepReceipts: readonly LegacyStateMigrationStepReceipt[];
   report: (result: MigrationMessages) => void;
 }): Promise<void> {

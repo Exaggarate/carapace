@@ -45,7 +45,7 @@ export function writePluginInspectFixture(
   mkdirSync(binDir, { recursive: true });
   const inspectionPath = join(binDir, "plugin-inspections.json");
   writeFileSync(inspectionPath, JSON.stringify(inspections));
-  const fixtureScript = join(binDir, "openclaw");
+  const fixtureScript = join(binDir, "carapace");
   writeFileSync(
     fixtureScript,
     `#!/usr/bin/env node
@@ -71,7 +71,7 @@ if (args.join(" ") === "plugins install --help") {
 import { syncBuiltinESMExports } from "node:module";
 const execFileSync = childProcess.execFileSync;
 childProcess.execFileSync = (file, args, options) => {
-  if (file === "openclaw") {
+  if (file === "carapace") {
     return execFileSync(process.execPath, [${JSON.stringify(fixtureScript)}, ...args], options);
   }
   return execFileSync(file, args, options);

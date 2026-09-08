@@ -9,9 +9,9 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { saveCronStore } from "../cron/store.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   formatCronSessionDiagnosticFields,
   formatStoppedCronSessionDiagnosticFields,
@@ -19,7 +19,7 @@ import {
 } from "./diagnostic-session-context.js";
 
 let tempDir: string | undefined;
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 
 async function seedSessionTranscript(params: {
   agentId: string;
@@ -40,9 +40,9 @@ async function seedSessionTranscript(params: {
 
 describe("diagnostic session context", () => {
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-diagnostic-session-",
+      prefix: "carapace-diagnostic-session-",
     });
     tempDir = testState.stateDir;
   });
@@ -169,7 +169,7 @@ describe("diagnostic session context", () => {
         resolveCronSessionDiagnosticContext({ sessionKey, activeSessionId: sessionId }),
       ).toEqual({});
       expect(
-        fs.existsSync(path.join(tempDir!, "agents", "main", "agent", "openclaw-agent.sqlite")),
+        fs.existsSync(path.join(tempDir!, "agents", "main", "agent", "carapace-agent.sqlite")),
       ).toBe(false);
     },
   );
@@ -263,7 +263,7 @@ describe("diagnostic session context", () => {
       "agents",
       "missing-agent",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
     expect(fs.existsSync(databasePath)).toBe(false);
 

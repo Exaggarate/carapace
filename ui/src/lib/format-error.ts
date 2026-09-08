@@ -1,4 +1,4 @@
-import { formatErrorMessage } from "@openclaw/normalization-core";
+import { formatErrorMessage } from "@carapace/normalization-core";
 import { redactToolDetail } from "./browser-redact.ts";
 
 export function formatUiError(error: unknown, fallback = ""): string {

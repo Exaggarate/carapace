@@ -2,18 +2,18 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   buildExecRemoteCommand,
   disposeSshSandboxSession,
   shellEscape,
-} from "openclaw/plugin-sdk/sandbox";
+} from "carapace/plugin-sdk/sandbox";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
-import { createSandboxTestContext } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/temp-path";
+import { createSandboxTestContext } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { OpenShellMirrorBackend, OpenShellSandboxBackend } from "./backend.types.js";
 import {
@@ -27,12 +27,12 @@ import {
   createOpenShellRuntimeEntryFixture,
 } from "./openshell.test-support.js";
 
-const openShellTestWorkspaceRoot = resolvePreferredOpenClawTmpDir();
+const openShellTestWorkspaceRoot = resolvePreferredCarapaceTmpDir();
 
 function createOpenShellTestWorkspace(label: string): Promise<TempWorkspace> {
   return tempWorkspace({
     rootDir: openShellTestWorkspaceRoot,
-    prefix: `openclaw-openshell-${label}-`,
+    prefix: `carapace-openshell-${label}-`,
   });
 }
 
@@ -54,9 +54,9 @@ let createOpenShellSandboxBackendManager: typeof import("./backend.js").createOp
 let createOpenShellSandboxBackendFactory: typeof import("./backend.js").createOpenShellSandboxBackendFactory;
 
 async function installOpenShellBackendMocks() {
-  vi.doMock("openclaw/plugin-sdk/sandbox", async () => {
-    const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/sandbox")>(
-      "openclaw/plugin-sdk/sandbox",
+  vi.doMock("carapace/plugin-sdk/sandbox", async () => {
+    const actual = await vi.importActual<typeof import("carapace/plugin-sdk/sandbox")>(
+      "carapace/plugin-sdk/sandbox",
     );
     return {
       ...actual,
@@ -78,7 +78,7 @@ async function installOpenShellBackendMocks() {
 }
 
 function uninstallOpenShellBackendMocks() {
-  vi.doUnmock("openclaw/plugin-sdk/sandbox");
+  vi.doUnmock("carapace/plugin-sdk/sandbox");
   vi.doUnmock("./cli.js");
   vi.resetModules();
 }
@@ -87,7 +87,7 @@ function resetOpenShellBackendMocks() {
   vi.clearAllMocks();
   cliMocks.createOpenShellSshSession.mockResolvedValue({
     command: "ssh",
-    configPath: "/tmp/openclaw-openshell-test-ssh-config",
+    configPath: "/tmp/carapace-openshell-test-ssh-config",
     host: "openshell-test",
   });
   sandboxMocks.cleanupPreparedExec.mockResolvedValue(undefined);
@@ -102,7 +102,7 @@ function resetOpenShellBackendMocks() {
         params.session.configPath,
         ...(params.tty ? ["-tt", "-o", "RequestTTY=force"] : ["-T", "-o", "RequestTTY=no"]),
         params.session.host,
-        "'/bin/sh' '/tmp/openclaw-synthetic-staging/run.sh'",
+        "'/bin/sh' '/tmp/carapace-synthetic-staging/run.sh'",
       ],
       cleanup: sandboxMocks.cleanupPreparedExec,
     }),
@@ -294,9 +294,9 @@ describe("openshell backend manager", () => {
     const repeated = await createBackend("agent:main");
     const other = await createBackend("agent:other");
     const workspaceScoped = await createBackend(`agent:main:workspace:${"a".repeat(32)}`);
-    const legacyRuntimeId = "openclaw-agent-main-25bffc4d";
+    const legacyRuntimeId = "carapace-agent-main-25bffc4d";
     const adoptedLegacy = await createBackend("agent:main", [legacyRuntimeId]);
-    const punctuationLegacyRuntimeId = "openclaw-agent-foo-bar-baz-ab401a99";
+    const punctuationLegacyRuntimeId = "carapace-agent-foo-bar-baz-ab401a99";
     const adoptedPunctuationLegacy = await createBackend("agent:foo_bar.baz", [
       punctuationLegacyRuntimeId,
     ]);
@@ -318,7 +318,7 @@ describe("openshell backend manager", () => {
 
   it("does not recreate an unreachable registered legacy sandbox name", async () => {
     const scopeKey = "agent:main'$(touch /tmp/pwn)";
-    const legacyRuntimeId = "openclaw-agent-main-touch-tmp-pwn-87608e6a";
+    const legacyRuntimeId = "carapace-agent-main-touch-tmp-pwn-87608e6a";
     cliMocks.runOpenShellCli.mockResolvedValue({
       code: 1,
       stdout: "",
@@ -341,7 +341,7 @@ describe("openshell backend manager", () => {
         script: "true",
       }),
     ).rejects.toThrow(
-      `Run \`openclaw sandbox recreate --session ${shellEscape(scopeKey)}\` to migrate this scope`,
+      `Run \`carapace sandbox recreate --session ${shellEscape(scopeKey)}\` to migrate this scope`,
     );
     expect(cliMocks.runOpenShellCli).toHaveBeenCalledTimes(1);
     expect(cliMocks.runOpenShellCli).not.toHaveBeenCalledWith(
@@ -376,7 +376,7 @@ describe("openshell backend manager", () => {
 
   it("does not execute a registered legacy sandbox that is no longer ready", async () => {
     const scopeKey = "agent:main";
-    const legacyRuntimeId = "openclaw-agent-main-25bffc4d";
+    const legacyRuntimeId = "carapace-agent-main-25bffc4d";
     cliMocks.runOpenShellCli
       .mockResolvedValueOnce({
         code: 0,
@@ -446,7 +446,7 @@ describe("openshell backend manager", () => {
       sandboxMocks.remoteRoot = remoteWorkspace.dir;
       await using remoteAgentWorkspace = await createOpenShellTestWorkspace("agent-remote");
       sandboxMocks.remoteAgentRoot = remoteAgentWorkspace.dir;
-      const materializedDir = path.join(sandboxMocks.remoteRoot, ".openclaw", "sandbox-skills");
+      const materializedDir = path.join(sandboxMocks.remoteRoot, ".carapace", "sandbox-skills");
       await fs.mkdir(materializedDir, { recursive: true });
       await fs.writeFile(path.join(materializedDir, "stale.txt"), "stale", "utf8");
       await fs.writeFile(path.join(skillsWorkspaceDir, "SKILL.md"), "# Skill\n", "utf8");
@@ -463,7 +463,7 @@ describe("openshell backend manager", () => {
 
       const result = await backend.runRemoteShellScript({
         script: 'test -d "$1"',
-        args: ["/sandbox/.openclaw/sandbox-skills"],
+        args: ["/sandbox/.carapace/sandbox-skills"],
       });
 
       expect(result?.code).toBe(0);
@@ -485,7 +485,7 @@ describe("openshell backend manager", () => {
       sandboxMocks.remoteAgentRoot = remoteAgentWorkspace.dir;
       await using outsideWorkspace = await createOpenShellTestWorkspace("outside");
       const outsideDir = outsideWorkspace.dir;
-      await fs.symlink(outsideDir, path.join(sandboxMocks.remoteRoot, ".openclaw"));
+      await fs.symlink(outsideDir, path.join(sandboxMocks.remoteRoot, ".carapace"));
       await fs.writeFile(path.join(skillsWorkspaceDir, "SKILL.md"), "# Skill\n", "utf8");
       cliMocks.runOpenShellCli.mockResolvedValue({ code: 0, stdout: "", stderr: "" });
 
@@ -505,7 +505,7 @@ describe("openshell backend manager", () => {
     },
   );
 
-  it("checks runtime status with config override from OpenClaw config", async () => {
+  it("checks runtime status with config override from Carapace config", async () => {
     cliMocks.runOpenShellCli.mockResolvedValue({
       code: 0,
       stdout: JSON.stringify({ phase: "Ready" }),
@@ -515,12 +515,12 @@ describe("openshell backend manager", () => {
     const manager = createOpenShellSandboxBackendManager({
       pluginConfig: resolveOpenShellPluginConfig({
         command: "openshell",
-        from: "openclaw",
+        from: "carapace",
       }),
     });
 
     const result = await manager.describeRuntime({
-      entry: createOpenShellRuntimeEntryFixture("openclaw-session-1234", "custom-source"),
+      entry: createOpenShellRuntimeEntryFixture("carapace-session-1234", "custom-source"),
       config: {
         plugins: {
           entries: {
@@ -547,10 +547,10 @@ describe("openshell backend manager", () => {
     });
     expect(cliMocks.runOpenShellCli).toHaveBeenCalledWith({
       context: {
-        sandboxName: "openclaw-session-1234",
+        sandboxName: "carapace-session-1234",
         config: expectedConfig,
       },
-      args: ["sandbox", "get", "openclaw-session-1234", "--output", "json"],
+      args: ["sandbox", "get", "carapace-session-1234", "--output", "json"],
     });
   });
 
@@ -568,7 +568,7 @@ describe("openshell backend manager", () => {
 
       await expect(
         manager.describeRuntime({
-          entry: createOpenShellRuntimeEntryFixture("openclaw-session-1234"),
+          entry: createOpenShellRuntimeEntryFixture("carapace-session-1234"),
           config: {},
         }),
       ).resolves.toMatchObject({ running: false });
@@ -590,7 +590,7 @@ describe("openshell backend manager", () => {
     });
 
     await manager.removeRuntime({
-      entry: createOpenShellRuntimeEntryFixture("openclaw-session-5678"),
+      entry: createOpenShellRuntimeEntryFixture("carapace-session-5678"),
       config: {},
     });
 
@@ -600,14 +600,14 @@ describe("openshell backend manager", () => {
     });
     expect(cliMocks.runOpenShellCli).toHaveBeenCalledWith({
       context: {
-        sandboxName: "openclaw-session-5678",
+        sandboxName: "carapace-session-5678",
         config: expectedConfig,
       },
-      args: ["sandbox", "delete", "openclaw-session-5678"],
+      args: ["sandbox", "delete", "carapace-session-5678"],
     });
 
     await manager.removeRuntime({
-      entry: createOpenShellRuntimeEntryFixture("openclaw-session-5678"),
+      entry: createOpenShellRuntimeEntryFixture("carapace-session-5678"),
       config: {
         plugins: {
           entries: {
@@ -626,14 +626,14 @@ describe("openshell backend manager", () => {
 
     expect(cliMocks.runOpenShellCli).toHaveBeenLastCalledWith({
       context: {
-        sandboxName: "openclaw-session-5678",
+        sandboxName: "carapace-session-5678",
         config: resolveOpenShellPluginConfig({
           command: "/opt/openshell/bin/openshell",
           gateway: "research",
           workspace: "team-1",
         }),
       },
-      args: ["sandbox", "delete", "openclaw-session-5678"],
+      args: ["sandbox", "delete", "carapace-session-5678"],
     });
   });
 
@@ -653,7 +653,7 @@ describe("openshell backend manager", () => {
 
     await expect(
       manager.removeRuntime({
-        entry: createOpenShellRuntimeEntryFixture("openclaw-session-5678"),
+        entry: createOpenShellRuntimeEntryFixture("carapace-session-5678"),
         config: {},
       }),
     ).rejects.toThrow(expected);
@@ -694,7 +694,7 @@ describe("openshell backend manager", () => {
         code: 0,
       });
       const backend = await createOpenShellBackendFixture({
-        workspaceDir: "/tmp/openclaw-synthetic-workspace",
+        workspaceDir: "/tmp/carapace-synthetic-workspace",
         mode: "remote",
       });
 
@@ -748,7 +748,7 @@ describe("openshell backend manager", () => {
       new Error("synthetic staging failure"),
     );
     const backend = await createOpenShellBackendFixture({
-      workspaceDir: "/tmp/openclaw-synthetic-workspace",
+      workspaceDir: "/tmp/carapace-synthetic-workspace",
       mode: "remote",
     });
 
@@ -773,7 +773,7 @@ describe("openshell backend manager", () => {
     async (outcome) => {
       await using workspace = await createOpenShellTestWorkspace("workspace");
       const workspaceDir = workspace.dir;
-      const shadowFile = path.join(workspaceDir, ".openclaw", "sandbox-skills", "user-note.txt");
+      const shadowFile = path.join(workspaceDir, ".carapace", "sandbox-skills", "user-note.txt");
       await fs.mkdir(path.dirname(shadowFile), { recursive: true });
       await fs.writeFile(shadowFile, "local shadow", "utf8");
       const sourceContents = new Map([["user-note.txt", "local shadow"]]);
@@ -836,11 +836,11 @@ describe("openshell backend manager", () => {
         if (args[0] === "sandbox" && args[1] === "download") {
           const tmpDir = expectDefined(args[4], "OpenShell download destination");
           await fs.writeFile(path.join(tmpDir, "from-remote.txt"), "remote", "utf8");
-          await fs.mkdir(path.join(tmpDir, ".openclaw", "sandbox-skills", "skills"), {
+          await fs.mkdir(path.join(tmpDir, ".carapace", "sandbox-skills", "skills"), {
             recursive: true,
           });
           await fs.writeFile(
-            path.join(tmpDir, ".openclaw", "sandbox-skills", "skills", "generated.txt"),
+            path.join(tmpDir, ".carapace", "sandbox-skills", "skills", "generated.txt"),
             "generated",
             "utf8",
           );
@@ -914,7 +914,7 @@ describe("openshell backend manager", () => {
           ).toContain(backup);
         }
         await expectPathMissing(
-          path.join(workspaceDir, ".openclaw", "sandbox-skills", "skills", "generated.txt"),
+          path.join(workspaceDir, ".carapace", "sandbox-skills", "skills", "generated.txt"),
         );
       } finally {
         renameSpy.mockRestore();
@@ -933,8 +933,8 @@ describe("openshell backend manager", () => {
       if (args[0] === "sandbox" && args[1] === "download") {
         const tmpDir = expectDefined(args[4], "OpenShell download destination");
         await fs.writeFile(path.join(tmpDir, "from-remote.txt"), "remote", "utf8");
-        await fs.mkdir(path.join(tmpDir, ".openclaw"), { recursive: true });
-        await fs.writeFile(path.join(tmpDir, ".openclaw", "sandbox-skills"), "poison", "utf8");
+        await fs.mkdir(path.join(tmpDir, ".carapace"), { recursive: true });
+        await fs.writeFile(path.join(tmpDir, ".carapace", "sandbox-skills"), "poison", "utf8");
       }
       return { code: 0, stdout: "", stderr: "" };
     });
@@ -951,7 +951,7 @@ describe("openshell backend manager", () => {
     await expect(fs.readFile(path.join(workspaceDir, "from-remote.txt"), "utf8")).resolves.toBe(
       "remote",
     );
-    await expectPathMissing(path.join(workspaceDir, ".openclaw", "sandbox-skills"));
+    await expectPathMissing(path.join(workspaceDir, ".carapace", "sandbox-skills"));
   });
 
   it.each(["original", "replaced"] as const)(
@@ -959,15 +959,15 @@ describe("openshell backend manager", () => {
     async (backupState) => {
       await using workspace = await createOpenShellTestWorkspace("workspace");
       const workspaceDir = workspace.dir;
-      const shadowFile = path.join(workspaceDir, ".openclaw", "sandbox-skills", "user-note.txt");
-      const parentPath = path.join(workspaceDir, ".openclaw");
+      const shadowFile = path.join(workspaceDir, ".carapace", "sandbox-skills", "user-note.txt");
+      const parentPath = path.join(workspaceDir, ".carapace");
       await fs.mkdir(path.dirname(shadowFile), { recursive: true });
       await fs.writeFile(shadowFile, "local shadow", "utf8");
       cliMocks.runOpenShellCli.mockImplementation(async ({ args }: { args: string[] }) => {
         if (args[0] === "sandbox" && args[1] === "download") {
           const tmpDir = expectDefined(args[4], "OpenShell download destination");
           await fs.writeFile(path.join(tmpDir, "from-remote.txt"), "remote", "utf8");
-          await fs.writeFile(path.join(tmpDir, ".openclaw"), "poison", "utf8");
+          await fs.writeFile(path.join(tmpDir, ".carapace"), "poison", "utf8");
         }
         return { code: 0, stdout: "", stderr: "" };
       });
@@ -1057,7 +1057,7 @@ describe("openshell backend manager", () => {
   it("reports completed restoration cleanup accurately and restores earlier shadows", async () => {
     await using workspace = await createOpenShellTestWorkspace("workspace");
     await using agentWorkspace = await createOpenShellTestWorkspace("agent-workspace");
-    const skillsDir = path.join(workspace.dir, ".openclaw", "sandbox-skills");
+    const skillsDir = path.join(workspace.dir, ".carapace", "sandbox-skills");
     const agentShadowDir = path.join(workspace.dir, "nested", "agent");
     for (const directory of [skillsDir, agentShadowDir]) {
       await fs.mkdir(directory, { recursive: true });
@@ -1155,9 +1155,9 @@ async function readOpenShellSshConfig(params: {
     name: "openshell-ssh-config",
     script: [
       "#!/bin/sh",
-      "cat <<'OPENCLAW_SSH_CONFIG'",
+      "cat <<'CARAPACE_SSH_CONFIG'",
       params.configText,
-      "OPENCLAW_SSH_CONFIG",
+      "CARAPACE_SSH_CONFIG",
     ].join("\n"),
   });
   const session = await createOpenShellSshSession({
@@ -1885,7 +1885,7 @@ describe("openshell fs bridges", () => {
       const skillFile = path.join(skillsWorkspaceDir, "skills", "demo", "SKILL.md");
       const shadowFile = path.join(
         workspaceDir,
-        ".openclaw",
+        ".carapace",
         "sandbox-skills",
         "skills",
         "demo",
@@ -1913,24 +1913,24 @@ describe("openshell fs bridges", () => {
       const bridge = createOpenShellFsBridge({ sandbox, backend });
 
       await expect(
-        bridge.readDirectory({ filePath: "/sandbox/.openclaw/sandbox-skills/skills/demo" }),
+        bridge.readDirectory({ filePath: "/sandbox/.carapace/sandbox-skills/skills/demo" }),
       ).resolves.toEqual([
         { name: "SKILL.md", isDirectory: false },
         { name: "examples.md", isDirectory: false },
       ]);
       await expect(
         bridge.readFile({
-          filePath: "/sandbox/.openclaw/sandbox-skills/skills/demo/SKILL.md",
+          filePath: "/sandbox/.carapace/sandbox-skills/skills/demo/SKILL.md",
         }),
       ).resolves.toEqual(Buffer.from("# Demo\nmaterialized\n"));
       await expect(
         bridge.readFile({
-          filePath: ".openclaw/sandbox-skills/skills/demo/SKILL.md",
+          filePath: ".carapace/sandbox-skills/skills/demo/SKILL.md",
         }),
       ).resolves.toEqual(Buffer.from("# Demo\nmaterialized\n"));
       await expect(
         bridge.writeFile({
-          filePath: ".openclaw/sandbox-skills/skills/demo/SKILL.md",
+          filePath: ".carapace/sandbox-skills/skills/demo/SKILL.md",
           data: "owned",
         }),
       ).rejects.toThrow(/read-only/);

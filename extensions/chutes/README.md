@@ -1,12 +1,12 @@
-# OpenClaw Chutes Provider
+# Carapace Chutes Provider
 
-Official OpenClaw provider plugin for Chutes.
+Official Carapace provider plugin for Chutes.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/chutes-provider
-openclaw gateway restart
+carapace plugins install @carapace/chutes-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/chutes> for setup and configuration.
+See <../../docs/providers/chutes.md> for setup and configuration.

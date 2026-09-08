@@ -8,10 +8,10 @@ import fs from "node:fs/promises";
 const uid = Number(execFileSync("id", ["-u", "appuser"], { encoding: "utf8" }).trim());
 const gid = Number(execFileSync("id", ["-g", "appuser"], { encoding: "utf8" }).trim());
 const home = "/home/appuser";
-const state = `${home}/.openclaw`;
+const state = `${home}/.carapace`;
 const unitDir = `${home}/.config/systemd/user`;
-const unit = `${unitDir}/openclaw-gateway.service`;
-const fixture = "/tmp/openclaw-file-mount";
+const unit = `${unitDir}/carapace-gateway.service`;
+const fixture = "/tmp/carapace-file-mount";
 const shims = `${fixture}/bin`;
 const kernelOnly = process.argv.includes("--kernel-only");
 
@@ -49,7 +49,7 @@ async function snapshot() {
   const files = [
     unit,
     `${unit}.bak`,
-    `${state}/openclaw.json`,
+    `${state}/carapace.json`,
     `${state}/gateway.systemd.env`,
     `${state}/.env`,
   ];
@@ -111,7 +111,7 @@ esac
   await fs.writeFile(
     `${shims}/busctl`,
     `#!/bin/sh
-printf '%s\n' 'Call failed: Unit openclaw-gateway.service not found.' >&2
+printf '%s\n' 'Call failed: Unit carapace-gateway.service not found.' >&2
 exit 1
 `,
     { mode: 0o755 },
@@ -132,13 +132,13 @@ exit 1
     const source = `${fixture}/source-${mode}`;
     await fs.writeFile(
       source,
-      "[Service]\nExecStart=/usr/local/bin/node /app/openclaw.mjs gateway\n",
+      "[Service]\nExecStart=/usr/local/bin/node /app/carapace.mjs gateway\n",
       { mode },
     );
     await fs.chown(source, uid, gid);
     await fs.writeFile(unit, "");
     for (const [file, contents] of [
-      [`${state}/openclaw.json`, '{"gateway":{"mode":"local","auth":{"mode":"token"}}}'],
+      [`${state}/carapace.json`, '{"gateway":{"mode":"local","auth":{"mode":"token"}}}'],
       [`${state}/gateway.systemd.env`, "OPERATOR_VALUE=unchanged\n"],
       [`${state}/.env`, "OPERATOR_VALUE=unchanged\n"],
     ]) {
@@ -159,7 +159,7 @@ exit 1
         const before = await snapshot();
         const result = spawnSync(
           process.execPath,
-          ["/app/openclaw.mjs", "gateway", "install", "--force", "--json"],
+          ["/app/carapace.mjs", "gateway", "install", "--force", "--json"],
           childOptions,
         );
         assert.notEqual(result.status, null, "packaged CLI must finish normally");

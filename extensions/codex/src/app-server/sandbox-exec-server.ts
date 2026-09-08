@@ -1,14 +1,14 @@
 /**
- * Hosts the local OpenClaw sandbox exec-server that Codex app-server native
+ * Hosts the local Carapace sandbox exec-server that Codex app-server native
  * execution can register as an external environment.
  */
 import { createHash, randomUUID } from "node:crypto";
 import { once } from "node:events";
 import type { IncomingMessage } from "node:http";
 import { isIP, type AddressInfo } from "node:net";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { SandboxContext } from "openclaw/plugin-sdk/sandbox";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import type { SandboxContext } from "carapace/plugin-sdk/sandbox";
 import type { RawData, WebSocket } from "ws";
 import type { CodexAppServerClient } from "./client.js";
 import type { CodexAppServerStartOptions } from "./config.js";
@@ -23,9 +23,9 @@ import type { SandboxChildOwner } from "./sandbox-exec-server/sandbox-child.js";
 import { CodexSandboxExecSession } from "./sandbox-exec-server/session.js";
 import type {
   CodexNodeExecServerLease,
-  OpenClawExecServer,
-  OpenClawLeasedExecServer,
-  OpenClawNodeExecServer,
+  CarapaceExecServer,
+  CarapaceLeasedExecServer,
+  CarapaceNodeExecServer,
 } from "./sandbox-exec-server/types.js";
 
 /** Codex environment metadata registered for one sandbox exec-server lease. */
@@ -63,10 +63,10 @@ export async function ensureCodexSandboxExecServerEnvironment(params: {
   }
   if (!canExposeLocalExecServerToAppServer(params.appServerStartOptions)) {
     throw new Error(
-      "OpenClaw Codex exec-server uses a local loopback URL and cannot be registered with a remote Codex app-server.",
+      "Carapace Codex exec-server uses a local loopback URL and cannot be registered with a remote Codex app-server.",
     );
   }
-  const { server: execServer, nodeLease } = await acquireOpenClawExecServer({
+  const { server: execServer, nodeLease } = await acquireCarapaceExecServer({
     sandbox: params.sandbox,
     runtime: params.runtime,
     signal: params.signal,
@@ -74,7 +74,7 @@ export async function ensureCodexSandboxExecServerEnvironment(params: {
   });
   // Codex retains a thread's environment instance when its id and cwd stay equal.
   // A single-use paired-node channel therefore needs a fresh selected identity.
-  const environmentId = nodeLease ? `openclaw-node-${nodeLease.id}` : execServer.environmentId;
+  const environmentId = nodeLease ? `carapace-node-${nodeLease.id}` : execServer.environmentId;
   try {
     const execServerUrl = nodeLease ? `${execServer.url}?lease=${nodeLease.id}` : execServer.url;
     await params.client.request(
@@ -89,7 +89,7 @@ export async function ensureCodexSandboxExecServerEnvironment(params: {
     if (nodeLease && "node" in execServer) {
       closeCodexNodeExecServerLease(execServer, nodeLease);
     }
-    await releaseOpenClawExecServer(execServer);
+    await releaseCarapaceExecServer(execServer);
     throw error;
   }
   const environment = {
@@ -119,7 +119,7 @@ export async function releaseCodexSandboxExecServerEnvironment(
       codexNodeExecServerLeases.delete(environment);
       closeCodexNodeExecServerLease(server, nodeLease);
     }
-    await releaseOpenClawExecServer(server);
+    await releaseCarapaceExecServer(server);
   }
 }
 
@@ -144,17 +144,17 @@ function canExposeLocalExecServerToAppServer(
   }
 }
 
-async function acquireOpenClawExecServer(params: {
+async function acquireCarapaceExecServer(params: {
   sandbox: SandboxContext;
   runtime?: PluginRuntime;
   signal?: AbortSignal;
   onExecutionDisconnect?: (error: Error) => void;
-}): Promise<{ server: OpenClawLeasedExecServer; nodeLease?: CodexNodeExecServerLease }> {
+}): Promise<{ server: CarapaceLeasedExecServer; nodeLease?: CodexNodeExecServerLease }> {
   const { sandbox, runtime, signal, onExecutionDisconnect } = params;
   const key = sandbox.runtimeId;
   while (true) {
     const existing = sandboxExecServerRegistry.servers.get(key);
-    const promise = existing ?? startAndRememberOpenClawExecServer(sandbox);
+    const promise = existing ?? startAndRememberCarapaceExecServer(sandbox);
     const server = await promise;
     if (!server.closed && sandboxExecServerRegistry.servers.get(key) === promise) {
       server.refCount += 1;
@@ -162,7 +162,7 @@ async function acquireOpenClawExecServer(params: {
         return { server };
       }
       if (!runtime || !signal) {
-        await releaseOpenClawExecServer(server);
+        await releaseCarapaceExecServer(server);
         throw new Error("Codex node execution requires an active runtime and attempt.");
       }
       try {
@@ -209,17 +209,17 @@ async function acquireOpenClawExecServer(params: {
           });
         return { server, nodeLease };
       } catch (error) {
-        await releaseOpenClawExecServer(server);
+        await releaseCarapaceExecServer(server);
         throw error;
       }
     }
   }
 }
 
-function startAndRememberOpenClawExecServer(
+function startAndRememberCarapaceExecServer(
   sandbox: SandboxContext,
-): Promise<OpenClawLeasedExecServer> {
-  const created = startOpenClawExecServer(sandbox);
+): Promise<CarapaceLeasedExecServer> {
+  const created = startCarapaceExecServer(sandbox);
   const key = sandbox.runtimeId;
   sandboxExecServerRegistry.servers.set(key, created);
   void created.catch(() => {
@@ -230,7 +230,7 @@ function startAndRememberOpenClawExecServer(
   return created;
 }
 
-async function startOpenClawExecServer(sandbox: SandboxContext): Promise<OpenClawLeasedExecServer> {
+async function startCarapaceExecServer(sandbox: SandboxContext): Promise<CarapaceLeasedExecServer> {
   const backend = sandbox.backend;
   const fsBridge = sandbox.fsBridge;
   const placementNodeId = readCodexPlacementNodeId(sandbox);
@@ -245,7 +245,7 @@ async function startOpenClawExecServer(sandbox: SandboxContext): Promise<OpenCla
     connection = { kind: "node", id: placementNodeId };
   } else {
     if (!backend) {
-      throw new Error("OpenClaw sandbox backend is unavailable.");
+      throw new Error("Carapace sandbox backend is unavailable.");
     }
     if (!fsBridge) {
       throw new Error("Sandbox filesystem bridge is unavailable.");
@@ -265,10 +265,10 @@ async function startOpenClawExecServer(sandbox: SandboxContext): Promise<OpenCla
   await once(server, "listening");
   const address = server.address();
   if (!address || typeof address === "string") {
-    throw new Error("OpenClaw Codex exec-server did not bind to a TCP port.");
+    throw new Error("Carapace Codex exec-server did not bind to a TCP port.");
   }
   const environmentId = buildEnvironmentId(sandbox);
-  const authPath = `/openclaw-${randomUUID()}`;
+  const authPath = `/carapace-${randomUUID()}`;
   const url = `ws://127.0.0.1:${(address as AddressInfo).port}${authPath}`;
   const common = {
     authPath,
@@ -281,7 +281,7 @@ async function startOpenClawExecServer(sandbox: SandboxContext): Promise<OpenCla
     children: new Set<SandboxChildOwner>(),
     cleanupTasks: new Set<Promise<void>>(),
   };
-  const execServer: OpenClawLeasedExecServer =
+  const execServer: CarapaceLeasedExecServer =
     connection.kind === "node"
       ? { ...common, node: { id: connection.id, leases: new Map() } }
       : {
@@ -314,7 +314,7 @@ async function startOpenClawExecServer(sandbox: SandboxContext): Promise<OpenCla
   return execServer;
 }
 
-async function releaseOpenClawExecServer(execServer: OpenClawLeasedExecServer): Promise<void> {
+async function releaseCarapaceExecServer(execServer: CarapaceLeasedExecServer): Promise<void> {
   if (execServer.closed) {
     return;
   }
@@ -336,11 +336,11 @@ async function releaseOpenClawExecServer(execServer: OpenClawLeasedExecServer): 
 
 function buildEnvironmentId(sandbox: SandboxContext): string {
   const hash = createHash("sha256").update(sandbox.runtimeId).digest("hex").slice(0, 16);
-  return `openclaw-sandbox-${hash}`;
+  return `carapace-sandbox-${hash}`;
 }
 
 function isAuthorizedExecServerRequest(
-  execServer: OpenClawLeasedExecServer,
+  execServer: CarapaceLeasedExecServer,
   request: IncomingMessage,
 ): boolean {
   const url = new URL(request.url ?? "", "ws://127.0.0.1");
@@ -393,7 +393,7 @@ function readCodexPlacementWorkspaceIdentity(sandbox: SandboxContext): {
 }
 
 function handleNodeConnection(
-  execServer: OpenClawNodeExecServer,
+  execServer: CarapaceNodeExecServer,
   socket: WebSocket,
   request: IncomingMessage,
 ): void {
@@ -419,7 +419,7 @@ function handleNodeConnection(
 }
 
 function closeCodexNodeExecServerLease(
-  execServer: OpenClawNodeExecServer,
+  execServer: CarapaceNodeExecServer,
   lease: CodexNodeExecServerLease,
 ): void {
   execServer.node.leases.delete(lease.id);
@@ -431,7 +431,7 @@ function closeCodexNodeExecServerLease(
 }
 
 function handleClosedCodexNodeExecServerLease(
-  execServer: OpenClawNodeExecServer,
+  execServer: CarapaceNodeExecServer,
   lease: CodexNodeExecServerLease,
   result: { failed: boolean; error?: unknown },
 ): void {
@@ -454,7 +454,7 @@ function handleClosedCodexNodeExecServerLease(
   }
 }
 
-function handleConnection(execServer: OpenClawExecServer, socket: WebSocket): void {
+function handleConnection(execServer: CarapaceExecServer, socket: WebSocket): void {
   const session = new CodexSandboxExecSession(execServer, {
     isOpen: () => socket.readyState === socket.OPEN,
     send: (message) => socket.send(JSON.stringify(message)),

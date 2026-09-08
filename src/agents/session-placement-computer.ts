@@ -13,7 +13,7 @@ type PlacementComputerContext = Readonly<{
 }>;
 
 const placementComputer = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionPlacementComputer"),
+  Symbol.for("carapace.sessionPlacementComputer"),
   () => new AsyncLocalStorage<PlacementComputerContext>(),
 );
 

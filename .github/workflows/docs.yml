@@ -40,7 +40,7 @@ jobs:
       - name: Checkout ClawHub docs source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/clawhub
+          repository: carapace/clawhub
           ref: main
           path: clawhub-source
           fetch-depth: 1
@@ -48,5 +48,5 @@ jobs:
 
       - name: Check docs
         env:
-          OPENCLAW_DOCS_SYNC_CLAWHUB_REPO: ${{ github.workspace }}/clawhub-source
+          CARAPACE_DOCS_SYNC_CLAWHUB_REPO: ${{ github.workspace }}/clawhub-source
         run: pnpm check:docs

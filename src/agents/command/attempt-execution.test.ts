@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { waitForSessionTranscriptIndexReconcile } from "../../config/sessions/session-transcript-reconcile.js";
-import { closeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { SessionManager } from "../sessions/session-manager.js";
 import { buildAssistantMessage, buildUsageWithNoCost } from "../stream-message-shared.js";
 
@@ -315,7 +315,7 @@ describe("sessionTranscriptHasContent", () => {
       agentId: "audit",
       sessionId: "fallback-history",
       sessionKey: "agent:audit:main",
-      storePath: path.join(tmpDir, "openclaw-agent.sqlite"),
+      storePath: path.join(tmpDir, "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(target, { sessionId: target.sessionId, updatedAt: 1 });
   });
@@ -325,7 +325,7 @@ describe("sessionTranscriptHasContent", () => {
       agentId: target.agentId,
       path: target.storePath,
     });
-    closeOpenClawAgentDatabaseByPath(target.storePath);
+    closeCarapaceAgentDatabaseByPath(target.storePath);
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
@@ -413,7 +413,7 @@ describe("claudeCliSessionTranscriptPath", () => {
     expect(
       claudeCliSessionTranscriptPath({
         sessionId: "11111111-2222-3333-4444-555555555555",
-        workspaceDir: "/home/faris/.openclaw/workspace",
+        workspaceDir: "/home/faris/.carapace/workspace",
         homeDir: "/home/faris",
       }),
     ).toBe(
@@ -421,7 +421,7 @@ describe("claudeCliSessionTranscriptPath", () => {
         "/home/faris",
         ".claude",
         "projects",
-        "-home-faris--openclaw-workspace",
+        "-home-faris--carapace-workspace",
         "11111111-2222-3333-4444-555555555555.jsonl",
       ),
     );

@@ -1,8 +1,8 @@
-import type { SessionCatalogProvider } from "openclaw/plugin-sdk/session-catalog";
+import type { SessionCatalogProvider } from "carapace/plugin-sdk/session-catalog";
 import {
   isRecord,
   normalizeBoundedOptionalString as readBoundedString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const BEAM_HOST_ID = "gateway";
 export const BEAM_SESSION_SHARE_ROUTE = {

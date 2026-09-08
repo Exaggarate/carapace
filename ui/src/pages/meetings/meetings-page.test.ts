@@ -19,7 +19,7 @@ function mount(request: ReturnType<typeof vi.fn>, search = "", scopes = ["operat
     phase: "connected",
     hello: { auth: { role: "operator", scopes } },
   } as ApplicationGatewaySnapshot;
-  const page = document.createElement("openclaw-meetings-page") as TestPage;
+  const page = document.createElement("carapace-meetings-page") as TestPage;
   const navigate = vi.fn((_route: string, options: { search: string }) => {
     page.routeSearch = options.search;
   });

@@ -97,7 +97,7 @@ describe("rooted CLI preparation", () => {
           tools: projected.tools.filter((tool) => scope.context.toolsAllow?.includes(tool.name)),
         };
       },
-      resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+      resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
       prepareClaudeCliSkillsPlugin: prepareSkillsPlugin,
       getCliLiveSessionGeneration: () => undefined,
       loadManifestModelCatalog: () => [],
@@ -155,7 +155,7 @@ describe("rooted CLI preparation", () => {
     expect(prepared.params.disableCliLiveSession).toBe(true);
     expect(prepareExecution).toHaveBeenCalledWith(
       expect.objectContaining({
-        toolAvailability: { native: [], openClaw: ["read", "write", "exec", "apply_patch"] },
+        toolAvailability: { native: [], carapace: ["read", "write", "exec", "apply_patch"] },
       }),
     );
     expect(prepareExecution.mock.calls[0]?.[0]).not.toHaveProperty("rootedExecution");
@@ -165,19 +165,19 @@ describe("rooted CLI preparation", () => {
     { label: "runtime allowlist", policy: { toolsAllow: ["read"] }, expected: ["read"] },
     {
       label: "exact CLI availability",
-      policy: { cliToolAvailability: { native: ["Read"], openClaw: ["read"] } },
+      policy: { cliToolAvailability: { native: ["Read"], carapace: ["read"] } },
       expected: ["read"],
     },
     {
       label: "exact write cap",
-      policy: { cliToolAvailability: { native: [], openClaw: ["write"] } },
+      policy: { cliToolAvailability: { native: [], carapace: ["write"] } },
       expected: ["write"],
     },
   ])("preserves the caller's $label while disabling native tools", async ({ policy, expected }) => {
     await prepare(policy);
 
     expect(prepareExecution).toHaveBeenCalledWith(
-      expect.objectContaining({ toolAvailability: { native: [], openClaw: expected } }),
+      expect.objectContaining({ toolAvailability: { native: [], carapace: expected } }),
     );
     expect(mintGrant.mock.calls[0]?.[0].context.toolsAllow).toEqual(expected);
   });

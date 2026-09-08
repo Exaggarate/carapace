@@ -1,6 +1,6 @@
 /** Runtime entrypoint for image generation with provider fallback and override normalization. */
 import { resolveAgentModelTimeoutMsValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { parseImageGenerationModelRef } from "../media-generation/model-ref.js";
 import {
@@ -36,7 +36,7 @@ type ImageGenerationRuntimeDeps = {
 export type { GenerateImageParams, GenerateImageRuntimeResult } from "./runtime-types.js";
 
 function buildNoImageGenerationModelConfiguredMessage(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps: ImageGenerationRuntimeDeps,
 ): string {
   const listProviders = deps.listProviders ?? listImageGenerationProviders;
@@ -50,7 +50,7 @@ function buildNoImageGenerationModelConfiguredMessage(
 
 /** Lists image-generation providers visible for the current config. */
 export function listRuntimeImageGenerationProviders(
-  params?: { config?: OpenClawConfig },
+  params?: { config?: CarapaceConfig },
   deps: ImageGenerationRuntimeDeps = {},
 ) {
   return (deps.listProviders ?? listImageGenerationProviders)(params?.config);

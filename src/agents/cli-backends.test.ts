@@ -1,6 +1,6 @@
 /** Tests plugin-owned CLI backend resolution and runtime bindings. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type {
   CliBackendConfig,
   CliBackendPlugin,
@@ -101,7 +101,7 @@ function setupEntry(
   } as SetupBackendEntry;
 }
 
-function requireBackend(provider = "acme-cli", cfg?: OpenClawConfig) {
+function requireBackend(provider = "acme-cli", cfg?: CarapaceConfig) {
   const resolved = resolveCliBackendConfig(provider, cfg);
   if (!resolved) {
     throw new Error(`Expected CLI backend ${provider}`);
@@ -172,7 +172,7 @@ describe("resolveCliBackendConfig", () => {
       resolveRuntimeCliBackends: () => [runtimeEntry({ normalizeConfig })],
       resolvePluginSetupCliBackend: () => undefined,
     });
-    const cfg: OpenClawConfig = { tools: { exec: { mode: "ask" } } };
+    const cfg: CarapaceConfig = { tools: { exec: { mode: "ask" } } };
 
     const resolved = resolveCliBackendConfig("acme-cli", cfg, { agentId: "reviewer" });
 

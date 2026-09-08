@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/lmstudio-provider",
+  "name": "@carapace/lmstudio-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw LM Studio provider plugin",
+  "description": "Carapace LM Studio provider plugin",
   "type": "module",
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

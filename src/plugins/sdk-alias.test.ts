@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   bundledDistPluginFile,
   bundledPluginFile,
   bundledPluginRoot,
-} from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { withEnv, withEnvAsync } from "../test-utils/env.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
@@ -36,7 +36,7 @@ async function getCreateJiti() {
 }
 
 const fixtureTempDirs: string[] = [];
-const fixtureRoot = makeTrackedTempDir("openclaw-sdk-alias-root", fixtureTempDirs);
+const fixtureRoot = makeTrackedTempDir("carapace-sdk-alias-root", fixtureTempDirs);
 let tempDirIndex = 0;
 
 function makeTempDir() {
@@ -45,16 +45,16 @@ function makeTempDir() {
   return dir;
 }
 
-function createTrustedOpenClawPackageFixture(version: string) {
+function createTrustedCarapacePackageFixture(version: string) {
   const root = makeTempDir();
-  fs.writeFileSync(path.join(root, "openclaw.mjs"), "export {};\n", "utf-8");
+  fs.writeFileSync(path.join(root, "carapace.mjs"), "export {};\n", "utf-8");
   fs.writeFileSync(
     path.join(root, "package.json"),
     JSON.stringify(
       {
-        name: "openclaw",
+        name: "carapace",
         version,
-        bin: { openclaw: "openclaw.mjs" },
+        bin: { carapace: "carapace.mjs" },
         exports: { "./plugin-sdk/core": { default: "./dist/plugin-sdk/core.js" } },
       },
       null,
@@ -93,12 +93,12 @@ function createPluginSdkAliasFixture(params?: {
     params?.trustedRootIndicatorMode ??
     (params?.trustedRootIndicators === false ? "none" : "bin+marker");
   const packageJson: Record<string, unknown> = {
-    name: "openclaw",
+    name: "carapace",
     type: "module",
   };
   if (trustedRootIndicatorMode === "bin+marker") {
     packageJson.bin = {
-      openclaw: "openclaw.mjs",
+      carapace: "carapace.mjs",
     };
   }
   if (params?.packageExports || trustedRootIndicatorMode === "cli-entry-only") {
@@ -114,7 +114,7 @@ function createPluginSdkAliasFixture(params?: {
   }
   fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(packageJson, null, 2), "utf-8");
   if (trustedRootIndicatorMode === "bin+marker") {
-    fs.writeFileSync(path.join(root, "openclaw.mjs"), "export {};\n", "utf-8");
+    fs.writeFileSync(path.join(root, "carapace.mjs"), "export {};\n", "utf-8");
   }
   mkdirSafeDir(path.join(root, "scripts", "lib"));
   fs.writeFileSync(
@@ -165,7 +165,7 @@ function writeWorkspacePackageExports(
     path.join(root, "packages", packageDir, "package.json"),
     JSON.stringify(
       {
-        name: `@openclaw/${packageDir}`,
+        name: `@carapace/${packageDir}`,
         exports: Object.fromEntries(
           subpaths.map((subpath) => {
             const exportKey = subpath ? `./${subpath}` : ".";
@@ -182,7 +182,7 @@ function writeWorkspacePackageExports(
 }
 
 type WorkspaceAliasFixture = readonly [
-  alias: `@openclaw/${string}`,
+  alias: `@carapace/${string}`,
   packageDir: string,
   entryStem: string,
   rootDistFile?: string,
@@ -229,7 +229,7 @@ function createPluginRuntimeAliasFixture(params?: { srcBody?: string; distBody?:
   mkdirSafeDir(path.dirname(distFile));
   fs.writeFileSync(
     path.join(root, "package.json"),
-    JSON.stringify({ name: "openclaw", type: "module" }, null, 2),
+    JSON.stringify({ name: "carapace", type: "module" }, null, 2),
     "utf-8",
   );
   fs.writeFileSync(
@@ -298,7 +298,7 @@ function createBundledPluginPackagePublicSurfaceAliasFixture() {
   mkdirSafeDir(distExtensionRoot);
   fs.writeFileSync(
     path.join(extensionRoot, "package.json"),
-    JSON.stringify({ name: "@openclaw/slack", type: "module" }, null, 2),
+    JSON.stringify({ name: "@carapace/slack", type: "module" }, null, 2),
     "utf-8",
   );
   const sourceApiPath = path.join(extensionRoot, "api.ts");
@@ -361,13 +361,13 @@ function writeInstalledPluginEntry(params: {
 function createUserInstalledPluginSdkAliasFixture() {
   const { fixture, sourcePluginEntryPath, sourceChannelRuntimePath } =
     createPluginSdkAliasTargetFixture();
-  const externalPluginRoot = path.join(makeTempDir(), ".openclaw", "extensions", "demo");
+  const externalPluginRoot = path.join(makeTempDir(), ".carapace", "extensions", "demo");
   const externalPluginEntry = path.join(externalPluginRoot, "index.ts");
   mkdirSafeDir(externalPluginRoot);
   fs.writeFileSync(
     externalPluginEntry,
     [
-      'import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";',
+      'import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";',
       'export default definePluginEntry({ id: "demo", register() {} });',
       "",
     ].join("\n"),
@@ -417,18 +417,18 @@ function expectPluginSdkAliasTargets(
   },
 ) {
   if (params.channelRuntimePath) {
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/channel-runtime-context"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/channel-runtime-context"] ?? "")).toBe(
       fs.realpathSync(params.channelRuntimePath),
     );
-    expect(fs.realpathSync(aliases["@openclaw/plugin-sdk/channel-runtime-context"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/plugin-sdk/channel-runtime-context"] ?? "")).toBe(
       fs.realpathSync(params.channelRuntimePath),
     );
   }
   if (params.pluginEntryPath) {
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/plugin-entry"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/plugin-entry"] ?? "")).toBe(
       fs.realpathSync(params.pluginEntryPath),
     );
-    expect(fs.realpathSync(aliases["@openclaw/plugin-sdk/plugin-entry"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/plugin-sdk/plugin-entry"] ?? "")).toBe(
       fs.realpathSync(params.pluginEntryPath),
     );
   }
@@ -450,8 +450,8 @@ function listPluginSdkExportedSubpaths(params: {
       params.devSourceRoot,
     ),
   )
-    .filter((key) => key.startsWith("openclaw/plugin-sdk/"))
-    .map((key) => key.slice("openclaw/plugin-sdk/".length))
+    .filter((key) => key.startsWith("carapace/plugin-sdk/"))
+    .map((key) => key.slice("carapace/plugin-sdk/".length))
     .toSorted();
 }
 
@@ -474,8 +474,8 @@ function expectCwdFallbackPluginSdkAliasResolution(params: {
     withEnv(
       { NODE_ENV: undefined },
       () =>
-        buildPluginLoaderAliasMap("/tmp/tsx-cache/openclaw-loader.js", "")[
-          "openclaw/plugin-sdk/channel-runtime-context"
+        buildPluginLoaderAliasMap("/tmp/tsx-cache/carapace-loader.js", "")[
+          "carapace/plugin-sdk/channel-runtime-context"
         ] ?? null,
     ),
   );
@@ -541,7 +541,7 @@ describe("plugin sdk alias helpers", () => {
       "utf-8",
     );
 
-    const subpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
+    const subpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
       listPluginSdkExportedSubpaths({
         modulePath: path.join(fixture.root, "src", "plugins", "loader.ts"),
       }),
@@ -575,29 +575,29 @@ describe("plugin sdk alias helpers", () => {
       bundledPluginFile("demo", "src/index.ts"),
     );
 
-    const subpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+    const subpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
       listPluginSdkExportedSubpaths({ modulePath: sourcePluginEntry }),
     );
     const aliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
       () => buildPluginLoaderAliasMap(sourcePluginEntry),
     );
 
     expect(subpaths).toEqual(["core", "qa-runner-runtime"]);
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/qa-runner-runtime"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/qa-runner-runtime"] ?? "")).toBe(
       fs.realpathSync(sourceQaRunnerPath),
     );
-    expect(aliases["openclaw/plugin-sdk/qa-runtime"]).toBeUndefined();
+    expect(aliases["carapace/plugin-sdk/qa-runtime"]).toBeUndefined();
 
     const { pluginEntry: externalEntry } = writeInstalledPluginEntry({
       installRoot: makeTempDir(),
       packageName: "@example/external",
     });
     const externalAliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
-      () => buildPluginLoaderAliasMap(externalEntry, path.join(fixture.root, "openclaw.mjs")),
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
+      () => buildPluginLoaderAliasMap(externalEntry, path.join(fixture.root, "carapace.mjs")),
     );
-    expect(externalAliases["openclaw/plugin-sdk/qa-runner-runtime"]).toBeUndefined();
+    expect(externalAliases["carapace/plugin-sdk/qa-runner-runtime"]).toBeUndefined();
   });
 
   it("adds the non-QA private Codex helper subpath only for trusted Codex plugins", () => {
@@ -636,55 +636,55 @@ describe("plugin sdk alias helpers", () => {
     );
     const { packageRoot: installedCodexRoot, pluginEntry: installedCodexEntry } =
       writeInstalledPluginEntry({
-        installRoot: path.join(makeTempDir(), ".openclaw", "npm"),
-        packageName: "@openclaw/codex",
+        installRoot: path.join(makeTempDir(), ".carapace", "npm"),
+        packageName: "@carapace/codex",
       });
     const { packageRoot: installedOtherRoot, pluginEntry: installedOtherEntry } =
       writeInstalledPluginEntry({
-        installRoot: path.join(makeTempDir(), ".openclaw", "npm"),
-        packageName: "@openclaw/demo",
+        installRoot: path.join(makeTempDir(), ".carapace", "npm"),
+        packageName: "@carapace/demo",
       });
-    const shadowCodexRoot = path.join(makeTempDir(), ".openclaw", "extensions", "codex-shadow");
+    const shadowCodexRoot = path.join(makeTempDir(), ".carapace", "extensions", "codex-shadow");
     const shadowCodexEntry = path.join(shadowCodexRoot, "dist", "index.js");
     mkdirSafeDir(path.dirname(shadowCodexEntry));
     fs.writeFileSync(
       path.join(shadowCodexRoot, "package.json"),
-      JSON.stringify({ name: "@openclaw/codex", type: "module" }, null, 2),
+      JSON.stringify({ name: "@carapace/codex", type: "module" }, null, 2),
       "utf-8",
     );
     fs.writeFileSync(shadowCodexEntry, 'export const plugin = "shadow";\n', "utf-8");
 
-    const codexSubpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+    const codexSubpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
       listPluginSdkExportedSubpaths({
         modulePath: sourceCodexEntry,
       }),
     );
-    const otherSubpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+    const otherSubpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
       listPluginSdkExportedSubpaths({
         modulePath: sourceOtherEntry,
       }),
     );
     const installedCodexSubpaths = withCwd(installedCodexRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
         listPluginSdkExportedSubpaths({
           modulePath: installedCodexEntry,
-          argv1: path.join(fixture.root, "openclaw.mjs"),
+          argv1: path.join(fixture.root, "carapace.mjs"),
         }),
       ),
     );
     const installedOtherSubpaths = withCwd(installedOtherRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
         listPluginSdkExportedSubpaths({
           modulePath: installedOtherEntry,
-          argv1: path.join(fixture.root, "openclaw.mjs"),
+          argv1: path.join(fixture.root, "carapace.mjs"),
         }),
       ),
     );
     const shadowCodexSubpaths = withCwd(shadowCodexRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
         listPluginSdkExportedSubpaths({
           modulePath: shadowCodexEntry,
-          argv1: path.join(fixture.root, "openclaw.mjs"),
+          argv1: path.join(fixture.root, "carapace.mjs"),
         }),
       ),
     );
@@ -734,7 +734,7 @@ describe("plugin sdk alias helpers", () => {
       }),
     ).toEqual(["core"]);
 
-    const privateSubpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
+    const privateSubpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
       listPluginSdkExportedSubpaths({
         modulePath: path.join(fixture.root, "src", "plugins", "loader.ts"),
       }),
@@ -750,7 +750,7 @@ describe("plugin sdk alias helpers", () => {
 
   it.each([
     {
-      name: "does not derive plugin-sdk subpaths from cwd fallback when package root is not an OpenClaw root",
+      name: "does not derive plugin-sdk subpaths from cwd fallback when package root is not an Carapace root",
       fixture: () =>
         createPluginSdkAliasFixture({
           trustedRootIndicators: false,
@@ -783,7 +783,7 @@ describe("plugin sdk alias helpers", () => {
     expectExportedSubpaths({
       fixture,
       cwd: fixture.root,
-      modulePath: "/tmp/tsx-cache/openclaw-loader.js",
+      modulePath: "/tmp/tsx-cache/carapace-loader.js",
       expected,
     });
   });
@@ -844,20 +844,20 @@ describe("plugin sdk alias helpers", () => {
       bundledPluginFile("qa-runner-fixture", "src/index.ts"),
     );
 
-    const aliases = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1", NODE_ENV: undefined }, () =>
+    const aliases = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: "1", NODE_ENV: undefined }, () =>
       buildPluginLoaderAliasMap(sourcePluginEntry),
     );
 
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/qa-runtime"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/qa-runtime"] ?? "")).toBe(
       fs.realpathSync(sourceQaRuntimePath),
     );
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/qa-channel"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/qa-channel"] ?? "")).toBe(
       fs.realpathSync(sourceQaChannelPath),
     );
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/qa-channel-protocol"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/qa-channel-protocol"] ?? "")).toBe(
       fs.realpathSync(sourceQaChannelProtocolPath),
     );
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/qa-lab"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/qa-lab"] ?? "")).toBe(
       fs.realpathSync(distQaLabPath),
     );
   });
@@ -960,99 +960,99 @@ describe("plugin sdk alias helpers", () => {
     );
     const { packageRoot: installedCodexRoot, pluginEntry: installedCodexEntry } =
       writeInstalledPluginEntry({
-        installRoot: path.join(makeTempDir(), ".openclaw", "npm"),
-        packageName: "@openclaw/codex",
+        installRoot: path.join(makeTempDir(), ".carapace", "npm"),
+        packageName: "@carapace/codex",
       });
     const { packageRoot: installedOtherRoot, pluginEntry: installedOtherEntry } =
       writeInstalledPluginEntry({
-        installRoot: path.join(makeTempDir(), ".openclaw", "npm"),
-        packageName: "@openclaw/demo",
+        installRoot: path.join(makeTempDir(), ".carapace", "npm"),
+        packageName: "@carapace/demo",
       });
-    const shadowCodexRoot = path.join(makeTempDir(), ".openclaw", "extensions", "codex-shadow");
+    const shadowCodexRoot = path.join(makeTempDir(), ".carapace", "extensions", "codex-shadow");
     const shadowCodexEntry = path.join(shadowCodexRoot, "dist", "index.js");
     mkdirSafeDir(path.dirname(shadowCodexEntry));
     fs.writeFileSync(
       path.join(shadowCodexRoot, "package.json"),
-      JSON.stringify({ name: "@openclaw/codex", type: "module" }, null, 2),
+      JSON.stringify({ name: "@carapace/codex", type: "module" }, null, 2),
       "utf-8",
     );
     fs.writeFileSync(shadowCodexEntry, 'export const plugin = "shadow";\n', "utf-8");
 
     const aliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
       () => buildPluginLoaderAliasMap(sourcePluginEntry),
     );
     const otherAliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
       () => buildPluginLoaderAliasMap(sourceOtherPluginEntry),
     );
     const devRootAliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
       () =>
         buildPluginLoaderAliasMap(
           distCodexEntry,
-          path.join(fixture.root, "openclaw.mjs"),
+          path.join(fixture.root, "carapace.mjs"),
           undefined,
           "dist",
           devFixture.root,
         ),
     );
     const installedAliases = withCwd(installedCodexRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
         buildPluginLoaderAliasMap(
           installedCodexEntry,
-          path.join(fixture.root, "openclaw.mjs"),
+          path.join(fixture.root, "carapace.mjs"),
           undefined,
           "dist",
         ),
       ),
     );
     const shadowCodexAliases = withCwd(shadowCodexRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
         buildPluginLoaderAliasMap(
           shadowCodexEntry,
-          path.join(fixture.root, "openclaw.mjs"),
+          path.join(fixture.root, "carapace.mjs"),
           undefined,
           "dist",
         ),
       ),
     );
     const installedOtherAliases = withCwd(installedOtherRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
         buildPluginLoaderAliasMap(
           installedOtherEntry,
-          path.join(fixture.root, "openclaw.mjs"),
+          path.join(fixture.root, "carapace.mjs"),
           undefined,
           "dist",
         ),
       ),
     );
 
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/codex-mcp-projection"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/codex-mcp-projection"] ?? "")).toBe(
       fs.realpathSync(sourceCodexMcpProjectionPath),
     );
     expect(
-      fs.realpathSync(installedAliases["openclaw/plugin-sdk/codex-mcp-projection"] ?? ""),
+      fs.realpathSync(installedAliases["carapace/plugin-sdk/codex-mcp-projection"] ?? ""),
     ).toBe(fs.realpathSync(distCodexMcpProjectionPath));
-    expect(fs.realpathSync(devRootAliases["openclaw/plugin-sdk/codex-mcp-projection"] ?? "")).toBe(
+    expect(fs.realpathSync(devRootAliases["carapace/plugin-sdk/codex-mcp-projection"] ?? "")).toBe(
       fs.realpathSync(devCodexMcpProjectionPath),
     );
-    expect(fs.realpathSync(aliases["openclaw/plugin-sdk/native-hook-relay-runtime"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["carapace/plugin-sdk/native-hook-relay-runtime"] ?? "")).toBe(
       fs.realpathSync(sourceNativeHookRelayRuntimePath),
     );
     expect(
-      fs.realpathSync(installedAliases["openclaw/plugin-sdk/native-hook-relay-runtime"] ?? ""),
+      fs.realpathSync(installedAliases["carapace/plugin-sdk/native-hook-relay-runtime"] ?? ""),
     ).toBe(fs.realpathSync(distNativeHookRelayRuntimePath));
     expect(
-      fs.realpathSync(devRootAliases["openclaw/plugin-sdk/native-hook-relay-runtime"] ?? ""),
+      fs.realpathSync(devRootAliases["carapace/plugin-sdk/native-hook-relay-runtime"] ?? ""),
     ).toBe(fs.realpathSync(devNativeHookRelayRuntimePath));
-    expect(aliases["openclaw/plugin-sdk/qa-runtime"]).toBeUndefined();
-    expect(otherAliases["openclaw/plugin-sdk/codex-mcp-projection"]).toBeUndefined();
-    expect(otherAliases["openclaw/plugin-sdk/native-hook-relay-runtime"]).toBeUndefined();
-    expect(installedOtherAliases["openclaw/plugin-sdk/codex-mcp-projection"]).toBeUndefined();
-    expect(installedOtherAliases["openclaw/plugin-sdk/native-hook-relay-runtime"]).toBeUndefined();
-    expect(shadowCodexAliases["openclaw/plugin-sdk/codex-mcp-projection"]).toBeUndefined();
-    expect(shadowCodexAliases["openclaw/plugin-sdk/native-hook-relay-runtime"]).toBeUndefined();
+    expect(aliases["carapace/plugin-sdk/qa-runtime"]).toBeUndefined();
+    expect(otherAliases["carapace/plugin-sdk/codex-mcp-projection"]).toBeUndefined();
+    expect(otherAliases["carapace/plugin-sdk/native-hook-relay-runtime"]).toBeUndefined();
+    expect(installedOtherAliases["carapace/plugin-sdk/codex-mcp-projection"]).toBeUndefined();
+    expect(installedOtherAliases["carapace/plugin-sdk/native-hook-relay-runtime"]).toBeUndefined();
+    expect(shadowCodexAliases["carapace/plugin-sdk/codex-mcp-projection"]).toBeUndefined();
+    expect(shadowCodexAliases["carapace/plugin-sdk/native-hook-relay-runtime"]).toBeUndefined();
   });
 
   it("aliases the SSRF internal helper only for bundled local IPC owner plugins", async () => {
@@ -1077,7 +1077,7 @@ describe("plugin sdk alias helpers", () => {
     fs.rmSync(path.join(fixture.root, "scripts"), { force: true, recursive: true });
     fs.writeFileSync(sourceSsrFInternalPath, "export const ssrfInternal = true;\n", "utf-8");
     fs.writeFileSync(distSsrFInternalPath, "export const ssrfInternal = true;\n", "utf-8");
-    const ssrfInternalSpecifier = "openclaw/plugin-sdk/ssrf-runtime-internal";
+    const ssrfInternalSpecifier = "carapace/plugin-sdk/ssrf-runtime-internal";
     const entryBody = [
       `import { ssrfInternal } from "${ssrfInternalSpecifier}";`,
       "export const loadedSsrFInternal = ssrfInternal;",
@@ -1139,28 +1139,28 @@ describe("plugin sdk alias helpers", () => {
     fs.writeFileSync(sourceOtherPluginEntry, entryBody, "utf-8");
     const { packageRoot: installedOllamaRoot, pluginEntry: installedOllamaEntry } =
       writeInstalledPluginEntry({
-        installRoot: path.join(makeTempDir(), ".openclaw", "npm"),
-        packageName: "@openclaw/ollama",
+        installRoot: path.join(makeTempDir(), ".carapace", "npm"),
+        packageName: "@carapace/ollama",
       });
     const { packageRoot: installedLlamaRoot, pluginEntry: installedLlamaEntry } =
       writeInstalledPluginEntry({
-        installRoot: path.join(makeTempDir(), ".openclaw", "npm"),
-        packageName: "@openclaw/llama-cpp-provider",
+        installRoot: path.join(makeTempDir(), ".carapace", "npm"),
+        packageName: "@carapace/llama-cpp-provider",
       });
 
     for (const owner of owners.filter(({ resolution }) => resolution === undefined)) {
-      const sourceSubpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+      const sourceSubpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
         listPluginSdkExportedSubpaths({ modulePath: owner.entry }),
       );
       expect(sourceSubpaths).toEqual(["core", "ssrf-runtime-internal"]);
     }
-    const privateQaOtherSubpaths = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
+    const privateQaOtherSubpaths = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
       listPluginSdkExportedSubpaths({
         modulePath: sourceOtherPluginEntry,
       }),
     );
     const ownersWithAliases = owners.map((owner) => ({
-      aliases: withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
+      aliases: withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
         owner.resolution === "dist"
           ? buildPluginLoaderAliasMap(owner.entry, undefined, undefined, "dist")
           : buildPluginLoaderAliasMap(owner.entry),
@@ -1171,28 +1171,28 @@ describe("plugin sdk alias helpers", () => {
       tryNative: owner.tryNative,
     }));
     const otherAliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined },
       () => buildPluginLoaderAliasMap(sourceOtherPluginEntry),
     );
     const privateQaOtherAliases = withEnv(
-      { OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1", NODE_ENV: undefined },
+      { CARAPACE_ENABLE_PRIVATE_QA_CLI: "1", NODE_ENV: undefined },
       () => buildPluginLoaderAliasMap(sourceOtherPluginEntry),
     );
     const installedAliases = withCwd(installedOllamaRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
         buildPluginLoaderAliasMap(
           installedOllamaEntry,
-          path.join(fixture.root, "openclaw.mjs"),
+          path.join(fixture.root, "carapace.mjs"),
           undefined,
           "dist",
         ),
       ),
     );
     const installedLlamaAliases = withCwd(installedLlamaRoot, () =>
-      withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
+      withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined, NODE_ENV: undefined }, () =>
         buildPluginLoaderAliasMap(
           installedLlamaEntry,
-          path.join(fixture.root, "openclaw.mjs"),
+          path.join(fixture.root, "carapace.mjs"),
           undefined,
           "dist",
         ),
@@ -1267,41 +1267,41 @@ describe("plugin sdk alias helpers", () => {
       "string-coerce",
     ]);
     const workspaceAliases = writeWorkspaceAliasFixtures(fixture.root, [
-      ["@openclaw/gateway-client", "gateway-client", "index"],
-      ["@openclaw/gateway-client/timeouts", "gateway-client", "timeouts"],
-      ["@openclaw/gateway-client/websocket-data", "gateway-client", "websocket-data"],
-      ["@openclaw/gateway-protocol", "gateway-protocol", "index"],
-      ["@openclaw/gateway-protocol/schema", "gateway-protocol", "schema"],
-      ["@openclaw/gateway-protocol/frame-guards", "gateway-protocol", "frame-guards"],
+      ["@carapace/gateway-client", "gateway-client", "index"],
+      ["@carapace/gateway-client/timeouts", "gateway-client", "timeouts"],
+      ["@carapace/gateway-client/websocket-data", "gateway-client", "websocket-data"],
+      ["@carapace/gateway-protocol", "gateway-protocol", "index"],
+      ["@carapace/gateway-protocol/schema", "gateway-protocol", "schema"],
+      ["@carapace/gateway-protocol/frame-guards", "gateway-protocol", "frame-guards"],
       [
-        "@openclaw/gateway-protocol/gateway-error-details",
+        "@carapace/gateway-protocol/gateway-error-details",
         "gateway-protocol",
         "gateway-error-details",
       ],
-      ["@openclaw/gateway-protocol/restart-unavailable", "gateway-protocol", "restart-unavailable"],
-      ["@openclaw/markdown-core", "markdown-core", "index"],
-      ["@openclaw/markdown-core/tables", "markdown-core", "tables"],
-      ["@openclaw/media-generation-core", "media-generation-core", "index"],
-      ["@openclaw/media-generation-core/model-ref", "media-generation-core", "model-ref"],
-      ["@openclaw/media-core", "media-core", "index"],
-      ["@openclaw/media-core/attachment-classify", "media-core", "attachment-classify"],
-      ["@openclaw/media-core/mime", "media-core", "mime"],
-      ["@openclaw/acp-core", "acp-core", "index"],
-      ["@openclaw/acp-core/runtime/types", "acp-core", "runtime/types"],
-      ["@openclaw/normalization-core", "normalization-core", "index"],
-      ["@openclaw/normalization-core/boolean-coercion", "normalization-core", "boolean-coercion"],
-      ["@openclaw/normalization-core/result", "normalization-core", "result"],
-      ["@openclaw/normalization-core/agent-id", "normalization-core", "agent-id"],
-      ["@openclaw/normalization-core/string-coerce", "normalization-core", "string-coerce"],
-      ["@openclaw/retry", "retry", "index"],
-      ["@openclaw/terminal-core", "terminal-core", "index"],
-      ["@openclaw/terminal-core/theme", "terminal-core", "theme"],
-      ["@openclaw/net-policy", "net-policy", "index"],
-      ["@openclaw/net-policy/ip", "net-policy", "ip"],
-      ["@openclaw/net-policy/url-protocol", "net-policy", "url-protocol"],
-      ["@openclaw/model-catalog-core/provider-id", "model-catalog-core", "provider-id"],
+      ["@carapace/gateway-protocol/restart-unavailable", "gateway-protocol", "restart-unavailable"],
+      ["@carapace/markdown-core", "markdown-core", "index"],
+      ["@carapace/markdown-core/tables", "markdown-core", "tables"],
+      ["@carapace/media-generation-core", "media-generation-core", "index"],
+      ["@carapace/media-generation-core/model-ref", "media-generation-core", "model-ref"],
+      ["@carapace/media-core", "media-core", "index"],
+      ["@carapace/media-core/attachment-classify", "media-core", "attachment-classify"],
+      ["@carapace/media-core/mime", "media-core", "mime"],
+      ["@carapace/acp-core", "acp-core", "index"],
+      ["@carapace/acp-core/runtime/types", "acp-core", "runtime/types"],
+      ["@carapace/normalization-core", "normalization-core", "index"],
+      ["@carapace/normalization-core/boolean-coercion", "normalization-core", "boolean-coercion"],
+      ["@carapace/normalization-core/result", "normalization-core", "result"],
+      ["@carapace/normalization-core/agent-id", "normalization-core", "agent-id"],
+      ["@carapace/normalization-core/string-coerce", "normalization-core", "string-coerce"],
+      ["@carapace/retry", "retry", "index"],
+      ["@carapace/terminal-core", "terminal-core", "index"],
+      ["@carapace/terminal-core/theme", "terminal-core", "theme"],
+      ["@carapace/net-policy", "net-policy", "index"],
+      ["@carapace/net-policy/ip", "net-policy", "ip"],
+      ["@carapace/net-policy/url-protocol", "net-policy", "url-protocol"],
+      ["@carapace/model-catalog-core/provider-id", "model-catalog-core", "provider-id"],
       [
-        "@openclaw/model-catalog-core/model-catalog-pricing",
+        "@carapace/model-catalog-core/model-catalog-pricing",
         "model-catalog-core",
         "model-catalog-pricing",
       ],
@@ -1327,45 +1327,45 @@ describe("plugin sdk alias helpers", () => {
     writeWorkspacePackageExports(fixture.root, "acp-core", ["normalize-text"]);
     writeWorkspacePackageExports(fixture.root, "normalization-core", ["record-coerce"]);
     const workspaceAliases = writeWorkspaceAliasFixtures(fixture.root, [
-      ["@openclaw/gateway-client/readiness", "gateway-client", "readiness"],
+      ["@carapace/gateway-client/readiness", "gateway-client", "readiness"],
       [
-        "@openclaw/gateway-protocol/connect-error-details",
+        "@carapace/gateway-protocol/connect-error-details",
         "gateway-protocol",
         "connect-error-details",
       ],
-      ["@openclaw/gateway-protocol/frame-guards", "gateway-protocol", "frame-guards"],
+      ["@carapace/gateway-protocol/frame-guards", "gateway-protocol", "frame-guards"],
       [
-        "@openclaw/gateway-protocol/gateway-error-details",
+        "@carapace/gateway-protocol/gateway-error-details",
         "gateway-protocol",
         "gateway-error-details",
       ],
-      ["@openclaw/gateway-protocol/restart-unavailable", "gateway-protocol", "restart-unavailable"],
-      ["@openclaw/markdown-core/render", "markdown-core", "render"],
-      ["@openclaw/media-generation-core/catalog", "media-generation-core", "catalog"],
-      ["@openclaw/media-core/attachment-classify", "media-core", "attachment-classify"],
+      ["@carapace/gateway-protocol/restart-unavailable", "gateway-protocol", "restart-unavailable"],
+      ["@carapace/markdown-core/render", "markdown-core", "render"],
+      ["@carapace/media-generation-core/catalog", "media-generation-core", "catalog"],
+      ["@carapace/media-core/attachment-classify", "media-core", "attachment-classify"],
       [
-        "@openclaw/acp-core/normalize-text",
+        "@carapace/acp-core/normalize-text",
         "acp-core",
         "normalize-text",
         "dist/acp-core/normalize-text.js",
         false,
       ],
       [
-        "@openclaw/normalization-core/record-coerce",
+        "@carapace/normalization-core/record-coerce",
         "normalization-core",
         "record-coerce",
         "dist/normalization-core/record-coerce.js",
       ],
-      ["@openclaw/retry", "retry", "index", "dist/retry/index.js"],
-      ["@openclaw/terminal-core/links", "terminal-core", "links", "dist/terminal-core/links.js"],
-      ["@openclaw/net-policy/url-protocol", "net-policy", "url-protocol"],
+      ["@carapace/retry", "retry", "index", "dist/retry/index.js"],
+      ["@carapace/terminal-core/links", "terminal-core", "links", "dist/terminal-core/links.js"],
+      ["@carapace/net-policy/url-protocol", "net-policy", "url-protocol"],
       [
-        "@openclaw/model-catalog-core/provider-model-id-normalize",
+        "@carapace/model-catalog-core/provider-model-id-normalize",
         "model-catalog-core",
         "provider-model-id-normalize",
       ],
       [
-        "@openclaw/model-catalog-core/model-catalog-pricing",
+        "@carapace/model-catalog-core/model-catalog-pricing",
         "model-catalog-core",
         "model-catalog-pricing",
       ],
@@ -1416,13 +1416,13 @@ describe("plugin sdk alias helpers", () => {
       ),
     );
 
-    expect(fs.realpathSync(aliases["@openclaw/acp-core/runtime/errors"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/acp-core/runtime/errors"] ?? "")).toBe(
       fs.realpathSync(acpRuntimeErrors),
     );
-    expect(fs.realpathSync(aliases["@openclaw/normalization-core/agent-id"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/normalization-core/agent-id"] ?? "")).toBe(
       fs.realpathSync(normalizationAgentId),
     );
-    expect(fs.realpathSync(aliases["@openclaw/media-core/attachment-classify"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/media-core/attachment-classify"] ?? "")).toBe(
       fs.realpathSync(mediaAttachmentClassify),
     );
   });
@@ -1439,14 +1439,14 @@ describe("plugin sdk alias helpers", () => {
       buildPluginLoaderAliasMap(sourcePluginEntry),
     );
 
-    expect(fs.realpathSync(aliases["@openclaw/slack/api.js"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/slack/api.js"] ?? "")).toBe(
       fs.realpathSync(sourceApiPath),
     );
-    expect(fs.realpathSync(aliases["@openclaw/slack/runtime-api.js"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/slack/runtime-api.js"] ?? "")).toBe(
       fs.realpathSync(sourceRuntimeApiPath),
     );
-    expect(aliases["@openclaw/slack/test-api.js"]).toBeUndefined();
-    expect(aliases["@openclaw/slack/internal.js"]).toBeUndefined();
+    expect(aliases["@carapace/slack/test-api.js"]).toBeUndefined();
+    expect(aliases["@carapace/slack/internal.js"]).toBeUndefined();
   });
 
   it("aliases bundled plugin package test surfaces only in private QA mode", () => {
@@ -1456,11 +1456,11 @@ describe("plugin sdk alias helpers", () => {
       bundledPluginFile("qa-lab", "src/live-transports/slack/slack-live.runtime.ts"),
     );
 
-    const aliases = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1", NODE_ENV: undefined }, () =>
+    const aliases = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: "1", NODE_ENV: undefined }, () =>
       buildPluginLoaderAliasMap(sourcePluginEntry),
     );
 
-    expect(fs.realpathSync(aliases["@openclaw/slack/test-api.js"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/slack/test-api.js"] ?? "")).toBe(
       fs.realpathSync(sourceTestApiPath),
     );
   });
@@ -1477,10 +1477,10 @@ describe("plugin sdk alias helpers", () => {
       buildPluginLoaderAliasMap(sourcePluginEntry, undefined, undefined, "dist"),
     );
 
-    expect(fs.realpathSync(aliases["@openclaw/slack/api.js"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/slack/api.js"] ?? "")).toBe(
       fs.realpathSync(distApiPath),
     );
-    expect(fs.realpathSync(aliases["@openclaw/slack/runtime-api.js"] ?? "")).toBe(
+    expect(fs.realpathSync(aliases["@carapace/slack/runtime-api.js"] ?? "")).toBe(
       fs.realpathSync(distRuntimeApiPath),
     );
   });
@@ -1509,7 +1509,7 @@ describe("plugin sdk alias helpers", () => {
       buildPluginLoaderAliasMap(sourcePluginEntry, undefined, undefined, "dist"),
     );
 
-    expect(fs.realpathSync(distAliases["openclaw/plugin-sdk/provider-entry"] ?? "")).toBe(
+    expect(fs.realpathSync(distAliases["carapace/plugin-sdk/provider-entry"] ?? "")).toBe(
       fs.realpathSync(sourceProviderEntryPath),
     );
   });
@@ -1532,7 +1532,7 @@ describe("plugin sdk alias helpers", () => {
     });
   });
 
-  it("resolves plugin-sdk aliases for user-installed plugins via the running openclaw argv hint", () => {
+  it("resolves plugin-sdk aliases for user-installed plugins via the running carapace argv hint", () => {
     const {
       externalPluginEntry,
       externalPluginRoot,
@@ -1543,7 +1543,7 @@ describe("plugin sdk alias helpers", () => {
 
     const aliases = withCwd(externalPluginRoot, () =>
       withEnv({ NODE_ENV: undefined }, () =>
-        buildPluginLoaderAliasMap(externalPluginEntry, path.join(fixture.root, "openclaw.mjs")),
+        buildPluginLoaderAliasMap(externalPluginEntry, path.join(fixture.root, "carapace.mjs")),
       ),
     );
 
@@ -1563,18 +1563,18 @@ describe("plugin sdk alias helpers", () => {
     } = createUserInstalledPluginSdkAliasFixture();
 
     // Simulate loader.ts passing its own import.meta.url as the moduleUrl hint.
-    // This covers installations where argv1 does not resolve to the openclaw root
+    // This covers installations where argv1 does not resolve to the carapace root
     // (e.g. single-binary distributions or custom process launchers).
-    // Use openclaw.mjs which is created by createPluginSdkAliasFixture (bin+marker mode).
+    // Use carapace.mjs which is created by createPluginSdkAliasFixture (bin+marker mode).
     // Use fixture.root as cwd so process.cwd() fallback also resolves to fixture, not the
-    // real openclaw repo root in the test runner environment.
-    const loaderModuleUrl = pathToFileURL(path.join(fixture.root, "openclaw.mjs")).href;
+    // real carapace repo root in the test runner environment.
+    const loaderModuleUrl = pathToFileURL(path.join(fixture.root, "carapace.mjs")).href;
 
     // Use externalPluginRoot as cwd so process.cwd() fallback cannot accidentally
     // resolve to the fixture root — only the moduleUrl hint can bridge the gap.
     // Pass "" for argv1: undefined would trigger the STARTUP_ARGV1 default (the vitest
-    // runner binary, inside the openclaw repo), which resolves before moduleUrl is checked.
-    // An empty string is falsy so resolveTrustedOpenClawRootFromArgvHint returns null,
+    // runner binary, inside the carapace repo), which resolves before moduleUrl is checked.
+    // An empty string is falsy so resolveTrustedCarapaceRootFromArgvHint returns null,
     // meaning only the moduleUrl hint can bridge the gap.
     const aliases = withCwd(externalPluginRoot, () =>
       withEnv({ NODE_ENV: undefined }, () =>
@@ -1594,7 +1594,7 @@ describe("plugin sdk alias helpers", () => {
 
   it.each([
     {
-      name: "does not resolve plugin-sdk alias files from cwd fallback when package root is not an OpenClaw root",
+      name: "does not resolve plugin-sdk alias files from cwd fallback when package root is not an Carapace root",
       fixture: () =>
         createPluginSdkAliasFixture({
           srcFile: "channel-runtime-context.ts",
@@ -1620,20 +1620,20 @@ describe("plugin sdk alias helpers", () => {
     const options = buildPluginLoaderJitiOptions({});
 
     expect(options.tryNative).toBe(true);
-    expect(options.nativeModules).toEqual(["openclaw"]);
+    expect(options.nativeModules).toEqual(["carapace"]);
     expect(options.interopDefault).toBe(true);
     expect(options.extensions).toContain(".js");
     expect(options.extensions).toContain(".ts");
     expect("alias" in options).toBe(false);
   });
 
-  it("preserves configured jiti native modules while adding openclaw", () => {
+  it("preserves configured jiti native modules while adding carapace", () => {
     const options = withEnv(
-      { JITI_NATIVE_MODULES: JSON.stringify(["native-addon", "openclaw"]) },
+      { JITI_NATIVE_MODULES: JSON.stringify(["native-addon", "carapace"]) },
       () => buildPluginLoaderJitiOptions({}),
     );
 
-    expect(options.nativeModules).toEqual(["native-addon", "openclaw"]);
+    expect(options.nativeModules).toEqual(["native-addon", "carapace"]);
   });
 
   it.each([
@@ -1691,12 +1691,12 @@ describe("plugin sdk alias helpers", () => {
   it("reuses prepared aliases in the same generation", () => {
     const first = preparePluginLoaderAliases({
       modulePath: `/repo/${bundledDistPluginFile("browser", "index.js")}`,
-      argv1: "/repo/openclaw.mjs",
+      argv1: "/repo/carapace.mjs",
       moduleUrl: "file:///repo/src/plugins/public-surface-loader.ts",
     });
     const second = preparePluginLoaderAliases({
       modulePath: `/repo/${bundledDistPluginFile("browser", "index.js")}`,
-      argv1: "/repo/openclaw.mjs",
+      argv1: "/repo/carapace.mjs",
       moduleUrl: "file:///repo/src/plugins/public-surface-loader.ts",
     });
 
@@ -1714,14 +1714,14 @@ describe("plugin sdk alias helpers", () => {
     fs.unlinkSync(distPluginEntryPath);
     fs.unlinkSync(path.join(fixture.root, "src", "plugin-sdk", "plugin-entry.ts"));
     const prepared = withPluginCache(owner, () => preparePluginLoaderAliases(params));
-    expect(prepared.resolveAlias("openclaw/plugin-sdk/plugin-entry")).toBeUndefined();
+    expect(prepared.resolveAlias("carapace/plugin-sdk/plugin-entry")).toBeUndefined();
     fs.writeFileSync(distPluginEntryPath, "export const marker = 'new-generation';\n", "utf8");
 
     withPluginCache(other, () => {
-      expect(prepared.resolveAlias("openclaw/plugin-sdk/plugin-entry")).toBeUndefined();
-      expect(prepared.getAliasMap()["openclaw/plugin-sdk/plugin-entry"]).toBeUndefined();
+      expect(prepared.resolveAlias("carapace/plugin-sdk/plugin-entry")).toBeUndefined();
+      expect(prepared.getAliasMap()["carapace/plugin-sdk/plugin-entry"]).toBeUndefined();
       const fresh = preparePluginLoaderAliases(params);
-      expect(fs.realpathSync(fresh.resolveAlias("openclaw/plugin-sdk/plugin-entry") ?? "")).toBe(
+      expect(fs.realpathSync(fresh.resolveAlias("carapace/plugin-sdk/plugin-entry") ?? "")).toBe(
         fs.realpathSync(distPluginEntryPath),
       );
     });
@@ -1738,19 +1738,19 @@ describe("plugin sdk alias helpers", () => {
     const { auto, dist, distAgain } = withEnv({ NODE_ENV: undefined }, () => ({
       auto: preparePluginLoaderAliases({
         modulePath: sourcePluginEntry,
-        argv1: path.join(fixture.root, "openclaw.mjs"),
+        argv1: path.join(fixture.root, "carapace.mjs"),
         moduleUrl: pathToFileURL(path.join(fixture.root, "src/plugins/loader.ts")).href,
         pluginSdkResolution: "auto",
       }),
       dist: preparePluginLoaderAliases({
         modulePath: sourcePluginEntry,
-        argv1: path.join(fixture.root, "openclaw.mjs"),
+        argv1: path.join(fixture.root, "carapace.mjs"),
         moduleUrl: pathToFileURL(path.join(fixture.root, "src/plugins/loader.ts")).href,
         pluginSdkResolution: "dist",
       }),
       distAgain: preparePluginLoaderAliases({
         modulePath: sourcePluginEntry,
-        argv1: path.join(fixture.root, "openclaw.mjs"),
+        argv1: path.join(fixture.root, "carapace.mjs"),
         moduleUrl: pathToFileURL(path.join(fixture.root, "src/plugins/loader.ts")).href,
         pluginSdkResolution: "dist",
       }),
@@ -1759,10 +1759,10 @@ describe("plugin sdk alias helpers", () => {
     expect(distAgain).toBe(dist);
     expect(auto).not.toBe(dist);
     expect(
-      fs.realpathSync(auto.getAliasMap()["openclaw/plugin-sdk/channel-runtime-context"] ?? ""),
+      fs.realpathSync(auto.getAliasMap()["carapace/plugin-sdk/channel-runtime-context"] ?? ""),
     ).toBe(fs.realpathSync(sourceChannelRuntimePath));
     expect(
-      fs.realpathSync(dist.getAliasMap()["openclaw/plugin-sdk/channel-runtime-context"] ?? ""),
+      fs.realpathSync(dist.getAliasMap()["carapace/plugin-sdk/channel-runtime-context"] ?? ""),
     ).toBe(fs.realpathSync(distChannelRuntimePath));
   });
 
@@ -1791,7 +1791,7 @@ describe("plugin sdk alias helpers", () => {
     fs.writeFileSync(sourceLoaderBaseFile, "export {};\n", "utf-8");
     fs.writeFileSync(
       path.join(copiedSourceDir, "channel.runtime.ts"),
-      `import { resolveOutboundSendDep } from "@openclaw/plugin-sdk/channel-outbound";
+      `import { resolveOutboundSendDep } from "@carapace/plugin-sdk/channel-outbound";
 
 export const syntheticRuntimeMarker = {
   resolveOutboundSendDep,
@@ -1827,8 +1827,8 @@ export const syntheticRuntimeMarker = {
 
     const withAlias = createJiti(sourceLoaderBaseUrl, {
       ...buildPluginLoaderJitiOptions({
-        "openclaw/plugin-sdk/channel-outbound": copiedChannelRuntimeShim,
-        "@openclaw/plugin-sdk/channel-outbound": copiedChannelRuntimeShim,
+        "carapace/plugin-sdk/channel-outbound": copiedChannelRuntimeShim,
+        "@carapace/plugin-sdk/channel-outbound": copiedChannelRuntimeShim,
       }),
       tryNative: false,
     });
@@ -1853,8 +1853,8 @@ export const syntheticRuntimeMarker = {
     },
     {
       name: "resolves plugin runtime module from package root when loader runs from transpiler cache path",
-      modulePath: () => "/tmp/tsx-cache/openclaw-loader.js",
-      argv1: (root: string) => path.join(root, "openclaw.mjs"),
+      modulePath: () => "/tmp/tsx-cache/carapace-loader.js",
+      argv1: (root: string) => path.join(root, "carapace.mjs"),
       env: { NODE_ENV: undefined },
       expected: "src" as const,
     },
@@ -1892,7 +1892,7 @@ export const syntheticRuntimeMarker = {
   it("falls back to ancestor runtime candidates when package-root markers are unavailable", () => {
     const root = makeTempDir();
     const distFile = path.join(root, "dist", "plugins", "runtime", "index.js");
-    const loaderCachePath = path.join(root, ".cache", "tsx", "openclaw-loader.js");
+    const loaderCachePath = path.join(root, ".cache", "tsx", "carapace-loader.js");
     mkdirSafeDir(path.dirname(distFile));
     mkdirSafeDir(path.dirname(loaderCachePath));
     fs.writeFileSync(distFile, "export const createPluginRuntime = () => ({});\n", "utf-8");
@@ -1901,7 +1901,7 @@ export const syntheticRuntimeMarker = {
     expect(
       resolvePluginRuntimeModule({
         modulePath: loaderCachePath,
-        argv1: path.join(root, "bin", "openclaw"),
+        argv1: path.join(root, "bin", "carapace"),
         pluginSdkResolution: "dist",
       }),
     ).toBe(distFile);
@@ -1911,7 +1911,7 @@ export const syntheticRuntimeMarker = {
     const root = makeTempDir();
     const distFile = path.join(root, "dist", "plugins", "runtime", "index.js");
     const loaderCacheRoot = makeTempDir();
-    const loaderCachePath = path.join(loaderCacheRoot, "tsx", "openclaw-loader.js");
+    const loaderCachePath = path.join(loaderCacheRoot, "tsx", "carapace-loader.js");
     const originalArgv1 = process.argv[1];
     mkdirSafeDir(path.dirname(distFile));
     mkdirSafeDir(path.dirname(loaderCachePath));
@@ -1919,7 +1919,7 @@ export const syntheticRuntimeMarker = {
     fs.writeFileSync(distFile, "export const createPluginRuntime = () => ({});\n", "utf-8");
     fs.writeFileSync(loaderCachePath, "export {};\n", "utf-8");
 
-    process.argv[1] = path.join(root, "bin", "openclaw");
+    process.argv[1] = path.join(root, "bin", "carapace");
     try {
       expect(
         resolvePluginRuntimeModule({
@@ -1941,7 +1941,7 @@ export const syntheticRuntimeMarker = {
     const distFile = path.join(root, "dist", "plugins", "runtime", "index.js");
     const loaderCacheRoot = makeTempDir();
     const cacheDistFile = path.join(loaderCacheRoot, "dist", "plugins", "runtime", "index.js");
-    const loaderCachePath = path.join(loaderCacheRoot, "tsx", "openclaw-loader.js");
+    const loaderCachePath = path.join(loaderCacheRoot, "tsx", "carapace-loader.js");
     mkdirSafeDir(path.dirname(distFile));
     mkdirSafeDir(path.dirname(cacheDistFile));
     mkdirSafeDir(path.dirname(loaderCachePath));
@@ -1953,7 +1953,7 @@ export const syntheticRuntimeMarker = {
     expect(
       resolvePluginRuntimeModule({
         modulePath: loaderCachePath,
-        argv1: path.join(root, "bin", "openclaw"),
+        argv1: path.join(root, "bin", "carapace"),
         pluginSdkResolution: "dist",
       }),
     ).toBe(distFile);
@@ -1962,10 +1962,10 @@ export const syntheticRuntimeMarker = {
   it("resolves runtime fallback through symlinked startup argv", () => {
     const root = makeTempDir();
     const distFile = path.join(root, "dist", "plugins", "runtime", "index.js");
-    const binFile = path.join(root, "bin", "openclaw");
+    const binFile = path.join(root, "bin", "carapace");
     const shimRoot = makeTempDir();
-    const shimFile = path.join(shimRoot, "bin", "openclaw");
-    const loaderCachePath = path.join(makeTempDir(), "tsx", "openclaw-loader.js");
+    const shimFile = path.join(shimRoot, "bin", "carapace");
+    const loaderCachePath = path.join(makeTempDir(), "tsx", "carapace-loader.js");
     mkdirSafeDir(path.dirname(distFile));
     mkdirSafeDir(path.dirname(binFile));
     mkdirSafeDir(path.dirname(shimFile));
@@ -1986,11 +1986,11 @@ export const syntheticRuntimeMarker = {
 
   it("resolves runtime fallback through npm .bin startup argv", () => {
     const root = makeTempDir();
-    const packageRoot = path.join(root, "node_modules", "openclaw");
+    const packageRoot = path.join(root, "node_modules", "carapace");
     const distFile = path.join(packageRoot, "dist", "plugins", "runtime", "index.js");
     const projectDistFile = path.join(root, "dist", "plugins", "runtime", "index.js");
-    const binFile = path.join(root, "node_modules", ".bin", "openclaw");
-    const loaderCachePath = path.join(makeTempDir(), "tsx", "openclaw-loader.js");
+    const binFile = path.join(root, "node_modules", ".bin", "carapace");
+    const loaderCachePath = path.join(makeTempDir(), "tsx", "carapace-loader.js");
     mkdirSafeDir(path.dirname(distFile));
     mkdirSafeDir(path.dirname(projectDistFile));
     mkdirSafeDir(path.dirname(binFile));
@@ -2014,7 +2014,7 @@ export const syntheticRuntimeMarker = {
     const modulePath = path.join(root, "dist", "plugins", "loader.js");
     fs.writeFileSync(
       path.join(root, "package.json"),
-      JSON.stringify({ name: "openclaw", type: "module" }, null, 2),
+      JSON.stringify({ name: "carapace", type: "module" }, null, 2),
       "utf-8",
     );
     mkdirSafeDir(path.dirname(modulePath));
@@ -2045,7 +2045,7 @@ describe("buildPluginLoaderAliasMap memoization", () => {
       bundledPluginFile("memo-demo", "src/index.ts"),
     );
 
-    withEnv({ OPENCLAW_DEV_SOURCE_ROOT: fixture.root }, () => {
+    withEnv({ CARAPACE_DEV_SOURCE_ROOT: fixture.root }, () => {
       const first = buildPluginLoaderAliasMap(sourcePluginEntry);
       const reads = [
         vi.spyOn(fs, "readFileSync"),
@@ -2145,16 +2145,16 @@ describe("buildPluginLoaderAliasMap memoization", () => {
     fs.writeFileSync(sourceQaRuntimePath, "export const qaRuntime = true;\n", "utf-8");
     const entry = writePluginEntry(fixture.root, bundledPluginFile("private-qa", "src/index.ts"));
 
-    const publicAliases = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
+    const publicAliases = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: undefined }, () =>
       buildPluginLoaderAliasMap(entry),
     );
-    const privateAliases = withEnv({ OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
+    const privateAliases = withEnv({ CARAPACE_ENABLE_PRIVATE_QA_CLI: "1" }, () =>
       buildPluginLoaderAliasMap(entry),
     );
 
     expect(publicAliases).not.toBe(privateAliases);
-    expect(publicAliases["openclaw/plugin-sdk/qa-runtime"]).toBeUndefined();
-    expect(fs.realpathSync(privateAliases["openclaw/plugin-sdk/qa-runtime"] ?? "")).toBe(
+    expect(publicAliases["carapace/plugin-sdk/qa-runtime"]).toBeUndefined();
+    expect(fs.realpathSync(privateAliases["carapace/plugin-sdk/qa-runtime"] ?? "")).toBe(
       fs.realpathSync(sourceQaRuntimePath),
     );
   });
@@ -2175,19 +2175,19 @@ describe("buildPluginLoaderAliasMap memoization", () => {
 });
 
 describe("buildPluginLoaderJitiOptions", () => {
-  it("scopes the jiti cache to the durable user cache and OpenClaw install", () => {
-    const root = createTrustedOpenClawPackageFixture("2.0.0");
+  it("scopes the jiti cache to the durable user cache and Carapace install", () => {
+    const root = createTrustedCarapacePackageFixture("2.0.0");
     const tmpDir = path.join(root, "tmp");
     const cacheRoot = path.join(root, "cache");
 
     const options = withEnv({ TMPDIR: tmpDir, XDG_CACHE_HOME: `  ${cacheRoot}  ` }, () =>
       buildPluginLoaderJitiOptions(
-        { "openclaw/plugin-sdk/core": path.join(root, "dist", "plugin-sdk", "core.js") },
+        { "carapace/plugin-sdk/core": path.join(root, "dist", "plugin-sdk", "core.js") },
         { modulePath: path.join(root, "dist", "plugins", "loader.js") },
       ),
     );
 
-    expect(options.fsCache).toContain(path.join(cacheRoot, "openclaw", "jiti", "2.0.0"));
+    expect(options.fsCache).toContain(path.join(cacheRoot, "carapace", "jiti", "2.0.0"));
     expect(options.fsCache).not.toContain(tmpDir);
     const stat = vi.spyOn(fs, "statSync");
     try {
@@ -2209,13 +2209,13 @@ describe("buildPluginLoaderJitiOptions", () => {
   it.each(["", "   ", "relative/cache"])(
     "ignores non-absolute XDG cache roots (%j)",
     (xdgCacheHome) => {
-      const root = createTrustedOpenClawPackageFixture("2.0.0");
+      const root = createTrustedCarapacePackageFixture("2.0.0");
       const homeDir = path.join(root, "home");
       const options = withEnv(
         {
           XDG_CACHE_HOME: xdgCacheHome,
           LOCALAPPDATA: undefined,
-          OPENCLAW_HOME: homeDir,
+          CARAPACE_HOME: homeDir,
         },
         () => buildPluginLoaderJitiOptions({}, { modulePath: path.join(root, "dist", "plugins") }),
       );
@@ -2226,30 +2226,30 @@ describe("buildPluginLoaderJitiOptions", () => {
             ? path.join(homeDir, "Library", "Caches")
             : path.join(homeDir, ".cache");
 
-      expect(options.fsCache).toContain(path.join(platformCacheRoot, "openclaw", "jiti", "2.0.0"));
+      expect(options.fsCache).toContain(path.join(platformCacheRoot, "carapace", "jiti", "2.0.0"));
     },
   );
 
   it.skipIf(process.platform !== "win32")(
     "uses an absolute Windows local application-data cache root",
     () => {
-      const root = createTrustedOpenClawPackageFixture("2.0.0");
+      const root = createTrustedCarapacePackageFixture("2.0.0");
       const localAppData = path.join(root, "local-app-data");
       const options = withEnv(
         {
           XDG_CACHE_HOME: undefined,
           LOCALAPPDATA: `  ${localAppData}  `,
-          OPENCLAW_HOME: path.join(root, "home"),
+          CARAPACE_HOME: path.join(root, "home"),
         },
         () => buildPluginLoaderJitiOptions({}, { modulePath: path.join(root, "dist", "plugins") }),
       );
 
-      expect(options.fsCache).toContain(path.join(localAppData, "openclaw", "jiti", "2.0.0"));
+      expect(options.fsCache).toContain(path.join(localAppData, "carapace", "jiti", "2.0.0"));
     },
   );
 
   it.each(["JITI_FS_CACHE", "JITI_CACHE"])("honors the %s filesystem-cache opt-out", (envKey) => {
-    const root = createTrustedOpenClawPackageFixture("2.0.0");
+    const root = createTrustedCarapacePackageFixture("2.0.0");
     const options = withEnv(
       {
         JITI_FS_CACHE: envKey === "JITI_FS_CACHE" ? "false" : undefined,
@@ -2263,7 +2263,7 @@ describe("buildPluginLoaderJitiOptions", () => {
   });
 
   it("keeps deferred jiti imports working after the temporary directory is deleted", async () => {
-    const root = createTrustedOpenClawPackageFixture("2.0.0");
+    const root = createTrustedCarapacePackageFixture("2.0.0");
     const transientTmpRoot = path.join(root, "tmp");
     const durableCacheRoot = path.join(root, "cache");
     const sourceRoot = path.join(root, "source");
@@ -2299,7 +2299,7 @@ describe("buildPluginLoaderJitiOptions", () => {
         fs.rmSync(transientTmpRoot, { recursive: true, force: true });
 
         await expect(parent.loadChild()).resolves.toMatchObject({ marker: "still-delivered" });
-        expect(String(options.fsCache)).toContain(path.join(durableCacheRoot, "openclaw", "jiti"));
+        expect(String(options.fsCache)).toContain(path.join(durableCacheRoot, "carapace", "jiti"));
         expect(fs.readdirSync(String(options.fsCache)).some((file) => file.includes("child"))).toBe(
           true,
         );
@@ -2310,8 +2310,8 @@ describe("buildPluginLoaderJitiOptions", () => {
   it("pre-normalizes and marks alias maps for source transforms", () => {
     const marker = Symbol.for("pathe:normalizedAlias");
     const aliasMap = {
-      "openclaw/plugin-sdk/core": "/repo/src/plugin-sdk/core.ts",
-      "@openclaw/plugin-sdk/core": "/repo/src/plugin-sdk/core.ts",
+      "carapace/plugin-sdk/core": "/repo/src/plugin-sdk/core.ts",
+      "@carapace/plugin-sdk/core": "/repo/src/plugin-sdk/core.ts",
     };
 
     const first = buildPluginLoaderJitiOptions(aliasMap).alias as Record<string, string>;

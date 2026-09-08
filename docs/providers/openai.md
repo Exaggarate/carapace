@@ -1,17 +1,17 @@
 ---
-summary: "Use OpenAI via API keys or Codex subscription in OpenClaw"
+summary: "Use OpenAI via API keys or Codex subscription in Carapace"
 read_when:
-  - You want to use OpenAI models in OpenClaw
+  - You want to use OpenAI models in Carapace
   - You want Codex subscription auth instead of API keys
   - You want Astra async tools, mid-turn steering, or cached reasoning changes
   - You need stricter GPT-5 agent execution behavior
 title: "OpenAI"
 ---
 
-OpenClaw uses one provider id, `openai`, for both direct API-key auth and
+Carapace uses one provider id, `openai`, for both direct API-key auth and
 ChatGPT/Codex subscription auth. `openai/*` is the canonical model route.
 For embedded agent turns with runtime policy unset or `auto`, OpenAI's route
-facts decide whether OpenClaw may select the bundled Codex app-server runtime
+facts decide whether Carapace may select the bundled Codex app-server runtime
 implicitly. The `openai/*` prefix alone does not select a runtime.
 
 - **Agent models** - `openai/*` through the runtime selected by explicit
@@ -22,21 +22,21 @@ implicitly. The `openai/*` prefix alone does not select a runtime.
   through `OPENAI_API_KEY` or an `openai` API-key auth profile.
 - **Legacy config** - `codex/*` and `openai-codex/*` refs are repaired to
   `openai/*` plus model-scoped `agentRuntime.id: "codex"` by
-  `openclaw doctor --fix`.
+  `carapace doctor --fix`.
 
 OpenAI explicitly supports subscription OAuth usage in external tools and
-workflows like OpenClaw.
+workflows like Carapace.
 
 ## Usage and cost tracking
 
-OpenClaw keeps subscription quota and Platform API billing distinct:
+Carapace keeps subscription quota and Platform API billing distinct:
 
 - ChatGPT/Codex OAuth shows the subscription plan, quota windows, and credit balance.
 - `OPENAI_ADMIN_KEY` shows 30 days of provider-reported organization cost and completions usage in Control UI **Usage**, including daily spend, request/token totals, top models, and cost categories.
 - `OPENAI_PROJECT_ID` optionally scopes Admin API history to one project.
-- OpenClaw never sends `OPENAI_API_KEY` or an `openai` inference profile to organization APIs; those credentials may belong to custom, Azure, or agent-local endpoints.
+- Carapace never sends `OPENAI_API_KEY` or an `openai` inference profile to organization APIs; those credentials may belong to custom, Azure, or agent-local endpoints.
 
-An explicit Admin key takes precedence over OAuth. Provider-reported history is not merged with OpenClaw's session-derived estimated cost; it can include API activity from other clients and provider-side billing adjustments.
+An explicit Admin key takes precedence over OAuth. Provider-reported history is not merged with Carapace's session-derived estimated cost; it can include API activity from other clients and provider-side billing adjustments.
 
 OpenAI's [API Usage Dashboard](https://help.openai.com/en/articles/10478918) documentation describes the organization-owner and explicit Usage Dashboard permission requirements for usage data.
 
@@ -51,15 +51,15 @@ changing config.
 | ChatGPT/Codex subscription, native Codex runtime  | `openai/gpt-5.6-sol`                                               | Fresh subscription setup; sign in with Codex auth.                  |
 | Direct API-key billing for agent turns            | `openai/gpt-5.6-sol` plus an ordered API-key auth profile          | Fresh API-key setup uses the explicit Sol id.                       |
 | Choose an exact GPT-5.6 tier                      | `openai/gpt-5.6-sol`, `-terra`, or `-luna`                         | Check `models list` for the tiers available to this account.        |
-| Account without GPT-5.6 access                    | `openai/gpt-5.5`                                                   | Explicit recovery choice; OpenClaw does not silently downgrade.     |
-| Direct API-key billing, explicit OpenClaw runtime | `openai/gpt-5.6` plus provider/model `agentRuntime.id: "openclaw"` | Select a normal `openai` API-key profile.                           |
+| Account without GPT-5.6 access                    | `openai/gpt-5.5`                                                   | Explicit recovery choice; Carapace does not silently downgrade.     |
+| Direct API-key billing, explicit Carapace runtime | `openai/gpt-5.6` plus provider/model `agentRuntime.id: "carapace"` | Select a normal `openai` API-key profile.                           |
 | Latest ChatGPT Instant model alias                | `openai/chat-latest`                                               | Direct API-key only; moving alias, not the stable default.          |
 | Image generation or editing                       | `openai/gpt-image-2`                                               | Works with `OPENAI_API_KEY` or Codex OAuth.                         |
 | Transparent-background images                     | `openai/gpt-image-1.5`                                             | Set `outputFormat` to `png` or `webp` and `background=transparent`. |
 
 ### Retired subscription model references
 
-GPT-5.4 and GPT-5.4 Mini are retired from the ChatGPT-account Codex route. Run `openclaw doctor --fix` to replace persisted subscription references with their documented successors: `openai/gpt-5.6-terra` and `openai/gpt-5.6-luna`, respectively. This includes defaults, per-agent model selections, automation overrides, and unlocked session overrides whose selected route is known. The Platform API-key route is unaffected. Doctor retains pinned overrides when their successor is outside the agent's model policy, or when clearing an override would keep the same retired model and account. It reports the model or policy change needed, along with unresolved or conflicting account routes. Review the repair output, restart the Gateway, and re-enable any automation that was disabled after repeated failures.
+GPT-5.4 and GPT-5.4 Mini are retired from the ChatGPT-account Codex route. Run `carapace doctor --fix` to replace persisted subscription references with their documented successors: `openai/gpt-5.6-terra` and `openai/gpt-5.6-luna`, respectively. This includes defaults, per-agent model selections, automation overrides, and unlocked session overrides whose selected route is known. The Platform API-key route is unaffected. Doctor retains pinned overrides when their successor is outside the agent's model policy, or when clearing an override would keep the same retired model and account. It reports the model or policy change needed, along with unresolved or conflicting account routes. Review the repair output, restart the Gateway, and re-enable any automation that was disabled after repeated failures.
 
 ## GPT-6 Astra
 
@@ -71,14 +71,14 @@ If ChatGPT/Codex catalog discovery is unavailable, the offline fallback list
 omits Astra until account discovery succeeds.
 
 ```bash
-openclaw models set openai/gpt-6-astra
+carapace models set openai/gpt-6-astra
 ```
 
 Astra uses the Responses API for agent tool calls. It supports text and image
 input, a 1,050,000-token context window, and up to 128,000 output tokens.
-OpenClaw retains its ordinary 272,000-token active input budget by default.
+Carapace retains its ordinary 272,000-token active input budget by default.
 The supported reasoning efforts are `low`, `medium`, `high`, `xhigh`, and `max`.
-OpenClaw defaults Astra to `low` on both the OpenClaw and Codex runtimes to
+Carapace defaults Astra to `low` on both the Carapace and Codex runtimes to
 limit reasoning cost and subscription-budget consumption on ordinary prompts.
 The OpenAI provider owns this default, so model selection, Control UI, and
 Codex turn requests share it. Explicit agent, model, global, and session
@@ -91,8 +91,8 @@ These defaults also apply to configured Astra model entries without explicit
 reasoning or temperature compatibility metadata.
 Azure Responses deployments continue to use their configured capabilities.
 
-`/think ultra` is also available on the OpenClaw and Codex runtimes. Ultra enables
-proactive sub-agent orchestration; it is not a raw Responses API effort. OpenClaw
+`/think ultra` is also available on the Carapace and Codex runtimes. Ultra enables
+proactive sub-agent orchestration; it is not a raw Responses API effort. Carapace
 uses `max`, while native Codex selects Astra's model-defined effort (`xhigh`).
 
 Standard pricing per million tokens is $10 input, $1 cache reads, $12.50 cache
@@ -102,7 +102,7 @@ and [migration guide](https://developers.openai.com/api/docs/guides/latest-model
 
 ### Async tools, steering, and reasoning changes
 
-Use an OpenAI Platform API-key profile and the built-in OpenClaw runtime for
+Use an OpenAI Platform API-key profile and the built-in Carapace runtime for
 these Astra capabilities. They require the official `https://api.openai.com/v1`
 Responses endpoint. Configure the existing model settings:
 
@@ -112,7 +112,7 @@ Responses endpoint. Configure the existing model settings:
     defaults: {
       models: {
         "openai/gpt-6-astra": {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           params: {
             transport: "auto",
             responsesServerCompaction: false,
@@ -124,8 +124,8 @@ Responses endpoint. Configure the existing model settings:
 }
 ```
 
-- **Async function calls:** Astra can continue reasoning while OpenClaw runs a
-  direct function tool. OpenClaw sends the completed result in the next model
+- **Async function calls:** Astra can continue reasoning while Carapace runs a
+  direct function tool. Carapace sends the completed result in the next model
   request after the active response finishes. This
   applies to direct tools; code-mode tools retain their existing execution flow.
 - **Mid-turn steering:** [Steering messages](/concepts/queue#queue-modes) can
@@ -136,7 +136,7 @@ Responses endpoint. Configure the existing model settings:
   that rewrite the active request's prefix keep ordinary queued delivery.
 - **Reasoning changes without rebuilding the cached prefix:** Change the
   [thinking level](/tools/thinking), for example with `/think high`, before
-  the next user turn. OpenClaw preserves the original request-level effort
+  the next user turn. Carapace preserves the original request-level effort
   and places a `configuration_update` at the new turn. This optimization
   works across matching session history over SSE or cached WebSockets.
   Automatic steering continuations keep their inherited settings. If steering
@@ -180,10 +180,10 @@ endpoint and adapter:
 | Effective route facts                                                                                                                                                           | Implicit runtime      |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Exact official Platform HTTPS endpoint with `openai-responses`, or exact official ChatGPT HTTPS endpoint with `openai-chatgpt-responses`; no authored provider request override | Codex may be selected |
-| Authored `openai-completions` adapter                                                                                                                                           | OpenClaw              |
-| Custom endpoint                                                                                                                                                                 | OpenClaw              |
+| Authored `openai-completions` adapter                                                                                                                                           | Carapace              |
+| Custom endpoint                                                                                                                                                                 | Carapace              |
 | Explicit exact official endpoint using HTTP                                                                                                                                     | Rejected              |
-| Route with an authored provider/model request override                                                                                                                          | OpenClaw              |
+| Route with an authored provider/model request override                                                                                                                          | Carapace              |
 
 Valid model-scoped `params.fastMode` / `params.fast_mode`, cutoff, and `thinking`
 values are typed agent-runtime controls, not authored provider request params.
@@ -191,15 +191,15 @@ Affirmative reasoning support and native reasoning-effort metadata also preserve
 Codex selection. See [Runtime selection](/concepts/agent-runtimes#runtime-selection)
 for the supported capability values and the request overrides that remain protected.
 
-An explicit `agentRuntime.id: "openclaw"` keeps a Codex-eligible route on
-OpenClaw. Explicit `agentRuntime.id: "codex"` requires a registered Codex harness;
+An explicit `agentRuntime.id: "carapace"` keeps a Codex-eligible route on
+Carapace. Explicit `agentRuntime.id: "codex"` requires a registered Codex harness;
 unsupported routes/auth fail closed, except that authored request overrides may
-use Codex's declared exact-request OpenClaw fallback before execution. Inspect
+use Codex's declared exact-request Carapace fallback before execution. Inspect
 the completed result's actual harness when a recipe depends on native execution.
 Runtime selection does not change credential type or billing: Platform API-key
 auth and ChatGPT/Codex subscription auth remain distinct.
 
-`openclaw doctor --fix` migrates legacy `codex/*` and `openai-codex/*` model
+`carapace doctor --fix` migrates legacy `codex/*` and `openai-codex/*` model
 refs, legacy Codex auth profile ids, and legacy Codex auth-order entries to the
 canonical `openai` route. Migrated model refs receive model-scoped
 `agentRuntime.id: "codex"`; use `auth.order.openai` for new auth-order config.
@@ -214,7 +214,7 @@ only when you want API-key auth for an agent model.
 
 ## GPT-5.6 limited preview
 
-OpenClaw recognizes the exact `openai/gpt-5.6-sol`,
+Carapace recognizes the exact `openai/gpt-5.6-sol`,
 `openai/gpt-5.6-terra`, and `openai/gpt-5.6-luna` model ids. All three expose
 `xhigh` and `max` reasoning in the current catalog. OpenAI describes Sol as
 the flagship tier, Terra as the balanced tier, and Luna as the fast,
@@ -226,37 +226,37 @@ OpenAI's [GPT-5.6 Sol model page](https://developers.openai.com/api/docs/models/
 documents the bare `openai/gpt-5.6` id as a supported alias for Sol. Fresh
 API-key and ChatGPT/Codex OAuth setup use the canonical `openai/gpt-5.6-sol`
 ref so model pickers do not show both names for the same tier. Run
-`openclaw doctor --fix` to rewrite persisted bare OpenAI refs to that canonical
+`carapace doctor --fix` to rewrite persisted bare OpenAI refs to that canonical
 identity. The native Codex catalog can show the exact Sol, Terra, and Luna ids depending on
 workspace access. Check the current account with:
 
 ```bash
-openclaw models list --provider openai
+carapace models list --provider openai
 ```
 
 API organization and Codex workspace access can differ. If GPT-5.6 is not
 available, select GPT-5.5 explicitly:
 
 ```bash
-openclaw models set openai/gpt-5.5
+carapace models set openai/gpt-5.5
 ```
 
-OpenClaw surfaces the upstream access error and does not silently replace a
+Carapace surfaces the upstream access error and does not silently replace a
 GPT-5.6 selection with GPT-5.5.
 
 <Note>
 Eligible exact official HTTPS routes may select the bundled Codex app-server
 plugin when runtime policy is unset or `auto`; authored Completions routes,
-custom endpoints, and request-transport overrides remain on OpenClaw. Plaintext
+custom endpoints, and request-transport overrides remain on Carapace. Plaintext
 official HTTP endpoints are rejected. Explicit provider/model runtime config remains
-authoritative. Run `openclaw doctor --fix` to repair stale legacy Codex model
+authoritative. Run `carapace doctor --fix` to repair stale legacy Codex model
 refs, `codex-cli/*` refs, or old runtime session pins that were not set by
 explicit runtime config.
 </Note>
 
-## OpenClaw feature coverage
+## Carapace feature coverage
 
-| OpenAI capability         | OpenClaw surface                                                                              | Status                                                             |
+| OpenAI capability         | Carapace surface                                                                              | Status                                                             |
 | ------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | Chat / Responses          | `openai/<model>` model provider                                                               | Yes                                                                |
 | Codex subscription models | `openai/<model>` with OpenAI OAuth                                                            | Yes                                                                |
@@ -272,7 +272,7 @@ explicit runtime config.
 | Embeddings                | memory embedding provider                                                                     | Yes                                                                |
 
 <Note>
-Released GPT-Live browser and Gateway-relay WebRTC try an OpenClaw ChatGPT OAuth
+Released GPT-Live browser and Gateway-relay WebRTC try an Carapace ChatGPT OAuth
 profile first and fall back to Platform API-key auth. Ordinary GA browser
 Realtime tries Platform auth first and falls back to OAuth only when no Platform
 credential source is configured. Direct backend sockets and unlisted or private
@@ -287,20 +287,20 @@ If API-key auth reports missing billing, top up Platform credits at
 [platform.openai.com/account/billing](https://platform.openai.com/account/billing)
 for the organization backing your realtime credentials when using API-key
 auth. Realtime voice accepts the `openai` API-key auth profile created by
-`openclaw onboard --auth-choice openai-api-key`, a Platform API key set via
+`carapace onboard --auth-choice openai-api-key`, a Platform API key set via
 `talk.realtime.providers.openai.apiKey` for Control UI Talk, or
 `plugins.entries.voice-call.config.realtime.providers.openai.apiKey` for Voice
 Call, or the `OPENAI_API_KEY` environment variable.
 
 In Control UI Video Talk with Platform auth, OpenAI WebRTC receives camera context on demand:
 when the model calls `describe_view`, the browser sends one bounded JPEG over
-the realtime data channel. OpenClaw does not attach a continuous camera track
+the realtime data channel. Carapace does not attach a continuous camera track
 to the OpenAI session.
 </Note>
 
 ## Memory embeddings
 
-OpenClaw can use OpenAI, or an OpenAI-compatible embedding endpoint, for
+Carapace can use OpenAI, or an OpenAI-compatible embedding endpoint, for
 `memory_search` indexing and query embeddings:
 
 ```json5
@@ -315,7 +315,7 @@ OpenClaw can use OpenAI, or an OpenAI-compatible embedding endpoint, for
 ```
 
 For OpenAI-compatible endpoints that require asymmetric embedding labels, set
-`queryInputType` and `documentInputType` under `memory.search`. OpenClaw
+`queryInputType` and `documentInputType` under `memory.search`. Carapace
 forwards these as provider-specific `input_type` request fields: query
 embeddings use `queryInputType`; indexed memory chunks and batch indexing use
 `documentInputType`. See the
@@ -334,18 +334,18 @@ for the full example.
       </Step>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice openai-api-key
+        carapace onboard --auth-choice openai-api-key
         ```
 
         Or pass the key directly:
 
         ```bash
-        openclaw onboard --openai-api-key "$OPENAI_API_KEY"
+        carapace onboard --openai-api-key "$OPENAI_API_KEY"
         ```
       </Step>
       <Step title="Verify the model is available">
         ```bash
-        openclaw models list --provider openai
+        carapace models list --provider openai
         ```
       </Step>
     </Steps>
@@ -355,9 +355,9 @@ for the full example.
     | Model ref        | Runtime policy or route facts                                 | Route                     | Auth                              |
     | ---------------- | ------------------------------------------------------------- | ------------------------- | --------------------------------- |
     | `openai/gpt-5.6` | unset/`auto`, exact official HTTPS native route, no request override | Codex may be selected     | Ordered API-key auth profile      |
-    | `openai/gpt-5.6` | provider/model `agentRuntime.id: "openclaw"`                  | OpenClaw embedded runtime | Selected `openai` API-key profile |
+    | `openai/gpt-5.6` | provider/model `agentRuntime.id: "carapace"`                  | Carapace embedded runtime | Selected `openai` API-key profile |
     | `openai/gpt-5.5` | explicit provider/model `agentRuntime.id`                     | Selected agent runtime    | Selected OpenAI API-key profile   |
-    | `openai/*`       | authored Completions, custom, or request override | OpenClaw embedded runtime | Credential type remains unchanged |
+    | `openai/*`       | authored Completions, custom, or request override | Carapace embedded runtime | Credential type remains unchanged |
     | `openai/*`       | plaintext official HTTP endpoint                  | Rejected                 | Credential is not sent             |
 
     <Note>
@@ -365,7 +365,7 @@ for the full example.
     route may select the Codex app-server harness implicitly. For API-key auth
     on an agent model, create an `openai` API-key auth profile and order it with
     `auth.order.openai`; `OPENAI_API_KEY` remains the direct fallback for
-    non-agent OpenAI API surfaces. Run `openclaw doctor --fix` to migrate older
+    non-agent OpenAI API surfaces. Run `carapace doctor --fix` to migrate older
     legacy Codex auth-order entries.
     </Note>
 
@@ -396,11 +396,11 @@ for the full example.
     `openai/gpt-5.6-sol`. The bare direct-API `openai/gpt-5.6` alias remains
     supported and resolves to Sol. Existing
     explicit primaries, including `openai/gpt-5.5`, remain unchanged. The
-    `chat-latest` alias only accepts `medium` text verbosity; OpenClaw forces
+    `chat-latest` alias only accepts `medium` text verbosity; Carapace forces
     any other requested verbosity to `medium` for this model.
 
     <Warning>
-    OpenClaw does **not** expose `gpt-5.3-codex-spark` on the direct OpenAI
+    Carapace does **not** expose `gpt-5.3-codex-spark` on the direct OpenAI
     API-key route. It is available only through Codex subscription catalog
     entries when your signed-in account exposes it.
     </Warning>
@@ -415,13 +415,13 @@ for the full example.
     <Steps>
       <Step title="Run Codex OAuth">
         ```bash
-        openclaw onboard --auth-choice openai
+        carapace onboard --auth-choice openai
         ```
 
         Or run OAuth directly:
 
         ```bash
-        openclaw models auth login --provider openai
+        carapace models auth login --provider openai
         ```
 
         For headless or callback-hostile setups, add `--device-code` to sign
@@ -429,22 +429,22 @@ for the full example.
         callback:
 
         ```bash
-        openclaw models auth login --provider openai --device-code
+        carapace models auth login --provider openai --device-code
         ```
       </Step>
       <Step title="Use the canonical OpenAI model route">
         ```bash
-        openclaw config set agents.defaults.model.primary openai/gpt-5.6-sol
+        carapace config set agents.defaults.model.primary openai/gpt-5.6-sol
         ```
 
         No runtime config is required for this exact official HTTPS native
         route. It may select the Codex app-server runtime automatically, and
-        OpenClaw installs or repairs the bundled Codex plugin when that runtime
+        Carapace installs or repairs the bundled Codex plugin when that runtime
         is chosen.
       </Step>
       <Step title="Verify Codex auth is available">
         ```bash
-        openclaw models list --provider openai
+        carapace models list --provider openai
         ```
 
         After the gateway is running, send `/codex status` or `/codex models`
@@ -459,9 +459,9 @@ for the full example.
     | `openai/gpt-5.6-sol`     | unset/`auto`, exact official HTTPS native route, no request override | Codex may be selected                                    | Codex sign-in, or an ordered `openai` auth profile |
     | `openai/gpt-5.6-terra`   | unset/`auto`, exact official HTTPS native route, no request override | Codex may be selected                                    | Codex sign-in when the catalog exposes Terra       |
     | `openai/gpt-5.6-luna`    | unset/`auto`, exact official HTTPS native route, no request override | Codex may be selected                                    | Codex sign-in when the catalog exposes Luna        |
-    | `openai/gpt-5.6-sol`     | provider/model `agentRuntime.id: "openclaw"`                  | OpenClaw embedded runtime, internal Codex-auth transport | Selected `openai` OAuth profile                    |
+    | `openai/gpt-5.6-sol`     | provider/model `agentRuntime.id: "carapace"`                  | Carapace embedded runtime, internal Codex-auth transport | Selected `openai` OAuth profile                    |
     | `openai/gpt-5.5`         | explicit provider/model `agentRuntime.id`                     | Selected agent runtime                                   | Selected OpenAI auth profile                       |
-    | `openai/*`               | authored Completions, custom, or request override | OpenClaw embedded runtime                                | Credential requirement remains route-specific      |
+    | `openai/*`               | authored Completions, custom, or request override | Carapace embedded runtime                                | Credential requirement remains route-specific      |
     | `openai/*`               | plaintext official HTTP endpoint                  | Rejected                                                 | Credential is not sent                              |
     | Legacy Codex GPT-5.5 ref | repaired by doctor                                            | Rewritten to `openai/gpt-5.5`                            | Migrated OpenAI OAuth profile                      |
     | `codex-cli/gpt-5.5`      | repaired by doctor                                            | Rewritten to `openai/gpt-5.5`                            | Codex app-server auth                              |
@@ -470,8 +470,8 @@ for the full example.
     Fresh subscription-backed setup uses exact `openai/gpt-5.6-sol`; the
     native Codex catalog may also expose exact Terra or Luna refs. If the
     account does not expose GPT-5.6, select `openai/gpt-5.5` explicitly. Older
-    Codex GPT refs are legacy OpenClaw routes, not the native Codex runtime
-    path; run `openclaw doctor --fix` to migrate them without upgrading an
+    Codex GPT refs are legacy Carapace routes, not the native Codex runtime
+    path; run `carapace doctor --fix` to migrate them without upgrading an
     existing explicit GPT-5.5 selection. `gpt-5.3-codex-spark` stays limited
     to accounts whose Codex subscription catalog advertises it; direct OpenAI
     API-key and Azure refs for it stay suppressed.
@@ -496,7 +496,7 @@ for the full example.
     ```
 
     With an API-key backup, keep the selected model under `openai/*` and put
-    the auth order under `openai`. OpenClaw tries the subscription first, then
+    the auth order under `openai`. Carapace tries the subscription first, then
     the API key, while staying on the Codex harness:
 
     ```json5
@@ -520,51 +520,51 @@ for the full example.
 
     <Note>
     Onboarding no longer imports OAuth material from `~/.codex`. Sign in with
-    browser OAuth (default) or the device-code flow above; OpenClaw manages the
+    browser OAuth (default) or the device-code flow above; Carapace manages the
     resulting credentials in its own agent auth store.
     </Note>
 
     ### Check and recover Codex OAuth routing
 
     ```bash
-    openclaw models status
-    openclaw models auth list --provider openai
-    openclaw config get agents.defaults.model --json
-    openclaw config get models.providers.openai.agentRuntime --json
+    carapace models status
+    carapace models auth list --provider openai
+    carapace config get agents.defaults.model --json
+    carapace config get models.providers.openai.agentRuntime --json
     ```
 
     For a specific agent, add `--agent <id>`:
 
     ```bash
-    openclaw models status --agent <id>
-    openclaw models auth list --agent <id> --provider openai
+    carapace models status --agent <id>
+    carapace models auth list --agent <id> --provider openai
     ```
 
     If an older config still has legacy Codex GPT refs, or a stale OpenAI
     runtime session pin without explicit runtime config, repair it:
 
     ```bash
-    openclaw doctor --fix
-    openclaw config validate
+    carapace doctor --fix
+    carapace config validate
     ```
 
     If `models auth list --provider openai` shows no usable profile, sign in
     again:
 
     ```bash
-    openclaw models auth login --provider openai
-    openclaw models status --probe --probe-provider openai
+    carapace models auth login --provider openai
+    carapace models status --probe --probe-provider openai
     ```
 
     Use `--profile-id` for multiple Codex OAuth logins in the same agent, then
     control them via auth ordering or `/model ...@<profileId> -s`:
 
     ```bash
-    openclaw models auth login --provider openai --profile-id openai:ritsuko
-    openclaw models auth login --provider openai --profile-id openai:lain
+    carapace models auth login --provider openai --profile-id openai:ritsuko
+    carapace models auth login --provider openai --profile-id openai:lain
     ```
 
-    Run `openclaw doctor --fix` to migrate older legacy OpenAI Codex prefix
+    Run `carapace doctor --fix` to migrate older legacy OpenAI Codex prefix
     profile ids and order entries before relying on profile ordering.
 
     ### Status indicator
@@ -577,16 +577,16 @@ for the full example.
     ### Doctor warning
 
     If legacy Codex model refs or stale OpenAI runtime pins remain in config
-    or session state, `openclaw doctor --fix` rewrites them to `openai/*` with
-    the Codex runtime unless OpenClaw is explicitly configured.
+    or session state, `carapace doctor --fix` rewrites them to `openai/*` with
+    the Codex runtime unless Carapace is explicitly configured.
 
     ### Context window defaults and long-context opt-in
 
-    OpenClaw treats native model capacity and the active runtime budget as
+    Carapace treats native model capacity and the active runtime budget as
     separate values:
 
     - `contextWindow` declares the model's native window.
-    - `contextTokens` caps how much of that window OpenClaw uses for active input.
+    - `contextTokens` caps how much of that window Carapace uses for active input.
 
     ChatGPT/Codex OAuth follows the live Codex account catalog. The current
     catalog commonly advertises a `272000` token active window for GPT-5.6.
@@ -608,14 +608,14 @@ for the full example.
 
     `922000` is a derived operating budget, not a separate provider-published
     input limit. The two runtimes translate that budget differently: embedded
-    OpenClaw sends Responses compaction controls, while native Codex owns its
+    Carapace sends Responses compaction controls, while native Codex owns its
     catalog window and automatic compaction. See the official
     [model comparison](https://developers.openai.com/api/docs/models/compare)
     and [GPT-5.5 model page](https://developers.openai.com/api/docs/models/gpt-5.5).
 
-    #### Embedded OpenClaw translation
+    #### Embedded Carapace translation
 
-    This example pins the exact Sol model to the embedded OpenClaw runtime,
+    This example pins the exact Sol model to the embedded Carapace runtime,
     enables OpenAI API Fast mode through the shared runtime control, and asks OpenAI Responses
     to compact at `700000` active tokens:
 
@@ -641,7 +641,7 @@ for the full example.
           model: { primary: "openai/gpt-5.6-sol" },
           models: {
             "openai/gpt-5.6-sol": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: {
                 fastMode: true,
                 responsesServerCompaction: true,
@@ -656,7 +656,7 @@ for the full example.
 
     OpenAI Responses automatic compaction emits an encrypted `compaction`
     output item. A stateless client carries the newest item into the next
-    request and may drop every earlier input item. OpenClaw persists that item
+    request and may drop every earlier input item. Carapace persists that item
     opaquely, fences reuse by route, session, and auth, replays it, prunes the
     replaced prefix, carries it through worker transcript commits, and removes
     it from display and diagnostics. Never print, log, or expose the encrypted
@@ -674,7 +674,7 @@ for the full example.
 
     #### Native Codex translation
 
-    Keep the same OpenClaw model selection, but make Codex the explicit runtime
+    Keep the same Carapace model selection, but make Codex the explicit runtime
     and do not add Responses compaction params to this model entry:
 
     ```json5
@@ -704,7 +704,7 @@ for the full example.
 
     These examples are two explicit runtime choices, not one auto-selecting
     configuration. The model-scoped `agentRuntime` and runtime-owned compaction
-    settings must change together. OpenClaw can retain both choices only when
+    settings must change together. Carapace can retain both choices only when
     their model refs or agent configurations are distinguishable; otherwise,
     switch the model runtime and its matching config as one atomic change. Then
     restart the Gateway and native Codex app-server, run `/model default -s`,
@@ -727,9 +727,9 @@ for the full example.
 
     ### Catalog recovery
 
-    OpenClaw uses upstream Codex catalog metadata for `gpt-5.5` when it is
+    Carapace uses upstream Codex catalog metadata for `gpt-5.5` when it is
     present. If live Codex discovery omits the `gpt-5.5` row while the account
-    is authenticated, OpenClaw synthesizes that OAuth model row so cron,
+    is authenticated, Carapace synthesizes that OAuth model row so cron,
     sub-agent, and configured default-model runs do not fail with
     `Unknown model`.
 
@@ -741,13 +741,13 @@ for the full example.
 The native Codex app-server harness uses `openai/*` model refs when an eligible
 exact official HTTPS route selects it implicitly, or when provider/model
 `agentRuntime.id: "codex"` selects it explicitly. Its auth is still
-account-based. OpenClaw selects auth in this order:
+account-based. Carapace selects auth in this order:
 
 1. Ordered OpenAI auth profiles for the agent, preferably under
-   `auth.order.openai`. Run `openclaw doctor --fix` to migrate older legacy
+   `auth.order.openai`. Run `carapace doctor --fix` to migrate older legacy
    Codex auth profile ids and auth order.
 2. The app-server's existing account, such as a local Codex CLI ChatGPT
-   sign-in. For the default isolated agent home, OpenClaw bridges that native
+   sign-in. For the default isolated agent home, Carapace bridges that native
    CLI account into the app-server through its login RPC; it does not share the
    CLI's config, plugins, or thread store.
 3. For local stdio app-server launches only, and only when the app-server
@@ -755,23 +755,23 @@ account-based. OpenClaw selects auth in this order:
 
 The default per-agent `codex-home/auth.json` is not a runtime auth store. If
 you copied or mounted Codex CLI credentials there, import them into the agent's
-OpenClaw auth store before starting a native Codex turn. Replace `<agent-id>`
+Carapace auth store before starting a native Codex turn. Replace `<agent-id>`
 with the configured agent that owns this Codex home:
 
 ```bash
-openclaw migrate plan codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai
-openclaw migrate apply codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai --yes
+carapace migrate plan codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai
+carapace migrate apply codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai --yes
 ```
 
 A local ChatGPT/Codex subscription sign-in is not replaced just because the
 gateway process also has `OPENAI_API_KEY` for direct OpenAI models or
 embeddings. The env API-key fallback applies only to the local stdio no-account
 path; it is never sent over WebSocket app-server connections. When a
-subscription-style Codex profile is selected, OpenClaw also keeps
+subscription-style Codex profile is selected, Carapace also keeps
 `CODEX_API_KEY` and `OPENAI_API_KEY` out of the spawned stdio app-server child
 and sends the selected credentials through the app-server login RPC instead.
 
-When that subscription profile is blocked by a Codex usage limit, OpenClaw
+When that subscription profile is blocked by a Codex usage limit, Carapace
 marks the profile blocked until Codex's advertised reset time and lets auth
 ordering rotate to the next `openai:*` profile, without changing the selected
 model or dropping out of the Codex harness. Once the reset time passes, the
@@ -818,7 +818,7 @@ transparent-background PNG/WebP output; the current `gpt-image-2` API rejects
 For a transparent-background request, call `image_generate` with
 `model: "openai/gpt-image-1.5"`, `outputFormat: "png"` or `"webp"`, and
 `background: "transparent"`; the older `openai.background` provider option is
-still accepted. OpenClaw also protects the public OpenAI and OpenAI Codex OAuth
+still accepted. Carapace also protects the public OpenAI and OpenAI Codex OAuth
 routes by rewriting default `openai/gpt-image-2` transparent requests to
 `gpt-image-1.5`; Azure and custom OpenAI-compatible endpoints keep their
 configured deployment/model names.
@@ -826,7 +826,7 @@ configured deployment/model names.
 The same setting is exposed for headless CLI runs:
 
 ```bash
-openclaw infer image generate \
+carapace infer image generate \
   --model openai/gpt-image-1.5 \
   --output-format png \
   --background transparent \
@@ -835,7 +835,7 @@ openclaw infer image generate \
 ```
 
 Use the same `--output-format` and `--background` flags with
-`openclaw infer image edit` when starting from an input file.
+`carapace infer image edit` when starting from an input file.
 `--openai-background` remains available as an OpenAI-specific alias. Use
 `--quality low|medium|high|auto` to control OpenAI Images quality and cost.
 Use `--openai-moderation low|auto` with both `image generate` and `image edit`
@@ -844,20 +844,20 @@ ChatGPT/Codex OAuth Responses backend both support moderation for text-to-image
 generation and reference-image edits.
 
 For ChatGPT/Codex OAuth installs, keep the same `openai/gpt-image-2` ref. When
-an `openai` OAuth profile is configured, OpenClaw resolves that stored OAuth
+an `openai` OAuth profile is configured, Carapace resolves that stored OAuth
 access token and sends image requests through the Codex Responses backend; it
 does not first try `OPENAI_API_KEY` or silently fall back to an API key.
 Configure `models.providers.openai` explicitly with an API key, custom base
 URL, or Azure endpoint when you want the direct OpenAI Images API route
 instead. If that custom image endpoint is on a trusted LAN/private address,
-also set `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork: true`; OpenClaw
+also set `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork: true`; Carapace
 keeps private/internal OpenAI-compatible image endpoints blocked unless this
 opt-in is present.
 
 Generate:
 
 ```
-/tool image_generate model=openai/gpt-image-2 prompt="A polished launch poster for OpenClaw on macOS" size=3840x2160 count=1
+/tool image_generate model=openai/gpt-image-2 prompt="A polished launch poster for Carapace on macOS" size=3840x2160 count=1
 ```
 
 Generate a transparent PNG:
@@ -905,7 +905,7 @@ See [Video Generation](/tools/video-generation) for shared tool parameters,
 provider selection, and failover behavior.
 
 The OpenAI provider declares `supportsSize` but not `supportsAspectRatio` or
-`supportsResolution`. OpenClaw's shared normalization layer converts a
+`supportsResolution`. Carapace's shared normalization layer converts a
 requested `aspectRatio` into the closest matching OpenAI `size` before the
 request reaches the provider, so aspect-ratio requests generally still work.
 `resolution` has no size fallback and is dropped, surfaced to the caller as
@@ -914,26 +914,26 @@ request reaches the provider, so aspect-ratio requests generally still work.
 
 ## GPT-5 prompt contribution
 
-OpenClaw adds a shared GPT-5 prompt contribution to matching GPT-5-family
-OpenClaw-assembled prompts. The OpenAI plugin setting below controls the
+Carapace adds a shared GPT-5 prompt contribution to matching GPT-5-family
+Carapace-assembled prompts. The OpenAI plugin setting below controls the
 friendly style on OpenAI-family routes. Older GPT-4.x model ids do not match.
 
 The native Codex app-server harness does not receive the persona/tool-
 discipline behavior contract or the friendly interaction-style overlay through
 developer instructions; native Codex keeps Codex-owned base, model, and
-project-doc behavior, and OpenClaw disables Codex's built-in personality for
+project-doc behavior, and Carapace disables Codex's built-in personality for
 native threads so agent workspace personality files stay authoritative.
-OpenClaw contributes only runtime context to native Codex threads: channel
-delivery, OpenClaw dynamic tools, ACP delegation, workspace context, and
-OpenClaw skills. The heartbeat-guidance text from this same contribution is the
+Carapace contributes only runtime context to native Codex threads: channel
+delivery, Carapace dynamic tools, ACP delegation, workspace context, and
+Carapace skills. The heartbeat-guidance text from this same contribution is the
 one exception: native Codex heartbeat turns do get it, injected as dedicated
 collaboration instructions rather than through the shared prompt-contribution
 hook.
 
 The GPT-5 contribution adds a tagged behavior contract for persona
 persistence, execution safety, tool discipline, output shape, completion
-checks, and verification on matching OpenClaw-assembled prompts. Channel-
-specific reply and silent-message behavior stays in the shared OpenClaw system
+checks, and verification on matching Carapace-assembled prompts. Channel-
+specific reply and silent-message behavior stays in the shared Carapace system
 prompt and outbound delivery policy. The friendly interaction-style layer is
 separate and configurable.
 
@@ -959,7 +959,7 @@ separate and configurable.
   </Tab>
   <Tab title="CLI">
     ```bash
-    openclaw config set plugins.entries.openai.config.personality off
+    carapace config set plugins.entries.openai.config.personality off
     ```
   </Tab>
 </Tabs>
@@ -971,7 +971,7 @@ friendly style layer.
 
 <Note>
 The retired `agents.defaults.promptOverlays` key is no longer read; config
-validation rejects it, and `openclaw doctor --fix` migrates its personality
+validation rejects it, and `carapace doctor --fix` migrates its personality
 value into `plugins.entries.openai.config.personality` when that key is unset.
 </Note>
 
@@ -998,7 +998,7 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
     `echo`, `fable`, `juniper`, `marin`, `onyx`, `nova`, `sage`, `shimmer`,
     `verse`.
 
-    `extraBody` is merged into `/audio/speech` request JSON after OpenClaw's
+    `extraBody` is merged into `/audio/speech` request JSON after Carapace's
     generated fields, so use it for OpenAI-compatible endpoints that require
     additional keys such as `lang`. Prototype keys are ignored.
 
@@ -1026,7 +1026,7 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
 
   <Accordion title="Speech-to-text">
     The bundled `openai` plugin registers batch speech-to-text through
-    OpenClaw's media-understanding transcription surface.
+    Carapace's media-understanding transcription surface.
 
     Batch transcription can use the selected OpenAI API-key or ChatGPT OAuth
     profile on the standard transcription endpoint when the account permits it.
@@ -1148,7 +1148,7 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
     client secret and the browser performs the SDP exchange directly.
 
     When no Platform credential source is configured, ordinary GA browser Talk
-    falls back to the OpenClaw ChatGPT OAuth subscription profile. The
+    falls back to the Carapace ChatGPT OAuth subscription profile. The
     single-use Gateway offer broker keeps OAuth server-side, exchanges the
     browser's SDP, and returns only the answer SDP. An explicitly configured but
     unavailable Platform credential fails instead of falling back to OAuth.
@@ -1158,11 +1158,11 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
 
     #### Released GPT-Live browser and Gateway relay authentication
 
-    Released GPT-Live browser and Gateway-relay WebRTC try the OpenClaw ChatGPT
+    Released GPT-Live browser and Gateway-relay WebRTC try the Carapace ChatGPT
     OAuth subscription profile first. When OAuth is unavailable, the Gateway
     falls back to Platform auth in this order: the configured realtime key, an
     `openai` API-key profile, then `OPENAI_API_KEY`. Create the OAuth profile
-    with `openclaw models auth login --provider openai`.
+    with `carapace models auth login --provider openai`.
 
     Both credential types stay in the Gateway. The single-use offer broker
     exchanges the browser's SDP and returns only the answer SDP; it does not
@@ -1192,7 +1192,7 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
     or diagnostics. Opt in explicitly with `talk.realtime.model`; the released
     model remains the default.
 
-    Current Platform-key sessions accept `marin` and `cedar`. OpenClaw defaults
+    Current Platform-key sessions accept `marin` and `cedar`. Carapace defaults
     to `marin` and maps unsupported configured voices back to it.
 
     Unlisted or private browser WebRTC prerequisites, in order:
@@ -1261,10 +1261,10 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
     project.
 
     The released Gateway-owned WebRTC route uses OAuth first with Platform
-    fallback, routes sideband delegations through the configured OpenClaw
+    fallback, routes sideband delegations through the configured Carapace
     agent, and keeps credentials away from relay clients. Unlisted or private
     browser WebRTC and the direct backend socket remain Platform-only. The
-    direct socket enables Discord voice and Voice Call/telephony; OpenClaw
+    direct socket enables Discord voice and Voice Call/telephony; Carapace
     converts G.711 u-law telephony audio to and from the provider's 24 kHz PCM
     stream. Android's client-side gate stays closed until the Gateway relay
     path has live proof from an Android device.
@@ -1280,8 +1280,8 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
     produce sanitized skips, and the tests never print either value:
 
     ```bash
-    OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_GPT_LIVE=1 node --import tsx scripts/test-live.mts -- extensions/openai/realtime-quicksilver.live.test.ts
-    OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_GPT_LIVE=1 node --import tsx scripts/test-live.mts -- extensions/openai/realtime-quicksilver-gateway-bridge.live.test.ts
+    CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_GPT_LIVE=1 node --import tsx scripts/test-live.mts -- extensions/openai/realtime-quicksilver.live.test.ts
+    CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_GPT_LIVE=1 node --import tsx scripts/test-live.mts -- extensions/openai/realtime-quicksilver-gateway-bridge.live.test.ts
     ```
 
     <Note>
@@ -1296,7 +1296,7 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
     <Note>
     Realtime voice is selected when the session is created. OpenAI allows most
     session fields to change later, but the voice cannot be changed after the
-    model has emitted audio in that session. OpenClaw currently exposes the
+    model has emitted audio in that session. Carapace currently exposes the
     built-in Realtime voice ids as strings.
     </Note>
 
@@ -1322,7 +1322,7 @@ value into `plugins.entries.openai.config.personality` when that key is unset.
 ## Azure OpenAI endpoints
 
 The bundled `openai` provider can target an Azure OpenAI resource for image
-generation by overriding the base URL. On the image-generation path, OpenClaw
+generation by overriding the base URL. On the image-generation path, Carapace
 detects Azure hostnames on `models.providers.openai.baseUrl` and switches to
 Azure's request shape automatically.
 
@@ -1360,14 +1360,14 @@ the Azure OpenAI key (not an OpenAI Platform key):
 }
 ```
 
-OpenClaw recognizes these Azure host suffixes for the Azure image-generation
+Carapace recognizes these Azure host suffixes for the Azure image-generation
 route:
 
 - `*.openai.azure.com`
 - `*.services.ai.azure.com`
 - `*.cognitiveservices.azure.com`
 
-For image-generation requests on a recognized Azure host, OpenClaw:
+For image-generation requests on a recognized Azure host, Carapace:
 
 - Sends the `api-key` header instead of `Authorization: Bearer`
 - Uses deployment-scoped paths (`/openai/deployments/{deployment}/...`)
@@ -1380,7 +1380,7 @@ OpenAI image request shape.
 
 <Note>
 Azure routing for the `openai` provider's image-generation path requires
-OpenClaw 2026.4.22 or later. Earlier versions treat any custom
+Carapace 2026.4.22 or later. Earlier versions treat any custom
 `openai.baseUrl` like the public OpenAI endpoint and fail against Azure image
 deployments.
 </Note>
@@ -1399,7 +1399,7 @@ The default is `2024-12-01-preview` when the variable is unset.
 ### Model names are deployment names
 
 Azure OpenAI binds models to deployments. For Azure image-generation requests
-routed through the bundled `openai` provider, the `model` field in OpenClaw
+routed through the bundled `openai` provider, the `model` field in Carapace
 must be the **Azure deployment name** you configured in the Azure portal, not
 the public OpenAI model id.
 
@@ -1425,13 +1425,13 @@ Azure OpenAI and public OpenAI do not always accept the same image parameters.
 Azure may reject options public OpenAI allows (for example certain
 `background` values on `gpt-image-2`) or expose them only on specific model
 versions. These differences come from Azure and the underlying model, not
-OpenClaw. If an Azure request fails with a validation error, check the
+Carapace. If an Azure request fails with a validation error, check the
 parameter set supported by your specific deployment and API version in the
 Azure portal.
 
 <Note>
 Azure OpenAI uses native transport and compat behavior but does not receive
-OpenClaw's hidden attribution headers - see the **Native vs OpenAI-compatible
+Carapace's hidden attribution headers - see the **Native vs OpenAI-compatible
 routes** accordion under [Advanced configuration](#advanced-configuration).
 
 For chat or Responses traffic on Azure (beyond image generation), use the
@@ -1444,12 +1444,12 @@ accordion below.
 ## Advanced configuration
 
 The `transport` and `serviceTier` examples below are authored embedded-provider
-request settings, so an otherwise eligible `auto` route stays on OpenClaw
+request settings, so an otherwise eligible `auto` route stays on Carapace
 instead of selecting Codex implicitly. Valid `fastMode` / `fast_mode` values
 and valid cutoff keys are typed agent-runtime controls and do not select a
 runtime. Runtime-specific examples therefore pin `agentRuntime.id` explicitly.
 The native Codex app-server harness owns its transport and request settings.
-Authored embedded-provider settings can therefore select the declared OpenClaw
+Authored embedded-provider settings can therefore select the declared Carapace
 fallback even with explicit `agentRuntime.id: "codex"`; see
 [Runtime selection](/concepts/agent-runtimes#runtime-selection).
 
@@ -1466,7 +1466,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
     | `"websocket"`         | Use a transient WebSocket for the request, with pre-dispatch SSE fallback |
 
     Cached modes keep one eligible connection per session. When the prior
-    request and response still match the current history, OpenClaw sends only
+    request and response still match the current history, Carapace sends only
     the new input and references the prior response with
     `previous_response_id`. Otherwise it sends full history without that
     reference.
@@ -1475,7 +1475,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
     is not retried or reconnected first. After dispatch, failures with an
     unknown outcome remain replay-unsafe and fail closed. The explicit server
     rejections `previous_response_not_found` and
-    `websocket_connection_limit_reached` are safe exceptions: OpenClaw closes
+    `websocket_connection_limit_reached` are safe exceptions: Carapace closes
     the failed socket and retries that turn once over SSE with full history and
     no rejected `previous_response_id`.
 
@@ -1485,7 +1485,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
         defaults: {
           models: {
             "openai/gpt-5.5": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: { transport: "auto" },
             },
           },
@@ -1501,17 +1501,17 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
   </Accordion>
 
   <Accordion title="Fast mode">
-    OpenClaw exposes a shared fast-mode toggle for `openai/*`:
+    Carapace exposes a shared fast-mode toggle for `openai/*`:
 
     - **Chat/UI:** `/fast status|auto|on|off`
     - **Config:** `agents.defaults.models["<provider>/<model>"].params.fastMode`
 
     Valid `params.fastMode` / `params.fast_mode` values and valid cutoff keys
     are typed runtime controls. They do not count as authored provider request
-    params and do not select OpenClaw or Codex. The example below pins embedded
-    OpenClaw because it describes a direct provider request.
+    params and do not select Carapace or Codex. The example below pins embedded
+    Carapace because it describes a direct provider request.
 
-    When enabled on the embedded runtime, OpenClaw maps fast mode to OpenAI API
+    When enabled on the embedded runtime, Carapace maps fast mode to OpenAI API
     Fast mode (formerly Priority processing) and currently sends
     `service_tier = "priority"`. Fast mode does not rewrite `reasoning` or
     `text.verbosity`. `fastMode: "auto"` starts new model calls fast until the
@@ -1525,7 +1525,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
         defaults: {
           models: {
             "openai/gpt-5.5": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: { fastMode: "auto", fastAutoOnSeconds: 30 },
             },
           },
@@ -1537,7 +1537,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
     <Note>
     The full precedence is inline message, stored session, per-agent default,
     global default, per-model `params.fastMode`, then off. `/fast default`
-    clears only the session layer. `/status` reports the resolved OpenClaw
+    clears only the session layer. `/status` reports the resolved Carapace
     policy and runtime, not the upstream service tier actually honored or
     returned. See [Thinking levels](/tools/thinking#fast-mode-%2Ffast) and
     [Codex harness](/plugins/codex-harness/commands#shared-fast-mode-and-codex-fast-mode).
@@ -1556,9 +1556,9 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
 
   <Accordion title="OpenAI API Fast mode with service_tier">
     OpenAI now calls this API product Fast mode; it was formerly Priority
-    processing. OpenClaw currently sends the wire value
+    processing. Carapace currently sends the wire value
     `service_tier = "priority"`. Set an explicit tier per
-    model on the embedded OpenClaw runtime:
+    model on the embedded Carapace runtime:
 
     ```json5
     {
@@ -1566,7 +1566,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
         defaults: {
           models: {
             "openai/gpt-5.5": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: { serviceTier: "priority" },
             },
           },
@@ -1582,7 +1582,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
     Codex app-server configuration. It is forwarded only by the embedded
     runtime to native OpenAI endpoints (`api.openai.com`) and native ChatGPT
     endpoints (`chatgpt.com/backend-api`). If you route either provider through
-    a proxy, OpenClaw leaves `service_tier` untouched. Configure the native
+    a proxy, Carapace leaves `service_tier` untouched. Configure the native
     harness separately with `plugins.entries.codex.config.appServer.serviceTier`;
     the shared Fast-mode run control can supersede that value.
     </Warning>
@@ -1591,7 +1591,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
 
   <Accordion title="Server-side compaction (Responses API)">
     For store-capable direct OpenAI Responses models (`openai/*` resolved to
-    `api.openai.com`), the OpenAI plugin's OpenClaw stream wrapper auto-enables
+    `api.openai.com`), the OpenAI plugin's Carapace stream wrapper auto-enables
     server-side compaction:
 
     - Forces `store: true` (unless model compat sets `supportsStore: false`)
@@ -1600,17 +1600,17 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
       unavailable)
 
     The same resolved route and effective threshold gate the client preflight,
-    so OpenClaw does not delay local compaction unless the transport will inject
+    so Carapace does not delay local compaction unless the transport will inject
     `context_management`. ChatGPT OAuth, custom proxies, and routes with
     `compat.supportsStore: false` are not store-capable and therefore ignore
-    these server-compaction controls. This applies to the built-in OpenClaw
+    these server-compaction controls. This applies to the built-in Carapace
     runtime path and to OpenAI provider hooks used by embedded runs. The native
     Codex app-server harness manages its own context through Codex and is not
     affected by this setting.
 
     OpenAI emits the compacted state as an encrypted `compaction` output item.
     Keep that item opaque. For stateless continuation, carry the newest item
-    forward and drop the earlier input prefix it replaces. OpenClaw does this
+    forward and drop the earlier input prefix it replaces. Carapace does this
     automatically: it persists and replays the item only for the matching
     route, session, and auth identity, preserves it across worker transcript
     commits, and filters it from user-visible history and diagnostics. Never
@@ -1679,8 +1679,8 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
   </Accordion>
 
   <Accordion title="Strict-agentic GPT mode">
-    For `openai` provider GPT-5-family models run through OpenClaw's embedded
-    runtime, OpenClaw already defaults to a stricter execution contract called
+    For `openai` provider GPT-5-family models run through Carapace's embedded
+    runtime, Carapace already defaults to a stricter execution contract called
     `strict-agentic`. It auto-activates whenever the resolved provider is
     `openai` and the model id matches the GPT-5 family, unless config
     explicitly opts back out:
@@ -1698,18 +1698,18 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
     Setting `"strict-agentic"` explicitly is a no-op on a supported lane (it
     is already the default) and inert on unsupported provider/model pairs.
 
-    With `strict-agentic` active, OpenClaw:
+    With `strict-agentic` active, Carapace:
     - Makes `progress_card` available for substantial work unless `tools.updatePlan` disables it
     - Retries structurally empty or reasoning-only turns with a visible-answer
       continuation
     - Uses explicit harness plan events when the selected harness provides
       them
 
-    OpenClaw does not classify assistant prose to decide whether a turn is a
+    Carapace does not classify assistant prose to decide whether a turn is a
     plan, progress update, or final answer.
 
     <Note>
-    This contract lives entirely in OpenClaw's embedded agent runner. It does
+    This contract lives entirely in Carapace's embedded agent runner. It does
     not apply to the native Codex app-server harness, which manages its own
     turn and plan behavior; the harness selection matters more than the
     execution-contract setting for native Codex runs.
@@ -1718,7 +1718,7 @@ fallback even with explicit `agentRuntime.id: "codex"`; see
   </Accordion>
 
   <Accordion title="Native vs OpenAI-compatible routes">
-    OpenClaw treats direct OpenAI, Codex, and Azure OpenAI endpoints
+    Carapace treats direct OpenAI, Codex, and Azure OpenAI endpoints
     differently from generic OpenAI-compatible `/v1` proxies:
 
     **Native routes** (`openai/*`, Azure OpenAI):

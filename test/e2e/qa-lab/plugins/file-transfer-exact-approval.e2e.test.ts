@@ -5,11 +5,11 @@ import path from "node:path";
 import {
   createPluginRegistryFixture,
   registerVirtualTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/plugin-test-contracts";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { describe, expect, it, vi } from "vitest";
 import fileTransferPlugin from "../../../../extensions/file-transfer/index.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import type { GatewayClient } from "../../../../src/gateway/client.js";
 import { startGatewayServer } from "../../../../src/gateway/server.js";
 import {
@@ -45,19 +45,19 @@ type CapturedInvocation = {
 
 describe("file-transfer exact approval transport", () => {
   it("rejects a replaced file before final I/O", { timeout: E2E_TIMEOUT_MS }, async () => {
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "qa-file-transfer-exact-approval",
       layout: "home",
       env: {
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "0",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_TEST_FAST: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "0",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_TEST_FAST: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
       },
     });
     const port = await getGatewayE2ePortBlock();
@@ -73,7 +73,7 @@ describe("file-transfer exact approval transport", () => {
       path: path.join(state.home, "node.sqlite"),
     });
     const nodeId = nodeIdentity.deviceId;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: {
         mode: "local",
         port,

@@ -1,14 +1,14 @@
 // Ollama provider module implements model/runtime integration.
 import { createHash } from "node:crypto";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { LiveModelCatalogHttpError } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { LiveModelCatalogHttpError } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import {
   isCloudModelRef,
   type ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-onboard";
-import { fetchWithSsrFGuard, type LookupFn } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-onboard";
+import { fetchWithSsrFGuard, type LookupFn } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   isOllamaCloudOrigin,
   OLLAMA_CLOUD_DEFAULT_MODELS,

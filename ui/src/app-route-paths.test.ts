@@ -2,7 +2,7 @@
 import {
   CONTROL_UI_RESERVED_ROUTE_SEGMENTS,
   isControlUiReservedRouteSegment,
-} from "@openclaw/session-url-contract";
+} from "@carapace/session-url-contract";
 import { notFound, type RouteLocation, type RouterHistory } from "@openclaw/uirouter";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -172,8 +172,8 @@ describe("Dynamic route startup bridge", () => {
     ]) {
       expect(routeIdFromPath(pathname)).toBe("chat");
     }
-    expect(routeIdFromPath("/openclaw/beam/0123456789ab", "/openclaw")).toBe("chat");
-    expect(inferBasePathFromPathname("/openclaw/beam/0123456789ab")).toBe("/openclaw");
+    expect(routeIdFromPath("/carapace/beam/0123456789ab", "/carapace")).toBe("chat");
+    expect(inferBasePathFromPathname("/carapace/beam/0123456789ab")).toBe("/carapace");
   });
 
   it("does not steal mounted routes, docs, app resources, or reserved routes", () => {
@@ -198,7 +198,7 @@ describe("Dynamic route startup bridge", () => {
     expect(routeIdFromPath("/plugin/0123456789ab")).toBeNull();
     expect(routeIdFromPath("/usage/0123456789ab")).toBeNull();
     expect(routeIdFromPath("/settings/0123456789ab")).toBeNull();
-    expect(routeIdFromPath("/openclaw/skills/0123456789ab", "/openclaw")).toBeNull();
+    expect(routeIdFromPath("/carapace/skills/0123456789ab", "/carapace")).toBeNull();
   });
 
   it("registers the Updates settings path", () => {

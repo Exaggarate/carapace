@@ -8,9 +8,9 @@ import {
 } from "../state/agent-deletion-journal.js";
 import { readAgentProvenance, recordAgentProvenance } from "../state/agent-provenance.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   captureAgentLifecycleBinding,
   claimCompletedAgentDeletion,
@@ -23,10 +23,10 @@ const tempDirs: string[] = [];
 
 function createOptions() {
   const stateDir = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-delete-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-agent-delete-")),
   );
   tempDirs.push(stateDir);
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 }
 
 function createEntry(agentId: string) {
@@ -39,7 +39,7 @@ function createEntry(agentId: string) {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -111,7 +111,7 @@ describe("agent lifecycle registry", () => {
         const deletion = begin(createEntry("main"));
         expect(() => first.finish()).toThrow("no longer owns");
         expect(readAgentProvenance("main", options)).toEqual(before);
-        runOpenClawStateWriteTransaction(deletion.completeInTransaction, options);
+        runCarapaceStateWriteTransaction(deletion.completeInTransaction, options);
         return deletion;
       },
       options,

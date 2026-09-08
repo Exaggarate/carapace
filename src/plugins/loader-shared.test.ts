@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import { afterAll, describe, expect, it } from "vitest";
 import { setRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { resolvePluginCandidateInstallOwner } from "./candidate-install-owner.js";
 import { getPluginCliCommandDescriptors } from "./cli-root-descriptors.js";
 import { createPluginActivationSource } from "./config-state.js";
@@ -12,7 +12,7 @@ import {
   preparePluginLoadRecord,
   validatePluginConfig as validatePluginConfigByOrigin,
 } from "./loader-shared.js";
-import { loadOpenClawPluginCliRegistry, loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePluginCliRegistry, loadCarapacePlugins } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   resetPluginLoaderTestStateForTest,
@@ -46,17 +46,17 @@ const manifestRecord = {
   origin: "global",
   rootDir: "/plugins/example",
   source: "/plugins/example/index.js",
-  manifestPath: "/plugins/example/openclaw.plugin.json",
+  manifestPath: "/plugins/example/carapace.plugin.json",
 } satisfies PluginManifestRecord;
 
-function createRecordWithBuildVersion(openclawVersion: unknown) {
+function createRecordWithBuildVersion(carapaceVersion: unknown) {
   const candidate = {
     idHint: "example",
     source: manifestRecord.source,
     rootDir: manifestRecord.rootDir,
     origin: manifestRecord.origin,
     packageManifest: {
-      build: { openclawVersion },
+      build: { carapaceVersion },
     } as unknown as NonNullable<PluginCandidate["packageManifest"]>,
   } satisfies PluginCandidate;
 
@@ -81,10 +81,10 @@ function createRecordWithBuildVersion(openclawVersion: unknown) {
 describe("preparePluginLoadRecord", () => {
   it("ignores malformed package build version metadata", () => {
     expect(createRecordWithBuildVersion(" 2026.7.2 ")).toHaveProperty(
-      "builtWithOpenClawVersion",
+      "builtWithCarapaceVersion",
       "2026.7.2",
     );
-    expect(createRecordWithBuildVersion(42)).toHaveProperty("builtWithOpenClawVersion", undefined);
+    expect(createRecordWithBuildVersion(42)).toHaveProperty("builtWithCarapaceVersion", undefined);
   });
 });
 
@@ -287,8 +287,8 @@ describe.each(["runtime", "cli", "descriptors"] as const)(
     it.each(["paired", "mixed-case", "candidate", "undeclared", "invalid-source"] as const)(
       "validates the exact source only for declared secretInputs (%s)",
       async (scenario) => {
-        await withOpenClawTestState(
-          { label: "plugin-source-validation", env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" } },
+        await withCarapaceTestState(
+          { label: "plugin-source-validation", env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" } },
           async (state) => {
             const id = "source-fixture";
             const configId = scenario === "mixed-case" ? "Source-Fixture" : id;
@@ -331,7 +331,7 @@ module.exports = { id: "source-fixture", register(api) {
   api.registerCli(() => {}, { descriptors: [{ ...${JSON.stringify(descriptor)}, description: api.pluginConfig.description }] });
 } };`,
             );
-            await state.writeJson("fixture/openclaw.plugin.json", {
+            await state.writeJson("fixture/carapace.plugin.json", {
               id,
               configSchema,
               cliCommands: [descriptor],
@@ -343,7 +343,7 @@ module.exports = { id: "source-fixture", register(api) {
                     },
                   }),
             });
-            const runtime: OpenClawConfig = {
+            const runtime: CarapaceConfig = {
               plugins: {
                 allow: [id],
                 load: { paths: [entry] },
@@ -352,7 +352,7 @@ module.exports = { id: "source-fixture", register(api) {
                 },
               },
             };
-            const source: OpenClawConfig = {
+            const source: CarapaceConfig = {
               ...runtime,
               plugins: {
                 ...runtime.plugins,
@@ -395,8 +395,8 @@ module.exports = { id: "source-fixture", register(api) {
                 };
                 const registry =
                   surface === "runtime"
-                    ? loadOpenClawPlugins(options)
-                    : await loadOpenClawPluginCliRegistry(options);
+                    ? loadCarapacePlugins(options)
+                    : await loadCarapacePluginCliRegistry(options);
                 expect(registry.plugins.find((plugin) => plugin.id === id)?.status).toBe(
                   accepted ? "loaded" : "error",
                 );
@@ -406,21 +406,21 @@ module.exports = { id: "source-fixture", register(api) {
                 expect(fs.existsSync(marker)).toBe(accepted);
                 if (surface === "runtime" && scenario === "paired") {
                   const candidate = structuredClone(runtime);
-                  const unpaired = loadOpenClawPlugins({ ...options, config: candidate });
+                  const unpaired = loadCarapacePlugins({ ...options, config: candidate });
                   expect
                     .soft(unpaired.plugins.find((plugin) => plugin.id === id)?.status)
                     .toBe("error");
                   // Identity failures must not expand the registries' lazy runtime properties.
                   expect.soft(unpaired === registry).toBe(false);
                   expect(
-                    loadOpenClawPlugins({
+                    loadCarapacePlugins({
                       ...options,
                       config: candidate,
                       activationSourceConfig: structuredClone(source),
                     }) === registry,
                   ).toBe(true);
 
-                  const alternateSource: OpenClawConfig = {
+                  const alternateSource: CarapaceConfig = {
                     ...source,
                     plugins: {
                       ...source.plugins,
@@ -439,20 +439,20 @@ module.exports = { id: "source-fixture", register(api) {
                     config: candidate,
                     activationSourceConfig: alternateSource,
                   };
-                  const alternate = loadOpenClawPlugins(alternateOptions);
+                  const alternate = loadCarapacePlugins(alternateOptions);
                   expect.soft(alternate === registry).toBe(false);
                   expect
                     .soft(alternate.cliRegistrars.flatMap((registrar) => registrar.descriptors))
                     .toEqual([{ ...descriptor, description: "Alternate command" }]);
                   expect(
-                    loadOpenClawPlugins({
+                    loadCarapacePlugins({
                       ...alternateOptions,
                       activationSourceConfig: structuredClone(alternateSource),
                     }) === alternate,
                   ).toBe(true);
 
                   setRuntimeConfigSnapshot(candidate, structuredClone(source));
-                  expect(loadOpenClawPlugins({ ...options, config: candidate }) === registry).toBe(
+                  expect(loadCarapacePlugins({ ...options, config: candidate }) === registry).toBe(
                     true,
                   );
                 }

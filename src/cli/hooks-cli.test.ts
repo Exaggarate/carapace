@@ -1,13 +1,13 @@
 // Hooks CLI tests cover hook command registration and output behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { withContendedConfigMutation } from "../../test/helpers/config-mutation-lock.js";
 import { readConfigFileSnapshot } from "../config/config.js";
 import type { HookStatusReport } from "../hooks/hooks-status.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { formatHookInfo, formatHooksCheck, formatHooksList } from "./hooks-cli.format.js";
 import { registerHooksCli } from "./hooks-cli.js";
 import { createEmptyInstallChecks } from "./requirements-test-fixtures.js";
@@ -30,14 +30,14 @@ const report: HookStatusReport = {
     {
       name: "session-memory",
       description: "Save session context to memory",
-      source: "openclaw-bundled",
+      source: "carapace-bundled",
       pluginId: undefined,
       filePath: "/tmp/hooks/session-memory/HOOK.md",
       baseDir: "/tmp/hooks/session-memory",
       handlerPath: "/tmp/hooks/session-memory/handler.js",
       hookKey: "session-memory",
       emoji: "💾",
-      homepage: "https://docs.openclaw.ai/automation/hooks#session-memory",
+      homepage: "https://github.com/Exaggarate/carapace#session-memory",
       events: ["command:new"],
       unknownEvents: [],
       always: false,
@@ -64,7 +64,7 @@ function createPluginManagedHookReport(): HookStatusReport {
       {
         name: "plugin-hook",
         description: "Hook from plugin",
-        source: "openclaw-plugin",
+        source: "carapace-plugin",
         pluginId: "voice-call",
         filePath: "/tmp/hooks/plugin-hook/HOOK.md",
         baseDir: "/tmp/hooks/plugin-hook",
@@ -308,24 +308,24 @@ describe("hooks config write ownership", () => {
   it.each(["enable", "disable"])(
     "preserves env references while %s waits for the write lock",
     async (action) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           label: "hook-write-env",
-          env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_TEST_HOOK_PREFIX: "before-lock" },
+          env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", CARAPACE_TEST_HOOK_PREFIX: "before-lock" },
         },
         async (state) => {
           const hookDir = path.join(state.workspaceDir, "hooks", "fixture-hook");
           await fs.mkdir(hookDir, { recursive: true });
           await fs.writeFile(
             path.join(hookDir, "HOOK.md"),
-            '---\nname: fixture-hook\ndescription: Fixture hook\nmetadata: {"openclaw":{"events":["command:new"]}}\n---\n',
+            '---\nname: fixture-hook\ndescription: Fixture hook\nmetadata: {"carapace":{"events":["command:new"]}}\n---\n',
           );
           await fs.writeFile(
             path.join(hookDir, "handler.js"),
             "export default async function () {}\n",
           );
           await state.writeConfig({
-            messages: { responsePrefix: "${OPENCLAW_TEST_HOOK_PREFIX}" },
+            messages: { responsePrefix: "${CARAPACE_TEST_HOOK_PREFIX}" },
             agents: {
               ownership: "explicit",
               entries: { fixture: { workspace: state.workspaceDir } },
@@ -349,11 +349,11 @@ describe("hooks config write ownership", () => {
               }),
             async () => {
               expect(await fs.readFile(state.configPath, "utf8")).toBe(raw);
-              process.env.OPENCLAW_TEST_HOOK_PREFIX = "after-lock";
+              process.env.CARAPACE_TEST_HOOK_PREFIX = "after-lock";
             },
           );
           expect(JSON.parse(await fs.readFile(state.configPath, "utf8"))).toMatchObject({
-            messages: { responsePrefix: "${OPENCLAW_TEST_HOOK_PREFIX}" },
+            messages: { responsePrefix: "${CARAPACE_TEST_HOOK_PREFIX}" },
             hooks: { internal: { entries: { "fixture-hook": { enabled: action === "enable" } } } },
           });
           const fresh = await readConfigFileSnapshot();

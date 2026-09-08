@@ -1,5 +1,5 @@
-import { getRootOptionAwareCommandPath } from "openclaw/plugin-sdk/cli-argv";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { getRootOptionAwareCommandPath } from "carapace/plugin-sdk/cli-argv";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 
 // Metadata discovery for unrelated commands must not load the meeting runtime.
 const descriptor = {
@@ -15,7 +15,7 @@ export const ZOOM_MEETINGS_CLI_METADATA = {
   name: "Zoom meetings",
   description: "Zoom meetings CLI metadata",
   descriptor,
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     api.registerCli(() => {}, { descriptors: [descriptor] });
   },
 };

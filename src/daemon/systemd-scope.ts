@@ -1,7 +1,7 @@
 /** Installed systemd scope discovery and dueling-manager diagnostics. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { hasErrnoCode } from "../infra/errno.js";
 import { isGatewayServiceEnv } from "./constants.js";
 import { resolveDaemonHomeDir } from "./paths.js";
@@ -104,7 +104,7 @@ export async function assertNoSystemGatewayOwnership(
   env: GatewayServiceEnv,
   timeoutMs?: number,
 ): Promise<void> {
-  if (env.OPENCLAW_SERVICE_KIND?.trim() === "node") {
+  if (env.CARAPACE_SERVICE_KIND?.trim() === "node") {
     return;
   }
   await assertNoSystemSystemdOwnership(`${resolveSystemdServiceName(env)}.service`, timeoutMs);
@@ -127,7 +127,7 @@ async function findMarkerOwnedSystemSystemdUnit(): Promise<{
     if (
       svc.platform !== "linux" ||
       svc.scope !== "system" ||
-      svc.marker !== "openclaw" ||
+      svc.marker !== "carapace" ||
       !svc.label?.endsWith(".service")
     ) {
       continue;
@@ -296,6 +296,6 @@ export function formatDuelingScopesWarning(
   return (
     `detected BOTH a user-scope (${user.unitPath}) and a system-scope (${system.unitPath}) ` +
     `gateway unit bound to port ${port}; they will SIGTERM each other in a restart loop. ` +
-    `Run \`openclaw doctor\` interactively to inspect both scopes and review supported cleanup.`
+    `Run \`carapace doctor\` interactively to inspect both scopes and review supported cleanup.`
   );
 }

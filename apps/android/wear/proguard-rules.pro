@@ -1,2 +1,2 @@
 -keepattributes *Annotation*
--keepclassmembers class ai.openclaw.wear.** { *; }
+-keepclassmembers class ai.carapace.wear.** { *; }

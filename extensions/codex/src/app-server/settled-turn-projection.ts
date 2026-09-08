@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { CodexHistoryRejection } from "./history-rejection.js";
 import type { JsonValue } from "./protocol.js";
 import { readUpstreamUserText } from "./upstream-prompt-provenance.js";

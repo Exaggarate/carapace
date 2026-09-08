@@ -24,17 +24,17 @@ function requireGateway(): ConnectedGateway {
 }
 
 beforeAll(async () => {
-  minimalGatewayEnv = captureEnv(["OPENCLAW_TEST_MINIMAL_GATEWAY"]);
+  minimalGatewayEnv = captureEnv(["CARAPACE_TEST_MINIMAL_GATEWAY"]);
   // The production lifecycle has no refresh-on-read escape hatch. This must stay non-minimal,
   // otherwise the old sticky behavior is hidden by the test-only lifecycle configuration.
-  setTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY", "0");
+  setTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY", "0");
   await writeGatewayConfig(CHAT_METADATA_BOUNDARY_CONFIG);
   gateway = await startConnectedServerWithClient();
   await gateway.server.startupSettled;
 }, 60_000);
 
 beforeEach(async () => {
-  setTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY", "0");
+  setTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY", "0");
   await writeGatewayConfig(CHAT_METADATA_BOUNDARY_CONFIG);
   const { refreshPreparedModelRuntimeSnapshots } =
     await import("../agents/prepared-model-runtime.js");
@@ -86,9 +86,9 @@ async function writeGatewayConfig(
   config: Record<string, unknown>,
   options: { clearRuntimeSnapshot?: boolean } = {},
 ) {
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const configPath = process.env.CARAPACE_CONFIG_PATH;
   if (!configPath) {
-    throw new Error("OPENCLAW_CONFIG_PATH missing in gateway test environment");
+    throw new Error("CARAPACE_CONFIG_PATH missing in gateway test environment");
   }
   await fs.mkdir(path.dirname(configPath), { recursive: true });
   await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");

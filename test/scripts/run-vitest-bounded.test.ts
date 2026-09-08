@@ -83,12 +83,12 @@ export default { test: { include: [${JSON.stringify(target)}], maxWorkers: 1 } }
         if (outcome !== "help") {
           args.push(...(direct ? [] : ["--"]), "--configLoader=native");
           if (outcome === "startup") {
-            args.push("--openclaw-trailer-repro");
+            args.push("--carapace-trailer-repro");
           }
         }
         const env = { ...process.env };
         for (const key of Object.keys(env)) {
-          if (key.startsWith("VITEST") || key.startsWith("OPENCLAW_")) {
+          if (key.startsWith("VITEST") || key.startsWith("CARAPACE_")) {
             delete env[key];
           }
         }
@@ -193,8 +193,8 @@ posixDescribe("bounded Vitest process ownership", () => {
 const kind = process.argv[2];
 const record = (event) => fs.appendFileSync(${JSON.stringify(receiptsPath)}, JSON.stringify({
   kind, event, pid: process.pid, shard: process.argv[3],
-  prebuilt: process.env.OPENCLAW_E2E_USE_PREBUILT_DIST ?? "",
-  skip: process.env.OPENCLAW_E2E_SKIP_BUILD ?? "",
+  prebuilt: process.env.CARAPACE_E2E_USE_PREBUILT_DIST ?? "",
+  skip: process.env.CARAPACE_E2E_SKIP_BUILD ?? "",
 }) + "\\n");
 record("start");
 if (kind === "runtime" && ${JSON.stringify(outcome)} === "cancel") {
@@ -225,15 +225,15 @@ syncBuiltinESMExports();
       );
       const env = { ...process.env };
       for (const key of Object.keys(env)) {
-        if (key.startsWith("VITEST") || key.startsWith("OPENCLAW_")) {
+        if (key.startsWith("VITEST") || key.startsWith("CARAPACE_")) {
           delete env[key];
         }
       }
       if (outcome === "prebuilt") {
-        env.OPENCLAW_E2E_USE_PREBUILT_DIST = "1";
+        env.CARAPACE_E2E_USE_PREBUILT_DIST = "1";
       }
       if (outcome === "skip") {
-        env.OPENCLAW_E2E_SKIP_BUILD = "1";
+        env.CARAPACE_E2E_SKIP_BUILD = "1";
       }
       const child = spawn(
         process.execPath,
@@ -355,7 +355,7 @@ it("case ${index}", () => {
       }
       const env = { ...process.env };
       for (const key of Object.keys(env)) {
-        if (key.startsWith("VITEST") || key.startsWith("OPENCLAW_")) {
+        if (key.startsWith("VITEST") || key.startsWith("CARAPACE_")) {
           delete env[key];
         }
       }

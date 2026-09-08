@@ -9,21 +9,21 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { SQLITE_SESSION_WRITER_QUEUES } from "../config/sessions/store-writer-state.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { runPluginHostCleanup } from "./host-hook-cleanup.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
 
 describe("plugin host cleanup session stores", () => {
   let stateDir: string | undefined;
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     if (stateDir) {
       await fs.rm(stateDir, { recursive: true, force: true });
@@ -33,9 +33,9 @@ describe("plugin host cleanup session stores", () => {
 
   it("leaves entries unchanged when cleanup finds no plugin-owned state", async () => {
     stateDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-host-cleanup-noop-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-host-cleanup-noop-"),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     const storePath = path.join(stateDir, "sessions.json");
     await replaceSessionEntry({ sessionKey: "agent:main:main", storePath }, {
       sessionId: "session-id",
@@ -58,9 +58,9 @@ describe("plugin host cleanup session stores", () => {
     "revalidates queued cleanup and counts only committed changes (%s)",
     async (mode) => {
       stateDir = await fs.realpath(
-        await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cleanup-queued-")),
+        await fs.mkdtemp(path.join(resolvePreferredCarapaceTmpDir(), "carapace-cleanup-queued-")),
       );
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       const scope = {
         agentId: "main",
         sessionKey: "agent:main:cleanup-target",
@@ -166,9 +166,9 @@ describe("plugin host cleanup session stores", () => {
 
   it("can defer persistent session-state cleanup to an atomic owner", async () => {
     stateDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-host-cleanup-deferred-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-host-cleanup-deferred-"),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     const storePath = path.join(stateDir, "sessions.json");
     await replaceSessionEntry({ sessionKey: "agent:main:main", storePath }, {
       sessionId: "session-id",
@@ -227,9 +227,9 @@ describe("plugin host cleanup session stores", () => {
     "clears only the selected %s session's plugin state",
     async (_, targetKey, siblingKey, filter) => {
       stateDir = await fs.mkdtemp(
-        path.join(resolvePreferredOpenClawTmpDir(), "openclaw-host-cleanup-opaque-"),
+        path.join(resolvePreferredCarapaceTmpDir(), "carapace-host-cleanup-opaque-"),
       );
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       const storePath = path.join(stateDir, "sessions.json");
       for (const [sessionKey, sessionId] of [
         [targetKey, "target"],
@@ -267,7 +267,7 @@ describe("plugin host cleanup session stores", () => {
       });
 
       expect(result).toEqual({ cleanupCount: 1, failures: [] });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const target = loadSessionEntry({ sessionKey: targetKey, storePath });
       expect(target?.pluginExtensions).toEqual({ other: { state: { preserved: true } } });
       expect(target?.pluginNextTurnInjections).toBeUndefined();
@@ -279,9 +279,9 @@ describe("plugin host cleanup session stores", () => {
     "matches runtime session ID %s case-insensitively without interpreting it as a key",
     async (runtimeSessionId) => {
       stateDir = await fs.mkdtemp(
-        path.join(resolvePreferredOpenClawTmpDir(), "openclaw-host-cleanup-multistore-"),
+        path.join(resolvePreferredCarapaceTmpDir(), "carapace-host-cleanup-multistore-"),
       );
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       const firstStorePath = path.join(stateDir, "agents", "a", "sessions", "sessions.json");
       const secondStorePath = path.join(stateDir, "agents", "b", "sessions", "sessions.json");
       const beforeUpdatedAt = 100;
@@ -368,9 +368,9 @@ describe("plugin host cleanup session stores", () => {
 
   it("clears shared custom SQLite stores for each resolved agent", async () => {
     stateDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-host-cleanup-shared-custom-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-host-cleanup-shared-custom-"),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     const sharedStorePath = path.join(stateDir, "custom", "sessions.json");
     const beforeUpdatedAt = 100;
     const entry: SessionEntry = {
@@ -418,9 +418,9 @@ describe("plugin host cleanup session stores", () => {
 
   it("preserves locked sessions for every harness owned by a disabled plugin", async () => {
     stateDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-host-cleanup-locked-harness-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-host-cleanup-locked-harness-"),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     const storePath = path.join(stateDir, "sessions.json");
     const updatedAt = 100;
     const registry = createEmptyPluginRegistry();

@@ -1,7 +1,7 @@
 // Discord plugin module implements message handler.batch gate behavior.
-import type { ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyThreadingPolicy } from "openclaw/plugin-sdk/reply-reference";
-import { resolveBatchedReplyThreadingPolicy } from "openclaw/plugin-sdk/reply-reference";
+import type { ReplyToMode } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyThreadingPolicy } from "carapace/plugin-sdk/reply-reference";
+import { resolveBatchedReplyThreadingPolicy } from "carapace/plugin-sdk/reply-reference";
 
 type ReplyThreadingContext = {
   ReplyThreading?: ReplyThreadingPolicy;

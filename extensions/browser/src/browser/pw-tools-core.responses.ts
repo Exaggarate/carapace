@@ -1,8 +1,8 @@
 /**
  * Response-body retrieval for Playwright-backed browser tools.
  */
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { Response } from "playwright-core";
 import { toErrorObject } from "../infra/errors.js";
 import { ensurePageState, getPageForTargetId } from "./pw-session.js";
@@ -68,7 +68,7 @@ export async function responseBodyViaPlaywright(opts: {
         new Error(
           matched
             ? `Response body timed out after ${timeout}ms for url pattern "${pattern}".`
-            : `Response not found for url pattern "${pattern}". Run 'openclaw browser requests' to inspect recent network activity.`,
+            : `Response not found for url pattern "${pattern}". Run 'carapace browser requests' to inspect recent network activity.`,
         ),
       );
     }, timeout);

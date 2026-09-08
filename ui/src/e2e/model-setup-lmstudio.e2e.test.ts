@@ -11,7 +11,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -44,7 +44,7 @@ suite.define(() => {
           candidates: [],
           manualProviders: [],
           prepareOptions,
-          workspace: "/tmp/openclaw-e2e",
+          workspace: "/tmp/carapace-e2e",
           setupComplete: false,
         };
         const modelRef = "lmstudio/qwen3-8b-instruct";
@@ -52,19 +52,19 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
-            "openclaw.setup.prepare.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
+            "carapace.setup.prepare.start",
             "wizard.next",
           ],
           methodResponses: {
-            "openclaw.setup.detect": initialDetection,
-            "openclaw.setup.prepare.start": {
+            "carapace.setup.detect": initialDetection,
+            "carapace.setup.prepare.start": {
               sessionId: "lmstudio-prepare-session",
               done: false,
               status: "running",
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
@@ -139,7 +139,7 @@ suite.define(() => {
         }
 
         await lmStudioRow.getByRole("button", { name: "Connect server" }).click();
-        const start = await gateway.waitForRequest("openclaw.setup.prepare.start");
+        const start = await gateway.waitForRequest("carapace.setup.prepare.start");
         expect(start.params).toMatchObject({ authChoice: "lmstudio" });
         await expect
           .poll(() => page.getByLabel("LM Studio base URL").inputValue())
@@ -161,7 +161,7 @@ suite.define(() => {
 
         await page.getByRole("button", { name: "Continue" }).click();
         await page.getByText("Retry this LM Studio connection now?").waitFor();
-        await gateway.setMethodResponse("openclaw.setup.detect", {
+        await gateway.setMethodResponse("carapace.setup.detect", {
           ...initialDetection,
           candidates: [
             {
@@ -187,7 +187,7 @@ suite.define(() => {
           .poll(() => page.locator('.model-setup-success [data-provider-icon="lmstudio"]').count())
           .toBe(1);
 
-        const activate = await gateway.waitForRequest("openclaw.setup.activate.start");
+        const activate = await gateway.waitForRequest("carapace.setup.activate.start");
         expect(activate.params).toEqual({
           sessionId: expect.any(String),
           kind: "provider-auto:lmstudio",
@@ -209,7 +209,7 @@ suite.define(() => {
           });
         }
 
-        await gateway.setMethodResponse("openclaw.setup.detect", {
+        await gateway.setMethodResponse("carapace.setup.detect", {
           ...initialDetection,
           candidates: [],
           configuredModel: modelRef,

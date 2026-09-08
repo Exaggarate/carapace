@@ -1,5 +1,5 @@
 // Delivery lookup recovers routable channel context from persisted session stores.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   resolveSessionStoreIdentity,
   resolveSessionStoreKey,
@@ -10,7 +10,7 @@ import {
   hasDeliveryTargetFields,
 } from "../../utils/delivery-context.shared.js";
 import { getRuntimeConfig } from "../io.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { resolveSessionStorePathCore } from "./paths.js";
 import { openSessionEntryReadView, type SessionEntryReadView } from "./session-accessor.js";
 import {
@@ -31,7 +31,7 @@ import type { SessionEntry } from "./types.js";
  */
 export function extractDeliveryInfo(
   sessionKey: string | undefined,
-  options?: { cfg?: OpenClawConfig },
+  options?: { cfg?: CarapaceConfig },
 ): {
   deliveryContext:
     | { channel?: string; to?: string; accountId?: string; threadId?: string | number }
@@ -69,7 +69,7 @@ export function extractDeliveryInfo(
   return { deliveryContext, threadId };
 }
 
-function resolveDeliveryStorePaths(cfg: OpenClawConfig, agentId: string): string[] {
+function resolveDeliveryStorePaths(cfg: CarapaceConfig, agentId: string): string[] {
   const paths = new Set<string>();
   paths.add(resolveSessionStorePathCore(cfg.session?.store, { agentId }));
   // Delivery can be restored from any resolved agent target; store order keeps the configured
@@ -197,7 +197,7 @@ function buildFreshestSessionEntryIndex(store: SessionEntryReadView): Map<string
 }
 
 function loadDeliverySessionEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   baseSessionKey: string;
 }) {

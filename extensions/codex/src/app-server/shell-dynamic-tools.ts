@@ -1,14 +1,14 @@
 import {
   pinExecToolTarget,
   type CodexScheduledToolProjectionFactory,
-} from "openclaw/plugin-sdk/codex-mcp-projection";
-import { loadNodeExecAvailability } from "openclaw/plugin-sdk/node-selection-runtime";
+} from "carapace/plugin-sdk/codex-mcp-projection";
+import { loadNodeExecAvailability } from "carapace/plugin-sdk/node-selection-runtime";
 import type { CodexPluginConfig } from "./config.js";
 import { normalizeCodexDynamicToolName } from "./dynamic-tool-profile.js";
 
-type OpenClawCodingToolsFactory =
-  (typeof import("openclaw/plugin-sdk/agent-harness"))["createOpenClawCodingTools"];
-type OpenClawDynamicTool = ReturnType<OpenClawCodingToolsFactory>[number];
+type CarapaceCodingToolsFactory =
+  (typeof import("carapace/plugin-sdk/agent-harness"))["createCarapaceCodingTools"];
+type CarapaceDynamicTool = ReturnType<CarapaceCodingToolsFactory>[number];
 
 export const CODEX_NODE_EXEC_DYNAMIC_TOOL_NAME = "node_exec";
 export const CODEX_GATEWAY_EXEC_DYNAMIC_TOOL_NAME = "gateway_exec";
@@ -31,11 +31,11 @@ export function isCodexDynamicToolExcluded(
 export type NodeExecAvailabilityRef = { current?: ReturnType<typeof loadNodeExecAvailability> };
 
 export async function createNodeExecAliasDynamicTool(
-  execTool: OpenClawDynamicTool,
+  execTool: CarapaceDynamicTool,
   node?: string,
   discoverySignal?: AbortSignal,
   availabilityRef?: NodeExecAvailabilityRef,
-): Promise<OpenClawDynamicTool | undefined> {
+): Promise<CarapaceDynamicTool | undefined> {
   const pinnedNode = node?.trim();
   const availability = await (availabilityRef
     ? (availabilityRef.current ??= loadNodeExecAvailability(discoverySignal))
@@ -48,7 +48,7 @@ export async function createNodeExecAliasDynamicTool(
     host: "node",
     ...(pinnedNode ? { node: pinnedNode } : {}),
   });
-  const execute: OpenClawDynamicTool["execute"] = async (toolCallId, args, signal, onUpdate) => {
+  const execute: CarapaceDynamicTool["execute"] = async (toolCallId, args, signal, onUpdate) => {
     const result = await pinnedTool.execute(toolCallId, args, signal, onUpdate);
     return {
       ...result,
@@ -68,22 +68,22 @@ export async function createNodeExecAliasDynamicTool(
     ...pinnedTool,
     name: CODEX_NODE_EXEC_DYNAMIC_TOOL_NAME,
     description: pinnedNode
-      ? "Run a shell command to completion on the OpenClaw configured remote node for this session. This tool always uses OpenClaw host=node internally and follows the existing node exec approval and allowlist policy. Remote-node background follow-up is unavailable. Use Codex's native shell for local app-server work when it is available."
-      : "Run a shell command to completion on an OpenClaw remote node. The sole connected node that can execute commands is selected automatically; select by name or id when several can. This tool always uses OpenClaw host=node internally and follows the existing node exec approval and allowlist policy. Remote-node background follow-up is unavailable. Use Codex's native shell for local app-server work when it is available.",
+      ? "Run a shell command to completion on the Carapace configured remote node for this session. This tool always uses Carapace host=node internally and follows the existing node exec approval and allowlist policy. Remote-node background follow-up is unavailable. Use Codex's native shell for local app-server work when it is available."
+      : "Run a shell command to completion on an Carapace remote node. The sole connected node that can execute commands is selected automatically; select by name or id when several can. This tool always uses Carapace host=node internally and follows the existing node exec approval and allowlist policy. Remote-node background follow-up is unavailable. Use Codex's native shell for local app-server work when it is available.",
     execute,
   };
 }
 
 export function createGatewayExecProjection(
   createProjection: CodexScheduledToolProjectionFactory,
-  execTool: OpenClawDynamicTool,
+  execTool: CarapaceDynamicTool,
   params: { processAliasAvailable: boolean; ask?: "always" },
-): OpenClawDynamicTool {
+): CarapaceDynamicTool {
   return createProjection(execTool, {
     kind: "exec",
     name: CODEX_GATEWAY_EXEC_DYNAMIC_TOOL_NAME,
     description:
-      "Run a shell command through OpenClaw on the Gateway host for OpenClaw-managed Gateway environment access, including Secret Store agent-readable environment values and protected egress sentinels. Native Codex shell remains preferred for ordinary local work. This tool always uses OpenClaw host=gateway internally and follows Gateway exec approval and allowlist policy.",
+      "Run a shell command through Carapace on the Gateway host for Carapace-managed Gateway environment access, including Secret Store agent-readable environment values and protected egress sentinels. Native Codex shell remains preferred for ordinary local work. This tool always uses Carapace host=gateway internally and follows Gateway exec approval and allowlist policy.",
     followupText: params.processAliasAvailable
       ? "Use gateway_process (list/poll/log/write/send-keys/submit/paste/kill/clear/remove) for follow-up."
       : "Background session follow-up is unavailable because gateway_process is not exposed. Rerun without background=true and set yieldMs high enough to wait for completion.",
@@ -93,12 +93,12 @@ export function createGatewayExecProjection(
 
 export function createGatewayProcessProjection(
   createProjection: CodexScheduledToolProjectionFactory,
-  processTool: OpenClawDynamicTool,
-): OpenClawDynamicTool {
+  processTool: CarapaceDynamicTool,
+): CarapaceDynamicTool {
   return createProjection(processTool, {
     kind: "process",
     name: CODEX_GATEWAY_PROCESS_DYNAMIC_TOOL_NAME,
     description:
-      "Manage background shell sessions in the existing per-session OpenClaw process scope: list, poll, log, write, send-keys, submit, paste, kill, clear, or remove. Use for gateway_exec follow-up; use native Codex shell session handling for ordinary local work.",
+      "Manage background shell sessions in the existing per-session Carapace process scope: list, poll, log, write, send-keys, submit, paste, kill, clear, or remove. Use for gateway_exec follow-up; use native Codex shell session handling for ordinary local work.",
   });
 }

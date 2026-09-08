@@ -1,5 +1,5 @@
 // Line tests cover allowlist config-edit adapter plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { linePlugin } from "./channel.js";
 
@@ -28,7 +28,7 @@ describe("line allowlist adapter", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(allowlist?.readConfig?.({ cfg, accountId: "default" })).toEqual({
       dmAllowFrom: ["Ualice"],
@@ -42,7 +42,7 @@ describe("line allowlist adapter", () => {
   it("adds a dm allowlist entry under channels.line.allowFrom", () => {
     const parsedConfig: Record<string, unknown> = {};
     const result = allowlist?.applyConfigEdit?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       parsedConfig,
       accountId: "default",
       scope: "dm",
@@ -71,7 +71,7 @@ describe("line allowlist adapter", () => {
       },
     };
     const result = allowlist?.applyConfigEdit?.({
-      cfg: parsedConfig as OpenClawConfig,
+      cfg: parsedConfig as CarapaceConfig,
       parsedConfig,
       accountId: "support",
       scope: "dm",
@@ -102,7 +102,7 @@ describe("line allowlist adapter", () => {
   it("adds a group allowlist entry under channels.line.groupAllowFrom", () => {
     const parsedConfig: Record<string, unknown> = {};
     const result = allowlist?.applyConfigEdit?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       parsedConfig,
       accountId: "default",
       scope: "group",
@@ -124,7 +124,7 @@ describe("line allowlist adapter", () => {
       channels: { line: { allowFrom: ["Ufrank"] } },
     };
     const result = allowlist?.applyConfigEdit?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       parsedConfig,
       accountId: "default",
       scope: "dm",
@@ -141,7 +141,7 @@ describe("line allowlist adapter", () => {
       channels: { line: { allowFrom: ["Ugone", "Ustay"] } },
     };
     const result = allowlist?.applyConfigEdit?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       parsedConfig,
       accountId: "default",
       scope: "dm",

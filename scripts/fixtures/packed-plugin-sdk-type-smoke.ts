@@ -1,12 +1,12 @@
-// Packed Plugin Sdk Type Smoke script supports OpenClaw repository automation.
-import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+// Packed Plugin Sdk Type Smoke script supports Carapace repository automation.
+import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 type PublicPluginSdkModules = [
-  typeof import("openclaw/plugin-sdk/core"),
-  typeof import("openclaw/plugin-sdk/channel-entry-contract"),
-  typeof import("openclaw/plugin-sdk/config-contracts"),
-  typeof import("openclaw/plugin-sdk/plugin-entry"),
-  typeof import("openclaw/plugin-sdk/runtime-env"),
-  typeof import("openclaw/plugin-sdk/tool-plugin"),
+  typeof import("carapace/plugin-sdk/core"),
+  typeof import("carapace/plugin-sdk/channel-entry-contract"),
+  typeof import("carapace/plugin-sdk/config-contracts"),
+  typeof import("carapace/plugin-sdk/plugin-entry"),
+  typeof import("carapace/plugin-sdk/runtime-env"),
+  typeof import("carapace/plugin-sdk/tool-plugin"),
 ];
 
 const resolvedModules = null as unknown as PublicPluginSdkModules;

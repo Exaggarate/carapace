@@ -29,16 +29,16 @@ describe("Slack QA transport boundary", () => {
     );
 
     for (const [file, source] of sources) {
-      expect(source, file).not.toContain("@openclaw/slack/api.js");
-      if (source.includes("@openclaw/slack/test-api.js")) {
+      expect(source, file).not.toContain("@carapace/slack/api.js");
+      if (source.includes("@carapace/slack/test-api.js")) {
         expect(source, file).toMatch(
-          /type \w+ = typeof import\("@openclaw\/slack\/test-api\.js"\);/u,
+          /type \w+ = typeof import\("@carapace\/slack\/test-api\.js"\);/u,
         );
       }
     }
     expect(
       sources
-        .filter(([, source]) => source.includes("@openclaw/slack/test-api.js"))
+        .filter(([, source]) => source.includes("@carapace/slack/test-api.js"))
         .map(([file]) => path.relative(process.cwd(), file))
         .toSorted(),
     ).toEqual([

@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 
 extension GatewaySettingsStore {
     struct GatewayRegistry: Codable, Equatable {

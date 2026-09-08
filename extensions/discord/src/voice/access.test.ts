@@ -1,14 +1,14 @@
 // Discord tests cover access plugin behavior.
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { createDiscordLivePolicyReader } from "../monitor/live-policy.js";
 import { authorizeDiscordVoiceIngress } from "./access.js";
 
-const baseCfg = { commands: { useAccessGroups: true } } as OpenClawConfig;
+const baseCfg = { commands: { useAccessGroups: true } } as CarapaceConfig;
 
 describe("authorizeDiscordVoiceIngress", () => {
   it("applies published guild policy over retained voice startup settings", async () => {
-    let cfg: OpenClawConfig = {
+    let cfg: CarapaceConfig = {
       channels: { discord: { groupPolicy: "allowlist", guilds: {} } },
     };
     const readPolicy = createDiscordLivePolicyReader({

@@ -6,13 +6,13 @@ import {
   SESSION_ARCHIVE_ZSTD_SUFFIX,
 } from "../config/sessions/archive-compression.js";
 import { reconcileSessionTranscriptIndexInTransaction } from "../config/sessions/session-transcript-index.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
+import { registerCarapaceAgentDatabase } from "../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { requireNodeSqlite } from "./node-sqlite.js";
 
 export const PREVIOUS_VERSION = 16;
@@ -42,14 +42,14 @@ export function createLegacyDatabaseFixture(params: {
 }): string {
   const agentId = params.agentId ?? "main";
   const schemaVersion = params.schemaVersion ?? PREVIOUS_VERSION;
-  const opened = openOpenClawAgentDatabase({ agentId, env: params.env });
+  const opened = openCarapaceAgentDatabase({ agentId, env: params.env });
   const databasePath = opened.path;
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   const { DatabaseSync } = requireNodeSqlite();
   const database = new DatabaseSync(databasePath);
   try {
     database.exec("PRAGMA foreign_keys = ON;");
-    if (schemaVersion < OPENCLAW_AGENT_SCHEMA_VERSION) {
+    if (schemaVersion < CARAPACE_AGENT_SCHEMA_VERSION) {
       database.exec("DROP TABLE session_participants;");
     }
     database.exec(`PRAGMA user_version = ${schemaVersion};`);
@@ -102,7 +102,7 @@ export function createLegacyDatabaseFixture(params: {
   } finally {
     database.close();
   }
-  registerOpenClawAgentDatabase({
+  registerCarapaceAgentDatabase({
     agentId,
     env: params.env,
     path: databasePath,
@@ -190,7 +190,7 @@ export function writeArchive(filePath: string, events: FixtureEvent[], compresse
 }
 
 export function cleanupMediaPersistenceFixtures(tempDirs: string[]): void {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 }

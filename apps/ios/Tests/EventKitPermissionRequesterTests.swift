@@ -1,5 +1,5 @@
 import EventKit
-@testable import OpenClaw
+@testable import Carapace
 import Testing
 
 @Suite(.serialized) struct EventKitPermissionRequesterTests {

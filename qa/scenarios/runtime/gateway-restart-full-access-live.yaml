@@ -33,7 +33,7 @@ scenario:
     - extensions/qa-lab/src/suite-runtime-gateway.ts
   execution:
     kind: flow
-    runtime: openclaw
+    runtime: carapace
     retryCount: 0
     summary: Run a live OpenAI full-access task across one real Gateway replacement, verify fresh shell and delegation capabilities, and reject duplicate prior effects.
     suiteIsolation: isolated

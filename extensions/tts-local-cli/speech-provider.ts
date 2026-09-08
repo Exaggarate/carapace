@@ -6,9 +6,9 @@ import type {
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
   SpeechTelephonySynthesisRequest,
-} from "openclaw/plugin-sdk/speech-core";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/speech-provider";
-import { asOptionalRecord, filterStringRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/speech-core";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/speech-provider";
+import { asOptionalRecord, filterStringRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const VALID_OUTPUT_FORMATS = ["mp3", "opus", "wav"] as const;
 const AUDIO_EXTENSIONS = new Set([".wav", ".mp3", ".opus", ".ogg", ".m4a"]);
@@ -190,7 +190,7 @@ function getFileExt(format: SourceFormat): string {
 }
 
 async function readAudioFile(filePath: string): Promise<Buffer> {
-  const { readRegularFileSync } = await import("openclaw/plugin-sdk/security-runtime");
+  const { readRegularFileSync } = await import("carapace/plugin-sdk/security-runtime");
   return readRegularFileSync({ filePath, maxBytes: MAX_AUDIO_OUTPUT_BYTES }).buffer;
 }
 
@@ -221,7 +221,7 @@ async function runCli(params: {
   const baseArgs = [...initialArgs, ...params.config.args];
   const args = baseArgs.map((a) => applyTemplate(a, ctx));
   const input = baseArgs.some((a) => /{{\s*text\s*}}/i.test(a)) ? "" : cleanText;
-  const { runCommandBuffered } = await import("openclaw/plugin-sdk/process-runtime");
+  const { runCommandBuffered } = await import("carapace/plugin-sdk/process-runtime");
   const result = await runCommandBuffered([cmd, ...args], {
     cwd: params.config.cwd,
     env: params.config.env,
@@ -289,8 +289,8 @@ async function runFfmpegToBuffer(params: {
   outputFileName: string;
 }): Promise<Buffer> {
   const outputPath = path.join(params.outputDir, params.outputFileName);
-  const { runFfmpeg } = await import("openclaw/plugin-sdk/media-runtime");
-  const { writeExternalFileWithinRoot } = await import("openclaw/plugin-sdk/security-runtime");
+  const { runFfmpeg } = await import("carapace/plugin-sdk/media-runtime");
+  const { writeExternalFileWithinRoot } = await import("carapace/plugin-sdk/security-runtime");
   await writeExternalFileWithinRoot({
     rootDir: params.outputDir,
     path: params.outputFileName,
@@ -354,9 +354,9 @@ export function buildCliSpeechProvider(): SpeechProviderPlugin {
     },
 
     async synthesize(req: SpeechSynthesisRequest) {
-      const { resolvePreferredOpenClawTmpDir, withTempWorkspace } =
-        await import("openclaw/plugin-sdk/temp-path");
-      const { createSubsystemLogger } = await import("openclaw/plugin-sdk/runtime-env");
+      const { resolvePreferredCarapaceTmpDir, withTempWorkspace } =
+        await import("carapace/plugin-sdk/temp-path");
+      const { createSubsystemLogger } = await import("carapace/plugin-sdk/runtime-env");
       const log = createSubsystemLogger("tts-local-cli");
       const config = getConfig(req.providerConfig, req.timeoutMs);
       if (!config) {
@@ -367,8 +367,8 @@ export function buildCliSpeechProvider(): SpeechProviderPlugin {
 
       return await withTempWorkspace(
         {
-          rootDir: resolvePreferredOpenClawTmpDir(),
-          prefix: "openclaw-cli-tts-",
+          rootDir: resolvePreferredCarapaceTmpDir(),
+          prefix: "carapace-cli-tts-",
         },
         async (temp) => {
           const tempDir = temp.dir;
@@ -404,9 +404,9 @@ export function buildCliSpeechProvider(): SpeechProviderPlugin {
     },
 
     async synthesizeTelephony(req: SpeechTelephonySynthesisRequest) {
-      const { resolvePreferredOpenClawTmpDir, withTempWorkspace } =
-        await import("openclaw/plugin-sdk/temp-path");
-      const { createSubsystemLogger } = await import("openclaw/plugin-sdk/runtime-env");
+      const { resolvePreferredCarapaceTmpDir, withTempWorkspace } =
+        await import("carapace/plugin-sdk/temp-path");
+      const { createSubsystemLogger } = await import("carapace/plugin-sdk/runtime-env");
       const log = createSubsystemLogger("tts-local-cli");
       const config = getConfig(req.providerConfig, req.timeoutMs);
       if (!config) {
@@ -417,8 +417,8 @@ export function buildCliSpeechProvider(): SpeechProviderPlugin {
 
       return await withTempWorkspace(
         {
-          rootDir: resolvePreferredOpenClawTmpDir(),
-          prefix: "openclaw-cli-tts-",
+          rootDir: resolvePreferredCarapaceTmpDir(),
+          prefix: "carapace-cli-tts-",
         },
         async (temp) => {
           const tempDir = temp.dir;

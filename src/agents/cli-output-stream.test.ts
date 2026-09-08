@@ -122,7 +122,7 @@ describe("createCliJsonlStreamingParser", () => {
       type: "system",
       subtype: "init",
       session_id: "reused-session",
-      tools: ["Read", "Bash", "mcp__openclaw__automations"],
+      tools: ["Read", "Bash", "mcp__carapace__automations"],
     });
     parser.push(initial.slice(0, -2));
     expect(snapshots).toEqual([]);
@@ -138,7 +138,7 @@ describe("createCliJsonlStreamingParser", () => {
     );
     parser.finish();
 
-    expect(snapshots).toEqual([["Read", "Bash", "mcp__openclaw__automations"], ["Read"], []]);
+    expect(snapshots).toEqual([["Read", "Bash", "mcp__carapace__automations"], ["Read"], []]);
   });
 
   it("ignores subagent and non-initialization native tool lists", () => {

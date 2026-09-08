@@ -1,10 +1,10 @@
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 /**
  * Builds structured observations for embedded-agent API/text failures.
  */
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { readLoggingConfig } from "../logging/config.js";
 import { getDefaultRedactPatterns, redactSensitiveText } from "../logging/redact.js";
 import {

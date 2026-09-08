@@ -25,7 +25,7 @@ import {
 } from "../claws/monitor-cleanup-contract.js";
 import { parseClawManifest } from "../claws/schema.js";
 import { registerConfigWriteListener, resetConfigRuntimeState } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { applyHeartbeatMonitorJobs } from "../cron/heartbeat-monitor.js";
 import { cronJobReadView } from "../cron/job-read-view.js";
 import { normalizeCronJobCreate } from "../cron/normalize.js";
@@ -44,13 +44,13 @@ import {
   beginAgentDeletionJournal,
   readAgentDeletionJournal,
 } from "../state/agent-deletion-journal.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { authorizeOperatorScopesForMethod, isGatewayMethodClassified } from "./method-scopes.js";
 import { reconcileSkillCollectionReviewJobs } from "./server-cron-skill-review-jobs.js";
 import { clawsMonitorHandlers } from "./server-methods/claws-monitors.js";
@@ -69,7 +69,7 @@ async function fixture(
   runner?: CronServiceDeps["runIsolatedAgentJob"],
   withCron = false,
 ) {
-  const state = await createOpenClawTestState({ label: "claw-monitor-removal" });
+  const state = await createCarapaceTestState({ label: "claw-monitor-removal" });
   cleanups.push(state.cleanup);
   await fs.writeFile(state.path("SOUL.md"), "synthetic managed file\n");
   const parsed = parseClawManifest({
@@ -98,7 +98,7 @@ async function fixture(
       name: "synthetic-worker",
       version: "1.0.0",
       packageRoot: state.root,
-      manifestPath: state.path("openclaw.claw.json"),
+      manifestPath: state.path("carapace.claw.json"),
       integrityKind: "artifact",
       integrity: "sha256:synthetic",
       byteLength: 100,
@@ -106,7 +106,7 @@ async function fixture(
     context: { workspace: workspaceDir },
   });
   expect(addPlan.blockers).toEqual([]);
-  let config: OpenClawConfig = {
+  let config: CarapaceConfig = {
     agents: { defaults: { heartbeat: { every: enabled ? "30m" : "0m" } } },
     skills: { workshop: { autonomous: { mode: enabled ? "auto" : "off" } } },
   };
@@ -204,7 +204,7 @@ async function fixture(
       await invoke({ phase: "drain", agentId, operationId });
     },
   };
-  const writeConfig = async (nextConfig: OpenClawConfig) => {
+  const writeConfig = async (nextConfig: CarapaceConfig) => {
     config = nextConfig;
     await state.writeConfig(config);
     resetConfigRuntimeState();
@@ -274,7 +274,7 @@ describe("Claw serving monitor cleanup", () => {
     async (phase) => {
       const current = await fixture(false);
       await current.withDeletion(async (deletion) => {
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare("DELETE FROM claw_installs WHERE agent_id = ?")
           .run("worker");
         await expect(
@@ -300,7 +300,7 @@ describe("Claw serving monitor cleanup", () => {
     await current.writeConfig({
       agents: { entries: { main: { workspace: current.state.path("main-workspace") } } },
     });
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare("DELETE FROM claw_installs WHERE agent_id = ?")
       .run("worker");
     expect(
@@ -388,7 +388,7 @@ describe("Claw serving monitor cleanup", () => {
     "revalidates the %s owner after awaited inventory",
     async (changedOwner) => {
       const current = await fixture(false);
-      const database = openOpenClawAgentDatabase({ agentId: "worker" });
+      const database = openCarapaceAgentDatabase({ agentId: "worker" });
       const monitors = await current.gateway.inspect("worker");
       await current.withDeletion(async (deletion) => {
         const originalList = current.cron.list.bind(current.cron);
@@ -429,7 +429,7 @@ describe("Claw serving monitor cleanup", () => {
         agentId: "worker",
         startedAtMs: Date.now(),
       });
-      const handle = runOpenClawStateWriteTransaction(({ db }) =>
+      const handle = runCarapaceStateWriteTransaction(({ db }) =>
         claimCronRunReceiptInDatabase({
           database: db,
           prepared,
@@ -446,7 +446,7 @@ describe("Claw serving monitor cleanup", () => {
           throw new Error("Missing fixture process identity");
         }
         const ownerStartTime = unverifiable ? null : getFileLockProcessStartTime(holder.pid);
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         database.db
           .prepare(
             "UPDATE cron_run_receipts SET owner_pid = ?, owner_start_time = ? WHERE receipt_id = ?",
@@ -487,7 +487,7 @@ describe("Claw serving monitor cleanup", () => {
 
   it("closes idle databases but waits for an agent still configured through agents.list", async () => {
     const current = await fixture(false);
-    const database = openOpenClawAgentDatabase({ agentId: "worker" });
+    const database = openCarapaceAgentDatabase({ agentId: "worker" });
     const monitors = await current.gateway.inspect("worker");
     await current.withDeletion(async (deletion) => {
       await current.gateway.quiesce("worker", deletion.entry.operationId, monitors);
@@ -575,7 +575,7 @@ describe("Claw serving monitor cleanup", () => {
     async (failure) => {
       const current = await fixture(false);
       const plan = await current.plan();
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       if (failure === "cron-persistence") {
         database.db.exec(`CREATE TEMP TRIGGER refuse_monitor_delete
           BEFORE DELETE ON cron_jobs WHEN OLD.agent_id = 'worker'
@@ -631,7 +631,7 @@ describe("Claw serving monitor cleanup", () => {
       const firstJournal = readAgentDeletionJournal("worker");
       expect(firstJournal).toBeDefined();
       await expect(fs.access(path.join(current.workspaceDir, "SOUL.md"))).resolves.toBeUndefined();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(readAgentDeletionJournal("worker")?.operationId).toBe(firstJournal?.operationId);
       current.setReloadSettled(true);
       if (failure === "cron-persistence") {
@@ -661,7 +661,7 @@ describe("Claw serving monitor cleanup", () => {
       (job) => job.agentId === "worker" && job.payload.kind === "agentTurn",
     )!;
     upsertCronJobRow(
-      openOpenClawStateDatabase().db,
+      openCarapaceStateDatabase().db,
       current.state.statePath("cron", "jobs.json"),
       { ...monitor, payload: { kind: "agentTurn", message: "changed source" } },
       0,
@@ -752,7 +752,7 @@ describe("Claw serving monitor cleanup", () => {
         ? { payload: { kind: "agentTurn" as const, message: "independent" } }
         : {}),
     };
-    const database = openOpenClawStateDatabase();
+    const database = openCarapaceStateDatabase();
     upsertCronJobRow(
       database.db,
       variant === "foreign-store" ? "/foreign/cron" : current.state.statePath("cron", "jobs.json"),
@@ -797,7 +797,7 @@ describe("Claw serving monitor cleanup", () => {
       expect(readAgentDeletionJournal("worker")).toBeDefined();
       expect(Object.hasOwn(current.getConfig().agents?.entries ?? {}, "worker")).toBe(true);
       await expect(fs.access(path.join(current.workspaceDir, "SOUL.md"))).resolves.toBeUndefined();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(readAgentDeletionJournal("worker")).toBeDefined();
       release.resolve();
       await vi.waitFor(() => expect(signal.aborted).toBe(true));

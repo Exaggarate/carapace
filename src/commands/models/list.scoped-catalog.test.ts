@@ -71,7 +71,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
     await expect(
       loadScopedListModelCatalogSnapshot({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         providerIds: [],
         configuredKeys: [],
       }),
@@ -89,7 +89,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
   it("uses runtime manifest rows as seeds while retaining live provider discovery", async () => {
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["openai"],
       configuredKeys: ["openai/gpt-5.6"],
     });
@@ -116,7 +116,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
   it("uses authenticated manifest fallback rows without loading provider runtime", async () => {
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["openai"],
       runtimeProviderIds: [],
       manifestFallbackProviderIds: ["openai"],
@@ -154,7 +154,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
     });
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["moonshot"],
       configuredKeys: [],
     });
@@ -203,7 +203,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
 
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["openai"],
       configuredKeys: [],
     });
@@ -250,7 +250,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
       mocks.loadPersistedListCatalogEntries.mockReturnValueOnce([persisted]);
       const snapshot = await loadScopedListModelCatalogSnapshot({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         providerIds: ["openai"],
         runtimeProviderIds: [],
         configuredKeys: [],
@@ -288,7 +288,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
           },
         },
       },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["custom"],
       configuredKeys: ["custom/gpt-5.5"],
     });
@@ -342,7 +342,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
           },
         },
       },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["openai"],
       runtimeProviderIds: ["openai"],
       configuredKeys: ["openai/gpt-configured"],
@@ -376,7 +376,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
 
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["moonshot"],
       runtimeProviderIds: ["moonshot"],
       configuredKeys: [],
@@ -419,7 +419,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
           },
         },
       },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["custom"],
       runtimeProviderIds: ["custom"],
       configuredKeys: ["custom/custom-model"],
@@ -437,7 +437,7 @@ describe("loadScopedListModelCatalogSnapshot", () => {
 
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       providerIds: ["google-antigravity"],
       runtimeProviderIds: [],
       configuredKeys: ["google-antigravity/claude-opus-4-6-thinking"],
@@ -468,9 +468,9 @@ describe("loadScopedListModelCatalogSnapshot", () => {
     const snapshot = await loadScopedListModelCatalogSnapshot({
       cfg: {},
       agentId: "main",
-      agentDir: "/tmp/openclaw-agent",
-      inheritedAuthDir: "/tmp/openclaw-default",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-agent",
+      inheritedAuthDir: "/tmp/carapace-default",
+      workspaceDir: "/tmp/carapace-workspace",
       providerIds: ["google"],
       configuredKeys: [],
     });
@@ -480,9 +480,9 @@ describe("loadScopedListModelCatalogSnapshot", () => {
       {
         config: {},
         agentId: "main",
-        agentDir: "/tmp/openclaw-agent",
-        inheritedAuthDir: "/tmp/openclaw-default",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        inheritedAuthDir: "/tmp/carapace-default",
+        workspaceDir: "/tmp/carapace-workspace",
         readOnly: true,
       },
       ["google"],

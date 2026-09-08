@@ -5,8 +5,8 @@
 import {
   applyAgentDefaultModelPrimary,
   applyProviderConfigWithDefaultModel,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/provider-onboard";
 import {
   buildCloudflareAiGatewayModelDefinition,
   CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF,
@@ -47,9 +47,9 @@ export function buildCloudflareAiGatewayConfigPatch(params: {
  * Applies provider model config while preserving existing agent model aliases.
  */
 export function applyCloudflareAiGatewayProviderConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: { accountId?: string; gatewayId?: string },
-): OpenClawConfig {
+): CarapaceConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF] = {
     ...models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF],
@@ -94,9 +94,9 @@ export function applyCloudflareAiGatewayProviderConfig(
  * Applies Cloudflare AI Gateway config and makes its default model primary.
  */
 export function applyCloudflareAiGatewayConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: { accountId?: string; gatewayId?: string },
-): OpenClawConfig {
+): CarapaceConfig {
   return applyAgentDefaultModelPrimary(
     applyCloudflareAiGatewayProviderConfig(cfg, params),
     CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF,

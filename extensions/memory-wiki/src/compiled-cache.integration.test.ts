@@ -3,12 +3,12 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { OpenBlobStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { OpenBlobStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginBlobStoreForTests,
   resetPluginBlobStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { compileMemoryWikiVault } from "./compile.js";
 import {
@@ -183,7 +183,7 @@ describe("Memory Wiki compiled cache lifecycle", () => {
     resetPluginBlobStoreForTests();
     configureMemoryWikiCompiledCacheStore(undefined);
     blobStateDir = await createTempDir("memory-wiki-compiled-cache-state-");
-    blobStoreEnv = { ...process.env, OPENCLAW_STATE_DIR: blobStateDir };
+    blobStoreEnv = { ...process.env, CARAPACE_STATE_DIR: blobStateDir };
     configureMemoryWikiCompiledCacheStore(createCacheStore());
   });
 
@@ -244,7 +244,7 @@ describe("Memory Wiki compiled cache lifecycle", () => {
     async (change) => {
       const { rootDir, config } = await createPersistentVault({ initialize: true });
       const sourcePath = path.join(rootDir, "sources", "alpha.md");
-      const logPath = path.join(rootDir, ".openclaw-wiki", "log.jsonl");
+      const logPath = path.join(rootDir, ".carapace-wiki", "log.jsonl");
       await fs.writeFile(sourcePath, "# Alpha\n\nOriginal source.\n");
       const originalLog = await fs.readFile(logPath, "utf8");
       await compileMemoryWikiVault(config);
@@ -383,7 +383,7 @@ describe("Memory Wiki compiled cache lifecycle", () => {
       initialize: true,
       config: { context: { includeCompiledDigestPrompt: true } },
     });
-    const legacyPath = path.join(rootDir, ".openclaw-wiki", "cache", "agent-digest.json");
+    const legacyPath = path.join(rootDir, ".carapace-wiki", "cache", "agent-digest.json");
     await fs.mkdir(path.dirname(legacyPath), { recursive: true });
     await fs.writeFile(legacyPath, JSON.stringify({ claimCount: 1, pages: [] }), "utf8");
     await fs.writeFile(
@@ -543,7 +543,7 @@ describe("Memory Wiki compiled cache lifecycle", () => {
   it("rejects claims newer than a restored vault after lifecycle refresh", async () => {
     const { rootDir, config } = await createPersistentVault({ initialize: true });
     await publishSnapshot(config, snapshot("backup"));
-    const logPath = path.join(rootDir, ".openclaw-wiki", "log.jsonl");
+    const logPath = path.join(rootDir, ".carapace-wiki", "log.jsonl");
     const backupLog = await fs.readFile(logPath, "utf8");
     const newerSnapshot = snapshot("Private post-backup claim.");
     const preRestorePublicationId = await publishSnapshot(config, newerSnapshot);
@@ -599,7 +599,7 @@ describe("Memory Wiki compiled cache lifecycle", () => {
   it("rejects a reserved publication when its identical parent was restored", async () => {
     const { rootDir, config } = await createPersistentVault({ initialize: true });
     await publishSnapshot(config, snapshot("backup"));
-    const logPath = path.join(rootDir, ".openclaw-wiki", "log.jsonl");
+    const logPath = path.join(rootDir, ".carapace-wiki", "log.jsonl");
     const backupLog = await fs.readFile(logPath, "utf8");
     const parentPublicationId = (await loadMemoryWikiVaultIdentity(rootDir))
       .compiledCachePublicationId;
@@ -741,7 +741,7 @@ describe("Memory Wiki compiled cache lifecycle", () => {
   it("keeps a restored owner closed when lifecycle reconciliation fails", async () => {
     const { rootDir, config } = await createPersistentVault({ initialize: true });
     await publishSnapshot(config, snapshot("backup"));
-    const logPath = path.join(rootDir, ".openclaw-wiki", "log.jsonl");
+    const logPath = path.join(rootDir, ".carapace-wiki", "log.jsonl");
     const backupLog = await fs.readFile(logPath, "utf8");
     await publishSnapshot(config, snapshot("Private newer claim."));
     await fs.writeFile(logPath, backupLog, "utf8");
@@ -780,11 +780,11 @@ describe("Memory Wiki compiled cache lifecycle", () => {
     });
     await publishSnapshot(config, snapshot("Private predecessor content."));
     await fs.rm(rootDir, { recursive: true, force: true });
-    await fs.mkdir(path.join(rootDir, ".openclaw-wiki"), { recursive: true });
+    await fs.mkdir(path.join(rootDir, ".carapace-wiki"), { recursive: true });
     await Promise.all([
       fs.writeFile(path.join(rootDir, "WIKI.md"), "# Replacement\n", "utf8"),
       fs.writeFile(
-        path.join(rootDir, ".openclaw-wiki", "log.jsonl"),
+        path.join(rootDir, ".carapace-wiki", "log.jsonl"),
         `${JSON.stringify({
           type: "vault-generation",
           timestamp: "2026-07-17T00:00:00.000Z",

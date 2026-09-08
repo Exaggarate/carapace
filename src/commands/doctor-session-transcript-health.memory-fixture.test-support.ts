@@ -10,8 +10,8 @@ assert(
   stateDir && sqlitePath && expectedDigest && (scenario === "headers" || scenario === "labels"),
 );
 process.stderr.write(`checking ${scenario}\n`);
-process.env.OPENCLAW_STATE_DIR = stateDir;
-process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+process.env.CARAPACE_STATE_DIR = stateDir;
+process.env.CARAPACE_CONFIG_PATH = path.join(stateDir, "carapace.json");
 const started = performance.now();
 const params = {
   cfg: { agents: { list: [{ id: "main" }] } },

@@ -8,9 +8,9 @@ import type {
   PromptResponse,
   StopReason,
 } from "@agentclientprotocol/sdk";
-import { readBool, readMetadataString, readNonNegativeInteger } from "@openclaw/acp-core/meta";
-import type { AcpSessionStore } from "@openclaw/acp-core/session";
-import type { AcpServerOptions } from "@openclaw/acp-core/types";
+import { readBool, readMetadataString, readNonNegativeInteger } from "@carapace/acp-core/meta";
+import type { AcpSessionStore } from "@carapace/acp-core/session";
+import type { AcpServerOptions } from "@carapace/acp-core/types";
 import type { EventFrame } from "../../packages/gateway-protocol/src/index.js";
 import type { GatewayClient } from "../gateway/client.js";
 import { normalizeTerminalChatSendAckStatus } from "../shared/chat-send-ack-status.js";
@@ -73,7 +73,7 @@ function buildSystemInputProvenance(originSessionId: string) {
     kind: "external_user" as const,
     originSessionId,
     sourceChannel: "acp",
-    sourceTool: "openclaw_acp",
+    sourceTool: "carapace_acp",
   };
 }
 
@@ -84,7 +84,7 @@ function buildSystemProvenanceReceipt(params: {
 }) {
   return [
     "[Source Receipt]",
-    "bridge=openclaw-acp",
+    "bridge=carapace-acp",
     `originHost=${os.hostname()}`,
     `originCwd=${shortenHomePath(params.cwd)}`,
     `acpSessionId=${params.sessionId}`,
@@ -586,7 +586,7 @@ export class AcpTranslatorPromptStream {
       await this.emitPromptChunk(
         pending,
         "agent_message_chunk",
-        `[OpenClaw interruption] ${options.interruption}`,
+        `[Carapace interruption] ${options.interruption}`,
         false,
       );
     }
@@ -665,7 +665,7 @@ export class AcpTranslatorPromptStream {
     await this.emitPromptChunk(
       pending,
       "agent_message_chunk",
-      `[OpenClaw interruption] ${message}`,
+      `[Carapace interruption] ${message}`,
       false,
     );
     await this.rejectPendingPrompt(pending, new Error(message), { claimed: true });
@@ -723,8 +723,8 @@ export class AcpTranslatorPromptStream {
     try {
       if (options.recordDisconnectNotice) {
         const text = pending.sendAccepted
-          ? "[OpenClaw interruption] The Gateway disconnected after accepting this message, so its final outcome is unknown. Check the session before retrying."
-          : "[OpenClaw interruption] The Gateway disconnected before OpenClaw could confirm whether this message was accepted, so its final outcome is unknown. Check the session before retrying.";
+          ? "[Carapace interruption] The Gateway disconnected after accepting this message, so its final outcome is unknown. Check the session before retrying."
+          : "[Carapace interruption] The Gateway disconnected before Carapace could confirm whether this message was accepted, so its final outcome is unknown. Check the session before retrying.";
         await this.emitPromptChunk(pending, "agent_message_chunk", text, false);
       }
     } catch (noticeError) {

@@ -40,16 +40,16 @@ function sandboxContext(workspaceAccess: SandboxContext["workspaceAccess"]): San
     enabled: true,
     backendId: "docker",
     sessionKey: "agent:main:skill-collection-review",
-    workspaceDir: path.join(os.tmpdir(), "openclaw-sandbox-workspace"),
-    agentWorkspaceDir: path.join(os.tmpdir(), "openclaw-agent-workspace"),
+    workspaceDir: path.join(os.tmpdir(), "carapace-sandbox-workspace"),
+    agentWorkspaceDir: path.join(os.tmpdir(), "carapace-agent-workspace"),
     workspaceAccess,
     runtimeId: "sandbox-runtime",
     runtimeLabel: "sandbox",
-    containerName: "openclaw-sandbox",
+    containerName: "carapace-sandbox",
     containerWorkdir: "/workspace",
     docker: {
-      image: "openclaw-sandbox",
-      containerPrefix: "openclaw-sandbox",
+      image: "carapace-sandbox",
+      containerPrefix: "carapace-sandbox",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -81,7 +81,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
       sessionKey: "agent:marketing:main",
       thinkLevel: "high",
       timeoutMs: 30_000,
-      workspaceDir: path.join(os.tmpdir(), "openclaw-attempt-setup-agent-identities"),
+      workspaceDir: path.join(os.tmpdir(), "carapace-attempt-setup-agent-identities"),
     } as unknown as EmbeddedRunAttemptParams);
 
     expect(setup.sessionAgentId).toBe("marketing");
@@ -95,7 +95,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
     "prepares a global workspace with policy $sandboxSessionKey (detached=$detached)",
     async ({ sandboxSessionKey, detached }) => {
       resolveSandboxContext.mockImplementationOnce(resolveRealSandboxContext);
-      const workspaceDir = tempDirs.make("openclaw-global-attempt-");
+      const workspaceDir = tempDirs.make("carapace-global-attempt-");
       const foreground = {
         agentId: "marketing",
         sessionId: "global-attempt",
@@ -128,7 +128,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
 
   it("does not apply an execution owner to an independent unscoped sandbox policy", async () => {
     resolveSandboxContext.mockImplementationOnce(resolveRealSandboxContext);
-    const workspaceDir = tempDirs.make("openclaw-policy-attempt-");
+    const workspaceDir = tempDirs.make("carapace-policy-attempt-");
     await expect(
       resolveAttemptWorkspaceSandbox({
         agentId: "marketing",
@@ -144,7 +144,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
   });
 
   it("hydrates recent history media from the prepared session agent workspace", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-history-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-attempt-history-"));
     const imagePath = path.join(workspaceDir, "photo.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
     const agent = {} as {
@@ -200,7 +200,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
   });
 
   it("prepares one closed session permission policy", async () => {
-    const root = path.join(os.tmpdir(), "openclaw-attempt-permission-root");
+    const root = path.join(os.tmpdir(), "carapace-attempt-permission-root");
     const setup = await prepareEmbeddedAttemptSetup({
       config: {},
       modelId: "gpt-5.4",
@@ -235,14 +235,14 @@ describe("prepareEmbeddedAttemptSetup", () => {
       skillsSnapshot,
       thinkLevel: "high",
       timeoutMs: 30_000,
-      workspaceDir: path.join(os.tmpdir(), "openclaw-attempt-setup-sandbox-skills"),
+      workspaceDir: path.join(os.tmpdir(), "carapace-attempt-setup-sandbox-skills"),
     } as unknown as EmbeddedRunAttemptParams);
 
     expect(resolveSandboxContext).toHaveBeenCalledWith(expect.objectContaining({ skillsSnapshot }));
   });
 
   it("keeps collection review in the Workshop workspace with read-write sandbox access", async () => {
-    const workspaceDir = tempDirs.make("openclaw-attempt-setup-collection-review-rw-");
+    const workspaceDir = tempDirs.make("carapace-attempt-setup-collection-review-rw-");
     resolveSandboxContext.mockResolvedValueOnce(sandboxContext("rw"));
 
     const setup = await resolveAttemptWorkspaceSandbox({
@@ -258,7 +258,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
   });
 
   it("fails closed before collection review enters a read-only sandbox workspace", async () => {
-    const workspaceDir = tempDirs.make("openclaw-attempt-setup-collection-review-ro-");
+    const workspaceDir = tempDirs.make("carapace-attempt-setup-collection-review-ro-");
     resolveSandboxContext.mockResolvedValueOnce(sandboxContext("ro"));
 
     await expect(
@@ -275,7 +275,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
 
   it("reuses lifecycle metadata and the provider handle from the runtime plan", async () => {
     const metadataSnapshot = { plugins: [] } as never;
-    const workspaceDir = path.join(os.tmpdir(), "openclaw-attempt-setup-prepared");
+    const workspaceDir = path.join(os.tmpdir(), "carapace-attempt-setup-prepared");
     const providerRuntimeHandle: ProviderRuntimePluginHandle & { prepared: true } = {
       provider: "openai",
       modelId: "gpt-5.4",
@@ -316,7 +316,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
       sessionId: "session-partial",
       thinkLevel: "high",
       timeoutMs: 30_000,
-      workspaceDir: path.join(os.tmpdir(), "openclaw-attempt-setup-partial"),
+      workspaceDir: path.join(os.tmpdir(), "carapace-attempt-setup-partial"),
       preparedModelRuntime: {
         metadataSnapshot,
       } as never,
@@ -342,10 +342,10 @@ describe("prepareEmbeddedSkills", () => {
     { label: "all execution denied", toolExecutionAllow: [], readable: false },
   ])("prepares readable skills with $label execution", async ({ toolExecutionAllow, readable }) => {
     const agentWorkspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-skills-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-skills-")),
     );
     const executionWorkspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-execution-skills-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-execution-skills-")),
     );
     const writeSkill = async (workspaceDir: string, name: string) => {
       const skillDir = path.join(workspaceDir, "skills", name);

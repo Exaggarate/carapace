@@ -45,9 +45,9 @@ describe("promoteToPopoverTopLayer", () => {
   });
 });
 
-describe("openclaw-menu-surface", () => {
+describe("carapace-menu-surface", () => {
   it("promotes itself to the top layer on every connect", () => {
-    const surface = document.createElement("openclaw-menu-surface");
+    const surface = document.createElement("carapace-menu-surface");
     const showPopover = vi.fn();
     surface.showPopover = showPopover;
     document.body.append(surface);
@@ -62,7 +62,7 @@ describe("openclaw-menu-surface", () => {
   });
 
   it("keeps children rendered in-flow when the popover API is unavailable", () => {
-    const surface = document.createElement("openclaw-menu-surface");
+    const surface = document.createElement("carapace-menu-surface");
     const menu = document.createElement("div");
     menu.className = "menu";
     surface.append(menu);

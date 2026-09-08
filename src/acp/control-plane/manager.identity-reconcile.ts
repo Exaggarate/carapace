@@ -6,13 +6,13 @@ import {
   mergeSessionIdentity,
   resolveRuntimeHandleIdentifiersFromIdentity,
   resolveSessionIdentityFromMeta,
-} from "@openclaw/acp-core/runtime/session-identity";
+} from "@carapace/acp-core/runtime/session-identity";
 import type {
   AcpRuntime,
   AcpRuntimeHandle,
   AcpRuntimeStatus,
-} from "@openclaw/acp-core/runtime/types";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@carapace/acp-core/runtime/types";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { withAcpRuntimeErrorBoundary } from "../runtime/errors.js";
 import { isAcpOwnerRepairRequired } from "./manager.runtime-owner.js";
@@ -21,7 +21,7 @@ import { hasLegacyAcpIdentityProjection } from "./manager.utils.js";
 
 /** Reconciles runtime-reported session identifiers into persisted ACP session metadata. */
 export async function reconcileManagerRuntimeSessionIdentifiers(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   runtime: AcpRuntime;
@@ -31,7 +31,7 @@ export async function reconcileManagerRuntimeSessionIdentifiers(params: {
   failOnStatusError: boolean;
   setCachedHandle: (target: AcpSessionTarget, handle: AcpRuntimeHandle) => void;
   writeSessionMeta: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionKey: string;
     agentId: string;
     mutate: (

@@ -4,15 +4,15 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { stripAnsiSequences } from "../../../../packages/terminal-core/src/ansi.js";
 import { createConfigIO } from "../../../../src/config/io.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { withSecureTestNodeCommand } from "../../../../src/secrets/test-node-command.test-support.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 
-let instance: OpenClawTestInstance | undefined;
-type GatewayToken = NonNullable<NonNullable<OpenClawConfig["gateway"]>["auth"]>["token"];
+let instance: CarapaceTestInstance | undefined;
+type GatewayToken = NonNullable<NonNullable<CarapaceConfig["gateway"]>["auth"]>["token"];
 const DOCTOR_CLI_TIMEOUT_MS = 120_000;
 const DOCTOR_CLI_CALL_COUNT = 6;
 // Entry-point preparation can precede the first CLI timeout; reserve one more
@@ -32,7 +32,7 @@ function normalizedOutputOf(result: { stderr: string; stdout: string }): string 
   return stripAnsiSequences(outputOf(result)).replaceAll("│", " ").replace(/\s+/g, " ").trim();
 }
 
-async function writeConfig(config: OpenClawConfig): Promise<void> {
+async function writeConfig(config: CarapaceConfig): Promise<void> {
   const activeInstance = instance;
   if (!activeInstance) {
     throw new Error("Doctor test instance is not initialized");
@@ -46,7 +46,7 @@ async function writeConfig(config: OpenClawConfig): Promise<void> {
   await io.writeConfigFile({ ...(await io.readSourceConfigBestEffort()), ...config });
 }
 
-function localGatewayConfig(token?: GatewayToken): OpenClawConfig {
+function localGatewayConfig(token?: GatewayToken): CarapaceConfig {
   return {
     gateway: {
       mode: "local",
@@ -68,7 +68,7 @@ describe.skipIf(process.platform === "win32")("doctor auth and SecretRef product
     "preserves SecretRef ownership while proving resolution, fallback, exec gating, and token generation",
     { timeout: DOCTOR_SCENARIO_TIMEOUT_MS },
     async () => {
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "qa-doctor-auth-secretref",
       });
 
@@ -91,7 +91,7 @@ describe.skipIf(process.platform === "win32")("doctor auth and SecretRef product
       expect(resolvedOutput).not.toContain(resolvedValue);
 
       delete instance.env.QA_DOCTOR_MISSING_GATEWAY_TOKEN;
-      instance.env.OPENCLAW_GATEWAY_TOKEN = "qa-ambient-token-must-not-win";
+      instance.env.CARAPACE_GATEWAY_TOKEN = "qa-ambient-token-must-not-win";
       const unresolvedRef = {
         source: "env" as const,
         provider: "default",
@@ -195,7 +195,7 @@ describe.skipIf(process.platform === "win32")("doctor auth and SecretRef product
         expect(execAllowedOutput).not.toContain("qa-exec-token");
       });
 
-      delete instance.env.OPENCLAW_GATEWAY_TOKEN;
+      delete instance.env.CARAPACE_GATEWAY_TOKEN;
       await writeConfig(localGatewayConfig());
       const generated = await instance.cli(
         [

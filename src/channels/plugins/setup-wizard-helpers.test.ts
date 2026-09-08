@@ -1,12 +1,12 @@
 // Setup wizard helper tests cover channel setup step formatting and config writes.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   resolveSetupWizardAllowFromEntries,
   resolveSetupWizardGroupAllowlist,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import {
@@ -346,10 +346,10 @@ describe("promptSingleChannelSecretInput", () => {
   });
 
   it("returns ref + resolved value when external env ref is selected", async () => {
-    process.env.OPENCLAW_TEST_TOKEN = "secret-token";
+    process.env.CARAPACE_TEST_TOKEN = "secret-token";
     const prompter = createSecretInputPrompter({
       selects: ["ref", "env"],
-      texts: ["OPENCLAW_TEST_TOKEN"],
+      texts: ["CARAPACE_TEST_TOKEN"],
     });
 
     const result = await runPromptSingleChannelSecretInput({
@@ -359,7 +359,7 @@ describe("promptSingleChannelSecretInput", () => {
       accountConfigured: false,
       canUseEnv: false,
       hasConfigToken: false,
-      preferredEnvVar: "OPENCLAW_TEST_TOKEN",
+      preferredEnvVar: "CARAPACE_TEST_TOKEN",
     });
 
     expect(result).toEqual({
@@ -367,7 +367,7 @@ describe("promptSingleChannelSecretInput", () => {
       value: {
         source: "env",
         provider: "default",
-        id: "OPENCLAW_TEST_TOKEN",
+        id: "CARAPACE_TEST_TOKEN",
       },
       resolvedValue: "secret-token",
     });
@@ -409,7 +409,7 @@ describe("promptParsedAllowFromForAccount", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "alt",
       defaultAccountId: DEFAULT_ACCOUNT_ID,
       prompter,
@@ -453,7 +453,7 @@ describe("promptParsedAllowFromForAccount", () => {
             allowFrom: ["old"],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       defaultAccountId: DEFAULT_ACCOUNT_ID,
       prompter: createPrompter(["new"]),
       noteTitle: "Nostr allowlist",
@@ -477,7 +477,7 @@ describe("promptParsedAllowFromForAccount", () => {
 
 describe("createPromptParsedAllowFromForAccount", () => {
   it("supports computed default account ids and optional notes", async () => {
-    const promptAllowFrom = createPromptParsedAllowFromForAccount<OpenClawConfig>({
+    const promptAllowFrom = createPromptParsedAllowFromForAccount<CarapaceConfig>({
       defaultAccountId: () => "work",
       message: "msg",
       placeholder: "placeholder",
@@ -593,7 +593,7 @@ describe("channel lookup note helpers", () => {
 
 describe("setAccountAllowFromForChannel", () => {
   it("writes allowFrom on default account channel config", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         imessage: {
           enabled: true,
@@ -617,7 +617,7 @@ describe("setAccountAllowFromForChannel", () => {
   });
 
   it("writes allowFrom on nested non-default account config", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         signal: {
           enabled: true,
@@ -645,7 +645,7 @@ describe("setAccountAllowFromForChannel", () => {
 describe("patchChannelConfigForAccount", () => {
   it("preserves a plugin-owned root while patching the first named account policy", () => {
     const root = { name: "Root", groupPolicy: "allowlist" as const, groupAllowFrom: [] };
-    const cfg: OpenClawConfig = { channels: { demo: root } };
+    const cfg: CarapaceConfig = { channels: { demo: root } };
     const next = patchChannelConfigForAccount({
       cfg,
       channel: "demo",
@@ -665,7 +665,7 @@ describe("patchChannelConfigForAccount", () => {
   });
 
   it("patches root channel config for default account", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         telegram: {
           enabled: false,
@@ -687,7 +687,7 @@ describe("patchChannelConfigForAccount", () => {
   });
 
   it("patches nested account config and preserves existing enabled flag", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           enabled: true,
@@ -715,7 +715,7 @@ describe("patchChannelConfigForAccount", () => {
   });
 
   it("moves single-account config into default account when patching non-default", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         telegram: {
           enabled: true,
@@ -752,7 +752,7 @@ describe("patchChannelConfigForAccount", () => {
   });
 
   it("supports imessage/signal account-scoped channel patches", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         signal: {
           enabled: false,
@@ -787,7 +787,7 @@ describe("patchChannelConfigForAccount", () => {
 
 describe("setSetupChannelEnabled", () => {
   it("updates enabled and keeps existing channel fields", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         discord: {
           enabled: true,
@@ -809,7 +809,7 @@ describe("setSetupChannelEnabled", () => {
 
 describe("setTopLevelChannelDmPolicyWithAllowFrom", () => {
   it("adds wildcard allowFrom for open policy", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         zalo: {
           dmPolicy: "pairing",
@@ -828,7 +828,7 @@ describe("setTopLevelChannelDmPolicyWithAllowFrom", () => {
   });
 
   it("supports custom allowFrom lookup callback", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         "nextcloud-talk": {
           dmPolicy: "pairing",

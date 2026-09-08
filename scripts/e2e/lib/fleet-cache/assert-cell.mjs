@@ -22,12 +22,12 @@ if (tmpdir === "") {
 } else {
   assert.equal(environment.TMPDIR, tmpdir);
 }
-assert.equal(cell.Config.Labels["openclaw.fleet.env-keys"], keys);
+assert.equal(cell.Config.Labels["carapace.fleet.env-keys"], keys);
 assert.equal(environment.HOME, "/home/node");
-assert.equal(environment.OPENCLAW_STATE_DIR, "/home/node/.openclaw");
+assert.equal(environment.CARAPACE_STATE_DIR, "/home/node/.carapace");
 for (const [directory, destination] of [
-  ["cells", "/home/node/.openclaw"],
-  ["auth-profile-secrets", "/home/node/.config/openclaw"],
+  ["cells", "/home/node/.carapace"],
+  ["auth-profile-secrets", "/home/node/.config/carapace"],
 ]) {
   const mount = cell.Mounts.find((entry) => entry.Destination === destination);
   assert.ok(mount);
@@ -39,7 +39,7 @@ assert.ok(cell.HostConfig.CapDrop.includes("ALL"));
 assert.ok(cell.HostConfig.SecurityOpt.includes("no-new-privileges"));
 assert.ok(cell.HostConfig.SecurityOpt.every((option) => !option.includes("unconfined")));
 assert.equal(cell.HostConfig.Privileged, false);
-const network = `openclaw-cell-${tenant}-net`;
+const network = `carapace-cell-${tenant}-net`;
 assert.equal(cell.HostConfig.NetworkMode, network);
 assert.deepEqual(Object.keys(cell.NetworkSettings.Networks), [network]);
 for (const bindings of Object.values(cell.HostConfig.PortBindings)) {

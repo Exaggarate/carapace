@@ -1,6 +1,6 @@
 // Package script tests validate root package script invariants.
 import fs from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { parseBuildAllArgs, resolveBuildAllSteps } from "../scripts/build-all.mts";
 import { detectChangedScope } from "../scripts/ci-changed-scope.mjs";
@@ -157,13 +157,13 @@ describe("package scripts", () => {
 
   it("enables live cache validation in the package script", () => {
     expect(readPackageJson().scripts["test:live:cache"]).toBe(
-      "node --import ./scripts/tsx.mjs scripts/run-with-env.mts OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_CACHE_TEST=1 -- node --import ./scripts/tsx.mjs scripts/check-live-cache.ts",
+      "node --import ./scripts/tsx.mjs scripts/run-with-env.mts CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_CACHE_TEST=1 -- node --import ./scripts/tsx.mjs scripts/check-live-cache.ts",
     );
   });
 
   it("builds runtime artifacts before browser bootstrap E2E against real Chromium", () => {
     expect(readPackageJson().scripts["test:e2e:browser-extension"]).toBe(
-      "node --import ./scripts/tsx.mjs scripts/build-all.mts qaRuntime && node --import ./scripts/tsx.mjs scripts/run-with-env.mts PLAYWRIGHT_BROWSERS_PATH=.artifacts/playwright-browsers -- node --import ./scripts/tsx.mjs scripts/ensure-playwright-chromium.mts --require-playwright-chromium && node --import ./scripts/tsx.mjs scripts/run-with-env.mts PLAYWRIGHT_BROWSERS_PATH=.artifacts/playwright-browsers OPENCLAW_BROWSER_EXTENSION_E2E=1 OPENCLAW_E2E_WORKERS=1 -- node scripts/run-vitest.mjs extensions/browser/chrome-extension/bootstrap.chromium.test.ts",
+      "node --import ./scripts/tsx.mjs scripts/build-all.mts qaRuntime && node --import ./scripts/tsx.mjs scripts/run-with-env.mts PLAYWRIGHT_BROWSERS_PATH=.artifacts/playwright-browsers -- node --import ./scripts/tsx.mjs scripts/ensure-playwright-chromium.mts --require-playwright-chromium && node --import ./scripts/tsx.mjs scripts/run-with-env.mts PLAYWRIGHT_BROWSERS_PATH=.artifacts/playwright-browsers CARAPACE_BROWSER_EXTENSION_E2E=1 CARAPACE_E2E_WORKERS=1 -- node scripts/run-vitest.mjs extensions/browser/chrome-extension/bootstrap.chromium.test.ts",
     );
   });
 
@@ -228,7 +228,7 @@ describe("package scripts", () => {
   });
 
   it("uses the shipped package launcher for npm start", () => {
-    expect(readPackageJson().scripts.start).toBe("node openclaw.mjs");
+    expect(readPackageJson().scripts.start).toBe("node carapace.mjs");
   });
 
   it("builds iOS against a generic simulator by default", () => {
@@ -310,7 +310,7 @@ describe("package scripts", () => {
 
   it("runs Docker package process-tree coverage in Windows CI", () => {
     expect(readWindowsCiCoverageScript()).toContain(
-      "test/e2e/qa-lab/runtime/package-openclaw-for-docker.e2e.test.ts",
+      "test/e2e/qa-lab/runtime/package-carapace-for-docker.e2e.test.ts",
     );
   });
 
@@ -331,7 +331,7 @@ describe("package scripts", () => {
   });
 
   it("runs shared-state ownership coverage in Windows CI", () => {
-    expect(readWindowsCiCoverageScript()).toContain("src/state/openclaw-state-ownership.test.ts");
+    expect(readWindowsCiCoverageScript()).toContain("src/state/carapace-state-ownership.test.ts");
   });
 
   it("runs mixed-case local media file URL coverage in Windows CI", () => {
@@ -371,7 +371,7 @@ describe("package scripts", () => {
   });
 
   it("runs shared test-state cleanup coverage in Windows CI", () => {
-    expect(readWindowsCiCoverageScript()).toContain("src/test-utils/openclaw-test-state.test.ts");
+    expect(readWindowsCiCoverageScript()).toContain("src/test-utils/carapace-test-state.test.ts");
   });
 
   it("runs snapshot repository verification coverage in Windows CI", () => {
@@ -393,7 +393,7 @@ describe("package scripts", () => {
 
   it("runs cross-OS installer behavior coverage in Windows CI", () => {
     expect(readWindowsCiCoverageScript()).toContain(
-      "test/scripts/openclaw-cross-os-installer.windows.test.ts",
+      "test/scripts/carapace-cross-os-installer.windows.test.ts",
     );
     expect(
       readWindowsCiPartScripts()

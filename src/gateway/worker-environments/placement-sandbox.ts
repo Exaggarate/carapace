@@ -5,7 +5,7 @@ import { createSandboxFsBridge } from "../../agents/sandbox/fs-bridge.js";
 import { createPreprovisionedSshSandboxBackend } from "../../agents/sandbox/ssh-backend.js";
 import type { SandboxConfig, SandboxContext } from "../../agents/sandbox/types.js";
 import { resolveSessionSkillResourceMounts } from "../../agents/session-placement-skill-resources.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { WorkerSessionPlacementRecord } from "./placement-record.js";
 import type { WorkerEnvironmentService } from "./service.js";
 import { resolveWorkerSshSandboxSettings } from "./ssh.js";
@@ -52,7 +52,7 @@ function requireRemoteWorkspaceDir(value: string, nodeCarrier: boolean): string 
 
 /** Builds the node or SSH sandbox owned by one exact active placement generation. */
 export async function createRemoteExecPlacementSandbox(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   environments: PlacementSandboxEnvironmentService;
   workspaceDir: string;
   placement: ActiveRemoteExecPlacement;

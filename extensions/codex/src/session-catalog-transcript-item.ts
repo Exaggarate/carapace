@@ -1,4 +1,4 @@
-import type { SessionCatalogTranscriptItem } from "openclaw/plugin-sdk/session-catalog";
+import type { SessionCatalogTranscriptItem } from "carapace/plugin-sdk/session-catalog";
 import type { CodexThreadItem } from "./app-server/protocol.js";
 import { projectCodexUserItemText } from "./app-server/transcript-history-projection.js";
 

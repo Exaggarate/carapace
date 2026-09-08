@@ -1,4 +1,4 @@
-import { resolveIntegerOption } from "openclaw/plugin-sdk/number-runtime";
+import { resolveIntegerOption } from "carapace/plugin-sdk/number-runtime";
 // Transport-agnostic Parallel search normalization shared by the paid REST
 // provider (`parallel`) and the free Search MCP provider (`parallel-free`).
 // Both transports return the same v1 result shape, so query/result handling
@@ -16,12 +16,12 @@ import {
   type SearchConfigRecord,
   wrapWebContent,
   writeCachedSearchPayload,
-} from "openclaw/plugin-sdk/provider-web-search";
+} from "carapace/plugin-sdk/provider-web-search";
 import {
   normalizeBoundedOptionalString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { PARALLEL_FREE_SESSION_ID_MAX_LENGTH } from "./parallel-free-web-search-provider.shared.js";
 
 // Internal-only bounds (the model-facing tool schema declares its own copies).
@@ -205,7 +205,7 @@ function invalidSearchQueriesPayload() {
     error: "invalid_search_queries",
     message:
       "search_queries must be a non-empty array of keyword strings (max 5, max 200 chars each). See https://docs.parallel.ai/search/best-practices.",
-    docs: "https://docs.openclaw.ai/tools/parallel-search",
+    docs: "https://github.com/Exaggarate/carapace",
   };
 }
 

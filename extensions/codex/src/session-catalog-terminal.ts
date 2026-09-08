@@ -1,13 +1,13 @@
 // Codex catalog terminal ownership: validated native start/resume commands and plans.
-import { resolveDefaultAgentDir } from "openclaw/plugin-sdk/agent-harness-registration";
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { decodeNodePtyResumeParams, decodeNodePtyStartParams } from "openclaw/plugin-sdk/node-host";
+import { resolveDefaultAgentDir } from "carapace/plugin-sdk/agent-harness-registration";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { decodeNodePtyResumeParams, decodeNodePtyStartParams } from "carapace/plugin-sdk/node-host";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { SessionCatalogTerminalPlan } from "openclaw/plugin-sdk/session-catalog";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+} from "carapace/plugin-sdk/plugin-entry";
+import type { SessionCatalogTerminalPlan } from "carapace/plugin-sdk/session-catalog";
 import { resolveCodexAppServerLocalHomeDir } from "./app-server/auth-start-options.js";
 import type { resolveCodexSupervisionAppServerRuntimeOptions } from "./app-server/config-runtime.js";
 import type { CodexCatalogHome } from "./session-catalog-homes.js";
@@ -25,7 +25,7 @@ import type { CodexSessionCatalogControl } from "./session-catalog-types.js";
 export const CODEX_TERMINAL_RESUME_COMMAND = "codex.terminal.resume.v1";
 export const CODEX_TERMINAL_START_COMMAND = "codex.terminal.start.v1";
 
-export function createCodexTerminalStartNodeHostCommand(): OpenClawPluginNodeHostCommand {
+export function createCodexTerminalStartNodeHostCommand(): CarapacePluginNodeHostCommand {
   return {
     command: CODEX_TERMINAL_START_COMMAND,
     cap: CODEX_APP_SERVER_THREADS_CAPABILITY,
@@ -62,7 +62,7 @@ export function createCodexTerminalStartNodeHostCommand(): OpenClawPluginNodeHos
 
 export type CodexTerminalConfigSources = {
   getPluginConfig: () => unknown;
-  getRuntimeConfig: () => OpenClawConfig | undefined;
+  getRuntimeConfig: () => CarapaceConfig | undefined;
   resolveRuntimeOptions: typeof resolveCodexSupervisionAppServerRuntimeOptions;
 };
 
@@ -71,7 +71,7 @@ function resolveCodexCatalogTerminalHome(
 ): string {
   const runtimeConfig = sources.getRuntimeConfig();
   if (!runtimeConfig) {
-    throw new Error("OpenClaw runtime config is unavailable");
+    throw new Error("Carapace runtime config is unavailable");
   }
   const agentDir =
     sources.source?.agentDir ??
@@ -122,7 +122,7 @@ export function createCodexTerminalNodeHostCommand(
     paramsJSON: string;
   },
   configSources: CodexTerminalConfigSources,
-): OpenClawPluginNodeHostCommand {
+): CarapacePluginNodeHostCommand {
   return {
     command: CODEX_TERMINAL_RESUME_COMMAND,
     cap: CODEX_APP_SERVER_THREADS_CAPABILITY,
@@ -184,7 +184,7 @@ export function createCodexTerminalNodeHostCommand(
 export async function openCodexCatalogTerminal(
   params: {
     agentId: string;
-    api: OpenClawPluginApi;
+    api: CarapacePluginApi;
     control: CodexSessionCatalogControl;
     hostId: string;
     threadId: string;

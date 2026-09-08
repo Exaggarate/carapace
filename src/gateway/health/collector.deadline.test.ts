@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { AsyncWorkScope } from "../../shared/async-work-scope.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 
@@ -12,7 +12,7 @@ type DeadlineAccount = {
   configured: boolean;
 };
 
-let testConfig: OpenClawConfig = {};
+let testConfig: CarapaceConfig = {};
 let healthPluginsForTest: ChannelPlugin[] = [];
 const tempDirs = createTempDirTracker();
 let sessionStorePath: string;
@@ -28,7 +28,7 @@ function createDeadlinePlugin(params: {
   accountIds: string[];
   probe: (account: DeadlineAccount) => Promise<Record<string, unknown>>;
 }): ChannelPlugin {
-  const resolveAccount = (_cfg: OpenClawConfig, accountId?: string | null): DeadlineAccount => ({
+  const resolveAccount = (_cfg: CarapaceConfig, accountId?: string | null): DeadlineAccount => ({
     accountId: accountId?.trim() || "default",
     enabled: true,
     configured: true,
@@ -86,7 +86,7 @@ describe("gateway health collection deadline", () => {
 
   beforeEach(async () => {
     sessionStorePath = path.join(
-      tempDirs.make("openclaw-health-deadline-sessions-"),
+      tempDirs.make("carapace-health-deadline-sessions-"),
       "sessions.json",
     );
     readSessionStoreSummaryReadOnly.mockReset();
@@ -113,7 +113,7 @@ describe("gateway health collection deadline", () => {
     const channel = snap.channels["deadline-test"];
 
     expect(snap.sessions.path).toBe(
-      path.join(path.dirname(sessionStorePath), "openclaw-agent.sqlite"),
+      path.join(path.dirname(sessionStorePath), "carapace-agent.sqlite"),
     );
     expect(channel?.probe).toMatchObject({ ok: false, timedOut: true });
     expect(channel?.accounts?.default?.probe).toMatchObject({ ok: false, timedOut: true });

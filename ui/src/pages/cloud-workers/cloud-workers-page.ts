@@ -24,7 +24,7 @@ import { resolveEditableSnapshotConfig } from "../../lib/config/config-state-mod
 import { formatUiError } from "../../lib/format-error.ts";
 import { canCallGatewayMethod } from "../../lib/gateway-methods.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   buildCloudWorkerDeletePatch,
@@ -40,7 +40,7 @@ import {
 
 registerSettingsEnglish();
 
-const CLOUD_WORKERS_DOCS_URL = "https://docs.openclaw.ai/gateway/cloud-workers";
+const CLOUD_WORKERS_DOCS_URL = "https://github.com/Exaggarate/carapace";
 type EditorState = { kind: "add" } | { kind: "edit"; profileId: string } | null;
 
 function formControlValue(event: Event): string {
@@ -50,7 +50,7 @@ function formControlValue(event: Event): string {
     : "";
 }
 
-class CloudWorkersPage extends OpenClawLightDomElement {
+class CloudWorkersPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -577,6 +577,6 @@ class CloudWorkersPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-cloud-workers-page")) {
-  customElements.define("openclaw-cloud-workers-page", CloudWorkersPage);
+if (!customElements.get("carapace-cloud-workers-page")) {
+  customElements.define("carapace-cloud-workers-page", CloudWorkersPage);
 }

@@ -1,9 +1,9 @@
 // Imessage helper module supports normalize behavior.
-import { normalizeE164 } from "openclaw/plugin-sdk/account-resolution";
+import { normalizeE164 } from "carapace/plugin-sdk/account-resolution";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isIMessagePhoneLikeHandle,
   normalizeBareIMessageChatIdentifier,

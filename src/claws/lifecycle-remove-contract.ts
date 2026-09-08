@@ -1,8 +1,8 @@
 import type { unsetConfiguredMcpServer } from "../agents/mcp-config-mutation.js";
 import type { listConfiguredMcpServers } from "../config/mcp-config.js";
 import type { purgeAgentSessionStoreEntries } from "../config/sessions/cleanup-service.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import type { ClawCronGateway } from "./cron.js";
 import type { ClawTrashPath, RemovedWorkspaceFile } from "./lifecycle-delete-support.js";
 import type { ClawMonitorCleanupGateway } from "./monitor-cleanup-contract.js";
@@ -13,7 +13,7 @@ import type {
 } from "./package-remove.js";
 import { CLAW_OUTPUT_STABILITY } from "./types.js";
 
-export const CLAW_REMOVE_PLAN_SCHEMA_VERSION = "openclaw.clawRemovePlan.v1" as const;
+export const CLAW_REMOVE_PLAN_SCHEMA_VERSION = "carapace.clawRemovePlan.v1" as const;
 
 export type ClawRemovePlanAction = {
   kind:
@@ -64,8 +64,8 @@ export type RemovedMcpServer = {
   message?: string;
 };
 
-export type ClawRemovePlanOptions = OpenClawStateDatabaseOptions & {
-  config?: OpenClawConfig;
+export type ClawRemovePlanOptions = CarapaceStateDatabaseOptions & {
+  config?: CarapaceConfig;
   sourceMcpServers?: Record<string, Record<string, unknown>>;
   listMcpServers?: typeof listConfiguredMcpServers;
   packageDeps?: PackageRemovalDeps;
@@ -83,7 +83,7 @@ export type ClawRemoveApplyOptions = ClawRemovePlanOptions & {
   cronGateway?: Pick<ClawCronGateway, "get" | "remove">;
 };
 
-export const CLAW_REMOVE_RESULT_SCHEMA_VERSION = "openclaw.clawRemoveResult.v1" as const;
+export const CLAW_REMOVE_RESULT_SCHEMA_VERSION = "carapace.clawRemoveResult.v1" as const;
 export type ClawRemoveResult = {
   schemaVersion: typeof CLAW_REMOVE_RESULT_SCHEMA_VERSION;
   stability: typeof CLAW_OUTPUT_STABILITY;

@@ -166,18 +166,18 @@ describe("settingsSearchTextMatches", () => {
 
 describe("formatDocumentTitle", () => {
   it("does not duplicate a context ending in the brand", () => {
-    expect(formatDocumentTitle({ context: "Ask OpenClaw" })).toBe("Ask OpenClaw");
-    expect(formatDocumentTitle({ context: "OpenClaw" })).toBe("OpenClaw");
+    expect(formatDocumentTitle({ context: "Ask Carapace" })).toBe("Ask Carapace");
+    expect(formatDocumentTitle({ context: "Carapace" })).toBe("Carapace");
   });
 
   it("names the disconnected gateway without implying internet loss", () => {
     expect(
       formatDocumentTitle({ context: "Usage", gatewayDisconnected: true, queuedCount: 0 }),
-    ).toBe("(Disconnected) Usage — OpenClaw");
+    ).toBe("(Disconnected) Usage — Carapace");
   });
 
   it("ignores a queued count while online", () => {
-    expect(formatDocumentTitle({ context: "Usage", queuedCount: 3 })).toBe("Usage — OpenClaw");
+    expect(formatDocumentTitle({ context: "Usage", queuedCount: 3 })).toBe("Usage — Carapace");
   });
 });
 
@@ -197,7 +197,7 @@ describe("titleForRoute", () => {
       Object.fromEntries(ALL_ROUTES.map((routeId) => [routeId, titleForRoute(routeId)])),
     ).toEqual({
       chat: "Chat",
-      custodian: "OpenClaw",
+      custodian: "Carapace",
       activity: "Activity",
       meetings: "Meetings",
       apps: "Apps",
@@ -316,7 +316,7 @@ describe("pathForRoute", () => {
 
   it("prepends base path", () => {
     expect(pathForRoute("chat", "/ui")).toBe("/ui/chat");
-    expect(pathForRoute("sessions", "/apps/openclaw")).toBe("/apps/openclaw/sessions");
+    expect(pathForRoute("sessions", "/apps/carapace")).toBe("/apps/carapace/sessions");
   });
 });
 
@@ -325,7 +325,7 @@ describe("route path normalization", () => {
     expect(normalizeBasePath("")).toBe("");
     expect(normalizeBasePath("/")).toBe("");
     expect(normalizeBasePath("ui")).toBe("/ui");
-    expect(normalizeBasePath("/apps/openclaw/")).toBe("/apps/openclaw");
+    expect(normalizeBasePath("/apps/carapace/")).toBe("/apps/carapace");
     expect(routeIdFromPath("/chat/")).toBe("chat");
     expect(routeIdFromPath("/ui/chat/", "/ui/")).toBe("chat");
   });
@@ -361,7 +361,7 @@ describe("routeIdFromPath", () => {
 
   it("handles base paths", () => {
     expect(routeIdFromPath("/ui/chat", "/ui")).toBe("chat");
-    expect(routeIdFromPath("/apps/openclaw/sessions", "/apps/openclaw")).toBe("sessions");
+    expect(routeIdFromPath("/apps/carapace/sessions", "/apps/carapace")).toBe("sessions");
     expect(routeIdFromPath("/ui/settings/plugins", "/ui")).toBe("plugins");
     expect(routeIdFromPath("/xx/chat/main", "/ui")).toBeNull();
   });
@@ -444,8 +444,8 @@ describe("routeIdFromPath", () => {
     );
     expect(activityPersonFromPath("/activity/renamed-josh-12345678/")).toBe("12345678");
     expect(inferBasePathFromPathname("/activity/josh-12345678")).toBe("");
-    expect(inferBasePathFromPathname("/apps/openclaw/activity/josh-12345678")).toBe(
-      "/apps/openclaw",
+    expect(inferBasePathFromPathname("/apps/carapace/activity/josh-12345678")).toBe(
+      "/apps/carapace",
     );
   });
 
@@ -492,7 +492,7 @@ describe("routeIdFromPath", () => {
   it("rejects route-shaped paths outside the configured base path", () => {
     expect(routeIdFromPath("/xx/chat", "/ui")).toBeNull();
     expect(routeIdFromPath("/xx/activity/josh-12345678", "/ui")).toBeNull();
-    expect(routeIdFromPath("/other/sessions", "/apps/openclaw")).toBeNull();
+    expect(routeIdFromPath("/other/sessions", "/apps/carapace")).toBeNull();
   });
 
   it("returns null for unknown path", () => {
@@ -541,9 +541,9 @@ describe("inferBasePathFromPathname", () => {
     expect(inferBasePathFromPathname("/custodian")).toBe("");
     expect(inferBasePathFromPathname("/settings/connection")).toBe("");
     expect(inferBasePathFromPathname("/ui/chat")).toBe("/ui");
-    expect(inferBasePathFromPathname("/apps/openclaw/sessions")).toBe("/apps/openclaw");
-    expect(inferBasePathFromPathname("/__openclaw__/")).toBe("/__openclaw__");
-    expect(inferBasePathFromPathname("/apps/openclaw/")).toBe("/apps/openclaw");
+    expect(inferBasePathFromPathname("/apps/carapace/sessions")).toBe("/apps/carapace");
+    expect(inferBasePathFromPathname("/__carapace__/")).toBe("/__carapace__");
+    expect(inferBasePathFromPathname("/apps/carapace/")).toBe("/apps/carapace");
     expect(inferBasePathFromPathname("/typo")).toBe("");
     expect(inferBasePathFromPathname("/index.html")).toBe("");
     expect(inferBasePathFromPathname("/ui/index.html")).toBe("/ui");
@@ -565,7 +565,7 @@ describe("inferBasePathFromPathname", () => {
     expect(inferBasePathFromPathname("/ui/config")).toBe("/ui");
     expect(inferBasePathFromPathname("/ui/settings/appearance")).toBe("/ui");
     expect(inferBasePathFromPathname("/focus/terminal")).toBe("");
-    expect(inferBasePathFromPathname("/openclaw/focus/dashboard/main")).toBe("/openclaw");
+    expect(inferBasePathFromPathname("/carapace/focus/dashboard/main")).toBe("/carapace");
     expect(inferBasePathFromPathname("/company/focus/focus/terminal")).toBe("/company/focus");
   });
 });

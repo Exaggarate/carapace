@@ -24,7 +24,7 @@ export function createComposerProps(overrides: Partial<ComposerProps> = {}): Com
     selectedSession: overrides.sessions?.sessions.find(
       (row) => row.key === (overrides.sessionKey ?? "main"),
     ),
-    assistantName: "OpenClaw",
+    assistantName: "Carapace",
     onDraftChange: vi.fn(),
     onSend: vi.fn(),
     onQueueRemove: vi.fn(),
@@ -50,13 +50,13 @@ export function findComposerButton(container: Element, label: string): HTMLButto
 export function findPrimaryButton(container: Element): HTMLButtonElement {
   const actions = container.querySelector(".agent-chat__composer-actions");
   const result = actions?.querySelector<HTMLButtonElement>(
-    ":scope > .chat-desktop-primary-action > openclaw-tooltip > button",
+    ":scope > .chat-desktop-primary-action > carapace-tooltip > button",
   );
   if (!result) {
     throw new Error("expected one primary composer button");
   }
   expect(
-    actions?.querySelectorAll(":scope > .chat-desktop-primary-action > openclaw-tooltip > button"),
+    actions?.querySelectorAll(":scope > .chat-desktop-primary-action > carapace-tooltip > button"),
   ).toHaveLength(1);
   return result;
 }

@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as replyModule from "../auto-reply/reply/get-reply-from-config.runtime.js";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 import { installHeartbeatRunnerTestRuntime } from "./heartbeat-runner.test-harness.js";
@@ -51,7 +51,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
   async function runIsolatedHeartbeat(params: {
     tmpDir: string;
     storePath: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionKey: string;
   }) {
     await seedSessionStore(params.storePath, params.sessionKey, {
@@ -76,7 +76,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
     return replyCall(replySpy);
   }
 
-  function makeIsolatedHeartbeatConfig(tmpDir: string, storePath: string): OpenClawConfig {
+  function makeIsolatedHeartbeatConfig(tmpDir: string, storePath: string): CarapaceConfig {
     return {
       agents: {
         defaults: {
@@ -97,7 +97,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
     tmpDir: string,
     storePath: string,
     heartbeatSession: string,
-  ): OpenClawConfig {
+  ): CarapaceConfig {
     return {
       agents: {
         defaults: {
@@ -414,7 +414,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
 
   it("treats leftover tasks text as ordinary scratch instead of runtime scheduling state", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

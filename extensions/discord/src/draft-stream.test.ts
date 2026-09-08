@@ -1,6 +1,6 @@
 // Discord tests cover draft stream plugin behavior.
 import { MessageFlags, Routes } from "discord-api-types/v10";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { createDiscordDraftStream } from "./draft-stream.js";
 

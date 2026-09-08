@@ -12,10 +12,10 @@ exec.approvals.node.get exec.approvals.node.set exec.approval.get exec.approval.
 exec.approval.request exec.approval.waitDecision exec.approval.resolve exec.approval.grants.list
 exec.approval.grants.revoke question.request question.waitAnswer question.resolve question.get
 question.list plugin.approval.list plugin.approval.request plugin.approval.waitDecision
-plugin.approval.resolve plugins.uiDescriptors plugins.sessionAction openclaw.chat
-openclaw.chat.history openclaw.changes.list openclaw.approval.list openclaw.setup.detect
-openclaw.setup.activate openclaw.setup.activate.start openclaw.setup.auth.start
-openclaw.setup.prepare.start wizard.start wizard.next wizard.cancel wizard.status talk.catalog
+plugin.approval.resolve plugins.uiDescriptors plugins.sessionAction carapace.chat
+carapace.chat.history carapace.changes.list carapace.approval.list carapace.setup.detect
+carapace.setup.activate carapace.setup.activate.start carapace.setup.auth.start
+carapace.setup.prepare.start wizard.start wizard.next wizard.cancel wizard.status talk.catalog
 talk.config talk.client.create talk.client.transcript talk.client.close talk.client.toolCall
 talk.client.steer talk.session.create talk.session.appendAudio talk.session.cancelOutput
 talk.session.acknowledgeMark talk.session.submitToolResult talk.session.steer talk.session.close
@@ -67,7 +67,7 @@ controlUi.githubPreview system.info agents.workspace.list agents.workspace.get t
 plugins.list plugins.search plugins.install plugins.setEnabled plugins.uninstall plugins.refresh
 controlUi.sessionPullRequests.subscribe controlUi.sessionPreview gateway.suspend.prepare
 gateway.suspend.status gateway.suspend.resume chat.toolTitles sessions.diff
-openclaw.setup.verify environments.create environments.destroy sessions.catalog.list
+carapace.setup.verify environments.create environments.destroy sessions.catalog.list
 sessions.catalog.read terminal.upload sessions.catalog.continue sessions.catalog.archive
 approval.get approval.resolve sessions.search sessions.dispatch sessions.reclaim models.probe
 migrations.memory.plan migrations.memory.apply ui.command approval.history

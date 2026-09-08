@@ -1,7 +1,7 @@
 // Voice Call tests cover stale-call reaping through a real provider HTTP boundary.
 import type { ServerResponse } from "node:http";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withFetchPreconnect, withServer } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withFetchPreconnect, withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { endCall } from "../manager/outbound.js";
 import { TelnyxProvider } from "../providers/telnyx.js";
@@ -89,7 +89,7 @@ describe("stale-call reaper provider transport", () => {
           activeCalls: new Map([[call.callId, call]]),
           providerCallIdMap: new Map([[call.providerCallId, call.callId]]),
           provider,
-          storePath: "/tmp/openclaw-voice-call-proof.json",
+          storePath: "/tmp/carapace-voice-call-proof.json",
           transcriptWaiters: new Map(),
           maxDurationTimers: new Map(),
           endCallOperations: new Map(),

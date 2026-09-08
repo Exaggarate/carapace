@@ -23,7 +23,7 @@ function message(id: string, role: string, content: unknown, seq: number, runId?
     role,
     content,
     timestamp: seq * 1_000,
-    __openclaw: { id, seq, ...(runId ? { runId } : {}) },
+    __carapace: { id, seq, ...(runId ? { runId } : {}) },
   };
 }
 

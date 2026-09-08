@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { migrateCanvasHostConfig } from "./config-migration.js";
 
@@ -9,7 +9,7 @@ describe("migrateCanvasHostConfig", () => {
   it("keeps only enabled from the legacy root host config", () => {
     const result = migrateCanvasHostConfig({
       canvasHost: { enabled: false, root: "~/canvas", port: 18793, liveReload: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(result).toEqual({
       config: {
@@ -35,7 +35,7 @@ describe("migrateCanvasHostConfig", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = migrateCanvasHostConfig(config);
 
@@ -70,7 +70,7 @@ describe("migrateCanvasHostConfig", () => {
   });
 
   it("is idempotent for canonical or absent config", () => {
-    expect(migrateCanvasHostConfig({} as OpenClawConfig)).toBeNull();
+    expect(migrateCanvasHostConfig({} as CarapaceConfig)).toBeNull();
     expect(
       migrateCanvasHostConfig({
         plugins: { entries: { canvas: { config: { host: { enabled: true } } } } },
@@ -79,7 +79,7 @@ describe("migrateCanvasHostConfig", () => {
   });
 
   it("retains an unresolved source root for a later resolved repair", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { entries: { canvas: { config: { host: { root: "${CANVAS_MIGRATION_ROOT}" } } } } },
     };
     expect(migrateCanvasHostConfig(config)).toBeNull();
@@ -87,7 +87,7 @@ describe("migrateCanvasHostConfig", () => {
 
   it("moves an unresolved older root into the pending plugin setting", () => {
     const root = "${CANVAS_MIGRATION_ROOT}";
-    const result = migrateCanvasHostConfig({ canvasHost: { root } } as OpenClawConfig);
+    const result = migrateCanvasHostConfig({ canvasHost: { root } } as CarapaceConfig);
     expect(result?.config).toEqual({
       plugins: { entries: { canvas: { config: { host: { root } } } } },
     });
@@ -117,7 +117,7 @@ describe("migrateCanvasHostConfig", () => {
               },
             },
           },
-        } as OpenClawConfig);
+        } as CarapaceConfig);
         expect(result?.config.plugins?.entries?.canvas?.config?.host).toEqual({
           enabled: true,
           ...(scenario === "inherited" ? { root: legacyRoot } : {}),

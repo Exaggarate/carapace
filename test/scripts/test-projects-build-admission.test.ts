@@ -37,7 +37,7 @@ const lifecycle = targets[1]!;
 const ordinaryQa = "extensions/qa-lab/src/gateway-child.test.ts";
 const patternFiles = createPatternFileHelper("plugin-build-selection-");
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const e2eTarget = "test/openclaw-launcher-version.e2e.test.ts";
+const e2eTarget = "test/carapace-launcher-version.e2e.test.ts";
 const nativeHostTarget = "extensions/browser/src/browser/extension-install.native-host.e2e.test.ts";
 const e2eConfig = "test/vitest/vitest.e2e.config.ts";
 let originalArgv: string[];
@@ -48,7 +48,7 @@ let startCount = 0;
 
 beforeEach(() => {
   commands.prepare.mockReset();
-  commands.prepareE2e.mockReset().mockResolvedValue({ OPENCLAW_E2E_USE_PREBUILT_DIST: "1" });
+  commands.prepareE2e.mockReset().mockResolvedValue({ CARAPACE_E2E_USE_PREBUILT_DIST: "1" });
   commands.reader.mockReset().mockImplementation(() => ({
     completion: Promise.resolve({ code: 0, signal: null }),
     getForwardedSignal: () => undefined,
@@ -56,11 +56,11 @@ beforeEach(() => {
   originalArgv = process.argv;
   originalExitCode = process.exitCode;
   process.exitCode = 0;
-  vi.stubEnv("OPENCLAW_TEST_PROJECTS_PARALLEL", "");
-  vi.stubEnv("OPENCLAW_BUILD_PRIVATE_QA", "");
-  vi.stubEnv("OPENCLAW_E2E_SKIP_BUILD", "");
-  vi.stubEnv("OPENCLAW_E2E_USE_PREBUILT_DIST", "");
-  vi.stubEnv("OPENCLAW_VITEST_INCLUDE_FILE", "");
+  vi.stubEnv("CARAPACE_TEST_PROJECTS_PARALLEL", "");
+  vi.stubEnv("CARAPACE_BUILD_PRIVATE_QA", "");
+  vi.stubEnv("CARAPACE_E2E_SKIP_BUILD", "");
+  vi.stubEnv("CARAPACE_E2E_USE_PREBUILT_DIST", "");
+  vi.stubEnv("CARAPACE_VITEST_INCLUDE_FILE", "");
   terminal = createDeferred<unknown>();
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation((value: unknown) => {
@@ -343,7 +343,7 @@ syncFixtureBuiltinExports();\n`,
               ["--import", preload, path.resolve(script), ...args],
               {
                 cwd: _name === "single" ? path.resolve("extensions/qa-lab") : process.cwd(),
-                env: { ...process.env, OPENCLAW_EXTENSION_BATCH_PARALLEL: "2" },
+                env: { ...process.env, CARAPACE_EXTENSION_BATCH_PARALLEL: "2" },
                 stdio: ["pipe", "pipe", "pipe"],
               },
             );
@@ -435,8 +435,8 @@ describe("parallel cache lease completion", () => {
     "preserves $platform policy after an unverified $phase completion",
     async ({ platform, phase }) => {
       vi.spyOn(process, "platform", "get").mockReturnValue(platform);
-      vi.stubEnv("OPENCLAW_TEST_PROJECTS_PARALLEL", "2");
-      vi.stubEnv("OPENCLAW_VITEST_NO_OUTPUT_RETRY", "1");
+      vi.stubEnv("CARAPACE_TEST_PROJECTS_PARALLEL", "2");
+      vi.stubEnv("CARAPACE_VITEST_NO_OUTPUT_RETRY", "1");
       const { runTestProjects } = await import("../../scripts/test-projects-run.mts");
       let preflights = 0;
       let attempts = 0;
@@ -486,9 +486,9 @@ describe("parallel cache lease completion", () => {
     async (platform) => {
       vi.spyOn(process, "platform", "get").mockReturnValue(platform);
       const cacheRoot = tempDirs.make("cache-policy-");
-      vi.stubEnv("OPENCLAW_VITEST_FS_MODULE_CACHE_PATH", cacheRoot);
-      vi.stubEnv("OPENCLAW_TEST_PROJECTS_PARALLEL", "2");
-      vi.stubEnv("OPENCLAW_VITEST_NO_OUTPUT_RETRY", "1");
+      vi.stubEnv("CARAPACE_VITEST_FS_MODULE_CACHE_PATH", cacheRoot);
+      vi.stubEnv("CARAPACE_TEST_PROJECTS_PARALLEL", "2");
+      vi.stubEnv("CARAPACE_VITEST_NO_OUTPUT_RETRY", "1");
       const { runTestProjects } = await import("../../scripts/test-projects-run.mts");
       const firstPreflight = createDeferred<{ code: number; signal: null; groupJoined: boolean }>();
       const retryPreflight = createDeferred<{ code: number; signal: null; groupJoined: boolean }>();
@@ -502,7 +502,7 @@ describe("parallel cache lease completion", () => {
       let attempts = 0;
       const joined = { code: 0, signal: null, groupJoined: platform !== "win32" };
       commands.reader.mockImplementation(({ env, pnpmArgs, onNoOutputTimeout }) => {
-        const cache = env.OPENCLAW_VITEST_FS_MODULE_CACHE_PATH;
+        const cache = env.CARAPACE_VITEST_FS_MODULE_CACHE_PATH;
         paths.push(cache);
         let completion;
         if (pnpmArgs.includes("scripts/ensure-playwright-chromium.mts")) {
@@ -565,7 +565,7 @@ describe("parallel cache lease completion", () => {
     "joins admitted work after %s without confusing failure with cleanup",
     async (outcome) => {
       const groupJoined = process.platform !== "win32";
-      vi.stubEnv("OPENCLAW_TEST_PROJECTS_PARALLEL", "2");
+      vi.stubEnv("CARAPACE_TEST_PROJECTS_PARALLEL", "2");
       const { runTestProjects } = await import("../../scripts/test-projects-run.mts");
       const first = createDeferred<{
         code: number;
@@ -688,7 +688,7 @@ describe("test-projects build admission", () => {
       ? { bytes: fs.readFileSync(borrowed), stat: fs.statSync(borrowed) }
       : undefined;
     if (borrowed) {
-      vi.stubEnv("OPENCLAW_VITEST_INCLUDE_FILE", borrowed);
+      vi.stubEnv("CARAPACE_VITEST_INCLUDE_FILE", borrowed);
     }
     commands.prepare.mockResolvedValue(0);
     const selected: unknown[] = [];
@@ -726,7 +726,7 @@ describe("test-projects build admission", () => {
         ino: original.stat.ino,
         mtimeMs: original.stat.mtimeMs,
       });
-      const readerInclude = commands.reader.mock.calls[0]![0].env.OPENCLAW_VITEST_INCLUDE_FILE;
+      const readerInclude = commands.reader.mock.calls[0]![0].env.CARAPACE_VITEST_INCLUDE_FILE;
       if (args[0] === toolingConfig) {
         expect(readerInclude).toBe(borrowed);
       } else {
@@ -769,7 +769,7 @@ describe("test-projects build admission", () => {
   it.each([false, true])(
     "holds every reader until preparation completes (parallel=%s)",
     async (parallel) => {
-      vi.stubEnv("OPENCLAW_TEST_PROJECTS_PARALLEL", parallel ? "2" : "");
+      vi.stubEnv("CARAPACE_TEST_PROJECTS_PARALLEL", parallel ? "2" : "");
       const preparation = createPreparationGate<number>(commands.prepare);
       const readers = createDeferred<{ code: number; signal: null }>();
       const readersStarted = createDeferred();
@@ -789,7 +789,7 @@ describe("test-projects build admission", () => {
         expect(commands.prepare).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({
             args: ["scripts/run-node.mjs", "--version"],
-            env: expect.objectContaining({ OPENCLAW_BUILD_PRIVATE_QA: "1" }),
+            env: expect.objectContaining({ CARAPACE_BUILD_PRIVATE_QA: "1" }),
           }),
         );
         preparation.resolve(0);
@@ -834,7 +834,7 @@ describe("test-projects build admission", () => {
     "admits the built native-host integration after %s",
     async (mode) => {
       if (mode === "prebuilt") {
-        vi.stubEnv("OPENCLAW_E2E_USE_PREBUILT_DIST", "1");
+        vi.stubEnv("CARAPACE_E2E_USE_PREBUILT_DIST", "1");
       }
       const preparation = createPreparationGate<NodeJS.ProcessEnv>(commands.prepareE2e);
       if (mode === "prebuilt") {
@@ -851,7 +851,7 @@ describe("test-projects build admission", () => {
         if (mode === "failed build") {
           preparation.reject(new Error("build failed"));
         } else {
-          preparation.resolve({ OPENCLAW_E2E_USE_PREBUILT_DIST: "1" });
+          preparation.resolve({ CARAPACE_E2E_USE_PREBUILT_DIST: "1" });
         }
         await terminal.promise;
       }
@@ -864,14 +864,14 @@ describe("test-projects build admission", () => {
         expect(commands.reader).toHaveBeenCalledWith(
           expect.objectContaining({
             pnpmArgs: expect.arrayContaining(["--config", e2eConfig]),
-            env: expect.objectContaining({ OPENCLAW_E2E_USE_PREBUILT_DIST: "1" }),
+            env: expect.objectContaining({ CARAPACE_E2E_USE_PREBUILT_DIST: "1" }),
           }),
         );
       }
     },
   );
 
-  it.each(["", "OPENCLAW_E2E_SKIP_BUILD", "OPENCLAW_E2E_USE_PREBUILT_DIST"])(
+  it.each(["", "CARAPACE_E2E_SKIP_BUILD", "CARAPACE_E2E_USE_PREBUILT_DIST"])(
     "prepares an ordinary runtime reader independently of E2E flag %s",
     async (key) => {
       if (key) {
@@ -882,7 +882,7 @@ describe("test-projects build admission", () => {
       await terminal.promise;
       expect(commands.prepare).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          env: expect.objectContaining({ OPENCLAW_BUILD_PRIVATE_QA: "" }),
+          env: expect.objectContaining({ CARAPACE_BUILD_PRIVATE_QA: "" }),
         }),
       );
       expect(commands.prepareE2e).not.toHaveBeenCalled();
@@ -891,7 +891,7 @@ describe("test-projects build admission", () => {
   );
 
   it("coalesces mixed E2E and private QA preparation before marking only E2E prebuilt", async () => {
-    vi.stubEnv("OPENCLAW_TEST_PROJECTS_PARALLEL", "2");
+    vi.stubEnv("CARAPACE_TEST_PROJECTS_PARALLEL", "2");
     const preparation = createPreparationGate<NodeJS.ProcessEnv>(commands.prepareE2e);
     await start([...targets, e2eTarget]);
     try {
@@ -900,14 +900,14 @@ describe("test-projects build admission", () => {
       expect(commands.prepare).not.toHaveBeenCalled();
       expect(commands.reader).not.toHaveBeenCalled();
     } finally {
-      preparation.resolve({ OPENCLAW_E2E_USE_PREBUILT_DIST: "1" });
+      preparation.resolve({ CARAPACE_E2E_USE_PREBUILT_DIST: "1" });
       await terminal.promise;
     }
     expect(await terminal.promise).toMatch(/^\[test\] passed 3 Vitest shards/u);
     expect(commands.prepare).not.toHaveBeenCalled();
     expect(commands.reader).toHaveBeenCalledTimes(3);
     for (const [options] of commands.reader.mock.calls) {
-      expect(options.env.OPENCLAW_E2E_USE_PREBUILT_DIST).toBe(
+      expect(options.env.CARAPACE_E2E_USE_PREBUILT_DIST).toBe(
         options.pnpmArgs.includes(e2eConfig) ? "1" : "",
       );
     }
@@ -922,7 +922,7 @@ describe("test-projects build admission", () => {
     expect(process.exitCode).toBe(1);
   });
 
-  it.each(["OPENCLAW_E2E_SKIP_BUILD", "OPENCLAW_E2E_USE_PREBUILT_DIST"] as const)(
+  it.each(["CARAPACE_E2E_SKIP_BUILD", "CARAPACE_E2E_USE_PREBUILT_DIST"] as const)(
     "preserves the explicit %s contract",
     async (key) => {
       vi.stubEnv(key, "1");
@@ -952,7 +952,7 @@ describe("plugin batch build admission", () => {
       const preparation = createPreparationGate<number>(commands.prepare);
       const reader = vi.fn().mockResolvedValue(0);
       const running = runExtensionBatchPlan(batch, {
-        env: { OPENCLAW_EXTENSION_BATCH_PARALLEL: parallel },
+        env: { CARAPACE_EXTENSION_BATCH_PARALLEL: parallel },
         runGroup: reader,
       });
       try {
@@ -961,7 +961,7 @@ describe("plugin batch build admission", () => {
         expect(commands.prepare).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({
             args: ["scripts/run-node.mjs", "--version"],
-            env: expect.objectContaining({ OPENCLAW_BUILD_PRIVATE_QA: "1" }),
+            env: expect.objectContaining({ CARAPACE_BUILD_PRIVATE_QA: "1" }),
           }),
         );
       } finally {
@@ -994,7 +994,7 @@ describe("plugin batch build admission", () => {
       resolveExtensionBatchPlan({ extensionIds: ["qa-lab", "matrix"] }),
       {
         runGroup: reader,
-        env: { OPENCLAW_EXTENSION_BATCH_PARALLEL: "2" },
+        env: { CARAPACE_EXTENSION_BATCH_PARALLEL: "2" },
       },
     );
     if (outcome === "throw") {
@@ -1074,7 +1074,7 @@ describe("plugin batch build admission", () => {
         await import("../../scripts/lib/extension-test-plan.mts");
       const { runExtensionBatchPlan } = await import("../../scripts/test-extension-batch.mts");
       const env = include
-        ? { OPENCLAW_VITEST_INCLUDE_FILE: patternFiles.writePatternFile("include.json", include) }
+        ? { CARAPACE_VITEST_INCLUDE_FILE: patternFiles.writePatternFile("include.json", include) }
         : {};
       commands.prepare.mockResolvedValue(0);
       const reader = vi.fn().mockResolvedValue(0);

@@ -1,6 +1,6 @@
 import { fork } from "node:child_process";
 import fs from "node:fs";
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import { sameFileIdentity, type FileIdentityStat } from "./fs-safe-advanced.js";
 import { resolveRuntimeProcessEntrypointUrl } from "./runtime-process-url.js";
 import { resolveRuntimeWorkerArgv } from "./runtime-worker-url.js";

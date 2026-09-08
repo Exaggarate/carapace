@@ -227,7 +227,7 @@ describe("statusSummaryRuntime.resolveSessionRuntime", () => {
           agents: {
             defaults: {
               models: {
-                "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
               },
             },
             list: [
@@ -265,25 +265,25 @@ describe("statusSummaryRuntime.resolveSessionRuntime", () => {
           },
         } as never,
         entry: {
-          sessionId: "openclaw-produced-session",
+          sessionId: "carapace-produced-session",
           updatedAt: 0,
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
         },
         provider: "openai",
         model: "gpt-5.5",
         sessionKey: "agent:main:main",
       }),
-    ).toEqual({ id: "codex", label: "OpenAI Codex (previous runtime: OpenClaw Default)" });
+    ).toEqual({ id: "codex", label: "OpenAI Codex (previous runtime: Carapace Default)" });
   });
 
-  it("reports the owning Codex harness for a locked session with stale OpenClaw metadata", () => {
+  it("reports the owning Codex harness for a locked session with stale Carapace metadata", () => {
     expect(
       resolveSessionRuntime({
         cfg: {
           agents: {
             defaults: {
               models: {
-                "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
               },
             },
           },
@@ -292,7 +292,7 @@ describe("statusSummaryRuntime.resolveSessionRuntime", () => {
           sessionId: "locked-codex-session",
           updatedAt: 0,
           agentHarnessId: "codex",
-          agentRuntimeOverride: "openclaw",
+          agentRuntimeOverride: "carapace",
           modelSelectionLocked: true,
         },
         provider: "openai",

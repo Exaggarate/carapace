@@ -1,4 +1,4 @@
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import { Value } from "typebox/value";
 import {
   type WorkerSessionsSendParams,

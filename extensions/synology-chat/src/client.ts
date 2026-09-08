@@ -5,15 +5,15 @@
 
 import * as http from "node:http";
 import * as https from "node:https";
-import { collectErrorGraphCandidates, extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import { safeParseJsonWithSchema, safeParseWithSchema } from "openclaw/plugin-sdk/extension-shared";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { readByteStreamWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { classifyTransientNetworkErrorCode, retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { sleep, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+import { collectErrorGraphCandidates, extractErrorCode } from "carapace/plugin-sdk/error-runtime";
+import { safeParseJsonWithSchema, safeParseWithSchema } from "carapace/plugin-sdk/extension-shared";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
+import { readByteStreamWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { classifyTransientNetworkErrorCode, retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import { sleep, sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 import { z } from "zod";
 import type { SynologyHostedMediaUrl } from "./outbound-media.js";
 
@@ -173,7 +173,7 @@ export async function sendMessage(
 }
 
 /**
- * Send an OpenClaw-hosted immutable file URL to Synology Chat.
+ * Send an Carapace-hosted immutable file URL to Synology Chat.
  */
 export async function sendHostedFileUrl(
   incomingUrl: string,

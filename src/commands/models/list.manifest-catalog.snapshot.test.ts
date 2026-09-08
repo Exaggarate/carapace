@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
 import { loadPluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.js";
 import {
@@ -35,7 +35,7 @@ function prepareFixture() {
     ["catalog-owner", "fixture-provider", bundled],
     ["fixture-direct", "fixture-direct", bundled],
     ["disabled-owner", "fixture-disabled", bundled],
-    ["workspace-owner", "fixture-workspace", path.join(workspaceDir, ".openclaw/extensions")],
+    ["workspace-owner", "fixture-workspace", path.join(workspaceDir, ".carapace/extensions")],
   ] as const;
   const fixtures = declarations.map(([pluginId, providerId, parent]) => {
     const rootDir = path.join(parent, pluginId);
@@ -78,7 +78,7 @@ function prepareFixture() {
       },
     });
   });
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     models: { catalogRefresh: { enabled: false } },
     plugins: {
       entries: Object.fromEntries(
@@ -88,12 +88,12 @@ function prepareFixture() {
   };
   const env: NodeJS.ProcessEnv = {
     HOME: path.join(root, "home"),
-    OPENCLAW_HOME: path.join(root, "home"),
-    OPENCLAW_STATE_DIR: path.join(root, "state"),
-    OPENCLAW_CONFIG_PATH: path.join(root, "state/openclaw.json"),
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundled,
-    OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-    OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+    CARAPACE_HOME: path.join(root, "home"),
+    CARAPACE_STATE_DIR: path.join(root, "state"),
+    CARAPACE_CONFIG_PATH: path.join(root, "state/carapace.json"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: bundled,
+    CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+    CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
     VITEST: "true",
   };
   const metadataSnapshot = loadPluginMetadataSnapshot({
@@ -113,7 +113,7 @@ function prepareFixture() {
     [],
   );
   const manifestPaths = fixtures.map((fixture) =>
-    path.join(fixture.rootDir, "openclaw.plugin.json"),
+    path.join(fixture.rootDir, "carapace.plugin.json"),
   );
   return { cfg, env, workspaceDir, metadataSnapshot, fixtures, manifestPaths };
 }
@@ -286,7 +286,7 @@ describe("model-list prepared manifest snapshot", () => {
     },
   );
 
-  it.each<[string, NonNullable<OpenClawConfig["plugins"]>, string, boolean]>([
+  it.each<[string, NonNullable<CarapaceConfig["plugins"]>, string, boolean]>([
     ["global disable", { enabled: false }, "fixture-alias", false],
     ["denylist", { deny: ["catalog-owner"] }, "fixture-alias", false],
     ["restrictive allowlist", { allow: ["fixture-direct"] }, "fixture-alias", false],

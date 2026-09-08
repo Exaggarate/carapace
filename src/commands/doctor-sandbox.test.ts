@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { note } from "../../packages/terminal-core/src/note.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import { noteSandboxScopeWarnings } from "./doctor-sandbox.js";
 import { resolveSandboxScript } from "./doctor-sandbox.test-support.js";
 
@@ -80,25 +80,25 @@ describe("resolveSandboxScript", () => {
 
   const scriptRel = path.join("scripts", "sandbox-setup.sh");
 
-  // Create a repo checkout that the shared resolver will recognize: it keys off an openclaw
+  // Create a repo checkout that the shared resolver will recognize: it keys off an carapace
   // package.json marker, then resolveSandboxScript looks for scripts/ under that root.
   function mkRepo(prefix: string): string {
     const repo = mkTmp(prefix);
     fs.mkdirSync(path.join(repo, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(repo, scriptRel), "#!/bin/sh\n");
-    fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "openclaw" }));
+    fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "carapace" }));
     return repo;
   }
 
   it("follows a symlinked launcher to find scripts/ in the real repo", () => {
     // Repo checkout that actually contains scripts/sandbox-setup.sh ...
     const repo = mkRepo("ocsbx-repo-");
-    const entry = path.join(repo, "openclaw.mjs");
+    const entry = path.join(repo, "carapace.mjs");
     fs.writeFileSync(entry, "");
 
     // ... reached only via a symlinked launcher in an unrelated bin dir (the npm/pnpm global case).
     const binDir = mkTmp("ocsbx-bin-");
-    const launcher = path.join(binDir, "openclaw");
+    const launcher = path.join(binDir, "carapace");
     fs.symlinkSync(entry, launcher);
 
     const result = resolveSandboxScript(scriptRel, { argv1: launcher, cwd: binDir });
@@ -111,7 +111,7 @@ describe("resolveSandboxScript", () => {
 
   it("still resolves a script relative to a non-symlinked launcher dir", () => {
     const repo = mkRepo("ocsbx-direct-");
-    const entry = path.join(repo, "openclaw.mjs");
+    const entry = path.join(repo, "carapace.mjs");
     fs.writeFileSync(entry, "");
 
     const result = resolveSandboxScript(scriptRel, { argv1: entry, cwd: os.tmpdir() });
@@ -121,7 +121,7 @@ describe("resolveSandboxScript", () => {
 
   it("returns null when the script is unreachable from cwd or the launcher", () => {
     const binDir = mkTmp("ocsbx-none-");
-    const launcher = path.join(binDir, "openclaw");
+    const launcher = path.join(binDir, "carapace");
     fs.writeFileSync(launcher, "");
 
     expect(
@@ -136,7 +136,7 @@ describe("resolveSandboxScript", () => {
     const repo = mkRepo("ocsbx-missing-argv1-");
 
     const result = resolveSandboxScript(scriptRel, {
-      argv1: "/nonexistent-ocsbx/bin/openclaw",
+      argv1: "/nonexistent-ocsbx/bin/carapace",
       cwd: repo,
     });
 
@@ -145,19 +145,19 @@ describe("resolveSandboxScript", () => {
   });
 
   it("keeps searching cwd after a first-root lookup finds a package without the script", () => {
-    // Installed/published openclaw package root: it carries the package.json marker but not
+    // Installed/published carapace package root: it carries the package.json marker but not
     // scripts/sandbox-setup.sh, because the npm files allowlist drops scripts/. It resolves from
     // argv1 before cwd, so stopping at the first root would miss the source checkout below.
     const installed = mkTmp("ocsbx-installed-");
-    fs.writeFileSync(path.join(installed, "package.json"), JSON.stringify({ name: "openclaw" }));
-    const entry = path.join(installed, "openclaw.mjs");
+    fs.writeFileSync(path.join(installed, "package.json"), JSON.stringify({ name: "carapace" }));
+    const entry = path.join(installed, "carapace.mjs");
     fs.writeFileSync(entry, "");
 
     // Valid source checkout (cwd) that does contain the script.
     const repo = mkRepo("ocsbx-source-");
 
     const options = { argv1: entry, cwd: repo };
-    expect(resolveOpenClawPackageRootSync(options)).toBe(installed);
+    expect(resolveCarapacePackageRootSync(options)).toBe(installed);
     const result = resolveSandboxScript(scriptRel, options);
 
     expect(result?.scriptPath).toBe(path.join(repo, scriptRel));

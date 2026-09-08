@@ -1,18 +1,18 @@
 /**
  * Limits embedded-agent history length from session-key policy.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { normalizeChatType, type ChatType } from "../../channels/chat-type.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeAccountId } from "../../routing/account-id.js";
 import { resolveNormalizedAccountEntry } from "../../routing/account-lookup.js";
 import { resolveLinkedDirectPeerId } from "../../routing/session-key.js";
 import type { AgentMessage } from "../runtime/index.js";
 
 const THREAD_SUFFIX_REGEX = /^(.*)(?::(?:thread|topic):\d+)$/i;
-const SESSION_HISTORY_PRELUDE = Symbol.for("openclaw.sessionHistoryPrelude");
+const SESSION_HISTORY_PRELUDE = Symbol.for("carapace.sessionHistoryPrelude");
 
 function isSessionHistoryPrelude(message: AgentMessage | undefined): boolean {
   return Boolean(
@@ -105,7 +105,7 @@ type HistoryLimitChannelConfig = {
  */
 export function getHistoryLimitFromSessionKey(
   sessionKey: string | undefined,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   route?: { accountId?: string | null; peerId?: string; chatType?: ChatType },
 ): number | undefined {
   if (!sessionKey || !config) {

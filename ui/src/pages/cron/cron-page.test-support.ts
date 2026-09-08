@@ -134,7 +134,7 @@ export function createPage(
   context: ApplicationContext,
   options: { render?: boolean } = {},
 ): CronTestPage {
-  const page = document.createElement("openclaw-cron-page") as CronTestPage;
+  const page = document.createElement("carapace-cron-page") as CronTestPage;
   page.context = context;
   if (!options.render) {
     page.render = () => nothing;

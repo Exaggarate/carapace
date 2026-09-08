@@ -134,11 +134,11 @@ export class ShellChromeOwner {
       [KEYBOARD_SHORTCUTS_REQUEST_EVENT, this.handleKeyboardShortcutsRequest],
       ["resize", this.handleWindowResize],
       [NATIVE_HISTORY_STATE_EVENT, this.handleNativeHistoryState],
-      ["openclaw:native-toggle-sidebar", this.handleNativeToggleSidebar],
-      ["openclaw:native-open-search", this.handleNativeOpenSearch],
-      ["openclaw:native-toggle-search", this.handleNativeToggleSearch],
-      ["openclaw:native-new-session", this.handleNativeNewSession],
-      ["openclaw:native-navigate", this.handleNativeNavigate],
+      ["carapace:native-toggle-sidebar", this.handleNativeToggleSidebar],
+      ["carapace:native-open-search", this.handleNativeOpenSearch],
+      ["carapace:native-toggle-search", this.handleNativeToggleSearch],
+      ["carapace:native-new-session", this.handleNativeNewSession],
+      ["carapace:native-navigate", this.handleNativeNavigate],
       [TERMINAL_PANEL_TOGGLE_EVENT, this.panels.handleDeferredTerminalToggle],
       [BROWSER_PANEL_TOGGLE_EVENT, this.panels.handleDeferredBrowserToggle],
       [DESKTOP_PANEL_TOGGLE_EVENT, this.panels.handleDeferredDesktopToggle],
@@ -154,8 +154,8 @@ export class ShellChromeOwner {
     }
     // Document load can be a proxy sign-in page; the listener owner records readiness.
     nativeCommandsOwner = this.listeners;
-    Object.assign(window, { __OPENCLAW_NATIVE_COMMANDS_READY__: true });
-    window.dispatchEvent(new Event("openclaw:native-commands-state"));
+    Object.assign(window, { __CARAPACE_NATIVE_COMMANDS_READY__: true });
+    window.dispatchEvent(new Event("carapace:native-commands-state"));
   }
 
   disconnect(): void {
@@ -165,8 +165,8 @@ export class ShellChromeOwner {
     this.navDrawerSwipe.disconnect();
     if (listenerOwner && nativeCommandsOwner === listenerOwner) {
       nativeCommandsOwner = undefined;
-      Object.assign(window, { __OPENCLAW_NATIVE_COMMANDS_READY__: false });
-      window.dispatchEvent(new Event("openclaw:native-commands-state"));
+      Object.assign(window, { __CARAPACE_NATIVE_COMMANDS_READY__: false });
+      window.dispatchEvent(new Event("carapace:native-commands-state"));
     }
   }
 
@@ -371,7 +371,7 @@ export class ShellChromeOwner {
     if (event.defaultPrevented || !matchesShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.escape, event)) {
       return;
     }
-    if (host.navDrawerOpen && isMobileNavLayout() && !document.openClawModalLayers?.size) {
+    if (host.navDrawerOpen && isMobileNavLayout() && !document.carapaceModalLayers?.size) {
       event.preventDefault();
       host.closeNavDrawer({ restoreFocus: true });
     } else if (
@@ -385,7 +385,7 @@ export class ShellChromeOwner {
 
   readonly handleDocumentKeydown = (event: KeyboardEvent): void => {
     const host = this.host;
-    if (document.openClawModalLayers?.size) {
+    if (document.carapaceModalLayers?.size) {
       return;
     }
     if (host.navDrawerOpen && isMobileNavLayout()) {
@@ -502,7 +502,7 @@ export class ShellChromeOwner {
         ?.isOpen ||
       overlaySnapshot?.devicePairSetupOpen ||
       host.approvalOverlay?.dialogOpen === true ||
-      document.openClawModalLayers?.size
+      document.carapaceModalLayers?.size
     ) {
       return true;
     }

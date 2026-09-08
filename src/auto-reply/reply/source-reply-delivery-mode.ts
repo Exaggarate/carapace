@@ -1,7 +1,7 @@
 /** Source-reply visibility and suppression policy for auto-reply delivery. */
 import { normalizeChatType } from "../../channels/chat-type.js";
 import type { InboundEventKind } from "../../channels/inbound-event/kind.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { InputProvenance } from "../../sessions/input-provenance.js";
 import type { SessionSendPolicyDecision } from "../../sessions/send-policy.js";
 import { INTERNAL_MESSAGE_CHANNEL, normalizeMessageChannel } from "../../utils/message-channel.js";
@@ -39,7 +39,7 @@ function toSessionStableDeliveryModeContext(
 /** Returns true when the turn explicitly invoked a source-visible command. */
 export function isExplicitSourceReplyCommand(
   ctx: SourceReplyDeliveryModeContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): boolean {
   return isExplicitCommandTurnContext(ctx, cfg);
 }
@@ -50,7 +50,7 @@ export function isExplicitSourceReplyCommand(
  */
 export function isDirectedSourceReplyTurn(
   ctx: SourceReplyDeliveryModeContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   isDirectChat: boolean,
   inboundEventKind = ctx.InboundEventKind,
 ): boolean {
@@ -88,7 +88,7 @@ export function isInternalSourceReplyChannel(ctx: SourceReplyDeliveryModeContext
 
 /** Resolves whether normal final text should auto-deliver or require the message tool. */
 export function resolveSourceReplyDeliveryMode(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: SourceReplyDeliveryModeContext;
   requested?: SourceReplyDeliveryMode;
   strictMessageToolOnly?: boolean;
@@ -161,7 +161,7 @@ type SourceReplyVisibilityPolicy = {
 
 /** Resolves source delivery, hooks, lifecycle, and typing suppression flags. */
 export function resolveSourceReplyVisibilityPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: SourceReplyDeliveryModeContext;
   requested?: SourceReplyDeliveryMode;
   strictMessageToolOnly?: boolean;

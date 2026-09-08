@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   discordQaScenarioSupport,
@@ -14,7 +14,7 @@ const driverId = "423456789012345678";
 const voiceChannelId = "523456789012345678";
 
 async function prepareScenario(voiceDestination?: string) {
-  const patches: OpenClawConfig[] = [];
+  const patches: CarapaceConfig[] = [];
   const call = vi.fn(async (method: string, params?: unknown) => {
     if (method === "config.get") {
       return {
@@ -25,7 +25,7 @@ async function prepareScenario(voiceDestination?: string) {
       };
     }
     if (method === "config.patch") {
-      patches.push(JSON.parse((params as { raw: string }).raw) as OpenClawConfig);
+      patches.push(JSON.parse((params as { raw: string }).raw) as CarapaceConfig);
       return { hash: "config-hash" };
     }
     if (method === "channels.status") {

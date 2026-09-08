@@ -2,8 +2,8 @@ import Foundation
 import SwiftUI
 import Testing
 import WebKit
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 @MainActor
 struct TerminalHubScreenTests {
@@ -37,12 +37,12 @@ struct TerminalHubScreenTests {
 
     @Test func `terminal URL flips scheme and preserves the Control UI base path`() throws {
         let config = try Self.makeConfig(
-            url: #require(URL(string: "wss://gateway.example.com:8443/openclaw/")),
+            url: #require(URL(string: "wss://gateway.example.com:8443/carapace/")),
             token: "secret-token")
 
         let url = TerminalHubScreen.terminalURL(config: config)
 
-        #expect(url?.absoluteString == "https://gateway.example.com:8443/openclaw/focus/terminal")
+        #expect(url?.absoluteString == "https://gateway.example.com:8443/carapace/focus/terminal")
         // Credentials must never ride in the page URL; they travel via the
         // document-start auth user script instead.
         #expect(url?.absoluteString.contains("secret-token") == false)
@@ -64,7 +64,7 @@ struct TerminalHubScreenTests {
 
         let script = TerminalHubScreen.terminalAuthUserScript(config: config)
 
-        #expect(script?.contains("__OPENCLAW_NATIVE_CONTROL_AUTH__") == true)
+        #expect(script?.contains("__CARAPACE_NATIVE_CONTROL_AUTH__") == true)
         // JSONSerialization escapes forward slashes, hence the `\/` literals.
         #expect(script?.contains("\"https:\\/\\/gateway.example.com:8443\"") == true)
         #expect(script?.contains("\"token\":\"secret-token\"") == true)
@@ -119,8 +119,8 @@ struct TerminalHubScreenTests {
 
         let script = TerminalHubScreen.terminalAuthUserScript(config: config)
 
-        #expect(script?.contains("openclaw-device-identity-v1") == true)
-        #expect(script?.contains("openclaw.device.auth.v1:${scope}") == true)
+        #expect(script?.contains("carapace-device-identity-v1") == true)
+        #expect(script?.contains("carapace.device.auth.v1:${scope}") == true)
         #expect(script?.contains(identity.deviceId) == true)
         #expect(script?.contains("\"token\":\"scoped-terminal-token\"") == true)
         #expect(script?.contains("operator.read") == true)

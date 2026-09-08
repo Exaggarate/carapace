@@ -1,7 +1,7 @@
 import { formatTerminalLink } from "./terminal-link.js";
 
 function resolveDocsRoot(): string {
-  return "https://docs.openclaw.ai";
+  return "https://github.com/Exaggarate/carapace";
 }
 
 const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//i;

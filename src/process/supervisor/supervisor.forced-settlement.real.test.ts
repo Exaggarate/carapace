@@ -39,7 +39,7 @@ afterEach(async () => {
 });
 
 async function createLeakedPipeScope() {
-  const cwd = tempDirs.make("openclaw-forced-settlement-");
+  const cwd = tempDirs.make("carapace-forced-settlement-");
   const leakPath = path.join(cwd, "leak.cjs");
   const leakPidPath = path.join(cwd, "leak.pid");
   const leakTickPath = path.join(cwd, "leak.ticks");

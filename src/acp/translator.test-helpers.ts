@@ -1,7 +1,7 @@
 /** Shared mocked ACP connection and Gateway client helpers for translator tests. */
 import type { AgentSideConnection } from "@agentclientprotocol/sdk";
-import type { AcpSessionStore } from "@openclaw/acp-core/session";
-import type { AcpServerOptions } from "@openclaw/acp-core/types";
+import type { AcpSessionStore } from "@carapace/acp-core/session";
+import type { AcpServerOptions } from "@carapace/acp-core/types";
 import { vi } from "vitest";
 import type { GatewayClient } from "../gateway/client.js";
 import type { AcpEventLedger } from "./event-ledger.js";

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { containsConfigIncludeDirective } from "../config/io.read-helpers.js";
 import { GUARDED_CONFIG_INCLUDE_WRITE_ERROR } from "../config/mutation-conflict.js";
 import { resolveStateDir } from "../config/paths.js";
@@ -45,7 +45,7 @@ async function assertArtifactConfigPublicationSupported(): Promise<void> {
     (Object.hasOwn(parsed, "$include") || containsConfigIncludeDirective(parsed.plugins))
   ) {
     throw new Error(
-      `${GUARDED_CONFIG_INCLUDE_WRITE_ERROR} Install the reviewed archive with openclaw plugins install.`,
+      `${GUARDED_CONFIG_INCLUDE_WRITE_ERROR} Install the reviewed archive with carapace plugins install.`,
     );
   }
 }
@@ -116,7 +116,7 @@ async function prunePendingArtifacts(
 async function readVerifiedArtifact(filePath: string, sha256: string): Promise<Buffer> {
   if (!path.isAbsolute(filePath) || !/\.(?:tgz|tar\.gz)$/u.test(filePath)) {
     throw new Error(
-      "Plugin artifact path must be an absolute .tgz or .tar.gz file from openclaw plugins pack.",
+      "Plugin artifact path must be an absolute .tgz or .tar.gz file from carapace plugins pack.",
     );
   }
   const source = await root(path.dirname(filePath), {
@@ -143,23 +143,23 @@ async function inspectArtifact(rootDir: string): Promise<ArtifactReview> {
     const value = packageJson[field];
     if (value !== undefined && (!isRecord(value) || Object.keys(value).length > 0)) {
       throw new Error(
-        `Plugin artifacts cannot contain ${field}. Use openclaw plugins pack to bundle the plugin first.`,
+        `Plugin artifacts cannot contain ${field}. Use carapace plugins pack to bundle the plugin first.`,
       );
     }
   }
   const peers = packageJson.peerDependencies;
   if (
     (peers !== undefined &&
-      (!isRecord(peers) || Object.keys(peers).some((name) => name !== "openclaw"))) ||
+      (!isRecord(peers) || Object.keys(peers).some((name) => name !== "carapace"))) ||
     (await artifact.exists("node_modules"))
   ) {
     throw new Error(
-      "Plugin artifacts must bundle dependencies and may only reference the host openclaw peer.",
+      "Plugin artifacts must bundle dependencies and may only reference the host carapace peer.",
     );
   }
   const extensions = resolvePackageExtensionEntries(packageJson);
   if (extensions.status !== "ok" || extensions.entries.length !== 1) {
-    throw new Error("Plugin artifact must declare exactly one compiled openclaw.extensions entry.");
+    throw new Error("Plugin artifact must declare exactly one compiled carapace.extensions entry.");
   }
   const entry = (extensions.entries[0] ?? "").replace(/^\.\//u, "");
   if (!/^dist\/(?:[\w-][\w.-]*\/)*[\w-][\w.-]*\.(?:[cm]?js)$/u.test(entry)) {
@@ -202,7 +202,7 @@ async function withVerifiedArtifact<T>(
   bytes: Buffer,
   run: (artifact: { archivePath: string; review: ArtifactReview }) => Promise<T>,
 ): Promise<T> {
-  return await withInstallWorkspace("openclaw-plugin-artifact-", async (workspace) => {
+  return await withInstallWorkspace("carapace-plugin-artifact-", async (workspace) => {
     const files = await root(workspace, { hardlinks: "reject", symlinks: "reject", mode: 0o600 });
     await files.create("package.tgz", bytes);
     await files.mkdir("extract");
@@ -220,7 +220,7 @@ async function withVerifiedArtifact<T>(
       },
     });
     const artifactRoot = await resolvePackedRootDir(extractDir, {
-      rootMarkers: ["package.json", "openclaw.plugin.json"],
+      rootMarkers: ["package.json", "carapace.plugin.json"],
     });
     return await run({ archivePath, review: await inspectArtifact(artifactRoot) });
   });
@@ -235,7 +235,7 @@ export async function prepareSystemAgentPluginArtifact(
   await assertArtifactConfigPublicationSupported();
   if (await isPluginBackingDefaultInferenceRoute(review.pluginId)) {
     throw new Error(
-      "This plugin backs OpenClaw's active inference route. Stop OpenClaw and install the artifact from a trusted shell.",
+      "This plugin backs Carapace's active inference route. Stop Carapace and install the artifact from a trusted shell.",
     );
   }
   return await withArtifactImports(async (files, assertOwned) => {
@@ -295,7 +295,7 @@ export async function executePluginArtifactActivation(
             await assertArtifactConfigPublicationSupported();
             if (await isPluginBackingDefaultInferenceRoute(review.pluginId)) {
               throw new Error(
-                "Artifact activation stopped: this plugin now backs the active inference route. Stop OpenClaw and install it from a trusted shell.",
+                "Artifact activation stopped: this plugin now backs the active inference route. Stop Carapace and install it from a trusted shell.",
               );
             }
             assertPersistentApply();

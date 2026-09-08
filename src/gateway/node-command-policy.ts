@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Gateway node command policy.
 // Computes per-platform allowlists from built-in, plugin, runtime, and config inputs.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   NODE_AGENT_CLI_CLAUDE_RUN_COMMAND,
   NODE_BROWSER_PROXY_COMMANDS,
@@ -386,7 +386,7 @@ function hasTalkSurface(node?: NodeCommandPolicyNode): boolean {
 }
 
 function resolveNodeCommandAllowlistInternal(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   node?: NodeCommandPolicyNode,
   options?: { includeDesktopHostCommands?: boolean; includeDangerousDefaults?: boolean },
 ): Set<string> {
@@ -464,14 +464,14 @@ function resolveNodeCommandAllowlistInternal(
 }
 
 export function resolveNodeCommandAllowlist(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   node?: NodeCommandPolicyNode,
 ): Set<string> {
   return resolveNodeCommandAllowlistInternal(cfg, node);
 }
 
 export function resolveNodePairingCommandAllowlist(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   node?: NodeCommandPolicyNode,
 ): Set<string> {
   return resolveNodeCommandAllowlistInternal(cfg, node, {

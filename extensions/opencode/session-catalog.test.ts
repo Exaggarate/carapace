@@ -1,17 +1,17 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import type { SessionTranscriptWriteLockContext } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import type { SessionTranscriptWriteLockContext } from "carapace/plugin-sdk/session-transcript-runtime";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 type ResolveAcpSessionAvailability =
-  (typeof import("openclaw/plugin-sdk/acp-runtime"))["resolveAcpSessionAvailability"];
+  (typeof import("carapace/plugin-sdk/acp-runtime"))["resolveAcpSessionAvailability"];
 type RunCommandBuffered =
-  (typeof import("openclaw/plugin-sdk/process-runtime"))["runCommandBuffered"];
-type RegisteredSessionCatalogProvider = Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0];
+  (typeof import("carapace/plugin-sdk/process-runtime"))["runCommandBuffered"];
+type RegisteredSessionCatalogProvider = Parameters<CarapacePluginApi["registerSessionCatalog"]>[0];
 type OptionalCatalogAgent<T extends { agentId?: string }> = Omit<T, "agentId"> & {
   agentId?: string;
 };
@@ -41,12 +41,12 @@ type SessionCatalogProvider = Omit<
     >,
   ) => ReturnType<NonNullable<RegisteredSessionCatalogProvider["openTerminal"]>>;
 };
-type NodeHostCommand = Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0];
-type NodeInvokePolicy = Parameters<OpenClawPluginApi["registerNodeInvokePolicy"]>[0];
+type NodeHostCommand = Parameters<CarapacePluginApi["registerNodeHostCommand"]>[0];
+type NodeInvokePolicy = Parameters<CarapacePluginApi["registerNodeInvokePolicy"]>[0];
 type CatalogListParams = Parameters<SessionCatalogProvider["list"]>[0];
 type CatalogReadParams = Parameters<SessionCatalogProvider["read"]>[0];
 type CreateSessionEntryParams = Parameters<
-  OpenClawPluginApi["runtime"]["agent"]["session"]["createSessionEntry"]
+  CarapacePluginApi["runtime"]["agent"]["session"]["createSessionEntry"]
 >[0];
 
 function bindTestCatalogOwner(provider: RegisteredSessionCatalogProvider): SessionCatalogProvider {
@@ -83,20 +83,20 @@ const transcriptMocks = vi.hoisted(() => ({
   messages: [] as Array<Record<string, unknown>>,
 }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/process-runtime")>();
+vi.mock("carapace/plugin-sdk/process-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/process-runtime")>();
   processRuntimeMocks.runCommandBuffered.mockImplementation(actual.runCommandBuffered);
   return { ...actual, runCommandBuffered: processRuntimeMocks.runCommandBuffered };
 });
 
-vi.mock("openclaw/plugin-sdk/acp-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/acp-runtime")>()),
+vi.mock("carapace/plugin-sdk/acp-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/acp-runtime")>()),
   resolveAcpSessionAvailability: acpRuntimeMocks.resolveAcpSessionAvailability,
 }));
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-transcript-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-transcript-runtime")>();
   return {
     ...actual,
     withSessionTranscriptWriteLock: async (
@@ -121,8 +121,8 @@ vi.mock("openclaw/plugin-sdk/session-transcript-runtime", async (importOriginal)
   };
 });
 
-vi.mock("openclaw/plugin-sdk/node-host", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/node-host")>();
+vi.mock("carapace/plugin-sdk/node-host", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/node-host")>();
   return {
     ...actual,
     runNodePtyCommand: nodeHostMocks.runNodePtyCommand,
@@ -164,7 +164,7 @@ const pairedNodeLocator = { hostId: "node:node-1", threadId: "ses_remote" } as c
 const removeDirectory = (directory: string) => fs.rm(directory, { recursive: true, force: true });
 
 function captureOpenCodeSessionRegistrations(
-  pluginConfig: OpenClawPluginApi["pluginConfig"] = {},
+  pluginConfig: CarapacePluginApi["pluginConfig"] = {},
   overrides: Record<string, unknown> = {},
 ) {
   const catalogs: SessionCatalogProvider[] = [];
@@ -176,8 +176,8 @@ function captureOpenCodeSessionRegistrations(
       pluginConfig,
       runtime: {
         nodes: { list: vi.fn().mockResolvedValue({ nodes: [] }) },
-      } as unknown as OpenClawPluginApi["runtime"],
-      ...(overrides as Partial<OpenClawPluginApi>),
+      } as unknown as CarapacePluginApi["runtime"],
+      ...(overrides as Partial<CarapacePluginApi>),
       registerSessionCatalog: (catalog: RegisteredSessionCatalogProvider) =>
         catalogs.push(bindTestCatalogOwner(catalog)),
       registerNodeHostCommand: (command: NodeHostCommand) => commands.push(command),
@@ -311,7 +311,7 @@ async function installFakeOpenCode(
   sessionTitle = "Catalog session",
   toolInput: unknown = { command: "pwd" },
 ): Promise<string> {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-opencode-catalog-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-opencode-catalog-"));
   temporaryDirectories.push(directory);
   const executable = path.join(directory, "opencode");
   const session = {
@@ -665,12 +665,12 @@ describe("OpenCode session catalog", () => {
       'Tool call\n\nbash\n{"command":"pwd"}',
       "Tool result\n\n/workspace",
     ]);
-    expect(transcriptMocks.messages[0]?.["__openclaw"]).toEqual({
+    expect(transcriptMocks.messages[0]?.["__carapace"]).toEqual({
       mirrorOrigin: "opencode-catalog-import",
     });
   });
 
-  itWithCli("projects only adopted OpenCode rows with their OpenClaw session key", async () => {
+  itWithCli("projects only adopted OpenCode rows with their Carapace session key", async () => {
     await installFakeOpenCode();
     const { entries, provider } = captureOpenCodeContinuationCatalog();
     const sessionEntries = { entriesForAgent: () => entries } as never;

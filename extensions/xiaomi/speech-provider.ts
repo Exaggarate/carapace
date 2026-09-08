@@ -1,17 +1,17 @@
 // Xiaomi provider module implements model/runtime integration.
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
-import { resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-core";
+import { resolveSpeechProviderApiKey } from "carapace/plugin-sdk/speech-provider";
 import {
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const DEFAULT_XIAOMI_TTS_BASE_URL = "https://api.xiaomimimo.com/v1";
 const DEFAULT_XIAOMI_TTS_MODEL = "mimo-v2.5-tts";
@@ -242,11 +242,11 @@ async function xiaomiTTS(params: {
 }): Promise<Buffer> {
   const { text, apiKey, baseUrl, model, voice, format, style, timeoutMs } = params;
   const requestTimeoutMs = resolveTimerTimeoutMs(timeoutMs, 1);
-  const { canonicalizeBase64 } = await import("openclaw/plugin-sdk/media-runtime");
+  const { canonicalizeBase64 } = await import("carapace/plugin-sdk/media-runtime");
   const { assertOkOrThrowProviderError, readProviderJsonResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
   const resolvedStyle = isXiaomiVoiceDesignModel(model)
@@ -330,7 +330,7 @@ export function buildXiaomiSpeechProvider(): SpeechProviderPlugin {
         timeoutMs: req.timeoutMs,
       });
       if (req.target === "voice-note") {
-        const { transcodeAudioBufferToOpus } = await import("openclaw/plugin-sdk/media-runtime");
+        const { transcodeAudioBufferToOpus } = await import("carapace/plugin-sdk/media-runtime");
         const opusBuffer = await transcodeAudioBufferToOpus({
           audioBuffer,
           inputExtension: outputFormat,

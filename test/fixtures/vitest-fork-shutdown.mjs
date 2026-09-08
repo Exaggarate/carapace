@@ -33,8 +33,8 @@ const env = {
   TEMP: path.join(root, "tmp"),
   CI: "1",
   LIVE: "0",
-  OPENCLAW_LIVE_TEST: "0",
-  OPENCLAW_LIVE_GATEWAY: "0",
+  CARAPACE_LIVE_TEST: "0",
+  CARAPACE_LIVE_GATEWAY: "0",
   PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
   pnpm_config_verify_deps_before_run: "false",
   NODE_OPTIONS: `--import=${JSON.stringify(pathToFileURL(preload).href)}`,
@@ -92,7 +92,7 @@ syncBuiltinESMExports();
 if (scenario === "slow-exit") {
   const remove = fs.rmSync;
   fs.rmSync = function(target, ...args) {
-    const home = path.basename(String(target)).startsWith("openclaw-test-home-");
+    const home = path.basename(String(target)).startsWith("carapace-test-home-");
     if (home) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 750);
     const result = remove.call(fs, target, ...args);
     if (home) record({ event: "home-removed" });

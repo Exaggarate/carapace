@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 
-export const LEGACY_EXTENSION_RELAY_PROTOCOL = "openclaw-extension-relay";
-const LEGACY_EXTENSION_RELAY_TOKEN_PROTOCOL_PREFIX = "openclaw-extension-token.";
+export const LEGACY_EXTENSION_RELAY_PROTOCOL = "carapace-extension-relay";
+const LEGACY_EXTENSION_RELAY_TOKEN_PROTOCOL_PREFIX = "carapace-extension-token.";
 
 export function firstHeader(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");

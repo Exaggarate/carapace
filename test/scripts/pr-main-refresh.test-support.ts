@@ -52,7 +52,7 @@ function createMainRefreshTemplate(directory: string) {
   const { git } = createFixtureGit(root);
   git(root, "init", "--bare", "-b", "main", origin);
   git(root, "init", "-b", "main", canonical);
-  git(canonical, "config", "user.name", "OpenClaw Test");
+  git(canonical, "config", "user.name", "Carapace Test");
   git(canonical, "config", "user.email", "test@example.invalid");
   git(canonical, "config", "core.hooksPath", "/dev/null");
   git(canonical, "config", "extensions.worktreeConfig", "true");
@@ -94,7 +94,7 @@ function createMainRefreshTemplate(directory: string) {
 // transport faults, and GitHub responses are synthetic.
 export function createMainRefreshFixture(directory: string) {
   const template = (fixtureTemplate ??= createMainRefreshTemplate(
-    templateDirs.make("openclaw-pr-main-refresh-template-"),
+    templateDirs.make("carapace-pr-main-refresh-template-"),
   ));
   const root = realpathSync(directory);
   const canonical = join(root, "canonical");
@@ -365,7 +365,7 @@ if (args[0] === 'pr' && args[1] === 'view') {
     console.error('GitHub API unavailable');
     process.exit(1);
   }
-  value = [{ name: 'openclaw/ci-gate', bucket: 'pass', state: 'SUCCESS' }];
+  value = [{ name: 'carapace/ci-gate', bucket: 'pass', state: 'SUCCESS' }];
   if (control.requiredChecks !== 'pass') value.push({
     name: 'independent required check', bucket: control.requiredChecks,
     state: control.requiredChecks === 'pending' ? 'IN_PROGRESS' : 'FAILURE',
@@ -443,7 +443,7 @@ if (args[0] === 'pr' && args[1] === 'view') {
     })) };
   } else if (endpoint === 'repos/fixture/repo/actions/runs/1') {
     value = { run_attempt: 1, status: 'in_progress', conclusion: null };
-  } else if (/^repos\\/(fixture\\/repo|openclaw\\/openclaw)\\/actions\\/runs\\?/.test(endpoint)) {
+  } else if (/^repos\\/(fixture\\/repo|carapace\\/carapace)\\/actions\\/runs\\?/.test(endpoint)) {
     if (control.moveAtGate) {
       runGit(['-C', origin, 'update-ref', 'refs/heads/main', ${JSON.stringify(gateMain)}]);
     }
@@ -511,8 +511,8 @@ exec grep "$@"
     chmodSync(join(bin, command), 0o755);
   }
   env.PATH = `${bin}${delimiter}${env.PATH ?? ""}`;
-  env.OPENCLAW_GH_BIN = join(bin, "gh");
-  env.OPENCLAW_TESTBOX = "1";
+  env.CARAPACE_GH_BIN = join(bin, "gh");
+  env.CARAPACE_TESTBOX = "1";
   // Advance only the real watcher's polling clock, so a stuck CI fixture
   // reaches its normal deadline without an hour-long regression test.
   const clock = join(root, "watch-clock.mjs");

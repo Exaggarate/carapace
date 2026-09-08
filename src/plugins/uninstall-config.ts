@@ -1,5 +1,5 @@
 // Pure plugin config cleanup shared by doctor repair and full uninstall flows.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isUninstallPathInsideOrEqualInternal,
   removePluginInstallOwnerFromConfig,
@@ -44,10 +44,10 @@ function mergeUninstallActions(
 
 /** Remove plugin references from config without loading uninstall process/runtime dependencies. */
 export function removePluginFromConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   pluginId: string,
   opts?: { channelIds?: string[] },
-): { config: OpenClawConfig; actions: PluginConfigUninstallActions } {
+): { config: CarapaceConfig; actions: PluginConfigUninstallActions } {
   const hasInstallRecord = Object.hasOwn(cfg.plugins?.installs ?? {}, pluginId);
   const policy = removePluginRuntimePolicyFromConfig(cfg, pluginId, {
     ...(hasInstallRecord ? opts : { channelIds: [] }),

@@ -6,7 +6,7 @@ import { NewSessionModelControl } from "./model-control.ts";
 
 export function contextWith(
   models: ModelCatalogEntry[],
-  runtime = "openclaw",
+  runtime = "carapace",
   featureMethods: string[] = [],
   cloudPlacementSupported?: boolean,
   devicePlacementSupported?: boolean,

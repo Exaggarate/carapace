@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw dashboard` (securely open the Control UI)"
+summary: "CLI reference for `carapace dashboard` (securely open the Control UI)"
 read_when:
   - You want to open or re-pair the Control UI from the Gateway host
   - You want to print the URL without launching a browser
 title: "Dashboard CLI"
 ---
 
-# `openclaw dashboard`
+# `carapace dashboard`
 
 Open the Control UI with a short-lived, one-time owner pairing link. A successful handoff gives that
 signed browser a durable administrator device credential, so reopening the dashboard does not depend
@@ -14,10 +14,10 @@ on the shared Gateway token. Opening a fresh handoff in the same browser can als
 limited device credential.
 
 ```bash
-openclaw dashboard
-openclaw dashboard --no-open
-openclaw dashboard --json
-openclaw dashboard --yes
+carapace dashboard
+carapace dashboard --no-open
+carapace dashboard --json
+carapace dashboard --yes
 ```
 
 - `--no-open`: print the URL but do not launch a browser.
@@ -26,16 +26,16 @@ openclaw dashboard --yes
 
 ## Gateway service and state compatibility
 
-The OpenClaw CLI and the background Gateway service are separate. A service-installation
+The Carapace CLI and the background Gateway service are separate. A service-installation
 prompt refers to the background service for the selected profile; it does not mean the
 CLI is missing. The dashboard needs a running Gateway, which can also run in a terminal.
 
 If the configured port is busy but its Gateway handshake cannot be verified, the dashboard
 reports the failed probe and does not offer to start another service. Run
-`openclaw gateway status --deep` to inspect the listener and repair its connection.
+`carapace gateway status --deep` to inspect the listener and repair its connection.
 
 A newer database schema warning means this build cannot read the existing state. Use a
-compatible build with that state. To start fresh, point `OPENCLAW_STATE_DIR` at a separate
+compatible build with that state. To start fresh, point `CARAPACE_STATE_DIR` at a separate
 directory. Installing the background service does not resolve a database version mismatch. See
 [database compatibility](/reference/database-schemas#troubleshooting).
 
@@ -44,7 +44,7 @@ directory. Installing the background service does not resolve a database version
 Use `--json` for desktop integrations and scripts that need the resolved Control UI URL:
 
 ```bash
-openclaw dashboard --json
+carapace dashboard --json
 ```
 
 The response includes the backward-compatible shared-auth `url`, plus `browserUrl`,
@@ -69,9 +69,9 @@ Notes:
 - The interactive command prints only the clean base URL; the clipboard/browser launch receives the
   one-time `browserUrl`, never the shared token. SecretRef-managed shared tokens therefore do not leak
   into terminal output, clipboard history, or browser-launch arguments.
-- If clipboard/browser delivery fails for a token-authenticated URL, the command logs a safe manual-auth hint naming `OPENCLAW_GATEWAY_TOKEN`, `gateway.auth.token`, and the URL fragment key `token`, without printing the token value.
+- If clipboard/browser delivery fails for a token-authenticated URL, the command logs a safe manual-auth hint naming `CARAPACE_GATEWAY_TOKEN`, `gateway.auth.token`, and the URL fragment key `token`, without printing the token value.
 - If the shared token cannot be placed in a URL and clipboard/browser delivery fails, run
-  `openclaw dashboard --json` and open its short-lived `browserUrl` within ten minutes.
+  `carapace dashboard --json` and open its short-lived `browserUrl` within ten minutes.
 
 ## Related
 

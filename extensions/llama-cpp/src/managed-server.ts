@@ -5,14 +5,14 @@ import path from "node:path";
 import {
   readProviderJsonResponse,
   readProviderTextResponse,
-} from "openclaw/plugin-sdk/provider-http";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-http";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { fetchConfiguredLocalOriginWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime-internal";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
+import { fetchConfiguredLocalOriginWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime-internal";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEFAULT_LLAMA_CPP_EMBEDDING_CACHE_FILE,
   DEFAULT_LLAMA_CPP_EMBEDDING_MODEL,
@@ -609,7 +609,7 @@ export async function inspectLlamaServerRuntime(params: {
     model: { id: params.modelId, ...(pathValue ? { path: pathValue } : {}) },
     capabilities: {
       vision: modalities?.vision === true,
-      // OpenClaw does not configure a draft model in the managed preset.
+      // Carapace does not configure a draft model in the managed preset.
       draft: false,
     },
     endpoints: {

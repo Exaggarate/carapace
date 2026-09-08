@@ -17,7 +17,7 @@ const describeBrowser = canRunPlaywrightChromium(chromiumExecutablePath) ? descr
 const DRAFT_HASH = "a".repeat(64);
 const REVISION_HASH = "b".repeat(64);
 const ISO_NOW = "2026-07-29T10:00:00.000Z";
-const configuredArtifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const configuredArtifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 const artifactParent = configuredArtifactDir
   ? path.join(path.resolve(process.cwd(), configuredArtifactDir), "skill-workshop-evaluation")
   : undefined;
@@ -119,7 +119,7 @@ describeBrowser("Skill Workshop proposal evaluation mocked Gateway E2E", () => {
           featureMethods: ["chat.metadata", "chat.startup", "skills.proposals.evaluate"],
           methodResponses: {
             "skills.proposals.list": {
-              schema: "openclaw.skill-workshop.proposals-manifest.v1",
+              schema: "carapace.skill-workshop.proposals-manifest.v1",
               installedSkills: [],
               updatedAt: ISO_NOW,
               proposals: [

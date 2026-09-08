@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
@@ -16,8 +16,8 @@ import {
   getCommandLaneSnapshot,
   setCommandLaneConcurrency,
 } from "../../process/command-queue.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../../state/user-profiles.js";
 import type { GatewayRequestContext, RespondFn, GatewayClient } from "./types.js";
 
@@ -72,7 +72,7 @@ beforeEach(async () => {
     };
   });
   setActivePluginRegistry(createEmptyPluginRegistry());
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-rewind-handler-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-rewind-handler-"));
   await upsertSessionEntryCore(
     { agentId: "main", sessionKey },
     {
@@ -92,7 +92,7 @@ beforeEach(async () => {
           { type: "text", text: "edit me" },
           { type: "image", data: "aW1hZ2U=", mimeType: "image/png" },
         ],
-        __openclaw: {
+        __carapace: {
           media: [
             { path: storedImagePath, contentType: "image/png" },
             // Duplicate ref proves dedupe: the response must carry this image once.
@@ -140,8 +140,8 @@ afterEach(async () => {
   await Promise.all(queuedCommandSettlements);
   queuedCommandSettlements.clear();
   resetPluginRuntimeStateForTest();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 

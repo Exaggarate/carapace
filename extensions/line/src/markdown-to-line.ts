@@ -8,12 +8,12 @@ import {
   type MarkdownStyleSpan,
   type MarkdownTableCell,
   type MarkdownTableMeta,
-} from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { fitsLineFlexBubble, toFlexMessage } from "./flex-templates/message.js";
 import { createReceiptCard } from "./flex-templates/schedule-cards.js";
 import type { FlexBubble } from "./flex-templates/types.js";
-export { stripMarkdown } from "openclaw/plugin-sdk/text-chunking";
+export { stripMarkdown } from "carapace/plugin-sdk/text-chunking";
 
 type FlexMessage = messagingApi.FlexMessage;
 type FlexComponent = messagingApi.FlexComponent;

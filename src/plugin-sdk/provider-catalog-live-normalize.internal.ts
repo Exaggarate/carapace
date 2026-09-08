@@ -1,5 +1,5 @@
-import { normalizeUpstreamModelPricing } from "@openclaw/model-catalog-core/model-catalog-pricing";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeUpstreamModelPricing } from "@carapace/model-catalog-core/model-catalog-pricing";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "./provider-model-shared.js";
 
 export type UpstreamProviderCatalogModel = Record<string, unknown> & {

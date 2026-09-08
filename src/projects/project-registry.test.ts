@@ -6,12 +6,12 @@ import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   cloneProjectCheckout,
   ensureProjectCheckoutCommit,
@@ -31,15 +31,15 @@ const execFileAsync = promisify(execFile);
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function initializeRepository(root: string, name: string): Promise<string> {
   const repo = path.join(root, name);
   await fs.mkdir(repo, { recursive: true });
   await execFileAsync("git", ["init", "-b", "main", repo]);
-  await execFileAsync("git", ["-C", repo, "config", "user.name", "OpenClaw Tests"]);
-  await execFileAsync("git", ["-C", repo, "config", "user.email", "tests@openclaw.invalid"]);
+  await execFileAsync("git", ["-C", repo, "config", "user.name", "Carapace Tests"]);
+  await execFileAsync("git", ["-C", repo, "config", "user.email", "tests@carapace.invalid"]);
   await fs.writeFile(path.join(repo, "README.md"), `${name}\n`);
   await execFileAsync("git", ["-C", repo, "add", "README.md"]);
   await execFileAsync("git", ["-C", repo, "commit", "-m", "initial"]);
@@ -48,52 +48,52 @@ async function initializeRepository(root: string, name: string): Promise<string>
 
 describe("project registry", () => {
   it.each([
-    ["https://github.com/OpenClaw/OpenClaw", "https://github.com/openclaw/openclaw.git"],
-    ["https://github.com/OpenClaw/OpenClaw.git", "https://github.com/openclaw/openclaw.git"],
-    ["git@github.com:OpenClaw/OpenClaw.git", "https://github.com/openclaw/openclaw.git"],
-    ["ssh://git@github.com/OpenClaw/OpenClaw.git", "https://github.com/openclaw/openclaw.git"],
-    ["ssh://git@github.com:22/OpenClaw/OpenClaw", "https://github.com/openclaw/openclaw.git"],
+    ["https://github.com/Carapace/Carapace", "https://github.com/Exaggarate/carapace.git"],
+    ["https://github.com/Carapace/Carapace.git", "https://github.com/Exaggarate/carapace.git"],
+    ["git@github.com:Carapace/Carapace.git", "https://github.com/Exaggarate/carapace.git"],
+    ["ssh://git@github.com/Carapace/Carapace.git", "https://github.com/Exaggarate/carapace.git"],
+    ["ssh://git@github.com:22/Carapace/Carapace", "https://github.com/Exaggarate/carapace.git"],
   ])("canonicalizes accepted GitHub clone URL %s", (input, expected) => {
     expect(parseProjectGitUrl(input)?.url).toBe(expected);
   });
 
   it.each([
-    "http://github.com/openclaw/openclaw.git",
-    "file:///tmp/openclaw.git",
-    "ssh://git@github.com:2222/openclaw/openclaw.git",
-    "/tmp/openclaw",
-    "../openclaw",
+    "http://github.com/Exaggarate/carapace.git",
+    "file:///tmp/carapace.git",
+    "ssh://git@github.com:2222/carapace/carapace.git",
+    "/tmp/carapace",
+    "../carapace",
     "--upload-pack=touch-pwned",
-    "https://token@github.com/openclaw/openclaw.git",
-    "https://github.com/openclaw/openclaw.git?config=evil",
-    "https://github.com/openclaw/openclaw/extra",
-    "git@github.com:../../tmp/openclaw.git",
-    "https://github.com/openclaw/openclaw.git --config=evil",
+    "https://token@github.com/Exaggarate/carapace.git",
+    "https://github.com/Exaggarate/carapace.git?config=evil",
+    "https://github.com/Exaggarate/carapace/extra",
+    "git@github.com:../../tmp/carapace.git",
+    "https://github.com/Exaggarate/carapace.git --config=evil",
   ])("rejects unsafe project clone URL %s", (input) => {
     expect(parseProjectGitUrl(input)).toBeNull();
   });
 
   it("lazily ensures the additive table exactly once per database", async () => {
-    const root = tempDirs.make("openclaw-project-schema-");
+    const root = tempDirs.make("carapace-project-schema-");
     const options = { path: path.join(root, "state.sqlite") };
-    openOpenClawStateDatabase(options);
-    closeOpenClawStateDatabaseForTest();
+    openCarapaceStateDatabase(options);
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const legacy = new DatabaseSync(options.path);
     legacy.exec("DROP TABLE projects;");
     legacy.close();
 
-    const state = openOpenClawStateDatabase(options);
+    const state = openCarapaceStateDatabase(options);
     expect(
       state.db
         .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = 'projects'")
         .get(),
     ).toBeUndefined();
 
-    expect(listProjectRegistry({} as OpenClawConfig, options)).toEqual([
+    expect(listProjectRegistry({} as CarapaceConfig, options)).toEqual([
       expect.objectContaining({ id: "workspace:main", source: "workspace" }),
     ]);
-    expect(listProjectRegistry({} as OpenClawConfig, options)).toHaveLength(1);
+    expect(listProjectRegistry({} as CarapaceConfig, options)).toHaveLength(1);
 
     const rows = state.db
       .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = 'projects'")
@@ -102,17 +102,17 @@ describe("project registry", () => {
   });
 
   it("registers, orders, resolves real paths, deduplicates roots, and removes rows", async () => {
-    const root = tempDirs.make("openclaw-project-roundtrip-");
-    const repo = await initializeRepository(root, "openclaw");
+    const root = tempDirs.make("carapace-project-roundtrip-");
+    const repo = await initializeRepository(root, "carapace");
     const alias = path.join(root, "repo-link");
     await fs.symlink(repo, alias, "dir");
     const options = { path: path.join(root, "state.sqlite") };
 
-    const first = await registerProjectRegistry({ path: alias, name: "OpenClaw" }, options);
-    const second = await registerProjectRegistry({ path: repo, name: "OpenClaw" }, options);
+    const first = await registerProjectRegistry({ path: alias, name: "Carapace" }, options);
+    const second = await registerProjectRegistry({ path: repo, name: "Carapace" }, options);
     expect(first).toMatchObject({
-      id: "openclaw",
-      displayName: "OpenClaw",
+      id: "carapace",
+      displayName: "Carapace",
       repoRoot: repo,
       source: "registered",
     });
@@ -125,10 +125,10 @@ describe("project registry", () => {
           { id: "work", workspace: "/workspace/alpha" },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(listProjectRegistry(cfg, options).map((project) => project.displayName)).toEqual([
       "alpha",
-      "OpenClaw",
+      "Carapace",
       "zeta",
     ]);
     const sharedWorkspaceCfg = {
@@ -138,9 +138,9 @@ describe("project registry", () => {
           { id: "work", workspace: repo },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(listProjectRegistry(sharedWorkspaceCfg, options).map((project) => project.id)).toEqual([
-      "openclaw",
+      "carapace",
       "workspace:main",
       "workspace:work",
     ]);
@@ -150,14 +150,14 @@ describe("project registry", () => {
   });
 
   it("rejects paths outside a git checkout", async () => {
-    const root = tempDirs.make("openclaw-project-non-git-");
+    const root = tempDirs.make("carapace-project-non-git-");
     await expect(
       registerProjectRegistry({ path: root }, { path: path.join(root, "state.sqlite") }),
     ).rejects.toBeInstanceOf(ProjectCheckoutError);
   });
 
   it("clones a local bare fixture through the internal full-history clone boundary", async () => {
-    const root = tempDirs.make("openclaw-project-clone-");
+    const root = tempDirs.make("carapace-project-clone-");
     const source = await initializeRepository(root, "source");
     await fs.writeFile(path.join(source, "second.txt"), "second\n");
     await execFileAsync("git", ["-C", source, "add", "second.txt"]);
@@ -200,7 +200,7 @@ describe("project registry", () => {
   });
 
   it("returns an existing registration for the same canonical remote without cloning", async () => {
-    const root = tempDirs.make("openclaw-project-idempotent-");
+    const root = tempDirs.make("carapace-project-idempotent-");
     const repo = await initializeRepository(root, "existing");
     await execFileAsync("git", [
       "-C",
@@ -214,16 +214,16 @@ describe("project registry", () => {
     const registered = await registerProjectRegistry({ path: repo, name: "Existing" }, options);
 
     const added = await materializeProjectClone(
-      { cfg: {} as OpenClawConfig, gitUrl: "https://github.com/acme/existing.git" },
+      { cfg: {} as CarapaceConfig, gitUrl: "https://github.com/acme/existing.git" },
       options,
     );
 
     expect(added).toEqual(registered);
-    expect(listProjectRegistry({} as OpenClawConfig, options)).toHaveLength(2);
+    expect(listProjectRegistry({} as CarapaceConfig, options)).toHaveLength(2);
   });
 
   it("serializes an existing cloned-project return with checkout deletion", async () => {
-    const root = tempDirs.make("openclaw-project-existing-delete-race-");
+    const root = tempDirs.make("carapace-project-existing-delete-race-");
     const stateDir = path.join(root, "state");
     const originUrl = "https://github.com/acme/existing-delete-race.git";
     const checkout = await initializeRepository(
@@ -231,8 +231,8 @@ describe("project registry", () => {
       "existing-delete-race",
     );
     const options = {
-      path: path.join(stateDir, "openclaw.sqlite"),
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      path: path.join(stateDir, "carapace.sqlite"),
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     };
     const project = await registerClonedProjectRegistry(
       { path: checkout, name: "Existing delete race", originUrl },
@@ -254,7 +254,7 @@ describe("project registry", () => {
 
     let additionSettled = false;
     const addition = materializeProjectClone(
-      { cfg: {} as OpenClawConfig, gitUrl: originUrl },
+      { cfg: {} as CarapaceConfig, gitUrl: originUrl },
       options,
     ).finally(() => {
       additionSettled = true;
@@ -269,7 +269,7 @@ describe("project registry", () => {
   });
 
   it("serializes registration with the final managed-checkout deletion boundary", async () => {
-    const root = tempDirs.make("openclaw-project-delete-race-");
+    const root = tempDirs.make("carapace-project-delete-race-");
     const stateDir = path.join(root, "state");
     const originUrl = "https://github.com/acme/delete-race.git";
     const checkout = await initializeRepository(
@@ -277,8 +277,8 @@ describe("project registry", () => {
       "delete-race",
     );
     const options = {
-      path: path.join(stateDir, "openclaw.sqlite"),
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      path: path.join(stateDir, "carapace.sqlite"),
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     };
     const project = await registerClonedProjectRegistry(
       { path: checkout, name: "Delete race", originUrl },
@@ -317,7 +317,7 @@ describe("project registry", () => {
     await expect(deletion).resolves.toBe(true);
     const registrationResult = await registration;
     expect(registrationResult).toMatchObject({ error: expect.any(ProjectCheckoutError) });
-    expect(listProjectRegistry({} as OpenClawConfig, options)).toEqual([
+    expect(listProjectRegistry({} as CarapaceConfig, options)).toEqual([
       expect.objectContaining({ source: "workspace" }),
     ]);
     await expect(fs.stat(checkout)).rejects.toMatchObject({ code: "ENOENT" });
@@ -340,7 +340,7 @@ describe("project registry", () => {
       const error = await cloneProjectCheckout(
         {
           url: `http://127.0.0.1:${address.port}/private.git`,
-          target: path.join(tempDirs.make("openclaw-project-auth-"), "private"),
+          target: path.join(tempDirs.make("carapace-project-auth-"), "private"),
         },
         { token },
       ).catch((caught: unknown) => caught);

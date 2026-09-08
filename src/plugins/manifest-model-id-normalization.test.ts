@@ -1,7 +1,7 @@
 // Verifies model IDs declared by plugin manifests are normalized.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeConfiguredProviderCatalogModelId } from "@openclaw/model-catalog-core/provider-model-id-normalization";
+import { normalizeConfiguredProviderCatalogModelId } from "@carapace/model-catalog-core/provider-model-id-normalization";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { normalizeStaticProviderModelId } from "../agents/model-ref-shared.js";
@@ -9,7 +9,7 @@ import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/e
 import { withPluginMetadataSnapshotScope } from "./current-plugin-metadata-snapshot.js";
 import { setCurrentPluginMetadataSnapshot } from "./current-plugin-metadata.test-support.js";
 import { writePersistedInstalledPluginIndexSync } from "./installed-plugin-index-store-write.js";
-import { listOpenClawPluginManifestMetadata } from "./manifest-metadata-scan.js";
+import { listCarapacePluginManifestMetadata } from "./manifest-metadata-scan.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 // Registers the snapshot resolver in the runtime bridge slot. Production and
 // jiti load it via the bridge's require fallback; vitest workers lack a CJS TS
@@ -22,10 +22,10 @@ import { resetPluginRuntimeStateForTest } from "./runtime.js";
 
 const tempDirs = createTempDirTracker();
 const testEnvSnapshot = captureEnv([
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_HOME",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_HOME",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
 ]);
 
 function restoreEnv(): void {
@@ -45,7 +45,7 @@ function writeInstallIndex(params: { stateDir: string; pluginDir: string }): voi
       plugins: [
         {
           pluginId: "normalizer",
-          manifestPath: path.join(params.pluginDir, "openclaw.plugin.json"),
+          manifestPath: path.join(params.pluginDir, "carapace.plugin.json"),
           manifestHash: "normalizer-manifest",
           rootDir: params.pluginDir,
           origin: "global",
@@ -72,7 +72,7 @@ function writeNormalizerManifest(params: { pluginDir: string; prefix: string }):
     "utf-8",
   );
   fs.writeFileSync(
-    path.join(params.pluginDir, "openclaw.plugin.json"),
+    path.join(params.pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "normalizer",
       configSchema: { type: "object" },
@@ -108,14 +108,14 @@ describe("manifest model id normalization", () => {
   });
 
   it("does not reuse broader normalization policies in a narrowed metadata view", () => {
-    const stateDir = tempDirs.make("openclaw-model-id-normalization-");
+    const stateDir = tempDirs.make("carapace-model-id-normalization-");
     const pluginDir = path.join(stateDir, "extensions", "normalizer");
     writeInstallIndex({ stateDir, pluginDir });
     writeNormalizerManifest({ pluginDir, prefix: "scoped" });
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    deleteTestEnvValue("OPENCLAW_HOME");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    deleteTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    deleteTestEnvValue("CARAPACE_HOME");
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    deleteTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR");
     const snapshot = resolvePluginMetadataSnapshot({ config: {}, env: process.env });
     const narrowed = projectPluginMetadataSnapshot(snapshot, []);
     setCurrentPluginMetadataSnapshot(snapshot, { config: {}, env: process.env });
@@ -140,15 +140,15 @@ describe("manifest model id normalization", () => {
   });
 
   it("keeps process metadata stable until the lifecycle owner reloads it", () => {
-    const stateDirA = tempDirs.make("openclaw-model-id-normalization-");
+    const stateDirA = tempDirs.make("carapace-model-id-normalization-");
     const pluginDirA = path.join(stateDirA, "extensions", "normalizer");
     writeInstallIndex({ stateDir: stateDirA, pluginDir: pluginDirA });
     writeNormalizerManifest({ pluginDir: pluginDirA, prefix: "alpha" });
 
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDirA);
-    deleteTestEnvValue("OPENCLAW_HOME");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    deleteTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDirA);
+    deleteTestEnvValue("CARAPACE_HOME");
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    deleteTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR");
 
     expect(normalizeDemoModel()).toBe("alpha/demo-model");
 
@@ -158,31 +158,31 @@ describe("manifest model id normalization", () => {
     clearPluginMetadataLifecycleCaches();
     expect(normalizeDemoModel()).toBe("bravo-local/demo-model");
 
-    const stateDirB = tempDirs.make("openclaw-model-id-normalization-");
+    const stateDirB = tempDirs.make("carapace-model-id-normalization-");
     const pluginDirB = path.join(stateDirB, "extensions", "normalizer");
     writeInstallIndex({ stateDir: stateDirB, pluginDir: pluginDirB });
     writeNormalizerManifest({ pluginDir: pluginDirB, prefix: "charlie" });
 
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDirB);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDirB);
     clearPluginMetadataLifecycleCaches();
     expect(normalizeDemoModel()).toBe("charlie/demo-model");
   });
 
   it("reuses manifest metadata for the same environment identity", () => {
-    const stateDir = tempDirs.make("openclaw-model-id-normalization-");
+    const stateDir = tempDirs.make("carapace-model-id-normalization-");
     const pluginDir = path.join(stateDir, "extensions", "normalizer");
     writeInstallIndex({ stateDir, pluginDir });
     writeNormalizerManifest({ pluginDir, prefix: "alpha" });
 
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    deleteTestEnvValue("OPENCLAW_HOME");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    deleteTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    deleteTestEnvValue("CARAPACE_HOME");
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    deleteTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR");
 
     // The scan also lists source-checkout extensions/ manifests when tests run
     // from a repo checkout, so only pin the record for the plugin under test.
     const listNormalizerRecords = () =>
-      listOpenClawPluginManifestMetadata(process.env).filter(
+      listCarapacePluginManifestMetadata(process.env).filter(
         (record) => record.pluginDir === pluginDir,
       );
     const firstRecords = listNormalizerRecords();

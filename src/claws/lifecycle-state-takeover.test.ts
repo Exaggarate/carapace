@@ -7,22 +7,22 @@ import {
   beginAgentDeletionJournal,
   readAgentDeletionJournal,
 } from "../state/agent-deletion-journal.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { quiescentClawMonitorGateway } from "./lifecycle-remove.test-support.js";
 import { applyClawRemovePlan, buildClawRemovePlan } from "./lifecycle-state.js";
 import { createClawRemoveTestFixtures } from "./lifecycle-state.test-helpers.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ prefix: "claw-takeover-config-" });
+  state = await createCarapaceTestState({ prefix: "claw-takeover-config-" });
   await state.writeConfig({});
 });
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await state.cleanup();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -66,7 +66,7 @@ describe("Claw workspace deletion ownership", () => {
         const readBytes = workspace.readBytes.bind(workspace);
         workspace.readBytes = async (path, options) => {
           const bytes = await readBytes(path, options);
-          if (boundary !== "discovery" && path.startsWith(`${filename}.openclaw-claw-remove-`)) {
+          if (boundary !== "discovery" && path.startsWith(`${filename}.carapace-claw-remove-`)) {
             if (boundary === "staged replacement") {
               await writeFile(join(current.plan.agent.workspace, filename), "replacement\n");
             }
@@ -95,7 +95,7 @@ describe("Claw workspace deletion ownership", () => {
         boundary === "staged replacement" ? "replacement\n" : "managed\n",
       );
       const staged = (await readdir(current.plan.agent.workspace)).filter((name) =>
-        name.includes(".openclaw-claw-remove-"),
+        name.includes(".carapace-claw-remove-"),
       );
       if (boundary === "staged replacement") {
         expect(staged).toHaveLength(1);

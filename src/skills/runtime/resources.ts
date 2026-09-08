@@ -95,7 +95,7 @@ export async function prepareSkillResourceDelivery(
     const loaded = loadSingleSkillDirectory({
       skillDir,
       rootRealPath,
-      source: "openclaw-resources",
+      source: "carapace-resources",
       maxBytes: SKILL_LIBRARY_MAX_FILE_BYTES,
     });
     if (
@@ -200,7 +200,7 @@ export async function materializeSkillResources(
     throw new Error("Skill resource integrity or delivery limit check failed.");
   }
   assertCurrent();
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-resources-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-resources-"));
   const cleanup = () => removeTemporaryArtifacts(directory, "Materialized skill");
   try {
     const pathMappings: Array<[string, string]> = [];
@@ -229,8 +229,8 @@ export async function materializeSkillResources(
         description: skill.description,
         filePath,
         baseDir,
-        source: "openclaw-resources",
-        sourceInfo: createSyntheticSourceInfo(filePath, { source: "openclaw-resources", baseDir }),
+        source: "carapace-resources",
+        sourceInfo: createSyntheticSourceInfo(filePath, { source: "carapace-resources", baseDir }),
         disableModelInvocation: skill.modelVisible === false,
       });
     }

@@ -5,7 +5,7 @@ import type { AddressInfo } from "node:net";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromDangerouslyAllowPrivateNetwork,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 import { vi } from "vitest";
 import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
 import type { FeishuStatusSink, monitorFeishuProvider } from "./monitor.js";

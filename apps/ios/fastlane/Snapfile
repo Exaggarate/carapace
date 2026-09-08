@@ -1,5 +1,5 @@
-project("OpenClaw.xcodeproj")
-scheme("OpenClawUITests")
+project("Carapace.xcodeproj")
+scheme("CarapaceUITests")
 configuration("Debug")
 
 # The Fastfile screenshot lane resolves concrete device names from the installed
@@ -11,7 +11,7 @@ languages([
 ])
 
 launch_arguments([
-  "--openclaw-screenshot-mode",
+  "--carapace-screenshot-mode",
 ])
 
 output_directory("fastlane/screenshots")

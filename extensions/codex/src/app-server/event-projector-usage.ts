@@ -1,8 +1,8 @@
-import { normalizeUsage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { normalizeUsage } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   asSafeIntegerInRange,
   readStringField as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { isJsonObject, type JsonObject } from "./protocol.js";
 
 function readTokenCount(record: JsonObject, key: string): number | undefined {
@@ -47,7 +47,7 @@ export function readCodexThreadContextSnapshot(params: JsonObject): {
 }
 
 function normalizeCodexResponseTokenUsage(record: JsonObject): ReturnType<typeof normalizeUsage> {
-  // v2 TokenUsageBreakdown. inputTokens includes cached input; OpenClaw usage
+  // v2 TokenUsageBreakdown. inputTokens includes cached input; Carapace usage
   // tracks uncached input, cache reads, and cache writes separately.
   const totalTokens = readTokenCount(record, "totalTokens");
   const inputTokens = readTokenCount(record, "inputTokens");

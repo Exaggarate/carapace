@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { resolveRunWorkspaceDir } from "../agents/workspace-run.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ActivateSetupInferenceDeps } from "../system-agent/setup-inference-core.js";
 import { verifySetupInferenceConfig } from "../system-agent/setup-inference-verify.js";
 import type { WizardPrompter } from "./prompts.js";
@@ -50,12 +50,12 @@ describe("offerLiveModelVerification", () => {
 
   it.each<{
     label: string;
-    roster: NonNullable<OpenClawConfig["agents"]>;
+    roster: NonNullable<CarapaceConfig["agents"]>;
     owner: string | undefined;
-    harness: "codex" | "openclaw" | undefined;
+    harness: "codex" | "carapace" | undefined;
   }>([
     { label: "missing legacy roster", roster: {}, owner: "main", harness: undefined },
-    { label: "empty legacy roster", roster: { entries: {} }, owner: "main", harness: "openclaw" },
+    { label: "empty legacy roster", roster: { entries: {} }, owner: "main", harness: "carapace" },
     {
       label: "named explicit owner",
       roster: { ownership: "explicit", entries: { research: {} } },
@@ -66,7 +66,7 @@ describe("offerLiveModelVerification", () => {
       label: "legacy named owner",
       roster: { entries: { research: { default: true }, other: {} } },
       owner: "research",
-      harness: "openclaw",
+      harness: "carapace",
     },
     {
       label: "empty explicit roster",
@@ -75,8 +75,8 @@ describe("offerLiveModelVerification", () => {
       harness: undefined,
     },
   ])("keeps $label runtime-only during verification", async ({ roster, owner, harness }) => {
-    const root = await fs.realpath(tempRoots.make("openclaw-staged-verification-"));
-    const config: OpenClawConfig = {
+    const root = await fs.realpath(tempRoots.make("carapace-staged-verification-"));
+    const config: CarapaceConfig = {
       agents: {
         ...roster,
         defaults: {
@@ -108,7 +108,7 @@ describe("offerLiveModelVerification", () => {
     mocks.verify.mockImplementation((params: Parameters<typeof verifySetupInferenceConfig>[0]) =>
       verifySetupInferenceConfig({ ...params, deps: { ...params.deps, runEmbeddedAgent } }),
     );
-    const writeConfig = vi.fn(async (next: OpenClawConfig) => next);
+    const writeConfig = vi.fn(async (next: CarapaceConfig) => next);
     const persistAuthProfiles = vi.fn(async () => {});
     const verification = offerLiveModelVerification({
       config,
@@ -151,7 +151,7 @@ describe("offerLiveModelVerification", () => {
         opts: { nonInteractive: true },
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() } as never,
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/carapace-test-workspace",
         writeConfig: async (config) => config,
         required: true,
       }),
@@ -181,7 +181,7 @@ describe("offerLiveModelVerification", () => {
         opts: { nonInteractive: true },
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() } as never,
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/carapace-test-workspace",
         writeConfig: async (config) => config,
         required: true,
       }),
@@ -193,7 +193,7 @@ describe("offerLiveModelVerification", () => {
   });
 
   it("reports when a repair candidate persisted its verified config", async () => {
-    const repairedConfig: OpenClawConfig = {
+    const repairedConfig: CarapaceConfig = {
       agents: { entries: { main: { default: true } } },
       models: {
         providers: {
@@ -223,7 +223,7 @@ describe("offerLiveModelVerification", () => {
         opts: {},
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() } as never,
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/carapace-test-workspace",
         writeConfig,
       }),
     ).resolves.toEqual({
@@ -238,7 +238,7 @@ describe("offerLiveModelVerification", () => {
   });
 
   it("requires managed local model verification and keeps a failed candidate uncommitted", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { defaults: { model: "local-fixture/model" } },
       models: {
         providers: {
@@ -251,7 +251,7 @@ describe("offerLiveModelVerification", () => {
       },
     };
     const persistAuthProfiles = vi.fn(async () => {});
-    const writeConfig = vi.fn(async (next: OpenClawConfig) => next);
+    const writeConfig = vi.fn(async (next: CarapaceConfig) => next);
     const prompter = createPrompter();
     mocks.verify.mockResolvedValue({
       ok: false,
@@ -266,7 +266,7 @@ describe("offerLiveModelVerification", () => {
         opts: {},
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/carapace-test-workspace",
         writeConfig,
       }),
     ).rejects.toThrow("repair cancelled");
@@ -278,7 +278,7 @@ describe("offerLiveModelVerification", () => {
   });
 
   it("leaves verification of an existing managed route optional", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { defaults: { model: "local-fixture/model" } },
       models: {
         providers: {
@@ -292,14 +292,14 @@ describe("offerLiveModelVerification", () => {
     };
     const prompter = createPrompter();
     vi.mocked(prompter.confirm).mockResolvedValue(false);
-    const writeConfig = vi.fn(async (next: OpenClawConfig) => next);
+    const writeConfig = vi.fn(async (next: CarapaceConfig) => next);
     expect(
       await offerLiveModelVerification({
         config,
         opts: {},
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/carapace-test-workspace",
         writeConfig,
       }),
     ).toMatchObject({ attempted: false, verified: false, persisted: false });

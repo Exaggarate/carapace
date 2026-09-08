@@ -1,12 +1,12 @@
 // Runtime bridge for plugin install security scanning.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { tryReadJson } from "../infra/json-files.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import {
   runInstallPolicy,
   type InstallPolicyFinding,
@@ -37,7 +37,7 @@ const MAX_INSTALL_POLICY_NOTICE_CHARS = 4_000;
 const INSTALL_POLICY_REVIEW_GUIDANCE = [
   "This invocation cannot approve install policy warnings.",
   "To continue:",
-  "  • Run the matching direct `openclaw plugins ...` or `openclaw skills ...` command interactively.",
+  "  • Run the matching direct `carapace plugins ...` or `carapace skills ...` command interactively.",
   `  • For reviewed direct CLI automation, add ${INSTALL_POLICY_ACKNOWLEDGEMENT_FLAG}.`,
   "  • If no equivalent direct command exists, change security.installPolicy to allow this reviewed request, then retry.",
   "  • --force does not approve install policy warnings.",
@@ -181,13 +181,13 @@ function pathContainsNodeModulesSegment(relativePath: string): boolean {
     .includes("node_modules");
 }
 
-function isPackageRootOpenClawPeerSymlink(segments: string[]): boolean {
+function isPackageRootCarapacePeerSymlink(segments: string[]): boolean {
   return (
-    (segments.length === 2 && segments[0] === "node_modules" && segments[1] === "openclaw") ||
+    (segments.length === 2 && segments[0] === "node_modules" && segments[1] === "carapace") ||
     (segments.length === 3 &&
       segments[0] === "node_modules" &&
       segments[1] === ".bin" &&
-      segments[2] === "openclaw")
+      segments[2] === "carapace")
   );
 }
 
@@ -203,23 +203,23 @@ function isManagedNpmRootPackagePeerSymlink(segments: string[]): boolean {
   ) {
     return false;
   }
-  return isPackageRootOpenClawPeerSymlink(segments.slice(packageEndIndex));
+  return isPackageRootCarapacePeerSymlink(segments.slice(packageEndIndex));
 }
 
-function isTrustedOpenClawPeerSymlink(params: {
+function isTrustedCarapacePeerSymlink(params: {
   allowManagedNpmRootPackagePeerSymlinks?: boolean;
   relativePath: string;
 }): boolean {
   const segments = params.relativePath.split(/[\\/]+/);
   return (
-    isPackageRootOpenClawPeerSymlink(segments) ||
+    isPackageRootCarapacePeerSymlink(segments) ||
     (params.allowManagedNpmRootPackagePeerSymlinks === true &&
       isManagedNpmRootPackagePeerSymlink(segments))
   );
 }
 
-async function resolveTrustedHostOpenClawRootRealPath(): Promise<string | null> {
-  const hostRoot = resolveOpenClawPackageRootSync({
+async function resolveTrustedHostCarapaceRootRealPath(): Promise<string | null> {
+  const hostRoot = resolveCarapacePackageRootSync({
     argv1: process.argv[1],
     cwd: process.cwd(),
     moduleUrl: import.meta.url,
@@ -230,13 +230,13 @@ async function resolveTrustedHostOpenClawRootRealPath(): Promise<string | null> 
   return await fs.realpath(hostRoot).catch(() => path.resolve(hostRoot));
 }
 
-function isTrustedHostOpenClawPath(params: {
+function isTrustedHostCarapacePath(params: {
   resolvedTargetPath: string;
-  trustedHostOpenClawRootRealPath: string | null;
+  trustedHostCarapaceRootRealPath: string | null;
 }): boolean {
   return (
-    params.trustedHostOpenClawRootRealPath !== null &&
-    isPathInside(params.trustedHostOpenClawRootRealPath, params.resolvedTargetPath)
+    params.trustedHostCarapaceRootRealPath !== null &&
+    isPathInside(params.trustedHostCarapaceRootRealPath, params.resolvedTargetPath)
   );
 }
 
@@ -245,7 +245,7 @@ async function inspectNodeModulesSymlinkTarget(params: {
   rootRealPath: string;
   symlinkPath: string;
   symlinkRelativePath: string;
-  trustedHostOpenClawRootRealPath: string | null;
+  trustedHostCarapaceRootRealPath: string | null;
 }): Promise<void> {
   let resolvedTargetPath: string;
   try {
@@ -261,13 +261,13 @@ async function inspectNodeModulesSymlinkTarget(params: {
 
   if (!isPathInside(params.rootRealPath, resolvedTargetPath)) {
     if (
-      isTrustedOpenClawPeerSymlink({
+      isTrustedCarapacePeerSymlink({
         allowManagedNpmRootPackagePeerSymlinks: params.allowManagedNpmRootPackagePeerSymlinks,
         relativePath: params.symlinkRelativePath,
       }) &&
-      isTrustedHostOpenClawPath({
+      isTrustedHostCarapacePath({
         resolvedTargetPath,
-        trustedHostOpenClawRootRealPath: params.trustedHostOpenClawRootRealPath,
+        trustedHostCarapaceRootRealPath: params.trustedHostCarapaceRootRealPath,
       })
     ) {
       return;
@@ -290,11 +290,11 @@ function readPositiveIntegerEnv(name: string, fallback: number): number {
 function resolvePackageTraversalLimits(): PackageTraversalLimits {
   return {
     maxDepth: readPositiveIntegerEnv(
-      "OPENCLAW_INSTALL_SCAN_MAX_DEPTH",
+      "CARAPACE_INSTALL_SCAN_MAX_DEPTH",
       DEFAULT_PACKAGE_TRAVERSAL_LIMITS.maxDepth,
     ),
     maxDirectories: readPositiveIntegerEnv(
-      "OPENCLAW_INSTALL_SCAN_MAX_DIRECTORIES",
+      "CARAPACE_INSTALL_SCAN_MAX_DIRECTORIES",
       DEFAULT_PACKAGE_TRAVERSAL_LIMITS.maxDirectories,
     ),
   };
@@ -334,7 +334,7 @@ function collectManifestRuntimeDependencyNames(manifest: PackageManifest): strin
     }
   }
   for (const dependencyName of Object.keys(manifest.peerDependencies ?? {})) {
-    if (dependencyName !== "openclaw" && isInstallScannableDependencyName(dependencyName)) {
+    if (dependencyName !== "carapace" && isInstallScannableDependencyName(dependencyName)) {
       dependencyNames.add(dependencyName);
     }
   }
@@ -346,7 +346,7 @@ async function resolveInstalledPackageScanRoot(params: {
   boundaryRealPath: string;
   dependencyName: string;
   packageDir: string;
-  trustedHostOpenClawRootRealPath: string | null;
+  trustedHostCarapaceRootRealPath: string | null;
 }): Promise<InstalledPackageScanRoot | undefined> {
   const packageDir = path.join(params.packageDir, "node_modules", params.dependencyName);
   let stats: Awaited<ReturnType<typeof fs.stat>>;
@@ -366,10 +366,10 @@ async function resolveInstalledPackageScanRoot(params: {
   if (!isSamePathOrInside(params.boundaryRealPath, realPath)) {
     if (
       params.allowManagedNpmRootPackagePeerSymlinks === true &&
-      params.dependencyName === "openclaw" &&
-      isTrustedHostOpenClawPath({
+      params.dependencyName === "carapace" &&
+      isTrustedHostCarapacePath({
         resolvedTargetPath: realPath,
-        trustedHostOpenClawRootRealPath: params.trustedHostOpenClawRootRealPath,
+        trustedHostCarapaceRootRealPath: params.trustedHostCarapaceRootRealPath,
       })
     ) {
       return undefined;
@@ -390,7 +390,7 @@ async function collectInstalledPackageScanRoots(params: {
   const limits = resolvePackageTraversalLimits();
   const boundaryDir = params.dependencyScanRootDir ?? params.packageDir;
   const boundaryRealPath = await fs.realpath(boundaryDir).catch(() => path.resolve(boundaryDir));
-  const trustedHostOpenClawRootRealPath = await resolveTrustedHostOpenClawRootRealPath();
+  const trustedHostCarapaceRootRealPath = await resolveTrustedHostCarapaceRootRealPath();
   const packageRealPath = await fs
     .realpath(params.packageDir)
     .catch(() => path.resolve(params.packageDir));
@@ -442,7 +442,7 @@ async function collectInstalledPackageScanRoots(params: {
         boundaryRealPath,
         dependencyName,
         packageDir: current.packageDir,
-        trustedHostOpenClawRootRealPath,
+        trustedHostCarapaceRootRealPath,
       });
       const candidate =
         nestedCandidate ??
@@ -452,7 +452,7 @@ async function collectInstalledPackageScanRoots(params: {
               boundaryRealPath,
               dependencyName,
               packageDir: params.dependencyScanRootDir,
-              trustedHostOpenClawRootRealPath,
+              trustedHostCarapaceRootRealPath,
             })
           : undefined);
       if (candidate && !visitedRealPaths.has(candidate.realPath)) {
@@ -483,7 +483,7 @@ async function validatePackageDependencyBoundaries(params: {
   const limits = resolvePackageTraversalLimits();
   const rootDir = params.rootDir;
   const rootRealPath = await fs.realpath(rootDir).catch(() => rootDir);
-  const trustedHostOpenClawRootRealPath = await resolveTrustedHostOpenClawRootRealPath();
+  const trustedHostCarapaceRootRealPath = await resolveTrustedHostCarapaceRootRealPath();
   const queue: Array<{ depth: number; dir: string }> = [{ depth: 0, dir: rootDir }];
   const visitedDirectories = new Set<string>();
   let queueIndex = 0;
@@ -536,7 +536,7 @@ async function validatePackageDependencyBoundaries(params: {
             rootRealPath,
             symlinkPath: nextPath,
             symlinkRelativePath: relativeNextPath,
-            trustedHostOpenClawRootRealPath,
+            trustedHostCarapaceRootRealPath,
           });
         }
         continue;
@@ -641,7 +641,7 @@ function resolvePolicySource(params: {
   if (params.requestKind === "skill-install") {
     switch (params.origin?.type) {
       case "clawhub":
-        return { kind: "clawhub", authority: "openclaw", mutable: false, network: true };
+        return { kind: "clawhub", authority: "carapace", mutable: false, network: true };
       case "git":
         return {
           kind: "git",
@@ -653,11 +653,11 @@ function resolvePolicySource(params: {
         return { kind: "local-path", authority: "user", mutable: true, network: false };
       case "upload":
         return { kind: "upload", authority: "user", mutable: false, network: false };
-      case "openclaw-bundled":
-        return { kind: "bundled", authority: "openclaw", mutable: false, network: false };
-      case "openclaw-managed":
-      case "openclaw-extra":
-        return { kind: "managed", authority: "openclaw", mutable: false, network: false };
+      case "carapace-bundled":
+        return { kind: "bundled", authority: "carapace", mutable: false, network: false };
+      case "carapace-managed":
+      case "carapace-extra":
+        return { kind: "managed", authority: "carapace", mutable: false, network: false };
       default:
         return { kind: "workspace", authority: "user", mutable: true, network: false };
     }
@@ -678,7 +678,7 @@ function resolvePolicySource(params: {
   return { kind: "local-path", authority: "unknown", mutable: true, network: false };
 }
 
-function shouldBypassOpenClawInstallFriction(params: {
+function shouldBypassCarapaceInstallFriction(params: {
   source?: InstallPolicySource;
   trustedSourceLinkedOfficialInstall?: boolean;
 }): boolean {
@@ -693,12 +693,12 @@ function shouldBypassOpenClawInstallFriction(params: {
     return source.kind === "clawhub" || source.kind === "git" || source.kind === "npm";
   }
   return (
-    source.authority === "openclaw" && (source.kind === "bundled" || source.kind === "managed")
+    source.authority === "carapace" && (source.kind === "bundled" || source.kind === "managed")
   );
 }
 
 async function runOperatorInstallPolicy(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   dangerouslyForceUnsafeInstall?: boolean;
   logger: InstallScanLogger;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
@@ -893,7 +893,7 @@ async function runOperatorInstallPolicy(params: {
 
 export async function scanBundleInstallSourceRuntime(
   params: InstallSafetyOverrides & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     logger: InstallScanLogger;
     pluginId: string;
     sourceDir: string;
@@ -930,7 +930,7 @@ export async function scanBundleInstallSourceRuntime(
   await validatePackageDependencyBoundaries({
     rootDir: params.sourceDir,
   });
-  if (shouldBypassOpenClawInstallFriction({ source: params.source })) {
+  if (shouldBypassCarapaceInstallFriction({ source: params.source })) {
     return await runPolicy();
   }
 
@@ -962,7 +962,7 @@ export async function scanBundleInstallSourceRuntime(
 
 export async function scanPackageInstallSourceRuntime(
   params: InstallSafetyOverrides & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     extensions: string[];
     logger: InstallScanLogger;
     packageDir: string;
@@ -1010,7 +1010,7 @@ export async function scanPackageInstallSourceRuntime(
     rootDir: params.packageDir,
   });
   if (
-    shouldBypassOpenClawInstallFriction({
+    shouldBypassCarapaceInstallFriction({
       source: params.source,
       trustedSourceLinkedOfficialInstall: params.trustedSourceLinkedOfficialInstall,
     })
@@ -1049,7 +1049,7 @@ export async function scanPackageInstallSourceRuntime(
 export async function scanInstalledPackageDependencyTreeRuntime(params: {
   additionalPackageDirs?: string[];
   allowManagedNpmRootPackagePeerSymlinks?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   dependencyScanRootDir?: string;
   logger: InstallScanLogger;
   mode?: "install" | "update";
@@ -1102,7 +1102,7 @@ export async function scanInstalledPackageDependencyTreeRuntime(params: {
 
 export async function scanFileInstallSourceRuntime(
   params: InstallSafetyOverrides & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     filePath: string;
     logger: InstallScanLogger;
     mode?: "install" | "update";
@@ -1156,7 +1156,7 @@ export async function scanFileInstallSourceRuntime(
 }
 
 export async function preflightPluginNpmInstallPolicyRuntime(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   dangerouslyForceUnsafeInstall?: boolean;
   logger: InstallScanLogger;
   mode?: "install" | "update";
@@ -1192,7 +1192,7 @@ export async function preflightPluginNpmInstallPolicyRuntime(params: {
 }
 
 export async function preflightPluginGitInstallPolicyRuntime(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   dangerouslyForceUnsafeInstall?: boolean;
   logger: InstallScanLogger;
   mode?: "install" | "update";
@@ -1224,7 +1224,7 @@ export async function preflightPluginGitInstallPolicyRuntime(params: {
 }
 
 export async function evaluateSkillInstallPolicyRuntime(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   installId: string;
   installSpec?: SkillInstallSpecMetadata;
   logger: InstallScanLogger;
@@ -1257,7 +1257,7 @@ export async function evaluateSkillInstallPolicyRuntime(params: {
         ...(params.installSpec ? { installSpec: params.installSpec } : {}),
       },
     });
-  if (shouldBypassOpenClawInstallFriction({ source: params.source })) {
+  if (shouldBypassCarapaceInstallFriction({ source: params.source })) {
     return await runPolicy();
   }
   const policyResult = await runPolicy();

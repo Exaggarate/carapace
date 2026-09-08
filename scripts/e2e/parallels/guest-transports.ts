@@ -1,4 +1,4 @@
-// Guest Transports script supports OpenClaw repository automation.
+// Guest Transports script supports Carapace repository automation.
 import { randomUUID } from "node:crypto";
 import { sleep } from "../../lib/sleep.mjs";
 import { run } from "./host-command.ts";
@@ -42,7 +42,7 @@ interface PosixBackgroundShellOptions {
 }
 
 function guestScriptName(extension: string): string {
-  return `openclaw-parallels-${randomUUID()}.${extension}`;
+  return `carapace-parallels-${randomUUID()}.${extension}`;
 }
 
 function posixSingleQuote(value: string): string {
@@ -140,7 +140,7 @@ export async function runPosixBackgroundShell(options: PosixBackgroundShellOptio
   const runCommand = options.runCommand ?? run;
   const safeLabel = options.label.replaceAll(/[^A-Za-z0-9_-]/g, "-");
   const nonce = `${safeLabel}-${randomUUID()}`;
-  const runDir = `/tmp/openclaw-parallels/${nonce}`;
+  const runDir = `/tmp/carapace-parallels/${nonce}`;
   const scriptPath = `${runDir}/run.sh`;
   const runnerPath = `${runDir}/runner.sh`;
   const launcherPath = `${runDir}/launcher.mjs`;
@@ -340,11 +340,11 @@ export async function runWindowsBackgroundPowerShell(
   const runCommand = options.runCommand ?? run;
   const safeLabel = options.label.replaceAll(/[^A-Za-z0-9_-]/g, "-");
   const nonce = `${safeLabel}-${randomUUID()}`;
-  const guestRunDir = `openclaw-parallels\\${nonce}`;
+  const guestRunDir = `carapace-parallels\\${nonce}`;
   const windowsDonePath = `%WINDIR%\\Temp\\${guestRunDir}\\done`;
   const windowsLogPath = `%WINDIR%\\Temp\\${guestRunDir}\\run.log`;
-  const backgroundExitPrefix = `__OPENCLAW_BACKGROUND_EXIT__:${nonce}:`;
-  const backgroundDoneMarker = `__OPENCLAW_BACKGROUND_DONE__:${nonce}`;
+  const backgroundExitPrefix = `__CARAPACE_BACKGROUND_EXIT__:${nonce}:`;
+  const backgroundDoneMarker = `__CARAPACE_BACKGROUND_DONE__:${nonce}`;
   // PhaseRunner cannot cancel an in-flight callback. Keep cleanup inside the
   // helper budget so a timed-out lane cannot overlap the next snapshot restore.
   const deadline =
@@ -361,26 +361,26 @@ export async function runWindowsBackgroundPowerShell(
       );
     }
   };
-  const pathsScript = `$runDir = Join-Path (Join-Path $env:WINDIR 'Temp\\openclaw-parallels') ${psSingleQuote(nonce)}
+  const pathsScript = `$runDir = Join-Path (Join-Path $env:WINDIR 'Temp\\carapace-parallels') ${psSingleQuote(nonce)}
 $scriptPath = Join-Path $runDir 'run.ps1'
 $logPath = Join-Path $runDir 'run.log'
 $donePath = Join-Path $runDir 'done'
 $exitPath = Join-Path $runDir 'exit'
 $pidPath = Join-Path $runDir 'pid'
-function Write-OpenClawUtf8File([string]$Path, [string]$Value) {
+function Write-CarapaceUtf8File([string]$Path, [string]$Value) {
   [System.IO.File]::WriteAllText($Path, $Value, [System.Text.UTF8Encoding]::new($false))
 }`;
   const payload = `$ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false
 ${pathsScript}
-Write-OpenClawUtf8File $pidPath ([string]$PID)
-$script:OpenClawBackgroundLogBytes = 0
-function Add-OpenClawBackgroundLog {
+Write-CarapaceUtf8File $pidPath ([string]$PID)
+$script:CarapaceBackgroundLogBytes = 0
+function Add-CarapaceBackgroundLog {
   param([Parameter(ValueFromPipeline=$true)]$InputObject)
   process {
     $text = $InputObject | Out-String
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($text)
-    $remaining = [int64]${WINDOWS_BACKGROUND_LOG_MAX_BYTES} - $script:OpenClawBackgroundLogBytes
+    $remaining = [int64]${WINDOWS_BACKGROUND_LOG_MAX_BYTES} - $script:CarapaceBackgroundLogBytes
     if ($remaining -le 0) {
       return
     }
@@ -393,11 +393,11 @@ function Add-OpenClawBackgroundLog {
     try {
       if ($count -gt 0) {
         $stream.Write($bytes, 0, $count)
-        $script:OpenClawBackgroundLogBytes += $count
+        $script:CarapaceBackgroundLogBytes += $count
       }
       if ($needsBoundaryNewline) {
         $stream.WriteByte(10)
-        $script:OpenClawBackgroundLogBytes++
+        $script:CarapaceBackgroundLogBytes++
       }
     } finally {
       $stream.Dispose()
@@ -408,13 +408,13 @@ try {
   & {
 ${windowsProcessEnvScript(options.env)}
 ${options.script}
-  } *>&1 | Add-OpenClawBackgroundLog
-  Write-OpenClawUtf8File $exitPath '0'
+  } *>&1 | Add-CarapaceBackgroundLog
+  Write-CarapaceUtf8File $exitPath '0'
 } catch {
-  $_ | Add-OpenClawBackgroundLog
-  Write-OpenClawUtf8File $exitPath '1'
+  $_ | Add-CarapaceBackgroundLog
+  Write-CarapaceUtf8File $exitPath '1'
 } finally {
-  Write-OpenClawUtf8File $donePath 'done'
+  Write-CarapaceUtf8File $donePath 'done'
 }`;
   const writeArgs = [
     "exec",
@@ -663,16 +663,16 @@ function cleanupWindowsBackground(
   },
 ): void {
   const stopProcessTree = options.stopProcessTree
-    ? `function Stop-OpenClawBackgroundProcessTree([int]$ProcessId) {
+    ? `function Stop-CarapaceBackgroundProcessTree([int]$ProcessId) {
   Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId" -ErrorAction SilentlyContinue | ForEach-Object {
-    Stop-OpenClawBackgroundProcessTree ([int]$_.ProcessId)
+    Stop-CarapaceBackgroundProcessTree ([int]$_.ProcessId)
   }
   Stop-Process -Id $ProcessId -Force -ErrorAction SilentlyContinue
 }
 if (Test-Path $pidPath) {
   $backgroundPid = (Get-Content -Path $pidPath -Raw).Trim()
   if ($backgroundPid) {
-    Stop-OpenClawBackgroundProcessTree ([int]$backgroundPid)
+    Stop-CarapaceBackgroundProcessTree ([int]$backgroundPid)
   }
 }
 `
@@ -757,7 +757,7 @@ export class LinuxGuest {
   private transportArgs(args: string[], env: Record<string, string> = {}): string[] {
     const envArgs = Object.entries({
       HOME: "/root",
-      OPENCLAW_ALLOW_ROOT: "1",
+      CARAPACE_ALLOW_ROOT: "1",
       ...this.getEnv(),
       ...env,
     }).map(([key, value]) => `${key}=${value}`);

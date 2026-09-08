@@ -42,7 +42,7 @@ describe("preaction model output owner", () => {
       args: ["models", "--status-plain", "auth", "list", "--provider", "--plain"],
     },
   ])("restores human stdout for $name", async ({ args }) => {
-    const program = new Command().name("openclaw").enablePositionalOptions();
+    const program = new Command().name("carapace").enablePositionalOptions();
     program
       .command("models")
       .option("--status-plain")
@@ -55,7 +55,7 @@ describe("preaction model output owner", () => {
     registerPreActionHooks(program, "test");
     loggingState.forceConsoleToStderr = true;
     loggingState.earlyConsoleRoutingRestore = false;
-    process.argv = ["node", "openclaw", ...args];
+    process.argv = ["node", "carapace", ...args];
 
     await program.parseAsync(process.argv);
 

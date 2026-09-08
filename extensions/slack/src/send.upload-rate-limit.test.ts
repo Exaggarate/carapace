@@ -1,13 +1,13 @@
 // Real send owner, Slack SDK and loopback transport; media loading and the
 // SSRF adapter are synthetic so no external Slack service or filesystem is used.
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSlackWriteClient } from "./client.js";
 import { sendMessageSlack } from "./send.js";
 
-vi.mock("openclaw/plugin-sdk/outbound-media", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/outbound-media")>()),
+vi.mock("carapace/plugin-sdk/outbound-media", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/outbound-media")>()),
   loadOutboundMediaFromUrl: async () => ({
     buffer: Buffer.from("synthetic upload"),
     contentType: "text/plain",
@@ -16,8 +16,8 @@ vi.mock("openclaw/plugin-sdk/outbound-media", async (importOriginal) => ({
   }),
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>()),
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>()),
   fetchWithSsrFGuard: async (params: {
     url: string;
     init?: RequestInit;

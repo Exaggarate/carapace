@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 function makeTempRepo() {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-ownership-surface-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-ownership-surface-"));
   tempDirs.push(dir);
   return dir;
 }

@@ -1,6 +1,6 @@
 // Target prefix helpers separate provider-owned prefixes from generic target
 // kind prefixes and validate selected-channel mismatches.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { normalizeMessageChannel } from "../../utils/message-channel-core.js";
 import { listRuntimeVisibleChannelPlugins } from "./runtime-visible-channels.js";
 

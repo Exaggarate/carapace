@@ -8,7 +8,7 @@ import {
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
 import { isSessionMember, type SessionEntry } from "../config/sessions.js";
 import { sessionCreatorProfileId } from "../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isIncognitoSessionKey } from "../routing/session-key.js";
 import {
   authorizeGatewaySessionCreation,
@@ -71,7 +71,7 @@ export function isGatewayAdmin(client: Pick<GatewayClient, "connect"> | null): b
   return client?.connect?.scopes?.includes("operator.admin") === true;
 }
 
-export function allowedSessionVisibilities(cfg: OpenClawConfig): SessionVisibility[] {
+export function allowedSessionVisibilities(cfg: CarapaceConfig): SessionVisibility[] {
   const policy = cfg.session?.sharing;
   return [
     "shared",
@@ -82,14 +82,14 @@ export function allowedSessionVisibilities(cfg: OpenClawConfig): SessionVisibili
 }
 
 export function isSessionVisibilityAllowed(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   visibility: SessionVisibility,
 ): boolean {
   return allowedSessionVisibilities(cfg).includes(visibility);
 }
 
 export function resolveSessionSharingTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   exactRead?: boolean;
@@ -114,7 +114,7 @@ export function resolveSessionSharingTarget(params: {
 
 /** Fresh metadata for one synchronous batch; no authorization decisions are retained. */
 export function resolveSessionSharingTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targets: readonly { sessionKey: string; agentId?: string }[];
 }): Array<SessionSharingTarget | null> {
   return resolveGatewaySessionStoreTargetsReadOnly({
@@ -140,7 +140,7 @@ function toSessionSharingTarget(
 }
 
 export type SessionSharingRoleParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   client: GatewayClient | null;
   target: SessionSharingTarget;
   includeMembership?: boolean;
@@ -225,7 +225,7 @@ function isIncognitoSessionTarget(params: {
 }
 
 export function isResolvedIncognitoSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
 }): boolean {
@@ -257,7 +257,7 @@ export function authorizeIncognitoSessionTarget(params: {
 }
 
 export function canAccessIncognitoSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   sessionKey: string;
   agentId?: string;
@@ -275,7 +275,7 @@ export function canAccessIncognitoSession(params: {
 }
 
 export function authorizeResolvedSessionMutation(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   sessionKey: string;
   agentId?: string;
@@ -315,7 +315,7 @@ export function authorizeResolvedSessionMutation(params: {
 }
 
 export function authorizeSessionAgentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   target: SessionSharingTarget;
 }): ErrorShape | null {
@@ -341,7 +341,7 @@ export function authorizeSessionAgentRun(params: {
 }
 
 export function authorizeSessionSharingTarget(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   client: GatewayClient | null;
   target: SessionSharingTarget;
 }): ErrorShape | null {

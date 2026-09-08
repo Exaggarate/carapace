@@ -55,20 +55,20 @@ describe("write-plugin-sdk-entry-dts", { timeout: WRITER_TEST_TIMEOUT_MS }, () =
       {
         name: "bounded plugins",
         badPlugin: "broken",
-        before: { OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "plain" },
+        before: { CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "plain" },
         after: {},
       },
       {
         name: "optional plugins",
         badPlugin: "acpx",
-        before: { OPENCLAW_INCLUDE_OPTIONAL_BUNDLED: "0" },
+        before: { CARAPACE_INCLUDE_OPTIONAL_BUNDLED: "0" },
         after: {},
       },
       {
         name: "Docker plugins",
         badPlugin: "external",
         before: {},
-        after: { OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: "external" },
+        after: { CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: "external" },
       },
     ],
   )(
@@ -76,12 +76,12 @@ describe("write-plugin-sdk-entry-dts", { timeout: WRITER_TEST_TIMEOUT_MS }, () =
     ({ badPlugin, before, after }) => {
       const { root, write } = createFixture();
       for (const id of ["plain", badPlugin]) {
-        write(`extensions/${id}/openclaw.plugin.json`, JSON.stringify({ id }));
+        write(`extensions/${id}/carapace.plugin.json`, JSON.stringify({ id }));
         write(
           `extensions/${id}/package.json`,
           JSON.stringify({
-            name: `@openclaw/${id}`,
-            openclaw: { build: { bundledDist: id !== "external" } },
+            name: `@carapace/${id}`,
+            carapace: { build: { bundledDist: id !== "external" } },
           }),
         );
         if (id !== badPlugin) {

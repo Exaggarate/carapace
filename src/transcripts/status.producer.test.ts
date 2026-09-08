@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { getRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { diffGatewayReloadPaths } from "../gateway/config-diff.js";
 import {
   buildGatewayReloadPlan,
@@ -42,7 +42,7 @@ describe("configured transcript source provenance", () => {
       });
       let current = f.ctx.config;
       setRuntimeConfigSnapshot(current, current);
-      const publish = (candidate: OpenClawConfig) => {
+      const publish = (candidate: CarapaceConfig) => {
         const plan = buildGatewayReloadPlan(
           diffGatewayReloadPaths(current, candidate, listConfigReloadRefinementPrefixes()),
           {

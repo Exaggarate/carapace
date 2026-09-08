@@ -1,7 +1,7 @@
 import {
   createPluginRegistryFixture,
   registerTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "carapace/plugin-sdk/plugin-test-contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import type { WidgetPresenter } from "./plugin-registration.types.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";

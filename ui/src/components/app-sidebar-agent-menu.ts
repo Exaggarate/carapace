@@ -38,15 +38,15 @@ const IDENTITY_MENU_LINKS: ReadonlyArray<{
   icon: IconName;
   label: () => string;
 }> = [
-  { href: "https://docs.openclaw.ai", icon: "book", label: () => t("common.docs") },
+  { href: "https://github.com/Exaggarate/carapace", icon: "book", label: () => t("common.docs") },
   {
-    href: "https://docs.openclaw.ai/help",
+    href: "https://github.com/Exaggarate/carapace",
     icon: "messageSquare",
     label: () => t("agentChip.getHelp"),
   },
   { href: "https://discord.gg/clawd", icon: "users", label: () => t("agentChip.discord") },
   {
-    href: "https://docs.openclaw.ai/releases",
+    href: "https://github.com/Exaggarate/carapace",
     icon: "scrollText",
     label: () => t("agentChip.viewChangelog"),
   },
@@ -498,7 +498,7 @@ export function renderSidebarIdentityMenu(params: SidebarIdentityMenuParams) {
         value="command:profile"
       >
         <span slot="icon" class="sidebar-identity-menu__avatar" aria-hidden="true">
-          <openclaw-viewer-avatar .user=${avatarUser} variant="footer"></openclaw-viewer-avatar>
+          <carapace-viewer-avatar .user=${avatarUser} variant="footer"></carapace-viewer-avatar>
         </span>
         <span class="sidebar-identity-menu__identity">
           <span class="sidebar-identity-menu__name" title=${profileName}>${profileName}</span>
@@ -568,7 +568,7 @@ export function renderSidebarIdentityMenu(params: SidebarIdentityMenuParams) {
       }
       <div class="sidebar-customize-menu__separator" role="separator"></div>
       <div class="sidebar-identity-menu__footer">
-        <openclaw-sidebar-build-chip
+        <carapace-sidebar-build-chip
           .variant=${"identity"}
           .basePath=${params.basePath}
           .gatewayVersion=${params.gatewayVersion}
@@ -577,9 +577,9 @@ export function renderSidebarIdentityMenu(params: SidebarIdentityMenuParams) {
             params.onClose();
             params.onNavigate(routeId);
           }}
-        ></openclaw-sidebar-build-chip>
+        ></carapace-sidebar-build-chip>
         <span class="sidebar-mode-switch">
-          <openclaw-theme-mode-toggle .mode=${params.themeMode}></openclaw-theme-mode-toggle>
+          <carapace-theme-mode-toggle .mode=${params.themeMode}></carapace-theme-mode-toggle>
         </span>
       </div>
     </wa-dropdown>

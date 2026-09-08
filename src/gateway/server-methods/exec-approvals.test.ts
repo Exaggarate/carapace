@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type { ExecApprovalsFile } from "../../infra/exec-approvals.js";
 
@@ -342,7 +342,7 @@ describe("exec approvals gateway methods", () => {
             nodeId: "node-1",
             connId: "conn-1",
             pairingGeneration: "generation-1",
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             clientMode: "node",
             platform: "macOS 26.5.2",
             deviceFamily: "Mac",
@@ -389,14 +389,14 @@ describe("exec approvals gateway methods", () => {
     },
     {
       label: "non-macOS app identity",
-      clientId: "openclaw-macos",
+      clientId: "carapace-macos",
       clientMode: "node",
       platform: "linux",
       deviceFamily: "Linux",
     },
     {
       label: "non-node Mac App identity",
-      clientId: "openclaw-macos",
+      clientId: "carapace-macos",
       clientMode: "ui",
       platform: "macOS 26.5.2",
       deviceFamily: "Mac",

@@ -27,7 +27,7 @@ function entry(id: string, parentId: string | null, message: unknown) {
 }
 
 function metadata(message: unknown) {
-  return (message as { __openclaw: Record<string, unknown> })["__openclaw"];
+  return (message as { __carapace: Record<string, unknown> })["__carapace"];
 }
 
 function positions(messages: unknown[]) {
@@ -40,7 +40,7 @@ describe("archive transcript display positions", () => {
   const archiveOptions = { allowResetArchiveFallback: true, resetArchiveOnly: true };
 
   beforeAll(() => {
-    dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-archive-position-"));
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-archive-position-"));
     storePath = path.join(dir, "sessions.json");
   });
   afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));

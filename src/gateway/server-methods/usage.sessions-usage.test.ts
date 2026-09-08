@@ -2,15 +2,15 @@
 // discovered agent session logs.
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyCostUsageTotals } from "../../infra/session-cost-usage-totals.js";
 import type { SessionCostSummary } from "../../infra/session-cost-usage.types.js";
 import type { SessionsUsageResult } from "../../shared/usage-types.js";
 import { withEnvAsync } from "../../test-utils/env.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 
 vi.mock("../../config/config.js", () => {
   return {
@@ -117,7 +117,7 @@ const TEST_RUNTIME_CONFIG = {
 async function runSessionsUsageMethod(
   method: "sessions.usage" | "sessions.usage.timeseries" | "sessions.usage.logs",
   params: Record<string, unknown>,
-  config: OpenClawConfig = TEST_RUNTIME_CONFIG,
+  config: CarapaceConfig = TEST_RUNTIME_CONFIG,
 ) {
   const respond = vi.fn();
   const handler = expectDefined(usageHandlers[method], `${method} test invariant`);
@@ -129,11 +129,11 @@ async function runSessionsUsageMethod(
   return respond;
 }
 
-const runSessionsUsage = (params: Record<string, unknown>, config?: OpenClawConfig) =>
+const runSessionsUsage = (params: Record<string, unknown>, config?: CarapaceConfig) =>
   runSessionsUsageMethod("sessions.usage", params, config);
-const runSessionsUsageTimeseries = (params: Record<string, unknown>, config?: OpenClawConfig) =>
+const runSessionsUsageTimeseries = (params: Record<string, unknown>, config?: CarapaceConfig) =>
   runSessionsUsageMethod("sessions.usage.timeseries", params, config);
-const runSessionsUsageLogs = (params: Record<string, unknown>, config?: OpenClawConfig) =>
+const runSessionsUsageLogs = (params: Record<string, unknown>, config?: CarapaceConfig) =>
   runSessionsUsageMethod("sessions.usage.logs", params, config);
 
 const BASE_USAGE_RANGE = {
@@ -167,7 +167,7 @@ function mockCombinedStore(
         key,
         {
           agentId,
-          storeTarget: { agentId, storePath: `/tmp/agents/${agentId}/agent/openclaw-agent.sqlite` },
+          storeTarget: { agentId, storePath: `/tmp/agents/${agentId}/agent/carapace-agent.sqlite` },
         },
       ]),
     ),
@@ -180,7 +180,7 @@ function mockStoredSession(
   options: { resolution?: "valid" | "missing" } = {},
 ) {
   const entry = { sessionId, updatedAt: 1_000 };
-  const storePath = "/tmp/agents/opus/agent/openclaw-agent.sqlite";
+  const storePath = "/tmp/agents/opus/agent/carapace-agent.sqlite";
   vi.mocked(loadGatewaySessionEntryReadOnly).mockReturnValueOnce({
     cfg: TEST_RUNTIME_CONFIG,
     agentId: "opus",
@@ -200,7 +200,7 @@ function mockStoredSession(
 async function withUsageState(
   run: (writeSessionFile: (fileName: string) => string) => Promise<void>,
 ) {
-  await withOpenClawTestState({ label: "usage" }, async (state) => {
+  await withCarapaceTestState({ label: "usage" }, async (state) => {
     const agentSessionsDir = state.sessionsDir("opus");
     fs.mkdirSync(agentSessionsDir, { recursive: true });
     await run((fileName) => {
@@ -548,7 +548,7 @@ describe("sessions.usage", () => {
   });
 
   it("keeps legacy global session entries in explicitly scoped agent usage lookups", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         list: [{ id: "main" }, { id: "opus" }],
@@ -945,9 +945,9 @@ describe("sessions.usage", () => {
   });
 
   it("loads bare-key usage details through the persisted fixed-store owner", async () => {
-    await withOpenClawTestState({ label: "usage-fixed-store-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "usage-fixed-store-owner" }, async (state) => {
       const storePath = state.statePath("shared-sessions.sqlite");
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         session: { store: storePath, scope: "global" },
         agents: {
           ownership: "explicit",

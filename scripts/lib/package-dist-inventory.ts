@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { writeJson } from "../../src/infra/json-files.ts";
 import { collectPackageDistInventory } from "../../src/infra/package-dist-inventory.ts";
 import { PACKAGE_DIST_INVENTORY_RELATIVE_PATH } from "./package-dist-inventory-contract.mts";
@@ -9,7 +9,7 @@ import { PACKAGE_LIFECYCLE_PENDING_RELATIVE_PATH } from "./package-lifecycle-mar
 export { LOCAL_BUILD_METADATA_DIST_PATHS } from "./local-build-metadata-paths.mts";
 export { PACKAGE_DIST_INVENTORY_RELATIVE_PATH } from "./package-dist-inventory-contract.mts";
 
-const INSTALL_STAGE_DEBRIS_DIR_PATTERN = /^\.openclaw-install-stage(?:-[^/]+)?$/iu;
+const INSTALL_STAGE_DEBRIS_DIR_PATTERN = /^\.carapace-install-stage(?:-[^/]+)?$/iu;
 
 function normalizeRelativePath(value: string): string {
   return value.replace(/\\/g, "/");

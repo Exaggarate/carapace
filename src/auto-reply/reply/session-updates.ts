@@ -13,7 +13,7 @@ import {
 import { projectCompactionAccountingPatch } from "../../config/sessions/session-entry-projection.js";
 import { projectCanonicalSessionEntryShape } from "../../config/sessions/store-entry-shape.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isFastTestRuntimeEnv } from "../../infra/env.js";
 import { getRemoteSkillEligibility } from "../../skills/runtime/remote.js";
 import { resolveReusableWorkspaceSkillSnapshot } from "../../skills/runtime/session-snapshot.js";
@@ -76,7 +76,7 @@ export async function ensureSkillSnapshot(params: {
   isFirstTurnInSession: boolean;
   workspaceDir: string;
   executionSkillsDir?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   execOverrides?: ExecPolicyOverrides;
   /** If provided, only load skills with these names (for per-channel skill filtering) */
   skillFilter?: string[];

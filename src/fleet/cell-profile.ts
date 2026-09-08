@@ -3,24 +3,24 @@ import path from "node:path";
 
 export type FleetContainerRuntimeName = "docker" | "podman";
 
-export const DEFAULT_FLEET_IMAGE = "ghcr.io/openclaw/openclaw:latest";
+export const DEFAULT_FLEET_IMAGE = "ghcr.io/carapace/carapace:latest";
 const FLEET_BASE_PORT = 19_100;
 export const FLEET_GATEWAY_PORT = 18_789;
 const FLEET_CONTAINER_HOME = "/home/node";
-const FLEET_CONTAINER_STATE_DIR = "/home/node/.openclaw";
-const FLEET_CONTAINER_AUTH_SECRET_DIR = "/home/node/.config/openclaw";
-export const FLEET_TENANT_LABEL = "openclaw.fleet.tenant";
-export const FLEET_OWNER_LABEL = "openclaw.fleet.owner";
-export const FLEET_ATTEMPT_LABEL = "openclaw.fleet.attempt";
-export const FLEET_ENV_KEYS_LABEL = "openclaw.fleet.env-keys";
-export const FLEET_DISK_LIMIT_LABEL = "openclaw.fleet.disk-limit";
+const FLEET_CONTAINER_STATE_DIR = "/home/node/.carapace";
+const FLEET_CONTAINER_AUTH_SECRET_DIR = "/home/node/.config/carapace";
+export const FLEET_TENANT_LABEL = "carapace.fleet.tenant";
+export const FLEET_OWNER_LABEL = "carapace.fleet.owner";
+export const FLEET_ATTEMPT_LABEL = "carapace.fleet.attempt";
+export const FLEET_ENV_KEYS_LABEL = "carapace.fleet.env-keys";
+export const FLEET_DISK_LIMIT_LABEL = "carapace.fleet.disk-limit";
 const FLEET_MANAGED_ENV_KEYS = [
   "HOME",
-  "OPENCLAW_HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_WORKSPACE_DIR",
-  "OPENCLAW_GATEWAY_TOKEN",
+  "CARAPACE_HOME",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_WORKSPACE_DIR",
+  "CARAPACE_GATEWAY_TOKEN",
 ] as const;
 
 const FLEET_TENANT_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
@@ -156,18 +156,18 @@ export function buildCellEnvironment(
   }
   return {
     HOME: FLEET_CONTAINER_HOME,
-    OPENCLAW_HOME: FLEET_CONTAINER_HOME,
-    OPENCLAW_STATE_DIR: FLEET_CONTAINER_STATE_DIR,
-    OPENCLAW_CONFIG_PATH: `${FLEET_CONTAINER_STATE_DIR}/openclaw.json`,
-    OPENCLAW_WORKSPACE_DIR: `${FLEET_CONTAINER_STATE_DIR}/workspace`,
-    OPENCLAW_GATEWAY_TOKEN: token,
+    CARAPACE_HOME: FLEET_CONTAINER_HOME,
+    CARAPACE_STATE_DIR: FLEET_CONTAINER_STATE_DIR,
+    CARAPACE_CONFIG_PATH: `${FLEET_CONTAINER_STATE_DIR}/carapace.json`,
+    CARAPACE_WORKSPACE_DIR: `${FLEET_CONTAINER_STATE_DIR}/workspace`,
+    CARAPACE_GATEWAY_TOKEN: token,
     XDG_CACHE_HOME: `${FLEET_CONTAINER_STATE_DIR}/cache`,
     ...userEnv,
   };
 }
 
 export function cellContainerName(tenantId: string): string {
-  return `openclaw-cell-${validateTenantId(tenantId)}`;
+  return `carapace-cell-${validateTenantId(tenantId)}`;
 }
 
 export function cellNetworkName(tenantId: string): string {

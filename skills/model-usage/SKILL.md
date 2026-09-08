@@ -3,7 +3,7 @@ name: model-usage
 description: "Summarize CodexBar local cost logs by model for Codex or Claude, including current or full breakdowns."
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "📊",
         "os": ["darwin", "linux"],

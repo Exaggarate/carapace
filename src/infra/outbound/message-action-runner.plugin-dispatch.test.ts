@@ -1,10 +1,10 @@
 // Covers plugin-dispatched message actions, target resolution, dry-run behavior,
 // and plugin tool-result extraction.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../../utils/message-channel.js";
@@ -84,7 +84,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "react",
         params: {
           channel: "operation-local",
@@ -142,7 +142,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "broadcast",
         params: {
           channel: "operation-local",
@@ -174,7 +174,7 @@ describe("runMessageAction plugin dispatch", () => {
                 enabled: true,
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           action: "react",
           params: {
             channel: "actionhub",
@@ -220,7 +220,7 @@ describe("runMessageAction plugin dispatch", () => {
                   enabled: true,
                 },
               },
-            } as OpenClawConfig,
+            } as CarapaceConfig,
             action: "pin",
             params: {
               channel: "actionhub",
@@ -281,7 +281,7 @@ describe("runMessageAction plugin dispatch", () => {
                 enabled: true,
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           action: "pin",
           params: {
             channel: "actionhub",
@@ -341,7 +341,7 @@ describe("runMessageAction plugin dispatch", () => {
                 enabled: true,
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           action: "react",
           params: {
             channel: "gatewaychat",
@@ -394,7 +394,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "broadcast",
         params: {
           channel: "gatewaychat",
@@ -521,7 +521,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "broadcast",
         params: {
           channel: "gatewaychat",
@@ -572,7 +572,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "broadcast",
         params: {
           channel: "gatewaychat",
@@ -642,7 +642,7 @@ describe("runMessageAction plugin dispatch", () => {
         blocks: [{ type: "buttons", buttons: [{ label: "A", value: "a" }] }],
       };
       const result = await runMessageAction({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         action: "send",
         params: {
           channel: "componentchat",
@@ -668,7 +668,7 @@ describe("runMessageAction plugin dispatch", () => {
     it("throws on invalid presentation JSON strings", async () => {
       await expect(
         runMessageAction({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           action: "send",
           params: {
             channel: "componentchat",
@@ -721,7 +721,7 @@ describe("runMessageAction plugin dispatch", () => {
     });
     it("rejects an unknown broadcast account before live target resolution", async () => {
       const result = await runMessageAction({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         action: "broadcast",
         params: {
           channel: "accountchat",
@@ -743,7 +743,7 @@ describe("runMessageAction plugin dispatch", () => {
 
     it("preserves planned per-channel broadcast rejection without resolving a target", async () => {
       const result = await runMessageAction({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         action: "broadcast",
         params: {
           targets: ["resolved"],
@@ -776,7 +776,7 @@ describe("runMessageAction plugin dispatch", () => {
     it("rejects an empty broadcast account plan instead of reporting empty success", async () => {
       await expect(
         runMessageAction({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           action: "broadcast",
           params: {
             targets: ["resolved"],

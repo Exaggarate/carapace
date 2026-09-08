@@ -12,9 +12,9 @@ import {
 } from "./widearea-dns.js";
 
 const zoneOpts: WideAreaGatewayZoneOpts = {
-  domain: "openclaw.internal.",
+  domain: "carapace.internal.",
   gatewayPort: 18789,
-  displayName: "Mac Studio (OpenClaw)",
+  displayName: "Mac Studio (Carapace)",
   tailnetIPv4: "100.123.224.76",
   hostLabel: "studio-london",
   instanceLabel: "studio-london",
@@ -28,15 +28,15 @@ describe("wide-area DNS zone writer — unmocked production boundary", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-03-13T12:00:00.000Z"));
     stateDir = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-widearea-dns-boundary-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "carapace-widearea-dns-boundary-")),
     );
     originalConfigDir = utils.CONFIG_DIR;
-    utils.pinConfigDir({ ...process.env, OPENCLAW_STATE_DIR: stateDir });
+    utils.pinConfigDir({ ...process.env, CARAPACE_STATE_DIR: stateDir });
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    utils.pinConfigDir({ ...process.env, OPENCLAW_STATE_DIR: originalConfigDir });
+    utils.pinConfigDir({ ...process.env, CARAPACE_STATE_DIR: originalConfigDir });
     fs.rmSync(stateDir, { recursive: true, force: true });
     expect(utils.CONFIG_DIR).toBe(originalConfigDir);
   });

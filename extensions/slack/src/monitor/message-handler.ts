@@ -2,12 +2,12 @@ import {
   createChannelInboundDebouncer,
   resolveInboundDebounceMs,
   shouldDebounceTextInbound,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { collectErrorGraphCandidates, formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { createRuntimeConfigReader } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-inbound";
+import { collectErrorGraphCandidates, formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { createRuntimeConfigReader } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import type { ResolvedSlackAccount } from "../accounts.js";
 import type { SlackSendIdentity } from "../send.js";
 import type { SlackMessageEvent } from "../types.js";

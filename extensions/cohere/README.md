@@ -1,13 +1,13 @@
-# OpenClaw Cohere Provider
+# Carapace Cohere Provider
 
-Official OpenClaw provider plugin for Cohere's OpenAI-compatible Compatibility
+Official Carapace provider plugin for Cohere's OpenAI-compatible Compatibility
 API.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/cohere-provider
-openclaw gateway restart
+carapace plugins install @carapace/cohere-provider
+carapace gateway restart
 ```
 
 Configure a Cohere API key, then select `cohere/command-a-plus-05-2026`,

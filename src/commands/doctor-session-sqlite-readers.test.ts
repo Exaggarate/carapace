@@ -11,7 +11,7 @@ describe("legacy transcript row classification", () => {
   let directory: string;
   let transcriptPath: string;
   beforeEach(() => {
-    directory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reader-classification-"));
+    directory = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reader-classification-"));
     transcriptPath = path.join(directory, "session.jsonl");
   });
   afterEach(() => fs.rmSync(directory, { recursive: true, force: true }));

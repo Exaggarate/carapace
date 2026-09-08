@@ -51,7 +51,7 @@ function makeSkillEntry(
       description: "test skill",
       filePath: path.join(skillDir, "SKILL.md"),
       baseDir: skillDir,
-      source: "openclaw-workspace",
+      source: "carapace-workspace",
     } as SkillEntry["skill"],
     frontmatter: {},
     metadata: {
@@ -131,7 +131,7 @@ function withUid<T>(uid: number, fn: () => Promise<T>): Promise<T> {
   return fn().finally(() => spy.mockRestore());
 }
 
-const suiteTempDirs = createSuiteTempRootTracker({ prefix: "openclaw-fallback-test-" });
+const suiteTempDirs = createSuiteTempRootTracker({ prefix: "carapace-fallback-test-" });
 
 describe("skills-install fallback edge cases", () => {
   let workspaceDir: string;

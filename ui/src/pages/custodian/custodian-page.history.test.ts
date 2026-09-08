@@ -18,14 +18,14 @@ describe("custodian page history", () => {
 
   it("shows advertised recent changes and loads a short cursor page inline", async () => {
     const request = vi.fn(async (method: string, params: Record<string, unknown>) => {
-      if (method === "openclaw.chat") {
+      if (method === "carapace.chat") {
         return {
           sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
           reply: "Hello.",
           action: "none",
         };
       }
-      if (method === "openclaw.changes.list" && !params.beforeCursor) {
+      if (method === "carapace.changes.list" && !params.beforeCursor) {
         return {
           entries: [
             {
@@ -41,7 +41,7 @@ describe("custodian page history", () => {
               at: Date.now() - 10_000,
               kind: "external-edit",
               source: "external",
-              summary: "Configuration edited outside OpenClaw",
+              summary: "Configuration edited outside Carapace",
               invalid: true,
               opaqueChange: true,
             },
@@ -56,7 +56,7 @@ describe("custodian page history", () => {
           nextCursor: "next-page",
         };
       }
-      if (method === "openclaw.changes.list" && params.beforeCursor === "next-page") {
+      if (method === "carapace.changes.list" && params.beforeCursor === "next-page") {
         return {
           entries: [
             {
@@ -71,17 +71,17 @@ describe("custodian page history", () => {
       }
       throw new Error(`unexpected request ${method}`);
     });
-    const harness = createContext(request, ["openclaw.chat", "openclaw.changes.list"]);
+    const harness = createContext(request, ["carapace.chat", "carapace.changes.list"]);
     const { context } = harness;
     const { page } = await mountPage(context, { onboarding: false });
     await waitForFast(() =>
-      expect(request).toHaveBeenCalledWith("openclaw.chat", expect.anything(), expect.anything()),
+      expect(request).toHaveBeenCalledWith("carapace.chat", expect.anything(), expect.anything()),
     );
     await page.updateComplete;
 
     page.querySelector<HTMLButtonElement>(".custodian__history-toggle")!.click();
     await waitForFast(() =>
-      expect(request).toHaveBeenCalledWith("openclaw.changes.list", { limit: 50 }),
+      expect(request).toHaveBeenCalledWith("carapace.changes.list", { limit: 50 }),
     );
     await page.updateComplete;
 
@@ -105,7 +105,7 @@ describe("custodian page history", () => {
 
     page.querySelector<HTMLButtonElement>(".custodian__history-more")!.click();
     await waitForFast(() =>
-      expect(request).toHaveBeenCalledWith("openclaw.changes.list", {
+      expect(request).toHaveBeenCalledWith("carapace.changes.list", {
         limit: 50,
         beforeCursor: "next-page",
       }),
@@ -120,7 +120,7 @@ describe("custodian page history", () => {
     await waitForFast(() =>
       expect(
         request.mock.calls.filter(
-          ([method, params]) => method === "openclaw.changes.list" && !params.beforeCursor,
+          ([method, params]) => method === "carapace.changes.list" && !params.beforeCursor,
         ),
       ).toHaveLength(2),
     );

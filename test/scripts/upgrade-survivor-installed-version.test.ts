@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
@@ -36,16 +36,16 @@ describe.skipIf(process.platform === "win32")(
       const tmp = join(home, "tmp");
       const artifacts = join(home, "artifacts");
       const prefix = join(artifacts, "npm-prefix");
-      const packageRoot = join(prefix, "lib", "node_modules", "openclaw");
+      const packageRoot = join(prefix, "lib", "node_modules", "carapace");
       const bin = join(prefix, "bin");
       for (const directory of [state, tmp, packageRoot, bin]) {
         mkdirSync(directory, { recursive: true });
       }
       writeFileSync(
         join(packageRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", version: baselineVersion }),
+        JSON.stringify({ name: "carapace", version: baselineVersion }),
       );
-      const entrypoint = join(packageRoot, "openclaw.mjs");
+      const entrypoint = join(packageRoot, "carapace.mjs");
       const targetVersion = fixture.targetVersion ?? candidateVersion;
       const targetPackage = join(home, fixture.targetVersion ? "future.tgz" : "candidate.tgz");
       // Inject the package-swap/finalization fault at the executable boundary.
@@ -64,15 +64,15 @@ if (args[0] === 'update') {
   if (packageState === 'missing') {
     fs.unlinkSync(manifest);
   } else if (packageState !== 'unchanged') {
-    const bytes = packageState === 'broken' ? '{' : JSON.stringify({name:'openclaw', version:${JSON.stringify(targetVersion)}});
+    const bytes = packageState === 'broken' ? '{' : JSON.stringify({name:'carapace', version:${JSON.stringify(targetVersion)}});
     fs.writeFileSync(manifest + '.next', bytes);
     fs.renameSync(manifest + '.next', manifest);
   }
   console.log(JSON.stringify({
-    status:'error', mode:'npm', reason:'openclaw doctor',
+    status:'error', mode:'npm', reason:'carapace doctor',
     before:{version:${JSON.stringify(baselineVersion)}},
     after:{version:${JSON.stringify(targetVersion)}},
-    steps:[{name:'global update',exitCode:0},{name:'global install swap',exitCode:0},{name:'openclaw doctor',exitCode:${fixture.exitCode}}]
+    steps:[{name:'global update',exitCode:0},{name:'global install swap',exitCode:0},{name:'carapace doctor',exitCode:${fixture.exitCode}}]
   }));
   console.error('target Doctor fixture failed');
   process.exitCode = ${fixture.exitCode};
@@ -83,7 +83,7 @@ if (args[0] === 'update') {
 `,
         { mode: 0o755 },
       );
-      symlinkSync(entrypoint, join(bin, "openclaw"));
+      symlinkSync(entrypoint, join(bin, "carapace"));
       const prelude = join(home, "bash-env");
       writeFileSync(
         prelude,
@@ -113,14 +113,14 @@ trap 'case "$BASH_COMMAND" in "phase "*) install_fixture_phases ;; esac' DEBUG
           PATH: `${dirname(process.execPath)}:/usr/bin:/bin`,
           HOME: home,
           USERPROFILE: home,
-          OPENCLAW_HOME: home,
-          OPENCLAW_STATE_DIR: state,
-          OPENCLAW_CONFIG_PATH: join(state, "openclaw.json"),
+          CARAPACE_HOME: home,
+          CARAPACE_STATE_DIR: state,
+          CARAPACE_CONFIG_PATH: join(state, "carapace.json"),
           TMPDIR: tmp,
-          OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(home, "runtime"),
-          OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: summaryPath,
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE: `openclaw@${baselineVersion}`,
-          OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_SPEC: join(home, "candidate.tgz"),
+          CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(home, "runtime"),
+          CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: summaryPath,
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE: `carapace@${baselineVersion}`,
+          CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_SPEC: join(home, "candidate.tgz"),
           BASH_ENV: prelude,
         },
       });

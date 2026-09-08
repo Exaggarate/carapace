@@ -3,7 +3,7 @@ import { createBrowserRouteApp, createBrowserRouteResponse } from "./test-helper
 import type { BrowserRequest } from "./types.js";
 
 const routeState = vi.hoisted(() => ({
-  driver: "openclaw",
+  driver: "carapace",
   cookiesGetViaPlaywright: vi.fn(async () => ({ cookies: [] })),
   cookiesSetManyViaPlaywright: vi.fn(async () => ({ added: 2 })),
   setDeviceViaPlaywright: vi.fn(async () => {}),
@@ -48,7 +48,7 @@ function getPostHandler(route: string) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  routeState.driver = "openclaw";
+  routeState.driver = "carapace";
   routeState.withPlaywrightRouteContext
     .mockReset()
     .mockImplementation(async (params: PlaywrightRouteParams) => {

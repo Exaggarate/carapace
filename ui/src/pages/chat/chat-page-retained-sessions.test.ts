@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 /* @vitest-environment-options {"url":"http://chat-page-retained.test/"} */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./chat-pane.ts", () => ({}));
@@ -114,7 +114,7 @@ async function mountRetainedPage(sessionKey: string, ...warmSessionKeys: string[
   for (const key of warmSessionKeys) {
     await showSession(page, key);
   }
-  const panes = () => [...page.querySelectorAll<RenderedPane>("openclaw-chat-pane")];
+  const panes = () => [...page.querySelectorAll<RenderedPane>("carapace-chat-pane")];
   const paneFor = (key: string) => panes().find((pane) => pane.sessionKey === key);
   return { navigation, page, paneFor, panes };
 }
@@ -177,7 +177,7 @@ describe("chat page retained sessions", () => {
     context.gateway.snapshot.hello = {
       snapshot: { sessionDefaults: { mainKey: "main", mainSessionKey: "agent:main:main" } },
     } as GatewayHelloOk;
-    const pane = page.querySelector<RenderedPane>("openclaw-chat-pane")!;
+    const pane = page.querySelector<RenderedPane>("carapace-chat-pane")!;
 
     pane.onPaneSessionChange?.(pane.paneId, "agent:main:main");
 
@@ -368,7 +368,7 @@ describe("chat page retained sessions", () => {
       document.body.append(page);
       await page.updateComplete;
       const pane = expectDefined(
-        page.querySelector<RenderedPane>("openclaw-chat-pane"),
+        page.querySelector<RenderedPane>("carapace-chat-pane"),
         "retained chat pane",
       );
       expect(pane.focusComposer).toBe(true);
@@ -381,7 +381,7 @@ describe("chat page retained sessions", () => {
       vi.advanceTimersByTime(250);
       expect(document.activeElement).toBe(textarea);
 
-      const replacementPane = document.createElement("openclaw-chat-pane") as RenderedPane;
+      const replacementPane = document.createElement("carapace-chat-pane") as RenderedPane;
       replacementPane.active = true;
       replacementPane.sessionKey = "main";
       const replacementCombobox = document.createElement("div");
@@ -425,7 +425,7 @@ describe("chat page retained sessions", () => {
 
   it("rejects a pane callback while a newer browser route is loading", async () => {
     const { navigation, page } = await mountRetainedPage("main");
-    const pane = page.querySelector<RenderedPane>("openclaw-chat-pane");
+    const pane = page.querySelector<RenderedPane>("carapace-chat-pane");
     const previousHref = window.location.href;
 
     try {

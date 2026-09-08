@@ -31,13 +31,13 @@ function writeChannelContract(params: {
   targetId: string;
   ownership: "channelConfigs" | "channels";
 }) {
-  const rootDir = makeTrackedTempDir("openclaw-target-registry-channel", tempDirs);
+  const rootDir = makeTrackedTempDir("carapace-target-registry-channel", tempDirs);
   fs.writeFileSync(
     path.join(rootDir, "secret-contract-api.cjs"),
     `module.exports = { secretTargetRegistryEntries: [${JSON.stringify({
       id: params.targetId,
       targetType: params.targetId,
-      configFile: "openclaw.json",
+      configFile: "carapace.json",
       pathPattern: params.targetId,
       secretShape: "secret_input",
       expectedResolvedValue: "string",
@@ -91,7 +91,7 @@ describe("getSecretTargetRegistry metadata reuse", () => {
       const missing = {
         ...broken,
         id: "missing",
-        rootDir: makeTrackedTempDir("openclaw-target-registry-missing", tempDirs),
+        rootDir: makeTrackedTempDir("carapace-target-registry-missing", tempDirs),
       };
       // A dependency failure can resemble the old missing-artifact message; it is not absence.
       const failure = "Unable to resolve bundled plugin public surface fixture dependency failed";
@@ -105,8 +105,8 @@ describe("getSecretTargetRegistry metadata reuse", () => {
           id: origin === "bundled" ? path.basename(record.rootDir) : record.id,
         }),
       );
-      vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", path.dirname(healthy.rootDir));
-      vi.stubEnv("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+      vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", path.dirname(healthy.rootDir));
+      vi.stubEnv("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
       metadataMocks.resolvePluginMetadataSnapshot.mockReturnValue({ plugins: records } as never);
       const { getSecretTargetRegistry } = await import("./target-registry-data.js");
       const { buildSecretRefCredentialMatrix } =
@@ -136,7 +136,7 @@ describe("getSecretTargetRegistry metadata reuse", () => {
         targetId: "channels.blocked.token",
         ownership: "channels",
       });
-      const outsideDir = makeTrackedTempDir("openclaw-contract-outside", tempDirs);
+      const outsideDir = makeTrackedTempDir("carapace-contract-outside", tempDirs);
       fs.linkSync(
         path.join(record.rootDir, "secret-contract-api.cjs"),
         path.join(outsideDir, "linked-contract.cjs"),
@@ -216,7 +216,7 @@ describe("getSecretTargetRegistry metadata reuse", () => {
   });
 
   it("preserves plugin, array, and record identity across discovery, setup, and apply", async () => {
-    const rootDir = makeTrackedTempDir("openclaw-target-registry-plugin-identity", tempDirs);
+    const rootDir = makeTrackedTempDir("carapace-target-registry-plugin-identity", tempDirs);
     const pluginContracts = [
       { id: "foo.config.bar", secretPath: "token", refId: "DOTTED_PLUGIN_TOKEN" },
       { id: "foo", secretPath: "bar.config.token", refId: "NESTED_PLUGIN_TOKEN" },
@@ -240,7 +240,7 @@ describe("getSecretTargetRegistry metadata reuse", () => {
         configSchema: { type: "object", additionalProperties: true },
         configContracts: { secretInputs: { paths: [{ path: secretPath }] } },
       };
-      fs.writeFileSync(path.join(pluginRoot, "openclaw.plugin.json"), JSON.stringify(manifest));
+      fs.writeFileSync(path.join(pluginRoot, "carapace.plugin.json"), JSON.stringify(manifest));
       return { ...manifest, origin: "config", channels: [], rootDir: pluginRoot };
     });
     metadataMocks.resolvePluginMetadataSnapshot.mockReturnValue({
@@ -421,12 +421,12 @@ describe("getSecretTargetRegistry metadata reuse", () => {
     );
     expect(isSecretsApplyPlan(plan)).toBe(true);
 
-    const configPath = path.join(rootDir, "openclaw.json");
+    const configPath = path.join(rootDir, "carapace.json");
     fs.writeFileSync(configPath, JSON.stringify(config));
     const { testing } = await import("./apply.js");
     const env = {
-      OPENCLAW_STATE_DIR: rootDir,
-      OPENCLAW_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: rootDir,
+      CARAPACE_CONFIG_PATH: configPath,
       DOTTED_PLUGIN_TOKEN: "dotted-secret",
       NESTED_PLUGIN_TOKEN: "nested-secret",
       ARRAY_PLUGIN_TOKEN: "array-secret",

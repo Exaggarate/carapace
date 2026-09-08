@@ -95,7 +95,7 @@ async function mountMenu(
   containers.push(container);
   document.body.append(container);
   render(
-    html`<openclaw-chat-header-session-menu
+    html`<carapace-chat-header-session-menu
       .session=${{
         label: "Test session",
         sessionId: "session-123",
@@ -130,10 +130,10 @@ async function mountMenu(
       .onOpenCommandPalette=${options.onOpenCommandPalette ?? (() => {})}
       .onSettingsChange=${options.onSettingsChange ?? (() => {})}
       .onAction=${options.onAction ?? (() => {})}
-    ></openclaw-chat-header-session-menu>`,
+    ></carapace-chat-header-session-menu>`,
     container,
   );
-  const menu = container.querySelector<HeaderMenuElement>("openclaw-chat-header-session-menu");
+  const menu = container.querySelector<HeaderMenuElement>("carapace-chat-header-session-menu");
   if (!menu) {
     throw new Error("Expected chat header session menu");
   }
@@ -216,7 +216,7 @@ describe("chat header session menu", () => {
         ),
         container,
       );
-      const menu = container.querySelector<HeaderMenuElement>("openclaw-chat-header-session-menu");
+      const menu = container.querySelector<HeaderMenuElement>("carapace-chat-header-session-menu");
       await menu?.updateComplete;
 
       expect(menu?.textContent?.includes("Open in")).toBe(true);
@@ -296,7 +296,7 @@ describe("chat header session menu", () => {
       ),
       container,
     );
-    const menu = container.querySelector<HeaderMenuElement>("openclaw-chat-header-session-menu");
+    const menu = container.querySelector<HeaderMenuElement>("carapace-chat-header-session-menu");
     if (!menu) {
       throw new Error("Expected chat header session menu");
     }
@@ -360,7 +360,7 @@ describe("chat header session menu", () => {
       ),
     ).toEqual(["New tab", "New window", "Continue in terminal…"]);
     const onAction = vi.fn<(action: HeaderMenuAction) => void>();
-    const menu = await mountMenu({ worktreePath: "/work/openclaw", onAction });
+    const menu = await mountMenu({ worktreePath: "/work/carapace", onAction });
     const openIn = item(menu, "Open in");
 
     expect(
@@ -380,7 +380,7 @@ describe("chat header session menu", () => {
     expect(onAction).toHaveBeenCalledWith({
       kind: "open-in",
       editor: "vscode",
-      path: "/work/openclaw",
+      path: "/work/carapace",
     });
   });
 
@@ -499,7 +499,7 @@ describe("chat header session menu", () => {
     const { context } = createSessionOwnerMenuHarness();
     const menu = await mountMenu({
       compact: true,
-      worktreePath: "/work/openclaw",
+      worktreePath: "/work/carapace",
       panelActions: [
         {
           id: "background-tasks",

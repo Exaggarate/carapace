@@ -8,17 +8,17 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { acquireAgentRunPreparedModelRuntime } from "../agents/prepared-model-runtime.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { EmbeddedPreparedModelRuntimeHost } from "./embedded-prepared-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("EmbeddedPreparedModelRuntimeHost", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
   });
 
@@ -43,7 +43,7 @@ describe("EmbeddedPreparedModelRuntimeHost", () => {
     second.release();
 
     expect(second.snapshot).toBe(first.snapshot);
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 });
 

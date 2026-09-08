@@ -29,7 +29,7 @@ function createMessage(
   return {
     role,
     content: [{ type: "text", text }],
-    ...(metadata ? { __openclaw: metadata } : {}),
+    ...(metadata ? { __carapace: metadata } : {}),
   };
 }
 
@@ -130,7 +130,7 @@ describe("readSessionMessageIdentity", () => {
         role: "assistant",
         content: "Commentary",
         idempotencyKey: "codex-app-server:thread-1:turn-1:commentary:item-1",
-        __openclaw: { mirrorOrigin: "codex-app-server", runId: "run-1" },
+        __carapace: { mirrorOrigin: "codex-app-server", runId: "run-1" },
       }),
     ).toMatchObject({
       idempotencyKey: "codex-app-server:thread-1:turn-1:commentary:item-1",
@@ -141,7 +141,7 @@ describe("readSessionMessageIdentity", () => {
         role: "assistant",
         content: "Imported history",
         idempotencyKey: "codex-app-server:thread-1:history:turn-1:assistant",
-        __openclaw: { mirrorOrigin: "codex-app-server" },
+        __carapace: { mirrorOrigin: "codex-app-server" },
       }),
     ).toHaveProperty("runId", null);
   });
@@ -175,13 +175,13 @@ describe("readSessionMessageIdentity", () => {
 
 describe("readSessionMessageSequence", () => {
   it("preserves the durable sequence of role-less history and status markers", () => {
-    expect(readSessionMessageSequence({ __openclaw: { seq: 7 } })).toBe(7);
+    expect(readSessionMessageSequence({ __carapace: { seq: 7 } })).toBe(7);
   });
 
   it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1])(
     "rejects unsafe role-less marker sequence %s",
     (sequence) => {
-      expect(readSessionMessageSequence({ __openclaw: { seq: sequence } })).toBeNull();
+      expect(readSessionMessageSequence({ __carapace: { seq: sequence } })).toBeNull();
     },
   );
 });
@@ -391,7 +391,7 @@ describe("session transcript projection", () => {
     ({ itemId, runId, id, seq, importedFrom, adopts }) => {
       const local = {
         ...createMessage("assistant", "Repeated progress.", { id, seq, importedFrom }),
-        openclawStreamFallback: { itemId, runId, source: "segment" },
+        carapaceStreamFallback: { itemId, runId, source: "segment" },
       };
       const durable = {
         ...createMessage("assistant", "Repeated progress.", {
@@ -400,7 +400,7 @@ describe("session transcript projection", () => {
           runId: "run-1",
           mirrorOrigin: "codex-app-server",
         }),
-        openclawStreamFallback: { itemId: "item-1", source: "segment" },
+        carapaceStreamFallback: { itemId: "item-1", source: "segment" },
       };
       const final = createMessage("assistant", "Finished.", {
         id: "final",
@@ -426,11 +426,11 @@ describe("session transcript projection", () => {
         seq: 3,
         runId: "run-1",
       }),
-      openclawStreamFallback: { itemId: "item-1", source: "segment" },
+      carapaceStreamFallback: { itemId: "item-1", source: "segment" },
     };
     const local = {
       ...createMessage("assistant", "Partial progress."),
-      openclawStreamFallback: { itemId: "item-1", runId: "run-1", source: "segment" },
+      carapaceStreamFallback: { itemId: "item-1", runId: "run-1", source: "segment" },
     };
     const state = projectLiveSessionMessage(createSessionProjection(primaryScope), durable);
 
@@ -829,12 +829,12 @@ describe("session transcript projection", () => {
       const pending = {
         role: "user",
         content: "",
-        __openclaw: { idempotencyKey: "image-run:user" },
+        __carapace: { idempotencyKey: "image-run:user" },
       };
       const persisted = {
         role: "user",
         content: "",
-        __openclaw: {
+        __carapace: {
           id: "image-user",
           seq: 1,
           idempotencyKey: "image-run:user",

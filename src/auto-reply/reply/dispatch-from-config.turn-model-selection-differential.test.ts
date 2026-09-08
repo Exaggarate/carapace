@@ -4,7 +4,7 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import type { AgentHarness } from "../../agents/harness/types.js";
 import { replaceSessionEntrySync } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createSessionConversationTestRegistry } from "../../test-utils/session-conversation-registry.js";
 import {
@@ -39,12 +39,12 @@ const recorderHarness = {
 function createConfig(
   storePath: string,
   modelByChannel: TurnModelDifferentialFixture["modelByChannel"],
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     session: { store: storePath },
     agents: { defaults: { model: { primary: turnModelRefLabel(TURN_MODEL_DEFAULT_REF) } } },
     channels: modelByChannel ? { modelByChannel } : undefined,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function observeHarnessSelection(fixture: TurnModelDifferentialFixture): TurnModelSelectionVerdict {
@@ -101,7 +101,7 @@ describe("turn model selection harness-path differential", () => {
   });
 
   it.each([
-    { pluginOwnerId: "model-owner", expectedPin: undefined, expectedOverride: "openclaw" },
+    { pluginOwnerId: "model-owner", expectedPin: undefined, expectedOverride: "carapace" },
     { pluginOwnerId: undefined, expectedPin: "codex", expectedOverride: "codex" },
   ])(
     "preserves the delivery-policy owner with pluginOwnerId=$pluginOwnerId",
@@ -117,7 +117,7 @@ describe("turn model selection harness-path differential", () => {
           sessionId: "owned-session",
           updatedAt: 100,
           agentHarnessId: "codex",
-          agentRuntimeOverride: "openclaw",
+          agentRuntimeOverride: "carapace",
           modelSelectionLocked: true,
           pluginOwnerId,
         },
@@ -151,7 +151,7 @@ describe("turn model selection harness-path differential", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     selectAgentHarnessMock.mockClear();
     resolveVisibleRepliesPolicy({

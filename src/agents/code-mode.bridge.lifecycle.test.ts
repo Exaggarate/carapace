@@ -1,7 +1,7 @@
 /** Subscribed embedded tool lifecycles, including real QuickJS bridge coverage. */
 import { getEventListeners } from "node:events";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
@@ -57,7 +57,7 @@ describe("Code Mode subscribed bridge lifecycle", () => {
         const result = harness.executeTool({
           tool: target,
           toolName: "message",
-          source: "openclaw",
+          source: "carapace",
           sourceName: "core",
           toolCallId: "nested-source-reply",
           parentToolCallId: "outer-exec",
@@ -119,7 +119,7 @@ describe("Code Mode subscribed bridge lifecycle", () => {
       executeTool({
         tool: target,
         toolName: "read",
-        source: "openclaw",
+        source: "carapace",
         toolCallId: expectDefined(ids[index], "nested invocation id"),
         parentToolCallId: "exec|fc-original",
         input: { path: "repeat-proof.txt" },
@@ -270,7 +270,7 @@ describe("Code Mode subscribed bridge lifecycle", () => {
       const pending = harness.executeTool({
         tool: target,
         toolName: "read",
-        source: "openclaw",
+        source: "carapace",
         toolCallId: "stalled-terminal",
         input: {},
         acceptResultBeforeProjection: async (result) => result,
@@ -328,7 +328,7 @@ describe("Code Mode subscribed bridge lifecycle", () => {
         harness.executeTool({
           tool,
           toolName: tool.name,
-          source: "openclaw",
+          source: "carapace",
           sourceName: "fixture-plugin",
           toolCallId,
           parentToolCallId: `code-${toolCallId}`,

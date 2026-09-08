@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawChatUI
+import CarapaceChatUI
 import Testing
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 @MainActor
 struct SessionDashboardScreenTests {
@@ -11,7 +11,7 @@ struct SessionDashboardScreenTests {
             #"{"key":"agent:main:dashboard:cleanup","displayName":"Nightly Disk Cleanup","boardFace":"dashboard","agentId":"main"}"#
                 .utf8)
 
-        let session = try JSONDecoder().decode(OpenClawChatSessionEntry.self, from: data)
+        let session = try JSONDecoder().decode(CarapaceChatSessionEntry.self, from: data)
 
         #expect(session.boardFace == "dashboard")
         #expect(session.agentId == "main")
@@ -31,7 +31,7 @@ struct SessionDashboardScreenTests {
         let data = Data(
             #"{"key":"global","displayName":"Shared Dashboard","boardFace":"dashboard","agentId":"work"}"#
                 .utf8)
-        let session = try JSONDecoder().decode(OpenClawChatSessionEntry.self, from: data)
+        let session = try JSONDecoder().decode(CarapaceChatSessionEntry.self, from: data)
 
         let target = RootTabs.sidebarDashboardTarget(for: session)
 
@@ -120,12 +120,12 @@ struct SessionDashboardScreenTests {
             storedOperatorToken: nil,
             usesNativeNavigationChrome: true)
 
-        #expect(script?.contains("__OPENCLAW_NATIVE_WEB_CHROME__") == true)
+        #expect(script?.contains("__CARAPACE_NATIVE_WEB_CHROME__") == true)
     }
 
     @Test func `dashboard URL routes a global session through its roster agent`() throws {
         let config = try GatewayConnectConfig(
-            url: #require(URL(string: "wss://gateway.example.com/openclaw")),
+            url: #require(URL(string: "wss://gateway.example.com/carapace")),
             stableID: "manual|gateway.example.com|443",
             tls: nil,
             token: "secret-token",
@@ -146,7 +146,7 @@ struct SessionDashboardScreenTests {
             sessionKey: "global",
             agentId: "work")
 
-        #expect(url?.absoluteString == "https://gateway.example.com/openclaw/focus/dashboard/work")
+        #expect(url?.absoluteString == "https://gateway.example.com/carapace/focus/dashboard/work")
     }
 
     @Test func `dashboard URL rejects an unscoped session key without a roster agent`() throws {
@@ -170,13 +170,13 @@ struct SessionDashboardScreenTests {
         #expect(SessionDashboardScreen.dashboardURL(config: config, sessionKey: "main") == nil)
     }
 
-    private static func session(boardFace: String?) throws -> OpenClawChatSessionEntry {
+    private static func session(boardFace: String?) throws -> CarapaceChatSessionEntry {
         var object: [String: String] = [
             "key": "agent:main:dashboard:cleanup",
             "displayName": "Nightly Disk Cleanup",
         ]
         object["boardFace"] = boardFace
         let data = try JSONSerialization.data(withJSONObject: object)
-        return try JSONDecoder().decode(OpenClawChatSessionEntry.self, from: data)
+        return try JSONDecoder().decode(CarapaceChatSessionEntry.self, from: data)
     }
 }

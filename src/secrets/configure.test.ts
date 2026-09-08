@@ -38,14 +38,14 @@ vi.mock("./apply.js", () => ({
 
 import { noteCommittedSharedAuthStoreOwnership } from "../agents/auth-profiles/path-resolve.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 
 const { runSecretsConfigureInteractive } = await import("./configure.js");
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-secrets-configure-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-secrets-configure-"));
   fs.chmodSync(dir, 0o700);
   tempDirs.push(dir);
   return dir;
@@ -60,13 +60,13 @@ function makeTempDir(): string {
  */
 function writeSharedAuthProfileStoreRaw(env: NodeJS.ProcessEnv, payload: unknown): void {
   noteCommittedSharedAuthStoreOwnership({ location: "state-db" }, env);
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   try {
     db.prepare(
       "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES (?, ?, 1)",
     ).run("authProfiles.store", JSON.stringify(payload));
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
 }
 
@@ -202,7 +202,7 @@ describe("runSecretsConfigureInteractive", () => {
     // is required to still see that plaintext. `secrets configure` only edits
     // the selected agent's local store, so neither is migratable here.
     const stateDir = makeTempDir();
-    const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+    const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
     writeSharedAuthProfileStoreRaw(env, {
       version: 1,
       profiles: {
@@ -261,7 +261,7 @@ describe("runSecretsConfigureInteractive", () => {
     // two have no `keyRef`; without sharing audit's `coerceSecretRef` check the
     // counter would miscount them as plaintext.
     const stateDir = makeTempDir();
-    const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+    const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
     writeSharedAuthProfileStoreRaw(env, {
       version: 1,
       profiles: {
@@ -315,7 +315,7 @@ describe("runSecretsConfigureInteractive", () => {
 
     // No shared store row committed → no plaintext to report.
     const stateDir = makeTempDir();
-    const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+    const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
     loadPersistedAuthProfileStoreMock.mockReturnValue({
       version: 1,
       profiles: {},

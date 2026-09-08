@@ -15,16 +15,16 @@ import {
   uploadBatchJsonlFile,
   waitForEmbeddingBatch,
   withRemoteHttpResponse,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   assertOkOrThrowProviderError,
   createProviderOperationDeadline,
   readProviderJsonResponse,
   resolveProviderOperationTimeoutMs,
   waitProviderOperationPollInterval,
-} from "openclaw/plugin-sdk/provider-http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { VoyageEmbeddingClient } from "./embedding-provider.js";
 
 /**

@@ -241,8 +241,8 @@ export function buildBuiltinChatCommands(
       ],
     }),
     defineBuiltinCommand(
-      "openclaw",
-      "Run the OpenClaw setup and repair helper.",
+      "carapace",
+      "Run the Carapace setup and repair helper.",
       "management",
       "essential",
       {
@@ -424,7 +424,7 @@ export function buildBuiltinChatCommands(
       argsParsing: "none",
       formatArgs: COMMAND_ARG_FORMATTERS.config,
     }),
-    defineBuiltinCommand("mcp", "Show or set OpenClaw MCP servers.", "management", "power", {
+    defineBuiltinCommand("mcp", "Show or set Carapace MCP servers.", "management", "power", {
       args: [
         defineCommandArgument("action", "show | get | set | unset", {
           choices: ["show", "get", "set", "unset"],
@@ -474,8 +474,8 @@ export function buildBuiltinChatCommands(
     defineBuiltinCommand("stop", "Stop the current run.", "session", "essential", {
       activeRunSafe: true,
     }),
-    defineBuiltinCommand("restart", "Restart OpenClaw.", "tools", "power"),
-    defineBuiltinCommand("update", "Update OpenClaw and restart.", "tools", "power"),
+    defineBuiltinCommand("restart", "Restart Carapace.", "tools", "power"),
+    defineBuiltinCommand("update", "Update Carapace and restart.", "tools", "power"),
     defineBuiltinCommand("activation", "Set group activation mode.", "management", "power", {
       args: [
         defineCommandArgument("mode", "mention or always", { choices: ["mention", "always"] }),

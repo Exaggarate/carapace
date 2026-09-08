@@ -119,7 +119,7 @@ function createSuccessfulLeaderRunner(mode: SuccessfulLeaderDescendantMode, targ
 async function runSuccessfulLeaderDescendantScenario(
   mode: SuccessfulLeaderDescendantMode,
 ): Promise<number> {
-  const tempDir = createTempDir(`openclaw-oxlint-success-${mode}-`);
+  const tempDir = createTempDir(`carapace-oxlint-success-${mode}-`);
   const runner = join(tempDir, "success-runner.mjs");
   const childPidPath = join(tempDir, "child.pid");
   const readyFile = join(tempDir, "ready");
@@ -135,9 +135,9 @@ async function runSuccessfulLeaderDescendantScenario(
       DRAINING_FILE: drainingFile,
       READY_FILE: readyFile,
       RELEASE_FILE: releaseFile,
-      OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0",
-      OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "1000",
-      OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "0",
+      CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "0",
+      CARAPACE_OXLINT_SHARD_KILL_GRACE_MS: "1000",
+      CARAPACE_OXLINT_SHARD_TIMEOUT_MS: "0",
     },
     extraArgs: [],
     runner,
@@ -169,7 +169,7 @@ async function runSuccessfulLeaderDescendantScenario(
 function runParentTerminationScenario(mode: SignalScenario) {
   const groupScenario = mode === "group";
   const tempDir = createTempDir(
-    groupScenario ? "openclaw-oxlint-parent-group-" : "openclaw-oxlint-signal-",
+    groupScenario ? "carapace-oxlint-parent-group-" : "carapace-oxlint-signal-",
   );
   const runner = join(tempDir, "signal-runner.mjs");
   const harness = join(tempDir, "signal-harness.mjs");
@@ -186,9 +186,9 @@ function runParentTerminationScenario(mode: SignalScenario) {
     `import { runShard } from ${JSON.stringify(RUN_OXLINT_SHARDS_URL)};`,
     "const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)); const groupScenario = process.env.SCENARIO === 'group';",
     "const waitFor = async (predicate) => { const attempts = groupScenario ? 500 : 100; const delay = groupScenario ? 5 : 10; for (let attempt = 0; attempt < attempts; attempt += 1) { if (predicate()) return true; await sleep(delay); } return false; };",
-    "const shardEnv = { ...process.env, OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: '0', OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: '0' };",
-    "if (process.env.SCENARIO === 'ignore') shardEnv.OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS = '250';",
-    "if (groupScenario) shardEnv.OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS = '25';",
+    "const shardEnv = { ...process.env, CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: '0', CARAPACE_OXLINT_SHARD_TIMEOUT_MS: '0' };",
+    "if (process.env.SCENARIO === 'ignore') shardEnv.CARAPACE_OXLINT_SHARD_KILL_GRACE_MS = '250';",
+    "if (groupScenario) shardEnv.CARAPACE_OXLINT_SHARD_KILL_GRACE_MS = '25';",
     "const promise = runShard({ env: shardEnv, extraArgs: [], runner: process.env.RUNNER_FILE, shard: { name: groupScenario ? 'signal-group-test' : 'signal-test', args: [] } });",
     "const waitPath = groupScenario ? process.env.CHILD_PID_PATH : process.env.READY_FILE;",
     "if (!(await waitFor(() => existsSync(waitPath)))) process.exit(2);",
@@ -268,7 +268,7 @@ function createPluginShardFixture(
   memoryGiB: number,
   platform: NodeJS.Platform = "linux",
 ) {
-  const cwd = createTempDir("openclaw-oxlint-memory-");
+  const cwd = createTempDir("carapace-oxlint-memory-");
   for (const directory of PLUGIN_FIXTURE_DIRECTORIES) {
     mkdirSync(join(cwd, "extensions", directory), { recursive: true });
   }
@@ -277,7 +277,7 @@ function createPluginShardFixture(
   return filterOxlintShards(
     createOxlintShards({
       cwd,
-      env: { ...env, OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "1" },
+      env: { ...env, CARAPACE_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "1" },
       platform,
       hostResources: { totalMemoryBytes: memoryGiB * 1024 ** 3, logicalCpuCount: 4 },
     }),
@@ -372,7 +372,7 @@ describe("run-oxlint", () => {
       "node --import ./scripts/tsx.mjs scripts/prepare-extension-package-boundary-artifacts.mts",
     );
     expect(shardedLintRunner).toContain("prepare-extension-package-boundary-artifacts.mts");
-    expect(shardedLintRunner).toContain('OPENCLAW_OXLINT_SKIP_PREPARE: "1"');
+    expect(shardedLintRunner).toContain('CARAPACE_OXLINT_SKIP_PREPARE: "1"');
   });
 
   it("serializes broad oxlint shards on constrained local hosts", () => {
@@ -381,7 +381,7 @@ describe("run-oxlint", () => {
 
   it("serializes broad oxlint shards on constrained CI hosts", () => {
     expect(shouldSerializeShards({ CI: "true" })).toBe(true);
-    expect(shouldSerializeShards({ CI: "true", OPENCLAW_LOCAL_CHECK_MODE: "throttled" })).toBe(
+    expect(shouldSerializeShards({ CI: "true", CARAPACE_LOCAL_CHECK_MODE: "throttled" })).toBe(
       true,
     );
   });
@@ -405,14 +405,14 @@ describe("run-oxlint", () => {
 
   it("keeps oxlint shards parallel for roomy CI and explicit full-speed runs", () => {
     expect(shouldSerializeShards({ CI: "true" }, ROOMY_HOST)).toBe(false);
-    expect(shouldSerializeShards({ OPENCLAW_LOCAL_CHECK_MODE: "full" })).toBe(false);
+    expect(shouldSerializeShards({ CARAPACE_LOCAL_CHECK_MODE: "full" })).toBe(false);
   });
 
   it("honors explicit oxlint shard serial overrides", () => {
     expect(
-      shouldSerializeShards({ OPENCLAW_OXLINT_SHARDS_SERIAL: "1", CI: "true" }, ROOMY_HOST),
+      shouldSerializeShards({ CARAPACE_OXLINT_SHARDS_SERIAL: "1", CI: "true" }, ROOMY_HOST),
     ).toBe(true);
-    expect(shouldSerializeShards({ OPENCLAW_OXLINT_SHARDS_SERIAL: "0" }, ROOMY_HOST)).toBe(false);
+    expect(shouldSerializeShards({ CARAPACE_OXLINT_SHARDS_SERIAL: "0" }, ROOMY_HOST)).toBe(false);
   });
 
   it("bounds split-core shard parallelism on roomy CI hosts", () => {
@@ -426,29 +426,29 @@ describe("run-oxlint", () => {
   it("does not let local throttled mode serialize remote changed gates", () => {
     expect(
       resolveSplitCoreConcurrency({
-        OPENCLAW_CHECK_CHANGED_REMOTE_CHILD: "1",
-        OPENCLAW_LOCAL_CHECK_MODE: "throttled",
+        CARAPACE_CHECK_CHANGED_REMOTE_CHILD: "1",
+        CARAPACE_LOCAL_CHECK_MODE: "throttled",
       }),
     ).toBe(4);
   });
 
   it("honors explicit oxlint shard concurrency overrides", () => {
     expect(
-      resolveSplitCoreConcurrency({ CI: "true", OPENCLAW_OXLINT_SHARD_CONCURRENCY: "2" }),
+      resolveSplitCoreConcurrency({ CI: "true", CARAPACE_OXLINT_SHARD_CONCURRENCY: "2" }),
     ).toBe(2);
 
     expect(() =>
       resolveSplitCoreConcurrency({
         CI: "true",
-        OPENCLAW_OXLINT_SHARD_CONCURRENCY: "2x",
+        CARAPACE_OXLINT_SHARD_CONCURRENCY: "2x",
       }),
-    ).toThrow("OPENCLAW_OXLINT_SHARD_CONCURRENCY must be a positive integer; got: 2x");
+    ).toThrow("CARAPACE_OXLINT_SHARD_CONCURRENCY must be a positive integer; got: 2x");
   });
 
   it("keeps explicitly split extension stripes serial on roomy hosts", () => {
     expect(
       resolveOxlintShardConcurrency({
-        env: { CI: "true", OPENCLAW_OXLINT_SHARD_CONCURRENCY: "2" },
+        env: { CI: "true", CARAPACE_OXLINT_SHARD_CONCURRENCY: "2" },
         platform: "linux",
         hostResources: ROOMY_HOST,
         splitExtensions: true,
@@ -458,38 +458,38 @@ describe("run-oxlint", () => {
 
   it("uses a bounded oxlint shard heartbeat by default", () => {
     expect(resolveShardHeartbeatMs({})).toBe(30_000);
-    expect(resolveShardHeartbeatMs({ OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0" })).toBe(0);
-    expect(resolveShardHeartbeatMs({ OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "5000" })).toBe(5000);
-    expect(() => resolveShardHeartbeatMs({ OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "5000ms" })).toThrow(
-      "OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS must be a non-negative integer; got: 5000ms",
+    expect(resolveShardHeartbeatMs({ CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "0" })).toBe(0);
+    expect(resolveShardHeartbeatMs({ CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "5000" })).toBe(5000);
+    expect(() => resolveShardHeartbeatMs({ CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "5000ms" })).toThrow(
+      "CARAPACE_OXLINT_SHARD_HEARTBEAT_MS must be a non-negative integer; got: 5000ms",
     );
   });
 
   it("uses a bounded oxlint shard timeout by default", () => {
     expect(resolveShardTimeoutMs({})).toBe(900_000);
-    expect(resolveShardTimeoutMs({ OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "0" })).toBe(0);
-    expect(resolveShardTimeoutMs({ OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "5000" })).toBe(5000);
-    expect(() => resolveShardTimeoutMs({ OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "1e3" })).toThrow(
-      "OPENCLAW_OXLINT_SHARD_TIMEOUT_MS must be a non-negative integer; got: 1e3",
+    expect(resolveShardTimeoutMs({ CARAPACE_OXLINT_SHARD_TIMEOUT_MS: "0" })).toBe(0);
+    expect(resolveShardTimeoutMs({ CARAPACE_OXLINT_SHARD_TIMEOUT_MS: "5000" })).toBe(5000);
+    expect(() => resolveShardTimeoutMs({ CARAPACE_OXLINT_SHARD_TIMEOUT_MS: "1e3" })).toThrow(
+      "CARAPACE_OXLINT_SHARD_TIMEOUT_MS must be a non-negative integer; got: 1e3",
     );
     expect(resolveShardKillGraceMs({})).toBe(5_000);
-    expect(resolveShardKillGraceMs({ OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "0" })).toBe(0);
-    expect(() => resolveShardKillGraceMs({ OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "-1" })).toThrow(
-      "OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS must be a non-negative integer; got: -1",
+    expect(resolveShardKillGraceMs({ CARAPACE_OXLINT_SHARD_KILL_GRACE_MS: "0" })).toBe(0);
+    expect(() => resolveShardKillGraceMs({ CARAPACE_OXLINT_SHARD_KILL_GRACE_MS: "-1" })).toThrow(
+      "CARAPACE_OXLINT_SHARD_KILL_GRACE_MS must be a non-negative integer; got: -1",
     );
   });
 
   it("fails a stuck oxlint shard instead of waiting forever", async () => {
-    const tempDir = createTempDir("openclaw-oxlint-shard-");
+    const tempDir = createTempDir("carapace-oxlint-shard-");
     const runner = join(tempDir, "hang-runner.mjs");
     writeFileSync(runner, "setInterval(() => {}, 1000);\n", "utf8");
 
     const status = await runShard({
       env: {
         ...process.env,
-        OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0",
-        OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "25",
-        OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "25",
+        CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "0",
+        CARAPACE_OXLINT_SHARD_TIMEOUT_MS: "25",
+        CARAPACE_OXLINT_SHARD_KILL_GRACE_MS: "25",
       },
       extraArgs: [],
       runner,
@@ -502,7 +502,7 @@ describe("run-oxlint", () => {
   it.runIf(process.platform !== "win32")(
     "kills timed-out shard process groups when the leader exits first",
     async () => {
-      const tempDir = createTempDir("openclaw-oxlint-timeout-group-");
+      const tempDir = createTempDir("carapace-oxlint-timeout-group-");
       const runner = join(tempDir, "timeout-runner.mjs");
       const childPidPath = join(tempDir, "child.pid");
       let childPid = 0;
@@ -526,9 +526,9 @@ describe("run-oxlint", () => {
             env: {
               ...process.env,
               CHILD_PID_PATH: childPidPath,
-              OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0",
-              OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "25",
-              OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "250",
+              CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "0",
+              CARAPACE_OXLINT_SHARD_KILL_GRACE_MS: "25",
+              CARAPACE_OXLINT_SHARD_TIMEOUT_MS: "250",
             },
             extraArgs: [],
             runner,
@@ -605,7 +605,7 @@ describe("run-oxlint", () => {
     const shards = createOxlintShards({
       cwd: "/repo",
       env: {
-        OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "2",
+        CARAPACE_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "2",
       },
       platform: "win32",
       hostResources: ROOMY_HOST,
@@ -646,11 +646,11 @@ describe("run-oxlint", () => {
   );
 
   it.each([
-    { name: "explicit full speed", memoryGiB: 16, env: { OPENCLAW_LOCAL_CHECK_MODE: "full" } },
-    { name: "explicit fast mode", memoryGiB: 16, env: { OPENCLAW_LOCAL_CHECK_MODE: "fast" } },
-    { name: "explicit parallel", memoryGiB: 16, env: { OPENCLAW_OXLINT_SHARDS_SERIAL: "0" } },
+    { name: "explicit full speed", memoryGiB: 16, env: { CARAPACE_LOCAL_CHECK_MODE: "full" } },
+    { name: "explicit fast mode", memoryGiB: 16, env: { CARAPACE_LOCAL_CHECK_MODE: "fast" } },
+    { name: "explicit parallel", memoryGiB: 16, env: { CARAPACE_OXLINT_SHARDS_SERIAL: "0" } },
     { name: "large low-CPU CI", memoryGiB: 64, env: { CI: "true" } },
-    { name: "large explicit serial", memoryGiB: 64, env: { OPENCLAW_OXLINT_SHARDS_SERIAL: "1" } },
+    { name: "large explicit serial", memoryGiB: 64, env: { CARAPACE_OXLINT_SHARDS_SERIAL: "1" } },
     { name: "memory threshold", memoryGiB: 24, env: { CI: "true" } },
   ])("keeps the unsplit plugin workload for $name", ({ memoryGiB, env }) => {
     expect(createPluginShardFixture(env, memoryGiB)).toEqual([
@@ -738,7 +738,7 @@ describe("run-oxlint", () => {
     {
       name: "explicit parallel",
       hostResources: CONSTRAINED_HOST,
-      env: { OPENCLAW_OXLINT_SHARDS_SERIAL: "0" },
+      env: { CARAPACE_OXLINT_SHARDS_SERIAL: "0" },
     },
   ])("partitions explicit extension stripes on $name", ({ hostResources, env }) => {
     const entries = [
@@ -782,7 +782,7 @@ describe("run-oxlint", () => {
   it.runIf(process.platform !== "win32")(
     "partitions explicit extension stripes through the CLI on nonserial hosts",
     () => {
-      const cwd = createTempDir("openclaw-oxlint-cli-stripes-");
+      const cwd = createTempDir("carapace-oxlint-cli-stripes-");
       const receivedArgsPath = join(cwd, "received-args.jsonl");
       for (const directory of PLUGIN_FIXTURE_DIRECTORIES) {
         mkdirSync(join(cwd, "extensions", directory), { recursive: true });
@@ -809,8 +809,8 @@ describe("run-oxlint", () => {
             encoding: "utf8",
             env: {
               ...process.env,
-              OPENCLAW_LOCAL_CHECK: "0",
-              OPENCLAW_OXLINT_SHARDS_SERIAL: "0",
+              CARAPACE_LOCAL_CHECK: "0",
+              CARAPACE_OXLINT_SHARDS_SERIAL: "0",
             },
             timeout: 5_000,
           },
@@ -899,13 +899,13 @@ describe("run-oxlint", () => {
     ["--only=wat"],
     ["--only=core", "--only=wat"],
   ])("rejects invalid shard CLI input before starting work: %s", (...args) => {
-    const tempDir = createTempDir("openclaw-oxlint-selector-");
+    const tempDir = createTempDir("carapace-oxlint-selector-");
     const result = spawnSync(process.execPath, [fileURLToPath(RUN_OXLINT_SHARDS_URL), ...args], {
       cwd: tempDir,
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_LOCAL_CHECK: "1",
+        CARAPACE_LOCAL_CHECK: "1",
       },
     });
 
@@ -930,14 +930,14 @@ describe("run-oxlint", () => {
   it("rejects invalid Windows oxlint extension chunk size overrides", () => {
     expect(resolveWindowsExtensionChunkSize({})).toBe(8);
     expect(() =>
-      resolveWindowsExtensionChunkSize({ OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "0" }),
-    ).toThrow("OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 0");
+      resolveWindowsExtensionChunkSize({ CARAPACE_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "0" }),
+    ).toThrow("CARAPACE_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 0");
     expect(() =>
       resolveWindowsExtensionChunkSize({
-        OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "8 chunks",
+        CARAPACE_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "8 chunks",
       }),
     ).toThrow(
-      "OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 8 chunks",
+      "CARAPACE_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 8 chunks",
     );
   });
 

@@ -2,10 +2,10 @@ import {
   embeddedAgentLog,
   formatErrorMessage,
   isHostScopedAgentToolActive,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { buildCodexUserMcpServersThreadConfigPatchForRun } from "openclaw/plugin-sdk/codex-mcp-projection";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import { buildCodexUserMcpServersThreadConfigPatchForRun } from "carapace/plugin-sdk/codex-mcp-projection";
 import { getCodexAppServerClientInstanceId } from "./client.js";
 import {
   CODEX_SESSION_OVERRIDABLE_LAYER_TYPES,
@@ -130,7 +130,7 @@ export async function prepareCodexThreadLifecyclePreflight(params: CodexStartOrR
     params.environmentSelection,
   );
   const hostSystemAgentActive =
-    params.hostSystemAgentActive ?? isHostScopedAgentToolActive("openclaw");
+    params.hostSystemAgentActive ?? isHostScopedAgentToolActive("carapace");
   const ringZeroActive =
     hostSystemAgentActive && isSystemAgentOnlyCodexDynamicToolAllowlist(params.params.toolsAllow);
   const messageOnlySourceReply = isMessageOnlyCodexSourceReply(params.params);

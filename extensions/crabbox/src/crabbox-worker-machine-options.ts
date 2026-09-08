@@ -1,5 +1,5 @@
-import type { WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
-import { asPositiveSafeInteger, isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
+import { asPositiveSafeInteger, isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CrabboxCommandRunner } from "./crabbox-worker-command.js";
 import {
   type CrabboxMachineShape,

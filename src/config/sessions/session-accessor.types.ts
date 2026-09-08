@@ -1,5 +1,5 @@
 import type { SessionTranscriptUpdate } from "../../sessions/transcript-events.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import type {
   SessionTranscriptTurnMutation,
   SessionTranscriptTurnMutationResult,
@@ -63,7 +63,7 @@ export type LogicalSessionAccessScope = {
   /** Prepared agent owner for unscoped keys; must agree with agent-scoped keys. */
   agentId?: string;
   /** Runtime config whose session store rules define the logical session owner. */
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   /** Environment override used when resolving configured/discovered agent stores. */
   env?: NodeJS.ProcessEnv;
   /** Canonical or alias session key for the logical entry being read or written. */
@@ -100,7 +100,7 @@ export type SessionEntryCandidateAccessScope = {
   /** Ordered session keys to test inside the resolved store. */
   candidateKeys: readonly string[];
   /** Runtime config whose session store rule selects the backend target. */
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   /** Environment override used when resolving agent-scoped store paths in tests/tools. */
   env?: NodeJS.ProcessEnv;
   /** Optional synthesized entry returned only when no candidate exists. */
@@ -303,7 +303,7 @@ export type TranscriptMessageAppendOptions<TMessage> = {
   /** Rebase a stale explicit parent when the current tail still descends from it. */
   appendIntent?: "active-branch";
   /** Runtime config used for message redaction and transcript header metadata. */
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   /** Working directory recorded in a newly created transcript header. */
   cwd?: string;
   /** How duplicate message idempotency keys are detected before append. */
@@ -398,7 +398,7 @@ export type SessionTranscriptTurnWriteContext = {
 
 export type SessionTranscriptTurnPersistOptions = {
   /** Runtime config used for lock settings, redaction, and header metadata. */
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   /** Working directory recorded in a newly created transcript header. */
   cwd?: string;
   /**

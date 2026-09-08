@@ -3,7 +3,7 @@ import { property } from "lit/decorators.js";
 import { ref } from "lit/directives/ref.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { t } from "../../../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../../../lit/carapace-element.ts";
 import {
   openAttachmentCardFromClick,
   renderAttachmentCardHeader,
@@ -14,7 +14,7 @@ import { observeChatAttachmentViewport } from "./chat-attachment-viewport.ts";
 import type { ChatMediaPlaybackMode } from "./chat-media-playback.ts";
 import { ChatMediaSourceController } from "./chat-media-source.ts";
 
-class ChatVideoPlayer extends OpenClawLightDomContentsElement {
+class ChatVideoPlayer extends CarapaceLightDomContentsElement {
   @property() src = "";
   @property() sourceIdentity = "";
   @property() label = "";
@@ -216,12 +216,12 @@ class ChatVideoPlayer extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-video-player")) {
-  customElements.define("openclaw-chat-video-player", ChatVideoPlayer);
+if (!customElements.get("carapace-chat-video-player")) {
+  customElements.define("carapace-chat-video-player", ChatVideoPlayer);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-chat-video-player": ChatVideoPlayer;
+    "carapace-chat-video-player": ChatVideoPlayer;
   }
 }

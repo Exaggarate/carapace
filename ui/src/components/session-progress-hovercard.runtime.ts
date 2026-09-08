@@ -1,4 +1,4 @@
-import type { ProgressCard, ProgressCardGetParams } from "@openclaw/gateway-protocol";
+import type { ProgressCard, ProgressCardGetParams } from "@carapace/gateway-protocol";
 import { nothing, ReactiveElement, render } from "lit";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
 import type { ApplicationContext } from "../app/context.ts";
@@ -303,7 +303,7 @@ export class SessionProgressHovercardProvider extends ReactiveElement {
     }
     const agentId =
       parseAgentSessionKey(sessionKey)?.agentId ??
-      target.closest<AppSidebarSessionNavigationElement>("openclaw-app-sidebar")?.expandedAgentId();
+      target.closest<AppSidebarSessionNavigationElement>("carapace-app-sidebar")?.expandedAgentId();
     if (!agentId) {
       return;
     }
@@ -411,7 +411,7 @@ export class SessionProgressHovercardProvider extends ReactiveElement {
     }
     const sidebarRow =
       this.querySelector<AppSidebarSessionNavigationElement>(
-        "openclaw-app-sidebar",
+        "carapace-app-sidebar",
       )?.findSidebarHovercardRowByKey(sessionKey);
     const pullRequests = this.pullRequests?.get(artifactKey);
     const currentProgressCard = this.progressCards?.get(session);
@@ -478,7 +478,7 @@ export class SessionProgressHovercardProvider extends ReactiveElement {
     if (!card) {
       nextHovercardId += 1;
       card = createPortaledHovercard(
-        `openclaw-session-progress-hovercard-${nextHovercardId}`,
+        `carapace-session-progress-hovercard-${nextHovercardId}`,
         "session-progress-hovercard",
       );
       this.animateNextOpen = false;

@@ -1,4 +1,4 @@
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginNodeInvokePolicyContext } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import { zoomMeetingsConfig } from "./config.js";
 import { createZoomMeetingsNodeInvokePolicy } from "./node-invoke-policy.js";
@@ -27,7 +27,7 @@ describe("Zoom meetings node invoke policy", () => {
         audioInputCommand: ["untrusted-input"],
         audioOutputCommand: ["untrusted-output"],
       },
-    } as OpenClawPluginNodeInvokePolicyContext);
+    } as CarapacePluginNodeInvokePolicyContext);
 
     expect(invokeNode).toHaveBeenCalledWith({
       params: {

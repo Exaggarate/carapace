@@ -20,7 +20,7 @@ describe("scanPolicyDataHandling", () => {
       expect.objectContaining({
         kind: "memorySessionTranscriptIndexing",
         source:
-          "oc://openclaw.config/agents/entries/support/memory/search/experimental/sessionMemory",
+          "oc://carapace.config/agents/entries/support/memory/search/experimental/sessionMemory",
         scope: "agent",
         agentId: "support",
         value: true,
@@ -67,7 +67,7 @@ describe("scanPolicyDataHandling", () => {
 
     expect(evidence).toContainEqual(
       expect.objectContaining({
-        source: "oc://openclaw.config/agents/list/#0/memory/search/experimental/sessionMemory",
+        source: "oc://carapace.config/agents/list/#0/memory/search/experimental/sessionMemory",
         agentId: "support",
         value: true,
       }),

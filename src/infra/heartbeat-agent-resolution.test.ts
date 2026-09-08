@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { tryResolveAmbientHeartbeatAgentId } from "./heartbeat-agent-resolution.js";
 import { isHeartbeatOwnerUnresolved, resolveHeartbeatAgents } from "./heartbeat-config.js";
 import { isHeartbeatEnabledForAgent } from "./heartbeat-summary.js";
@@ -17,7 +17,7 @@ describe("tryResolveAmbientHeartbeatAgentId", () => {
             systemAgent: { agentId: "main" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: "ops",
     },
     {
@@ -28,21 +28,21 @@ describe("tryResolveAmbientHeartbeatAgentId", () => {
           entries: { main: {}, ops: {} },
           defaults: { systemAgent: { agentId: "ops" } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: "ops",
     },
     {
       name: "sole agent",
       cfg: {
         agents: { ownership: "explicit", entries: { solo: {} } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: "solo",
     },
     {
       name: "ownerless explicit multi-agent roster",
       cfg: {
         agents: { ownership: "explicit", entries: { main: {}, ops: {} } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: undefined,
     },
   ])("resolves the $name", ({ cfg, expected }) => {
@@ -57,10 +57,10 @@ describe("resolveHeartbeatAgents", () => {
       entries: { ops: {}, main: {} },
       defaults: { systemAgent: { agentId: "ops" } },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const ownerlessConfig = {
     agents: { ownership: "explicit", entries: { ops: {}, main: {} } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it("enrolls the system agent when ambient heartbeat config is absent", () => {
     expect(resolveHeartbeatAgents(systemOwnedConfig)).toEqual([
@@ -88,19 +88,19 @@ describe("resolveHeartbeatAgents", () => {
           entries: { main: {}, ops: {} },
           defaults: { heartbeat: { agentId: "ops" } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectedAgentIds: ["ops"],
     },
     {
       name: "legacy default marker",
       cfg: {
         agents: { entries: { main: { default: true }, ops: {} } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectedAgentIds: ["main"],
     },
     {
       name: "sole agent",
-      cfg: { agents: { ownership: "explicit", entries: { solo: {} } } } as OpenClawConfig,
+      cfg: { agents: { ownership: "explicit", entries: { solo: {} } } } as CarapaceConfig,
       expectedAgentIds: ["solo"],
     },
     {
@@ -110,7 +110,7 @@ describe("resolveHeartbeatAgents", () => {
           ownership: "explicit",
           entries: { main: {}, ops: { heartbeat: { every: "30m" } } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectedAgentIds: ["ops"],
     },
     {
@@ -121,7 +121,7 @@ describe("resolveHeartbeatAgents", () => {
           entries: { main: {}, ops: { heartbeat: { every: "30m" } } },
           defaults: { heartbeat: { agentId: "main" } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectedAgentIds: ["ops"],
     },
     {
@@ -132,7 +132,7 @@ describe("resolveHeartbeatAgents", () => {
           entries: { main: {}, ops: {} },
           defaults: { heartbeat: { every: "30m" } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectedAgentIds: ["main", "ops"],
     },
   ])("enrolls exactly the runnable agents for the $name config", ({ cfg, expectedAgentIds }) => {

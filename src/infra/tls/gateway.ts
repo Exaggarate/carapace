@@ -4,7 +4,7 @@ import type { Stats } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import tls from "node:tls";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { normalizeTlsFingerprint } from "../../../packages/gateway-client/src/client-address-utils.js";
 import type { GatewayTlsConfig } from "../../config/types.gateway.js";
 import { runExec } from "../../process/exec.js";
@@ -114,11 +114,11 @@ async function generateSelfSignedCert(params: {
       "openssl not found in trusted system directories. Install it in an OS-managed location.",
     );
   }
-  const certStageDir = await fs.mkdtemp(path.join(certDir, ".openclaw-gateway-tls-cert-"));
+  const certStageDir = await fs.mkdtemp(path.join(certDir, ".carapace-gateway-tls-cert-"));
   const stagedCertPath = path.join(certStageDir, "cert.pem");
   let keyStageDir: string | undefined;
   try {
-    keyStageDir = await fs.mkdtemp(path.join(keyDir, ".openclaw-gateway-tls-key-"));
+    keyStageDir = await fs.mkdtemp(path.join(keyDir, ".carapace-gateway-tls-key-"));
     const stagedKeyPath = path.join(keyStageDir, "key.pem");
     await Promise.all([fs.chmod(certStageDir, 0o700), fs.chmod(keyStageDir, 0o700)]);
     // OpenSSL never sees the configured final paths, so timeout and generation
@@ -139,7 +139,7 @@ async function generateSelfSignedCert(params: {
         "-out",
         stagedCertPath,
         "-subj",
-        "/CN=openclaw-gateway",
+        "/CN=carapace-gateway",
       ],
       {
         logOutput: false,

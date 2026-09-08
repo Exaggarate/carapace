@@ -1,5 +1,5 @@
-import { shouldAckReaction } from "openclaw/plugin-sdk/channel-feedback";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { shouldAckReaction } from "carapace/plugin-sdk/channel-feedback";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { requireWhatsAppInboundAdmission } from "../../inbound/admission.js";
 import type { AdmittedWebInboundMessage } from "../../inbound/types.js";
 import { resolveWhatsAppReactionLevel } from "../../reaction-level.js";
@@ -11,7 +11,7 @@ import { resolveReactionParticipant } from "./reaction-participant.js";
 const DISABLED_REACTION = { status: "disabled" } as const;
 
 export async function resolveWhatsAppReactionEligibility(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   msg: AdmittedWebInboundMessage;
   agentId: string;
   sessionKey: string;

@@ -16,8 +16,8 @@ import {
 } from "./pr-lib/crabbox-gate-contract.mjs";
 import { resolveCrabboxGatePlan } from "./pr-lib/crabbox-gate-plan.mts";
 
-const REPOSITORY = "openclaw/openclaw";
-const ORGANIZATION = "openclaw";
+const REPOSITORY = "carapace/carapace";
+const ORGANIZATION = "carapace";
 const WORKFLOW = ".github/workflows/pr-crabbox-gate-publisher.yml";
 const BOOTSTRAP_PATH = "scripts/crabbox-untrusted-bootstrap.sh";
 const CHECK_NAME = CRABBOX_GATE_CHECK_NAME;
@@ -27,12 +27,12 @@ const RUN_ID_PATTERN = /^run_[a-z0-9]+$/u;
 const LEASE_ID_PATTERN = /^cbx_[a-z0-9]+$/u;
 const MAX_PROOF_AGE_MS = 2 * 60 * 60 * 1000;
 const EXPECTED_MARKERS = [
-  "OPENCLAW_CRABBOX_GATE_VERSION=1",
-  "OPENCLAW_CRABBOX_GATE_MODE=remote_crabbox_aws",
-  "OPENCLAW_CRABBOX_GATE_STAGE=build:ok",
-  "OPENCLAW_CRABBOX_GATE_STAGE=check:ok",
-  "OPENCLAW_CRABBOX_GATE_STAGE=test:ok",
-  "OPENCLAW_CRABBOX_GATE_RESULT=success",
+  "CARAPACE_CRABBOX_GATE_VERSION=1",
+  "CARAPACE_CRABBOX_GATE_MODE=remote_crabbox_aws",
+  "CARAPACE_CRABBOX_GATE_STAGE=build:ok",
+  "CARAPACE_CRABBOX_GATE_STAGE=check:ok",
+  "CARAPACE_CRABBOX_GATE_STAGE=test:ok",
+  "CARAPACE_CRABBOX_GATE_RESULT=success",
 ];
 
 function requiredString(value, label) {
@@ -129,7 +129,7 @@ function validatePullRequest(value, context) {
     throw new Error("pull request exact base, head, or head repository does not match");
   }
   if (base.ref !== "main" || record(base.repo, "pull request.base.repo").full_name !== REPOSITORY) {
-    throw new Error("pull request base must be openclaw/openclaw main");
+    throw new Error("pull request base must be carapace/carapace main");
   }
 }
 
@@ -296,7 +296,7 @@ async function executeCrabbox({ args, bin, env, stream = false }) {
 }
 
 function buildCrabboxRunArgs(context, bootstrapSha256) {
-  const label = `openclaw-pr-gate:${context.prNumber}:${context.baseSha}:${context.headSha}`;
+  const label = `carapace-pr-gate:${context.prNumber}:${context.baseSha}:${context.headSha}`;
   const args =
     `run --provider aws --target linux --class standard --market on-demand --network public ` +
     `--tailscale=false --no-hydrate --fresh-pr ${REPOSITORY}#${context.prNumber} ` +
@@ -352,7 +352,7 @@ export function validateBrokerProof({
     );
   }
   if (
-    proof.label !== `openclaw-pr-gate:${context.prNumber}:${context.baseSha}:${context.headSha}`
+    proof.label !== `carapace-pr-gate:${context.prNumber}:${context.baseSha}:${context.headSha}`
   ) {
     throw new Error("Crabbox run label does not bind the requested PR, base, and exact head");
   }
@@ -423,11 +423,11 @@ export function validateBrokerProof({
   if (log.length > 0) {
     for (const marker of [
       ...EXPECTED_MARKERS,
-      `OPENCLAW_CRABBOX_GATE_BASE=${context.baseSha}`,
-      `OPENCLAW_CRABBOX_GATE_HEAD=${context.headSha}`,
-      `OPENCLAW_CRABBOX_GATE_PLAN_SHA256=${crabboxGatePlanDigest(plan)}`,
-      `OPENCLAW_CRABBOX_GATE_TARGET_COUNT=${plan.targets.length}`,
-      `OPENCLAW_CRABBOX_BOOTSTRAP_SHA256=${bootstrapSha256}`,
+      `CARAPACE_CRABBOX_GATE_BASE=${context.baseSha}`,
+      `CARAPACE_CRABBOX_GATE_HEAD=${context.headSha}`,
+      `CARAPACE_CRABBOX_GATE_PLAN_SHA256=${crabboxGatePlanDigest(plan)}`,
+      `CARAPACE_CRABBOX_GATE_TARGET_COUNT=${plan.targets.length}`,
+      `CARAPACE_CRABBOX_BOOTSTRAP_SHA256=${bootstrapSha256}`,
     ]) {
       if (log.split(marker).length !== 2) {
         throw new Error(`Crabbox retained log must contain exactly one ${marker} marker`);
@@ -441,7 +441,7 @@ function bootstrapHash(bootstrapPath = BOOTSTRAP_PATH) {
 }
 
 function resolvePlanInDetachedWorktree(context) {
-  const tempRoot = mkdtempSync(path.join(tmpdir(), "openclaw-crabbox-gate-plan-"));
+  const tempRoot = mkdtempSync(path.join(tmpdir(), "carapace-crabbox-gate-plan-"));
   const worktree = path.join(tempRoot, "head");
   try {
     execFileSync("git", ["fetch", "--no-tags", "origin", context.headSha], {
@@ -509,7 +509,7 @@ export async function runPublisher({
   }
   const principal = validateServicePrincipal(await broker.request("/v1/whoami"));
   const crabboxBin = requiredEnv(env, "CRABBOX_BIN");
-  const crabboxHome = mkdtempSync(path.join(tmpdir(), "openclaw-crabbox-publisher-"));
+  const crabboxHome = mkdtempSync(path.join(tmpdir(), "carapace-crabbox-publisher-"));
   try {
     const crabboxEnv = sanitizedCrabboxEnvironment(env, crabboxHome);
     const configResult = await runCrabbox({

@@ -1,16 +1,16 @@
 // OpenCode Zen stream adapter handles provider-specific Responses wire compatibility.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   streamSimple,
   type AssistantMessage,
   type AssistantMessageEvent,
   type ToolCall,
-} from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const WEB_SEARCH = "web_search";
-const WEB_SEARCH_ALIAS = "openclaw_web_search";
+const WEB_SEARCH_ALIAS = "carapace_web_search";
 
 type ProviderStream = Awaited<ReturnType<StreamFn>>;
 type DynamicFields = Map<string, Array<readonly [name: string, jsonValues: boolean]>>;

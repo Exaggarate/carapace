@@ -2,7 +2,7 @@
 import { createConfigIO } from "../config/io.factory.js";
 import { createManagedRuntimeEnvBase } from "../config/io.read-helpers.js";
 import { formatConfigIssueSummary } from "../config/issue-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { loadInstalledPluginIndexInstallRecords } from "./installed-plugin-index-records.js";
 import type { InstalledPluginIndexRefreshReason } from "./installed-plugin-index.js";
@@ -48,14 +48,14 @@ export function refreshPluginRegistryAfterConfigMutation(
 
 /** Setup probes discover staged packages before their config is committed. */
 export function refreshPluginRegistryForPreparedConfig(
-  params: PluginRegistryRefreshParams & { config: OpenClawConfig },
+  params: PluginRegistryRefreshParams & { config: CarapaceConfig },
 ): Promise<void> {
   return refreshPluginRegistryWithConfig(params, () => params.config);
 }
 
 async function refreshPluginRegistryWithConfig(
   params: PluginRegistryRefreshParams,
-  readConfig: () => OpenClawConfig | Promise<OpenClawConfig>,
+  readConfig: () => CarapaceConfig | Promise<CarapaceConfig>,
 ): Promise<void> {
   try {
     // Mutations must discover post-write filesystem state without retiring the

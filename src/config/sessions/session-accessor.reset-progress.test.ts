@@ -7,8 +7,8 @@ import {
   writeSessionProgressCard,
 } from "../../session-cards/progress-card-store.js";
 import { onSessionLifecycleEvent } from "../../sessions/session-lifecycle-events.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   applySessionEntryLifecycleMutation,
   loadSessionEntry,
@@ -35,7 +35,7 @@ it.each(
 )(
   "$writer $context reset owns the $content card lifetime (rollback=$rollback)",
   async ({ writer, context, content, rollback }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:reset-progress";
       const sessionId = "same-reset-session";
       const storePath = path.join(state.sessionsDir(), "sessions.json");
@@ -46,7 +46,7 @@ it.each(
         eventId: "retained-message",
         message: { role: "user", content: "Retain this history" },
       });
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "main",
         path: resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       });

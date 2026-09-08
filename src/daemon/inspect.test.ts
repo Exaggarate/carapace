@@ -21,27 +21,27 @@ vi.mock("./schtasks-exec.js", () => ({
 // File-scope cleanup cannot prevent the nested platform-restoration hooks from running.
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-// Real content from the openclaw-gateway.service unit file (the canonical gateway unit).
+// Real content from the carapace-gateway.service unit file (the canonical gateway unit).
 const GATEWAY_SERVICE_CONTENTS = `\
 [Unit]
-Description=OpenClaw Gateway
+Description=Carapace Gateway
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/bin/node /home/openclaw/.npm-global/lib/node_modules/openclaw/dist/entry.js gateway --port 18789
+ExecStart=/usr/bin/node /home/carapace/.npm-global/lib/node_modules/carapace/dist/entry.js gateway --port 18789
 Restart=always
-Environment=OPENCLAW_SERVICE_MARKER=openclaw
-Environment=OPENCLAW_SERVICE_KIND=gateway
+Environment=CARAPACE_SERVICE_MARKER=carapace
+Environment=CARAPACE_SERVICE_KIND=gateway
 
 [Install]
 WantedBy=default.target
 `;
 
-// Real content from the openclaw-test.service unit file (a non-gateway openclaw service).
+// Real content from the carapace-test.service unit file (a non-gateway carapace service).
 const TEST_SERVICE_CONTENTS = `\
 [Unit]
-Description=OpenClaw test service
+Description=Carapace test service
 After=default.target
 
 [Service]
@@ -63,29 +63,29 @@ Environment=HOME=/home/clawdbot
 
 const COMPANION_SERVICE_CONTENTS = `\
 [Unit]
-Description=OpenClaw companion worker
-After=openclaw-gateway.service
-Requires=openclaw-gateway.service
+Description=Carapace companion worker
+After=carapace-gateway.service
+Requires=carapace-gateway.service
 
 [Service]
-ExecStart=/usr/bin/node /opt/openclaw-worker/dist/index.js worker
+ExecStart=/usr/bin/node /opt/carapace-worker/dist/index.js worker
 `;
 
-const CUSTOM_OPENCLAW_GATEWAY_CONTENTS = `\
+const CUSTOM_CARAPACE_GATEWAY_CONTENTS = `\
 [Unit]
-Description=Custom OpenClaw gateway
+Description=Custom Carapace gateway
 
 [Service]
-ExecStart=/usr/bin/node /opt/openclaw/dist/entry.js gateway --port 18888
+ExecStart=/usr/bin/node /opt/carapace/dist/entry.js gateway --port 18888
 `;
 
 describe("detectMarkerLineWithGateway", () => {
-  it("returns null for openclaw-test.service (openclaw only in description, no gateway on same line)", () => {
+  it("returns null for carapace-test.service (carapace only in description, no gateway on same line)", () => {
     expect(detectMarkerLineWithGateway(TEST_SERVICE_CONTENTS)).toBeNull();
   });
 
-  it("returns openclaw for the canonical gateway unit (ExecStart has both openclaw and gateway)", () => {
-    expect(detectMarkerLineWithGateway(GATEWAY_SERVICE_CONTENTS)).toBe("openclaw");
+  it("returns carapace for the canonical gateway unit (ExecStart has both carapace and gateway)", () => {
+    expect(detectMarkerLineWithGateway(GATEWAY_SERVICE_CONTENTS)).toBe("carapace");
   });
 
   it("returns clawdbot for a clawdbot gateway unit", () => {
@@ -93,18 +93,18 @@ describe("detectMarkerLineWithGateway", () => {
   });
 
   it.each([
-    "ExecStart=/usr/bin/openclaw \\\n  gateway",
-    "# comment \\\nExecStart=/usr/bin/openclaw gateway",
-    "; comment \\\nExecStart=/usr/bin/openclaw gateway",
-    "ExecStart=/usr/bin/openclaw \\\n# comment\n  gateway",
+    "ExecStart=/usr/bin/carapace \\\n  gateway",
+    "# comment \\\nExecStart=/usr/bin/carapace gateway",
+    "; comment \\\nExecStart=/usr/bin/carapace gateway",
+    "ExecStart=/usr/bin/carapace \\\n# comment\n  gateway",
   ])("detects commands through native comments and continuations: %s", (command) => {
-    expect(detectMarkerLineWithGateway(`[Service]\n${command}\n`)).toBe("openclaw");
+    expect(detectMarkerLineWithGateway(`[Service]\n${command}\n`)).toBe("carapace");
   });
 
   it.each(["After", "Requires", "Description", "Environment"])(
     "ignores gateway mentions in %s instead of an executable directive",
     (key) => {
-      expect(detectMarkerLineWithGateway(`${key}=openclaw gateway\n`)).toBeNull();
+      expect(detectMarkerLineWithGateway(`${key}=carapace gateway\n`)).toBeNull();
     },
   );
 
@@ -113,7 +113,7 @@ describe("detectMarkerLineWithGateway", () => {
   });
 
   it("ignores non-gateway ExecStart commands that only pass gateway-named options", () => {
-    const contents = `[Service]\nExecStart=/usr/bin/openclaw-helper --gateway-url http://127.0.0.1:18789 sync\n`;
+    const contents = `[Service]\nExecStart=/usr/bin/carapace-helper --gateway-url http://127.0.0.1:18789 sync\n`;
     expect(detectMarkerLineWithGateway(contents)).toBeNull();
   });
 });
@@ -127,29 +127,29 @@ describe("renderGatewayServiceCleanupHints", () => {
     {
       title: "targets the detected macOS LaunchAgent instead of the active gateway",
       platform: "darwin",
-      serviceName: "com.example.openclaw-gateway",
-      source: "plist: /Users/test/Library/LaunchAgents/com.example.openclaw-gateway.plist",
+      serviceName: "com.example.carapace-gateway",
+      source: "plist: /Users/test/Library/LaunchAgents/com.example.carapace-gateway.plist",
       scope: "user",
-      stopCommand: "launchctl bootout gui/$UID/com.example.openclaw-gateway",
-      removeCommand: "rm /Users/test/Library/LaunchAgents/com.example.openclaw-gateway.plist",
+      stopCommand: "launchctl bootout gui/$UID/com.example.carapace-gateway",
+      removeCommand: "rm /Users/test/Library/LaunchAgents/com.example.carapace-gateway.plist",
     },
     {
       title: "uses the system domain for a detected macOS LaunchDaemon",
       platform: "darwin",
-      serviceName: "com.example.openclaw-gateway",
-      source: "plist: /Library/LaunchDaemons/com.example.openclaw-gateway.plist",
+      serviceName: "com.example.carapace-gateway",
+      source: "plist: /Library/LaunchDaemons/com.example.carapace-gateway.plist",
       scope: "system",
-      stopCommand: "sudo launchctl bootout system/com.example.openclaw-gateway",
-      removeCommand: "sudo rm /Library/LaunchDaemons/com.example.openclaw-gateway.plist",
+      stopCommand: "sudo launchctl bootout system/com.example.carapace-gateway",
+      removeCommand: "sudo rm /Library/LaunchDaemons/com.example.carapace-gateway.plist",
     },
     {
       title: "keeps global macOS LaunchAgents in the GUI domain",
       platform: "darwin",
-      serviceName: "com.example.openclaw-gateway",
-      source: "plist: /Library/LaunchAgents/com.example.openclaw-gateway.plist",
+      serviceName: "com.example.carapace-gateway",
+      source: "plist: /Library/LaunchAgents/com.example.carapace-gateway.plist",
       scope: "system",
-      stopCommand: "launchctl bootout gui/$UID/com.example.openclaw-gateway",
-      removeCommand: "sudo rm /Library/LaunchAgents/com.example.openclaw-gateway.plist",
+      stopCommand: "launchctl bootout gui/$UID/com.example.carapace-gateway",
+      removeCommand: "sudo rm /Library/LaunchAgents/com.example.carapace-gateway.plist",
     },
     {
       title: "targets the detected user-level systemd unit",
@@ -205,15 +205,15 @@ describe("renderGatewayServiceCleanupHints", () => {
       renderGatewayServiceCleanupHints([
         {
           platform: "win32",
-          label: "\\OpenClaw Gateway Backup",
-          detail: "task: \\OpenClaw Gateway Backup",
+          label: "\\Carapace Gateway Backup",
+          detail: "task: \\Carapace Gateway Backup",
           scope: "system",
         },
       ]),
-    ).toEqual(['schtasks /Delete /TN "\\OpenClaw Gateway Backup" /F']);
+    ).toEqual(['schtasks /Delete /TN "\\Carapace Gateway Backup" /F']);
   });
 
-  it.each(["$(Start-Process calc)", "%OPENCLAW_GATEWAY_TASK%", "unsafe&task", "task`name"])(
+  it.each(["$(Start-Process calc)", "%CARAPACE_GATEWAY_TASK%", "unsafe&task", "task`name"])(
     "does not render a Windows task name expandable by cmd.exe or PowerShell: %s",
     (label) => {
       expect(
@@ -234,12 +234,12 @@ describe("renderGatewayServiceCleanupHints", () => {
       renderGatewayServiceCleanupHints([
         {
           platform: "darwin",
-          label: "com.example.openclaw-gateway",
+          label: "com.example.carapace-gateway",
           detail: "loaded",
           scope: "user",
         },
       ]),
-    ).toEqual(["launchctl bootout gui/$UID/com.example.openclaw-gateway"]);
+    ).toEqual(["launchctl bootout gui/$UID/com.example.carapace-gateway"]);
   });
 });
 
@@ -248,23 +248,23 @@ describe("findExtraGatewayServices (linux / scanSystemdDir) — real filesystem"
   // with that dir as HOME. No platform mocking or fs mocking needed.
   const isLinux = process.platform === "linux";
 
-  it.skipIf(!isLinux)("does not report openclaw-test.service as a gateway service", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+  it.skipIf(!isLinux)("does not report carapace-test.service as a gateway service", async () => {
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
     await fs.mkdir(systemdDir, { recursive: true });
-    await fs.writeFile(path.join(systemdDir, "openclaw-test.service"), TEST_SERVICE_CONTENTS);
+    await fs.writeFile(path.join(systemdDir, "carapace-test.service"), TEST_SERVICE_CONTENTS);
     const result = await findExtraGatewayServices({ HOME: tmpHome });
     expect(result).toStrictEqual([]);
   });
 
   it.skipIf(!isLinux)(
-    "does not report the canonical openclaw-gateway.service as an extra service",
+    "does not report the canonical carapace-gateway.service as an extra service",
     async () => {
-      const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+      const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
       const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
       await fs.mkdir(systemdDir, { recursive: true });
       await fs.writeFile(
-        path.join(systemdDir, "openclaw-gateway.service"),
+        path.join(systemdDir, "carapace-gateway.service"),
         GATEWAY_SERVICE_CONTENTS,
       );
       const result = await findExtraGatewayServices({ HOME: tmpHome });
@@ -275,7 +275,7 @@ describe("findExtraGatewayServices (linux / scanSystemdDir) — real filesystem"
   it.skipIf(!isLinux)(
     "reports a legacy clawdbot-gateway service as an extra gateway service",
     async () => {
-      const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+      const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
       const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
       const unitPath = path.join(systemdDir, "clawdbot-gateway.service");
       await fs.mkdir(systemdDir, { recursive: true });
@@ -295,7 +295,7 @@ describe("findExtraGatewayServices (linux / scanSystemdDir) — real filesystem"
   );
 
   it.skipIf(!isLinux)("reports an orphaned legacy systemd backup", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
     const backupPath = path.join(systemdDir, "clawdbot-gateway.service.bak");
     await fs.mkdir(systemdDir, { recursive: true });
@@ -316,7 +316,7 @@ describe("findExtraGatewayServices (linux / scanSystemdDir) — real filesystem"
   });
 
   it.skipIf(!isLinux)("reports a legacy systemd unit and its backup once", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
     const unitPath = path.join(systemdDir, "clawdbot-gateway.service");
     await fs.mkdir(systemdDir, { recursive: true });
@@ -340,11 +340,11 @@ describe("findExtraGatewayServices (linux / scanSystemdDir) — real filesystem"
   it.skipIf(!isLinux)(
     "does not report companion units that only depend on the gateway",
     async () => {
-      const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+      const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
       const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
       await fs.mkdir(systemdDir, { recursive: true });
       await fs.writeFile(
-        path.join(systemdDir, "openclaw-companion.service"),
+        path.join(systemdDir, "carapace-companion.service"),
         COMPANION_SERVICE_CONTENTS,
       );
       const result = await findExtraGatewayServices({ HOME: tmpHome });
@@ -355,22 +355,22 @@ describe("findExtraGatewayServices (linux / scanSystemdDir) — real filesystem"
   it.skipIf(!isLinux).each(["", "# comment \\\n", "; comment \\\n"])(
     "reports custom-named gateway units after a physical comment: %j",
     async (comment) => {
-      const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+      const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
       const systemdDir = path.join(tmpHome, ".config", "systemd", "user");
-      const unitPath = path.join(systemdDir, "custom-openclaw.service");
+      const unitPath = path.join(systemdDir, "custom-carapace.service");
       await fs.mkdir(systemdDir, { recursive: true });
       await fs.writeFile(
         unitPath,
-        CUSTOM_OPENCLAW_GATEWAY_CONTENTS.replace("ExecStart=", `${comment}ExecStart=`),
+        CUSTOM_CARAPACE_GATEWAY_CONTENTS.replace("ExecStart=", `${comment}ExecStart=`),
       );
       const result = await findExtraGatewayServices({ HOME: tmpHome });
       expect(result).toEqual([
         {
           platform: "linux",
-          label: "custom-openclaw.service",
+          label: "custom-carapace.service",
           detail: `unit: ${unitPath}`,
           scope: "user",
-          marker: "openclaw",
+          marker: "carapace",
           legacy: false,
         },
       ]);
@@ -396,7 +396,7 @@ describe("findExtraGatewayServices (darwin / scanLaunchdDir) — real filesystem
   });
 
   it("does not report LaunchAgent companions that only mention the gateway label", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const launchdDir = path.join(tmpHome, "Library", "LaunchAgents");
     await fs.mkdir(launchdDir, { recursive: true });
     await fs.writeFile(
@@ -404,8 +404,8 @@ describe("findExtraGatewayServices (darwin / scanLaunchdDir) — real filesystem
       `<?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0"><dict>
 <key>Label</key><string>com.example.companion</string>
-<key>KeepAlive</key><dict><key>OtherJobEnabled</key><dict><key>ai.openclaw.gateway</key><true/></dict></dict>
-<key>ProgramArguments</key><array><string>/usr/local/bin/openclaw-helper</string><string>sync</string></array>
+<key>KeepAlive</key><dict><key>OtherJobEnabled</key><dict><key>ai.carapace.gateway</key><true/></dict></dict>
+<key>ProgramArguments</key><array><string>/usr/local/bin/carapace-helper</string><string>sync</string></array>
 </dict></plist>`,
     );
     const result = await findExtraGatewayServices({ HOME: tmpHome });
@@ -413,7 +413,7 @@ describe("findExtraGatewayServices (darwin / scanLaunchdDir) — real filesystem
   });
 
   it("does not report LaunchAgent companions that only pass gateway-named options", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const launchdDir = path.join(tmpHome, "Library", "LaunchAgents");
     await fs.mkdir(launchdDir, { recursive: true });
     await fs.writeFile(
@@ -421,7 +421,7 @@ describe("findExtraGatewayServices (darwin / scanLaunchdDir) — real filesystem
       `<?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0"><dict>
 <key>Label</key><string>com.example.companion-options</string>
-<key>ProgramArguments</key><array><string>/usr/local/bin/openclaw-helper</string><string>--gateway-url</string><string>http://127.0.0.1:18789</string><string>sync</string></array>
+<key>ProgramArguments</key><array><string>/usr/local/bin/carapace-helper</string><string>--gateway-url</string><string>http://127.0.0.1:18789</string><string>sync</string></array>
 </dict></plist>`,
     );
     const result = await findExtraGatewayServices({ HOME: tmpHome });
@@ -429,7 +429,7 @@ describe("findExtraGatewayServices (darwin / scanLaunchdDir) — real filesystem
   });
 
   it("does not report non-gateway LaunchAgents that mention clawdbot in environment values", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const launchdDir = path.join(tmpHome, "Library", "LaunchAgents");
     await fs.mkdir(launchdDir, { recursive: true });
     await fs.writeFile(
@@ -445,32 +445,32 @@ describe("findExtraGatewayServices (darwin / scanLaunchdDir) — real filesystem
     expect(result).toStrictEqual([]);
   });
 
-  it("reports custom LaunchAgents that execute openclaw gateway", async () => {
-    const tmpHome = tempDirs.make("openclaw-test-", os.tmpdir());
+  it("reports custom LaunchAgents that execute carapace gateway", async () => {
+    const tmpHome = tempDirs.make("carapace-test-", os.tmpdir());
     const launchdDir = path.join(tmpHome, "Library", "LaunchAgents");
-    const plistPath = path.join(launchdDir, "com.example.openclaw-gateway.plist");
+    const plistPath = path.join(launchdDir, "com.example.carapace-gateway.plist");
     await fs.mkdir(launchdDir, { recursive: true });
     await fs.writeFile(
       plistPath,
       `<?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0"><dict>
-<key>Label</key><string>com.example.openclaw-gateway</string>
-<key>ProgramArguments</key><array><string>/usr/local/bin/openclaw</string><string>gateway</string><string>--port</string><string>18888</string></array>
+<key>Label</key><string>com.example.carapace-gateway</string>
+<key>ProgramArguments</key><array><string>/usr/local/bin/carapace</string><string>gateway</string><string>--port</string><string>18888</string></array>
 </dict></plist>`,
     );
     const result = await findExtraGatewayServices({ HOME: tmpHome });
     expect(result).toEqual([
       {
         platform: "darwin",
-        label: "com.example.openclaw-gateway",
+        label: "com.example.carapace-gateway",
         detail: `plist: ${plistPath}`,
         scope: "user",
-        marker: "openclaw",
+        marker: "carapace",
         legacy: false,
       },
     ]);
     expect(renderGatewayServiceCleanupHints(result)).toEqual([
-      "launchctl bootout gui/$UID/com.example.openclaw-gateway",
+      "launchctl bootout gui/$UID/com.example.carapace-gateway",
       `rm ${plistPath}`,
     ]);
   });
@@ -511,14 +511,14 @@ describe("findExtraGatewayServices (win32)", () => {
     expect(result).toStrictEqual([]);
   });
 
-  it("collects only non-openclaw marker tasks from schtasks output", async () => {
+  it("collects only non-carapace marker tasks from schtasks output", async () => {
     // Real schtasks /Query /FO LIST /V output prefixes root-folder task
-    // names with a backslash (e.g. TaskName:\OpenClaw Gateway).
+    // names with a backslash (e.g. TaskName:\Carapace Gateway).
     execSchtasksMock.mockResolvedValueOnce({
       code: 0,
       stdout: [
-        "TaskName:\\OpenClaw Gateway",
-        "Task To Run: C:\\Program Files\\OpenClaw\\openclaw.exe gateway run",
+        "TaskName:\\Carapace Gateway",
+        "Task To Run: C:\\Program Files\\Carapace\\carapace.exe gateway run",
         "",
         "TaskName: Clawdbot Legacy",
         "Task To Run: C:\\clawdbot\\clawdbot.exe run",
@@ -531,7 +531,7 @@ describe("findExtraGatewayServices (win32)", () => {
     });
 
     const result = await findExtraGatewayServices({}, { deep: true });
-    // The \OpenClaw Gateway task is the live launcher — it must be skipped.
+    // The \Carapace Gateway task is the live launcher — it must be skipped.
     // Only the unrelated clawdbot task should be flagged.
     expect(result).toEqual([
       {
@@ -549,14 +549,14 @@ describe("findExtraGatewayServices (win32)", () => {
     execSchtasksMock.mockResolvedValueOnce({
       code: 0,
       stdout: [
-        "TaskName:\\OpenClaw Gateway",
-        "Task To Run: C:\\Program Files\\OpenClaw\\openclaw.exe gateway run",
+        "TaskName:\\Carapace Gateway",
+        "Task To Run: C:\\Program Files\\Carapace\\carapace.exe gateway run",
         "",
-        "TaskName:\\OpenClaw Gateway (dev)",
-        "Task To Run: C:\\Program Files\\OpenClaw\\openclaw.exe gateway run --profile dev",
+        "TaskName:\\Carapace Gateway (dev)",
+        "Task To Run: C:\\Program Files\\Carapace\\carapace.exe gateway run --profile dev",
         "",
-        "TaskName:\\OpenClaw Gateway Backup",
-        "Task To Run: C:\\Program Files\\OpenClaw\\openclaw.exe gateway run",
+        "TaskName:\\Carapace Gateway Backup",
+        "Task To Run: C:\\Program Files\\Carapace\\carapace.exe gateway run",
         "",
       ].join("\n"),
       stderr: "",
@@ -566,11 +566,11 @@ describe("findExtraGatewayServices (win32)", () => {
     expect(result).toEqual([
       {
         platform: "win32",
-        label: "\\OpenClaw Gateway Backup",
+        label: "\\Carapace Gateway Backup",
         detail:
-          "task: \\OpenClaw Gateway Backup, run: C:\\Program Files\\OpenClaw\\openclaw.exe gateway run",
+          "task: \\Carapace Gateway Backup, run: C:\\Program Files\\Carapace\\carapace.exe gateway run",
         scope: "system",
-        marker: "openclaw",
+        marker: "carapace",
         legacy: false,
       },
     ]);

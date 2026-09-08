@@ -21,7 +21,7 @@ afterEach(async () => {
 describe("workspace skill mutations", () => {
   it("removes support files when the activating SKILL.md write fails", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-write-failure-"),
+      await tempDirs.make("carapace-workspace-skill-write-failure-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "partial-create");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -43,7 +43,7 @@ describe("workspace skill mutations", () => {
 
   it("restores the complete previous update bundle", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-write-update-"),
+      await tempDirs.make("carapace-workspace-skill-write-update-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "reversible-update");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -72,7 +72,7 @@ describe("workspace skill mutations", () => {
 
   it("removes a support file when its atomic write commits and then rejects", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-support-commit-failure-"),
+      await tempDirs.make("carapace-workspace-skill-support-commit-failure-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "partial-support");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -102,7 +102,7 @@ describe("workspace skill mutations", () => {
 
   it("restores an update when the SKILL.md write commits and then rejects", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-main-commit-failure-"),
+      await tempDirs.make("carapace-workspace-skill-main-commit-failure-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "partial-main");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -135,7 +135,7 @@ describe("workspace skill mutations", () => {
 
   it("removes every file from a restored create mutation", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-write-create-"),
+      await tempDirs.make("carapace-workspace-skill-write-create-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "reversible-create");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -158,7 +158,7 @@ describe("workspace skill mutations", () => {
 
   it("restores an interrupted update from persisted rollback facts", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-recovery-"),
+      await tempDirs.make("carapace-workspace-skill-recovery-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "recovered-update");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -190,7 +190,7 @@ describe("workspace skill mutations", () => {
 
   it("detects external edits before restoring a completed mutation", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workspace-skill-external-edit-"),
+      await tempDirs.make("carapace-workspace-skill-external-edit-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "external-edit");
     const skillFile = path.join(skillDir, "SKILL.md");

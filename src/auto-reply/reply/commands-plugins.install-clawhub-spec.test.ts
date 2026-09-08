@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { withTempHome } from "../../config/home-env.test-harness.js";
 import { invokePluginArtifactInstallMock } from "../../plugins/test-helpers/install-fixtures.js";
 import { mockFirstObjectArg } from "../../test-utils/mock-call-assertions.js";
@@ -61,7 +61,7 @@ vi.mock("../../plugins/install-persistence.js", async (importOriginal) => ({
   persistPluginInstall: persistPluginInstallMock,
 }));
 
-const workspaceHarness = createCommandWorkspaceHarness("openclaw-command-plugins-clawhub-");
+const workspaceHarness = createCommandWorkspaceHarness("carapace-command-plugins-clawhub-");
 
 function buildClawHubPluginsParams(commandBodyNormalized: string, workspaceDir: string) {
   return buildPluginsCommandParams({
@@ -85,7 +85,7 @@ describe("chat plugin install explicit ClawHub selectors", () => {
   it.each(["clawhub:", "clawhub:demo@", "clawhub:@scope/pkg@", "CLAWHUB:"])(
     "rejects malformed source %s before installer side effects",
     async (raw) => {
-      await withTempHome("openclaw-command-plugins-home-", async () => {
+      await withTempHome("carapace-command-plugins-home-", async () => {
         const workspaceDir = await workspaceHarness.createWorkspace();
         const params = buildClawHubPluginsParams(`/plugins install ${raw} --force`, workspaceDir);
 
@@ -110,11 +110,11 @@ describe("chat plugin install explicit ClawHub selectors", () => {
       targetDir: "/tmp/clawhub-demo",
       version: "1.2.3",
       extensions: ["index.js"],
-      packageName: "@openclaw/clawhub-demo",
+      packageName: "@carapace/clawhub-demo",
       clawhub: {
         source: "clawhub",
         clawhubUrl: "https://clawhub.ai",
-        clawhubPackage: "@openclaw/clawhub-demo",
+        clawhubPackage: "@carapace/clawhub-demo",
         clawhubFamily: "code-plugin",
         clawhubChannel: "official",
         version: "1.2.3",
@@ -123,11 +123,11 @@ describe("chat plugin install explicit ClawHub selectors", () => {
       },
     });
 
-    await withTempHome("openclaw-command-plugins-home-", async () => {
+    await withTempHome("carapace-command-plugins-home-", async () => {
       const workspaceDir = await workspaceHarness.createWorkspace();
       const result = await handlePluginsCommand(
         buildClawHubPluginsParams(
-          "/plugins install clawhub:@openclaw/clawhub-demo@1.2.3",
+          "/plugins install clawhub:@carapace/clawhub-demo@1.2.3",
           workspaceDir,
         ),
         true,
@@ -137,12 +137,12 @@ describe("chat plugin install explicit ClawHub selectors", () => {
       expect(result?.reply?.text).toBe(
         [
           "⚠️ Plugin capabilities require approval: Cold Control Plane (clawhub-demo) @ 1.2.3",
-          "Source: clawhub: clawhub:@openclaw/clawhub-demo@1.2.3",
+          "Source: clawhub: clawhub:@carapace/clawhub-demo@1.2.3",
           "Channels: cold-channel",
           "Providers: cold-model-provider",
           "Prompt injection: allowed",
           "Conversation access: denied",
-          "Review these capabilities, then rerun /plugins install clawhub:@openclaw/clawhub-demo@1.2.3 --accept-capabilities to continue.",
+          "Review these capabilities, then rerun /plugins install clawhub:@carapace/clawhub-demo@1.2.3 --accept-capabilities to continue.",
         ].join("\n"),
       );
       expect(persistPluginInstallMock).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe("chat plugin install release stream", () => {
   )(
     "selects $selected with capability acceptance $acceptCapabilities (beta=$beta)",
     async ({ beta, selected, acceptCapabilities }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         commands: { text: true, plugins: true },
         plugins: { enabled: true },
         update: { channel: "beta" },
@@ -181,9 +181,9 @@ describe("chat plugin install release stream", () => {
         resolveNpmSpecMetadataMock.mockResolvedValueOnce({
           ok: true,
           metadata: {
-            name: "@openclaw/brave-plugin",
+            name: "@carapace/brave-plugin",
             version,
-            resolvedSpec: `@openclaw/brave-plugin@${version}`,
+            resolvedSpec: `@carapace/brave-plugin@${version}`,
           },
         });
       }
@@ -194,22 +194,22 @@ describe("chat plugin install release stream", () => {
         version: selected,
         extensions: ["index.js"],
         npmResolution: {
-          name: "@openclaw/brave-plugin",
+          name: "@carapace/brave-plugin",
           version: selected,
-          resolvedSpec: `@openclaw/brave-plugin@${selected}`,
+          resolvedSpec: `@carapace/brave-plugin@${selected}`,
         },
       });
       persistPluginInstallMock.mockResolvedValue({});
 
-      await withTempHome("openclaw-command-plugins-home-", async (home) => {
+      await withTempHome("carapace-command-plugins-home-", async (home) => {
         await fs.writeFile(
-          path.join(home, ".openclaw", "openclaw.json"),
+          path.join(home, ".carapace", "carapace.json"),
           `${JSON.stringify(cfg, null, 2)}
 `,
         );
         const workspaceDir = await workspaceHarness.createWorkspace();
         const params = buildPluginsCommandParams({
-          commandBodyNormalized: `/plugins install npm:@openclaw/brave-plugin${acceptCapabilities ? " --accept-capabilities" : ""}`,
+          commandBodyNormalized: `/plugins install npm:@carapace/brave-plugin${acceptCapabilities ? " --accept-capabilities" : ""}`,
           cfg,
           workspaceDir,
           gatewayClientScopes: ["operator.admin", "operator.write", "operator.pairing"],
@@ -218,14 +218,14 @@ describe("chat plugin install release stream", () => {
         const result = await handlePluginsCommand(params, true);
 
         expect(mockFirstObjectArg(installPluginFromNpmSpecMock).spec).toBe(
-          `@openclaw/brave-plugin@${selected}`,
+          `@carapace/brave-plugin@${selected}`,
         );
         expect(installPluginFromNpmSpecMock).toHaveBeenCalledOnce();
         if (acceptCapabilities) {
           expect(persistPluginInstallMock).toHaveBeenCalledWith(
             expect.objectContaining({
               install: expect.objectContaining({
-                spec: "@openclaw/brave-plugin",
+                spec: "@carapace/brave-plugin",
                 version: selected,
                 acceptedSurfaceHash: expect.any(String),
               }),
@@ -233,7 +233,7 @@ describe("chat plugin install release stream", () => {
           );
         } else {
           expect(result?.reply?.text).toContain("Plugin capabilities require approval");
-          expect(result?.reply?.text).toContain(`@openclaw/brave-plugin@${selected}`);
+          expect(result?.reply?.text).toContain(`@carapace/brave-plugin@${selected}`);
           expect(persistPluginInstallMock).not.toHaveBeenCalled();
         }
       });

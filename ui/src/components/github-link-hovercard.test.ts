@@ -10,7 +10,7 @@ import { LazyHovercardBootstrap } from "./lazy-hovercard-registration.ts";
 // Mirrors CLOSE_DELAY_MS in the runtime, like the 250ms open delay used below.
 const GITHUB_HOVERCARD_CLOSE_DELAY_MS = 120;
 
-const GITHUB_LINK_HOVERCARD_ELEMENT_NAME = `test-openclaw-github-link-hovercard-provider-${crypto.randomUUID()}`;
+const GITHUB_LINK_HOVERCARD_ELEMENT_NAME = `test-carapace-github-link-hovercard-provider-${crypto.randomUUID()}`;
 
 customElements.define(
   GITHUB_LINK_HOVERCARD_ELEMENT_NAME,
@@ -34,7 +34,7 @@ function createLink(href: string, label = "GitHub item") {
   return { anchor, provider };
 }
 
-const ISSUE_HREF = "https://github.com/openclaw/openclaw/issues/99815";
+const ISSUE_HREF = "https://github.com/Exaggarate/carapace/issues/99815";
 
 function issuePreviewResponse(overrides: Record<string, unknown> = {}) {
   return {
@@ -43,8 +43,8 @@ function issuePreviewResponse(overrides: Record<string, unknown> = {}) {
     kind: "issue",
     login: "octocat",
     number: 99815,
-    owner: "openclaw",
-    repo: "openclaw",
+    owner: "carapace",
+    repo: "carapace",
     state: "open",
     title: "Keep hover previews reachable",
     updatedAt: "2026-07-05T09:55:00Z",
@@ -86,7 +86,7 @@ function hovercard(): HTMLElement | null {
   return document.querySelector<HTMLElement>(".github-link-hovercard");
 }
 
-describe("openclaw-github-link-hovercard-provider", () => {
+describe("carapace-github-link-hovercard-provider", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-05T10:00:00Z"));
@@ -118,14 +118,14 @@ describe("openclaw-github-link-hovercard-provider", () => {
       login: "roboclaw-bot",
       mergedAt: "2026-07-04T09:53:52Z",
       number: 131440,
-      owner: "OpenClaw",
-      repo: "OpenClaw",
+      owner: "Carapace",
+      repo: "Carapace",
       state: "closed",
       title: "fix(ui): open people cards from one row",
       updatedAt: "2026-07-05T09:55:00Z",
     });
     const { anchor, provider } = createLink(
-      "https://github.com/openclaw/openclaw/pull/131440",
+      "https://github.com/Exaggarate/carapace/pull/131440",
       "#131440",
     );
     provider.client = { request } as unknown as GatewayBrowserClient;
@@ -162,14 +162,14 @@ describe("openclaw-github-link-hovercard-provider", () => {
       kind: "pull",
       login: "roboclaw-bot",
       number: 131442,
-      owner: "OpenClaw",
-      repo: "OpenClaw",
+      owner: "Carapace",
+      repo: "Carapace",
       state: "open",
       title: "fix(ui): one row",
       updatedAt: "2026-07-05T09:55:00Z",
     });
     const { anchor, provider } = createLink(
-      "https://github.com/openclaw/openclaw/pull/131442",
+      "https://github.com/Exaggarate/carapace/pull/131442",
       "#131442",
     );
     provider.client = { request } as unknown as GatewayBrowserClient;
@@ -188,14 +188,14 @@ describe("openclaw-github-link-hovercard-provider", () => {
       kind: "pull",
       login: "roboclaw-bot",
       number: 131441,
-      owner: "OpenClaw",
-      repo: "OpenClaw",
+      owner: "Carapace",
+      repo: "Carapace",
       state: "open",
       title: "fix(ui): one row",
       updatedAt: "2026-07-05T09:55:00Z",
     });
     const { anchor, provider } = createLink(
-      "https://github.com/openclaw/openclaw/pull/131441",
+      "https://github.com/Exaggarate/carapace/pull/131441",
       "#131441",
     );
     provider.client = { request } as unknown as GatewayBrowserClient;
@@ -219,15 +219,15 @@ describe("openclaw-github-link-hovercard-provider", () => {
       login: "steipete",
       mergedAt: "2026-07-04T09:53:52Z",
       number: 99816,
-      owner: "OpenClaw",
-      repo: "OpenClaw",
+      owner: "Carapace",
+      repo: "Carapace",
       state: "closed",
       title: "fix(agents): derive conversation scope from trusted group facts",
       updatedAt: "2026-07-05T09:55:00Z",
     });
-    const href = "https://github.com/openclaw/openclaw/pull/99816";
+    const href = "https://github.com/Exaggarate/carapace/pull/99816";
     const { anchor, provider } = createLink(
-      "HTTPS://GITHUB.COM:443/openclaw/openclaw/pull/99816",
+      "HTTPS://GITHUB.COM:443/carapace/carapace/pull/99816",
       "#99816",
     );
     provider.client = { request } as unknown as GatewayBrowserClient;
@@ -236,7 +236,7 @@ describe("openclaw-github-link-hovercard-provider", () => {
 
     const card = document.querySelector<HTMLElement>(".github-link-hovercard");
     expect(card?.textContent).toContain("Merged");
-    expect(card?.textContent).toContain("openclaw/openclaw #99816");
+    expect(card?.textContent).toContain("carapace/carapace #99816");
     expect(card?.textContent).toContain(
       "fix(agents): derive conversation scope from trusted group facts",
     );
@@ -278,8 +278,8 @@ describe("openclaw-github-link-hovercard-provider", () => {
       {
         kind: "pull",
         number: 99816,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
       },
       { signal: expect.any(AbortSignal) },
     );
@@ -297,9 +297,9 @@ describe("openclaw-github-link-hovercard-provider", () => {
     "keeps cached $kind preview links on the current anchor ($first first)",
     async ({ kind, first }) => {
       const surface = kind === "pull" ? "pull" : "issues";
-      const baseHref = `https://github.com/openclaw/openclaw/${surface}/99815`;
+      const baseHref = `https://github.com/Exaggarate/carapace/${surface}/99815`;
       const commentHref = `${baseHref}#issuecomment-123`;
-      const variantHref = `https://github.com/OpenClaw/OpenClaw/${surface}/99815/?view=activity#issuecomment-456`;
+      const variantHref = `https://github.com/Carapace/Carapace/${surface}/99815/?view=activity#issuecomment-456`;
       const { anchor, provider } = createLink(baseHref);
       const request = vi.fn().mockResolvedValue(issuePreviewResponse({ kind }));
       provider.client = { request } as unknown as GatewayBrowserClient;
@@ -527,14 +527,14 @@ describe("openclaw-github-link-hovercard-provider", () => {
 
   it("ignores unsupported GitHub links and shows a quiet unavailable state", async () => {
     const request = vi.fn().mockRejectedValue(new Error("Not Found"));
-    const unsupportedLink = createLink("https://github.com/openclaw/openclaw", "repository");
+    const unsupportedLink = createLink("https://github.com/Exaggarate/carapace", "repository");
     unsupportedLink.provider.client = { request } as unknown as GatewayBrowserClient;
 
     await hover(unsupportedLink.anchor);
     expect(request).not.toHaveBeenCalled();
     expect(document.querySelector(".github-link-hovercard")).toBeNull();
 
-    const missingLink = createLink("https://github.com/openclaw/openclaw/issues/999999", "missing");
+    const missingLink = createLink("https://github.com/Exaggarate/carapace/issues/999999", "missing");
     missingLink.provider.client = { request } as unknown as GatewayBrowserClient;
     await hover(missingLink.anchor);
     expect(document.querySelector(".github-link-hovercard")?.textContent).toContain(
@@ -610,12 +610,12 @@ describe("openclaw-github-link-hovercard-provider", () => {
   });
 
   it.each([
-    "http://github.com/openclaw/openclaw/issues/99815",
-    "https://user:password@github.com/openclaw/openclaw/issues/99815",
-    "https://github.com:8443/openclaw/openclaw/issues/99815",
-    "https://github.com.example.com/openclaw/openclaw/issues/99815",
+    "http://github.com/Exaggarate/carapace/issues/99815",
+    "https://user:password@github.com/Exaggarate/carapace/issues/99815",
+    "https://github.com:8443/carapace/carapace/issues/99815",
+    "https://github.com.example.com/carapace/carapace/issues/99815",
     "blob:https://github.com/issues/99815",
-    "https://example.com/openclaw/openclaw/issues/99815",
+    "https://example.com/carapace/carapace/issues/99815",
     "javascript:alert(1)",
   ])("does not preview an untrusted item URL: %s", async (href) => {
     const request = vi.fn();
@@ -630,7 +630,7 @@ describe("openclaw-github-link-hovercard-provider", () => {
 
   it("leaves no popup state on the link when hover ends before opening", async () => {
     const request = vi.fn();
-    const { anchor, provider } = createLink("https://github.com/openclaw/openclaw/issues/99815");
+    const { anchor, provider } = createLink("https://github.com/Exaggarate/carapace/issues/99815");
     provider.client = { request } as unknown as GatewayBrowserClient;
 
     anchor.dispatchEvent(new MouseEvent("pointerover", { bubbles: true, composed: true }));

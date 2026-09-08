@@ -1,4 +1,4 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
 import type { AttemptParamsLike } from "./attempt-types.js";
 
 type TranscriptRecorder = NonNullable<AttemptParamsLike["userTurnTranscriptRecorder"]>;

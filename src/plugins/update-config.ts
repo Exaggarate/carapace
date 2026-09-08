@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { resolveUserPath } from "../utils.js";
 import { normalizePluginsConfig, resolveEffectiveEnableState } from "./config-state.js";
@@ -12,7 +12,7 @@ import { resolveDefaultPluginExtensionsDir } from "./install-paths.js";
 import { resolvePluginInstallDir } from "./install.js";
 import { resolvePackageExtensionEntries, type PackageManifest } from "./manifest.js";
 import { validatePackageExtensionEntriesForInstall } from "./package-entry-resolution.js";
-import { reconcileRegisteredOpenClawHostLinks } from "./plugin-peer-link.js";
+import { reconcileRegisteredCarapaceHostLinks } from "./plugin-peer-link.js";
 import { resetPluginSlotsToDefaults } from "./slots.js";
 import { setPluginEnabledInConfig } from "./toggle-config.js";
 import type { PluginUpdateLogger } from "./update-source.js";
@@ -188,7 +188,7 @@ export function resolveBridgeInstallRecord(params: {
 }
 
 function isBridgeChannelEnabledByConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   bridge: ExternalizedBundledPluginBridge;
 }): boolean {
   const channels = params.config.channels;
@@ -208,7 +208,7 @@ function isBridgeChannelEnabledByConfig(params: {
 }
 
 export function isExternalizedBundledPluginEnabled(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   bridge: ExternalizedBundledPluginBridge;
 }): boolean {
   const normalized = normalizePluginsConfig(params.config.plugins);
@@ -263,10 +263,10 @@ function replacePluginIdInList(
 }
 
 export function migratePluginConfigId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   fromId: string,
   toId: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const plugins = cfg.plugins;
   if (fromId === toId || !plugins) {
     return cfg;
@@ -341,9 +341,9 @@ export function migratePluginConfigId(
 }
 
 export function disablePluginAfterUpdateFailure(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginId: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const disabled = setPluginEnabledInConfig(config, pluginId, false, {
     updateChannelConfig: false,
   });
@@ -359,12 +359,12 @@ export function disablePluginAfterUpdateFailure(
 }
 
 /** Repairs a legacy npm-owned extensions-root host without reinstalling its package. */
-export async function repairRegisteredOpenClawHostLink(params: {
+export async function repairRegisteredCarapaceHostLink(params: {
   pluginId: string;
   record: PluginInstallRecord;
   logger: PluginUpdateLogger;
 }): Promise<boolean> {
-  const result = await reconcileRegisteredOpenClawHostLinks({
+  const result = await reconcileRegisteredCarapaceHostLinks({
     installRecords: { [params.pluginId]: params.record },
     extensionsDir: resolveDefaultPluginExtensionsDir(),
     mode: "repair",
@@ -373,18 +373,18 @@ export async function repairRegisteredOpenClawHostLink(params: {
   return result.repaired > 0;
 }
 
-export async function repairOpenClawPeerLinksForNpmInstalls(params: {
-  config: OpenClawConfig;
+export async function repairCarapacePeerLinksForNpmInstalls(params: {
+  config: CarapaceConfig;
   logger: PluginUpdateLogger;
 }): Promise<boolean> {
-  const result = await reconcileRegisteredOpenClawHostLinks({
+  const result = await reconcileRegisteredCarapaceHostLinks({
     installRecords: params.config.plugins?.installs ?? {},
     extensionsDir: resolveDefaultPluginExtensionsDir(),
     mode: "repair",
     logger: params.logger,
     onPackageReadError: (error, packageDir) => {
       params.logger.warn?.(
-        `Could not repair openclaw peer link at ${packageDir}: ${String(error)}`,
+        `Could not repair carapace peer link at ${packageDir}: ${String(error)}`,
       );
     },
   });

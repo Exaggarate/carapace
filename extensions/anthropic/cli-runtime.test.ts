@@ -8,9 +8,9 @@ import type {
   CliBackendLiveSessionHandle,
   CliBackendPreparedExecution,
   CliBackendToolPermissionResult,
-} from "openclaw/plugin-sdk/cli-backend";
-import { formatErrorMessageForDisplay } from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/cli-backend";
+import { formatErrorMessageForDisplay } from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import type { ClaudeCliSecretInput } from "./cli-process.js";
@@ -34,7 +34,7 @@ async function createContext(
   scenario = "normal",
   overrides: Partial<CliBackendExecuteContext> = {},
 ): Promise<CliBackendExecuteContext> {
-  const root = await realpath(await mkdtemp(path.join(os.tmpdir(), "openclaw-claude-protocol-")));
+  const root = await realpath(await mkdtemp(path.join(os.tmpdir(), "carapace-claude-protocol-")));
   roots.push(root);
   const fixture = path.join(root, "claude.mjs");
   await writeFile(fixture, CLAUDE_PROTOCOL_FIXTURE);
@@ -348,7 +348,7 @@ describe("Claude native stdio boundary", () => {
     });
   });
 
-  it("leaves admitted OpenClaw MCP tools with their own host policy", async () => {
+  it("leaves admitted Carapace MCP tools with their own host policy", async () => {
     const context = await createContext("mcp-hook", { liveSession: createLiveSession() });
     const detail = resultDetail(await collect(context));
     expect(detail.hookDecision).toEqual({ continue: true });
@@ -511,7 +511,7 @@ describe("Claude native stdio boundary", () => {
   it("keeps bypass arguments and native allow rules behind the admitted host policy", async () => {
     const context = await createContext("normal", {
       liveSession: createLiveSession(),
-      toolAvailability: { native: ["Read"], openClaw: ["message"] },
+      toolAvailability: { native: ["Read"], carapace: ["message"] },
     });
     context.args = [
       ...context.args,
@@ -519,7 +519,7 @@ describe("Claude native stdio boundary", () => {
       "bypassPermissions",
       "--allowedTools",
       "Bash",
-      "mcp__openclaw__*",
+      "mcp__carapace__*",
     ];
     const detail = resultDetail(await collect(context));
     const args = detail.argv as string[];
@@ -537,7 +537,7 @@ describe("Claude native stdio boundary", () => {
     expect(args).not.toContain("bypassPermissions");
     expect(flagValues("--permission-mode")).toEqual(["default"]);
     expect(flagValues("--tools")).toEqual(["Read"]);
-    expect(flagValues("--allowedTools")).toEqual(["mcp__openclaw__message"]);
+    expect(flagValues("--allowedTools")).toEqual(["mcp__carapace__message"]);
     expect(context.requestToolPermission).toHaveBeenCalledTimes(2);
   });
 
@@ -593,7 +593,7 @@ describe("Claude native stdio boundary", () => {
 
     expect(resultDetail(records).lateDecision).toMatchObject({
       behavior: "deny",
-      message: "The OpenClaw run is no longer active.",
+      message: "The Carapace run is no longer active.",
     });
     expect(context.requestToolPermission).toHaveBeenCalledOnce();
   });

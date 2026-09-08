@@ -1,11 +1,11 @@
 // Test Support provider module implements model/runtime integration.
-import type { ModelRegistry } from "openclaw/plugin-sdk/agent-sessions";
+import type { ModelRegistry } from "carapace/plugin-sdk/agent-sessions";
 import type {
   ProviderCatalogContext,
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/plugin-entry";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 
 export function createProviderDynamicModelContext(params: {
   provider: string;

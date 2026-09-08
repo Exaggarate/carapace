@@ -4,7 +4,7 @@
 import { once } from "node:events";
 import { existsSync } from "node:fs";
 import type { AddressInfo } from "node:net";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
 import { resolveSessionStorePathCore } from "../config/sessions.js";
@@ -13,12 +13,12 @@ import {
   patchSessionEntryCore,
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setVerbose } from "../global-state.js";
 import type { SystemPresence } from "../infra/system-presence.js";
 import { resetLogger, setLoggerOverride } from "../logging/logger.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createPresenceRecipientProjection } from "./presence-projection.js";
 import { createGatewayBroadcaster } from "./server-broadcast.js";
 import { createGatewayConnectionState } from "./server-connection-state.js";
@@ -350,8 +350,8 @@ describe("presence recipient projection", () => {
   });
 
   it("preserves scoped sentinels, recipient ordering, and current visibility without changing the source", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
-      let cfg: OpenClawConfig = { agents: { entries: { main: {}, work: {} } } };
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
+      let cfg: CarapaceConfig = { agents: { entries: { main: {}, work: {} } } };
       const sharedKey = "agent:main:shared";
       const incognitoKey = "agent:main:dashboard:incognito-presence";
       const keys = [
@@ -480,7 +480,7 @@ describe("presence recipient projection", () => {
   });
 
   it("keeps solo and system authority without treating pending identity or missing read scope as solo", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const key = "agent:main:private";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: key },
@@ -530,7 +530,7 @@ describe("presence recipient projection", () => {
       }
       pending.connect.scopes = ["operator.admin"];
       expect(project(pending)).toEqual(presence);
-      const cfg: OpenClawConfig = { gateway: { roles: { definitions: {} } } };
+      const cfg: CarapaceConfig = { gateway: { roles: { definitions: {} } } };
       const restrictedProject = createPresenceRecipientProjection({ cfg, presence });
       expect(restrictedProject(solo)).toEqual([person, idle]);
       solo.internal = { operatorRoleActor: { kind: "system" } };
@@ -548,7 +548,7 @@ describe("presence recipient projection", () => {
   });
 
   it("omits obsolete watches without creating missing agent stores or omission metadata", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const person = { text: "watcher", ts: 1 };
       const project = createPresenceRecipientProjection({
         cfg: { agents: { entries: { uncreated: {} } } },

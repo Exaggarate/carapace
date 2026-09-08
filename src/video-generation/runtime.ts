@@ -1,6 +1,6 @@
 // Video generation runtime coordinates provider auth, fallbacks, and job polling.
 import { resolveAgentModelTimeoutMsValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { parseVideoGenerationModelRef } from "../media-generation/model-ref.js";
 import {
@@ -28,7 +28,7 @@ import type { VideoGenerationProviderOptionType, VideoGenerationResult } from ".
 const log = createSubsystemLogger("video-generation");
 const MODEL_CAPABILITY_LOOKUP_TIMEOUT_MS = 5_000;
 // Internal request hint for providers that perform their own final snapping.
-const SUPPORTED_DURATIONS_HINT = Symbol.for("openclaw.videoGeneration.supportedDurations");
+const SUPPORTED_DURATIONS_HINT = Symbol.for("carapace.videoGeneration.supportedDurations");
 
 type VideoGenerationRuntimeDeps = {
   getProvider?: typeof getVideoGenerationProvider;
@@ -94,7 +94,7 @@ function validateProviderOptionsAgainstDeclaration(params: {
 }
 
 function buildNoVideoGenerationModelConfiguredMessage(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps: VideoGenerationRuntimeDeps,
 ): string {
   const listProviders = deps.listProviders ?? listVideoGenerationProviders;
@@ -107,7 +107,7 @@ function buildNoVideoGenerationModelConfiguredMessage(
 }
 
 export function listRuntimeVideoGenerationProviders(
-  params?: { config?: OpenClawConfig },
+  params?: { config?: CarapaceConfig },
   deps: VideoGenerationRuntimeDeps = {},
 ) {
   return (deps.listProviders ?? listVideoGenerationProviders)(params?.config);

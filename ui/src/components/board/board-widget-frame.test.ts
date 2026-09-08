@@ -127,7 +127,7 @@ describe("board widget frame scroll handoff", () => {
       reportContentHeight: () => {},
       scrollBy: () => {},
       requestUpdate: () => {},
-      resolveFrameUrl: () => () => "/__openclaw__/board/long-dashboard",
+      resolveFrameUrl: () => () => "/__carapace__/board/long-dashboard",
       root: () => document,
       widget: () => widget,
     });
@@ -150,7 +150,7 @@ describe("board widget frame scroll handoff", () => {
 
     internals.notifyBoardHost({ currentTarget: frame } as unknown as Event);
     const initialMessages = postMessage.mock.calls.filter(
-      ([message]) => (message as { type?: string }).type === "openclaw:widget-board-host",
+      ([message]) => (message as { type?: string }).type === "carapace:widget-board-host",
     );
     expect(initialMessages).toHaveLength(1);
     const initialNonce = (initialMessages[0]![0] as { nonce?: string }).nonce;
@@ -159,12 +159,12 @@ describe("board widget frame scroll handoff", () => {
       new MessageEvent("message", {
         source: frame.contentWindow,
         origin: "https://sandbox.example",
-        data: { type: "openclaw:widget-bridge-ready" },
+        data: { type: "carapace:widget-bridge-ready" },
       }),
     );
 
     const readyMessages = postMessage.mock.calls.filter(
-      ([message]) => (message as { type?: string }).type === "openclaw:widget-board-host",
+      ([message]) => (message as { type?: string }).type === "carapace:widget-board-host",
     );
     expect(readyMessages).toHaveLength(2);
     expect((readyMessages[1]![0] as { nonce?: string }).nonce).not.toBe(initialNonce);
@@ -195,20 +195,20 @@ describe("board widget frame scroll handoff", () => {
     window.dispatchEvent(
       new MessageEvent("message", {
         source: frame.contentWindow,
-        data: { type: "openclaw:widget-scroll", deltaY: 48, nonce: "board-scroll-nonce" },
+        data: { type: "carapace:widget-scroll", deltaY: 48, nonce: "board-scroll-nonce" },
       }),
     );
     window.dispatchEvent(
       new MessageEvent("message", {
         source: window,
-        data: { type: "openclaw:widget-scroll", deltaY: 96, nonce: "board-scroll-nonce" },
+        data: { type: "carapace:widget-scroll", deltaY: 96, nonce: "board-scroll-nonce" },
       }),
     );
     window.dispatchEvent(
       new MessageEvent("message", {
         source: frame.contentWindow,
         data: {
-          type: "openclaw:widget-scroll",
+          type: "carapace:widget-scroll",
           deltaY: Number.POSITIVE_INFINITY,
           nonce: "board-scroll-nonce",
         },
@@ -217,7 +217,7 @@ describe("board widget frame scroll handoff", () => {
     window.dispatchEvent(
       new MessageEvent("message", {
         source: frame.contentWindow,
-        data: { type: "openclaw:widget-scroll", deltaY: 192, nonce: "wrong-nonce" },
+        data: { type: "carapace:widget-scroll", deltaY: 192, nonce: "wrong-nonce" },
       }),
     );
 

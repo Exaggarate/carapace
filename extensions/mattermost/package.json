@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/mattermost",
+  "name": "@carapace/mattermost",
   "version": "2026.9.2",
-  "description": "OpenClaw Mattermost channel plugin",
+  "description": "Carapace Mattermost channel plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -12,18 +12,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -91,8 +91,8 @@
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/mattermost",
-      "npmSpec": "@openclaw/mattermost",
+      "clawhubSpec": "clawhub:@carapace/mattermost",
+      "npmSpec": "@carapace/mattermost",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9",
       "allowInvalidConfigRecovery": true
@@ -101,7 +101,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {

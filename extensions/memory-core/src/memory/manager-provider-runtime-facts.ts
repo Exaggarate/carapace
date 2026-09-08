@@ -1,7 +1,7 @@
 // Memory Core reads optional provider runtime diagnostics without widening the provider contract.
 import type { EmbeddingProvider } from "./embeddings.js";
 
-const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("openclaw.localEmbeddingRuntimeFacts");
+const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("carapace.localEmbeddingRuntimeFacts");
 
 export function getLocalEmbeddingRuntimeFacts(provider: EmbeddingProvider | null): unknown {
   if (!provider) {

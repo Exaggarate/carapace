@@ -2,8 +2,8 @@ import { execFile, execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isPidAlive } from "openclaw/plugin-sdk/process-runtime";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+import { isPidAlive } from "carapace/plugin-sdk/process-runtime";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import {
   type PosixProcess,

@@ -1,6 +1,6 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
@@ -285,7 +285,7 @@ suite.define(() => {
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
         await expect.poll(() => gateway.getRequests("progressCard.get")).toHaveLength(1);
 
-        const visiblePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
+        const visiblePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
         const expectVisibleLastActivity = async (placement: "composer") => {
           const card = visiblePane.locator(`[data-progress-card-placement="${placement}"]`);
           const timestamp = card.locator("time");

@@ -18,7 +18,7 @@ conversation. Subagent and ACP worker sessions do not receive it.
 
 It is enabled by default and governed by the normal tool policy — there is no
 dedicated config key. To remove it, deny it like any other tool (for example
-`tools.deny: ["secrets"]` in `openclaw.json`); allowlists and tool profiles
+`tools.deny: ["secrets"]` in `carapace.json`); allowlists and tool profiles
 apply to it the same way.
 
 When the tool is callable, the agent's prompt tells it to list metadata first,
@@ -50,7 +50,7 @@ you to safe external setup, never ask for the value in chat.
 
 There is deliberately no action that writes a value the agent supplies. If a
 value must enter the store, it arrives through the human prompt, the
-`/settings/secrets` page, or the [`openclaw secrets store` CLI](/cli/secrets).
+`/settings/secrets` page, or the [`carapace secrets store` CLI](/cli/secrets).
 
 ## Answering a request
 
@@ -71,7 +71,7 @@ egress substitution while keeping the credential usable through config SecretRef
 
 Once the store write commits, the question is answered and cannot be submitted
 again. A later runtime refresh failure does not undo that write: resolve the
-reported provider error and run `openclaw secrets reload`, rather than resubmitting.
+reported provider error and run `carapace secrets reload`, rather than resubmitting.
 
 The same tool result reports `status: "stored"`, the SecretRef, and `currentPolicy`
 from one follow-up metadata read. This is the entry's current host list, which you
@@ -121,7 +121,7 @@ because answering provides a value rather than reading one.
 In Gateway-backed sessions, a missing credential for an unrelated provider does
 not block a turn on a healthy provider. The agent can use that healthy model to
 request the missing entry. Selecting the unavailable provider still fails until
-its SecretRef resolves; OpenClaw does not silently substitute an environment or
+its SecretRef resolves; Carapace does not silently substitute an environment or
 auth-profile credential.
 
 A stored entry is a regular shared-store entry (see
@@ -144,7 +144,7 @@ A stored entry is a regular shared-store entry (see
   destination to match the entry's allowed hosts. With the proxy disabled,
   protected entries are not injected; use a supported config SecretRef instead.
   Native harness shell, sandbox, and node execution do not receive these protected
-  values. The provider troubleshooting switch `OPENCLAW_SECRET_SENTINELS=off` does
+  values. The provider troubleshooting switch `CARAPACE_SECRET_SENTINELS=off` does
   not disable protected-store sealing.
 
 Gateway-host exec captures one store snapshot on its first execution in a run.

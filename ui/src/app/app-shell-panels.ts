@@ -63,11 +63,11 @@ export class ShellPanelOwner {
       return;
     }
     const desktopAvailable = isDesktopPanelAvailable(gatewaySnapshot);
-    // Scope-aware: openclaw.chat is operator.admin; advertisement alone would
+    // Scope-aware: carapace.chat is operator.admin; advertisement alone would
     // show read-scoped clients a control the store then refuses to use.
     const custodianAvailable = canCallGatewayMethod(
       gatewaySnapshot,
-      "openclaw.chat",
+      "carapace.chat",
       "operator.admin",
     );
     // Only restored open docks load automatically. Explicit actions use the
@@ -183,7 +183,7 @@ export class ShellPanelOwner {
     if (
       home
         ? isHomePanelAvailable(host.context?.gateway)
-        : canCallGatewayMethod(snapshot, "openclaw.chat", "operator.admin")
+        : canCallGatewayMethod(snapshot, "carapace.chat", "operator.admin")
     ) {
       this.requestLazyElement(
         host.assistantPanelElement,

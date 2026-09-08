@@ -28,7 +28,7 @@ suite.define(() => {
           const pageErrors: string[] = [];
           page.on("pageerror", (error) => pageErrors.push(error.message));
           const messages = Array.from({ length: 72 }, (_, index) => ({
-            __openclaw: { id: `position-rail-${index}`, seq: index + 1 },
+            __carapace: { id: `position-rail-${index}`, seq: index + 1 },
             content: [{ text: `Transcript checkpoint ${index}`, type: "text" }],
             role: index % 2 === 0 ? "user" : "assistant",
             timestamp: Date.UTC(2026, 8, 4, 12, index),

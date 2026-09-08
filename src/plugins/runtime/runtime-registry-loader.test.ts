@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  loadOpenClawPlugins: vi.fn<typeof import("../loader.js").loadOpenClawPlugins>(),
+  loadCarapacePlugins: vi.fn<typeof import("../loader.js").loadCarapacePlugins>(),
   resolveConfiguredChannelPluginIds:
     vi.fn<typeof import("../channel-plugin-ids.js").resolveConfiguredChannelPluginIds>(),
   resolveChannelPluginIds:
@@ -36,8 +36,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../loader.js", () => ({
-  loadOpenClawPlugins: (...args: Parameters<typeof mocks.loadOpenClawPlugins>) =>
-    mocks.loadOpenClawPlugins(...args),
+  loadCarapacePlugins: (...args: Parameters<typeof mocks.loadCarapacePlugins>) =>
+    mocks.loadCarapacePlugins(...args),
 }));
 
 vi.mock("../channel-plugin-ids.js", () => ({
@@ -121,7 +121,7 @@ function useMemoryProviderOwner(params: {
 }
 
 function requireLoadOptions(): Record<string, unknown> {
-  const options = mocks.loadOpenClawPlugins.mock.calls[0]?.[0];
+  const options = mocks.loadCarapacePlugins.mock.calls[0]?.[0];
   if (!options) {
     throw new Error("expected plugin load options");
   }
@@ -151,7 +151,7 @@ describe("ensurePluginRegistryLoaded", () => {
   });
 
   it("loads configured channel owners through the canonical root loader", () => {
-    const env = { HOME: "/tmp/openclaw-home" };
+    const env = { HOME: "/tmp/carapace-home" };
     const config = { channels: { demo: { enabled: true } } };
     mocks.resolveConfiguredChannelPluginIds.mockReturnValue(["demo-channel"]);
 
@@ -178,7 +178,7 @@ describe("ensurePluginRegistryLoaded", () => {
   });
 
   it("loads effective plugin ids for the all scope", () => {
-    const env = { HOME: "/tmp/openclaw-home" };
+    const env = { HOME: "/tmp/carapace-home" };
     const config = { plugins: { enabled: true } };
     mocks.resolveEffectivePluginIds.mockReturnValue(["demo", "memory-core"]);
 
@@ -221,7 +221,7 @@ describe("ensurePluginRegistryLoaded", () => {
       },
       manifestRegistry: { plugins: [], diagnostics: [] },
     } as never);
-    mocks.loadOpenClawPlugins.mockImplementationOnce((options) => {
+    mocks.loadCarapacePlugins.mockImplementationOnce((options) => {
       if (options?.onlyPluginIds?.includes("broken-plugin")) {
         throw new Error("unrelated plugin failed to initialize");
       }
@@ -313,7 +313,7 @@ describe("ensurePluginRegistryLoaded", () => {
   });
 
   it("loads only the selected memory backend and embedding provider owners", () => {
-    const env = { HOME: "/tmp/openclaw-home" };
+    const env = { HOME: "/tmp/carapace-home" };
     const config = {
       memory: { search: { provider: "openai" } },
       plugins: {

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import { buildContextEngineRuntimeSettings } from "../../context-engine/runtime-settings.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import { createEmbeddedRunContextRecoveryState } from "./run/context-recovery-state.js";
@@ -94,7 +94,7 @@ function makeInput(overrides: RecoveryOverrides = {}): RecoveryInput {
             sessionId: session.id,
             sessionKey: session.target?.sessionKey ?? input.resolvedSessionKey,
             storePath:
-              session.target?.storePath ?? path.join(input.workspaceDir, "openclaw-agent.sqlite"),
+              session.target?.storePath ?? path.join(input.workspaceDir, "carapace-agent.sqlite"),
           },
         },
         assertActive,
@@ -136,13 +136,13 @@ function makeInput(overrides: RecoveryOverrides = {}): RecoveryInput {
     workspaceDir: "/tmp/workspace",
     provider: "openai",
     modelId: "gpt-5.6-luna",
-    harnessRuntime: "openclaw",
+    harnessRuntime: "carapace",
     thinkLevel: "off",
     authProfileIdSource: "auto",
     resolveContextEnginePluginId: () => undefined,
     buildRuntimeSettings: ({ tokenBudget, degradedReason }) =>
       buildContextEngineRuntimeSettings({
-        contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        contextEngineHost: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
         provider: input.provider,
         requestedModel: input.modelId,
         resolvedModel: input.modelId,

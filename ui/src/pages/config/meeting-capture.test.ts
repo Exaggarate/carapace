@@ -1,4 +1,4 @@
-import type { TranscriptsStatusResult } from "@openclaw/gateway-protocol";
+import type { TranscriptsStatusResult } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -87,7 +87,7 @@ async function mount(
   configs.push(runtimeConfig);
   await runtimeConfig.ensureLoaded();
   const navigate = vi.fn();
-  const page = document.createElement("openclaw-meeting-capture-settings") as CaptureElement;
+  const page = document.createElement("carapace-meeting-capture-settings") as CaptureElement;
   page.context = {
     gateway,
     runtimeConfig,

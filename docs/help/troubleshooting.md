@@ -1,7 +1,7 @@
 ---
-summary: "Symptom first troubleshooting hub for OpenClaw"
+summary: "Symptom first troubleshooting hub for Carapace"
 read_when:
-  - OpenClaw is not working and you need the fastest path to a fix
+  - Carapace is not working and you need the fastest path to a fix
   - You want a triage flow before diving into deep runbooks
 title: "General troubleshooting"
 ---
@@ -13,41 +13,41 @@ Triage front door. 2 minutes to a diagnosis, then jump to the deep page.
 Run this ladder in order:
 
 ```bash
-openclaw triage
-openclaw status
-openclaw status --all
-openclaw gateway probe
-openclaw gateway status
-openclaw doctor
-openclaw channels status --probe
-openclaw logs --follow
+carapace triage
+carapace status
+carapace status --all
+carapace gateway probe
+carapace gateway status
+carapace doctor
+carapace channels status --probe
+carapace logs --follow
 ```
 
 Good output, one line each:
 
-- `openclaw triage` writes a sanitized, agent-ready diagnosis and, when the Gateway is reachable, a support archive. See [Triage](/cli/triage) for agent handoff options.
-- `openclaw status` shows configured channels, no auth errors.
-- `openclaw status --all` produces a full, shareable report.
-- `openclaw gateway probe` shows `Reachable: yes`. `Capability: ...` is the
+- `carapace triage` writes a sanitized, agent-ready diagnosis and, when the Gateway is reachable, a support archive. See [Triage](/cli/triage) for agent handoff options.
+- `carapace status` shows configured channels, no auth errors.
+- `carapace status --all` produces a full, shareable report.
+- `carapace gateway probe` shows `Reachable: yes`. `Capability: ...` is the
   auth level the probe proved; `Read probe: limited - missing scope:
 operator.read` is degraded diagnostics, not a connect failure.
-- `openclaw gateway status` shows `Runtime: running`, `Connectivity probe:
+- `carapace gateway status` shows `Runtime: running`, `Connectivity probe:
 ok`, and a plausible `Capability: ...`. Add `--require-rpc` to also require
   read-scope RPC proof.
-- `openclaw doctor` reports no blocking config/service errors.
-- `openclaw channels status --probe` returns live per-account transport state
+- `carapace doctor` reports no blocking config/service errors.
+- `carapace channels status --probe` returns live per-account transport state
   (`works` / `audit ok`) when the gateway is reachable; falls back to
   config-only summaries when it is not.
-- `openclaw logs --follow` shows steady activity, no repeating fatal errors.
+- `carapace logs --follow` shows steady activity, no repeating fatal errors.
 
 ## Assistant feels limited or missing tools
 
 Check the effective tool profile:
 
 ```bash
-openclaw status
-openclaw status --all
-openclaw doctor
+carapace status
+carapace status --all
+carapace doctor
 ```
 
 Common causes:
@@ -62,42 +62,42 @@ Common causes:
   for one agent.
 
 Change the profile, restart or reload the Gateway, then recheck with
-`openclaw status --all`. Full profile/group table: [Tool profiles](/gateway/config-tools#tool-profiles).
+`carapace status --all`. Full profile/group table: [Tool profiles](/gateway/config-tools#tool-profiles).
 
 ## Anthropic long context 429
 
 `HTTP 429: rate_limit_error: Extra usage is required for long context requests`
 → [Anthropic 429 extra usage required for long context](/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context).
 
-## Local OpenAI-compatible backend works directly but fails in OpenClaw
+## Local OpenAI-compatible backend works directly but fails in Carapace
 
 Your local/self-hosted `/v1` backend answers direct `/v1/chat/completions`
-probes but fails on `openclaw infer model run` or normal agent turns:
+probes but fails on `carapace infer model run` or normal agent turns:
 
 1. Error mentions `messages[].content` expecting a string: set
    `models.providers.<provider>.models[].compat.requiresStringContent: true`.
-2. Still fails only on OpenClaw agent turns: set
+2. Still fails only on Carapace agent turns: set
    `models.providers.<provider>.models[].compat.supportsTools: false` and retry.
-3. Tiny direct calls work but larger OpenClaw prompts crash the backend: that
-   is an upstream model/server limit, not an OpenClaw bug. Continue in
+3. Tiny direct calls work but larger Carapace prompts crash the backend: that
+   is an upstream model/server limit, not an Carapace bug. Continue in
    [Local OpenAI-compatible backend passes direct probes but agent runs fail](/gateway/troubleshooting#local-openai-compatible-backend-passes-direct-probes-but-agent-runs-fail).
 
-## Plugin install fails with missing openclaw extensions
+## Plugin install fails with missing carapace extensions
 
-`package.json missing openclaw.extensions` means the plugin package uses a
-shape OpenClaw no longer accepts.
+`package.json missing carapace.extensions` means the plugin package uses a
+shape Carapace no longer accepts.
 
 Fix in the plugin package:
 
-1. Add `openclaw.extensions` to `package.json`, pointing at built runtime
+1. Add `carapace.extensions` to `package.json`, pointing at built runtime
    files (usually `./dist/index.js`).
-2. Republish, then run `openclaw plugins install <package>` again.
+2. Republish, then run `carapace plugins install <package>` again.
 
 ```json
 {
-  "name": "@openclaw/my-plugin",
+  "name": "@carapace/my-plugin",
   "version": "1.2.3",
-  "openclaw": {
+  "carapace": {
     "extensions": ["./dist/index.js"]
   }
 }
@@ -111,23 +111,23 @@ Update finishes but plugins are stale, disabled, or show `blocked by install
 policy`, `install policy failed closed`, or `Disabled "<plugin>" after plugin
 update failure`: check `security.installPolicy`.
 
-Install policy runs on plugin installs and updates. `@openclaw/*` plugin
-versions normally move with the OpenClaw release, so an OpenClaw update can
+Install policy runs on plugin installs and updates. `@carapace/*` plugin
+versions normally move with the Carapace release, so an Carapace update can
 need a matching plugin update during post-update sync.
 
 Avoid these policy shapes unless you also maintain the matching upgrade rule:
 
-- Freezing OpenClaw-owned plugins to one exact old version (for example, only
-  `@openclaw/*@2026.5.3`).
+- Freezing Carapace-owned plugins to one exact old version (for example, only
+  `@carapace/*@2026.5.3`).
 - Blocking by source kind alone (every npm, network, or `request.mode:
 "update"` request).
 - Treating the policy command as optional: when `security.installPolicy` is
   enabled, a missing, slow, unreadable, or permission-blocked policy
   executable fails closed.
-- Approving versions without checking the request's `openclawVersion` against
+- Approving versions without checking the request's `carapaceVersion` against
   plugin candidate metadata.
 
-Prefer rules that allow trusted `@openclaw/*` updates compatible with the
+Prefer rules that allow trusted `@carapace/*` updates compatible with the
 current host, instead of pinning one release forever. If you block npm by
 default, add a narrow exception for the plugin ids you use, and apply the same
 trust rule to `request.mode: "update"` as to installs.
@@ -135,25 +135,25 @@ trust rule to `request.mode: "update"` as to installs.
 Recovery:
 
 ```bash
-openclaw doctor --deep
-openclaw plugins update --all
-openclaw status --all
+carapace doctor --deep
+carapace plugins update --all
+carapace status --all
 ```
 
 If the policy is intentionally strict, relax it for the trusted upgrade
-window, rerun `openclaw plugins update --all`, then restore the stricter rule.
+window, rerun `carapace plugins update --all`, then restore the stricter rule.
 If update failure disabled a plugin, inspect before re-enabling:
 
 ```bash
-openclaw plugins inspect <plugin-id> --runtime --json
-openclaw plugins enable <plugin-id>
+carapace plugins inspect <plugin-id> --runtime --json
+carapace plugins enable <plugin-id>
 ```
 
 Reference: [Operator install policy](/tools/skills-config#operator-install-policy-security-installpolicy)
 
 ## Plugin present but blocked by suspicious ownership
 
-`openclaw doctor`, setup, or startup warnings show:
+`carapace doctor`, setup, or startup warnings show:
 
 ```text
 blocked plugin candidate: suspicious ownership (... uid=1000, expected uid=0 or root)
@@ -162,21 +162,21 @@ plugin present but blocked
 
 The plugin files are owned by a different Unix user than the process loading
 them. Do not remove the plugin config; fix the file ownership, or run
-OpenClaw as the user that owns the state directory.
+Carapace as the user that owns the state directory.
 
 Docker installs run as `node` (uid `1000`). Repair the host bind mounts:
 
 ```bash
-sudo chown -R 1000:1000 /path/to/openclaw-config /path/to/openclaw-workspace
-openclaw doctor --fix
+sudo chown -R 1000:1000 /path/to/carapace-config /path/to/carapace-workspace
+carapace doctor --fix
 ```
 
-If you intentionally run OpenClaw as root, repair the managed plugin root
+If you intentionally run Carapace as root, repair the managed plugin root
 instead:
 
 ```bash
-sudo chown -R root:root /path/to/openclaw-config/npm
-openclaw doctor --fix
+sudo chown -R root:root /path/to/carapace-config/npm
+carapace doctor --fix
 ```
 
 Deeper docs: [Blocked plugin path ownership](/tools/plugin#blocked-plugin-path-ownership), [Docker: Permissions and EACCES](/install/docker#permissions-and-eacces)
@@ -185,7 +185,7 @@ Deeper docs: [Blocked plugin path ownership](/tools/plugin#blocked-plugin-path-o
 
 ```mermaid
 flowchart TD
-  A[OpenClaw is not working] --> B{What breaks first}
+  A[Carapace is not working] --> B{What breaks first}
   B --> C[No replies]
   B --> D[Dashboard or Control UI will not connect]
   B --> E[Gateway will not start or service not running]
@@ -206,11 +206,11 @@ flowchart TD
 <AccordionGroup>
   <Accordion title="No replies">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw channels status --probe
-    openclaw pairing list --channel <channel> [--account <id>]
-    openclaw logs --follow
+    carapace status
+    carapace gateway status
+    carapace channels status --probe
+    carapace pairing list --channel <channel> [--account <id>]
+    carapace logs --follow
     ```
 
     Good output:
@@ -234,16 +234,16 @@ flowchart TD
 
   <Accordion title="Dashboard or Control UI will not connect">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw logs --follow
-    openclaw doctor
-    openclaw channels status --probe
+    carapace status
+    carapace gateway status
+    carapace logs --follow
+    carapace doctor
+    carapace channels status --probe
     ```
 
     Good output:
 
-    - `Dashboard: http://...` shown in `openclaw gateway status`
+    - `Dashboard: http://...` shown in `carapace gateway status`
     - `Connectivity probe: ok`
     - `Capability: read-only`, `write-capable`, or `admin-capable`
     - No auth loop in logs
@@ -263,11 +263,11 @@ flowchart TD
 
   <Accordion title="Gateway will not start or service installed but not running">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw logs --follow
-    openclaw doctor
-    openclaw channels status --probe
+    carapace status
+    carapace gateway status
+    carapace logs --follow
+    carapace doctor
+    carapace channels status --probe
     ```
 
     Good output:
@@ -289,11 +289,11 @@ flowchart TD
 
   <Accordion title="Channel connects but messages do not flow">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw logs --follow
-    openclaw doctor
-    openclaw channels status --probe
+    carapace status
+    carapace gateway status
+    carapace logs --follow
+    carapace doctor
+    carapace channels status --probe
     ```
 
     Good output:
@@ -314,12 +314,12 @@ flowchart TD
 
   <Accordion title="Cron or heartbeat did not fire or did not deliver">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw automations status
-    openclaw automations list
-    openclaw automations runs <jobId> --limit 20
-    openclaw logs --follow
+    carapace status
+    carapace gateway status
+    carapace automations status
+    carapace automations list
+    carapace automations runs <jobId> --limit 20
+    carapace logs --follow
     ```
 
     Good output:
@@ -343,11 +343,11 @@ flowchart TD
 
   <Accordion title="Node is paired but tool fails camera canvas screen exec">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw nodes status
-    openclaw nodes describe --node <idOrNameOrIp>
-    openclaw logs --follow
+    carapace status
+    carapace gateway status
+    carapace nodes status
+    carapace nodes describe --node <idOrNameOrIp>
+    carapace logs --follow
     ```
 
     Good output:
@@ -369,10 +369,10 @@ flowchart TD
 
   <Accordion title="Exec suddenly asks for approval">
     ```bash
-    openclaw config get tools.exec.host
-    openclaw config get tools.exec.security
-    openclaw config get tools.exec.ask
-    openclaw gateway restart
+    carapace config get tools.exec.host
+    carapace config get tools.exec.security
+    carapace config get tools.exec.ask
+    carapace gateway restart
     ```
 
     What changed:
@@ -389,10 +389,10 @@ flowchart TD
     Restore the current no-approval defaults:
 
     ```bash
-    openclaw config set tools.exec.host gateway
-    openclaw config set tools.exec.security full
-    openclaw config set tools.exec.ask off
-    openclaw gateway restart
+    carapace config set tools.exec.host gateway
+    carapace config set tools.exec.security full
+    carapace config set tools.exec.ask off
+    carapace gateway restart
     ```
 
     Safer alternatives:
@@ -414,17 +414,17 @@ flowchart TD
 
   <Accordion title="Browser tool fails">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw browser status
-    openclaw logs --follow
-    openclaw doctor
+    carapace status
+    carapace gateway status
+    carapace browser status
+    carapace logs --follow
+    carapace doctor
     ```
 
     Good output:
 
     - Browser status shows `running: true` and a chosen browser/profile.
-    - `openclaw` profile starts, or `user` profile sees local Chrome tabs.
+    - `carapace` profile starts, or `user` profile sees local Chrome tabs.
 
     Log signatures:
 
@@ -436,7 +436,7 @@ flowchart TD
     - `No Chrome tabs found for profile="user"` → the Chrome MCP attach profile has no open local Chrome tabs.
     - `Remote CDP for profile "<name>" is not reachable` → configured remote CDP endpoint unreachable from this host.
     - `Browser attachOnly is enabled ... not reachable` → attach-only profile has no live CDP target.
-    - Stale viewport/dark-mode/locale/offline overrides on attach-only or remote CDP profiles → run `openclaw browser stop --browser-profile <name>` to close the control session and release emulation state without restarting the gateway.
+    - Stale viewport/dark-mode/locale/offline overrides on attach-only or remote CDP profiles → run `carapace browser stop --browser-profile <name>` to close the control session and release emulation state without restarting the gateway.
 
     Deep pages: [Browser tool fails](/gateway/troubleshooting#browser-tool-fails), [Missing browser command or tool](/tools/browser#missing-browser-command-or-tool), [Browser: Linux troubleshooting](/tools/browser-linux-troubleshooting), [Browser: WSL2/Windows remote CDP troubleshooting](/tools/browser-wsl2-windows-remote-cdp-troubleshooting)
 

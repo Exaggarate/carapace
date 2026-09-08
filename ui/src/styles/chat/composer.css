@@ -112,7 +112,7 @@
   --chat-composer-group-hover: color-mix(in srgb, var(--text-strong) 6%, transparent);
   --chat-composer-popover-background: color-mix(in srgb, var(--bg-elevated) 96%, var(--card));
   --chat-composer-popover-border: var(--overlay-border);
-  --chat-composer-popover-radius: calc(14px * var(--openclaw-corner-radius-scale));
+  --chat-composer-popover-radius: calc(14px * var(--carapace-corner-radius-scale));
   /* Footer control box. Smaller than the editor's own line box on purpose: the
      controls read as chrome beside the text, not as peers of it. */
   --chat-composer-control-size: 28px;
@@ -136,7 +136,7 @@
   --chat-composer-menu-row-height: 40px;
   --chat-composer-menu-row-padding: 6px 9px;
   --chat-composer-menu-row-gap: 8px;
-  --chat-composer-menu-row-radius: calc(10px * var(--openclaw-corner-radius-scale));
+  --chat-composer-menu-row-radius: calc(10px * var(--carapace-corner-radius-scale));
   --chat-composer-menu-icon: 16px;
   --chat-composer-menu-selected: var(--menu-selected);
   /* Breathing room between the draft and the surface it sits in. Small on
@@ -178,7 +178,7 @@
   padding: 0;
   background: var(--chat-composer-surface);
   border: 1px solid var(--chat-composer-hairline);
-  border-radius: calc(20px * var(--openclaw-corner-radius-scale));
+  border-radius: calc(20px * var(--carapace-corner-radius-scale));
   /* Deliberately lighter than --shadow-sm: with the border and the luminance
      step already doing the separating, a heavier drop reads as a second frame. */
   box-shadow: 0 4px 16px rgb(0 0 0 / 5%);
@@ -323,8 +323,8 @@
   width: 100%;
   border: 1px solid color-mix(in srgb, var(--border) 16%, transparent);
   border-top: 0;
-  border-radius: 0 0 calc(16px * var(--openclaw-corner-radius-scale))
-    calc(16px * var(--openclaw-corner-radius-scale));
+  border-radius: 0 0 calc(16px * var(--carapace-corner-radius-scale))
+    calc(16px * var(--carapace-corner-radius-scale));
   corner-shape: superellipse(1.5);
   overflow: hidden;
   background: var(--composer-attached-surface, var(--chat-composer-surface));
@@ -1000,7 +1000,7 @@
 }
 
 .agent-chat__composer-errors--standalone {
-  border-radius: calc(20px * var(--openclaw-corner-radius-scale));
+  border-radius: calc(20px * var(--carapace-corner-radius-scale));
   overflow: hidden;
 }
 
@@ -1399,7 +1399,7 @@
   background: color-mix(in srgb, var(--text-strong) 7%, transparent);
 }
 
-.chat-talk-control > openclaw-tooltip {
+.chat-talk-control > carapace-tooltip {
   display: inline-flex;
 }
 
@@ -2149,7 +2149,7 @@
 
 @supports (corner-shape: superellipse(1.5)) {
   .agent-chat__input .slash-menu.slash-menu {
-    border-radius: calc(20px * var(--openclaw-corner-radius-scale));
+    border-radius: calc(20px * var(--carapace-corner-radius-scale));
     corner-shape: superellipse(1.5);
   }
 }
@@ -2315,7 +2315,7 @@
 }
 
 .chat-attachment-thumb {
-  --chat-attachment-radius: calc(14px * var(--openclaw-corner-radius-scale));
+  --chat-attachment-radius: calc(14px * var(--carapace-corner-radius-scale));
 
   position: relative;
   flex: 0 0 auto;
@@ -2445,7 +2445,7 @@
   width: 44px;
   height: 44px;
   padding: 12px;
-  border-radius: calc(12px + 7px * var(--openclaw-corner-radius-scale));
+  border-radius: calc(12px + 7px * var(--carapace-corner-radius-scale));
   corner-shape: superellipse(1.5);
   border: none;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -4334,7 +4334,7 @@
     gap: 6px;
   }
 
-  .agent-chat__welcome-clawd openclaw-mascot {
+  .agent-chat__welcome-clawd carapace-mascot {
     width: 77px;
     height: 77px;
   }

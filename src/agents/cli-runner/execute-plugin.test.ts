@@ -1,7 +1,7 @@
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   CliBackendExecute,
   CliBackendExecuteContext,
@@ -33,7 +33,7 @@ function registerOwnerSession(context: PreparedCliRunContext, generation: string
   const capability = createCliLiveSessionCapability({
     context,
     argv: ["/bin/sh", "-p", "--permission-mode", "bypassPermissions"],
-    env: { PATH: "/bin:/usr/bin", OPENCLAW_TEST_MARKER: "host-owned" },
+    env: { PATH: "/bin:/usr/bin", CARAPACE_TEST_MARKER: "host-owned" },
     beginCapture: () => {},
     abortSignal: new AbortController().signal,
   });
@@ -115,7 +115,7 @@ describe("plugin-owned CLI execution host boundary", () => {
         systemPrompt: "Follow host policy.\nKeep credentials private.",
         sessionId: "sdk-session",
         useResume: false,
-        env: { PATH: "/bin:/usr/bin", OPENCLAW_TEST_MARKER: "host-owned" },
+        env: { PATH: "/bin:/usr/bin", CARAPACE_TEST_MARKER: "host-owned" },
         requestToolPermission: expect.any(Function),
         requestUserInput: expect.any(Function),
       }),
@@ -278,7 +278,7 @@ describe("plugin-owned CLI execution host boundary", () => {
 
   it("restarts true fresh sessions while preserving legitimate no-resume warm reuse", async () => {
     const reseed = await createExecution({ runId: "plugin-fresh-reseed" });
-    reseed.context.openClawHistoryPrompt = "Previously recorded bounded conversation.";
+    reseed.context.carapaceHistoryPrompt = "Previously recorded bounded conversation.";
     const reseededSession = registerOwnerSession(reseed.context, "old-reseed-session");
 
     await runPlugin(
@@ -343,7 +343,7 @@ describe("plugin-owned CLI execution host boundary", () => {
     });
     expect(replacement.close).not.toHaveBeenCalled();
 
-    context.openClawHistoryPrompt = "Recovered conversation history.";
+    context.carapaceHistoryPrompt = "Recovered conversation history.";
     await expect(
       runPlugin(context, requireCurrentSession, {
         liveSession: true,
@@ -559,7 +559,7 @@ describe("plugin-owned CLI execution host boundary", () => {
   });
 
   it("retains safe standing approvals only for the exact live process and current turn policy", async () => {
-    const config: OpenClawConfig = { tools: { exec: { security: "allowlist", ask: "on-miss" } } };
+    const config: CarapaceConfig = { tools: { exec: { security: "allowlist", ask: "on-miss" } } };
     mockCallGatewayTool
       .mockResolvedValueOnce({ id: "approval-first", decision: "allow-always" })
       .mockResolvedValueOnce({ id: "approval-second", decision: "allow-always" });

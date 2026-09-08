@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const SCRIPT = resolve("scripts/full-release-artifacts.mjs");
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const WORKFLOW = ".github/workflows/full-release-artifacts.yml";
 const SOURCE_SHA = "a".repeat(40);
 const TOOLING_SHA = "b".repeat(40);
@@ -56,23 +56,23 @@ function npmBundles() {
     runAttempt: "1",
     jobId: "901",
     jobName: "Prepare npm artifacts / Prepare publishable npm package",
-    producerWorkflowPath: ".github/workflows/openclaw-npm-preflight.yml",
+    producerWorkflowPath: ".github/workflows/carapace-npm-preflight.yml",
   };
   const raw = {
-    schema: "openclaw.prepared-npm-bundle/v1",
+    schema: "carapace.prepared-npm-bundle/v1",
     source: { sha: SOURCE_SHA },
     producer,
     artifact: {
       id: "401",
-      name: "openclaw-npm-package-81-1",
+      name: "carapace-npm-package-81-1",
       digest: "c".repeat(64),
       runId: "81",
       runAttempt: "1",
     },
     package: {
-      name: "openclaw",
+      name: "carapace",
       version: "2026.8.1",
-      fileName: "openclaw-2026.8.1.tgz",
+      fileName: "carapace-2026.8.1.tgz",
       sha256: "d".repeat(64),
       sourceSha: SOURCE_SHA,
     },
@@ -80,14 +80,14 @@ function npmBundles() {
     manifestSha256: "e".repeat(64),
   };
   const qualified = {
-    schema: "openclaw.qualified-npm-preflight/v1",
+    schema: "carapace.qualified-npm-preflight/v1",
     source: raw.source,
     producer: {
       ...producer,
       jobId: "902",
       jobName: "Prepare npm artifacts / Qualify prepared npm package",
     },
-    artifact: { ...raw.artifact, id: "402", name: `openclaw-npm-preflight-${SOURCE_SHA}` },
+    artifact: { ...raw.artifact, id: "402", name: `carapace-npm-preflight-${SOURCE_SHA}` },
     preparedBundle: raw,
     manifestSha256: "f".repeat(64),
   };
@@ -283,7 +283,7 @@ describe.skipIf(process.platform === "win32")("immutable release artifact CLI", 
     ["another attempt", { run_attempt: 2 }, false],
     ["another workflow", { path: ".github/workflows/ci.yml" }, false],
     ["changed tooling", { head_sha: "c".repeat(40) }, false],
-    ["fork source", { head_repository: { full_name: "someone/openclaw" } }, false],
+    ["fork source", { head_repository: { full_name: "someone/carapace" } }, false],
     ["completed parent", { status: "completed", conclusion: "success" }, false],
   ] as const)("admits only its %s", (_name, override, accepted) => {
     const test = fixture();
@@ -407,7 +407,7 @@ describe.skipIf(process.platform === "win32")("immutable release artifact CLI", 
         test.jobs[0]!.run_attempt = 2;
       }
       await test.artifact(
-        "openclaw-npm-package-descriptor-81-1",
+        "carapace-npm-package-descriptor-81-1",
         "prepared-npm-bundle.json",
         test.raw,
       );
@@ -489,7 +489,7 @@ describe.skipIf(process.platform === "win32")("immutable release artifact CLI", 
     async (failure) => {
       const test = fixture();
       const archive = await test.artifact(
-        "openclaw-npm-package-descriptor-81-1",
+        "carapace-npm-package-descriptor-81-1",
         "prepared-npm-bundle.json",
         test.raw,
       );

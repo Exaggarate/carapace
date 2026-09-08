@@ -55,7 +55,7 @@ describe("scripts/lib/plugin-package-dependencies.mts", () => {
   });
 
   it("collects bundled plugin dependency owners and conflicts deterministically", () => {
-    const root = makeTempDir(tempDirs, "openclaw-plugin-dependencies-");
+    const root = makeTempDir(tempDirs, "carapace-plugin-dependencies-");
     writePackageJson(root, "alpha", {
       dependencies: {
         shared: "^1.0.0",
@@ -78,7 +78,7 @@ describe("scripts/lib/plugin-package-dependencies.mts", () => {
       dependencies: {
         shared: "^9.0.0",
       },
-      openclaw: {
+      carapace: {
         build: {
           bundledDist: false,
         },

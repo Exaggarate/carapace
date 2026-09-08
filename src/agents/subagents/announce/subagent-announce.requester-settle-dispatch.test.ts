@@ -361,7 +361,7 @@ describe("requester settle dispatch deadline", () => {
   );
 
   it("retains the durable settle batch through restart recovery and delivers one direct final", async () => {
-    const storePath = path.join(tempDirs.make("openclaw-settle-recovery-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("carapace-settle-recovery-"), "sessions.json");
     const target = { sessionKey: REQUESTER_KEY, storePath };
     const lifecycleGeneration = getAgentEventLifecycleGeneration();
     await replaceSessionEntry(target, {

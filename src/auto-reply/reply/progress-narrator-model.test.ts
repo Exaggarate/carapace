@@ -26,7 +26,7 @@ beforeEach(() => {
     text: "Working on the request.",
     provider: "openai",
     model: "gpt-test",
-    owner: { kind: "harness", id: "openclaw" },
+    owner: { kind: "harness", id: "carapace" },
   });
 });
 

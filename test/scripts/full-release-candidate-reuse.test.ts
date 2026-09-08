@@ -23,7 +23,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const NOW = Date.parse("2026-08-28T12:00:00Z");
 const EXPIRES_AT = "2026-09-04T12:00:00Z";
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const CONTRACT_SCRIPT = resolve("scripts/full-release-candidate-contract.mjs");
 const SCRIPT = resolve("scripts/full-release-candidate-reuse.mjs");
 const WORKFLOW_PATH = ".github/workflows/full-release-validation.yml";
@@ -375,7 +375,7 @@ printf '%s\n' '{"artifacts":[]}'
       rawInputPath,
       JSON.stringify(
         fullReleaseCandidateRequestInput({
-          upgradeSurvivorBaselines: "openclaw@latest",
+          upgradeSurvivorBaselines: "carapace@latest",
           upgradeSurvivorScenarios: "base",
         }),
       ),
@@ -395,7 +395,7 @@ printf '%s\n' '{"artifacts":[]}'
       upgradeSurvivorBaselines: string[];
       upgradeSurvivorScenarios: string[];
     };
-    expect(request.upgradeSurvivorBaselines).toEqual(["openclaw@latest"]);
+    expect(request.upgradeSurvivorBaselines).toEqual(["carapace@latest"]);
     expect(request.upgradeSurvivorScenarios).toEqual(["base"]);
 
     const result = spawnSync(

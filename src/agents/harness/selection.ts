@@ -1,7 +1,7 @@
 /**
  * Selects and invokes native agent harnesses for embedded run attempts.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createChildDiagnosticTraceContext,
   createDiagnosticTraceContext,
@@ -45,7 +45,7 @@ import type { SystemAgentToolOptions } from "../tools/system-agent-tool.js";
 import { copyCoreTtsAttemptResultProvenance } from "../tools/tts-tool-result-provenance.js";
 import { resolveAgentHarnessAutoSelectionHint } from "./auto-selection.js";
 import { resolveAgentHarnessAvailabilityDecision } from "./availability.js";
-import { createOpenClawAgentHarness, isBuiltInOpenClawAgentHarness } from "./builtin-openclaw.js";
+import { createCarapaceAgentHarness, isBuiltInCarapaceAgentHarness } from "./builtin-carapace.js";
 import { selectContextEngineForTranscriptHost } from "./context-engine-logical-turn.js";
 import { drainPendingContextEngineTurnsBeforeRun } from "./context-engine-turn-attempt.js";
 import { AgentHarnessPreflightError, MissingAgentHarnessError } from "./errors.js";
@@ -71,7 +71,7 @@ type AgentHarnessSelectionParams = {
   provider: string;
   modelId?: string;
   modelProvider?: AgentHarnessSupportContext["modelProvider"];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   agentHarnessId?: string;
@@ -111,20 +111,20 @@ type AgentHarnessSelectionDecision = {
   policy: AgentHarnessPolicy;
   selectedHarnessId: string;
   selectedReason:
-    | "forced_openclaw"
+    | "forced_carapace"
     | "forced_plugin"
-    // Implicit Codex preference found no registered Codex harness, so OpenClaw handled the run.
-    | "implicit_plugin_unavailable_openclaw"
-    // Implicit Codex preference cannot reproduce the prepared transport, so OpenClaw handled it.
-    | "implicit_plugin_unsupported_openclaw"
-    // The requested plugin declared OpenClaw as a lossless fallback for this prepared request.
-    | "plugin_declared_fallback_openclaw"
+    // Implicit Codex preference found no registered Codex harness, so Carapace handled the run.
+    | "implicit_plugin_unavailable_carapace"
+    // Implicit Codex preference cannot reproduce the prepared transport, so Carapace handled it.
+    | "implicit_plugin_unsupported_carapace"
+    // The requested plugin declared Carapace as a lossless fallback for this prepared request.
+    | "plugin_declared_fallback_carapace"
     // Provider-owned CLI runtime aliases have no agent harness plugin counterpart.
-    | "cli_runtime_passthrough_openclaw"
+    | "cli_runtime_passthrough_carapace"
     // Auto mode chose a registered plugin harness that supports the provider/model.
     | "auto_plugin"
-    // Auto mode found no supporting plugin harness, so OpenClaw handled the run.
-    | "auto_openclaw";
+    // Auto mode found no supporting plugin harness, so Carapace handled the run.
+    | "auto_carapace";
   candidates: AgentHarnessSelectionCandidate[];
 };
 
@@ -207,19 +207,19 @@ export function selectAgentHarnessForPreparedModelProviders(
   // One embedded runtime owns the complete retry set. Auto selection and plugin-declared
   // fallbacks may resolve individual prepared routes to different harnesses.
   return (
-    decisions.find((decision) => decision.selectedHarnessId === "openclaw")?.harness ??
-    createOpenClawAgentHarness()
+    decisions.find((decision) => decision.selectedHarnessId === "carapace")?.harness ??
+    createCarapaceAgentHarness()
   );
 }
 
-/** Returns whether a plugin harness constructs OpenClaw tools inside its runtime. */
-export function agentHarnessBuildsOpenClawTools(harnessId: string): boolean {
+/** Returns whether a plugin harness constructs Carapace tools inside its runtime. */
+export function agentHarnessBuildsCarapaceTools(harnessId: string): boolean {
   return harnessId === "codex" || harnessId === "copilot";
 }
 
-/** Returns whether the selected harness exposes OpenClaw's agent-tool surface. */
-export function agentHarnessExposesOpenClawTools(harnessId: string): boolean {
-  return harnessId === "openclaw" || agentHarnessBuildsOpenClawTools(harnessId);
+/** Returns whether the selected harness exposes Carapace's agent-tool surface. */
+export function agentHarnessExposesCarapaceTools(harnessId: string): boolean {
+  return harnessId === "carapace" || agentHarnessBuildsCarapaceTools(harnessId);
 }
 
 function selectAgentHarnessDecision(
@@ -236,21 +236,21 @@ function selectAgentHarnessDecision(
       }),
   });
   const policy = availability.policy;
-  // OpenClaw's built-in harness is intentionally not part of the plugin candidate list. Explicit plugin
-  // runtimes fail closed unless the selected plugin declares OpenClaw as a lossless fallback.
-  const openClawHarness = createOpenClawAgentHarness();
+  // Carapace's built-in harness is intentionally not part of the plugin candidate list. Explicit plugin
+  // runtimes fail closed unless the selected plugin declares Carapace as a lossless fallback.
+  const carapaceHarness = createCarapaceAgentHarness();
   const runtime = policy.runtime;
-  if (runtime === "openclaw") {
+  if (runtime === "carapace") {
     const selectedReason =
       availability.kind === "implicit-unavailable"
-        ? "implicit_plugin_unavailable_openclaw"
+        ? "implicit_plugin_unavailable_carapace"
         : availability.kind === "implicit-unsupported"
-          ? "implicit_plugin_unsupported_openclaw"
+          ? "implicit_plugin_unsupported_carapace"
           : availability.kind === "declared-fallback"
-            ? "plugin_declared_fallback_openclaw"
-            : "forced_openclaw";
+            ? "plugin_declared_fallback_carapace"
+            : "forced_carapace";
     return buildSelectionDecision({
-      harness: openClawHarness,
+      harness: carapaceHarness,
       policy,
       selectedReason,
       candidates: listHarnessCandidates(pluginHarnesses),
@@ -260,7 +260,7 @@ function selectAgentHarnessDecision(
     const forced = pluginHarnesses.find((entry) => entry.id === runtime);
     if (forced) {
       const support = availability.support;
-      if (!support || support.supported || support.fallbackRuntime === "openclaw") {
+      if (!support || support.supported || support.fallbackRuntime === "carapace") {
         if (support && !support.supported) {
           log.info(
             `agent harness selected requested=${runtime} selected=${forced.id} reason=private_qa_forced_runtime`,
@@ -275,12 +275,12 @@ function selectAgentHarnessDecision(
       }
       if (isCliRuntimeAliasForProvider({ runtime, provider: params.provider })) {
         return buildSelectionDecision({
-          harness: openClawHarness,
+          harness: carapaceHarness,
           policy: {
             ...policy,
-            runtime: "openclaw",
+            runtime: "carapace",
           },
-          selectedReason: "cli_runtime_passthrough_openclaw",
+          selectedReason: "cli_runtime_passthrough_carapace",
           candidates: listHarnessCandidates(pluginHarnesses),
         });
       }
@@ -298,12 +298,12 @@ function selectAgentHarnessDecision(
       })
     ) {
       return buildSelectionDecision({
-        harness: openClawHarness,
+        harness: carapaceHarness,
         policy: {
           ...policy,
-          runtime: "openclaw",
+          runtime: "carapace",
         },
-        selectedReason: "cli_runtime_passthrough_openclaw",
+        selectedReason: "cli_runtime_passthrough_carapace",
         candidates: listHarnessCandidates(pluginHarnesses),
       });
     }
@@ -360,9 +360,9 @@ function selectAgentHarnessDecision(
     });
   }
   return buildSelectionDecision({
-    harness: openClawHarness,
+    harness: carapaceHarness,
     policy,
-    selectedReason: "auto_openclaw",
+    selectedReason: "auto_carapace",
     candidates: candidates.map(toSelectionCandidate),
   });
 }
@@ -381,14 +381,14 @@ export async function runAgentHarnessSettledTurnFinalization(
     throw new Error(`Agent harness ${harness.id} cannot safely finalize a settled tool turn.`);
   }
   if (internalParams.systemAgentTool && !isSystemAgentOnlyAllowlist(internalParams.toolsAllow)) {
-    throw new Error('OpenClaw host authority requires toolsAllow: ["openclaw"]');
+    throw new Error('Carapace host authority requires toolsAllow: ["carapace"]');
   }
   const attemptParams = prepareHarnessFinalizationParams(
     {
       ...internalParams,
       operation: "settled-tool-finalization",
     },
-    isBuiltInOpenClawAgentHarness(harness),
+    isBuiltInCarapaceAgentHarness(harness),
   );
   return await runAgentHarnessOperation(harness, params, () =>
     runWithAgentRingZeroTools([], () =>
@@ -451,7 +451,7 @@ export async function runAgentHarnessAttempt(
     };
   }
   if (internalParams.systemAgentTool && !isSystemAgentOnlyAllowlist(internalParams.toolsAllow)) {
-    throw new Error('OpenClaw host authority requires toolsAllow: ["openclaw"]');
+    throw new Error('Carapace host authority requires toolsAllow: ["carapace"]');
   }
   const ringZeroTools = internalParams.systemAgentTool
     ? [
@@ -501,14 +501,14 @@ export async function runAgentHarnessAttempt(
       runWithAgentRingZeroTools(ringZeroTools, () => {
         // Resolve plugin policy after entering the host scope. Ring-zero tools are
         // trusted setup authority and must survive ordinary deny-all policy.
-        const hostOpenClawAuthority =
-          isHostScopedAgentToolActive("openclaw") &&
+        const hostCarapaceAuthority =
+          isHostScopedAgentToolActive("carapace") &&
           isSystemAgentOnlyAllowlist(pluginAttempt.params.toolsAllow);
         const preparedParams = selection.builtIn
           ? pluginAttempt.params
           : preparePluginHarnessParams(pluginAttempt.params, harness);
         const effectiveAttemptParams =
-          hostOpenClawAuthority && preparedParams.pluginHarnessToolPolicyRestricted
+          hostCarapaceAuthority && preparedParams.pluginHarnessToolPolicyRestricted
             ? { ...preparedParams, pluginHarnessToolPolicyRestricted: false }
             : preparedParams;
         assertPluginHarnessConversationToolPolicySupport(
@@ -628,14 +628,14 @@ async function runAgentHarnessOperation<T>(
   const harnessTrace = freezeDiagnosticTraceContext(
     activeTrace ? createChildDiagnosticTraceContext(activeTrace) : createDiagnosticTraceContext(),
   );
-  if (isBuiltInOpenClawAgentHarness(harness)) {
+  if (isBuiltInCarapaceAgentHarness(harness)) {
     return await runWithDiagnosticTraceContext(harnessTrace, execute);
   }
 
   try {
     return await runWithDiagnosticTraceContext(harnessTrace, execute);
   } catch (error) {
-    log.warn(`${harness.label} failed; not falling back to embedded OpenClaw backend`, {
+    log.warn(`${harness.label} failed; not falling back to embedded Carapace backend`, {
       harnessId: harness.id,
       provider: params.provider,
       modelId: params.modelId,
@@ -646,7 +646,7 @@ async function runAgentHarnessOperation<T>(
 }
 
 function isSystemAgentOnlyAllowlist(toolsAllow: readonly string[] | undefined): boolean {
-  return toolsAllow?.length === 1 && normalizeToolPolicyName(toolsAllow[0] ?? "") === "openclaw";
+  return toolsAllow?.length === 1 && normalizeToolPolicyName(toolsAllow[0] ?? "") === "carapace";
 }
 
 function withoutHarnessSetupAuthority(
@@ -739,10 +739,10 @@ function withoutPluginHarnessPrivateState(
     hostCapabilities: _hostCapabilities,
     onContextEngineTurnCandidate: _onContextEngineTurnCandidate,
     trajectoryRecorder: _trajectoryRecorder,
-    __openclawSourceReplyDeliveryRuntime: _sourceReplyDeliveryRuntime,
+    __carapaceSourceReplyDeliveryRuntime: _sourceReplyDeliveryRuntime,
     ...pluginParams
   } = params as EmbeddedRunAttemptInternalParams & {
-    __openclawSourceReplyDeliveryRuntime?: unknown;
+    __carapaceSourceReplyDeliveryRuntime?: unknown;
   };
   return pluginParams;
 }
@@ -782,7 +782,7 @@ function assertPluginHarnessConversationToolPolicySupport(
   restricted: boolean,
 ): void {
   if (
-    harness.id !== "openclaw" &&
+    harness.id !== "carapace" &&
     restricted &&
     harness.conversationToolPolicySupport !== "exact"
   ) {
@@ -798,9 +798,9 @@ function applyPluginHarnessDenyAllToolPolicy(
   policies: ResolvedPluginHarnessToolPolicies,
 ): import("./types.js").AgentHarnessAttemptParamsV2 {
   if (
-    isHostScopedAgentToolActive("openclaw") &&
+    isHostScopedAgentToolActive("carapace") &&
     params.toolsAllow?.length === 1 &&
-    normalizeToolPolicyName(params.toolsAllow[0] ?? "") === "openclaw"
+    normalizeToolPolicyName(params.toolsAllow[0] ?? "") === "carapace"
   ) {
     return params;
   }
@@ -958,7 +958,7 @@ export function resolvePluginHarnessToolPolicies(
       requestedToolPolicy,
     ],
     safeDeniedToolNames: collectHarnessSafeDeniedToolNames(explicitPolicies, safeDenyToolNameSet),
-    // Native tools bypass the collector's noninteractive OpenClaw wrappers.
+    // Native tools bypass the collector's noninteractive Carapace wrappers.
     // Keep policy-allowed host replacements, without ambient input or approval surfaces.
     toolPolicyRestricted:
       params.swarmCollector === true ||
@@ -1070,7 +1070,7 @@ function buildSelectionDecision(params: {
   selectedReason: AgentHarnessSelectionDecision["selectedReason"];
   candidates: AgentHarnessSelectionCandidate[];
 }): AgentHarnessSelectionDecision {
-  const builtIn = isBuiltInOpenClawAgentHarness(params.harness);
+  const builtIn = isBuiltInCarapaceAgentHarness(params.harness);
   return {
     harness: params.harness,
     builtIn,

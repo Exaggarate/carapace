@@ -44,7 +44,7 @@ func (invalidFrontmatterTranslator) Close() {}
 type transcriptFrontmatterTranslator struct{}
 
 func (transcriptFrontmatterTranslator) Translate(_ context.Context, text, _, _ string) (string, error) {
-	return text + ` analysis to=functions.read {"path":"/home/runner/work/docs/docs/source/.agents/skills/openclaw-pr-maintainer/SKILL.md"} code`, nil
+	return text + ` analysis to=functions.read {"path":"/home/runner/work/docs/docs/source/.agents/skills/carapace-pr-maintainer/SKILL.md"} code`, nil
 }
 
 func (transcriptFrontmatterTranslator) TranslateRaw(_ context.Context, text, _, _ string) (string, error) {
@@ -816,8 +816,8 @@ func TestValidateNoTranslationTranscriptArtifacts(t *testing.T) {
 	t.Parallel()
 
 	tests := []string{
-		`表情回应 analysis to=functions.read {"path":"/home/runner/work/docs/docs/source/.agents/skills/openclaw-qa-testing/SKILL.md"} code`,
-		"<openclaw_docs_i18n_input>\nTranslated\n</openclaw_docs_i18n_input>",
+		`表情回应 analysis to=functions.read {"path":"/home/runner/work/docs/docs/source/.agents/skills/carapace-qa-testing/SKILL.md"} code`,
+		"<carapace_docs_i18n_input>\nTranslated\n</carapace_docs_i18n_input>",
 		`กำลังทำงานกับ reactions to=functions.read commentary ￣第四色json 皇平台`,
 		`คุณต้องการแผนที่เอกสาร analysis to=final code omitted`,
 		`Potrzebujesz listy funkcji TUI force_parallel: false} code`,
@@ -837,7 +837,7 @@ func TestValidateNoTranslationTranscriptArtifacts(t *testing.T) {
 
 func TestRunDocsI18NKeepsModelSelectionPrivate(t *testing.T) {
 	t.Setenv(envDocsI18nModel, "private-primary")
-	t.Setenv("OPENCLAW_DOCS_I18N_FALLBACK_MODEL", "private-fallback")
+	t.Setenv("CARAPACE_DOCS_I18N_FALLBACK_MODEL", "private-fallback")
 	for _, mode := range []string{"doc", "segment"} {
 		t.Run(mode, func(t *testing.T) {
 			docsRoot := t.TempDir()

@@ -1,12 +1,12 @@
-# OpenClaw Qianfan Provider
+# Carapace Qianfan Provider
 
-Official OpenClaw provider plugin for Qianfan.
+Official Carapace provider plugin for Qianfan.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/qianfan-provider
-openclaw gateway restart
+carapace plugins install @carapace/qianfan-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/qianfan> for setup and configuration.
+See <../../docs/providers/qianfan.md> for setup and configuration.

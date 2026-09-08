@@ -1,8 +1,8 @@
-/** Manifest-backed model catalog row loaders for `openclaw models list`. */
-import { normalizeModelCatalogProviderId } from "@openclaw/model-catalog-core/model-catalog-refs";
-import type { NormalizedModelCatalogRow } from "@openclaw/model-catalog-core/model-catalog-types";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+/** Manifest-backed model catalog row loaders for `carapace models list`. */
+import { normalizeModelCatalogProviderId } from "@carapace/model-catalog-core/model-catalog-refs";
+import type { NormalizedModelCatalogRow } from "@carapace/model-catalog-core/model-catalog-types";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { planEffectiveModelCatalogRows } from "../../model-catalog/index.js";
 import type { ManifestModelCatalogRowSelection } from "../../model-catalog/manifest-planner.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
@@ -16,7 +16,7 @@ import {
 } from "../../plugins/plugin-registry-snapshot.js";
 
 function planManifestCatalogRowsForPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   registry: PluginManifestRegistry;
   pluginIds?: readonly string[];
   providerFilter?: string;
@@ -41,7 +41,7 @@ function planManifestCatalogRowsForPluginIds(params: {
 }
 
 function resolveConventionModelCatalogPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   index: PluginRegistrySnapshot;
   providerFilter: string;
 }): readonly string[] {
@@ -63,7 +63,7 @@ function resolveConventionModelCatalogPluginIds(params: {
 }
 
 function resolveDeclaredModelCatalogPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   snapshot: PluginMetadataSnapshot;
   providerFilter: string;
 }): readonly string[] {
@@ -76,7 +76,7 @@ function resolveDeclaredModelCatalogPluginIds(params: {
 }
 
 function resolveModelCatalogPluginIdsForProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   snapshot: PluginMetadataSnapshot;
   provider: string;
 }): readonly string[] {
@@ -101,7 +101,7 @@ function resolveModelCatalogPluginIdsForProvider(params: {
  * augmentation before they can be treated as complete catalog coverage.
  */
 export function resolveManifestCatalogCoverageForList(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerIds: ReadonlySet<string>;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;
@@ -156,7 +156,7 @@ export function resolveManifestCatalogCoverageForList(params: {
 }
 
 function loadManifestCatalogRowsForListSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerFilter?: string;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;
@@ -207,7 +207,7 @@ function loadManifestCatalogRowsForListSelection(params: {
 
 /** Loads manifest catalog rows without importing provider runtimes. */
 export function loadManifestCatalogRowsForList(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerFilter?: string;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;
@@ -217,7 +217,7 @@ export function loadManifestCatalogRowsForList(params: {
 
 /** Loads authoritative static manifest catalog rows for model-list output. */
 export function loadStaticManifestCatalogRowsForList(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerFilter?: string;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;

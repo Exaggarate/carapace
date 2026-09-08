@@ -17,7 +17,7 @@ import { resolveEditableSnapshotConfig } from "../../lib/config/config-state-mod
 import { buildExternalLinkRel, EXTERNAL_LINK_TARGET } from "../../lib/external-link.ts";
 import { formatUiError } from "../../lib/format-error.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   labFeatureMergePatch,
@@ -27,7 +27,7 @@ import {
   type LabFeature,
 } from "./labs-registry.ts";
 
-class LabsPage extends OpenClawLightDomElement {
+class LabsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -173,13 +173,13 @@ class LabsPage extends OpenClawLightDomElement {
       ${renderSettingsPageHeader({
         title: titleForRoute("labs"),
         subtitle: html`${t("labsPage.intro")}
-        ${renderLearnMoreLink("https://docs.openclaw.ai/concepts/experimental-features")}`,
+        ${renderLearnMoreLink("https://github.com/Exaggarate/carapace")}`,
       })}
       ${renderSettingsWorkspace(body)}
     `;
   }
 }
 
-if (!customElements.get("openclaw-labs-page")) {
-  customElements.define("openclaw-labs-page", LabsPage);
+if (!customElements.get("carapace-labs-page")) {
+  customElements.define("carapace-labs-page", LabsPage);
 }

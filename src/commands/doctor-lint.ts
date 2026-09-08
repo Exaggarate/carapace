@@ -33,7 +33,7 @@ import {
   withPluginInstallRoots,
 } from "../plugins/install-root-context.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { isPostCoreConvergencePass } from "./doctor/shared/update-phase.js";
 
 interface DoctorLintCliOptions {
@@ -279,7 +279,7 @@ async function withReadOnlyPluginStateSnapshot<T>(
   sourceEnv: NodeJS.ProcessEnv,
   run: (pluginMetadataEnv: NodeJS.ProcessEnv) => Promise<T>,
 ): Promise<T> {
-  const sourceDatabasePath = resolveOpenClawStateSqlitePath(sourceEnv);
+  const sourceDatabasePath = resolveCarapaceStateSqlitePath(sourceEnv);
   let cleanup: () => boolean;
   let privateRoot: string;
   let prepared: ReturnType<typeof prepareSqliteReadOnlyLocationSync> | undefined;
@@ -289,7 +289,7 @@ async function withReadOnlyPluginStateSnapshot<T>(
       privateRoot = path.dirname(prepared.location);
       cleanup = prepared.cleanup;
     } else {
-      privateRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-state-"));
+      privateRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-state-"));
       cleanup = () => {
         try {
           fs.rmSync(privateRoot, { force: true, recursive: true });
@@ -305,10 +305,10 @@ async function withReadOnlyPluginStateSnapshot<T>(
   let outcome: { ok: true; value: T } | { ok: false; error: unknown };
   let runStarted = false;
   try {
-    const privateStateDir = path.join(privateRoot, "openclaw-state");
-    const privateDatabasePath = resolveOpenClawStateSqlitePath({
+    const privateStateDir = path.join(privateRoot, "carapace-state");
+    const privateDatabasePath = resolveCarapaceStateSqlitePath({
       ...sourceEnv,
-      OPENCLAW_STATE_DIR: privateStateDir,
+      CARAPACE_STATE_DIR: privateStateDir,
     });
     fs.mkdirSync(path.dirname(privateDatabasePath), { recursive: true, mode: 0o700 });
     if (prepared) {
@@ -322,8 +322,8 @@ async function withReadOnlyPluginStateSnapshot<T>(
     const sourceConfigPath = resolveConfigPath(sourceEnv, resolveStateDir(sourceEnv));
     const privateEnv = {
       ...sourceEnv,
-      OPENCLAW_CONFIG_PATH: sourceConfigPath,
-      OPENCLAW_STATE_DIR: privateStateDir,
+      CARAPACE_CONFIG_PATH: sourceConfigPath,
+      CARAPACE_STATE_DIR: privateStateDir,
     };
     const installRoots = resolvePluginInstallRoots(sourceEnv);
     // Global readers and OAuth refresh/challenge writers share the private state view.
@@ -356,8 +356,8 @@ async function withDoctorLintStateEnv<T>(
 ): Promise<T> {
   const stateDir = resolveStateDir(env);
   const overrides = {
-    OPENCLAW_CONFIG_PATH: resolveConfigPath(env, stateDir),
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: resolveConfigPath(env, stateDir),
+    CARAPACE_STATE_DIR: stateDir,
   };
   const previous = Object.keys(overrides).map((key) => [key, process.env[key]] as const);
   // Doctor checks run serially. Scope ambient auth/global-store owners together,

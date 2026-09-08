@@ -3,7 +3,7 @@
  */
 import type { IncomingMessage } from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 
 const loadConfigMock = vi.fn();
 const loadGatewayModelCatalogMock = vi.fn();
@@ -39,7 +39,7 @@ describe("resolveOpenAiCompatModelOverride", () => {
           },
         },
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
     loadGatewayModelCatalogMock
       .mockReset()
       .mockResolvedValue([{ id: "gpt-5.4", name: "GPT 5.4", provider: "openai" }]);
@@ -48,9 +48,9 @@ describe("resolveOpenAiCompatModelOverride", () => {
   it("rejects CLI model overrides outside the configured allowlist", async () => {
     await expect(
       resolveOpenAiCompatModelOverride({
-        req: createReq({ "x-openclaw-model": "claude-cli/opus" }),
+        req: createReq({ "x-carapace-model": "claude-cli/opus" }),
         agentId: "main",
-        model: "openclaw",
+        model: "carapace",
       }),
     ).resolves.toEqual({
       errorMessage: "Model 'claude-cli/opus' is not allowed for agent 'main'.",
@@ -60,9 +60,9 @@ describe("resolveOpenAiCompatModelOverride", () => {
   it.each(["main", "beta"])("reads the prepared catalog for selected agent %s", async (agentId) => {
     await expect(
       resolveOpenAiCompatModelOverride({
-        req: createReq({ "x-openclaw-model": "openai/gpt-5.4" }),
+        req: createReq({ "x-carapace-model": "openai/gpt-5.4" }),
         agentId,
-        model: "openclaw",
+        model: "carapace",
       }),
     ).resolves.toEqual({ modelOverride: "openai/gpt-5.4" });
     expect(loadGatewayModelCatalogMock).toHaveBeenCalledExactlyOnceWith({ agentId });

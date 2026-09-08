@@ -4,9 +4,9 @@ import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { isRecord } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
+import { isRecord } from "carapace/plugin-sdk/channel-secret-basic-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
+import { replaceFileAtomic } from "carapace/plugin-sdk/security-runtime";
 import { QA_CHILD_STDOUT_MAX_BYTES } from "./child-output.js";
 import { runQaScenarioCommandLifecycle } from "./test-file-scenario-command-lifecycle.js";
 
@@ -515,7 +515,7 @@ export async function createQaGatewayProcessBoundaryController(params: {
     const sandboxFilePath = path.join(controlDir, `sandbox-${generation}.json`);
     const envKeys = normalizeEnvKeys([
       ...forwardedEnvKeys.filter((key) => spawnParams.env[key] !== undefined),
-      "OPENCLAW_QA_SUT_PREENTRY_STOP",
+      "CARAPACE_QA_SUT_PREENTRY_STOP",
     ]);
     const command: QaGatewayProcessCommand = {
       version: PROCESS_BOUNDARY_VERSION,
@@ -536,11 +536,11 @@ export async function createQaGatewayProcessBoundaryController(params: {
       commandSha256,
       env: {
         ...spawnParams.env,
-        OPENCLAW_QA_SUT_BOUNDARY_COMMAND_FILE: commandFilePath,
-        OPENCLAW_QA_SUT_BOUNDARY_COMMAND_SHA256: commandSha256,
-        OPENCLAW_QA_SUT_BOUNDARY_GENERATION: generation,
-        OPENCLAW_QA_SUT_BOUNDARY_IDENTITY_FILE: identityFilePath,
-        OPENCLAW_QA_SUT_BOUNDARY_SANDBOX_FILE: sandboxFilePath,
+        CARAPACE_QA_SUT_BOUNDARY_COMMAND_FILE: commandFilePath,
+        CARAPACE_QA_SUT_BOUNDARY_COMMAND_SHA256: commandSha256,
+        CARAPACE_QA_SUT_BOUNDARY_GENERATION: generation,
+        CARAPACE_QA_SUT_BOUNDARY_IDENTITY_FILE: identityFilePath,
+        CARAPACE_QA_SUT_BOUNDARY_SANDBOX_FILE: sandboxFilePath,
       },
       generation,
       identityFilePath,
@@ -795,7 +795,7 @@ export function assertQaGatewayCredentialLeaseQuarantine(
   lease: { leaseTtlMs: number; source: string },
   env: NodeJS.ProcessEnv = process.env,
 ) {
-  if (!env.OPENCLAW_QA_TELEGRAM_SUT_PROCESS_BOUNDARY_DIR?.trim() || lease.source !== "convex") {
+  if (!env.CARAPACE_QA_TELEGRAM_SUT_PROCESS_BOUNDARY_DIR?.trim() || lease.source !== "convex") {
     return;
   }
   if (lease.leaseTtlMs < QA_GATEWAY_PROCESS_BOUNDARY_MIN_QUARANTINE_TTL_MS) {
@@ -806,7 +806,7 @@ export function assertQaGatewayCredentialLeaseQuarantine(
 }
 
 export async function shouldRetainQaGatewayCredentialLease(env: NodeJS.ProcessEnv = process.env) {
-  const evidenceDir = env.OPENCLAW_QA_TELEGRAM_SUT_PROCESS_BOUNDARY_DIR?.trim();
+  const evidenceDir = env.CARAPACE_QA_TELEGRAM_SUT_PROCESS_BOUNDARY_DIR?.trim();
   if (!evidenceDir || !path.isAbsolute(evidenceDir)) {
     return false;
   }

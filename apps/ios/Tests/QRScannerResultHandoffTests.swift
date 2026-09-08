@@ -1,6 +1,6 @@
-import OpenClawKit
+import CarapaceKit
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct QRScannerResultHandoffTests {
@@ -124,7 +124,7 @@ struct OnboardingQRCodeCompletionTests {
         host: "gateway.example.com",
         port: 443,
         tls: true,
-        contextPath: "/openclaw",
+        contextPath: "/carapace",
         bootstrapToken: "bootstrap",
         token: nil,
         password: nil)
@@ -134,9 +134,9 @@ struct OnboardingQRCodeCompletionTests {
         completion.stage(Self.link)
 
         #expect(completion.destination(
-            connectedStableID: "manual|gateway.example.com|443|/openclaw") == .mainUI)
+            connectedStableID: "manual|gateway.example.com|443|/carapace") == .mainUI)
         #expect(completion.destination(
-            connectedStableID: "manual|gateway.example.com|443|/openclaw") == .successScreen)
+            connectedStableID: "manual|gateway.example.com|443|/carapace") == .successScreen)
     }
 
     @Test func `different gateway falls back to success screen and consumes scanned completion`() {
@@ -146,7 +146,7 @@ struct OnboardingQRCodeCompletionTests {
         #expect(completion.destination(
             connectedStableID: "manual|different.example.com|443") == .successScreen)
         #expect(completion.destination(
-            connectedStableID: "manual|gateway.example.com|443|/openclaw") == .successScreen)
+            connectedStableID: "manual|gateway.example.com|443|/carapace") == .successScreen)
     }
 
     @Test func `cancelled scanned completion retains success screen for same gateway`() {
@@ -155,7 +155,7 @@ struct OnboardingQRCodeCompletionTests {
         completion.cancel()
 
         #expect(completion.destination(
-            connectedStableID: "manual|gateway.example.com|443|/openclaw") == .successScreen)
+            connectedStableID: "manual|gateway.example.com|443|/carapace") == .successScreen)
     }
 
     @Test func `manual connection retains success screen`() {

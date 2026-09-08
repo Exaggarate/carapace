@@ -3,11 +3,11 @@
  * bounded context files.
  */
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { ChatType } from "../channels/chat-type.js";
 import { readRecentSessionTranscriptActiveEvents } from "../config/sessions/session-accessor.js";
 import type { AgentContextInjection } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isMemoryOriginEligibleForAutomaticInjection } from "../memory-host-sdk/host/types.js";
 import { classifyActiveMemoryWorkspacePaths } from "../plugins/memory-runtime.js";
 import { resolveUserPath } from "../utils.js";
@@ -36,7 +36,7 @@ import {
 export type BootstrapContextMode = "full" | "lightweight";
 
 const CONTINUATION_SCAN_MAX_RECORDS = 500;
-export const FULL_BOOTSTRAP_COMPLETED_CUSTOM_TYPE = "openclaw:bootstrap-context:full";
+export const FULL_BOOTSTRAP_COMPLETED_CUSTOM_TYPE = "carapace:bootstrap-context:full";
 const BOOTSTRAP_WARNING_DEDUPE_LIMIT = 1024;
 const seenBootstrapWarnings = new Set<string>();
 const bootstrapWarningOrder: string[] = [];
@@ -60,7 +60,7 @@ function rememberBootstrapWarning(key: string): boolean {
 
 /** Resolves the effective bootstrap injection mode for a session agent. */
 export function resolveContextInjectionMode(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   agentId?: string | null,
 ): AgentContextInjection {
   const agentMode =
@@ -237,7 +237,7 @@ function filterBootstrapFilesAfterHooks(params: {
 async function resolveIneligibleAutomaticMemoryFiles(params: {
   files: WorkspaceBootstrapFile[];
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   warn?: (message: string) => void;
 }): Promise<WorkspaceBootstrapFile[]> {
@@ -292,7 +292,7 @@ async function resolveIneligibleAutomaticMemoryFiles(params: {
 /** Resolves hook-adjusted, session-filtered bootstrap files for a run. */
 type BootstrapFileResolutionParams = {
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   sessionId?: string;
   chatType?: ChatType;
@@ -399,7 +399,7 @@ async function resolveBootstrapFiles(
 /** Resolves both raw bootstrap metadata and bounded context files for a run. */
 export async function resolveBootstrapContextForRun(params: {
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   sessionId?: string;
   chatType?: ChatType;
@@ -434,7 +434,7 @@ export async function resolveBootstrapContextWithProjectedHookFiles(
 export function buildBootstrapContextForFiles(
   bootstrapFiles: WorkspaceBootstrapFile[],
   params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string | null;
     warn?: (message: string) => void;
   },

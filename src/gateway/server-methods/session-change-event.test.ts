@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { retainLegacyDefaultAgentId } from "../../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { clearAgentRunContext, registerAgentRunContext } from "../../infra/agent-run-registry.js";
 import type { ChatAbortControllerEntry } from "../chat-abort.js";
 import { readGatewayAccessRevision } from "../gateway-access-revision.js";
@@ -61,7 +61,7 @@ const { emitSessionsChanged, flushPendingSessionsChangedEvents, readSessionsMuta
 
 function createContext(
   receivers = new Set(["conn-1"]),
-  config: OpenClawConfig = {},
+  config: CarapaceConfig = {},
   chatAbortControllers: GatewayRequestContext["chatAbortControllers"] = new Map(),
 ) {
   return {
@@ -242,7 +242,7 @@ describe("sessions.changed coalescing", () => {
         defaults: { sessionStore: { agentId: "ops" } },
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const context = createContext(
       new Set(["conn-1"]),
       config,
@@ -288,7 +288,7 @@ describe("sessions.changed coalescing", () => {
         defaults: { sessionStore: { agentId: "ops" } },
         entries: { research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const context = createContext(new Set(["conn-1"]), config);
 
     emitSessionsChanged(context, { reason: "update", sessionKey: "global" });

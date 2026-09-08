@@ -1,5 +1,5 @@
-import { OPENAI_PROMPT_CACHE_KEY_MAX_LENGTH } from "@openclaw/ai/providers";
-import { truncateCodePoints } from "@openclaw/normalization-core/code-points";
+import { OPENAI_PROMPT_CACHE_KEY_MAX_LENGTH } from "@carapace/ai/providers";
+import { truncateCodePoints } from "@carapace/normalization-core/code-points";
 
 export function resolveSessionBoundaryPromptCacheKey(params: {
   api: string;

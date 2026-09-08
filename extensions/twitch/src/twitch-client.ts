@@ -1,12 +1,12 @@
 // Twitch plugin module implements twitch client behavior.
 import { RefreshingAuthProvider, StaticAuthProvider } from "@twurple/auth";
 import { ChatClient, LogLevel } from "@twurple/chat";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-resolution";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
-import { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-resolution";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
+import { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { TWITCH_CHAT_MESSAGE_LIMIT } from "./constants.js";
 import { resolveTwitchToken } from "./token.js";
 import type {
@@ -112,7 +112,7 @@ export class TwitchClientManager {
    */
   async getClient(
     account: TwitchAccountConfig,
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
     accountId?: string,
   ): Promise<ChatClient> {
     const key = this.getAccountKey(account);
@@ -147,7 +147,7 @@ export class TwitchClientManager {
     key: string,
     account: TwitchAccountConfig,
     ownsConnection: () => boolean,
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
     accountId?: string,
   ): Promise<ChatClient> {
     const tokenResolution = resolveTwitchToken(cfg, {
@@ -160,7 +160,7 @@ export class TwitchClientManager {
         ? `channels.twitch.accounts.${resolvedAccountId}.accessToken`
         : "channels.twitch.accessToken";
       throw new Error(
-        `Missing Twitch token for account ${resolvedAccountId} (set ${tokenConfigPath} or OPENCLAW_TWITCH_ACCESS_TOKEN for default)`,
+        `Missing Twitch token for account ${resolvedAccountId} (set ${tokenConfigPath} or CARAPACE_TWITCH_ACCESS_TOKEN for default)`,
       );
     }
 
@@ -426,7 +426,7 @@ export class TwitchClientManager {
     account: TwitchAccountConfig,
     channel: string,
     message: string,
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
     accountId?: string,
   ): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
     try {

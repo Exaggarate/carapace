@@ -37,7 +37,7 @@ import {
 
 describe("setup admission", () => {
   beforeEach(() => {
-    mocks.stateDir = tempDirs.make("openclaw-setup-admission-");
+    mocks.stateDir = tempDirs.make("carapace-setup-admission-");
   });
 
   afterEach(() => {
@@ -449,7 +449,7 @@ describe("setup admission", () => {
   );
 
   it("does not report classic setup's saved settings as user cancellation", async () => {
-    const configPath = path.join(mocks.stateDir, "openclaw.json");
+    const configPath = path.join(mocks.stateDir, "carapace.json");
     const saved = '{"gateway":{"mode":"remote"}}';
     const session = await createAdmittedWizardSession(
       () =>

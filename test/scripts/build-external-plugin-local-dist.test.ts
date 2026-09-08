@@ -47,7 +47,7 @@ function writeChannelStateFixtures(pluginRoot: string) {
 
 describe("external plugin local dist build", () => {
   it("keeps excluded plugin graphs isolated and their runtime metadata loadable", async () => {
-    const repoRoot = fs.realpathSync(tempDirs.make("openclaw-isolated-plugin-graphs-"));
+    const repoRoot = fs.realpathSync(tempDirs.make("carapace-isolated-plugin-graphs-"));
     const plugins = [
       { id: "external-cjs", runtimeFormat: "cjs", publishToNpm: true, bundledDist: true },
       { id: "external-esm", runtimeFormat: "esm", publishToNpm: true, bundledDist: true },
@@ -57,7 +57,7 @@ describe("external plugin local dist build", () => {
     fs.writeFileSync(
       path.join(repoRoot, "package.json"),
       JSON.stringify({
-        name: "openclaw",
+        name: "carapace",
         version: "1.0.0",
         type: "module",
         files: ["dist/**", ...plugins.map(({ id }) => `!dist/extensions/${id}/**`)],
@@ -69,10 +69,10 @@ describe("external plugin local dist build", () => {
       fs.writeFileSync(
         path.join(pluginRoot, "package.json"),
         JSON.stringify({
-          name: `@openclaw/${id}`,
+          name: `@carapace/${id}`,
           version: "1.0.0",
           type: "module",
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             setupEntry: "./setup-entry.ts",
             channel: { id, label: id, ...channelStateFixtures },
@@ -81,7 +81,7 @@ describe("external plugin local dist build", () => {
           },
         }),
       );
-      fs.writeFileSync(path.join(pluginRoot, "openclaw.plugin.json"), JSON.stringify({ id }));
+      fs.writeFileSync(path.join(pluginRoot, "carapace.plugin.json"), JSON.stringify({ id }));
       writeChannelStateFixtures(pluginRoot);
       fs.writeFileSync(
         path.join(pluginRoot, "runtime-api.ts"),
@@ -105,8 +105,8 @@ describe("external plugin local dist build", () => {
       const pluginRoot = path.join(repoRoot, "dist/extensions", id);
       const metadata = JSON.parse(fs.readFileSync(path.join(pluginRoot, "package.json"), "utf8"));
       const extension = runtimeFormat === "cjs" ? ".cjs" : ".js";
-      expect(metadata.openclaw.extensions).toEqual([`./index${extension}`]);
-      expect(metadata.openclaw.setupEntry).toBe(`./setup-entry${extension}`);
+      expect(metadata.carapace.extensions).toEqual([`./index${extension}`]);
+      expect(metadata.carapace.setupEntry).toBe(`./setup-entry${extension}`);
       expect(fs.existsSync(path.join(repoRoot, "extensions", id, "dist"))).toBe(false);
       fs.writeFileSync(
         path.join(pluginRoot, runtimeFormat === "cjs" ? "index.js" : "index.cjs"),
@@ -136,11 +136,11 @@ describe("external plugin local dist build", () => {
         const root = pathToFileURL(process.cwd() + "/");
         const require = createRequire(new URL("package.json", root));
         const pkg = JSON.parse(readFileSync(new URL("package.json", root)));
-        for (const entry of [...pkg.openclaw.extensions, pkg.openclaw.setupEntry]) {
+        for (const entry of [...pkg.carapace.extensions, pkg.carapace.setupEntry]) {
           assert.equal((await import(new URL(entry, root))).identity, ${JSON.stringify(id)});
         }
         for (const key of ["configuredState", "persistedAuthState"]) {
-          const state = pkg.openclaw.channel[key];
+          const state = pkg.carapace.channel[key];
           const checker = require(require.resolve(state.specifier))[state.exportName];
           assert.equal(checker({ cfg: {} }), false);
           assert.equal(checker({ cfg: { ready: true } }), true);
@@ -150,7 +150,7 @@ describe("external plugin local dist build", () => {
         { cwd: pluginRoot, encoding: "utf8" },
       );
       expect(probe.status, probe.stdout + probe.stderr).toBe(0);
-      expect(metadata.openclaw.channel).toEqual({
+      expect(metadata.carapace.channel).toEqual({
         id,
         label: id,
         configuredState: {
@@ -165,7 +165,7 @@ describe("external plugin local dist build", () => {
       const sourcePackagePath = path.join(repoRoot, "extensions", id, "package.json");
       const sourceText = fs.readFileSync(sourcePackagePath, "utf8");
       const sourcePackage = JSON.parse(sourceText);
-      expect(sourcePackage.openclaw.channel).toEqual({ id, label: id, ...channelStateFixtures });
+      expect(sourcePackage.carapace.channel).toEqual({ id, label: id, ...channelStateFixtures });
       // Reuse the built graphs: partial pairs must retain env semantics, not require a sidecar.
       for (const metadataKey of ["configuredState", "persistedAuthState"] as const) {
         for (const partial of [
@@ -177,7 +177,7 @@ describe("external plugin local dist build", () => {
         ]) {
           for (const env of [undefined, { anyOf: ["SYNTHETIC_PLUGIN_TOKEN"] }]) {
             const declaration = { ...partial, ...(env ? { env } : {}) };
-            sourcePackage.openclaw.channel = {
+            sourcePackage.carapace.channel = {
               id,
               label: id,
               ...channelStateFixtures,
@@ -187,8 +187,8 @@ describe("external plugin local dist build", () => {
             copyBundledPluginMetadata({ repoRoot, env: {} });
             const channel = JSON.parse(
               fs.readFileSync(path.join(pluginRoot, "package.json"), "utf8"),
-            ).openclaw.channel;
-            expect(channel).toEqual({ ...metadata.openclaw.channel, [metadataKey]: declaration });
+            ).carapace.channel;
+            expect(channel).toEqual({ ...metadata.carapace.channel, [metadataKey]: declaration });
             const stateProbe = {
               entry: { channel, pluginId: id, rootDir: pluginRoot, origin: "bundled" as const },
               metadataKey,
@@ -203,7 +203,7 @@ describe("external plugin local dist build", () => {
             ).toBe(Boolean(env));
           }
         }
-        sourcePackage.openclaw.channel = {
+        sourcePackage.carapace.channel = {
           id,
           label: id,
           ...channelStateFixtures,
@@ -266,7 +266,7 @@ describe("external plugin local dist build", () => {
       if (relocate && process.platform === "win32") {
         context.skip();
       }
-      const repoRoot = fs.realpathSync(tempDirs.make("openclaw-external-plugin-owners-"));
+      const repoRoot = fs.realpathSync(tempDirs.make("carapace-external-plugin-owners-"));
       const dependency = "@fixture/private-dep";
       const plugins = [
         ["first", "1.0.0"],
@@ -275,7 +275,7 @@ describe("external plugin local dist build", () => {
       fs.writeFileSync(
         path.join(repoRoot, "package.json"),
         JSON.stringify({
-          name: "openclaw",
+          name: "carapace",
           version: "1.0.0",
           type: "module",
           exports: { "./plugin-sdk/probe": "./dist/plugin-sdk/probe.js" },
@@ -307,12 +307,12 @@ describe("external plugin local dist build", () => {
         fs.writeFileSync(
           path.join(packageDir, "package.json"),
           JSON.stringify({
-            name: `@openclaw/${pluginId}`,
+            name: `@carapace/${pluginId}`,
             version: "1.0.0",
             type: "module",
             dependencies: { [dependency]: version },
-            peerDependencies: { openclaw: "1.0.0" },
-            openclaw: {
+            peerDependencies: { carapace: "1.0.0" },
+            carapace: {
               extensions: ["./index.ts"],
               build: { bundledDist: false, runtimeFormat },
               release: { publishToNpm: true },
@@ -330,16 +330,16 @@ describe("external plugin local dist build", () => {
         fs.writeFileSync(path.join(dependencyDir, "SKILL.md"), `# Private dependency ${version}\n`);
         fs.symlinkSync(
           path.relative(modulesDir, repoRoot),
-          path.join(packageDir, "node_modules", "openclaw"),
+          path.join(packageDir, "node_modules", "carapace"),
           "dir",
         );
-        sourceHostLinks.set(pluginId, fs.readlinkSync(path.join(modulesDir, "openclaw")));
+        sourceHostLinks.set(pluginId, fs.readlinkSync(path.join(modulesDir, "carapace")));
         fs.writeFileSync(
           path.join(packageDir, "index.ts"),
-          `export { version } from "${dependency}";\nexport { shared } from "openclaw/plugin-sdk/probe";\n`,
+          `export { version } from "${dependency}";\nexport { shared } from "carapace/plugin-sdk/probe";\n`,
         );
         fs.writeFileSync(
-          path.join(packageDir, "openclaw.plugin.json"),
+          path.join(packageDir, "carapace.plugin.json"),
           JSON.stringify({ id: pluginId, skills: [`./node_modules/${dependency}`] }),
         );
       }
@@ -372,14 +372,14 @@ describe("external plugin local dist build", () => {
             fs.readFileSync(path.join(sourceModules, dependency, "SKILL.md"), "utf8"),
             profile,
           ).toBe(`# Private dependency ${version}\n`);
-          expect(fs.existsSync(path.join(outputRoot, "node_modules", "openclaw")), profile).toBe(
+          expect(fs.existsSync(path.join(outputRoot, "node_modules", "carapace")), profile).toBe(
             isolated,
           );
-          expect(fs.readlinkSync(path.join(sourceModules, "openclaw")), profile).toBe(
+          expect(fs.readlinkSync(path.join(sourceModules, "carapace")), profile).toBe(
             sourceHostLinks.get(pluginId),
           );
           const manifest = JSON.parse(
-            fs.readFileSync(path.join(outputRoot, "openclaw.plugin.json"), "utf8"),
+            fs.readFileSync(path.join(outputRoot, "carapace.plugin.json"), "utf8"),
           );
           expect(manifest.skills, profile).toEqual([`./bundled-skills/${dependency}`]);
           expect(
@@ -390,7 +390,7 @@ describe("external plugin local dist build", () => {
       }
       let runtimeRoot = repoRoot;
       if (relocate) {
-        runtimeRoot = fs.realpathSync(tempDirs.make("openclaw-external-plugin-relocated-"));
+        runtimeRoot = fs.realpathSync(tempDirs.make("carapace-external-plugin-relocated-"));
         await fs.promises.cp(repoRoot, runtimeRoot, { recursive: true, verbatimSymlinks: true });
         fs.rmSync(repoRoot, { recursive: true });
       }
@@ -430,7 +430,7 @@ describe("external plugin local dist build", () => {
         expect(fs.lstatSync(modules).isSymbolicLink()).toBe(false);
         expect(fs.lstatSync(path.join(modules, "@fixture")).isSymbolicLink()).toBe(false);
         for (const [name, owner] of [
-          ["openclaw", runtimeRoot],
+          ["carapace", runtimeRoot],
           [dependency, path.join(runtimeRoot, "installed", version, "node_modules", dependency)],
           [".bin", path.join(runtimeRoot, "extensions", pluginId, "node_modules", ".bin")],
         ] as const) {
@@ -487,7 +487,7 @@ describe("external plugin local dist build", () => {
   });
 
   it("retains released optional outputs and respects private QA and bounded selectors", () => {
-    const env = { OPENCLAW_INCLUDE_OPTIONAL_BUNDLED: "0" };
+    const env = { CARAPACE_INCLUDE_OPTIONAL_BUNDLED: "0" };
     const selected = collectSourceCheckoutPluginBuildEntries({ env });
     expect(selected.some(({ id }) => id === "qa-lab")).toBe(false);
     expect(selected.find(({ id }) => id === "msteams")).toMatchObject({
@@ -495,7 +495,7 @@ describe("external plugin local dist build", () => {
       runtimeExtension: ".cjs",
     });
     const privateQa = collectSourceCheckoutPluginBuildEntries({
-      env: { ...env, OPENCLAW_BUILD_PRIVATE_QA: "1" },
+      env: { ...env, CARAPACE_BUILD_PRIVATE_QA: "1" },
     });
     expect(privateQa.find(({ id }) => id === "qa-lab")).toMatchObject({
       isolated: false,
@@ -503,13 +503,13 @@ describe("external plugin local dist build", () => {
     });
     expect(
       collectSourceCheckoutPluginBuildEntries({
-        env: { OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "telegram" },
+        env: { CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "telegram" },
       }).map(({ id }) => id),
     ).toEqual(["telegram"]);
   });
 
   it("agrees on Docker compiler, metadata, and readiness outputs without unselected excluded plugins", () => {
-    const repoRoot = fs.realpathSync(tempDirs.make("openclaw-docker-plugin-format-"));
+    const repoRoot = fs.realpathSync(tempDirs.make("carapace-docker-plugin-format-"));
     const pluginIds = ["demo", "unselected", "packaged"];
     fs.writeFileSync(
       path.join(repoRoot, "package.json"),
@@ -522,11 +522,11 @@ describe("external plugin local dist build", () => {
     for (const id of pluginIds) {
       const pluginRoot = path.join(repoRoot, "extensions", id);
       fs.mkdirSync(pluginRoot, { recursive: true });
-      fs.writeFileSync(path.join(pluginRoot, "openclaw.plugin.json"), JSON.stringify({ id }));
+      fs.writeFileSync(path.join(pluginRoot, "carapace.plugin.json"), JSON.stringify({ id }));
       fs.writeFileSync(
         path.join(pluginRoot, "package.json"),
         JSON.stringify({
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             setupEntry: "./setup-entry.ts",
             build: { bundledDist: id !== "demo", runtimeFormat: "cjs" },
@@ -562,7 +562,7 @@ describe("external plugin local dist build", () => {
         `
         import { pathToFileURL } from "node:url";
         const { default: configs } = await import(pathToFileURL(process.argv[1]).href);
-        const entry = configs.find((config) => config.name === "openclaw-unified").entry;
+        const entry = configs.find((config) => config.name === "carapace-unified").entry;
         const ids = new Set(JSON.parse(process.argv[2]));
         console.log(JSON.stringify(Object.keys(entry).filter((key) =>
           key.startsWith("extensions/") && ids.has(key.split("/")[1])).sort()));
@@ -594,9 +594,9 @@ describe("external plugin local dist build", () => {
     const builtPackage = JSON.parse(
       fs.readFileSync(path.join(distRoot, "extensions/demo/package.json"), "utf8"),
     );
-    expect(builtPackage.openclaw.extensions).toEqual(["./index.js"]);
-    expect(builtPackage.openclaw.setupEntry).toBe("./setup-entry.js");
-    expect(builtPackage.openclaw.channel).toEqual({
+    expect(builtPackage.carapace.extensions).toEqual(["./index.js"]);
+    expect(builtPackage.carapace.setupEntry).toBe("./setup-entry.js");
+    expect(builtPackage.carapace.channel).toEqual({
       id: "demo",
       configuredState: {
         ...channelStateFixtures.configuredState,

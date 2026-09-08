@@ -2,7 +2,7 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { readAcpSessionMeta, readAcpSessionMetaForEntry } from "../acp/runtime/session-meta.js";
 import {
   resolveCurrentSessionAgentRuntimeMetadata,
@@ -42,7 +42,7 @@ import { tryResolveLegacyCompatibilityAgentId } from "../config/legacy.default-a
 import { resolveAgentMainSessionKey, type SessionEntry } from "../config/sessions.js";
 import { projectPublicSessionEntry } from "../config/sessions/session-entry-projection.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { LEGACY_IMPLICIT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
 import type { GatewayModelCatalogSnapshot } from "./server-model-catalog.types.js";
 import {
@@ -114,7 +114,7 @@ function resolveGatewaySessionThinkingLevel(params: {
 }
 
 function resolveGatewaySessionThinkingDefault(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   thinkingPolicyProvider?: string;
   model: string;
@@ -157,7 +157,7 @@ function resolveGatewaySessionThinkingDefault(params: {
 }
 
 export function resolveGatewayModelThinkingProfile(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   provider: string;
   model: string;
@@ -224,7 +224,7 @@ export function resolveGatewayModelThinkingProfile(params: {
 }
 
 type GatewaySessionThinkingProjectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   model: string;
   agentId: string;
@@ -318,7 +318,7 @@ export function resolveGatewaySessionThinkingProjectionInternal(
 }
 
 export function getSessionDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   modelCatalog?: ModelCatalogEntry[],
   options?: {
     agentId?: string;
@@ -614,7 +614,7 @@ export async function resolveGatewayModelSupportsImages(params: {
 }
 
 export function resolveSessionDisplayModelIdentityRefCached(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider?: string;
   model?: string;
   rowContext?: SessionListRowContext;
@@ -634,7 +634,7 @@ export function resolveSessionDisplayModelIdentityRefCached(params: {
 }
 
 function resolveSessionDisplayModelIdentityRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider?: string;
   model?: string;
 }): { provider?: string; model?: string } {
@@ -663,7 +663,7 @@ function resolveSessionDisplayModelIdentityRef(params: {
 
 export function projectSessionPatchResult(params: {
   canonicalKey: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry;
   modelCatalog?: ModelCatalogEntry[];
   storePath: string;

@@ -1,4 +1,4 @@
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import { controlUiSessionSlug, normalizeControlUiBasePath } from "./grammar.js";
 import { isControlUiReservedRouteSegment, type ControlUiCatalogShareRoute } from "./share.js";
 

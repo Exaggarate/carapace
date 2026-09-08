@@ -18,31 +18,31 @@ export function writeFeaturePluginScaffold(params: {
   const files: Record<string, string> = {
     "package.json": JSON.stringify(
       {
-        name: `openclaw-plugin-${params.id}`,
+        name: `carapace-plugin-${params.id}`,
         version: "0.1.0",
         type: "module",
         private: true,
         scripts: {
-          build: "tsc -p tsconfig.json && openclaw plugins build",
-          validate: "openclaw plugins validate --json",
-          pack: "openclaw plugins pack --json",
+          build: "tsc -p tsconfig.json && carapace plugins build",
+          validate: "carapace plugins validate --json",
+          pack: "carapace plugins pack --json",
         },
-        files: ["dist", "openclaw.plugin.json", "README.md"],
-        peerDependencies: { openclaw: `>=${VERSION}` },
+        files: ["dist", "carapace.plugin.json", "README.md"],
+        peerDependencies: { carapace: `>=${VERSION}` },
         dependencies: { typebox: "^1.3.17" },
-        devDependencies: { openclaw: "latest", esbuild: "0.28.2", typescript: "^5.9.0" },
-        openclaw: {
+        devDependencies: { carapace: "latest", esbuild: "0.28.2", typescript: "^5.9.0" },
+        carapace: {
           extensions: ["./dist/index.js"],
           controlUi: "./src/control-ui.ts",
           compat: { pluginApi: `>=${VERSION}` },
-          build: { openclawVersion: VERSION },
+          build: { carapaceVersion: VERSION },
         },
       },
       null,
       2,
     ),
     "src/contract.ts": `import { Type } from "typebox";
-import { defineFeatureContract } from "openclaw/plugin-sdk/feature-contract";
+import { defineFeatureContract } from "carapace/plugin-sdk/feature-contract";
 
 export const contract = defineFeatureContract({
   pluginId: ${literal(params.id)},
@@ -58,7 +58,7 @@ export const contract = defineFeatureContract({
   events: {},
 });
 `,
-    "src/index.ts": `import { defineFeaturePlugin } from "openclaw/plugin-sdk/feature-plugin";
+    "src/index.ts": `import { defineFeaturePlugin } from "carapace/plugin-sdk/feature-plugin";
 import { contract } from "./contract.js";
 
 export default defineFeaturePlugin({
@@ -76,8 +76,8 @@ export default defineFeaturePlugin({
   },
 });
 `,
-    "src/control-ui.ts": `import { defineControlUiPlugin } from "openclaw/plugin-sdk/control-ui";
-import { createFeatureClient } from "openclaw/plugin-sdk/feature-contract";
+    "src/control-ui.ts": `import { defineControlUiPlugin } from "carapace/plugin-sdk/control-ui";
+import { createFeatureClient } from "carapace/plugin-sdk/feature-contract";
 import { contract } from "./contract.js";
 import "./control-ui.css";
 
@@ -161,7 +161,7 @@ export default defineControlUiPlugin({
 .feature-draft-page button, .feature-draft-composer button { justify-self: start; padding: 8px 14px; border-radius: 6px; color: var(--accent-foreground, var(--text)); background: var(--accent); border: 0; font: inherit; }
 .feature-draft-page output { white-space: pre-wrap; }
 `,
-    "openclaw.plugin.json": JSON.stringify(
+    "carapace.plugin.json": JSON.stringify(
       {
         id: params.id,
         name: params.name,
@@ -176,7 +176,7 @@ export default defineControlUiPlugin({
     ),
     "README.md": `# ${params.name}
 
-This OpenClaw feature plugin includes a typed draft-analysis operation, a model tool, a native page, and a composer replacement. The browser entry owns its DOM and uses the host's canonical draft and send operations.
+This Carapace feature plugin includes a typed draft-analysis operation, a model tool, a native page, and a composer replacement. The browser entry owns its DOM and uses the host's canonical draft and send operations.
 
 ## Build and install
 
@@ -184,8 +184,8 @@ This OpenClaw feature plugin includes a typed draft-analysis operation, a model 
 npm install
 npm run build
 npm run validate
-openclaw plugins install .
-openclaw gateway restart
+carapace plugins install .
+carapace gateway restart
 \`\`\`
 
 For native UI, enable **Settings > Labs > Custom plugin UI** (\`gateway.controlUi.experimental.customPlugins: true\`), then restart the Gateway and reload the browser tab. This setting is off by default; backend installation does not require it.

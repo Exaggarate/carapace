@@ -32,7 +32,7 @@ suite.define(() => {
     });
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, key));
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       const selectedRow = sidebar.locator(`[data-session-key="${key}"]`);
       await expect.poll(() => selectedRow.textContent()).toContain("Weekly report");
       await gateway.waitForRequest("sessions.subscribe");

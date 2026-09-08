@@ -15,14 +15,14 @@ import {
 } from "../config/sessions/session-accessor.sqlite-read.js";
 import { sessionMatchesExpectedTranscriptTurn } from "../config/sessions/session-transcript-turn-state.js";
 import { getOwnedSessionTranscriptWriterFence } from "../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getAgentScopedMediaLocalRootsForSources } from "../media/local-roots.js";
 import {
   readAssistantDisplayContent,
   retainAssistantModelContent,
 } from "../shared/assistant-display-content.js";
 import { createKeyedFifoLeaseRegistry } from "../shared/keyed-fifo-lease.js";
-import { isOpenClawDeliveryMirrorAssistantMessage } from "../shared/transcript-only-openclaw-assistant.js";
+import { isCarapaceDeliveryMirrorAssistantMessage } from "../shared/transcript-only-carapace-assistant.js";
 import {
   attachManagedOutgoingMediaToMessage,
   createManagedOutgoingMediaBlocks,
@@ -31,11 +31,11 @@ import {
 } from "./managed-image-attachments.js";
 
 const internalSourceReplyPersistenceLeases = createKeyedFifoLeaseRegistry(
-  Symbol.for("openclaw.internalSourceReplyPersistenceLeases"),
+  Symbol.for("carapace.internalSourceReplyPersistenceLeases"),
 );
 
 async function completePersistedInternalSourceReply(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   expectedSessionId?: string;
   agentId?: string;
@@ -62,7 +62,7 @@ async function completePersistedInternalSourceReply(params: {
     const message = readTranscriptEventMessage(event);
     return (
       message?.idempotencyKey === params.idempotencyKey &&
-      isOpenClawDeliveryMirrorAssistantMessage(message)
+      isCarapaceDeliveryMirrorAssistantMessage(message)
     );
   });
   if (!found) {
@@ -127,7 +127,7 @@ function attachSourceReplyMedia(result: TranscriptMessageAppendResult<unknown>):
 
 /** Persist the private WebChat source reply before its successful tool result becomes visible. */
 export async function persistInternalSourceReply(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   expectedSessionId?: string;
   agentId?: string;

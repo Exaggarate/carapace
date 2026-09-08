@@ -4,8 +4,8 @@ import {
   ChannelType as DiscordChannelType,
   type APIApplicationCommandChannelOption,
 } from "discord-api-types/v10";
-import type { OpenClawConfig, DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { NativeCommandSpec } from "openclaw/plugin-sdk/native-command-registry";
+import type { CarapaceConfig, DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import type { NativeCommandSpec } from "carapace/plugin-sdk/native-command-registry";
 import {
   Command,
   CommandWithSubcommands,
@@ -37,7 +37,7 @@ export const DISCORD_VOICE_COMMAND_SPEC = {
 
 type VoiceCommandContext = {
   readPolicy?: DiscordLivePolicyReader;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   accountId: string;
   groupPolicy: "open" | "disabled" | "allowlist";

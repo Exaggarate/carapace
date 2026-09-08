@@ -4,7 +4,7 @@ import { state as litState } from "lit/decorators.js";
 import { applicationContext, type ApplicationContext } from "../../app/context.ts";
 import { t } from "../../i18n/index.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import "../../styles/debug.css";
@@ -23,7 +23,7 @@ type SectionState =
   | { status: "ready"; value: unknown }
   | { status: "unavailable" };
 
-export class DebugOverlay extends OpenClawLightDomElement {
+export class DebugOverlay extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: ApplicationContext;
 
@@ -196,6 +196,6 @@ export class DebugOverlay extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-debug-overlay")) {
-  customElements.define("openclaw-debug-overlay", DebugOverlay);
+if (!customElements.get("carapace-debug-overlay")) {
+  customElements.define("carapace-debug-overlay", DebugOverlay);
 }

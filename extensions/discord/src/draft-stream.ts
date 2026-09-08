@@ -1,6 +1,6 @@
 // Discord plugin module implements draft stream behavior.
-import { createFinalizableDraftStreamControlsForState } from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { createFinalizableDraftStreamControlsForState } from "carapace/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   createChannelMessage,
   deleteChannelMessage,

@@ -1,12 +1,12 @@
-# OpenClaw Parallel Plugin
+# Carapace Parallel Plugin
 
-Official OpenClaw plugin for Parallel.
+Official Carapace plugin for Parallel.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/parallel-plugin
-openclaw gateway restart
+carapace plugins install @carapace/parallel-plugin
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/parallel-search> for setup and configuration.
+See <../../docs/tools/parallel-search.md> for setup and configuration.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withEnv } from "../../test-utils/env.js";
 import { resolveGatewayModelSelectionPolicy } from "./session-model-selection-policy.js";
 
@@ -11,7 +11,7 @@ const cfg = {
       { id: "work", model: "anthropic/claude-sonnet-4-6" },
     ],
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 describe("resolveGatewayModelSelectionPolicy", () => {
   it("keeps an admin's ordinary selection session-only", () => {
@@ -42,7 +42,7 @@ describe("resolveGatewayModelSelectionPolicy", () => {
       }).target,
     ).toBe("session");
     expect(
-      withEnv({ OPENCLAW_NIX_MODE: "1" }, () =>
+      withEnv({ CARAPACE_NIX_MODE: "1" }, () =>
         resolveGatewayModelSelectionPolicy({
           callerScopes: ["operator.admin"],
           cfg,

@@ -2,11 +2,11 @@
 import {
   describeImageWithModel as describeImageWithModelImpl,
   transcribeFirstAudio as transcribeFirstAudioImpl,
-} from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/media-runtime";
 
 type DescribeImageWithModel =
-  typeof import("openclaw/plugin-sdk/media-runtime").describeImageWithModel;
-type TranscribeFirstAudio = typeof import("openclaw/plugin-sdk/media-runtime").transcribeFirstAudio;
+  typeof import("carapace/plugin-sdk/media-runtime").describeImageWithModel;
+type TranscribeFirstAudio = typeof import("carapace/plugin-sdk/media-runtime").transcribeFirstAudio;
 
 export async function describeImageWithModel(
   ...args: Parameters<DescribeImageWithModel>

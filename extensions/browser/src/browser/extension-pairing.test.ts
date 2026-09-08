@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { withEnvAsync, withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withEnvAsync, withTempDir } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { relayTestKey } from "../../chrome-extension/relay-key.test-support.js";
 import { buildBrowserExtensionPairing } from "./extension-pairing.js";
@@ -10,13 +10,13 @@ const ensureToken = async () => RELAY_KEY;
 
 describe("buildBrowserExtensionPairing", () => {
   it("pairs with the first writer's key when its file is already open but empty", async () => {
-    await withTempDir("openclaw-pairing-", async (dir) => {
+    await withTempDir("carapace-pairing-", async (dir) => {
       const stateDir = fs.realpathSync(dir);
       const credentials = path.join(stateDir, "credentials");
       fs.mkdirSync(credentials, { mode: 0o700 });
       const secretPath = path.join(credentials, "browser-extension-relay.secret");
       await withEnvAsync(
-        { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_OAUTH_DIR: credentials },
+        { CARAPACE_STATE_DIR: stateDir, CARAPACE_OAUTH_DIR: credentials },
         async () => {
           const fd = fs.openSync(secretPath, "wx", 0o600);
           try {
@@ -37,7 +37,7 @@ describe("buildBrowserExtensionPairing", () => {
   });
 
   it("preserves the standalone host relay for local manual pairing compatibility", async () => {
-    await withEnvAsync({ OPENCLAW_GATEWAY_PORT: undefined }, async () => {
+    await withEnvAsync({ CARAPACE_GATEWAY_PORT: undefined }, async () => {
       await expect(
         buildBrowserExtensionPairing({
           cfg: {
@@ -57,7 +57,7 @@ describe("buildBrowserExtensionPairing", () => {
   });
 
   it("routes local native bootstrap through the Gateway while retaining relay metadata", async () => {
-    await withEnvAsync({ OPENCLAW_GATEWAY_PORT: undefined }, async () => {
+    await withEnvAsync({ CARAPACE_GATEWAY_PORT: undefined }, async () => {
       await expect(
         buildBrowserExtensionPairing({
           cfg: {

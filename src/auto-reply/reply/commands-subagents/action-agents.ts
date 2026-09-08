@@ -1,5 +1,5 @@
 // Lists available agents and conversation bindings.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { buildSubagentRunReadIndex } from "../../../agents/subagents/registry/subagent-registry-read.js";
 import { buildSubagentRunView } from "../../../agents/subagents/registry/subagent-run-view.js";
 import { getChannelPlugin, normalizeChannelId } from "../../../channels/plugins/index.js";

@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, symlinkSync } from "node:fs";
 import path from "node:path";
 import { runInNewContext } from "node:vm";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { collectBundledPluginBuildEntries } from "../../scripts/lib/bundled-plugin-build-entries.mjs";
@@ -14,7 +14,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function workflow(): WorkflowDocument {
   return parse(
-    readFileSync(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml", "utf8"),
+    readFileSync(".github/workflows/carapace-live-and-e2e-checks-reusable.yml", "utf8"),
   ) as WorkflowDocument;
 }
 
@@ -270,7 +270,7 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
 
   it("builds provider owners used by every direct and Gateway Docker live lane", () => {
     const definition = workflow();
-    const outputDir = tempDirs.make("openclaw-live-image-selection-");
+    const outputDir = tempDirs.make("carapace-live-image-selection-");
     const outputPath = path.join(outputDir, "outputs");
     symlinkSync(path.resolve("scripts"), path.join(outputDir, "scripts"), "dir");
     mkdirSync(path.join(outputDir, ".release-target"));
@@ -281,7 +281,7 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
     );
     const env = {
       PATH: process.env.PATH,
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_OUTPUT: outputPath,
       GITHUB_STEP_SUMMARY: path.join(outputDir, "summary"),
       SELECTED_SHA: "a".repeat(40),
@@ -323,7 +323,7 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
     expect(outputs.live_image?.split(":")[1]?.length).toBeLessThanOrEqual(128);
     const builtIds = new Set(
       collectBundledPluginBuildEntries({
-        env: { OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: outputs.live_image_extensions },
+        env: { CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: outputs.live_image_extensions },
       }).map((entry: { id: string }) => entry.id),
     );
     const plan = createReleaseWorkflowMatrixPlan({
@@ -336,7 +336,7 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
     for (const entry of requiredJob(definition, "validate_live_docker_provider_suites").strategy
       .matrix.include) {
       for (const match of JSON.stringify(entry).matchAll(
-        /OPENCLAW_LIVE_GATEWAY_PROVIDERS=([^\s"]+)/gu,
+        /CARAPACE_LIVE_GATEWAY_PROVIDERS=([^\s"]+)/gu,
       )) {
         for (const provider of expectDefined(match[1], "Gateway provider selection").split(",")) {
           providers.add(provider);
@@ -344,7 +344,7 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
       }
     }
     const manifests = readdirSync("extensions").flatMap((id) => {
-      const manifestPath = path.join("extensions", id, "openclaw.plugin.json");
+      const manifestPath = path.join("extensions", id, "carapace.plugin.json");
       return existsSync(manifestPath)
         ? [{ id, manifest: JSON.parse(readFileSync(manifestPath, "utf8")) }]
         : [];
@@ -396,11 +396,11 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
       required: false,
       type: "boolean",
     });
-    expect(definition.env.OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG).toBe(
+    expect(definition.env.CARAPACE_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG).toBe(
       "${{ inputs.allow_unreleased_changelog }}",
     );
     const packageStep = requiredJob(definition, "prepare_docker_e2e_image").steps.find(
-      (step: WorkflowStep) => step.name === "Pack OpenClaw package for Docker E2E",
+      (step: WorkflowStep) => step.name === "Pack Carapace package for Docker E2E",
     );
     const requiredPackageStep = expectDefined(packageStep, "Docker E2E package step");
     expect(requiredPackageStep.env?.ALLOW_UNRELEASED_CHANGELOG).toBe(
@@ -572,8 +572,8 @@ describe("scripts/plan-release-workflow-matrix.mjs", () => {
     expect(liveModels.strategy.matrix).toBe(
       "${{ fromJson(needs.plan_release_workflow_matrices.outputs.live_models_matrix) }}",
     );
-    expect(liveModels.env.OPENCLAW_LIVE_MODELS).toBe("${{ matrix.models || 'modern' }}");
-    expect(liveModels.env.OPENCLAW_LIVE_MAX_MODELS).toBe("${{ matrix.max_models || '6' }}");
+    expect(liveModels.env.CARAPACE_LIVE_MODELS).toBe("${{ matrix.models || 'modern' }}");
+    expect(liveModels.env.CARAPACE_LIVE_MAX_MODELS).toBe("${{ matrix.max_models || '6' }}");
   });
 
   it("requires new release-profile matrices to use a planner or an explicit allowlist", () => {

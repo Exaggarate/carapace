@@ -39,7 +39,7 @@ export * from "./full-release-validation-policy.mjs";
 
 const execFileAsync = promisify(execFile);
 const RELEASE_SUMMARY_PATH =
-  process.env.OPENCLAW_RELEASE_CI_SUMMARY_VALIDATOR ??
+  process.env.CARAPACE_RELEASE_CI_SUMMARY_VALIDATOR ??
   fileURLToPath(new URL("./release-ci-summary.mjs", import.meta.url));
 const API_ERROR_PATTERN =
   /HTTP [45][0-9][0-9]|API|Bad credentials|rate limit|network|connection|timeout|ETIMEDOUT|ECONNRESET|EAI_AGAIN/u;

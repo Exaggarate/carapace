@@ -5,7 +5,7 @@ import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-ar
 
 let artifactDir: string | undefined;
 beforeEach(() => {
-  const parent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
   artifactDir = parent
     ? createControlUiE2eArtifactDir("chat-worked-for-visualization", parent)
     : undefined;
@@ -101,7 +101,7 @@ suite.define(() => {
                   render: "url",
                   title: "Release status",
                   viewId: "cv_worked_for_visual",
-                  url: "/__openclaw__/canvas/documents/cv_worked_for_visual/index.html",
+                  url: "/__carapace__/canvas/documents/cv_worked_for_visual/index.html",
                   preferredHeight: 180,
                   sandbox: "scripts",
                 },
@@ -112,7 +112,7 @@ suite.define(() => {
           {
             role: "assistant",
             content: [{ type: "text", text: "Checking." }],
-            openclawStreamFallback: {
+            carapaceStreamFallback: {
               itemId: "worked-for-checking",
               replacementText: "Checking.",
               source: "segment",
@@ -143,7 +143,7 @@ suite.define(() => {
       await captureProof(page, "worked-for-geometry-collapsed");
 
       const geometry = await workedFor.evaluate(async (element) => {
-        const owner = element.closest("openclaw-chat-pane") as
+        const owner = element.closest("carapace-chat-pane") as
           | (HTMLElement & { updateComplete: Promise<unknown> })
           | null;
         const thread = element.closest<HTMLElement>(".chat-thread");

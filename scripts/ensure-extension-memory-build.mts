@@ -35,7 +35,7 @@ type ExtensionMemoryBuildParams = {
  */
 export function resolveExtensionMemoryBuildTimeoutMs(env: NodeJS.ProcessEnv = process.env) {
   return readPositiveEnvInt(
-    "OPENCLAW_EXTENSION_MEMORY_BUILD_TIMEOUT_MS",
+    "CARAPACE_EXTENSION_MEMORY_BUILD_TIMEOUT_MS",
     env,
     DEFAULT_BUILD_TIMEOUT_MS,
   );

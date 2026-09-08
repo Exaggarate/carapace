@@ -43,7 +43,7 @@ const ROOT_TEST_ENTRY_GLOBS = [
   // ExecHostTransportProofTests.swift launches this isolated native client by path.
   "src/infra/exec-host.native.test-support.ts!",
   // The Windows CLI lifetime test launches this isolated probe by path.
-  "test/helpers/openclaw-test-instance.cli.test-support.mjs!",
+  "test/helpers/carapace-test-instance.cli.test-support.mjs!",
   // The public QA Gateway child launches this transport proxy by path.
   "test/fixtures/qa-gateway-rpc-proxy.mjs!",
   // ClawSweeper's paired consumer proof launches this cross-repository fixture by path.

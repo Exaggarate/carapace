@@ -37,18 +37,18 @@ describe("check-package-dist-imports", () => {
   });
 
   it("accepts a minimal package dist root", () => {
-    const root = makeTempDir(tempDirs, "openclaw-package-dist-imports-");
+    const root = makeTempDir(tempDirs, "carapace-package-dist-imports-");
     mkdirSync(join(root, "dist"), { recursive: true });
     writeFileSync(join(root, "dist", "index.js"), "export {};\n", "utf8");
 
     const result = spawnSync("node", [CHECK_SCRIPT, root], { encoding: "utf8" });
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toContain("OpenClaw package dist import closure passed.");
+    expect(result.stdout).toContain("Carapace package dist import closure passed.");
   });
 
   it("rejects missing chunks across ESM import, re-export, and CommonJS forms", () => {
-    const root = makeTempDir(tempDirs, "openclaw-package-dist-imports-");
+    const root = makeTempDir(tempDirs, "carapace-package-dist-imports-");
     mkdirSync(join(root, "dist"), { recursive: true });
     const sources = {
       "named-import.js": 'import { value } from "./missing.js";\n',
@@ -71,7 +71,7 @@ describe("check-package-dist-imports", () => {
   });
 
   it("ignores import-like text inside multiline template literals", () => {
-    const root = makeTempDir(tempDirs, "openclaw-package-dist-imports-");
+    const root = makeTempDir(tempDirs, "carapace-package-dist-imports-");
     mkdirSync(join(root, "dist"), { recursive: true });
     writeFileSync(
       join(root, "dist", "index.js"),
@@ -82,14 +82,14 @@ describe("check-package-dist-imports", () => {
     const result = spawnSync("node", [CHECK_SCRIPT, root], { encoding: "utf8" });
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toContain("OpenClaw package dist import closure passed.");
+    expect(result.stdout).toContain("Carapace package dist import closure passed.");
   });
 
   it("ignores import.meta.url probes outside packaged dist", () => {
-    const root = makeTempDir(tempDirs, "openclaw-package-dist-imports-");
+    const root = makeTempDir(tempDirs, "carapace-package-dist-imports-");
     mkdirSync(join(root, "dist"), { recursive: true });
     const probes = [
-      "../../openclaw.mjs",
+      "../../carapace.mjs",
       "../../scripts/run-node.mjs",
       "../../dist/entry.js",
       "../../dist/entry.mjs",
@@ -108,6 +108,6 @@ describe("check-package-dist-imports", () => {
     const result = spawnSync("node", [CHECK_SCRIPT, root], { encoding: "utf8" });
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toContain("OpenClaw package dist import closure passed.");
+    expect(result.stdout).toContain("Carapace package dist import closure passed.");
   });
 });

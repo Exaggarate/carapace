@@ -44,7 +44,7 @@ Local onboarding defaults new local configs to `tools.profile: "coding"` when un
 | `group:nodes`      | `nodes`, `computer`                                                                                                                                                                                                                                      |
 | `group:agents`     | `agents_list`, `get_goal`, `create_goal`, `update_goal`, `progress_card`, `ask_user`, `skill_workshop`                                                                                                                                                   |
 | `group:media`      | `view_image`, `image_generate`, `music_generate`, `video_generate`, `tts`                                                                                                                                                                                |
-| `group:openclaw`   | All built-in tools above except `read`/`write`/`edit`/`apply_patch`/`exec`/`process`/`canvas` (excludes plugin tools)                                                                                                                                    |
+| `group:carapace`   | All built-in tools above except `read`/`write`/`edit`/`apply_patch`/`exec`/`process`/`canvas` (excludes plugin tools)                                                                                                                                    |
 | `group:plugins`    | Tools owned by loaded plugins, including configured MCP servers exposed through `bundle-mcp`                                                                                                                                                             |
 
 `suggest_task` lets an agent propose confirmed follow-up work without starting it. The working directory must be absolute, but does not need to be a Git checkout. Local debugging and non-code tasks are supported. The Control UI shows the title and summary as an actionable chip; a Gateway-backed TUI shows an equivalent interactive prompt. **Start in a new session** opens a normal session in that directory and sends the full task prompt. The new session is instructed to ask the user before creating or switching to a worktree if isolation becomes necessary. There is no up-front worktree or execution-destination choice. `dismiss_task` withdraws a still-pending suggestion by the ephemeral `task_id` returned from `suggest_task`.
@@ -55,7 +55,7 @@ The tools are offered only when the initiating operator surface can receive and 
 
 Configured MCP servers are exposed as plugin-owned tools under the `bundle-mcp` plugin id. Normal tool profiles can allow them, but `tools.sandbox.tools` is an additional gate for sandboxed sessions. If sandbox mode is `"all"` or `"non-main"`, include one of these entries in the sandbox tool allowlist when MCP/plugin tools should be visible:
 
-- `bundle-mcp` for OpenClaw-managed MCP servers from `mcp.servers`
+- `bundle-mcp` for Carapace-managed MCP servers from `mcp.servers`
 - the plugin id for a specific native plugin
 - `group:plugins` for all loaded plugin-owned tools
 - exact MCP server tool names or server globs such as `outlook__send_mail` or `outlook__*` when you only want one server
@@ -82,12 +82,12 @@ Per-run `toolsAllow` caps also accept globs such as `outlook*` or `out*graph*` f
 }
 ```
 
-Without that sandbox-layer entry, the MCP server can still load successfully while its tools are filtered before the provider request. Use `openclaw doctor` to catch this shape for OpenClaw-managed servers in `mcp.servers`. MCP servers loaded from bundled plugin manifests or Claude `.mcp.json` use the same sandbox gate, but this diagnostic does not enumerate those sources yet; use the same allowlist entries if their tools disappear in sandboxed turns.
+Without that sandbox-layer entry, the MCP server can still load successfully while its tools are filtered before the provider request. Use `carapace doctor` to catch this shape for Carapace-managed servers in `mcp.servers`. MCP servers loaded from bundled plugin manifests or Claude `.mcp.json` use the same sandbox gate, but this diagnostic does not enumerate those sources yet; use the same allowlist entries if their tools disappear in sandboxed turns.
 
 ### `tools.codeMode`
 
-`tools.codeMode` gates the generic OpenClaw code-mode surface. When engaged
-for a run with tools, normal OpenClaw tools move behind the in-sandbox `tools.*`
+`tools.codeMode` gates the generic Carapace code-mode surface. When engaged
+for a run with tools, normal Carapace tools move behind the in-sandbox `tools.*`
 catalog bridge, and MCP tools are available through the generated `MCP`
 namespace. The model normally sees `exec` and `wait`; tools such as `computer`
 whose structured results cannot cross the JSON-only bridge stay direct.
@@ -147,7 +147,7 @@ Global tool allow/deny policy (deny wins). Case-insensitive, supports `*` wildca
 </Note>
 
 The image inspection tool is `view_image`. If an older config still names
-`image` in an allow, `alsoAllow`, or deny list, run `openclaw doctor --fix` to
+`image` in an allow, `alsoAllow`, or deny list, run `carapace doctor --fix` to
 rewrite supported global, per-agent, provider, sandbox, sender, channel, and
 Gateway policy surfaces. Doctor preserves patterns such as `image*` that may
 still match other tools and adds `view_image` when the pattern no longer covers
@@ -186,7 +186,7 @@ Restricts tools for the current turn's originating requester. This is defense-in
 }
 ```
 
-Keys use explicit prefixes: `channel:<channelId>:<senderId>`, `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>`, or `"*"`. Channel ids are canonical OpenClaw ids; aliases such as `teams` normalize to `msteams`. Legacy unprefixed keys are accepted as `id:` only. Matching order is channel+id, id, e164, username, name, then wildcard.
+Keys use explicit prefixes: `channel:<channelId>:<senderId>`, `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>`, or `"*"`. Channel ids are canonical Carapace ids; aliases such as `teams` normalize to `msteams`. Legacy unprefixed keys are accepted as `id:` only. Matching order is channel+id, id, e164, username, name, then wildcard.
 
 Per-agent `agents.entries.*.tools.toolsBySender` overrides the global sender match when it matches, even with an empty `{}` policy.
 
@@ -218,11 +218,11 @@ GitHub CLI identity is native by default. When `tools.github` is omitted, local 
 
 Use **Settings → Profile → GitHub connections** to see **My GitHub** and **System GitHub** together. Administrators explicitly choose **For the system** to configure this shared execution identity; the general connection flow defaults to **For me** for identified users. Per-agent overrides remain an advanced administrative setting under **Agents → Tools**. A personal connection is separate from `tools.github`: it supports explicitly selected Gateway-brokered publication and does not change agent shell credentials, shared defaults, or verified sign-in identity. See [GitHub connections](/concepts/user-model#github-connections).
 
-OpenClaw displays a one-time user code with a **Copy code** button beside it; clicking the code selects it in full for manual copying. Open the fixed `https://github.com/login/device` link, paste the code, and approve `repo`, `workflow`, `read:org`, and `gist`. The latter two are part of GitHub CLI's minimum classic-token contract. The Gateway owns the device code, token exchange, account verification, private managed `gh` profile, and rotating refresh token. Setup and refresh do not return credentials in browser responses or place them in config, logs, command arguments, transcripts, or the model runtime environment. OpenClaw-owned local exec receives an access token only through its private process-launch environment, as described below.
+Carapace displays a one-time user code with a **Copy code** button beside it; clicking the code selects it in full for manual copying. Open the fixed `https://github.com/login/device` link, paste the code, and approve `repo`, `workflow`, `read:org`, and `gist`. The latter two are part of GitHub CLI's minimum classic-token contract. The Gateway owns the device code, token exchange, account verification, private managed `gh` profile, and rotating refresh token. Setup and refresh do not return credentials in browser responses or place them in config, logs, command arguments, transcripts, or the model runtime environment. Carapace-owned local exec receives an access token only through its private process-launch environment, as described below.
 
 OAuth access tokens expire after about eight hours. The Gateway refreshes them before expiry, verifies the durable GitHub account ID, and atomically replaces the credential inside the same private profile. New local exec launches use the refreshed credential; an already-running local exec keeps its launch token until it exits. Restart a long-running shell after its access token expires. An expired or rejected refresh token is shown as **Reconnect required**. Refresh never blocks Gateway startup.
 
-**Use a PAT instead** preserves fine-grained personal access token setup as an explicit alternative. The browser places the pasted token in the secret store as a one-use handoff. The Gateway hard-deletes that handoff before validating the supplied credential with GitHub's `/user` endpoint. Both setup paths write an account-owned private `gh` profile without changing the host's global GitHub CLI login or OS keyring, default Git authorship to the account's canonical GitHub noreply identity, and store only secret-free OpenClaw config:
+**Use a PAT instead** preserves fine-grained personal access token setup as an explicit alternative. The browser places the pasted token in the secret store as a one-use handoff. The Gateway hard-deletes that handoff before validating the supplied credential with GitHub's `/user` endpoint. Both setup paths write an account-owned private `gh` profile without changing the host's global GitHub CLI login or OS keyring, default Git authorship to the account's canonical GitHub noreply identity, and store only secret-free Carapace config:
 
 ```json5
 {
@@ -250,19 +250,19 @@ OAuth access tokens expire after about eight hours. The Gateway refreshes them b
 
 Omitting `agents.entries.<id>.tools.github` inherits the system identity. An agent object is a complete managed override. Settings shows the effective identity and the selected configuration scope separately, so editing **System** never masquerades as an agent override. If a configured managed profile is missing, tokenless, or corrupt, GitHub status reports `configured_unavailable` rather than reporting the native account. Gateway-brokered publication verifies the selected profile's own credential and pins it for each child operation; a missing profile cannot redirect publication to native authentication. Ordinary agent shell execution continues to use the shared or per-agent selection, with the execution boundaries described below.
 
-Managed identity selects the `gh` CLI/API account and optional Git author/committer metadata. OpenClaw prepares a non-secret overlay containing the private `GH_CONFIG_DIR`, ambient token scrubs, and configured author fields. For local execution, it does not install a credential helper, rewrite SSH remotes, add HTTP authorization headers, or otherwise override an existing repository's Git network credentials. Commands still use the existing `gh` on `PATH`, including any operator-managed protection or caching wrapper.
+Managed identity selects the `gh` CLI/API account and optional Git author/committer metadata. Carapace prepares a non-secret overlay containing the private `GH_CONFIG_DIR`, ambient token scrubs, and configured author fields. For local execution, it does not install a credential helper, rewrite SSH remotes, add HTTP authorization headers, or otherwise override an existing repository's Git network credentials. Commands still use the existing `gh` on `PATH`, including any operator-managed protection or caching wrapper.
 
-For OpenClaw-owned `exec` with `host=gateway`, including Pi `exec` and Codex `gateway_exec`, the local launch owner reads and validates the selected profile immediately before each process launch. It places that access token in `GH_TOKEN` only in the private child environment and clears `GITHUB_TOKEN`; approval payloads and shared run environments remain non-secret. A missing, tokenless, or insecure profile refuses the local execution before the command starts instead of permitting native-keyring fallback. This also applies to commands that might invoke `gh` indirectly. Reconnect or change the GitHub Identity selection before retrying. A launched command retains its selected credential even if the profile later disappears; the next exec launch reads the profile again.
+For Carapace-owned `exec` with `host=gateway`, including Pi `exec` and Codex `gateway_exec`, the local launch owner reads and validates the selected profile immediately before each process launch. It places that access token in `GH_TOKEN` only in the private child environment and clears `GITHUB_TOKEN`; approval payloads and shared run environments remain non-secret. A missing, tokenless, or insecure profile refuses the local execution before the command starts instead of permitting native-keyring fallback. This also applies to commands that might invoke `gh` indirectly. Reconnect or change the GitHub Identity selection before retrying. A launched command retains its selected credential even if the profile later disappears; the next exec launch reads the profile again.
 
 **Codex-native shell is a separate boundary.** Native `exec_command` and shell execution still receive the non-secret profile overlay, not the private launch-time credential binding. `GH_CONFIG_DIR` does not isolate the OS keyring: if the selected profile disappears or loses its token, GitHub CLI can fall back to native keyring credentials. Use `gateway_exec` when the launch-bound managed identity guarantee is required. GitHub status and Gateway-owned publication guarantees do not extend to native shell execution.
 
 Choosing a different identity or inheritance target selects another profile for new runs. An admitted run keeps its prior profile selection, and already-launched local exec processes keep their launch token until they exit. Retired profile files are cleaned on the next Gateway restart, so changing this setting is not immediate credential revocation.
 
-Managed profiles provide execution and coordination identity; they are not an OS-user security sandbox. A process with unrestricted host execution under the same OS account can access account-owned files, including managed `gh` profiles. Use an OpenClaw sandbox, a dedicated host, or a dedicated OS user when adversarial isolation is required.
+Managed profiles provide execution and coordination identity; they are not an OS-user security sandbox. A process with unrestricted host execution under the same OS account can access account-owned files, including managed `gh` profiles. Use an Carapace sandbox, a dedicated host, or a dedicated OS user when adversarial isolation is required.
 
-OpenClaw `worker-turn` cloud workers receive the effective shared identity per turn through their private launch envelope. The worker writes the access token to a private per-turn profile in its throwaway state directory, with earlier profiles removed before the next binding; the same OS-user limit described above applies on the worker host. The sealed worker launcher gives each `exec` child the same launch-time credential binding as local exec. GitHub CLI must be installed on the worker host; the bundle includes the launcher, not `gh`. The checkout uses the session-owned branch and an HTTPS `origin` for GitHub repositories; HTTPS Git authentication uses `gh auth git-credential`, with inherited credential helpers cleared. Commits and pushes happen directly on the worker. Reconciliation returns file contents to the Gateway worktree, not commit history. At every turn start, the worker fast-forwards its checkout to the session branch on `origin` when the local branch is behind, bringing in history pushed by an earlier worker; a diverged local branch is left untouched. Paired devices' own GitHub CLI logins are not used for this binding.
+Carapace `worker-turn` cloud workers receive the effective shared identity per turn through their private launch envelope. The worker writes the access token to a private per-turn profile in its throwaway state directory, with earlier profiles removed before the next binding; the same OS-user limit described above applies on the worker host. The sealed worker launcher gives each `exec` child the same launch-time credential binding as local exec. GitHub CLI must be installed on the worker host; the bundle includes the launcher, not `gh`. The checkout uses the session-owned branch and an HTTPS `origin` for GitHub repositories; HTTPS Git authentication uses `gh auth git-credential`, with inherited credential helpers cleared. Commits and pushes happen directly on the worker. Reconciliation returns file contents to the Gateway worktree, not commit history. At every turn start, the worker fast-forwards its checkout to the session branch on `origin` when the local branch is behind, bringing in history pushed by an earlier worker; a diverged local branch is left untouched. Paired devices' own GitHub CLI logins are not used for this binding.
 
-OpenClaw sandboxes, ordinary node-host exec, and Codex `remote-exec` placements still do not receive the Gateway's managed GitHub credentials. The `github_publish` tool remains available for remote-exec sessions: it records a bounded publication request without credentials or repository authority. After the exact workspace result is reconciled and accepted, the Gateway commits remaining changes as the verified effective GitHub user, pushes the authoritative session branch through a one-shot HTTPS credential helper, and creates or reuses a draft pull request.
+Carapace sandboxes, ordinary node-host exec, and Codex `remote-exec` placements still do not receive the Gateway's managed GitHub credentials. The `github_publish` tool remains available for remote-exec sessions: it records a bounded publication request without credentials or repository authority. After the exact workspace result is reconciled and accepted, the Gateway commits remaining changes as the verified effective GitHub user, pushes the authoritative session branch through a one-shot HTTPS credential helper, and creates or reuses a draft pull request.
 
 Local session-owned worktrees can use the same **Publish PR** action in the Control UI. The Gateway derives the managed worktree, repository, branch, base, and head from current session ownership. It never accepts those authority facts from the browser or model. Publication retries use a durable request ID, an exact commit marker, remote branch observation, and pull-request lookup by head branch so a Gateway restart or lost response does not create duplicate commits, pushes, or pull requests.
 
@@ -270,7 +270,7 @@ Verification proves which account answered the GitHub API request. Status report
 
 Removing an agent override or choosing native credentials deletes the associated local refresh record after the config change. Already-running local processes may retain the old profile and its current access token until they exit, restart, or the token expires, while new runs use the updated identity immediately. This local change does not revoke the authorization at GitHub; revoke it separately from the OAuth application's GitHub settings when required.
 
-Control UI issue and pull request hover previews use the selected agent's effective managed GitHub identity, including an inherited system identity. An unavailable managed identity produces an actionable error rather than switching to another credential. Without a managed selection, previews retain the optional `gateway.controlUi.github.token` service credential, shared `GH_TOKEN`/`GITHUB_TOKEN` environment fallback, and anonymous public access. Previews remain public-only, and their caches are scoped to the credential used. Project discovery continues to use the separate service credential. When this SecretRef is explicit, OpenClaw excludes its exact environment or store name from agent execution. A custom name does not clear unrelated `GH_TOKEN` or `GITHUB_TOKEN` values used by native identity; a ref named `GH_TOKEN` or `GITHUB_TOKEN` excludes that exact variable.
+Control UI issue and pull request hover previews use the selected agent's effective managed GitHub identity, including an inherited system identity. An unavailable managed identity produces an actionable error rather than switching to another credential. Without a managed selection, previews retain the optional `gateway.controlUi.github.token` service credential, shared `GH_TOKEN`/`GITHUB_TOKEN` environment fallback, and anonymous public access. Previews remain public-only, and their caches are scoped to the credential used. Project discovery continues to use the separate service credential. When this SecretRef is explicit, Carapace excludes its exact environment or store name from agent execution. A custom name does not clear unrelated `GH_TOKEN` or `GITHUB_TOKEN` values used by native identity; a ref named `GH_TOKEN` or `GITHUB_TOKEN` excludes that exact variable.
 
 ### `tools.exec`
 
@@ -394,7 +394,7 @@ Configures inbound media understanding (image/audio/video):
     **CLI entry** (`type: "cli"`):
 
     - `command`: executable to run
-    - `args`: templated args (supports `{{AttachmentPath}}`, `{{AttachmentUrl}}`, `{{AttachmentContentType}}`, `{{AttachmentDir}}`, `{{AttachmentIndex}}`, `{{Prompt}}`, `{{MaxChars}}`, etc.; `openclaw doctor --fix` migrates deprecated `{input}` placeholders to `{{AttachmentPath}}`). The older `{{MediaPath}}`, `{{MediaUrl}}`, `{{MediaType}}`, and `{{MediaDir}}` aliases remain available during their compatibility window but are deprecated.
+    - `args`: templated args (supports `{{AttachmentPath}}`, `{{AttachmentUrl}}`, `{{AttachmentContentType}}`, `{{AttachmentDir}}`, `{{AttachmentIndex}}`, `{{Prompt}}`, `{{MaxChars}}`, etc.; `carapace doctor --fix` migrates deprecated `{input}` placeholders to `{{AttachmentPath}}`). The older `{{MediaPath}}`, `{{MediaUrl}}`, `{{MediaType}}`, and `{{MediaDir}}` aliases remain available during their compatibility window but are deprecated.
 
     **Common fields:**
 
@@ -425,7 +425,7 @@ Cross-agent access is on by default. `enabled` (default `true`) gates cross-agen
 `allow` lists the agent ids or `*` patterns that may take part in a cross-agent call. Both the requesting agent and the target agent must match an entry. Exact ids are case-sensitive; wildcard patterns are case-insensitive.
 
 <Note>
-An omitted or empty `allow` counts as unset: with agent-to-agent access enabled by default, every agent can reach every other agent. List every participating agent, requester and target alike, to restrict cross-agent access, as in the example above. A list containing only blank entries denies all cross-agent calls. Deleting an agent (`openclaw agents delete`) prunes its id from `allow`; if that empties the list, the policy falls back to allow-all, so re-check `allow` after removing agents.
+An omitted or empty `allow` counts as unset: with agent-to-agent access enabled by default, every agent can reach every other agent. List every participating agent, requester and target alike, to restrict cross-agent access, as in the example above. A list containing only blank entries denies all cross-agent calls. Deleting an agent (`carapace agents delete`) prunes its id from `allow`; if that empties the list, the policy falls back to allow-all, so re-check `allow` after removing agents.
 </Note>
 
 ### `tools.sessions`
@@ -494,7 +494,7 @@ Controls inline attachment support for `sessions_spawn`.
 <AccordionGroup>
   <Accordion title="Attachment notes">
     - Attachments require `enabled: true`.
-    - Subagent attachments are materialized into the child workspace at `.openclaw/attachments/<uuid>/` with a `.manifest.json`.
+    - Subagent attachments are materialized into the child workspace at `.carapace/attachments/<uuid>/` with a `.manifest.json`.
     - ACP attachments are image-only and forwarded inline to the ACP runtime after the same file count, per-file byte, and total byte limits pass.
     - Attachment content is automatically redacted from transcript persistence.
     - Base64 inputs are validated with strict alphabet/padding checks and a pre-decode size guard.
@@ -522,7 +522,7 @@ Kill switch for `progress_card`, the durable plan and status note used for non-t
 - The tool description tells the model to keep the plan current, use at most one `in_progress` step, and add Markdown only when it contributes information beyond the steps.
 - Use `progress_card` in new `tools.allow` and `tools.deny` policies. Existing policies that name `update_plan` map to `progress_card`, so shipped allowlists and denylists keep their meaning.
 
-Older configs used `tools.experimental.planTool`. Run `openclaw doctor --fix` to move the value to `tools.updatePlan`.
+Older configs used `tools.experimental.planTool`. Run `carapace doctor --fix` to move the value to `tools.updatePlan`.
 
 ### `agents.defaults.subagents`
 
@@ -544,7 +544,7 @@ Older configs used `tools.experimental.planTool`. Run `openclaw doctor --fix` to
 ```
 
 - `model`: default model for spawned sub-agents. If omitted, sub-agents inherit the caller's model.
-- `allowAgents`: default allowlist of configured target agent ids for `sessions_spawn` when the requester agent does not set its own `subagents.allowAgents` (`["*"]` = any configured target; default: same agent only). Stale entries whose agent config was deleted are rejected by `sessions_spawn` and omitted from `agents_list`; run `openclaw doctor --fix` to clean them up.
+- `allowAgents`: default allowlist of configured target agent ids for `sessions_spawn` when the requester agent does not set its own `subagents.allowAgents` (`["*"]` = any configured target; default: same agent only). Stale entries whose agent config was deleted are rejected by `sessions_spawn` and omitted from `agents_list`; run `carapace doctor --fix` to clean them up.
 - `maxConcurrent`: max concurrent sub-agent runs. Default: `8`.
 - `runTimeoutSeconds`: timeout (seconds) for `sessions_spawn` when the caller does not pass its own override. Default: `0` (no timeout); the `900` shown above is a common opt-in value, not the built-in default.
 - `announceTimeoutMs`: per-call timeout (milliseconds) for gateway `agent` announce delivery attempts. Default: `120000`. Transient retries can make the total announce wait longer than one configured timeout.
@@ -555,9 +555,9 @@ Older configs used `tools.experimental.planTool`. Run `openclaw doctor --fix` to
 
 ## Custom providers and base URLs
 
-Provider plugins publish their own model catalog rows. Add custom providers via `models.providers` in config or `~/.openclaw/agents/<agentId>/agent/models.json`.
+Provider plugins publish their own model catalog rows. Add custom providers via `models.providers` in config or `~/.carapace/agents/<agentId>/agent/models.json`.
 
-Configuring a custom/local provider `baseUrl` is also the narrow network trust decision for model HTTP requests: OpenClaw allows that exact `scheme://host:port` origin through the guarded fetch path, without adding a separate config option or trusting other private origins.
+Configuring a custom/local provider `baseUrl` is also the narrow network trust decision for model HTTP requests: Carapace allows that exact `scheme://host:port` origin through the guarded fetch path, without adding a separate config option or trusting other private origins.
 
 ```json5
 {
@@ -589,7 +589,7 @@ Configuring a custom/local provider `baseUrl` is also the narrow network trust d
 <AccordionGroup>
   <Accordion title="Auth and merge precedence">
     - Use `authHeader: true` + `headers` for custom auth needs.
-    - Override agent config root with `OPENCLAW_AGENT_DIR`.
+    - Override agent config root with `CARAPACE_AGENT_DIR`.
     - Merge precedence for matching provider IDs:
       - Non-empty agent `models.json` `baseUrl` values win.
       - Non-empty agent `apiKey` values win only when that provider is not SecretRef-managed in current config/auth-profile context.
@@ -611,7 +611,7 @@ Configuring a custom/local provider `baseUrl` is also the narrow network trust d
   <Accordion title="Top-level catalog">
     - `models.mode`: provider catalog behavior (`merge` or `replace`).
     - `models.providers`: custom provider map keyed by provider id.
-      - Safe edits: use `openclaw config set models.providers.<id> '<json>' --strict-json --merge` or `openclaw config set models.providers.<id>.models '<json-array>' --strict-json --merge` for additive updates. `config set` refuses destructive replacements unless you pass `--replace`.
+      - Safe edits: use `carapace config set models.providers.<id> '<json>' --strict-json --merge` or `carapace config set models.providers.<id>.models '<json-array>' --strict-json --merge` for additive updates. `config set` refuses destructive replacements unless you pass `--replace`.
 
   </Accordion>
   <Accordion title="Provider connection and auth">
@@ -640,11 +640,11 @@ Configuring a custom/local provider `baseUrl` is also the narrow network trust d
     - `models.providers.*.models`: explicit provider model catalog entries.
     - `models.providers.*.models.*.input`: model input modalities. Use `["text"]` for text-only models and `["text", "image"]` for native image/vision models. Image attachments are only injected into agent turns when the selected model is marked image-capable.
     - `models.providers.*.models.*.contextWindow`: native context-window metadata for that model.
-    - `models.providers.*.models.*.contextTokens`: optional active-input cap for that model; use it when you want an effective budget distinct from the model's native `contextWindow`; `openclaw models list` shows both when they differ.
+    - `models.providers.*.models.*.contextTokens`: optional active-input cap for that model; use it when you want an effective budget distinct from the model's native `contextWindow`; `carapace models list` shows both when they differ.
 
     #### Custom provider capability declarations
 
-    Provider catalogs own `compat` for bundled and catalog-known model routes. Do not copy those flags into config: OpenClaw uses the catalog row when the configured `api` and `baseUrl` still identify that route. `openclaw doctor --fix` removes matching legacy overrides and reports divergent values for review.
+    Provider catalogs own `compat` for bundled and catalog-known model routes. Do not copy those flags into config: Carapace uses the catalog row when the configured `api` and `baseUrl` still identify that route. `carapace doctor --fix` removes matching legacy overrides and reports divergent values for review.
 
     A `compat` block remains supported for a genuinely custom provider, custom model, or catalog model routed to a different endpoint. Set only capabilities verified against that endpoint:
 
@@ -663,7 +663,7 @@ Configuring a custom/local provider `baseUrl` is also the narrow network trust d
     | `strictMessageKeys` | Requires outgoing messages to contain only accepted keys. |
     | `visibleReasoningDetailTypes` | Names reasoning detail block types safe to show in transcripts. |
     | `supportedReasoningEfforts` | Lists the endpoint's accepted reasoning labels. |
-    | `reasoningEffortMap` | Maps OpenClaw thinking labels to endpoint-specific labels. |
+    | `reasoningEffortMap` | Maps Carapace thinking labels to endpoint-specific labels. |
     | `maxTokensField` | Selects `max_tokens` or `max_completion_tokens`. |
     | `thinkingFormat` | Selects the endpoint's reasoning payload dialect. |
     | `requiresToolResultName` | Requires a tool name on tool-result messages. |
@@ -694,7 +694,7 @@ Interactive custom-provider onboarding infers image input for known vision-model
 
 <AccordionGroup>
   <Accordion title="Cerebras (GLM 4.7 / GPT OSS)">
-    The official external `cerebras` provider plugin can configure this via `openclaw onboard --auth-choice cerebras-api-key`. Use explicit provider config only when overriding defaults.
+    The official external `cerebras` provider plugin can configure this via `carapace onboard --auth-choice cerebras-api-key`. Use explicit provider config only when overriding defaults.
 
     ```json5
     {
@@ -744,7 +744,7 @@ Interactive custom-provider onboarding infers image input for known vision-model
     }
     ```
 
-    Anthropic-compatible, built-in provider. Shortcut: `openclaw onboard --auth-choice kimi-code-api-key`.
+    Anthropic-compatible, built-in provider. Shortcut: `carapace onboard --auth-choice kimi-code-api-key`.
 
   </Accordion>
   <Accordion title="Local models (llama.cpp / llama-server)">
@@ -823,7 +823,7 @@ Interactive custom-provider onboarding infers image input for known vision-model
     }
     ```
 
-    Set `MINIMAX_API_KEY`. Shortcuts: `openclaw onboard --auth-choice minimax-global-api` or `openclaw onboard --auth-choice minimax-cn-api`. The model catalog defaults to M3 and also includes the M2.7 variants. On the Anthropic-compatible streaming path, OpenClaw disables MiniMax M2.x thinking by default unless you explicitly set `thinking` yourself; MiniMax-M3 (and M3.x) stays on the provider's omitted/adaptive thinking path by default. `/fast on` or `params.fastMode: true` rewrites `MiniMax-M2.7` to `MiniMax-M2.7-highspeed`.
+    Set `MINIMAX_API_KEY`. Shortcuts: `carapace onboard --auth-choice minimax-global-api` or `carapace onboard --auth-choice minimax-cn-api`. The model catalog defaults to M3 and also includes the M2.7 variants. On the Anthropic-compatible streaming path, Carapace disables MiniMax M2.x thinking by default unless you explicitly set `thinking` yourself; MiniMax-M3 (and M3.x) stays on the provider's omitted/adaptive thinking path by default. `/fast on` or `params.fastMode: true` rewrites `MiniMax-M2.7` to `MiniMax-M2.7-highspeed`.
 
   </Accordion>
   <Accordion title="Moonshot AI (Kimi)">
@@ -860,9 +860,9 @@ Interactive custom-provider onboarding infers image input for known vision-model
     }
     ```
 
-    For the China endpoint: `baseUrl: "https://api.moonshot.cn/v1"` or `openclaw onboard --auth-choice moonshot-api-key-cn`.
+    For the China endpoint: `baseUrl: "https://api.moonshot.cn/v1"` or `carapace onboard --auth-choice moonshot-api-key-cn`.
 
-    Native Moonshot endpoints advertise streaming usage compatibility on the shared `openai-completions` transport, and OpenClaw keys that off endpoint capabilities rather than the built-in provider id alone.
+    Native Moonshot endpoints advertise streaming usage compatibility on the shared `openai-completions` transport, and Carapace keys that off endpoint capabilities rather than the built-in provider id alone.
 
   </Accordion>
   <Accordion title="OpenCode">
@@ -877,7 +877,7 @@ Interactive custom-provider onboarding infers image input for known vision-model
     }
     ```
 
-    Set `OPENCODE_API_KEY` (or `OPENCODE_ZEN_API_KEY`). Use `opencode/...` refs for the Zen catalog or `opencode-go/...` refs for the Go catalog. Shortcut: `openclaw onboard --auth-choice opencode-zen` or `openclaw onboard --auth-choice opencode-go`.
+    Set `OPENCODE_API_KEY` (or `OPENCODE_ZEN_API_KEY`). Use `opencode/...` refs for the Zen catalog or `opencode-go/...` refs for the Go catalog. Shortcut: `carapace onboard --auth-choice opencode-zen` or `carapace onboard --auth-choice opencode-go`.
 
   </Accordion>
   <Accordion title="Synthetic (Anthropic-compatible)">
@@ -914,7 +914,7 @@ Interactive custom-provider onboarding infers image input for known vision-model
     }
     ```
 
-    Base URL should omit `/v1` (Anthropic client appends it). Shortcut: `openclaw onboard --auth-choice synthetic-api-key`.
+    Base URL should omit `/v1` (Anthropic client appends it). Shortcut: `carapace onboard --auth-choice synthetic-api-key`.
 
   </Accordion>
   <Accordion title="Z.AI (GLM-4.7)">
@@ -929,7 +929,7 @@ Interactive custom-provider onboarding infers image input for known vision-model
     }
     ```
 
-    Set `ZAI_API_KEY`. Model refs use the canonical `zai/*` provider ID. Shortcut: `openclaw onboard --auth-choice zai-api-key`.
+    Set `ZAI_API_KEY`. Model refs use the canonical `zai/*` provider ID. Shortcut: `carapace onboard --auth-choice zai-api-key`.
 
     - General endpoint: `https://api.z.ai/api/paas/v4`
     - Coding endpoint: `https://api.z.ai/api/coding/paas/v4`

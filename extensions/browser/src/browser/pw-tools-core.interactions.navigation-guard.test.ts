@@ -1,5 +1,5 @@
 // Browser tests cover pw tools core.interactions.navigation guard plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   getPwToolsCoreNavigationGuardMocks,
@@ -839,7 +839,7 @@ describe("pw-tools-core interaction navigation guard", () => {
       {
         url: "https://example.com/report.pdf",
         suggestedFilename: "report.pdf",
-        path: "/tmp/openclaw/downloads/report.pdf",
+        path: "/tmp/carapace/downloads/report.pdf",
       },
     ]);
     const dispose = mockDownloadCapture(drain);
@@ -856,7 +856,7 @@ describe("pw-tools-core interaction navigation guard", () => {
       {
         url: "https://example.com/report.pdf",
         suggestedFilename: "report.pdf",
-        path: "/tmp/openclaw/downloads/report.pdf",
+        path: "/tmp/carapace/downloads/report.pdf",
       },
     ]);
     expect(drain).toHaveBeenCalledWith(NO_EXTRA_DOWNLOAD_GRACE);
@@ -1113,7 +1113,7 @@ describe("pw-tools-core interaction navigation guard", () => {
       {
         url: "https://example.com/report.pdf",
         suggestedFilename: "report.pdf",
-        path: "/tmp/openclaw/downloads/report.pdf",
+        path: "/tmp/carapace/downloads/report.pdf",
       },
     ]);
     const dispose = mockDownloadCapture(drain);

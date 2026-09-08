@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { tryAcquireExclusiveSqliteCoordinator } from "../infra/sqlite-coordinator.js";
 import { acquireGatewayLifecycleCoordinator } from "../infra/state-database-coordinator.js";
 import { autoMigrateLegacyState } from "../infra/state-migrations.doctor.js";
@@ -10,7 +10,7 @@ import { resetAutoMigrateLegacyStateDirForTest } from "../infra/state-migrations
 import { writePersistedInstalledPluginIndexInstallRecordsSync } from "../plugins/installed-plugin-index-records.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { writeManagedNpmPlugin } from "../plugins/test-helpers/managed-npm-plugin.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { beginDoctorMaintenance } from "./doctor-maintenance.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -19,26 +19,26 @@ afterEach(() => {
   vi.unstubAllEnvs();
   clearPluginMetadataLifecycleCaches();
   resetAutoMigrateLegacyStateDirForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it("admits plugin-only repair before executing setup or doctor modules", async () => {
-  const root = tempDirs.make("openclaw-doctor-plugin-maintenance-");
+  const root = tempDirs.make("carapace-doctor-plugin-maintenance-");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   const bundledDir = path.join(root, "bundled-disabled");
   fs.mkdirSync(bundledDir);
   for (const [key, value] of Object.entries({
     HOME: root,
     USERPROFILE: root,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
   })) {
     vi.stubEnv(key, value);
   }
-  vi.stubEnv("OPENCLAW_HOME", undefined);
+  vi.stubEnv("CARAPACE_HOME", undefined);
   const pluginId = "fixture-maintenance-owner";
   const packageName = `@fixture/${pluginId}`;
   const pluginDir = writeManagedNpmPlugin({
@@ -55,7 +55,7 @@ it("admits plugin-only repair before executing setup or doctor modules", async (
     JSON.stringify({
       name: packageName,
       version: "1.0.0",
-      openclaw: {
+      carapace: {
         extensions: ["./dist/index.js"],
         setupEntry: "./dist/setup-entry.cjs",
         setupFeatures: { legacySessionSurfaces: true },
@@ -64,7 +64,7 @@ it("admits plugin-only repair before executing setup or doctor modules", async (
     }),
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       channels: ["fixture-chat"],
@@ -100,7 +100,7 @@ module.exports = {
   }],
 };`,
   );
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: {
       ownership: "explicit",
       entries: { main: { workspace: path.join(root, "workspace") } },
@@ -117,7 +117,7 @@ module.exports = {
     ["setup", "doctor", "session-agent", "migrated"].map((name) => fs.existsSync(marker(name)));
   expect(markers()).toEqual([false, false, false, false]);
 
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   const databaseBefore = fs.readFileSync(databasePath);
   const coordinator = acquireGatewayLifecycleCoordinator({ databasePath });
   coordinator.release();
@@ -132,7 +132,7 @@ module.exports = {
       runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
     });
   try {
-    await expect(begin()).rejects.toThrow("another OpenClaw process owns gateway-lifecycle");
+    await expect(begin()).rejects.toThrow("another Carapace process owns gateway-lifecycle");
     expect(markers()).toEqual([false, false, false, false]);
     expect(fs.readFileSync(databasePath)).toEqual(databaseBefore);
   } finally {

@@ -47,7 +47,7 @@ async function createGitTransfer() {
   const server = await startNodeWorkspaceTransferTestServer(service);
   const fetchPack = (token = prepared.token, manifestRef = prepared.snapshot.manifestRef) =>
     fetch(
-      `${server.gatewayUrl.replace(/^ws/u, "http")}/__openclaw__/worker-transfer/v1/environments/environment/snapshots/${manifestRef.slice(7)}/pack`,
+      `${server.gatewayUrl.replace(/^ws/u, "http")}/__carapace__/worker-transfer/v1/environments/environment/snapshots/${manifestRef.slice(7)}/pack`,
       { headers: { authorization: `Bearer ${token}` } },
     );
   return {

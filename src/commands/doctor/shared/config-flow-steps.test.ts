@@ -1,6 +1,6 @@
 // Config-flow step tests cover doctor repair step ordering and mutation planning.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../../../config/types.carapace.js";
 
 const { migrateLegacyConfigMock, stripUnknownConfigKeysMock } = vi.hoisted(() => ({
   migrateLegacyConfigMock: vi.fn(),
@@ -19,7 +19,7 @@ import { applyLegacyCompatibilityStep, applyUnknownConfigKeyStep } from "./confi
 
 function createLegacyStepResult(
   snapshot: Pick<ConfigFileSnapshot, "parsed" | "legacyIssues"> & Partial<ConfigFileSnapshot>,
-  doctorFixCommand = "openclaw doctor --fix",
+  doctorFixCommand = "carapace doctor --fix",
 ) {
   return applyLegacyCompatibilityStep({
     snapshot: {
@@ -49,7 +49,7 @@ function createLegacyStepResult(
 describe("doctor config flow steps", () => {
   beforeEach(() => {
     migrateLegacyConfigMock.mockReset();
-    migrateLegacyConfigMock.mockImplementation((config: OpenClawConfig) => ({
+    migrateLegacyConfigMock.mockImplementation((config: CarapaceConfig) => ({
       config,
       changes: [],
     }));
@@ -70,7 +70,7 @@ describe("doctor config flow steps", () => {
     expect(result.issueLines).toEqual(["- heartbeat: use agents.defaults.heartbeat"]);
     expect(result.changeLines).not.toStrictEqual([]);
     expect(result.state.fixHints).toStrictEqual([
-      'Run "openclaw doctor --fix" to migrate legacy config keys.',
+      'Run "carapace doctor --fix" to migrate legacy config keys.',
     ]);
     expect(result.state.pendingChanges).toBe(true);
   });
@@ -78,7 +78,7 @@ describe("doctor config flow steps", () => {
   it("migrates the resolved config so single-file include values are repairable", () => {
     const sourceConfig = {
       mcp: { servers: { local: { command: "node", disabled: true } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     migrateLegacyConfigMock.mockReturnValueOnce({
       config: {
         commands: { native: "auto" },
@@ -110,7 +110,7 @@ describe("doctor config flow steps", () => {
   it("blocks grpc migration when include ownership is ambiguous and names every source", () => {
     const sourceConfig = {
       diagnostics: { otel: { enabled: true, protocol: "grpc" } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = createLegacyStepResult({
       parsed: { diagnostics: { $include: ["./a.json5", "./b.json5"] } },
       includeProvenance: [
@@ -158,7 +158,7 @@ describe("doctor config flow steps", () => {
     expect(result.changeLines).toStrictEqual([]);
     expect(result.state.pendingChanges).toBe(true);
     expect(result.state.fixHints).toStrictEqual([
-      'Run "openclaw doctor --fix" to migrate legacy config keys.',
+      'Run "carapace doctor --fix" to migrate legacy config keys.',
     ]);
   });
 
@@ -235,18 +235,18 @@ describe("doctor config flow steps", () => {
     const result = applyUnknownConfigKeyStep({
       state: {
         cfg: {},
-        candidate: { bogus: true } as unknown as OpenClawConfig,
+        candidate: { bogus: true } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: false,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.removed).toEqual(["bogus"]);
     expect(result.state.candidate).toStrictEqual({});
     expect(result.state.fixHints).toStrictEqual([
-      'Run "openclaw doctor --fix" to remove these keys.',
+      'Run "carapace doctor --fix" to remove these keys.',
     ]);
   });
 
@@ -297,12 +297,12 @@ describe("doctor config flow steps", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: true,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.repairs).toEqual([
@@ -363,12 +363,12 @@ describe("doctor config flow steps", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: true,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.repairs).toStrictEqual([]);
@@ -413,12 +413,12 @@ describe("doctor config flow steps", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: true,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.repairs).toEqual([
@@ -465,12 +465,12 @@ describe("doctor config flow steps", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: true,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.state.cfg.auth?.profiles?.["openai:default"]).toEqual({
@@ -514,12 +514,12 @@ describe("doctor config flow steps", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: true,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.warnings).toStrictEqual([]);
@@ -564,12 +564,12 @@ describe("doctor config flow steps", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         pendingChanges: false,
         fixHints: [],
       },
       shouldRepair: true,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(result.state.cfg.auth?.profiles?.["openai:default"]).toEqual({

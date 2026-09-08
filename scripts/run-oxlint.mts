@@ -50,7 +50,7 @@ const OXLINT_BOUNDARY_FREE_TS_CONFIGS = new Set([
   "config/tsconfig/oxlint.scripts.json",
   "test/tsconfig/tsconfig.test.root.json",
 ]);
-const OPENCLAW_FOCUSED_CONFIG_FLAG = "--openclaw-focused-config";
+const CARAPACE_FOCUSED_CONFIG_FLAG = "--carapace-focused-config";
 
 /**
  * Returns whether oxlint args need package-boundary declaration artifacts first.
@@ -249,8 +249,8 @@ async function runOxlint(
   argv: string[] = process.argv.slice(2),
   runtimeEnv: NodeJS.ProcessEnv = process.env,
 ): Promise<number> {
-  const focusedConfig = argv.includes(OPENCLAW_FOCUSED_CONFIG_FLAG);
-  const oxlintArgs = argv.filter((arg) => arg !== OPENCLAW_FOCUSED_CONFIG_FLAG);
+  const focusedConfig = argv.includes(CARAPACE_FOCUSED_CONFIG_FLAG);
+  const oxlintArgs = argv.filter((arg) => arg !== CARAPACE_FOCUSED_CONFIG_FLAG);
   const localEnv = resolveLocalCheckEnv(runtimeEnv);
   // Focused configs are syntax-only guards; keep wrapper process handling
   // without the broad type-aware policy or package artifact preparation.
@@ -265,7 +265,7 @@ async function runOxlint(
   const oxlintPath = resolveRepoToolBinPath("oxlint");
   const needsArtifactPreparation =
     !focusedConfig &&
-    env.OPENCLAW_OXLINT_SKIP_PREPARE !== "1" &&
+    env.CARAPACE_OXLINT_SKIP_PREPARE !== "1" &&
     shouldPrepareExtensionPackageBoundaryArtifacts(finalArgs);
   if (sparseTargets.skippedTargets.length > 0) {
     console.error(
@@ -300,7 +300,7 @@ if (isDirectRunUrl(process.argv[1], import.meta.url)) {
   // Skip-prepare callers still consume shared declarations. Source-only lint
   // remains independent; sharded lint inherits its parent's owner.
   process.exitCode =
-    !argv.includes(OPENCLAW_FOCUSED_CONFIG_FLAG) &&
+    !argv.includes(CARAPACE_FOCUSED_CONFIG_FLAG) &&
     shouldPrepareExtensionPackageBoundaryArtifacts(argv)
       ? await withDistArtifactOwnership(process.cwd(), () => runOxlint(argv))
       : await runOxlint(argv);

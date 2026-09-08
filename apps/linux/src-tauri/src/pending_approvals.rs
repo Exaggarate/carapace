@@ -1,4 +1,4 @@
-use crate::cli::OpenClawCli;
+use crate::cli::CarapaceCli;
 use serde::Deserialize;
 use std::collections::HashSet;
 
@@ -78,7 +78,7 @@ struct DevicePairingList {
     pending: Vec<DevicePendingRequest>,
 }
 
-pub fn fetch(cli: &OpenClawCli) -> Result<Vec<PendingApproval>, String> {
+pub fn fetch(cli: &CarapaceCli) -> Result<Vec<PendingApproval>, String> {
     let nodes = cli
         .json::<Vec<NodePendingRequest>, _, _>(["nodes", "pending", "--json"])
         .map_err(|error| error.to_string())?;

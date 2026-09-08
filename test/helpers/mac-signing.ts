@@ -108,7 +108,7 @@ for arg in "$@"; do
     printf '%s\n' 'CodeDirectory v=20400 size=231 flags=0x10000(runtime) hashes=2+2 location=embedded' >&2
     printf '%s\n' 'TeamIdentifier=FWJYW4S8P8' >&2
     if [ "\${CODESIGN_FAKE_NO_AUTHORITY:-0}" != "1" ]; then
-      printf '%s\n' 'Authority=Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)' >&2
+      printf '%s\n' 'Authority=Developer ID Application: Carapace Foundation (FWJYW4S8P8)' >&2
     fi
     if [ "\${CODESIGN_FAKE_SECOND_AUTHORITY:-0}" = "1" ]; then
       printf '%s\n' 'Authority=Unexpected Secondary Authority' >&2
@@ -186,7 +186,7 @@ if (args.includes('-dv')) {
   if (config.signatureFormat !== 'missing') console.error('Format=' + (target === config.format ? 'generic' : 'Mach-O thin (arm64)'));
   console.error('CodeDirectory v=20400 size=231 flags=0x10000(runtime) hashes=2+2 location=embedded');
   if (config.metadata !== 'missing') console.error('TeamIdentifier=' + (target === config.mismatch ? 'WRONG' : 'FWJYW4S8P8'));
-  console.error('Authority=' + (config.authority || 'Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)'));
+  console.error('Authority=' + (config.authority || 'Developer ID Application: Carapace Foundation (FWJYW4S8P8)'));
   if (config.metadata === 'failure' || config.metadataFailure === target) process.exit(7);
 }
 if (args.includes('-d')) {
@@ -354,9 +354,9 @@ with tempfile.TemporaryDirectory(prefix='oc-sign-swap-', dir='/tmp') as control:
           TMPDIR: root,
           PATH: `${bin}:/usr/bin:/bin`,
           BASH_ENV: bashEnv,
-          SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+          SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
           ...(config.skipTeam === true ? { SKIP_TEAM_ID_CHECK: "1" } : {}),
-          ...(elevation ? { OPENCLAW_MAC_SIGNING_VARIANT: "elevation-host" } : {}),
+          ...(elevation ? { CARAPACE_MAC_SIGNING_VARIANT: "elevation-host" } : {}),
         },
       });
     },

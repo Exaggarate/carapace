@@ -257,11 +257,11 @@ describe("sessionsCommand", () => {
     const store = await writeStore(
       {
         "agent:main:main": {
-          sessionId: "stale-openclaw-window",
+          sessionId: "stale-carapace-window",
           updatedAt: Date.now() - 60_000,
           modelProvider: "openai",
           model: "gpt-5.6-sol",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokens: 272_000,
           contextTokensSource: "runtime",
           totalTokens: 11,
@@ -277,7 +277,7 @@ describe("sessionsCommand", () => {
     cleanupStore(store);
 
     const row = logs.find((line) => line.includes("agent:main:main")) ?? "";
-    expect(row).toContain("OpenClaw Default");
+    expect(row).toContain("Carapace Default");
     expect(row).toContain("0.0k/1000k (0%)");
   });
 
@@ -472,7 +472,7 @@ describe("sessionsCommand", () => {
       sessions?: Array<{ key: string }>;
     }>(sessionsCommand, store);
 
-    expect(payload.path).toMatch(/openclaw-agent\.sqlite$/u);
+    expect(payload.path).toMatch(/carapace-agent\.sqlite$/u);
     expect(payload.path).not.toContain("sessions.json");
     expect(payload.sessions?.find((row) => row.key === "agent:main:main")).not.toHaveProperty(
       "sessionFile",

@@ -1,5 +1,5 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { ErrorCodes, type AgentWaitParams } from "../../../packages/gateway-protocol/src/index.js";
 import { MAIN_SESSION_RECOVERY_WORK_ADMISSION_OWNER } from "../../agents/main-session-recovery/main-session-recovery-admission.js";
 import { scheduleMainSessionRecoveryPendingTarget } from "../../agents/main-session-recovery/main-session-recovery-owner-release.js";
@@ -8,7 +8,7 @@ import {
   type MainSessionRecoveryOwnerLease,
 } from "../../agents/main-session-recovery/main-session-recovery-store.js";
 import { mergeSessionEntry, type SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
 import { normalizeDeliveryContext } from "../../utils/delivery-context.shared.js";
 import { discardPreparedInboundMedia, type OffloadedRef } from "../chat-attachments.js";
@@ -240,7 +240,7 @@ export function createAgentTurnService(
         | undefined;
       let sessionPersistedBeforeGatewayAdmission = false;
       let bestEffortDeliver = requestedBestEffortDeliver ?? false;
-      let cfgForAgent: OpenClawConfig | undefined;
+      let cfgForAgent: CarapaceConfig | undefined;
       let resolvedSessionKey = requestedSessionKey;
       let resolvedSessionAgentId: string | undefined;
       let isNewSession = false;

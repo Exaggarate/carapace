@@ -15,7 +15,7 @@ const suite = createControlUiE2eSuite({
   startServer: () => startControlUiE2eServer(),
   startServerBeforeBrowser: true,
 });
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const sessionKeys = ["agent:main:review-a", "agent:main:review-b"] as const;
 
 suite.define(() => {
@@ -84,19 +84,19 @@ suite.define(() => {
           },
         });
         const visibleChecks = page.locator(
-          'openclaw-chat-pane[aria-hidden="false"] .chat-pr__checks',
+          'carapace-chat-pane[aria-hidden="false"] .chat-pr__checks',
         );
         const summary = visibleChecks.locator("summary");
         await summary.focus();
         await summary.press("Enter");
         await expect.poll(() => visibleChecks.getAttribute("open")).toBe("");
       }
-      await expect.poll(() => page.locator("openclaw-chat-pane").count()).toBe(2);
+      await expect.poll(() => page.locator("carapace-chat-pane").count()).toBe(2);
       const hiddenChecks = page.locator(
-        'openclaw-chat-pane[aria-hidden="true"][inert] .chat-pr__checks',
+        'carapace-chat-pane[aria-hidden="true"][inert] .chat-pr__checks',
       );
       const visibleChecks = page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] .chat-pr__checks',
+        'carapace-chat-pane[aria-hidden="false"] .chat-pr__checks',
       );
       expect(await hiddenChecks.getAttribute("open")).toBe("");
       if (captureProof) {
@@ -108,7 +108,7 @@ suite.define(() => {
     } finally {
       if (captureProof) {
         await page.screenshot({ path: path.join(suite.artifactDir, "after-escape.png") });
-        const panes = await page.locator("openclaw-chat-pane").evaluateAll((elements) =>
+        const panes = await page.locator("carapace-chat-pane").evaluateAll((elements) =>
           elements.map((element) => ({
             sessionKey: (element as HTMLElement & { sessionKey?: string }).sessionKey,
             hidden: element.getAttribute("aria-hidden"),

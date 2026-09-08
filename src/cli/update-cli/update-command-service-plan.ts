@@ -1,11 +1,11 @@
 // Read-only managed Gateway ownership and Node selection for update planning.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { err as resultError, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { err as resultError, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createConfigIO } from "../../config/io.js";
 import { resolveGatewayPort } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { summarizeGatewayServiceLayout } from "../../daemon/service-layout.js";
 import type { GatewayServiceCommandConfig } from "../../daemon/service-types.js";
 import { resolveGatewayService } from "../../daemon/service.js";
@@ -46,7 +46,7 @@ export function assertGatewayServiceAdmissionUnchanged(
   const expectedVerdict = expectedService?.serviceUpdateVerdict;
   if (expectedVerdict && expectedVerdict.kind !== serviceUpdateVerdict.kind) {
     throw new GatewayServiceUpdateOwnershipError(
-      "Gateway service ownership changed after database admission; run `openclaw gateway status --deep` and retry.",
+      "Gateway service ownership changed after database admission; run `carapace gateway status --deep` and retry.",
       undefined,
     );
   }
@@ -146,13 +146,13 @@ export async function resolvePackageRuntimePreflight(params: {
     : `Node ${runtime.version ?? "unknown"}`;
   return resultError(
     [
-      `${runtimeLabel} is too old for openclaw@${targetVersion}.`,
+      `${runtimeLabel} is too old for carapace@${targetVersion}.`,
       `The requested package requires ${target.nodeEngine}.`,
       runtime.nodeRunner
-        ? "Upgrade the Node runtime that owns the managed Gateway service, then rerun `openclaw update`."
-        : "Upgrade to Node 24.16.0+ or Node 26.1.0+, then rerun `openclaw update`.",
-      "Bare `npm i -g openclaw` can silently install an older compatible release.",
-      "After upgrading Node, use `npm i -g openclaw@latest`.",
+        ? "Upgrade the Node runtime that owns the managed Gateway service, then rerun `carapace update`."
+        : "Upgrade to Node 24.16.0+ or Node 26.1.0+, then rerun `carapace update`.",
+      "Bare `npm i -g carapace` can silently install an older compatible release.",
+      "After upgrading Node, use `npm i -g carapace@latest`.",
     ].join("\n"),
   );
 }
@@ -306,7 +306,7 @@ export async function gatewayServiceCommandUsesRoot(params: {
 }
 
 export async function resolveUpdatedGatewayRestartPort(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   processEnv?: NodeJS.ProcessEnv;
   serviceEnv?: NodeJS.ProcessEnv;
   serviceCommand?: GatewayServiceCommandConfig | null;

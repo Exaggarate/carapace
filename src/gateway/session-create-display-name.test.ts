@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createGatewaySession } from "./session-create-service.js";
 
 describe("session creation display titles", () => {
@@ -15,7 +15,7 @@ describe("session creation display titles", () => {
     },
     { kind: "whole surrogates", title: "🦞".repeat(300), expected: "🦞".repeat(250) },
   ])("bounds a create-only $kind title snapshot", async ({ title, expected }) => {
-    await withOpenClawTestState({ label: "create-display-title" }, async () => {
+    await withCarapaceTestState({ label: "create-display-title" }, async () => {
       const first = await createGatewaySession({
         cfg: {},
         key: "agent:main:title-first",
@@ -60,7 +60,7 @@ describe("session creation display titles", () => {
   });
 
   it("preserves explicit labels and still rejects equivalent duplicate labels", async () => {
-    await withOpenClawTestState({ label: "create-title-with-label" }, async () => {
+    await withCarapaceTestState({ label: "create-title-with-label" }, async () => {
       const create = (key: string, label: string) =>
         createGatewaySession({
           cfg: {},

@@ -147,8 +147,8 @@ describe("requester settle wake product flow", () => {
   let previousFastTestEnv: string | undefined;
 
   beforeEach(() => {
-    previousFastTestEnv = process.env.OPENCLAW_TEST_FAST;
-    process.env.OPENCLAW_TEST_FAST = "1";
+    previousFastTestEnv = process.env.CARAPACE_TEST_FAST;
+    process.env.CARAPACE_TEST_FAST = "1";
     vi.useFakeTimers();
     loadConfigMock.mockReset().mockReturnValue({
       agents: {
@@ -235,9 +235,9 @@ describe("requester settle wake product flow", () => {
     registry.resetSubagentRegistryForTests({ persist: false });
     vi.useRealTimers();
     if (previousFastTestEnv === undefined) {
-      delete process.env.OPENCLAW_TEST_FAST;
+      delete process.env.CARAPACE_TEST_FAST;
     } else {
-      process.env.OPENCLAW_TEST_FAST = previousFastTestEnv;
+      process.env.CARAPACE_TEST_FAST = previousFastTestEnv;
     }
   });
 

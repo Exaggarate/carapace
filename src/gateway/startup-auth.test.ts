@@ -1,7 +1,7 @@
 // Startup auth tests cover weak-token rejection, startup auth repair, env secret
 // references, and merged Tailscale gateway auth config.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { getConfigResolutionFacts, setConfigResolutionFacts } from "../config/resolution-facts.js";
 import { assertGatewayAuthNotKnownWeak } from "./known-weak-gateway-secrets.js";
 import { applyGatewayAuthOverridesForStartupPreflight } from "./server-startup-config-helpers.js";
@@ -15,7 +15,7 @@ const KNOWN_WEAK_GATEWAY_TOKEN_PLACEHOLDERS = [
 ] as const;
 
 const mocks = vi.hoisted(() => ({
-  replaceConfigFile: vi.fn(async (_params: { nextConfig: OpenClawConfig }) => {}),
+  replaceConfigFile: vi.fn(async (_params: { nextConfig: CarapaceConfig }) => {}),
 }));
 
 vi.mock("../config/mutate.js", () => ({
@@ -32,7 +32,7 @@ vi.mock("../config/mutate.js", async () => {
 
 type StartupAuthInput = Parameters<typeof ensureGatewayStartupAuth>[0];
 type StartupAuthResult = Awaited<ReturnType<typeof ensureGatewayStartupAuth>>;
-type GatewayAuthConfig = NonNullable<NonNullable<OpenClawConfig["gateway"]>["auth"]>;
+type GatewayAuthConfig = NonNullable<NonNullable<CarapaceConfig["gateway"]>["auth"]>;
 type GatewayAuthCheck = Parameters<typeof assertGatewayAuthNotKnownWeak>[0];
 
 function emptyEnv(): NodeJS.ProcessEnv {
@@ -43,13 +43,13 @@ function gatewayEnvSecretRef(id: string) {
   return { source: "env" as const, provider: "default", id };
 }
 
-function gatewayAuthConfig(auth: GatewayAuthConfig): OpenClawConfig {
+function gatewayAuthConfig(auth: GatewayAuthConfig): CarapaceConfig {
   return {
     gateway: { auth },
   };
 }
 
-function gatewayAuthConfigWithDefaultEnvProvider(auth: GatewayAuthConfig): OpenClawConfig {
+function gatewayAuthConfigWithDefaultEnvProvider(auth: GatewayAuthConfig): CarapaceConfig {
   return {
     ...gatewayAuthConfig(auth),
     secrets: {
@@ -99,7 +99,7 @@ describe("ensureGatewayStartupAuth", () => {
     expect(result.auth.password).toBe(password);
   }
 
-  async function expectEphemeralGeneratedTokenWhenOverridden(cfg: OpenClawConfig) {
+  async function expectEphemeralGeneratedTokenWhenOverridden(cfg: CarapaceConfig) {
     const result = await runStartupAuth({
       cfg,
       authOverride: { mode: "token" },
@@ -115,7 +115,7 @@ describe("ensureGatewayStartupAuth", () => {
     mocks.replaceConfigFile.mockClear();
   });
 
-  async function expectNoTokenGeneration(cfg: OpenClawConfig, mode: string) {
+  async function expectNoTokenGeneration(cfg: CarapaceConfig, mode: string) {
     const result = await runStartupAuth({
       cfg,
       persist: true,
@@ -127,7 +127,7 @@ describe("ensureGatewayStartupAuth", () => {
   }
 
   async function expectResolvedToken(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     env: NodeJS.ProcessEnv;
     authOverride?: StartupAuthInput["authOverride"];
     expectedToken: string;
@@ -149,7 +149,7 @@ describe("ensureGatewayStartupAuth", () => {
     expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
   }
 
-  function createMissingGatewayTokenSecretRefConfig(): OpenClawConfig {
+  function createMissingGatewayTokenSecretRefConfig(): CarapaceConfig {
     return gatewayAuthConfigWithDefaultEnvProvider({
       mode: "token",
       token: gatewayEnvSecretRef("MISSING_GW_TOKEN"),
@@ -195,7 +195,7 @@ describe("ensureGatewayStartupAuth", () => {
 
     await expectResolvedToken({
       cfg: config,
-      env: { OPENCLAW_GATEWAY_TOKEN: "environment-token" },
+      env: { CARAPACE_GATEWAY_TOKEN: "environment-token" },
       expectedToken: "environment-token",
     });
   });
@@ -261,16 +261,16 @@ describe("ensureGatewayStartupAuth", () => {
 
   it("resolves env-template gateway.auth.token before env-token short-circuiting", async () => {
     await expectResolvedToken({
-      cfg: gatewayAuthConfig({ mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" }),
+      cfg: gatewayAuthConfig({ mode: "token", token: "${CARAPACE_GATEWAY_TOKEN}" }),
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "resolved-token",
+        CARAPACE_GATEWAY_TOKEN: "resolved-token",
       } as NodeJS.ProcessEnv,
       expectedToken: "resolved-token",
-      expectedConfiguredToken: "${OPENCLAW_GATEWAY_TOKEN}",
+      expectedConfiguredToken: "${CARAPACE_GATEWAY_TOKEN}",
     });
   });
 
-  it("keeps configured token SecretRef ahead of OPENCLAW_GATEWAY_TOKEN", async () => {
+  it("keeps configured token SecretRef ahead of CARAPACE_GATEWAY_TOKEN", async () => {
     const configuredToken = gatewayEnvSecretRef("GW_TOKEN");
     await expectResolvedToken({
       cfg: gatewayAuthConfigWithDefaultEnvProvider({
@@ -279,18 +279,18 @@ describe("ensureGatewayStartupAuth", () => {
       }),
       env: {
         GW_TOKEN: "token-from-config-ref",
-        OPENCLAW_GATEWAY_TOKEN: "token-from-env",
+        CARAPACE_GATEWAY_TOKEN: "token-from-env",
       } as NodeJS.ProcessEnv,
       expectedToken: "token-from-config-ref",
       expectedConfiguredToken: configuredToken,
     });
   });
 
-  it("does not let OPENCLAW_GATEWAY_TOKEN mask an unresolved configured token ref", async () => {
+  it("does not let CARAPACE_GATEWAY_TOKEN mask an unresolved configured token ref", async () => {
     await expect(
       runStartupAuth({
         cfg: createMissingGatewayTokenSecretRefConfig(),
-        env: { OPENCLAW_GATEWAY_TOKEN: "token-from-env" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_GATEWAY_TOKEN: "token-from-env" } as NodeJS.ProcessEnv,
         persist: true,
       }),
     ).rejects.toThrow(/MISSING_GW_TOKEN/i);
@@ -319,7 +319,7 @@ describe("ensureGatewayStartupAuth", () => {
     expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
   });
 
-  it("keeps configured password SecretRef ahead of OPENCLAW_GATEWAY_PASSWORD", async () => {
+  it("keeps configured password SecretRef ahead of CARAPACE_GATEWAY_PASSWORD", async () => {
     const configuredPassword = gatewayEnvSecretRef("GW_PASSWORD");
     const result = await runStartupAuth({
       cfg: gatewayAuthConfigWithDefaultEnvProvider({
@@ -328,7 +328,7 @@ describe("ensureGatewayStartupAuth", () => {
       }),
       env: {
         GW_PASSWORD: "password-from-config-ref", // pragma: allowlist secret
-        OPENCLAW_GATEWAY_PASSWORD: "password-from-env", // pragma: allowlist secret
+        CARAPACE_GATEWAY_PASSWORD: "password-from-env", // pragma: allowlist secret
       } as NodeJS.ProcessEnv,
       persist: true,
     });
@@ -337,14 +337,14 @@ describe("ensureGatewayStartupAuth", () => {
     expect(result.cfg.gateway?.auth?.password).toEqual(configuredPassword);
   });
 
-  it("does not let OPENCLAW_GATEWAY_PASSWORD mask an unresolved configured password ref", async () => {
+  it("does not let CARAPACE_GATEWAY_PASSWORD mask an unresolved configured password ref", async () => {
     await expect(
       runStartupAuth({
         cfg: gatewayAuthConfigWithDefaultEnvProvider({
           mode: "password",
           password: gatewayEnvSecretRef("MISSING_GW_PASSWORD"),
         }),
-        env: { OPENCLAW_GATEWAY_PASSWORD: "password-from-env" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_GATEWAY_PASSWORD: "password-from-env" } as NodeJS.ProcessEnv,
         persist: true,
       }),
     ).rejects.toThrow(/MISSING_GW_PASSWORD/i);
@@ -458,7 +458,7 @@ describe("ensureGatewayStartupAuth", () => {
         },
       },
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "shared-gateway-token-1234567890",
+        CARAPACE_GATEWAY_TOKEN: "shared-gateway-token-1234567890",
       } as NodeJS.ProcessEnv,
       warn,
     });
@@ -467,7 +467,7 @@ describe("ensureGatewayStartupAuth", () => {
     expect(result.auth.mode).toBe("token");
     expect(result.auth.token).toBe("shared-gateway-token-1234567890");
     expect(warn).toHaveBeenCalledWith(expect.stringContaining("Security warning"));
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining("openclaw security audit"));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("carapace security audit"));
   });
 
   it("keeps startup non-breaking when hooks token reuses gateway password auth", async () => {
@@ -522,7 +522,7 @@ describe("ensureGatewayStartupAuth", () => {
         runStartupAuth({
           cfg: {},
           env: {
-            OPENCLAW_GATEWAY_TOKEN: token,
+            CARAPACE_GATEWAY_TOKEN: token,
           } as NodeJS.ProcessEnv,
         }),
       ).rejects.toThrow(/example placeholder/i);
@@ -560,7 +560,7 @@ describe("ensureGatewayStartupAuth", () => {
       await expect(
         runStartupAuth({ cfg: gatewayAuthConfig({ mode: "password", password }), env: emptyEnv() }),
       ).rejects.toThrow(
-        /gateway auth password.*Generate a real secret.*OPENCLAW_GATEWAY_PASSWORD.*gateway.auth.password/,
+        /gateway auth password.*Generate a real secret.*CARAPACE_GATEWAY_PASSWORD.*gateway.auth.password/,
       );
       expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
     },

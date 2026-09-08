@@ -1,6 +1,6 @@
-import OpenClawKit
+import CarapaceKit
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct GatewayStatusBuilderTests {
     @Test(arguments: [nil, "gateway.example.com"] as [String?])

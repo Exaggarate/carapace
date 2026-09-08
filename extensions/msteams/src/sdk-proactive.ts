@@ -1,5 +1,5 @@
 import type { IMessageActivityInput } from "@microsoft/teams.api";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 // Msteams plugin module implements sdk proactive behavior.
 import { normalizeBotFrameworkServiceUrl } from "./bot-framework-service-url.js";
 import {

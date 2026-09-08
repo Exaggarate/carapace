@@ -1,7 +1,7 @@
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
 import { describe, expect, it } from "vitest";
 import {
-  CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+  CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
   type CodexDynamicToolSpec,
 } from "./protocol.js";
 import { buildDeveloperInstructions } from "./thread-prompt.js";
@@ -10,30 +10,30 @@ const delegationTools: CodexDynamicToolSpec[] = [
   {
     type: "function",
     name: "sessions_spawn",
-    description: "Spawn an OpenClaw session",
+    description: "Spawn an Carapace session",
     inputSchema: { type: "object" },
   },
   {
     type: "function",
     name: "sessions_send",
-    description: "Send to an OpenClaw session",
+    description: "Send to an Carapace session",
     inputSchema: { type: "object" },
   },
   {
     type: "function",
     name: "subagents",
-    description: "List OpenClaw subagents",
+    description: "List Carapace subagents",
     inputSchema: { type: "object" },
   },
   {
     type: "namespace",
-    name: CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
-    description: "Direct OpenClaw tools",
+    name: CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+    description: "Direct Carapace tools",
     tools: [
       {
         type: "function",
         name: "sessions_yield",
-        description: "Yield for OpenClaw session events",
+        description: "Yield for Carapace session events",
         inputSchema: { type: "object" },
       },
     ],
@@ -115,9 +115,9 @@ describe("buildDeveloperInstructions credential guidance", () => {
     {
       name: "namespaced",
       dynamicTools: [
-        { type: "namespace", name: "openclaw", description: "Tools", tools: [secretTool] },
+        { type: "namespace", name: "carapace", description: "Tools", tools: [secretTool] },
       ],
-      toolName: "openclaw.secrets",
+      toolName: "carapace.secrets",
     },
   ] satisfies { name: string; dynamicTools: CodexDynamicToolSpec[]; toolName: string }[])(
     "teaches the actual $name credential route",
@@ -181,12 +181,12 @@ describe("buildDeveloperInstructions UI presentation guidance", () => {
       dynamicTools: [
         {
           type: "namespace",
-          name: "openclaw",
-          description: "OpenClaw tools",
+          name: "carapace",
+          description: "Carapace tools",
           tools: uiTools.map((tool) => ({ ...tool, deferLoading: true })),
         },
       ],
-      prefix: "openclaw.",
+      prefix: "carapace.",
     },
   ] satisfies { name: string; dynamicTools: CodexDynamicToolSpec[]; prefix: string }[])(
     "explains the actual $name presentation routes",

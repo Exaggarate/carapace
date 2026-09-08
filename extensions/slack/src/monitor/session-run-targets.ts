@@ -1,5 +1,5 @@
-import type { ResolvedAgentRoute } from "openclaw/plugin-sdk/routing";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+import type { ResolvedAgentRoute } from "carapace/plugin-sdk/routing";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import type { SlackMonitorContext } from "./context.js";
 import type { SlackEventScope } from "./event-scope.js";
 

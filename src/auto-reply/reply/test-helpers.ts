@@ -133,8 +133,8 @@ export function createMockTypingController(
 export function createMockFollowupRun(
   overrides: Partial<Omit<FollowupRun, "run">> & { run?: Partial<FollowupRun["run"]> } = {},
 ): FollowupRun {
-  const rootDir = useAutoCleanupTempDirTracker(onTestFinished).make("openclaw-mock-followup-");
-  const skipProviderRuntimeHints = process.env.OPENCLAW_TEST_FAST === "1";
+  const rootDir = useAutoCleanupTempDirTracker(onTestFinished).make("carapace-mock-followup-");
+  const skipProviderRuntimeHints = process.env.CARAPACE_TEST_FAST === "1";
   const base: FollowupRun = {
     prompt: "hello",
     summaryLine: "hello",

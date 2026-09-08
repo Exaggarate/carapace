@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { createPluginRecord } from "./loader-records.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
@@ -22,7 +22,7 @@ function createHarness() {
   registry.plugins.push(owner);
   markPluginRegistryActive(registry);
   let currentRegistry = registry;
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     cloudWorkers: {
       profiles: {
         project: { provider: "cloud-a", settings: { location: "one" } },

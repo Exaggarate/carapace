@@ -1,4 +1,4 @@
-import { OPENCLAW_AGENT_RUNTIME_ID } from "../../agents/agent-runtime-id.js";
+import { CARAPACE_AGENT_RUNTIME_ID } from "../../agents/agent-runtime-id.js";
 import {
   createSessionMaintenanceFollowup,
   scheduleSessionMaintenance,
@@ -32,7 +32,7 @@ export function scheduleReplySessionMaintenance(params: {
     meta?.aborted ||
     meta?.yielded ||
     meta?.error ||
-    meta?.agentMeta?.agentHarnessId !== OPENCLAW_AGENT_RUNTIME_ID ||
+    meta?.agentMeta?.agentHarnessId !== CARAPACE_AGENT_RUNTIME_ID ||
     auth === undefined ||
     cfg.agents?.defaults?.compaction?.enabled === false
   ) {

@@ -26,7 +26,7 @@ suite.define(() => {
         });
         const page = await context.newPage();
         const favicon = await readFile(path.resolve(process.cwd(), "ui/public/favicon.svg"));
-        await page.route("**/__openclaw__/workspace-icon/**", async (route) => {
+        await page.route("**/__carapace__/workspace-icon/**", async (route) => {
           await route.fulfill({ body: favicon, contentType: "image/svg+xml", status: 200 });
         });
         await installMockGateway(page, {
@@ -36,7 +36,7 @@ suite.define(() => {
                 key: "agent:main:parent",
                 kind: "direct",
                 label: "Release readiness and production rollout coordination",
-                spawnedCwd: "/repo/openclaw",
+                spawnedCwd: "/repo/carapace",
                 updatedAt: 1,
               },
               {
@@ -44,7 +44,7 @@ suite.define(() => {
                 kind: "direct",
                 label: "Implement parent breadcrumb navigation and polish overflow behavior",
                 parentSessionKey: "agent:main:parent",
-                spawnedCwd: "/repo/openclaw",
+                spawnedCwd: "/repo/carapace",
                 updatedAt: 2,
               },
             ]),
@@ -60,7 +60,7 @@ suite.define(() => {
 
           const geometry = await header.evaluate((root) => {
             const main = root
-              .closest("openclaw-chat-pane")
+              .closest("carapace-chat-pane")
               ?.querySelector('[data-region="main"]:not([hidden])');
             if (!main) {
               throw new Error("Task header requires visible main content");
@@ -224,7 +224,7 @@ suite.define(() => {
     const page = await context.newPage();
     const favicon = await readFile(path.resolve(process.cwd(), "ui/public/favicon.svg"));
     let requests = 0;
-    await page.route("**/__openclaw__/workspace-icon/**", async (route) => {
+    await page.route("**/__carapace__/workspace-icon/**", async (route) => {
       requests += 1;
       if (requests === 1) {
         await route.fulfill({
@@ -243,7 +243,7 @@ suite.define(() => {
             key: "agent:main:session-a",
             kind: "direct",
             label: "Workspace icon recovery",
-            spawnedCwd: "/repo/openclaw",
+            spawnedCwd: "/repo/carapace",
             updatedAt: 1,
           },
         ]),
@@ -253,7 +253,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, "agent:main:session-a"));
-      const icon = page.locator(".chat-pane__header openclaw-workspace-icon").first();
+      const icon = page.locator(".chat-pane__header carapace-workspace-icon").first();
       await icon.waitFor();
       await icon.locator("svg").waitFor();
       await icon.evaluate((element) => element.setAttribute("data-recovery-host", "mounted"));

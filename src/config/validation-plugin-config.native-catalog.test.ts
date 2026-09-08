@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { normalizePluginsConfig } from "../plugins/config-state.js";
 import { initializeNativeSessionCatalogPreferences } from "../plugins/native-session-catalog-config.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, CarapaceConfig } from "./types.js";
 import { validateExplicitPluginConfig } from "./validation-plugin-config.js";
 
 const roots = createTempDirTracker();
@@ -11,16 +11,16 @@ afterEach(() => {
   roots.cleanup();
 });
 
-function missingPluginWarningPaths(config: OpenClawConfig): string[] {
-  const home = roots.make("openclaw-catalog-preference-warnings-");
-  vi.stubEnv("OPENCLAW_HOME", home);
-  vi.stubEnv("OPENCLAW_STATE_DIR", home);
+function missingPluginWarningPaths(config: CarapaceConfig): string[] {
+  const home = roots.make("carapace-catalog-preference-warnings-");
+  vi.stubEnv("CARAPACE_HOME", home);
+  vi.stubEnv("CARAPACE_STATE_DIR", home);
   const warnings: ConfigValidationIssue[] = [];
   const issues: ConfigValidationIssue[] = [];
   validateExplicitPluginConfig({
     raw: config,
     config,
-    env: { HOME: home, OPENCLAW_HOME: home, OPENCLAW_STATE_DIR: home },
+    env: { HOME: home, CARAPACE_HOME: home, CARAPACE_STATE_DIR: home },
     applyDefaults: false,
     registry: { plugins: [], diagnostics: [] },
     knownIds: new Set(),
@@ -45,7 +45,7 @@ describe("native catalog preferences without installed plugins", () => {
 
   const explicitUsageCases: Array<{
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     warningPath: string;
   }> = [
     {

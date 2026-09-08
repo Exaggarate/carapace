@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import type { NodePluginToolDescriptor } from "../../../../packages/gateway-protocol/src/schema/nodes.js";
 import { createSessionMcpRuntime } from "../../../../src/agents/agent-bundle-mcp-runtime.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 import {
@@ -57,11 +57,11 @@ describe("Gateway/node MCP real-process stress", () => {
     { timeout: TEST_TIMEOUT_MS },
     async () => {
       const repoRoot = process.cwd();
-      const root = tempDirs.make("openclaw-gateway-node-mcp-stress-");
+      const root = tempDirs.make("carapace-gateway-node-mcp-stress-");
       const at = (...parts: string[]) => path.join(root, ...parts);
       const nodeHome = at("node", "home");
       const nodeStateDir = at("node", "state");
-      const nodeConfigPath = at("node", "openclaw.json");
+      const nodeConfigPath = at("node", "carapace.json");
       const nodeTempDir = at("node", "tmp");
       const sessionHome = at("session", "home");
       const sessionTempDir = at("session", "tmp");
@@ -101,7 +101,7 @@ describe("Gateway/node MCP real-process stress", () => {
           fixturePath,
           repoRoot,
         });
-        const nodeConfig: OpenClawConfig = {
+        const nodeConfig: CarapaceConfig = {
           gateway: { mode: "local" },
           plugins: { enabled: false },
           nodeHost: { mcp: { servers: nodeServers }, skills: { enabled: false } },
@@ -119,9 +119,9 @@ describe("Gateway/node MCP real-process stress", () => {
           transportBaseUrl: "http://127.0.0.1",
           controlUiEnabled: false,
           runtimeEnvPatch: {
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "1",
           },
           mutateConfig: (cfg) => {
             return {
@@ -142,13 +142,13 @@ describe("Gateway/node MCP real-process stress", () => {
           home: nodeHome,
           tempDir: nodeTempDir,
           extra: {
-            OPENCLAW_HOME: nodeHome,
-            OPENCLAW_STATE_DIR: nodeStateDir,
-            OPENCLAW_CONFIG_PATH: nodeConfigPath,
-            OPENCLAW_GATEWAY_TOKEN: gateway.token,
-            OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1",
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
+            CARAPACE_HOME: nodeHome,
+            CARAPACE_STATE_DIR: nodeStateDir,
+            CARAPACE_CONFIG_PATH: nodeConfigPath,
+            CARAPACE_GATEWAY_TOKEN: gateway.token,
+            CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
           },
         });
         const gatewayPort = Number(new URL(gateway.baseUrl).port);

@@ -47,14 +47,14 @@ async function hold() {
 }
 
 type OlderReaderRuntime = Pick<
-  typeof import("../../state/openclaw-state-db.js"),
-  | "openOpenClawStateDatabase"
-  | "openExistingOpenClawStateDatabaseReadOnly"
-  | "closeOpenClawStateDatabase"
+  typeof import("../../state/carapace-state-db.js"),
+  | "openCarapaceStateDatabase"
+  | "openExistingCarapaceStateDatabaseReadOnly"
+  | "closeCarapaceStateDatabase"
 > &
   Pick<
-    typeof import("../../state/openclaw-agent-db.js"),
-    "openOpenClawAgentDatabase" | "closeOpenClawAgentDatabases"
+    typeof import("../../state/carapace-agent-db.js"),
+    "openCarapaceAgentDatabase" | "closeCarapaceAgentDatabases"
   > &
   Pick<
     typeof import("../../state/user-preferences.js"),
@@ -63,7 +63,7 @@ type OlderReaderRuntime = Pick<
   Pick<
     typeof import("../../config/sessions/session-accessor.sqlite-entry.js"),
     "loadSessionEntry" | "upsertSessionEntryCore"
-  > & { OPENCLAW_STATE_SCHEMA_VERSION: number; OPENCLAW_AGENT_SCHEMA_VERSION: number };
+  > & { CARAPACE_STATE_SCHEMA_VERSION: number; CARAPACE_AGENT_SCHEMA_VERSION: number };
 
 async function runOlderReader(
   entrypoint: string,
@@ -74,17 +74,17 @@ async function runOlderReader(
   // describe its exports and cannot load the candidate's schema/parser/store.
   await phase("baseline-import");
   const old = (await import(pathToFileURL(entrypoint).href)) as OlderReaderRuntime;
-  assert.equal(old.OPENCLAW_STATE_SCHEMA_VERSION, 15);
-  assert.equal(old.OPENCLAW_AGENT_SCHEMA_VERSION, 19);
+  assert.equal(old.CARAPACE_STATE_SCHEMA_VERSION, 15);
+  assert.equal(old.CARAPACE_AGENT_SCHEMA_VERSION, 19);
   await phase("imports-complete");
   await beginOperation();
-  const options = { env: process.env, path: path.join(root, "state", "openclaw.sqlite") };
+  const options = { env: process.env, path: path.join(root, "state", "carapace.sqlite") };
   const scope = { env: process.env, agentId: "main", sessionKey: PERSISTENCE_SESSION_KEY };
   try {
-    const readOnly = await old.openExistingOpenClawStateDatabaseReadOnly(options);
+    const readOnly = await old.openExistingCarapaceStateDatabaseReadOnly(options);
     assert.ok(readOnly);
     readOnly.walMaintenance.close();
-    const state = old.openOpenClawStateDatabase(options);
+    const state = old.openCarapaceStateDatabase(options);
     assert.equal(
       old.setUserPreferences(profileId, { "library.persistence.legacy": true }, options).ok,
       true,
@@ -95,15 +95,15 @@ async function runOlderReader(
     assert.ok(old.loadSessionEntry(scope));
     const updated = await old.upsertSessionEntryCore(scope, { label: "Edited by baseline reader" });
     assert.equal(updated?.label, "Edited by baseline reader");
-    const agent = old.openOpenClawAgentDatabase({ agentId: "main", env: process.env });
+    const agent = old.openCarapaceAgentDatabase({ agentId: "main", env: process.env });
     return {
       kind: "older-reader",
       stateVersion: Number(state.db.prepare("PRAGMA user_version").get()?.user_version),
       agentVersion: Number(agent.db.prepare("PRAGMA user_version").get()?.user_version),
     };
   } finally {
-    old.closeOpenClawAgentDatabases();
-    old.closeOpenClawStateDatabase();
+    old.closeCarapaceAgentDatabases();
+    old.closeCarapaceStateDatabase();
   }
 }
 
@@ -130,7 +130,7 @@ async function runCandidate(
     return { kind: "complete" };
   }
   await phase("state-import");
-  const state = await import("../../state/openclaw-state-db.js");
+  const state = await import("../../state/carapace-state-db.js");
   await phase("profiles-import");
   const { ensureProfileForEmail } = await import("../../state/user-profiles.js");
   await phase("service-import");
@@ -140,12 +140,12 @@ async function runCandidate(
   const sessions = usesSessions
     ? await import("../../config/sessions/session-accessor.sqlite-entry.js")
     : undefined;
-  const agent = usesSessions ? await import("../../state/openclaw-agent-db.js") : undefined;
+  const agent = usesSessions ? await import("../../state/carapace-agent-db.js") : undefined;
   const selection = usesSessions ? await import("./selection.js") : undefined;
   const uploads = command.action === "seed" ? await import("./import.js") : undefined;
   await phase("imports-complete");
   await beginOperation();
-  const options = { env: process.env, path: path.join(root, "state", "openclaw.sqlite") };
+  const options = { env: process.env, path: path.join(root, "state", "carapace.sqlite") };
   const scope = { env: process.env, agentId: "main", sessionKey: PERSISTENCE_SESSION_KEY };
   const draft = (version: "old" | "new" | "orphan", slug: string) => {
     const [instructions, ...files] = persistenceFiles(version);
@@ -296,8 +296,8 @@ async function runCandidate(
     }
     return { kind: "complete" };
   } finally {
-    agent?.closeOpenClawAgentDatabases();
-    state.closeOpenClawStateDatabase();
+    agent?.closeCarapaceAgentDatabases();
+    state.closeCarapaceStateDatabase();
   }
 }
 
@@ -305,7 +305,7 @@ process.once("message", (command: PersistenceCommand) => {
   void (async () => {
     try {
       await phase("command-received");
-      const root = process.env.OPENCLAW_STATE_DIR;
+      const root = process.env.CARAPACE_STATE_DIR;
       assert.ok(root);
       const reply =
         command.action === "older-reader"

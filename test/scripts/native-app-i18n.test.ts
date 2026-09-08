@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { buildMacosCatalog } from "../../scripts/apple-app-i18n.ts";
 import {
@@ -182,7 +182,7 @@ describe("native app i18n inventory", () => {
     const entries = assignNativeI18nIds(
       extractNativeI18nCandidates(
         "apple",
-        "apps/macos/Sources/OpenClaw/Expiry.swift",
+        "apps/macos/Sources/Carapace/Expiry.swift",
         [
           "let minutes: Int = 3",
           'Label(String(format: String(localized: "Expires in %lld minutes"), minutes), systemImage: "clock")',
@@ -325,16 +325,16 @@ describe("native app i18n inventory", () => {
       "apps/ios/Fixture/Info.plist",
       `<plist><dict>
         <key>CFBundleDisplayName</key>
-        <string>OpenClaw Fixture</string>
+        <string>Carapace Fixture</string>
         <key>NSCameraUsageDescription</key>
-        <string>OpenClaw uses the camera to scan setup codes &amp; documents.</string>
-        <key>OpenClawFixtureValue</key>
+        <string>Carapace uses the camera to scan setup codes &amp; documents.</string>
+        <key>CarapaceFixtureValue</key>
         <string>Runtime configuration value</string>
       </dict></plist>`,
     );
 
     expect(entries.map((entry) => entry.source)).toEqual([
-      "OpenClaw uses the camera to scan setup codes & documents.",
+      "Carapace uses the camera to scan setup codes & documents.",
     ]);
   });
 
@@ -345,7 +345,7 @@ describe("native app i18n inventory", () => {
       `<resources>
         <string-array name="capabilities" translatable="false">
           <item>@string/native_capability</item>
-          <item>openclaw_wear_companion_v1</item>
+          <item>carapace_wear_companion_v1</item>
           <item>Visible choice</item>
         </string-array>
         <string-array name="modes">
@@ -391,7 +391,7 @@ describe("native app i18n inventory", () => {
         .filter((entry) => entry.surface === "apple")
         .every((entry) =>
           entry.sites.every((site) =>
-            /^(?:apps\/ios|apps\/macos\/Sources|apps\/shared\/OpenClawKit\/Sources)\//u.test(
+            /^(?:apps\/ios|apps\/macos\/Sources|apps\/shared\/CarapaceKit\/Sources)\//u.test(
               site.path,
             ),
           ),
@@ -429,7 +429,7 @@ describe("native app i18n inventory", () => {
               entry,
               (site) =>
                 site.path ===
-                "apps/android/app/src/main/java/ai/openclaw/app/ui/SettingsScreens.kt",
+                "apps/android/app/src/main/java/ai/carapace/app/ui/SettingsScreens.kt",
             ),
         )
         .map((entry) => entry.source),
@@ -439,7 +439,7 @@ describe("native app i18n inventory", () => {
         (entry) =>
           hasSite(entry, (site) =>
             site.path.endsWith(
-              "/thirdParty/java/ai/openclaw/app/ui/SensitivePhoneCapabilitiesSettings.kt",
+              "/thirdParty/java/ai/carapace/app/ui/SensitivePhoneCapabilitiesSettings.kt",
             ),
           ) && entry.source === "Control other apps",
       ),
@@ -501,12 +501,12 @@ describe("native app i18n inventory", () => {
         (entry) =>
           entry.surface === "apple" &&
           entry.source === "Connection…" &&
-          hasSite(entry, (site) => site.path === "apps/macos/Sources/OpenClaw/MenuBar.swift"),
+          hasSite(entry, (site) => site.path === "apps/macos/Sources/Carapace/MenuBar.swift"),
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "Loading chat")).toBe(true);
     expect(
-      entries.some((entry) => entry.surface === "android" && entry.source === "Search OpenClaw"),
+      entries.some((entry) => entry.surface === "android" && entry.source === "Search Carapace"),
     ).toBe(true);
     expect(
       entries.some(
@@ -530,14 +530,14 @@ describe("native app i18n inventory", () => {
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "What would you like to work on?")).toBe(true);
-    expect(entries.some((entry) => entry.source === "Check OpenClaw status")).toBe(true);
+    expect(entries.some((entry) => entry.source === "Check Carapace status")).toBe(true);
     expect(entries.some((entry) => entry.source === "What can I control here?")).toBe(true);
     expect(entries.some((entry) => entry.source === "Help me start voice chat")).toBe(true);
     expect(
       entries.some(
         (entry) =>
           entry.source ===
-          "Summarize the current OpenClaw status and tell me what needs attention.",
+          "Summarize the current Carapace status and tell me what needs attention.",
       ),
     ).toBe(true);
     expect(
@@ -553,8 +553,8 @@ describe("native app i18n inventory", () => {
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "DIARY")).toBe(true);
-    expect(entries.some((entry) => entry.source === "ask OpenClaw $prompt")).toBe(true);
-    expect(entries.some((entry) => entry.source === "OpenClaw is paused")).toBe(true);
+    expect(entries.some((entry) => entry.source === "ask Carapace $prompt")).toBe(true);
+    expect(entries.some((entry) => entry.source === "Carapace is paused")).toBe(true);
     expect(
       entries.some(
         (entry) =>
@@ -621,7 +621,7 @@ describe("native app i18n inventory", () => {
     expect(
       entries.some(
         (entry) =>
-          entry.source === 'OpenClaw needs ${labels.joinToString(", ")} permissions to continue.',
+          entry.source === 'Carapace needs ${labels.joinToString(", ")} permissions to continue.',
       ),
     ).toBe(true);
     expect(
@@ -631,7 +631,7 @@ describe("native app i18n inventory", () => {
       entries.some(
         (entry) =>
           entry.source ===
-          "The current gateway.remote.token value is not plain text. OpenClaw for macOS cannot use it directly; enter a plaintext token here to replace it.",
+          "The current gateway.remote.token value is not plain text. Carapace for macOS cannot use it directly; enter a plaintext token here to replace it.",
       ),
     ).toBe(true);
     expect(
@@ -645,14 +645,14 @@ describe("native app i18n inventory", () => {
       entries.some(
         (entry) =>
           entry.source ===
-          "Writes a rotating, local-only log under ~/Library/Logs/OpenClaw/. Enable only while actively debugging.",
+          "Writes a rotating, local-only log under ~/Library/Logs/Carapace/. Enable only while actively debugging.",
       ),
     ).toBe(true);
     expect(
       entries.some(
         (entry) =>
           entry.source ===
-          "Paste the token configured on the gateway host. On the gateway host, run `openclaw gateway auth-token --show` in an interactive terminal, then paste its output.",
+          "Paste the token configured on the gateway host. On the gateway host, run `carapace gateway auth-token --show` in an interactive terminal, then paste its output.",
       ),
     ).toBe(true);
     expect(
@@ -660,7 +660,7 @@ describe("native app i18n inventory", () => {
         [
           "The current gateway.remote.token value is not plain text. ",
           "Cron changes require operator.admin. Setup codes intentionally do not grant it. ",
-          "Writes a rotating, local-only log under ~/Library/Logs/OpenClaw/. ",
+          "Writes a rotating, local-only log under ~/Library/Logs/Carapace/. ",
           "Paste the token configured on the gateway host. ",
         ].includes(entry.source),
       ),
@@ -675,7 +675,7 @@ describe("native app i18n inventory", () => {
       entries.some(
         (entry) =>
           entry.source ===
-          "Approve this device on the gateway.\n1) `%1$@`\n2) `/pair approve` in your OpenClaw chat\n%2$@\nOpenClaw will also retry automatically when you return to this app.",
+          "Approve this device on the gateway.\n1) `%1$@`\n2) `/pair approve` in your Carapace chat\n%2$@\nCarapace will also retry automatically when you return to this app.",
       ),
     ).toBe(true);
     expect(
@@ -710,12 +710,12 @@ describe("native app i18n inventory", () => {
     expect(
       entries.some((entry) =>
         entry.source.startsWith(
-          "Exec approvals can only be reviewed while OpenClaw is open and connected.",
+          "Exec approvals can only be reviewed while Carapace is open and connected.",
         ),
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "$(PRODUCT_BUNDLE_IDENTIFIER)")).toBe(false);
-    expect(entries.some((entry) => entry.source === "ai.openclaw.screenRecord.writer")).toBe(false);
+    expect(entries.some((entry) => entry.source === "ai.carapace.screenRecord.writer")).toBe(false);
     expect(
       entries.some(
         (entry) =>
@@ -756,7 +756,7 @@ describe("native app i18n inventory", () => {
           hasSite(
             entry,
             (site) =>
-              site.path === "apps/macos/Sources/OpenClaw/OnboardingAISetupView.swift" &&
+              site.path === "apps/macos/Sources/Carapace/OnboardingAISetupView.swift" &&
               site.kind === "ui-localized-call-multiline",
           ) &&
           entry.source ===
@@ -772,7 +772,7 @@ describe("native app i18n inventory", () => {
 
   it("migrates v1 translations deterministically and drops stale IDs after a source edit", async () => {
     const tempDirs: string[] = [];
-    const translationsDir = makeTempDir(tempDirs, "openclaw-native-i18n-");
+    const translationsDir = makeTempDir(tempDirs, "carapace-native-i18n-");
     const entries = assignNativeI18nIds([
       {
         kind: "ui-call",
@@ -893,7 +893,7 @@ describe("native app i18n inventory", () => {
   });
   it("rejects invalid native placeholders inside the translation batch", async () => {
     const tempDirs: string[] = [];
-    const translationsDir = makeTempDir(tempDirs, "openclaw-native-i18n-");
+    const translationsDir = makeTempDir(tempDirs, "carapace-native-i18n-");
     const entry = testEntry("native.apple.progress", "apple", "Processed %lld of %@");
     let translatorReturned = false;
 
@@ -920,7 +920,7 @@ describe("native app i18n inventory", () => {
 
   it("retranslates existing native strings only when a full refresh is requested", async () => {
     const tempDirs: string[] = [];
-    const translationsDir = makeTempDir(tempDirs, "openclaw-native-i18n-");
+    const translationsDir = makeTempDir(tempDirs, "carapace-native-i18n-");
     const entry = testEntry("native.apple.open", "apple", "Open");
     try {
       await syncNativeLocale("sv", [entry], {
@@ -945,7 +945,7 @@ describe("native app i18n inventory", () => {
 
   it("rejects native printf placeholder drift", async () => {
     const tempDirs: string[] = [];
-    const translationsDir = makeTempDir(tempDirs, "openclaw-native-i18n-");
+    const translationsDir = makeTempDir(tempDirs, "carapace-native-i18n-");
     const cases = [
       {
         entry: testEntry(
@@ -1074,8 +1074,8 @@ describe("native app i18n inventory", () => {
       testEntry(
         "native.android.language-picker",
         "android",
-        "OpenClaw translations · $languageTag",
-        "apps/android/app/src/main/java/ai/openclaw/app/AppLanguage.kt",
+        "Carapace translations · $languageTag",
+        "apps/android/app/src/main/java/ai/carapace/app/AppLanguage.kt",
         "conditional-branch",
       ),
       testEntry("native.android.inspect", "android", "Inspect", "apps/android/Workshop.kt"),

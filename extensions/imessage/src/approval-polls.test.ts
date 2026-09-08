@@ -1,5 +1,5 @@
 // Imessage tests cover native approval poll bindings and vote authorization.
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
+import type { ExecApprovalReplyDecision } from "carapace/plugin-sdk/approval-reply-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildApprovalPollOptions,
@@ -14,12 +14,12 @@ const resolverMocks = vi.hoisted(() => ({
   isApprovalNotFoundError: vi.fn(() => false),
 }));
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: resolverMocks.resolveApprovalOverGateway,
 }));
-vi.mock("openclaw/plugin-sdk/error-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/error-runtime")>(
-    "openclaw/plugin-sdk/error-runtime",
+vi.mock("carapace/plugin-sdk/error-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/error-runtime")>(
+    "carapace/plugin-sdk/error-runtime",
   );
   return {
     ...actual,

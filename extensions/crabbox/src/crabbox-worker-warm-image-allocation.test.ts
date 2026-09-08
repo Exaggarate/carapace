@@ -1,4 +1,4 @@
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { resolveCrabboxProvisionProfile } from "./crabbox-worker-profile.js";
 import {
@@ -17,7 +17,7 @@ import {
 } from "./crabbox-worker-warm-image.test-support.js";
 
 function fixture(failCreate = false, onCommand?: (argv: string[]) => void) {
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-crabbox-allocation-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-crabbox-allocation-"));
   const calls: string[][] = [];
   let captures = 0;
   const manager = () =>

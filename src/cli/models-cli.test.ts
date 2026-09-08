@@ -187,7 +187,7 @@ describe("models cli", () => {
     });
 
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "models", flag];
+    process.argv = ["node", "carapace", "models", flag];
     try {
       await program.parseAsync(["models", flag], { from: "user" });
     } finally {
@@ -205,7 +205,7 @@ describe("models cli", () => {
     });
 
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "models", "--status-json", "list"];
+    process.argv = ["node", "carapace", "models", "--status-json", "list"];
     try {
       await program.parseAsync(["models", "--status-json", "list"], { from: "user" });
     } finally {
@@ -225,7 +225,7 @@ describe("models cli", () => {
       });
 
       const originalArgv = process.argv;
-      process.argv = ["node", "openclaw", "models", "auth", "list", "--provider", provider];
+      process.argv = ["node", "carapace", "models", "auth", "list", "--provider", provider];
       try {
         await program.parseAsync(["models", "auth", "list", "--provider", provider], {
           from: "user",
@@ -266,7 +266,7 @@ describe("models cli", () => {
     });
 
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", ...args];
+    process.argv = ["node", "carapace", ...args];
     try {
       await program.parseAsync(args, { from: "user" });
     } finally {
@@ -285,7 +285,7 @@ describe("models cli", () => {
     ["status --plain", ["models", "status", "--plain"]],
     ["parent --status-plain", ["models", "--status-plain"]],
   ])("declares %s as plain machine output owning stdout", (_label, args) => {
-    const argv = ["node", "openclaw", ...args];
+    const argv = ["node", "carapace", ...args];
     expect(isModelsPlainMachineOutput(argv)).toBe(true);
   });
 
@@ -299,7 +299,7 @@ describe("models cli", () => {
     ["secrets store get --plain", ["secrets", "store", "get", "EXAMPLE", "--plain"]],
     ["plain after argv terminator", ["models", "list", "--", "--plain"]],
   ])("does not declare %s as plain machine output", (_label, args) => {
-    const argv = ["node", "openclaw", ...args];
+    const argv = ["node", "carapace", ...args];
     expect(isModelsPlainMachineOutput(argv)).toBe(false);
   });
 
@@ -311,7 +311,7 @@ describe("models cli", () => {
     });
 
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "models", "aliases", "list", "--plain"];
+    process.argv = ["node", "carapace", "models", "aliases", "list", "--plain"];
     try {
       await program.parseAsync(["models", "aliases", "list", "--plain"], { from: "user" });
     } finally {

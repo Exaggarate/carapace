@@ -8,12 +8,12 @@ import {
 } from "../../../infra/kysely-sync.js";
 import { openNodeSqliteDatabase } from "../../../infra/node-sqlite.js";
 import { recordLegacyMigrationRun } from "../../../infra/state-migrations.receipts.js";
-import type { DB as OpenClawStateDatabase } from "../../../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../../state/openclaw-state-db.paths.js";
+import type { DB as CarapaceStateDatabase } from "../../../state/carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "../../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../../state/carapace-state-db.paths.js";
 import type { LegacyCronMigrationSource } from "./legacy-store-migration.js";
 
-type CronMigrationDatabase = Pick<OpenClawStateDatabase, "migration_sources">;
+type CronMigrationDatabase = Pick<CarapaceStateDatabase, "migration_sources">;
 
 function hasLegacyCronMigrationReceiptInDatabase(
   db: DatabaseSync,
@@ -30,7 +30,7 @@ function hasLegacyCronMigrationReceiptInDatabase(
 }
 
 export function hasLegacyCronMigrationReceipt(source: LegacyCronMigrationSource): boolean {
-  return hasLegacyCronMigrationReceiptInDatabase(openOpenClawStateDatabase().db, source);
+  return hasLegacyCronMigrationReceiptInDatabase(openCarapaceStateDatabase().db, source);
 }
 
 function tableExists(db: DatabaseSync, tableName: string): boolean {
@@ -42,7 +42,7 @@ function tableExists(db: DatabaseSync, tableName: string): boolean {
 }
 
 export function hasLegacyCronMigrationReceiptReadOnly(source: LegacyCronMigrationSource): boolean {
-  const statePath = resolveOpenClawStateSqlitePath(process.env);
+  const statePath = resolveCarapaceStateSqlitePath(process.env);
   if (!fs.existsSync(statePath)) {
     return false;
   }

@@ -1,6 +1,6 @@
 // Slack tests cover actionsownload file plugin behavior.
 import type { WebClient } from "@slack/web-api";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const resolveSlackMedia = vi.fn<typeof import("./monitor/media.js").resolveSlackMedia>();
@@ -421,7 +421,7 @@ describe("downloadSlackFile", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await downloadSlackFile("F123", {
       cfg,

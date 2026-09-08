@@ -140,7 +140,7 @@ suite.define(() => {
       ).toHaveCount(1);
       await expectBrowser(bobSection.locator('[data-viewer-id="profile-morgan"]')).toHaveCount(1);
       await captureSessionOwnerProof(suite, page, "person-grouping-live-presence.png");
-      await expectBrowser(bobSection.locator("openclaw-session-owner-chip")).toHaveCount(0);
+      await expectBrowser(bobSection.locator("carapace-session-owner-chip")).toHaveCount(0);
       const adaHeader = adaSection.locator(".sidebar-recent-sessions__head");
       await adaHeader.hover();
       await captureSessionOwnerProof(suite, page, "person-grouping-header-hover.png");

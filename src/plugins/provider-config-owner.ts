@@ -2,9 +2,9 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import { normalizeUniqueSingleOrTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/model-catalog-core/provider-id";
+import { normalizeUniqueSingleOrTrimmedStringList } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** Core built-in model API ids that do not imply plugin ownership of a provider config. */
 export const CORE_BUILT_IN_MODEL_APIS = new Set([
@@ -21,7 +21,7 @@ export const CORE_BUILT_IN_MODEL_APIS = new Set([
 /** Returns the plugin API id that owns a provider config when it is not core built-in. */
 export function resolveProviderConfigApiOwnerHint(params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): string | undefined {
   const providers = params.config?.models?.providers;
   if (!providers) {
@@ -57,7 +57,7 @@ function providerConfigDeclaresModel(
 
 /** Resolves provider/model refs used to scope model catalog discovery. */
 export function resolveModelCatalogScope(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   model: string;
 }): { providerRefs: string[]; modelRefs: string[] } {

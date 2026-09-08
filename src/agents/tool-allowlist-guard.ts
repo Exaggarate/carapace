@@ -3,7 +3,7 @@
  *
  * Collects operator/user allowlist sources and explains when no callable tools remain.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { normalizeToolPolicyName } from "./tool-policy.js";
 
 type ExplicitToolAllowlistSource = {

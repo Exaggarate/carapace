@@ -1,6 +1,6 @@
 import fs from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import type { GatewayStoredSessionTargets } from "../../config/sessions/combined-store-gateway.js";
 import { parseSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";
@@ -9,7 +9,7 @@ import {
   resolveSessionFilePathOptions,
 } from "../../config/sessions/paths.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveExistingUsageSessionFile } from "../../infra/session-cost-usage.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { resolvePreferredSessionKeyForSessionIdMatches } from "../../sessions/session-id-resolution.js";
@@ -34,7 +34,7 @@ type ResolvedSessionUsageTarget = {
 
 export function resolveSessionUsageTarget(
   key: string,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentIdHint?: string,
 ): ResolvedSessionUsageTarget | undefined {
   const { canonicalKey, entry, storePath } = loadGatewaySessionEntryReadOnly(
@@ -184,7 +184,7 @@ function withUsageGrouping(
 }
 
 export async function selectUsageSessions(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   specificKey: string | null;
   groupingMode: UsageGroupingMode;

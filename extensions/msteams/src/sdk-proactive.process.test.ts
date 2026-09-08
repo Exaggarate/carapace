@@ -65,17 +65,17 @@ describe("sendMSTeamsActivityWithReference SDK import ordering", () => {
           },
         },
       );
-      // The built plugin expects an installed OpenClaw host. Stub unrelated host SDK exports so
+      // The built plugin expects an installed Carapace host. Stub unrelated host SDK exports so
       // this child isolates the emitted Teams loader and the real pinned Teams CommonJS package.
       Module._load = function load(request, parent, isMain) {
-        if (request.startsWith("openclaw/plugin-sdk/")) {
+        if (request.startsWith("carapace/plugin-sdk/")) {
           return hostSdkStub;
         }
         return originalLoad.call(this, request, parent, isMain);
       };
 
       const { sendMSTeamsActivityWithReference } =
-        require(process.env.OPENCLAW_MSTEAMS_PROACTIVE_ARTIFACT);
+        require(process.env.CARAPACE_MSTEAMS_PROACTIVE_ARTIFACT);
       const quotedCreates = [];
       const posts = [];
       const app = {
@@ -153,7 +153,7 @@ describe("sendMSTeamsActivityWithReference SDK import ordering", () => {
         env: {
           ...process.env,
           NODE_DISABLE_COMPILE_CACHE: "1",
-          OPENCLAW_MSTEAMS_PROACTIVE_ARTIFACT: proactiveArtifact,
+          CARAPACE_MSTEAMS_PROACTIVE_ARTIFACT: proactiveArtifact,
           VITEST: undefined,
         },
       },

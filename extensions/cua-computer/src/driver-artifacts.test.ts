@@ -21,7 +21,7 @@ function createArtifactFixture(
     expectedDigest?: string;
   } = {},
 ) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cua-artifacts-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cua-artifacts-"));
   temporaryDirectories.push(root);
   const platformKey = options.platformKey ?? "linux-x64-gnu";
   const acceptedVersion = "0.20.0";
@@ -97,7 +97,7 @@ describe("CUA Driver artifact verification", () => {
     });
 
     expect(result).toMatchObject({ ok: false, code: "COMPUTER_DRIVER_PACKAGE_MISSING" });
-    expect(result.ok ? "" : result.diagnostic).toContain("Reinstall OpenClaw on this node host");
+    expect(result.ok ? "" : result.diagnostic).toContain("Reinstall Carapace on this node host");
   });
 
   it("refuses SDK and platform package version skew", () => {

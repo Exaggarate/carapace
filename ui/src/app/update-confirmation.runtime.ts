@@ -161,7 +161,7 @@ export async function confirmAndStartUpdateRuntime(
               : `${route.message} ${t("updates.confirm.impact")}`;
       render(
         html`
-          <openclaw-modal-dialog label=${route.title} description=${body} @modal-cancel=${finish}>
+          <carapace-modal-dialog label=${route.title} description=${body} @modal-cancel=${finish}>
             <div class="exec-approval-card update-run-dialog">
               <div class="exec-approval-header">
                 <div>
@@ -176,10 +176,10 @@ export async function confirmAndStartUpdateRuntime(
               }
               ${
                 current.kind === "run"
-                  ? html`<openclaw-update-run-view
+                  ? html`<carapace-update-run-view
                       .run=${current.run}
                       .connected=${current.connected}
-                    ></openclaw-update-run-view>`
+                    ></carapace-update-run-view>`
                   : nothing
               }
               <div class="exec-approval-actions">
@@ -240,7 +240,7 @@ export async function confirmAndStartUpdateRuntime(
                 }
               </div>
             </div>
-          </openclaw-modal-dialog>
+          </carapace-modal-dialog>
         `,
         host,
       );

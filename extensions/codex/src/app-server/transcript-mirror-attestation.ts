@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { AttemptSettlementWarning } from "./attempt-terminal.js";
 import type { CodexAsyncAssistantMessage } from "./event-projector-assistant-message.js";
 import { readMirrorIdentity, readUpstreamUserText } from "./upstream-prompt-provenance.js";
@@ -9,7 +9,7 @@ export type MirroredAgentMessage = Extract<
   AgentMessage,
   { role: "user" | "assistant" | "toolResult" }
 > &
-  Partial<Pick<CodexAsyncAssistantMessage, "openclawAsyncDelivery">>;
+  Partial<Pick<CodexAsyncAssistantMessage, "carapaceAsyncDelivery">>;
 
 export function isMirroredAgentMessage(message: AgentMessage): message is MirroredAgentMessage {
   return message.role === "user" || message.role === "assistant" || message.role === "toolResult";
@@ -29,7 +29,7 @@ export function buildCodexMirrorDedupeIdentity(message: MirroredAgentMessage): s
 const MIRROR_ORIGIN_META_KEY = "mirrorOrigin" as const;
 const MIRROR_SOURCE_FINGERPRINT_META_KEY = "mirrorSourceFingerprint" as const;
 const CODEX_APP_SERVER_MIRROR_ORIGIN = "codex-app-server" as const;
-const CODEX_META_KEY = "__openclaw";
+const CODEX_META_KEY = "__carapace";
 
 export function applyCodexTranscriptTaint(
   message: AgentMessage,
@@ -43,7 +43,7 @@ export function applyCodexTranscriptTaint(
   const metadata = asOptionalRecord(existing);
   state.tainted ||= metadata?.turnTainted === true || metadata?.resultContentSource === "network";
   return message.role === "assistant" && state.tainted
-    ? ({ ...message, __openclaw: { ...metadata, turnTainted: true } } as AgentMessage) // SAFETY: Only provider metadata changes.
+    ? ({ ...message, __carapace: { ...metadata, turnTainted: true } } as AgentMessage) // SAFETY: Only provider metadata changes.
     : message;
 }
 

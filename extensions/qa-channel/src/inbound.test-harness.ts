@@ -1,4 +1,4 @@
-import type { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import type { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
 import { vi } from "vitest";
 import type { handleQaInbound } from "./inbound.js";
 
@@ -18,8 +18,8 @@ export function createQaInboundParams(
       enabled: true,
       configured: true,
       baseUrl: "http://127.0.0.1:43123",
-      botUserId: "openclaw",
-      botDisplayName: "OpenClaw QA",
+      botUserId: "carapace",
+      botDisplayName: "Carapace QA",
       pollTimeoutMs: 250,
       config: {
         allowFrom: ["*"],

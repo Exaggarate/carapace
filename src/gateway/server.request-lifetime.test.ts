@@ -150,7 +150,7 @@ describe("public Gateway close request lifetime", () => {
     const bothEntered = createDeferredCore();
     const release = createDeferredCore();
     const initialRoot = path.join(os.tmpdir(), "gateway-lifetime", "fixture");
-    const selection = { OPENCLAW_STATE_DIR: initialRoot };
+    const selection = { CARAPACE_STATE_DIR: initialRoot };
     const selectedRoots: string[] = [];
     const handlerRuns: Promise<void>[] = [];
     let enteredCount = 0;
@@ -205,7 +205,7 @@ describe("public Gateway close request lifetime", () => {
           gateway.server.close({ reason: "request lifetime proof" }).then(() => {
             finishedAtClose.push(selectedRoots.length);
             // Model fixture restoration with an explicit synthetic selector only.
-            selection.OPENCLAW_STATE_DIR = path.join(os.tmpdir(), "gateway-lifetime", "restored");
+            selection.CARAPACE_STATE_DIR = path.join(os.tmpdir(), "gateway-lifetime", "restored");
             unblock();
           }),
         );

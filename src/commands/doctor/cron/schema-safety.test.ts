@@ -4,11 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { isSqliteSchemaVersionError } from "../../../infra/sqlite-user-version.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../../state/openclaw-state-db-contract.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../../state/openclaw-state-db.paths.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../../state/carapace-state-db-contract.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../../state/carapace-state-db.paths.js";
 import { collectLegacyCronStoreHealthFindings, maybeRepairLegacyCronStore } from "./index.js";
 import {
   applyLegacyCronStoreRepair,
@@ -19,7 +19,7 @@ import {
 } from "./legacy-repair.js";
 
 type FutureSchemaFixture = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   databasePath: string;
   storePath: string;
 };
@@ -30,7 +30,7 @@ let fixtureDatabase: DatabaseSync | undefined;
 afterEach(async () => {
   fixtureDatabase?.close();
   fixtureDatabase = undefined;
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   if (tempRoot) {
     await fs.rm(tempRoot, { recursive: true, force: true });
@@ -45,7 +45,7 @@ async function writeFutureSchema(databasePath: string): Promise<void> {
     database.exec(`
       CREATE TABLE preserved_sentinel (value TEXT NOT NULL) STRICT;
       INSERT INTO preserved_sentinel (value) VALUES ('keep-me');
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};
+      PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};
     `);
   } finally {
     database.close();
@@ -53,19 +53,19 @@ async function writeFutureSchema(databasePath: string): Promise<void> {
 }
 
 async function createFixture(options: { futureSchema: boolean }): Promise<FutureSchemaFixture> {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-cron-schema-"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempRoot);
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-cron-schema-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", tempRoot);
   const storePath = path.join(tempRoot, "cron", "jobs.json");
   await fs.mkdir(path.dirname(storePath), { recursive: true });
   await fs.writeFile(storePath, JSON.stringify({ version: 1, jobs: [] }), "utf8");
 
-  const databasePath = resolveOpenClawStateSqlitePath();
+  const databasePath = resolveCarapaceStateSqlitePath();
   if (options.futureSchema) {
     await writeFutureSchema(databasePath);
   }
 
   return {
-    cfg: { cron: { store: storePath } } as OpenClawConfig,
+    cfg: { cron: { store: storePath } } as CarapaceConfig,
     databasePath,
     storePath,
   };
@@ -169,7 +169,7 @@ describe("future shared-state schema safety", () => {
       PRAGMA wal_autocheckpoint = 0;
       CREATE TABLE preserved_sentinel (value TEXT NOT NULL) STRICT;
       INSERT INTO preserved_sentinel (value) VALUES ('keep-me');
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};
+      PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};
     `);
 
     await expectSchemaRefusalWithoutMutation(fixture, async () => {
@@ -185,7 +185,7 @@ describe("future shared-state schema safety", () => {
     const fixture = await createFixture({ futureSchema: false });
     const state = await loadLegacyCronRepairState({ cfg: fixture.cfg });
     expect(state).not.toBeNull();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await writeFutureSchema(fixture.databasePath);
 
     await expectSchemaRefusalWithoutMutation(fixture, async () => {

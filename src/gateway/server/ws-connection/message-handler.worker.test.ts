@@ -19,9 +19,9 @@ import {
 } from "../../../process/gateway-work-admission.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../../state/carapace-state-db.js";
 import { createWorkerSessionPlacementStore } from "../../worker-environments/placement-store.js";
 import { signalWorkerTurnClaimClosed } from "../../worker-environments/placement-turn-claim-events.js";
 import { prepareWorkerAgentRuntimeIdentity } from "../../worker-environments/worker-turn-payload.js";
@@ -697,9 +697,9 @@ describe("dedicated worker websocket protocol", () => {
       "test.worker-suspension",
     );
     const stateDir = await fs.mkdtemp(
-      path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-suspension-"),
+      path.join(await fs.realpath(os.tmpdir()), "carapace-worker-suspension-"),
     );
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: stateDir } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: stateDir } });
     const placements = createWorkerSessionPlacementStore({ database });
     let placementActive = true;
     vi.spyOn(placements, "validateTurnClaim").mockImplementation(
@@ -761,7 +761,7 @@ describe("dedicated worker websocket protocol", () => {
       signalWorkerTurnClaimClosed(storePath, claim);
       preparedRunAdmission.close();
       rootAdmission.release();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   });

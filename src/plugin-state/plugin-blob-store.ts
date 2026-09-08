@@ -1,5 +1,5 @@
 // Public facade for plugin-scoped SQLite blob storage.
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   MAX_PLUGIN_BLOB_BYTES_PER_ENTRY,
   MAX_PLUGIN_BLOB_BYTES_PER_PLUGIN,
@@ -282,6 +282,6 @@ export function createPluginBlobStoreForTests<TMetadata>(
 export function resetPluginBlobStoreForTests(options: { closeDatabase?: boolean } = {}): void {
   optionPolicy.clear();
   if (options.closeDatabase !== false) {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
 }

@@ -8,7 +8,7 @@ import {
   type SessionStoreTarget,
 } from "../config/sessions.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 
@@ -78,7 +78,7 @@ export function resolveExplicitSessionStorePath(params: {
       applicationTables.length > 0 &&
       !applicationTables.some((row) => row.name === "schema_meta")
     ) {
-      throw new Error("the SQLite file has application tables but no OpenClaw schema metadata");
+      throw new Error("the SQLite file has application tables but no Carapace schema metadata");
     }
   } catch (error) {
     databaseFailure = { error };
@@ -87,7 +87,7 @@ export function resolveExplicitSessionStorePath(params: {
   }
   if (databaseFailure) {
     throw new Error(
-      `Session store target is not a session store: ${displayTarget}. ${formatErrorMessage(databaseFailure.error)}. Pass a legacy store selector or SQLite target reported by openclaw sessions or openclaw status.`,
+      `Session store target is not a session store: ${displayTarget}. ${formatErrorMessage(databaseFailure.error)}. Pass a legacy store selector or SQLite target reported by carapace sessions or carapace status.`,
     );
   }
   return storePath;
@@ -95,7 +95,7 @@ export function resolveExplicitSessionStorePath(params: {
 
 /** Selection failures reach the root CLI handler for shared JSON output and cleanup. */
 export function resolveCommandSessionStoreTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   opts: SessionStoreSelectionOptions;
 }): SessionStoreTarget[] {
   try {

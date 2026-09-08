@@ -16,7 +16,7 @@ import {
   type PluginMetadataSnapshot,
 } from "../plugins/plugin-metadata-snapshot.js";
 import { normalizePluginPolicyId } from "../plugins/plugin-policy-id.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 function mergeRegistries(registries: readonly PluginManifestRegistry[]): PluginManifestRegistry {
   const grouped = new Map<
@@ -51,7 +51,7 @@ function mergeRegistries(registries: readonly PluginManifestRegistry[]): PluginM
 
 /** Read complete installed ownership for maintenance, including older partial index caches. */
 export function discoverConfigWidePluginManifestRegistry(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   artifactPreservingReadOnly?: boolean;
@@ -75,7 +75,7 @@ export function discoverConfigWidePluginManifestRegistry(params: {
 }
 
 type ResolveConfigWidePluginMetadataParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   stateDir?: string;
   allowCurrent?: boolean;

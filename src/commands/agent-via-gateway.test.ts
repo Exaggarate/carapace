@@ -2,9 +2,9 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 // Agent via gateway tests cover gateway-backed agent command dispatch and session loading.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayPendingRequests } from "../../packages/gateway-client/src/pending-request.js";
 import { GatewayClientRequestError } from "../../packages/gateway-client/src/request-error.js";
@@ -14,7 +14,7 @@ import {
 } from "../audit/execution-identity-admission.js";
 import { recordAgentRunTerminalOutcome } from "../channels/turn/agent-run-terminal-outcome.js";
 import { formatCliFailureLines, formatCliJsonFailure } from "../cli/failure-output.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
 import { acquireGatewayLock, type GatewayLockOptions } from "../infra/gateway-lock.js";
 import { loggingState } from "../logging/state.js";
@@ -70,7 +70,7 @@ const jsonRuntime = {
   exit: vi.fn(),
 };
 
-function mockConfig(storePath: string, overrides?: Partial<OpenClawConfig>) {
+function mockConfig(storePath: string, overrides?: Partial<CarapaceConfig>) {
   const config = {
     agents: {
       defaults: {
@@ -95,9 +95,9 @@ function mockConfig(storePath: string, overrides?: Partial<OpenClawConfig>) {
 
 async function withTempStore(
   fn: (ctx: { dir: string; store: string }) => Promise<void>,
-  overrides?: Partial<OpenClawConfig>,
+  overrides?: Partial<CarapaceConfig>,
 ) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-cli-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-agent-cli-"));
   const store = path.join(dir, "sessions.json");
   mockConfig(store, overrides);
   try {
@@ -157,8 +157,8 @@ function createLocalGatewayLockOptions(
     allowInTests: true,
     env: {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_STATE_DIR: stateDir,
     },
     lockDir: path.join(stateDir, "gateway-locks"),
     timeoutMs: 100,
@@ -318,7 +318,7 @@ function resetAgentCliCommandMocksForTest() {
   // into every later --local test and silently route them through the failure path.
   startOneShotDiagnosticsExporters.mockReset();
   startOneShotDiagnosticsExporters.mockResolvedValue(null);
-  vi.stubEnv("OPENCLAW_GATEWAY_URL", "");
+  vi.stubEnv("CARAPACE_GATEWAY_URL", "");
   agentViaGatewayTesting.resetLazyImportsForTests();
   agentViaGatewayTesting.setGatewayAbortRetryDelaysMsForTests([0, 0, 0, 0]);
   loadAgentSessionModuleMock.mockImplementation(
@@ -489,7 +489,7 @@ describe("agentCliCommand", () => {
     },
   ])("keeps ordinary $label runs least-privilege", async ({ gatewayUrl, overrides }) => {
     if (gatewayUrl) {
-      vi.stubEnv("OPENCLAW_GATEWAY_URL", gatewayUrl);
+      vi.stubEnv("CARAPACE_GATEWAY_URL", gatewayUrl);
     }
     await withTempStore(async () => {
       mockRemoteGatewayRoster("sole");
@@ -707,7 +707,7 @@ describe("agentCliCommand", () => {
   it("uses the local global session through --local despite remote gateway settings", async () => {
     await withTempStore(
       async () => {
-        vi.stubEnv("OPENCLAW_GATEWAY_URL", "wss://gateway.example.test");
+        vi.stubEnv("CARAPACE_GATEWAY_URL", "wss://gateway.example.test");
         const cfg = retainLegacyDefaultAgentId(
           {
             ...loadRuntimeConfig(),
@@ -824,7 +824,7 @@ describe("agentCliCommand", () => {
             localGatewayLockOptions: lockOptions,
           }),
         ).rejects.toThrow(
-          `A Gateway is running for this state directory (pid ${process.pid}, port 28789). Run without --local to use it, or stop the Gateway first (openclaw gateway stop).`,
+          `A Gateway is running for this state directory (pid ${process.pid}, port 28789). Run without --local to use it, or stop the Gateway first (carapace gateway stop).`,
         );
         expect(agentCommand).not.toHaveBeenCalled();
         expect(startOneShotDiagnosticsExporters).not.toHaveBeenCalled();
@@ -863,7 +863,7 @@ describe("agentCliCommand", () => {
           localGatewayLockOptions: { ...lockOptions, pollIntervalMs: 2, timeoutMs: 15 },
         }),
       ).rejects.toThrow(
-        `another embedded OpenClaw state writer is active (pid ${process.pid}); lock timeout after 15ms`,
+        `another embedded Carapace state writer is active (pid ${process.pid}); lock timeout after 15ms`,
       );
       expect(agentCommand).toHaveBeenCalledTimes(1);
 
@@ -1079,7 +1079,7 @@ describe("agentCliCommand", () => {
 
   it("uses an agent-scoped --to value as the gateway session selector", async () => {
     await withTempStore(async () => {
-      const sessionKey = "agent:main:openclaw-weixin:direct:o9cq802hhmfc@im.wechat";
+      const sessionKey = "agent:main:carapace-weixin:direct:o9cq802hhmfc@im.wechat";
       mockGatewaySuccessReply();
 
       await agentCliCommand({ message: "hi", to: sessionKey }, runtime);
@@ -2926,7 +2926,7 @@ describe("agentCliCommand", () => {
       expect(agentCommand).not.toHaveBeenCalled();
       expect(runtime.exit).toHaveBeenCalledWith(1);
       const errorMessages = mockMessages(runtime.error);
-      expect(errorMessages.some((m) => m.includes("openclaw sessions compact"))).toBe(true);
+      expect(errorMessages.some((m) => m.includes("carapace sessions compact"))).toBe(true);
     });
   }
 
@@ -2946,7 +2946,7 @@ describe("agentCliCommand", () => {
     expect(agentCommand).not.toHaveBeenCalled();
     expect(runtime.exit).toHaveBeenCalledWith(1);
     const errorMessages = mockMessages(runtime.error);
-    expect(errorMessages.some((m) => m.includes("openclaw sessions compact"))).toBe(true);
+    expect(errorMessages.some((m) => m.includes("carapace sessions compact"))).toBe(true);
   });
 
   it("does not mistake a /compacting-prefixed message for the /compact control command", async () => {

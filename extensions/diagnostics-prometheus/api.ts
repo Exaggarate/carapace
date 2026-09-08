@@ -2,13 +2,13 @@
 export type {
   DiagnosticEventMetadata,
   DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-export { isInternalDiagnosticEventMetadata } from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
+export { isInternalDiagnosticEventMetadata } from "carapace/plugin-sdk/diagnostic-runtime";
 export {
   emptyPluginConfigSchema,
-  type OpenClawPluginApi,
-  type OpenClawPluginHttpRouteHandler,
-  type OpenClawPluginService,
-  type OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-export { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
+  type CarapacePluginApi,
+  type CarapacePluginHttpRouteHandler,
+  type CarapacePluginService,
+  type CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
+export { redactSensitiveText } from "carapace/plugin-sdk/security-runtime";

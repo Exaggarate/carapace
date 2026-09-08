@@ -5,7 +5,7 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetFileLockStateForTest } from "../../infra/file-lock.js";
 import { captureEnv } from "../../test-utils/env.js";
@@ -62,7 +62,7 @@ describe("OAuth credential adoption is identity-gated", () => {
   let mainAgentDir = "";
 
   beforeAll(async () => {
-    tempRoot = await createOAuthTestTempRoot("openclaw-oauth-adopt-identity-");
+    tempRoot = await createOAuthTestTempRoot("carapace-oauth-adopt-identity-");
   });
 
   beforeEach(async () => {

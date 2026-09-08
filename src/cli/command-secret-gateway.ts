@@ -1,5 +1,5 @@
 // Command-time secret resolution through gateway/local secret stores for configured targets.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -10,7 +10,7 @@ import {
   copyConfigResolutionFactsExcept,
   resolveConfigSecretRef,
 } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { callGateway } from "../gateway/call.js";
 import { gatewaySecretInputPathCanWin } from "../gateway/credentials-secret-inputs.js";
@@ -37,7 +37,7 @@ import {
 } from "../secrets/target-registry.js";
 
 type ResolveCommandSecretsResult = {
-  resolvedConfig: OpenClawConfig;
+  resolvedConfig: CarapaceConfig;
   diagnostics: string[];
   targetStatesByPath: Record<string, CommandSecretTargetState>;
   hadUnresolvedTargets: boolean;
@@ -115,7 +115,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.commandSecretGatewayTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.commandSecretGatewayTestApi")] =
     testing;
 }
 
@@ -159,7 +159,7 @@ function targetsRuntimeWebPath(path: string): boolean {
 }
 
 function classifyRuntimeWebTargetPathState(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: string;
 }): "active" | "inactive" | "unknown" {
   const pluginId = pluginIdFromRuntimeWebPath(params.path);
@@ -208,7 +208,7 @@ function classifyRuntimeWebTargetPathState(params: {
 }
 
 function describeInactiveRuntimeWebTargetPath(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: string;
 }): string | undefined {
   const pluginId = pluginIdFromRuntimeWebPath(params.path);
@@ -267,7 +267,7 @@ function targetsRuntimeWebResolution(params: {
 }
 
 function collectConfiguredTargetRefPaths(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   targetIds: Set<string>;
   allowedPaths?: ReadonlySet<string>;
 }): Set<string> {
@@ -298,7 +298,7 @@ function collectConfiguredTargetRefPaths(params: {
 }
 
 function classifyConfiguredTargetRefs(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configuredTargetRefPaths: Set<string>;
   agentId?: string;
   forcedActivePaths?: ReadonlySet<string>;
@@ -452,7 +452,7 @@ function resolveLocalResolutionPolicy(params: {
 }
 
 function collectActiveGatewayExecSecretRefCredentialPaths(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): SupportedGatewaySecretInputPath[] {
   const defaults = config.secrets?.defaults;
   return ALL_GATEWAY_SECRET_INPUT_PATHS.filter((path) => {
@@ -472,7 +472,7 @@ function collectActiveGatewayExecSecretRefCredentialPaths(
 }
 
 async function resolveCommandSecretRefsWithoutGateway(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   commandName: string;
   targetIds: Set<string>;
   agentId?: string;
@@ -503,7 +503,7 @@ async function resolveCommandSecretRefsWithoutGateway(params: {
 }
 
 async function callGatewaySecretsResolve(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   commandName: string;
   targetIds: Set<string>;
   allowedPaths?: ReadonlySet<string>;
@@ -553,7 +553,7 @@ function isDirectRuntimeWebTargetPath(path: string): boolean {
 }
 
 async function resolveCommandSecretRefsLocally(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   commandName: string;
   targetIds: Set<string>;
   agentId?: string;
@@ -753,7 +753,7 @@ function buildUnresolvedDiagnostics(
 }
 
 function scrubUnresolvedAssignments(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   unresolved: UnresolvedCommandSecretAssignment[],
 ): void {
   for (const entry of unresolved) {
@@ -778,8 +778,8 @@ function filterInactiveSurfaceDiagnostics(params: {
 
 async function resolveTargetSecretLocally(params: {
   target: DiscoveredConfigSecretTarget;
-  sourceConfig: OpenClawConfig;
-  resolvedConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
+  resolvedConfig: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   cache: ReturnType<typeof createResolverContext>["cache"];
   activePaths: ReadonlySet<string>;
@@ -850,7 +850,7 @@ async function resolveTargetSecretLocally(params: {
 }
 
 export async function resolveCommandSecretRefsViaGateway(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   commandName: string;
   targetIds: Set<string>;
   agentId?: string;

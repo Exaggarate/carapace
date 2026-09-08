@@ -1,16 +1,16 @@
 ---
-summary: "CLI reference for `openclaw update` (updates, repair, and recovery cleanup)"
+summary: "CLI reference for `carapace update` (updates, repair, and recovery cleanup)"
 read_when:
   - You want to update a source checkout safely
-  - You are debugging `openclaw update` output or options
+  - You are debugging `carapace update` output or options
   - You want to inspect or retire migration recovery originals after an update
   - You need to understand `--update` shorthand behavior
 title: "Update"
 ---
 
-# `openclaw update`
+# `carapace update`
 
-Update OpenClaw and switch between stable/extended-stable/beta/dev channels.
+Update Carapace and switch between stable/extended-stable/beta/dev channels.
 
 If you installed via **npm/pnpm/bun** (global install, no git metadata),
 updates go through the package-manager flow described in
@@ -19,24 +19,24 @@ updates go through the package-manager flow described in
 ## Usage
 
 ```bash
-openclaw update
-openclaw update status
-openclaw update repair
-openclaw update cleanup --dry-run
-openclaw update wizard
-openclaw update --channel extended-stable
-openclaw update --channel beta
-openclaw update --channel dev
-openclaw update --tag beta
-openclaw update --dry-run
-openclaw update --no-restart
-openclaw update --yes
-openclaw update --accept-capabilities
-openclaw update --json
-openclaw --update
+carapace update
+carapace update status
+carapace update repair
+carapace update cleanup --dry-run
+carapace update wizard
+carapace update --channel extended-stable
+carapace update --channel beta
+carapace update --channel dev
+carapace update --tag beta
+carapace update --dry-run
+carapace update --no-restart
+carapace update --yes
+carapace update --accept-capabilities
+carapace update --json
+carapace --update
 ```
 
-`openclaw --update` rewrites to `openclaw update` (useful for shells and
+`carapace --update` rewrites to `carapace update` (useful for shells and
 launcher scripts).
 
 Failed update and repair attempts enter [recovery triage](/cli/update#recover-a-failed-update)
@@ -47,18 +47,18 @@ again, and the report keeps the failing check as the reason.
 After a final interactive update failure, **Diagnose update failure** and
 **Report update failure** are separate choices. Reporting first shows the exact
 sanitized issue body and defaults confirmation to **No**. After confirmation,
-OpenClaw checks the GitHub CLI's active `github.com` account with a silent,
+Carapace checks the GitHub CLI's active `github.com` account with a silent,
 read-only request before issue creation. Fallback and pending outcomes retain the
 sanitized report locally; a confirmed issue keeps only its durable issue URL.
-If the CLI is missing or that check cannot confirm authentication, OpenClaw
+If the CLI is missing or that check cannot confirm authentication, Carapace
 provides a prefilled issue link without starting issue creation. If the exact
-report exceeds the browser URL limit, OpenClaw keeps the sanitized body locally
+report exceeds the browser URL limit, Carapace keeps the sanitized body locally
 and returns to the action menu, where reporting can be chosen and confirmed
 again. A report preparation or submission
 error also returns to that menu; Diagnose runs only when selected explicitly.
 In the Control UI, an interrupted
 pre-create preparation becomes retryable after its local reservation expires.
-After an uncertain creation result, OpenClaw checks for an issue matching the
+After an uncertain creation result, Carapace checks for an issue matching the
 exact report. If neither a verified issue URL nor a definitive rejection is
 available, the report stays pending with no replay link because an issue may
 already exist.
@@ -79,7 +79,7 @@ submit a report.
 | `--accept-capabilities`                          | Accept each plugin's reviewed capability changes during post-update sync. This acknowledges the exact staged capability surface; it does not disable capability checks or establish future trust.                                                                                                                                             |
 
 There is no `--verbose` flag. Use `--dry-run` to preview planned actions,
-`--json` for machine-readable results, and `openclaw update status --json`
+`--json` for machine-readable results, and `carapace update status --json`
 for channel, availability, and the latest durable update report. Gateway console verbosity (`--verbose`) and
 file log level (`logging.level: "debug"`/`"trace"`) are independent knobs; see
 [Gateway logging](/gateway/logging).
@@ -114,11 +114,11 @@ For explicit package artifacts, configured plugin availability is checked agains
 
 For source checkouts, `--dry-run` previews the update flow without fetching Git
 refs or checking working-tree changes. The real update checks for uncommitted
-changes before modifying the checkout. Use `openclaw update status` to inspect
+changes before modifying the checkout. Use `carapace update status` to inspect
 the current branch, version, and update availability.
 
 <Note>
-In Nix mode (`OPENCLAW_NIX_MODE=1`), mutating `openclaw update` runs are disabled. Update the Nix source or flake input for this install instead; for nix-openclaw, use the agent-first [Quick Start](https://github.com/openclaw/nix-openclaw#quick-start). `openclaw update status` remains read-only. `openclaw update --dry-run` previews the flow and records a skipped run without changing the installation.
+In Nix mode (`CARAPACE_NIX_MODE=1`), mutating `carapace update` runs are disabled. Update the Nix source or flake input for this install instead; for nix-carapace, use the agent-first [Quick Start](https://github.com/Exaggarate/carapace/nix-carapace#quick-start). `carapace update status` remains read-only. `carapace update --dry-run` previews the flow and records a skipped run without changing the installation.
 </Note>
 
 <Warning>
@@ -130,7 +130,7 @@ transcript artifacts before starting an older file-backed version. See
 
 ## Recover a failed update
 
-After a failed interactive update or repair, OpenClaw finishes cleanup and
+After a failed interactive update or repair, Carapace finishes cleanup and
 opens [Triage](/cli/triage). Triage immediately starts the first directly
 launchable coding agent on `PATH`, in this order: Claude Code, Codex, OpenCode,
 then Pi. It passes the captured update failure directly and leaves fresh Doctor
@@ -156,15 +156,15 @@ POSIX shells on macOS, Linux, and WSL. When running triage manually, keep the sa
 profile and state/config overrides:
 
 ```bash
-openclaw triage
-openclaw triage --agent codex
+carapace triage
+carapace triage --agent codex
 ```
 
-Use `openclaw triage --non-interactive` to collect diagnostics without starting
+Use `carapace triage --non-interactive` to collect diagnostics without starting
 an agent. Add `--update-result <path>` to include a saved update-failure artifact.
 
 Validation failures leave the serving Gateway untouched. If stopping the managed
-service unloads it and then fails before activation, OpenClaw attempts to restore
+service unloads it and then fails before activation, Carapace attempts to restore
 the verified original runtime after rechecking service ownership. After activation, a
 failed verification can [restore the previous package](/cli/update#validation-and-activation)
 when database schemas are unchanged and the config file still matches the
@@ -188,9 +188,9 @@ Show the active update channel, git tag/branch/SHA (source checkouts only),
 update availability, and the active or most recent update report.
 
 ```bash
-openclaw update status
-openclaw update status --json
-openclaw update status --timeout 10
+carapace update status
+carapace update status --json
+carapace update status --timeout 10
 ```
 
 | Flag                  | Default | Description                         |
@@ -218,7 +218,7 @@ a run ID.
 Triage preserves the original update report. Any update launched during repair
 gets a separate `runId`.
 
-`openclaw update --json` includes `runId` and the `run` record. `openclaw update status --json`
+`carapace update --json` includes `runId` and the `run` record. `carapace update status --json`
 includes `activeRun` when a run is active and `lastRun` when history exists.
 When the active row has been inactive for more than 30 minutes and its recorded
 driver is verifiably dead, status also reports `abandonedRun` with its `runId`
@@ -227,10 +227,10 @@ and reconciliation `rule`. Status remains read-only: the stored row stays in
 Identityless rows are never reconciled automatically, even when their only
 step is `requested/in_progress`. For stale identityless rows, JSON includes
 `staleRun` with `runId` and `guidance`; human status and Doctor preflight report
-"no activity since &lt;time&gt;; if no update is running, run `openclaw update repair`
-or start a new `openclaw update`".
+"no activity since &lt;time&gt;; if no update is running, run `carapace update repair`
+or start a new `carapace update`".
 
-An explicit new `openclaw update` (including `--dry-run`) supersedes the old row
+An explicit new `carapace update` (including `--dry-run`) supersedes the old row
 only when it is the sole active run, has no recorded driver identity, and has
 had no activity for more than 30 minutes. Admission atomically finishes that
 row as `failed` with reason `superseded` and a retained `reconcile:superseded`
@@ -239,20 +239,20 @@ are preserved. Inherited update continuations and automatic campaigns do not
 supersede legacy history. Configuration writes remain suspended until the
 active row is reconciled.
 
-OpenClaw 2026.9.2 can admit a new CLI update while an older row remains running;
+Carapace 2026.9.2 can admit a new CLI update while an older row remains running;
 the stale row does not block updater admission. Upgrade normally, then run
-`openclaw update repair` from the updated installation if status still shows the
+`carapace update repair` from the updated installation if status still shows the
 old run. See [Updating](/install/updating#stale-update-history).
 
 Human output, chat completion notices, the Control UI update view, and the
-`openclaw status` update line use the same report, including on success. The report shows recorded facts; an absent verification fact
+`carapace status` update line use the same report, including on success. The report shows recorded facts; an absent verification fact
 means that check has not been observed.
 
 Gateway clients with `operator.admin` can inspect history:
 
 ```bash
-openclaw gateway call update.runs.list --params '{"limit":10}'
-openclaw gateway call update.runs.get --params '{"runId":"<run-id>"}'
+carapace gateway call update.runs.list --params '{"limit":10}'
+carapace gateway call update.runs.get --params '{"runId":"<run-id>"}'
 ```
 
 `update.runs.list` returns `{ runs }`; `limit` defaults to 20 and is capped at 100. `update.runs.get` returns `{ run }`, with `run: null` when the ID is unknown. `update.status` retains its existing
@@ -286,7 +286,7 @@ Heartbeat write errors warn once per driver run and do not interrupt a running
 build, install, or finalization phase.
 
 Historical rows without a driver identity require explicit `update repair` or
-a new operator-started `openclaw update`.
+a new operator-started `carapace update`.
 An old `requested` row alone does not prove that its updater exited: the 2026.9.2
 updater can still be waiting on package-manager or registry preflight before it
 records its first staging step. Stop an unrecorded old updater before explicitly
@@ -319,15 +319,15 @@ report.
 
 Rerun update finalization after the core package already changed but later
 repair work did not finish cleanly. This is the supported recovery path when
-`openclaw update` installed the new core package but post-core plugin sync,
+`carapace update` installed the new core package but post-core plugin sync,
 managed npm plugin metadata, registry refresh, or doctor repair did not
 converge.
 
 ```bash
-openclaw update repair
-openclaw update repair --channel beta
-openclaw update repair --json
-openclaw update repair --accept-capabilities
+carapace update repair
+carapace update repair --channel beta
+carapace update repair --json
+carapace update repair --accept-capabilities
 ```
 
 | Flag                                             | Description                                                                                                                                                                                                                                                                                      |
@@ -365,11 +365,11 @@ selected run resumes before reconciliation, the whole selection is preserved.
 Full finalization JSON includes `reconciledRuns` when stale rows were selected
 for recovery, listing the IDs reconciled by that invocation.
 
-For full finalization, `update repair` runs `openclaw doctor --fix`, reloads the repaired config and
+For full finalization, `update repair` runs `carapace doctor --fix`, reloads the repaired config and
 install records, syncs tracked plugins for the active update channel, updates
 managed npm plugin installs, repairs missing configured plugin payloads,
 refreshes the plugin registry, and writes converged install-record metadata.
-Configured runtime plugins whose versions follow OpenClaw are checked against
+Configured runtime plugins whose versions follow Carapace are checked against
 the newly installed core during post-update repair, even when the updater process
 started on the previous version.
 It does not install a new core package and does not restart the Gateway.
@@ -385,7 +385,7 @@ repaired install record is published.
 
 When a bundled plugin moves to an external package, failed relocation reports
 that the replacement payload was not installed and preserves the underlying error.
-Resolve that error before retrying with `openclaw update repair`.
+Resolve that error before retrying with `carapace update repair`.
 Doctor and update repair reinstall configured payloads with missing package files
 or a reported missing runtime entry;
 an empty directory is not a successful installation. Rollback removes empty
@@ -437,9 +437,9 @@ a missing configured plugin has no install record yet. Automatic repair can
 report a deferred replacement as a notice when a usable, enabled artifact remains
 installed; that retained artifact still undergoes payload validation.
 
-If the core package has already changed, run `openclaw update repair` in an
+If the core package has already changed, run `carapace update repair` in an
 interactive terminal to review plugin capabilities. After reviewing the changes,
-automation can use `openclaw update repair --accept-capabilities`. Acceptance
+automation can use `carapace update repair --accept-capabilities`. Acceptance
 applies to each artifact's recomputed declared surface during this invocation;
 it does not approve future capability additions.
 
@@ -450,11 +450,11 @@ session history work. Start with a preview, which can run while the Gateway is
 active:
 
 ```bash
-openclaw update cleanup --dry-run
-openclaw --profile work update cleanup --dry-run --json
+carapace update cleanup --dry-run
+carapace --profile work update cleanup --dry-run --json
 ```
 
-Cleanup targets the selected profile and `OPENCLAW_STATE_DIR` / `OPENCLAW_CONFIG_PATH`
+Cleanup targets the selected profile and `CARAPACE_STATE_DIR` / `CARAPACE_CONFIG_PATH`
 overrides. It displays that state directory and does not redirect to a managed
 service. Confirm the displayed directory is the installation you intend to clean.
 `--dry-run` reads only configuration and recovery metadata, without opening
@@ -465,7 +465,7 @@ include reason codes.
 
 Before applying, stop the Gateway for that same profile/state directory and wait
 for other SQLite maintenance commands to finish. Stop database readers too,
-including watchers that repeatedly run `openclaw sessions --all-agents --json`,
+including watchers that repeatedly run `carapace sessions --all-agents --json`,
 and keep them stopped until cleanup exits. Read-only SQLite connections can
 create or change WAL/SHM sidecars, invalidating cleanup's destination check even
 when session content is unchanged. If cleanup reports `Recovery destination
@@ -481,8 +481,8 @@ them, if you still need that rollback path. Current SQLite history stays in plac
 </Warning>
 
 ```bash
-openclaw update cleanup
-openclaw update cleanup --yes --json
+carapace update cleanup
+carapace update cleanup --yes --json
 ```
 
 Interactive confirmation defaults to **No**. JSON mode never prompts or grants
@@ -530,7 +530,7 @@ checkout offers to create one.
 
 The channel picker reads the local install identity without checking Git
 freshness or dependencies. Those checks run when you apply the update; use
-`openclaw update status` to inspect availability first.
+`carapace update status` to inspect availability first.
 
 | Flag                    | Default | Description                                                  |
 | ----------------------- | ------- | ------------------------------------------------------------ |
@@ -542,9 +542,9 @@ freshness or dependencies. Those checks run when you apply the update; use
 Switching channels explicitly (`--channel ...`) also keeps the install method
 aligned:
 
-- `dev` -> ensures a git checkout (default `~/openclaw`, or
-  `$OPENCLAW_HOME/openclaw` when `OPENCLAW_HOME` is set; override with
-  `OPENCLAW_GIT_DIR`), updates it, and installs the global CLI from that
+- `dev` -> ensures a git checkout (default `~/carapace`, or
+  `$CARAPACE_HOME/carapace` when `CARAPACE_HOME` is set; override with
+  `CARAPACE_GIT_DIR`), updates it, and installs the global CLI from that
   checkout.
 - `stable` -> installs from npm using `latest`.
 - `extended-stable` -> resolves the public npm `extended-stable` selector,
@@ -561,7 +561,7 @@ the selected channel or installation method, or the Git target SHA equals
 explicit `--channel` or installation-method change finishes successfully.
 Neither path stops or restarts the Gateway unless the installation method
 changes. Read-only plugin convergence checks can still report repair needs; use
-`openclaw update repair` to apply them.
+`carapace update repair` to apply them.
 
 For targets that support candidate validation, the old Gateway keeps serving through `staging` and
 `validating`. The updater uses the candidate entrypoint for Doctor lint
@@ -570,7 +570,7 @@ plugin resolution and compatibility planning. It also rehearses migrations and
 boots a canary with copied configuration and verified SQLite snapshots in an
 isolated temporary state directory. The copied database registry points to the
 copied agent databases. Installed plugin payloads and their dependencies are also
-copied; the rehearsal install records point to those copies, and their OpenClaw
+copied; the rehearsal install records point to those copies, and their Carapace
 host links target the staged candidate. The live plugin files and host links stay
 unchanged. Channels, cron, automatic updates, and other side services are
 suppressed in this canary.
@@ -598,7 +598,7 @@ repair discards the candidate and leaves the serving Gateway untouched.
 Pre-activation repair uses disposable rehearsal state and configuration, then
 independently validates surviving candidate changes before activation, and
 `repair-requires-config-change` reports changed top-level keys that require
-operator-run `openclaw doctor --fix` or `openclaw triage`; post-activation repair
+operator-run `carapace doctor --fix` or `carapace triage`; post-activation repair
 uses the live installation. See
 [Unattended repair](/install/updating#unattended-repair-on-your-own-inference) for
 budgets, permitted repairs, and attempt reports.
@@ -665,7 +665,7 @@ If schema state cannot be verified, rollback is refused with
 
 ### Restart handoff
 
-When an agent runs `openclaw update` inside a systemd user service or macOS
+When an agent runs `carapace update` inside a systemd user service or macOS
 LaunchAgent Gateway, the CLI hands the update to the same managed-service helper
 before stopping the Gateway. It prints the helper log path and follow-up commands
 for update status and Gateway health, then exits; this acknowledges the handoff,
@@ -682,12 +682,12 @@ does not authorize stopping the agent's Gateway.
 The Gateway core auto-updater requires a managed service restart path. It hands
 the CLI update to a detached helper before activation. A foreground
 Gateway keeps update hints but leaves installation and activation to the
-operator: stop it, run `openclaw update`, then launch it again.
+operator: stop it, run `carapace update`, then launch it again.
 
 Control-plane `update.run` package-manager updates and supervised git-checkout updates use
 the same managed-service handoff instead of replacing the package tree or
 rebuilding `dist/` inside the live Gateway process: the Gateway starts a
-detached helper, which runs `openclaw update --yes --json` from outside the
+detached helper, which runs `carapace update --yes --json` from outside the
 Gateway process tree. The Gateway exits only after candidate validation succeeds
 and activation begins. If the handoff is unavailable,
 `update.run` returns a structured response with the safe shell command to run
@@ -717,7 +717,7 @@ its own version guards apply and automatic repair stays disabled. If the target
 CLI does not support that option, it rejects activation before repair. The code
 update stays installed, but the command exits nonzero with the activation error
 (on stderr in JSON mode). A service stopped for the update may remain stopped.
-Run `openclaw gateway status --deep` and ask the deployment owner to restart it
+Run `carapace gateway status --deep` and ask the deployment owner to restart it
 through its native manager or repair stale metadata; do not retry without the
 preservation option unless definition repair is intended.
 
@@ -733,12 +733,12 @@ manager runtime state, or failed filesystem inspection still require service acc
 If service inspection is unavailable or installation ownership is unresolved,
 the update refuses to mutate the checkout or package tree, including with
 `--no-restart`. It cannot assess another service-owned profile's databases from
-the invoking profile alone. Run `openclaw gateway status --deep` and retry when
+the invoking profile alone. Run `carapace gateway status --deep` and retry when
 ownership can be inspected. Proven-absent services and inspectable stopped
 services remain supported. Services owned by another install remain untouched.
 
 The published 2026.8.2 CLI also refuses updates on service-less Linux installs.
-Use `openclaw update --no-restart` for that upgrade after confirming that no Gateway
+Use `carapace update --no-restart` for that upgrade after confirming that no Gateway
 is running; the new CLI cannot fix the old CLI's pre-update inspection.
 
 Package-manager updates normally keep using the Node binary recorded in the
@@ -750,7 +750,7 @@ metadata, so the same runtime mismatch stops before package mutation.
 
 On macOS, the post-update check also verifies the LaunchAgent is
 loaded/running for the active profile and the configured loopback port is
-healthy. If the plist is installed but launchd is not supervising it, OpenClaw
+healthy. If the plist is installed but launchd is not supervising it, Carapace
 re-bootstraps the LaunchAgent automatically and reruns the health/version/
 channel readiness checks (a fresh bootstrap loads the `RunAtLoad` job directly,
 so recovery does not immediately `kickstart -k` the newly spawned Gateway).
@@ -775,13 +775,13 @@ separately from the CLI update that continues in the detached helper:
 - `ok: true`, `result.status: "skipped"`,
   `result.reason: "managed-service-handoff-started"`, and
   `handoff.status: "started"`: the Gateway created the managed-service handoff
-  so the detached helper can run `openclaw update --yes --json` outside the live
+  so the detached helper can run `carapace update --yes --json` outside the live
   service process. The old Gateway stays available during validation; this
   response does not mean the service has stopped or the update has completed.
 - `ok: false`, `result.reason: "managed-service-handoff-unavailable"`, and
-  `handoff.status: "unavailable"`: OpenClaw could not find a supervising
+  `handoff.status: "unavailable"`: Carapace could not find a supervising
   service boundary and durable service identity for a safe handoff (for
-  example, systemd handoff requires the `OPENCLAW_SYSTEMD_UNIT` unit identity,
+  example, systemd handoff requires the `CARAPACE_SYSTEMD_UNIT` unit identity,
   not just ambient systemd process markers). The response includes
   `handoff.command`, the shell command to run from outside the Gateway.
 - `ok: false`, `result.reason: "managed-service-handoff-failed"`: the Gateway
@@ -793,7 +793,7 @@ health checks complete. During the handoff, the sentinel can carry
 `stats.reason: "restart-health-pending"` with no success continuation; the
 restarted Gateway polls it and fires the continuation only after the CLI has
 verified service health and rewritten the sentinel with the final `ok` result.
-`openclaw status` and `openclaw status --all` show an `Update restart` row
+`carapace status` and `carapace status --all` show an `Update restart` row
 while that sentinel is pending or failed. `update.status` retains the latest
 sentinel and also returns the durable run record. The sentinel carries
 `stats.runId`; the run record remains available after notice delivery consumes
@@ -824,7 +824,7 @@ the sentinel.
 
     The updater prepares the built runtime on the destination filesystem and removes the temporary Git worktree registration before changing the live checkout. Cleanup failures remain visible in the update result. If an interruption leaves staging behind, artifact-area staging does not dirty the checkout or block the next update's clean check.
 
-    Dev can walk back up to 10 commits to find the newest buildable candidate. Confirmed ENOSPC storage failures stop immediately with `preflight-insufficient-space`; free space on the preflight staging and package-manager store filesystems before retrying. Shared package-manager stores are not deleted. Update builds skip TypeScript declaration generation by default. Set `OPENCLAW_RUN_NODE_SKIP_DTS_BUILD=0` to explicitly request declarations. Set `OPENCLAW_UPDATE_PREFLIGHT_LINT=1` to also run source lint during this preflight; lint runs in constrained serial mode because user update hosts are often smaller than CI runners.
+    Dev can walk back up to 10 commits to find the newest buildable candidate. Confirmed ENOSPC storage failures stop immediately with `preflight-insufficient-space`; free space on the preflight staging and package-manager store filesystems before retrying. Shared package-manager stores are not deleted. Update builds skip TypeScript declaration generation by default. Set `CARAPACE_RUN_NODE_SKIP_DTS_BUILD=0` to explicitly request declarations. Set `CARAPACE_UPDATE_PREFLIGHT_LINT=1` to also run source lint during this preflight; lint runs in constrained serial mode because user update hosts are often smaller than CI runners.
 
     The updater already running owns staging. Updating to a commit with this repair cannot change an older published updater's first hop; that default path requires a published baseline containing the repair.
 
@@ -837,7 +837,7 @@ the sentinel.
   <Step title="Activate and verify">
     Stops the managed service, checks out the exact candidate SHA, publishes the prepared runtime, and runs required Doctor migrations. It starts and verifies the Gateway without reinstalling dependencies or rebuilding the checkout during downtime.
 
-    If restoring the previous Git runtime fails, the Gateway stays stopped and the failed rollback step records the filesystem error. Pending originals remain in sibling `<runtime>.openclaw-update-<id>.tmp/previous` directories. Preserve those backups and repair the installation before restarting; cleanup does not delete an unrestored original.
+    If restoring the previous Git runtime fails, the Gateway stays stopped and the failed rollback step records the filesystem error. Pending originals remain in sibling `<runtime>.carapace-update-<id>.tmp/previous` directories. Preserve those backups and repair the installation before restarting; cleanup does not delete an unrestored original.
 
   </Step>
   <Step title="Sync plugins">
@@ -847,7 +847,7 @@ the sentinel.
 
 ### Plugin sync details
 
-On stable updates, a configured OpenClaw-owned official plugin with no install
+On stable updates, a configured Carapace-owned official plugin with no install
 record is repaired from the selected core release cohort. This also applies to
 `doctor --fix` after an earlier upgrade lost a formerly bundled plugin. Admission
 checks that package target before stopping the Gateway; post-core reconciliation
@@ -858,55 +858,55 @@ selector policy. Verified official packages use the existing
 Managed npm plugins on the beta channel select the newest version by semantic
 version order from their `beta` and `latest` dist-tags, using the same policy as
 the core updater. This includes official plugins with a default/latest catalog
-target and managed `@beta` selectors. OpenClaw installs the exact inspected
+target and managed `@beta` selectors. Carapace installs the exact inspected
 version and retains the recorded selector for future updates.
 
 ClawHub plugins on the beta channel try their own `@beta` tag. If that release
-is unavailable, OpenClaw falls back to the default/latest spec and reports a
+is unavailable, Carapace falls back to the default/latest spec and reports a
 warning naming the requested and used targets.
 Integrity, compatibility, trust, install-policy, and capability-consent failures
 do not trigger fallback. Availability fallback warnings do not fail the core
 update. Ordinary exact versions, ranges, and explicit tags other than `beta`
 retain their selector.
 Doctor can refresh a stale official runtime plugin that is bound to the current
-OpenClaw release cohort. That repair stays on the recorded registry, verifies
+Carapace release cohort. That repair stays on the recorded registry, verifies
 the replacement artifact, and records its exact version if the npm install was
 previously pinned.
 Already-current runtime plugins are kept in place; a no-op startup repair does
 not reinstall the package or invalidate the migration checkpoint.
 
 <Warning>
-If an exact pinned npm plugin update resolves to an artifact whose integrity differs from the stored install record, `openclaw update` aborts that plugin artifact update instead of installing it. Reinstall or update the plugin explicitly only after verifying you trust the new artifact.
+If an exact pinned npm plugin update resolves to an artifact whose integrity differs from the stored install record, `carapace update` aborts that plugin artifact update instead of installing it. Reinstall or update the plugin explicitly only after verifying you trust the new artifact.
 </Warning>
 
 <Note>
-Post-update plugin sync failures that are scoped to a managed plugin and that the sync path can route around (for example an unreachable npm registry for a non-essential plugin) are reported as warnings after the core update succeeds. The JSON result keeps top-level update `status: "ok"` and reports `postUpdate.plugins.status: "warning"` with `openclaw update repair` and `openclaw plugins inspect <id> --runtime --json` guidance. Unexpected updater or sync exceptions still fail the update result. Fix the plugin install or update error, then rerun `openclaw update repair`. When a failed update leaves a managed plugin unusable, OpenClaw disables its runtime entry and resets active slots without changing the operator-authored `plugins.allow` or `plugins.deny` policy.
+Post-update plugin sync failures that are scoped to a managed plugin and that the sync path can route around (for example an unreachable npm registry for a non-essential plugin) are reported as warnings after the core update succeeds. The JSON result keeps top-level update `status: "ok"` and reports `postUpdate.plugins.status: "warning"` with `carapace update repair` and `carapace plugins inspect <id> --runtime --json` guidance. Unexpected updater or sync exceptions still fail the update result. Fix the plugin install or update error, then rerun `carapace update repair`. When a failed update leaves a managed plugin unusable, Carapace disables its runtime entry and resets active slots without changing the operator-authored `plugins.allow` or `plugins.deny` policy.
 
-After the core Gateway is serving, `openclaw update` runs mandatory **post-core convergence**: it repairs missing configured plugin payloads, validates each _active_ tracked install record on disk, and statically verifies its `package.json` is parseable and its declared `openclaw.extensions` entries are loadable. When a package does not declare OpenClaw extensions, the check instead verifies any explicitly declared npm `main`. Failures from this pass, and an invalid config snapshot, return `postUpdate.plugins.status: "error"` and flip the top-level update `status` to `"error"`, so `openclaw update` exits nonzero and does not restart with the unverified plugin set. The error includes structured `postUpdate.plugins.warnings[].guidance` lines pointing at `openclaw update repair` and `openclaw plugins inspect <id> --runtime --json`. Disabled plugin entries and records that are not trusted-source-linked official sync targets are skipped here (mirroring the `skipDisabledPlugins` policy used by the missing-payload check), so a stale disabled plugin record cannot block an otherwise valid update. A changed plugin snapshot completes the exclusive Doctor maintenance, restart, and runtime verification sequence described above before the run succeeds.
+After the core Gateway is serving, `carapace update` runs mandatory **post-core convergence**: it repairs missing configured plugin payloads, validates each _active_ tracked install record on disk, and statically verifies its `package.json` is parseable and its declared `carapace.extensions` entries are loadable. When a package does not declare Carapace extensions, the check instead verifies any explicitly declared npm `main`. Failures from this pass, and an invalid config snapshot, return `postUpdate.plugins.status: "error"` and flip the top-level update `status` to `"error"`, so `carapace update` exits nonzero and does not restart with the unverified plugin set. The error includes structured `postUpdate.plugins.warnings[].guidance` lines pointing at `carapace update repair` and `carapace plugins inspect <id> --runtime --json`. Disabled plugin entries and records that are not trusted-source-linked official sync targets are skipped here (mirroring the `skipDisabledPlugins` policy used by the missing-payload check), so a stale disabled plugin record cannot block an otherwise valid update. A changed plugin snapshot completes the exclusive Doctor maintenance, restart, and runtime verification sequence described above before the run succeeds.
 
 When the updated Gateway starts, plugin loading is verify-only: startup does not run package managers or mutate dependency trees. Package-manager `update.run` restarts are handed to the CLI managed-service path, so the package swap happens outside the old Gateway process and the service health checks decide whether the update can be reported as complete.
 </Note>
 
 After an extended-stable core update succeeds, post-core plugin integrity and
 convergence target eligible official npm and trusted official ClawHub plugins at the exact installed core
-version. For default/`latest` intent, OpenClaw does not query plugin
+version. For default/`latest` intent, Carapace does not query plugin
 `@extended-stable` or fall back to npm `latest`; it derives the package version
 from the installed core. Explicit version pins, explicit non-`latest` tags,
 third-party packages, custom registries, and other sources keep their existing intent.
 
-For package-manager installs, `openclaw update` resolves the target package
+For package-manager installs, `carapace update` resolves the target package
 version before invoking the package manager. npm global installs use a staged
-install: OpenClaw installs the new package into a temporary npm prefix,
+install: Carapace installs the new package into a temporary npm prefix,
 lets the candidate package validate the host Node version during `preinstall`,
 and verifies the packaged `dist` inventory there. A packed completion guard
 stays outside that inventory until `preinstall` succeeds, so package managers
 that skip lifecycle scripts also stop before activation. On npm 12 and newer,
-the updater approves only the candidate OpenClaw lifecycle; transitive
-dependency scripts remain blocked. OpenClaw then swaps the clean package tree
+the updater approves only the candidate Carapace lifecycle; transitive
+dependency scripts remain blocked. Carapace then swaps the clean package tree
 into the real global prefix. If verification fails, post-update doctor, plugin
 sync, and restart work do not run from the suspect tree.
 
-Staging uses a unique `.openclaw.update-stage-*` directory inside the target
+Staging uses a unique `.carapace.update-stage-*` directory inside the target
 global `node_modules`, separate from disposable npm rename leftovers. Each
 attempt tries to remove only its own staging prefix; leftover cleanup does not
 reclaim these stages. If an interrupted update leaves one behind, confirm that
@@ -915,7 +915,7 @@ does not make simultaneous package swaps safe.
 
 A matching installed version is an `already-current` no-op. Real updates also
 refresh core-command completion; full plugin-command completion rebuilds remain explicit
-`openclaw completion --write-state` runs.
+`carapace completion --write-state` runs.
 
 pnpm and Bun on macOS/Linux stage their owning global project and launchers,
 preserving the manager's manifests, locks, and sibling packages for rollback.
@@ -930,7 +930,7 @@ supported through the owning manager.
 
 ## Related
 
-- `openclaw doctor` (offers to run update first on git checkouts)
+- `carapace doctor` (offers to run update first on git checkouts)
 - [Development channels](/install/development-channels)
 - [Updating](/install/updating)
 - [CLI reference](/cli)

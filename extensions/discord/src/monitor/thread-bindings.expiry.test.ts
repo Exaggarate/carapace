@@ -3,9 +3,9 @@ import { resolvePreparedThreadBindingLifecycle } from "./thread-bindings.state.j
 import type { ThreadBindingRecord } from "./thread-bindings.types.js";
 
 const sdk = vi.hoisted(() => ({ helperAvailable: true, calls: 0 }));
-vi.mock("openclaw/plugin-sdk/thread-bindings-session-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/thread-bindings-session-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/thread-bindings-session-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/thread-bindings-session-runtime")>();
   const resolve = (params: Parameters<typeof actual.resolveThreadBindingExpiry>[0]) => {
     sdk.calls += 1;
     return actual.resolveThreadBindingExpiry(params);

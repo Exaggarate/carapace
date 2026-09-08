@@ -11,6 +11,6 @@ type SessionMcpRuntimeOwner = {
 
 // SDK facades and the Gateway can load separate bundles of this module.
 export const sessionMcpRuntimeOwners = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionMcpRuntimeOwners"),
+  Symbol.for("carapace.sessionMcpRuntimeOwners"),
   () => new WeakMap<SessionMcpRuntime, SessionMcpRuntimeOwner>(),
 );

@@ -3,8 +3,8 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import "../test-helpers/fast-coding-tools.js";
-import "../test-helpers/fast-openclaw-tools.js";
-import { createOpenClawCodingTools } from "../agent-tools.js";
+import "../test-helpers/fast-carapace-tools.js";
+import { createCarapaceCodingTools } from "../agent-tools.js";
 import { prepareRootedExecutionCapability } from "../rooted-run-params.js";
 import type { resolveSandboxContext as ResolveSandboxContext } from "../sandbox/context.js";
 import {
@@ -32,14 +32,14 @@ async function prepare(root: string) {
 
 function codingTools(capability: Awaited<ReturnType<typeof prepare>>) {
   return expectReadWriteEditTools(
-    createOpenClawCodingTools({
+    createCarapaceCodingTools({
       ...capability,
       config,
       toolConstructionPlan: {
         includeBaseCodingTools: true,
         includeShellTools: false,
         includeChannelTools: false,
-        includeOpenClawTools: false,
+        includeCarapaceTools: false,
         includePluginTools: false,
       },
     }),
@@ -54,7 +54,7 @@ describe("prepared rooted execution", () => {
   it.each(["ro", "none"] as const)(
     "rejects a configured %s sandbox before granting file access",
     async (workspaceAccess) => {
-      const root = tempDirs.make("openclaw-rooted-review-");
+      const root = tempDirs.make("carapace-rooted-review-");
       resolveSandboxContext.mockResolvedValue(
         createAgentToolsSandboxContext({ workspaceDir: root, workspaceAccess }),
       );
@@ -66,7 +66,7 @@ describe("prepared rooted execution", () => {
   );
 
   it("confines file access to the requested root even when configured filesystem access is broad", async () => {
-    const parent = tempDirs.make("openclaw-rooted-review-");
+    const parent = tempDirs.make("carapace-rooted-review-");
     const root = path.join(parent, "workshop");
     const outside = path.join(parent, "outside.md");
     await fs.writeFile(outside, "outside unchanged");
@@ -89,7 +89,7 @@ describe("prepared rooted execution", () => {
   });
 
   it("reads, edits, and writes a writable Workshop through the configured sandbox bridge", async () => {
-    const root = tempDirs.make("openclaw-rooted-sandbox-review-");
+    const root = tempDirs.make("carapace-rooted-sandbox-review-");
     await fs.writeFile(path.join(root, "SKILL.md"), "Original guidance\n");
     const bridge = createHostSandboxFsBridge(root);
     const readFile = vi.spyOn(bridge, "readFile");

@@ -1,8 +1,8 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   resolveAgentHarnessBeforePromptBuildResult,
   runAgentHarnessLlmInputHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { createSessionConfig, type resolvePoolAcquire } from "./attempt-config.js";
 import { isRawCopilotModelRun } from "./attempt-mode.js";
 import { assertCopilotAttemptHostCapabilities } from "./attempt-types.js";
@@ -108,7 +108,7 @@ export async function createCopilotSessionSetup(params: {
   const promptTools = promptPolicyResult?.tools ?? [];
   const finalDeveloperInstructions = promptBuild.developerInstructions;
   // Restricted turns may expose native ask_user only when its policy-filtered
-  // OpenClaw equivalent survived the canonical tool catalog.
+  // Carapace equivalent survived the canonical tool catalog.
   const includeAskUser =
     !ringZeroSystemAgentRun &&
     (attemptInput.pluginHarnessToolPolicyRestricted !== true ||

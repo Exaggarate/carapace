@@ -1,7 +1,7 @@
 // Tests compact command behavior for session compaction and reply status.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { testing as cliBackendsTesting } from "../../agents/cli-backends.test-support.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   resolveAgentDirMock,
   resolveSessionAgentIdMock,
@@ -30,7 +30,7 @@ describe("handleCompactCommand", () => {
       buildCompactParams("/status", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       true,
     );
 
@@ -42,7 +42,7 @@ describe("handleCompactCommand", () => {
     const params = buildCompactParams("/compact", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const result = await handleCompactCommand(
       {
@@ -72,8 +72,8 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-          session: { store: "/tmp/openclaw-session-store.json" },
-        } as OpenClawConfig),
+          session: { store: "/tmp/carapace-session-store.json" },
+        } as CarapaceConfig),
         ctx: {
           Provider: "whatsapp",
           Surface: "whatsapp",
@@ -86,7 +86,7 @@ describe("handleCompactCommand", () => {
           SenderUsername: "alice_u",
           SenderE164: "+15551234567",
         },
-        agentDir: "/tmp/openclaw-agent-compact",
+        agentDir: "/tmp/carapace-agent-compact",
         opts: { abortSignal: abortController.signal },
         sessionEntry: {
           sessionId: "session-1",
@@ -120,7 +120,7 @@ describe("handleCompactCommand", () => {
     expect(call.senderName).toBe("Alice");
     expect(call.senderUsername).toBe("alice_u");
     expect(call.senderE164).toBe("+15551234567");
-    expect(call.agentDir).toBe("/tmp/openclaw-agent-compact");
+    expect(call.agentDir).toBe("/tmp/carapace-agent-compact");
     expect(call.authProfileId).toBe("github-copilot:work");
     expect(call.authProfileIdSource).toBe("user");
     expect(vi.mocked(abortEmbeddedAgentRun)).not.toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe("handleCompactCommand", () => {
     const params = buildCompactParams("/compact", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.command = {
       ...params.command,
       ownerList: ownerIds,
@@ -169,7 +169,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "session-1",
           updatedAt: Date.now(),
@@ -197,7 +197,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "session-1",
           updatedAt: Date.now(),
@@ -224,7 +224,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "session-1",
           updatedAt: Date.now(),
@@ -248,8 +248,8 @@ describe("handleCompactCommand", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-      session: { store: "/tmp/openclaw-session-store.json" },
-    } as OpenClawConfig;
+      session: { store: "/tmp/carapace-session-store.json" },
+    } as CarapaceConfig;
 
     await handleCompactCommand(
       {
@@ -272,7 +272,7 @@ describe("handleCompactCommand", () => {
       agentId: "target",
       sessionId: "session-1",
       sessionKey: "agent:target:whatsapp:direct:12345",
-      storePath: "/tmp/openclaw-session-store.json",
+      storePath: "/tmp/carapace-session-store.json",
     });
   });
 
@@ -289,7 +289,7 @@ describe("handleCompactCommand", () => {
           "marie-clawndo": {},
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleCompactCommand(
       {
@@ -323,7 +323,7 @@ describe("handleCompactCommand", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { store: "/tmp/default-sessions.json" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleCompactCommand(
       {
@@ -352,7 +352,7 @@ describe("handleCompactCommand", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleCompactCommand(
       {
@@ -386,7 +386,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionKey: "agent:target:whatsapp:direct:12345",
         sessionEntry: {
           sessionId: "wrapper-session",
@@ -435,12 +435,12 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "locked-session",
           updatedAt: Date.now(),
           agentHarnessId: "codex",
-          agentRuntimeOverride: "openclaw",
+          agentRuntimeOverride: "carapace",
           modelSelectionLocked: true,
         },
       } as HandleCommandsParams,
@@ -477,7 +477,7 @@ describe("handleCompactCommand", () => {
           ...buildCompactParams("/compact", {
             commands: { text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as OpenClawConfig),
+          } as CarapaceConfig),
           provider: "anthropic",
           sessionEntry: {
             sessionId: "cli-session",
@@ -543,7 +543,7 @@ describe("handleCompactCommand", () => {
             ...buildCompactParams("/compact", {
               commands: { text: true },
               channels: { whatsapp: { allowFrom: ["*"] } },
-            } as OpenClawConfig),
+            } as CarapaceConfig),
             provider,
             sessionEntry: {
               sessionId: "picker-session",
@@ -581,7 +581,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionKey: "agent:target:whatsapp:direct:12345",
         sessionEntry: {
           sessionId: "wrapper-session",
@@ -617,7 +617,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "target-session",
           updatedAt: Date.now(),
@@ -649,7 +649,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: { sessionId: "server-session", updatedAt: Date.now() },
       } as HandleCommandsParams,
       true,
@@ -689,7 +689,7 @@ describe("handleCompactCommand", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "native-session",
           updatedAt: Date.now(),
@@ -717,7 +717,7 @@ describe("handleCompactCommand", () => {
       ...buildCompactParams("/compact", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       provider: "anthropic",
       model: "claude-opus-4-6",
       contextTokens: 200_000,

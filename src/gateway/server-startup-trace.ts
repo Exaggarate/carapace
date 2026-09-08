@@ -1,5 +1,5 @@
 import { monitorEventLoopDelay, performance } from "node:perf_hooks";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   emitDiagnosticsTimelineEvent,
   isDiagnosticsTimelineEnabled,
@@ -28,8 +28,8 @@ export async function measureStartup<T>(
 }
 
 export function createGatewayStartupTrace(log: GatewayLogger, startedAt = performance.now()) {
-  const logEnabled = isTruthyEnvValue(process.env.OPENCLAW_GATEWAY_STARTUP_TRACE);
-  let timelineConfig: OpenClawConfig | undefined;
+  const logEnabled = isTruthyEnvValue(process.env.CARAPACE_GATEWAY_STARTUP_TRACE);
+  let timelineConfig: CarapaceConfig | undefined;
   let eventLoopDelay: ReturnType<typeof monitorEventLoopDelay> | undefined;
   let closed = false;
   const timelineOptions = () => ({
@@ -38,7 +38,7 @@ export function createGatewayStartupTrace(log: GatewayLogger, startedAt = perfor
   });
   const eventLoopTimelineEnabled = () =>
     isDiagnosticsTimelineEnabled(timelineOptions()) &&
-    isTruthyEnvValue(process.env.OPENCLAW_DIAGNOSTICS_EVENT_LOOP);
+    isTruthyEnvValue(process.env.CARAPACE_DIAGNOSTICS_EVENT_LOOP);
   const ensureEventLoopDelay = () => {
     if (closed || eventLoopDelay || (!logEnabled && !eventLoopTimelineEnabled())) {
       return;
@@ -129,7 +129,7 @@ export function createGatewayStartupTrace(log: GatewayLogger, startedAt = perfor
   };
   return {
     close,
-    setConfig(config: OpenClawConfig) {
+    setConfig(config: CarapaceConfig) {
       timelineConfig = config;
       ensureEventLoopDelay();
     },

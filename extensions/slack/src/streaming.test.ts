@@ -1,7 +1,7 @@
 // Slack tests cover streaming plugin behavior.
 import { WebClient } from "@slack/web-api";
 import { ChatStreamer } from "@slack/web-api/dist/chat-stream.js";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { getSlackListenerWriteClient } from "./client.js";
 import {
@@ -562,7 +562,7 @@ describe("stopSlackStream finalize error handling", () => {
       delivered: false,
       pendingText: "",
     };
-    const metadata = { event_type: "openclaw.reply", event_payload: { turn: "qa" } };
+    const metadata = { event_type: "carapace.reply", event_payload: { turn: "qa" } };
 
     await appendSlackStream({ session, text: "short committed reply", chunks: [] });
     await expect(stopSlackStream({ session, metadata })).resolves.toEqual({});

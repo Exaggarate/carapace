@@ -21,7 +21,7 @@ describe("cloud attachment transfer confinement", () => {
   let root: string;
   beforeEach(async () => {
     root = await realpath(await mkdtemp(path.join(os.tmpdir(), "cloud-attachments-")));
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
   });
   afterEach(async () => {
     vi.unstubAllEnvs();

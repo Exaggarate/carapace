@@ -106,7 +106,7 @@ async function approveNodeIdentity(params: { identityPath: string; caps: string[
 describe("node pairing rate limit", () => {
   test("admits an authenticated paired node while gateway startup is pending", async () => {
     testState.gatewayAuth = { mode: "token", token: "secret" };
-    const identityDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-node-startup-"));
+    const identityDir = await mkdtemp(path.join(os.tmpdir(), "carapace-node-startup-"));
     const identityPath = path.join(identityDir, "identity.sqlite");
     const attachGatewayWsHandlers = gatewayWsRuntime.attachGatewayWsHandlers;
     let nodeRegistry: NodeRegistry | undefined;
@@ -163,7 +163,7 @@ describe("node pairing rate limit", () => {
     "rejects a %s shared-token node during startup without creating pairing requests",
     async (_pairingState, approveDevice, omitDevice) => {
       testState.gatewayAuth = { mode: "token", token: "secret" };
-      const identityDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-node-startup-unpaired-"));
+      const identityDir = await mkdtemp(path.join(os.tmpdir(), "carapace-node-startup-unpaired-"));
       const attachGatewayWsHandlers = gatewayWsRuntime.attachGatewayWsHandlers;
       const startupAdmission = vi
         .spyOn(gatewayWsRuntime, "attachGatewayWsHandlers")
@@ -220,7 +220,7 @@ describe("node pairing rate limit", () => {
       },
     };
     await withGatewayServer(async ({ port }) => {
-      const identityPrefix = path.join(os.tmpdir(), `openclaw-node-pairing-${randomUUID()}`);
+      const identityPrefix = path.join(os.tmpdir(), `carapace-node-pairing-${randomUUID()}`);
 
       const responses = await Promise.all(
         Array.from(
@@ -257,7 +257,7 @@ describe("node pairing rate limit", () => {
     await withGatewayServer(async ({ port }) => {
       const identityPrefix = path.join(
         os.tmpdir(),
-        `openclaw-node-pairing-upgrade-${randomUUID()}`,
+        `carapace-node-pairing-upgrade-${randomUUID()}`,
       );
       const pairedIdentityPath = `${identityPrefix}-paired.sqlite`;
       const pairedIdentity = await approveNodeIdentity({
@@ -318,7 +318,7 @@ describe("node pairing rate limit", () => {
     await withGatewayServer(async ({ port }) => {
       const identityPath = path.join(
         os.tmpdir(),
-        `openclaw-node-reapproval-${randomUUID()}.sqlite`,
+        `carapace-node-reapproval-${randomUUID()}.sqlite`,
       );
       const identity = await approveNodeIdentity({ identityPath, caps: ["camera"] });
 

@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeOptionalAgentRuntimeId } from "../agents/agent-runtime-id.js";
 import { resolveInitialEmbeddedRunModel } from "../agents/embedded-agent-runner/run/runtime-resolution.js";
 import { resolveSessionRuntimeOverrideForProvider } from "../agents/session-runtime-compat.js";
@@ -10,7 +10,7 @@ import {
 import { resolveSessionEntryAccessTarget } from "../config/sessions/session-accessor.entry.js";
 import { resolveSessionStorePathForScope } from "../config/sessions/session-store-path.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   classifySessionKeyShape,
   isUnscopedSessionKeySentinel,
@@ -61,7 +61,7 @@ const PLUGIN_GATEWAY_GLOBAL_SESSION_MUTATION_METHODS = new Set([
 export function createPluginSessionOwnership(state: PluginRegistryState, pluginId: string) {
   const { registry, registryParams } = state;
   // SAFETY: Logical session resolution only reads the immutable runtime config snapshot.
-  const currentSessionConfig = () => registryParams.runtime.config.current() as OpenClawConfig;
+  const currentSessionConfig = () => registryParams.runtime.config.current() as CarapaceConfig;
   const resolveHarnessRegistration = (harnessId: unknown) => {
     const normalizedHarnessId = normalizeOptionalAgentRuntimeId(harnessId);
     return normalizedHarnessId

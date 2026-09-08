@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { requireNodeSqlite } from "./node-sqlite.js";
 import { migrateLegacyMediaPersistence } from "./state-migrations.media-persistence.js";
 
@@ -15,11 +15,11 @@ function createV17AdditiveFixture(
   options: { schemaDrift?: "missing-cache-table" | "participant-dependency" } = {},
 ) {
   const stateDir = makeTempDir(tempDirs, "media-persistence-v17-additive-");
-  const env = { OPENCLAW_STATE_DIR: stateDir };
-  const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+  const env = { CARAPACE_STATE_DIR: stateDir };
+  const opened = openCarapaceAgentDatabase({ agentId: "main", env });
   const databasePath = opened.path;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 
   const { DatabaseSync } = requireNodeSqlite();
   const database = new DatabaseSync(databasePath);
@@ -56,15 +56,15 @@ function createV17AdditiveFixture(
 
 describe("legacy media persistence additive schema repair", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanupTempDirs(tempDirs);
   });
 
   it("repairs same-version additive session schema before media validation", async () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-current-additive-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     opened.db
       .prepare(
@@ -77,8 +77,8 @@ describe("legacy media persistence additive schema repair", () => {
         JSON.stringify({ sessionId: "session-1", updatedAt: 1 }),
         1,
       );
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const { DatabaseSync } = requireNodeSqlite();
     const database = new DatabaseSync(databasePath);
@@ -97,7 +97,7 @@ describe("legacy media persistence additive schema repair", () => {
     const repaired = new DatabaseSync(databasePath, { readOnly: true });
     try {
       expect(repaired.prepare("PRAGMA user_version").get()).toEqual({
-        user_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+        user_version: CARAPACE_AGENT_SCHEMA_VERSION,
       });
       expect(
         repaired
@@ -120,7 +120,7 @@ describe("legacy media persistence additive schema repair", () => {
     const repaired = new DatabaseSync(databasePath, { readOnly: true });
     try {
       expect(repaired.prepare("PRAGMA user_version").get()).toEqual({
-        user_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+        user_version: CARAPACE_AGENT_SCHEMA_VERSION,
       });
       expect(
         repaired
@@ -158,7 +158,7 @@ describe("legacy media persistence additive schema repair", () => {
     expect(result.warnings[0]).toContain(
       "Participant migration cannot rebuild unknown indexes, views, or triggers",
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const rolledBack = new DatabaseSync(databasePath, { readOnly: true });
     try {

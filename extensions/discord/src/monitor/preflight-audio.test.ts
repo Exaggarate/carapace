@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const transcribeFirstAudioMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/media-understanding-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/media-understanding-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/media-understanding-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/media-understanding-runtime")>();
   return {
     ...actual,
     createChannelPreflightAudio: (
@@ -20,7 +20,7 @@ vi.mock("openclaw/plugin-sdk/media-understanding-runtime", async (importOriginal
 
 import { resolveDiscordPreflightAudioMentionContext } from "./preflight-audio.js";
 
-const cfg = {} as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+const cfg = {} as import("carapace/plugin-sdk/config-contracts").CarapaceConfig;
 
 describe("resolveDiscordPreflightAudioMentionContext", () => {
   beforeEach(() => {

@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import * as pdfExtractModule from "../../media/pdf-extract.js";
 import * as webMedia from "../../media/web-media.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
@@ -79,16 +79,16 @@ async function withConfiguredPdfTool(
   });
 }
 
-function withPdfModel(primary: string): OpenClawConfig {
+function withPdfModel(primary: string): CarapaceConfig {
   return {
     agents: { defaults: { pdfModel: { primary } } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function withDefaultModel(primary: string): OpenClawConfig {
+function withDefaultModel(primary: string): CarapaceConfig {
   return {
     agents: { defaults: { model: { primary } } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function expectFields(value: unknown, expected: Record<string, unknown>): void {
@@ -122,14 +122,14 @@ async function withManagedInboundPdf(
 ) {
   // Managed inbound PDFs live under state and may be addressed by claim-check
   // IDs or absolute paths even when workspace-only policy is active.
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pdf-managed-inbound-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pdf-managed-inbound-"));
   const inboundDir = path.join(stateDir, "media", "inbound");
   const mediaId = "claim-check-test.pdf";
   const mediaPath = path.join(inboundDir, mediaId);
   await fs.mkdir(inboundDir, { recursive: true });
   await fs.writeFile(mediaPath, FAKE_PDF_MEDIA.buffer);
   try {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       await run({ stateDir, mediaId, mediaPath });
     });
   } finally {
@@ -175,7 +175,7 @@ describe("createPdfTool", () => {
       vi.stubEnv("AWS_ACCESS_KEY_ID", "");
       vi.stubEnv("AWS_SECRET_ACCESS_KEY", "");
       vi.stubEnv("AWS_BEARER_TOKEN_BEDROCK", "");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { model: { primary: "amazon-bedrock/text-1" } } },
         models: {
           mode: "replace",
@@ -375,8 +375,8 @@ describe("createPdfTool", () => {
 
   it("respects fsPolicy.workspaceOnly for non-sandbox pdf paths", async () => {
     await withTempPdfAgentDir(async (agentDir) => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pdf-ws-"));
-      const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pdf-out-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pdf-ws-"));
+      const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pdf-out-"));
       try {
         const cfg = withPdfModel(ANTHROPIC_PDF_MODEL);
         const tool = requirePdfTool(
@@ -450,7 +450,7 @@ describe("createPdfTool", () => {
     "reads a mounted PDF from %s",
     async (pdf) => {
       await withTempPdfAgentDir(async (agentDir) => {
-        const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pdf-sandbox-"));
+        const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pdf-sandbox-"));
         try {
           await fs.writeFile(path.join(workspaceDir, "doc.pdf"), FAKE_PDF_MEDIA.buffer);
           await stubPdfToolInfra(agentDir, {
@@ -483,8 +483,8 @@ describe("createPdfTool", () => {
 
   it("resolves a producer-staged bare PDF handle", async () => {
     await withTempPdfAgentDir(async (agentDir) => {
-      const workspaceDir = tempDirs.make("openclaw-pdf-sandbox-");
-      const stagedPath = "media/inbound/openclaw-staged-proof/input-file_upload.pdf";
+      const workspaceDir = tempDirs.make("carapace-pdf-sandbox-");
+      const stagedPath = "media/inbound/carapace-staged-proof/input-file_upload.pdf";
       await fs.mkdir(path.dirname(path.join(workspaceDir, stagedPath)), { recursive: true });
       await fs.writeFile(path.join(workspaceDir, stagedPath), FAKE_PDF_MEDIA.buffer);
       await stubPdfToolInfra(agentDir, {
@@ -521,7 +521,7 @@ describe("createPdfTool", () => {
         input: ["text", "document"],
       });
       vi.spyOn(pdfNativeProviders, "anthropicAnalyzePdf").mockResolvedValue("native summary");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         ...withPdfModel(ANTHROPIC_PDF_MODEL),
         tools: {
           web: {

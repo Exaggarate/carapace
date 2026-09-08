@@ -10,7 +10,7 @@ import {
   SessionDeliveryDeadLetteredError,
   SessionDeliveryDeferredError,
 } from "../../../infra/session-delivery-queue-storage.js";
-import type { OpenClawStateDatabaseOptions } from "../../../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../../../state/carapace-state-db.js";
 import { findTaskByRunId, getTaskById } from "../../../tasks/runtime-internal.js";
 import type { TaskRecord } from "../../../tasks/task-registry.types.js";
 import type { RuntimeContextFragment } from "../../internal-runtime-context.js";
@@ -224,7 +224,7 @@ export async function settleCorrelatedSubagentDelivery(
 
 export async function retrySubagentCompletionDelivery(
   taskId: string,
-  databaseOptions?: OpenClawStateDatabaseOptions,
+  databaseOptions?: CarapaceStateDatabaseOptions,
 ): Promise<CompletionDeliveryRecoveryResult> {
   const task = getTaskById(taskId);
   const current = task ? findSubagentForTask(task) : undefined;
@@ -272,7 +272,7 @@ export async function dismissSubagentCompletionDelivery(
   taskId: string,
   options: {
     discardTerminalDelivery: typeof SubagentLifecycleController.discardTerminalDelivery;
-    databaseOptions?: OpenClawStateDatabaseOptions;
+    databaseOptions?: CarapaceStateDatabaseOptions;
   },
 ): Promise<CompletionDeliveryRecoveryResult> {
   const task = getTaskById(taskId);

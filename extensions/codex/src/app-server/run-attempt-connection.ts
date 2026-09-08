@@ -3,15 +3,15 @@ import {
   resolveSandboxContext,
   resolveUserPath,
   type FastModeAutoProgressState,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   createDiagnosticTraceContextFromActiveScope,
   freezeDiagnosticTraceContext,
   resolveDiagnosticModelContentCapturePolicy,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { loadExecApprovals } from "openclaw/plugin-sdk/exec-approvals-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
+import { loadExecApprovals } from "carapace/plugin-sdk/exec-approvals-runtime";
 import { resolveCodexAppServerForModelProvider } from "./app-server-policy.js";
 import { resolveCodexAppServerPreparedAuthHandoff } from "./auth-bridge.js";
 import {
@@ -31,7 +31,7 @@ import {
   resolveCodexAppServerHomeScope,
   resolveCodexComputerUseConfig,
   resolveCodexModelBackedReviewerPolicyContext,
-  resolveOpenClawExecPolicyForCodexAppServer,
+  resolveCarapaceExecPolicyForCodexAppServer,
   type CodexAppServerRuntimeOptions,
 } from "./config.js";
 import { createCodexDynamicToolBuildStageTracker } from "./dynamic-tool-build.js";
@@ -116,7 +116,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
       ? createIsolatedCodexAppServerClient
       : getLeasedSharedCodexAppServerClient);
   preDynamicStartupStages.mark("sandbox");
-  const execPolicy = resolveOpenClawExecPolicyForCodexAppServer({
+  const execPolicy = resolveCarapaceExecPolicyForCodexAppServer({
     // Explicit modes replace legacy fields; full also replaces approval-file floors.
     permissionMode: params.permissionMode,
     execOverrides: params.execOverrides,
@@ -244,7 +244,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
       config: params.config,
       agentDir,
       requirementsToml,
-      openClawSandboxActive: sandbox?.enabled === true,
+      carapaceSandboxActive: sandbox?.enabled === true,
       sessionPermissionMode: params.permissionMode,
     }).appServer;
   const initialStartupBindingHadInactiveThreadBootstrap =

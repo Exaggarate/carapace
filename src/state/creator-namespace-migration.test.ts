@@ -4,22 +4,22 @@ import { loadSessionEntry, upsertSessionEntryCore } from "../config/sessions/ses
 import { makeCronJob } from "../cron/delivery.test-helpers.js";
 import { loadCronStore, saveCronStore } from "../cron/store.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  ensureOpenClawAgentDatabaseSchema,
-  openOpenClawAgentDatabase,
+  closeCarapaceAgentDatabasesForTest,
+  ensureCarapaceAgentDatabaseSchema,
+  openCarapaceAgentDatabase,
   withAgentDatabaseMaintenanceLease,
-} from "./openclaw-agent-db.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "./openclaw-state-db-contract.js";
+} from "./carapace-agent-db.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "./carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "./carapace-state-db.js";
 
 describe("creator namespace upgrades", () => {
   it("qualifies only proven historical seams atomically and keeps a restorable backup", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const options = { agentId: "main", env: state.env };
       const cases = [
         ["operator", "profile"],
@@ -52,13 +52,13 @@ describe("creator namespace upgrades", () => {
           createdVia: "operator",
         },
       );
-      const databasePath = openOpenClawAgentDatabase(options).path;
+      const databasePath = openCarapaceAgentDatabase(options).path;
       // Retire automatic maintenance before constructing the historical snapshot.
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const db = openNodeSqliteDatabase(databasePath);
       const backupPath = state.path("before.sqlite");
       const migrate = () =>
-        ensureOpenClawAgentDatabaseSchema(db, { ...options, path: databasePath });
+        ensureCarapaceAgentDatabaseSchema(db, { ...options, path: databasePath });
       try {
         db.exec(
           `UPDATE session_nodes SET entry_json = json_set(entry_json, '$.createdBy', json('{"id":"old-id","label":"Legacy label"}')) WHERE session_key = 'agent:main:legacy'`,
@@ -128,7 +128,7 @@ describe("creator namespace upgrades", () => {
   });
 
   it("retains historical cron attribution as unknown through the actual store upgrade", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = state.statePath("cron", "jobs.json");
       await saveCronStore(storePath, {
         version: 1,
@@ -144,14 +144,14 @@ describe("creator namespace upgrades", () => {
           },
         ],
       });
-      const initial = openOpenClawStateDatabase({ env: state.env });
+      const initial = openCarapaceStateDatabase({ env: state.env });
       initial.db
         .exec(`UPDATE cron_jobs SET job_json = json_remove(job_json, '$.createdActor.source');
         PRAGMA user_version = 13; UPDATE schema_meta SET schema_version = 13;`);
-      closeOpenClawStateDatabaseForTest();
-      const reopened = openOpenClawStateDatabase({ env: state.env });
+      closeCarapaceStateDatabaseForTest();
+      const reopened = openCarapaceStateDatabase({ env: state.env });
       expect(reopened.db.prepare("PRAGMA user_version").get()?.user_version).toBe(
-        OPENCLAW_STATE_SCHEMA_VERSION,
+        CARAPACE_STATE_SCHEMA_VERSION,
       );
       expect((await loadCronStore(storePath)).jobs[0]).toMatchObject({
         createdActor: {

@@ -17,10 +17,10 @@ import {
 import { tryBeginGatewayRootWorkAdmission } from "../../process/gateway-work-admission.js";
 import { onSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { projectSessionMessagePayload } from "../session-transcript-message.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
 import { placementTurnOwner, type WorkerSessionPlacementIdentity } from "./placement-record.js";
@@ -43,17 +43,17 @@ const SESSION: WorkerSessionPlacementIdentity = {
 };
 
 let root: string;
-let database: OpenClawStateDatabase;
+let database: CarapaceStateDatabase;
 let store: WorkerSessionPlacementStore;
 
 beforeEach(async () => {
-  root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-placement-claim-"));
-  database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+  root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-placement-claim-"));
+  database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
   store = createWorkerSessionPlacementStore({ database });
 });
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await fs.rm(root, { recursive: true, force: true });
 });
 
@@ -438,7 +438,7 @@ it.each([
       expect(rows.at(-1)).toMatchObject({
         message: {
           content: [{ type: "text", text }],
-          ...(current ? { openclawDelivery: { mediaUrls: ["./owned.png"] } } : {}),
+          ...(current ? { carapaceDelivery: { mediaUrls: ["./owned.png"] } } : {}),
         },
       });
     } finally {

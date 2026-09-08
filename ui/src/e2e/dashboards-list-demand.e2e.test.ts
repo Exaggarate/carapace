@@ -79,7 +79,7 @@ suite.define(() => {
         },
       });
       await page.goto(`${suite.server.baseUrl}dashboards`);
-      const dashboards = page.locator("openclaw-dashboards-page");
+      const dashboards = page.locator("carapace-dashboards-page");
       await dashboards.getByText("Deploy monitor", { exact: true }).waitFor();
       const before = (await gateway.getRequests("sessions.list")).filter(isDashboardRequest);
       await gateway.deferNext("sessions.list", { hasBoard: true });
@@ -105,7 +105,7 @@ suite.define(() => {
       // Confirm the real store consumed the failed wire response before capturing the UI.
       // The predicate runs in the page, so the limit crosses as an argument.
       await page.waitForFunction((rosterLimit) => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               agentSelection: { state: { scopeId: string | null } };
@@ -130,7 +130,7 @@ suite.define(() => {
       }, SIDEBAR_SESSION_ROSTER_LIMIT);
       await page.screenshot({ path: path.join(artifactDir, "refresh-failed.png") });
       expect(await dashboards.getByText("Deploy monitor", { exact: true }).isVisible()).toBe(true);
-      expect(await page.locator("openclaw-router-outlet").getAttribute("inert")).toBeNull();
+      expect(await page.locator("carapace-router-outlet").getAttribute("inert")).toBeNull();
       await expect.poll(() => dashboards.getByRole("alert").allTextContents()).toHaveLength(1);
       expect(await dashboards.getByRole("alert").textContent()).toContain(
         "Dashboard refresh unavailable",
@@ -188,7 +188,7 @@ suite.define(() => {
           },
         });
         await page.goto(`${suite.server.baseUrl}dashboards`);
-        const dashboards = page.locator("openclaw-dashboards-page");
+        const dashboards = page.locator("carapace-dashboards-page");
         if (suspending) {
           await dashboards.locator('[aria-busy="true"]').waitFor();
           expect(await dashboards.getByRole("alert").count()).toBe(0);
@@ -288,13 +288,13 @@ suite.define(() => {
           });
           await waitForControlUiRoute(page, { pathname: "/new", routeId: "new-session" });
           await page.waitForFunction(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { agents: { state: { agentsList: unknown } } } };
             };
             return app.runtime?.context.agents.state.agentsList != null;
           });
           await page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: {
                 context: {
                   navigate: (routeId: string) => void;
@@ -306,7 +306,7 @@ suite.define(() => {
               };
             };
             if (!app.runtime) {
-              throw new Error("OpenClaw application runtime is unavailable");
+              throw new Error("Carapace application runtime is unavailable");
             }
             app.runtime.context.agentSelection.setScope(null);
             if (app.runtime.context.agentSelection.state.scopeId !== null) {

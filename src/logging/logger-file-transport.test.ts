@@ -12,7 +12,7 @@ import { testApi } from "./logger.test-support.js";
 import { registerSecretValueForRedaction } from "./secret-redaction-registry.js";
 import { resetSecretRedactionRegistryForTest } from "./secret-redaction-registry.test-support.js";
 
-const logPathTracker = createSuiteLogPathTracker("openclaw-file-transport-");
+const logPathTracker = createSuiteLogPathTracker("carapace-file-transport-");
 
 function writeStableRecords(): void {
   const logger = getLogger();
@@ -105,11 +105,11 @@ describe("async logger file transport", () => {
     expect(markers).toEqual([
       expect.objectContaining({
         dropped: 2,
-        message: "[openclaw] file log queue overflow; dropped 2 oldest records",
+        message: "[carapace] file log queue overflow; dropped 2 oldest records",
       }),
     ]);
     expect(records.map((record) => record.message)).toEqual([
-      "[openclaw] file log queue overflow; dropped 2 oldest records",
+      "[carapace] file log queue overflow; dropped 2 oldest records",
       "queued-record-3",
       "queued-record-4",
       "queued-record-5",

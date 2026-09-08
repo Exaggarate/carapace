@@ -7,7 +7,7 @@ import { createUpdateProgress, printResult } from "./progress.js";
 vi.mock("../../infra/update-run-ledger.js", () => ({ getUpdateRun: vi.fn() }));
 
 const runId = "6631ecee-adbf-41e8-a0e3-1b88b28b0a59";
-const context = { runId, env: { OPENCLAW_STATE_DIR: "/isolated/update-progress" } };
+const context = { runId, env: { CARAPACE_STATE_DIR: "/isolated/update-progress" } };
 const step = { name: "build", command: "pnpm build", index: 0, total: 1 };
 const result = { runId, status: "ok" as const, mode: "git" as const, steps: [], durationMs: 1200 };
 
@@ -104,7 +104,7 @@ describe("update progress", () => {
     const lines = log.mock.calls.flat();
     const finalPhase = lines.indexOf("Phase: finished");
     const report = lines.findIndex(
-      (line) => typeof line === "string" && line.includes("OpenClaw updated to 2026.9.3"),
+      (line) => typeof line === "string" && line.includes("Carapace updated to 2026.9.3"),
     );
     expect(finalPhase).toBeGreaterThan(-1);
     expect(report).toBeGreaterThan(finalPhase);

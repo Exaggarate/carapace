@@ -1,7 +1,7 @@
 import {
   createMeetingLeaveSource,
   createMeetingTranscriptSource,
-} from "openclaw/plugin-sdk/meeting-page-script-runtime";
+} from "carapace/plugin-sdk/meeting-page-script-runtime";
 import { TEAMS_MEETING_SELECTORS } from "./teams-meetings-selectors.js";
 import { teamsMeetingStatusCallSource } from "./teams-meetings-status-call-source.js";
 import { teamsMeetingStatusPreludeSource } from "./teams-meetings-status-prejoin-source.js";
@@ -116,9 +116,9 @@ export function teamsMeetingTranscriptScript(
     expectedIdentity,
     finalize,
     globals: {
-      captionArchive: "__openclawTeamsCaptionArchive",
-      captions: "__openclawTeamsCaptions",
-      meeting: "__openclawTeamsMeeting",
+      captionArchive: "__carapaceTeamsCaptionArchive",
+      captions: "__carapaceTeamsCaptions",
+      meeting: "__carapaceTeamsMeeting",
     },
     meetingSessionId,
     pageIdentitySource: pageIdentityFunctionSource(),
@@ -154,8 +154,8 @@ export function teamsMeetingLeaveScript(params: {
     platform: {
       displayName: "Teams",
       globals: {
-        audioOutputs: "__openclawTeamsAudioOutputs",
-        meeting: "__openclawTeamsMeeting",
+        audioOutputs: "__carapaceTeamsAudioOutputs",
+        meeting: "__carapaceTeamsMeeting",
       },
     },
     selectors,

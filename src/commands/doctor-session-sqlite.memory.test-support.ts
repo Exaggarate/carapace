@@ -5,8 +5,8 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { withSuppressedNotes } from "../../packages/terminal-core/src/note.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { resolveTargetSqlitePath } from "./doctor-session-sqlite-readers.js";
 import { runDoctorSessionSqlite } from "./doctor-session-sqlite.js";
 import { noteSessionTranscriptHealth } from "./doctor-session-transcripts.js";
@@ -16,8 +16,8 @@ export const sqliteImportMemorySupportUrl = import.meta.url;
 async function main() {
   const [stateDir, scenario] = process.argv.slice(2);
   assert(stateDir && scenario);
-  process.env.OPENCLAW_STATE_DIR = stateDir;
-  process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+  process.env.CARAPACE_STATE_DIR = stateDir;
+  process.env.CARAPACE_CONFIG_PATH = path.join(stateDir, "carapace.json");
   const sessionCount = scenario === "batch" ? 256 : 1;
   const eventCount =
     scenario === "deep" || scenario === "public" ? 100_000 : scenario === "batch" ? 64 : 8;
@@ -142,8 +142,8 @@ async function main() {
     env: process.env,
   });
   assert.equal(rerun.totals.importedEntries, 0);
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   process.stdout.write(
     JSON.stringify({
       scenario,

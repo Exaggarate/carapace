@@ -4,7 +4,7 @@ import { persistCodexContextCompactionActivity } from "./context-compaction-acti
 const appendMessage = vi.hoisted(() => vi.fn());
 const publishUpdate = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", () => ({
+vi.mock("carapace/plugin-sdk/session-transcript-runtime", () => ({
   appendSessionTranscriptMessageByIdentity: appendMessage,
   publishSessionTranscriptUpdateByIdentity: publishUpdate,
 }));
@@ -34,7 +34,7 @@ describe("persistCodexContextCompactionActivity", () => {
         agentId: "main",
         sessionId: "session-1",
         sessionKey: "agent:main:dashboard:session-1",
-        storePath: "/state/openclaw-agent.sqlite",
+        storePath: "/state/carapace-agent.sqlite",
       },
       threadId: "thread-1",
       turnId: "turn-1",
@@ -50,12 +50,12 @@ describe("persistCodexContextCompactionActivity", () => {
       eventId: "codex-context-compaction:thread-1:turn-1:compact-1",
       message: {
         role: "custom",
-        customType: "openclaw.context-compaction",
+        customType: "carapace.context-compaction",
         content: "Context compacted",
         display: true,
         excludeFromContext: true,
         idempotencyKey: "codex-context-compaction:thread-1:turn-1:compact-1",
-        __openclaw: { runId: "run-1", itemId: "compact-1" },
+        __carapace: { runId: "run-1", itemId: "compact-1" },
       },
     });
     expect(publishUpdate).toHaveBeenCalledOnce();

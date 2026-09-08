@@ -1,11 +1,11 @@
 // Logbook SQLite store: frames on disk, everything else in one plugin-owned DB.
 import { chmodSync, mkdirSync, rmdirSync, rmSync } from "node:fs";
 import path from "node:path";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   configureSqliteConnectionPragmas,
   migrateSqliteSchemaToStrict,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   compileSqliteQueryBindings,
   executeSqliteQuerySync,
@@ -14,7 +14,7 @@ import {
   openNodeSqliteDatabase,
   runSqliteImmediateTransactionSync,
   type Selectable,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
 import type {
   LogbookBatch,
   LogbookBatchStatus,

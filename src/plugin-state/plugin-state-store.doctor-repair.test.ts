@@ -2,12 +2,12 @@ import { rmSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   createPluginStateSyncKeyedStore,
   MAX_PLUGIN_STATE_BULK_DELETE_ENTRIES,
@@ -21,11 +21,11 @@ import {
   seedPluginStateEntriesForTests,
 } from "./plugin-state-store.test-helpers.js";
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 
 beforeAll(async () => {
-  testState = await createOpenClawTestState({ label: "plugin-state-doctor-repair" });
-  rmSync(path.dirname(resolveOpenClawStateSqlitePath()), { recursive: true, force: true });
+  testState = await createCarapaceTestState({ label: "plugin-state-doctor-repair" });
+  rmSync(path.dirname(resolveCarapaceStateSqlitePath()), { recursive: true, force: true });
 });
 
 beforeEach(() => {
@@ -114,7 +114,7 @@ describe("plugin state Doctor repair", () => {
       { pluginId: "codex", namespace, key: "binding:c", value: { generation: 1 } },
       { pluginId: "codex", namespace, key: "binding:d", value: { generation: 1 }, createdAt: -1 },
     ]);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const replaceJson = database.prepare(
       "UPDATE plugin_state_entries SET value_json = ? WHERE plugin_id = ? AND namespace = ? AND entry_key = ?",
     );

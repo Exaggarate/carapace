@@ -2,7 +2,7 @@ import { request as httpRequest } from "node:http";
 import { request as httpsRequest } from "node:https";
 import { TLSSocket } from "node:tls";
 import { normalizeTlsFingerprint } from "../../packages/gateway-client/src/client-address-utils.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const GATEWAY_HTTP_PROBE_MAX_RESPONSE_CHARS = 1024;
 
@@ -114,7 +114,7 @@ export async function requestGatewayLocalHttpProbe(params: {
 }
 
 export function createConfiguredGatewayLocalProbe(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): ConfiguredGatewayLocalProbe {
   const tlsConfig = config.gateway?.tls;
   let tlsFingerprint: string | undefined;

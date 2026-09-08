@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { note as clackNote } from "@clack/prompts";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { iterateGraphemes, visibleWidth } from "./ansi.js";
 import { stylePromptTitle } from "./prompt-style.js";
 
@@ -208,7 +208,7 @@ export function noteToStream(
 ) {
   if (
     suppressNotesStorage.getStore() === true ||
-    isSuppressedByEnv(process.env.OPENCLAW_SUPPRESS_NOTES)
+    isSuppressedByEnv(process.env.CARAPACE_SUPPRESS_NOTES)
   ) {
     return;
   }

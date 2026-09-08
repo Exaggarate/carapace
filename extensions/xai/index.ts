@@ -1,11 +1,11 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-// Xai plugin entrypoint registers its OpenClaw integration.
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
-import { defaultToolStreamExtraParams } from "openclaw/plugin-sdk/provider-stream-shared";
-import { jsonResult } from "openclaw/plugin-sdk/provider-web-search";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+// Xai plugin entrypoint registers its Carapace integration.
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "carapace/plugin-sdk/provider-model-shared";
+import { defaultToolStreamExtraParams } from "carapace/plugin-sdk/provider-stream-shared";
+import { jsonResult } from "carapace/plugin-sdk/provider-web-search";
 import {
   buildMissingCodeExecutionApiKeyPayload,
   createCodeExecutionToolDefinition,
@@ -116,7 +116,7 @@ function shouldExposeXaiBilledTool(params: {
   return isXaiProviderId(activeProvider) || params.enabled === true;
 }
 
-function createLazyCodeExecutionTool(ctx: OpenClawPluginToolContext) {
+function createLazyCodeExecutionTool(ctx: CarapacePluginToolContext) {
   const effectiveConfig = ctx.runtimeConfig ?? ctx.config;
   const codeExecutionConfig = readPluginCodeExecutionConfig(effectiveConfig);
   if (
@@ -147,7 +147,7 @@ function createLazyCodeExecutionTool(ctx: OpenClawPluginToolContext) {
   );
 }
 
-function createLazyXSearchTool(ctx: OpenClawPluginToolContext) {
+function createLazyXSearchTool(ctx: CarapacePluginToolContext) {
   const effectiveConfig = ctx.runtimeConfig ?? ctx.config;
   const xSearchConfig = resolveEffectiveXSearchConfig(effectiveConfig);
   if (
@@ -211,7 +211,7 @@ export default defineSingleProviderPluginEntry({
           return null;
         }
         const { resolveApiKeyForProvider } =
-          await import("openclaw/plugin-sdk/provider-auth-runtime");
+          await import("carapace/plugin-sdk/provider-auth-runtime");
         const grokProxy = isXaiGrokProxyBaseUrl(
           ctx.config.models?.providers?.[PROVIDER_ID]?.baseUrl,
         );

@@ -1,4 +1,4 @@
-import type { AgentRunTimeoutPhase } from "@openclaw/normalization-core/agent-run-terminal-outcome";
+import type { AgentRunTimeoutPhase } from "@carapace/normalization-core/agent-run-terminal-outcome";
 import type { AgentRunTerminalReplySnapshot } from "./agent-run-terminal-reply.js";
 
 /** Normalized terminal or pending state returned by `agent.wait`. */

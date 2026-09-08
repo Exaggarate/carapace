@@ -1,6 +1,6 @@
 import {
   assertContextEngineHostSupport,
-  OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+  CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
 } from "../../../context-engine/host-compat.js";
 import { resolveContextEngineOwnerPluginId } from "../../../context-engine/registry.js";
 import { createBundleLspToolRuntime } from "../../agent-bundle-lsp-runtime.js";
@@ -162,7 +162,7 @@ export async function runEmbeddedAttempt(
       assertContextEngineHostSupport({
         contextEngine: activeContextEngine,
         operation: "agent-run",
-        host: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        host: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
       });
     }
     const resolveActiveContextEnginePluginId = () =>

@@ -2,8 +2,8 @@
 import {
   asNonNegativeFiniteNumber,
   asPositiveFiniteNumber,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { ReplyMediaAttachment } from "../auto-reply/reply-payload.js";
 import { extractToolResultText } from "./embedded-agent-tool-results.js";
 import { normalizeToolPolicyName } from "./tool-policy.js";
@@ -164,7 +164,7 @@ function isToolResultMediaTrusted(
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.embeddedSubscribeToolsTestApi")
+    Symbol.for("carapace.embeddedSubscribeToolsTestApi")
   ] = { isToolResultMediaTrusted };
 }
 

@@ -3,7 +3,7 @@
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import { primeConfiguredBindingRegistry } from "../channels/plugins/configured-binding-registry.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ChannelPluginLoadIntent } from "../plugins/loader-types.js";
 import type { PluginLookUpTable } from "../plugins/plugin-lookup-table.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
@@ -32,8 +32,8 @@ type GatewayStartupTrace = {
 };
 
 type GatewayPluginBootstrapParams = {
-  cfg: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   workspaceDir?: string;
   log: GatewayPluginBootstrapLog;
   coreGatewayHandlers?: Record<string, GatewayRequestHandler>;

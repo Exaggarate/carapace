@@ -1,9 +1,9 @@
 // Repairs canonical binding references after agent config migration.
-import { asNullableRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord, isRecord } from "@carapace/normalization-core/record-coerce";
 import { AgentSelectionRequiredError, listAgentIds } from "../../../agents/agent-scope-config.js";
 import { resolveReadOnlyChannelPluginsForConfig } from "../../../channels/plugins/read-only.js";
 import type { AgentRouteBinding } from "../../../config/types.agents.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveNormalizedAccountEntry } from "../../../routing/account-lookup.js";
 import {
   listChannelAccountRouteBindings,
@@ -17,9 +17,9 @@ import {
 import type { DoctorConfigMutationResult } from "./config-mutation-state.js";
 
 export function pruneBindingsForMissingAgents(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const agents = cfg.agents?.list;
   const bindings = cfg.bindings;
   if (!Array.isArray(agents) || agents.length === 0 || !Array.isArray(bindings)) {
@@ -58,7 +58,7 @@ export function pruneBindingsForMissingAgents(
 
 /** Materialize only channel-account owners already established by narrower route bindings. */
 export function repairUnownedChannelAccountBindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): DoctorConfigMutationResult {
   const agentIds = new Set(listAgentIds(cfg));
   const additions: AgentRouteBinding[] = [];

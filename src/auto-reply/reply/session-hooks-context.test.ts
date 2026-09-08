@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
 import {
@@ -67,7 +67,7 @@ vi.mock("../../plugin-sdk/browser-maintenance.js", () => ({
   closeTrackedBrowserTabsForSessions: sessionCleanupMocks.closeTrackedBrowserTabsForSessions,
 }));
 
-const suiteTempDirs = createSuiteTempRootTracker({ prefix: "openclaw-session-hooks-" });
+const suiteTempDirs = createSuiteTempRootTracker({ prefix: "carapace-session-hooks-" });
 
 async function createStorePath(prefix: string): Promise<string> {
   const root = await suiteTempDirs.make(prefix);
@@ -124,7 +124,7 @@ async function createStoredSession(params: {
   return { storePath, transcriptPath };
 }
 
-type SessionResetConfig = NonNullable<NonNullable<OpenClawConfig["session"]>["reset"]>;
+type SessionResetConfig = NonNullable<NonNullable<CarapaceConfig["session"]>["reset"]>;
 
 async function initStoredSessionState(params: {
   prefix: string;
@@ -140,7 +140,7 @@ async function initStoredSessionState(params: {
       store: storePath,
       ...(params.reset ? { reset: params.reset } : {}),
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   await initSessionState({
     ctx: { Body: "hello", SessionKey: params.sessionKey },
@@ -222,7 +222,7 @@ describe("session hook context wiring", () => {
       const storePath = await createStorePath(`memory-${reason}`);
       const workspaceDir = path.join(path.dirname(storePath), "workspace");
       const automatic = reason === "daily" || reason === "idle";
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { workspace: workspaceDir } },
         hooks: { internal: { enabled: true, entries: { "session-memory": { enabled: true } } } },
         session: {
@@ -350,9 +350,9 @@ describe("session hook context wiring", () => {
 
   it("passes sessionKey to session_start hook context", async () => {
     const sessionKey = "agent:main:telegram:direct:123";
-    const storePath = await createStorePath("openclaw-session-hook-start");
+    const storePath = await createStorePath("carapace-session-hook-start");
     await writeStore(storePath, {});
-    const cfg = { session: { store: storePath } } as OpenClawConfig;
+    const cfg = { session: { store: storePath } } as CarapaceConfig;
 
     await initSessionState({
       ctx: { Body: "hello", SessionKey: sessionKey },
@@ -369,7 +369,7 @@ describe("session hook context wiring", () => {
   it("starts the first reply lifecycle for a session created by admission without resetting it", async () => {
     const sessionKey = "agent:main:dashboard:admitted-goal";
     const sessionId = "admitted-session";
-    const storePath = await createStorePath("openclaw-session-hook-admission");
+    const storePath = await createStorePath("carapace-session-hook-admission");
     const now = Date.now();
     const seed: SessionEntry = {
       sessionId,
@@ -397,7 +397,7 @@ describe("session hook context wiring", () => {
     await writeStore(storePath, { [sessionKey]: seed });
     const params = {
       ctx: { Body: seed.goal?.objective, SessionKey: sessionKey },
-      cfg: { session: { store: storePath } } as OpenClawConfig,
+      cfg: { session: { store: storePath } } as CarapaceConfig,
       commandAuthorized: true,
       expectedExistingSessionId: sessionId,
       pinExpectedExistingSession: true,
@@ -437,11 +437,11 @@ describe("session hook context wiring", () => {
   it("passes sessionKey to session_end hook context on reset", async () => {
     const sessionKey = "agent:main:telegram:direct:123";
     const { storePath } = await createStoredSession({
-      prefix: "openclaw-session-hook-end",
+      prefix: "carapace-session-hook-end",
       sessionKey,
       sessionId: "old-session",
     });
-    const cfg = { session: { store: storePath } } as OpenClawConfig;
+    const cfg = { session: { store: storePath } } as CarapaceConfig;
 
     await initSessionState({
       ctx: { Body: "/new", SessionKey: sessionKey },
@@ -484,14 +484,14 @@ describe("session hook context wiring", () => {
     );
     const sessionKey = "agent:main:telegram:direct:held-rollover";
     const { storePath } = await createStoredSession({
-      prefix: "openclaw-session-hook-held-rollover",
+      prefix: "carapace-session-hook-held-rollover",
       sessionKey,
       sessionId: "old-held-session",
     });
 
     await initSessionState({
       ctx: { Body: "/new", SessionKey: sessionKey },
-      cfg: { session: { store: storePath } } as OpenClawConfig,
+      cfg: { session: { store: storePath } } as CarapaceConfig,
       commandAuthorized: true,
     });
 
@@ -519,7 +519,7 @@ describe("session hook context wiring", () => {
     );
     const sessionKey = "agent:main:telegram:direct:restart-handoff";
     const { storePath } = await createStoredSession({
-      prefix: "openclaw-session-hook-restart-handoff",
+      prefix: "carapace-session-hook-restart-handoff",
       sessionKey,
       sessionId: "old-restart-session",
     });
@@ -530,7 +530,7 @@ describe("session hook context wiring", () => {
       markGatewayRestartDraining();
       await initSessionState({
         ctx: { Body: "/new", SessionKey: sessionKey },
-        cfg: { session: { store: storePath } } as OpenClawConfig,
+        cfg: { session: { store: storePath } } as CarapaceConfig,
         commandAuthorized: true,
       });
       await vi.waitFor(() => expect(releases).toHaveLength(3));
@@ -550,12 +550,12 @@ describe("session hook context wiring", () => {
   it("marks explicit /reset rollovers with reason reset", async () => {
     const sessionKey = "agent:main:telegram:direct:456";
     const { storePath } = await createStoredSession({
-      prefix: "openclaw-session-hook-explicit-reset",
+      prefix: "carapace-session-hook-explicit-reset",
       sessionKey,
       sessionId: "reset-session",
       text: "reset me",
     });
-    const cfg = { session: { store: storePath } } as OpenClawConfig;
+    const cfg = { session: { store: storePath } } as CarapaceConfig;
 
     await initSessionState({
       ctx: { Body: "/reset", SessionKey: sessionKey },
@@ -570,7 +570,7 @@ describe("session hook context wiring", () => {
   it("maps custom reset trigger aliases to the new-session reason", async () => {
     const sessionKey = "agent:main:telegram:direct:alias";
     const { storePath } = await createStoredSession({
-      prefix: "openclaw-session-hook-reset-alias",
+      prefix: "carapace-session-hook-reset-alias",
       sessionKey,
       sessionId: "alias-session",
       text: "alias me",
@@ -580,7 +580,7 @@ describe("session hook context wiring", () => {
         store: storePath,
         resetTriggers: ["/fresh"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await initSessionState({
       ctx: { Body: "/fresh", SessionKey: sessionKey },
@@ -598,7 +598,7 @@ describe("session hook context wiring", () => {
       vi.setSystemTime(new Date(2026, 0, 18, 5, 0, 0));
       const sessionKey = "agent:main:telegram:direct:daily";
       await initStoredSessionState({
-        prefix: "openclaw-session-hook-daily",
+        prefix: "carapace-session-hook-daily",
         sessionKey,
         sessionId: "daily-session",
         text: "daily",
@@ -624,7 +624,7 @@ describe("session hook context wiring", () => {
       vi.setSystemTime(new Date(2026, 0, 18, 5, 0, 0));
       const sessionKey = "agent:main:telegram:direct:idle";
       await initStoredSessionState({
-        prefix: "openclaw-session-hook-idle",
+        prefix: "carapace-session-hook-idle",
         sessionKey,
         sessionId: "idle-session",
         text: "idle",
@@ -659,7 +659,7 @@ describe("session hook context wiring", () => {
       registerInternalHook("session:auto-reset", listener);
       const sessionKey = `agent:main:telegram:direct:auto-${reason}`;
       await initStoredSessionState({
-        prefix: `openclaw-session-auto-${reason}`,
+        prefix: `carapace-session-auto-${reason}`,
         sessionKey,
         sessionId: `auto-${reason}-session`,
         text: reason,
@@ -689,7 +689,7 @@ describe("session hook context wiring", () => {
       vi.setSystemTime(new Date(2026, 0, 18, 5, 30, 0));
       const sessionKey = "agent:main:telegram:direct:overlap";
       await initStoredSessionState({
-        prefix: "openclaw-session-hook-overlap",
+        prefix: "carapace-session-hook-overlap",
         sessionKey,
         sessionId: "overlap-session",
         text: "overlap",

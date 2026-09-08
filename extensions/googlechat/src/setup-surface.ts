@@ -1,4 +1,4 @@
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
+import { createChannelDmPolicy } from "carapace/plugin-sdk/channel-dm-policy";
 // Googlechat plugin module implements setup surface behavior.
 import {
   applySetupAccountConfigPatch,
@@ -11,11 +11,11 @@ import {
   splitSetupEntries,
   createSetupTranslator,
   type ChannelSetupWizard,
-} from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/setup";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultGoogleChatAccountId, resolveGoogleChatAccount } from "./accounts.js";
 
 const t = createSetupTranslator();

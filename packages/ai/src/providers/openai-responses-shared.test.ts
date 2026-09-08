@@ -121,7 +121,7 @@ async function* responseEvents(events: Array<Record<string, unknown>>) {
 
 describe("convertResponsesToolPayload", () => {
   beforeEach(() => {
-    // Mimic the OpenClaw host strict-tool policy: native OpenAI routes force
+    // Mimic the Carapace host strict-tool policy: native OpenAI routes force
     // strict=true, proxy-like routes leave the flag unset.
     configureAiTransportHost({
       resolveOpenAIStrictToolSetting: (model, options) => {
@@ -433,7 +433,7 @@ describe("convertResponsesMessages", () => {
       role: "developer",
       content: [{ type: "input_text", text: "Stable\nDynamic" }],
     });
-    expect(JSON.stringify(input)).not.toContain("OPENCLAW_CACHE_BOUNDARY");
+    expect(JSON.stringify(input)).not.toContain("CARAPACE_CACHE_BOUNDARY");
   });
 
   it("omits phase-tagged assistant replay ids without reasoning", () => {
@@ -847,11 +847,11 @@ describe("convertResponsesMessages", () => {
                     content: [{ type: "reasoning_text", text: "safe content" }],
                     encrypted_content: "route-bound-ciphertext",
                     ...(embeddedMetadata !== undefined
-                      ? { __openclaw_replay: embeddedMetadata }
+                      ? { __carapace_replay: embeddedMetadata }
                       : {}),
                   }),
                   ...(blockMetadata !== undefined
-                    ? { openclawReasoningReplay: blockMetadata }
+                    ? { carapaceReasoningReplay: blockMetadata }
                     : {}),
                 },
               ] as unknown as AssistantMessage["content"],
@@ -877,7 +877,7 @@ describe("convertResponsesMessages", () => {
         summary: [{ type: "summary_text", text: "safe summary" }],
         content: [{ type: "reasoning_text", text: "safe content" }],
       });
-      expect(reasoningItem).not.toHaveProperty("__openclaw_replay");
+      expect(reasoningItem).not.toHaveProperty("__carapace_replay");
       expect(reasoningItem).toHaveProperty("encrypted_content", "route-bound-ciphertext");
     },
   );

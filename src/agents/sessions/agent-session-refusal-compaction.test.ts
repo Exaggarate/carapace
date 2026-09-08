@@ -4,7 +4,7 @@ import type {
   Context,
   Model,
   SimpleStreamOptions,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { streamAnthropic } from "../../../packages/ai/src/providers/anthropic.js";
 import {

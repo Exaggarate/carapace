@@ -1,6 +1,6 @@
 // Transcript persistence and source-reply rewrites shared by chat send and abort.
-import { asOptionalRecord as transcriptEventRecord } from "@openclaw/normalization-core/record-coerce";
-import type { Result } from "@openclaw/normalization-core/result";
+import { asOptionalRecord as transcriptEventRecord } from "@carapace/normalization-core/record-coerce";
+import type { Result } from "@carapace/normalization-core/result";
 import { getReplyPayloadMetadata } from "../../auto-reply/reply-payload.js";
 import {
   findTranscriptEvent,
@@ -16,7 +16,7 @@ import {
 import type { SessionLifecycleRevisionExpectation } from "../../config/sessions/session-transcript-turn-lifecycle.types.js";
 import { applyAssistantDeliveryDirectives } from "../../config/sessions/transcript-assistant-delivery.js";
 import { resolveMirroredTranscriptText } from "../../config/sessions/transcript-mirror.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeMediaReferenceForComparison } from "../../media/media-reference-comparison.js";
 import { splitMediaFromOutput } from "../../media/parse.js";
 import { ASSISTANT_DISPLAY_CONTENT_FIELD } from "../../shared/assistant-display-content.js";
@@ -253,7 +253,7 @@ function findSourceReplyTranscriptMirrorByIdempotencyKeyInEvents(
   idempotencyKey: string,
 ): { messageId: string; message: Record<string, unknown> } | null {
   const found = findAssistantTranscriptMessageByIdempotencyKeyInEvents(events, idempotencyKey);
-  if (found?.message.provider !== "openclaw" || found.message.model !== "delivery-mirror") {
+  if (found?.message.provider !== "carapace" || found.message.model !== "delivery-mirror") {
     return null;
   }
   return found;
@@ -303,7 +303,7 @@ function findSourceReplyTranscriptMirrorByMetadataInEvents(params: {
     return (
       typeof transcriptEventId(event) === "string" &&
       message?.role === "assistant" &&
-      message.provider === "openclaw" &&
+      message.provider === "carapace" &&
       message.model === "delivery-mirror" &&
       extractAssistantTranscriptText(message) === expectedText
     );
@@ -349,7 +349,7 @@ export async function appendAssistantTranscriptMessage(params: {
     runId: string;
   };
   ttsSupplement?: GatewayInjectedTtsSupplementMarker;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): Promise<TranscriptAppendResult> {
   const scope = assistantTranscriptScope(params);
   if (!scope) {

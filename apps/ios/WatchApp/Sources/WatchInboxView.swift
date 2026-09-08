@@ -372,7 +372,7 @@ private struct WatchControlSurfaceView: View {
                     self.directNode.endpointText ?? String(localized: "Enable from iPhone")),
                 subtitle: .localized(
                     self.directNode.isConfigured
-                        ? "Uses Wi-Fi or cellular while OpenClaw is active"
+                        ? "Uses Wi-Fi or cellular while Carapace is active"
                         : "Open iPhone Settings → Apple Watch"),
                 accessory: .verbatim(self.directNode.isConnected
                     ? String(localized: "Online")
@@ -608,7 +608,7 @@ private struct WatchControlSurfaceView: View {
         case "system":
             String(localized: "System")
         default:
-            "OpenClaw"
+            "Carapace"
         }
     }
 
@@ -751,7 +751,7 @@ private struct WatchClawAvatar: View {
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
         } else {
-            Image("OpenClawIcon")
+            Image("CarapaceIcon")
                 .resizable()
                 .scaledToFit()
         }
@@ -1004,7 +1004,7 @@ private struct WatchActionCard: View {
     var body: some View {
         Button(action: self.action) {
             WatchStackCard(
-                label: .localized("OpenClaw"),
+                label: .localized("Carapace"),
                 title: .verbatim(self.title),
                 subtitle: .verbatim(self.subtitle),
                 badge: nil)
@@ -1156,7 +1156,7 @@ private struct WatchChatBubble: View {
         case "system":
             String(localized: "System")
         default:
-            "OpenClaw"
+            "Carapace"
         }
     }
 }
@@ -1385,7 +1385,7 @@ private struct WatchChatComposer: View {
                 self.onComposeMessage()
             } label: {
                 HStack(spacing: 5) {
-                    Text("Message OpenClaw")
+                    Text("Message Carapace")
                         .font(WatchClawType.body(size: 12, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

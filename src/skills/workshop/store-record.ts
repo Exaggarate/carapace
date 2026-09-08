@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { z } from "zod";
 import {
   MAX_WORKSPACE_SKILL_SUPPORT_FILE_BYTES,

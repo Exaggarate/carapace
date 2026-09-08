@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import {
-  openOpenClawAgentDatabase,
-  openOpenClawStateDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  openCarapaceAgentDatabase,
+  openCarapaceStateDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { cleanupQaGatewayTempRoots } from "./gateway-child-artifacts.js";
 import { stageQaLiveApiKeyProfiles } from "./providers/live-frontier/auth.js";
 import { readQaAuthProfiles } from "./providers/shared/auth-store.js";
@@ -27,15 +27,15 @@ await Promise.all(
 const stores = roots.map((root) => {
   const stateDir = path.join(root, "state");
   const agentDir = path.join(stateDir, "agents", "qa", "agent");
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+  const env = { CARAPACE_STATE_DIR: stateDir };
   return {
     agentDir,
-    agent: openOpenClawAgentDatabase({
+    agent: openCarapaceAgentDatabase({
       agentId: "qa",
       env,
-      path: path.join(agentDir, "openclaw-agent.sqlite"),
+      path: path.join(agentDir, "carapace-agent.sqlite"),
     }),
-    shared: openOpenClawStateDatabase({ env }),
+    shared: openCarapaceStateDatabase({ env }),
     profiles: readQaAuthProfiles(agentDir),
   };
 });

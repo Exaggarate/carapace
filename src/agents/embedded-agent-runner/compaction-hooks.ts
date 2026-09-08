@@ -1,7 +1,7 @@
 /**
  * Runs compaction hooks and post-compaction side effects for embedded sessions.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createInternalHookEvent, triggerInternalHook } from "../../hooks/internal-hooks.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { getGlobalHookRunner } from "../../plugins/hook-runner-global.js";
@@ -16,7 +16,7 @@ import {
 } from "../sessions/compaction/request-budget.js";
 import { log } from "./logger.js";
 
-function resolvePostCompactionIndexSyncMode(config?: OpenClawConfig): "off" | "async" | "await" {
+function resolvePostCompactionIndexSyncMode(config?: CarapaceConfig): "off" | "async" | "await" {
   const mode = config?.agents?.defaults?.compaction?.postIndexSync;
   if (mode === "off" || mode === "async" || mode === "await") {
     return mode;
@@ -25,7 +25,7 @@ function resolvePostCompactionIndexSyncMode(config?: OpenClawConfig): "off" | "a
 }
 
 type PostCompactionSession = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   sessionId?: string;
   agentId?: string;

@@ -4,12 +4,12 @@ import { EventEmitter } from "node:events";
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   bundledDistPluginFile,
   bundledPluginFile,
   bundledPluginRoot,
-} from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it as baseIt, vi } from "vitest";
 import { copyBundledPluginMetadata } from "../../scripts/copy-bundled-plugin-metadata.mts";
 import {
@@ -26,7 +26,7 @@ import { withTestDir } from "../test-helpers/temp-dir.js";
 
 const it = baseIt.extend<{ tmp: string }>({
   tmp: async ({ task: _task }, use) => {
-    await withTestDir({ prefix: "openclaw-run-node-" }, use);
+    await withTestDir({ prefix: "carapace-run-node-" }, use);
   },
 });
 
@@ -68,7 +68,7 @@ const EXTENSION_INDEX = bundledPluginFile("demo", "index.ts");
 const EXTENSION_SRC = bundledPluginFile("demo", "src/index.ts");
 const EXTENSION_EXTRA_SRC = bundledPluginFile("demo", "src/extra.ts");
 const EXTENSION_SKILL = bundledPluginFile("demo", "skills/SKILL.md");
-const EXTENSION_MANIFEST = bundledPluginFile("demo", "openclaw.plugin.json");
+const EXTENSION_MANIFEST = bundledPluginFile("demo", "carapace.plugin.json");
 const EXTENSION_PACKAGE = bundledPluginFile("demo", "package.json");
 const EXTENSION_README = bundledPluginFile("demo", "README.md");
 const DIST_EXTENSION_INDEX = bundledDistPluginFile("demo", "index.js");
@@ -76,21 +76,21 @@ const DIST_EXTENSION_SRC = bundledDistPluginFile("demo", "src/index.js");
 const DIST_EXTENSION_SKILL = bundledDistPluginFile("demo", "skills/SKILL.md");
 const DIST_EXTENSION_RUNTIME_SRC = "dist-runtime/extensions/demo/src/index.js";
 const DIST_RUNTIME_EXTENSION_INDEX = "dist-runtime/extensions/demo/index.js";
-const DIST_RUNTIME_EXTENSION_MANIFEST = "dist-runtime/extensions/demo/openclaw.plugin.json";
+const DIST_RUNTIME_EXTENSION_MANIFEST = "dist-runtime/extensions/demo/carapace.plugin.json";
 const DIST_RUNTIME_EXTENSION_PACKAGE = "dist-runtime/extensions/demo/package.json";
 const DIST_RUNTIME_EXTENSION_SKILL = "dist-runtime/extensions/demo/skills/SKILL.md";
-const DIST_OPENCLAW_ALIAS_PACKAGE = "dist/extensions/node_modules/openclaw/package.json";
-const DIST_OPENCLAW_ALIAS_PLUGIN_SDK_CORE =
-  "dist/extensions/node_modules/openclaw/plugin-sdk/core.js";
-const DIST_OPENCLAW_ALIAS_PLUGIN_SDK_STRING_COERCE =
-  "dist/extensions/node_modules/openclaw/plugin-sdk/string-coerce-runtime.js";
+const DIST_CARAPACE_ALIAS_PACKAGE = "dist/extensions/node_modules/carapace/package.json";
+const DIST_CARAPACE_ALIAS_PLUGIN_SDK_CORE =
+  "dist/extensions/node_modules/carapace/plugin-sdk/core.js";
+const DIST_CARAPACE_ALIAS_PLUGIN_SDK_STRING_COERCE =
+  "dist/extensions/node_modules/carapace/plugin-sdk/string-coerce-runtime.js";
 const DIFFS_PACKAGE = "extensions/diffs/package.json";
 const DIFFS_VIEWER_RUNTIME_SOURCE = "extensions/diffs/assets/viewer-runtime.js";
 const DIST_DIFFS_VIEWER_RUNTIME = "dist/extensions/diffs/assets/viewer-runtime.js";
 const DIST_RUNTIME_DIFFS_VIEWER_RUNTIME = "dist-runtime/extensions/diffs/assets/viewer-runtime.js";
 const BUNDLED_HOOK_METADATA = "src/hooks/bundled/demo/HOOK.md";
 const DIST_BUNDLED_HOOK_METADATA = "dist/bundled/demo/HOOK.md";
-const DIST_EXTENSION_MANIFEST = bundledDistPluginFile("demo", "openclaw.plugin.json");
+const DIST_EXTENSION_MANIFEST = bundledDistPluginFile("demo", "carapace.plugin.json");
 const DIST_EXTENSION_PACKAGE = bundledDistPluginFile("demo", "package.json");
 
 const OLD_TIME = new Date("2026-03-13T10:00:00.000Z");
@@ -99,7 +99,7 @@ const NEW_TIME = new Date("2026-03-13T12:00:01.000Z");
 
 const BASE_PROJECT_FILES = {
   [ROOT_TSCONFIG]: "{}\n",
-  [ROOT_PACKAGE]: '{"name":"openclaw-test"}\n',
+  [ROOT_PACKAGE]: '{"name":"carapace-test"}\n',
   [DIST_ENTRY]: "console.log('built');\n",
   [BUILD_STAMP]: '{"head":"abc123"}\n',
 } as const;
@@ -175,9 +175,9 @@ async function writeRuntimePostBuildScaffold(tmp: string): Promise<void> {
     [DIST_LEGACY_UPDATE_NODE_RUNNER_COMPAT_2026_9_1]: "export function resolveNodeRunner() {}\n",
     [DIST_LEGACY_CLI_EXIT_COMPAT]: "export function hasMemoryRuntime() { return false; }\n",
     [DIST_LEGACY_CLI_EXIT_COMPAT_ALT]: "export function hasMemoryRuntime() { return false; }\n",
-    [DIST_OPENCLAW_ALIAS_PACKAGE]:
-      '{"name":"openclaw","type":"module","exports":{"./plugin-sdk/core":"./plugin-sdk/core.js"}}\n',
-    [DIST_OPENCLAW_ALIAS_PLUGIN_SDK_CORE]: "export * from '../../../../plugin-sdk/core.js';\n",
+    [DIST_CARAPACE_ALIAS_PACKAGE]:
+      '{"name":"carapace","type":"module","exports":{"./plugin-sdk/core":"./plugin-sdk/core.js"}}\n',
+    [DIST_CARAPACE_ALIAS_PLUGIN_SDK_CORE]: "export * from '../../../../plugin-sdk/core.js';\n",
   });
   await touchProjectFiles(
     tmp,
@@ -190,8 +190,8 @@ async function writeRuntimePostBuildScaffold(tmp: string): Promise<void> {
       DIST_LEGACY_UPDATE_NODE_RUNNER_COMPAT_2026_9_1,
       DIST_LEGACY_CLI_EXIT_COMPAT,
       DIST_LEGACY_CLI_EXIT_COMPAT_ALT,
-      DIST_OPENCLAW_ALIAS_PACKAGE,
-      DIST_OPENCLAW_ALIAS_PLUGIN_SDK_CORE,
+      DIST_CARAPACE_ALIAS_PACKAGE,
+      DIST_CARAPACE_ALIAS_PLUGIN_SDK_CORE,
     ],
     BUILD_TIME,
   );
@@ -202,13 +202,13 @@ function expectedBuildSpawn() {
 }
 
 function statusCommandSpawn() {
-  return [process.execPath, "openclaw.mjs", "status"];
+  return [process.execPath, "carapace.mjs", "status"];
 }
 
 function gatewayStatusCommandSpawn() {
   return [
     process.execPath,
-    "openclaw.mjs",
+    "carapace.mjs",
     "gateway",
     "status",
     "--deep",
@@ -377,7 +377,7 @@ async function runNodeCommand(tmp: string, options: RunNodeTestOptions): Promise
     cwd: tmp,
     args: ["status"],
     ...overrides,
-    env: { ...process.env, OPENCLAW_RUNNER_LOG: "0", ...env },
+    env: { ...process.env, CARAPACE_RUNNER_LOG: "0", ...env },
     execPath: process.execPath,
     platform: options.platform ?? process.platform,
   } as RunNodeTestOptions);
@@ -423,7 +423,7 @@ describe("run-node script", () => {
     const runRuntimePostBuild = vi.fn();
     const result = runNodeCommand(tmp, {
       spawn,
-      env: { OPENCLAW_FORCE_BUILD: "1" },
+      env: { CARAPACE_FORCE_BUILD: "1" },
       runRuntimePostBuild,
     });
     await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce());
@@ -451,16 +451,16 @@ describe("run-node script", () => {
         return createExitedProcess(0);
       };
       const exitCode = await runNodeCommand(tmp, {
-        env: { OPENCLAW_FORCE_BUILD: "1", OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: skipDts },
+        env: { CARAPACE_FORCE_BUILD: "1", CARAPACE_RUN_NODE_SKIP_DTS_BUILD: skipDts },
         spawn,
       });
       expect(exitCode).toBe(0);
       expect(spawnCalls.map(({ args }) => args)).toEqual([
         expectedBuildSpawn().slice(1),
-        ["openclaw.mjs", "status"],
+        ["carapace.mjs", "status"],
       ]);
-      expect(spawnCalls[0]?.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts ?? "1");
-      expect(spawnCalls[1]?.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts);
+      expect(spawnCalls[0]?.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts ?? "1");
+      expect(spawnCalls[1]?.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts);
     },
   );
 
@@ -480,8 +480,8 @@ describe("run-node script", () => {
         stdio: opts?.stdio,
       });
       return createPipedExitedProcess({
-        stdout: args[0] === "openclaw.mjs" ? "child stdout\n" : "",
-        stderr: args[0] === "openclaw.mjs" ? "child stderr\n" : "",
+        stdout: args[0] === "carapace.mjs" ? "child stdout\n" : "",
+        stderr: args[0] === "carapace.mjs" ? "child stderr\n" : "",
       });
     };
     const mutedStream = {
@@ -490,9 +490,9 @@ describe("run-node script", () => {
 
     const exitCode = await runNodeCommand(tmp, {
       env: {
-        OPENCLAW_FORCE_BUILD: "1",
-        OPENCLAW_RUNNER_LOG: "1",
-        OPENCLAW_RUN_NODE_OUTPUT_LOG: outputPath,
+        CARAPACE_FORCE_BUILD: "1",
+        CARAPACE_RUNNER_LOG: "1",
+        CARAPACE_RUN_NODE_OUTPUT_LOG: outputPath,
       },
       spawn,
       stderr: mutedStream,
@@ -503,9 +503,9 @@ describe("run-node script", () => {
     expect(exitCode).toBe(0);
     await expect(fs.readFile(outputPath, "utf-8")).resolves.toContain("child stdout\n");
     await expect(fs.readFile(outputPath, "utf-8")).resolves.toContain("child stderr\n");
-    await expect(fs.readFile(outputPath, "utf-8")).resolves.toContain("[openclaw]");
-    expect(spawnCalls.at(-1)?.args).toEqual(["openclaw.mjs", "status"]);
-    expect(spawnCalls.at(-1)?.env.OPENCLAW_RUN_NODE_OUTPUT_LOG).toBe(outputPath);
+    await expect(fs.readFile(outputPath, "utf-8")).resolves.toContain("[carapace]");
+    expect(spawnCalls.at(-1)?.args).toEqual(["carapace.mjs", "status"]);
+    expect(spawnCalls.at(-1)?.env.CARAPACE_RUN_NODE_OUTPUT_LOG).toBe(outputPath);
     expect(spawnCalls.at(-1)?.stdio).toEqual(["inherit", "pipe", "pipe"]);
   });
 
@@ -538,7 +538,7 @@ describe("run-node script", () => {
 
     const exitCode = await runNodeCommand(tmp, {
       args: ["plugins", "list", "--json"],
-      env: { OPENCLAW_FORCE_BUILD: "1", OPENCLAW_RUN_NODE_OUTPUT_LOG: outputPath },
+      env: { CARAPACE_FORCE_BUILD: "1", CARAPACE_RUN_NODE_OUTPUT_LOG: outputPath },
       spawn,
       stdout,
       stderr,
@@ -568,7 +568,7 @@ describe("run-node script", () => {
     ].join("");
     const spawn = (_cmd: string, args: string[]) =>
       createPipedExitedProcess({
-        stderr: args[0] === "openclaw.mjs" ? childStderr : "",
+        stderr: args[0] === "carapace.mjs" ? childStderr : "",
       });
     const stderrChunks: string[] = [];
     const stderr = {
@@ -583,8 +583,8 @@ describe("run-node script", () => {
 
     const exitCode = await runNodeCommand(tmp, {
       env: {
-        OPENCLAW_RUN_NODE_FILTER_SYNC_IO_STDERR: "1",
-        OPENCLAW_RUN_NODE_OUTPUT_LOG: outputPath,
+        CARAPACE_RUN_NODE_FILTER_SYNC_IO_STDERR: "1",
+        CARAPACE_RUN_NODE_OUTPUT_LOG: outputPath,
       },
       spawn,
       stderr,
@@ -601,7 +601,7 @@ describe("run-node script", () => {
     await expect(fs.readFile(outputPath, "utf-8")).resolves.toContain(childStderr);
   });
 
-  it("adds Node CPU profiling flags to the launched OpenClaw child when requested", async ({
+  it("adds Node CPU profiling flags to the launched Carapace child when requested", async ({
     tmp,
   }) => {
     await setupStampedProject(tmp, {
@@ -622,7 +622,7 @@ describe("run-node script", () => {
     const { spawnSync } = createCurrentGitSpawnRecorder();
 
     const exitCode = await runNodeCommand(tmp, {
-      env: { OPENCLAW_RUN_NODE_CPU_PROF_DIR: ".artifacts/profiles" },
+      env: { CARAPACE_RUN_NODE_CPU_PROF_DIR: ".artifacts/profiles" },
       spawn,
       spawnSync,
       runRuntimePostBuild: skipRuntimePostBuild,
@@ -634,10 +634,10 @@ describe("run-node script", () => {
     expect(childArgs[0]).toBe("--cpu-prof");
     expect(childArgs[1]).toBe(`--cpu-prof-dir=${profileDir}`);
     expect(childArgs[2]).toMatch(
-      /^--cpu-prof-name=openclaw-status-4242-\d{4}-\d{2}-\d{2}T.*\.cpuprofile$/,
+      /^--cpu-prof-name=carapace-status-4242-\d{4}-\d{2}-\d{2}T.*\.cpuprofile$/,
     );
-    expect(childArgs.slice(3)).toEqual(["openclaw.mjs", "status"]);
-    expect(spawnCalls.at(-1)?.env.OPENCLAW_RUN_NODE_CPU_PROF_DIR).toBe(profileDir);
+    expect(childArgs.slice(3)).toEqual(["carapace.mjs", "status"]);
+    expect(spawnCalls.at(-1)?.env.CARAPACE_RUN_NODE_CPU_PROF_DIR).toBe(profileDir);
     expect(fsSync.existsSync(profileDir)).toBe(true);
   });
 
@@ -646,9 +646,9 @@ describe("run-node script", () => {
     const profileDir = path.join(tmp, ".artifacts", "profiles");
     fsSync.mkdirSync(profileDir, { recursive: true });
     const oldProfiles = [
-      "openclaw-status-oldest.cpuprofile",
-      "openclaw-status-middle.cpuprofile",
-      "openclaw-status-newest.cpuprofile",
+      "carapace-status-oldest.cpuprofile",
+      "carapace-status-middle.cpuprofile",
+      "carapace-status-newest.cpuprofile",
     ];
     for (const [index, name] of oldProfiles.entries()) {
       const filePath = path.join(profileDir, name);
@@ -656,15 +656,15 @@ describe("run-node script", () => {
       const mtime = new Date(1_700_000_000_000 + index * 1000);
       fsSync.utimesSync(filePath, mtime, mtime);
     }
-    fsSync.writeFileSync(path.join(profileDir, "openclaw-models-old.cpuprofile"), "{}");
+    fsSync.writeFileSync(path.join(profileDir, "carapace-models-old.cpuprofile"), "{}");
 
     const spawn = () => createExitedProcess(0);
     const { spawnSync } = createCurrentGitSpawnRecorder();
 
     const exitCode = await runNodeCommand(tmp, {
       env: {
-        OPENCLAW_RUN_NODE_CPU_PROF_DIR: ".artifacts/profiles",
-        OPENCLAW_RUN_NODE_CPU_PROF_MAX_FILES: "2",
+        CARAPACE_RUN_NODE_CPU_PROF_DIR: ".artifacts/profiles",
+        CARAPACE_RUN_NODE_CPU_PROF_MAX_FILES: "2",
       },
       spawn,
       spawnSync,
@@ -688,10 +688,10 @@ describe("run-node script", () => {
         path.join(profileDir, expectDefined(oldProfiles[2], "oldProfiles[2] test invariant")),
       ),
     ).toBe(true);
-    expect(fsSync.existsSync(path.join(profileDir, "openclaw-models-old.cpuprofile"))).toBe(true);
+    expect(fsSync.existsSync(path.join(profileDir, "carapace-models-old.cpuprofile"))).toBe(true);
   });
 
-  it("adds Node sync I/O tracing flag to the launched OpenClaw child when requested", async ({
+  it("adds Node sync I/O tracing flag to the launched Carapace child when requested", async ({
     tmp,
   }) => {
     await setupStampedProject(tmp, { oldPaths: [ROOT_SRC, ROOT_TSCONFIG, ROOT_PACKAGE] });
@@ -704,14 +704,14 @@ describe("run-node script", () => {
 
     const exitCode = await runNodeCommand(tmp, {
       args: ["gateway", "--force"],
-      env: { OPENCLAW_TRACE_SYNC_IO: "1" },
+      env: { CARAPACE_TRACE_SYNC_IO: "1" },
       spawn,
       spawnSync,
       runRuntimePostBuild: skipRuntimePostBuild,
     });
 
     expect(exitCode).toBe(0);
-    expect(spawnCalls.at(-1)).toEqual(["--trace-sync-io", "openclaw.mjs", "gateway", "--force"]);
+    expect(spawnCalls.at(-1)).toEqual(["--trace-sync-io", "carapace.mjs", "gateway", "--force"]);
   });
 
   it("surfaces generic output log stream errors", async ({ tmp }) => {
@@ -728,7 +728,7 @@ describe("run-node script", () => {
     } as unknown as NodeJS.WriteStream;
 
     const exitCode = await runNodeCommand(tmp, {
-      env: { OPENCLAW_RUN_NODE_OUTPUT_LOG: outputPath },
+      env: { CARAPACE_RUN_NODE_OUTPUT_LOG: outputPath },
       spawn,
       stderr: mutedStream,
       stdout: mutedStream,
@@ -761,8 +761,8 @@ describe("run-node script", () => {
 
     expect(exitCode).toBe(0);
     const childArgs = spawnCalls.at(-1)?.args ?? [];
-    expect(childArgs).toEqual(["openclaw.mjs", "qa", "matrix"]);
-    expect(spawnCalls.at(-1)?.env.OPENCLAW_RUN_NODE_OUTPUT_LOG).toBeUndefined();
+    expect(childArgs).toEqual(["carapace.mjs", "qa", "matrix"]);
+    expect(spawnCalls.at(-1)?.env.CARAPACE_RUN_NODE_OUTPUT_LOG).toBeUndefined();
   });
 
   it("skips rebuilding when dist is current and the source tree is clean", async ({ tmp }) => {
@@ -787,7 +787,7 @@ describe("run-node script", () => {
       const { spawnSync } = createCurrentGitSpawnRecorder();
       let childEnv: NodeJS.ProcessEnv | undefined;
       const exitCode = await runNodeCommand(tmp, {
-        env: { OPENCLAW_DEV_SOURCE_ROOT: override },
+        env: { CARAPACE_DEV_SOURCE_ROOT: override },
         spawn: (_cmd, _args, options) => {
           childEnv = options.env;
           return createExitedProcess(0);
@@ -796,7 +796,7 @@ describe("run-node script", () => {
         runRuntimePostBuild: skipRuntimePostBuild,
       });
       expect(exitCode).toBe(0);
-      expect(childEnv?.OPENCLAW_DEV_SOURCE_ROOT).toBe(override ?? tmp);
+      expect(childEnv?.CARAPACE_DEV_SOURCE_ROOT).toBe(override ?? tmp);
     },
   );
 
@@ -829,7 +829,7 @@ describe("run-node script", () => {
     expect(spawnCalls).toEqual([
       [
         process.execPath,
-        "openclaw.mjs",
+        "carapace.mjs",
         "qa",
         "suite",
         "--transport",
@@ -861,7 +861,7 @@ describe("run-node script", () => {
       expectedBuildSpawn(),
       [
         process.execPath,
-        "openclaw.mjs",
+        "carapace.mjs",
         "qa",
         "suite",
         "--transport",
@@ -899,17 +899,17 @@ describe("run-node script", () => {
         spawn,
         spawnSync,
         runRuntimePostBuild,
-        env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: disable },
+        env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: disable },
       });
       expect(exitCode).toBe(0);
       expect(spawn.mock.calls.map(([, args]) => args)).toEqual([
         ...(mode === "build" ? [expectedBuildSpawn().slice(1)] : []),
-        ["openclaw.mjs", "qa", "suite"],
+        ["carapace.mjs", "qa", "suite"],
       ]);
       const expectedEnv = {
-        OPENCLAW_BUILD_PRIVATE_QA: "1",
-        OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: disable ?? "0",
+        CARAPACE_BUILD_PRIVATE_QA: "1",
+        CARAPACE_ENABLE_PRIVATE_QA_CLI: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: disable ?? "0",
       };
       for (const call of spawn.mock.calls) {
         expect(call[2].env).toMatchObject(expectedEnv);
@@ -934,7 +934,7 @@ describe("run-node script", () => {
     });
 
     const requirement = resolveBuildRequirement(
-      createBuildRequirementDeps(tmp, { env: { OPENCLAW_BUILD_PRIVATE_QA: "1" } }),
+      createBuildRequirementDeps(tmp, { env: { CARAPACE_BUILD_PRIVATE_QA: "1" } }),
     );
 
     expect(requirement).toEqual({
@@ -954,7 +954,7 @@ describe("run-node script", () => {
       tmp,
       spawn,
       spawnSync,
-      env: { OPENCLAW_WATCH_MODE: "1" },
+      env: { CARAPACE_WATCH_MODE: "1" },
       runRuntimePostBuild,
     });
 
@@ -973,7 +973,7 @@ describe("run-node script", () => {
       },
       oldPaths: [ROOT_SRC, ROOT_TSCONFIG, ROOT_PACKAGE],
     });
-    await fs.rm(resolvePath(tmp, DIST_OPENCLAW_ALIAS_PACKAGE));
+    await fs.rm(resolvePath(tmp, DIST_CARAPACE_ALIAS_PACKAGE));
 
     const runRuntimePostBuild = vi.fn();
     const { spawnCalls, spawn, spawnSync } = createCurrentGitSpawnRecorder();
@@ -981,7 +981,7 @@ describe("run-node script", () => {
       tmp,
       spawn,
       spawnSync,
-      env: { OPENCLAW_WATCH_MODE: "1" },
+      env: { CARAPACE_WATCH_MODE: "1" },
       runRuntimePostBuild,
     });
 
@@ -995,7 +995,7 @@ describe("run-node script", () => {
   }) => {
     await setupStampedProject(tmp, {
       files: {
-        [EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./index.ts"]}}\n',
+        [EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./index.ts"]}}\n',
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
       trackConfig: true,
@@ -1009,7 +1009,7 @@ describe("run-node script", () => {
       tmp,
       spawn,
       spawnSync,
-      env: { OPENCLAW_WATCH_MODE: "1" },
+      env: { CARAPACE_WATCH_MODE: "1" },
       runRuntimePostBuild,
     });
 
@@ -1119,7 +1119,7 @@ describe("run-node script", () => {
     },
     {
       label: "runtime postbuild output",
-      missingPath: DIST_OPENCLAW_ALIAS_PACKAGE,
+      missingPath: DIST_CARAPACE_ALIAS_PACKAGE,
       expectedReason: "required runtime postbuild output missing",
     },
   ]) {
@@ -1153,7 +1153,7 @@ describe("run-node script", () => {
       expect(spawnCalls).toEqual([]);
       expect(runRuntimePostBuild).not.toHaveBeenCalled();
       expect(stderrChunks.join("")).toContain(expectedReason);
-      expect(stderrChunks.join("")).toContain("node openclaw.mjs");
+      expect(stderrChunks.join("")).toContain("node carapace.mjs");
     });
   }
 
@@ -1214,7 +1214,7 @@ describe("run-node script", () => {
         spawn,
         spawnSync,
         env: {
-          OPENCLAW_RUN_NODE_BUILD_LOCK_POLL_MS: "1",
+          CARAPACE_RUN_NODE_BUILD_LOCK_POLL_MS: "1",
         },
         runRuntimePostBuild,
       }),
@@ -1223,7 +1223,7 @@ describe("run-node script", () => {
         spawn,
         spawnSync,
         env: {
-          OPENCLAW_RUN_NODE_BUILD_LOCK_POLL_MS: "1",
+          CARAPACE_RUN_NODE_BUILD_LOCK_POLL_MS: "1",
         },
         runRuntimePostBuild,
       }),
@@ -1246,7 +1246,7 @@ describe("run-node script", () => {
       return createExitedProcess(0);
     });
 
-    const exitCode = await runNodeCommand(tmp, { env: { OPENCLAW_FORCE_BUILD: "1" }, spawn });
+    const exitCode = await runNodeCommand(tmp, { env: { CARAPACE_FORCE_BUILD: "1" }, spawn });
 
     expect(exitCode).toBe(23);
     expect(spawn).toHaveBeenCalledOnce();
@@ -1270,7 +1270,7 @@ describe("run-node script", () => {
       return createExitedProcess(0);
     });
 
-    const exitCode = await runNodeCommand(tmp, { env: { OPENCLAW_FORCE_BUILD: "1" }, spawn });
+    const exitCode = await runNodeCommand(tmp, { env: { CARAPACE_FORCE_BUILD: "1" }, spawn });
 
     expect(exitCode).toBe(1);
     expect(spawn).toHaveBeenCalledOnce();
@@ -1313,7 +1313,7 @@ describe("run-node script", () => {
       }));
 
       const exitCodePromise = runNodeCommand(tmp, {
-        env: { OPENCLAW_FORCE_BUILD: rebuild ? "1" : "0" },
+        env: { CARAPACE_FORCE_BUILD: rebuild ? "1" : "0" },
         process: fakeProcess,
         spawn,
         runRuntimePostBuild: skipRuntimePostBuild,
@@ -1330,7 +1330,7 @@ describe("run-node script", () => {
       const spawnCall = firstMockCall(spawn) as [string, string[], { stdio?: unknown }] | undefined;
       expect(spawnCall?.[0]).toBe(process.execPath);
       expect(spawnCall?.[1]).toEqual(
-        rebuild ? expectedBuildSpawn().slice(1) : ["openclaw.mjs", "status"],
+        rebuild ? expectedBuildSpawn().slice(1) : ["carapace.mjs", "status"],
       );
       expect(spawnCall?.[2].stdio).toEqual(rebuild ? ["inherit", "pipe", "pipe"] : "inherit");
       expect(spawnCall?.[2]).toMatchObject({ detached: false });
@@ -1378,7 +1378,7 @@ describe("run-node script", () => {
       }));
 
       const exitCodePromise = runNodeCommand(tmp, {
-        env: { OPENCLAW_FORCE_BUILD: rebuild ? "1" : "0" },
+        env: { CARAPACE_FORCE_BUILD: rebuild ? "1" : "0" },
         platform: "darwin",
         process: fakeProcess,
         signalProcess: (pid: number, signal?: string | number) => {
@@ -1403,7 +1403,7 @@ describe("run-node script", () => {
         | [string, string[], { detached?: boolean; stdio?: unknown }]
         | undefined;
       expect(spawnCall?.[1]).toEqual(
-        rebuild ? expectedBuildSpawn().slice(1) : ["openclaw.mjs", "status"],
+        rebuild ? expectedBuildSpawn().slice(1) : ["carapace.mjs", "status"],
       );
       expect(spawnCall?.[2]).toMatchObject({
         detached: true,
@@ -1456,7 +1456,7 @@ describe("run-node script", () => {
     } as unknown as NodeJS.WriteStream;
 
     const exitCode = await runNodeCommand(tmp, {
-      env: { CI: "false", OPENCLAW_FORCE_BUILD: "1" },
+      env: { CI: "false", CARAPACE_FORCE_BUILD: "1" },
       spawn,
       spawnSync,
       stderr,
@@ -1493,10 +1493,10 @@ describe("run-node script", () => {
       files: {
         [EXTENSION_INDEX]: "export default {};\n",
         [EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [EXTENSION_PACKAGE]: '{"name":"demo","openclaw":{"extensions":["./index.ts"]}}\n',
+        [EXTENSION_PACKAGE]: '{"name":"demo","carapace":{"extensions":["./index.ts"]}}\n',
         [ROOT_TSDOWN]: "export default {};\n",
         [DIST_EXTENSION_INDEX]: "export default {};\n",
-        [DIST_EXTENSION_PACKAGE]: '{"name":"demo","openclaw":{"extensions":["./stale.js"]}}\n',
+        [DIST_EXTENSION_PACKAGE]: '{"name":"demo","carapace":{"extensions":["./stale.js"]}}\n',
       },
       oldPaths: [EXTENSION_INDEX, EXTENSION_MANIFEST, ROOT_TSCONFIG, ROOT_PACKAGE, ROOT_TSDOWN],
       newPaths: [EXTENSION_PACKAGE],
@@ -1586,7 +1586,7 @@ describe("run-node script", () => {
     { label: "remote agent", args: ["agent", "--message", "hello"] },
     { label: "dashboard", args: ["dashboard", "--no-open", "--yes"] },
   ])("does not rebuild for $label calls against an existing dirty dist", async ({ args }) => {
-    await withTestDir({ prefix: "openclaw-run-node-" }, async (tmp) => {
+    await withTestDir({ prefix: "carapace-run-node-" }, async (tmp) => {
       await setupStampedProject(tmp, {
         files: { [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n' },
         trackConfig: true,
@@ -1605,7 +1605,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", ...args]]);
+      expect(spawnCalls).toEqual([[process.execPath, "carapace.mjs", ...args]]);
       expect(runRuntimePostBuild).not.toHaveBeenCalled();
     });
   });
@@ -1624,7 +1624,7 @@ describe("run-node script", () => {
     const releaseLock = await acquireRunNodeBuildLock({
       cwd: tmp,
       args: ["gateway"],
-      env: { OPENCLAW_RUNNER_LOG: "0" },
+      env: { CARAPACE_RUNNER_LOG: "0" },
       fs: fsSync,
       process: lockProcess,
       stderr: { write: () => true } as unknown as NodeJS.WriteStream,
@@ -1647,7 +1647,7 @@ describe("run-node script", () => {
     });
     const clientRun = runNodeCommand(tmp, {
       args: ["dashboard", "--no-open", "--yes"],
-      env: { OPENCLAW_RUNNER_LOG: "1", OPENCLAW_RUN_NODE_BUILD_LOCK_POLL_MS: "1" },
+      env: { CARAPACE_RUNNER_LOG: "1", CARAPACE_RUN_NODE_BUILD_LOCK_POLL_MS: "1" },
       spawn,
       spawnSync,
       process: lockProcess,
@@ -1662,7 +1662,7 @@ describe("run-node script", () => {
 
     await expect(clientRun).resolves.toBe(0);
     expect(spawnCalls).toEqual([
-      [process.execPath, "openclaw.mjs", "dashboard", "--no-open", "--yes"],
+      [process.execPath, "carapace.mjs", "dashboard", "--no-open", "--yes"],
     ]);
     expect(runRuntimePostBuild).not.toHaveBeenCalled();
   });
@@ -1733,7 +1733,7 @@ describe("run-node script", () => {
         [EXTENSION_SRC]: "export default {};\n",
         [EXTENSION_EXTRA_SRC]: "export const extra = true;\n",
         [EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./src/index.ts","./src/extra.ts"]}}\n',
+        [EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./src/index.ts","./src/extra.ts"]}}\n',
         [DIST_EXTENSION_SRC]: "export default {};\n",
       },
       trackConfig: true,
@@ -1755,7 +1755,7 @@ describe("run-node script", () => {
         [EXTENSION_SRC]: "export default {};\n",
         [EXTENSION_EXTRA_SRC]: "export const extra = true;\n",
         [EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./src/index.ts","./src/extra.ts"]}}\n',
+        [EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./src/index.ts","./src/extra.ts"]}}\n',
         [DIST_EXTENSION_SRC]: "export default {};\n",
       },
       trackConfig: true,
@@ -1774,7 +1774,7 @@ describe("run-node script", () => {
       files: {
         [EXTENSION_SRC]: "export default {};\n",
         [EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./src/index.ts"]}}\n',
+        [EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./src/index.ts"]}}\n',
       },
       trackConfig: true,
     });
@@ -1808,13 +1808,13 @@ describe("run-node script", () => {
       files: {
         [EXTENSION_SRC]: "export default {};\n",
         [EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./src/index.ts"]}}\n',
+        [EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./src/index.ts"]}}\n',
         [DIST_EXTENSION_SRC]: "export default {};\n",
         [DIST_EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [DIST_EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./src/index.js"]}}\n',
+        [DIST_EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./src/index.js"]}}\n',
         [DIST_EXTENSION_RUNTIME_SRC]: "export default {};\n",
         [DIST_RUNTIME_EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [DIST_RUNTIME_EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./src/index.js"]}}\n',
+        [DIST_RUNTIME_EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./src/index.js"]}}\n',
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
     });
@@ -1835,10 +1835,10 @@ describe("run-node script", () => {
       files: {
         [DIST_EXTENSION_INDEX]: "export default {};\n",
         [DIST_EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [DIST_EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./index.js"]}}\n',
+        [DIST_EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./index.js"]}}\n',
         [DIST_RUNTIME_EXTENSION_INDEX]: "export default {};\n",
         [DIST_RUNTIME_EXTENSION_MANIFEST]: '{"id":"demo","configSchema":{"type":"object"}}\n',
-        [DIST_RUNTIME_EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./index.js"]}}\n',
+        [DIST_RUNTIME_EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./index.js"]}}\n',
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
     });
@@ -1853,7 +1853,7 @@ describe("run-node script", () => {
     });
   });
 
-  it("does not require OpenClaw SDK alias outputs when dist extensions are absent", async ({
+  it("does not require Carapace SDK alias outputs when dist extensions are absent", async ({
     tmp,
   }) => {
     await setupStampedProject(tmp, {
@@ -1875,31 +1875,31 @@ describe("run-node script", () => {
     });
   });
 
-  it("reports missing OpenClaw SDK alias outputs when runtime stamps match HEAD", async ({
+  it("reports missing Carapace SDK alias outputs when runtime stamps match HEAD", async ({
     tmp,
   }) => {
     await setupTrackedProject(tmp, {
       files: {
         [ROOT_SRC]: "export const value = 1;\n",
         [ROOT_PACKAGE]:
-          '{"name":"openclaw-test","exports":{"./plugin-sdk/core":"./dist/plugin-sdk/core.js"}}\n',
+          '{"name":"carapace-test","exports":{"./plugin-sdk/core":"./dist/plugin-sdk/core.js"}}\n',
         [DIST_PLUGIN_SDK_CORE]: "export const core = true;\n",
-        [DIST_OPENCLAW_ALIAS_PACKAGE]:
-          '{"name":"openclaw","type":"module","exports":{"./plugin-sdk/core":"./plugin-sdk/core.js"}}\n',
-        [DIST_OPENCLAW_ALIAS_PLUGIN_SDK_CORE]: "export * from '../../../../plugin-sdk/core.js';\n",
+        [DIST_CARAPACE_ALIAS_PACKAGE]:
+          '{"name":"carapace","type":"module","exports":{"./plugin-sdk/core":"./plugin-sdk/core.js"}}\n',
+        [DIST_CARAPACE_ALIAS_PLUGIN_SDK_CORE]: "export * from '../../../../plugin-sdk/core.js';\n",
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
       buildPaths: [
         ROOT_SRC,
         DIST_ENTRY,
         DIST_PLUGIN_SDK_CORE,
-        DIST_OPENCLAW_ALIAS_PACKAGE,
-        DIST_OPENCLAW_ALIAS_PLUGIN_SDK_CORE,
+        DIST_CARAPACE_ALIAS_PACKAGE,
+        DIST_CARAPACE_ALIAS_PLUGIN_SDK_CORE,
         BUILD_STAMP,
         RUNTIME_POSTBUILD_STAMP,
       ],
     });
-    await fs.rm(resolvePath(tmp, DIST_OPENCLAW_ALIAS_PLUGIN_SDK_CORE));
+    await fs.rm(resolvePath(tmp, DIST_CARAPACE_ALIAS_PLUGIN_SDK_CORE));
 
     const requirement = resolveRuntimePostBuildRequirement(createBuildRequirementDeps(tmp));
 
@@ -1909,14 +1909,14 @@ describe("run-node script", () => {
     });
   });
 
-  it("does not require private OpenClaw SDK dist files that package exports omit", async ({
+  it("does not require private Carapace SDK dist files that package exports omit", async ({
     tmp,
   }) => {
     await setupStampedProject(tmp, {
       files: {
         [ROOT_PACKAGE]: JSON.stringify(
           {
-            name: "openclaw-test",
+            name: "carapace-test",
             exports: {
               "./plugin-sdk/string-coerce-runtime": "./dist/plugin-sdk/string-coerce-runtime.js",
             },
@@ -1926,9 +1926,9 @@ describe("run-node script", () => {
         ),
         "dist/plugin-sdk/string-coerce-runtime.js": "export const publicRuntime = true;\n",
         "dist/plugin-sdk/ssrf-runtime-internal.js": "export const internal = true;\n",
-        [DIST_OPENCLAW_ALIAS_PACKAGE]:
-          '{"name":"openclaw","type":"module","exports":{"./plugin-sdk/string-coerce-runtime":"./plugin-sdk/string-coerce-runtime.js"}}\n',
-        [DIST_OPENCLAW_ALIAS_PLUGIN_SDK_STRING_COERCE]:
+        [DIST_CARAPACE_ALIAS_PACKAGE]:
+          '{"name":"carapace","type":"module","exports":{"./plugin-sdk/string-coerce-runtime":"./plugin-sdk/string-coerce-runtime.js"}}\n',
+        [DIST_CARAPACE_ALIAS_PLUGIN_SDK_STRING_COERCE]:
           "export * from '../../../../plugin-sdk/string-coerce-runtime.js';\n",
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
@@ -1956,7 +1956,7 @@ describe("run-node script", () => {
       await setupStampedProject(tmp, {
         files: {
           [DIFFS_PACKAGE]:
-            '{"openclaw":{"build":{"staticAssets":[{"source":"./assets/viewer-runtime.js","output":"assets/viewer-runtime.js"}]}}}\n',
+            '{"carapace":{"build":{"staticAssets":[{"source":"./assets/viewer-runtime.js","output":"assets/viewer-runtime.js"}]}}}\n',
           [DIFFS_VIEWER_RUNTIME_SOURCE]: "export {};\n",
           [DIST_DIFFS_VIEWER_RUNTIME]: "export {};\n",
           [DIST_RUNTIME_DIFFS_VIEWER_RUNTIME]: "export {};\n",
@@ -1978,15 +1978,15 @@ describe("run-node script", () => {
     await setupStampedProject(tmp, {
       files: {
         [DIFFS_PACKAGE]:
-          '{"openclaw":{"build":{"staticAssets":[{"source":"./assets/viewer-runtime.js","output":"assets/viewer-runtime.js"}]}}}\n',
+          '{"carapace":{"build":{"staticAssets":[{"source":"./assets/viewer-runtime.js","output":"assets/viewer-runtime.js"}]}}}\n',
         [DIFFS_VIEWER_RUNTIME_SOURCE]: "export {};\n",
-        [DIST_RUNTIME_EXTENSION_PACKAGE]: '{"openclaw":{"extensions":["./index.js"]}}\n',
+        [DIST_RUNTIME_EXTENSION_PACKAGE]: '{"carapace":{"extensions":["./index.js"]}}\n',
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
     });
 
     const requirement = resolveRuntimePostBuildRequirement(
-      createBuildRequirementDeps(tmp, { env: { OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" } }),
+      createBuildRequirementDeps(tmp, { env: { CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" } }),
     );
 
     expect(requirement).toEqual({
@@ -2001,7 +2001,7 @@ describe("run-node script", () => {
     await setupStampedProject(tmp, {
       files: {
         [DIFFS_PACKAGE]:
-          '{"openclaw":{"build":{"staticAssets":[{"source":"./assets/viewer-runtime.js","output":"assets/viewer-runtime.js"}]}}}\n',
+          '{"carapace":{"build":{"staticAssets":[{"source":"./assets/viewer-runtime.js","output":"assets/viewer-runtime.js"}]}}}\n',
         [RUNTIME_POSTBUILD_STAMP]: '{"head":"abc123"}\n',
       },
     });
@@ -2143,7 +2143,7 @@ describe("run-node script", () => {
   it.each(RUNTIME_POSTBUILD_IMPLEMENTATION_PATHS)(
     "reports dirty runtime postbuild implementation %s",
     async (implementationPath) => {
-      await withTestDir({ prefix: "openclaw-run-node-" }, async (tmp) => {
+      await withTestDir({ prefix: "carapace-run-node-" }, async (tmp) => {
         await setupStampedProject(tmp, {
           files: {
             [implementationPath]: "export {};\n",
@@ -2312,7 +2312,7 @@ describe("run-node script", () => {
     const lockDeps = (tmp: string, fakeProcess: NodeJS.Process) => ({
       cwd: tmp,
       args: ["status"],
-      env: { OPENCLAW_RUNNER_LOG: "0" },
+      env: { CARAPACE_RUNNER_LOG: "0" },
       fs: fsSync,
       process: fakeProcess,
       stderr: { write: () => true } as unknown as NodeJS.WriteStream,

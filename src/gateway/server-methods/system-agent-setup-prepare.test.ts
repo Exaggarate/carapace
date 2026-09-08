@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Compile } from "typebox/compile";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
@@ -6,7 +6,7 @@ import type {
   WizardNextResult,
 } from "../../../packages/gateway-protocol/src/index.js";
 import { WizardNextResultSchema } from "../../../packages/gateway-protocol/src/schema/wizard.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetCommandQueueStateForTest } from "../../process/command-queue.test-support.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { WizardSession } from "../../wizard/session.js";
@@ -32,7 +32,7 @@ vi.mock("../../wizard/setup.shared.js", () => ({
   writeWizardConfigFile: setupSharedMocks.writeWizardConfigFile,
 }));
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: { defaults: { model: "openai/gpt-5.6-luna" } },
 };
 const validateWizardResult = Compile(WizardNextResultSchema);
@@ -85,12 +85,12 @@ async function callWizardNext(
   return payload;
 }
 
-describe("openclaw.setup provider preparation", () => {
+describe("carapace.setup provider preparation", () => {
   beforeEach(() => {
     setupSharedMocks.readSetupConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       hash: "setup-resolution-config",
       sourceConfig: config,
       config,
@@ -116,7 +116,7 @@ describe("openclaw.setup provider preparation", () => {
       const finishPreparation = createDeferredCore();
       const credentialWriteStarted = createDeferredCore();
       const finishCredentialWrite = createDeferredCore();
-      const preparedConfig: OpenClawConfig = {
+      const preparedConfig: CarapaceConfig = {
         ...config,
         auth: { profiles: { "fixture:default": { provider: "fixture", mode: "api_key" } } },
       };
@@ -145,7 +145,7 @@ describe("openclaw.setup provider preparation", () => {
         },
       );
       try {
-        await systemAgentHandler("openclaw.setup.prepare.start")({
+        await systemAgentHandler("carapace.setup.prepare.start")({
           params: { sessionId, authChoice: "fixture-provider" },
           respond: () => undefined,
           context,
@@ -216,7 +216,7 @@ describe("openclaw.setup provider preparation", () => {
   it.each([false, true])(
     "runs provider preparation with native discovery preference %s",
     async (nativeSessionCatalogsEnabled) => {
-      const preparedConfig: OpenClawConfig = {
+      const preparedConfig: CarapaceConfig = {
         ...config,
         models: { providers: { ollama: { baseUrl: "http://127.0.0.1:11434", models: [] } } },
       };
@@ -236,7 +236,7 @@ describe("openclaw.setup provider preparation", () => {
       const { wizardSessions, context } = makeContext();
       const { calls, respond } = makeRespond();
 
-      await systemAgentHandler("openclaw.setup.prepare.start")({
+      await systemAgentHandler("carapace.setup.prepare.start")({
         params: {
           sessionId: "prepare-session-1",
           nativeSessionCatalogsEnabled,

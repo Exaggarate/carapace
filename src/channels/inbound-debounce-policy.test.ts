@@ -1,7 +1,7 @@
 // Inbound debounce policy tests cover channel message coalescing and delay decisions.
 import { describe, expect, it, vi } from "vitest";
 import { resolveInboundDebounceMs } from "../auto-reply/inbound-debounce.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   createChannelInboundDebouncer,
   shouldDebounceTextInbound,
@@ -36,7 +36,7 @@ describe("createChannelInboundDebouncer", () => {
       vi.useFakeTimers();
       try {
         const flushed: string[][] = [];
-        let cfg: OpenClawConfig = {
+        let cfg: CarapaceConfig = {
           messages: {
             inbound: {
               debounceMs: 10,

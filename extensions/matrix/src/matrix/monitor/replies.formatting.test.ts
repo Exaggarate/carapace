@@ -3,21 +3,21 @@ import path from "node:path";
 import {
   resolveMarkdownTableMode,
   type MarkdownTableMode,
-} from "openclaw/plugin-sdk/markdown-table-runtime";
-import { mediaKindFromMime } from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/markdown-table-runtime";
+import { mediaKindFromMime } from "carapace/plugin-sdk/media-runtime";
 import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
   type PluginRuntime,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   chunkMarkdownTextWithMode,
   resolveChunkMode,
   resolveTextChunkLimit,
-} from "openclaw/plugin-sdk/reply-chunking";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/reply-chunking";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { matrixPlugin } from "../../channel.js";
 import { setMatrixRuntime } from "../../runtime.js";

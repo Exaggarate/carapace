@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   ProviderModelRouteCandidate,
   ProviderModelRouteResolution,
@@ -17,7 +17,7 @@ export const platformRoute = {
   baseUrl: "https://api.openai.com/v1",
   authRequirement: "api-key",
   requestTransportOverrides: "none",
-  runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+  runtimePolicy: { compatibleIds: ["carapace", "codex"] },
 } satisfies ProviderModelRouteCandidate;
 
 export const subscriptionRoute = {
@@ -25,7 +25,7 @@ export const subscriptionRoute = {
   baseUrl: "https://chatgpt.com/backend-api/codex",
   authRequirement: "subscription",
   requestTransportOverrides: "none",
-  runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+  runtimePolicy: { compatibleIds: ["carapace", "codex"] },
 } satisfies ProviderModelRouteCandidate;
 
 export const dualRoutes = {
@@ -50,7 +50,7 @@ export function authStore(
 }
 
 export function evaluate(params: {
-  cfg?: OpenClawConfig | Record<string, unknown>;
+  cfg?: CarapaceConfig | Record<string, unknown>;
   env?: NodeJS.ProcessEnv;
   ref?: ModelAuthAvailabilityRef;
   resolution?: ProviderModelRouteResolution | null;
@@ -61,7 +61,7 @@ export function evaluate(params: {
   preparedRuntimeAuthMaterializations?: readonly RuntimeAuthMaterialization[];
 }) {
   return createModelAuthAvailabilityResolver({
-    cfg: (params.cfg ?? {}) as OpenClawConfig,
+    cfg: (params.cfg ?? {}) as CarapaceConfig,
     authStore: params.store ?? authStore(),
     env: params.env ?? {},
     routeResolverFactory: routeResolverFactory(params.resolution ?? dualRoutes),

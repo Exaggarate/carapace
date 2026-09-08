@@ -1,6 +1,6 @@
 // Descendant-settle wake replaces an ended nested orchestrator run while
 // preserving lifecycle ownership.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { GatewayContextResolver } from "../../../gateway/server-methods/types.js";
 import { getAgentEventLifecycleGeneration } from "../../../infra/agent-events.js";
 import { INTERNAL_PROVENANCE_SOURCE_CHANNEL } from "../../../sessions/input-provenance.js";

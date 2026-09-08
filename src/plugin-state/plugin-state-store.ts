@@ -1,6 +1,6 @@
 // Plugin state store exposes persisted per-plugin state operations.
-import type { Result } from "@openclaw/normalization-core/result";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { Result } from "@carapace/normalization-core/result";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   clearPluginStateDatabaseForTests,
   closePluginStateDatabase,
@@ -530,13 +530,13 @@ function clearPluginStateStoreForTests(): void {
 export function resetPluginStateStoreForTests(options: { closeDatabase?: boolean } = {}): void {
   if (options.closeDatabase !== false) {
     closePluginStateDatabase();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
   optionPolicy.clear();
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.pluginStateStoreTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.pluginStateStoreTestApi")] = {
     clearPluginStateStoreForTests,
   };
 }

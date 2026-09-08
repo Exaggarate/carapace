@@ -2,7 +2,7 @@ import { setImmediate as nextTurn } from "node:timers/promises";
 import { afterEach, expect, test } from "vitest";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { writeSessionStore } from "./test-helpers.js";
 import {
   directSessionReq,
@@ -17,7 +17,7 @@ import type { WorkerSessionPlacementRecord } from "./worker-environments/placeme
 const { createSessionStoreDir } = setupGatewaySessionsHandlerTestHarness();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 test.each([false, true])(

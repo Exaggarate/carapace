@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { reviewExecRequestWithConfiguredModel } from "openclaw/plugin-sdk/agent-harness-exec-review-runtime";
+import { reviewExecRequestWithConfiguredModel } from "carapace/plugin-sdk/agent-harness-exec-review-runtime";
 import {
   callGatewayTool,
   buildAgentHookContextChannelFields,
@@ -10,10 +10,10 @@ import {
   resolveNativeHookRelayDeferredToolApproval,
   runBeforeToolCallHook,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { prepareSystemRunMutableFileApproval } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { prepareSystemRunMutableFileApproval } from "carapace/plugin-sdk/plugin-test-runtime";
 // Codex tests cover approval bridge plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleCodexAppServerApprovalRequest } from "./approval-bridge.js";
 import { codexTestTurnIds } from "./codex-app-server.test-fixtures.js";
@@ -23,8 +23,8 @@ import {
   waitForPluginApprovalDecision,
 } from "./plugin-approval-roundtrip.js";
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>()),
   callGatewayTool: vi.fn(),
   hasNativeHookRelayInvocation: vi.fn(() => false),
   invokeNativeHookRelay: vi.fn(),
@@ -35,9 +35,9 @@ vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => (
   })),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-exec-review-runtime", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/agent-harness-exec-review-runtime", async (importOriginal) => ({
   ...(await importOriginal<
-    typeof import("openclaw/plugin-sdk/agent-harness-exec-review-runtime")
+    typeof import("carapace/plugin-sdk/agent-harness-exec-review-runtime")
   >()),
   reviewExecRequestWithConfiguredModel: vi.fn(),
 }));
@@ -573,7 +573,7 @@ describe("Codex app-server approval bridge", () => {
   });
 
   it("denies command approval when a script operand changes before the decision", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-script-drift-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-script-drift-"));
     const scriptPath = path.join(tempDir, "script.sh");
     try {
       await fs.writeFile(scriptPath, "#!/bin/sh\necho approved\n");
@@ -613,7 +613,7 @@ describe("Codex app-server approval bridge", () => {
   });
 
   it("accepts command approval when the bound script operand is unchanged", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-script-stable-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-script-stable-"));
     const scriptPath = path.join(tempDir, "script.sh");
     try {
       await fs.writeFile(scriptPath, "#!/bin/sh\necho approved\n");
@@ -652,7 +652,7 @@ describe("Codex app-server approval bridge", () => {
   });
 
   it("denies command approval when a script operand cannot be snapshotted", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-script-missing-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-script-missing-"));
     try {
       const params = createParams();
       params.hostCapabilities = {
@@ -1109,7 +1109,7 @@ describe("Codex app-server approval bridge", () => {
   });
 
   it("falls back to plugin approval when Codex native OpenAI config uses a local base URL", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-approval-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-approval-"));
     try {
       await fs.mkdir(path.join(tempDir, "codex-home"), { recursive: true });
       await fs.writeFile(
@@ -1295,8 +1295,8 @@ describe("Codex app-server approval bridge", () => {
   it.each([
     "/approve abc123 allow-once",
     "bash -lc '/approve abc123 allow-once'",
-    "openclaw channels login --channel whatsapp",
-    "sudo -EH bash -lc 'openclaw channels login --channel whatsapp'",
+    "carapace channels login --channel whatsapp",
+    "sudo -EH bash -lc 'carapace channels login --channel whatsapp'",
   ])("fails closed or routes unsafe control command approval: %s", async (command) => {
     const params = createParams();
     if (!command.startsWith("/approve ")) {
@@ -1376,7 +1376,7 @@ describe("Codex app-server approval bridge", () => {
       requestParams: {
         ...codexTestTurnIds(),
         itemId: "cmd-auto-review-security-suppression",
-        command: "openclaw config set security.audit.suppressions '[]'",
+        command: "carapace config set security.audit.suppressions '[]'",
       },
       paramsForRun: params,
       ...codexTestTurnIds(),
@@ -1513,7 +1513,7 @@ describe("Codex app-server approval bridge", () => {
     ]);
   });
 
-  it("normalizes prefixed channel targets for OpenClaw tool policy context", async () => {
+  it("normalizes prefixed channel targets for Carapace tool policy context", async () => {
     const params = createParams();
     params.messageChannel = "telegram";
     params.messageProvider = "telegram";
@@ -1543,7 +1543,7 @@ describe("Codex app-server approval bridge", () => {
     expect(gatewayRequestPayload().turnSourceTo).toBeUndefined();
   });
 
-  it("denies command approvals before prompting when OpenClaw tool policy blocks", async () => {
+  it("denies command approvals before prompting when Carapace tool policy blocks", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: true,
@@ -1643,7 +1643,7 @@ describe("Codex app-server approval bridge", () => {
       event: "pre_tool_use",
       rawPayload: {
         hook_event_name: "PreToolUse",
-        openclaw_approval_mode: "report",
+        carapace_approval_mode: "report",
         tool_name: "exec_command",
         tool_use_id: "cmd-native-relay",
         cwd: "/workspace",
@@ -1999,7 +1999,7 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw native hook relay returned an unreadable Codex app-server approval result.",
+        "Carapace native hook relay returned an unreadable Codex app-server approval result.",
     });
   });
 
@@ -2040,7 +2040,7 @@ describe("Codex app-server approval bridge", () => {
     expect(mockCallGatewayTool).not.toHaveBeenCalled();
     findApprovalEvent(params, {
       status: "denied",
-      message: "OpenClaw native hook relay returned a non-deny Codex app-server approval decision.",
+      message: "Carapace native hook relay returned a non-deny Codex app-server approval decision.",
     });
   });
 
@@ -2106,7 +2106,7 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw native hook relay unavailable for Codex app-server approval: native hook relay not found",
+        "Carapace native hook relay unavailable for Codex app-server approval: native hook relay not found",
     });
   });
 
@@ -2169,7 +2169,7 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw native hook relay unavailable for Codex app-server approval: native hook relay handler failed",
+        "Carapace native hook relay unavailable for Codex app-server approval: native hook relay handler failed",
     });
   });
 
@@ -2219,7 +2219,7 @@ describe("Codex app-server approval bridge", () => {
     ]);
   });
 
-  it("denies command approvals when OpenClaw tool policy rewrites params", async () => {
+  it("denies command approvals when Carapace tool policy rewrites params", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: false,
@@ -2249,11 +2249,11 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw tool policy rewrote Codex app-server approval params; refusing original request.",
+        "Carapace tool policy rewrote Codex app-server approval params; refusing original request.",
     });
   });
 
-  it("keeps OpenClaw plugin allow-always approvals scoped to one Codex request", async () => {
+  it("keeps Carapace plugin allow-always approvals scoped to one Codex request", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: false,
@@ -2287,7 +2287,7 @@ describe("Codex app-server approval bridge", () => {
     });
   });
 
-  it("denies command approvals when OpenClaw tool policy requires approval", async () => {
+  it("denies command approvals when Carapace tool policy requires approval", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: true,
@@ -2948,7 +2948,7 @@ describe("Codex app-server approval bridge", () => {
 
     expect(result).toEqual({
       decision: "decline",
-      reason: "OpenClaw codex app-server bridge does not grant native approvals yet.",
+      reason: "Carapace codex app-server bridge does not grant native approvals yet.",
     });
     expect(mockRunBeforeToolCallHook).not.toHaveBeenCalled();
     expect(mockCallGatewayTool.mock.calls.map(([method]) => method)).toEqual([

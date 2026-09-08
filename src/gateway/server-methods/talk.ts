@@ -1,10 +1,10 @@
 // Gateway RPC handlers for Talk voice, transcription, and speech synthesis surfaces.
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -29,7 +29,7 @@ import type {
   TalkProviderConfig,
   TalkRealtimeConfig,
 } from "../../config/types.gateway.js";
-import type { OpenClawConfig, TtsConfig, TtsProviderConfigMap } from "../../config/types.js";
+import type { CarapaceConfig, TtsConfig, TtsProviderConfigMap } from "../../config/types.js";
 import { resolveProviderRawConfig } from "../../plugin-sdk/provider-selection-runtime.js";
 import type { RealtimeVoicePublicClientHints } from "../../plugins/provider-policy-surface.js";
 import { canonicalizeRealtimeTranscriptionProviderId } from "../../realtime-transcription/provider-registry.js";
@@ -196,9 +196,9 @@ function withTalkBaseTtsSpeakerSelectionCompat(
 }
 
 function buildTalkTtsConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ):
-  | { cfg: OpenClawConfig; provider: string; providerConfig: TalkProviderConfig }
+  | { cfg: CarapaceConfig; provider: string; providerConfig: TalkProviderConfig }
   | { error: string; reason: TalkSpeakReason } {
   const resolved = resolveActiveTalkProviderConfig(config.talk);
   const provider = canonicalizeSpeechProviderId(resolved?.provider, config);
@@ -250,7 +250,7 @@ function buildTalkTtsConfig(
   };
 }
 
-function buildTalkCatalog(config: OpenClawConfig) {
+function buildTalkCatalog(config: CarapaceConfig) {
   // Reject ambiguous ownership before provider discovery loads unrelated plugins.
   const realtimeAgentId = resolveTalkSessionAgentId(config);
   const talkResolved = resolveActiveTalkProviderConfig(config.talk);
@@ -521,7 +521,7 @@ function resolveTalkSpeed(params: TalkSpeakParams): number | undefined {
 function buildTalkSpeakOverrides(
   provider: string,
   providerConfig: TalkProviderConfig,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   params: TalkSpeakParams,
 ): TtsDirectiveOverrides {
   const speechProvider = getSpeechProvider(provider, config);
@@ -554,8 +554,8 @@ function buildTalkSpeakOverrides(
 
 function resolveTalkResponseFromConfig(params: {
   includeSecrets: boolean;
-  sourceConfig: OpenClawConfig;
-  runtimeConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
+  runtimeConfig: CarapaceConfig;
 }):
   | {
       talk: TalkConfigResponse;
@@ -672,7 +672,7 @@ function resolveTalkResponseFromConfig(params: {
 
 function projectTalkRealtimePublicModels(params: {
   payload: TalkConfigResponse;
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
   effectiveProvider?: string;
 }): {
   payload: TalkConfigResponse;

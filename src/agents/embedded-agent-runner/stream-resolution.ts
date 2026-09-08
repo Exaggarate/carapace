@@ -1,11 +1,11 @@
 /**
  * Resolves provider stream functions and API keys for embedded agents.
  */
-import type { LlmRuntime } from "@openclaw/ai";
-import { notifyLlmRequestActivity, onLlmRequestActivity } from "@openclaw/ai/internal/runtime";
-import { stripSystemPromptCacheBoundary } from "@openclaw/ai/internal/shared";
-import { createBoundaryAwareStreamFnForModel } from "@openclaw/ai/transports";
-import { hasNonEmptyString as hasResolvedRuntimeApiKey } from "@openclaw/normalization-core/string-coerce";
+import type { LlmRuntime } from "@carapace/ai";
+import { notifyLlmRequestActivity, onLlmRequestActivity } from "@carapace/ai/internal/runtime";
+import { stripSystemPromptCacheBoundary } from "@carapace/ai/internal/shared";
+import { createBoundaryAwareStreamFnForModel } from "@carapace/ai/transports";
+import { hasNonEmptyString as hasResolvedRuntimeApiKey } from "@carapace/normalization-core/string-coerce";
 import { getStreamLlmRuntime } from "../../llm/model-runtime-binding.js";
 import "../ai-transport-runtime-host.js";
 import { createAnthropicVertexStreamFnForModel } from "../anthropic-vertex-stream.js";
@@ -55,7 +55,7 @@ function resolveEmbeddedStreamRuntime(owner: EmbeddedStreamRuntimeOwner): LlmRun
   return runtime;
 }
 
-function isDefaultOpenClawStreamFnForModel(
+function isDefaultCarapaceStreamFnForModel(
   model: EmbeddedRunAttemptParams["model"],
   streamFn: StreamFn | undefined,
   llmRuntime: LlmRuntime,
@@ -75,7 +75,7 @@ function isOpenAICodexResponsesModel(model: EmbeddedRunAttemptParams["model"]): 
   return model.provider === "openai" && model.api === "openai-chatgpt-responses";
 }
 
-function resolveOpenClawNativeCodexResponsesStreamFn(params: {
+function resolveCarapaceNativeCodexResponsesStreamFn(params: {
   model: EmbeddedRunAttemptParams["model"];
   currentStreamFn: StreamFn | undefined;
   llmRuntime: LlmRuntime;
@@ -86,7 +86,7 @@ function resolveOpenClawNativeCodexResponsesStreamFn(params: {
   // Lifecycle-owned session streams wrap auth/retry policy, so their runtime
   // binding preserves native Codex transport even when function identity differs.
   if (
-    !isDefaultOpenClawStreamFnForModel(params.model, params.currentStreamFn, params.llmRuntime) &&
+    !isDefaultCarapaceStreamFnForModel(params.model, params.currentStreamFn, params.llmRuntime) &&
     getStreamLlmRuntime(params.currentStreamFn) !== params.llmRuntime
   ) {
     return undefined;
@@ -154,7 +154,7 @@ export function resolveEmbeddedAgentStream(
     };
   }
 
-  const nativeStreamFn = resolveOpenClawNativeCodexResponsesStreamFn({
+  const nativeStreamFn = resolveCarapaceNativeCodexResponsesStreamFn({
     model: params.model,
     currentStreamFn: params.currentStreamFn,
     llmRuntime,
@@ -166,11 +166,11 @@ export function resolveEmbeddedAgentStream(
         sessionId: params.sessionId,
         transformContext: stripCacheBoundary,
       }),
-      strategy: "openclaw-native-codex-responses",
+      strategy: "carapace-native-codex-responses",
     };
   }
 
-  const isDefault = isDefaultOpenClawStreamFnForModel(
+  const isDefault = isDefaultCarapaceStreamFnForModel(
     params.model,
     params.currentStreamFn,
     llmRuntime,

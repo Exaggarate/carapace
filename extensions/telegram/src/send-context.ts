@@ -1,12 +1,12 @@
 import { type ApiClientOptions, Bot, HttpError } from "grammy";
-import { isDiagnosticFlagEnabled } from "openclaw/plugin-sdk/diagnostic-flags";
-import { formatUncaughtError } from "openclaw/plugin-sdk/error-runtime";
-import { redactSensitiveText } from "openclaw/plugin-sdk/logging-core";
-import { parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
-import { createChannelApiRetryRunner, type RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isDiagnosticFlagEnabled } from "carapace/plugin-sdk/diagnostic-flags";
+import { formatUncaughtError } from "carapace/plugin-sdk/error-runtime";
+import { redactSensitiveText } from "carapace/plugin-sdk/logging-core";
+import { parseStrictInteger } from "carapace/plugin-sdk/number-runtime";
+import { createChannelApiRetryRunner, type RetryConfig } from "carapace/plugin-sdk/retry-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveTelegramAccountOwnerAgentId } from "./account-owner.js";
 import { getOrCreateAccountThrottler } from "./account-throttler.js";
 import { type ResolvedTelegramAccount, resolveTelegramAccount } from "./accounts.js";
@@ -24,7 +24,7 @@ import {
 } from "./reply-parameters.js";
 import { TELEGRAM_OUTBOUND_RETRY_AFTER_CAP_MS } from "./retry-after.js";
 import type { TelegramRichMessageContextParams } from "./rich-message.js";
-import { requireRuntimeConfig, type OpenClawConfig } from "./send.runtime.js";
+import { requireRuntimeConfig, type CarapaceConfig } from "./send.runtime.js";
 import { maybePersistResolvedTelegramTarget } from "./target-writeback.js";
 import { normalizeTelegramChatId, normalizeTelegramLookupTarget } from "./targets.js";
 
@@ -150,7 +150,7 @@ export function resetTelegramClientOptionsCacheForTests(): void {
   telegramClientOptionsCache.clear();
 }
 
-function createTelegramHttpLogger(cfg: OpenClawConfig) {
+function createTelegramHttpLogger(cfg: CarapaceConfig) {
   const enabled = isDiagnosticFlagEnabled("telegram.http", cfg);
   if (!enabled) {
     return () => {};
@@ -315,7 +315,7 @@ async function resolveChatId(
 }
 
 export async function resolveAndPersistChatId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   api: TelegramApiOverride;
   lookupTarget: string;
   persistTarget: string;
@@ -394,7 +394,7 @@ export async function withTelegramNativeQuoteFallback<T>(params: {
 }
 
 export type TelegramApiContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedTelegramAccount;
   ownerAgentId: string;
   api: TelegramApi;
@@ -405,7 +405,7 @@ function resolveTelegramApiContext(opts: {
   token?: string;
   accountId?: string;
   api?: TelegramApiOverride;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   signal?: AbortSignal;
   assertPlatformSendAuthorized?: () => void;
 }): TelegramApiContext {
@@ -465,7 +465,7 @@ type TelegramRequestWithDiag = <T>(
 ) => Promise<T>;
 
 export function createTelegramRequestWithDiag(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedTelegramAccount;
   retry?: RetryConfig;
   verbose?: boolean;
@@ -552,7 +552,7 @@ export function createRequestWithChatNotFound(params: {
 }
 
 export function createTelegramNonIdempotentRequestWithDiag(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedTelegramAccount;
   retry?: RetryConfig;
   verbose?: boolean;

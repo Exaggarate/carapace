@@ -1,8 +1,8 @@
 import {
   createOutboundPayloadPlan,
   projectOutboundPayloadPlanForDelivery,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { dispatchReplyWithBufferedBlockDispatcher as dispatchThroughSharedOwner } from "openclaw/plugin-sdk/reply-dispatch-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { dispatchReplyWithBufferedBlockDispatcher as dispatchThroughSharedOwner } from "carapace/plugin-sdk/reply-dispatch-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   describeTelegramDispatch,

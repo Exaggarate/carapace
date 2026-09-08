@@ -3,9 +3,9 @@ import nodeFs from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
 import * as manifestModelIdNormalization from "../plugins/manifest-model-id-normalization.js";
 import { captureEnv } from "../test-utils/env.js";
@@ -45,11 +45,11 @@ describe("usage-format", () => {
   let stateDir: string;
 
   beforeEach(async () => {
-    envSnapshot = captureEnv(["OPENCLAW_AGENT_DIR", "OPENCLAW_STATE_DIR"]);
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-usage-format-"));
+    envSnapshot = captureEnv(["CARAPACE_AGENT_DIR", "CARAPACE_STATE_DIR"]);
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-usage-format-"));
     agentDir = path.join(stateDir, "agents", "main", "agent");
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    delete process.env.OPENCLAW_AGENT_DIR;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    delete process.env.CARAPACE_AGENT_DIR;
     await fs.mkdir(agentDir, { recursive: true });
     resetUsageFormatCachesForTest();
   });
@@ -81,7 +81,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const cost = resolveModelCostConfig({
       provider: "test",
@@ -120,7 +120,7 @@ describe("usage-format", () => {
     ).toBeUndefined();
   });
 
-  it("prefers models.json pricing over openclaw config and cached pricing", async () => {
+  it("prefers models.json pricing over carapace config and cached pricing", async () => {
     const config = {
       models: {
         providers: {
@@ -134,7 +134,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await fs.writeFile(
       path.join(agentDir, "models.json"),
@@ -185,7 +185,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -210,7 +210,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await fs.writeFile(
       path.join(agentDir, "models.json"),
@@ -277,7 +277,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const resolveInputPrice = (scopedAgentDir?: string) =>
       resolveModelCostConfig({
         provider: "demo-scoped",
@@ -337,7 +337,7 @@ describe("usage-format", () => {
     ).toBe(999);
   });
 
-  it("falls back to openclaw config pricing when models.json is absent", () => {
+  it("falls back to carapace config pricing when models.json is absent", () => {
     const config = {
       models: {
         providers: {
@@ -351,7 +351,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -381,7 +381,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -416,7 +416,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -476,7 +476,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       resolveModelCostConfig({ config, agentDir, provider: "venice", model: "priced-fixture" }),
     ).toEqual(expected);
@@ -489,7 +489,7 @@ describe("usage-format", () => {
     const models = [first, later];
     const config = {
       models: { providers: { venice: { models } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     let previousFingerprint: string | undefined;
     const check = (label: string, expected: ModelCostConfig | undefined) => {
       expect
@@ -540,7 +540,7 @@ describe("usage-format", () => {
           : order === "canonical last"
             ? { " VENICE ": alias, venice: canonical }
             : { " Venice ": alias, " VENICE ": canonical };
-      const config = { models: { providers } } as unknown as OpenClawConfig;
+      const config = { models: { providers } } as unknown as CarapaceConfig;
       expect(
         resolveModelCostConfig({ config, agentDir, provider: "venice", model: "priced-fixture" }),
       ).toEqual(firstRates);
@@ -550,7 +550,7 @@ describe("usage-format", () => {
   it("preserves explicit models.json precedence while merging its duplicate rows and provider keys", async () => {
     const config = {
       models: { providers: { venice: { models: [{ id: "priced-fixture", cost: laterRates }] } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     await fs.writeFile(
       path.join(agentDir, "models.json"),
       JSON.stringify({
@@ -583,7 +583,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -617,7 +617,7 @@ describe("usage-format", () => {
           "demo-structural": { models },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -660,7 +660,7 @@ describe("usage-format", () => {
           "demo-replaced-cost": { models: [model] },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -703,7 +703,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -738,7 +738,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveModelCostConfig({
@@ -803,7 +803,7 @@ describe("usage-format", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const before = resolveModelCostConfigFingerprint(config);
     metadataOnlyModel.cost = { input: 9, output: 8, cacheRead: 7, cacheWrite: 6 };

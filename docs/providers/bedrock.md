@@ -1,12 +1,12 @@
 ---
-summary: "Use Amazon Bedrock (Converse API) models with OpenClaw"
+summary: "Use Amazon Bedrock (Converse API) models with Carapace"
 read_when:
-  - You want to use Amazon Bedrock models with OpenClaw
+  - You want to use Amazon Bedrock models with Carapace
   - You need AWS credential/region setup for model calls
 title: "Amazon Bedrock"
 ---
 
-OpenClaw can use **Amazon Bedrock** models via its **Bedrock Converse**
+Carapace can use **Amazon Bedrock** models via its **Bedrock Converse**
 streaming provider. Bedrock auth uses the **AWS SDK default credential chain**,
 not an API key.
 
@@ -73,13 +73,13 @@ Choose your preferred auth method and follow the setup steps.
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list
+        carapace models list
         ```
       </Step>
     </Steps>
 
     <Tip>
-    With env-marker auth (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, or `AWS_BEARER_TOKEN_BEDROCK`), OpenClaw auto-enables the implicit Bedrock provider for model discovery without extra config.
+    With env-marker auth (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, or `AWS_BEARER_TOKEN_BEDROCK`), Carapace auto-enables the implicit Bedrock provider for model discovery without extra config.
     </Tip>
 
   </Tab>
@@ -89,15 +89,15 @@ Choose your preferred auth method and follow the setup steps.
 
     <Steps>
       <Step title="Enable discovery explicitly">
-        When using IMDS, OpenClaw cannot detect AWS auth from env markers alone, so you must opt in:
+        When using IMDS, Carapace cannot detect AWS auth from env markers alone, so you must opt in:
 
         ```bash
-        openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
-        openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
+        carapace config set plugins.entries.amazon-bedrock.config.discovery.enabled true
+        carapace config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
         ```
       </Step>
       <Step title="Optionally add an env marker for auto mode">
-        If you also want the env-marker auto-detection path to work (for example, for `openclaw status` surfaces):
+        If you also want the env-marker auto-detection path to work (for example, for `carapace status` surfaces):
 
         ```bash
         export AWS_PROFILE=default
@@ -108,7 +108,7 @@ Choose your preferred auth method and follow the setup steps.
       </Step>
       <Step title="Verify models are discovered">
         ```bash
-        openclaw models list
+        carapace models list
         ```
       </Step>
     </Steps>
@@ -133,11 +133,11 @@ Choose your preferred auth method and follow the setup steps.
 
 ## Automatic model discovery
 
-OpenClaw can automatically discover Bedrock models that support **streaming**
+Carapace can automatically discover Bedrock models that support **streaming**
 and **text output**. Discovery uses `bedrock:ListFoundationModels` and
 `bedrock:ListInferenceProfiles`, and results are cached (default: 1 hour).
 
-Both lists, including every inference-profile page, must succeed before OpenClaw
+Both lists, including every inference-profile page, must succeed before Carapace
 caches the result. A failed refresh reports unavailable or rejected catalog access
 and preserves compatible last-good models. Restore access to both list operations
 and refresh again. A successful empty list clears discovered membership.
@@ -154,9 +154,9 @@ hooks do. Advisory partial results are not cached as complete inventory.
 How the implicit provider is enabled:
 
 - If `plugins.entries.amazon-bedrock.config.discovery.enabled` is `true`,
-  OpenClaw will try discovery even when no AWS env marker is present.
+  Carapace will try discovery even when no AWS env marker is present.
 - If `plugins.entries.amazon-bedrock.config.discovery.enabled` is unset,
-  OpenClaw only auto-adds the
+  Carapace only auto-adds the
   implicit Bedrock provider when it sees one of these AWS auth markers:
   `AWS_BEARER_TOKEN_BEDROCK`, `AWS_ACCESS_KEY_ID` +
   `AWS_SECRET_ACCESS_KEY`, or `AWS_PROFILE`.
@@ -165,7 +165,7 @@ How the implicit provider is enabled:
   needed `enabled: true` to opt in.
 
 <Note>
-For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still resolve Bedrock env-marker auth early from AWS env markers such as `AWS_BEARER_TOKEN_BEDROCK` without forcing full runtime auth loading. The actual model-call auth path still uses the AWS SDK default chain.
+For explicit `models.providers["amazon-bedrock"]` entries, Carapace can still resolve Bedrock env-marker auth early from AWS env markers such as `AWS_BEARER_TOKEN_BEDROCK` without forcing full runtime auth loading. The actual model-call auth path still uses the AWS SDK default chain.
 </Note>
 
 <AccordionGroup>
@@ -195,7 +195,7 @@ For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still re
 
     | Option | Default | Description |
     | ------ | ------- | ----------- |
-    | `enabled` | auto | In auto mode, OpenClaw only enables the implicit Bedrock provider when it sees a supported AWS env marker. Set `true` to force discovery. |
+    | `enabled` | auto | In auto mode, Carapace only enables the implicit Bedrock provider when it sees a supported AWS env marker. Set `true` to force discovery. |
     | `region` | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | AWS region used for discovery API calls. |
     | `providerFilter` | (all) | Matches Bedrock provider names (for example `anthropic`, `amazon`). |
     | `refreshInterval` | `3600` | Cache duration in seconds. Set to `0` to disable caching. |
@@ -207,7 +207,7 @@ For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still re
   <Accordion title="Context window and max-token limits">
     The Bedrock `ListFoundationModels` and `GetFoundationModel` APIs return no
     token-limit metadata, only model ID, name, modalities, and lifecycle
-    status. OpenClaw ships a lookup table of known context windows and output
+    status. Carapace ships a lookup table of known context windows and output
     limits for popular Bedrock models (Claude, Nova, Llama, Mistral, DeepSeek,
     and others) so session management, compaction thresholds, and
     context-overflow detection work correctly for those models.
@@ -223,7 +223,7 @@ For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still re
 ## Quick setup (AWS path)
 
 This walkthrough creates an IAM role, attaches Bedrock permissions, associates
-the instance profile, and enables OpenClaw discovery on the EC2 host.
+the instance profile, and enables Carapace discovery on the EC2 host.
 
 ```bash
 # 1. Create IAM role and instance profile
@@ -251,8 +251,8 @@ aws ec2 associate-iam-instance-profile \
   --iam-instance-profile Name=EC2-Bedrock-Access
 
 # 3. On the EC2 instance, enable discovery explicitly
-openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
-openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
+carapace config set plugins.entries.amazon-bedrock.config.discovery.enabled true
+carapace config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
 
 # 4. Optional: add an env marker if you want auto mode without explicit enable
 echo 'export AWS_PROFILE=default' >> ~/.bashrc
@@ -260,20 +260,20 @@ echo 'export AWS_REGION=us-east-1' >> ~/.bashrc
 source ~/.bashrc
 
 # 5. Verify models are discovered
-openclaw models list
+carapace models list
 ```
 
 ## Advanced configuration
 
 <AccordionGroup>
   <Accordion title="Inference profiles">
-    OpenClaw discovers **regional and global inference profiles** alongside
+    Carapace discovers **regional and global inference profiles** alongside
     foundation models. When a profile maps to a known foundation model, the
     profile inherits that model's capabilities (context window, max tokens,
     reasoning, vision) and the correct Bedrock request region is injected
     automatically. This means cross-region Claude profiles work without manual
     provider overrides. Global cross-region profiles (`global.*`) are listed
-    first in `openclaw models list` since they generally offer better capacity
+    first in `carapace models list` since they generally offer better capacity
     and automatic failover.
 
     Inference profile IDs look like `us.anthropic.claude-opus-4-6-v1` (regional)
@@ -283,7 +283,7 @@ openclaw models list
 
     No extra configuration is needed. As long as discovery is enabled and the IAM
     principal has `bedrock:ListInferenceProfiles`, profiles appear alongside
-    foundation models in `openclaw models list`.
+    foundation models in `carapace models list`.
 
   </Accordion>
 
@@ -322,7 +322,7 @@ openclaw models list
     ```
 
     Valid values are `default`, `flex`, `priority`, and `reserved`. Claude
-    Fable 5, Opus 5, and Sonnet 5 only support the `default` tier; OpenClaw warns and
+    Fable 5, Opus 5, and Sonnet 5 only support the `default` tier; Carapace warns and
     ignores `flex`, `priority`, or `reserved` requested for those models. For
     other models, not every model supports every tier -- an unsupported tier
     returns a Bedrock validation error, and the error message can be
@@ -334,7 +334,7 @@ openclaw models list
 
   <Accordion title="Claude Opus 5, 4.8, and 4.7 temperature">
     Bedrock rejects the `temperature` parameter for Claude Opus 5, Opus 4.8,
-    and Opus 4.7. OpenClaw omits `temperature` automatically for any matching Bedrock
+    and Opus 4.7. Carapace omits `temperature` automatically for any matching Bedrock
     ref, including foundation model ids, named inference profiles, application
     inference profiles whose underlying model resolves to Opus 5/4.8/4.7 via
     `bedrock:GetInferenceProfile`, and dotted `opus-4.7`/`opus-4.8` variants
@@ -347,12 +347,12 @@ openclaw models list
     Use `amazon-bedrock/anthropic.claude-opus-5` on the Messages-API Bedrock
     endpoint, or a regional/global inference profile such as
     `global.anthropic.claude-opus-5` when it appears in Bedrock discovery.
-    OpenClaw applies the 1,000,000-token context window, 128,000-token output
+    Carapace applies the 1,000,000-token context window, 128,000-token output
     limit, image input, prompt caching, refusal-safe streaming, and native
     `xhigh`/`max` effort levels.
 
     Adaptive thinking defaults to `high`. `/think off` disables thinking, while
-    `/think xhigh|max` keeps adaptive thinking enabled. OpenClaw omits custom
+    `/think xhigh|max` keeps adaptive thinking enabled. Carapace omits custom
     sampling parameters and unsupported non-default service tiers.
 
   </Accordion>
@@ -360,7 +360,7 @@ openclaw models list
   <Accordion title="Claude Fable 5">
     Use `amazon-bedrock/anthropic.claude-fable-5` in `us-east-1`, or the
     regional inference ids such as `us.anthropic.claude-fable-5`.
-    OpenClaw applies Fable's 1M context window, 128K output limit, always-on
+    Carapace applies Fable's 1M context window, 128K output limit, always-on
     adaptive thinking, and supported effort mapping. `/think off` and
     `/think minimal` map to `low`; temperature and forced tool choice controls
     are omitted, matching the Opus 4.7/4.8 route. Streaming output is held
@@ -377,11 +377,11 @@ openclaw models list
 
   <Accordion title="Claude Mythos 5">
     Claude Mythos 5 is available through Bedrock only for accounts with the
-    required limited-access approval. OpenClaw recognizes the foundation model
+    required limited-access approval. Carapace recognizes the foundation model
     `anthropic.claude-mythos-5` and regional or global inference profiles such
     as `us.anthropic.claude-mythos-5`.
 
-    OpenClaw applies the 1,000,000-token context window, 128,000-token output
+    Carapace applies the 1,000,000-token context window, 128,000-token output
     limit, image input, prompt caching, refusal-safe streaming, and native
     effort levels. Adaptive thinking is always enabled: `/think off` and
     `/think minimal` map to `low`, while `xhigh` and `max` remain available.
@@ -392,13 +392,13 @@ openclaw models list
   <Accordion title="Claude Sonnet 5">
     AWS documents Sonnet 5 for both the
     [`bedrock-runtime` and `bedrock-mantle` endpoints](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-sonnet-5.html).
-    OpenClaw recognizes the Bedrock foundation model
+    Carapace recognizes the Bedrock foundation model
     `anthropic.claude-sonnet-5` and regional or global inference profiles such
     as `us.anthropic.claude-sonnet-5`. It applies the 1,000,000-token context
     window, 128,000-token output limit, image input, native effort levels,
     prompt caching, and refusal-safe streaming.
 
-    Bedrock keeps adaptive thinking enabled for Sonnet 5. OpenClaw defaults to
+    Bedrock keeps adaptive thinking enabled for Sonnet 5. Carapace defaults to
     `high`; `/think off` and `/think minimal` map to `low` because this route
     cannot disable thinking. Custom temperature and forced tool choice values
     are omitted while adaptive thinking is active.
@@ -480,7 +480,7 @@ openclaw models list
     - If you rely on auto mode, set one of the supported AWS auth env markers on the
       gateway host. If you prefer IMDS/shared-config auth without env markers, set
       `plugins.entries.amazon-bedrock.config.discovery.enabled: true`.
-    - OpenClaw surfaces the credential source in this order: `AWS_BEARER_TOKEN_BEDROCK`,
+    - Carapace surfaces the credential source in this order: `AWS_BEARER_TOKEN_BEDROCK`,
       then `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, then `AWS_PROFILE`, then the
       default AWS SDK chain.
     - Reasoning support depends on the model; check the Bedrock model card for

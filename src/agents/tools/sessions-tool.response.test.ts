@@ -88,7 +88,7 @@ describe("sessions tool responses", () => {
     const resolved = {
       modelProvider: "openai",
       model: "gpt-5.6-luna",
-      agentRuntime: { id: "codex", fallback: "openclaw" as const, source: "session" as const },
+      agentRuntime: { id: "codex", fallback: "carapace" as const, source: "session" as const },
       thinkingLevel: "medium",
       thinkingLevels: [
         { id: "off", label: "Off" },

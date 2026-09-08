@@ -4,7 +4,7 @@ import { afterEach, expect, test } from "vitest";
 import { getRuntimeConfig } from "../config/io.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { beginSessionWorkAdmission } from "../sessions/session-lifecycle-admission.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { rpcReq, writeSessionStore } from "./test-helpers.js";
 import {
   sessionStoreEntry,
@@ -15,7 +15,7 @@ const { createSessionStoreDir, openClient, seedActiveMainSession } =
   setupGatewaySessionsTestHarness();
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 test("sessions.patch stores and clears rootless modes while preserving recorded roots", async () => {

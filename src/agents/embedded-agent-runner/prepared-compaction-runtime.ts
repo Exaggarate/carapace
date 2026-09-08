@@ -21,7 +21,7 @@ import { normalizeMessageChannel } from "../../utils/message-channel.js";
 import { isReasoningTagProvider } from "../../utils/provider-utils.js";
 import { createBundleLspToolRuntime } from "../agent-bundle-lsp-runtime.js";
 import { createBundleMcpToolRuntime } from "../agent-bundle-mcp-tools.js";
-import { createOpenClawCodingTools } from "../agent-tools.js";
+import { createCarapaceCodingTools } from "../agent-tools.js";
 import { createSkillInstructionDeliveryCache } from "../agent-tools.read.js";
 import { listActiveProcessSessionReferences } from "../bash-process-references.js";
 import { resolveProcessToolScopeKey } from "../bash-process-scope.js";
@@ -36,7 +36,7 @@ import {
 } from "../channel-tools.js";
 import { resolveConversationCapabilityProfile } from "../conversation-capability-profile.js";
 import { formatDateStamp, resolveUserTimezone } from "../date-time.js";
-import { resolveOpenClawReferencePaths } from "../docs-path.js";
+import { resolveCarapaceReferencePaths } from "../docs-path.js";
 import { prepareAgentMemoryPrompt } from "../memory-prompt-prepare.js";
 import {
   applyAuthHeaderOverride,
@@ -286,7 +286,7 @@ export async function buildPreparedCompactionRuntime(prepared: DirectCompactionP
     const toolsEnabled = supportsModelTools(effectiveModel);
     const skillInstructionDeliveryCache = createSkillInstructionDeliveryCache();
     const toolsRaw = toolsEnabled
-      ? createOpenClawCodingTools({
+      ? createCarapaceCodingTools({
           ...conversationContext,
           agentId: sessionAgentId,
           exec: {
@@ -472,7 +472,7 @@ export async function buildPreparedCompactionRuntime(prepared: DirectCompactionP
     const nativeCommandGuidanceLines = listRegisteredPluginAgentPromptGuidance({
       surface: promptSurface,
     });
-    const openClawReferences = await resolveOpenClawReferencePaths({
+    const carapaceReferences = await resolveCarapaceReferencePaths({
       workspaceDir: effectiveWorkspace,
       argv1: process.argv[1],
       cwd: effectiveCwd,
@@ -523,8 +523,8 @@ export async function buildPreparedCompactionRuntime(prepared: DirectCompactionP
         ownerNumbers: params.ownerNumbers,
         reasoningTagHint,
         skillsPrompt: promptPolicyRestricted ? undefined : skillsPrompt,
-        docsPath: openClawReferences.docsPath ?? undefined,
-        sourcePath: openClawReferences.sourcePath ?? undefined,
+        docsPath: carapaceReferences.docsPath ?? undefined,
+        sourcePath: carapaceReferences.sourcePath ?? undefined,
         promptMode,
         promptSurface,
         sourceReplyDeliveryMode: params.sourceReplyDeliveryMode,

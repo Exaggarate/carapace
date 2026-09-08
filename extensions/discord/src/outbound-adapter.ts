@@ -1,18 +1,18 @@
 // Discord plugin module implements outbound adapter behavior.
-import { resolveOutboundSendDep } from "openclaw/plugin-sdk/channel-outbound";
+import { resolveOutboundSendDep } from "carapace/plugin-sdk/channel-outbound";
 import {
   attachChannelToResult,
   type ChannelOutboundAdapter,
   createAttachedChannelResultAdapter,
-} from "openclaw/plugin-sdk/channel-send-result";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-send-result";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { questionGatewayRuntime } from "carapace/plugin-sdk/question-gateway-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
 import {
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { createDiscordActionGate } from "./accounts.js";
 import { formatDiscordApprovalDisplayValue } from "./approval-message-safety.js";
 import { chunkDiscordTextWithMode } from "./chunk.js";

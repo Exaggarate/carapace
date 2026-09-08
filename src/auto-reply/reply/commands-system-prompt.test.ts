@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createOpenClawCodingTools } from "../../agents/agent-tools.js";
+import { createCarapaceCodingTools } from "../../agents/agent-tools.js";
 import { makeBootstrapWarn, resolveBootstrapContextForRun } from "../../agents/bootstrap-files.js";
 import {
   resolveChannelMessageToolHints,
@@ -22,7 +22,7 @@ import type { HandleCommandsParams } from "./commands-types.js";
 
 const {
   collectRuntimeChannelCapabilitiesMock,
-  createOpenClawCodingToolsMock,
+  createCarapaceCodingToolsMock,
   detectRuntimeShellMock,
   getMachineDisplayNameMock,
   logWarnMock,
@@ -32,7 +32,7 @@ const {
   resolveRuntimeOsLabelMock,
 } = vi.hoisted(() => ({
   collectRuntimeChannelCapabilitiesMock: vi.fn(() => ["voice"]),
-  createOpenClawCodingToolsMock: vi.fn(() => []),
+  createCarapaceCodingToolsMock: vi.fn(() => []),
   detectRuntimeShellMock: vi.fn(() => "zsh"),
   getMachineDisplayNameMock: vi.fn(async () => "test-host"),
   logWarnMock: vi.fn(),
@@ -117,7 +117,7 @@ vi.mock("../../agents/system-prompt.js", () => ({
 }));
 
 vi.mock("../../agents/agent-tools.js", () => ({
-  createOpenClawCodingTools: createOpenClawCodingToolsMock,
+  createCarapaceCodingTools: createCarapaceCodingToolsMock,
 }));
 
 vi.mock("../../tts/tts-settings.js", () => ({
@@ -189,8 +189,8 @@ function requireFirstArg(
 describe("resolveCommandsSystemPromptBundle", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    createOpenClawCodingToolsMock.mockClear();
-    createOpenClawCodingToolsMock.mockReturnValue([]);
+    createCarapaceCodingToolsMock.mockClear();
+    createCarapaceCodingToolsMock.mockReturnValue([]);
     vi.mocked(ensureSandboxWorkspaceForSession).mockResolvedValue(null);
     vi.mocked(resolveReusableWorkspaceSkillSnapshot).mockReturnValue({
       snapshot: { prompt: "", skills: [], resolvedSkills: [] },
@@ -203,8 +203,8 @@ describe("resolveCommandsSystemPromptBundle", () => {
     await resolveCommandsSystemPromptBundle(makeParams());
 
     const toolParams = requireFirstArg(
-      vi.mocked(createOpenClawCodingTools),
-      "createOpenClawCodingTools",
+      vi.mocked(createCarapaceCodingTools),
+      "createCarapaceCodingTools",
     );
     expect(toolParams.allowGatewaySubagentBinding).toBe(true);
     expect(toolParams.sessionKey).toBe("agent:main:default");
@@ -319,8 +319,8 @@ describe("resolveCommandsSystemPromptBundle", () => {
     await resolveCommandsSystemPromptBundle(params);
 
     const toolParams = requireFirstArg(
-      vi.mocked(createOpenClawCodingTools),
-      "createOpenClawCodingTools",
+      vi.mocked(createCarapaceCodingTools),
+      "createCarapaceCodingTools",
     );
     expect(toolParams.agentId).toBe("target");
     expect(toolParams.sessionKey).toBe("agent:target:telegram:direct:target-session");
@@ -392,8 +392,8 @@ describe("resolveCommandsSystemPromptBundle", () => {
       }),
     );
     const toolParams = requireFirstArg(
-      vi.mocked(createOpenClawCodingTools),
-      "createOpenClawCodingTools",
+      vi.mocked(createCarapaceCodingTools),
+      "createCarapaceCodingTools",
     );
     expect(toolParams.groupId).toBe("target-group");
     expect(toolParams.groupChannel).toBe("#target");
@@ -430,7 +430,7 @@ describe("resolveCommandsSystemPromptBundle", () => {
   });
 
   it("uses materialized sandbox skill paths for sandbox command prompts", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-command-sandbox-skills-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-command-sandbox-skills-"));
     try {
       const workspaceDir = path.join(root, "workspace");
       const skillsWorkspaceDir = path.join(root, "state", "sandbox-skills");
@@ -468,7 +468,7 @@ describe("resolveCommandsSystemPromptBundle", () => {
       vi.mocked(resolveReusableWorkspaceSkillSnapshot).mockReturnValue({
         snapshot: {
           prompt:
-            "<available_skills>~/.npm-global/lib/node_modules/openclaw/skills/gog/SKILL.md</available_skills>",
+            "<available_skills>~/.npm-global/lib/node_modules/carapace/skills/gog/SKILL.md</available_skills>",
           skills: [],
           resolvedSkills: [],
         },
@@ -485,7 +485,7 @@ describe("resolveCommandsSystemPromptBundle", () => {
         workspaceDir,
       });
       expect(result.skillsPrompt).toContain(
-        "/workspace/.openclaw/sandbox-skills/skills/gog/SKILL.md",
+        "/workspace/.carapace/sandbox-skills/skills/gog/SKILL.md",
       );
       expect(result.skillsPrompt).not.toContain("~/.npm-global");
       expect(vi.mocked(resolveReusableWorkspaceSkillSnapshot)).not.toHaveBeenCalled();
@@ -494,7 +494,7 @@ describe("resolveCommandsSystemPromptBundle", () => {
         "buildAgentSystemPrompt",
       );
       expect(promptParams.skillsPrompt).toContain(
-        "/workspace/.openclaw/sandbox-skills/skills/gog/SKILL.md",
+        "/workspace/.carapace/sandbox-skills/skills/gog/SKILL.md",
       );
       expect(String(promptParams.skillsPrompt)).not.toContain("~/.npm-global");
     } finally {
@@ -518,7 +518,7 @@ describe("resolveCommandsSystemPromptBundle", () => {
   });
 
   it("uses config-backed prompt settings for the target agent", async () => {
-    createOpenClawCodingToolsMock.mockReturnValue([{ name: "sessions_spawn" }] as never);
+    createCarapaceCodingToolsMock.mockReturnValue([{ name: "sessions_spawn" }] as never);
     const params = makeParams();
     params.cfg = {
       agents: {

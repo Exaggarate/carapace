@@ -5,7 +5,7 @@ export function createMediaUnderstandingVitestConfig(env?: Record<string, string
   return createScopedVitestConfig(["src/media-understanding/**/*.test.ts"], {
     dir: "src",
     env,
-    includeOpenClawRuntimeSetup: false,
+    includeCarapaceRuntimeSetup: false,
     name: "media-understanding",
     passWithNoTests: true,
   });

@@ -1,11 +1,11 @@
 /** Tests Code Mode skills and read tools. */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Skill } from "../skills/loading/skill-contract.js";
 import { resolveSkillsPrompt } from "../skills/loading/workspace-skill-prompt.js";
 import { createFixtureSkillEntry } from "../skills/test-support/test-helpers.js";
-import { createOpenClawReadTool } from "./agent-tools.read.js";
+import { createCarapaceReadTool } from "./agent-tools.read.js";
 import { resolveCodeModeSkills } from "./code-mode-skills.js";
 import { applyCodeModeCatalog } from "./code-mode.js";
 import {
@@ -167,7 +167,7 @@ describe("Code Mode skills and read tools", () => {
     "returns $name through the wrapped Code Mode boundary",
     async ({ path, content, expected }) => {
       const { config, catalogRef, tools: codeModeTools } = createCodeModeHarness();
-      const read = createOpenClawReadTool(
+      const read = createCarapaceReadTool(
         createReadTool("/workspace", {
           operations: {
             access: async () => {
@@ -177,7 +177,7 @@ describe("Code Mode skills and read tools", () => {
             },
             readFile: async () => Buffer.from(content ?? "unreachable"),
           },
-        }) as unknown as Parameters<typeof createOpenClawReadTool>[0],
+        }) as unknown as Parameters<typeof createCarapaceReadTool>[0],
       );
       applyCodeModeCatalog({
         tools: [...codeModeTools, read],

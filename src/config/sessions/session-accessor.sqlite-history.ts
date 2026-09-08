@@ -1,7 +1,7 @@
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { isInternalSessionEffectsKey } from "./internal-session-key.js";
 import type {
   SessionAccessScope,
@@ -17,7 +17,7 @@ import type { SessionEntry } from "./types.js";
 
 export function listTranscriptInstancesFromDatabase(params: {
   currentEntries: Pick<ReadonlyMap<string, SessionEntry>, "get">;
-  database: Pick<OpenClawAgentDatabase, "agentId" | "db">;
+  database: Pick<CarapaceAgentDatabase, "agentId" | "db">;
   options: SessionTranscriptInstanceListOptions;
 }): SessionTranscriptInstance[] {
   const db = getSessionKysely(params.database.db);
@@ -116,7 +116,7 @@ export function listSessionTranscriptArchivesReadOnly(
     return [];
   }
   const resolved = resolveSqliteReadScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly(({ db, agentId }) => {
+  const result = withCarapaceAgentDatabaseReadOnly(({ db, agentId }) => {
     let query = getSessionKysely(db)
       .selectFrom("session_transcript_archives")
       .select([

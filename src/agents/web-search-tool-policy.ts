@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { InputProvenance } from "../sessions/input-provenance.js";
 import { resolveEffectiveToolPolicy, resolveGroupToolPolicy } from "./agent-tools.policy.js";
 import { resolveRequesterToolPolicies } from "./requester-tool-policy.js";
@@ -11,7 +11,7 @@ import { mergeAlsoAllowPolicy, resolveToolProfilePolicy } from "./tool-policy.js
 
 export type WebSearchToolPolicyParams = {
   webSearchEnabled?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   modelProvider?: string;
   modelId?: string;
   agentId?: string;

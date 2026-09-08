@@ -2,14 +2,14 @@
 name: notcrawl
 description: "Notion archive: search, sync freshness, pages/databases, Markdown exports, SQL counts, and Notcrawl repo work."
 metadata:
-  openclaw:
-    homepage: https://github.com/openclaw/notcrawl
+  carapace:
+    homepage: https://github.com/Exaggarate/carapace/notcrawl
     requires:
       bins:
         - notcrawl
     install:
       - kind: go
-        module: github.com/openclaw/notcrawl/cmd/notcrawl@latest
+        module: github.com/Exaggarate/carapace/notcrawl/cmd/notcrawl@latest
         bins:
           - notcrawl
 ---

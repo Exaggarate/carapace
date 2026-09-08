@@ -6,9 +6,9 @@ import {
   type MemoryExtraPath,
   type MemoryIndexIdentityState,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 
-export type { MemoryIndexIdentityState } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+export type { MemoryIndexIdentityState } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 
 export type MemoryIndexMeta = {
   model: string;
@@ -96,11 +96,11 @@ function configuredMetaSourcesDiffer(params: {
   return metaSources.some((source, index) => source !== params.configuredSources[index]);
 }
 
-function openClawIndexMismatch(
+function carapaceIndexMismatch(
   code: "provenance_version" | "chunking_version",
   reason: string,
 ): MemoryIndexIdentityState {
-  return { status: "mismatched", reason, code, owner: "openclaw" };
+  return { status: "mismatched", reason, code, owner: "carapace" };
 }
 
 function configuredIndexMismatch(
@@ -165,14 +165,14 @@ export function resolveMemoryIndexIdentityState(params: {
       status: "missing",
       reason: "index metadata is missing",
       code: "metadata_missing",
-      owner: "openclaw",
+      owner: "carapace",
     };
   }
   if (meta.provenanceVersion !== MEMORY_INDEX_PROVENANCE_VERSION) {
-    return openClawIndexMismatch("provenance_version", "index provenance classifier changed");
+    return carapaceIndexMismatch("provenance_version", "index provenance classifier changed");
   }
   if (meta.chunkingVersion !== MEMORY_CHUNKING_VERSION) {
-    return openClawIndexMismatch("chunking_version", "index chunking implementation changed");
+    return carapaceIndexMismatch("chunking_version", "index chunking implementation changed");
   }
   const expectedModel =
     params.provider && params.provider.model === undefined

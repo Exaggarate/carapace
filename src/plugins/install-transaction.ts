@@ -3,9 +3,9 @@ export type PluginInstallTransaction = {
   rollback(): Promise<void>;
 };
 
-const PLUGIN_INSTALL_TRANSACTION = Symbol.for("openclaw.pluginInstallTransaction");
-const PLUGIN_INSTALL_TRANSACTION_REQUEST = Symbol.for("openclaw.pluginInstallTransactionRequest");
-const PLUGIN_INSTALL_OWNER_MIGRATIONS = Symbol.for("openclaw.pluginInstallOwnerMigrations");
+const PLUGIN_INSTALL_TRANSACTION = Symbol.for("carapace.pluginInstallTransaction");
+const PLUGIN_INSTALL_TRANSACTION_REQUEST = Symbol.for("carapace.pluginInstallTransactionRequest");
+const PLUGIN_INSTALL_OWNER_MIGRATIONS = Symbol.for("carapace.pluginInstallOwnerMigrations");
 
 type PluginInstallTransactionRequest = {
   deferCommit: true;

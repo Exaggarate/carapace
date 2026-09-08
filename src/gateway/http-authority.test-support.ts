@@ -21,8 +21,8 @@ export async function expectDeclaredHttpOwnerIdentity(params: OwnerIdentityReque
       agentCommandMock.mockClear();
       agentCommandMock.mockResolvedValueOnce({ payloads: [{ text: "hello" }] } as never);
       const response = await params.post(stream, {
-        "x-openclaw-scopes": scopes,
-        "x-openclaw-sender-is-owner": "true",
+        "x-carapace-scopes": scopes,
+        "x-carapace-sender-is-owner": "true",
       });
       expect(response.status).toBe(200);
       await params.consume(response, stream);
@@ -38,8 +38,8 @@ export async function expectSharedSecretHttpOwnerIdentity(params: OwnerIdentityR
     agentCommandMock.mockResolvedValueOnce({ payloads: [{ text: "hello" }] } as never);
     const response = await params.post(stream, {
       authorization: "Bearer secret",
-      "x-openclaw-scopes": "operator.approvals",
-      "x-openclaw-sender-is-owner": "false",
+      "x-carapace-scopes": "operator.approvals",
+      "x-carapace-sender-is-owner": "false",
     });
     expect(response.status).toBe(200);
     await params.consume(response, stream);
@@ -49,7 +49,7 @@ export async function expectSharedSecretHttpOwnerIdentity(params: OwnerIdentityR
   agentCommandMock.mockClear();
   const unauthorized = await params.post(undefined, {
     authorization: "Bearer wrong",
-    "x-openclaw-sender-is-owner": "true",
+    "x-carapace-sender-is-owner": "true",
   });
   expect(unauthorized.status).toBe(401);
   await params.consume(unauthorized, false);
@@ -68,7 +68,7 @@ export async function expectHttpForeignSessionAuthority(params: {
 }) {
   const sharedSecretOwner = params.authMethod === "token";
   await withEnvAsync(
-    { OPENCLAW_GATEWAY_TOKEN: undefined, OPENCLAW_GATEWAY_PASSWORD: undefined },
+    { CARAPACE_GATEWAY_TOKEN: undefined, CARAPACE_GATEWAY_PASSWORD: undefined },
     async () => {
       const port = await getGatewayTestPort();
       let server: GatewayServer | undefined;
@@ -128,7 +128,7 @@ export async function expectHttpForeignSessionAuthority(params: {
                 "x-forwarded-proto": "https",
                 "x-forwarded-user": "guest@example.test",
               }),
-          "x-openclaw-session-key": sessionKey,
+          "x-carapace-session-key": sessionKey,
         });
 
         expect(response.status).toBe(sharedSecretOwner ? 200 : 403);

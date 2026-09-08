@@ -9,7 +9,7 @@ import { createAgentHarnessTaskRuntimeScope } from "../../../tasks/agent-harness
 import { createTrajectoryRuntimeRecorder } from "../../../trajectory/runtime.js";
 import type { ToolOutcomeObserver } from "../../agent-tools.before-tool-call.js";
 import { resolveDelegationCapability } from "../../delegation-capability.js";
-import { agentHarnessBuildsOpenClawTools } from "../../harness/selection.js";
+import { agentHarnessBuildsCarapaceTools } from "../../harness/selection.js";
 import { appendIncognitoSystemPrompt } from "../../incognito-system-prompt.js";
 import { applyAuthHeaderOverride, applyLocalNoAuthHeaderOverride } from "../../model-auth.js";
 import { recordAdmittedModelRoutingDecision } from "../../model-routing-decision.js";
@@ -252,7 +252,7 @@ export async function prepareAndDispatchEmbeddedRunAttempt(input: {
   const { sessionManager } = params;
   const { nativeSessionRuntime } = preparedRuntime;
   const authProfileStore = resolveRunAttemptAuthProfileStore();
-  const toolAuthProfileStore = agentHarnessBuildsOpenClawTools(runtime.agentHarness.id)
+  const toolAuthProfileStore = agentHarnessBuildsCarapaceTools(runtime.agentHarness.id)
     ? attemptAuthProfileStore
     : undefined;
   const captureRuntimeArtifact = Boolean(params.onSuccessfulAuthBinding || expectedHarnessArtifact);

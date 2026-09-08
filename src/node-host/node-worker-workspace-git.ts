@@ -53,8 +53,8 @@ export async function initializeNodeWorkerGitWorkspace(params: {
   if (actual !== params.baseCommit) {
     throw new Error("workspace transfer Git base does not match the prepared objects");
   }
-  await git(["update-ref", "refs/heads/openclaw-worker", params.baseCommit]);
-  await git(["symbolic-ref", "HEAD", "refs/heads/openclaw-worker"]);
+  await git(["update-ref", "refs/heads/carapace-worker", params.baseCommit]);
+  await git(["symbolic-ref", "HEAD", "refs/heads/carapace-worker"]);
   await git(["read-tree", params.baseCommit]);
   const index = await git(["ls-files", "--stage", "-z"], {
     maxOutputBytes: MAX_WORKSPACE_MANIFEST_BYTES,

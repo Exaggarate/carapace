@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { readRestartSentinel, writeRestartSentinel } from "./restart-sentinel.js";
@@ -11,11 +11,11 @@ import {
 import { buildUpdateRestartSentinelPayload } from "./update-restart-sentinel-payload.js";
 
 async function withRestartSentinelStateDir(run: () => Promise<void>): Promise<void> {
-  await withTestDir({ prefix: "openclaw-sentinel-" }, async (tempDir) => {
+  await withTestDir({ prefix: "carapace-sentinel-" }, async (tempDir) => {
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tempDir }, run);
+      await withEnvAsync({ CARAPACE_STATE_DIR: tempDir }, run);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 }
@@ -31,8 +31,8 @@ describe("control-plane update restart sentinel", () => {
             steps: [
               {
                 name: "post-install doctor",
-                command: "openclaw doctor",
-                cwd: "/tmp/openclaw",
+                command: "carapace doctor",
+                cwd: "/tmp/carapace",
                 durationMs: 1,
                 exitCode: 86,
                 advisory: {
@@ -146,7 +146,7 @@ describe("control-plane update restart sentinel", () => {
       runId: "ab186c13-181b-4cf7-a882-c179928539e6",
       status: "ok" as const,
       mode: "npm" as const,
-      root: "/tmp/openclaw",
+      root: "/tmp/carapace",
       before: { version: "2026.4.23" },
       after: { version: "2026.4.24" },
       steps: [],

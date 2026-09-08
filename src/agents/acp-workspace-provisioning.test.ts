@@ -4,7 +4,7 @@
 import { describe, beforeEach, expect, it } from "vitest";
 import type { ChannelConfiguredBindingProvider } from "../channels/plugins/types.adapters.js";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SessionAcpMeta } from "../config/sessions/types.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createChannelTestPluginBase, createTestRegistry } from "../test-utils/channel-plugins.js";
@@ -45,7 +45,7 @@ function acpBinding(params: {
   conversationId: string;
   agentId?: string;
   cwd?: string;
-}): NonNullable<OpenClawConfig["bindings"]>[number] {
+}): NonNullable<CarapaceConfig["bindings"]>[number] {
   return {
     type: "acp",
     agentId: params.agentId ?? "codex",
@@ -54,10 +54,10 @@ function acpBinding(params: {
       peer: { kind: "channel", id: params.conversationId },
     },
     ...(params.cwd ? { acp: { cwd: params.cwd } } : {}),
-  } as NonNullable<OpenClawConfig["bindings"]>[number];
+  } as NonNullable<CarapaceConfig["bindings"]>[number];
 }
 
-const baseCfg: OpenClawConfig = {
+const baseCfg: CarapaceConfig = {
   agents: {
     defaults: { workspace: "/shared-ws" },
     list: [{ id: "main" }, { id: "codex", runtime: { type: "acp" } }],
@@ -76,7 +76,7 @@ function sessionAcpMeta(cwd?: string): SessionAcpMeta {
   };
 }
 
-async function bindingSessionKey(cfg: OpenClawConfig, conversationId: string): Promise<string> {
+async function bindingSessionKey(cfg: CarapaceConfig, conversationId: string): Promise<string> {
   const { resolveConfiguredAcpBindingRecord } =
     await import("../acp/persistent-bindings.resolve.js");
   const resolved = resolveConfiguredAcpBindingRecord({
@@ -90,7 +90,7 @@ async function bindingSessionKey(cfg: OpenClawConfig, conversationId: string): P
 
 describe("resolveAcpAgentWorkspaceProvisioningForTurn", () => {
   it("scopes the skip to the turn bound to a cwd-bearing binding (mixed bindings)", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       ...baseCfg,
       bindings: [
         acpBinding({ conversationId: "111", cwd: "/projects/app" }),
@@ -121,7 +121,7 @@ describe("resolveAcpAgentWorkspaceProvisioningForTurn", () => {
   });
 
   it("keeps standard provisioning when the binding cwd equals the resolved workspace", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       ...baseCfg,
       bindings: [acpBinding({ conversationId: "111", cwd: "/shared-ws/codex" })],
     };
@@ -188,7 +188,7 @@ describe("resolveAcpAgentWorkspaceProvisioningForTurn", () => {
   });
 
   it("keeps standard provisioning for embedded agents and explicit workspaces", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { workspace: "/shared-ws" },
         list: [
@@ -214,7 +214,7 @@ describe("resolveAcpAgentWorkspaceProvisioningForTurn", () => {
   });
 
   it("falls back to the agent-global runtime acp.cwd default", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { workspace: "/shared-ws" },
         list: [{ id: "codex", runtime: { type: "acp", acp: { cwd: "/projects/app" } } }],

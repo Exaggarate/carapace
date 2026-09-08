@@ -1,5 +1,5 @@
 import { createServer, type ServerResponse } from "node:http";
-import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { createQaGatewayChild, type QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import {
@@ -309,8 +309,8 @@ describe("agent session scope continuity", () => {
         controlUiEnabled: false,
         fastMode: true,
         runtimeEnvPatch: {
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         },
         mutateConfig: (config) => ({ ...config, plugins: { enabled: false } }),
       });

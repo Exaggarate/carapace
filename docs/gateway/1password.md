@@ -1,19 +1,19 @@
 ---
-summary: "Use the 1Password plugin, bundled skill, or official MCP with OpenClaw"
+summary: "Use the 1Password plugin, bundled skill, or official MCP with Carapace"
 read_when:
-  - You want API keys out of openclaw.json and inside 1Password
+  - You want API keys out of carapace.json and inside 1Password
   - You run the Gateway headless and need service account auth for op
   - A Homebrew upgrade broke a manual 1Password exec provider
   - You want agents to read, inject, or maintain secrets with 1Password
 title: "1Password"
 ---
 
-OpenClaw pairs with **1Password** in four independent ways:
+Carapace pairs with **1Password** in four independent ways:
 
-- **Config secrets:** any [SecretRef](/gateway/secrets) field in `openclaw.json` can resolve through the `op` CLI at runtime, so API keys never live in the config file.
+- **Config secrets:** any [SecretRef](/gateway/secrets) field in `carapace.json` can resolve through the `op` CLI at runtime, so API keys never live in the config file.
 - **Agent workflows:** the bundled `1password` skill teaches agents to sign in and read or inject secrets with `op` for their own tasks.
 - **Desktop environments:** the official 1Password MCP server gives interactive desktop agents approved access to 1Password Environments.
-- **Browser sign-in:** the `claude-cli` backend can use Claude Code's Chrome integration with [1Password for Claude](https://support.1password.com/1password-claude/), letting the agent sign in to websites without the password ever reaching the model or OpenClaw.
+- **Browser sign-in:** the `claude-cli` backend can use Claude Code's Chrome integration with [1Password for Claude](https://support.1password.com/1password-claude/), letting the agent sign in to websites without the password ever reaching the model or Carapace.
 
 ## Requirements
 
@@ -28,29 +28,29 @@ OpenClaw pairs with **1Password** in four independent ways:
 Enable the bundled plugin and create its service-account token file:
 
 ```bash
-openclaw plugins enable onepassword
-mkdir -p ~/.openclaw/credentials/onepassword
-chmod 700 ~/.openclaw/credentials/onepassword
+carapace plugins enable onepassword
+mkdir -p ~/.carapace/credentials/onepassword
+chmod 700 ~/.carapace/credentials/onepassword
 printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" > \
-  ~/.openclaw/credentials/onepassword/service-account-token
-chmod 600 ~/.openclaw/credentials/onepassword/service-account-token
+  ~/.carapace/credentials/onepassword/service-account-token
+chmod 600 ~/.carapace/credentials/onepassword/service-account-token
 unset OP_SERVICE_ACCOUNT_TOKEN
 ```
 
-When `OPENCLAW_STATE_DIR` is set, use that directory instead of
-`~/.openclaw`. Then generate and apply a SecretRef plan:
+When `CARAPACE_STATE_DIR` is set, use that directory instead of
+`~/.carapace`. Then generate and apply a SecretRef plan:
 
 ```bash
-openclaw onepassword secretref setup \
+carapace onepassword secretref setup \
   --openai-id op://Automation/OpenAI/credential \
   --anthropic-id op://Automation/Anthropic/credential \
-  --plan-out ./openclaw-1password-secrets-plan.json
+  --plan-out ./carapace-1password-secrets-plan.json
 
-openclaw onepassword secretref status
-openclaw secrets apply --from ./openclaw-1password-secrets-plan.json --dry-run --allow-exec
-openclaw secrets apply --from ./openclaw-1password-secrets-plan.json --allow-exec
-openclaw secrets audit --check --allow-exec
-openclaw secrets reload
+carapace onepassword secretref status
+carapace secrets apply --from ./carapace-1password-secrets-plan.json --dry-run --allow-exec
+carapace secrets apply --from ./carapace-1password-secrets-plan.json --allow-exec
+carapace secrets audit --check --allow-exec
+carapace secrets reload
 ```
 
 The setup command requires at least one target. Before the plan is applied,
@@ -61,21 +61,21 @@ trusted `op` executable, and accepted non-empty token file are all ready.
 The plugin accepts native
 `op://<vault>/<item>/<field>` and
 `op://<vault>/<item>/<section>/<field>` references. It resolves only
-registered OpenClaw credential targets, bounds parallel `op read` calls, and
+registered Carapace credential targets, bounds parallel `op read` calls, and
 forces desktop-app integration off. See the
 [plugin guide](/plugins/onepassword) for manual configuration, custom targets,
 and the separate audited agent tool.
 
 ## The 1password skill for agents
 
-OpenClaw bundles a `1password` skill that teaches agents to select an available
+Carapace bundles a `1password` skill that teaches agents to select an available
 auth mode, verify access, and prefer `op run` or `op inject` over writing secret
 values to disk.
 
 Agents use it for workflows that intentionally exceed the plugin's narrow
 contracts, for example creating or rotating an item or injecting credentials
-into a one-off command. When a credential is already wired to an OpenClaw
-SecretRef target, the owning OpenClaw workflow should resolve it; the agent does
+into a one-off command. When a credential is already wired to an Carapace
+SecretRef target, the owning Carapace workflow should resolve it; the agent does
 not need to call `op` directly.
 
 ## Official 1Password MCP server
@@ -88,14 +88,14 @@ local process through an in-memory `.env` file; secret values are not returned
 to the MCP client or model.
 
 It does not provide headless service-account access to arbitrary vault items,
-and the OpenClaw plugin does not call it. If an MCP-managed Environment launches
-OpenClaw with variables already mounted, use OpenClaw's `env` SecretRefs for
+and the Carapace plugin does not call it. If an MCP-managed Environment launches
+Carapace with variables already mounted, use Carapace's `env` SecretRefs for
 those values. Use the plugin when the Gateway itself should resolve 1Password
 references on startup or reload.
 
 ## Browser sign-in with 1Password for Claude
 
-[1Password for Claude](https://support.1password.com/1password-claude/) lets Claude request a login while the 1Password browser extension fills the credential directly into the page over an encrypted channel. The secret never enters the model context, the transcript, or OpenClaw. When OpenClaw runs the [`claude-cli` backend](/gateway/cli-backends#claude-cli-specifics) with Claude Code's Chrome integration enabled, agent tasks can use that flow for websites that need a real signed-in session.
+[1Password for Claude](https://support.1password.com/1password-claude/) lets Claude request a login while the 1Password browser extension fills the credential directly into the page over an encrypted channel. The secret never enters the model context, the transcript, or Carapace. When Carapace runs the [`claude-cli` backend](/gateway/cli-backends#claude-cli-specifics) with Claude Code's Chrome integration enabled, agent tasks can use that flow for websites that need a real signed-in session.
 
 What this requires, beyond the backend itself:
 
@@ -103,9 +103,9 @@ What this requires, beyond the backend itself:
 - Claude Code signed in to a direct Anthropic plan (Pro, Max, Team, or Enterprise). Chrome integration is not available through Amazon Bedrock, Google Cloud, or other third-party providers.
 - The one-time 1Password connection on the Anthropic side: 1Password for Claude is set up through the Claude desktop app or extension flow described in [1Password's guide](https://support.1password.com/1password-claude/), and it is currently a macOS beta. On 1Password Business, an administrator must first enable "Allow AI agents to autofill for users" under Policies; Anthropic Team/Enterprise plans also ship with the integration off until an Owner enables it.
 - A [CLI backend plugin](/plugins/cli-backend-plugins) that adds `--chrome` to the Claude launch args; the bundled backend does not enable Chrome.
-- A person at the gateway host: every credential use shows a 1Password prompt confirmed there (for example with Touch ID). Under a restrictive exec policy the browser tool calls themselves are also relayed to your channel as OpenClaw approvals first.
+- A person at the gateway host: every credential use shows a 1Password prompt confirmed there (for example with Touch ID). Under a restrictive exec policy the browser tool calls themselves are also relayed to your channel as Carapace approvals first.
 
-Before wiring this into OpenClaw, verify the pieces in an interactive session on the gateway host: run `claude --chrome`, confirm the extension connects, and check that the `claude-in-chrome` tools include the credential tools. If they do not appear there, they will not appear through OpenClaw either.
+Before wiring this into Carapace, verify the pieces in an interactive session on the gateway host: run `claude --chrome`, confirm the extension connects, and check that the `claude-in-chrome` tools include the credential tools. If they do not appear there, they will not appear through Carapace either.
 
 One-time passcodes are filled by 1Password on the same page; never relay verification codes or passwords through chat. Headless or remote gateways cannot use this flow today because the approval and the browser both live on the gateway host.
 
@@ -124,8 +124,8 @@ One-time passcodes are filled by 1Password on the same page; never relay verific
 - A resolver request is limited to 32 references. Reads run four at a time with
   a seven-second per-read timeout; the provider-wide 90-second timeout covers
   the full supported batch plus process and permission-check overhead.
-- Never place secret values in `openclaw.json`, logs, or chat. Scope the service
-  account to only the vaults and items OpenClaw needs.
+- Never place secret values in `carapace.json`, logs, or chat. Scope the service
+  account to only the vaults and items Carapace needs.
 
 ## Troubleshooting
 
@@ -134,7 +134,7 @@ One-time passcodes are filled by 1Password on the same page; never relay verific
 - `op` is not trusted: use an executable owned by the current user or root and
   remove group/other write access from the executable and its parent chain.
 - Authentication fails: check the plugin token file, its contents, and the
-  service account's vault permissions with `openclaw onepassword status`.
+  service account's vault permissions with `carapace onepassword status`.
 - A reference is rejected: include the vault explicitly and use stable vault,
   item, section, and field IDs when names are long or contain unsupported
   1Password reference characters.
@@ -153,7 +153,7 @@ request, then checks the real executable and its parent directories before
 passing the service-account token. An existing `CLAW_1PASSWORD_OP` override
 can name the stable absolute Homebrew link and receives the same checks.
 The plugin follows a replacement link after an upgrade without storing its
-versioned target in `openclaw.json`. Group- or other-writable executables still
+versioned target in `carapace.json`. Group- or other-writable executables still
 fail, as do parent directories that let another user replace the checked path.
 
 Before migrating, map every existing credential target to the exact 1Password
@@ -166,10 +166,10 @@ Create the plugin token file as shown above, then generate a plan with explicit
 mappings, for example:
 
 ```bash
-openclaw onepassword secretref setup \
+carapace onepassword secretref setup \
   --target 'models.providers.anthropic.apiKey=op://Automation/Anthropic/credential' \
   --target 'models.providers.openai.apiKey=op://Automation/OpenAI/credential' \
-  --plan-out ./openclaw-1password-secrets-plan.json
+  --plan-out ./carapace-1password-secrets-plan.json
 ```
 
 Inspect the plan's provider alias and every target before using the status,

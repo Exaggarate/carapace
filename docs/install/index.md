@@ -1,5 +1,5 @@
 ---
-summary: "Install OpenClaw - desktop app downloads, installer script, npm/pnpm/bun, from source, Docker, and more"
+summary: "Install Carapace - desktop app downloads, installer script, npm/pnpm/bun, from source, Docker, and more"
 read_when:
   - You need an install method other than the Getting Started quickstart
   - You want to download the Windows Hub or macOS desktop app instead of the CLI
@@ -16,19 +16,19 @@ title: "Install"
 
 ## Download the desktop app
 
-Prefer a normal app download over the CLI? OpenClaw ships desktop companions:
+Prefer a normal app download over the CLI? Carapace ships desktop companions:
 
 - **Windows**: the [Windows Hub](/platforms/windows#recommended-windows-hub) companion app — a signed installer you download and run like any Windows app, with setup, tray status, chat, and node mode:
-  - [OpenClawCompanion-Setup-x64.exe](https://github.com/openclaw/openclaw-windows-node/releases/latest/download/OpenClawCompanion-Setup-x64.exe)
-  - [OpenClawCompanion-Setup-arm64.exe](https://github.com/openclaw/openclaw-windows-node/releases/latest/download/OpenClawCompanion-Setup-arm64.exe)
-  - All Hub releases: [Windows Hub releases page](https://github.com/openclaw/openclaw-windows-node/releases/latest)
-- **macOS**: the [macOS menu bar app](/platforms/macos) — download the `OpenClaw-<version>.dmg` (preferred) or `.zip` asset from [OpenClaw GitHub releases](https://github.com/openclaw/openclaw/releases), then install and launch **OpenClaw.app**. See the [macOS app page](/platforms/macos) for details, including what to do when the newest release ships no macOS asset.
+  - [CarapaceCompanion-Setup-x64.exe](https://github.com/Exaggarate/carapace/carapace-windows-node/releases/latest/download/CarapaceCompanion-Setup-x64.exe)
+  - [CarapaceCompanion-Setup-arm64.exe](https://github.com/Exaggarate/carapace/carapace-windows-node/releases/latest/download/CarapaceCompanion-Setup-arm64.exe)
+  - All Hub releases: [Windows Hub releases page](https://github.com/Exaggarate/carapace/carapace-windows-node/releases/latest)
+- **macOS**: the [macOS menu bar app](/platforms/macos) — download the `Carapace-<version>.dmg` (preferred) or `.zip` asset from [Carapace GitHub releases](https://github.com/Exaggarate/carapace/releases), then install and launch **Carapace.app**. See the [macOS app page](/platforms/macos) for details, including what to do when the newest release ships no macOS asset.
 
 Both desktop apps can provision a local Gateway during first-run setup, or connect to an existing remote Gateway.
 
 ## Recommended: installer script
 
-The fastest way to install. It detects your OS, installs Node if needed, installs OpenClaw, and launches onboarding.
+The fastest way to install. It detects your OS, installs Node if needed, installs Carapace, and launches onboarding.
 
 <Note>
 Windows desktop users can also install the native [Windows Hub](/platforms/windows#recommended-windows-hub) companion app, which includes setup, tray status, chat, node mode, and local MCP mode.
@@ -37,12 +37,12 @@ Windows desktop users can also install the native [Windows Hub](/platforms/windo
 <Tabs>
   <Tab title="macOS / Linux / WSL2">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash
+    curl -fsSL https://github.com/Exaggarate/carapace | bash
     ```
   </Tab>
   <Tab title="Windows (PowerShell)">
     ```powershell
-    iwr -useb https://openclaw.ai/install.ps1 | iex
+    iwr -useb https://github.com/Exaggarate/carapace | iex
     ```
   </Tab>
 </Tabs>
@@ -52,12 +52,12 @@ To install without running onboarding:
 <Tabs>
   <Tab title="macOS / Linux / WSL2">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard
+    curl -fsSL https://github.com/Exaggarate/carapace | bash -s -- --no-onboard
     ```
   </Tab>
   <Tab title="Windows (PowerShell)">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -NoOnboard
     ```
   </Tab>
 </Tabs>
@@ -68,18 +68,18 @@ For all flags and CI/automation options, see [Installer internals](/install/inst
 
 ### Local prefix installer (`install-cli.sh`)
 
-Use this when you want OpenClaw and Node kept under a local prefix such as
-`~/.openclaw`, without depending on a system-wide Node install:
+Use this when you want Carapace and Node kept under a local prefix such as
+`~/.carapace`, without depending on a system-wide Node install:
 
 ```bash
-curl -fsSL https://openclaw.ai/install-cli.sh | bash
+curl -fsSL https://github.com/Exaggarate/carapace | bash
 ```
 
 It supports npm installs by default, plus git-checkout installs under the same
 prefix flow. Full reference: [Installer internals](/install/installer#install-clish).
 
 Already installed? Switch between package and git installs with
-`openclaw update --channel dev` and `openclaw update --channel stable`. See
+`carapace update --channel dev` and `carapace update --channel stable`. See
 [Updating](/install/updating#switch-between-npm-and-git-installs).
 
 ### npm, pnpm, or bun
@@ -91,55 +91,55 @@ If you already manage Node yourself:
     On npm 12 or npm 11.16+:
 
     ```bash
-    npm install -g openclaw@latest --allow-scripts=openclaw
-    openclaw onboard --install-daemon
+    npm install -g carapace@latest --allow-scripts=carapace
+    carapace onboard --install-daemon
     ```
 
     On npm 11.15 and earlier, use the same command without
-    `--allow-scripts=openclaw`.
+    `--allow-scripts=carapace`.
 
     <Note>
     npm 12 blocks unapproved package lifecycle scripts by default. The
-    `--allow-scripts=openclaw` option explicitly allows OpenClaw's `preinstall`
+    `--allow-scripts=carapace` option explicitly allows Carapace's `preinstall`
     and `postinstall` steps; without it, npm reports them as `blocked because
     they are not covered by allowScripts`.
 
     npm 11.16 accepts the option but otherwise only warns that the scripts are
     `not yet covered by allowScripts` and still runs them. npm 11.15 and earlier
     have neither the policy nor the option, so their command must be unflagged.
-    The `npm approve-scripts openclaw`
+    The `npm approve-scripts carapace`
     command suggested by npm 11.16 does not work for a global install — it fails
-    with `ENOMATCH  No installed packages match: openclaw`.
+    with `ENOMATCH  No installed packages match: carapace`.
     </Note>
 
     <Note>
     The hosted installer clears npm freshness filters such as `min-release-age`
-    for the OpenClaw package install. If you install manually with npm, your own
+    for the Carapace package install. If you install manually with npm, your own
     npm policy still applies.
     </Note>
 
   </Tab>
   <Tab title="pnpm">
     ```bash
-    pnpm add -g --allow-build=openclaw openclaw@latest
-    openclaw onboard --install-daemon
+    pnpm add -g --allow-build=carapace carapace@latest
+    carapace onboard --install-daemon
     ```
 
     <Note>
-    pnpm requires explicit approval for packages with build scripts. `approve-builds -g` is not supported for global installs, so pass `--allow-build=openclaw` on the `pnpm add -g` command instead.
+    pnpm requires explicit approval for packages with build scripts. `approve-builds -g` is not supported for global installs, so pass `--allow-build=carapace` on the `pnpm add -g` command instead.
     </Note>
 
   </Tab>
   <Tab title="bun">
     ```bash
-    bun add -g --trust openclaw@latest
-    bun run --bun openclaw onboard --install-daemon --daemon-runtime bun
+    bun add -g --trust carapace@latest
+    bun run --bun carapace onboard --install-daemon --daemon-runtime bun
     ```
 
     <Note>
-    `--trust` allows OpenClaw's package lifecycle scripts for this install. Bun
-    1.4 or newer can also run OpenClaw's CLI, local agent, and Gateway. Node
-    remains the primary runtime, so the plain `openclaw` executable keeps its
+    `--trust` allows Carapace's package lifecycle scripts for this install. Bun
+    1.4 or newer can also run Carapace's CLI, local agent, and Gateway. Node
+    remains the primary runtime, so the plain `carapace` executable keeps its
     Node shebang. `bun run --bun` forces the Bun runtime, while
     `--daemon-runtime bun` installs the managed Gateway under Bun.
     </Note>
@@ -152,27 +152,27 @@ If you already manage Node yourself:
 For contributors or anyone who wants to run from a local checkout:
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw
+git clone https://github.com/Exaggarate/carapace.git
+cd carapace
 corepack enable
 pnpm install && pnpm build && pnpm ui:build
-pnpm add --global "openclaw@link:$PWD"
-openclaw onboard --install-daemon
+pnpm add --global "carapace@link:$PWD"
+carapace onboard --install-daemon
 ```
 
-`pnpm add --global "openclaw@link:$PWD"` links the CLI to this checkout without changing its package files. If pnpm reports that its global bin directory is not on `PATH`, run `pnpm setup`, reopen your shell, and retry.
+`pnpm add --global "carapace@link:$PWD"` links the CLI to this checkout without changing its package files. If pnpm reports that its global bin directory is not on `PATH`, run `pnpm setup`, reopen your shell, and retry.
 
 Corepack selects the exact pnpm version from `package.json` (currently pnpm 12).
 If Corepack is unavailable, install that version explicitly with
 `npm install -g pnpm@12.3.4 --allow-scripts=pnpm@12.3.4`; keep npm install scripts and optional dependencies
 enabled so pnpm can provision its native executable.
 
-Or skip the global install and use `pnpm openclaw ...` from inside the repo. See [Setup](/start/setup) for full development workflows.
+Or skip the global install and use `pnpm carapace ...` from inside the repo. See [Setup](/start/setup) for full development workflows.
 
 ### Install from the GitHub main checkout
 
 ```bash
-curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --version main
+curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method git --version main
 ```
 
 ### Containers and package managers
@@ -198,14 +198,14 @@ curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -
 ## Verify the install
 
 ```bash
-openclaw --version      # confirm the CLI is available
-openclaw doctor         # check for config issues
-openclaw gateway status # verify the Gateway is running
+carapace --version      # confirm the CLI is available
+carapace doctor         # check for config issues
+carapace gateway status # verify the Gateway is running
 ```
 
 If you want managed startup after install:
 
-- macOS: LaunchAgent via `openclaw onboard --install-daemon` or `openclaw gateway install`
+- macOS: LaunchAgent via `carapace onboard --install-daemon` or `carapace gateway install`
 - Linux/WSL2: systemd user service via the same commands
 - Native Windows: Scheduled Task first, with a per-user Startup-folder login item fallback if task creation is denied
 
@@ -222,7 +222,7 @@ If you want managed startup after install:
 
 ## Hosting and deployment
 
-Deploy OpenClaw on a cloud server or VPS. See [Linux server](/vps) for the full
+Deploy Carapace on a cloud server or VPS. See [Linux server](/vps) for the full
 provider picker (DigitalOcean, Hetzner, Hostinger, Fly.io, GCP, Azure, Railway,
 Northflank, Oracle Cloud, Raspberry Pi, and more), deploy declaratively on
 [Render](/install/render), or try the experimental [Cloudflare Containers](/install/cloudflare)
@@ -256,17 +256,17 @@ template.
     Create, verify, and restore state archives.
   </Card>
   <Card title="Updating" href="/install/updating" icon="refresh-cw">
-    Keep OpenClaw up to date.
+    Keep Carapace up to date.
   </Card>
   <Card title="Migrating" href="/install/migrating" icon="arrow-right">
     Move to a new machine.
   </Card>
   <Card title="Uninstall" href="/install/uninstall" icon="trash-2">
-    Remove OpenClaw completely.
+    Remove Carapace completely.
   </Card>
 </CardGroup>
 
-## Troubleshooting: `openclaw` not found
+## Troubleshooting: `carapace` not found
 
 Almost always a PATH issue: npm's global bin directory isn't on your shell's `PATH`. See [Node.js troubleshooting](/install/node#troubleshooting) for the full fix, including the Windows path.
 

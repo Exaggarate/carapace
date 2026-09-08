@@ -1,4 +1,4 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@carapace/workboard-contract";
 import { describe, expect, it } from "vitest";
 import { redactClaimToken } from "./card-redaction.js";
 

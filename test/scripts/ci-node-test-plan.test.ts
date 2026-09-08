@@ -1,7 +1,7 @@
 // Ci Node Test Plan tests cover ci node test plan script behavior.
 import { existsSync, globSync, readdirSync } from "node:fs";
 import { isAbsolute, join, matchesGlob, relative, resolve } from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   createChangedExtensionFallbackShards,
@@ -157,7 +157,7 @@ function listAllToolingTestFiles(): string[] {
     return listMatchedTestFiles(
       createToolingVitestConfig({
         ...process.env,
-        OPENCLAW_VITEST_INCLUDE_FILE: undefined,
+        CARAPACE_VITEST_INCLUDE_FILE: undefined,
       }),
     );
   } finally {
@@ -176,7 +176,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
   it("binds split timing identity to exact complete-file membership", () => {
     const common = {
       configs: ["test/vitest/vitest.gateway-server.config.ts"],
-      env: { OPENCLAW_GATEWAY_TEST_WORKERS: "2" },
+      env: { CARAPACE_GATEWAY_TEST_WORKERS: "2" },
       parentShardName: "agentic-control-plane-agent-chat",
     };
     const original = createCompactSplitTimingGeneration({
@@ -481,7 +481,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
     );
     expect(embeddedGroups).toHaveLength(4);
     expect(
-      embeddedGroups.every((group) => group.env?.OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS === "660000"),
+      embeddedGroups.every((group) => group.env?.CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS === "660000"),
     ).toBe(true);
 
     const gatewayGroups = groups.filter((group) =>
@@ -509,7 +509,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
 
     expect(groups.find((group) => group.shard_name === "cache-warm:ui-package")).toEqual({
       configs: ["ui/vitest.config.ts"],
-      env: { OPENCLAW_VITEST_MAX_WORKERS: "1" },
+      env: { CARAPACE_VITEST_MAX_WORKERS: "1" },
       includePatterns: [
         "ui/src/components/app-sidebar.test.ts",
         "ui/src/pages/chat/chat-view.test.ts",
@@ -577,7 +577,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
     expect(
       bundled.find((shard) => shard.shardName === "agentic-control-plane-startup-health-runtime")
         ?.env,
-    ).toEqual({ OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "60000" });
+    ).toEqual({ CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "60000" });
     expect(
       bundled.find((shard) => shard.shardName === "agentic-control-plane-startup-core")?.runner,
     ).toBe(DEFAULT_NODE_TEST_RUNNER);
@@ -882,7 +882,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
         expect(job).toMatchObject({ planConcurrency: 1, requiresDist: false });
         for (const group of job.groups) {
           expect(group.configs).toEqual([config]);
-          expect(group.env?.OPENCLAW_VITEST_MAX_WORKERS).toBe("2");
+          expect(group.env?.CARAPACE_VITEST_MAX_WORKERS).toBe("2");
           expect(group.pretestBuildMode).toBe(job.pretestBuildMode);
           expect(group.requiresDist).toBe(false);
         }
@@ -1478,17 +1478,17 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
         .flatMap((shard) => shard.groups)
         .find((group) => group.shard_name === "core-runtime-tui-pty")?.env,
     ).toEqual({
-      OPENCLAW_TUI_PTY_INCLUDE_LOCAL: "1",
-      OPENCLAW_TUI_PTY_USE_BUILT_CLI: "1",
+      CARAPACE_TUI_PTY_INCLUDE_LOCAL: "1",
+      CARAPACE_TUI_PTY_USE_BUILT_CLI: "1",
       // Timing-sensitive groups pin the worker budget while the job-level
       // default scales with the runner class.
-      OPENCLAW_VITEST_MAX_WORKERS: "2",
+      CARAPACE_VITEST_MAX_WORKERS: "2",
     });
     expect(
       compact.flatMap((shard) => shard.groups).find((group) => group.shard_name === "agentic-cli")
         ?.env,
     ).toEqual({
-      OPENCLAW_VITEST_MAX_WORKERS: "2",
+      CARAPACE_VITEST_MAX_WORKERS: "2",
     });
     for (const prefix of ["agentic-gateway-core", "core-runtime-media-ui"]) {
       for (const suffix of ["1", "2", "3"]) {
@@ -1499,7 +1499,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
           );
         expect(groups.length).toBeGreaterThan(0);
         for (const group of groups) {
-          expect(group.env).toEqual({ OPENCLAW_VITEST_MAX_WORKERS: "2" });
+          expect(group.env).toEqual({ CARAPACE_VITEST_MAX_WORKERS: "2" });
         }
       }
     }
@@ -1507,7 +1507,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
       compact
         .flatMap((shard) => shard.groups)
         .find((group) => group.shard_name === "core-runtime-media-ui-support")?.env,
-    ).toEqual({ OPENCLAW_VITEST_MAX_WORKERS: "2" });
+    ).toEqual({ CARAPACE_VITEST_MAX_WORKERS: "2" });
     const startupCoreJob = compact.find((shard) =>
       shard.groups.some((group) => group.shard_name === "agentic-control-plane-startup-core"),
     );
@@ -1525,7 +1525,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
       compact
         .flatMap((shard) => shard.groups)
         .find((group) => group.shard_name === "agentic-control-plane-startup-health-runtime")?.env,
-    ).toEqual({ OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "60000" });
+    ).toEqual({ CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "60000" });
     const largeJobs = compact.filter(
       (shard) => !shard.requiresDist && shard.checkName.startsWith("checks-node-compact-large-"),
     );
@@ -1569,7 +1569,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
           continue;
         }
         expect(isExclusiveCompactShardName(group.shard_name)).toBe(true);
-        expect(group.env?.OPENCLAW_VITEST_MAX_WORKERS).toBe("2");
+        expect(group.env?.CARAPACE_VITEST_MAX_WORKERS).toBe("2");
         if ((shard.predictedSeconds ?? 0) > 150) {
           if (isCombinedUnbuiltCliJob(shard)) {
             expect([...hybridCompact, ...hybridPullRequestCompact]).toContain(shard);
@@ -1603,7 +1603,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
     );
     expect(
       embeddedAgentGroups.every(
-        (group) => group.env?.OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS === "660000",
+        (group) => group.env?.CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS === "660000",
       ),
     ).toBe(true);
     // The base config runs serially with a shared module graph, so its stripes
@@ -1858,7 +1858,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
   });
 
   it("partitions each giant compact group across three deterministic stripes", () => {
-    const env = { ...process.env, OPENCLAW_VITEST_INCLUDE_FILE: undefined };
+    const env = { ...process.env, CARAPACE_VITEST_INCLUDE_FILE: undefined };
     const cases = [
       {
         stripeConfigs: [createUiVitestConfig(env)],
@@ -2104,7 +2104,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
       "test/scripts/managed-child-process.test.ts",
       "test/scripts/vitest-worker-artifacts.test.ts",
       "test/scripts/vitest-worker-artifacts.transforms.test.ts",
-      "test/scripts/openclaw-performance-git-lifecycle.test.ts",
+      "test/scripts/carapace-performance-git-lifecycle.test.ts",
       "test/scripts/ci-linux-git.test.ts",
       "test/scripts/pr-merge-outcome.test.ts",
     ];
@@ -2162,7 +2162,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
           includePatterns: ["test/scripts/pr-merge-outcome.test.ts"],
           requiresDist: false,
           runner: BUNDLED_NODE_TEST_RUNNER,
-          env: { OPENCLAW_VITEST_MAX_WORKERS: "2" },
+          env: { CARAPACE_VITEST_MAX_WORKERS: "2" },
         },
       ],
     };
@@ -2210,7 +2210,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
     const extraInventories = [
       ["test/scripts/npm-package-locks-report.test.ts"],
       Array.from({ length: 10 }, (_, index) => `test/scripts/zz-growth-probe-${index}.test.ts`),
-      ["test/scripts/openclaw-performance-crabbox.test.ts"],
+      ["test/scripts/carapace-performance-crabbox.test.ts"],
       ["test/scripts/install-smoke-ref-admission.test.ts"],
     ];
     const growthFiles = new Set([inventoryGrowthFile, ...extraInventories.flat()]);
@@ -2633,8 +2633,8 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
       checkName: "checks-node-core-runtime-tui-pty",
       configs: ["test/vitest/vitest.tui-pty.config.ts"],
       env: {
-        OPENCLAW_TUI_PTY_INCLUDE_LOCAL: "1",
-        OPENCLAW_TUI_PTY_USE_BUILT_CLI: "1",
+        CARAPACE_TUI_PTY_INCLUDE_LOCAL: "1",
+        CARAPACE_TUI_PTY_USE_BUILT_CLI: "1",
       },
       requiresDist: true,
     });
@@ -2748,7 +2748,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
           ? { pretestBuildMode: "runtime" }
           : {}),
         ...(shard.shardName === "agentic-control-plane-startup-health-runtime"
-          ? { env: { OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "60000" } }
+          ? { env: { CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "60000" } }
           : {}),
         ...(shard.includePatterns?.includes("src/gateway/server-sidecar-retention.test.ts")
           ? { pretestBuildMode: "runtime" }
@@ -2768,7 +2768,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
     const expectedControlPlaneFiles = listMatchedTestFiles(
       createGatewayServerVitestConfig({
         ...process.env,
-        OPENCLAW_VITEST_INCLUDE_FILE: undefined,
+        CARAPACE_VITEST_INCLUDE_FILE: undefined,
       }),
     );
     expect(
@@ -2961,7 +2961,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
           "test/vitest/vitest.agents-embedded-agent-overflow-compaction.config.ts",
           "test/vitest/vitest.agents-embedded-agent-run.config.ts",
         ],
-        env: { OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "660000" },
+        env: { CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "660000" },
         requiresDist: false,
         runner: DEFAULT_NODE_TEST_RUNNER,
         shardName: "agentic-agents-embedded",
@@ -3359,7 +3359,7 @@ describe("scripts/lib/ci-node-test-plan.mts", () => {
               timingFamilies(mutated).get(toolingParent(target)),
               "timing family for environment mutation",
             )) {
-              group.env = { ...group.env, OPENCLAW_VITEST_MAX_WORKERS: "3" };
+              group.env = { ...group.env, CARAPACE_VITEST_MAX_WORKERS: "3" };
             }
           } else {
             target.runner =

@@ -1,7 +1,7 @@
 import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { APIError as AnthropicAPIError } from "@anthropic-ai/sdk/core/error.js";
-import type { AssistantMessageEventStreamLike, Model } from "@openclaw/llm-core";
+import type { AssistantMessageEventStreamLike, Model } from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import { configureAiTransportHost, getAiTransportHost } from "./host.js";
 import {
@@ -260,7 +260,7 @@ async function observeStream(stream: AssistantMessageEventStreamLike): Promise<{
       "model",
       "responseId",
       "responseModel",
-      "openclawDelivery",
+      "carapaceDelivery",
       "usage",
       "stopReason",
       "diagnostics",
@@ -773,7 +773,7 @@ describe("provider and transport observable parity fixtures", () => {
           ),
         },
       ]);
-      expect(hiddenReasoningResult.terminal.openclawDelivery).toEqual({
+      expect(hiddenReasoningResult.terminal.carapaceDelivery).toEqual({
         textPhaseRequiresTerminal: true,
       });
 

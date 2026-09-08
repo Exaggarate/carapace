@@ -1,14 +1,14 @@
 import {
   resolveAllowedModelRef,
   resolveDefaultModelForAgent,
-} from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { resolveCodexCatalogCreateSession } from "./session-catalog-create.js";
 
 const modelConfig = { resolveAllowedModelRef, resolveDefaultModelForAgent };
 
-function configWithAllowedModels(models: string[], runtime?: string): OpenClawConfig {
+function configWithAllowedModels(models: string[], runtime?: string): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -33,7 +33,7 @@ describe("resolveCodexCatalogCreateSession", () => {
     expect(
       resolveCodexCatalogCreateSession(
         modelConfig,
-        configWithAllowedModels(["openai/gpt-5.6-sol"], "openclaw"),
+        configWithAllowedModels(["openai/gpt-5.6-sol"], "carapace"),
         "main",
       ),
     ).toEqual({
@@ -69,7 +69,7 @@ describe("resolveCodexCatalogCreateSession", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(resolveCodexCatalogCreateSession(modelConfig, config, "main")).toEqual({
       model: "openai/gpt-5.6-sol",

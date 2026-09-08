@@ -4,8 +4,8 @@
  * Pure helper – no side effects, no runtime imports.
  */
 
-import type { ChannelBotLoopProtectionConfig } from "openclaw/plugin-sdk/config-contracts";
-import { mergePairLoopGuardConfig } from "openclaw/plugin-sdk/pair-loop-guard-runtime";
+import type { ChannelBotLoopProtectionConfig } from "carapace/plugin-sdk/config-contracts";
+import { mergePairLoopGuardConfig } from "carapace/plugin-sdk/pair-loop-guard-runtime";
 
 type ClickClackGroupPolicy = {
   requireMention: boolean;

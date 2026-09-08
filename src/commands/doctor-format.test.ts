@@ -9,11 +9,11 @@ describe("buildGatewayRuntimeHints", () => {
         status: "unknown",
         missingGuiSession: true,
       },
-      { platform: "darwin", env: { OPENCLAW_PROFILE: "work" } },
+      { platform: "darwin", env: { CARAPACE_PROFILE: "work" } },
     );
 
     expect(hints.join("\n")).toContain("logged-in macOS GUI session");
-    expect(hints.join("\n")).toContain("openclaw --profile work gateway restart");
+    expect(hints.join("\n")).toContain("carapace --profile work gateway restart");
   });
 
   it("surfaces suspicious systemd cgroup hygiene with inspection commands", () => {
@@ -23,7 +23,7 @@ describe("buildGatewayRuntimeHints", () => {
           status: "running",
           pid: 1234,
           systemd: {
-            unit: "openclaw-gateway.service",
+            unit: "carapace-gateway.service",
             killMode: "process",
             tasksCurrent: 807,
             memoryCurrent: 11_918_534_246,
@@ -34,9 +34,9 @@ describe("buildGatewayRuntimeHints", () => {
     ).toEqual([
       "Systemd cgroup hygiene looks elevated: cgroup hygiene: KillMode=process, tasks=807, memory=11.1GiB.",
       "This usually means old helper or browser processes may still be attached to the gateway service.",
-      "Run: systemctl --user show openclaw-gateway.service -p KillMode -p TasksCurrent -p MemoryCurrent -p MainPID",
-      "Run: systemd-cgls --user-unit openclaw-gateway.service",
-      "After reviewing service settings, run: openclaw gateway restart",
+      "Run: systemctl --user show carapace-gateway.service -p KillMode -p TasksCurrent -p MemoryCurrent -p MainPID",
+      "Run: systemd-cgls --user-unit carapace-gateway.service",
+      "After reviewing service settings, run: carapace gateway restart",
     ]);
   });
 
@@ -61,7 +61,7 @@ describe("buildGatewayRuntimeHints", () => {
     const hints = buildGatewayRuntimeHints(
       {
         status: "unknown",
-        detail: "service runtime inspection failed; retry with openclaw status --deep",
+        detail: "service runtime inspection failed; retry with carapace status --deep",
         inspectionFailure: {
           code: "service-runtime-inspection-failed",
           detail: "systemctl --user unavailable: Failed to connect to bus",
@@ -75,16 +75,16 @@ describe("buildGatewayRuntimeHints", () => {
 
   it.each([
     {
-      env: { OPENCLAW_PROFILE: "blue" },
-      command: "openclaw --profile blue gateway",
+      env: { CARAPACE_PROFILE: "blue" },
+      command: "carapace --profile blue gateway",
     },
     {
-      env: { OPENCLAW_CONTAINER_HINT: "sandbox" },
-      command: "openclaw --container sandbox gateway",
+      env: { CARAPACE_CONTAINER_HINT: "sandbox" },
+      command: "carapace --container sandbox gateway",
     },
     {
-      env: { OPENCLAW_PROFILE: "blue", OPENCLAW_CONTAINER_HINT: "sandbox" },
-      command: "openclaw --container sandbox gateway",
+      env: { CARAPACE_PROFILE: "blue", CARAPACE_CONTAINER_HINT: "sandbox" },
+      command: "carapace --container sandbox gateway",
     },
   ])("preserves the active target in systemd recovery commands: $command", ({ env, command }) => {
     const hints = buildGatewayRuntimeHints(
@@ -97,7 +97,7 @@ describe("buildGatewayRuntimeHints", () => {
 
     expect(hints.some((hint) => hint.includes(command))).toBe(true);
     expect(hints.some((hint) => hint.includes("headless server"))).toBe(
-      !env.OPENCLAW_CONTAINER_HINT,
+      !env.CARAPACE_CONTAINER_HINT,
     );
   });
 
@@ -114,7 +114,7 @@ describe("buildGatewayRuntimeHints", () => {
     ).join("\n");
 
     expect(text).toContain("systemd stopped restarting the gateway after repeated crashes");
-    expect(text).toContain("openclaw gateway restart");
+    expect(text).toContain("carapace gateway restart");
     expect(text).not.toContain("likely exited immediately");
   });
 
@@ -166,7 +166,7 @@ describe("buildGatewayRuntimeHints", () => {
           status: "running",
           pid: 1234,
           systemd: {
-            unit: "openclaw-gateway.service",
+            unit: "carapace-gateway.service",
             killMode: "control-group",
             tasksCurrent: 7,
             memoryCurrent: 132_120_576,

@@ -1,4 +1,4 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 /**
  * Shared Browser control-server test harness with mocked Chrome, CDP,
  * Playwright, Chrome MCP, config, and media dependencies.
@@ -25,7 +25,7 @@ type HarnessState = {
       cdpPort?: number;
       cdpUrl?: string;
       color: string;
-      driver?: "openclaw" | "existing-session";
+      driver?: "carapace" | "existing-session";
       attachOnly?: boolean;
     }
   >;
@@ -43,7 +43,7 @@ const state: HarnessState = {
   cfgEvaluateEnabled: true,
   cfgExtraArgs: [],
   cfgSsrfPolicy: undefined,
-  cfgDefaultProfile: "openclaw",
+  cfgDefaultProfile: "carapace",
   cfgProfiles: {},
   tabUrl: "https://example.com",
   prevGatewayPort: undefined,
@@ -63,10 +63,10 @@ export function getBrowserControlServerBaseUrl(): string {
 
 function restoreGatewayPortEnv(prevGatewayPort: string | undefined): void {
   if (prevGatewayPort === undefined) {
-    delete process.env.OPENCLAW_GATEWAY_PORT;
+    delete process.env.CARAPACE_GATEWAY_PORT;
     return;
   }
-  process.env.OPENCLAW_GATEWAY_PORT = prevGatewayPort;
+  process.env.CARAPACE_GATEWAY_PORT = prevGatewayPort;
 }
 
 /** Sets the mocked browser.evaluateEnabled config flag. */
@@ -97,7 +97,7 @@ export function setBrowserControlServerTabUrl(url: string): void {
 /** Sets mocked Browser profiles and default profile for config reload tests. */
 export function setBrowserControlServerProfiles(
   profiles: HarnessState["cfgProfiles"],
-  defaultProfile = Object.keys(profiles)[0] ?? "openclaw",
+  defaultProfile = Object.keys(profiles)[0] ?? "carapace",
 ): void {
   state.cfgProfiles = profiles;
   state.cfgDefaultProfile = defaultProfile;
@@ -423,7 +423,7 @@ const chromeMcpMocks = vi.hoisted(() => ({
   uploadChromeMcpFile: vi.fn(async () => {}),
 }));
 
-const chromeUserDataDir = vi.hoisted(() => ({ dir: "/tmp/openclaw" }));
+const chromeUserDataDir = vi.hoisted(() => ({ dir: "/tmp/carapace" }));
 installChromeUserDataDirHooks(chromeUserDataDir);
 
 function makeProc(pid = 123) {
@@ -455,7 +455,7 @@ function defaultBrowserCdpPortForState(testPort: number): number {
 
 function defaultProfilesForState(testPort: number): HarnessState["cfgProfiles"] {
   return {
-    openclaw: { cdpPort: defaultBrowserCdpPortForState(testPort), color: "#FF4500" },
+    carapace: { cdpPort: defaultBrowserCdpPortForState(testPort), color: "#FF4500" },
   };
 }
 
@@ -488,13 +488,13 @@ vi.mock("../config/config.js", async () => {
       ) => unknown;
     }) => {
       const draft = structuredClone(loadConfig());
-      const result = await params.mutate(draft, { snapshot: { path: "/tmp/openclaw.json" } });
+      const result = await params.mutate(draft, { snapshot: { path: "/tmp/carapace.json" } });
       await writeConfigFile(draft);
       return {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         previousHash: "test-hash",
         persistedHash: "test-hash",
-        snapshot: { path: "/tmp/openclaw.json" },
+        snapshot: { path: "/tmp/carapace.json" },
         nextConfig: draft,
         result,
         attempts: 1,
@@ -523,7 +523,7 @@ vi.mock("./chrome.js", () => ({
   isChromeCdpOwnedByPid: vi.fn(async () => true),
   isChromeCdpReady: vi.fn(async () => state.reachable),
   isChromeReachable: vi.fn(async () => state.reachable),
-  launchOpenClawChrome: vi.fn(async (_resolved: unknown, profile: { cdpPort: number }) => {
+  launchCarapaceChrome: vi.fn(async (_resolved: unknown, profile: { cdpPort: number }) => {
     launchCalls.push({ port: profile.cdpPort });
     state.reachable = true;
     return {
@@ -535,9 +535,9 @@ vi.mock("./chrome.js", () => ({
       proc,
     };
   }),
-  resolveOpenClawUserDataDir: vi.fn(() => chromeUserDataDir.dir),
-  stopOwnedOpenClawChrome: vi.fn(async () => false),
-  stopOpenClawChrome: vi.fn(async () => {
+  resolveCarapaceUserDataDir: vi.fn(() => chromeUserDataDir.dir),
+  stopOwnedCarapaceChrome: vi.fn(async () => false),
+  stopCarapaceChrome: vi.fn(async () => {
     state.reachable = false;
   }),
 }));
@@ -614,7 +614,7 @@ export async function resetBrowserControlServerTestContext(): Promise<void> {
   state.cfgEvaluateEnabled = true;
   state.cfgExtraArgs = [];
   state.cfgSsrfPolicy = undefined;
-  state.cfgDefaultProfile = "openclaw";
+  state.cfgDefaultProfile = "carapace";
   state.cfgProfiles = defaultProfilesForState(state.testPort);
   state.tabUrl = "https://example.com";
 
@@ -625,14 +625,14 @@ export async function resetBrowserControlServerTestContext(): Promise<void> {
   state.testPort = await getFreePort();
   state.cdpBaseUrl = `http://127.0.0.1:${defaultBrowserCdpPortForState(state.testPort)}`;
   state.cfgProfiles = defaultProfilesForState(state.testPort);
-  state.prevGatewayPort = process.env.OPENCLAW_GATEWAY_PORT;
-  process.env.OPENCLAW_GATEWAY_PORT = String(state.testPort - 2);
+  state.prevGatewayPort = process.env.CARAPACE_GATEWAY_PORT;
+  process.env.CARAPACE_GATEWAY_PORT = String(state.testPort - 2);
   // Avoid flaky auth coupling: some suites temporarily set gateway env auth
   // which would make the browser control server require auth.
-  state.prevGatewayToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-  state.prevGatewayPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
-  delete process.env.OPENCLAW_GATEWAY_TOKEN;
-  delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+  state.prevGatewayToken = process.env.CARAPACE_GATEWAY_TOKEN;
+  state.prevGatewayPassword = process.env.CARAPACE_GATEWAY_PASSWORD;
+  delete process.env.CARAPACE_GATEWAY_TOKEN;
+  delete process.env.CARAPACE_GATEWAY_PASSWORD;
 }
 
 function restoreGatewayAuthEnv(
@@ -640,14 +640,14 @@ function restoreGatewayAuthEnv(
   prevGatewayPassword: string | undefined,
 ): void {
   if (prevGatewayToken === undefined) {
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    delete process.env.CARAPACE_GATEWAY_TOKEN;
   } else {
-    process.env.OPENCLAW_GATEWAY_TOKEN = prevGatewayToken;
+    process.env.CARAPACE_GATEWAY_TOKEN = prevGatewayToken;
   }
   if (prevGatewayPassword === undefined) {
-    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+    delete process.env.CARAPACE_GATEWAY_PASSWORD;
   } else {
-    process.env.OPENCLAW_GATEWAY_PASSWORD = prevGatewayPassword;
+    process.env.CARAPACE_GATEWAY_PASSWORD = prevGatewayPassword;
   }
 }
 

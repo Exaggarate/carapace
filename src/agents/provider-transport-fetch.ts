@@ -1,21 +1,21 @@
-import { emitModelTransportDebug, formatModelTransportDebugUrl } from "@openclaw/ai/diagnostics";
+import { emitModelTransportDebug, formatModelTransportDebugUrl } from "@carapace/ai/diagnostics";
 /**
  * Guarded provider fetch transport utilities.
  *
  * Applies request timeouts, proxy/TLS overrides, SSRF policy, local-service leases, retry hints, and SSE normalization.
  */
-import { parseRetryAfterHeadersSeconds as parseRetryAfterSeconds } from "@openclaw/ai/internal/retry-after";
+import { parseRetryAfterHeadersSeconds as parseRetryAfterSeconds } from "@carapace/ai/internal/retry-after";
 import {
   isCloudMetadataIpAddress,
   isLinkLocalIpAddress,
   isRfc8215LocalUseNat64Ipv6Address,
   parseCanonicalIpAddress,
-} from "@openclaw/net-policy/ip";
+} from "@carapace/net-policy/ip";
 import {
   asFiniteNumberInRange,
   clampTimerTimeoutMs,
   parseStrictFiniteNumber,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import {
   fetchWithSsrFGuard,
   withTrustedEnvProxyGuardedFetchMode,
@@ -462,7 +462,7 @@ function requestBodyHasStreamTrue(
 }
 
 function resolveMaxSdkRetryWaitSeconds(): number | undefined {
-  const raw = process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS?.trim();
+  const raw = process.env.CARAPACE_SDK_RETRY_MAX_WAIT_SECONDS?.trim();
   if (!raw) {
     return DEFAULT_MAX_SDK_RETRY_WAIT_SECONDS;
   }
@@ -715,7 +715,7 @@ function withModelProviderNetworkRemediation(
   }
   return new SsrFBlockedError(
     `Configured model provider ${params.providerId} uses local-use NAT64 origin ` +
-      `${baseOrigin}, which OpenClaw blocks by default. Move the provider to a ` +
+      `${baseOrigin}, which Carapace blocks by default. Move the provider to a ` +
       `loopback, LAN, or tailnet address, or set ` +
       `models.providers.${params.providerId}.request.allowPrivateNetwork=true only for an ` +
       `operator-controlled endpoint. Original block: ${error.message}`,

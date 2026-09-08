@@ -1,6 +1,6 @@
 // QA Lab plugin module embeds profile scorecard context into QA evidence.
 import fs from "node:fs/promises";
-import { normalizeSortedUniqueTrimmedStringList } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeSortedUniqueTrimmedStringList } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   attachQaEvidenceScorecard,
   validateQaEvidenceSummaryJson,

@@ -1,4 +1,4 @@
-import { ConnectErrorDetailCodes } from "@openclaw/gateway-client/browser";
+import { ConnectErrorDetailCodes } from "@carapace/gateway-client/browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   MentionInboxItem,

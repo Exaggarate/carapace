@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setCurrentPluginMetadataSnapshot } from "./current-plugin-metadata.test-support.js";
 import type { PluginCandidate } from "./discovery.js";
 import { loadInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
@@ -32,20 +32,20 @@ afterEach(() => {
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-plugin-registry-snapshot", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-registry-snapshot", tempDirs);
 }
 
 function createHermeticEnv(rootDir: string): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
-    OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
-    OPENCLAW_VERSION: "2026.4.26",
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
+    CARAPACE_STATE_DIR: path.join(rootDir, "state"),
+    CARAPACE_VERSION: "2026.4.26",
     VITEST: "true",
   };
 }
 
 function createCurrentMetadataSnapshot(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   workspaceDir: string,
 ): PluginMetadataSnapshot {
   const snapshot = createPluginMetadataSnapshotFixture();
@@ -77,7 +77,7 @@ function writePackagePlugin(
   fs.mkdirSync(rootDir, { recursive: true });
   fs.writeFileSync(path.join(rootDir, "index.ts"), "export default { register() {} };\n", "utf8");
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       name: pluginId,
@@ -104,7 +104,7 @@ function writeBundledPlugin(
   fs.mkdirSync(rootDir, { recursive: true });
   fs.writeFileSync(path.join(rootDir, entryPath), "export default { register() {} };\n", "utf8");
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       name: pluginId,
@@ -116,9 +116,9 @@ function writeBundledPlugin(
   fs.writeFileSync(
     path.join(rootDir, "package.json"),
     JSON.stringify({
-      name: `@openclaw/${pluginId}`,
+      name: `@carapace/${pluginId}`,
       version: "1.0.0",
-      openclaw: {
+      carapace: {
         extensions: [`./${entryPath}`],
         ...(build ? { build } : {}),
       },
@@ -145,7 +145,7 @@ function createCandidate(rootDir: string, pluginId = "demo"): PluginCandidate {
   fs.mkdirSync(rootDir, { recursive: true });
   fs.writeFileSync(path.join(rootDir, "index.ts"), "export default { register() {} };\n", "utf8");
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       name: pluginId,
@@ -244,17 +244,17 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     "reselects checkout plugins for a fresh config request after a %s global selection",
     (cache) => {
       const root = fs.realpathSync(makeTempDir());
-      const packageRoot = path.join(root, "openclaw");
+      const packageRoot = path.join(root, "carapace");
       const bundledRoot = path.join(packageRoot, "dist", "extensions");
       const bundledPlugin = path.join(bundledRoot, "demo");
       const globalPlugin = path.join(root, "state", "extensions", "demo");
       const env: NodeJS.ProcessEnv = {
         ...createHermeticEnv(root),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
       };
       fs.mkdirSync(path.join(packageRoot, "src"), { recursive: true });
       fs.mkdirSync(path.join(packageRoot, "extensions"));
-      fs.writeFileSync(path.join(packageRoot, "package.json"), '{"name":"openclaw"}');
+      fs.writeFileSync(path.join(packageRoot, "package.json"), '{"name":"carapace"}');
       fs.writeFileSync(path.join(packageRoot, "pnpm-workspace.yaml"), "packages: []\n");
       writeBundledPlugin(bundledPlugin, "demo", "index.js");
       writeBundledPlugin(globalPlugin, "demo", "index.js");
@@ -267,7 +267,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
         },
       });
       expect(requirePluginRecord(index.plugins, "demo").origin).toBe("global");
-      writePersistedInstalledPluginIndexSync(index, { stateDir: env.OPENCLAW_STATE_DIR });
+      writePersistedInstalledPluginIndexSync(index, { stateDir: env.CARAPACE_STATE_DIR });
       if (cache === "current") {
         setCurrentPluginMetadataSnapshot(loadPluginMetadataSnapshot({ config, env }), {
           config,
@@ -276,7 +276,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
       }
       const result = loadPluginRegistrySnapshotWithMetadata({
         config: structuredClone(config),
-        env: { ...env, OPENCLAW_DEV_SOURCE_ROOT: packageRoot },
+        env: { ...env, CARAPACE_DEV_SOURCE_ROOT: packageRoot },
       });
       expect(requirePluginRecord(result.snapshot.plugins, "demo")).toMatchObject({
         origin: "bundled",
@@ -307,7 +307,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const rootDir = makeTempDir();
     const env = {
       ...createHermeticEnv(rootDir),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
     const config = {};
     const derived = loadPluginMetadataSnapshot({
@@ -332,7 +332,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
   it("reuses diagnostic current metadata without promoting its registry source", () => {
     const env = {
       ...createHermeticEnv(makeTempDir()),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
     const config = {};
     const workspaceDir = path.join(makeTempDir(), "workspace");
@@ -379,7 +379,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
     const config = {};
     const workspaceDir = path.join(tempRoot, "workspace");
@@ -405,13 +405,13 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const stateDir = path.join(tempRoot, "state");
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     const config = {};
     const whatsappDir = writeManagedNpmPlugin({
       stateDir,
-      packageName: "@openclaw/whatsapp",
+      packageName: "@carapace/whatsapp",
       pluginId: "whatsapp",
       version: "2026.5.2",
     });
@@ -434,18 +434,18 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     expectDiagnosticsContainCode(result.diagnostics, "persisted-registry-stale-source");
     expect(result.snapshot.installRecords.whatsapp).toEqual({
       source: "npm",
-      spec: "@openclaw/whatsapp@2026.5.2",
+      spec: "@carapace/whatsapp@2026.5.2",
       installPath: whatsappDir,
       version: "2026.5.2",
-      resolvedName: "@openclaw/whatsapp",
+      resolvedName: "@carapace/whatsapp",
       resolvedVersion: "2026.5.2",
-      resolvedSpec: "@openclaw/whatsapp@2026.5.2",
+      resolvedSpec: "@carapace/whatsapp@2026.5.2",
     });
     const whatsappPlugin = requirePluginRecord(result.snapshot.plugins, "whatsapp");
     expect(whatsappPlugin.origin).toBe("global");
   });
 
-  it.each<[string, NonNullable<OpenClawConfig["plugins"]>]>([
+  it.each<[string, NonNullable<CarapaceConfig["plugins"]>]>([
     ["entry", { entries: { "memory-demo": { enabled: true } } }],
     ["allowlist", { allow: ["memory-demo"] }],
     ["memory slot", { slots: { memory: " memory-demo " } }],
@@ -457,8 +457,8 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
       const stateDir = path.join(tempRoot, "state");
       const env = {
         ...createHermeticEnv(tempRoot),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: stateDir,
       };
       const config = { plugins };
       const staleIndex = loadInstalledPluginIndex({
@@ -491,13 +491,13 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const stateDir = path.join(tempRoot, "state");
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     const config = {};
     const codexDir = writeManagedNpmPlugin({
       stateDir,
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       pluginId: "codex",
       version: "2026.6.10-beta.1",
     });
@@ -531,17 +531,17 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const stateDir = path.join(tempRoot, "state");
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     const codexDir = writeManagedNpmPlugin({
       stateDir,
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       pluginId: "codex",
       version: "2026.6.10-beta.1",
     });
     fs.writeFileSync(
-      path.join(codexDir, ".openclaw-retained-npm-install.json"),
+      path.join(codexDir, ".carapace-retained-npm-install.json"),
       '{"version":1,"pluginId":"codex"}\n',
       "utf8",
     );
@@ -555,8 +555,8 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const goneDir = path.join(tempRoot, "gone");
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     writePersistedInstalledPluginIndexSync(
       {
@@ -579,8 +579,8 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const goneDir = path.join(stateDir, "extensions", "gone");
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     writePackagePlugin(demoDir, { pluginId: "demo" });
     const config = {
@@ -608,7 +608,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -630,12 +630,12 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
 
   it("ignores malformed load paths while deriving snapshots", () => {
     const tempRoot = makeTempDir();
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: "not-an-array" },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(() => loadPluginRegistrySnapshotWithMetadata({ config, env })).not.toThrow();
   });
@@ -644,7 +644,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -657,7 +657,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
       throw new Error("expected package plugin index record with file signatures");
     }
     expect(record.manifestFile.size).toBe(
-      fs.statSync(path.join(rootDir, "openclaw.plugin.json")).size,
+      fs.statSync(path.join(rootDir, "carapace.plugin.json")).size,
     );
     expect(record.packageJson.fileSignature.size).toBe(
       fs.statSync(path.join(rootDir, "package.json")).size,
@@ -678,7 +678,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const packageContents = JSON.stringify({ name: "demo", version: "1.0.0" });
     const baseCandidate = createCandidate(rootDir);
     fs.writeFileSync(path.join(rootDir, "package.json"), packageContents, "utf8");
@@ -709,7 +709,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const firstRoot = path.join(tempRoot, "first");
     const secondRoot = path.join(tempRoot, "second");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const staleConfig = {
       plugins: {
         load: { paths: [firstRoot] },
@@ -760,7 +760,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const firstRoot = path.join(tempRoot, "first");
     const secondRoot = path.join(tempRoot, "second");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const originalConfig = {
       plugins: {
         load: { paths: [firstRoot, secondRoot] },
@@ -802,7 +802,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -831,7 +831,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -846,7 +846,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
       JSON.stringify({
         name: "demo",
         version: "1.0.0",
-        openclaw: {
+        carapace: {
           channel: {
             id: "demo",
             label: "Demo",
@@ -912,7 +912,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
       const outsideDir = path.join(tempRoot, "outside");
       const packageJsonPath = path.join(rootDir, "package.json");
       const outsidePackageJsonPath = path.join(outsideDir, "package.json");
-      const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+      const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
       const config = {
         plugins: {
           load: { paths: [rootDir] },
@@ -969,7 +969,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
         const tempRoot = makeTempDir();
         const rootDir = path.join(tempRoot, "workspace");
         const stateDir = path.join(tempRoot, "state");
-        const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+        const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
         const config = {
           plugins: {
             load: { paths: [rootDir] },
@@ -983,7 +983,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
         const artifactPath =
           artifact === "root"
             ? rootDir
-            : path.join(rootDir, artifact === "source" ? "index.ts" : "openclaw.plugin.json");
+            : path.join(rootDir, artifact === "source" ? "index.ts" : "carapace.plugin.json");
         fs.rmSync(artifactPath, { recursive: artifact === "root" });
         fs.symlinkSync(path.join(tempRoot, "missing"), artifactPath);
 
@@ -999,7 +999,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -1032,7 +1032,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -1043,7 +1043,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     writePersistedInstalledPluginIndexSync(index, { stateDir });
 
     replaceFilePreservingSizeAndMtime(
-      path.join(rootDir, "openclaw.plugin.json"),
+      path.join(rootDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "demo",
         name: "Demo",
@@ -1069,9 +1069,9 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const stateDir = path.join(tempRoot, "state");
     const contractPath = path.join(rootDir, "doctor-contract-api.ts");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
     const config = {};
@@ -1097,7 +1097,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
     const contractPath = path.join(rootDir, "doctor-contract-api.ts");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = { plugins: { load: { paths: [rootDir] } } };
     writePackagePlugin(rootDir);
     fs.writeFileSync(contractPath, 'export const marker = "aaaa";\n', "utf8");
@@ -1127,7 +1127,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
     const contractPath = path.join(rootDir, "doctor-contract-api.ts");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = { plugins: { load: { paths: [rootDir] } } };
     writePackagePlugin(rootDir);
     fs.writeFileSync(contractPath, 'export const marker = "aaaa";\n', "utf8");
@@ -1146,7 +1146,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -1175,7 +1175,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const tempRoot = makeTempDir();
     const rootDir = path.join(tempRoot, "workspace");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [rootDir] },
@@ -1222,14 +1222,14 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
 
   it("keeps mixed source-checkout bundled roots from the same checkout", () => {
     const tempRoot = makeTempDir();
-    const packageRoot = path.join(tempRoot, "openclaw");
+    const packageRoot = path.join(tempRoot, "carapace");
     const bundledRoot = path.join(packageRoot, "dist", "extensions");
     const sourceRoot = path.join(packageRoot, "extensions");
     const stateDir = path.join(tempRoot, "state");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
 
@@ -1238,11 +1238,11 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     fs.writeFileSync(path.join(packageRoot, "pnpm-workspace.yaml"), "packages: []\n", "utf8");
     writeBundledPlugin(path.join(bundledRoot, "codex"), "codex", "index.js", {
       bundledDist: true,
-      openclawVersion: "2026.4.26",
+      carapaceVersion: "2026.4.26",
       pluginSdkVersion: "2026.4.26",
     });
     writeBundledPlugin(path.join(sourceRoot, "whatsapp"), "whatsapp", "index.ts", {
-      openclawVersion: "2026.4.26",
+      carapaceVersion: "2026.4.26",
     });
 
     const index = loadInstalledPluginIndex({ config: {}, env, stateDir });
@@ -1253,11 +1253,11 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     ]);
     expect(requirePluginRecord(index.plugins, "codex").packageBuild).toEqual({
       bundledDist: true,
-      openclawVersion: "2026.4.26",
+      carapaceVersion: "2026.4.26",
       pluginSdkVersion: "2026.4.26",
     });
     expect(requirePluginRecord(index.plugins, "whatsapp").packageBuild).toEqual({
-      openclawVersion: "2026.4.26",
+      carapaceVersion: "2026.4.26",
     });
     writePersistedInstalledPluginIndexSync(index, { stateDir });
 
@@ -1278,9 +1278,9 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const pluginRoot = path.join(bundledRoot, "whatsapp");
     const stateDir = path.join(tempRoot, "state");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
     const config = { plugins: { entries: { whatsapp: { enabled: false } } } };
@@ -1313,9 +1313,9 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const stateDir = path.join(tempRoot, "state");
     const contractPath = path.join(pluginRoot, "doctor-contract-api.ts");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
     const config = { plugins: { entries: { whatsapp: { enabled: false } } } };
@@ -1336,7 +1336,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const liveRoot = path.join(tempRoot, "live");
     const missingRoot = path.join(tempRoot, "missing");
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       plugins: {
         load: { paths: [liveRoot, missingRoot] },
@@ -1357,14 +1357,14 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
 
   it("treats a persisted source bundled root as stale once its built peer appears", () => {
     const tempRoot = makeTempDir();
-    const packageRoot = path.join(tempRoot, "openclaw");
+    const packageRoot = path.join(tempRoot, "carapace");
     const bundledRoot = path.join(packageRoot, "dist", "extensions");
     const sourceRoot = path.join(packageRoot, "extensions");
     const stateDir = path.join(tempRoot, "state");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
 
@@ -1392,14 +1392,14 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
 
   it("replaces a persisted built root when its source plugin opts out of bundled output", () => {
     const tempRoot = makeTempDir();
-    const packageRoot = path.join(tempRoot, "openclaw");
+    const packageRoot = path.join(tempRoot, "carapace");
     const bundledRoot = path.join(packageRoot, "dist", "extensions");
     const sourcePluginDir = path.join(packageRoot, "extensions", "whatsapp");
     const stateDir = path.join(tempRoot, "state");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
 
@@ -1417,9 +1417,9 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     fs.writeFileSync(
       path.join(sourcePluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/whatsapp",
+        name: "@carapace/whatsapp",
         version: "1.0.0",
-        openclaw: { extensions: ["./index.ts"], build: { bundledDist: false } },
+        carapace: { extensions: ["./index.ts"], build: { bundledDist: false } },
       }),
       "utf8",
     );
@@ -1437,7 +1437,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     "respects %s source mounts after restarting with a persisted built registry",
     (mount) => {
       const tempRoot = makeTempDir();
-      const packageRoot = path.join(tempRoot, "openclaw");
+      const packageRoot = path.join(tempRoot, "carapace");
       const bundledRoot = path.join(packageRoot, "dist", "extensions");
       const builtPluginDir = path.join(bundledRoot, "demo");
       const sourceRoot = path.join(packageRoot, "extensions");
@@ -1445,11 +1445,11 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
       const stateDir = path.join(tempRoot, "state");
       const workspaceDir = path.join(tempRoot, "workspace");
       const env = {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_VERSION: "2026.4.26",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_VERSION: "2026.4.26",
         VITEST: "true",
-        ...(mount === "disabled" ? { OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1" } : {}),
+        ...(mount === "disabled" ? { CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1" } : {}),
       };
       const config = { plugins: { entries: { demo: { enabled: true } } } };
       writeBundledPlugin(builtPluginDir, "demo", "index.js");
@@ -1478,14 +1478,14 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
 
   it("keeps a persisted bind-mounted source overlay when its built peer exists", () => {
     const tempRoot = makeTempDir();
-    const packageRoot = path.join(tempRoot, "openclaw");
+    const packageRoot = path.join(tempRoot, "carapace");
     const bundledRoot = path.join(packageRoot, "dist", "extensions");
     const sourcePluginDir = path.join(packageRoot, "extensions", "whatsapp");
     const stateDir = path.join(tempRoot, "state");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.26",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.26",
       VITEST: "true",
     };
 
@@ -1514,8 +1514,8 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
     const stateDir = path.join(tempRoot, "state");
     const env = {
       ...createHermeticEnv(tempRoot),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     const config = {};
     const ghostDir = path.join(tempRoot, "extensions", "lossless-claw");
@@ -1554,7 +1554,7 @@ describe("loadPluginRegistrySnapshotWithMetadata", () => {
   it("keeps persisted registry when a non-plugin diagnostic source path still does not exist", () => {
     const tempRoot = makeTempDir();
     const stateDir = path.join(tempRoot, "state");
-    const env = { ...createHermeticEnv(tempRoot), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...createHermeticEnv(tempRoot), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {};
     const missingConfiguredPath = path.join(tempRoot, "missing-configured-plugin");
     const index: InstalledPluginIndex = {

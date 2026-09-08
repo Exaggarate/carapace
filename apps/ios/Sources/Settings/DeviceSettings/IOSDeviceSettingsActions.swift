@@ -1,12 +1,12 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import UIKit
 import UserNotifications
 
 @MainActor
 enum IOSDeviceSettingsActions {
     static func applyLocationMode(
-        _ mode: OpenClawLocationMode,
+        _ mode: CarapaceLocationMode,
         appModel: NodeAppModel,
         isCurrent: @MainActor () -> Bool = { true }) async -> Bool
     {
@@ -60,7 +60,7 @@ enum IOSDeviceSettingsActions {
 
     static func registerForRemoteNotificationsIfEnrollmentReady(status: UNAuthorizationStatus) {
         guard NotificationServingPreference.isEnabled(),
-              !PushBuildConfig.current.usesOpenClawHostedRelay || PushEnrollmentConsent.disclosureAccepted,
+              !PushBuildConfig.current.usesCarapaceHostedRelay || PushEnrollmentConsent.disclosureAccepted,
               SettingsNotificationStatus(status).allowsNotifications
         else { return }
         UIApplication.shared.registerForRemoteNotifications()
@@ -71,7 +71,7 @@ enum IOSDeviceSettingsActions {
         isCurrent: @MainActor () -> Bool) async -> Bool
     {
         guard !Task.isCancelled, isCurrent() else { return false }
-        if PushBuildConfig.current.usesOpenClawHostedRelay, !PushEnrollmentConsent.disclosureAccepted {
+        if PushBuildConfig.current.usesCarapaceHostedRelay, !PushEnrollmentConsent.disclosureAccepted {
             guard await confirmDisclosure(), !Task.isCancelled, isCurrent() else { return false }
             PushEnrollmentConsent.markDisclosureAccepted()
         }

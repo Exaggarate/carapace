@@ -3,7 +3,7 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import { runOpenClawStateWriteTransaction } from "../../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../../state/carapace-state-db.js";
 import {
   appendSkillProposalEvent,
   readStoredSkillProposalEvent,
@@ -35,7 +35,7 @@ export function commitPendingSkillProposalTransition(params: {
   invalidateRollback?: boolean;
 }): PendingSkillProposalTransitionCommit {
   ensureSkillWorkshopSchema(params.store);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<SkillWorkshopDatabase>(db);
       const current = executeSqliteQueryTakeFirstSync(

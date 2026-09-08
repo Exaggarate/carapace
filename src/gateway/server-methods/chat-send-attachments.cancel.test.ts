@@ -5,9 +5,9 @@ import { createDeferred } from "../../../test/helpers/promise.js";
 import { createAgentRunDirectAbortError } from "../../agents/run-termination.js";
 import * as sandboxWorkspace from "../../agents/sandbox/context.js";
 import * as staging from "../../auto-reply/reply/stage-sandbox-media.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { clearAgentRunContext } from "../../infra/agent-run-registry.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createChatAbortOps } from "../chat-abort-ops.js";
 import { abortChatRunById } from "../chat-abort.js";
 import * as attachments from "../chat-attachments.js";
@@ -78,7 +78,7 @@ it.each([
 ] as const)("$name", async (testCase) => {
   const { pdf, interruption, stageError, outcome } = testCase;
   const preparation = "preparation" in testCase ? testCase.preparation : "stage";
-  await withOpenClawTestState({ label: "gateway-attachment-cancellation" }, async (state) => {
+  await withCarapaceTestState({ label: "gateway-attachment-cancellation" }, async (state) => {
     const cfg = {
       agents: {
         ownership: "explicit",
@@ -94,7 +94,7 @@ it.each([
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     await state.writeConfig(cfg);
     const context = createDirectChatContext({ getRuntimeConfig: () => cfg });
     const runId = "attachment-cancellation";

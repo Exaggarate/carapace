@@ -9,7 +9,7 @@ title: "Webhooks plugin"
 
 The Webhooks plugin adds authenticated HTTP routes so a trusted external
 system (Zapier, n8n, a CI job, an internal service) can create and drive
-managed OpenClaw TaskFlow records over HTTP, without writing a custom plugin.
+managed Carapace TaskFlow records over HTTP, without writing a custom plugin.
 `create_flow` creates a tracking record; `run_task` creates or links a child task
 record. Neither operation starts an agent. The external controller owns the
 workflow and advances its state.
@@ -40,7 +40,7 @@ Set config under `plugins.entries.webhooks.config`:
               secret: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_WEBHOOK_SECRET",
+                id: "CARAPACE_WEBHOOK_SECRET",
               },
               controllerId: "webhooks/zapier",
               description: "Zapier TaskFlow bridge",
@@ -104,7 +104,7 @@ action validation. Earlier failures do not reach later checks.
 ## Request format
 
 Send `POST` requests with `Content-Type: application/json` and either
-`Authorization: Bearer <secret>` or `x-openclaw-webhook-secret: <secret>`:
+`Authorization: Bearer <secret>` or `x-carapace-webhook-secret: <secret>`:
 
 ```bash
 curl --include https://gateway.example.com/plugins/webhooks/zapier \
@@ -278,7 +278,7 @@ reason not covered by the named codes above.
 | `503 persist_failed`  | The record could not be persisted; investigate Gateway storage/logs before retrying.                    |
 
 Failures before action validation can be plain text, not the JSON envelope
-above. A Bearer header takes precedence over `x-openclaw-webhook-secret`;
+above. A Bearer header takes precedence over `x-carapace-webhook-secret`;
 query-string and body tokens are not authentication methods for this plugin.
 
 ## Related

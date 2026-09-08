@@ -1,7 +1,7 @@
 // Deepseek plugin module implements models behavior.
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const DEEPSEEK_MANIFEST_CATALOG = manifest.modelCatalog.providers.deepseek;
 export const DEEPSEEK_BASE_URL = DEEPSEEK_MANIFEST_CATALOG.baseUrl;

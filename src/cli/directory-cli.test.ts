@@ -161,7 +161,7 @@ describe("registerDirectoryCli", () => {
       runtimeConfig = postWriteRuntimeConfig;
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(["directory", "self", "--channel", "slack", "--json"], {
@@ -218,7 +218,7 @@ describe("registerDirectoryCli", () => {
       listGroupMembers: vi.fn().mockResolvedValue([]),
     };
     mocks.readConfigFileSnapshot.mockResolvedValue({
-      path: "/tmp/invalid-openclaw.json",
+      path: "/tmp/invalid-carapace.json",
       exists: true,
       valid: false,
       sourceConfig: {},
@@ -236,7 +236,7 @@ describe("registerDirectoryCli", () => {
     });
     runtimeState.defaultRuntime.exit.mockImplementation(() => undefined);
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
     await program.parseAsync(args, { from: "user" });
 
@@ -245,7 +245,7 @@ describe("registerDirectoryCli", () => {
     expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
     expect(runtimeState.defaultRuntime.writeJson).not.toHaveBeenCalled();
     expect(runtimeState.defaultRuntime.log).not.toHaveBeenCalled();
-    expect(runtimeErrors()[0]).toContain("OpenClaw config is invalid");
+    expect(runtimeErrors()[0]).toContain("Carapace config is invalid");
     expect(runtimeState.defaultRuntime.exit).toHaveBeenCalledWith(1);
   });
 
@@ -269,7 +269,7 @@ describe("registerDirectoryCli", () => {
       source: "single-configured",
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(["directory", "self", "--json"], { from: "user" });
@@ -346,7 +346,7 @@ describe("registerDirectoryCli", () => {
       };
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(["directory", "self", "--json"], { from: "user" });
@@ -396,7 +396,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(args, { from: "user" });
@@ -445,7 +445,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(args, { from: "user" });
@@ -478,7 +478,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(
@@ -520,7 +520,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(["directory", "groups", "list", "--channel", "slack", "--json"], {
@@ -583,7 +583,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await program.parseAsync(args, { from: "user" });
@@ -608,7 +608,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const textProgram = new Command().name("openclaw");
+    const textProgram = new Command().name("carapace");
     registerDirectoryCli(textProgram);
     await textProgram.parseAsync(["directory", "peers", "list", "--channel", "slack"], {
       from: "user",
@@ -622,7 +622,7 @@ describe("registerDirectoryCli", () => {
     expect(textOutput).toContain("🦞");
 
     runtimeState.defaultRuntime.writeJson.mockClear();
-    const jsonProgram = new Command().name("openclaw");
+    const jsonProgram = new Command().name("carapace");
     registerDirectoryCli(jsonProgram);
     await jsonProgram.parseAsync(["directory", "peers", "list", "--channel", "slack", "--json"], {
       from: "user",
@@ -633,32 +633,32 @@ describe("registerDirectoryCli", () => {
 
   it("reports unsupported directory capability instead of continuing setup for installed plugins", async () => {
     mocks.resolveInstallableChannelPlugin.mockResolvedValue({
-      cfg: { channels: { "openclaw-weixin": {} } },
-      channelId: "openclaw-weixin",
+      cfg: { channels: { "carapace-weixin": {} } },
+      channelId: "carapace-weixin",
       plugin: {
-        id: "openclaw-weixin",
+        id: "carapace-weixin",
       },
       configChanged: false,
       pluginInstalled: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await expect(
-      program.parseAsync(["directory", "peers", "list", "--channel", "openclaw-weixin"], {
+      program.parseAsync(["directory", "peers", "list", "--channel", "carapace-weixin"], {
         from: "user",
       }),
     ).rejects.toThrow("exit:1");
 
     expect(mocks.resolveInstallableChannelPlugin).toHaveBeenCalledTimes(1);
     const installArgs = firstRecordArg(mocks.resolveInstallableChannelPlugin);
-    expect(installArgs.rawChannel).toBe("openclaw-weixin");
+    expect(installArgs.rawChannel).toBe("carapace-weixin");
     expect(installArgs.allowInstall).toBe(true);
     expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
     expect(
       runtimeErrors().some((message) =>
-        message.includes("Channel openclaw-weixin does not support directory peers"),
+        message.includes("Channel carapace-weixin does not support directory peers"),
       ),
     ).toBe(true);
   });
@@ -704,7 +704,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await expect(program.parseAsync(args, { from: "user" })).rejects.toThrow(expectedError);
@@ -731,7 +731,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     if (mode === "JSON") {
@@ -780,7 +780,7 @@ describe("registerDirectoryCli", () => {
       configChanged: false,
     });
 
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerDirectoryCli(program);
 
     await expect(program.parseAsync(args, { from: "user" })).rejects.toThrow("exit:1");

@@ -1,5 +1,5 @@
-import { asRecord, readStringField } from "@openclaw/normalization-core/record-coerce";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asRecord, readStringField } from "@carapace/normalization-core/record-coerce";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 
 export const DEFAULT_UPDATE_TIMEOUT_MS = 20 * 60 * 1000;
 

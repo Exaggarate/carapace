@@ -1,19 +1,19 @@
 // Mattermost plugin module owns one accepted message's reply turn and delivery.
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
 import {
   isChannelPartialDeliveryError,
   type ChannelInboundTurnPlan,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   bindIngressLifecycleToReplyOptions,
   buildChannelProgressDraftLineForEntry,
   createMessageReceiptFromOutboundResults,
   createChannelProgressDraftCompositor,
   listMessageReceiptPlatformIds,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
-import type { finalizeInboundContext } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveInboundLastRouteSessionKey } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-outbound";
+import { getGlobalHookRunner } from "carapace/plugin-sdk/plugin-runtime";
+import type { finalizeInboundContext } from "carapace/plugin-sdk/reply-runtime";
+import { resolveInboundLastRouteSessionKey } from "carapace/plugin-sdk/routing";
 import type { MattermostPost } from "./client.js";
 import {
   createMattermostDraftPreviewBoundaryController,

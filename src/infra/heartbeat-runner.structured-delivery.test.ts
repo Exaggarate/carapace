@@ -1,5 +1,5 @@
 // Covers structured heartbeat delivery, text-only dedupe, and recovery ownership.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { heartbeatRunnerTelegramPlugin } from "../../test/helpers/infra/heartbeat-runner-channel-plugins.js";
 import { createHeartbeatToolResponsePayload } from "../auto-reply/heartbeat-tool-response.js";
@@ -7,7 +7,7 @@ import { setReplyPayloadMetadata } from "../auto-reply/reply-payload.js";
 import type { InternalGetReplyFromConfig } from "../auto-reply/reply/get-reply.types.js";
 import { finalizeInboundContext } from "../auto-reply/reply/inbound-context.js";
 import { initSessionState } from "../auto-reply/reply/session.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   patchSessionEntryCore,
   replaceSessionEntrySync,
@@ -19,7 +19,7 @@ import {
 } from "../plugins/hook-runner-global.js";
 import { addTestHook } from "../plugins/hooks.test-helpers.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { getLastHeartbeatEvent, resetHeartbeatEventsForTest } from "./heartbeat-events.js";
 import { claimHeartbeatOutcomeForRun } from "./heartbeat-outcome-store.js";
@@ -40,13 +40,13 @@ describe("runHeartbeatOnce structured heartbeat delivery", () => {
 
   afterEach(() => {
     resetGlobalHookRunner();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     vi.unstubAllEnvs();
     resetHeartbeatEventsForTest();
     resetSystemEventsForTest();
   });
 
-  function createConfig(tmpDir: string, storePath: string): OpenClawConfig {
+  function createConfig(tmpDir: string, storePath: string): CarapaceConfig {
     return {
       agents: {
         defaults: {
@@ -63,12 +63,12 @@ describe("runHeartbeatOnce structured heartbeat delivery", () => {
         },
       },
       session: { store: storePath },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   function seedTelegramSession(
     storePath: string,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     entry: Partial<Parameters<typeof seedMainSessionStore>[2]> = {},
   ) {
     return seedMainSessionStore(storePath, cfg, {
@@ -80,7 +80,7 @@ describe("runHeartbeatOnce structured heartbeat delivery", () => {
   }
 
   function runHeartbeat(
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     replySpy: HeartbeatDeps["getReplyFromConfig"],
     sendTelegram: ReturnType<typeof vi.fn>,
     overrides: Omit<Parameters<typeof runHeartbeatOnce>[0], "cfg" | "deps"> = {},
@@ -239,7 +239,7 @@ describe("runHeartbeatOnce structured heartbeat delivery", () => {
           });
           expect.soft(isRetryableHeartbeatSkipReason("channel-not-ready")).toBe(true);
         }
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         const stored = claimHeartbeatOutcomeForRun({
           agentId: "main",
           sessionKey,
@@ -255,7 +255,7 @@ describe("runHeartbeatOnce structured heartbeat delivery", () => {
         expect(stored?.summary).toContain("Build needs credentials.");
         expect(stored?.responseReason).toContain(reason);
         expect(stored?.responseReason).toContain("notify:true");
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       });
     },
   );

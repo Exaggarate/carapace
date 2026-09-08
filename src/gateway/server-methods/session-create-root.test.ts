@@ -1,19 +1,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { prepareSessionCreateFilesystemRoot } from "./session-create-root.js";
 
 const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
 
 describe("session create filesystem root", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
-  let cfg: OpenClawConfig;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
+  let cfg: CarapaceConfig;
   let workspace: string;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "openclaw-session-root-", layout: "split" });
+    state = await createCarapaceTestState({ prefix: "carapace-session-root-", layout: "split" });
     workspace = state.workspaceDir;
     await fs.mkdir(path.join(workspace, "project"));
     await fs.mkdir(state.path("outside", "project"), { recursive: true });

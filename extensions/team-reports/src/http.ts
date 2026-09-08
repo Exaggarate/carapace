@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { join } from "node:path";
 import { TLSSocket } from "node:tls";
-import { getPluginRuntimeGatewayRequestScope } from "openclaw/plugin-sdk/plugin-runtime";
+import { getPluginRuntimeGatewayRequestScope } from "carapace/plugin-sdk/plugin-runtime";
 import { DAY_MS, describePeriod } from "./periods.js";
 import {
   renderIndexPage,

@@ -1,11 +1,11 @@
-import { isWssUrl } from "@openclaw/net-policy/url-protocol";
+import { isWssUrl } from "@carapace/net-policy/url-protocol";
 import { requireTlsFingerprint } from "../../packages/gateway-client/src/client-address-utils.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { inspectGatewayTlsCertificate } from "../infra/tls/gateway.js";
 
 /** Resolve the certificate pin for one already-selected Gateway target. */
 export async function resolveGatewayConnectionTlsFingerprint(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   url: string;
   urlSource: string;
   explicitTlsFingerprint?: string;
@@ -22,7 +22,7 @@ export async function resolveGatewayConnectionTlsFingerprint(params: {
   const remoteTlsFingerprint =
     params.config.gateway?.mode === "remote" &&
     (params.urlSource === "config gateway.remote.url" ||
-      params.urlSource === "env OPENCLAW_GATEWAY_URL")
+      params.urlSource === "env CARAPACE_GATEWAY_URL")
       ? params.config.gateway.remote?.tlsFingerprint
         ? requireTlsFingerprint(params.config.gateway.remote.tlsFingerprint)
         : undefined

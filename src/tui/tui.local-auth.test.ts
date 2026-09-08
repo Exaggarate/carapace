@@ -24,8 +24,8 @@ describe("formatTuiAuthCommandArgv", () => {
   });
 
   it("keeps built-in masking when custom log patterns are configured", async () => {
-    await withTempDir("openclaw-tui-auth-redaction-", async (dir) => {
-      const configPath = path.join(dir, "openclaw.json");
+    await withTempDir("carapace-tui-auth-redaction-", async (dir) => {
+      const configPath = path.join(dir, "carapace.json");
       await fs.writeFile(
         configPath,
         JSON.stringify({ logging: { redactPatterns: ["project-secret-\\d+"] } }),
@@ -33,7 +33,7 @@ describe("formatTuiAuthCommandArgv", () => {
       const token = "sk-proof-only-1234567890";
       const customSecret = "project-secret-12345";
 
-      const rendered = withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () =>
+      const rendered = withEnv({ CARAPACE_CONFIG_PATH: configPath }, () =>
         formatTuiAuthCommandArgv("codex", ["login", token, customSecret]),
       );
 

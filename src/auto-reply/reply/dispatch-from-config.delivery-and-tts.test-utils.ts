@@ -1,13 +1,13 @@
 import { setImmediate as nextEventLoopTurn } from "node:timers/promises";
 // Imported by a dispatch-from-config entrypoint to keep its mocked suite in one Vitest module graph.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createChannelPartialDeliveryError } from "../../channels/turn/delivery-result.js";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../../config/config.js";
 import {
   createDiagnosticTraceContext,
@@ -337,7 +337,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true, reply: { text: "do not leak slash reply" } },
@@ -355,8 +355,8 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
         detachHint: "/codex detach",
       },
     } satisfies SessionBindingRecord);
@@ -396,7 +396,7 @@ describe("dispatchReplyFromConfig", () => {
       expect.objectContaining({ channel: "discord", accountId: "default" }),
     );
     expect(hookMocks.runner.runInboundClaimForPluginOutcome).toHaveBeenCalledWith(
-      "openclaw-codex-app-server",
+      "carapace-codex-app-server",
       expect.objectContaining({ content: "/codex detach" }),
       expect.objectContaining({
         pluginBinding: expect.objectContaining({ bindingId: "binding-command-escape-denied" }),
@@ -619,8 +619,8 @@ describe("dispatchReplyFromConfig", () => {
 
     const result = await dispatchReplyFromConfig({
       ctx: buildTestCtx({
-        Provider: "openclaw",
-        Surface: "openclaw",
+        Provider: "carapace",
+        Surface: "carapace",
         OriginatingChannel: "slack",
         OriginatingTo: "user:U123",
         To: "user:U123",
@@ -688,8 +688,8 @@ describe("dispatchReplyFromConfig", () => {
     const rotatedDispatcher = createDispatcher();
     const rotatedResult = await dispatchReplyFromConfig({
       ctx: buildTestCtx({
-        Provider: "openclaw",
-        Surface: "openclaw",
+        Provider: "carapace",
+        Surface: "carapace",
         OriginatingChannel: "slack",
         OriginatingTo: "user:U123",
         To: "user:U123",
@@ -738,8 +738,8 @@ describe("dispatchReplyFromConfig", () => {
     const blockedDispatcher = createDispatcher();
     await dispatchReplyFromConfig({
       ctx: buildTestCtx({
-        Provider: "openclaw",
-        Surface: "openclaw",
+        Provider: "carapace",
+        Surface: "carapace",
         OriginatingChannel: "slack",
         OriginatingTo: "user:U123",
         To: "user:U123",
@@ -905,7 +905,7 @@ describe("dispatchReplyFromConfig", () => {
         ((hookName?: string) =>
           hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
       );
-      hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+      hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
       hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue(params.claimOutcome);
       const abortController = new AbortController();
       mocks.routeReply.mockImplementation(async () => {
@@ -927,7 +927,7 @@ describe("dispatchReplyFromConfig", () => {
         boundAt: 1710000000000,
         metadata: {
           pluginBindingOwner: "plugin",
-          pluginId: "openclaw-codex-app-server",
+          pluginId: "carapace-codex-app-server",
           pluginRoot: "/plugins/codex",
         },
       } satisfies SessionBindingRecord);
@@ -937,8 +937,8 @@ describe("dispatchReplyFromConfig", () => {
       const { result, processedOutcome } = await withDispatchProcessedOutcomeSink(() =>
         dispatchReplyFromConfig({
           ctx: buildTestCtx({
-            Provider: "openclaw",
-            Surface: "openclaw",
+            Provider: "carapace",
+            Surface: "carapace",
             OriginatingChannel: "slack",
             OriginatingTo: "user:U123",
             To: "user:U123",
@@ -979,7 +979,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true },
@@ -997,8 +997,8 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
       },
     } satisfies SessionBindingRecord);
     const cfg = emptyConfig;
@@ -1039,7 +1039,7 @@ describe("dispatchReplyFromConfig", () => {
           { accountId?: unknown; channelId?: unknown; conversationId?: unknown },
         ]
       | undefined;
-    expect(inboundClaimCall?.[0]).toBe("openclaw-codex-app-server");
+    expect(inboundClaimCall?.[0]).toBe("carapace-codex-app-server");
     expect(inboundClaimCall?.[1]?.channel).toBe("discord");
     expect(inboundClaimCall?.[1]?.accountId).toBe("default");
     expect(inboundClaimCall?.[1]?.conversationId).toBe("1480574946919846079");
@@ -1073,9 +1073,9 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
         pluginName: "Codex App Server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
         detachHint: "/codex_detach",
       },
     };
@@ -1093,7 +1093,7 @@ describe("dispatchReplyFromConfig", () => {
       });
       const dispatcher = createDispatcher();
       const replyResolver = vi.fn(
-        async () => ({ text: "openclaw fallback" }) satisfies ReplyPayload,
+        async () => ({ text: "carapace fallback" }) satisfies ReplyPayload,
       );
       await dispatchReplyFromConfig({
         ctx: buildTestCtx({
@@ -1126,13 +1126,13 @@ describe("dispatchReplyFromConfig", () => {
     }
   });
 
-  it("falls back to OpenClaw when the bound plugin is loaded but has no inbound_claim handler", async () => {
+  it("falls back to Carapace when the bound plugin is loaded but has no inbound_claim handler", async () => {
     setNoAbort();
     hookMocks.runner.hasHooks.mockImplementation(
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "no_handler",
     });
@@ -1150,13 +1150,13 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
         pluginName: "Codex App Server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
       },
     } satisfies SessionBindingRecord);
     const dispatcher = createDispatcher();
-    const replyResolver = vi.fn(async () => ({ text: "openclaw fallback" }) satisfies ReplyPayload);
+    const replyResolver = vi.fn(async () => ({ text: "carapace fallback" }) satisfies ReplyPayload);
 
     await dispatchReplyFromConfig({
       ctx: buildTestCtx({
@@ -1192,7 +1192,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "declined",
     });
@@ -1209,9 +1209,9 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
         pluginName: "Codex App Server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
         detachHint: "/codex_detach",
       },
     } satisfies SessionBindingRecord);
@@ -1250,7 +1250,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "error",
       error: "boom",
@@ -1268,9 +1268,9 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
         pluginName: "Codex App Server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
       },
     } satisfies SessionBindingRecord);
     const dispatcher = createDispatcher();
@@ -1290,7 +1290,7 @@ describe("dispatchReplyFromConfig", () => {
         RawBody: "hello",
         Body: "hello",
       }),
-      cfg: { diagnostics: { enabled: true } } as OpenClawConfig,
+      cfg: { diagnostics: { enabled: true } } as CarapaceConfig,
       dispatcher,
       replyResolver,
     });
@@ -1320,7 +1320,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("marks diagnostics skipped for duplicate inbound messages", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const ctx = buildTestCtx({
       Provider: "whatsapp",
       OriginatingChannel: "whatsapp",
@@ -1361,7 +1361,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("keeps duplicate skip diagnostics inside the active inbound trace", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const ctx = buildTestCtx({
       Provider: "whatsapp",
       OriginatingChannel: "whatsapp",
@@ -1409,7 +1409,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("releases inbound dedupe when dispatch fails before completion", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const ctx = buildTestCtx({
       Provider: "whatsapp",
       OriginatingChannel: "whatsapp",
@@ -1424,7 +1424,7 @@ describe("dispatchReplyFromConfig", () => {
     });
     const replyResolver = vi
       .fn<
-        (_ctx: MsgContext, _opts?: GetReplyOptions, _cfg?: OpenClawConfig) => Promise<ReplyPayload>
+        (_ctx: MsgContext, _opts?: GetReplyOptions, _cfg?: CarapaceConfig) => Promise<ReplyPayload>
       >()
       .mockRejectedValueOnce(new Error("dispatch failed"))
       .mockResolvedValueOnce({ text: "retry succeeds" });
@@ -1544,7 +1544,7 @@ describe("dispatchReplyFromConfig", () => {
     const runtimeCfg = {
       agents: { defaults: { userTimezone: "UTC" } },
       messages: { responsePrefix: "[test]" },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const preparedRuntimeModule = await import("../../agents/prepared-model-runtime.js");
     const preparedLookup = vi
       .spyOn(preparedRuntimeModule, "loadPublishedGatewayReplyDispatchRuntime")
@@ -1562,14 +1562,14 @@ describe("dispatchReplyFromConfig", () => {
 
     const overrideCfg = {
       agents: { defaults: { userTimezone: "America/New_York" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
-    let receivedCfg: OpenClawConfig | undefined;
+    let receivedCfg: CarapaceConfig | undefined;
     let receivedPreparedRuntime: unknown;
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      cfgArg?: OpenClawConfig,
+      cfgArg?: CarapaceConfig,
       preparedRuntime?: unknown,
     ) => {
       receivedCfg = cfgArg;
@@ -1603,8 +1603,8 @@ describe("dispatchReplyFromConfig", () => {
     setNoAbort();
     const cfg = {
       agents: { defaults: { userTimezone: "America/Los_Angeles" } },
-    } as OpenClawConfig;
-    let receivedCfg: OpenClawConfig | undefined;
+    } as CarapaceConfig;
+    let receivedCfg: CarapaceConfig | undefined;
 
     await dispatchReplyFromConfig({
       ctx: buildTestCtx({ Provider: "discord", Surface: "discord" }),
@@ -1624,9 +1624,9 @@ describe("dispatchReplyFromConfig", () => {
     setNoAbort();
     const runtimeCfg = {
       agents: { defaults: { userTimezone: "America/New_York" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     setRuntimeConfigSnapshot(runtimeCfg);
-    let receivedCfg: OpenClawConfig | undefined;
+    let receivedCfg: CarapaceConfig | undefined;
 
     await dispatchReplyFromConfig({
       ctx: buildTestCtx({ Provider: "discord", Surface: "discord" }),
@@ -1647,8 +1647,8 @@ describe("dispatchReplyFromConfig", () => {
     setNoAbort();
     const cfg = {
       agents: { defaults: { userTimezone: "America/Los_Angeles" } },
-    } as OpenClawConfig;
-    let receivedCfg: OpenClawConfig | undefined;
+    } as CarapaceConfig;
+    let receivedCfg: CarapaceConfig | undefined;
 
     await dispatchReplyFromConfig({
       ctx: buildTestCtx({ Provider: "slack", Surface: "slack" }),
@@ -1683,10 +1683,10 @@ describe("dispatchReplyFromConfig", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeCfg = {
       agents: { defaults: { userTimezone: "America/Edmonton" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const preparedRuntimeModule = await import("../../agents/prepared-model-runtime.js");
     const preparedLookup = vi
       .spyOn(preparedRuntimeModule, "loadPublishedGatewayReplyDispatchRuntime")
@@ -1704,11 +1704,11 @@ describe("dispatchReplyFromConfig", () => {
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({ Provider: "discord", Surface: "discord" });
 
-    let receivedCfg: OpenClawConfig | undefined;
+    let receivedCfg: CarapaceConfig | undefined;
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      cfgArg?: OpenClawConfig,
+      cfgArg?: CarapaceConfig,
     ) => {
       receivedCfg = getPreparedReplyDispatchRuntime()?.config ?? cfgArg;
       if (receivedCfg?.plugins?.entries?.firecrawl) {
@@ -2327,7 +2327,7 @@ describe("dispatchReplyFromConfig", () => {
     setNoAbort();
     const cfg = {
       agents: { defaults: { verboseDefault: "on" } },
-    } as const satisfies OpenClawConfig;
+    } as const satisfies CarapaceConfig;
     const ctx = buildTestCtx({ Provider: "whatsapp" });
     const delivered: ReplyPayload[] = [];
     let releaseDelivery: (() => void) | undefined;
@@ -2411,7 +2411,7 @@ describe("dispatchReplyFromConfig", () => {
     setNoAbort();
     const cfg = {
       agents: { defaults: { verboseDefault: "on" } },
-    } as const satisfies OpenClawConfig;
+    } as const satisfies CarapaceConfig;
     const ctx = buildTestCtx({ Provider: "whatsapp" });
     const delivered: ReplyPayload[] = [];
     let releaseDelivery: (() => void) | undefined;

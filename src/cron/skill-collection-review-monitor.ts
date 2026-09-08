@@ -1,6 +1,6 @@
 /** Canonical projection from skill workshop config to system-owned cron jobs. */
 import { listAgentIds } from "../agents/agent-scope.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveHeartbeatSchedulerSeed } from "../infra/heartbeat-runner.js";
 import { resolveHeartbeatPhaseMs } from "../infra/heartbeat-schedule.js";
 import { resolveSkillWorkshopConfig } from "../skills/workshop/config.js";
@@ -23,7 +23,7 @@ export function skillCollectionReviewMonitorAgentId(job: CronJob): string | unde
 
 /** One system-owned review job per configured agent and its Workshop directory. */
 export function resolveSkillCollectionReviewMonitorSpecs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: { schedulerSeed?: string } = {},
 ): Array<{ agentId: string; input: CronJobCreate }> {
   const schedulerSeed = resolveHeartbeatSchedulerSeed(options.schedulerSeed);

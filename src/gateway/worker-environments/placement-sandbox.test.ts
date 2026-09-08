@@ -5,7 +5,7 @@ import { createRemoteExecPlacementSandbox } from "./placement-sandbox.js";
 import type { WorkerEnvironmentService } from "./service.js";
 
 const environmentId = "worker:environment-1";
-const remoteWorkspaceDir = "/srv/openclaw/workspaces/session-1";
+const remoteWorkspaceDir = "/srv/carapace/workspaces/session-1";
 
 function remoteExecPlacement() {
   return {
@@ -108,7 +108,7 @@ describe("remote-exec placement sandbox", () => {
         "C:\\",
         "Users",
         "Node",
-        ".openclaw",
+        ".carapace",
         "node-host",
         "workspaces",
         "session-1",

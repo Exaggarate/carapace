@@ -1,4 +1,4 @@
-// Write Cli Startup Metadata script supports OpenClaw repository automation.
+// Write Cli Startup Metadata script supports Carapace repository automation.
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs, {
@@ -12,10 +12,10 @@ import fs, {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import pMap from "p-map";
 import type { RootHelpRenderOptions } from "../src/cli/program/root-help.js";
-import type { OpenClawConfig } from "../src/config/config.js";
+import type { CarapaceConfig } from "../src/config/config.js";
 import { resolveCliStartupRootHelpBundleIdentity } from "./lib/cli-startup-root-help-bundle.js";
 import { terminateManagedChild } from "./lib/managed-child-process.mts";
 
@@ -314,7 +314,7 @@ function readBundledChannelCatalog(
       const raw = readFileSync(packageJsonPath, "utf8");
       signature.update(`${dirEntry.name}\0${raw}\0`);
       const parsed = JSON.parse(raw) as {
-        openclaw?: {
+        carapace?: {
           channel?: {
             id?: unknown;
             order?: unknown;
@@ -322,12 +322,12 @@ function readBundledChannelCatalog(
           };
         };
       };
-      const id = parsed.openclaw?.channel?.id;
+      const id = parsed.carapace?.channel?.id;
       if (typeof id !== "string" || !id.trim()) {
         continue;
       }
-      const orderRaw = parsed.openclaw?.channel?.order;
-      const labelRaw = parsed.openclaw?.channel?.label;
+      const orderRaw = parsed.carapace?.channel?.order;
+      const labelRaw = parsed.carapace?.channel?.label;
       entries.push({
         id: id.trim(),
         order: typeof orderRaw === "number" ? orderRaw : 999,
@@ -348,7 +348,7 @@ function readBundledChannelCatalog(
 }
 
 function createRootHelpRenderStateDir(): string {
-  return mkdtempSync(path.join(tmpdir(), "openclaw-build-root-help-"));
+  return mkdtempSync(path.join(tmpdir(), "carapace-build-root-help-"));
 }
 
 function cleanupRootHelpRenderStateDir(stateDir: string): void {
@@ -408,19 +408,19 @@ function createIsolatedRootHelpRenderContext(
   const homeDir = path.join(stateDir, "home");
   const env: NodeJS.ProcessEnv = {
     HOME: homeDir,
-    LOGNAME: process.env.LOGNAME ?? process.env.USER ?? "openclaw-build",
-    USER: process.env.USER ?? process.env.LOGNAME ?? "openclaw-build",
+    LOGNAME: process.env.LOGNAME ?? process.env.USER ?? "carapace-build",
+    USER: process.env.USER ?? process.env.LOGNAME ?? "carapace-build",
     PATH: process.env.PATH ?? "",
     TMPDIR: process.env.TMPDIR ?? "/tmp",
     LANG: process.env.LANG ?? "C.UTF-8",
     LC_ALL: process.env.LC_ALL ?? "C.UTF-8",
     TERM: process.env.TERM ?? "dumb",
     NO_COLOR: "1",
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "",
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "",
+    CARAPACE_STATE_DIR: stateDir,
   };
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: {
       defaults: {
         workspace: workspaceDir,
@@ -828,11 +828,11 @@ async function renderSourceCommandHelpText(
   renderContext: RootHelpRenderContext,
   taskContext?: RenderTaskContext,
 ): Promise<string> {
-  return await spawnText(["openclaw.mjs", command, "--help"], {
+  return await spawnText(["carapace.mjs", command, "--help"], {
     cwd: rootDir,
     env: {
       ...renderContext.env,
-      OPENCLAW_DISABLE_CLI_STARTUP_HELP_FAST_PATH: "1",
+      CARAPACE_DISABLE_CLI_STARTUP_HELP_FAST_PATH: "1",
     },
     failureMessage: `Failed to render source ${command} help`,
     onTerminalFailure: taskContext?.reportFailure,

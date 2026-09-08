@@ -6,27 +6,27 @@ read_when:
   - You are triaging a nightly, scheduled, or maintenance workflow
 ---
 
-## OpenClaw Performance
+## Carapace Performance
 
-`OpenClaw Performance` is the product/runtime performance workflow. It runs daily on `main` and can be dispatched manually:
+`Carapace Performance` is the product/runtime performance workflow. It runs daily on `main` and can be dispatched manually:
 
 ```bash
-gh workflow run openclaw-performance.yml --ref main -f profile=diagnostic -f repeat=3
-gh workflow run openclaw-performance.yml --ref main -f profile=smoke -f repeat=1 -f deep_profile=true -f live_openai_candidate=true
-gh workflow run openclaw-performance.yml --ref main -f target_ref=v2026.5.2 -f profile=diagnostic -f repeat=3
+gh workflow run carapace-performance.yml --ref main -f profile=diagnostic -f repeat=3
+gh workflow run carapace-performance.yml --ref main -f profile=smoke -f repeat=1 -f deep_profile=true -f live_openai_candidate=true
+gh workflow run carapace-performance.yml --ref main -f target_ref=v2026.5.2 -f profile=diagnostic -f repeat=3
 ```
 
 Manual dispatch normally benchmarks the workflow ref. Set `target_ref` to benchmark a release tag or another branch with the current workflow implementation. Published report paths and latest pointers are keyed by the tested ref, and each `index.md` records the tested ref/SHA, workflow ref/SHA, Kova ref, profile, lane auth mode, model, repeat count, and scenario filters.
 
-The workflow installs OCM from a pinned release and Kova from `openclaw/Kova` at the pinned `kova_ref` input, then runs three lanes:
+The workflow installs OCM from a pinned release and Kova from `carapace/Kova` at the pinned `kova_ref` input, then runs three lanes:
 
 - `mock-provider`: Kova diagnostic scenarios against a local-build runtime with deterministic fake OpenAI-compatible auth.
 - `mock-deep-profile`: CPU/heap/trace profiling for startup, gateway, and agent-turn hotspots. Runs on schedule, or on dispatch with `deep_profile=true`.
 - `live-openai-candidate`: a real OpenAI `openai/gpt-5.6-luna` agent turn. Selected on schedule, or on dispatch with `live_openai_candidate=true`. Candidates ineligible for live credentials are skipped. For a selected, eligible lane, missing `OPENAI_API_KEY` fails the lane rather than skipping it.
 
-OpenClaw-native source probes run in the separate `source_performance` job, in parallel with the Kova lanes after `resolve_target`: gateway boot timing and memory across default, skipped-channel, internal-hook, and fifty-plugin startup cases; bundled plugin import RSS, repeated mock-OpenAI `channel-chat-baseline` hello loops, CLI startup commands against the booted gateway, and the SQLite state smoke performance probe. When the previous published mock-provider source report is available for the tested ref, the source summary compares current RSS and heap values against that baseline and marks large RSS increases as `watch`. The publisher includes these source artifacts in the `mock-provider` report bundle, with the Markdown summary at `source/index.md` and raw JSON beside it.
+Carapace-native source probes run in the separate `source_performance` job, in parallel with the Kova lanes after `resolve_target`: gateway boot timing and memory across default, skipped-channel, internal-hook, and fifty-plugin startup cases; bundled plugin import RSS, repeated mock-OpenAI `channel-chat-baseline` hello loops, CLI startup commands against the booted gateway, and the SQLite state smoke performance probe. When the previous published mock-provider source report is available for the tested ref, the source summary compares current RSS and heap values against that baseline and marks large RSS increases as `watch`. The publisher includes these source artifacts in the `mock-provider` report bundle, with the Markdown summary at `source/index.md` and raw JSON beside it.
 
-Every lane uploads its complete GitHub artifact, including CPU, heap, trace, and compressed diagnostic bundles. A separate publisher job downloads and validates those artifacts, then mints a short-lived ClawSweeper GitHub App token scoped only to `openclaw/clawgrit-reports` contents and passes it only to the Git push step. It commits `report.json`, `report.md`, `index.md`, source-probe artifacts, and bundle metadata/checksums under `openclaw-performance/<tested-ref>/<run-id>-<attempt>/<lane>/`; the full diagnostic archive stays in the linked Actions artifact. The publisher rejects any report file over 50 MB before attempting a push. The current tested-ref pointer is `openclaw-performance/<tested-ref>/latest-<lane>.json`. Scheduled runs and `profile=release` dispatches fail if app-token creation or report publication fails. Manual non-release dispatches keep publication advisory and retain the GitHub artifacts when authentication or publishing fails. The previous source baseline is fetched anonymously from the public reports repository, so a successful baseline fetch does not prove publisher authentication.
+Every lane uploads its complete GitHub artifact, including CPU, heap, trace, and compressed diagnostic bundles. A separate publisher job downloads and validates those artifacts, then mints a short-lived ClawSweeper GitHub App token scoped only to `carapace/clawgrit-reports` contents and passes it only to the Git push step. It commits `report.json`, `report.md`, `index.md`, source-probe artifacts, and bundle metadata/checksums under `carapace-performance/<tested-ref>/<run-id>-<attempt>/<lane>/`; the full diagnostic archive stays in the linked Actions artifact. The publisher rejects any report file over 50 MB before attempting a push. The current tested-ref pointer is `carapace-performance/<tested-ref>/latest-<lane>.json`. Scheduled runs and `profile=release` dispatches fail if app-token creation or report publication fails. Manual non-release dispatches keep publication advisory and retain the GitHub artifacts when authentication or publishing fails. The previous source baseline is fetched anonymously from the public reports repository, so a successful baseline fetch does not prove publisher authentication.
 
 All explicit Performance workflow Git commands use the pinned Git lifecycle owner,
 prepared in `RUNNER_TEMP` before each job's selected checkout. Target resolution,
@@ -62,7 +62,7 @@ The manual-only `vitest-pair` mode compares two exact commits with the workflow
 implementation from the candidate commit:
 
 ```bash
-gh workflow run openclaw-performance.yml \
+gh workflow run carapace-performance.yml \
   --ref <candidate-branch> \
   -f mode=vitest-pair \
   -f baseline_ref=<40-character-baseline-sha> \
@@ -125,7 +125,7 @@ QA Lab has dedicated CI lanes outside the main smart-scoped workflow. Agentic pa
 
 Scheduled, manual, and release Matrix checks use the deterministic mock provider so the live transport contract is isolated from model latency and normal provider-plugin startup. Telegram release checks use the same deterministic model boundary. The live transport gateway disables memory search because QA parity covers memory behavior separately; provider connectivity is covered by the separate live model, native provider, and Docker provider suites.
 
-`OpenClaw Release Checks` also runs the release-critical QA Lab lanes before release approval; its QA parity gate runs the candidate and baseline packs as parallel lane jobs, then downloads both artifacts into a small report job for the final parity comparison.
+`Carapace Release Checks` also runs the release-critical QA Lab lanes before release approval; its QA parity gate runs the candidate and baseline packs as parallel lane jobs, then downloads both artifacts into a small report job for the final parity comparison.
 
 For normal PRs, follow scoped CI/check evidence instead of treating parity as a required status.
 
@@ -211,7 +211,7 @@ The triage owner is **@steipete**. Investigate failed scheduled runs and rerun
 the strict workflow to confirm recovery:
 
 ```bash
-gh workflow run dependency-audit.yml --repo openclaw/openclaw --ref main
+gh workflow run dependency-audit.yml --repo carapace/carapace --ref main
 ```
 
 GitHub sends scheduled-run notifications to the workflow creator or the latest
@@ -256,7 +256,7 @@ for the weekly burst separately from PR and main admission.
 
 ## ClawSweeper activity forwarding
 
-`.github/workflows/clawsweeper-dispatch.yml` is the target-side bridge from OpenClaw repository activity into ClawSweeper. It does not check out or execute untrusted pull request code. The workflow creates a GitHub App token from `CLAWSWEEPER_APP_PRIVATE_KEY`, then dispatches compact `repository_dispatch` payloads to `openclaw/clawsweeper`.
+`.github/workflows/clawsweeper-dispatch.yml` is the target-side bridge from Carapace repository activity into ClawSweeper. It does not check out or execute untrusted pull request code. The workflow creates a GitHub App token from `CLAWSWEEPER_APP_PRIVATE_KEY`, then dispatches compact `repository_dispatch` payloads to `carapace/clawsweeper`.
 
 The workflow has three lanes:
 
@@ -264,7 +264,7 @@ The workflow has three lanes:
 - `clawsweeper_comment` for explicit ClawSweeper commands in issue comments;
 - `github_activity` for general GitHub activity that the ClawSweeper agent may inspect.
 
-The `github_activity` lane forwards normalized metadata only: event type, action, actor, repository, item number, URL, title, state, and short excerpts for comments or reviews when present. It intentionally avoids forwarding the full webhook body. The receiving workflow in `openclaw/clawsweeper` is `.github/workflows/github-activity.yml`, which posts the normalized event to the OpenClaw Gateway hook for the ClawSweeper agent.
+The `github_activity` lane forwards normalized metadata only: event type, action, actor, repository, item number, URL, title, state, and short excerpts for comments or reviews when present. It intentionally avoids forwarding the full webhook body. The receiving workflow in `carapace/clawsweeper` is `.github/workflows/github-activity.yml`, which posts the normalized event to the Carapace Gateway hook for the ClawSweeper agent.
 
 Main pushes remain `github_activity` observations. They do not produce hosted per-commit reports or commit Check Runs.
 

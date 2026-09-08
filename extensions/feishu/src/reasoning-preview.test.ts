@@ -7,9 +7,9 @@ const { getSessionEntryMock } = vi.hoisted(() => ({
   getSessionEntryMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("carapace/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/session-store-runtime")>(
+    "carapace/plugin-sdk/session-store-runtime",
   );
   return {
     ...actual,
@@ -18,7 +18,7 @@ vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/session-store-runtime");
+  vi.doUnmock("carapace/plugin-sdk/session-store-runtime");
   vi.resetModules();
 });
 

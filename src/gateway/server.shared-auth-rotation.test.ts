@@ -4,7 +4,7 @@ import type { HelloOk } from "../../packages/gateway-protocol/src/index.js";
 import { withTestTimeout } from "../../test/helpers/promise.js";
 import { runQaGatewayFixture } from "../../test/helpers/qa-gateway-cleanup.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   loadOrCreateDeviceIdentity,
   publicKeyRawBase64UrlFromPem,
@@ -20,7 +20,7 @@ import { resetLogger } from "../logging/logger.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { setTestEnvValue } from "../test-utils/env.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { GatewayClient, type GatewayClientOptions } from "./client.js";
 import { startGatewayServerCore } from "./server-start.js";
@@ -28,31 +28,31 @@ import { resolveSharedGatewaySessionGeneration } from "./server/ws-shared-genera
 
 const OLD_TOKEN = "shared-token-old";
 const NEW_TOKEN = "shared-token-new";
-const SECRET_REF_TOKEN_ID = "OPENCLAW_SHARED_AUTH_ROTATION_SECRET_REF";
-type ConfigSnapshot = { hash: string; config: OpenClawConfig };
+const SECRET_REF_TOKEN_ID = "CARAPACE_SHARED_AUTH_ROTATION_SECRET_REF";
+type ConfigSnapshot = { hash: string; config: CarapaceConfig };
 type ConfigAck = { hash: string; sentinel: { payload: { stats: { requiresRestart: boolean } } } };
 
 describe("gateway shared auth rotation", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
   let server: Awaited<ReturnType<typeof startGatewayServerCore>> | undefined;
   let port: number;
   const clients: GatewayClient[] = [];
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "shared-auth-rotation",
       env: {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
         [SECRET_REF_TOKEN_ID]: undefined,
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
     });
     port = await getFreePort();
@@ -134,7 +134,7 @@ describe("gateway shared auth rotation", () => {
     params: { issuerGeneration?: string; browserClient?: boolean } = {},
   ) {
     const identity = loadOrCreateDeviceIdentity({ path: state.path("device-identity.sqlite") });
-    const clientName = params.browserClient ? "openclaw-control-ui" : "test";
+    const clientName = params.browserClient ? "carapace-control-ui" : "test";
     const mode = params.browserClient ? "webchat" : "test";
     const pending = await requestDevicePairing({
       deviceId: identity.deviceId,

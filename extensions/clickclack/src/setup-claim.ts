@@ -4,14 +4,14 @@ import {
   readProviderJsonResponse,
   readResponseTextLimited,
   resolveProviderOperationTimeoutMs,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   fetchWithSsrFGuard,
   resolvePinnedHostnameWithPolicy,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
   type LookupFn,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   buildClickClackSetupClaimUrl,
   CLICKCLACK_SETUP_CODE_CLAIM_PATH,

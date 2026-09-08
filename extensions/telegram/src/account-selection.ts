@@ -3,16 +3,16 @@ import {
   createAccountListHelpers,
   hasConfiguredAccountValue,
   resolveListedDefaultAccountId,
-} from "openclaw/plugin-sdk/account-core";
+} from "carapace/plugin-sdk/account-core";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "openclaw/plugin-sdk/account-id";
-import { listAgentIds } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveDefaultAgentBoundAccountId } from "openclaw/plugin-sdk/routing";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/account-id";
+import { listAgentIds } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveDefaultAgentBoundAccountId } from "carapace/plugin-sdk/routing";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 function resolveBindingAccount(params: {
   binding: unknown;
@@ -36,7 +36,7 @@ function resolveBindingAccount(params: {
   };
 }
 
-function listBoundAccountIds(cfg: OpenClawConfig, channelId: string): string[] {
+function listBoundAccountIds(cfg: CarapaceConfig, channelId: string): string[] {
   const ids = new Set<string>();
   for (const binding of cfg.bindings ?? []) {
     const resolved = resolveBindingAccount({ binding, channelId });
@@ -47,7 +47,7 @@ function listBoundAccountIds(cfg: OpenClawConfig, channelId: string): string[] {
   return [...ids].toSorted((left, right) => left.localeCompare(right));
 }
 
-function hasImplicitDefaultTelegramAccount(cfg: OpenClawConfig): boolean {
+function hasImplicitDefaultTelegramAccount(cfg: CarapaceConfig): boolean {
   const telegram = cfg.channels?.telegram;
   if (!telegram) {
     return false;
@@ -67,7 +67,7 @@ const { listAccountIds: listTelegramAccountIds } = createAccountListHelpers("tel
 
 export { listTelegramAccountIds };
 
-export function resolveDefaultTelegramAccountSelection(cfg: OpenClawConfig): {
+export function resolveDefaultTelegramAccountSelection(cfg: CarapaceConfig): {
   accountId: string;
   accountIds: string[];
   shouldWarnMissingDefault: boolean;
@@ -105,6 +105,6 @@ export function resolveDefaultTelegramAccountSelection(cfg: OpenClawConfig): {
   };
 }
 
-export function resolveDefaultTelegramAccountId(cfg: OpenClawConfig): string {
+export function resolveDefaultTelegramAccountId(cfg: CarapaceConfig): string {
   return resolveDefaultTelegramAccountSelection(cfg).accountId;
 }

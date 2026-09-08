@@ -127,8 +127,8 @@ describe("ssh subprocess env sanitization", () => {
     await runSshSandboxCommand({
       session: {
         command: "ssh",
-        configPath: "/tmp/openclaw-test-ssh-config",
-        host: "openclaw-sandbox",
+        configPath: "/tmp/carapace-test-ssh-config",
+        host: "carapace-sandbox",
       },
       remoteCommand: "true",
     });
@@ -148,8 +148,8 @@ describe("ssh subprocess env sanitization", () => {
         prepareSshSandboxExec({
           session: {
             command: "ssh",
-            configPath: "/tmp/openclaw-test-ssh-config",
-            host: "openclaw-sandbox",
+            configPath: "/tmp/carapace-test-ssh-config",
+            host: "carapace-sandbox",
           },
           remoteCommand: "'/bin/sh' '-c' 'true'",
           env: { [name]: sentinel },
@@ -171,8 +171,8 @@ describe("ssh subprocess env sanitization", () => {
       prepareSshSandboxExec({
         session: {
           command: "ssh",
-          configPath: "/tmp/openclaw-test-ssh-config",
-          host: "openclaw-sandbox",
+          configPath: "/tmp/carapace-test-ssh-config",
+          host: "carapace-sandbox",
         },
         remoteCommand: "'/bin/sh' '-c' 'true'",
         env: { SYNTHETIC_VALUE: `${sentinel}\0suffix` },
@@ -193,8 +193,8 @@ describe("ssh subprocess env sanitization", () => {
     const prepared = await prepareSshSandboxExec({
       session: {
         command: "ssh",
-        configPath: "/tmp/openclaw-test-ssh-config",
-        host: "openclaw-sandbox",
+        configPath: "/tmp/carapace-test-ssh-config",
+        host: "carapace-sandbox",
       },
       remoteCommand: "'/bin/sh' '-c' 'printf %s \"$TERM\"'",
       env: { TERM: sentinel },
@@ -229,8 +229,8 @@ describe("ssh subprocess env sanitization", () => {
       prepareSshSandboxExec({
         session: {
           command: "ssh",
-          configPath: "/tmp/openclaw-test-ssh-config",
-          host: "openclaw-sandbox",
+          configPath: "/tmp/carapace-test-ssh-config",
+          host: "carapace-sandbox",
         },
         remoteCommand: "'/bin/sh' '-c' 'true'",
         env: { SYNTHETIC_VALUE: sentinel },
@@ -243,7 +243,7 @@ describe("ssh subprocess env sanitization", () => {
     const cleanupArgv = spawnCommandMock.mock.calls[1]?.[0] as string[];
     expect(uploadArgv.join(" ")).not.toContain(sentinel);
     expect(uploadOptions.input).toContain(sentinel);
-    expect(cleanupArgv.at(-1)).toContain("openclaw-sandbox-exec-cleanup");
+    expect(cleanupArgv.at(-1)).toContain("carapace-sandbox-exec-cleanup");
     expect(cleanupArgv.join(" ")).not.toContain(sentinel);
   });
 
@@ -262,8 +262,8 @@ describe("ssh subprocess env sanitization", () => {
       runSshSandboxCommand({
         session: {
           command: "ssh",
-          configPath: "/tmp/openclaw-test-ssh-config",
-          host: "openclaw-sandbox",
+          configPath: "/tmp/carapace-test-ssh-config",
+          host: "carapace-sandbox",
         },
         remoteCommand: "true",
       }),
@@ -286,8 +286,8 @@ describe("ssh subprocess env sanitization", () => {
       runSshSandboxCommand({
         session: {
           command: "ssh",
-          configPath: "/tmp/openclaw-test-ssh-config",
-          host: "openclaw-sandbox",
+          configPath: "/tmp/carapace-test-ssh-config",
+          host: "carapace-sandbox",
         },
         remoteCommand: "false",
         allowFailure: true,
@@ -300,14 +300,14 @@ describe("ssh subprocess env sanitization", () => {
 
     process.env.ANTHROPIC_API_KEY = "x";
     process.env.NODE_ENV = "test";
-    const localDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ssh-upload-env-"));
+    const localDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ssh-upload-env-"));
     tempDirs.push(localDir);
 
     await uploadDirectoryToSshTarget({
       session: {
         command: "ssh",
-        configPath: "/tmp/openclaw-test-ssh-config",
-        host: "openclaw-sandbox",
+        configPath: "/tmp/carapace-test-ssh-config",
+        host: "carapace-sandbox",
       },
       localDir,
       remoteDir: "/remote/workspace",
@@ -323,7 +323,7 @@ describe("ssh subprocess env sanitization", () => {
     async () => {
       mockSuccessfulSpawnCalls(2);
 
-      const localDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ssh-upload-safe-"));
+      const localDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ssh-upload-safe-"));
       tempDirs.push(localDir);
       await fs.mkdir(path.join(localDir, "real"), { recursive: true });
       await fs.writeFile(path.join(localDir, "real", "payload.txt"), "ok\n", "utf8");
@@ -332,8 +332,8 @@ describe("ssh subprocess env sanitization", () => {
       await uploadDirectoryToSshTarget({
         session: {
           command: "ssh",
-          configPath: "/tmp/openclaw-test-ssh-config",
-          host: "openclaw-sandbox",
+          configPath: "/tmp/carapace-test-ssh-config",
+          host: "carapace-sandbox",
         },
         localDir,
         remoteDir: "/remote/workspace",

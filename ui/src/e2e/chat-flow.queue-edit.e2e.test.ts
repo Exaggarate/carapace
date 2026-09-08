@@ -153,7 +153,7 @@ suite.define(() => {
   });
 
   it("keeps edit, remove, and reorder outcomes exact through reconnect", async () => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.queue-edit", artifactDirParent)
       : undefined;

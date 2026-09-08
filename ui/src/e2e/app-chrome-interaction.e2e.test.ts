@@ -13,10 +13,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI app chrome interaction mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -85,8 +85,8 @@ suite.define(() => {
           models: [
             {
               contextWindow: 1_000_000,
-              id: "gpt-5.6-sol-openclaw",
-              name: "openai/gpt-5.6-sol-openclaw",
+              id: "gpt-5.6-sol-carapace",
+              name: "openai/gpt-5.6-sol-carapace",
               provider: "openai",
             },
             ...Array.from({ length: 24 }, (_value, index) => ({

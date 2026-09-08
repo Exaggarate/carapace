@@ -1,8 +1,8 @@
-import { resolveClaudeOpus5ModelIdentity } from "@openclaw/llm-core";
+import { resolveClaudeOpus5ModelIdentity } from "@carapace/llm-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   resolveSupportedThinkingLevel,
   resolveThinkingDefaultForModel,
@@ -12,7 +12,7 @@ import {
   resolveThinkingDefaultForModelCore,
   type ThinkLevel,
 } from "../auto-reply/thinking.shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderThinkingPolicySource } from "../plugins/provider-thinking.types.js";
 import type { ModelCatalogEntry } from "./model-catalog.types.js";
 import { resolveModelExtraParamSources } from "./model-extra-params.js";
@@ -21,7 +21,7 @@ import { normalizeModelSelection } from "./model-selection-resolve.js";
 import { buildConfiguredModelCatalog } from "./model-selection-shared.js";
 
 type ThinkingDefaultParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   model: string;
   catalog?: ModelCatalogEntry[];
@@ -30,7 +30,7 @@ type ThinkingDefaultParams = {
 };
 
 export function resolveConfiguredThinkingDefaultCore(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   model: string;
   agentId?: string;

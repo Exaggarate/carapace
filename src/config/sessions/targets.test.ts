@@ -1,14 +1,14 @@
 // Session target tests cover persisted channel targets for sessions.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import {
-  registerOpenClawAgentDatabase,
-  unregisterOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db-registry.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import type { OpenClawConfig } from "../config.js";
+  registerCarapaceAgentDatabase,
+  unregisterCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db-registry.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
+import type { CarapaceConfig } from "../config.js";
 import { resolveSessionStorePathCore } from "./paths.js";
 import { listSessionEntriesReadOnly, replaceSessionEntry } from "./session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
@@ -21,9 +21,9 @@ import { createAgentSessionStores, EXPLICIT_MAIN_CONFIG } from "./targets.test-s
 describe("resolveSessionStoreTargets", () => {
   it("resolves all configured agent stores", async () => {
     await withTempHome(async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: {
-          store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+          store: "~/.carapace/agents/{agentId}/sessions/sessions.json",
         },
         agents: {
           list: [{ id: "main", default: true }, { id: "work" }],
@@ -47,9 +47,9 @@ describe("resolveSessionStoreTargets", () => {
 
   it("includes configured ACP harness stores for all-agent session views", async () => {
     await withTempHome(async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: {
-          store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+          store: "~/.carapace/agents/{agentId}/sessions/sessions.json",
         },
         agents: {
           list: [
@@ -91,7 +91,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("keeps shared store paths distinct by SQLite owner for --all-agents", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: {
         store: "/tmp/shared-sessions.json",
       },
@@ -108,10 +108,10 @@ describe("resolveSessionStoreTargets", () => {
 
   it("keeps a colliding fixed-store target on the configured default", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, ".carapace") };
       const storePath = path.join(home, "ops.json");
       const diagnostics: string[] = [];
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -126,7 +126,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("lands colliding fixed-store writes in distinct owner databases", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, ".carapace") };
       const storePath = path.join(home, "ops.json");
 
       await replaceSessionEntry(
@@ -184,7 +184,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("keeps a promoted default on its registered suffixed database", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, ".carapace") };
       const storePath = path.join(home, "shared.json");
       await replaceSessionEntry(
         {
@@ -242,7 +242,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("does not let durable metadata override ambiguous suffix registration", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, ".carapace") };
       const storePath = path.join(home, "shared.json");
       await replaceSessionEntry(
         {
@@ -259,7 +259,7 @@ describe("resolveSessionStoreTargets", () => {
         defaultAgentId: "main",
         env,
       }).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: occupiedPath });
+      registerCarapaceAgentDatabase({ agentId: "ops", env, path: occupiedPath });
 
       expect(
         resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -273,7 +273,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("retains a shared-store claimant when the physical owner left the roster", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, ".carapace") };
       const storePath = path.join(home, "shared.sqlite");
       await replaceSessionEntry(
         {
@@ -295,7 +295,7 @@ describe("resolveSessionStoreTargets", () => {
         },
         { sessionId: "ops-session", updatedAt: 2 },
       );
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { ops: { default: true }, other: {} } },
       };
@@ -314,15 +314,15 @@ describe("resolveSessionStoreTargets", () => {
 
   it("honors a registered owner over the configured default for a fixed-store collision", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".carapace");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
       const unsuffixedPath = resolveSqliteTargetFromSessionStorePath(storePath).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
+      registerCarapaceAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
       await replaceSessionEntry(
         {
           agentId: "ops",
@@ -348,8 +348,8 @@ describe("resolveSessionStoreTargets", () => {
 
   it("honors durable database ownership after its registry row is removed", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".carapace");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
       await replaceSessionEntry(
         {
@@ -366,7 +366,7 @@ describe("resolveSessionStoreTargets", () => {
         defaultAgentId: "ops",
         env,
       }).path;
-      unregisterOpenClawAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
+      unregisterCarapaceAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
 
       expect(
         resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -384,7 +384,7 @@ describe("resolveSessionStoreTargets", () => {
       ).toBe(path.join(home, "ops.main.sqlite"));
 
       const diagnostics: string[] = [];
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -400,13 +400,13 @@ describe("resolveSessionStoreTargets", () => {
 
   it("does not let a scoped losing owner claim an unregistered fixed-store database", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".carapace");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath, {
         agentId: "main",
       }).path;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -414,7 +414,7 @@ describe("resolveSessionStoreTargets", () => {
         { agentId: "main", env, storePath, sessionKey: "main" },
         { sessionId: "main-session", updatedAt: 1 },
       );
-      unregisterOpenClawAgentDatabase({ agentId: "main", env, path: databasePath });
+      unregisterCarapaceAgentDatabase({ agentId: "main", env, path: databasePath });
 
       expect(resolveExistingAgentSessionStoreTargetsSync(cfg, "ops", { env })).toEqual([]);
       expect(resolveExistingAgentSessionStoreTargetsSync(cfg, "main", { env })).toEqual([
@@ -425,13 +425,13 @@ describe("resolveSessionStoreTargets", () => {
 
   it("keeps ambiguous registry ownership off the unsuffixed target", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".carapace");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: databasePath });
-      registerOpenClawAgentDatabase({ agentId: "main", env, path: databasePath });
-      const cfg: OpenClawConfig = {
+      registerCarapaceAgentDatabase({ agentId: "ops", env, path: databasePath });
+      registerCarapaceAgentDatabase({ agentId: "main", env, path: databasePath });
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -449,12 +449,12 @@ describe("resolveSessionStoreTargets", () => {
 
   it("prefers a canonical database-path owner over a conflicting registry row", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".carapace");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: databasePath });
-      const cfg: OpenClawConfig = {
+      registerCarapaceAgentDatabase({ agentId: "ops", env, path: databasePath });
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -467,12 +467,12 @@ describe("resolveSessionStoreTargets", () => {
 
   it("fails closed when the ownership registry cannot be read", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-      const registryPath = resolveOpenClawStateSqlitePath(env);
+      const stateDir = path.join(home, ".carapace");
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+      const registryPath = resolveCarapaceStateSqlitePath(env);
       await fs.mkdir(path.dirname(registryPath), { recursive: true });
       await fs.writeFile(registryPath, "not a sqlite database", "utf-8");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: path.join(home, "ops.json") },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -483,9 +483,9 @@ describe("resolveSessionStoreTargets", () => {
 
   it("uses the path-owned agent id for explicit agent store paths", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".carapace");
       const storePaths = await createAgentSessionStores(stateDir, ["codex-proof"]);
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
 
       expect(
         resolveSessionStoreTargets(
@@ -517,7 +517,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("uses the persisted owner when --store targets the configured fixed store", () => {
     const storePath = path.resolve("/tmp/restart-shaped-shared.sqlite");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { store: storePath },
       agents: {
         ownership: "explicit",
@@ -536,7 +536,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("rejects a path-inferred agent that conflicts with the persisted fixed-store owner", () => {
     const storePath = path.resolve("/tmp/agents/research/sessions/sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { store: storePath },
       agents: {
         ownership: "explicit",
@@ -552,7 +552,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("allows an explicit store path with an explicit fleet agent", () => {
     const storePath = path.resolve("/tmp/explicit-fleet-sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { ownership: "explicit", entries: { Ops: {}, research: {} } },
     };
 
@@ -568,7 +568,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("accepts case-insensitive legacy main paths but rejects aliases", () => {
-    const cfg: OpenClawConfig = { agents: { list: [{ id: "ops", default: true }] } };
+    const cfg: CarapaceConfig = { agents: { list: [{ id: "ops", default: true }] } };
     const mainPath = path.resolve("/tmp/agents/Main/sessions/sessions.json");
 
     expect(resolveSessionStoreTargets(cfg, { store: mainPath })).toEqual([
@@ -583,7 +583,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("rejects unknown agent ids", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         list: [{ id: "main", default: true }, { id: "work" }],
       },

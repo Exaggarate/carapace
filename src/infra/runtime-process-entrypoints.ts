@@ -44,13 +44,13 @@ export const runtimeProcessEntrypoints = {
   },
   databaseVerify: {
     currentModuleUrl,
-    sourceWorkerName: "../state/openclaw-database-verify.worker",
-    distWorkerPath: "state/openclaw-database-verify.worker.js",
+    sourceWorkerName: "../state/carapace-database-verify.worker",
+    distWorkerPath: "state/carapace-database-verify.worker.js",
   },
   stateLeaseHeartbeat: {
     currentModuleUrl,
-    sourceWorkerName: "../state/openclaw-state-lease-heartbeat.worker",
-    distWorkerPath: "state/openclaw-state-lease-heartbeat.worker.js",
+    sourceWorkerName: "../state/carapace-state-lease-heartbeat.worker",
+    distWorkerPath: "state/carapace-state-lease-heartbeat.worker.js",
   },
   sessionTranscriptArchive: {
     currentModuleUrl,

@@ -22,7 +22,7 @@ const suite = createControlUiE2eSuite({
   trackBrowserContexts: true,
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let artifactDir: string;
 beforeEach(() => {
   if (captureProof) {
@@ -325,7 +325,7 @@ suite.define(() => {
     await expect
       .poll(() =>
         page
-          .locator('openclaw-chat-pane[aria-hidden="false"] .session-diff__filename')
+          .locator('carapace-chat-pane[aria-hidden="false"] .session-diff__filename')
           .allTextContents(),
       )
       .toEqual(["second.md"]);
@@ -334,7 +334,7 @@ suite.define(() => {
       .toMatchObject({ sessionKey: secondSessionKey });
     expect(
       await firstFileToggle.evaluate((element) =>
-        element.closest("openclaw-chat-pane")?.getAttribute("aria-hidden"),
+        element.closest("carapace-chat-pane")?.getAttribute("aria-hidden"),
       ),
     ).toBe("true");
 
@@ -342,7 +342,7 @@ suite.define(() => {
     await expect
       .poll(() =>
         page
-          .locator('openclaw-chat-pane[aria-hidden="false"] .session-diff__filename')
+          .locator('carapace-chat-pane[aria-hidden="false"] .session-diff__filename')
           .allTextContents(),
       )
       .toEqual(["app.ts", "notes.md"]);
@@ -389,8 +389,8 @@ suite.define(() => {
         [watchedKey]: {
           pullRequests: [],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             branch: "feature/panel",
             additions: 142,
             deletions: 198,
@@ -665,7 +665,7 @@ suite.define(() => {
     // The section-title button opens the same scope menu as the footer.
     await panel.locator(".session-diff__section-title").click();
     await page
-      .locator('openclaw-session-diff-menu wa-dropdown-item[value="scope:uncommitted"]')
+      .locator('carapace-session-diff-menu wa-dropdown-item[value="scope:uncommitted"]')
       .click();
     await expect
       .poll(() => panel.locator(".session-diff__section-title span").textContent())
@@ -677,7 +677,7 @@ suite.define(() => {
 
     await panel.locator(".session-diff__footer").click();
     await page
-      .locator('openclaw-session-diff-menu wa-dropdown-item[value="scope:commit:abc1234"]')
+      .locator('carapace-session-diff-menu wa-dropdown-item[value="scope:commit:abc1234"]')
       .click();
     await expect
       .poll(() => panel.locator(".session-diff__section-title span").textContent())

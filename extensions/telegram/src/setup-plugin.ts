@@ -1,5 +1,5 @@
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import { getChatChannelMeta } from "openclaw/plugin-sdk/channel-plugin-common";
+import type { ChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import { getChatChannelMeta } from "carapace/plugin-sdk/channel-plugin-common";
 import type { ResolvedTelegramAccount } from "./accounts.js";
 import { createTelegramPluginConfig } from "./config-adapter.js";
 import { TelegramChannelConfigSchema } from "./config-schema.js";

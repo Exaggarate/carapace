@@ -4,14 +4,14 @@ import {
   loadTranscriptEvents,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { loadGatewaySessionRow } from "../session-utils.js";
 import { sessionMutationHandlers } from "./sessions-mutations.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 function client(profileId?: string, displayName?: string): GatewayClient {
@@ -20,7 +20,7 @@ function client(profileId?: string, displayName?: string): GatewayClient {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -79,7 +79,7 @@ async function invokePatchSession(
 
 describe("sessions.patch archive attribution", () => {
   it("stamps the transition actor without adding transcript events and preserves the first archiver", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:archive-attribution";
       const sessionId = "session-archive-attribution";
       await upsertSessionEntryCore(
@@ -119,7 +119,7 @@ describe("sessions.patch archive attribution", () => {
   });
 
   it("does not fabricate attribution or transcript events for an unidentified client", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:solo-archive";
       const sessionId = "session-solo-archive";
       await upsertSessionEntryCore({ agentId: "main", sessionKey }, { sessionId, updatedAt: 1 });
@@ -137,7 +137,7 @@ describe("sessions.patch archive attribution", () => {
   });
 
   it("archives through an alias with attribution", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const canonicalKey = "agent:main:alias-happy-archive";
       const aliasKey = "alias-happy-archive";
       await upsertSessionEntryCore(

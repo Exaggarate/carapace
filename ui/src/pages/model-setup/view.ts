@@ -21,7 +21,7 @@ import { activationTargetId } from "./state.ts";
 import { renderModelSetupSuccessDialog } from "./success-dialog.ts";
 import { renderModelSetupWizard } from "./wizard-view.ts";
 
-const MODEL_SETUP_DOCS_URL = "https://docs.openclaw.ai/concepts/model-providers";
+const MODEL_SETUP_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type Candidate = SystemAgentSetupDetectResult["candidates"][number];
 type AuthOption = NonNullable<SystemAgentSetupDetectResult["authOptions"]>[number];

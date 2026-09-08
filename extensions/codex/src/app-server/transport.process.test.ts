@@ -126,7 +126,7 @@ describe.skipIf(process.platform === "win32")("Codex app-server process containm
   );
 
   it("reaps descendants in independent and root process groups before close returns", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-transport-process-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-transport-process-"));
     const logPath = path.join(tempDir, "processes.jsonl");
     const rootPath = path.join(tempDir, "root.mjs");
     const leaderPath = path.join(tempDir, "leader.mjs");
@@ -222,7 +222,7 @@ process.stdin.on("end", () => process.exit(0));
     ["inspection-timeout", true],
     ["extended", false],
   ] as const)("revalidates identities while quiescing: %s", async (mode, sentinelSurvived) => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-identity-reuse-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-identity-reuse-"));
     const rootPath = path.join(tempDir, "root.mjs");
     const sentinelPath = path.join(tempDir, "sentinel.mjs");
     const sentinelPidPath = path.join(tempDir, "sentinel.pid");

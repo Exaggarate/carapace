@@ -3,7 +3,7 @@ import {
   createMessageReceiveContext,
   type MessageAckPolicy,
   type MessageReceiveContext,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   buildTelegramUpdateKey,
   createTelegramUpdateDedupe,

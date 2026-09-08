@@ -1,5 +1,5 @@
 // Prepared plugin runtime load facts and registry-owned context access.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { createSubsystemLogger } from "../../logging.js";
 import { resolvePluginRegistrationConfigKey } from "../loader-registration-config.js";
@@ -20,9 +20,9 @@ const log = createSubsystemLogger("plugins");
 
 /** Resolved plugin runtime load context shared by runtime loader callers. */
 export type PluginRuntimeLoadContext = {
-  rawConfig: OpenClawConfig;
-  config: OpenClawConfig;
-  activationSourceConfig: OpenClawConfig;
+  rawConfig: CarapaceConfig;
+  config: CarapaceConfig;
+  activationSourceConfig: CarapaceConfig;
   autoEnabledReasons: Readonly<Record<string, string[]>>;
   workspaceDir: string | undefined;
   env: NodeJS.ProcessEnv;

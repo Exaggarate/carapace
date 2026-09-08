@@ -4,28 +4,28 @@
  * These values cross the WebSocket handshake boundary, so additions must stay
  * aligned with protocol schemas and server policy checks.
  */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 
 /** Canonical client ids accepted in gateway hello/connect payloads. */
 export const GATEWAY_CLIENT_IDS = {
   WEBCHAT_UI: "webchat-ui",
-  CONTROL_UI: "openclaw-control-ui",
-  BROWSER_COPILOT: "openclaw-browser-copilot",
-  TUI: "openclaw-tui",
+  CONTROL_UI: "carapace-control-ui",
+  BROWSER_COPILOT: "carapace-browser-copilot",
+  TUI: "carapace-tui",
   WEBCHAT: "webchat",
   CLI: "cli",
   GATEWAY_CLIENT: "gateway-client",
-  MACOS_APP: "openclaw-macos",
+  MACOS_APP: "carapace-macos",
   // Native Linux UI uses the same trusted-client admission class as the macOS app.
-  LINUX_APP: "openclaw-linux",
-  IOS_APP: "openclaw-ios",
-  WATCHOS_APP: "openclaw-watchos",
-  ANDROID_APP: "openclaw-android",
+  LINUX_APP: "carapace-linux",
+  IOS_APP: "carapace-ios",
+  WATCHOS_APP: "carapace-watchos",
+  ANDROID_APP: "carapace-android",
   NODE_HOST: "node-host",
-  WORKER: "openclaw-worker",
+  WORKER: "carapace-worker",
   TEST: "test",
   FINGERPRINT: "fingerprint",
-  PROBE: "openclaw-probe",
+  PROBE: "carapace-probe",
 } as const;
 
 /** Stable gateway client ids used on the wire during hello/connect handshakes. */

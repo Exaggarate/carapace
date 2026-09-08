@@ -5,10 +5,10 @@ import type {
 } from "../../agents/sessions/session-manager-types.js";
 import { executeSqliteQueryTakeFirstSync } from "../../infra/kysely-sync.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import type { SessionTranscriptWriteScope } from "./session-accessor.sqlite-contract.js";
 import { readSessionEntryRow } from "./session-accessor.sqlite-entry-store.js";
 import { withSessionPendingInputRelocation } from "./session-accessor.sqlite-pending-inputs.js";
@@ -48,7 +48,7 @@ export function prepareTranscriptRewriteSync(
   const fencedScope = withOwnedSessionTranscriptWriterFence(scope);
   const resolved = resolveSqliteTranscriptScope(fencedScope);
   const options = toDatabaseOptions(resolved);
-  const database = openOpenClawAgentDatabase(options);
+  const database = openCarapaceAgentDatabase(options);
   assertActive();
   assertOwnedTranscriptWriteCommit(fencedScope);
   const version = readTranscriptContextVersionInTransaction(database, resolved.sessionId);
@@ -63,7 +63,7 @@ export function prepareTranscriptRewriteSync(
   }
   return (entries, sources, adopt) => {
     // A savepoint cannot own admission validation or publication at a later outer commit.
-    if (openOpenClawAgentDatabase(options).db.isTransaction) {
+    if (openCarapaceAgentDatabase(options).db.isTransaction) {
       throw new Error(
         "Transcript rewrite must own its commit; run it outside the active transaction",
       );
@@ -75,10 +75,10 @@ export function prepareTranscriptRewriteSync(
       }
     }
     let committedVersion: SessionTranscriptContextVersion;
-    runOpenClawAgentWriteTransaction((current) => {
+    runCarapaceAgentWriteTransaction((current) => {
       // Custody stages commit first; insert observers must also see the committed manager view.
       // The version is assigned before COMMIT; rollback discards this publication.
-      if (!deferOpenClawAgentPostCommitPublication(current, () => adopt(committedVersion))) {
+      if (!deferCarapaceAgentPostCommitPublication(current, () => adopt(committedVersion))) {
         throw new Error("Transcript rewrite requires a commit publication");
       }
       assertActive();

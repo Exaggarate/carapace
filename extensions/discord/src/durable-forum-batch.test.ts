@@ -1,16 +1,16 @@
 // Exercises the durable batch owner through Discord's real RequestClient boundary.
 import { ChannelType, Routes } from "discord-api-types/v10";
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { sendDurableMessageBatch } from "carapace/plugin-sdk/channel-outbound";
 import {
   createEmptyPluginRegistry,
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createDiscordLoopbackRest } from "./send.test-harness.js";
 
-vi.mock("openclaw/plugin-sdk/web-media", async () => {
+vi.mock("carapace/plugin-sdk/web-media", async () => {
   const { discordWebMediaMockFactory } = await import("./send.test-harness.js");
   return discordWebMediaMockFactory();
 });
@@ -34,7 +34,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/web-media");
+  vi.doUnmock("carapace/plugin-sdk/web-media");
 });
 
 async function runDurableDiscordForumBatch(params: {

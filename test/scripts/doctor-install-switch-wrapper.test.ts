@@ -29,7 +29,7 @@ function runExecStartAssertion(args: string[]) {
 
 describe("doctor install switch wrapper writer", () => {
   it("writes an executable wrapper that preserves quoted paths and arguments", () => {
-    const root = makeTempDir(tempDirs, "openclaw-doctor-wrapper-");
+    const root = makeTempDir(tempDirs, "carapace-doctor-wrapper-");
     const npmDir = path.join(root, "bin with ' quote");
     mkdirSync(npmDir);
 
@@ -45,7 +45,7 @@ fs.writeFileSync(${JSON.stringify(forwardedArgsPath)}, JSON.stringify(process.ar
     );
     chmodSync(fakeNpm, 0o755);
 
-    const wrapperPath = path.join(root, "openclaw wrapper");
+    const wrapperPath = path.join(root, "carapace wrapper");
     const wrapperLogPath = path.join(root, "wrapper log with ' quote.txt");
     const writeResult = runWriter([wrapperPath, fakeNpm, wrapperLogPath]);
 
@@ -74,8 +74,8 @@ fs.writeFileSync(${JSON.stringify(forwardedArgsPath)}, JSON.stringify(process.ar
 
 describe("doctor install switch ExecStart assertions", () => {
   it("resolves a quoted entrypoint after inserted Node heap flags", () => {
-    const root = makeTempDir(tempDirs, "openclaw-doctor-exec-start-");
-    const unitPath = path.join(root, "openclaw-gateway.service");
+    const root = makeTempDir(tempDirs, "carapace-doctor-exec-start-");
+    const unitPath = path.join(root, "carapace-gateway.service");
     const entrypoint = path.join(root, "index with spaces.js");
     writeFileSync(entrypoint, "export {};\n");
     writeFileSync(
@@ -97,8 +97,8 @@ describe("doctor install switch ExecStart assertions", () => {
   });
 
   it.each(["missing", "directory"])("rejects a %s service entrypoint", (kind) => {
-    const root = makeTempDir(tempDirs, "openclaw-doctor-exec-start-");
-    const unitPath = path.join(root, "openclaw-gateway.service");
+    const root = makeTempDir(tempDirs, "carapace-doctor-exec-start-");
+    const unitPath = path.join(root, "carapace-gateway.service");
     const entrypoint = path.join(root, "entry.js");
     if (kind === "directory") {
       mkdirSync(entrypoint);
@@ -114,9 +114,9 @@ describe("doctor install switch ExecStart assertions", () => {
   });
 
   it("reads wrapper arguments from parsed ExecStart argv", () => {
-    const root = makeTempDir(tempDirs, "openclaw-doctor-exec-start-");
-    const unitPath = path.join(root, "openclaw-gateway.service");
-    const wrapper = "/home/test user/.local/bin/openclaw-wrapper";
+    const root = makeTempDir(tempDirs, "carapace-doctor-exec-start-");
+    const unitPath = path.join(root, "carapace-gateway.service");
+    const wrapper = "/home/test user/.local/bin/carapace-wrapper";
     writeFileSync(unitPath, `[Service]\nExecStart="${wrapper}" gateway\n`);
 
     const wrapperResult = runExecStartAssertion(["argument", unitPath, wrapper, "1"]);
@@ -129,8 +129,8 @@ describe("doctor install switch ExecStart assertions", () => {
   });
 
   it("reports the parsed argv when entrypoint detection fails", () => {
-    const root = makeTempDir(tempDirs, "openclaw-doctor-exec-start-");
-    const unitPath = path.join(root, "openclaw-gateway.service");
+    const root = makeTempDir(tempDirs, "carapace-doctor-exec-start-");
+    const unitPath = path.join(root, "carapace-gateway.service");
     writeFileSync(
       unitPath,
       "[Service]\nExecStart=/usr/bin/node --max-old-space-size=4096 /app/dist/index.js gateway\n",

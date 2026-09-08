@@ -21,11 +21,11 @@ function writeCommand(
       "#!/bin/bash",
       "set -euo pipefail",
       "attempts=0",
-      'if [[ -f "$OPENCLAW_RETRY_TEST_COUNTER" ]]; then',
-      '  attempts="$(<"$OPENCLAW_RETRY_TEST_COUNTER")"',
+      'if [[ -f "$CARAPACE_RETRY_TEST_COUNTER" ]]; then',
+      '  attempts="$(<"$CARAPACE_RETRY_TEST_COUNTER")"',
       "fi",
       'attempts="$((attempts + 1))"',
-      'printf "%s" "$attempts" > "$OPENCLAW_RETRY_TEST_COUNTER"',
+      'printf "%s" "$attempts" > "$CARAPACE_RETRY_TEST_COUNTER"',
       ...lines,
       "",
     ].join("\n"),
@@ -36,18 +36,18 @@ function writeCommand(
 
 function runRetryHelper(commandPath: string, counterPath: string) {
   const env = { ...process.env };
-  delete env.OPENCLAW_LIVE_COMMAND_RETRY_PATTERN;
-  delete env.OPENCLAW_LIVE_COMMAND_RATE_LIMIT_PATTERN;
+  delete env.CARAPACE_LIVE_COMMAND_RETRY_PATTERN;
+  delete env.CARAPACE_LIVE_COMMAND_RATE_LIMIT_PATTERN;
   return spawnSync("/bin/bash", [SCRIPT_PATH], {
     cwd: process.cwd(),
     encoding: "utf8",
     env: {
       ...env,
-      OPENCLAW_LIVE_COMMAND: `/bin/bash ${JSON.stringify(commandPath)}`,
-      OPENCLAW_LIVE_COMMAND_ATTEMPTS: "2",
-      OPENCLAW_LIVE_COMMAND_RETRY_DELAY_SECONDS: "0",
-      OPENCLAW_LIVE_COMMAND_RATE_LIMIT_RETRY_DELAY_SECONDS: "0",
-      OPENCLAW_RETRY_TEST_COUNTER: counterPath,
+      CARAPACE_LIVE_COMMAND: `/bin/bash ${JSON.stringify(commandPath)}`,
+      CARAPACE_LIVE_COMMAND_ATTEMPTS: "2",
+      CARAPACE_LIVE_COMMAND_RETRY_DELAY_SECONDS: "0",
+      CARAPACE_LIVE_COMMAND_RATE_LIMIT_RETRY_DELAY_SECONDS: "0",
+      CARAPACE_RETRY_TEST_COUNTER: counterPath,
     },
   });
 }
@@ -60,7 +60,7 @@ afterEach(() => {
 
 describe("scripts/ci-live-command-retry.sh", () => {
   it("retries a provider-internal RPC timeout", () => {
-    const { commandPath, counterPath } = writeCommand("openclaw-ci-live-rpc-timeout-", [
+    const { commandPath, counterPath } = writeCommand("carapace-ci-live-rpc-timeout-", [
       'if [[ "$attempts" -eq 1 ]]; then',
       '  echo "MiniMax image generation API error (1000): rpc timeout: timeout=1m0s" >&2',
       "  exit 42",
@@ -81,7 +81,7 @@ describe("scripts/ci-live-command-retry.sh", () => {
     ["live test timeout", "Error: Test timed out in 45000ms."],
     ["live terminal timeout", "Error: terminal timeout after 300000ms"],
   ])("retries a transient %s", (_label, message) => {
-    const { commandPath, counterPath } = writeCommand("openclaw-ci-live-transient-", [
+    const { commandPath, counterPath } = writeCommand("carapace-ci-live-transient-", [
       'if [[ "$attempts" -eq 1 ]]; then',
       `  echo ${JSON.stringify(message)} >&2`,
       "  exit 42",
@@ -96,7 +96,7 @@ describe("scripts/ci-live-command-retry.sh", () => {
   });
 
   it("does not retry a MiniMax authentication failure", () => {
-    const { commandPath, counterPath } = writeCommand("openclaw-ci-live-auth-failure-", [
+    const { commandPath, counterPath } = writeCommand("carapace-ci-live-auth-failure-", [
       'echo "MiniMax image generation API error (1004): authentication failed" >&2',
       "exit 42",
     ]);

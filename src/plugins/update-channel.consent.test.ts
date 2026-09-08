@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PLUGIN_CAPABILITY_CONSENT_REQUIRED } from "../../packages/gateway-protocol/src/capability-consent-error-details.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePluginArtifactDeclaredSurface } from "./capability-artifact.js";
 import { computeDeclaredSurfaceHash } from "./capability-summary.js";
 import type { PluginInstallArtifactConsentHandler } from "./install-types.js";
@@ -34,23 +34,23 @@ describe("channel migration artifact consent", () => {
       })),
     ),
   )("$source with $review consent protects payload and acceptance", async ({ source, review }) => {
-    const root = makeTrackedTempDir("openclaw-channel-consent", tempDirs);
+    const root = makeTrackedTempDir("carapace-channel-consent", tempDirs);
     const pluginId = "channel-consent-fixture";
-    const packageName = `@openclaw/${pluginId}`;
+    const packageName = `@carapace/${pluginId}`;
     const installedDir = path.join(root, "extensions", pluginId);
     const stagedDir = path.join(root, "stage");
     function writeArtifact(dir: string, version: string, providers: string[]) {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(
         path.join(dir, "package.json"),
-        JSON.stringify({ name: packageName, version, openclaw: { extensions: ["./index.js"] } }),
+        JSON.stringify({ name: packageName, version, carapace: { extensions: ["./index.js"] } }),
       );
       fs.writeFileSync(
         path.join(dir, "index.js"),
         `export default () => ${JSON.stringify(version)};`,
       );
       fs.writeFileSync(
-        path.join(dir, "openclaw.plugin.json"),
+        path.join(dir, "carapace.plugin.json"),
         JSON.stringify({ id: pluginId, providers, configSchema: { type: "object" } }),
       );
     }
@@ -58,13 +58,13 @@ describe("channel migration artifact consent", () => {
     writeArtifact(stagedDir, "2.0.0", ["existing-provider", "new-provider"]);
     const env = {
       ...process.env,
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_STATE_DIR: path.join(root, "state"),
       HOME: root,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
     };
     const previousSurface = resolvePluginArtifactDeclaredSurface(installedDir, env);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: { [pluginId]: { enabled: true } },
         load: { paths: [installedDir] },
@@ -177,7 +177,7 @@ describe("channel migration artifact consent", () => {
         expect(result.summary.errors[0]?.message).toContain(
           "did not install the replacement plugin payload",
         );
-        expect(result.summary.errors[0]?.message).toContain("openclaw update repair");
+        expect(result.summary.errors[0]?.message).toContain("carapace update repair");
         if (source !== "npm") {
           expect(result.summary.errors[0]?.message).toContain(`(ClawHub clawhub:${pluginId}).`);
         }

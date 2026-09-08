@@ -383,9 +383,9 @@ export function renderProjectChip(params: {
                 }
                 ${
                   browseNeedsAdmin
-                    ? html`<openclaw-tooltip .content=${t("newSession.browseRequiresAdmin")}>
+                    ? html`<carapace-tooltip .content=${t("newSession.browseRequiresAdmin")}>
                         ${browseButton}
-                      </openclaw-tooltip>`
+                      </carapace-tooltip>`
                     : browseButton
                 }
               </div>

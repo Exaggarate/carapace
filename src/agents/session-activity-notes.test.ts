@@ -35,14 +35,14 @@ describe("session activity assistant buffering", () => {
     const state = createSessionActivityNoteState();
     noteSessionActivityEvent(
       state,
-      assistantEvent(1_000, "visible\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\n", "visible"),
+      assistantEvent(1_000, "visible\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\n", "visible"),
     );
     noteSessionActivityEvent(
       state,
       assistantEvent(
         1_050,
-        "visible\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nsecret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>\nafter",
-        "secret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>\nafter",
+        "visible\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nsecret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>\nafter",
+        "secret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>\nafter",
       ),
     );
 

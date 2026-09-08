@@ -3,16 +3,16 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { createStartAccountContext } from "openclaw/plugin-sdk/channel-test-helpers";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { createStartAccountContext } from "carapace/plugin-sdk/channel-test-helpers";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime";
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import { defaultRuntime } from "carapace/plugin-sdk/runtime";
+import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateIdentity } from "../protocol/index.js";
 import { runReefChannelLifecycle } from "./channel-lifecycle.js";
@@ -142,13 +142,13 @@ describe("Reef conversation directory", () => {
 
   beforeEach(() => {
     resetPluginStateStoreForTests();
-    // openclaw-temp-dir: allow Reef directory tests need an on-disk state root; afterEach removes it.
+    // carapace-temp-dir: allow Reef directory tests need an on-disk state root; afterEach removes it.
     stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "reef-directory-"));
     const runtime = createPluginRuntimeMock();
     runtime.state.openSyncKeyedStore = <T>(options: OpenKeyedStoreOptions) =>
       createPluginStateSyncKeyedStoreForTests<T>("reef", {
         ...options,
-        env: { OPENCLAW_STATE_DIR: stateDir },
+        env: { CARAPACE_STATE_DIR: stateDir },
       });
     setReefRuntime(runtime);
     const identity = generateIdentity();
@@ -237,7 +237,7 @@ describe("Reef gateway account ownership", () => {
     runtime.state.openSyncKeyedStore = <T>(options: OpenKeyedStoreOptions) =>
       createPluginStateSyncKeyedStoreForTests<T>("reef", {
         ...options,
-        env: { OPENCLAW_STATE_DIR: stateDir },
+        env: { CARAPACE_STATE_DIR: stateDir },
       });
     runtime.state.resolveStateDir = () => stateDir;
     await generateAndStoreKeys(runtime);

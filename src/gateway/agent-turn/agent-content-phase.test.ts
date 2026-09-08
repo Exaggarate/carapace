@@ -1,16 +1,16 @@
 import { afterEach, expect, it, vi } from "vitest";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createChatRunState } from "../server-chat-state.js";
 import { prepareAgentContentPhase } from "./agent-content-phase.js";
 import type { AgentTurnContext } from "./types.js";
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 afterEach(async () => {
   await state?.cleanup();
 });
@@ -18,9 +18,9 @@ afterEach(async () => {
 it.each(["main", "work"])(
   "admits images using the explicit %s global session owner",
   async (agentId) => {
-    state = await createOpenClawTestState({ label: "agent-content-owner" });
+    state = await createCarapaceTestState({ label: "agent-content-owner" });
     const { stateDir, workspaceDir } = state;
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: {

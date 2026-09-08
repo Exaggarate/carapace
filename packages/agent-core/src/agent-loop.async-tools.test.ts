@@ -1,6 +1,6 @@
 import { setImmediate } from "node:timers/promises";
-import { createAssistantMessageEventStream } from "@openclaw/ai/event-stream";
-import type { AssistantMessage, Context, Model, ToolCall } from "@openclaw/llm-core";
+import { createAssistantMessageEventStream } from "@carapace/ai/event-stream";
+import type { AssistantMessage, Context, Model, ToolCall } from "@carapace/llm-core";
 import { Type } from "typebox";
 import { expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";

@@ -1,5 +1,5 @@
 import { resolveDefaultAgentId } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { resolveTranscriptsConfig } from "./config.js";
 import type { TranscriptSessionDescriptor } from "./provider-types.js";
 import { TranscriptsSummaryChangedError, type TranscriptsStore } from "./store.js";
@@ -8,7 +8,7 @@ import { summarizeTranscripts } from "./summary.js";
 
 export async function readTranscriptSummary(params: {
   config: ReturnType<typeof resolveTranscriptsConfig>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   store: TranscriptsStore;
   session: TranscriptSessionDescriptor;
 }) {

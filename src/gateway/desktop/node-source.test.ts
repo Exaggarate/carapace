@@ -2,7 +2,7 @@ import { PassThrough } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_IDS } from "../../../packages/gateway-protocol/src/client-info.js";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { NODE_DESKTOP_STREAM_COMMAND } from "../../shared/node-desktop-stream.js";
 import { NodeRegistry } from "../node-registry.js";
 import type { GatewayWsClient } from "../server/ws-types.js";
@@ -19,7 +19,7 @@ afterEach(async () => {
 });
 
 function createFixture(boundary: "activation" | "pairing" | "attachment") {
-  let config: OpenClawConfig = {
+  let config: CarapaceConfig = {
     gateway: { nodes: { commands: { allow: [NODE_DESKTOP_STREAM_COMMAND] } } },
   };
   const reached = createDeferred();

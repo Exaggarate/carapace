@@ -14,7 +14,7 @@ import {
 const tmpDirs: string[] = [];
 
 function makeTempWorkspace(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sandbox-mounts-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sandbox-mounts-"));
   tmpDirs.push(dir);
   return dir;
 }
@@ -201,7 +201,7 @@ describe("appendWorkspaceMountArgs", () => {
     );
     expect(mounts).toEqual([
       `${agentWorkspaceDir}:/workspace:z`,
-      `${materializedSkillsDir}:/workspace/.openclaw/sandbox-skills/skills:ro,z`,
+      `${materializedSkillsDir}:/workspace/.carapace/sandbox-skills/skills:ro,z`,
     ]);
   });
 

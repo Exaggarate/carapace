@@ -1,5 +1,5 @@
 // Legacy auth-choice alias handling for CLI/onboarding compatibility.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveManifestDeprecatedProviderAuthChoice } from "../plugins/provider-auth-choices.js";
 import type { AuthChoice } from "./onboard-types.js";
 
@@ -9,7 +9,7 @@ const LEGACY_REPLACEMENT_AUTH_CHOICES = new Set(["claude-cli"]);
 export function resolveLegacyOnboardAuthChoice(
   authChoice: AuthChoice | undefined,
   params?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
   },

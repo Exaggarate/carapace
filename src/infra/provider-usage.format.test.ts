@@ -1,6 +1,6 @@
 // Covers provider usage report formatting.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { formatUsageReportLines, formatUsageWindowSummary } from "./provider-usage.format.js";
 import type { ProviderUsageSnapshot, UsageSummary } from "./provider-usage.types.js";

@@ -1,5 +1,5 @@
-// Elevenlabs plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Elevenlabs plugin entrypoint registers its Carapace integration.
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { elevenLabsMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import { buildElevenLabsRealtimeTranscriptionProvider } from "./realtime-transcription-provider-factory.js";
 import { buildElevenLabsSpeechProvider } from "./speech-provider-factory.js";

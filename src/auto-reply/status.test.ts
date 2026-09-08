@@ -1,10 +1,10 @@
 /** Tests auto-reply status message formatting. */
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { normalizeTestText } from "../../test/helpers/normalize-text.js";
 import { testing as cliBackendsTesting } from "../agents/cli-backends.test-support.js";
 import { getContextWindowCaches, providerContextTokenCacheKey } from "../agents/context-cache.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import {
   appendTranscriptMessageSync,
@@ -138,7 +138,7 @@ function makeFallbackContextStatusArgs({
   }
 
   return {
-    config: { models: { providers } } as unknown as OpenClawConfig,
+    config: { models: { providers } } as unknown as CarapaceConfig,
     agent: { model: "xiaomi/mimo-v2-flash" },
     ...(runtimeContextTokens === undefined ? {} : { runtimeContextTokens }),
     sessionEntry: {
@@ -162,7 +162,7 @@ function makeFallbackContextStatusArgs({
         : {
             contextTokens: sessionContextTokens,
             contextTokensSource: "runtime" as const,
-            agentHarnessId: "openclaw" as const,
+            agentHarnessId: "carapace" as const,
           }),
     },
     sessionKey: "agent:main:main",
@@ -170,7 +170,7 @@ function makeFallbackContextStatusArgs({
     queue: { mode: "collect", depth: 0 },
     modelAuth: "api-key",
     activeModelAuth: "api-key",
-    resolvedHarness: "openclaw",
+    resolvedHarness: "carapace",
   };
 }
 
@@ -197,7 +197,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "anthropic/test:opus",
       },
@@ -219,7 +219,7 @@ describe("buildStatusMessage", () => {
       sessionScope: "per-sender",
       resolvedThink: "medium",
       resolvedVerbose: "off",
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
       queue: { mode: "collect", depth: 0 },
       pluginHealthLine: "🔌 Plugins: OK",
       modelAuth: "api-key",
@@ -228,7 +228,7 @@ describe("buildStatusMessage", () => {
     });
     const normalized = normalizeTestText(text);
 
-    expect(normalized).toContain("OpenClaw");
+    expect(normalized).toContain("Carapace");
     expect(normalized).toContain("Model: anthropic/test:opus");
     expect(normalized).toContain("api-key");
     expect(normalized).toContain("Plugins: OK");
@@ -240,7 +240,7 @@ describe("buildStatusMessage", () => {
     expect(normalized).toContain("duration 2h 14m");
     expect(normalized).toContain("updated 4h ago");
     expect(normalized).toContain("Execution: direct");
-    expect(normalized).toContain("Runtime: OpenClaw Default");
+    expect(normalized).toContain("Runtime: Carapace Default");
     expect(normalized).not.toContain("Runner:");
     expect(normalized).toContain("think medium");
     expect(normalized).not.toContain("verbose");
@@ -270,7 +270,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "amazon-bedrock/us.anthropic.claude-sonnet-4-6",
       },
@@ -435,7 +435,7 @@ describe("buildStatusMessage", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         agent: {},
         now: 0,
       });
@@ -456,7 +456,7 @@ describe("buildStatusMessage", () => {
         agents: {
           defaults: {},
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "claude-cli/opus",
       },
@@ -479,7 +479,7 @@ describe("buildStatusMessage", () => {
         agents: {
           defaults: {},
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "claude-cli/opus",
       },
@@ -740,11 +740,11 @@ describe("buildStatusMessage", () => {
       unexpectedSuffix: "· codex",
     },
     {
-      name: "shows the default OpenClaw harness as the model runtime",
-      sessionId: "openclaw-harness",
-      resolvedHarness: "openclaw" as const,
-      expectedRuntime: "Runtime: OpenClaw Default",
-      unexpectedSuffix: "· openclaw",
+      name: "shows the default Carapace harness as the model runtime",
+      sessionId: "carapace-harness",
+      resolvedHarness: "carapace" as const,
+      expectedRuntime: "Runtime: Carapace Default",
+      unexpectedSuffix: "· carapace",
     },
   ])("$name", ({ sessionId, resolvedHarness, expectedRuntime, unexpectedSuffix }) => {
     const text = buildStatusMessage({
@@ -776,7 +776,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "openai/gpt-5.4",
       },
@@ -814,7 +814,7 @@ describe("buildStatusMessage", () => {
             },
           ],
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agentId: "main",
       agent: {
         model: "openai/gpt-5.4",
@@ -840,7 +840,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "openai/gpt-4.1",
       },
@@ -880,7 +880,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "minimax-portal/MiniMax-M2.7",
       },
@@ -919,7 +919,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "anthropic/claude-opus-4-6",
       },
@@ -990,7 +990,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "local/large-model",
       },
@@ -1013,7 +1013,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "ollama-cloud/kimi-k2.7-code",
       },
@@ -1052,7 +1052,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "ollama-cloud/deepseek-v4-pro",
       },
@@ -1186,7 +1186,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "anthropic/claude-opus-4-7",
       },
@@ -1263,7 +1263,7 @@ describe("buildStatusMessage", () => {
             { id: "discord", sandbox: { mode: "all" } },
           ],
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {},
       sessionKey: "agent:discord:discord:channel:1456350065223270435",
       sessionScope: "per-sender",
@@ -1638,7 +1638,7 @@ describe("buildStatusMessage", () => {
     expect(normalized).not.toContain("Reason: session override");
     expect(normalized).not.toContain("This session is pinned");
     expect(normalized).not.toContain(
-      "Docs: https://docs.openclaw.ai/concepts/models#selection-source-and-fallback-behavior",
+      "Docs: https://github.com/Exaggarate/carapace#selection-source-and-fallback-behavior",
     );
   });
 
@@ -1783,7 +1783,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: { model: "anthropic/claude-opus-4-6" },
       sessionEntry: { sessionId: "c1", updatedAt: 0, inputTokens: 10 },
       sessionKey: "agent:main:main",
@@ -1855,7 +1855,7 @@ describe("buildStatusMessage", () => {
         totalTokens: 3,
         modelProvider: "anthropic",
         model: "claude-opus-4-6",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         contextTokens: 32_000,
         contextTokensSource: "runtime",
       },
@@ -1864,7 +1864,7 @@ describe("buildStatusMessage", () => {
       queue: { mode: "collect", depth: 0 },
       includeTranscriptUsage: true,
       modelAuth: "api-key",
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
     });
   }
 
@@ -1899,7 +1899,7 @@ describe("buildStatusMessage", () => {
 
         expect(normalizeTestText(text)).toContain(expected);
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -1945,7 +1945,7 @@ describe("buildStatusMessage", () => {
         expect(normalized).not.toContain("Context: 3.8m/1.0m");
         expect(normalized).not.toContain("Context: 3.82m/1.0m");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -1992,7 +1992,7 @@ describe("buildStatusMessage", () => {
         expect(normalized).toContain("Context: 36k/1.0m (4%)");
         expect(normalized).not.toContain("Context: 2.3m/1.0m");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -2024,7 +2024,7 @@ describe("buildStatusMessage", () => {
             totalTokens: 5,
             modelProvider: "anthropic",
             model: "claude-opus-4-6",
-            agentHarnessId: "openclaw",
+            agentHarnessId: "carapace",
             contextTokens: 32_000,
             contextTokensSource: "runtime",
           },
@@ -2033,12 +2033,12 @@ describe("buildStatusMessage", () => {
           queue: { mode: "collect", depth: 0 },
           includeTranscriptUsage: true,
           modelAuth: "api-key",
-          resolvedHarness: "openclaw",
+          resolvedHarness: "carapace",
         });
 
         expect(normalizeTestText(text)).toContain("Context: 1.2k/32k");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -2057,7 +2057,7 @@ describe("buildStatusMessage", () => {
           {
             message: {
               role: "assistant",
-              provider: "openclaw",
+              provider: "carapace",
               model: "delivery-mirror",
               usage: {
                 input: 0,
@@ -2078,7 +2078,7 @@ describe("buildStatusMessage", () => {
         expect(normalizeTestText(text)).toContain("Cache: 100% hit · 1.0k cached, 0 new");
         expect(normalizeTestText(text)).toContain("Context: 1.0k/32k");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -2113,7 +2113,7 @@ describe("buildStatusMessage", () => {
 
         expect(normalizeTestText(text)).toContain("Cache: 26% hit · 12 cached, 34 new");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -2146,7 +2146,7 @@ describe("buildStatusMessage", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as CarapaceConfig,
           agent: {
             model: "openrouter/google/gemini-2.5-pro",
           },
@@ -2166,7 +2166,7 @@ describe("buildStatusMessage", () => {
         expect(normalized).toContain("Context: 1.2k/999k");
         expect(normalized).not.toContain("Context: 1.2k/2.0m");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -2182,7 +2182,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "openrouter/google/gemini-2.5-pro",
       },
@@ -2220,7 +2220,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "xiaomi/mimo-v2-flash",
       },
@@ -2265,7 +2265,7 @@ describe("buildStatusMessage", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       agent: {
         model: "openai/gpt-4o",
       },
@@ -2333,7 +2333,7 @@ describe("buildStatusMessage", () => {
         expect(normalized).toContain("Context: 1.2k/1.0m");
         expect(normalized).not.toContain("Context: 1.2k/128k");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "carapace-status-" },
     );
   });
 
@@ -2423,7 +2423,7 @@ describe("buildCommandsMessage", () => {
   it("lists commands with aliases and hints", () => {
     const text = buildCommandsMessage({
       commands: { config: false, debug: false },
-    } as unknown as OpenClawConfig);
+    } as unknown as CarapaceConfig);
     expect(text).toContain("ℹ️ Slash commands");
     expect(text).toContain("Status");
     expect(text).toContain("/commands - List all slash commands.");
@@ -2439,7 +2439,7 @@ describe("buildCommandsMessage", () => {
     const text = buildCommandsMessage(
       {
         commands: { config: false, debug: false },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       [
         {
           name: "demo_skill",
@@ -2456,7 +2456,7 @@ describe("buildHelpMessage", () => {
   it("hides config/debug when disabled", () => {
     const text = buildHelpMessage({
       commands: { config: false, debug: false },
-    } as unknown as OpenClawConfig);
+    } as unknown as CarapaceConfig);
     expect(text).toContain("Skills");
     expect(text).toContain("/skill <name> [input]");
     expect(text).not.toContain("/config");
@@ -2477,7 +2477,7 @@ describe("buildCommandsMessagePaginated", () => {
     const result = buildCommandsMessagePaginated(
       {
         commands: { config: false, debug: false },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       undefined,
       { surface: "telegram", page: 1, forcePaginatedList: true },
     );
@@ -2495,7 +2495,7 @@ describe("buildCommandsMessagePaginated", () => {
     const firstPage = buildCommandsMessagePaginated(
       {
         commands: { config: false, debug: false },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       undefined,
       { surface: "telegram", page: 1, forcePaginatedList: true },
     );
@@ -2503,7 +2503,7 @@ describe("buildCommandsMessagePaginated", () => {
       buildCommandsMessagePaginated(
         {
           commands: { config: false, debug: false },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         undefined,
         { surface: "telegram", page: index + 1, forcePaginatedList: true },
       ),

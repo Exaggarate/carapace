@@ -56,7 +56,7 @@ function mount(scopes: string[], profileId: string | null, request: ReturnType<t
     },
   } as unknown as ApplicationContext;
   const provider = createApplicationContextProvider(context);
-  const element = document.createElement("openclaw-github-connections");
+  const element = document.createElement("carapace-github-connections");
   provider.append(element);
   document.body.append(provider);
   return {

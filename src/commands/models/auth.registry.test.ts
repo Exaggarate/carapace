@@ -31,7 +31,7 @@ it("keeps the active plugin registry when provider sign-in is declined", async (
   const pluginDir = path.join(root, "provider");
   fs.mkdirSync(pluginDir);
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "auth-registry-fixture",
       providers: ["fixture-provider"],
@@ -54,9 +54,9 @@ it("keeps the active plugin registry when provider sign-in is declined", async (
       }
     };`,
   );
-  vi.stubEnv("OPENCLAW_STATE_DIR", root);
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(root, "openclaw.json"));
-  vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
+  vi.stubEnv("CARAPACE_STATE_DIR", root);
+  vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(root, "carapace.json"));
+  vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
   const registry = createEmptyPluginRegistry();
   setActivePluginRegistry(registry);
   const declined = new Error("Sign-in declined");

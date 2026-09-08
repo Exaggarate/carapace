@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 
 const runtimeMocks = vi.hoisted(() => ({
   createDispatch: vi.fn(),
@@ -80,7 +80,7 @@ async function withRecoveryRuntime(
     warn: ReturnType<typeof vi.fn>;
   }) => Promise<void>,
 ): Promise<void> {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     vi.useFakeTimers();
     const placements = new Map<string, RecoveryPlacement>();
     if (options.placement) {

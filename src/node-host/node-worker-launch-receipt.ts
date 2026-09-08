@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { Selectable } from "kysely";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
 import type { NodeWorkerProcessIdentity } from "./node-worker-process-identity.js";
 
 type NodeWorkerLaunchState =
@@ -18,7 +18,7 @@ export type NodeWorkerContainerIdentity = {
   engineTarget: string;
 };
 
-export type NodeWorkerLaunchRow = Selectable<OpenClawStateDatabase["node_worker_launches"]> & {
+export type NodeWorkerLaunchRow = Selectable<CarapaceStateDatabase["node_worker_launches"]> & {
   container_json?: string | null;
 };
 

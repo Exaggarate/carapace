@@ -39,7 +39,7 @@ type PreparedPluginAliases = {
 
 type PluginSdkHostFacts = {
   packageJson?: PluginSdkPackageJson | null;
-  nativePackage?: { name?: string; hasOpenClawBin: boolean } | null;
+  nativePackage?: { name?: string; hasCarapaceBin: boolean } | null;
   trustedRoot?: boolean;
   exportedSubpaths?: string[] | null;
   privateSubpaths?: string[];

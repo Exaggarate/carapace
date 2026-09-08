@@ -36,7 +36,7 @@ vi.mock("./worker.runtime.js", () => ({
 
 const descriptor = {
   version: 4,
-  connectionEndpoint: { kind: "unix", socketPath: "/tmp/openclaw-worker/gateway.sock" },
+  connectionEndpoint: { kind: "unix", socketPath: "/tmp/carapace-worker/gateway.sock" },
   admission: {
     environmentId: "environment-1",
     credential: ["worker", "fixture", "value"].join("-"),
@@ -45,7 +45,7 @@ const descriptor = {
     rpcSetVersion: WORKER_RPC_SET_VERSION,
     handshake: {
       bundleHash: "a".repeat(64),
-      openclawVersion: "2026.7.12",
+      carapaceVersion: "2026.7.12",
       protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
     },
   },
@@ -57,7 +57,7 @@ const descriptor = {
     turnId: "turn-1",
     prompt: "Inspect the workspace.",
     suppressPromptTranscript: false,
-    workspaceDir: "/tmp/openclaw-worker/workspace",
+    workspaceDir: "/tmp/carapace-worker/workspace",
     modelRef: { provider: "provider-1", model: "model-1" },
     inferenceOptions: { reasoning: "medium", maxTokens: 512 },
     initialMessages: [
@@ -155,7 +155,7 @@ describe("worker command lifetime gate", () => {
     managedRuntime.close.mockResolvedValue(undefined);
     vi.mocked(createWorkerRuntimeEnvironment).mockReset();
     vi.mocked(createWorkerRuntimeEnvironment).mockResolvedValue({
-      stateDir: "/tmp/openclaw-managed-worker-state",
+      stateDir: "/tmp/carapace-managed-worker-state",
       close: managedRuntime.close,
     });
   });
@@ -246,7 +246,7 @@ describe("worker command lifetime gate", () => {
     loggingState.rawConsole = null;
     loggingState.streamErrorHandlersInstalled = false;
     const invalidStart = Object.assign(
-      Object.create({ type: "openclaw-worker-start-v1" }) as Record<string, unknown>,
+      Object.create({ type: "carapace-worker-start-v1" }) as Record<string, unknown>,
       { unexpected: true },
     );
 
@@ -414,7 +414,7 @@ describe("worker command lifetime gate", () => {
     expect(createWorkerRuntimeEnvironment).toHaveBeenCalledOnce();
     expect(
       vi.mocked(runWorkerDescriptor).mock.calls.map(([, options]) => options?.environmentStateDir),
-    ).toEqual(["/tmp/openclaw-managed-worker-state", "/tmp/openclaw-managed-worker-state"]);
+    ).toEqual(["/tmp/carapace-managed-worker-state", "/tmp/carapace-managed-worker-state"]);
     expect(managedRuntime.close).toHaveBeenCalledOnce();
     expect(lifetime.dispose).toHaveBeenCalledOnce();
   });
@@ -629,7 +629,7 @@ describe("worker command lifetime gate", () => {
   ])("enforces $mode input at cap + $delta bytes", async ({ mode, delta }) => {
     const harness = managedHarness();
     const prefix = "wss://worker.invalid/";
-    const suffix = "/__openclaw__/worker";
+    const suffix = "/__carapace__/worker";
     harness.launch.connectionEndpoint = {
       kind: "websocket",
       url: prefix + "\0".repeat(4_096 - prefix.length - suffix.length) + suffix,

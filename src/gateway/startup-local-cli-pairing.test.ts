@@ -6,21 +6,21 @@ import {
 } from "../infra/device-identity.js";
 import { approveDevicePairing } from "../infra/device-pairing-approval.js";
 import { getPairedDevice, requestDevicePairing } from "../infra/device-pairing.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { READ_SCOPE } from "./operator-scopes.js";
 import { ensureStartupLocalCliPairing } from "./startup-local-cli-pairing.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("startup local CLI pairing", () => {
   it("persists canonical Windows metadata for a new local CLI pairing", async () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
 
-    await withStateDirEnv("openclaw-startup-local-cli-pairing-", async () => {
+    await withStateDirEnv("carapace-startup-local-cli-pairing-", async () => {
       const identity = loadOrCreateDeviceIdentity();
 
       await expect(ensureStartupLocalCliPairing()).resolves.toBe("created");
@@ -32,12 +32,12 @@ describe("startup local CLI pairing", () => {
   });
 
   it("does not report a limited existing operator token as admin-ready", async () => {
-    await withStateDirEnv("openclaw-startup-local-cli-pairing-", async () => {
+    await withStateDirEnv("carapace-startup-local-cli-pairing-", async () => {
       const identity = loadOrCreateDeviceIdentity();
       const request = await requestDevicePairing({
         deviceId: identity.deviceId,
         publicKey: publicKeyRawBase64UrlFromPem(identity.publicKeyPem),
-        clientId: "openclaw-cli",
+        clientId: "carapace-cli",
         clientMode: "cli",
         role: "operator",
         scopes: [READ_SCOPE],

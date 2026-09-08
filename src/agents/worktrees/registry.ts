@@ -1,17 +1,17 @@
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { Insertable, Selectable } from "kysely";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import {
-  withExistingOpenClawStateDatabaseArtifactPreservingReadOnly,
-  withExistingOpenClawStateDatabaseReadOnly,
-} from "../../state/openclaw-state-db-readonly.js";
-import { tableExists, tableHasColumn } from "../../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+  withExistingCarapaceStateDatabaseArtifactPreservingReadOnly,
+  withExistingCarapaceStateDatabaseReadOnly,
+} from "../../state/carapace-state-db-readonly.js";
+import { tableExists, tableHasColumn } from "../../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import {
   collectLiveRunLeases,
   WORKTREE_REMOVING_LEASE_KEY,
@@ -24,17 +24,17 @@ import type {
   ProvisionedFileState,
 } from "./types.js";
 
-type WorktreesTable = OpenClawStateKyselyDatabase["worktrees"];
+type WorktreesTable = CarapaceStateKyselyDatabase["worktrees"];
 type WorktreeRow = Selectable<WorktreesTable>;
-type WorktreeRegistryDatabase = Pick<OpenClawStateKyselyDatabase, "worktrees">;
+type WorktreeRegistryDatabase = Pick<CarapaceStateKyselyDatabase, "worktrees">;
 type WorktreeProvisionedDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "worktree_provisioned_file_chunks"
 >;
-type WorktreeLeaseDatabase = Pick<OpenClawStateKyselyDatabase, "worktrees" | "state_leases">;
+type WorktreeLeaseDatabase = Pick<CarapaceStateKyselyDatabase, "worktrees" | "state_leases">;
 
 function dbFor(env: NodeJS.ProcessEnv): DatabaseSync {
-  return openOpenClawStateDatabase({ env }).db;
+  return openCarapaceStateDatabase({ env }).db;
 }
 
 function kyselyFor(db: DatabaseSync) {
@@ -206,8 +206,8 @@ function readRegistry<T>(
   const operation = ({ db }: { db: DatabaseSync }) =>
     tableExists(db, "worktrees") ? read(db) : undefined;
   return behavior.artifactPreservingReadOnly
-    ? withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(operation, { env })
-    : withExistingOpenClawStateDatabaseReadOnly(operation, { env });
+    ? withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(operation, { env })
+    : withExistingCarapaceStateDatabaseReadOnly(operation, { env });
 }
 
 export function getRegistryWorktree(
@@ -243,7 +243,7 @@ export function discardLegacyRegistryWorktrees(
     return 0;
   }
   const db = dbFor(env);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     () =>
       Number(
         executeSqliteQuerySync(
@@ -270,7 +270,7 @@ export function rewriteRegistryWorktreePathsForMigration(
   const db = dbFor(env);
   // Only the state-migration owner may rewrite persisted worktree identity paths.
   // Runtime updates deliberately keep `path` outside their patch surface.
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     () =>
       rewrites.reduce(
         (count, rewrite) =>
@@ -312,7 +312,7 @@ export function clearRegistryWorktreeProvisionedChunks(
   worktreeId: string,
 ): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     executeSqliteQuerySync(
       db,
       kyselyProvisionedFor(db)
@@ -332,7 +332,7 @@ export function insertRegistryWorktreeProvisionedChunk(
   },
 ): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     executeSqliteQuerySync(
       db,
       kyselyProvisionedFor(db).insertInto("worktree_provisioned_file_chunks").values({
@@ -399,7 +399,7 @@ export function insertRegistryWorktree(
   options: { provisionedPaths?: readonly string[] } = {},
 ): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     executeSqliteQuerySync(
       db,
       kyselyFor(db).insertInto("worktrees").values(recordToRow(record, options.provisionedPaths)),
@@ -443,7 +443,7 @@ export function updateRegistryWorktree(
   } else if (patch.provisionedPaths !== undefined) {
     values.provisioned_paths_json = JSON.stringify(patch.provisionedPaths);
   }
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     let update = kyselyFor(db).updateTable("worktrees").set(values).where("id", "=", id);
     // Busy/retained/failed outcomes are authoritative only for the lifecycle the
     // writer observed: the live condition blocks post-finalization overwrites, and
@@ -461,7 +461,7 @@ export function updateRegistryWorktree(
 
 export function deleteRegistryWorktree(env: NodeJS.ProcessEnv, id: string): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     executeSqliteQuerySync(
       db,
       kyselyProvisionedFor(db)
@@ -500,7 +500,7 @@ export function admitWorktreeRunLeaseRow(
     exclusive?: true;
   },
 ): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const db = database.db;
       const k = kyselyLeaseFor(db);
@@ -563,7 +563,7 @@ export function claimWorktreeRemovalRow(
     checks?: RunLeaseOwnerChecks;
   },
 ): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const db = database.db;
       const k = kyselyLeaseFor(db);
@@ -630,7 +630,7 @@ export function releaseWorktreeRunLeaseRow(
   token: string,
 ): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     () => {
       executeSqliteQuerySync(
         db,
@@ -646,7 +646,7 @@ export function releaseWorktreeRunLeaseRow(
 
 export function finalizeWorktreeRemovalRows(env: NodeJS.ProcessEnv, worktreeId: string): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     () => {
       executeSqliteQuerySync(
         db,
@@ -665,7 +665,7 @@ export function abortWorktreeRemovalRow(
   token: string,
 ): void {
   const db = dbFor(env);
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     () => {
       // Owner-scoped: only the claim that still owns the marker may clear it, so a slow
       // remover cannot delete a marker a newer remover established after replacing it.
@@ -687,7 +687,7 @@ export function hasLiveWorktreeRunLeaseRow(
   worktreeId: string,
   checks?: RunLeaseOwnerChecks,
 ): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const db = database.db;
       const k = kyselyLeaseFor(db);

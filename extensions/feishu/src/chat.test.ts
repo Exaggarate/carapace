@@ -1,7 +1,7 @@
 // Feishu tests cover chat plugin behavior.
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi, PluginRuntime } from "../runtime-api.js";
+import type { CarapacePluginApi, PluginRuntime } from "../runtime-api.js";
 import type { FeishuConfig } from "./types.js";
 
 const createFeishuClientMock = vi.hoisted(() => vi.fn());
@@ -52,9 +52,9 @@ describe("registerFeishuChatTools", () => {
   }
 
   function createChatToolApi(params: {
-    config: OpenClawPluginApi["config"];
-    registerTool: OpenClawPluginApi["registerTool"];
-  }): OpenClawPluginApi {
+    config: CarapacePluginApi["config"];
+    registerTool: CarapacePluginApi["registerTool"];
+  }): CarapacePluginApi {
     return createTestPluginApi({
       id: "feishu-test",
       name: "Feishu Test",
@@ -66,7 +66,7 @@ describe("registerFeishuChatTools", () => {
     });
   }
 
-  function createChatConfig(overrides: Partial<FeishuConfig> = {}): OpenClawPluginApi["config"] {
+  function createChatConfig(overrides: Partial<FeishuConfig> = {}): CarapacePluginApi["config"] {
     return {
       channels: {
         feishu: {
@@ -92,7 +92,7 @@ describe("registerFeishuChatTools", () => {
   function registerChatTool(
     params: {
       account?: Partial<FeishuConfig>;
-      config?: OpenClawPluginApi["config"];
+      config?: CarapacePluginApi["config"];
       context?: RegisteredToolContext;
     } = {},
   ) {

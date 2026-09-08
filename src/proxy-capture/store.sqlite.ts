@@ -4,7 +4,7 @@ import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { StringDecoder } from "node:string_decoder";
 import { gunzipSync, gzipSync } from "node:zlib";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import type { InferResult } from "kysely";
 import { sha256Hex } from "../infra/crypto-digest.js";
 import { compileSqliteQueryBindings, getNodeSqliteKysely } from "../infra/kysely-sync.js";
@@ -18,12 +18,12 @@ import {
   registerSqliteCacheExitClose,
   type SqliteWalMaintenance,
 } from "../infra/sqlite-wal.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   findDebugProxyCaptureBlobReference,
   listDebugProxyCaptureSessions,
@@ -54,7 +54,7 @@ type PathBasedDebugProxyCaptureStore = {
 };
 
 type CaptureDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "capture_sessions" | "capture_events" | "capture_blobs"
 >;
 type LegacyCaptureDatabase = Pick<CaptureDatabase, "capture_events"> & {
@@ -202,7 +202,7 @@ function serializeJson(value: unknown): string | null {
 }
 
 type SharedDebugProxyCaptureState = {
-  database: OpenClawStateDatabase;
+  database: CarapaceStateDatabase;
   env?: NodeJS.ProcessEnv;
 };
 
@@ -213,7 +213,7 @@ function runSharedDebugProxyCaptureWrite<T>(owner: object, operation: () => T): 
   if (!shared) {
     throw new Error("shared debug proxy capture state is unavailable");
   }
-  return runOpenClawStateWriteTransaction(() => operation(), {
+  return runCarapaceStateWriteTransaction(() => operation(), {
     database: shared.database,
     env: shared.env ?? process.env,
   });
@@ -241,7 +241,7 @@ class DebugProxyCaptureStoreImpl {
       this.pathBased = opened.pathBased;
       return;
     }
-    const database = openOpenClawStateDatabase({ env: optionsOrDbPath.env });
+    const database = openCarapaceStateDatabase({ env: optionsOrDbPath.env });
     sharedDebugProxyCaptureStates.set(this, { database, env: optionsOrDbPath.env });
     this.db = database.db;
     this.dbPath = database.path;
@@ -701,7 +701,7 @@ function resolveDebugProxyCaptureStoreKey(
 ): string {
   return typeof optionsOrDbPath === "string"
     ? `legacy:${optionsOrDbPath}:${legacyBlobDir ?? ""}`
-    : `shared:${openOpenClawStateDatabase({ env: optionsOrDbPath.env }).path}`;
+    : `shared:${openCarapaceStateDatabase({ env: optionsOrDbPath.env }).path}`;
 }
 
 function getDebugProxyCaptureStoreImpl(

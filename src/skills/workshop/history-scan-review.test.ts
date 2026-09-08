@@ -29,7 +29,7 @@ describe("Skill Workshop history scan review", () => {
           transcript: "[user]\nRepair it.\n\n[assistant]\nDone.",
         },
       ],
-      workspaceDir: "/tmp/openclaw-history-scan-review",
+      workspaceDir: "/tmp/carapace-history-scan-review",
     });
 
     expect(runEmbeddedAgent).toHaveBeenCalledWith(

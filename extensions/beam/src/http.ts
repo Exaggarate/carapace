@@ -1,12 +1,12 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { getPluginRuntimeGatewayRequestScope } from "openclaw/plugin-sdk/plugin-runtime";
-import { buildControlUiCatalogSharePath } from "openclaw/plugin-sdk/session-catalog-runtime";
+import { getPluginRuntimeGatewayRequestScope } from "carapace/plugin-sdk/plugin-runtime";
+import { buildControlUiCatalogSharePath } from "carapace/plugin-sdk/session-catalog-runtime";
 import {
   beginWebhookRequestPipelineOrReject,
   createFixedWindowRateLimiter,
   createWebhookInFlightLimiter,
   readJsonWebhookBodyOrReject,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 import type { BeamStore } from "./store.js";
 import { BEAM_MAX_BODY_BYTES, BEAM_SESSION_SHARE_ROUTE, parseBeamUpload } from "./types.js";
 

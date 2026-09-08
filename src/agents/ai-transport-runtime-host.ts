@@ -2,8 +2,8 @@ import {
   configureAiTransportHost,
   getAiTransportHost,
   type AiProviderRequestCapabilities,
-} from "@openclaw/ai";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/ai";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import "../llm/ai-transport-host.js";
 import { getModelProviderRuntimePluginHandle } from "../plugins/provider-hook-runtime.js";
 import type { ProviderRuntimeModel } from "../plugins/provider-runtime-model.types.js";
@@ -44,18 +44,18 @@ export function configureAiTransportRuntimeHost(): void {
       resolveProviderStream: (params) =>
         resolveProviderStreamFn({
           ...params,
-          config: params.config as OpenClawConfig | undefined,
+          config: params.config as CarapaceConfig | undefined,
           runtimeHandle: getModelProviderRuntimePluginHandle(params.context.model),
           context: {
             ...params.context,
-            config: params.context.config as OpenClawConfig | undefined,
+            config: params.context.config as CarapaceConfig | undefined,
             model: params.context.model as ProviderRuntimeModel,
           },
         }),
       resolveTransportTurnState: (params) =>
         resolveProviderTransportTurnStateWithPlugin({
           ...params,
-          config: params.config as OpenClawConfig | undefined,
+          config: params.config as CarapaceConfig | undefined,
           runtimeHandle: getModelProviderRuntimePluginHandle(params.context.model),
           context: {
             ...params.context,
@@ -65,11 +65,11 @@ export function configureAiTransportRuntimeHost(): void {
       wrapSimpleCompletionStream: (params) =>
         wrapProviderSimpleCompletionStreamFn({
           ...params,
-          config: params.config as OpenClawConfig | undefined,
+          config: params.config as CarapaceConfig | undefined,
           runtimeHandle: getModelProviderRuntimePluginHandle(params.context.model),
           context: {
             ...params.context,
-            config: params.context.config as OpenClawConfig | undefined,
+            config: params.context.config as CarapaceConfig | undefined,
             model: params.context.model as ProviderRuntimeModel,
           },
         }),

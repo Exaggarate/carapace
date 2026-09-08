@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { crc32 } from "node:zlib";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { AssistantMessageEvent, Model } from "openclaw/plugin-sdk/llm";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { AssistantMessageEvent, Model } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { afterEach, expect, it, vi } from "vitest";
 import { streamSimpleBedrock } from "./stream.runtime.js";

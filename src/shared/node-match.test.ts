@@ -48,7 +48,7 @@ describe("shared/node-match", () => {
     ).toBe("mac-studio");
   });
 
-  it("prefers a unique current OpenClaw client over a legacy clawdbot client", () => {
+  it("prefers a unique current Carapace client over a legacy clawdbot client", () => {
     expect(
       resolveNodeIdFromCandidates(
         [
@@ -61,7 +61,7 @@ describe("shared/node-match", () => {
           {
             nodeId: "current-mac",
             displayName: "Peter’s Mac Studio",
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             connected: false,
           },
         ],
@@ -71,12 +71,12 @@ describe("shared/node-match", () => {
   });
 
   it.each([
-    { clientIds: ["openclaw-macos", "node-host"] },
-    { clientIds: ["openclaw-macos", "openclaw-linux"] },
-    { clientIds: ["openclaw-macos", undefined] },
-    { clientIds: ["openclaw-macos", "custom-client"] },
-    { clientIds: ["openclaw-macos", "clawdbot-macos", "node-host"] },
-    { clientIds: ["openclaw-macos", "moldbot-macos", undefined] },
+    { clientIds: ["carapace-macos", "node-host"] },
+    { clientIds: ["carapace-macos", "carapace-linux"] },
+    { clientIds: ["carapace-macos", undefined] },
+    { clientIds: ["carapace-macos", "custom-client"] },
+    { clientIds: ["carapace-macos", "clawdbot-macos", "node-host"] },
+    { clientIds: ["carapace-macos", "moldbot-macos", undefined] },
     { clientIds: ["clawdbot-macos", undefined] },
     { clientIds: ["node-host", "clawdbot-macos"] },
   ])("keeps non-migration ties ambiguous for $clientIds", ({ clientIds }) => {
@@ -98,7 +98,7 @@ describe("shared/node-match", () => {
   it.each([true, false, undefined])(
     "keeps the unique current client in an entirely legacy migration tie (connected=%s)",
     (connected) => {
-      const nodes = ["clawdbot-macos", "moldbot-macos", " OpenClaw-MacOS "].map(
+      const nodes = ["clawdbot-macos", "moldbot-macos", " Carapace-MacOS "].map(
         (clientId, index) => ({
           nodeId: `node-${index}`,
           displayName: "Shared Desk",
@@ -116,7 +116,7 @@ describe("shared/node-match", () => {
     "prefers a connected %s client over a disconnected current app",
     (clientId) => {
       const nodes = [
-        { nodeId: "app", displayName: "Shared Desk", clientId: "openclaw-macos", connected: false },
+        { nodeId: "app", displayName: "Shared Desk", clientId: "carapace-macos", connected: false },
         { nodeId: "live", displayName: "Shared Desk", clientId, connected: true },
       ];
       for (const candidates of [nodes, nodes.toReversed()]) {
@@ -174,20 +174,20 @@ describe("shared/node-match", () => {
           {
             nodeId: "other-mac",
             displayName: "Peter’s Mac Studio",
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             connected: true,
           },
           {
             nodeId: "third-mac",
             displayName: "Peter’s Mac Studio",
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             connected: true,
           },
         ],
         "Peter's Mac Studio",
       ),
     ).toThrow(
-      /ambiguous node: Peter's Mac Studio.*node=other-mac.*client=openclaw-macos.*node=third-mac.*client=openclaw-macos/,
+      /ambiguous node: Peter's Mac Studio.*node=other-mac.*client=carapace-macos.*node=third-mac.*client=carapace-macos/,
     );
   });
 

@@ -8,7 +8,7 @@ import {
   SessionsFilesListResultSchema,
 } from "../../packages/gateway-protocol/src/schema/sessions.js";
 
-export const WORKSPACE_INSPECTION_COMMAND = "openclaw-internal-workspace-inspect";
+export const WORKSPACE_INSPECTION_COMMAND = "carapace-internal-workspace-inspect";
 export const WORKSPACE_INSPECTION_MAX_BYTES = 2 * 1024 * 1024;
 
 export function isWorkspaceInspectionCommand(argv: readonly string[]): boolean {

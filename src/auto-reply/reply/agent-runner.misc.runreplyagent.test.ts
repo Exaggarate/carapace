@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Tests miscellaneous run-reply-agent behaviors and artifact output.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
@@ -27,7 +27,7 @@ import {
 } from "../../agents/test-helpers/model-fallback-runner.test-support.js";
 import type { InboundEventKind } from "../../channels/inbound-event/kind.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { loadSessionEntry, replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import {
@@ -166,7 +166,7 @@ vi.mock("../../agents/model-selection.js", async () => {
   );
   return {
     ...actual,
-    isCliProvider: (provider: string, _cfg?: OpenClawConfig) => {
+    isCliProvider: (provider: string, _cfg?: CarapaceConfig) => {
       const normalized = provider.trim().toLowerCase();
       return (
         normalized === "claude-cli" ||
@@ -184,7 +184,7 @@ vi.mock("../../agents/thinking-runtime.js", async (importOriginal) => {
     resolveCandidateThinkingLevel: (
       params: Parameters<typeof actual.resolveCandidateThinkingLevel>[0],
     ) => params.level,
-    resolveEffectiveAgentRuntime: () => "openclaw",
+    resolveEffectiveAgentRuntime: () => "carapace",
   };
 });
 
@@ -244,7 +244,7 @@ vi.mock("../../utils/provider-utils.js", () => ({
 
 const loadCronStoreMock = vi.fn();
 vi.mock("../../cron/store.js", () => {
-  const resolveCronPath = (storePath?: string) => storePath ?? "/tmp/openclaw-cron-store.json";
+  const resolveCronPath = (storePath?: string) => storePath ?? "/tmp/carapace-cron-store.json";
   return {
     loadCronJobsStore: (...args: unknown[]) => loadCronStoreMock(...args),
     loadCronStore: (...args: unknown[]) => loadCronStoreMock(...args),
@@ -410,7 +410,7 @@ function firstMockCallArg(mock: MockCallSource, label: string): unknown {
 }
 
 function setupAgentRunnerMocks(): void {
-  rootDir = tempDirs.make("openclaw-run-reply-agent-");
+  rootDir = tempDirs.make("carapace-run-reply-agent-");
   vi.useRealTimers();
   registerCliBackendsForTest();
   clearRuntimeConfigSnapshot();
@@ -528,7 +528,7 @@ describe("runReplyAgent auto-compaction token update", () => {
     agentResult: Record<string, unknown>,
     options?: {
       agentEvents?: Array<{ stream: string; data: Record<string, unknown> }>;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       onBlockReply?: (payload: unknown) => Promise<void> | void;
       onAgentRunTerminalOutcome?: (outcome: "completed" | "failed") => void;
     },
@@ -585,7 +585,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   async function runBaseReplyWithAgentMeta(params: {
     agentMeta: Record<string, unknown>;
     collectDiagnostics?: boolean;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     tmpPrefix: string;
     workspaceDir?: string;
   }) {
@@ -643,7 +643,7 @@ describe("runReplyAgent auto-compaction token update", () => {
 
   it("updates totalTokens from lastCallUsage even without compaction", async () => {
     const { sessionKey, stored } = await runBaseReplyWithAgentMeta({
-      tmpPrefix: "openclaw-usage-last-",
+      tmpPrefix: "carapace-usage-last-",
       agentMeta: {
         // Tool-use loop: accumulated input is higher than last call's input
         usage: { input: 75_000, output: 5_000, total: 80_000 },
@@ -656,7 +656,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   }, 180_000);
 
   it("keeps an unarmed preflight drain visible instead of dropping the reply", async () => {
-    const tmp = tempDirs.make("openclaw-preflight-drain-");
+    const tmp = tempDirs.make("carapace-preflight-drain-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "agent:main:main";
     const sessionEntry = {
@@ -692,7 +692,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   ])(
     "defers optional memory until real delivery settles ($preempted, retired=$retiredGateway, compact=$compactAfterFlush)",
     async ({ preempted, retiredGateway, compactAfterFlush = false }) => {
-      const tmp = tempDirs.make("openclaw-early-flush-");
+      const tmp = tempDirs.make("carapace-early-flush-");
       const logPath = path.join(tmp, "maintenance.log");
       setLoggerOverride({ level: "debug", consoleLevel: "silent", file: logPath });
       const storePath = path.join(tmp, "sessions.json");
@@ -729,7 +729,7 @@ describe("runReplyAgent auto-compaction token update", () => {
       } as never;
       const resolveGatewayContext = () => gatewayContext;
       let releaseForeground: (() => void) | undefined;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             anthropic: {
@@ -805,7 +805,7 @@ describe("runReplyAgent auto-compaction token update", () => {
           meta: {
             agentMeta: {
               sessionId: "session",
-              agentHarnessId: "openclaw",
+              agentHarnessId: "carapace",
               provider: "anthropic",
               model: "claude-opus-4-6",
               lastCallUsage: { input: compactAfterFlush ? 26_000 : 10_920, output: 10 },
@@ -1060,7 +1060,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   });
 
   it("loads post-compaction context before starting a queued followup drain", async () => {
-    const workspaceDir = tempDirs.make("openclaw-post-compaction-queued-followup-");
+    const workspaceDir = tempDirs.make("carapace-post-compaction-queued-followup-");
     try {
       await fs.writeFile(
         path.join(workspaceDir, "AGENTS.md"),
@@ -1175,7 +1175,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   ])(
     "records a settled fallback cancelled by $label without losing committed compaction",
     async ({ superseded, expectedCode }) => {
-      const root = tempDirs.make("openclaw-aborted-compaction-");
+      const root = tempDirs.make("carapace-aborted-compaction-");
       const storePath = path.join(root, "sessions.json");
       const upstreamAbort = new AbortController();
       const sessionKey = `${superseded ? "superseded" : "upstream-cancelled"}-settled-fallback`;
@@ -1280,7 +1280,7 @@ describe("runReplyAgent auto-compaction token update", () => {
 
   it("reports live diagnostic context from promptTokens, not provider usage totals", async () => {
     const { sessionKey, stored, usageEvent } = await runBaseReplyWithAgentMeta({
-      tmpPrefix: "openclaw-usage-diagnostic-",
+      tmpPrefix: "carapace-usage-diagnostic-",
       collectDiagnostics: true,
       agentMeta: {
         usage: { input: 75_000, output: 5_000, cacheRead: 25_000, total: 105_000 },
@@ -1331,7 +1331,7 @@ describe("runReplyAgent auto-compaction token update", () => {
     "preserves cost-only total %s in reply diagnostics and persistence",
     async (total) => {
       const { sessionKey, stored, usageEvent } = await runBaseReplyWithAgentMeta({
-        tmpPrefix: "openclaw-usage-diagnostic-cost-only-",
+        tmpPrefix: "carapace-usage-diagnostic-cost-only-",
         collectDiagnostics: true,
         agentMeta: { usage: { cost: { total } } },
       });
@@ -1349,7 +1349,7 @@ describe("runReplyAgent auto-compaction token update", () => {
 
   it("falls back to last-call prompt usage for live diagnostic context", async () => {
     const { usageEvent } = await runBaseReplyWithAgentMeta({
-      tmpPrefix: "openclaw-usage-diagnostic-last-",
+      tmpPrefix: "carapace-usage-diagnostic-last-",
       collectDiagnostics: true,
       agentMeta: {
         usage: { input: 75_000, output: 5_000, cacheRead: 25_000, total: 105_000 },
@@ -1392,7 +1392,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   });
 
   it("does not treat diagnostic compaction metadata as a context-refresh trigger", async () => {
-    const workspaceDir = tempDirs.make("openclaw-post-compaction-workspace-");
+    const workspaceDir = tempDirs.make("carapace-post-compaction-workspace-");
     await fs.writeFile(
       path.join(workspaceDir, "AGENTS.md"),
       [
@@ -1406,7 +1406,7 @@ describe("runReplyAgent auto-compaction token update", () => {
     );
 
     const { sessionKey } = await runBaseReplyWithAgentMeta({
-      tmpPrefix: "openclaw-post-compaction-workspace-root-",
+      tmpPrefix: "carapace-post-compaction-workspace-root-",
       workspaceDir,
       config: {
         agents: {
@@ -1640,7 +1640,7 @@ describe("runReplyAgent Active Memory inline debug", () => {
       resolvedVerboseLevel?: VerboseLevel;
     } = {},
   ) {
-    const tmp = tempDirs.make("openclaw-active-memory-inline-");
+    const tmp = tempDirs.make("carapace-active-memory-inline-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     const resolvedVerboseLevel =
@@ -1843,7 +1843,7 @@ describe("runReplyAgent Active Memory inline debug", () => {
   });
 
   it("appends raw trace payloads when trace raw is enabled", async () => {
-    const tmp = tempDirs.make("openclaw-trace-raw-usage-");
+    const tmp = tempDirs.make("carapace-trace-raw-usage-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionFile = path.join(tmp, "session.jsonl");
     const sessionKey = "main";
@@ -2046,7 +2046,7 @@ describe("runReplyAgent Active Memory inline debug", () => {
   });
 
   it("does not emit persisted trace output to an unauthorized sender", async () => {
-    const tmp = tempDirs.make("openclaw-trace-raw-unauthorized-");
+    const tmp = tempDirs.make("carapace-trace-raw-unauthorized-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionFile = path.join(tmp, "session.jsonl");
     const sessionKey = "main";
@@ -2089,7 +2089,7 @@ describe("runReplyAgent Active Memory inline debug", () => {
   });
 
   it("shows session and last-turn usage totals without per-call usage blocks", async () => {
-    const tmp = tempDirs.make("openclaw-trace-raw-usage-");
+    const tmp = tempDirs.make("carapace-trace-raw-usage-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionFile = path.join(tmp, "session.jsonl");
     const sessionKey = "main";
@@ -2145,7 +2145,7 @@ describe("runReplyAgent Active Memory inline debug", () => {
   });
 
   it("escapes markdown fence delimiters inside raw trace blocks", async () => {
-    const tmp = tempDirs.make("openclaw-trace-raw-fence-");
+    const tmp = tempDirs.make("carapace-trace-raw-fence-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionFile = path.join(tmp, "session.jsonl");
     const sessionKey = "main";
@@ -2678,7 +2678,7 @@ describe("runReplyAgent fallback reasoning tags", () => {
   });
 
   it("enforces <final> during memory flush on fallback providers", async () => {
-    const root = await fs.realpath(tempDirs.make("openclaw-memory-flush-tags-"));
+    const root = await fs.realpath(tempDirs.make("carapace-memory-flush-tags-"));
     const storePath = path.join(root, "sessions.json");
     const sessionKey = "agent:main:memory-flush-tags";
     const sessionEntry: SessionEntry = {
@@ -3083,7 +3083,7 @@ describe("runReplyAgent private message_tool_only final warning (#85714)", () =>
     replyOperation?: ReturnType<typeof createReplyOperation>;
     turnAdoptionLifecycle?: FollowupRun["turnAdoptionLifecycle"];
   }) {
-    const tmp = tempDirs.make("openclaw-stranded-");
+    const tmp = tempDirs.make("carapace-stranded-");
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "stranded";
     const sessionEntry = {

@@ -1,6 +1,6 @@
 // Memory Core classifies automatic workspace context without loading the search manager.
 import path from "node:path";
-import type { MemoryPluginRuntime } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+import type { MemoryPluginRuntime } from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import { resolveMemoryPathClassification } from "./memory/memory-path-provenance.js";
 
 type ClassifyWorkspaceMemoryPaths = NonNullable<

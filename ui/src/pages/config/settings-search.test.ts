@@ -41,7 +41,7 @@ describe("findSettingsSearchBlocks", () => {
   it("loads Settings English only when cold search opens, before the config page", async () => {
     // The ordinary imports above exercise warm search. This module graph starts
     // at the runtime barrel, without importing a page or priming its catalogs.
-    const testApiKey = Symbol.for("openclaw.i18nManagerTestApi");
+    const testApiKey = Symbol.for("carapace.i18nManagerTestApi");
     const previousTestApi = Object.getOwnPropertyDescriptor(globalThis, testApiKey);
     vi.resetModules();
     const runtime = await import("../../i18n/index.ts");

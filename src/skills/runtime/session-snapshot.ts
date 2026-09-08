@@ -1,6 +1,6 @@
 // Session snapshot helpers capture and restore runtime skill state for sessions.
-import { stableStringify } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { stableStringify } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { matchesSkillFilter } from "../discovery/filter.js";
@@ -27,7 +27,7 @@ type ReusableSkillSnapshotParams = {
   librarySelections?: SkillSnapshot["librarySelections"];
   workspaceDir: string;
   executionSkillsDir?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   skillFilter?: string[];
   skillOverrides?: Record<string, boolean>;

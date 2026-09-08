@@ -12,7 +12,7 @@ import {
 } from "../agents/auth-profiles.js";
 import type { AuthProfileCredential, AuthProfileStore } from "../agents/auth-profiles/types.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   COPILOT_INTEGRATION_ID,
   deriveCopilotApiBaseUrlFromToken,
@@ -37,7 +37,7 @@ describe("provider auth public SDK", () => {
   });
 
   it("keeps the shipped Claude credential reader functional during its deprecation window", async () => {
-    const homeDir = tempDirs.make("openclaw-sdk-claude-auth-");
+    const homeDir = tempDirs.make("carapace-sdk-claude-auth-");
     const credentialsDir = path.join(homeDir, ".claude");
     await fs.mkdir(credentialsDir, { recursive: true });
     await fs.writeFile(
@@ -63,7 +63,7 @@ describe("provider auth public SDK", () => {
   });
 
   it("reads Claude credentials from CLAUDE_CONFIG_DIR", async () => {
-    const configDir = tempDirs.make("openclaw-sdk-claude-config-");
+    const configDir = tempDirs.make("carapace-sdk-claude-config-");
     await fs.writeFile(
       path.join(configDir, ".credentials.json"),
       JSON.stringify({
@@ -93,8 +93,8 @@ describe("provider auth public SDK", () => {
   });
 
   it("does not attach shared config identity to split-store credentials", async () => {
-    const configDir = tempDirs.make("openclaw-sdk-claude-config-split-");
-    const secureStorageDir = tempDirs.make("openclaw-sdk-claude-secure-storage-");
+    const configDir = tempDirs.make("carapace-sdk-claude-config-split-");
+    const secureStorageDir = tempDirs.make("carapace-sdk-claude-secure-storage-");
     await fs.writeFile(
       path.join(secureStorageDir, ".credentials.json"),
       JSON.stringify({
@@ -125,9 +125,9 @@ describe("provider auth public SDK", () => {
   });
 
   it("isolates cached config metadata when profiles share secure storage", async () => {
-    const firstConfigDir = tempDirs.make("openclaw-sdk-claude-first-config-");
-    const secondConfigDir = tempDirs.make("openclaw-sdk-claude-second-config-");
-    const secureStorageDir = tempDirs.make("openclaw-sdk-claude-shared-storage-");
+    const firstConfigDir = tempDirs.make("carapace-sdk-claude-first-config-");
+    const secondConfigDir = tempDirs.make("carapace-sdk-claude-second-config-");
+    const secureStorageDir = tempDirs.make("carapace-sdk-claude-shared-storage-");
     const firstHelper = "first-profile-helper";
     const secondHelper = "second-profile-helper";
     const firstSettingsPath = path.join(firstConfigDir, "settings.json");
@@ -159,9 +159,9 @@ describe("provider auth public SDK", () => {
   });
 
   it("pins an empty secure-storage override to the default credential store", async () => {
-    const osHome = tempDirs.make("openclaw-sdk-claude-default-home-");
+    const osHome = tempDirs.make("carapace-sdk-claude-default-home-");
     const defaultCredentialsDir = path.join(osHome, ".claude");
-    const configDir = tempDirs.make("openclaw-sdk-claude-other-config-");
+    const configDir = tempDirs.make("carapace-sdk-claude-other-config-");
     await fs.mkdir(defaultCredentialsDir, { recursive: true });
     await fs.writeFile(
       path.join(defaultCredentialsDir, ".credentials.json"),
@@ -302,7 +302,7 @@ describe("provider auth public SDK", () => {
   });
 
   it("does not reuse a no-prompt Keychain miss for a prompt-enabled read", () => {
-    const homeDir = tempDirs.make("openclaw-sdk-claude-keychain-cache-");
+    const homeDir = tempDirs.make("carapace-sdk-claude-keychain-cache-");
     const execSyncImpl = vi.fn((command: string) =>
       command.includes(" -w")
         ? JSON.stringify({
@@ -340,7 +340,7 @@ describe("provider auth public SDK", () => {
   });
 
   it("does not reuse a silent malformed-file miss for a diagnostic read", async () => {
-    const homeDir = tempDirs.make("openclaw-sdk-claude-unreadable-cache-");
+    const homeDir = tempDirs.make("carapace-sdk-claude-unreadable-cache-");
     const credentialsDir = path.join(homeDir, ".claude");
     await fs.mkdir(credentialsDir, { recursive: true });
     await fs.writeFile(path.join(credentialsDir, ".credentials.json"), "{}\n");
@@ -428,7 +428,7 @@ async function runFallbackStoreCase(): Promise<FallbackStoreCaseResult> {
     const { resolveAgentDir } = await vi.importActual<
       typeof import("../agents/agent-scope-config.js")
     >("../agents/agent-scope-config.js");
-    return { resolveAgentDir, resolveDefaultAgentDir: () => "/tmp/openclaw-agent" };
+    return { resolveAgentDir, resolveDefaultAgentDir: () => "/tmp/carapace-agent" };
   });
   vi.doMock("../agents/auth-profiles/oauth.js", () => ({
     resolveApiKeyForProfile,
@@ -470,7 +470,7 @@ describe("provider API-key readiness", () => {
     vi.unstubAllEnvs();
   });
 
-  function configuredProvider(apiKey: unknown, providerId = provider): OpenClawConfig {
+  function configuredProvider(apiKey: unknown, providerId = provider): CarapaceConfig {
     return {
       models: {
         providers: {
@@ -481,7 +481,7 @@ describe("provider API-key readiness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   it.each([provider, ` ${provider.toUpperCase()} `])(
@@ -587,7 +587,7 @@ describe("provider API-key readiness", () => {
     "applies credential acceptance to the higher-priority auth profile %s",
     async (profileKey, envKey, expected) => {
       vi.stubEnv("GOOGLE_API_KEY", envKey);
-      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-key-policy-"));
+      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-media-key-policy-"));
 
       try {
         saveAuthProfileStore(
@@ -745,7 +745,7 @@ describe("provider API-key readiness", () => {
     async ({ credential, expected, profileTypes }) => {
       vi.stubEnv("MEDIA_PROFILE_MISSING_SECRET", "");
       const profileId = `${provider}:selected`;
-      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-profile-binding-"));
+      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-media-profile-binding-"));
       try {
         saveAuthProfileStore({ version: 1, profiles: { [profileId]: credential } }, agentDir, {
           filterExternalAuthProfiles: false,
@@ -768,7 +768,7 @@ describe("provider API-key readiness", () => {
   );
 
   it("preserves API-key-only profile filters while accepting actual config API keys", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-auth-readiness-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-media-auth-readiness-"));
     try {
       saveAuthProfileStore(
         {
@@ -836,7 +836,7 @@ describe("provider auth profile helpers", () => {
     expect(fallbackStoreCase.resolvedKey).toBe("fallback-key");
     expect(fallbackStoreCase.resolveApiKeyCalls).toContainEqual([
       expect.objectContaining({
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         profileId: "openai:default",
         store: expect.objectContaining({
           profiles: expect.objectContaining({
@@ -894,7 +894,7 @@ describe("provider auth profile helpers", () => {
       const { resolveAgentDir } = await vi.importActual<
         typeof import("../agents/agent-scope-config.js")
       >("../agents/agent-scope-config.js");
-      return { resolveAgentDir, resolveDefaultAgentDir: () => "/tmp/openclaw-agent" };
+      return { resolveAgentDir, resolveDefaultAgentDir: () => "/tmp/carapace-agent" };
     });
     vi.doMock("../agents/auth-profiles/oauth.js", () => ({
       resolveApiKeyForProfile,
@@ -967,7 +967,7 @@ describe("provider auth profile helpers", () => {
       const { resolveAgentDir } = await vi.importActual<
         typeof import("../agents/agent-scope-config.js")
       >("../agents/agent-scope-config.js");
-      return { resolveAgentDir, resolveDefaultAgentDir: () => "/tmp/openclaw-agent" };
+      return { resolveAgentDir, resolveDefaultAgentDir: () => "/tmp/carapace-agent" };
     });
     vi.doMock("../agents/auth-profiles/external-cli-discovery.js", () => ({
       externalCliDiscoveryForProviderAuth: vi.fn(() => externalCli),
@@ -1009,10 +1009,10 @@ describe("provider auth profile helpers", () => {
         includeExternalCliAuth: true,
       }),
     ).toBe(true);
-    expect(loadAuthProfileStoreForSecretsRuntime).toHaveBeenNthCalledWith(1, "/tmp/openclaw-agent");
+    expect(loadAuthProfileStoreForSecretsRuntime).toHaveBeenNthCalledWith(1, "/tmp/carapace-agent");
     expect(loadAuthProfileStoreForSecretsRuntime).toHaveBeenNthCalledWith(
       2,
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       { externalCli },
     );
   });
@@ -1506,7 +1506,7 @@ describe("provider auth profile helpers", () => {
   });
 
   it("retains valid Copilot exchanges across A to B to A profile rotation", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-copilot-cache-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-copilot-cache-"));
     try {
       const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
         const authorization = new Headers(init?.headers).get("authorization");
@@ -1525,7 +1525,7 @@ describe("provider auth profile helpers", () => {
           { status: 200, headers: { "content-type": "application/json" } },
         );
       });
-      const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+      const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
 
       const firstA = await resolveCopilotApiToken({
         githubToken: "test-auth-token",

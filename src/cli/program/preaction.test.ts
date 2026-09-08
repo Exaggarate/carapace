@@ -1,6 +1,6 @@
 // Preaction tests cover CLI preaction hooks and command context setup.
 import { Command } from "commander";
-import { repoInstallSpec } from "openclaw/plugin-sdk/test-fixtures";
+import { repoInstallSpec } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { loggingState } from "../../logging/state.js";
 import { isConfigSetJsonParseOnly } from "../config-output-mode.js";
@@ -96,7 +96,7 @@ beforeEach(() => {
   originalProcessTitleDescriptor = Object.getOwnPropertyDescriptor(process, "title");
   observedProcessTitle = originalProcessTitle;
   originalNodeNoWarnings = process.env.NODE_NO_WARNINGS;
-  originalHideBanner = process.env.OPENCLAW_HIDE_BANNER;
+  originalHideBanner = process.env.CARAPACE_HIDE_BANNER;
   originalForceStderr = loggingState.forceConsoleToStderr;
   originalEarlyConsoleRoutingRestore = loggingState.earlyConsoleRoutingRestore;
   observedMachineOutputStdoutIsTTY = undefined;
@@ -113,7 +113,7 @@ beforeEach(() => {
   loggingState.forceConsoleToStderr = false;
   loggingState.earlyConsoleRoutingRestore = null;
   delete process.env.NODE_NO_WARNINGS;
-  delete process.env.OPENCLAW_HIDE_BANNER;
+  delete process.env.CARAPACE_HIDE_BANNER;
 });
 
 afterEach(() => {
@@ -136,9 +136,9 @@ afterEach(() => {
     process.env.NODE_NO_WARNINGS = originalNodeNoWarnings;
   }
   if (originalHideBanner === undefined) {
-    delete process.env.OPENCLAW_HIDE_BANNER;
+    delete process.env.CARAPACE_HIDE_BANNER;
   } else {
-    process.env.OPENCLAW_HIDE_BANNER = originalHideBanner;
+    process.env.CARAPACE_HIDE_BANNER = originalHideBanner;
   }
 });
 
@@ -149,7 +149,7 @@ describe("registerPreActionHooks", () => {
     | null = null;
 
   function buildProgram() {
-    const programLocal = new Command().name("openclaw").enablePositionalOptions();
+    const programLocal = new Command().name("carapace").enablePositionalOptions();
     const agent = programLocal
       .command("agent")
       .argument("[note]")
@@ -333,19 +333,19 @@ describe("registerPreActionHooks", () => {
     const processTitleSetSpy = vi.spyOn(process, "title", "set");
     await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "openclaw", "status", "--debug"],
+      processArgv: ["node", "carapace", "status", "--debug"],
     });
 
     expect(emitCliBannerMock).toHaveBeenCalledWith("9.9.9-test");
     expect(setVerboseMock).toHaveBeenCalledWith(true);
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
     expect(ensurePluginRegistryLoadedMock).not.toHaveBeenCalled();
-    expect(processTitleSetSpy).toHaveBeenCalledWith("openclaw-status");
+    expect(processTitleSetSpy).toHaveBeenCalledWith("carapace-status");
 
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["agents", "list"],
-      processArgv: ["node", "openclaw", "agents", "list"],
+      processArgv: ["node", "carapace", "agents", "list"],
     });
 
     expect(setVerboseMock).toHaveBeenCalledWith(false);
@@ -367,7 +367,7 @@ describe("registerPreActionHooks", () => {
   ])("keeps the real Commander preAction cold for %s", async (...commandPath) => {
     await runPreAction({
       parseArgv: commandPath,
-      processArgv: ["node", "openclaw", ...commandPath, "--json"],
+      processArgv: ["node", "carapace", ...commandPath, "--json"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -383,7 +383,7 @@ describe("registerPreActionHooks", () => {
         parseArgv: ["gateway", "run"],
         processArgv: [
           "node",
-          "openclaw",
+          "carapace",
           "--log-level",
           "debug",
           "gateway",
@@ -407,7 +407,7 @@ describe("registerPreActionHooks", () => {
   it("passes the gateway config recheck to the state migration boundary", async () => {
     await runPreAction({
       parseArgv: ["gateway", "run"],
-      processArgv: ["node", "openclaw", "gateway", "run"],
+      processArgv: ["node", "carapace", "gateway", "run"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith(
@@ -436,7 +436,7 @@ describe("registerPreActionHooks", () => {
     try {
       await runPreAction({
         parseArgv: ["gateway", "run"],
-        processArgv: ["node", "openclaw", "gateway", "run", "--allow-unconfigured"],
+        processArgv: ["node", "carapace", "gateway", "run", "--allow-unconfigured"],
       });
     } finally {
       gatewayRunCommand.setOptionValueWithSource("allowUnconfigured", false, "default");
@@ -454,7 +454,7 @@ describe("registerPreActionHooks", () => {
   it("defers config bootstrap for update commands", async () => {
     await runPreAction({
       parseArgv: ["update"],
-      processArgv: ["node", "openclaw", "update", "--json"],
+      processArgv: ["node", "carapace", "update", "--json"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -462,7 +462,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["update", "status"],
-      processArgv: ["node", "openclaw", "update", "status", "--json"],
+      processArgv: ["node", "carapace", "update", "status", "--json"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -471,7 +471,7 @@ describe("registerPreActionHooks", () => {
   it("loads plugins for text local agent runs", async () => {
     await runPreAction({
       parseArgv: ["agent"],
-      processArgv: ["node", "openclaw", "agent", "--local", "--message", "hi"],
+      processArgv: ["node", "carapace", "agent", "--local", "--message", "hi"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -487,7 +487,7 @@ describe("registerPreActionHooks", () => {
   it("loads plugins for json local agent runs", async () => {
     await runPreAction({
       parseArgv: ["agent"],
-      processArgv: ["node", "openclaw", "agent", "--local", "--message", "hi", "--json"],
+      processArgv: ["node", "carapace", "agent", "--local", "--message", "hi", "--json"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -504,7 +504,7 @@ describe("registerPreActionHooks", () => {
   it("bypasses operator config and plugin startup for agent exec", async () => {
     await runPreAction({
       parseArgv: ["agent", "exec", "fix it"],
-      processArgv: ["node", "openclaw", "agent", "--agent", "main", "exec", "fix it"],
+      processArgv: ["node", "carapace", "agent", "--agent", "main", "exec", "fix it"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -516,7 +516,7 @@ describe("registerPreActionHooks", () => {
   it("keeps setup alias and channels add manifest-first", async () => {
     await runPreAction({
       parseArgv: ["onboard"],
-      processArgv: ["node", "openclaw", "onboard"],
+      processArgv: ["node", "carapace", "onboard"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -529,7 +529,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["channels", "add"],
-      processArgv: ["node", "openclaw", "channels", "add"],
+      processArgv: ["node", "carapace", "channels", "add"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -543,7 +543,7 @@ describe("registerPreActionHooks", () => {
   it("skips startup bootstrap for parent default help actions", async () => {
     await runPreAction({
       parseArgv: ["channels"],
-      processArgv: ["node", "openclaw", "channels"],
+      processArgv: ["node", "carapace", "channels"],
     });
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
@@ -555,7 +555,7 @@ describe("registerPreActionHooks", () => {
   it("lets configure own config validation and plugin loading", async () => {
     await runPreAction({
       parseArgv: ["configure"],
-      processArgv: ["node", "openclaw", "configure"],
+      processArgv: ["node", "carapace", "configure"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -565,7 +565,7 @@ describe("registerPreActionHooks", () => {
   it("keeps private QA commands isolated from operator config bootstrap", async () => {
     await runPreAction({
       parseArgv: ["qa", "suite"],
-      processArgv: ["node", "openclaw", "qa", "suite"],
+      processArgv: ["node", "carapace", "qa", "suite"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -575,7 +575,7 @@ describe("registerPreActionHooks", () => {
   it("lets bare config own config validation and plugin loading", async () => {
     await runPreAction({
       parseArgv: ["config"],
-      processArgv: ["node", "openclaw", "config"],
+      processArgv: ["node", "carapace", "config"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -585,7 +585,7 @@ describe("registerPreActionHooks", () => {
   it("lets guided config sections own config validation and plugin loading", async () => {
     await runPreAction({
       parseArgv: ["config"],
-      processArgv: ["node", "openclaw", "config", "--section", "models"],
+      processArgv: ["node", "carapace", "config", "--section", "models"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -595,7 +595,7 @@ describe("registerPreActionHooks", () => {
   it("skips the config guard and plugin loading for doctor lint", async () => {
     await runPreAction({
       parseArgv: ["doctor"],
-      processArgv: ["node", "openclaw", "doctor", "--lint"],
+      processArgv: ["node", "carapace", "doctor", "--lint"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -604,8 +604,8 @@ describe("registerPreActionHooks", () => {
 
   it("only allows invalid config for explicit official recovery reinstall requests", async () => {
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/discord"],
-      processArgv: ["node", "openclaw", "plugins", "install", "@openclaw/discord"],
+      parseArgv: ["plugins", "install", "@carapace/discord"],
+      processArgv: ["node", "carapace", "plugins", "install", "@carapace/discord"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -617,8 +617,8 @@ describe("registerPreActionHooks", () => {
 
     vi.clearAllMocks();
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/discord@2026.5.22"],
-      processArgv: ["node", "openclaw", "plugins", "install", "@openclaw/discord@2026.5.22"],
+      parseArgv: ["plugins", "install", "@carapace/discord@2026.5.22"],
+      processArgv: ["node", "carapace", "plugins", "install", "@carapace/discord@2026.5.22"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -630,8 +630,8 @@ describe("registerPreActionHooks", () => {
 
     vi.clearAllMocks();
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/brave-plugin"],
-      processArgv: ["node", "openclaw", "plugins", "install", "@openclaw/brave-plugin"],
+      parseArgv: ["plugins", "install", "@carapace/brave-plugin"],
+      processArgv: ["node", "carapace", "plugins", "install", "@carapace/brave-plugin"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -643,8 +643,8 @@ describe("registerPreActionHooks", () => {
 
     vi.clearAllMocks();
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/slack"],
-      processArgv: ["node", "openclaw", "plugins", "install", "@openclaw/slack"],
+      parseArgv: ["plugins", "install", "@carapace/slack"],
+      processArgv: ["node", "carapace", "plugins", "install", "@carapace/slack"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -657,7 +657,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["plugins", "install", "alpha"],
-      processArgv: ["node", "openclaw", "plugins", "install", "alpha"],
+      processArgv: ["node", "carapace", "plugins", "install", "alpha"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -669,7 +669,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["plugins", "install", DISCORD_REPO_INSTALL_SPEC],
-      processArgv: ["node", "openclaw", "plugins", "install", DISCORD_REPO_INSTALL_SPEC],
+      processArgv: ["node", "carapace", "plugins", "install", DISCORD_REPO_INSTALL_SPEC],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -681,13 +681,13 @@ describe("registerPreActionHooks", () => {
 
     vi.clearAllMocks();
     await runPreAction({
-      parseArgv: ["plugins", "install", "@openclaw/discord", "--marketplace", "local/repo"],
+      parseArgv: ["plugins", "install", "@carapace/discord", "--marketplace", "local/repo"],
       processArgv: [
         "node",
-        "openclaw",
+        "carapace",
         "plugins",
         "install",
-        "@openclaw/discord",
+        "@carapace/discord",
         "--marketplace",
         "local/repo",
       ],
@@ -703,7 +703,7 @@ describe("registerPreActionHooks", () => {
   it("skips help/version preaction and respects banner opt-out", async () => {
     await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "openclaw", "--version"],
+      processArgv: ["node", "carapace", "--version"],
     });
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
@@ -711,11 +711,11 @@ describe("registerPreActionHooks", () => {
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
 
     vi.clearAllMocks();
-    process.env.OPENCLAW_HIDE_BANNER = "1";
+    process.env.CARAPACE_HIDE_BANNER = "1";
 
     await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "openclaw", "status"],
+      processArgv: ["node", "carapace", "status"],
     });
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
@@ -724,7 +724,7 @@ describe("registerPreActionHooks", () => {
 
   it("bootstraps when Commander consumed --help as a required option value", async () => {
     const parseProgram = buildProgram();
-    process.argv = ["node", "openclaw", "agent", "--message", "--help", "--message", "hello"];
+    process.argv = ["node", "carapace", "agent", "--message", "--help", "--message", "hello"];
 
     await parseProgram.parseAsync(process.argv);
 
@@ -735,24 +735,24 @@ describe("registerPreActionHooks", () => {
     {
       name: "version-pinned skill install",
       action: "install",
-      argv: ["node", "openclaw", "skills", "install", "@owner/weather", "--version", "1.2.3"],
+      argv: ["node", "carapace", "skills", "install", "@owner/weather", "--version", "1.2.3"],
     },
     {
       name: "version-pinned skill verification",
       action: "verify",
-      argv: ["node", "openclaw", "skills", "verify", "@owner/weather", "--version", "1.2.3"],
+      argv: ["node", "carapace", "skills", "verify", "@owner/weather", "--version", "1.2.3"],
     },
     {
       name: "equals-form version-pinned skill install",
       action: "install",
-      argv: ["node", "openclaw", "skills", "install", "@owner/weather", "--version=1.2.3"],
+      argv: ["node", "carapace", "skills", "install", "@owner/weather", "--version=1.2.3"],
     },
     {
       name: "profiled version-pinned skill verification",
       action: "verify",
       argv: [
         "node",
-        "openclaw",
+        "carapace",
         "--profile",
         "work",
         "skills",
@@ -780,7 +780,7 @@ describe("registerPreActionHooks", () => {
   it("applies --json stdout suppression only for explicit JSON output commands", async () => {
     await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "openclaw", "status", "--json"],
+      processArgv: ["node", "carapace", "status", "--json"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -789,7 +789,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["update", "status", "--json"],
-      processArgv: ["node", "openclaw", "update", "status", "--json"],
+      processArgv: ["node", "carapace", "update", "status", "--json"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledOnce();
@@ -799,7 +799,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["config", "set", "gateway.auth.mode", "{bad", "--json"],
-      processArgv: ["node", "openclaw", "config", "set", "gateway.auth.mode", "{bad", "--json"],
+      processArgv: ["node", "carapace", "config", "set", "gateway.auth.mode", "{bad", "--json"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -811,7 +811,7 @@ describe("registerPreActionHooks", () => {
 
   it("does not select JSON output when Commander consumed --json as an option value", async () => {
     const parseProgram = buildProgram();
-    process.argv = ["node", "openclaw", "agent", "", "--message", "--json", "--message", "hello"];
+    process.argv = ["node", "carapace", "agent", "", "--message", "--json", "--message", "hello"];
 
     await parseProgram.parseAsync(process.argv);
 
@@ -822,7 +822,7 @@ describe("registerPreActionHooks", () => {
   it("routes logs to stderr in --json mode so stdout stays clean", async () => {
     await runPreAction({
       parseArgv: ["channels", "send"],
-      processArgv: ["node", "openclaw", "channels", "send", "--json"],
+      processArgv: ["node", "carapace", "channels", "send", "--json"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledOnce();
@@ -834,7 +834,7 @@ describe("registerPreActionHooks", () => {
     loggingState.earlyConsoleRoutingRestore = false;
     await runPreAction({
       parseArgv: ["config", "set", "gateway.auth.mode", "local", "--json"],
-      processArgv: ["node", "openclaw", "config", "set", "gateway.auth.mode", "local", "--json"],
+      processArgv: ["node", "carapace", "config", "set", "gateway.auth.mode", "local", "--json"],
     });
 
     expect(routeLogsToStderrMock).not.toHaveBeenCalled();
@@ -848,7 +848,7 @@ describe("registerPreActionHooks", () => {
       parseArgv: ["config", "set", "gateway.auth.mode", "local", "--dry-run", "--json"],
       processArgv: [
         "node",
-        "openclaw",
+        "carapace",
         "config",
         "set",
         "gateway.auth.mode",
@@ -866,7 +866,7 @@ describe("registerPreActionHooks", () => {
     // non-json command should not route
     await runPreAction({
       parseArgv: ["agents", "list"],
-      processArgv: ["node", "openclaw", "agents", "list"],
+      processArgv: ["node", "carapace", "agents", "list"],
     });
 
     expect(routeLogsToStderrMock).not.toHaveBeenCalled();
@@ -878,7 +878,7 @@ describe("registerPreActionHooks", () => {
     try {
       await runPreAction({
         parseArgv: ["machine"],
-        processArgv: ["node", "openclaw", "machine", "--machine-output"],
+        processArgv: ["node", "carapace", "machine", "--machine-output"],
       });
     } finally {
       if (stdoutDescriptor) {
@@ -905,7 +905,7 @@ describe("registerPreActionHooks", () => {
 
     await runPreAction({
       parseArgv: ["models", "aliases", "list"],
-      processArgv: ["node", "openclaw", "models", "aliases", "list", "--plain"],
+      processArgv: ["node", "carapace", "models", "aliases", "list", "--plain"],
     });
 
     expect(loggingState.forceConsoleToStderr).toBe(true);
@@ -922,7 +922,7 @@ describe("registerPreActionHooks", () => {
   it("uses the Commander action path for protocol stdout ownership", async () => {
     await runPreAction({
       parseArgv: ["acp"],
-      processArgv: ["node", "openclaw", "acp", "--token", "-secret"],
+      processArgv: ["node", "carapace", "acp", "--token", "-secret"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledOnce();
@@ -936,7 +936,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["acp", "client"],
-      processArgv: ["node", "openclaw", "acp", "--verbose", "client"],
+      processArgv: ["node", "carapace", "acp", "--verbose", "client"],
     });
 
     expect(routeLogsToStderrMock).not.toHaveBeenCalled();
@@ -949,7 +949,7 @@ describe("registerPreActionHooks", () => {
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["mcp", "serve"],
-      processArgv: ["node", "openclaw", "mcp", "serve"],
+      processArgv: ["node", "carapace", "mcp", "serve"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledOnce();
@@ -963,7 +963,7 @@ describe("registerPreActionHooks", () => {
 
   it("uses the Commander path past parent option values for gateway calls", async () => {
     const parseProgram = buildProgram();
-    process.argv = ["node", "openclaw", "gateway", "--token", "secret", "call", "health", "--json"];
+    process.argv = ["node", "carapace", "gateway", "--token", "secret", "call", "health", "--json"];
 
     await parseProgram.parseAsync(process.argv);
 
@@ -979,7 +979,7 @@ describe("registerPreActionHooks", () => {
 
   it("uses the shared skip policy for gateway health on the Commander path", async () => {
     const parseProgram = buildProgram();
-    process.argv = ["node", "openclaw", "gateway", "--port", "19083", "health", "--json"];
+    process.argv = ["node", "carapace", "gateway", "--port", "19083", "health", "--json"];
 
     await parseProgram.parseAsync(process.argv);
 
@@ -989,7 +989,7 @@ describe("registerPreActionHooks", () => {
   it("does not preload plugins for agents list JSON output", async () => {
     await runPreAction({
       parseArgv: ["agents", "list"],
-      processArgv: ["node", "openclaw", "agents", "list", "--json"],
+      processArgv: ["node", "carapace", "agents", "list", "--json"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledOnce();
@@ -999,7 +999,7 @@ describe("registerPreActionHooks", () => {
   it("does not preload plugins for remote agent JSON output", async () => {
     await runPreAction({
       parseArgv: ["agent"],
-      processArgv: ["node", "openclaw", "agent", "--message", "hi", "--json"],
+      processArgv: ["node", "carapace", "agent", "--message", "hi", "--json"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledOnce();
@@ -1010,7 +1010,7 @@ describe("registerPreActionHooks", () => {
   it("bypasses config and plugin bootstrap for remote agent text output", async () => {
     await runPreAction({
       parseArgv: ["agent"],
-      processArgv: ["node", "openclaw", "agent", "--message", "hi"],
+      processArgv: ["node", "carapace", "agent", "--message", "hi"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -1018,8 +1018,8 @@ describe("registerPreActionHooks", () => {
   });
 
   it.each([
-    ["default profile", ["node", "openclaw", "config", "file"]],
-    ["named profile", ["node", "openclaw", "--profile", "work", "config", "file"]],
+    ["default profile", ["node", "carapace", "config", "file"]],
+    ["named profile", ["node", "carapace", "--profile", "work", "config", "file"]],
   ])("bypasses config guard for a %s config path query", async (_name, processArgv) => {
     await runPreAction({
       parseArgv: ["config", "file"],
@@ -1033,7 +1033,7 @@ describe("registerPreActionHooks", () => {
   it("bypasses config guard for config validate", async () => {
     await runPreAction({
       parseArgv: ["config", "validate"],
-      processArgv: ["node", "openclaw", "config", "validate"],
+      processArgv: ["node", "carapace", "config", "validate"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -1043,7 +1043,7 @@ describe("registerPreActionHooks", () => {
   it("bypasses config guard for config validate when root option values are present", async () => {
     await runPreAction({
       parseArgv: ["config", "validate"],
-      processArgv: ["node", "openclaw", "--profile", "work", "config", "validate"],
+      processArgv: ["node", "carapace", "--profile", "work", "config", "validate"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -1053,7 +1053,7 @@ describe("registerPreActionHooks", () => {
   it("bypasses config guard for config schema", async () => {
     await runPreAction({
       parseArgv: ["config", "schema"],
-      processArgv: ["node", "openclaw", "config", "schema"],
+      processArgv: ["node", "carapace", "config", "schema"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -1063,7 +1063,7 @@ describe("registerPreActionHooks", () => {
   it("keeps config guard for config unset mutations", async () => {
     await runPreAction({
       parseArgv: ["config", "unset", "gateway.port"],
-      processArgv: ["node", "openclaw", "config", "unset", "gateway.port"],
+      processArgv: ["node", "carapace", "config", "unset", "gateway.port"],
     });
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
@@ -1076,7 +1076,7 @@ describe("registerPreActionHooks", () => {
   it("bypasses config guard for backup create", async () => {
     await runPreAction({
       parseArgv: ["backup", "create"],
-      processArgv: ["node", "openclaw", "backup", "create", "--json"],
+      processArgv: ["node", "carapace", "backup", "create", "--json"],
     });
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
@@ -1088,7 +1088,7 @@ describe("registerPreActionHooks", () => {
       parseArgv: ["backup", "sqlite", "restore"],
       processArgv: [
         "node",
-        "openclaw",
+        "carapace",
         "backup",
         "sqlite",
         "restore",
@@ -1110,7 +1110,7 @@ describe("registerPreActionHooks", () => {
 
     await runPreAction({
       parseArgv: ["channels", "send"],
-      processArgv: ["node", "openclaw", "channels", "send", "--json"],
+      processArgv: ["node", "carapace", "channels", "send", "--json"],
     });
 
     expect(ensurePluginRegistryLoadedMock).toHaveBeenCalledWith({
@@ -1124,7 +1124,7 @@ describe("registerPreActionHooks", () => {
   it("does not preload plugins or route logs to stderr for agents list without --json", async () => {
     await runPreAction({
       parseArgv: ["agents", "list"],
-      processArgv: ["node", "openclaw", "agents", "list"],
+      processArgv: ["node", "carapace", "agents", "list"],
     });
 
     expect(ensurePluginRegistryLoadedMock).not.toHaveBeenCalled();

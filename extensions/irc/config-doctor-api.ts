@@ -2,13 +2,13 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   stripRetiredChannelKeys,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 
 // IRC's nested streaming schema is delivery-only ({chunkMode, block}); it has
 // no preview mode, so only the delivery flat aliases are legal legacy input.
@@ -33,7 +33,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
     path: ["channels", "irc"],
     match: (value) => Object.hasOwn(asObjectRecord(value) ?? {}, "mentionPatterns"),
     message:
-      'channels.irc.mentionPatterns was accepted but never read; configure mention patterns with messages.groupChat.mentionPatterns. Run "openclaw doctor --fix".',
+      'channels.irc.mentionPatterns was accepted but never read; configure mention patterns with messages.groupChat.mentionPatterns. Run "carapace doctor --fix".',
   },
   {
     path: ["channels", "irc", "accounts"],
@@ -42,14 +42,14 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
         Object.hasOwn(asObjectRecord(account) ?? {}, "mentionPatterns"),
       ),
     message:
-      'channels.irc.accounts.<id>.mentionPatterns was accepted but never read; configure mention patterns with messages.groupChat.mentionPatterns. Run "openclaw doctor --fix".',
+      'channels.irc.accounts.<id>.mentionPatterns was accepted but never read; configure mention patterns with messages.groupChat.mentionPatterns. Run "carapace doctor --fix".',
   },
 ];
 
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   const aliases = streamingAliasMigration.normalizeChannelConfig({ cfg });
   const changes = [...aliases.changes];

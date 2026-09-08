@@ -1,10 +1,10 @@
 // Fresh-store reads remain empty after checkpoint bootstrap; missing canonical tables stay errors.
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it } from "vitest";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { withOpenClawStateStartupMigrationCheckpointDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { withCarapaceStateStartupMigrationCheckpointDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   countPluginStateLiveEntries,
   createPluginStateKeyedStore,
@@ -37,11 +37,11 @@ async function expectPluginStateReadFailure(
 
 describe("plugin state fresh-store reads", () => {
   it("initializes an empty canonical plugin-state store before startup checkpoint reads", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-state-read-only-table-missing", applyEnv: false },
       async (state) => {
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
-        withOpenClawStateStartupMigrationCheckpointDatabase(() => undefined, { env: state.env });
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
+        withCarapaceStateStartupMigrationCheckpointDatabase(() => undefined, { env: state.env });
 
         const store = createPluginStateKeyedStore("discord", {
           namespace: "read-only-table-missing",
@@ -67,7 +67,7 @@ describe("plugin state fresh-store reads", () => {
         const verify = new DatabaseSync(databasePath, { readOnly: true });
         try {
           expect(verify.prepare("PRAGMA user_version").get()).toEqual({
-            user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+            user_version: CARAPACE_STATE_SCHEMA_VERSION,
           });
           expect(
             verify
@@ -82,11 +82,11 @@ describe("plugin state fresh-store reads", () => {
   });
 
   it("rejects a missing plugin-state table after another state table has been initialized", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-state-read-only-table-damaged", applyEnv: false },
       async (state) => {
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
-        withOpenClawStateStartupMigrationCheckpointDatabase(() => undefined, { env: state.env });
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
+        withCarapaceStateStartupMigrationCheckpointDatabase(() => undefined, { env: state.env });
         const database = new DatabaseSync(databasePath);
         database.exec("DROP TABLE plugin_state_entries");
         database.close();

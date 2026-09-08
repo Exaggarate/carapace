@@ -10,7 +10,7 @@ OpenCode Go is a separate paid subscription inside [OpenCode](/providers/opencod
 It uses the same `OPENCODE_API_KEY` credential infrastructure as Zen, but a Zen
 key does not automatically include Go entitlement. Go keeps its own runtime
 provider id (`opencode-go`) so upstream per-model routing stays correct.
-OpenCode Go is bundled in the OpenClaw package for this release, so onboarding
+OpenCode Go is bundled in the Carapace package for this release, so onboarding
 and configuration are sufficient; no separate plugin install is required.
 
 | Property         | Value                                              |
@@ -22,7 +22,7 @@ and configuration are sufficient; no separate plugin install is required.
 
 ## Getting started
 
-OpenCode Go is already included with OpenClaw for this release. Continue with
+OpenCode Go is already included with Carapace for this release. Continue with
 interactive onboarding or pass the shared OpenCode API key directly.
 
 <Tabs>
@@ -30,17 +30,17 @@ interactive onboarding or pass the shared OpenCode API key directly.
     <Steps>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice opencode-go
+        carapace onboard --auth-choice opencode-go
         ```
       </Step>
       <Step title="Set a Go model as default">
         ```bash
-        openclaw config set agents.defaults.model.primary "opencode-go/kimi-k3"
+        carapace config set agents.defaults.model.primary "opencode-go/kimi-k3"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider opencode-go
+        carapace models list --provider opencode-go
         ```
       </Step>
     </Steps>
@@ -50,12 +50,12 @@ interactive onboarding or pass the shared OpenCode API key directly.
     <Steps>
       <Step title="Pass the key directly">
         ```bash
-        openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
+        carapace onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider opencode-go
+        carapace models list --provider opencode-go
         ```
       </Step>
     </Steps>
@@ -73,10 +73,10 @@ interactive onboarding or pass the shared OpenCode API key directly.
 
 ## Catalog
 
-Run `openclaw models list --provider opencode-go` for the current model list.
-OpenClaw combines Go's advertised model IDs with authoritative metadata from
+Run `carapace models list --provider opencode-go` for the current model list.
+Carapace combines Go's advertised model IDs with authoritative metadata from
 `https://models.opencode.ai/api.json`, so new upstream models appear without an
-OpenClaw update when they use a supported transport on the trusted OpenCode
+Carapace update when they use a supported transport on the trusted OpenCode
 endpoint. The upstream catalog is downloaded and
 cached only when OpenCode Zen or Go is configured or explicitly selected with
 OpenCode credentials; it is never fetched at startup or while using unrelated
@@ -84,7 +84,7 @@ providers.
 
 Example refs include `opencode-go/deepseek-v4-flash`, `opencode-go/kimi-k3`, and
 `opencode-go/qwen3.8-max`. Use the CLI for the current lineup rather than treating
-these examples as an inventory. OpenClaw excludes deprecated rows from active
+these examples as an inventory. Carapace excludes deprecated rows from active
 discovery and applies refreshed lifecycle status to its offline fallback.
 Bundled preview rows stay hidden until accepted upstream metadata supplies them.
 Existing explicit refs in the bundled seed remain resolvable.
@@ -97,13 +97,13 @@ active Go subscription, including for promotional models.
 
 Retention and training policies vary by model. Review the current
 [OpenCode Go privacy table](https://opencode.ai/docs/go/#privacy) before using a
-model, because provider policy can change independently of OpenClaw.
+model, because provider policy can change independently of Carapace.
 
 ## Advanced configuration
 
 <AccordionGroup>
   <Accordion title="Routing behavior">
-    OpenClaw routes any `opencode-go/...` model ref automatically. No extra
+    Carapace routes any `opencode-go/...` model ref automatically. No extra
     provider config is required.
   </Accordion>
 

@@ -1,7 +1,7 @@
-// Builds the data model for the standard `openclaw status` text report.
+// Builds the data model for the standard `carapace status` text report.
 // It converts scan/runtime state into table rows and section lines before rendering.
 
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
 import type { ConnectPairingRequiredReason } from "../../packages/gateway-protocol/src/connect-error-details.js";
 import { renderTable, type TableColumn } from "../../packages/terminal-core/src/table.js";
 import { theme } from "../../packages/terminal-core/src/theme.js";
@@ -139,9 +139,9 @@ export async function buildStatusCommandReportData(params: {
       })
     : [
         theme.muted(
-          `Skipped in fast status. Full report: ${formatCliCommand("openclaw security audit")}`,
+          `Skipped in fast status. Full report: ${formatCliCommand("carapace security audit")}`,
         ),
-        theme.muted(`Deep probe: ${formatCliCommand("openclaw status --deep")}`),
+        theme.muted(`Deep probe: ${formatCliCommand("carapace status --deep")}`),
       ];
   const retainedLost = params.summary.taskAuditRetainedLost;
   // Lost task retention is operational noise unless the user requested deep/verbose status.
@@ -159,7 +159,7 @@ export async function buildStatusCommandReportData(params: {
     width: params.tableWidth,
     overviewRows,
     showTaskMaintenanceHint: params.summary.taskAudit.errors > 0,
-    taskMaintenanceHint: `Task maintenance: ${formatCliCommand("openclaw tasks maintenance --apply")}`,
+    taskMaintenanceHint: `Task maintenance: ${formatCliCommand("carapace tasks maintenance --apply")}`,
     taskRegistryMigrationHint: params.summary.tasks.warning
       ? theme.warn(params.summary.tasks.warning)
       : null,

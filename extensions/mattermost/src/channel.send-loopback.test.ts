@@ -1,8 +1,8 @@
 // Mattermost tests cover the action-to-REST send path over loopback.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import { mattermostPlugin } from "./channel.js";
 import { deliverMattermostReplyPayload } from "./mattermost/reply-delivery.js";
 import { sendMessageMattermost } from "./mattermost/send.js";
@@ -19,7 +19,7 @@ vi.mock("./mattermost/runtime-api.js", async () => ({
 }));
 
 async function sendPreparedMattermostLoopback(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   actionParams: Record<string, unknown>;
 }) {
   const to = typeof params.actionParams.to === "string" ? params.actionParams.to.trim() : "";
@@ -95,7 +95,7 @@ describe("Mattermost send action loopback", () => {
               network: { dangerouslyAllowPrivateNetwork: true },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
 
         const result = await deliverMattermostReplyPayload({
           core,
@@ -152,7 +152,7 @@ describe("Mattermost send action loopback", () => {
               network: { dangerouslyAllowPrivateNetwork: true },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         const result = await sendPreparedMattermostLoopback({
           cfg,
           actionParams: {
@@ -227,7 +227,7 @@ describe("Mattermost send action loopback", () => {
               network: { dangerouslyAllowPrivateNetwork: true },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         await sendPreparedMattermostLoopback({
           cfg,
           actionParams: {

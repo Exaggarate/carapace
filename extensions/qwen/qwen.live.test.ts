@@ -1,7 +1,7 @@
-import { streamSimple, type Context, type Model } from "openclaw/plugin-sdk/llm";
-import { buildOpenAICompatibleLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
-import { extractNonEmptyAssistantText, isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+import { streamSimple, type Context, type Model } from "carapace/plugin-sdk/llm";
+import { buildOpenAICompatibleLiveModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
+import { extractNonEmptyAssistantText, isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { Type } from "typebox";
 import { beforeAll, describe, expect, it } from "vitest";
 import { QWEN_STANDARD_GLOBAL_BASE_URL } from "./models.js";

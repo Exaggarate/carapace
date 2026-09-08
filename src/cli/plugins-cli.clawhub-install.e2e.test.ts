@@ -11,7 +11,7 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { ClawHubPackageSecurityResponse } from "../infra/clawhub-packages.js";
 import { loadInstalledPluginIndexInstallRecords } from "../plugins/installed-plugin-index-records.js";
 
-const PACKAGE_NAME = "@openclaw/telemetry-demo";
+const PACKAGE_NAME = "@carapace/telemetry-demo";
 const PACKAGE_VERSION = "1.0.0";
 const PLUGIN_ID = "telemetry-demo";
 const ENCODED_PACKAGE_NAME = encodeURIComponent(PACKAGE_NAME);
@@ -26,12 +26,12 @@ async function readRequestBody(req: IncomingMessage): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-async function spawnOpenClaw(
+async function spawnCarapace(
   args: string[],
   options: { cwd: string; env: NodeJS.ProcessEnv },
 ): Promise<{ status: number | null; stdout: string; stderr: string }> {
   return await new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["openclaw.mjs", ...args], {
+    const child = spawn(process.execPath, ["carapace.mjs", ...args], {
       cwd: options.cwd,
       env: options.env,
       stdio: ["ignore", "pipe", "pipe"],
@@ -59,11 +59,11 @@ async function buildPluginZip(): Promise<Buffer> {
       name: PACKAGE_NAME,
       version: PACKAGE_VERSION,
       type: "module",
-      openclaw: { extensions: ["./dist/index.js"] },
+      carapace: { extensions: ["./dist/index.js"] },
     }),
   );
   zip.file(
-    "package/openclaw.plugin.json",
+    "package/carapace.plugin.json",
     JSON.stringify({
       id: PLUGIN_ID,
       configSchema: { type: "object", properties: {} },
@@ -107,7 +107,7 @@ async function startClawHubServer(options: TestServerOptions = {}) {
             tags: { latest: PACKAGE_VERSION },
             compatibility: options.packageCompatibility ?? {},
           },
-          owner: { handle: "openclaw" },
+          owner: { handle: "carapace" },
         }),
       );
       return;
@@ -211,45 +211,45 @@ async function startClawHubServer(options: TestServerOptions = {}) {
 function buildEnv(stateDir: string, registry: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-    OPENCLAW_CLAWHUB_URL: registry,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+    CARAPACE_CLAWHUB_URL: registry,
     CLAWHUB_TOKEN: "test-token",
     CLAWHUB_DISABLE_TELEMETRY: "",
     CLAWDHUB_DISABLE_TELEMETRY: "",
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
   };
 }
 
 async function readPersistedInstallRecord(stateDir: string) {
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
-  process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+  const previousStateDir = process.env.CARAPACE_STATE_DIR;
+  const previousConfigPath = process.env.CARAPACE_CONFIG_PATH;
+  process.env.CARAPACE_STATE_DIR = stateDir;
+  process.env.CARAPACE_CONFIG_PATH = path.join(stateDir, "carapace.json");
   try {
     const records = await loadInstalledPluginIndexInstallRecords();
     return records[PLUGIN_ID];
   } finally {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     if (previousConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.CARAPACE_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+      process.env.CARAPACE_CONFIG_PATH = previousConfigPath;
     }
   }
 }
 
-describe("openclaw plugins install ClawHub E2E", () => {
+describe("carapace plugins install ClawHub E2E", () => {
   it("reports successful installs and repeat updates after persisting the install record", async () => {
     const testServer = await startClawHubServer();
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-telemetry-e2e-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-telemetry-e2e-"));
     try {
       const env = buildEnv(stateDir, testServer.registry);
-      const first = await spawnOpenClaw(
+      const first = await spawnCarapace(
         [
           "plugins",
           "install",
@@ -278,7 +278,7 @@ describe("openclaw plugins install ClawHub E2E", () => {
       );
       expect(testServer.requestLog).toContain(`GET ${PACKAGE_API_PATH}/download`);
 
-      const repeat = await spawnOpenClaw(
+      const repeat = await spawnCarapace(
         [
           "plugins",
           "install",
@@ -309,15 +309,15 @@ describe("openclaw plugins install ClawHub E2E", () => {
     {
       label: "version gateway",
       options: { artifactCompatibility: { minGatewayVersion: "9999.0.0" } },
-      error: "requires OpenClaw >=9999.0.0",
+      error: "requires Carapace >=9999.0.0",
     },
   ])(
     "rejects incompatible $label metadata before trust and download",
     async ({ options, error }) => {
       const testServer = await startClawHubServer(options);
-      const stateDir = tempDirs.make("openclaw-plugin-compatibility-e2e-");
+      const stateDir = tempDirs.make("carapace-plugin-compatibility-e2e-");
       try {
-        const result = await spawnOpenClaw(
+        const result = await spawnCarapace(
           ["plugins", "install", `clawhub:${PACKAGE_NAME}@${PACKAGE_VERSION}`],
           { cwd: process.cwd(), env: buildEnv(stateDir, testServer.registry) },
         );
@@ -339,9 +339,9 @@ describe("openclaw plugins install ClawHub E2E", () => {
 
   it("rejects a corrupt archive without persisting or reporting a successful install", async () => {
     const testServer = await startClawHubServer({ artifactSha256: "0".repeat(64) });
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-telemetry-fail-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-telemetry-fail-"));
     try {
-      const result = await spawnOpenClaw(
+      const result = await spawnCarapace(
         ["plugins", "install", `clawhub:${PACKAGE_NAME}@${PACKAGE_VERSION}`],
         { cwd: process.cwd(), env: buildEnv(stateDir, testServer.registry) },
       );
@@ -359,9 +359,9 @@ describe("openclaw plugins install ClawHub E2E", () => {
 
   it("keeps a valid local install successful when telemetry is unavailable", async () => {
     const testServer = await startClawHubServer({ telemetryStatus: 503 });
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-telemetry-down-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-telemetry-down-"));
     try {
-      const result = await spawnOpenClaw(
+      const result = await spawnCarapace(
         [
           "plugins",
           "install",

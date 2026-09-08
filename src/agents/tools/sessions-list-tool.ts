@@ -3,7 +3,7 @@
  *
  * Lists visible sessions and optionally hydrates titles, last messages, and transcript-derived metadata.
  */
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import pMap from "p-map";
 import { Type } from "typebox";
 import { Value } from "typebox/value";
@@ -12,7 +12,7 @@ import {
   type SessionRunStatus,
 } from "../../../packages/gateway-protocol/src/schema/sessions-row.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { readSessionTitleFieldsFromTranscript } from "../../gateway/session-transcript-title-reader.js";
 import { deriveSessionTitle } from "../../gateway/session-utils.js";
 import { classifySessionKeyShape, isIncognitoSessionKey } from "../../routing/session-key.js";
@@ -136,7 +136,7 @@ export function createSessionsListTool(opts?: {
   agentSessionKey?: string;
   requesterAgentIdOverride?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   callGateway?: GatewayCaller;
   sessionLinkBase?: string;
 }): AnyAgentTool {

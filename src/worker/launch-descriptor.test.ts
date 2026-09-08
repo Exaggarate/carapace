@@ -14,7 +14,7 @@ import { buildWorkerConnectParams, parseWorkerLaunchDescriptor } from "./launch-
 function launchDescriptor(): WorkerLaunchDescriptor {
   return {
     version: 4,
-    connectionEndpoint: { kind: "unix", socketPath: "/tmp/openclaw-worker/gateway.sock" },
+    connectionEndpoint: { kind: "unix", socketPath: "/tmp/carapace-worker/gateway.sock" },
     admission: {
       environmentId: "environment-1",
       credential: ["worker", "fixture", "value"].join("-"),
@@ -23,7 +23,7 @@ function launchDescriptor(): WorkerLaunchDescriptor {
       rpcSetVersion: WORKER_RPC_SET_VERSION,
       handshake: {
         bundleHash: "a".repeat(64),
-        openclawVersion: "2026.7.12",
+        carapaceVersion: "2026.7.12",
         protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
       },
     },
@@ -35,9 +35,9 @@ function launchDescriptor(): WorkerLaunchDescriptor {
       turnId: "turn-1",
       prompt: "Inspect the workspace.",
       suppressPromptTranscript: false,
-      workspaceDir: "/tmp/openclaw-worker/workspace",
+      workspaceDir: "/tmp/carapace-worker/workspace",
       permissionMode: "workspace",
-      workerContainmentRoot: "/tmp/openclaw-worker/workspace",
+      workerContainmentRoot: "/tmp/carapace-worker/workspace",
       modelRef: { provider: "provider-1", model: "model-1" },
       inferenceOptions: { reasoning: "medium", maxTokens: 512 },
       initialMessages: [
@@ -101,7 +101,7 @@ describe("worker launch descriptor", () => {
     expect(parseWorkerLaunchDescriptor(structuredClone(descriptor))).toEqual(descriptor);
     expect(buildWorkerConnectParams(descriptor)).toMatchObject({
       role: "worker",
-      client: { id: "openclaw-worker", mode: "worker", version: "2026.7.12" },
+      client: { id: "carapace-worker", mode: "worker", version: "2026.7.12" },
       admission: { ...descriptor.admission, runId: descriptor.assignment.runId },
     });
   });
@@ -117,7 +117,7 @@ describe("worker launch descriptor", () => {
       identity,
       {
         ...identity,
-        remoteUrl: "https://github.com/openclaw/openclaw.git",
+        remoteUrl: "https://github.com/Exaggarate/carapace.git",
         gitAuthor: { name: "Worker Bot", email: "worker@example.test" },
       },
     ]) {
@@ -159,11 +159,11 @@ describe("worker launch descriptor", () => {
         ...["..", "~", "^", ":", "?", "*", "[", "\\", "@{"].map((part) => `branch${part}name`),
       ].map((branch) => withBinding({ branch })),
       ...[
-        "http://github.com/openclaw/openclaw.git",
-        "https://example.com/openclaw/openclaw.git",
-        "git@github.com:openclaw/openclaw.git",
-        "https://github.com/openclaw/openclaw.git?token=x",
-        "https://github.com/openclaw/openclaw.git\n",
+        "http://github.com/Exaggarate/carapace.git",
+        "https://example.com/carapace/carapace.git",
+        "git@github.com:Exaggarate/carapace.git",
+        "https://github.com/Exaggarate/carapace.git?token=x",
+        "https://github.com/Exaggarate/carapace.git\n",
       ].map((remoteUrl) => withBinding({ remoteUrl })),
       withBinding({ gitAuthor: { unexpected: true } }),
       ...["name", "email"].flatMap((key) =>
@@ -213,7 +213,7 @@ describe("worker launch descriptor", () => {
 
     for (const assignment of [
       { ...withoutContext, permissionMode: "workspace" },
-      { ...withoutContext, workerContainmentRoot: "/tmp/openclaw-worker/workspace" },
+      { ...withoutContext, workerContainmentRoot: "/tmp/carapace-worker/workspace" },
     ]) {
       expect(() => parseWorkerLaunchDescriptor({ ...descriptor, assignment })).toThrow(
         "invalid worker launch descriptor",
@@ -225,7 +225,7 @@ describe("worker launch descriptor", () => {
     const descriptor = launchDescriptor();
     descriptor.connectionEndpoint = {
       kind: "websocket",
-      url: "wss://gateway.example/tenant/__openclaw__/worker",
+      url: "wss://gateway.example/tenant/__carapace__/worker",
       tlsFingerprint: "ab:".repeat(31) + "ab",
     };
     expect(parseWorkerLaunchDescriptor(structuredClone(descriptor))).toEqual({
@@ -239,18 +239,18 @@ describe("worker launch descriptor", () => {
     const invalidEndpoints: unknown[] = [
       { kind: "unix", socketPath: "gateway.sock" },
       { kind: "unix", socketPath: "/tmp/gateway:sock" },
-      { kind: "websocket", url: "https://gateway.example/__openclaw__/worker" },
-      { kind: "websocket", url: "ws://user@gateway.example/__openclaw__/worker" },
+      { kind: "websocket", url: "https://gateway.example/__carapace__/worker" },
+      { kind: "websocket", url: "ws://user@gateway.example/__carapace__/worker" },
       { kind: "websocket", url: "wss://gateway.example/other" },
-      { kind: "websocket", url: "wss://gateway.example/__openclaw__/worker?token=x" },
+      { kind: "websocket", url: "wss://gateway.example/__carapace__/worker?token=x" },
       {
         kind: "websocket",
-        url: "ws://127.0.0.1/__openclaw__/worker",
+        url: "ws://127.0.0.1/__carapace__/worker",
         tlsFingerprint: "ab".repeat(32),
       },
       {
         kind: "websocket",
-        url: "ws://127.0.0.1/__openclaw__/worker",
+        url: "ws://127.0.0.1/__carapace__/worker",
         cloudflareAccess: {
           clientId: "cf-worker-plaintext-id",
           clientSecret: "cf-worker-plaintext-secret",
@@ -258,17 +258,17 @@ describe("worker launch descriptor", () => {
       },
       {
         kind: "websocket",
-        url: "wss://gateway.example/__openclaw__/worker",
+        url: "wss://gateway.example/__carapace__/worker",
         tlsFingerprint: "",
       },
       {
         kind: "websocket",
-        url: "wss://gateway.example/__openclaw__/worker",
+        url: "wss://gateway.example/__carapace__/worker",
         tlsFingerprint: "ab:cd:ef",
       },
       {
         kind: "websocket",
-        url: "wss://gateway.example/__openclaw__/worker",
+        url: "wss://gateway.example/__carapace__/worker",
         tlsFingerprint: "g".repeat(64),
       },
       { ...descriptor.connectionEndpoint, unexpected: true },
@@ -382,7 +382,7 @@ describe("worker launch descriptor", () => {
     const descriptor = launchDescriptor();
     descriptor.assignment.browser = {
       cdpUrl: "http://127.0.0.1:9222",
-      launcherPath: "/usr/local/bin/openclaw-worker-browser",
+      launcherPath: "/usr/local/bin/carapace-worker-browser",
     };
     expect(parseWorkerLaunchDescriptor(structuredClone(descriptor))).toEqual(descriptor);
 
@@ -393,7 +393,7 @@ describe("worker launch descriptor", () => {
       { ...browser, cdpUrl: "http://localhost:9222" },
       { ...browser, cdpUrl: "http://127.0.0.1" },
       { ...browser, cdpUrl: "http://127.0.0.1:9222/json/version" },
-      { ...browser, launcherPath: "openclaw-worker-browser" },
+      { ...browser, launcherPath: "carapace-worker-browser" },
     ];
     for (const invalidBrowser of cases) {
       expect(() =>

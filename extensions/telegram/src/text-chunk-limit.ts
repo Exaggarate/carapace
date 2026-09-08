@@ -1,13 +1,13 @@
-import type { OutboundDeliveryFormattingOptions } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
+import type { OutboundDeliveryFormattingOptions } from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveTextChunkLimit } from "carapace/plugin-sdk/reply-chunking";
 import { mergeTelegramAccountConfig, resolveDefaultTelegramAccountId } from "./accounts.js";
 import { TELEGRAM_RICH_TEXT_LIMIT } from "./rich-message.js";
 
 export const TELEGRAM_TEXT_CHUNK_LIMIT = 4000;
 
 export function resolveTelegramTextChunkLimit(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   formatting?: OutboundDeliveryFormattingOptions;
 }): number {

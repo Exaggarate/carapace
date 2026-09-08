@@ -2,14 +2,14 @@
 import {
   registerSingleProviderPlugin,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { resolveProviderAuthEnvVarCandidates } from "openclaw/plugin-sdk/provider-env-vars";
-import * as ssrfRuntime from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { resolveProviderAuthEnvVarCandidates } from "carapace/plugin-sdk/provider-env-vars";
+import * as ssrfRuntime from "carapace/plugin-sdk/ssrf-runtime";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { runSingleProviderCatalog } from "../test-support/provider-model-test-helpers.js";
 import arceePlugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 describe("arcee provider plugin", () => {
   it("registers Arcee AI with direct and OpenRouter auth choices", async () => {

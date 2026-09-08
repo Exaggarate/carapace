@@ -6,12 +6,12 @@ import path from "node:path";
 import {
   clearActiveEmbeddedRun,
   setActiveEmbeddedRun,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { ExecApprovalsFile } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import type { PluginConversationBinding } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { ExecApprovalsFile } from "carapace/plugin-sdk/exec-approvals-runtime";
+import type { PluginConversationBinding } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sharedClientMocks = vi.hoisted(() => ({
@@ -82,17 +82,17 @@ vi.mock("node:fs", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>();
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>();
   return {
     ...actual,
     resolveSandboxContext: resolveSandboxContextMock,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/conversation-binding-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/conversation-binding-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/conversation-binding-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/conversation-binding-runtime")>();
   return {
     ...actual,
     getSessionBindingService: () => ({
@@ -133,38 +133,38 @@ vi.mock("./app-server/shared-client.js", () => ({
       assertCurrent: () => undefined,
     })),
 }));
-vi.mock("openclaw/plugin-sdk/exec-approvals-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/exec-approvals-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/exec-approvals-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/exec-approvals-runtime")>();
   return {
     ...actual,
     loadExecApprovals: execApprovalsRuntimeMocks.loadExecApprovals,
   };
 });
-vi.mock("openclaw/plugin-sdk/agent-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-runtime")>();
+vi.mock("carapace/plugin-sdk/agent-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/agent-runtime")>();
   return {
     ...agentRuntimeMocks,
     findPersistedAuthProfileCredential: actual.findPersistedAuthProfileCredential,
     refreshOAuthCredentialForRuntime: actual.refreshOAuthCredentialForRuntime,
   };
 });
-vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth")>()),
+vi.mock("carapace/plugin-sdk/provider-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-auth")>()),
   ensureAuthProfileStore: agentRuntimeMocks.ensureAuthProfileStore,
   resolveAuthProfileOrder: providerAuthMocks.resolveAuthProfileOrder,
 }));
-vi.mock("openclaw/plugin-sdk/agent-scope-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-scope-runtime")>()),
+vi.mock("carapace/plugin-sdk/agent-scope-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-scope-runtime")>()),
   resolveSessionAgentIdsStrict: agentRuntimeMocks.resolveSessionAgentIdsStrict,
   resolveAgentWorkspaceDir: agentRuntimeMocks.resolveAgentWorkspaceDir,
 }));
-vi.mock("openclaw/plugin-sdk/agent-harness-registration", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-registration")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-registration", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-registration")>()),
   resolveDefaultAgentDir: agentRuntimeMocks.resolveDefaultAgentDir,
 }));
-vi.mock("openclaw/plugin-sdk/provider-auth-aliases", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth-aliases")>()),
+vi.mock("carapace/plugin-sdk/provider-auth-aliases", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-auth-aliases")>()),
   resolveProviderIdForAuth: agentRuntimeMocks.resolveProviderIdForAuth,
 }));
 
@@ -459,7 +459,7 @@ function mockCallArg(mock: ReturnType<typeof vi.fn>, callIndex = 0, argIndex = 0
 describe("codex conversation binding", () => {
   beforeEach(async () => {
     resetCodexTestBindingStore();
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-binding-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-binding-"));
   });
 
   afterEach(async () => {
@@ -1789,7 +1789,7 @@ describe("codex conversation binding", () => {
         model: "gpt-5.4-mini",
       }),
     ).rejects.toThrow(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(requests).toEqual([]);
   });
@@ -1828,7 +1828,7 @@ describe("codex conversation binding", () => {
         model: "gpt-5.4-mini",
       }),
     ).rejects.toThrow(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(request).not.toHaveBeenCalled();
   });
@@ -1860,7 +1860,7 @@ describe("codex conversation binding", () => {
         model: "gpt-5.4-mini",
       }),
     ).rejects.toThrow(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(requests).toEqual([]);
   });
@@ -2145,7 +2145,7 @@ describe("codex conversation binding", () => {
         workspaceDir: tempDir,
         threadId: "thread-owned",
       }),
-    ).rejects.toThrow("owned by another OpenClaw session");
+    ).rejects.toThrow("owned by another Carapace session");
     expect(request).not.toHaveBeenCalled();
     expect(testCodexAppServerBindingStore.read(otherIdentity)).toMatchObject({
       threadId: "thread-owned",
@@ -2271,7 +2271,7 @@ describe("codex conversation binding", () => {
     });
   });
 
-  it("blocks bound Codex app-server turns when the current OpenClaw session is sandboxed", async () => {
+  it("blocks bound Codex app-server turns when the current Carapace session is sandboxed", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     await writeTestConversationBinding(sessionFile, { threadId: "thread-1", cwd: tempDir });
 
@@ -2311,7 +2311,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "Codex-native Codex app-server conversation binding is unavailable because OpenClaw sandboxing is active for this session.",
+          "Codex-native Codex app-server conversation binding is unavailable because Carapace sandboxing is active for this session.",
         ),
       },
     });
@@ -2358,7 +2358,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "Codex-native Codex app-server conversation binding is unavailable because OpenClaw exec host=node is active for this session.",
+          "Codex-native Codex app-server conversation binding is unavailable because Carapace exec host=node is active for this session.",
         ),
       },
     });
@@ -2408,7 +2408,7 @@ describe("codex conversation binding", () => {
     );
 
     expect(result?.handled).toBe(true);
-    expect(result?.reply?.text).toContain("OpenClaw exec host=node is active");
+    expect(result?.reply?.text).toContain("Carapace exec host=node is active");
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
   });
 
@@ -2458,7 +2458,7 @@ describe("codex conversation binding", () => {
     );
 
     expect(result?.handled).toBe(true);
-    expect(result?.reply?.text).toContain("OpenClaw exec host=node is active");
+    expect(result?.reply?.text).toContain("Carapace exec host=node is active");
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
   });
 
@@ -2523,7 +2523,7 @@ describe("codex conversation binding", () => {
     );
 
     expect(result?.handled).toBe(true);
-    expect(result?.reply?.text).toContain("OpenClaw exec host=node is active");
+    expect(result?.reply?.text).toContain("Carapace exec host=node is active");
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
   });
 
@@ -2591,12 +2591,12 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(request).not.toHaveBeenCalled();
   });
 
-  it("blocks bound Codex CLI node turns when the current OpenClaw session is sandboxed", async () => {
+  it("blocks bound Codex CLI node turns when the current Carapace session is sandboxed", async () => {
     const resumeCodexCliSessionOnNode = vi.fn();
 
     const result = await handleCodexConversationInboundClaim(
@@ -2637,7 +2637,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "Codex-native Codex CLI node conversation binding is unavailable because OpenClaw sandboxing is active for this session.",
+          "Codex-native Codex CLI node conversation binding is unavailable because Carapace sandboxing is active for this session.",
         ),
       },
     });
@@ -3052,7 +3052,7 @@ describe("codex conversation binding", () => {
       sandbox: "workspace-write",
       approvalPolicy: "on-request",
       approvalsReviewer: "auto_review",
-      developerInstructions: expect.stringContaining("bound to an OpenClaw conversation"),
+      developerInstructions: expect.stringContaining("bound to an Carapace conversation"),
       config: { apps: { _default: { enabled: false } }, "features.apps": false },
     });
     expect(requests[2]?.params).toMatchObject({
@@ -3370,7 +3370,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(requests).toEqual([]);
   });
@@ -3541,7 +3541,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(result?.reply?.text).not.toContain(
       "legacy full exec security with ask requires Codex app-server danger-full-access",
@@ -4454,7 +4454,7 @@ describe("codex conversation binding", () => {
     await writeTestConversationBinding(sessionFile, {
       threadId: "thread-old",
       cwd: tempDir,
-      networkProxyProfileName: "openclaw-network-stale",
+      networkProxyProfileName: "carapace-network-stale",
       networkProxyConfigFingerprint: "stale-proxy-config",
       conversationStartId: "start-1",
       conversationSourceTransferComplete: true,
@@ -4556,7 +4556,7 @@ describe("codex conversation binding", () => {
       threadId: "thread-old",
       clientId: "client-network-rotation",
       cwd: tempDir,
-      networkProxyProfileName: "openclaw-network-stale",
+      networkProxyProfileName: "carapace-network-stale",
       networkProxyConfigFingerprint: "stale-proxy-config",
       conversationStartId: "start-1",
     });
@@ -4687,7 +4687,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Carapace native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(turnStartParams).toEqual([]);
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
@@ -4771,7 +4771,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+          "Carapace native Codex conversation binding cannot route interactive approvals yet",
         ),
       },
     });

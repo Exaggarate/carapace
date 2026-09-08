@@ -83,7 +83,7 @@ async function mountMenu(
     ...options.session,
   };
   render(
-    html`<openclaw-session-menu
+    html`<carapace-session-menu
       .session=${session}
       .compact=${options.compact ?? false}
       .navigationAllowed=${options.navigationAllowed ?? true}
@@ -108,10 +108,10 @@ async function mountMenu(
       .pluginActions=${options.pluginActions ?? []}
       .onAction=${options.onAction ?? (() => {})}
       .onClose=${options.onClose ?? (() => {})}
-    ></openclaw-session-menu>`,
+    ></carapace-session-menu>`,
     container,
   );
-  const element = container.querySelector("openclaw-session-menu") as SessionMenuElement | null;
+  const element = container.querySelector("carapace-session-menu") as SessionMenuElement | null;
   if (!element) {
     throw new Error("Expected session menu");
   }
@@ -372,7 +372,7 @@ describe("session menu", () => {
       work: {
         loading: false,
         pullRequestUrl: "https://example.test/pr",
-        worktreePath: "/work/openclaw",
+        worktreePath: "/work/carapace",
       },
     });
 
@@ -956,7 +956,7 @@ describe("session menu", () => {
   );
 
   it("dispatches open-pr with the resolved URL from click or the G shortcut", async () => {
-    const url = "https://github.com/openclaw/openclaw/pull/12345";
+    const url = "https://github.com/Exaggarate/carapace/pull/12345";
     const calls: SessionMenuAction[] = [];
     const menu = await mountMenu({
       work: { loading: false, pullRequestUrl: url, worktreePath: null },

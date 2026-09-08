@@ -2,8 +2,8 @@
 import * as fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { escapeRegExp } from "../shared/regexp.js";
 import { execFileUtf8, type ExecResult } from "./exec-file.js";
 import type { GatewayServiceEnv } from "./service-types.js";

@@ -1,7 +1,7 @@
 // Webhooks plugin module implements http behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { PluginRuntime } from "../api.js";
 import {
   createFixedWindowRateLimiter,
@@ -12,7 +12,7 @@ import {
   withResolvedWebhookRequestPipeline,
   WEBHOOK_IN_FLIGHT_DEFAULTS,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type WebhookInFlightLimiter,
 } from "../runtime-api.js";
 import type { WebhookSecretInput } from "./config.js";
@@ -167,7 +167,7 @@ function extractSharedSecret(req: IncomingMessage): string {
   if (normalizeLowercaseStringOrEmpty(authHeader).startsWith("bearer ")) {
     return authHeader.slice("bearer ".length).trim();
   }
-  const sharedHeader = req.headers["x-openclaw-webhook-secret"];
+  const sharedHeader = req.headers["x-carapace-webhook-secret"];
   return Array.isArray(sharedHeader) ? (sharedHeader[0] ?? "").trim() : (sharedHeader ?? "").trim();
 }
 
@@ -403,7 +403,7 @@ function describeWebhookOutcome(params: { action: WebhookAction; result: unknown
 async function executeWebhookAction(params: {
   action: WebhookAction;
   target: TaskFlowWebhookTarget;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): Promise<unknown> {
   const { action, target } = params;
   switch (action.action) {
@@ -534,7 +534,7 @@ async function executeWebhookAction(params: {
 }
 
 export function createTaskFlowWebhookRequestHandler(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targetsByPath: Map<string, TaskFlowWebhookTarget[]>;
   inFlightLimiter?: WebhookInFlightLimiter;
 }): (req: IncomingMessage, res: ServerResponse) => Promise<boolean> {

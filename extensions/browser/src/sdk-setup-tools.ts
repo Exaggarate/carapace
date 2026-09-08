@@ -6,22 +6,22 @@ export {
   hasGatewayToolRoutingContext,
   listNodes,
   resolveNodeIdFromList,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-export type { AnyAgentTool } from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+export type { AnyAgentTool } from "carapace/plugin-sdk/agent-harness-runtime";
 export {
   imageResultFromFile,
   jsonResult,
   readPositiveIntegerParam,
   readStringParam,
-} from "openclaw/plugin-sdk/channel-actions";
-export { formatCliCommand, note } from "openclaw/plugin-sdk/cli-runtime";
+} from "carapace/plugin-sdk/channel-actions";
+export { formatCliCommand, note } from "carapace/plugin-sdk/cli-runtime";
 export {
   IMAGE_REDUCE_QUALITY_STEPS,
   buildImageResizeSideGrid,
   getImageMetadata,
   isImageProcessorUnavailableError,
   resizeToJpeg,
-} from "openclaw/plugin-sdk/media-runtime";
-export { detectMime } from "openclaw/plugin-sdk/media-mime";
-export { ensureMediaDir, saveMediaBuffer } from "openclaw/plugin-sdk/media-runtime";
-export { describeImageFile } from "openclaw/plugin-sdk/media-understanding-runtime";
+} from "carapace/plugin-sdk/media-runtime";
+export { detectMime } from "carapace/plugin-sdk/media-mime";
+export { ensureMediaDir, saveMediaBuffer } from "carapace/plugin-sdk/media-runtime";
+export { describeImageFile } from "carapace/plugin-sdk/media-understanding-runtime";

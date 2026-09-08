@@ -15,9 +15,9 @@ describe("deviceIcon", () => {
     ["iPhone", { modelIdentifier: "iPhone17,1" }, deviceIcons.smartphone],
     ["iPad", { modelIdentifier: "iPad16,3", platform: "iOS 18.0" }, deviceIcons.tablet],
     ["watch", { modelIdentifier: "Watch7,1" }, deviceIcons.watch],
-    ["browser client", { clientId: "openclaw-control-ui" }, deviceIcons.browser],
+    ["browser client", { clientId: "carapace-control-ui" }, deviceIcons.browser],
     ["CLI mode", { clientMode: "cli" }, deviceIcons.terminal],
-    ["TUI client", { clientId: "openclaw-tui", clientMode: "ui" }, deviceIcons.terminal],
+    ["TUI client", { clientId: "carapace-tui", clientMode: "ui" }, deviceIcons.terminal],
     ["gateway server", { clientMode: "gateway" }, deviceIcons.server],
     ["unknown", { modelIdentifier: "Mac99,99" }, icons.monitor],
   ] as const)("renders %s with its form-factor glyph", (_label, source, expectedIcon) => {

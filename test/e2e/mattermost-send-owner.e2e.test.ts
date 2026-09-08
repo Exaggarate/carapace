@@ -6,13 +6,13 @@ import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import mattermostEntry from "../../extensions/mattermost/index.js";
 import * as bootstrapRegistry from "../../src/channels/plugins/bootstrap-registry.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import { runMessageAction } from "../../src/infra/outbound/message-action-runner.js";
 
 const mattermostPlugin = mattermostEntry.loadChannelPlugin();
@@ -119,7 +119,7 @@ function registerMattermostRuntime(params: { sequence?: string[]; activityError?
   );
 }
 
-function createMattermostConfig(baseUrl: string): OpenClawConfig {
+function createMattermostConfig(baseUrl: string): CarapaceConfig {
   return {
     channels: {
       mattermost: {

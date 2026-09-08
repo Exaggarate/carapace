@@ -25,7 +25,7 @@ const messages = [
   { role: "user", senderLabel: "Alex", content: "I will write the release notes." },
   {
     role: "user",
-    __openclaw: { senderName: "Sam", senderId: "sam@example.invalid" },
+    __carapace: { senderName: "Sam", senderId: "sam@example.invalid" },
     content: "I will verify the build.",
   },
   {
@@ -76,7 +76,7 @@ suite.define(() => {
             const downloadPromise = page.waitForEvent("download");
             await page.getByRole("button", { name: "Send message" }).click();
             const download = await downloadPromise;
-            expect(download.suggestedFilename()).toMatch(/^chat-OpenClaw-.+\.md$/);
+            expect(download.suggestedFilename()).toMatch(/^chat-Carapace-.+\.md$/);
             const stream = await download.createReadStream();
             if (!stream) {
               throw new Error("chat export did not provide a readable download");
@@ -87,13 +87,13 @@ suite.define(() => {
             await row.hover();
             await row.getByRole("button", { name: "Open session menu: Release planning" }).click();
             await openSessionMenuSubmenu(page, "Copy");
-            const copy = page.locator("openclaw-session-menu").getByRole("menuitem", {
+            const copy = page.locator("carapace-session-menu").getByRole("menuitem", {
               name: "Conversation as Markdown",
               exact: true,
             });
             if (captureUiProofEnabled) {
               await waitForControlUiProofSurface(
-                page.locator('openclaw-session-menu > wa-dropdown [part="menu"]'),
+                page.locator('carapace-session-menu > wa-dropdown [part="menu"]'),
                 [page.getByRole("menuitem", { name: "Copy", exact: true })],
               );
             }

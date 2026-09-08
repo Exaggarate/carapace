@@ -1,7 +1,7 @@
 /** Tests pure Code Mode config without loading the guest or test runtime. */
 
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveCodeModeConfig } from "./code-mode-runtime.js";
 
 describe("Code Mode configuration", () => {
@@ -53,7 +53,7 @@ describe("Code Mode configuration", () => {
       expected: "auto",
     },
   ])("$name", ({ global, model, agent, agentModel, expected }) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: { codeMode: { enabled: global, timeoutMs: 1234, maxOutputBytes: 4096 } },
       agents: {
         defaults: { models: { "test/model-a": { codeMode: model } } },

@@ -10,7 +10,7 @@ import {
   isSameProcessSpecificIpv4WithLoopbackListeners,
 } from "./ports-format.js";
 
-const gatewayAlreadyRunningHint = `Gateway already running locally. Stop it (${formatCliCommand("openclaw gateway stop")}) or use a different port.`;
+const gatewayAlreadyRunningHint = `Gateway already running locally. Stop it (${formatCliCommand("carapace gateway stop")}) or use a different port.`;
 const multipleListenersHint =
   "Multiple listeners detected; ensure only one gateway/tunnel per port unless intentionally running isolated profiles.";
 
@@ -42,22 +42,22 @@ describe("ports-format", () => {
     // is no -L/-R forward, so it must not classify as a tunnel or emit the hint.
     [{ commandLine: "/opt/fast-ssh/server --listen 127.0.0.1:18789" }, "non_gateway"],
     [{ commandLine: "ssh -N -L 9999:remote:22 host" }, "ssh"],
-    [{ commandLine: "node /Users/me/Projects/openclaw/dist/entry.js gateway" }, "gateway"],
-    [{ command: "node", commandLine: "node /tmp/socat/openclaw/dist/index.js gateway" }, "gateway"],
+    [{ commandLine: "node /Users/me/Projects/carapace/dist/entry.js gateway" }, "gateway"],
+    [{ command: "node", commandLine: "node /tmp/socat/carapace/dist/index.js gateway" }, "gateway"],
     [{ command: "socat" }, "non_gateway"],
     [{ command: "socat1" }, "non_gateway"],
     [{ command: "socat.exe" }, "non_gateway"],
     [
       {
         command: "socat",
-        commandLine: "socat -lpopenclaw TCP-LISTEN:18789,fork TCP:127.0.0.1:18789",
+        commandLine: "socat -lpcarapace TCP-LISTEN:18789,fork TCP:127.0.0.1:18789",
       },
       "non_gateway",
     ],
     [
       {
         command: "node",
-        commandLine: "node /Users/me/Projects/openclaw/dist/index.js gateway --profile socat",
+        commandLine: "node /Users/me/Projects/carapace/dist/index.js gateway --profile socat",
       },
       "gateway",
     ],
@@ -78,7 +78,7 @@ describe("ports-format", () => {
     expect(
       buildPortHints(
         [
-          { commandLine: "node dist/index.js openclaw gateway" },
+          { commandLine: "node dist/index.js carapace gateway" },
           { commandLine: "ssh -N -L 18789:127.0.0.1:18789" },
           { commandLine: "python -m http.server 18789" },
         ],
@@ -95,8 +95,8 @@ describe("ports-format", () => {
 
   it("treats single-process loopback dual-stack gateway listeners as benign", () => {
     const listeners = [
-      { pid: 4242, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
-      { pid: 4242, commandLine: "openclaw-gateway", address: "[::1]:18789" },
+      { pid: 4242, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
+      { pid: 4242, commandLine: "carapace-gateway", address: "[::1]:18789" },
     ];
     expect(isDualStackLoopbackGatewayListeners(listeners, 18789)).toBe(true);
     expect(isExpectedGatewayListeners(listeners, 18789)).toBe(true);
@@ -105,8 +105,8 @@ describe("ports-format", () => {
 
   it("treats a single-process specific IPv4 plus loopback alias as benign", () => {
     const listeners = [
-      { pid: 4242, commandLine: "openclaw-gateway", address: "100.64.0.1:18789" },
-      { pid: 4242, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+      { pid: 4242, commandLine: "carapace-gateway", address: "100.64.0.1:18789" },
+      { pid: 4242, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
     ];
 
     expect(isExpectedGatewayListeners(listeners, 18789)).toBe(true);
@@ -147,7 +147,7 @@ describe("ports-format", () => {
     for (const addresses of orders) {
       const listeners = addresses.map((address) => ({
         pid: 4242,
-        commandLine: "openclaw-gateway",
+        commandLine: "carapace-gateway",
         address,
       }));
       expect(isExpectedGatewayListeners(listeners, 18789)).toBe(entry.expected);
@@ -177,34 +177,34 @@ describe("ports-format", () => {
     [
       "mixed process ids",
       [
-        { pid: 4242, commandLine: "openclaw-gateway", address: "100.64.0.1:18789" },
-        { pid: 4243, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+        { pid: 4242, commandLine: "carapace-gateway", address: "100.64.0.1:18789" },
+        { pid: 4243, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
       ],
     ],
     [
       "an IPv6 selected address",
       [
-        { pid: 4242, commandLine: "openclaw-gateway", address: "[fd7a:115c:a1e0::1]:18789" },
-        { pid: 4242, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+        { pid: 4242, commandLine: "carapace-gateway", address: "[fd7a:115c:a1e0::1]:18789" },
+        { pid: 4242, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
       ],
     ],
     [
       "a missing loopback alias",
-      [{ pid: 4242, commandLine: "openclaw-gateway", address: "100.64.0.1:18789" }],
+      [{ pid: 4242, commandLine: "carapace-gateway", address: "100.64.0.1:18789" }],
     ],
     [
       "missing process metadata",
       [
-        { commandLine: "openclaw-gateway", address: "100.64.0.1:18789" },
-        { commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+        { commandLine: "carapace-gateway", address: "100.64.0.1:18789" },
+        { commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
       ],
     ],
     [
       "an extra listener",
       [
-        { pid: 4242, commandLine: "openclaw-gateway", address: "100.64.0.1:18789" },
-        { pid: 4242, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
-        { pid: 4242, commandLine: "openclaw-gateway", address: "[::1]:18789" },
+        { pid: 4242, commandLine: "carapace-gateway", address: "100.64.0.1:18789" },
+        { pid: 4242, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
+        { pid: 4242, commandLine: "carapace-gateway", address: "[::1]:18789" },
       ],
     ],
   ])("rejects specific-address ownership with %s", (_label, listeners) => {
@@ -219,8 +219,8 @@ describe("ports-format", () => {
     expect(
       buildPortHints(
         [
-          { pid: 4242, commandLine: "openclaw-gateway", address: "0.0.0.0:18789" },
-          { pid: 4243, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+          { pid: 4242, commandLine: "carapace-gateway", address: "0.0.0.0:18789" },
+          { pid: 4243, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
         ],
         18789,
       ),

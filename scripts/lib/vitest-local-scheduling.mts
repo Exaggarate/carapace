@@ -32,7 +32,7 @@ function parsePositiveInt(value: string | undefined, label: string) {
 }
 
 function isSystemThrottleDisabled(env: Record<string, string | undefined>) {
-  const normalized = env.OPENCLAW_VITEST_DISABLE_SYSTEM_THROTTLE?.trim().toLowerCase();
+  const normalized = env.CARAPACE_VITEST_DISABLE_SYSTEM_THROTTLE?.trim().toLowerCase();
   return normalized === "1" || normalized === "true";
 }
 
@@ -48,14 +48,14 @@ export function isCiLikeEnv(env: Record<string, string | undefined> = process.en
 export function resolveLocalVitestEnv(
   env: Record<string, string | undefined> = process.env,
 ): Record<string, string | undefined> {
-  const normalizedLocalCheck = env.OPENCLAW_LOCAL_CHECK?.trim().toLowerCase();
+  const normalizedLocalCheck = env.CARAPACE_LOCAL_CHECK?.trim().toLowerCase();
   if (isCiLikeEnv(env) || (normalizedLocalCheck !== "0" && normalizedLocalCheck !== "false")) {
     return env;
   }
 
   return {
     ...env,
-    OPENCLAW_LOCAL_CHECK: "1",
+    CARAPACE_LOCAL_CHECK: "1",
   };
 }
 
@@ -72,7 +72,7 @@ export function detectVitestHostInfo() {
 
 // Vite bundles each project config on its own, so a module-level cache would be
 // per-project. The snapshot must live on globalThis to span every bundle in a process.
-const SCHEDULING_HOST_INFO = Symbol.for("openclaw.vitestSchedulingHostInfo");
+const SCHEDULING_HOST_INFO = Symbol.for("carapace.vitestSchedulingHostInfo");
 
 /**
  * Worker sizing reads the 1m load average, so re-detecting per Vitest project lets two
@@ -112,10 +112,10 @@ export function resolveLocalVitestScheduling(
   pool: "forks" | "threads" = "threads",
 ): LocalVitestScheduling {
   const override = parsePositiveInt(
-    env.OPENCLAW_VITEST_MAX_WORKERS ?? env.OPENCLAW_TEST_WORKERS,
-    env.OPENCLAW_VITEST_MAX_WORKERS === undefined
-      ? "OPENCLAW_TEST_WORKERS"
-      : "OPENCLAW_VITEST_MAX_WORKERS",
+    env.CARAPACE_VITEST_MAX_WORKERS ?? env.CARAPACE_TEST_WORKERS,
+    env.CARAPACE_VITEST_MAX_WORKERS === undefined
+      ? "CARAPACE_TEST_WORKERS"
+      : "CARAPACE_VITEST_MAX_WORKERS",
   );
   if (override !== null) {
     const maxWorkers = clamp(override, 1, 16);

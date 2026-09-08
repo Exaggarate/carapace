@@ -1,6 +1,6 @@
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { estimateBase64DecodedBytes } from "@carapace/media-core/base64";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import { parseInboundMediaUri, buildInboundMediaUriFromPath } from "../media/media-reference.js";
 import {
   parseAssistantTextSignature,
@@ -45,7 +45,7 @@ function projectChatHistoryMediaReference(value: unknown): string | undefined {
     return undefined;
   }
   const reference = value.trim();
-  if (/^\/(?:api\/chat\/media\/outgoing|media|__openclaw__)\//u.test(reference)) {
+  if (/^\/(?:api\/chat\/media\/outgoing|media|__carapace__)\//u.test(reference)) {
     return reference.split(/[?#]/u, 1)[0];
   }
   try {
@@ -227,8 +227,8 @@ export function sanitizeChatHistoryContentBlock(
     delete entry.thinkingSignature;
     changed = true;
   }
-  if ("openclawReasoningReplay" in entry) {
-    delete entry.openclawReasoningReplay;
+  if ("carapaceReasoningReplay" in entry) {
+    delete entry.carapaceReasoningReplay;
     changed = true;
   }
   const mediaChanged = projectChatHistoryMediaBlock(entry);
@@ -324,7 +324,7 @@ function projectAssistantCommentaryFallbacks(message: unknown, maxChars: number)
   ) {
     return [];
   }
-  const transcriptMeta = readRecord(entry["__openclaw"]);
+  const transcriptMeta = readRecord(entry["__carapace"]);
   return entry.content.flatMap((block) => {
     const content = readRecord(block);
     if (!content) {
@@ -357,12 +357,12 @@ function projectAssistantCommentaryFallbacks(message: unknown, maxChars: number)
         role: "assistant",
         content: [{ type: "text", text: projected.text }],
         ...(typeof entry.timestamp === "number" ? { timestamp: entry.timestamp } : {}),
-        openclawStreamFallback: {
+        carapaceStreamFallback: {
           replacementText: projected.text,
           source: "segment",
           itemId,
         },
-        ...(projectedMeta ? { __openclaw: projectedMeta } : {}),
+        ...(projectedMeta ? { __carapace: projectedMeta } : {}),
       },
     ];
   });
@@ -441,7 +441,7 @@ function projectWorkspaceConflictDetails(
       (entryPath): entryPath is string => typeof entryPath === "string" && entryPath.length > 0,
     ) ||
     typeof details.stagedResultRef !== "string" ||
-    !/^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef) ||
+    !/^refs\/carapace\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef) ||
     (details.totalCount !== undefined &&
       (!Number.isSafeInteger(details.totalCount) ||
         (details.totalCount as number) < details.paths.length))
@@ -473,11 +473,11 @@ export function sanitizeChatHistoryMessage(
     delete entry.providerReplay;
     changed = true;
   }
-  const openClawMeta = readRecord(entry["__openclaw"]);
-  if (openClawMeta && ("upstreamUserText" in openClawMeta || "media" in openClawMeta)) {
+  const carapaceMeta = readRecord(entry["__carapace"]);
+  if (carapaceMeta && ("upstreamUserText" in carapaceMeta || "media" in carapaceMeta)) {
     // Codex retains the decorated upstream prompt for transcript reconstruction.
     // It is not display data and can otherwise evict the visible row from history.
-    const projectedMeta = { ...openClawMeta };
+    const projectedMeta = { ...carapaceMeta };
     delete projectedMeta.upstreamUserText;
     if ("media" in projectedMeta) {
       projectedMeta.media = projectChatHistoryMediaFacts(projectedMeta.media);
@@ -486,9 +486,9 @@ export function sanitizeChatHistoryMessage(
       }
     }
     if (Object.keys(projectedMeta).length > 0) {
-      entry["__openclaw"] = projectedMeta;
+      entry["__carapace"] = projectedMeta;
     } else {
-      delete entry["__openclaw"];
+      delete entry["__carapace"];
     }
     changed = true;
   }
@@ -644,8 +644,8 @@ export function sanitizeChatHistoryMessage(
     // chat.history consumer can tell a bounded preview from the full row and
     // fetch it via chat.message.get. An upstream "oversized" transcript
     // marker already explains the truncation; never overwrite its reason.
-    const meta = readRecord(entry["__openclaw"]);
-    entry["__openclaw"] = {
+    const meta = readRecord(entry["__carapace"]);
+    entry["__carapace"] = {
       ...meta,
       truncated: true,
       reason: typeof meta?.reason === "string" ? meta.reason : "display-cap",

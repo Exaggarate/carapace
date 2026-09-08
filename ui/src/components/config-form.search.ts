@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { ConfigUiHints } from "../api/types.ts";
 import { hintForPath, humanize, schemaType, type JsonSchema } from "../lib/config-form-utils.ts";
 import { arrayItemSchema, arrayItemSchemaIndexes } from "./config-form.array-items.ts";

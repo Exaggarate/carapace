@@ -1,13 +1,13 @@
 import path from "node:path";
-import type { AcpRuntime } from "@openclaw/acp-core/runtime/types";
+import type { AcpRuntime } from "@carapace/acp-core/runtime/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   loadSessionEntryReadOnly,
   replaceSessionEntrySync,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import { AcpRuntimeError } from "../runtime/errors.js";
 import { buildAcpDatabaseSessionKey } from "../runtime/session-meta-keys.js";
@@ -23,8 +23,8 @@ import { DEFAULT_DEPS } from "./manager.types.js";
 
 describe("ACP manager with real owner-scoped metadata", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it.each(["global", "shared-project"])(
@@ -34,8 +34,8 @@ describe("ACP manager with real owner-scoped metadata", () => {
         const cfg = {
           agents: { ownership: "explicit", entries: { main: {}, work: {} } },
           session: { scope: "global", store: path.join(dir, "{agentId}", "sessions.json") },
-        } satisfies OpenClawConfig;
-        const databasePath = path.join(dir, "state", "openclaw.sqlite");
+        } satisfies CarapaceConfig;
+        const databasePath = path.join(dir, "state", "carapace.sqlite");
         const ensureSession = vi.fn(async (input: { sessionKey: string; agentId?: string }) => ({
           ...input,
           backend: "synthetic",
@@ -197,7 +197,7 @@ it("retains canonical metadata when an unmigrated backend locator blocks status 
       agents: { ownership: "explicit" as const, entries: { work: {} } },
       session: { store: path.join(dir, "{agentId}", "sessions.json") },
     };
-    const databasePath = path.join(dir, "state", "openclaw.sqlite");
+    const databasePath = path.join(dir, "state", "carapace.sqlite");
     const target = { cfg, sessionKey: "global", agentId: "work" };
     const runtime = {
       ownerAwareSessions: 1 as const,

@@ -1,8 +1,8 @@
 /**
  * Updates persisted session metadata after agent command runs.
  */
-import { asNonNegativeFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asNonNegativeFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   SESSION_TOTAL_TOKENS_VERSION,
   setSessionRuntimeModel,
@@ -14,7 +14,7 @@ import { COMPACTION_RUN_USAGE_CLEAR_PATCH } from "../../config/sessions/session-
 import { projectSessionSnapshotChanges } from "../../config/sessions/session-snapshot-merge.js";
 import { resolveMaintenanceConfigFromInput } from "../../config/sessions/store-maintenance.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createLazyPromise } from "../../shared/lazy-promise.js";
 import { clearAllCliSessions, setCliSessionBinding } from "../cli-session.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../defaults.js";
@@ -37,7 +37,7 @@ export function normalizeSessionTokenCount(value: number | undefined): number | 
 
 /** Applies run result metadata and usage to a session entry. */
 export async function updateSessionStoreAfterAgentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir: string;
   sessionId: string;
   sessionKey: string;

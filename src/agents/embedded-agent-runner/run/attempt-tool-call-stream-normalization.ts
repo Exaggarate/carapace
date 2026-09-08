@@ -1,6 +1,6 @@
 /** Normalizes live streamed tool-call names, ids, and unknown-tool loops. */
 import { randomUUID } from "node:crypto";
-import { stripCompactionReplayCheckpointInPlace } from "@openclaw/ai/transports";
+import { stripCompactionReplayCheckpointInPlace } from "@carapace/ai/transports";
 import type { StreamFn } from "../../runtime/index.js";
 import { normalizeToolPolicyName } from "../../tool-policy.js";
 import { isRunnerToolCallBlockType } from "./attempt-tool-call-block-type.js";

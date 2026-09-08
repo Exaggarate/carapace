@@ -9,7 +9,7 @@ import {
 } from "../audit/execution-identity-admission.js";
 import { loadSessionEntry, replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { getAgentEventLifecycleGeneration } from "../infra/agent-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { attachAgentCommandAdmissionFacts } from "./agent-command-admission-facts.js";
 import {
@@ -68,7 +68,7 @@ describe("Gateway agent command execution identity", () => {
     ),
   )("registers a real recovery turn without a foreground lease: %j", async ({ audit, outcome }) => {
     const stateDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-recovery-admission-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-recovery-admission-")),
     );
     const admittedCallback = createDeferred();
     const releaseCallback = createDeferred();
@@ -87,7 +87,7 @@ describe("Gateway agent command execution identity", () => {
     cleanupSink = configureExecutionIdentityAdmissionSink(() => true);
     let prepared: ReturnType<typeof prepareAgentCommandExecutionIdentity> | undefined;
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await replaceSessionEntry({ sessionKey, storePath }, sessionEntry);
         prepared = prepareAgentCommandExecutionIdentity({
           opts: {
@@ -191,7 +191,7 @@ describe("Gateway agent command execution identity", () => {
     } finally {
       prepared?.close();
       releaseCallback.resolve();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   });

@@ -2,17 +2,17 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import { insertRegistryWorktree } from "../agents/worktrees/registry.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/config.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
 import { insertGitHubPublicationSessionLifecycle } from "../state/github-publication-session-lifecycles.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  type OpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  type CarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createGitHubPublicationRuntime as createRuntime } from "./github-publication-runtime.js";
 import { createGitHubPublicationCoordinator as createCoordinator } from "./github-publication.js";
 import { REQUEST } from "./worker-environments/placement-dispatch-test-fixtures.js";
@@ -99,7 +99,7 @@ export function createTestGitHubPublicationCoordinator(
 
 export const SESSION_KEY = "agent:main:dashboard:publication";
 export const SESSION_ID = "session-publication";
-export const BRANCH = "openclaw/publication";
+export const BRANCH = "carapace/publication";
 export const BASE_HEAD = "a".repeat(40);
 export const OLD_HEAD = "b".repeat(40);
 export const NEW_HEAD = "c".repeat(40);
@@ -117,7 +117,7 @@ export function commandResult(stdout = "", code = 0) {
 }
 
 export function seedLocalPublication(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   params: {
     requestId: string;
     status: "requested" | "publishing";
@@ -155,7 +155,7 @@ export function seedLocalPublication(
       "Recovered after Gateway restart.",
       params.status,
       "previous-gateway-instance",
-      "openclaw/openclaw",
+      "carapace/carapace",
       BRANCH,
       "main",
       OLD_HEAD,
@@ -230,8 +230,8 @@ export async function persistPublicationTestSession(sessionKey = SESSION_KEY) {
 
 export function installGitHubPublicationTestHarness(): void {
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-publication-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", root);
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-publication-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", root);
     const syntheticIndex = path.join(root, "synthetic-index");
     await fs.writeFile(syntheticIndex, "synthetic Git transport index");
     insertRegistryWorktree(process.env, {
@@ -313,7 +313,7 @@ export function installGitHubPublicationTestHarness(): void {
     mocks.resolveRepository.mockReset().mockResolvedValue({
       checkoutRoot: "/repo/worktree",
       repoRoot: "/repo",
-      originUrl: "git@github.com:openclaw/openclaw.git",
+      originUrl: "git@github.com:Exaggarate/carapace.git",
       fingerprint: "fingerprint-1",
     });
     mocks.loadSession.mockReset().mockImplementation((sessionKey: string) => ({
@@ -343,12 +343,12 @@ export function installGitHubPublicationTestHarness(): void {
         }
         if (
           command.startsWith(
-            "gh api --hostname github.com repos/openclaw/openclaw --jq {fork, default_branch, parent:",
+            "gh api --hostname github.com repos/carapace/carapace --jq {fork, default_branch, parent:",
           )
         ) {
           return commandResult('{"fork":false,"default_branch":"main"}\n');
         }
-        const baseRefPrefix = "gh api --hostname github.com repos/openclaw/openclaw/git/ref/heads/";
+        const baseRefPrefix = "gh api --hostname github.com repos/carapace/carapace/git/ref/heads/";
         if (command.startsWith(baseRefPrefix)) {
           const branch = command.slice(baseRefPrefix.length).split(" --jq", 1)[0];
           return commandResult(JSON.stringify({ ref: `refs/heads/${branch}`, sha: BASE_HEAD }));
@@ -414,14 +414,14 @@ export function installGitHubPublicationTestHarness(): void {
           remoteLookup += 1;
           return commandResult(remoteLookup === 1 ? "" : `${NEW_HEAD}\trefs/heads/${BRANCH}\n`);
         }
-        if (command.includes(" repos/openclaw/openclaw/pulls ") && command.includes("state=all")) {
+        if (command.includes(" repos/carapace/carapace/pulls ") && command.includes("state=all")) {
           return commandResult("[]\n");
         }
         if (
           command ===
-          "gh api --hostname github.com --method POST repos/openclaw/openclaw/pulls --input -"
+          "gh api --hostname github.com --method POST repos/carapace/carapace/pulls --input -"
         ) {
-          return commandResult('{"html_url":"https://github.com/openclaw/openclaw/pull/125200"}\n');
+          return commandResult('{"html_url":"https://github.com/Exaggarate/carapace/pull/125200"}\n');
         }
         return commandResult();
       });
@@ -431,8 +431,8 @@ export function installGitHubPublicationTestHarness(): void {
     clearRuntimeConfigSnapshot();
     // Agent close releases leases through shared state; closing shared state first can
     // reopen it during teardown and leave a Windows handle under the fixture root.
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     await fs.rm(root, { recursive: true, force: true });
   });
@@ -513,7 +513,7 @@ export async function createRealPublicationWorkspace(
     checkoutRoot: cwd,
     repoRoot: cwd,
     fingerprint: worktree.repoFingerprint,
-    originUrl: "git@github.com:openclaw/openclaw.git",
+    originUrl: "git@github.com:Exaggarate/carapace.git",
   });
   mocks.updateIndex.mockImplementation(updateGitHubPublicationBranchAndIndex);
   const remote = mocks.runCommand.getMockImplementation()!;
@@ -523,7 +523,7 @@ export async function createRealPublicationWorkspace(
   mocks.runCommand.mockImplementation(
     async (argv: string[], options?: { cwd?: string; env?: NodeJS.ProcessEnv; input?: string }) => {
       if (argv[0] === "gh") {
-        if (argv.some((arg) => arg.startsWith("repos/openclaw/openclaw/git/ref/heads/"))) {
+        if (argv.some((arg) => arg.startsWith("repos/carapace/carapace/git/ref/heads/"))) {
           return commandResult(JSON.stringify({ ref: "refs/heads/main", sha: baseHead }));
         }
         if (argv.includes("POST")) {

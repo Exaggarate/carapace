@@ -1,8 +1,8 @@
 import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
 import os from "node:os";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { AgentToolUpdateCallback } from "./runtime/index.js";
 import { appendBoundedTextTail, SESSION_TOOL_STDERR_TAIL_BYTES } from "./sessions/tools/limits.js";
 import { TOOL_SEARCH_CODE_MODE_CHILD_SOURCE } from "./tool-search-code-mode-child.js";

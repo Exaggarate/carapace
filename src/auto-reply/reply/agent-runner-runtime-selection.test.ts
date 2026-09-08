@@ -4,13 +4,13 @@ import { resolveSessionRuntimeOverrideForProvider } from "../../agents/session-r
 import type { SessionEntry } from "../../config/sessions.js";
 
 describe("resolveSessionRuntimeOverrideForProvider", () => {
-  it("honors an explicit OpenClaw override for OpenAI", () => {
+  it("honors an explicit Carapace override for OpenAI", () => {
     expect(
       resolveSessionRuntimeOverrideForProvider({
         provider: "openai",
-        entry: { agentRuntimeOverride: "openclaw" } as SessionEntry,
+        entry: { agentRuntimeOverride: "carapace" } as SessionEntry,
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   afterEach(() => {

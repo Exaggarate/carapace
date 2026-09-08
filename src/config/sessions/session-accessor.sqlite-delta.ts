@@ -5,7 +5,7 @@ import {
 } from "../../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type {
   SessionTranscriptRawDeltaLimits,
   SessionTranscriptRawDeltaResult,
@@ -109,7 +109,7 @@ export function readTranscriptRawDelta(
     MAX_RAW_TRANSCRIPT_BYTES,
     "maxBytes",
   );
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return runSqliteDeferredTransactionSync(
     database.db,
     () => {

@@ -1,10 +1,10 @@
-import { formatReasoningMessage } from "openclaw/plugin-sdk/agent-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
+import { formatReasoningMessage } from "carapace/plugin-sdk/agent-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
 import {
   findCodeRegions,
   isInsideCode,
   stripReasoningTagsFromText,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import type { TelegramReasoningStepState } from "./bot-message-dispatch.types.js";
 
 // A durable reasoning message already marked channel-side: 🧠 + italic body

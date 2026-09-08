@@ -147,12 +147,12 @@ function prepareGitFixture(root) {
     packageJson.pnpm = pnpmConfig;
   }
   const fixtureUiBuildSource = `const fs=require("node:fs");fs.mkdirSync("dist/control-ui",{recursive:true});fs.writeFileSync("dist/control-ui/index.html",${JSON.stringify(controlUiHtml)})`;
-  const fixtureBuildPath = path.join(root, ".openclaw-fixture", "build.mjs");
+  const fixtureBuildPath = path.join(root, ".carapace-fixture", "build.mjs");
   fs.mkdirSync(path.dirname(fixtureBuildPath), { recursive: true });
   fs.copyFileSync(new URL("./build.mjs", import.meta.url), fixtureBuildPath);
   fs.copyFileSync(
     path.join(root, "dist", "build-info.json"),
-    path.join(root, ".openclaw-fixture", "build-info.json"),
+    path.join(root, ".carapace-fixture", "build-info.json"),
   );
   // The tarball omits source .gitignore rules; build metadata must remain generated.
   fs.appendFileSync(
@@ -161,7 +161,7 @@ function prepareGitFixture(root) {
   );
   packageJson.scripts = {
     ...packageJson.scripts,
-    build: "node .openclaw-fixture/build.mjs",
+    build: "node .carapace-fixture/build.mjs",
     lint: 'node -e "console.log(\\"fixture lint skipped\\")"',
     "ui:build": `node -e ${JSON.stringify(fixtureUiBuildSource)}`,
   };
@@ -194,7 +194,7 @@ function assertRuntimeStagingClean(root) {
     const directory = pending.pop();
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const fullPath = path.join(directory, entry.name);
-      if (/\.openclaw-update-.*\.tmp$/u.test(entry.name)) {
+      if (/\.carapace-update-.*\.tmp$/u.test(entry.name)) {
         leftovers.push(path.relative(root, fullPath));
       } else if (entry.isDirectory() && entry.name !== ".git") {
         pending.push(fullPath);
@@ -219,11 +219,11 @@ function assertDirtyUpdate(root, expectedHead) {
 }
 
 function assertConfigChannel(channel) {
-  const config = readJson(path.join(process.env.HOME, ".openclaw", "openclaw.json"));
+  const config = readJson(path.join(process.env.HOME, ".carapace", "carapace.json"));
   if (config.update?.channel === channel) {
     return;
   }
-  if (process.env.OPENCLAW_PACKAGE_ACCEPTANCE_LEGACY_COMPAT === "1") {
+  if (process.env.CARAPACE_PACKAGE_ACCEPTANCE_LEGACY_COMPAT === "1") {
     console.log(
       `legacy package did not persist update.channel ${channel}; got ${JSON.stringify(config.update?.channel)}`,
     );
@@ -257,17 +257,17 @@ function assertInstalledVersion(root, expectedVersion) {
   const manifest = readJson(path.join(root, "package.json"));
   if (manifest.version !== expectedVersion) {
     throw new Error(
-      `expected installed openclaw ${expectedVersion}, got ${String(manifest.version)}`,
+      `expected installed carapace ${expectedVersion}, got ${String(manifest.version)}`,
     );
   }
 }
 
 switch (command) {
   case "prepare-git-fixture":
-    prepareGitFixture(args[0] ?? "/tmp/openclaw-git");
+    prepareGitFixture(args[0] ?? "/tmp/carapace-git");
     break;
   case "write-control-ui":
-    writeControlUi(args[0] ?? "/tmp/openclaw-git");
+    writeControlUi(args[0] ?? "/tmp/carapace-git");
     break;
   case "assert-update":
     assertUpdate(args[0]);

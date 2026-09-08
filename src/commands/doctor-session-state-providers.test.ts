@@ -10,8 +10,8 @@ import {
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
   createPluginSessionStateDoctorScanner,
   runPluginSessionStateDoctorRepairs,
@@ -53,12 +53,12 @@ vi.mock("../plugins/doctor-contract-registry.js", async () => {
 
 async function runDoctor(params: {
   agentId?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   store: Record<string, SessionEntry>;
   confirm?: boolean;
   env?: NodeJS.ProcessEnv;
 }) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-route-doctor-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-route-doctor-"));
   const storePath = path.join(root, "sessions.json");
   await fs.writeFile(storePath, JSON.stringify(params.store), "utf8");
   const warnings: string[] = [];
@@ -154,7 +154,7 @@ describe("doctor session state provider routes", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ cfg, store });
 
@@ -187,7 +187,7 @@ describe("doctor session state provider routes", () => {
         },
       },
       session: { scope: "global" },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ agentId: "ops", cfg, store });
 
@@ -218,7 +218,7 @@ describe("doctor session state provider routes", () => {
     };
     const cfg = {
       agents: { defaults: { model: { primary: "github-copilot/gpt-5-mini" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ cfg, store });
     const repaired = result.store[sessionKey] as unknown as Record<string, unknown>;
@@ -259,7 +259,7 @@ describe("doctor session state provider routes", () => {
     };
     const cfg = {
       agents: { defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ cfg, store });
     const repaired = result.store[sessionKey];
@@ -289,7 +289,7 @@ describe("doctor session state provider routes", () => {
   });
 
   it("repairs a non-default SQLite row without creating a legacy store", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-route-sqlite-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-route-sqlite-"));
     const legacyStorePath = path.join(root, "sessions.json");
     const sqliteStorePath = resolveSqliteTargetFromSessionStorePath(legacyStorePath, {
       agentId: "ops",
@@ -308,7 +308,7 @@ describe("doctor session state provider routes", () => {
         defaults: { model: { primary: "github-copilot/gpt-5-mini" } },
         entries: { main: {}, ops: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     try {
       await upsertSessionEntryCore(
         {
@@ -340,7 +340,7 @@ describe("doctor session state provider routes", () => {
       expect(repaired?.modelProvider).toBeUndefined();
       expect(fsSync.existsSync(legacyStorePath)).toBe(false);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(root, { recursive: true, force: true });
     }
   });
@@ -359,7 +359,7 @@ describe("doctor session state provider routes", () => {
     };
     const cfg = {
       agents: { defaults: { model: { primary: "github-copilot/gpt-5-mini" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ cfg, store });
 
@@ -389,7 +389,7 @@ describe("doctor session state provider routes", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ cfg, store });
     const repaired = result.store[sessionKey] as unknown as Record<string, unknown>;
@@ -434,7 +434,7 @@ describe("doctor session state provider routes", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDoctor({ cfg, store });
 

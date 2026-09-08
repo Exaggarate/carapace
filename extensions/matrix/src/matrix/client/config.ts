@@ -3,23 +3,23 @@ import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "openclaw/plugin-sdk/account-id";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveOptionalIntegerOption } from "openclaw/plugin-sdk/number-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/account-id";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { resolveOptionalIntegerOption } from "carapace/plugin-sdk/number-runtime";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import { retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import {
   coerceSecretRef,
   isBuiltInDefaultSecretProviderRef,
   normalizeResolvedSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
-import type { PinnedDispatcherPolicy } from "openclaw/plugin-sdk/ssrf-dispatcher";
+} from "carapace/plugin-sdk/secret-input";
+import type { PinnedDispatcherPolicy } from "carapace/plugin-sdk/ssrf-dispatcher";
 import {
   isPrivateNetworkOptInEnabled,
   ssrfPolicyFromDangerouslyAllowPrivateNetwork,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 import {
   requiresExplicitMatrixDefaultAccount,
   resolveMatrixDefaultOrOnlyAccountId,
@@ -625,7 +625,7 @@ export async function resolveMatrixAuth(params?: {
         identifier: { type: "m.id.user", user: resolved.userId },
         password,
         device_id: resolved.deviceId,
-        initial_device_display_name: resolved.deviceName ?? "OpenClaw Gateway",
+        initial_device_display_name: resolved.deviceName ?? "Carapace Gateway",
       })) as MatrixLoginResponse,
   );
 

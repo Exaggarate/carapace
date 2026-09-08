@@ -3,23 +3,23 @@ import { afterEach, expect, it, vi } from "vitest";
 import { loadPersistedSharedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
 import { deletePersistedAuthProfileStoreRaw } from "../agents/auth-profiles/sqlite.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { maybeMigrateAuthProfileJsonStoresToSqlite } from "./doctor-auth-flat-profiles.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 afterEach(async () => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await state?.cleanup();
 });
 
@@ -29,7 +29,7 @@ it.each([
   ["state-db", "auth-profiles.json"],
   ["state-db", "auth.json"],
 ] as const)("recovers %s credentials after interrupted %s archival", async (location, filename) => {
-  state = await createOpenClawTestState({ layout: "state-only" });
+  state = await createCarapaceTestState({ layout: "state-only" });
   if (location === "state-db") {
     writeConfigMachineState("auth.sharedStore", { location }, { env: state.env });
   }
@@ -60,7 +60,7 @@ it.each([
     expect.stringContaining("simulated interruption after archive rename"),
   ]);
   expect(fs.existsSync(source)).toBe(false);
-  const db = openOpenClawStateDatabase({ env: state.env }).db;
+  const db = openCarapaceStateDatabase({ env: state.env }).db;
   expect(
     db.prepare("SELECT status FROM migration_sources WHERE source_path = ?").get(source),
   ).toEqual({ status: "imported" });

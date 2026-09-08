@@ -1,13 +1,13 @@
 // Matrix helper module supports format behavior.
 import MarkdownIt from "markdown-it";
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { isAutoLinkedFileRef } from "openclaw/plugin-sdk/text-autolink-runtime";
+import type { MarkdownTableMode } from "carapace/plugin-sdk/config-contracts";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { isAutoLinkedFileRef } from "carapace/plugin-sdk/text-autolink-runtime";
 import {
   markdownToIR,
   renderMarkdownWithMarkers,
   tokenizeHtmlTags,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import {
   createMatrixPrivateMarkers,
   isMarkdownEscaped,

@@ -197,7 +197,7 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
   }
 
   override disconnectedCallback() {
-    window.removeEventListener("openclaw:native-gateways-changed", this.nativeGatewaysChanged);
+    window.removeEventListener("carapace:native-gateways-changed", this.nativeGatewaysChanged);
     window.removeEventListener(
       SIDEBAR_HIDDEN_SESSION_CATALOGS_CHANGED_EVENT,
       this.hiddenSessionCatalogsChanged,
@@ -325,7 +325,7 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
 
   override connectedCallback() {
     super.connectedCallback();
-    window.addEventListener("openclaw:native-gateways-changed", this.nativeGatewaysChanged);
+    window.addEventListener("carapace:native-gateways-changed", this.nativeGatewaysChanged);
     this.hiddenSessionCatalogsChanged();
     window.addEventListener(
       SIDEBAR_HIDDEN_SESSION_CATALOGS_CHANGED_EVENT,
@@ -617,12 +617,12 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
                         ),
                     )
                     .map((tab) => renderAppSidebarPluginTabEntry(this, tab))}
-                  <openclaw-plugin-contributions
+                  <carapace-plugin-contributions
                     .kind=${"navigation"}
                     .excludedNavigationKeys=${sidebarZone.entries
                       .filter((entry) => entry.type === "plugin")
                       .map((entry) => entry.key)}
-                  ></openclaw-plugin-contributions>
+                  ></carapace-plugin-contributions>
                 </div>
               </nav>
               ${renderAppSidebarOnline(this)} ${this.renderSessions()}
@@ -638,7 +638,7 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
           </div>
           <div class="sidebar-shell__invite">
             ${this.communityInvitePresentation === "shown" ? renderCommunityInviteCard(this.dismissCommunityInvite) : nothing}
-            <openclaw-lobster-pet
+            <carapace-lobster-pet
               .seed=${lobsterPetSeed(this.sessionKey)}
               .mode=${resolveLobsterPetMode(
                 !this.offline,
@@ -649,19 +649,19 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
               .soundsEnabled=${this.lobsterPetSounds}
               .gatewayVersion=${this.gatewayVersion}
               .onVisitsDisabled=${this.refreshAppearanceSettings}
-            ></openclaw-lobster-pet>
+            ></carapace-lobster-pet>
           </div>
           <div class="sidebar-shell__footer">
             ${
               this.devGitBranch
-                ? html`<openclaw-tooltip .content=${this.devGitBranch}>
+                ? html`<carapace-tooltip .content=${this.devGitBranch}>
                     <div class="sidebar-footer-branch">
                       <span class="sidebar-footer-branch__icon" aria-hidden="true"
                         >${icons.gitBranch}</span
                       >
                       <span class="sidebar-footer-branch__name">${this.devGitBranch}</span>
                     </div>
-                  </openclaw-tooltip>`
+                  </carapace-tooltip>`
                 : nothing
             }
             ${renderAppSidebarFooterBar(this)}
@@ -677,6 +677,6 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
   }
 }
 
-if (!customElements.get("openclaw-app-sidebar")) {
-  customElements.define("openclaw-app-sidebar", AppSidebar);
+if (!customElements.get("carapace-app-sidebar")) {
+  customElements.define("carapace-app-sidebar", AppSidebar);
 }

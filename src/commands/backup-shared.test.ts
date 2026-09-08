@@ -26,7 +26,7 @@ describe("resolveRequiredBackupPath", () => {
 
   it("expands tilde from the effective home", () => {
     const home = path.resolve("effective-home");
-    vi.stubEnv("OPENCLAW_HOME", home);
+    vi.stubEnv("CARAPACE_HOME", home);
     expect(resolveRequiredBackupPath("~/backups", "--repository")).toBe(path.join(home, "backups"));
   });
 

@@ -1,11 +1,11 @@
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
 /** Removes retired provider profiles and repairs legacy OAuth profile ids. */
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { loadPersistedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
 import { repairOAuthProfileIdMismatch } from "../agents/auth-profiles/repair.js";
 import { ensureAuthProfileStoreWithoutExternalProfiles } from "../agents/auth-profiles/store-runtime.js";
 import { applyProviderConfigDefaultsForConfig } from "../config/provider-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   configReferencesAuthProfile,
   removeAuthProfileConfig,
@@ -25,7 +25,7 @@ function sanitizePromptLabel(label: string | undefined): string | undefined {
  * before writing config so stale provider-specific ids do not silently shadow current profiles.
  */
 export async function maybeRepairLegacyOAuthProfileIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   prompter: DoctorPrompter,
 ): Promise<LegacyOAuthProfileRepairResult> {
   let nextCfg = cfg;
@@ -151,6 +151,6 @@ export type RetiredAuthProfileCleanupPlan = {
 };
 
 export type LegacyOAuthProfileRepairResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   retiredProfileCleanupPlans: readonly RetiredAuthProfileCleanupPlan[];
 };

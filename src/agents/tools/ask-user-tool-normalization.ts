@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { Type } from "typebox";
 import type { QuestionRequestQuestion } from "../../../packages/gateway-protocol/src/index.js";
 import { ToolInputError } from "./common.js";

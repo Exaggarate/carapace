@@ -1,10 +1,10 @@
 /** Lazy preparation runtimes and session lifecycle helpers for cron runs. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { retireSessionMcpRuntime } from "../../agents/agent-bundle-mcp-tools.js";
 import { hasAnyAuthProfileStoreSource } from "../../agents/auth-profiles/source-check.js";
 import { SILENT_REPLY_TOKEN } from "../../auto-reply/tokens.js";
 import type { CliDeps } from "../../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
 import type { SkillSnapshot } from "../../skills/types.js";
 import type {
@@ -18,7 +18,7 @@ import { logWarn } from "./run.runtime.js";
 import type { RunCronAgentTurnResult } from "./run.types.js";
 
 export type RunCronAgentTurnParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deps: CliDeps;
   job: CronStoredJob;
   message: string;
@@ -49,7 +49,7 @@ export type WithRunSession = (
 ) => RunCronAgentTurnResult;
 
 const CRON_EXECUTION_ROOT_RUNTIME_ERROR =
-  "collection review requires a runtime that enforces the Workshop root through OpenClaw tools";
+  "collection review requires a runtime that enforces the Workshop root through Carapace tools";
 
 export class CronExecutionRootRuntimeError extends Error {
   constructor() {
@@ -63,7 +63,7 @@ export function assertCronExecutionRootRuntime(
   runtime: string,
   rootedCliExecution: boolean,
 ): void {
-  if (executionRoot && runtime !== "openclaw" && !rootedCliExecution) {
+  if (executionRoot && runtime !== "carapace" && !rootedCliExecution) {
     throw new CronExecutionRootRuntimeError();
   }
 }
@@ -89,7 +89,7 @@ async function loadCronAuthProfileRuntime() {
   return await cronAuthProfileRuntimeLoader.load();
 }
 
-function hasConfiguredAuthProfiles(cfg: OpenClawConfig): boolean {
+function hasConfiguredAuthProfiles(cfg: CarapaceConfig): boolean {
   return (
     Boolean(cfg.auth?.profiles && Object.keys(cfg.auth.profiles).length > 0) ||
     Boolean(cfg.auth?.order && Object.keys(cfg.auth.order).length > 0)
@@ -103,7 +103,7 @@ function hasConfiguredAuthProfiles(cfg: OpenClawConfig): boolean {
  * persistence will write.
  */
 export async function resolveCronAuthSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   modelId: string;
   configuredProfileId?: string;

@@ -57,7 +57,7 @@ function installNativeBridge(): ReturnType<typeof vi.fn> {
   const postMessage = vi.fn();
   Object.defineProperty(window, "webkit", {
     configurable: true,
-    value: { messageHandlers: { openclawUpdate: { postMessage } } },
+    value: { messageHandlers: { carapaceUpdate: { postMessage } } },
   });
   return postMessage;
 }
@@ -90,7 +90,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  document.body.querySelector("openclaw-modal-dialog")?.dispatchEvent(new Event("modal-cancel"));
+  document.body.querySelector("carapace-modal-dialog")?.dispatchEvent(new Event("modal-cancel"));
   document.body.replaceChildren();
   restoreDialogPolyfill();
   if (originalWebkit) {
@@ -162,7 +162,7 @@ it("keeps a repeated request from stacking a second confirmation or update", asy
   await getRenderedModalDialog(document.body);
 
   await second.settled;
-  expect(document.body.querySelectorAll("openclaw-modal-dialog")).toHaveLength(1);
+  expect(document.body.querySelectorAll("carapace-modal-dialog")).toHaveLength(1);
   expect(second.startGatewayUpdate).not.toHaveBeenCalled();
 
   findButton("Update and restart").click();
@@ -188,10 +188,10 @@ it("keeps the dialog open and narrates the install, the disconnect, and the fail
   // precisely so it can keep reporting through the disconnect.
   await stream.push({ run: null, busy: true, connected: false, failure: null });
   expect(modal.textContent).toContain("The Gateway disconnected during the update");
-  expect(modal.textContent).toContain("openclaw triage");
+  expect(modal.textContent).toContain("carapace triage");
   expect(modal.textContent).toContain("on the Gateway host");
   expect(modal.textContent).toContain("local coding agent");
-  expect(document.body.querySelector("openclaw-modal-dialog")).not.toBeNull();
+  expect(document.body.querySelector("carapace-modal-dialog")).not.toBeNull();
 
   await stream.push({
     run: null,
@@ -213,7 +213,7 @@ it("keeps the server success report visible across restart until the operator cl
   const restarting = createUpdateRunFixture({ phase: "restarting" });
   await stream.push({ run: restarting, busy: true, connected: false, failure: null });
   const view = document.body.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-    "openclaw-update-run-view",
+    "carapace-update-run-view",
   )!;
   await view.updateComplete;
   expect(view.textContent).toContain("Gateway restarting…");
@@ -229,9 +229,9 @@ it("keeps the server success report visible across restart until the operator cl
     failure: null,
   });
   await view.updateComplete;
-  expect(document.body.querySelector("openclaw-modal-dialog")).not.toBeNull();
+  expect(document.body.querySelector("carapace-modal-dialog")).not.toBeNull();
   expect(view.querySelector(".update-run-view__report")?.textContent).toContain(
-    "OpenClaw updated to 2026.9.2",
+    "Carapace updated to 2026.9.2",
   );
   findButton("Close").click();
   await settled;
@@ -254,7 +254,7 @@ it("opens a saved run without starting another update and acknowledges its repor
     viaNativeApp: false,
   });
   await getRenderedModalDialog(document.body);
-  expect(document.body.querySelector("openclaw-update-run-view")).not.toBeNull();
+  expect(document.body.querySelector("carapace-update-run-view")).not.toBeNull();
   expect(startGatewayUpdate).not.toHaveBeenCalled();
   findButton("Close").click();
   await settled;
@@ -289,11 +289,11 @@ it.each(["existing", "started"] as const)(
       findButton("Update and restart").click();
       await stream.push(progress);
     }
-    expect(document.body.querySelector("openclaw-update-run-view")).not.toBeNull();
+    expect(document.body.querySelector("carapace-update-run-view")).not.toBeNull();
 
     await stream.push({ run: null, busy: false, connected: false, failure: null });
 
-    expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull();
+    expect(document.body.querySelector("carapace-modal-dialog")).toBeNull();
     expect(document.body.classList.contains("update-dialog-open")).toBe(false);
     expect(stream.stopped).toBe(true);
     expect(onAcknowledge).not.toHaveBeenCalled();
@@ -320,7 +320,7 @@ it("unsubscribes when the initial snapshot retires a saved run before subscripti
   });
 
   expect(stopWatching).toHaveBeenCalledOnce();
-  expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull();
+  expect(document.body.querySelector("carapace-modal-dialog")).toBeNull();
   expect(document.body.classList.contains("update-dialog-open")).toBe(false);
   await settled;
 });
@@ -344,7 +344,7 @@ it("keeps the failure visible until the operator explicitly opens its review act
     connected: true,
     failure: "Read the recorded cause before retrying.",
   });
-  expect(document.body.querySelector("openclaw-modal-dialog")?.textContent).toContain(
+  expect(document.body.querySelector("carapace-modal-dialog")?.textContent).toContain(
     "Read the recorded cause",
   );
   expect(onReviewUpdate).not.toHaveBeenCalled();
@@ -442,7 +442,7 @@ it.each([
       await flushMicrotasks();
       const view = modal.querySelector<
         HTMLElement & { run: unknown; updateComplete: Promise<boolean> }
-      >("openclaw-update-run-view")!;
+      >("carapace-update-run-view")!;
       await view.updateComplete;
       expect(modal.textContent).toContain("Run status read failed");
       expect(view.run).toEqual(run);
@@ -464,7 +464,7 @@ it.each([
       );
     } finally {
       document.body
-        .querySelector("openclaw-modal-dialog")
+        .querySelector("carapace-modal-dialog")
         ?.dispatchEvent(new Event("modal-cancel"));
       await settled;
       await operation;

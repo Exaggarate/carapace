@@ -1,9 +1,9 @@
 /**
  * Doctor contract hooks for Codex plugin config and state migrations.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginDoctorStateMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginDoctorStateMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { codexOrphanedSessionBindingMigration } from "./src/migration/session-binding-orphans.js";
 import { stateMigrations as legacyStateMigrations } from "./src/migration/session-binding-sidecars.js";
 
@@ -56,25 +56,25 @@ export const legacyConfigRules: LegacyConfigRule[] = [
   {
     path: ["plugins", "entries", "codex", "config"],
     message:
-      'plugins.entries.codex.config.codexDynamicToolsProfile is retired; Codex app-server always keeps Codex-native workspace tools native. Run "openclaw doctor --fix".',
+      'plugins.entries.codex.config.codexDynamicToolsProfile is retired; Codex app-server always keeps Codex-native workspace tools native. Run "carapace doctor --fix".',
     match: hasRetiredDynamicToolsProfile,
   },
   {
     path: ["plugins", "entries", "codex", "config", "codexPlugins"],
     message:
-      'plugins.entries.codex.config.codexPlugins.allow_destructive_actions="on-request" was renamed to "auto". Run "openclaw doctor --fix".',
+      'plugins.entries.codex.config.codexPlugins.allow_destructive_actions="on-request" was renamed to "auto". Run "carapace doctor --fix".',
     match: hasLegacyPluginDestructivePolicy,
   },
   {
     path: ["plugins", "entries", "codex", "config", "appServer"],
     message:
-      'plugins.entries.codex.config.appServer.approvalPolicy values "on-failure" and "untrusted" are retired; use "on-request". Run "openclaw doctor --fix".',
+      'plugins.entries.codex.config.appServer.approvalPolicy values "on-failure" and "untrusted" are retired; use "on-request". Run "carapace doctor --fix".',
     match: hasRetiredApprovalPolicy,
   },
   {
     path: ["plugins", "entries", "codex", "config", "appServer"],
     message:
-      'Codex app-server turn idle timeouts are retired; native Codex owns provider liveness and turn completion. The existing agents.defaults.timeoutSeconds run limit remains unchanged. Run "openclaw doctor --fix" to remove the old settings.',
+      'Codex app-server turn idle timeouts are retired; native Codex owns provider liveness and turn completion. The existing agents.defaults.timeoutSeconds run limit remains unchanged. Run "carapace doctor --fix" to remove the old settings.',
     match: hasRetiredTurnIdleTimeout,
   },
 ];
@@ -82,8 +82,8 @@ export const legacyConfigRules: LegacyConfigRule[] = [
 /**
  * Removes retired Codex plugin config keys while preserving unrelated config.
  */
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: CarapaceConfig }): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   const rawEntry = asNullableRecord(cfg.plugins?.entries?.codex);
@@ -105,7 +105,7 @@ export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): 
     return { config: cfg, changes: [] };
   }
 
-  const nextConfig = structuredClone(cfg) as OpenClawConfig & {
+  const nextConfig = structuredClone(cfg) as CarapaceConfig & {
     plugins?: Record<string, unknown>;
   };
   const nextPlugins = asNullableRecord(nextConfig.plugins);

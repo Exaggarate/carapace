@@ -14,9 +14,9 @@ installConnectedControlUiServerSuite((started) => {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 it("tails configured rolling placeholders through authenticated Gateway RPC", async () => {
-  const tempDir = tempDirs.make("openclaw-gateway-log-tail-");
+  const tempDir = tempDirs.make("carapace-gateway-log-tail-");
   setLoggerOverride({
-    file: path.join(tempDir, "openclaw-YYYY-MM-DD.log"),
+    file: path.join(tempDir, "carapace-YYYY-MM-DD.log"),
     level: "info",
     consoleLevel: "silent",
   });
@@ -35,7 +35,7 @@ it("tails configured rolling placeholders through authenticated Gateway RPC", as
     );
     expect(path.dirname(response.payload?.file ?? "")).toBe(tempDir);
     expect(path.basename(response.payload?.file ?? "")).toMatch(
-      /^openclaw-\d{4}-\d{2}-\d{2}\.log$/,
+      /^carapace-\d{4}-\d{2}-\d{2}\.log$/,
     );
   } finally {
     await flushLogger();

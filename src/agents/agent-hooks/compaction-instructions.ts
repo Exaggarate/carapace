@@ -4,8 +4,8 @@
  * Provides default language-preservation instructions and a precedence-based
  * resolver for customInstructions used during context compaction summaries.
  */
-import { truncateCodePoints } from "@openclaw/normalization-core/code-points";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { truncateCodePoints } from "@carapace/normalization-core/code-points";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 
 /**
  * Default instructions injected into every safeguard-mode compaction summary.

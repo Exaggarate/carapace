@@ -22,7 +22,7 @@ env:
 jobs:
   update-docs:
     if: >
-      github.repository == 'openclaw/openclaw' &&
+      github.repository == 'carapace/carapace' &&
       github.actor != 'github-actions[bot]' &&
       (github.event_name != 'workflow_run' ||
         (github.event.workflow_run.conclusion == 'success' &&
@@ -41,7 +41,7 @@ jobs:
           submodules: false
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Gate trusted main activity and hourly cadence
         id: gate
@@ -176,11 +176,11 @@ jobs:
       - name: Ensure docs agent key exists
         if: steps.gate.outputs.run_agent == 'true'
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENCLAW_DOCS_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.CARAPACE_DOCS_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
           if [ -z "${OPENAI_API_KEY:-}" ]; then
-            echo "Missing OPENCLAW_DOCS_AGENT_OPENAI_API_KEY or OPENAI_API_KEY secret." >&2
+            echo "Missing CARAPACE_DOCS_AGENT_OPENAI_API_KEY or OPENAI_API_KEY secret." >&2
             exit 1
           fi
 
@@ -191,9 +191,9 @@ jobs:
           DOCS_AGENT_BASE_SHA: ${{ steps.gate.outputs.review_base_sha }}
           DOCS_AGENT_HEAD_SHA: ${{ steps.gate.outputs.review_head_sha }}
         with:
-          openai-api-key: ${{ secrets.OPENCLAW_DOCS_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
+          openai-api-key: ${{ secrets.CARAPACE_DOCS_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
           prompt-file: .github/codex/prompts/docs-agent.md
-          model: ${{ vars.OPENCLAW_CI_OPENAI_MODEL_BARE }}
+          model: ${{ vars.CARAPACE_CI_OPENAI_MODEL_BARE }}
           effort: medium
           sandbox: workspace-write
           safety-strategy: drop-sudo
@@ -274,8 +274,8 @@ jobs:
               print("No docs changes.")
               raise SystemExit(0)
 
-          run_git(workspace, "config", "user.name", "openclaw-docs-agent[bot]", reclaim_locks=True)
-          run_git(workspace, "config", "user.email", "openclaw-docs-agent[bot]@users.noreply.github.com", reclaim_locks=True)
+          run_git(workspace, "config", "user.name", "carapace-docs-agent[bot]", reclaim_locks=True)
+          run_git(workspace, "config", "user.email", "carapace-docs-agent[bot]@users.noreply.github.com", reclaim_locks=True)
           run_git(workspace, "add", "docs", "README.md", "CHANGELOG.md", reclaim_locks=True)
           run_git(workspace, "commit", "--no-verify", "-m", "docs: refresh documentation", reclaim_locks=True)
           for attempt in range(1, 6):

@@ -10,7 +10,7 @@ import { markdownToIR } from "../../packages/markdown-core/src/ir.js";
 const WORKFLOW_PATH = ".github/workflows/ios-periphery-comment.yml";
 const PRODUCER_WORKFLOW_PATH = ".github/workflows/ios-periphery.yml";
 const MACOS_PRODUCER_WORKFLOW_PATH = ".github/workflows/macos-periphery.yml";
-const SHARED_PRODUCER_WORKFLOW_PATH = ".github/workflows/shared-openclawkit-periphery.yml";
+const SHARED_PRODUCER_WORKFLOW_PATH = ".github/workflows/shared-carapacekit-periphery.yml";
 const ARTIFACT_NAME = "ios-periphery-dead-code-12345-2";
 
 type WorkflowStep = {
@@ -175,7 +175,7 @@ async function runCommenter(
     head_sha: options.runHeadSha ?? "head-sha",
     id: 12345,
     pull_requests: [{ number: 123 }],
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
     run_attempt: options.runAttempt ?? 2,
     run_number: 8,
     workflow_id: 999,
@@ -252,8 +252,8 @@ async function runCommenter(
                 repo: {
                   full_name:
                     pullGetCount > 1
-                      ? (options.liveRepositoryAfter ?? "openclaw/openclaw")
-                      : "openclaw/openclaw",
+                      ? (options.liveRepositoryAfter ?? "carapace/carapace")
+                      : "carapace/carapace",
                 },
               },
               draft:
@@ -323,8 +323,8 @@ async function runCommenter(
       workflow_run: run,
     },
     repo: {
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "carapace",
+      repo: "carapace",
     },
   };
 
@@ -658,7 +658,7 @@ describe("iOS Periphery comment workflow", () => {
       {
         existingComments: [
           {
-            body: "<!-- openclaw-ios-periphery-dead-code -->\nold findings",
+            body: "<!-- carapace-ios-periphery-dead-code -->\nold findings",
             id: 99,
             user: { login: "github-actions[bot]", type: "Bot" },
           },
@@ -802,7 +802,7 @@ describe("iOS Periphery comment workflow", () => {
       {
         existingComments: [
           {
-            body: "<!-- openclaw-ios-periphery-dead-code -->",
+            body: "<!-- carapace-ios-periphery-dead-code -->",
             id: 99,
             user: { login: "another-app[bot]", type: "Bot" },
           },
@@ -828,7 +828,7 @@ describe.each(["iOS", "macOS"] as const)("%s Periphery publication admission", (
     action: "converted_to_draft",
     draft: true,
   });
-  const marker = `<!-- openclaw-${platform.toLowerCase()}-periphery-dead-code -->`;
+  const marker = `<!-- carapace-${platform.toLowerCase()}-periphery-dead-code -->`;
   const archive = makeZip({
     "periphery.json": JSON.stringify([
       { kind: "function", location: "Sources/Test.swift:12", name: "unusedSyntheticFunction" },

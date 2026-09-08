@@ -5,7 +5,7 @@ import type { BoardSnapshot } from "../../lib/board/types.ts";
 import "../../styles/base.css";
 import "./board-view.ts";
 
-type OpenClawBoardView = HTMLElementTagNameMap["openclaw-board-view"];
+type CarapaceBoardView = HTMLElementTagNameMap["carapace-board-view"];
 
 const hasBrowserLayout = !navigator.userAgent.toLowerCase().includes("jsdom");
 
@@ -42,8 +42,8 @@ const source: BoardSnapshot = {
   ],
 };
 
-async function mount(applyOps = vi.fn(async () => undefined)): Promise<OpenClawBoardView> {
-  const view = document.createElement("openclaw-board-view");
+async function mount(applyOps = vi.fn(async () => undefined)): Promise<CarapaceBoardView> {
+  const view = document.createElement("carapace-board-view");
   view.snapshot = structuredClone(source);
   view.activeTabId = "main";
   view.widgetFrameUrl = () => "about:blank";
@@ -51,7 +51,7 @@ async function mount(applyOps = vi.fn(async () => undefined)): Promise<OpenClawB
   document.body.append(view);
   await view.updateComplete;
   await Promise.all(
-    [...view.querySelectorAll("openclaw-board-widget-cell")].map((cell) => cell.updateComplete),
+    [...view.querySelectorAll("carapace-board-widget-cell")].map((cell) => cell.updateComplete),
   );
   return view;
 }
@@ -79,7 +79,7 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
+describe.skipIf(!hasBrowserLayout)("carapace-board-view browser layout", () => {
   it("lays out adjacent first-fit cells without pixel overlap", async () => {
     const view = await mount();
     view.style.width = "1200px";
@@ -96,7 +96,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
     async (width) => {
       const view = await mount();
       view.style.width = `${width}px`;
-      const cells = [...view.querySelectorAll("openclaw-board-widget-cell")];
+      const cells = [...view.querySelectorAll("carapace-board-widget-cell")];
       const frames = cells.map((cell) => cell.querySelector("iframe"));
       const snapshot = structuredClone(source);
       snapshot.widgets[0]!.position = 1;
@@ -116,7 +116,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
       expect(first!.height).toBeGreaterThanOrEqual(BOARD_GRID_ROW_HEIGHT);
       expect(second!.height).toBe(BOARD_GRID_ROW_HEIGHT * 3 + BOARD_GRID_GAP * 2);
       expect(view.snapshot).toEqual(snapshot);
-      expect([...view.querySelectorAll("openclaw-board-widget-cell")]).toEqual(cells);
+      expect([...view.querySelectorAll("carapace-board-widget-cell")]).toEqual(cells);
       expect(cells.map((cell) => cell.querySelector("iframe"))).toEqual(frames);
       view.style.width = "1200px";
       expect(cells[0]!.querySelector("section")!.getBoundingClientRect().width).toBeLessThan(600);
@@ -133,7 +133,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
     pointer(window, "pointermove", 81, target.right - 3, target.top + target.height / 2);
     await view.updateComplete;
     await Promise.all(
-      [...view.querySelectorAll("openclaw-board-widget-cell")].map((cell) => cell.updateComplete),
+      [...view.querySelectorAll("carapace-board-widget-cell")].map((cell) => cell.updateComplete),
     );
     pointer(window, "pointerup", 81, target.right - 3, target.top + target.height / 2);
     await vi.waitFor(() =>
@@ -220,7 +220,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
       ],
     };
     await view.updateComplete;
-    const cell = view.querySelector("openclaw-board-widget-cell");
+    const cell = view.querySelector("carapace-board-widget-cell");
     await cell?.updateComplete;
     const widget = view.querySelector<HTMLElement>('[data-test-id="board-widget"]');
     const bar = widget!.querySelector<HTMLElement>(".board-widget__bar");
@@ -261,7 +261,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
       ],
     };
     await view.updateComplete;
-    const cell = view.querySelector("openclaw-board-widget-cell");
+    const cell = view.querySelector("carapace-board-widget-cell");
     await cell?.updateComplete;
     const widget = view.querySelector<HTMLElement>('[data-test-id="board-widget"]');
     const bar = widget!.querySelector<HTMLElement>(".board-widget__bar");
@@ -392,7 +392,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
     };
     await view.updateComplete;
     await Promise.all(
-      [...view.querySelectorAll("openclaw-board-widget-cell")].map((cell) => cell.updateComplete),
+      [...view.querySelectorAll("carapace-board-widget-cell")].map((cell) => cell.updateComplete),
     );
     const cells = [...view.querySelectorAll<HTMLElement>('[data-test-id="board-widget"]')];
     const first = cells[0]!;
@@ -403,7 +403,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
     window.dispatchEvent(
       new MessageEvent("message", {
         source: frame.contentWindow,
-        data: { type: "openclaw:widget-size", height: 300 },
+        data: { type: "carapace:widget-size", height: 300 },
       }),
     );
     // The card hugs its content (300px + 2x12px inset + 2px border); the
@@ -439,13 +439,13 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
         widgets: [{ ...source.widgets[0]!, presentation }],
       };
       await view.updateComplete;
-      const cell = view.querySelector("openclaw-board-widget-cell")!;
+      const cell = view.querySelector("carapace-board-widget-cell")!;
       await cell.updateComplete;
       const frame = cell.querySelector("iframe")!;
       const initialHeight = frame.getBoundingClientRect().height;
       const reports: number[] = [];
       const recordSize = (event: MessageEvent) => {
-        if (event.source === frame.contentWindow && event.data?.type === "openclaw:widget-size") {
+        if (event.source === frame.contentWindow && event.data?.type === "carapace:widget-size") {
           reports.push(event.data.height);
         }
       };
@@ -529,7 +529,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
       widgets: source.widgets.map((widget) => ({ ...widget, sizeW: 12 })),
     };
     await view.updateComplete;
-    const cells = view.querySelectorAll("openclaw-board-widget-cell");
+    const cells = view.querySelectorAll("carapace-board-widget-cell");
     await Promise.all([...cells].map((cell) => cell.updateComplete));
     const handle = view.querySelector<HTMLElement>(".board-widget__drag-handle");
     pointer(handle!, "pointerdown", 61, 100, 100);
@@ -552,7 +552,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
       widgets: [{ ...source.widgets[0]!, sizeH: 1, grantState: "pending" }],
     };
     await view.updateComplete;
-    const cell = view.querySelector("openclaw-board-widget-cell");
+    const cell = view.querySelector("carapace-board-widget-cell");
     await cell?.updateComplete;
     const body = view.querySelector<HTMLElement>(".board-widget__body--scrollable");
     const allow = view.querySelector<HTMLButtonElement>('[data-test-id="board-grant-allow"]');
@@ -572,7 +572,7 @@ describe.skipIf(!hasBrowserLayout)("openclaw-board-view browser layout", () => {
       throw new Error("one-row resolver failed");
     };
     await view.updateComplete;
-    const cell = view.querySelector("openclaw-board-widget-cell");
+    const cell = view.querySelector("carapace-board-widget-cell");
     await cell?.updateComplete;
     const body = view.querySelector<HTMLElement>(".board-widget__body--scrollable");
     expect(getComputedStyle(body!).overflowY).toBe("auto");

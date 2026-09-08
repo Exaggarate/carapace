@@ -1,6 +1,6 @@
 // Voice Call plugin module implements tunnel behavior.
 import { spawn, type ChildProcess, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   appendBoundedChildOutput,
   emptyBoundedChildOutput,

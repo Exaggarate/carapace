@@ -9,7 +9,7 @@ import {
 } from "../../config/sessions/main-session.js";
 import { buildSessionCreationStamp } from "../../config/sessions/session-entry-provenance.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { measureDiagnosticsTimelineSpanSync } from "../../infra/diagnostics-timeline.js";
 import { isIncognitoSessionKey } from "../../routing/session-key.js";
 import { resolveMissingAgentHarnessSessionError } from "../../sessions/agent-harness-session-key.js";
@@ -39,10 +39,10 @@ import type { GatewayRequestHandlerOptions } from "./types.js";
 // Admission's writer barrier owns preparation. Keep the seed in memory until the
 // input, Goal, run claim, and receipt commit together.
 export function prepareGoalChatSendSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayRequestHandlerOptions["client"];
   agentId: string;
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
 }): { entry: SessionEntry; assertSkillSelection: () => void } {
   const { cfg, client, agentId, getRuntimeConfig } = params;
   const creationError = authorizeGatewaySessionCreation({ cfg, client, agentId });
@@ -125,7 +125,7 @@ function loadChatSendSessionContext(params: {
   );
   const expectedLeafEntryId =
     p.expectedLeafEntryId === null ? null : normalizeOptionalChatText(p.expectedLeafEntryId);
-  const sessionRoutingChanged = (candidateConfig: OpenClawConfig) =>
+  const sessionRoutingChanged = (candidateConfig: CarapaceConfig) =>
     expectedSessionRoutingContract !== undefined &&
     expectedSessionRoutingContract.toLowerCase() !== resolveSessionRoutingContract(candidateConfig);
   return {

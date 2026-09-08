@@ -18,7 +18,7 @@ function changelog(strings: TemplateStringsArray, ...values: string[]) {
 
 const cumulativeChangelog = changelog`
 # Changelog
-Docs: https://docs.openclaw.ai
+Docs: https://github.com/Exaggarate/carapace
 ## Unreleased
 ### Fixes
 - Pending note.
@@ -66,7 +66,7 @@ describe("package-changelog", () => {
     expect(extractCurrentPackageChangelog(cumulativeChangelog, "2026.5.28-beta.1")).toBe(
       changelog`
 # Changelog
-Docs: https://docs.openclaw.ai
+Docs: https://github.com/Exaggarate/carapace
 
 ## 2026.5.28
 ### Highlights
@@ -155,7 +155,7 @@ Docs: https://docs.openclaw.ai
         }),
       ).toBe(changelog`
 # Changelog
-Docs: https://docs.openclaw.ai
+Docs: https://github.com/Exaggarate/carapace
 
 ## ${heading}
 ### Fixes
@@ -206,7 +206,7 @@ ${record}
       const source = `# Changelog\n\n${editorial}\n\n${oversizedContributionRecord}\n`;
       const packaged = extractCurrentPackageChangelog(source, version);
       expect(packaged).toBe(
-        `# Changelog\n\n${editorial}\n\n### Complete contribution record\n\nThe full contribution record is available in the tag-pinned [CHANGELOG.md](https://github.com/openclaw/openclaw/blob/v${version}/CHANGELOG.md#complete-contribution-record).\n`,
+        `# Changelog\n\n${editorial}\n\n### Complete contribution record\n\nThe full contribution record is available in the tag-pinned [CHANGELOG.md](https://github.com/Exaggarate/carapace/blob/v${version}/CHANGELOG.md#complete-contribution-record).\n`,
       );
     },
   );
@@ -221,7 +221,7 @@ ${record}
   it("fails closed when the extracted release section is effectively empty", () => {
     const source = changelog`
 # Changelog
-Docs: https://docs.openclaw.ai
+Docs: https://github.com/Exaggarate/carapace
 ## 2026.5.28
 ### Fixes
 ## 2026.5.27
@@ -236,7 +236,7 @@ Docs: https://docs.openclaw.ai
   it.each([cumulativeChangelog, oversizedChangelog])(
     "prepares and restores all source notes and credits (%#)",
     async (sourceChangelog) => {
-      const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-package-changelog-"));
+      const root = mkdtempSync(path.join(os.tmpdir(), "carapace-package-changelog-"));
       try {
         writeFileSync(path.join(root, "package.json"), '{"version":"2026.5.28-beta.1"}\n', "utf8");
         writeFileSync(path.join(root, "CHANGELOG.md"), sourceChangelog, "utf8");
@@ -259,7 +259,7 @@ Docs: https://docs.openclaw.ai
   it.each(["Unreleased", "2026.5.30 (Unreleased)"])(
     "recovers interrupted %s QA packaging with the default restore path",
     async (heading) => {
-      const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-package-changelog-"));
+      const root = mkdtempSync(path.join(os.tmpdir(), "carapace-package-changelog-"));
       const unreleasedChangelog = cumulativeChangelog
         .replace("## Unreleased", `## ${heading}`)
         .replace("- Pending note.", "- Pending release note with enough detail.");
@@ -279,7 +279,7 @@ Docs: https://docs.openclaw.ai
   it.each([cumulativeChangelog, oversizedChangelog])(
     "refuses to restore over edits after package preparation (%#)",
     async (sourceChangelog) => {
-      const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-package-changelog-"));
+      const root = mkdtempSync(path.join(os.tmpdir(), "carapace-package-changelog-"));
       const backupPath = path.join(
         root,
         ".artifacts",

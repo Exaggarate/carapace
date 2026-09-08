@@ -1,13 +1,13 @@
 import { hostname as readHostName } from "node:os";
-import type { EmbeddedRunAttemptParamsV2 } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import type { EmbeddedRunAttemptParamsV2 } from "carapace/plugin-sdk/agent-harness-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import type {
   CodexAppServerApprovalsReviewer,
   CodexAppServerManagedApprovalPolicy,
   CodexAppServerRuntimeOptions,
   CodexAppServerSandboxMode,
   CodexPluginConfig,
-  OpenClawExecMode,
+  CarapaceExecMode,
 } from "./config-contracts.js";
 import { selectGuardianSandbox } from "./config-exec-policy.js";
 import {
@@ -25,7 +25,7 @@ type SessionPermissionMode = NonNullable<EmbeddedRunAttemptParamsV2["permissionM
 export type CodexEffectiveSessionPermissionPolicy = {
   mode: SessionPermissionMode;
   root: string;
-  execMode: OpenClawExecMode;
+  execMode: CarapaceExecMode;
 };
 
 export const CODEX_SESSION_PERMISSION_EXEC_MODES = {
@@ -33,7 +33,7 @@ export const CODEX_SESSION_PERMISSION_EXEC_MODES = {
   guarded: "ask",
   workspace: "auto",
   full: "full",
-} satisfies Record<SessionPermissionMode, OpenClawExecMode>;
+} satisfies Record<SessionPermissionMode, CarapaceExecMode>;
 
 type CodexSessionPermissionTuple = {
   approvalPolicy: CodexAppServerManagedApprovalPolicy;
@@ -88,7 +88,7 @@ function requirementsAllowTuple(
 
 function tightenTupleForExecMode(
   tuple: CodexSessionPermissionTuple,
-  execMode: OpenClawExecMode | undefined,
+  execMode: CarapaceExecMode | undefined,
   requiresPerCommandApproval: boolean,
 ): CodexSessionPermissionTuple {
   switch (execMode) {
@@ -184,7 +184,7 @@ export function applyCodexSessionPermissionPolicy(params: {
   requirementsToml?: string;
   hostName?: string;
   policyLocked?: boolean;
-  execMode?: OpenClawExecMode;
+  execMode?: CarapaceExecMode;
 }): CodexAppServerRuntimeOptions {
   if (!params.permissionMode) {
     return params.appServer;

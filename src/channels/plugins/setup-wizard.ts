@@ -3,8 +3,8 @@
  *
  * Adapts declarative wizard definitions into imperative setup adapters used by onboarding.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import { resolveChannelSetupExecutionAdapter } from "./setup-contract.js";
 import { configureChannelAccessWithAllowlist } from "./setup-group-access-configure.js";
@@ -40,18 +40,18 @@ type ChannelSectionWithAccounts = Record<string, unknown> & {
   defaultAccount?: string;
 };
 
-function getChannelSection(cfg: OpenClawConfig, channelKey: string): ChannelSectionWithAccounts {
+function getChannelSection(cfg: CarapaceConfig, channelKey: string): ChannelSectionWithAccounts {
   const channels = cfg.channels as Record<string, unknown> | undefined;
   const channel = channels?.[channelKey];
   return channel && typeof channel === "object" ? (channel as ChannelSectionWithAccounts) : {};
 }
 
 function createWizardAccountScope(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   accountId: string;
   setupSurface?: ChannelSetupAdapter;
-}): { cfg: OpenClawConfig; restore: (cfg: OpenClawConfig) => OpenClawConfig } {
+}): { cfg: CarapaceConfig; restore: (cfg: CarapaceConfig) => CarapaceConfig } {
   const accountId = normalizeAccountId(params.accountId);
   const initialChannel = getChannelSection(params.cfg, params.channelKey);
   // An existing accounts map — even empty — makes legacy plugins write account-scoped
@@ -82,7 +82,7 @@ function createWizardAccountScope(params: {
         defaultAccount: accountId,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   return {
     cfg: scopedCfg,
@@ -98,7 +98,7 @@ function createWizardAccountScope(params: {
           ...currentCfg.channels,
           [params.channelKey]: restoredChannel,
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
     },
   };
 }
@@ -142,7 +142,7 @@ async function buildStatus(
 // supported through the single setup execution compatibility boundary.
 function applySetupInput(params: {
   plugin: ChannelSetupWizardPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   input: ChannelSetupInput;
 }) {
@@ -192,7 +192,7 @@ function applySetupInput(params: {
 
 function collectCredentialValues(params: {
   wizard: ChannelSetupWizard;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
 }): ChannelSetupWizardCredentialValues {
   const values: ChannelSetupWizardCredentialValues = {};
@@ -215,7 +215,7 @@ function collectCredentialValues(params: {
 async function applyWizardTextInputValue(params: {
   plugin: ChannelSetupWizardPlugin;
   input: ChannelSetupWizardTextInput;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   value: string;
 }) {
@@ -314,7 +314,7 @@ export function buildChannelSetupWizardAdapterFromSetupWizard(params: {
               | ChannelSetupAdapter
               | undefined,
           })
-        : { cfg, restore: (currentCfg: OpenClawConfig) => currentCfg };
+        : { cfg, restore: (currentCfg: CarapaceConfig) => currentCfg };
       let next = accountScope.cfg;
       let credentialValues = collectCredentialValues({
         wizard,

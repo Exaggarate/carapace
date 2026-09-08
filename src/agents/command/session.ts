@@ -39,7 +39,7 @@ import {
   resolvePersistedSessionStoreOwnerForKey,
 } from "../../config/sessions/session-store-owner.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   classifySessionKeyShape,
   isUnscopedSessionKeySentinel,
@@ -175,7 +175,7 @@ export function buildExplicitSessionIdSessionKey(params: {
 }
 
 function collectSessionIdMatchesForRequest(opts: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionEntries: SessionEntrySummary[];
   storePath: string;
   storeAgentId?: string;
@@ -294,7 +294,7 @@ function collectSessionIdMatchesForRequest(opts: {
  * into that agent's main session key.
  */
 export function resolveStoredSessionKeyForSessionId(opts: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionId: string;
   agentId?: string;
 }): SessionKeyResolution {
@@ -381,7 +381,7 @@ export function resolveStoredSessionKeyForSessionId(opts: {
 }
 
 function resolveSessionKeyForRequestInternal(opts: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to?: string;
   sessionId?: string;
   sessionKey?: string;
@@ -551,7 +551,7 @@ function resolveSessionKeyForRequestInternal(opts: {
 
 /** Resolves an existing session-id row across agent stores without creating a fallback key. */
 export function resolveExistingSessionKeyForRequest(opts: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionId: string;
   agentId?: string;
 }): SessionKeyResolution {
@@ -560,7 +560,7 @@ export function resolveExistingSessionKeyForRequest(opts: {
 
 /** Resolves the session key/store targeted by one command request. */
 function resolveSessionKeyForRequest(opts: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to?: string;
   sessionId?: string;
   sessionKey?: string;
@@ -578,7 +578,7 @@ export function resolveSessionKeyForRequestCore(
 
 /** Resolves or creates the session used by one agent command request. */
 export function resolveSession(opts: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to?: string;
   sessionId?: string;
   sessionKey?: string;

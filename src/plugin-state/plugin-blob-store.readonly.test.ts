@@ -3,19 +3,19 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  clearOpenClawDatabaseQuarantine,
-  recordOpenClawDatabaseQuarantine,
-} from "../state/openclaw-quarantine-store.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+  clearCarapaceDatabaseQuarantine,
+  recordCarapaceDatabaseQuarantine,
+} from "../state/carapace-quarantine-store.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  clearOpenClawStateDatabaseOpenFailure,
-  closeOpenClawStateDatabaseByPath,
-  isOpenClawStateDatabaseOpen,
-  openOpenClawStateDatabase,
-  recordOpenClawStateDatabaseOpenFailure,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  clearCarapaceStateDatabaseOpenFailure,
+  closeCarapaceStateDatabaseByPath,
+  isCarapaceStateDatabaseOpen,
+  openCarapaceStateDatabase,
+  recordCarapaceStateDatabaseOpenFailure,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   createPluginBlobStoreForTests,
   resetPluginBlobStoreForTests,
@@ -33,40 +33,40 @@ function createStore(env: NodeJS.ProcessEnv) {
 
 describe("plugin blob read-only access", () => {
   it("returns empty reads without creating an absent database", async () => {
-    await withOpenClawTestState({ label: "blob-read-absent", applyEnv: false }, async (state) => {
+    await withCarapaceTestState({ label: "blob-read-absent", applyEnv: false }, async (state) => {
       const store = createStore(state.env);
-      const databasePath = resolveOpenClawStateSqlitePath(state.env);
+      const databasePath = resolveCarapaceStateSqlitePath(state.env);
 
       await expect(store.lookup("missing")).resolves.toBeUndefined();
       await expect(store.entries()).resolves.toEqual([]);
       expect(existsSync(path.dirname(databasePath))).toBe(false);
-      expect(isOpenClawStateDatabaseOpen(databasePath)).toBe(false);
+      expect(isCarapaceStateDatabaseOpen(databasePath)).toBe(false);
     });
   });
 
   it("reads committed blobs after close without reopening a writable owner", async () => {
-    await withOpenClawTestState({ label: "blob-read-reopen", applyEnv: false }, async (state) => {
+    await withCarapaceTestState({ label: "blob-read-reopen", applyEnv: false }, async (state) => {
       const store = createStore(state.env);
       await store.register("saved", new Uint8Array([1, 2]), { version: 1 });
-      const databasePath = resolveOpenClawStateSqlitePath(state.env);
-      expect(closeOpenClawStateDatabaseByPath(databasePath)).toBe(true);
+      const databasePath = resolveCarapaceStateSqlitePath(state.env);
+      expect(closeCarapaceStateDatabaseByPath(databasePath)).toBe(true);
 
       const entry = await store.lookup("saved");
       expect(entry).toMatchObject({ metadata: { version: 1 }, bytes: new Uint8Array([1, 2]) });
       entry!.bytes[0] = 9;
       await expect(store.lookup("saved")).resolves.toMatchObject({ bytes: new Uint8Array([1, 2]) });
       await expect(store.entries()).resolves.toMatchObject([{ key: "saved", sizeBytes: 2 }]);
-      expect(isOpenClawStateDatabaseOpen(databasePath)).toBe(false);
+      expect(isCarapaceStateDatabaseOpen(databasePath)).toBe(false);
     });
   });
 
   it("keeps an active writer's uncommitted changes out of blob reads", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "blob-read-transaction", applyEnv: false },
       async (state) => {
         const store = createStore(state.env);
         await store.register("saved", new Uint8Array([1]), { version: 1 });
-        const { db } = openOpenClawStateDatabase({ env: state.env });
+        const { db } = openCarapaceStateDatabase({ env: state.env });
         db.exec("BEGIN IMMEDIATE; DELETE FROM plugin_blob_entries;");
         try {
           await expect(store.lookup("saved")).resolves.toMatchObject({ metadata: { version: 1 } });
@@ -80,10 +80,10 @@ describe("plugin blob read-only access", () => {
   });
 
   it("leaves a checkpoint-only database unchanged when its blob table is absent", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "blob-read-bootstrap", applyEnv: false },
       async (state) => {
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
         mkdirSync(path.dirname(databasePath), { recursive: true });
         const db = new DatabaseSync(databasePath);
         db.exec(`
@@ -104,18 +104,18 @@ describe("plugin blob read-only access", () => {
         await expect(store.lookup("missing")).resolves.toBeUndefined();
         await expect(store.entries()).resolves.toEqual([]);
         expect(readFileSync(databasePath)).toEqual(before);
-        expect(isOpenClawStateDatabaseOpen(databasePath)).toBe(false);
+        expect(isCarapaceStateDatabaseOpen(databasePath)).toBe(false);
       },
     );
   });
 
   it("reports a missing initialized blob table as a read error without repairing it", async () => {
-    await withOpenClawTestState({ label: "blob-read-damaged", applyEnv: false }, async (state) => {
+    await withCarapaceTestState({ label: "blob-read-damaged", applyEnv: false }, async (state) => {
       const store = createStore(state.env);
       await store.register("saved", new Uint8Array([1]), { version: 1 });
-      const databasePath = resolveOpenClawStateSqlitePath(state.env);
-      openOpenClawStateDatabase({ env: state.env }).db.exec("DROP TABLE plugin_blob_entries");
-      closeOpenClawStateDatabaseByPath(databasePath);
+      const databasePath = resolveCarapaceStateSqlitePath(state.env);
+      openCarapaceStateDatabase({ env: state.env }).db.exec("DROP TABLE plugin_blob_entries");
+      closeCarapaceStateDatabaseByPath(databasePath);
       const before = readFileSync(databasePath);
 
       for (const operation of ["lookup", "entries"] as const) {
@@ -128,20 +128,20 @@ describe("plugin blob read-only access", () => {
         });
       }
       expect(readFileSync(databasePath)).toEqual(before);
-      expect(isOpenClawStateDatabaseOpen(databasePath)).toBe(false);
+      expect(isCarapaceStateDatabaseOpen(databasePath)).toBe(false);
     });
   });
 
   it.each(["warm", "cold"])(
     "rejects a newer schema through %s acquisition",
     async (temperature) => {
-      await withOpenClawTestState({ label: "blob-read-newer", applyEnv: false }, async (state) => {
+      await withCarapaceTestState({ label: "blob-read-newer", applyEnv: false }, async (state) => {
         const store = createStore(state.env);
         await store.register("saved", new Uint8Array([1]), { version: 1 });
-        const { db, path: databasePath } = openOpenClawStateDatabase({ env: state.env });
-        db.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};`);
+        const { db, path: databasePath } = openCarapaceStateDatabase({ env: state.env });
+        db.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};`);
         if (temperature === "cold") {
-          closeOpenClawStateDatabaseByPath(databasePath);
+          closeCarapaceStateDatabaseByPath(databasePath);
         }
         for (const operation of ["lookup", "entries"] as const) {
           await expect(
@@ -157,24 +157,24 @@ describe("plugin blob read-only access", () => {
   );
 
   it("preserves process-local and persisted quarantine failures on cold reads", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "blob-read-quarantine", applyEnv: false },
       async (state) => {
         const store = createStore(state.env);
         await store.register("saved", new Uint8Array([1]), { version: 1 });
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
-        closeOpenClawStateDatabaseByPath(databasePath);
-        recordOpenClawStateDatabaseOpenFailure(databasePath, new Error("latched failure"));
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
+        closeCarapaceStateDatabaseByPath(databasePath);
+        recordCarapaceStateDatabaseOpenFailure(databasePath, new Error("latched failure"));
         try {
           await expect(store.lookup("saved")).rejects.toMatchObject({
             code: "PLUGIN_BLOB_OPEN_FAILED",
           });
           await expect(store.entries()).rejects.toMatchObject({ code: "PLUGIN_BLOB_OPEN_FAILED" });
         } finally {
-          clearOpenClawStateDatabaseOpenFailure(databasePath);
+          clearCarapaceStateDatabaseOpenFailure(databasePath);
         }
         expect(
-          recordOpenClawDatabaseQuarantine({
+          recordCarapaceDatabaseQuarantine({
             env: state.env,
             kind: "state",
             path: databasePath,
@@ -187,8 +187,8 @@ describe("plugin blob read-only access", () => {
           });
           await expect(store.entries()).rejects.toMatchObject({ code: "PLUGIN_BLOB_OPEN_FAILED" });
         } finally {
-          clearOpenClawStateDatabaseOpenFailure(databasePath);
-          expect(clearOpenClawDatabaseQuarantine(databasePath, { env: state.env })).toBe(true);
+          clearCarapaceStateDatabaseOpenFailure(databasePath);
+          expect(clearCarapaceDatabaseQuarantine(databasePath, { env: state.env })).toBe(true);
         }
       },
     );

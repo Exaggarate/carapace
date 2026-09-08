@@ -1,8 +1,8 @@
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { measureDiagnosticsTimelineSpan } from "../../../infra/diagnostics-timeline.js";
 
 type EmbeddedAgentPreparationTimingOptions = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 };
 

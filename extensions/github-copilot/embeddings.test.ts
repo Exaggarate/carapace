@@ -11,7 +11,7 @@ vi.mock("./auth.js", () => ({
   resolveFirstGithubToken: resolveFirstGithubTokenMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/secret-input-runtime", () => ({
+vi.mock("carapace/plugin-sdk/secret-input-runtime", () => ({
   resolveConfiguredSecretInputString: resolveConfiguredSecretInputStringMock,
 }));
 
@@ -20,7 +20,7 @@ vi.mock("./runtime-auth.js", () => ({
   resolveCopilotRuntimeAuth: resolveCopilotRuntimeAuthMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
@@ -28,9 +28,9 @@ import { githubCopilotMemoryEmbeddingProviderAdapter } from "./embeddings.js";
 
 afterAll(() => {
   vi.doUnmock("./auth.js");
-  vi.doUnmock("openclaw/plugin-sdk/secret-input-runtime");
+  vi.doUnmock("carapace/plugin-sdk/secret-input-runtime");
   vi.doUnmock("./runtime-auth.js");
-  vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+  vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
   vi.resetModules();
 });
 

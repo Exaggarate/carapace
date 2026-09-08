@@ -14,7 +14,7 @@ describe("worktrees cli", () => {
   it("maps --force only to snapshot-loss permission", async () => {
     const remove = vi.spyOn(managedWorktrees, "remove").mockResolvedValue({ removed: true });
     vi.spyOn(defaultRuntime, "log").mockImplementation(() => undefined);
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerWorktreesCli(program);
 
     await program.parseAsync(["worktrees", "remove", "worktree-id", "--force"], {
@@ -36,7 +36,7 @@ describe("worktrees cli", () => {
       snapshotsPruned: 0,
     });
     vi.spyOn(defaultRuntime, "log").mockImplementation(() => undefined);
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerWorktreesCli(program);
 
     await program.parseAsync(["worktrees", "gc"], { from: "user" });

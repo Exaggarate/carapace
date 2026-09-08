@@ -102,7 +102,7 @@ describe("outbox destination identity", () => {
 
   it("does not replay collapsed v2 global data using today's selected agent or main key", () => {
     sessionStorage.setItem(
-      `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
+      `carapace.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
       JSON.stringify({
         version: 2,
         gatewayOwner: gatewayUrl,
@@ -134,7 +134,7 @@ describe("outbox destination identity", () => {
 
 describe("outbox browser-state transfer", () => {
   const seed = (version: 1 | 2 | 3, sessions: Record<string, unknown>) => {
-    const key = `openclaw.control.chatComposer.v${version}:${encodeURIComponent(gatewayUrl)}`;
+    const key = `carapace.control.chatComposer.v${version}:${encodeURIComponent(gatewayUrl)}`;
     const raw = JSON.stringify({ version, gatewayOwner: gatewayUrl, sessions });
     sessionStorage.setItem(key, raw);
     return { key, raw };

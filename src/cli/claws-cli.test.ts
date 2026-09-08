@@ -4,7 +4,7 @@ import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { persistClawInstallRecord } from "../claws/provenance.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import * as cliTestHelpers from "./claws-cli.test-helpers.js";
 
 const mocks = vi.hoisted(() => {
@@ -29,7 +29,7 @@ const mocks = vi.hoisted(() => {
     listConfiguredMcpServers: vi.fn(),
     closeReadOnlyDatabase: vi.fn(),
     stateTableGet: vi.fn(),
-    openExistingOpenClawStateDatabaseReadOnly: vi.fn(),
+    openExistingCarapaceStateDatabaseReadOnly: vi.fn(),
     applyClawAddPlan: vi.fn(),
     readClawStatus: vi.fn(),
     buildClawRemovePlan: vi.fn(),
@@ -74,11 +74,11 @@ vi.mock("../claws/packages.js", async () => ({
   preflightClawPackage: mocks.preflightClawPackage,
 }));
 
-vi.mock("../state/openclaw-state-db.js", async () => ({
-  ...(await vi.importActual<typeof import("../state/openclaw-state-db.js")>(
-    "../state/openclaw-state-db.js",
+vi.mock("../state/carapace-state-db.js", async () => ({
+  ...(await vi.importActual<typeof import("../state/carapace-state-db.js")>(
+    "../state/carapace-state-db.js",
   )),
-  openExistingOpenClawStateDatabaseReadOnly: mocks.openExistingOpenClawStateDatabaseReadOnly,
+  openExistingCarapaceStateDatabaseReadOnly: mocks.openExistingCarapaceStateDatabaseReadOnly,
 }));
 
 vi.mock("../claws/add.js", async () => ({
@@ -134,7 +134,7 @@ async function runCli(args: string[]) {
 
 describe("claws cli", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_EXPERIMENTAL_CLAWS", "1");
+    vi.stubEnv("CARAPACE_EXPERIMENTAL_CLAWS", "1");
     mocks.logs.length = 0;
     mocks.errors.length = 0;
     mocks.runtime.log.mockClear();
@@ -162,8 +162,8 @@ describe("claws cli", () => {
     mocks.closeReadOnlyDatabase.mockReset();
     mocks.stateTableGet.mockReset();
     mocks.stateTableGet.mockReturnValue({ 1: 1 });
-    mocks.openExistingOpenClawStateDatabaseReadOnly.mockReset();
-    mocks.openExistingOpenClawStateDatabaseReadOnly.mockReturnValue({
+    mocks.openExistingCarapaceStateDatabaseReadOnly.mockReset();
+    mocks.openExistingCarapaceStateDatabaseReadOnly.mockReturnValue({
       db: {
         prepare: (sql: string) => ({
           get: sql.includes("sqlite_master") ? mocks.stateTableGet : vi.fn(() => undefined),
@@ -178,7 +178,7 @@ describe("claws cli", () => {
     });
     mocks.applyClawAddPlan.mockReset();
     mocks.applyClawAddPlan.mockImplementation(async (plan) => ({
-      schemaVersion: "openclaw.clawAddResult.v1",
+      schemaVersion: "carapace.clawAddResult.v1",
       stability: "experimental",
       dryRun: false,
       mutationAllowed: true,
@@ -192,13 +192,13 @@ describe("claws cli", () => {
     }));
     mocks.readClawStatus.mockReset();
     mocks.readClawStatus.mockResolvedValue({
-      schemaVersion: "openclaw.clawStatus.v1",
+      schemaVersion: "carapace.clawStatus.v1",
       records: [],
       summary: { claws: 0, partial: 0, missingAgents: 0, driftedFiles: 0, packageRefs: 0 },
     });
     mocks.buildClawRemovePlan.mockReset();
     mocks.buildClawRemovePlan.mockResolvedValue({
-      schemaVersion: "openclaw.clawRemovePlan.v1",
+      schemaVersion: "carapace.clawRemovePlan.v1",
       dryRun: true,
       mutationAllowed: false,
       planIntegrity: "sha256:remove-plan",
@@ -217,7 +217,7 @@ describe("claws cli", () => {
     });
     mocks.applyClawRemovePlan.mockReset();
     mocks.applyClawRemovePlan.mockResolvedValue({
-      schemaVersion: "openclaw.clawRemoveResult.v1",
+      schemaVersion: "carapace.clawRemoveResult.v1",
       dryRun: false,
       status: "complete",
       agentId: "demo-agent",
@@ -230,7 +230,7 @@ describe("claws cli", () => {
     });
     mocks.buildClawUpdatePlan.mockReset();
     mocks.buildClawUpdatePlan.mockResolvedValue({
-      schemaVersion: "openclaw.clawUpdatePlan.v1",
+      schemaVersion: "carapace.clawUpdatePlan.v1",
       stability: "experimental",
       dryRun: true,
       mutationAllowed: false,
@@ -272,7 +272,7 @@ describe("claws cli", () => {
     });
     mocks.applyClawUpdatePlan.mockReset();
     mocks.applyClawUpdatePlan.mockResolvedValue({
-      schemaVersion: "openclaw.clawUpdateResult.v1",
+      schemaVersion: "carapace.clawUpdateResult.v1",
       stability: "experimental",
       dryRun: false,
       mutationAllowed: true,
@@ -285,7 +285,7 @@ describe("claws cli", () => {
     });
     mocks.exportClawAgent.mockReset();
     mocks.exportClawAgent.mockResolvedValue({
-      schemaVersion: "openclaw.clawExportResult.v1",
+      schemaVersion: "carapace.clawExportResult.v1",
       stability: "experimental",
       agentId: "demo-agent",
       outputDirectory: "/tmp/exported",
@@ -297,17 +297,17 @@ describe("claws cli", () => {
         mcpServers: {},
         cronJobs: [],
       },
-      filesWritten: ["package.json", "openclaw.claw.json"],
+      filesWritten: ["package.json", "carapace.claw.json"],
     });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("does not register without the process opt-in", () => {
-    vi.stubEnv("OPENCLAW_EXPERIMENTAL_CLAWS", "");
+    vi.stubEnv("CARAPACE_EXPERIMENTAL_CLAWS", "");
     const program = new Command();
 
     registerClawsCli(program);
@@ -331,7 +331,7 @@ describe("claws cli", () => {
     await runCli(["claws", "inspect", manifestPath, "--json"]);
 
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawInspect.v1",
+      schemaVersion: "carapace.clawInspect.v1",
       stability: "experimental",
       valid: true,
       source: { kind: "development", version: "0.0.0-development" },
@@ -346,7 +346,7 @@ describe("claws cli", () => {
     await runCli(["claws", "add", root, "--dry-run", "--workspace", workspace, "--json"]);
 
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawAddPlan.v1",
+      schemaVersion: "carapace.clawAddPlan.v1",
       stability: "experimental",
       claw: { kind: "package", name: "@acme/demo-agent", version: "1.2.3" },
       agent: { finalId: "demo-agent", workspace: expectedWorkspace },
@@ -366,7 +366,7 @@ describe("claws cli", () => {
         },
       },
     });
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
 
     await runClawsAddCommand(manifestPath, { dryRun: true, workspace }, mocks.runtime);
 
@@ -414,14 +414,14 @@ describe("claws cli", () => {
   });
 
   it("discloses capability escalations in the human dry-run", async () => {
-    const root = tempDirs.make("openclaw-claws-cli-profile-");
+    const root = tempDirs.make("carapace-claws-cli-profile-");
     await mkdir(join(root, "profiles"));
     await writeFile(
-      join(root, "profiles", "openclaw.yml"),
+      join(root, "profiles", "carapace.yml"),
       "schemaVersion: 1\nagent:\n  tools:\n    allow: [read]\n",
       "utf8",
     );
-    const path = join(root, "openclaw.claw.json");
+    const path = join(root, "carapace.claw.json");
     await writeFile(
       path,
       JSON.stringify({
@@ -449,7 +449,7 @@ describe("claws cli", () => {
 
   it("applies a minimal Claw only after explicit consent", async () => {
     const manifestPath = await writeManifest();
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
     await runCli(["claws", "add", manifestPath, "--dry-run", "--workspace", workspace, "--json"]);
     const plan = JSON.parse(mocks.logs[0] ?? "{}");
     mocks.logs.length = 0;
@@ -491,9 +491,9 @@ describe("claws cli", () => {
 
   it("resumes consented add with the matching in-flight workspace on disk", async () => {
     const manifestPath = await writeManifest();
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
-    const stateRoot = tempDirs.make("openclaw-claws-state-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(stateRoot, "state"));
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
+    const stateRoot = tempDirs.make("carapace-claws-state-");
+    vi.stubEnv("CARAPACE_STATE_DIR", join(stateRoot, "state"));
 
     await runCli(["claws", "add", manifestPath, "--dry-run", "--workspace", workspace, "--json"]);
     const plan = JSON.parse(mocks.logs[0] ?? "{}");
@@ -526,9 +526,9 @@ describe("claws cli", () => {
 
   it("resumes when config committed before the workspace-ready phase advanced", async () => {
     const manifestPath = await writeManifest();
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
-    const stateRoot = tempDirs.make("openclaw-claws-state-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(stateRoot, "state"));
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
+    const stateRoot = tempDirs.make("carapace-claws-state-");
+    vi.stubEnv("CARAPACE_STATE_DIR", join(stateRoot, "state"));
 
     await runCli(["claws", "add", manifestPath, "--dry-run", "--workspace", workspace, "--json"]);
     const plan = JSON.parse(mocks.logs[0] ?? "{}");
@@ -560,9 +560,9 @@ describe("claws cli", () => {
 
   it("does not claim an on-disk workspace for a partial record without workspace ownership", async () => {
     const manifestPath = await writeManifest();
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
-    const stateRoot = tempDirs.make("openclaw-claws-state-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(stateRoot, "state"));
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
+    const stateRoot = tempDirs.make("carapace-claws-state-");
+    vi.stubEnv("CARAPACE_STATE_DIR", join(stateRoot, "state"));
 
     await runCli(["claws", "add", manifestPath, "--dry-run", "--workspace", workspace, "--json"]);
     const plan = JSON.parse(mocks.logs[0] ?? "{}");
@@ -593,9 +593,9 @@ describe("claws cli", () => {
 
   it("preserves a real agent collision while an add is still pending", async () => {
     const manifestPath = await writeManifest();
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
-    const stateRoot = tempDirs.make("openclaw-claws-state-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(stateRoot, "state"));
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
+    const stateRoot = tempDirs.make("carapace-claws-state-");
+    vi.stubEnv("CARAPACE_STATE_DIR", join(stateRoot, "state"));
 
     await runCli(["claws", "add", manifestPath, "--dry-run", "--workspace", workspace, "--json"]);
     const plan = JSON.parse(mocks.logs[0] ?? "{}");
@@ -626,9 +626,9 @@ describe("claws cli", () => {
 
   it("does not resume through another agent's configured workspace", async () => {
     const manifestPath = await writeManifest();
-    const workspace = join(tempDirs.make("openclaw-claws-add-"), "workspace");
-    const stateRoot = tempDirs.make("openclaw-claws-state-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(stateRoot, "state"));
+    const workspace = join(tempDirs.make("carapace-claws-add-"), "workspace");
+    const stateRoot = tempDirs.make("carapace-claws-state-");
+    vi.stubEnv("CARAPACE_STATE_DIR", join(stateRoot, "state"));
 
     await runCli(["claws", "add", manifestPath, "--dry-run", "--workspace", workspace, "--json"]);
     const plan = JSON.parse(mocks.logs[0] ?? "{}");
@@ -697,7 +697,7 @@ describe("claws cli", () => {
 
   it("reports installed Claw status by agent id", async () => {
     mocks.readClawStatus.mockResolvedValue({
-      schemaVersion: "openclaw.clawStatus.v1",
+      schemaVersion: "carapace.clawStatus.v1",
       target: "demo-agent",
       records: [
         {
@@ -714,7 +714,7 @@ describe("claws cli", () => {
 
     expect(mocks.readClawStatus).toHaveBeenCalledWith("demo-agent");
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawStatus.v1",
+      schemaVersion: "carapace.clawStatus.v1",
       summary: { claws: 1 },
     });
   });
@@ -732,7 +732,7 @@ describe("claws cli", () => {
     });
     expect(mocks.applyClawRemovePlan).not.toHaveBeenCalled();
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawRemovePlan.v1",
+      schemaVersion: "carapace.clawRemovePlan.v1",
       mutationAllowed: false,
     });
   });
@@ -754,7 +754,7 @@ describe("claws cli", () => {
       }),
     );
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawUpdatePlan.v1",
+      schemaVersion: "carapace.clawUpdatePlan.v1",
       dryRun: true,
       mutationAllowed: false,
       agentId: "demo-agent",
@@ -781,7 +781,7 @@ describe("claws cli", () => {
   it("returns failure when an update plan contains blocked actions", async () => {
     const { root } = await cliTestHelpers.writePackageFixture(tempDirs);
     mocks.buildClawUpdatePlan.mockResolvedValueOnce({
-      schemaVersion: "openclaw.clawUpdatePlan.v1",
+      schemaVersion: "carapace.clawUpdatePlan.v1",
       stability: "experimental",
       dryRun: true,
       mutationAllowed: false,
@@ -825,12 +825,12 @@ describe("claws cli", () => {
     const { root } = await cliTestHelpers.writePackageFixture(tempDirs);
     await mkdir(join(root, "profiles"));
     await writeFile(
-      join(root, "profiles", "openclaw.yml"),
+      join(root, "profiles", "carapace.yml"),
       "schemaVersion: 1\nagent:\n  tools:\n    profile: coding\n",
       "utf8",
     );
     mocks.readClawStatus.mockResolvedValue({
-      schemaVersion: "openclaw.clawStatus.v1",
+      schemaVersion: "carapace.clawStatus.v1",
       records: [
         {
           install: {
@@ -840,7 +840,7 @@ describe("claws cli", () => {
               name: "@acme/demo-agent",
               version: "1.0.0",
               packageRoot: root,
-              manifestPath: join(root, "openclaw.claw.json"),
+              manifestPath: join(root, "carapace.claw.json"),
               integrity: "sha256:old",
             },
           },
@@ -864,7 +864,7 @@ describe("claws cli", () => {
       expect.objectContaining({
         agentId: "demo-agent",
         targetSource: expect.objectContaining({ name: "@acme/demo-agent", version: "1.2.3" }),
-        targetOpenClawProfile: expect.objectContaining({
+        targetCarapaceProfile: expect.objectContaining({
           agent: {
             tools: expect.objectContaining({
               profile: "full",
@@ -896,7 +896,7 @@ describe("claws cli", () => {
 
     expect(mocks.buildClawUpdatePlan).not.toHaveBeenCalled();
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawUpdatePlan.v1",
+      schemaVersion: "carapace.clawUpdatePlan.v1",
       error: { code: "consent_required" },
     });
     expect(mocks.runtime.exit).toHaveBeenCalledWith(1);
@@ -959,7 +959,7 @@ describe("claws cli", () => {
     );
     expect(mocks.logs).toHaveLength(1);
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawUpdateResult.v1",
+      schemaVersion: "carapace.clawUpdateResult.v1",
       status: "complete",
       agentId: "demo-agent",
     });
@@ -994,7 +994,7 @@ describe("claws cli", () => {
     ]);
 
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawUpdateResult.v1",
+      schemaVersion: "carapace.clawUpdateResult.v1",
       status: "partial",
       error: { code: "update_partial" },
     });
@@ -1020,7 +1020,7 @@ describe("claws cli", () => {
       }),
     );
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawRemoveResult.v1",
+      schemaVersion: "carapace.clawRemoveResult.v1",
       status: "complete",
       agentId: "demo-agent",
     });
@@ -1031,7 +1031,7 @@ describe("claws cli", () => {
 
     expect(mocks.buildClawRemovePlan).not.toHaveBeenCalled();
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawRemovePlan.v1",
+      schemaVersion: "carapace.clawRemovePlan.v1",
       error: { code: "plan_integrity_required" },
     });
   });
@@ -1095,7 +1095,7 @@ describe("claws cli", () => {
     expect(mocks.exportClawAgent.mock.calls[0]?.slice(0, 2)).toEqual(["demo-agent", "/e"]);
     expect(mocks.exportClawAgent.mock.calls[0]?.[2]).toMatchObject({ bootstrapPath: "/b" });
     expect(JSON.parse(mocks.logs[0] ?? "{}")).toMatchObject({
-      schemaVersion: "openclaw.clawExportResult.v1",
+      schemaVersion: "carapace.clawExportResult.v1",
       stability: "experimental",
       agentId: "demo-agent",
     });

@@ -2,7 +2,7 @@
 import {
   MEMORY_CHUNKING_VERSION,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { describe, expect, it } from "vitest";
 import {
   MEMORY_INDEX_PROVENANCE_VERSION,
@@ -80,14 +80,14 @@ describe("memory reindex state", () => {
       reason: "index chunking implementation changed",
       code: "chunking_version",
     },
-  ])("invalidates indexes with $name as OpenClaw-owned", ({ meta, reason, code }) => {
+  ])("invalidates indexes with $name as Carapace-owned", ({ meta, reason, code }) => {
     expect(
       resolveMemoryIndexIdentityState(createIdentityParams({ meta: createMeta(meta) })),
     ).toEqual({
       status: "mismatched",
       reason,
       code,
-      owner: "openclaw",
+      owner: "carapace",
     });
   });
 
@@ -102,16 +102,16 @@ describe("memory reindex state", () => {
       status: "mismatched",
       reason: "index chunking implementation changed",
       code: "chunking_version",
-      owner: "openclaw",
+      owner: "carapace",
     });
   });
 
-  it("classifies missing metadata as OpenClaw-owned", () => {
+  it("classifies missing metadata as Carapace-owned", () => {
     expect(resolveMemoryIndexIdentityState(createIdentityParams({ meta: null }))).toEqual({
       status: "missing",
       reason: "index metadata is missing",
       code: "metadata_missing",
-      owner: "openclaw",
+      owner: "carapace",
     });
   });
 

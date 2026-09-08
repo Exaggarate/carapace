@@ -268,7 +268,7 @@ describe("Control UI GitHub failures", () => {
     { failure: new TypeError("fetch failed: secret-network-address"), reason: /reach GitHub/i },
   ])("explains transport errors without leaking their diagnostics", async ({ failure, reason }) => {
     const error = await fetchGitHubApi(
-      "https://api.github.com/repos/openclaw/openclaw",
+      "https://api.github.com/repos/carapace/carapace",
       vi.fn<typeof fetch>().mockRejectedValue(failure),
     ).catch((caught: unknown) => caught);
     const display = formatControlUiGitHubPreviewError(error);

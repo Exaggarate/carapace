@@ -1,5 +1,5 @@
 // Imessage tests cover group policy plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import {
   resolveIMessageGroupRequireMention,
@@ -17,7 +17,7 @@ describe("imessage group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveIMessageGroupRequireMention({ cfg, groupId: "exact" })).toBe(false);
     expect(resolveIMessageGroupRequireMention({ cfg, groupId: "other" })).toBe(true);
@@ -39,7 +39,7 @@ describe("imessage group policy", () => {
           accounts: { work: { groups: { exact: { requireMention: true } } } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const fallbackCfg = {
       channels: {
         imessage: {
@@ -47,7 +47,7 @@ describe("imessage group policy", () => {
           accounts: { work: { groups: {} } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveIMessageGroupRequireMention({
@@ -77,7 +77,7 @@ describe("imessage group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveIMessageGroupToolPolicy({ cfg, groupId: "exact", senderId: "alice" })).toEqual({
       allow: ["message.send"],

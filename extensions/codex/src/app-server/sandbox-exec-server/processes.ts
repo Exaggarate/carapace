@@ -2,15 +2,15 @@
  * Manages subprocess lifecycle, streaming output buffers, stdin writes, and
  * termination for Codex sandbox exec-server process RPCs.
  */
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { buildRemoteCommand, sanitizeEnvVars } from "openclaw/plugin-sdk/sandbox";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { buildRemoteCommand, sanitizeEnvVars } from "carapace/plugin-sdk/sandbox";
 import type { JsonObject, JsonValue } from "../protocol.js";
 import { resolveFsSandboxPolicy } from "./fs-policy.js";
 import { requireObject, requireString, requireStringArray } from "./json-rpc.js";
 import { resolveExecServerPath } from "./path-uri.js";
 import { prepareSandboxChildExec, spawnSandboxChild } from "./sandbox-child.js";
-import type { ManagedProcess, OpenClawExecServer, ProcessChunk } from "./types.js";
+import type { ManagedProcess, CarapaceExecServer, ProcessChunk } from "./types.js";
 
 const ENV_KEY_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const RETAINED_PROCESS_OUTPUT_BYTES = 1024 * 1024;
@@ -18,7 +18,7 @@ const CLOSED_PROCESS_EVICTION_MS = 60_000;
 
 /** Starts a sandbox-backed process and registers it in the connection-local process table. */
 export async function startProcess(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   processes: Map<string, ManagedProcess>,
   notify: ManagedProcess["emitNotification"],
   params: JsonValue | undefined,
@@ -83,7 +83,7 @@ export async function startProcess(
   return { processId, sandboxType: "none" };
 }
 
-function assertSupportedProcessSandbox(execServer: OpenClawExecServer, record: JsonObject): void {
+function assertSupportedProcessSandbox(execServer: CarapaceExecServer, record: JsonObject): void {
   if (record.networkProxy !== undefined && record.networkProxy !== null) {
     throw new Error("Codex sandbox exec-server network proxy launch is not supported.");
   }
@@ -115,7 +115,7 @@ function assertSupportedProcessSandbox(execServer: OpenClawExecServer, record: J
 }
 
 async function runProcess(
-  execServer: OpenClawExecServer,
+  execServer: CarapaceExecServer,
   managed: ManagedProcess,
   params: { argv: string[]; cwd: string; env: Record<string, string> },
 ): Promise<void> {

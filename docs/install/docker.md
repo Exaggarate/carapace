@@ -1,5 +1,5 @@
 ---
-summary: "Optional Docker-based setup and onboarding for OpenClaw"
+summary: "Optional Docker-based setup and onboarding for Carapace"
 read_when:
   - You want a containerized gateway instead of local installs
   - You are validating the Docker flow
@@ -30,21 +30,21 @@ Hosting multiple users? See [Multi-tenant hosting](/gateway/multi-tenant-hosting
     ./scripts/docker/setup.sh
     ```
 
-    This builds the gateway image locally as `openclaw:local`. To use a pre-built image instead:
+    This builds the gateway image locally as `carapace:local`. To use a pre-built image instead:
 
     ```bash
-    export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
+    export CARAPACE_IMAGE="ghcr.io/carapace/carapace:latest"
     ./scripts/docker/setup.sh
     ```
 
-    Pre-built images are published first to the [GitHub Container Registry](https://github.com/openclaw/openclaw/pkgs/container/openclaw). GHCR is the primary registry for release automation, pinned deployments, and provenance checks. The same release publishes a Docker Hub mirror at `openclaw/openclaw`:
+    Pre-built images are published first to the [GitHub Container Registry](https://github.com/Exaggarate/carapace/pkgs/container/carapace). GHCR is the primary registry for release automation, pinned deployments, and provenance checks. The same release publishes a Docker Hub mirror at `carapace/carapace`:
 
     ```bash
-    export OPENCLAW_IMAGE="openclaw/openclaw:latest"
+    export CARAPACE_IMAGE="carapace/carapace:latest"
     ./scripts/docker/setup.sh
     ```
 
-    Use `ghcr.io/openclaw/openclaw` or `openclaw/openclaw` and avoid unofficial mirrors, which don't share OpenClaw's release timing or retention policy. Version-specific tags include releases such as `2026.2.26` and prereleases such as `2026.2.26-beta.1`. Stable releases move `latest` and `main`; trailing-month Gateway releases move only `extended-stable`. Variants include `slim`, `main-slim`, `extended-stable-slim`, `latest-browser`, `main-browser`, and `extended-stable-browser`. The default images bundle the `codex` and `diagnostics-otel` plugins. A `-browser` variant also ships with Chromium baked in, useful for the [sandboxed browser](/gateway/sandboxing#sandboxed-browser) tool without a first-run Playwright install.
+    Use `ghcr.io/carapace/carapace` or `carapace/carapace` and avoid unofficial mirrors, which don't share Carapace's release timing or retention policy. Version-specific tags include releases such as `2026.2.26` and prereleases such as `2026.2.26-beta.1`. Stable releases move `latest` and `main`; trailing-month Gateway releases move only `extended-stable`. Variants include `slim`, `main-slim`, `extended-stable-slim`, `latest-browser`, `main-browser`, and `extended-stable-browser`. The default images bundle the `codex` and `diagnostics-otel` plugins. A `-browser` variant also ships with Chromium baked in, useful for the [sandboxed browser](/gateway/sandboxing#sandboxed-browser) tool without a first-run Playwright install.
 
   </Step>
 
@@ -52,14 +52,14 @@ Hosting multiple users? See [Multi-tenant hosting](/gateway/multi-tenant-hosting
     On offline hosts, transfer and load the image first:
 
     ```bash
-    docker load -i openclaw-image.tar
-    export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
+    docker load -i carapace-image.tar
+    export CARAPACE_IMAGE="ghcr.io/carapace/carapace:latest"
     ./scripts/docker/setup.sh --offline
     ```
 
-    `--offline` verifies `OPENCLAW_IMAGE` already exists locally, disables implicit Compose pulls/builds, then runs the normal flow: `.env` sync, permission fixes, onboarding, gateway config sync, Compose startup.
+    `--offline` verifies `CARAPACE_IMAGE` already exists locally, disables implicit Compose pulls/builds, then runs the normal flow: `.env` sync, permission fixes, onboarding, gateway config sync, Compose startup.
 
-    If `OPENCLAW_SANDBOX=1`, offline setup also checks the configured default and per-agent sandbox images on the daemon behind `OPENCLAW_DOCKER_SOCKET`, including the browser-contract label on Docker-backed browser images. If a required image is missing or stale, setup exits without changing sandbox config rather than reporting a broken success.
+    If `CARAPACE_SANDBOX=1`, offline setup also checks the configured default and per-agent sandbox images on the daemon behind `CARAPACE_DOCKER_SOCKET`, including the browser-contract label on Docker-backed browser images. If a required image is missing or stale, setup exits without changing sandbox config rather than reporting a broken success.
 
   </Step>
 
@@ -71,7 +71,7 @@ Hosting multiple users? See [Multi-tenant hosting](/gateway/multi-tenant-hosting
     - creates the legacy auth-profile secret key directory
     - starts the gateway via Docker Compose
 
-    Pre-start onboarding and config writes run through `openclaw-gateway` directly (with `--no-deps --entrypoint node`), since `openclaw-cli` shares the gateway's network namespace and only works once the gateway container exists.
+    Pre-start onboarding and config writes run through `carapace-gateway` directly (with `--no-deps --entrypoint node`), since `carapace-cli` shares the gateway's network namespace and only works once the gateway container exists.
 
   </Step>
 
@@ -81,23 +81,23 @@ Hosting multiple users? See [Multi-tenant hosting](/gateway/multi-tenant-hosting
     Need the URL again?
 
     ```bash
-    docker compose run --rm openclaw-cli dashboard --no-open
+    docker compose run --rm carapace-cli dashboard --no-open
     ```
 
-    With a custom `OPENCLAW_GATEWAY_PORT`, replace port `18789` in the printed URL with your host port before opening it in the browser; keep the rest of the URL intact. Dashboard commands inside either container use the internal listener port.
+    With a custom `CARAPACE_GATEWAY_PORT`, replace port `18789` in the printed URL with your host port before opening it in the browser; keep the rest of the URL intact. Dashboard commands inside either container use the internal listener port.
 
   </Step>
 
   <Step title="Configure channels (optional)">
     ```bash
     # WhatsApp (QR)
-    docker compose run --rm openclaw-cli channels login
+    docker compose run --rm carapace-cli channels login
 
     # Telegram
-    docker compose run --rm openclaw-cli channels add --channel telegram --token "<token>"
+    docker compose run --rm carapace-cli channels add --channel telegram --token "<token>"
 
     # Discord
-    docker compose run --rm openclaw-cli channels add --channel discord --token "<token>"
+    docker compose run --rm carapace-cli channels add --channel discord --token "<token>"
     ```
 
     Docs: [WhatsApp](/channels/whatsapp), [Telegram](/channels/telegram), [Discord](/channels/discord)
@@ -111,30 +111,30 @@ For an unattended container host, put provider, Gateway, and channel credentials
 
 ```bash
 OPENAI_API_KEY=<provider-key>
-OPENCLAW_GATEWAY_TOKEN=<gateway-token>
+CARAPACE_GATEWAY_TOKEN=<gateway-token>
 TELEGRAM_BOT_TOKEN=<bot-token>
 ```
 
 Run onboarding and channel provisioning without a pseudo-TTY, then start the Gateway:
 
 ```bash
-docker compose run -T --rm --no-deps --entrypoint node openclaw-gateway \
+docker compose run -T --rm --no-deps --entrypoint node carapace-gateway \
   dist/index.js onboard --non-interactive --accept-risk --skip-health \
   --mode local \
   --auth-choice openai-api-key \
   --secret-input-mode ref \
   --gateway-auth token \
-  --gateway-token-ref-env OPENCLAW_GATEWAY_TOKEN \
+  --gateway-token-ref-env CARAPACE_GATEWAY_TOKEN \
   --skip-channels \
   --no-install-daemon
-docker compose run -T --rm --no-deps --entrypoint node openclaw-gateway \
+docker compose run -T --rm --no-deps --entrypoint node carapace-gateway \
   dist/index.js channels add --channel telegram --use-env
-docker compose up -d openclaw-gateway
+docker compose up -d carapace-gateway
 ```
 
-The channel command fails before changing config if a plugin-declared environment variable is missing. Keep `TELEGRAM_BOT_TOKEN` in `.env` after bootstrap: `--use-env` leaves credential lookup to the environment without copying the token into `openclaw.json`, and the running Gateway needs the same variable. When channel config changes after startup, the Gateway's config watcher hot-reloads the affected channel automatically.
+The channel command fails before changing config if a plugin-declared environment variable is missing. Keep `TELEGRAM_BOT_TOKEN` in `.env` after bootstrap: `--use-env` leaves credential lookup to the environment without copying the token into `carapace.json`, and the running Gateway needs the same variable. When channel config changes after startup, the Gateway's config watcher hot-reloads the affected channel automatically.
 
-See [`openclaw channels`](/cli/channels) for credential-flag alternatives and other channel plugins.
+See [`carapace channels`](/cli/channels) for credential-flag alternatives and other channel plugins.
 
 ### Manual flow
 
@@ -143,13 +143,13 @@ BUILD_GIT_COMMIT="$(git rev-parse HEAD)"
 BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 docker build \
   --build-arg "GIT_COMMIT=${BUILD_GIT_COMMIT}" \
-  --build-arg "OPENCLAW_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}" \
-  -t openclaw:local -f Dockerfile .
-docker compose run --rm --no-deps --entrypoint node openclaw-gateway \
+  --build-arg "CARAPACE_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}" \
+  -t carapace:local -f Dockerfile .
+docker compose run --rm --no-deps --entrypoint node carapace-gateway \
   dist/index.js onboard --mode local --no-install-daemon
-docker compose run --rm --no-deps --entrypoint node openclaw-gateway \
+docker compose run --rm --no-deps --entrypoint node carapace-gateway \
   dist/index.js config set --batch-json '[{"path":"gateway.mode","value":"local"},{"path":"gateway.bind","value":"lan"},{"path":"gateway.controlUi.allowedOrigins","value":["http://localhost:18789","http://127.0.0.1:18789"]}]'
-docker compose up -d openclaw-gateway
+docker compose up -d carapace-gateway
 ```
 
 The Docker context excludes `.git`. Pass the source identity as build arguments
@@ -158,25 +158,25 @@ one build timestamp. `scripts/docker/setup.sh` resolves and passes both values
 automatically.
 
 <Note>
-Run `docker compose` from the repo root. If you enabled `OPENCLAW_EXTRA_MOUNTS` or `OPENCLAW_HOME_VOLUME`, the setup script writes `docker-compose.extra.yml`; include it after any `docker-compose.override.yml` you maintain yourself, e.g. `-f docker-compose.yml -f docker-compose.override.yml -f docker-compose.extra.yml`.
+Run `docker compose` from the repo root. If you enabled `CARAPACE_EXTRA_MOUNTS` or `CARAPACE_HOME_VOLUME`, the setup script writes `docker-compose.extra.yml`; include it after any `docker-compose.override.yml` you maintain yourself, e.g. `-f docker-compose.yml -f docker-compose.override.yml -f docker-compose.extra.yml`.
 </Note>
 
 ### Upgrading container images
 
-When you replace the OpenClaw image but keep the same mounted state/config, the
+When you replace the Carapace image but keep the same mounted state/config, the
 new gateway runs startup-safe upgrade migrations and plugin convergence before
 readiness. Routine image upgrades should not require a separate
-`openclaw doctor --fix` pass.
+`carapace doctor --fix` pass.
 
 If startup cannot complete those repairs safely, the gateway exits instead of
 reporting healthy. With a restart policy, Docker, Podman, or Kubernetes may show
 the gateway container restarting. Keep the mounted state volume, then run the
-same image once with `openclaw doctor --fix` as the container command, using the
+same image once with `carapace doctor --fix` as the container command, using the
 same state/config mounts the gateway uses:
 
 ```bash
-docker run --rm -v <openclaw-state>:/home/node/.openclaw <image> openclaw doctor --fix
-podman run --rm -v <openclaw-state>:/home/node/.openclaw <image> openclaw doctor --fix
+docker run --rm -v <carapace-state>:/home/node/.carapace <image> carapace doctor --fix
+podman run --rm -v <carapace-state>:/home/node/.carapace <image> carapace doctor --fix
 ```
 
 After doctor finishes, restart the gateway container with its default command.
@@ -187,7 +187,7 @@ After the container is running again, run the read-only deployment preflight
 against the same mounted state:
 
 ```bash
-docker compose run --rm openclaw-cli doctor --json
+docker compose run --rm carapace-cli doctor --json
 ```
 
 ### Environment variables
@@ -196,56 +196,56 @@ Optional variables accepted by `scripts/docker/setup.sh` (and, for the gateway c
 
 | Variable                                        | Purpose                                                                                                           |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `OPENCLAW_IMAGE`                                | Use a remote image instead of building locally                                                                    |
-| `OPENCLAW_GATEWAY_PORT`                         | Host-published gateway port (default `18789`); both containers keep port `18789` internally                       |
-| `OPENCLAW_IMAGE_APT_PACKAGES`                   | Install extra apt packages during build (space-separated). Legacy alias: `OPENCLAW_DOCKER_APT_PACKAGES`           |
-| `OPENCLAW_IMAGE_PIP_PACKAGES`                   | Install extra Python packages during build (space-separated)                                                      |
-| `OPENCLAW_EXTENSIONS`                           | Compile/package supported selected plugins and install their runtime dependencies (comma- or space-separated ids) |
-| `OPENCLAW_DOCKER_BUILD_NODE_OPTIONS`            | Override the local source-build Node options (default `--max-old-space-size=8192`)                                |
-| `OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB` | Override the local source-build tsdown heap in MB                                                                 |
-| `OPENCLAW_DOCKER_BUILD_SKIP_DTS`                | Skip declaration output during runtime-only local image builds (default `1`)                                      |
-| `OPENCLAW_INSTALL_BROWSER`                      | Bake Chromium + Xvfb into the image at build time                                                                 |
-| `OPENCLAW_EXTRA_MOUNTS`                         | Extra host bind mounts (comma-separated `source:target[:opts]`)                                                   |
-| `OPENCLAW_HOME_VOLUME`                          | Persist `/home/node` in a named Docker volume                                                                     |
-| `OPENCLAW_TZ`                                   | Set the gateway and CLI container timezone to an IANA name (default `UTC`)                                        |
-| `OPENCLAW_SANDBOX`                              | Opt in to sandbox bootstrap (`1`, `true`, `yes`, `on`)                                                            |
-| `OPENCLAW_SKIP_ONBOARDING`                      | Skip the interactive onboarding step (`1`, `true`, `yes`, `on`)                                                   |
-| `OPENCLAW_DOCKER_SOCKET`                        | Override the Docker socket path                                                                                   |
-| `OPENCLAW_DISABLE_BONJOUR`                      | Force Bonjour/mDNS advertising on (`0`) or off (`1`); see [Bonjour / mDNS](/install/docker#bonjour-%2F-mdns)      |
-| `OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS`      | Disable bundled plugin source bind-mount overlays                                                                 |
+| `CARAPACE_IMAGE`                                | Use a remote image instead of building locally                                                                    |
+| `CARAPACE_GATEWAY_PORT`                         | Host-published gateway port (default `18789`); both containers keep port `18789` internally                       |
+| `CARAPACE_IMAGE_APT_PACKAGES`                   | Install extra apt packages during build (space-separated). Legacy alias: `CARAPACE_DOCKER_APT_PACKAGES`           |
+| `CARAPACE_IMAGE_PIP_PACKAGES`                   | Install extra Python packages during build (space-separated)                                                      |
+| `CARAPACE_EXTENSIONS`                           | Compile/package supported selected plugins and install their runtime dependencies (comma- or space-separated ids) |
+| `CARAPACE_DOCKER_BUILD_NODE_OPTIONS`            | Override the local source-build Node options (default `--max-old-space-size=8192`)                                |
+| `CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB` | Override the local source-build tsdown heap in MB                                                                 |
+| `CARAPACE_DOCKER_BUILD_SKIP_DTS`                | Skip declaration output during runtime-only local image builds (default `1`)                                      |
+| `CARAPACE_INSTALL_BROWSER`                      | Bake Chromium + Xvfb into the image at build time                                                                 |
+| `CARAPACE_EXTRA_MOUNTS`                         | Extra host bind mounts (comma-separated `source:target[:opts]`)                                                   |
+| `CARAPACE_HOME_VOLUME`                          | Persist `/home/node` in a named Docker volume                                                                     |
+| `CARAPACE_TZ`                                   | Set the gateway and CLI container timezone to an IANA name (default `UTC`)                                        |
+| `CARAPACE_SANDBOX`                              | Opt in to sandbox bootstrap (`1`, `true`, `yes`, `on`)                                                            |
+| `CARAPACE_SKIP_ONBOARDING`                      | Skip the interactive onboarding step (`1`, `true`, `yes`, `on`)                                                   |
+| `CARAPACE_DOCKER_SOCKET`                        | Override the Docker socket path                                                                                   |
+| `CARAPACE_DISABLE_BONJOUR`                      | Force Bonjour/mDNS advertising on (`0`) or off (`1`); see [Bonjour / mDNS](/install/docker#bonjour-%2F-mdns)      |
+| `CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS`      | Disable bundled plugin source bind-mount overlays                                                                 |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`                   | Shared OTLP/HTTP collector endpoint for OpenTelemetry export                                                      |
 | `OTEL_EXPORTER_OTLP_*_ENDPOINT`                 | Signal-specific OTLP endpoints for traces, metrics, or logs                                                       |
 | `OTEL_EXPORTER_OTLP_PROTOCOL`                   | Shared OTLP protocol fallback. Only `http/protobuf` is supported today                                            |
 | `OTEL_EXPORTER_OTLP_*_PROTOCOL`                 | Signal-specific protocol fallback for traces, metrics, or logs; wins over the shared fallback                     |
 | `OTEL_SERVICE_NAME`                             | Service name used for OpenTelemetry resources                                                                     |
 | `OTEL_SEMCONV_STABILITY_OPT_IN`                 | Opt in to latest experimental GenAI semantic attributes                                                           |
-| `OPENCLAW_OTEL_PRELOADED`                       | Skip starting a second OpenTelemetry SDK when one is preloaded                                                    |
+| `CARAPACE_OTEL_PRELOADED`                       | Skip starting a second OpenTelemetry SDK when one is preloaded                                                    |
 
-After changing `.env` or Compose environment settings, run `docker compose up -d openclaw-gateway` to recreate the gateway with the new values. `docker compose restart` does not apply environment changes.
+After changing `.env` or Compose environment settings, run `docker compose up -d carapace-gateway` to recreate the gateway with the new values. `docker compose restart` does not apply environment changes.
 
-The official image ships no Homebrew. During onboarding, OpenClaw hides brew-only skill dependency installers in a Linux container without `brew`; provide those dependencies through a custom image or install manually. Use `OPENCLAW_IMAGE_APT_PACKAGES` for Debian-packaged dependencies and `OPENCLAW_IMAGE_PIP_PACKAGES` for Python dependencies (runs `python3 -m pip install --break-system-packages` at build time, so pin versions and use only indexes you trust).
+The official image ships no Homebrew. During onboarding, Carapace hides brew-only skill dependency installers in a Linux container without `brew`; provide those dependencies through a custom image or install manually. Use `CARAPACE_IMAGE_APT_PACKAGES` for Debian-packaged dependencies and `CARAPACE_IMAGE_PIP_PACKAGES` for Python dependencies (runs `python3 -m pip install --break-system-packages` at build time, so pin versions and use only indexes you trust).
 
 If Docker reports `ResourceExhausted`, `cannot allocate memory`, or aborts during `tsdown`, increase the Docker builder memory limit or retry with smaller explicit heaps:
 
 ```bash
-OPENCLAW_DOCKER_BUILD_NODE_OPTIONS=--max-old-space-size=4096 OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=4096
+CARAPACE_DOCKER_BUILD_NODE_OPTIONS=--max-old-space-size=4096 CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=4096
 ```
 
 The explicit tsdown heap override is also the supported opt-in for attempting a build below the automatically detected safe minimum. That attempt may stall or fail.
 
 ### Source-built images with selected plugins
 
-`OPENCLAW_EXTENSIONS` selects plugin manifest ids from the source checkout;
+`CARAPACE_EXTENSIONS` selects plugin manifest ids from the source checkout;
 existing source-directory names are also accepted when they differ. The Docker
 build resolves the selection to source directories once, installs production
 dependencies, links each selected plugin's own runtime dependencies under its
 packaged root in `/app/dist/extensions/<id>`, and includes the selected plugin
 runtime in the image. Source checkouts also compile first-party plugins
 published separately with
-`openclaw.build.bundledDist: false`; that marker still preserves the plugin's
+`carapace.build.bundledDist: false`; that marker still preserves the plugin's
 external npm or ClawHub ownership and does not change either artifact contract.
 Unknown, invalid, or ambiguous ids fail the image build.
-This includes WhatsApp: `OPENCLAW_EXTENSIONS=whatsapp` compiles and packages its
+This includes WhatsApp: `CARAPACE_EXTENSIONS=whatsapp` compiles and packages its
 runtime. Ordinary source builds generate its runtime through the separate
 external-plugin build path; root npm artifacts continue to exclude it. Selected
 plugins must compile successfully; unselected external plugin source and
@@ -253,7 +253,7 @@ runtime output are pruned.
 
 For example, these commands build separate, multi-architecture standalone
 FakeCo gateway images for ClickClack, Slack, and Microsoft Teams. ClawRouter is
-already part of the root OpenClaw runtime, so the ClickClack image selects only
+already part of the root Carapace runtime, so the ClickClack image selects only
 `clickclack`. The explicit empty browser argument keeps the default image free
 of Chromium:
 
@@ -268,12 +268,12 @@ build_gateway_image() {
   docker buildx build \
     --platform linux/amd64,linux/arm64 \
     --build-arg "GIT_COMMIT=${SOURCE_SHA}" \
-    --build-arg "OPENCLAW_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}" \
-    --build-arg "OPENCLAW_EXTENSIONS=${selected_plugin}" \
-    --build-arg OPENCLAW_INSTALL_BROWSER= \
+    --build-arg "CARAPACE_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}" \
+    --build-arg "CARAPACE_EXTENSIONS=${selected_plugin}" \
+    --build-arg CARAPACE_INSTALL_BROWSER= \
     --provenance=mode=max \
     --sbom=true \
-    --tag "${REGISTRY}/openclaw-${gateway}:${SOURCE_SHA}" \
+    --tag "${REGISTRY}/carapace-${gateway}:${SOURCE_SHA}" \
     --push \
     .
 }
@@ -291,32 +291,32 @@ mutable source-SHA tag:
 
 ```bash
 docker buildx imagetools inspect \
-  "${REGISTRY}/openclaw-clickclack:${SOURCE_SHA}"
-# Deploy: registry.example.com/fakeco/openclaw-clickclack@sha256:<manifest-digest>
+  "${REGISTRY}/carapace-clickclack:${SOURCE_SHA}"
+# Deploy: registry.example.com/fakeco/carapace-clickclack@sha256:<manifest-digest>
 ```
 
 These images are for standalone OCI-based gateways and generic Docker users.
 Crabhelm-managed gateways do not consume them: that delivery path builds a
-separate x86_64 appliance archive containing an OpenClaw npm tarball and pins
+separate x86_64 appliance archive containing an Carapace npm tarball and pins
 the Node, archive, and manifest digests. Build that appliance independently
-from the same landed OpenClaw source.
+from the same landed Carapace source.
 
-To test bundled plugin source against a packaged image, mount one plugin source directory over its packaged source path, e.g. `OPENCLAW_EXTRA_MOUNTS=/path/to/fork/extensions/synology-chat:/app/extensions/synology-chat:ro`. That overrides the matching compiled `/app/dist/extensions/synology-chat` bundle for the same plugin id. Restart the Gateway after adding or changing a mount; runtime loading and setup use the mounted source.
+To test bundled plugin source against a packaged image, mount one plugin source directory over its packaged source path, e.g. `CARAPACE_EXTRA_MOUNTS=/path/to/fork/extensions/synology-chat:/app/extensions/synology-chat:ro`. That overrides the matching compiled `/app/dist/extensions/synology-chat` bundle for the same plugin id. Restart the Gateway after adding or changing a mount; runtime loading and setup use the mounted source.
 
 ### Observability
 
 OpenTelemetry export is outbound from the Gateway container to your OTLP collector; it needs no published Docker port. To include the bundled exporter in a locally built image:
 
 ```bash
-export OPENCLAW_EXTENSIONS="diagnostics-otel"
+export CARAPACE_EXTENSIONS="diagnostics-otel"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector:4318"
-export OTEL_SERVICE_NAME="openclaw-gateway"
+export OTEL_SERVICE_NAME="carapace-gateway"
 ./scripts/docker/setup.sh
 ```
 
-Official prebuilt images already bundle `diagnostics-otel`; install `clawhub:@openclaw/diagnostics-otel` yourself only if you removed it. To enable export, allow and enable the `diagnostics-otel` plugin in config, then set `diagnostics.otel.enabled=true` (see the full example in [OpenTelemetry export](/gateway/opentelemetry)). Collector auth headers go through `diagnostics.otel.headers`, not Docker environment variables.
+Official prebuilt images already bundle `diagnostics-otel`; install `clawhub:@carapace/diagnostics-otel` yourself only if you removed it. To enable export, allow and enable the `diagnostics-otel` plugin in config, then set `diagnostics.otel.enabled=true` (see the full example in [OpenTelemetry export](/gateway/opentelemetry)). Collector auth headers go through `diagnostics.otel.headers`, not Docker environment variables.
 
-Prometheus metrics reuse the already-published Gateway port. Install `clawhub:@openclaw/diagnostics-prometheus`, enable the `diagnostics-prometheus` plugin, then scrape:
+Prometheus metrics reuse the already-published Gateway port. Install `clawhub:@carapace/diagnostics-prometheus`, enable the `diagnostics-prometheus` plugin, then scrape:
 
 ```text
 http://<gateway-host>:18789/api/diagnostics/prometheus
@@ -340,12 +340,12 @@ Use `/startupz` for an orchestrator startup or readiness probe so a failed chann
 Authenticated deep health snapshot:
 
 ```bash
-docker compose exec openclaw-gateway sh -lc 'node dist/index.js gateway health --token "$OPENCLAW_GATEWAY_TOKEN"'
+docker compose exec carapace-gateway sh -lc 'node dist/index.js gateway health --token "$CARAPACE_GATEWAY_TOKEN"'
 ```
 
 ### LAN vs loopback
 
-`scripts/docker/setup.sh` defaults `OPENCLAW_GATEWAY_BIND=lan` so `http://127.0.0.1:18789` on the host works with Docker port publishing.
+`scripts/docker/setup.sh` defaults `CARAPACE_GATEWAY_BIND=lan` so `http://127.0.0.1:18789` on the host works with Docker port publishing.
 
 - `lan` (default): host browser and host CLI can reach the published gateway port.
 - `loopback`: only processes inside the container network namespace can reach the gateway directly.
@@ -379,8 +379,8 @@ The official image does not pre-install Claude Code. Install and log in inside t
 For a new install, enable a persistent `/home/node` volume before running setup:
 
 ```bash
-export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
-export OPENCLAW_HOME_VOLUME="openclaw_home"
+export CARAPACE_IMAGE="ghcr.io/carapace/carapace:latest"
+export CARAPACE_HOME_VOLUME="carapace_home"
 ./scripts/docker/setup.sh
 ```
 
@@ -390,47 +390,47 @@ For an existing install, stop the stack and reload the current `.env` values fir
 set -a
 . ./.env
 set +a
-export OPENCLAW_HOME_VOLUME="${OPENCLAW_HOME_VOLUME:-openclaw_home}"
+export CARAPACE_HOME_VOLUME="${CARAPACE_HOME_VOLUME:-carapace_home}"
 ./scripts/docker/setup.sh
 ```
 
-If `.env` contains values your shell can't source, re-export what you rely on manually first (`OPENCLAW_IMAGE`, ports, bind mode, custom paths, `OPENCLAW_EXTRA_MOUNTS`, sandbox, skip-onboarding). The generated overlay mounts the home volume for both `openclaw-gateway` and `openclaw-cli`; run the remaining commands with that overlay (and `docker-compose.override.yml` first, if you use one):
+If `.env` contains values your shell can't source, re-export what you rely on manually first (`CARAPACE_IMAGE`, ports, bind mode, custom paths, `CARAPACE_EXTRA_MOUNTS`, sandbox, skip-onboarding). The generated overlay mounts the home volume for both `carapace-gateway` and `carapace-cli`; run the remaining commands with that overlay (and `docker-compose.override.yml` first, if you use one):
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.extra.yml run --rm \
-  --entrypoint sh openclaw-cli -lc \
+  --entrypoint sh carapace-cli -lc \
   'curl -fsSL https://claude.ai/install.sh | bash'
 ```
 
 The native installer writes `claude` to `/home/node/.local/bin/claude`. The
-OpenClaw image includes `/home/node/.local/bin` on `PATH`, so the bundled
+Carapace image includes `/home/node/.local/bin` on `PATH`, so the bundled
 Anthropic plugin resolves it without an adapter config override.
 
 Log in and verify from the same persisted home:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.extra.yml run --rm \
-  --entrypoint /home/node/.local/bin/claude openclaw-cli auth login
+  --entrypoint /home/node/.local/bin/claude carapace-cli auth login
 docker compose -f docker-compose.yml -f docker-compose.extra.yml run --rm \
-  --entrypoint /home/node/.local/bin/claude openclaw-cli auth status --text
+  --entrypoint /home/node/.local/bin/claude carapace-cli auth status --text
 docker compose -f docker-compose.yml -f docker-compose.extra.yml run --rm \
-  openclaw-cli models auth login \
+  carapace-cli models auth login \
   --provider anthropic --method cli --set-default
 docker compose -f docker-compose.yml -f docker-compose.extra.yml run --rm \
-  openclaw-cli models list --provider anthropic
+  carapace-cli models list --provider anthropic
 ```
 
 Then use the bundled `claude-cli` backend:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.extra.yml run --rm \
-  openclaw-cli agent \
+  carapace-cli agent \
   --agent main \
   --model claude-cli/claude-sonnet-4-6 \
   --message "Say hello from Docker Claude CLI"
 ```
 
-`OPENCLAW_HOME_VOLUME` persists the native install under `/home/node/.local/bin` and `/home/node/.local/share/claude`, plus Claude Code settings/auth under `/home/node/.claude` and `/home/node/.claude.json`. Persisting only `/home/node/.openclaw` is not enough; if you use `OPENCLAW_EXTRA_MOUNTS` instead of a home volume, mount all of those Claude paths into both services.
+`CARAPACE_HOME_VOLUME` persists the native install under `/home/node/.local/bin` and `/home/node/.local/share/claude`, plus Claude Code settings/auth under `/home/node/.claude` and `/home/node/.claude.json`. Persisting only `/home/node/.carapace` is not enough; if you use `CARAPACE_EXTRA_MOUNTS` instead of a home volume, mount all of those Claude paths into both services.
 
 <Note>
 For shared production automation or predictable Anthropic billing, prefer the Anthropic API-key path. Claude CLI reuse follows Claude Code's installed version, account login, billing, and update behavior.
@@ -438,29 +438,29 @@ For shared production automation or predictable Anthropic billing, prefer the An
 
 ### Bonjour / mDNS
 
-Docker bridge networking usually doesn't forward Bonjour/mDNS multicast (`224.0.0.251:5353`) reliably. When `OPENCLAW_DISABLE_BONJOUR` is unset, the bundled Bonjour plugin auto-disables LAN advertising once it detects it's running in a container, so it won't crash-loop retrying multicast the bridge drops. Set `OPENCLAW_DISABLE_BONJOUR=1` to force it off regardless of detection, or `0` to force it on (only on host networking, macvlan, or another network where mDNS multicast is known to work).
+Docker bridge networking usually doesn't forward Bonjour/mDNS multicast (`224.0.0.251:5353`) reliably. When `CARAPACE_DISABLE_BONJOUR` is unset, the bundled Bonjour plugin auto-disables LAN advertising once it detects it's running in a container, so it won't crash-loop retrying multicast the bridge drops. Set `CARAPACE_DISABLE_BONJOUR=1` to force it off regardless of detection, or `0` to force it on (only on host networking, macvlan, or another network where mDNS multicast is known to work).
 
 Use the published Gateway URL, Tailscale, or wide-area DNS-SD for Docker hosts otherwise. See [Bonjour discovery](/gateway/bonjour) for gotchas and troubleshooting.
 
 ### Storage and persistence
 
-Docker Compose bind-mounts `OPENCLAW_CONFIG_DIR` to `/home/node/.openclaw`, `OPENCLAW_WORKSPACE_DIR` to `/home/node/.openclaw/workspace`, and `OPENCLAW_AUTH_PROFILE_SECRET_DIR` to `/home/node/.config/openclaw`, so those paths survive container replacement. When a variable is unset, `docker-compose.yml` falls back under `${HOME}`, or `/tmp` if `HOME` itself is missing, so `docker compose up` never emits an empty-source volume spec on bare environments.
+Docker Compose bind-mounts `CARAPACE_CONFIG_DIR` to `/home/node/.carapace`, `CARAPACE_WORKSPACE_DIR` to `/home/node/.carapace/workspace`, and `CARAPACE_AUTH_PROFILE_SECRET_DIR` to `/home/node/.config/carapace`, so those paths survive container replacement. When a variable is unset, `docker-compose.yml` falls back under `${HOME}`, or `/tmp` if `HOME` itself is missing, so `docker compose up` never emits an empty-source volume spec on bare environments.
 
 That mounted config directory holds:
 
-- `openclaw.json` for behavior config
-- `state/openclaw.sqlite` for shared provider auth and `agents/<agentId>/agent/openclaw-agent.sqlite` for agent-local OAuth/API-key profiles
-- `.env` for env-backed runtime secrets such as `OPENCLAW_GATEWAY_TOKEN`
+- `carapace.json` for behavior config
+- `state/carapace.sqlite` for shared provider auth and `agents/<agentId>/agent/carapace-agent.sqlite` for agent-local OAuth/API-key profiles
+- `.env` for env-backed runtime secrets such as `CARAPACE_GATEWAY_TOKEN`
 
-The auth-profile secret directory stores the local encryption key used to recover legacy encrypted OAuth sidecar credentials. Keep it with your Docker host state, but separate from `OPENCLAW_CONFIG_DIR`.
+The auth-profile secret directory stores the local encryption key used to recover legacy encrypted OAuth sidecar credentials. Keep it with your Docker host state, but separate from `CARAPACE_CONFIG_DIR`.
 
-Current OAuth token material is stored as plaintext in SQLite under `OPENCLAW_CONFIG_DIR`, including access, refresh, and ID-token values. The separate key mount does not encrypt current SQLite rows or protect these tokens from a state-only backup or copy. Treat the config directory and its backups as credentials.
+Current OAuth token material is stored as plaintext in SQLite under `CARAPACE_CONFIG_DIR`, including access, refresh, and ID-token values. The separate key mount does not encrypt current SQLite rows or protect these tokens from a state-only backup or copy. Treat the config directory and its backups as credentials.
 
-Installed downloadable plugins store package state under the mounted OpenClaw home, so install records and package roots survive container replacement; gateway startup does not regenerate bundled-plugin dependency trees.
+Installed downloadable plugins store package state under the mounted Carapace home, so install records and package roots survive container replacement; gateway startup does not regenerate bundled-plugin dependency trees.
 
 For full VM persistence details, see [Docker VM Runtime - What persists where](/install/docker-vm-runtime#what-persists-where).
 
-**Disk growth hotspots:** `media/`, per-agent SQLite databases, legacy session JSONL transcripts, the shared SQLite state database, installed plugin package roots, and rolling file logs under `/tmp/openclaw/`.
+**Disk growth hotspots:** `media/`, per-agent SQLite databases, legacy session JSONL transcripts, the shared SQLite state database, installed plugin package roots, and rolling file logs under `/tmp/carapace/`.
 
 ### ClawDock migration
 
@@ -469,7 +469,7 @@ Existing copies downloaded with `curl` are not automatically uninstalled. Remove
 the `source ~/.clawdock/clawdock-helpers.sh` line from your shell startup file
 (`~/.zshrc` or `~/.bashrc`), then start a new shell. If you sourced a checkout copy
 from `scripts/clawdock/` or the older `scripts/shell-helpers/` path, remove that
-source line instead. Keep your OpenClaw state, credentials, workspace, project
+source line instead. Keep your Carapace state, credentials, workspace, project
 `.env`, and volumes.
 
 Run commands from the directory containing your `docker-compose.yml`. **Keep the
@@ -490,44 +490,44 @@ needed. See [Manual flow](/install/docker#manual-flow) for setup and extra mount
 
 | Task             | Command                                                            |
 | ---------------- | ------------------------------------------------------------------ |
-| Start            | `docker compose up -d openclaw-gateway`                            |
+| Start            | `docker compose up -d carapace-gateway`                            |
 | Stop the stack   | `docker compose down`                                              |
-| Restart          | `docker compose restart openclaw-gateway`                          |
+| Restart          | `docker compose restart carapace-gateway`                          |
 | Container status | `docker compose ps`                                                |
-| Follow logs      | `docker compose logs -f openclaw-gateway`                          |
-| Gateway shell    | `docker compose exec openclaw-gateway bash`                        |
-| CLI              | `docker compose run --rm openclaw-cli <command>`                   |
-| Dashboard URL    | `docker compose run --rm openclaw-cli dashboard --no-open`         |
-| List devices     | `docker compose run --rm openclaw-cli devices list`                |
-| Approve a device | `docker compose run --rm openclaw-cli devices approve <requestId>` |
-| Inspect config   | `docker compose run --rm openclaw-cli config get <path>`           |
+| Follow logs      | `docker compose logs -f carapace-gateway`                          |
+| Gateway shell    | `docker compose exec carapace-gateway bash`                        |
+| CLI              | `docker compose run --rm carapace-cli <command>`                   |
+| Dashboard URL    | `docker compose run --rm carapace-cli dashboard --no-open`         |
+| List devices     | `docker compose run --rm carapace-cli devices list`                |
+| Approve a device | `docker compose run --rm carapace-cli devices approve <requestId>` |
+| Inspect config   | `docker compose run --rm carapace-cli config get <path>`           |
 
 Start the gateway before using the shell or CLI commands. For a custom host port,
 adjust the printed dashboard URL as described in [Containerized gateway](/install/docker#containerized-gateway).
 Use [Health checks](/install/docker#health-checks) to verify the gateway and
-[Update OpenClaw](/install/docker-vm-runtime#update-openclaw) for image updates.
+[Update Carapace](/install/docker-vm-runtime#update-carapace) for image updates.
 
 Token setup belongs to the [Docker setup flow](/install/docker#containerized-gateway).
-If you need the Control UI token, read `OPENCLAW_GATEWAY_TOKEN` privately from the
+If you need the Control UI token, read `CARAPACE_GATEWAY_TOKEN` privately from the
 project `.env`. [`config get <path>`](/cli/config) redacts sensitive values; it
 does not reveal the full token.
 
 <AccordionGroup>
   <Accordion title="Enable agent sandbox for Docker gateway">
     ```bash
-    export OPENCLAW_SANDBOX=1
+    export CARAPACE_SANDBOX=1
     ./scripts/docker/setup.sh
     ```
 
     Custom socket path (e.g. rootless Docker):
 
     ```bash
-    export OPENCLAW_SANDBOX=1
-    export OPENCLAW_DOCKER_SOCKET=/run/user/1000/docker.sock
+    export CARAPACE_SANDBOX=1
+    export CARAPACE_DOCKER_SOCKET=/run/user/1000/docker.sock
     ./scripts/docker/setup.sh
     ```
 
-    The script mounts `docker.sock` only after sandbox prerequisites pass. If sandbox setup can't complete, it resets `agents.defaults.sandbox.mode` to `off`. Codex code mode is disabled for turns where the OpenClaw sandbox is active (see [Sandboxing § Docker backend](/gateway/sandboxing#docker-backend)); never mount the host Docker socket into agent sandbox containers.
+    The script mounts `docker.sock` only after sandbox prerequisites pass. If sandbox setup can't complete, it resets `agents.defaults.sandbox.mode` to `off`. Codex code mode is disabled for turns where the Carapace sandbox is active (see [Sandboxing § Docker backend](/gateway/sandboxing#docker-backend)); never mount the host Docker socket into agent sandbox containers.
 
   </Accordion>
 
@@ -535,41 +535,41 @@ does not reveal the full token.
     Disable Compose pseudo-TTY allocation with `-T`:
 
     ```bash
-    docker compose run -T --rm openclaw-cli gateway probe
-    docker compose run -T --rm openclaw-cli devices list --json
+    docker compose run -T --rm carapace-cli gateway probe
+    docker compose run -T --rm carapace-cli devices list --json
     ```
 
   </Accordion>
 
   <Accordion title="Shared-network security note">
-    `openclaw-cli` uses `network_mode: "service:openclaw-gateway"` so CLI commands can reach the gateway over `127.0.0.1`. Treat this as a shared trust boundary. The compose config drops `NET_RAW`/`NET_ADMIN` and enables `no-new-privileges` on both `openclaw-gateway` and `openclaw-cli`.
+    `carapace-cli` uses `network_mode: "service:carapace-gateway"` so CLI commands can reach the gateway over `127.0.0.1`. Treat this as a shared trust boundary. The compose config drops `NET_RAW`/`NET_ADMIN` and enables `no-new-privileges` on both `carapace-gateway` and `carapace-cli`.
   </Accordion>
 
-  <Accordion title="Docker Desktop DNS failures in openclaw-cli">
-    Some Docker Desktop setups fail DNS lookups from the shared-network `openclaw-cli` sidecar after `NET_RAW` is dropped, showing up as `EAI_AGAIN` during npm-backed commands like `openclaw plugins install`. Keep the default hardened compose file for normal operation. The override below restores default capabilities for the `openclaw-cli` container only — use it for the one-off command that needs registry access, not as your default invocation:
+  <Accordion title="Docker Desktop DNS failures in carapace-cli">
+    Some Docker Desktop setups fail DNS lookups from the shared-network `carapace-cli` sidecar after `NET_RAW` is dropped, showing up as `EAI_AGAIN` during npm-backed commands like `carapace plugins install`. Keep the default hardened compose file for normal operation. The override below restores default capabilities for the `carapace-cli` container only — use it for the one-off command that needs registry access, not as your default invocation:
 
     ```bash
     printf '%s\n' \
       'services:' \
-      '  openclaw-cli:' \
+      '  carapace-cli:' \
       '    cap_drop: !reset []' \
       > docker-compose.cli-no-dropped-caps.local.yml
 
-    docker compose -f docker-compose.yml -f docker-compose.cli-no-dropped-caps.local.yml run --rm openclaw-cli plugins install <package>
+    docker compose -f docker-compose.yml -f docker-compose.cli-no-dropped-caps.local.yml run --rm carapace-cli plugins install <package>
     ```
 
-    If you already created a long-running `openclaw-cli` container, recreate it with the same override — `docker compose exec`/`docker exec` can't change Linux capabilities on an already-created container.
+    If you already created a long-running `carapace-cli` container, recreate it with the same override — `docker compose exec`/`docker exec` can't change Linux capabilities on an already-created container.
 
   </Accordion>
 
   <Accordion title="Permissions and EACCES">
-    The image runs as `node` (uid 1000). If you see permission errors on `/home/node/.openclaw`, make sure your host bind mounts are owned by uid 1000:
+    The image runs as `node` (uid 1000). If you see permission errors on `/home/node/.carapace`, make sure your host bind mounts are owned by uid 1000:
 
     ```bash
-    sudo chown -R 1000:1000 /path/to/openclaw-config /path/to/openclaw-workspace
+    sudo chown -R 1000:1000 /path/to/carapace-config /path/to/carapace-workspace
     ```
 
-    The same mismatch can show up as `blocked plugin candidate: suspicious ownership (... uid=1000, expected uid=0 or root)` followed by `plugin present but blocked` — the process uid and the mounted plugin directory owner disagree. Prefer running as the default uid 1000 and fixing the bind mount ownership. Only chown `/path/to/openclaw-config/npm` to `root:root` if you intentionally run OpenClaw as root long term.
+    The same mismatch can show up as `blocked plugin candidate: suspicious ownership (... uid=1000, expected uid=0 or root)` followed by `plugin present but blocked` — the process uid and the mounted plugin directory owner disagree. Prefer running as the default uid 1000 and fixing the bind mount ownership. Only chown `/path/to/carapace-config/npm` to `root:root` if you intentionally run Carapace as root long term.
 
   </Accordion>
 
@@ -591,7 +591,7 @@ does not reveal the full token.
 
     The same Dockerfile preserves the production runtime contract: digest-pinned
     Node and Bun bases, non-root uid 1000, `tini`, the built-in health check, and
-    the `/usr/local/bin/openclaw` symlink. Dependabot refreshes the reviewed base
+    the `/usr/local/bin/carapace` symlink. Dependabot refreshes the reviewed base
     digests; do not replace them with floating `FROM node:24-bookworm` tags.
 
   </Accordion>
@@ -599,11 +599,11 @@ does not reveal the full token.
   <Accordion title="Power-user container options">
     The default image is security-first and runs as non-root `node`. For a more full-featured container:
 
-    1. **Persist `/home/node`**: `export OPENCLAW_HOME_VOLUME="openclaw_home"`
-    2. **Bake system deps**: `export OPENCLAW_IMAGE_APT_PACKAGES="git curl jq"`
-    3. **Bake Python deps**: `export OPENCLAW_IMAGE_PIP_PACKAGES="requests==2.32.5 humanize==4.14.0"`
-    4. **Bake Playwright Chromium**: `export OPENCLAW_INSTALL_BROWSER=1`, or use the official `-browser` image tag
-    5. **Persist browser downloads and caches**: use `OPENCLAW_HOME_VOLUME` or `OPENCLAW_EXTRA_MOUNTS`. OpenClaw auto-detects the image's Playwright-managed Chromium on Linux.
+    1. **Persist `/home/node`**: `export CARAPACE_HOME_VOLUME="carapace_home"`
+    2. **Bake system deps**: `export CARAPACE_IMAGE_APT_PACKAGES="git curl jq"`
+    3. **Bake Python deps**: `export CARAPACE_IMAGE_PIP_PACKAGES="requests==2.32.5 humanize==4.14.0"`
+    4. **Bake Playwright Chromium**: `export CARAPACE_INSTALL_BROWSER=1`, or use the official `-browser` image tag
+    5. **Persist browser downloads and caches**: use `CARAPACE_HOME_VOLUME` or `CARAPACE_EXTRA_MOUNTS`. Carapace auto-detects the image's Playwright-managed Chromium on Linux.
 
   </Accordion>
 
@@ -620,11 +620,11 @@ does not reveal the full token.
 
 Runtime images contain production Node.js dependencies only. Release builds pin the base image by digest and apply current Debian security updates with `apt-get dist-upgrade`; the `-browser` variant installs the Chromium version pinned by its Playwright release.
 
-Scanner totals can include Debian findings that the distribution marks `wont-fix`. To rebuild locally against current base and package metadata, run `docker build --pull -t openclaw:local .`.
+Scanner totals can include Debian findings that the distribution marks `wont-fix`. To rebuild locally against current base and package metadata, run `docker build --pull -t carapace:local .`.
 
 ### Weekly image refreshes
 
-The `latest*`, `main*`, and `extended-stable*` moving tags are rebuilt weekly from the same tagged release source so they pick up current OS security updates between OpenClaw releases. Stable and extended-stable refreshes remain separate, and beta images are not rebuilt on this schedule.
+The `latest*`, `main*`, and `extended-stable*` moving tags are rebuilt weekly from the same tagged release source so they pick up current OS security updates between Carapace releases. Stable and extended-stable refreshes remain separate, and beta images are not rebuilt on this schedule.
 
 Each refresh also publishes a dated tag such as `2026.8.1-r20260820` (plus `-slim` and `-browser` variants). Plain version tags and dated `-rYYYYMMDD` tags are immutable; pin either form when you do not want a deployment to follow a moving tag.
 
@@ -671,7 +671,7 @@ For npm installs without a source checkout, see [Sandboxing § Images and setup]
 
 <AccordionGroup>
   <Accordion title="Image missing or sandbox container not starting">
-    Build the sandbox image with [`scripts/sandbox-setup.sh`](https://github.com/openclaw/openclaw/blob/main/scripts/sandbox-setup.sh) (source checkout) or the inline `docker build` command from [Sandboxing § Images and setup](/gateway/sandboxing#images-and-setup) (npm install), or set `agents.defaults.sandbox.docker.image` to your custom image. Containers are auto-created per session on demand.
+    Build the sandbox image with [`scripts/sandbox-setup.sh`](https://github.com/Exaggarate/carapace/blob/main/scripts/sandbox-setup.sh) (source checkout) or the inline `docker build` command from [Sandboxing § Images and setup](/gateway/sandboxing#images-and-setup) (npm install), or set `agents.defaults.sandbox.docker.image` to your custom image. Containers are auto-created per session on demand.
   </Accordion>
 
   <Accordion title="Permission errors in sandbox">
@@ -679,7 +679,7 @@ For npm installs without a source checkout, see [Sandboxing § Images and setup]
   </Accordion>
 
   <Accordion title="Custom tools not found in sandbox">
-    OpenClaw runs commands with `sh -lc` (login shell), which sources `/etc/profile` and may reset PATH. Set `docker.env.PATH` to prepend your custom tool paths, or add a script under `/etc/profile.d/` in your Dockerfile.
+    Carapace runs commands with `sh -lc` (login shell), which sources `/etc/profile` and may reset PATH. Set `docker.env.PATH` to prepend your custom tool paths, or add a script under `/etc/profile.d/` in your Dockerfile.
   </Accordion>
 
   <Accordion title="OOM-killed during image build (exit 137)">
@@ -690,9 +690,9 @@ For npm installs without a source checkout, see [Sandboxing § Images and setup]
     Fetch a fresh dashboard link and approve the browser device:
 
     ```bash
-    docker compose run --rm openclaw-cli dashboard --no-open
-    docker compose run --rm openclaw-cli devices list
-    docker compose run --rm openclaw-cli devices approve <requestId>
+    docker compose run --rm carapace-cli dashboard --no-open
+    docker compose run --rm carapace-cli devices list
+    docker compose run --rm carapace-cli devices approve <requestId>
     ```
 
     More detail: [Dashboard](/web/dashboard), [Devices](/cli/devices).
@@ -703,8 +703,8 @@ For npm installs without a source checkout, see [Sandboxing § Images and setup]
     Reset gateway mode and bind:
 
     ```bash
-    docker compose run --rm openclaw-cli config set --batch-json '[{"path":"gateway.mode","value":"local"},{"path":"gateway.bind","value":"lan"}]'
-    docker compose run --rm openclaw-cli devices list --url ws://127.0.0.1:18789
+    docker compose run --rm carapace-cli config set --batch-json '[{"path":"gateway.mode","value":"local"},{"path":"gateway.bind","value":"lan"}]'
+    docker compose run --rm carapace-cli devices list --url ws://127.0.0.1:18789
     ```
 
   </Accordion>
@@ -714,5 +714,5 @@ For npm installs without a source checkout, see [Sandboxing § Images and setup]
 
 - [Install Overview](/install) — all installation methods
 - [Podman](/install/podman) — Podman alternative to Docker
-- [Updating](/install/updating) — keeping OpenClaw up to date
+- [Updating](/install/updating) — keeping Carapace up to date
 - [Configuration](/gateway/configuration) — gateway configuration after install

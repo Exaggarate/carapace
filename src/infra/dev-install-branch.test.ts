@@ -10,7 +10,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterAll);
 let root: string;
 
 beforeAll(() => {
-  root = tempDirs.make("openclaw-dev-branch-");
+  root = tempDirs.make("carapace-dev-branch-");
 });
 
 function makeRunCommand(byArg: {
@@ -39,8 +39,8 @@ async function resolveBranch(params: {
   runCommand: RunCommand;
 }): Promise<string | null> {
   vi.doMock("../process/exec.js", () => ({ runCommandWithTimeout: params.runCommand }));
-  vi.doMock("./openclaw-root.js", () => ({
-    resolveOpenClawPackageRoot: vi.fn(async () => params.root),
+  vi.doMock("./carapace-root.js", () => ({
+    resolveCarapacePackageRoot: vi.fn(async () => params.root),
   }));
   const { resolveDevInstallGitBranch } = await import("./dev-install-branch.js");
   return await resolveDevInstallGitBranch();
@@ -49,7 +49,7 @@ async function resolveBranch(params: {
 afterEach(() => {
   vi.resetModules();
   vi.doUnmock("../process/exec.js");
-  vi.doUnmock("./openclaw-root.js");
+  vi.doUnmock("./carapace-root.js");
 });
 
 describe("resolveDevInstallGitBranch", () => {
@@ -78,7 +78,7 @@ describe("resolveDevInstallGitBranch", () => {
   });
 
   it("returns null when the package root is nested inside an unrelated repo", async () => {
-    const nested = path.join(root, "node_modules", "openclaw");
+    const nested = path.join(root, "node_modules", "carapace");
     await fs.mkdir(nested, { recursive: true });
     const branch = await resolveBranch({
       root: nested,

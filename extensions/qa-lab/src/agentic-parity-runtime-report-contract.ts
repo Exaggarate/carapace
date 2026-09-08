@@ -9,19 +9,19 @@ export type QaRuntimeParityScenarioReport = {
   runtimeParityUsage: RuntimeParityUsagePolicy;
   drift: RuntimeParityDrift | "missing";
   driftDetails?: string;
-  openclawStatus: "pass" | "fail" | "missing";
+  carapaceStatus: "pass" | "fail" | "missing";
   codexStatus: "pass" | "fail" | "missing";
-  openclawTokens: number;
+  carapaceTokens: number;
   codexTokens: number;
-  openclawUsage: QaRuntimeParityCacheUsage | null;
+  carapaceUsage: QaRuntimeParityCacheUsage | null;
   codexUsage: QaRuntimeParityCacheUsage | null;
-  openclawCacheDiagnostics?: RuntimeParityCacheDiagnostics;
+  carapaceCacheDiagnostics?: RuntimeParityCacheDiagnostics;
   codexCacheDiagnostics?: RuntimeParityCacheDiagnostics;
-  openclawToolCalls: number;
+  carapaceToolCalls: number;
   codexToolCalls: number;
-  openclawWallClockMs: number | null;
+  carapaceWallClockMs: number | null;
   codexWallClockMs: number | null;
-  openclawBootstrapWallClockMs?: number;
+  carapaceBootstrapWallClockMs?: number;
   codexBootstrapWallClockMs?: number;
   fasterRuntime: RuntimeId | "tie" | null;
   speedupPercent: number | null;
@@ -39,7 +39,7 @@ export type QaRuntimeParityReport = {
   scenarios: QaRuntimeParityScenarioReport[];
   timing: QaRuntimeTiming;
   usage: {
-    openclaw: QaRuntimeParityCacheUsage | null;
+    carapace: QaRuntimeParityCacheUsage | null;
     codex: QaRuntimeParityCacheUsage | null;
   };
   pass: boolean;

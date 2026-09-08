@@ -5,11 +5,11 @@ import { DatabaseSync } from "node:sqlite";
 import { afterAll, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createUpdateRun } from "../infra/update-run-ledger.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   createBuiltRuntime,
   runBuiltRuntime,
@@ -22,14 +22,14 @@ describe("Doctor CLI migration refusal", () => {
   it.each(["index.js", "entry.js"])(
     "refuses missing deferral metadata through %s with the 2026.9.2 row only in WAL",
     (entry) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-doctor-update-wal-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-doctor-update-wal-"));
       const stateDir = path.join(root, "state");
-      const configPath = path.join(root, "openclaw.json");
-      const env = { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_CONFIG_PATH: configPath };
+      const configPath = path.join(root, "carapace.json");
+      const env = { CARAPACE_STATE_DIR: stateDir, CARAPACE_CONFIG_PATH: configPath };
       fs.writeFileSync(configPath, "{}\n");
-      const shared = openOpenClawStateDatabase({ env }).path;
+      const shared = openCarapaceStateDatabase({ env }).path;
       createUpdateRun({ trigger: "cli", before: { version: "2026.9.2" } }, { env });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const runtimeRoot = createBuiltRuntime(root, undefined, { copyDirectories: true });
       const packagePath = path.join(runtimeRoot, "package.json");
       const manifest = JSON.parse(fs.readFileSync(packagePath, "utf8"));
@@ -44,8 +44,8 @@ describe("Doctor CLI migration refusal", () => {
         writer.exec(`
           PRAGMA journal_mode = WAL;
           PRAGMA wal_autocheckpoint = 0;
-          PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION - 1};
-          UPDATE schema_meta SET schema_version = ${OPENCLAW_STATE_SCHEMA_VERSION - 1};
+          PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION - 1};
+          UPDATE schema_meta SET schema_version = ${CARAPACE_STATE_SCHEMA_VERSION - 1};
           DROP TABLE config_machine_state;
           DELETE FROM update_runs;
           PRAGMA wal_checkpoint(TRUNCATE);
@@ -76,9 +76,9 @@ describe("Doctor CLI migration refusal", () => {
               HOME: root,
               USERPROFILE: root,
               ...env,
-              OPENCLAW_UPDATE_IN_PROGRESS: "1",
-              OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.9.3",
-              OPENCLAW_SERVICE_REPAIR_POLICY: "external",
+              CARAPACE_UPDATE_IN_PROGRESS: "1",
+              CARAPACE_COMPATIBILITY_HOST_VERSION: "2026.9.3",
+              CARAPACE_SERVICE_REPAIR_POLICY: "external",
               NO_COLOR: "1",
               CI: "1",
             },
@@ -88,11 +88,11 @@ describe("Doctor CLI migration refusal", () => {
         expect(result.error, output).toBeUndefined();
         expect(result.status, output).toBe(1);
         expect(output).toContain(
-          "Doctor refused update-time schema repair driven by OpenClaw 2026.9.2",
+          "Doctor refused update-time schema repair driven by Carapace 2026.9.2",
         );
         expect(files.map((file) => fs.readFileSync(file))).toEqual(before);
         expect(writer.prepare("PRAGMA user_version").get()?.user_version).toBe(
-          OPENCLAW_STATE_SCHEMA_VERSION - 1,
+          CARAPACE_STATE_SCHEMA_VERSION - 1,
         );
         expect(writer.prepare("SELECT * FROM update_runs").get()).toEqual(row);
       } finally {
@@ -103,12 +103,12 @@ describe("Doctor CLI migration refusal", () => {
   );
 
   it("fails closed with manual recovery for an unsupported workspace and conflicting exec policy", async () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-unsupported-state-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-unsupported-state-"));
     const stateDir = path.join(root, "state");
     const workspaceDir = path.join(root, "workspace");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const sourcePath = path.join(stateDir, "exec-approvals.json");
-    const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+    const databasePath = path.join(stateDir, "state", "carapace.sqlite");
     fs.mkdirSync(stateDir, { recursive: true });
     fs.mkdirSync(workspaceDir);
     fs.writeFileSync(
@@ -124,9 +124,9 @@ describe("Doctor CLI migration refusal", () => {
       PATH: process.env.PATH,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_SERVICE_REPAIR_POLICY: "external",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_SERVICE_REPAIR_POLICY: "external",
       NO_COLOR: "1",
       CI: "1",
     };
@@ -134,14 +134,14 @@ describe("Doctor CLI migration refusal", () => {
     await runIsolatedModuleScript(
       env,
       `
-      import { openOpenClawStateDatabase, closeOpenClawStateDatabaseForTest } from "./src/state/openclaw-state-db.ts";
+      import { openCarapaceStateDatabase, closeCarapaceStateDatabaseForTest } from "./src/state/carapace-state-db.ts";
       import { resolveWorkspaceStateIdentity } from "./src/agents/workspace-state-identity.ts";
       import { writeExecApprovalsConfigRow } from "./src/infra/exec-approvals-sqlite.ts";
-      const { db } = openOpenClawStateDatabase();
+      const { db } = openCarapaceStateDatabase();
       const identity = resolveWorkspaceStateIdentity(${JSON.stringify(workspaceDir)});
       db.prepare("INSERT INTO workspace_setup_state (workspace_key, workspace_path, version, updated_at) VALUES (?, ?, 99, 1)").run(identity.workspaceKey, identity.workspacePath);
       writeExecApprovalsConfigRow({ db, file: { version: 1, defaults: { security: "deny" }, agents: {} } });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     `,
       { runtimeRoot, timeoutMs: 60_000 },
     );
@@ -158,10 +158,10 @@ describe("Doctor CLI migration refusal", () => {
     expect(output).toContain(databasePath);
     expect(output).toContain(workspaceDir);
     expect(text).toContain("unsupported workspace setup version 99");
-    expect(text).toContain("compatible OpenClaw build");
+    expect(text).toContain("compatible Carapace build");
     expect(output).toContain(sourcePath);
     expect(text).toContain("reconcile this file");
-    expect(text).not.toMatch(/(?:openclaw\s+)?doctor\s+--(?:fix|repair)/i);
+    expect(text).not.toMatch(/(?:carapace\s+)?doctor\s+--(?:fix|repair)/i);
     expect(output).not.toContain("Doctor complete.");
     expect(fs.readFileSync(sourcePath, "utf8")).toBe(legacy);
     const db = new DatabaseSync(databasePath, { readOnly: true });
@@ -183,9 +183,9 @@ describe("Doctor CLI migration refusal", () => {
   it.each([false, true])(
     "honors the ordered graph with valid TUI=%s",
     async (validTui) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-doctor-refusal-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-doctor-refusal-"));
       const stateDir = path.join(root, "state");
-      const configPath = path.join(root, "openclaw.json");
+      const configPath = path.join(root, "carapace.json");
       const tuiPath = path.join(stateDir, "tui", "last-session.json");
       const approvalsPath = path.join(stateDir, "exec-approvals.json");
       const tuiRaw = validTui
@@ -210,9 +210,9 @@ describe("Doctor CLI migration refusal", () => {
           PATH: process.env.PATH,
           HOME: root,
           USERPROFILE: root,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_SERVICE_REPAIR_POLICY: "external",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_SERVICE_REPAIR_POLICY: "external",
           NO_COLOR: "1",
           CI: "1",
         },
@@ -222,7 +222,7 @@ describe("Doctor CLI migration refusal", () => {
       const output = `${result.stdout}\n${result.stderr}`;
       expect(result.error, output).toBeUndefined();
       expect(result.signal, output).toBeNull();
-      const db = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+      const db = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
         readOnly: true,
       });
       try {

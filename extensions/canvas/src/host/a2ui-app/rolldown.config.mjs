@@ -11,10 +11,10 @@ const repoRoot = path.resolve(here, "../../../../..");
 const require = createRequire(import.meta.url);
 const uiRoot = path.resolve(repoRoot, "ui");
 const fromHere = (p) => path.resolve(here, p);
-const outputFile = process.env.OPENCLAW_A2UI_BUNDLE_OUT
-  ? path.resolve(process.env.OPENCLAW_A2UI_BUNDLE_OUT)
+const outputFile = process.env.CARAPACE_A2UI_BUNDLE_OUT
+  ? path.resolve(process.env.CARAPACE_A2UI_BUNDLE_OUT)
   : path.resolve(here, "..", "a2ui", "a2ui.bundle.js");
-const outputV09File = process.env.OPENCLAW_A2UI_BUNDLE_OUT
+const outputV09File = process.env.CARAPACE_A2UI_BUNDLE_OUT
   ? `${outputFile}.v0.9.js`
   : path.resolve(here, "..", "a2ui", "a2ui-v0.9.bundle.js");
 
@@ -56,7 +56,7 @@ const createConfig = (input, file) => ({
       "@a2ui/lit/ui": a2uiLitUi,
       "@a2ui/lit/v0_9": a2uiLitV09,
       "@a2ui/web_core/v0_9": a2uiWebCoreV09,
-      "@openclaw/a2ui-theme-context": a2uiThemeContext,
+      "@carapace/a2ui-theme-context": a2uiThemeContext,
       "@lit/context": resolveUiDependency("@lit/context"),
       "@lit/context/": resolveUiDependency("@lit/context/"),
       "@lit-labs/signals": resolveUiDependency("@lit-labs/signals"),

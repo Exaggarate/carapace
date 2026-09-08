@@ -1,5 +1,5 @@
 import type { managedWorktrees } from "../agents/worktrees/service.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runExclusiveSessionLifecycleMutation } from "../sessions/session-lifecycle-admission.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
@@ -26,7 +26,7 @@ type WorkerPlacementSessionRuntime = {
 
 export async function runWorkerPlacementSessionBarrier<T>(params: {
   sessionRuntime: WorkerPlacementSessionRuntime;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   sessionId: string;
   sessionKey: string;
   agentId: string;
@@ -109,7 +109,7 @@ export function resolveWorkerPlacementSessionTarget<
 >(params: {
   sessionRuntime: {
     resolveGatewaySessionStoreTargetWithStore: (input: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       key: string;
       agentId: string;
       clone: false;
@@ -123,7 +123,7 @@ export function resolveWorkerPlacementSessionTarget<
       findLiveByOwner: (ownerKind: "session", ownerId: string) => Worktree | undefined;
     };
   };
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   sessionId: string;
   sessionKey: string;
   agentId: string;

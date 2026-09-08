@@ -1,9 +1,9 @@
 // Builds normalized conversation binding inputs from channel and routing facts.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { normalizeConversationText } from "../../acp/conversation-id.js";
 import { resolveCommandConversationResolution } from "../../channels/conversation-resolution.js";
 import { getLoadedChannelPluginForRead } from "../../channels/plugins/registry-loaded.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { stringifyRouteThreadId } from "../../plugin-sdk/channel-route.js";
 import type { MsgContext } from "../templating.js";
 import type { HandleCommandsParams } from "./commands-types.js";
@@ -36,7 +36,7 @@ export function resolveConversationBindingChannelFromMessage(
 
 export function resolveConversationBindingAccountIdFromMessage(params: {
   ctx: BindingMsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   commandChannel?: string | null;
 }): string {
   const channel = resolveConversationBindingChannelFromMessage(params.ctx, params.commandChannel);
@@ -56,7 +56,7 @@ export function resolveConversationBindingThreadIdFromMessage(
 }
 
 export function resolveConversationBindingContextFromMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: BindingMsgContext;
   senderId?: string | null;
   sessionKey?: string | null;

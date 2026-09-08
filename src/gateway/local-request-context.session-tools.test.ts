@@ -14,7 +14,7 @@ import { createSessionsTool } from "../agents/tools/sessions-tool.js";
 import type { CliDeps } from "../cli/deps.types.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { loadSessionEntry, upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   getPluginRuntimeGatewayRequestScope,
   withPluginRuntimeGatewayRequestScope,
@@ -22,7 +22,7 @@ import {
 import { beginSessionWorkAdmission } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { ensureGatewayOwnerProfile } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { registerChatAbortController } from "./chat-abort.js";
 import { withLocalGatewayRequestScope } from "./local-request-context.js";
 import {
@@ -44,9 +44,9 @@ const TARGET_ID = "session-tools-target-id";
 const INCOGNITO = "agent:main:dashboard:incognito-session-tools";
 let fixtureRun: Promise<void> | undefined;
 
-function withSessionToolsFixture(run: (cfg: OpenClawConfig) => Promise<void>) {
-  return (fixtureRun = withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-    const cfg: OpenClawConfig = {
+function withSessionToolsFixture(run: (cfg: CarapaceConfig) => Promise<void>) {
+  return (fixtureRun = withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+    const cfg: CarapaceConfig = {
       ...rolePolicyConfig(),
       agents: {
         ownership: "explicit",

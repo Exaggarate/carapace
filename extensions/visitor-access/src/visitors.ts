@@ -93,7 +93,7 @@ export class VisitorAccessService {
         {
           headers: {
             Accept: "application/vnd.github+json",
-            "User-Agent": "OpenClaw-visitor-access",
+            "User-Agent": "Carapace-visitor-access",
           },
           redirect: "error",
           signal: this.signal
@@ -160,7 +160,7 @@ export class VisitorAccessService {
         return [...new Set([...emails, email])];
       });
       const who = grant.githubLogin ? `@${grant.githubLogin} (${email})` : email;
-      return `Invited ${who}. Expires: ${expiryText(grant.expiresAt)}. Log in at https://team.openclaw.ai with your GitHub account using this verified email.`;
+      return `Invited ${who}. Expires: ${expiryText(grant.expiresAt)}. Log in at https://github.com/Exaggarate/carapace with your GitHub account using this verified email.`;
     });
   }
 

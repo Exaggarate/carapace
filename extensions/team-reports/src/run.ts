@@ -1,4 +1,4 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import { aggregateDay, aggregateDays, boundReportDocument } from "./aggregate.js";
 import type { TeamReportsConfig, resolveTeamReportsConfig } from "./config.js";
 import { describePeriod } from "./periods.js";
@@ -50,7 +50,7 @@ export async function generateReportPeriods(params: {
   config: TeamReportsConfig;
   resolved: ResolvedTeamReportsConfig;
   store: TeamReportsStore;
-  llm: OpenClawPluginApi["runtime"]["llm"];
+  llm: CarapacePluginApi["runtime"]["llm"];
   periods: PeriodDescriptor[];
   runtime: SourceRuntime & { signal: AbortSignal };
   sources: ReportSourceFactory;

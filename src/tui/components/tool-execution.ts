@@ -1,7 +1,7 @@
 // Tool execution component renders tool call status and output in the TUI.
 import { Box, Container, Spacer, Text, truncateToWidth } from "@earendil-works/pi-tui";
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalObjectRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { formatToolDetail, resolveToolDisplay } from "../../agents/tool-display.js";
 import { markdownTheme, tuiTheme as theme } from "../theme/theme.js";
 import * as tuiFormatters from "../tui-formatters.js";

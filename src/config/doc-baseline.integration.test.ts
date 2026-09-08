@@ -115,7 +115,7 @@ describe("config doc baseline integration", () => {
     const msteamsEntry = requireEntry(byPath, "channels.msteams");
     expect(msteamsEntry.label).toBe("Microsoft Teams");
     expect(msteamsEntry.help).toBe("Teams SDK; enterprise support.");
-    expect(msteamsEntry.label).not.toContain("@openclaw/");
+    expect(msteamsEntry.label).not.toContain("@carapace/");
 
     const matrixEntry = requireEntry(byPath, "channels.matrix");
     expect(matrixEntry.label).toBe("Matrix");
@@ -151,7 +151,7 @@ describe("config doc baseline integration", () => {
   });
 
   it("supports check mode for stale hash files", async () => {
-    await withTestDir({ prefix: "openclaw-config-doc-baseline-" }, async (tempRoot) => {
+    await withTestDir({ prefix: "carapace-config-doc-baseline-" }, async (tempRoot) => {
       const rendered = getSharedRendered();
 
       const initial = await writeConfigDocBaselineArtifacts({
@@ -185,7 +185,7 @@ describe("config doc baseline integration", () => {
   });
 
   it("ratchets config entry count budgets in both directions", async () => {
-    await withTestDir({ prefix: "openclaw-config-doc-counts-" }, async (tempRoot) => {
+    await withTestDir({ prefix: "carapace-config-doc-counts-" }, async (tempRoot) => {
       const rendered = await getSharedRendered();
       const countsPath = path.join(tempRoot, "docs/.generated/config-baseline.counts.json");
 

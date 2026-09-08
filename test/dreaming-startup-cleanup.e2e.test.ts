@@ -1,26 +1,26 @@
 // A real Gateway restart must remove interrupted Dreaming sessions from its public session list.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import { getSessionEntry, upsertSessionEntry } from "../src/plugin-sdk/session-store-runtime.js";
 import {
   appendSqliteSessionTranscriptEventForTest,
-  closeOpenClawAgentDatabasesForTest,
+  closeCarapaceAgentDatabasesForTest,
 } from "../src/plugin-sdk/sqlite-runtime-testing.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const STALE_AGE_MS = 600_000;
 const WAIT_OPTIONS = { interval: 50, timeout: 15_000 } as const;
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 
 type GatewaySessionClient = Awaited<ReturnType<typeof connectGatewayClient>>;
 
 afterEach(async () => {
   await Promise.all(instances.splice(0).map(async (instance) => await instance.cleanup()));
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 async function seedSession(params: {
@@ -65,7 +65,7 @@ async function listSessionKeys(client: GatewaySessionClient): Promise<string[]> 
   return result.sessions.map(({ key }) => key);
 }
 
-async function connect(instance: OpenClawTestInstance): Promise<GatewaySessionClient> {
+async function connect(instance: CarapaceTestInstance): Promise<GatewaySessionClient> {
   return await connectGatewayClient({
     url: instance.url,
     token: instance.gatewayToken,
@@ -89,15 +89,15 @@ describe("Gateway dreaming session restart cleanup", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
-    const instance = await createOpenClawTestInstance({
+    } satisfies CarapaceConfig;
+    const instance = await createCarapaceTestInstance({
       name: "dreaming-startup-cleanup",
       config,
-      env: { OPENCLAW_TEST_MINIMAL_GATEWAY: undefined },
+      env: { CARAPACE_TEST_MINIMAL_GATEWAY: undefined },
     });
     instances.push(instance);
     instance.state.applyEnv();
-    expect(instance.env.OPENCLAW_SKIP_CRON).toBe("1");
+    expect(instance.env.CARAPACE_SKIP_CRON).toBe("1");
 
     const sentinel = await seedSession({
       agentId: "main",

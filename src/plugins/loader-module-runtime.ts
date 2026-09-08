@@ -1,4 +1,4 @@
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 import { toSafeImportPath } from "../shared/import-specifier.js";
 import { VERSION } from "../version.js";
 import { attachPluginApiFacades } from "./api-facades.js";
@@ -7,7 +7,7 @@ import { unwrapDefaultModuleExport } from "./module-export.js";
 import { getPluginCache, withPluginCache } from "./plugin-cache.js";
 import { withProfile } from "./plugin-load-profile.js";
 import { getCachedPluginModuleLoader } from "./plugin-module-loader-cache.js";
-import { installOpenClawPluginSdkNativeResolver } from "./plugin-sdk-native-resolver.js";
+import { installCarapacePluginSdkNativeResolver } from "./plugin-sdk-native-resolver.js";
 import { getPluginRegistryInspectionResources } from "./registry-inspection-resources.js";
 import type { PluginRegistry } from "./registry-types.js";
 import { withPluginRegistrationContext } from "./runtime.js";
@@ -22,7 +22,7 @@ import {
   type PluginSdkResolutionPreference,
   resolvePluginRuntimeModulePathWithDiagnostics,
 } from "./sdk-alias.js";
-import type { OpenClawPluginApi, OpenClawPluginDefinition } from "./types.js";
+import type { CarapacePluginApi, CarapacePluginDefinition } from "./types.js";
 
 // Preserve the existing enumeration order, appending surfaces added to the runtime contract.
 // Scoped runtime proxies also ask for descriptors after their get trap returns.
@@ -54,8 +54,8 @@ const LAZY_RUNTIME_PROPERTIES = {
   modelConfig: true,
 } satisfies Record<keyof PluginRuntime, true>;
 
-function createGuardedPluginRegistrationApi(api: OpenClawPluginApi): {
-  api: OpenClawPluginApi;
+function createGuardedPluginRegistrationApi(api: CarapacePluginApi): {
+  api: CarapacePluginApi;
   close: () => void;
 } {
   let closed = false;
@@ -87,8 +87,8 @@ function createGuardedPluginRegistrationApi(api: OpenClawPluginApi): {
 }
 
 function runPluginRegisterSync(
-  register: NonNullable<OpenClawPluginDefinition["register"]>,
-  api: Parameters<NonNullable<OpenClawPluginDefinition["register"]>>[0],
+  register: NonNullable<CarapacePluginDefinition["register"]>,
+  api: Parameters<NonNullable<CarapacePluginDefinition["register"]>>[0],
   registry: PluginRegistry,
 ): void {
   const guarded = createGuardedPluginRegistrationApi(api);
@@ -106,8 +106,8 @@ function runPluginRegisterSync(
 }
 
 export function runPluginRegisterSyncInRegistry(
-  register: NonNullable<OpenClawPluginDefinition["register"]>,
-  api: Parameters<NonNullable<OpenClawPluginDefinition["register"]>>[0],
+  register: NonNullable<CarapacePluginDefinition["register"]>,
+  api: Parameters<NonNullable<CarapacePluginDefinition["register"]>>[0],
   registry: PluginRegistry,
   pluginId: string,
 ): void {
@@ -132,7 +132,7 @@ export function createPluginModuleLoader(options: {
   const captured = { ...options };
   const createLoaderForModule = (modulePath: string) => {
     if (captured.installNativeSdkResolver !== false && captured.tryNative !== false) {
-      installOpenClawPluginSdkNativeResolver({
+      installCarapacePluginSdkNativeResolver({
         argv1: process.argv[1],
         moduleUrl: import.meta.url,
         pluginModulePath: modulePath,
@@ -294,8 +294,8 @@ export function createLazyPluginRuntime(params: {
 }
 
 export function resolvePluginModuleExport(moduleExport: unknown): {
-  definition?: OpenClawPluginDefinition;
-  register?: OpenClawPluginDefinition["register"];
+  definition?: CarapacePluginDefinition;
+  register?: CarapacePluginDefinition["register"];
 } {
   const seen = new Set<unknown>();
   const candidates: unknown[] = [unwrapDefaultModuleExport(moduleExport), moduleExport];
@@ -306,10 +306,10 @@ export function resolvePluginModuleExport(moduleExport: unknown): {
     }
     seen.add(resolved);
     if (typeof resolved === "function") {
-      return { register: resolved as OpenClawPluginDefinition["register"] };
+      return { register: resolved as CarapacePluginDefinition["register"] };
     }
     if (resolved && typeof resolved === "object") {
-      const definition = resolved as OpenClawPluginDefinition;
+      const definition = resolved as CarapacePluginDefinition;
       const register = definition.register;
       if (typeof register === "function") {
         return { definition, register };
@@ -323,7 +323,7 @@ export function resolvePluginModuleExport(moduleExport: unknown): {
   }
   const resolved = candidates[0];
   if (resolved && typeof resolved === "object") {
-    const definition = resolved as OpenClawPluginDefinition;
+    const definition = resolved as CarapacePluginDefinition;
     return { definition, register: definition.register };
   }
   return {};

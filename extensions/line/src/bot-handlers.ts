@@ -8,41 +8,41 @@ import {
   matchesMentionPatterns,
   implicitMentionKindWhen,
   type ChannelInboundMediaInput,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   resolveChannelImplicitMentions,
   resolveStableChannelMessageIngress,
   type ChannelIngressContextBinding,
   type ResolvedChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { reportChannelRoomJoin } from "openclaw/plugin-sdk/channel-join-intro-runtime";
-import { createChannelPairingChallengeIssuer } from "openclaw/plugin-sdk/channel-pairing";
-import { resolveChannelGroupsConfigPath } from "openclaw/plugin-sdk/channel-policy";
-import { hasControlCommand } from "openclaw/plugin-sdk/command-auth-native";
-import type { GroupPolicy, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import { reportChannelRoomJoin } from "carapace/plugin-sdk/channel-join-intro-runtime";
+import { createChannelPairingChallengeIssuer } from "carapace/plugin-sdk/channel-pairing";
+import { resolveChannelGroupsConfigPath } from "carapace/plugin-sdk/channel-policy";
+import { hasControlCommand } from "carapace/plugin-sdk/command-auth-native";
+import type { GroupPolicy, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   readChannelAllowFromStore,
   resolvePairingIdLabel,
   upsertChannelPairingRequest,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
 import {
   DEFAULT_GROUP_HISTORY_LIMIT,
   createChannelHistoryWindow,
   type HistoryEntry,
-} from "openclaw/plugin-sdk/reply-history";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/reply-history";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import { danger, logVerbose } from "carapace/plugin-sdk/runtime-env";
 import {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
+} from "carapace/plugin-sdk/runtime-group-policy";
 import {
   normalizeOptionalString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { firstDefined, normalizeLineAllowEntry } from "./bot-access.js";
 import {
   buildLineMessageContext,
@@ -85,7 +85,7 @@ function isDownloadableLineMessageType(
 }
 
 interface LineHandlerContext {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedLineAccount;
   runtime: RuntimeEnv;
   buildContext?: typeof buildChannelInboundEventContext;
@@ -93,7 +93,7 @@ interface LineHandlerContext {
   processMessage: (
     ctx: LineInboundContext,
     control: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       turnAdoptionLifecycle?: LineWebhookTurnAdoptionLifecycle;
     },
   ) => Promise<void>;

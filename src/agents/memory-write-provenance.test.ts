@@ -19,7 +19,7 @@ describe("memory write provenance", () => {
       (phase) => [false, true].map((revoke) => ({ phase, revoke })),
     ),
   )("preserves caller authority across $phase (revoke=$revoke)", async ({ phase, revoke }) => {
-    await withStateDirEnv("openclaw-memory-source-authority-", async ({ tempRoot }) => {
+    await withStateDirEnv("carapace-memory-source-authority-", async ({ tempRoot }) => {
       const target = `${tempRoot}/MEMORY.md`;
       await fs.writeFile(target, "before");
       let active = true;
@@ -71,7 +71,7 @@ describe("memory write provenance", () => {
   });
 
   it("rolls provenance back when the filesystem write fails", async () => {
-    await withStateDirEnv("openclaw-memory-provenance-", async ({ tempRoot }) => {
+    await withStateDirEnv("carapace-memory-provenance-", async ({ tempRoot }) => {
       const observer = createMemoryWriteProvenanceObserver({
         mutationRoot: tempRoot,
         workspaceDir: tempRoot,

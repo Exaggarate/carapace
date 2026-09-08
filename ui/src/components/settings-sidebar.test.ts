@@ -105,7 +105,7 @@ describe("settings sidebar search", () => {
     expect(active?.textContent?.trim()).toBe("Models");
   });
 
-  it("links Ask OpenClaw to the shared custodian route", () => {
+  it("links Ask Carapace to the shared custodian route", () => {
     const onNavigate = vi.fn();
     render(
       renderSettingsSidebar({
@@ -132,7 +132,7 @@ describe("settings sidebar search", () => {
     const link = container.querySelector<HTMLAnchorElement>(
       '.settings-sidebar__item[href="/custodian"]',
     );
-    expect(link?.textContent?.trim()).toBe("Ask OpenClaw");
+    expect(link?.textContent?.trim()).toBe("Ask Carapace");
     link?.click();
     expect(onNavigate).toHaveBeenCalledWith("custodian");
   });
@@ -602,14 +602,14 @@ describe("settings sidebar search", () => {
 
     renderSidebar(false, null, 3);
     expect(container.querySelector(".sidebar-footer-bar__status")).toBeNull();
-    expect(container.querySelector("openclaw-settings-save-indicator")).not.toBeNull();
+    expect(container.querySelector("carapace-settings-save-indicator")).not.toBeNull();
 
     renderSidebar(false, null, 0, false, "prepared");
     expect(container.querySelector(".sidebar-footer-bar__status")?.textContent).toBe("Suspended");
-    expect(container.querySelector("openclaw-settings-save-indicator")).toBeNull();
+    expect(container.querySelector("carapace-settings-save-indicator")).toBeNull();
     renderSidebar(false, null, 0, false, "accepting");
     expect(container.querySelector(".sidebar-footer-bar__status")).toBeNull();
-    expect(container.querySelector("openclaw-settings-save-indicator")).not.toBeNull();
+    expect(container.querySelector("carapace-settings-save-indicator")).not.toBeNull();
 
     // A Gateway-confirmed suspension outranks the ordinary offline pill while reconnecting.
     renderSidebar(true, "connection refused?token=settings-secret", 3, false, "prepared");
@@ -617,14 +617,14 @@ describe("settings sidebar search", () => {
       "Suspended",
     );
     expect(container.querySelector("button.sidebar-footer-bar__status")).toBeNull();
-    expect(container.querySelector("openclaw-settings-save-indicator")).toBeNull();
+    expect(container.querySelector("carapace-settings-save-indicator")).toBeNull();
 
     renderSidebar(true, "connection refused?token=settings-secret", 3);
-    expect(container.querySelector("openclaw-settings-save-indicator")).toBeNull();
+    expect(container.querySelector("carapace-settings-save-indicator")).toBeNull();
     const button = container.querySelector<HTMLButtonElement>(".sidebar-footer-bar__status");
     expect(button?.hasAttribute("title")).toBe(false);
     expect(
-      (button?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
+      (button?.closest("carapace-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
     ).toBe("connection refused?[redacted-credential]");
     expect(button?.textContent).toContain("3 queued");
     expect(button?.getAttribute("aria-label")).toBe("Offline — Retry now — 3 queued");

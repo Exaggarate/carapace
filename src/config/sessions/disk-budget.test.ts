@@ -7,10 +7,10 @@ import { describe, expect, it, vi } from "vitest";
 import { saveLegacySessionStore as saveSessionStore } from "../../infra/state-migrations.legacy-session-store.js";
 import { createFixtureSkillEntry } from "../../skills/test-support/test-helpers.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import {
   resolveTrajectoryFilePath,
@@ -57,7 +57,7 @@ function refreshPathBeforeSecondStat(targetPath: string): ReturnType<typeof vi.s
 
 describe("enforceSessionDiskBudget", () => {
   it("counts the SQLite main file and WAL as physical session usage", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-sqlite-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-sqlite-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath).path;
       if (!databasePath) {
@@ -78,7 +78,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("excludes migration archives from physical SQLite usage (#106875)", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-sqlite-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-sqlite-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath).path;
       if (!databasePath) {
@@ -104,18 +104,18 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("counts durable fixed-store agent partitions and their WAL files", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-partition-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-partition-" }, async (dir) => {
       const stateDir = path.join(dir, "state");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storePath = path.join(dir, "shared.json");
       const partitionPath = resolveSqliteTargetFromSessionStorePath(storePath, {
         agentId: "ops",
         defaultAgentId: "main",
         env,
       }).path;
-      const database = openOpenClawAgentDatabase({ agentId: "ops", env, path: partitionPath });
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      const database = openCarapaceAgentDatabase({ agentId: "ops", env, path: partitionPath });
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.writeFile(`${partitionPath}-wal`, Buffer.alloc(77));
       const partitionBytes = (await fs.stat(database.path)).size;
 
@@ -129,7 +129,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("excludes migration archives from the session disk budget (#106875)", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:main";
       const sessionId = "keep";
@@ -166,7 +166,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("does not treat referenced transcripts with marker-like session IDs as archived artifacts", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "keep.deleted.keep";
       const activeKey = "agent:main:main";
@@ -198,7 +198,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("removes true archived transcript artifacts while preserving referenced primary transcripts", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "keep";
       const transcriptPath = path.join(dir, `${sessionId}.jsonl`);
@@ -235,7 +235,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("reclaims stale store temps under pressure but never a fresh in-flight one (#56827)", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "keep";
       const transcriptPath = path.join(dir, `${sessionId}.jsonl`);
@@ -279,7 +279,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("preserves runtime-provided session keys when removing entries for disk budget", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const childKey = "agent:main:subagent:pending-budget";
       const removableKey = "agent:main:old-removable";
@@ -318,7 +318,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("preserves model-locked harness sessions when removing entries for disk budget", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const lockedKey = "agent:main:harness-owned:locked";
       const removableKey = "agent:main:old-removable";
@@ -356,7 +356,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("does not evict sessions for runtime-only resolved skill catalogs", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-runtime-skills-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-runtime-skills-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:subagent:runtime-skills";
       const resolvedSkills = [
@@ -387,7 +387,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("accounts for deduped skills prompt blobs before evicting sessions", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const prompt = `<available_skills>\n${"shared prompt\n".repeat(200)}</available_skills>`;
       const now = Date.now();
@@ -426,7 +426,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("removes unreferenced skills prompt blobs when evicting sessions", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const activeKey = "agent:main:active";
       const oldKey = "agent:main:old";
@@ -503,7 +503,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("preserves fresh unreferenced skills prompt blobs under pressure", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-fresh-prompt-blob-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-fresh-prompt-blob-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const store: Record<string, SessionEntry> = {
         "agent:main:active": { sessionId: "active", updatedAt: Date.now() },
@@ -534,7 +534,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("revalidates stale prompt blobs before removing them under pressure", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-revalidate-prompt-blob-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-revalidate-prompt-blob-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const store: Record<string, SessionEntry> = {
         "agent:main:active": { sessionId: "active", updatedAt: Date.now() },
@@ -571,7 +571,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("reclaims stale skills prompt blob temps under pressure", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-prompt-temp-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-prompt-temp-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const store: Record<string, SessionEntry> = {
         "agent:main:main": { sessionId: "keep", updatedAt: Date.now() },
@@ -606,7 +606,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("removes unreferenced compaction checkpoint artifacts under pressure", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "keep";
       const transcriptPath = path.join(dir, `${sessionId}.jsonl`);
@@ -667,7 +667,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("removes unreferenced trajectory sidecars while preserving referenced ones", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "keep";
       const transcriptPath = path.join(dir, `${sessionId}.jsonl`);
@@ -714,7 +714,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("does not evict protected thread session entries under store pressure", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const protectedKey = "agent:main:slack:channel:C123:thread:1710000000.000100";
       const manualArchiveKey = "agent:main:explicit:manual-archive";
@@ -768,7 +768,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("commits the reduced session index before deleting an evicted transcript", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-commit-order-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-commit-order-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const oldKey = "agent:main:subagent:old-worker";
       const activeKey = "agent:main:main";
@@ -823,7 +823,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("retains the evicted transcript when the index commit fails", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-commit-fail-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-commit-fail-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const oldKey = "agent:main:subagent:old-worker";
       const activeKey = "agent:main:main";
@@ -859,7 +859,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("retains evicted artifacts when no durable index commit is available", async () => {
-    await withTestDir({ prefix: "openclaw-disk-budget-missing-commit-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-disk-budget-missing-commit-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const oldKey = "agent:main:subagent:old-worker";
       const activeKey = "agent:main:main";
@@ -894,7 +894,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("stops at the default target when highWaterBytes resolves to zero", async () => {
-    await withTestDir({ prefix: "openclaw-zero-high-water-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-zero-high-water-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const store: Record<string, SessionEntry> = {};
       for (let index = 1; index <= 4; index += 1) {

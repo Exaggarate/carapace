@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildChannelAccountSummary } from "./account-summary.js";
 import type { ChannelPlugin } from "./plugins/types.plugin.js";
 
@@ -28,7 +28,7 @@ describe("buildChannelAccountSummary", () => {
     const snapshot = buildChannelAccountSummary({
       plugin,
       account,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       accountId: "default",
       enabled: true,
       configured: true,

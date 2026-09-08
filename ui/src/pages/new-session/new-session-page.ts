@@ -11,7 +11,7 @@ import "../../components/web-awesome-popover.ts";
 import type { HumanMention } from "../../lib/chat/chat-types.ts";
 import { sessionNavigationTarget } from "../../lib/sessions/route-navigation.ts";
 import { buildAgentMainSessionKey } from "../../lib/sessions/session-key.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { focusChatComposerFromPrintableKeydown } from "../chat/chat-pane-shared.ts";
 import "../../styles/chat/composer.css";
@@ -43,7 +43,7 @@ import { renderAgentSelect, renderNewSessionPlaceControls } from "./target-contr
 
 const { activateDraft, restoreDraft, restoreDraftOwner, retainDraft } = drafts;
 
-export class NewSessionPage extends OpenClawLightDomElement {
+export class NewSessionPage extends CarapaceLightDomElement {
   @property({ attribute: false }) data: NewSessionRouteData | undefined;
 
   @consume({ context: applicationContext, subscribe: true })

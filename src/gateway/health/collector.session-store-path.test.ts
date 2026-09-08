@@ -1,18 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import * as configRuntime from "../../config/config.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  resolveCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   buildHealthAgentSummaries,
   collectGatewayHealthSnapshot,
@@ -24,7 +24,7 @@ vi.mock("../../channels/plugins/read-only.js", () => ({
 }));
 
 async function summarizeStore(storePath: string, agentId: string) {
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { ownership: "explicit", entries: { [agentId]: {} } },
     session: { store: storePath },
   };
@@ -37,22 +37,22 @@ describe("health session store paths", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("reports the SQLite database that supplied the session count", async () => {
-    const stateDir = tempDirs.make("openclaw-health-session-store-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-health-session-store-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const agentId = "main";
     const storePath = resolveSessionStorePathCore(undefined, { agentId, env });
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId, env });
+    const databasePath = resolveCarapaceAgentSqlitePath({ agentId, env });
 
     await sessionAccessor.upsertSessionEntryCore(
       { agentId, env, sessionKey: `agent:${agentId}:main`, storePath },
       { sessionId: "session-1", updatedAt: 10 },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const summary = await summarizeStore(storePath, agentId);
 
@@ -64,8 +64,8 @@ describe("health session store paths", () => {
   it.each(["agent", "shared"] as const)(
     "counts and orders bounded %s session projections without cloning full entries",
     async (layout) => {
-      const stateDir = tempDirs.make("openclaw-health-session-projection-");
-      const env = { OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = tempDirs.make("carapace-health-session-projection-");
+      const env = { CARAPACE_STATE_DIR: stateDir };
       const agentIds = layout === "shared" ? ["main", "other"] : ["main"];
       const storePath =
         layout === "shared"
@@ -97,7 +97,7 @@ describe("health session store paths", () => {
       });
       const clone = vi.spyOn(globalThis, "structuredClone");
       const parse = vi.spyOn(JSON, "parse");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: Object.fromEntries(agentIds.map((agentId) => [agentId, {}])),
@@ -135,8 +135,8 @@ describe("health session store paths", () => {
   it.each(["template", "shared"] as const)(
     "scopes %s stores and recovers from transient reads",
     async (layout) => {
-      const stateDir = tempDirs.make("openclaw-health-session-template-");
-      const env = { OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = tempDirs.make("carapace-health-session-template-");
+      const env = { CARAPACE_STATE_DIR: stateDir };
       const storeTemplate = path.join(
         stateDir,
         "stores",
@@ -166,7 +166,7 @@ describe("health session store paths", () => {
         },
         { sessionId: "session-1", updatedAt: 10 },
       );
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       const populated = await summarizeStore(populatedStorePath, populatedAgentId);
       const emptyAgentId = "third";

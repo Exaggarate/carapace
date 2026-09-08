@@ -1,6 +1,6 @@
 // Account helper tests cover channel account normalization and lookup helpers.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { normalizeAccountId } from "../../routing/session-key.js";
 import {
   createAccountListHelpers,
@@ -15,16 +15,16 @@ import {
 const { listConfiguredAccountIds, listAccountIds, resolveDefaultAccountId } =
   createAccountListHelpers("testchannel");
 
-function cfg(accounts?: Record<string, unknown> | null, defaultAccount?: string): OpenClawConfig {
+function cfg(accounts?: Record<string, unknown> | null, defaultAccount?: string): CarapaceConfig {
   if (accounts === null) {
     return {
       channels: {
         testchannel: defaultAccount ? { defaultAccount } : {},
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
   }
   if (accounts === undefined && !defaultAccount) {
-    return {} as unknown as OpenClawConfig;
+    return {} as unknown as CarapaceConfig;
   }
   return {
     channels: {
@@ -33,18 +33,18 @@ function cfg(accounts?: Record<string, unknown> | null, defaultAccount?: string)
         ...(defaultAccount ? { defaultAccount } : {}),
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 function expectResolvedAccountIdsCase(params: {
-  resolve: (cfg: OpenClawConfig) => string[];
-  input: OpenClawConfig;
+  resolve: (cfg: CarapaceConfig) => string[];
+  input: CarapaceConfig;
   expected: string[];
 }) {
   expect(params.resolve(params.input)).toEqual(params.expected);
 }
 
-function expectResolvedDefaultAccountCase(input: OpenClawConfig, expected: string) {
+function expectResolvedDefaultAccountCase(input: CarapaceConfig, expected: string) {
   expect(resolveDefaultAccountId(input)).toBe(expected);
 }
 
@@ -53,7 +53,7 @@ describe("createAccountListHelpers", () => {
     it.each([
       {
         name: "returns empty for missing config",
-        input: {} as OpenClawConfig,
+        input: {} as CarapaceConfig,
       },
       {
         name: "returns empty when no accounts key",
@@ -103,7 +103,7 @@ describe("createAccountListHelpers", () => {
     it.each([
       {
         name: 'returns ["default"] for empty config',
-        input: {} as OpenClawConfig,
+        input: {} as CarapaceConfig,
         expected: ["default"],
       },
       {
@@ -137,7 +137,7 @@ describe("createAccountListHelpers", () => {
               accounts: { work: {} },
             },
           },
-        } as unknown as OpenClawConfig),
+        } as unknown as CarapaceConfig),
       ).toEqual(["default", "work"]);
     });
 
@@ -165,14 +165,14 @@ describe("createAccountListHelpers", () => {
         implicitDefaultAccount: { channelKeys: ["token"] },
       });
 
-      expect(helpers.listAccountIds({} as OpenClawConfig)).toEqual([]);
+      expect(helpers.listAccountIds({} as CarapaceConfig)).toEqual([]);
       expect(helpers.listAccountIds(cfg({}))).toEqual([]);
       expect(
         helpers.listAccountIds({
           channels: { testchannel: { token: "root-token" } },
-        } as unknown as OpenClawConfig),
+        } as unknown as CarapaceConfig),
       ).toEqual(["default"]);
-      expect(helpers.resolveDefaultAccountId({} as OpenClawConfig)).toBe("default");
+      expect(helpers.resolveDefaultAccountId({} as CarapaceConfig)).toBe("default");
     });
 
     it("combines additional owner-discovered accounts without changing stable order", () => {
@@ -198,11 +198,11 @@ describe("createAccountListHelpers", () => {
         },
       });
 
-      expect(helpers.listAccountIds({} as OpenClawConfig)).toEqual([]);
+      expect(helpers.listAccountIds({} as CarapaceConfig)).toEqual([]);
       expect(
         helpers.listAccountIds({
           channels: { testchannel: { token: "root-token", defaultAccount: "work" } },
-        } as unknown as OpenClawConfig),
+        } as unknown as CarapaceConfig),
       ).toEqual(["work"]);
     });
   });
@@ -241,7 +241,7 @@ describe("createAccountListHelpers", () => {
       },
       {
         name: 'returns "default" for empty config',
-        input: {} as OpenClawConfig,
+        input: {} as CarapaceConfig,
         expected: "default",
       },
     ])("$name", ({ input, expected }) => {
@@ -300,7 +300,7 @@ describe("createAccountListHelpers account resolution", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(resolver.resolveAccountConfig(input, "work-team")).toEqual({
       enabled: true,
@@ -317,7 +317,7 @@ describe("createAccountListHelpers account resolution", () => {
           accounts: { work: { token } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(resolver.resolveAccountConfig(input, "work").token).toBe(token);
   });
@@ -330,7 +330,7 @@ describe("createAccountListHelpers account resolution", () => {
           accounts: { work: { enabled: true, name: "Work" } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(resolver.resolveAccountConfig(input, "work")).toEqual({
       enabled: true,

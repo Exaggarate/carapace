@@ -3,9 +3,9 @@ import {
   verifyChannelMessageAdapterCapabilityProofs,
   verifyChannelMessageLiveCapabilityAdapterProofs,
   verifyChannelMessageLiveFinalizerProofs,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 
 const mocks = vi.hoisted(() => ({
   sendText: vi.fn(),
@@ -74,7 +74,7 @@ const cfg = {
       appId: "resolved-app-id",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 describe("msteams channel message adapter", () => {
   beforeEach(() => {

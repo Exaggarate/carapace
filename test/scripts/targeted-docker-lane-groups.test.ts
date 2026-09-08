@@ -37,7 +37,7 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
     ({ lane, scenario }) => {
       const groups = planTargetedDockerLaneGroups({
         lanes: lane,
-        upgradeSurvivorBaseline: "openclaw@2026.9.1",
+        upgradeSurvivorBaseline: "carapace@2026.9.1",
         upgradeSurvivorBaselines: "2026.9.2 2026.9.1 2026.6.35 2026.6.34",
         upgradeSurvivorScenarios: `${scenario} legacy-operator-state`,
         upgradeSurvivorBaselineScope: "legacy-operator-state",
@@ -66,7 +66,7 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
   it("preserves every synthetic soak fixture once and keeps the three-scenario group cap", () => {
     const synthetic = [
       "base",
-      "acpx-openclaw-tools-bridge",
+      "acpx-carapace-tools-bridge",
       "feishu-channel",
       "bootstrap-persona",
       "channel-post-core-restore",
@@ -92,9 +92,9 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
     );
     expect(pairs.toSorted()).toEqual(
       [
-        ...synthetic.map((scenario) => `openclaw@2026.9.1:${scenario}`),
+        ...synthetic.map((scenario) => `carapace@2026.9.1:${scenario}`),
         ...["2026.9.2", "2026.9.1", "2026.6.35", "2026.6.34"].map(
-          (baseline) => `openclaw@${baseline}:legacy-operator-state`,
+          (baseline) => `carapace@${baseline}:legacy-operator-state`,
         ),
       ].toSorted(),
     );
@@ -120,13 +120,13 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
         group.published_upgrade_survivor_scenarios,
       ]),
     ).toEqual([
-      ["openclaw@2026.9.2", "legacy-operator-state"],
-      ["openclaw@2026.6.34", "legacy-operator-state"],
-      ["openclaw@2026.9.1", "plugin-deps-cleanup"],
+      ["carapace@2026.9.2", "legacy-operator-state"],
+      ["carapace@2026.6.34", "legacy-operator-state"],
+      ["carapace@2026.9.1", "plugin-deps-cleanup"],
     ]);
   });
 
-  it.each([undefined, "", "openclaw@latest", "openclaw@beta"])(
+  it.each([undefined, "", "carapace@latest", "carapace@beta"])(
     "requires an exact predecessor for supported-line pairing (%s)",
     (upgradeSurvivorBaseline) => {
       expect(() =>
@@ -184,7 +184,7 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
         lanes:
           "doctor-switch update-channel-switch published-upgrade-survivor plugins-offline plugin-update",
         upgradeSurvivorBaselines:
-          "openclaw@2026.5.3-1 openclaw@2026.5.3 openclaw@2026.5.2 openclaw@2026.4.23",
+          "carapace@2026.5.3-1 carapace@2026.5.3 carapace@2026.5.2 carapace@2026.4.23",
       }),
     ).toEqual([
       {
@@ -194,22 +194,22 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
       {
         docker_lanes: "published-upgrade-survivor",
         label: "published-upgrade-survivor-2026.5.3-1",
-        published_upgrade_survivor_baselines: "openclaw@2026.5.3-1",
+        published_upgrade_survivor_baselines: "carapace@2026.5.3-1",
       },
       {
         docker_lanes: "published-upgrade-survivor",
         label: "published-upgrade-survivor-2026.5.3",
-        published_upgrade_survivor_baselines: "openclaw@2026.5.3",
+        published_upgrade_survivor_baselines: "carapace@2026.5.3",
       },
       {
         docker_lanes: "published-upgrade-survivor",
         label: "published-upgrade-survivor-2026.5.2",
-        published_upgrade_survivor_baselines: "openclaw@2026.5.2",
+        published_upgrade_survivor_baselines: "carapace@2026.5.2",
       },
       {
         docker_lanes: "published-upgrade-survivor",
         label: "published-upgrade-survivor-2026.4.23",
-        published_upgrade_survivor_baselines: "openclaw@2026.4.23",
+        published_upgrade_survivor_baselines: "carapace@2026.4.23",
       },
       { docker_lanes: "plugins-offline plugin-update", label: "plugins-offline--plugin-update" },
     ]);
@@ -219,7 +219,7 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
     expect(
       planTargetedDockerLaneGroups({
         lanes: "published-upgrade-survivor",
-        upgradeSurvivorBaselines: "openclaw@2026.5.2",
+        upgradeSurvivorBaselines: "carapace@2026.5.2",
       }),
     ).toEqual([
       { docker_lanes: "published-upgrade-survivor", label: "published-upgrade-survivor" },
@@ -269,13 +269,13 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
       {
         docker_lanes: "update-migration",
         label: "update-migration-2026.7.1",
-        published_upgrade_survivor_baselines: "openclaw@2026.7.1",
+        published_upgrade_survivor_baselines: "carapace@2026.7.1",
         timeout_minutes: 90,
       },
       {
         docker_lanes: "update-migration",
         label: "update-migration-2026.8.1",
-        published_upgrade_survivor_baselines: "openclaw@2026.8.1",
+        published_upgrade_survivor_baselines: "carapace@2026.8.1",
         timeout_minutes: 90,
       },
     ]);
@@ -295,14 +295,14 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
     },
     {
       label: "deduped baseline and scenario spellings",
-      baselines: "2026.4.15 openclaw@2026.4.15 2026.4.23",
+      baselines: "2026.4.15 carapace@2026.4.15 2026.4.23",
       scenarios: "reported-issues base feishu-channel",
     },
     {
       label: "an old single baseline with unsupported scenarios at the end",
       baselines: "2026.4.15",
       scenarios:
-        "base feishu-channel tilde-log-path acpx-openclaw-tools-bridge plugin-deps-cleanup",
+        "base feishu-channel tilde-log-path acpx-carapace-tools-bridge plugin-deps-cleanup",
     },
     { label: "the default baseline", baselines: "", scenarios: "far-reaching" },
   ])("preserves each expanded lane exactly once for $label", ({ baselines, scenarios }) => {
@@ -344,7 +344,7 @@ describe("scripts/plan-targeted-docker-lane-groups", () => {
   });
 
   it("preserves frozen-target omissions across scenario shards", async () => {
-    await withTempDir("openclaw-survivor-shards-", async (targetRoot) => {
+    await withTempDir("carapace-survivor-shards-", async (targetRoot) => {
       const harnessDir = join(targetRoot, "scripts/e2e/lib/upgrade-survivor");
       await mkdir(harnessDir, { recursive: true });
       await writeFile(

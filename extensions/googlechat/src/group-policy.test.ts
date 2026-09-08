@@ -1,5 +1,5 @@
 // Googlechat tests cover group policy plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { resolveGoogleChatGroupRequireMention } from "./group-policy.js";
 
@@ -14,7 +14,7 @@ describe("googlechat group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveGoogleChatGroupRequireMention({ cfg, groupId: "spaces/exact" })).toBe(false);
     expect(resolveGoogleChatGroupRequireMention({ cfg, groupId: "spaces/other" })).toBe(true);
@@ -31,7 +31,7 @@ describe("googlechat group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveGoogleChatGroupRequireMention({ cfg, accountId: "work", groupId: "spaces/exact" }),
@@ -46,7 +46,7 @@ describe("googlechat group policy", () => {
           accounts: { work: { groups: {} } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveGoogleChatGroupRequireMention({ cfg, accountId: "work", groupId: "spaces/exact" }),

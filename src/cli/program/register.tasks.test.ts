@@ -1,6 +1,6 @@
 // Task registration tests exercise the real Commander hierarchy and option sources.
 import { Command } from "commander";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ExpectedCliError } from "../failure-output.js";
 import { registerTasksCommand } from "./register.tasks.js";

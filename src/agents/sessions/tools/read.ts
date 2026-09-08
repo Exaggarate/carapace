@@ -194,7 +194,7 @@ function formatReadCall(args: ReadRenderArgs | undefined, theme: Theme): string 
   return `${theme.fg("toolTitle", theme.bold("read"))} ${pathDisplay}${formatReadLineRange(args, theme)}`;
 }
 
-function getOpenClawDocsClassification(
+function getCarapaceDocsClassification(
   absolutePath: string,
 ): CompactReadClassification | undefined {
   const packageRoot = dirname(getReadmePath());
@@ -230,7 +230,7 @@ function getCompactReadClassification(
     return { kind: "skill", label: basename(dirname(absolutePath)) || fileName };
   }
 
-  const docsClassification = getOpenClawDocsClassification(absolutePath);
+  const docsClassification = getCarapaceDocsClassification(absolutePath);
   if (docsClassification) {
     return docsClassification;
   }

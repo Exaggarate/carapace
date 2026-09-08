@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       sync_website:
-        description: Sync openclaw.ai after verification
+        description: Sync github.com/Exaggarate/carapace after verification
         required: false
         default: false
         type: boolean
@@ -73,16 +73,16 @@ jobs:
           timeout --kill-after=30s 20m docker run --rm \
             -v "$PWD/scripts/install.sh:/tmp/install.sh:ro" \
             node:24-bookworm-slim \
-            bash -lc 'bash /tmp/install.sh --version latest && openclaw --version'
+            bash -lc 'bash /tmp/install.sh --version latest && carapace --version'
 
       - name: install-cli.sh in Docker
         run: |
           timeout --kill-after=30s 20m docker run --rm \
-            -e OPENCLAW_NO_ONBOARD=1 \
-            -e OPENCLAW_NO_PROMPT=1 \
+            -e CARAPACE_NO_ONBOARD=1 \
+            -e CARAPACE_NO_PROMPT=1 \
             -v "$PWD/scripts/install-cli.sh:/tmp/install-cli.sh:ro" \
             node:24-bookworm-slim \
-            bash -lc 'apt-get update -y && apt-get install -y curl && bash /tmp/install-cli.sh --prefix /tmp/openclaw --no-onboard --version latest && /tmp/openclaw/bin/openclaw --version'
+            bash -lc 'apt-get update -y && apt-get install -y curl && bash /tmp/install-cli.sh --prefix /tmp/carapace --no-onboard --version latest && /tmp/carapace/bin/carapace --version'
 
   debian-installer:
     runs-on: ubuntu-24.04
@@ -106,7 +106,7 @@ jobs:
             console.log(`SQLite ${db.prepare("SELECT sqlite_version() AS version").get().version}`);
             db.close();
           '
-          openclaw --version
+          carapace --version
           CONTAINER
 
   linux-build-tools-failure:
@@ -200,7 +200,7 @@ jobs:
           fi
           bash /tmp/install.sh --install-method npm --no-onboard --no-prompt --version latest
           test "$(npm config get prefix)" = "$HOME/.npm-global"
-          "$HOME/.npm-global/bin/openclaw" --version
+          "$HOME/.npm-global/bin/carapace" --version
           grep -Fxq 'export PATH="$HOME/.npm-global/bin:$PATH"' "$HOME/.bashrc"
           echo "ok: non-root prefix relocation and bash PATH persistence verified"
           USER
@@ -227,7 +227,7 @@ jobs:
               bash -s <<'CONTAINER'
           set -euo pipefail
           bash /tmp/install.sh --install-method npm --no-onboard --no-prompt --version latest
-          openclaw --version
+          carapace --version
           CONTAINER
           else
             timeout --kill-after=30s 20m docker run --rm -i \
@@ -246,7 +246,7 @@ jobs:
           sudo -n true
           bash /tmp/install.sh --install-method npm --no-onboard --no-prompt --version latest
           test "$(npm config get prefix)" = "$HOME/.npm-global"
-          "$HOME/.npm-global/bin/openclaw" --version
+          "$HOME/.npm-global/bin/carapace" --version
           grep -Fxq 'export PATH="$HOME/.npm-global/bin:$PATH"' "$HOME/.bashrc"
           echo "ok: Fedora non-root install and PATH persistence verified"
           USER
@@ -268,11 +268,11 @@ jobs:
 
       - name: install.sh on macOS
         env:
-          OPENCLAW_NO_ONBOARD: "1"
-          OPENCLAW_NO_PROMPT: "1"
+          CARAPACE_NO_ONBOARD: "1"
+          CARAPACE_NO_PROMPT: "1"
         run: |
           bash scripts/install.sh --no-onboard --no-prompt --version latest
-          openclaw --version
+          carapace --version
 
   windows-installer:
     runs-on: windows-latest
@@ -288,8 +288,8 @@ jobs:
         shell: pwsh
         run: |
           $scriptPath = (Resolve-Path ".\scripts\install.ps1").Path
-          $env:OPENCLAW_DRY_RUN = "1"
-          $env:OPENCLAW_NO_ONBOARD = "1"
+          $env:CARAPACE_DRY_RUN = "1"
+          $env:CARAPACE_NO_ONBOARD = "1"
 
           function Invoke-InstallerProbe {
             param(
@@ -317,14 +317,14 @@ jobs:
               }
             }
 
-            $env:OPENCLAW_INSTALL_METHOD = "bogus"
+            $env:CARAPACE_INSTALL_METHOD = "bogus"
             try {
               $invalidEnvironment = Invoke-InstallerProbe -HostCommand $hostCommand -InstallerArgs @("-NoOnboard")
               if ($invalidEnvironment.ExitCode -eq 0 -or $invalidEnvironment.Output -match '\[OK\] Windows detected') {
-                throw "$hostCommand accepted invalid OPENCLAW_INSTALL_METHOD.`n$($invalidEnvironment.Output)"
+                throw "$hostCommand accepted invalid CARAPACE_INSTALL_METHOD.`n$($invalidEnvironment.Output)"
               }
             } finally {
-              Remove-Item Env:OPENCLAW_INSTALL_METHOD -ErrorAction SilentlyContinue
+              Remove-Item Env:CARAPACE_INSTALL_METHOD -ErrorAction SilentlyContinue
             }
 
             $help = Invoke-InstallerProbe -HostCommand $hostCommand -InstallerArgs @("-?")
@@ -357,40 +357,40 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.sync_website)
     runs-on: ubuntu-24.04
     env:
-      OPENCLAW_GH_TOKEN: ${{ secrets.OPENCLAW_GH_TOKEN }}
+      CARAPACE_GH_TOKEN: ${{ secrets.CARAPACE_GH_TOKEN }}
     steps:
       - name: Skip website sync without token
-        if: env.OPENCLAW_GH_TOKEN == ''
-        run: echo "OPENCLAW_GH_TOKEN is not configured; installer verification passed, skipping website sync."
+        if: env.CARAPACE_GH_TOKEN == ''
+        run: echo "CARAPACE_GH_TOKEN is not configured; installer verification passed, skipping website sync."
 
-      - name: Checkout OpenClaw
-        if: env.OPENCLAW_GH_TOKEN != ''
+      - name: Checkout Carapace
+        if: env.CARAPACE_GH_TOKEN != ''
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          path: openclaw
+          path: carapace
 
-      - name: Checkout openclaw.ai
-        if: env.OPENCLAW_GH_TOKEN != ''
+      - name: Checkout github.com/Exaggarate/carapace
+        if: env.CARAPACE_GH_TOKEN != ''
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/openclaw.ai
+          repository: carapace/github.com/Exaggarate/carapace
           ref: main
-          token: ${{ env.OPENCLAW_GH_TOKEN }}
-          path: openclaw.ai
+          token: ${{ env.CARAPACE_GH_TOKEN }}
+          path: github.com/Exaggarate/carapace
 
       - name: Sync installer scripts
-        if: env.OPENCLAW_GH_TOKEN != ''
+        if: env.CARAPACE_GH_TOKEN != ''
         run: |
-          cp openclaw/scripts/install.sh openclaw.ai/public/install.sh
-          cp openclaw/scripts/install-cli.sh openclaw.ai/public/install-cli.sh
-          cp openclaw/scripts/install.ps1 openclaw.ai/public/install.ps1
-          rm -f openclaw.ai/public/install.cmd
-          chmod +x openclaw.ai/public/install.sh openclaw.ai/public/install-cli.sh
+          cp carapace/scripts/install.sh github.com/Exaggarate/carapace/public/install.sh
+          cp carapace/scripts/install-cli.sh github.com/Exaggarate/carapace/public/install-cli.sh
+          cp carapace/scripts/install.ps1 github.com/Exaggarate/carapace/public/install.ps1
+          rm -f github.com/Exaggarate/carapace/public/install.cmd
+          chmod +x github.com/Exaggarate/carapace/public/install.sh github.com/Exaggarate/carapace/public/install-cli.sh
 
       - name: Check for changes
-        if: env.OPENCLAW_GH_TOKEN != ''
+        if: env.CARAPACE_GH_TOKEN != ''
         id: changes
-        working-directory: openclaw.ai
+        working-directory: github.com/Exaggarate/carapace
         run: |
           if git diff --quiet -- public/install.sh public/install-cli.sh public/install.ps1 public/install.cmd; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -412,7 +412,7 @@ jobs:
 
       - name: Verify website with synced installers
         if: steps.changes.outputs.changed == 'true'
-        working-directory: openclaw.ai
+        working-directory: github.com/Exaggarate/carapace
         run: |
           bash -n public/install.sh public/install-cli.sh
           shellcheck -e SC1091 public/install.sh public/install-cli.sh
@@ -421,14 +421,14 @@ jobs:
 
       - name: Commit and push website sync
         if: steps.changes.outputs.changed == 'true'
-        working-directory: openclaw.ai
+        working-directory: github.com/Exaggarate/carapace
         run: |
-          git config user.name "openclaw-installer-sync[bot]"
-          git config user.email "openclaw-installer-sync[bot]@users.noreply.github.com"
+          git config user.name "carapace-installer-sync[bot]"
+          git config user.email "carapace-installer-sync[bot]@users.noreply.github.com"
           git add public/install.sh public/install-cli.sh public/install.ps1
           if git ls-files --error-unmatch public/install.cmd >/dev/null 2>&1; then
             git add -u -- public/install.cmd
           fi
-          git commit -m "chore: sync installers from openclaw ${GITHUB_SHA::12}"
+          git commit -m "chore: sync installers from carapace ${GITHUB_SHA::12}"
           git pull --rebase origin main
           git push origin HEAD:main

@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import {
   conversationIdentityFromSessionEntry,
   type ConversationIdentity,
@@ -53,7 +53,7 @@ function prepareSessionConversation(params: {
 
 /** Keeps a previously observed route peer when a generic session writer has no route facts. */
 function preserveSessionConversationIdentity(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   identity: ConversationIdentity;
   sessionIds: string[];
 }): ConversationIdentity {
@@ -122,7 +122,7 @@ function preserveSessionConversationIdentity(params: {
 }
 
 export function prepareSessionConversationForWrite(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   entry: SessionEntry;
   previousEntry?: SessionEntry | null;
   routeContext?: ConversationRouteContext | null;
@@ -144,7 +144,7 @@ export function prepareSessionConversationForWrite(params: {
 
 /** Upserts the address before the session row so its primary-conversation FK is always valid. */
 export function upsertConversationIdentity(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   identity: ConversationIdentity,
   updatedAt: number,
 ): void {
@@ -190,7 +190,7 @@ export function upsertConversationIdentity(
 
 /** Links one external address to its local context without conflating the two identities. */
 export function linkSessionConversation(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   previousSessionId?: string;
   sessionId: string;
   conversation: PreparedSessionConversation;

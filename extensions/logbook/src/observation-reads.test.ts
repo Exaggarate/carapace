@@ -1,8 +1,8 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, expect, it, vi } from "vitest";
 import { resolveLogbookConfig } from "./config.js";
 import { buildAskPrompt } from "./prompts.js";
@@ -11,8 +11,8 @@ import { LogbookStore } from "./store.js";
 
 const reads = vi.hoisted(() => ({ rows: 0 }));
 
-vi.mock("openclaw/plugin-sdk/sqlite-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/sqlite-runtime")>();
+vi.mock("carapace/plugin-sdk/sqlite-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/sqlite-runtime")>();
   return {
     ...actual,
     openNodeSqliteDatabase: (...args: Parameters<typeof actual.openNodeSqliteDatabase>) => {
@@ -94,7 +94,7 @@ it.each([0, 199, 200, 201])(
     ]);
     store.close();
     const runtime = createPluginRuntimeMock();
-    const complete = vi.fn<OpenClawPluginApi["runtime"]["llm"]["complete"]>(async () => ({
+    const complete = vi.fn<CarapacePluginApi["runtime"]["llm"]["complete"]>(async () => ({
       text: "Synthetic answer",
       provider: "synthetic",
       model: "synthetic",

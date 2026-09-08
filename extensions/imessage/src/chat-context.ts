@@ -1,6 +1,6 @@
 // Imessage plugin module normalizes equivalent provider conversation identifiers.
-import { normalizeE164 } from "openclaw/plugin-sdk/account-resolution";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "carapace/plugin-sdk/account-resolution";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { IMessageService, IMessageTarget } from "./targets.js";
 
 export type IMessageChatContext = {

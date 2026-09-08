@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { loadOpenClawPluginsWithInternalOverrides } from "../plugins/loader-runtime-load.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { loadCarapacePluginsWithInternalOverrides } from "../plugins/loader-runtime-load.js";
 import { resetPluginLoaderTestStateForTest } from "../plugins/loader.test-fixtures.js";
 import { createPluginRuntime } from "../plugins/runtime/index.js";
 import { buildPluginRuntimeLoadOptions } from "../plugins/runtime/load-context.js";
 import { resolvePluginRuntimeLoadContext } from "../plugins/runtime/load-context.resolve.js";
 import { resolvePluginTools } from "../plugins/tools.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getTaskFlowByIdForOwner, listTaskFlowsForOwner } from "./task-flow-owner-access.js";
 import { reloadTaskFlowRegistryFromStore } from "./task-flow-registry.js";
 import { resetTaskFlowRegistryForTests } from "./task-runtime.test-helpers.js";
@@ -25,11 +25,11 @@ afterEach(resetTestState);
 
 describe("plugin-managed TaskFlows", () => {
   it("loads a real plugin tool that creates and finishes an owner-scoped managed flow", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
-        env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" },
+        env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" },
         layout: "state-only",
-        prefix: "openclaw-plugin-managed-flow-",
+        prefix: "carapace-plugin-managed-flow-",
       },
       async (state) => {
         resetTaskFlowRegistryForTests();
@@ -81,7 +81,7 @@ describe("plugin-managed TaskFlows", () => {
 };
 `,
         );
-        await state.writeJson(`plugins/${PLUGIN_ID}/openclaw.plugin.json`, {
+        await state.writeJson(`plugins/${PLUGIN_ID}/carapace.plugin.json`, {
           id: PLUGIN_ID,
           contracts: { tools: [TOOL_NAME] },
           configSchema: {
@@ -91,7 +91,7 @@ describe("plugin-managed TaskFlows", () => {
           },
         });
 
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           plugins: {
             enabled: true,
             allow: [PLUGIN_ID],
@@ -113,7 +113,7 @@ describe("plugin-managed TaskFlows", () => {
         if (!metadataSnapshot) {
           throw new Error("production load context did not resolve plugin metadata");
         }
-        const registry = loadOpenClawPluginsWithInternalOverrides(
+        const registry = loadCarapacePluginsWithInternalOverrides(
           {
             ...buildPluginRuntimeLoadOptions(loadContext),
             activate: false,

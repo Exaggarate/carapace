@@ -1,11 +1,11 @@
 // iMessage transport binding for numbered ask_user reactions.
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { OutboundDeliveryResult } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createQuestionReactionTargetStore,
   questionGatewayRuntime,
-} from "openclaw/plugin-sdk/question-gateway-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/question-gateway-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { normalizeIMessageGuid } from "./message-guid.js";
 import { resolveIMessageReactionContext } from "./monitor/reaction-context.js";
 import type { IMessagePayload } from "./monitor/types.js";
@@ -98,7 +98,7 @@ export function hasIMessageQuestionReactionTarget(params: {
 }
 
 export async function maybeResolveIMessageQuestionReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   message: IMessagePayload;
   bodyText: string;

@@ -1,13 +1,13 @@
 // Gateway-owned GPT-Live bridge over released WebRTC and unlisted direct transport.
 import { randomUUID } from "node:crypto";
-import type { PluginLogger } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginLogger } from "carapace/plugin-sdk/plugin-entry";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceBridgeCreateRequest,
   RealtimeVoiceCloseDisposition,
   RealtimeVoiceCloseOptions,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { toErrorObject } from "openclaw/plugin-sdk/realtime-voice-provider";
+} from "carapace/plugin-sdk/realtime-voice";
+import { toErrorObject } from "carapace/plugin-sdk/realtime-voice-provider";
 import WebSocket, { type RawData } from "ws";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import { OpenAIQuicksilverPendingAudio } from "./realtime-quicksilver-audio-buffer.js";

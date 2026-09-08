@@ -1,6 +1,6 @@
 // Shared detection and text fallback for Slack's native chart and table blocks.
-import { readResponseTextLimited } from "openclaw/plugin-sdk/provider-http";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { readResponseTextLimited } from "carapace/plugin-sdk/provider-http";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { renderSlackBlockFallbackText } from "./blocks-fallback.js";
 import {
   hasSlackDataTableBlock,

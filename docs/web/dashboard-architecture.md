@@ -128,7 +128,7 @@ sandbox proxy described below.
   pinned copy's grants.
 - **Board widgets** are session state: bytes live in the owning agent's SQLite
   DB (`board_widgets`), served by a core gateway route
-  (`/__openclaw__/board/<agentId>/<sessionKey>/<name>/`) that reads the DB.
+  (`/__carapace__/board/<agentId>/<sessionKey>/<name>/`) that reads the DB.
   Pinning a transcript widget copies the bytes. Caps: 256 KB per document,
   8KB per native widget's JSON props, and 48 widgets per board.
 - **Update in place:** re-emitting a widget with the same `name` and content
@@ -143,7 +143,7 @@ sandbox proxy described below.
 
 ### Widgets host content; MCP apps are one content kind
 
-The **widget is the OpenClaw primitive**: the named, pinned, sized,
+The **widget is the Carapace primitive**: the named, pinned, sized,
 session-owned board cell with a grant record. What renders inside it is a
 content kind:
 
@@ -158,7 +158,7 @@ content kind:
 
 MCP apps do not define the widget model; widgets gained the ability to host
 them. Identity, placement, pinning, grants, and the author-facing API stay
-OpenClaw's — so `show_widget` code stays as short as it is today and never
+Carapace's — so `show_widget` code stays as short as it is today and never
 needs to know the MCP Apps spec exists.
 
 Registered kinds use a small runtime Plugin SDK seam. A registration owns the
@@ -204,13 +204,13 @@ Shared hosting infrastructure:
   per-minting-run).
 - **Host tools for `html` widgets** (exposed over the widget bridge, checked
   against the grant):
-  - `openclaw.prompt.send` — tier 2; routed through the visible composer,
+  - `carapace.prompt.send` — tier 2; routed through the visible composer,
     user-confirmed unless granted
-  - `openclaw.state.emit` — tier 1 session notices (coalesced, size-capped)
-  - `openclaw.data.read` — parameterized read-only bindings (existing
+  - `carapace.state.emit` — tier 1 session notices (coalesced, size-capped)
+  - `carapace.data.read` — parameterized read-only bindings (existing
     allowlisted read RPC set), resolved gateway-side
-  - `openclaw.action.run` — tier 3 plugin-owned automation
-  - `openclaw.cron.trigger` — tier 3 automation
+  - `carapace.action.run` — tier 3 plugin-owned automation
+  - `carapace.cron.trigger` — tier 3 automation
 - **`net` = CSP.** Network reach uses the already-shipped per-widget CSP
   declaration (`connect-src` origins) — the self-updating weather widget
   fetches its API directly from the sandbox, no gateway involvement.
@@ -226,10 +226,10 @@ Shared hosting infrastructure:
   declaration does not widen. Wrapper-authored board widgets forward user-clicked
   `http`/`https` new-tab links to the Control UI host; this ordinary navigation
   needs no grant and never grants iframe popup permissions.
-- **Authoring shim.** The document wrapper injects `window.openclaw.prompt`,
-  `window.openclaw.state`, `window.openclaw.data`, `window.openclaw.action`,
-  `window.openclaw.cron`, and the host-provided
-  `window.openclaw.host.controlUiBaseUrl` as the stable author API. Dashboard
+- **Authoring shim.** The document wrapper injects `window.carapace.prompt`,
+  `window.carapace.state`, `window.carapace.data`, `window.carapace.action`,
+  `window.carapace.cron`, and the host-provided
+  `window.carapace.host.controlUiBaseUrl` as the stable author API. Dashboard
   calls and trusted new-tab link clicks share one view-ticket-bound request
   channel. The host opens links with `noopener,noreferrer`; size reporting and
   theme tokens remain separate host notifications.
@@ -291,11 +291,11 @@ interactive or inline content. See the [report schema and example](/tools/show-w
 ### Plugin capability declarations
 
 Enabled plugins can extend the widget host through `dashboard.dataBindings`
-and `dashboard.actionVerbs` in `openclaw.plugin.json`. Plugin-local ids become
+and `dashboard.actionVerbs` in `carapace.plugin.json`. Plugin-local ids become
 grant names prefixed by the plugin id, such as `workboard.cards.list` and
 `workboard.dispatch`; `%` and `.` in the plugin-id segment are escaped so a
 different plugin/local-id split cannot inherit the same persisted grant. During
-plugin registration, OpenClaw verifies that every binding targets an RPC
+plugin registration, Carapace verifies that every binding targets an RPC
 registered by the same plugin with `operator.read` and every action targets one
 with `operator.write`; invalid declarations fail the plugin load. The validated
 registry is rebuilt only with plugin lifecycle changes, while widget grants
@@ -354,8 +354,8 @@ does not implement it. Scriptable widgets can therefore use WebRTC data
 channels for egress without CSP enforcement of that directive. This residual
 also applies to inline chat widgets and the MCP Apps host.
 
-**Accepted tradeoff:** OpenClaw does not gate scriptable widgets on this
-residual. Widget content gains access to sensitive OpenClaw data only through
+**Accepted tradeoff:** Carapace does not gate scriptable widgets on this
+residual. Widget content gains access to sensitive Carapace data only through
 policy-granted, byte-frozen data bindings, and the sandbox Permissions Policy
 blocks camera and microphone access.
 
@@ -412,15 +412,15 @@ order. Agent vocabulary:
 
 ## Data model (per-agent DB)
 
-Board state lives in `agents/<agentId>/agent/openclaw-agent.sqlite`:
+Board state lives in `agents/<agentId>/agent/carapace-agent.sqlite`:
 
 - `board_tabs` stores tab identity, ordering, chat dock, and board revision.
 - `board_widgets` stores widget identity, placement, content or descriptors,
   capability declarations, approved digests, and grant state.
 
 The canonical table definitions, constraints, and indexes are in
-`src/state/openclaw-agent-schema.sql`. The board schema ensure/repair path is
-`src/state/openclaw-agent-board-schema.ts`; runtime reads and writes are owned by
+`src/state/carapace-agent-schema.sql`. The board schema ensure/repair path is
+`src/state/carapace-agent-board-schema.ts`; runtime reads and writes are owned by
 `src/boards/sqlite-board-store.ts`. See [Database schemas](/reference/database-schemas)
 for schema versions, migration and downgrade rules, and the review checkpoint for
 material storage changes. Do not use a copied SQL sketch as the schema contract.
@@ -502,7 +502,7 @@ false`, never in a stable release (first appeared in 2026.7.2 betas). No
   serving, and the `show_widget` tool live in core (`src/canvas/`); the Canvas
   plugin owns the macOS node-panel presenter and the A2UI
   dashboard content kind. The `pluginSurfaceUrls["canvas"]` advertisement and
-  `/__openclaw__/canvas` paths are shipped native-client contracts and stay
+  `/__carapace__/canvas` paths are shipped native-client contracts and stay
   stable. Discord Activities register a contextual presenter behind core's
   canonical `show_widget` tool.
 

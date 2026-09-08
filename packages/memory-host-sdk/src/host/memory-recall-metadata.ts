@@ -1,6 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { INVALID_PROJECT_ANNOTATION_KEY } from "./internal.js";
-import { executeSqliteQuerySync, getNodeSqliteKysely } from "./openclaw-runtime-kysely.js";
+import { executeSqliteQuerySync, getNodeSqliteKysely } from "./carapace-runtime-kysely.js";
 import type { MemoryEntryProvenance, MemoryOriginClass, MemorySessionKind } from "./types.js";
 
 type MemoryRecallMetadataDatabase = {

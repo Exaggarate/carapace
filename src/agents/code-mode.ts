@@ -4,7 +4,7 @@
  */
 import { Type } from "typebox";
 import { getAgentToolExecutionContext } from "../../packages/agent-core/src/tool-execution-context.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { finalizeAgentToolAvailability } from "./agent-tool-availability.js";
 import type { HookContext } from "./agent-tools.before-tool-call.js";
 import { CODE_MODE_NODES_TOOL_ID, isCodeModeSwarmAvailable } from "./code-mode-bridge.js";
@@ -168,12 +168,12 @@ function createCodeModeExecDescription(
     : undefined;
   const catalogIndex = bindings ? formatCodeModeCatalogIndex(bindings) : "";
   // Only the effective core binding proves shell capability after client overrides.
-  const shellTool = bindings?.find((entry) => entry.id === "openclaw:core:exec");
+  const shellTool = bindings?.find((entry) => entry.id === "carapace:core:exec");
   const shellGuidance = shellTool
     ? ` Use the shell tool \`${shellTool.callableName}\` for heavier computation.`
     : "";
   return (
-    `Run JavaScript or TypeScript in OpenClaw code mode. Guest work and inline tool waits share a ${timeoutMs} ms wall-clock budget per \`exec\`/\`wait\`; approvals pause it. Guest computation over this budget times out; pending tools may return \`waiting\` for \`wait\`.` +
+    `Run JavaScript or TypeScript in Carapace code mode. Guest work and inline tool waits share a ${timeoutMs} ms wall-clock budget per \`exec\`/\`wait\`; approvals pause it. Guest computation over this budget times out; pending tools may return \`waiting\` for \`wait\`.` +
     shellGuidance +
     ` Enabled tools are async global functions listed in the quick index. Await dependent calls in order; independent calls may run with Promise.all. Declared output fields may feed later calls in the same program; avoid extra inspection calls. Emit output with \`text(value)\` or \`json(value)\`. Return the final value; otherwise the result is \`null\`. \`-> ?\` means unknown output: do not feed it into guessed field-dependent logic in the same program. Return it raw, then use a later \`exec\` for dependent composition. If a tool is omitted from the bounded index, use \`catalog.search(query)\`; results are callable: \`const [tool] = await catalog.search("..."); return await tool({...});\`. Use handle \`describe()\` for schemas. \`setTimeout\` and \`clearTimeout\` work. \`TextEncoder\` and \`TextDecoder\` support local text encoding without network access. Console log/info/warn/error/debug emit bounded text. Nested calls enforce normal tool policy and approvals. Tool failures are catchable JavaScript errors; correct your code or choose another tool. Inspect possible effects before retrying. Nested results are intact or throw catchable resource errors. Replies share a ${Math.min(config.memoryLimitBytes, config.maxSnapshotBytes)}-byte cell inbox; consume replies or paginate if full. Cumulative output and the final value or error share ${maxOutputBytes} bytes across waits. Context limits preserve complete status and continuation. Output/value truncation reports a prefix and omitted bytes of the original normalized JSON; rerun with narrower args. Output is incremental; changed cumulative summaries replace earlier ones. Node.js modules and \`require\`/\`import\` are NOT available; use tools for external actions.` +
     apiGuidance +
@@ -217,7 +217,7 @@ export function createCodeModeTools(ctx: CodeModeToolContext): AnyAgentTool[] {
       restartSafe: Type.Optional(
         Type.Boolean({
           description:
-            "Do not set on a new exec. Set true only when OpenClaw explicitly requests replay after a gateway restart; never for write, edit, exec, or any mutation. True rejects unmarked or namespace surfaces.",
+            "Do not set on a new exec. Set true only when Carapace explicitly requests replay after a gateway restart; never for write, edit, exec, or any mutation. True rejects unmarked or namespace surfaces.",
         }),
       ),
     }),
@@ -305,7 +305,7 @@ export function createCodeModeTools(ctx: CodeModeToolContext): AnyAgentTool[] {
 /** Compact normal tools behind Code Mode exec/wait controls. */
 export function applyCodeModeCatalog(params: {
   tools: AnyAgentTool[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionId?: string;
   sessionKey?: string;
   agentId?: string;
@@ -361,7 +361,7 @@ export function applyCodeModeCatalog(params: {
 /** Move client-side tool definitions into the active Code Mode catalog. */
 export function addClientToolsToCodeModeCatalog(params: {
   tools: ToolDefinition[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionId?: string;
   sessionKey?: string;
   agentId?: string;

@@ -10,7 +10,7 @@ import type {
   UsersSelfResult,
 } from "../../../packages/gateway-protocol/src/schema/users.js";
 import { stripAnsi } from "../../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildMinimalGatewayHelloOkPayload,
   closeMinimalGatewayServer,
@@ -20,7 +20,7 @@ import {
 } from "../../gateway/minimal-gateway.test-helpers.js";
 import { ExitError } from "../../runtime.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { DEVICE_CODE_PHISHING_WARNING } from "../../wizard/prompts.js";
 import { WizardSession } from "../../wizard/session.js";
 import {
@@ -92,9 +92,9 @@ async function withGateway(
     connections: Request[];
     upgradeHeaders: IncomingHttpHeaders[];
   }) => Promise<void>,
-  options: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv } = {},
+  options: { config?: CarapaceConfig; env?: NodeJS.ProcessEnv } = {},
 ): Promise<void> {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "personal-account-cli", scenario: "minimal", env: options.env },
     async (state) => {
       const server = new WebSocketServer({ port: 0, host: "127.0.0.1" });
@@ -301,8 +301,8 @@ describe("personal model account CLI over an identified Gateway connection", () 
       },
       {
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "ambient-shared-token",
-          OPENCLAW_GATEWAY_PASSWORD: "ambient-shared-password",
+          CARAPACE_GATEWAY_TOKEN: "ambient-shared-token",
+          CARAPACE_GATEWAY_PASSWORD: "ambient-shared-password",
         },
         config: {
           gateway: {

@@ -7,7 +7,7 @@ const emptyGroupTimings: Readonly<Record<string, number>> = {};
 let cachedTimings: CiTestTimings | null | undefined;
 
 function readTestTimings(): CiTestTimings | null {
-  if (process.env.OPENCLAW_CI_TEST_TIMINGS === "0") {
+  if (process.env.CARAPACE_CI_TEST_TIMINGS === "0") {
     return null;
   }
   if (cachedTimings === undefined) {

@@ -1,4 +1,4 @@
-import { CompactionReplayRefreshRequiredError } from "@openclaw/ai/transports";
+import { CompactionReplayRefreshRequiredError } from "@carapace/ai/transports";
 import type { ThinkLevel } from "../../../auto-reply/thinking.js";
 import { formatErrorMessage, toErrorObject } from "../../../infra/errors.js";
 import {

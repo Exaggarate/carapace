@@ -9,7 +9,7 @@ import {
   resolveControlUiAssetHealth,
   resolveControlUiDistIndexPathForRoot,
 } from "../infra/control-ui-assets.js";
-import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRoot } from "../infra/carapace-root.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { resolveRuntimeServiceBuildId } from "../version.js";
@@ -38,7 +38,7 @@ export async function detectUiProtocolFreshnessIssues(
 ): Promise<readonly UiProtocolFreshnessIssue[]> {
   const root =
     opts.root ??
-    (await resolveOpenClawPackageRoot({
+    (await resolveCarapacePackageRoot({
       moduleUrl: import.meta.url,
       argv1: opts.argv1 ?? process.argv[1],
       cwd: opts.cwd ?? process.cwd(),
@@ -118,9 +118,9 @@ export function uiProtocolFreshnessIssueToHealthFinding(
     path: issue.uiIndexPath,
     fixHint: issue.canBuild
       ? issue.kind === "missing-assets"
-        ? "Run `openclaw doctor --fix` to build Control UI assets."
-        : `Run \`openclaw doctor --fix --force\` to rebuild Control UI assets, or run \`${formatControlUiSourceCommand(issue.root, "build")}\`.`
-      : "Reinstall OpenClaw to restore bundled Control UI assets.",
+        ? "Run `carapace doctor --fix` to build Control UI assets."
+        : `Run \`carapace doctor --fix --force\` to rebuild Control UI assets, or run \`${formatControlUiSourceCommand(issue.root, "build")}\`.`
+      : "Reinstall Carapace to restore bundled Control UI assets.",
   };
 }
 
@@ -153,7 +153,7 @@ function formatUiProtocolFreshnessIssue(issue: UiProtocolFreshnessIssue): string
     message,
     issue.canBuild
       ? `- Run: ${formatControlUiSourceCommand(issue.root, "build")}`
-      : "- Reinstall OpenClaw to restore bundled Control UI assets.",
+      : "- Reinstall Carapace to restore bundled Control UI assets.",
   ].join("\n");
 }
 

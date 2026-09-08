@@ -14,11 +14,11 @@ import {
   readSessionTranscriptMessageEvents,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { getAgentEventLifecycleGeneration } from "../infra/agent-events.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   authorizeClientVoiceConfirmation,
   bindAuthorizedClientVoiceConfirmation,
@@ -37,9 +37,9 @@ import {
 } from "../talk/provider-types.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { registerChatAbortController, type ChatAbortControllerEntry } from "./chat-abort.js";
 import { createChatRunState } from "./server-chat-state.js";
 import { projectTalkRealtimeRelayProviderError } from "./talk-realtime-relay-issues.js";
@@ -198,10 +198,10 @@ describe("talk realtime relay provider error projection", () => {
 });
 
 describe("talk realtime gateway relay", () => {
-  let testState: OpenClawTestState | undefined;
+  let testState: CarapaceTestState | undefined;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       label: "talk-realtime-relay",
       scenario: "minimal",
     });
@@ -520,9 +520,9 @@ describe("talk realtime gateway relay", () => {
   });
 
   it("closes only realtime relays owned by the disconnected connection", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    const tempDir = tempDirs.make("openclaw-relay-disconnect-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    const tempDir = tempDirs.make("carapace-relay-disconnect-");
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     const bridgeCloses: Array<ReturnType<typeof vi.fn>> = [];
     const bridgeAudioSends: Array<ReturnType<typeof vi.fn>> = [];
     const bridgeRequests: RealtimeVoiceBridgeCreateRequest[] = [];
@@ -636,7 +636,7 @@ describe("talk realtime gateway relay", () => {
       lateRequest.onToolCall?.({
         itemId: "late-item",
         callId: "late-call",
-        name: "openclaw_agent_consult",
+        name: "carapace_agent_consult",
         args: { question: "late consult" },
       });
       lateRequest.onClose?.("error");
@@ -677,8 +677,8 @@ describe("talk realtime gateway relay", () => {
       expect(bridgeCloses[2]).toHaveBeenCalledOnce();
     } finally {
       clientVoiceSessionTesting.reset();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
     }
   });
@@ -837,13 +837,13 @@ describe("talk realtime gateway relay", () => {
   ])(
     "appends relay transcripts from $sessionKey to $canonicalKey",
     async ({ sessionKey, canonicalKey, mainKey, scope }) => {
-      const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+      const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
       const tempDir = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-voice-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-relay-voice-")),
       );
-      setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
       const storePath = path.join(tempDir, "configured", "sessions.sqlite");
-      const cfg: OpenClawConfig = { session: { store: storePath, mainKey, scope } };
+      const cfg: CarapaceConfig = { session: { store: storePath, mainKey, scope } };
       let bridgeRequest: RealtimeVoiceBridgeCreateRequest | undefined;
       try {
         await replaceSessionEntry(
@@ -912,8 +912,8 @@ describe("talk realtime gateway relay", () => {
           ),
         );
       } finally {
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
         envSnapshot.restore();
         await fs.rm(tempDir, { recursive: true, force: true });
       }
@@ -921,9 +921,9 @@ describe("talk realtime gateway relay", () => {
   );
 
   it("emits one terminal error and close when transcript persistence overflows", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    const tempDir = tempDirs.make("openclaw-relay-voice-overflow-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    const tempDir = tempDirs.make("carapace-relay-voice-overflow-");
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     let bridgeRequest: RealtimeVoiceBridgeCreateRequest | undefined;
     const bridgeClose = vi.fn();
     const events: Array<{ event: string; payload: unknown; connIds: string[] }> = [];
@@ -1038,18 +1038,18 @@ describe("talk realtime gateway relay", () => {
       );
     } finally {
       releaseQueue();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
     }
   });
 
   it("creates the relay voice record before binding a transcript-free consult", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-voice-consult-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-relay-voice-consult-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     try {
       const session = createTalkRealtimeRelaySession({
         context: {
@@ -1096,20 +1096,20 @@ describe("talk realtime gateway relay", () => {
       );
     } finally {
       clientVoiceSessionTesting.reset();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("pins an unscoped relay owner before the configured default changes", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-owner-pin-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-relay-owner-pin-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
-    let runtimeConfig: OpenClawConfig = {
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
+    let runtimeConfig: CarapaceConfig = {
       agents: { entries: { main: { default: true }, ops: {} } },
     };
     try {
@@ -1149,19 +1149,19 @@ describe("talk realtime gateway relay", () => {
       );
       expect(clientVoiceSessionTesting.readRecord("ops", session.relaySessionId)).toBeUndefined();
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("pins a scoped relay owner from the trimmed session key", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-trimmed-owner-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-relay-trimmed-owner-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     try {
       const session = createTalkRealtimeRelaySessionRaw({
         controlSource: "transcript",
@@ -1196,19 +1196,19 @@ describe("talk realtime gateway relay", () => {
       });
       expect(clientVoiceSessionTesting.readRecord("ops", session.relaySessionId)).toBeUndefined();
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("logs relay transcript append failures", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-voice-failure-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-relay-voice-failure-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     let bridgeRequest: RealtimeVoiceBridgeCreateRequest | undefined;
     const warn = vi.fn();
     try {
@@ -1259,8 +1259,8 @@ describe("talk realtime gateway relay", () => {
       );
       expect(warn).toHaveBeenCalledTimes(1);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
@@ -1320,7 +1320,7 @@ describe("talk realtime gateway relay", () => {
       bridgeRequest?.onToolCall?.({
         itemId: `item-${callId}`,
         callId,
-        name: "openclaw_agent_consult",
+        name: "carapace_agent_consult",
         args: { question: "Can you check this?" },
       });
     }
@@ -1446,7 +1446,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "call-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "status?" },
     });
 
@@ -1507,7 +1507,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "call-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "status?" },
     });
     bridgeRequest?.onEvent?.({
@@ -1554,7 +1554,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-call",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "status?" },
     });
     registerTalkRealtimeRelayAgentRun({
@@ -1615,7 +1615,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "call-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "status?" },
     });
     await submitTalkRealtimeRelayToolResult({
@@ -1640,7 +1640,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "call-1-replay",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "status?" },
     });
     bridgeRequest?.onEvent?.({
@@ -1890,7 +1890,7 @@ describe("talk realtime gateway relay", () => {
         bridgeRequest?.onToolCall?.({
           itemId: "item-1",
           callId: "call-1",
-          name: "openclaw_agent_consult",
+          name: "carapace_agent_consult",
           args: { question: "hello" },
         });
       }),
@@ -2040,7 +2040,7 @@ describe("talk realtime gateway relay", () => {
       type: "toolCall",
       itemId: "item-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "hello" },
     });
     expectRecordFields(toolCallPayload.talkEvent, {
@@ -2097,9 +2097,9 @@ describe("talk realtime gateway relay", () => {
       "call-1",
       {
         status: "working",
-        tool: "openclaw_agent_consult",
+        tool: "carapace_agent_consult",
         message:
-          "Tell the person briefly that you are checking, then wait for the final OpenClaw result before answering with the actual result.",
+          "Tell the person briefly that you are checking, then wait for the final Carapace result before answering with the actual result.",
       },
       { willContinue: true },
     );
@@ -2162,7 +2162,7 @@ describe("talk realtime gateway relay", () => {
     expectRecordFields(toolResultPayloads[0]?.talkEvent, {
       type: "tool.progress",
       callId: "call-1",
-      payload: { name: "openclaw_agent_consult", status: "working" },
+      payload: { name: "carapace_agent_consult", status: "working" },
     });
     expectRecordFields(toolResultPayloads[1], {
       relaySessionId: session.relaySessionId,
@@ -2384,7 +2384,7 @@ describe("talk realtime gateway relay", () => {
       },
       ...(hideModel
         ? {
-            [Symbol.for("openclaw.internal.realtime-voice-provider.v1")]: {
+            [Symbol.for("carapace.internal.realtime-voice-provider.v1")]: {
               isBrowserSessionConfigured: () => true,
               projectPublicProjection: ({ config }: { config: Record<string, unknown> }) => {
                 const { model: _model, ...publicConfig } = config;
@@ -2583,7 +2583,7 @@ describe("talk realtime gateway relay", () => {
     expectRecordFields(forcedToolCall, {
       relaySessionId: session.relaySessionId,
       type: "toolCall",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       forced: true,
     });
     expectRecordFields(forcedToolCall.args, {
@@ -2608,22 +2608,22 @@ describe("talk realtime gateway relay", () => {
       options: { willContinue: true },
     });
     expect(bridge.sendUserMessage).toHaveBeenLastCalledWith(
-      "Briefly tell the person that you are checking with OpenClaw. Do not answer the request yet. Wait for the OpenClaw result before giving the actual answer.",
+      "Briefly tell the person that you are checking with Carapace. Do not answer the request yet. Wait for the Carapace result before giving the actual answer.",
     );
 
     bridgeRequest?.onToolCall?.({
       itemId: "native-item",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this?" },
     });
     expect(bridge.submitToolResult).toHaveBeenLastCalledWith(
       "native-call",
       {
         status: "working",
-        tool: "openclaw_agent_consult",
+        tool: "carapace_agent_consult",
         message:
-          "Tell the person briefly that you are checking, then wait for the final OpenClaw result before answering with the actual result.",
+          "Tell the person briefly that you are checking, then wait for the final Carapace result before answering with the actual result.",
       },
       { willContinue: true },
     );
@@ -2645,13 +2645,13 @@ describe("talk realtime gateway relay", () => {
       "native-call",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+        message: "Carapace already delivered this consult result internally. Do not repeat it.",
       },
       { suppressResponse: true },
     );
     expect(bridge.sendUserMessage).toHaveBeenLastCalledWith(
       [
-        "OpenClaw finished checking. Speak this result naturally and concisely.",
+        "Carapace finished checking. Speak this result naturally and concisely.",
         "Do not mention tool calls, JSON, or internal routing.",
         "",
         "Here is the checked answer.",
@@ -2681,16 +2681,16 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-other-item",
       callId: "native-other-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check something else?" },
     });
     expect(bridge.submitToolResult).toHaveBeenLastCalledWith(
       "native-other-call",
       {
         status: "working",
-        tool: "openclaw_agent_consult",
+        tool: "carapace_agent_consult",
         message:
-          "Tell the person briefly that you are checking, then wait for the final OpenClaw result before answering with the actual result.",
+          "Tell the person briefly that you are checking, then wait for the final Carapace result before answering with the actual result.",
       },
       { willContinue: true },
     );
@@ -2702,7 +2702,7 @@ describe("talk realtime gateway relay", () => {
       relaySessionId: session.relaySessionId,
       type: "toolCall",
       callId: "native-other-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check something else?" },
     });
     stopTalkRealtimeRelaySession({ relaySessionId: session.relaySessionId, connId: "conn-1" });
@@ -2835,7 +2835,7 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "late-item",
       callId: "native-2",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this?" },
     });
     expect(fixture.submitToolResult.mock.calls.map((call) => call[0])).toEqual(["native-1"]);
@@ -2845,7 +2845,7 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "later-item",
       callId: "native-3",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this?" },
     });
     second.resolve();
@@ -2956,14 +2956,14 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "late-item",
       callId: "late-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this?" },
     });
     expect(fixture.submitToolResult).toHaveBeenCalledWith(
       "late-call",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+        message: "Carapace already delivered this consult result internally. Do not repeat it.",
       },
       undefined,
     );
@@ -3043,7 +3043,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-item",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this for me?" },
     });
     await vi.advanceTimersByTimeAsync(250);
@@ -3078,7 +3078,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "unicode-native-item",
       callId: "unicode-native-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "проверь статус" },
     });
     await vi.advanceTimersByTimeAsync(250);
@@ -3960,7 +3960,7 @@ describe("talk realtime gateway relay", () => {
       "call-1",
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
       { suppressResponse: true },
     );
@@ -4033,7 +4033,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "item-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "check" },
     });
     const finalSubmission = submitTalkRealtimeRelayToolResult({
@@ -4219,7 +4219,7 @@ describe("talk realtime gateway relay", () => {
       { phase: "first" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
     ]);
     expect(submitToolResult.mock.calls[1]?.[2]).toEqual({ suppressResponse: true });
@@ -4274,7 +4274,7 @@ describe("talk realtime gateway relay", () => {
       { status: "working" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
     ]);
     expect(submitToolResult.mock.calls[1]?.[2]).toBeUndefined();
@@ -4339,7 +4339,7 @@ describe("talk realtime gateway relay", () => {
       { answer: "stale" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
     ]);
   });
@@ -4528,7 +4528,7 @@ describe("talk realtime gateway relay", () => {
           return bridge;
         },
       };
-      Object.defineProperty(provider, Symbol.for("openclaw.internal.realtime-voice-provider.v1"), {
+      Object.defineProperty(provider, Symbol.for("carapace.internal.realtime-voice-provider.v1"), {
         value: {
           isBrowserSessionConfigured: () => true,
           resolveGatewayRelayCapabilities: () => ({ ...capabilities, handlesAgentConsult: native }),
@@ -4572,7 +4572,7 @@ describe("talk realtime gateway relay", () => {
       if (transition !== "disconnect") {
         await vi.waitFor(() =>
           expect(native ? respond : bridge.sendUserMessage).toHaveBeenCalledWith(
-            expect.stringContaining("There is no active OpenClaw run to cancel."),
+            expect.stringContaining("There is no active Carapace run to cancel."),
           ),
         );
       } else {
@@ -4688,7 +4688,7 @@ describe("talk realtime gateway relay", () => {
         suppress: expectedSuppress,
         providerResult: {
           status: "cancelled",
-          message: "Cancelled the active OpenClaw run.",
+          message: "Cancelled the active Carapace run.",
         },
       });
       expect(abortEmbeddedRun).toHaveBeenCalledTimes(1);
@@ -4696,7 +4696,7 @@ describe("talk realtime gateway relay", () => {
         "call-1",
         {
           status: "cancelled",
-          message: "Cancelled the active OpenClaw run.",
+          message: "Cancelled the active Carapace run.",
         },
         expectedOptions,
       );
@@ -4906,7 +4906,7 @@ describe("talk realtime gateway relay", () => {
       mode: "cancel",
       providerResult: {
         status: "cancelled",
-        message: "Cancelled the active OpenClaw run.",
+        message: "Cancelled the active Carapace run.",
       },
     });
     expect(abortEmbeddedRun).toHaveBeenCalledTimes(1);
@@ -4940,7 +4940,7 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "late-native-item",
       callId: "native-2",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this?" },
     });
     await submitTalkRealtimeRelayToolResult({
@@ -4956,7 +4956,7 @@ describe("talk realtime gateway relay", () => {
     for (const call of fixture.submitToolResult.mock.calls) {
       expect(call[1]).toEqual({
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       });
       expect(call[2]).toBeUndefined();
     }
@@ -4977,7 +4977,7 @@ describe("talk realtime gateway relay", () => {
     expectRecordFields((terminal.talkEvent as Record<string, unknown>).payload, {
       result: {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
       forced: true,
     });
@@ -5009,7 +5009,7 @@ describe("talk realtime gateway relay", () => {
       expect.objectContaining({ status: "working" }),
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
     ]);
     expect(fixture.submitToolResult.mock.calls[1]?.[2]).toBeUndefined();
@@ -5056,7 +5056,7 @@ describe("talk realtime gateway relay", () => {
       { answer: "stale" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Carapace cancelled this consult before completion. Do not restart it.",
       },
     ]);
   });
@@ -5126,7 +5126,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-item",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "Can you check this?" },
     });
     registerTalkRealtimeRelayAgentRun({
@@ -5157,7 +5157,7 @@ describe("talk realtime gateway relay", () => {
       "native-call",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+        message: "Carapace already delivered this consult result internally. Do not repeat it.",
       },
       { suppressResponse: true },
     );
@@ -5177,7 +5177,7 @@ describe("talk realtime gateway relay", () => {
       text: "cancel",
       supportsToolCalls: false,
       handlesAgentConsult: false,
-      reply: "There is no active OpenClaw run to cancel.",
+      reply: "There is no active Carapace run to cancel.",
     },
     { text: "status", supportsToolCalls: true, handlesAgentConsult: false, reply: undefined },
     { text: "status", supportsToolCalls: undefined, handlesAgentConsult: false, reply: undefined },
@@ -5191,7 +5191,7 @@ describe("talk realtime gateway relay", () => {
       text: "cancel",
       supportsToolCalls: false,
       handlesAgentConsult: true,
-      reply: "There is no active OpenClaw run to cancel.",
+      reply: "There is no active Carapace run to cancel.",
     },
     { text: "cancel", supportsToolCalls: true, handlesAgentConsult: false, reply: undefined },
   ])(
@@ -5217,7 +5217,7 @@ describe("talk realtime gateway relay", () => {
           return bridge;
         },
       };
-      Object.defineProperty(provider, Symbol.for("openclaw.internal.realtime-voice-provider.v1"), {
+      Object.defineProperty(provider, Symbol.for("carapace.internal.realtime-voice-provider.v1"), {
         value: {
           isBrowserSessionConfigured: () => true,
           resolveGatewayRelayCapabilities: () => ({

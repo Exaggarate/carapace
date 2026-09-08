@@ -53,7 +53,7 @@ vi.mock("../shared/global-singleton.js", async (importOriginal) => {
   return {
     ...actual,
     resolveGlobalSingleton: (...args: Parameters<typeof actual.resolveGlobalSingleton>) => {
-      if (args[0] === Symbol.for("openclaw.testPortPool")) {
+      if (args[0] === Symbol.for("carapace.testPortPool")) {
         args[0] = host.cacheKey;
       }
       return actual.resolveGlobalSingleton(...args);

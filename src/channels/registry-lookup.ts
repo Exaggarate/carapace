@@ -1,5 +1,5 @@
 // Cached lookup view for active channel plugin registry entries and aliases.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import type {
   ActivePluginChannelRegistration,
   ActivePluginChannelRegistry,

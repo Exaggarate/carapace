@@ -22,7 +22,7 @@ function routeData(sessions: SessionsListResult["sessions"], basePath = ""): Das
 }
 
 describe("dashboards index", () => {
-  it.each(["", "/openclaw"])(
+  it.each(["", "/carapace"])(
     "links each dashboard back to its owning chat with the panel expanded at %s",
     (basePath) => {
       const container = document.createElement("div");

@@ -31,9 +31,9 @@ const SESSION_KEY = "agent:main:main";
 
 describe("managed image actions Gateway E2E", () => {
   test("issues one transcript ticket for full and thumbnail image bytes", async () => {
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
-      throw new Error("OPENCLAW_STATE_DIR is required for managed image E2E fixtures");
+      throw new Error("CARAPACE_STATE_DIR is required for managed image E2E fixtures");
     }
     testState.gatewayAuth = { mode: "token", token: GATEWAY_TOKEN };
     testState.gatewayControlUi = { basePath: "/rosita" };
@@ -41,7 +41,7 @@ describe("managed image actions Gateway E2E", () => {
     testState.sessionStorePath = storePath;
 
     const source = await fs.readFile(
-      path.join(process.cwd(), "docs/assets/openclaw-banner-dark.png"),
+      path.join(process.cwd(), "docs/assets/carapace-banner-dark.png"),
     );
     const messageId = "managed-image-actions-message";
     const blocks = await createManagedOutgoingMediaBlocks({
@@ -81,7 +81,7 @@ describe("managed image actions Gateway E2E", () => {
           role: "assistant",
           content: blocks,
           timestamp: Date.now(),
-          __openclaw: { id: messageId },
+          __carapace: { id: messageId },
         },
       },
     ];
@@ -219,7 +219,7 @@ describe("managed image actions Gateway E2E", () => {
           expect(activeHistory.messages).toHaveLength(1);
           expect(activeHistory.messages[0]).toMatchObject({
             content: "Live history without the old image",
-            __openclaw: { id: "managed-image-actions-live-replacement" },
+            __carapace: { id: "managed-image-actions-live-replacement" },
           });
           const denied = [];
           for (const variant of ["full", "thumbnail"] as const) {

@@ -1,6 +1,6 @@
 // Discord tests cover resolve channels plugin behavior.
 import { ChannelType } from "discord-api-types/v10";
-import { withFetchPreconnect } from "openclaw/plugin-sdk/test-env";
+import { withFetchPreconnect } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { resolveDiscordChannelAllowlist } from "./resolve-channels.js";
 import { jsonResponse, urlToString } from "./test-http-helpers.js";

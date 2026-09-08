@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { GatewayClientRequestError } from "../../../packages/gateway-client/src/index.js";
 import { isExecutionIdentityCollectionEnabled } from "../../audit/audit-config.js";
 import { sanitizePendingFinalDeliveryText } from "../../auto-reply/reply/pending-final-delivery-state.js";
@@ -10,7 +10,7 @@ import {
   resolveRestartRecoveryChannelAuthority,
 } from "../../config/sessions/restart-recovery-state.js";
 import { applySessionEntryReplacements } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isTrustedMessageActionTurnIngress } from "../../gateway/message-action-turn-capability.js";
 import type { GatewayRecoveryRuntime } from "../../gateway/server-instance-runtime.types.js";
 import type { AgentRunRequest } from "../../gateway/server-methods/agent-request-types.js";
@@ -49,7 +49,7 @@ import { normalizeFiniteTimestamp } from "./main-session-restart-recovery-shared
 const log = createSubsystemLogger("main-session-restart-recovery");
 const RESTART_RECOVERY_RESUME_MESSAGE = formatSystemTurnPrompt(
   "Your previous turn was interrupted by a gateway restart while " +
-    "OpenClaw was waiting on tool/model work. Continue from the existing " +
+    "Carapace was waiting on tool/model work. Continue from the existing " +
     "transcript and finish the interrupted response. Treat a tool result marked interrupted or " +
     `missing as having an unknown outcome. ${TOOL_FAILURE_INSTRUCTION}`,
 );
@@ -84,7 +84,7 @@ function buildResumeMessage(pendingFinalDeliveryText?: string | null): string {
 }
 
 export function resolveRestartRecoveryDeliveryContext(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   entry: SessionEntry;
   includeSessionDeliveryFallback?: boolean;
   sessionKey: string;
@@ -332,7 +332,7 @@ function scheduleRestartRecoveryReservationRollback(
 export async function resumeMainSession(params: {
   agentId: string;
   canonicalSessionKey?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   entry: SessionEntry;
   observation: MainSessionRecoveryObservation;
   recoveryAttempt: number;

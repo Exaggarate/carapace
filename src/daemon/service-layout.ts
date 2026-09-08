@@ -1,4 +1,4 @@
-/** Summarizes installed service command paths and OpenClaw package layout. */
+/** Summarizes installed service command paths and Carapace package layout. */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathExists } from "../infra/fs-safe.js";
@@ -113,7 +113,7 @@ async function isSourceCheckoutRoot(candidate: string): Promise<boolean> {
   );
 }
 
-async function resolveOpenClawPackageRoot(entrypoint: string): Promise<string | undefined> {
+async function resolveCarapacePackageRoot(entrypoint: string): Promise<string | undefined> {
   let current = path.dirname(path.resolve(entrypoint));
   // Installed dist entrypoints can sit several levels below package root in
   // pnpm layouts; bound the walk to avoid scanning arbitrary filesystem depth.
@@ -121,7 +121,7 @@ async function resolveOpenClawPackageRoot(entrypoint: string): Promise<string | 
     const packageJson = path.join(current, "package.json");
     if (await pathExists(packageJson)) {
       const name = await readPackageName(current);
-      if (name === "openclaw") {
+      if (name === "carapace") {
         return current;
       }
     }
@@ -146,7 +146,7 @@ export async function summarizeGatewayServiceLayout(
     tryRealpath(sourcePath),
     tryRealpath(entrypoint),
   ]);
-  const packageRoot = entrypointReal ? await resolveOpenClawPackageRoot(entrypointReal) : undefined;
+  const packageRoot = entrypointReal ? await resolveCarapacePackageRoot(entrypointReal) : undefined;
   const packageRootReal = await tryRealpath(packageRoot);
   const packageVersion = packageRoot
     ? ((await readPackageVersion(packageRoot)) ?? undefined)

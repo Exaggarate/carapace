@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasActiveStartupMigrationLease } from "../infra/startup-migration-checkpoint.js";
 import {
   createSourceRuntime,
@@ -15,23 +15,23 @@ const tempDirs = useAutoCleanupTempDirTracker(afterAll);
 
 describe("gateway startup-migration refusal", () => {
   it("skips state-only checkpoint work when config and state remain absent", async () => {
-    const root = await fs.promises.realpath(tempDirs.make("openclaw-configless-checkpoint-"));
+    const root = await fs.promises.realpath(tempDirs.make("carapace-configless-checkpoint-"));
     const runtimeRoot = createSourceRuntime(root);
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
     delete env.VITEST_POOL_ID;
     delete env.VITEST_WORKER_ID;
@@ -98,28 +98,28 @@ describe("CLI pristine startup after early config observation", () => {
   ])(
     "preserves the migration decision for $name",
     async ({ explicit, existingState, stateful }) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-cli-pristine-observation-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-cli-pristine-observation-"));
       const runtimeRoot = createSourceRuntime(root);
       const stateDir = path.join(root, "state");
-      const configPath = path.join(root, "openclaw.json");
+      const configPath = path.join(root, "carapace.json");
       const timelinePath = path.join(root, "timeline.jsonl");
       const config = {
         gateway: { mode: "local", port: 19876, auth: { mode: "token", token: "test-token" } },
         agents: { defaults: { workspace: path.join(root, "workspace") } },
-        logging: { file: path.join(root, "openclaw.log") },
+        logging: { file: path.join(root, "carapace.log") },
         // Inherited plugin selectors must not add unrelated convergence work to this fixture.
         plugins: { enabled: false },
         ...(stateful ? { messages: { ackReaction: "ok" } } : {}),
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const configRaw = JSON.stringify(config);
       fs.writeFileSync(configPath, configRaw);
       const env: NodeJS.ProcessEnv = {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DIAGNOSTICS: "1",
-        OPENCLAW_DIAGNOSTICS_TIMELINE_PATH: timelinePath,
-        OPENCLAW_HIDE_BANNER: "1",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DIAGNOSTICS: "1",
+        CARAPACE_DIAGNOSTICS_TIMELINE_PATH: timelinePath,
+        CARAPACE_HIDE_BANNER: "1",
         XDG_CONFIG_HOME: path.join(root, "xdg-config"),
         XDG_DATA_HOME: path.join(root, "xdg-data"),
         XDG_STATE_HOME: path.join(root, "xdg-state"),
@@ -131,11 +131,11 @@ describe("CLI pristine startup after early config observation", () => {
       delete env.VITEST;
       delete env.VITEST_POOL_ID;
       delete env.VITEST_WORKER_ID;
-      delete env.OPENCLAW_PROFILE;
-      delete env.OPENCLAW_CONTAINER;
-      delete env.OPENCLAW_GATEWAY_URL;
-      delete env.OPENCLAW_GATEWAY_TOKEN;
-      delete env.OPENCLAW_GATEWAY_PASSWORD;
+      delete env.CARAPACE_PROFILE;
+      delete env.CARAPACE_CONTAINER;
+      delete env.CARAPACE_GATEWAY_URL;
+      delete env.CARAPACE_GATEWAY_TOKEN;
+      delete env.CARAPACE_GATEWAY_PASSWORD;
       // Check the authored input without warming the CLI child's startup graph.
       const { planPristineStartupConfigMigrations } =
         await import("./doctor/shared/pristine-startup-state.js");
@@ -154,7 +154,7 @@ describe("CLI pristine startup after early config observation", () => {
       export * from ${JSON.stringify(sourceUrl("gateway/call.ts"))};
       export async function callGateway(options) {
         if (options.method !== "sessions.resolve") throw new Error("Unexpected RPC: " + options.method);
-        globalThis[Symbol.for("openclaw.test.pristineStartupRpcCalls")].push({
+        globalThis[Symbol.for("carapace.test.pristineStartupRpcCalls")].push({
           method: options.method, params: options.params, url: options.url ?? null,
           configMode: options.config?.gateway?.mode, configPort: options.config?.gateway?.port,
         });
@@ -171,7 +171,7 @@ describe("CLI pristine startup after early config observation", () => {
       import path from "node:path";
       import { DatabaseSync } from "node:sqlite";
       import { registerHooks } from "node:module";
-      const calls = globalThis[Symbol.for("openclaw.test.pristineStartupRpcCalls")] = [];
+      const calls = globalThis[Symbol.for("carapace.test.pristineStartupRpcCalls")] = [];
       registerHooks({
         resolve(specifier, context, nextResolve) {
           const parent = context.parentURL ?? "";
@@ -184,29 +184,29 @@ describe("CLI pristine startup after early config observation", () => {
         },
       });
       if (${existingState}) {
-        const { openOpenClawStateDatabase, closeOpenClawStateDatabase } =
-          await import(${JSON.stringify(sourceUrl("state/openclaw-state-db.ts"))});
-        openOpenClawStateDatabase({ env: process.env });
-        closeOpenClawStateDatabase();
+        const { openCarapaceStateDatabase, closeCarapaceStateDatabase } =
+          await import(${JSON.stringify(sourceUrl("state/carapace-state-db.ts"))});
+        openCarapaceStateDatabase({ env: process.env });
+        closeCarapaceStateDatabase();
       }
-      const databasePath = path.join(process.env.OPENCLAW_STATE_DIR, "state", "openclaw.sqlite");
+      const databasePath = path.join(process.env.CARAPACE_STATE_DIR, "state", "carapace.sqlite");
       const databaseExistedBefore = fs.existsSync(databasePath);
       const { runCli } = await import(${JSON.stringify(sourceUrl("cli/run-main.ts"))});
-      process.argv = [process.execPath, "openclaw", ...${JSON.stringify(args)}];
+      process.argv = [process.execPath, "carapace", ...${JSON.stringify(args)}];
       let message;
       try { await runCli(process.argv); }
       catch (error) { message = error instanceof Error ? error.message : String(error); }
       const { flushDiagnosticsTimeline } =
         await import(${JSON.stringify(sourceUrl("infra/diagnostics-timeline.ts"))});
       flushDiagnosticsTimeline();
-      const events = fs.readFileSync(process.env.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH, "utf8")
+      const events = fs.readFileSync(process.env.CARAPACE_DIAGNOSTICS_TIMELINE_PATH, "utf8")
         .trim().split("\\n").map(line => JSON.parse(line));
       const stages = events.filter(event => event.type === "span.end" &&
         event.name === "cli.command-startup").map(event => event.attributes?.stage);
       const database = new DatabaseSync(databasePath, { readOnly: true });
       let health;
       try { health = database.prepare("SELECT last_known_good_json FROM config_health_entries WHERE config_path = ?")
-        .get(process.env.OPENCLAW_CONFIG_PATH); }
+        .get(process.env.CARAPACE_CONFIG_PATH); }
       finally { database.close(); }
       process.stdout.write("__RESULT__" + JSON.stringify({
         message, calls, stages, databaseExistedBefore,

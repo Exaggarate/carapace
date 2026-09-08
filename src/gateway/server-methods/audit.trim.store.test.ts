@@ -1,22 +1,22 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../../test/helpers/temp-dir.js";
 import { listAuditEvents, recordAuditEvent } from "../../audit/audit-event-store.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import { auditHandlers } from "./audit.js";
 
 const tempDirs: string[] = [];
 
-function createDatabaseOptions(): OpenClawStateDatabaseOptions {
-  return { env: { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "openclaw-audit-trim-") } };
+function createDatabaseOptions(): CarapaceStateDatabaseOptions {
+  return { env: { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "carapace-audit-trim-") } };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
-  delete process.env.OPENCLAW_STATE_DIR;
+  closeCarapaceStateDatabaseForTest();
+  delete process.env.CARAPACE_STATE_DIR;
 });
 
 afterAll(() => {
@@ -26,8 +26,8 @@ afterAll(() => {
 describe("audit.list padded filters against a real audit store", () => {
   it("returns the planted run for padded agentId/runId filters", async () => {
     const database = createDatabaseOptions();
-    const stateDir = expectDefined(database.env?.OPENCLAW_STATE_DIR, "temp state dir");
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    const stateDir = expectDefined(database.env?.CARAPACE_STATE_DIR, "temp state dir");
+    process.env.CARAPACE_STATE_DIR = stateDir;
 
     recordAuditEvent(
       {

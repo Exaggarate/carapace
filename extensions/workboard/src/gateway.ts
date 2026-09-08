@@ -1,6 +1,6 @@
 // Workboard plugin module implements gateway behavior.
-import type { WorkboardCard } from "@openclaw/workboard-contract";
-import type { OpenClawPluginApi } from "../api.js";
+import type { WorkboardCard } from "@carapace/workboard-contract";
+import type { CarapacePluginApi } from "../api.js";
 import { redactClaimToken } from "./card-redaction.js";
 import {
   assertNoCursorAdvance,
@@ -37,7 +37,7 @@ async function redactCardResult(card: Promise<WorkboardCard>) {
 }
 
 export function registerWorkboardGatewayMethods(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   store?: WorkboardStore;
 }) {
   const { api: hostApi } = params;
@@ -45,7 +45,7 @@ export function registerWorkboardGatewayMethods(params: {
   if (!params.store) {
     registerWorkboardStoreLifecycle(hostApi, store);
   }
-  const api: OpenClawPluginApi = {
+  const api: CarapacePluginApi = {
     ...hostApi,
     registerGatewayMethod: (method, handler, options) =>
       hostApi.registerGatewayMethod(

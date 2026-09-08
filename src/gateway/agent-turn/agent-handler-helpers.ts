@@ -10,7 +10,7 @@ import {
   resolveSessionWorkStartError,
   type SessionEntry,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   CronScheduledToolCallerOrigin,
   CronScheduledToolPolicy,
@@ -58,7 +58,7 @@ export function clientHasAdminScope(client: GatewayRequestHandlerOptions["client
 }
 
 export function respondDeletedAgentSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   canonicalKey: string;
   entry?: SessionEntry | null;
   acpMetadataSessionKey?: string;
@@ -155,7 +155,7 @@ export function resolveCanUseCronRunContinuation(
 }
 
 export function cronContinuationHasReusableRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry;
   agentId: string;
   provider: string;
@@ -182,7 +182,7 @@ export function withoutCronRunContinuation(entry: SessionEntry): SessionEntry {
 export function emitAgentSendSessionLifecycleTransition(
   transition:
     | {
-        cfg: OpenClawConfig;
+        cfg: CarapaceConfig;
         sessionKey: string;
         sessionId: string;
         storePath: string;

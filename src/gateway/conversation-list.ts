@@ -14,7 +14,7 @@ import {
   type ConversationRecord,
   type ConversationRegistryScope,
 } from "../config/sessions/conversation-registry.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resolveOutboundChannelPlugin } from "../infra/outbound/channel-resolution.js";
 import { resolveOutboundSessionRoute } from "../infra/outbound/outbound-session.js";
@@ -72,7 +72,7 @@ async function listLiveDirectoryEntries(params: {
 }
 
 async function listDirectoryEntries(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   accountId: string;
   query?: string;
   limit: number;
@@ -118,14 +118,14 @@ async function listDirectoryEntries(params: {
 }
 
 async function discoverChannelAddresses(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   channel: string;
   query?: string;
   limit: number;
   scope: ConversationRegistryScope;
   deps: ConversationListDeps;
-  readCurrentConfig?: () => OpenClawConfig;
+  readCurrentConfig?: () => CarapaceConfig;
 }): Promise<{ channel: string; discoveredConversationRefs: ReadonlySet<string> }> {
   const plugin = params.deps.resolveOutboundChannelPlugin({
     channel: params.channel,
@@ -231,8 +231,8 @@ function matchesConversationQuery(conversation: ConversationRecord, rawQuery: st
 /** Lists persisted and channel-directory addresses from the Gateway's live plugin runtime. */
 export async function runGatewayConversationList(
   params: {
-    config: OpenClawConfig;
-    readCurrentConfig?: () => OpenClawConfig;
+    config: CarapaceConfig;
+    readCurrentConfig?: () => CarapaceConfig;
     agentId: string;
     channel?: string;
     query?: string;

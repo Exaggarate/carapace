@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { AssistantDeliveryTtsFacts, AssistantMessage } from "../../llm/types.js";
 import { extractTtsDirectiveFacts } from "../../tts/directive-facts.js";
 import {
@@ -8,7 +8,7 @@ import {
 
 type AssistantDirectiveMessage = {
   content?: unknown;
-  openclawDelivery?: unknown;
+  carapaceDelivery?: unknown;
   role?: unknown;
 };
 
@@ -33,8 +33,8 @@ export function recordAssistantManagedMediaUrls<T extends AssistantDirectiveMess
   const mediaUrls = Array.from(new Set(urls?.map((url) => url.trim()).filter(Boolean) ?? []));
   if (message.role === "assistant" && mediaUrls.length > 0) {
     Object.assign(message, {
-      openclawDelivery: {
-        ...(isRecord(message.openclawDelivery) ? message.openclawDelivery : {}),
+      carapaceDelivery: {
+        ...(isRecord(message.carapaceDelivery) ? message.carapaceDelivery : {}),
         mediaUrls,
       },
     });
@@ -58,7 +58,7 @@ function mergeTtsFacts(
 /** Strips final-answer directives in place so live state and persisted bytes stay identical. */
 // TRANSITIONAL(marker-retirement): once the visibleReplies default flips and the
 // model stops emitting inline markers, this projection parses nothing and the
-// whole applier (plus its parser imports) can be deleted; openclawDelivery facts
+// whole applier (plus its parser imports) can be deleted; carapaceDelivery facts
 // then come exclusively from structured message-tool sends and managed-media rewrites.
 export function applyAssistantDeliveryDirectives<T extends AssistantDirectiveMessage>(
   message: T,
@@ -92,14 +92,14 @@ export function applyAssistantDeliveryDirectives<T extends AssistantDirectiveMes
     });
   }
   if (facts) {
-    const currentFacts = isRecord(message.openclawDelivery) ? message.openclawDelivery : undefined;
+    const currentFacts = isRecord(message.carapaceDelivery) ? message.carapaceDelivery : undefined;
     const mergedFacts = { ...currentFacts, ...facts };
     if (facts.replyToId) {
       delete mergedFacts.replyToCurrent;
     } else if (facts.replyToCurrent) {
       delete mergedFacts.replyToId;
     }
-    Object.assign(message, { openclawDelivery: mergedFacts });
+    Object.assign(message, { carapaceDelivery: mergedFacts });
   }
   return recordAssistantManagedMediaUrls(message, options?.managedMediaUrls);
 }

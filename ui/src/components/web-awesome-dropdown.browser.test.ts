@@ -93,7 +93,7 @@ describe.runIf(browserMode)("Web Awesome dropdown lifecycle", () => {
       await page.elementLocator(f.item).click();
       expect(f.item.checked).toBe(true);
       expect(f.dropdown.open).toBe(true);
-      expect(document.querySelector("openclaw-tooltip[open]")).toBeNull();
+      expect(document.querySelector("carapace-tooltip[open]")).toBeNull();
       if (dismissal === "pointer") {
         await page.elementLocator(f.outside).click();
       } else {
@@ -113,7 +113,7 @@ describe.runIf(browserMode)("Web Awesome dropdown lifecycle", () => {
     const f = await fixture();
     await reopen(f);
     f.item.checked = true;
-    const tooltip = document.createElement("openclaw-tooltip");
+    const tooltip = document.createElement("carapace-tooltip");
     tooltip.content = "Search the web for current information";
     tooltip.anchor = f.item;
     f.host.append(tooltip);

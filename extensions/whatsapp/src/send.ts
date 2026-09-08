@@ -1,21 +1,21 @@
 // Whatsapp plugin module implements send behavior.
-import type { ChannelOutboundContext } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelOutboundContext } from "carapace/plugin-sdk/channel-contract";
 import {
   createMessageReceiptFromOutboundResults,
   createReplyToFanout,
   type MessageReceipt,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatCliCommand } from "openclaw/plugin-sdk/cli-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { generateSecureUuid } from "openclaw/plugin-sdk/core";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { redactIdentifier } from "openclaw/plugin-sdk/logging-core";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { normalizePollInput, type PollInput } from "openclaw/plugin-sdk/poll-runtime";
-import { resolveChunkMode, resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
-import { createSubsystemLogger, getChildLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import { formatCliCommand } from "carapace/plugin-sdk/cli-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { generateSecureUuid } from "carapace/plugin-sdk/core";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { redactIdentifier } from "carapace/plugin-sdk/logging-core";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import { normalizePollInput, type PollInput } from "carapace/plugin-sdk/poll-runtime";
+import { resolveChunkMode, resolveTextChunkLimit } from "carapace/plugin-sdk/reply-chunking";
+import { createSubsystemLogger, getChildLogger } from "carapace/plugin-sdk/runtime-env";
 import {
   resolveDefaultWhatsAppAccountId,
   resolveWhatsAppAccount,
@@ -90,7 +90,7 @@ function buildWhatsAppMediaSendState(params: {
 }
 
 function resolveOutboundWhatsAppAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
 }): string | undefined {
   const explicitAccountId = params.accountId?.trim();
@@ -100,7 +100,7 @@ function resolveOutboundWhatsAppAccountId(params: {
   return resolveDefaultWhatsAppAccountId(params.cfg);
 }
 
-function requireOutboundActiveWebListener(params: { cfg: OpenClawConfig; accountId?: string }): {
+function requireOutboundActiveWebListener(params: { cfg: CarapaceConfig; accountId?: string }): {
   accountId: string;
   listener: ActiveWebListener;
 } {
@@ -109,7 +109,7 @@ function requireOutboundActiveWebListener(params: { cfg: OpenClawConfig; account
   const listener = getWhatsAppConnectionController(resolvedAccountId)?.getActiveListener() ?? null;
   if (!listener) {
     const cause = new Error(
-      `No active WhatsApp Web listener (account: ${resolvedAccountId}). Start the gateway, then link WhatsApp with: ${formatCliCommand(`openclaw channels login --channel whatsapp --account ${resolvedAccountId}`)}.`,
+      `No active WhatsApp Web listener (account: ${resolvedAccountId}). Start the gateway, then link WhatsApp with: ${formatCliCommand(`carapace channels login --channel whatsapp --account ${resolvedAccountId}`)}.`,
     );
     throw new PlatformMessageNotDispatchedError(cause.message, { cause });
   }
@@ -135,7 +135,7 @@ export async function sendMessageWhatsApp(
   body: string,
   options: {
     verbose: boolean;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     mediaUrl?: string;
     mediaUrls?: readonly string[];
     mediaAccess?: {
@@ -376,7 +376,7 @@ async function sendMessageWhatsAppInActivityScope(
 export async function sendTypingWhatsApp(
   to: string,
   options: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string;
   },
 ): Promise<void> {
@@ -400,7 +400,7 @@ export async function sendReactionWhatsApp(
     fromMe?: boolean;
     participant?: string;
     accountId?: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
   },
 ): Promise<void> {
   const correlationId = generateSecureUuid();
@@ -442,7 +442,7 @@ export async function sendReactionWhatsApp(
 export async function sendPollWhatsApp(
   to: string,
   poll: PollInput,
-  options: { verbose: boolean; accountId?: string; cfg: OpenClawConfig },
+  options: { verbose: boolean; accountId?: string; cfg: CarapaceConfig },
 ): Promise<{ messageId: string; toJid: string }> {
   const correlationId = generateSecureUuid();
   const startedAt = Date.now();

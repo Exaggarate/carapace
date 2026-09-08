@@ -1,18 +1,18 @@
 // Discord tests cover monitor.agent components plugin behavior.
 import { ChannelType, ComponentType } from "discord-api-types/v10";
-import { expectPairingReplyText } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import { expectPairingReplyText } from "carapace/plugin-sdk/channel-test-helpers";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { buildAgentSessionKey } from "carapace/plugin-sdk/routing";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   enqueueSystemEvent,
   peekSystemEventEntries,
-} from "openclaw/plugin-sdk/system-event-runtime";
-import { peekSystemEvents, resetSystemEventsForTest } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/system-event-runtime";
+import { peekSystemEvents, resetSystemEventsForTest } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ButtonInteraction,
@@ -51,7 +51,7 @@ describe("agent components", () => {
     peer: { kind: "group", id: "group-dm-channel" },
   });
 
-  const createCfg = (): OpenClawConfig => ({}) as OpenClawConfig;
+  const createCfg = (): CarapaceConfig => ({}) as CarapaceConfig;
   const createDmInteraction = (params: { interactionId: string; data?: Record<string, unknown> }) =>
     createInteraction(
       createInternalTestClient(),
@@ -190,7 +190,7 @@ describe("agent components", () => {
   });
 
   it("does not create pairing after policy is revoked during the component store read", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { discord: { dmPolicy: "pairing", allowFrom: [] } },
     };
     setRuntimeConfigSnapshot(cfg, cfg);
@@ -214,7 +214,7 @@ describe("agent components", () => {
     try {
       const run = button.run(interaction, { componentId: "hello" } as ComponentData);
       await readStarted.promise;
-      const revoked: OpenClawConfig = {
+      const revoked: CarapaceConfig = {
         channels: { discord: { dmPolicy: "disabled", allowFrom: [] } },
       };
       setRuntimeConfigSnapshot(revoked, revoked);
@@ -250,7 +250,7 @@ describe("agent components", () => {
       channel: "discord",
       idLine: "Your Discord user id: 123456789",
     });
-    expect(pairingText).toContain(`openclaw pairing approve discord ${code}`);
+    expect(pairingText).toContain(`carapace pairing approve discord ${code}`);
     expect(peekSystemEvents(defaultDmSessionKey)).toStrictEqual([]);
     expect(readAllowFromStoreMock).toHaveBeenCalledWith("discord", "default");
   });

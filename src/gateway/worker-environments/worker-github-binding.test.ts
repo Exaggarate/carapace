@@ -5,7 +5,7 @@ import {
   installManagedGitHubProfile,
   resolveManagedGitHubProfileDir,
 } from "../../agents/github-tool-identity.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { prepareWorkerGitHubBinding } from "./worker-github-binding.js";
 
 const mocks = vi.hoisted(() => ({
@@ -47,7 +47,7 @@ const worktree = {
   path: "/repo/worktree",
   repoRoot: "/repo",
   repoFingerprint: "repository-fingerprint",
-  branch: "openclaw/session-branch",
+  branch: "carapace/session-branch",
   ownerKind: "session",
   ownerId: session.sessionKey,
 };
@@ -56,7 +56,7 @@ const verified = {
   account: { accountId: 42, login: "shared-bot", avatarUrl: null },
   scopes: [],
 };
-let config: OpenClawConfig;
+let config: CarapaceConfig;
 
 async function installProfile(scope: "agent" | "system" = "system") {
   const profileDir = resolveManagedGitHubProfileDir({ agentId: "main", scope, profileId });
@@ -71,7 +71,7 @@ async function installProfile(scope: "agent" | "system" = "system") {
 
 describe("worker GitHub launch binding", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("worker-github-binding-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("worker-github-binding-"));
     config = { tools: { github: { profileId, gitAuthor: { name: "Shared Bot" } } } };
     mocks.snapshot.mockReset().mockImplementation(() => ({ config, sourceConfig: config }));
     mocks.refresh.mockReset().mockResolvedValue(undefined);
@@ -216,7 +216,7 @@ describe("worker GitHub launch binding", () => {
         agentId: session.agentId,
         sessionKey: session.sessionKey,
         url: "https://github.com/owner/repo.git",
-        branch: "openclaw/repository-session",
+        branch: "carapace/repository-session",
         baseCommit: null,
         checkpointRef: null,
       };

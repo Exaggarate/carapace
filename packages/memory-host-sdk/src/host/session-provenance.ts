@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { MemoryOriginClass } from "./types.js";
 
 export function classifySessionMessageOrigin(
@@ -9,8 +9,8 @@ export function classifySessionMessageOrigin(
   turnOrigin: MemoryOriginClass,
 ): MemoryOriginClass {
   if (message.role === "assistant") {
-    const openClawMetadata = asOptionalRecord(message["__openclaw"]);
-    if (openClawMetadata?.turnTainted === true) {
+    const carapaceMetadata = asOptionalRecord(message["__carapace"]);
+    if (carapaceMetadata?.turnTainted === true) {
       return "untrusted";
     }
     return turnOrigin === "owner" ? "agent" : turnOrigin;
@@ -19,6 +19,6 @@ export function classifySessionMessageOrigin(
   if (provenance?.kind === "internal_system") {
     return "system";
   }
-  const metadata = asOptionalRecord(message["__openclaw"]);
+  const metadata = asOptionalRecord(message["__carapace"]);
   return metadata?.senderIsOwner === true ? "owner" : "untrusted";
 }

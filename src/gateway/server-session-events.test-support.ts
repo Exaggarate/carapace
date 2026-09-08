@@ -12,7 +12,7 @@ const sessionRow = vi.hoisted(() => ({
   thinkingLevels: [{ id: "ultra", label: "ultra" }],
   thinkingOptions: ["ultra"],
   thinkingDefault: "medium",
-  agentRuntime: { id: "openclaw", source: "model" },
+  agentRuntime: { id: "carapace", source: "model" },
 }));
 const resolveEmbeddedAgentSessionProgressStateMock = vi.hoisted(() => vi.fn());
 const loadGatewaySessionRowMock = vi.hoisted(() => vi.fn());
@@ -40,7 +40,7 @@ vi.mock("./chat-display-projection.js", async (importOriginal) => {
   return { ...actual, projectChatDisplayMessage: projectChatDisplayMessageMock };
 });
 vi.mock("./session-utils.js", () => ({
-  attachOpenClawTranscriptMeta: (message: unknown) => message,
+  attachCarapaceTranscriptMeta: (message: unknown) => message,
   loadGatewaySessionRow: loadGatewaySessionRowMock,
   loadSessionEntry: () => ({ entry: undefined, storePath: "" }),
   loadGatewaySessionEntryReadOnly: loadGatewaySessionEntryReadOnlyMock,

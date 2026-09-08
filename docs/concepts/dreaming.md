@@ -164,7 +164,7 @@ Dreaming completions share the [background work budget](/concepts/queue#backgrou
 An explicit multi-agent fleet needs an [ambient system owner](/gateway/config-agents/heartbeat-compaction-and-streaming#agents.defaults.systemagent) for this job. If logs report `Agent-less cron job has no resolvable owner`, choose an existing agent to own the sweep. For example, if that agent is `ops`:
 
 ```bash
-openclaw config set agents.defaults.systemAgent.agentId ops
+carapace config set agents.defaults.systemAgent.agentId ops
 ```
 
 This selects the execution owner; it does not change any agent's workspace or limit the sweep to that agent's memory. A sole-agent installation resolves its owner automatically.
@@ -231,10 +231,10 @@ This selects the execution owner; it does not change any agent's workspace or li
 <Tabs>
   <Tab title="Promotion preview / apply">
     ```bash
-    openclaw memory promote
-    openclaw memory promote --apply
-    openclaw memory promote --limit 5
-    openclaw memory status --deep
+    carapace memory promote
+    carapace memory promote --apply
+    carapace memory promote --limit 5
+    carapace memory status --deep
     ```
 
     Manual `memory promote` uses deep-phase thresholds by default unless overridden with CLI flags.
@@ -244,8 +244,8 @@ This selects the execution owner; it does not change any agent's workspace or li
     Explain why a specific candidate would or would not promote:
 
     ```bash
-    openclaw memory promote-explain "router vlan"
-    openclaw memory promote-explain "router vlan" --json
+    carapace memory promote-explain "router vlan"
+    carapace memory promote-explain "router vlan" --json
     ```
 
   </Tab>
@@ -253,8 +253,8 @@ This selects the execution owner; it does not change any agent's workspace or li
     Preview REM reflections, candidate truths, and deep promotion output without writing anything:
 
     ```bash
-    openclaw memory rem-harness
-    openclaw memory rem-harness --json
+    carapace memory rem-harness
+    carapace memory rem-harness --json
     ```
 
   </Tab>
@@ -303,7 +303,7 @@ When the bundled [`memory-wiki`](/plugins/memory-wiki) plugin is enabled, the
 Diary view gains two more sub-tabs next to Dreams:
 
 - **Imported Insights**: clustered insights surfaced by external-history
-  imports (for example `openclaw wiki chatgpt import`), for review before any
+  imports (for example `carapace wiki chatgpt import`), for review before any
   of it graduates into durable memory
 - **Memory Wiki**: the compiled wiki the memory system can search and reason
   over — synthesis, entity, and concept pages (plus sources and reports that

@@ -208,7 +208,7 @@ export function renderChat(props: ChatProps) {
         onFocusComposer: () =>
           chatSection
             ?.querySelector<HTMLElement>(
-              "openclaw-plugin-view[data-plugin-composer], .agent-chat__composer-combobox > textarea",
+              "carapace-plugin-view[data-plugin-composer], .agent-chat__composer-combobox > textarea",
             )
             ?.focus({ preventScroll: true }),
       },
@@ -341,12 +341,12 @@ export function renderChat(props: ChatProps) {
             <div class="chat-main">
               <div class="chat-main__conversation-column">
                 ${props.header ?? nothing} ${renderChatTopbarNotices(props)}
-                <openclaw-plugin-contributions
+                <carapace-plugin-contributions
                   .kind=${"header"}
                   .sessionKey=${props.sessionKey}
                   .agentId=${props.currentAgentId}
                   .presented=${props.presented ?? true}
-                ></openclaw-plugin-contributions>
+                ></carapace-plugin-contributions>
                 ${renderTranscriptSearch(props.paneId, requestUpdate)}
                 <div class="chat-main__conversation">
                   ${historyRefreshNotice} ${historyError === nothing ? thread : historyError}
@@ -430,12 +430,12 @@ export function renderChat(props: ChatProps) {
                       props.onResolveSessionSuggestion?.(suggestion, resolution),
                   })}
                   ${props.swarm ? renderChatSwarmProgress(props.swarm) : nothing}
-                  <openclaw-plugin-contributions
+                  <carapace-plugin-contributions
                     .kind=${"composer"}
                     .sessionKey=${props.sessionKey}
                     .agentId=${props.currentAgentId}
                     .presented=${props.presented ?? true}
-                  ></openclaw-plugin-contributions>
+                  ></carapace-plugin-contributions>
                   ${showModelSetupSplash ? nothing : chatColumnFooter}
                 </div>
               </div>

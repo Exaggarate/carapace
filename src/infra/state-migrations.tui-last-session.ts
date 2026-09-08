@@ -1,12 +1,12 @@
 // Doctor-only import for the retired TUI last-session JSON store.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { isRecord as isObjectRecord } from "@carapace/normalization-core/record-coerce";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -21,7 +21,7 @@ import {
 } from "./state-migrations.source-snapshot.js";
 import type { LegacyStateDetection, MigrationMessages } from "./state-migrations.types.js";
 
-type TuiLastSessionMigrationDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
+type TuiLastSessionMigrationDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
 
 type LegacyTuiLastSession = {
   scopeKey: string;
@@ -150,7 +150,7 @@ export function migrateLegacyTuiLastSessions(params: {
   try {
     // No filesystem work belongs inside the synchronous SQLite commit section.
     assertLegacySourceUnchanged(params.detected.sourcePath, snapshot);
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         const tuiDb = getNodeSqliteKysely<TuiLastSessionMigrationDatabase>(db);
         for (const record of activeRecords) {
@@ -209,7 +209,7 @@ export function migrateLegacyTuiLastSessions(params: {
           importedCount += 1;
         }
       },
-      { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } },
+      { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } },
     );
   } catch (error) {
     warnings.push(`Failed migrating legacy TUI last-session state: ${String(error)}`);
@@ -218,8 +218,8 @@ export function migrateLegacyTuiLastSessions(params: {
 
   try {
     params.beforeVerify?.();
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir },
+    const database = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir },
     });
     const tuiDb = getNodeSqliteKysely<TuiLastSessionMigrationDatabase>(database.db);
     for (const expected of expectedRows.values()) {

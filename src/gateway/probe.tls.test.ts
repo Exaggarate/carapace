@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { WebSocketServer } from "ws";
 import { TEST_TLS_CERT_PEM, TEST_TLS_KEY_PEM } from "../../test/helpers/tls-fixture.js";
 import { waitForGatewayReachable } from "../commands/onboard-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resetSecretRedactionRegistryForTest } from "../logging/secret-redaction-registry.test-support.js";
 import { createSuiteTempRootTracker, withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -24,7 +24,7 @@ const correctPin = new X509Certificate(TEST_TLS_CERT_PEM).fingerprint256
   .toLowerCase();
 const fingerprint = new X509Certificate(TEST_TLS_CERT_PEM).fingerprint256;
 const wrongPin = "00".repeat(32);
-const tempDirs = createSuiteTempRootTracker({ prefix: "openclaw-probe-tls-" });
+const tempDirs = createSuiteTempRootTracker({ prefix: "carapace-probe-tls-" });
 const edgeAuthValue = "synthetic-probe-edge-auth";
 
 async function startTlsProbeGateway() {
@@ -98,11 +98,11 @@ describe("probeGateway TLS", () => {
     { name: "matching pin", savedPin: correctPin, explicitPin: undefined, outcome: "connected" },
     { name: "CA validation", savedPin: undefined, explicitPin: undefined, outcome: "untrusted" },
   ])("validates $name before upgrade", async ({ savedPin, explicitPin, outcome }) => {
-    await withTestDir({ prefix: "openclaw-probe-tls-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-probe-tls-" }, async (stateDir) => {
       const gateway = await startTlsProbeGateway();
       try {
-        const env = { OPENCLAW_STATE_DIR: stateDir };
-        const config: OpenClawConfig = {
+        const env = { CARAPACE_STATE_DIR: stateDir };
+        const config: CarapaceConfig = {
           gateway: {
             mode: "remote",
             remote: {
@@ -247,7 +247,7 @@ describe("Gateway probe TLS trust", () => {
         auth: { token: "test-probe-token" },
         timeoutMs: 2_000,
         detailLevel: "none",
-        env: { OPENCLAW_STATE_DIR: await tempDirs.make("state") },
+        env: { CARAPACE_STATE_DIR: await tempDirs.make("state") },
       });
 
       await gateway.drain();
@@ -272,7 +272,7 @@ describe("Gateway probe TLS trust", () => {
   it("retains saved TLS trust through the health readiness polling path", async () => {
     const before = gateway.observed.connectFrames;
     const result = await withEnvAsync(
-      { OPENCLAW_STATE_DIR: await tempDirs.make("polling-state") },
+      { CARAPACE_STATE_DIR: await tempDirs.make("polling-state") },
       () =>
         waitForGatewayReachable({
           url,

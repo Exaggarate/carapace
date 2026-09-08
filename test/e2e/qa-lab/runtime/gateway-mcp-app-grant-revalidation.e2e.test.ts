@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createQaGatewayChild,
@@ -11,7 +11,7 @@ import type {
   BoardWidgetAppViewResult,
   BoardWidgetPutResult,
 } from "../../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 import {
@@ -53,7 +53,7 @@ async function readExecutedMarkers(eventPath: string): Promise<string[]> {
     );
 }
 
-function appConfig(cfg: OpenClawConfig, fixture: HttpFixture): OpenClawConfig {
+function appConfig(cfg: CarapaceConfig, fixture: HttpFixture): CarapaceConfig {
   return {
     ...cfg,
     mcp: {
@@ -85,7 +85,7 @@ async function postStandalone(params: {
   ticket: string;
   marker: string;
 }): Promise<Response> {
-  return await fetch(new URL("/__openclaw__/mcp-app/view", params.gateway.baseUrl), {
+  return await fetch(new URL("/__carapace__/mcp-app/view", params.gateway.baseUrl), {
     method: "POST",
     headers: {
       Authorization: `MCP-App ${params.ticket}`,
@@ -102,7 +102,7 @@ async function readStandaloneResource(params: {
   gateway: GatewayHandle;
   ticket: string;
 }): Promise<Response> {
-  return await fetch(new URL("/__openclaw__/mcp-app/view", params.gateway.baseUrl), {
+  return await fetch(new URL("/__carapace__/mcp-app/view", params.gateway.baseUrl), {
     method: "POST",
     headers: {
       Authorization: `MCP-App ${params.ticket}`,
@@ -121,7 +121,7 @@ describe("Gateway MCP App board grant revalidation", () => {
     { timeout: TEST_TIMEOUT_MS },
     async () => {
       const repoRoot = process.cwd();
-      const taskRoot = tempDirs.make("openclaw-mcp-app-grant-revalidation-");
+      const taskRoot = tempDirs.make("carapace-mcp-app-grant-revalidation-");
       const fixtureRoot = path.join(taskRoot, "fixture");
       const fixtureHome = path.join(fixtureRoot, "home");
       const fixtureTemp = path.join(fixtureRoot, "tmp");
@@ -178,7 +178,7 @@ describe("Gateway MCP App board grant revalidation", () => {
           primaryModel: "mock-openai/gpt-5.6-luna",
           transportBaseUrl: "http://127.0.0.1",
           controlUiEnabled: false,
-          runtimeEnvPatch: { OPENCLAW_SKIP_CHANNELS: "1" },
+          runtimeEnvPatch: { CARAPACE_SKIP_CHANNELS: "1" },
           mutateConfig: (cfg) => appConfig(cfg, activeFixture),
         });
 

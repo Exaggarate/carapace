@@ -4,21 +4,21 @@ import { withStateSchemaFence } from "../src/infra/state-database-coordinator.js
 import { readUpdateRunDriver, type UpdateRunDriver } from "../src/infra/update-run-driver.js";
 import { createUpdateRun, finishUpdateRun } from "../src/infra/update-run-ledger.js";
 import { ABANDONED_UPDATE_RUN_MS } from "../src/infra/update-run-timeouts.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../src/state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../src/state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../src/state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../src/state/carapace-state-db.js";
 import { withEnv } from "../src/test-utils/env.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const publicationGraceMs = 5 * 60_000;
 
 async function createPublicationInstance(name: string) {
-  return createOpenClawTestInstance({
+  return createCarapaceTestInstance({
     name,
     config: { update: { checkOnStart: false, auto: { enabled: false } } },
     env: {
@@ -28,23 +28,23 @@ async function createPublicationInstance(name: string) {
       VITEST_WORKER_ID: undefined,
       NODE_ENV: undefined,
       NODE_OPTIONS: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-      OPENCLAW_NO_RESPAWN: "1",
-      OPENCLAW_SUPERVISOR_MODE: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_NO_RESPAWN: "1",
+      CARAPACE_SUPERVISOR_MODE: undefined,
     },
   });
 }
 
-function seedDeferredState(instance: OpenClawTestInstance, terminal: boolean) {
+function seedDeferredState(instance: CarapaceTestInstance, terminal: boolean) {
   const options = { env: instance.env };
-  const { db, path: databasePath } = openOpenClawStateDatabase(options);
+  const { db, path: databasePath } = openCarapaceStateDatabase(options);
   try {
     const run = createUpdateRun({ trigger: "cli", before: { version: "2026.9.2" } }, options);
     const now = Date.now();
     // Migration content is already committed; the runner suite proves the v15 rebuild itself.
     db.prepare(`INSERT INTO config_machine_state (state_key, value_json, updated_at_ms)
       VALUES ('state.schema.contentVersion', ?, ?)`).run(
-      String(OPENCLAW_STATE_SCHEMA_VERSION),
+      String(CARAPACE_STATE_SCHEMA_VERSION),
       now,
     );
     db.prepare(`UPDATE update_runs SET created_at_ms = ?, updated_at_ms = ?,
@@ -60,16 +60,16 @@ function seedDeferredState(instance: OpenClawTestInstance, terminal: boolean) {
       UPDATE schema_meta SET schema_version = 15 WHERE meta_key = 'primary';`);
     return { databasePath, runId: run.runId };
   } finally {
-    closeOpenClawStateDatabaseByPath(databasePath);
+    closeCarapaceStateDatabaseByPath(databasePath);
   }
 }
 
 function seedInactiveUpdateRun(
-  instance: OpenClawTestInstance,
+  instance: CarapaceTestInstance,
   input: { ageMs: number; phase?: "requested" | "staging"; driver?: UpdateRunDriver },
 ) {
   const options = { env: instance.env };
-  const { db, path: databasePath } = openOpenClawStateDatabase(options);
+  const { db, path: databasePath } = openCarapaceStateDatabase(options);
   try {
     const run = createUpdateRun(
       {
@@ -103,7 +103,7 @@ function seedInactiveUpdateRun(
     );
     return { databasePath, runId: run.runId, lastActivity };
   } finally {
-    closeOpenClawStateDatabaseByPath(databasePath);
+    closeCarapaceStateDatabaseByPath(databasePath);
   }
 }
 
@@ -114,8 +114,8 @@ function readUpdateOutcome(db: DatabaseSync, runId: string) {
 }
 
 async function expectGatewayStillServing(
-  instance: OpenClawTestInstance,
-  child: NonNullable<OpenClawTestInstance["child"]>,
+  instance: CarapaceTestInstance,
+  child: NonNullable<CarapaceTestInstance["child"]>,
 ) {
   expect(instance.child).toBe(child);
   expect(child.exitCode).toBeNull();
@@ -144,7 +144,7 @@ function readSchemaVersions(db: DatabaseSync) {
   };
 }
 
-function expectGatewayOwnsState(instance: OpenClawTestInstance, databasePath: string) {
+function expectGatewayOwnsState(instance: CarapaceTestInstance, databasePath: string) {
   // Windows places lifecycle coordinators under the child's isolated home directory.
   withEnv({ HOME: instance.env.HOME, USERPROFILE: instance.env.USERPROFILE }, () =>
     expect(() => withStateSchemaFence({ databasePath }, () => "unexpected authority")).toThrow(
@@ -255,7 +255,7 @@ describe("Gateway external shared-state ownership", () => {
           { env: instance.env },
         );
       }
-      closeOpenClawStateDatabaseByPath(inactive.databasePath);
+      closeCarapaceStateDatabaseByPath(inactive.databasePath);
       const repair = await instance.cli(["update", "repair", "--json"]);
       expect(repair.code, `${repair.stderr}\n${repair.stdout}`).toBe(0);
       expect(JSON.parse(repair.stdout)).toMatchObject({
@@ -345,7 +345,7 @@ describe("Gateway external shared-state ownership", () => {
       observer = new DatabaseSync(databasePath, { readOnly: true });
       await instance.startGateway();
       expectGatewayOwnsState(instance, databasePath);
-      const deferred = { published: 15, metadata: 15, content: OPENCLAW_STATE_SCHEMA_VERSION };
+      const deferred = { published: 15, metadata: 15, content: CARAPACE_STATE_SCHEMA_VERSION };
       expect(readSchemaVersions(observer)).toEqual(deferred);
 
       for (const args of [
@@ -380,7 +380,7 @@ describe("Gateway external shared-state ownership", () => {
       expect(readSchemaVersions(observer)).toEqual({
         published: 15,
         metadata: 15,
-        content: OPENCLAW_STATE_SCHEMA_VERSION,
+        content: CARAPACE_STATE_SCHEMA_VERSION,
       });
 
       const publishAfterMs = Date.now() + 10_000;
@@ -410,9 +410,9 @@ describe("Gateway external shared-state ownership", () => {
           { timeout: 20_000, interval: 100 },
         )
         .toEqual({
-          published: OPENCLAW_STATE_SCHEMA_VERSION,
-          metadata: OPENCLAW_STATE_SCHEMA_VERSION,
-          content: OPENCLAW_STATE_SCHEMA_VERSION,
+          published: CARAPACE_STATE_SCHEMA_VERSION,
+          metadata: CARAPACE_STATE_SCHEMA_VERSION,
+          content: CARAPACE_STATE_SCHEMA_VERSION,
         });
       expect(publishedBeforeDeadline).toBe(false);
       expect(
@@ -431,9 +431,9 @@ describe("Gateway external shared-state ownership", () => {
   }, 120_000);
 
   it("refuses unmarked startup and accepts the external supervisor marker", async () => {
-    const instance = await createOpenClawTestInstance({
+    const instance = await createCarapaceTestInstance({
       name: "gateway-external-state-owner",
-      env: { OPENCLAW_SUPERVISOR_MODE: "external" },
+      env: { CARAPACE_SUPERVISOR_MODE: "external" },
       startTimeoutMs: 30_000,
     });
     try {
@@ -465,7 +465,7 @@ describe("Gateway external shared-state ownership", () => {
       const preflight = await instance.cli(["database", "preflight", preflightPath, "--json"]);
       expect(preflight.code, `${preflight.stderr}\n${preflight.stdout}`).toBe(0);
       expect(JSON.parse(preflight.stdout)).toMatchObject({
-        schema: "openclaw.state-schema-preflight.v1",
+        schema: "carapace.state-schema-preflight.v1",
         status: "exact",
         requiresWrite: false,
       });
@@ -477,7 +477,7 @@ describe("Gateway external shared-state ownership", () => {
       ]);
       expect(unreadable.code).toBe(1);
       expect(JSON.parse(unreadable.stdout)).toMatchObject({
-        schema: "openclaw.state-schema-preflight.v1",
+        schema: "carapace.state-schema-preflight.v1",
         status: "indeterminate",
       });
       const status = await instance.cli(["database", "ownership", "status", "--json"]);
@@ -499,11 +499,11 @@ describe("Gateway external shared-state ownership", () => {
         error: expect.stringContaining("already claimed by external manager gateway-supervisor"),
       });
 
-      delete instance.env.OPENCLAW_SUPERVISOR_MODE;
+      delete instance.env.CARAPACE_SUPERVISOR_MODE;
       await expect(instance.startGateway()).rejects.toThrow(/gateway-supervisor/u);
-      expect(instance.logs()).toMatch(/OPENCLAW_SUPERVISOR_MODE=external/u);
+      expect(instance.logs()).toMatch(/CARAPACE_SUPERVISOR_MODE=external/u);
 
-      instance.env.OPENCLAW_SUPERVISOR_MODE = "external";
+      instance.env.CARAPACE_SUPERVISOR_MODE = "external";
       await instance.startGateway();
       expect(instance.child).toBeDefined();
     } finally {

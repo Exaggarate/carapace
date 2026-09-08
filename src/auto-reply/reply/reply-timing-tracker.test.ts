@@ -1,6 +1,6 @@
 // Tests reply profiler flag detection and timing tracker output.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createAgentTurnTimingTracker } from "./agent-runner-turn-timing.js";
 import { createReplyHotPathTimingTracker } from "./dispatch-from-config.timing.js";
 import { createReplyTimingTracker, isReplyProfilerEnabled } from "./reply-timing-tracker.js";
@@ -19,11 +19,11 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("isReplyProfilerEnabled", () => {
   it("matches global and reply profiler diagnostic flags", () => {
-    const cfg = { diagnostics: { flags: ["reply.profiler"] } } as OpenClawConfig;
+    const cfg = { diagnostics: { flags: ["reply.profiler"] } } as CarapaceConfig;
     expect(isReplyProfilerEnabled({ config: cfg, env: {} as NodeJS.ProcessEnv })).toBe(true);
     expect(
       isReplyProfilerEnabled({
-        env: { OPENCLAW_DIAGNOSTICS: "profiler" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_DIAGNOSTICS: "profiler" } as NodeJS.ProcessEnv,
       }),
     ).toBe(true);
   });
@@ -56,7 +56,7 @@ describe("createReplyTimingTracker", () => {
     const warn = vi.fn();
     const tracker = createReplyTimingTracker({
       log: { warn },
-      env: { OPENCLAW_DIAGNOSTICS: "reply.profiler" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_DIAGNOSTICS: "reply.profiler" } as NodeJS.ProcessEnv,
       totalWarnMs: 0,
       stageWarnMs: 0,
     });

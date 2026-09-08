@@ -74,6 +74,6 @@ export function resetTaskFlowRegistryRuntimeForTests() {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.taskFlowRegistryStoreTestApi")
+    Symbol.for("carapace.taskFlowRegistryStoreTestApi")
   ] = { configureTaskFlowRegistryRuntime };
 }

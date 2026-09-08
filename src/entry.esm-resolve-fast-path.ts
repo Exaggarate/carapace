@@ -3,7 +3,7 @@
  *
  * Node's default resolver calls getPackageScopeConfig() for every file: URL to
  * pick a module format, and each call re-materializes the package.json
- * `exports` map. With openclaw's 300+ subpath exports that costs ~0.1ms per
+ * `exports` map. With carapace's 300+ subpath exports that costs ~0.1ms per
  * resolution and multiple seconds across the ~15k module edges of a gateway
  * boot. Every built dist file is ESM (all dist package.json files declare
  * "type": "module"), so a relative "./chunk.js" import inside dist can resolve

@@ -1,13 +1,13 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createDedupeCache, type DedupeCache } from "../infra/dedupe.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { normalizeChannel } from "./conversation-binding-session-key.js";
 
 const log = createSubsystemLogger("plugins/binding");
@@ -22,14 +22,14 @@ export type PluginBindingApprovalEntry = {
 };
 
 type PluginBindingApprovalsState = { approvals: PluginBindingApprovalEntry[] };
-type PluginBindingApprovalsDatabase = Pick<OpenClawStateKyselyDatabase, "plugin_binding_approvals">;
+type PluginBindingApprovalsDatabase = Pick<CarapaceStateKyselyDatabase, "plugin_binding_approvals">;
 
 type PluginBindingGlobalState = {
   fallbackNoticeBindingIds: DedupeCache;
   approvalsCache: PluginBindingApprovalsState | null;
 };
 
-const pluginBindingGlobalStateKey = Symbol.for("openclaw.plugins.binding.global-state");
+const pluginBindingGlobalStateKey = Symbol.for("carapace.plugins.binding.global-state");
 export const pluginBindingGlobalState = resolveGlobalSingleton<PluginBindingGlobalState>(
   pluginBindingGlobalStateKey,
   () => ({
@@ -57,7 +57,7 @@ function buildApprovalScopeKey(params: {
 
 function loadApprovalsFromDatabase(): PluginBindingApprovalsState {
   try {
-    const database = openOpenClawStateDatabase();
+    const database = openCarapaceStateDatabase();
     const approvalsDb = getNodeSqliteKysely<PluginBindingApprovalsDatabase>(database.db);
     const rows = executeSqliteQuerySync(
       database.db,
@@ -93,7 +93,7 @@ function persistApprovalEntry(entry: PluginBindingApprovalEntry): void {
     plugin_name: entry.pluginName ?? null,
     approved_at: entry.approvedAt,
   };
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const approvalsDb = getNodeSqliteKysely<PluginBindingApprovalsDatabase>(db);
     executeSqliteQuerySync(
       db,

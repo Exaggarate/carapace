@@ -6,7 +6,7 @@ set -euo pipefail
 identity="${1:?Pass the matching Developer ID Application signing identity or certificate SHA}"
 fixture_source="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$fixture_source/../../../../.." && pwd)"
-fixture_dir="$(mktemp -d /tmp/openclaw-talk-overlay.XXXXXX)"
+fixture_dir="$(mktemp -d /tmp/carapace-talk-overlay.XXXXXX)"
 trap 'rm -rf -- "$fixture_dir"' EXIT
 bundle="$fixture_dir/TalkOverlayFixture.app"
 mkdir -p "$bundle/Contents/MacOS"
@@ -14,7 +14,7 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>ai.openclaw.talk-overlay-fixture</string>
+<key>CFBundleIdentifier</key><string>ai.carapace.talk-overlay-fixture</string>
 <key>CFBundleExecutable</key><string>TalkOverlayFixture</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>LSUIElement</key><true/>
@@ -23,8 +23,8 @@ PLIST
 
 cd -- "$repo_root"
 sources=(
-  apps/macos/Sources/OpenClaw/TalkOverlay.swift
-  apps/macos/Sources/OpenClaw/OverlayPanelFactory.swift
+  apps/macos/Sources/Carapace/TalkOverlay.swift
+  apps/macos/Sources/Carapace/OverlayPanelFactory.swift
   apps/macos/Tests/Fixtures/TalkOverlay/Fixture.swift
 )
 shasum -a 256 "${sources[@]}" apps/macos/Tests/Fixtures/TalkOverlay/run.sh

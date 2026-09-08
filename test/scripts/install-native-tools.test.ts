@@ -28,7 +28,7 @@ function writeExecutable(filePath: string, lines: string[]): void {
 }
 
 function makePeripheryFixture(version = "3.8.0") {
-  const root = tempDirs.make("openclaw-periphery-installer-");
+  const root = tempDirs.make("carapace-periphery-installer-");
   const binDir = path.join(root, "bin");
   const bundleDir = path.join(root, "bundle");
   const installDir = path.join(root, "install directory");
@@ -37,10 +37,10 @@ function makePeripheryFixture(version = "3.8.0") {
   mkdirSync(binDir);
   mkdirSync(bundleDir);
   writeExecutable(path.join(bundleDir, "periphery"), [
-    'printf "%s\\n" "$0" "$@" >>"$OPENCLAW_TEST_PERIPHERY_CALLS"',
+    'printf "%s\\n" "$0" "$@" >>"$CARAPACE_TEST_PERIPHERY_CALLS"',
     '[[ "$#" -eq 1 && "$1" == "version" ]]',
     '[[ -f "$(dirname "$0")/libIndexStore.dylib" ]]',
-    'printf "%s\\n" "$OPENCLAW_TEST_PERIPHERY_VERSION"',
+    'printf "%s\\n" "$CARAPACE_TEST_PERIPHERY_VERSION"',
   ]);
   writeFileSync(path.join(bundleDir, "libIndexStore.dylib"), "fixture index store\n");
   writeFileSync(path.join(bundleDir, "LICENSE.md"), "fixture license\n");
@@ -52,7 +52,7 @@ function makePeripheryFixture(version = "3.8.0") {
   writeExecutable(path.join(binDir, "curl"), [
     'while [[ "$#" -gt 0 ]]; do',
     '  case "$1" in',
-    '    --output|-o) cp "$OPENCLAW_TEST_PERIPHERY_ARCHIVE" "$2"; exit 0 ;;',
+    '    --output|-o) cp "$CARAPACE_TEST_PERIPHERY_ARCHIVE" "$2"; exit 0 ;;',
     "  esac",
     "  shift",
     "done",
@@ -68,9 +68,9 @@ function makePeripheryFixture(version = "3.8.0") {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_TEST_PERIPHERY_ARCHIVE: archive,
-          OPENCLAW_TEST_PERIPHERY_CALLS: callsPath,
-          OPENCLAW_TEST_PERIPHERY_VERSION: version,
+          CARAPACE_TEST_PERIPHERY_ARCHIVE: archive,
+          CARAPACE_TEST_PERIPHERY_CALLS: callsPath,
+          CARAPACE_TEST_PERIPHERY_VERSION: version,
           PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
           TMPDIR: root,
         },
@@ -86,19 +86,19 @@ function expectOption(args: string[], option: string, value: string): void {
 
 describe.runIf(process.platform !== "win32")("native tool installers", () => {
   it.each(installers)("bounds stalled downloads in $script", ({ script, url }) => {
-    const root = tempDirs.make("openclaw-native-tool-installer-");
+    const root = tempDirs.make("carapace-native-tool-installer-");
     const binDir = path.join(root, "bin");
     const argsPath = path.join(root, "curl-args.txt");
     const curlPath = path.join(binDir, "curl");
     mkdirSync(binDir);
-    writeExecutable(curlPath, ['printf "%s\\n" "$@" >"$OPENCLAW_TEST_CURL_ARGS_PATH"', "exit 28"]);
+    writeExecutable(curlPath, ['printf "%s\\n" "$@" >"$CARAPACE_TEST_CURL_ARGS_PATH"', "exit 28"]);
 
     const result = spawnSync("bash", [script, path.join(root, "install")], {
       cwd: process.cwd(),
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_TEST_CURL_ARGS_PATH: argsPath,
+        CARAPACE_TEST_CURL_ARGS_PATH: argsPath,
         PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
       },
     });
@@ -139,7 +139,7 @@ describe.runIf(process.platform !== "win32")("native tool installers", () => {
       // Substitute only the digest boundary; extraction, installation, and execution stay real.
       writeExecutable(path.join(fixture.binDir, "shasum"), [
         '[[ "$#" -eq 3 && "$1" == "-a" && "$2" == "256" ]]',
-        'cmp "$3" "$OPENCLAW_TEST_PERIPHERY_ARCHIVE"',
+        'cmp "$3" "$CARAPACE_TEST_PERIPHERY_ARCHIVE"',
         'printf "%s  %s\\n" "07d4e286e31dd79164df39097e0b59f533c94badbe18158464a455ea88a166d7" "$3"',
       ]);
 

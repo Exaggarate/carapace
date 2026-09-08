@@ -30,13 +30,13 @@ function resolveSourceModule(importer: string, specifier: string): string | unde
       : specifier.startsWith(prefix!) && specifier.endsWith(suffix);
   });
   const workspacePackage =
-    specifier.startsWith("@openclaw/") &&
+    specifier.startsWith("@carapace/") &&
     fs.existsSync(path.join(repoRoot, "packages", specifier.split("/")[1]!, "package.json"));
   if (
     !specifier.startsWith(".") &&
     !path.isAbsolute(specifier) &&
     !mapped &&
-    !specifier.startsWith("openclaw/") &&
+    !specifier.startsWith("carapace/") &&
     !workspacePackage
   ) {
     return undefined;

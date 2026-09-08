@@ -1,8 +1,8 @@
-import { prependSystemPromptAdditionAfterCacheBoundary } from "@openclaw/ai/internal/shared";
+import { prependSystemPromptAdditionAfterCacheBoundary } from "@carapace/ai/internal/shared";
 /**
  * Builds and repairs prompt inputs for embedded-agent attempts.
  */
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type {
   ContextEnginePromptCacheInfo,
   ContextEngineRuntimeContext,
@@ -89,7 +89,7 @@ export function forgetPromptBuildDrainCacheForRun(runId: string | undefined): vo
  * session-store reads do not lose plugin context after a failed first attempt.
  */
 export async function resolvePromptBuildHookResult(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   prompt: string;
   messages: unknown[];
   hookCtx: PluginHookAgentContext;
@@ -428,7 +428,7 @@ export function mergeOrphanedTrailingUserPrompt(params: {
 }
 
 export function resolveAttemptFsWorkspaceOnly(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionAgentId: string;
 }): boolean {
   return resolveEffectiveToolFsWorkspaceOnly({

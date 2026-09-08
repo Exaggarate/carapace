@@ -8,20 +8,20 @@ import {
   embeddedAgentLog,
   type AgentMessage,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/hook-runtime";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
   castAgentMessage,
   makeAgentAssistantMessage,
   makeAgentUserMessage,
-} from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CodexAppServerEventProjector } from "./event-projector.js";
 import {
@@ -50,9 +50,9 @@ const deliverAsyncMessageBestEffort = codexTranscriptMirrorRuntime.deliverAsyncM
 
 const publishSessionTranscriptUpdateByIdentityMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-transcript-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-transcript-runtime")>();
   return {
     ...actual,
     publishSessionTranscriptUpdateByIdentity: publishSessionTranscriptUpdateByIdentityMock,
@@ -164,7 +164,7 @@ async function createSqliteMirrorTarget(prefix: string, options: { sessionId?: s
   const agentId = "main";
   const sessionId = options.sessionId ?? "session-1";
   const sessionKey = `agent:${agentId}:${sessionId}`;
-  const storePath = path.join(root, "openclaw-agent.sqlite");
+  const storePath = path.join(root, "carapace-agent.sqlite");
   await upsertSessionEntry({
     agentId,
     sessionKey,
@@ -265,7 +265,7 @@ describe("importCodexThreadHistoryToTranscript", () => {
   ])(
     "preserves $label without leaking attachment contents or locations",
     async ({ caseId, content, expectedText, privateValues }) => {
-      const target = await createSqliteMirrorTarget(`openclaw-codex-audio-history-${caseId}-`, {
+      const target = await createSqliteMirrorTarget(`carapace-codex-audio-history-${caseId}-`, {
         sessionId: `session-audio-${caseId}`,
       });
       const thread = {
@@ -332,7 +332,7 @@ describe("importCodexThreadHistoryToTranscript", () => {
   );
 
   it("imports only bounded user-visible conversation items with stable identities", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-history-", {
+    const target = await createSqliteMirrorTarget("carapace-codex-history-", {
       sessionId: "session-history",
     });
     const sessionFile = `sqlite:${target.agentId}:${target.sessionId}:${target.storePath}`;
@@ -457,7 +457,7 @@ describe("importCodexThreadHistoryToTranscript", () => {
   });
 
   it("keeps the newest 200 visible messages and deduplicates a retried import", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-bounded-history-", {
+    const target = await createSqliteMirrorTarget("carapace-codex-bounded-history-", {
       sessionId: "session-bounded-history",
     });
     const thread = {
@@ -504,7 +504,7 @@ describe("importCodexThreadHistoryToTranscript", () => {
   });
 
   it("assigns canonical assistant attribution and numeric fallback timestamps", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-fallback-history-", {
+    const target = await createSqliteMirrorTarget("carapace-codex-fallback-history-", {
       sessionId: "session-fallback-history",
     });
     const sessionFile = `sqlite:${target.agentId}:${target.sessionId}:${target.storePath}`;
@@ -726,7 +726,7 @@ describe("projectBoundedCodexThreadHistory", () => {
     expect(projection.transcriptMessages[1]).toMatchObject({ phase: "commentary" });
     expect(projection.transcriptMessages[2]).toMatchObject({
       phase: "final_answer",
-      openclawAsyncDelivery: { itemId: "async-history" },
+      carapaceAsyncDelivery: { itemId: "async-history" },
     });
     expect(JSON.stringify(projection.responseItems)).not.toContain(
       "Which environment should I use?",
@@ -883,8 +883,8 @@ describe("mirrorCodexAppServerTranscript", () => {
     const terminal = attachCodexMirrorRunId(message, "run-1", true);
     const intermediate = attachCodexMirrorRunId(terminal, "run-1");
 
-    expect(intermediate).toMatchObject({ __openclaw: { runId: "run-1" } });
-    expect(intermediate).not.toHaveProperty("__openclaw.runTerminal");
+    expect(intermediate).toMatchObject({ __carapace: { runId: "run-1" } });
+    expect(intermediate).not.toHaveProperty("__carapace.runTerminal");
   });
   it("hides current memory-maintenance messages without hiding replayed turns", async () => {
     const prepareAssistantTranscriptMessage = vi.fn((message: AssistantMessage) => message);
@@ -901,7 +901,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         },
       ]),
     );
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-memory-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-memory-");
     const messages = [
       attachCodexMirrorIdentity(
         makeAgentAssistantMessage({
@@ -969,7 +969,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("mirrors user, assistant, and tool result messages by SQLite identity", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-basic-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-basic-");
     const userMessage = makeAgentUserMessage({
       content: [{ type: "text", text: "hello" }],
       timestamp: Date.now(),
@@ -1014,7 +1014,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("preserves gateway user-turn identity across Codex transcript mirroring", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-user-identity-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-user-identity-");
     const userMessage = castAgentMessage({
       ...makeAgentUserMessage({
         content: [{ type: "text", text: "client prompt" }],
@@ -1051,7 +1051,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("preserves mirror identity across redaction from prompt append through final snapshot", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-redacted-identity-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-redacted-identity-");
     const config = { logging: { redactPatterns: [String.raw`^codex-app-server:.*$`] } };
     const userMessage = attachCodexMirrorIdentity(
       makeAgentUserMessage({
@@ -1090,7 +1090,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("emits message-bearing updates for newly appended mirrored messages only", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-live-updates-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-live-updates-");
     const userMessage = attachCodexMirrorIdentity(
       makeAgentUserMessage({
         content: [{ type: "text", text: "show me live" }],
@@ -1138,7 +1138,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("delivers the persisted async rewrite once across reconnect replay", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-async-reconnect-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-async-reconnect-");
     initializeGlobalHookRunner(
       createMockPluginRegistry([
         {
@@ -1161,7 +1161,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         timestamp: Date.now(),
       }),
       phase: "final_answer",
-      openclawAsyncDelivery: { itemId: "async-update" },
+      carapaceAsyncDelivery: { itemId: "async-update" },
     });
     const onBlockReply = vi.fn();
     const runParams = {
@@ -1215,12 +1215,12 @@ describe("mirrorCodexAppServerTranscript", () => {
       content: [{ type: "text", text: "[redacted async update]" }],
       phase: "final_answer",
       idempotencyKey: "codex-app-server:thread-1:turn-1:async:async-update",
-      openclawAsyncDelivery: { itemId: "async-update" },
+      carapaceAsyncDelivery: { itemId: "async-update" },
     });
   });
 
   it("retries a durable async callback from the persisted row", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-async-callback-fail-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-async-callback-fail-");
     const onBlockReply = vi
       .fn()
       .mockRejectedValueOnce(new Error("channel unavailable"))
@@ -1243,7 +1243,7 @@ describe("mirrorCodexAppServerTranscript", () => {
           content: [{ type: "text", text: "Persisted background update." }],
           timestamp: Date.now(),
         }),
-        openclawAsyncDelivery: { itemId: "async-callback-fail" },
+        carapaceAsyncDelivery: { itemId: "async-callback-fail" },
       }),
       text: "Persisted background update.",
       threadId: "thread-1",
@@ -1268,7 +1268,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("does not deliver async messages blocked by before_message_write", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-async-blocked-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-async-blocked-");
     initializeGlobalHookRunner(
       createMockPluginRegistry([
         { hookName: "before_message_write", handler: () => ({ block: true }) },
@@ -1295,7 +1295,7 @@ describe("mirrorCodexAppServerTranscript", () => {
             content: [{ type: "text", text: "Blocked update." }],
             timestamp: Date.now(),
           }),
-          openclawAsyncDelivery: { itemId: "async-blocked" },
+          carapaceAsyncDelivery: { itemId: "async-blocked" },
         }),
         text: "Blocked update.",
         threadId: "thread-1",
@@ -1309,7 +1309,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("emits stable sequence numbers for multi-message mirror batches", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-seq-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-seq-");
 
     await mirrorCodexAppServerTranscript({
       ...target,
@@ -1330,11 +1330,11 @@ describe("mirrorCodexAppServerTranscript", () => {
         ),
       ],
       idempotencyScope: "codex-app-server:thread-1",
-      runId: "openclaw-run-1",
+      runId: "carapace-run-1",
       runMirrorIdentityPrefix: "turn-1:",
       terminalAssistantOwner: {
         mirrorIdentity: "turn-1:assistant",
-        runId: "openclaw-run-1",
+        runId: "carapace-run-1",
       },
     });
 
@@ -1342,20 +1342,20 @@ describe("mirrorCodexAppServerTranscript", () => {
       ([update]) => update as Record<string, unknown> & { update?: Record<string, unknown> },
     );
     expect(updates.map((update) => update.update?.messageSeq)).toEqual([1, 2]);
-    expect(updates.map((update) => update.update?.runId)).toEqual([undefined, "openclaw-run-1"]);
+    expect(updates.map((update) => update.update?.runId)).toEqual([undefined, "carapace-run-1"]);
     expect(
       updates.map(
         (update) =>
-          (update.update?.message as { __openclaw?: { runId?: string } } | undefined)?.[
-            "__openclaw"
+          (update.update?.message as { __carapace?: { runId?: string } } | undefined)?.[
+            "__carapace"
           ]?.runId,
       ),
-    ).toEqual(["openclaw-run-1", "openclaw-run-1"]);
+    ).toEqual(["carapace-run-1", "carapace-run-1"]);
     expect(
       updates.map(
         (update) =>
-          (update.update?.message as { __openclaw?: { runTerminal?: boolean } } | undefined)?.[
-            "__openclaw"
+          (update.update?.message as { __carapace?: { runTerminal?: boolean } } | undefined)?.[
+            "__carapace"
           ]?.runTerminal,
       ),
     ).toEqual([undefined, true]);
@@ -1370,14 +1370,14 @@ describe("mirrorCodexAppServerTranscript", () => {
   it.each([false, true])(
     "prepares only the owned terminal media row before persistence and publication (skip hooks: %s)",
     async (skipBeforeMessageWriteHooks) => {
-      const target = await createSqliteMirrorTarget("openclaw-codex-mirror-media-owner-");
+      const target = await createSqliteMirrorTarget("carapace-codex-mirror-media-owner-");
       const sourceText = "Artifacts ready\nMEDIA:./artifact.json";
       const rewrittenText = skipBeforeMessageWriteHooks
         ? sourceText
         : `${sourceText}\nMEDIA:./hook-only.json`;
       const prepareAssistantTranscriptMessage = vi.fn((message: AssistantMessage) => ({
         ...message,
-        openclawDelivery: { mediaUrls: ["./artifact.json"] },
+        carapaceDelivery: { mediaUrls: ["./artifact.json"] },
       }));
       const beforeMessageWrite = vi.fn((input: unknown) => {
         const message = (input as { message: AgentMessage }).message;
@@ -1462,10 +1462,10 @@ describe("mirrorCodexAppServerTranscript", () => {
             expect.objectContaining({ role: message.role, content: message.content }),
           ),
       );
-      expect(published.slice(0, -1).some((message) => message.openclawDelivery)).toBe(false);
+      expect(published.slice(0, -1).some((message) => message.carapaceDelivery)).toBe(false);
       expect(published.at(-1)).toMatchObject({
         content: [{ type: "text", text: rewrittenText }],
-        openclawDelivery: { mediaUrls: ["./artifact.json"] },
+        carapaceDelivery: { mediaUrls: ["./artifact.json"] },
       });
       const persisted = (await readMirrorEvents(target)).flatMap((event) =>
         event && typeof event === "object" && "message" in event ? [event.message] : [],
@@ -1476,7 +1476,7 @@ describe("mirrorCodexAppServerTranscript", () => {
 
   it("keeps assistant ownership when live update publication fails", async () => {
     publishSessionTranscriptUpdateByIdentityMock.mockRejectedValueOnce(new Error("publish failed"));
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-publish-failure-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-publish-failure-");
     const assistantMessage = attachCodexMirrorIdentity(
       makeAgentAssistantMessage({
         content: [{ type: "text", text: "durably persisted" }],
@@ -1510,7 +1510,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("deduplicates app-server turn mirrors by idempotency scope", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-dedupe-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-dedupe-");
     const messages = [
       makeAgentUserMessage({
         content: [{ type: "text", text: "hello" }],
@@ -1537,7 +1537,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("serializes concurrent mirrors with the same supplied identity", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-concurrent-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-concurrent-");
     const message = attachCodexMirrorIdentity(
       makeAgentUserMessage({
         content: [{ type: "text", text: "append once" }],
@@ -1568,7 +1568,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("reports final assistant ownership for new and idempotent mirrors", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-assistant-owned-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-assistant-owned-");
     const assistantMessage = attachCodexMirrorIdentity(
       makeAgentAssistantMessage({
         content: [{ type: "text", text: "owned once" }],
@@ -1603,16 +1603,16 @@ describe("mirrorCodexAppServerTranscript", () => {
           {
             hookName: "before_message_write",
             handler: (event) => {
-              const message = (event as { message: { __openclaw: Record<string, unknown> } })
+              const message = (event as { message: { __carapace: Record<string, unknown> } })
                 .message;
               if (mode === "omit") {
-                delete message["__openclaw"].senderIdentity;
+                delete message["__carapace"].senderIdentity;
               }
               if (mode === "in-place") {
-                (message["__openclaw"].senderIdentity as { id: string }).id = "forged";
+                (message["__carapace"].senderIdentity as { id: string }).id = "forged";
               }
               if (mode === "forge") {
-                message["__openclaw"].senderIdentity = { type: "profile", id: "forged" };
+                message["__carapace"].senderIdentity = { type: "profile", id: "forged" };
               }
             },
           },
@@ -1627,7 +1627,7 @@ describe("mirrorCodexAppServerTranscript", () => {
             role: "user",
             content: "hello",
             timestamp: 1,
-            __openclaw: {
+            __carapace: {
               senderId: "author",
               ...(mode === "forge" ? {} : { senderIdentity: { type: "profile", id: "author" } }),
             },
@@ -1636,12 +1636,12 @@ describe("mirrorCodexAppServerTranscript", () => {
       });
       const entries = (await readMirrorEvents(target)) as Array<{
         type: string;
-        message?: { role: string; __openclaw?: Record<string, unknown> };
+        message?: { role: string; __carapace?: Record<string, unknown> };
       }>;
       const messages = entries.filter(
         (entry) => entry.type === "message" && entry.message?.role === "user",
       );
-      expect(messages.map((entry) => entry.message?.["__openclaw"]?.senderIdentity)).toEqual([
+      expect(messages.map((entry) => entry.message?.["__carapace"]?.senderIdentity)).toEqual([
         mode === "retain" ? { type: "profile", id: "author" } : undefined,
       ]);
     },
@@ -1661,7 +1661,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         },
       ]),
     );
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-hook-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-hook-");
     const sourceMessage = makeAgentAssistantMessage({
       content: [{ type: "text", text: "hello" }],
       timestamp: Date.now(),
@@ -1694,7 +1694,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         },
       ]),
     );
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-duplicates-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-duplicates-");
     const sourceMessage = makeAgentUserMessage({
       content: [{ type: "text", text: "secret prompt" }],
       timestamp: Date.now(),
@@ -1737,7 +1737,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         },
       ]),
     );
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-key-hook-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-key-hook-");
     const sourceMessage = makeAgentAssistantMessage({
       content: [{ type: "text", text: "hello" }],
       timestamp: Date.now(),
@@ -1762,7 +1762,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         { hookName: "before_message_write", handler: () => ({ block: true }) },
       ]),
     );
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-blocked-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-blocked-");
 
     const result = await mirrorCodexAppServerTranscript({
       ...target,
@@ -1783,7 +1783,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("skips transcript mirrors for sessionless embedded runs", async () => {
-    const root = await makeRoot("openclaw-codex-transcript-failure-");
+    const root = await makeRoot("carapace-codex-transcript-failure-");
     const warn = vi.spyOn(embeddedAgentLog, "warn").mockImplementation(() => undefined);
     const markRuntimePersistencePending = vi.fn();
     const assistantMessage = attachCodexMirrorIdentity(
@@ -1831,10 +1831,10 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("renders normal-session mirror failures in structured warnings", async () => {
-    const root = await makeRoot("openclaw-codex-transcript-failure-");
+    const root = await makeRoot("carapace-codex-transcript-failure-");
     const blockedParent = path.join(root, "not-a-directory");
     await fs.writeFile(blockedParent, "blocked");
-    const storePath = path.join(blockedParent, "openclaw-agent.sqlite");
+    const storePath = path.join(blockedParent, "carapace-agent.sqlite");
     const warn = vi.spyOn(embeddedAgentLog, "warn").mockImplementation(() => undefined);
     warn.mockClear();
     const runId = "run-1";
@@ -1889,7 +1889,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("does not attest a stale idempotency hit with the same mirror identity", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-stale-identity-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-stale-identity-");
     const staleMessage = attachCodexMirrorIdentity(
       makeAgentAssistantMessage({
         content: [{ type: "text", text: "stale answer" }],
@@ -1946,7 +1946,7 @@ describe("mirrorCodexAppServerTranscript", () => {
         },
       ]),
     );
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-attested-hook-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-attested-hook-");
     const sourceMessage = attachCodexMirrorIdentity(
       makeAgentAssistantMessage({
         content: [{ type: "text", text: "sensitive answer" }],
@@ -1984,7 +1984,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("returns the final mirrored row as the terminal anchor", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-terminal-anchor-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-terminal-anchor-");
     const assistantMessage = attachCodexMirrorIdentity(
       makeAgentAssistantMessage({
         content: [{ type: "toolCall", id: "call-1", name: "read", arguments: {} }],
@@ -2036,7 +2036,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("returns the user anchor for a turn without an assistant row", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-user-terminal-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-user-terminal-");
     const userMessage = attachCodexMirrorIdentity(
       makeAgentUserMessage({
         content: [{ type: "text", text: "run silently" }],
@@ -2083,7 +2083,7 @@ describe("mirrorCodexAppServerTranscript", () => {
     it.each([true, false])(
       "keeps failed attempt diagnostics without taking deferred run ownership (deferred: %s)",
       async (deferTerminalLifecycle) => {
-        const target = await createSqliteMirrorTarget("openclaw-codex-mirror-retry-owner-");
+        const target = await createSqliteMirrorTarget("carapace-codex-mirror-retry-owner-");
         const params: EmbeddedRunAttemptParams = {
           ...(await createProjectorParams()),
           ...target,
@@ -2147,12 +2147,12 @@ describe("mirrorCodexAppServerTranscript", () => {
             content: [{ type: "text", text: "The file is ready." }],
             stopReason: "error",
             errorMessage: expect.stringContaining("Rate limit reached"),
-            __openclaw: { mirrorIdentity: "turn-1:assistant", runId: params.runId },
+            __carapace: { mirrorIdentity: "turn-1:assistant", runId: params.runId },
           },
           {
             content: [{ type: "text", text: "The action completed once." }],
             stopReason: "stop",
-            __openclaw: {
+            __carapace: {
               mirrorIdentity: "turn-2:assistant",
               runId: finalRunId,
               runTerminal: true,
@@ -2160,12 +2160,12 @@ describe("mirrorCodexAppServerTranscript", () => {
           },
         ]);
         if (deferTerminalLifecycle) {
-          expect(messages?.[0]).not.toHaveProperty("__openclaw.runTerminal");
+          expect(messages?.[0]).not.toHaveProperty("__carapace.runTerminal");
           expect(
             publishSessionTranscriptUpdateByIdentityMock.mock.calls[0]?.[0].update,
           ).not.toHaveProperty("runId");
         } else {
-          expect(messages?.[0]).toHaveProperty("__openclaw.runTerminal", true);
+          expect(messages?.[0]).toHaveProperty("__carapace.runTerminal", true);
           expect(
             publishSessionTranscriptUpdateByIdentityMock.mock.calls[0]?.[0].update,
           ).toHaveProperty("runId", params.runId);
@@ -2177,7 +2177,7 @@ describe("mirrorCodexAppServerTranscript", () => {
     );
 
     it("preserves reasoning as nonterminal thinking beside the final answer in SQLite", async () => {
-      const target = await createSqliteMirrorTarget("openclaw-codex-mirror-reasoning-");
+      const target = await createSqliteMirrorTarget("carapace-codex-mirror-reasoning-");
       const params: EmbeddedRunAttemptParams = {
         ...(await createProjectorParams()),
         ...target,
@@ -2221,20 +2221,20 @@ describe("mirrorCodexAppServerTranscript", () => {
         {
           role: "assistant",
           content: [{ type: "thinking", thinking: "checking the answer" }],
-          __openclaw: { mirrorIdentity: "turn-1:reasoning", runId: "run-1" },
+          __carapace: { mirrorIdentity: "turn-1:reasoning", runId: "run-1" },
         },
         {
           role: "assistant",
           content: [{ type: "text", text: "hi there" }],
-          __openclaw: { mirrorIdentity: "turn-1:assistant", runTerminal: true },
+          __carapace: { mirrorIdentity: "turn-1:assistant", runTerminal: true },
         },
       ]);
-      expect(messages?.[1]).not.toHaveProperty("__openclaw.runTerminal");
+      expect(messages?.[1]).not.toHaveProperty("__carapace.runTerminal");
     });
   });
 
   it("dedupes mirrored messages despite snapshot positional shifts", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-shift-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-shift-");
     const userMessage = attachCodexMirrorIdentity(
       makeAgentUserMessage({
         content: [{ type: "text", text: "hello" }],
@@ -2276,7 +2276,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("keeps repeated same-content turns distinct", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-repeat-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-repeat-");
     const userTurn1 = attachCodexMirrorIdentity(
       makeAgentUserMessage({ content: [{ type: "text", text: "yes" }], timestamp: Date.now() }),
       "turn-1:prompt",
@@ -2320,7 +2320,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("dedupes prior-turn entries re-emitted into a later turn's snapshot", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-reemit-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-reemit-");
     const userTurn1 = attachCodexMirrorIdentity(
       makeAgentUserMessage({ content: [{ type: "text", text: "msg1" }], timestamp: Date.now() }),
       "turn-1:prompt",
@@ -2367,7 +2367,7 @@ describe("mirrorCodexAppServerTranscript", () => {
   });
 
   it("uses the role+content fingerprint when no identity is attached", async () => {
-    const target = await createSqliteMirrorTarget("openclaw-codex-mirror-fingerprint-");
+    const target = await createSqliteMirrorTarget("carapace-codex-mirror-fingerprint-");
     const userMessage = makeAgentUserMessage({
       content: [{ type: "text", text: "hello" }],
       timestamp: Date.now(),

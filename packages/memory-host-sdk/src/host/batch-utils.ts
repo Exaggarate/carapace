@@ -1,4 +1,4 @@
-import type { SsrFPolicy } from "./openclaw-runtime-network.js";
+import type { SsrFPolicy } from "./carapace-runtime-network.js";
 
 // Common HTTP and grouping helpers for remote embedding batch clients.
 

@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import {
   appendTranscriptMessage,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { readChatHistoryMessageId } from "../session-history-tail.js";
 import { chatHistoryHandlers } from "./chat-history-handler.js";
@@ -38,7 +38,7 @@ async function withImportedHistory(
     importedIds: string[];
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionKey: "agent:main:cli-history-anchor",
@@ -171,7 +171,7 @@ describe("CLI-imported history anchors", () => {
   });
 
   it("does not substitute nearby SQLite messages for a filtered anchor", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const scope = {
         agentId: "main",
         sessionKey: "agent:main:hidden-history-anchor",

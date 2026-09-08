@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import type { AgentEventPayload } from "../../infra/agent-events.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
   mockedClassifyFailoverReason,
@@ -13,7 +13,7 @@ import {
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 import type { EmbeddedRunAttemptResult } from "./run/types.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
 let onAgentEvent: typeof import("../../infra/agent-events.js").onAgentEvent;
 let resetAgentEventsForTest: typeof import("../../infra/agent-events.js").resetAgentEventsForTest;
@@ -59,8 +59,8 @@ describe("runEmbeddedAgent fast auto progress", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.fast-mode-auto" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.fast-mode-auto" });
     mockedGlobalHookRunner.hasHooks.mockImplementation(() => false);
     mockedClassifyFailoverReason.mockReturnValue(null);
   });
@@ -197,7 +197,7 @@ describe("runEmbeddedAgent fast auto progress", () => {
       expect(toolResults.some((payload) => payload.text === "💨Fast: auto-off(31s>=30s)")).toBe(
         true,
       );
-      expect(toolResults.at(-1)?.channelData?.openclawProgressKind).toBe("fast-mode-auto");
+      expect(toolResults.at(-1)?.channelData?.carapaceProgressKind).toBe("fast-mode-auto");
 
       completeAttempt?.();
       await resultPromise;

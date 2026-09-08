@@ -26,7 +26,7 @@ describe("Windows skills watcher paths", () => {
   beforeEach(async () => {
     watchMock.mockClear();
     createdWatchers.length = 0;
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-fixture-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-fixture-"));
     fixtureWorkspaceDir = path.join(fixtureRoot, "workspace");
     await fs.mkdir(path.join(fixtureWorkspaceDir, "skills"), { recursive: true });
   });

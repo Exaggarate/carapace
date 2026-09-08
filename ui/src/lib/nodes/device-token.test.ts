@@ -34,7 +34,7 @@ function createState(request: (method: string, params?: unknown) => Promise<unkn
 
 function storeIdentity(deviceId = "00") {
   localStorage.setItem(
-    "openclaw-device-identity-v1",
+    "carapace-device-identity-v1",
     JSON.stringify({
       version: 1,
       deviceId,
@@ -71,7 +71,7 @@ const rotationResult = {
 function storedTokenKey(): string {
   const key = Array.from({ length: localStorage.length }, (_, index) =>
     localStorage.key(index),
-  ).find((candidate) => candidate?.startsWith("openclaw.device.auth.v1:"));
+  ).find((candidate) => candidate?.startsWith("carapace.device.auth.v1:"));
   if (!key) {
     throw new Error("missing device-auth test storage key");
   }

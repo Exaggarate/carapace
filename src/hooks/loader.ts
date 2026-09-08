@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { sanitizeForLog as safeLogValue } from "../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { openRootFile } from "../infra/boundary-file-read.js";
 import { safeRealpathSync } from "../infra/boundary-path.js";
 import { formatErrorMessage } from "../infra/errors.js";
@@ -27,7 +27,7 @@ type HookGeneration = {
   committed?: true;
 };
 const hookOwner = resolveGlobalSingleton<{ generation: HookGeneration }>(
-  Symbol.for("openclaw.loadedInternalHookRegistrations"),
+  Symbol.for("carapace.loadedInternalHookRegistrations"),
   () => ({ generation: { registrations: [] } }),
   () => resetLoadedInternalHooks(),
 );
@@ -46,7 +46,7 @@ export type PreparedInternalHooks = {
 
 /** Imports candidate handlers without publishing registrations or changing the dispatch gate. */
 export async function prepareInternalHooks(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   workspaceDir: string,
   opts?: {
     managedHooksDir?: string;
@@ -98,9 +98,9 @@ export async function prepareInternalHooks(
       }
       const safeHandlerPath = opened.path;
       fs.closeSync(opened.fd);
-      if (entry.hook.source === "openclaw-workspace" || entry.hook.source === "openclaw-managed") {
+      if (entry.hook.source === "carapace-workspace" || entry.hook.source === "carapace-managed") {
         log.warn(
-          `Loading ${entry.hook.source.slice("openclaw-".length)} hook code into the gateway process. Hooks are trusted local code.`,
+          `Loading ${entry.hook.source.slice("carapace-".length)} hook code into the gateway process. Hooks are trusted local code.`,
         );
       }
 
@@ -124,9 +124,9 @@ export async function prepareInternalHooks(
       if (unknownEvents.length > 0) {
         log.warn(
           `Hook '${safeLogValue(entry.hook.name)}' subscribes to event${unknownEvents.length === 1 ? "" : "s"} ` +
-            `${unknownEvents.map((event) => safeLogValue(event)).join(", ")} not emitted by OpenClaw core — ` +
+            `${unknownEvents.map((event) => safeLogValue(event)).join(", ")} not emitted by Carapace core — ` +
             `likely a typo; unless a plugin emits it, the hook never fires. ` +
-            `Known events: https://docs.openclaw.ai/automation/hooks`,
+            `Known events: https://github.com/Exaggarate/carapace`,
         );
       }
       registrations.push(...events.map((event) => ({ event, handler })));

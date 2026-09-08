@@ -1,7 +1,7 @@
 /** Tests BTW side-question execution, session context, auth, and harness routing. */
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { consumeReplyUsageState } from "../auto-reply/reply/reply-usage-state.js";
 import type { SessionEntry } from "../config/sessions.js";
@@ -17,9 +17,9 @@ import {
   resolveSecretSentinel,
 } from "../secrets/sentinel.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { guardModelFixtureWorkspace } from "./embedded-agent-runner/model.fixture.test-support.js";
 import {
   createModelGenerationFixture,
@@ -30,10 +30,10 @@ import type { AgentHarnessHostCapabilities } from "./harness/host-capability-typ
 import type { AgentHarness } from "./harness/types.js";
 import type { AgentRuntimeAuthPlan } from "./runtime-plan/types.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let workspaceGuard: ReturnType<typeof guardModelFixtureWorkspace>;
 beforeAll(async () => {
-  state = await createOpenClawTestState({ label: "btw-model" });
+  state = await createCarapaceTestState({ label: "btw-model" });
 });
 beforeEach(() => {
   workspaceGuard = guardModelFixtureWorkspace(state.root);
@@ -55,7 +55,7 @@ const readFileMock = vi.fn();
 const parseSessionEntriesMock = vi.fn();
 const migrateSessionEntriesMock = vi.fn();
 const buildSessionContextMock = vi.fn();
-const ensureOpenClawModelsJsonMock = vi.fn();
+const ensureCarapaceModelsJsonMock = vi.fn();
 const loadPreparedModelRuntimeSnapshotMock = vi.fn();
 const discoverAuthStorageMock = vi.fn();
 const discoverModelsMock = vi.fn();
@@ -93,7 +93,7 @@ const agentHarnessHostCapabilitiesMock: AgentHarnessHostCapabilities = Object.fr
 const listSessionEntriesCoreMock = vi.fn();
 const loadSessionEntryMock = vi.fn();
 const loadTranscriptEventsMock = vi.fn();
-const builtInOpenClawHarnesses = new WeakSet<object>();
+const builtInCarapaceHarnesses = new WeakSet<object>();
 const shouldPreferExplicitConfigApiKeyAuthMock = vi.fn((..._args: unknown[]) => false);
 const hasUsableCustomProviderApiKeyMock = vi.fn((..._args: unknown[]) => false);
 const resolveProviderEntryApiKeyProfileReferenceMock = vi.fn((_params?: unknown): unknown => ({
@@ -132,7 +132,7 @@ vi.mock("./sessions/session-manager.js", () => ({
 }));
 
 vi.mock("./models-config.js", () => ({
-  ensureOpenClawModelsJson: (...args: unknown[]) => ensureOpenClawModelsJsonMock(...args),
+  ensureCarapaceModelsJson: (...args: unknown[]) => ensureCarapaceModelsJsonMock(...args),
 }));
 
 vi.mock("./agent-model-discovery.js", () => ({
@@ -156,7 +156,7 @@ vi.mock("./prepared-model-runtime.js", () => ({
   }) => {
     loadPreparedModelRuntimeSnapshotMock(params);
     const workspaceOptions = params.workspaceDir ? { workspaceDir: params.workspaceDir } : {};
-    await ensureOpenClawModelsJsonMock(params.config, params.agentDir, workspaceOptions);
+    await ensureCarapaceModelsJsonMock(params.config, params.agentDir, workspaceOptions);
     const authStorage = discoverAuthStorageMock(params.agentDir, {
       config: params.config,
       ...(params.inheritedAuthDir ? { inheritedAuthDir: params.inheritedAuthDir } : {}),
@@ -264,18 +264,18 @@ vi.mock("./harness/runtime-plugin.js", () => ({
 
 // Selection and host-capability owner suites execute the embedded runner and capability surface.
 // BTW only needs their identities while it verifies side-question orchestration.
-vi.mock("./harness/builtin-openclaw.js", () => ({
-  createOpenClawAgentHarness: (): AgentHarness => {
+vi.mock("./harness/builtin-carapace.js", () => ({
+  createCarapaceAgentHarness: (): AgentHarness => {
     const harness: AgentHarness = {
-      id: "openclaw",
-      label: "OpenClaw embedded agent",
+      id: "carapace",
+      label: "Carapace embedded agent",
       supports: () => ({ supported: true, priority: 0 }),
       runAttempt: vi.fn(),
     };
-    builtInOpenClawHarnesses.add(harness);
+    builtInCarapaceHarnesses.add(harness);
     return harness;
   },
-  isBuiltInOpenClawAgentHarness: (harness: AgentHarness) => builtInOpenClawHarnesses.has(harness),
+  isBuiltInCarapaceAgentHarness: (harness: AgentHarness) => builtInCarapaceHarnesses.has(harness),
 }));
 
 vi.mock("./harness/host-capability.js", () => {
@@ -327,10 +327,10 @@ vi.mock("../plugins/provider-policy-surface.js", () => ({
         requestTransportOverrides = "none",
       }: ProviderResolveModelRoutesContext) => {
         const compatibleIds =
-          requestTransportOverrides === "none" ? ["openclaw", "codex"] : ["openclaw"];
+          requestTransportOverrides === "none" ? ["carapace", "codex"] : ["carapace"];
         return {
           kind: "routes" as const,
-          defaultRuntimeId: requestTransportOverrides === "none" ? "codex" : "openclaw",
+          defaultRuntimeId: requestTransportOverrides === "none" ? "codex" : "carapace",
           routes: [
             {
               api: "openai-responses" as const,
@@ -717,7 +717,7 @@ describe("runBtwSideQuestion", () => {
     parseSessionEntriesMock.mockReset();
     migrateSessionEntriesMock.mockReset();
     buildSessionContextMock.mockReset();
-    ensureOpenClawModelsJsonMock.mockReset();
+    ensureCarapaceModelsJsonMock.mockReset();
     loadPreparedModelRuntimeSnapshotMock.mockReset();
     discoverAuthStorageMock.mockReset();
     discoverModelsMock.mockReset();
@@ -931,7 +931,7 @@ describe("runBtwSideQuestion", () => {
       expect(result).toEqual({ text: "Final answer." });
       expect(onReasoningStream).not.toHaveBeenCalled();
       expect(onReasoningEnd).not.toHaveBeenCalled();
-      const ensureArgs = mockCall(ensureOpenClawModelsJsonMock);
+      const ensureArgs = mockCall(ensureCarapaceModelsJsonMock);
       expect(ensureArgs?.[1]).toBe(DEFAULT_AGENT_DIR);
       expect(ensureArgs?.[2]).toEqual({ workspaceDir: "/tmp/workspace" });
       expect(discoverModelsMock).toHaveBeenCalledWith(undefined, DEFAULT_AGENT_DIR, {
@@ -978,7 +978,7 @@ describe("runBtwSideQuestion", () => {
   );
 
   it.each([
-    { harness: "openclaw", sandboxSessionKey: undefined },
+    { harness: "carapace", sandboxSessionKey: undefined },
     { harness: "codex", sandboxSessionKey: undefined },
     { harness: "codex", sandboxSessionKey: "agent:main:policy" },
   ])(
@@ -1357,7 +1357,7 @@ describe("runBtwSideQuestion", () => {
     },
   );
 
-  it("keeps an unprofiled subscription token on the OpenClaw BTW path", async () => {
+  it("keeps an unprofiled subscription token on the Carapace BTW path", async () => {
     const supports = vi.fn(supportsPreparedOpenAIAuth);
     const codexSideQuestionMock = registerCodexSideQuestionHarness({ supports });
     const subscriptionModel = {
@@ -1377,7 +1377,7 @@ describe("runBtwSideQuestion", () => {
       source: "models.json",
     });
     requireApiKeyMock.mockReturnValue("subscription-token");
-    mockDoneAnswer("OpenClaw side answer.");
+    mockDoneAnswer("Carapace side answer.");
 
     await expect(
       runSideQuestion({
@@ -1391,7 +1391,7 @@ describe("runBtwSideQuestion", () => {
         provider: "openai",
         model: "gpt-5.5",
       }),
-    ).resolves.toEqual({ text: "OpenClaw side answer." });
+    ).resolves.toEqual({ text: "Carapace side answer." });
 
     expect(codexSideQuestionMock).not.toHaveBeenCalled();
     expect(streamSimpleMock).toHaveBeenCalled();
@@ -2335,7 +2335,7 @@ describe("runBtwSideQuestion", () => {
           agents: {
             defaults: {
               models: {
-                "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
               },
             },
           },
@@ -2416,7 +2416,7 @@ describe("runBtwSideQuestion", () => {
           agents: {
             defaults: {
               models: {
-                "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
               },
             },
           },

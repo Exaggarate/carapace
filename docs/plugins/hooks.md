@@ -6,10 +6,10 @@ read_when:
   - You are building a plugin that needs before_tool_call, before_agent_reply, message hooks, or lifecycle hooks
   - You need to block, rewrite, or require approval for tool calls from a plugin
   - You are deciding between internal hooks and plugin hooks
-  - You are projecting OpenClaw cron wakes into an external host scheduler
+  - You are projecting Carapace cron wakes into an external host scheduler
 ---
 
-Plugin hooks let a native OpenClaw plugin observe or change agent runs, tool
+Plugin hooks let a native Carapace plugin observe or change agent runs, tool
 calls, message delivery, and lifecycle events. Register a typed handler with
 `api.on("hook_name", handler)` and return the result documented for that hook.
 
@@ -41,11 +41,11 @@ Create a local `hook-demo` directory with these files:
   "name": "hook-demo",
   "version": "1.0.0",
   "type": "module",
-  "openclaw": { "extensions": ["./index.ts"] }
+  "carapace": { "extensions": ["./index.ts"] }
 }
 ```
 
-```json openclaw.plugin.json
+```json carapace.plugin.json
 {
   "id": "hook-demo",
   "name": "Hook Demo",
@@ -55,7 +55,7 @@ Create a local `hook-demo` directory with these files:
 ```
 
 ```typescript index.ts
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 
 export default definePluginEntry({
   id: "hook-demo",
@@ -80,11 +80,11 @@ process. Link and enable the directory (`--force` acknowledges installing from
 a local source):
 
 ```bash
-openclaw plugins install --link ./hook-demo --force
-openclaw plugins enable hook-demo
+carapace plugins install --link ./hook-demo --force
+carapace plugins enable hook-demo
 ```
 
-Grant this plugin access to conversation hooks in `openclaw.json`:
+Grant this plugin access to conversation hooks in `carapace.json`:
 
 ```json
 {
@@ -103,7 +103,7 @@ Merge that entry into your existing config, then let the default hybrid reload
 mode apply it and inspect:
 
 ```bash
-openclaw plugins inspect hook-demo --runtime --json
+carapace plugins inspect hook-demo --runtime --json
 ```
 
 Send `hook-demo-check` as a normal chat message. Expect `Hook is working.`; other
@@ -190,7 +190,7 @@ modifications explicitly instead of relying on in-place mutation.
 
 | Option                  | Effect                                                                                                                                                                                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `matcher`               | Non-empty list of canonical OpenClaw tool ids handled by `before_tool_call` or `after_tool_call`, such as `exec`, `apply_patch`, or `spawn_agent`. Omit to match all tools. Empty lists, wildcards, blanks, and provider-specific aliases are invalid. |
+| `matcher`               | Non-empty list of canonical Carapace tool ids handled by `before_tool_call` or `after_tool_call`, such as `exec`, `apply_patch`, or `spawn_agent`. Omit to match all tools. Empty lists, wildcards, blanks, and provider-specific aliases are invalid. |
 | `priority`              | Ordering; higher runs first.                                                                                                                                                                                                                           |
 | `registrationId`        | Stable identity for one registration inside a plugin. Skill evaluators use it as `evaluatorId`; otherwise the plugin id is used.                                                                                                                       |
 | `timeoutMs`             | Per-handler asynchronous await budget. Expiry applies the hook's failure policy below; it does not cancel the handler or its side effects. Omit to use the runner's default, if any.                                                                   |
@@ -314,7 +314,7 @@ contracts above; a modifying hook is not an observation hook.
 | `before_dispatch`           | Claim         | Handle an inbound message before the normal model dispatch                 |
 | `reply_dispatch`            | Claim         | Own reply generation and dispatch instead of the default model path        |
 
-`inbound_claim` is not a global pre-routing broadcast. OpenClaw invokes it only
+`inbound_claim` is not a global pre-routing broadcast. Carapace invokes it only
 for the plugin that owns the message's core-managed conversation binding. To
 suppress an ordinary agent turn before model input without retaining the
 original prompt in transcript, use `before_agent_run` on a supported runner.
@@ -342,7 +342,7 @@ before the process exits.
 Shutdown and restart share one **2-second total `session_end` drain budget**
 across all active sessions and plugin handlers; the budget is not per handler.
 Return quickly or keep finalization bounded and persistence crash-consistent.
-If the budget expires, OpenClaw logs `shutdown session-end drain timed out`
+If the budget expires, Carapace logs `shutdown session-end drain timed out`
 and continues shutdown, so unfinished plugin work can be interrupted.
 
 For `sessions.create` calls with `parentSessionKey` and `emitCommandHooks: true`, a distinct child always receives `session_start`. Callers declare whether the parent also receives terminal `session_end` with `succeedsParent`: `true` means successor, `false` means parallel child. Omission preserves the legacy parent-rollover behavior. The `command:new` and `before_reset` hooks still describe the requested `/new` action in both cases.
@@ -352,7 +352,7 @@ For `sessions.create` calls with `parentSessionKey` and `emitCommandHooks: true`
 - `subagent_spawned` / `subagent_ended` - observe subagent launch and completion.
 - `subagent_progress` - observe portable `started` / `ended` progress for a background child run; includes `runId`, `childSessionKey`, optional requester route, and an outcome on `ended`.
 - `subagent_delivery_target` - modifying compatibility hook for completion delivery when no core session binding can project a route. The first returned `origin` wins.
-- `subagent_spawned` includes `resolvedModel` and `resolvedProvider` when OpenClaw has resolved the child session's native model before launch.
+- `subagent_spawned` includes `resolvedModel` and `resolvedProvider` when Carapace has resolved the child session's native model before launch.
 - `subagent_ended` carries `targetSessionKey` (identity - matches `subagent_spawned.childSessionKey`), `targetKind` (`"subagent"` or `"acp"`), `reason`, optional `outcome` (`"ok"`, `"error"`, `"timeout"`, `"killed"`, `"reset"`, or `"deleted"`), optional `error`, `runId`, `endedAt`, `accountId`, and `sendFarewell`. It does **not** include `agentId` or `childSessionKey`; use `targetSessionKey` to correlate with the matching `subagent_spawned` event.
 
 **Lifecycle**
@@ -370,7 +370,7 @@ For `sessions.create` calls with `parentSessionKey` and `emitCommandHooks: true`
 ### Skill lifecycle and evaluation
 
 Use `skill_proposal_evaluate` for static analyzers, security scanners,
-benchmarks, model-based graders, or other third-party evaluators. OpenClaw
+benchmarks, model-based graders, or other third-party evaluators. Carapace
 passes an immutable candidate bundle with file hashes and a tree hash. Update
 proposals also include the complete current skill as `baseline`. Text files use
 UTF-8 content; binary files use base64.
@@ -396,7 +396,7 @@ api.on(
 );
 ```
 
-When evaluation input includes `correlationId`, OpenClaw forwards it to the
+When evaluation input includes `correlationId`, Carapace forwards it to the
 evaluator event for both manual and apply-triggered evaluations. This value is
 caller-supplied correlation metadata, not authenticated identity or proof of
 authorization. An authorization plugin must mint or replace the value through
@@ -421,7 +421,7 @@ declared and source versions when available.
 
 These hooks are primitives, not an optimization scheduler. A plugin or external
 controller can observe a durable proposal event, evaluate its exact revision hash,
-revise with that hash and a correlation id, then repeat. OpenClaw does not
+revise with that hash and a correlation id, then repeat. Carapace does not
 automatically revise proposals or run an unbounded evaluation loop.
 Event replay is byte-bounded and returns `nextSequence` when another page is
 available.
@@ -456,7 +456,7 @@ the runtime emits it; `assistantTexts` can be empty and `lastAssistant` absent,
 so the event alone does not prove a successful final answer.
 
 For proof of the effective session model, inspect runtime registrations, then
-use `openclaw sessions` or the Gateway session/status surfaces. To debug
+use `carapace sessions` or the Gateway session/status surfaces. To debug
 provider payloads, start the Gateway with `--raw-stream` and
 `--raw-stream-path <path>` to write raw model stream events to a jsonl file.
 
@@ -560,7 +560,7 @@ lets configured maintainers use a conservative tool and message-action set,
 and exposes `/fix` to senders already authorized by the channel configuration:
 
 ```typescript
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 
 const AGENT_ID = "maintenance-agent";
 const MAINTAINER_SCOPES = [
@@ -639,7 +639,7 @@ Load the file directly and restart the Gateway:
     entries: {
       "maintenance-agent": {
         default: true,
-        workspace: "~/.openclaw/workspace-maintenance",
+        workspace: "~/.carapace/workspace-maintenance",
       },
     },
   },
@@ -654,7 +654,7 @@ Load the file directly and restart the Gateway:
     },
   ],
   plugins: {
-    load: { paths: ["~/.openclaw/policies/maintenance-access.ts"] },
+    load: { paths: ["~/.carapace/policies/maintenance-access.ts"] },
   },
 }
 ```
@@ -698,7 +698,7 @@ by `before_tool_call`. Omit the matcher to retain match-all behavior.
 
 ### Exec environment hook
 
-`resolve_exec_env` lets plugins contribute environment variables to OpenClaw
+`resolve_exec_env` lets plugins contribute environment variables to Carapace
 `exec` tool invocations before the command runs. It is not a hook for every
 harness-native shell. It receives:
 
@@ -730,7 +730,7 @@ Each handler receives the message returned by the previous handler.
 `before_message_write` can return `{ message }` or `{ block: true }` to prevent
 that transcript write. Blocking persistence is not a tool-execution veto.
 
-These hooks operate on OpenClaw-owned transcript writes. They do not rewrite
+These hooks operate on Carapace-owned transcript writes. They do not rewrite
 Codex-native tool records; see
 [Codex transcript boundaries](/plugins/codex-harness-runtime#compaction-and-transcript-mirror).
 
@@ -738,7 +738,7 @@ Tool results can include structured `details` for UI rendering, diagnostics,
 media routing, or plugin-owned metadata. Treat `details` as runtime metadata,
 not prompt content:
 
-- OpenClaw strips `toolResult.details` before provider replay and compaction
+- Carapace strips `toolResult.details` before provider replay and compaction
   input so metadata does not become model context.
 - Persisted session entries keep only bounded `details`. Oversized details are
   replaced with a compact summary and `persistedDetailsTruncated: true`.
@@ -833,8 +833,8 @@ The host revalidates authority after each awaited handler and discards stale
 enrichment. A retained `toolAuthority` object fails closed after dispatch.
 
 This option requires a host that implements the post-policy phase. Published
-plugins must set `package.json` `openclaw.compat.pluginApi` to a range beginning
-with the first OpenClaw version they build against for this contract. Older
+plugins must set `package.json` `carapace.compat.pluginApi` to a range beginning
+with the first Carapace version they build against for this contract. Older
 hosts skip incompatible packages during discovery and reject incompatible
 installs or updates. Do not publish a package that uses this option while
 claiming compatibility with an older plugin API; an older host may otherwise
@@ -849,7 +849,7 @@ to stop the run before the model reads the prompt. `reason` is internal;
 `message` is the user-facing replacement. Only `pass` and `block` outcomes are
 supported; unsupported decision shapes fail closed.
 
-When a run is blocked, OpenClaw stores only the replacement text in
+When a run is blocked, Carapace stores only the replacement text in
 `message.content` plus non-sensitive block metadata such as the blocking
 plugin id and timestamp. The original user text is not retained in transcript
 or future context. Internal block reasons are treated as sensitive and
@@ -858,7 +858,7 @@ Observability should use sanitized fields such as blocker id, outcome,
 timestamp, or a safe category.
 
 Hooks that expose `event.runId`, such as `agent_end` and
-`before_agent_finalize`, receive it when OpenClaw can identify the active run;
+`before_agent_finalize`, receive it when Carapace can identify the active run;
 the same value is also on `ctx.runId`. Prompt hooks do not all have an event
 `runId` field, so use their typed context for correlation. Cron-driven
 runs can also expose `ctx.jobId` (the originating cron job id) when supplied
@@ -868,7 +868,7 @@ part of the `before_tool_call` tool context.
 
 For channel-originated runs, `ctx.channel` and `ctx.messageProvider` identify
 the provider surface such as `discord` or `telegram`, while `ctx.channelId` is
-the conversation target identifier when OpenClaw can derive one from the
+the conversation target identifier when Carapace can derive one from the
 session key or delivery metadata.
 
 When sender identity is available, agent hook contexts also include:
@@ -888,10 +888,10 @@ When sender identity is available, agent hook contexts also include:
 Core only defines the nested `id` fields. Channel plugins that pass richer
 sender or chat metadata through the inbound helper can augment
 `PluginHookChannelSenderContext` or `PluginHookChannelChatContext` from
-`openclaw/plugin-sdk/channel-inbound`:
+`carapace/plugin-sdk/channel-inbound`:
 
 ```ts
-declare module "openclaw/plugin-sdk/channel-inbound" {
+declare module "carapace/plugin-sdk/channel-inbound" {
   interface PluginHookChannelSenderContext {
     unionId?: string;
     userId?: string;
@@ -924,7 +924,7 @@ it fire-and-forget after the turn, while local one-shot paths can wait
 for the hook promise before process cleanup so trusted plugins can flush
 terminal observability or capture state. The hook runner applies a 30 second
 default per-handler timeout so a wedged plugin or embedding endpoint cannot
-leave the hook promise pending forever. A timeout is logged and OpenClaw continues; it does not
+leave the hook promise pending forever. A timeout is logged and Carapace continues; it does not
 cancel plugin-owned network work unless the plugin also uses its own abort
 signal.
 
@@ -932,7 +932,7 @@ Use `model_call_started` and `model_call_ended` for provider-call telemetry
 that should not receive raw prompts, history, responses, headers, request
 bodies, or provider request IDs. These hooks include stable metadata such as
 `runId`, `callId`, `provider`, `model`, optional `api`/`transport`, terminal
-`durationMs`/`outcome`, and `upstreamRequestIdHash` when OpenClaw can derive a
+`durationMs`/`outcome`, and `upstreamRequestIdHash` when Carapace can derive a
 bounded provider request-id hash. When the runtime has resolved
 context-window metadata, the hook event and context also include
 `contextTokenBudget`, the effective token budget after model configuration,
@@ -950,13 +950,13 @@ final assistant answer. It is not the `/stop` cancellation path and does not
 run when the user aborts a turn. Return `{ action: "revise", reason }` to ask
 the harness for one more model pass before finalization, `{ action:
 "finalize", reason? }` to force finalization, or omit a result to continue.
-Handlers have a 15s default budget; on timeout, OpenClaw logs the failure and
+Handlers have a 15s default budget; on timeout, Carapace logs the failure and
 keeps decisions from other handlers. With no revision decision, normal
 finalization continues. Multiple `revise` reasons are combined; any `finalize`
 decision overrides revision requests. This hook requires a finalization
 integration: the embedded runner and native hook relay provide it, but the
 Copilot harness does not currently dispatch it.
-Codex native `Stop` hooks are relayed into this hook as OpenClaw
+Codex native `Stop` hooks are relayed into this hook as Carapace
 `before_agent_finalize` decisions.
 
 When returning `action: "revise"`, plugins can include `retry` metadata to
@@ -993,7 +993,7 @@ the `api.session.state` namespace.
 Use `api.session.workflow.enqueueNextTurnInjection(...)` when a plugin needs
 durable context queued for the next prompt build (the top-level
 `api.enqueueNextTurnInjection(...)` is a deprecated alias with the same
-behavior). On the embedded and CLI prompt-preparation paths, OpenClaw drains
+behavior). On the embedded and CLI prompt-preparation paths, Carapace drains
 queued injections before prompt hooks. It drops expired entries and entries
 whose plugin is inactive or has prompt injection disabled. `idempotencyKey`
 deduplicates unexpired pending entries for the same plugin and session; the
@@ -1140,7 +1140,7 @@ Decision rules:
 ## Install hooks
 
 Use `security.installPolicy` for operator-owned allow/warn/block decisions. That
-policy runs from OpenClaw config, covers CLI install and update paths, and
+policy runs from Carapace config, covers CLI install and update paths, and
 fails closed when enabled but unavailable.
 
 `before_install` is a plugin-runtime lifecycle hook. It can run after
@@ -1150,7 +1150,7 @@ install paths can skip this hook; they still run the operator install policy.
 It is useful for plugin-owned observations, warnings, and compatibility checks,
 but it is not the primary enterprise or host security boundary for installs. The
 `builtinScan` field remains in the event payload for compatibility, but
-OpenClaw no longer runs built-in install-time dangerous-code blocking, so it
+Carapace no longer runs built-in install-time dangerous-code blocking, so it
 is an empty `ok` result. Return additional findings or
 `{ block: true, blockReason }` to stop the install in that process.
 
@@ -1205,7 +1205,7 @@ explicit `added`, `updated`, or `removed` lifecycle event. The top-level
 no next wake. Treat these events as reconciliation hints, not an ordered delta
 log. Use them as coalescible hints to reread the scheduler last captured by
 `cron_reconciled`; do not adopt the scheduler from a `cron_changed` context.
-Keep OpenClaw as the source of truth for due checks and execution.
+Keep Carapace as the source of truth for due checks and execution.
 
 ### Safe external cron projection
 
@@ -1223,7 +1223,7 @@ snapshot.
 
 ```typescript
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 
 type ExternalWake = { jobId: string; runAtMs: number };
 
@@ -1242,7 +1242,7 @@ type CronReader = {
   >;
 };
 
-export function registerCronProjection(api: OpenClawPluginApi, host: ExternalWakeHost) {
+export function registerCronProjection(api: CarapacePluginApi, host: ExternalWakeHost) {
   const lifecycle = new AbortController();
   let cron: CronReader | undefined;
   let enabled = false;
@@ -1352,7 +1352,7 @@ export function registerCronProjection(api: OpenClawPluginApi, host: ExternalWak
 When `cron_reconciled` reports `enabled: false`, the same path calls
 `replaceAll([])` and clears stale external wakes. Retry/backoff in this example
 is process-local and treats runtime adapter failures as transient; validate
-non-retryable configuration before registration. OpenClaw does not provide an
+non-retryable configuration before registration. Carapace does not provide an
 outbox for plugin hook effects. If the process exits before durable acceptance,
 the next Gateway start emits a new authoritative `cron_reconciled` snapshot.
 `gateway_stop` aborts in-flight host work, waits for the worker to settle, then
@@ -1362,7 +1362,7 @@ closes the adapter.
 
 | Symptom                                    | Check                                                                                                                                                                                                                            |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Plugin loads but the handler never runs    | Use `api.on` for typed names, inspect `openclaw plugins inspect <id> --runtime --json`, and check diagnostics for blocked registrations. Runtime inspection loads the plugin in the inspecting process; restart the Gateway too. |
+| Plugin loads but the handler never runs    | Use `api.on` for typed names, inspect `carapace plugins inspect <id> --runtime --json`, and check diagnostics for blocked registrations. Runtime inspection loads the plugin in the inspecting process; restart the Gateway too. |
 | Conversation hook is blocked               | Set `plugins.entries.<id>.hooks.allowConversationAccess: true`; for prompt hooks, also check that `allowPromptInjection` is not `false`. These keys belong under `hooks`, not the plugin's `config`.                             |
 | Hook works for one runtime or trigger only | Check the runtime boundary and `eligibleTriggers`. Missing context fields are not proof of a different sender, agent, or authorization state.                                                                                    |
 | Persistence rewrite has no effect          | Return `{ message }` synchronously. An `async` handler's result is ignored.                                                                                                                                                      |

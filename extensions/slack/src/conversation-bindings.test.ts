@@ -2,16 +2,16 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   getSessionBindingService,
   testing as sessionBindingTesting,
-} from "openclaw/plugin-sdk/session-binding-runtime";
+} from "carapace/plugin-sdk/session-binding-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { slackPlugin } from "./channel.js";
 import { registerSlackInstallationState } from "./installation-identity-state.js";
@@ -26,15 +26,15 @@ const CONVERSATION = {
 };
 
 describe("Slack runtime conversation bindings", () => {
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
   let previousStateDir: string | undefined;
   let testStateDir = "";
   let installationState: SlackInstallationStateRegistration;
 
   beforeEach(async () => {
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-slack-bindings-"));
-    process.env.OPENCLAW_STATE_DIR = testStateDir;
+    previousStateDir = process.env.CARAPACE_STATE_DIR;
+    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-slack-bindings-"));
+    process.env.CARAPACE_STATE_DIR = testStateDir;
     cfg = { channels: { slack: {} } };
     setSlackRuntime({ config: { current: () => cfg } } as never);
     setActivePluginRegistry(
@@ -47,12 +47,12 @@ describe("Slack runtime conversation bindings", () => {
   afterEach(async () => {
     installationState.release();
     sessionBindingTesting.resetSessionBindingAdaptersForTests();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     setSlackRuntime(null as never);
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     await fs.rm(testStateDir, { recursive: true, force: true });
   });

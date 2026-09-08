@@ -7,11 +7,11 @@ import {
 } from "../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { activityRunInspectorSearch } from "../../ui/src/pages/activity/run-inspector-model.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { recordAuditEvent } from "./audit-event-store.js";
 import {
   pageExecutionDecisionFactsForContext,
@@ -37,13 +37,13 @@ import { recordOutboundMessageProgress } from "./message-delivery-progress-store
 const RETENTION_MS = 30 * 24 * 60 * 60_000;
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function databaseOptions() {
-  return { env: { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-decision-facts-") } };
+  return { env: { CARAPACE_STATE_DIR: tempDirs.make("carapace-decision-facts-") } };
 }
 
 function seedExecutionContext(
@@ -260,7 +260,7 @@ describe("execution decision facts", () => {
   it("projects exact-bound cron, task, and flow owner rows without generic facts", () => {
     const database = databaseOptions();
     const context = seedExecutionContext(database);
-    const db = openOpenClawStateDatabase(database).db;
+    const db = openCarapaceStateDatabase(database).db;
     db.prepare(
       `INSERT INTO cron_run_receipts (
          receipt_id, store_key, job_id, config_revision, agent_id, request_run_id,
@@ -374,7 +374,7 @@ describe("execution decision facts", () => {
       ).toEqual([]);
     }
     expect(
-      tableExists(openOpenClawStateDatabase(database).db, "outbound_message_execution_bindings"),
+      tableExists(openCarapaceStateDatabase(database).db, "outbound_message_execution_bindings"),
     ).toBe(false);
 
     recordAuditEvent(
@@ -407,7 +407,7 @@ describe("execution decision facts", () => {
     expect(messageReceipts(first)).toHaveLength(1);
     expect(messageReceipts(second)).toEqual([]);
     expect(
-      openOpenClawStateDatabase(database)
+      openCarapaceStateDatabase(database)
         .db.prepare(
           "SELECT context_id, execution_id, run_id FROM outbound_message_execution_bindings",
         )
@@ -550,7 +550,7 @@ describe("execution decision facts", () => {
     expect(JSON.stringify(firstInspection)).not.toContain("raw-channel-target");
     expect(JSON.stringify(firstInspection)).not.toContain("raw-platform-message");
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(inspect().decisionDisplays.map((item) => item.selectorId)).toEqual(selectors);
     expect(
       presentExecutionDecisionReceipts({
@@ -565,7 +565,7 @@ describe("execution decision facts", () => {
   it("stays absent until a future owner writes one immutable fact", () => {
     const database = databaseOptions();
     seedExecutionContext(database);
-    const opened = openOpenClawStateDatabase(database);
+    const opened = openCarapaceStateDatabase(database);
     expect(tableExists(opened.db, "execution_decision_facts")).toBe(false);
     expect(pruneExpiredExecutionDecisionFacts({ database })).toBe(0);
     expect(tableExists(opened.db, "execution_decision_facts")).toBe(false);
@@ -615,7 +615,7 @@ describe("execution decision facts", () => {
         { ...database, now: 100 },
       ),
     ).toThrow("owner-native table");
-    expect(tableExists(openOpenClawStateDatabase(database).db, "execution_decision_facts")).toBe(
+    expect(tableExists(openCarapaceStateDatabase(database).db, "execution_decision_facts")).toBe(
       false,
     );
   });
@@ -855,7 +855,7 @@ describe("execution decision facts", () => {
         database,
       ),
     ).toThrow("exact retained execution context");
-    expect(tableExists(openOpenClawStateDatabase(database).db, "execution_decision_facts")).toBe(
+    expect(tableExists(openCarapaceStateDatabase(database).db, "execution_decision_facts")).toBe(
       false,
     );
   });
@@ -902,7 +902,7 @@ describe("execution decision facts", () => {
       }).receipts.map((item) => item.receiptId),
     ).toEqual(["new"]);
     expect(
-      openOpenClawStateDatabase(database)
+      openCarapaceStateDatabase(database)
         .db.prepare("SELECT COUNT(*) AS count FROM execution_decision_facts")
         .get(),
     ).toEqual({ count: 1 });
@@ -949,7 +949,7 @@ describe("execution decision facts", () => {
       missingEvidence: [],
     };
     recordExecutionDecisionFact(receipt("corrupt"), { ...database, now: 100 });
-    openOpenClawStateDatabase(database)
+    openCarapaceStateDatabase(database)
       .db.prepare("UPDATE execution_decision_facts SET receipt_json = ? WHERE receipt_id = ?")
       .run("{", "corrupt");
 
@@ -1002,7 +1002,7 @@ describe("execution decision facts", () => {
     const database = databaseOptions();
     const context = seedExecutionContext(database);
     recordExecutionDecisionFact(receipt("oversized"), { ...database, now: 100 });
-    const db = openOpenClawStateDatabase(database).db;
+    const db = openCarapaceStateDatabase(database).db;
     db.exec("PRAGMA ignore_check_constraints = ON");
     db.prepare("UPDATE execution_decision_facts SET receipt_json = ? WHERE receipt_id = ?").run(
       "x".repeat(20_000),

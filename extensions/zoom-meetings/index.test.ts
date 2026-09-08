@@ -1,7 +1,7 @@
-import { ErrorCodes } from "openclaw/plugin-sdk/gateway-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import type { TranscriptSourceProvider } from "openclaw/plugin-sdk/transcripts";
+import { ErrorCodes } from "carapace/plugin-sdk/gateway-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import type { TranscriptSourceProvider } from "carapace/plugin-sdk/transcripts";
 import { describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { ZOOM_MEETINGS_CLI_METADATA } from "./src/cli-output-mode.js";
@@ -71,7 +71,7 @@ function authorizationHarness(options?: { browserError?: Error }) {
     pluginConfig: { defaultMode: "transcribe", chrome: { waitForInCallMs: 1 } },
     runtime: {
       gateway: { isAvailable: vi.fn(async () => true), request: gatewayRequest },
-    } as unknown as OpenClawPluginApi["runtime"],
+    } as unknown as CarapacePluginApi["runtime"],
     logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
     registerGatewayMethod: (method: string, handler: unknown) =>
       methods.set(method, handler as GatewayHandler),
@@ -115,7 +115,7 @@ describe("Zoom meetings plugin surface", () => {
   it("registers the bounded gateway, tool, CLI, and node surfaces", () => {
     const methods = new Map<string, unknown>();
     const tools: Array<Record<string, unknown>> = [];
-    const cli: Array<Parameters<OpenClawPluginApi["registerCli"]>[1]> = [];
+    const cli: Array<Parameters<CarapacePluginApi["registerCli"]>[1]> = [];
     const nodeCommands: unknown[] = [];
     const policies: unknown[] = [];
     const transcriptProviders: TranscriptSourceProvider[] = [];
@@ -129,7 +129,7 @@ describe("Zoom meetings plugin surface", () => {
       pluginConfig: {},
       runtime: {
         gateway: { isAvailable: vi.fn(async () => false), request: vi.fn() },
-      } as unknown as OpenClawPluginApi["runtime"],
+      } as unknown as CarapacePluginApi["runtime"],
       logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
       registerGatewayMethod: (method: string, handler: unknown) => methods.set(method, handler),
       registerTool: (tool: unknown) => {
@@ -188,7 +188,7 @@ describe("Zoom meetings plugin surface", () => {
       pluginConfig: { enabled: false },
       runtime: {
         gateway: { isAvailable: vi.fn(async () => false), request: vi.fn() },
-      } as unknown as OpenClawPluginApi["runtime"],
+      } as unknown as CarapacePluginApi["runtime"],
       logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
       registerNodeHostCommand: (command: unknown) => nodeCommands.push(command),
       registerNodeInvokePolicy: (policy: unknown) => policies.push(policy),
@@ -215,7 +215,7 @@ describe("Zoom meetings plugin surface", () => {
       pluginConfig: {},
       runtime: {
         gateway: { isAvailable: vi.fn(async () => true), request: gatewayRequest },
-      } as unknown as OpenClawPluginApi["runtime"],
+      } as unknown as CarapacePluginApi["runtime"],
       logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
       registerTool: (registered: unknown) => {
         tool = (

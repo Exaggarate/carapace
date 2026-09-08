@@ -11,7 +11,7 @@ import { setPluginToolMeta } from "../plugins/tool-metadata.js";
 
 const mocks = vi.hoisted(() => ({
   createBundleMcpToolRuntime: vi.fn(),
-  createOpenClawCodingTools: vi.fn(),
+  createCarapaceCodingTools: vi.fn(),
   disposeBundleRuntime: vi.fn(),
   loadModelCatalog: vi.fn(async (): Promise<Array<Record<string, unknown>>> => []),
   normalizeProviderToolSchemasWithPlugin: vi.fn(),
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
   isGatewayCredentialsRequiredError: vi.fn(),
   isContainerEnvironment: vi.fn(() => false),
   readGatewayServiceState: vi.fn(),
-  resolveGatewayService: vi.fn(() => ({ label: "openclaw-gateway" })),
+  resolveGatewayService: vi.fn(() => ({ label: "carapace-gateway" })),
   resolvePluginProvidersCore: vi.fn((): Array<Record<string, unknown>> => []),
   resolveDefaultModelForAgent: vi.fn(() => ({ provider: "openai", model: "gpt-5.5" })),
 }));
@@ -48,7 +48,7 @@ vi.mock("../agents/agent-bundle-mcp-tools.js", () => ({
 }));
 
 vi.mock("../agents/agent-tools.js", () => ({
-  createOpenClawCodingTools: mocks.createOpenClawCodingTools,
+  createCarapaceCodingTools: mocks.createCarapaceCodingTools,
 }));
 
 vi.mock("../gateway/call.js", () => ({
@@ -110,7 +110,7 @@ function bundleMcpTool(name: string, parameters: unknown): AnyAgentTool {
 
 describe("doctor runtime tool schema checks", () => {
   beforeEach(() => {
-    mocks.createOpenClawCodingTools.mockReset().mockReturnValue([]);
+    mocks.createCarapaceCodingTools.mockReset().mockReturnValue([]);
     mocks.createBundleMcpToolRuntime.mockReset().mockReturnValue({
       tools: [],
       dispose: mocks.disposeBundleRuntime,
@@ -125,7 +125,7 @@ describe("doctor runtime tool schema checks", () => {
       loadState: { status: "loaded" },
       running: true,
       env: {},
-      command: { programArguments: ["openclaw", "gateway"], sourcePath: "/tmp/gateway.service" },
+      command: { programArguments: ["carapace", "gateway"], sourcePath: "/tmp/gateway.service" },
       runtime: { status: "running" },
     });
     mocks.resolveGatewayService.mockClear();
@@ -178,7 +178,7 @@ describe("doctor runtime tool schema checks", () => {
         compat: { supportsTools: true },
       },
     ]);
-    mocks.createOpenClawCodingTools.mockReturnValueOnce([
+    mocks.createCarapaceCodingTools.mockReturnValueOnce([
       tool("healthy", { type: "object", properties: {} }),
     ]);
 
@@ -208,7 +208,7 @@ describe("doctor runtime tool schema checks", () => {
         compat: { supportsTools: true },
       },
     ]);
-    mocks.createOpenClawCodingTools.mockReturnValueOnce([
+    mocks.createCarapaceCodingTools.mockReturnValueOnce([
       tool("healthy", { type: "object", properties: {} }),
     ]);
 
@@ -356,7 +356,7 @@ describe("doctor runtime tool schema checks", () => {
   });
 
   it("reports unsupported schemas exposed only to a non-default configured agent", async () => {
-    mocks.createOpenClawCodingTools.mockImplementation((options) =>
+    mocks.createCarapaceCodingTools.mockImplementation((options) =>
       options?.agentId === "worker"
         ? [tool("fuzzplugin_move_angles", { type: "array", items: { type: "number" } })]
         : [tool("healthy", { type: "object", properties: {} })],
@@ -382,10 +382,10 @@ describe("doctor runtime tool schema checks", () => {
       fixHint:
         "Disable or update the offending plugin/tool so its parameters are a JSON object schema, then rerun doctor.",
     });
-    expect(mocks.createOpenClawCodingTools).toHaveBeenCalledWith(
+    expect(mocks.createCarapaceCodingTools).toHaveBeenCalledWith(
       expect.objectContaining({ agentId: "main" }),
     );
-    expect(mocks.createOpenClawCodingTools).toHaveBeenCalledWith(
+    expect(mocks.createCarapaceCodingTools).toHaveBeenCalledWith(
       expect.objectContaining({ agentId: "worker" }),
     );
     expect(mocks.loadModelCatalog).toHaveBeenCalledTimes(2);
@@ -410,7 +410,7 @@ describe("doctor runtime tool schema checks", () => {
   });
 
   it("skips ACP-only agents because they do not use embedded tool projection", async () => {
-    mocks.createOpenClawCodingTools.mockImplementation((options) =>
+    mocks.createCarapaceCodingTools.mockImplementation((options) =>
       options?.agentId === "acp-worker"
         ? [tool("fuzzplugin_move_angles", { type: "array", items: { type: "number" } })]
         : [tool("healthy", { type: "object", properties: {} })],
@@ -438,8 +438,8 @@ describe("doctor runtime tool schema checks", () => {
         },
       }),
     ).resolves.toEqual([]);
-    expect(mocks.createOpenClawCodingTools).toHaveBeenCalledTimes(1);
-    expect(mocks.createOpenClawCodingTools).toHaveBeenCalledWith(
+    expect(mocks.createCarapaceCodingTools).toHaveBeenCalledTimes(1);
+    expect(mocks.createCarapaceCodingTools).toHaveBeenCalledWith(
       expect.objectContaining({ agentId: "main" }),
     );
     expect(mocks.createBundleMcpToolRuntime).toHaveBeenCalledTimes(1);
@@ -449,7 +449,7 @@ describe("doctor runtime tool schema checks", () => {
   });
 
   it("reuses one bundled MCP probe for equivalent agent workspaces", async () => {
-    mocks.createOpenClawCodingTools.mockReturnValue([]);
+    mocks.createCarapaceCodingTools.mockReturnValue([]);
     mocks.createBundleMcpToolRuntime.mockResolvedValue({
       tools: [],
       diagnostics: [
@@ -625,10 +625,10 @@ describe("doctor gateway runtime checks", () => {
       loadState: { status: "loaded" },
       running: true,
       env: {},
-      command: { programArguments: ["openclaw", "gateway"], sourcePath: "/tmp/gateway.service" },
+      command: { programArguments: ["carapace", "gateway"], sourcePath: "/tmp/gateway.service" },
       runtime: { status: "running" },
     });
-    mocks.resolveGatewayService.mockReset().mockReturnValue({ label: "openclaw-gateway" });
+    mocks.resolveGatewayService.mockReset().mockReturnValue({ label: "carapace-gateway" });
   });
 
   it("projects every degraded SecretRef owner from exactly one authenticated read-only status RPC", async () => {
@@ -673,7 +673,7 @@ describe("doctor gateway runtime checks", () => {
 
     const findings = await collectGatewayHealthFindings({
       cfg,
-      configPath: "/tmp/selected-openclaw.json",
+      configPath: "/tmp/selected-carapace.json",
     });
 
     expect(mocks.callGateway).toHaveBeenCalledExactlyOnceWith({
@@ -682,7 +682,7 @@ describe("doctor gateway runtime checks", () => {
       timeoutMs: 3000,
       sharedStateMode: "read-only",
       config: cfg,
-      configPath: "/tmp/selected-openclaw.json",
+      configPath: "/tmp/selected-carapace.json",
       tlsFingerprint: "sha256:test-doctor-fingerprint",
       preauthHandshakeTimeoutMs: 1200,
     });
@@ -693,7 +693,7 @@ describe("doctor gateway runtime checks", () => {
         message: expect.stringContaining("cold account:discord:ops"),
         path: "channels.discord.accounts.ops.token",
         target: "account:discord:ops",
-        fixHint: expect.stringContaining("openclaw secrets reload"),
+        fixHint: expect.stringContaining("carapace secrets reload"),
       }),
       expect.objectContaining({
         checkId: "core/doctor/gateway-health",
@@ -701,7 +701,7 @@ describe("doctor gateway runtime checks", () => {
         message: expect.stringContaining("stale capability:tts"),
         path: "tts.providers.elevenlabs.apiKey",
         target: "capability:tts",
-        fixHint: expect.stringContaining("openclaw secrets reload"),
+        fixHint: expect.stringContaining("carapace secrets reload"),
       }),
       expect.objectContaining({
         checkId: "core/doctor/gateway-health",
@@ -763,7 +763,7 @@ describe("doctor gateway runtime checks", () => {
       credentialsRequired: false,
       message: "Gateway status could not be inspected: connect ECONNREFUSED 127.0.0.1:5829",
       fixHint:
-        "Inspect the service with `openclaw gateway status --deep`, or run `openclaw doctor` for guided checks.",
+        "Inspect the service with `carapace gateway status --deep`, or run `carapace doctor` for guided checks.",
     },
   ])("reports $label from exactly one sanitized status attempt", async (entry) => {
     if (entry.error instanceof GatewayClientRequestError) {
@@ -828,7 +828,7 @@ describe("doctor gateway runtime checks", () => {
         severity: "warning",
         message: expect.stringContaining("intentionally skipped"),
         fixHint:
-          "Rerun `openclaw doctor --lint --only core/doctor/gateway-health --allow-exec` to permit configured secret execution.",
+          "Rerun `carapace doctor --lint --only core/doctor/gateway-health --allow-exec` to permit configured secret execution.",
       }),
     ]);
     expect(JSON.stringify(findings)).not.toContain("PRIVATE_REF_ID");
@@ -871,7 +871,7 @@ describe("doctor gateway runtime checks", () => {
       runtimeStatus: "stopped",
       message: "Gateway service is not installed.",
       path: "gateway.mode",
-      fixHint: "Run `openclaw gateway install` to install the service.",
+      fixHint: "Run `carapace gateway install` to install the service.",
     },
     {
       label: "installed but not loaded",
@@ -880,7 +880,7 @@ describe("doctor gateway runtime checks", () => {
       runtimeStatus: "stopped",
       message: "Gateway service is installed but not loaded.",
       path: "/tmp/gateway.service",
-      fixHint: "Start the installed service with `openclaw gateway start`.",
+      fixHint: "Start the installed service with `carapace gateway start`.",
     },
     {
       label: "loaded with unconfirmed runtime",
@@ -890,7 +890,7 @@ describe("doctor gateway runtime checks", () => {
       message: "Gateway service runtime is unknown, not running.",
       path: "/tmp/gateway.service",
       fixHint:
-        "Run `openclaw gateway status --deep` to inspect the service before choosing a recovery action.",
+        "Run `carapace gateway status --deep` to inspect the service before choosing a recovery action.",
     },
   ])("reports actionable advice for a $label local gateway daemon", async (entry) => {
     mocks.readGatewayServiceState.mockResolvedValueOnce({
@@ -899,7 +899,7 @@ describe("doctor gateway runtime checks", () => {
       running: false,
       env: {},
       command: entry.installed
-        ? { programArguments: ["openclaw", "gateway"], sourcePath: "/tmp/gateway.service" }
+        ? { programArguments: ["carapace", "gateway"], sourcePath: "/tmp/gateway.service" }
         : null,
       runtime: { status: entry.runtimeStatus },
     });
@@ -912,7 +912,7 @@ describe("doctor gateway runtime checks", () => {
         severity: "warning",
         message: entry.message,
         path: entry.path,
-        target: "openclaw-gateway",
+        target: "carapace-gateway",
         fixHint: entry.fixHint,
       },
     ]);
@@ -926,7 +926,7 @@ describe("doctor gateway runtime checks", () => {
     expect(mocks.readGatewayServiceState).not.toHaveBeenCalled();
   });
 
-  it("skips host-service findings for a container without an OpenClaw service", async () => {
+  it("skips host-service findings for a container without an Carapace service", async () => {
     mocks.isContainerEnvironment.mockReturnValue(true);
 
     await expect(

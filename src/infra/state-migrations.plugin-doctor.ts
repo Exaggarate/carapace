@@ -2,7 +2,7 @@ import os from "node:os";
 import { tryResolveConfiguredAgentWorkspaceDir } from "../agents/agent-scope-config.js";
 import { resolveDefaultAgentWorkspaceDir } from "../agents/workspace-default.js";
 import { resolveOAuthDir, resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   listPluginDoctorStateMigrationEntries,
   PluginDoctorStateMigrationDeclarationError,
@@ -10,8 +10,8 @@ import {
   type PluginDoctorStateMigrationDetection,
 } from "../plugins/doctor-contract-registry.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
-import { withAgentDatabaseMaintenanceLease } from "../state/openclaw-agent-db.js";
-import { repairOpenClawStateDatabaseSchemaIfNeeded } from "../state/openclaw-state-db.js";
+import { withAgentDatabaseMaintenanceLease } from "../state/carapace-agent-db.js";
+import { repairCarapaceStateDatabaseSchemaIfNeeded } from "../state/carapace-state-db.js";
 import { acquireGatewayLock } from "./gateway-lock.js";
 import { formatStartupMigrationFailure } from "./state-migrations.messages.js";
 import { createPluginDoctorStateMigrationContext } from "./state-migrations.plugin-doctor-context.js";
@@ -147,7 +147,7 @@ export async function collectPluginDoctorStateMigrationPlans(
 
 export async function runPluginDoctorStateMigrationPlans(params: {
   detected: LegacyStateDetection;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   plannedActions?: readonly PlannedPluginDoctorAction[];
 }): Promise<MigrationMessages> {
@@ -250,7 +250,7 @@ async function migratePluginDoctorStatePlans(
   try {
     lock = await acquireGatewayLock({
       allowInTests: true,
-      env: { ...input.env, OPENCLAW_STATE_DIR: input.stateDir },
+      env: { ...input.env, CARAPACE_STATE_DIR: input.stateDir },
       pollIntervalMs: PLUGIN_DOCTOR_MIGRATION_LOCK_POLL_INTERVAL_MS,
       role: "sqlite-maintenance",
       timeoutMs: PLUGIN_DOCTOR_MIGRATION_LOCK_TIMEOUT_MS,
@@ -283,7 +283,7 @@ async function migratePluginDoctorStatePlans(
 
 /** Detect after canonical inspection; destructive repair also requires offline maintenance ownership. */
 export async function runPostSessionPluginDoctorStateRepairs(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   maintenanceAuthority?: { assertCurrent(): void };
   plannedActions?: readonly PlannedPluginDoctorAction[];
@@ -312,7 +312,7 @@ export async function runPostSessionPluginDoctorStateRepairs(params: {
           ...warnings,
           ...plans.flatMap((plan) => plan.preview),
           ...(plans.length
-            ? ['Run "openclaw doctor --fix" to repair plugin session ownership.']
+            ? ['Run "carapace doctor --fix" to repair plugin session ownership.']
             : []),
         ],
       };
@@ -367,7 +367,7 @@ export async function runPostSessionPluginDoctorStateRepairs(params: {
 }
 
 export async function autoMigrateLegacyPluginDoctorState(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   log?: MigrationLogger;
@@ -387,8 +387,8 @@ export async function autoMigrateLegacyPluginDoctorState(params: {
   });
   const stateDir = resolveStateDir(env, params.homedir ?? os.homedir);
   const oauthDir = resolveOAuthDir(env, stateDir);
-  const stateSchema = repairOpenClawStateDatabaseSchemaIfNeeded({
-    env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+  const stateSchema = repairCarapaceStateDatabaseSchemaIfNeeded({
+    env: { ...env, CARAPACE_STATE_DIR: stateDir },
   });
   const changes = [...stateDirResult.changes, ...stateSchema.changes];
   const warnings = [...stateDirResult.warnings, ...stateSchema.warnings];

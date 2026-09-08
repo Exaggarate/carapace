@@ -1,14 +1,14 @@
 /** Prepares only the provider owners needed by a model config mutation. */
 import { tryResolveConfiguredAgentWorkspaceDir } from "../../agents/agent-scope-config.js";
 import { modelKey, type ModelRef } from "../../agents/model-ref-shared.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
 import { resolvePluginProviderRegistryCore } from "../../plugins/providers.runtime.js";
 import { withPluginRuntimeGenerationScope } from "../../plugins/runtime/generation-scope.js";
 
 export function withModelCommandProviderRuntime<T>(
   params: {
-    runtimeConfig: OpenClawConfig;
+    runtimeConfig: CarapaceConfig;
     selectModelRefs: () => readonly (ModelRef | undefined)[];
   },
   run: () => T,

@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import os
 
 actor CameraController {
@@ -38,8 +38,8 @@ actor CameraController {
     }
 
     func snap(
-        params: OpenClawCameraSnapParams,
-        defaultFacing: OpenClawCameraFacing = .front) async throws -> (
+        params: CarapaceCameraSnapParams,
+        defaultFacing: CarapaceCameraFacing = .front) async throws -> (
         format: String,
         base64: String,
         width: Int,
@@ -104,8 +104,8 @@ actor CameraController {
     }
 
     func clip(
-        params: OpenClawCameraClipParams,
-        defaultFacing: OpenClawCameraFacing = .front) async throws -> (
+        params: CarapaceCameraClipParams,
+        defaultFacing: CarapaceCameraFacing = .front) async throws -> (
         format: String,
         base64: String,
         durationMs: Int,
@@ -125,9 +125,9 @@ actor CameraController {
         }
 
         let movURL = FileManager().temporaryDirectory
-            .appendingPathComponent("openclaw-camera-\(UUID().uuidString).mov")
+            .appendingPathComponent("carapace-camera-\(UUID().uuidString).mov")
         let mp4URL = FileManager().temporaryDirectory
-            .appendingPathComponent("openclaw-camera-\(UUID().uuidString).mp4")
+            .appendingPathComponent("carapace-camera-\(UUID().uuidString).mp4")
         defer {
             try? FileManager().removeItem(at: movURL)
             try? FileManager().removeItem(at: mp4URL)
@@ -193,7 +193,7 @@ actor CameraController {
     }
 
     private nonisolated static func pickCamera(
-        facing: OpenClawCameraFacing,
+        facing: CarapaceCameraFacing,
         deviceId: String?) throws -> AVCaptureDevice
     {
         try CameraCapturePipelineSupport.selectCamera(
@@ -255,8 +255,8 @@ actor CameraController {
     }
 
     nonisolated static func resolveFacing(
-        _ explicitFacing: OpenClawCameraFacing?,
-        defaultFacing: OpenClawCameraFacing) -> OpenClawCameraFacing
+        _ explicitFacing: CarapaceCameraFacing?,
+        defaultFacing: CarapaceCameraFacing) -> CarapaceCameraFacing
     {
         explicitFacing ?? defaultFacing
     }

@@ -6,8 +6,8 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   type ProviderAuthAliasLookupParams,
   resolveProviderIdForAuth,
@@ -39,7 +39,7 @@ type AuthProfileEligibility = {
 };
 
 function isProfileProviderCompatibleWithAuthProvider(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   authAliasLookupParams?: ProviderAuthAliasLookupParams;
   providerAuthKey: string;
   provider: string;
@@ -53,7 +53,7 @@ function isProfileProviderCompatibleWithAuthProvider(params: {
 
 /** Returns true when a stored credential can authenticate the requested provider. */
 export function isStoredCredentialCompatibleWithAuthProvider(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   authAliasLookupParams?: ProviderAuthAliasLookupParams;
   provider: string;
   credential: AuthProfileCredential;
@@ -70,7 +70,7 @@ export function isStoredCredentialCompatibleWithAuthProvider(params: {
 }
 
 function listProfilesCompatibleWithAuthProvider(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   authAliasLookupParams?: ProviderAuthAliasLookupParams;
   store: AuthProfileStore;
   providerAuthKey: string;
@@ -88,7 +88,7 @@ function listProfilesCompatibleWithAuthProvider(params: {
 }
 
 function resolveProviderAuthMode(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   provider: string,
 ): string | undefined {
   const providers = cfg?.models?.providers;
@@ -100,14 +100,14 @@ function resolveProviderAuthMode(
   return typeof auth === "string" ? auth : undefined;
 }
 
-function providerAllowsAwsSdkAuth(cfg: OpenClawConfig | undefined, provider: string): boolean {
+function providerAllowsAwsSdkAuth(cfg: CarapaceConfig | undefined, provider: string): boolean {
   const authMode = resolveProviderAuthMode(cfg, provider);
   return authMode === "aws-sdk";
 }
 
 /** Returns true when config declares an aws-sdk auth profile for a provider. */
 export function isConfiguredAwsSdkAuthProfileForProvider(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   authAliasLookupParams?: ProviderAuthAliasLookupParams;
   provider: string;
   profileId: string;
@@ -133,7 +133,7 @@ export function isConfiguredAwsSdkAuthProfileForProvider(params: {
 
 /** Resolves whether a profile can be used for a provider right now. */
 export function resolveAuthProfileEligibility(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   authAliasLookupParams?: ProviderAuthAliasLookupParams;
   store: AuthProfileStore;
   provider: string;
@@ -198,7 +198,7 @@ export function resolveAuthProfileEligibility(params: {
 }
 
 type ResolveAuthProfileOrderParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   store: AuthProfileStore;
   provider: string;
   /** Exact prepared metadata for request paths that must not rediscover plugin aliases. */

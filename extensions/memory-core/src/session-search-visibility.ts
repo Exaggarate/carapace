@@ -1,41 +1,41 @@
-import { resolveSessionAgentIdStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { resolveSessionAgentIdStrict } from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   buildSessionEntry,
   loadArchivedSessions,
-} from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
+} from "carapace/plugin-sdk/memory-core-host-engine-sessions";
 import {
   resolveCanonicalMainSessionKey,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { sessionDeliveryOrigin } from "openclaw/plugin-sdk/session-store-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import { sessionDeliveryOrigin } from "carapace/plugin-sdk/session-store-runtime";
 import {
   extractTranscriptIdentityFromSessionsMemoryHit,
   loadCombinedSessionStoreForGateway,
   resolveTranscriptStemToSessionKeys,
-} from "openclaw/plugin-sdk/session-transcript-hit";
+} from "carapace/plugin-sdk/session-transcript-hit";
 import {
   createAgentToAgentPolicy,
   createSessionVisibilityGuard,
   resolveEffectiveSessionToolsVisibility,
   resolveSandboxSessionToolsVisibility,
-} from "openclaw/plugin-sdk/session-visibility";
+} from "carapace/plugin-sdk/session-visibility";
 import {
   normalizeOptionalLowercaseString as normalizeAgentIdForCompare,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   readSessionArchiveReasonFromHitPath,
   readSessionResetRecallCutoffMetadata,
   type SessionResetRecallCutoff,
 } from "./session-reset-recall-metadata.js";
 
-function isGlobalSessionKeyForSharedScope(cfg: OpenClawConfig, key: string): boolean {
+function isGlobalSessionKeyForSharedScope(cfg: CarapaceConfig, key: string): boolean {
   return cfg.session?.scope === "global" && key.trim().toLowerCase() === "global";
 }
 
-type ConversationRecallContext = NonNullable<OpenClawPluginToolContext["conversationRecall"]>;
+type ConversationRecallContext = NonNullable<CarapacePluginToolContext["conversationRecall"]>;
 
 type SessionStore = ReturnType<typeof loadCombinedSessionStoreForGateway>["store"];
 
@@ -142,7 +142,7 @@ function isTrustedRecallRequester(params: {
 }
 
 function filterSessionKeysByScopedAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   keys: string[];
   scopedAgentId: string | undefined;
 }): string[] {
@@ -163,7 +163,7 @@ function filterSessionKeysByScopedAgent(params: {
 }
 
 export async function filterMemorySearchHitsBySessionVisibility(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   requesterSessionKey: string | undefined;
   sandboxed: boolean;

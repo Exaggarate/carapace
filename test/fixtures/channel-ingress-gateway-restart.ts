@@ -1,5 +1,5 @@
 import path from "node:path";
-import { createStandardRawEventIngressMonitor } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { createStandardRawEventIngressMonitor } from "carapace/plugin-sdk/channel-ingress-runtime";
 import { createChannelIngressQueue } from "../../src/channels/message/ingress-queue.js";
 import { runGatewayLoop } from "../../src/cli/gateway-cli/run-loop.js";
 import type { GatewayServer } from "../../src/gateway/server-public.js";
@@ -11,14 +11,14 @@ import {
   getGatewayRestartDrainSignal,
   resetGatewayWorkAdmission,
 } from "../../src/process/gateway-work-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../src/state/carapace-state-db.js";
 
 const stateDir = process.argv[2];
 if (!stateDir) {
   throw new Error("state directory argument is required");
 }
-process.env.OPENCLAW_STATE_DIR = path.resolve(stateDir);
-process.env.OPENCLAW_NO_RESPAWN = "1";
+process.env.CARAPACE_STATE_DIR = path.resolve(stateDir);
+process.env.CARAPACE_NO_RESPAWN = "1";
 resetGatewayWorkAdmission();
 resetGatewayRestartStateForInProcessRestart();
 
@@ -143,7 +143,7 @@ releaseFirstClose();
 await secondStarted;
 process.emit("SIGINT");
 const exitCode = await exited;
-closeOpenClawStateDatabaseForTest();
+closeCarapaceStateDatabaseForTest();
 
 process.send?.({
   type: "ingress-restart-proof",

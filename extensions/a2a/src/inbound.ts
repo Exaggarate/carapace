@@ -1,16 +1,16 @@
 import {
   buildChannelInboundEventContext,
   resolveChannelInboundRouteEnvelope,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveStableChannelMessageIngress } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveStableChannelMessageIngress } from "carapace/plugin-sdk/channel-ingress-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/runtime-store";
 import type { A2aTaskStore } from "./task-store.js";
 import type { ResolvedA2aChannelAccount } from "./types.js";
 
 type A2aInboundDispatchParams = {
   account: ResolvedA2aChannelAccount;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   channelRuntime: PluginRuntime["channel"];
   buildContext: typeof buildChannelInboundEventContext;
   store: A2aTaskStore;

@@ -1,12 +1,12 @@
 // Qa Lab plugin module implements WhatsApp live transport adapter behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { WhatsAppQaDriverSession } from "@openclaw/whatsapp/api.js";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
-import { buildQaTarget } from "openclaw/plugin-sdk/qa-channel-protocol";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { WhatsAppQaDriverSession } from "@carapace/whatsapp/api.js";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
+import { buildQaTarget } from "carapace/plugin-sdk/qa-channel-protocol";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import {
   acquireQaCredentialLease,
   startQaCredentialLeaseHeartbeat,
@@ -47,7 +47,7 @@ export async function createWhatsAppQaTransportAdapter(
   let sutAuthDir: string;
   try {
     authRoot = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-whatsapp-qa-adapter-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-whatsapp-qa-adapter-"),
     );
     // Unpack sequentially so rollback cannot remove authRoot while another unpack is writing.
     driverAuthDir = await unpackWhatsAppAuthArchive({
@@ -186,7 +186,7 @@ export async function createWhatsAppQaTransportAdapter(
       busMessageIds.clear();
     },
     createGatewayConfig: () =>
-      buildWhatsAppQaConfig({} as OpenClawConfig, {
+      buildWhatsAppQaConfig({} as CarapaceConfig, {
         allowFrom: [runtimeEnv.driverPhoneE164],
         authDir: sutAuthDir,
         dmPolicy: "allowlist",

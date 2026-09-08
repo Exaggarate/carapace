@@ -1,5 +1,5 @@
 // Browser tests cover browser request.profile from body plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayRequestHandlers } from "../core-api.js";
 
@@ -49,10 +49,10 @@ vi.mock("../core-api.js", async () => {
 
 vi.mock("../browser-proxy-upload.js", () => uploadMocks);
 
-vi.mock("openclaw/plugin-sdk/runtime-config-snapshot", async () => {
+vi.mock("carapace/plugin-sdk/runtime-config-snapshot", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/runtime-config-snapshot")
-  >("openclaw/plugin-sdk/runtime-config-snapshot");
+    typeof import("carapace/plugin-sdk/runtime-config-snapshot")
+  >("carapace/plugin-sdk/runtime-config-snapshot");
   return {
     ...actual,
     getRuntimeConfig: loadConfigMock,
@@ -367,7 +367,7 @@ describe("browser.request profile selection", () => {
             method: "POST",
             path: "/hooks/file-chooser",
             target: "node",
-            body: { paths: ["/tmp/openclaw/uploads/report.txt"] },
+            body: { paths: ["/tmp/carapace/uploads/report.txt"] },
           }
         : { method: "GET", path: "/tabs", target: "node" },
       {
@@ -586,7 +586,7 @@ describe("browser.request profile selection", () => {
       method: "POST",
       path: "/hooks/file-chooser",
       body: {
-        paths: ["/tmp/openclaw/uploads/report.txt"],
+        paths: ["/tmp/carapace/uploads/report.txt"],
         ref: "e12",
       },
     });
@@ -602,7 +602,7 @@ describe("browser.request profile selection", () => {
 
   it("uses the original Gateway paths when an auto-selected old node lacks upload support", async () => {
     const originalBody = {
-      paths: ["/tmp/openclaw/uploads/report.txt"],
+      paths: ["/tmp/carapace/uploads/report.txt"],
       ref: "e12",
     };
     uploadMocks.prepareBrowserProxyUploadRequest.mockResolvedValueOnce({
@@ -660,7 +660,7 @@ describe("browser.request profile selection", () => {
       {
         method: "POST",
         path: "/hooks/file-chooser",
-        body: { paths: ["/tmp/openclaw/uploads/report.txt"], ref: "e12" },
+        body: { paths: ["/tmp/carapace/uploads/report.txt"], ref: "e12" },
       },
       undefined,
       [
@@ -690,7 +690,7 @@ describe("browser.request profile selection", () => {
       {
         method: "POST",
         path: "/hooks/file-chooser",
-        body: { paths: ["/tmp/openclaw/uploads/report.txt"], ref: "e12" },
+        body: { paths: ["/tmp/carapace/uploads/report.txt"], ref: "e12" },
       },
       undefined,
       [
@@ -750,7 +750,7 @@ describe("browser.request profile selection", () => {
       error: "headed mode needs a display",
       reason: "no_display_for_headed_profile",
       details: {
-        profile: "openclaw",
+        profile: "carapace",
         requestedHeadless: false,
         headlessSource: "config",
         displayPresent: false,

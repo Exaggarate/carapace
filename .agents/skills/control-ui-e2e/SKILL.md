@@ -1,6 +1,6 @@
 ---
 name: control-ui-e2e
-description: Use when testing, fixing, or extending the OpenClaw Control UI GUI with Vitest + Playwright end-to-end checks, mocked Gateway WebSocket flows, mocked dashboard runs, screenshots/videos, or agent-verifiable browser proof.
+description: Use when testing, fixing, or extending the Carapace Control UI GUI with Vitest + Playwright end-to-end checks, mocked Gateway WebSocket flows, mocked dashboard runs, screenshots/videos, or agent-verifiable browser proof.
 ---
 
 # Control UI E2E
@@ -30,7 +30,7 @@ pnpm test:ui:e2e
 
 Use an existing ready dependency installation or a prepared normal checkout;
 do not reconcile a shared install while other jobs use it. Follow
-`$openclaw-testing`: trusted development proof may run locally, and remote
+`$carapace-testing`: trusted development proof may run locally, and remote
 proof needs a browser/platform, clean-environment, or source-isolation reason.
 
 ## Visual Proof Default
@@ -44,8 +44,8 @@ screenshot set are not mandatory when assertions already demonstrate the change.
 - Drive Chromium with Playwright against the local mock URL. Capture the states
   needed to demonstrate the change, using screenshots or a short video.
 - Use `browser.newContext({ recordVideo: { dir, size }, viewport })`, `page.screenshot({ path })`, and close the context before reporting the video path.
-- The session-host command-state proof uses viewport-only captures, verified with Playwright 1.62.1 and Chrome 151.0.7922.34 (Linux real Gateway; macOS arm64 synthetic reproduction). Other recording owners have not been migrated or certified by this fix; verify their required screenshot content and finalized video separately. See [the verified capture path and upstream limitation](https://docs.openclaw.ai/reference/test#screenshots-during-chromium-recordings).
-- Allocate retained proof with `createControlUiE2eArtifactDir(scope, parentDir?)` from `ui/src/test-helpers/control-ui-e2e-artifacts.ts`. Each call atomically creates a fresh directory and logs its actual path. An explicit parent wins, then the trimmed existing `OPENCLAW_UI_E2E_ARTIFACT_DIR`, then the repository's `.artifacts/control-ui-e2e` parent. Existing custom output controls select parents; do not add or rewrite env vars to enable capture.
+- The session-host command-state proof uses viewport-only captures, verified with Playwright 1.62.1 and Chrome 151.0.7922.34 (Linux real Gateway; macOS arm64 synthetic reproduction). Other recording owners have not been migrated or certified by this fix; verify their required screenshot content and finalized video separately. See [the verified capture path and upstream limitation](../../../docs/reference/test.md#screenshots-during-chromium-recordings).
+- Allocate retained proof with `createControlUiE2eArtifactDir(scope, parentDir?)` from `ui/src/test-helpers/control-ui-e2e-artifacts.ts`. Each call atomically creates a fresh directory and logs its actual path. An explicit parent wins, then the trimmed existing `CARAPACE_UI_E2E_ARTIFACT_DIR`, then the repository's `.artifacts/control-ui-e2e` parent. Existing custom output controls select parents; do not add or rewrite env vars to enable capture.
 - Allocate during the test/scenario or `beforeEach`, once per attempt; standalone scripts allocate once per invocation. Pass the owner explicitly to shared capture helpers. Keep the original gates, feature/stage names, viewports, waits, and recording options. Use distinct filenames for distinct stages and keep screenshots, reports, and video together.
 - Retain successful and failed evidence. Report actual allocated paths, including relocated filename overrides. Manually delete only exact owned directories after review; never clear shared parents before a replay. Disposable build/media fixtures and owned temporary raw video may keep their cleanup. New synthetic captures do not recover overwritten evidence.
 - Timeout diagnostics use fresh children beneath their existing diagnostic parent. Mantis retains every capture attempt under an invocation-owned directory and refuses to overwrite reports. Real-Gateway suites, `chat-outbox-*`, and `chat-attachment-read-lifecycle` remain separate owners; coordinate before claiming replay-safe retention there.

@@ -215,7 +215,7 @@ function createDeclarationBoundaryPlugin(cwd: string): NonNullable<UserConfig["p
   const inputs = createDeclarationInputBoundary(cwd);
   const releases: (() => void)[] = [];
   return {
-    name: "openclaw-declaration-boundary",
+    name: "carapace-declaration-boundary",
     buildStart: {
       order: "pre",
       handler() {

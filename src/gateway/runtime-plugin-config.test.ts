@@ -2,7 +2,7 @@
  * Runtime plugin config regression tests.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const mocks = vi.hoisted(() => ({
   applyPluginAutoEnable: vi.fn(),
@@ -26,9 +26,9 @@ describe("resolveGatewayPluginConfig", () => {
 
   it("reuses auto-enabled config for the same runtime config and metadata snapshot", async () => {
     const { resolveGatewayPluginConfig } = await import("./runtime-plugin-config.js");
-    const config = { channels: { telegram: { botToken: "token" } } } as OpenClawConfig;
+    const config = { channels: { telegram: { botToken: "token" } } } as CarapaceConfig;
     const snapshot = { manifestRegistry: { plugins: [], diagnostics: [] } };
-    const resolved = { ...config, plugins: { allow: ["telegram"] } } as OpenClawConfig;
+    const resolved = { ...config, plugins: { allow: ["telegram"] } } as CarapaceConfig;
     mocks.getCurrentPluginMetadataSnapshot.mockReturnValue(snapshot);
     mocks.applyPluginAutoEnable.mockReturnValue({ config: resolved, changes: [] });
 
@@ -40,7 +40,7 @@ describe("resolveGatewayPluginConfig", () => {
 
   it("refreshes the cached config when metadata snapshot changes", async () => {
     const { resolveGatewayPluginConfig } = await import("./runtime-plugin-config.js");
-    const config = { channels: { telegram: { botToken: "token" } } } as OpenClawConfig;
+    const config = { channels: { telegram: { botToken: "token" } } } as CarapaceConfig;
     const first = { manifestRegistry: { plugins: [], diagnostics: [] } };
     const second = { manifestRegistry: { plugins: [], diagnostics: [] } };
     mocks.getCurrentPluginMetadataSnapshot.mockReturnValueOnce(first).mockReturnValue(second);
@@ -56,7 +56,7 @@ describe("resolveGatewayPluginConfig", () => {
 
   it("does not cache without a current metadata snapshot", async () => {
     const { resolveGatewayPluginConfig } = await import("./runtime-plugin-config.js");
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     mocks.getCurrentPluginMetadataSnapshot.mockReturnValue(undefined);
     mocks.applyPluginAutoEnable.mockImplementation(() => ({ config: {}, changes: [] }));
 

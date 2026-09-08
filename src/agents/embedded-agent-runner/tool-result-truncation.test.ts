@@ -3,10 +3,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { estimateStringChars } from "@openclaw/normalization-core/cjk-chars";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
-import type { AssistantMessage, ToolResultMessage, UserMessage } from "openclaw/plugin-sdk/llm";
+import { estimateStringChars } from "@carapace/normalization-core/cjk-chars";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
+import type { AssistantMessage, ToolResultMessage, UserMessage } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { convertToLlm } from "../../../packages/agent-core/src/harness/messages.js";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";

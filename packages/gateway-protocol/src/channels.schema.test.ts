@@ -40,7 +40,7 @@ describe("WebLoginWaitParamsSchema", () => {
   it("accepts an explicit channel and opaque login session key", () => {
     expect(
       validate.Check({
-        channel: "openclaw-weixin",
+        channel: "carapace-weixin",
         sessionKey: "2d3c49c2-5a88-4e90-9a36-264834875ecc",
       }),
     ).toBe(true);
@@ -51,7 +51,7 @@ describe("WebLoginStartParamsSchema", () => {
   const validate = Compile(WebLoginStartParamsSchema);
 
   it("accepts an explicit QR-login channel", () => {
-    expect(validate.Check({ channel: "openclaw-weixin" })).toBe(true);
+    expect(validate.Check({ channel: "carapace-weixin" })).toBe(true);
   });
 });
 

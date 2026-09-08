@@ -1,7 +1,7 @@
 // Utility-model preparation and completion for progress narration.
 import { runIsolatedCompletion } from "../../agents/isolated-completion.js";
 import { prepareUtilityCompletionForAgent } from "../../agents/utility-completion.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 
 const NARRATION_TIMEOUT_MS = 10_000;
@@ -55,7 +55,7 @@ function buildNarrationUserPrompt(input: ProgressNarrationInput): string {
   ].join("\n\n");
 }
 
-export async function prepareNarrationModel(params: { cfg: OpenClawConfig; agentId: string }) {
+export async function prepareNarrationModel(params: { cfg: CarapaceConfig; agentId: string }) {
   try {
     return await prepareUtilityCompletionForAgent({
       cfg: params.cfg,
@@ -69,7 +69,7 @@ export async function prepareNarrationModel(params: { cfg: OpenClawConfig; agent
 }
 
 export async function generateNarrationWithUtilityModel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prepared: NonNullable<Awaited<ReturnType<typeof prepareNarrationModel>>>;
   input: ProgressNarrationInput;
   abortSignal?: AbortSignal;

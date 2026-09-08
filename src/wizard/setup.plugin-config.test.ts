@@ -1,6 +1,6 @@
 // Setup plugin config tests cover plugin choices and generated config.
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { PluginConfigUiHint } from "../plugins/types.js";
 import type { WizardPrompter } from "./prompts.js";
 import {
@@ -122,7 +122,7 @@ describe("discoverUnconfiguredPlugins", () => {
         gateway: { label: "Gateway" },
       }),
     ];
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           openshell: {
@@ -147,7 +147,7 @@ describe("discoverUnconfiguredPlugins", () => {
         gateway: { label: "Gateway" },
       }),
     ];
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           openshell: {
@@ -169,7 +169,7 @@ describe("discoverUnconfiguredPlugins", () => {
         endpoint: { label: "Endpoint" },
       }),
     ];
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           "test-plugin": {
@@ -217,7 +217,7 @@ describe("discoverUnconfiguredPlugins", () => {
         },
       ),
     ];
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           brave: {
@@ -437,7 +437,7 @@ describe("setupPluginConfig", () => {
   });
 
   it("rejects prototype-polluting dotted uiHint paths without mutating config", async () => {
-    const pollutionProbe = "openclawPluginPollutionProbe";
+    const pollutionProbe = "carapacePluginPollutionProbe";
     loadPluginManifestRegistryCore.mockReturnValue({
       plugins: [
         {
@@ -448,7 +448,7 @@ describe("setupPluginConfig", () => {
         },
       ],
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { entries: { "unsafe-plugin": { enabled: true } } },
     };
 

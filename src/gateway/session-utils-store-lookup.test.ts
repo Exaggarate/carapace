@@ -2,9 +2,9 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { prepareCurrentGitHubPublicationIdentity } from "./github-publication-availability.js";
 import { handleGatewayRequest } from "./server-methods.js";
@@ -22,7 +22,7 @@ vi.mock("./github-publication-availability.js", () => ({
   })),
 }));
 
-async function withGlobalSessions(mainKey: string, run: (cfg: OpenClawConfig) => Promise<void>) {
+async function withGlobalSessions(mainKey: string, run: (cfg: CarapaceConfig) => Promise<void>) {
   await withStateDirEnv("gateway-global-lookup-", async ({ stateDir }) => {
     const cfg = {
       agents: { ownership: "explicit", entries: { main: {}, research: {} } },
@@ -31,7 +31,7 @@ async function withGlobalSessions(mainKey: string, run: (cfg: OpenClawConfig) =>
         mainKey,
         store: path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json"),
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     setRuntimeConfigSnapshot(cfg, cfg);
     try {
       for (const agentId of ["main", "research"]) {
@@ -44,8 +44,8 @@ async function withGlobalSessions(mainKey: string, run: (cfg: OpenClawConfig) =>
       }
       await run(cfg);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       resetConfigRuntimeState();
     }
   });
@@ -96,7 +96,7 @@ describe("global session lookup ownership", () => {
     "rejects contradictory key and fixed-store owners through %s reads",
     async (mode) => {
       await withGlobalSessions("main", async (cfg) => {
-        const read = (config: OpenClawConfig, key: string, agentId?: string) => {
+        const read = (config: CarapaceConfig, key: string, agentId?: string) => {
           setRuntimeConfigSnapshot(config, config);
           return mode === "batch"
             ? resolveGatewaySessionStoreTargetsReadOnly({
@@ -111,7 +111,7 @@ describe("global session lookup ownership", () => {
           expect.soft(() => read(cfg, key, "research")).toThrow('belongs to "main"');
         }
         for (const owner of ["main", "retired"]) {
-          const fixed: OpenClawConfig = {
+          const fixed: CarapaceConfig = {
             ...cfg,
             agents: { ...cfg.agents, defaults: { sessionStore: { agentId: owner } } },
             session: {

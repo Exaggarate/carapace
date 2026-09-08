@@ -1,7 +1,7 @@
 import type {
   ProviderCatalogContext,
   ProviderPrepareDynamicModelContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { discoverLlamaServerProvider, prepareLlamaServerDynamicModel } from "./provider.js";
 
@@ -12,9 +12,9 @@ const catalogSdk = vi.hoisted((): { available: boolean; calls: number; failure?:
   calls: 0,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-catalog-live-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/provider-catalog-live-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/provider-catalog-live-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/provider-catalog-live-runtime")>();
   const run = (params: Parameters<typeof actual.runLiveProviderCatalog>[0]) => {
     catalogSdk.calls += 1;
     if (catalogSdk.failure) {

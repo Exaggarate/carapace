@@ -1,16 +1,16 @@
 // Imported CLI history merge helpers.
-// Deduplicates external history messages against local OpenClaw transcripts.
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+// Deduplicates external history messages against local Carapace transcripts.
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   hashCliImageTurnEntryId,
   readCliImageTurnContext,
 } from "../agents/cli-image-turn-correlation.js";
-import { isOpenClawCliImageCachePath } from "../agents/embedded-agent-runner/run/images.media-refs.js";
+import { isCarapaceCliImageCachePath } from "../agents/embedded-agent-runner/run/images.media-refs.js";
 import { stripInboundMetadata } from "../auto-reply/reply/strip-inbound-meta.js";
 import { isImageMediaFact, readPersistedMediaFacts } from "../media/media-facts.js";
 import { stripInlineDirectiveTagsForDisplay } from "../utils/directive-tags.js";
@@ -46,7 +46,7 @@ function stripTrailingCliImageMentions(text: string): {
   let end = lines.length;
   while (end > 0) {
     const line = lines[end - 1]?.trim() ?? "";
-    if (!line.startsWith("@") || !isOpenClawCliImageCachePath(line.slice(1))) {
+    if (!line.startsWith("@") || !isCarapaceCliImageCachePath(line.slice(1))) {
       break;
     }
     end -= 1;
@@ -60,7 +60,7 @@ function isClaudeCliImportedUserMessage(message: unknown, role: string | undefin
   if (role !== "user") {
     return false;
   }
-  const meta = asOptionalRecord(asOptionalRecord(message)?.["__openclaw"]);
+  const meta = asOptionalRecord(asOptionalRecord(message)?.["__carapace"]);
   return normalizeOptionalString(meta?.importedFrom) === "claude-cli";
 }
 
@@ -109,7 +109,7 @@ function extractComparableText(
     role === "user" ? stripInboundMetadata(stripResult.text) : stripResult.text,
   ).text;
   const normalized = visible.replace(/\s+/g, " ").trim();
-  const meta = asOptionalRecord(asOptionalRecord(message)?.["__openclaw"]);
+  const meta = asOptionalRecord(asOptionalRecord(message)?.["__carapace"]);
   const storedImageTurnKey = normalizeOptionalString(meta?.cliImageTurnKey);
   return {
     hasCliImageMentions: stripResult.stripped,
@@ -149,7 +149,7 @@ function resolveImportedExternalIdentityKey(message: unknown): string | undefine
   if (!message || typeof message !== "object") {
     return undefined;
   }
-  const rawMeta = (message as { __openclaw?: unknown })["__openclaw"];
+  const rawMeta = (message as { __carapace?: unknown })["__carapace"];
   if (!rawMeta || typeof rawMeta !== "object") {
     return undefined;
   }
@@ -274,7 +274,7 @@ export function mergeImportedChatHistoryMessages(params: {
     if (!hasLocalImageMediaFacts(entry)) {
       continue;
     }
-    const localMeta = asOptionalRecord(asOptionalRecord(entry.message)?.["__openclaw"]);
+    const localMeta = asOptionalRecord(asOptionalRecord(entry.message)?.["__carapace"]);
     const localEntryId = normalizeOptionalString(localMeta?.id);
     const turnKey = localEntryId ? hashCliImageTurnEntryId(localEntryId) : entry.cliImageTurnKey;
     if (turnKey) {

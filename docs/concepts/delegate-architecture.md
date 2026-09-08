@@ -1,17 +1,17 @@
 ---
-summary: "Delegate architecture: running OpenClaw as a named agent on behalf of an organization"
+summary: "Delegate architecture: running Carapace as a named agent on behalf of an organization"
 title: Delegate architecture
 read_when: "You want an agent with its own identity that acts on behalf of humans in an organization."
 status: active
 ---
 
-Run OpenClaw as a **named delegate**: an agent with its own identity that acts "on behalf of" people in an organization. The agent never impersonates a human - it sends, reads, and schedules under its own account with explicit delegation permissions.
+Run Carapace as a **named delegate**: an agent with its own identity that acts "on behalf of" people in an organization. The agent never impersonates a human - it sends, reads, and schedules under its own account with explicit delegation permissions.
 
 This extends [Multi-Agent Routing](/concepts/multi-agent) from personal use into organizational deployments.
 
 ## What is a delegate
 
-A delegate is an OpenClaw agent that:
+A delegate is an Carapace agent that:
 
 - Has its **own identity** (email address, display name, calendar).
 - Acts **on behalf of** one or more humans, never pretends to be them.
@@ -22,7 +22,7 @@ This maps to how executive assistants work: their own credentials, mail sent "on
 
 ## Why delegates
 
-OpenClaw's simplest mode is **one human, one agent**. Delegates extend this to organizations:
+Carapace's simplest mode is **one human, one agent**. Delegates extend this to organizations:
 
 | Personal mode               | Delegate mode                                  |
 | --------------------------- | ---------------------------------------------- |
@@ -34,7 +34,7 @@ OpenClaw's simplest mode is **one human, one agent**. Delegates extend this to o
 Delegates solve two problems:
 
 1. **Accountability**: messages sent by the agent are clearly from the agent, not a human.
-2. **Scope control**: the identity provider enforces what the delegate can access, independent of OpenClaw's own tool policy.
+2. **Scope control**: the identity provider enforces what the delegate can access, independent of Carapace's own tool policy.
 
 ## Capability tiers
 
@@ -98,7 +98,7 @@ Use per-agent tool policy to enforce boundaries at the Gateway level, independen
 ```json5
 {
   id: "delegate",
-  workspace: "~/.openclaw/workspace-delegate",
+  workspace: "~/.carapace/workspace-delegate",
   tools: {
     allow: ["read", "exec", "message", "cron"],
     deny: ["write", "edit", "apply_patch", "browser", "canvas"],
@@ -113,7 +113,7 @@ For high-security deployments, sandbox the delegate agent so it cannot reach the
 ```json5
 {
   id: "delegate",
-  workspace: "~/.openclaw/workspace-delegate",
+  workspace: "~/.carapace/workspace-delegate",
   sandbox: {
     mode: "all",
     scope: "agent",
@@ -127,11 +127,11 @@ See [Sandboxing](/gateway/sandboxing) and [Multi-Agent Sandbox & Tools](/tools/m
 
 Configure logging before the delegate handles any real data:
 
-- Cron run history: OpenClaw's shared SQLite state database.
-- Session transcripts: `~/.openclaw/agents/delegate/sessions`.
+- Cron run history: Carapace's shared SQLite state database.
+- Session transcripts: `~/.carapace/agents/delegate/sessions`.
 - Identity provider audit logs (Exchange, Google Workspace).
 
-All delegate actions flow through OpenClaw's session store. For compliance, retain and review these logs.
+All delegate actions flow through Carapace's session store. For compliance, retain and review these logs.
 
 ## Setting up a delegate
 
@@ -140,14 +140,14 @@ With hardening in place, grant the delegate its identity and permissions.
 ### 1. Create the delegate agent
 
 ```bash
-openclaw agents add delegate --workspace ~/.openclaw/workspace-delegate
+carapace agents add delegate --workspace ~/.carapace/workspace-delegate
 ```
 
 This creates:
 
-- Workspace: `~/.openclaw/workspace-delegate`
-- Agent state: `~/.openclaw/agents/delegate/agent`
-- Sessions: `~/.openclaw/agents/delegate/sessions`
+- Workspace: `~/.carapace/workspace-delegate`
+- Agent state: `~/.carapace/agents/delegate/agent`
+- Sessions: `~/.carapace/agents/delegate/sessions`
 
 Configure the delegate's personality in its workspace files:
 
@@ -210,9 +210,9 @@ Route inbound messages to the delegate agent using [Multi-Agent Routing](/concep
 {
   agents: {
     entries: {
-      main: { default: true, workspace: "~/.openclaw/workspace" },
+      main: { default: true, workspace: "~/.carapace/workspace" },
       delegate: {
-        workspace: "~/.openclaw/workspace-delegate",
+        workspace: "~/.carapace/workspace-delegate",
         tools: {
           deny: ["browser", "canvas"],
         },
@@ -242,10 +242,10 @@ Agents read shared auth profiles without copying them. To give the delegate an
 independent provider account, sign in on the Gateway host for that agent:
 
 ```bash
-openclaw models auth login --provider <providerId> --agent delegate
+carapace models auth login --provider <providerId> --agent delegate
 ```
 
-The login writes the delegate's SQLite auth store at `~/.openclaw/agents/delegate/agent/openclaw-agent.sqlite`; its local profiles override the shared read-through base. Never share the main agent's `agentDir` with the delegate. See [Auth credential semantics](/auth-credential-semantics#agent-copy-portability) and [Multi-Agent Routing](/concepts/multi-agent) for auth isolation details.
+The login writes the delegate's SQLite auth store at `~/.carapace/agents/delegate/agent/carapace-agent.sqlite`; its local profiles override the shared read-through base. Never share the main agent's `agentDir` with the delegate. See [Auth credential semantics](/auth-credential-semantics#agent-copy-portability) and [Multi-Agent Routing](/concepts/multi-agent) for auth isolation details.
 
 ## Example: organizational assistant
 
@@ -255,11 +255,11 @@ A complete delegate configuration handling email, calendar, and social media:
 {
   agents: {
     entries: {
-      main: { default: true, workspace: "~/.openclaw/workspace" },
+      main: { default: true, workspace: "~/.carapace/workspace" },
       "org-assistant": {
         name: "[Organization] Assistant",
-        workspace: "~/.openclaw/workspace-org",
-        agentDir: "~/.openclaw/agents/org-assistant/agent",
+        workspace: "~/.carapace/workspace-org",
+        agentDir: "~/.carapace/agents/org-assistant/agent",
         identity: { name: "[Organization] Assistant" },
         tools: {
           allow: ["read", "exec", "message", "cron", "sessions_list", "sessions_history"],
@@ -282,7 +282,7 @@ A complete delegate configuration handling email, calendar, and social media:
 
 The delegate's `AGENTS.md` defines its autonomous authority - what it may do without asking, what needs approval, and what is forbidden. [Cron Jobs](/automation/cron-jobs) drive its daily schedule.
 
-If you grant `sessions_history`, it is a bounded, safety-filtered recall view, not a raw transcript dump. OpenClaw redacts credential/token-like text, truncates long content, and strips internal scaffolding (thinking-block signatures, `<relevant-memories>` scaffolding tags, tool-call XML tags such as `<tool_call>`/`<function_calls>`, and similar leaked provider control tokens) from assistant recall. Oversized rows can be replaced with `[sessions_history omitted: message too large]` instead of returning the raw content. Use `nextOffset` when present to page backward through older transcript windows.
+If you grant `sessions_history`, it is a bounded, safety-filtered recall view, not a raw transcript dump. Carapace redacts credential/token-like text, truncates long content, and strips internal scaffolding (thinking-block signatures, `<relevant-memories>` scaffolding tags, tool-call XML tags such as `<tool_call>`/`<function_calls>`, and similar leaked provider control tokens) from assistant recall. Oversized rows can be replaced with `[sessions_history omitted: message too large]` instead of returning the raw content. Use `nextOffset` when present to page backward through older transcript windows.
 
 ## Scaling pattern
 

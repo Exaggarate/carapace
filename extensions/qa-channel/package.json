@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/qa-channel",
+  "name": "@carapace/qa-channel",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw QA synthetic channel plugin",
+  "description": "Carapace QA synthetic channel plugin",
   "type": "module",
   "exports": {
     ".": "./index.ts",
@@ -15,18 +15,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -38,7 +38,7 @@
       "detailLabel": "QA Channel",
       "docsPath": "/channels/qa-channel",
       "docsLabel": "qa-channel",
-      "blurb": "Synthetic Slack-class transport for automated OpenClaw QA scenarios.",
+      "blurb": "Synthetic Slack-class transport for automated Carapace QA scenarios.",
       "systemImage": "checklist",
       "order": 999,
       "exposure": {

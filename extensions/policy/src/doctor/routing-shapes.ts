@@ -1,8 +1,8 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
+import type { HealthFinding } from "carapace/plugin-sdk/health";
 import {
   hasNonEmptyString as nonEmptyString,
   isRecord,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { ROUTING_MATCH_KINDS } from "../policy-routing.js";
 import { policyShapeFinding, unsupportedPolicyKey } from "./shape-helpers.js";
 import { ocPathSegment } from "./utils.js";

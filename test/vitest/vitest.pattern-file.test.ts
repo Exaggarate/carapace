@@ -12,7 +12,7 @@ import {
 
 describe("native CLI selection", () => {
   it("plans Node CI test ownership before dependencies are installed", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-selection-preflight-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-selection-preflight-"));
     try {
       for (const relative of [
         "test/vitest/vitest.pattern-file.ts",

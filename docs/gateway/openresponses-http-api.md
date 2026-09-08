@@ -8,7 +8,7 @@ title: "OpenResponses API"
 
 The Gateway can serve an OpenResponses-compatible `POST /v1/responses` endpoint. It is **disabled by default** and shares its port with the Gateway (WS + HTTP multiplex): `http://<gateway-host>:<port>/v1/responses`.
 
-Requests run as a normal Gateway agent run (same codepath as `openclaw agent`), so routing, permissions, and config match your Gateway.
+Requests run as a normal Gateway agent run (same codepath as `carapace agent`), so routing, permissions, and config match your Gateway.
 
 Enable or disable with `gateway.http.endpoints.responses.enabled`. When enabled, the same compatibility surface also serves `GET /v1/models`, `GET /v1/models/{id}`, and `POST /v1/embeddings`.
 
@@ -18,16 +18,16 @@ Enable or disable with `gateway.http.endpoints.responses.enabled`. When enabled,
 
 Operational behavior matches [OpenAI Chat Completions](/gateway/openai-http-api):
 
-- Auth path matches `gateway.auth.mode`: shared-secret (`token`/`password`) uses `Authorization: Bearer <token-or-password>`; trusted-proxy uses identity-aware proxy headers (same-host loopback proxies need `gateway.auth.trustedProxy.allowLoopback = true`, with a same-host direct fallback via `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD` when no `Forwarded`/`X-Forwarded-*`/`X-Real-IP` header is present); `none` on private ingress needs no auth header. See [Trusted proxy auth](/gateway/trusted-proxy-auth).
+- Auth path matches `gateway.auth.mode`: shared-secret (`token`/`password`) uses `Authorization: Bearer <token-or-password>`; trusted-proxy uses identity-aware proxy headers (same-host loopback proxies need `gateway.auth.trustedProxy.allowLoopback = true`, with a same-host direct fallback via `gateway.auth.password` / `CARAPACE_GATEWAY_PASSWORD` when no `Forwarded`/`X-Forwarded-*`/`X-Real-IP` header is present); `none` on private ingress needs no auth header. See [Trusted proxy auth](/gateway/trusted-proxy-auth).
 - Treat the endpoint as full operator access to the gateway instance.
-- Shared-secret auth modes ignore a narrower bearer-declared `x-openclaw-scopes` and restore the full default operator scope set: `operator.admin`, `operator.approvals`, `operator.pairing`, `operator.read`, `operator.talk.secrets`, `operator.write`. Chat turns on this endpoint are treated as owner-sender turns.
-- Trusted identity-bearing HTTP modes (trusted-proxy, or `gateway.auth.mode="none"`) honor `x-openclaw-scopes` when present, otherwise fall back to the operator default scope set. Owner semantics are lost only when the caller explicitly narrows scopes and omits `operator.admin`.
-- Select agents with `model: "openclaw"`, `"openclaw/default"`, `"openclaw/<agentId>"`, or the `x-openclaw-agent-id` header.
-- Use `x-openclaw-model` to override the selected agent's backend model (requires `operator.admin` on identity-bearing auth paths).
-- Use `x-openclaw-session-key` for explicit session routing (rejected with `400 invalid_request_error` if it uses a reserved namespace: `subagent:`, `cron:`, `acp:`).
-- Use `x-openclaw-message-channel` for a non-default synthetic ingress channel context.
+- Shared-secret auth modes ignore a narrower bearer-declared `x-carapace-scopes` and restore the full default operator scope set: `operator.admin`, `operator.approvals`, `operator.pairing`, `operator.read`, `operator.talk.secrets`, `operator.write`. Chat turns on this endpoint are treated as owner-sender turns.
+- Trusted identity-bearing HTTP modes (trusted-proxy, or `gateway.auth.mode="none"`) honor `x-carapace-scopes` when present, otherwise fall back to the operator default scope set. Owner semantics are lost only when the caller explicitly narrows scopes and omits `operator.admin`.
+- Select agents with `model: "carapace"`, `"carapace/default"`, `"carapace/<agentId>"`, or the `x-carapace-agent-id` header.
+- Use `x-carapace-model` to override the selected agent's backend model (requires `operator.admin` on identity-bearing auth paths).
+- Use `x-carapace-session-key` for explicit session routing (rejected with `400 invalid_request_error` if it uses a reserved namespace: `subagent:`, `cron:`, `acp:`).
+- Use `x-carapace-message-channel` for a non-default synthetic ingress channel context.
 
-For the canonical explanation of agent-target models, `openclaw/default`, embeddings pass-through, and backend model overrides, see [OpenAI Chat Completions](/gateway/openai-http-api#agent-first-model-contract).
+For the canonical explanation of agent-target models, `carapace/default`, embeddings pass-through, and backend model overrides, see [OpenAI Chat Completions](/gateway/openai-http-api#agent-first-model-contract).
 
 See [Operator scopes](/gateway/operator-scopes) and [Security](/gateway/security).
 
@@ -37,11 +37,11 @@ By default the endpoint is **stateless per request** (a new session key is gener
 
 If the request includes an OpenResponses `user` string, the Gateway derives a stable session key from it so repeated calls can share an agent session.
 
-`previous_response_id` reuses the earlier response's session when the request stays within the same agent/user/requested-session scope (matched by auth subject, agent id, and `x-openclaw-session-key`).
+`previous_response_id` reuses the earlier response's session when the request stays within the same agent/user/requested-session scope (matched by auth subject, agent id, and `x-carapace-session-key`).
 
 ### Explicit incognito session continuation
 
-Explicitly selecting or continuing an incognito conversation with `x-openclaw-session-key` (the `sessionKey` override) requires effective `operator.admin` authority. This rule follows authority, not ingress: it denies both trusted-proxy callers without owner/admin authority and private `gateway.auth.mode="none"` callers that explicitly narrow `x-openclaw-scopes` below admin (for example, to `operator.write`). Either receives HTTP `403` with a `forbidden` error. A profile-less private no-auth caller on this path gets `missing scope: operator.admin`; for a profile-backed caller, the response hides the private target with this error shape (where `<sessionKey>` is the requested override):
+Explicitly selecting or continuing an incognito conversation with `x-carapace-session-key` (the `sessionKey` override) requires effective `operator.admin` authority. This rule follows authority, not ingress: it denies both trusted-proxy callers without owner/admin authority and private `gateway.auth.mode="none"` callers that explicitly narrow `x-carapace-scopes` below admin (for example, to `operator.write`). Either receives HTTP `403` with a `forbidden` error. A profile-less private no-auth caller on this path gets `missing scope: operator.admin`; for a profile-backed caller, the response hides the private target with this error shape (where `<sessionKey>` is the requested override):
 
 ```json
 {
@@ -52,7 +52,7 @@ Explicitly selecting or continuing an incognito conversation with `x-openclaw-se
 }
 ```
 
-Owner/admin callers keep explicit incognito session continuation. A private no-auth request without `x-openclaw-scopes` receives the default operator scopes, including `operator.admin`, and is therefore treated as owner/admin. Reserved internal namespace overrides (`subagent:`, `cron:`, `acp:`) remain a separate validation failure and still return HTTP `400` with `invalid_request_error`.
+Owner/admin callers keep explicit incognito session continuation. A private no-auth request without `x-carapace-scopes` receives the default operator scopes, including `operator.admin`, and is therefore treated as owner/admin. Reserved internal namespace overrides (`subagent:`, `cron:`, `acp:`) remain a separate validation failure and still return HTTP `400` with `invalid_request_error`.
 
 ## Request shape
 
@@ -229,7 +229,7 @@ Defaults when omitted:
 | `images.maxRedirects`    | 3         |
 | `images.timeoutMs`       | 10s       |
 
-HEIC/HEIF `input_image` sources are normalized to JPEG before provider delivery through the shared OpenClaw image processor (Rastermill), which falls back to a system converter (`sips`, ImageMagick, GraphicsMagick, or ffmpeg) for formats needing external codec support.
+HEIC/HEIF `input_image` sources are normalized to JPEG before provider delivery through the shared Carapace image processor (Rastermill), which falls back to a system converter (`sips`, ImageMagick, GraphicsMagick, or ffmpeg) for formats needing external codec support.
 
 Security note: URL allowlists are enforced before fetch and on redirect hops. Allowlisting a hostname does not bypass private/internal IP blocking. For internet-exposed gateways, apply network egress controls in addition to app-level guards. See [Security](/gateway/security).
 
@@ -251,7 +251,7 @@ Disconnecting the HTTP client cancels active source-URL downloads and the agent 
 
 ## Usage
 
-`usage` is populated when the underlying provider reports token counts. OpenClaw normalizes common OpenAI-style aliases before those counters reach downstream status/session surfaces, including `input_tokens` / `output_tokens` and `prompt_tokens` / `completion_tokens`.
+`usage` is populated when the underlying provider reports token counts. Carapace normalizes common OpenAI-style aliases before those counters reach downstream status/session surfaces, including `input_tokens` / `output_tokens` and `prompt_tokens` / `completion_tokens`.
 
 ## Errors
 
@@ -271,9 +271,9 @@ Non-streaming:
 curl -sS http://127.0.0.1:18789/v1/responses \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
-  -H 'x-openclaw-agent-id: main' \
+  -H 'x-carapace-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "carapace",
     "input": "hi"
   }'
 ```
@@ -284,9 +284,9 @@ Streaming:
 curl -N http://127.0.0.1:18789/v1/responses \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
-  -H 'x-openclaw-agent-id: main' \
+  -H 'x-carapace-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "carapace",
     "stream": true,
     "input": "hi"
   }'

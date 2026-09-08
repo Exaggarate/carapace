@@ -52,7 +52,7 @@ const info = z
   )
   .length(1)
   .parse(JSON.parse(await podman(["image", "inspect", image])))[0]!;
-if (info.Config.Labels["org.openclaw.mantis.candidate-sha"] !== candidate) {
+if (info.Config.Labels["org.carapace.mantis.candidate-sha"] !== candidate) {
   throw new Error("Candidate runtime identity mismatch");
 }
 const output = path.resolve(outputArg);
@@ -104,7 +104,7 @@ try {
     // private container hostname. Only this observer gets it; the network is
     // internal and the Gateway token is synthetic and unique to this run.
     "--env",
-    "OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1",
+    "CARAPACE_ALLOW_INSECURE_PRIVATE_WS=1",
     "--mount",
     `type=bind,source=${scratch},target=/out`,
     harness,
@@ -141,16 +141,16 @@ try {
     "--tmpfs",
     "/state:rw,nosuid,nodev,size=1g",
     "--env",
-    "OPENCLAW_STATE_DIR=/state",
+    "CARAPACE_STATE_DIR=/state",
     "--env",
     "XDG_CACHE_HOME=/state/cache",
     "--env",
-    "OPENCLAW_CONFIG_PATH=/candidate-config.json",
+    "CARAPACE_CONFIG_PATH=/candidate-config.json",
     info.Id,
     "sh",
     "-eu",
     "-c",
-    "mkdir -p /state/state && cp /candidate-pairing.sqlite /state/state/openclaw.sqlite && exec node dist/entry.js gateway --port 19879",
+    "mkdir -p /state/state && cp /candidate-pairing.sqlite /state/state/carapace.sqlite && exec node dist/entry.js gateway --port 19879",
   ]);
   await podman(["cp", configPath, `${sut}:/candidate-config.json`]);
   await podman([

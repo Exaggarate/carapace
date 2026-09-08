@@ -1,10 +1,10 @@
-import type { ChannelGroupContext } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelGroupContext } from "carapace/plugin-sdk/channel-contract";
 // Matrix plugin module implements group mentions behavior.
 import {
   resolveScopeRequireMention,
   resolveScopeToolsPolicy,
   type GroupToolPolicyConfig,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-policy";
 import { resolveMatrixAccountConfig } from "./matrix/accounts.js";
 import { buildMatrixRoomScopeTree, resolveMatrixRoomScopePath } from "./matrix/monitor/rooms.js";
 import { normalizeMatrixResolvableTarget } from "./matrix/target-ids.js";

@@ -1,12 +1,12 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ConfigAuditRecord } from "../../../config/io.audit.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { repairGeneratedModelMetadataCorruption } from "./model-metadata-corruption-repair.js";
 
-const configPath = path.resolve("/tmp/openclaw-model-metadata-corruption.json");
+const configPath = path.resolve("/tmp/carapace-model-metadata-corruption.json");
 
-function corruptedConfig(): OpenClawConfig {
+function corruptedConfig(): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -44,7 +44,7 @@ function writeRecord(
     pid: 1,
     ppid: 0,
     cwd: "/tmp",
-    argv: ["openclaw", "update", "finalize", "--yes", "--channel", "dev"],
+    argv: ["carapace", "update", "finalize", "--yes", "--channel", "dev"],
     execArgv: [],
     watchMode: false,
     watchSession: null,

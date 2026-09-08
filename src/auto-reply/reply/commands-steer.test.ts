@@ -5,7 +5,7 @@ import {
   setActiveEmbeddedRun,
 } from "../../agents/embedded-agent-runner/runs.js";
 import type { ChatType } from "../../channels/chat-type.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildCommandTestParams } from "./commands.test-harness.js";
 import type { ReplyBackendQueueMessageOptions, ReplyOperation } from "./reply-run-registry.js";
 import { createReplyOperation } from "./reply-run-registry.js";
@@ -17,7 +17,7 @@ const { handleSteerCommand } = await import("./commands-steer.js");
 const baseCfg = {
   commands: { text: true },
   session: { mainKey: "main", scope: "per-sender" },
-} as OpenClawConfig;
+} as CarapaceConfig;
 const queueMessage = vi.fn(
   async (_text: string, _options?: ReplyBackendQueueMessageOptions) => undefined,
 );

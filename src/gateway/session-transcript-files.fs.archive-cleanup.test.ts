@@ -16,7 +16,7 @@ describe("cleanupArchivedSessionTranscripts", () => {
   let dir = "";
 
   beforeEach(async () => {
-    dir = await fsPromises.mkdtemp(path.join(os.tmpdir(), "openclaw-archive-cleanup-"));
+    dir = await fsPromises.mkdtemp(path.join(os.tmpdir(), "carapace-archive-cleanup-"));
   });
 
   afterEach(async () => {

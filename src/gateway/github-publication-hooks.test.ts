@@ -32,10 +32,10 @@ async function git(...args: string[]): Promise<string> {
 }
 
 beforeEach(async () => {
-  root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-publication-hooks-")));
+  root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-publication-hooks-")));
   await git("init", "--initial-branch=main");
-  await git("config", "user.name", "OpenClaw Test");
-  await git("config", "user.email", "openclaw@example.test");
+  await git("config", "user.name", "Carapace Test");
+  await git("config", "user.email", "carapace@example.test");
   await fs.writeFile(path.join(root, "artifact.txt"), "base\n");
   await git("add", "artifact.txt");
   await git("commit", "-m", "base");

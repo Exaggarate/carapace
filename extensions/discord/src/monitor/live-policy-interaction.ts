@@ -1,4 +1,4 @@
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import type { DiscordLivePolicy, DiscordLivePolicyReader } from "./live-policy.js";
 
 const INTERACTION_POLICY_WAIT_MS = 1_000;

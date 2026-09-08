@@ -4,7 +4,7 @@ import {
   projectAgentHarnessTranscriptMessageForDisplay,
   type AgentMessage,
   type EmbeddedRunAttemptParamsV2,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { applyCodexTranscriptTaint } from "./transcript-mirror-attestation.js";
 import { codexTranscriptMirrorRuntime } from "./transcript-mirror.js";
 import { attachCodexMirrorIdentity } from "./upstream-prompt-provenance.js";

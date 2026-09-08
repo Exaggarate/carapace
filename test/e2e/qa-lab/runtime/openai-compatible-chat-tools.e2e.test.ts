@@ -33,8 +33,8 @@ function runClient(port: number | string, env: Record<string, string> = {}, time
     {
       ...process.env,
       MODEL_REF: "openai/gpt-5.4-mini",
-      OPENCLAW_GATEWAY_TOKEN: "test-token",
-      OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "1",
+      CARAPACE_GATEWAY_TOKEN: "test-token",
+      CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "1",
       PORT: String(port),
       ...env,
     },
@@ -47,11 +47,11 @@ function runWriteConfig(root: string, env: Record<string, string> = {}) {
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-      OPENCLAW_GATEWAY_TOKEN: "test-token",
-      OPENCLAW_OPENAI_CHAT_TOOLS_MODEL: "openai/gpt-5.6-luna",
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
-      OPENCLAW_TEST_WORKSPACE_DIR: path.join(root, "workspace"),
+      CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+      CARAPACE_GATEWAY_TOKEN: "test-token",
+      CARAPACE_OPENAI_CHAT_TOOLS_MODEL: "openai/gpt-5.6-luna",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
+      CARAPACE_TEST_WORKSPACE_DIR: path.join(root, "workspace"),
       PORT: "18789",
       ...env,
     },
@@ -66,7 +66,7 @@ function runDockerRunnerAuthPreflight(root: string, env: Record<string, string> 
       HOME: root,
       OPENAI_API_KEY: "",
       OPENAI_BASE_URL: "",
-      OPENCLAW_OPENAI_CHAT_TOOLS_PROFILE_FILE: path.join(root, "missing.profile"),
+      CARAPACE_OPENAI_CHAT_TOOLS_PROFILE_FILE: path.join(root, "missing.profile"),
       ...env,
     },
   });
@@ -135,7 +135,7 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
   });
 
   it("fails auth preflight before Docker build work starts", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-openai-chat-tools-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-openai-chat-tools-"));
     try {
       const result = runDockerRunnerAuthPreflight(root);
       const output = `${result.stdout}\n${result.stderr}`;
@@ -151,12 +151,12 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
   });
 
   it("treats placeholder profile auth as missing before Docker build work starts", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-openai-chat-tools-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-openai-chat-tools-"));
     try {
       const profile = path.join(root, "profile");
       writeFileSync(profile, "OPENAI_API_KEY=undefined\n");
       const result = runDockerRunnerAuthPreflight(root, {
-        OPENCLAW_OPENAI_CHAT_TOOLS_PROFILE_FILE: profile,
+        CARAPACE_OPENAI_CHAT_TOOLS_PROFILE_FILE: profile,
       });
       const output = `${result.stdout}\n${result.stderr}`;
 
@@ -171,13 +171,13 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
   });
 
   it.each([
-    ["timeout", "OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS", "1e3"],
-    ["body limit", "OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES", "64bytes"],
+    ["timeout", "CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS", "1e3"],
+    ["body limit", "CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES", "64bytes"],
   ])(
     "rejects invalid Docker runner %s before auth or Docker build work starts",
     (_label, envName, value) => {
       const tempDirs: string[] = [];
-      const root = makeTempDir(tempDirs, "openclaw-openai-chat-tools-");
+      const root = makeTempDir(tempDirs, "carapace-openai-chat-tools-");
       try {
         const result = runDockerRunnerAuthPreflight(root, { [envName]: value });
         const output = `${result.stdout}\n${result.stderr}`;
@@ -198,31 +198,31 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
     const runner = readFileSync(dockerRunnerPath, "utf8");
 
     expect(runner).toContain(
-      "docker_e2e_read_positive_int_env OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS 180",
+      "docker_e2e_read_positive_int_env CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS 180",
     );
     expect(runner).toContain(
-      "docker_e2e_read_positive_int_env OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES 1048576",
+      "docker_e2e_read_positive_int_env CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES 1048576",
     );
-    expect(runner).toContain('-e "OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS=$TIMEOUT_SECONDS"');
-    expect(runner).toContain('-e "OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES=$MAX_BODY_BYTES"');
+    expect(runner).toContain('-e "CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS=$TIMEOUT_SECONDS"');
+    expect(runner).toContain('-e "CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES=$MAX_BODY_BYTES"');
   });
 
   it("rejects loose timeout env values instead of parsing numeric prefixes", async () => {
     const result = await runClient(1, {
-      OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "1e3",
+      CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "1e3",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: 1e3");
+    expect(result.stderr).toContain("invalid CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: 1e3");
   });
 
   it("rejects loose body limit env values instead of parsing numeric prefixes", async () => {
     const result = await runClient(1, {
-      OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64bytes",
+      CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64bytes",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: 64bytes");
+    expect(result.stderr).toContain("invalid CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: 64bytes");
   });
 
   it("rejects out-of-range client gateway ports", async () => {
@@ -233,21 +233,21 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
   });
 
   it("rejects loose write-config timeout env values", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-openai-chat-tools-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-openai-chat-tools-"));
     try {
       const result = runWriteConfig(root, {
-        OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "1e3",
+        CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "1e3",
       });
 
       expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain("invalid OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: 1e3");
+      expect(result.stderr).toContain("invalid CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: 1e3");
     } finally {
       rmSync(root, { force: true, recursive: true });
     }
   });
 
   it("rejects out-of-range write-config gateway ports", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-openai-chat-tools-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-openai-chat-tools-"));
     try {
       const result = runWriteConfig(root, { PORT: "65536" });
 
@@ -259,15 +259,15 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
   });
 
   it("writes strict positive timeout and port values into generated config", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-openai-chat-tools-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-openai-chat-tools-"));
     try {
       const result = runWriteConfig(root, {
-        OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "240",
+        CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: "240",
         PORT: "19001",
       });
 
       expect(result.status).toBe(0);
-      const config = JSON.parse(readFileSync(path.join(root, "openclaw.json"), "utf8"));
+      const config = JSON.parse(readFileSync(path.join(root, "carapace.json"), "utf8"));
       expect(config.gateway.port).toBe(19001);
       expect(config.models.providers.openai.timeoutSeconds).toBe(240);
       expect(config.agents.defaults.timeoutSeconds).toBe(240);
@@ -281,7 +281,7 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
       expect(request.method).toBe("POST");
       expect(request.url).toBe("/v1/chat/completions");
       expect(request.headers.authorization).toBe("Bearer test-token");
-      expect(request.headers["x-openclaw-model"]).toBe("openai/gpt-5.4-mini");
+      expect(request.headers["x-carapace-model"]).toBe("openai/gpt-5.4-mini");
       response.writeHead(200, { "content-type": "application/json" });
       response.end(JSON.stringify(toolCallResponse()));
     });
@@ -332,7 +332,7 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
     });
     const port = await listen(server);
     try {
-      const result = await runClient(port, { OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64" });
+      const result = await runClient(port, { CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64" });
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain("chat completions response body exceeded 64 bytes");
@@ -352,7 +352,7 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
     const port = await listen(server);
     try {
       const startedAt = Date.now();
-      const result = await runClient(port, { OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64" });
+      const result = await runClient(port, { CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64" });
 
       expect(result.error).toBeUndefined();
       expect(result.status).not.toBe(0);
@@ -374,7 +374,7 @@ describe("scripts/e2e/lib/openai-chat-tools/client.mjs", () => {
     const port = await listen(server);
     try {
       const startedAt = Date.now();
-      const result = await runClient(port, { OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64" });
+      const result = await runClient(port, { CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: "64" });
 
       expect(result.error).toBeUndefined();
       expect(result.status).not.toBe(0);

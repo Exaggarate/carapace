@@ -2,18 +2,18 @@
 import {
   createStartAccountContext,
   installChannelDmPolicyContractSuite,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   createPluginSetupWizardConfigure,
   createTestWizardPrompter,
   runSetupWizardConfigure,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { WizardPrompter } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveRequestUrl } from "openclaw/plugin-sdk/request-url";
-import { waitForAbortSignal } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { WizardPrompter } from "carapace/plugin-sdk/plugin-test-runtime";
+import { resolveRequestUrl } from "carapace/plugin-sdk/request-url";
+import { waitForAbortSignal } from "carapace/plugin-sdk/runtime-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime, ResolvedLineAccount } from "../api.js";
+import type { CarapaceConfig, PluginRuntime, ResolvedLineAccount } from "../api.js";
 import { linePlugin } from "./channel.js";
 import { lineGatewayAdapter } from "./gateway.js";
 import { stubLineApiFetch } from "./probe.test-support.js";
@@ -43,7 +43,7 @@ describe("line setup wizard", () => {
 
     const result = await runSetupWizardConfigure({
       configure: lineConfigure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       prompter,
       options: {},
     });
@@ -88,7 +88,7 @@ describe("line setup wizard", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(configured).toBe(false);
@@ -100,15 +100,15 @@ describe("linePlugin status.probeAccount", () => {
     vi.resetModules();
     const { lineStatusAdapter } = await import("./status.js");
     const identity = {
-      displayName: "OpenClaw",
+      displayName: "Carapace",
       userId: "U123",
-      basicId: "@openclaw",
+      basicId: "@carapace",
       pictureUrl: "https://example.com/bot.png",
     };
     const fetchMock = stubLineApiFetch(Response.json(identity), Response.json({ type: "none" }));
 
     const params = {
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       account: {
         accountId: "default",
         enabled: true,
@@ -215,7 +215,7 @@ describe("linePlugin gateway.startAccount", () => {
   it("starts provider when token and secret are present", async () => {
     // Startup probes before entering the monitor; keep that HTTP boundary local to this test.
     stubLineApiFetch(
-      Response.json({ displayName: "OpenClaw", userId: "U123" }),
+      Response.json({ displayName: "Carapace", userId: "U123" }),
       Response.json({ type: "none" }),
     );
     const abort = new AbortController();

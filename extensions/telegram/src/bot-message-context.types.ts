@@ -4,16 +4,16 @@ import type { Message } from "grammy/types";
 import type {
   ChannelIngressContextBinding,
   ResolvedChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   DmPolicy,
   TelegramDirectConfig,
   TelegramGroupConfig,
   TelegramTopicConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import type { MsgContext } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/config-contracts";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import type { MsgContext } from "carapace/plugin-sdk/reply-runtime";
 import type { TelegramMediaKind } from "./bot/body-helpers.js";
 import type { TelegramThreadSpec } from "./bot/helpers.js";
 import type { StickerMetadata, TelegramContext } from "./bot/types.js";
@@ -67,7 +67,7 @@ export type TelegramLogger = {
 type ResolveTelegramGroupConfig = (
   chatId: string | number,
   messageThreadId: number | undefined,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ) => {
   groupConfig?: TelegramGroupConfig | TelegramDirectConfig;
   topicConfig?: TelegramTopicConfig;
@@ -76,10 +76,10 @@ type ResolveTelegramGroupConfig = (
 type ResolveGroupActivation = (params: {
   agentId?: string;
   sessionKey: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }) => boolean | undefined;
 
-type ResolveGroupRequireMention = (chatId: string | number, cfg: OpenClawConfig) => boolean;
+type ResolveGroupRequireMention = (chatId: string | number, cfg: CarapaceConfig) => boolean;
 
 type TelegramMessageContextRuntimeOverrides = Partial<
   Pick<
@@ -111,7 +111,7 @@ export type BuildTelegramMessageContextParams = {
   storeAllowFrom: string[];
   options?: TelegramMessageContextOptions;
   bot: Bot;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: { accountId: string };
   ownerAgentId?: string;
   historyLimit: number;
@@ -127,7 +127,7 @@ export type BuildTelegramMessageContextParams = {
   resolveTelegramGroupConfig: ResolveTelegramGroupConfig;
   runtime?: TelegramMessageContextRuntimeOverrides;
   sessionRuntime?: TelegramMessageContextSessionRuntimeOverrides;
-  upsertPairingRequest?: typeof import("openclaw/plugin-sdk/conversation-runtime").upsertChannelPairingRequest;
+  upsertPairingRequest?: typeof import("carapace/plugin-sdk/conversation-runtime").upsertChannelPairingRequest;
   /** Global (per-account) handler for sendChatAction 401 backoff (#27092). */
   sendChatActionHandler: TelegramSendChatActionHandler;
 };

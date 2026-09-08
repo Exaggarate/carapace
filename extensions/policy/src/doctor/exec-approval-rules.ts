@@ -1,6 +1,6 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "carapace/plugin-sdk/health";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { EXEC_APPROVALS_POLICY_URI, execApprovalsPolicyUri } from "../exec-approvals-uri.js";
 import type { PolicyExecApprovalEvidence } from "../policy-state.js";
 import { getPolicyPath } from "../policy-value.js";

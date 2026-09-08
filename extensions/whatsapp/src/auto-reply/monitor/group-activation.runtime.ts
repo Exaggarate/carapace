@@ -1,2 +1,2 @@
 // Whatsapp plugin module implements group activation behavior.
-export { normalizeGroupActivation } from "openclaw/plugin-sdk/group-activation";
+export { normalizeGroupActivation } from "carapace/plugin-sdk/group-activation";

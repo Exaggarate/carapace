@@ -1,12 +1,12 @@
-import { AgentHarnessPreflightError } from "openclaw/plugin-sdk/agent-harness-registration";
+import { AgentHarnessPreflightError } from "carapace/plugin-sdk/agent-harness-registration";
 import type {
   CodexAppServerApprovalPolicy,
   CodexAppServerApprovalsReviewer,
   CodexAppServerDefaultPolicy,
   CodexAppServerPolicyMode,
   CodexAppServerSandboxMode,
-  OpenClawExecMode,
-  OpenClawExecPolicyForCodexAppServer,
+  CarapaceExecMode,
+  CarapaceExecPolicyForCodexAppServer,
 } from "./config-contracts.js";
 
 export function selectForcedPromptingSandbox(params: {
@@ -22,13 +22,13 @@ export function selectForcedPromptingSandbox(params: {
 export function selectForcedDangerFullAccessSandbox(params: {
   configuredSandbox?: CodexAppServerSandboxMode;
   defaultPolicy: CodexAppServerDefaultPolicy | undefined;
-  openClawSandboxActive: boolean;
+  carapaceSandboxActive: boolean;
 }): CodexAppServerSandboxMode {
   if (params.configuredSandbox === "read-only") {
     return "read-only";
   }
   if (params.defaultPolicy?.dangerFullAccessAllowed === false) {
-    if (params.openClawSandboxActive) {
+    if (params.carapaceSandboxActive) {
       return params.defaultPolicy.sandbox ?? "workspace-write";
     }
     throw new Error(
@@ -56,7 +56,7 @@ export function selectGuardianSandbox(
 export function resolveApprovalPolicy(value: unknown): CodexAppServerApprovalPolicy | undefined {
   if (value === "untrusted") {
     throw new Error(
-      'Codex app-server approval policy "untrusted" is retired; run "openclaw doctor --fix" and use "on-request".',
+      'Codex app-server approval policy "untrusted" is retired; run "carapace doctor --fix" and use "on-request".',
     );
   }
   if (value === "on-failure") {
@@ -79,18 +79,18 @@ export function resolveApprovalsReviewer(
     : undefined;
 }
 
-export function resolveEffectiveOpenClawExecModeForCodexAppServer(params: {
-  execMode?: OpenClawExecMode;
-  execPolicy?: OpenClawExecPolicyForCodexAppServer;
-}): OpenClawExecMode | undefined {
+export function resolveEffectiveCarapaceExecModeForCodexAppServer(params: {
+  execMode?: CarapaceExecMode;
+  execPolicy?: CarapaceExecPolicyForCodexAppServer;
+}): CarapaceExecMode | undefined {
   if (params.execPolicy?.touched === true) {
     return params.execPolicy.mode;
   }
   return params.execMode;
 }
 
-export function resolveCodexPolicyModeForOpenClawExecMode(
-  mode: OpenClawExecMode | undefined,
+export function resolveCodexPolicyModeForCarapaceExecMode(
+  mode: CarapaceExecMode | undefined,
 ): CodexAppServerPolicyMode | undefined {
   if (!mode || mode === "full") {
     return undefined;
@@ -98,13 +98,13 @@ export function resolveCodexPolicyModeForOpenClawExecMode(
   return "guardian";
 }
 
-export function assertCodexAppServerAllowedForOpenClawExecMode(
-  mode: OpenClawExecMode | undefined,
+export function assertCodexAppServerAllowedForCarapaceExecMode(
+  mode: CarapaceExecMode | undefined,
 ): void {
   if (mode === "deny" || mode === "allowlist") {
     throw new AgentHarnessPreflightError(
       `Codex app-server local execution is unavailable because effective tools.exec.mode=${mode}. ` +
-        "Execution-host approvals are authoritative. For gateway turns, inspect them with `openclaw approvals get --gateway` and update that same target with `openclaw approvals set --gateway --stdin`; for local `agent exec`, omit `--gateway`. Intentionally align that host policy before retrying.",
+        "Execution-host approvals are authoritative. For gateway turns, inspect them with `carapace approvals get --gateway` and update that same target with `carapace approvals set --gateway --stdin`; for local `agent exec`, omit `--gateway`. Intentionally align that host policy before retrying.",
       { scope: "harness" },
     );
   }

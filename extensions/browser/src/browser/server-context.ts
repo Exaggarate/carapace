@@ -8,7 +8,7 @@ import {
 } from "./cdp-reachability-policy.js";
 import { usesFastLoopbackCdpProbeClass } from "./cdp-timeouts.js";
 import { redactCdpUrl } from "./cdp.helpers.js";
-import { isChromeReachable, resolveOpenClawUserDataDir } from "./chrome.js";
+import { isChromeReachable, resolveCarapaceUserDataDir } from "./chrome.js";
 import { getOwnBrowserProfile, resolveProfile, type ResolvedBrowserProfile } from "./config.js";
 import {
   BrowserProfileNotFoundError,
@@ -134,7 +134,7 @@ function createProfileContext(
     state,
     runtime: profileState,
     configRevision,
-    resolveOpenClawUserDataDir,
+    resolveCarapaceUserDataDir,
   });
 
   const withLease = async <T>(

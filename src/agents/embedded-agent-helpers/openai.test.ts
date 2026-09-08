@@ -1,5 +1,5 @@
 // Covers OpenAI Responses tool-call id normalization for replay safety.
-import type { AssistantMessage, ToolResultMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage, ToolResultMessage } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import type { AgentMessage } from "../runtime/index.js";
 import { createZeroUsageFixture } from "../test-helpers/usage-fixtures.js";

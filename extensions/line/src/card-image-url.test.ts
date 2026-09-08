@@ -1,13 +1,13 @@
 import { createServer } from "node:http";
 import type { messagingApi } from "@line/bot-sdk";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createActionCard, createImageCard } from "./flex-templates/basic-cards.js";
 import { renderLineCard } from "./rich-messages.js";
 import { pushMessagesLine, replyMessageLine } from "./send.js";
 import { buildTemplateMessageFromPayload } from "./template-messages.js";
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-config-runtime", () => ({
   requireRuntimeConfig: (cfg: unknown) => cfg,
 }));
 vi.mock("./accounts.js", () => ({
@@ -16,7 +16,7 @@ vi.mock("./accounts.js", () => ({
 vi.mock("./channel-access-token.js", () => ({
   resolveLineChannelAccessToken: () => "line-card-wire-test-token",
 }));
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", () => ({
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", () => ({
   recordChannelActivity: () => {},
 }));
 
@@ -555,10 +555,10 @@ describe("LINE card shape on the actual push and reply wire", () => {
     await new Promise<void>((resolve, reject) => {
       server.close((error) => (error ? reject(error) : resolve()));
     });
-    vi.doUnmock("openclaw/plugin-sdk/plugin-config-runtime");
+    vi.doUnmock("carapace/plugin-sdk/plugin-config-runtime");
     vi.doUnmock("./accounts.js");
     vi.doUnmock("./channel-access-token.js");
-    vi.doUnmock("openclaw/plugin-sdk/channel-activity-runtime");
+    vi.doUnmock("carapace/plugin-sdk/channel-activity-runtime");
     vi.resetModules();
   });
 

@@ -23,7 +23,7 @@ on:
         default: true
         type: boolean
       update_baseline_version:
-        description: Baseline openclaw version or dist-tag for installer update smoke
+        description: Baseline carapace version or dist-tag for installer update smoke
         required: false
         default: latest
         type: string
@@ -110,10 +110,10 @@ jobs:
       - name: Build install-smoke CI manifest
         id: manifest
         env:
-          OPENCLAW_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE: ${{ inputs.run_bun_global_install_smoke || 'false' }}
+          CARAPACE_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE: ${{ inputs.run_bun_global_install_smoke || 'false' }}
         run: |
           set -euo pipefail
-          workflow_bun_global_install_smoke="${OPENCLAW_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE:-false}"
+          workflow_bun_global_install_smoke="${CARAPACE_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE:-false}"
           docs_only=false
           run_fast_install_smoke=true
           run_full_install_smoke=true
@@ -128,7 +128,7 @@ jobs:
           fs_safe_native_contract="$(node .release-harness/scripts/resolve-fs-safe-native-contract.mjs \
             "$target_sha" "${{ steps.workflow.outputs.workflow_sha }}" \
             "${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}")"
-          dockerfile_image="openclaw-dockerfile-smoke-local:${target_sha}"
+          dockerfile_image="carapace-dockerfile-smoke-local:${target_sha}"
           {
             echo "docs_only=$docs_only"
             echo "run_install_smoke=$run_install_smoke"
@@ -148,7 +148,7 @@ jobs:
     env:
       DOCKER_BUILD_SUMMARY: "false"
       DOCKER_BUILD_RECORD_UPLOAD: "false"
-      OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
+      CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
     steps:
       - name: Checkout CLI
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -169,17 +169,17 @@ jobs:
           timeout --kill-after=30s 45m docker buildx build \
             --progress=plain \
             --load \
-            --build-arg OPENCLAW_EXTENSIONS=matrix \
-            -t openclaw-dockerfile-smoke:local \
-            -t openclaw-ext-smoke:local \
+            --build-arg CARAPACE_EXTENSIONS=matrix \
+            -t carapace-dockerfile-smoke:local \
+            -t carapace-ext-smoke:local \
             -f ./Dockerfile \
             .
 
       - name: Run root Dockerfile CLI smoke
         run: |
-          timeout --kill-after=30s 20m docker run --rm --entrypoint sh openclaw-dockerfile-smoke:local -lc '
-            which openclaw &&
-            openclaw --version &&
+          timeout --kill-after=30s 20m docker run --rm --entrypoint sh carapace-dockerfile-smoke:local -lc '
+            which carapace &&
+            carapace --version &&
             node -e "
               const fs = require(\"node:fs\");
               const path = require(\"node:path\");
@@ -196,21 +196,21 @@ jobs:
 
       - name: Run agents delete shared workspace Docker CLI smoke
         env:
-          OPENCLAW_AGENTS_DELETE_SHARED_WORKSPACE_E2E_IMAGE: openclaw-dockerfile-smoke:local
-          OPENCLAW_AGENTS_DELETE_SHARED_WORKSPACE_E2E_SKIP_BUILD: "1"
+          CARAPACE_AGENTS_DELETE_SHARED_WORKSPACE_E2E_IMAGE: carapace-dockerfile-smoke:local
+          CARAPACE_AGENTS_DELETE_SHARED_WORKSPACE_E2E_SKIP_BUILD: "1"
         run: bash scripts/e2e/agents-delete-shared-workspace-docker.sh
 
       - name: Run Docker gateway network e2e
         env:
-          OPENCLAW_GATEWAY_NETWORK_E2E_IMAGE: openclaw-dockerfile-smoke:local
-          OPENCLAW_GATEWAY_NETWORK_E2E_SKIP_BUILD: "1"
+          CARAPACE_GATEWAY_NETWORK_E2E_IMAGE: carapace-dockerfile-smoke:local
+          CARAPACE_GATEWAY_NETWORK_E2E_SKIP_BUILD: "1"
         run: bash scripts/e2e/gateway-network-docker.sh
 
       - name: Smoke test Dockerfile with matrix extension build arg
         run: |
-          timeout --kill-after=30s 20m docker run --rm --entrypoint sh openclaw-ext-smoke:local -lc '
-            which openclaw &&
-            openclaw --version &&
+          timeout --kill-after=30s 20m docker run --rm --entrypoint sh carapace-ext-smoke:local -lc '
+            which carapace &&
+            carapace --version &&
             node -e "
               const Module = require(\"node:module\");
               const matrixPackage = require(\"/app/extensions/matrix/package.json\");
@@ -225,7 +225,7 @@ jobs:
                 requireFromMatrix.resolve(dep);
               }
               const { spawnSync } = require(\"node:child_process\");
-              const run = spawnSync(\"openclaw\", [\"plugins\", \"list\", \"--json\"], { encoding: \"utf8\" });
+              const run = spawnSync(\"carapace\", [\"plugins\", \"list\", \"--json\"], { encoding: \"utf8\" });
               if (run.status !== 0) {
                 process.stderr.write(run.stderr || run.stdout || \"plugins list failed\\n\");
                 process.exit(run.status ?? 1);
@@ -300,7 +300,7 @@ jobs:
         name: Checkout trusted release harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/openclaw
+          repository: carapace/carapace
           ref: main
           path: .release-harness
           fetch-depth: 1
@@ -323,7 +323,7 @@ jobs:
           const job = JSON.parse(process.env.JOB_CONTEXT ?? "{}");
           const repository = process.env.EXPECTED_WORKFLOW_REPOSITORY ?? "";
           const harnessPath = process.env.HARNESS_PATH ?? "";
-          if (repository !== "openclaw/openclaw" || job.workflow_repository !== repository) {
+          if (repository !== "carapace/carapace" || job.workflow_repository !== repository) {
             throw new Error("job.workflow_repository must exactly match github.repository");
           }
           if (typeof job.workflow_sha !== "string" || !/^[0-9a-f]{40}$/u.test(job.workflow_sha)) {
@@ -384,7 +384,7 @@ jobs:
           timeout --kill-after=30s 45m docker buildx build \
             --progress=plain \
             --load \
-            --build-arg OPENCLAW_EXTENSIONS=matrix \
+            --build-arg CARAPACE_EXTENSIONS=matrix \
             -t "$IMAGE_REF" \
             -f "$CANDIDATE_DIR/Dockerfile" \
             "$CANDIDATE_DIR"
@@ -475,7 +475,7 @@ jobs:
 
       - name: Run QR package install smoke
         env:
-          OPENCLAW_QR_SMOKE_FORCE_INSTALL: "1"
+          CARAPACE_QR_SMOKE_FORCE_INSTALL: "1"
         run: bash scripts/e2e/qr-import-docker.sh
 
   root_dockerfile_smokes:
@@ -484,7 +484,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
+      CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
     steps:
       - *trusted_workflow_subdir_checkout_step
       - *trusted_workflow_subdir_identity_step
@@ -495,7 +495,7 @@ jobs:
       - name: Checkout selected source for gateway network provenance
         env:
           CHECKOUT_KIND: preflight
-          CHECKOUT_REPO: openclaw/openclaw
+          CHECKOUT_REPO: carapace/carapace
           CHECKOUT_REF: ${{ needs.preflight.outputs.target_sha }}
           CHECKOUT_FALLBACK_REF: ${{ needs.preflight.outputs.target_sha }}
           CHECKOUT_TOKEN: ""
@@ -558,9 +558,9 @@ jobs:
       - name: Verify and load root Dockerfile image artifact
         env:
           IMAGE_REF: ${{ needs.root_dockerfile_image.outputs.image_ref }}
-          OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256: ${{ needs.root_dockerfile_image.outputs.archive_sha256 }}
-          OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT: ${{ needs.root_dockerfile_image.outputs.artifact_run_attempt }}
-          OPENCLAW_SHARED_IMAGE_RUN_ID: ${{ needs.root_dockerfile_image.outputs.artifact_run_id }}
+          CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256: ${{ needs.root_dockerfile_image.outputs.archive_sha256 }}
+          CARAPACE_SHARED_IMAGE_RUN_ATTEMPT: ${{ needs.root_dockerfile_image.outputs.artifact_run_attempt }}
+          CARAPACE_SHARED_IMAGE_RUN_ID: ${{ needs.root_dockerfile_image.outputs.artifact_run_id }}
           TARGET_SHA: ${{ needs.preflight.outputs.target_sha }}
           WORKFLOW_SHA: ${{ steps.workflow.outputs.sha }}
         run: |
@@ -579,8 +579,8 @@ jobs:
           IMAGE_REF: ${{ needs.root_dockerfile_image.outputs.image_ref }}
         run: |
           timeout --kill-after=30s 20m docker run --rm --entrypoint sh "$IMAGE_REF" -lc '
-            which openclaw &&
-            openclaw --version &&
+            which carapace &&
+            carapace --version &&
             node -e "
               const fs = require(\"node:fs\");
               const path = require(\"node:path\");
@@ -597,18 +597,18 @@ jobs:
 
       - name: Run agents delete shared workspace Docker CLI smoke
         env:
-          OPENCLAW_AGENTS_DELETE_SHARED_WORKSPACE_E2E_IMAGE: ${{ needs.root_dockerfile_image.outputs.image_ref }}
-          OPENCLAW_AGENTS_DELETE_SHARED_WORKSPACE_E2E_SKIP_BUILD: "1"
+          CARAPACE_AGENTS_DELETE_SHARED_WORKSPACE_E2E_IMAGE: ${{ needs.root_dockerfile_image.outputs.image_ref }}
+          CARAPACE_AGENTS_DELETE_SHARED_WORKSPACE_E2E_SKIP_BUILD: "1"
         run: bash .release-harness/scripts/e2e/agents-delete-shared-workspace-docker.sh
 
       - name: Run Docker gateway network e2e
         env:
-          OPENCLAW_DOCKER_E2E_REPO_ROOT: ${{ github.workspace }}/.release-source
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: ${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}
-          OPENCLAW_GATEWAY_NETWORK_E2E_IMAGE: ${{ needs.root_dockerfile_image.outputs.image_ref }}
-          OPENCLAW_GATEWAY_NETWORK_E2E_SKIP_BUILD: "1"
-          OPENCLAW_SELECTED_SHA: ${{ needs.preflight.outputs.target_sha }}
-          OPENCLAW_TOOLING_SHA: ${{ steps.workflow.outputs.sha }}
+          CARAPACE_DOCKER_E2E_REPO_ROOT: ${{ github.workspace }}/.release-source
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: ${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}
+          CARAPACE_GATEWAY_NETWORK_E2E_IMAGE: ${{ needs.root_dockerfile_image.outputs.image_ref }}
+          CARAPACE_GATEWAY_NETWORK_E2E_SKIP_BUILD: "1"
+          CARAPACE_SELECTED_SHA: ${{ needs.preflight.outputs.target_sha }}
+          CARAPACE_TOOLING_SHA: ${{ steps.workflow.outputs.sha }}
         run: bash .release-harness/scripts/e2e/gateway-network-docker.sh
 
       - name: Smoke test Dockerfile with matrix extension build arg
@@ -616,8 +616,8 @@ jobs:
           IMAGE_REF: ${{ needs.root_dockerfile_image.outputs.image_ref }}
         run: |
           timeout --kill-after=30s 20m docker run --rm --entrypoint sh "$IMAGE_REF" -lc '
-            which openclaw &&
-            openclaw --version &&
+            which carapace &&
+            carapace --version &&
             node -e "
               const Module = require(\"node:module\");
               const matrixPackage = require(\"/app/extensions/matrix/package.json\");
@@ -632,7 +632,7 @@ jobs:
                 requireFromMatrix.resolve(dep);
               }
               const { spawnSync } = require(\"node:child_process\");
-              const run = spawnSync(\"openclaw\", [\"plugins\", \"list\", \"--json\"], { encoding: \"utf8\" });
+              const run = spawnSync(\"carapace\", [\"plugins\", \"list\", \"--json\"], { encoding: \"utf8\" });
               if (run.status !== 0) {
                 process.stderr.write(run.stderr || run.stdout || \"plugins list failed\\n\");
                 process.exit(run.status ?? 1);
@@ -718,7 +718,7 @@ jobs:
           timeout --kill-after=30s 20m docker buildx build \
             --progress=plain \
             --load \
-            -t openclaw-install-candidate-packager:local \
+            -t carapace-install-candidate-packager:local \
             -f ./.release-harness/scripts/docker/install-sh-smoke/Dockerfile \
             ./.release-harness/scripts/docker
 
@@ -741,7 +741,7 @@ jobs:
             -v "${RUNNER_TEMP}/candidate.tar.gz:/input/candidate.tar.gz:ro" \
             -v "${package_dir}:/output" \
             -v "$PWD/.release-harness:/harness:ro" \
-            openclaw-install-candidate-packager:local \
+            carapace-install-candidate-packager:local \
             -lc '
               set -euo pipefail
               source_dir="$(mktemp -d)"
@@ -768,10 +768,10 @@ jobs:
               # The TypeScript implementation is the capability boundary for this
               # newer option; frozen Node-native packers intentionally omit it.
               if [[ "$ALLOW_UNRELEASED_CHANGELOG" == "true" ]] && \
-                grep -Fq -- '--allow-unreleased-changelog' scripts/package-openclaw-for-docker.mts; then
+                grep -Fq -- '--allow-unreleased-changelog' scripts/package-carapace-for-docker.mts; then
                 package_args+=(--allow-unreleased-changelog)
               fi
-              node scripts/package-openclaw-for-docker.mjs "${package_args[@]}"
+              node scripts/package-carapace-for-docker.mjs "${package_args[@]}"
             '
 
       - name: Seal candidate payload in clean pinned harness
@@ -795,7 +795,7 @@ jobs:
             -v "${RUNNER_TEMP}/candidate.tar.gz:/input/candidate.tar.gz:ro" \
             -v "${RUNNER_TEMP}/candidate-package:/package:ro" \
             -v "${payload_dir}:/payload" \
-            openclaw-install-candidate-packager:local \
+            carapace-install-candidate-packager:local \
             /harness/scripts/install-smoke-candidate-payload.mts seal \
               --archive /input/candidate.tar.gz \
               --package-dir /package \
@@ -864,7 +864,7 @@ jobs:
 
       - name: Build installer smoke image
         env:
-          IMAGE_REF: openclaw-install-smoke:local
+          IMAGE_REF: carapace-install-smoke:local
         run: |
           timeout --kill-after=30s 20m docker buildx build \
             --progress=plain \
@@ -876,7 +876,7 @@ jobs:
       - name: Pack installer smoke image artifact
         id: image_artifact
         env:
-          IMAGE_REF: openclaw-install-smoke:local
+          IMAGE_REF: carapace-install-smoke:local
           TARGET_SHA: ${{ needs.preflight.outputs.target_sha }}
           WORKFLOW_SHA: ${{ steps.workflow.outputs.sha }}
         run: |
@@ -937,7 +937,7 @@ jobs:
 
       - name: Build installer non-root image
         env:
-          IMAGE_REF: openclaw-install-nonroot:local
+          IMAGE_REF: carapace-install-nonroot:local
         run: |
           timeout --kill-after=30s 20m docker buildx build \
             --progress=plain \
@@ -949,7 +949,7 @@ jobs:
       - name: Pack installer non-root image artifact
         id: image_artifact
         env:
-          IMAGE_REF: openclaw-install-nonroot:local
+          IMAGE_REF: carapace-install-nonroot:local
           TARGET_SHA: ${{ needs.preflight.outputs.target_sha }}
           WORKFLOW_SHA: ${{ steps.workflow.outputs.sha }}
         run: |
@@ -990,7 +990,7 @@ jobs:
     env:
       DOCKER_BUILD_SUMMARY: "false"
       DOCKER_BUILD_RECORD_UPLOAD: "false"
-      OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
+      CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
     steps:
       - *trusted_workflow_subdir_checkout_step
       - *trusted_workflow_subdir_identity_step
@@ -1111,10 +1111,10 @@ jobs:
 
       - name: Verify and load installer update image artifact
         env:
-          IMAGE_REF: openclaw-install-smoke:local
-          OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256: ${{ needs.installer_smoke_update_image.outputs.archive_sha256 }}
-          OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT: ${{ needs.installer_smoke_update_image.outputs.artifact_run_attempt }}
-          OPENCLAW_SHARED_IMAGE_RUN_ID: ${{ needs.installer_smoke_update_image.outputs.artifact_run_id }}
+          IMAGE_REF: carapace-install-smoke:local
+          CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256: ${{ needs.installer_smoke_update_image.outputs.archive_sha256 }}
+          CARAPACE_SHARED_IMAGE_RUN_ATTEMPT: ${{ needs.installer_smoke_update_image.outputs.artifact_run_attempt }}
+          CARAPACE_SHARED_IMAGE_RUN_ID: ${{ needs.installer_smoke_update_image.outputs.artifact_run_id }}
           TARGET_SHA: ${{ needs.installer_smoke_update_image.outputs.target_sha }}
           WORKFLOW_SHA: ${{ needs.installer_smoke_update_image.outputs.workflow_sha }}
         run: |
@@ -1124,7 +1124,7 @@ jobs:
             "$TARGET_SHA" "$WORKFLOW_SHA" "$IMAGE_REF"
 
       - name: Require local installer update image
-        run: docker image inspect openclaw-install-smoke:local >/dev/null
+        run: docker image inspect carapace-install-smoke:local >/dev/null
 
       - name: Verify candidate payload contents
         env:
@@ -1144,7 +1144,7 @@ jobs:
             --entrypoint node \
             -v "$PWD/.release-harness:/harness:ro" \
             -v "${RUNNER_TEMP}/install-smoke-candidate-payload:/payload:ro" \
-            openclaw-install-smoke:local \
+            carapace-install-smoke:local \
             /harness/scripts/install-smoke-candidate-payload.mts verify \
               --payload-dir /payload \
               --repository "$TARGET_REPOSITORY" \
@@ -1159,20 +1159,20 @@ jobs:
 
       - name: Run installer update docker tests
         env:
-          OPENCLAW_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR: ${{ runner.temp }}/install-smoke-candidate-payload
-          OPENCLAW_INSTALL_SMOKE_GROUP: update
-          OPENCLAW_INSTALL_URL: file:///tmp/openclaw-install.sh
-          OPENCLAW_INSTALL_CLI_URL: file:///tmp/openclaw-install-cli.sh
-          OPENCLAW_NO_ONBOARD: "1"
-          OPENCLAW_INSTALL_SMOKE_SKIP_CLI: "0"
-          OPENCLAW_INSTALL_SMOKE_SKIP_IMAGE_BUILD: "1"
-          OPENCLAW_INSTALL_NONROOT_SKIP_IMAGE_BUILD: "1"
-          OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT: "0"
-          OPENCLAW_INSTALL_SMOKE_SKIP_NPM_GLOBAL: "1"
-          OPENCLAW_INSTALL_SMOKE_SKIP_PREVIOUS: "1"
-          OPENCLAW_INSTALL_SMOKE_UPDATE_BASELINE: ${{ inputs.update_baseline_version || 'latest' }}
-          OPENCLAW_INSTALL_SMOKE_UPDATE_EXPECT_VERSION: ${{ needs.installer_smoke_candidate_payload.outputs.package_version }}
-          OPENCLAW_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY: ${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}
+          CARAPACE_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR: ${{ runner.temp }}/install-smoke-candidate-payload
+          CARAPACE_INSTALL_SMOKE_GROUP: update
+          CARAPACE_INSTALL_URL: file:///tmp/carapace-install.sh
+          CARAPACE_INSTALL_CLI_URL: file:///tmp/carapace-install-cli.sh
+          CARAPACE_NO_ONBOARD: "1"
+          CARAPACE_INSTALL_SMOKE_SKIP_CLI: "0"
+          CARAPACE_INSTALL_SMOKE_SKIP_IMAGE_BUILD: "1"
+          CARAPACE_INSTALL_NONROOT_SKIP_IMAGE_BUILD: "1"
+          CARAPACE_INSTALL_SMOKE_SKIP_NONROOT: "0"
+          CARAPACE_INSTALL_SMOKE_SKIP_NPM_GLOBAL: "1"
+          CARAPACE_INSTALL_SMOKE_SKIP_PREVIOUS: "1"
+          CARAPACE_INSTALL_SMOKE_UPDATE_BASELINE: ${{ inputs.update_baseline_version || 'latest' }}
+          CARAPACE_INSTALL_SMOKE_UPDATE_EXPECT_VERSION: ${{ needs.installer_smoke_candidate_payload.outputs.package_version }}
+          CARAPACE_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY: ${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}
         run: bash .release-harness/scripts/test-install-sh-docker.sh
 
       - name: Run Rocky Linux installer smoke
@@ -1181,11 +1181,11 @@ jobs:
         run: |
           timeout --kill-after=30s 20m docker run --rm \
             --platform linux/amd64 \
-            -e OPENCLAW_NO_ONBOARD=1 \
-            -e OPENCLAW_NO_PROMPT=1 \
+            -e CARAPACE_NO_ONBOARD=1 \
+            -e CARAPACE_NO_PROMPT=1 \
             -v "$PAYLOAD_DIR/install.sh:/tmp/install.sh:ro" \
             rockylinux:9@sha256:d644d203142cd5b54ad2a83a203e1dee68af2229f8fe32f52a30c6e1d3c3a9e0 \
-            bash -lc 'dnf install -y -q ca-certificates tar gzip xz findutils which sudo >/dev/null && bash /tmp/install.sh --install-method npm --version latest --no-onboard --no-prompt --verify && openclaw --version'
+            bash -lc 'dnf install -y -q ca-certificates tar gzip xz findutils which sudo >/dev/null && bash /tmp/install.sh --install-method npm --version latest --no-onboard --no-prompt --verify && carapace --version'
 
       - name: Run Rocky Linux CLI installer smoke
         env:
@@ -1193,11 +1193,11 @@ jobs:
         run: |
           timeout --kill-after=30s 20m docker run --rm \
             --platform linux/amd64 \
-            -e OPENCLAW_NO_ONBOARD=1 \
-            -e OPENCLAW_NO_PROMPT=1 \
+            -e CARAPACE_NO_ONBOARD=1 \
+            -e CARAPACE_NO_PROMPT=1 \
             -v "$PAYLOAD_DIR/install-cli.sh:/tmp/install-cli.sh:ro" \
             rockylinux:9@sha256:d644d203142cd5b54ad2a83a203e1dee68af2229f8fe32f52a30c6e1d3c3a9e0 \
-            bash -lc 'dnf install -y -q ca-certificates tar gzip xz findutils which sudo >/dev/null && bash /tmp/install-cli.sh --prefix /tmp/openclaw-cli --version latest --no-onboard && /tmp/openclaw-cli/bin/openclaw --version'
+            bash -lc 'dnf install -y -q ca-certificates tar gzip xz findutils which sudo >/dev/null && bash /tmp/install-cli.sh --prefix /tmp/carapace-cli --version latest --no-onboard && /tmp/carapace-cli/bin/carapace --version'
 
   installer_smoke_nonroot:
     needs: [preflight, installer_smoke_candidate_payload, installer_smoke_nonroot_image]
@@ -1205,7 +1205,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
+      CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1"
     steps:
       - *trusted_workflow_subdir_checkout_step
       - *trusted_workflow_subdir_identity_step
@@ -1311,10 +1311,10 @@ jobs:
 
       - name: Verify and load installer non-root image artifact
         env:
-          IMAGE_REF: openclaw-install-nonroot:local
-          OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256: ${{ needs.installer_smoke_nonroot_image.outputs.archive_sha256 }}
-          OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT: ${{ needs.installer_smoke_nonroot_image.outputs.artifact_run_attempt }}
-          OPENCLAW_SHARED_IMAGE_RUN_ID: ${{ needs.installer_smoke_nonroot_image.outputs.artifact_run_id }}
+          IMAGE_REF: carapace-install-nonroot:local
+          CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256: ${{ needs.installer_smoke_nonroot_image.outputs.archive_sha256 }}
+          CARAPACE_SHARED_IMAGE_RUN_ATTEMPT: ${{ needs.installer_smoke_nonroot_image.outputs.artifact_run_attempt }}
+          CARAPACE_SHARED_IMAGE_RUN_ID: ${{ needs.installer_smoke_nonroot_image.outputs.artifact_run_id }}
           TARGET_SHA: ${{ needs.installer_smoke_nonroot_image.outputs.target_sha }}
           WORKFLOW_SHA: ${{ needs.installer_smoke_nonroot_image.outputs.workflow_sha }}
         run: |
@@ -1324,7 +1324,7 @@ jobs:
             "$TARGET_SHA" "$WORKFLOW_SHA" "$IMAGE_REF"
 
       - name: Require local installer non-root image
-        run: docker image inspect openclaw-install-nonroot:local >/dev/null
+        run: docker image inspect carapace-install-nonroot:local >/dev/null
 
       - name: Verify candidate payload contents
         env:
@@ -1344,7 +1344,7 @@ jobs:
             --entrypoint node \
             -v "$PWD/.release-harness:/harness:ro" \
             -v "${RUNNER_TEMP}/install-smoke-candidate-payload:/payload:ro" \
-            openclaw-install-nonroot:local \
+            carapace-install-nonroot:local \
             /harness/scripts/install-smoke-candidate-payload.mts verify \
               --payload-dir /payload \
               --repository "$TARGET_REPOSITORY" \
@@ -1359,16 +1359,16 @@ jobs:
 
       - name: Run installer non-root docker tests
         env:
-          OPENCLAW_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR: ${{ runner.temp }}/install-smoke-candidate-payload
-          OPENCLAW_INSTALL_SMOKE_GROUP: nonroot
-          OPENCLAW_INSTALL_URL: file:///tmp/openclaw-install.sh
-          OPENCLAW_INSTALL_CLI_URL: file:///tmp/openclaw-install-cli.sh
-          OPENCLAW_NO_ONBOARD: "1"
-          OPENCLAW_INSTALL_SMOKE_SKIP_CLI: "0"
-          OPENCLAW_INSTALL_SMOKE_SKIP_IMAGE_BUILD: "1"
-          OPENCLAW_INSTALL_NONROOT_SKIP_IMAGE_BUILD: "1"
-          OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT: "0"
-          OPENCLAW_INSTALL_SMOKE_UPDATE_EXPECT_VERSION: ${{ needs.installer_smoke_candidate_payload.outputs.package_version }}
+          CARAPACE_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR: ${{ runner.temp }}/install-smoke-candidate-payload
+          CARAPACE_INSTALL_SMOKE_GROUP: nonroot
+          CARAPACE_INSTALL_URL: file:///tmp/carapace-install.sh
+          CARAPACE_INSTALL_CLI_URL: file:///tmp/carapace-install-cli.sh
+          CARAPACE_NO_ONBOARD: "1"
+          CARAPACE_INSTALL_SMOKE_SKIP_CLI: "0"
+          CARAPACE_INSTALL_SMOKE_SKIP_IMAGE_BUILD: "1"
+          CARAPACE_INSTALL_NONROOT_SKIP_IMAGE_BUILD: "1"
+          CARAPACE_INSTALL_SMOKE_SKIP_NONROOT: "0"
+          CARAPACE_INSTALL_SMOKE_UPDATE_EXPECT_VERSION: ${{ needs.installer_smoke_candidate_payload.outputs.package_version }}
         run: bash .release-harness/scripts/test-install-sh-docker.sh
 
   installer_smoke:
@@ -1515,9 +1515,9 @@ jobs:
       - name: Run Bun global install candidate-payload smoke
         working-directory: .release-harness
         env:
-          OPENCLAW_FS_SAFE_NATIVE_CONTRACT: ${{ needs.preflight.outputs.fs_safe_native_contract }}
-          OPENCLAW_BUN_GLOBAL_SMOKE_HOST_BUILD: "0"
-          OPENCLAW_BUN_GLOBAL_SMOKE_PACKAGE_TGZ: ${{ runner.temp }}/install-smoke-candidate-payload/candidate.tgz
+          CARAPACE_FS_SAFE_NATIVE_CONTRACT: ${{ needs.preflight.outputs.fs_safe_native_contract }}
+          CARAPACE_BUN_GLOBAL_SMOKE_HOST_BUILD: "0"
+          CARAPACE_BUN_GLOBAL_SMOKE_PACKAGE_TGZ: ${{ runner.temp }}/install-smoke-candidate-payload/candidate.tgz
         run: bash scripts/e2e/bun-global-install-smoke.sh
 
   docker-e2e-fast:

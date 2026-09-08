@@ -10,13 +10,13 @@ import type {
   SpeechProviderConfig,
   SpeechProviderPlugin,
   SpeechVoiceOption,
-} from "openclaw/plugin-sdk/speech";
+} from "carapace/plugin-sdk/speech";
 import {
   asBoolean,
   asFiniteNumber,
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { edgeTTS, inferEdgeExtension } from "./tts.js";
 
 const DEFAULT_EDGE_VOICE = "en-US-MichelleNeural";
@@ -127,11 +127,11 @@ async function listMicrosoftVoices(
   timeoutMs = DEFAULT_MICROSOFT_VOICE_LIST_TIMEOUT_MS,
 ): Promise<SpeechVoiceOption[]> {
   const { assertOkOrThrowProviderError, readProviderJsonResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { captureHttpExchange, isDebugProxyGlobalFetchPatchInstalled } =
-    await import("openclaw/plugin-sdk/proxy-capture");
+    await import("carapace/plugin-sdk/proxy-capture");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const url =
     "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list" +
     `?trustedclienttoken=${TRUSTED_CLIENT_TOKEN}`;
@@ -242,11 +242,11 @@ export function buildMicrosoftSpeechProvider(): SpeechProviderPlugin {
     isConfigured: ({ providerConfig }) => readMicrosoftProviderConfig(providerConfig).enabled,
     synthesize: async (req) => {
       const config = readMicrosoftProviderConfig(req.providerConfig);
-      const { isVoiceMessageCompatibleAudio } = await import("openclaw/plugin-sdk/media-runtime");
-      const { tempWorkspace, resolvePreferredOpenClawTmpDir } =
-        await import("openclaw/plugin-sdk/temp-path");
+      const { isVoiceMessageCompatibleAudio } = await import("carapace/plugin-sdk/media-runtime");
+      const { tempWorkspace, resolvePreferredCarapaceTmpDir } =
+        await import("carapace/plugin-sdk/temp-path");
       const temp = await tempWorkspace({
-        rootDir: resolvePreferredOpenClawTmpDir(),
+        rootDir: resolvePreferredCarapaceTmpDir(),
         prefix: "tts-microsoft-",
       });
       const tempDir = temp.dir;

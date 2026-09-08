@@ -1,13 +1,13 @@
-# OpenClaw Volcengine Provider
+# Carapace Volcengine Provider
 
-Official OpenClaw provider plugin for Volcengine models, the Volcengine coding
+Official Carapace provider plugin for Volcengine models, the Volcengine coding
 plan, and Volcengine Speech text-to-speech.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/volcengine-provider
-openclaw gateway restart
+carapace plugins install @carapace/volcengine-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/volcengine> for model and speech setup.
+See <../../docs/providers/volcengine.md> for model and speech setup.

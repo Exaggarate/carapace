@@ -5,7 +5,7 @@ import {
   mergeTransportHeaders,
   sanitizeNonEmptyTransportPayloadText,
   sanitizeTransportPayloadText,
-} from "@openclaw/ai/transports";
+} from "@carapace/ai/transports";
 import OpenAI from "openai";
 // Transport stream shared tests cover payload sanitization, header merging, and
 // final/error stream termination helpers used by provider transports.
@@ -70,12 +70,12 @@ describe("transport stream shared helpers", () => {
       mergeTransportHeaders(
         { accept: "text/event-stream", "user-agent": "configured", "x-base": "one" },
         { authorization: "Bearer token" },
-        { "User-Agent": "openclaw/2026.9.1", "x-base": "two" },
+        { "User-Agent": "carapace/2026.9.1", "x-base": "two" },
       ),
     ).toEqual({
       accept: "text/event-stream",
       authorization: "Bearer token",
-      "User-Agent": "openclaw/2026.9.1",
+      "User-Agent": "carapace/2026.9.1",
       "x-base": "two",
     });
     expect(mergeTransportHeaders(undefined, undefined)).toBeUndefined();
@@ -105,7 +105,7 @@ describe("transport stream shared helpers", () => {
     const controller = new AbortController();
     const reason = Object.assign(new Error("agent run aborted for restart"), {
       name: "AbortError",
-      code: "OPENCLAW_RESTART_ABORT",
+      code: "CARAPACE_RESTART_ABORT",
     });
     controller.abort(reason);
     const output = createTransportOutput();
@@ -125,7 +125,7 @@ describe("transport stream shared helpers", () => {
       error: reason,
     });
     expect(output.stopReason).toBe("aborted");
-    expect(output.errorCode).toBe("OPENCLAW_RESTART_ABORT");
+    expect(output.errorCode).toBe("CARAPACE_RESTART_ABORT");
   });
 
   it.each([
@@ -238,14 +238,14 @@ describe("transport stream shared helpers", () => {
       name: "coded abort",
       setup: () => {
         const controller = new AbortController();
-        const error = Object.assign(new Error("restarted"), { code: "OPENCLAW_RESTART_ABORT" });
+        const error = Object.assign(new Error("restarted"), { code: "CARAPACE_RESTART_ABORT" });
         controller.abort(error);
         return { error, signal: controller.signal };
       },
       expected: {
         stopReason: "aborted",
         errorMessage: "restarted",
-        errorCode: "OPENCLAW_RESTART_ABORT",
+        errorCode: "CARAPACE_RESTART_ABORT",
       },
     },
   ])("keeps the deprecated public wrapper terminal fields for $name", ({ setup, expected }) => {

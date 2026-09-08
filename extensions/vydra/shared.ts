@@ -1,8 +1,8 @@
 // Vydra plugin module implements shared behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { extensionForMime, type MediaKind } from "openclaw/plugin-sdk/media-mime";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveGeneratedMediaMaxBytes } from "carapace/plugin-sdk/media-generation-runtime";
+import { extensionForMime, type MediaKind } from "carapace/plugin-sdk/media-mime";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   assertOkOrThrowHttpError,
   createProviderOperationDeadline,
@@ -17,13 +17,13 @@ import {
   sanitizeConfiguredModelProviderRequest,
   type ProviderOperationDeadline,
   type ProviderOperationTimeoutMs,
-} from "openclaw/plugin-sdk/provider-http";
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import type { SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { DEFAULT_VYDRA_BASE_URL, normalizeVydraBaseUrl } from "./defaults.js";
 
 export { DEFAULT_VYDRA_IMAGE_MODEL, DEFAULT_VYDRA_VIDEO_MODEL } from "./defaults.js";
@@ -73,7 +73,7 @@ function resolveVydraBaseUrlFromConfig(cfg: unknown): string {
 }
 
 async function resolveVydraRequestContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: VydraAuthStore;
   capability: "image" | "video";
@@ -377,7 +377,7 @@ async function resolveCompletedVydraPayload(params: {
 }
 
 export async function runVydraGeneration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: VydraAuthStore;
   body: unknown;

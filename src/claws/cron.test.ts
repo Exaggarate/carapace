@@ -5,9 +5,9 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { cronJobReadView } from "../cron/job-read-view.js";
 import { normalizeCronJobCreate } from "../cron/normalize.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   clawCronGatewayInput,
   clawCronGatewayJobMatchesRef,
@@ -22,10 +22,10 @@ import { parseClawManifest } from "./schema.js";
 import type { ClawSourceIdentity } from "./types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 async function fixture() {
-  const root = tempDirs.make("openclaw-claw-cron-");
+  const root = tempDirs.make("carapace-claw-cron-");
   const parsed = parseClawManifest({
     schemaVersion: 1,
     agent: { id: "worker" },
@@ -49,7 +49,7 @@ async function fixture() {
     name: "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "carapace.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -59,7 +59,7 @@ async function fixture() {
     source,
     context: { workspace: join(root, "workspace"), agentId: "worker-two" },
   });
-  return { root, plan, env: { OPENCLAW_STATE_DIR: join(root, "state") } };
+  return { root, plan, env: { CARAPACE_STATE_DIR: join(root, "state") } };
 }
 
 function listedCronJob(
@@ -128,7 +128,7 @@ describe("installClawCronJobs", () => {
     expect(validateCronAddParams(add.mock.calls[0]?.[0])).toBe(true);
     expect(refs).toMatchObject([
       {
-        schemaVersion: "openclaw.clawCronRef.v1",
+        schemaVersion: "carapace.clawCronRef.v1",
         agentId: "worker-two",
         manifestId: "daily-report",
         schedulerJobId: "scheduler-123",
@@ -408,7 +408,7 @@ describe("installClawCronJobs", () => {
       },
       options,
     );
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
     db.prepare("UPDATE claw_cron_refs SET job_json = ? WHERE manifest_id = ?").run(
       "{",
       "zz-malformed",

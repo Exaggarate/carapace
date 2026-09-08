@@ -1,11 +1,11 @@
 import {
   asOptionalObjectRecord,
   asOptionalRecord as readRecordField,
-} from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { consumeRootOptionToken } from "../infra/cli-root-options.js";
 import type { ExecApprovalDecision } from "../infra/exec-approvals.js";
 import {
@@ -238,17 +238,17 @@ export function extractLiveExecOutput(result: unknown): string | undefined {
   return typeof output === "string" ? truncateLiveExecOutput(output) : undefined;
 }
 
-function isOpenClawExecutable(token: string | undefined): boolean {
+function isCarapaceExecutable(token: string | undefined): boolean {
   const executable = normalizeOptionalLowercaseString(token);
-  return executable?.split(/[\\/]/).at(-1) === "openclaw";
+  return executable?.split(/[\\/]/).at(-1) === "carapace";
 }
 
-function isOpenClawPackageSpec(token: string | undefined): boolean {
+function isCarapacePackageSpec(token: string | undefined): boolean {
   const packageSpec = normalizeOptionalLowercaseString(token);
-  return packageSpec?.startsWith("openclaw@") === true && packageSpec.length > "openclaw@".length;
+  return packageSpec?.startsWith("carapace@") === true && packageSpec.length > "carapace@".length;
 }
 
-function skipOpenClawPackageRunner(
+function skipCarapacePackageRunner(
   tokens: string[],
   startIndex: number,
 ): { commandIndex: number; acceptsPackageSpec: boolean } {
@@ -301,7 +301,7 @@ function skipOpenClawPackageRunner(
   return { commandIndex, acceptsPackageSpec };
 }
 
-function isOpenClawCronAddShellCommand(args: unknown): boolean {
+function isCarapaceCronAddShellCommand(args: unknown): boolean {
   const record = asOptionalObjectRecord(args);
   const command = readStringValue(record?.command) ?? readStringValue(record?.cmd);
   if (!command || hasTopLevelShellControlOperator(command)) {
@@ -320,7 +320,7 @@ function isOpenClawCronAddShellCommand(args: unknown): boolean {
   while (/^[A-Za-z_][A-Za-z0-9_]*=/u.test(tokens[commandIndex] ?? "")) {
     commandIndex += 1;
   }
-  const packageRunner = skipOpenClawPackageRunner(tokens, commandIndex);
+  const packageRunner = skipCarapacePackageRunner(tokens, commandIndex);
   commandIndex = packageRunner.commandIndex;
 
   let cliArgIndex = commandIndex + 1;
@@ -334,8 +334,8 @@ function isOpenClawCronAddShellCommand(args: unknown): boolean {
   const action = normalizeOptionalLowercaseString(tokens[cliArgIndex + 1]);
   const actionArgs = tokens.slice(cliArgIndex + 2);
   return (
-    (isOpenClawExecutable(tokens[commandIndex]) ||
-      (packageRunner.acceptsPackageSpec && isOpenClawPackageSpec(tokens[commandIndex]))) &&
+    (isCarapaceExecutable(tokens[commandIndex]) ||
+      (packageRunner.acceptsPackageSpec && isCarapacePackageSpec(tokens[commandIndex]))) &&
     (normalizeOptionalLowercaseString(tokens[cliArgIndex]) === "cron" ||
       normalizeOptionalLowercaseString(tokens[cliArgIndex]) === "automations") &&
     (action === "add" || action === "create") &&
@@ -344,7 +344,7 @@ function isOpenClawCronAddShellCommand(args: unknown): boolean {
 }
 
 export function didShellCronAddSucceed(args: unknown, result: unknown): boolean {
-  if (!isOpenClawCronAddShellCommand(args)) {
+  if (!isCarapaceCronAddShellCommand(args)) {
     return false;
   }
   const details = readExecToolDetails(result);

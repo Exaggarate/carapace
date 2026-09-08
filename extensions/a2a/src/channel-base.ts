@@ -1,4 +1,4 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "carapace/plugin-sdk/channel-setup";
 import {
   listA2aChannelAccountIds,
   resolveA2aChannelAccount,

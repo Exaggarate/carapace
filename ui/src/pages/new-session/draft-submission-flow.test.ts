@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SESSION_CREATE_RETRY_WINDOW_MS } from "../../../../packages/gateway-protocol/src/index.js";
 import type { ApplicationContext } from "../../app/context.ts";
@@ -51,8 +51,8 @@ describe("DraftSubmissionFlow", () => {
       queueMicrotask(() => document.dispatchEvent(new Event(CHAT_ROUTE_READY_EVENT)));
     });
     place.selectRemoteProject({
-      identity: "openclaw/openclaw",
-      cloneUrl: "https://github.com/openclaw/openclaw.git",
+      identity: "carapace/carapace",
+      cloneUrl: "https://github.com/Exaggarate/carapace.git",
       projectId: "old-local-clone",
     });
     place.setBaseRef("release/next");
@@ -70,7 +70,7 @@ describe("DraftSubmissionFlow", () => {
     expect(created).toMatchObject({
       agentId: "main",
       message: "",
-      repository: { url: "https://github.com/openclaw/openclaw.git", ref: "release/next" },
+      repository: { url: "https://github.com/Exaggarate/carapace.git", ref: "release/next" },
     });
     for (const field of [
       "projectId",
@@ -144,7 +144,7 @@ describe("DraftSubmissionFlow", () => {
       "agent:main:dashboard:background",
       context.gateway.snapshot.client,
     );
-    expect(retained?.message["__openclaw"]).toMatchObject({
+    expect(retained?.message["__carapace"]).toMatchObject({
       humanMentions: [{ profileId: "profile-alex", start: 0, end: 5 }],
     });
     expect(retained?.message.content).toContainEqual({
@@ -190,7 +190,7 @@ describe("DraftSubmissionFlow", () => {
       displayName: "Original prepared title",
       mentions: [{ profileId: "profile-original", start: 0, end: 5 }],
     });
-    expect(flow.pendingMessage?.["__openclaw"].humanMentions).toEqual([
+    expect(flow.pendingMessage?.["__carapace"].humanMentions).toEqual([
       { profileId: "profile-original", start: 0, end: 5 },
     ]);
     flow.invalidate("gateway-changed");
@@ -198,7 +198,7 @@ describe("DraftSubmissionFlow", () => {
     flow.setMessage("@Alex a different draft", [
       { profileId: "profile-replacement", start: 0, end: 5 },
     ]);
-    expect(flow.pendingMessage?.["__openclaw"].humanMentions).toEqual([
+    expect(flow.pendingMessage?.["__carapace"].humanMentions).toEqual([
       { profileId: "profile-original", start: 0, end: 5 },
     ]);
     place.applyPendingPlacement({ agentId: "main", profileId: "new-cloud-discovery" });
@@ -206,7 +206,7 @@ describe("DraftSubmissionFlow", () => {
     expect(flow.submitting).toBe(true);
 
     flow.resumeInterruptedSubmission();
-    expect(flow.pendingMessage?.["__openclaw"].humanMentions).toEqual([
+    expect(flow.pendingMessage?.["__carapace"].humanMentions).toEqual([
       { profileId: "profile-original", start: 0, end: 5 },
     ]);
     await vi.waitFor(() => expect(context.sessions.createResult).toHaveBeenCalledTimes(2));
@@ -365,8 +365,8 @@ describe("DraftSubmissionFlow", () => {
   ])("checks remote-project access with worktree=$worktree", ({ methods, allowed, worktree }) => {
     const { flow, place } = createDraftFixture({ methods });
     place.selectRemoteProject({
-      identity: "openclaw/openclaw",
-      cloneUrl: "https://github.com/openclaw/openclaw.git",
+      identity: "carapace/carapace",
+      cloneUrl: "https://github.com/Exaggarate/carapace.git",
     });
     if (worktree) {
       place.selectWorktree(true);
@@ -396,8 +396,8 @@ describe("DraftSubmissionFlow", () => {
       queueMicrotask(() => document.dispatchEvent(new Event(CHAT_ROUTE_READY_EVENT)));
     });
     place.selectRemoteProject({
-      identity: "openclaw/openclaw",
-      cloneUrl: "https://github.com/openclaw/openclaw.git",
+      identity: "carapace/carapace",
+      cloneUrl: "https://github.com/Exaggarate/carapace.git",
     });
     if (worktree) {
       place.selectWorktree(true);
@@ -410,16 +410,16 @@ describe("DraftSubmissionFlow", () => {
     await vi.waitFor(() =>
       expect(request).toHaveBeenCalledWith(
         "projects.add",
-        { gitUrl: "https://github.com/openclaw/openclaw.git" },
+        { gitUrl: "https://github.com/Exaggarate/carapace.git" },
         { timeoutMs: null },
       ),
     );
     expect(context.sessions.createResult).not.toHaveBeenCalled();
-    materializeProject({ id: "openclaw" });
+    materializeProject({ id: "carapace" });
     await submitted;
 
     const createParams = vi.mocked(context.sessions.createResult).mock.calls[0]?.[0];
-    expect(createParams).toMatchObject({ agentId: "main", message, projectId: "openclaw" });
+    expect(createParams).toMatchObject({ agentId: "main", message, projectId: "carapace" });
     expect(createParams?.worktree).toBe(worktree || undefined);
     expect(createParams).not.toHaveProperty("projectGitUrl");
     expect(createParams).not.toHaveProperty("cwd");
@@ -437,15 +437,15 @@ describe("DraftSubmissionFlow", () => {
       },
     });
     place.selectRemoteProject({
-      identity: "openclaw/openclaw",
-      cloneUrl: "https://github.com/openclaw/openclaw.git",
+      identity: "carapace/carapace",
+      cloneUrl: "https://github.com/Exaggarate/carapace.git",
     });
     vi.spyOn(flow, "canSubmit").mockReturnValue(true);
 
     await flow.submit();
 
     expect(flow.error).toBe("clone failed");
-    expect(place.browser.remoteProject?.identity).toBe("openclaw/openclaw");
+    expect(place.browser.remoteProject?.identity).toBe("carapace/carapace");
     expect(context.sessions.createResult).not.toHaveBeenCalled();
   });
 
@@ -467,8 +467,8 @@ describe("DraftSubmissionFlow", () => {
       queueMicrotask(() => document.dispatchEvent(new Event(CHAT_ROUTE_READY_EVENT)));
     });
     place.selectRemoteProject({
-      identity: "openclaw/openclaw",
-      cloneUrl: "https://github.com/openclaw/openclaw.git",
+      identity: "carapace/carapace",
+      cloneUrl: "https://github.com/Exaggarate/carapace.git",
     });
     if (worktree) {
       place.selectWorktree(true);
@@ -490,7 +490,7 @@ describe("DraftSubmissionFlow", () => {
       expect.objectContaining({
         agentId: "main",
         message,
-        projectGitUrl: "https://github.com/openclaw/openclaw.git",
+        projectGitUrl: "https://github.com/Exaggarate/carapace.git",
         attachments: [expect.objectContaining({ fileName: "note.txt", mimeType: "text/plain" })],
       }),
       { reconciliation: "background" },

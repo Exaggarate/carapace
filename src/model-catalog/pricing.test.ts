@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as staticNormalization from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { expectDefined } from "@openclaw/normalization-core";
+import * as staticNormalization from "@carapace/model-catalog-core/provider-model-id-normalization";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import * as runtimeNormalization from "../agents/provider-model-normalization.runtime.js";
@@ -11,7 +11,7 @@ import {
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as manifestNormalization from "../plugins/manifest-model-id-normalization.js";
 import { normalizeManifestModelPricing } from "../plugins/manifest-model-provider-normalizers.js";
 import * as pluginMetadata from "../plugins/plugin-metadata-snapshot.js";
@@ -32,7 +32,7 @@ beforeEach(() => {
   clearRuntimeConfigSnapshot();
   resetUsageFormatCachesForTest();
   readStoredCatalog.mockReset().mockReturnValue({
-    source_url: "https://catalog.openclaw.ai/models/v1/catalog.json",
+    source_url: "https://github.com/Exaggarate/carapace",
     bundle_json: JSON.stringify({
       schemaVersion: 1,
       generatedAt: 200,
@@ -102,7 +102,7 @@ afterEach(() => {
   setRemoteModelCatalogOverlaySourcesForTest();
 });
 
-function configFor(baseUrl: string): OpenClawConfig {
+function configFor(baseUrl: string): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -112,7 +112,7 @@ function configFor(baseUrl: string): OpenClawConfig {
         },
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 describe("hosted model pricing", () => {
@@ -126,8 +126,8 @@ describe("hosted model pricing", () => {
       maxTokens: 8192,
     };
     const providers = { fixture: { baseUrl: "https://fixture.invalid", models: [model] } };
-    const firstConfig: OpenClawConfig = { models: { providers } };
-    const secondConfig: OpenClawConfig = { models: { providers } };
+    const firstConfig: CarapaceConfig = { models: { providers } };
+    const secondConfig: CarapaceConfig = { models: { providers } };
     const enumeratePolicies = vi.fn(Reflect.ownKeys);
     const snapshotFor = (canonicalModel: string) =>
       createPluginMetadataSnapshotFixture({
@@ -149,7 +149,7 @@ describe("hosted model pricing", () => {
       .mockReturnValueOnce(snapshotFor("first"))
       .mockReturnValueOnce(snapshotFor("second"));
     enumeratePolicies.mockClear();
-    const agentDir = tempDirs.make("openclaw-policy-pricing-");
+    const agentDir = tempDirs.make("carapace-policy-pricing-");
     const lookup = () =>
       [firstConfig, secondConfig].flatMap((config) =>
         ["first", "second"].map(
@@ -183,7 +183,7 @@ describe("hosted model pricing", () => {
   it.each(["config", "models.json"] as const)(
     "reuses normalized pricing indexes for repeated fallbacks from %s",
     async (source) => {
-      const agentDir = tempDirs.make("openclaw-repeated-pricing-");
+      const agentDir = tempDirs.make("carapace-repeated-pricing-");
       const providers = {
         custom: {
           baseUrl: "https://pricing.example/v1",
@@ -197,7 +197,7 @@ describe("hosted model pricing", () => {
           })),
         },
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             openai: { baseUrl: "https://api.openai.com/v1", models: [] },
@@ -228,7 +228,7 @@ describe("hosted model pricing", () => {
   it("resolves catalog and hosted prices without activating provider runtime", () => {
     const runtimeSpy = vi.spyOn(runtimeNormalization, "normalizeProviderModelIdWithRuntime");
     const config = configFor("https://api.openai.com/v1");
-    const agentDir = tempDirs.make("openclaw-static-pricing-");
+    const agentDir = tempDirs.make("carapace-static-pricing-");
     expect(
       ["gpt-catalog", "gpt-external"].map(
         (model) => resolveModelCostConfig({ config, agentDir, provider: "openai", model })?.input,
@@ -240,8 +240,8 @@ describe("hosted model pricing", () => {
   it.each(["config", "models.json"] as const)(
     "keeps exact pricing namespaces distinct in %s",
     async (source) => {
-      const agentDir = tempDirs.make("openclaw-exact-pricing-");
-      const config: OpenClawConfig = {
+      const agentDir = tempDirs.make("carapace-exact-pricing-");
+      const config: CarapaceConfig = {
         models: {
           providers: {
             custom: {
@@ -281,8 +281,8 @@ describe("hosted model pricing", () => {
     { provider: "openrouter", model: "openrouter/auto", shortModel: "auto" },
     { provider: "nvidia", model: "nvidia/nemotron", shortModel: "nemotron" },
   ])("retains static pricing aliases for $provider", ({ provider, model, shortModel }) => {
-    const agentDir = tempDirs.make("openclaw-static-pricing-alias-");
-    const config: OpenClawConfig = {
+    const agentDir = tempDirs.make("carapace-static-pricing-alias-");
+    const config: CarapaceConfig = {
       models: {
         providers: {
           [provider]: {
@@ -321,7 +321,7 @@ describe("hosted model pricing", () => {
     { source: "hosted", model: "pricing-hosted", expected: [4, 5] },
   ])("keeps exact pricing namespaces distinct in $source", ({ model, expected }) => {
     const config = configFor("https://api.openai.com/v1");
-    const agentDir = tempDirs.make("openclaw-catalog-namespaces-");
+    const agentDir = tempDirs.make("carapace-catalog-namespaces-");
     expect(
       [model, `openai/${model}`].map(
         (modelId) =>
@@ -337,7 +337,7 @@ describe("hosted model pricing", () => {
     entry.id = "pricing-hosted";
     models.push({ ...entry, id: "openai/pricing-hosted", baseUrl: "http://127.0.0.1:8080/v1" });
 
-    const agentDir = tempDirs.make("openclaw-exact-endpoint-pricing-");
+    const agentDir = tempDirs.make("carapace-exact-endpoint-pricing-");
     expect(
       ["pricing-hosted", "openai/pricing-hosted"].map(
         (model) => resolveModelCostConfig({ config, agentDir, provider: "openai", model })?.input,
@@ -392,9 +392,9 @@ describe("hosted model pricing", () => {
       known: false,
     },
   ])("requires exact authoritative hosted zero evidence: $name", (scenario) => {
-    const agentDir = tempDirs.make("openclaw-native-zero-policy-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", agentDir);
-    const config: OpenClawConfig = {
+    const agentDir = tempDirs.make("carapace-native-zero-policy-");
+    vi.stubEnv("CARAPACE_STATE_DIR", agentDir);
+    const config: CarapaceConfig = {
       plugins: { allow: ["venice"], entries: { venice: { enabled: !scenario.disabled } } },
       ...(scenario.private
         ? {
@@ -417,7 +417,7 @@ describe("hosted model pricing", () => {
       manifestRegistry: { ...snapshot.manifestRegistry, plugins },
     });
     readStoredCatalog.mockReturnValue({
-      source_url: "https://catalog.openclaw.ai/models/v1/catalog.json",
+      source_url: "https://github.com/Exaggarate/carapace",
       bundle_json: JSON.stringify({
         schemaVersion: 1,
         generatedAt: 200,
@@ -571,7 +571,7 @@ describe("hosted model pricing", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       const runtime = structuredClone(source);
       const model = expectDefined(
         runtime.models?.providers?.openai?.models[0],
@@ -582,8 +582,8 @@ describe("hosted model pricing", () => {
         ...(flatPrepared ? {} : { tieredPricing: [{ ...preparedRates, range: [0] }] }),
       };
       setRuntimeConfigSnapshot(runtime, source);
-      const agentDir = tempDirs.make("openclaw-authored-pricing-");
-      vi.stubEnv("OPENCLAW_STATE_DIR", agentDir);
+      const agentDir = tempDirs.make("carapace-authored-pricing-");
+      vi.stubEnv("CARAPACE_STATE_DIR", agentDir);
       const fetch = vi.fn(() => {
         throw new Error("pricing display must not use the network");
       });
@@ -656,7 +656,7 @@ describe("hosted model pricing", () => {
   it.each(["unpaired", "incompatible"] as const)(
     "preserves independent configured pricing with an %s runtime snapshot",
     (snapshot) => {
-      const runtime = { agents: { defaults: {} } } satisfies OpenClawConfig;
+      const runtime = { agents: { defaults: {} } } satisfies CarapaceConfig;
       setRuntimeConfigSnapshot(runtime, snapshot === "unpaired" ? undefined : {});
       const config = {
         models: {
@@ -667,8 +667,8 @@ describe("hosted model pricing", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
-      const agentDir = tempDirs.make("openclaw-independent-pricing-");
+      } as unknown as CarapaceConfig;
+      const agentDir = tempDirs.make("carapace-independent-pricing-");
       expect(
         resolveModelCostConfig({ config, agentDir, provider: "openai", model: "gpt-authored" }),
       ).toEqual({ ...catalogRates, output: 3 });
@@ -704,8 +704,8 @@ describe("hosted model pricing", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
-    const agentDir = tempDirs.make("openclaw-empty-tier-pricing-");
+    } as unknown as CarapaceConfig;
+    const agentDir = tempDirs.make("carapace-empty-tier-pricing-");
     expect(
       resolveModelCostConfig({ config, agentDir, provider: "openai", model: "gpt-authored" }),
     ).toEqual({ ...catalogRates, tieredPricing: catalogTiers });
@@ -718,7 +718,7 @@ describe("hosted model pricing", () => {
   });
 
   it("resolves a non-catalog model from the stored hosted pricing map", () => {
-    const agentDir = tempDirs.make("openclaw-hosted-pricing-");
+    const agentDir = tempDirs.make("carapace-hosted-pricing-");
     expect(
       resolveModelCostConfig({
         config: configFor("https://api.openai.com/v1"),
@@ -730,7 +730,7 @@ describe("hosted model pricing", () => {
   });
 
   it("prefers configured pricing over merged catalog pricing", () => {
-    const agentDir = tempDirs.make("openclaw-catalog-pricing-");
+    const agentDir = tempDirs.make("carapace-catalog-pricing-");
     const config = {
       models: {
         providers: {
@@ -746,14 +746,14 @@ describe("hosted model pricing", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       resolveModelCostConfig({ config, agentDir, provider: "openai", model: "gpt-catalog" }),
     ).toEqual({ input: 99, output: 99, cacheRead: 0, cacheWrite: 0 });
   });
 
   it("does not apply hosted pricing to private endpoints or unknown models", () => {
-    const agentDir = tempDirs.make("openclaw-private-pricing-");
+    const agentDir = tempDirs.make("carapace-private-pricing-");
     expect(
       resolveModelCostConfig({
         config: configFor("http://127.0.0.1:8080/v1"),
@@ -813,7 +813,7 @@ describe("hosted model pricing", () => {
   });
 
   it("resolves passthrough provider aliases through a priced catalog row", () => {
-    const agentDir = tempDirs.make("openclaw-passthrough-pricing-");
+    const agentDir = tempDirs.make("carapace-passthrough-pricing-");
     const config = {
       models: {
         providers: {
@@ -823,7 +823,7 @@ describe("hosted model pricing", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       resolveModelCostConfig({
         config,
@@ -835,7 +835,7 @@ describe("hosted model pricing", () => {
   });
 
   it("falls through zero-only catalog tiers without reviving disabled source aliases", () => {
-    const agentDir = tempDirs.make("openclaw-zero-tier-pricing-");
+    const agentDir = tempDirs.make("carapace-zero-tier-pricing-");
     expect(
       resolveModelCostConfig({
         config: configFor("https://api.openai.com/v1"),
@@ -854,7 +854,7 @@ describe("hosted model pricing", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       resolveModelCostConfig({
         config: zaiConfig,
@@ -868,7 +868,7 @@ describe("hosted model pricing", () => {
   it("fingerprints provider overlays without explicit model rows", () => {
     const config = {
       models: { providers: { openai: { baseUrl: "https://api.openai.com/v1" } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(() => resolveModelCostConfigFingerprint(config)).not.toThrow();
   });
 
@@ -892,7 +892,7 @@ describe("hosted model pricing", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(resolveModelCostConfig({ config, provider: "fixture", model: "priced" })).toEqual({
       input: 1,
@@ -926,7 +926,7 @@ describe("hosted model pricing", () => {
     const bundleJson = JSON.stringify(bundle);
     expect(Buffer.byteLength(bundleJson)).toBeGreaterThan(2 * 1024 * 1024);
     readStoredCatalog.mockReturnValue({
-      source_url: "https://catalog.openclaw.ai/models/v1/catalog.json",
+      source_url: "https://github.com/Exaggarate/carapace",
       bundle_json: bundleJson,
     });
 

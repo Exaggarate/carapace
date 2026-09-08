@@ -10,7 +10,7 @@ export const GIT_TIMEOUT_MS = 120_000;
 // Keep live writers ordered across runtime chunks and shutdown. Settled tails
 // remove themselves; resetting this queue would release already-owned cleanup.
 const gitRefMutations = resolveGlobalSingleton(
-  Symbol.for("openclaw.gitRefMutations"),
+  Symbol.for("carapace.gitRefMutations"),
   () => new KeyedAsyncQueue(),
 );
 

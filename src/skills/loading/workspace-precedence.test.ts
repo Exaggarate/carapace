@@ -8,7 +8,7 @@ import { withEnv } from "../../test-utils/env.js";
 import { createFixtureSuite } from "../../test-utils/fixture-suite.js";
 import { bumpSkillsSnapshotVersion } from "../runtime/refresh-state.js";
 import { writeSkill } from "../test-support/e2e-test-helpers.js";
-import type { OpenClawSkillMetadata, SkillEntry } from "../types.js";
+import type { CarapaceSkillMetadata, SkillEntry } from "../types.js";
 import { resolveWorkshopSkillsDir } from "../workshop/skills-root.js";
 import { createSyntheticSourceInfo } from "./skill-contract.js";
 import { loadMergedWorkspaceSkills } from "./workspace-skill-loader.js";
@@ -23,7 +23,7 @@ vi.mock("./plugin-skills.js", () => ({
   resolvePluginSkillRoots: () => [],
 }));
 
-const fixtureSuite = createFixtureSuite("openclaw-skills-prompt-suite-");
+const fixtureSuite = createFixtureSuite("carapace-skills-prompt-suite-");
 
 beforeAll(async () => {
   await fixtureSuite.setup();
@@ -66,7 +66,7 @@ function captureJsonWarningLogger() {
 function createSkillEntry(params: {
   name: string;
   description?: string;
-  metadata?: OpenClawSkillMetadata;
+  metadata?: CarapaceSkillMetadata;
 }): SkillEntry {
   const filePath = `/skills/${params.name}/SKILL.md`;
   return {
@@ -152,11 +152,11 @@ describe("buildWorkspaceSkillsPrompt", () => {
     });
 
     expect(entries.find((entry) => entry.skill.name === "managed-wins")?.skill).toMatchObject({
-      source: "openclaw-managed",
+      source: "carapace-managed",
       description: "Managed version",
     });
     expect(entries.find((entry) => entry.skill.name === "workshop-wins")?.skill).toMatchObject({
-      source: "openclaw-workshop",
+      source: "carapace-workshop",
       description: "Workshop version",
     });
   });
@@ -191,8 +191,8 @@ describe("buildWorkspaceSkillsPrompt", () => {
     expect(prompt).toContain("Bundled version");
     expect(prompt).not.toContain("Extra version");
     expect(warningText).toContain('skill="demo-skill"');
-    expect(warningText).toContain("winner=openclaw-bundled:~/.bundled/demo-skill/SKILL.md");
-    expect(warningText).toContain("loser=openclaw-extra:~/.extra/demo-skill/SKILL.md");
+    expect(warningText).toContain("winner=carapace-bundled:~/.bundled/demo-skill/SKILL.md");
+    expect(warningText).toContain("loser=carapace-extra:~/.extra/demo-skill/SKILL.md");
   });
 
   it("reports execution-directory collisions while keeping workspace precedence", async () => {

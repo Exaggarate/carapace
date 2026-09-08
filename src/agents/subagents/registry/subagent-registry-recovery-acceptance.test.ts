@@ -7,7 +7,7 @@ import {
   rotateAgentEventLifecycleGeneration,
 } from "../../../infra/agent-events.js";
 import { bindGatewayContextResolver } from "../../../plugins/runtime/gateway-request-scope.js";
-import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../../state/carapace-state-db.js";
 import { reloadTaskRuntimeStateFromStore } from "../../../tasks/runtime-internal.js";
 import { getTaskFlowById } from "../../../tasks/task-flow-registry.js";
 import { findTaskByRunId, getTaskById } from "../../../tasks/task-registry.js";
@@ -101,7 +101,7 @@ async function setupAcceptedRecovery(persistedPhase: "attempted" | "consumed" = 
     })?.phase,
   ).toBe("attempted");
 
-  const database = openOpenClawStateDatabase().db;
+  const database = openCarapaceStateDatabase().db;
   const rejectedPhases = persistedPhase === "attempted" ? "'consumed', 'accepted'" : "'accepted'";
   database.exec(`CREATE TEMP TRIGGER reject_recovery_receipt
     BEFORE UPDATE ON subagent_runs

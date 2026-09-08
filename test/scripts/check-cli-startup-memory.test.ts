@@ -16,7 +16,7 @@ function expectNoNodeStack(stderr: string): void {
 
 function runStartupMemoryCheckWithHelpSamples(
   helpSamplesMb: number[],
-  tempRoot = tempRoots.make("openclaw-startup-memory-test-"),
+  tempRoot = tempRoots.make("carapace-startup-memory-test-"),
 ) {
   let sampleIndex = 0;
   return testing.runStartupMemoryCheck(
@@ -36,7 +36,7 @@ function runStartupMemoryCheckWithHelpSamples(
         return {
           signal: null,
           status: 0,
-          stderr: `__OPENCLAW_MAX_RSS_KB__=${rssMb * 1024}\n`,
+          stderr: `__CARAPACE_MAX_RSS_KB__=${rssMb * 1024}\n`,
           stdout: "",
         };
       },
@@ -76,7 +76,7 @@ describe("check-cli-startup-memory", () => {
     expect(testing.cases).toContainEqual(
       expect.objectContaining({
         id: "pluginsList",
-        args: ["openclaw.mjs", "plugins", "list", "--json"],
+        args: ["carapace.mjs", "plugins", "list", "--json"],
       }),
     );
   });
@@ -90,7 +90,7 @@ describe("check-cli-startup-memory", () => {
       return;
     }
 
-    const tempRoot = tempRoots.make("openclaw-startup-memory-test-");
+    const tempRoot = tempRoots.make("carapace-startup-memory-test-");
     const helpLimitMb = testing.resolveDefaultLimitsMb(process.platform).help;
     const helpSamplesMb = [helpLimitMb + 20, helpLimitMb + 0.5, helpLimitMb - 20];
     const result = runStartupMemoryCheckWithHelpSamples(helpSamplesMb, tempRoot);
@@ -130,51 +130,51 @@ describe("check-cli-startup-memory", () => {
 
   it("keeps invalid startup memory env values from bypassing budgets", () => {
     expect(() =>
-      testing.readPositiveNumberEnv("OPENCLAW_STARTUP_MEMORY_HELP_MB", 100, {
-        OPENCLAW_STARTUP_MEMORY_HELP_MB: "abc",
+      testing.readPositiveNumberEnv("CARAPACE_STARTUP_MEMORY_HELP_MB", 100, {
+        CARAPACE_STARTUP_MEMORY_HELP_MB: "abc",
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_HELP_MB must be a positive number");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_HELP_MB must be a positive number");
     expect(() =>
-      testing.readPositiveNumberEnv("OPENCLAW_STARTUP_MEMORY_HELP_MB", 100, {
-        OPENCLAW_STARTUP_MEMORY_HELP_MB: "1e3",
+      testing.readPositiveNumberEnv("CARAPACE_STARTUP_MEMORY_HELP_MB", 100, {
+        CARAPACE_STARTUP_MEMORY_HELP_MB: "1e3",
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_HELP_MB must be a positive number");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_HELP_MB must be a positive number");
     expect(() =>
-      testing.readPositiveNumberEnv("OPENCLAW_STARTUP_MEMORY_HELP_MB", 100, {
-        OPENCLAW_STARTUP_MEMORY_HELP_MB: "0x10",
+      testing.readPositiveNumberEnv("CARAPACE_STARTUP_MEMORY_HELP_MB", 100, {
+        CARAPACE_STARTUP_MEMORY_HELP_MB: "0x10",
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_HELP_MB must be a positive number");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_HELP_MB must be a positive number");
     expect(() =>
-      testing.readPositiveNumberEnv("OPENCLAW_STARTUP_MEMORY_HELP_MB", 100, {
-        OPENCLAW_STARTUP_MEMORY_HELP_MB: "0",
+      testing.readPositiveNumberEnv("CARAPACE_STARTUP_MEMORY_HELP_MB", 100, {
+        CARAPACE_STARTUP_MEMORY_HELP_MB: "0",
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_HELP_MB must be a positive number");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_HELP_MB must be a positive number");
     expect(
-      testing.readPositiveNumberEnv("OPENCLAW_STARTUP_MEMORY_HELP_MB", 100, {
-        OPENCLAW_STARTUP_MEMORY_HELP_MB: "125.5",
+      testing.readPositiveNumberEnv("CARAPACE_STARTUP_MEMORY_HELP_MB", 100, {
+        CARAPACE_STARTUP_MEMORY_HELP_MB: "125.5",
       }),
     ).toBe(125.5);
   });
 
   it("keeps invalid startup memory timeout env values from parsing loosely", () => {
     expect(() =>
-      testing.readPositiveIntEnv("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
-        OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS: "1e3",
+      testing.readPositiveIntEnv("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
+        CARAPACE_STARTUP_MEMORY_TIMEOUT_MS: "1e3",
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS must be a positive number");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS must be a positive number");
     expect(() =>
-      testing.readPositiveIntEnv("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
-        OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS: "1000.5",
+      testing.readPositiveIntEnv("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
+        CARAPACE_STARTUP_MEMORY_TIMEOUT_MS: "1000.5",
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS must be a positive integer");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS must be a positive integer");
     expect(() =>
-      testing.readPositiveIntEnv("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
-        OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS: String(Number.MAX_SAFE_INTEGER + 1),
+      testing.readPositiveIntEnv("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
+        CARAPACE_STARTUP_MEMORY_TIMEOUT_MS: String(Number.MAX_SAFE_INTEGER + 1),
       }),
-    ).toThrow("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS must be a positive integer");
+    ).toThrow("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS must be a positive integer");
     expect(
-      testing.readPositiveIntEnv("OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
-        OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS: "1000",
+      testing.readPositiveIntEnv("CARAPACE_STARTUP_MEMORY_TIMEOUT_MS", 60_000, {
+        CARAPACE_STARTUP_MEMORY_TIMEOUT_MS: "1000",
       }),
     ).toBe(1000);
   });
@@ -197,7 +197,7 @@ describe("check-cli-startup-memory", () => {
       return;
     }
 
-    const tempRoot = tempRoots.make("openclaw-startup-memory-test-");
+    const tempRoot = tempRoots.make("carapace-startup-memory-test-");
     const result = spawnSync(process.execPath, ["scripts/check-cli-startup-memory.mjs", "--json"], {
       cwd: path.resolve(__dirname, "..", ".."),
       encoding: "utf8",
@@ -230,7 +230,7 @@ describe("check-cli-startup-memory", () => {
       return;
     }
 
-    const tempRoot = tempRoots.make("openclaw-startup-memory-test-");
+    const tempRoot = tempRoots.make("carapace-startup-memory-test-");
     const seenTimeouts: Array<number | undefined> = [];
     const seenKillSignals: Array<string | undefined> = [];
     const timeoutError = Object.assign(new Error("spawnSync timed out"), { code: "ETIMEDOUT" });
@@ -273,7 +273,7 @@ describe("check-cli-startup-memory", () => {
       return;
     }
 
-    const tempRoot = tempRoots.make("openclaw-startup-memory-test-");
+    const tempRoot = tempRoots.make("carapace-startup-memory-test-");
     expect(() =>
       testing.runStartupMemoryCheck(
         [
@@ -287,7 +287,7 @@ describe("check-cli-startup-memory", () => {
           spawnSync: () => ({
             signal: null,
             status: 0,
-            stderr: "__OPENCLAW_MAX_RSS_KB__=0\n",
+            stderr: "__CARAPACE_MAX_RSS_KB__=0\n",
             stdout: "",
           }),
         },
@@ -300,7 +300,7 @@ describe("check-cli-startup-memory", () => {
       return;
     }
 
-    const tempRoot = tempRoots.make("openclaw-startup-memory-test-");
+    const tempRoot = tempRoots.make("carapace-startup-memory-test-");
     const seenArgs: string[][] = [];
     const seenHomes: string[] = [];
 
@@ -324,7 +324,7 @@ describe("check-cli-startup-memory", () => {
             error: null,
             signal: null,
             status: 0,
-            stderr: "__OPENCLAW_MAX_RSS_KB__=1024\n",
+            stderr: "__CARAPACE_MAX_RSS_KB__=1024\n",
             stdout: "",
           };
         },
@@ -340,7 +340,7 @@ describe("check-cli-startup-memory", () => {
       // measure a non-default resolution configuration.
       expect(args[0]).toMatch(/bench-entry\.mjs$/u);
       expect(args[0]).not.toBe("--import");
-      expect(args[1]).not.toBe("openclaw.mjs");
+      expect(args[1]).not.toBe("carapace.mjs");
     }
   });
 });

@@ -1,5 +1,5 @@
-import type { AssistantMessage, Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AssistantMessage, Context, Model } from "@carapace/llm-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { isOpenAIResponsesReplayContext } from "./openai-responses-compaction-replay.js";
 import {
   responsesContinuationPrefixFingerprint,
@@ -20,7 +20,7 @@ type ReplayIdentity = { sessionId?: string; authProfileId?: string };
 
 function inputReplay(message: AssistantMessage) {
   const value =
-    "openclawResponsesInputReplay" in message ? message.openclawResponsesInputReplay : undefined;
+    "carapaceResponsesInputReplay" in message ? message.carapaceResponsesInputReplay : undefined;
   return isRecord(value) ? value : undefined;
 }
 
@@ -53,7 +53,7 @@ export function recordResponsesReasoningState(
     prefixHash: responsesContinuationPrefixFingerprint(request.input, output),
     requestHash: responsesContinuationRequestFingerprint(request),
   };
-  Object.assign(message, { openclawResponsesInputReplay: { ...inputReplay(message), reasoning } });
+  Object.assign(message, { carapaceResponsesInputReplay: { ...inputReplay(message), reasoning } });
 }
 
 /** A cold transport can replay controls, but cannot resurrect a server response handle. */

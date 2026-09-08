@@ -1,6 +1,6 @@
 // Discord plugin module owns its transport-private approval callback envelope.
-import { buildApprovalResolutionRef } from "openclaw/plugin-sdk/approval-reference-runtime";
-import type { MessagePresentationAction } from "openclaw/plugin-sdk/interactive-runtime";
+import { buildApprovalResolutionRef } from "carapace/plugin-sdk/approval-reference-runtime";
+import type { MessagePresentationAction } from "carapace/plugin-sdk/interactive-runtime";
 import type { ComponentData } from "./internal/discord.js";
 
 type DiscordApprovalAction = Extract<MessagePresentationAction, { type: "approval" }>;

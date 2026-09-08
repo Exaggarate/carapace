@@ -20,18 +20,18 @@ describe("shared/entry-status", () => {
       entry: {
         metadata: {
           emoji: "🦀",
-          homepage: " https://openclaw.ai ",
+          homepage: " https://github.com/Exaggarate/carapace ",
           requires: {
             bins: ["bun"],
             anyBins: ["ffmpeg", "sox"],
-            env: ["OPENCLAW_TOKEN"],
+            env: ["CARAPACE_TOKEN"],
             config: ["gateway.bind"],
           },
           os: ["darwin"],
         },
         frontmatter: {
           emoji: "🙂",
-          homepage: "https://docs.openclaw.ai",
+          homepage: "https://github.com/Exaggarate/carapace",
         },
       },
       hasLocalBin: (bin) => bin === "bun",
@@ -44,18 +44,18 @@ describe("shared/entry-status", () => {
 
     expect(result).toEqual({
       emoji: "🦀",
-      homepage: "https://openclaw.ai",
+      homepage: "https://github.com/Exaggarate/carapace",
       required: {
         bins: ["bun"],
         anyBins: ["ffmpeg", "sox"],
-        env: ["OPENCLAW_TOKEN"],
+        env: ["CARAPACE_TOKEN"],
         config: ["gateway.bind"],
         os: ["darwin"],
       },
       missing: {
         bins: [],
         anyBins: [],
-        env: ["OPENCLAW_TOKEN"],
+        env: ["CARAPACE_TOKEN"],
         config: [],
         os: ["darwin"],
       },
@@ -95,7 +95,7 @@ describe("shared/entry-status", () => {
           },
         },
         frontmatter: {
-          website: " https://docs.openclaw.ai ",
+          website: " https://github.com/Exaggarate/carapace ",
           emoji: "🙂",
         },
       },
@@ -106,7 +106,7 @@ describe("shared/entry-status", () => {
 
     expect(result).toEqual({
       emoji: "🙂",
-      homepage: "https://docs.openclaw.ai",
+      homepage: "https://github.com/Exaggarate/carapace",
       required: {
         bins: ["missing-bin"],
         anyBins: [],
@@ -169,17 +169,17 @@ describe("shared/entry-status", () => {
     },
     {
       name: "URL alias is trimmed when higher-priority fields are absent",
-      entry: { frontmatter: { emoji: " ", url: " https://openclaw.ai/install " } },
+      entry: { frontmatter: { emoji: " ", url: " https://github.com/Exaggarate/carapace " } },
       emoji: " ",
-      homepage: "https://openclaw.ai/install",
+      homepage: "https://github.com/Exaggarate/carapace",
     },
     {
       name: "blank homepage suppresses lower-priority aliases",
       entry: {
         frontmatter: {
           homepage: " ",
-          website: "https://docs.openclaw.ai",
-          url: "https://openclaw.ai/install",
+          website: "https://github.com/Exaggarate/carapace",
+          url: "https://github.com/Exaggarate/carapace",
         },
       },
       emoji: undefined,

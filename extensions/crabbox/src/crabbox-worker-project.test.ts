@@ -1,6 +1,6 @@
 import { setImmediate } from "node:timers/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import {
   createNodeBootstrapFixture,
@@ -65,7 +65,7 @@ function projectOptions(events: string[], controller = new AbortController()) {
         mode: "connect" as const,
         setupCode: "synthetic-setup-code",
         setupId: "project-setup",
-        openclawVersion: "2026.8.1",
+        carapaceVersion: "2026.8.1",
         nodeBootstrap: createNodeBootstrapFixture(),
         displayName: "Project worker",
         signal: controller.signal,

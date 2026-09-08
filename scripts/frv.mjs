@@ -20,7 +20,7 @@ import {
 import { plainGhAuthenticatedEnv, resolvePlainGhBin } from "./lib/plain-gh.mjs";
 
 const execFileAsync = promisify(execFile);
-const DEFAULT_REPOSITORY = "openclaw/openclaw";
+const DEFAULT_REPOSITORY = "carapace/carapace";
 const DEFAULT_POLL_MS = 30_000;
 const DEFAULT_TIMEOUT_MS = 12 * 60 * 60_000;
 const DEFAULT_RECONCILE_TIMEOUT_MS = 60_000;
@@ -47,7 +47,7 @@ function configuredTimeout(name, fallback) {
 }
 
 function createOperationDeadline() {
-  const deadline = Date.now() + configuredTimeout("OPENCLAW_FRV_TIMEOUT_MS", DEFAULT_TIMEOUT_MS);
+  const deadline = Date.now() + configuredTimeout("CARAPACE_FRV_TIMEOUT_MS", DEFAULT_TIMEOUT_MS);
   if (!Number.isSafeInteger(deadline)) {
     throw new Error("FRV operation deadline is invalid");
   }
@@ -203,7 +203,7 @@ async function ghAttemptJobs(repository, runId, runAttempt) {
 }
 
 async function downloadExecutionPlan(repository, runId) {
-  const directory = mkdtempSync(join(tmpdir(), "openclaw-frv-plan-"));
+  const directory = mkdtempSync(join(tmpdir(), "carapace-frv-plan-"));
   try {
     try {
       await execGhRead([
@@ -580,7 +580,7 @@ function controllerRunAttempt(run, sourceAttempt, expectedAttempt) {
 }
 
 async function waitForTerminal(runIds, client, operationDeadline, expectedAttempts = new Map()) {
-  const pollMs = configuredTimeout("OPENCLAW_FRV_POLL_MS", DEFAULT_POLL_MS);
+  const pollMs = configuredTimeout("CARAPACE_FRV_POLL_MS", DEFAULT_POLL_MS);
   while (Date.now() < operationDeadline) {
     const runs = await Promise.all(runIds.map((runId) => client.getRun(runId)));
     const ready = runs.every((run) => {
@@ -610,7 +610,7 @@ async function reconcileAttemptStarts(
   const reconcileDeadline = Math.min(
     operationDeadline,
     Date.now() +
-      configuredTimeout("OPENCLAW_FRV_RECONCILE_TIMEOUT_MS", DEFAULT_RECONCILE_TIMEOUT_MS),
+      configuredTimeout("CARAPACE_FRV_RECONCILE_TIMEOUT_MS", DEFAULT_RECONCILE_TIMEOUT_MS),
   );
   const hardFailures = mutationResults.filter(
     (result) =>
@@ -643,7 +643,7 @@ async function reconcileAttemptStarts(
       }
       await sleep(
         Math.min(
-          configuredTimeout("OPENCLAW_FRV_POLL_MS", DEFAULT_POLL_MS),
+          configuredTimeout("CARAPACE_FRV_POLL_MS", DEFAULT_POLL_MS),
           remainingReconcileTime,
         ),
       );
@@ -885,7 +885,7 @@ function print(value, json) {
     console.log(`action: ${value.action}`);
   }
   if (value.finalRunId) {
-    console.log(`final run: https://github.com/openclaw/openclaw/actions/runs/${value.finalRunId}`);
+    console.log(`final run: https://github.com/Exaggarate/carapace/actions/runs/${value.finalRunId}`);
   }
 }
 

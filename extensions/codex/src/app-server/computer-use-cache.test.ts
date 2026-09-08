@@ -10,7 +10,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("prefers the current ChatGPT.app bundled marketplace when both desktop app candidates exist", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const chatGptMarketplacePath = path.join(
       root,
       "Applications",
@@ -46,7 +46,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("falls back to the legacy Codex.app bundled marketplace when ChatGPT.app is absent", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const chatGptMarketplacePath = path.join(
       root,
       "Applications",
@@ -81,7 +81,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("copies the bundled plugin without removing versions used by live clients", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const bundledMarketplacePath = path.join(root, "Codex.app", "plugins", "openai-bundled");
     const bundledPluginRoot = path.join(bundledMarketplacePath, "plugins", "computer-use");
     await fs.mkdir(path.join(bundledPluginRoot, ".codex-plugin"), { recursive: true });
@@ -138,7 +138,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("leaves an up-to-date copied cache entry unchanged", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const bundledMarketplacePath = path.join(root, "Codex.app", "plugins", "openai-bundled");
     const bundledPluginRoot = path.join(bundledMarketplacePath, "plugins", "computer-use");
     await fs.mkdir(path.join(bundledPluginRoot, ".codex-plugin"), { recursive: true });
@@ -176,7 +176,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("refreshes same-version cache bytes for a new desktop generation", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-generation-");
+    const root = tempDirs.make("carapace-computer-use-cache-generation-");
     const bundledMarketplacePath = path.join(root, "Codex.app", "plugins", "openai-bundled");
     const bundledPluginRoot = path.join(bundledMarketplacePath, "plugins", "computer-use");
     await writeBundledComputerUsePlugin(bundledMarketplacePath, "1.0.857");
@@ -211,7 +211,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("leaves same-version cache bytes intact when the generation is stale before publication", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-stale-");
+    const root = tempDirs.make("carapace-computer-use-cache-stale-");
     const bundledMarketplacePath = path.join(root, "Codex.app", "plugins", "openai-bundled");
     const bundledPluginRoot = path.join(bundledMarketplacePath, "plugins", "computer-use");
     await writeBundledComputerUsePlugin(bundledMarketplacePath, "1.0.857");
@@ -260,7 +260,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("refreshes a stale copied cache entry with the bundled version", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const bundledMarketplacePath = path.join(root, "Codex.app", "plugins", "openai-bundled");
     const bundledPluginRoot = path.join(bundledMarketplacePath, "plugins", "computer-use");
     await fs.mkdir(path.join(bundledPluginRoot, ".codex-plugin"), { recursive: true });
@@ -303,7 +303,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a symlinked managed cache parent without touching its external target",
     async () => {
-      const root = tempDirs.make("openclaw-computer-use-cache-link-");
+      const root = tempDirs.make("carapace-computer-use-cache-link-");
       const agentDir = path.join(root, "agent");
       const codexHome = path.join(agentDir, "codex-home");
       const bundledMarketplacePath = path.join(root, "bundled-marketplace");
@@ -328,7 +328,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   );
 
   it("leaves cache entries alone in independent mode", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const result = await ensureCodexComputerUseSharedPluginCache({
       codexHome: path.join(root, "codex-home"),
       bundledMarketplacePath: path.join(root, "missing"),
@@ -343,7 +343,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("preserves an explicitly named marketplace cache", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const codexHome = path.join(root, "agent", "codex-home");
     const cacheRoot = path.join(codexHome, "plugins", "cache", "desktop-tools", "computer-use");
     await fs.mkdir(path.join(cacheRoot, "1.0.101"), { recursive: true });
@@ -365,7 +365,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("preserves the default namespace when marketplacePath is explicit", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const codexHome = path.join(root, "agent", "codex-home");
     const cacheRoot = path.join(codexHome, "plugins", "cache", "openai-bundled", "computer-use");
     await fs.mkdir(path.join(cacheRoot, "1.0.101"), { recursive: true });
@@ -395,7 +395,7 @@ describe("Codex Computer Use shared plugin cache", () => {
   });
 
   it("preserves the active cache when replacement copying fails", async () => {
-    const root = tempDirs.make("openclaw-computer-use-cache-");
+    const root = tempDirs.make("carapace-computer-use-cache-");
     const codexHome = path.join(root, "agent", "codex-home");
     const bundledMarketplacePath = path.join(root, "bundled-marketplace");
     const cachePath = path.join(

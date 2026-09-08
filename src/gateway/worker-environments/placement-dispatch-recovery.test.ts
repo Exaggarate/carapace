@@ -656,7 +656,7 @@ describe("worker placement restart recovery", () => {
       {
         bootstrapReceipt: {
           bundleHash: "a".repeat(64),
-          openclawVersion: "2026.7.2",
+          carapaceVersion: "2026.7.2",
           protocolFeatures: Array.of(WORKER_LAUNCH_V2_PROTOCOL_FEATURE),
         },
       },

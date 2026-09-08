@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   collectManifestModelIdNormalizationPolicies,
   normalizeConfiguredProviderCatalogModelId,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
+} from "@carapace/model-catalog-core/provider-model-id-normalization";
 import { describe, expect, it, vi } from "vitest";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
 import {
@@ -56,7 +56,7 @@ function createSnapshot(
           origin: "config",
           rootDir: "/fixture",
           source: "test",
-          manifestPath: "/fixture/openclaw.plugin.json",
+          manifestPath: "/fixture/carapace.plugin.json",
           modelIdNormalization: {
             providers: {
               fixture: {
@@ -210,7 +210,7 @@ describe("current plugin metadata snapshot", () => {
         expect(
           getCurrentPluginMetadataSnapshot({
             config: { plugins: { allow: ["derived-run-policy"] } },
-            env: { OPENCLAW_BUNDLED_PLUGINS_DIR: "/plugins/redirected-run" },
+            env: { CARAPACE_BUNDLED_PLUGINS_DIR: "/plugins/redirected-run" },
             workspaceDir: agentWorkspaceDir,
           }),
         ).toBe(metadataSnapshot);
@@ -558,7 +558,7 @@ describe("current plugin metadata snapshot", () => {
     {
       name: "development root",
       env: { HOME: "/home/metadata" },
-      changedEnv: { HOME: "/home/metadata", OPENCLAW_DEV_SOURCE_ROOT: process.cwd() },
+      changedEnv: { HOME: "/home/metadata", CARAPACE_DEV_SOURCE_ROOT: process.cwd() },
     },
     {
       name: "Termux prefix",
@@ -603,14 +603,14 @@ describe("current plugin metadata snapshot", () => {
     "rejects configless default-discovery reuse when %s bundled-directory trust changes",
     (trustSource) => {
       const overrideRoot = fs.realpathSync(
-        fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-metadata-bundled-trust-")),
+        fs.mkdtempSync(path.join(os.tmpdir(), "carapace-metadata-bundled-trust-")),
       );
-      const originalTrust = process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+      const originalTrust = process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
       const env: NodeJS.ProcessEnv = {
         VITEST: "true",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: overrideRoot,
+        CARAPACE_BUNDLED_PLUGINS_DIR: overrideRoot,
       };
-      delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+      delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
 
       try {
         const snapshot = createSnapshot();
@@ -623,7 +623,7 @@ describe("current plugin metadata snapshot", () => {
 
         withPluginRuntimeGenerationScope({ metadataSnapshot: snapshot }, () => {
           const trustEnv = trustSource === "supplied" ? env : process.env;
-          trustEnv.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+          trustEnv.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
           expect(resolveBundledPluginsDir(env)).toBe(overrideRoot);
           expect(getCurrentPluginMetadataSnapshot(request)).toBe(snapshot);
         });
@@ -632,9 +632,9 @@ describe("current plugin metadata snapshot", () => {
       } finally {
         clearCurrentPluginMetadataSnapshot();
         if (originalTrust === undefined) {
-          delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+          delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
         } else {
-          process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrust;
+          process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrust;
         }
         fs.rmSync(overrideRoot, { recursive: true, force: true });
       }
@@ -689,12 +689,12 @@ describe("current plugin metadata snapshot", () => {
   it.each([
     { config: { plugins: { load: { paths: ["~/plugins"] } } }, key: "HOME" },
     { config: {}, key: "HOME" },
-    { config: {}, key: "OPENCLAW_BUNDLED_PLUGINS_DIR" },
+    { config: {}, key: "CARAPACE_BUNDLED_PLUGINS_DIR" },
   ])("rejects ordinary metadata when $key changes for $config", ({ config, key }) => {
     const snapshot = createSnapshot({ config });
     const snapshotEnv = {
       HOME: "/home/snapshot",
-      OPENCLAW_HOME: undefined,
+      CARAPACE_HOME: undefined,
       [key]: "/plugins/snapshot",
     };
     const requestedEnv = { ...snapshotEnv, [key]: "/plugins/requested" };
@@ -761,7 +761,7 @@ describe("current plugin metadata snapshot", () => {
     const snapshot = createSnapshot({ config });
     const env = {
       HOME: "/home/snapshot",
-      OPENCLAW_HOME: undefined,
+      CARAPACE_HOME: undefined,
     } as NodeJS.ProcessEnv;
     setCurrentPluginMetadataSnapshot(snapshot, { config, env });
 
@@ -854,7 +854,7 @@ describe("current plugin metadata snapshot", () => {
     const empty = restorePluginMetadataSnapshot(createPluginMetadataSnapshotFixture());
     const env = {
       HOME: "/home/original-snapshot",
-      OPENCLAW_HOME: undefined,
+      CARAPACE_HOME: undefined,
     } as NodeJS.ProcessEnv;
     enumerate.mockClear();
 
@@ -876,7 +876,7 @@ describe("current plugin metadata snapshot", () => {
   });
 
   it("clears the current snapshot when the persisted installed index changes", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-metadata-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-metadata-"));
     try {
       setCurrentPluginMetadataSnapshot(createSnapshot());
 

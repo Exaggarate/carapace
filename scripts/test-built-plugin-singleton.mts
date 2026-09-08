@@ -19,18 +19,18 @@ const {
   clearPluginCommands,
   getPluginCommandSpecs,
   getPluginModuleLoaderStats,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   matchPluginCommand,
   resolvePluginRuntimeLoadContext,
 } = await import(pathToFileURL(smokeEntryPath).href);
 
-assert.equal(typeof loadOpenClawPlugins, "function", "built loader export missing");
+assert.equal(typeof loadCarapacePlugins, "function", "built loader export missing");
 assert.equal(typeof clearPluginCommands, "function", "clearPluginCommands missing");
 assert.equal(typeof getPluginCommandSpecs, "function", "getPluginCommandSpecs missing");
 assert.equal(typeof getPluginModuleLoaderStats, "function", "plugin loader stats missing");
 assert.equal(typeof matchPluginCommand, "function", "matchPluginCommand missing");
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-build-smoke-"));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-build-smoke-"));
 const pluginId = "build-smoke-plugin";
 const distPluginDir = path.join(repoRoot, "dist", "extensions", pluginId);
 const runtimePluginDir = path.join(repoRoot, "dist-runtime", "extensions", pluginId);
@@ -57,9 +57,9 @@ fs.writeFileSync(
   path.join(distPluginDir, "package.json"),
   JSON.stringify(
     {
-      name: "@openclaw/build-smoke-plugin",
+      name: "@carapace/build-smoke-plugin",
       type: "module",
-      openclaw: {
+      carapace: {
         extensions: ["./index.js"],
       },
     },
@@ -69,7 +69,7 @@ fs.writeFileSync(
   "utf8",
 );
 fs.writeFileSync(
-  path.join(distPluginDir, "openclaw.plugin.json"),
+  path.join(distPluginDir, "carapace.plugin.json"),
   JSON.stringify(
     {
       id: pluginId,
@@ -87,7 +87,7 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join(distPluginDir, "index.js"),
   [
-    "import { emptyPluginConfigSchema } from 'openclaw/plugin-sdk/plugin-entry';",
+    "import { emptyPluginConfigSchema } from 'carapace/plugin-sdk/plugin-entry';",
     "",
     "export default {",
     `  id: ${JSON.stringify(pluginId)},`,
@@ -130,7 +130,7 @@ clearPluginCommands();
 const smsStatsBefore = getPluginModuleLoaderStats();
 // Prepared runtimes carry this context into late, plugin-scoped loads. Prove that the load-options
 // projection retains the built-artifact choice instead of reopening source transformation.
-const smsRegistry = loadOpenClawPlugins(
+const smsRegistry = loadCarapacePlugins(
   buildPluginRuntimeLoadOptions(
     resolvePluginRuntimeLoadContext({
       config: {
@@ -142,7 +142,7 @@ const smsRegistry = loadOpenClawPlugins(
       },
       env: {
         ...process.env,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "extensions"),
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "extensions"),
       },
       workspaceDir: tempRoot,
     }),
@@ -223,7 +223,7 @@ fs.writeFileSync(
   path.join(artifactBuiltRoot, "package.json"),
   JSON.stringify({
     type: "module",
-    openclaw: { extensions: ["./index.js"] },
+    carapace: { extensions: ["./index.js"] },
   }),
 );
 const artifactConfig = {
@@ -240,7 +240,7 @@ const artifactManifest = {
   skills: [],
   hooks: [],
   contracts: { tools: ["artifact_probe"] },
-  manifestPath: path.join(artifactSourceRoot, "openclaw.plugin.json"),
+  manifestPath: path.join(artifactSourceRoot, "carapace.plugin.json"),
   providerDiscoverySource: path.join(artifactSourceRoot, "provider-discovery.ts"),
   configSchema: { type: "object", properties: {}, additionalProperties: false },
   packageManifest: { extensions: ["./index.ts"], build: { bundledDist: false } },
@@ -254,7 +254,7 @@ for (const toolDiscovery of [false, true]) {
   for (const preferBuiltPluginArtifacts of [undefined, false]) {
     const values = {
       config: artifactConfig,
-      env: { ...process.env, OPENCLAW_STATE_DIR: path.join(tempRoot, "artifact-state") },
+      env: { ...process.env, CARAPACE_STATE_DIR: path.join(tempRoot, "artifact-state") },
       manifestRegistry: artifactManifestRegistry,
       installRecords: {},
       preferBuiltPluginArtifacts,
@@ -263,7 +263,7 @@ for (const toolDiscovery of [false, true]) {
     const options = toolDiscovery
       ? buildPluginRuntimeLoadOptions(resolvePluginRuntimeLoadContext(values))
       : values;
-    const selected = loadOpenClawPlugins({
+    const selected = loadCarapacePlugins({
       ...options,
       cache: false,
       activate: false,
@@ -304,7 +304,7 @@ for (const [orderIndex, preferences] of [
 ].entries()) {
   const options = {
     config: artifactConfig,
-    env: { ...process.env, OPENCLAW_STATE_DIR: path.join(tempRoot, "artifact-state") },
+    env: { ...process.env, CARAPACE_STATE_DIR: path.join(tempRoot, "artifact-state") },
     workspaceDir: path.join(tempRoot, `cache-order-${orderIndex}`),
     manifestRegistry: {
       ...artifactManifestRegistry,
@@ -316,7 +316,7 @@ for (const [orderIndex, preferences] of [
     activate: false,
   };
   const registries = preferences.map((preferBuiltPluginArtifacts) => {
-    const selected = loadOpenClawPlugins({ ...options, preferBuiltPluginArtifacts });
+    const selected = loadCarapacePlugins({ ...options, preferBuiltPluginArtifacts });
     const label = preferBuiltPluginArtifacts ? "package-local" : "source";
     assert.equal(selected.plugins[0]?.status, "loaded", selected.plugins[0]?.error);
     assert.equal(selected.providers[0]?.provider.label, label, `cache call order ${orderIndex}`);
@@ -325,7 +325,7 @@ for (const [orderIndex, preferences] of [
   });
   for (const [index, preferBuiltPluginArtifacts] of preferences.entries()) {
     assert.equal(
-      loadOpenClawPlugins({ ...options, preferBuiltPluginArtifacts }),
+      loadCarapacePlugins({ ...options, preferBuiltPluginArtifacts }),
       registries[index],
       "repeated selection did not reuse its own cached registry",
     );
@@ -334,12 +334,12 @@ for (const [orderIndex, preferences] of [
 
 clearPluginCommands();
 
-const registry = loadOpenClawPlugins({
+const registry = loadCarapacePlugins({
   cache: false,
   workspaceDir: tempRoot,
   env: {
     ...process.env,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "dist-runtime", "extensions"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "dist-runtime", "extensions"),
   },
   config: {
     plugins: {

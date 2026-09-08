@@ -1,4 +1,4 @@
-// Persists managed task-flow records through the OpenClaw SQLite state database.
+// Persists managed task-flow records through the Carapace SQLite state database.
 import type { DatabaseSync } from "node:sqlite";
 import type { Insertable, Selectable } from "kysely";
 import type { AdmittedRunContext } from "../agents/admitted-run-context.js";
@@ -16,14 +16,14 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import type { TaskFlowRegistryStoreSnapshot } from "./task-flow-registry.store.types.js";
 import {
   parseOptionalTaskFlowSyncMode,
@@ -35,8 +35,8 @@ import {
 import { parseDeliveryContextJson, parseSqliteJsonValue } from "./task-registry.sqlite.shared.js";
 import { parseTaskNotifyPolicy } from "./task-registry.types.js";
 
-type FlowRunsTable = OpenClawStateKyselyDatabase["flow_runs"];
-type FlowRegistryStoreDatabase = Pick<OpenClawStateKyselyDatabase, "flow_runs">;
+type FlowRunsTable = CarapaceStateKyselyDatabase["flow_runs"];
+type FlowRegistryStoreDatabase = Pick<CarapaceStateKyselyDatabase, "flow_runs">;
 
 type FlowRegistryRow = Selectable<FlowRunsTable> & {
   sync_mode: string | null;
@@ -49,7 +49,7 @@ type FlowRegistryDatabase = {
   path: string;
 };
 
-// SQLite-backed task-flow store mirrors the in-process registry into openclaw-state.db.
+// SQLite-backed task-flow store mirrors the in-process registry into carapace-state.db.
 let cachedDatabase: FlowRegistryDatabase | null = null;
 
 function serializeJson(value: unknown): string | null {
@@ -222,7 +222,7 @@ export function readTaskFlowRecord(db: DatabaseSync, flowId: string): TaskFlowRe
 }
 
 function openFlowRegistryDatabase(): FlowRegistryDatabase {
-  const database = openOpenClawStateDatabase();
+  const database = openCarapaceStateDatabase();
   const pathname = database.path;
   if (cachedDatabase && cachedDatabase.path === pathname && cachedDatabase.db.isOpen) {
     return cachedDatabase;
@@ -239,7 +239,7 @@ function openFlowRegistryDatabase(): FlowRegistryDatabase {
 
 function withWriteTransaction(write: (database: FlowRegistryDatabase) => void) {
   const database = openFlowRegistryDatabase();
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     write(database);
   });
 }
@@ -251,7 +251,7 @@ export function loadTaskFlowRegistryStateFromSqlite(): TaskFlowRegistryStoreSnap
 /** Loads task flows without creating or migrating shared state. */
 export function loadTaskFlowRegistryStateFromSqliteReadOnly(): TaskFlowRegistryStoreSnapshot {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => readTaskFlowRegistrySnapshot(db)) ?? {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => readTaskFlowRegistrySnapshot(db)) ?? {
       flows: new Map(),
     }
   );
@@ -267,13 +267,13 @@ export function upsertTaskFlowRegistryRecordToSqlite(flow: TaskFlowRecord) {
 export function bindTaskFlowExecution(params: {
   admitted: AdmittedRunContext;
   flowId: string;
-  options?: OpenClawStateDatabaseOptions;
+  options?: CarapaceStateDatabaseOptions;
 }): ExecutionOwnerBindingResult {
   const binding = executionOwnerBindingFromAdmission(params.admitted);
   if (!binding) {
     return "disabled";
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getFlowRegistryKysely(db);
       const current = executeSqliteQueryTakeFirstSync(
@@ -310,5 +310,5 @@ export function deleteTaskFlowRegistryRecordFromSqlite(flowId: string) {
 
 export function closeTaskFlowRegistryDatabase() {
   cachedDatabase = null;
-  closeOpenClawStateDatabase();
+  closeCarapaceStateDatabase();
 }

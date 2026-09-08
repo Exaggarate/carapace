@@ -1,13 +1,13 @@
 import { createServer, type Server } from "node:http";
-import { withFirstStreamEventTimeout } from "@openclaw/ai/internal/runtime";
+import { withFirstStreamEventTimeout } from "@carapace/ai/internal/runtime";
 import { beforeEach, describe, expect, it } from "vitest";
 import { withTestTimeout } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "../../plugins/provider-runtime-model.types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import type { StreamFn } from "../runtime/index.js";
 import { guardModelFixtureAuth } from "./model.fixture.test-support.js";
 import { resolveModelAsync } from "./model.js";
@@ -29,10 +29,10 @@ const SHORT_CONTROL_TIMEOUT_MS = 20;
 
 type RebuildingHookStage = "model" | "transport";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "provider-timeout" });
+  state = await createCarapaceTestState({ label: "provider-timeout" });
   const auth = guardModelFixtureAuth(state.root);
   return async () => {
     try {
@@ -75,7 +75,7 @@ function createRebuildingRuntimeHooks(
   };
 }
 
-function createProviderConfig(baseUrl: string, timeoutSeconds?: number): OpenClawConfig {
+function createProviderConfig(baseUrl: string, timeoutSeconds?: number): CarapaceConfig {
   return {
     models: {
       providers: {

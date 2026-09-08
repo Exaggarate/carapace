@@ -4,7 +4,7 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { MovePathPublicationReceipt } from "@openclaw/fs-safe/atomic";
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isObjectRecord } from "@carapace/normalization-core/record-coerce";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { hasErrnoCode } from "./errno.js";
 import { pathExists } from "./fs-safe.js";
@@ -23,7 +23,7 @@ const INSTALL_BASE_CHANGED_ABORT_WARNING =
 const INSTALL_BASE_CHANGED_BACKUP_WARNING =
   "Install base directory changed before backup cleanup; leaving backup in place.";
 const STAGED_NPM_PROJECT_CONFIG_NAME = ".npmrc";
-const STAGED_NPM_PROJECT_CONFIG_PREFIX = ".openclaw-install-hidden-npmrc-";
+const STAGED_NPM_PROJECT_CONFIG_PREFIX = ".carapace-install-hidden-npmrc-";
 
 type HiddenProjectConfigFile = {
   hiddenDir: string;
@@ -176,9 +176,9 @@ type PackageDirInstallTransactionRequest = {
   assertOwned?: () => void;
 };
 
-const PACKAGE_DIR_INSTALL_TRANSACTION = Symbol.for("openclaw.packageDirInstallTransaction");
+const PACKAGE_DIR_INSTALL_TRANSACTION = Symbol.for("carapace.packageDirInstallTransaction");
 const PACKAGE_DIR_INSTALL_TRANSACTION_REQUEST = Symbol.for(
-  "openclaw.packageDirInstallTransactionRequest",
+  "carapace.packageDirInstallTransactionRequest",
 );
 
 export function requestDeferredPackageDirInstall<T extends object>(
@@ -330,7 +330,7 @@ export async function installPackageDir<
       }
       if (!quarantine) {
         const directory = await fs.mkdtemp(
-          path.join(installBaseRealPath, ".openclaw-install-rollback-"),
+          path.join(installBaseRealPath, ".carapace-install-rollback-"),
         );
         const identity = fsSync.lstatSync(directory, { bigint: true });
         try {
@@ -438,7 +438,7 @@ export async function installPackageDir<
       installBaseDir: installBaseRealPath,
       candidatePaths: [canonicalTargetDir],
     });
-    stageDir = await fs.mkdtemp(path.join(installBaseRealPath, ".openclaw-install-stage-"));
+    stageDir = await fs.mkdtemp(path.join(installBaseRealPath, ".carapace-install-stage-"));
     if (params.sourceDir !== undefined) {
       await fs.cp(params.sourceDir, stageDir, {
         recursive: true,
@@ -503,7 +503,7 @@ export async function installPackageDir<
   }
 
   if (params.mode === "update" && (await pathExists(canonicalTargetDir))) {
-    const backupRoot = path.join(installBaseRealPath, ".openclaw-install-backups");
+    const backupRoot = path.join(installBaseRealPath, ".carapace-install-backups");
     const backupPath = path.join(
       backupRoot,
       `${path.basename(canonicalTargetDir)}-${randomUUID()}`,

@@ -1,17 +1,17 @@
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
 import type {
   ApprovalMetadataView,
   ChannelApprovalKind,
   ExpiredApprovalView,
   PendingApprovalView,
   ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   formatApprovalDecisionLabel,
   formatChannelApprovalResolvedLabel,
   type ExecApprovalDecision,
-} from "openclaw/plugin-sdk/approval-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { msTeamsApprovalControls } from "./approval-card-actions.js";
 
 export type MSTeamsApprovalActionToken = {
@@ -98,7 +98,7 @@ export function buildMSTeamsPendingApprovalCard(params: {
     view.approvalKind === "plugin"
       ? "Plugin"
       : view.approvalKind === "system-agent"
-        ? "OpenClaw Change"
+        ? "Carapace Change"
         : "Exec";
   const actionTokens: MSTeamsApprovalActionToken[] = [];
   const actions = view.actions.map(({ decision, label }) => {
@@ -107,7 +107,7 @@ export function buildMSTeamsPendingApprovalCard(params: {
     return {
       type: "Action.Submit",
       title: label,
-      data: { openclawAction: "approval", token },
+      data: { carapaceAction: "approval", token },
     };
   });
   const remainingSeconds = Math.max(0, Math.ceil((view.expiresAtMs - nowMs) / 1000));
@@ -133,7 +133,7 @@ export function buildMSTeamsResolvedApprovalCard(
     view.approvalKind === "plugin"
       ? "Plugin"
       : view.approvalKind === "system-agent"
-        ? "OpenClaw Change"
+        ? "Carapace Change"
         : "Exec";
   const resolvedBy = normalizeOptionalString(view.resolvedBy);
   const decisionLabel = formatChannelApprovalResolvedLabel(view);
@@ -154,7 +154,7 @@ export function buildMSTeamsExpiredApprovalCard(
     view.approvalKind === "plugin"
       ? "Plugin"
       : view.approvalKind === "system-agent"
-        ? "OpenClaw Change"
+        ? "Carapace Change"
         : "Exec";
   return buildAdaptiveCard([
     ...buildCardHeading(

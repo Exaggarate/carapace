@@ -1,7 +1,7 @@
 // Agent binding test support centralizes mocked channel plugin registries and lazy imports.
 import type { Mock } from "vitest";
 import { vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
 import { createTestRuntime } from "./test-runtime-config-helpers.js";
 
@@ -14,10 +14,10 @@ export const writeConfigFileMock: Mock<(...args: unknown[]) => Promise<unknown>>
   .fn()
   .mockResolvedValue(undefined);
 const replaceConfigFileMock: Mock<(...args: unknown[]) => Promise<unknown>> = vi.fn(
-  async (params: { sourceConfig: OpenClawConfig }): Promise<ReplaceConfigFileResult> => {
+  async (params: { sourceConfig: CarapaceConfig }): Promise<ReplaceConfigFileResult> => {
     await writeConfigFileMock(params.sourceConfig);
     return {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       previousHash: null,
       snapshot: {} as never,
       nextConfig: params.sourceConfig,
@@ -41,14 +41,14 @@ vi.mock("./agents.command-shared.js", () => ({
 vi.mock("./config-validation.js", () => ({
   requireValidConfig: async (_runtime: unknown, opts?: unknown) => {
     const snapshot = (await readConfigFileSnapshotMock(opts)) as
-      | { config?: OpenClawConfig; sourceConfig?: OpenClawConfig }
+      | { config?: CarapaceConfig; sourceConfig?: CarapaceConfig }
       | undefined;
     return snapshot?.sourceConfig ?? snapshot?.config ?? null;
   },
   requireValidConfigForWrite: async () => {
     const snapshot = (await readConfigFileSnapshotMock()) as {
-      sourceConfig?: OpenClawConfig;
-      config: OpenClawConfig;
+      sourceConfig?: CarapaceConfig;
+      config: CarapaceConfig;
     };
     return {
       snapshot: { ...snapshot, sourceConfig: snapshot.sourceConfig ?? snapshot.config },

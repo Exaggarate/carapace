@@ -1,9 +1,9 @@
 /** Tests Code Mode catalog and model-visible surface. */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as codeModeExecution from "./code-mode-execution.js";
 import {
   addClientToolsToCodeModeCatalog,
@@ -234,7 +234,7 @@ describe("Code Mode catalog and model-visible surface", () => {
 
   it("hides normal tools when only the active agent enables code mode", () => {
     const catalogRef = createToolSearchCatalogRef();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         entries: { ops: { tools: { codeMode: true } } },
       },
@@ -332,7 +332,7 @@ describe("Code Mode catalog and model-visible surface", () => {
     expect(parameters.properties?.code?.description).toContain("`require`, or `import`");
     expect(parameters.properties?.restartSafe?.description).toContain("Do not set on a new exec");
     expect(parameters.properties?.restartSafe?.description).toContain(
-      "only when OpenClaw explicitly requests replay after a gateway restart",
+      "only when Carapace explicitly requests replay after a gateway restart",
     );
     expect(parameters.properties?.restartSafe?.description).toContain(
       "never for write, edit, exec, or any mutation",
@@ -355,11 +355,11 @@ describe("Code Mode catalog and model-visible surface", () => {
       catalogRef,
     });
 
-    // The compacted catalog is known and holds no openclaw:core:nodes entry
+    // The compacted catalog is known and holds no carapace:core:nodes entry
     // (owner-only surfaces filter it); advertising the namespace anyway sends
     // the model into guaranteed unknown-tool failures.
     const execTool = expectDefined(compacted.tools[0], "exec tool test invariant");
-    expect(catalogRef.current?.entries.some((entry) => entry.id === "openclaw:core:nodes")).toBe(
+    expect(catalogRef.current?.entries.some((entry) => entry.id === "carapace:core:nodes")).toBe(
       false,
     );
     expect(execTool.description).not.toContain("paired Gateway nodes");
@@ -395,7 +395,7 @@ describe("Code Mode catalog and model-visible surface", () => {
     },
   ] satisfies {
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     expectedBudgetMs: number;
     pluginName: string;
   }[])(
@@ -465,7 +465,7 @@ describe("Code Mode catalog and model-visible surface", () => {
     expect(description).toContain(
       "- read { path: string; cursor?: number /* integer, >= 0 */; limit?: number; offset?: number /* integer, >= 1 */; optional?: true } -> ?",
     );
-    expect(description).not.toContain("openclaw:fake-code-mode");
+    expect(description).not.toContain("carapace:fake-code-mode");
     expect(description.indexOf("alpha_tool")).toBeLessThan(description.indexOf("zeta_tool"));
     expect(description).not.toContain("Description stays deferred.");
     expect(description).not.toContain("Another deferred description.");
@@ -679,7 +679,7 @@ describe("Code Mode catalog and model-visible surface", () => {
     expect(description).toContain("API.list(prefix?)");
     expect(description).toContain("MCP tools are available only through");
     expect(description).toContain("- fake_noop ");
-    expect(description).not.toContain("openclaw:fake-code-mode");
+    expect(description).not.toContain("carapace:fake-code-mode");
     expect(description).not.toContain("github__create_issue");
     expect(description).not.toContain("malicious_prompt");
   });
@@ -712,7 +712,7 @@ describe("Code Mode catalog and model-visible surface", () => {
     expect(description).toMatch(/- MCP_[a-f0-9]{8} /u);
     expect(description).toMatch(/- class_[a-f0-9]{8} /u);
     expect(description).toContain("- tool_9patch ");
-    expect(description).not.toContain("openclaw:fake-code-mode");
+    expect(description).not.toContain("carapace:fake-code-mode");
   });
 
   it("normalizes a lone llm-task tool to llm_task", () => {

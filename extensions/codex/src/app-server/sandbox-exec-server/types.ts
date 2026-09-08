@@ -2,8 +2,8 @@
  * Shared protocol and runtime state types for the Codex sandbox exec-server
  * transport-neutral execution session.
  */
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { SandboxContext } from "openclaw/plugin-sdk/sandbox";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import type { SandboxContext } from "carapace/plugin-sdk/sandbox";
 import type { JsonObject, JsonValue } from "../protocol.js";
 import type { SandboxChildOwner } from "./sandbox-child.js";
 
@@ -93,7 +93,7 @@ export type ManagedProcess = {
 };
 
 /** Common loopback server and lease ownership shared by both execution transports. */
-type OpenClawExecServerLease = {
+type CarapaceExecServerLease = {
   environmentId: string;
   authPath: string;
   refCount: number;
@@ -108,8 +108,8 @@ type OpenClawExecServerLease = {
   cleanupTasks: Set<Promise<void>>;
 };
 
-/** Locally interpreted exec-server protocol backed by an OpenClaw sandbox. */
-export type OpenClawExecServer = OpenClawExecServerLease & {
+/** Locally interpreted exec-server protocol backed by an Carapace sandbox. */
+export type CarapaceExecServer = CarapaceExecServerLease & {
   backend: NonNullable<SandboxContext["backend"]>;
   fsBridge: NonNullable<SandboxContext["fsBridge"]>;
   readonly networkIsolated: boolean;
@@ -127,7 +127,7 @@ export type CodexNodeExecServerLease = {
 };
 
 /** Opaque exec-server relay backed by the exact prepared paired-device placement. */
-export type OpenClawNodeExecServer = OpenClawExecServerLease & {
+export type CarapaceNodeExecServer = CarapaceExecServerLease & {
   node: {
     id: string;
     leases: Map<string, CodexNodeExecServerLease>;
@@ -135,4 +135,4 @@ export type OpenClawNodeExecServer = OpenClawExecServerLease & {
 };
 
 /** One canonical loopback/refcount owner with either local or node connection handling. */
-export type OpenClawLeasedExecServer = OpenClawExecServer | OpenClawNodeExecServer;
+export type CarapaceLeasedExecServer = CarapaceExecServer | CarapaceNodeExecServer;

@@ -6,9 +6,9 @@ import {
   resetSessionEntryLifecycle,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { progressCardStore } from "../progress-card-store.js";
 import { handleGatewayRequest } from "../server-methods.js";
 import {
@@ -31,8 +31,8 @@ describe("progress card request authorization", () => {
   )(
     "revalidates $method for $sessionKey after preparation (replace=$replace)",
     async (testCase) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
-        const cfg: OpenClawConfig = {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
+        const cfg: CarapaceConfig = {
           ...rolePolicyConfig(),
           agents: { ownership: "explicit", entries: { main: {}, work: {} } },
           session: { scope: "per-sender" },
@@ -210,8 +210,8 @@ describe("progress card request authorization", () => {
 it.each([false, true])(
   "rejects a pre-reset card write after a same-id reset (admin=%s)",
   async (admin) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
+      const cfg: CarapaceConfig = {
         ...rolePolicyConfig(),
         agents: { ownership: "explicit", entries: { main: {}, work: {} } },
       };

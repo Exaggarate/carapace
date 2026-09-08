@@ -28,7 +28,7 @@ describe("live model policy configuration", () => {
   });
 
   it("selects a scoped plugin's modern models under Vitest", () => {
-    const rootDir = makeTrackedTempDir("openclaw-live-model-policy", tempDirs);
+    const rootDir = makeTrackedTempDir("carapace-live-model-policy", tempDirs);
     const fixture = createColdPluginFixture({ rootDir });
     fs.writeFileSync(
       fixture.runtimeSource,
@@ -45,7 +45,7 @@ describe("live model policy configuration", () => {
       };`,
     );
     const env = createColdPluginHermeticEnv(rootDir, {
-      bundledPluginsDir: makeTrackedTempDir("openclaw-live-model-empty-bundles", tempDirs),
+      bundledPluginsDir: makeTrackedTempDir("carapace-live-model-empty-bundles", tempDirs),
     });
     const config = createColdPluginConfig(rootDir, fixture.pluginId);
     const ref = { provider: fixture.providerId, id: "current-model", env };

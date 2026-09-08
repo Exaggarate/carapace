@@ -4,14 +4,14 @@ import {
   recordSessionParticipant,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { runOpenClawAgentWriteTransaction } from "../../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { runCarapaceAgentWriteTransaction } from "../../state/carapace-agent-db.js";
 import {
   ensureProfileForEmail,
   getUserProfileDisplay,
   linkEmail,
 } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { SessionsListResult } from "../session-utils.types.js";
 import { respondWithCachedSessionList } from "./sessions-list-cache.js";
 import type { GatewayClient, GatewayRequestContext } from "./types.js";
@@ -53,7 +53,7 @@ it("invalidates completed sessions.list identity after a worker environment inve
     inventoryVersion: () => inventoryVersion,
   };
   const context = { workerEnvironmentService } as unknown as GatewayRequestContext;
-  const config: OpenClawConfig = {};
+  const config: CarapaceConfig = {};
   const run = vi.fn(async () => {
     const value = result("available");
     Object.assign(value.sessions[0]!.placement!, workerEnvironmentService.get());
@@ -88,7 +88,7 @@ it("invalidates completed sessions.list identity after a worker environment inve
 });
 
 it("does not publish old in-flight runner availability across a version transition", async () => {
-  const config: OpenClawConfig = {};
+  const config: CarapaceConfig = {};
   let runnerAvailabilityVersion = 0;
   const context = {
     workerPlacementRunnerAvailabilityReader: {
@@ -100,7 +100,7 @@ it("does not publish old in-flight runner availability across a version transiti
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.read", "operator.write"],
     },
@@ -144,7 +144,7 @@ it("does not publish old in-flight runner availability across a version transiti
   });
   expect(await fresh).toBe(offline);
   expect(await requestList(async () => result("available"))).toBe(offline);
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const scope = { agentId: "main", env: state.env, sessionKey: "agent:main:runner-fence" };
     await upsertSessionEntryCore(scope, { sessionId: "cache-publication", updatedAt: 1 });
     const former = ensureProfileForEmail("former@example.test", { env: state.env });
@@ -159,7 +159,7 @@ it("does not publish old in-flight runner availability across a version transiti
     const empty = await requestList(snapshot);
     expect(empty?.sessions[0]?.participantCount).toBe(0);
     expect(() =>
-      runOpenClawAgentWriteTransaction(() => {
+      runCarapaceAgentWriteTransaction(() => {
         recordSessionParticipant(scope, {
           identity: { type: "profile", id: former.id },
           promptedAt: 10,

@@ -190,7 +190,7 @@ pub fn build(
         .separator()
         .items(&[&start, &stop, &restart])
         .separator()
-        .text(QUIT_ID, "Quit OpenClaw")
+        .text(QUIT_ID, "Quit Carapace")
         .build()?;
 
     // macOS draws menu bar icons from the alpha channel alone (see
@@ -202,7 +202,7 @@ pub fn build(
     let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/32x32.png"))?;
     let menu_quickchat_shortcut = quickchat_shortcut.clone();
     let menu_global_shortcut = global_shortcut.clone();
-    let tray_builder = TrayIconBuilder::with_id("openclaw-main")
+    let tray_builder = TrayIconBuilder::with_id("carapace-main")
         .icon(tray_icon)
         .menu(&menu)
         .show_menu_on_left_click(false)
@@ -500,7 +500,7 @@ mod tests {
             .expect("clock before Unix epoch")
             .as_nanos();
         let directory = std::env::temp_dir().join(format!(
-            "openclaw-global-shortcut-test-{}-{unique}",
+            "carapace-global-shortcut-test-{}-{unique}",
             std::process::id()
         ));
         fs::create_dir_all(&directory).expect("create test directory");

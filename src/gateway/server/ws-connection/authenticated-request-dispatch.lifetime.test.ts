@@ -28,7 +28,7 @@ describe("authenticated request completion", { concurrent: false }, () => {
       const initialRoot = path.join(os.tmpdir(), "dispatch-lifetime", "fixture");
       const restoredRoot = path.join(os.tmpdir(), "dispatch-lifetime", "restored");
       // Exercise late path selection without opening a store or changing process selectors.
-      const selection = { OPENCLAW_STATE_DIR: initialRoot };
+      const selection = { CARAPACE_STATE_DIR: initialRoot };
       let selectedRoot: string | undefined;
       let dispatched = false;
       const unblock = () => release.resolve();
@@ -84,7 +84,7 @@ describe("authenticated request completion", { concurrent: false }, () => {
         .dispatch({ type: "req", id: "held", method: "test.lifetime", params: {} }, client)
         .then(() => {
           dispatched = true;
-          selection.OPENCLAW_STATE_DIR = restoredRoot;
+          selection.CARAPACE_STATE_DIR = restoredRoot;
         });
       try {
         await entered.promise;

@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { expect, it, vi } from "vitest";
 import { resolveWorkspaceStateIdentity } from "../agents/workspace-state-identity.js";
 import { runCommandWithRuntime } from "../cli/cli-utils.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   readExecApprovalsConfigRow,
   serializeExecApprovals,
@@ -14,8 +14,8 @@ import {
   detectLegacyExecApprovals,
   migrateLegacyExecApprovals,
 } from "../infra/state-migrations.exec-approvals.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runDoctorHealthFlow } from "./doctor-health.js";
 
 const { mocks } = await import("./doctor-health.test-support.js");
@@ -23,13 +23,13 @@ const { mocks } = await import("./doctor-health.test-support.js");
 it("reports unsupported workspace and conflicting exec policy without recommending itself", async () => {
   mocks.packageRoot.mockReturnValue(undefined);
   mocks.outro.mockClear();
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-    const cfg: OpenClawConfig = {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+    const cfg: CarapaceConfig = {
       agents: { entries: { main: { default: true, workspace: state.workspaceDir } } },
     };
     mocks.config.mockReturnValue(cfg);
     const identity = resolveWorkspaceStateIdentity(state.workspaceDir);
-    const { db, path: databasePath } = openOpenClawStateDatabase({ env: state.env });
+    const { db, path: databasePath } = openCarapaceStateDatabase({ env: state.env });
     db.prepare(
       "INSERT INTO workspace_setup_state (workspace_key, workspace_path, version, updated_at) VALUES (?, ?, 99, 1)",
     ).run(identity.workspaceKey, identity.workspacePath);
@@ -65,12 +65,12 @@ it("reports unsupported workspace and conflicting exec policy without recommendi
     expect(output).toContain(databasePath);
     expect(output).toContain(state.workspaceDir);
     expect(output).toContain("99");
-    expect(output).toContain("compatible OpenClaw build");
+    expect(output).toContain("compatible Carapace build");
     expect(output).toContain(sourcePath);
     expect(output).toContain("reconcile this file");
-    expect(output).not.toMatch(/(?:openclaw\s+)?doctor\s+--(?:fix|repair)/i);
+    expect(output).not.toMatch(/(?:carapace\s+)?doctor\s+--(?:fix|repair)/i);
     expect(fs.readFileSync(sourcePath, "utf8")).toBe(legacy);
-    const reopened = openOpenClawStateDatabase({ env: state.env }).db;
+    const reopened = openCarapaceStateDatabase({ env: state.env }).db;
     expect(readExecApprovalsConfigRow(reopened)).toEqual(canonical);
     expect(
       reopened

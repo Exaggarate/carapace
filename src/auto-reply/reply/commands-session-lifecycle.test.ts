@@ -1,6 +1,6 @@
 // Tests conversation binding lifecycle updates and non-destructive detach.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import type { HandleCommandsParams } from "./commands-types.js";
 import { parseInlineSessionDirectives } from "./directive-handling.parse.js";
@@ -264,7 +264,7 @@ vi.mock("../../infra/outbound/session-binding-service.js", () => {
 let handleSessionCommand: (typeof import("./commands-session.js"))["handleSessionCommand"];
 const baseCfg = {
   session: { mainKey: "main", scope: "per-sender" },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 function buildSessionCommandParams(
   commandBody: string,

@@ -2,13 +2,13 @@
 import {
   extractErrorCode,
   formatErrorMessage as formatSharedErrorMessage,
-} from "@openclaw/normalization-core/error-coercion";
+} from "@carapace/normalization-core/error-coercion";
 import { redactSensitiveText } from "../logging/redact.js";
 export {
   collectErrorGraphCandidates,
   extractErrorCode,
   readErrorName,
-} from "@openclaw/normalization-core/error-coercion";
+} from "@carapace/normalization-core/error-coercion";
 export { hasErrnoCode, isErrno, isMissingPathError } from "./errno.js";
 
 export function readErrorCause(error: unknown): unknown {
@@ -27,7 +27,7 @@ export function formatErrorMessageWithCode(err: unknown): string {
   return formatSharedErrorMessage(err, { includeCode: true, redact: redactSensitiveText });
 }
 
-export { stringifyNonErrorCause, toErrorObject } from "@openclaw/normalization-core/error-coercion";
+export { stringifyNonErrorCause, toErrorObject } from "@carapace/normalization-core/error-coercion";
 
 export function formatUncaughtError(err: unknown): string {
   if (extractErrorCode(err) === "INVALID_CONFIG") {

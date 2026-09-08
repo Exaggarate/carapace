@@ -9,13 +9,13 @@ import { runExtensionRelayDaemon } from "./relay-daemon.js";
 const TOKEN = relayTestKey(1);
 
 const tempStateDirs: string[] = [];
-const savedStateDirEnv = process.env.OPENCLAW_STATE_DIR;
+const savedStateDirEnv = process.env.CARAPACE_STATE_DIR;
 
 afterEach(async () => {
   if (savedStateDirEnv === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = savedStateDirEnv;
+    process.env.CARAPACE_STATE_DIR = savedStateDirEnv;
   }
   await Promise.all(
     tempStateDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })),
@@ -24,14 +24,14 @@ afterEach(async () => {
 
 /** Point readExtensionRelayToken() at an isolated credentials dir holding TOKEN. */
 async function stageRelaySecret(): Promise<void> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-daemon-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-relay-daemon-"));
   tempStateDirs.push(stateDir);
   const credentialsDir = path.join(stateDir, "credentials");
   await fs.mkdir(credentialsDir, { recursive: true, mode: 0o700 });
   await fs.writeFile(path.join(credentialsDir, "browser-extension-relay.secret"), `${TOKEN}\n`, {
     mode: 0o600,
   });
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  process.env.CARAPACE_STATE_DIR = stateDir;
 }
 
 describe("runExtensionRelayDaemon", () => {

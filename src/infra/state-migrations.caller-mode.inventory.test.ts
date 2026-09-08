@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { withDoctorSqliteMaintenanceLock } from "../commands/doctor-sqlite-maintenance-lock.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
 import {
   listPluginDoctorStateMigrationEntries,
@@ -16,11 +16,11 @@ import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surface
 import { createPluginCache, withPluginCache } from "../plugins/plugin-cache.js";
 import { loadPluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import { loadPluginRegistrySnapshotWithMetadata } from "../plugins/plugin-registry-snapshot.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { autoMigrateLegacyState } from "./state-migrations.doctor.js";
 import { runPostSessionPluginDoctorStateRepairs } from "./state-migrations.plugin-doctor.js";
@@ -32,15 +32,15 @@ afterEach(async () => {
   vi.unstubAllEnvs();
   clearPluginDoctorContractRegistryCache();
   resetAutoMigrateLegacyStateDirForTest();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
 });
 
 it("repairs a planned bundled owner omitted by a partial index after acquiring fresh maintenance ownership", async () => {
-  const root = await tempDirs.make("openclaw-doctor-partial-inventory-");
+  const root = await tempDirs.make("carapace-doctor-partial-inventory-");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   const bundledRoot = path.join(root, "bundled");
   const pluginIds = ["kept-owner", "omitted-owner"];
   const action = { id: "session-action", phase: "after-session-repair", doctorOnly: true };
@@ -54,11 +54,11 @@ it("repairs a planned bundled owner omitted by a partial index after acquiring f
         name: `@test/${pluginId}`,
         version: "0.0.0",
         type: "commonjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        carapace: { extensions: ["./index.cjs"] },
       }),
     );
     fs.writeFileSync(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "carapace.plugin.json"),
       JSON.stringify({
         id: pluginId,
         configSchema: {},
@@ -82,19 +82,19 @@ module.exports = { stateMigrations: [{
 }] };\n`,
     );
   }
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: { entries: { main: { workspace: path.join(root, "workspace") } } },
     plugins: { allow: ["kept-owner"] },
   };
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: root,
-    OPENCLAW_HOME: root,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-    OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+    CARAPACE_HOME: root,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+    CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
   };
   fs.writeFileSync(configPath, JSON.stringify(config));
   const fullIndex = withPluginCache(createPluginCache(), () =>
@@ -169,7 +169,7 @@ it.each([
 ] as const)(
   "does not silently drop a live post-session action when inventory is %s",
   async (inventory) => {
-    const root = await tempDirs.make("openclaw-doctor-live-inventory-");
+    const root = await tempDirs.make("carapace-doctor-live-inventory-");
     const stateDir = path.join(root, "state");
     const pluginId = "inventory-owner";
     const pluginRoot = path.join(root, pluginId);
@@ -189,11 +189,11 @@ it.each([
         name: "@test/inventory-owner",
         version: "0.0.0",
         type: "commonjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        carapace: { extensions: ["./index.cjs"] },
       }),
     );
     fs.writeFileSync(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "carapace.plugin.json"),
       JSON.stringify({
         id: pluginId,
         configSchema: {},
@@ -224,21 +224,21 @@ module.exports = { stateMigrations: [{
   },
 }] };\n`,
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { list: [{ id: "main", default: true }] },
       plugins: { load: { paths: [pluginRoot] }, entries: { [pluginId]: { enabled: true } } },
     };
     const env = {
       ...process.env,
       HOME: root,
-      OPENCLAW_HOME: root,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_HOME: root,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
-    fs.writeFileSync(env.OPENCLAW_CONFIG_PATH, JSON.stringify(cfg));
-    openOpenClawStateDatabase({ env });
-    closeOpenClawStateDatabaseForTest();
+    fs.writeFileSync(env.CARAPACE_CONFIG_PATH, JSON.stringify(cfg));
+    openCarapaceStateDatabase({ env });
+    closeCarapaceStateDatabaseForTest();
     clearPluginDoctorContractRegistryCache();
     if (inventory === "staging-unavailable") {
       // Ordinary reads remain valid. Clear their cache so the next inventory must

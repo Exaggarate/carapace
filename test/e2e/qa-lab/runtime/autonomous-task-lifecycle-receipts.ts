@@ -81,11 +81,11 @@ function sha256(value: string): string {
 }
 
 function stateDatabasePath(gateway: QaGatewayChild): string {
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("QA Gateway did not expose its isolated state directory");
   }
-  return path.join(stateDir, "state", "openclaw.sqlite");
+  return path.join(stateDir, "state", "carapace.sqlite");
 }
 
 function countExecutionContexts(gateway: QaGatewayChild): number {

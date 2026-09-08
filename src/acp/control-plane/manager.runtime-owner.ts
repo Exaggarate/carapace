@@ -1,8 +1,8 @@
 import {
   resolveRuntimeHandleIdentifiersFromIdentity,
   resolveSessionIdentityFromMeta,
-} from "@openclaw/acp-core/runtime/session-identity";
-import type { AcpRuntime, AcpRuntimeHandle } from "@openclaw/acp-core/runtime/types";
+} from "@carapace/acp-core/runtime/session-identity";
+import type { AcpRuntime, AcpRuntimeHandle } from "@carapace/acp-core/runtime/types";
 import type { SessionAcpMeta } from "../../config/sessions/types.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { AcpRuntimeError } from "../runtime/errors.js";

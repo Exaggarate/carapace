@@ -1,6 +1,6 @@
 import type { FollowupRun } from "../../auto-reply/reply/queue.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { fenceScheduledGatewayContextResolver } from "../../gateway/scheduled-run-gateway-context.js";
 import {
   createAbortError,
@@ -28,7 +28,7 @@ import { createSessionMaintenanceOwner } from "./coordinator.js";
 const log = createSubsystemLogger("agents/session-maintenance");
 export type SessionMaintenanceRequest = {
   prepared: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionKey?: string;
     storePath: string;
     timeoutMs: number;
@@ -68,7 +68,7 @@ export function createSessionMaintenanceFollowup(params: {
     | "timeoutMs"
   >;
   sessionEntry: SessionEntry;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey?: string;
   runtimePolicySessionKey?: string;
   provider: string;

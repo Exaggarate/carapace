@@ -6,7 +6,7 @@ import { loadSessionEntry, replaceSessionEntry } from "../config/sessions/sessio
 import type { SessionEntry } from "../config/sessions/types.js";
 import { saveCronStore } from "../cron/store.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { createManagedTaskFlow as createManagedTaskFlowOrNull } from "../tasks/task-flow-registry.js";
 import type { TaskFlowRecord } from "../tasks/task-flow-registry.types.js";
 import {
@@ -29,8 +29,8 @@ import type {
   TaskSystemAuditCode,
   TaskSystemAuditSeverity,
 } from "../tasks/task-system-audit.types.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
-import type { OpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
+import type { CarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createInMemoryTaskFlowRegistryStore } from "../test-utils/task-registry-store.js";
 import {
   tasksAuditCommand,
@@ -133,14 +133,14 @@ function resetTaskCommandRuntime() {
   resetTaskRegistryDeliveryRuntimeForTests();
   resetTaskRegistryForTests({ persist: false });
   resetTaskFlowRegistryForTests({ persist: false });
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 }
 
 async function withTaskCommandStateDir(
-  run: (state: OpenClawTestState) => Promise<void>,
+  run: (state: CarapaceTestState) => Promise<void>,
 ): Promise<void> {
-  await withOpenClawTestState(
-    { layout: "state-only", prefix: "openclaw-tasks-command-" },
+  await withCarapaceTestState(
+    { layout: "state-only", prefix: "carapace-tasks-command-" },
     async (state) => {
       resetTaskCommandRuntime();
       try {

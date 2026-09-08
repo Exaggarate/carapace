@@ -2,10 +2,10 @@ import {
   createInboundEnvelopeBuilder,
   resolveInboundRouteEnvelopeBuilder,
   resolveInboundRouteEnvelopeBuilderWithRuntime,
-} from "openclaw/plugin-sdk/inbound-envelope";
+} from "carapace/plugin-sdk/inbound-envelope";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { formatAgentEnvelope, resolveEnvelopeFormatOptions } from "../../auto-reply/envelope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createChannelInboundEnvelopeBuilder,
   resolveChannelInboundRouteEnvelope,
@@ -30,7 +30,7 @@ vi.mock("../../routing/resolve-route.js", () => ({ resolveAgentRoute }));
 const cfg = {
   agents: { defaults: { userTimezone: "UTC" } },
   session: { store: "/state/{agentId}/sessions.json" },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 describe("channel inbound envelope", () => {
   beforeEach(() => vi.clearAllMocks());

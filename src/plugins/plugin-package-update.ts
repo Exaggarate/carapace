@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { InstalledPluginIndex } from "./installed-plugin-index.js";
 import {
   createInstalledPluginOwnershipResolver,
@@ -51,13 +51,13 @@ function contributionKeys(
 
 /** Reconcile policy for children removed by a package update. */
 export function reconcilePluginPackageUpdateConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   beforeIndex: InstalledPluginIndex;
   afterIndex: InstalledPluginIndex;
   snapshot: PluginPackageUpdateSnapshot;
   installOwnerMigrations?: Readonly<Record<string, string>>;
   env?: NodeJS.ProcessEnv;
-}): { ok: true; config: OpenClawConfig } | { ok: false; error: string } {
+}): { ok: true; config: CarapaceConfig } | { ok: false; error: string } {
   let config = params.config;
   const resolver = createInstalledPluginOwnershipResolver(params.afterIndex, params.env);
   for (const [installOwner, before] of params.snapshot) {
@@ -122,7 +122,7 @@ export function reconcilePluginPackageUpdateConfig(params: {
 }
 
 export function pluginPackageUpdateMayMutateConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   index: InstalledPluginIndex;
   snapshot: PluginPackageUpdateSnapshot;
 }): boolean {

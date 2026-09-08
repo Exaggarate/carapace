@@ -1,14 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { pluginDoctorContractRegistryLoaderState } from "../plugins/doctor-contract-registry-loader-state.js";
 import { clearPluginDoctorContractRegistryCache } from "../plugins/doctor-contract-registry.test-fixtures.js";
 import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surfaces.types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   expectBlockedTailInPlanOrder,
@@ -27,10 +27,10 @@ import { resetAutoMigrateLegacyStateDirForTest } from "./state-migrations.state-
 const tempDirs = createTrackedTempDirs();
 
 async function makeFixture() {
-  const root = await tempDirs.make("openclaw-doctor-caller-execution-");
+  const root = await tempDirs.make("carapace-doctor-caller-execution-");
   const homeDir = path.join(root, "home");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   fs.mkdirSync(homeDir, { recursive: true });
   fs.mkdirSync(stateDir, { recursive: true });
   fs.symlinkSync(
@@ -42,10 +42,10 @@ async function makeFixture() {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: homeDir,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
   };
   return { root, homeDir, stateDir, configPath, env };
 }
@@ -53,8 +53,8 @@ async function makeFixture() {
 afterEach(async () => {
   pluginDoctorContractRegistryLoaderState.moduleLoaderFactory = undefined;
   resetAutoMigrateLegacyStateDirForTest();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
   vi.restoreAllMocks();
 });
@@ -62,8 +62,8 @@ afterEach(async () => {
 describe("legacy state migration caller plugin execution", () => {
   it("keeps absent migration descriptors stable when plugin migrations are disabled", async () => {
     const fixture = await makeFixture();
-    fixture.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
-    const cfg: OpenClawConfig = { plugins: { enabled: false } };
+    fixture.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
+    const cfg: CarapaceConfig = { plugins: { enabled: false } };
     fs.writeFileSync(fixture.configPath, `${JSON.stringify(cfg)}\n`);
     const plan = await planLegacyStateMigrationsReadOnly({
       mode: "doctor",
@@ -155,7 +155,7 @@ describe("legacy state migration caller plugin execution", () => {
     const mutationPath = path.join(fixture.root, "unplanned-migration-ran");
     fs.mkdirSync(pluginRoot, { recursive: true });
     fs.writeFileSync(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "carapace.plugin.json"),
       `${JSON.stringify({
         id: "surprise-owner",
         configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -182,7 +182,7 @@ export const stateMigrations = ${JSON.stringify(testCase.runtimeIds)}.map((id) =
 }));
 `,
     );
-    fixture.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+    fixture.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledRoot;
 
     const plan = await planLegacyStateMigrationsReadOnly({
       mode: "doctor",
@@ -253,12 +253,12 @@ export const stateMigrations = ${JSON.stringify(testCase.runtimeIds)}.map((id) =
     const mutationPath = path.join(fixture.stateDir, "external-plugin-migrated");
     const postSessionPath = path.join(fixture.stateDir, "external-plugin-session-migrated");
     const legacyAgentDir = path.join(fixture.stateDir, "agent");
-    fixture.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
+    fixture.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
     fs.mkdirSync(pluginRoot);
     fs.mkdirSync(legacyAgentDir);
     fs.writeFileSync(path.join(legacyAgentDir, "settings.json"), "{}\n");
     fs.writeFileSync(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "carapace.plugin.json"),
       `${JSON.stringify({
         id: pluginId,
         name: "External Doctor Owner",
@@ -270,10 +270,10 @@ export const stateMigrations = ${JSON.stringify(testCase.runtimeIds)}.map((id) =
     fs.writeFileSync(
       path.join(pluginRoot, "package.json"),
       `${JSON.stringify({
-        name: "@openclaw/external-doctor-owner",
+        name: "@carapace/external-doctor-owner",
         version: "0.0.0-test",
         type: "commonjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        carapace: { extensions: ["./index.cjs"] },
       })}\n`,
     );
     fs.writeFileSync(path.join(pluginRoot, "index.cjs"), "module.exports = {};\n");
@@ -302,7 +302,7 @@ module.exports = { stateMigrations: [{
 }], resolveSessionStoreAgentIds: () => ["voice"] };
 `,
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { list: [{ id: "main", default: true }] },
       plugins: {
         load: { paths: [pluginRoot] },
@@ -417,7 +417,7 @@ module.exports = { stateMigrations: [{
       const legacyStateDir = legacyRoot
         ? path.join(fixture.homeDir, ".clawdbot")
         : fixture.stateDir;
-      const stateDir = legacyRoot ? path.join(fixture.homeDir, ".openclaw") : fixture.stateDir;
+      const stateDir = legacyRoot ? path.join(fixture.homeDir, ".carapace") : fixture.stateDir;
       const pluginId = "relocated-owner";
       const pluginRoot = fromInstallIndex
         ? path.join(fixture.root, pluginId)
@@ -437,14 +437,14 @@ module.exports = { stateMigrations: [{
       fs.writeFileSync(
         path.join(pluginRoot, "package.json"),
         JSON.stringify({
-          name: "@openclaw/relocated-owner",
+          name: "@carapace/relocated-owner",
           version: "0.0.0-test",
           type: "commonjs",
-          openclaw: { extensions: ["./index.cjs"] },
+          carapace: { extensions: ["./index.cjs"] },
         }),
       );
       fs.writeFileSync(
-        path.join(pluginRoot, "openclaw.plugin.json"),
+        path.join(pluginRoot, "carapace.plugin.json"),
         JSON.stringify({
           id: pluginId,
           configSchema: {},
@@ -479,22 +479,22 @@ module.exports = { stateMigrations: [{
             : ""
         }] };\n`,
       );
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }] },
         plugins: { entries: { [pluginId]: { enabled: true } } },
       };
       fs.writeFileSync(fixture.configPath, `${JSON.stringify(cfg)}\n`);
       const env: NodeJS.ProcessEnv = {
         ...fixture.env,
-        OPENCLAW_HOME: fixture.homeDir,
-        OPENCLAW_TEST_FAST: "0",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_HOME: fixture.homeDir,
+        CARAPACE_TEST_FAST: "0",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       };
       if (legacyRoot) {
-        delete env.OPENCLAW_STATE_DIR;
+        delete env.CARAPACE_STATE_DIR;
       }
       if (legacySchema) {
-        writeLegacyStateSchemaV1(resolveOpenClawStateSqlitePath(env));
+        writeLegacyStateSchemaV1(resolveCarapaceStateSqlitePath(env));
       }
       clearPluginDoctorContractRegistryCache();
 
@@ -566,11 +566,11 @@ module.exports = { stateMigrations: [{
 
   it("closes the exact plan after install-index refusal without later discovery or writes", async () => {
     const fixture = await makeFixture();
-    fixture.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
+    fixture.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
     const sourcePath = path.join(fixture.stateDir, "plugins", "installs.json");
     fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
     fs.writeFileSync(sourcePath, "{invalid");
-    const cfg: OpenClawConfig = { plugins: { enabled: false } };
+    const cfg: CarapaceConfig = { plugins: { enabled: false } };
     fs.writeFileSync(fixture.configPath, JSON.stringify(cfg));
     const plan = await planLegacyStateMigrationsReadOnly({
       mode: "doctor",
@@ -611,7 +611,7 @@ module.exports = { stateMigrations: [{
 
   it("defers a dynamic bundled session-store owner without loading its contract in copied planning", async () => {
     const fixture = await makeFixture();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         entries: {
           "voice-call": { enabled: true, config: { agentId: "voice" } },

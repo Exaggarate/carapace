@@ -1,6 +1,6 @@
-// Validates normalized OpenClaw config and reports user-facing errors.
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+// Validates normalized Carapace config and reports user-facing errors.
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { listAgentEntriesWithSource } from "../agents/agent-scope.js";
 import type { ChannelDmAllowFromMode } from "../channels/plugins/dm-access.js";
@@ -31,7 +31,7 @@ import {
 import { materializeLegacyDefaultAgentRoles } from "./legacy.default-agent-roles.js";
 import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
 import { materializeRuntimeConfig } from "./materialize.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, CarapaceConfig } from "./types.js";
 import { resolveSecretInputRef } from "./types.secrets.js";
 import {
   bundledChannelIds,
@@ -52,7 +52,7 @@ export { validateConfigObject, validateConfigObjectRaw } from "./validation-core
 export { collectUnsupportedSecretRefPolicyIssues } from "./validation-issues.js";
 
 type ValidateConfigWithPluginsResult =
-  | { ok: true; config: OpenClawConfig; warnings: ConfigValidationIssue[] }
+  | { ok: true; config: CarapaceConfig; warnings: ConfigValidationIssue[] }
   | { ok: false; issues: ConfigValidationIssue[]; warnings: ConfigValidationIssue[] };
 
 type ValidateConfigWithPluginsParams = {
@@ -63,7 +63,7 @@ type ValidateConfigWithPluginsParams = {
   semanticValidation?: "runtime" | "strict";
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "manifestRegistry">;
   loadPluginMetadataSnapshot?: (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
   ) => Pick<PluginMetadataSnapshot, "manifestRegistry">;
   sourceRaw?: unknown;
   preservedLegacyRootKeys?: readonly string[];
@@ -82,7 +82,7 @@ type RegistryInfo = {
 };
 
 function collectSecretRefProviderSourceIssues(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   manifestRegistry: PluginManifestRegistry;
 }): ConfigValidationIssue[] {
@@ -141,7 +141,7 @@ function validateConfigObjectWithPluginMode(
   const migrated = migratePersistedImplicitMainRoster(contextBudgetConfig, {
     env: params?.env,
     homedir: params?.homedir,
-  }).config as OpenClawConfig;
+  }).config as CarapaceConfig;
   let manifestRegistry = params?.pluginMetadataSnapshot?.manifestRegistry;
   const result = validateConfigObjectWithPluginsBase(migrated, {
     ...params,
@@ -170,7 +170,7 @@ function validateConfigObjectWithPluginMode(
 }
 
 export function materializeLegacyAgentOwnershipForActiveChannelsResult(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   legacyDefaultAgentId: string,
   env?: NodeJS.ProcessEnv,
   manifestRecords?: PluginManifestRegistry["plugins"],
@@ -214,7 +214,7 @@ function validateConfigObjectWithPluginsBase(
   }
   // Zod returns a fresh object. Preserve the migration-only owner before
   // workspace-scoped plugin discovery, or legacy-root plugins disappear here.
-  const parsedConfig = inheritLegacyDefaultAgentId(raw as OpenClawConfig, base.config);
+  const parsedConfig = inheritLegacyDefaultAgentId(raw as CarapaceConfig, base.config);
 
   const rememberRegistry = (registry: PluginManifestRegistry): RegistryInfo => {
     opts.onManifestRegistryResolved?.(registry);
@@ -502,13 +502,13 @@ function validateConfigObjectWithPluginsBase(
     if (installCatalogEntry) {
       const issue = {
         path: issuePath,
-        message: `web_search provider is not available: ${trimmed} (install or enable plugin "${installCatalogEntry.pluginId}", then run openclaw doctor --fix)`,
+        message: `web_search provider is not available: ${trimmed} (install or enable plugin "${installCatalogEntry.pluginId}", then run carapace doctor --fix)`,
         allowedValues: collectKnownWebSearchProviderIds(),
       };
       if (hasPluginEvidenceForWebSearchProvider(trimmed, installCatalogEntry.pluginId)) {
         warnings.push({
           ...issue,
-          message: `web_search provider is not available: ${trimmed} (configured plugin "${installCatalogEntry.pluginId}" is unavailable; Gateway will ignore this optional provider until the plugin is installed/enabled or openclaw doctor --fix repairs the config)`,
+          message: `web_search provider is not available: ${trimmed} (configured plugin "${installCatalogEntry.pluginId}" is unavailable; Gateway will ignore this optional provider until the plugin is installed/enabled or carapace doctor --fix repairs the config)`,
         });
       } else {
         issues.push(issue);
@@ -533,7 +533,7 @@ function validateConfigObjectWithPluginsBase(
     if (hasStaleEvidence) {
       warnings.push({
         ...issue,
-        message: `${issue.message} (stale web search plugin config ignored; run openclaw doctor --fix to remove stale config, or install the plugin)`,
+        message: `${issue.message} (stale web search plugin config ignored; run carapace doctor --fix to remove stale config, or install the plugin)`,
       });
     } else {
       issues.push(issue);
@@ -630,7 +630,7 @@ function validateConfigObjectWithPluginsBase(
         if (hasStalePluginEvidenceForUnknownChannel(trimmed)) {
           warnings.push({
             ...issue,
-            message: `${issue.message} (stale channel plugin config ignored; run openclaw doctor --fix to remove stale config, or install the plugin)`,
+            message: `${issue.message} (stale channel plugin config ignored; run carapace doctor --fix to remove stale config, or install the plugin)`,
           });
         } else {
           issues.push(issue);

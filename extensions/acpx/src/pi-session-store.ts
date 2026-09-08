@@ -1,13 +1,13 @@
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { isPathStrictlyInside } from "openclaw/plugin-sdk/file-access-runtime";
-import type { SessionCatalogSession } from "openclaw/plugin-sdk/session-catalog";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { isPathStrictlyInside } from "carapace/plugin-sdk/file-access-runtime";
+import type { SessionCatalogSession } from "carapace/plugin-sdk/session-catalog";
 import {
   isRecord,
   normalizeBoundedOptionalString as readBoundedString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { piAcpSessionStoreRoot, piSessionStore } from "./pi-session-paths.js";
 import { parsePiSessionTimestampMs } from "./pi-session-timestamp.js";
 

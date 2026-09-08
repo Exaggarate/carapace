@@ -6,7 +6,7 @@ type SkillsRefreshTestApi = {
 
 function getTestApi(): SkillsRefreshTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.skillsRefreshTestApi")
+    Symbol.for("carapace.skillsRefreshTestApi")
   ] as SkillsRefreshTestApi;
 }
 

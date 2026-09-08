@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveGitCoauthorAttribution } from "../agents/git-coauthor-attribution.js";
 import type { PreparedGitHubPublicationIdentity } from "../agents/github-tool-identity.js";
 import { resolveControlUiSessionUrl } from "../config/control-ui-link-base.js";
@@ -216,7 +216,7 @@ export async function executeRepositoryGitHubPublication(params: {
         value.parents.length !== 1 ||
         objectSha(value.parents[0]) !== (row.previous_head_commit ?? snapshot.baseCommit) ||
         typeof value.message !== "string" ||
-        !value.message.split(/\r?\n/u).includes("OpenClaw-Publication: " + row.request_id)
+        !value.message.split(/\r?\n/u).includes("Carapace-Publication: " + row.request_id)
       ) {
         throw new GitHubPublicationWorkspaceChangedError(
           "GitHub publication commit does not match its accepted checkpoint.",
@@ -280,7 +280,7 @@ export async function executeRepositoryGitHubPublication(params: {
       });
     }
     const pushOwner = pushRepository.split("/")[0]!;
-    const marker = "<!-- openclaw-publication:" + row.request_id + " -->";
+    const marker = "<!-- carapace-publication:" + row.request_id + " -->";
     const findPullRequest = () =>
       findGitHubPublicationPullRequest({
         repository,
@@ -365,7 +365,7 @@ export async function executeRepositoryGitHubPublication(params: {
         message:
           appendGitHubPublicationMessage(credit ? title + "\n\nWorked on by:\n" + credit : title, [
             ...(attribution?.trailers ?? []),
-            "OpenClaw-Publication: " + row.request_id,
+            "Carapace-Publication: " + row.request_id,
           ]) + "\n",
       });
       headCommit = verifyCommit(commit);
@@ -430,7 +430,7 @@ export async function executeRepositoryGitHubPublication(params: {
         "\n\n" +
         marker +
         (sessionUrl?.startsWith("https://")
-          ? "\n\n---\n[View the OpenClaw team session](" + sessionUrl + ")"
+          ? "\n\n---\n[View the Carapace team session](" + sessionUrl + ")"
           : "");
       identity = await refreshIdentity();
       assertCurrent();

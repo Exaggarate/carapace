@@ -404,7 +404,7 @@ describe("startGatewayEventSubscriptions", () => {
 
   it("uses the persisted bare-key owner for ownerless active-run projections", async () => {
     runtimeConfigState.value = {
-      session: { scope: "global", store: "/tmp/openclaw-owned-sessions.sqlite" },
+      session: { scope: "global", store: "/tmp/carapace-owned-sessions.sqlite" },
       agents: {
         ownership: "explicit",
         defaults: { sessionStore: { agentId: "ops" } },
@@ -636,7 +636,7 @@ describe("startGatewayEventSubscriptions", () => {
     const storedMessage = {
       role: "assistant",
       content: [{ type: "text", text: "visible answer" }],
-      __openclaw: { transcriptPosition },
+      __carapace: { transcriptPosition },
     };
     transcriptBroadcastMocks.readMessageById
       .mockRejectedValueOnce(persistenceFailure)
@@ -648,7 +648,7 @@ describe("startGatewayEventSubscriptions", () => {
 
     const emitMessage = (messageId: string) =>
       emitSessionTranscriptUpdate({
-        sessionFile: "/tmp/openclaw-transcript-dispatch.sqlite",
+        sessionFile: "/tmp/carapace-transcript-dispatch.sqlite",
         sessionKey: "agent:main:main",
         message: { role: "assistant", content: [{ type: "text", text: "stale queued answer" }] },
         messageId,
@@ -656,7 +656,7 @@ describe("startGatewayEventSubscriptions", () => {
           agentId: "main",
           sessionId: "sess-transcript",
           sessionKey: "agent:main:main",
-          storePath: "/tmp/openclaw-transcript-dispatch-sessions.json",
+          storePath: "/tmp/carapace-transcript-dispatch-sessions.json",
         },
       });
 
@@ -682,7 +682,7 @@ describe("startGatewayEventSubscriptions", () => {
         messageSeq: 2,
         message: expect.objectContaining({
           content: storedMessage.content,
-          __openclaw: expect.objectContaining({ transcriptPosition }),
+          __carapace: expect.objectContaining({ transcriptPosition }),
         }),
       }),
       new Set(["conn-transcript"]),
@@ -823,14 +823,14 @@ describe("startGatewayEventSubscriptions", () => {
     emitAgentEvent({
       runId: secondary.runId!,
       stream: "assistant",
-      data: { text: "OpenClaw runtime context (internal): Keep internal details private." },
+      data: { text: "Carapace runtime context (internal): Keep internal details private." },
     });
     await vi.advanceTimersByTimeAsync(1_000);
     const sanitizedActivity = readTaskUpserts(broadcast).find(
       ({ task }) => task.id === secondary.taskId,
     );
     expect(sanitizedActivity?.task).not.toHaveProperty("lastActivity");
-    expect(JSON.stringify(sanitizedActivity)).not.toContain("OpenClaw runtime context");
+    expect(JSON.stringify(sanitizedActivity)).not.toContain("Carapace runtime context");
 
     broadcast.mockClear();
     emitAgentEvent({

@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
-import { GatewayProtocolRequestError } from "@openclaw/gateway-client/browser";
-import { buildSystemAgentSessionInvalidatedErrorDetails } from "@openclaw/gateway-protocol";
+import { GatewayProtocolRequestError } from "@carapace/gateway-client/browser";
+import { buildSystemAgentSessionInvalidatedErrorDetails } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { waitForFast } from "../../test-helpers/wait-for.ts";
 import { createContext, mountPage } from "./custodian-page.test-harness.ts";
@@ -55,7 +55,7 @@ describe("custodian page session lifecycle", () => {
           if (invalidated) {
             throw new GatewayProtocolRequestError({
               code: "UNAVAILABLE",
-              message: "OpenClaw inference became unavailable.",
+              message: "Carapace inference became unavailable.",
               details: buildSystemAgentSessionInvalidatedErrorDetails(),
             });
           }
@@ -193,7 +193,7 @@ describe("custodian page session lifecycle", () => {
       const question = {
         id: "credentials",
         header: "Credentials",
-        question: "How should OpenClaw authenticate?",
+        question: "How should Carapace authenticate?",
         options: [{ label: "Enter credential" }, { label: "Use environment" }],
       };
       const request = vi
@@ -276,7 +276,7 @@ describe("custodian page session lifecycle", () => {
       .mockRejectedValueOnce(
         new GatewayProtocolRequestError({
           code: "INVALID_REQUEST",
-          message: "No active OpenClaw chat session is awaiting that wizard answer.",
+          message: "No active Carapace chat session is awaiting that wizard answer.",
           details: buildSystemAgentSessionInvalidatedErrorDetails(),
         }),
       )
@@ -327,7 +327,7 @@ describe("custodian page session lifecycle", () => {
       .mockRejectedValueOnce(
         new GatewayProtocolRequestError({
           code: "INVALID_REQUEST",
-          message: "No active OpenClaw chat session is awaiting that wizard cancel.",
+          message: "No active Carapace chat session is awaiting that wizard cancel.",
           details: buildSystemAgentSessionInvalidatedErrorDetails(),
         }),
       )

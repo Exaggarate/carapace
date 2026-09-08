@@ -1,7 +1,7 @@
 // Prepares config writes by diffing current state and preserving metadata.
 import { isDeepStrictEqual } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord, readStringField } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord, readStringField } from "@carapace/normalization-core/record-coerce";
 import {
   hasAgentRosterProperty,
   listAgentEntries,
@@ -28,7 +28,7 @@ import {
   hasUnresolvedConfigPathInSubtree,
 } from "./resolution-facts.js";
 import { projectRuntimeChangesOntoSource } from "./source-value-projection.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 const AGENT_ROSTER_PATHS = [
   ["agents", "entries"],
@@ -921,12 +921,12 @@ function shouldPersistCanonicalAgentRoster(params: {
     return true;
   }
   const runtimeRoster = toAgentEntriesRecord(
-    listAgentEntries(params.runtimeConfig as OpenClawConfig),
+    listAgentEntries(params.runtimeConfig as CarapaceConfig),
   );
   const sourceRoster = toAgentEntriesRecord(
-    listAgentEntries(params.sourceConfig as OpenClawConfig),
+    listAgentEntries(params.sourceConfig as CarapaceConfig),
   );
-  const nextRoster = toAgentEntriesRecord(listAgentEntries(params.nextConfig as OpenClawConfig));
+  const nextRoster = toAgentEntriesRecord(listAgentEntries(params.nextConfig as CarapaceConfig));
   return (
     !isDeepStrictEqual(runtimeRoster, nextRoster) && !isDeepStrictEqual(sourceRoster, nextRoster)
   );
@@ -941,7 +941,7 @@ function assertCanonicalAgentRosterRetainsEntries(params: {
     (params.allowedRemovals ?? []).map((agentId) => normalizeAgentId(agentId)),
   );
   const canonicalIds = new Set(
-    listAgentEntries(params.canonicalConfig as OpenClawConfig).map((entry) =>
+    listAgentEntries(params.canonicalConfig as CarapaceConfig).map((entry) =>
       normalizeAgentId(entry.id),
     ),
   );
@@ -950,7 +950,7 @@ function assertCanonicalAgentRosterRetainsEntries(params: {
   const currentEntries =
     currentRoster?.kind === "list" && Array.isArray(currentRoster.value)
       ? projectLegacyAgentRosterEntries(currentRoster.value).entries
-      : listAgentEntries(params.currentConfig as OpenClawConfig);
+      : listAgentEntries(params.currentConfig as CarapaceConfig);
   const droppedIds = currentEntries
     .filter((entry) => {
       const agentId = normalizeAgentId(entry.id);
@@ -985,7 +985,7 @@ function containsAuthoredRosterReference(value: unknown, includeEnvStrings: bool
 }
 
 function indexAgentRosterSourcePaths(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   legacyIdsByIndex: ReadonlyMap<number, string>,
 ): Map<string, string> {
   return new Map(
@@ -1144,7 +1144,7 @@ function projectAuthoredRosterValue(params: {
 function indexAgentRosterForWrite(config: unknown, legacyIdsByIndex: ReadonlyMap<number, string>) {
   const roster = readAgentRosterProperty(config);
   if (roster?.kind !== "list" || !Array.isArray(roster.value)) {
-    return toAgentEntriesRecord(listAgentEntries(config as OpenClawConfig)) as Record<
+    return toAgentEntriesRecord(listAgentEntries(config as CarapaceConfig)) as Record<
       string,
       unknown
     >;
@@ -1191,7 +1191,7 @@ function canonicalizeAgentRosterForExplicitWrite(params: {
   const runtimeEntries = indexAgentRosterForWrite(params.runtimeConfig, legacyIdsByIndex);
   const sourceEntries = indexAgentRosterForWrite(params.sourceConfig, legacyIdsByIndex);
   const nextEntries = toAgentEntriesRecord(
-    listAgentEntries(params.nextConfig as OpenClawConfig),
+    listAgentEntries(params.nextConfig as CarapaceConfig),
   ) as Record<string, unknown>;
   const explicitRoster = readAgentRosterProperty(params.valueSource);
   const rosterFactOwner = coerceConfig(
@@ -1305,7 +1305,7 @@ function canonicalizeAgentRosterForExplicitWrite(params: {
             return [[id, config]];
           }),
         )
-      : (toAgentEntriesRecord(listAgentEntries(params.valueSource as OpenClawConfig)) as Record<
+      : (toAgentEntriesRecord(listAgentEntries(params.valueSource as CarapaceConfig)) as Record<
           string,
           unknown
         >);
@@ -1654,7 +1654,7 @@ export function resolvePersistCandidateForWrite(
       ? setPathValueCreatingParents(
           projectedAuthoredRoster,
           ["agents", "entries"],
-          toAgentEntriesRecord(listAgentEntries(params.sourceConfig as OpenClawConfig)),
+          toAgentEntriesRecord(listAgentEntries(params.sourceConfig as CarapaceConfig)),
         )
       : projectedAuthoredRoster;
   const explicitSetPaths = persistCanonicalRoster

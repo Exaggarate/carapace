@@ -3,7 +3,7 @@ export {
   isGoogleGemini3FlashModel,
   isGoogleGemini3ProModel,
   isGoogleGemini3ThinkingLevelModel,
-} from "@openclaw/ai/internal/google-model-family";
+} from "@carapace/ai/internal/google-model-family";
 
 const THINKING_LEVEL_IDS = new Set(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
 

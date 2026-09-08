@@ -6,7 +6,7 @@ import {
   LEGACY_WORKSPACE_ATTESTATION_HEADER,
   resolveLegacyWorkspaceSourcePaths,
 } from "../agents/workspace-legacy-state.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { renderProposalMarkdown } from "../skills/workshop/frontmatter.js";
 import { inspectSkillProposal, listSkillProposals } from "../skills/workshop/service.js";
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
@@ -22,9 +22,9 @@ import {
   type SkillProposalRollback,
 } from "../skills/workshop/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   inspectLegacySkillWorkshopMigration,
@@ -37,12 +37,12 @@ import {
 } from "./doctor-skill-workshop-sqlite.test-support.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workshop-reservations-",
+    prefix: "carapace-workshop-reservations-",
   });
 });
 
@@ -142,7 +142,7 @@ async function expectSourcesPreserved(sources: readonly LegacySource[]): Promise
   }
 }
 
-async function expectSourceMoved(source: LegacySource, config: OpenClawConfig): Promise<void> {
+async function expectSourceMoved(source: LegacySource, config: CarapaceConfig): Promise<void> {
   const target = path.join(
     resolveWorkshopSkillsDir(config, source.ownerAgentId, testState.env),
     source.record.target.skillKey,
@@ -257,7 +257,7 @@ describe("doctor Workshop relocation reservations", () => {
     const currentWorkspace = legacyState
       ? await fs.realpath(await tempDirs.make("workshop-reserved-current-"))
       : workspaceDir;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: {

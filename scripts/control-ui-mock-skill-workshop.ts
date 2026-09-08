@@ -41,7 +41,7 @@ export function buildSkillWorkshopMocks(baseTime: number) {
   ];
   return {
     list: {
-      schema: "openclaw.skill-workshop.proposals-manifest.v1",
+      schema: "carapace.skill-workshop.proposals-manifest.v1",
       updatedAt: new Date(baseTime - hour).toISOString(),
       proposals,
       installedSkills: [],
@@ -69,7 +69,7 @@ export function buildSkillWorkshopMocks(baseTime: number) {
       })),
     },
     historyStatus: {
-      schema: "openclaw.skill-workshop.history-scan.v1",
+      schema: "carapace.skill-workshop.history-scan.v1",
       hasScanned: false,
       reviewedSessions: 0,
       ideasFound: 0,
@@ -78,7 +78,7 @@ export function buildSkillWorkshopMocks(baseTime: number) {
       lastScanIdeas: 0,
     },
     historyScan: {
-      schema: "openclaw.skill-workshop.history-scan.v1",
+      schema: "carapace.skill-workshop.history-scan.v1",
       hasScanned: true,
       reviewedSessions: 34,
       ideasFound: 2,

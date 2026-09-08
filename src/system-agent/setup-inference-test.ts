@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { prepareSystemAgentRunAdmission } from "../agents/admitted-run-context.js";
 import {
   type AgentRunResultView,
@@ -122,7 +122,7 @@ export async function runSetupInferenceTest(
         ok: false,
         status: "format",
         error:
-          "The local model answered a simple prompt but could not read and return a file through an OpenClaw tool. Choose another model or review its tool support, then retry setup. No default model was changed.",
+          "The local model answered a simple prompt but could not read and return a file through an Carapace tool. Choose another model or review its tool support, then retry setup. No default model was changed.",
       };
     }
     if (!isDeepStrictEqual(connection.auth, verified.auth)) {
@@ -153,7 +153,7 @@ async function runSetupInferenceProbe(
   const sessionId = runId;
   const sessionFile = `in-memory:${sessionId}`;
   const sessionManager = SessionManager.inMemory(tempDir);
-  const effectiveAgentId = plan.routeAgentId ?? plan.agentId ?? "openclaw";
+  const effectiveAgentId = plan.routeAgentId ?? plan.agentId ?? "carapace";
   const sessionKey = `agent:${effectiveAgentId}:setup-inference:incognito-${runId}`;
   const timeoutMs = deps.timeoutMs ?? SETUP_INFERENCE_TEST_TIMEOUT_MS;
   const started = Date.now();
@@ -223,8 +223,8 @@ async function runSetupInferenceProbe(
         ...(plan.authProfileId ? { authProfileId: plan.authProfileId } : {}),
         timeoutMs,
         runId,
-        messageChannel: "openclaw",
-        messageProvider: "openclaw",
+        messageChannel: "carapace",
+        messageProvider: "carapace",
         executionMode: "side-question",
         disableTools: true,
         cleanupCliLiveSessionOnRunEnd: true,
@@ -301,8 +301,8 @@ async function runSetupInferenceProbe(
               onAgentToolResult: agentProbe.onAgentToolResult,
             }
           : { disableTools: true, modelRun: true }),
-        messageChannel: "openclaw",
-        messageProvider: "openclaw",
+        messageChannel: "carapace",
+        messageProvider: "carapace",
         onSuccessfulAuthBinding: (binding) => {
           successfulAuth = binding;
         },
@@ -331,7 +331,7 @@ async function runSetupInferenceProbe(
     if (requireExecutionOwner && !successfulAuth) {
       return failed(
         "unknown",
-        "Inference succeeded, but its runtime did not report an owner that OpenClaw can safely reuse.",
+        "Inference succeeded, but its runtime did not report an owner that Carapace can safely reuse.",
       );
     }
     return {

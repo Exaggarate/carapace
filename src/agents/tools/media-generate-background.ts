@@ -3,7 +3,7 @@
  *
  * Binds shared detached media-task lifecycle behavior to image_generate labels and completion messages.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { DeliveryContext } from "../../utils/delivery-context.types.js";
 import { recordRecentMediaGenerationTaskStartForSession } from "../media-generation-task-status-shared.js";
 import {
@@ -33,7 +33,7 @@ export async function runMediaGenerationTask<T extends MediaGenerationExecutionR
   prompt: string;
   requestKey: string;
   providerId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   scheduleBackgroundWork: MediaGenerateBackgroundScheduler;
   onAsyncTaskStarted?: MediaGenerateAsyncStartCallback;
   onFailure: (message: string, meta?: Record<string, unknown>) => void;

@@ -1,7 +1,7 @@
 // Gateway post-ready runtime services.
 // Starts delayed maintenance, cron, heartbeat, recovery, and pricing refresh work.
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { computeBackoffMs } from "../infra/delivery-recovery.shared.js";
 import {
   resolveHeartbeatAgents,
@@ -53,7 +53,7 @@ export function startGatewayCronWithLogging(params: {
   cronState: GatewayCronState;
   cronReconciliation: GatewayCronReconciliation;
   reason: "startup" | "reload";
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   afterStart?: () => Promise<void>;
   onStartError?: (error: unknown) => void;
   logCron: { error: (message: string) => void };
@@ -106,7 +106,7 @@ export function scheduleGatewayPostReadyMaintenance(params: {
   markCronStartHandled: () => void;
   cronState: GatewayCronState;
   cronReconciliation: GatewayCronReconciliation;
-  cronConfig: OpenClawConfig;
+  cronConfig: CarapaceConfig;
   logCron: { error: (message: string) => void };
   log: GatewayPostReadyLogger;
   recordPostReadyMemory: () => void;
@@ -155,7 +155,7 @@ export function scheduleGatewayPostReadyMaintenance(params: {
 const RECOVERY_SHUTDOWN_STILL_PENDING_WARN_MS = 5_000;
 
 function startPendingOutboundDeliveryRecovery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: GatewayRuntimeServiceLogger;
 }): () => Promise<void> {
   let stopped = false;
@@ -360,7 +360,7 @@ function startPendingSessionDeliveryRuntime(params: {
 /** Activates background gateway services after core runtime startup is ready. */
 export function activateGatewayScheduledServices(params: {
   minimalTestGateway: boolean;
-  cfgAtStart: OpenClawConfig;
+  cfgAtStart: CarapaceConfig;
   deps: import("../cli/deps.types.js").CliDeps;
   sessionDeliveryRecoveryMaxEnqueuedAt: number;
   cronState: GatewayCronState;

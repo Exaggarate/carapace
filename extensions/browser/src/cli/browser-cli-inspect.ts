@@ -4,7 +4,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { Command } from "commander";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SnapshotResult } from "../browser/client.js";
 import { writeExternalFileWithinOutputRoot } from "../browser/output-files.js";
 import {

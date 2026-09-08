@@ -88,7 +88,7 @@ describe("screenshotWithLabelsViaPlaywright (viewport)", () => {
 
     // The clear script must have run (string evaluate calls include the overlay attr)
     const clearCalls = evaluate.mock.calls.filter(
-      ([arg]) => typeof arg === "string" && arg.includes("data-openclaw-labels"),
+      ([arg]) => typeof arg === "string" && arg.includes("data-carapace-labels"),
     );
     // inject + clear = at least 2 string evaluations
     expect(clearCalls.length).toBeGreaterThanOrEqual(2);

@@ -1,6 +1,6 @@
 // Xai plugin module implements web search shared behavior.
-import { wrapWebContent } from "openclaw/plugin-sdk/provider-web-search";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { wrapWebContent } from "carapace/plugin-sdk/provider-web-search";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { XAI_DEFAULT_MODEL_ID } from "../model-definitions.js";
 import { normalizeXaiModelId } from "../model-id.js";
 import {

@@ -35,7 +35,7 @@ async function mount(
   canHoldUpdate = true,
 ) {
   const element = document.createElement(
-    "openclaw-sidebar-update-card",
+    "carapace-sidebar-update-card",
   ) as SidebarUpdateCardElement;
   element.updateAvailable = update;
   element.updateSchedule = schedule;
@@ -197,7 +197,7 @@ describe("SidebarUpdateCard", () => {
     const element = await mount(null);
     element.updateRun = createUpdateRunFixture();
     await element.updateComplete;
-    expect(element.textContent).toContain("OpenClaw update in progress: staging");
+    expect(element.textContent).toContain("Carapace update in progress: staging");
     expect(element.textContent).toContain("phases complete");
     expect(element.querySelector<HTMLButtonElement>(".sidebar-update-card__action")?.disabled).toBe(
       false,
@@ -210,7 +210,7 @@ describe("SidebarUpdateCard", () => {
       after: { version: "2026.9.2" },
     });
     await element.updateComplete;
-    expect(element.textContent).toContain("OpenClaw updated to 2026.9.2");
+    expect(element.textContent).toContain("Carapace updated to 2026.9.2");
     element.updateRunAcknowledged = true;
     await element.updateComplete;
     expect(element.querySelector(".sidebar-update-card")).toBeNull();
@@ -281,7 +281,7 @@ describe("SidebarUpdateCard", () => {
     element.onUpdate = onUpdate;
 
     const action = element.querySelector<HTMLButtonElement>(".sidebar-update-card__action");
-    const tooltip = action?.closest("openclaw-tooltip") as
+    const tooltip = action?.closest("carapace-tooltip") as
       | (HTMLElement & { content?: string; updateComplete: Promise<boolean> })
       | null;
     await tooltip?.updateComplete;

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError } from "../api/gateway.ts";
 import { createStorageMock } from "../test-helpers/storage.ts";
@@ -333,7 +333,7 @@ describe("update failure triage admission", () => {
     async (id) => {
       const scope = gatewayCredentialScope("ws://gateway.test");
       const stored = JSON.stringify({ triaged: [JSON.stringify([scope, null, id])] });
-      sessionStorage.setItem("openclaw:control-ui:update:v1", stored);
+      sessionStorage.setItem("carapace:control-ui:update:v1", stored);
       const harness = updateRunHarness(async () => ({
         sentinel: {
           kind: "update",
@@ -348,7 +348,7 @@ describe("update failure triage admission", () => {
         await flushMicrotasks();
         expect(overlays.snapshot.recordedUpdateAttempt?.reason).toBe("build-failed");
         expect(onUpdateFailure).not.toHaveBeenCalled();
-        expect(sessionStorage.getItem("openclaw:control-ui:update:v1")).toBe(stored);
+        expect(sessionStorage.getItem("carapace:control-ui:update:v1")).toBe(stored);
       } finally {
         overlays.dispose();
       }

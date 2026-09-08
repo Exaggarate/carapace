@@ -132,7 +132,7 @@ describe("gateway node MCP fixture ownership", () => {
     const descendantPidPath = path.join(root, "descendant.pid");
     await fs.writeFile(
       fixturePath,
-      `import {spawn} from "node:child_process"; import fs from "node:fs"; const child=spawn(process.execPath,["-e","setInterval(()=>{},1000)"],{stdio:"ignore"}); fs.writeFileSync(${JSON.stringify(descendantPidPath)},String(child.pid)); console.log(JSON.stringify({type:"openclaw-mcp-parity-ready",urls:{streamableHttp:"http://127.0.0.1/mcp",sse:"http://127.0.0.1/sse"}})); setInterval(()=>{},1000);`,
+      `import {spawn} from "node:child_process"; import fs from "node:fs"; const child=spawn(process.execPath,["-e","setInterval(()=>{},1000)"],{stdio:"ignore"}); fs.writeFileSync(${JSON.stringify(descendantPidPath)},String(child.pid)); console.log(JSON.stringify({type:"carapace-mcp-parity-ready",urls:{streamableHttp:"http://127.0.0.1/mcp",sse:"http://127.0.0.1/sse"}})); setInterval(()=>{},1000);`,
       "utf8",
     );
 

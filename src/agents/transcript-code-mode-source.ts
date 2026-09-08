@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveCodeModeExecToolInputKind } from "./code-mode-control-tools.js";
 import type { AgentMessage, StreamFn } from "./runtime/index.js";
 

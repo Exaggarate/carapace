@@ -6,40 +6,40 @@ import {
   normalizeConfiguredMemoryExtraPaths,
   resolveMemoryHostAgentWorkspaceDir,
   resolveRememberAcrossConversations,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "./config-utils.js";
 
 describe("resolveMemoryHostAgentWorkspaceDir", () => {
   it.each([
     { name: "profile alone", stateDir: undefined },
-    { name: "explicit profile state directory", stateDir: "/home/fixture/.openclaw-work" },
+    { name: "explicit profile state directory", stateDir: "/home/fixture/.carapace-work" },
   ])("uses the active profile workspace with $name", ({ stateDir }) => {
     expect(
       resolveMemoryHostAgentWorkspaceDir({}, "main", {
         HOME: "/home/fixture",
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_PROFILE: "work",
+        CARAPACE_STATE_DIR: stateDir,
       }),
-    ).toBe(path.resolve("/home/fixture/.openclaw-work/workspace"));
+    ).toBe(path.resolve("/home/fixture/.carapace-work/workspace"));
   });
 
   it("keeps the default agent workspace inside an overridden state directory", () => {
     expect(
       resolveMemoryHostAgentWorkspaceDir({}, "main", {
         HOME: "/home/peter",
-        OPENCLAW_STATE_DIR: "/srv/openclaw-scratch",
+        CARAPACE_STATE_DIR: "/srv/carapace-scratch",
       }),
-    ).toBe("/srv/openclaw-scratch/workspace");
+    ).toBe("/srv/carapace-scratch/workspace");
   });
 
   it("prefers an explicit workspace override to the state directory", () => {
     expect(
       resolveMemoryHostAgentWorkspaceDir({}, "main", {
         HOME: "/home/peter",
-        OPENCLAW_STATE_DIR: "/srv/openclaw-scratch",
-        OPENCLAW_WORKSPACE_DIR: "/srv/openclaw-workspace",
+        CARAPACE_STATE_DIR: "/srv/carapace-scratch",
+        CARAPACE_WORKSPACE_DIR: "/srv/carapace-workspace",
       }),
-    ).toBe("/srv/openclaw-workspace");
+    ).toBe("/srv/carapace-workspace");
   });
 
   it("keeps literal $ patterns in home when expanding tilde workspace paths", () => {
@@ -47,7 +47,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
       resolveMemoryHostAgentWorkspaceDir(
         { agents: { entries: { support: { workspace: "~/ws" } } } },
         "support",
-        { HOME: "/home/peter$&mall", OPENCLAW_HOME: "~/oc" },
+        { HOME: "/home/peter$&mall", CARAPACE_HOME: "~/oc" },
       ),
     ).toBe(path.resolve("/home/peter$&mall/oc/ws"));
   });
@@ -65,19 +65,19 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
       workspaceDir: "~/workspace",
       expected: "workspace",
     },
-  ])("expands the $name against OPENCLAW_HOME", ({ stateDir, workspaceDir, expected }) => {
+  ])("expands the $name against CARAPACE_HOME", ({ stateDir, workspaceDir, expected }) => {
     expect(
       resolveMemoryHostAgentWorkspaceDir({}, "main", {
         HOME: "/home/fixture",
-        OPENCLAW_HOME: "~/openclaw-home",
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_WORKSPACE_DIR: workspaceDir,
+        CARAPACE_HOME: "~/carapace-home",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_WORKSPACE_DIR: workspaceDir,
       }),
-    ).toBe(path.resolve("/home/fixture/openclaw-home", expected));
+    ).toBe(path.resolve("/home/fixture/carapace-home", expected));
   });
 
   it.each([
-    { name: "default workspace", workspace: undefined, expected: ".openclaw/workspace" },
+    { name: "default workspace", workspace: undefined, expected: ".carapace/workspace" },
     { name: "configured workspace", workspace: "~/notes", expected: "notes" },
   ])("uses the Termux home for the $name when HOME is unavailable", ({ workspace, expected }) => {
     const homedir = vi.spyOn(os, "homedir").mockReturnValue("/unexpected/os/home");
@@ -100,8 +100,8 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
   });
 
   it.each([
-    { agentId: "main", stateDir: undefined, expected: ".openclaw/workspace" },
-    { agentId: "support", stateDir: undefined, expected: ".openclaw/workspace-support" },
+    { agentId: "main", stateDir: undefined, expected: ".carapace/workspace" },
+    { agentId: "support", stateDir: undefined, expected: ".carapace/workspace-support" },
     { agentId: "main", stateDir: "~/state", expected: "state/workspace" },
     { agentId: "support", stateDir: "~/state", expected: "state/workspace-support" },
   ])(
@@ -114,10 +114,10 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
             { agents: { entries: { main: {}, support: {} } } },
             agentId,
             {
-              OPENCLAW_HOME: "~/oc",
-              OPENCLAW_STATE_DIR: stateDir,
+              CARAPACE_HOME: "~/oc",
+              CARAPACE_STATE_DIR: stateDir,
               VITEST: "1",
-              OPENCLAW_TEST_FAST: "1",
+              CARAPACE_TEST_FAST: "1",
             },
           ),
         ).toBe(path.resolve("/home/fixture/oc", expected));
@@ -148,9 +148,9 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
             { agents: { entries: { main: {}, support: {} } } },
             agentId,
             {
-              OPENCLAW_HOME: "~/oc",
-              OPENCLAW_STATE_DIR: override === "state" ? absolute : "~/state",
-              OPENCLAW_WORKSPACE_DIR: override === "workspace" ? absolute : undefined,
+              CARAPACE_HOME: "~/oc",
+              CARAPACE_STATE_DIR: override === "state" ? absolute : "~/state",
+              CARAPACE_WORKSPACE_DIR: override === "workspace" ? absolute : undefined,
             },
           ),
         ).toBe(expected);
@@ -162,7 +162,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
   );
 
   it("falls back to cwd when no home source is available", () => {
-    const expected = path.join(process.cwd(), ".openclaw", "workspace");
+    const expected = path.join(process.cwd(), ".carapace", "workspace");
     const homedir = vi.spyOn(os, "homedir").mockImplementation(() => {
       throw new Error("fixture home unavailable");
     });
@@ -182,7 +182,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
     });
     try {
       expect(() => resolveMemoryHostAgentWorkspaceDir({}, "main", {})).toThrow(
-        "Unable to resolve an OpenClaw home: set OPENCLAW_HOME, HOME, or USERPROFILE",
+        "Unable to resolve an Carapace home: set CARAPACE_HOME, HOME, or USERPROFILE",
       );
     } finally {
       cwd.mockRestore();
@@ -192,10 +192,10 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
 
   it("preserves legacy state precedence for secondary agents without moving the default workspace", async () => {
     const home = await fs.mkdtemp(path.join(os.tmpdir(), "memory-host-state-"));
-    const cfg: OpenClawConfig = { agents: { entries: { main: {}, support: {} } } };
+    const cfg: CarapaceConfig = { agents: { entries: { main: {}, support: {} } } };
     const env = { HOME: home };
     const legacy = path.join(home, ".clawdbot");
-    const current = path.join(home, ".openclaw");
+    const current = path.join(home, ".carapace");
     try {
       await fs.mkdir(legacy);
       expect(resolveMemoryHostAgentWorkspaceDir(cfg, "support", env)).toBe(
@@ -208,7 +208,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
         resolveMemoryHostAgentWorkspaceDir(cfg, "support", {
           ...env,
           VITEST: "1",
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_TEST_FAST: "1",
         }),
       ).toBe(path.join(current, "workspace-support"));
       await fs.mkdir(current);
@@ -218,7 +218,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
       expect(
         resolveMemoryHostAgentWorkspaceDir(cfg, "support", {
           ...env,
-          OPENCLAW_STATE_DIR: path.join(home, "override"),
+          CARAPACE_STATE_DIR: path.join(home, "override"),
         }),
       ).toBe(path.join(home, "override", "workspace-support"));
     } finally {
@@ -228,7 +228,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
 
   it.each<{
     name: string;
-    agents: NonNullable<OpenClawConfig["agents"]>;
+    agents: NonNullable<CarapaceConfig["agents"]>;
     expected: Record<string, string>;
   }>([
     {
@@ -247,7 +247,7 @@ describe("resolveMemoryHostAgentWorkspaceDir", () => {
       expected: { main: "anonymous", support: "shared/support" },
     },
   ])("preserves $name", ({ agents, expected }) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { ...agents, defaults: { workspace: "~/shared" } },
     };
     for (const [agentId, relativePath] of Object.entries(expected)) {

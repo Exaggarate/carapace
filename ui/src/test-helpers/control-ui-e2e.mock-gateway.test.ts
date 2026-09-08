@@ -25,8 +25,8 @@ function waitForMockCycle(): Promise<void> {
 it("keeps handler responses and events on the requesting socket", async ({ gatewayPage }) => {
   const { window, execute } = gatewayPage;
   execute(createControlUiMockGatewayInitScript());
-  const gateway = (window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway })
-    .openclawControlUiE2eGateway;
+  const gateway = (window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway })
+    .carapaceControlUiE2eGateway;
   if (!gateway) {
     throw new Error("Mock Gateway was not installed");
   }
@@ -104,9 +104,9 @@ describe("mock gateway stateful config", () => {
 
     const controls = (
       window as typeof window & {
-        openclawControlUiE2eGateway?: { setOnline: (online: boolean) => void };
+        carapaceControlUiE2eGateway?: { setOnline: (online: boolean) => void };
       }
-    ).openclawControlUiE2eGateway;
+    ).carapaceControlUiE2eGateway;
     expect(controls).toBeDefined();
     controls?.setOnline(false);
 
@@ -237,7 +237,7 @@ describe("mock gateway stateful config", () => {
       },
     });
     window.sessionStorage.setItem(
-      "openclaw.control-ui-e2e.configState",
+      "carapace.control-ui-e2e.configState",
       JSON.stringify({ raw, revision: 2 }),
     );
     execute(script);
@@ -300,11 +300,11 @@ describe("mock gateway stateful sessions", () => {
 
     const gateway = (
       window as unknown as {
-        openclawControlUiE2eGateway?: {
+        carapaceControlUiE2eGateway?: {
           resolveDeferred: (method: string, payload?: unknown) => void;
         };
       }
-    ).openclawControlUiE2eGateway;
+    ).carapaceControlUiE2eGateway;
     if (!gateway) {
       throw new Error("Mock Gateway was not installed");
     }

@@ -1,5 +1,5 @@
 /** Controller identity, authorization, and controlled-run read scope. */
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   isSubagentSessionKey,
   normalizeAgentId,
@@ -35,7 +35,7 @@ export type ResolvedSubagentController = {
 
 /** Resolves which subagent runs the caller is allowed to control. */
 export function resolveSubagentController(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentSessionKey?: string;
   agentId?: string;
 }): ResolvedSubagentController {
@@ -75,7 +75,7 @@ export function resolveSubagentController(params: {
 
 function resolveRunRequesterAgentId(
   entry: SubagentRunRecord,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): string | undefined {
   if (entry.requesterAgentId) {
     return entry.requesterAgentId;
@@ -91,7 +91,7 @@ function isSubagentRunVisibleToSession(
   entry: SubagentRunRecord,
   sessionKey: string,
   agentId: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): boolean {
   const controllerKey = entry.controllerSessionKey?.trim();
   const requesterKey = entry.requesterSessionKey.trim();
@@ -111,7 +111,7 @@ function isSubagentRunVisibleToSession(
 export function buildControlledSubagentRunsReadContext(
   controllerSessionKey: string,
   controllerAgentId?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): {
   runs: SubagentRunRecord[];
   countPendingDescendantRuns(rootSessionKey: string): number;
@@ -141,13 +141,13 @@ export function buildControlledSubagentRunsReadContext(
 export function listControlledSubagentRuns(
   controllerSessionKey: string,
   controllerAgentId?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): SubagentRunRecord[] {
   return buildControlledSubagentRunsReadContext(controllerSessionKey, controllerAgentId, cfg).runs;
 }
 
 export function ensureSubagentControllerOwnsRun(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   controller: Pick<ResolvedSubagentController, "controllerSessionKey" | "controllerAgentId">;
   entry: SubagentRunRecord;
 }) {
@@ -166,7 +166,7 @@ export function ensureSubagentControllerOwnsRun(params: {
 export function getLatestOwnedSubagentRun(
   childSessionKey: string,
   agentId: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): SubagentRunRecord | undefined {
   // Agent-scoped child keys already carry their sole owner; any newer generation fences
   // the old row. Bare per-agent keys need the explicit owner to avoid cross-agent shadowing.
@@ -181,7 +181,7 @@ export function getLatestOwnedSubagentRun(
   );
 }
 
-export function isCurrentSubagentRun(entry: SubagentRunRecord, cfg?: OpenClawConfig): boolean {
+export function isCurrentSubagentRun(entry: SubagentRunRecord, cfg?: CarapaceConfig): boolean {
   if (!cfg) {
     return getLatestLiveSubagentRunByChildSessionKey(entry.childSessionKey) === entry;
   }

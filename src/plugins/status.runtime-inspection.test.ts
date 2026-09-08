@@ -8,7 +8,7 @@ import { runPluginsInspectCommand } from "../cli/plugins-inspect-command.js";
 import { readConfigFileSnapshotForWrite, writeConfigFile } from "../config/config.js";
 import { defaultRuntime } from "../runtime.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnv, withEnvAsync } from "../test-utils/env.js";
 import { setGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import { getGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
@@ -45,7 +45,7 @@ describe("plugin runtime inspection", () => {
   afterEach(() => {
     clearPluginMetadataLifecycleCaches();
     resetPluginLoaderTestStateForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   afterAll(() => {
@@ -56,7 +56,7 @@ describe("plugin runtime inspection", () => {
     "releases chat inspection while the active native registration stays usable: %s",
     async (selection) => {
       const stateDir = makePluginLoaderTempDir();
-      const key = `__openclaw_chat_inspection_${selection}`;
+      const key = `__carapace_chat_inspection_${selection}`;
       const started = createDeferredCore();
       const finish = createDeferredCore();
       const connections: Array<{
@@ -97,9 +97,9 @@ module.exports = { id: "native-chat-inspection", register(api) {
       try {
         await withEnvAsync(
           {
-            OPENCLAW_HOME: stateDir,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+            CARAPACE_HOME: stateDir,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
           },
           async () => {
             useNoBundledPlugins();
@@ -199,7 +199,7 @@ module.exports = { id: "native-chat-inspection", register(api) {
     const all = mode === "all";
     const stateDir = makePluginLoaderTempDir();
     const databasePath = path.join(stateDir, "inspection.sqlite");
-    const key = `__openclaw_inspect_${mode}`;
+    const key = `__carapace_inspect_${mode}`;
     const state: {
       database?: DatabaseSync;
       disposals: number;
@@ -250,9 +250,9 @@ module.exports = {
     try {
       await withEnvAsync(
         {
-          OPENCLAW_HOME: stateDir,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+          CARAPACE_HOME: stateDir,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
         },
         async () => {
           useNoBundledPlugins();
@@ -348,15 +348,15 @@ module.exports = {
         filename: "index.cjs",
         body: `require("node:fs").writeFileSync(${JSON.stringify(imported)}, "imported"); module.exports = { id: ${JSON.stringify(pluginId)}, kind: ${JSON.stringify(runtimeKind)}, register() {} };`,
       });
-      const manifestPath = path.join(plugin.dir, "openclaw.plugin.json");
+      const manifestPath = path.join(plugin.dir, "carapace.plugin.json");
       const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
       fs.writeFileSync(manifestPath, JSON.stringify({ ...manifest, ...(kind ? { kind } : {}) }));
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: source === "bundled" ? undefined : "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: source === "bundled" ? undefined : "1",
         },
         async () => {
           await writeConfigFile({
@@ -395,7 +395,7 @@ module.exports = {
       },
     };
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: makePluginLoaderTempDir() }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: makePluginLoaderTempDir() }, async () => {
       useNoBundledPlugins();
       const bootConfig = { plugins: { enabled: false } };
       const boot = loadPluginMetadataSnapshot({ config: bootConfig, env: process.env });
@@ -425,12 +425,12 @@ module.exports = {
     { source: "npm", kind: "memory", mode: "requires-config", slots: [] },
   ] as const)("persists first-install slots for $source ($kind, $mode)", async (testCase) => {
     const stateDir = makePluginLoaderTempDir();
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     await withEnvAsync(
       {
-        OPENCLAW_HOME: stateDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_HOME: stateDir,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
       },
       async () => {
         useNoBundledPlugins();
@@ -450,11 +450,11 @@ module.exports = {
             JSON.stringify({
               name: pluginId,
               version: "1.0.0",
-              openclaw: { extensions: ["./index.cjs"] },
+              carapace: { extensions: ["./index.cjs"] },
             }),
           );
           fs.writeFileSync(
-            path.join(pluginDir, "openclaw.plugin.json"),
+            path.join(pluginDir, "carapace.plugin.json"),
             JSON.stringify({
               id: pluginId,
               kind: testCase.kind,
@@ -506,17 +506,17 @@ module.exports = {
     "uses replaced package metadata while preserving its old snapshot (requires config: %s)",
     async (requiresConfig) => {
       const stateDir = makePluginLoaderTempDir();
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const pluginId = "same-path-candidate";
       const pluginDir = path.join(stateDir, "extensions", pluginId);
       const writeVersion = (version: "1.0.0" | "2.0.0") => {
         fs.mkdirSync(pluginDir, { recursive: true });
         fs.writeFileSync(
           path.join(pluginDir, "package.json"),
-          JSON.stringify({ name: pluginId, version, openclaw: { extensions: ["./index.cjs"] } }),
+          JSON.stringify({ name: pluginId, version, carapace: { extensions: ["./index.cjs"] } }),
         );
         fs.writeFileSync(
-          path.join(pluginDir, "openclaw.plugin.json"),
+          path.join(pluginDir, "carapace.plugin.json"),
           JSON.stringify({
             id: pluginId,
             version,
@@ -547,7 +547,7 @@ module.exports = {
         });
 
       await withEnvAsync(
-        { OPENCLAW_HOME: stateDir, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_CONFIG_PATH: configPath },
+        { CARAPACE_HOME: stateDir, CARAPACE_STATE_DIR: stateDir, CARAPACE_CONFIG_PATH: configPath },
         async () => {
           useNoBundledPlugins();
           await writeConfigFile({});
@@ -599,12 +599,12 @@ module.exports = {
     "rechecks install authority when it closes %s",
     async (closedAt) => {
       const stateDir = makePluginLoaderTempDir();
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await withEnvAsync(
         {
-          OPENCLAW_HOME: stateDir,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
+          CARAPACE_HOME: stateDir,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
         },
         async () => {
           useNoBundledPlugins();
@@ -628,11 +628,11 @@ module.exports = {
               JSON.stringify({
                 name: pluginId,
                 version: "1.0.0",
-                openclaw: { extensions: ["./first.cjs", "./second.cjs"] },
+                carapace: { extensions: ["./first.cjs", "./second.cjs"] },
               }),
             );
             fs.writeFileSync(
-              path.join(pluginDir, "openclaw.plugin.json"),
+              path.join(pluginDir, "carapace.plugin.json"),
               JSON.stringify({ id: pluginId, configSchema: { type: "object" } }),
             );
             for (const [entry, kind] of [
@@ -720,7 +720,7 @@ module.exports = { id: ${JSON.stringify(`${pluginId}/${entry}`)}, kind: ${JSON.s
       },
     };
 
-    withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+    withEnv({ CARAPACE_STATE_DIR: stateDir }, () => {
       useNoBundledPlugins();
       const params = { config, workspaceDir: plugin.dir, env: process.env };
 

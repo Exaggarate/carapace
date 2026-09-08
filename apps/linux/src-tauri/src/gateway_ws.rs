@@ -136,7 +136,7 @@ impl ServerCertVerifier for GatewayTlsPinVerifier {
         _now: UnixTime,
     ) -> Result<ServerCertVerified, RustlsError> {
         // The local CLI authenticates this exact leaf-certificate hash before handing it to the
-        // app. A present pin replaces CA/hostname trust, matching OpenClawKit; the signature
+        // app. A present pin replaces CA/hostname trust, matching CarapaceKit; the signature
         // methods below still prove the peer owns the certificate's private key.
         if pinned_fingerprint_matches(&self.expected, end_entity.as_ref()) {
             Ok(ServerCertVerified::assertion())
@@ -1735,7 +1735,7 @@ mod tests {
     #[cfg(unix)]
     mod dashboard_handoff {
         use super::*;
-        use crate::{cli::OpenClawCli, gateway, NavigationState};
+        use crate::{cli::CarapaceCli, gateway, NavigationState};
         use std::ffi::OsString;
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
@@ -1754,9 +1754,9 @@ mod tests {
             fn new() -> Self {
                 let environment = CLI_ENV.lock().unwrap_or_else(|error| error.into_inner());
                 let directory = std::env::temp_dir()
-                    .join(format!("openclaw-dashboard-handoff-{}", Uuid::new_v4()));
+                    .join(format!("carapace-dashboard-handoff-{}", Uuid::new_v4()));
                 fs::create_dir(&directory).expect("create CLI fixture");
-                let executable = directory.join("openclaw");
+                let executable = directory.join("carapace");
                 fs::write(
                     &executable,
                     r#"#!/bin/sh
@@ -1778,8 +1778,8 @@ esac
                 .expect("write CLI fixture");
                 fs::set_permissions(&executable, fs::Permissions::from_mode(0o700))
                     .expect("make CLI fixture executable");
-                let previous_cli = std::env::var_os("OPENCLAW_DESKTOP_CLI");
-                std::env::set_var("OPENCLAW_DESKTOP_CLI", executable);
+                let previous_cli = std::env::var_os("CARAPACE_DESKTOP_CLI");
+                std::env::set_var("CARAPACE_DESKTOP_CLI", executable);
                 Self {
                     directory,
                     previous_cli,
@@ -1790,7 +1790,7 @@ esac
             fn ready(&self, response: Value) -> Result<gateway::ReadyGateway, String> {
                 fs::write(self.directory.join("dashboard.json"), response.to_string())
                     .expect("write dashboard response");
-                let cli = OpenClawCli::discover().expect("discover fixture CLI");
+                let cli = CarapaceCli::discover().expect("discover fixture CLI");
                 gateway::ensure_ready(&cli)
             }
         }
@@ -1798,8 +1798,8 @@ esac
         impl Drop for CliFixture {
             fn drop(&mut self) {
                 match self.previous_cli.as_ref() {
-                    Some(value) => std::env::set_var("OPENCLAW_DESKTOP_CLI", value),
-                    None => std::env::remove_var("OPENCLAW_DESKTOP_CLI"),
+                    Some(value) => std::env::set_var("CARAPACE_DESKTOP_CLI", value),
+                    None => std::env::remove_var("CARAPACE_DESKTOP_CLI"),
                 }
                 let _ = fs::remove_dir_all(&self.directory);
             }
@@ -1808,7 +1808,7 @@ esac
         #[test]
         fn gateway_actions_supply_stop_consent_without_forcing_restart() {
             let _fixture = CliFixture::new();
-            let cli = OpenClawCli::discover().expect("discover fixture CLI");
+            let cli = CarapaceCli::discover().expect("discover fixture CLI");
             for action in [
                 gateway::GatewayAction::Stop,
                 gateway::GatewayAction::Start,
@@ -2189,7 +2189,7 @@ esac
     #[test]
     fn connect_frame_matches_gateway_schema() {
         let directory = std::env::temp_dir().join(format!(
-            "openclaw-linux-connect-frame-test-{}",
+            "carapace-linux-connect-frame-test-{}",
             Uuid::new_v4()
         ));
         let store = GatewayDeviceIdentityStore::load_or_create(directory.join("identity.json"))
@@ -2288,7 +2288,7 @@ esac
             "auth": { "deviceToken": "test-device-token" },
             "policy": { "tickIntervalMs": 1_250 },
             "pluginSurfaceUrls": {
-                "canvas": "https://gateway.example/__openclaw__/cap/fixture-capability"
+                "canvas": "https://gateway.example/__carapace__/cap/fixture-capability"
             }
         }))
         .expect("valid hello");
@@ -2297,7 +2297,7 @@ esac
         assert_eq!(hello.tick_watch_timeout, Duration::from_millis(2_500));
         assert_eq!(
             hello.canvas_surface_url.as_deref(),
-            Some("https://gateway.example/__openclaw__/cap/fixture-capability")
+            Some("https://gateway.example/__carapace__/cap/fixture-capability")
         );
         assert_eq!(
             gated_canvas_surface_url(hello.canvas_surface_url.clone(), true),
@@ -2313,7 +2313,7 @@ esac
     fn plugin_surface_refresh_response_decodes_canvas_url() {
         let response: PluginSurfaceRefreshResponse = serde_json::from_value(json!({
             "pluginSurfaceUrls": {
-                "canvas": "https://gateway.example/__openclaw__/cap/refreshed-capability"
+                "canvas": "https://gateway.example/__carapace__/cap/refreshed-capability"
             }
         }))
         .expect("refresh response");
@@ -2323,7 +2323,7 @@ esac
                 .plugin_surface_urls
                 .and_then(|urls| urls.get("canvas").cloned())
                 .as_deref(),
-            Some("https://gateway.example/__openclaw__/cap/refreshed-capability")
+            Some("https://gateway.example/__carapace__/cap/refreshed-capability")
         );
     }
 
@@ -2415,14 +2415,14 @@ esac
         let event = serde_json::to_value(GatewayStateEvent::new(
             GatewayConnectionState::Up,
             None,
-            Some("https://gateway.example/__openclaw__/cap/fixture-capability".to_string()),
+            Some("https://gateway.example/__carapace__/cap/fixture-capability".to_string()),
             Some("#abc123".to_string()),
         ))
         .expect("serialize gateway state");
 
         assert_eq!(
             event["canvasSurfaceUrl"],
-            "https://gateway.example/__openclaw__/cap/fixture-capability"
+            "https://gateway.example/__carapace__/cap/fixture-capability"
         );
         assert_eq!(event["accent"], "#abc123");
         assert!(event.get("canvas_surface_url").is_none());

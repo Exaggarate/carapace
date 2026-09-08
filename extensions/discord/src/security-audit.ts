@@ -1,17 +1,17 @@
 // Discord plugin module implements security audit behavior.
-import { coerceNativeSetting, normalizeAllowFromList } from "openclaw/plugin-sdk/channel-policy";
+import { coerceNativeSetting, normalizeAllowFromList } from "carapace/plugin-sdk/channel-policy";
 import type {
   DiscordGuildChannelConfig,
   DiscordGuildEntry,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import { readChannelAllowFromStore } from "openclaw/plugin-sdk/conversation-runtime";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/config-contracts";
+import { readChannelAllowFromStore } from "carapace/plugin-sdk/conversation-runtime";
+import { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
 import {
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
-} from "openclaw/plugin-sdk/native-command-config-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/native-command-config-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { ResolvedDiscordAccount } from "./accounts.js";
 import { isDiscordMutableAllowEntry } from "./security-doctor.js";
 
@@ -72,7 +72,7 @@ function addDiscordNameBasedEntries(params: {
 }
 
 export async function collectDiscordSecurityAuditFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   account: ResolvedDiscordAccount;
   orderedAccountIds: string[];

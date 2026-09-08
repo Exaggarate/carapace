@@ -1,8 +1,8 @@
 // Feishu plugin module implements monitor mocks behavior.
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
+import { createChannelIngressQueueForTests } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
 import { vi } from "vitest";
 
 export function createFeishuClientMockModule(): {
@@ -20,7 +20,7 @@ export function createFeishuRuntimeMockModule(): {
 } {
   const stateDir = path.join(
     process.env.HOME ?? process.cwd(),
-    `.openclaw-feishu-monitor-${randomUUID()}`,
+    `.carapace-feishu-monitor-${randomUUID()}`,
   );
   const runtime = {
     state: {

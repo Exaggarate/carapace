@@ -165,6 +165,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: 0.120.0
         version: 0.120.0(zod@4.4.3)
+      '@carapace/ai':
+        specifier: workspace:*
+        version: link:packages/ai
       '@clack/core':
         specifier: 1.4.3
         version: 1.4.3
@@ -198,9 +201,6 @@ importers:
       '@mozilla/readability':
         specifier: 0.6.0
         version: 0.6.0
-      '@openclaw/ai':
-        specifier: workspace:*
-        version: link:packages/ai
       '@openclaw/fs-safe':
         specifier: 0.8.5
         version: 0.8.5
@@ -361,6 +361,9 @@ importers:
       '@a2ui/web_core':
         specifier: 0.10.6
         version: 0.10.6
+      '@carapace/session-url-contract':
+        specifier: workspace:*
+        version: link:packages/session-url-contract
       '@copilotkit/aimock':
         specifier: 1.39.0
         version: 1.39.0(vitest@5.0.0)
@@ -379,9 +382,6 @@ importers:
       '@openclaw/crabline':
         specifier: 0.1.20
         version: 0.1.20
-      '@openclaw/session-url-contract':
-        specifier: workspace:*
-        version: link:packages/session-url-contract
       '@opentelemetry/sdk-node':
         specifier: 0.221.0
         version: 0.221.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
@@ -545,7 +545,7 @@ importers:
 
   examples/ai-chat:
     dependencies:
-      '@openclaw/ai':
+      '@carapace/ai':
         specifier: workspace:*
         version: link:../../packages/ai
 
@@ -555,10 +555,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -580,19 +580,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/admin-http-rpc:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/alibaba:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -617,7 +617,7 @@ importers:
         specifier: 4.17.2
         version: 4.17.2
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -630,13 +630,13 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/anthropic:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -652,31 +652,31 @@ importers:
         specifier: 8.10.2
         version: 8.10.2
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/arcee:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/azure-speech:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/baseten:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/beam:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -686,13 +686,13 @@ importers:
         specifier: 1.3.12
         version: 1.3.12(supports-color@10.2.2)
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/brave:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -720,7 +720,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
       '@types/yargs-parser':
@@ -739,16 +739,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/byteplus:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -770,25 +770,25 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/cerebras:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/chutes:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/clawrouter:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -801,16 +801,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/cloudflare-ai-gateway:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -835,19 +835,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/cohere:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/comfy:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -857,19 +857,19 @@ importers:
         specifier: 1.0.11
         version: 1.0.11
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/copilot-proxy:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/crabbox:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -885,25 +885,25 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/deepgram:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/deepinfra:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/deepseek:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -952,13 +952,13 @@ importers:
         specifier: 1.43.0
         version: 1.43.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/diagnostics-prometheus:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -980,13 +980,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/diffs-language-pack:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1020,10 +1020,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1033,37 +1033,37 @@ importers:
         specifier: 0.3.1
         version: 0.3.1
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/duckduckgo:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/elevenlabs:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/exa:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/fal:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/featherless:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1088,10 +1088,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1104,7 +1104,7 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1117,19 +1117,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/fireworks:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/fish-audio-speech:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1139,19 +1139,19 @@ importers:
         specifier: 5.0.7
         version: 5.0.7
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/github-copilot:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/gmi:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1167,7 +1167,7 @@ importers:
         specifier: 11.0.2
         version: 11.0.2(supports-color@10.2.2)
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1180,10 +1180,10 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1196,34 +1196,34 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/gradium:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/groq:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/huggingface:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/image-generation-core:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1239,7 +1239,7 @@ importers:
         specifier: 3.9.15
         version: 3.9.15
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
       '@types/mailparser':
@@ -1255,16 +1255,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/inworld:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1274,19 +1274,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/kilocode:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/kimi-coding:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1302,10 +1302,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1315,19 +1315,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/litellm:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/llama-cpp:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1337,7 +1337,7 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1352,22 +1352,22 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/logbook:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/longcat:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1398,10 +1398,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1414,10 +1414,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1436,10 +1436,10 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1455,12 +1455,12 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
+      '@carapace/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
       '@lancedb/lancedb':
         specifier: 0.37.1
         version: 0.37.1(@types/node@26.4.0)(apache-arrow@18.1.0)
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
     optionalDependencies:
       '@lancedb/lancedb-darwin-arm64':
         specifier: 0.37.1
@@ -1499,19 +1499,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/memory-core':
+      '@carapace/memory-core':
         specifier: workspace:*
         version: link:../memory-core
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/meta:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1521,22 +1521,22 @@ importers:
         specifier: 1.2.10
         version: 1.2.10(supports-color@10.2.2)
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/microsoft-foundry:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/migrate-claude:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1549,28 +1549,28 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/minimax:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/mistral:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/moonshot:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1595,18 +1595,18 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      '@carapace/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
       '@microsoft/teams.common':
         specifier: 2.0.15
         version: 2.0.15(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      '@openclaw/plugin-sdk':
+      carapace:
         specifier: workspace:*
-        version: link:../../packages/plugin-sdk
+        version: link:../..
       jose:
         specifier: 6.2.10
         version: 6.2.10
-      openclaw:
-        specifier: workspace:*
-        version: link:../..
 
   extensions/mxc:
     dependencies:
@@ -1617,7 +1617,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1627,10 +1627,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1643,22 +1643,22 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/novita:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/nvidia:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1677,10 +1677,10 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1690,7 +1690,7 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1700,7 +1700,7 @@ importers:
         specifier: 0.8.5
         version: 0.8.5
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1719,25 +1719,25 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/opencode:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/opencode-go:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/openrouter:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1753,28 +1753,28 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/parallel:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/perplexity:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/pixverse:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1784,10 +1784,10 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1800,10 +1800,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1834,22 +1834,22 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/discord':
+      '@carapace/discord':
         specifier: workspace:*
         version: link:../discord
-      '@openclaw/matrix':
+      '@carapace/matrix':
         specifier: workspace:*
         version: link:../matrix
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      '@openclaw/slack':
+      '@carapace/slack':
         specifier: workspace:*
         version: link:../slack
-      '@openclaw/whatsapp':
+      '@carapace/whatsapp':
         specifier: workspace:*
         version: link:../whatsapp
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
       vite:
@@ -1858,13 +1858,13 @@ importers:
 
   extensions/qianfan:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/qwen:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1874,10 +1874,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1899,31 +1899,31 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/runway:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/searxng:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/senseaudio:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/sglang:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1936,7 +1936,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1970,10 +1970,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -1983,13 +1983,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/stepfun:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1999,13 +1999,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/synthetic:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2015,7 +2015,7 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2025,10 +2025,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -2038,10 +2038,10 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -2066,13 +2066,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/tencent:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2094,16 +2094,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/together:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2113,16 +2113,16 @@ importers:
         specifier: 0.8.1
         version: 0.8.1
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/tts-local-cli:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2141,25 +2141,25 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vault:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/venice:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vercel-ai-gateway:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2172,13 +2172,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vllm:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2194,28 +2194,28 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/volcengine:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/voyage:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vydra:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2228,7 +2228,7 @@ importers:
         specifier: 0.18.13
         version: 0.18.13
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2238,7 +2238,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2254,19 +2254,19 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   extensions/workboard:
     dependencies:
-      '@openclaw/gateway-protocol':
+      '@carapace/gateway-protocol':
         specifier: workspace:*
         version: link:../../packages/gateway-protocol
-      '@openclaw/workboard-contract':
+      '@carapace/workboard-contract':
         specifier: workspace:*
         version: link:../../packages/workboard-contract
       lit:
@@ -2279,16 +2279,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/gateway-client':
+      '@carapace/gateway-client':
         specifier: workspace:*
         version: link:../../packages/gateway-client
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../../packages/normalization-core
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -2301,19 +2301,19 @@ importers:
         specifier: 8.21.3
         version: 8.21.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/xiaomi:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/zai:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2323,10 +2323,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -2342,10 +2342,10 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
@@ -2355,28 +2355,28 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@carapace/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   packages/acp-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
   packages/agent-core:
     dependencies:
-      '@openclaw/ai':
+      '@carapace/ai':
         specifier: workspace:*
         version: link:../ai
-      '@openclaw/llm-core':
+      '@carapace/llm-core':
         specifier: workspace:*
         version: link:../llm-core
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       typebox:
@@ -2404,16 +2404,16 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/model-catalog-core':
+      '@carapace/model-catalog-core':
         specifier: workspace:*
         version: link:../model-catalog-core
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
   packages/gateway-client:
     dependencies:
-      '@openclaw/gateway-protocol':
+      '@carapace/gateway-protocol':
         specifier: workspace:*
         version: link:../gateway-protocol
       ipaddr.js:
@@ -2423,7 +2423,7 @@ importers:
         specifier: 8.21.3
         version: 8.21.3
     devDependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
@@ -2433,7 +2433,7 @@ importers:
         specifier: 1.3.18
         version: 1.3.18
     devDependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
@@ -2445,7 +2445,7 @@ importers:
 
   packages/markdown-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       markdown-it:
@@ -2469,7 +2469,7 @@ importers:
 
   packages/media-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       file-type:
@@ -2478,7 +2478,7 @@ importers:
 
   packages/media-generation-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
@@ -2486,23 +2486,23 @@ importers:
 
   packages/memory-host-sdk:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
-      '@openclaw/retry':
+      '@carapace/retry':
         specifier: workspace:*
         version: link:../retry
       p-map:
         specifier: 7.0.7
         version: 7.0.7
     devDependencies:
-      openclaw:
+      carapace:
         specifier: workspace:*
         version: link:../..
 
   packages/mermaid-renderer:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       dompurify:
@@ -2518,7 +2518,7 @@ importers:
 
   packages/model-catalog-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       zod:
@@ -2527,7 +2527,7 @@ importers:
 
   packages/net-policy:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       ipaddr.js:
@@ -2551,30 +2551,30 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@openclaw/gateway-client':
+      '@carapace/gateway-client':
         specifier: workspace:*
         version: link:../gateway-client
-      '@openclaw/gateway-protocol':
+      '@carapace/gateway-protocol':
         specifier: workspace:*
         version: link:../gateway-protocol
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
   packages/session-url-contract:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
   packages/terminal-core:
     dependencies:
+      '@carapace/normalization-core':
+        specifier: workspace:*
+        version: link:../normalization-core
       '@clack/prompts':
         specifier: 1.7.0
         version: 1.7.0
-      '@openclaw/normalization-core':
-        specifier: workspace:*
-        version: link:../normalization-core
       chalk:
         specifier: 6.0.0
         version: 6.0.0
@@ -2584,7 +2584,7 @@ importers:
 
   packages/tool-call-repair:
     dependencies:
-      '@openclaw/normalization-core':
+      '@carapace/normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
@@ -2595,6 +2595,33 @@ importers:
       '@awesome.me/webawesome':
         specifier: 3.12.0
         version: 3.12.0(patch_hash=a366a1422e3d8f0b9699205e969a73294877cbff761550bb360380e3ab9428f1)(@floating-ui/utils@0.2.12)(@types/node@26.4.0)(@types/react@19.2.18)
+      '@carapace/gateway-client':
+        specifier: workspace:*
+        version: link:../packages/gateway-client
+      '@carapace/gateway-protocol':
+        specifier: workspace:*
+        version: link:../packages/gateway-protocol
+      '@carapace/media-core':
+        specifier: workspace:*
+        version: link:../packages/media-core
+      '@carapace/mermaid-renderer':
+        specifier: workspace:*
+        version: link:../packages/mermaid-renderer
+      '@carapace/model-catalog-core':
+        specifier: workspace:*
+        version: link:../packages/model-catalog-core
+      '@carapace/net-policy':
+        specifier: workspace:*
+        version: link:../packages/net-policy
+      '@carapace/normalization-core':
+        specifier: workspace:*
+        version: link:../packages/normalization-core
+      '@carapace/session-url-contract':
+        specifier: workspace:*
+        version: link:../packages/session-url-contract
+      '@carapace/workboard-contract':
+        specifier: workspace:*
+        version: link:../packages/workboard-contract
       '@codemirror/commands':
         specifier: 6.11.0
         version: 6.11.0
@@ -2634,39 +2661,12 @@ importers:
       '@novnc/novnc':
         specifier: 1.7.0
         version: 1.7.0(patch_hash=bfde0e1bda172da3525f9f5014d85ad28073325b74f09609084598a65d2f412d)
-      '@openclaw/gateway-client':
-        specifier: workspace:*
-        version: link:../packages/gateway-client
-      '@openclaw/gateway-protocol':
-        specifier: workspace:*
-        version: link:../packages/gateway-protocol
       '@openclaw/libterminal':
         specifier: 0.3.2
         version: 0.3.2
-      '@openclaw/media-core':
-        specifier: workspace:*
-        version: link:../packages/media-core
-      '@openclaw/mermaid-renderer':
-        specifier: workspace:*
-        version: link:../packages/mermaid-renderer
-      '@openclaw/model-catalog-core':
-        specifier: workspace:*
-        version: link:../packages/model-catalog-core
-      '@openclaw/net-policy':
-        specifier: workspace:*
-        version: link:../packages/net-policy
-      '@openclaw/normalization-core':
-        specifier: workspace:*
-        version: link:../packages/normalization-core
-      '@openclaw/session-url-contract':
-        specifier: workspace:*
-        version: link:../packages/session-url-contract
       '@openclaw/uirouter':
         specifier: 0.1.1
         version: 0.1.1
-      '@openclaw/workboard-contract':
-        specifier: workspace:*
-        version: link:../packages/workboard-contract
       '@panzoom/panzoom':
         specifier: 4.6.2
         version: 4.6.2
@@ -2716,15 +2716,15 @@ importers:
       '@vitest/browser-playwright':
         specifier: 5.0.0
         version: 5.0.0(playwright@1.62.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))(vitest@5.0.0)
+      carapace:
+        specifier: workspace:*
+        version: link:..
       fake-indexeddb:
         specifier: 6.2.5
         version: 6.2.5
       jsdom:
         specifier: 29.1.1
         version: 29.1.1(@noble/hashes@2.4.0)
-      openclaw:
-        specifier: workspace:*
-        version: link:..
       pako:
         specifier: 3.0.1
         version: 3.0.1

@@ -2,8 +2,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { withTempHome as withTempHomeBase } from "openclaw/plugin-sdk/test-env";
+import { expectDefined } from "@carapace/normalization-core";
+import { withTempHome as withTempHomeBase } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
 // Register shared mocks before imports bind their production exports.
 import "./agent-command.test-mocks.js";
@@ -39,7 +39,7 @@ import {
 import { addSessionMember, listSessionMembers } from "../config/sessions/session-sharing-store.js";
 import { clearSessionStoreCacheForTest } from "../config/sessions/store-writer-state.js";
 import type { InternalSessionEntry as SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getBootEchoContextForSession } from "../gateway/boot-echo-guard.js";
 import { runBootOnce } from "../gateway/boot.js";
 import { emitAgentEvent, onAgentEvent, resetAgentEventsForTest } from "../infra/agent-events.js";
@@ -131,7 +131,7 @@ vi.mock("../agents/harness/selection.js", () => ({
   // Availability fallback has focused owner coverage in selection.test.ts. The
   // command suite only needs a stable policy for auth-profile validation.
   resolveAvailableAgentHarnessPolicy: vi.fn(() => ({
-    runtime: "openclaw",
+    runtime: "carapace",
     runtimeSource: "implicit",
   })),
 }));
@@ -163,7 +163,7 @@ vi.mock("../agents/thinking-runtime.js", () => ({
     model: string,
     agentRuntime: string,
   ) =>
-    agentRuntime !== "openclaw" ||
+    agentRuntime !== "carapace" ||
     !catalog?.some(
       (entry) =>
         entry.provider.toLowerCase() === provider.toLowerCase() &&
@@ -173,7 +173,7 @@ vi.mock("../agents/thinking-runtime.js", () => ({
   normalizeThinkingCatalogProviders: <T extends { provider: string }>(catalog: T[]) =>
     catalog.map((entry) => ({ ...entry, provider: entry.provider.toLowerCase() })),
   resolveCandidateThinkingLevel: ({ level }: { level?: string }) => level,
-  resolveEffectiveAgentRuntime: () => "openclaw",
+  resolveEffectiveAgentRuntime: () => "carapace",
 }));
 
 vi.mock("../agents/main-session-recovery/main-session-recovery-store.js", () => ({
@@ -325,7 +325,7 @@ vi.mock("../agents/command/delivery.runtime.js", () => {
   return {
     deliverAgentCommandResult: vi.fn(
       async (params: {
-        cfg: OpenClawConfig;
+        cfg: CarapaceConfig;
         deps: {
           sendMessageTelegram?: (
             to: string,
@@ -405,16 +405,16 @@ const runtime = createThrowingTestRuntime();
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
   return withTempHomeBase(fn, {
-    prefix: "openclaw-agent-",
+    prefix: "carapace-agent-",
   });
 }
 
 function mockConfig(
   home: string,
   storePath: string,
-  agentOverrides?: Partial<NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]>>,
-  telegramOverrides?: Partial<NonNullable<NonNullable<OpenClawConfig["channels"]>["telegram"]>>,
-  agentsList?: NonNullable<NonNullable<OpenClawConfig["agents"]>["list"]>,
+  agentOverrides?: Partial<NonNullable<NonNullable<CarapaceConfig["agents"]>["defaults"]>>,
+  telegramOverrides?: Partial<NonNullable<NonNullable<CarapaceConfig["channels"]>["telegram"]>>,
+  agentsList?: NonNullable<NonNullable<CarapaceConfig["agents"]>["list"]>,
 ) {
   const cfg = {
     meta: { migrations: { modelPolicyAllowlist: true } },
@@ -422,7 +422,7 @@ function mockConfig(
       defaults: {
         model: { primary: "anthropic/claude-opus-4-6" },
         models: { "anthropic/claude-opus-4-6": {} },
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "carapace"),
         ...agentOverrides,
       },
       list: agentsList,
@@ -431,7 +431,7 @@ function mockConfig(
     channels: {
       telegram: telegramOverrides ? { ...telegramOverrides } : undefined,
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   configIoMocks.loadConfig.mockReturnValue(cfg);
   return cfg;
 }
@@ -441,7 +441,7 @@ function mockUserInvocableSkills(params: {
   skills: Array<{ name: string; disableModelInvocation?: boolean }>;
 }) {
   const entries = params.skills.map(({ name, disableModelInvocation = false }) => {
-    const baseDir = path.join(params.home, "openclaw", "skills", name);
+    const baseDir = path.join(params.home, "carapace", "skills", name);
     const filePath = path.join(baseDir, "SKILL.md");
     return {
       skill: {
@@ -449,10 +449,10 @@ function mockUserInvocableSkills(params: {
         description: `${name} instructions`,
         filePath,
         baseDir,
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
         sourceInfo: {
           path: filePath,
-          source: "openclaw-workspace",
+          source: "carapace-workspace",
           scope: "project",
           origin: "top-level",
         },
@@ -567,7 +567,7 @@ function installThinkingTestProviders(channels: Parameters<typeof createTestRegi
 }
 
 function createOutboundSessionRouteFixture(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   channel: string;
   accountId?: string | null;
@@ -602,7 +602,7 @@ beforeEach(() => {
   vi.mocked(loadEnabledClaudeBundleCommands).mockReturnValue([]);
   vi.mocked(modelSelectionModule.isCliProvider).mockImplementation(() => false);
   configIoMocks.readConfigFileSnapshotForWrite.mockResolvedValue({
-    snapshot: { valid: false, resolved: {} as OpenClawConfig },
+    snapshot: { valid: false, resolved: {} as CarapaceConfig },
     writeOptions: {},
   });
 });
@@ -647,7 +647,7 @@ describe("agentCommand", () => {
         const cfg = mockConfig(home, storePath, undefined, undefined, [
           { id: "main", default: true },
         ]);
-        const workspaceDir = path.join(home, "openclaw");
+        const workspaceDir = path.join(home, "carapace");
         fs.mkdirSync(workspaceDir, { recursive: true });
         fs.writeFileSync(path.join(workspaceDir, "BOOT.md"), "Check status.");
         const priorScope = { storePath, sessionKey: "agent:main:boot", sessionId: "previous-boot" };
@@ -919,7 +919,7 @@ describe("agentCommand", () => {
     await withTempHome(async (home) => {
       const store = path.join(home, "sessions.json");
       const repository = path.join(home, "repository");
-      const configuredWorkspace = path.join(repository, ".openclaw", "workspace");
+      const configuredWorkspace = path.join(repository, ".carapace", "workspace");
       fs.mkdirSync(repository, { recursive: true });
       execFileSync("git", ["-C", repository, "init", "-b", "main"]);
       fs.writeFileSync(path.join(repository, "README.md"), "base\n");
@@ -959,13 +959,13 @@ describe("agentCommand", () => {
       const canonicalWorkspace = path.join(home, "project");
       fs.mkdirSync(canonicalWorkspace, { recursive: true });
       execFileSync("git", ["-C", canonicalWorkspace, "init", "-b", "main"]);
-      execFileSync("git", ["-C", canonicalWorkspace, "config", "user.name", "OpenClaw Test"]);
+      execFileSync("git", ["-C", canonicalWorkspace, "config", "user.name", "Carapace Test"]);
       execFileSync("git", [
         "-C",
         canonicalWorkspace,
         "config",
         "user.email",
-        "openclaw-test@example.invalid",
+        "carapace-test@example.invalid",
       ]);
       fs.writeFileSync(path.join(canonicalWorkspace, "README.md"), "base\n");
       execFileSync("git", ["-C", canonicalWorkspace, "add", "README.md"]);
@@ -1107,7 +1107,7 @@ describe("agentCommand", () => {
         runtime,
       );
 
-      const skillFile = path.join(home, "openclaw", "skills", "release-notes", "SKILL.md");
+      const skillFile = path.join(home, "carapace", "skills", "release-notes", "SKILL.md");
       expect(getLastEmbeddedCall()?.prompt).toContain(`- release-notes (SKILL.md: ${skillFile})`);
     });
   });
@@ -1284,13 +1284,13 @@ describe("agentCommand", () => {
   it("continues an existing locked harness-owned session", async () => {
     await withTempHome(async (home) => {
       const store = path.join(home, "sessions.json");
-      const sessionKey = "agent:main:harness:openclaw:supervision:existing";
+      const sessionKey = "agent:main:harness:carapace:supervision:existing";
       mockConfig(home, store);
       await writeSessionStoreSeed(store, {
         [sessionKey]: {
           sessionId: "existing-harness-session",
           updatedAt: Date.now(),
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           modelSelectionLocked: true,
         },
       });
@@ -1464,7 +1464,7 @@ describe("agentCommand", () => {
             updatedAt: Date.now(),
           },
         });
-        return { dir: params?.dir ?? "/tmp/openclaw-workspace" };
+        return { dir: params?.dir ?? "/tmp/carapace-workspace" };
       });
 
       await expect(
@@ -1500,7 +1500,7 @@ describe("agentCommand", () => {
         await writeSessionStoreSeed(store, {
           [sessionKey]: { sessionId, updatedAt: Date.now() },
         });
-        return { dir: params?.dir ?? "/tmp/openclaw-workspace" };
+        return { dir: params?.dir ?? "/tmp/carapace-workspace" };
       });
 
       await agentCommandFromIngress(
@@ -1822,7 +1822,7 @@ describe("agentCommand", () => {
 
       await agentCommand(
         {
-          message: "Reply with exactly OPENCLAW-MODEL-OK",
+          message: "Reply with exactly CARAPACE-MODEL-OK",
           sessionKey,
           model: "openrouter/auto",
           modelRun: true,
@@ -1835,7 +1835,7 @@ describe("agentCommand", () => {
       const callArgs = getLastEmbeddedCall();
       expect(callArgs?.provider).toBe("openrouter");
       expect(callArgs?.model).toBe("openrouter/auto");
-      expect(callArgs?.prompt).toBe("Reply with exactly OPENCLAW-MODEL-OK");
+      expect(callArgs?.prompt).toBe("Reply with exactly CARAPACE-MODEL-OK");
       expect(callArgs?.modelRun).toBe(true);
       expect(callArgs?.promptMode).toBe("none");
       expect(callArgs?.disableTools).toBe(true);
@@ -2708,7 +2708,7 @@ describe("agentCommand", () => {
   it("rejects agent-scoped to session selectors that conflict with the requested agent", async () => {
     await withTempHome(async (home) => {
       const store = path.join(home, "sessions.json");
-      const sessionKey = "agent:main:openclaw-weixin:direct:o9cq802hhmfc@im.wechat";
+      const sessionKey = "agent:main:carapace-weixin:direct:o9cq802hhmfc@im.wechat";
       await writeSessionStoreSeed(store, {
         [sessionKey]: { sessionId: "wechat-session", updatedAt: Date.now() },
       });
@@ -2724,7 +2724,7 @@ describe("agentCommand", () => {
   it("does not forward agent-scoped to session selectors as delivery targets", async () => {
     await withTempHome(async (home) => {
       const store = path.join(home, "sessions.json");
-      const sessionKey = "agent:main:openclaw-weixin:direct:o9cq802hhmfc@im.wechat";
+      const sessionKey = "agent:main:carapace-weixin:direct:o9cq802hhmfc@im.wechat";
       await writeSessionStoreSeed(store, {
         [sessionKey]: {
           sessionId: "wechat-session",

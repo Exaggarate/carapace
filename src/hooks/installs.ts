@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Hook install record helpers read and write installed hook metadata.
 import type { HookInstallRecord } from "../config/types.hooks.js";
 import { updateConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 
 /** Install record plus its canonical hook pack id. */
 export type HookInstallUpdate = HookInstallRecord & { hookId: string };
@@ -17,7 +17,7 @@ export type HookInstallWriteReceipt = {
 
 /** Read canonical hook install records from machine state. */
 export function readHookInstalls(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Record<string, HookInstallRecord> {
   return (
     readConfigMachineState<Record<string, HookInstallRecord>>("hooks.internal.installs", options) ??
@@ -28,7 +28,7 @@ export function readHookInstalls(
 /** Persist one hook install record in machine state. */
 export function recordHookInstall(
   update: HookInstallUpdate,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): HookInstallWriteReceipt {
   const { hookId, ...record } = update;
   let receipt: HookInstallWriteReceipt | undefined;
@@ -58,7 +58,7 @@ export function recordHookInstall(
 /** Undo only this install's record, preserving unrelated or newer writers. */
 export function restoreHookInstallIfCurrent(
   receipt: HookInstallWriteReceipt,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   let restored = false;
   updateConfigMachineState<Record<string, HookInstallRecord>>(

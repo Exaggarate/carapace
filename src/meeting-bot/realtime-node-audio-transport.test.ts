@@ -18,7 +18,7 @@ function createTransport(
   });
   Reflect.set(
     transport,
-    Symbol.for("openclaw.internal.meeting-node-output-generation.v1"),
+    Symbol.for("carapace.internal.meeting-node-output-generation.v1"),
     options.outputGenerationSupported === true,
   );
   return transport;

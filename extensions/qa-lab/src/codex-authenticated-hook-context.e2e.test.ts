@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import { startQaBusServer } from "./bus-server.js";
 import { createQaBusState } from "./bus-state.js";
@@ -31,7 +31,7 @@ type HookCaptures = {
   afterCompaction: CapturedContext[];
 };
 
-function withFixturePlugin(config: OpenClawConfig): OpenClawConfig {
+function withFixturePlugin(config: CarapaceConfig): CarapaceConfig {
   return {
     ...config,
     plugins: {
@@ -150,7 +150,7 @@ describe("Codex authenticated hook context product proof", () => {
     expect(captures.afterCompaction.length).toBeGreaterThan(0);
     expectAuthenticatedContext(captures.beforeCompaction.at(-1));
     expectAuthenticatedContext(captures.afterCompaction.at(-1));
-    const verdictPath = process.env.OPENCLAW_QA_VERDICT_PATH?.trim();
+    const verdictPath = process.env.CARAPACE_QA_VERDICT_PATH?.trim();
     if (verdictPath) {
       await fs.mkdir(path.dirname(verdictPath), { recursive: true });
       await fs.writeFile(

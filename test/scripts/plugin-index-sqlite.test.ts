@@ -17,7 +17,7 @@ async function loadPluginIndex(env: Record<string, string> = {}) {
 }
 
 function sqlitePath(root: string) {
-  return path.join(root, "state", "openclaw.sqlite");
+  return path.join(root, "state", "carapace.sqlite");
 }
 
 function openSqlite(root: string) {
@@ -33,7 +33,7 @@ function writeLegacyIndex(root: string, text: string) {
 }
 
 function configPath(root: string) {
-  return path.join(root, "openclaw.json");
+  return path.join(root, "carapace.json");
 }
 
 function currentValueJson(installRecords: unknown) {
@@ -149,7 +149,7 @@ function readTableNames(root: string) {
 
 describe("plugin index SQLite E2E helpers", () => {
   it("reads legacy install records when SQLite index state is absent", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writeLegacyIndex(
         root,
@@ -167,7 +167,7 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("keeps malformed legacy install JSON as an empty fallback", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writeLegacyIndex(root, "{not-json");
 
@@ -182,12 +182,12 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("rejects oversized legacy install JSON before parsing it", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writeLegacyIndex(root, JSON.stringify({ records: {}, filler: "x".repeat(128) }));
 
       const { readPluginInstallRecords } = await loadPluginIndex({
-        OPENCLAW_PLUGIN_INDEX_JSON_MAX_BYTES: "64",
+        CARAPACE_PLUGIN_INDEX_JSON_MAX_BYTES: "64",
       });
 
       expect(() =>
@@ -199,7 +199,7 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("reads the current index for schema v13", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writeCurrentSqliteIndex(root, currentValueJson({ current: { source: "npm" } }));
 
@@ -214,7 +214,7 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("reads the retired index for pre-v13 schemas", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writePreV13SqliteIndex(root, JSON.stringify({ legacy: { source: "npm" } }));
 
@@ -231,7 +231,7 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("prefers current state for unversioned databases", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writePreV13SqliteIndex(root, JSON.stringify({ stale: { source: "npm" } }), 0);
       writeCurrentSqliteIndex(root, currentValueJson({ current: { source: "npm" } }), 0);
@@ -247,7 +247,7 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("does not fall back to a retired row for schema v13", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writePreV13SqliteIndex(root, JSON.stringify({ stale: { source: "npm" } }), 13);
 
@@ -262,7 +262,7 @@ describe("plugin index SQLite E2E helpers", () => {
   });
 
   it("does not read current state for pre-v13 schemas", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       writeCurrentSqliteIndex(root, currentValueJson({ future: { source: "npm" } }), 12);
 
@@ -286,7 +286,7 @@ describe("plugin index SQLite E2E helpers", () => {
       write: (root: string) => writePreV13SqliteIndex(root, "{not-json"),
     },
   ])("keeps malformed $name SQLite state as an empty fallback", async ({ write }) => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       write(root);
 
@@ -314,12 +314,12 @@ describe("plugin index SQLite E2E helpers", () => {
         writePreV13SqliteIndex(root, JSON.stringify({ filler: "x".repeat(128) })),
     },
   ])("rejects oversized $name SQLite state before parsing it", async ({ expected, write }) => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       write(root);
 
       const { readPluginInstallIndex } = await loadPluginIndex({
-        OPENCLAW_PLUGIN_INDEX_JSON_MAX_BYTES: "64",
+        CARAPACE_PLUGIN_INDEX_JSON_MAX_BYTES: "64",
       });
 
       expect(() =>
@@ -355,7 +355,7 @@ describe("plugin index SQLite E2E helpers", () => {
   ])(
     "writes only the $mode storage contract",
     async ({ absentTable, expectedTable, options, schemaVersion }) => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+      const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
       try {
         const db = openSqlite(root);
         db.exec(`PRAGMA user_version = ${schemaVersion}`);
@@ -377,7 +377,7 @@ describe("plugin index SQLite E2E helpers", () => {
   );
 
   it("rejects unknown writer storage modes", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-index-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-index-"));
     try {
       const { writePluginInstallIndexForE2E } = await loadPluginIndex();
 

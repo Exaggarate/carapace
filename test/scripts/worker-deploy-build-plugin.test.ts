@@ -48,7 +48,7 @@ describe("worker deploy build plugin", () => {
     if (!config) {
       throw new Error("Worker deploy build config is missing");
     }
-    const root = tempDirs.make("openclaw-worker-complete-graph-");
+    const root = tempDirs.make("carapace-worker-complete-graph-");
     const bundles = await build({
       ...config,
       config: false,
@@ -88,7 +88,7 @@ describe("worker deploy build plugin", () => {
         config.entry["worker/worker"] === "src/worker/worker-deploy-entry.ts",
     );
     expect(workerConfig).toBeDefined();
-    const root = tempDirs.make("openclaw-worker-websocket-");
+    const root = tempDirs.make("carapace-worker-websocket-");
     const source = path.join(root, "transport.ts");
     const output = path.join(root, "output");
     const relocated = path.join(root, "relocated");
@@ -223,7 +223,7 @@ console.log("relocated worker WebSocket and transcription passed");
 
     const transformed = plugin.transform.call({ error: fail }, source, bridgePath);
 
-    const root = tempDirs.make("openclaw-worker-browser-composition-");
+    const root = tempDirs.make("carapace-worker-browser-composition-");
     const outputPath = path.join(root, "src/worker/browser.mjs");
     const runtimePath = path.join(root, "extensions/browser/runtime-api.js");
     const eventsPath = path.join(root, "events.txt");
@@ -345,7 +345,7 @@ export async function createAttachedBrowserToolRuntime(params) {
   it("matches the canonical dependency path behind a pnpm-style symlink", () => {
     const sourceRoot = path.resolve("node_modules/playwright-core");
     const source = fs.readFileSync(path.join(sourceRoot, "lib/coreBundle.js"), "utf8");
-    const tempRoot = tempDirs.make("openclaw-worker-build-plugin-");
+    const tempRoot = tempDirs.make("carapace-worker-build-plugin-");
     const linkedRoot = path.join(tempRoot, "node_modules", "playwright-core");
     fs.mkdirSync(path.dirname(linkedRoot), { recursive: true });
     fs.symlinkSync(sourceRoot, linkedRoot, process.platform === "win32" ? "junction" : "dir");

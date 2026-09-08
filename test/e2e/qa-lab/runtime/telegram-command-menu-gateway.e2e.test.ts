@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { withServer, withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withServer, withTempDir } from "carapace/plugin-sdk/test-env";
 import { expect, test } from "vitest";
 import {
   createQaGatewayChild,
@@ -49,17 +49,17 @@ async function writeLocalizedCommandPlugin(params: { repoRoot: string; workspace
     path.join(pluginDir, "package.json"),
     `${JSON.stringify(
       {
-        name: `@openclaw/${LOCALIZED_PLUGIN_ID}`,
+        name: `@carapace/${LOCALIZED_PLUGIN_ID}`,
         version: "0.0.0",
         type: "module",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       },
       null,
       2,
     )}\n`,
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: LOCALIZED_PLUGIN_ID,
@@ -151,7 +151,7 @@ test("registers pressure-prioritized Telegram menus through a real Gateway", asy
       void handleRequest(req, res);
     },
     async (apiRoot) =>
-      await withTempDir("openclaw-telegram-menu-", async (workspace) => {
+      await withTempDir("carapace-telegram-menu-", async (workspace) => {
         let mock: Awaited<ReturnType<typeof startQaMockOpenAiServer>> | undefined;
         const gatewayOwner = createQaGatewayChild();
         try {
@@ -207,9 +207,9 @@ test("registers pressure-prioritized Telegram menus through a real Gateway", asy
             },
             controlUiEnabled: false,
             runtimeEnvPatch: {
-              OPENCLAW_SKIP_CHANNELS: undefined,
-              OPENCLAW_SKIP_PROVIDERS: undefined,
-              OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+              CARAPACE_SKIP_CHANNELS: undefined,
+              CARAPACE_SKIP_PROVIDERS: undefined,
+              CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
               TELEGRAM_BOT_TOKEN: undefined,
             },
             mutateConfig: (cfg) => {

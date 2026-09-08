@@ -4,7 +4,7 @@
 // concrete core tool mint an alias projection and lets cron creator capture
 // translate that alias back to its canonical tool name. The registry is
 // in-memory object identity only — nothing here is persisted.
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import type { AnyAgentTool } from "./tools/common.js";
 
 /** Canonical identity of a host-created scheduled tool alias. */

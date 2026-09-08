@@ -1,10 +1,10 @@
 import { updateConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   type ClawHubPromotionsFeedEntry,
   fetchClawHubPromotionsFeed,
@@ -25,7 +25,7 @@ const PROMOTIONS_FEED_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 // 30s — a blackholed connection must not stall `models list`.
 const PROMOTIONS_FEED_FETCH_TIMEOUT_MS = 2500;
 
-type PromotionsFeedDatabase = Pick<OpenClawStateKyselyDatabase, "clawhub_promotion_claims">;
+type PromotionsFeedDatabase = Pick<CarapaceStateKyselyDatabase, "clawhub_promotion_claims">;
 
 type StoredPromotionsFeedState = {
   etag: string | null;
@@ -245,7 +245,7 @@ export async function maybeRefreshPromotionsFeed(
 
 export function recordPromotionClaim(record: PromotionClaimRecord): void {
   try {
-    runOpenClawStateWriteTransaction((database) => {
+    runCarapaceStateWriteTransaction((database) => {
       const db = getNodeSqliteKysely<PromotionsFeedDatabase>(database.db);
       const values = {
         slug: record.slug,
@@ -269,7 +269,7 @@ export function recordPromotionClaim(record: PromotionClaimRecord): void {
 
 export function readPromotionClaims(): PromotionClaimRecord[] {
   try {
-    const database = openOpenClawStateDatabase();
+    const database = openCarapaceStateDatabase();
     const db = getNodeSqliteKysely<PromotionsFeedDatabase>(database.db);
     const { rows } = executeSqliteQuerySync(
       database.db,

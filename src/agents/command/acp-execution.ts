@@ -3,7 +3,7 @@ import { resolveInlineAgentImageAttachments } from "../../auto-reply/reply/agent
 import { recordAgentRunTerminalOutcome } from "../../channels/turn/agent-run-terminal-outcome.js";
 import type { CliDeps } from "../../cli/deps.types.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { assertAgentRunLifecycleGenerationCurrent } from "../../infra/agent-events.js";
 import { registerAgentRunContext } from "../../infra/agent-run-registry.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -46,7 +46,7 @@ type AcpReadyResolution = Extract<
 
 export async function runAcpAgentCommand(params: {
   preparedRunAdmission: PreparedAgentRunAdmission;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deps: CliDeps;
   runtime: RuntimeEnv;
   opts: AgentCommandOpts;

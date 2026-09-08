@@ -185,7 +185,7 @@ describe("prepareEmbeddedAttemptBundleTools", () => {
     if (!record) {
       throw new Error("missing native plugin fixture");
     }
-    record.format = "openclaw";
+    record.format = "carapace";
     record.mcpServers = { "chrome dev": { command: "unused" } };
     const snapshot = createPluginMetadataSnapshot({
       config: input.attempt.config,

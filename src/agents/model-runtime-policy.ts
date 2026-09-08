@@ -4,13 +4,13 @@
  * Agent execution uses this to choose a model/provider-specific runtime policy
  * from agent entries, model catalog config, provider config, or QA overrides.
  */
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { parseModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { tryResolveLegacyCompatibilityAgentId } from "../config/legacy.default-agent-owner.js";
 import type { AgentModelEntryConfig } from "../config/types.agent-defaults.js";
 import type { AgentRuntimePolicyConfig } from "../config/types.agents-shared.js";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentEntry } from "./agent-scope-config.js";
 import { resolveSessionAgentIds } from "./agent-scope.js";
 
@@ -22,7 +22,7 @@ export type AgentRuntimePolicyScope = { sessionKey?: string } & (
 
 /** Resolve request hints; prepared owner facts never re-admit a canonical sentinel. */
 export function resolveAgentRuntimePolicyAgentId(
-  params: AgentRuntimePolicyScope & { config?: OpenClawConfig },
+  params: AgentRuntimePolicyScope & { config?: CarapaceConfig },
 ): string | undefined {
   if (params.agentScope?.kind === "prepared") {
     return params.agentScope.agentId;
@@ -63,7 +63,7 @@ function hasRuntimePolicy(value: AgentRuntimePolicyConfig | undefined): boolean 
 }
 
 function resolveProviderConfig(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   provider: string | undefined,
 ): ModelProviderConfig | undefined {
   if (!config?.models?.providers || !provider?.trim()) {
@@ -165,7 +165,7 @@ function modelEntryMatchKind(params: {
 }
 
 function resolveAgentModelEntryRuntimePolicy(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider?: string;
   modelId?: string;
   agentId?: string;
@@ -225,7 +225,7 @@ function resolveModelConfig(params: {
 /** Resolves the effective runtime policy for an agent/model/provider selection. */
 export function resolveModelRuntimePolicy(
   params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     provider?: string;
     modelId?: string;
   } & AgentRuntimePolicyScope,
@@ -233,9 +233,9 @@ export function resolveModelRuntimePolicy(
   const callerProvider = normalizeProviderId(params.provider ?? "");
   const effectiveProvider = resolveEffectiveProvider(params.provider, params.modelId);
   const inferredMatchedProvider = callerProvider ? undefined : effectiveProvider;
-  if (process.env.OPENCLAW_BUILD_PRIVATE_QA === "1") {
-    const forcedRuntime = process.env.OPENCLAW_QA_FORCE_RUNTIME?.trim().toLowerCase();
-    if (forcedRuntime === "openclaw" || forcedRuntime === "codex") {
+  if (process.env.CARAPACE_BUILD_PRIVATE_QA === "1") {
+    const forcedRuntime = process.env.CARAPACE_QA_FORCE_RUNTIME?.trim().toLowerCase();
+    if (forcedRuntime === "carapace" || forcedRuntime === "codex") {
       return { policy: { id: forcedRuntime }, source: "model", forcedByEnvironment: true };
     }
   }

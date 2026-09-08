@@ -18,7 +18,7 @@ function writeIndex(
   record: Record<string, unknown>,
   packageVersion: string,
 ) {
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const db = new DatabaseSync(databasePath);
   try {
@@ -60,30 +60,30 @@ function writeIndex(
 }
 
 function runHelper(home: string, args: string[]) {
-  const stateDir = path.join(home, ".openclaw");
+  const stateDir = path.join(home, ".carapace");
   return spawnSync(process.execPath, [HELPER, ...args], {
     encoding: "utf8",
     env: {
       ...process.env,
       HOME: home,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_STATE_DIR: stateDir,
     },
   });
 }
 
 function writeMarketplaceState(home: string, version: string) {
   const pluginId = "release-marketplace-plugin";
-  const stateDir = path.join(home, ".openclaw");
+  const stateDir = path.join(home, ".carapace");
   const installPath = path.join(stateDir, "extensions", pluginId);
   fs.mkdirSync(installPath, { recursive: true });
   fs.writeFileSync(
     path.join(installPath, "package.json"),
-    `${JSON.stringify({ name: `@openclaw/${pluginId}`, version })}\n`,
+    `${JSON.stringify({ name: `@carapace/${pluginId}`, version })}\n`,
     "utf8",
   );
   fs.writeFileSync(
-    path.join(stateDir, "openclaw.json"),
+    path.join(stateDir, "carapace.json"),
     `${JSON.stringify({
       plugins: { entries: { [pluginId]: { enabled: true } } },
     })}\n`,
@@ -106,7 +106,7 @@ function writeMarketplaceState(home: string, version: string) {
 }
 
 function clearMarketplaceIndex(home: string) {
-  const databasePath = path.join(home, ".openclaw", "state", "openclaw.sqlite");
+  const databasePath = path.join(home, ".carapace", "state", "carapace.sqlite");
   const db = new DatabaseSync(databasePath);
   try {
     db.prepare(
@@ -128,7 +128,7 @@ function clearMarketplaceIndex(home: string) {
 
 describe("release plugin marketplace lifecycle assertions", () => {
   it("checks canonical marketplace metadata and stable managed install paths", () => {
-    const home = makeTempDir(tempDirs, "openclaw-marketplace-lifecycle-");
+    const home = makeTempDir(tempDirs, "carapace-marketplace-lifecycle-");
     const { installPath, pluginId } = writeMarketplaceState(home, "0.0.1");
     const installPathFile = path.join(home, "install-path.txt");
 
@@ -158,7 +158,7 @@ describe("release plugin marketplace lifecycle assertions", () => {
   });
 
   it("rejects marketplace state with the wrong persisted version", () => {
-    const home = makeTempDir(tempDirs, "openclaw-marketplace-lifecycle-");
+    const home = makeTempDir(tempDirs, "carapace-marketplace-lifecycle-");
     const { pluginId } = writeMarketplaceState(home, "0.0.1");
 
     const result = runHelper(home, [
@@ -175,7 +175,7 @@ describe("release plugin marketplace lifecycle assertions", () => {
   });
 
   it("seeds uninstall state and verifies complete cleanup with sentinels preserved", () => {
-    const home = makeTempDir(tempDirs, "openclaw-marketplace-lifecycle-");
+    const home = makeTempDir(tempDirs, "carapace-marketplace-lifecycle-");
     const { installPath, pluginId } = writeMarketplaceState(home, "0.0.2");
     const sentinelPluginId = "release-marketplace-other";
     const sentinelPath = path.join(home, "marketplace", sentinelPluginId);
@@ -192,7 +192,7 @@ describe("release plugin marketplace lifecycle assertions", () => {
     expect(seeded.stderr).toBe("");
     expect(seeded.status).toBe(0);
 
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
+    const configPath = path.join(home, ".carapace", "carapace.json");
     const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     expect(config.plugins.allow).toEqual([pluginId, sentinelPluginId]);
     expect(config.plugins.deny).toEqual([pluginId, sentinelPluginId]);
@@ -218,7 +218,7 @@ describe("release plugin marketplace lifecycle assertions", () => {
   });
 
   it("checks the exact dry-run and update outcome text", () => {
-    const home = makeTempDir(tempDirs, "openclaw-marketplace-lifecycle-");
+    const home = makeTempDir(tempDirs, "carapace-marketplace-lifecycle-");
     const logPath = path.join(home, "update.log");
     fs.writeFileSync(logPath, "Would update release-marketplace-plugin: 0.0.1 -> 0.0.2.\n", "utf8");
 

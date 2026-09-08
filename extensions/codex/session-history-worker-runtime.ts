@@ -1,13 +1,13 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   captureCodexSessionTranscriptReadAdmission,
   SessionTranscriptReadFenceError,
   validateCodexSessionTranscriptReadAdmission,
   validateCodexSessionTranscriptContextVersion,
-} from "openclaw/plugin-sdk/codex-session-transcript-runtime";
-import { WorkerTaskPool } from "openclaw/plugin-sdk/process-runtime";
-import { isIncognitoSessionKey } from "openclaw/plugin-sdk/session-key-runtime";
-import type { TranscriptTurnAdmission } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/codex-session-transcript-runtime";
+import { WorkerTaskPool } from "carapace/plugin-sdk/process-runtime";
+import { isIncognitoSessionKey } from "carapace/plugin-sdk/session-key-runtime";
+import type { TranscriptTurnAdmission } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
   codexHistoryWorkerUrl,
   runCodexHistoryWorkerInput,

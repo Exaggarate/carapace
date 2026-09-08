@@ -1,10 +1,10 @@
 // QA Lab Matrix setup prepares transport state for the shared flow host.
 import { setTimeout as sleep } from "node:timers/promises";
 import { isDeepStrictEqual } from "node:util";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { MatrixQaProvisionResult, MatrixQaRoomObserver } from "../substrate/client.js";
 import { buildMatrixQaConfig, type MatrixQaConfigOverrides } from "../substrate/config.js";
 import type { MatrixQaObservedEvent } from "../substrate/events.js";
@@ -75,8 +75,8 @@ function arrayPreservesBaseEntries(base: unknown[], merged: unknown[]): boolean 
 }
 
 function createMatrixQaConfigPatch(
-  current: OpenClawConfig,
-  target: OpenClawConfig,
+  current: CarapaceConfig,
+  target: CarapaceConfig,
   accountId: string,
 ) {
   const accountPath = `channels.matrix.accounts.${accountId}`;
@@ -282,7 +282,7 @@ export function createMatrixQaScenarioEnvironment(params: MatrixQaScenarioEnviro
   const syncState: MatrixQaScenarioContext["syncState"] = {};
   const syncStreams: Partial<Record<"driver" | "observer", MatrixQaRoomObserver>> = {};
   let canary: MatrixQaCanaryArtifact | undefined;
-  let baselineConfig: OpenClawConfig | undefined;
+  let baselineConfig: CarapaceConfig | undefined;
   const resetObserverState = () => {
     for (const actorId of ["driver", "observer"] as const) {
       delete syncState[actorId];
@@ -307,7 +307,7 @@ export function createMatrixQaScenarioEnvironment(params: MatrixQaScenarioEnviro
         timeoutMs: 60_000,
       },
     )) as {
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
     };
     if (!configSnapshot.config) {
       throw new Error("Matrix QA scenario requires config.get config");
@@ -388,7 +388,7 @@ export function createMatrixQaScenarioEnvironment(params: MatrixQaScenarioEnviro
       observerPassword: params.provisioning.observer.password,
       observerUserId: params.provisioning.observer.userId,
       gatewayRuntimeEnv: input.gateway.runtimeEnv,
-      gatewayStateDir: input.gateway.runtimeEnv.OPENCLAW_STATE_DIR,
+      gatewayStateDir: input.gateway.runtimeEnv.CARAPACE_STATE_DIR,
       gatewayWorkspaceDir: input.gateway.workspaceDir,
       gatewayCall: async (
         method: string,

@@ -10,7 +10,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("loadPromptTemplates", () => {
   it("keeps fallback descriptions on a UTF-16 boundary", async () => {
-    const root = tempDirs.make("openclaw-prompt-templates-");
+    const root = tempDirs.make("carapace-prompt-templates-");
     const promptsDir = join(root, "prompts");
     await mkdir(promptsDir, { recursive: true });
     await writeFile(join(promptsDir, "emoji.md"), `${"a".repeat(59)}🚀tail\n`, "utf-8");
@@ -27,7 +27,7 @@ describe("loadPromptTemplates", () => {
   });
 
   it("preserves dash-prefixed Markdown as prompt content", async () => {
-    const root = tempDirs.make("openclaw-prompt-templates-");
+    const root = tempDirs.make("carapace-prompt-templates-");
     const promptsDir = join(root, "prompts");
     await mkdir(promptsDir, { recursive: true });
     const content = "----\nname: bogus\ndescription: must remain Markdown\n---\n# Body\n";
@@ -49,7 +49,7 @@ describe("loadPromptTemplates", () => {
   });
 
   it("keeps case-variant Windows user prompt paths in user scope", async () => {
-    const root = tempDirs.make("openclaw-prompt-templates-");
+    const root = tempDirs.make("carapace-prompt-templates-");
     const promptDir = join(root, "agent", "prompts");
     await mkdir(promptDir, { recursive: true });
     await writeFile(join(promptDir, "user.md"), "User prompt\n", "utf-8");

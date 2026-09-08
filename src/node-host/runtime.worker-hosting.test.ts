@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock("../infra/path-env.js", () => ({ ensureOpenClawCliOnPath: vi.fn() }));
+vi.mock("../infra/path-env.js", () => ({ ensureCarapaceCliOnPath: vi.fn() }));
 vi.mock("./invoke.js", () => ({ handleInvoke: vi.fn(async () => undefined) }));
 vi.mock("./mcp.js", () => ({
   startNodeHostMcpManager: vi.fn(async () => ({
@@ -200,7 +200,7 @@ describe("node-host worker manifest", () => {
           workerRuns: {
             enabled: true,
             isolation: "container",
-            containerImage: "registry.example/openclaw-worker:22",
+            containerImage: "registry.example/carapace-worker:22",
           },
         },
       },
@@ -217,7 +217,7 @@ describe("node-host worker manifest", () => {
     expect(createNodeWorkerSupervisor).toHaveBeenCalledWith(
       expect.objectContaining({
         containerEngine: { id: "docker", command: "docker", target: "e".repeat(64) },
-        containerImage: "registry.example/openclaw-worker:22",
+        containerImage: "registry.example/carapace-worker:22",
       }),
     );
     expect(mocks.resolveContainerEngine).toHaveBeenCalledOnce();

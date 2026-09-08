@@ -3,10 +3,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { ChannelIngressQueue } from "carapace/plugin-sdk/channel-outbound";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMSTeamsIngress } from "./msteams-ingress.js";
 import { createMSTeamsReplayContext } from "./replay-context.js";
@@ -79,7 +79,7 @@ function makeIngress(queue: IngressQueue, dispatch: IngressDispatch) {
 }
 
 async function withQueue<T>(fn: (queue: IngressQueue) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-msteams-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-msteams-ingress-"));
   const stateDir = await fs.realpath(created);
   const queue = createChannelIngressQueueForTests<IngressPayload>({
     channelId: "msteams",
@@ -89,7 +89,7 @@ async function withQueue<T>(fn: (queue: IngressQueue) => Promise<T>): Promise<T>
   try {
     return await fn(queue);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -109,7 +109,7 @@ async function waitForVerdict(
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

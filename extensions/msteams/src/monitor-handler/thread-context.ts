@@ -1,6 +1,6 @@
-import { resolveInboundSupplementalSenderAllowed } from "openclaw/plugin-sdk/channel-inbound";
-import { filterSupplementalContextItems } from "openclaw/plugin-sdk/context-visibility-runtime";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import { resolveInboundSupplementalSenderAllowed } from "carapace/plugin-sdk/channel-inbound";
+import { filterSupplementalContextItems } from "carapace/plugin-sdk/context-visibility-runtime";
+import type { CarapaceConfig } from "../../runtime-api.js";
 import { formatUnknownError } from "../errors.js";
 import {
   buildThreadContext,
@@ -26,7 +26,7 @@ import {
 import { resolveMSTeamsRouteSessionKey } from "./thread-session.js";
 
 export function prepareMSTeamsThreadRouting(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   context: MSTeamsTurnContext;
   isDirectMessage: boolean;
   isChannel: boolean;

@@ -20,7 +20,7 @@ describe("resolveMessageActionDetails full-message eligibility", () => {
     { role: "user", id: "pending:input-1", shouldFetch: true },
   ])("role=$role capped by metadata -> eligible=$shouldFetch", ({ role, id, shouldFetch }) => {
     const details = resolveMessageActionDetails({
-      message: { role, content: "Preview\n...(truncated)...", __openclaw: { ...cappedMeta, id } },
+      message: { role, content: "Preview\n...(truncated)...", __carapace: { ...cappedMeta, id } },
       messageId: "msg-1",
       canFetchFullMessage: true,
       onReply: () => {},
@@ -33,7 +33,7 @@ describe("resolveMessageActionDetails full-message eligibility", () => {
     const message = {
       role: "user",
       content: "Preview",
-      __openclaw: { ...cappedMeta, id: "pending:input-1" },
+      __carapace: { ...cappedMeta, id: "pending:input-1" },
     };
     const details = resolveMessageActionDetails({
       message,
@@ -59,7 +59,7 @@ describe("resolveMessageActionDetails full-message eligibility", () => {
       message: {
         role: "assistant",
         content: "Quoting a log line:\n...(truncated)...\nand continuing normally.",
-        __openclaw: { id: "msg-3" },
+        __carapace: { id: "msg-3" },
       },
       messageId: "msg-3",
       canFetchFullMessage: true,
@@ -70,7 +70,7 @@ describe("resolveMessageActionDetails full-message eligibility", () => {
 
   it("does not fetch an untruncated assistant message", () => {
     const details = resolveMessageActionDetails({
-      message: { role: "assistant", content: "Complete.", __openclaw: { id: "msg-2" } },
+      message: { role: "assistant", content: "Complete.", __carapace: { id: "msg-2" } },
       messageId: "msg-2",
       canFetchFullMessage: true,
       senderLabel: "assistant",
@@ -82,7 +82,7 @@ describe("resolveMessageActionDetails full-message eligibility", () => {
     const message = {
       role: "assistant",
       content: "[chat.history omitted: message too large]",
-      __openclaw: { id: "msg-oversized", truncated: true, reason: "oversized" },
+      __carapace: { id: "msg-oversized", truncated: true, reason: "oversized" },
     };
     const details = resolveMessageActionDetails({
       message,
@@ -119,7 +119,7 @@ describe("resolveMessageActionDetails full-message eligibility", () => {
       message: {
         role: "assistant",
         content: [{ type: "image", omitted: true, bytes: 12 * 1024 }],
-        __openclaw: { id: "msg-omitted-image" },
+        __carapace: { id: "msg-omitted-image" },
       },
       messageId: "msg-omitted-image",
       onReply: () => {},
@@ -237,7 +237,7 @@ describe("message Markdown source preservation", () => {
 
   it("preserves assistant snapshot indentation and recovered Markdown for copying", () => {
     const source = "    *literal*";
-    const message = { role: "assistant", content: source, __openclaw: cappedMeta };
+    const message = { role: "assistant", content: source, __carapace: cappedMeta };
     expect(extractText(message)).toBe(source);
     const details = resolveMessageActionDetails({
       message,

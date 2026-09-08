@@ -1,5 +1,5 @@
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { extractQueryTerms } from "./helpers.ts";
 import type { CostDailyEntry, UsageAggregates, UsageSessionEntry } from "./types.ts";
 

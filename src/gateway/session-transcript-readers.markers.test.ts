@@ -2,8 +2,8 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { replaceTranscriptEvents } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { readSessionMessagesAroundIdWithStatsAsync } from "./session-transcript-anchor-reader.js";
 import {
@@ -40,7 +40,7 @@ function reset(id: string, firstKeptEntryId?: string) {
 }
 
 function messageIds(messages: unknown[]) {
-  return messages.map((entry) => (entry as { __openclaw: { id: string } })["__openclaw"].id);
+  return messages.map((entry) => (entry as { __carapace: { id: string } })["__carapace"].id);
 }
 
 function historicalWindowIds(events: Array<{ id: string; type?: string }>, targetId: string) {
@@ -61,15 +61,15 @@ describe("session transcript reader marker projection", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    tempDir = tempDirs.make("openclaw-transcript-markers-");
+    envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    tempDir = tempDirs.make("carapace-transcript-markers-");
     storePath = path.join(tempDir, "sessions.json");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
   });
 
@@ -210,7 +210,7 @@ describe("session transcript reader marker projection", () => {
       expect(messageIds(page.messages)).toEqual([id]);
       expect(page.totalMessages).toBe(fixture.expectedIds.length);
       expect(byId).toMatchObject({ found: true, seq: index + 1 });
-      expect(byId.message).toMatchObject({ __openclaw: { id, seq: index + 1 } });
+      expect(byId.message).toMatchObject({ __carapace: { id, seq: index + 1 } });
       const entry = fixture.events.find((event) => event.id === id)!;
       expect(byId.message).toMatchObject(
         entry.type === "message"
@@ -221,7 +221,7 @@ describe("session transcript reader marker projection", () => {
                 { type: "text", text: entry.type === "compaction" ? "Compaction" : "Reset" },
               ],
               timestamp: Date.parse(timestamp),
-              __openclaw: { kind: entry.type },
+              __carapace: { kind: entry.type },
             },
       );
       expect(anchored.found).toBe(true);
@@ -235,7 +235,7 @@ describe("session transcript reader marker projection", () => {
       expect(await readSessionMessagesMatchingIdAsync(scope, id)).toEqual([]);
       expect(await readSessionMessageByIdAsync(scope, id)).toMatchObject({
         found: true,
-        message: { __openclaw: { id } },
+        message: { __carapace: { id } },
       });
       const anchored = await readSessionMessagesAroundIdWithStatsAsync(scope, {
         messageId: id,

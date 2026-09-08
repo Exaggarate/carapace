@@ -606,7 +606,7 @@ describe("materializeStaticMcpToolsForHarnessRunCore", () => {
     expect(result.tools).toEqual([]);
     expect(result.diagnosticNotice).toContain("user-mail/inbox");
     expect(result.diagnosticNotice).toContain(
-      "openclaw mcp configure user-mail --approval approve",
+      "carapace mcp configure user-mail --approval approve",
     );
     expect(callTool).not.toHaveBeenCalled();
     await result?.dispose();
@@ -691,7 +691,7 @@ describe("materializeStaticMcpToolsForHarnessRunCore", () => {
     expect(result.tools).toEqual([]);
     expect(result.diagnosticNotice).toContain("user-mail/inbox");
     expect(result.diagnosticNotice).toContain(
-      "openclaw mcp configure user-mail --approval approve",
+      "carapace mcp configure user-mail --approval approve",
     );
     expect(callTool).not.toHaveBeenCalled();
     await result?.dispose();

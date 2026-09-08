@@ -5,12 +5,12 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import type { NodeWorkerSupervisorIdentity } from "../worker/node-supervisor-protocol.js";
 import {
   readNodeWorkerLaunchReceipt,
@@ -21,7 +21,7 @@ import {
 } from "./node-worker-launch-store.js";
 import type { NodeWorkerProcessIdentity } from "./node-worker-process-identity.js";
 
-type TurnDatabase = Pick<OpenClawStateDatabase, "node_worker_turns">;
+type TurnDatabase = Pick<CarapaceStateDatabase, "node_worker_turns">;
 type TurnRow = Selectable<TurnDatabase["node_worker_turns"]>;
 
 export type NodeWorkerTurnReceipt = NodeWorkerLaunchReceipt & { ownerLaunchId: string };
@@ -35,13 +35,13 @@ function query(database: DatabaseSync) {
 }
 
 function ensureTurnSchema(database: DatabaseSync): void {
-  const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf("CREATE TABLE IF NOT EXISTS node_worker_turns (");
+  const start = CARAPACE_STATE_SCHEMA_SQL.indexOf("CREATE TABLE IF NOT EXISTS node_worker_turns (");
   const endMarker = "\n  WHERE state = 'running';";
-  const end = OPENCLAW_STATE_SCHEMA_SQL.indexOf(endMarker, start);
+  const end = CARAPACE_STATE_SCHEMA_SQL.indexOf(endMarker, start);
   if (start < 0 || end < start) {
-    throw new Error("OpenClaw node worker turn schema marker is missing.");
+    throw new Error("Carapace node worker turn schema marker is missing.");
   }
-  database.exec(OPENCLAW_STATE_SCHEMA_SQL.slice(start, end + endMarker.length)); // sqlite-allow-raw -- Canonical feature-local additive DDL only.
+  database.exec(CARAPACE_STATE_SCHEMA_SQL.slice(start, end + endMarker.length)); // sqlite-allow-raw -- Canonical feature-local additive DDL only.
 }
 
 function readRow(database: DatabaseSync, turnId: string): TurnRow | undefined {
@@ -142,7 +142,7 @@ function pruneTerminal(database: DatabaseSync, nowMs: number, excludeTurnId: str
 
 /** Immutable turn outcomes attached to a separately supervised physical worker. */
 export class NodeWorkerTurnStore {
-  private readonly databaseOptions: OpenClawStateDatabaseOptions;
+  private readonly databaseOptions: CarapaceStateDatabaseOptions;
 
   constructor(options: { env?: NodeJS.ProcessEnv } = {}) {
     this.databaseOptions = options.env ? { env: options.env } : {};
@@ -150,7 +150,7 @@ export class NodeWorkerTurnStore {
 
   private write<T>(operationLabel: string, operation: (database: DatabaseSync) => T): T {
     let initialized: DatabaseSync | undefined;
-    const result = runOpenClawStateWriteTransaction(
+    const result = runCarapaceStateWriteTransaction(
       ({ db }) => {
         if (!initializedDatabases.has(db)) {
           ensureTurnSchema(db);

@@ -18,7 +18,7 @@
  * capabilities instead of the text-only fallback.
  */
 
-import { normalizeOpenRouterModelPricing } from "@openclaw/model-catalog-core/model-catalog-pricing";
+import { normalizeOpenRouterModelPricing } from "@carapace/model-catalog-core/model-catalog-pricing";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { cancelUnreadResponseBody } from "../../infra/http-body.js";
 import { resolveProxyFetchFromEnv } from "../../infra/net/proxy-fetch.js";

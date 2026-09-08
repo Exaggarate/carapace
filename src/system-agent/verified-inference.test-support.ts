@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginOrigin } from "../plugins/types.js";
 
 type TestPluginRecord = {
@@ -24,10 +24,10 @@ export function pluginRecord(
     pluginId,
     origin: "global",
     rootDir,
-    manifestPath: `${rootDir}/openclaw.plugin.json`,
+    manifestPath: `${rootDir}/carapace.plugin.json`,
     manifestHash: `${pluginId}-manifest-v1`,
     source: `${rootDir}/index.js`,
-    packageName: `@openclaw/${pluginId}`,
+    packageName: `@carapace/${pluginId}`,
     packageVersion: "1.0.0",
     installRecordHash: `${pluginId}-install-v1`,
     packageJson: { path: `${rootDir}/package.json`, hash: `${pluginId}-package-v1` },
@@ -58,7 +58,7 @@ export const codexRuntimeArtifactAuth = {
   runtimeArtifactId: "codex-app-server",
 } as const;
 
-export function config(model = "openai/gpt-5.5@openai:verified"): OpenClawConfig {
+export function config(model = "openai/gpt-5.5@openai:verified"): CarapaceConfig {
   return {
     agents: { defaults: { model } },
     auth: {

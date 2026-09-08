@@ -1,9 +1,9 @@
 // Discord plugin module implements rest routes behavior.
-import { redactIdentifier } from "openclaw/plugin-sdk/logging-core";
+import { redactIdentifier } from "carapace/plugin-sdk/logging-core";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 
 type QueryValue = string | number | boolean;
 

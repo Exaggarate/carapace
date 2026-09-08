@@ -11,8 +11,8 @@ import {
   BUILD_STAMP_FILE,
   RUNTIME_POSTBUILD_STAMP_FILE,
 } from "../../scripts/lib/local-build-metadata-paths.mts";
-import { createOpenClawTestInstance } from "../../test/helpers/openclaw-test-instance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { createCarapaceTestInstance } from "../../test/helpers/carapace-test-instance.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AgentEventPayload } from "../infra/agent-events.js";
 import { hasErrnoCode } from "../infra/errno.js";
 import { buildMockOpenAiResponsesProvider } from "./test-openai-responses-model.js";
@@ -55,24 +55,24 @@ describe("Gateway concurrent HTTP streams", () => {
     const buildInfo = JSON.parse(await fs.readFile(path.join(cwd, "dist/build-info.json"), "utf8"));
     expect(buildInfo.commit).toBe(checkoutSha);
     const token = `fanout-${randomUUID()}`;
-    const gateway = await createOpenClawTestInstance({
+    const gateway = await createCarapaceTestInstance({
       name: "concurrent-streams",
       cwd,
       gatewayToken: token,
       env: {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_GATEWAY_STARTUP_TRACE: "1",
-        OPENCLAW_TEST_CONSOLE: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_STARTUP_TRACE: "1",
+        CARAPACE_TEST_CONSOLE: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
       },
     });
     const { state, port } = gateway;
@@ -153,7 +153,7 @@ describe("Gateway concurrent HTTP streams", () => {
             model: { primary: provider.modelRef },
             models: {
               [provider.modelRef]: {
-                agentRuntime: { id: "openclaw" },
+                agentRuntime: { id: "carapace" },
                 params: { transport: "sse", openaiWsWarmup: false },
               },
             },
@@ -167,7 +167,7 @@ describe("Gateway concurrent HTTP streams", () => {
         },
         plugins: { slots: { memory: "none" } },
         tools: { profile: "minimal" },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await state.writeConfig(cfg);
       await gateway.startGateway();
       client = createGatewayWsClient({
@@ -200,7 +200,7 @@ describe("Gateway concurrent HTTP streams", () => {
         });
         expect(subscribed.ok, JSON.stringify(subscribed.error)).toBe(true);
         const body = {
-          model: "openclaw:main",
+          model: "carapace:main",
           stream: true,
           ...(item.endpoint === "/v1/responses"
             ? { input: item.marker }
@@ -212,7 +212,7 @@ describe("Gateway concurrent HTTP streams", () => {
             headers: {
               authorization: `Bearer ${token}`,
               "content-type": "application/json",
-              "x-openclaw-session-key": item.sessionKey,
+              "x-carapace-session-key": item.sessionKey,
             },
             body: JSON.stringify(body),
             signal: abort.signal,

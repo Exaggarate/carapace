@@ -2,16 +2,16 @@
 summary: "Cohere setup (auth + model selection)"
 title: "Cohere"
 read_when:
-  - You want to use Cohere with OpenClaw
+  - You want to use Cohere with Carapace
   - You need the Cohere API key env var or CLI auth choice
 ---
 
-[Cohere](https://cohere.com) provides OpenAI-compatible inference through its Compatibility API. OpenClaw provides Cohere as an official external plugin.
+[Cohere](https://cohere.com) provides OpenAI-compatible inference through its Compatibility API. Carapace provides Cohere as an official external plugin.
 
 | Property        | Value                                    |
 | --------------- | ---------------------------------------- |
 | Provider id     | `cohere`                                 |
-| Plugin          | `@openclaw/cohere-provider`              |
+| Plugin          | `@carapace/cohere-provider`              |
 | Auth env var    | `COHERE_API_KEY`                         |
 | Onboarding flag | `--auth-choice cohere-api-key`           |
 | Direct CLI flag | `--cohere-api-key <key>`                 |
@@ -30,22 +30,22 @@ read_when:
 | `cohere/command-a-vision-07-2025`    | hidden     | text, image | 128,000 | 8,000      | Previous generation; replaced by Command A+   |
 | `cohere/north-mini-code-1-0`         | visible    | text, image | 256,000 | 64,000     | Agentic coding; reasoning; free limits        |
 
-Reasoning-capable Cohere models support two Compatibility API reasoning modes. OpenClaw maps **off** to `none` and every enabled thinking level to `high`. Command A Vision does not support tool use, so OpenClaw keeps agent tools disabled for that model.
+Reasoning-capable Cohere models support two Compatibility API reasoning modes. Carapace maps **off** to `none` and every enabled thinking level to `high`. Command A Vision does not support tool use, so Carapace keeps agent tools disabled for that model.
 
 ## Get started
 
 1. Install the official plugin and restart the Gateway:
 
 ```bash
-openclaw plugins install @openclaw/cohere-provider
-openclaw gateway restart
+carapace plugins install @carapace/cohere-provider
+carapace gateway restart
 ```
 
 2. Create a Cohere API key.
 3. Run onboarding:
 
 ```bash
-openclaw onboard --non-interactive --accept-risk --skip-health \
+carapace onboard --non-interactive --accept-risk --skip-health \
   --auth-choice cohere-api-key \
   --cohere-api-key "$COHERE_API_KEY"
 ```
@@ -53,7 +53,7 @@ openclaw onboard --non-interactive --accept-risk --skip-health \
 4. Confirm the catalog is available:
 
 ```bash
-openclaw models list --provider cohere
+carapace models list --provider cohere
 ```
 
 Onboarding only sets Cohere as the primary model when no primary model is already configured.

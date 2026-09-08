@@ -1,4 +1,4 @@
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getReplyPayloadMetadata } from "../../../auto-reply/reply-payload.js";
 import { SILENT_REPLY_TOKEN } from "../../../auto-reply/tokens.js";
@@ -112,7 +112,7 @@ function settledFailedAttempt(): EmbeddedRunAttemptWithReceiptEvidence {
     currentAttemptAssistant: assistant,
     currentAttemptReplayMetadata: { hadPotentialSideEffects: true, replaySafe: false },
     replayMetadata: { hadPotentialSideEffects: true, replaySafe: false },
-    settledTurnFinalizationContext: { source: "openclaw-transcript", messages: messagesSnapshot },
+    settledTurnFinalizationContext: { source: "carapace-transcript", messages: messagesSnapshot },
     lastToolError: {
       toolName: "exec",
       error: "post-processing error",
@@ -210,7 +210,7 @@ describe("resolveSettledTurnFinalizationRequest", () => {
       toolMetas: [{ toolName: "write", toolCallId: "tool-1", replaySafe: false }],
       itemLifecycle: { startedCount: 1, completedCount: 1, activeCount: 0 },
       messagesSnapshot: [
-        { role: "user", content: [{ type: "text", text: "[OpenClaw heartbeat poll]" }] },
+        { role: "user", content: [{ type: "text", text: "[Carapace heartbeat poll]" }] },
         toolUseAssistant,
         { role: "toolResult", toolCallId: "tool-1", toolName: "write", isError: false },
         silentAssistant,

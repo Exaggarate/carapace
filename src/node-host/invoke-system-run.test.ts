@@ -33,9 +33,9 @@ import type { ExecHostResponse } from "../infra/exec-host.js";
 import { sanitizeHostExecEnv } from "../infra/host-env-security.js";
 import { formatExecCommand } from "../infra/system-run-command.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { buildSystemRunApprovalPlan } from "./invoke-system-run-plan.js";
 import { handleSystemRunInvoke } from "./invoke-system-run.js";
@@ -78,25 +78,25 @@ type MacExecHostCall = {
 
 describe("handleSystemRunInvoke mac app exec host routing", () => {
   let sharedFixtureRoot = "";
-  let sharedOpenClawHome = "";
+  let sharedCarapaceHome = "";
   let sharedRuntimeBinDir = "";
   let sharedFixtureId = 0;
-  let previousOpenClawHome: string | undefined;
+  let previousCarapaceHome: string | undefined;
   const sharedRuntimeBins = new Set<string>();
 
   beforeAll(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     sharedFixtureRoot = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-node-host-fixtures-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "carapace-node-host-fixtures-")),
     );
-    sharedOpenClawHome = path.join(sharedFixtureRoot, "openclaw-home");
+    sharedCarapaceHome = path.join(sharedFixtureRoot, "carapace-home");
     sharedRuntimeBinDir = path.join(sharedFixtureRoot, "bin");
-    fs.mkdirSync(sharedOpenClawHome, { recursive: true });
+    fs.mkdirSync(sharedCarapaceHome, { recursive: true });
     fs.mkdirSync(sharedRuntimeBinDir, { recursive: true });
   });
 
   afterAll(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     if (sharedFixtureRoot) {
       fs.rmSync(sharedFixtureRoot, { recursive: true, force: true });
     }
@@ -109,21 +109,21 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   }
 
   beforeEach(() => {
-    previousOpenClawHome = process.env.OPENCLAW_HOME;
-    process.env.OPENCLAW_HOME = sharedOpenClawHome;
+    previousCarapaceHome = process.env.CARAPACE_HOME;
+    process.env.CARAPACE_HOME = sharedCarapaceHome;
     execApprovalsStoreTesting.reset();
     // Cases isolate the canonical policy row, not shared-state schema bootstrap.
-    deleteExecApprovalsConfigRow(openOpenClawStateDatabase().db);
+    deleteExecApprovalsConfigRow(openCarapaceStateDatabase().db);
     clearRuntimeConfigSnapshot();
   });
 
   afterEach(() => {
     execApprovalsStoreTesting.reset();
     clearRuntimeConfigSnapshot();
-    if (previousOpenClawHome === undefined) {
-      delete process.env.OPENCLAW_HOME;
+    if (previousCarapaceHome === undefined) {
+      delete process.env.CARAPACE_HOME;
     } else {
-      process.env.OPENCLAW_HOME = previousOpenClawHome;
+      process.env.CARAPACE_HOME = previousCarapaceHome;
     }
   });
 
@@ -444,8 +444,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     approvals: Parameters<typeof saveExecApprovals>[0],
     run: (ctx: { tempHome: string }) => Promise<T>,
   ): Promise<T> {
-    const tempHome = sharedOpenClawHome;
-    return await withEnvAsync({ OPENCLAW_HOME: tempHome }, async () => {
+    const tempHome = sharedCarapaceHome;
+    return await withEnvAsync({ CARAPACE_HOME: tempHome }, async () => {
       saveExecApprovals(approvals);
       return await run({ tempHome });
     });
@@ -818,7 +818,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("uses auto reviewer for system.run approval misses when exec mode is auto", async () => {
-    const tmp = createFixtureDir("openclaw-system-run-auto-review-");
+    const tmp = createFixtureDir("carapace-system-run-auto-review-");
     const executablePath = createTempExecutable(tmp, "read-info");
     setRuntimeConfigSnapshot({
       tools: {
@@ -895,7 +895,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("does not auto-review direct system.run approval misses without an approval plan", async () => {
-    const tmp = createFixtureDir("openclaw-system-run-auto-review-no-plan-");
+    const tmp = createFixtureDir("carapace-system-run-auto-review-no-plan-");
     const executablePath = createTempExecutable(tmp, "read-info");
     setRuntimeConfigSnapshot({
       tools: {
@@ -942,7 +942,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       },
     },
   ])("denies direct system.run when its reviewer $name", async ({ reviewer }) => {
-    const tmp = createFixtureDir("openclaw-system-run-auto-review-failure-");
+    const tmp = createFixtureDir("carapace-system-run-auto-review-failure-");
     const executablePath = createTempExecutable(tmp, "read-info");
     setRuntimeConfigSnapshot({ tools: { exec: { mode: "auto" } } });
     const autoReviewer = vi.fn<ExecAutoReviewer>(reviewer);
@@ -972,7 +972,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32").each(["bash", "sh", "/bin/sh"])(
     "does not auto-review direct %s login-shell startup",
     async (shell) => {
-      const tmp = createFixtureDir("openclaw-system-run-auto-review-login-");
+      const tmp = createFixtureDir("carapace-system-run-auto-review-login-");
       setRuntimeConfigSnapshot({ tools: { exec: { mode: "auto" } } });
       try {
         const autoReviewer = vi.fn<ExecAutoReviewer>(() => ({
@@ -1012,8 +1012,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it("does not auto-review direct system.run security audit suppression edits", async () => {
-    const tmp = createFixtureDir("openclaw-system-run-auto-review-suppression-");
-    const executablePath = createTempExecutable(tmp, "openclaw");
+    const tmp = createFixtureDir("carapace-system-run-auto-review-suppression-");
+    const executablePath = createTempExecutable(tmp, "carapace");
     setRuntimeConfigSnapshot({
       tools: {
         exec: {
@@ -1053,7 +1053,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("defers to human approval when system.run auto reviewer asks", async () => {
-    const tmp = createFixtureDir("openclaw-system-run-auto-review-ask-");
+    const tmp = createFixtureDir("carapace-system-run-auto-review-ask-");
     const executablePath = createTempExecutable(tmp, "read-info");
     setRuntimeConfigSnapshot({
       tools: {
@@ -1108,7 +1108,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     "preserves wrapper argv for approved env shell commands",
     async () => {
       for (const testCase of approvedEnvShellWrapperCases) {
-        const tmp = createFixtureDir("openclaw-approved-wrapper-");
+        const tmp = createFixtureDir("carapace-approved-wrapper-");
         const marker = path.join(tmp, "marker");
         const attackerScript = path.join(tmp, "sh");
         fs.writeFileSync(attackerScript, "#!/bin/sh\necho exploited > marker\n");
@@ -1241,16 +1241,16 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
         label: "semicolon chain simple command",
         command:
           process.platform === "win32"
-            ? ["cmd.exe", "/d", "/s", "/c", "openclaw status; id"]
-            : ["/bin/sh", "-lc", "openclaw status; id"],
+            ? ["cmd.exe", "/d", "/s", "/c", "carapace status; id"]
+            : ["/bin/sh", "-lc", "carapace status; id"],
         approvalRequired: true,
       },
       {
         label: "semicolon chain path read",
         command:
           process.platform === "win32"
-            ? ["cmd.exe", "/d", "/s", "/c", "openclaw status; cat /etc/passwd"]
-            : ["/bin/sh", "-lc", "openclaw status; cat /etc/passwd"],
+            ? ["cmd.exe", "/d", "/s", "/c", "carapace status; cat /etc/passwd"]
+            : ["/bin/sh", "-lc", "carapace status; cat /etc/passwd"],
         approvalRequired: true,
       },
       {
@@ -1282,8 +1282,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
         "allowlist",
         "off",
         {
-          command: ["/bin/sh", "-lc", "head -c${IFS}16${IFS}${OPENCLAW_CONFIG_PATH}"],
-          rawCommand: "head -c${IFS}16${IFS}${OPENCLAW_CONFIG_PATH}",
+          command: ["/bin/sh", "-lc", "head -c${IFS}16${IFS}${CARAPACE_CONFIG_PATH}"],
+          rawCommand: "head -c${IFS}16${IFS}${CARAPACE_CONFIG_PATH}",
         },
       );
 
@@ -1384,7 +1384,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it("denies abbreviated PowerShell encoded payloads even when the wrapper is allowlisted", async () => {
-    const binDir = createFixtureDir("openclaw-pwsh-allowlist-");
+    const binDir = createFixtureDir("carapace-pwsh-allowlist-");
     const executablePath = createTempExecutable(binDir, "pwsh");
     await withTempApprovalsHome(
       createAllowlistOnMissApprovals({
@@ -1430,7 +1430,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "pins PATH-token executable to canonical path",
     async () => {
-      await withPathTokenCommand("openclaw-approval-path-pin-", async ({ expected }) => {
+      await withPathTokenCommand("carapace-approval-path-pin-", async ({ expected }) => {
         const { runCommand, sendInvokeResult } = await runLocalSystemInvokeWithPolicy(
           "full",
           "off",
@@ -1455,7 +1455,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       }));
       const sendInvokeResult = vi.fn(async () => {});
       await withPathTokenCommand(
-        "openclaw-allowlist-path-pin-",
+        "carapace-allowlist-path-pin-",
         async ({ link: _link, expected }) => {
           await withTempApprovalsHome(
             createApprovals("allowlist", "off", "deny", {
@@ -1490,7 +1490,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
         {
           label: "cwd symlink",
           setup: () => {
-            const tmp = createFixtureDir("openclaw-approval-cwd-link-");
+            const tmp = createFixtureDir("carapace-approval-cwd-link-");
             const safeDir = path.join(tmp, "safe");
             const linkDir = path.join(tmp, "cwd-link");
             const script = path.join(safeDir, "run.sh");
@@ -1507,7 +1507,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
         {
           label: "parent symlink",
           setup: () => {
-            const tmp = createFixtureDir("openclaw-approval-cwd-parent-link-");
+            const tmp = createFixtureDir("carapace-approval-cwd-parent-link-");
             const safeSymlinkRoot = path.join(tmp, "safe-root");
             const safeSymlinkSub = path.join(safeSymlinkRoot, "sub");
             const linkRoot = path.join(tmp, "approved-link");
@@ -1534,7 +1534,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it("uses canonical executable path for approval-based relative command execution", async () => {
-    const tmp = createFixtureDir("openclaw-approval-cwd-real-");
+    const tmp = createFixtureDir("carapace-approval-cwd-real-");
     const script = path.join(tmp, "run.sh");
     fs.writeFileSync(script, "#!/bin/sh\necho SAFE\n");
     fs.chmodSync(script, 0o755);
@@ -1562,8 +1562,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("denies approval-based execution when cwd identity drifts before execution", async () => {
-    const tmp = createFixtureDir("openclaw-approval-cwd-drift-");
-    const fallback = createFixtureDir("openclaw-approval-cwd-drift-alt-");
+    const tmp = createFixtureDir("carapace-approval-cwd-drift-");
+    const fallback = createFixtureDir("carapace-approval-cwd-drift-alt-");
     const script = path.join(tmp, "run.sh");
     fs.writeFileSync(script, "#!/bin/sh\necho SAFE\n");
     fs.chmodSync(script, 0o755);
@@ -1601,7 +1601,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it("validates approved script operand bindings at dispatch", async () => {
     for (const mutate of [true, false]) {
       const tmp = createFixtureDir(
-        mutate ? "openclaw-approval-script-drift-" : "openclaw-approval-script-stable-",
+        mutate ? "carapace-approval-script-drift-" : "carapace-approval-script-stable-",
       );
       const fixture = createMutableScriptOperandFixture(tmp);
       fs.writeFileSync(fixture.scriptPath, fixture.initialBody);
@@ -1638,7 +1638,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "revalidates approved cwd identity after authorization commit",
     async () => {
-      const tmp = createFixtureDir("openclaw-approval-cwd-post-commit-drift-");
+      const tmp = createFixtureDir("carapace-approval-cwd-post-commit-drift-");
       const moved = `${tmp}-approved`;
       const script = path.join(tmp, "run.sh");
       fs.writeFileSync(script, "#!/bin/sh\necho SAFE\n");
@@ -1669,7 +1669,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it("revalidates approved script operands after authorization commit", async () => {
-    const tmp = createFixtureDir("openclaw-approval-script-post-commit-drift-");
+    const tmp = createFixtureDir("carapace-approval-script-post-commit-drift-");
     const fixture = createMutableScriptOperandFixture(tmp);
     fs.writeFileSync(fixture.scriptPath, fixture.initialBody);
     if (process.platform !== "win32") {
@@ -1702,7 +1702,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
 
   it("validates approved runtime script operand bindings at dispatch", async () => {
     await withFakeRuntimeOnPath("tsx", async () => {
-      const tmp = createFixtureDir("openclaw-approval-tsx-script-drift-");
+      const tmp = createFixtureDir("carapace-approval-tsx-script-drift-");
       const fixture = createRuntimeScriptOperandFixture(tmp, "tsx");
       fs.writeFileSync(fixture.scriptPath, fixture.initialBody);
       const prepared = buildCwdApprovalPlan(fixture.command, tmp);
@@ -1722,7 +1722,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
         "SYSTEM_RUN_DENIED: approval script operand changed before execution",
         true,
       );
-      const missingBindingTmp = createFixtureDir("openclaw-approval-tsx-missing-binding-");
+      const missingBindingTmp = createFixtureDir("carapace-approval-tsx-missing-binding-");
       const missingBindingFixture = createRuntimeScriptOperandFixture(missingBindingTmp, "tsx");
       fs.writeFileSync(missingBindingFixture.scriptPath, missingBindingFixture.initialBody);
       const missingBindingPrepared = buildCwdApprovalPlan(
@@ -1752,7 +1752,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("denies ./sh wrapper spoof in allowlist on-miss mode before execution", async () => {
-    const marker = path.join(os.tmpdir(), `openclaw-wrapper-spoof-${process.pid}-${Date.now()}`);
+    const marker = path.join(os.tmpdir(), `carapace-wrapper-spoof-${process.pid}-${Date.now()}`);
     const runCommand = vi.fn(async () => {
       fs.writeFileSync(marker, "executed");
       return createLocalRunResult();
@@ -1878,7 +1878,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     const { runCommand, sendInvokeResult } = await runLocalSystemInvokeWithPolicy("full", "off", {
       command: ["/bin/sh", "./script.sh"],
       env: {
-        OPENCLAW_TEST: "1",
+        CARAPACE_TEST: "1",
         LANG: "C",
         LC_TIME: "C",
       },
@@ -2014,7 +2014,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
 
   it("fails closed when allow-always approval persistence fails", async () => {
     await withTempApprovalsHome(createAllowlistOnMissApprovals(), async () => {
-      const tempDir = createFixtureDir("openclaw-allow-always-write-failure-");
+      const tempDir = createFixtureDir("carapace-allow-always-write-failure-");
       const executablePath = createTempExecutable(tempDir, "approved-tool");
       const commitAuthorization = vi.fn(async () => {
         throw new Error("approval lock unavailable");
@@ -2036,7 +2036,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("does not restore a revoked allowlist rule during explicit allow-always persistence", async () => {
-    const tempDir = createFixtureDir("openclaw-allow-always-revoked-rule-");
+    const tempDir = createFixtureDir("carapace-allow-always-revoked-rule-");
     const executablePath = createTempExecutable(tempDir, "approved-tool");
     const matchedEntry = { pattern: fs.realpathSync(executablePath) };
     const expectedPolicySnapshot = {
@@ -2101,7 +2101,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("fails closed when allowlist usage persistence fails", async () => {
-    const tempDir = createFixtureDir("openclaw-allowlist-usage-write-failure-");
+    const tempDir = createFixtureDir("carapace-allowlist-usage-write-failure-");
     const executablePath = createTempExecutable(tempDir, "allowlisted-tool");
     await withTempApprovalsHome(
       createAllowlistOnMissApprovals({
@@ -2340,8 +2340,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("does not let forwarded auto-review authorize security audit suppression edits", async () => {
-    const tmp = createFixtureDir("openclaw-forwarded-auto-review-suppression-");
-    const executablePath = createTempExecutable(tmp, "openclaw");
+    const tmp = createFixtureDir("carapace-forwarded-auto-review-suppression-");
+    const executablePath = createTempExecutable(tmp, "carapace");
     const prepared = buildCwdSessionApprovalPlan(
       [executablePath, "config", "set", "security.audit.suppressions", "[]"],
       tmp,
@@ -2367,7 +2367,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("preserves exact-plan forwarded auto-review for strict inline eval", async () => {
-    const plan = createStrictInlineEvalApprovalPlan("openclaw-forwarded-inline-");
+    const plan = createStrictInlineEvalApprovalPlan("carapace-forwarded-inline-");
     setRuntimeConfigSnapshot({ tools: { exec: { strictInlineEval: true } } });
     try {
       await withTempApprovalsHome(createApprovals("full", "on-miss", "deny"), async () => {
@@ -2640,7 +2640,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "permits a durable exact-command approval under allowlist timeout fallback",
     async () => {
-      const tempDir = createFixtureDir("openclaw-fallback-durable-");
+      const tempDir = createFixtureDir("carapace-fallback-durable-");
       const prepared = buildCwdSessionApprovalPlan(
         ["/bin/sh", "-c", "/bin/ls"],
         tempDir,
@@ -2680,7 +2680,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "rejects allowlist timeout fallback when its durable source is removed before commit",
     async () => {
-      const tempDir = createFixtureDir("openclaw-fallback-durable-revoked-");
+      const tempDir = createFixtureDir("carapace-fallback-durable-revoked-");
       const prepared = buildCwdSessionApprovalPlan(
         ["/bin/sh", "-c", "/bin/ls"],
         tempDir,
@@ -2764,7 +2764,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("does not let timeout fallback satisfy strict inline review", async () => {
-    const plan = createStrictInlineEvalApprovalPlan("openclaw-fallback-inline-");
+    const plan = createStrictInlineEvalApprovalPlan("carapace-fallback-inline-");
     setRuntimeConfigSnapshot({ tools: { exec: { strictInlineEval: true } } });
     try {
       await withTempApprovalsHome(createApprovals("full", "always", "full", {}), async () => {
@@ -2785,8 +2785,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("does not let timeout fallback authorize security audit suppression edits", async () => {
-    const tmp = createFixtureDir("openclaw-timeout-fallback-suppression-");
-    const executablePath = createTempExecutable(tmp, "openclaw");
+    const tmp = createFixtureDir("carapace-timeout-fallback-suppression-");
+    const executablePath = createTempExecutable(tmp, "carapace");
     const prepared = buildCwdSessionApprovalPlan(
       [executablePath, "config", "set", "security.audit.suppressions", "[]"],
       tmp,
@@ -2807,8 +2807,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("keeps audit suppression edits approval-gated under allowlist fallback from full/off", async () => {
-    const tmp = createFixtureDir("openclaw-timeout-fallback-full-off-suppression-");
-    const executablePath = createTempExecutable(tmp, "openclaw");
+    const tmp = createFixtureDir("carapace-timeout-fallback-full-off-suppression-");
+    const executablePath = createTempExecutable(tmp, "carapace");
     const prepared = buildCwdSessionApprovalPlan(
       [executablePath, "config", "set", "security.audit.suppressions", "[]"],
       tmp,
@@ -2854,7 +2854,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     });
     try {
       await withTempApprovalsHome(createAllowlistOnMissApprovals(), async () => {
-        const tempDir = createFixtureDir("openclaw-inline-eval-bin-");
+        const tempDir = createFixtureDir("carapace-inline-eval-bin-");
         const executablePath = createTempExecutable(tempDir, "python3.13");
         const prepared = buildSystemRunApprovalPlan({
           command: [executablePath, "-c", "print('hi')"],
@@ -2882,7 +2882,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     });
     try {
       await withTempApprovalsHome(createAllowlistOnMissApprovals(), async () => {
-        const tempDir = createFixtureDir("openclaw-inline-eval-awk-");
+        const tempDir = createFixtureDir("carapace-inline-eval-awk-");
         const executablePath = createTempExecutable(tempDir, "gawk");
         fs.writeFileSync(path.join(tempDir, "script.awk"), "{ print }\n");
         const benign = await runLocalSystemInvokeWithPolicy("allowlist", "on-miss", {
@@ -2939,7 +2939,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     });
     try {
       await withTempApprovalsHome(createAllowlistOnMissApprovals(), async () => {
-        const tempDir = createFixtureDir("openclaw-inline-eval-make-");
+        const tempDir = createFixtureDir("carapace-inline-eval-make-");
         const executablePath = createTempExecutable(tempDir, "make");
         const makefilePath = path.join(tempDir, "Makefile");
         fs.writeFileSync(makefilePath, "all:\n\t@echo inline-eval-ok\n");
@@ -2971,7 +2971,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "auto-runs allowlisted inner scripts through transport shell wrappers",
     async () => {
-      const tempDir = createFixtureDir("openclaw-shell-wrapper-inner-");
+      const tempDir = createFixtureDir("carapace-shell-wrapper-inner-");
       const scriptsDir = path.join(tempDir, "scripts");
       fs.mkdirSync(scriptsDir, { recursive: true });
       const scriptPath = path.join(scriptsDir, "check_mail.sh");
@@ -3010,7 +3010,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
           commandPrefix: ["env", "FOO=bar", "cmd.exe", "/d", "/s", "/c"],
         },
       ]) {
-        const tempDir = createFixtureDir("openclaw-cmd-wrapper-allow-");
+        const tempDir = createFixtureDir("carapace-cmd-wrapper-allow-");
         const scriptPath = path.join(tempDir, "check_mail.cmd");
         fs.writeFileSync(scriptPath, "@echo off\r\necho ok\r\n");
         const command = [...testCase.commandPrefix, `${scriptPath} --limit 5`];
@@ -3055,7 +3055,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it("fails closed when cmd.exe wrapper trust is downgraded before execution", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     try {
-      const tempDir = createFixtureDir("openclaw-cmd-wrapper-downgraded-");
+      const tempDir = createFixtureDir("carapace-cmd-wrapper-downgraded-");
       const commandName = "check_mail.cmd";
       const command = ["env", "FOO=bar", "cmd.exe", "/d", "/s", "/c", `${commandName} --limit 5`];
       const ordinaryPattern = "*";
@@ -3121,7 +3121,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       return;
     }
 
-    const tempDir = createFixtureDir("openclaw-shell-wrapper-allow-");
+    const tempDir = createFixtureDir("carapace-shell-wrapper-allow-");
     const prepared = buildCwdApprovalPlan(["/bin/sh", "-c", "/bin/ls"], tempDir);
     expect(prepared.ok).toBe(true);
     requireApprovalPlan(prepared, "unreachable");
@@ -3157,7 +3157,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "rejects durable trust when its approved directory is replaced before execution",
     async () => {
-      const tempDir = createFixtureDir("openclaw-durable-cwd-drift-");
+      const tempDir = createFixtureDir("carapace-durable-cwd-drift-");
       const movedDir = `${tempDir}-moved`;
       const prepared = buildCwdApprovalPlan(["/bin/sh", "-c", "/bin/ls"], tempDir);
       expect(prepared.ok).toBe(true);
@@ -3199,7 +3199,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       return;
     }
 
-    const tempDir = createFixtureDir("openclaw-shell-wrapper-redundant-grant-");
+    const tempDir = createFixtureDir("carapace-shell-wrapper-redundant-grant-");
     const prepared = buildCwdApprovalPlan(["/bin/sh", "-c", "cd ."], tempDir);
     expect(prepared.ok).toBe(true);
     requireApprovalPlan(prepared, "unreachable");
@@ -3242,7 +3242,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       return;
     }
 
-    const tempDir = createFixtureDir("openclaw-shell-wrapper-revoked-");
+    const tempDir = createFixtureDir("carapace-shell-wrapper-revoked-");
     const prepared = buildCwdApprovalPlan(["/bin/sh", "-c", "/bin/ls"], tempDir);
     expect(prepared.ok).toBe(true);
     requireApprovalPlan(prepared, "unreachable");

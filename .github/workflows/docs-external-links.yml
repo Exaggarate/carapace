@@ -43,7 +43,7 @@ jobs:
         with:
           args: >-
             --no-progress
-            --base-url https://docs.openclaw.ai
+            --base-url https://github.com/Exaggarate/carapace
             --exclude-all-private
             --accept '100..=399,401,403,429,500..=599'
             --accept-timeouts
@@ -52,8 +52,8 @@ jobs:
             --timeout 20
             --scheme http
             --scheme https
-            --exclude '^https://docs\.openclaw\.ai/'
-            --exclude '^https://github\.com/openclaw/maintainers/'
+            --exclude '^https://docs\.carapace\.ai/'
+            --exclude '^https://github\.com/carapace/maintainers/'
             --exclude '^https://(claude\.ai|help\.openai\.com|openai\.com|platform\.openai\.com|support\.discord\.com|www\.npmjs\.com|www\.raspberrypi\.com)/'
             './README.md'
             './CONTRIBUTING.md'
@@ -76,7 +76,7 @@ jobs:
         run: >-
           lychee
           --no-progress
-          --base-url https://docs.openclaw.ai
+          --base-url https://github.com/Exaggarate/carapace
           --exclude-all-private
           --accept '100..=300,302..=307,309..=599'
           --accept-timeouts
@@ -86,8 +86,8 @@ jobs:
           --max-redirects 0
           --scheme http
           --scheme https
-          --exclude '^https://docs\.openclaw\.ai/'
-          --exclude '^https://github\.com/openclaw/maintainers/'
+          --exclude '^https://docs\.carapace\.ai/'
+          --exclude '^https://github\.com/carapace/maintainers/'
           --exclude '^https://(claude\.ai|help\.openai\.com|openai\.com|platform\.openai\.com|support\.discord\.com|www\.npmjs\.com|www\.raspberrypi\.com)/'
           --format markdown
           --output .artifacts/docs-external-links/permanent-redirects.md

@@ -2,8 +2,8 @@
 # Shared owner for trusted release child dispatch, approval, and completion.
 set -euo pipefail
 
-openclaw_npm_expected_workflow_ref="${GITHUB_REF}"
-openclaw_npm_expected_workflow_sha="${PARENT_WORKFLOW_SHA}"
+carapace_npm_expected_workflow_ref="${GITHUB_REF}"
+carapace_npm_expected_workflow_sha="${PARENT_WORKFLOW_SHA}"
 
 is_stable_release() {
   [[ "${RELEASE_TAG}" != *"-alpha."* && "${RELEASE_TAG}" != *"-beta."* ]]
@@ -513,7 +513,7 @@ approve_clawhub_bootstrap_environments() {
 guard_existing_public_release() {
   local release_version asset_name release_json is_draft has_sha has_proof has_asset has_canonical_body release_url release_body release_body_file
 
-  if [[ "${PUBLISH_OPENCLAW_NPM}" != "true" ]]; then
+  if [[ "${PUBLISH_CARAPACE_NPM}" != "true" ]]; then
     return 0
   fi
 
@@ -527,7 +527,7 @@ guard_existing_public_release() {
   fi
 
   release_version="${RELEASE_TAG#v}"
-  asset_name="openclaw-${release_version}-dependency-evidence.zip"
+  asset_name="carapace-${release_version}-dependency-evidence.zip"
   has_sha="$(printf '%s' "${release_json}" | jq --arg sha "${TARGET_SHA}" -r '.body | contains($sha)')"
   has_proof="$(printf '%s' "${release_json}" | jq -r '.body | contains("### Release verification")')"
   has_asset="$(printf '%s' "${release_json}" | jq --arg name "${asset_name}" -r 'any(.assets[]?; .name == $name)')"
@@ -565,17 +565,17 @@ guard_existing_public_release() {
   exit 1
 }
 
-resolve_openclaw_npm_publish_state() {
+resolve_carapace_npm_publish_state() {
   local artifact_name manifest_dir manifest_path manifest_sha manifest_tarball_sha published_sha published_tarball_path published_tarball_url release_version
   local resume_state resume_url
 
-  openclaw_npm_already_published="false"
-  if [[ "${PUBLISH_OPENCLAW_NPM}" != "true" ]]; then
+  carapace_npm_already_published="false"
+  if [[ "${PUBLISH_CARAPACE_NPM}" != "true" ]]; then
     return 0
   fi
 
   release_version="${RELEASE_TAG#v}"
-  if ! npm view "openclaw@${release_version}" version >/dev/null 2>&1; then
+  if ! npm view "carapace@${release_version}" version >/dev/null 2>&1; then
     return 0
   fi
 
@@ -583,8 +583,8 @@ resolve_openclaw_npm_publish_state() {
   # that far. Resume is only safe when the registry serves the exact
   # tarball this tag's preflight built; the same version from any
   # other artifact is immutable on npm and needs a correction tag.
-  artifact_name="${PREFLIGHT_ARTIFACT_NAME:-openclaw-npm-preflight-${RELEASE_TAG}}"
-  manifest_dir="${RUNNER_TEMP}/openclaw-npm-resume-preflight"
+  artifact_name="${PREFLIGHT_ARTIFACT_NAME:-carapace-npm-preflight-${RELEASE_TAG}}"
+  manifest_dir="${RUNNER_TEMP}/carapace-npm-resume-preflight"
   rm -rf "${manifest_dir}"
   mkdir -p "${manifest_dir}"
   gh run download "${PREFLIGHT_ARTIFACT_RUN_ID}" \
@@ -595,10 +595,10 @@ resolve_openclaw_npm_publish_state() {
   manifest_sha="$(jq -er '.releaseSha' "${manifest_path}")"
   manifest_tarball_sha="$(jq -er '.tarballSha256' "${manifest_path}")"
   if [[ "${manifest_sha}" != "${TARGET_SHA}" ]]; then
-    echo "openclaw@${release_version} is already on npm but preflight ${PREFLIGHT_ARTIFACT_RUN_ID} was built from ${manifest_sha}, not ${TARGET_SHA}; refusing to resume." >&2
+    echo "carapace@${release_version} is already on npm but preflight ${PREFLIGHT_ARTIFACT_RUN_ID} was built from ${manifest_sha}, not ${TARGET_SHA}; refusing to resume." >&2
     exit 1
   fi
-  published_tarball_url="$(npm view "openclaw@${release_version}" dist.tarball)"
+  published_tarball_url="$(npm view "carapace@${release_version}" dist.tarball)"
   published_tarball_path="${manifest_dir}/published.tgz"
   # Keep registry identity verification bounded if a connected
   # tarball endpoint stops transferring during a release resume.
@@ -611,7 +611,7 @@ resolve_openclaw_npm_publish_state() {
   published_sha="$(sha256sum "${published_tarball_path}" | awk '{print $1}')"
   if [[ "${published_sha}" != "${manifest_tarball_sha}" ]]; then
     {
-      echo "openclaw@${release_version} is already published on npm but its tarball does not match this tag's preflight artifact."
+      echo "carapace@${release_version} is already published on npm but its tarball does not match this tag's preflight artifact."
       echo "Published sha256: ${published_sha}"
       echo "Preflight tarballSha256: ${manifest_tarball_sha}"
       echo "Cut a correction tag instead of resuming this publish."
@@ -619,28 +619,28 @@ resolve_openclaw_npm_publish_state() {
     exit 1
   fi
 
-  if [[ -z "${OPENCLAW_NPM_RESUME_RUN_ID//[[:space:]]/}" ]]; then
-    echo "openclaw@${release_version} is already published; openclaw_npm_resume_run_id is required to bind postpublish proof to the original workflow identity." >&2
+  if [[ -z "${CARAPACE_NPM_RESUME_RUN_ID//[[:space:]]/}" ]]; then
+    echo "carapace@${release_version} is already published; carapace_npm_resume_run_id is required to bind postpublish proof to the original workflow identity." >&2
     exit 1
   fi
-  resume_state="$(node --import tsx "${GITHUB_WORKSPACE}/.release-harness/scripts/openclaw-npm-resume-run.mts" \
+  resume_state="$(node --import tsx "${GITHUB_WORKSPACE}/.release-harness/scripts/carapace-npm-resume-run.mts" \
     --repo "${GITHUB_REPOSITORY}" \
-    --run-id "${OPENCLAW_NPM_RESUME_RUN_ID}" \
+    --run-id "${CARAPACE_NPM_RESUME_RUN_ID}" \
     --trusted-workflow-ref "${PARENT_WORKFLOW_BRANCH}" \
     --trusted-workflow-full-ref "${GITHUB_REF}")"
   resume_url="$(printf '%s' "${resume_state}" | jq -er '.url')"
-  openclaw_npm_expected_workflow_ref="$(printf '%s' "${resume_state}" | jq -er '.workflowRef')"
-  openclaw_npm_expected_workflow_sha="$(printf '%s' "${resume_state}" | jq -er '.workflowSha')"
+  carapace_npm_expected_workflow_ref="$(printf '%s' "${resume_state}" | jq -er '.workflowRef')"
+  carapace_npm_expected_workflow_sha="$(printf '%s' "${resume_state}" | jq -er '.workflowSha')"
 
-  openclaw_npm_already_published="true"
-  echo "openclaw@${release_version} is already published on npm with this tag's preflight tarball; resuming from ${resume_url}."
+  carapace_npm_already_published="true"
+  echo "carapace@${release_version} is already published on npm with this tag's preflight tarball; resuming from ${resume_url}."
 }
 
 resolve_clawhub_release_plan() {
   clawhub_plan_path="${CLAWHUB_PLAN_PATH}"
   test -s "${clawhub_plan_path}"
 
-  echo "Resolved OpenClaw release ClawHub dispatch plan:"
+  echo "Resolved Carapace release ClawHub dispatch plan:"
   cat "${clawhub_plan_path}"
 
   clawhub_workflow_ref="$(jq -r '.clawHubWorkflowRef' "${clawhub_plan_path}")"
@@ -684,7 +684,7 @@ write_clawhub_runtime_state() {
     force_skip_clawhub=true
   fi
   node --import tsx \
-    "${GITHUB_WORKSPACE}/.release-harness/scripts/openclaw-release-clawhub-runtime-state.ts" \
+    "${GITHUB_WORKSPACE}/.release-harness/scripts/carapace-release-clawhub-runtime-state.ts" \
     --repository "${GITHUB_REPOSITORY}" \
     --wait-for-clawhub "${WAIT_FOR_CLAWHUB}" \
     --force-skip-clawhub "${force_skip_clawhub}" \
@@ -771,7 +771,7 @@ create_or_update_github_release() {
   local existing_body_file existing_state release_version title latest_arg prerelease_arg
   verify_release_tag_target
   release_version="${RELEASE_TAG#v}"
-  title="openclaw ${release_version}"
+  title="carapace ${release_version}"
 
   prerelease_arg="--prerelease=false"
   latest_arg="--latest=false"
@@ -814,39 +814,39 @@ create_or_update_github_release() {
 verify_android_release_asset_contract() {
   local actual_android_assets actual_digest expected_android_assets expected_digest expected_hash release_json verify_dir
   local -a required_assets=(
-    "OpenClaw-Android.apk"
-    "OpenClaw-Android-SHA256SUMS.txt"
+    "Carapace-Android.apk"
+    "Carapace-Android-SHA256SUMS.txt"
   )
 
   release_json="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json assets,url)" || return 1
   expected_android_assets="$(printf '%s\n' "${required_assets[@]}" | jq -R . | jq -sc 'sort')"
   actual_android_assets="$(printf '%s' "${release_json}" | jq -c '
-    [.assets[]? | select(.name | startswith("OpenClaw-Android")) | .name] | sort
+    [.assets[]? | select(.name | startswith("Carapace-Android")) | .name] | sort
   ')"
   if [[ "${actual_android_assets}" != "${expected_android_assets}" ]]; then
     echo "Stable release Android asset names do not match the canonical contract." >&2
     return 1
   fi
 
-  verify_dir="${RUNNER_TEMP}/openclaw-android-release-contract"
+  verify_dir="${RUNNER_TEMP}/carapace-android-release-contract"
   rm -rf "${verify_dir}"
   mkdir -p "${verify_dir}"
   gh release download "${RELEASE_TAG}" \
     --repo "${GITHUB_REPOSITORY}" \
-    --pattern "OpenClaw-Android.apk" \
-    --pattern "OpenClaw-Android-SHA256SUMS.txt" \
+    --pattern "Carapace-Android.apk" \
+    --pattern "Carapace-Android-SHA256SUMS.txt" \
     --dir "${verify_dir}" || return 1
   (
     cd "${verify_dir}"
-    sha256sum --strict --check OpenClaw-Android-SHA256SUMS.txt
+    sha256sum --strict --check Carapace-Android-SHA256SUMS.txt
   ) || return 1
-  expected_hash="$(awk '$2 == "OpenClaw-Android.apk" { print $1 }' "${verify_dir}/OpenClaw-Android-SHA256SUMS.txt")"
+  expected_hash="$(awk '$2 == "Carapace-Android.apk" { print $1 }' "${verify_dir}/Carapace-Android-SHA256SUMS.txt")"
   if [[ ! "${expected_hash}" =~ ^[a-f0-9]{64}$ ]]; then
     echo "Android checksum manifest does not contain the canonical APK entry." >&2
     return 1
   fi
   expected_digest="sha256:${expected_hash}"
-  actual_digest="$(printf '%s' "${release_json}" | jq -r '.assets[]? | select(.name == "OpenClaw-Android.apk") | .digest // empty')"
+  actual_digest="$(printf '%s' "${release_json}" | jq -r '.assets[]? | select(.name == "Carapace-Android.apk") | .digest // empty')"
   if [[ "${actual_digest}" != "${expected_digest}" ]]; then
     echo "Android release APK digest does not match its checksum manifest." >&2
     return 1
@@ -854,7 +854,7 @@ verify_android_release_asset_contract() {
   # Explicit guard: this function doubles as an `if` predicate, where
   # bash suppresses errexit, so a failed attestation must not fall
   # through to the summary echo.
-  gh attestation verify "${verify_dir}/OpenClaw-Android.apk" \
+  gh attestation verify "${verify_dir}/Carapace-Android.apk" \
     --repo "${GITHUB_REPOSITORY}" \
     --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/android-release.yml" \
     --source-ref "refs/tags/${RELEASE_TAG}" \
@@ -887,7 +887,7 @@ promote_android_release_asset() {
   # publish run's verified APK promotion is reused instead of
   # re-running the Android child workflow.
   if verify_android_release_asset_contract >/dev/null 2>&1; then
-    android_release_note="- Android APK: previously published assets verified; https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/OpenClaw-Android.apk"
+    android_release_note="- Android APK: previously published assets verified; https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/Carapace-Android.apk"
     echo "${android_release_note}" >> "${GITHUB_STEP_SUMMARY}"
     return 0
   fi
@@ -908,10 +908,10 @@ promote_android_release_asset() {
 upload_dependency_evidence_release_asset() {
   local release_version download_dir asset_path asset_name artifact_name
   release_version="${RELEASE_TAG#v}"
-  download_dir="${RUNNER_TEMP}/openclaw-release-dependency-evidence-asset"
-  asset_name="openclaw-${release_version}-dependency-evidence.zip"
+  download_dir="${RUNNER_TEMP}/carapace-release-dependency-evidence-asset"
+  asset_name="carapace-${release_version}-dependency-evidence.zip"
   asset_path="${RUNNER_TEMP}/${asset_name}"
-  artifact_name="${PREFLIGHT_ARTIFACT_NAME:-openclaw-npm-preflight-${RELEASE_TAG}}"
+  artifact_name="${PREFLIGHT_ARTIFACT_NAME:-carapace-npm-preflight-${RELEASE_TAG}}"
 
   rm -rf "${download_dir}" "${asset_path}"
   mkdir -p "${download_dir}"
@@ -921,7 +921,7 @@ upload_dependency_evidence_release_asset() {
     --dir "${download_dir}"
 
   if [[ ! -d "${download_dir}/dependency-evidence" ]]; then
-    echo "Dependency evidence is missing from OpenClaw npm preflight artifact." >&2
+    echo "Dependency evidence is missing from Carapace npm preflight artifact." >&2
     find "${download_dir}" -maxdepth 2 -type f -print >&2 || true
     exit 1
   fi
@@ -947,7 +947,7 @@ attach_or_verify_release_asset() {
   local source_path="$1"
   local asset_name="$2"
   local comparison_mode="${3:-exact}"
-  local existing_dir="${RUNNER_TEMP}/openclaw-release-existing-assets/${asset_name}"
+  local existing_dir="${RUNNER_TEMP}/carapace-release-existing-assets/${asset_name}"
   local existing_path="${existing_dir}/${asset_name}"
 
   case "${comparison_mode}" in
@@ -992,14 +992,14 @@ upload_release_evidence_assets() {
   local release_version manifest_path evidence_path manifest_asset evidence_asset
   release_version="${RELEASE_TAG#v}"
   evidence_path="${POSTPUBLISH_EVIDENCE_DIR}/release-postpublish-evidence.json"
-  evidence_asset="openclaw-${release_version}-postpublish-evidence.json"
+  evidence_asset="carapace-${release_version}-postpublish-evidence.json"
 
   if [[ "${RELEASE_EVIDENCE_MODE}" == "authorized-beta-focused-v1" ]]; then
     manifest_path="${FOCUSED_RELEASE_EVIDENCE_DIR}/evidence.json"
-    manifest_asset="openclaw-${release_version}-authorized-focused-evidence.json"
+    manifest_asset="carapace-${release_version}-authorized-focused-evidence.json"
   else
     manifest_path="${FULL_RELEASE_VALIDATION_MANIFEST_DIR}/full-release-validation-manifest.json"
-    manifest_asset="openclaw-${release_version}-release-manifest.json"
+    manifest_asset="carapace-${release_version}-release-manifest.json"
   fi
   if [[ ! -f "${manifest_path}" ]]; then
     echo "Release evidence is missing for mode ${RELEASE_EVIDENCE_MODE}: ${manifest_path}." >&2
@@ -1056,10 +1056,10 @@ verify_published_release() {
   )
   # Resumed publishes have no core npm run of their own; the
   # registry package check still verifies the published state.
-  if [[ -n "${openclaw_npm_run_id// }" ]]; then
-    verify_args+=(--openclaw-npm-run "${openclaw_npm_run_id}")
+  if [[ -n "${carapace_npm_run_id// }" ]]; then
+    verify_args+=(--carapace-npm-run "${carapace_npm_run_id}")
   fi
-  clawhub_runtime_state_path="${RUNNER_TEMP}/openclaw-release-clawhub-runtime-state-verify.json"
+  clawhub_runtime_state_path="${RUNNER_TEMP}/carapace-release-clawhub-runtime-state-verify.json"
   write_clawhub_runtime_state "${clawhub_runtime_state_path}"
   while IFS= read -r arg; do
     verify_args+=("${arg}")
@@ -1079,15 +1079,15 @@ verify_published_release() {
     verify_args+=(--npm-telegram-run "${NPM_TELEGRAM_RUN_ID}")
   fi
 
-  if [[ "${PUBLISH_OPENCLAW_NPM}" == "true" ]]; then
+  if [[ "${PUBLISH_CARAPACE_NPM}" == "true" ]]; then
     verify_args+=(
       --postpublish-verifier
-      "${GITHUB_WORKSPACE}/.release-harness/scripts/openclaw-npm-postpublish-verify.ts"
+      "${GITHUB_WORKSPACE}/.release-harness/scripts/carapace-npm-postpublish-verify.ts"
     )
   fi
 
-  OPENCLAW_NPM_EXPECTED_WORKFLOW_REF="${openclaw_npm_expected_workflow_ref}" \
-    OPENCLAW_NPM_EXPECTED_WORKFLOW_SHA="${openclaw_npm_expected_workflow_sha}" \
+  CARAPACE_NPM_EXPECTED_WORKFLOW_REF="${carapace_npm_expected_workflow_ref}" \
+    CARAPACE_NPM_EXPECTED_WORKFLOW_SHA="${carapace_npm_expected_workflow_sha}" \
     node --import tsx \
       "${GITHUB_WORKSPACE}/.release-harness/scripts/release-verify-beta.ts" \
       "${verify_args[@]}"
@@ -1158,8 +1158,8 @@ append_release_proof_to_github_release() {
   notes_file="${RUNNER_TEMP}/release-notes-with-proof.md"
   metadata_file="${RUNNER_TEMP}/release-notes-with-proof.json"
   evidence_path="${POSTPUBLISH_EVIDENCE_DIR}/release-postpublish-evidence.json"
-  tarball="$(jq -er '.openclawNpmTarball | select(type == "string" and length > 0)' "${evidence_path}")"
-  integrity="$(jq -er '.openclawNpmIntegrity | select(type == "string" and length > 0)' "${evidence_path}")"
+  tarball="$(jq -er '.carapaceNpmTarball | select(type == "string" and length > 0)' "${evidence_path}")"
+  integrity="$(jq -er '.carapaceNpmIntegrity | select(type == "string" and length > 0)' "${evidence_path}")"
 
   if [[ "$(jq -r '.telegramWaiver // ""' "${evidence_path}")" == "${release_version}-owner-approved" ]]; then
     telegram_line="- Telegram integration checks: waived by the release owner for ${release_version} (source QA, Package Acceptance, published-package E2E); not run."
@@ -1168,7 +1168,7 @@ append_release_proof_to_github_release() {
   else
     telegram_line="- npm Telegram beta E2E: not supplied"
   fi
-  clawhub_runtime_state_path="${RUNNER_TEMP}/openclaw-release-clawhub-runtime-state-proof.json"
+  clawhub_runtime_state_path="${RUNNER_TEMP}/carapace-release-clawhub-runtime-state-proof.json"
   write_clawhub_runtime_state "${clawhub_runtime_state_path}"
   clawhub_line="$(jq -r '.proofLines.normal' "${clawhub_runtime_state_path}")"
   clawhub_bootstrap_line="$(jq -r '.proofLines.bootstrap' "${clawhub_runtime_state_path}")"
@@ -1192,7 +1192,7 @@ append_release_proof_to_github_release() {
     RELEASE_VALIDATION_LABEL="${proof_label}" \
     RELEASE_VALIDATION_RUN_ID="${proof_run_id}" \
     PLUGIN_NPM_RUN_ID="${plugin_npm_run_id}" \
-    OPENCLAW_NPM_RUN_ID="${openclaw_npm_run_id}" \
+    CARAPACE_NPM_RUN_ID="${carapace_npm_run_id}" \
     CLAWHUB_LINE="${clawhub_line}" \
     CLAWHUB_BOOTSTRAP_LINE="${clawhub_bootstrap_line}" \
     TELEGRAM_LINE="${telegram_line}" \
@@ -1208,11 +1208,11 @@ if (!proofFile) {
 const section = [
   "### Release verification",
   "",
-  `- npm package: https://www.npmjs.com/package/openclaw/v/${process.env.RELEASE_VERSION}`,
+  `- npm package: https://www.npmjs.com/package/carapace/v/${process.env.RELEASE_VERSION}`,
   `- registry tarball: ${process.env.RELEASE_TARBALL}`,
   `- integrity: \`${process.env.RELEASE_INTEGRITY}\``,
   `- release SHA: \`${process.env.RELEASE_SHA}\``,
-  `- full release CI report: https://github.com/openclaw/releases/blob/main/evidence/${process.env.RELEASE_VERSION}/release-evidence.md`,
+  `- full release CI report: https://github.com/Exaggarate/carapace/releases/blob/main/evidence/${process.env.RELEASE_VERSION}/release-evidence.md`,
   `- release publish: https://github.com/${process.env.RELEASE_REPO}/actions/runs/${process.env.RELEASE_PUBLISH_RUN_ID}`,
   `- npm preflight: https://github.com/${process.env.RELEASE_REPO}/actions/runs/${process.env.PREFLIGHT_ARTIFACT_RUN_ID}`,
   `- ${process.env.RELEASE_VALIDATION_LABEL}: https://github.com/${process.env.RELEASE_REPO}/actions/runs/${process.env.RELEASE_VALIDATION_RUN_ID}`,
@@ -1221,9 +1221,9 @@ const section = [
   process.env.CLAWHUB_BOOTSTRAP_LINE,
   // Resumed publishes reuse the already-published npm package and
   // have no core npm run of their own to cite.
-  ...(process.env.OPENCLAW_NPM_RUN_ID
+  ...(process.env.CARAPACE_NPM_RUN_ID
     ? [
-        `- OpenClaw npm publish: https://github.com/${process.env.RELEASE_REPO}/actions/runs/${process.env.OPENCLAW_NPM_RUN_ID}`,
+        `- Carapace npm publish: https://github.com/${process.env.RELEASE_REPO}/actions/runs/${process.env.CARAPACE_NPM_RUN_ID}`,
       ]
     : []),
   process.env.TELEGRAM_LINE,

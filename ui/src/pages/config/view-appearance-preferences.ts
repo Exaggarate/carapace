@@ -382,7 +382,7 @@ export function renderLobsterPetSection(props: ConfigProps) {
                     .filter((line): line is string => line !== null)
                     .join("\n");
                   return html`
-                    <openclaw-tooltip>
+                    <carapace-tooltip>
                       <span
                         class="lobsterdex__mini lobster-pet--palette-${palette.id} ${
                           seen ? "" : "lobsterdex__mini--unseen"
@@ -404,7 +404,7 @@ export function renderLobsterPetSection(props: ConfigProps) {
                         <span>${loreLine}</span>
                         ${visitedLine ? html`<span>${visitedLine}</span>` : nothing}
                       </span>
-                    </openclaw-tooltip>
+                    </carapace-tooltip>
                   `;
                 })}
               </div>

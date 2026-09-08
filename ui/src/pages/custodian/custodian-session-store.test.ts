@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { buildSystemAgentSessionInvalidatedErrorDetails } from "@openclaw/gateway-protocol";
+import { buildSystemAgentSessionInvalidatedErrorDetails } from "@carapace/gateway-protocol";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError, type GatewayBrowserClient } from "../../api/gateway.ts";
 import { installSafeLocalStorageForTesting } from "../../test-helpers/storage.ts";
@@ -104,7 +104,7 @@ describe("CustodianSessionStore", () => {
     new CustodianSessionStore().connect(context, "caretaker");
     await waitForFast(() => expect(request).toHaveBeenCalledOnce());
     const firstSessionId = request.mock.calls[0]?.[1].sessionId;
-    expect(localStorage.getItem("openclaw.custodian.session.v1")).toBe(firstSessionId);
+    expect(localStorage.getItem("carapace.custodian.session.v1")).toBe(firstSessionId);
 
     new CustodianSessionStore().connect(context, "caretaker");
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -116,7 +116,7 @@ describe("CustodianSessionStore", () => {
     const request = vi.fn().mockRejectedValue(
       new GatewayRequestError({
         code: "INVALID_REQUEST",
-        message: "OpenClaw session belongs to another caller.",
+        message: "Carapace session belongs to another caller.",
         details: buildSystemAgentSessionInvalidatedErrorDetails(),
       }),
     );
@@ -127,7 +127,7 @@ describe("CustodianSessionStore", () => {
     await waitForFast(() => expect(store.sending).toBe(false));
     const rejectedSessionId = request.mock.calls[0]?.[1].sessionId;
 
-    expect(localStorage.getItem("openclaw.custodian.session.v1")).not.toBe(rejectedSessionId);
+    expect(localStorage.getItem("carapace.custodian.session.v1")).not.toBe(rejectedSessionId);
     expect(store.canRetry()).toBe(true);
   });
 
@@ -140,7 +140,7 @@ describe("CustodianSessionStore", () => {
       .mockRejectedValueOnce(
         new GatewayRequestError({
           code: "UNAVAILABLE",
-          message: "OpenClaw session expired.",
+          message: "Carapace session expired.",
           details: buildSystemAgentSessionInvalidatedErrorDetails(),
         }),
       )
@@ -158,18 +158,18 @@ describe("CustodianSessionStore", () => {
     const replacementSessionId = request.mock.calls[2]?.[1].sessionId;
 
     expect(replacementSessionId).not.toBe(staleSessionId);
-    expect(localStorage.getItem("openclaw.custodian.session.v1")).toBe(replacementSessionId);
+    expect(localStorage.getItem("carapace.custodian.session.v1")).toBe(replacementSessionId);
   });
 
   it("refreshes durable history on surface open only while idle", async () => {
     let historyTurns: Array<{ role: "assistant" | "user"; text: string; at: number }> = [];
     const request = vi.fn((method: string, params: { sessionId?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         return Promise.resolve({ turns: historyTurns });
       }
       return Promise.resolve({ sessionId: params.sessionId, reply: "Ready.", action: "none" });
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
     const store = new CustodianSessionStore();
     store.connect(context, "caretaker");
     await waitForFast(() => expect(store.sending).toBe(false));
@@ -184,7 +184,7 @@ describe("CustodianSessionStore", () => {
       "Durable answer",
     ]);
     const historyCallCount = request.mock.calls.filter(
-      ([method]) => method === "openclaw.chat.history",
+      ([method]) => method === "carapace.chat.history",
     ).length;
 
     store.sending = true;
@@ -202,7 +202,7 @@ describe("CustodianSessionStore", () => {
         question: {
           id: "repair",
           header: "Repair",
-          question: "What should OpenClaw repair?",
+          question: "What should Carapace repair?",
           options: [{ label: "Gateway" }, { label: "Channel" }],
           isOther: false,
         },
@@ -212,7 +212,7 @@ describe("CustodianSessionStore", () => {
     await store.refreshTranscriptIfIdle();
 
     expect(
-      request.mock.calls.filter(([method]) => method === "openclaw.chat.history"),
+      request.mock.calls.filter(([method]) => method === "carapace.chat.history"),
     ).toHaveLength(historyCallCount);
     expect(store.messages[0]?.question?.id).toBe("repair");
   });
@@ -221,7 +221,7 @@ describe("CustodianSessionStore", () => {
     const pending = deferred<{ turns: Array<{ role: "assistant"; text: string; at: number }> }>();
     let historyCall = 0;
     const request = vi.fn((method: string, params: { sessionId?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCall += 1;
         if (historyCall === 1) {
           return Promise.resolve({ turns: [] });
@@ -230,7 +230,7 @@ describe("CustodianSessionStore", () => {
       }
       return Promise.resolve({ sessionId: params.sessionId, reply: "Ready.", action: "none" });
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
     const store = new CustodianSessionStore();
     store.connect(context, "caretaker");
     await waitForFast(() => expect(store.sending).toBe(false));
@@ -249,7 +249,7 @@ describe("CustodianSessionStore", () => {
     const reply = deferred<{ sessionId: string; reply: string; action: "none" }>();
     let historyCall = 0;
     const request = vi.fn((method: string, params: { sessionId?: string; message?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCall += 1;
         if (historyCall === 1) {
           return Promise.reject(new Error("history unavailable"));
@@ -261,7 +261,7 @@ describe("CustodianSessionStore", () => {
       }
       return Promise.resolve({ sessionId: params.sessionId, reply: "Ready.", action: "none" });
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
     const store = new CustodianSessionStore();
     store.connect(context, "caretaker");
     await waitForFast(() => expect(store.sending).toBe(false));
@@ -285,7 +285,7 @@ describe("CustodianSessionStore", () => {
         params: { message?: string; sessionId?: string },
         options?: { signal?: AbortSignal },
       ) => {
-        if (method === "openclaw.chat.history") {
+        if (method === "carapace.chat.history") {
           return Promise.resolve({ turns: [] });
         }
         if (params.message) {
@@ -297,8 +297,8 @@ describe("CustodianSessionStore", () => {
       },
     );
     const { context, setGatewaySnapshot } = createContext(initialRequest, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const store = new CustodianSessionStore();
     store.connect(context, "caretaker");
@@ -311,7 +311,7 @@ describe("CustodianSessionStore", () => {
 
     const liveStep = { id: "repair-step", type: "text", message: "Which channel?" };
     const reconnectRequest = vi.fn((method: string, params: { sessionId?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         return Promise.resolve({
           turns: [
             { role: "user", text: "Finish the repair", at: 20 },
@@ -319,7 +319,7 @@ describe("CustodianSessionStore", () => {
           ],
         });
       }
-      if (method === "openclaw.chat") {
+      if (method === "carapace.chat") {
         // The full rejoin projects the authoritative live interaction.
         return Promise.resolve({
           sessionId: params.sessionId,
@@ -345,14 +345,14 @@ describe("CustodianSessionStore", () => {
     expect(store.abandonedTurnOutcomeUnknown).toBe(false);
     expect(store.wizardInputPending).toBe(true);
     expect(store.messages.some((message) => message.text === "Repair complete")).toBe(true);
-    expect(reconnectRequest.mock.calls.some(([method]) => method === "openclaw.chat")).toBe(true);
+    expect(reconnectRequest.mock.calls.some(([method]) => method === "carapace.chat")).toBe(true);
   });
 
   it("reconciles racing history even when the rejoin projects a live wizard", async () => {
     const step = { id: "live-step", type: "text", message: "Continue setup" };
     let historyCall = 0;
     const request = vi.fn((method: string, params: { sessionId?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCall += 1;
         return Promise.resolve(
           historyCall === 1
@@ -368,8 +368,8 @@ describe("CustodianSessionStore", () => {
         step,
       });
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
-    localStorage.setItem("openclaw.custodian.session.v1", "persisted-session-2");
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
+    localStorage.setItem("carapace.custodian.session.v1", "persisted-session-2");
     const store = new CustodianSessionStore();
 
     store.connect(context, "caretaker");
@@ -395,16 +395,16 @@ describe("CustodianSessionStore", () => {
     ];
     let historyCall = 0;
     const request = vi.fn((method: string, params: { sessionId?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         const batch = historyBatches[Math.min(historyCall, historyBatches.length - 1)];
         historyCall += 1;
         return Promise.resolve(batch);
       }
       return Promise.resolve({ sessionId: params.sessionId, reply: "Ready.", action: "none" });
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
     // A restored persisted id is what makes this a rejoin candidate.
-    localStorage.setItem("openclaw.custodian.session.v1", "persisted-session-1");
+    localStorage.setItem("carapace.custodian.session.v1", "persisted-session-1");
     const store = new CustodianSessionStore();
 
     store.connect(context, "caretaker");
@@ -528,7 +528,7 @@ describe("CustodianSessionStore", () => {
 
   it("shows setup before starting chat when the default agent has no model", async () => {
     const request = vi.fn();
-    const { context } = createContext(request, ["openclaw.chat"], {
+    const { context } = createContext(request, ["carapace.chat"], {
       agentsList: {
         defaultId: "main",
         mainKey: "main",

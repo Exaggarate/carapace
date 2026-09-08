@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createAssistantMessageEventStream, type Context } from "openclaw/plugin-sdk/llm";
+import { createAssistantMessageEventStream, type Context } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
@@ -8,8 +8,8 @@ import {
   loadSessionEntryReadOnly as loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   runWithDeferredSessionSuspension,
   suspendSession,
@@ -44,7 +44,7 @@ beforeAll(async () => {
   vi.doUnmock("../runtime-plan/build.js");
   vi.doUnmock("../../plugins/provider-runtime.js");
   vi.doUnmock("../../plugins/provider-hook-runtime.js");
-  vi.doMock("../models-config.js", () => ({ ensureOpenClawModelsJson: vi.fn() }));
+  vi.doMock("../models-config.js", () => ({ ensureCarapaceModelsJson: vi.fn() }));
   vi.doMock("./model.js", async () => {
     const { AuthStorage, ModelRegistry } = await import("../sessions/index.js");
     return {
@@ -100,17 +100,17 @@ async function joinSuspensionWrites() {
 
 afterEach(async () => {
   await joinSuspensionWrites();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
   tempRoots.cleanup();
 });
 
 async function createRun(agentId: string, sessionPersistence?: "durable" | "detached") {
-  const root = tempRoots.make("openclaw-suspension-boundary-");
+  const root = tempRoots.make("carapace-suspension-boundary-");
   const stateDir = path.join(root, "final");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   const agentDir = path.join(root, "staged", "agents", agentId, "agent");
   const workspaceDir = path.join(root, "workspace");
   await fs.mkdir(agentDir, { recursive: true });
@@ -148,7 +148,7 @@ async function createRun(agentId: string, sessionPersistence?: "durable" | "deta
     params,
     scope,
     stateDir,
-    database: path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite"),
+    database: path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite"),
   };
 }
 
@@ -465,7 +465,7 @@ describe("embedded run detached session metadata", () => {
         });
       }
       const before = loadSessionEntry(scope);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const databaseBefore = existing ? await fs.readFile(database) : undefined;
       const open = vi.spyOn(SessionManager, "open");
       const targetResolver =
@@ -550,7 +550,7 @@ describe("embedded run detached session metadata", () => {
       expect(open).not.toHaveBeenCalled();
       expect(resolveTarget).not.toHaveBeenCalled();
       expect.soft(loadSessionEntry(scope)).toEqual(before);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       if (existing) {
         expect(await fs.readFile(database)).toEqual(databaseBefore);
       } else {
@@ -594,8 +594,8 @@ describe("embedded run detached session metadata", () => {
   });
 
   it.each([
-    ["openclaw", true],
-    ["openclaw", false],
+    ["carapace", true],
+    ["carapace", false],
     ["codex", true],
     ["codex", false],
   ] as const)(

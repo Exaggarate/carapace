@@ -5,8 +5,8 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { MAX_WORKSPACE_BOOTSTRAP_FILE_BYTES } from "../agents/workspace-bootstrap-read.js";
 import { readWorkspaceStateSnapshot } from "../agents/workspace-state-store.js";
 import { withTempHomeConfig } from "../config/test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { setTestEnvValue } from "../test-utils/env.js";
 import { applyClawAddPlan } from "./add.js";
 import { seedClawPackageBootstrap } from "./bootstrap.js";
@@ -23,17 +23,17 @@ import { parseClawManifest } from "./schema.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 async function createPackage(bootstrap = "# First run\n\nAsk which repositories matter.\n") {
-  const root = tempDirs.make("openclaw-claw-bootstrap-");
+  const root = tempDirs.make("carapace-claw-bootstrap-");
   await mkdir(root, { recursive: true });
   await writeFile(
     join(root, "package.json"),
     JSON.stringify({
       name: "@acme/bootstrap-worker",
       version: "1.0.0",
-      openclaw: { claw: "CLAW.md" },
+      carapace: { claw: "CLAW.md" },
     }),
     "utf8",
   );
@@ -103,7 +103,7 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const plan = await buildClawAddPlan({
       manifest: read.manifest,
       clawMarkdownBody: read.clawMarkdownBody,
@@ -111,7 +111,7 @@ describe("package-root BOOTSTRAP.md", () => {
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     const added = await applyClawAddPlan(plan, {
       env,
       nowMs: 1_000,
@@ -149,7 +149,7 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const plan = await buildClawAddPlan({
       manifest: read.manifest,
       clawMarkdownBody: read.clawMarkdownBody,
@@ -157,7 +157,7 @@ describe("package-root BOOTSTRAP.md", () => {
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     const order: string[] = [];
 
     const added = await applyClawAddPlan(plan, {
@@ -185,7 +185,7 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const plan = await buildClawAddPlan({
       manifest: read.manifest,
       clawMarkdownBody: read.clawMarkdownBody,
@@ -193,7 +193,7 @@ describe("package-root BOOTSTRAP.md", () => {
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
 
     const added = await applyClawAddPlan(plan, {
       env,
@@ -242,7 +242,7 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const plan = await buildClawAddPlan({
       manifest: read.manifest,
       clawMarkdownBody: read.clawMarkdownBody,
@@ -250,7 +250,7 @@ describe("package-root BOOTSTRAP.md", () => {
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
 
     const added = await applyClawAddPlan(plan, {
       env,
@@ -292,7 +292,7 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const addPlan = await buildClawAddPlan({
       manifest: read.manifest,
       clawMarkdownBody: read.clawMarkdownBody,
@@ -300,7 +300,7 @@ describe("package-root BOOTSTRAP.md", () => {
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     let releaseSeed!: () => void;
     const seedReleased = new Promise<void>((resolve) => {
       releaseSeed = resolve;
@@ -343,7 +343,7 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const addPlan = await buildClawAddPlan({
       manifest: read.manifest,
       clawMarkdownBody: read.clawMarkdownBody,
@@ -383,8 +383,8 @@ describe("package-root BOOTSTRAP.md", () => {
     );
 
     const removed = await withTempHomeConfig({}, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
       return applyClawRemovePlan(removePlan, {
         monitorGateway: quiescentClawMonitorGateway,
         env,
@@ -425,7 +425,7 @@ describe("package-root BOOTSTRAP.md", () => {
     if (!read.ok || !read.packageBootstrap) {
       throw new Error("expected package bootstrap");
     }
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const context = { workspace: join(root, "workspace") };
     const addPlan = await buildClawAddPlan({
       manifest: read.manifest,
@@ -456,14 +456,14 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const addPlan = await buildClawAddPlan({
       manifest: read.manifest,
       packageBootstrap: read.packageBootstrap,
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     await applyClawAddPlan(addPlan, {
       env,
       consentPlanIntegrity: addPlan.planIntegrity,
@@ -480,8 +480,8 @@ describe("package-root BOOTSTRAP.md", () => {
       expect.objectContaining({ kind: "workspace", action: "trash" }),
     );
     const removed = await withTempHomeConfig(config, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
       return applyClawRemovePlan(removePlan, {
         monitorGateway: quiescentClawMonitorGateway,
         env,
@@ -508,14 +508,14 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const addPlan = await buildClawAddPlan({
       manifest: read.manifest,
       packageBootstrap: read.packageBootstrap,
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     await applyClawAddPlan(addPlan, {
       env,
       consentPlanIntegrity: addPlan.planIntegrity,
@@ -532,8 +532,8 @@ describe("package-root BOOTSTRAP.md", () => {
       expect.objectContaining({ kind: "bootstrap", action: "delete", blocked: false }),
     );
     const removed = await withTempHomeConfig(config, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
       return applyClawRemovePlan(removePlan, {
         monitorGateway: quiescentClawMonitorGateway,
         env,
@@ -558,14 +558,14 @@ describe("package-root BOOTSTRAP.md", () => {
       throw new Error("expected package bootstrap");
     }
     const workspace = join(root, "workspace");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const addPlan = await buildClawAddPlan({
       manifest: read.manifest,
       packageBootstrap: read.packageBootstrap,
       source: read.source,
       context: { workspace },
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     await applyClawAddPlan(addPlan, {
       env,
       consentPlanIntegrity: addPlan.planIntegrity,
@@ -583,8 +583,8 @@ describe("package-root BOOTSTRAP.md", () => {
       expect.objectContaining({ kind: "workspace", action: "retain" }),
     );
     const removed = await withTempHomeConfig(config, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
       return applyClawRemovePlan(removePlan, {
         monitorGateway: quiescentClawMonitorGateway,
         env,

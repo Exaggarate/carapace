@@ -1,10 +1,10 @@
 import { createServer } from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createWebFetchTool } from "./web-fetch.js";
 
 const runtimeState = vi.hoisted(() => ({
-  config: undefined as OpenClawConfig | undefined,
+  config: undefined as CarapaceConfig | undefined,
   resolveWebFetchDefinition: vi.fn(),
 }));
 

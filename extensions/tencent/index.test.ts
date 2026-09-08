@@ -1,17 +1,17 @@
 // Tencent tests cover index plugin behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
 import {
   createRuntimeEnv,
   registerProviderPlugin,
   requireRegisteredProvider,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { runSingleProviderCatalog } from "../test-support/provider-model-test-helpers.js";
 import tencentPlugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 type OpenAICompletionsModel = Model<"openai-completions">;
 

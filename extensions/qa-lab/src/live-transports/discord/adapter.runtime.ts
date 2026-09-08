@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
 import {
   acquireQaCredentialLease,
   startQaCredentialLeaseHeartbeat,
@@ -119,7 +119,7 @@ export async function createDiscordQaTransportAdapter(
       heartbeat.throwIfFailed();
     },
     async sendInbound(input) {
-      const text = input.text.replaceAll("@openclaw", `<@${runtimeEnv.sutApplicationId}>`);
+      const text = input.text.replaceAll("@carapace", `<@${runtimeEnv.sutApplicationId}>`);
       const sent = await discordQaScenarioSupport.testing.sendChannelMessage(
         runtimeEnv.driverBotToken,
         runtimeEnv.channelId,
@@ -134,7 +134,7 @@ export async function createDiscordQaTransportAdapter(
     },
     resetTransport: () => undefined,
     createGatewayConfig: () =>
-      discordQaScenarioSupport.testing.buildDiscordQaConfig({} as OpenClawConfig, {
+      discordQaScenarioSupport.testing.buildDiscordQaConfig({} as CarapaceConfig, {
         guildId: runtimeEnv.guildId,
         channelId: runtimeEnv.channelId,
         driverBotId: driverIdentity.id,

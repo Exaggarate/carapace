@@ -1,5 +1,5 @@
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionStableReplyMode } from "../../auto-reply/reply/session-stable-reply-mode.js";
 import { isSyntheticSourceReplyTurn } from "../../auto-reply/reply/source-reply-delivery-mode.js";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../auto-reply/thinking.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveAgentExplicitRecipientSession } from "../../infra/outbound/agent-delivery.js";
 import { buildOutboundSessionContext } from "../../infra/outbound/session-context.js";
 import { resolvePluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.js";
@@ -85,7 +85,7 @@ export function normalizeExplicitOverrideInput(raw: string, kind: "provider" | "
 }
 
 export type PreparedAgentCommandRuntimeContext = Readonly<{
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginGeneration: PreparedModelRuntimePluginGeneration;
 }>;
 
@@ -142,7 +142,7 @@ export async function prepareAgentCommandExecution(
     const knownAgents = listAgentIds(cfg);
     if (!knownAgents.includes(agentIdOverride)) {
       throw new Error(
-        `Unknown agent id "${agentIdOverrideRaw}". Use "${formatCliCommand("openclaw agents list")}" to see configured agents.`,
+        `Unknown agent id "${agentIdOverrideRaw}". Use "${formatCliCommand("carapace agents list")}" to see configured agents.`,
       );
     }
   }

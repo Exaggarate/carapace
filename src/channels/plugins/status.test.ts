@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildChannelAccountSnapshotFromAccount,
   buildReadOnlySourceChannelAccountSnapshot,
@@ -203,7 +203,7 @@ describe("buildChannelAccountSnapshotFromAccount", () => {
 
     const snapshot = await buildChannelAccountSnapshotFromAccount({
       plugin,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       accountId: "default",
       account,
     });
@@ -231,7 +231,7 @@ describe("buildChannelAccountSnapshotFromAccount", () => {
     await expect(
       buildChannelAccountSnapshotFromAccount({
         plugin,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         accountId: "default",
         account,
       }),
@@ -255,7 +255,7 @@ describe("buildChannelAccountSnapshotFromAccount", () => {
     await expect(
       buildChannelAccountSnapshotFromAccount({
         plugin,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         accountId: "default",
         account,
       }),
@@ -280,7 +280,7 @@ describe("buildChannelAccountSnapshotFromAccount", () => {
     await expect(
       buildChannelAccountSnapshotFromAccount({
         plugin,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         accountId: "default",
         account,
       }),

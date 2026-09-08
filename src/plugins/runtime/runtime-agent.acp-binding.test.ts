@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { readAcpSessionMeta, upsertAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import { writeSessionEntry } from "../../config/sessions/session-accessor.sqlite-entry-store.js";
-import { runOpenClawAgentWriteTransaction } from "../../state/openclaw-agent-db.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { runCarapaceAgentWriteTransaction } from "../../state/carapace-agent-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createRuntimeAgent } from "./runtime-agent.js";
 
 describe("plugin runtime ACP session creation", () => {
   it("does not initialize or remove a successor observed after ACP preparation", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-acp-successor" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-acp-successor" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:plugin:acpx:catalog-adopt:pi:source";
       let successor: ReturnType<typeof runtime.session.getSessionEntry>;
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       database.db.function("replace_prepared_child", () => {
         const current = runtime.session.getSessionEntry({
           sessionKey: key,
@@ -26,7 +26,7 @@ describe("plugin runtime ACP session creation", () => {
           sessionId: "successor",
           lifecycleRevision: "successor-generation",
         };
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (agentDatabase) => {
             writeSessionEntry(agentDatabase, key, successor!);
           },
@@ -60,7 +60,7 @@ describe("plugin runtime ACP session creation", () => {
   });
 
   it("persists a plugin-owned native resume binding", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-acp-session-create" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-acp-session-create" }, async () => {
       const runtime = createRuntimeAgent();
       const created = await runtime.session.createSessionEntry({
         cfg: {},
@@ -99,7 +99,7 @@ describe("plugin runtime ACP session creation", () => {
   });
 
   it("rejects recovery when the native resume binding differs", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-acp-recovery-binding" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-acp-recovery-binding" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:plugin:opencode:catalog-adopt:source";
       const storePath = runtime.session.resolveStorePath(undefined, { agentId: "main" });
@@ -170,7 +170,7 @@ describe("plugin runtime ACP session creation", () => {
   });
 
   it("recovers an interrupted ACP initializer before metadata was seeded", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-acp-recovery-missing-meta" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-acp-recovery-missing-meta" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:plugin:acpx:catalog-adopt:pi:recovery";
       const storePath = runtime.session.resolveStorePath(undefined, { agentId: "main" });

@@ -1,21 +1,21 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { writeSkill } from "../../skills/test-support/e2e-test-helpers.js";
 import { resolveWorkshopSkillsDir } from "../../skills/workshop/skills-root.js";
 import { readSkillProposalRecord } from "../../skills/workshop/store.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createSkillWorkshopTool as createSkillWorkshopToolImpl } from "./skill-workshop-tool.js";
 
 const commitLockState = vi.hoisted(() => ({ active: false, calls: 0 }));
 const createSkillWorkshopTool = (
   options: Omit<Parameters<typeof createSkillWorkshopToolImpl>[0], "config" | "agentId"> & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
   },
 ) => createSkillWorkshopToolImpl({ config: {}, agentId: "main", ...options });
@@ -39,14 +39,14 @@ vi.mock("../../skills/workshop/target-lock.js", () => ({
 }));
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
   commitLockState.active = false;
   commitLockState.calls = 0;
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-list-state-",
+    prefix: "carapace-skill-workshop-list-state-",
   });
 });
 
@@ -57,7 +57,7 @@ afterEach(async () => {
 
 describe("skill_workshop list", () => {
   it("lists a pending proposal whose draft is missing", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-missing-draft-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-missing-draft-");
     const tool = createSkillWorkshopTool({
       workspaceDir,
       config: {},
@@ -96,12 +96,12 @@ describe("skill_workshop list", () => {
     await expect(
       tool.execute("call-inspect", { action: "inspect", proposal_id: proposalId }),
     ).rejects.toThrow(
-      `Skill proposal draft is missing: ${proposalId}. Run openclaw doctor --fix for recovery.`,
+      `Skill proposal draft is missing: ${proposalId}. Run carapace doctor --fix for recovery.`,
     );
     await expect(
       tool.execute("call-apply", { action: "apply", proposal_id: proposalId }),
     ).rejects.toThrow(
-      `Skill proposal draft is missing: ${proposalId}. Run openclaw doctor --fix for recovery.`,
+      `Skill proposal draft is missing: ${proposalId}. Run carapace doctor --fix for recovery.`,
     );
     await expect(
       tool.execute("call-reject", { action: "reject", proposal_id: proposalId }),
@@ -111,7 +111,7 @@ describe("skill_workshop list", () => {
   it.each([0, 1.5, "1.5", "25items", "many"])(
     "rejects invalid list limit %s before touching proposal state",
     async (limit) => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-workshop-list-");
+      const workspaceDir = await tempDirs.make("carapace-skill-workshop-list-");
       const tool = createSkillWorkshopTool({
         workspaceDir,
         config: {},
@@ -127,7 +127,7 @@ describe("skill_workshop list", () => {
   );
 
   it("reconciles a full pending page while preserving list limits through 50", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-list-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-list-");
     const tool = createSkillWorkshopTool({
       workspaceDir,
       config: { skills: { workshop: { maxPending: 200 } } },

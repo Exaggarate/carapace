@@ -32,11 +32,11 @@ it.skipIf(process.platform === "win32")(
     const tempDirs = createTempDirTracker();
     const children: Promise<ChildExit>[] = [];
     try {
-      const executable = path.join(tempDirs.make("openclaw-completion-exit-"), "pwsh");
+      const executable = path.join(tempDirs.make("carapace-completion-exit-"), "pwsh");
       writeFileSync(executable, "#!/bin/sh\nexit 23\n", { mode: 0o700 });
       const closed = createDeferred<ChildExit>();
       vi.resetModules();
-      vi.stubEnv("OPENCLAW_TEST_PWSH", executable);
+      vi.stubEnv("CARAPACE_TEST_PWSH", executable);
       vi.doMock("node:child_process", () => ({
         ...childProcess,
         spawn(...args: Parameters<typeof childProcess.spawn>) {
@@ -52,9 +52,9 @@ it.skipIf(process.platform === "win32")(
       }));
       const { PowerShellCompletionRunner } = await import("./completion-cli.test-support.js");
       const runner = new PowerShellCompletionRunner();
-      const program = new Command().name("openclaw");
-      const first = observeSettlement(runner.complete(program, "openclaw "));
-      const second = observeSettlement(runner.complete(program, "openclaw --"));
+      const program = new Command().name("carapace");
+      const first = observeSettlement(runner.complete(program, "carapace "));
+      const second = observeSettlement(runner.complete(program, "carapace --"));
 
       expect(await closed.promise).toEqual({ code: 23, signal: null });
       // The real child is closed; only promise continuations remain.

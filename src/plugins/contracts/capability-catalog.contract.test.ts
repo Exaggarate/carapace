@@ -46,7 +46,7 @@ const families = [
 ] as const;
 const fixtures = fs.readdirSync(extensions).flatMap((dir) => {
   const root = path.join(extensions, dir);
-  const manifestPath = path.join(root, "openclaw.plugin.json");
+  const manifestPath = path.join(root, "carapace.plugin.json");
   if (!fs.existsSync(manifestPath)) {
     return [];
   }

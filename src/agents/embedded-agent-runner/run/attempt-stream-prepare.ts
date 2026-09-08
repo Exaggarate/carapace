@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 /**
  * Prepares stream subscription, tool execution, and the active run queue.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../../../auto-reply/tokens.js";
 import { runWithOwnedSessionTranscriptWrite } from "../../../config/sessions/transcript-write-context.js";
 import { captureAgentRunLifecycleGeneration } from "../../../infra/agent-events.js";
@@ -385,7 +385,7 @@ export function prepareEmbeddedAttemptStream(input: {
     const startOrder = nestedStartOrder++;
     const manager = input.activeSession.sessionManager;
     const afterEntryId = manager.getAppendParentId();
-    if (toolParams.source === "openclaw" && toolParams.sourceName === "core") {
+    if (toolParams.source === "carapace" && toolParams.sourceName === "core") {
       recordStructuredReplayTrustForToolCall(
         toolParams.toolCallId,
         toolParams.tool as never,
@@ -485,7 +485,7 @@ export function prepareEmbeddedAttemptStream(input: {
                 manager,
                 toolParams.toolCallId,
                 result.details,
-                toolParams.source === "openclaw" &&
+                toolParams.source === "carapace" &&
                   toolParams.sourceName === "core" &&
                   toolParams.toolName === "message",
               );

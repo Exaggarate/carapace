@@ -1,11 +1,11 @@
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth-api-key";
-// Moonshot plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildOpenAICompatibleReplayPolicy } from "openclaw/plugin-sdk/provider-model-shared";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-auth-api-key";
+// Moonshot plugin entrypoint registers its Carapace integration.
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { buildOpenAICompatibleReplayPolicy } from "carapace/plugin-sdk/provider-model-shared";
 import { moonshotMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import { wrapMoonshotStream } from "./native-video.js";
 import { applyMoonshotConfig, applyMoonshotConfigCn } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildMoonshotProvider, MOONSHOT_DEFAULT_MODEL_REF } from "./provider-catalog.js";
 import {
   isMoonshotAlwaysThinkingModelId,

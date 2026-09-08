@@ -13,10 +13,10 @@ import { requireRecord, requireString } from "./chat-flow.test-support.ts";
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const proofStage = process.env.OPENCLAW_CODE_FENCE_PROOF_STAGE ?? "after";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const proofStage = process.env.CARAPACE_CODE_FENCE_PROOF_STAGE ?? "after";
 let artifactDir: string;
 beforeEach(() => {
   if (captureProof) {
@@ -44,7 +44,7 @@ const shortFence = `\`\`\`json
 \`\`\``;
 
 const wideFence = `\`\`\`bash
-openclaw gateway start ${"--flag value ".repeat(40)}
+carapace gateway start ${"--flag value ".repeat(40)}
 \`\`\``;
 
 async function setThemeMode(page: Page, mode: "dark" | "light"): Promise<void> {
@@ -270,15 +270,15 @@ describeControlUiE2e("Control UI fenced code blocks", () => {
       await page.goto(`${server.baseUrl}chat`);
       await expect.poll(async () => (await observations()).connected).toBe(2);
       const code = await page.locator(".chat-thread code").elementHandle();
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.locator(".sidebar-identity-card").click();
       await sidebar
         .locator("wa-dropdown.sidebar-identity-menu")
         .getByRole("menuitem", { exact: true, name: "Settings" })
         .click();
       await page.locator('.settings-sidebar__item[href="/logs"]').click();
-      await page.locator("openclaw-logs-page").waitFor({ state: "visible" });
-      await page.locator("openclaw-chat-pane").waitFor({ state: "hidden" });
+      await page.locator("carapace-logs-page").waitFor({ state: "visible" });
+      await page.locator("carapace-chat-pane").waitFor({ state: "hidden" });
       expect(await code?.evaluate((element) => element.isConnected)).toBe(true);
       // A page reload would discard the probe too and cannot prove in-app teardown.
       expect((await observations()).observed).toBeGreaterThanOrEqual(2);
@@ -318,49 +318,49 @@ describeControlUiE2e("Control UI fenced code blocks", () => {
             role: index % 2 === 0 ? "user" : "assistant",
             content: [{ type: "text", text: `Earlier diagnostic turn ${index}` }],
             timestamp: Date.now() - 40 + index,
-            __openclaw: { id: `earlier-diagnostic-${index}`, seq: index + 1 },
+            __carapace: { id: `earlier-diagnostic-${index}`, seq: index + 1 },
           })),
           {
             role: "user",
             content: [{ type: "text", text: "Show the full diagnostic payload." }],
             timestamp: Date.now(),
-            __openclaw: { id: "user-fence-long", seq: 41 },
+            __carapace: { id: "user-fence-long", seq: 41 },
           },
           {
             role: "assistant",
             content: [{ type: "text", text: fencedJson(41) }],
             timestamp: Date.now() + 1,
-            __openclaw: { id: "assistant-fence-long", seq: 42 },
+            __carapace: { id: "assistant-fence-long", seq: 42 },
           },
           {
             role: "user",
             content: [{ type: "text", text: "Return the deployment receipt." }],
             timestamp: Date.now() + 2,
-            __openclaw: { id: "user-fence-short", seq: 43 },
+            __carapace: { id: "user-fence-short", seq: 43 },
           },
           {
             role: "assistant",
             content: [{ type: "text", text: shortFence }],
             timestamp: Date.now() + 3,
-            __openclaw: { id: "assistant-fence-short", seq: 44 },
+            __carapace: { id: "assistant-fence-short", seq: 44 },
           },
           {
             role: "user",
             content: [{ type: "text", text: "Show the launch command." }],
             timestamp: Date.now() + 4,
-            __openclaw: { id: "user-fence-wide", seq: 45 },
+            __carapace: { id: "user-fence-wide", seq: 45 },
           },
           {
             role: "assistant",
             content: [{ type: "text", text: wideFence }],
             timestamp: Date.now() + 5,
-            __openclaw: { id: "assistant-fence-wide", seq: 46 },
+            __carapace: { id: "assistant-fence-wide", seq: 46 },
           },
           ...(["text", "md", "markdown"] as const).map((language, index) => ({
             role: "assistant",
             content: [{ type: "text", text: fencedProse(language) }],
             timestamp: Date.now() + 6 + index,
-            __openclaw: { id: `assistant-fence-${language}`, seq: 47 + index },
+            __carapace: { id: `assistant-fence-${language}`, seq: 47 + index },
           })),
         ],
       });

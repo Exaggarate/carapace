@@ -26,8 +26,8 @@ const logger = {
 async function withRuntime(
   run: (start: typeof startSessionDeliveryRuntime) => Promise<void>,
 ): Promise<void> {
-  await withTestDir({ prefix: "openclaw-session-delivery-runtime-" }, async (tempDir) => {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: tempDir }, async () => {
+  await withTestDir({ prefix: "carapace-session-delivery-runtime-" }, async (tempDir) => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: tempDir }, async () => {
       let stop: ReturnType<typeof startSessionDeliveryRuntime> | undefined;
       try {
         await run((params) => (stop = startSessionDeliveryRuntime(params)));

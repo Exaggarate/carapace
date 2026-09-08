@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import ts from "typescript";
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { applyCodeModeCatalog } from "../code-mode.js";

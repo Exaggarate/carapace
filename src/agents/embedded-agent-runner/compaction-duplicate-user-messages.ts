@@ -1,7 +1,7 @@
 /**
  * Removes short-window duplicate user turns from compaction summaries.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { hasPersistedMedia } from "../../sessions/user-turn-media.js";
 
 const DEFAULT_DUPLICATE_USER_MESSAGE_WINDOW_MS = 60_000;
@@ -11,7 +11,7 @@ type MessageLike = {
   role?: unknown;
   content?: unknown;
   timestamp?: unknown;
-  __openclaw?: unknown;
+  __carapace?: unknown;
 };
 
 type DuplicateUserMessageOptions = {
@@ -50,7 +50,7 @@ function duplicateSignature(message: unknown): { key: string; timestamp: number 
   }
   // Persisted sender identity keeps distinct participants separate while senderless legacy
   // turns retain the old retry behavior. A JSON tuple avoids sender/text delimiter collisions.
-  const metadata = message["__openclaw"];
+  const metadata = message["__carapace"];
   const senderId =
     isRecord(metadata) && typeof metadata.senderId === "string" ? metadata.senderId : "";
   return {

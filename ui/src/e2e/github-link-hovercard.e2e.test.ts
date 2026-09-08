@@ -8,7 +8,7 @@ import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-ar
 
 let artifactDir: string | undefined;
 beforeEach(() => {
-  const parent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
   artifactDir = parent ? createControlUiE2eArtifactDir("github-link-hovercard", parent) : undefined;
 });
 import {
@@ -22,7 +22,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let server: ControlUiE2eServer;
@@ -89,14 +89,14 @@ const pullPreviewResponse = {
   login: "steipete",
   mergedAt: "2026-07-04T09:53:52Z",
   number: 99816,
-  owner: "openclaw",
-  repo: "openclaw",
+  owner: "carapace",
+  repo: "carapace",
   state: "closed",
   title: "fix(agents): derive conversation scope from trusted group facts",
   updatedAt: "2026-07-04T09:53:55Z",
 };
 
-const PULL_HREF = "https://github.com/openclaw/openclaw/pull/99816";
+const PULL_HREF = "https://github.com/Exaggarate/carapace/pull/99816";
 const PULL_COMMENT_HREF = `${PULL_HREF}#issuecomment-123`;
 
 // Shared page setup for lifecycle cases and cached permalink navigation.
@@ -282,8 +282,8 @@ describeControlUiE2e("GitHub link hover cards", () => {
                 login: "steipete",
                 mergedAt: "2026-07-04T09:53:52Z",
                 number: 99816,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 state: "closed",
                 title: "fix(agents): derive conversation scope from trusted group facts",
                 updatedAt: "2026-07-04T09:53:55Z",
@@ -299,8 +299,8 @@ describeControlUiE2e("GitHub link hover cards", () => {
                 kind: "issue",
                 login: "octocat",
                 number: 99815,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 state: "open",
                 title: "Keep hover previews compact",
                 updatedAt: new Date().toISOString(),
@@ -319,12 +319,12 @@ describeControlUiE2e("GitHub link hover cards", () => {
             {
               type: "text",
               text: [
-                "Review https://github.com/openclaw/openclaw/pull/99816,",
-                "then https://github.com/openclaw/openclaw/issues/99815.",
-                "A [missing item](https://github.com/openclaw/openclaw/issues/999999) stays usable.",
-                "The [repository](https://github.com/openclaw/openclaw) has no item preview.",
+                "Review https://github.com/Exaggarate/carapace/pull/99816,",
+                "then https://github.com/Exaggarate/carapace/issues/99815.",
+                "A [missing item](https://github.com/Exaggarate/carapace/issues/999999) stays usable.",
+                "The [repository](https://github.com/Exaggarate/carapace) has no item preview.",
                 "The skill lives at https://github.com/blader/humanizer/blob/main/SKILL.md.",
-                "Styling notes live in [the docs](https://docs.openclaw.ai/web/control-ui).",
+                "Styling notes live in [the docs](https://github.com/Exaggarate/carapace).",
               ].join(" "),
             },
           ],
@@ -374,14 +374,14 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await pullLink.hover();
     const card = page.locator(".github-link-hovercard");
     await expectText(card, "Merged");
-    await expectText(card, "openclaw/openclaw #99816");
+    await expectText(card, "carapace/carapace #99816");
     await expectText(card, "+101");
     await expectText(card, "−12");
     expect(await card.getByText("3 files", { exact: true }).count()).toBe(0);
     expect(await card.locator(".github-link-hovercard__metric--files").count()).toBe(0);
     await page.clock.runFor(300);
     await captureArtifact(page, "github-hovercard-title-tooltip");
-    await expect.poll(() => page.locator("openclaw-tooltip[open]").count()).toBe(0);
+    await expect.poll(() => page.locator("carapace-tooltip[open]").count()).toBe(0);
     expect(await pullLink.getAttribute("title")).toBe("");
     await expect.poll(() => card.locator("img").count()).toBe(1);
     expect((await gateway.getRequests("controlUi.githubPreview")).length).toBe(1);
@@ -397,7 +397,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await expectText(card, "Keep hover previews compact");
     await expectText(card, "octocat");
     await expectText(card, "4 comments");
-    await expect.poll(() => page.locator("openclaw-tooltip[open]").count()).toBe(0);
+    await expect.poll(() => page.locator("carapace-tooltip[open]").count()).toBe(0);
     await expect.poll(() => card.locator("img").count()).toBe(1);
     expect((await gateway.getRequests("controlUi.githubPreview")).length).toBe(2);
 
@@ -415,7 +415,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     const fileLink = page.getByRole("link", { name: "SKILL.md" });
     await fileLink.hover();
     await expect
-      .poll(() => page.locator("openclaw-tooltip[open]").textContent())
+      .poll(() => page.locator("carapace-tooltip[open]").textContent())
       .toContain("https://github.com/blader/humanizer/blob/main/SKILL.md");
 
     const missingLink = page.getByRole("link", { name: "missing item" });
@@ -423,7 +423,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await expectText(card, "GitHub preview unavailable");
     expect((await gateway.getRequests("controlUi.githubPreview")).length).toBe(3);
     expect(await missingLink.getAttribute("href")).toBe(
-      "https://github.com/openclaw/openclaw/issues/999999",
+      "https://github.com/Exaggarate/carapace/issues/999999",
     );
     await page.mouse.move(1, 1);
 
@@ -436,7 +436,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
 
     await pullLink.focus();
     await expectText(card, "Merged");
-    await expect.poll(() => page.locator("openclaw-tooltip[open]").count()).toBe(0);
+    await expect.poll(() => page.locator("carapace-tooltip[open]").count()).toBe(0);
     await page.keyboard.press("Escape");
     await expect.poll(() => card.count()).toBe(0);
     await expect
@@ -447,14 +447,14 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await pullLink.click();
     const popup = await popupPromise;
     await popup.waitForLoadState("domcontentloaded");
-    expect(popup.url()).toBe("https://github.com/openclaw/openclaw/pull/99816");
+    expect(popup.url()).toBe("https://github.com/Exaggarate/carapace/pull/99816");
   });
 
   it("keeps the card open while the pointer crosses the gap onto it, then closes once it leaves both", async () => {
     const { card, page, pullLink } = await openPullPreviewPage();
 
     await pullLink.hover();
-    await expectText(card, "openclaw/openclaw #99816");
+    await expectText(card, "carapace/carapace #99816");
     // Let preview response timers finish before freezing the pointer's grace.
     await pauseVirtualClock(page);
     const linkBox = await pullLink.boundingBox();
@@ -490,7 +490,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     // the unit test's ten-grace-window persistence check.
     await page.clock.runFor(1_200);
     expect(await card.count()).toBe(1);
-    await expectText(card, "openclaw/openclaw #99816");
+    await expectText(card, "carapace/carapace #99816");
 
     // Leaving both surfaces, with no click, still dismisses the card after the
     // traversal grace period.
@@ -505,7 +505,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     const { card, page, pullLink } = await openPullPreviewPage();
 
     await pullLink.focus();
-    await expectText(card, "openclaw/openclaw #99816");
+    await expectText(card, "carapace/carapace #99816");
     // The real accessibility tree has to report a dialog, not a tooltip: the card
     // owns a link, which tooltip semantics may not contain.
     await expect.poll(() => page.getByRole("dialog").count()).toBe(1);
@@ -540,7 +540,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     const { card, commentLink, gateway, page, pullLink } = await openPullPreviewPage();
 
     await pullLink.hover();
-    await expectText(card, "openclaw/openclaw #99816");
+    await expectText(card, "carapace/carapace #99816");
     const titleLink = card.locator(".github-link-hovercard__title");
     await expectText(titleLink, pullPreviewResponse.title);
 

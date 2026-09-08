@@ -6,7 +6,7 @@ import {
 import { supportsContextEngineDurableTurnAdvancement } from "../../context-engine/host-compat.js";
 import type { ContextEngineSessionTarget } from "../../context-engine/types.js";
 import type { UserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.types.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type { ContextEngineLogicalTurnLease } from "./context-engine-logical-turn.js";
 import {
   acceptContextEngineTurnIntent,
@@ -65,7 +65,7 @@ export async function drainPendingContextEngineTurnsBeforeRun(params: {
           sessionKey: target.sessionKey,
           storePath: target.storePath,
         });
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: target.agentId,
       path: databasePath,
     });
@@ -137,7 +137,7 @@ export function discardContextEngineTurnAttemptIntent(params: {
     const admission = params.facts.boundary.admission;
     discardContextEngineTurnIntent({
       admission,
-      database: openOpenClawAgentDatabase({
+      database: openCarapaceAgentDatabase({
         agentId: admission.agentId,
         path: admission.storePath,
       }),
@@ -197,7 +197,7 @@ export async function finalizeAcceptedContextEngineTurn(params: {
       throw new Error("accepted context engine does not support durable turn advancement");
     }
     const admission = params.facts.boundary.admission;
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: admission.agentId,
       path: admission.storePath,
     });

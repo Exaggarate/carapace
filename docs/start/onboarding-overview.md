@@ -1,5 +1,5 @@
 ---
-summary: "Overview of OpenClaw onboarding options and flows"
+summary: "Overview of Carapace onboarding options and flows"
 read_when:
   - Choosing an onboarding path
   - Setting up a new environment
@@ -7,9 +7,9 @@ title: "Onboarding overview"
 sidebarTitle: "Onboarding Overview"
 ---
 
-OpenClaw supports onboarding from the terminal, the macOS app, and the Linux
+Carapace supports onboarding from the terminal, the macOS app, and the Linux
 desktop companion. Every path establishes inference first: it detects existing
-AI access, requires a live completion, and only then starts OpenClaw to
+AI access, requires a live completion, and only then starts Carapace to
 configure the remaining setup. During macOS onboarding, selecting an already
 configured model verifies that route before opening the normal dashboard.
 The terminal flow also offers the full classic wizard for detailed setup.
@@ -23,7 +23,7 @@ The terminal flow also offers the full classic wizard for detailed setup.
 | **Gateway**    | Local or remote                        | Local, direct remote, or SSH                        | Local, direct remote, or SSH              |
 | **Best for**   | Servers, headless, full control        | Desktop Mac, visual setup                           | Linux desktop, visual setup               |
 | **Automation** | `--non-interactive` for scripts        | Manual only                                         | Manual only                               |
-| **Start**      | `openclaw onboard`                     | [Download the macOS app](/platforms/macos#download) | [Install the Linux app](/platforms/linux) |
+| **Start**      | `carapace onboard`                     | [Download the macOS app](/platforms/macos#download) | [Install the Linux app](/platforms/linux) |
 
 Most users should start with **CLI onboarding** — it works everywhere and gives
 you the most control.
@@ -37,7 +37,7 @@ The guided inference phase establishes only:
 2. **Verified inference** — a real completion on the default agent's effective
    model
 
-After that completion passes, OpenClaw can configure the workspace, Gateway,
+After that completion passes, Carapace can configure the workspace, Gateway,
 Gateway service, channels, agents, plugins, and other optional features.
 
 The classic CLI wizard can additionally configure:
@@ -52,7 +52,7 @@ The classic CLI wizard can additionally configure:
 Run in any terminal:
 
 ```bash
-openclaw onboard
+carapace onboard
 ```
 
 On a fresh install the guided flow offers **Quick start** and **Custom setup**,
@@ -61,19 +61,19 @@ a real completion, and only then configures the rest of the setup. Both lanes,
 the provider picker, **Skip for now**, and the foreground Gateway are described
 step by step in [Onboarding (CLI)](/start/wizard#guided-default).
 
-After inference passes, OpenClaw can hand channel setup to a masked terminal
-wizard. It does not open guided or classic provider setup. Exit OpenClaw and
-run `openclaw onboard` to change the model provider or its authentication.
+After inference passes, Carapace can hand channel setup to a masked terminal
+wizard. It does not open guided or classic provider setup. Exit Carapace and
+run `carapace onboard` to change the model provider or its authentication.
 
-Use `openclaw onboard --classic` for detailed model/auth, channel, skill,
+Use `carapace onboard --classic` for detailed model/auth, channel, skill,
 remote Gateway, or import setup. Adding `--install-daemon` also selects the
-classic flow and installs the background service in one step. Use `openclaw
-setup` for conversational non-inference setup and repair. `openclaw
+classic flow and installs the background service in one step. Use `carapace
+setup` for conversational non-inference setup and repair. `carapace
 onboard --modern` is a compatibility alias that uses the same live-inference
 gate.
 
 Full reference: [Onboarding (CLI)](/start/wizard)
-CLI command docs: [`openclaw onboard`](/cli/onboard)
+CLI command docs: [`carapace onboard`](/cli/onboard)
 
 ## macOS app onboarding
 
@@ -127,7 +127,7 @@ Platform and remote-access details: [Linux app](/platforms/linux) and
 
 ## Custom or unlisted providers
 
-If your provider is not listed, run `openclaw onboard` in a terminal on the
+If your provider is not listed, run `carapace onboard` in a terminal on the
 Gateway host, choose **Custom Provider** (under **More…** when shown), and enter:
 
 - Endpoint compatibility: OpenAI-compatible (`/chat/completions`), OpenAI Responses-compatible (`/responses`), Anthropic-compatible (`/messages`), or unknown (probes all three and auto-detects)

@@ -2,7 +2,7 @@ import Panzoom, { type PanzoomObject } from "@panzoom/panzoom";
 import { css, html, nothing, type PropertyValues } from "lit";
 import { property, query, queryAll, state } from "lit/decorators.js";
 import { t } from "../i18n/index.ts";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 import { icons } from "./icons.ts";
 import "./modal-dialog.ts";
 
@@ -34,7 +34,7 @@ function dataUrlMimeType(source: string): string | undefined {
   return mediaType === undefined ? undefined : mimeTypeEssence(mediaType);
 }
 
-class OpenClawImageLightbox extends OpenClawLitElement {
+class CarapaceImageLightbox extends CarapaceLitElement {
   @property() mediaKind: "image" | "video" = "image";
   @property() src = "";
   @property() originalSrc = "";
@@ -66,11 +66,11 @@ class OpenClawImageLightbox extends OpenClawLitElement {
       --image-lightbox-control-background-hover: rgba(255, 255, 255, 0.22);
     }
 
-    openclaw-modal-dialog {
-      --openclaw-modal-width: 100vw;
-      --openclaw-modal-max-width: 100vw;
-      --openclaw-modal-max-height: 100dvh;
-      --openclaw-modal-backdrop-filter: none;
+    carapace-modal-dialog {
+      --carapace-modal-width: 100vw;
+      --carapace-modal-max-width: 100vw;
+      --carapace-modal-max-height: 100dvh;
+      --carapace-modal-backdrop-filter: none;
     }
 
     .lightbox {
@@ -242,10 +242,10 @@ class OpenClawImageLightbox extends OpenClawLitElement {
 
     @media (max-width: 768px),
       (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
-      openclaw-modal-dialog {
-        --openclaw-modal-width: 100vw;
-        --openclaw-modal-max-width: 100vw;
-        --openclaw-modal-max-height: 100dvh;
+      carapace-modal-dialog {
+        --carapace-modal-width: 100vw;
+        --carapace-modal-max-width: 100vw;
+        --carapace-modal-max-height: 100dvh;
       }
 
       .lightbox {
@@ -283,7 +283,7 @@ class OpenClawImageLightbox extends OpenClawLitElement {
     }
 
     @media (prefers-reduced-motion: reduce) {
-      openclaw-modal-dialog {
+      carapace-modal-dialog {
         --show-duration: 0ms;
         --hide-duration: 0ms;
       }
@@ -338,7 +338,7 @@ class OpenClawImageLightbox extends OpenClawLitElement {
         : t("chat.imageLightbox.close");
     const canZoom = this.imageReady && this.panzoom !== undefined;
     return html`
-      <openclaw-modal-dialog
+      <carapace-modal-dialog
         class="mobile-edge-to-edge viewport-edge-to-edge"
         label=${dialogLabel}
         @modal-cancel=${this.emitClose}
@@ -441,7 +441,7 @@ class OpenClawImageLightbox extends OpenClawLitElement {
               : nothing
           }
         </section>
-      </openclaw-modal-dialog>
+      </carapace-modal-dialog>
     `;
   }
 
@@ -675,12 +675,12 @@ class OpenClawImageLightbox extends OpenClawLitElement {
   };
 }
 
-if (!customElements.get("openclaw-image-lightbox")) {
-  customElements.define("openclaw-image-lightbox", OpenClawImageLightbox);
+if (!customElements.get("carapace-image-lightbox")) {
+  customElements.define("carapace-image-lightbox", CarapaceImageLightbox);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-image-lightbox": OpenClawImageLightbox;
+    "carapace-image-lightbox": CarapaceImageLightbox;
   }
 }

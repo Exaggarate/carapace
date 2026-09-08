@@ -104,7 +104,7 @@ async function waitForFile(filePath: string): Promise<void> {
 
 describe("runWorkspaceInventoryCommandToFile", () => {
   it("fully persists bounded stdout after a positive short write", async () => {
-    const root = tempDirs.make("openclaw-workspace-command-short-write-");
+    const root = tempDirs.make("carapace-workspace-command-short-write-");
     const outputPath = path.join(root, "output");
     const expected = Buffer.from("bounded workspace inventory output\n");
     const shortWriteObserved = injectPositiveShortWrite(outputPath);
@@ -122,7 +122,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   });
 
   it("fully persists a buffered Git transfer list after a positive short write", async () => {
-    const root = tempDirs.make("openclaw-workspace-list-short-write-");
+    const root = tempDirs.make("carapace-workspace-list-short-write-");
     const temporaryDirectory = `${root}-transfer`;
     const outputPath = path.join(temporaryDirectory, "transfer-list");
     await fs.mkdir(path.join(root, "nested"));
@@ -159,7 +159,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   )(
     "settles $operation writers when $firstFailure fails first (cancel=$cancelRemaining)",
     async ({ operation, firstFailure, cancelRemaining }) => {
-      const root = await fs.realpath(tempDirs.make("openclaw-workspace-list-writers-"));
+      const root = await fs.realpath(tempDirs.make("carapace-workspace-list-writers-"));
       const workspace = path.join(root, "workspace");
       const temporaryDirectory = path.join(root, "transfer");
       await fs.mkdir(workspace);
@@ -247,7 +247,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   );
 
   it("fully persists a filtered Git transfer list after a positive short write", async () => {
-    const root = tempDirs.make("openclaw-workspace-filter-short-write-");
+    const root = tempDirs.make("carapace-workspace-filter-short-write-");
     const preparedListPath = path.join(root, "prepared");
     const outputPath = path.join(root, "filtered");
     await fs.mkdir(path.join(root, "nested"));
@@ -267,7 +267,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   });
 
   it("force-kills a command that ignores abort termination", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-sync-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-sync-"));
     const outputPath = path.join(root, "output");
     const readyPath = path.join(root, "ready");
     const controller = new AbortController();
@@ -302,7 +302,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   });
 
   it("closes its output when opening the input fails", async () => {
-    const root = tempDirs.make("openclaw-workspace-input-open-");
+    const root = tempDirs.make("carapace-workspace-input-open-");
     const outputPath = path.join(root, "output");
     let output: Awaited<ReturnType<typeof fs.open>> | undefined;
     const originalOpen = fs.open.bind(fs);
@@ -336,7 +336,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
     .each(["ordinary-exit", "abort-exit", "timeout-exit"] as const)(
     "preserves the command outcome before delayed stdio close (%s)",
     async (mode) => {
-      const root = tempDirs.make("openclaw-workspace-command-exit-");
+      const root = tempDirs.make("carapace-workspace-command-exit-");
       const outputPath = path.join(root, "output");
       const marker = path.join(root, "command-identity");
       const controller = new AbortController();
@@ -437,7 +437,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   );
 
   it("stops a pack producer before it can exceed its output budget", async () => {
-    const root = tempDirs.make("openclaw-workspace-pack-limit-");
+    const root = tempDirs.make("carapace-workspace-pack-limit-");
     const outputPath = path.join(root, "pack");
 
     await expect(
@@ -453,11 +453,11 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   });
 
   it("omits derived artifacts from outbound Git file lists", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-files-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-files-"));
     const retainedFiles = [
       "src/keep.ts",
-      "openclaw-inbound-project/report.txt",
-      "nested/openclaw-inbound-12345678-1234-4234-8234-123456789ab-/report.txt",
+      "carapace-inbound-project/report.txt",
+      "nested/carapace-inbound-12345678-1234-4234-8234-123456789ab-/report.txt",
     ];
     const files = [
       ...retainedFiles,
@@ -471,8 +471,8 @@ describe("runWorkspaceInventoryCommandToFile", () => {
       ".ruff_cache/state",
       "node_modules/pkg/index.js",
       ".DS_Store",
-      "openclaw-inbound-12345678-1234-4234-8234-123456789abc/report.pdf",
-      "nested/openclaw-inbound-12345678-1234-4234-8234-123456789abc/photo.png",
+      "carapace-inbound-12345678-1234-4234-8234-123456789abc/report.pdf",
+      "nested/carapace-inbound-12345678-1234-4234-8234-123456789abc/photo.png",
     ];
     const temporaryDirectory = path.join(root, "..", `${path.basename(root)}-transfer`);
     const initOutputPath = path.join(root, "..", `${path.basename(root)}-git-init-output`);
@@ -510,7 +510,7 @@ describe("runWorkspaceInventoryCommandToFile", () => {
   });
 
   it("bounds raw Git candidates before materializing the eligible inventory", async () => {
-    const root = tempDirs.make("openclaw-workspace-candidates-");
+    const root = tempDirs.make("carapace-workspace-candidates-");
     const bin = path.join(root, "bin");
     const mockGit = path.join(bin, "git");
     const countFile = path.join(bin, "git-entry-count");
@@ -568,7 +568,7 @@ process.stdout.write("eligible.txt\\0".repeat(count));
 
 describe("preflightWorkerWorkspace", () => {
   it("measures the canonical Git eligibility boundary without hashing content", async () => {
-    const root = tempDirs.make("openclaw-workspace-preflight-");
+    const root = tempDirs.make("carapace-workspace-preflight-");
     const transferDirectory = `${root}-transfer`;
     try {
       await git(root, "init", "--quiet");
@@ -582,9 +582,9 @@ describe("preflightWorkerWorkspace", () => {
       await git(
         root,
         "-c",
-        "user.name=OpenClaw Test",
+        "user.name=Carapace Test",
         "-c",
-        "user.email=test@openclaw.invalid",
+        "user.email=test@carapace.invalid",
         "commit",
         "--quiet",
         "-m",
@@ -634,7 +634,7 @@ describe("preflightWorkerWorkspace", () => {
   });
 
   it("rejects escaping symlinks with a typed bounded error", async () => {
-    const root = tempDirs.make("openclaw-workspace-symlink-");
+    const root = tempDirs.make("carapace-workspace-symlink-");
     try {
       await git(root, "init", "--quiet");
       await fs.writeFile(path.join(root, "tracked.txt"), "tracked\n");
@@ -642,9 +642,9 @@ describe("preflightWorkerWorkspace", () => {
       await git(
         root,
         "-c",
-        "user.name=OpenClaw Test",
+        "user.name=Carapace Test",
         "-c",
-        "user.email=test@openclaw.invalid",
+        "user.email=test@carapace.invalid",
         "commit",
         "--quiet",
         "-m",
@@ -665,8 +665,8 @@ describe("preflightWorkerWorkspace", () => {
   });
 
   it("preserves filesystem and abort failures as operational errors", async () => {
-    const missingParent = tempDirs.make("openclaw-workspace-missing-");
-    const root = tempDirs.make("openclaw-workspace-abort-");
+    const missingParent = tempDirs.make("carapace-workspace-missing-");
+    const root = tempDirs.make("carapace-workspace-abort-");
     try {
       const missing = await preflightWorkerWorkspace({
         localPath: path.join(missingParent, "absent"),

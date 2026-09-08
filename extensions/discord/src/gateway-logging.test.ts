@@ -4,8 +4,8 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Suite runs isolate=false: a partial factory here poisons the shared module
 // cache for later files in the worker (#123025), so spread the real module.
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   return {
     ...actual,
     logVerbose: vi.fn(),
@@ -13,7 +13,7 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
   };
 });
 
-let logVerbose: typeof import("openclaw/plugin-sdk/runtime-env").logVerbose;
+let logVerbose: typeof import("carapace/plugin-sdk/runtime-env").logVerbose;
 let attachDiscordGatewayLogging: typeof import("./gateway-logging.js").attachDiscordGatewayLogging;
 
 const makeRuntime = () => ({
@@ -24,7 +24,7 @@ const makeRuntime = () => ({
 
 describe("attachDiscordGatewayLogging", () => {
   beforeAll(async () => {
-    const { logVerbose: loadedLogVerbose } = await import("openclaw/plugin-sdk/runtime-env");
+    const { logVerbose: loadedLogVerbose } = await import("carapace/plugin-sdk/runtime-env");
     logVerbose = loadedLogVerbose;
     ({ attachDiscordGatewayLogging } = await import("./gateway-logging.js"));
   });

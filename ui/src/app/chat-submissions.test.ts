@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { findChatSubmissionMessage } from "../lib/chat/history-message-identity.ts";
 import { shouldDisplayChatSubmission } from "../pages/chat/history-merge.ts";
@@ -6,7 +6,7 @@ import { buildInitialChatSubmission } from "../pages/chat/user-message-content.t
 import { createChatSubmissions, type RetainedChatSubmission } from "./chat-submissions.ts";
 
 function message(text: string): RetainedChatSubmission["message"] {
-  return { role: "user", content: [{ type: "text", text }], timestamp: 1, __openclaw: {} };
+  return { role: "user", content: [{ type: "text", text }], timestamp: 1, __carapace: {} };
 }
 
 describe("retained chat submissions", () => {
@@ -44,7 +44,7 @@ describe("retained chat submissions", () => {
             [
               {
                 ...replacement.message,
-                __openclaw: { id: "receipt", idempotencyKey: `${replacement.pendingRunId}:user` },
+                __carapace: { id: "receipt", idempotencyKey: `${replacement.pendingRunId}:user` },
               },
             ],
             replacement.pendingRunId,
@@ -138,7 +138,7 @@ describe("initial user message handoff", () => {
           },
         ],
         timestamp: 123,
-        __openclaw: {
+        __carapace: {
           idempotencyKey: "initial-image-run:user",
           senderId: "profile-1",
           senderName: "Alice Example",

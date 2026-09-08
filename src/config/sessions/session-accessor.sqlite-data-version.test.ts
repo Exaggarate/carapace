@@ -6,11 +6,11 @@ import { clearNodeSqliteKyselyCacheForDatabase } from "../../infra/kysely-sync.j
 import { listUsageCountedTranscriptStats } from "../../infra/session-cost-usage-collection.js";
 import { configureSqliteConnectionPragmas } from "../../infra/sqlite-wal.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   appendTranscriptEventSync,
   appendTranscriptMessage,
@@ -52,8 +52,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function readDataVersion(database: DatabaseSync): number {
@@ -68,7 +68,7 @@ function readTotalChanges(database: DatabaseSync): number {
 
 describe("SQLite entry cache validity counters", () => {
   it("separately tracks same-connection and other-connection commits", () => {
-    const databasePath = path.join(tempDirs.make("openclaw-data-version-"), "probe.sqlite");
+    const databasePath = path.join(tempDirs.make("carapace-data-version-"), "probe.sqlite");
     const first = new DatabaseSync(databasePath);
     const firstMaintenance = configureSqliteConnectionPragmas(first, {
       checkpointIntervalMs: 0,
@@ -114,10 +114,10 @@ describe("SQLite entry cache validity counters", () => {
 });
 
 function createSessionScope(label: string) {
-  const stateDir = tempDirs.make(`openclaw-entry-cache-${label}-`);
+  const stateDir = tempDirs.make(`carapace-entry-cache-${label}-`);
   return {
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     sessionKey: `agent:main:${label}`,
     projection: "list" as const,
   };
@@ -126,7 +126,7 @@ function createSessionScope(label: string) {
 describe("SQLite retained session window references", () => {
   it("reads retained candidate windows freshly and honors owner exclusions", () => {
     const scope = createSessionScope("reference-window-candidates");
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     database.db
       .prepare(
         "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at) VALUES (?, ?, ?, 1)",
@@ -134,7 +134,7 @@ describe("SQLite retained session window references", () => {
       .run(scope.sessionKey, "current", JSON.stringify({ sessionId: "current", updatedAt: 1 }));
     readReferencedSessionIds(database);
     const ids = Array.from({ length: 1201 }, (_, index) => `history-${index}`);
-    runOpenClawAgentWriteTransaction((current) => {
+    runCarapaceAgentWriteTransaction((current) => {
       current.db
         .prepare("UPDATE session_nodes SET archived_at = 1 WHERE session_key = ?")
         .run(scope.sessionKey);
@@ -187,7 +187,7 @@ describe("SQLite session entry cache", () => {
       await upsertSessionEntryCore(siblingScope, { ...entry, sessionId: "plugin-cleanup-sibling" });
       const siblingBefore = loadSessionEntry(siblingScope);
       expect(siblingBefore).toBeDefined();
-      const database = openOpenClawAgentDatabase(scope);
+      const database = openCarapaceAgentDatabase(scope);
 
       parseSessionEntryCalls.mockClear();
       expect(
@@ -223,7 +223,7 @@ describe("SQLite session entry cache", () => {
     await upsertSessionEntryCore(scope, { sessionId, updatedAt: 1, skillsSnapshot, worktree });
     const event = { type: "session", id: sessionId };
     expect(appendTranscriptEventSync({ ...scope, sessionId }, event).ok).toBe(true);
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const inventoryParams = { storePath: database.path, sessionsDir: path.dirname(database.path) };
 
     parseSessionEntryCalls.mockClear();
@@ -274,7 +274,7 @@ describe("SQLite session entry cache", () => {
     ],
   ])("preserves list parsing for %s rows", (_name, entryJson, readable) => {
     const scope = createSessionScope("raw-list-projection");
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     // Raw runtime writes follow canonical admission; this case isolates subsequent JSON decoding.
     listSessionEntriesCore(scope);
     database.db
@@ -341,7 +341,7 @@ describe("SQLite session entry cache", () => {
       expect(
         parseSessionEntryCalls.mock.calls.every(([json]) => Buffer.byteLength(json) < 1024),
       ).toBe(true);
-      const cached = readSessionEntryCache(openOpenClawAgentDatabase(scope), { cache: true });
+      const cached = readSessionEntryCache(openCarapaceAgentDatabase(scope), { cache: true });
       expect(cached.entries.get(scope.sessionKey)).toBe(first);
       expect(cached.entries.get(scope.sessionKey)?.skillsSnapshot).toBeUndefined();
       expect(cached.entries.get(scope.sessionKey)?.systemPromptReport).toBeUndefined();
@@ -393,7 +393,7 @@ describe("SQLite session entry cache", () => {
       sessionId: "connection-identity",
       updatedAt: 1,
     });
-    const primary = openOpenClawAgentDatabase(scope);
+    const primary = openCarapaceAgentDatabase(scope);
     const first = listSessionEntriesCore({ ...scope, clone: false });
     const alternate = new DatabaseSync(primary.path, { readOnly: true });
     const parse = vi.spyOn(JSON, "parse");
@@ -481,7 +481,7 @@ describe("SQLite session entry cache", () => {
     if (!before) {
       throw new Error("missing seeded external-write entry");
     }
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const external = new DatabaseSync(database.path);
     const maintenance = configureSqliteConnectionPragmas(external, {
       checkpointIntervalMs: 0,
@@ -527,7 +527,7 @@ describe("SQLite session entry cache", () => {
       throw new Error("missing seeded external-same-ms entry");
     }
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const external = new DatabaseSync(database.path);
     const maintenance = configureSqliteConnectionPragmas(external, {
       checkpointIntervalMs: 0,
@@ -568,7 +568,7 @@ describe("SQLite session entry cache", () => {
     });
     listSessionEntriesCore(scope);
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const localEntry = {
       label: "local-after",
       sessionId: "external-race-local",
@@ -630,7 +630,7 @@ describe("SQLite session entry cache", () => {
     const before = listSessionEntriesCore({ ...scope, clone: false, projection: "list" });
     const keptProjection = before.find((row) => row.sessionKey === scope.sessionKey)?.entry;
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const insertedKey = "agent:main:same-connection-inserted";
     const insertedEntry = {
       label: "projection-probe-inserted",
@@ -717,7 +717,7 @@ describe("SQLite session entry cache", () => {
     });
     const before = listSessionEntriesCore({ ...scope, clone: false, projection: "list" });
     const siblingBefore = before.find((row) => row.sessionKey === siblingScope.sessionKey)?.entry;
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const cachedBefore = readSessionEntryCache(database, { cache: true });
     const changedEntryBefore = cachedBefore.entries.get(scope.sessionKey);
     const siblingEntryBefore = cachedBefore.entries.get(siblingScope.sessionKey);
@@ -758,7 +758,7 @@ describe("SQLite session entry cache", () => {
     });
     const existing = listSessionEntriesCore({ ...scope, clone: false, projection: "list" })[0]
       ?.entry;
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const cachedBefore = readSessionEntryCache(database, { cache: true });
     const existingEntry = cachedBefore.entries.get(scope.sessionKey);
     const insertedScope = { ...scope, sessionKey: "agent:main:write-through-inserted" };
@@ -798,7 +798,7 @@ describe("SQLite session entry cache", () => {
       });
       listSessionEntriesCore(scope);
 
-      const database = openOpenClawAgentDatabase(scope);
+      const database = openCarapaceAgentDatabase(scope);
       const previous = loadSessionEntry(scope)!;
       const rawEntry = {
         ...previous,
@@ -826,12 +826,12 @@ describe("SQLite session entry cache", () => {
   it("invalidates cached keys when transcript creation inserts a placeholder node", async () => {
     const scope = createSessionScope("placeholder-key");
     await upsertSessionEntryCore(scope, { sessionId: "entry", updatedAt: 1 });
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const before = readSessionEntryCache(database, { cache: true });
     expect(before.keys).toEqual([scope.sessionKey]);
 
     const placeholderKey = "agent:main:placeholder-only";
-    runOpenClawAgentWriteTransaction((transactionDatabase) => {
+    runCarapaceAgentWriteTransaction((transactionDatabase) => {
       ensureTranscriptSessionRoot(
         transactionDatabase,
         {
@@ -855,7 +855,7 @@ describe("SQLite session entry cache", () => {
     await upsertSessionEntryCore(scope, { sessionId, updatedAt: 1 });
 
     expect(() =>
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         ensureTranscriptSessionRoot(
           database,
           {
@@ -869,7 +869,7 @@ describe("SQLite session entry cache", () => {
       }, scope),
     ).toThrow("resolve the transcript target again before retrying");
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     expect(
       database.db
         .prepare("SELECT session_key, entry_valid FROM session_nodes ORDER BY session_key")
@@ -892,7 +892,7 @@ describe("SQLite session entry cache", () => {
     }
 
     expect(() =>
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         const updated = { ...borrowedBefore, label: "uncommitted", updatedAt: 2 };
         database.db
           .prepare("UPDATE session_nodes SET entry_json = ?, updated_at = ? WHERE session_key = ?")
@@ -931,7 +931,7 @@ describe("SQLite session entry cache", () => {
     await upsertSessionEntryCore(scope, { label: "cached", sessionId: "latest", updatedAt: 1 });
     expect(listSessionEntriesCore(scope)[0]?.entry.label).toBe("cached");
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const updated = { label: "latest", sessionId: "latest", updatedAt: 2 };
     database.db
       .prepare("UPDATE session_nodes SET entry_json = ?, updated_at = ? WHERE session_key = ?")

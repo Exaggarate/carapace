@@ -1,4 +1,4 @@
-import { readSessionMessageSequence } from "@openclaw/gateway-client/browser";
+import { readSessionMessageSequence } from "@carapace/gateway-client/browser";
 import type {
   ChatInputReceipts,
   ChatPendingInputsPage,

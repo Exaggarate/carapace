@@ -108,7 +108,7 @@ function toStoredState(params: {
     candidates: params.candidates,
   });
   return {
-    schema: "openclaw.skill-workshop.history-scan.v1",
+    schema: "carapace.skill-workshop.history-scan.v1",
     hasScanned: true,
     reviewedSessions: (previous?.reviewedSessions ?? 0) + params.sessions.length,
     ideasFound: (previous?.ideasFound ?? 0) + params.ideasFound,

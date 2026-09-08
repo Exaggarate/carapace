@@ -161,7 +161,7 @@ describe("browser screencast mint route", () => {
     expect(body.expiresAtMs).toBeGreaterThanOrEqual(startedAt + 60_000);
     expect(ensureTabAvailable).toHaveBeenCalledWith("t1", expect.any(Object));
     expect(consumeBrowserScreencastToken(body.token)).toMatchObject({
-      profileName: "openclaw",
+      profileName: "carapace",
       targetId: "resolved-tab",
       cdpUrl: "http://127.0.0.1:18800",
       maxWidth: 320,
@@ -203,7 +203,7 @@ describe("browser screencast mint route", () => {
       if (transition === "runtime retirement") {
         markBrowserRuntimeStopping(state);
       } else {
-        state.profiles.delete("openclaw");
+        state.profiles.delete("carapace");
       }
 
       expect(() => token.assertCurrent()).toThrow("superseded");

@@ -1,16 +1,16 @@
-import { readPositiveIntegerParam, readStringParam } from "openclaw/plugin-sdk/channel-actions";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { readPositiveIntegerParam, readStringParam } from "carapace/plugin-sdk/channel-actions";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   ErrorCodes,
   errorShape,
   type GatewayRequestHandlerOptions,
-} from "openclaw/plugin-sdk/gateway-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { listAgentIds } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { resolveMemoryRemDreamingConfig } from "openclaw/plugin-sdk/memory-core-host-status";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/gateway-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { listAgentIds } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { resolveMemoryRemDreamingConfig } from "carapace/plugin-sdk/memory-core-host-status";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
 import type { SessionBackfillResult } from "./session-backfill-contract.js";
 import { normalizeSessionBackfillSelection } from "./session-backfill-selection.js";
 
@@ -91,8 +91,8 @@ function readRollbackParams(value: unknown): { agentId: string } {
   };
 }
 
-function resolveExecutionContext(api: OpenClawPluginApi, agentId: string) {
-  const config = api.runtime.config.current() as OpenClawConfig;
+function resolveExecutionContext(api: CarapacePluginApi, agentId: string) {
+  const config = api.runtime.config.current() as CarapaceConfig;
   const configuredAgentIds = listAgentIds(config);
   if (!configuredAgentIds.includes(agentId)) {
     throw new InvalidSessionBackfillRequestError(`Unknown agent id "${agentId}".`);
@@ -152,7 +152,7 @@ function respondUnavailable(
   respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, message));
 }
 
-export function registerSessionBackfillGatewayMethods(api: OpenClawPluginApi): void {
+export function registerSessionBackfillGatewayMethods(api: CarapacePluginApi): void {
   const registerBackfill = (
     method: (typeof SESSION_BACKFILL_GATEWAY_METHODS)["preview" | "apply"],
     apply: boolean,

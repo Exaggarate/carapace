@@ -1,8 +1,8 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceProviderPlugin,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import { describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import type { VoiceCallRealtimeConfig } from "../config.js";
@@ -857,7 +857,7 @@ describe("RealtimeCallHandler lifecycle", () => {
       noOpStreamDisconnectLifecycle,
     );
     const consult = vi.fn(async () => ({ text: "This should not run." }));
-    handler.registerToolHandler("openclaw_agent_consult", consult);
+    handler.registerToolHandler("carapace_agent_consult", consult);
     const { streamUrl } = handler.issueStreamSession();
     const server = await startUpgradeWsServer({
       urlPath: new URL(streamUrl).pathname,
@@ -882,7 +882,7 @@ describe("RealtimeCallHandler lifecycle", () => {
       onToolCall?.({
         itemId: "item-settling-consult",
         callId: "tool-settling-consult",
-        name: "openclaw_agent_consult",
+        name: "carapace_agent_consult",
         args: { question: "Check the deployment." },
       });
       const consults = (
@@ -962,7 +962,7 @@ describe("RealtimeCallHandler lifecycle", () => {
       "/voice/webhook",
       noOpStreamDisconnectLifecycle,
     );
-    handler.registerToolHandler("openclaw_agent_consult", async (_args, _callId, context) => {
+    handler.registerToolHandler("carapace_agent_consult", async (_args, _callId, context) => {
       consultSignal = context.abortSignal;
       return await new Promise<unknown>((_resolve, reject) => {
         context.abortSignal?.addEventListener(
@@ -995,7 +995,7 @@ describe("RealtimeCallHandler lifecycle", () => {
       onToolCall?.({
         itemId: "item-consult",
         callId: "tool-consult",
-        name: "openclaw_agent_consult",
+        name: "carapace_agent_consult",
         args: { question: "Check the deployment." },
       });
       await vi.waitFor(() => {

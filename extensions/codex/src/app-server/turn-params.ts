@@ -2,12 +2,12 @@ import {
   buildTemporalContextText,
   buildHarnessVisibleReplyGuidance,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { codexSandboxPolicyForTurn, type CodexAppServerRuntimeOptions } from "./config.js";
 import type {
   CodexSandboxPolicy,
@@ -29,7 +29,7 @@ const CODEX_CURRENT_SENDER_FIELD_MAX_CHARS = 256;
 
 function buildCodexCurrentSenderContextValue(params: EmbeddedRunAttemptParams): string | undefined {
   const metadata = asOptionalRecord(
-    asOptionalRecord(params.userTurnTranscriptRecorder?.message as unknown)?.["__openclaw"],
+    asOptionalRecord(params.userTurnTranscriptRecorder?.message as unknown)?.["__carapace"],
   );
   const recorded = [
     normalizeOptionalString(metadata?.["senderId"]),
@@ -108,7 +108,7 @@ export function buildTurnStartParams(
   // including automatic/disabled defaults, without replacing other context entries.
   additionalContext = {
     ...additionalContext,
-    openclaw_source_delivery: {
+    carapace_source_delivery: {
       kind: "application",
       value: [
         "Current source-delivery policy for this turn (replaces earlier source-delivery guidance):",
@@ -124,7 +124,7 @@ export function buildTurnStartParams(
   if (currentSenderContext) {
     additionalContext = {
       ...additionalContext,
-      openclaw_current_sender: { kind: "untrusted", value: currentSenderContext },
+      carapace_current_sender: { kind: "untrusted", value: currentSenderContext },
     };
   }
   if (params.permissionChange?.notice) {
@@ -132,7 +132,7 @@ export function buildTurnStartParams(
     // reaches native-preserved threads without overriding their turn settings.
     additionalContext = {
       ...additionalContext,
-      openclaw_permission_change: { kind: "application", value: params.permissionChange.notice },
+      carapace_permission_change: { kind: "application", value: params.permissionChange.notice },
     };
   }
   return {
@@ -166,7 +166,7 @@ export function buildTurnStartParams(
       ? { model: modelSelection.model, personality: CODEX_NATIVE_PERSONALITY_NONE }
       : {}),
     // Codex distinguishes an omitted native default from explicitly clearing
-    // an OpenClaw-owned priority override left on this exact warm session.
+    // an Carapace-owned priority override left on this exact warm session.
     ...(options.appServer.serviceTier !== undefined
       ? { serviceTier: options.appServer.serviceTier }
       : options.clearInheritedServiceTier
@@ -187,7 +187,7 @@ export function buildCodexTemporalAdditionalContext(
   options: { sessionStatusAvailable: boolean },
 ): NonNullable<CodexTurnStartParams["additionalContext"]> {
   return {
-    openclaw_temporal_context: {
+    carapace_temporal_context: {
       kind: "application",
       value: buildTemporalContextText({
         configuredTimezone: params.config?.agents?.defaults?.userTimezone,
@@ -247,7 +247,7 @@ function buildTurnScopedCollaborationInstructions(
 
 function buildDefaultCollaborationInstructions(): string {
   // Codex only applies the built-in Default-mode preset when `developer_instructions`
-  // is null. OpenClaw adds per-turn workspace instructions here, so preserve that
+  // is null. Carapace adds per-turn workspace instructions here, so preserve that
   // pinned Codex default behavior before appending the workspace overlay.
   return [
     "# Collaboration Mode: Default",
@@ -266,7 +266,7 @@ function buildDefaultCollaborationInstructions(): string {
 
 function buildCronCollaborationInstructions(): string {
   return [
-    "This is an OpenClaw cron automation turn. Apply these instructions only to this scheduled job; ordinary chat turns should stay in Codex Default mode.",
+    "This is an Carapace cron automation turn. Apply these instructions only to this scheduled job; ordinary chat turns should stay in Codex Default mode.",
     "Execute the cron payload directly. If it asks you to run an exact command, run that command before doing any investigation, planning, memory review, or workspace bootstrap.",
     "Use context already provided by the runtime, but do not spend time loading or re-reading workspace bootstrap, memory, or project-doc files before executing the cron payload. Inspect those files only if the payload asks for them or the command fails and they are needed to diagnose it.",
     "Keep output concise and automation-oriented. Prefer the final command result or a short failure summary over status narration.",

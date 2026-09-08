@@ -1,7 +1,7 @@
 import type { BundledStaticCatalogState } from "../agents/embedded-agent-runner/model.static-catalog.types.js";
 import type { BundledChannelCatalogEntry } from "../channels/bundled-channel-catalog.types.js";
 import type { ManifestChannelPlugin } from "../channels/plugins/manifest-channel-plugin.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginDiscoveryResult } from "./discovery.types.js";
 import type {
   InstalledPluginIndex,
@@ -20,7 +20,7 @@ type CurrentPluginMetadataCacheState = {
   compatiblePolicyHashes: readonly string[] | undefined;
   compatibleConfigFingerprints: readonly string[] | undefined;
   revision: symbol;
-  configIdentities: WeakSet<OpenClawConfig>;
+  configIdentities: WeakSet<CarapaceConfig>;
 };
 
 export type PluginCacheMetadata = {
@@ -37,12 +37,12 @@ export type PluginCacheMetadata = {
     indexFacts: WeakMap<InstalledPluginIndex, InstalledPluginIndexFacts>;
     channelAdapters: WeakMap<PluginManifestRecord, Map<string, ManifestChannelPlugin | undefined>>;
     bundledChannelCatalogs: Map<string, BundledChannelCatalogEntry[]>;
-    staticCatalogStates: WeakMap<object, WeakMap<OpenClawConfig, BundledStaticCatalogState>>;
+    staticCatalogStates: WeakMap<object, WeakMap<CarapaceConfig, BundledStaticCatalogState>>;
     modelSuppressionResolvers: WeakMap<
       PluginMetadataSnapshot,
       {
         unconfigured?: ManifestModelSuppressionResolver;
-        byConfig: WeakMap<OpenClawConfig, ManifestModelSuppressionResolver>;
+        byConfig: WeakMap<CarapaceConfig, ManifestModelSuppressionResolver>;
       }
     >;
   };

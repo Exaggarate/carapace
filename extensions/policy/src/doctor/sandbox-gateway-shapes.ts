@@ -1,5 +1,5 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "carapace/plugin-sdk/health";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { SANDBOX_CONTAINER_POLICY_RULES } from "./metadata.js";
 import {
   SUPPORTED_GATEWAY_HTTP_ENDPOINTS,

@@ -1,5 +1,5 @@
 import { resolveBundledChannelGatewayAuthBypassPaths } from "../channels/plugins/gateway-auth-bypass.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { registerPluginMetadataProcessMemoLifecycleClear } from "../plugins/plugin-metadata-lifecycle.js";
 import type { AuthorizedGatewayHttpRequest } from "./http-auth-utils.js";
 import type { PluginNodeCapabilitySurface } from "./plugin-node-capability.js";
@@ -23,14 +23,14 @@ export type ResolvePluginNodeCapabilityRoute = (
 // metadata lifecycle reset can replace that contract while the config object
 // identity stays stable, so the cache must roll to a fresh generation on reset
 // or a replaced channel plugin keeps its predecessor's HTTP auth exceptions.
-let pluginGatewayAuthBypassPathsCache = new WeakMap<OpenClawConfig, Promise<ReadonlySet<string>>>();
+let pluginGatewayAuthBypassPathsCache = new WeakMap<CarapaceConfig, Promise<ReadonlySet<string>>>();
 
 registerPluginMetadataProcessMemoLifecycleClear(() => {
   pluginGatewayAuthBypassPathsCache = new WeakMap();
 });
 
 async function resolvePluginGatewayAuthBypassPaths(
-  configSnapshot: OpenClawConfig,
+  configSnapshot: CarapaceConfig,
 ): Promise<Set<string>> {
   const paths = new Set<string>();
   const configuredChannels = configSnapshot.channels;
@@ -49,7 +49,7 @@ async function resolvePluginGatewayAuthBypassPaths(
 }
 
 export function getCachedPluginGatewayAuthBypassPaths(
-  configSnapshot: OpenClawConfig,
+  configSnapshot: CarapaceConfig,
 ): Promise<ReadonlySet<string>> {
   const cache = pluginGatewayAuthBypassPathsCache;
   const cached = cache.get(configSnapshot);

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { promptAndConfigureOpenAICompatibleSelfHostedProviderAuth } from "./provider-self-hosted-setup.js";
 
 const { fetchWithSsrFGuardMock, upsertAuthProfileWithLock } = vi.hoisted(() => ({
@@ -29,7 +29,7 @@ describe("promptAndConfigureOpenAICompatibleSelfHostedProviderAuth", () => {
         mode: "replace",
         providers: { existing: { baseUrl: "https://existing.example.invalid/v1", models: [] } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await promptAndConfigureOpenAICompatibleSelfHostedProviderAuth({
       cfg,

@@ -37,13 +37,13 @@ describe("normalizeLegacyTerminalViewLocation", () => {
     },
     {
       location: {
-        pathname: "/openclaw/",
+        pathname: "/carapace/",
         search: "?keep=yes&view=terminal",
         hash: "#pane",
       },
-      basePath: "/openclaw",
+      basePath: "/carapace",
       expected: {
-        pathname: "/openclaw/focus/terminal",
+        pathname: "/carapace/focus/terminal",
         search: "?keep=yes",
         hash: "#pane",
       },
@@ -65,13 +65,13 @@ describe("bootstrapApplication", () => {
   it("starts native notifications before Gateway use and preserves synchronous permission requests", async () => {
     const previousUrl = window.location.href;
     const previousSettings = loadSettings();
-    const promptKey = "openclaw.control.notificationsAutoPrompt.v1";
+    const promptKey = "carapace.control.notificationsAutoPrompt.v1";
     const previousPrompt = localStorage.getItem(promptKey);
     localStorage.removeItem(promptKey);
     window.history.replaceState({}, "", "/focus/terminal");
     const postMessage = vi.fn();
-    vi.stubGlobal("webkit", { messageHandlers: { openclawNotifications: { postMessage } } });
-    vi.stubGlobal("__OPENCLAW_NATIVE_NOTIFICATIONS__", { permission: "notDetermined" });
+    vi.stubGlobal("webkit", { messageHandlers: { carapaceNotifications: { postMessage } } });
+    vi.stubGlobal("__CARAPACE_NATIVE_NOTIFICATIONS__", { permission: "notDetermined" });
     const runtime = bootstrapApplication();
     const startGateway = vi.spyOn(runtime.context.gateway, "start").mockImplementation(() => {
       expect(runtime.context.nativeNotifications?.snapshot.permission).toBe("notDetermined");
@@ -94,7 +94,7 @@ describe("bootstrapApplication", () => {
       postMessage.mockClear();
       window.dispatchEvent(new Event("focus"));
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-notifications-status", {
+        new CustomEvent("carapace:native-notifications-status", {
           detail: { permission: "denied", test: null },
         }),
       );
@@ -119,7 +119,7 @@ describe("bootstrapApplication", () => {
     const previousSettings = loadSettings();
     window.history.replaceState({}, "", "/focus/terminal");
     const postMessage = vi.fn();
-    vi.stubGlobal("webkit", { messageHandlers: { openclawNotifications: { postMessage } } });
+    vi.stubGlobal("webkit", { messageHandlers: { carapaceNotifications: { postMessage } } });
     const runtime = bootstrapApplication();
     try {
       const starting = runtime.start();
@@ -283,7 +283,7 @@ describe("bootstrapApplication", () => {
       client,
       hello: {
         auth: { role: "operator", scopes: ["operator.admin"] },
-        features: { methods: ["openclaw.setup.detect"] },
+        features: { methods: ["carapace.setup.detect"] },
         snapshot: {
           sessionDefaults: { defaultAgentId: "main", modelConfigured: false },
         },
@@ -429,16 +429,16 @@ describe("bootstrapApplication", () => {
       lastActiveSessionKey: "agent:main:main",
     });
     document.documentElement.setAttribute(CONTROL_UI_BASE_PATH_ATTRIBUTE, "");
-    window.history.replaceState({}, "", "/__openclaw__/new");
+    window.history.replaceState({}, "", "/__carapace__/new");
     const runtime = bootstrapApplication();
 
     try {
       await runtime.start();
 
-      expect(runtime.context.basePath).toBe("/__openclaw__");
+      expect(runtime.context.basePath).toBe("/__carapace__");
       expect(runtime.context.resourceBasePath).toBe("");
       expect(runtime.router.getState().matches[0]?.routeId).toBe("new-session");
-      expect(window.location.pathname).toBe("/__openclaw__/new");
+      expect(window.location.pathname).toBe("/__carapace__/new");
     } finally {
       runtime.stop();
       saveSettings(previousSettings);
@@ -485,9 +485,9 @@ describe("bootstrapApplication", () => {
       basePath: "",
     },
     {
-      initialUrl: "/openclaw/?view=terminal&keep=yes#pane",
-      expectedUrl: "/openclaw/focus/terminal?keep=yes#pane",
-      basePath: "/openclaw",
+      initialUrl: "/carapace/?view=terminal&keep=yes#pane",
+      expectedUrl: "/carapace/focus/terminal?keep=yes#pane",
+      basePath: "/carapace",
     },
   ])(
     "rewrites the released terminal query at the $basePath application boundary",

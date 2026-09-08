@@ -7,6 +7,6 @@ export function renderReasonedDisabledControl(
   control: TemplateResult,
 ): TemplateResult {
   return reason
-    ? html`<openclaw-tooltip open-on-click .content=${reason}>${control}</openclaw-tooltip>`
+    ? html`<carapace-tooltip open-on-click .content=${reason}>${control}</carapace-tooltip>`
     : control;
 }

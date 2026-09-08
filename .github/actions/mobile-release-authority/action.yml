@@ -236,8 +236,8 @@ runs:
       with:
         app-id: "2729701"
         private-key: ${{ inputs.release-ref-private-key }}
-        owner: openclaw
-        repositories: openclaw
+        owner: carapace
+        repositories: carapace
         permission-contents: write
 
     - name: Record immutable mobile release ref

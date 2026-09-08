@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { openOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { openCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DREAMING_MEMORY_BACKUP_NAMESPACE,
@@ -27,24 +27,24 @@ import { configureMemoryCoreDreamingStateForTests } from "./test-helpers.js";
 describe("memory forget", () => {
   let stateDir: string;
   let workspaceDir: string;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
 
   beforeEach(async () => {
     stateDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-forget-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-forget-")),
     );
     workspaceDir = path.join(stateDir, "workspace");
     await fs.mkdir(workspaceDir);
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     await configureMemoryCoreDreamingStateForTests();
     cfg = {
       agents: { defaults: { workspace: workspaceDir }, list: [{ id: "main", default: true }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetPluginStateStoreForTests();
     vi.unstubAllEnvs();
     await fs.rm(stateDir, { recursive: true, force: true });
@@ -74,7 +74,7 @@ describe("memory forget", () => {
             { id: "vacant", workspace: workspaceDir },
           ],
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       await upsertSessionEntry({
         agentId: "gamma",
         sessionKey: "agent:gamma:private-session",
@@ -88,8 +88,8 @@ describe("memory forget", () => {
       await fs.writeFile(diaryPath, "# Dream Diary\nKeep this unrelated diary entry.\n");
       const previousMemory = [
         "# Long-Term Memory",
-        ...(action === "superseded" ? ["<!-- openclaw-memory-lineage:launch-code -->"] : []),
-        "<!-- openclaw-memory-promotion:retired-entry -->",
+        ...(action === "superseded" ? ["<!-- carapace-memory-lineage:launch-code -->"] : []),
+        "<!-- carapace-memory-promotion:retired-entry -->",
         priorEntry,
         "",
       ].join("\n");
@@ -110,7 +110,7 @@ describe("memory forget", () => {
           },
         ],
       });
-      const vacantDb = openOpenClawAgentDatabase({ agentId: "vacant" }).db;
+      const vacantDb = openCarapaceAgentDatabase({ agentId: "vacant" }).db;
       vacantDb.exec("DROP TABLE IF EXISTS memory_entry_origins");
       const nowMs = Date.parse("2026-08-26T12:00:00.000Z");
       await recordShortTermRecalls({
@@ -156,7 +156,7 @@ describe("memory forget", () => {
       };
 
       if (failOrigins) {
-        openOpenClawAgentDatabase({ agentId: "gamma" }).db.exec(`
+        openCarapaceAgentDatabase({ agentId: "gamma" }).db.exec(`
           CREATE TRIGGER fail_origin_reservation BEFORE INSERT ON memory_entry_origins
           WHEN NEW.entry_key != 'retired-entry'
           BEGIN SELECT RAISE(ABORT, 'injected origin write failure'); END;
@@ -201,8 +201,8 @@ describe("memory forget", () => {
       ).toBeUndefined();
 
       expect(await fs.readFile(diaryPath, "utf8")).toContain(snippet);
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       resetPluginStateStoreForTests();
       const report = await forgetMemoryEntries({
         cfg,
@@ -251,7 +251,7 @@ describe("memory forget", () => {
       });
       const diaryPath = path.join(workspaceDir, diaryName);
       const historical =
-        "# Dream Diary\n## Memory Consolidation History\n- Highlights:\n  - `+ <!-- openclaw-memory-promotion:historical -->`\n  - `+ Untraceable historical fact.`\n";
+        "# Dream Diary\n## Memory Consolidation History\n- Highlights:\n  - `+ <!-- carapace-memory-promotion:historical -->`\n  - `+ Untraceable historical fact.`\n";
       await fs.writeFile(diaryPath, historical);
       const preview = await forgetMemoryEntries({
         cfg,
@@ -280,7 +280,7 @@ describe("memory forget", () => {
     const selected =
       "  - `+ Session ID: target; Selected private fact.`\n    Selected continuation.";
     const survivor =
-      "  - `+ Keep this unrelated historical fact.`\n<!-- openclaw-memory-promotion:unrelated -->\n- Unrelated adjacent marked entry.";
+      "  - `+ Keep this unrelated historical fact.`\n<!-- carapace-memory-promotion:unrelated -->\n- Unrelated adjacent marked entry.";
     const heading = "## Memory Consolidation History\n";
     await fs.writeFile(diaryPath, `${heading}${selected}\n${survivor}\n`);
     const report = await forgetMemoryEntries({ cfg, agentId: "main", sessionIds: ["target"] });
@@ -333,7 +333,7 @@ describe("memory forget", () => {
         "Curated operator fact.",
         "",
         "## Promoted From Short-Term Memory (2026-08-24)",
-        "<!-- openclaw-memory-promotion:older-entry -->",
+        "<!-- carapace-memory-promotion:older-entry -->",
         `- ${"x".repeat(500)}`,
         "",
       ].join("\n"),
@@ -380,7 +380,7 @@ describe("memory forget", () => {
     expect(promoted.appended).toBe(1);
     expect(promoted.compactedDates).toEqual(["2026-08-24"]);
     const promotedMemory = await fs.readFile(path.join(workspaceDir, "MEMORY.md"), "utf8");
-    expect(promotedMemory).toContain(`<!-- openclaw-memory-promotion:${candidateKey} -->`);
+    expect(promotedMemory).toContain(`<!-- carapace-memory-promotion:${candidateKey} -->`);
     expect(promotedMemory).toContain(snippet);
 
     const report = await forgetMemoryEntries({

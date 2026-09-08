@@ -1,11 +1,11 @@
 import { isDeepStrictEqual } from "node:util";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   projectAgentHarnessTranscriptMessageForDisplay,
   restorePreparedUserTurnOperationalMetaForRuntime,
   runAgentHarnessBeforeMessageWriteHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   appendSessionTranscriptMessageByIdentityStrict,
   appendSessionTranscriptMessagesByIdentity,
@@ -13,8 +13,8 @@ import {
   readVisibleSessionTranscriptMessageEntries,
   type SessionTranscriptTargetParams,
   type TranscriptEntryAnchor,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isCompatibleSingletonRewrite,
   isCompleteToolGroup,
@@ -48,7 +48,7 @@ type PersistenceReceipt = ReturnType<typeof createDeferred<void>>;
 type TurnTaintMetadata = { resultContentSource?: "network"; turnTainted?: true };
 
 function readTurnTaintMetadata(message: AgentMessage): TurnTaintMetadata | undefined {
-  const metadata = (message as unknown as Record<string, unknown>)["__openclaw"];
+  const metadata = (message as unknown as Record<string, unknown>)["__carapace"];
   return metadata && typeof metadata === "object" && !Array.isArray(metadata)
     ? (metadata as TurnTaintMetadata)
     : undefined;
@@ -74,7 +74,7 @@ function withAssistantTurnTaint(
   return tainted
     ? ({
         ...message,
-        __openclaw: { ...readTurnTaintMetadata(message), turnTainted: true },
+        __carapace: { ...readTurnTaintMetadata(message), turnTainted: true },
       } as typeof message)
     : message;
 }
@@ -217,7 +217,7 @@ export function createAttemptTranscriptJournal(params: {
       ...hooked,
       ...toolIdentity,
       ...(taintMetadata
-        ? { __openclaw: { ...readTurnTaintMetadata(hooked), ...taintMetadata } }
+        ? { __carapace: { ...readTurnTaintMetadata(hooked), ...taintMetadata } }
         : {}),
       ...(idempotencyKey ? { idempotencyKey } : {}),
       ...(message.role === "user" && message.provenance ? { provenance: message.provenance } : {}),

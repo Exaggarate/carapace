@@ -11,7 +11,7 @@ type DaemonStatusSummary = {
   installed: boolean | null;
   loaded: boolean | null;
   loadState: Awaited<ReturnType<typeof readServiceStatusSummary>>["loadState"];
-  managedByOpenClaw: boolean;
+  managedByCarapace: boolean;
   externallyManaged: boolean;
   loadedText: string;
   runtime: Awaited<ReturnType<typeof readServiceStatusSummary>>["runtime"];
@@ -28,7 +28,7 @@ async function buildDaemonStatusSummary(
   const fallbackLabel = serviceLabel === "gateway" ? "Daemon" : "Node";
   const summary = await readServiceStatusSummary(service, fallbackLabel, timeoutMs);
   const runtime = summary.runtime?.inspectionFailure
-    ? { ...summary.runtime, detail: `${summary.runtime.detail}; retry with openclaw status --deep` }
+    ? { ...summary.runtime, detail: `${summary.runtime.detail}; retry with carapace status --deep` }
     : summary.runtime;
   const loaded =
     summary.loadState.status === "unknown" ? null : summary.loadState.status === "loaded";
@@ -37,7 +37,7 @@ async function buildDaemonStatusSummary(
     installed: summary.installed,
     loaded,
     loadState: summary.loadState,
-    managedByOpenClaw: summary.managedByOpenClaw,
+    managedByCarapace: summary.managedByCarapace,
     externallyManaged: summary.externallyManaged,
     loadedText: summary.loadedText,
     runtime,

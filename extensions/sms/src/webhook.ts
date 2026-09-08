@@ -1,15 +1,15 @@
 // Sms plugin module implements webhook behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createFixedWindowRateLimiter,
   isRequestBodyLimitError,
   resolveRequestClientIp,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 import {
   createWebhookInFlightLimiter,
   sendHttpRequestRejection,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-request-guards";
 import { assertSmsCredentialOwnerAvailable } from "./credential-availability.js";
 import {
   createSmsDeliveryRecorder,
@@ -32,7 +32,7 @@ const PRE_AUTH_MAX_IN_FLIGHT = 64;
 const INBOUND_DISPATCH_MAX_REQUESTS = 30;
 const DELIVERY_CALLBACK_MAX_REQUESTS = 3_000;
 const DELIVERY_CALLBACK_WINDOW_MS = 60_000;
-const SMS_WEBHOOK_ACCEPTED_HEADER = "x-openclaw-delivery-accepted";
+const SMS_WEBHOOK_ACCEPTED_HEADER = "x-carapace-delivery-accepted";
 const SMS_WEBHOOK_ACCEPTED_VALUE = "durable";
 
 // Count failed-auth traffic separately from the stricter dispatchable inbound quota.
@@ -62,7 +62,7 @@ type SmsWebhookLog = {
 };
 
 export type SmsWebhookHandlerParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedSmsAccount;
   ingress: {
     enqueue: (form: Record<string, string>) => Promise<{ duplicate: boolean }>;
@@ -78,7 +78,7 @@ function headerValue(value: string | string[] | undefined): string | undefined {
   return value;
 }
 
-function resolvedClientAddress(params: { cfg: OpenClawConfig; req: IncomingMessage }): string {
+function resolvedClientAddress(params: { cfg: CarapaceConfig; req: IncomingMessage }): string {
   return (
     resolveRequestClientIp(
       params.req,

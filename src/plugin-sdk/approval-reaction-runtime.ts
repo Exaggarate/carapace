@@ -441,7 +441,7 @@ function buildApprovalReactionPromptText(params: {
     sections.push(info.join("\n"));
   } else if (view.approvalKind === "system-agent") {
     const details = [
-      "**OpenClaw change requires approval**",
+      "**Carapace change requires approval**",
       `**Change:** ${view.operationSummary}`,
     ];
     if (view.agentId) {

@@ -10,9 +10,9 @@ import {
   parseUpgradeSurvivorScenarios,
 } from "./lib/upgrade-survivor-policy.mjs";
 
-const FULL_RELEASE_CANDIDATE_REQUEST_SCHEMA = "openclaw.full-release-candidate-request/v2";
-const FULL_RELEASE_CANDIDATE_MANIFEST_SCHEMA = "openclaw.full-release-candidate/v2";
-const FULL_RELEASE_CANDIDATE_BINDING_SCHEMA = "openclaw.full-release-candidate-binding/v2";
+const FULL_RELEASE_CANDIDATE_REQUEST_SCHEMA = "carapace.full-release-candidate-request/v2";
+const FULL_RELEASE_CANDIDATE_MANIFEST_SCHEMA = "carapace.full-release-candidate/v2";
+const FULL_RELEASE_CANDIDATE_BINDING_SCHEMA = "carapace.full-release-candidate-binding/v2";
 const FULL_RELEASE_CANDIDATE_ARTIFACT_PREFIX = "full-release-candidate-v2-";
 
 const MANIFEST_MAX_BYTES = 32 * 1024;

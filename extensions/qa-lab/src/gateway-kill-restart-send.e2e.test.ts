@@ -1,5 +1,5 @@
 import path from "node:path";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import { buildAgentSessionKey } from "carapace/plugin-sdk/routing";
 import { afterEach, describe, expect, it } from "vitest";
 import { startQaBusServer } from "./bus-server.js";
 import { createQaBusState } from "./bus-state.js";
@@ -47,7 +47,7 @@ describe.skipIf(process.platform === "win32")("gateway hard-kill recovery", () =
       repoRoot,
       providerBaseUrl: `${mock.baseUrl}/v1`,
       providerMode: "mock-openai",
-      forcedRuntime: "openclaw",
+      forcedRuntime: "carapace",
       transport,
       transportBaseUrl: bus.baseUrl,
       controlUiEnabled: false,

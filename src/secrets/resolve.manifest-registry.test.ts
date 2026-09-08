@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { resolveSecretRefString } from "./resolve.js";
 import { withSecureTestNodeExecPath } from "./test-node-command.test-support.js";
@@ -25,7 +25,7 @@ vi.mock("../plugins/manifest-registry.js", () => ({
 }));
 
 function createPluginManagedSecretProviderFixture(): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   manifestRegistry: Pick<PluginManifestRegistry, "plugins">;
   rootDir: string;
 } {
@@ -81,7 +81,7 @@ function createPluginManagedSecretProviderFixture(): {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   return { config, manifestRegistry, rootDir };
 }
 

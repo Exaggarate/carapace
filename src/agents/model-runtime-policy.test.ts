@@ -2,19 +2,19 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { resolveModelRuntimePolicy as resolveModelRuntimePolicyBase } from "./model-runtime-policy.js";
 
-const ORIGINAL_BUILD_PRIVATE_QA = process.env.OPENCLAW_BUILD_PRIVATE_QA;
-const ORIGINAL_QA_FORCE_RUNTIME = process.env.OPENCLAW_QA_FORCE_RUNTIME;
+const ORIGINAL_BUILD_PRIVATE_QA = process.env.CARAPACE_BUILD_PRIVATE_QA;
+const ORIGINAL_QA_FORCE_RUNTIME = process.env.CARAPACE_QA_FORCE_RUNTIME;
 
 function resolveModelRuntimePolicy(
   params: Parameters<typeof resolveModelRuntimePolicyBase>[0],
 ): ReturnType<typeof resolveModelRuntimePolicyBase> {
   return resolveModelRuntimePolicyBase({
     ...params,
-    config: migratePersistedImplicitMainRoster(params.config).config as OpenClawConfig,
+    config: migratePersistedImplicitMainRoster(params.config).config as CarapaceConfig,
   });
 }
 
@@ -38,7 +38,7 @@ const createModelConfig = (
 });
 
 function restoreEnv(
-  name: "OPENCLAW_BUILD_PRIVATE_QA" | "OPENCLAW_QA_FORCE_RUNTIME",
+  name: "CARAPACE_BUILD_PRIVATE_QA" | "CARAPACE_QA_FORCE_RUNTIME",
   value: string | undefined,
 ): void {
   // Tests mutate private QA env gates; restore exact process state after each.
@@ -49,7 +49,7 @@ function restoreEnv(
   setTestEnvValue(name, value);
 }
 
-function makeProviderRuntimeConfig(runtime: string): OpenClawConfig {
+function makeProviderRuntimeConfig(runtime: string): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -60,18 +60,18 @@ function makeProviderRuntimeConfig(runtime: string): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 afterEach(() => {
-  restoreEnv("OPENCLAW_BUILD_PRIVATE_QA", ORIGINAL_BUILD_PRIVATE_QA);
-  restoreEnv("OPENCLAW_QA_FORCE_RUNTIME", ORIGINAL_QA_FORCE_RUNTIME);
+  restoreEnv("CARAPACE_BUILD_PRIVATE_QA", ORIGINAL_BUILD_PRIVATE_QA);
+  restoreEnv("CARAPACE_QA_FORCE_RUNTIME", ORIGINAL_QA_FORCE_RUNTIME);
 });
 
 describe("resolveModelRuntimePolicy", () => {
   it("ignores the QA force-runtime override when the private QA gate is unset", () => {
-    deleteTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA");
-    setTestEnvValue("OPENCLAW_QA_FORCE_RUNTIME", "openclaw");
+    deleteTestEnvValue("CARAPACE_BUILD_PRIVATE_QA");
+    setTestEnvValue("CARAPACE_QA_FORCE_RUNTIME", "carapace");
 
     expect(
       resolveModelRuntimePolicy({
@@ -88,8 +88,8 @@ describe("resolveModelRuntimePolicy", () => {
   it("respects the QA force-runtime override when the private QA gate is set", () => {
     // The force-runtime override is intentionally gated to private QA builds so
     // normal users cannot accidentally change model runtime selection via env.
-    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
-    setTestEnvValue("OPENCLAW_QA_FORCE_RUNTIME", "openclaw");
+    setTestEnvValue("CARAPACE_BUILD_PRIVATE_QA", "1");
+    setTestEnvValue("CARAPACE_QA_FORCE_RUNTIME", "carapace");
 
     expect(
       resolveModelRuntimePolicy({
@@ -98,15 +98,15 @@ describe("resolveModelRuntimePolicy", () => {
         modelId: "gpt-5.5",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "carapace" },
       source: "model",
       forcedByEnvironment: true,
     });
   });
 
   it("ignores invalid QA force-runtime values even when the private QA gate is set", () => {
-    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
-    setTestEnvValue("OPENCLAW_QA_FORCE_RUNTIME", "bogus");
+    setTestEnvValue("CARAPACE_BUILD_PRIVATE_QA", "1");
+    setTestEnvValue("CARAPACE_QA_FORCE_RUNTIME", "bogus");
 
     expect(
       resolveModelRuntimePolicy({
@@ -127,11 +127,11 @@ describe("resolveModelRuntimePolicy", () => {
         entries: { ops: {}, research: {} },
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "carapace" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -140,7 +140,7 @@ describe("resolveModelRuntimePolicy", () => {
         modelId: "qwen-local",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "carapace" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -151,11 +151,11 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "carapace" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -163,7 +163,7 @@ describe("resolveModelRuntimePolicy", () => {
         provider: "vllm",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "carapace" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -176,12 +176,12 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "carapace" } },
             "vllm/qwen-local": { agentRuntime: { id: "codex" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -201,7 +201,7 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "carapace" } },
           },
         },
       },
@@ -213,7 +213,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -242,7 +242,7 @@ describe("resolveModelRuntimePolicy", () => {
         defaults: {
           models: {
             "openrouter/anthropic/claude-opus-4.6": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
             },
             "anthropic/claude-opus-4.6": {
               agentRuntime: { id: "claude-cli" },
@@ -259,7 +259,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -268,7 +268,7 @@ describe("resolveModelRuntimePolicy", () => {
         modelId,
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "carapace" },
       source: "model",
       matchedProvider: "openrouter",
     });
@@ -302,14 +302,14 @@ describe("resolveModelRuntimePolicy", () => {
             openrouter: {
               baseUrl: "https://openrouter.ai/api/v1",
               agentRuntime: { id: "codex" },
-              models: [createModelConfig("openclaw", "anthropic/claude-opus-4.6")],
+              models: [createModelConfig("carapace", "anthropic/claude-opus-4.6")],
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       expect(resolveModelRuntimePolicy({ config, provider, modelId })).toEqual({
-        policy: { id: "openclaw" },
+        policy: { id: "carapace" },
         source: "model",
         ...(matchedProvider ? { matchedProvider } : {}),
       });
@@ -326,7 +326,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -352,7 +352,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -372,12 +372,12 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "claude-opus-4-7": { agentRuntime: { id: "openclaw" } },
+            "claude-opus-4-7": { agentRuntime: { id: "carapace" } },
             "anthropic/claude-opus-4-7": { agentRuntime: { id: "claude-cli" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -397,7 +397,7 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "carapace" } },
           },
         },
       },
@@ -410,7 +410,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -419,7 +419,7 @@ describe("resolveModelRuntimePolicy", () => {
         modelId: "qwen-local",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "carapace" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -434,7 +434,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -458,7 +458,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -478,7 +478,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -510,7 +510,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -542,12 +542,12 @@ describe("resolveModelRuntimePolicy", () => {
           {
             id: "research",
             models: {
-              "vllm/qwen-local": { agentRuntime: { id: "openclaw" } },
+              "vllm/qwen-local": { agentRuntime: { id: "carapace" } },
             },
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -557,7 +557,7 @@ describe("resolveModelRuntimePolicy", () => {
         sessionKey: "global",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "carapace" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -575,13 +575,13 @@ describe("resolveModelRuntimePolicy", () => {
   it.each(["openai/gpt-5.5", "openai/*"])(
     "uses a prepared stored-row owner for %s without re-admitting global",
     (modelKey) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         session: { store: "/synthetic/shared.sqlite" },
         agents: {
           ownership: "explicit",
           defaults: { sessionStore: { agentId: "ops" } },
           entries: {
-            main: { models: { [modelKey]: { agentRuntime: { id: "openclaw" } } } },
+            main: { models: { [modelKey]: { agentRuntime: { id: "carapace" } } } },
             ops: { models: { [modelKey]: { agentRuntime: { id: "codex" } } } },
           },
         },
@@ -594,7 +594,7 @@ describe("resolveModelRuntimePolicy", () => {
           sessionKey: "global",
           agentScope: { kind: "prepared", agentId: "main" },
         }),
-      ).toEqual({ policy: { id: "openclaw" }, source: "model", matchedProvider: "openai" });
+      ).toEqual({ policy: { id: "carapace" }, source: "model", matchedProvider: "openai" });
     },
   );
 
@@ -609,7 +609,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveModelRuntimePolicy({

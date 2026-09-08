@@ -5,14 +5,14 @@ import { createDeferred } from "../../test/helpers/promise.js";
 import { readSourceConfigBestEffort, resetConfigRuntimeState } from "../config/config.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
-import { listOpenClawRegisteredAgentDatabases } from "../state/openclaw-agent-db-registry.js";
+import { listCarapaceRegisteredAgentDatabases } from "../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabases,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabases,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { applyClawAddPlan } from "./add.js";
 import type { ClawRemoveApplyOptions, ClawRemoveResult } from "./lifecycle-remove-contract.js";
 import {
@@ -31,7 +31,7 @@ afterEach(async () => {
 });
 
 async function fixture(withFile = false) {
-  const state = await createOpenClawTestState({ prefix: "claw-removal-owner-" });
+  const state = await createCarapaceTestState({ prefix: "claw-removal-owner-" });
   cleanups.push(() => state.cleanup());
   await state.writeConfig({});
   const install = async (name: string) => {
@@ -71,7 +71,7 @@ async function fixture(withFile = false) {
 
 function expireDeletionLease(): void {
   // A live deletion serializes successors; expiry models the recovery boundary.
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<Pick<DB, "state_leases">>(db)
@@ -216,8 +216,8 @@ describe("Claw removal operation ownership", () => {
         path.join(current.workspace, "operator-note.txt"),
         "retain this untracked file",
       );
-      openOpenClawAgentDatabase({ agentId: "worker" });
-      closeOpenClawAgentDatabases();
+      openCarapaceAgentDatabase({ agentId: "worker" });
+      closeCarapaceAgentDatabases();
       const entered = createDeferred();
       const release = createDeferred();
       const enteredNext = createDeferred();
@@ -247,7 +247,7 @@ describe("Claw removal operation ownership", () => {
           },
         });
         await enteredNext.promise;
-        const registry = listOpenClawRegisteredAgentDatabases();
+        const registry = listCarapaceRegisteredAgentDatabases();
         const install = readClawInstallRecord("worker");
         const files = readClawWorkspaceFiles("worker");
         const journal = readAgentDeletionJournal("worker");
@@ -264,7 +264,7 @@ describe("Claw removal operation ownership", () => {
             ),
           },
         });
-        expect(listOpenClawRegisteredAgentDatabases()).toEqual(registry);
+        expect(listCarapaceRegisteredAgentDatabases()).toEqual(registry);
         expect(readClawWorkspaceFiles("worker")).toEqual(files);
         expect(readClawInstallRecord("worker")).toEqual(install);
         expect(readAgentDeletionJournal("worker")).toEqual(journal);

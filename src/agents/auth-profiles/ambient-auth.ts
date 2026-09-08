@@ -1,6 +1,6 @@
-/** Provider auth-pin policy for credentials discovered outside OpenClaw storage. */
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+/** Provider auth-pin policy for credentials discovered outside Carapace storage. */
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   type ProviderAuthAliasLookupParams,
   resolveProviderIdForAuth,
@@ -9,7 +9,7 @@ import type { AuthProfileCredential } from "./types.js";
 
 /** Returns whether ambient credential material agrees with a provider's declared auth mode. */
 export function isAmbientCredentialAllowedByProviderAuthPin(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   authAliasLookupParams?: Omit<ProviderAuthAliasLookupParams, "config">;
   provider: string;
   type: AuthProfileCredential["type"];

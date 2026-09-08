@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { expandPolicyToolRequirement, toolListCoversTool } from "./tool-policy-conformance.js";
 
 describe("policy tool group conformance", () => {
-  it("keeps computer control in both node and OpenClaw policy groups", () => {
+  it("keeps computer control in both node and Carapace policy groups", () => {
     expect(expandPolicyToolRequirement("group:nodes")).toEqual(
       expect.arrayContaining(["computer", "mobile_ui"]),
     );
-    expect(expandPolicyToolRequirement("group:openclaw")).toEqual(
+    expect(expandPolicyToolRequirement("group:carapace")).toEqual(
       expect.arrayContaining(["computer", "mobile_ui"]),
     );
   });
@@ -52,12 +52,12 @@ describe("policy tool group conformance", () => {
     expect(toolListCoversTool([`group:${group}`], tool)).toBe(true);
     expect(expandPolicyToolRequirement(`group:${group}`)).toContain(tool);
     if (tool !== "ls") {
-      expect(toolListCoversTool(["group:openclaw"], tool)).toBe(true);
+      expect(toolListCoversTool(["group:carapace"], tool)).toBe(true);
     }
   });
 
-  it("uses the current image tool name in media and OpenClaw groups", () => {
-    expect(toolListCoversTool(["group:media", "group:openclaw"], "image")).toBe(false);
+  it("uses the current image tool name in media and Carapace groups", () => {
+    expect(toolListCoversTool(["group:media", "group:carapace"], "image")).toBe(false);
   });
 
   it("keeps coverage lists restrictive without the runtime write compatibility", () => {

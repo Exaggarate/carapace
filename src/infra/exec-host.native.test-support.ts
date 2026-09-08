@@ -9,13 +9,13 @@ import { createDeferred } from "../../test/helpers/promise.js";
 import { requestExecHostViaSocket, type ExecHostRequest } from "./exec-host.js";
 
 const [rootArgument, nativeSocket] = process.argv.slice(2);
-assert.equal(process.env.OPENCLAW_EXEC_HOST_NATIVE_PROOF, "1");
+assert.equal(process.env.CARAPACE_EXEC_HOST_NATIVE_PROOF, "1");
 assert.ok(rootArgument, "Native proof requires an isolated root argument");
 assert.ok(nativeSocket, "Native proof requires a socket path argument");
 const root = await fs.realpath(rootArgument);
 assert.equal(path.dirname(root), await fs.realpath("/tmp"));
 assert.ok(path.basename(root).startsWith("oc-exec-native-"));
-assert.equal(await fs.realpath(process.env.OPENCLAW_STATE_DIR!), path.join(root, "state"));
+assert.equal(await fs.realpath(process.env.CARAPACE_STATE_DIR!), path.join(root, "state"));
 const token = "exec-host-native-proof-token";
 const marker = path.join(root, "native-markers");
 const release = path.join(root, "release-child");

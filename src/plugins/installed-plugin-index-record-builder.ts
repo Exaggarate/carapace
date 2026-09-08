@@ -1,9 +1,9 @@
 /** Builds installed-index records from normalized plugin manifest registry entries. */
 import path from "node:path";
-import { normalizeOptionalString as normalizeStringField } from "@openclaw/normalization-core/string-coerce";
-import { normalizeSortedUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString as normalizeStringField } from "@carapace/normalization-core/string-coerce";
+import { normalizeSortedUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import { getPluginInstallRecordMapEntry } from "../config/plugin-install-record-map.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   isPluginCandidateInstallOwnerAmbiguous,
   resolvePluginCandidateInstallOwner,
@@ -234,7 +234,7 @@ function buildCandidateLookup(
 export function buildInstalledPluginIndexRecords(params: {
   candidates: readonly PluginCandidate[];
   registry: PluginManifestRegistry;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   diagnostics: PluginDiagnostic[];
   installRecords: Record<string, InstalledPluginInstallRecordInfo>;
   /** Index builds scoped to an explicit env stamp that env's compat decisions. */
@@ -317,7 +317,7 @@ export function buildInstalledPluginIndexRecords(params: {
       contributions: buildContributionInfo(record),
       compat: collectPluginManifestCompatCodes(record),
     };
-    if (record.format && record.format !== "openclaw") {
+    if (record.format && record.format !== "carapace") {
       indexRecord.format = record.format;
     }
     if (record.bundleFormat) {

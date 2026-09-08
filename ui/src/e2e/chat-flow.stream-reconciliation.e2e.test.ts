@@ -42,7 +42,7 @@ suite.define(() => {
           const message = {
             role: "assistant",
             content: [{ type: "text", text }],
-            __openclaw: { id: "hydrated-answer", seq: 2, runId },
+            __carapace: { id: "hydrated-answer", seq: 2, runId },
           };
           const historyMessages = [
             message,
@@ -51,7 +51,7 @@ suite.define(() => {
                   {
                     role: "user",
                     content: [{ type: "text", text: "Check the follow-up." }],
-                    __openclaw: {
+                    __carapace: {
                       id: "follow-up",
                       seq: 3,
                       idempotencyKey: "follow-up:user",
@@ -115,7 +115,7 @@ suite.define(() => {
           });
           await page.waitForFunction(() => {
             const pane = document.querySelector<HTMLElement & { state?: { chatLoading: boolean } }>(
-              "openclaw-chat-pane",
+              "carapace-chat-pane",
             );
             return pane?.state?.chatLoading === false;
           });
@@ -143,7 +143,7 @@ suite.define(() => {
             },
           });
           await page.getByRole("button", { name: "Stop generating" }).waitFor({ state: "hidden" });
-          if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+          if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
             await page.screenshot({
               fullPage: true,
               path: path.join(
@@ -185,8 +185,8 @@ suite.define(() => {
         role: "assistant",
         content: [{ type: "text", text }],
         timestamp: 1_000 + index,
-        __openclaw: { id: `commentary-message-${index}`, runId, seq: index + 1 },
-        openclawStreamFallback: { itemId, replacementText: text, source: "segment" },
+        __carapace: { id: `commentary-message-${index}`, runId, seq: index + 1 },
+        carapaceStreamFallback: { itemId, replacementText: text, source: "segment" },
       }));
       const sessionInfo = {
         activeRunIds: [runId],
@@ -223,7 +223,7 @@ suite.define(() => {
       await gateway.waitForRequest("chat.startup", { after: startupCount });
       await expect.poll(itemOccurrences).toEqual([1, 1]);
 
-      if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+      if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
         await page.screenshot({
           fullPage: true,
           path: path.join(suite.artifactDir, "commentary-reconciliation.png"),
@@ -280,7 +280,7 @@ suite.define(() => {
           message: {
             role: "assistant",
             content: [{ type: "text", text }],
-            __openclaw: { id: "workspace-answer", seq: 2, runId },
+            __carapace: { id: "workspace-answer", seq: 2, runId },
           },
         });
         await page.locator(".chat-group.assistant .chat-text", { hasText: text }).waitFor();

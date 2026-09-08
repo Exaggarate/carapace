@@ -33,7 +33,7 @@ if (command === "models") {
   writeFileSync(recordPath, "");
   const server = createServer((req, res) => {
     if (req.url === "/__fixture") {
-      if (req.headers["x-qa-fixture-token"] !== process.env.OPENCLAW_GATEWAY_TOKEN) {
+      if (req.headers["x-qa-fixture-token"] !== process.env.CARAPACE_GATEWAY_TOKEN) {
         res.writeHead(403).end();
         return;
       }

@@ -1,7 +1,7 @@
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/core";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/core";
+import type { Model } from "carapace/plugin-sdk/llm";
 // Provider stream tests cover shared stream-wrapper families and payload compatibility.
-import { createRequireRecord, createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord, createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import { createAssistantMessageEventStream } from "../llm/utils/event-stream.js";
 import { VERSION } from "../version.js";
@@ -562,8 +562,8 @@ describe("buildProviderStreamFamilyHooks", () => {
     expect(openAiPayload.reasoning).toEqual({ effort: "max", summary: "auto" });
     expect(openAiPayload.service_tier).toBe("flex");
     expect(capturedHeaders).toEqual({
-      "User-Agent": `openclaw/${VERSION}`,
-      originator: "openclaw",
+      "User-Agent": `carapace/${VERSION}`,
+      originator: "carapace",
       version: VERSION,
     });
 

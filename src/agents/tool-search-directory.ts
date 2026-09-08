@@ -1,5 +1,5 @@
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import {
   applyToolCatalogCompaction,
@@ -152,7 +152,7 @@ function formatToolDirectoryEntry(
   entry: ToolSearchCatalogEntry,
   descriptionMaxChars: number,
 ): string | undefined {
-  if (entry.source !== "openclaw") {
+  if (entry.source !== "carapace") {
     return undefined;
   }
   const name = formatToolDirectoryIdentifier(entry.name);
@@ -205,7 +205,7 @@ function formatToolSearchCatalogDirectory(
   for (;;) {
     guidance =
       mode === "code"
-        ? "Use tool_search_code with openclaw.tools.search(query), openclaw.tools.describe(id), and openclaw.tools.call(id, args)."
+        ? "Use tool_search_code with carapace.tools.search(query), carapace.tools.describe(id), and carapace.tools.call(id, args)."
         : omitted > 0
           ? "Use tool_search to find a tool and its input signature; use tool_describe when a full schema is needed."
           : "Use tool_search for a compact input signature or tool_describe for a full schema.";

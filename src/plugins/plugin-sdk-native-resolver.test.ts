@@ -8,8 +8,8 @@ import { pathToFileURL } from "node:url";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 import {
-  installOpenClawInternalCorePackageNativeResolver,
-  installOpenClawPluginSdkNativeResolver,
+  installCarapaceInternalCorePackageNativeResolver,
+  installCarapacePluginSdkNativeResolver,
 } from "./plugin-sdk-native-resolver.js";
 
 type NativeEsmLazyImportProbe = {
@@ -24,12 +24,12 @@ function writeJsonFile(targetPath: string, value: unknown): void {
   fs.writeFileSync(targetPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-function writeFakeOpenClawPackage(root: string): { distRoot: string; loaderModulePath: string } {
+function writeFakeCarapacePackage(root: string): { distRoot: string; loaderModulePath: string } {
   writeJsonFile(path.join(root, "package.json"), {
-    name: "openclaw",
+    name: "carapace",
     type: "module",
     bin: {
-      openclaw: "./openclaw.mjs",
+      carapace: "./carapace.mjs",
     },
     exports: {
       "./cli-entry": "./dist/cli-entry.js",
@@ -39,7 +39,7 @@ function writeFakeOpenClawPackage(root: string): { distRoot: string; loaderModul
       "./plugin-sdk/source-only": "./dist/plugin-sdk/source-only.js",
     },
   });
-  fs.writeFileSync(path.join(root, "openclaw.mjs"), "#!/usr/bin/env node\n", "utf8");
+  fs.writeFileSync(path.join(root, "carapace.mjs"), "#!/usr/bin/env node\n", "utf8");
   const distRoot = path.join(root, "dist");
   const pluginSdkDir = path.join(distRoot, "plugin-sdk");
   fs.mkdirSync(pluginSdkDir, { recursive: true });
@@ -99,7 +99,7 @@ function writeInternalCorePackageExports(
   subpaths: readonly string[],
 ): void {
   writeJsonFile(path.join(root, "packages", packageDir, "package.json"), {
-    name: `@openclaw/${packageDir}`,
+    name: `@carapace/${packageDir}`,
     exports: Object.fromEntries(
       subpaths.map((subpath) => {
         const exportKey = subpath ? `./${subpath}` : ".";
@@ -130,7 +130,7 @@ function createInternalCoreAliasFixture(prefix: string): {
   sourcePath: string;
 } {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), prefix)));
-  const { loaderModulePath } = writeFakeOpenClawPackage(root);
+  const { loaderModulePath } = writeFakeCarapacePackage(root);
   const sourcePath = writeInternalCorePackageSource(root, "markdown-core", "code-spans.ts");
   const coreSourceParent = path.join(root, "src", "host-probe.js");
   fs.mkdirSync(path.dirname(coreSourceParent), { recursive: true });
@@ -144,30 +144,30 @@ function createInternalCoreAliasFixture(prefix: string): {
   };
 }
 
-describe("installOpenClawInternalCorePackageNativeResolver", () => {
+describe("installCarapaceInternalCorePackageNativeResolver", () => {
   it("shares one internal core alias scan between resolver installers", () => {
-    const fixture = createInternalCoreAliasFixture("openclaw-sdk-native-core-cache-");
+    const fixture = createInternalCoreAliasFixture("carapace-sdk-native-core-cache-");
     const externalPluginEntry = writeExternalPluginEntry(
       path.join(path.dirname(path.dirname(fixture.loaderModulePath)), "external-plugin"),
     );
     const existsSync = vi.spyOn(fs, "existsSync");
 
     try {
-      installOpenClawPluginSdkNativeResolver({
+      installCarapacePluginSdkNativeResolver({
         modulePath: fixture.loaderModulePath,
         pluginModulePath: externalPluginEntry,
       });
       expect(existsSync).toHaveBeenCalledWith(fixture.sourcePath);
 
       existsSync.mockClear();
-      const aliases = installOpenClawInternalCorePackageNativeResolver({
+      const aliases = installCarapaceInternalCorePackageNativeResolver({
         moduleUrl: fixture.moduleUrl,
       });
 
-      expect(aliases).toContain("@openclaw/markdown-core/code-spans");
+      expect(aliases).toContain("@carapace/markdown-core/code-spans");
       expect(existsSync).not.toHaveBeenCalled();
 
-      installOpenClawPluginSdkNativeResolver({
+      installCarapacePluginSdkNativeResolver({
         modulePath: fixture.loaderModulePath,
         pluginModulePath: externalPluginEntry,
       });
@@ -178,7 +178,7 @@ describe("installOpenClawInternalCorePackageNativeResolver", () => {
   });
 
   it("shares one internal core alias scan across importers from the same host package", () => {
-    const fixture = createInternalCoreAliasFixture("openclaw-sdk-native-core-shared-host-");
+    const fixture = createInternalCoreAliasFixture("carapace-sdk-native-core-shared-host-");
     const secondModulePath = path.join(
       path.dirname(fixture.loaderModulePath),
       "provider-policy.js",
@@ -188,23 +188,23 @@ describe("installOpenClawInternalCorePackageNativeResolver", () => {
     const readFileSync = vi.spyOn(fs, "readFileSync");
 
     try {
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
       expect(existsSync).toHaveBeenCalledWith(fixture.sourcePath);
 
       existsSync.mockClear();
       readFileSync.mockClear();
       const secondModuleUrl = pathToFileURL(secondModulePath).href;
-      const aliases = installOpenClawInternalCorePackageNativeResolver({
+      const aliases = installCarapaceInternalCorePackageNativeResolver({
         moduleUrl: secondModuleUrl,
       });
 
-      expect(aliases).toContain("@openclaw/markdown-core/code-spans");
+      expect(aliases).toContain("@carapace/markdown-core/code-spans");
       expect(existsSync).not.toHaveBeenCalledWith(fixture.sourcePath);
       expect(readFileSync).not.toHaveBeenCalled();
 
       existsSync.mockClear();
       readFileSync.mockClear();
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: secondModuleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: secondModuleUrl });
 
       expect(existsSync).not.toHaveBeenCalled();
       expect(readFileSync).not.toHaveBeenCalled();
@@ -215,25 +215,25 @@ describe("installOpenClawInternalCorePackageNativeResolver", () => {
   });
 
   it("keeps internal core alias registration isolated between host modules", () => {
-    const first = createInternalCoreAliasFixture("openclaw-sdk-native-core-host-a-");
-    const second = createInternalCoreAliasFixture("openclaw-sdk-native-core-host-b-");
+    const first = createInternalCoreAliasFixture("carapace-sdk-native-core-host-a-");
+    const second = createInternalCoreAliasFixture("carapace-sdk-native-core-host-b-");
     const existsSync = vi.spyOn(fs, "existsSync");
 
     try {
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: first.moduleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: first.moduleUrl });
       existsSync.mockClear();
 
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: second.moduleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: second.moduleUrl });
 
       expect(existsSync).toHaveBeenCalledWith(second.sourcePath);
       expect(
         fs.realpathSync(
-          createRequire(first.coreSourceParent).resolve("@openclaw/markdown-core/code-spans"),
+          createRequire(first.coreSourceParent).resolve("@carapace/markdown-core/code-spans"),
         ),
       ).toBe(fs.realpathSync(first.sourcePath));
       expect(
         fs.realpathSync(
-          createRequire(second.coreSourceParent).resolve("@openclaw/markdown-core/code-spans"),
+          createRequire(second.coreSourceParent).resolve("@carapace/markdown-core/code-spans"),
         ),
       ).toBe(fs.realpathSync(second.sourcePath));
     } finally {
@@ -242,19 +242,19 @@ describe("installOpenClawInternalCorePackageNativeResolver", () => {
   });
 
   it("rescans internal core aliases after plugin metadata lifecycle invalidation", () => {
-    const fixture = createInternalCoreAliasFixture("openclaw-sdk-native-core-invalidation-");
+    const fixture = createInternalCoreAliasFixture("carapace-sdk-native-core-invalidation-");
     const existsSync = vi.spyOn(fs, "existsSync");
 
     try {
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
       existsSync.mockClear();
 
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
       expect(existsSync).not.toHaveBeenCalled();
 
       clearPluginMetadataLifecycleCaches();
       existsSync.mockClear();
-      installOpenClawInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
+      installCarapaceInternalCorePackageNativeResolver({ moduleUrl: fixture.moduleUrl });
 
       expect(existsSync).toHaveBeenCalledWith(fixture.sourcePath);
     } finally {
@@ -263,120 +263,120 @@ describe("installOpenClawInternalCorePackageNativeResolver", () => {
   });
 });
 
-describe("installOpenClawPluginSdkNativeResolver", () => {
+describe("installCarapacePluginSdkNativeResolver", () => {
   it("resolves installed plugin SDK imports to the dev source root", () => {
-    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-stable-"));
-    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-dev-source-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(stableRoot);
-    writeFakeOpenClawPackage(devRoot);
+    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-stable-"));
+    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-dev-source-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(stableRoot);
+    writeFakeCarapacePackage(devRoot);
     fs.mkdirSync(path.join(devRoot, "src"), { recursive: true });
     fs.mkdirSync(path.join(devRoot, "extensions"), { recursive: true });
     const externalPluginEntry = writeExternalPluginEntry(path.join(stableRoot, "external-plugin"));
-    const previousDevSourceRoot = process.env.OPENCLAW_DEV_SOURCE_ROOT;
-    process.env.OPENCLAW_DEV_SOURCE_ROOT = devRoot;
+    const previousDevSourceRoot = process.env.CARAPACE_DEV_SOURCE_ROOT;
+    process.env.CARAPACE_DEV_SOURCE_ROOT = devRoot;
 
     try {
-      installOpenClawPluginSdkNativeResolver({
+      installCarapacePluginSdkNativeResolver({
         modulePath: loaderModulePath,
         pluginModulePath: externalPluginEntry,
       });
 
       const requireFromPlugin = createRequire(externalPluginEntry);
-      expect(fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/agent-runtime"))).toBe(
+      expect(fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/agent-runtime"))).toBe(
         fs.realpathSync(path.join(devRoot, "dist", "plugin-sdk", "agent-runtime.js")),
       );
     } finally {
       if (previousDevSourceRoot === undefined) {
-        delete process.env.OPENCLAW_DEV_SOURCE_ROOT;
+        delete process.env.CARAPACE_DEV_SOURCE_ROOT;
       } else {
-        process.env.OPENCLAW_DEV_SOURCE_ROOT = previousDevSourceRoot;
+        process.env.CARAPACE_DEV_SOURCE_ROOT = previousDevSourceRoot;
       }
     }
   });
 
   it("resolves installed plugin SDK imports to an explicit dev source root", () => {
-    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-stable-"));
-    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-dev-source-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(stableRoot);
-    writeFakeOpenClawPackage(devRoot);
+    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-stable-"));
+    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-dev-source-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(stableRoot);
+    writeFakeCarapacePackage(devRoot);
     fs.mkdirSync(path.join(devRoot, "src"), { recursive: true });
     fs.mkdirSync(path.join(devRoot, "extensions"), { recursive: true });
     const externalPluginEntry = writeExternalPluginEntry(path.join(stableRoot, "external-plugin"));
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       devSourceRoot: devRoot,
     });
 
     const requireFromPlugin = createRequire(externalPluginEntry);
-    expect(fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/agent-runtime"))).toBe(
+    expect(fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/agent-runtime"))).toBe(
       fs.realpathSync(path.join(devRoot, "dist", "plugin-sdk", "agent-runtime.js")),
     );
   });
 
   it("updates native SDK aliases when the same plugin parent switches dev source roots", () => {
-    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-stable-"));
-    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-dev-source-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(stableRoot);
-    writeFakeOpenClawPackage(devRoot);
+    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-stable-"));
+    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-dev-source-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(stableRoot);
+    writeFakeCarapacePackage(devRoot);
     fs.mkdirSync(path.join(devRoot, "src"), { recursive: true });
     fs.mkdirSync(path.join(devRoot, "extensions"), { recursive: true });
     const externalPluginEntry = writeExternalPluginEntry(path.join(stableRoot, "external-plugin"));
     const requireFromPlugin = createRequire(externalPluginEntry);
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
     });
-    expect(fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/agent-runtime"))).toBe(
+    expect(fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/agent-runtime"))).toBe(
       fs.realpathSync(path.join(stableRoot, "dist", "plugin-sdk", "agent-runtime.js")),
     );
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       devSourceRoot: devRoot,
     });
 
-    expect(fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/agent-runtime"))).toBe(
+    expect(fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/agent-runtime"))).toBe(
       fs.realpathSync(path.join(devRoot, "dist", "plugin-sdk", "agent-runtime.js")),
     );
   });
 
   it("removes stale native SDK aliases when a later dev root omits a subpath", () => {
-    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-stable-"));
-    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-dev-source-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(stableRoot);
-    writeFakeOpenClawPackage(devRoot);
+    const stableRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-stable-"));
+    const devRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-dev-source-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(stableRoot);
+    writeFakeCarapacePackage(devRoot);
     const stableExtraPath = addFakePluginSdkDistExport(stableRoot, "stable-extra");
     fs.mkdirSync(path.join(devRoot, "src"), { recursive: true });
     fs.mkdirSync(path.join(devRoot, "extensions"), { recursive: true });
     const externalPluginEntry = writeExternalPluginEntry(path.join(stableRoot, "external-plugin"));
     const requireFromPlugin = createRequire(externalPluginEntry);
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
     });
-    expect(fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/stable-extra"))).toBe(
+    expect(fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/stable-extra"))).toBe(
       fs.realpathSync(stableExtraPath),
     );
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       devSourceRoot: devRoot,
     });
 
-    expect(() => requireFromPlugin.resolve("openclaw/plugin-sdk/stable-extra")).toThrow();
+    expect(() => requireFromPlugin.resolve("carapace/plugin-sdk/stable-extra")).toThrow();
   });
 
   it("keeps overlapping parent precedence across first demand and reinstallation", () => {
-    const broadHost = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-broad-host-"));
-    const narrowHost = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-narrow-host-"));
-    const broad = writeFakeOpenClawPackage(broadHost);
-    const narrow = writeFakeOpenClawPackage(narrowHost);
+    const broadHost = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-broad-host-"));
+    const narrowHost = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-narrow-host-"));
+    const broad = writeFakeCarapacePackage(broadHost);
+    const narrow = writeFakeCarapacePackage(narrowHost);
     const broadEntry = writeExternalPluginEntry(path.join(broadHost, "external-plugin"));
     const narrowEntry = writeExternalPluginEntry(path.join(broadHost, "external-plugin", "nested"));
     const narrowOptions = {
@@ -389,8 +389,8 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
       pluginModulePath: broadEntry,
       devSourceRoot: broadHost,
     };
-    installOpenClawPluginSdkNativeResolver(narrowOptions);
-    installOpenClawPluginSdkNativeResolver(broadOptions);
+    installCarapacePluginSdkNativeResolver(narrowOptions);
+    installCarapacePluginSdkNativeResolver(broadOptions);
     const fromBroad = createRequire(broadEntry);
     const fromNarrow = createRequire(narrowEntry);
     const expected = (host: string, subpath: string) =>
@@ -398,45 +398,45 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
 
     // A demand outside the nested root gives the broad host precedence even
     // though it was installed second; the later path was not demanded yet.
-    expect(fs.realpathSync(fromBroad.resolve("openclaw/plugin-sdk/agent-runtime"))).toBe(
+    expect(fs.realpathSync(fromBroad.resolve("carapace/plugin-sdk/agent-runtime"))).toBe(
       expected(broadHost, "agent-runtime"),
     );
-    expect(fs.realpathSync(fromNarrow.resolve("openclaw/plugin-sdk/channel-outbound.js"))).toBe(
+    expect(fs.realpathSync(fromNarrow.resolve("carapace/plugin-sdk/channel-outbound.js"))).toBe(
       expected(broadHost, "channel-outbound"),
     );
 
-    installOpenClawPluginSdkNativeResolver(broadOptions);
-    expect(fs.realpathSync(fromNarrow.resolve("openclaw/plugin-sdk/channel-message"))).toBe(
+    installCarapacePluginSdkNativeResolver(broadOptions);
+    expect(fs.realpathSync(fromNarrow.resolve("carapace/plugin-sdk/channel-message"))).toBe(
       expected(narrowHost, "channel-message"),
     );
-    expect(fs.realpathSync(fromBroad.resolve("openclaw/plugin-sdk/channel-message"))).toBe(
+    expect(fs.realpathSync(fromBroad.resolve("carapace/plugin-sdk/channel-message"))).toBe(
       expected(broadHost, "channel-message"),
     );
   });
 
   it("keeps native aliases on JS dist artifacts when source files exist", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-source-resolver-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(root);
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-source-resolver-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(root);
     const sourceChannelOutboundPath = path.join(root, "src", "plugin-sdk", "channel-outbound.ts");
     fs.mkdirSync(path.dirname(sourceChannelOutboundPath), { recursive: true });
     fs.writeFileSync(sourceChannelOutboundPath, "export const sourceOnly = true;\n", "utf8");
     const externalPluginEntry = writeExternalPluginEntry(path.join(root, "external-plugin"));
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       pluginSdkResolution: "src",
     });
 
     const requireFromPlugin = createRequire(externalPluginEntry);
-    expect(fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/channel-outbound"))).toBe(
+    expect(fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/channel-outbound"))).toBe(
       fs.realpathSync(path.join(root, "dist", "plugin-sdk", "channel-outbound.js")),
     );
   });
 
-  it("lets built external plugins resolve OpenClaw SDK subpaths with createRequire", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-resolver-"));
-    const { distRoot, loaderModulePath } = writeFakeOpenClawPackage(root);
+  it("lets built external plugins resolve Carapace SDK subpaths with createRequire", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-resolver-"));
+    const { distRoot, loaderModulePath } = writeFakeCarapacePackage(root);
     const externalPluginEntry = writeExternalPluginEntry(path.join(root, "external-plugin"));
 
     const distMode = fs.statSync(distRoot).mode;
@@ -445,7 +445,7 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
     }
 
     try {
-      installOpenClawPluginSdkNativeResolver({
+      installCarapacePluginSdkNativeResolver({
         modulePath: loaderModulePath,
         pluginModulePath: externalPluginEntry,
         pluginSdkResolution: "dist",
@@ -454,14 +454,14 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
       expect(fs.existsSync(path.join(distRoot, "extensions"))).toBe(false);
       const requireFromPlugin = createRequire(externalPluginEntry);
       expect(
-        fs.realpathSync(requireFromPlugin.resolve("openclaw/plugin-sdk/channel-outbound")),
+        fs.realpathSync(requireFromPlugin.resolve("carapace/plugin-sdk/channel-outbound")),
       ).toBe(fs.realpathSync(path.join(root, "dist", "plugin-sdk", "channel-outbound.js")));
-      const sdk = requireFromPlugin("openclaw/plugin-sdk/channel-outbound") as {
+      const sdk = requireFromPlugin("carapace/plugin-sdk/channel-outbound") as {
         defineChannelMessageAdapter?: () => string;
       };
 
       expect(sdk.defineChannelMessageAdapter?.()).toBe("adapter");
-      expect(() => requireFromPlugin.resolve("openclaw/not-plugin-sdk/channel-message")).toThrow();
+      expect(() => requireFromPlugin.resolve("carapace/not-plugin-sdk/channel-message")).toThrow();
     } finally {
       if (process.platform !== "win32") {
         fs.chmodSync(distRoot, distMode);
@@ -470,7 +470,7 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
   });
 
   beforeAll(() => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-esm-resolver-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-esm-resolver-"));
     const probePath = path.join(root, "probe.mjs");
     const resolverModuleUrl = pathToFileURL(
       path.join(process.cwd(), "src", "plugins", "plugin-sdk-native-resolver.ts"),
@@ -482,22 +482,22 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
         'import Module from "node:module";',
         'import path from "node:path";',
         'import { pathToFileURL } from "node:url";',
-        `import { installOpenClawInternalCorePackageNativeResolver, installOpenClawPluginSdkNativeResolver } from ${JSON.stringify(resolverModuleUrl)};`,
+        `import { installCarapaceInternalCorePackageNativeResolver, installCarapacePluginSdkNativeResolver } from ${JSON.stringify(resolverModuleUrl)};`,
         `const root = ${JSON.stringify(root)};`,
         "const writeJson = (targetPath, value) => {",
         "  fs.mkdirSync(path.dirname(targetPath), { recursive: true });",
         '  fs.writeFileSync(targetPath, `${JSON.stringify(value, null, 2)}\\n`, "utf8");',
         "};",
         'writeJson(path.join(root, "package.json"), {',
-        '  name: "openclaw",',
+        '  name: "carapace",',
         '  type: "module",',
-        '  bin: { openclaw: "./openclaw.mjs" },',
+        '  bin: { carapace: "./carapace.mjs" },',
         "  exports: {",
         '    "./plugin-sdk/channel-outbound": "./dist/plugin-sdk/channel-outbound.js",',
         '    "./plugin-sdk/late-entry": "./dist/plugin-sdk/late-entry.js",',
         "  },",
         "});",
-        'fs.writeFileSync(path.join(root, "openclaw.mjs"), "#!/usr/bin/env node\\n", "utf8");',
+        'fs.writeFileSync(path.join(root, "carapace.mjs"), "#!/usr/bin/env node\\n", "utf8");',
         'fs.mkdirSync(path.join(root, "dist", "plugin-sdk"), { recursive: true });',
         'fs.writeFileSync(path.join(root, "dist", "plugin-sdk", "late-entry.js"), "export const late = \\"late-adapter\\";\\n", "utf8");',
         'fs.writeFileSync(path.join(root, "dist", "plugin-sdk", "channel-outbound.js"), "export const defineChannelMessageAdapter = () => \\"adapter\\";\\n", "utf8");',
@@ -506,19 +506,19 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
         'fs.writeFileSync(loaderModulePath, "export default {};\\n", "utf8");',
         // Internal alias scans are host snapshots; keep the alias-free host separate.
         'const aliasFreeRoot = path.join(root, "alias-free-host");',
-        'writeJson(path.join(aliasFreeRoot, "package.json"), { name: "openclaw", type: "module" });',
+        'writeJson(path.join(aliasFreeRoot, "package.json"), { name: "carapace", type: "module" });',
         'const aliasFreeLoaderPath = path.join(aliasFreeRoot, "loader.js");',
         'fs.writeFileSync(aliasFreeLoaderPath, "export default {};\\n", "utf8");',
         "const originalResolver = Module._resolveFilename;",
-        "installOpenClawInternalCorePackageNativeResolver({ moduleUrl: pathToFileURL(aliasFreeLoaderPath).href });",
-        "installOpenClawPluginSdkNativeResolver({ modulePath: aliasFreeLoaderPath });",
+        "installCarapaceInternalCorePackageNativeResolver({ moduleUrl: pathToFileURL(aliasFreeLoaderPath).href });",
+        "installCarapacePluginSdkNativeResolver({ modulePath: aliasFreeLoaderPath });",
         "const aliasFreeUnchanged = Module._resolveFilename === originalResolver;",
         'const aiToolSchemaPath = path.join(root, "packages", "ai", "src", "internal", "tool-schema.ts");',
         "fs.mkdirSync(path.dirname(aiToolSchemaPath), { recursive: true });",
         'fs.writeFileSync(aiToolSchemaPath, "export const schemaSource = import.meta.url;\\n", "utf8");',
         'const coreEntryPath = path.join(root, "src", "schema-probe.mjs");',
         "fs.mkdirSync(path.dirname(coreEntryPath), { recursive: true });",
-        'fs.writeFileSync(coreEntryPath, \'export { schemaSource } from "@openclaw/ai/internal/tool-schema";\\n\', "utf8");',
+        'fs.writeFileSync(coreEntryPath, \'export { schemaSource } from "@carapace/ai/internal/tool-schema";\\n\', "utf8");',
         'const pluginRoot = path.join(root, "external-plugin");',
         'writeJson(path.join(pluginRoot, "package.json"), { name: "external-plugin", type: "module" });',
         'const entryPath = path.join(pluginRoot, "dist", "runtime-api.js");',
@@ -526,15 +526,15 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
         "fs.mkdirSync(path.dirname(entryPath), { recursive: true });",
         "fs.writeFileSync(",
         "  entryPath,",
-        '  "import { defineChannelMessageAdapter } from \\"openclaw/plugin-sdk/channel-outbound\\"; export const eager = defineChannelMessageAdapter(); export const loadLazy = () => import(\\"./lazy.js\\");\\n",',
+        '  "import { defineChannelMessageAdapter } from \\"carapace/plugin-sdk/channel-outbound\\"; export const eager = defineChannelMessageAdapter(); export const loadLazy = () => import(\\"./lazy.js\\");\\n",',
         '  "utf8",',
         ");",
         "fs.writeFileSync(",
         "  lazyPath,",
-        '  "export { late as lazy } from \\"openclaw/plugin-sdk/late-entry.js\\";\\n",',
+        '  "export { late as lazy } from \\"carapace/plugin-sdk/late-entry.js\\";\\n",',
         '  "utf8",',
         ");",
-        "installOpenClawPluginSdkNativeResolver({",
+        "installCarapacePluginSdkNativeResolver({",
         "  modulePath: loaderModulePath,",
         "  pluginModulePath: entryPath,",
         '  pluginSdkResolution: "dist",',
@@ -577,15 +577,15 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
   });
 
   it("does not resolve SDK aliases for parents outside registered plugin roots", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-guard-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(root);
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-guard-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(root);
     const externalPluginEntry = writeExternalPluginEntry(path.join(root, "external-plugin"));
-    const unrelatedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-outside-"));
+    const unrelatedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-outside-"));
     const unrelatedEntry = path.join(unrelatedRoot, "runtime-api.js");
     fs.mkdirSync(path.dirname(unrelatedEntry), { recursive: true });
     fs.writeFileSync(unrelatedEntry, "export default {};\n", "utf8");
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       pluginSdkResolution: "dist",
@@ -593,13 +593,13 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
 
     const requireFromPlugin = createRequire(externalPluginEntry);
     const requireFromOutside = createRequire(unrelatedEntry);
-    expect(requireFromPlugin.resolve("openclaw/plugin-sdk/channel-outbound")).toBeTruthy();
-    expect(() => requireFromOutside.resolve("openclaw/plugin-sdk/channel-outbound")).toThrow();
+    expect(requireFromPlugin.resolve("carapace/plugin-sdk/channel-outbound")).toBeTruthy();
+    expect(() => requireFromOutside.resolve("carapace/plugin-sdk/channel-outbound")).toThrow();
   });
 
-  it("resolves internal core packages only for OpenClaw-owned source parents", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-core-internal-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(root);
+  it("resolves internal core packages only for Carapace-owned source parents", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-core-internal-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(root);
     const normalizationSource = writeNormalizationCoreSource(root);
     const booleanCoercionSource = writeInternalCorePackageSource(
       root,
@@ -664,7 +664,7 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
     fs.mkdirSync(path.dirname(coreSourceParent), { recursive: true });
     fs.writeFileSync(coreSourceParent, "export default {};\n", "utf8");
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       pluginSdkResolution: "dist",
@@ -673,95 +673,95 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
     const requireFromCoreSource = createRequire(coreSourceParent);
     const requireFromPlugin = createRequire(externalPluginEntry);
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/normalization-core/string-coerce")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/normalization-core/string-coerce")),
     ).toBe(fs.realpathSync(normalizationSource));
     expect(
       fs.realpathSync(
-        requireFromCoreSource.resolve("@openclaw/normalization-core/boolean-coercion"),
+        requireFromCoreSource.resolve("@carapace/normalization-core/boolean-coercion"),
       ),
     ).toBe(fs.realpathSync(booleanCoercionSource));
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/normalization-core/result")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/normalization-core/result")),
     ).toBe(fs.realpathSync(resultSource));
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/normalization-core/agent-id")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/normalization-core/agent-id")),
     ).toBe(fs.realpathSync(agentIdSource));
-    expect(fs.realpathSync(requireFromCoreSource.resolve("@openclaw/media-core/mime"))).toBe(
+    expect(fs.realpathSync(requireFromCoreSource.resolve("@carapace/media-core/mime"))).toBe(
       fs.realpathSync(mediaMimeSource),
     );
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/media-core/attachment-classify")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/media-core/attachment-classify")),
     ).toBe(fs.realpathSync(mediaAttachmentClassifySource));
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/markdown-core/code-spans")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/markdown-core/code-spans")),
     ).toBe(fs.realpathSync(markdownCoreSource));
-    expect(fs.realpathSync(requireFromCoreSource.resolve("@openclaw/ai/transports"))).toBe(
+    expect(fs.realpathSync(requireFromCoreSource.resolve("@carapace/ai/transports"))).toBe(
       fs.realpathSync(aiTransportsSource),
     );
     expect(
       fs.realpathSync(
-        requireFromCoreSource.resolve("@openclaw/ai/internal/openai-responses-payload-policy"),
+        requireFromCoreSource.resolve("@carapace/ai/internal/openai-responses-payload-policy"),
       ),
     ).toBe(fs.realpathSync(aiResponsesPayloadPolicySource));
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/ai/internal/google-model-family")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/ai/internal/google-model-family")),
     ).toBe(fs.realpathSync(aiGoogleModelFamilySource));
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/ai/internal/retry-after")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/ai/internal/retry-after")),
     ).toBe(fs.realpathSync(aiRetryAfterSource));
-    expect(fs.realpathSync(requireFromCoreSource.resolve("@openclaw/ai/internal/runtime"))).toBe(
+    expect(fs.realpathSync(requireFromCoreSource.resolve("@carapace/ai/internal/runtime"))).toBe(
       fs.realpathSync(aiRuntimeSource),
     );
     expect(
-      fs.realpathSync(requireFromCoreSource.resolve("@openclaw/ai/internal/tool-schema")),
+      fs.realpathSync(requireFromCoreSource.resolve("@carapace/ai/internal/tool-schema")),
     ).toBe(fs.realpathSync(aiToolSchemaSource));
-    expect(fs.realpathSync(requireFromCoreSource.resolve("@openclaw/acp-core/runtime/types"))).toBe(
+    expect(fs.realpathSync(requireFromCoreSource.resolve("@carapace/acp-core/runtime/types"))).toBe(
       fs.realpathSync(acpCoreSource),
     );
-    expect(fs.realpathSync(requireFromCoreSource.resolve("@openclaw/llm-core"))).toBe(
+    expect(fs.realpathSync(requireFromCoreSource.resolve("@carapace/llm-core"))).toBe(
       fs.realpathSync(llmCoreSource),
     );
-    expect(() => requireFromPlugin.resolve("@openclaw/normalization-core/string-coerce")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/normalization-core/string-coerce")).toThrow();
     expect(() =>
-      requireFromPlugin.resolve("@openclaw/normalization-core/boolean-coercion"),
+      requireFromPlugin.resolve("@carapace/normalization-core/boolean-coercion"),
     ).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/normalization-core/result")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/media-core/mime")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/media-core/attachment-classify")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/markdown-core/code-spans")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/ai/transports")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/normalization-core/result")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/media-core/mime")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/media-core/attachment-classify")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/markdown-core/code-spans")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/ai/transports")).toThrow();
     expect(() =>
-      requireFromPlugin.resolve("@openclaw/ai/internal/openai-responses-payload-policy"),
+      requireFromPlugin.resolve("@carapace/ai/internal/openai-responses-payload-policy"),
     ).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/ai/internal/google-model-family")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/ai/internal/retry-after")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/ai/internal/runtime")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/ai/internal/tool-schema")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/acp-core/runtime/types")).toThrow();
-    expect(() => requireFromPlugin.resolve("@openclaw/llm-core")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/ai/internal/google-model-family")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/ai/internal/retry-after")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/ai/internal/runtime")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/ai/internal/tool-schema")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/acp-core/runtime/types")).toThrow();
+    expect(() => requireFromPlugin.resolve("@carapace/llm-core")).toThrow();
   });
 
   it("does not register source-only SDK subpaths for native resolution", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-source-only-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(root);
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-source-only-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(root);
     const sourceOnlyPath = path.join(root, "src", "plugin-sdk", "source-only.ts");
     fs.mkdirSync(path.dirname(sourceOnlyPath), { recursive: true });
     fs.writeFileSync(sourceOnlyPath, "export const sourceOnly = true;\n", "utf8");
     const externalPluginEntry = writeExternalPluginEntry(path.join(root, "external-plugin"));
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: externalPluginEntry,
       pluginSdkResolution: "src",
     });
 
     const requireFromPlugin = createRequire(externalPluginEntry);
-    expect(() => requireFromPlugin.resolve("openclaw/plugin-sdk/source-only")).toThrow();
+    expect(() => requireFromPlugin.resolve("carapace/plugin-sdk/source-only")).toThrow();
   });
 
   it("scopes private SSRF SDK aliases to bundled local IPC native parents", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-native-ssrf-"));
-    const { loaderModulePath } = writeFakeOpenClawPackage(root);
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-native-ssrf-"));
+    const { loaderModulePath } = writeFakeCarapacePackage(root);
     const internalPath = path.join(root, "dist", "plugin-sdk", "ssrf-runtime-internal.js");
     fs.writeFileSync(internalPath, "export const ssrfInternal = true;\n", "utf8");
     const ollamaEntry = path.join(root, "dist", "extensions", "ollama", "index.js");
@@ -786,27 +786,27 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
     fs.writeFileSync(runtimeBrowserEntry, "export default {};\n", "utf8");
     fs.writeFileSync(otherEntry, "export default {};\n", "utf8");
 
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: ollamaEntry,
       pluginSdkResolution: "dist",
     });
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: runtimeOllamaEntry,
       pluginSdkResolution: "dist",
     });
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: browserEntry,
       pluginSdkResolution: "dist",
     });
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: runtimeBrowserEntry,
       pluginSdkResolution: "dist",
     });
-    installOpenClawPluginSdkNativeResolver({
+    installCarapacePluginSdkNativeResolver({
       modulePath: loaderModulePath,
       pluginModulePath: otherEntry,
       pluginSdkResolution: "dist",
@@ -814,29 +814,29 @@ describe("installOpenClawPluginSdkNativeResolver", () => {
 
     const requireFromOllama = createRequire(ollamaEntry);
     expect(
-      fs.realpathSync(requireFromOllama.resolve("openclaw/plugin-sdk/ssrf-runtime-internal")),
+      fs.realpathSync(requireFromOllama.resolve("carapace/plugin-sdk/ssrf-runtime-internal")),
     ).toBe(fs.realpathSync(internalPath));
 
     const requireFromRuntimeOllama = createRequire(runtimeOllamaEntry);
     expect(
       fs.realpathSync(
-        requireFromRuntimeOllama.resolve("openclaw/plugin-sdk/ssrf-runtime-internal"),
+        requireFromRuntimeOllama.resolve("carapace/plugin-sdk/ssrf-runtime-internal"),
       ),
     ).toBe(fs.realpathSync(internalPath));
 
     const requireFromBrowser = createRequire(browserEntry);
     expect(
-      fs.realpathSync(requireFromBrowser.resolve("openclaw/plugin-sdk/ssrf-runtime-internal")),
+      fs.realpathSync(requireFromBrowser.resolve("carapace/plugin-sdk/ssrf-runtime-internal")),
     ).toBe(fs.realpathSync(internalPath));
 
     const requireFromRuntimeBrowser = createRequire(runtimeBrowserEntry);
     expect(
       fs.realpathSync(
-        requireFromRuntimeBrowser.resolve("openclaw/plugin-sdk/ssrf-runtime-internal"),
+        requireFromRuntimeBrowser.resolve("carapace/plugin-sdk/ssrf-runtime-internal"),
       ),
     ).toBe(fs.realpathSync(internalPath));
 
     const requireFromOther = createRequire(otherEntry);
-    expect(() => requireFromOther.resolve("openclaw/plugin-sdk/ssrf-runtime-internal")).toThrow();
+    expect(() => requireFromOther.resolve("carapace/plugin-sdk/ssrf-runtime-internal")).toThrow();
   });
 });

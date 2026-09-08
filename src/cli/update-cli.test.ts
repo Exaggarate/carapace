@@ -6,7 +6,7 @@ import fs from "node:fs/promises";
 import { createServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { afterAll, afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { PLUGIN_CAPABILITY_CONSENT_REQUIRED } from "../../packages/gateway-protocol/src/capability-consent-error-details.js";
@@ -17,7 +17,7 @@ import { createDeferred } from "../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { sanitizeTriageUpdateFailure } from "../commands/triage-update.js";
 import { resolveConfigPath, resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig, ConfigFileSnapshot } from "../config/types.openclaw.js";
+import type { CarapaceConfig, ConfigFileSnapshot } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import {
   GATEWAY_SERVICE_RUNTIME_PID_ENV,
@@ -42,9 +42,9 @@ import type { UpdateRunRecord } from "../infra/update-run-record.js";
 import type { UpdateRunResult } from "../infra/update-runner.js";
 import { CLAWHUB_INSTALL_ERROR_CODE } from "../plugins/clawhub-error-codes.js";
 import { ManagedPluginLifecycleError } from "../plugins/management-lifecycle-error.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { captureEnv, withEnvAsync } from "../test-utils/env.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { VERSION } from "../version.js";
@@ -110,7 +110,7 @@ const pathExists = vi.fn();
 const syncPluginsForUpdateChannel = vi.fn();
 const updateNpmInstalledPlugins = vi.fn();
 const loadInstalledPluginIndexInstallRecords = vi.fn(
-  async (params: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv } = {}) =>
+  async (params: { config?: CarapaceConfig; env?: NodeJS.ProcessEnv } = {}) =>
     params.config?.plugins?.installs ?? {},
 );
 const readPersistedInstalledPluginIndex = vi.fn(async () => null);
@@ -130,11 +130,11 @@ const legacyConfigRepairMocks = vi.hoisted(() => ({
   repairLegacyConfigForUpdateChannel: vi.fn(),
 }));
 const launchdUpdateCleanupMocks = vi.hoisted(() => ({
-  disableCurrentOpenClawUpdateLaunchdJob: vi.fn(async () => false),
+  disableCurrentCarapaceUpdateLaunchdJob: vi.fn(async () => false),
 }));
 const windowsOfflineProbe = vi.hoisted(() => vi.fn(async () => null));
 const databasePreflightMocks = vi.hoisted(() => ({
-  preflightOpenClawDatabaseSchemas: vi.fn(),
+  preflightCarapaceDatabaseSchemas: vi.fn(),
 }));
 const restartHealthTestControl = vi.hoisted(() => ({
   snapshot: undefined as unknown,
@@ -151,10 +151,10 @@ const spawn = vi.fn();
 const { defaultRuntime: runtimeCapture, resetRuntimeCapture } = createCliRuntimeCapture();
 const serviceEnvSnapshot = captureEnv([
   ...SUPERVISOR_HINT_ENV_VARS,
-  "OPENCLAW_COMPATIBILITY_HOST_VERSION",
-  "OPENCLAW_UPDATE_RUN_HANDOFF",
-  "OPENCLAW_SERVICE_MARKER",
-  "OPENCLAW_SERVICE_KIND",
+  "CARAPACE_COMPATIBILITY_HOST_VERSION",
+  "CARAPACE_UPDATE_RUN_HANDOFF",
+  "CARAPACE_SERVICE_MARKER",
+  "CARAPACE_SERVICE_KIND",
   GATEWAY_SERVICE_RUNTIME_PID_ENV,
   ...GATEWAY_SERVICE_SELECTOR_ENV_KEYS,
 ]);
@@ -217,19 +217,19 @@ vi.mock("../infra/update-runner.js", async (importOriginal) => ({
   runGatewayUpdate: vi.fn(),
 }));
 
-vi.mock("../state/openclaw-database-preflight.js", () => ({
-  OPENCLAW_DATABASE_SCHEMA_DOCS_URL: "https://docs.openclaw.ai/reference/database-schemas",
-  preflightOpenClawDatabaseSchemas: databasePreflightMocks.preflightOpenClawDatabaseSchemas,
+vi.mock("../state/carapace-database-preflight.js", () => ({
+  CARAPACE_DATABASE_SCHEMA_DOCS_URL: "https://github.com/Exaggarate/carapace",
+  preflightCarapaceDatabaseSchemas: databasePreflightMocks.preflightCarapaceDatabaseSchemas,
 }));
 
-vi.mock("../state/openclaw-state-ownership.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../state/openclaw-state-ownership.js")>()),
-  assertOpenClawStateWriteAllowedAtPath: vi.fn(async () => undefined),
+vi.mock("../state/carapace-state-ownership.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../state/carapace-state-ownership.js")>()),
+  assertCarapaceStateWriteAllowedAtPath: vi.fn(async () => undefined),
 }));
 
-vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot: vi.fn(),
-  resolveOpenClawPackageRootSync: vi.fn(() => process.cwd()),
+vi.mock("../infra/carapace-root.js", () => ({
+  resolveCarapacePackageRoot: vi.fn(),
+  resolveCarapacePackageRootSync: vi.fn(() => process.cwd()),
 }));
 
 vi.mock("../daemon/gateway-entrypoint.js", async (importOriginal) => {
@@ -262,13 +262,13 @@ vi.mock("../config/config.js", () => {
       }),
     }),
     assertConfigWriteAllowedInCurrentMode: () => {
-      if (process.env.OPENCLAW_NIX_MODE === "1") {
+      if (process.env.CARAPACE_NIX_MODE === "1") {
         throw new Error(
           [
-            "Config is managed by Nix (`OPENCLAW_NIX_MODE=1`), so OpenClaw treats openclaw.json as immutable.",
-            "Do not run setup, onboarding, openclaw update, plugin install/update/uninstall/enable, doctor repair/token-generation, or config set against this file.",
-            "Agent-first Nix setup: https://github.com/openclaw/nix-openclaw#quick-start",
-            "OpenClaw Nix overview: https://docs.openclaw.ai/install/nix",
+            "Config is managed by Nix (`CARAPACE_NIX_MODE=1`), so Carapace treats carapace.json as immutable.",
+            "Do not run setup, onboarding, carapace update, plugin install/update/uninstall/enable, doctor repair/token-generation, or config set against this file.",
+            "Agent-first Nix setup: https://github.com/Exaggarate/carapace/nix-carapace#quick-start",
+            "Carapace Nix overview: https://github.com/Exaggarate/carapace",
           ].join("\n"),
         );
       }
@@ -406,14 +406,14 @@ vi.mock("./update-cli/update-command-post-plugin-readiness.js", async (importOri
 vi.mock("../utils.js", async (importOriginal) => {
   const [actual, { isRecord }] = await Promise.all([
     importOriginal<typeof import("../utils.js")>(),
-    import("@openclaw/normalization-core/record-coerce"),
+    import("@carapace/normalization-core/record-coerce"),
   ]);
   return {
     ...actual,
     displayString: (input: string) => input,
     isRecord,
     pathExists: (...args: unknown[]) => pathExists(...args),
-    resolveConfigDir: () => "/tmp/openclaw-config",
+    resolveConfigDir: () => "/tmp/carapace-config",
     sleep: vi.fn(async () => undefined),
   };
 });
@@ -496,7 +496,7 @@ vi.mock("../daemon/service.js", () => ({
     };
     // An absent fixture service must probe its own port, not the operator's listener.
     if (command === null) {
-      env.OPENCLAW_GATEWAY_PORT ??= String(absentServicePort);
+      env.CARAPACE_GATEWAY_PORT ??= String(absentServicePort);
     }
     args?.validateEnvBeforeStatusRead?.(env);
     const [loadState, runtime] = await Promise.all([
@@ -530,8 +530,8 @@ vi.mock("../daemon/service.js", () => ({
 
 vi.mock("../daemon/launchd.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../daemon/launchd.js")>()),
-  disableCurrentOpenClawUpdateLaunchdJob:
-    launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+  disableCurrentCarapaceUpdateLaunchdJob:
+    launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
 }));
 
 vi.mock("../daemon/schtasks.js", () => ({
@@ -630,7 +630,7 @@ const { createUpdateRun, getUpdateRun, listUpdateRuns } =
   await import("../infra/update-run-ledger.js");
 // Real recovery dependencies need the initialized runtime and child-process mocks.
 const { runUpdateFailureTriage } = await import("../infra/update-triage.js");
-const { resolveOpenClawPackageRoot } = await import("../infra/openclaw-root.js");
+const { resolveCarapacePackageRoot } = await import("../infra/carapace-root.js");
 const { resolveGatewayInstallEntrypoint } = await import("../daemon/gateway-entrypoint.js");
 const {
   mutateConfigFileWithRetry,
@@ -711,12 +711,12 @@ describe("update-cli", () => {
   // never share fixture paths — some cases write real files and rm them in cleanup. Realpath'd
   // because macOS os.tmpdir() is a /var -> /private/var symlink.
   const fixtureRoot = fsSync.realpathSync(
-    fsSync.mkdtempSync(path.join(os.tmpdir(), "openclaw-update-tests-")),
+    fsSync.mkdtempSync(path.join(os.tmpdir(), "carapace-update-tests-")),
   );
   const profileStateDir = (profile = "default") =>
     path.join(
       expectDefined(process.env.HOME, "isolated test home"),
-      profile === "default" ? ".openclaw" : `.openclaw-${profile}`,
+      profile === "default" ? ".carapace" : `.carapace-${profile}`,
     );
   let fixtureCount = 0;
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -728,9 +728,9 @@ describe("update-cli", () => {
     return dir;
   };
 
-  const baseConfig = {} as OpenClawConfig;
+  const baseConfig = {} as CarapaceConfig;
   const baseSnapshot: ConfigFileSnapshot = {
-    path: "/tmp/openclaw-config.json",
+    path: "/tmp/carapace-config.json",
     exists: true,
     raw: "{}",
     parsed: {},
@@ -771,7 +771,7 @@ describe("update-cli", () => {
   };
 
   const mockPackageInstallStatus = (root: string) => {
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
     vi.mocked(resolveUpdateInstallKind).mockResolvedValue("package");
     vi.mocked(resolveUpdateInstallIdentity).mockResolvedValue({ installKind: "package" });
     vi.mocked(checkUpdateStatus).mockResolvedValue({
@@ -787,7 +787,7 @@ describe("update-cli", () => {
     });
   };
 
-  const mockPackageInstallAtCaseDir = async (prefix = "openclaw-update") => {
+  const mockPackageInstallAtCaseDir = async (prefix = "carapace-update") => {
     const { pkgRoot, nodeModules } = await setupInstalledPackageRoot(
       createCaseDir(prefix),
       "1.0.0",
@@ -835,15 +835,15 @@ describe("update-cli", () => {
   const packagePackCommandCall = () =>
     commandCalls().find(([argv]) => argv[0] === "npm" && argv[1] === "pack");
 
-  const stripOpenClawPackageAlias = (spec: string) => {
+  const stripCarapacePackageAlias = (spec: string) => {
     const trimmed = spec.trim();
-    return trimmed.toLowerCase().startsWith("openclaw@")
-      ? trimmed.slice("openclaw@".length)
+    return trimmed.toLowerCase().startsWith("carapace@")
+      ? trimmed.slice("carapace@".length)
       : trimmed;
   };
 
   const isNpmGitPackageSpec = (spec: string) => {
-    const target = stripOpenClawPackageAlias(spec);
+    const target = stripCarapacePackageAlias(spec);
     const [repo] = target.split("#", 1);
     const isGitHubShorthand =
       Boolean(repo) &&
@@ -913,14 +913,14 @@ describe("update-cli", () => {
 
   const syncPluginCall = (index = 0) => {
     const calls = syncPluginsForUpdateChannel.mock.calls as unknown as Array<
-      [Record<string, unknown> & { channel?: string; config?: OpenClawConfig }]
+      [Record<string, unknown> & { channel?: string; config?: CarapaceConfig }]
     >;
     return calls[index]?.[0];
   };
 
   const npmPluginUpdateCall = (index = 0) => {
     const calls = updateNpmInstalledPlugins.mock.calls as unknown as Array<
-      [Record<string, unknown> & { config?: OpenClawConfig; timeoutMs?: number }]
+      [Record<string, unknown> & { config?: CarapaceConfig; timeoutMs?: number }]
     >;
     return calls[index]?.[0];
   };
@@ -931,11 +931,11 @@ describe("update-cli", () => {
   const lastReplaceConfigCall = () =>
     replaceConfigCall(vi.mocked(replaceConfigFile).mock.calls.length - 1);
   const setupConfigMutationWithRetryMock = (
-    onCommitted?: (snapshot: ConfigFileSnapshot, nextConfig: OpenClawConfig) => void,
+    onCommitted?: (snapshot: ConfigFileSnapshot, nextConfig: CarapaceConfig) => void,
   ) => {
     vi.mocked(mutateConfigFileWithRetry).mockImplementation(async (params) => {
       const snapshot = await readConfigFileSnapshot();
-      const nextConfig = structuredClone(snapshot.sourceConfig) as OpenClawConfig;
+      const nextConfig = structuredClone(snapshot.sourceConfig) as CarapaceConfig;
       await params.mutate(nextConfig, {
         snapshot,
         previousHash: snapshot.hash ?? null,
@@ -1012,14 +1012,14 @@ describe("update-cli", () => {
       if (!packDir) {
         throw new Error("Expected package pack directory");
       }
-      installSpec = path.join(packDir, "openclaw-9999.0.0.tgz");
+      installSpec = path.join(packDir, "carapace-9999.0.0.tgz");
     } else {
       expect(packagePackCommandCall()).toBeUndefined();
     }
     const allowScriptsIdentity = isNpmGitPackageSpec(spec)
       ? installSpec
-      : spec.toLowerCase().startsWith("openclaw@")
-        ? "openclaw"
+      : spec.toLowerCase().startsWith("carapace@")
+        ? "carapace"
         : spec;
     const call = packageInstallCommandCall();
     expect(call?.[0]).toEqual([
@@ -1027,7 +1027,7 @@ describe("update-cli", () => {
       "i",
       "-g",
       `--allow-scripts=${allowScriptsIdentity}`,
-      ...(staged ? ["--prefix", expect.stringContaining(".openclaw.update-stage-")] : []),
+      ...(staged ? ["--prefix", expect.stringContaining(".carapace.update-stage-")] : []),
       installSpec,
       "--no-fund",
       "--no-audit",
@@ -1152,7 +1152,7 @@ describe("update-cli", () => {
     entrypoints?: string[];
     admitMutation?: boolean;
   }) => {
-    const root = createCaseDir("openclaw-updated-root");
+    const root = createCaseDir("carapace-updated-root");
     const entrypoints = params?.entrypoints ?? [path.join(root, "dist", "entry.js")];
     const packageRoots = entrypoints.map((entrypoint) => path.dirname(path.dirname(entrypoint)));
     const packageJsonPaths = new Set(
@@ -1165,7 +1165,7 @@ describe("update-cli", () => {
       fsSync.writeFileSync(entrypoint, "// test entrypoint\n", "utf8");
       fsSync.writeFileSync(
         packageJsonPath,
-        JSON.stringify({ name: "openclaw", version: "2026.4.24" }),
+        JSON.stringify({ name: "carapace", version: "2026.4.24" }),
         "utf8",
       );
       tempDirsToCleanup.add(packageRoot);
@@ -1189,7 +1189,7 @@ describe("update-cli", () => {
     return { root, entrypoints };
   };
 
-  const FRESH_POST_UPDATE_ENTRYPOINT = "/tmp/openclaw-updated-entry.mjs";
+  const FRESH_POST_UPDATE_ENTRYPOINT = "/tmp/carapace-updated-entry.mjs";
 
   const mockCurrentProcessFreshDoctor = (
     params: { postCoreResumeAttempt?: boolean; packageRoot?: string } = {},
@@ -1249,7 +1249,7 @@ describe("update-cli", () => {
   const writeNpmPackageInstall = async (
     argv: string[],
     packageRoot: string,
-    version = argv.find((arg) => /^openclaw@\d/u.test(arg))?.slice("openclaw@".length) ??
+    version = argv.find((arg) => /^carapace@\d/u.test(arg))?.slice("carapace@".length) ??
       "9999.0.0",
   ) => {
     const stagePrefix = argv.includes("--prefix")
@@ -1259,10 +1259,10 @@ describe("update-cli", () => {
       ? path.join(
           stagePrefix,
           process.platform === "win32" ? "node_modules" : "lib/node_modules",
-          "openclaw",
+          "carapace",
         )
       : packageRoot;
-    await writeOpenClawPackageFixture(installedRoot, version, {
+    await writeCarapacePackageFixture(installedRoot, version, {
       entrySource: "export {};\n",
       inventory: true,
     });
@@ -1295,7 +1295,7 @@ describe("update-cli", () => {
         await fs.mkdir(stageRoot, { recursive: true });
         await fs.symlink(
           checkout,
-          path.join(stageRoot, "openclaw"),
+          path.join(stageRoot, "carapace"),
           process.platform === "win32" ? "junction" : undefined,
         );
       }
@@ -1310,7 +1310,7 @@ describe("update-cli", () => {
           argv[argv.indexOf("--pack-destination") + 1],
           "pack destination",
         );
-        await fs.writeFile(path.join(destination, "openclaw-9999.0.0.tgz"), "packed\n", "utf8");
+        await fs.writeFile(path.join(destination, "carapace-9999.0.0.tgz"), "packed\n", "utf8");
       }
       await activateGateway(argv);
       return commandResult();
@@ -1344,7 +1344,7 @@ describe("update-cli", () => {
   };
 
   const pluginSyncResult = (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     changed = false,
     overrides: {
       warnings?: string[];
@@ -1363,7 +1363,7 @@ describe("update-cli", () => {
     },
   });
 
-  const npmPluginUpdateResult = (config: OpenClawConfig) => ({
+  const npmPluginUpdateResult = (config: CarapaceConfig) => ({
     changed: false,
     config,
     outcomes: [],
@@ -1397,7 +1397,7 @@ describe("update-cli", () => {
 
   const mockPostDoctorSnapshot = (
     configPath: string,
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     options: { preserveParsed?: boolean } = {},
   ) => {
     vi.mocked(readConfigFileSnapshot).mockResolvedValue({
@@ -1412,7 +1412,7 @@ describe("update-cli", () => {
   };
 
   const configSnapshot = (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     overrides: Partial<ConfigFileSnapshot> = {},
   ): ConfigFileSnapshot => ({
     ...baseSnapshot,
@@ -1451,12 +1451,12 @@ describe("update-cli", () => {
     );
   };
 
-  const stableConfig = (overrides: Omit<OpenClawConfig, "update"> = {}): OpenClawConfig => ({
+  const stableConfig = (overrides: Omit<CarapaceConfig, "update"> = {}): CarapaceConfig => ({
     update: { channel: "stable" },
     ...overrides,
   });
 
-  const stableWhatsAppConfig = (): OpenClawConfig =>
+  const stableWhatsAppConfig = (): CarapaceConfig =>
     stableConfig({
       channels: {
         whatsapp: { enabled: true, dmPolicy: "pairing" },
@@ -1466,9 +1466,9 @@ describe("update-cli", () => {
   const runPostCoreUpdate = (env: NodeJS.ProcessEnv = {}) => {
     return withEnvAsync(
       {
-        OPENCLAW_UPDATE_POST_CORE: "1",
-        OPENCLAW_UPDATE_POST_CORE_CHANNEL: "stable",
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION,
+        CARAPACE_UPDATE_POST_CORE: "1",
+        CARAPACE_UPDATE_POST_CORE_CHANNEL: "stable",
+        CARAPACE_COMPATIBILITY_HOST_VERSION: process.env.CARAPACE_COMPATIBILITY_HOST_VERSION,
         ...env,
       },
       async () => {
@@ -1483,9 +1483,9 @@ describe("update-cli", () => {
   ) => {
     return withEnvAsync(
       {
-        OPENCLAW_UPDATE_POST_CORE: "1",
-        OPENCLAW_UPDATE_POST_CORE_CHANNEL: "stable",
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION,
+        CARAPACE_UPDATE_POST_CORE: "1",
+        CARAPACE_UPDATE_POST_CORE_CHANNEL: "stable",
+        CARAPACE_COMPATIBILITY_HOST_VERSION: process.env.CARAPACE_COMPATIBILITY_HOST_VERSION,
         ...env,
       },
       async () => {
@@ -1501,7 +1501,7 @@ describe("update-cli", () => {
   ): Promise<void> =>
     fs.writeFile(filePath, `${JSON.stringify(value)}${trailingNewline ? "\n" : ""}`, "utf-8");
 
-  const writeOpenClawPackageFixture = async (
+  const writeCarapacePackageFixture = async (
     root: string,
     version: string,
     options: {
@@ -1519,7 +1519,7 @@ describe("update-cli", () => {
     if (options.git) {
       await fs.mkdir(path.join(root, ".git"), { recursive: true });
     }
-    await writeJsonFixture(path.join(root, "package.json"), { name: "openclaw", version }, false);
+    await writeJsonFixture(path.join(root, "package.json"), { name: "carapace", version }, false);
     if (options.entrySource !== undefined) {
       await fs.writeFile(entryPath, options.entrySource, "utf-8");
     }
@@ -1528,7 +1528,7 @@ describe("update-cli", () => {
         await fs.mkdir(path.join(root, dir), { recursive: true });
       }
       for (const [file, contents] of Object.entries({
-        "openclaw.mjs": "export {};\n",
+        "carapace.mjs": "export {};\n",
         "dist/entry.js": "export {};\n",
         "dist/build-info.json": JSON.stringify({
           commit: options.builtSha,
@@ -1549,14 +1549,14 @@ describe("update-cli", () => {
   };
 
   const setupPostCoreConfigFixture = async (params: {
-    backupConfig?: OpenClawConfig;
-    postDoctorConfig: OpenClawConfig;
-    preUpdateConfig?: OpenClawConfig;
+    backupConfig?: CarapaceConfig;
+    postDoctorConfig: CarapaceConfig;
+    preUpdateConfig?: CarapaceConfig;
     snapshotSuffix?: ".bak" | ".pre-update";
     preserveParsed?: boolean;
   }) => {
-    const tempDir = createCaseDir("openclaw-update");
-    const configPath = path.join(tempDir, "openclaw.json");
+    const tempDir = createCaseDir("carapace-update");
+    const configPath = path.join(tempDir, "carapace.json");
     await fs.mkdir(tempDir, { recursive: true });
     if (params.preUpdateConfig) {
       await writeJsonFixture(
@@ -1576,9 +1576,9 @@ describe("update-cli", () => {
   };
 
   const setupInstalledPackageAtNodeModules = async (nodeModules: string, version = "2026.4.21") => {
-    const pkgRoot = path.join(nodeModules, "openclaw");
+    const pkgRoot = path.join(nodeModules, "carapace");
     mockPackageInstallStatus(pkgRoot);
-    const entryPath = await writeOpenClawPackageFixture(pkgRoot, version, {
+    const entryPath = await writeCarapacePackageFixture(pkgRoot, version, {
       entrySource: "export {};\n",
       inventory: true,
     });
@@ -1597,7 +1597,7 @@ describe("update-cli", () => {
     withNpm?: boolean;
   }) => {
     const nodeModules = path.join(params.prefix, "lib", "node_modules");
-    const root = path.join(nodeModules, "openclaw");
+    const root = path.join(nodeModules, "carapace");
     const serviceNode = path.join(params.prefix, "bin", "node");
     const serviceNpm = path.join(params.prefix, "bin", "npm");
     await fs.mkdir(path.dirname(serviceNode), { recursive: true });
@@ -1606,7 +1606,7 @@ describe("update-cli", () => {
       params.withNpm === false
         ? undefined
         : await fs.writeFile(serviceNpm, "", "utf-8").then(() => fs.realpath(serviceNpm));
-    const entrypoint = await writeOpenClawPackageFixture(root, params.version ?? "2026.5.18", {
+    const entrypoint = await writeCarapacePackageFixture(root, params.version ?? "2026.5.18", {
       entrySource: "",
       inventory: true,
     });
@@ -1667,9 +1667,9 @@ describe("update-cli", () => {
           ? argv[argv.indexOf("--prefix") + 1]
           : undefined;
         const stageRoot = stagePrefix
-          ? path.join(stagePrefix, "lib", "node_modules", "openclaw")
+          ? path.join(stagePrefix, "lib", "node_modules", "carapace")
           : params.packageRoot;
-        await writeOpenClawPackageFixture(stageRoot, params.targetVersion, {
+        await writeCarapacePackageFixture(stageRoot, params.targetVersion, {
           entrySource: "export {};\n",
           inventory: true,
         });
@@ -1680,13 +1680,13 @@ describe("update-cli", () => {
   };
 
   const mockRunningManagedGateway = (
-    programArguments: string[] = ["openclaw", "gateway", "run"],
+    programArguments: string[] = ["carapace", "gateway", "run"],
   ) => {
     serviceReadCommand.mockResolvedValue({
       programArguments,
       environment: {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       },
     });
     serviceLoaded.mockResolvedValue(true);
@@ -1734,7 +1734,7 @@ describe("update-cli", () => {
     overrides: Partial<Parameters<typeof completePostCorePluginUpdate>[0]> = {},
   ) =>
     completePostCorePluginUpdate({
-      root: "/tmp/openclaw-updated-root",
+      root: "/tmp/carapace-updated-root",
       pluginUpdate: {
         status: "ok",
         changed: true,
@@ -1757,7 +1757,7 @@ describe("update-cli", () => {
     });
 
   const setupNpmUpdatedRootRefresh = () => {
-    const updatedRoot = createCaseDir("openclaw-updated-root");
+    const updatedRoot = createCaseDir("carapace-updated-root");
     const updatedEntrypoint = path.join(updatedRoot, "dist", "entry.js");
     setupUpdatedRootRefresh({
       entrypoints: [updatedEntrypoint],
@@ -1775,7 +1775,7 @@ describe("update-cli", () => {
   const setupManagedGitRootRefresh = async (reinspect = false) => {
     const { root, entrypoints } = setupUpdatedRootRefresh();
     const updatedEntrypoint = requireValue(entrypoints[0], "updated entrypoint");
-    await writeOpenClawPackageFixture(root, "2026.4.27");
+    await writeCarapacePackageFixture(root, "2026.4.27");
     mockOwnedGitService();
     mockGitUpdateAfterMutation(
       makeOkUpdateResult({
@@ -1826,7 +1826,7 @@ describe("update-cli", () => {
   const mockNpmGlobalRoot = (nodeModules: string) => {
     mockNpmGlobalCommands(nodeModules, async (argv) => {
       if (argv[0] === "npm" && argv[1] === "i" && argv[2] === "-g") {
-        await writeNpmPackageInstall(argv, path.join(nodeModules, "openclaw"));
+        await writeNpmPackageInstall(argv, path.join(nodeModules, "carapace"));
       }
     });
   };
@@ -1860,8 +1860,8 @@ describe("update-cli", () => {
   ) =>
     withEnvAsync(
       {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
         ...env,
       },
       async () => {
@@ -1875,10 +1875,10 @@ describe("update-cli", () => {
     beforeUpdate?: () => void | Promise<void>;
     expectedExitCode?: number;
   }) => {
-    const home = tempDirs.make("openclaw-update-sentinel-home-");
-    const stateDir = path.join(home, ".openclaw");
+    const home = tempDirs.make("carapace-update-sentinel-home-");
+    const stateDir = path.join(home, ".carapace");
     await fs.mkdir(stateDir);
-    const metaDir = tempDirs.make("openclaw-update-sentinel-meta-");
+    const metaDir = tempDirs.make("carapace-update-sentinel-meta-");
     const metaPath = path.join(metaDir, "meta.json");
     await writeJsonFixture(metaPath, { version: 1, meta: params.meta }, false);
     await params.beforeUpdate?.();
@@ -1886,7 +1886,7 @@ describe("update-cli", () => {
       {
         [CONTROL_PLANE_UPDATE_SENTINEL_META_ENV]: metaPath,
         HOME: home,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_STATE_DIR: stateDir,
       },
       async () => {
         if (params.expectedExitCode === undefined) {
@@ -1898,7 +1898,7 @@ describe("update-cli", () => {
         }
       },
     );
-    return readRestartSentinel({ OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv);
+    return readRestartSentinel({ CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv);
   };
 
   beforeEach(async () => {
@@ -1910,14 +1910,14 @@ describe("update-cli", () => {
     vi.mocked(gatewayEntrypoint.resolveGatewayInstallEntrypoint).mockImplementation(
       actualGatewayEntrypoint.resolveGatewayInstallEntrypoint,
     );
-    delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
-    delete process.env.OPENCLAW_SERVICE_MARKER;
-    delete process.env.OPENCLAW_SERVICE_KIND;
+    delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
+    delete process.env.CARAPACE_SERVICE_MARKER;
+    delete process.env.CARAPACE_SERVICE_KIND;
     delete process.env[GATEWAY_SERVICE_RUNTIME_PID_ENV];
     for (const key of [
       ...GATEWAY_SERVICE_SELECTOR_ENV_KEYS,
       ...SUPERVISOR_HINT_ENV_VARS,
-      "OPENCLAW_UPDATE_RUN_HANDOFF",
+      "CARAPACE_UPDATE_RUN_HANDOFF",
     ]) {
       delete process.env[key];
     }
@@ -1935,13 +1935,13 @@ describe("update-cli", () => {
       reportCandidateSteps(options, {
         status: "ok",
         candidateSchemaVersions: {
-          state: OPENCLAW_STATE_SCHEMA_VERSION,
-          agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+          state: CARAPACE_STATE_SCHEMA_VERSION,
+          agent: CARAPACE_AGENT_SCHEMA_VERSION,
         },
         steps: [
           {
             name: "candidate gateway canary",
-            command: "openclaw gateway",
+            command: "carapace gateway",
             cwd: "/candidate",
             durationMs: 1,
             exitCode: 0,
@@ -1953,9 +1953,9 @@ describe("update-cli", () => {
 
     stateSchemaVersions.mockImplementation(
       async ({ stateDir, env }: { stateDir: string; env?: NodeJS.ProcessEnv }) => [
-        { path: resolveOpenClawStateSqlitePath(env), userVersion: OPENCLAW_STATE_SCHEMA_VERSION },
+        { path: resolveCarapaceStateSqlitePath(env), userVersion: CARAPACE_STATE_SCHEMA_VERSION },
         {
-          path: path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+          path: path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
           userVersion: null,
         },
       ],
@@ -1982,11 +1982,11 @@ describe("update-cli", () => {
       return child;
     });
     vi.mocked(defaultRuntime.exit).mockImplementation(() => {});
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockReturnValue({
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockReturnValue({
       incompatible: [],
       indeterminate: [],
     });
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(process.cwd());
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(process.cwd());
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(baseSnapshot);
     vi.mocked(readSourceConfigBestEffort).mockResolvedValue(baseSnapshot.config);
     setupConfigMutationWithRetryMock();
@@ -2003,7 +2003,7 @@ describe("update-cli", () => {
       status: "resolved",
       selector: "extended-stable",
       version: "2026.6.33",
-      packageSpec: "openclaw@2026.6.33",
+      packageSpec: "carapace@2026.6.33",
     });
     primeNpmChannelTag("latest", "9999.0.0");
     nodeVersionSatisfiesEngine.mockReturnValue(true);
@@ -2049,7 +2049,7 @@ describe("update-cli", () => {
       if (argv[0] === "npm" && argv[1] === "pack") {
         const destination = argv[argv.indexOf("--pack-destination") + 1];
         if (destination) {
-          await fs.writeFile(path.join(destination, "openclaw-9999.0.0.tgz"), "packed\n", "utf8");
+          await fs.writeFile(path.join(destination, "carapace-9999.0.0.tgz"), "packed\n", "utf8");
         }
       }
       return commandResult();
@@ -2057,7 +2057,7 @@ describe("update-cli", () => {
     vi.spyOn(updateCliShared, "readPackageName").mockImplementation(readPackageName);
     vi.spyOn(updateCliShared, "readPackageVersion").mockImplementation(readPackageVersion);
     vi.spyOn(updateCliShared, "resolveGlobalManager").mockImplementation(resolveGlobalManager);
-    readPackageName.mockResolvedValue("openclaw");
+    readPackageName.mockResolvedValue("carapace");
     readPackageVersion.mockResolvedValue("1.0.0");
     resolveGlobalManager.mockResolvedValue("npm");
     serviceStart.mockResolvedValue(undefined);
@@ -2069,7 +2069,7 @@ describe("update-cli", () => {
     resumeScheduledTaskAutoStartAfterUpdate.mockResolvedValue(false);
     serviceLoaded.mockResolvedValue(false);
     serviceReadCommand.mockImplementation(async () =>
-      (await serviceLoaded()) ? { programArguments: ["openclaw", "gateway", "run"] } : null,
+      (await serviceLoaded()) ? { programArguments: ["carapace", "gateway", "run"] } : null,
     );
     serviceReadRuntime.mockImplementation(async () =>
       (await serviceLoaded())
@@ -2077,12 +2077,12 @@ describe("update-cli", () => {
         : { status: "stopped", state: "stopped", missingUnit: true },
     );
     mockGetSelfAndAncestorPidsSync.mockReturnValue(new Set<number>([process.pid]));
-    prepareRestartScript.mockResolvedValue("/tmp/openclaw-restart-test.sh");
+    prepareRestartScript.mockResolvedValue("/tmp/carapace-restart-test.sh");
     runRestartScript.mockResolvedValue(undefined);
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: gatewayFixturePid, command: "openclaw-gateway" }],
+      listeners: [{ pid: gatewayFixturePid, command: "carapace-gateway" }],
       hints: [],
     });
     classifyPortListener.mockReturnValue("gateway");
@@ -2096,7 +2096,7 @@ describe("update-cli", () => {
       shell: "zsh",
       profileInstalled: false,
       cacheExists: false,
-      cachePath: "/tmp/openclaw-completion.zsh",
+      cachePath: "/tmp/carapace-completion.zsh",
       usesSlowPattern: false,
     });
     ensureCompletionCacheExists.mockResolvedValue(true);
@@ -2110,8 +2110,8 @@ describe("update-cli", () => {
         repaired: false,
       }),
     );
-    launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob.mockReset();
-    launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob.mockResolvedValue(false);
+    launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob.mockReset();
+    launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob.mockResolvedValue(false);
     confirm.mockResolvedValue(false);
     select.mockResolvedValue("stable");
     vi.mocked(runGatewayUpdate).mockResolvedValue(makeOkUpdateResult());
@@ -2142,7 +2142,7 @@ describe("update-cli", () => {
     const original = await serviceReadCommand(process.env);
     serviceReadCommand.mockResolvedValueOnce(original).mockResolvedValue({
       ...original,
-      programArguments: ["/foreign/openclaw", "gateway"],
+      programArguments: ["/foreign/carapace", "gateway"],
     });
     const { maybeStopManagedServiceBeforeMutableUpdate } =
       await import("./update-cli/update-command-service.js");
@@ -2226,8 +2226,8 @@ describe("update-cli", () => {
         packageRoot: root,
         npmOwner: { version: "12.0.0", lifecyclePolicy: "allow-scripts" },
       },
-      installSpec: "openclaw@2.0.0",
-      packageName: "openclaw",
+      installSpec: "carapace@2.0.0",
+      packageName: "carapace",
       packageRoot: root,
       runCommand: async () => ({ code: 0, stdout: nodeModules, stderr: "" }),
       runStep: async ({ name, argv }) => {
@@ -2281,7 +2281,7 @@ describe("update-cli", () => {
       if (ownership === "unavailable") {
         serviceReadCommand.mockRejectedValue(new Error("inspection-secret-canary"));
       } else {
-        mockRunningManagedGateway(["openclaw-wrapper", "gateway", "run"]);
+        mockRunningManagedGateway(["carapace-wrapper", "gateway", "run"]);
       }
 
       await expect(invokeUpdateCli({ yes: true, json: true, restart })).rejects.toEqual(
@@ -2304,7 +2304,7 @@ describe("update-cli", () => {
         prepareRestartScript,
         runRestartScript,
         cleanupStaleManagedServiceUpdateHandoffs,
-        launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+        launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
       );
       expect(getErrorOutput()).not.toContain("inspection-secret-canary");
     },
@@ -2353,11 +2353,11 @@ describe("update-cli", () => {
     async ({ kind, restart, capability }) => {
       const root =
         kind === "package"
-          ? await mockPackageInstallAtCaseDir("openclaw-sealed-code-update")
+          ? await mockPackageInstallAtCaseDir("carapace-sealed-code-update")
           : process.cwd();
       const entrypoint =
         kind === "package"
-          ? await writeOpenClawPackageFixture(root, "1.0.0", {
+          ? await writeCarapacePackageFixture(root, "1.0.0", {
               entrySource: "export {};\n",
               inventory: true,
             })
@@ -2381,7 +2381,7 @@ describe("update-cli", () => {
       });
 
       if (kind === "package") {
-        expectPackageInstallSpec("openclaw@9999.0.0", true);
+        expectPackageInstallSpec("carapace@9999.0.0", true);
       } else {
         expect(runGatewayUpdate).toHaveBeenCalledOnce();
       }
@@ -2457,7 +2457,7 @@ describe("update-cli", () => {
         serviceUpdateVerdict: { kind: "unresolved" },
       });
       if (inspection === "changed") {
-        mockRunningManagedGateway(["foreign-openclaw", "gateway", "run"]);
+        mockRunningManagedGateway(["foreign-carapace", "gateway", "run"]);
       } else if (inspection === "unreadable") {
         serviceReadCommand.mockRejectedValueOnce(new Error("manager unavailable"));
       }
@@ -2528,7 +2528,7 @@ describe("update-cli", () => {
   it.each([undefined, 1_200])(
     "passes the completion refresh budget %s and core-only command scope",
     async (timeoutMs) => {
-      const root = createCaseDir("openclaw-completion-timeout");
+      const root = createCaseDir("carapace-completion-timeout");
       pathExists.mockResolvedValue(true);
 
       await expect(updateCliShared.tryWriteCompletionCache(root, false, timeoutMs)).resolves.toBe(
@@ -2538,12 +2538,12 @@ describe("update-cli", () => {
       const call = completionCommandCall();
       expect(call?.[0]).toEqual([
         expect.any(String),
-        path.join(root, "openclaw.mjs"),
+        path.join(root, "carapace.mjs"),
         "completion",
         "--write-state",
       ]);
       expect(call?.[1]).toMatchObject({
-        env: { OPENCLAW_COMPLETION_SKIP_PLUGIN_COMMANDS: "1" },
+        env: { CARAPACE_COMPLETION_SKIP_PLUGIN_COMMANDS: "1" },
         timeoutMs: timeoutMs ?? 30_000,
         killProcessTree: true,
       });
@@ -2551,16 +2551,16 @@ describe("update-cli", () => {
   );
 
   it("disarms legacy launchd updater jobs before refusing mutating updates in Nix mode", async () => {
-    await withEnvAsync({ OPENCLAW_NIX_MODE: "1" }, async () => {
-      await expect(updateCommand({ yes: true })).rejects.toThrow("OPENCLAW_NIX_MODE=1");
+    await withEnvAsync({ CARAPACE_NIX_MODE: "1" }, async () => {
+      await expect(updateCommand({ yes: true })).rejects.toThrow("CARAPACE_NIX_MODE=1");
     });
 
-    expect(launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob).toHaveBeenCalledOnce();
+    expect(launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob).toHaveBeenCalledOnce();
     expectNoSideEffects(runGatewayUpdate, replaceConfigFile, updateNpmInstalledPlugins);
   });
 
   it("delegates mutating updates when an external supervisor owns gateway lifecycle", async () => {
-    await withEnvAsync({ OPENCLAW_SUPERVISOR_MODE: "external" }, async () => {
+    await withEnvAsync({ CARAPACE_SUPERVISOR_MODE: "external" }, async () => {
       await invokeUpdateCli({ yes: true });
     });
 
@@ -2579,7 +2579,7 @@ describe("update-cli", () => {
   });
 
   it("logs friendly hint with manual refresh command when completion cache write times out", async () => {
-    const root = createCaseDir("openclaw-completion-timeout-msg");
+    const root = createCaseDir("carapace-completion-timeout-msg");
     pathExists.mockResolvedValue(true);
     vi.mocked(runCommandWithTimeout).mockResolvedValueOnce(
       commandResult({ code: 124, killed: true, termination: "timeout" }),
@@ -2590,7 +2590,7 @@ describe("update-cli", () => {
 
     const logOutput = getLogOutput();
     expect(logOutput).toContain("timed out after 30s");
-    expect(logOutput).toContain("openclaw completion --write-state");
+    expect(logOutput).toContain("carapace completion --write-state");
   });
 
   it("keeps update completion refresh best-effort when profile install fails", async () => {
@@ -2599,7 +2599,7 @@ describe("update-cli", () => {
       shell: "zsh",
       profileInstalled: true,
       cacheExists: true,
-      cachePath: "/tmp/openclaw-completion.zsh",
+      cachePath: "/tmp/carapace-completion.zsh",
       usesSlowPattern: true,
     });
     installCompletion.mockRejectedValueOnce(new Error("EACCES: permission denied"));
@@ -2621,7 +2621,7 @@ describe("update-cli", () => {
     if (yes) {
       expect(installCompletion).not.toHaveBeenCalled();
     } else {
-      expect(installCompletion).toHaveBeenCalledWith("zsh", false, "openclaw");
+      expect(installCompletion).toHaveBeenCalledWith("zsh", false, "carapace");
     }
   });
 
@@ -2635,11 +2635,11 @@ describe("update-cli", () => {
     expect(call?.[1]).toEqual([entrypoints[0], "update", "--yes", "--timeout", "1800"]);
     expect(call?.[2]?.stdio).toBe("inherit");
     expect(call?.[2]?.env?.NODE_DISABLE_COMPILE_CACHE).toBe("1");
-    expect(call?.[2]?.env?.OPENCLAW_UPDATE_IN_PROGRESS).toBe("1");
-    expect(getUpdateRun(call?.[2]?.env?.OPENCLAW_UPDATE_RUN_ID ?? "")?.trigger).toBe("cli");
-    expect(call?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE).toBe("1");
-    expect(call?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE_CHANNEL).toBe("dev");
-    expect(call?.[2]?.env?.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBe("1.0.0");
+    expect(call?.[2]?.env?.CARAPACE_UPDATE_IN_PROGRESS).toBe("1");
+    expect(getUpdateRun(call?.[2]?.env?.CARAPACE_UPDATE_RUN_ID ?? "")?.trigger).toBe("cli");
+    expect(call?.[2]?.env?.CARAPACE_UPDATE_POST_CORE).toBe("1");
+    expect(call?.[2]?.env?.CARAPACE_UPDATE_POST_CORE_CHANNEL).toBe("dev");
+    expect(call?.[2]?.env?.CARAPACE_COMPATIBILITY_HOST_VERSION).toBe("1.0.0");
     expect(vi.mocked(readConfigFileSnapshot).mock.calls[1]?.[0]).toEqual({
       skipPluginValidation: true,
       suppressFutureVersionWarning: true,
@@ -2653,17 +2653,17 @@ describe("update-cli", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "stale-version",
-        OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL: "beta",
-        OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: "/tmp/stale-config.json",
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_COMPATIBILITY_HOST_VERSION: "stale-version",
+        CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL: "beta",
+        CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: "/tmp/stale-config.json",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
         [GATEWAY_SERVICE_RUNTIME_PID_ENV]: String(unrelatedGatewayFixturePid),
-        OPENCLAW_UNRELATED: "preserved",
+        CARAPACE_UNRELATED: "preserved",
       },
       async () => {
         await continuePostCoreUpdateInFreshProcess({
-          root: "/tmp/openclaw-updated-root",
+          root: "/tmp/carapace-updated-root",
           channel: "stable",
           requestedChannel: null,
           opts: {},
@@ -2674,16 +2674,16 @@ describe("update-cli", () => {
 
         expect(spawn).toHaveBeenCalledOnce();
         const env = spawnCall()?.[2]?.env;
-        expect(env?.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBeUndefined();
-        expect(env?.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBeUndefined();
-        expect(env?.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBeUndefined();
-        expect(env?.OPENCLAW_SERVICE_MARKER).toBeUndefined();
-        expect(env?.OPENCLAW_SERVICE_KIND).toBeUndefined();
+        expect(env?.CARAPACE_COMPATIBILITY_HOST_VERSION).toBeUndefined();
+        expect(env?.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBeUndefined();
+        expect(env?.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBeUndefined();
+        expect(env?.CARAPACE_SERVICE_MARKER).toBeUndefined();
+        expect(env?.CARAPACE_SERVICE_KIND).toBeUndefined();
         expect(env?.[GATEWAY_SERVICE_RUNTIME_PID_ENV]).toBeUndefined();
-        expect(env?.OPENCLAW_UNRELATED).toBe("preserved");
-        expect(process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBe("stale-version");
-        expect(process.env.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("beta");
-        expect(process.env.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBe(
+        expect(env?.CARAPACE_UNRELATED).toBe("preserved");
+        expect(process.env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBe("stale-version");
+        expect(process.env.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("beta");
+        expect(process.env.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBe(
           "/tmp/stale-config.json",
         );
       },
@@ -2701,38 +2701,38 @@ describe("update-cli", () => {
         update: { channel: "beta" as const },
       };
       const managedSnapshot = configSnapshot(managedConfig, {
-        path: path.join(managedState, "openclaw.json"),
+        path: path.join(managedState, "carapace.json"),
       });
       const managedRecords = {
-        telegram: { source: "npm", spec: "@openclaw/telegram@beta" },
+        telegram: { source: "npm", spec: "@carapace/telegram@beta" },
       } satisfies Record<string, PluginInstallRecord>;
       primeServiceCommand(
         ["node", path.join(process.cwd(), "dist", "index.js"), "gateway", "run"],
         {
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: managedState,
-          OPENCLAW_CONFIG_PATH: path.join(managedState, "openclaw.json"),
-          OPENCLAW_GATEWAY_PORT: "19222",
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "gateway",
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: managedState,
+          CARAPACE_CONFIG_PATH: path.join(managedState, "carapace.json"),
+          CARAPACE_GATEWAY_PORT: "19222",
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "gateway",
           [GATEWAY_SERVICE_RUNTIME_PID_ENV]: String(unrelatedGatewayFixturePid),
         },
       );
       vi.mocked(readConfigFileSnapshot).mockImplementation(async () =>
-        process.env.OPENCLAW_PROFILE === "work" ? managedSnapshot : baseSnapshot,
+        process.env.CARAPACE_PROFILE === "work" ? managedSnapshot : baseSnapshot,
       );
       loadInstalledPluginIndexInstallRecords.mockImplementation(async (options = {}) =>
-        options.env?.OPENCLAW_PROFILE === "work" ? managedRecords : {},
+        options.env?.CARAPACE_PROFILE === "work" ? managedRecords : {},
       );
       let handedConfig: unknown;
       let handedRecords: unknown;
       spawn.mockImplementationOnce((_node, _argv, options) => {
         const env = (options as { env?: NodeJS.ProcessEnv }).env;
         handedConfig = JSON.parse(
-          fsSync.readFileSync(env?.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH ?? "", "utf-8"),
+          fsSync.readFileSync(env?.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH ?? "", "utf-8"),
         );
         handedRecords = JSON.parse(
-          fsSync.readFileSync(env?.OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH ?? "", "utf-8"),
+          fsSync.readFileSync(env?.CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH ?? "", "utf-8"),
         );
         const child = new EventEmitter() as EventEmitter & { once: EventEmitter["once"] };
         queueMicrotask(() => child.emit("exit", 0, null));
@@ -2741,10 +2741,10 @@ describe("update-cli", () => {
 
       await withEnvAsync(
         {
-          OPENCLAW_PROFILE: "personal",
-          OPENCLAW_STATE_DIR: personalState,
-          OPENCLAW_CONFIG_PATH: path.join(personalState, "openclaw.json"),
-          OPENCLAW_GATEWAY_PORT: "19111",
+          CARAPACE_PROFILE: "personal",
+          CARAPACE_STATE_DIR: personalState,
+          CARAPACE_CONFIG_PATH: path.join(personalState, "carapace.json"),
+          CARAPACE_GATEWAY_PORT: "19111",
         },
         async () => {
           await updateCommand({ yes: true });
@@ -2756,12 +2756,12 @@ describe("update-cli", () => {
       expect(runRestartScript).toHaveBeenCalledOnce();
       expect(getLogOutput()).toContain("Gateway: restarted and verified.");
       expect(spawnCall()?.[2]?.env).toMatchObject({
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_STATE_DIR: managedState,
-        OPENCLAW_CONFIG_PATH: path.join(managedState, "openclaw.json"),
-        OPENCLAW_GATEWAY_PORT: "19222",
+        CARAPACE_PROFILE: "work",
+        CARAPACE_STATE_DIR: managedState,
+        CARAPACE_CONFIG_PATH: path.join(managedState, "carapace.json"),
+        CARAPACE_GATEWAY_PORT: "19222",
       });
-      expect(spawnCall()?.[2]?.env?.OPENCLAW_SERVICE_MARKER).toBeUndefined();
+      expect(spawnCall()?.[2]?.env?.CARAPACE_SERVICE_MARKER).toBeUndefined();
       expect(spawnCall()?.[2]?.env?.[GATEWAY_SERVICE_RUNTIME_PID_ENV]).toBeUndefined();
       expect(handedConfig).toEqual({ sourceConfig: managedConfig, authoredConfig: managedConfig });
       expect(handedRecords).toEqual(managedRecords);
@@ -2774,8 +2774,8 @@ describe("update-cli", () => {
   it("keeps foreign-service updates in the caller profile", async () => {
     const personalState = profileStateDir("personal");
     const { root, entrypoints } = setupUpdatedRootRefresh();
-    const foreignRoot = tempDirs.make("openclaw-update-foreign-profile-");
-    const foreignEntrypoint = await writeOpenClawPackageFixture(foreignRoot, "2026.4.21", {
+    const foreignRoot = tempDirs.make("carapace-update-foreign-profile-");
+    const foreignEntrypoint = await writeCarapacePackageFixture(foreignRoot, "2026.4.21", {
       entrySource: "export {};\n",
     });
     mockGitUpdateAfterMutation(
@@ -2789,9 +2789,9 @@ describe("update-cli", () => {
     serviceReadCommand.mockResolvedValue({
       programArguments: ["node", foreignEntrypoint, "gateway", "run"],
       environment: {
-        OPENCLAW_PROFILE: "foreign",
-        OPENCLAW_STATE_DIR: profileStateDir("foreign"),
-        OPENCLAW_GATEWAY_PORT: "19333",
+        CARAPACE_PROFILE: "foreign",
+        CARAPACE_STATE_DIR: profileStateDir("foreign"),
+        CARAPACE_GATEWAY_PORT: "19333",
       },
     });
     serviceLoaded.mockResolvedValue(true);
@@ -2803,9 +2803,9 @@ describe("update-cli", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_PROFILE: "personal",
-        OPENCLAW_STATE_DIR: personalState,
-        OPENCLAW_GATEWAY_PORT: "19111",
+        CARAPACE_PROFILE: "personal",
+        CARAPACE_STATE_DIR: personalState,
+        CARAPACE_GATEWAY_PORT: "19111",
       },
       async () => {
         await updateCommand({ yes: true });
@@ -2815,9 +2815,9 @@ describe("update-cli", () => {
     expect(serviceStop).not.toHaveBeenCalled();
     expect(serviceRestart).not.toHaveBeenCalled();
     expect(spawnCall()?.[2]?.env).toMatchObject({
-      OPENCLAW_PROFILE: "personal",
-      OPENCLAW_STATE_DIR: personalState,
-      OPENCLAW_GATEWAY_PORT: "19111",
+      CARAPACE_PROFILE: "personal",
+      CARAPACE_STATE_DIR: personalState,
+      CARAPACE_GATEWAY_PORT: "19111",
     });
   });
 
@@ -2825,10 +2825,10 @@ describe("update-cli", () => {
     const updatedEntrypoint = await setupManagedGitRootRefresh();
     const managedState = profileStateDir("work");
     primeServiceCommand(["node", path.join(process.cwd(), "dist", "index.js"), "gateway", "run"], {
-      OPENCLAW_PROFILE: "work",
-      OPENCLAW_STATE_DIR: managedState,
-      OPENCLAW_CONFIG_PATH: path.join(managedState, "openclaw.json"),
-      OPENCLAW_GATEWAY_PORT: "19222",
+      CARAPACE_PROFILE: "work",
+      CARAPACE_STATE_DIR: managedState,
+      CARAPACE_CONFIG_PATH: path.join(managedState, "carapace.json"),
+      CARAPACE_GATEWAY_PORT: "19222",
     });
     // Only the resume attempt misses; Doctor and service refresh resolve the real target.
     let resumeAttempted = false;
@@ -2843,21 +2843,21 @@ describe("update-cli", () => {
       });
     const convergenceProfiles: Array<string | undefined> = [];
     syncPluginsForUpdateChannel.mockImplementation(async () => {
-      convergenceProfiles.push(process.env.OPENCLAW_PROFILE);
+      convergenceProfiles.push(process.env.CARAPACE_PROFILE);
       return pluginSyncResult(baseConfig, true);
     });
 
     await withEnvAsync(
       {
-        OPENCLAW_PROFILE: "personal",
-        OPENCLAW_STATE_DIR: profileStateDir("personal"),
-        OPENCLAW_GATEWAY_PORT: "19111",
+        CARAPACE_PROFILE: "personal",
+        CARAPACE_STATE_DIR: profileStateDir("personal"),
+        CARAPACE_GATEWAY_PORT: "19111",
       },
       async () => {
         await updateCommand({ yes: true }).catch((error: unknown) => {
           throw new Error(getErrorOutput() + getLogOutput(), { cause: error });
         });
-        expect(process.env.OPENCLAW_PROFILE).toBe("personal");
+        expect(process.env.CARAPACE_PROFILE).toBe("personal");
       },
     );
 
@@ -2875,9 +2875,9 @@ describe("update-cli", () => {
       const options = call[2];
       const baseEnv = typeof options === "number" ? undefined : options?.baseEnv;
       expect(baseEnv).toMatchObject({
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_STATE_DIR: managedState,
-        OPENCLAW_GATEWAY_PORT: "19222",
+        CARAPACE_PROFILE: "work",
+        CARAPACE_STATE_DIR: managedState,
+        CARAPACE_GATEWAY_PORT: "19222",
       });
     }
   });
@@ -2892,14 +2892,14 @@ describe("update-cli", () => {
       async (candidate: string) =>
         candidate === path.join(process.cwd(), "package.json") ||
         candidate === path.join(process.cwd(), "dist", "index.js") ||
-        candidate === path.join(process.cwd(), "openclaw.mjs"),
+        candidate === path.join(process.cwd(), "carapace.mjs"),
     );
     const managedState = profileStateDir("work");
     primeServiceCommand(["node", path.join(process.cwd(), "dist", "index.js"), "gateway", "run"], {
-      OPENCLAW_PROFILE: "work",
-      OPENCLAW_STATE_DIR: managedState,
-      OPENCLAW_CONFIG_PATH: path.join(managedState, "openclaw.json"),
-      OPENCLAW_GATEWAY_PORT: "19222",
+      CARAPACE_PROFILE: "work",
+      CARAPACE_STATE_DIR: managedState,
+      CARAPACE_CONFIG_PATH: path.join(managedState, "carapace.json"),
+      CARAPACE_GATEWAY_PORT: "19222",
     });
     serviceLoaded.mockResolvedValue(true);
     serviceReadRuntime.mockResolvedValue({
@@ -2911,21 +2911,21 @@ describe("update-cli", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_PROFILE: "personal",
-        OPENCLAW_STATE_DIR: profileStateDir("personal"),
-        OPENCLAW_GATEWAY_PORT: "19111",
+        CARAPACE_PROFILE: "personal",
+        CARAPACE_STATE_DIR: profileStateDir("personal"),
+        CARAPACE_GATEWAY_PORT: "19111",
       },
       async () => {
         await updateCommand({});
-        expect(process.env.OPENCLAW_PROFILE).toBe("personal");
+        expect(process.env.CARAPACE_PROFILE).toBe("personal");
       },
     );
 
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(freshRestartCalls()).toHaveLength(1);
-    expect(freshRestartCalls()[0]?.[1]).toMatchObject({ env: { OPENCLAW_PROFILE: "work" } });
+    expect(freshRestartCalls()[0]?.[1]).toMatchObject({ env: { CARAPACE_PROFILE: "work" } });
     expect(runDaemonRestart).not.toHaveBeenCalled();
-    expect(completionCommandCall()?.[1]).toMatchObject({ env: { OPENCLAW_PROFILE: "personal" } });
+    expect(completionCommandCall()?.[1]).toMatchObject({ env: { CARAPACE_PROFILE: "personal" } });
   });
 
   it("routes JSON post-core child output to stderr", async () => {
@@ -2983,7 +2983,7 @@ describe("update-cli", () => {
       });
     spawn.mockImplementationOnce((_command: unknown, _argv: unknown, options: unknown) => {
       resultPath = (options as { env?: NodeJS.ProcessEnv }).env
-        ?.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH;
+        ?.CARAPACE_UPDATE_POST_CORE_RESULT_PATH;
       if (!resultPath) {
         throw new Error("missing post-core result path");
       }
@@ -3042,7 +3042,7 @@ describe("update-cli", () => {
     });
     spawn.mockImplementationOnce((_command: unknown, _argv: unknown, options: unknown) => {
       const resultPath = (options as { env?: NodeJS.ProcessEnv }).env
-        ?.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH;
+        ?.CARAPACE_UPDATE_POST_CORE_RESULT_PATH;
       if (!resultPath) {
         throw new Error("missing post-core result path");
       }
@@ -3058,7 +3058,7 @@ describe("update-cli", () => {
                 reason: "missing-extension-entry: ./dist/index.js",
                 message:
                   'Plugin "demo" failed post-core payload smoke check (missing-extension-entry): ./dist/index.js',
-                guidance: ["Run openclaw update repair to retry post-update plugin repair."],
+                guidance: ["Run carapace update repair to retry post-update plugin repair."],
               },
             ],
             sync: {
@@ -3131,8 +3131,8 @@ describe("update-cli", () => {
     const pluginInstallRecords = {
       demo: {
         source: "npm",
-        spec: "@openclaw/demo@1.0.0",
-        installPath: "/tmp/openclaw-demo-plugin",
+        spec: "@carapace/demo@1.0.0",
+        installPath: "/tmp/carapace-demo-plugin",
       },
     } as const;
     const preUpdateConfig = {
@@ -3142,7 +3142,7 @@ describe("update-cli", () => {
           dmPolicy: "pairing",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     let capturedRecords: unknown;
     let capturedSourceConfig: unknown;
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(
@@ -3151,8 +3151,8 @@ describe("update-cli", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce(pluginInstallRecords);
     spawn.mockImplementationOnce((_node, _argv, options) => {
       const env = (options as { env?: NodeJS.ProcessEnv }).env;
-      const recordsPath = env?.OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH;
-      const sourceConfigPath = env?.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH;
+      const recordsPath = env?.CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH;
+      const sourceConfigPath = env?.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH;
       if (!recordsPath) {
         throw new Error("missing post-core install records path");
       }
@@ -3191,17 +3191,17 @@ describe("update-cli", () => {
           msteams: { enabled: false },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(configSnapshot(preUpdateConfig));
     const pluginInstallRecords = {
       msteams: {
         source: "npm",
-        spec: "@openclaw/msteams",
-        installPath: "/tmp/openclaw-msteams-plugin",
+        spec: "@carapace/msteams",
+        installPath: "/tmp/carapace-msteams-plugin",
         version: "1.0.0",
-        resolvedName: "@openclaw/msteams",
+        resolvedName: "@carapace/msteams",
         resolvedVersion: "1.0.0",
-        resolvedSpec: "@openclaw/msteams@1.0.0",
+        resolvedSpec: "@carapace/msteams@1.0.0",
         integrity: "sha512-newer",
       },
     } as const;
@@ -3209,7 +3209,7 @@ describe("update-cli", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce(pluginInstallRecords);
     spawn.mockImplementationOnce((_node, _argv, options) => {
       const env = (options as { env?: NodeJS.ProcessEnv }).env;
-      const recordsPath = env?.OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH;
+      const recordsPath = env?.CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH;
       if (!recordsPath) {
         throw new Error("missing post-core install records path");
       }
@@ -3228,10 +3228,10 @@ describe("update-cli", () => {
     expect(capturedRecords).toEqual({
       msteams: {
         source: "npm",
-        spec: "@openclaw/msteams",
-        installPath: "/tmp/openclaw-msteams-plugin",
+        spec: "@carapace/msteams",
+        installPath: "/tmp/carapace-msteams-plugin",
         version: "1.0.0",
-        resolvedName: "@openclaw/msteams",
+        resolvedName: "@carapace/msteams",
         integrity: "sha512-newer",
       },
     });
@@ -3266,7 +3266,7 @@ describe("update-cli", () => {
         installRecords: {
           msteams: {
             source: "npm",
-            spec: "@openclaw/msteams",
+            spec: "@carapace/msteams",
             resolvedVersion: "1.0.0",
           },
         } satisfies Record<string, PluginInstallRecord>,
@@ -3284,7 +3284,7 @@ describe("update-cli", () => {
         }
         const child = new EventEmitter();
         fsSync.writeFileSync(
-          options.env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH,
+          options.env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH,
           JSON.stringify({
             status: "failed",
             error: "pre-plugin Doctor failed before convergence",
@@ -3332,7 +3332,7 @@ describe("update-cli", () => {
     spawn.mockImplementationOnce((_command: string, _args: string[], options: unknown) => {
       const child = new EventEmitter() as EventEmitter & { kill: () => void };
       const resultPath = expectDefined(
-        (options as { env: Record<string, string> }).env["OPENCLAW_UPDATE_POST_CORE_RESULT_PATH"],
+        (options as { env: Record<string, string> }).env["CARAPACE_UPDATE_POST_CORE_RESULT_PATH"],
         "post-core result path test invariant",
       );
       fsSync.writeFileSync(resultPath, JSON.stringify({ status: "ok" }), "utf8");
@@ -3355,7 +3355,7 @@ describe("update-cli", () => {
       installRecords: {
         msteams: {
           source: "npm",
-          spec: "@openclaw/msteams",
+          spec: "@carapace/msteams",
           resolvedVersion: "1.0.0",
         },
       } satisfies Record<string, PluginInstallRecord>,
@@ -3417,9 +3417,9 @@ describe("update-cli", () => {
     expect(call?.[0]).toMatch(/node/);
     expect(call?.[1]).toEqual([entrypoints[0], "update", "--no-restart", "--yes"]);
     expect(call?.[2]?.stdio).toBe("inherit");
-    expect(call?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE).toBe("1");
-    expect(call?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE_CHANNEL).toBe("dev");
-    expect(call?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("dev");
+    expect(call?.[2]?.env?.CARAPACE_UPDATE_POST_CORE).toBe("1");
+    expect(call?.[2]?.env?.CARAPACE_UPDATE_POST_CORE_CHANNEL).toBe("dev");
+    expect(call?.[2]?.env?.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("dev");
     expectNoSideEffects(replaceConfigFile, syncPluginsForUpdateChannel, updateNpmInstalledPlugins);
   });
 
@@ -3556,7 +3556,7 @@ describe("update-cli", () => {
         return inspectOriginalState(options);
       });
       const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageRoot(
-        createCaseDir("openclaw-downgrade-writer"),
+        createCaseDir("carapace-downgrade-writer"),
         "2026.9.3-beta.1",
       );
       mockFileBackedPathExists();
@@ -3578,7 +3578,7 @@ describe("update-cli", () => {
       if (fresh) {
         expect(spawn).toHaveBeenCalledOnce();
         expect(spawnCall()?.[1]).toContain(entryPath);
-        expect(spawnCall()?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("stable");
+        expect(spawnCall()?.[2]?.env?.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("stable");
         expectNoSideEffects(
           replaceConfigFile,
           syncPluginsForUpdateChannel,
@@ -3597,8 +3597,8 @@ describe("update-cli", () => {
   it.each([true, false])(
     "checks original Git version before a package downgrade (dry-run=%s)",
     async (dryRun) => {
-      vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(
-        createCaseDir("openclaw-git-downgrade"),
+      vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(
+        createCaseDir("carapace-git-downgrade"),
       );
       readPackageVersion.mockResolvedValue("2026.9.3-beta.1");
       primeNpmChannelTag("latest", "2026.9.1");
@@ -3624,7 +3624,7 @@ describe("update-cli", () => {
   it.each([false, true])(
     "keeps downgrade consent separate from --yes (explicit=%s)",
     async (acceptCapabilities) => {
-      const downgradedRoot = createCaseDir("openclaw-downgraded-consent-root");
+      const downgradedRoot = createCaseDir("carapace-downgraded-consent-root");
       setupUpdatedRootRefresh({
         gatewayUpdateImpl: async () =>
           makeOkUpdateResult({
@@ -3660,7 +3660,7 @@ describe("update-cli", () => {
   );
 
   it("pins the compatibility host version to the downgraded target during current-process post-core plugin convergence (#87914)", async () => {
-    const downgradedRoot = createCaseDir("openclaw-downgraded-compat-root");
+    const downgradedRoot = createCaseDir("carapace-downgraded-compat-root");
     setupUpdatedRootRefresh({
       gatewayUpdateImpl: async () =>
         makeOkUpdateResult({
@@ -3677,11 +3677,11 @@ describe("update-cli", () => {
     );
     primeNpmChannelTag("latest", "2026.4.10");
 
-    delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+    delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
     mockCurrentProcessFreshDoctor();
     let hostVersionDuringPluginUpdate: string | undefined = "unset";
     updateNpmInstalledPlugins.mockImplementation(async () => {
-      hostVersionDuringPluginUpdate = process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+      hostVersionDuringPluginUpdate = process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
       return { changed: false, config: baseConfig, outcomes: [] };
     });
 
@@ -3698,28 +3698,28 @@ describe("update-cli", () => {
         expect.objectContaining({ compatibilityHostVersion: "2026.4.10" }),
       );
       // The override is scoped to the plugin convergence and restored afterward.
-      expect(process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBeUndefined();
+      expect(process.env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBeUndefined();
     } finally {
-      delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+      delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
     }
   });
 
   it("runs updated plugin migrations for a plugin-only current-process update", async () => {
     mockGitUpdateAfterMutation();
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
     mockNpmPluginOutcomes([], true);
     let strictValidationEnv: string | undefined;
     vi.mocked(readConfigFileSnapshot).mockImplementation(async (options) => {
       if (!options) {
-        strictValidationEnv = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+        strictValidationEnv = process.env.CARAPACE_UPDATE_IN_PROGRESS;
       }
       return baseSnapshot;
     });
     vi.mocked(runExec).mockImplementationOnce(async (_file, args) => {
       expect(args).toEqual([
-        "/tmp/openclaw-updated-entry.mjs",
+        "/tmp/carapace-updated-entry.mjs",
         "doctor",
         "--repair",
         "--non-interactive",
@@ -3752,28 +3752,28 @@ describe("update-cli", () => {
     expect(spawn).not.toHaveBeenCalled();
     const doctorCall = vi.mocked(runExec).mock.calls.find(([, args]) => args[1] === "doctor");
     expect(doctorCall?.[2]).toMatchObject({
-      env: { OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1" },
+      env: { CARAPACE_UPDATE_POST_CORE_CONVERGENCE: "1" },
     });
     const strictValidationCall = vi
       .mocked(runExec)
       .mock.calls.find(([, args]) => args[1] === "config" && args[2] === "validate");
     expect(strictValidationCall?.[2]).toMatchObject({
-      env: { OPENCLAW_UPDATE_IN_PROGRESS: "0" },
+      env: { CARAPACE_UPDATE_IN_PROGRESS: "0" },
     });
   });
 
   it("runs the fresh plugin doctor with the selected Node runner", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
-    await completeChangedPostCorePluginUpdate({ nodeRunner: "/opt/openclaw-service/bin/node" });
+    await completeChangedPostCorePluginUpdate({ nodeRunner: "/opt/carapace-service/bin/node" });
 
-    expect(vi.mocked(runExec).mock.calls[0]?.[0]).toBe("/opt/openclaw-service/bin/node");
+    expect(vi.mocked(runExec).mock.calls[0]?.[0]).toBe("/opt/carapace-service/bin/node");
   });
 
   it("runs the fresh plugin doctor when the migration owner changed even if config is valid", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
     const result = await completeChangedPostCorePluginUpdate();
 
@@ -3784,7 +3784,7 @@ describe("update-cli", () => {
 
   it("returns a structured error when the fresh plugin doctor cannot run", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
     vi.mocked(runExec).mockRejectedValueOnce(
       Object.assign(new Error("Command failed: " + "long-argv-prefix ".repeat(100)), {
@@ -3805,7 +3805,7 @@ describe("update-cli", () => {
 
   it("keeps an invalid config authoritative after a fresh plugin doctor failure", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
     vi.mocked(runExec)
       .mockRejectedValueOnce(new Error("doctor process failed"))
@@ -3860,14 +3860,14 @@ describe("update-cli", () => {
         return child;
       });
 
-      await withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: handoff }, async () => {
+      await withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: handoff }, async () => {
         await expect(updateCommand({ yes: true, json: true })).rejects.toEqual(
           new ExitError(expectedExit),
         );
       });
 
       expect(defaultRuntime.exit).not.toHaveBeenCalled();
-      expect(spawnCall()?.[2]?.env?.OPENCLAW_UPDATE_RUN_HANDOFF).toBe(handoff);
+      expect(spawnCall()?.[2]?.env?.CARAPACE_UPDATE_RUN_HANDOFF).toBe(handoff);
       expect(lastWriteJsonCall()).toMatchObject({
         status: "error",
         reason: "post-core-update-failed",
@@ -3879,7 +3879,7 @@ describe("update-cli", () => {
 
   it("post-core resume returns package work without running core update or Doctor completion", async () => {
     readPackageVersion.mockResolvedValue("2026.9.4");
-    await runPostCoreCommand({ restart: false }, { OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1" });
+    await runPostCoreCommand({ restart: false }, { CARAPACE_UPDATE_POST_CORE_CONVERGENCE: "1" });
 
     expect(runGatewayUpdate).not.toHaveBeenCalled();
     const installCall = (
@@ -4067,7 +4067,7 @@ describe("update-cli", () => {
   it.each([false, true])(
     "post-core resume children leave run ownership with the parent (forwarded run=%s)",
     async (forwardedRun) => {
-      const resultDir = createCaseDir("openclaw-post-core-result");
+      const resultDir = createCaseDir("carapace-post-core-result");
       const resultPath = path.join(resultDir, "plugins.json");
       await fs.mkdir(resultDir, { recursive: true });
       const parentRun = forwardedRun
@@ -4082,8 +4082,8 @@ describe("update-cli", () => {
       await runPostCoreCommand(
         { restart: false },
         {
-          OPENCLAW_UPDATE_POST_CORE_RESULT_PATH: resultPath,
-          OPENCLAW_UPDATE_RUN_ID: parentRun?.runId,
+          CARAPACE_UPDATE_POST_CORE_RESULT_PATH: resultPath,
+          CARAPACE_UPDATE_RUN_ID: parentRun?.runId,
         },
       );
 
@@ -4099,18 +4099,18 @@ describe("update-cli", () => {
 
   it("post-core resume mode uses the parent install records snapshot for missing payload warnings", async () => {
     mockNoopPostUpdatePluginConvergence();
-    const resultDir = createCaseDir("openclaw-post-core-records");
+    const resultDir = createCaseDir("carapace-post-core-records");
     const recordsPath = path.join(resultDir, "plugin-install-records.json");
     const installPath = path.join(resultDir, "demo-plugin");
     await fs.mkdir(installPath, { recursive: true });
     await writeJsonFixture(recordsPath, {
-      demo: { source: "npm", spec: "@openclaw/demo@1.0.0", installPath },
+      demo: { source: "npm", spec: "@carapace/demo@1.0.0", installPath },
     });
     pathExists.mockImplementation(async (candidate: string) => candidate === installPath);
 
     await runPostCoreCommand(
       { json: true, restart: false },
-      { OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH: recordsPath },
+      { CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH: recordsPath },
     );
 
     const jsonOutput = lastWriteJsonCall() as UpdateRunResult | undefined;
@@ -4123,20 +4123,20 @@ describe("update-cli", () => {
   });
 
   it("post-core resume mode prefers post-doctor disk install records over the stale parent snapshot", async () => {
-    const resultDir = createCaseDir("openclaw-post-core-disk-records");
+    const resultDir = createCaseDir("carapace-post-core-disk-records");
     const recordsPath = path.join(resultDir, "plugin-install-records.json");
     await fs.mkdir(resultDir, { recursive: true });
     await writeJsonFixture(recordsPath, {
       stale: {
         source: "npm",
-        spec: "@openclaw/stale@1.0.0",
+        spec: "@carapace/stale@1.0.0",
         installPath: "/tmp/stale-plugin",
       },
     });
     const postDoctorRecords = {
       codex: {
         source: "npm",
-        spec: "@openclaw/codex@2026.5.17",
+        spec: "@carapace/codex@2026.5.17",
         installPath: "/tmp/codex-plugin",
       },
     } satisfies Record<string, PluginInstallRecord>;
@@ -4144,7 +4144,7 @@ describe("update-cli", () => {
 
     await runPostCoreCommand(
       { json: true, restart: false },
-      { OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH: recordsPath },
+      { CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH: recordsPath },
     );
 
     expect(syncPluginCall()?.config?.plugins?.installs).toEqual(postDoctorRecords);
@@ -4158,8 +4158,8 @@ describe("update-cli", () => {
     await runPostCoreCommand(
       { restart: false },
       {
-        OPENCLAW_UPDATE_POST_CORE_CHANNEL: "dev",
-        OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL: "dev",
+        CARAPACE_UPDATE_POST_CORE_CHANNEL: "dev",
+        CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL: "dev",
       },
     );
 
@@ -4260,8 +4260,8 @@ describe("update-cli", () => {
     await runPostCoreCommand(
       { restart: false },
       {
-        OPENCLAW_UPDATE_POST_CORE_CHANNEL: "dev",
-        OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL: "dev",
+        CARAPACE_UPDATE_POST_CORE_CHANNEL: "dev",
+        CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL: "dev",
       },
     );
 
@@ -4294,7 +4294,7 @@ describe("update-cli", () => {
       },
     ]);
 
-    await runPostCoreCommand({ restart: false }, { OPENCLAW_UPDATE_POST_CORE_CHANNEL: "beta" });
+    await runPostCoreCommand({ restart: false }, { CARAPACE_UPDATE_POST_CORE_CHANNEL: "beta" });
 
     const logs = vi.mocked(runtimeCapture.log).mock.calls.map((call) => String(call[0]));
     expect(logs.some((line) => line.includes("npm plugins: 1 updated, 0 unchanged."))).toBe(true);
@@ -4331,8 +4331,8 @@ describe("update-cli", () => {
     await expect(
       onIntegrityDrift({
         pluginId: "demo",
-        spec: "@openclaw/demo@1.0.0",
-        resolvedSpec: "@openclaw/demo@1.0.0",
+        spec: "@carapace/demo@1.0.0",
+        resolvedSpec: "@carapace/demo@1.0.0",
         expectedIntegrity: "sha512-old",
         actualIntegrity: "sha512-new",
       }),
@@ -4418,7 +4418,7 @@ describe("update-cli", () => {
       ]);
       if (source === "bridge") {
         expect(jsonOutput?.postUpdate?.plugins?.sync.errors).toEqual([
-          'Failed to update consent-fixture: Operator review token changed.\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "openclaw update repair".',
+          'Failed to update consent-fixture: Operator review token changed.\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "carapace update repair".',
         ]);
       }
       expect(defaultRuntime.exit).not.toHaveBeenCalled();
@@ -4453,7 +4453,7 @@ describe("update-cli", () => {
   it("keeps json update output successful when post-core plugin updates warn", async () => {
     updateNpmInstalledPlugins.mockImplementationOnce(
       async (params: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         onIntegrityDrift?: (drift: {
           pluginId: string;
           spec: string;
@@ -4466,8 +4466,8 @@ describe("update-cli", () => {
       }) => {
         const proceed = await params.onIntegrityDrift?.({
           pluginId: "demo",
-          spec: "@openclaw/demo@1.0.0",
-          resolvedSpec: "@openclaw/demo@1.0.0",
+          spec: "@carapace/demo@1.0.0",
+          resolvedSpec: "@carapace/demo@1.0.0",
           resolvedVersion: "1.0.0",
           expectedIntegrity: "sha512-old",
           actualIntegrity: "sha512-new",
@@ -4482,7 +4482,7 @@ describe("update-cli", () => {
               status: "error",
               message:
                 proceed === false
-                  ? "Failed to update demo: aborted: npm package integrity drift detected for @openclaw/demo@1.0.0"
+                  ? "Failed to update demo: aborted: npm package integrity drift detected for @carapace/demo@1.0.0"
                   : "unexpected drift continuation",
             },
           ],
@@ -4500,8 +4500,8 @@ describe("update-cli", () => {
     expect(jsonOutput?.postUpdate?.plugins?.integrityDrifts).toEqual([
       {
         pluginId: "demo",
-        spec: "@openclaw/demo@1.0.0",
-        resolvedSpec: "@openclaw/demo@1.0.0",
+        spec: "@carapace/demo@1.0.0",
+        resolvedSpec: "@carapace/demo@1.0.0",
         resolvedVersion: "1.0.0",
         expectedIntegrity: "sha512-old",
         actualIntegrity: "sha512-new",
@@ -4511,16 +4511,16 @@ describe("update-cli", () => {
     expect(jsonOutput?.postUpdate?.plugins?.status).toBe("warning");
     expect(pluginWarning(jsonOutput)?.pluginId).toBe("demo");
     expect(pluginWarning(jsonOutput)?.guidance).toEqual([
-      "Run openclaw update repair to retry post-update plugin repair.",
-      "Run openclaw plugins inspect demo --runtime --json for details.",
+      "Run carapace update repair to retry post-update plugin repair.",
+      "Run carapace plugins inspect demo --runtime --json for details.",
     ]);
     expect(pluginWarning(jsonOutput)?.reason).toContain("npm package integrity drift");
     expect(jsonOutput?.postUpdate?.plugins?.npm.outcomes[0]?.status).toBe("error");
     expect(jsonOutput?.postUpdate?.plugins?.npm.outcomes[0]?.message).toContain(
-      "Run openclaw update repair to retry post-update plugin repair.",
+      "Run carapace update repair to retry post-update plugin repair.",
     );
     expect(jsonOutput?.postUpdate?.plugins?.npm.outcomes[0]?.message).toContain(
-      "Run openclaw plugins inspect demo --runtime --json for details.",
+      "Run carapace plugins inspect demo --runtime --json for details.",
     );
   });
 
@@ -4532,7 +4532,7 @@ describe("update-cli", () => {
       "╰────────────────────────────────────────────────────────────────────────╯";
     updateNpmInstalledPlugins.mockImplementationOnce(
       async (params: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         logger?: { terminalLinks?: boolean; warn?: (message: string) => void };
       }) => {
         expect(params.logger?.terminalLinks).toBe(false);
@@ -4563,13 +4563,13 @@ describe("update-cli", () => {
 
   it("includes colored ClawHub trust warnings in json post-core plugin output", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
     const trustWarning = clawHubRiskWarning;
     const coloredTrustWarning = `\u001b[33m${trustWarning}\u001b[39m`;
     updateNpmInstalledPlugins.mockImplementationOnce(
       async (params: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         logger?: { terminalLinks?: boolean; warn?: (message: string) => void };
       }) => {
         expect(params.logger?.terminalLinks).toBe(false);
@@ -4621,7 +4621,7 @@ describe("update-cli", () => {
   it("does not print duplicate failed ClawHub sync trust warnings in human post-core output", async () => {
     const trustWarning = clawHubSuspiciousPayloadWarning;
     syncPluginsForUpdateChannel.mockImplementationOnce(
-      async (params: { config: OpenClawConfig; logger?: { warn?: (message: string) => void } }) => {
+      async (params: { config: CarapaceConfig; logger?: { warn?: (message: string) => void } }) => {
         params.logger?.warn?.(trustWarning);
         return pluginSyncResult(params.config, false, {
           warnings: [trustWarning],
@@ -4639,7 +4639,7 @@ describe("update-cli", () => {
   it("does not print duplicate ClawHub update trust warnings in human post-core output", async () => {
     const trustWarning = clawHubSuspiciousPayloadWarning;
     updateNpmInstalledPlugins.mockImplementationOnce(
-      async (params: { config: OpenClawConfig; logger?: { warn?: (message: string) => void } }) => {
+      async (params: { config: CarapaceConfig; logger?: { warn?: (message: string) => void } }) => {
         params.logger?.warn?.(trustWarning);
         return {
           changed: false,
@@ -4664,13 +4664,13 @@ describe("update-cli", () => {
     const trustWarningOccurrences = output.split(trustWarning).length - 1;
     expect(trustWarningOccurrences).toBe(1);
     expect(output).toContain("Skipped demo ClawHub update");
-    expect(output).toContain("Run openclaw update repair to retry post-update plugin repair.");
-    expect(output).toContain("Run openclaw plugins inspect demo --runtime --json for details.");
+    expect(output).toContain("Run carapace update repair to retry post-update plugin repair.");
+    expect(output).toContain("Run carapace plugins inspect demo --runtime --json for details.");
   });
 
   it("detects missing plugin payloads from persisted records before npm updates", async () => {
     mockNoopPostUpdatePluginConvergence();
-    const installPath = createCaseDir("openclaw-missing-plugin-payload");
+    const installPath = createCaseDir("carapace-missing-plugin-payload");
     fsSync.mkdirSync(installPath, { recursive: true });
     const config = {
       plugins: {
@@ -4678,12 +4678,12 @@ describe("update-cli", () => {
           demo: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(configSnapshot(config));
     loadInstalledPluginIndexInstallRecords.mockResolvedValue({
       demo: {
         source: "npm",
-        spec: "@openclaw/demo@1.0.0",
+        spec: "@carapace/demo@1.0.0",
         installPath,
       },
     });
@@ -4722,13 +4722,13 @@ describe("update-cli", () => {
     expect(getErrorOutput()).not.toContain("Update failed during plugin post-update sync.");
     const logs = getLogOutput();
     expect(logs).toContain("Failed to update demo: registry timeout");
-    expect(logs).toContain("Run openclaw update repair to retry post-update plugin repair.");
-    expect(logs).toContain("Run openclaw plugins inspect demo --runtime --json for details.");
+    expect(logs).toContain("Run carapace update repair to retry post-update plugin repair.");
+    expect(logs).toContain("Run carapace plugins inspect demo --runtime --json for details.");
   });
 
   it("marks disabled-after-failure plugin skips as post-update warnings", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValueOnce(
-      "/tmp/openclaw-updated-entry.mjs",
+      "/tmp/carapace-updated-entry.mjs",
     );
     mockNpmPluginOutcomes(
       [
@@ -4736,7 +4736,7 @@ describe("update-cli", () => {
           pluginId: "demo",
           status: "skipped",
           message:
-            'Disabled "demo" after plugin update failure; OpenClaw will continue without it. Failed to update demo: registry timeout',
+            'Disabled "demo" after plugin update failure; Carapace will continue without it. Failed to update demo: registry timeout',
         },
       ],
       true,
@@ -4749,8 +4749,8 @@ describe("update-cli", () => {
     expect(jsonOutput?.postUpdate?.plugins?.status).toBe("warning");
     expect(pluginWarning(jsonOutput)?.pluginId).toBe("demo");
     expect(pluginWarning(jsonOutput)?.guidance).toEqual([
-      "Run openclaw update repair to retry post-update plugin repair.",
-      "Run openclaw plugins inspect demo --runtime --json for details.",
+      "Run carapace update repair to retry post-update plugin repair.",
+      "Run carapace plugins inspect demo --runtime --json for details.",
     ]);
     expect(pluginOutcome(jsonOutput)?.pluginId).toBe("demo");
     expect(pluginOutcome(jsonOutput)?.status).toBe("skipped");
@@ -4782,7 +4782,7 @@ describe("update-cli", () => {
     expect(pluginWarning(jsonOutput)?.reason).toContain("ClawHub blocked this release");
     expect(pluginOutcome(jsonOutput)?.pluginId).toBe("demo");
     expect(pluginOutcome(jsonOutput)?.status).toBe("skipped");
-    expect(pluginOutcome(jsonOutput)?.message).toContain("Run openclaw update repair");
+    expect(pluginOutcome(jsonOutput)?.message).toContain("Run carapace update repair");
   });
 
   it.each([
@@ -4810,7 +4810,7 @@ describe("update-cli", () => {
       const env = (options as { env?: NodeJS.ProcessEnv }).env;
       queueMicrotask(() => {
         void (async () => {
-          const resultPath = env?.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH;
+          const resultPath = env?.CARAPACE_UPDATE_POST_CORE_RESULT_PATH;
           if (resultPath) {
             await fs.writeFile(
               resultPath,
@@ -4822,10 +4822,10 @@ describe("update-cli", () => {
                     pluginId: "demo",
                     reason: "Failed to update demo: registry timeout",
                     message:
-                      'Plugin "demo" could not be processed after the core update: Failed to update demo: registry timeout Run openclaw update repair to retry post-update plugin repair. Run openclaw plugins inspect demo --runtime --json for details.',
+                      'Plugin "demo" could not be processed after the core update: Failed to update demo: registry timeout Run carapace update repair to retry post-update plugin repair. Run carapace plugins inspect demo --runtime --json for details.',
                     guidance: [
-                      "Run openclaw update repair to retry post-update plugin repair.",
-                      "Run openclaw plugins inspect demo --runtime --json for details.",
+                      "Run carapace update repair to retry post-update plugin repair.",
+                      "Run carapace plugins inspect demo --runtime --json for details.",
                     ],
                   },
                 ],
@@ -4865,7 +4865,7 @@ describe("update-cli", () => {
     expect(jsonOutput?.status).toBe("ok");
     expect(jsonOutput?.reason).toBeUndefined();
     expect(jsonOutput?.postUpdate?.plugins?.warnings?.[0]?.guidance).toContain(
-      "Run openclaw update repair to retry post-update plugin repair.",
+      "Run carapace update repair to retry post-update plugin repair.",
     );
     expect(jsonOutput?.postUpdate?.plugins?.npm.outcomes[0]?.message).toContain("registry timeout");
   });
@@ -4887,7 +4887,7 @@ describe("update-cli", () => {
           runDaemonInstall,
           runRestartScript,
           runDaemonRestart,
-          launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+          launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
         );
 
         const logs = getLogOutput();
@@ -4907,7 +4907,7 @@ describe("update-cli", () => {
         expect(cleanupStaleManagedServiceUpdateHandoffs).not.toHaveBeenCalled();
         expect(runGatewayUpdate).not.toHaveBeenCalled();
         expect(
-          launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+          launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
         ).not.toHaveBeenCalled();
       },
     },
@@ -4927,8 +4927,8 @@ describe("update-cli", () => {
   });
 
   it("does not clean managed-service handoffs during a JSON dry run", async () => {
-    const stateDir = tempDirs.make("openclaw-update-run-preview-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-update-run-preview-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       await updateCommand({ dryRun: true, json: true, channel: "beta", acceptCapabilities: true });
       const output = lastWriteJsonCall() as { runId: string };
       expect(listUpdateRuns()).toMatchObject([
@@ -4956,8 +4956,8 @@ describe("update-cli", () => {
   it.each(["progress initialization", "triage preparation"] as const)(
     "finishes the admitted run when %s fails before update execution",
     async (boundary) => {
-      const { closeOpenClawStateDatabaseByPath } = await import("../state/openclaw-state-db.js");
-      const stateDir = tempDirs.make("openclaw-update-run-initialization-");
+      const { closeCarapaceStateDatabaseByPath } = await import("../state/carapace-state-db.js");
+      const stateDir = tempDirs.make("carapace-update-run-initialization-");
       const failure = new Error(`${boundary} failed`);
       if (boundary === "progress initialization") {
         const progress = await import("./update-cli/progress.js");
@@ -4969,7 +4969,7 @@ describe("update-cli", () => {
         vi.spyOn(triage, "prepareUpdateFailureTriage").mockRejectedValueOnce(failure);
       }
 
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await expect(updateCommand({ yes: true, json: true })).rejects.toBe(failure);
 
         const runs = listUpdateRuns();
@@ -4989,8 +4989,8 @@ describe("update-cli", () => {
         });
         expect(runs[0]?.steps.some((step) => step.status === "in_progress")).toBe(false);
       }).finally(() => {
-        closeOpenClawStateDatabaseByPath(
-          resolveOpenClawStateSqlitePath({ ...process.env, OPENCLAW_STATE_DIR: stateDir }),
+        closeCarapaceStateDatabaseByPath(
+          resolveCarapaceStateSqlitePath({ ...process.env, CARAPACE_STATE_DIR: stateDir }),
         );
       });
 
@@ -5007,7 +5007,7 @@ describe("update-cli", () => {
         doctorCommand,
         syncPluginsForUpdateChannel,
         updateNpmInstalledPlugins,
-        launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+        launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
       );
       expect(packageInstallCommandCall()).toBeUndefined();
     },
@@ -5033,7 +5033,7 @@ describe("update-cli", () => {
     mockOwnedGitService();
     mockGitUpdateAfterMutation(makeOkUpdateResult({ root: process.cwd() }));
 
-    await withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: "1" }, async () => {
+    await withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: "1" }, async () => {
       await expect(updateCommand({ yes: true, json: true })).rejects.toEqual(new ExitError(1));
 
       expect(postUpdate.finishUpdate).toHaveBeenCalledOnce();
@@ -5202,8 +5202,8 @@ describe("update-cli", () => {
       const destination = path.join(fixture, "checkout");
       let destinationVisibleAtAdmission: boolean | undefined;
       if (kind === "git") {
-        await writeOpenClawPackageFixture(root, "1.0.0", { git: true });
-        vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+        await writeCarapacePackageFixture(root, "1.0.0", { git: true });
+        vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
       } else {
         mockFileBackedPathExists();
         mockNpmGlobalRoot(nodeModules);
@@ -5215,7 +5215,7 @@ describe("update-cli", () => {
         mockFileBackedPathExists();
         mockNpmGlobalCommands(nodeModules, async (argv) => {
           if (argv[0] === "git" && argv[1] === "clone") {
-            await writeOpenClawPackageFixture(argv.at(-1)!, "1.0.0", { git: true });
+            await writeCarapacePackageFixture(argv.at(-1)!, "1.0.0", { git: true });
             return commandResult();
           }
           return undefined;
@@ -5229,9 +5229,9 @@ describe("update-cli", () => {
           "run",
         ],
         {
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: managedState,
-          OPENCLAW_CONFIG_PATH: path.join(managedState, "openclaw.json"),
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: managedState,
+          CARAPACE_CONFIG_PATH: path.join(managedState, "carapace.json"),
         },
       );
       serviceLoaded.mockResolvedValue(true);
@@ -5250,20 +5250,20 @@ describe("update-cli", () => {
         });
       }
       const inspectedStates: Array<string | undefined> = [];
-      databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockImplementation(({ env }) => {
-        inspectedStates.push(env.OPENCLAW_STATE_DIR);
+      databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockImplementation(({ env }) => {
+        inspectedStates.push(env.CARAPACE_STATE_DIR);
         return {
           incompatible:
-            env.OPENCLAW_STATE_DIR === managedState || callerIncompatible
+            env.CARAPACE_STATE_DIR === managedState || callerIncompatible
               ? [
                   {
                     kind: "agent",
                     path: path.join(
-                      env.OPENCLAW_STATE_DIR!,
+                      env.CARAPACE_STATE_DIR!,
                       "agents",
                       "worker",
                       "agent",
-                      "openclaw-agent.sqlite",
+                      "carapace-agent.sqlite",
                     ),
                     foundVersion: 999,
                     supportedVersion: 11,
@@ -5275,10 +5275,10 @@ describe("update-cli", () => {
       });
       await withEnvAsync(
         {
-          OPENCLAW_PROFILE: "personal",
-          OPENCLAW_STATE_DIR: callerState,
-          OPENCLAW_CONFIG_PATH: path.join(callerState, "openclaw.json"),
-          OPENCLAW_GIT_DIR: destination,
+          CARAPACE_PROFILE: "personal",
+          CARAPACE_STATE_DIR: callerState,
+          CARAPACE_CONFIG_PATH: path.join(callerState, "carapace.json"),
+          CARAPACE_GIT_DIR: destination,
         },
         async () => {
           if (kind === "package-preview") {
@@ -5300,10 +5300,10 @@ describe("update-cli", () => {
       expect(inspectedStates).toContain(managedState);
       if (callerIncompatible) {
         expect(getErrorOutput()).toContain(
-          path.join(callerState, "agents", "worker", "agent", "openclaw-agent.sqlite"),
+          path.join(callerState, "agents", "worker", "agent", "carapace-agent.sqlite"),
         );
         expect(getErrorOutput()).toContain(
-          path.join(managedState, "agents", "worker", "agent", "openclaw-agent.sqlite"),
+          path.join(managedState, "agents", "worker", "agent", "carapace-agent.sqlite"),
         );
       }
       expectNoSideEffects(
@@ -5312,7 +5312,7 @@ describe("update-cli", () => {
         serviceRestart,
         managedUpdateHandoff.start,
         cleanupStaleManagedServiceUpdateHandoffs,
-        launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+        launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
       );
       expect(packageInstallCommandCall()).toBeUndefined();
       if (kind === "package-to-git") {
@@ -5323,15 +5323,15 @@ describe("update-cli", () => {
   );
 
   it("refuses an incompatible package target before service stop or install", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-schema-refusal"));
+    mockPackageInstallStatus(createCaseDir("carapace-schema-refusal"));
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
       packageTargetStatus({ schemaVersions: { state: 3, agent: 9 } }),
     );
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockReturnValue({
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockReturnValue({
       incompatible: [
         {
           kind: "agent",
-          path: "/tmp/openclaw/agents/main/agent/openclaw-agent.sqlite",
+          path: "/tmp/carapace/agents/main/agent/carapace-agent.sqlite",
           agentId: "main",
           foundVersion: 11,
           supportedVersion: 9,
@@ -5343,14 +5343,14 @@ describe("update-cli", () => {
 
     await expect(updateCommand({ yes: true })).rejects.toEqual(new ExitError(1));
 
-    expect(databasePreflightMocks.preflightOpenClawDatabaseSchemas).toHaveBeenCalledWith({
+    expect(databasePreflightMocks.preflightCarapaceDatabaseSchemas).toHaveBeenCalledWith({
       // The inspection snapshot retains the scoped marker after the updater
       // restores process.env on refusal.
-      env: { ...process.env, OPENCLAW_UPDATE_IN_PROGRESS: "1" },
+      env: { ...process.env, CARAPACE_UPDATE_IN_PROGRESS: "1" },
       supportedVersions: { state: 3, agent: 9 },
       configuredAgentDatabaseTargets: [],
       configuredAgentDatabaseCandidatePaths: [
-        path.join(profileStateDir(), "agents", "main", "agent", "openclaw-agent.sqlite"),
+        path.join(profileStateDir(), "agents", "main", "agent", "carapace-agent.sqlite"),
       ],
     });
     expect(serviceStop).not.toHaveBeenCalled();
@@ -5368,18 +5368,18 @@ describe("update-cli", () => {
     "refuses a newly owned service after an initially %s Git admission snapshot",
     async (initial) => {
       const root = createCaseDir(`new-service-${initial}`);
-      await writeOpenClawPackageFixture(root, "1.0.0", { git: true });
-      vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+      await writeCarapacePackageFixture(root, "1.0.0", { git: true });
+      vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
       if (initial === "foreign") {
         const foreignRoot = createCaseDir("foreign-service-root");
-        const foreignEntry = await writeOpenClawPackageFixture(foreignRoot, "1.0.0");
+        const foreignEntry = await writeCarapacePackageFixture(foreignRoot, "1.0.0");
         mockRunningManagedGateway(["node", foreignEntry, "gateway", "run"]);
       }
       const managedState = profileStateDir("work");
       let admitted = false;
-      databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockImplementation(({ env }) => ({
+      databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockImplementation(({ env }) => ({
         incompatible:
-          env.OPENCLAW_STATE_DIR === managedState
+          env.CARAPACE_STATE_DIR === managedState
             ? [
                 {
                   kind: "agent",
@@ -5393,9 +5393,9 @@ describe("update-cli", () => {
       }));
       vi.mocked(runGatewayUpdate).mockImplementationOnce(async (options) => {
         primeServiceCommand(["node", path.join(root, "dist", "index.js"), "gateway", "run"], {
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: managedState,
-          OPENCLAW_CONFIG_PATH: path.join(managedState, "openclaw.json"),
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: managedState,
+          CARAPACE_CONFIG_PATH: path.join(managedState, "carapace.json"),
         });
         serviceLoaded.mockResolvedValue(true);
         await options?.beforeGitMutation?.({ schemaVersions: { state: 3, agent: 11 } });
@@ -5413,7 +5413,7 @@ describe("update-cli", () => {
       expectNoSideEffects(
         serviceStop,
         cleanupStaleManagedServiceUpdateHandoffs,
-        launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+        launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
       );
       expect(lastWriteJsonCall()).toMatchObject({
         status: "error",
@@ -5434,7 +5434,7 @@ describe("update-cli", () => {
       runGatewayUpdate,
       serviceStop,
       cleanupStaleManagedServiceUpdateHandoffs,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
     expect(packageInstallCommandCall()).toBeUndefined();
   });
@@ -5449,7 +5449,7 @@ describe("update-cli", () => {
     "git metadata",
     "git schema",
   ] as const)("returns verified handoff recovery for a %s refusal", async (failure) => {
-    const tempDir = tempDirs.make("openclaw-update-handoff-preflight-");
+    const tempDir = tempDirs.make("carapace-update-handoff-preflight-");
     const { nodeModules } = await setupInstalledPackageRoot(tempDir);
     const gitRoot = path.join(tempDir, "checkout");
     const packageTarget = failure.startsWith("package ");
@@ -5468,7 +5468,7 @@ describe("update-cli", () => {
       await fs.writeFile(path.join(gitRoot, "keep.txt"), "operator data\n");
     }
     if (failure.startsWith("git ")) {
-      await writeOpenClawPackageFixture(gitRoot, "2026.8.18", { git: true });
+      await writeCarapacePackageFixture(gitRoot, "2026.8.18", { git: true });
       vi.mocked(runGatewayUpdate).mockImplementationOnce(async (options) => {
         await options?.beforeGitMutation?.(
           failure === "git metadata"
@@ -5487,9 +5487,9 @@ describe("update-cli", () => {
       vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
         packageTargetStatus({ schemaVersions: { state: 3, agent: 11 } }),
       );
-      databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockReturnValue({
+      databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockReturnValue({
         incompatible: [],
-        indeterminate: [{ kind: "state", path: "/tmp/openclaw.sqlite", reason: "database busy" }],
+        indeterminate: [{ kind: "state", path: "/tmp/carapace.sqlite", reason: "database busy" }],
       });
     }
     if (failure === "package runtime") {
@@ -5497,7 +5497,7 @@ describe("update-cli", () => {
     }
 
     await withEnvAsync(
-      { OPENCLAW_UPDATE_RUN_HANDOFF: "1", OPENCLAW_GIT_DIR: gitRoot },
+      { CARAPACE_UPDATE_RUN_HANDOFF: "1", CARAPACE_GIT_DIR: gitRoot },
       async () => {
         await expect(
           updateCommand({ channel: packageTarget ? "beta" : "dev", yes: true, json: true }),
@@ -5520,48 +5520,48 @@ describe("update-cli", () => {
   });
 
   it("skips package schema preflight when target metadata is missing", async () => {
-    await mockPackageInstallAtCaseDir("openclaw-schema-missing");
+    await mockPackageInstallAtCaseDir("carapace-schema-missing");
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(packageTargetStatus());
 
     await updateCommand({ yes: true, restart: false });
 
-    expect(databasePreflightMocks.preflightOpenClawDatabaseSchemas).not.toHaveBeenCalled();
+    expect(databasePreflightMocks.preflightCarapaceDatabaseSchemas).not.toHaveBeenCalled();
     expect(packageInstallCommandCall()).toBeDefined();
   });
 
   it("refuses a package update when exact target metadata lookup fails", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-schema-metadata-failure"));
+    mockPackageInstallStatus(createCaseDir("carapace-schema-metadata-failure"));
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
       packageTargetStatus({ version: null, nodeEngine: null, error: "registry timeout" }),
     );
 
     await expect(updateCommand({ yes: true })).rejects.toEqual(new ExitError(1));
 
-    expectNoSideEffects(databasePreflightMocks.preflightOpenClawDatabaseSchemas, serviceStop);
+    expectNoSideEffects(databasePreflightMocks.preflightCarapaceDatabaseSchemas, serviceStop);
     expect(packageInstallCommandCall()?.[0]).toBeUndefined();
-    expect(getLogOutput()).toContain("could not inspect exact package target openclaw@9999.0.0");
+    expect(getLogOutput()).toContain("could not inspect exact package target carapace@9999.0.0");
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
   });
 
   it("continues a package update when target schemas are compatible", async () => {
-    await mockPackageInstallAtCaseDir("openclaw-schema-compatible");
+    await mockPackageInstallAtCaseDir("carapace-schema-compatible");
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
       packageTargetStatus({ schemaVersions: { state: 3, agent: 11 } }),
     );
 
     await updateCommand({ yes: true, restart: false });
 
-    expect(databasePreflightMocks.preflightOpenClawDatabaseSchemas).toHaveBeenCalled();
-    for (const [input] of databasePreflightMocks.preflightOpenClawDatabaseSchemas.mock.calls) {
+    expect(databasePreflightMocks.preflightCarapaceDatabaseSchemas).toHaveBeenCalled();
+    for (const [input] of databasePreflightMocks.preflightCarapaceDatabaseSchemas.mock.calls) {
       expect(input).toMatchObject({ supportedVersions: { state: 3, agent: 11 } });
     }
-    expect(packageInstallCommandCall()?.[0]).toContain("openclaw@9999.0.0");
+    expect(packageInstallCommandCall()?.[0]).toContain("carapace@9999.0.0");
   });
 
   it.each([true, false])(
     "uses inspected package runtime requirements when a later lookup disagrees (compatible=%s)",
     async (compatible) => {
-      await mockPackageInstallAtCaseDir("openclaw-runtime-target");
+      await mockPackageInstallAtCaseDir("carapace-runtime-target");
       const inspectedEngine = compatible ? ">=22.19.0" : ">=999.0.0";
       vi.mocked(fetchNpmPackageTargetStatus)
         .mockResolvedValueOnce(packageTargetStatus({ nodeEngine: inspectedEngine }))
@@ -5581,7 +5581,7 @@ describe("update-cli", () => {
       }
 
       if (compatible) {
-        expect(packageInstallCommandCall()?.[0]).toContain("openclaw@9999.0.0");
+        expect(packageInstallCommandCall()?.[0]).toContain("carapace@9999.0.0");
       } else {
         expect(packageInstallCommandCall()?.[0]).toBeUndefined();
         expect(getLogOutput()).toContain("The requested package requires >=999.0.0");
@@ -5591,7 +5591,7 @@ describe("update-cli", () => {
   );
 
   it("previews explicit artifacts without claiming staged plugin admission", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-local-preview"));
+    mockPackageInstallStatus(createCaseDir("carapace-local-preview"));
     await updateCommand({ dryRun: true, json: true, tag: "/tmp/candidate.tgz" });
     expect(lastWriteJsonCall()).toMatchObject({
       dryRun: true,
@@ -5607,7 +5607,7 @@ describe("update-cli", () => {
   });
 
   it("previews the resolved package owner without probing for another manager", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-dry-run-owner"));
+    mockPackageInstallStatus(createCaseDir("carapace-dry-run-owner"));
     resolveGlobalManager.mockResolvedValueOnce("npm").mockResolvedValue("bun");
 
     await updateCommand({ dryRun: true, json: true });
@@ -5618,15 +5618,15 @@ describe("update-cli", () => {
   });
 
   it("does not clean handoffs before rejecting an unknown package owner", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-unknown-owner"));
+    mockPackageInstallStatus(createCaseDir("carapace-unknown-owner"));
     resolveGlobalManager.mockRejectedValueOnce(
       new Error(
-        "Update refused: package manager owner is unknown; no changes were made. Run this OpenClaw install through its active npm, pnpm, or Bun global shim, or reinstall it with that package manager, then retry.",
+        "Update refused: package manager owner is unknown; no changes were made. Run this Carapace install through its active npm, pnpm, or Bun global shim, or reinstall it with that package manager, then retry.",
       ),
     );
 
     await expect(updateCommand({ yes: true, restart: false })).rejects.toThrow(
-      "Update refused: package manager owner is unknown; no changes were made. Run this OpenClaw install through its active npm, pnpm, or Bun global shim, or reinstall it with that package manager, then retry.",
+      "Update refused: package manager owner is unknown; no changes were made. Run this Carapace install through its active npm, pnpm, or Bun global shim, or reinstall it with that package manager, then retry.",
     );
 
     expect(cleanupStaleManagedServiceUpdateHandoffs).not.toHaveBeenCalled();
@@ -5634,15 +5634,15 @@ describe("update-cli", () => {
   });
 
   it("reports an incompatible package target during dry-run", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-schema-dry-run"));
+    mockPackageInstallStatus(createCaseDir("carapace-schema-dry-run"));
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
       packageTargetStatus({ schemaVersions: { state: 2, agent: 9 } }),
     );
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockReturnValue({
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockReturnValue({
       incompatible: [
         {
           kind: "state",
-          path: "/tmp/openclaw/state/openclaw.sqlite",
+          path: "/tmp/carapace/state/carapace.sqlite",
           foundVersion: 3,
           supportedVersion: 2,
         },
@@ -5654,7 +5654,7 @@ describe("update-cli", () => {
 
     const logs = getLogOutput();
     expect(logs).toContain("Would refuse update: state database");
-    expect(logs).toContain("https://docs.openclaw.ai/reference/database-schemas");
+    expect(logs).toContain("https://github.com/Exaggarate/carapace");
     expect(serviceStop).not.toHaveBeenCalled();
     expect(packageInstallCommandCall()?.[0]).toBeUndefined();
     expect(defaultRuntime.exit).not.toHaveBeenCalledWith(1);
@@ -5667,11 +5667,11 @@ describe("update-cli", () => {
       await options?.beforeGitMutation?.({ schemaVersions: { state: 3, agent: 9 } });
       return makeOkUpdateResult({ mode: "git" });
     });
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockReturnValue({
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockReturnValue({
       incompatible: [
         {
           kind: "agent",
-          path: "/tmp/openclaw/agents/main/agent/openclaw-agent.sqlite",
+          path: "/tmp/carapace/agents/main/agent/carapace-agent.sqlite",
           foundVersion: 11,
           supportedVersion: 9,
         },
@@ -5686,14 +5686,14 @@ describe("update-cli", () => {
   });
 
   it("reports indeterminate package databases during dry-run", async () => {
-    mockPackageInstallStatus(createCaseDir("openclaw-schema-indeterminate-dry-run"));
+    mockPackageInstallStatus(createCaseDir("carapace-schema-indeterminate-dry-run"));
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
       packageTargetStatus({ schemaVersions: { state: 3, agent: 11 } }),
     );
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockReturnValue({
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockReturnValue({
       incompatible: [],
       indeterminate: [
-        { kind: "state", path: "/tmp/openclaw/state/openclaw.sqlite", reason: "database busy" },
+        { kind: "state", path: "/tmp/carapace/state/carapace.sqlite", reason: "database busy" },
       ],
     });
 
@@ -5701,7 +5701,7 @@ describe("update-cli", () => {
 
     const logs = getLogOutput();
     expect(logs).toContain(
-      "could not inspect state database /tmp/openclaw/state/openclaw.sqlite: database busy; retry once the gateway releases it",
+      "could not inspect state database /tmp/carapace/state/carapace.sqlite: database busy; retry once the gateway releases it",
     );
   });
 
@@ -5712,19 +5712,19 @@ describe("update-cli", () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(entrypoint);
     mockOwnedGitService(pkgRoot);
     primeServiceCommand([nodeRunner, entrypoint, "gateway", "run"], {
-      OPENCLAW_STATE_DIR: profileStateDir(),
+      CARAPACE_STATE_DIR: profileStateDir(),
     });
     serviceLoaded.mockResolvedValue(true);
     vi.mocked(fetchNpmPackageTargetStatus).mockResolvedValue(
       packageTargetStatus({ schemaVersions: { state: 3, agent: 11 } }),
     );
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockImplementation(({ env }) =>
-      env?.OPENCLAW_STATE_DIR === profileStateDir()
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockImplementation(({ env }) =>
+      env?.CARAPACE_STATE_DIR === profileStateDir()
         ? {
             incompatible: [
               {
                 kind: "agent",
-                path: "/tmp/openclaw/agents/main/agent/openclaw-agent.sqlite",
+                path: "/tmp/carapace/agents/main/agent/carapace-agent.sqlite",
                 foundVersion: 12,
                 supportedVersion: 11,
               },
@@ -5734,15 +5734,15 @@ describe("update-cli", () => {
         : { incompatible: [], indeterminate: [] },
     );
 
-    await withEnvAsync({ OPENCLAW_GATEWAY_PORT: "19999" }, async () => {
+    await withEnvAsync({ CARAPACE_GATEWAY_PORT: "19999" }, async () => {
       await expect(updateCommand({ yes: true, json: true, timeout: "17" })).rejects.toEqual(
         new ExitError(1),
       );
     });
 
     expect(serviceStop).not.toHaveBeenCalled();
-    expect(databasePreflightMocks.preflightOpenClawDatabaseSchemas.mock.calls[1]?.[0].env).toEqual(
-      expect.objectContaining({ OPENCLAW_STATE_DIR: profileStateDir() }),
+    expect(databasePreflightMocks.preflightCarapaceDatabaseSchemas.mock.calls[1]?.[0].env).toEqual(
+      expect.objectContaining({ CARAPACE_STATE_DIR: profileStateDir() }),
     );
     expect(packageInstallCommandCall()?.[0]).toBeUndefined();
     expect(freshRestartCalls()).toEqual([]);
@@ -5753,7 +5753,7 @@ describe("update-cli", () => {
     });
     expect(getTriageFailures()).toContainEqual(
       expect.objectContaining({
-        error: expect.stringContaining("openclaw-agent.sqlite"),
+        error: expect.stringContaining("carapace-agent.sqlite"),
         result: expect.objectContaining({
           reason: "database-schema-preflight",
           steps: [],
@@ -5766,12 +5766,12 @@ describe("update-cli", () => {
   it("refuses a git target that changes after the service stops", async () => {
     const root = createCaseDir("schema-git");
     const sha = "a".repeat(40);
-    await writeOpenClawPackageFixture(root, "1.0.0", {
+    await writeCarapacePackageFixture(root, "1.0.0", {
       git: true,
       builtSha: sha,
       entrySource: "export {};\n",
     });
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
     vi.mocked(runCommandWithTimeout).mockResolvedValue(commandResult({ stdout: sha }));
     mockOwnedGitService(root);
     mockGatewayHealth("1.0.0", "restored", "fixture-original-build");
@@ -5783,13 +5783,13 @@ describe("update-cli", () => {
       await options?.beforeGitMutation?.({ schemaVersions: { state: 3, agent: 11 } });
       return makeOkUpdateResult({ mode: "git" });
     });
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockImplementation(() =>
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockImplementation(() =>
       serviceStop.mock.calls.length === 0
         ? { incompatible: [], indeterminate: [] }
         : {
             incompatible: [],
             indeterminate: [
-              { kind: "agent", path: "/tmp/openclaw-agent.sqlite", reason: "database busy" },
+              { kind: "agent", path: "/tmp/carapace-agent.sqlite", reason: "database busy" },
             ],
           },
     );
@@ -5799,7 +5799,7 @@ describe("update-cli", () => {
     expect(serviceStop).toHaveBeenCalledOnce();
     const stoppedAt = serviceStop.mock.invocationCallOrder[0]!;
     const schemaCalls =
-      databasePreflightMocks.preflightOpenClawDatabaseSchemas.mock.invocationCallOrder;
+      databasePreflightMocks.preflightCarapaceDatabaseSchemas.mock.invocationCallOrder;
     expect(schemaCalls.some((order) => order < stoppedAt)).toBe(true);
     expect(schemaCalls.some((order) => order > stoppedAt)).toBe(true);
     expect(freshRestartCalls()).toEqual([
@@ -5823,11 +5823,11 @@ describe("update-cli", () => {
       await options?.beforeGitMutation?.({ schemaVersions: { state: 3, agent: 11 } });
       return makeOkUpdateResult({ mode: "git" });
     });
-    databasePreflightMocks.preflightOpenClawDatabaseSchemas
+    databasePreflightMocks.preflightCarapaceDatabaseSchemas
       .mockReturnValueOnce({ incompatible: [], indeterminate: [] })
       .mockReturnValueOnce({
         incompatible: [],
-        indeterminate: [{ kind: "state", path: "/tmp/openclaw.sqlite", reason: "database busy" }],
+        indeterminate: [{ kind: "state", path: "/tmp/carapace.sqlite", reason: "database busy" }],
       });
 
     await expect(updateCommand({ yes: true })).rejects.toEqual(new ExitError(1));
@@ -5844,7 +5844,7 @@ describe("update-cli", () => {
         await updateStatusCommand({ json: false });
       },
       assert: () => {
-        expect(getLogOutput()).toContain("OpenClaw update status");
+        expect(getLogOutput()).toContain("Carapace update status");
         expect(checkUpdateStatus).toHaveBeenCalledWith(
           expect.objectContaining({ useDetachedDevUpstream: false }),
         );
@@ -5869,11 +5869,11 @@ describe("update-cli", () => {
     vi.mocked(readConfigFileSnapshot).mockResolvedValue({
       ...baseSnapshot,
       valid: false,
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
     });
     vi.mocked(readSourceConfigBestEffort).mockResolvedValue({
       update: { channel: "dev" },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     await updateStatusCommand({ json: true });
 
@@ -5889,7 +5889,7 @@ describe("update-cli", () => {
 
   it("parses update status --json as the subcommand option", async () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("carapace");
     program.enablePositionalOptions();
     let seenJson = false;
     const update = program.command("update").option("--json", "", false);
@@ -5900,7 +5900,7 @@ describe("update-cli", () => {
         seenJson = Boolean(opts.json);
       });
 
-    await program.parseAsync(["node", "openclaw", "update", "status", "--json"]);
+    await program.parseAsync(["node", "carapace", "update", "status", "--json"]);
 
     expect(seenJson).toBe(true);
   });
@@ -5979,19 +5979,19 @@ describe("update-cli", () => {
       if (storedChannel) {
         vi.mocked(readConfigFileSnapshot).mockResolvedValue({
           ...baseSnapshot,
-          config: { update: { channel: storedChannel } } as OpenClawConfig,
+          config: { update: { channel: storedChannel } } as CarapaceConfig,
         });
       }
 
       if (installKind === "package" && expectedChannel !== undefined) {
-        const prefix = createCaseDir("openclaw-update-git-prefix");
+        const prefix = createCaseDir("carapace-update-git-prefix");
         const { nodeModules } = await setupInstalledPackageAtNodeModules(
           path.join(prefix, "lib", "node_modules"),
           "1.0.0",
         );
-        const gitRoot = createCaseDir("openclaw-update-git");
+        const gitRoot = createCaseDir("carapace-update-git");
         const sha = "a".repeat(40);
-        await writeOpenClawPackageFixture(gitRoot, "2026.8.17", {
+        await writeCarapacePackageFixture(gitRoot, "2026.8.17", {
           git: true,
           builtSha: sha,
           entrySource: "export {};\n",
@@ -6006,7 +6006,7 @@ describe("update-cli", () => {
             after: { sha, version: "2026.8.17" },
           }),
         );
-        await withEnvAsync({ OPENCLAW_GIT_DIR: gitRoot }, async () => {
+        await withEnvAsync({ CARAPACE_GIT_DIR: gitRoot }, async () => {
           await updateCommand(options);
         });
       } else {
@@ -6016,7 +6016,7 @@ describe("update-cli", () => {
       if (expectedChannel !== undefined) {
         expectUpdateCallChannel(expectedChannel);
       } else {
-        expectPackageInstallSpec("openclaw@9999.0.0");
+        expectPackageInstallSpec("carapace@9999.0.0");
       }
 
       if (expectedPersistedChannel !== undefined) {
@@ -6033,12 +6033,12 @@ describe("update-cli", () => {
     await mockPackageInstallAtCaseDir();
     vi.mocked(readConfigFileSnapshot).mockResolvedValue({
       ...baseSnapshot,
-      config: { update: { channel: "beta" } } as OpenClawConfig,
+      config: { update: { channel: "beta" } } as CarapaceConfig,
     });
     primeNpmChannelTag("latest", "1.2.3-1");
     await updateCommand({});
 
-    expectPackageInstallSpec("openclaw@1.2.3-1");
+    expectPackageInstallSpec("carapace@1.2.3-1");
   });
 
   it("installs the verified exact package and persists an explicit extended-stable channel", async () => {
@@ -6050,9 +6050,9 @@ describe("update-cli", () => {
     expect(resolveExtendedStablePackage).toHaveBeenCalledWith({
       installKind: "package",
       timeoutMs: undefined,
-      packageName: "openclaw",
+      packageName: "carapace",
     });
-    expectPackageInstallSpec("openclaw@2026.6.33");
+    expectPackageInstallSpec("carapace@2026.6.33");
     expect(lastReplaceConfigCall()?.nextConfig?.update?.channel).toBe("extended-stable");
     expect(syncPluginCall()?.channel).toBe("extended-stable");
     expect(syncPluginCall()?.coreVersion).toBe("2026.6.33");
@@ -6063,7 +6063,7 @@ describe("update-cli", () => {
   it("uses the same exact resolver for a bare update with stored extended-stable", async () => {
     await mockPackageInstallAtCaseDir();
     readPackageVersion.mockResolvedValueOnce("1.0.0").mockResolvedValue("2026.6.33");
-    const config = { update: { channel: "extended-stable" } } as OpenClawConfig;
+    const config = { update: { channel: "extended-stable" } } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(configSnapshot(config));
 
     await updateCommand({ yes: true, restart: false });
@@ -6071,9 +6071,9 @@ describe("update-cli", () => {
     expect(resolveExtendedStablePackage).toHaveBeenCalledWith({
       installKind: "package",
       timeoutMs: undefined,
-      packageName: "openclaw",
+      packageName: "carapace",
     });
-    expectPackageInstallSpec("openclaw@2026.6.33");
+    expectPackageInstallSpec("carapace@2026.6.33");
     expect(syncPluginCall()?.channel).toBe("extended-stable");
     expect(syncPluginCall()?.coreVersion).toBe("2026.6.33");
   });
@@ -6092,7 +6092,7 @@ describe("update-cli", () => {
     expect(packageInstallCommandCall()?.[0]).toBeUndefined();
     expectNoSideEffects(
       replaceConfigFile,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
     expect(lastWriteJsonCall()).toBeUndefined();
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
@@ -6100,7 +6100,7 @@ describe("update-cli", () => {
 
   it("fails a stored extended-stable update before launchd cleanup when resolution fails", async () => {
     await mockPackageInstallAtCaseDir();
-    const config = { update: { channel: "extended-stable" } } as OpenClawConfig;
+    const config = { update: { channel: "extended-stable" } } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(configSnapshot(config));
     vi.mocked(resolveExtendedStablePackage).mockResolvedValueOnce({
       status: "failed",
@@ -6112,7 +6112,7 @@ describe("update-cli", () => {
     expect(packageInstallCommandCall()?.[0]).toBeUndefined();
     expectNoSideEffects(
       replaceConfigFile,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
   });
@@ -6123,7 +6123,7 @@ describe("update-cli", () => {
   ])("rejects --tag for an $name extended-stable channel", async ({ explicit }) => {
     await mockPackageInstallAtCaseDir();
     if (!explicit) {
-      const config = { update: { channel: "extended-stable" } } as OpenClawConfig;
+      const config = { update: { channel: "extended-stable" } } as CarapaceConfig;
       vi.mocked(readConfigFileSnapshot).mockResolvedValue(configSnapshot(config));
     }
 
@@ -6139,7 +6139,7 @@ describe("update-cli", () => {
     expect(packageInstallCommandCall()?.[0]).toBeUndefined();
     expectNoSideEffects(
       replaceConfigFile,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
   });
@@ -6153,7 +6153,7 @@ describe("update-cli", () => {
       resolveExtendedStablePackage,
       runGatewayUpdate,
       replaceConfigFile,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
     expect(commandCalls().every(([argv]) => argv[0] === "git" && argv.includes("rev-parse"))).toBe(
       true,
@@ -6172,7 +6172,7 @@ describe("update-cli", () => {
       status: "resolved",
       selector: "extended-stable",
       version: "2026.6.33",
-      packageSpec: "openclaw@2026.6.33",
+      packageSpec: "carapace@2026.6.33",
     });
 
     await updateCommand({ channel: "extended-stable", yes, restart: false });
@@ -6195,7 +6195,7 @@ describe("update-cli", () => {
             pluginId: "demo",
             reason: "plugin smoke failed",
             message: "plugin smoke failed",
-            guidance: ["Run openclaw update repair."],
+            guidance: ["Run carapace update repair."],
           },
         ],
         errored: true,
@@ -6244,18 +6244,18 @@ describe("update-cli", () => {
 
   it("reports a same-version channel switch as successful without updating the package", async () => {
     const root = await mockPackageInstallAtCaseDir();
-    const stateDir = tempDirs.make("openclaw-update-channel-switch-");
+    const stateDir = tempDirs.make("carapace-update-channel-switch-");
     readPackageVersion.mockResolvedValue("2026.4.22");
     primeNpmChannelTag("beta", "2026.4.22");
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(
       configSnapshot({ update: { channel: "stable" } }),
     );
-    await writeJsonFixture(path.join(stateDir, "openclaw.json"), {
+    await writeJsonFixture(path.join(stateDir, "carapace.json"), {
       update: { channel: "stable" },
     });
     mockRunningManagedGateway(["node", path.join(root, "dist", "index.js"), "gateway", "run"]);
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       await updateCommand({ channel: "beta", yes: true, restart: true, json: true });
     });
 
@@ -6275,25 +6275,25 @@ describe("update-cli", () => {
     const result = lastWriteJsonCall() as UpdateRunResult;
     expect(
       getUpdateRun(requireValue(result.runId, "channel switch run id"), {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       }),
     ).toMatchObject({ status: "succeeded", downtimeMs: 0 });
   });
 
   it("keeps an explicit same-version channel no-op skipped without rewriting config", async () => {
     const root = await mockPackageInstallAtCaseDir();
-    const stateDir = tempDirs.make("openclaw-update-channel-noop-");
+    const stateDir = tempDirs.make("carapace-update-channel-noop-");
     readPackageVersion.mockResolvedValue("2026.4.22");
     primeNpmChannelTag("beta", "2026.4.22");
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(
       configSnapshot({ update: { channel: "beta" } }),
     );
-    await writeJsonFixture(path.join(stateDir, "openclaw.json"), {
+    await writeJsonFixture(path.join(stateDir, "carapace.json"), {
       update: { channel: "beta" },
     });
     mockRunningManagedGateway(["node", path.join(root, "dist", "index.js"), "gateway", "run"]);
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       await updateCommand({ channel: "beta", yes: true, restart: true, json: true });
     });
 
@@ -6313,7 +6313,7 @@ describe("update-cli", () => {
 
   it("completes an equal-version Git-to-package switch", async () => {
     const { nodeModules, pkgRoot } = await setupInstalledPackageRoot(
-      createCaseDir("openclaw-git-to-package-same-version"),
+      createCaseDir("carapace-git-to-package-same-version"),
       "2026.4.22",
     );
     await fs.writeFile(path.join(pkgRoot, "dist", "index.js"), "git runtime\n");
@@ -6324,7 +6324,7 @@ describe("update-cli", () => {
       }
       await writeNpmPackageInstall(argv, pkgRoot, "2026.4.22");
       const stagePrefix = requireValue(argv[argv.indexOf("--prefix") + 1], "staged prefix");
-      const stageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
+      const stageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
       await fs.writeFile(path.join(stageRoot, "dist", "index.js"), "package runtime\n");
       await writePackageDistInventory(stageRoot);
     });
@@ -6347,7 +6347,7 @@ describe("update-cli", () => {
 
     await updateCommand({ channel: "stable", yes: true, restart: false, json: true });
 
-    expectPackageInstallSpec("openclaw@2026.4.22");
+    expectPackageInstallSpec("carapace@2026.4.22");
     expect(candidateValidation).toHaveBeenCalled();
     await expect(fs.readFile(path.join(pkgRoot, "dist", "index.js"), "utf8")).resolves.toBe(
       "package runtime\n",
@@ -6372,7 +6372,7 @@ describe("update-cli", () => {
 
     expect(getErrorOutput()).not.toContain("Downgrade confirmation required.");
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
-    expectPackageInstallSpec("openclaw@latest");
+    expectPackageInstallSpec("carapace@latest");
     expect(vi.mocked(runExec).mock.calls.filter(([, args]) => args[1] === "doctor")).toEqual([]);
   });
 
@@ -6405,14 +6405,14 @@ describe("update-cli", () => {
 
     await updateCommand({ yes: true });
 
-    expectPackageInstallSpec("openclaw@9999.0.0");
+    expectPackageInstallSpec("carapace@9999.0.0");
     const preflightParams = vi
       .mocked(fetchNpmPackageTargetStatus)
       .mock.calls.find(([params]) => params.target === "9999.0.0")?.[0];
     expect(preflightParams).toEqual(
       expect.objectContaining({
         target: "9999.0.0",
-        spec: "openclaw@9999.0.0",
+        spec: "carapace@9999.0.0",
         cwd: process.cwd(),
       }),
     );
@@ -6423,8 +6423,8 @@ describe("update-cli", () => {
 
   const packageUpdateInGatewayMessage = [
     "Package updates cannot run from inside the gateway service process.",
-    "That path replaces the active OpenClaw dist tree while the live gateway may still lazy-load old chunks.",
-    "Run `openclaw update` from a terminal outside the gateway service.",
+    "That path replaces the active Carapace dist tree while the live gateway may still lazy-load old chunks.",
+    "Run `carapace update` from a terminal outside the gateway service.",
   ].join("\n");
 
   it("allows package updates from inherited gateway service env when the managed gateway is not running", async () => {
@@ -6438,7 +6438,7 @@ describe("update-cli", () => {
     await runWithGatewayServiceEnv({ yes: true });
 
     expect(defaultRuntime.error).not.toHaveBeenCalledWith(packageUpdateInGatewayMessage);
-    expectPackageInstallSpec("openclaw@9999.0.0");
+    expectPackageInstallSpec("carapace@9999.0.0");
   });
 
   it("refuses an absent service update while its selected port has a real listener", async () => {
@@ -6466,8 +6466,8 @@ describe("update-cli", () => {
   it("refuses package updates from inherited gateway service env when --no-restart leaves the gateway running", async () => {
     const root = await mockPackageInstallAtCaseDir();
     primeServiceCommand(["node", path.join(root, "dist", "index.js"), "gateway", "run"], {
-      OPENCLAW_SERVICE_MARKER: "openclaw",
-      OPENCLAW_SERVICE_KIND: "gateway",
+      CARAPACE_SERVICE_MARKER: "carapace",
+      CARAPACE_SERVICE_KIND: "gateway",
     });
     serviceLoaded.mockResolvedValue(true);
 
@@ -6495,9 +6495,9 @@ describe("update-cli", () => {
     "refuses package updates from inherited gateway service env when $name",
     async ({ setupRuntime }) => {
       await mockPackageInstallAtCaseDir();
-      primeServiceCommand(["openclaw", "gateway", "run"], {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+      primeServiceCommand(["carapace", "gateway", "run"], {
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       });
       setupRuntime();
 
@@ -6546,7 +6546,7 @@ describe("update-cli", () => {
     );
 
     await expect(
-      withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: "1" }, () => invokeUpdateCli({ yes: true })),
+      withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: "1" }, () => invokeUpdateCli({ yes: true })),
     ).rejects.toEqual(new ExitError(1));
 
     const errors = getErrorOutput();
@@ -6578,7 +6578,7 @@ describe("update-cli", () => {
     { platform: "linux", env: { JOURNAL_STREAM: "8:123" }, supervisor: "systemd" },
     {
       platform: "linux",
-      env: { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service" },
+      env: { CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service" },
       supervisor: "systemd",
     },
     { platform: "linux", env: {}, supervisor: "systemd", ancestor: true },
@@ -6596,7 +6596,7 @@ describe("update-cli", () => {
     },
     {
       platform: "darwin",
-      env: { OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" },
+      env: { CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" },
       supervisor: "launchd",
     },
     { platform: "linux", env: {}, supervisor: "systemd", ancestor: true, git: true },
@@ -6608,12 +6608,12 @@ describe("update-cli", () => {
         "maybeStopManagedServiceBeforeMutableUpdate",
       );
       vi.spyOn(process, "platform", "get").mockReturnValue(platform);
-      const caseDir = createCaseDir("openclaw-update-handoff");
+      const caseDir = createCaseDir("carapace-update-handoff");
       const sha = "a".repeat(40);
       const { pkgRoot: root, entryPath } = git
         ? {
             pkgRoot: caseDir,
-            entryPath: await writeOpenClawPackageFixture(caseDir, "1.0.0", {
+            entryPath: await writeCarapacePackageFixture(caseDir, "1.0.0", {
               git: true,
               builtSha: sha,
               entrySource: "export {};\n",
@@ -6621,7 +6621,7 @@ describe("update-cli", () => {
           }
         : await setupInstalledPackageRoot(caseDir);
       if (git) {
-        vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+        vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
         vi.mocked(runCommandWithTimeout).mockResolvedValue(commandResult({ stdout: sha }));
         vi.mocked(runGatewayUpdate).mockImplementationOnce(async (updateOptions) => {
           await updateOptions?.inspectGitTarget?.({});
@@ -6639,7 +6639,7 @@ describe("update-cli", () => {
         handoffId: "test-handoff",
         installRoot: root,
         logPath: "/tmp/update-handoff/handoff.log",
-        command: "openclaw update --yes",
+        command: "carapace update --yes",
         pid: 12345,
       });
       managedUpdateHandoff.transfer.mockResolvedValue(true);
@@ -6688,14 +6688,14 @@ describe("update-cli", () => {
   );
 
   it("reports a Git service refusal at the final ancestry recheck without an unsafe recovery verdict", async () => {
-    const root = createCaseDir("openclaw-git-ancestry-refusal");
+    const root = createCaseDir("carapace-git-ancestry-refusal");
     const sha = "a".repeat(40);
-    await writeOpenClawPackageFixture(root, "1.0.0", {
+    await writeCarapacePackageFixture(root, "1.0.0", {
       git: true,
       builtSha: sha,
       entrySource: "export {};\n",
     });
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
     vi.mocked(runCommandWithTimeout).mockResolvedValue(commandResult({ stdout: sha }));
     mockRunningManagedGateway(["node", path.join(root, "dist", "index.js"), "gateway"]);
     const preparations = mockGitUpdateAfterMutation(makeOkUpdateResult({ mode: "git", root }));
@@ -6723,7 +6723,7 @@ describe("update-cli", () => {
     });
 
     await expect(
-      withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: "1" }, () =>
+      withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: "1" }, () =>
         invokeUpdateCli({ yes: true, json: true }),
       ),
     ).rejects.toEqual(new ExitError(1));
@@ -6762,7 +6762,7 @@ describe("update-cli", () => {
         { yes: true },
         {
           [GATEWAY_SERVICE_RUNTIME_PID_ENV]: String(gatewayFixturePid),
-          OPENCLAW_UPDATE_RUN_HANDOFF: "1",
+          CARAPACE_UPDATE_RUN_HANDOFF: "1",
         },
       ),
     ).rejects.toEqual(new ExitError(1));
@@ -6796,7 +6796,7 @@ describe("update-cli", () => {
     const report = getLogOutput();
     expect(report).toContain("Node ");
     expect(report).toContain(
-      "Bare `npm i -g openclaw` can silently install an older compatible release.",
+      "Bare `npm i -g carapace` can silently install an older compatible release.",
     );
   });
 
@@ -6805,66 +6805,66 @@ describe("update-cli", () => {
       name: "explicit dist-tag",
       options: { tag: "next" },
       packageSpec: undefined,
-      expectedSpec: "openclaw@9999.0.0",
+      expectedSpec: "carapace@9999.0.0",
     },
     {
       name: "explicit git package spec",
-      options: { yes: true, tag: "github:openclaw/openclaw#main" },
+      options: { yes: true, tag: "github:carapace/carapace#main" },
       packageSpec: undefined,
-      expectedSpec: "github:openclaw/openclaw#main",
+      expectedSpec: "github:carapace/carapace#main",
     },
     {
       name: "aliased git package spec",
-      options: { yes: true, tag: "OpenClaw@github:openclaw/openclaw#main" },
+      options: { yes: true, tag: "Carapace@github:carapace/carapace#main" },
       packageSpec: undefined,
-      expectedSpec: "OpenClaw@github:openclaw/openclaw#main",
+      expectedSpec: "Carapace@github:carapace/carapace#main",
     },
     {
       name: "full git URL package spec",
-      options: { yes: true, tag: "https://github.com/openclaw/openclaw.git#main" },
+      options: { yes: true, tag: "https://github.com/Exaggarate/carapace.git#main" },
       packageSpec: undefined,
-      expectedSpec: "https://github.com/openclaw/openclaw.git#main",
+      expectedSpec: "https://github.com/Exaggarate/carapace.git#main",
     },
     {
       name: "hosted GitHub URL package spec without git suffix",
-      options: { yes: true, tag: "https://github.com/openclaw/openclaw#main" },
+      options: { yes: true, tag: "https://github.com/Exaggarate/carapace#main" },
       packageSpec: undefined,
-      expectedSpec: "https://github.com/openclaw/openclaw#main",
+      expectedSpec: "https://github.com/Exaggarate/carapace#main",
     },
     {
       name: "aliased hosted GitHub URL package spec without git suffix",
-      options: { yes: true, tag: "openclaw@https://github.com/openclaw/openclaw#main" },
+      options: { yes: true, tag: "carapace@https://github.com/Exaggarate/carapace#main" },
       packageSpec: undefined,
-      expectedSpec: "https://github.com/openclaw/openclaw#main",
+      expectedSpec: "https://github.com/Exaggarate/carapace#main",
     },
     {
       name: "GitHub shorthand package spec",
-      options: { yes: true, tag: "openclaw/openclaw#main" },
+      options: { yes: true, tag: "carapace/carapace#main" },
       packageSpec: undefined,
-      expectedSpec: "openclaw/openclaw#main",
+      expectedSpec: "carapace/carapace#main",
     },
     {
       name: "SCP-style SSH package spec",
-      options: { yes: true, tag: "git@github.com:openclaw/openclaw.git#main" },
+      options: { yes: true, tag: "git@github.com:Exaggarate/carapace.git#main" },
       packageSpec: undefined,
-      expectedSpec: "git@github.com:openclaw/openclaw.git#main",
+      expectedSpec: "git@github.com:Exaggarate/carapace.git#main",
     },
     {
-      name: "OPENCLAW_UPDATE_PACKAGE_SPEC override",
+      name: "CARAPACE_UPDATE_PACKAGE_SPEC override",
       options: { yes: true, tag: "latest" },
-      packageSpec: "http://10.211.55.2:8138/openclaw-next.tgz",
-      expectedSpec: "http://10.211.55.2:8138/openclaw-next.tgz",
+      packageSpec: "http://10.211.55.2:8138/carapace-next.tgz",
+      expectedSpec: "http://10.211.55.2:8138/carapace-next.tgz",
     },
   ] as const)(
     "resolves package install specs from tags and env overrides: $name",
     async ({ options, packageSpec, expectedSpec }) => {
       vi.clearAllMocks();
-      readPackageName.mockResolvedValue("openclaw");
+      readPackageName.mockResolvedValue("carapace");
       readPackageVersion.mockResolvedValue("1.0.0");
       resolveGlobalManager.mockResolvedValue("npm");
       await mockPackageInstallAtCaseDir();
       if (packageSpec) {
-        await withEnvAsync({ OPENCLAW_UPDATE_PACKAGE_SPEC: packageSpec }, async () => {
+        await withEnvAsync({ CARAPACE_UPDATE_PACKAGE_SPEC: packageSpec }, async () => {
           await updateCommand(options);
         });
       } else {
@@ -6876,13 +6876,13 @@ describe("update-cli", () => {
 
   it.each([
     { name: "real run", options: { yes: true, json: true, tag: "main" } },
-    { name: "normalized alias", options: { yes: true, json: true, tag: "openclaw@main" } },
+    { name: "normalized alias", options: { yes: true, json: true, tag: "carapace@main" } },
     {
       name: "dry-run",
       options: { dryRun: true, json: true, tag: "main", yes: true },
     },
   ] as const)("refuses --tag main before package resolution: $name", async ({ options }) => {
-    mockPackageInstallStatus(createCaseDir("openclaw-update-main-refusal"));
+    mockPackageInstallStatus(createCaseDir("carapace-update-main-refusal"));
 
     await expect(updateCommand(options)).rejects.toEqual(new ExitError(1));
 
@@ -6898,15 +6898,15 @@ describe("update-cli", () => {
       expect(cleanupStaleManagedServiceUpdateHandoffs).not.toHaveBeenCalled();
     }
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
-    expect(getErrorOutput()).toContain("openclaw update --channel dev");
+    expect(getErrorOutput()).toContain("carapace update --channel dev");
   });
 
   it("fails package updates when the installed correction version does not match the requested target", async () => {
-    const tempDir = createCaseDir("openclaw-update");
+    const tempDir = createCaseDir("carapace-update");
     const nodeModules = path.join(tempDir, "lib", "node_modules");
-    const pkgRoot = path.join(nodeModules, "openclaw");
+    const pkgRoot = path.join(nodeModules, "carapace");
     mockPackageInstallStatus(tempDir);
-    await writeOpenClawPackageFixture(pkgRoot, "2026.3.23", {
+    await writeCarapacePackageFixture(pkgRoot, "2026.3.23", {
       inventory: true,
     });
     readPackageVersion.mockResolvedValue("2026.3.23");
@@ -6936,7 +6936,7 @@ describe("update-cli", () => {
     "gates old Gateway recovery at the swap boundary after staged npm %s failure",
     async (failure) => {
       await useFileBackedConfig();
-      const tempDir = tempDirs.make("openclaw-update-staged-fail-");
+      const tempDir = tempDirs.make("carapace-update-staged-fail-");
       const prefix = path.join(tempDir, "prefix");
       const nodeModules = path.join(prefix, "lib", "node_modules");
       const { pkgRoot, entryPath } = await setupInstalledPackageAtNodeModules(
@@ -6946,7 +6946,7 @@ describe("update-cli", () => {
       mockFileBackedPathExists();
       mockRunningManagedGateway([process.execPath, entryPath, "gateway", "run"]);
       vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(entryPath);
-      const targetShim = path.join(prefix, "bin", "openclaw");
+      const targetShim = path.join(prefix, "bin", "carapace");
       if (failure !== "verification") {
         await fs.mkdir(path.dirname(targetShim), { recursive: true });
         await fs.writeFile(targetShim, "old shim\n");
@@ -6975,8 +6975,8 @@ describe("update-cli", () => {
           if (typeof stagePrefix !== "string") {
             throw new Error("missing stage prefix");
           }
-          const stageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
-          await writeOpenClawPackageFixture(stageRoot, "2026.8.1", {
+          const stageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
+          await writeCarapacePackageFixture(stageRoot, "2026.8.1", {
             entrySource: "export {};\n",
             inventory: true,
           });
@@ -6993,7 +6993,7 @@ describe("update-cli", () => {
               "utf8",
             );
           } else if (failure === "shim swap") {
-            stagedShim = path.join(stagePrefix, "bin", "openclaw");
+            stagedShim = path.join(stagePrefix, "bin", "carapace");
             await fs.mkdir(path.dirname(stagedShim), { recursive: true });
             await fs.writeFile(stagedShim, "new shim\n");
           }
@@ -7042,7 +7042,7 @@ describe("update-cli", () => {
   );
 
   it("completes a suppressed npm lifecycle before activating the staged package", async () => {
-    const tempDir = tempDirs.make("openclaw-update-staged-lifecycle-");
+    const tempDir = tempDirs.make("carapace-update-staged-lifecycle-");
     const prefix = path.join(tempDir, "prefix");
     const nodeModules = path.join(prefix, "lib", "node_modules");
     const { pkgRoot } = await setupInstalledPackageAtNodeModules(nodeModules, "2026.7.1");
@@ -7060,8 +7060,8 @@ describe("update-cli", () => {
     mockNpmGlobalCommands(nodeModules, async (argv) => {
       if (argv[0] === "npm" && argv[1] === "i" && argv.includes("--prefix")) {
         const stagePrefix = requireValue(argv[argv.indexOf("--prefix") + 1], "staged prefix");
-        const stageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
-        await writeOpenClawPackageFixture(stageRoot, "2026.8.1", {
+        const stageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
+        await writeCarapacePackageFixture(stageRoot, "2026.8.1", {
           entrySource: "export {};\n",
           inventory: true,
         });
@@ -7075,7 +7075,7 @@ describe("update-cli", () => {
         argv[1]?.endsWith("preinstall-package-manager-warning.mjs")
       ) {
         await fs.rm(
-          path.join(path.dirname(path.dirname(argv[1])), "dist", "openclaw-install-guard"),
+          path.join(path.dirname(path.dirname(argv[1])), "dist", "carapace-install-guard"),
         );
       }
       return undefined;
@@ -7099,10 +7099,10 @@ describe("update-cli", () => {
   });
 
   it("runs old package doctors without fix mode when the service belongs to another install", async () => {
-    const tempDir = tempDirs.make("openclaw-update-package-");
+    const tempDir = tempDirs.make("carapace-update-package-");
     const { nodeModules, entryPath } = await setupInstalledPackageRoot(tempDir, "2026.4.20");
     const foreignRoot = createCaseDir("old-doctor-foreign");
-    const foreignEntry = await writeOpenClawPackageFixture(foreignRoot, "1.0.0", {
+    const foreignEntry = await writeCarapacePackageFixture(foreignRoot, "1.0.0", {
       entrySource: "export {};\n",
       git: true,
     });
@@ -7123,7 +7123,7 @@ describe("update-cli", () => {
     mockFileBackedPathExists();
     mockNpmGlobalRoot(nodeModules);
 
-    await withEnvAsync({ OPENCLAW_SERVICE_REPAIR_POLICY: "external" }, async () => {
+    await withEnvAsync({ CARAPACE_SERVICE_REPAIR_POLICY: "external" }, async () => {
       await updateCommand({ yes: true });
     });
 
@@ -7131,22 +7131,22 @@ describe("update-cli", () => {
     expect(doctorCall?.[0][0]).toContain("node");
     expect(doctorCall?.[0].slice(1)).toEqual([entryPath, "doctor", "--non-interactive"]);
     expect(
-      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.OPENCLAW_UPDATE_IN_PROGRESS,
+      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.CARAPACE_UPDATE_IN_PROGRESS,
     ).toBe("1");
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION,
+        ?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION,
     ).toBe("0");
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR,
+        ?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR,
     ).toBe("0");
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART,
+        ?.CARAPACE_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART,
     ).toBe("1");
     expect(
-      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.OPENCLAW_SERVICE_REPAIR_POLICY,
+      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.CARAPACE_SERVICE_REPAIR_POLICY,
     ).toBeUndefined();
     const doctorIndex = doctorCommandCallIndex();
     const snapshotOrder = createPreUpdateConfigSnapshotMock.mock.invocationCallOrder[0];
@@ -7157,14 +7157,14 @@ describe("update-cli", () => {
   });
 
   it("retains the exact package and launchers for explicit rollback after managed Doctor fails", async () => {
-    const tempDir = tempDirs.make("openclaw-update-managed-backup-");
+    const tempDir = tempDirs.make("carapace-update-managed-backup-");
     const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageAtNodeModules(
       path.join(tempDir, "lib", "node_modules"),
     );
     const candidateVersion = "2026.5.14";
     const packageEntry = path.join(pkgRoot, "dist", "index.js");
     const launcherDir = path.join(tempDir, "bin");
-    const launcherNames = ["openclaw", "openclaw.cmd", "openclaw.ps1"];
+    const launcherNames = ["carapace", "carapace.cmd", "carapace.ps1"];
     await fs.writeFile(packageEntry, "old package entry\n", "utf8");
     await fs.mkdir(launcherDir, { recursive: true });
     await Promise.all(
@@ -7197,8 +7197,8 @@ describe("update-cli", () => {
     mockNpmGlobalCommands(nodeModules, async (argv, options) => {
       if (argv[0] === "npm" && argv[1] === "i" && argv.includes("--prefix")) {
         const stagePrefix = requireValue(argv[argv.indexOf("--prefix") + 1], "staged prefix");
-        const stageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
-        await writeOpenClawPackageFixture(stageRoot, candidateVersion, {
+        const stageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
+        await writeCarapacePackageFixture(stageRoot, candidateVersion, {
           entrySource: "candidate package entry\n",
           inventory: true,
         });
@@ -7224,7 +7224,7 @@ describe("update-cli", () => {
         );
       }
       const doctorEnv = typeof options === "number" ? undefined : options.env;
-      expect(doctorEnv?.OPENCLAW_CONFIG_PATH).toBe(managedConfig);
+      expect(doctorEnv?.CARAPACE_CONFIG_PATH).toBe(managedConfig);
       backupAtDoctorEntry = await fs
         .readFile(`${managedConfig}.pre-update`, "utf8")
         .catch(() => undefined);
@@ -7233,7 +7233,7 @@ describe("update-cli", () => {
     });
     const { runPackageInstallUpdate } = await import("./update-cli/update-command-package.js");
     let transaction: PackageUpdateTransaction | undefined;
-    const result = await withEnvAsync({ OPENCLAW_CONFIG_PATH: callerConfig }, async () => {
+    const result = await withEnvAsync({ CARAPACE_CONFIG_PATH: callerConfig }, async () => {
       const packageResult = await runPackageInstallUpdate({
         root: pkgRoot,
         installKind: "package",
@@ -7242,14 +7242,14 @@ describe("update-cli", () => {
         startedAt: Date.now(),
         progress: {},
         jsonMode: true,
-        managedServiceEnv: { OPENCLAW_CONFIG_PATH: managedConfig },
+        managedServiceEnv: { CARAPACE_CONFIG_PATH: managedConfig },
         validateCandidate: async () => [],
         beforeActivate: async () => {},
         onTransaction: (retained) => {
           transaction = retained;
         },
       });
-      expect(process.env.OPENCLAW_CONFIG_PATH).toBe(callerConfig);
+      expect(process.env.CARAPACE_CONFIG_PATH).toBe(callerConfig);
       return packageResult;
     });
 
@@ -7274,7 +7274,7 @@ describe("update-cli", () => {
     const rollback = await retained.rollback();
     expect(rollback.exitCode).toBe(0);
     await retained.complete({ activationVerified: false });
-    const doctorStep = result.steps.find((step) => step.name === "openclaw doctor");
+    const doctorStep = result.steps.find((step) => step.name === "carapace doctor");
     expect(doctorStep?.exitCode).toBe(1);
     expect(doctorStep?.advisory).toBeUndefined();
     await expect(fs.readFile(path.join(pkgRoot, "package.json"), "utf8")).resolves.toContain(
@@ -7294,11 +7294,11 @@ describe("update-cli", () => {
     expect(
       (await fs.readdir(nodeModules)).filter((entry) =>
         [
-          ".openclaw.update-stage-",
-          ".openclaw.package-backup-",
-          ".openclaw-package-backup-",
-          ".openclaw.shim-backup-",
-          ".openclaw-shim-backup-",
+          ".carapace.update-stage-",
+          ".carapace.package-backup-",
+          ".carapace-package-backup-",
+          ".carapace.shim-backup-",
+          ".carapace-shim-backup-",
         ].some((prefix) => entry.startsWith(prefix)),
       ),
     ).toEqual([]);
@@ -7306,7 +7306,7 @@ describe("update-cli", () => {
   });
 
   it("continues package post-core work for explicit post-update doctor advisories", async () => {
-    const tempDir = tempDirs.make("openclaw-update-package-doctor-warning-");
+    const tempDir = tempDirs.make("carapace-update-package-doctor-warning-");
     const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageRoot(
       tempDir,
       "2026.4.20",
@@ -7337,7 +7337,7 @@ describe("update-cli", () => {
       return undefined;
     });
 
-    await withEnvAsync({ OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION: "1" }, async () => {
+    await withEnvAsync({ CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION: "1" }, async () => {
       await updateCommand({ yes: true, restart: false, json: true });
     });
 
@@ -7345,24 +7345,24 @@ describe("update-cli", () => {
     expect(doctorCall?.[0].slice(1)).toEqual([entryPath, "doctor", "--non-interactive"]);
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION,
+        ?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION,
     ).toBe("0");
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR,
+        ?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR,
     ).toBe("0");
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART,
+        ?.CARAPACE_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART,
     ).toBe("1");
     const postCoreCall = spawnCall();
     expect(postCoreCall?.[0]).toMatch(/node/);
     expect(postCoreCall?.[1]).toEqual([entryPath, "update", "--json", "--no-restart", "--yes"]);
-    expect(postCoreCall?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE).toBe("1");
+    expect(postCoreCall?.[2]?.env?.CARAPACE_UPDATE_POST_CORE).toBe("1");
     expect(updateNpmInstalledPlugins).not.toHaveBeenCalled();
     expect(defaultRuntime.exit).not.toHaveBeenCalledWith(1);
     const jsonOutput = lastWriteJsonCall() as UpdateRunResult | undefined;
-    const doctorStep = jsonOutput?.steps.find((step) => step.name === "openclaw doctor");
+    const doctorStep = jsonOutput?.steps.find((step) => step.name === "carapace doctor");
     expect(jsonOutput?.status).toBe("ok");
     expect(doctorStep?.exitCode).toBe(UPDATE_POST_INSTALL_DOCTOR_ADVISORY_EXIT_CODE);
     expect(doctorStep?.advisory).toEqual({
@@ -7375,7 +7375,7 @@ describe("update-cli", () => {
   });
 
   it("fails package updates when the post-update doctor is killed after verification", async () => {
-    const tempDir = tempDirs.make("openclaw-update-package-doctor-timeout-");
+    const tempDir = tempDirs.make("carapace-update-package-doctor-timeout-");
     const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageRoot(
       tempDir,
       "2026.4.20",
@@ -7406,7 +7406,7 @@ describe("update-cli", () => {
     expect(spawn).not.toHaveBeenCalled();
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
     const jsonOutput = lastWriteJsonCall() as UpdateRunResult | undefined;
-    const doctorStep = jsonOutput?.steps.find((step) => step.name === "openclaw doctor");
+    const doctorStep = jsonOutput?.steps.find((step) => step.name === "carapace doctor");
     expect(doctorStep?.exitCode).toBe(124);
     expect(doctorStep?.advisory).toBeUndefined();
     expect(doctorStep?.termination).toBe("timeout");
@@ -7416,7 +7416,7 @@ describe("update-cli", () => {
   });
 
   it("runs package post-update doctor from the verified package root after a staged swap", async () => {
-    const tempDir = tempDirs.make("openclaw-update-staged-doctor-");
+    const tempDir = tempDirs.make("carapace-update-staged-doctor-");
     const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageAtNodeModules(
       path.join(tempDir, "lib", "node_modules"),
     );
@@ -7429,9 +7429,9 @@ describe("update-cli", () => {
           requireValue(stagePrefix, "stage prefix"),
           "lib",
           "node_modules",
-          "openclaw",
+          "carapace",
         );
-        await writeOpenClawPackageFixture(stagePackageRoot, "2026.5.14", {
+        await writeCarapacePackageFixture(stagePackageRoot, "2026.5.14", {
           entrySource: "export {};\n",
           inventory: true,
         });
@@ -7450,10 +7450,10 @@ describe("update-cli", () => {
     expect(doctorCall?.[0].slice(1)).toEqual([entryPath, "doctor", "--non-interactive", "--fix"]);
     expect(doctorCall?.[1].cwd).toBe(pkgRoot);
     expect(
-      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.OPENCLAW_SERVICE_REPAIR_POLICY,
+      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.CARAPACE_SERVICE_REPAIR_POLICY,
     ).toBe("external");
     expect(
-      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.OPENCLAW_COMPATIBILITY_HOST_VERSION,
+      (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)?.CARAPACE_COMPATIBILITY_HOST_VERSION,
     ).toBe("2026.5.14");
     expect(defaultRuntime.exit).not.toHaveBeenCalledWith(1);
   });
@@ -7467,14 +7467,14 @@ describe("update-cli", () => {
       const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
       suspendScheduledTaskAutoStartForUpdate.mockResolvedValue(true);
       resumeScheduledTaskAutoStartAfterUpdate.mockRejectedValue(new Error("task restore denied"));
-      const root = await mockPackageInstallAtCaseDir("openclaw-update-autostart-restore-failure");
+      const root = await mockPackageInstallAtCaseDir("carapace-update-autostart-restore-failure");
       mockRunningManagedGateway(["node", path.join(root, "dist", "index.js"), "gateway", "run"]);
       mockFileBackedPathExists();
       setTty(true);
       setStdoutTty(true);
       try {
         await expect(
-          withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: handoff }, () => updateCommand({ json })),
+          withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: handoff }, () => updateCommand({ json })),
         ).rejects.toEqual(new ExitError(expectedExitCode));
         expect(resumeScheduledTaskAutoStartAfterUpdate).toHaveBeenCalledOnce();
         expect(defaultRuntime.exit).not.toHaveBeenCalled();
@@ -7514,7 +7514,7 @@ describe("update-cli", () => {
       const valid = outcome === "valid";
       const succeeds = valid || outcome === "repaired";
       const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageAtNodeModules(
-        path.join(tempDirs.make("openclaw-update-candidate-order-"), "lib", "node_modules"),
+        path.join(tempDirs.make("carapace-update-candidate-order-"), "lib", "node_modules"),
         "1.0.0",
       );
       mockNpmGlobalRoot(nodeModules);
@@ -7522,12 +7522,12 @@ describe("update-cli", () => {
       mockRunningManagedGateway([process.execPath, entryPath, "gateway", "run"]);
       let liveConfigPath: string | undefined;
       if (outcome === "live-config-change") {
-        liveConfigPath = path.join(tempDirs.make("openclaw-update-live-config-"), "openclaw.json");
+        liveConfigPath = path.join(tempDirs.make("carapace-update-live-config-"), "carapace.json");
         await fs.writeFile(liveConfigPath, "{}\n");
         vi.mocked(readConfigFileSnapshot).mockImplementation(async () => {
           const configPath = requireValue(liveConfigPath, "live config path");
           const raw = await fs.readFile(configPath, "utf8");
-          return configSnapshot(JSON.parse(raw) as OpenClawConfig, {
+          return configSnapshot(JSON.parse(raw) as CarapaceConfig, {
             path: configPath,
             raw,
             hash: createHash("sha256").update(raw).digest("hex"),
@@ -7536,7 +7536,7 @@ describe("update-cli", () => {
       }
       const events: string[] = [];
       spawn.mockImplementationOnce((_node, _argv, options: { env: NodeJS.ProcessEnv }) => {
-        const resultPath = options.env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH;
+        const resultPath = options.env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH;
         if (!resultPath) {
           throw new Error("post-core result path missing");
         }
@@ -7545,9 +7545,9 @@ describe("update-cli", () => {
         queueMicrotask(() => {
           void withEnvAsync(
             {
-              OPENCLAW_COMPATIBILITY_HOST_VERSION: undefined,
+              CARAPACE_COMPATIBILITY_HOST_VERSION: undefined,
               ...options.env,
-              OPENCLAW_UPDATE_POST_CORE_RESULT_PATH: childResultPath,
+              CARAPACE_UPDATE_POST_CORE_RESULT_PATH: childResultPath,
             },
             async () => {
               const { resumePostCoreUpdate } =
@@ -7581,9 +7581,9 @@ describe("update-cli", () => {
         expect(repair.target.stateDir).not.toBe(resolveStateDir());
         rehearsalStateDir = repair.target.stateDir;
         expect(repair.target.environment).toMatchObject({
-          OPENCLAW_STATE_DIR: repair.target.stateDir,
-          OPENCLAW_CONFIG_PATH: repair.target.configPath,
-          OPENCLAW_WORKSPACE_DIR: repair.target.workspaceDir,
+          CARAPACE_STATE_DIR: repair.target.stateDir,
+          CARAPACE_CONFIG_PATH: repair.target.configPath,
+          CARAPACE_WORKSPACE_DIR: repair.target.workspaceDir,
         });
         expect(repair.context.phase).toBe("validating");
         expect(repair.context).toMatchObject({ result: { reason: "runtime-verification-failed" } });
@@ -7601,7 +7601,7 @@ describe("update-cli", () => {
         if (outcome === "config-change") {
           const config = JSON.parse(
             await fs.readFile(repair.target.configPath, "utf8"),
-          ) as OpenClawConfig;
+          ) as CarapaceConfig;
           config.logging = { ...config.logging, level: "debug" };
           await fs.writeFile(repair.target.configPath, JSON.stringify(config));
         }
@@ -7665,13 +7665,13 @@ describe("update-cli", () => {
           logTail: ["candidate readiness failed"],
           reason: "runtime-verification-failed",
           candidateSchemaVersions: {
-            state: OPENCLAW_STATE_SCHEMA_VERSION,
-            agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+            state: CARAPACE_STATE_SCHEMA_VERSION,
+            agent: CARAPACE_AGENT_SCHEMA_VERSION,
           },
           steps: [
             {
               name: "candidate gateway canary",
-              command: "openclaw gateway",
+              command: "carapace gateway",
               cwd: root,
               durationMs: 1,
               exitCode: candidateReady ? 0 : 1,
@@ -7708,9 +7708,9 @@ describe("update-cli", () => {
         expect(runExec).toHaveBeenCalledWith(
           expect.any(String),
           [entryPath, "config", "validate", "--json"],
-          expect.objectContaining({ env: { OPENCLAW_UPDATE_IN_PROGRESS: "0" } }),
+          expect.objectContaining({ env: { CARAPACE_UPDATE_IN_PROGRESS: "0" } }),
         );
-        expect(process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBeUndefined();
+        expect(process.env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBeUndefined();
         const result = lastWriteJsonCall() as UpdateRunResult;
         expect(result.status).toBe("ok");
         expect(getUpdateRun(requireValue(result.runId, "updated run id"))).toMatchObject({
@@ -7783,7 +7783,7 @@ describe("update-cli", () => {
   );
 
   it("refuses activation when successful Doctor leaves the validated candidate schema unapplied", async () => {
-    const root = await mockPackageInstallAtCaseDir("openclaw-update-incomplete-migration");
+    const root = await mockPackageInstallAtCaseDir("carapace-update-incomplete-migration");
     mockFileBackedPathExists();
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(
       path.join(root, "dist", "index.js"),
@@ -7792,13 +7792,13 @@ describe("update-cli", () => {
       reportCandidateSteps(options, {
         status: "ok",
         candidateSchemaVersions: {
-          state: OPENCLAW_STATE_SCHEMA_VERSION + 1,
-          agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+          state: CARAPACE_STATE_SCHEMA_VERSION + 1,
+          agent: CARAPACE_AGENT_SCHEMA_VERSION,
         },
         steps: [
           {
             name: "candidate gateway canary",
-            command: "openclaw gateway",
+            command: "carapace gateway",
             cwd: root,
             durationMs: 1,
             exitCode: 0,
@@ -7814,11 +7814,11 @@ describe("update-cli", () => {
     expect(freshRestartCalls()).toEqual([]);
     expect(lastWriteJsonCall()).toMatchObject({
       status: "error",
-      reason: "openclaw doctor",
+      reason: "carapace doctor",
       steps: expect.arrayContaining([
         expect.objectContaining({
           exitCode: 1,
-          stderrTail: expect.stringContaining(String(OPENCLAW_STATE_SCHEMA_VERSION + 1)),
+          stderrTail: expect.stringContaining(String(CARAPACE_STATE_SCHEMA_VERSION + 1)),
         }),
       ]),
     });
@@ -7830,7 +7830,7 @@ describe("update-cli", () => {
     const processOffSpy = vi.spyOn(process, "off");
     suspendScheduledTaskAutoStartForUpdate.mockResolvedValue(true);
     resumeScheduledTaskAutoStartAfterUpdate.mockResolvedValue(true);
-    const root = await mockPackageInstallAtCaseDir("openclaw-update-stop-service");
+    const root = await mockPackageInstallAtCaseDir("carapace-update-stop-service");
     vi.mocked(resolveGatewayInstallEntrypoint)
       .mockReset()
       .mockResolvedValue(path.join(root, "dist", "index.js"));
@@ -7847,11 +7847,11 @@ describe("update-cli", () => {
     expect(doctorCall).toBeDefined();
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR,
+        ?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR,
     ).toBe("0");
     expect(
       (doctorCall?.[1].env as NodeJS.ProcessEnv | undefined)
-        ?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION,
+        ?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION,
     ).toBe("0");
     expect(getLogOutput()).toContain("Gateway: restarted and verified.");
     const npmInstallCallIndex = vi
@@ -7864,8 +7864,8 @@ describe("update-cli", () => {
     const serviceStopCall = serviceStop.mock.calls[0]?.[0] as
       | { env?: NodeJS.ProcessEnv }
       | undefined;
-    expect(serviceStopCall?.env?.OPENCLAW_SERVICE_MARKER).toBe("openclaw");
-    expect(serviceStopCall?.env?.OPENCLAW_SERVICE_KIND).toBe("gateway");
+    expect(serviceStopCall?.env?.CARAPACE_SERVICE_MARKER).toBe("carapace");
+    expect(serviceStopCall?.env?.CARAPACE_SERVICE_KIND).toBe("gateway");
     const serviceStopCallOrder = serviceStop.mock.invocationCallOrder[0];
     const requiredServiceStopCallOrder = requireValue(
       serviceStopCallOrder,
@@ -7887,15 +7887,15 @@ describe("update-cli", () => {
     );
     expect(suspendScheduledTaskAutoStartForUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       }),
       expect.objectContaining({ beforeMutation: expect.any(Function) }),
     );
     expect(resumeScheduledTaskAutoStartAfterUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       }),
       expect.objectContaining({ beforeMutation: expect.any(Function) }),
     );
@@ -7926,11 +7926,11 @@ describe("update-cli", () => {
     "quiesces a stopped loaded managed gateway on $platform before package replacement",
     async ({ platform, handoff }) => {
       const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue(platform);
-      const tempDir = tempDirs.make(`openclaw-update-stopped-loaded-${platform}-`);
+      const tempDir = tempDirs.make(`carapace-update-stopped-loaded-${platform}-`);
       const { nodeModules, entryPath } = await setupInstalledPackageRoot(tempDir);
       primeServiceCommand(["node", entryPath, "gateway", "run"], {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       });
       serviceLoaded.mockResolvedValue(true);
       serviceReadRuntime.mockResolvedValue({ status: "stopped", state: "stopped" });
@@ -7949,7 +7949,7 @@ describe("update-cli", () => {
       });
 
       try {
-        await withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: handoff }, async () => {
+        await withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: handoff }, async () => {
           const updatePromise = updateCommand({ yes: true });
           const firstOutcome = await Promise.race([
             stopStarted.then(() => "stop" as const),
@@ -7962,7 +7962,7 @@ describe("update-cli", () => {
           expect(candidateValidation).toHaveBeenCalledOnce();
           expect(
             JSON.parse(
-              await fs.readFile(path.join(nodeModules, "openclaw", "package.json"), "utf8"),
+              await fs.readFile(path.join(nodeModules, "carapace", "package.json"), "utf8"),
             ),
           ).toMatchObject({
             version: "2026.4.21",
@@ -7999,7 +7999,7 @@ describe("update-cli", () => {
     { name: "an ordinary stopped Scheduled Task", platform: "win32" as const, loaded: true },
   ])("leaves $name stopped during package replacement", async ({ platform, loaded }) => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue(platform);
-    const tempDir = tempDirs.make(`openclaw-update-stopped-${platform}-`);
+    const tempDir = tempDirs.make(`carapace-update-stopped-${platform}-`);
     const { nodeModules, entryPath } = await setupInstalledPackageRoot(tempDir);
     primeServiceCommand(["node", entryPath, "gateway", "run"]);
     serviceLoaded.mockResolvedValue(loaded);
@@ -8008,7 +8008,7 @@ describe("update-cli", () => {
     mockNpmGlobalRoot(nodeModules);
 
     try {
-      await withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: undefined }, async () => {
+      await withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: undefined }, async () => {
         await updateCommand({ yes: true });
       });
     } finally {
@@ -8022,13 +8022,13 @@ describe("update-cli", () => {
 
   it("leaves an enabled LaunchAgent untouched when staged installation fails", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
-    const tempDir = tempDirs.make("openclaw-update-stopped-launchagent-failure-");
+    const tempDir = tempDirs.make("carapace-update-stopped-launchagent-failure-");
     const { nodeModules, entryPath } = await setupInstalledPackageAtNodeModules(
       path.join(tempDir, "lib", "node_modules"),
     );
     const nodeRunner = path.join(tempDir, "bin", "node");
     primeServiceCommand([nodeRunner, entryPath, "gateway", "run"], {
-      OPENCLAW_STATE_DIR: profileStateDir(),
+      CARAPACE_STATE_DIR: profileStateDir(),
     });
     serviceLoaded.mockResolvedValue(true);
     serviceReadRuntime.mockResolvedValue({ status: "stopped", state: "stopped" });
@@ -8040,7 +8040,7 @@ describe("update-cli", () => {
     });
 
     try {
-      await withEnvAsync({ OPENCLAW_GATEWAY_PORT: "19999" }, async () => {
+      await withEnvAsync({ CARAPACE_GATEWAY_PORT: "19999" }, async () => {
         await expect(updateCommand({ yes: true, timeout: "17" })).rejects.toEqual(new ExitError(1));
       });
     } finally {
@@ -8059,7 +8059,7 @@ describe("update-cli", () => {
 
   it("leaves a disabled stopped LaunchAgent disabled when package replacement fails", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
-    const tempDir = tempDirs.make("openclaw-update-disabled-launchagent-failure-");
+    const tempDir = tempDirs.make("carapace-update-disabled-launchagent-failure-");
     const { nodeModules, entryPath } = await setupInstalledPackageRoot(tempDir);
     primeServiceCommand(["node", entryPath, "gateway", "run"]);
     serviceLoaded.mockResolvedValue(true);
@@ -8110,7 +8110,7 @@ describe("update-cli", () => {
       });
 
       await expect(
-        withEnvAsync({ OPENCLAW_UPDATE_RUN_HANDOFF: handoff }, () => updateCommand({ json })),
+        withEnvAsync({ CARAPACE_UPDATE_RUN_HANDOFF: handoff }, () => updateCommand({ json })),
       ).rejects.toEqual(new ExitError(expectedExitCode));
       expect(serviceStop).toHaveBeenCalledOnce();
       expect(freshRestartCalls()).toHaveLength(0);
@@ -8156,9 +8156,9 @@ describe("update-cli", () => {
     vi.mocked(readConfigFileSnapshot).mockRejectedValueOnce(failure);
     const cwd = process.cwd();
     const selectors = {
-      OPENCLAW_STATE_DIR: path.relative(cwd, profileStateDir()),
-      OPENCLAW_CONFIG_PATH: path.relative(cwd, path.join(profileStateDir(), "custom.json")),
-      OPENCLAW_WORKSPACE_DIR: "relative-workspace",
+      CARAPACE_STATE_DIR: path.relative(cwd, profileStateDir()),
+      CARAPACE_CONFIG_PATH: path.relative(cwd, path.join(profileStateDir(), "custom.json")),
+      CARAPACE_WORKSPACE_DIR: "relative-workspace",
     };
     await withEnvAsync(selectors, async () => {
       await expect(run({ yes: true, json: true, restart: false })).rejects.toBe(failure);
@@ -8169,19 +8169,19 @@ describe("update-cli", () => {
         expect(triageCall?.target.env[key], key).toBe(path.resolve(cwd, value));
         expect(process.env[key]).toBe(value);
       }
-      expect(process.env.OPENCLAW_UPDATE_IN_PROGRESS).toBeUndefined();
+      expect(process.env.CARAPACE_UPDATE_IN_PROGRESS).toBeUndefined();
     });
   });
 
   it("does not inspect or mutate a Windows host service from an isolated install", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-    const tempDir = tempDirs.make("openclaw-update-isolated-service-");
+    const tempDir = tempDirs.make("carapace-update-isolated-service-");
     const { nodeModules } = await setupInstalledPackageRoot(tempDir);
     mockRunningManagedGateway();
     mockFileBackedPathExists();
     mockNpmGlobalRoot(nodeModules);
 
-    await withEnvAsync({ OPENCLAW_HOME: path.join(tempDir, "relocated-home") }, async () => {
+    await withEnvAsync({ CARAPACE_HOME: path.join(tempDir, "relocated-home") }, async () => {
       await updateCommand({ yes: true });
     });
     platformSpy.mockRestore();
@@ -8198,31 +8198,31 @@ describe("update-cli", () => {
   it.each([
     {
       platform: "darwin" as const,
-      envKey: "OPENCLAW_LAUNCHD_LABEL",
-      value: "ai.openclaw.gateway",
+      envKey: "CARAPACE_LAUNCHD_LABEL",
+      value: "ai.carapace.gateway",
     },
     {
       platform: "linux" as const,
-      envKey: "OPENCLAW_SYSTEMD_UNIT",
-      value: "openclaw-gateway.service",
+      envKey: "CARAPACE_SYSTEMD_UNIT",
+      value: "carapace-gateway.service",
     },
     {
       platform: "win32" as const,
-      envKey: "OPENCLAW_WINDOWS_TASK_NAME",
-      value: "OpenClaw Gateway",
+      envKey: "CARAPACE_WINDOWS_TASK_NAME",
+      value: "Carapace Gateway",
     },
   ])(
     "does not reuse a conflicting $envKey selector from the managed service on $platform",
     async ({ platform, envKey, value }) => {
       const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue(platform);
-      const tempDir = tempDirs.make(`openclaw-update-${platform}-selector-`);
+      const tempDir = tempDirs.make(`carapace-update-${platform}-selector-`);
       const home = path.join(tempDir, "home");
-      const stateDir = path.join(home, ".openclaw-work");
+      const stateDir = path.join(home, ".carapace-work");
       const { nodeModules } = await setupInstalledPackageRoot(tempDir);
       serviceReadCommand.mockResolvedValue({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
         environment: {
-          OPENCLAW_PROFILE: "work",
+          CARAPACE_PROFILE: "work",
           [envKey]: value,
         },
       });
@@ -8236,10 +8236,10 @@ describe("update-cli", () => {
           {
             HOME: home,
             USERPROFILE: undefined,
-            OPENCLAW_HOME: undefined,
-            OPENCLAW_PROFILE: "work",
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+            CARAPACE_HOME: undefined,
+            CARAPACE_PROFILE: "work",
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
             [envKey]: undefined,
           },
           async () => {
@@ -8266,7 +8266,7 @@ describe("update-cli", () => {
   it.each([false, true])(
     "recovers a failed managed service stop only after an observed mutation (%s)",
     async (mutated) => {
-      const root = await mockPackageInstallAtCaseDir("openclaw-update-partial-stop");
+      const root = await mockPackageInstallAtCaseDir("carapace-update-partial-stop");
       mockRunningManagedGateway(["node", path.join(root, "dist", "index.js"), "gateway", "run"]);
       serviceStop.mockImplementationOnce(async ({ onMutation }) => {
         if (mutated) {
@@ -8295,7 +8295,7 @@ describe("update-cli", () => {
 
   it("restores Windows Scheduled Task autostart when service stop fails", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-    const root = await mockPackageInstallAtCaseDir("openclaw-update-stop-failure");
+    const root = await mockPackageInstallAtCaseDir("carapace-update-stop-failure");
     mockRunningManagedGateway(["node", path.join(root, "dist", "index.js"), "gateway", "run"]);
     suspendScheduledTaskAutoStartForUpdate.mockResolvedValue(true);
     serviceStop.mockRejectedValueOnce(new Error("stop failed"));
@@ -8336,7 +8336,7 @@ describe("update-cli", () => {
       vi.spyOn(process, "platform", "get").mockReturnValue("win32");
       setTty(true);
       setStdoutTty(true);
-      const root = await mockPackageInstallAtCaseDir("openclaw-update-native-preparation");
+      const root = await mockPackageInstallAtCaseDir("carapace-update-native-preparation");
       mockRunningManagedGateway([
         process.execPath,
         path.join(root, "dist", "entry.js"),
@@ -8346,7 +8346,7 @@ describe("update-cli", () => {
       mockFileBackedPathExists();
       const target = {
         stateDir: profileStateDir("native-preparation"),
-        configPath: path.join(profileStateDir("native-preparation"), "openclaw.json"),
+        configPath: path.join(profileStateDir("native-preparation"), "carapace.json"),
         defaultWorkspaceDir: path.join(profileStateDir("native-preparation"), "workspace"),
       };
       tempDirsToCleanup.add(target.stateDir);
@@ -8355,10 +8355,10 @@ describe("update-cli", () => {
       primeServiceCommand(
         [process.execPath, path.join(root, "dist", "entry.js"), "gateway", "run"],
         {
-          OPENCLAW_PROFILE: "native-preparation",
-          OPENCLAW_STATE_DIR: target.stateDir,
-          OPENCLAW_CONFIG_PATH: target.configPath,
-          OPENCLAW_WORKSPACE_DIR: target.defaultWorkspaceDir,
+          CARAPACE_PROFILE: "native-preparation",
+          CARAPACE_STATE_DIR: target.stateDir,
+          CARAPACE_CONFIG_PATH: target.configPath,
+          CARAPACE_WORKSPACE_DIR: target.defaultWorkspaceDir,
         },
       );
       const nativeTaskControl = await vi.importActual<
@@ -8414,7 +8414,7 @@ describe("update-cli", () => {
       // This fixture owns a native service; neither a relocated home nor the
       // host's external-repair policy should opt Doctor out of exercising it.
       await withEnvAsync(
-        { OPENCLAW_HOME: undefined, OPENCLAW_SERVICE_REPAIR_POLICY: undefined },
+        { CARAPACE_HOME: undefined, CARAPACE_SERVICE_REPAIR_POLICY: undefined },
         async () => {
           try {
             if (command === "doctor") {
@@ -8600,10 +8600,10 @@ describe("update-cli", () => {
   it("keeps Windows Scheduled Task autostart disabled after unverified lifecycle failure", async () => {
     await useFileBackedConfig();
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-    const root = await mockPackageInstallAtCaseDir("openclaw-update-recovery-failure");
+    const root = await mockPackageInstallAtCaseDir("carapace-update-recovery-failure");
     primeServiceCommand(["node", path.join(root, "dist", "index.js"), "gateway", "run"], {
-      OPENCLAW_SERVICE_MARKER: "openclaw",
-      OPENCLAW_SERVICE_KIND: "gateway",
+      CARAPACE_SERVICE_MARKER: "carapace",
+      CARAPACE_SERVICE_KIND: "gateway",
     });
     serviceReadRuntime.mockResolvedValue({ status: "stopped", state: "stopped" });
     suspendScheduledTaskAutoStartForUpdate.mockResolvedValue(true);
@@ -8640,10 +8640,10 @@ describe("update-cli", () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     const processOnSpy = vi.spyOn(process, "on");
     const processExitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-    const root = await mockPackageInstallAtCaseDir("openclaw-update-lifecycle-signal");
+    const root = await mockPackageInstallAtCaseDir("carapace-update-lifecycle-signal");
     primeServiceCommand(["node", path.join(root, "dist", "index.js"), "gateway", "run"], {
-      OPENCLAW_SERVICE_MARKER: "openclaw",
-      OPENCLAW_SERVICE_KIND: "gateway",
+      CARAPACE_SERVICE_MARKER: "carapace",
+      CARAPACE_SERVICE_KIND: "gateway",
     });
     serviceReadRuntime.mockResolvedValue({ status: "stopped", state: "stopped" });
     suspendScheduledTaskAutoStartForUpdate.mockResolvedValue(true);
@@ -8842,7 +8842,7 @@ describe("update-cli", () => {
       nativeTaskControl.resumeScheduledTaskAutoStartAfterUpdate,
     );
     serviceStop.mockImplementationOnce(async () => {
-      primeServiceCommand(["node", "/another-install/openclaw.mjs", "gateway", "run"]);
+      primeServiceCommand(["node", "/another-install/carapace.mjs", "gateway", "run"]);
       throw new Error("stop failed after task replacement");
     });
     try {
@@ -8894,17 +8894,17 @@ describe("update-cli", () => {
           gitMutation();
           return makeOkUpdateResult({ mode: "git" });
         });
-        databasePreflightMocks.preflightOpenClawDatabaseSchemas.mockImplementation(async () => {
+        databasePreflightMocks.preflightCarapaceDatabaseSchemas.mockImplementation(async () => {
           if (taskSuspended) {
             await waitForSignal();
           }
           return { incompatible: [], indeterminate: [] };
         });
       } else {
-        const root = await mockPackageInstallAtCaseDir("openclaw-update-suspension-signal");
+        const root = await mockPackageInstallAtCaseDir("carapace-update-suspension-signal");
         primeServiceCommand(["node", path.join(root, "dist", "index.js"), "gateway", "run"], {
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "gateway",
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "gateway",
         });
       }
       resumeScheduledTaskAutoStartAfterUpdate.mockResolvedValue(true);
@@ -8958,7 +8958,7 @@ describe("update-cli", () => {
       const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
       const homeSpy = vi.spyOn(os, "homedir").mockReturnValue(fixtureRoot);
       const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageRoot(
-        createCaseDir("openclaw-update-stopped-task"),
+        createCaseDir("carapace-update-stopped-task"),
       );
       primeNpmChannelTag("latest", "2026.4.22");
       mockFileBackedPathExists();
@@ -8969,8 +8969,8 @@ describe("update-cli", () => {
         }
       });
       primeServiceCommand(["node", entryPath, "gateway", "run"], {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       });
       serviceReadRuntime.mockResolvedValue(
         runtimeStatus === "running"
@@ -9015,9 +9015,9 @@ describe("update-cli", () => {
     "does not suspend a %s foreign Windows task when offline inspection is unavailable",
     async (runtimeStatus) => {
       const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-      const updateRoot = tempDirs.make("openclaw-update-foreign-task-");
-      const foreignRoot = tempDirs.make("openclaw-update-foreign-task-owner-");
-      const foreignEntrypoint = await writeOpenClawPackageFixture(foreignRoot, "2026.4.21", {
+      const updateRoot = tempDirs.make("carapace-update-foreign-task-");
+      const foreignRoot = tempDirs.make("carapace-update-foreign-task-owner-");
+      const foreignEntrypoint = await writeCarapacePackageFixture(foreignRoot, "2026.4.21", {
         entrySource: "export {};\n",
       });
       primeServiceCommand(["node", foreignEntrypoint, "gateway", "run"]);
@@ -9121,8 +9121,8 @@ describe("update-cli", () => {
     const serviceStopCall = serviceStop.mock.calls[0]?.[0] as
       | { env?: NodeJS.ProcessEnv }
       | undefined;
-    expect(serviceStopCall?.env?.OPENCLAW_SERVICE_MARKER).toBe("openclaw");
-    expect(serviceStopCall?.env?.OPENCLAW_SERVICE_KIND).toBe("gateway");
+    expect(serviceStopCall?.env?.CARAPACE_SERVICE_MARKER).toBe("carapace");
+    expect(serviceStopCall?.env?.CARAPACE_SERVICE_KIND).toBe("gateway");
     const updateCall = vi.mocked(runGatewayUpdate).mock.calls[0]?.[0];
     expect(updateCall?.beforeGitMutation).toEqual(expect.any(Function));
     expect(updateCall?.allowGatewayActivation).toBe(false);
@@ -9136,11 +9136,11 @@ describe("update-cli", () => {
     const command = {
       programArguments: ["node", entrypoint, "gateway", "--port", "18789"],
       environment: {
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
       },
-      sourcePath: "/etc/systemd/user/openclaw-gateway.service",
-      definitionPaths: ["/etc/systemd/user/openclaw-gateway.service"],
+      sourcePath: "/etc/systemd/user/carapace-gateway.service",
+      definitionPaths: ["/etc/systemd/user/carapace-gateway.service"],
     };
     serviceReadCommand.mockImplementation(async (options) =>
       options?.requireEffective ? command : null,
@@ -9164,33 +9164,33 @@ describe("update-cli", () => {
   });
 
   it.each(["owned", "unresolved"] as const)(
-    "inspects an %s service wrapper when openclaw is absent from PATH",
+    "inspects an %s service wrapper when carapace is absent from PATH",
     async (ownership) => {
-      const root = createCaseDir("openclaw-update-wrapper-install");
-      const entrypoint = await writeOpenClawPackageFixture(root, "1.0.0", {
+      const root = createCaseDir("carapace-update-wrapper-install");
+      const entrypoint = await writeCarapacePackageFixture(root, "1.0.0", {
         git: true,
         entrySource: "export {};\n",
       });
-      vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+      vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
       mockFileBackedPathExists();
       const wrapperDir =
         ownership === "owned"
           ? path.join(root, "bin")
-          : createCaseDir("openclaw-update-wrapper-service");
+          : createCaseDir("carapace-update-wrapper-service");
       const wrapperPath = path.join(wrapperDir, "gateway-wrapper");
       await fs.mkdir(wrapperDir, { recursive: true });
       await fs.writeFile(wrapperPath, "#!/bin/sh\nexit 0\n", { mode: 0o755 });
       const stateDir = profileStateDir("wrapper-service");
       tempDirsToCleanup.add(stateDir);
       await fs.mkdir(stateDir, { recursive: true });
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await fs.writeFile(configPath, JSON.stringify(baseSnapshot.config));
       const serviceEnv = {
         ...process.env,
-        OPENCLAW_PROFILE: "wrapper-service",
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_WRAPPER: wrapperPath,
+        CARAPACE_PROFILE: "wrapper-service",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_WRAPPER: wrapperPath,
         PATH: path.dirname(process.execPath),
       };
       const { buildGatewayInstallPlan } = await import("../commands/daemon-install-helpers.js");
@@ -9253,7 +9253,7 @@ describe("update-cli", () => {
       });
       const { resolveExecutablePath } = await import("../infra/executable-path.js");
       expect(
-        resolveExecutablePath("openclaw", { env: serviceCommand.environment }),
+        resolveExecutablePath("carapace", { env: serviceCommand.environment }),
       ).toBeUndefined();
       const envSnapshot = captureEnv(Object.keys(serviceCommand.environment));
       mockGitUpdateAfterMutation(makeOkUpdateResult({ mode: "git", root }));
@@ -9291,7 +9291,7 @@ describe("update-cli", () => {
       expect(serviceStop).toHaveBeenCalledTimes(1);
       expect(runGatewayUpdate).toHaveBeenCalledTimes(1);
       const restartOptions = freshRestartCalls()[0]?.[1];
-      expect(typeof restartOptions === "object" && restartOptions.env?.OPENCLAW_WRAPPER).toBe(
+      expect(typeof restartOptions === "object" && restartOptions.env?.CARAPACE_WRAPPER).toBe(
         wrapperPath,
       );
       expect(serviceStart).not.toHaveBeenCalled();
@@ -9311,7 +9311,7 @@ describe("update-cli", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: gatewayFixturePid, command: "openclaw-gateway" }],
+        listeners: [{ pid: gatewayFixturePid, command: "carapace-gateway" }],
         hints: [],
       },
       healthy: true,
@@ -9364,13 +9364,13 @@ describe("update-cli", () => {
   });
 
   it("stops a managed gateway rooted at the git checkout when switching package installs to dev", async () => {
-    const prefix = createCaseDir("openclaw-update-package-root");
+    const prefix = createCaseDir("carapace-update-package-root");
     const { nodeModules } = await setupInstalledPackageAtNodeModules(
       path.join(prefix, "lib", "node_modules"),
     );
-    const gitRoot = tempDirs.make("openclaw-update-git-service-root-");
+    const gitRoot = tempDirs.make("carapace-update-git-service-root-");
     const sha = "a".repeat(40);
-    const serviceEntrypoint = await writeOpenClawPackageFixture(gitRoot, "2026.4.21", {
+    const serviceEntrypoint = await writeCarapacePackageFixture(gitRoot, "2026.4.21", {
       entrySource: "export {};\n",
       git: true,
       builtSha: sha,
@@ -9387,7 +9387,7 @@ describe("update-cli", () => {
       }),
     );
 
-    await withEnvAsync({ OPENCLAW_GIT_DIR: gitRoot }, async () => {
+    await withEnvAsync({ CARAPACE_GIT_DIR: gitRoot }, async () => {
       await updateCommand({ channel: "dev", yes: true });
     });
 
@@ -9401,15 +9401,15 @@ describe("update-cli", () => {
   it.each(["owned", "foreign"])(
     "uses only the owned profile when switching package installs to dev (%s service)",
     async (serviceOwnership) => {
-      const prefix = tempDirs.make("openclaw-update-package-service-root-");
+      const prefix = tempDirs.make("carapace-update-package-service-root-");
       const nodeModules = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(nodeModules, "openclaw");
+      const packageRoot = path.join(nodeModules, "carapace");
       const sha = "a".repeat(40);
-      const gitRoot = tempDirs.make("openclaw-update-git-service-root-");
-      const packageEntrypoint = await writeOpenClawPackageFixture(packageRoot, "2026.4.20", {
+      const gitRoot = tempDirs.make("carapace-update-git-service-root-");
+      const packageEntrypoint = await writeCarapacePackageFixture(packageRoot, "2026.4.20", {
         entrySource: "export {};\n",
       });
-      const gitEntrypoint = await writeOpenClawPackageFixture(gitRoot, "2026.4.21", {
+      const gitEntrypoint = await writeCarapacePackageFixture(gitRoot, "2026.4.21", {
         entrySource: "export {};\n",
         git: true,
         builtSha: sha,
@@ -9418,8 +9418,8 @@ describe("update-cli", () => {
       const serviceEntrypoint =
         serviceOwnership === "owned"
           ? packageEntrypoint
-          : await writeOpenClawPackageFixture(
-              tempDirs.make("openclaw-update-foreign-service-root-"),
+          : await writeCarapacePackageFixture(
+              tempDirs.make("carapace-update-foreign-service-root-"),
               "2026.4.20",
               // A source checkout is not adopted by package-root planning.
               { entrySource: "export {};\n", git: true, builtSha: "b".repeat(40) },
@@ -9429,8 +9429,8 @@ describe("update-cli", () => {
       const managedProfile = `package-git-${serviceOwnership}-managed`;
       const callerState = profileStateDir(callerProfile);
       const managedState = profileStateDir(managedProfile);
-      const callerConfig = path.join(callerState, "openclaw.json");
-      const managedConfig = path.join(managedState, "openclaw.json");
+      const callerConfig = path.join(callerState, "carapace.json");
+      const managedConfig = path.join(managedState, "carapace.json");
       await Promise.all([fs.mkdir(callerState), fs.mkdir(managedState)]);
       tempDirsToCleanup.add(callerState);
       tempDirsToCleanup.add(managedState);
@@ -9482,11 +9482,11 @@ describe("update-cli", () => {
           "run",
         ],
         environment: {
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "gateway",
-          OPENCLAW_PROFILE: managedProfile,
-          OPENCLAW_CONFIG_PATH: managedConfig,
-          OPENCLAW_STATE_DIR: managedState,
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "gateway",
+          CARAPACE_PROFILE: managedProfile,
+          CARAPACE_CONFIG_PATH: managedConfig,
+          CARAPACE_STATE_DIR: managedState,
         },
       }));
       const preparations = mockGitUpdateAfterMutation(
@@ -9499,29 +9499,29 @@ describe("update-cli", () => {
 
       await withEnvAsync(
         {
-          OPENCLAW_GIT_DIR: gitRoot,
-          OPENCLAW_PROFILE: callerProfile,
-          OPENCLAW_CONFIG_PATH: callerConfig,
-          OPENCLAW_STATE_DIR: callerState,
+          CARAPACE_GIT_DIR: gitRoot,
+          CARAPACE_PROFILE: callerProfile,
+          CARAPACE_CONFIG_PATH: callerConfig,
+          CARAPACE_STATE_DIR: callerState,
         },
         async () => {
           await updateCommand({ channel: "dev", yes: true });
-          expect(process.env.OPENCLAW_PROFILE).toBe(callerProfile);
-          expect(process.env.OPENCLAW_CONFIG_PATH).toBe(callerConfig);
-          expect(process.env.OPENCLAW_STATE_DIR).toBe(callerState);
+          expect(process.env.CARAPACE_PROFILE).toBe(callerProfile);
+          expect(process.env.CARAPACE_CONFIG_PATH).toBe(callerConfig);
+          expect(process.env.CARAPACE_STATE_DIR).toBe(callerState);
         },
       );
 
       expect
         .soft({
-          OPENCLAW_PROFILE: doctorEnv?.OPENCLAW_PROFILE,
-          OPENCLAW_CONFIG_PATH: doctorEnv?.OPENCLAW_CONFIG_PATH,
-          OPENCLAW_STATE_DIR: doctorEnv?.OPENCLAW_STATE_DIR,
+          CARAPACE_PROFILE: doctorEnv?.CARAPACE_PROFILE,
+          CARAPACE_CONFIG_PATH: doctorEnv?.CARAPACE_CONFIG_PATH,
+          CARAPACE_STATE_DIR: doctorEnv?.CARAPACE_STATE_DIR,
         })
         .toEqual({
-          OPENCLAW_PROFILE: serviceOwnership === "owned" ? managedProfile : callerProfile,
-          OPENCLAW_CONFIG_PATH: selectedConfig,
-          OPENCLAW_STATE_DIR: serviceOwnership === "owned" ? managedState : callerState,
+          CARAPACE_PROFILE: serviceOwnership === "owned" ? managedProfile : callerProfile,
+          CARAPACE_CONFIG_PATH: selectedConfig,
+          CARAPACE_STATE_DIR: serviceOwnership === "owned" ? managedState : callerState,
         });
       expect
         .soft(backupAtDoctorEntry)
@@ -9558,7 +9558,7 @@ describe("update-cli", () => {
   it.runIf(process.platform !== "win32")(
     "continues package-to-Git updates from the published checkout after its alias is retargeted",
     async () => {
-      const root = tempDirs.make("openclaw-update-git-alias-");
+      const root = tempDirs.make("carapace-update-git-alias-");
       const { nodeModules } = await setupInstalledPackageAtNodeModules(
         path.join(root, "package", "lib", "node_modules"),
       );
@@ -9575,7 +9575,7 @@ describe("update-cli", () => {
         const stagingRoot = requireValue(options?.cwd, "staged update root");
         expect(stagingRoot).not.toBe(publishedRoot);
         await options?.inspectGitTarget?.({});
-        await writeOpenClawPackageFixture(stagingRoot, "2026.8.17", {
+        await writeCarapacePackageFixture(stagingRoot, "2026.8.17", {
           git: true,
           builtSha: sha,
           entrySource: "export {};\n",
@@ -9595,7 +9595,7 @@ describe("update-cli", () => {
         async (argv) => {
           if (argv[0] === "git" && argv[1] === "clone") {
             const stagingDir = requireValue(argv.at(-1), "Git clone staging directory");
-            await writeOpenClawPackageFixture(stagingDir, "2026.8.17", { git: true });
+            await writeCarapacePackageFixture(stagingDir, "2026.8.17", { git: true });
             await fs.unlink(checkoutAlias);
             await fs.symlink(replacementRoot, checkoutAlias, "dir");
           }
@@ -9604,7 +9604,7 @@ describe("update-cli", () => {
           requireValue(vi.mocked(runGatewayUpdate).mock.calls[0]?.[0]?.cwd, "candidate checkout"),
       );
 
-      await withEnvAsync({ OPENCLAW_GIT_DIR: checkoutAlias }, async () => {
+      await withEnvAsync({ CARAPACE_GIT_DIR: checkoutAlias }, async () => {
         await updateCommand({ channel: "dev", yes: true, restart: false }).catch(
           (error: unknown) => {
             throw new Error(getErrorOutput() + getLogOutput(), { cause: error });
@@ -9625,14 +9625,14 @@ describe("update-cli", () => {
   );
 
   it("does not stop an unresolved service when package-to-Git staging fails", async () => {
-    const root = tempDirs.make("openclaw-update-package-to-git-unsafe-");
-    const packageRoot = path.join(root, ".bun", "install", "global", "node_modules", "openclaw");
+    const root = tempDirs.make("carapace-update-package-to-git-unsafe-");
+    const packageRoot = path.join(root, ".bun", "install", "global", "node_modules", "carapace");
     const gitRoot = path.join(root, "git-root");
-    const packageEntry = await writeOpenClawPackageFixture(packageRoot, "2026.4.20", {
+    const packageEntry = await writeCarapacePackageFixture(packageRoot, "2026.4.20", {
       entrySource: "export {};\n",
     });
     const sha = "a".repeat(40);
-    await writeOpenClawPackageFixture(gitRoot, "2026.8.18", { git: true, builtSha: sha });
+    await writeCarapacePackageFixture(gitRoot, "2026.8.18", { git: true, builtSha: sha });
     mockPackageInstallStatus(packageRoot);
     resolveGlobalManager.mockResolvedValue("bun");
     mockFileBackedPathExists();
@@ -9646,7 +9646,7 @@ describe("update-cli", () => {
       return commandResult();
     });
 
-    await withEnvAsync({ OPENCLAW_GIT_DIR: gitRoot }, async () => {
+    await withEnvAsync({ CARAPACE_GIT_DIR: gitRoot }, async () => {
       await expect(updateCommand({ channel: "dev", yes: true, json: true })).rejects.toEqual(
         new ExitError(1),
       );
@@ -9665,20 +9665,20 @@ describe("update-cli", () => {
   it.each(["package", "git"])(
     "leaves the %s service untouched when package-to-Git staging fails",
     async (serviceRoot) => {
-      const root = tempDirs.make("openclaw-update-package-to-git-fail-");
+      const root = tempDirs.make("carapace-update-package-to-git-fail-");
       const prefix = path.join(root, "prefix");
       const nodeModules = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(nodeModules, "openclaw");
-      const shim = path.join(prefix, "bin", "openclaw");
+      const packageRoot = path.join(nodeModules, "carapace");
+      const shim = path.join(prefix, "bin", "carapace");
       const gitRoot = path.join(root, "git-root");
       const sha = "a".repeat(40);
-      const packageEntry = await writeOpenClawPackageFixture(packageRoot, "2026.4.20", {
+      const packageEntry = await writeCarapacePackageFixture(packageRoot, "2026.4.20", {
         entrySource: "export {};\n",
         inventory: true,
       });
       await fs.mkdir(path.dirname(shim), { recursive: true });
       await fs.writeFile(shim, "old package shim\n", { mode: 0o755 });
-      const gitEntry = await writeOpenClawPackageFixture(gitRoot, "2026.8.18", {
+      const gitEntry = await writeCarapacePackageFixture(gitRoot, "2026.8.18", {
         git: true,
         builtSha: sha,
         entrySource: "export {};\n",
@@ -9699,7 +9699,7 @@ describe("update-cli", () => {
         return undefined;
       });
 
-      await withEnvAsync({ OPENCLAW_GIT_DIR: gitRoot }, async () => {
+      await withEnvAsync({ CARAPACE_GIT_DIR: gitRoot }, async () => {
         await expect(updateCommand({ channel: "dev", yes: true, json: true })).rejects.toEqual(
           new ExitError(1),
         );
@@ -9728,14 +9728,14 @@ describe("update-cli", () => {
   it.each(["package", "git"] as const)(
     "recovers only an untouched package service after source publication fails (service=%s)",
     async (serviceRoot) => {
-      const root = tempDirs.make("openclaw-update-source-publish-failure-");
+      const root = tempDirs.make("carapace-update-source-publish-failure-");
       const { nodeModules, pkgRoot, entryPath } = await setupInstalledPackageAtNodeModules(
         path.join(root, "prefix", "lib", "node_modules"),
         "2026.4.20",
       );
       const gitRoot = path.join(root, "git-root");
       const sha = "a".repeat(40);
-      const gitEntry = await writeOpenClawPackageFixture(gitRoot, "2026.8.18", {
+      const gitEntry = await writeCarapacePackageFixture(gitRoot, "2026.8.18", {
         git: true,
         builtSha: sha,
         entrySource: "export {};\n",
@@ -9776,7 +9776,7 @@ describe("update-cli", () => {
         });
       });
 
-      await withEnvAsync({ OPENCLAW_GIT_DIR: gitRoot }, async () => {
+      await withEnvAsync({ CARAPACE_GIT_DIR: gitRoot }, async () => {
         await expect(updateCommand({ channel: "dev", yes: true, json: true })).rejects.toEqual(
           new ExitError(1),
         );
@@ -9787,8 +9787,8 @@ describe("update-cli", () => {
       expect(
         (await fs.readdir(nodeModules)).filter(
           (entry) =>
-            entry.startsWith(".openclaw.update-stage-") ||
-            entry.startsWith(".openclaw.package-backup-"),
+            entry.startsWith(".carapace.update-stage-") ||
+            entry.startsWith(".carapace.package-backup-"),
         ).length,
       ).toBe(0);
       expect(doctorCommandCall()).toBeUndefined();
@@ -9814,8 +9814,8 @@ describe("update-cli", () => {
   );
 
   it("does not stop or restart a managed gateway owned by another git checkout", async () => {
-    const otherRoot = tempDirs.make("openclaw-update-other-service-root-");
-    const otherEntrypoint = await writeOpenClawPackageFixture(otherRoot, "2026.4.21", {
+    const otherRoot = tempDirs.make("carapace-update-other-service-root-");
+    const otherEntrypoint = await writeCarapacePackageFixture(otherRoot, "2026.4.21", {
       entrySource: "export {};\n",
     });
     mockRunningManagedGateway(["node", otherEntrypoint, "gateway", "run"]);
@@ -9864,9 +9864,9 @@ describe("update-cli", () => {
     expect(runExec).toHaveBeenCalledExactlyOnceWith(
       expect.any(String),
       [serviceEntrypoint, "config", "validate", "--json"],
-      expect.objectContaining({ env: { OPENCLAW_UPDATE_IN_PROGRESS: "0" } }),
+      expect.objectContaining({ env: { CARAPACE_UPDATE_IN_PROGRESS: "0" } }),
     );
-    expect(getLogOutput()).toContain("OpenClaw update failed: post-update-plugins.");
+    expect(getLogOutput()).toContain("Carapace update failed: post-update-plugins.");
     expect(getErrorOutput()).not.toContain("Update failed during plugin post-update sync.");
   });
 
@@ -9928,17 +9928,17 @@ describe("update-cli", () => {
     expect(freshRestartCalls()).toHaveLength(0);
 
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
-    expect(getLogOutput()).toContain("OpenClaw update failed: post-update-plugins.");
-    expect(getLogOutput()).not.toContain("OpenClaw updated");
+    expect(getLogOutput()).toContain("Carapace update failed: post-update-plugins.");
+    expect(getLogOutput()).not.toContain("Carapace updated");
   });
 
   it("keeps managed service stop output off stdout during json package updates", async () => {
-    const tempDir = tempDirs.make("openclaw-update-json-stop-service-");
+    const tempDir = tempDirs.make("carapace-update-json-stop-service-");
     const { nodeModules, entryPath } = await setupInstalledPackageRoot(tempDir);
     const stdoutWrite = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     mockRunningManagedGateway(["node", entryPath, "gateway", "run"]);
     serviceStop.mockImplementationOnce(async (params: { stdout?: NodeJS.WritableStream }) => {
-      params.stdout?.write("Stopped systemd service: openclaw-gateway.service\n");
+      params.stdout?.write("Stopped systemd service: carapace-gateway.service\n");
     });
     mockFileBackedPathExists();
     mockNpmGlobalRoot(nodeModules);
@@ -9956,17 +9956,17 @@ describe("update-cli", () => {
   });
 
   it("disarms legacy launchd updater jobs before stopping the gateway", async () => {
-    const tempDir = tempDirs.make("openclaw-update-launchd-loop-");
+    const tempDir = tempDirs.make("carapace-update-launchd-loop-");
     const { nodeModules, entryPath } = await setupInstalledPackageRoot(tempDir);
     mockRunningManagedGateway(["node", entryPath, "gateway", "run"]);
-    launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob.mockResolvedValue(true);
+    launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob.mockResolvedValue(true);
     mockFileBackedPathExists();
     mockNpmGlobalRoot(nodeModules);
 
     await updateCommand({ yes: true });
 
     const cleanupOrder =
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob.mock.invocationCallOrder[0];
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob.mock.invocationCallOrder[0];
     const serviceStopOrder = serviceStop.mock.invocationCallOrder[0];
     expect(requireValue(cleanupOrder, "launchd updater cleanup order")).toBeLessThan(
       requireValue(serviceStopOrder, "service stop order"),
@@ -9974,14 +9974,14 @@ describe("update-cli", () => {
   });
 
   it("leaves same-version package files intact with --no-restart", async () => {
-    const tempDir = tempDirs.make("openclaw-update-current-");
+    const tempDir = tempDirs.make("carapace-update-current-");
     const { nodeModules, pkgRoot } = await setupInstalledPackageRoot(tempDir, "2026.4.23");
     readPackageVersion.mockResolvedValue("2026.4.23");
     vi.mocked(resolveNpmChannelTag).mockResolvedValue({
       tag: "latest",
       version: "2026.4.23",
     });
-    await writeOpenClawPackageFixture(pkgRoot, "2026.4.23", {
+    await writeCarapacePackageFixture(pkgRoot, "2026.4.23", {
       inventory: true,
     });
     mockFileBackedPathExists();
@@ -9997,12 +9997,12 @@ describe("update-cli", () => {
   });
 
   it("retries package updates without optional deps when npm global update fails", async () => {
-    const tempDir = tempDirs.make("openclaw-update-optional-");
+    const tempDir = tempDirs.make("carapace-update-optional-");
     const nodeModules = path.join(tempDir, "lib", "node_modules");
-    const pkgRoot = path.join(nodeModules, "openclaw");
+    const pkgRoot = path.join(nodeModules, "carapace");
     mockPackageInstallStatus(pkgRoot);
     mockCurrentProcessFreshDoctor({ packageRoot: pkgRoot });
-    await writeOpenClawPackageFixture(pkgRoot, "1.0.0", {
+    await writeCarapacePackageFixture(pkgRoot, "1.0.0", {
       inventory: true,
       entrySource: "export {};\n",
     });
@@ -10031,10 +10031,10 @@ describe("update-cli", () => {
       "npm",
       "i",
       "-g",
-      "--allow-scripts=openclaw",
+      "--allow-scripts=carapace",
       "--prefix",
-      expect.stringContaining(".openclaw.update-stage-"),
-      "openclaw@9999.0.0",
+      expect.stringContaining(".carapace.update-stage-"),
+      "carapace@9999.0.0",
     ];
     const installFlags = ["--no-fund", "--no-audit", "--loglevel=error", "--min-release-age=0"];
     expect(installArgvs).toEqual([
@@ -10048,7 +10048,7 @@ describe("update-cli", () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
     const brewPrefix = createCaseDir("brew-prefix");
     const brewRoot = path.join(brewPrefix, "lib", "node_modules");
-    const pkgRoot = path.join(brewRoot, "openclaw");
+    const pkgRoot = path.join(brewRoot, "carapace");
     const brewNpm = path.join(brewPrefix, "bin", "npm");
     const win32PrefixNpm = path.join(brewPrefix, "npm.cmd");
     const owningNpmCommands = new Set([brewNpm, win32PrefixNpm].map(path.normalize));
@@ -10056,7 +10056,7 @@ describe("update-cli", () => {
       typeof value === "string" && owningNpmCommands.has(path.normalize(value));
     const pathNpmRoot = createCaseDir("nvm-root");
     mockPackageInstallStatus(pkgRoot);
-    await writeOpenClawPackageFixture(pkgRoot, "1.0.0", {
+    await writeCarapacePackageFixture(pkgRoot, "1.0.0", {
       entrySource: "export {};\n",
       inventory: true,
     });
@@ -10097,7 +10097,7 @@ describe("update-cli", () => {
           isOwningNpmCommand(argv[0]) &&
           argv[1] === "i" &&
           argv[2] === "-g" &&
-          argv.includes("openclaw@9999.0.0"),
+          argv.includes("carapace@9999.0.0"),
       );
 
     const requiredInstallCall = requireValue(installCall, "brew npm install call");
@@ -10126,10 +10126,10 @@ describe("update-cli", () => {
   it("prepends portable Git PATH for package updates on Windows", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     await mockPackageInstallAtCaseDir();
-    const localAppData = createCaseDir("openclaw-localappdata");
+    const localAppData = createCaseDir("carapace-localappdata");
     const portableGitMingw = path.join(
       localAppData,
-      "OpenClaw",
+      "Carapace",
       "deps",
       "portable-git",
       "mingw64",
@@ -10137,7 +10137,7 @@ describe("update-cli", () => {
     );
     const portableGitUsr = path.join(
       localAppData,
-      "OpenClaw",
+      "Carapace",
       "deps",
       "portable-git",
       "usr",
@@ -10235,11 +10235,11 @@ describe("update-cli", () => {
   });
 
   it("warns when a package update targets a managed service root outside the shell root", async () => {
-    const shellRoot = createCaseDir("openclaw-shell-root");
-    const serviceRoot = tempDirs.make("openclaw-service-root-");
+    const shellRoot = createCaseDir("carapace-shell-root");
+    const serviceRoot = tempDirs.make("carapace-service-root-");
     const serviceNode = path.join(path.dirname(serviceRoot), "bin", "node");
     await fs.mkdir(path.join(serviceRoot, "dist"), { recursive: true });
-    await writeOpenClawPackageFixture(serviceRoot, "2026.5.18");
+    await writeCarapacePackageFixture(serviceRoot, "2026.5.18");
     mockPackageInstallStatus(shellRoot);
     primeServiceCommand([serviceNode, path.join(serviceRoot, "dist", "index.js"), "gateway"]);
 
@@ -10249,20 +10249,20 @@ describe("update-cli", () => {
     const logs = getLogOutput();
     expect(logs).toContain(`Targeting managed gateway service package root: ${serviceRoot}`);
     expect(logs).toContain(
-      `Shell OpenClaw root differs from the managed gateway service root: ${shellRoot}`,
+      `Shell Carapace root differs from the managed gateway service root: ${shellRoot}`,
     );
-    expect(logs).toContain("make sure `openclaw` on PATH resolves to the managed service root");
+    expect(logs).toContain("make sure `carapace` on PATH resolves to the managed service root");
     expect(logs).toContain(`Managed gateway service Node: ${serviceNode}`);
   });
 
   it("blocks a stale managed service Node before a no-restart package update", async () => {
-    const shellRoot = createCaseDir("openclaw-shell-root");
-    const serviceRoot = tempDirs.make("openclaw-service-root-");
+    const shellRoot = createCaseDir("carapace-shell-root");
+    const serviceRoot = tempDirs.make("carapace-service-root-");
     const serviceNode = path.join(path.dirname(serviceRoot), "bin", "node");
     await fs.mkdir(path.join(serviceRoot, "dist"), { recursive: true });
     await fs.mkdir(path.dirname(serviceNode), { recursive: true });
     await fs.writeFile(serviceNode, "", "utf-8");
-    await writeOpenClawPackageFixture(serviceRoot, "2026.5.18");
+    await writeCarapacePackageFixture(serviceRoot, "2026.5.18");
     mockPackageInstallStatus(shellRoot);
     primeServiceCommand([serviceNode, path.join(serviceRoot, "dist", "index.js"), "gateway"]);
     primeNpmChannelTag("latest", "2026.5.20");
@@ -10291,8 +10291,8 @@ describe("update-cli", () => {
   });
 
   it("runs managed service package follow-up commands with the service Node despite heap argv", async () => {
-    const shellRoot = createCaseDir("openclaw-shell-root");
-    const servicePrefix = tempDirs.make("openclaw-service-prefix-");
+    const shellRoot = createCaseDir("carapace-shell-root");
+    const servicePrefix = tempDirs.make("carapace-service-prefix-");
     const {
       nodeModules,
       root: serviceRoot,
@@ -10331,8 +10331,8 @@ describe("update-cli", () => {
   ])(
     "plans service Node selection independently of database admission ($scenario)",
     async ({ command, sameNode, selected }) => {
-      const root = createCaseDir("openclaw-same-root");
-      const entrypoint = await writeOpenClawPackageFixture(root, "2026.5.18");
+      const root = createCaseDir("carapace-same-root");
+      const entrypoint = await writeCarapacePackageFixture(root, "2026.5.18");
       let serviceNode = "/opt/other-node/bin/node";
       if (sameNode) {
         const nodeAliasDir = path.join(root, "node-bin");
@@ -10370,7 +10370,7 @@ describe("update-cli", () => {
   );
 
   it("refreshes the managed service to current Node when its baked Node cannot run the target", async () => {
-    const servicePrefix = tempDirs.make("openclaw-service-prefix-");
+    const servicePrefix = tempDirs.make("carapace-service-prefix-");
     const { nodeModules, root, serviceNode, serviceNpm, serviceNpmReal, entrypoint } =
       await setupServicePackageAtPrefix({ prefix: servicePrefix });
     // Same package root for both shell and service.
@@ -10405,7 +10405,7 @@ describe("update-cli", () => {
   });
 
   it("pins package install to the service root when nodes differ and no owning npm exists at the prefix", async () => {
-    const servicePrefix = tempDirs.make("openclaw-no-npm-prefix-");
+    const servicePrefix = tempDirs.make("carapace-no-npm-prefix-");
     // Create the node binary but intentionally do NOT create <prefix>/bin/npm
     // so resolvePreferredNpmCommand returns null and the PATH npm is used.
     const { root, serviceNode, entrypoint } = await setupServicePackageAtPrefix({
@@ -10460,7 +10460,7 @@ describe("update-cli", () => {
           streaming: "block",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const migratedConfig = {
       channels: {
         slack: {
@@ -10475,7 +10475,7 @@ describe("update-cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot)
       .mockResolvedValueOnce(
         configSnapshot(legacyConfig, {
@@ -10558,7 +10558,7 @@ describe("update-cli", () => {
           nativeStreaming: false,
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot).mockResolvedValueOnce(
       configSnapshot(legacyConfigWithInclude, {
         valid: false,
@@ -10593,7 +10593,7 @@ describe("update-cli", () => {
           nativeStreaming: false,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot).mockResolvedValueOnce(
       configSnapshot(legacyConfig, {
         valid: false,
@@ -10620,7 +10620,7 @@ describe("update-cli", () => {
     expectNoSideEffects(
       replaceConfigFile,
       runCommandWithTimeout,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
   });
@@ -10657,11 +10657,11 @@ describe("update-cli", () => {
 
   it("refreshes post-doctor config before post-update plugin sync", async () => {
     await mockPackageInstallAtCaseDir();
-    const preUpdateConfig = { update: { channel: "stable" } } as OpenClawConfig;
+    const preUpdateConfig = { update: { channel: "stable" } } as CarapaceConfig;
     const postDoctorConfig = {
       update: { channel: "stable" },
       meta: { lastTouchedVersion: "2026.5.14" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     vi.mocked(readConfigFileSnapshot)
       .mockResolvedValueOnce({
         ...baseSnapshot,
@@ -10681,7 +10681,7 @@ describe("update-cli", () => {
           ...config,
           plugins: {
             ...config.plugins,
-            load: { paths: ["/tmp/openclaw-updated-plugin"] },
+            load: { paths: ["/tmp/carapace-updated-plugin"] },
           },
         },
         true,
@@ -10712,12 +10712,12 @@ describe("update-cli", () => {
     await runPostCoreUpdate();
 
     const syncConfig = syncPluginCall()?.config as
-      | (OpenClawConfig & { meta?: { lastTouchedVersion?: string } })
+      | (CarapaceConfig & { meta?: { lastTouchedVersion?: string } })
       | undefined;
     const lastWrite = lastReplaceConfigCall() as
       | {
           baseHash?: string;
-          nextConfig?: OpenClawConfig & {
+          nextConfig?: CarapaceConfig & {
             meta?: { lastTouchedVersion?: string };
             channels?: { whatsapp?: { enabled?: boolean; dmPolicy?: string } };
           };
@@ -10748,7 +10748,7 @@ describe("update-cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const postDoctorConfig = {
       update: { channel: "stable" },
       channels: {
@@ -10761,13 +10761,13 @@ describe("update-cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await setupPostCoreConfigFixture({ preUpdateConfig, postDoctorConfig });
 
     await runPostCoreUpdate();
 
     const syncConfig = syncPluginCall()?.config as
-      | (OpenClawConfig & {
+      | (CarapaceConfig & {
           channels?: {
             modelByChannel?: Record<string, Record<string, string>>;
           };
@@ -10775,7 +10775,7 @@ describe("update-cli", () => {
       | undefined;
     const lastWrite = lastReplaceConfigCall() as
       | {
-          nextConfig?: OpenClawConfig & {
+          nextConfig?: CarapaceConfig & {
             channels?: {
               modelByChannel?: Record<string, Record<string, string>>;
             };
@@ -10795,7 +10795,7 @@ describe("update-cli", () => {
   it.each([
     {
       name: "does not restore stale backup channels when current pre-update snapshot has none",
-      prepare: async (configPath: string, preUpdateConfig: OpenClawConfig) => {
+      prepare: async (configPath: string, preUpdateConfig: CarapaceConfig) => {
         await writeJsonFixture(`${configPath}.pre-update`, stableConfig());
         await writeJsonFixture(`${configPath}.bak`, preUpdateConfig);
         return {};
@@ -10803,7 +10803,7 @@ describe("update-cli", () => {
     },
     {
       name: "ignores pre-update channel snapshots older than the current update attempt",
-      prepare: async (configPath: string, preUpdateConfig: OpenClawConfig) => {
+      prepare: async (configPath: string, preUpdateConfig: CarapaceConfig) => {
         const updateStartedAtMs = Date.now();
         const staleTime = new Date(updateStartedAtMs - 60_000);
         for (const suffix of [".pre-update", ".bak"]) {
@@ -10811,12 +10811,12 @@ describe("update-cli", () => {
           await writeJsonFixture(snapshotPath, preUpdateConfig);
           await fs.utimes(snapshotPath, staleTime, staleTime);
         }
-        return { OPENCLAW_UPDATE_POST_CORE_STARTED_AT_MS: String(updateStartedAtMs) };
+        return { CARAPACE_UPDATE_POST_CORE_STARTED_AT_MS: String(updateStartedAtMs) };
       },
     },
     {
       name: "ignores disk fallback snapshots when the update attempt start is unknown",
-      prepare: async (configPath: string, preUpdateConfig: OpenClawConfig) => {
+      prepare: async (configPath: string, preUpdateConfig: CarapaceConfig) => {
         for (const suffix of [".pre-update", ".bak"]) {
           await writeJsonFixture(`${configPath}${suffix}`, preUpdateConfig);
         }
@@ -10830,7 +10830,7 @@ describe("update-cli", () => {
       prepare: async (configPath: string) => {
         const staleConfig = {
           channels: { whatsapp: { enabled: true } },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         const snapshotPath = `${configPath}.pre-update`;
         await writeJsonFixture(snapshotPath, staleConfig);
         const staleTime = new Date(Date.now() - 7 * 60 * 60 * 1000);
@@ -10839,8 +10839,8 @@ describe("update-cli", () => {
       },
     },
   ])("$name", async ({ prepare, preserveParsed = false }) => {
-    const tempDir = createCaseDir("openclaw-update");
-    const configPath = path.join(tempDir, "openclaw.json");
+    const tempDir = createCaseDir("carapace-update");
+    const configPath = path.join(tempDir, "carapace.json");
     const preUpdateConfig = stableWhatsAppConfig();
     const postDoctorConfig = stableConfig();
     await fs.mkdir(tempDir, { recursive: true });
@@ -10888,7 +10888,7 @@ describe("update-cli", () => {
   });
 
   it("persists authored channel values when post-core restore input is resolved", async () => {
-    const tempDir = createCaseDir("openclaw-update");
+    const tempDir = createCaseDir("carapace-update");
     const sourceConfigPath = path.join(tempDir, "source-config.json");
     const resolvedPreUpdateConfig = {
       update: { channel: "stable" },
@@ -10898,7 +10898,7 @@ describe("update-cli", () => {
           token: "resolved-secret",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const authoredPreUpdateConfig = {
       update: { channel: "stable" },
       channels: {
@@ -10907,11 +10907,11 @@ describe("update-cli", () => {
           token: "${WHATSAPP_TOKEN}",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const postDoctorConfig = {
       update: { channel: "stable" },
       meta: { lastTouchedVersion: "2026.5.14" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await fs.mkdir(tempDir, { recursive: true });
     await writeJsonFixture(sourceConfigPath, {
       sourceConfig: resolvedPreUpdateConfig,
@@ -10926,14 +10926,14 @@ describe("update-cli", () => {
     });
     mockNoopPostUpdatePluginConvergence();
 
-    await runPostCoreUpdate({ OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: sourceConfigPath });
+    await runPostCoreUpdate({ CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: sourceConfigPath });
 
     const syncConfig = syncPluginCall()?.config as
-      | (OpenClawConfig & { channels?: { whatsapp?: { token?: string } } })
+      | (CarapaceConfig & { channels?: { whatsapp?: { token?: string } } })
       | undefined;
     const lastWrite = lastReplaceConfigCall() as
       | {
-          nextConfig?: OpenClawConfig & {
+          nextConfig?: CarapaceConfig & {
             channels?: { whatsapp?: { token?: string } };
           };
         }
@@ -10943,8 +10943,8 @@ describe("update-cli", () => {
   });
 
   it("resolves included pre-update channels for old post-core parents", async () => {
-    const tempDir = createCaseDir("openclaw-update");
-    const configPath = path.join(tempDir, "openclaw.json");
+    const tempDir = createCaseDir("carapace-update");
+    const configPath = path.join(tempDir, "carapace.json");
     const channelsPath = path.join(tempDir, "channels.json5");
     const includedChannels = {
       whatsapp: {
@@ -10955,11 +10955,11 @@ describe("update-cli", () => {
     const preUpdateConfig = {
       update: { channel: "stable" },
       channels: { $include: "./channels.json5" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const postDoctorConfig = {
       update: { channel: "stable" },
       channels: {},
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await fs.mkdir(tempDir, { recursive: true });
     await writeJsonFixture(channelsPath, includedChannels);
     await writeJsonFixture(`${configPath}.bak`, preUpdateConfig);
@@ -10970,11 +10970,11 @@ describe("update-cli", () => {
     await runPostCoreUpdate({ WHATSAPP_TOKEN: "resolved-token" });
 
     const syncConfig = syncPluginCall()?.config as
-      | (OpenClawConfig & { channels?: { whatsapp?: { token?: string } } })
+      | (CarapaceConfig & { channels?: { whatsapp?: { token?: string } } })
       | undefined;
     const lastWrite = lastReplaceConfigCall() as
       | {
-          nextConfig?: OpenClawConfig & {
+          nextConfig?: CarapaceConfig & {
             channels?: { $include?: string };
           };
         }
@@ -10994,7 +10994,7 @@ describe("update-cli", () => {
     } as const;
     const sourceConfig = {
       plugins: {},
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadInstalledPluginIndexInstallRecords.mockResolvedValue(pluginInstallRecords);
     mockMutableConfigSnapshot({
       ...baseSnapshot,
@@ -11012,7 +11012,7 @@ describe("update-cli", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     syncPluginsForUpdateChannel.mockResolvedValue(pluginSyncResult(sourceConfig));
     updateNpmInstalledPlugins.mockResolvedValue(npmPluginUpdateResult(sourceConfig));
@@ -11034,26 +11034,26 @@ describe("update-cli", () => {
   it.each(["ok", "error"] as const)(
     "hands the checkout to global activation and fresh finalization only after Git update success (%s)",
     async (status) => {
-      const tempDir = createCaseDir("openclaw-update");
-      const gitRoot = path.join(tempDir, "..", "openclaw");
+      const tempDir = createCaseDir("carapace-update");
+      const gitRoot = path.join(tempDir, "..", "carapace");
       const completionCacheSpy = vi
         .spyOn(updateCliShared, "tryWriteCompletionCache")
         .mockResolvedValueOnce("completed");
       const nodeModules = path.join(tempDir, "prefix", "lib", "node_modules");
-      const packageRoot = path.join(nodeModules, "openclaw");
+      const packageRoot = path.join(nodeModules, "carapace");
       const sha = "a".repeat(40);
-      await writeOpenClawPackageFixture(packageRoot, "2026.4.10", { inventory: true });
-      await writeOpenClawPackageFixture(gitRoot, "2026.8.1", { git: true, builtSha: sha });
+      await writeCarapacePackageFixture(packageRoot, "2026.4.10", { inventory: true });
+      await writeCarapacePackageFixture(gitRoot, "2026.8.1", { git: true, builtSha: sha });
       mockPackageInstallStatus(packageRoot);
       mockFileBackedPathExists();
       mockNpmGlobalCommands(nodeModules, undefined, gitRoot);
       vi.mocked(readConfigFileSnapshot).mockResolvedValue({
         ...baseSnapshot,
         parsed: { update: { channel: "stable" } },
-        resolved: { update: { channel: "stable" } } as OpenClawConfig,
-        sourceConfig: { update: { channel: "stable" } } as OpenClawConfig,
-        runtimeConfig: { update: { channel: "stable" } } as OpenClawConfig,
-        config: { update: { channel: "stable" } } as OpenClawConfig,
+        resolved: { update: { channel: "stable" } } as CarapaceConfig,
+        sourceConfig: { update: { channel: "stable" } } as CarapaceConfig,
+        runtimeConfig: { update: { channel: "stable" } } as CarapaceConfig,
+        config: { update: { channel: "stable" } } as CarapaceConfig,
       });
       const updateResult = makeOkUpdateResult({
         status,
@@ -11068,7 +11068,7 @@ describe("update-cli", () => {
       }
       mockNoopPostUpdatePluginConvergence();
 
-      await withEnvAsync({ OPENCLAW_GIT_DIR: gitRoot }, async () => {
+      await withEnvAsync({ CARAPACE_GIT_DIR: gitRoot }, async () => {
         const command = updateCommand({ channel: "dev", yes: true, restart: false });
         if (status === "error") {
           await expect(command).rejects.toEqual(new ExitError(1));
@@ -11088,8 +11088,8 @@ describe("update-cli", () => {
       await expect(fs.realpath(packageRoot)).resolves.toBe(await fs.realpath(gitRoot));
       // A real built entry resumes finalization in fresh code, not this old process.
       expect(spawnCall()?.[1]?.[0]).toBe(path.join(gitRoot, "dist", "entry.js"));
-      expect(spawnCall()?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE_CHANNEL).toBe("dev");
-      expect(spawnCall()?.[2]?.env?.OPENCLAW_UPDATE_POST_CORE).toBe("1");
+      expect(spawnCall()?.[2]?.env?.CARAPACE_UPDATE_POST_CORE_CHANNEL).toBe("dev");
+      expect(spawnCall()?.[2]?.env?.CARAPACE_UPDATE_POST_CORE).toBe("1");
       expectNoSideEffects(
         replaceConfigFile,
         syncPluginsForUpdateChannel,
@@ -11111,7 +11111,7 @@ describe("update-cli", () => {
       await fs.mkdir(stateDir, { recursive: true });
       const target = {
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "carapace.json"),
         defaultWorkspaceDir: path.join(stateDir, "workspace"),
       };
       const operatorPath = `${path.join(stateDir, "coding-tools")}${path.delimiter}${process.env.PATH}`;
@@ -11135,10 +11135,10 @@ describe("update-cli", () => {
         {
           PATH: "/usr/bin:/bin",
           NODE_OPTIONS: "",
-          OPENCLAW_PROFILE: "update-triage",
-          OPENCLAW_STATE_DIR: target.stateDir,
-          OPENCLAW_CONFIG_PATH: target.configPath,
-          OPENCLAW_WORKSPACE_DIR: target.defaultWorkspaceDir,
+          CARAPACE_PROFILE: "update-triage",
+          CARAPACE_STATE_DIR: target.stateDir,
+          CARAPACE_CONFIG_PATH: target.configPath,
+          CARAPACE_WORKSPACE_DIR: target.defaultWorkspaceDir,
         },
       );
       mockGitUpdateAfterMutation(update);
@@ -11147,10 +11147,10 @@ describe("update-cli", () => {
       triageCommand.mockImplementationOnce(async () => {
         events.push("triage");
         triageEnv = {
-          updateInProgress: process.env.OPENCLAW_UPDATE_IN_PROGRESS,
-          stateDir: process.env.OPENCLAW_STATE_DIR,
-          configPath: process.env.OPENCLAW_CONFIG_PATH,
-          defaultWorkspaceDir: process.env.OPENCLAW_WORKSPACE_DIR,
+          updateInProgress: process.env.CARAPACE_UPDATE_IN_PROGRESS,
+          stateDir: process.env.CARAPACE_STATE_DIR,
+          configPath: process.env.CARAPACE_CONFIG_PATH,
+          defaultWorkspaceDir: process.env.CARAPACE_WORKSPACE_DIR,
           path: process.env.PATH,
           nodeOptions: process.env.NODE_OPTIONS,
         };
@@ -11161,11 +11161,11 @@ describe("update-cli", () => {
 
       await withEnvAsync(
         {
-          OPENCLAW_PROFILE: "update-triage",
-          OPENCLAW_STATE_DIR: target.stateDir,
-          OPENCLAW_CONFIG_PATH: target.configPath,
-          OPENCLAW_WORKSPACE_DIR: target.defaultWorkspaceDir,
-          OPENCLAW_UPDATE_IN_PROGRESS: undefined,
+          CARAPACE_PROFILE: "update-triage",
+          CARAPACE_STATE_DIR: target.stateDir,
+          CARAPACE_CONFIG_PATH: target.configPath,
+          CARAPACE_WORKSPACE_DIR: target.defaultWorkspaceDir,
+          CARAPACE_UPDATE_IN_PROGRESS: undefined,
           PATH: operatorPath,
           NODE_OPTIONS: operatorNodeOptions,
         },
@@ -11176,7 +11176,7 @@ describe("update-cli", () => {
               throw error;
             }),
           ).rejects.toEqual(new ExitError(1));
-          expect(process.env.OPENCLAW_UPDATE_IN_PROGRESS).toBeUndefined();
+          expect(process.env.CARAPACE_UPDATE_IN_PROGRESS).toBeUndefined();
         },
       );
 
@@ -11267,12 +11267,12 @@ describe("update-cli", () => {
     await expect(updateCommand({ channel: "dev" })).rejects.toEqual(new ExitError(1));
 
     const logs = getLogOutput();
-    expect(logs).toContain("OpenClaw update skipped: dirty.");
+    expect(logs).toContain("Carapace update skipped: dirty.");
     expect(logs).toContain(
       "Git-based updates need a clean working tree before they can switch commits, fetch, or rebase.",
     );
     expect(logs).toContain(
-      "Commit, stash, or discard the local changes, then rerun `openclaw update`.",
+      "Commit, stash, or discard the local changes, then rerun `carapace update`.",
     );
     expect(listUpdateRuns({ limit: 1 })[0]?.origin.nextAction).toContain(
       "Commit, stash, or discard the local changes",
@@ -11421,7 +11421,7 @@ describe("update-cli", () => {
   );
 
   it("accepts same-version refresh failure recovery when the managed service restarts", async () => {
-    const updatedRoot = createCaseDir("openclaw-updated-root");
+    const updatedRoot = createCaseDir("carapace-updated-root");
     const updatedEntrypoint = path.join(updatedRoot, "dist", "entry.js");
     const updatedPackageJson = path.join(updatedRoot, "package.json");
     setupUpdatedRootRefresh({
@@ -11452,8 +11452,8 @@ describe("update-cli", () => {
   });
 
   it("leaves a same-version service untouched when its package root is foreign", async () => {
-    const oldRoot = createCaseDir("openclaw-old-root");
-    const updatedRoot = createCaseDir("openclaw-updated-root");
+    const oldRoot = createCaseDir("carapace-old-root");
+    const updatedRoot = createCaseDir("carapace-updated-root");
     const oldEntrypoint = path.join(oldRoot, "dist", "entry.js");
     const updatedEntrypoint = path.join(updatedRoot, "dist", "entry.js");
     const oldPackageJson = path.join(oldRoot, "package.json");
@@ -11487,7 +11487,7 @@ describe("update-cli", () => {
       prepareRestartScript,
       runRestartScript,
     );
-    expect(getErrorOutput()).toContain("service belongs to a different OpenClaw installation");
+    expect(getErrorOutput()).toContain("service belongs to a different Carapace installation");
     expect(defaultRuntime.exit).not.toHaveBeenCalledWith(1);
   });
 
@@ -11525,7 +11525,7 @@ describe("update-cli", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: gatewayFixturePid, command: "openclaw-gateway" }],
+        listeners: [{ pid: gatewayFixturePid, command: "carapace-gateway" }],
         hints: [],
       },
       healthy: false,
@@ -11641,7 +11641,7 @@ describe("update-cli", () => {
     "reports plugin admission refusal without changing the serving install (dryRun=%s)",
     async (dryRun) => {
       const detail =
-        'Plugin "example" requires @openclaw/example@1.0.1: Package not found on npm. Retry later.';
+        'Plugin "example" requires @carapace/example@1.0.1: Package not found on npm. Retry later.';
       const sentinel = await runControlPlaneUpdate({
         expectedExitCode: 1,
         meta: {
@@ -11771,28 +11771,28 @@ describe("update-cli", () => {
     let setup: ReturnType<typeof setupUpdatedRootRefresh> | undefined;
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_AUTH_TOKEN: undefined,
-        OPENCLAW_PROFILE: "personal",
-        OPENCLAW_STATE_DIR: path.relative(invocationCwd, profileStateDir("personal")),
-        OPENCLAW_CONFIG_PATH: path.relative(
+        CARAPACE_GATEWAY_AUTH_TOKEN: undefined,
+        CARAPACE_PROFILE: "personal",
+        CARAPACE_STATE_DIR: path.relative(invocationCwd, profileStateDir("personal")),
+        CARAPACE_CONFIG_PATH: path.relative(
           invocationCwd,
-          path.join(profileStateDir("personal"), "openclaw.json"),
+          path.join(profileStateDir("personal"), "carapace.json"),
         ),
         PATH: "/caller/bin",
       },
       async () => {
         setup = setupUpdatedRootRefresh({
           gatewayUpdateImpl: async (root) => {
-            process.env.OPENCLAW_GATEWAY_AUTH_TOKEN = "runtime-auth-ref";
+            process.env.CARAPACE_GATEWAY_AUTH_TOKEN = "runtime-auth-ref";
             return makeOkUpdateResult({ mode: "npm", root });
           },
         });
         primeServiceCommand([process.execPath, setup.entrypoints[0], "gateway", "run"], {
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: path.relative(invocationCwd, profileStateDir("work")),
-          OPENCLAW_CONFIG_PATH: path.relative(
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: path.relative(invocationCwd, profileStateDir("work")),
+          CARAPACE_CONFIG_PATH: path.relative(
             invocationCwd,
-            path.join(profileStateDir("work"), "openclaw.json"),
+            path.join(profileStateDir("work"), "carapace.json"),
           ),
           PATH: "/service/bin",
         });
@@ -11805,10 +11805,10 @@ describe("update-cli", () => {
     const installEnv = gatewayCommandCall(entryPath, "install")?.[1].env as
       | NodeJS.ProcessEnv
       | undefined;
-    expect(installEnv?.OPENCLAW_GATEWAY_AUTH_TOKEN).toBe("runtime-auth-ref");
-    expect(installEnv?.OPENCLAW_STATE_DIR).toBe(profileStateDir("work"));
-    expect(installEnv?.OPENCLAW_CONFIG_PATH).toBe(
-      path.join(profileStateDir("work"), "openclaw.json"),
+    expect(installEnv?.CARAPACE_GATEWAY_AUTH_TOKEN).toBe("runtime-auth-ref");
+    expect(installEnv?.CARAPACE_STATE_DIR).toBe(profileStateDir("work"));
+    expect(installEnv?.CARAPACE_CONFIG_PATH).toBe(
+      path.join(profileStateDir("work"), "carapace.json"),
     );
     expect(installEnv?.PATH).toBe("/service/bin");
   });
@@ -11831,10 +11831,10 @@ describe("update-cli", () => {
       invoke: async () => {
         await withEnvAsync(
           {
-            OPENCLAW_STATE_DIR: path.relative(process.cwd(), profileStateDir()),
-            OPENCLAW_CONFIG_PATH: path.relative(
+            CARAPACE_STATE_DIR: path.relative(process.cwd(), profileStateDir()),
+            CARAPACE_CONFIG_PATH: path.relative(
               process.cwd(),
-              path.join(profileStateDir(), "openclaw.json"),
+              path.join(profileStateDir(), "carapace.json"),
             ),
           },
           async () => {
@@ -11843,8 +11843,8 @@ describe("update-cli", () => {
         );
       },
       expectedEnv: () => ({
-        OPENCLAW_STATE_DIR: profileStateDir(),
-        OPENCLAW_CONFIG_PATH: path.join(profileStateDir(), "openclaw.json"),
+        CARAPACE_STATE_DIR: profileStateDir(),
+        CARAPACE_CONFIG_PATH: path.join(profileStateDir(), "carapace.json"),
       }),
       assertExtra: () => {
         expect(runDaemonInstall).not.toHaveBeenCalled();
@@ -11867,8 +11867,8 @@ describe("update-cli", () => {
         try {
           await withEnvAsync(
             {
-              OPENCLAW_STATE_DIR: path.relative(originalCwd, profileStateDir()),
-              OPENCLAW_WORKSPACE_DIR: path.relative(
+              CARAPACE_STATE_DIR: path.relative(originalCwd, profileStateDir()),
+              CARAPACE_WORKSPACE_DIR: path.relative(
                 originalCwd,
                 path.join(profileStateDir(), "workspace"),
               ),
@@ -11884,8 +11884,8 @@ describe("update-cli", () => {
       },
       customSetup: true,
       expectedEnv: () => ({
-        OPENCLAW_STATE_DIR: profileStateDir(),
-        OPENCLAW_WORKSPACE_DIR: path.join(profileStateDir(), "workspace"),
+        CARAPACE_STATE_DIR: profileStateDir(),
+        CARAPACE_WORKSPACE_DIR: path.join(profileStateDir(), "workspace"),
       }),
       assertExtra: () => {
         expect(runDaemonInstall).not.toHaveBeenCalled();
@@ -11926,7 +11926,7 @@ describe("update-cli", () => {
   ])(
     "restores update flag $previous after restart (core mutation: $mutatesCore)",
     async ({ previous, mutatesCore }) => {
-      await withEnvAsync({ OPENCLAW_UPDATE_IN_PROGRESS: previous }, async () => {
+      await withEnvAsync({ CARAPACE_UPDATE_IN_PROGRESS: previous }, async () => {
         const entrypoint = path.join(process.cwd(), "dist", "index.js");
         vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(entrypoint);
         mockRunningManagedGateway(["node", entrypoint, "gateway"]);
@@ -11939,7 +11939,7 @@ describe("update-cli", () => {
         await updateCommand({});
 
         expect(doctorCommand).not.toHaveBeenCalled();
-        expect(process.env.OPENCLAW_UPDATE_IN_PROGRESS).toBe(previous);
+        expect(process.env.CARAPACE_UPDATE_IN_PROGRESS).toBe(previous);
         const restartIndex = vi
           .mocked(runCommandWithTimeout)
           .mock.calls.findIndex(([argv]) => argv[2] === "gateway" && argv[3] === "restart");
@@ -11955,7 +11955,7 @@ describe("update-cli", () => {
 
         const successIndex = vi
           .mocked(defaultRuntime.log)
-          .mock.calls.findIndex((call) => String(call[0]).includes("OpenClaw updated"));
+          .mock.calls.findIndex((call) => String(call[0]).includes("Carapace updated"));
         expect(successIndex).toBeGreaterThanOrEqual(0);
         expect(
           vi.mocked(defaultRuntime.log).mock.invocationCallOrder[successIndex],
@@ -11965,17 +11965,17 @@ describe("update-cli", () => {
   );
 
   it("marks the whole update command as update-in-progress", async () => {
-    await withEnvAsync({ OPENCLAW_UPDATE_IN_PROGRESS: undefined }, async () => {
+    await withEnvAsync({ CARAPACE_UPDATE_IN_PROGRESS: undefined }, async () => {
       let observedUpdateEnv: string | undefined;
       vi.mocked(runGatewayUpdate).mockImplementationOnce(async () => {
-        observedUpdateEnv = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+        observedUpdateEnv = process.env.CARAPACE_UPDATE_IN_PROGRESS;
         return makeOkUpdateResult();
       });
 
       await updateCommand({ restart: false });
 
       expect(observedUpdateEnv).toBe("1");
-      expect(process.env.OPENCLAW_UPDATE_IN_PROGRESS).toBeUndefined();
+      expect(process.env.CARAPACE_UPDATE_IN_PROGRESS).toBeUndefined();
     });
   });
 
@@ -11983,10 +11983,10 @@ describe("update-cli", () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(FRESH_POST_UPDATE_ENTRYPOINT);
     await withEnvAsync(
       {
-        OPENCLAW_UPDATE_IN_PROGRESS: undefined,
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: undefined,
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: undefined,
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: undefined,
+        CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: undefined,
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: undefined,
+        CARAPACE_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
       async () => {
         let doctorEnv: NodeJS.ProcessEnv | undefined;
@@ -12005,14 +12005,14 @@ describe("update-cli", () => {
           restart: false,
         });
 
-        expect(doctorEnv?.OPENCLAW_UPDATE_IN_PROGRESS).toBe("1");
-        expect(doctorEnv?.OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR).toBe("1");
-        expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE).toBe("1");
-        expect(doctorEnv?.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE).toBeUndefined();
-        expect(process.env.OPENCLAW_UPDATE_IN_PROGRESS).toBeUndefined();
-        expect(process.env.OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR).toBeUndefined();
-        expect(process.env.OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE).toBeUndefined();
-        expect(process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE).toBe("1");
+        expect(doctorEnv?.CARAPACE_UPDATE_IN_PROGRESS).toBe("1");
+        expect(doctorEnv?.CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR).toBe("1");
+        expect(doctorEnv?.CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE).toBe("1");
+        expect(doctorEnv?.CARAPACE_UPDATE_POST_CORE_CONVERGENCE).toBeUndefined();
+        expect(process.env.CARAPACE_UPDATE_IN_PROGRESS).toBeUndefined();
+        expect(process.env.CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR).toBeUndefined();
+        expect(process.env.CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE).toBeUndefined();
+        expect(process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE).toBe("1");
         expectFreshPostUpdateDoctor({ yes: true, workspaceSuggestions: true });
         expect(syncPluginCall()?.channel).toBe("stable");
         expect(lastNpmPluginUpdateCall()?.timeoutMs).toBe(9_000);
@@ -12092,8 +12092,8 @@ describe("update-cli", () => {
     // Option wiring needs an idle installation; earlier workflow cases retain parent runs.
     await withEnvAsync(
       {
-        OPENCLAW_UPDATE_POST_CORE: "1",
-        OPENCLAW_STATE_DIR: tempDirs.make("openclaw-finalizer-options-"),
+        CARAPACE_UPDATE_POST_CORE: "1",
+        CARAPACE_STATE_DIR: tempDirs.make("carapace-finalizer-options-"),
       },
       async () => {
         const run = async (command: "repair" | "finalize") => {
@@ -12102,10 +12102,10 @@ describe("update-cli", () => {
           );
           vi.mocked(defaultRuntime.writeJson).mockClear();
           const program = new Command();
-          program.name("openclaw");
+          program.name("carapace");
           program.exitOverride();
           registerUpdateCli(program);
-          await program.parseAsync(["node", "openclaw", "update", command, "--json", "--yes"]);
+          await program.parseAsync(["node", "carapace", "update", command, "--json", "--yes"]);
           const output = lastWriteJsonCall() as
             | { phaseTimings?: Array<{ phase?: string; outcome?: string }> }
             | undefined;
@@ -12133,16 +12133,16 @@ describe("update-cli", () => {
       pathExists.mockResolvedValue(false);
       vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(FRESH_POST_UPDATE_ENTRYPOINT);
       const program = new Command();
-      program.name("openclaw");
+      program.name("carapace");
       program.exitOverride();
       registerUpdateCli(program);
 
       await withEnvAsync(
-        { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-capability-options-") },
+        { CARAPACE_STATE_DIR: tempDirs.make("carapace-capability-options-") },
         () =>
           program.parseAsync([
             "node",
-            "openclaw",
+            "carapace",
             "update",
             ...(position === "before" ? ["--accept-capabilities"] : []),
             leaf,
@@ -12188,15 +12188,15 @@ describe("update-cli", () => {
   it("updateFinalizeCommand repairs doctor by default and refreshes plugin state after doctor", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint)
       .mockResolvedValueOnce(FRESH_POST_UPDATE_ENTRYPOINT)
-      .mockResolvedValueOnce("/tmp/openclaw-entry.mjs");
+      .mockResolvedValueOnce("/tmp/carapace-entry.mjs");
     const preDoctorConfig = {
       update: { channel: "stable" },
       plugins: { entries: { pre: { enabled: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const postDoctorConfig = {
       update: { channel: "beta" },
       plugins: { entries: { post: { enabled: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const preDoctorSnapshot = configSnapshot(preDoctorConfig, {
       parsed: baseSnapshot.parsed,
       hash: "pre-doctor",
@@ -12219,7 +12219,7 @@ describe("update-cli", () => {
     });
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce(postDoctorRecords);
     syncPluginsForUpdateChannel.mockImplementationOnce(
-      async (params: { config?: OpenClawConfig }) =>
+      async (params: { config?: CarapaceConfig }) =>
         pluginSyncResult(params.config ?? baseConfig, true),
     );
     updateNpmInstalledPlugins.mockImplementation(async ({ config }) =>
@@ -12232,10 +12232,10 @@ describe("update-cli", () => {
     const freshDoctorCall = vi
       .mocked(runExec)
       .mock.calls.find(
-        ([, args]) => args[0] === "/tmp/openclaw-entry.mjs" && args.includes("doctor"),
+        ([, args]) => args[0] === "/tmp/carapace-entry.mjs" && args.includes("doctor"),
       );
     expect(freshDoctorCall?.[1]).toEqual([
-      "/tmp/openclaw-entry.mjs",
+      "/tmp/carapace-entry.mjs",
       "doctor",
       "--repair",
       "--non-interactive",
@@ -12244,10 +12244,10 @@ describe("update-cli", () => {
     expect(freshDoctorCall?.[2]).toMatchObject({
       cwd: process.cwd(),
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
     });
     expect(syncPluginCall()?.channel).toBe("beta");
@@ -12266,11 +12266,11 @@ describe("update-cli", () => {
   });
 
   it("updateFinalizeCommand restores channels from the RPC pre-update config payload", async () => {
-    const tempDir = createCaseDir("openclaw-rpc-finalize");
-    const entryPath = await writeOpenClawPackageFixture(tempDir, "2026.6.18", {
+    const tempDir = createCaseDir("carapace-rpc-finalize");
+    const entryPath = await writeCarapacePackageFixture(tempDir, "2026.6.18", {
       entrySource: "export {};\n",
     });
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(tempDir);
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(tempDir);
     mockFileBackedPathExists();
     const sourceConfigPath = path.join(tempDir, "source-config.json");
     const preUpdateConfig = {
@@ -12280,10 +12280,10 @@ describe("update-cli", () => {
           dmPolicy: "pairing",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const postDoctorConfig = {
       meta: { lastTouchedVersion: "2026.6.18" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const postDoctorSnapshot = configSnapshot(postDoctorConfig, {
       parsed: baseSnapshot.parsed,
       hash: "post-doctor",
@@ -12296,7 +12296,7 @@ describe("update-cli", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: sourceConfigPath,
+        CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: sourceConfigPath,
       },
       async () => {
         await updateFinalizeCommand({ json: true, restart: false });
@@ -12326,8 +12326,8 @@ describe("update-cli", () => {
 
   it("updateFinalizeCommand reapplies requested channel against post-doctor config", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(FRESH_POST_UPDATE_ENTRYPOINT);
-    const preDoctorConfig = { update: { channel: "stable" } } as OpenClawConfig;
-    const postDoctorConfig = { update: { channel: "beta" } } as OpenClawConfig;
+    const preDoctorConfig = { update: { channel: "stable" } } as CarapaceConfig;
+    const postDoctorConfig = { update: { channel: "beta" } } as CarapaceConfig;
     const preDoctorSnapshot = configSnapshot(preDoctorConfig, {
       parsed: baseSnapshot.parsed,
       hash: "pre-doctor",
@@ -12356,22 +12356,22 @@ describe("update-cli", () => {
 
   it("updateFinalizeCommand converges on the effective channel from env without persisting update.channel", async () => {
     vi.mocked(resolveGatewayInstallEntrypoint).mockResolvedValue(FRESH_POST_UPDATE_ENTRYPOINT);
-    const noChannelConfig = {} as OpenClawConfig;
+    const noChannelConfig = {} as CarapaceConfig;
     const noChannelSnapshot = configSnapshot(noChannelConfig, {
       parsed: baseSnapshot.parsed,
       hash: "no-channel",
     });
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(noChannelSnapshot);
-    const priorEffective = process.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL;
+    const priorEffective = process.env.CARAPACE_UPDATE_EFFECTIVE_CHANNEL;
     // Simulate a no-config git/source update whose effective channel is dev.
-    process.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL = "dev";
+    process.env.CARAPACE_UPDATE_EFFECTIVE_CHANNEL = "dev";
     try {
       await updateFinalizeCommand({ json: true, restart: false });
     } finally {
       if (priorEffective === undefined) {
-        delete process.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL;
+        delete process.env.CARAPACE_UPDATE_EFFECTIVE_CHANNEL;
       } else {
-        process.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL = priorEffective;
+        process.env.CARAPACE_UPDATE_EFFECTIVE_CHANNEL = priorEffective;
       }
     }
     // Convergence runs on the effective (git/dev) channel...
@@ -12409,7 +12409,7 @@ describe("update-cli", () => {
       run: async () => await updateWizardCommand({}),
       requireTty: false,
       expectedError:
-        "Update wizard requires a TTY. Use `openclaw update --channel <stable|extended-stable|beta|dev>` instead.",
+        "Update wizard requires a TTY. Use `carapace update --channel <stable|extended-stable|beta|dev>` instead.",
     },
   ] as const)(
     "validates update command invocation errors: $name",
@@ -12479,12 +12479,12 @@ describe("update-cli", () => {
   it.each(["before", "after"])(
     "update wizard forwards explicit consent %s the subcommand",
     async (position) => {
-      const root = await fs.realpath(tempDirs.make("openclaw-update-wizard-"));
-      const tempDir = path.join(root, "openclaw");
+      const root = await fs.realpath(tempDirs.make("carapace-update-wizard-"));
+      const tempDir = path.join(root, "carapace");
       const nodeModules = path.join(root, "prefix", "lib", "node_modules");
-      const packageRoot = path.join(nodeModules, "openclaw");
+      const packageRoot = path.join(nodeModules, "carapace");
       const sha = "a".repeat(40);
-      await writeOpenClawPackageFixture(packageRoot, "2026.4.10", { inventory: true });
+      await writeCarapacePackageFixture(packageRoot, "2026.4.10", { inventory: true });
       mockPackageInstallStatus(packageRoot);
       mockFileBackedPathExists();
       mockNpmGlobalCommands(
@@ -12492,7 +12492,7 @@ describe("update-cli", () => {
         async (argv) => {
           if (argv[0] === "git" && argv[1] === "clone") {
             const stagingDir = requireValue(argv.at(-1), "clone destination");
-            await writeOpenClawPackageFixture(stagingDir, "2026.8.1", { git: true });
+            await writeCarapacePackageFixture(stagingDir, "2026.8.1", { git: true });
             return commandResult();
           }
           return undefined;
@@ -12500,12 +12500,12 @@ describe("update-cli", () => {
         tempDir,
       );
       vi.spyOn(updateCliShared, "tryWriteCompletionCache").mockResolvedValueOnce("completed");
-      await withEnvAsync({ OPENCLAW_GIT_DIR: tempDir }, async () => {
+      await withEnvAsync({ CARAPACE_GIT_DIR: tempDir }, async () => {
         setTty(true);
         select.mockResolvedValue("dev");
         confirm.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
         vi.mocked(runGatewayUpdate).mockImplementation(async (options) => {
-          await writeOpenClawPackageFixture(tempDir, "2026.8.1", { git: true, builtSha: sha });
+          await writeCarapacePackageFixture(tempDir, "2026.8.1", { git: true, builtSha: sha });
           await options?.prepareGitExposure?.(tempDir, sha, undefined);
           await options?.validateCandidate?.(tempDir);
           await options?.beforeGitMutation?.({});
@@ -12524,7 +12524,7 @@ describe("update-cli", () => {
         registerUpdateCli(program);
         await program.parseAsync([
           "node",
-          "openclaw",
+          "carapace",
           "update",
           ...(position === "before" ? ["--accept-capabilities"] : []),
           "wizard",
@@ -12550,7 +12550,7 @@ describe("update-cli", () => {
   it.each([
     {
       name: "ref-only as detached",
-      env: { OPENCLAW_UPDATE_DEV_TARGET_REF: "frozen-sha" },
+      env: { CARAPACE_UPDATE_DEV_TARGET_REF: "frozen-sha" },
       expected: { mode: "detached", ref: "frozen-sha" },
     },
     {
@@ -12572,74 +12572,74 @@ describe("update-cli", () => {
   });
 
   it.each([
-    ["malformed", "openclaw-dev-target:v1:not+base64url"],
-    ["unknown version", "openclaw-dev-target:v2:hostile-ref"],
+    ["malformed", "carapace-dev-target:v1:not+base64url"],
+    ["unknown version", "carapace-dev-target:v2:hostile-ref"],
     ["unknown namespace", "other-dev-target:v1:hostile-ref"],
   ])("rejects a %s tracked dev target before update side effects", async (_name, value) => {
-    await withEnvAsync({ OPENCLAW_UPDATE_DEV_TARGET_REF: value }, async () => {
+    await withEnvAsync({ CARAPACE_UPDATE_DEV_TARGET_REF: value }, async () => {
       await invokeUpdateCli({ channel: "dev", yes: true, restart: false });
     });
 
     expect(defaultRuntime.error).toHaveBeenCalledWith(
-      "Invalid internal OPENCLAW_UPDATE_DEV_TARGET_REF contract; expected a plain Git ref or a supported tracked-target encoding.",
+      "Invalid internal CARAPACE_UPDATE_DEV_TARGET_REF contract; expected a plain Git ref or a supported tracked-target encoding.",
     );
     expect(defaultRuntime.error).toHaveBeenCalledTimes(1);
     expect(defaultRuntime.exit).toHaveBeenCalledWith(1);
     expectNoSideEffects(
       cleanupStaleManagedServiceUpdateHandoffs,
       runGatewayUpdate,
-      launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob,
+      launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob,
     );
   });
 
   it("rejects a malformed inferred dev target before running the update", async () => {
     await withEnvAsync(
-      { OPENCLAW_UPDATE_DEV_TARGET_REF: "openclaw-dev-target:v1:not+base64url" },
+      { CARAPACE_UPDATE_DEV_TARGET_REF: "carapace-dev-target:v1:not+base64url" },
       async () => {
         await updateCommand({ yes: true, restart: false });
       },
     );
 
     expect(defaultRuntime.error).toHaveBeenCalledWith(
-      "Invalid internal OPENCLAW_UPDATE_DEV_TARGET_REF contract; expected a plain Git ref or a supported tracked-target encoding.",
+      "Invalid internal CARAPACE_UPDATE_DEV_TARGET_REF contract; expected a plain Git ref or a supported tracked-target encoding.",
     );
     expect(defaultRuntime.error).toHaveBeenCalledTimes(1);
     expect(defaultRuntime.exit).toHaveBeenCalledWith(1);
     expect(runGatewayUpdate).not.toHaveBeenCalled();
-    expect(launchdUpdateCleanupMocks.disableCurrentOpenClawUpdateLaunchdJob).not.toHaveBeenCalled();
+    expect(launchdUpdateCleanupMocks.disableCurrentCarapaceUpdateLaunchdJob).not.toHaveBeenCalled();
   });
 
   it("ignores a malformed dev target for a stable package update", async () => {
-    await mockPackageInstallAtCaseDir("openclaw-stable-update");
+    await mockPackageInstallAtCaseDir("carapace-stable-update");
     mockCurrentProcessFreshDoctor();
 
     await withEnvAsync(
-      { OPENCLAW_UPDATE_DEV_TARGET_REF: "openclaw-dev-target:v1:not+base64url" },
+      { CARAPACE_UPDATE_DEV_TARGET_REF: "carapace-dev-target:v1:not+base64url" },
       async () => {
         await updateCommand({ channel: "stable", yes: true, restart: false });
       },
     );
 
     expect(defaultRuntime.error).not.toHaveBeenCalledWith(
-      expect.stringContaining("OPENCLAW_UPDATE_DEV_TARGET_REF"),
+      expect.stringContaining("CARAPACE_UPDATE_DEV_TARGET_REF"),
     );
     expect(defaultRuntime.exit).not.toHaveBeenCalledWith(1);
     expect(packageInstallCommandCall()).toBeDefined();
     expect(runGatewayUpdate).not.toHaveBeenCalled();
   });
 
-  it("uses ~/openclaw as the default dev checkout directory", async () => {
+  it("uses ~/carapace as the default dev checkout directory", async () => {
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue("/tmp/oc-home");
     try {
       await withEnvAsync(
         {
           HOME: undefined,
-          OPENCLAW_GIT_DIR: undefined,
-          OPENCLAW_HOME: undefined,
+          CARAPACE_GIT_DIR: undefined,
+          CARAPACE_HOME: undefined,
           USERPROFILE: undefined,
         },
         async () => {
-          expect(resolveGitInstallDir()).toBe(path.posix.join("/tmp/oc-home", "openclaw"));
+          expect(resolveGitInstallDir()).toBe(path.posix.join("/tmp/oc-home", "carapace"));
         },
       );
     } finally {
@@ -12647,13 +12647,13 @@ describe("update-cli", () => {
     }
   });
 
-  it("uses OPENCLAW_HOME for the default dev checkout directory", async () => {
+  it("uses CARAPACE_HOME for the default dev checkout directory", async () => {
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue("/tmp/oc-home");
     try {
       await withEnvAsync(
-        { OPENCLAW_GIT_DIR: undefined, OPENCLAW_HOME: "/srv/openclaw-home" },
+        { CARAPACE_GIT_DIR: undefined, CARAPACE_HOME: "/srv/carapace-home" },
         async () => {
-          expect(resolveGitInstallDir()).toBe(path.posix.join("/srv/openclaw-home", "openclaw"));
+          expect(resolveGitInstallDir()).toBe(path.posix.join("/srv/carapace-home", "carapace"));
         },
       );
     } finally {

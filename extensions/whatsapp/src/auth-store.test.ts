@@ -2,7 +2,7 @@
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getWebAuthAgeMs,
@@ -25,7 +25,7 @@ const hoisted = vi.hoisted(() => ({
   waitForCredsSaveQueueWithTimeout: vi.fn<() => Promise<CredsQueueWaitResult>>(
     async () => "drained",
   ),
-  oauthDir: "/tmp/openclaw-wa-auth-store-test-oauth",
+  oauthDir: "/tmp/carapace-wa-auth-store-test-oauth",
 }));
 
 vi.mock("./creds-persistence.js", async () => {
@@ -63,7 +63,7 @@ describe("auth-store", () => {
   });
 
   it("does not restore creds from backup on ordinary reads", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-read-");
+    const authDir = tempDirs.make("carapace-wa-auth-read-");
     const credsPath = path.join(authDir, "creds.json");
     const backupPath = path.join(authDir, "creds.json.bak");
     fsSync.writeFileSync(backupPath, JSON.stringify({ me: { id: "123@s.whatsapp.net" } }), "utf-8");
@@ -73,7 +73,7 @@ describe("auth-store", () => {
   });
 
   it("restores malformed creds from a valid backup", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-restore-");
+    const authDir = tempDirs.make("carapace-wa-auth-restore-");
     const credsPath = path.join(authDir, "creds.json");
     fsSync.writeFileSync(credsPath, "{x", "utf-8");
     fsSync.writeFileSync(
@@ -89,7 +89,7 @@ describe("auth-store", () => {
   });
 
   it("revalidates setup ownership immediately before restoring backup credentials", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-guarded-restore-");
+    const authDir = tempDirs.make("carapace-wa-auth-guarded-restore-");
     const credsPath = path.join(authDir, "creds.json");
     const guardError = new Error("verified inference route changed");
     fsSync.writeFileSync(credsPath, "{x", "utf-8");
@@ -110,7 +110,7 @@ describe("auth-store", () => {
   });
 
   it("leaves malformed creds unchanged when the backup is malformed", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-malformed-backup-");
+    const authDir = tempDirs.make("carapace-wa-auth-malformed-backup-");
     const credsPath = path.join(authDir, "creds.json");
     fsSync.writeFileSync(credsPath, "{x", "utf-8");
     fsSync.writeFileSync(path.join(authDir, "creds.json.bak"), "{y", "utf-8");
@@ -120,7 +120,7 @@ describe("auth-store", () => {
   });
 
   it("preserves valid large creds instead of treating them as corrupt", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-large-creds-");
+    const authDir = tempDirs.make("carapace-wa-auth-large-creds-");
     const credsPath = path.join(authDir, "creds.json");
     const largeCreds = JSON.stringify({
       me: { id: "15551234567@s.whatsapp.net" },
@@ -143,7 +143,7 @@ describe("auth-store", () => {
   });
 
   it("refuses to restore creds from a symlinked backup path", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-restore-symlink-");
+    const authDir = tempDirs.make("carapace-wa-auth-restore-symlink-");
     const targetPath = path.join(authDir, "backup-target.json");
     const backupPath = path.join(authDir, "creds.json.bak");
     const credsPath = path.join(authDir, "creds.json");
@@ -158,7 +158,7 @@ describe("auth-store", () => {
   it.runIf(process.platform !== "win32")(
     "does not restore backup over a symlinked creds path",
     async () => {
-      const authDir = tempDirs.make("openclaw-wa-auth-restore-target-symlink-");
+      const authDir = tempDirs.make("carapace-wa-auth-restore-target-symlink-");
       const targetPath = path.join(authDir, "target-creds.json");
       const credsPath = path.join(authDir, "creds.json");
       const backupPath = path.join(authDir, "creds.json.bak");
@@ -177,7 +177,7 @@ describe("auth-store", () => {
   );
 
   it("reports linked auth state and snapshot from the shared read helper", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-linked-");
+    const authDir = tempDirs.make("carapace-wa-auth-linked-");
     fsSync.writeFileSync(
       path.join(authDir, "creds.json"),
       JSON.stringify({ me: { id: "15551234567@s.whatsapp.net" } }),
@@ -202,7 +202,7 @@ describe("auth-store", () => {
   it.runIf(process.platform !== "win32")(
     "treats symlinked creds as missing across auth readers",
     async () => {
-      const authDir = tempDirs.make("openclaw-wa-auth-symlink-read-");
+      const authDir = tempDirs.make("carapace-wa-auth-symlink-read-");
       const targetPath = path.join(authDir, "target-creds.json");
       const credsPath = path.join(authDir, "creds.json");
       fsSync.writeFileSync(
@@ -236,7 +236,7 @@ describe("auth-store", () => {
   it.runIf(process.platform !== "win32")(
     "treats creds under a symlinked auth directory as missing",
     async () => {
-      const rootDir = tempDirs.make("openclaw-wa-auth-symlink-parent-");
+      const rootDir = tempDirs.make("carapace-wa-auth-symlink-parent-");
       const targetAuthDir = path.join(rootDir, "target-auth");
       const authDir = path.join(rootDir, "linked-auth");
       fsSync.mkdirSync(targetAuthDir);
@@ -258,7 +258,7 @@ describe("auth-store", () => {
   );
 
   it("reports unstable auth state when the shared barrier read times out", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-unstable-state-");
+    const authDir = tempDirs.make("carapace-wa-auth-unstable-state-");
     fsSync.writeFileSync(
       path.join(authDir, "creds.json"),
       JSON.stringify({ me: { id: "15551234567@s.whatsapp.net" } }),
@@ -277,7 +277,7 @@ describe("auth-store", () => {
   });
 
   it("clears unreadable auth state on explicit logout", async () => {
-    await withOwnedOAuthAuthDir("openclaw-wa-auth-logout", async (authDir) => {
+    await withOwnedOAuthAuthDir("carapace-wa-auth-logout", async (authDir) => {
       fsSync.writeFileSync(path.join(authDir, "creds.json"), "{", "utf-8");
       fsSync.writeFileSync(
         path.join(authDir, "creds.json.bak"),
@@ -297,7 +297,7 @@ describe("auth-store", () => {
   });
 
   it("revalidates setup ownership immediately before deleting linked credentials", async () => {
-    await withOwnedOAuthAuthDir("openclaw-wa-auth-guarded-logout", async (authDir) => {
+    await withOwnedOAuthAuthDir("carapace-wa-auth-guarded-logout", async (authDir) => {
       const credsPath = path.join(authDir, "creds.json");
       const guardError = new Error("verified inference route changed");
       fsSync.writeFileSync(credsPath, "{}", "utf-8");
@@ -315,7 +315,7 @@ describe("auth-store", () => {
   });
 
   it("does not delete the whole legacy auth root when targeted cleanup fails", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-legacy-failure-");
+    const authDir = tempDirs.make("carapace-wa-auth-legacy-failure-");
     const previousOAuthDir = hoisted.oauthDir;
     fsSync.writeFileSync(path.join(authDir, "creds.json"), "{}", "utf-8");
     fsSync.writeFileSync(path.join(authDir, "oauth.json"), '{"token":true}', "utf-8");
@@ -347,7 +347,7 @@ describe("auth-store", () => {
   });
 
   it("clears every Baileys auth category from the shared legacy root without touching other files", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-legacy-categories-");
+    const authDir = tempDirs.make("carapace-wa-auth-legacy-categories-");
     const previousOAuthDir = hoisted.oauthDir;
     const authFiles = [
       "creds.json",
@@ -396,7 +396,7 @@ describe("auth-store", () => {
   });
 
   it("does not delete unrelated non-empty directories on logout", async () => {
-    const authDir = tempDirs.make("openclaw-wa-auth-unrelated-");
+    const authDir = tempDirs.make("carapace-wa-auth-unrelated-");
     fsSync.writeFileSync(path.join(authDir, "notes.txt"), "keep me", "utf-8");
     const runtime = {
       log: vi.fn(),
@@ -412,7 +412,7 @@ describe("auth-store", () => {
   it("throws a typed unstable-auth error when channel selection times out", async () => {
     hoisted.waitForCredsSaveQueueWithTimeout.mockResolvedValueOnce("timed_out");
 
-    const error = await pickWebChannel("auto", "/tmp/openclaw-wa-auth-unstable").catch(
+    const error = await pickWebChannel("auto", "/tmp/carapace-wa-auth-unstable").catch(
       (caught: unknown) => caught,
     );
     expect(error).toBeInstanceOf(WhatsAppAuthUnstableError);

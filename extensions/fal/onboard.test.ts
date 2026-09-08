@@ -1,12 +1,12 @@
 // Fal tests cover onboard plugin behavior.
 import {
-  type OpenClawConfig,
+  type CarapaceConfig,
   resolveAgentModelPrimaryValue,
-} from "openclaw/plugin-sdk/provider-onboard";
+} from "carapace/plugin-sdk/provider-onboard";
 import { describe, expect, it } from "vitest";
 import { applyFalConfig } from "./onboard.js";
 
-const emptyCfg: OpenClawConfig = {};
+const emptyCfg: CarapaceConfig = {};
 
 describe("applyFalConfig", () => {
   it("writes the default image model to mediaModels.image (the key the runtime reads)", () => {
@@ -26,7 +26,7 @@ describe("applyFalConfig", () => {
           mediaModels: { image: { primary: "other-provider/custom-model" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = applyFalConfig(cfg);
 

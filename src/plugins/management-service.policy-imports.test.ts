@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, afterEach, expect, it, vi } from "vitest";
 import { readConfigFileSnapshotForWrite, writeConfigFile } from "../config/config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   cleanupPluginLoaderFixturesForTest,
@@ -29,7 +29,7 @@ vi.mock("./status.js", () => {
 afterEach(() => {
   clearPluginMetadataLifecycleCaches();
   resetPluginLoaderTestStateForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 afterAll(cleanupPluginLoaderFixturesForTest);
 
@@ -45,10 +45,10 @@ it("persists CLI plugin policy without loading installation, removal, or runtime
   });
   await withEnvAsync(
     {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
     },
     async () => {
       await writeConfigFile({ plugins: { entries: { [pluginId]: { enabled: false } } } });
@@ -61,7 +61,7 @@ it("persists CLI plugin policy without loading installation, removal, or runtime
       ).toBe(true);
       await runPluginsDisableCommand(pluginId);
       expect(
-        JSON.parse(fs.readFileSync(path.join(stateDir, "openclaw.json"), "utf8")).plugins.entries[
+        JSON.parse(fs.readFileSync(path.join(stateDir, "carapace.json"), "utf8")).plugins.entries[
           pluginId
         ].enabled,
       ).toBe(false);

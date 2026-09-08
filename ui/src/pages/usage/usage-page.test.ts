@@ -335,7 +335,7 @@ describe("UsagePage provider usage outcome", () => {
         }
         return method === "usage.cost" ? { daily: [] } : { sessions: [], totals: null };
       });
-      const page = document.createElement("openclaw-usage-page") as TestUsagePage;
+      const page = document.createElement("carapace-usage-page") as TestUsagePage;
       page.context = contextWithClient({ request } as unknown as GatewayBrowserClient);
       page.render = () => nothing;
       document.body.append(page);
@@ -402,7 +402,7 @@ describe("UsagePage provider usage outcome", () => {
       }
       return { sessions: [], totals: null };
     });
-    const page = document.createElement("openclaw-usage-page") as TestUsagePage;
+    const page = document.createElement("carapace-usage-page") as TestUsagePage;
     page.context = contextWithClient({ request } as unknown as GatewayBrowserClient);
     page.render = () => nothing;
     document.body.append(page);
@@ -460,7 +460,7 @@ describe("UsagePage provider usage outcome", () => {
       }
       return { sessions: [], totals: null };
     });
-    const page = document.createElement("openclaw-usage-page") as TestUsagePage;
+    const page = document.createElement("carapace-usage-page") as TestUsagePage;
     page.context = contextWithClient({ request } as unknown as GatewayBrowserClient);
     page.render = () => nothing;
     document.body.append(page);

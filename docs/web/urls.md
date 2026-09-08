@@ -11,7 +11,7 @@ title: "Control UI URLs"
 
 The Control UI uses readable paths for pages and session links. A configured
 `gateway.controlUi.basePath` prefixes every path below. For example, `/chat/main`
-becomes `/openclaw/chat/main` when the base path is `/openclaw`.
+becomes `/carapace/chat/main` when the base path is `/carapace`.
 
 ## Session and dashboard URLs
 
@@ -152,16 +152,16 @@ Native catalog threads use the agent path with a source query:
 /chat/<agentId>?catalog=<catalogId>&host=<hostId>&thread=<threadId>
 ```
 
-URL-encode each query value. The agent in the path owns the OpenClaw pane,
+URL-encode each query value. The agent in the path owns the Carapace pane,
 including catalog reads and continuation; `catalog`, `host`, and `thread`
 identify the native source. Opening the same source under different agents
 keeps their panes and drafts separate, including in split view. Continuing a
-thread navigates to the adopted OpenClaw session link. The same catalog query
+thread navigates to the adopted Carapace session link. The same catalog query
 also works under `/dashboard/<agentId>`.
 
 ## Social previews
 
-Use **Copy → Preview link** in a session's menu to share a link with an OpenClaw
+Use **Copy → Preview link** in a session's menu to share a link with an Carapace
 social card. It opens a small public landing page; **Open dashboard** or
 **Open session** then takes the recipient to the normal authenticated view.
 **Copy → Session link** still copies the direct link.
@@ -171,7 +171,7 @@ For example, `/share/dashboard/main/deploy-monitor-6db92d48` previews
 prefixes both paths. The preview serves Open Graph metadata and a 1200 × 630 PNG
 at `/share/card.png`, without requiring JavaScript or a Gateway connection.
 
-The card shows generic OpenClaw branding, not the session's title, messages,
+The card shows generic Carapace branding, not the session's title, messages,
 dashboard widgets, or screenshots. Preview requests never look up session state,
 so the page does not reveal whether the target exists. The link itself still
 contains the session route and, for catalog sessions, the catalog routing fields.
@@ -181,14 +181,14 @@ Treat those URLs as information you are choosing to share.
 
 Link crawlers cannot sign in to your proxy. Allow anonymous `GET` and `HEAD`
 requests **only** to the Control UI's `/share/*` namespace (for example,
-`/openclaw/share/*` for a `/openclaw` base path). Keep the dashboard, WebSocket,
+`/carapace/share/*` for a `/carapace` base path). Keep the dashboard, WebSocket,
 bootstrap, API, and other routes protected. Do not grant crawlers authenticated
 access based on their User-Agent.
 
 For Cloudflare Access, use a separate application matching that public path with
 a Bypass policy; keep the existing authenticated application for the rest of the
 host. See [Cloudflare's application path rules](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/app-paths/).
-This is an operator deployment step; OpenClaw does not change proxy policies.
+This is an operator deployment step; Carapace does not change proxy policies.
 
 Set the existing `gateway.publicOrigin` to your external HTTP(S) origin when TLS
 terminates at the proxy, so the image and canonical URLs use the public HTTPS
@@ -250,7 +250,7 @@ not require a database schema migration. Normal session retention still applies.
 
 Tokens are bound to the Gateway installation identity, not its login token or
 password. Rotating Gateway authentication does not break public links. A full
-OpenClaw backup preserves both the installation identity and agent session
+Carapace backup preserves both the installation identity and agent session
 databases, so links survive a full restore. Restoring only an agent database to
 another installation, or replacing the installation identity during repair,
 invalidates its existing links; disable and enable public access again to issue
@@ -260,7 +260,7 @@ Behind a login proxy, apply the same narrow `/share/*` routing described in
 [Behind a login proxy](/web/urls#behind-a-login-proxy). Keep all other routes protected.
 The proxy must overwrite `X-Forwarded-Proto` with the external request scheme;
 public session reads require its exact value to be `https`. The viewer and social
-card must both be reachable without cookies. OpenClaw
+card must both be reachable without cookies. Carapace
 does not change the proxy's access policies automatically.
 
 ## Person activity URLs
@@ -308,8 +308,8 @@ it returns the corresponding normal route when one exists:
 /dashboard/roboclaw/the-daily-claw-6d7c9ccb
 /focus/dashboard/roboclaw/the-daily-claw-6d7c9ccb
 
-/openclaw/dashboard/roboclaw/the-daily-claw-6d7c9ccb
-/openclaw/focus/dashboard/roboclaw/the-daily-claw-6d7c9ccb
+/carapace/dashboard/roboclaw/the-daily-claw-6d7c9ccb
+/carapace/focus/dashboard/roboclaw/the-daily-claw-6d7c9ccb
 ```
 
 Dashboard focus routes use the complete canonical `/dashboard` grammar above:
@@ -390,8 +390,8 @@ lowercase hexadecimal prefix through the full 32-character id is accepted.
 Uppercase, non-hexadecimal, shorter, and longer id suffixes, or extra path segments,
 are invalid.
 
-With `gateway.controlUi.basePath: "/openclaw"`, use
-`/openclaw/beam/fix-the-upload-flow-0123456789ab`.
+With `gateway.controlUi.basePath: "/carapace"`, use
+`/carapace/beam/fix-the-upload-flow-0123456789ab`.
 
 ## Route table
 
@@ -404,7 +404,7 @@ no route-specific URL parameters.
 | Dashboard           | `/dashboard`                    | -                         | Key-backed session forms above; `?draft=<text>`                   |
 | Beam transcript     | `/beam/<title>-<beam-id>`       | `/beam/<beam-id>`         | Optional title slug and 12-32 lowercase hexadecimal id characters |
 | Dashboards          | `/dashboards`                   | -                         | -                                                                 |
-| Ask OpenClaw        | `/custodian`                    | -                         | `?intent=new-agent`, `?onboarding=1`                              |
+| Ask Carapace        | `/custodian`                    | -                         | `?intent=new-agent`, `?onboarding=1`                              |
 | New session         | `/new`                          | -                         | `?agent=<agentId>`, `?catalog=<catalogId>`                        |
 | Activity            | `/activity`                     | -                         | `?view=run&run=<run-id>`, `?view=run&execution=<execution-id>`    |
 | Person activity     | `/activity/<name>-<profile-id>` | -                         | Optional name slug and 8-32 lowercase hexadecimal id characters   |

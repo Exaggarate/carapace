@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDoctorConfigSnapshot } from "../commands/doctor-config-snapshot.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runWriteConfigHealth } from "./doctor-health-contribution-runners.config.js";
 import type { DoctorHealthFlowContext } from "./doctor-health-contribution-types.js";
 
@@ -14,7 +14,7 @@ vi.mock("../agents/auth-profiles.js", () => ({
 }));
 
 vi.mock("../commands/doctor/shared/config-flow-steps.js", () => ({
-  restoreDoctorConfigEnvRefs: (cfg: OpenClawConfig) => cfg,
+  restoreDoctorConfigEnvRefs: (cfg: CarapaceConfig) => cfg,
 }));
 
 vi.mock("../config/config.js", () => ({
@@ -36,11 +36,11 @@ vi.mock("../config/logging.js", () => ({
 }));
 
 vi.mock("../commands/onboard-helpers.js", () => ({
-  applyWizardMetadata: (cfg: OpenClawConfig) => cfg,
+  applyWizardMetadata: (cfg: CarapaceConfig) => cfg,
 }));
 
 function createContext(): DoctorHealthFlowContext {
-  const cfg = { gateway: { mode: "local" } } satisfies OpenClawConfig;
+  const cfg = { gateway: { mode: "local" } } satisfies CarapaceConfig;
   return {
     runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
     options: {},
@@ -48,13 +48,13 @@ function createContext(): DoctorHealthFlowContext {
     configResult: {
       cfg,
       retiredAuthProfileCleanupPlans: [
-        { agentDir: "/tmp/openclaw/agents/main", profileIds: ["anthropic:claude-cli"] },
+        { agentDir: "/tmp/carapace/agents/main", profileIds: ["anthropic:claude-cli"] },
       ],
     },
     cfg,
     cfgForPersistence: {},
     sourceConfigValid: true,
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
   };
 }
 
@@ -69,7 +69,7 @@ describe("Doctor retired auth profile cleanup", () => {
 
     expect(mocks.replaceConfigFile).toHaveBeenCalledOnce();
     expect(mocks.removeAuthProfilesAcrossOwnerStores).toHaveBeenCalledWith({
-      agentDir: "/tmp/openclaw/agents/main",
+      agentDir: "/tmp/carapace/agents/main",
       profileIds: ["anthropic:claude-cli"],
     });
     expect(mocks.replaceConfigFile.mock.invocationCallOrder[0]).toBeLessThan(

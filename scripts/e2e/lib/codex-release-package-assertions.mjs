@@ -26,22 +26,22 @@ export function assertCodexReleasePackageContract(params) {
   }
 
   // The lane mounts candidate metadata separately from the trusted harness checkout.
-  const candidate = readJson("/tmp/openclaw-candidate-codex-package.json");
+  const candidate = readJson("/tmp/carapace-candidate-codex-package.json");
   const expectedVersion = candidate.dependencies?.["@openai/codex"];
   const pluginPackage = readJson(params.pluginPackageJson);
   const dependency = pluginPackage.dependencies?.["@openai/codex"];
   if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/u.test(expectedVersion) || dependency !== expectedVersion) {
     throw new Error(
-      `@openclaw/codex must depend on @openai/codex ${expectedVersion}; found ${String(dependency)}`,
+      `@carapace/codex must depend on @openai/codex ${expectedVersion}; found ${String(dependency)}`,
     );
   }
-  const requiredPlatformPackages = pluginPackage.openclaw?.install?.requiredPlatformPackages;
+  const requiredPlatformPackages = pluginPackage.carapace?.install?.requiredPlatformPackages;
   if (
     !Array.isArray(requiredPlatformPackages) ||
     !requiredPlatformPackages.includes(target.alias)
   ) {
     throw new Error(
-      `@openclaw/codex manifest does not require current platform alias ${target.alias}`,
+      `@carapace/codex manifest does not require current platform alias ${target.alias}`,
     );
   }
 

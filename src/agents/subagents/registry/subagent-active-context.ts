@@ -3,7 +3,7 @@
  *
  * Renders sanitized runtime-owned subagent facts for the current-turn carrier.
  */
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { sanitizeForPromptLiteral } from "../../sanitize-for-prompt.js";
 import {
   resolveInternalSessionKey,
@@ -20,7 +20,7 @@ function quotePromptData(value: string): string {
 
 /** Builds a bounded, deterministic snapshot without repeating system instructions. */
 export function buildActiveSubagentRuntimeContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   controllerSessionKey?: string;
   controllerAgentId?: string;
   recentMinutes?: number;

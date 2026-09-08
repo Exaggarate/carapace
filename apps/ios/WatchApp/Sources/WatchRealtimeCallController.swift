@@ -1,7 +1,7 @@
 import Foundation
 import Observation
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceKit
+import CarapaceProtocol
 import Synchronization
 
 @MainActor
@@ -99,7 +99,7 @@ final class WatchRealtimeCallController {
         return self
             .end(
                 message: String(
-                    localized: "Connection stopped in the background. Keep OpenClaw on screen until connected."))
+                    localized: "Connection stopped in the background. Keep Carapace on screen until connected."))
     }
 
     private func resetPresentation() {
@@ -185,9 +185,9 @@ final class WatchRealtimeCallController {
             caps: [],
             commands: [],
             permissions: [:],
-            clientId: "openclaw-watchos",
+            clientId: "carapace-watchos",
             clientMode: "node",
-            clientDisplayName: "OpenClaw Watch Voice",
+            clientDisplayName: "Carapace Watch Voice",
             deviceIdentityProfile: .primary,
             deviceAuthGatewayID: attempt.call.connection.gatewayID)
         let events = attempt.continuation
@@ -206,7 +206,7 @@ final class WatchRealtimeCallController {
                         BridgeInvokeResponse(
                             id: request.id,
                             ok: false,
-                            error: OpenClawNodeError(
+                            error: CarapaceNodeError(
                                 code: .unavailable,
                                 message: "Voice connection has no node commands."))
                     },

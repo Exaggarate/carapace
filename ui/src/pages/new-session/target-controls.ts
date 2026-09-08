@@ -30,7 +30,7 @@ export function renderAgentSelect(params: {
   const selectedId = normalizeAgentId(params.agentId);
   return html`
     <span class="new-session-page__select new-session-page__select--agent">
-      <openclaw-agent-select
+      <carapace-agent-select
         class="agent-select--compact"
         .options=${params.agents.map((agent) => ({
           value: normalizeAgentId(agent.id),
@@ -44,7 +44,7 @@ export function renderAgentSelect(params: {
         .onSelect=${params.onSelect}
         @wa-show=${() => params.onOpenChange(true)}
         @wa-hide=${() => params.onOpenChange(false)}
-      ></openclaw-agent-select>
+      ></carapace-agent-select>
     </span>
   `;
 }

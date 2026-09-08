@@ -256,7 +256,7 @@ describe("runCronIsolatedAgentTurn — payload.fallbacks", () => {
   });
 
   it.each([
-    { name: "a different embedded runtime", runtime: "openclaw", cli: false },
+    { name: "a different embedded runtime", runtime: "carapace", cli: false },
     { name: "a CLI execution path", runtime: "codex", cli: true },
   ])("fails closed before executing stored Codex authority on $name", async ({ runtime, cli }) => {
     mockRunCronFallbackPassthrough();
@@ -284,7 +284,7 @@ describe("runCronIsolatedAgentTurn — payload.fallbacks", () => {
 
   it("does not persist an authority-incompatible fallback on the run continuation", async () => {
     resolveEffectiveAgentRuntimeMock.mockImplementation(({ provider }: { provider: string }) =>
-      provider === "openai" ? "codex" : "openclaw",
+      provider === "openai" ? "codex" : "carapace",
     );
     runEmbeddedAgentMock.mockRejectedValueOnce(new Error("primary failed"));
     runWithModelFallbackMock.mockImplementation(async (params: TestModelFallbackRunnerParams) => {

@@ -2,25 +2,25 @@
 import type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogProviderContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { getCachedLiveCatalogValue } from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/plugin-entry";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import { getCachedLiveCatalogValue } from "carapace/plugin-sdk/provider-catalog-shared";
 import {
   assertOkOrThrowHttpError,
   readProviderJsonArrayFieldResponse,
   resolveProviderHttpRequestConfig,
   sanitizeConfiguredModelProviderRequest,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   isRecord,
   normalizeOptionalString,
   normalizeTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   VideoGenerationModelCapabilitiesContext,
   VideoGenerationProviderCapabilities,
   VideoGenerationResolution,
-} from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/video-generation";
 import { OPENROUTER_BASE_URL } from "./provider-catalog.js";
 import { fetchOpenRouterVideoGet, type OpenRouterVideoDispatcherPolicy } from "./video-http.js";
 
@@ -247,8 +247,8 @@ function resolveOpenRouterVideoCatalogRequest(params: {
       defaultBaseUrl: OPENROUTER_BASE_URL,
       defaultHeaders: {
         Authorization: `Bearer ${params.apiKey}`,
-        "HTTP-Referer": "https://openclaw.ai",
-        "X-OpenRouter-Title": "OpenClaw",
+        "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+        "X-OpenRouter-Title": "Carapace",
       },
       request,
     }),

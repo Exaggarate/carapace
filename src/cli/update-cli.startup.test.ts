@@ -15,7 +15,7 @@ it("keeps update help available without loading execution dependencies", async (
   for (const leaf of [undefined, "status", "repair", "finalize", "wizard"]) {
     let output = "";
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .exitOverride()
       .configureOutput({ writeOut: (text) => (output += text) });
     registerUpdateCli(program);
@@ -24,6 +24,6 @@ it("keeps update help available without loading execution dependencies", async (
       code: "commander.helpDisplayed",
       exitCode: 0,
     });
-    expect(output).toContain(`Usage: openclaw update${leaf ? ` ${leaf}` : ""} [options]`);
+    expect(output).toContain(`Usage: carapace update${leaf ? ` ${leaf}` : ""} [options]`);
   }
 });

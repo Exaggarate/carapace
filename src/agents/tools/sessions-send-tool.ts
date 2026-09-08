@@ -4,9 +4,9 @@
  * Sends messages to visible sessions, starts embedded runs, and optionally announces replies.
  */
 import crypto from "node:crypto";
-import { isRequesterParentOfBackgroundAcpSession } from "@openclaw/acp-core/session-interaction-mode";
-import { finiteSecondsToTimerSafeMilliseconds } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRequesterParentOfBackgroundAcpSession } from "@carapace/acp-core/session-interaction-mode";
+import { finiteSecondsToTimerSafeMilliseconds } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { Type } from "typebox";
 import { readAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
@@ -16,7 +16,7 @@ import { parseSessionThreadInfo } from "../../config/sessions/thread-info.js";
 import { runWithoutOwnedSessionTranscriptWrites } from "../../config/sessions/transcript-write-context.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import type { AgentRouteBinding } from "../../config/types.agents.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
@@ -200,7 +200,7 @@ function normalizeSessionsSendArguments(args: unknown): Record<string, unknown> 
 }
 
 function resolveConfiguredAgentMainSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   mainKey: string;
 }): string | undefined {
@@ -216,7 +216,7 @@ function resolveConfiguredAgentMainSessionKey(params: {
 }
 
 function isConfiguredAgentMainSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   mainKey: string;
@@ -239,7 +239,7 @@ function isConfiguredAgentMainSessionKey(params: {
 }
 
 async function createConfiguredAgentMainSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   callGateway: GatewayCaller;
   agentId?: string;
   sessionKey: string;
@@ -354,7 +354,7 @@ function shouldFallbackCronRunScopedActiveDelivery(
 }
 
 async function startAgentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   callGateway: GatewayCaller;
   runId: string;
   sendParams: Record<string, unknown> & {
@@ -497,7 +497,7 @@ export function createSessionsSendTool(opts?: {
   agentSessionKey?: string;
   agentChannel?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   callGateway?: GatewayCaller;
   /** Backend-derived target incarnation; never sourced from model arguments. */
   expectedTargetSessionId?: string;
@@ -556,7 +556,7 @@ export function createSessionsSendTool(opts?: {
         return jsonResult({
           runId: crypto.randomUUID(),
           status: "error",
-          error: `Agent "${labelAgentIdInput}" not found. Run openclaw agents list to see configured agents.`,
+          error: `Agent "${labelAgentIdInput}" not found. Run carapace agents list to see configured agents.`,
         });
       }
       const explicitTargetAgentId = normalizedLabelAgentId?.value;
@@ -574,7 +574,7 @@ export function createSessionsSendTool(opts?: {
           return jsonResult({
             runId: crypto.randomUUID(),
             status: "error",
-            error: `Agent "${labelAgentIdInput}" not found. Run openclaw agents list to see configured agents.`,
+            error: `Agent "${labelAgentIdInput}" not found. Run carapace agents list to see configured agents.`,
           });
         }
         sessionKey = agentMainKey;

@@ -1,6 +1,6 @@
-import type { AssistantMessage, Model } from "@openclaw/llm-core";
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AssistantMessage, Model } from "@carapace/llm-core";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { ResponseInput } from "openai/resources/responses/responses.js";
 import { sha256Hex } from "./transport-utils.js";
 
@@ -11,13 +11,13 @@ export function recordResponsesInputReplay(
   replay?: ResponsesInputReplay,
 ) {
   if (replay) {
-    Object.assign(message, { openclawResponsesInputReplay: replay });
+    Object.assign(message, { carapaceResponsesInputReplay: replay });
   }
 }
 
 function readResponsesInputReplay(message: AssistantMessage): ResponsesInputReplay | undefined {
   const replay =
-    "openclawResponsesInputReplay" in message ? message.openclawResponsesInputReplay : undefined;
+    "carapaceResponsesInputReplay" in message ? message.carapaceResponsesInputReplay : undefined;
   if (
     isRecord(replay) &&
     typeof replay.afterResponseId === "string" &&

@@ -1,4 +1,4 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import { buildDiscordActivityCustomId } from "../component-custom-id.js";
 import type { sendDiscordComponentMessage } from "../send.components.js";
@@ -9,7 +9,7 @@ import {
   createActivityTestRuntime,
 } from "./test-helpers.test-support.js";
 
-type WidgetPresenter = Parameters<OpenClawPluginApi["registerWidgetPresenter"]>[0];
+type WidgetPresenter = Parameters<CarapacePluginApi["registerWidgetPresenter"]>[0];
 type WidgetPresenterContext = Parameters<WidgetPresenter["availability"]>[0];
 type SendResult = Awaited<ReturnType<typeof sendDiscordComponentMessage>>;
 

@@ -43,7 +43,7 @@ await mkdir(resultsRoot, { recursive: true });
 const temporaryRoot = execFileSync("getconf", ["DARWIN_USER_TEMP_DIR"], {
   encoding: "utf8",
 }).trim();
-const mountRoot = await mkdtemp(path.join(await realpath(temporaryRoot), "openclaw-swift-mounts-"));
+const mountRoot = await mkdtemp(path.join(await realpath(temporaryRoot), "carapace-swift-mounts-"));
 const worker = path.join(root, "scripts/lib/mac-swift-build.sh");
 const workerArgs = (operation: string, arch: string, work: string) => [
   worker,
@@ -65,7 +65,7 @@ try {
     }
     await Promise.allSettled(
       architectures.slice(offset, offset + concurrency).map(async (arch) => {
-        const lock = path.join(root, "apps/macos/.build", `.openclaw-package-${arch}.lock`);
+        const lock = path.join(root, "apps/macos/.build", `.carapace-package-${arch}.lock`);
         const work = path.join(resultsRoot, arch);
         let ownership: (typeof owned)[number] | undefined;
         try {

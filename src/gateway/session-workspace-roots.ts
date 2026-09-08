@@ -1,11 +1,11 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** One persisted workspace owner for file browsing, diff state, and media containment. */
 export function resolveSessionWorkspaceRoots(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   entry: Pick<SessionEntry, "spawnedCwd" | "spawnedWorkspaceDir">,
 ) {

@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   PluginAcceptedDeclaredSurface,
   PluginInstallRecord,
@@ -115,7 +115,7 @@ function throwManagedPluginCapabilityConsentRequired(review: PluginCapabilityCon
     }
   }
   throw new ManagedPluginLifecycleError(
-    `Plugin "${review.pluginId}" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.`,
+    `Plugin "${review.pluginId}" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.`,
     {
       capabilityConsent: {
         pluginId: review.pluginId,
@@ -129,7 +129,7 @@ function throwManagedPluginCapabilityConsentRequired(review: PluginCapabilityCon
 
 /** Enforce and durably acknowledge consent before an installed plugin is enabled. */
 export async function resolvePluginCapabilityConsent(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginId: string;
   env?: NodeJS.ProcessEnv;
   acknowledge?: PluginCapabilityConsentAcknowledgment;
@@ -230,7 +230,7 @@ export async function resolvePluginCapabilityConsent(params: {
 }
 
 async function resolvePluginArtifactCapabilityConsent(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginId: string;
   record: PluginInstallRecord;
   sourceRecord?: PluginInstallRecord;
@@ -323,7 +323,7 @@ async function resolvePluginArtifactCapabilityConsent(params: {
 
 /** Bind artifact consent to verified staged bytes and carry acceptance into the record commit. */
 export function createManagedPluginArtifactConsentHandler(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   source: PluginInstallRecord["source"];
   env?: NodeJS.ProcessEnv;
   spec?: string;

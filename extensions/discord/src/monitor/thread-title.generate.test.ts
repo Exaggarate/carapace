@@ -4,8 +4,8 @@ import { EMPTY_DISCORD_TEST_CONFIG } from "../test-support/config.js";
 
 const generateConversationLabelMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/reply-dispatch-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/reply-dispatch-runtime")>()),
+vi.mock("carapace/plugin-sdk/reply-dispatch-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/reply-dispatch-runtime")>()),
   generateConversationLabel: generateConversationLabelMock,
 }));
 let generateThreadTitle: typeof import("./thread-title.js").generateThreadTitle;

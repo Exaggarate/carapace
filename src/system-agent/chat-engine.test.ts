@@ -12,7 +12,7 @@ import {
   RuntimeSystemAgentChatEngine,
   SystemAgentInferenceUnavailableError,
   runSystemAgentTurnWithDeps,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type SystemAgentChatEngineOptions,
 } from "./chat-engine.test-support.js";
 import { loadSystemAgentOverview } from "./overview.js";
@@ -20,7 +20,7 @@ import { loadSystemAgentOverview } from "./overview.js";
 describe("SystemAgentChatEngine facade", () => {
   it("ends a partial timed-out agent turn without starting a second planner inference", async () => {
     useTempStateDir();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { defaults: { model: "openai/gpt-5.6-luna" } },
     };
     const inference = await createSystemAgentVerifiedInferenceTestFixture(config);
@@ -82,7 +82,7 @@ describe("SystemAgentChatEngine facade", () => {
 
   it("uses the verified inference owner for a delegated fleet overview", async () => {
     useTempStateDir();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: { main: { model: "openai/gpt-5.6-luna" }, work: {} },
@@ -128,12 +128,12 @@ describe("SystemAgentChatEngine facade", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const changedConfig = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const verifiedInference = await createAmbientVerifiedBinding(baseConfig);
-    let currentConfig = baseConfig as OpenClawConfig;
+    let currentConfig = baseConfig as CarapaceConfig;
     const runConfigSet = vi.fn(async () => {});
     const engine = new SystemAgentChatEngine({
       verifiedInference,
@@ -155,7 +155,7 @@ describe("SystemAgentChatEngine facade", () => {
   it("rejects a setup write without a verified inference binding", async () => {
     useTempStateDir();
     const applySetup = vi.fn(async () => ({
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
       configHashBefore: null,
       configHashAfter: "after",
       bootstrapPending: false,
@@ -190,12 +190,12 @@ describe("SystemAgentChatEngine facade", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const changedConfig = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const verifiedInference = await createAmbientVerifiedBinding(baseConfig);
-    let currentConfig: OpenClawConfig = baseConfig;
+    let currentConfig: CarapaceConfig = baseConfig;
     const runAgentTurn = vi.fn(async () => {
       currentConfig = changedConfig;
       return { text: "stale reply" };
@@ -217,13 +217,13 @@ describe("SystemAgentChatEngine facade", () => {
   it("preserves the inference failure without a second model attempt", async () => {
     const engine = new SystemAgentChatEngine({
       runAgentTurn: async () => {
-        throw new Error("workspace owner openclaw is missing from the roster");
+        throw new Error("workspace owner carapace is missing from the roster");
       },
       deps: { loadOverview: fakeOverviewLoader() },
     });
 
     await expect(engine.handle("please make everything nice")).rejects.toThrow(
-      "workspace owner openclaw is missing from the roster",
+      "workspace owner carapace is missing from the roster",
     );
   });
 });

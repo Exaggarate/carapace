@@ -1,5 +1,5 @@
 import type { Server as HttpServer } from "node:http";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { Locator, Page } from "playwright";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { buildWidgetDocument } from "../../../src/canvas/wrap.js";
@@ -91,7 +91,7 @@ suite.define(() => {
           "Panel continuity",
           '<label>Widget note <input id="widget-note"></label><script>globalThis.documentIdentity=crypto.randomUUID();</script>',
         );
-        await page.route("**/__openclaw__/board/**", (route) =>
+        await page.route("**/__carapace__/board/**", (route) =>
           route.fulfill({ status: 200, contentType: "text/html", body: widgetHtml }),
         );
         const gateway = await installMockGateway(page, {
@@ -120,7 +120,7 @@ suite.define(() => {
                   grantState: "none",
                   revision: 1,
                   instanceId: "continuity-instance",
-                  frameUrl: `${new URL(suite.server.baseUrl).origin}/__openclaw__/board/${encodeURIComponent(sessionKey)}/continuity/index.html?bt=ticket`,
+                  frameUrl: `${new URL(suite.server.baseUrl).origin}/__carapace__/board/${encodeURIComponent(sessionKey)}/continuity/index.html?bt=ticket`,
                   viewTicket: "ticket",
                   viewTicketTtlMs: 1_200_000,
                   viewGeneration: "0123456789abcdef0123456789abcdef",
@@ -173,7 +173,7 @@ suite.define(() => {
         await expectPaneHeaderGeometry(page, "right");
         await chat.evaluate((element) => {
           const initialWidth = element.getBoundingClientRect().width;
-          element.parentElement!.addEventListener("openclaw-sidebar-geometry-commit", (event) => {
+          element.parentElement!.addEventListener("carapace-sidebar-geometry-commit", (event) => {
             if (element.getBoundingClientRect().width !== initialWidth) {
               element.setAttribute(
                 "data-swap-width-invalidated",
@@ -240,7 +240,7 @@ suite.define(() => {
           .locator(".side-panel-type-menu wa-dropdown-item")
           .filter({ hasText: "Terminal" })
           .click();
-        const terminal = page.locator("openclaw-terminal-panel");
+        const terminal = page.locator("carapace-terminal-panel");
         await terminal.locator(".tp-host canvas").waitFor();
         await expect.poll(() => gateway.getRequests("terminal.open")).toHaveLength(1);
         await expectSwapLabel("Swap Dashboard and Terminal");

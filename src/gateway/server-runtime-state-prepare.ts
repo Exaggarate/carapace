@@ -1,10 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { listLoadedChannelPluginsForRegistry } from "../channels/plugins/registry-loaded.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import { createDefaultDeps } from "../cli/deps.js";
 import { getRuntimeConfig } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { loadGatewayTlsServerRuntime } from "../infra/tls/gateway.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
@@ -12,8 +12,8 @@ import { runtimeForLogger } from "../logging/subsystem.js";
 import { isGatewayDraining } from "../process/command-queue.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { getActiveSecretsRuntimeConfigSnapshot } from "../secrets/runtime-state.js";
-import { openClawStateDatabaseCache } from "../state/openclaw-state-db-cache.js";
-import { resolveDatabasePath } from "../state/openclaw-state-db-maintenance.js";
+import { carapaceStateDatabaseCache } from "../state/carapace-state-db-cache.js";
+import { resolveDatabasePath } from "../state/carapace-state-db-maintenance.js";
 import { createAuthRateLimiter } from "./auth-rate-limit.js";
 import { resolveGatewayAuth } from "./auth.js";
 import { createDesktopSessionRegistry } from "./desktop/session-registry.js";
@@ -302,7 +302,7 @@ export async function prepareGatewayKernelState(params: {
       env: process.env,
       tailscaleMode,
     });
-  const resolveSharedGatewaySessionGenerationForConfig = (config: OpenClawConfig) =>
+  const resolveSharedGatewaySessionGenerationForConfig = (config: CarapaceConfig) =>
     resolveSharedGatewaySessionGeneration(
       resolveGatewayAuth({
         authConfig: config.gateway?.auth,
@@ -423,10 +423,10 @@ export async function prepareGatewayKernelState(params: {
     ...startupCheckerDeps,
     getEventLoopHealth: readinessEventLoopHealth.snapshot,
     getStateDatabaseFailure: () =>
-      openClawStateDatabaseCache.getOpenClawStateDatabaseRuntimeFailure(resolveDatabasePath()),
+      carapaceStateDatabaseCache.getCarapaceStateDatabaseRuntimeFailure(resolveDatabasePath()),
     shouldSkipChannelReadiness: () =>
-      isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-      isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS),
+      isTruthyEnvValue(process.env.CARAPACE_SKIP_CHANNELS) ||
+      isTruthyEnvValue(process.env.CARAPACE_SKIP_PROVIDERS),
   });
   const watchNodeRequestHandler: {
     current?: (req: IncomingMessage, res: ServerResponse) => Promise<boolean>;

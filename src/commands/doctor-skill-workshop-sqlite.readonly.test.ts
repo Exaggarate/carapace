@@ -8,9 +8,9 @@ import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
 import { importLegacySkillProposal } from "../skills/workshop/store.js";
 import type { SkillProposalRecord } from "../skills/workshop/types.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { inspectLegacySkillWorkshopMigration } from "./doctor-skill-workshop-sqlite.js";
 import {
   createAppliedLegacyProposal,
@@ -49,7 +49,7 @@ describe("read-only Skill Workshop migration inspection", () => {
   ])(
     "gives truthful read-only lint remediation for roots=$roots proposal=$proposal",
     async ({ roots, proposal, preserved, automatic }) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const config = {
           agents: {
             entries: {
@@ -64,7 +64,7 @@ describe("read-only Skill Workshop migration inspection", () => {
         const manifests = await Promise.all(
           roots.map(async (kind, index) => {
             const contents = JSON.stringify({
-              schema: kind === "invalid" ? "invalid" : "openclaw.skill-collection-backup.v1",
+              schema: kind === "invalid" ? "invalid" : "carapace.skill-collection-backup.v1",
               id: "legacy-backup",
               createdAt: "2026-09-01T00:00:00.000Z",
               workspaceDir:
@@ -96,8 +96,8 @@ describe("read-only Skill Workshop migration inspection", () => {
             store: { env: state.env },
           });
         }
-        closeOpenClawStateDatabaseForTest();
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
+        closeCarapaceStateDatabaseForTest();
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
         const databaseBefore = proposal ? await snapshotDatabase(databasePath) : undefined;
         const filesBefore = await fs.readdir(state.stateDir, { recursive: true });
 
@@ -115,7 +115,7 @@ describe("read-only Skill Workshop migration inspection", () => {
         if (result.findings.length > 0) {
           const finding = result.findings[0]!;
           expect(finding.severity).toBe("warning");
-          expect(finding.fixHint?.includes("Run `openclaw doctor --fix`")).toBe(automatic);
+          expect(finding.fixHint?.includes("Run `carapace doctor --fix`")).toBe(automatic);
           expect(finding.fixHint).not.toContain("retire legacy backup roots");
           if (preserved > 0) {
             expect(finding.message).toContain(`${preserved} preserved`);
@@ -146,7 +146,7 @@ describe("read-only Skill Workshop migration inspection", () => {
   ])(
     "preserves schema $version with source present=$sourcePresent",
     async ({ version, sourcePresent }) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const config = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
         const content =
           "---\nname: readonly-workshop\ndescription: Preserved procedure\n---\n\n# Keep\n";
@@ -174,8 +174,8 @@ describe("read-only Skill Workshop migration inspection", () => {
         } else {
           importLegacySkillProposal({ record, ownerAgentId: "main", store: { env: state.env } });
         }
-        closeOpenClawStateDatabaseForTest();
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
+        closeCarapaceStateDatabaseForTest();
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
         const seed = openNodeSqliteDatabase(databasePath);
         try {
           // Empty feature tables may be absent under LAZY_ADDITIVE_STATE_TABLES.
@@ -198,7 +198,7 @@ describe("read-only Skill Workshop migration inspection", () => {
           preservedLegacyBackupRootCount: 0,
         });
 
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         expect(await snapshotDatabase(databasePath)).toEqual(before);
         expect(await fs.readFile(skillFile, "utf8")).toBe(content);
       });
@@ -206,7 +206,7 @@ describe("read-only Skill Workshop migration inspection", () => {
   );
 
   it("preserves proposal status filters, ownership precedence, and unknown owner counts", async () => {
-    await withOpenClawTestState({ layout: "split" }, async (state) => {
+    await withCarapaceTestState({ layout: "split" }, async (state) => {
       const config = {
         agents: {
           entries: {
@@ -270,8 +270,8 @@ describe("read-only Skill Workshop migration inspection", () => {
           store: { env: state.env },
         });
       }
-      closeOpenClawStateDatabaseForTest();
-      const seed = openNodeSqliteDatabase(resolveOpenClawStateSqlitePath(state.env));
+      closeCarapaceStateDatabaseForTest();
+      const seed = openNodeSqliteDatabase(resolveCarapaceStateSqlitePath(state.env));
       try {
         for (const sample of cases.filter((entry) => entry.owner === null)) {
           seed

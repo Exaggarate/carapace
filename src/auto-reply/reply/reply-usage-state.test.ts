@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildReplyUsageState,
   consumeReplyUsageState,
@@ -53,8 +53,8 @@ describe("reply usage state handoff", () => {
             },
           },
         },
-      } as OpenClawConfig,
-      agentDir: "/tmp/openclaw-main-agent",
+      } as CarapaceConfig,
+      agentDir: "/tmp/carapace-main-agent",
       provider: "fixture",
       model: "priced",
       agentId: "main",

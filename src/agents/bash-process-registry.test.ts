@@ -403,7 +403,7 @@ describe("bash process registry", () => {
   });
 
   it("resets its own registry after another module instance replaces the global test API", async () => {
-    const testApiKey = Symbol.for("openclaw.bashProcessRegistryTestApi");
+    const testApiKey = Symbol.for("carapace.bashProcessRegistryTestApi");
     const globalStore = globalThis as Record<PropertyKey, unknown>;
     const originalTestApi = globalStore[testApiKey];
     const session = createRegistrySession({

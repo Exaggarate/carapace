@@ -1,10 +1,10 @@
 import type { DatabaseSync } from "node:sqlite";
 import { expect, it } from "vitest";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { replaceTranscriptEvents } from "./session-accessor.js";
 import {
   readRecentSessionTranscriptActiveEvents,
@@ -78,17 +78,17 @@ function rawRows(db: DatabaseSync) {
 }
 
 it("converges an older current-watermark rebuild and a following append without changing history", async () => {
-  await withOpenClawTestState({ label: "transcript-eligibility" }, async (state) => {
+  await withCarapaceTestState({ label: "transcript-eligibility" }, async (state) => {
     const scope = {
       agentId: "main",
       env: state.env,
       sessionId,
       sessionKey: "agent:main:eligibility",
     };
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, entries)).toBe(entries.length);
     }, scope);
-    const { db } = openOpenClawAgentDatabase(scope);
+    const { db } = openCarapaceAgentDatabase(scope);
     const expectedRows = projectionRows(db);
     expect(expectedRows.map((row) => row.context_eligible)).toEqual([1, 1, 0, 1]);
     expect(readRecentSessionTranscriptActiveEvents(scope, 3)).toEqual([
@@ -114,7 +114,7 @@ it("converges an older current-watermark rebuild and a following append without 
     expect(() => readSessionTranscriptActiveStats(scope)).toThrow(
       SessionTranscriptProjectionUnavailableError,
     );
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       appendTranscriptEventsInTransaction(database, scope, [
         entries[3],
         {
@@ -145,7 +145,7 @@ it("converges an older current-watermark rebuild and a following append without 
 });
 
 it("reclassifies exact rewrites in both directions and deletes eligibility with the transcript", async () => {
-  await withOpenClawTestState({ label: "transcript-eligibility-rewrite" }, async (state) => {
+  await withCarapaceTestState({ label: "transcript-eligibility-rewrite" }, async (state) => {
     const scope = {
       agentId: "main",
       env: state.env,
@@ -153,7 +153,7 @@ it("reclassifies exact rewrites in both directions and deletes eligibility with 
       sessionKey: "agent:main:eligibility",
     };
     await replaceTranscriptEvents(scope, [...entries]);
-    const { db } = openOpenClawAgentDatabase(scope);
+    const { db } = openCarapaceAgentDatabase(scope);
     for (const excludeFromContext of [false, true]) {
       const before = rawRows(db);
       const row = before[2];
@@ -162,7 +162,7 @@ it("reclassifies exact rewrites in both directions and deletes eligibility with 
       }
       const expectedEventJson = row.event_json;
       const event = { ...entries[2], message: { ...entries[2].message, excludeFromContext } };
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         rewriteSqliteTranscriptEventRowsInTransaction(database, scope, [
           { seq: 2, event, expectedEventJson },
         ]);
@@ -184,7 +184,7 @@ it("reclassifies exact rewrites in both directions and deletes eligibility with 
 });
 
 it("rejects a prepared projection after a same-sequence rewrite before its claim", async () => {
-  await withOpenClawTestState({ label: "transcript-eligibility-stale" }, async (state) => {
+  await withCarapaceTestState({ label: "transcript-eligibility-stale" }, async (state) => {
     const scope = {
       agentId: "main",
       env: state.env,
@@ -192,12 +192,12 @@ it("rejects a prepared projection after a same-sequence rewrite before its claim
       sessionKey: "agent:main:eligibility",
     };
     await replaceTranscriptEvents(scope, [...entries]);
-    const { db } = openOpenClawAgentDatabase(scope);
+    const { db } = openCarapaceAgentDatabase(scope);
     const plan = prepareSessionTranscriptProjection(db, sessionId);
     if (!plan) {
       throw new Error("missing prepared projection");
     }
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       rewriteSqliteTranscriptEventRowsInTransaction(database, scope, [
         {
           seq: 2,
@@ -221,7 +221,7 @@ it("rejects a prepared projection after a same-sequence rewrite before its claim
 it.each(["interrupted", "unclassified", "append", "rewrite", "delete"])(
   "fences partial eligibility publication after %s work",
   async (change) => {
-    await withOpenClawTestState({ label: "transcript-eligibility-claim" }, async (state) => {
+    await withCarapaceTestState({ label: "transcript-eligibility-claim" }, async (state) => {
       const scope = {
         agentId: "main",
         env: state.env,
@@ -229,7 +229,7 @@ it.each(["interrupted", "unclassified", "append", "rewrite", "delete"])(
         sessionKey: "agent:main:eligibility",
       };
       await replaceTranscriptEvents(scope, [...entries]);
-      const { db } = openOpenClawAgentDatabase(scope);
+      const { db } = openCarapaceAgentDatabase(scope);
       db.prepare(
         "UPDATE session_transcript_active_events SET context_eligible = NULL WHERE session_id = ?",
       ).run(sessionId);
@@ -238,7 +238,7 @@ it.each(["interrupted", "unclassified", "append", "rewrite", "delete"])(
         throw new Error("missing prepared projection");
       }
       const claimId = -1;
-      runOpenClawAgentWriteTransaction(() => {
+      runCarapaceAgentWriteTransaction(() => {
         expect(claimPreparedSessionTranscriptProjectionInTransaction(db, plan, claimId)).toBe(true);
         expect(
           deletePreparedSessionTranscriptProjectionChunkInTransaction(db, {
@@ -262,7 +262,7 @@ it.each(["interrupted", "unclassified", "append", "rewrite", "delete"])(
       );
 
       if (change !== "interrupted") {
-        runOpenClawAgentWriteTransaction((database) => {
+        runCarapaceAgentWriteTransaction((database) => {
           if (change === "unclassified") {
             expect(
               appendPreparedSessionTranscriptProjectionChunkInTransaction(db, {

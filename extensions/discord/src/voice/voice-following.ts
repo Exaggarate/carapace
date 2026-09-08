@@ -1,7 +1,7 @@
-import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   getGuildVoiceState,
   isUnknownDiscordVoiceStateError,
@@ -86,7 +86,7 @@ function logFollowUserReconcileVerbose(reason: string, message: string): void {
 }
 
 function resolveVoiceConnectionGroup(accountId: string): string {
-  return `openclaw:${accountId}`;
+  return `carapace:${accountId}`;
 }
 
 export class DiscordVoiceFollowing {

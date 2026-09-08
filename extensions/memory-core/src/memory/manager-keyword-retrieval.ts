@@ -1,7 +1,7 @@
 // Memory Core plugin module owns keyword retrieval and ranking.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { extractKeywords } from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { extractKeywords } from "carapace/plugin-sdk/memory-core-host-engine-sessions";
 import {
   readCuratedProjectMemoryCandidates,
   readCuratedMemoryTriggerCandidates,
@@ -10,7 +10,7 @@ import {
   MEMORY_INDEX_PATHS_FTS_TABLE,
   type MemorySearchResult,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { bm25RankToScore, buildFtsQuery, scoreExactPathTieForTemporalDecay } from "./hybrid.js";
 import { applyImportanceMultiplier } from "./importance.js";
 import { MemoryProviderLifecycle } from "./manager-provider-lifecycle.js";

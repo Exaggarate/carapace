@@ -3,11 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
-import * as stateDbReadOnly from "../state/openclaw-state-db-readonly.js";
+import * as stateDbReadOnly from "../state/carapace-state-db-readonly.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { inspectPersistedInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-record-state.js";
 import { readPersistedInstalledPluginIndexInstallRecords } from "./installed-plugin-index-records.js";
 import {
@@ -23,21 +23,21 @@ import { cleanupTrackedTempDirs, makeTrackedTempDir } from "./test-helpers/fs-fi
 
 const tempDirs: string[] = [];
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-installed-plugin-index-read-state", tempDirs);
+  return makeTrackedTempDir("carapace-installed-plugin-index-read-state", tempDirs);
 }
 
 function insertPersistedIndexRow(stateDir: string, valueJson: string): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       db.prepare(
         "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES ('plugins.installedIndex', ?, 123)",
       ).run(valueJson);
     },
-    { env: { OPENCLAW_STATE_DIR: stateDir } },
+    { env: { CARAPACE_STATE_DIR: stateDir } },
   );
 }
 
@@ -59,7 +59,7 @@ describe("installed plugin index read state", () => {
   it("preserves the original read error through both full-index readers", async () => {
     const stateDir = makeTempDir();
     const error = Object.assign(new Error("plugin index read denied"), { code: "EACCES" });
-    const readSpy = vi.spyOn(stateDbReadOnly, "withExistingOpenClawStateDatabaseReadOnly");
+    const readSpy = vi.spyOn(stateDbReadOnly, "withExistingCarapaceStateDatabaseReadOnly");
     for (const read of [readPersistedInstalledPluginIndexSync, readPersistedInstalledPluginIndex]) {
       readSpy.mockImplementationOnce(() => {
         throw error;
@@ -132,10 +132,10 @@ describe("installed plugin index read state", () => {
       });
       insertPersistedIndexRow(stateDir, valueJson);
       const filePath = resolveInstalledPluginIndexStorePath({ stateDir });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const error = Object.assign(new Error("plugin index read denied"), { code: "EACCES" });
       const readSpy = vi
-        .spyOn(stateDbReadOnly, "withExistingOpenClawStateDatabaseReadOnly")
+        .spyOn(stateDbReadOnly, "withExistingCarapaceStateDatabaseReadOnly")
         .mockImplementationOnce(() => {
           throw error;
         });
@@ -144,7 +144,7 @@ describe("installed plugin index read state", () => {
         reason,
         stateDir,
         candidates: [],
-        env: { OPENCLAW_VERSION: "2026.4.25", VITEST: "true" },
+        env: { CARAPACE_VERSION: "2026.4.25", VITEST: "true" },
         ...(reason === "policy-changed" ? { installRecords } : {}),
       };
       const refresh = async () =>

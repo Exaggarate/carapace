@@ -142,7 +142,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content,
-          __openclaw: {
+          __carapace: {
             id: "attachment-user-1",
             idempotencyKey: "attachment-run-1:user",
             seq: 1,
@@ -164,7 +164,7 @@ describe("readTuiSessionUserMessage", () => {
         sessionKey: "agent:main:main",
         messageId: "user-1",
         message: {
-          __openclaw: { id: "user-1", idempotencyKey: "run-1:user", seq: 1 },
+          __carapace: { id: "user-1", idempotencyKey: "run-1:user", seq: 1 },
           content: [{ type: "text", text: "shared prompt" }],
           role: "user",
         },
@@ -181,7 +181,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "authoritative persisted prompt",
-          __openclaw: {
+          __carapace: {
             id: "persisted-message",
             idempotencyKey: "persisted-run:user",
             runId: "execution-run",
@@ -204,7 +204,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "sequenced persisted prompt",
-          __openclaw: { seq: 7 },
+          __carapace: { seq: 7 },
         },
       }),
     ).toEqual({ messageId: "seq:7", text: "sequenced persisted prompt" });
@@ -217,7 +217,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "nested user suffix",
-          __openclaw: { id: "persisted-message", idempotencyKey: "actual:user:user" },
+          __carapace: { id: "persisted-message", idempotencyKey: "actual:user:user" },
         },
       }),
     ).toEqual({
@@ -235,7 +235,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "imported prompt",
-          __openclaw: {
+          __carapace: {
             id: "provider-local-id",
             importedFrom: "claude-cli",
             cliSessionId,
@@ -261,7 +261,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "partially imported prompt",
-          __openclaw: {
+          __carapace: {
             id: "provider-local-id",
             importedFrom: "claude-cli",
             externalId: "provider-local-id",
@@ -278,7 +278,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: `partially imported prompt ${seq}`,
-          __openclaw: {
+          __carapace: {
             id: "shared-provider-local-id",
             importedFrom: "claude-cli",
             seq,
@@ -298,7 +298,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "imported prompt",
-          __openclaw: {
+          __carapace: {
             id: "provider-local-id",
             importedFrom: "claude-cli",
             externalId: "provider-local-id",
@@ -315,7 +315,7 @@ describe("readTuiSessionUserMessage", () => {
         message: {
           role: "user",
           content: "imported prompt",
-          __openclaw: {
+          __carapace: {
             id: "provider-local-id",
             importedFrom: "claude-cli",
             externalId: "provider-local-id",

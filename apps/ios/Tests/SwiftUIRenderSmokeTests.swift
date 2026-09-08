@@ -1,9 +1,9 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 import Testing
 import UIKit
-@testable import OpenClaw
-@testable import OpenClawChatUI
+@testable import Carapace
+@testable import CarapaceChatUI
 
 struct SwiftUIRenderSmokeTests {
     @MainActor private static func host(_ view: some View, size: CGSize? = nil) -> UIWindow {
@@ -84,25 +84,25 @@ struct SwiftUIRenderSmokeTests {
                     text: #"Inline math \(E = mc^2\) stays inside prose."#,
                     context: .assistant,
                     variant: .standard,
-                    textColor: OpenClawChatTheme.assistantText)
+                    textColor: CarapaceChatTheme.assistantText)
                 ChatMathBlockView(block: ChatMathBlock(
                     latex: #"\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}"#,
-                    isComplete: true), textColor: OpenClawChatTheme.assistantText)
+                    isComplete: true), textColor: CarapaceChatTheme.assistantText)
                 ChatMathBlockView(block: ChatMathBlock(
                     latex: #"\notARealCommand{"#,
-                    isComplete: true), textColor: OpenClawChatTheme.assistantText)
+                    isComplete: true), textColor: CarapaceChatTheme.assistantText)
                 ChatMathBlockView(block: ChatMathBlock(
                     latex: "α + β = γ",
-                    isComplete: true), textColor: OpenClawChatTheme.assistantText)
+                    isComplete: true), textColor: CarapaceChatTheme.assistantText)
                 ChatMathBlockView(block: ChatMathBlock(
                     latex: String(repeating: "{", count: 65) + "x",
-                    isComplete: true), textColor: OpenClawChatTheme.assistantText)
+                    isComplete: true), textColor: CarapaceChatTheme.assistantText)
                 ChatMathBlockView(block: ChatMathBlock(
                     latex: String(repeating: #"\bar"#, count: 129) + "x",
-                    isComplete: true), textColor: OpenClawChatTheme.assistantText)
+                    isComplete: true), textColor: CarapaceChatTheme.assistantText)
                 ChatMathBlockView(block: ChatMathBlock(
                     latex: #"x\textcolor{#fff}{}"#,
-                    isComplete: true), textColor: OpenClawChatTheme.assistantText)
+                    isComplete: true), textColor: CarapaceChatTheme.assistantText)
             }
             .environment(\.dynamicTypeSize, typeSize)
 
@@ -112,9 +112,9 @@ struct SwiftUIRenderSmokeTests {
 
     @Test @MainActor func `long user prompt disclosure builds across dynamic type sizes`() {
         let text = Array(repeating: "A long user-authored prompt line.", count: 13).joined(separator: "\n")
-        let message = OpenClawChatMessage(
+        let message = CarapaceChatMessage(
             role: "user",
-            content: [OpenClawChatMessageContent(
+            content: [CarapaceChatMessageContent(
                 type: "text",
                 text: text,
                 mimeType: nil,
@@ -129,7 +129,7 @@ struct SwiftUIRenderSmokeTests {
                 markdownVariant: .standard,
                 userAccent: nil,
                 displayOptions: [],
-                assistantName: "OpenClaw",
+                assistantName: "Carapace",
                 assistantAvatarText: "OC",
                 assistantAvatarTint: nil,
                 showsAssistantAvatar: true,
@@ -150,9 +150,9 @@ struct SwiftUIRenderSmokeTests {
 
     @Test @MainActor func `managed assistant image starts its artifact load`() async throws {
         let artifactId = "artifact_managed_image_11111111-1111-4111-8111-111111111111"
-        let message = OpenClawChatMessage(
+        let message = CarapaceChatMessage(
             role: "assistant",
-            content: [OpenClawChatMessageContent(
+            content: [CarapaceChatMessageContent(
                 type: "image",
                 text: nil,
                 mimeType: "image/png",
@@ -169,7 +169,7 @@ struct SwiftUIRenderSmokeTests {
             markdownVariant: .standard,
             userAccent: nil,
             displayOptions: [],
-            assistantName: "OpenClaw",
+            assistantName: "Carapace",
             assistantAvatarText: "OC",
             assistantAvatarTint: nil,
             showsAssistantAvatar: true,
@@ -184,7 +184,7 @@ struct SwiftUIRenderSmokeTests {
             loadMediaArtifact: { requested, kind, _ in
                 requestedArtifactId = requested
                 #expect(kind == .image)
-                return OpenClawChatLoadedMedia.data(OpenClawChatMediaData(
+                return CarapaceChatLoadedMedia.data(CarapaceChatMediaData(
                     data: Data(base64Encoded:
                         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8A" +
                             "AusB9Y9Zl1sAAAAASUVORK5CYII=")!,
@@ -216,7 +216,7 @@ struct SwiftUIRenderSmokeTests {
             text: text,
             markdownVariant: .standard,
             showsReasoning: false,
-            assistantName: "OpenClaw",
+            assistantName: "Carapace",
             assistantAvatarText: "OC",
             assistantAvatarTint: nil,
             showsAssistantAvatar: true,
@@ -227,12 +227,12 @@ struct SwiftUIRenderSmokeTests {
 
     @Test @MainActor func `assistant usage footer builds across dynamic type sizes`() throws {
         let usage = try JSONDecoder().decode(
-            OpenClawChatUsage.self,
+            CarapaceChatUsage.self,
             from: Data(#"{"input":12000,"output":300,"cacheRead":438400,"cacheWrite":307000,"cost":{"total":0.0123}}"#
                 .utf8))
-        let message = OpenClawChatMessage(
+        let message = CarapaceChatMessage(
             role: "assistant",
-            content: [OpenClawChatMessageContent(
+            content: [CarapaceChatMessageContent(
                 type: "text",
                 text: "A completed assistant response with per-run usage.",
                 thinking: nil,
@@ -253,7 +253,7 @@ struct SwiftUIRenderSmokeTests {
                 markdownVariant: .standard,
                 userAccent: nil,
                 displayOptions: [],
-                assistantName: "OpenClaw",
+                assistantName: "Carapace",
                 assistantAvatarText: "OC",
                 assistantAvatarTint: nil,
                 showsAssistantAvatar: true,
@@ -344,7 +344,7 @@ struct SwiftUIRenderSmokeTests {
             .environment(gatewayController)
 
         let window = Self.host(root)
-        let url = try #require(URL(string: "openclaw://agent?message=hello%20from%20deep%20link"))
+        let url = try #require(URL(string: "carapace://agent?message=hello%20from%20deep%20link"))
         await appModel.handleDeepLink(url: url)
         await Self.waitForPresentedAlert(in: window)
 

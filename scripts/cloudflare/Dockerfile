@@ -1,7 +1,7 @@
 # Replace the placeholder with an immutable linux/amd64 digest from the official
-# Docker Hub repository. Cloudflare Containers cannot pull OpenClaw from GHCR.
-ARG OPENCLAW_IMAGE=openclaw/openclaw@sha256:<official-openclaw-image-digest>
-FROM ${OPENCLAW_IMAGE}
+# Docker Hub repository. Cloudflare Containers cannot pull Carapace from GHCR.
+ARG CARAPACE_IMAGE=carapace/carapace@sha256:<official-carapace-image-digest>
+FROM ${CARAPACE_IMAGE}
 
 USER root
 

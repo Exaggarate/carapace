@@ -17,7 +17,7 @@ describe("gateway protocol push schema", () => {
         ok: true,
         status: 200,
         tokenSuffix: "abcd1234",
-        topic: "ai.openclaw.ios",
+        topic: "ai.carapace.ios",
         environment: "production",
         transport: "relay",
       }),

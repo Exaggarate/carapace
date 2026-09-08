@@ -94,7 +94,7 @@ describe("integrated public Code Mode", () => {
       bridgeDispatchStarted: false,
       failurePhase: "input",
     });
-    expect(result.error).toContain("openclaw-code-mode:user.ts:2:");
+    expect(result.error).toContain("carapace-code-mode:user.ts:2:");
     expect(target.execute).not.toHaveBeenCalled();
   });
 

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: Merged OpenClaw pull request containing the FRV recovery controller
+        description: Merged Carapace pull request containing the FRV recovery controller
         required: true
         type: string
       landed_sha:

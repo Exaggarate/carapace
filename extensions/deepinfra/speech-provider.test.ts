@@ -1,5 +1,5 @@
 // Deepinfra tests cover speech provider plugin behavior.
-import { requireFirstPostJsonRequest } from "openclaw/plugin-sdk/test-fixtures";
+import { requireFirstPostJsonRequest } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { buildDeepInfraSpeechProvider } from "./speech-provider.js";
 
@@ -15,15 +15,15 @@ const { assertOkOrThrowHttpErrorMock, postJsonRequestMock, resolveProviderHttpRe
     })),
   }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-http")>()),
+vi.mock("carapace/plugin-sdk/provider-http", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-http")>()),
   assertOkOrThrowHttpError: assertOkOrThrowHttpErrorMock,
   postJsonRequest: postJsonRequestMock,
   resolveProviderHttpRequestConfig: resolveProviderHttpRequestConfigMock,
 }));
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/provider-http");
+  vi.doUnmock("carapace/plugin-sdk/provider-http");
   vi.resetModules();
 });
 

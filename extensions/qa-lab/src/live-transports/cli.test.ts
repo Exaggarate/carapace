@@ -1,6 +1,6 @@
 // Qa Lab tests cover live transport CLI and adapter contribution discovery.
 import { Command } from "commander";
-import type { QaRunnerCliContribution } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { QaRunnerCliContribution } from "carapace/plugin-sdk/qa-runner-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -23,7 +23,7 @@ const {
   suiteRuntimeLoads: { count: 0 },
 }));
 
-vi.mock("openclaw/plugin-sdk/qa-runner-runtime", () => ({ listQaRunnerCliContributions }));
+vi.mock("carapace/plugin-sdk/qa-runner-runtime", () => ({ listQaRunnerCliContributions }));
 vi.mock("./shared/live-transport-suite.runtime.js", () => {
   suiteRuntimeLoads.count += 1;
   return {
@@ -121,7 +121,7 @@ describe("live transport QA contributions", () => {
       const qa = new Command();
       registration?.register(qa);
 
-      await qa.parseAsync(["node", "openclaw", commandName, "--scenario", `${commandName}-canary`]);
+      await qa.parseAsync(["node", "carapace", commandName, "--scenario", `${commandName}-canary`]);
 
       expect(runLiveTransportQaSuiteCommand).toHaveBeenCalledWith({
         channelId: commandName,
@@ -211,7 +211,7 @@ describe("live transport QA contributions", () => {
 
       await qa.parseAsync([
         "node",
-        "openclaw",
+        "carapace",
         commandName,
         "--scenario",
         " first ",
@@ -244,7 +244,7 @@ describe("live transport QA contributions", () => {
 
       const failure = new Error(`${commandName} suite failed`);
       runLiveTransportQaSuiteCommand.mockRejectedValueOnce(failure);
-      const next = registerCommand(commandName).qa.parseAsync(["node", "openclaw", commandName]);
+      const next = registerCommand(commandName).qa.parseAsync(["node", "carapace", commandName]);
       await expect(next).rejects.toBe(failure);
     },
   );
@@ -254,7 +254,7 @@ describe("live transport QA contributions", () => {
     async (commandName) => {
       const { qa } = registerCommand(commandName);
 
-      await expect(qa.parseAsync(["node", "openclaw", commandName, "--model"])).rejects.toThrow(
+      await expect(qa.parseAsync(["node", "carapace", commandName, "--model"])).rejects.toThrow(
         "option '--model <ref>' argument missing",
       );
       expect(runLiveTransportQaSuiteCommand).not.toHaveBeenCalled();
@@ -308,7 +308,7 @@ describe("live transport QA contributions", () => {
     const qa = new Command();
     registration?.register(qa);
 
-    await qa.parseAsync(["node", "openclaw", "telegram", "--scenario", "telegram-canary"]);
+    await qa.parseAsync(["node", "carapace", "telegram", "--scenario", "telegram-canary"]);
 
     expect(runTelegram).toHaveBeenCalledWith(
       expect.objectContaining({ scenarioIds: ["telegram-canary"] }),
@@ -325,7 +325,7 @@ describe("live transport QA contributions", () => {
       registration?.register(qa);
 
       await expect(
-        qa.parseAsync(["node", "openclaw", commandName, "--concurrency", "2"]),
+        qa.parseAsync(["node", "carapace", commandName, "--concurrency", "2"]),
       ).rejects.toThrow("unknown option '--concurrency'");
       expect(runLiveTransportQaSuiteCommand).not.toHaveBeenCalled();
       expect(runTelegram).not.toHaveBeenCalled();

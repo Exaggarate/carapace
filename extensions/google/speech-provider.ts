@@ -1,20 +1,20 @@
 // Google provider module implements model/runtime integration.
-import type { sanitizeConfiguredModelProviderRequest } from "openclaw/plugin-sdk/provider-http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-onboard";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import type { sanitizeConfiguredModelProviderRequest } from "carapace/plugin-sdk/provider-http";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-onboard";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
-} from "openclaw/plugin-sdk/speech-core";
-import { retryAsync } from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-core";
+import { retryAsync } from "carapace/plugin-sdk/speech-provider";
 import {
   asOptionalRecord,
   normalizeOptionalString,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const DEFAULT_GOOGLE_TTS_MODEL = "gemini-3.1-flash-tts-preview";
 const DEFAULT_GOOGLE_TTS_VOICE = "Kore";
@@ -159,7 +159,7 @@ function resolveGoogleTtsEnvApiKey(): string | undefined {
   );
 }
 
-function resolveGoogleTtsModelProviderApiKey(cfg?: OpenClawConfig): string | undefined {
+function resolveGoogleTtsModelProviderApiKey(cfg?: CarapaceConfig): string | undefined {
   return normalizeResolvedSecretInputString({
     value: cfg?.models?.providers?.google?.apiKey,
     path: "models.providers.google.apiKey",
@@ -167,7 +167,7 @@ function resolveGoogleTtsModelProviderApiKey(cfg?: OpenClawConfig): string | und
 }
 
 function resolveGoogleTtsApiKey(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: SpeechProviderConfig;
 }): string | undefined {
   return (
@@ -178,7 +178,7 @@ function resolveGoogleTtsApiKey(params: {
 }
 
 function resolveGoogleTtsBaseUrl(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: GoogleTtsProviderConfig;
 }): string | undefined {
   return (
@@ -308,7 +308,7 @@ function normalizePromptSectionText(value: string | undefined): string | undefin
   return sanitized;
 }
 
-function isOpenClawGoogleAudioProfilePrompt(text: string): boolean {
+function isCarapaceGoogleAudioProfilePrompt(text: string): boolean {
   return (
     text.includes("# AUDIO PROFILE:") &&
     text.includes("### TRANSCRIPT") &&
@@ -388,7 +388,7 @@ async function synthesizeGoogleTtsPcmOnce(params: {
   timeoutMs: number;
 }): Promise<Buffer> {
   const { assertOkOrThrowProviderError, postJsonRequest, readProviderJsonResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { resolveGoogleGenerativeAiHttpRequestConfig } = await import("./api.js");
   const { canonicalizeGoogleProviderBase64 } = await import("./base64.js");
   const { baseUrl, allowPrivateNetwork, headers, dispatcherPolicy } =
@@ -511,7 +511,7 @@ async function synthesizeConfiguredGoogleTts(req: GoogleTtsSynthesisRequest): Pr
     throw new Error("Google API key missing");
   }
   const { sanitizeConfiguredModelProviderRequest } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   return synthesizeGoogleTtsPcm({
     text: req.text,
     apiKey,
@@ -574,7 +574,7 @@ export function buildGoogleSpeechProvider(): SpeechProviderPlugin {
       const shouldWrap =
         config.promptTemplate === GOOGLE_AUDIO_PROFILE_PROMPT_TEMPLATE ||
         Boolean(config.personaPrompt);
-      if (!shouldWrap || isOpenClawGoogleAudioProfilePrompt(ctx.text)) {
+      if (!shouldWrap || isCarapaceGoogleAudioProfilePrompt(ctx.text)) {
         return undefined;
       }
       return {
@@ -588,7 +588,7 @@ export function buildGoogleSpeechProvider(): SpeechProviderPlugin {
     synthesize: async (req) => {
       const pcm = await synthesizeConfiguredGoogleTts(req);
       if (req.target === "voice-note") {
-        const { transcodeAudioBufferToOpus } = await import("openclaw/plugin-sdk/media-runtime");
+        const { transcodeAudioBufferToOpus } = await import("carapace/plugin-sdk/media-runtime");
         return {
           audioBuffer: await transcodeAudioBufferToOpus({
             audioBuffer: wrapPcm16MonoToWav(pcm),

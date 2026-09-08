@@ -2,14 +2,14 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ELEVATION_LABEL="ai.openclaw.mac.elevation-host"
-NORMAL_LABEL="ai.openclaw.mac"
-EXPECTED_BUNDLE_ID="ai.openclaw.mac"
+ELEVATION_LABEL="ai.carapace.mac.elevation-host"
+NORMAL_LABEL="ai.carapace.mac"
+EXPECTED_BUNDLE_ID="ai.carapace.mac"
 EXPECTED_TEAM_ID="FWJYW4S8P8"
-EXPECTED_AUTHORITY="Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)"
-DEFAULT_APP="/Applications/OpenClaw.app"
-RECOVERY_APP_PLAN_XATTR="com.openclaw.elevation.recovery-app-plan"
-RECOVERY_MIGRATION_IDENTITY_XATTR="com.openclaw.elevation.recovery-migration-identity"
+EXPECTED_AUTHORITY="Developer ID Application: Carapace Foundation (FWJYW4S8P8)"
+DEFAULT_APP="/Applications/Carapace.app"
+RECOVERY_APP_PLAN_XATTR="com.carapace.elevation.recovery-app-plan"
+RECOVERY_MIGRATION_IDENTITY_XATTR="com.carapace.elevation.recovery-migration-identity"
 
 COMMAND="${1:-}"
 [[ -n "$COMMAND" ]] && shift || true
@@ -17,7 +17,7 @@ ARCHIVE=""
 ARTIFACT_RECEIPT=""
 EXPECTED_ARTIFACT_RECEIPT_SHA256=""
 APP_PATH="$DEFAULT_APP"
-STATE_DIR="${HOME}/.openclaw-elevation-host"
+STATE_DIR="${HOME}/.carapace-elevation-host"
 STATE_DIR_EXPLICIT=0
 CONFIG_PATH=""
 CONFIG_PATH_EXPLICIT=0
@@ -108,7 +108,7 @@ RECOVERY_RESUMED=0
 UNSAFE_ELEVATION_APP_QUARANTINE=""
 UNSAFE_ELEVATION_APP_WAS_QUARANTINED=0
 ELEVATION_APP_OWNER_WAS_EVIDENCED=0
-OPENCLAW_CLI=()
+CARAPACE_CLI=()
 
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
@@ -127,7 +127,7 @@ Usage:
   scripts/mac-elevation-host.sh uninstall [--app <path>] [--state-dir <dir>]
   scripts/mac-elevation-host.sh print-plist [--app <path>] [--state-dir <dir>] [--config-path <file>]
 
-The elevation host uses a separate launchd job, never rewrites ordinary OpenClaw
+The elevation host uses a separate launchd job, never rewrites ordinary Carapace
 Launch at login, and never opens System Settings. Missing TCC is reported by status.
 HELP
 }
@@ -217,7 +217,7 @@ fi
 PLIST_PATH="${HOME}/Library/LaunchAgents/${ELEVATION_LABEL}.plist"
 NORMAL_PLIST_PATH="${HOME}/Library/LaunchAgents/${NORMAL_LABEL}.plist"
 RECEIPT_PATH="${STATE_DIR}/elevation-host-install.json"
-BRIDGE_SOCKET="${HOME}/Library/Application Support/OpenClaw/bridge.sock"
+BRIDGE_SOCKET="${HOME}/Library/Application Support/Carapace/bridge.sock"
 
 cleanup_work_root() {
   if [[ -n "$WORK_ROOT" && -d "$WORK_ROOT" ]]; then
@@ -406,7 +406,7 @@ verify_elevation_code() (
     [[ "$resolved" == "$signed_path" ]] ||
       fail "elevation worker directory missing or symlinked: $signed_path (canonical directory spelling required)"
   done
-  inventory="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-elevation-code.XXXXXX")" ||
+  inventory="$(mktemp -d "${TMPDIR:-/tmp}/carapace-elevation-code.XXXXXX")" ||
     fail 'could not create elevation code inventory'
   trap 'rm -rf "$inventory"' EXIT
   find "$app" -print0 >"$inventory/paths" || fail 'could not scan elevation code'
@@ -559,16 +559,16 @@ verify_elevation_code() (
 
   local node entry metadata version commit built_at build_id
   version="$(plist_value "$app" CFBundleShortVersionString)"
-  commit="$(plist_value "$app" OpenClawGitCommit)"
-  built_at="$(plist_value "$app" OpenClawBuildTimestamp)"
-  build_id="$(plist_value "$app" OpenClawWorkerBuildID)"
+  commit="$(plist_value "$app" CarapaceGitCommit)"
+  built_at="$(plist_value "$app" CarapaceBuildTimestamp)"
+  build_id="$(plist_value "$app" CarapaceWorkerBuildID)"
   [[ -n "$version" && -n "$commit" && -n "$built_at" && -n "$build_id" ]] ||
     fail 'elevation app is missing worker build identity'
   for arch in arm64 x86_64; do
     worker="$workers/$arch"
     node="$worker/bin/node"
-    entry="$worker/lib/node_modules/openclaw/dist/entry.js"
-    metadata="$worker/lib/node_modules/openclaw/dist/build-info.json"
+    entry="$worker/lib/node_modules/carapace/dist/entry.js"
+    metadata="$worker/lib/node_modules/carapace/dist/build-info.json"
     [[ -f "$node" && -x "$node" && -f "$entry" && -r "$entry" && -f "$metadata" ]] ||
       fail "elevation worker payload is incomplete: $worker"
     resolved="$(stat -f '%R/' -- "$node")" || fail "could not resolve elevation worker Node: $node"
@@ -583,7 +583,7 @@ verify_elevation_code() (
     ' "$metadata" >/dev/null 2>&1 || fail "elevation worker build metadata does not match app: $worker"
   done
 
-  local helper="$app/Contents/MacOS/openclaw-mlx-tts"
+  local helper="$app/Contents/MacOS/carapace-mlx-tts"
   if [[ -f "$helper" ]] && grep -q '<key>' <<<"$(entitlements_for "$helper")"; then
     fail "MLX helper must be signed without app entitlements: $helper"
   fi
@@ -600,7 +600,7 @@ elevation_plist_binds_app() {
   [[ -n "$plist" && -f "$plist" && ! -L "$plist" ]] || return 1
   label="$(plist_file_value "$plist" Label)"
   [[ "$label" == "$ELEVATION_LABEL" ]] || return 1
-  executable="$APP_PATH/Contents/MacOS/OpenClaw"
+  executable="$APP_PATH/Contents/MacOS/Carapace"
   if program="$(plutil -extract Program raw -o - "$plist" 2>/dev/null)"; then
     [[ "$program" == "$executable" ]] || return 1
   elif plutil -extract Program xml1 -o /dev/null "$plist" 2>/dev/null; then
@@ -621,7 +621,7 @@ elevation_receipt_binds_app() {
       .appPath == $appPath and
       .plistPath == $plistPath and
       (
-        (.schemaVersion == 3 and .kind == "openclaw-elevation-install") or
+        (.schemaVersion == 3 and .kind == "carapace-elevation-install") or
         (
           (has("schemaVersion") | not) and (has("kind") | not) and
           keys == ["appPath","archiveSha256","backupPath","peekabooCommit","plistPath","previousPlist","sourceCommit"]
@@ -635,7 +635,7 @@ loaded_elevation_job_binds_app() {
   snapshot="$(job_snapshot "$job_domain")"
   [[ -n "$snapshot" ]] || return 1
   program="$(awk -F' = ' '/^[[:space:]]*program = / {print $2; exit}' <<<"$snapshot")"
-  [[ "$program" == "$APP_PATH/Contents/MacOS/OpenClaw" ]] || return 1
+  [[ "$program" == "$APP_PATH/Contents/MacOS/Carapace" ]] || return 1
   grep -Eq '^[[:space:]]*--elevation-host[[:space:]]*$' <<<"$snapshot"
 }
 
@@ -736,7 +736,7 @@ quarantine_entry_unsafe_elevation_app() {
   fi
   if [[ "$quarantine_failed" == "0" ]]; then
     if quarantine_container="$(mktemp -d "$STATE_DIR/elevation-host.quarantined-app.XXXXXX")"; then
-      quarantine_app="$quarantine_container/OpenClaw.app"
+      quarantine_app="$quarantine_container/Carapace.app"
       rename_app_exclusively "$APP_PATH" "$quarantine_app" || quarantine_failed=1
       if path_matches_identity "$quarantine_app" "$app_identity" &&
         { [[ "$app_kind" == "symlink" && -L "$quarantine_app" ]] ||
@@ -775,9 +775,9 @@ verify_elevation_app() {
   [[ "$(plist_value "$app" CFBundleIdentifier)" == "$EXPECTED_BUNDLE_ID" ]] ||
     fail "elevation app bundle id must be $EXPECTED_BUNDLE_ID"
   local source_commit peekaboo_commit
-  source_commit="$(plist_value "$app" OpenClawGitCommit)"
+  source_commit="$(plist_value "$app" CarapaceGitCommit)"
   peekaboo_commit="$(plist_value "$app" PeekabooSourceCommit)"
-  [[ "$source_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'elevation app has invalid OpenClawGitCommit'
+  [[ "$source_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'elevation app has invalid CarapaceGitCommit'
   [[ "$peekaboo_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'elevation app has invalid PeekabooSourceCommit'
   verify_signed_app_identity "$app" ||
     fail "elevation app must be signed for every architecture by $EXPECTED_AUTHORITY"
@@ -801,7 +801,7 @@ verify_rollback_app() {
   local app="$1" expected_arm64_cdhash="$2" expected_x86_64_cdhash="$3"
   [[ -d "$app" && ! -L "$app" ]] || return 1
   [[ "$(plist_value "$app" CFBundleIdentifier)" == "$EXPECTED_BUNDLE_ID" ]] || return 1
-  [[ "$(plist_value "$app" OpenClawGitCommit)" =~ ^[0-9a-f]{40}$ ]] || return 1
+  [[ "$(plist_value "$app" CarapaceGitCommit)" =~ ^[0-9a-f]{40}$ ]] || return 1
   verify_signed_app_identity "$app" || return 1
   [[ -n "$expected_arm64_cdhash" && -n "$expected_x86_64_cdhash" ]] || return 1
   [[ "$(codesign_value_for_arch "$app" CDHash arm64)" == "$expected_arm64_cdhash" ]] || return 1
@@ -1057,7 +1057,7 @@ prepare_authenticated_artifact_inputs() {
   [[ -f "$installer" && ! -L "$installer" ]] || fail "elevation installer not found or symlinked: $installer"
 
   cleanup_artifact_snapshot
-  ARTIFACT_SNAPSHOT_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-elevation-inputs.XXXXXX")"
+  ARTIFACT_SNAPSHOT_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/carapace-elevation-inputs.XXXXXX")"
   AUTHENTICATED_RECEIPT_PATH="$ARTIFACT_SNAPSHOT_ROOT/receipt.json"
   cp -p "$receipt" "$AUTHENTICATED_RECEIPT_PATH"
   local receipt_sha receipt_archive_checksum receipt_installer_checksum
@@ -1069,7 +1069,7 @@ prepare_authenticated_artifact_inputs() {
   jq -e '
     type == "object" and
     keys == ["architectures","archive","archiveChecksum","archiveSha256","authority","build","cdhashes","entitlementsSha256","installer","installerChecksum","installerSha256","kind","notarizationId","peekabooCommit","schemaVersion","sourceCommit","teamIdentifier","version"] and
-    .schemaVersion == 1 and .kind == "openclaw-elevation-artifact" and
+    .schemaVersion == 1 and .kind == "carapace-elevation-artifact" and
     (.architectures | type == "object" and keys == ["helper","main"]) and
     (.cdhashes | type == "object" and keys == ["arm64","x86_64"]) and
     (.entitlementsSha256 | type == "object" and keys == ["helper","main"]) and
@@ -1114,7 +1114,7 @@ verify_artifact_receipt() {
   jq -e '
     type == "object" and
     keys == ["architectures","archive","archiveChecksum","archiveSha256","authority","build","cdhashes","entitlementsSha256","installer","installerChecksum","installerSha256","kind","notarizationId","peekabooCommit","schemaVersion","sourceCommit","teamIdentifier","version"] and
-    .schemaVersion == 1 and .kind == "openclaw-elevation-artifact" and
+    .schemaVersion == 1 and .kind == "carapace-elevation-artifact" and
     (.architectures | type == "object" and keys == ["helper","main"]) and
     (.cdhashes | type == "object" and keys == ["arm64","x86_64"]) and
     (.entitlementsSha256 | type == "object" and keys == ["helper","main"]) and
@@ -1127,7 +1127,7 @@ verify_artifact_receipt() {
   installer_name="$AUTHENTICATED_INSTALLER_NAME"
   archive_sha="$(shasum -a 256 "$archive" | awk '{print $1}')"
   installer_sha="$(shasum -a 256 "$installer" | awk '{print $1}')"
-  source_commit="$(plist_value "$app" OpenClawGitCommit)"
+  source_commit="$(plist_value "$app" CarapaceGitCommit)"
   peekaboo_commit="$(plist_value "$app" PeekabooSourceCommit)"
 
   [[ "$(receipt_string "$receipt" '.archive' archive)" == "$archive_name" ]] || fail 'artifact receipt archive name mismatch'
@@ -1140,7 +1140,7 @@ verify_artifact_receipt() {
     fail 'artifact receipt installer checksum name mismatch'
   [[ "$(receipt_string "$receipt" '.installerSha256' installerSha256)" == "$installer_sha" ]] ||
     fail 'artifact receipt installer digest mismatch'
-  [[ "$(receipt_string "$receipt" '.sourceCommit' sourceCommit)" == "$source_commit" ]] || fail 'artifact receipt OpenClaw source mismatch'
+  [[ "$(receipt_string "$receipt" '.sourceCommit' sourceCommit)" == "$source_commit" ]] || fail 'artifact receipt Carapace source mismatch'
   [[ "$(receipt_string "$receipt" '.peekabooCommit' peekabooCommit)" == "$peekaboo_commit" ]] || fail 'artifact receipt Peekaboo source mismatch'
   [[ "$(receipt_string "$receipt" '.version' version)" == "$(plist_value "$app" CFBundleShortVersionString)" ]] || fail 'artifact receipt version mismatch'
   [[ "$(receipt_string "$receipt" '.build' build)" == "$(plist_value "$app" CFBundleVersion)" ]] || fail 'artifact receipt build mismatch'
@@ -1152,10 +1152,10 @@ verify_artifact_receipt() {
     fail 'artifact receipt arm64 CDHash mismatch'
   [[ "$(receipt_string "$receipt" '.cdhashes.x86_64' cdhashes.x86_64)" == "$x86_64_cdhash" ]] ||
     fail 'artifact receipt x86_64 CDHash mismatch'
-  [[ "$(receipt_string "$receipt" '.architectures.main' architectures.main)" == "$(lipo -archs "$app/Contents/MacOS/OpenClaw")" ]] || fail 'artifact receipt main architecture mismatch'
-  [[ "$(receipt_string "$receipt" '.architectures.helper' architectures.helper)" == "$(lipo -archs "$app/Contents/MacOS/openclaw-mlx-tts")" ]] || fail 'artifact receipt helper architecture mismatch'
-  [[ "$(receipt_string "$receipt" '.entitlementsSha256.main' entitlementsSha256.main)" == "$(entitlements_for "$app/Contents/MacOS/OpenClaw" | shasum -a 256 | awk '{print $1}')" ]] || fail 'artifact receipt main entitlement mismatch'
-  [[ "$(receipt_string "$receipt" '.entitlementsSha256.helper' entitlementsSha256.helper)" == "$(entitlements_for "$app/Contents/MacOS/openclaw-mlx-tts" | shasum -a 256 | awk '{print $1}')" ]] || fail 'artifact receipt helper entitlement mismatch'
+  [[ "$(receipt_string "$receipt" '.architectures.main' architectures.main)" == "$(lipo -archs "$app/Contents/MacOS/Carapace")" ]] || fail 'artifact receipt main architecture mismatch'
+  [[ "$(receipt_string "$receipt" '.architectures.helper' architectures.helper)" == "$(lipo -archs "$app/Contents/MacOS/carapace-mlx-tts")" ]] || fail 'artifact receipt helper architecture mismatch'
+  [[ "$(receipt_string "$receipt" '.entitlementsSha256.main' entitlementsSha256.main)" == "$(entitlements_for "$app/Contents/MacOS/Carapace" | shasum -a 256 | awk '{print $1}')" ]] || fail 'artifact receipt main entitlement mismatch'
+  [[ "$(receipt_string "$receipt" '.entitlementsSha256.helper' entitlementsSha256.helper)" == "$(entitlements_for "$app/Contents/MacOS/carapace-mlx-tts" | shasum -a 256 | awk '{print $1}')" ]] || fail 'artifact receipt helper entitlement mismatch'
 
   VERIFIED_ARTIFACT_RECEIPT_SHA="$receipt_sha"
   VERIFIED_INSTALLER_SHA="$installer_sha"
@@ -1167,38 +1167,38 @@ verify_artifact_set() {
   prepare_authenticated_artifact_inputs "$ARTIFACT_RECEIPT" "$ARCHIVE" "${BASH_SOURCE[0]}"
   extract_verified_artifact "${BASH_SOURCE[0]}" staged_app
   printf 'Elevation artifact verified: source=%s peekaboo=%s\n' \
-    "$(plist_value "$staged_app" OpenClawGitCommit)" "$(plist_value "$staged_app" PeekabooSourceCommit)"
+    "$(plist_value "$staged_app" CarapaceGitCommit)" "$(plist_value "$staged_app" PeekabooSourceCommit)"
 }
 
 extract_verified_artifact() {
   local installer="$1" output_variable="$2" candidate_helper candidate_helper_sha entries
   [[ -f "$AUTHENTICATED_ARCHIVE_PATH" ]] || fail "archive not found: $AUTHENTICATED_ARCHIVE_PATH"
   cleanup_work_root
-  WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-elevation.XXXXXX")"
+  WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/carapace-elevation.XXXXXX")"
   ditto -x -k "$AUTHENTICATED_ARCHIVE_PATH" "$WORK_ROOT" || return $?
   entries="$(find "$WORK_ROOT" -mindepth 1 -maxdepth 1 -print | sort)"
-  [[ "$entries" == "$WORK_ROOT/OpenClaw.app" && -d "$WORK_ROOT/OpenClaw.app" &&
-    ! -L "$WORK_ROOT/OpenClaw.app" ]] || fail 'elevation archive root must contain exactly physical OpenClaw.app'
+  [[ "$entries" == "$WORK_ROOT/Carapace.app" && -d "$WORK_ROOT/Carapace.app" &&
+    ! -L "$WORK_ROOT/Carapace.app" ]] || fail 'elevation archive root must contain exactly physical Carapace.app'
   # Capture untrusted helper bytes before the final audit; publish authority only
   # after the complete app/receipt check. Later helper use rechecks this digest.
-  candidate_helper="$WORK_ROOT/OpenClaw.app/Contents/MacOS/OpenClaw"
+  candidate_helper="$WORK_ROOT/Carapace.app/Contents/MacOS/Carapace"
   [[ -f "$candidate_helper" && ! -L "$candidate_helper" && -x "$candidate_helper" ]] ||
     fail 'authenticated elevation rename helper is unavailable'
   candidate_helper_sha="$(shasum -a 256 "$candidate_helper" | awk '{print $1}')" || return $?
   verify_artifact_receipt \
-    "$AUTHENTICATED_RECEIPT_PATH" "$AUTHENTICATED_ARCHIVE_PATH" "$WORK_ROOT/OpenClaw.app" "$installer" || return $?
+    "$AUTHENTICATED_RECEIPT_PATH" "$AUTHENTICATED_ARCHIVE_PATH" "$WORK_ROOT/Carapace.app" "$installer" || return $?
   AUTHENTICATED_RENAME_HELPER="$candidate_helper"
   AUTHENTICATED_RENAME_HELPER_SHA="$candidate_helper_sha"
-  printf -v "$output_variable" '%s' "$WORK_ROOT/OpenClaw.app"
+  printf -v "$output_variable" '%s' "$WORK_ROOT/Carapace.app"
 }
 
 stage_verified_app_for_install() {
   local source_app="$1" source_commit="$2" peekaboo_commit="$3"
   cleanup_staged_install_app
   STAGED_APP_CONTAINER="$(mktemp -d "${APP_PATH}.incoming-${source_commit}.XXXXXX")"
-  STAGED_INSTALL_APP_PATH="$STAGED_APP_CONTAINER/OpenClaw.app"
+  STAGED_INSTALL_APP_PATH="$STAGED_APP_CONTAINER/Carapace.app"
   ditto "$source_app" "$STAGED_INSTALL_APP_PATH"
-  [[ "$(plist_value "$STAGED_INSTALL_APP_PATH" OpenClawGitCommit)" == "$source_commit" ]] ||
+  [[ "$(plist_value "$STAGED_INSTALL_APP_PATH" CarapaceGitCommit)" == "$source_commit" ]] ||
     fail 'same-filesystem staged app source mismatch'
   [[ "$(plist_value "$STAGED_INSTALL_APP_PATH" PeekabooSourceCommit)" == "$peekaboo_commit" ]] ||
     fail 'same-filesystem staged Peekaboo source mismatch'
@@ -1215,11 +1215,11 @@ prepare_current_app_rename_helper() {
   verify_recorded_current_app "$source_app" ||
     fail 'current recovery app cannot authenticate the exclusive rename helper'
   cleanup_work_root
-  WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-elevation-current.XXXXXX")"
-  ditto "$source_app" "$WORK_ROOT/OpenClaw.app"
-  verify_recorded_current_app "$WORK_ROOT/OpenClaw.app" ||
+  WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/carapace-elevation-current.XXXXXX")"
+  ditto "$source_app" "$WORK_ROOT/Carapace.app"
+  verify_recorded_current_app "$WORK_ROOT/Carapace.app" ||
     fail 'copied recovery app cannot authenticate the exclusive rename helper'
-  AUTHENTICATED_RENAME_HELPER="$WORK_ROOT/OpenClaw.app/Contents/MacOS/OpenClaw"
+  AUTHENTICATED_RENAME_HELPER="$WORK_ROOT/Carapace.app/Contents/MacOS/Carapace"
   [[ -f "$AUTHENTICATED_RENAME_HELPER" && ! -L "$AUTHENTICATED_RENAME_HELPER" &&
     -x "$AUTHENTICATED_RENAME_HELPER" ]] || fail 'authenticated elevation rename helper is unavailable'
   AUTHENTICATED_RENAME_HELPER_SHA="$(shasum -a 256 "$AUTHENTICATED_RENAME_HELPER" | awk '{print $1}')"
@@ -1256,7 +1256,7 @@ preserve_current_app_for_recovery() {
   else
     failed_container="$(mktemp -d "${APP_PATH}.failed-elevation-host-${ROLLBACK_FAILED_SOURCE}.XXXXXX")" ||
       return 1
-    failed_path="$failed_container/OpenClaw.app"
+    failed_path="$failed_container/Carapace.app"
   fi
   if ! rename_app_exclusively "$APP_PATH" "$failed_path"; then
     rmdir "$failed_container" 2>/dev/null || true
@@ -1286,14 +1286,14 @@ preserve_current_app_for_recovery() {
 
 render_plist() {
   local destination="$1"
-  local executable="$APP_PATH/Contents/MacOS/OpenClaw"
+  local executable="$APP_PATH/Contents/MacOS/Carapace"
   local log_path="$STATE_DIR/logs/mac-app.log"
   local environment_json
   environment_json="$(jq -cn \
     --arg path '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin' \
     --arg state "$STATE_DIR" \
     --arg config "$CONFIG_PATH" \
-    '{PATH:$path,OPENCLAW_STATE_DIR:$state} + (if $config == "" then {} else {OPENCLAW_CONFIG_PATH:$config} end)')"
+    '{PATH:$path,CARAPACE_STATE_DIR:$state} + (if $config == "" then {} else {CARAPACE_CONFIG_PATH:$config} end)')"
 
   plutil -create xml1 "$destination"
   plutil -insert Label -string "$ELEVATION_LABEL" "$destination"
@@ -1341,12 +1341,12 @@ refresh_runtime_paths() {
   RECEIPT_PATH="$FINAL_RECEIPT_PATH"
 }
 
-resolve_reusable_openclaw_cli() {
+resolve_reusable_carapace_cli() {
   local cli
-  cli="$(command -v openclaw 2>/dev/null || true)"
-  case "$cli" in /*) ;; *) fail 'openclaw CLI is required for gateway node attestation' ;; esac
-  [[ -f "$cli" && -x "$cli" ]] || fail 'openclaw CLI is required for gateway node attestation'
-  OPENCLAW_CLI=("$cli")
+  cli="$(command -v carapace 2>/dev/null || true)"
+  case "$cli" in /*) ;; *) fail 'carapace CLI is required for gateway node attestation' ;; esac
+  [[ -f "$cli" && -x "$cli" ]] || fail 'carapace CLI is required for gateway node attestation'
+  CARAPACE_CLI=("$cli")
 }
 
 resolve_migration_inputs() {
@@ -1370,7 +1370,7 @@ resolve_migration_inputs() {
   args="$(plutil -extract ProgramArguments json -o - "$MIGRATE_LAUNCH_AGENT" 2>/dev/null || true)"
   jq -e 'type == "array" and length > 0 and all(.[]; type == "string")' <<<"$args" >/dev/null 2>&1 ||
     fail 'migration LaunchAgent must have a string ProgramArguments array'
-  app_binary="$APP_PATH/Contents/MacOS/OpenClaw"
+  app_binary="$APP_PATH/Contents/MacOS/Carapace"
   if jq -e --arg appBinary "$app_binary" '
       .[0] == $appBinary and
       (.[1:] | index("--background-only") != null) and
@@ -1381,17 +1381,17 @@ resolve_migration_inputs() {
     environment="$(plutil -extract EnvironmentVariables json -o - "$MIGRATE_LAUNCH_AGENT" 2>/dev/null || true)"
     jq -e '
       type == "object" and
-      all(keys[]; . == "PATH" or . == "OPENCLAW_STATE_DIR" or . == "OPENCLAW_CONFIG_PATH")
+      all(keys[]; . == "PATH" or . == "CARAPACE_STATE_DIR" or . == "CARAPACE_CONFIG_PATH")
     ' <<<"$environment" >/dev/null 2>&1 ||
       fail 'app migration LaunchAgent has unsupported environment keys; move routing into its state/config first'
-    inline_state="$(plist_file_value "$MIGRATE_LAUNCH_AGENT" EnvironmentVariables.OPENCLAW_STATE_DIR)"
-    case "$inline_state" in /*) ;; *) fail 'app migration LaunchAgent must expose an absolute OPENCLAW_STATE_DIR' ;; esac
-    inline_config="$(plist_file_value "$MIGRATE_LAUNCH_AGENT" EnvironmentVariables.OPENCLAW_CONFIG_PATH)"
-    resolve_reusable_openclaw_cli
+    inline_state="$(plist_file_value "$MIGRATE_LAUNCH_AGENT" EnvironmentVariables.CARAPACE_STATE_DIR)"
+    case "$inline_state" in /*) ;; *) fail 'app migration LaunchAgent must expose an absolute CARAPACE_STATE_DIR' ;; esac
+    inline_config="$(plist_file_value "$MIGRATE_LAUNCH_AGENT" EnvironmentVariables.CARAPACE_CONFIG_PATH)"
+    resolve_reusable_carapace_cli
   else
     MIGRATION_KIND="canonical-node"
-    [[ "$MIGRATION_LABEL" == "ai.openclaw.node" ]] ||
-      fail 'non-app migration sources must be the canonical ai.openclaw.node LaunchAgent'
+    [[ "$MIGRATION_LABEL" == "ai.carapace.node" ]] ||
+      fail 'non-app migration sources must be the canonical ai.carapace.node LaunchAgent'
     jq -e '
       def validTail:
         length == 0 or
@@ -1424,7 +1424,7 @@ resolve_migration_inputs() {
     node_paths="$(read_generated_node_paths "$node_env")"
     inline_state="$(jq -r '.stateDir' <<<"$node_paths")"
     inline_config="$(jq -r '.configPath' <<<"$node_paths")"
-    case "$inline_state" in /*) ;; *) fail 'canonical node OPENCLAW_STATE_DIR must be absolute' ;; esac
+    case "$inline_state" in /*) ;; *) fail 'canonical node CARAPACE_STATE_DIR must be absolute' ;; esac
     [[ "$node_env" == "${inline_state}/service-env/${MIGRATION_LABEL}.env" ]] ||
       fail 'canonical node environment file is outside its state-owned service-env directory'
     MIGRATION_NODE_ENV_PATH="$node_env"
@@ -1435,16 +1435,16 @@ resolve_migration_inputs() {
     MIGRATION_NODE_WRAPPER_SHA="$(shasum -a 256 "$node_wrapper" | awk '{print $1}')"
     MIGRATION_NODE_WRAPPER_IDENTITY="$(durable_path_identity "$node_wrapper")" ||
       fail 'canonical node wrapper identity could not be inspected'
-    resolve_reusable_openclaw_cli
+    resolve_reusable_carapace_cli
   fi
   if [[ "$STATE_DIR_EXPLICIT" == "1" && "$STATE_DIR" != "$inline_state" ]]; then
-    fail '--state-dir does not match the migration LaunchAgent OPENCLAW_STATE_DIR'
+    fail '--state-dir does not match the migration LaunchAgent CARAPACE_STATE_DIR'
   fi
   STATE_DIR="$inline_state"
-  local effective_config="${inline_config:-$STATE_DIR/openclaw.json}"
-  case "$effective_config" in /*) ;; *) fail 'migration LaunchAgent OPENCLAW_CONFIG_PATH must be absolute' ;; esac
+  local effective_config="${inline_config:-$STATE_DIR/carapace.json}"
+  case "$effective_config" in /*) ;; *) fail 'migration LaunchAgent CARAPACE_CONFIG_PATH must be absolute' ;; esac
   if [[ "$CONFIG_PATH_EXPLICIT" == "1" && "$CONFIG_PATH" != "$effective_config" ]]; then
-    fail '--config-path does not match the migration LaunchAgent OPENCLAW_CONFIG_PATH'
+    fail '--config-path does not match the migration LaunchAgent CARAPACE_CONFIG_PATH'
   fi
   CONFIG_PATH="$effective_config"
   refresh_runtime_paths
@@ -1482,7 +1482,7 @@ try:
     lines = raw.decode("utf-8").split("\n")
 except UnicodeDecodeError:
     raise SystemExit("ERROR: canonical node environment must be UTF-8") from None
-header = "# Generated by OpenClaw. Do not edit while the gateway service is installed."
+header = "# Generated by Carapace. Do not edit while the gateway service is installed."
 if not lines or lines[0] != header:
     raise SystemExit("ERROR: canonical node environment lacks its generated header")
 
@@ -1504,11 +1504,11 @@ for line in lines[1:]:
     canonical = "'" + value.replace("'", "'\\''") + "'"
     if encoded != canonical:
         raise SystemExit("ERROR: canonical node environment contains a noncanonical value")
-    if key in {"OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"}:
+    if key in {"CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"}:
         selected[key] = value
-if not selected.get("OPENCLAW_STATE_DIR") or not selected.get("OPENCLAW_CONFIG_PATH"):
+if not selected.get("CARAPACE_STATE_DIR") or not selected.get("CARAPACE_CONFIG_PATH"):
     raise SystemExit("ERROR: canonical node environment lacks state/config paths")
-print(json.dumps({"stateDir": selected["OPENCLAW_STATE_DIR"], "configPath": selected["OPENCLAW_CONFIG_PATH"]}))
+print(json.dumps({"stateDir": selected["CARAPACE_STATE_DIR"], "configPath": selected["CARAPACE_CONFIG_PATH"]}))
 PY
 }
 
@@ -1548,7 +1548,7 @@ migration_receipt_matches_backup_plist() {
   args="$(plutil -extract ProgramArguments json -o - "$plist_path" 2>/dev/null)" || return 1
   jq -e 'type == "array" and length > 0 and all(.[]; type == "string")' <<<"$args" >/dev/null 2>&1 ||
     return 1
-  app_binary="$APP_PATH/Contents/MacOS/OpenClaw"
+  app_binary="$APP_PATH/Contents/MacOS/Carapace"
   if jq -e --arg appBinary "$app_binary" '
       .[0] == $appBinary and
       (.[1:] | index("--background-only") != null) and
@@ -1560,7 +1560,7 @@ migration_receipt_matches_backup_plist() {
       -z "$MIGRATION_NODE_WRAPPER_PATH" && -z "$MIGRATION_NODE_WRAPPER_SHA" ]]
     return
   fi
-  [[ "$MIGRATION_KIND" == "canonical-node" && "$plist_label" == "ai.openclaw.node" ]] || return 1
+  [[ "$MIGRATION_KIND" == "canonical-node" && "$plist_label" == "ai.carapace.node" ]] || return 1
   jq -e '
     def validTail:
       length == 0 or
@@ -1579,7 +1579,7 @@ migration_receipt_matches_backup_plist() {
 }
 
 background_app_records() {
-  local app_binary="$APP_PATH/Contents/MacOS/OpenClaw" pid command_line executable attach_only
+  local app_binary="$APP_PATH/Contents/MacOS/Carapace" pid command_line executable attach_only
   while IFS= read -r pid; do
     [[ "$pid" =~ ^[0-9]+$ ]] || continue
     executable="$(lsof -a -p "$pid" -d txt -Fn 2>/dev/null | sed -n 's/^n//p' | head -n 1)"
@@ -1592,13 +1592,13 @@ background_app_records() {
       *) continue ;;
     esac
     printf '%s %s\n' "$pid" "$attach_only"
-  done < <(pgrep -x OpenClaw 2>/dev/null || true)
+  done < <(pgrep -x Carapace 2>/dev/null || true)
 }
 
 app_binary_pids() {
-  local app_binary="$APP_PATH/Contents/MacOS/OpenClaw" pid executable lsof_output listed_status
+  local app_binary="$APP_PATH/Contents/MacOS/Carapace" pid executable lsof_output listed_status
   local pids="" pgrep_status=0
-  pids="$(pgrep -x OpenClaw 2>/dev/null)" || pgrep_status=$?
+  pids="$(pgrep -x Carapace 2>/dev/null)" || pgrep_status=$?
   case "$pgrep_status" in
     0) ;;
     1) return 0 ;;
@@ -1608,7 +1608,7 @@ app_binary_pids() {
     [[ "$pid" =~ ^[0-9]+$ ]] || continue
     if ! lsof_output="$(lsof -a -p "$pid" -d txt -Fn 2>/dev/null)"; then
       listed_status=0
-      openclaw_pid_is_listed "$pid" || listed_status=$?
+      carapace_pid_is_listed "$pid" || listed_status=$?
       case "$listed_status" in
         0|2) return 1 ;;
         1) continue ;;
@@ -1617,7 +1617,7 @@ app_binary_pids() {
     executable="$(sed -n 's/^n//p' <<<"$lsof_output" | head -n 1)"
     if [[ -z "$executable" ]]; then
       listed_status=0
-      openclaw_pid_is_listed "$pid" || listed_status=$?
+      carapace_pid_is_listed "$pid" || listed_status=$?
       case "$listed_status" in
         0|2) return 1 ;;
         1) continue ;;
@@ -1627,9 +1627,9 @@ app_binary_pids() {
   done <<<"$pids"
 }
 
-openclaw_pid_is_listed() {
+carapace_pid_is_listed() {
   local _expected_pid="$1" pgrep_status=0
-  pgrep -x OpenClaw >/dev/null 2>&1 || pgrep_status=$?
+  pgrep -x Carapace >/dev/null 2>&1 || pgrep_status=$?
   case "$pgrep_status" in
     0) return 0 ;;
     1) return 1 ;;
@@ -1651,15 +1651,15 @@ wait_for_app_binary_exit() {
 resolve_adoption_inputs() {
   [[ "$ADOPT_RUNNING_APP" == "1" ]] || return 0
   MIGRATION_KIND="running-app"
-  [[ -n "$CONFIG_PATH" ]] || CONFIG_PATH="$STATE_DIR/openclaw.json"
+  [[ -n "$CONFIG_PATH" ]] || CONFIG_PATH="$STATE_DIR/carapace.json"
   refresh_runtime_paths
-  resolve_reusable_openclaw_cli
+  resolve_reusable_carapace_cli
   local records=() record
   while IFS= read -r record; do
     [[ -n "$record" ]] && records+=("$record")
   done < <(background_app_records)
   [[ "${#records[@]}" == "1" ]] ||
-    fail 'adoption requires exactly one unsupervised background-only OpenClaw process'
+    fail 'adoption requires exactly one unsupervised background-only Carapace process'
   ADOPTION_PID="${records[0]%% *}"
   ADOPTION_ATTACH_ONLY="${records[0]##* }"
   local elevation_pid
@@ -1677,11 +1677,11 @@ resolve_managed_upgrade_inputs() {
   if [[ "$INSTALL_RECEIPT_SCHEMA" == "legacy" ]]; then
     [[ -f "$PLIST_PATH" && ! -L "$PLIST_PATH" ]] ||
       fail 'legacy elevation upgrade requires its installed LaunchAgent plist'
-    recorded_state="$(plist_file_value "$PLIST_PATH" EnvironmentVariables.OPENCLAW_STATE_DIR)"
+    recorded_state="$(plist_file_value "$PLIST_PATH" EnvironmentVariables.CARAPACE_STATE_DIR)"
     [[ "$recorded_state" == "$STATE_DIR" ]] ||
       fail 'legacy elevation LaunchAgent state directory does not match --state-dir'
-    recorded_config="$(plist_file_value "$PLIST_PATH" EnvironmentVariables.OPENCLAW_CONFIG_PATH)"
-    recorded_config="${recorded_config:-$STATE_DIR/openclaw.json}"
+    recorded_config="$(plist_file_value "$PLIST_PATH" EnvironmentVariables.CARAPACE_CONFIG_PATH)"
+    recorded_config="${recorded_config:-$STATE_DIR/carapace.json}"
   else
     recorded_config="$(jq -r '.configPath' "$RECEIPT_PATH")"
   fi
@@ -1726,8 +1726,8 @@ relaunch_adopted_app() {
   local open_args=(
     -n
     -g
-    --env "OPENCLAW_STATE_DIR=$STATE_DIR"
-    --env "OPENCLAW_CONFIG_PATH=$CONFIG_PATH"
+    --env "CARAPACE_STATE_DIR=$STATE_DIR"
+    --env "CARAPACE_CONFIG_PATH=$CONFIG_PATH"
     "$APP_PATH"
     --args
   )
@@ -1755,45 +1755,45 @@ restore_adopted_app_after_cutover() {
   relaunch_adopted_app || return 1
   RECOVERY_RELAUNCHED_ADOPTED_PID="$ADOPTION_PID"
 }
-run_openclaw_cli() {
-  [[ "${#OPENCLAW_CLI[@]}" -gt 0 && -n "${OPENCLAW_CLI[0]}" ]] ||
-    fail 'openclaw CLI is required for gateway node attestation'
+run_carapace_cli() {
+  [[ "${#CARAPACE_CLI[@]}" -gt 0 && -n "${CARAPACE_CLI[0]}" ]] ||
+    fail 'carapace CLI is required for gateway node attestation'
   local env_args=(
-    -u OPENCLAW_GATEWAY_URL
-    -u OPENCLAW_GATEWAY_PORT
-    -u OPENCLAW_GATEWAY_TOKEN
-    -u OPENCLAW_GATEWAY_PASSWORD
-    "OPENCLAW_STATE_DIR=$STATE_DIR"
-    "OPENCLAW_CONFIG_PATH=$CONFIG_PATH"
+    -u CARAPACE_GATEWAY_URL
+    -u CARAPACE_GATEWAY_PORT
+    -u CARAPACE_GATEWAY_TOKEN
+    -u CARAPACE_GATEWAY_PASSWORD
+    "CARAPACE_STATE_DIR=$STATE_DIR"
+    "CARAPACE_CONFIG_PATH=$CONFIG_PATH"
   )
-  env "${env_args[@]}" "${OPENCLAW_CLI[@]}" "$@"
+  env "${env_args[@]}" "${CARAPACE_CLI[@]}" "$@"
 }
 
 prepare_gateway_attestation() {
   [[ -d "$STATE_DIR" && ! -L "$STATE_DIR" ]] || fail "state directory is missing or symlinked: $STATE_DIR"
   [[ -f "$CONFIG_PATH" && ! -L "$CONFIG_PATH" ]] || fail "config is missing or symlinked: $CONFIG_PATH"
   local mode remote_url token password profile database node_id nodes_json
-  mode="$(run_openclaw_cli config get gateway.mode --json 2>/dev/null || true)"
+  mode="$(run_carapace_cli config get gateway.mode --json 2>/dev/null || true)"
   jq -e '. == "remote"' <<<"$mode" >/dev/null 2>&1 ||
     fail 'elevation host requires app-readable gateway.mode=remote in the selected config'
-  remote_url="$(run_openclaw_cli config get gateway.remote.url --json 2>/dev/null || true)"
+  remote_url="$(run_carapace_cli config get gateway.remote.url --json 2>/dev/null || true)"
   jq -e 'type == "string" and length > 0' <<<"$remote_url" >/dev/null 2>&1 ||
     fail 'elevation host requires a nonempty app-readable gateway.remote.url'
-  token="$(run_openclaw_cli config get gateway.remote.token --json 2>/dev/null || true)"
-  password="$(run_openclaw_cli config get gateway.remote.password --json 2>/dev/null || true)"
+  token="$(run_carapace_cli config get gateway.remote.token --json 2>/dev/null || true)"
+  password="$(run_carapace_cli config get gateway.remote.password --json 2>/dev/null || true)"
   if ! jq -e 'type == "string" and length > 0' <<<"$token" >/dev/null 2>&1 &&
     ! jq -e 'type == "string" and length > 0' <<<"$password" >/dev/null 2>&1
   then
     fail 'elevation host requires app-readable string auth in gateway.remote.token or gateway.remote.password'
   fi
 
-  profile="$(defaults read "$EXPECTED_BUNDLE_ID" openclaw.macNodeIdentityProfile 2>/dev/null || true)"
+  profile="$(defaults read "$EXPECTED_BUNDLE_ID" carapace.macNodeIdentityProfile 2>/dev/null || true)"
   [[ "$profile" == 'primary' || "$profile" == 'node' ]] ||
     fail 'macOS app node identity profile is unavailable; launch and pair the app before migration'
   if [[ "$MIGRATION_KIND" == 'canonical-node' && "$profile" != 'primary' ]]; then
     fail 'canonical node migration requires the macOS app to select the primary identity profile'
   fi
-  database="$STATE_DIR/state/openclaw.sqlite"
+  database="$STATE_DIR/state/carapace.sqlite"
   [[ -f "$database" && ! -L "$database" ]] || fail 'state database is missing or symlinked'
   node_id="$(sqlite3 -readonly -batch -noheader "$database" \
     "SELECT device_id FROM device_identities WHERE identity_key = '$profile';" 2>/dev/null || true)"
@@ -1809,7 +1809,7 @@ prepare_gateway_attestation() {
   then
     fail 'managed upgrade identity does not match the existing elevation install receipt'
   fi
-  nodes_json="$(run_openclaw_cli nodes status --json --timeout 5000 2>/dev/null || true)"
+  nodes_json="$(run_carapace_cli nodes status --json --timeout 5000 2>/dev/null || true)"
   jq -e --arg nodeId "$node_id" '
     [.nodes[]? | select(.nodeId == $nodeId)] as $matches |
     ($matches | length) == 1 and
@@ -1827,7 +1827,7 @@ prepare_gateway_attestation() {
 verify_gateway_node_readiness() {
   local expected_version="$1" nodes_json
   for _ in $(seq 1 30); do
-    nodes_json="$(run_openclaw_cli nodes status --connected --json --timeout 3000 2>/dev/null || true)"
+    nodes_json="$(run_carapace_cli nodes status --connected --json --timeout 3000 2>/dev/null || true)"
     if jq -e \
       --arg nodeId "$EXPECTED_NODE_ID" \
       --arg version "$expected_version" \
@@ -1835,7 +1835,7 @@ verify_gateway_node_readiness() {
         [.nodes[]? | select(.nodeId == $nodeId)] as $matches |
         ($matches | length) == 1 and
         $matches[0].connected == true and
-        $matches[0].clientId == "openclaw-macos" and
+        $matches[0].clientId == "carapace-macos" and
         $matches[0].clientMode == "node" and
         (($matches[0].uiVersion == $version) or ($matches[0].version == $version)) and
         (($matches[0].connectedAtMs | numbers) > $previousConnectedAt) and
@@ -1876,8 +1876,8 @@ ensure_no_normal_owner() {
     [[ -n "$MIGRATE_LAUNCH_AGENT" && "$candidate_plist" == "$MIGRATE_LAUNCH_AGENT" ]] && continue
     candidate_label="$(plutil -extract Label raw -o - "$candidate_plist" 2>/dev/null || true)"
     candidate_program="$(plutil -extract ProgramArguments.0 raw -o - "$candidate_plist" 2>/dev/null || true)"
-    if [[ "$candidate_program" == "$APP_PATH/Contents/MacOS/OpenClaw" ]]; then
-      fail "conflicting OpenClaw launch agent is installed: ${candidate_label:-$candidate_plist}"
+    if [[ "$candidate_program" == "$APP_PATH/Contents/MacOS/Carapace" ]]; then
+      fail "conflicting Carapace launch agent is installed: ${candidate_label:-$candidate_plist}"
     fi
   done < <(find "$(dirname "$PLIST_PATH")" -maxdepth 1 -type f -name '*.plist' -print0 2>/dev/null)
 
@@ -1890,12 +1890,12 @@ ensure_no_normal_owner() {
   while IFS= read -r pid; do
     [[ -n "$pid" ]] || continue
     command_line="$(ps -p "$pid" -o command= 2>/dev/null || true)"
-    [[ "$command_line" == "$APP_PATH/Contents/MacOS/OpenClaw"* ]] || continue
+    [[ "$command_line" == "$APP_PATH/Contents/MacOS/Carapace"* ]] || continue
     [[ -n "$elevation_pid" && "$pid" == "$elevation_pid" ]] ||
       [[ -n "$migration_pid" && "$pid" == "$migration_pid" ]] ||
       [[ -n "$ADOPTION_PID" && "$pid" == "$ADOPTION_PID" ]] ||
-      fail "unsupervised or conflicting OpenClaw process is running: $pid"
-  done < <(pgrep -x OpenClaw 2>/dev/null || true)
+      fail "unsupervised or conflicting Carapace process is running: $pid"
+  done < <(pgrep -x Carapace 2>/dev/null || true)
 }
 
 peekaboo_bin() {
@@ -1967,7 +1967,7 @@ write_install_receipt() {
   local tmp="${target}.tmp.$$"
   jq -n \
     --argjson schemaVersion 3 \
-    --arg kind 'openclaw-elevation-install' \
+    --arg kind 'carapace-elevation-install' \
     --arg transactionState "$transaction_state" \
     --arg transactionId "$INSTALL_TRANSACTION_ID" \
     --arg sourceCommit "$source_commit" \
@@ -2073,7 +2073,7 @@ verify_install_receipt() {
     type == "object" and
     keys == ["adoptedApp","appPath","archiveSha256","artifactReceiptSha256","backupCDHashes","backupPath","cdhashes","configPath","installerSha256","kind","migration","nodeId","nodeProfile","peekabooCommit","plistPath","previousPlist","previousPlistSha256","previousPlistWasLoaded","previousReceipt","previousReceiptSha256","schemaVersion","sourceCommit","stateDir","transactionId","transactionState"] and
     .schemaVersion == 3 and
-    .kind == "openclaw-elevation-install" and
+    .kind == "carapace-elevation-install" and
     (.transactionState == "installing" or .transactionState == "installed") and
     (.transactionId | type == "string" and test("^[0-9A-F-]{36}$")) and
     (.sourceCommit | type == "string" and test("^[0-9a-f]{40}$")) and
@@ -2124,7 +2124,7 @@ verify_install_receipt() {
     fail 'elevation install receipt schema is invalid'
   fi
   if [[ "$verify_current_app" == "1" ]]; then
-    [[ "$(jq -r '.sourceCommit' "$RECEIPT_PATH")" == "$(plist_value "$APP_PATH" OpenClawGitCommit)" ]] ||
+    [[ "$(jq -r '.sourceCommit' "$RECEIPT_PATH")" == "$(plist_value "$APP_PATH" CarapaceGitCommit)" ]] ||
       fail 'installed app source does not match the elevation install receipt'
     [[ "$(jq -r '.peekabooCommit' "$RECEIPT_PATH")" == "$(plist_value "$APP_PATH" PeekabooSourceCommit)" ]] ||
       fail 'installed Peekaboo source does not match the elevation install receipt'
@@ -2157,7 +2157,7 @@ package_host() {
   local source_commit prefix zip_path receipt_path checksum_path installer_path installer_checksum_path notary_result
   source_commit="$(git -C "$ROOT_DIR" rev-parse HEAD)"
   [[ "$source_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'could not resolve exact source commit'
-  prefix="OpenClaw-${source_commit}-Peekaboo-${EXPECTED_PEEKABOO_SOURCE_COMMIT}-stable"
+  prefix="Carapace-${source_commit}-Peekaboo-${EXPECTED_PEEKABOO_SOURCE_COMMIT}-stable"
   zip_path="$OUTPUT_DIR/${prefix}.zip"
   receipt_path="$OUTPUT_DIR/${prefix}.json"
   checksum_path="$zip_path.sha256"
@@ -2167,26 +2167,26 @@ package_host() {
     [[ ! -e "$output" ]] || fail "immutable elevation output already exists: $output"
   done
   mkdir -p "$OUTPUT_DIR"
-  NOTARY_RESULT_TEMP="$(mktemp "${TMPDIR:-/tmp}/openclaw-elevation-notary.XXXXXX")"
+  NOTARY_RESULT_TEMP="$(mktemp "${TMPDIR:-/tmp}/carapace-elevation-notary.XXXXXX")"
   notary_result="$NOTARY_RESULT_TEMP"
 
   SIGN_IDENTITY="$EXPECTED_AUTHORITY" \
-    OPENCLAW_EXPECTED_PEEKABOO_SOURCE_COMMIT="$EXPECTED_PEEKABOO_SOURCE_COMMIT" \
-    OPENCLAW_MAC_SIGNING_VARIANT=elevation-host \
+    CARAPACE_EXPECTED_PEEKABOO_SOURCE_COMMIT="$EXPECTED_PEEKABOO_SOURCE_COMMIT" \
+    CARAPACE_MAC_SIGNING_VARIANT=elevation-host \
     NOTARY_RESULT_FILE="$notary_result" \
     SKIP_DMG=1 \
     SKIP_DSYM=1 \
     "$ROOT_DIR/scripts/package-mac-dist.sh"
 
-  local app="$ROOT_DIR/dist/OpenClaw.app"
+  local app="$ROOT_DIR/dist/Carapace.app"
   verify_elevation_app "$app"
-  [[ "$(plist_value "$app" OpenClawGitCommit)" == "$source_commit" ]] ||
+  [[ "$(plist_value "$app" CarapaceGitCommit)" == "$source_commit" ]] ||
     fail 'packaged elevation source does not match HEAD'
   [[ "$(plist_value "$app" PeekabooSourceCommit)" == "$EXPECTED_PEEKABOO_SOURCE_COMMIT" ]] ||
     fail 'packaged elevation Peekaboo source does not match the requested release head'
   local version source_zip
   version="$(plist_value "$app" CFBundleShortVersionString)"
-  source_zip="$ROOT_DIR/dist/OpenClaw-${version}.zip"
+  source_zip="$ROOT_DIR/dist/Carapace-${version}.zip"
   [[ -f "$source_zip" ]] || fail "distribution zip missing: $source_zip"
   local tmp_zip="${zip_path}.tmp.$$"
   cp "$source_zip" "$tmp_zip"
@@ -2204,10 +2204,10 @@ package_host() {
     fail 'portable installer does not match the selected source commit'
   notary_id="$(jq -r '.id // empty' "$notary_result")"
   [[ -n "$notary_id" ]] || fail 'accepted notarization id was not recorded'
-  main_archs="$(lipo -archs "$app/Contents/MacOS/OpenClaw")"
-  helper_archs="$(lipo -archs "$app/Contents/MacOS/openclaw-mlx-tts")"
-  main_entitlements="$(entitlements_for "$app/Contents/MacOS/OpenClaw" | shasum -a 256 | awk '{print $1}')"
-  helper_entitlements="$(entitlements_for "$app/Contents/MacOS/openclaw-mlx-tts" | shasum -a 256 | awk '{print $1}')"
+  main_archs="$(lipo -archs "$app/Contents/MacOS/Carapace")"
+  helper_archs="$(lipo -archs "$app/Contents/MacOS/carapace-mlx-tts")"
+  main_entitlements="$(entitlements_for "$app/Contents/MacOS/Carapace" | shasum -a 256 | awk '{print $1}')"
+  helper_entitlements="$(entitlements_for "$app/Contents/MacOS/carapace-mlx-tts" | shasum -a 256 | awk '{print $1}')"
   arm64_cdhash="$(codesign_value_for_arch "$app" CDHash arm64)"
   x86_64_cdhash="$(codesign_value_for_arch "$app" CDHash x86_64)"
   [[ -n "$arm64_cdhash" && -n "$x86_64_cdhash" ]] || fail 'could not resolve per-architecture app CDHashes'
@@ -2215,7 +2215,7 @@ package_host() {
   mv "$tmp_installer" "$installer_path"
   jq -n \
     --argjson schemaVersion 1 \
-    --arg kind 'openclaw-elevation-artifact' \
+    --arg kind 'carapace-elevation-artifact' \
     --arg archive "$(basename "$zip_path")" \
     --arg archiveSha256 "$archive_sha" \
     --arg archiveChecksum "$(basename "$checksum_path")" \
@@ -2248,7 +2248,7 @@ package_host() {
   prepare_authenticated_artifact_inputs "$receipt_path" "$zip_path" "$installer_path"
   local extracted
   extract_verified_artifact "$installer_path" extracted
-  [[ "$(plist_value "$extracted" OpenClawGitCommit)" == "$source_commit" ]] ||
+  [[ "$(plist_value "$extracted" CarapaceGitCommit)" == "$source_commit" ]] ||
     fail 'extracted elevation source mismatch'
   printf 'Elevation archive: %s\nInstaller: %s\nReceipt: %s\nArchive SHA-256: %s\nInstaller SHA-256: %s\nReceipt SHA-256: %s\n' \
     "$zip_path" "$installer_path" "$receipt_path" "$archive_sha" "$installer_sha" \
@@ -2264,7 +2264,7 @@ install_host() {
   local planned_archive_sha planned_arm64_cdhash planned_x86_64_cdhash
   prepare_authenticated_artifact_inputs "$ARTIFACT_RECEIPT" "$ARCHIVE" "${BASH_SOURCE[0]}"
   extract_verified_artifact "${BASH_SOURCE[0]}" staged_app
-  source_commit="$(plist_value "$staged_app" OpenClawGitCommit)"
+  source_commit="$(plist_value "$staged_app" CarapaceGitCommit)"
   peekaboo_commit="$(plist_value "$staged_app" PeekabooSourceCommit)"
   planned_archive_sha="$(shasum -a 256 "$AUTHENTICATED_ARCHIVE_PATH" | awk '{print $1}')"
   planned_arm64_cdhash="$(receipt_string "$AUTHENTICATED_RECEIPT_PATH" '.cdhashes.arm64' cdhashes.arm64)"
@@ -2283,10 +2283,10 @@ install_host() {
   ROLLBACK_APP_CDHASH_X86_64=""
   if [[ -e "$APP_PATH" || -L "$APP_PATH" ]]; then
     [[ -d "$APP_PATH" && ! -L "$APP_PATH" ]] ||
-      fail 'installed OpenClaw app is missing, symlinked, or not a bundle directory'
+      fail 'installed Carapace app is missing, symlinked, or not a bundle directory'
     local installed_commit
-    installed_commit="$(plist_value "$APP_PATH" OpenClawGitCommit)"
-    [[ "$installed_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'installed OpenClaw app has no exact source receipt'
+    installed_commit="$(plist_value "$APP_PATH" CarapaceGitCommit)"
+    [[ "$installed_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'installed Carapace app has no exact source receipt'
     ROLLBACK_APP_PATH="$(mktemp -u "${APP_PATH}.rollback-elevation-host-${installed_commit}.XXXXXX")"
     # The unpredictable name is consumed only by renamex_np(RENAME_EXCL); any entry that
     # appears before custody atomically refuses without nesting or overwrite.
@@ -2295,9 +2295,9 @@ install_host() {
     ROLLBACK_APP_CDHASH_ARM64="$(codesign_value_for_arch "$APP_PATH" CDHash arm64)"
     ROLLBACK_APP_CDHASH_X86_64="$(codesign_value_for_arch "$APP_PATH" CDHash x86_64)"
     [[ -n "$ROLLBACK_APP_CDHASH_ARM64" && -n "$ROLLBACK_APP_CDHASH_X86_64" ]] ||
-      fail 'installed OpenClaw app has no signed per-architecture CDHashes'
+      fail 'installed Carapace app has no signed per-architecture CDHashes'
     verify_recorded_rollback_app "$APP_PATH" ||
-      fail 'installed OpenClaw app does not pass strict signature and identity validation'
+      fail 'installed Carapace app does not pass strict signature and identity validation'
   fi
   ROLLBACK_INSTALL_RECEIPT=""
   ROLLBACK_INSTALL_RECEIPT_SHA=""
@@ -2411,12 +2411,12 @@ install_host() {
       fail "could not stop migration LaunchAgent: $MIGRATION_LABEL"
   fi
   if [[ -n "$ADOPTION_PID" ]]; then
-    adopted_app_is_current || fail 'adopted OpenClaw process changed after migration planning'
+    adopted_app_is_current || fail 'adopted Carapace process changed after migration planning'
     trap 'adoption_signal=INT' INT
     trap 'adoption_signal=TERM' TERM
     trap 'adoption_signal=HUP' HUP
     CUTOVER_ADOPTION_STOPPED=1
-    kill "$ADOPTION_PID" 2>/dev/null || fail "could not stop adopted OpenClaw process: $ADOPTION_PID"
+    kill "$ADOPTION_PID" 2>/dev/null || fail "could not stop adopted Carapace process: $ADOPTION_PID"
     CUTOVER_ADOPTION_TERMINATION_SENT=1
     finish_custody_signal_deferral "$adoption_signal"
   fi
@@ -2440,14 +2440,14 @@ install_host() {
       kill -0 "$ADOPTION_PID" 2>/dev/null || break
       sleep 0.25
     done
-    kill -0 "$ADOPTION_PID" 2>/dev/null && fail "adopted OpenClaw process did not exit: $ADOPTION_PID"
+    kill -0 "$ADOPTION_PID" 2>/dev/null && fail "adopted Carapace process did not exit: $ADOPTION_PID"
   fi
   if [[ -n "$MIGRATION_LABEL" ]]; then
     current_migration_state="$(job_loaded_state "$launch_domain/$MIGRATION_LABEL")"
     [[ "$current_migration_state" == "absent" ]] ||
       fail 'migration LaunchAgent remained loaded after bootout'
   fi
-  wait_for_app_binary_exit || fail 'an OpenClaw app process survived owner shutdown'
+  wait_for_app_binary_exit || fail 'an Carapace app process survived owner shutdown'
   if [[ -n "$MIGRATION_LABEL" ]]; then
     current_migration_state="$(job_loaded_state "$launch_domain/$MIGRATION_LABEL")"
     [[ "$current_migration_state" == "absent" ]] ||
@@ -2458,12 +2458,12 @@ install_host() {
   CUTOVER_APP_MUTATED=1
   if [[ -n "$ROLLBACK_APP_PATH" ]]; then
     verify_recorded_rollback_app "$APP_PATH" ||
-      fail 'installed OpenClaw app changed before rollback custody'
+      fail 'installed Carapace app changed before rollback custody'
     rename_app_exclusively "$APP_PATH" "$ROLLBACK_APP_PATH" || true
     verify_recorded_rollback_app "$ROLLBACK_APP_PATH" ||
-      fail 'could not take verified custody of the installed OpenClaw app'
+      fail 'could not take verified custody of the installed Carapace app'
     [[ ! -e "$APP_PATH" && ! -L "$APP_PATH" ]] ||
-      fail 'installed OpenClaw app path was recreated during rollback custody'
+      fail 'installed Carapace app path was recreated during rollback custody'
   fi
   staged_install_identity="$(path_identity "$STAGED_INSTALL_APP_PATH")" ||
     fail 'same-filesystem staged app identity could not be inspected before install'
@@ -2623,7 +2623,7 @@ recover_install() {
   then
     preserve_current_app_for_recovery 'damaged current app' || return 1
   elif [[ "$CUTOVER_APP_MUTATED" == "1" && -d "$APP_PATH" &&
-    "$(plist_value "$APP_PATH" OpenClawGitCommit)" == "$ROLLBACK_FAILED_SOURCE" ]]
+    "$(plist_value "$APP_PATH" CarapaceGitCommit)" == "$ROLLBACK_FAILED_SOURCE" ]]
   then
     preserve_current_app_for_recovery 'failed elevation app' || return 1
   elif [[ "$CUTOVER_APP_MUTATED" == "1" && -d "$APP_PATH" ]]; then
@@ -3024,15 +3024,15 @@ status_host() {
   [[ -f "$PLIST_PATH" ]] || fail "elevation launch agent is not installed: $PLIST_PATH"
   local args loaded_pid plist_config
   args="$(plutil -extract ProgramArguments json -o - "$PLIST_PATH")"
-  [[ "$(jq -c . <<<"$args")" == "$(jq -cn --arg executable "$APP_PATH/Contents/MacOS/OpenClaw" '[$executable,"--elevation-host"]')" ]] ||
+  [[ "$(jq -c . <<<"$args")" == "$(jq -cn --arg executable "$APP_PATH/Contents/MacOS/Carapace" '[$executable,"--elevation-host"]')" ]] ||
     fail 'elevation launch agent arguments are not canonical'
   [[ "$(plutil -extract RunAtLoad raw -o - "$PLIST_PATH")" == 'true' ]] || fail 'RunAtLoad is not enabled'
   [[ "$(plutil -extract KeepAlive raw -o - "$PLIST_PATH")" == 'true' ]] || fail 'KeepAlive is not enabled'
-  [[ "$(plist_file_value "$PLIST_PATH" EnvironmentVariables.OPENCLAW_STATE_DIR)" == "$STATE_DIR" ]] ||
+  [[ "$(plist_file_value "$PLIST_PATH" EnvironmentVariables.CARAPACE_STATE_DIR)" == "$STATE_DIR" ]] ||
     fail 'elevation launch agent state directory is not canonical'
-  plist_config="$(plist_file_value "$PLIST_PATH" EnvironmentVariables.OPENCLAW_CONFIG_PATH)"
+  plist_config="$(plist_file_value "$PLIST_PATH" EnvironmentVariables.CARAPACE_CONFIG_PATH)"
   if [[ "$INSTALL_RECEIPT_SCHEMA" == 'legacy' ]]; then
-    CONFIG_PATH="${plist_config:-$STATE_DIR/openclaw.json}"
+    CONFIG_PATH="${plist_config:-$STATE_DIR/carapace.json}"
   else
     CONFIG_PATH="$(jq -r '.configPath' "$RECEIPT_PATH")"
     [[ "$plist_config" == "$CONFIG_PATH" ]] || fail 'elevation launch agent config path is not canonical'
@@ -3040,7 +3040,7 @@ status_host() {
   loaded_pid="$(job_pid)"
   [[ "$loaded_pid" =~ ^[0-9]+$ ]] || fail 'elevation launch agent is not running'
   verify_bridge_readiness "$loaded_pid" || fail 'elevation Bridge is not ready for the launchd-owned process'
-  resolve_reusable_openclaw_cli
+  resolve_reusable_carapace_cli
   if [[ "$INSTALL_RECEIPT_SCHEMA" == 'legacy' ]]; then
     prepare_gateway_attestation
   else
@@ -3050,7 +3050,7 @@ status_host() {
   BEFORE_NODE_CONNECTED_AT=-1
   verify_gateway_node_readiness "$(plist_value "$APP_PATH" CFBundleShortVersionString)" ||
     fail 'elevation macOS computer-use node is not ready on the configured gateway'
-  printf 'Elevation host ready: pid=%s source=%s\n' "$loaded_pid" "$(plist_value "$APP_PATH" OpenClawGitCommit)"
+  printf 'Elevation host ready: pid=%s source=%s\n' "$loaded_pid" "$(plist_value "$APP_PATH" CarapaceGitCommit)"
   tcc_summary || return $?
 }
 
@@ -3061,7 +3061,7 @@ select_recovery_receipt() {
   [[ -f "$PENDING_RECEIPT_PATH" && ! -L "$PENDING_RECEIPT_PATH" ]] ||
     fail 'pending elevation install receipt is not a regular file'
   local current_source final_transaction_id pending_source pending_transaction_id
-  current_source="$(plist_value "$APP_PATH" OpenClawGitCommit)"
+  current_source="$(plist_value "$APP_PATH" CarapaceGitCommit)"
   pending_source="$(jq -r '.sourceCommit // empty' "$PENDING_RECEIPT_PATH" 2>/dev/null || true)"
   pending_transaction_id="$(jq -r '.transactionId // empty' "$PENDING_RECEIPT_PATH" 2>/dev/null || true)"
   final_transaction_id="$(jq -r '.transactionId // empty' "$FINAL_RECEIPT_PATH" 2>/dev/null || true)"
@@ -3086,10 +3086,10 @@ recover_host() {
   if [[ ! -e "$APP_PATH" && ! -L "$APP_PATH" ]]; then
     RECOVERY_CURRENT_APP_STATE="absent"
   elif [[ -L "$APP_PATH" || ! -d "$APP_PATH" ]]; then
-    fail 'current OpenClaw app has an unsupported entry type; inspect it before recovery'
+    fail 'current Carapace app has an unsupported entry type; inspect it before recovery'
   else
     RECOVERY_CURRENT_APP_IDENTITY="$(durable_path_identity "$APP_PATH")" ||
-      fail 'current OpenClaw app identity could not be inspected before recovery'
+      fail 'current Carapace app identity could not be inspected before recovery'
     if (verify_elevation_app "$APP_PATH") >/dev/null 2>&1; then
       RECOVERY_CURRENT_APP_STATE="valid"
       current_app_valid=1
@@ -3097,7 +3097,7 @@ recover_host() {
       RECOVERY_CURRENT_APP_STATE="damaged"
     fi
     path_matches_identity "$APP_PATH" "$RECOVERY_CURRENT_APP_IDENTITY" ||
-      fail 'current OpenClaw app changed during recovery planning'
+      fail 'current Carapace app changed during recovery planning'
   fi
   select_recovery_receipt
   verify_install_receipt 0
@@ -3138,7 +3138,7 @@ recover_host() {
   ROLLBACK_ADOPTED_APP_WAS_RUNNING="$(jq -r 'if .adoptedApp.wasRunning then 1 else 0 end' "$RECEIPT_PATH")"
   ROLLBACK_ADOPTED_APP_ATTACH_ONLY="$(jq -r 'if .adoptedApp.attachOnly then 1 else 0 end' "$RECEIPT_PATH")"
   current_receipt_sha="$(shasum -a 256 "$RECEIPT_PATH" | awk '{print $1}')"
-  RECOVERY_FAILED_APP_PLANNED_PATH="${APP_PATH}.failed-elevation-host-${ROLLBACK_FAILED_SOURCE}.${current_receipt_sha:0:12}/OpenClaw.app"
+  RECOVERY_FAILED_APP_PLANNED_PATH="${APP_PATH}.failed-elevation-host-${ROLLBACK_FAILED_SOURCE}.${current_receipt_sha:0:12}/Carapace.app"
   read_optional_receipt_xattr plan_value "$RECOVERY_APP_PLAN_XATTR" ||
     fail 'could not inspect the recovery app transaction binding'
   if [[ -n "$plan_value" ]]; then
@@ -3211,7 +3211,7 @@ recover_host() {
     prepare_authenticated_artifact_inputs "$ARTIFACT_RECEIPT" "$ARCHIVE" "${BASH_SOURCE[0]}"
     extract_verified_artifact "${BASH_SOURCE[0]}" recovery_helper_app
     if [[ "$INSTALL_RECEIPT_SCHEMA" == 'legacy' ]]; then
-      CONFIG_PATH="$STATE_DIR/openclaw.json"
+      CONFIG_PATH="$STATE_DIR/carapace.json"
     else
       CONFIG_PATH="$(jq -r '.configPath' "$RECEIPT_PATH")"
     fi
@@ -3332,7 +3332,7 @@ recover_host() {
           "$RECOVERY_RESTORED_MIGRATION_IDENTITY" ||
         ! backup_file_matches "$ROLLBACK_MIGRATION_SOURCE" "$ROLLBACK_MIGRATION_PLIST_SHA"
       then
-        fail 'could not restore the previous OpenClaw installation completely: migration source no longer matches its durable recovery transaction'
+        fail 'could not restore the previous Carapace installation completely: migration source no longer matches its durable recovery transaction'
       fi
       RECOVERY_RESUMED=1
     fi
@@ -3409,10 +3409,10 @@ recover_host() {
     fi
     if restore_current_generation_after_recovery_failure; then
       finish_custody_signal_deferral "$recovery_signal"
-      fail 'could not restore the previous OpenClaw installation completely'
+      fail 'could not restore the previous Carapace installation completely'
     fi
     finish_custody_signal_deferral "$recovery_signal"
-    fail 'recovery failed and the current OpenClaw installation could not be restored completely'
+    fail 'recovery failed and the current Carapace installation could not be restored completely'
   fi
 
   if [[ -n "$receipt_restore_tmp" ]]; then
@@ -3422,7 +3422,7 @@ recover_host() {
         fail 'could not restore the previous elevation install receipt'
       fi
       finish_custody_signal_deferral "$recovery_signal"
-      fail 'receipt restoration failed and the current OpenClaw installation could not be restored completely'
+      fail 'receipt restoration failed and the current Carapace installation could not be restored completely'
     fi
     if ! fsync_file_and_parent "$FINAL_RECEIPT_PATH"; then
       CUTOVER_COMMITTED=1
@@ -3437,7 +3437,7 @@ recover_host() {
         fail 'could not remove the replaced elevation install receipt'
       fi
       finish_custody_signal_deferral "$recovery_signal"
-      fail 'receipt removal failed and the current OpenClaw installation could not be restored completely'
+      fail 'receipt removal failed and the current Carapace installation could not be restored completely'
     fi
     if ! fsync_parent "$FINAL_RECEIPT_PATH"; then
       CUTOVER_COMMITTED=1
@@ -3455,7 +3455,7 @@ recover_host() {
   CUTOVER_COMMITTED=1
   CUTOVER_ACTIVE=0
   finish_custody_signal_deferral "$recovery_signal"
-  printf 'Recovered previous OpenClaw app from %s; replaced app preserved at %s; receipt preserved at %s\n' \
+  printf 'Recovered previous Carapace app from %s; replaced app preserved at %s; receipt preserved at %s\n' \
     "$ROLLBACK_APP_PATH" "$RECOVERED_FAILED_APP_PATH" "$recovered_receipt"
 }
 
@@ -3473,10 +3473,10 @@ resolve_migration_inputs
 resolve_adoption_inputs
 resolve_managed_upgrade_inputs
 if [[ "$COMMAND" == "install" || "$COMMAND" == "migration-plan" ]]; then
-  [[ -n "$CONFIG_PATH" ]] || CONFIG_PATH="$STATE_DIR/openclaw.json"
+  [[ -n "$CONFIG_PATH" ]] || CONFIG_PATH="$STATE_DIR/carapace.json"
   refresh_runtime_paths
-  if [[ "${#OPENCLAW_CLI[@]}" == "0" ]]; then
-    resolve_reusable_openclaw_cli
+  if [[ "${#CARAPACE_CLI[@]}" == "0" ]]; then
+    resolve_reusable_carapace_cli
   fi
   prepare_gateway_attestation
 fi
@@ -3490,7 +3490,7 @@ case "$COMMAND" in
   recover) recover_host ;;
   uninstall) uninstall_host ;;
   print-plist)
-    WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-elevation-plist.XXXXXX")"
+    WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/carapace-elevation-plist.XXXXXX")"
     render_plist "$WORK_ROOT/agent.plist"
     cat "$WORK_ROOT/agent.plist"
     ;;

@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-installed-manifest-registry", tempDirs);
+  return makeTrackedTempDir("carapace-installed-manifest-registry", tempDirs);
 }
 
 describe("loadPluginManifestRegistryForInstalledIndex", () => {
@@ -40,12 +40,12 @@ describe("loadPluginManifestRegistryForInstalledIndex", () => {
       JSON.stringify({
         name: "pack",
         version: "1.0.0",
-        openclaw: { extensions: ["./one.cjs", "./two.cjs"] },
+        carapace: { extensions: ["./one.cjs", "./two.cjs"] },
       }),
       "utf8",
     );
     fs.writeFileSync(
-      path.join(packageDir, "openclaw.plugin.json"),
+      path.join(packageDir, "carapace.plugin.json"),
       JSON.stringify({ id: "pack", configSchema: { type: "object" } }),
       "utf8",
     );
@@ -65,9 +65,9 @@ describe("loadPluginManifestRegistryForInstalledIndex", () => {
       },
     };
     const env = {
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.4.25",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.4.25",
       VITEST: "true",
     };
     const installRecords = {

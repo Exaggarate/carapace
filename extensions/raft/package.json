@@ -1,34 +1,34 @@
 {
-  "name": "@openclaw/raft",
+  "name": "@carapace/raft",
   "version": "2026.9.2",
-  "description": "OpenClaw Raft channel plugin for Raft CLI wake bridges.",
+  "description": "Carapace Raft channel plugin for Raft CLI wake bridges.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "setupEntry": "./setup-entry.ts",
     "install": {
-      "npmSpec": "@openclaw/raft",
+      "npmSpec": "@carapace/raft",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.8"
     },
@@ -36,7 +36,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "channel": {
       "id": "raft",

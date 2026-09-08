@@ -23,7 +23,7 @@ const snapshotUITestPath = path.join(
   "apps",
   "ios",
   "UITests",
-  "OpenClawSnapshotUITests.swift",
+  "CarapaceSnapshotUITests.swift",
 );
 const rootTabsPath = path.join(process.cwd(), "apps", "ios", "Sources", "RootTabs.swift");
 const ciWorkflowPath = path.join(process.cwd(), ".github", "workflows", "ci.yml");
@@ -51,7 +51,7 @@ function runIosScreenshotsCommand(
     conflictingGemfile?: boolean;
   } = {},
 ) {
-  const fixture = mkdtempSync(path.join(tmpdir(), "openclaw-ios-fastlane-"));
+  const fixture = mkdtempSync(path.join(tmpdir(), "carapace-ios-fastlane-"));
   const tracePath = path.join(fixture, "trace.log");
   const writeExecutable = (name: string, body: string) => {
     const executable = path.join(fixture, name);
@@ -60,13 +60,13 @@ function runIosScreenshotsCommand(
   };
   writeExecutable(
     "bundle",
-    '[[ "$BUNDLE_GEMFILE" == "$OPENCLAW_FASTLANE_EXPECTED_GEMFILE" ]] || exit 91\n' +
+    '[[ "$BUNDLE_GEMFILE" == "$CARAPACE_FASTLANE_EXPECTED_GEMFILE" ]] || exit 91\n' +
       '[[ "${1:-}" == "_2.6.9_" ]] || exit 92\n' +
       `[[ "\${2:-}" != "check" ]] || exit ${options.bundleCheckExit ?? 0}\n` +
-      'printf "bundle:%s\\n" "$*" >> "$OPENCLAW_FASTLANE_TEST_TRACE"\n' +
+      'printf "bundle:%s\\n" "$*" >> "$CARAPACE_FASTLANE_TEST_TRACE"\n' +
       `exit ${options.bundleExit ?? 0}`,
   );
-  writeExecutable("fastlane", 'printf "direct:%s\\n" "$*" >> "$OPENCLAW_FASTLANE_TEST_TRACE"');
+  writeExecutable("fastlane", 'printf "direct:%s\\n" "$*" >> "$CARAPACE_FASTLANE_TEST_TRACE"');
 
   try {
     const result = spawnSync("bash", [screenshotsScriptPath], {
@@ -74,8 +74,8 @@ function runIosScreenshotsCommand(
       env: {
         ...process.env,
         BUNDLE_GEMFILE: options.conflictingGemfile ? path.join(fixture, "Gemfile") : "",
-        OPENCLAW_FASTLANE_EXPECTED_GEMFILE: gemfilePath,
-        OPENCLAW_FASTLANE_TEST_TRACE: tracePath,
+        CARAPACE_FASTLANE_EXPECTED_GEMFILE: gemfilePath,
+        CARAPACE_FASTLANE_TEST_TRACE: tracePath,
         PATH: `${fixture}:/usr/bin:/bin`,
       },
     });
@@ -208,12 +208,12 @@ describe("iOS Fastlane release upload gates", () => {
   });
 
   it("documents a direct Fastlane command that rejects an inherited Gemfile", () => {
-    const fixture = mkdtempSync(path.join(tmpdir(), "openclaw-ios-fastlane-docs-"));
+    const fixture = mkdtempSync(path.join(tmpdir(), "carapace-ios-fastlane-docs-"));
     const bundlePath = path.join(fixture, "bundle");
     const tracePath = path.join(fixture, "trace.log");
     writeFileSync(
       bundlePath,
-      '#!/usr/bin/env bash\nprintf "%s\\n" "$BUNDLE_GEMFILE" > "$OPENCLAW_FASTLANE_TEST_TRACE"\n',
+      '#!/usr/bin/env bash\nprintf "%s\\n" "$BUNDLE_GEMFILE" > "$CARAPACE_FASTLANE_TEST_TRACE"\n',
       "utf8",
     );
     chmodSync(bundlePath, 0o755);
@@ -228,7 +228,7 @@ describe("iOS Fastlane release upload gates", () => {
           env: {
             ...process.env,
             BUNDLE_GEMFILE: path.join(fixture, "Gemfile"),
-            OPENCLAW_FASTLANE_TEST_TRACE: tracePath,
+            CARAPACE_FASTLANE_TEST_TRACE: tracePath,
             PATH: `${fixture}:/usr/bin:/bin`,
           },
         },
@@ -273,7 +273,7 @@ describe("iOS Fastlane release upload gates", () => {
   });
 
   it("fails closed when the repository Gemfile is absent", () => {
-    const fixture = mkdtempSync(path.join(tmpdir(), "openclaw-ios-fastlane-missing-gemfile-"));
+    const fixture = mkdtempSync(path.join(tmpdir(), "carapace-ios-fastlane-missing-gemfile-"));
     const wrapperPath = path.join(fixture, "scripts", "lib", "ios-fastlane.sh");
     const binDir = path.join(fixture, "bin");
     const tracePath = path.join(fixture, "trace.log");
@@ -285,7 +285,7 @@ describe("iOS Fastlane release upload gates", () => {
     const fastlanePath = path.join(binDir, "fastlane");
     writeFileSync(
       fastlanePath,
-      '#!/usr/bin/env bash\nprintf "direct:%s\\n" "$*" >> "$OPENCLAW_FASTLANE_TEST_TRACE"\n',
+      '#!/usr/bin/env bash\nprintf "direct:%s\\n" "$*" >> "$CARAPACE_FASTLANE_TEST_TRACE"\n',
       "utf8",
     );
     chmodSync(fastlanePath, 0o755);
@@ -299,7 +299,7 @@ describe("iOS Fastlane release upload gates", () => {
           env: {
             ...process.env,
             BUNDLE_GEMFILE: inheritedGemfile,
-            OPENCLAW_FASTLANE_TEST_TRACE: tracePath,
+            CARAPACE_FASTLANE_TEST_TRACE: tracePath,
             PATH: `${binDir}:/usr/bin:/bin`,
           },
         },
@@ -330,7 +330,7 @@ describe("iOS Fastlane release upload gates", () => {
   it("routes the package upload wrapper through the guarded Fastlane lane", () => {
     const script = readFileSync(uploadScriptPath, "utf8");
 
-    expect(script).toContain("OPENCLAW_IOS_RELEASE_WRAPPER=1");
+    expect(script).toContain("CARAPACE_IOS_RELEASE_WRAPPER=1");
     expect(script).not.toContain("Missing required --version.");
     expect(script).not.toContain("Missing required --revision.");
     expect(script).toContain('"release_version:${RELEASE_VERSION}"');
@@ -356,7 +356,7 @@ describe("iOS Fastlane release upload gates", () => {
     const releaseUpload = laneBody(fastfile, "release_upload");
     const prepareContext = laneBody(fastfile, "prepare_app_store_context");
 
-    expect(releaseUpload).toContain('ENV["OPENCLAW_IOS_RELEASE_WRAPPER"] == "1"');
+    expect(releaseUpload).toContain('ENV["CARAPACE_IOS_RELEASE_WRAPPER"] == "1"');
     expect(releaseUpload).toContain("Use `pnpm ios:release:upload`");
     expect(prepareContext).toContain("options[:release_version]");
     expect(prepareContext).toContain("options[:app_store_revision]");
@@ -505,9 +505,9 @@ describe("iOS Fastlane release upload gates", () => {
     expect(releaseUpload.indexOf("finalize_mobile_release_ref!")).toBeGreaterThan(
       releaseUpload.indexOf("assign_and_verify_ci_testflight_internal_group!"),
     );
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_INTENT_PATH");
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST");
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_TARGET_REF");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_INTENT_PATH");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_TARGET_REF");
   });
 
   it("requires one immutable internal TestFlight group ID without name collisions", () => {
@@ -745,32 +745,32 @@ end
 ${intentContext}
 cases = [
   {},
-  { "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "invalid" },
-  { "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent" },
+  { "CARAPACE_MOBILE_RELEASE_REF_MODE" => "invalid" },
+  { "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent" },
   {
-    "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent",
-    "OPENCLAW_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
-    "OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:receipt",
-    "OPENCLAW_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
+    "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent",
+    "CARAPACE_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
+    "CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:receipt",
+    "CARAPACE_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
   },
   {
-    "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent",
-    "OPENCLAW_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
-    "OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
-    "OPENCLAW_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.3-mobile"
+    "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent",
+    "CARAPACE_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
+    "CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
+    "CARAPACE_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.3-mobile"
   },
   {
-    "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent",
-    "OPENCLAW_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
-    "OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
-    "OPENCLAW_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
+    "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent",
+    "CARAPACE_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
+    "CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
+    "CARAPACE_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
   }
 ]
 cases.each do |values|
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_REF_MODE")
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_INTENT_PATH")
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST")
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_TARGET_REF")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_REF_MODE")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_INTENT_PATH")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_TARGET_REF")
   values.each { |key, value| ENV[key] = value }
   begin
     context = mobile_release_intent_context!(gateway_version: "2026.9.2")
@@ -785,10 +785,10 @@ end
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout.trim().split("\n")).toEqual([
       "ok:local",
-      "error:OPENCLAW_MOBILE_RELEASE_REF_MODE must be empty or intent.",
-      "error:OPENCLAW_MOBILE_RELEASE_INTENT_PATH is required in intent mode.",
-      "error:OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST must be a canonical SHA-256 digest.",
-      "error:OPENCLAW_MOBILE_RELEASE_TARGET_REF must exactly match the mobile gateway version.",
+      "error:CARAPACE_MOBILE_RELEASE_REF_MODE must be empty or intent.",
+      "error:CARAPACE_MOBILE_RELEASE_INTENT_PATH is required in intent mode.",
+      "error:CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST must be a canonical SHA-256 digest.",
+      "error:CARAPACE_MOBILE_RELEASE_TARGET_REF must exactly match the mobile gateway version.",
       "ok:release/2026.9.2-mobile",
     ]);
   });
@@ -827,7 +827,7 @@ end
       "result_bundle_archive_directory: result_bundle_archive_directory",
     );
     expect(capture).toContain(
-      'only_testing: ["OpenClawUITests/OpenClawSnapshotUITests/#{test_name}"]',
+      'only_testing: ["CarapaceUITests/CarapaceSnapshotUITests/#{test_name}"]',
     );
     expect(capture).toContain("test_without_building: true");
     expect(capture).toContain("result_bundle: true");
@@ -901,10 +901,10 @@ end
     const verifier = functionBody(fastfile, "verify_release_ios_screenshot_manifest!");
 
     expect(fastfile).toContain("REQUIRED_IOS_SCREENSHOT_NAMES");
-    expect(snapshotDevices).toContain('ENV["OPENCLAW_SNAPSHOT_DEVICES"]');
+    expect(snapshotDevices).toContain('ENV["CARAPACE_SNAPSHOT_DEVICES"]');
     expect(snapshotDevices).toContain("return default_snapshot_devices if raw.empty?");
     expect(defaultSnapshotDevices).toContain("available_simulator_devices");
-    expect(defaultSnapshotDevices).toContain('ENV["OPENCLAW_SNAPSHOT_DEVICE_FAMILY"]');
+    expect(defaultSnapshotDevices).toContain('ENV["CARAPACE_SNAPSHOT_DEVICE_FAMILY"]');
     expect(defaultSnapshotDevices).toContain("families = DEFAULT_SNAPSHOT_DEVICE_FAMILIES");
     expect(defaultSnapshotDevices).toContain("families = [family]");
     expect(verifier).toContain("expected_names - actual_names");
@@ -917,7 +917,7 @@ end
     expect(screenshots.indexOf("verify_release_ios_screenshot_manifest!")).toBeLessThan(
       screenshots.indexOf("capture_watch_screenshot"),
     );
-    expect(screenshots).toContain('ENV["OPENCLAW_SNAPSHOT_SKIP_WATCH"] == "1"');
+    expect(screenshots).toContain('ENV["CARAPACE_SNAPSHOT_SKIP_WATCH"] == "1"');
   });
 
   it("reuses only the current screenshot build for Watch while standalone capture builds fresh", () => {
@@ -962,7 +962,7 @@ def normalize_watch_screenshot_status_bar(*); end
 def sleep(*); end
 
 def make_product(derived_data_path)
-  app = File.join(derived_data_path, "Build", "Products", "Debug-watchsimulator", "OpenClawWatchApp.app")
+  app = File.join(derived_data_path, "Build", "Products", "Debug-watchsimulator", "CarapaceWatchApp.app")
   raise "stale product survived clean build" if File.exist?(File.join(app, "stale"))
   return if @scenario == "missing"
   FileUtils.mkdir_p(app)
@@ -1008,10 +1008,10 @@ def sh(command)
 end
 
 results = %w[combined iphone standalone standalone-build-failure missing invalid-plist invalid-install build-failure].map do |scenario|
-  Dir.mktmpdir("openclaw-watch-build-") do |root|
+  Dir.mktmpdir("carapace-watch-build-") do |root|
     @root, @scenario, @builds, @commands, @installed = root, scenario, [], [], nil
     %w[SnapshotDerivedData WatchScreenshotDerivedData].each do |directory|
-      app = File.join(ios_root, "build", directory, "Build", "Products", "Debug-watchsimulator", "OpenClawWatchApp.app")
+      app = File.join(ios_root, "build", directory, "Build", "Products", "Debug-watchsimulator", "CarapaceWatchApp.app")
       FileUtils.mkdir_p(app)
       File.write(File.join(app, "stale"), "previous invocation")
     end
@@ -1020,7 +1020,7 @@ results = %w[combined iphone standalone standalone-build-failure missing invalid
       FileUtils.mkdir_p(output)
       File.write(File.join(output, "Apple Watch Ultra 3 (49mm)-01-now-face.png"), "previous screenshot")
     end
-    ENV["OPENCLAW_SNAPSHOT_SKIP_WATCH"] = scenario == "iphone" ? "1" : "0"
+    ENV["CARAPACE_SNAPSHOT_SKIP_WATCH"] = scenario == "iphone" ? "1" : "0"
     error = nil
     begin
       options = { release_version: "2026.9.1", app_store_revision: "2", build_number: "123" }
@@ -1058,7 +1058,7 @@ puts JSON.generate(results)
       builds: ["snapshot"],
       error: null,
       installed:
-        "/apps/ios/build/SnapshotDerivedData/Build/Products/Debug-watchsimulator/OpenClawWatchApp.app",
+        "/apps/ios/build/SnapshotDerivedData/Build/Products/Debug-watchsimulator/CarapaceWatchApp.app",
       pngs: 5,
       xcresults: 4,
       attempts: true,
@@ -1074,7 +1074,7 @@ puts JSON.generate(results)
       builds: ["watch"],
       error: null,
       installed:
-        "/apps/ios/build/WatchScreenshotDerivedData/Build/Products/Debug-watchsimulator/OpenClawWatchApp.app",
+        "/apps/ios/build/WatchScreenshotDerivedData/Build/Products/Debug-watchsimulator/CarapaceWatchApp.app",
       pngs: 1,
       versions: [versionArgs],
     });
@@ -1124,7 +1124,7 @@ puts JSON.generate(results)
     expect(shardJob).toContain("max-parallel: 2");
     expect(shardJob).toContain("device_family: [iphone, ipad-13]");
     expect(shardJob).toContain(
-      "OPENCLAW_SNAPSHOT_SKIP_WATCH: ${{ matrix.device_family == 'iphone' && '1' || '0' }}",
+      "CARAPACE_SNAPSHOT_SKIP_WATCH: ${{ matrix.device_family == 'iphone' && '1' || '0' }}",
     );
     expect(shardJob).not.toContain("run_ios_fastlane ios watch_screenshot");
     expect(shardJob).toContain("run: pnpm ios:screenshots");

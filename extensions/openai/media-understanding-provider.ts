@@ -1,5 +1,5 @@
 // Openai provider module implements model/runtime integration.
-import type { MediaUnderstandingProvider } from "openclaw/plugin-sdk/media-understanding";
+import type { MediaUnderstandingProvider } from "carapace/plugin-sdk/media-understanding";
 import { OPENAI_DEFAULT_AUDIO_TRANSCRIPTION_MODEL } from "./default-models.js";
 
 export const openaiMediaUnderstandingProvider: MediaUnderstandingProvider = {
@@ -8,11 +8,11 @@ export const openaiMediaUnderstandingProvider: MediaUnderstandingProvider = {
   defaultModels: { image: "gpt-5.6-sol", audio: OPENAI_DEFAULT_AUDIO_TRANSCRIPTION_MODEL },
   autoPriority: { image: 20, audio: 20 },
   async describeImage(req) {
-    const { describeImageWithModel } = await import("openclaw/plugin-sdk/media-understanding");
+    const { describeImageWithModel } = await import("carapace/plugin-sdk/media-understanding");
     return describeImageWithModel(req);
   },
   async describeImages(req) {
-    const { describeImagesWithModel } = await import("openclaw/plugin-sdk/media-understanding");
+    const { describeImagesWithModel } = await import("carapace/plugin-sdk/media-understanding");
     return describeImagesWithModel(req);
   },
   async transcribeAudio(req) {

@@ -23,11 +23,11 @@ import {
   type SkillProposalRecord,
   type SkillProposalRollback,
 } from "../skills/workshop/types.js";
-import { repairOpenClawStateDatabaseSchemaIfNeeded } from "../state/openclaw-state-db.js";
+import { repairCarapaceStateDatabaseSchemaIfNeeded } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { migrateLegacySkillWorkshopProposals } from "./doctor-skill-workshop-sqlite.js";
 import {
@@ -38,12 +38,12 @@ import {
 } from "./doctor-skill-workshop-sqlite.test-support.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workshop-relocation-atomicity-",
+    prefix: "carapace-workshop-relocation-atomicity-",
   });
 });
 
@@ -108,7 +108,7 @@ describe("doctor Workshop relocation ownership and commit boundaries", () => {
           ...record.target,
           skillDir: legacySkillDir,
           skillFile: legacySkillFile,
-          source: "openclaw-workspace",
+          source: "carapace-workspace",
         },
       };
       legacyRecords.push(legacy);
@@ -167,7 +167,7 @@ describe("doctor Workshop relocation ownership and commit boundaries", () => {
       });
       const previousContent =
         version === "display-name"
-          ? '---\nname: Atomic Guide\ndescription: Relocation procedure\nmetadata: {"openclaw":{"skillKey":"atomic-skill"}}\n---\n\n# Improved procedure\n'
+          ? '---\nname: Atomic Guide\ndescription: Relocation procedure\nmetadata: {"carapace":{"skillKey":"atomic-skill"}}\n---\n\n# Improved procedure\n'
           : version === "improved"
             ? `${created.content}\nVerify the result before continuing.\n`
             : created.content;
@@ -258,7 +258,7 @@ describe("doctor Workshop relocation ownership and commit boundaries", () => {
         { record: created.record, workspaceDir, claimReleasedTime: null },
         { record: pending, workspaceDir, claimReleasedTime: null },
       ]);
-      repairOpenClawStateDatabaseSchemaIfNeeded({ env: testState.env });
+      repairCarapaceStateDatabaseSchemaIfNeeded({ env: testState.env });
       if (state !== "unstarted") {
         await writeSkillProposalRollback({ proposalId: pending.id, rollback, store: options });
       }
@@ -269,7 +269,7 @@ describe("doctor Workshop relocation ownership and commit boundaries", () => {
       const relocatedTarget = {
         skillDir: destinationDir,
         skillFile: path.join(destinationDir, "SKILL.md"),
-        source: "openclaw-workshop",
+        source: "carapace-workshop",
       };
       const destinationSupportFile = path.join(destinationDir, supportPath);
       if (state === "missing-source") {
@@ -436,7 +436,7 @@ describe("doctor Workshop relocation ownership and commit boundaries", () => {
       seedLegacyV15ProposalRows(testState.env, [
         { record: pending, workspaceDir, claimReleasedTime: null },
       ]);
-      repairOpenClawStateDatabaseSchemaIfNeeded({ env: testState.env });
+      repairCarapaceStateDatabaseSchemaIfNeeded({ env: testState.env });
       await writeSkillProposalRollback({ proposalId: pending.id, rollback, store: options });
       expect(readStoredProposal(pending.id, options)?.record).toEqual(pending);
       const destinationDir = path.join(
@@ -461,7 +461,7 @@ describe("doctor Workshop relocation ownership and commit boundaries", () => {
         target: {
           skillDir: destinationDir,
           skillFile: destinationSkillFile,
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         },
       });
       await expect(readSkillProposalRollback(pending.id, options)).resolves.toEqual(

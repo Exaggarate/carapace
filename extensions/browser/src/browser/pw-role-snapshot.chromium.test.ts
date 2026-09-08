@@ -21,11 +21,11 @@ import { getFreePort } from "./test-port.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-describe.runIf(process.env.OPENCLAW_BROWSER_SNAPSHOT_E2E === "1")(
+describe.runIf(process.env.CARAPACE_BROWSER_SNAPSHOT_E2E === "1")(
   "Chromium snapshot-to-action name fidelity",
   () => {
     it("returns selector no-match snapshots without waiting for the snapshot timeout", async () => {
-      const rootDir = tempDirs.make("openclaw-snapshot-selector-absence-");
+      const rootDir = tempDirs.make("carapace-snapshot-selector-absence-");
       const port = await getFreePort();
       const cdpUrl = `http://127.0.0.1:${port}`;
       const context = await getPlaywrightCore().chromium.launchPersistentContext(
@@ -82,7 +82,7 @@ describe.runIf(process.env.OPENCLAW_BROWSER_SNAPSHOT_E2E === "1")(
     }, 30_000);
 
     it("publishes actionable main-frame CDP refs into the Playwright cache", async () => {
-      const rootDir = tempDirs.make("openclaw-cdp-role-refs-");
+      const rootDir = tempDirs.make("carapace-cdp-role-refs-");
       const port = await getFreePort();
       const cdpUrl = `http://127.0.0.1:${port}`;
       const context = await getPlaywrightCore().chromium.launchPersistentContext(
@@ -184,7 +184,7 @@ describe.runIf(process.env.OPENCLAW_BROWSER_SNAPSHOT_E2E === "1")(
     }, 30_000);
 
     it("resolves encoded and omitted names, raw AX names, and native frame refs", async () => {
-      const rootDir = tempDirs.make("openclaw-snapshot-labels-");
+      const rootDir = tempDirs.make("carapace-snapshot-labels-");
       const port = await getFreePort();
       const cdpUrl = `http://127.0.0.1:${port}`;
       const context = await getPlaywrightCore().chromium.launchPersistentContext(

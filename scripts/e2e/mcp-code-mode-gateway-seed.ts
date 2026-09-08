@@ -1,21 +1,21 @@
-// Mcp Code Mode Gateway Seed script supports OpenClaw repository automation.
+// Mcp Code Mode Gateway Seed script supports Carapace repository automation.
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { applyDockerOpenAiProviderConfig, type OpenClawConfig } from "./docker-openai-seed.ts";
+import { applyDockerOpenAiProviderConfig, type CarapaceConfig } from "./docker-openai-seed.ts";
 import { writeProbeMcpServer } from "./lib/mcp-code-mode-probe-server.ts";
 
 async function main() {
-  const stateDir = process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw");
+  const stateDir = process.env.CARAPACE_STATE_DIR?.trim() || path.join(os.homedir(), ".carapace");
   const configPath =
-    process.env.OPENCLAW_CONFIG_PATH?.trim() || path.join(stateDir, "openclaw.json");
+    process.env.CARAPACE_CONFIG_PATH?.trim() || path.join(stateDir, "carapace.json");
   const workspaceDir = path.join(stateDir, "workspace");
   const serverPath = path.join(stateDir, "mcp-code-mode-fixture", "fixture-server.mjs");
   const apiKey =
     process.env.OPENAI_API_KEY?.trim() ||
-    process.env.OPENCLAW_MCP_CODE_MODE_OPENAI_API_KEY?.trim() ||
+    process.env.CARAPACE_MCP_CODE_MODE_OPENAI_API_KEY?.trim() ||
     "sk-docker-smoke-test";
-  const legacyMemoryConfig = process.env.OPENCLAW_FROZEN_TARGET_MCP_MEMORY_CONFIG_MODE === "agent";
+  const legacyMemoryConfig = process.env.CARAPACE_FROZEN_TARGET_MCP_MEMORY_CONFIG_MODE === "agent";
   const agentDefaults = {
     heartbeat: {
       every: "0m",
@@ -74,7 +74,7 @@ async function main() {
           },
         },
       },
-    } satisfies OpenClawConfig,
+    } satisfies CarapaceConfig,
     apiKey,
   );
 

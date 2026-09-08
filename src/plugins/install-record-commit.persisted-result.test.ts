@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { commitConfigWithPendingPluginInstalls } from "./install-record-commit.js";
 
 describe("committed plugin configuration", () => {
   it.each([false, true])(
     "returns the persisted configuration (pending records: %s)",
     async (pending) => {
-      await withOpenClawTestState({ label: "committed-plugin-config" }, async (state) => {
+      await withCarapaceTestState({ label: "committed-plugin-config" }, async (state) => {
         await state.writeConfig({ gateway: { mode: "local" } });
-        const nextConfig: OpenClawConfig = {
+        const nextConfig: CarapaceConfig = {
           gateway: { mode: "local" },
           ...(pending
             ? {

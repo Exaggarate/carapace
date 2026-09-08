@@ -1,9 +1,9 @@
 // Verifies bundled MCP plugin metadata and package output.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { isRecord } from "../utils.js";
 import { loadEnabledBundleLspConfig } from "./bundle-lsp.js";
 import { loadBundleManifest } from "./bundle-manifest.js";
@@ -53,7 +53,7 @@ afterEach(async () => {
   await tempHarness.cleanup();
 });
 
-function createEnabledBundleConfig(pluginIds: string[]): OpenClawConfig {
+function createEnabledBundleConfig(pluginIds: string[]): CarapaceConfig {
   return {
     plugins: {
       entries: createEnabledPluginEntries(pluginIds),
@@ -118,11 +118,11 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("loads enabled Claude bundle MCP config and absolutizes relative args", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-bundle-mcp",
+      "carapace-bundle-mcp",
       async ({ homeDir, workspaceDir }) => {
         const { pluginRoot, serverPath } = await createBundleProbePlugin(homeDir);
 
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           plugins: {
             entries: {
               "bundle-probe": { enabled: true },
@@ -158,8 +158,8 @@ describe("loadEnabledBundleMcpConfig", () => {
   });
 
   it("uses a provided manifest registry instead of rediscovering bundle plugins", async () => {
-    const homeDir = await tempHarness.createTempDir("openclaw-bundle-mcp-home-");
-    const workspaceDir = await tempHarness.createTempDir("openclaw-bundle-mcp-workspace-");
+    const homeDir = await tempHarness.createTempDir("carapace-bundle-mcp-home-");
+    const workspaceDir = await tempHarness.createTempDir("carapace-bundle-mcp-workspace-");
     const { pluginRoot } = await createBundleProbePlugin(homeDir);
 
     const loaded = loadEnabledBundleMcpConfig({
@@ -192,8 +192,8 @@ describe("loadEnabledBundleMcpConfig", () => {
   });
 
   it("loads MCP servers declared by an enabled native plugin", async () => {
-    const workspaceDir = await tempHarness.createTempDir("openclaw-native-mcp-workspace-");
-    const pluginRoot = await tempHarness.createTempDir("openclaw-native-mcp-plugin-");
+    const workspaceDir = await tempHarness.createTempDir("carapace-native-mcp-workspace-");
+    const pluginRoot = await tempHarness.createTempDir("carapace-native-mcp-plugin-");
     const loaded = loadEnabledBundleMcpConfig({
       workspaceDir,
       cfg: createEnabledBundleConfig(["native-mcp"]),
@@ -202,7 +202,7 @@ describe("loadEnabledBundleMcpConfig", () => {
           {
             id: "native-mcp",
             origin: "global",
-            format: "openclaw",
+            format: "carapace",
             channels: [],
             providers: [],
             cliBackends: [],
@@ -210,7 +210,7 @@ describe("loadEnabledBundleMcpConfig", () => {
             hooks: [],
             rootDir: pluginRoot,
             source: path.join(pluginRoot, "index.js"),
-            manifestPath: path.join(pluginRoot, "openclaw.plugin.json"),
+            manifestPath: path.join(pluginRoot, "carapace.plugin.json"),
             mcpServers: {
               app: {
                 transport: "stdio",
@@ -233,8 +233,8 @@ describe("loadEnabledBundleMcpConfig", () => {
   });
 
   it("skips MCP servers declared by a disabled native plugin", async () => {
-    const workspaceDir = await tempHarness.createTempDir("openclaw-native-mcp-workspace-");
-    const pluginRoot = await tempHarness.createTempDir("openclaw-native-mcp-plugin-");
+    const workspaceDir = await tempHarness.createTempDir("carapace-native-mcp-workspace-");
+    const pluginRoot = await tempHarness.createTempDir("carapace-native-mcp-plugin-");
     const loaded = loadEnabledBundleMcpConfig({
       workspaceDir,
       cfg: { plugins: { entries: { "native-mcp": { enabled: false } } } },
@@ -243,7 +243,7 @@ describe("loadEnabledBundleMcpConfig", () => {
           {
             id: "native-mcp",
             origin: "global",
-            format: "openclaw",
+            format: "carapace",
             channels: [],
             providers: [],
             cliBackends: [],
@@ -251,7 +251,7 @@ describe("loadEnabledBundleMcpConfig", () => {
             hooks: [],
             rootDir: pluginRoot,
             source: path.join(pluginRoot, "index.js"),
-            manifestPath: path.join(pluginRoot, "openclaw.plugin.json"),
+            manifestPath: path.join(pluginRoot, "carapace.plugin.json"),
             mcpServers: { app: { command: "node", args: ["./mcp-server.js"] } },
           },
         ],
@@ -265,7 +265,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("merges inline bundle MCP servers and skips disabled bundles", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-bundle-inline",
+      "carapace-bundle-inline",
       async ({ homeDir, workspaceDir }) => {
         await writeClaudeBundleManifest({
           homeDir,
@@ -323,7 +323,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("resolves inline Claude MCP paths from the plugin root and expands CLAUDE_PLUGIN_ROOT", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-bundle-inline-placeholder",
+      "carapace-bundle-inline-placeholder",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeClaudeBundleManifest({
           homeDir,
@@ -366,7 +366,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("loads Link-style Codex bundle MCP config", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-bundle-link",
+      "carapace-bundle-link",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = resolveBundlePluginRoot(homeDir, "link");
         await writeBundleTextFiles(pluginRoot, {
@@ -413,7 +413,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("reports malformed file-backed MCP configs instead of silently dropping servers", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-bundle-malformed-mcp",
+      "carapace-bundle-malformed-mcp",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeClaudeBundleManifest({
           homeDir,
@@ -441,7 +441,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("reports malformed file-backed LSP configs instead of silently dropping servers", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-bundle-malformed-lsp",
+      "carapace-bundle-malformed-lsp",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeClaudeBundleManifest({
           homeDir,
@@ -469,7 +469,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("loads Agent Plugins MCP config with placeholders, injected env, and canonical transports", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-agent-bundle-mcp",
+      "carapace-agent-bundle-mcp",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeAgentBundle({
           homeDir,
@@ -521,7 +521,7 @@ describe("loadEnabledBundleMcpConfig", () => {
         await expectResolvedPathEqual(localArgs?.[0], path.join(pluginRoot, "config.json"));
         expect(localArgs?.[1]).toBe(path.join(String(localEnv.PLUGIN_DATA), "cache"));
         await expectResolvedPathEqual(localEnv.PLUGIN_ROOT, pluginRoot);
-        const pluginDataPath = path.join(homeDir, ".openclaw", "plugin-data", "portable-mcp");
+        const pluginDataPath = path.join(homeDir, ".carapace", "plugin-data", "portable-mcp");
         expect(localEnv.PLUGIN_DATA).toBe(pluginDataPath);
         expect(local.cwd).toBe(pluginDataPath);
         expect(loaded.prepareDataDirsByServer).toEqual({
@@ -558,7 +558,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("resolves Agent Plugins relative cwd from the plugin root and rejects traversal", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-agent-bundle-cwd",
+      "carapace-agent-bundle-cwd",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeAgentBundle({
           homeDir,
@@ -612,7 +612,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("ignores dot MCP config and inline MCP fields for Agent Plugins", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-agent-bundle-closed",
+      "carapace-agent-bundle-closed",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeAgentBundle({
           homeDir,
@@ -636,7 +636,7 @@ describe("loadEnabledBundleMcpConfig", () => {
 
         expectNoDiagnostics(loaded.diagnostics);
         expect(loaded.config.mcpServers).toStrictEqual({});
-        await expectPathMissing(path.join(homeDir, ".openclaw", "plugin-data", "closed-agent"));
+        await expectPathMissing(path.join(homeDir, ".carapace", "plugin-data", "closed-agent"));
         expect(await fs.realpath(pluginRoot)).toBeTruthy();
       },
     );
@@ -645,7 +645,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("keeps Agent Plugins inspection pure when PLUGIN_DATA collides", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-agent-bundle-data-collision",
+      "carapace-agent-bundle-data-collision",
       async ({ homeDir, workspaceDir }) => {
         const pluginId = "data-dir-collision";
         const pluginRoot = await writeAgentBundle({
@@ -662,7 +662,7 @@ describe("loadEnabledBundleMcpConfig", () => {
             "skills/weather/SKILL.md": "---\nname: weather\ndescription: Weather skill\n---\n",
           },
         });
-        const pluginDataPath = path.join(homeDir, ".openclaw", "plugin-data", pluginId);
+        const pluginDataPath = path.join(homeDir, ".carapace", "plugin-data", pluginId);
         await fs.mkdir(path.dirname(pluginDataPath), { recursive: true });
         await fs.writeFile(pluginDataPath, "directory collision", "utf8");
 
@@ -717,7 +717,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   ])("isolates Agent Plugins MCP failure for $name", async ({ content }) => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-agent-bundle-invalid",
+      "carapace-agent-bundle-invalid",
       async ({ homeDir, workspaceDir }) => {
         const pluginRoot = await writeAgentBundle({
           homeDir,
@@ -741,7 +741,7 @@ describe("loadEnabledBundleMcpConfig", () => {
   it("skips invalid Agent Plugins MCP entries while retaining valid siblings", async () => {
     await withBundleHomeEnv(
       tempHarness,
-      "openclaw-agent-bundle-entry-isolation",
+      "carapace-agent-bundle-entry-isolation",
       async ({ homeDir, workspaceDir }) => {
         await writeAgentBundle({
           homeDir,

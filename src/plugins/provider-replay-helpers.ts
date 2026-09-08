@@ -3,8 +3,8 @@ import {
   bindsClaudeThinkingPrefix,
   resolveClaudeModelIdentity,
   resolveClaudeOpus5ModelIdentity,
-} from "@openclaw/llm-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/llm-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { AgentMessage } from "../agents/runtime/index.js";
 import { sanitizeGoogleAssistantFirstOrdering } from "../shared/google-turn-ordering.js";
 import type { ProviderRuntimeModel } from "./provider-runtime-model.types.js";

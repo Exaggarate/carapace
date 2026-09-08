@@ -5,7 +5,7 @@ import type { AddressObject, ParsedMail } from "mailparser";
 import {
   meetsIdentifierAuthentication,
   type IdentifierAuthentication,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import type { ImapAccountConfig } from "./config.js";
 
 const AUTH_FRESHNESS_MS = 48 * 60 * 60 * 1_000;

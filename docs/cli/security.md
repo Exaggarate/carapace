@@ -1,23 +1,23 @@
 ---
-summary: "CLI reference for `openclaw security` (audit and fix common security footguns)"
+summary: "CLI reference for `carapace security` (audit and fix common security footguns)"
 read_when:
   - You want to run a quick security audit on config/state
   - You want to apply safe "fix" suggestions (permissions, tighten defaults)
 title: "Security CLI"
 ---
 
-# `openclaw security`
+# `carapace security`
 
 Security tools: audit plus optional safe fixes. Related: [Security](/gateway/security).
 
 ```bash
-openclaw security audit
-openclaw security audit --deep
-openclaw security audit --deep --password <password>
-openclaw security audit --deep --token <token>
-openclaw security audit --auth password --password <password>
-openclaw security audit --fix
-openclaw security audit --json
+carapace security audit
+carapace security audit --deep
+carapace security audit --deep --password <password>
+carapace security audit --deep --token <token>
+carapace security audit --auth password --password <password>
+carapace security audit --fix
+carapace security audit --json
 ```
 
 ## Audit modes
@@ -32,13 +32,13 @@ If Gateway password auth is supplied only at startup, pass the same value with `
 
 - Warns when multiple DM senders share the main session and recommends secure DM mode: `session.dmScope="per-channel-peer"` (or `per-account-channel-peer` for multi-account channels) for shared inboxes. This is cooperative/shared-inbox hardening, not isolation for mutually untrusted operators; split trust boundaries with separate gateways (or separate OS users/hosts) for that.
 - Emits `security.trust_model.group_scope_main` when global `session.groupScope="main"` or a binding override merges group/channel rooms into the main session. Every member of each matched room shares that context, so reserve this for trusted rooms (see [Groups](/channels/groups#session-keys)).
-- Emits `security.trust_model.multi_user_heuristic` when config suggests likely shared-user ingress (for example open DM/group policy, configured group targets, or wildcard sender rules) — OpenClaw's default trust model is personal-assistant (one operator), not hostile multi-tenant isolation. For intentional shared-user setups: sandbox all sessions, keep filesystem access workspace-scoped, and keep personal/private identities or credentials off that runtime.
+- Emits `security.trust_model.multi_user_heuristic` when config suggests likely shared-user ingress (for example open DM/group policy, configured group targets, or wildcard sender rules) — Carapace's default trust model is personal-assistant (one operator), not hostile multi-tenant isolation. For intentional shared-user setups: sandbox all sessions, keep filesystem access workspace-scoped, and keep personal/private identities or credentials off that runtime.
 - Emits `security.trust_model.cross_agent_session_access_default` when two or more agents have `tools.sessions.visibility` resolving to `all` and agent-to-agent access enabled with an omitted or empty `tools.agentToAgent.allow` list, provided at least one agent retains a session tool in an unclamped context (unsandboxed sessions or `agents.defaults.sandbox.sessionToolsVisibility: "all"`). The detail lists each agent's reach and allowed session tools; no finding is emitted if every agent is clamped or has no session tools. This is `info` for plain multi-agent setups, escalating to `warn` when an agent is sandboxed, has agent-level tool restrictions, or shared-user ingress signals suggest different trust levels. Narrow [session visibility or agent-to-agent access](/gateway/config-tools#tools-agenttoagent) for persona separation.
 - Warns when small models (`<=300B` parameters) are used without sandboxing and with web/browser tools enabled.
 
 **Webhook/hooks**
 
-Startup logs a non-fatal security warning, and audit flags `hooks.token` reuse of active Gateway shared-secret auth values (`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN`, `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`). Also warns when:
+Startup logs a non-fatal security warning, and audit flags `hooks.token` reuse of active Gateway shared-secret auth values (`gateway.auth.token` / `CARAPACE_GATEWAY_TOKEN`, `gateway.auth.password` / `CARAPACE_GATEWAY_PASSWORD`). Also warns when:
 
 - `hooks.token` is short
 - `hooks.path="/"`
@@ -47,7 +47,7 @@ Startup logs a non-fatal security warning, and audit flags `hooks.token` reuse o
 - request `sessionKey` overrides are enabled
 - overrides are enabled without `hooks.allowedSessionKeyPrefixes`
 
-Run `openclaw doctor --fix` to rotate a persisted reused `hooks.token`, then update external hook senders to use the new token.
+Run `carapace doctor --fix` to rotate a persisted reused `hooks.token`, then update external hook senders to use the new token.
 
 **Sandbox/tools**
 
@@ -63,7 +63,7 @@ Run `openclaw doctor --fix` to rotate a persisted reused `hooks.token`, then upd
 
 - Warns when sandbox browser uses Docker `bridge` network without `sandbox.browser.cdpSourceRange`.
 - Flags dangerous sandbox Docker network modes, including `host` and `container:*` namespace joins.
-- Warns when existing sandbox browser Docker containers have missing/stale hash labels (for example pre-migration containers missing `openclaw.browserConfigEpoch`) and recommends `openclaw sandbox recreate --browser --all`.
+- Warns when existing sandbox browser Docker containers have missing/stale hash labels (for example pre-migration containers missing `carapace.browserConfigEpoch`) and recommends `carapace sandbox recreate --browser --all`.
 
 **Network/discovery**
 
@@ -109,14 +109,14 @@ Because suppressions can hide standing risk, adding or removing them through age
 ## JSON output
 
 ```bash
-openclaw security audit --json | jq '.summary'
-openclaw security audit --deep --json | jq '.findings[] | select(.severity=="critical") | .checkId'
+carapace security audit --json | jq '.summary'
+carapace security audit --deep --json | jq '.findings[] | select(.severity=="critical") | .checkId'
 ```
 
 With `--fix --json`, output includes both fix actions and the final report:
 
 ```bash
-openclaw security audit --fix --json | jq '{fix: .fix.ok, summary: .report.summary}'
+carapace security audit --fix --json | jq '{fix: .fix.ok, summary: .report.summary}'
 ```
 
 ## What `--fix` changes
@@ -125,8 +125,8 @@ Applies safe, deterministic remediations:
 
 - flips common `groupPolicy="open"` to `groupPolicy="allowlist"` (including account variants in supported channels)
 - when WhatsApp group policy flips to `allowlist`, seeds `groupAllowFrom` from the stored `allowFrom` file when that list exists and config does not already define `allowFrom`
-- tightens permissions for state/config and common sensitive files (`credentials/*.json`, legacy `auth-profiles.json`, `openclaw-agent.sqlite`, and legacy session artifacts)
-- also tightens config include files referenced from `openclaw.json`
+- tightens permissions for state/config and common sensitive files (`credentials/*.json`, legacy `auth-profiles.json`, `carapace-agent.sqlite`, and legacy session artifacts)
+- also tightens config include files referenced from `carapace.json`
 - uses `chmod` on POSIX hosts and `icacls` resets on Windows
 
 `--fix` does **not**:

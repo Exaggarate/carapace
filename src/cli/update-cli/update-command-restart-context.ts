@@ -1,4 +1,4 @@
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.carapace.js";
 import { resolveManagedGatewayServiceProcessEnv } from "../../daemon/service-types.js";
 import { readGatewayServiceState, resolveGatewayService } from "../../daemon/service.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -87,7 +87,7 @@ export async function prepareUpdateRestart(
       } else if (serviceUpdateVerdict.kind === "foreign") {
         serviceMutationAllowed = false;
         serviceMutationSkipMessage =
-          "Gateway service management skipped: the service belongs to a different OpenClaw installation and was left untouched.";
+          "Gateway service management skipped: the service belongs to a different Carapace installation and was left untouched.";
       } else if (
         !skipLegacyServiceRestart &&
         shouldPrepareUpdatedInstallRestart({
@@ -142,7 +142,7 @@ export async function prepareUpdateRestart(
       serviceMutationAllowed = false;
       serviceMutationSkipMessage =
         "Code update completed; gateway service management skipped because its current ownership could not be inspected. " +
-        "Run `openclaw gateway status --deep` before restarting it manually.";
+        "Run `carapace gateway status --deep` before restarting it manually.";
     }
   }
   return {

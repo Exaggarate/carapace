@@ -1,5 +1,5 @@
 // Shared type contracts for dispatch-from-config runtime execution.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SessionWorkerPlacementContext } from "../../gateway/worker-environments/session-placement-lifecycle.js";
 import type { SourceReplyDeliveryMode } from "../get-reply-options.types.js";
 import type { FinalizedMsgContext } from "../templating.js";
@@ -31,7 +31,7 @@ export type DispatchFromConfigResult = {
 export type DispatchFromConfigParams = {
   ctx: FinalizedMsgContext;
   /** Full runtime config captured by the channel; reply resolution refreshes it per turn. */
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   dispatcher: ReplyDispatcher;
   replyOptions?: Omit<InternalGetReplyOptions, "onBlockReply">;
   replyResolver?: InternalGetReplyFromConfig;
@@ -39,7 +39,7 @@ export type DispatchFromConfigParams = {
   fastAbortResolver?: TryFastAbortFromMessage;
   formatAbortReplyTextResolver?: FormatAbortReplyText;
   /** Optional patch applied to the current runtime config before reply resolution. */
-  configOverride?: OpenClawConfig;
+  configOverride?: CarapaceConfig;
   /** Gateway-owned worker services for archive recovery outside a request scope. */
   sessionWorkerPlacementContext?: SessionWorkerPlacementContext;
   /**

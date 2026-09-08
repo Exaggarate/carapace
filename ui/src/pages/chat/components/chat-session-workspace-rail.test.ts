@@ -33,7 +33,7 @@ describe("session workspace path actions", () => {
 
     render(renderSessionWorkspaceRail(workspace, { embedded: true }), mount);
 
-    const skeleton = mount.querySelector("openclaw-panel-loading-skeleton");
+    const skeleton = mount.querySelector("carapace-panel-loading-skeleton");
     expect(skeleton).toBeInstanceOf(HTMLElement);
     await (skeleton as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
     expect(skeleton?.getAttribute("data-panel-skeleton")).toBe("files");

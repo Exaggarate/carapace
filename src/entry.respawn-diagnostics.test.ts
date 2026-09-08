@@ -8,7 +8,7 @@ const boundary = vi.hoisted(() => ({
 }));
 
 vi.mock("./infra/is-main.js", () => ({ isMainModule: () => true }));
-vi.mock("./infra/openclaw-exec-env.js", () => ({ ensureOpenClawExecMarkerOnProcess: vi.fn() }));
+vi.mock("./infra/carapace-exec-env.js", () => ({ ensureCarapaceExecMarkerOnProcess: vi.fn() }));
 vi.mock("./infra/warning-filter.js", () => ({ installProcessWarningFilter: vi.fn() }));
 vi.mock("./cli/dotenv.js", () => ({
   loadCliDotEnv: () => boundary.events.push("dotenv"),
@@ -20,9 +20,9 @@ vi.mock("./cli/startup-trace.js", () => ({
   },
 }));
 vi.mock("./entry.compile-cache.js", () => ({
-  resolveEntryInstallRoot: () => "/fixture/openclaw",
-  enableOpenClawCompileCache: vi.fn(),
-  respawnWithoutOpenClawCompileCacheIfNeeded: async (params: {
+  resolveEntryInstallRoot: () => "/fixture/carapace",
+  enableCarapaceCompileCache: vi.fn(),
+  respawnWithoutCarapaceCompileCacheIfNeeded: async (params: {
     prepareWriteError: () => Promise<NonNullable<typeof boundary.writer>>;
   }) => {
     if (boundary.mode !== "compile-cache") {
@@ -50,7 +50,7 @@ beforeEach(() => {
   boundary.writer = undefined;
   process.argv = [
     process.execPath,
-    "/fixture/openclaw/dist/entry.js",
+    "/fixture/carapace/dist/entry.js",
     "plugins",
     "enable",
     "fixture",

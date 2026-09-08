@@ -1,4 +1,4 @@
-import { onInternalDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
+import { onInternalDiagnosticEvent } from "carapace/plugin-sdk/diagnostic-runtime";
 import { handleCodexAppServerApprovalRequest } from "./approval-bridge.js";
 import { isCodexAppServerApprovalRequest } from "./client.js";
 import { shouldAutoApproveCodexAppServerApprovals } from "./config.js";
@@ -63,8 +63,8 @@ export function createCodexAttemptServerRequestController(
     state,
     turnIdRef,
     userInputBridgeRef,
-    openClawDynamicToolExecutions,
-    pendingOpenClawDynamicToolCompletionIds,
+    carapaceDynamicToolExecutions,
+    pendingCarapaceDynamicToolCompletionIds,
     noteProgress,
   } = turnRuntime;
   const {
@@ -149,14 +149,14 @@ export function createCodexAttemptServerRequestController(
       if (!call || call.threadId !== resourceState.thread.threadId || call.turnId !== turnId) {
         return undefined;
       }
-      const replayedExecution = openClawDynamicToolExecutions.get(call);
+      const replayedExecution = carapaceDynamicToolExecutions.get(call);
       if (replayedExecution) {
         markCurrentTurnRequestProgress();
         return toCodexDynamicToolProtocolResponse(await replayedExecution) as JsonValue;
       }
       const toolCallOrdinal = allocateCodexToolOutcomeOrdinal?.(call.callId);
       markCurrentTurnRequestProgress();
-      pendingOpenClawDynamicToolCompletionIds.add(call.callId);
+      pendingCarapaceDynamicToolCompletionIds.add(call.callId);
       trajectoryRecorder?.recordEvent("tool.call", {
         threadId: call.threadId,
         turnId: call.turnId,
@@ -216,7 +216,7 @@ export function createCodexAttemptServerRequestController(
         { include: DYNAMIC_TOOL_TERMINAL_DIAGNOSTIC_TYPES },
       );
       try {
-        const { execution } = openClawDynamicToolExecutions.claim(call, async () => {
+        const { execution } = carapaceDynamicToolExecutions.claim(call, async () => {
           // Publish the execution claim before persistence yields, so a replay
           // cannot become another owner of this call's progress or result.
           await projector?.transcriptCheckpoint.flush();
@@ -322,7 +322,7 @@ export function createCodexAttemptServerRequestController(
             durationMs: toolDurationMs,
           });
         }
-        pendingOpenClawDynamicToolCompletionIds.delete(call.callId);
+        pendingCarapaceDynamicToolCompletionIds.delete(call.callId);
         if (response.terminate === true && response.success) {
           scheduleTurnReleaseAfterTerminalDynamicTool({
             call,
@@ -337,7 +337,7 @@ export function createCodexAttemptServerRequestController(
         }
         return protocolResponse as JsonValue;
       } catch (error) {
-        pendingOpenClawDynamicToolCompletionIds.delete(call.callId);
+        pendingCarapaceDynamicToolCompletionIds.delete(call.callId);
         if (
           !terminalDiagnosticObserved &&
           !hasPendingDynamicToolTerminalDiagnostic({

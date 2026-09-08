@@ -12,7 +12,7 @@ export type QaRuntimeParityCacheUsage = {
 };
 
 type QaRuntimeParityCacheScenario = {
-  openclawUsage: QaRuntimeParityCacheUsage | null;
+  carapaceUsage: QaRuntimeParityCacheUsage | null;
   codexUsage: QaRuntimeParityCacheUsage | null;
 };
 
@@ -50,7 +50,7 @@ export function aggregateRuntimeParityCacheUsage(
   runtime: RuntimeId,
 ): QaRuntimeParityCacheUsage | null {
   const captures = scenarios.flatMap((scenario) => {
-    const usage = runtime === "openclaw" ? scenario.openclawUsage : scenario.codexUsage;
+    const usage = runtime === "carapace" ? scenario.carapaceUsage : scenario.codexUsage;
     return usage === null ? [] : [usage];
   });
   if (captures.length === 0) {

@@ -1,5 +1,5 @@
 // Control UI tests cover cron filters behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import {
@@ -16,7 +16,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI cron mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 function cronJob(id: string, name: string, schedule: Record<string, unknown>, state = {}) {
@@ -223,7 +223,7 @@ suite.define(() => {
             enabled: true,
             jobs: 2,
             nextWakeAtMs: Date.parse("2026-05-29T09:00:00.000Z"),
-            storePath: "/tmp/openclaw-e2e/cron/jobs.json",
+            storePath: "/tmp/carapace-e2e/cron/jobs.json",
           },
         },
       });

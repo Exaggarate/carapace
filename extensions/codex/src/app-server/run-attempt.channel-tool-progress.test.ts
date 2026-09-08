@@ -47,7 +47,7 @@ describe("Codex channel tool progress", () => {
 
     expect(onToolResult).toHaveBeenCalledWith({
       text: "🛠️ Bash",
-      channelData: { openclawToolProgressId: "private-command-1" },
+      channelData: { carapaceToolProgressId: "private-command-1" },
     });
     const toolStart = onAgentEvent.mock.calls
       .map(([event]) => event)
@@ -136,8 +136,8 @@ describe("Codex channel tool progress", () => {
           const item = {
             type: "webSearch",
             id: "search-1",
-            query: "OpenClaw repository",
-            action: { type: "search", query: "OpenClaw repository" },
+            query: "Carapace repository",
+            action: { type: "search", query: "Carapace repository" },
           };
           await harness.notify(itemNotification("item/started", { ...item, status: "inProgress" }));
           await harness.notify(
@@ -169,7 +169,7 @@ describe("Codex channel tool progress", () => {
         },
       },
       {
-        label: "OpenClaw dynamic tool",
+        label: "Carapace dynamic tool",
         toolCallId: "dynamic-1",
         name: "agents_list",
         drive: async () => {
@@ -213,7 +213,7 @@ describe("Codex channel tool progress", () => {
         resultCount + 1,
       );
       expect(onToolResult.mock.calls[resultCount]?.[0], testCase.label).toMatchObject({
-        channelData: { openclawToolProgressId: testCase.toolCallId },
+        channelData: { carapaceToolProgressId: testCase.toolCallId },
       });
     }
 

@@ -7,7 +7,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const PUBLISHED_RUNNER_PATH = path.resolve("scripts/e2e/lib/upgrade-survivor/run.sh");
 const SCRIPT_PATH = path.resolve("scripts/e2e/lib/upgrade-survivor/config-parking.mjs");
 const SURVIVOR_SCRIPT_PATH = path.resolve("scripts/e2e/upgrade-survivor-docker.sh");
-const E2E_INSTANCE_SCRIPT_PATH = path.resolve("scripts/lib/openclaw-e2e-instance.sh");
+const E2E_INSTANCE_SCRIPT_PATH = path.resolve("scripts/lib/carapace-e2e-instance.sh");
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function run(...args: string[]) {
@@ -28,9 +28,9 @@ describe("upgrade survivor config parking", () => {
   ])(
     "isolates published auth setup and restores the migration specimen (registry=$registry, install=$installStatus, stop=$stopStatus, active=$activeStatus)",
     ({ registry, installStatus, stopStatus, activeStatus }) => {
-      const root = tempDirs.make("openclaw-published-auth-parking-");
+      const root = tempDirs.make("carapace-published-auth-parking-");
       const stateDir = path.join(root, "state");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const capturePath = path.join(root, "service-config.json");
       mkdirSync(stateDir);
       const auth = {
@@ -84,11 +84,11 @@ trap - EXIT ERR INT TERM
 install_update_restart_systemctl_shim() { :; }
 
 check_gateway_status() { :; }
-openclaw_e2e_probe_tcp() { [ -f "$PROBE_LIVE" ]; }
+carapace_e2e_probe_tcp() { [ -f "$PROBE_LIVE" ]; }
 assert_prepublish_fixture_idle() { :; }
 assert_baseline_state() { :; }
 run_update_restart_probe_gateway() {
-  cp "$OPENCLAW_CONFIG_PATH" "$PROBE_CAPTURE"
+  cp "$CARAPACE_CONFIG_PATH" "$PROBE_CAPTURE"
   touch "$PROBE_INSTALLED" "$PROBE_LIVE"
   return "$PROBE_INSTALL_STATUS"
 }
@@ -102,14 +102,14 @@ exit "$probe_status"
           ...process.env,
           HOME: root,
           PATH: `${bin}${path.delimiter}${process.env.PATH}`,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.8.1",
-          OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
-          OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
-          OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
-          OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER: parkingWrapper,
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry ? path.join(root, "registry") : "",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.8.1",
+          CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+          CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
+          CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
+          CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER: parkingWrapper,
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry ? path.join(root, "registry") : "",
           PROBE_CAPTURE: capturePath,
           PROBE_EVENTS: path.join(root, "events"),
           PROBE_LIVE: path.join(root, "live"),
@@ -135,10 +135,10 @@ exit "$probe_status"
           reload: { mode: "off" },
         },
       });
-      const snapshot = path.join(root, "runtime", "baseline-authored-openclaw.json");
+      const snapshot = path.join(root, "runtime", "baseline-authored-carapace.json");
       const events = readFileSync(path.join(root, "events"), "utf8");
       if (stopped) {
-        expect(events).toContain("--user stop openclaw-gateway.service\n");
+        expect(events).toContain("--user stop carapace-gateway.service\n");
         expect(events).toContain("restore-offline\n");
         expect(events).not.toContain("restore-live");
         expect(readFileSync(configPath, "utf8")).toBe(authoredConfig);
@@ -169,26 +169,26 @@ exit "$probe_status"
   ])(
     "requires prepared service readiness before the final updater (start=$startStatus, ready=$readyStatus, active=$activeStatus, mutation=$mutation)",
     ({ startStatus, readyStatus, activeStatus, mutation, scenario = "base" }) => {
-      const root = tempDirs.make("openclaw-repaired-service-start-");
+      const root = tempDirs.make("carapace-repaired-service-start-");
       const bin = path.join(root, "bin");
       mkdirSync(bin);
       writeFileSync(
         path.join(bin, "systemctl"),
         `#!/usr/bin/env bash
-[ "$*" != '--user is-active --quiet openclaw-gateway.service' ] || exit "$PROBE_ACTIVE_STATUS"
+[ "$*" != '--user is-active --quiet carapace-gateway.service' ] || exit "$PROBE_ACTIVE_STATUS"
 printf '%s\\n' "$*" >>"$PROBE_EVENTS"
-[ "$*" = '--user start openclaw-gateway.service' ] || exit 97
+[ "$*" = '--user start carapace-gateway.service' ] || exit 97
 printf 'synthetic start diagnostic\\n' >&2
 [ "$PROBE_START_STATUS" -eq 0 ] || exit "$PROBE_START_STATUS"
-printf '42\\n' >"$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE"
+printf '42\\n' >"$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE"
 case "$PROBE_MUTATION" in
-  unit) printf 'changed' >>"$HOME/.config/systemd/user/openclaw-gateway.service" ;;
-  env) printf 'changed' >>"$OPENCLAW_STATE_DIR/gateway.systemd.env" ;;
+  unit) printf 'changed' >>"$HOME/.config/systemd/user/carapace-gateway.service" ;;
+  env) printf 'changed' >>"$CARAPACE_STATE_DIR/gateway.systemd.env" ;;
 esac
 `,
         { mode: 0o755 },
       );
-      writeFileSync(path.join(bin, "openclaw"), "#!/usr/bin/env bash\nexit 98\n", { mode: 0o755 });
+      writeFileSync(path.join(bin, "carapace"), "#!/usr/bin/env bash\nexit 98\n", { mode: 0o755 });
       const redactor = path.join(root, "redactor.mjs");
       writeFileSync(
         redactor,
@@ -205,13 +205,13 @@ export const { redactSensitiveText } = await tsImport(${JSON.stringify(path.reso
           `${setup}
 trap - EXIT ERR INT TERM
 update_repair_required=0
-mkdir -p "$HOME/.config/systemd/user" "$OPENCLAW_STATE_DIR"
-printf 'original unit\\n' >"$HOME/.config/systemd/user/openclaw-gateway.service"
-printf 'original env\\n' >"$OPENCLAW_STATE_DIR/gateway.systemd.env"
-printf 'original dotenv\\n' >"$OPENCLAW_STATE_DIR/.env"
-printf 'baseline timeline\\n' >"$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG"
+mkdir -p "$HOME/.config/systemd/user" "$CARAPACE_STATE_DIR"
+printf 'original unit\\n' >"$HOME/.config/systemd/user/carapace-gateway.service"
+printf 'original env\\n' >"$CARAPACE_STATE_DIR/gateway.systemd.env"
+printf 'original dotenv\\n' >"$CARAPACE_STATE_DIR/.env"
+printf 'baseline timeline\\n' >"$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG"
 : >"$PROBE_EVENTS"
-openclaw_e2e_wait_gateway_ready() {
+carapace_e2e_wait_gateway_ready() {
   printf 'readiness\\n' >>"$PROBE_EVENTS"
   return "$PROBE_READY_STATUS"
 }
@@ -231,7 +231,7 @@ node() {
   if [ "$#" -eq 3 ] && [ "$1" = scripts/e2e/lib/upgrade-survivor/assertions.mjs ] && [ "$2" = assert-restart-serving-turn ]; then
     printf 'serving-turn\\n' >>"$PROBE_EVENTS"
   elif [ "$#" -eq 2 ] && [ "$2" = assert-state ]; then
-    [ "\${OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE:-survival}" = post-inference ] || return 96
+    [ "\${CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE:-survival}" = post-inference ] || return 96
     printf 'volume-state\\n' >>"$PROBE_EVENTS"
   else
     command node "$@"
@@ -244,8 +244,8 @@ assert_survival() {
 probe_status=0
 repair_fixture_plugin_consent || probe_status=$?
 if [ "$SCENARIO" = sqlite-volume ] && [ "$probe_status" -eq 0 ]; then
-openclaw_e2e_maybe_timeout() {
-  [ "$#" -eq 5 ] && [ "$2" = openclaw ] && [ "$3" = doctor ] && [ "$4" = --fix ] && [ "$5" = --non-interactive ] || return 95
+carapace_e2e_maybe_timeout() {
+  [ "$#" -eq 5 ] && [ "$2" = carapace ] && [ "$3" = doctor ] && [ "$4" = --fix ] && [ "$5" = --non-interactive ] || return 95
   printf 'volume-doctor\\n' >>"$PROBE_EVENTS"
 }
   assert_volume_idempotence || probe_status=$?
@@ -259,15 +259,15 @@ exit "$probe_status"
             ...process.env,
             PATH: `${bin}${path.delimiter}${process.env.PATH}`,
             HOME: root,
-            OPENCLAW_STATE_DIR: path.join(root, "state"),
-            OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.8.1",
-            OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
-            OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: scenario,
-            OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
-            OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
-            OPENCLAW_CLAWHUB_URL: "",
+            CARAPACE_STATE_DIR: path.join(root, "state"),
+            CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.8.1",
+            CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+            CARAPACE_UPGRADE_SURVIVOR_SCENARIO: scenario,
+            CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
+            CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
+            CARAPACE_CLAWHUB_URL: "",
             PROBE_EVENTS: path.join(root, "events"),
-            OPENCLAW_E2E_REDACTOR_MODULE: redactor,
+            CARAPACE_E2E_REDACTOR_MODULE: redactor,
             PROBE_ACTIVE_STATUS: String(activeStatus),
             PROBE_MUTATION: mutation,
             PROBE_START_STATUS: String(startStatus),
@@ -286,11 +286,11 @@ exit "$probe_status"
         activeStatus !== 3
           ? []
           : startStatus || mutation !== "none"
-            ? ["--user start openclaw-gateway.service"]
+            ? ["--user start carapace-gateway.service"]
             : readyStatus
-              ? ["--user start openclaw-gateway.service", "readiness"]
+              ? ["--user start carapace-gateway.service", "readiness"]
               : [
-                  "--user start openclaw-gateway.service",
+                  "--user start carapace-gateway.service",
                   "readiness",
                   "authenticated",
                   "update",
@@ -335,7 +335,7 @@ exit "$probe_status"
     "assert-state",
     "installed-version",
   ])("propagates guarded restart survival failure at %s", (failure) => {
-    const root = tempDirs.make("openclaw-survivor-guarded-assertion-");
+    const root = tempDirs.make("carapace-survivor-guarded-assertion-");
     const source = readFileSync(PUBLISHED_RUNNER_PATH, "utf8");
     const setup = source.slice(0, source.indexOf("phase storage-preflight"));
     const result = spawnSync(
@@ -349,7 +349,7 @@ UPDATE_RESTART_MODE=auto-auth
 update_repair_required=0
 candidate_version=2026.9.3
 baseline_version=2026.9.2
-OPENCLAW_CLAWHUB_URL=fixture
+CARAPACE_CLAWHUB_URL=fixture
 prepare_restart_inference() { :; }
 prepare_restart_fixture() { restart_fixture_package=/tmp/fixture.tgz; restart_fixture_version=2026.9.3; }
 install_update_restart_systemctl_shim() { :; }
@@ -369,9 +369,9 @@ exit "$probe_status"
         env: {
           ...process.env,
           HOME: root,
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.9.2",
-          OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
-          OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.9.2",
+          CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
+          CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
           PROBE_FAILURE: failure,
           PROBE_SIDE_EFFECT: path.join(root, "continued"),
         },
@@ -384,7 +384,7 @@ exit "$probe_status"
   it.each([false, true])(
     "preserves phase failure without disabling normal errexit (conditional=%s)",
     (conditional) => {
-      const root = tempDirs.make("openclaw-survivor-phase-failure-");
+      const root = tempDirs.make("carapace-survivor-phase-failure-");
       const source = readFileSync(PUBLISHED_RUNNER_PATH, "utf8");
       const setup = source.slice(0, source.indexOf("phase storage-preflight"));
       const result = spawnSync(
@@ -405,9 +405,9 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
           env: {
             ...process.env,
             HOME: root,
-            OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.8.1",
-            OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
-            OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
+            CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.8.1",
+            CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
+            CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
             PROBE_SIDE_EFFECT: path.join(root, "side-effect"),
           },
         },
@@ -421,9 +421,9 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
   );
 
   it("parks legacy authored config behind a strict restart probe config", () => {
-    const root = tempDirs.make("openclaw-restart-config-parking-");
-    const configPath = path.join(root, "openclaw.json");
-    const snapshotPath = path.join(root, "openclaw.authored.json");
+    const root = tempDirs.make("carapace-restart-config-parking-");
+    const configPath = path.join(root, "carapace.json");
+    const snapshotPath = path.join(root, "carapace.authored.json");
     const authoredConfig =
       '{"channels":{"discord":{"dm":{"policy":"allowlist","allowFrom":["123"]}}}}\n';
     writeFileSync(configPath, authoredConfig);
@@ -452,9 +452,9 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
   });
 
   it("parks companion installs behind a plugin-disabled config and restores exact bytes", () => {
-    const root = tempDirs.make("openclaw-companion-config-parking-");
-    const configPath = path.join(root, "openclaw.json");
-    const snapshotPath = path.join(root, "openclaw.authored.json");
+    const root = tempDirs.make("carapace-companion-config-parking-");
+    const configPath = path.join(root, "carapace.json");
+    const snapshotPath = path.join(root, "carapace.authored.json");
     const authoredConfig =
       '{"channels":{"discord":{"dm":{"policy":"allowlist","allowFrom":["123"]}}}}\n';
     writeFileSync(configPath, authoredConfig);
@@ -480,10 +480,10 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
   ])(
     "parks companion inspection and restores authored bytes (install=$installStatus, inspect=$inspectStatus)",
     ({ installStatus, inspectStatus }) => {
-      const root = tempDirs.make("openclaw-companion-install-failure-");
+      const root = tempDirs.make("carapace-companion-install-failure-");
       const binDir = path.join(root, "bin");
-      const configPath = path.join(root, "openclaw.json");
-      const invocationPath = path.join(root, "openclaw-invocations");
+      const configPath = path.join(root, "carapace.json");
+      const invocationPath = path.join(root, "carapace-invocations");
       const runnerPath = path.join(root, "run-companion-install.sh");
       const authoredConfig =
         '{"channels":{"discord":{"dm":{"policy":"allowlist","allowFrom":["123"]}}}}\n';
@@ -492,7 +492,7 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
       const survivorScript = readFileSync(SURVIVOR_SCRIPT_PATH, "utf8");
       const functionStart = survivorScript.indexOf("install_companion_plugins() {");
       const functionEnd = survivorScript.indexOf(
-        "\n}\n\nopenclaw_e2e_eval_test_state_from_b64",
+        "\n}\n\ncarapace_e2e_eval_test_state_from_b64",
         functionStart,
       );
       expect(functionStart).toBeGreaterThan(-1);
@@ -500,10 +500,10 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
       const functionSource = survivorScript.slice(functionStart, functionEnd + 2);
       const e2eInstanceScript = readFileSync(E2E_INSTANCE_SCRIPT_PATH, "utf8");
       const fixtureCommandStart = e2eInstanceScript.indexOf(
-        "openclaw_e2e_fixture_plugin_command() {",
+        "carapace_e2e_fixture_plugin_command() {",
       );
       const fixtureCommandEnd = e2eInstanceScript.indexOf(
-        "\n}\nopenclaw_e2e_enable_openclaw_cli_timeout",
+        "\n}\ncarapace_e2e_enable_carapace_cli_timeout",
         fixtureCommandStart,
       );
       expect(fixtureCommandStart).toBeGreaterThan(-1);
@@ -513,29 +513,29 @@ ${conditional ? 'probe_status=0; phase preparation handler || probe_status=$?; e
         fixtureCommandEnd + 2,
       );
       writeFileSync(
-        path.join(binDir, "openclaw"),
+        path.join(binDir, "carapace"),
         `#!/usr/bin/env bash
 set -euo pipefail
 count=0
-if [ -f "$OPENCLAW_INVOCATION_PATH" ]; then
-  count="$(cat "$OPENCLAW_INVOCATION_PATH")"
+if [ -f "$CARAPACE_INVOCATION_PATH" ]; then
+  count="$(cat "$CARAPACE_INVOCATION_PATH")"
 fi
 count=$((count + 1))
-printf '%s' "$count" >"$OPENCLAW_INVOCATION_PATH"
+printf '%s' "$count" >"$CARAPACE_INVOCATION_PATH"
 if [ "$count" -eq 2 ]; then
   exit "$PROBE_INSTALL_STATUS"
 fi
 `,
       );
-      chmodSync(path.join(binDir, "openclaw"), 0o755);
+      chmodSync(path.join(binDir, "carapace"), 0o755);
       writeFileSync(
         path.join(binDir, "node"),
         `#!/usr/bin/env bash
 set -euo pipefail
 case "$1" in
   scripts/e2e/lib/upgrade-survivor/assertions.mjs)
-    cp "$OPENCLAW_CONFIG_PATH" "$PROBE_INSPECT_CONFIG"
-    "$PROBE_NODE" -e 'const config = require(process.env.OPENCLAW_CONFIG_PATH); if (config.channels || config.plugins?.enabled !== false) process.exit(37);'
+    cp "$CARAPACE_CONFIG_PATH" "$PROBE_INSPECT_CONFIG"
+    "$PROBE_NODE" -e 'const config = require(process.env.CARAPACE_CONFIG_PATH); if (config.channels || config.plugins?.enabled !== false) process.exit(37);'
     exit "$PROBE_INSPECT_STATUS" ;;
   unused) exit 0 ;;
   *) exec "$PROBE_NODE" "$@" ;;
@@ -557,13 +557,13 @@ install_companion_plugins
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_INVOCATION_PATH: invocationPath,
-          OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: root,
-          OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER: SCRIPT_PATH,
-          OPENCLAW_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER: "unused",
-          OPENCLAW_CLAWHUB_URL: "http://fixture.invalid",
-          OPENCLAW_E2E_LAST_FIXTURE_PLUGIN_CAPABILITY_CONSENT_SUPPORTED: "1",
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_INVOCATION_PATH: invocationPath,
+          CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: root,
+          CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER: SCRIPT_PATH,
+          CARAPACE_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER: "unused",
+          CARAPACE_CLAWHUB_URL: "http://fixture.invalid",
+          CARAPACE_E2E_LAST_FIXTURE_PLUGIN_CAPABILITY_CONSENT_SUPPORTED: "1",
           PROBE_NODE: process.execPath,
           PROBE_INSPECT_CONFIG: path.join(root, "inspect-config.json"),
           PROBE_INSTALL_STATUS: String(installStatus),
@@ -585,9 +585,9 @@ install_companion_plugins
   );
 
   it("rejects malformed config without changing authored bytes", () => {
-    const root = tempDirs.make("openclaw-invalid-config-parking-");
-    const configPath = path.join(root, "openclaw.json");
-    const snapshotPath = path.join(root, "openclaw.authored.json");
+    const root = tempDirs.make("carapace-invalid-config-parking-");
+    const configPath = path.join(root, "carapace.json");
+    const snapshotPath = path.join(root, "carapace.authored.json");
     const authoredConfig = "[]\n";
     writeFileSync(configPath, authoredConfig);
 
@@ -599,9 +599,9 @@ install_companion_plugins
   });
 
   it("keeps the snapshot when restore cannot replace the config path", () => {
-    const root = tempDirs.make("openclaw-failed-config-restore-");
+    const root = tempDirs.make("carapace-failed-config-restore-");
     const configPath = path.join(root, "config-directory");
-    const snapshotPath = path.join(root, "openclaw.authored.json");
+    const snapshotPath = path.join(root, "carapace.authored.json");
     mkdirSync(configPath);
     writeFileSync(snapshotPath, '{"gateway":{"mode":"local"}}\n');
 

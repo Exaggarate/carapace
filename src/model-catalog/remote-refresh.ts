@@ -2,15 +2,15 @@ import {
   parseRemoteModelCatalogBundle,
   validateAndSanitizeRemoteModelCatalogBundle,
   type RemoteModelCatalogBundle,
-} from "@openclaw/model-catalog-core";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { compareOpenClawVersions } from "../config/version.js";
+} from "@carapace/model-catalog-core";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { compareCarapaceVersions } from "../config/version.js";
 import { readResponseWithLimit } from "../infra/http-body.js";
 import {
   fetchConfiguredLocalOriginWithSsrFGuard,
   fetchWithSsrFGuard,
 } from "../infra/net/fetch-guard.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { VERSION } from "../version.js";
 import { bundledCatalogGeneratedAt } from "./bundled-catalog-stamp.js";
 import { isRemoteModelCatalogRefreshEnabled, resolveRemoteCatalogUrl } from "./remote-config.js";
@@ -48,18 +48,18 @@ function assertCompatibleMinVersion(bundle: RemoteModelCatalogBundle): void {
   if (!bundle.minVersion) {
     return;
   }
-  const comparison = compareOpenClawVersions(VERSION, bundle.minVersion);
+  const comparison = compareCarapaceVersions(VERSION, bundle.minVersion);
   if (comparison === null) {
     throw new Error(`invalid remote catalog minVersion: ${bundle.minVersion}`);
   }
   if (comparison < 0) {
     throw new Error(
-      `remote catalog requires OpenClaw ${bundle.minVersion} or newer (current ${VERSION})`,
+      `remote catalog requires Carapace ${bundle.minVersion} or newer (current ${VERSION})`,
     );
   }
 }
 
-function isExplicitLocalHttpUrl(config: OpenClawConfig, url: string): boolean {
+function isExplicitLocalHttpUrl(config: CarapaceConfig, url: string): boolean {
   if (!config.models?.catalogRefresh?.url) {
     return false;
   }
@@ -73,11 +73,11 @@ function isExplicitLocalHttpUrl(config: OpenClawConfig, url: string): boolean {
 }
 
 export async function refreshRemoteModelCatalog(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   force?: boolean;
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
   now?: () => number;
   bundledGeneratedAt?: () => number | undefined;
 }): Promise<RemoteModelCatalogRefreshResult> {

@@ -6,7 +6,7 @@ import {
   buildRecoverablePendingFinalDeliveryText,
   normalizePendingFinalRecoveryPayloads,
 } from "../auto-reply/reply/pending-final-delivery.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { loadSessionEntry, patchSessionEntryCore } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { resetHeartbeatEventsForTest } from "./heartbeat-events.js";
@@ -30,7 +30,7 @@ describe("heartbeat pending-final delivery ownership", () => {
     resetSystemEventsForTest();
   });
 
-  function createHeartbeatConfig(storePath: string, isolatedSession = false): OpenClawConfig {
+  function createHeartbeatConfig(storePath: string, isolatedSession = false): CarapaceConfig {
     return {
       agents: { defaults: { heartbeat: { every: "5m", target: "telegram", isolatedSession } } },
       messages: { visibleReplies: "automatic" },
@@ -38,7 +38,7 @@ describe("heartbeat pending-final delivery ownership", () => {
         telegram: { token: "test-token", allowFrom: ["*"], heartbeat: { showOk: false } },
       },
       session: { store: storePath },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   function heartbeatDeps(
@@ -110,7 +110,7 @@ describe("heartbeat pending-final delivery ownership", () => {
     });
   }
 
-  async function seedSession(storePath: string, cfg: OpenClawConfig, updatedAt: number) {
+  async function seedSession(storePath: string, cfg: CarapaceConfig, updatedAt: number) {
     return seedMainSessionStore(storePath, cfg, {
       lastChannel: "telegram",
       lastProvider: "telegram",

@@ -17,7 +17,7 @@ import { createApplicationContextProvider } from "../../test-helpers/application
 import { createTestGatewayClient } from "../../test-helpers/gateway-client.ts";
 import { ModelAccounts } from "./model-accounts.ts";
 
-const TEST_TAG = "test-openclaw-model-accounts";
+const TEST_TAG = "test-carapace-model-accounts";
 if (!customElements.get(TEST_TAG)) {
   customElements.define(TEST_TAG, class extends ModelAccounts {});
 }

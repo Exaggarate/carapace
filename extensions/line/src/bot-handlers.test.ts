@@ -1,7 +1,7 @@
 // Line tests cover bot handlers plugin behavior.
 import type { webhook } from "@line/bot-sdk";
-import { MediaFetchError } from "openclaw/plugin-sdk/media-runtime";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
+import { MediaFetchError } from "carapace/plugin-sdk/media-runtime";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LineAccountConfig } from "./types.js";
 
@@ -18,10 +18,10 @@ const pairingDeliveryMocks = vi.hoisted(() => ({
 }));
 
 // Stub delivery and context wiring while keeping mention-drop diagnostics real.
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => ({
-  implicitMentionKindWhen: (await import("openclaw/plugin-sdk/channel-mention-gating"))
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => ({
+  implicitMentionKindWhen: (await import("carapace/plugin-sdk/channel-mention-gating"))
     .implicitMentionKindWhen,
-  logInboundDrop: (await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>())
+  logInboundDrop: (await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>())
     .logInboundDrop,
   buildMentionRegexes: () => [],
   isChannelPartialDeliveryError: (error: unknown) =>
@@ -32,7 +32,7 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => ({
     ),
   matchesMentionPatterns: () => false,
 }));
-vi.mock("openclaw/plugin-sdk/channel-pairing", () => ({
+vi.mock("carapace/plugin-sdk/channel-pairing", () => ({
   createChannelPairingChallengeIssuer:
     ({ upsertPairingRequest }: { upsertPairingRequest: (args: unknown) => Promise<unknown> }) =>
     async ({
@@ -51,7 +51,7 @@ vi.mock("openclaw/plugin-sdk/channel-pairing", () => ({
       }
     },
 }));
-vi.mock("openclaw/plugin-sdk/command-auth-native", () => ({
+vi.mock("carapace/plugin-sdk/command-auth-native", () => ({
   hasControlCommand: (text: string) => {
     const body = text.trim().toLowerCase();
     return body === "/status" || body.startsWith("/status ");
@@ -67,7 +67,7 @@ vi.mock("openclaw/plugin-sdk/command-auth-native", () => ({
       hasControlCommand && authorizers.some((entry) => entry.allowed || !entry.configured),
   }),
 }));
-vi.mock("openclaw/plugin-sdk/runtime-group-policy", () => ({
+vi.mock("carapace/plugin-sdk/runtime-group-policy", () => ({
   resolveAllowlistProviderRuntimeGroupPolicy: ({
     groupPolicy,
     defaultGroupPolicy,
@@ -82,11 +82,11 @@ vi.mock("openclaw/plugin-sdk/runtime-group-policy", () => ({
     cfg.channels?.line?.groupPolicy ?? "open",
   warnMissingProviderGroupPolicyFallbackOnce: () => {},
 }));
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("carapace/plugin-sdk/runtime-env", () => ({
   danger: (text: string) => text,
   logVerbose: () => {},
 }));
-vi.mock("openclaw/plugin-sdk/reply-history", () => ({
+vi.mock("carapace/plugin-sdk/reply-history", () => ({
   DEFAULT_GROUP_HISTORY_LIMIT: 20,
   createChannelHistoryWindow: ({ historyMap }: { historyMap: Map<string, HistoryEntry[]> }) => ({
     record: ({
@@ -149,7 +149,7 @@ vi.mock("openclaw/plugin-sdk/reply-history", () => ({
     historyMap.set(historyKey, [...existing, entry].slice(-limit));
   },
 }));
-vi.mock("openclaw/plugin-sdk/routing", () => ({
+vi.mock("carapace/plugin-sdk/routing", () => ({
   resolveAgentRoute: () => ({ agentId: "default" }),
 }));
 
@@ -160,7 +160,7 @@ const { readAllowFromStoreMock, upsertPairingRequestMock } = vi.hoisted(() => ({
 const downloadLineMediaMock = vi.hoisted(() => vi.fn());
 const getUserDisplayNameMock = vi.hoisted(() => vi.fn(async (userId: string) => userId));
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", () => ({
+vi.mock("carapace/plugin-sdk/conversation-runtime", () => ({
   resolvePairingIdLabel: () => "lineUserId",
   readChannelAllowFromStore: readAllowFromStoreMock,
   upsertChannelPairingRequest: upsertPairingRequestMock,
@@ -332,14 +332,14 @@ describe("handleLineWebhookEvents", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/channel-inbound");
-    vi.doUnmock("openclaw/plugin-sdk/channel-pairing");
-    vi.doUnmock("openclaw/plugin-sdk/command-auth-native");
-    vi.doUnmock("openclaw/plugin-sdk/runtime-group-policy");
-    vi.doUnmock("openclaw/plugin-sdk/runtime-env");
-    vi.doUnmock("openclaw/plugin-sdk/reply-history");
-    vi.doUnmock("openclaw/plugin-sdk/routing");
-    vi.doUnmock("openclaw/plugin-sdk/conversation-runtime");
+    vi.doUnmock("carapace/plugin-sdk/channel-inbound");
+    vi.doUnmock("carapace/plugin-sdk/channel-pairing");
+    vi.doUnmock("carapace/plugin-sdk/command-auth-native");
+    vi.doUnmock("carapace/plugin-sdk/runtime-group-policy");
+    vi.doUnmock("carapace/plugin-sdk/runtime-env");
+    vi.doUnmock("carapace/plugin-sdk/reply-history");
+    vi.doUnmock("carapace/plugin-sdk/routing");
+    vi.doUnmock("carapace/plugin-sdk/conversation-runtime");
     vi.doUnmock("./download.js");
     vi.doUnmock("./send.js");
     vi.doUnmock("./bot-message-context.js");

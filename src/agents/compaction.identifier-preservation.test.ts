@@ -1,7 +1,7 @@
 // Covers identifier-preservation instructions through single and staged
 // compaction summarization paths.
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { ExtensionContext } from "openclaw/plugin-sdk/agent-sessions";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import type { ExtensionContext } from "carapace/plugin-sdk/agent-sessions";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { retryAsync } from "../infra/retry.js";
 import * as agentSessions from "./sessions/index.js";

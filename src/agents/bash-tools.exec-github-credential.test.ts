@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { quoteCliArg } from "../cli/quote-cli-arg.js";
 import { createProcessSupervisor } from "../process/supervisor/supervisor.js";
@@ -93,7 +93,7 @@ describe.skipIf(process.platform === "win32")("local GitHub credential launch bo
       const prepared = prepareGitHubToolEnvironment({
         config: { tools: { github: { profileId: "ghp_11111111111111111111111111111111" } } },
         agentId: "main",
-        env: { OPENCLAW_STATE_DIR: root },
+        env: { CARAPACE_STATE_DIR: root },
       });
       profileDir = expectDefined(prepared.localIdentityEnv.GH_CONFIG_DIR, "managed GitHub profile");
       hostsPath = path.join(profileDir, "hosts.yml");

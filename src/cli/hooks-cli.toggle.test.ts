@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayClientRequestError } from "../../packages/gateway-client/src/request-error.js";
 import type { TransformConfigFileParams } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { GatewayTransportError } from "../gateway/transport-error.js";
 import { resolveInternalHookSelection } from "../hooks/configured.js";
 import type { HookStatusEntry, HookStatusReport } from "../hooks/hooks-status.js";
@@ -60,8 +60,8 @@ vi.mock("../gateway/call.js", () => ({
     error instanceof Error && error.name === "GatewayClientRequestError",
   isGatewayCredentialsRequiredError: (error: unknown) =>
     error instanceof Error && error.name === "GatewayCredentialsRequiredError",
-  isImplicitLocalGatewayTarget: async ({ config }: { config?: OpenClawConfig }) =>
-    !process.env.OPENCLAW_GATEWAY_URL && config?.gateway?.mode !== "remote",
+  isImplicitLocalGatewayTarget: async ({ config }: { config?: CarapaceConfig }) =>
+    !process.env.CARAPACE_GATEWAY_URL && config?.gateway?.mode !== "remote",
 }));
 
 vi.mock("../hooks/hooks-status.js", () => ({
@@ -123,10 +123,10 @@ const sourceConfig = {
 const hook: HookStatusEntry = {
   name: "display-name",
   description: "Hook with a metadata config-key override",
-  source: "openclaw-workspace",
-  filePath: "/tmp/openclaw-hook-workspace/HOOK.md",
-  baseDir: "/tmp/openclaw-hook-workspace",
-  handlerPath: "/tmp/openclaw-hook-workspace/handler.js",
+  source: "carapace-workspace",
+  filePath: "/tmp/carapace-hook-workspace/HOOK.md",
+  baseDir: "/tmp/carapace-hook-workspace",
+  handlerPath: "/tmp/carapace-hook-workspace/handler.js",
   hookKey: "metadata-key",
   events: ["command:new"],
   unknownEvents: [],
@@ -139,8 +139,8 @@ const hook: HookStatusEntry = {
 };
 
 const report: HookStatusReport = {
-  workspaceDir: "/tmp/openclaw-hook-workspace",
-  managedHooksDir: "/tmp/openclaw-managed-hooks",
+  workspaceDir: "/tmp/carapace-hook-workspace",
+  managedHooksDir: "/tmp/carapace-managed-hooks",
   hooks: [hook],
 };
 
@@ -168,8 +168,8 @@ function configureExplicitFleet() {
     agents: {
       ownership: "explicit" as const,
       list: [
-        { id: "main", workspace: "/tmp/openclaw-main-workspace" },
-        { id: "research", workspace: "/tmp/openclaw-research-workspace" },
+        { id: "main", workspace: "/tmp/carapace-main-workspace" },
+        { id: "research", workspace: "/tmp/carapace-research-workspace" },
       ],
     },
   };
@@ -180,7 +180,7 @@ function configureExplicitFleet() {
     throw new Error("selection required");
   });
   mocks.resolveAgentWorkspaceDir.mockImplementation(
-    (_config: unknown, agentId: string) => `/tmp/openclaw-${agentId}-workspace`,
+    (_config: unknown, agentId: string) => `/tmp/carapace-${agentId}-workspace`,
   );
   return config;
 }
@@ -198,14 +198,14 @@ describe("hooks CLI metadata config keys", () => {
     mocks.getRuntimeConfig.mockReturnValue(sourceConfig);
     mocks.listAgentIds.mockReturnValue(["main"]);
     mocks.resolveConfiguredAgentId.mockImplementation(
-      (_config: OpenClawConfig, agentId: string) => {
+      (_config: CarapaceConfig, agentId: string) => {
         if (!mocks.listAgentIds().includes(agentId)) {
           throw new Error(`Unknown agent id "${agentId}"`);
         }
         return agentId;
       },
     );
-    mocks.resolveAgentWorkspaceDir.mockReturnValue("/tmp/openclaw-hook-workspace");
+    mocks.resolveAgentWorkspaceDir.mockReturnValue("/tmp/carapace-hook-workspace");
     mocks.resolveDefaultAgentId.mockReturnValue("main");
     mocks.tryResolveLegacyCompatibilityAgentId.mockReturnValue("main");
     mocks.readConfigFileSnapshot.mockResolvedValue({ sourceConfig, hash: "config-hash" });
@@ -239,7 +239,7 @@ describe("hooks CLI metadata config keys", () => {
       },
       baseHash: "config-hash",
     });
-    const writtenConfig = mocks.replaceConfigFile.mock.calls[0]?.[0]?.nextConfig as OpenClawConfig;
+    const writtenConfig = mocks.replaceConfigFile.mock.calls[0]?.[0]?.nextConfig as CarapaceConfig;
     expect(resolveInternalHookSelection(writtenConfig).names).toEqual(
       new Set(testCase.enabled ? ["metadata-key"] : []),
     );
@@ -353,7 +353,7 @@ describe("hooks CLI metadata config keys", () => {
       ).rejects.toThrow("__exit__:1");
 
       expect(capture.runtimeErrors.at(-1)).toBe(
-        'Error: Hook "missing-hook" not found. Run `openclaw hooks list` to see available hooks.',
+        'Error: Hook "missing-hook" not found. Run `carapace hooks list` to see available hooks.',
       );
       expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
     },
@@ -373,7 +373,7 @@ describe("hooks CLI metadata config keys", () => {
         os: ["linux"],
       },
       install: [
-        { id: "demo-npm", kind: "npm", label: "Install @openclaw/demo-hook (npm)", bins: [] },
+        { id: "demo-npm", kind: "npm", label: "Install @carapace/demo-hook (npm)", bins: [] },
       ],
     };
     mocks.buildWorkspaceHookStatus.mockReturnValue({ ...report, hooks: [ineligibleHook] });
@@ -383,7 +383,7 @@ describe("hooks CLI metadata config keys", () => {
     ).rejects.toThrow("__exit__:1");
 
     expect(capture.runtimeErrors.at(-1)).toBe(
-      'Error: Hook "display-name" is not eligible; missing bins: missing-bin; anyBins: missing-any-a, missing-any-b; env: MISSING_ENV; config: hooks.demo.enabled; os: linux. Install options: Install @openclaw/demo-hook (npm). Run `openclaw hooks info display-name` for details.',
+      'Error: Hook "display-name" is not eligible; missing bins: missing-bin; anyBins: missing-any-a, missing-any-b; env: MISSING_ENV; config: hooks.demo.enabled; os: linux. Install options: Install @carapace/demo-hook (npm). Run `carapace hooks info display-name` for details.',
     );
     expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
   });
@@ -417,7 +417,7 @@ describe("hooks CLI metadata config keys", () => {
       {
         label: "plugin-managed hook",
         hooks: [
-          { ...hook, source: "openclaw-plugin", managedByPlugin: true, pluginId: "demo-plugin" },
+          { ...hook, source: "carapace-plugin", managedByPlugin: true, pluginId: "demo-plugin" },
         ],
         identifier: "metadata-key",
         selected: hook,
@@ -484,7 +484,7 @@ describe("hooks CLI metadata config keys", () => {
         expect(capture.defaultRuntime.writeStdout).toHaveBeenCalledOnce();
       } else {
         expect(capture.runtimeLogs[0]).toBe(
-          'Hook "missing-hook" not found. Run `openclaw hooks list` to see available hooks.',
+          'Hook "missing-hook" not found. Run `carapace hooks list` to see available hooks.',
         );
         expect(capture.defaultRuntime.writeStdout).not.toHaveBeenCalled();
       }
@@ -497,7 +497,7 @@ describe("hooks CLI metadata config keys", () => {
     mocks.buildWorkspaceHookStatus.mockReturnValue({
       ...report,
       hooks: [
-        { ...hook, source: "openclaw-plugin", managedByPlugin: true, pluginId: "demo-plugin" },
+        { ...hook, source: "carapace-plugin", managedByPlugin: true, pluginId: "demo-plugin" },
       ],
     });
     await expect(
@@ -760,7 +760,7 @@ describe("hooks CLI metadata config keys", () => {
   )("does not substitute local hooks after $label", async ({ target, command, json }) => {
     mocks.getRuntimeConfig.mockReturnValue(target.config);
     if (target.url) {
-      vi.stubEnv("OPENCLAW_GATEWAY_URL", target.url);
+      vi.stubEnv("CARAPACE_GATEWAY_URL", target.url);
     }
     const error = target.unsupported
       ? new GatewayClientRequestError({ code: "INVALID_REQUEST", message: target.message })
@@ -823,7 +823,7 @@ describe("hooks CLI metadata config keys", () => {
       error: Object.assign(new Error("gateway requires credentials"), {
         name: "GatewayCredentialsRequiredError",
         method: "hooks.status",
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       }),
     },
     { label: "typed timeout", error: createGatewayTransportError("timeout") },
@@ -941,7 +941,7 @@ describe("hooks CLI metadata config keys", () => {
     expect(mocks.resolveDefaultAgentId).not.toHaveBeenCalled();
     expect(mocks.resolveAgentWorkspaceDir).toHaveBeenCalledWith(explicitFleet, "research");
     expect(mocks.buildWorkspaceHookStatus).toHaveBeenCalledWith(
-      "/tmp/openclaw-research-workspace",
+      "/tmp/carapace-research-workspace",
       expect.anything(),
     );
   });
@@ -978,7 +978,7 @@ describe("hooks CLI metadata config keys", () => {
     });
 
     expect(mocks.buildWorkspaceHookStatus).toHaveBeenCalledWith(
-      "/tmp/openclaw-hook-workspace",
+      "/tmp/carapace-hook-workspace",
       expect.anything(),
     );
   });

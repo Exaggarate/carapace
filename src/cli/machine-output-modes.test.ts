@@ -21,19 +21,19 @@ describe("built-in machine-output resolvers", () => {
     ["heartbeat disable", ["system", "heartbeat", "disable"]],
     ["presence", ["system", "presence"]],
   ])("detects system %s", (_name, path) => {
-    expect(isSystemMachineOutput(["node", "openclaw", ...path])).toBe(true);
+    expect(isSystemMachineOutput(["node", "carapace", ...path])).toBe(true);
   });
 
   it("detects non-TTY doctor lint without changing terminal output", () => {
-    const argv = ["node", "openclaw", "doctor", "--lint"];
+    const argv = ["node", "carapace", "doctor", "--lint"];
     expect(isDoctorMachineOutput({ argv, stdoutIsTTY: false })).toBe(true);
     expect(isDoctorMachineOutput({ argv, stdoutIsTTY: true })).toBe(false);
   });
 
   it("reserves doctor JSON output with or without explicit lint mode", () => {
     for (const argv of [
-      ["node", "openclaw", "doctor", "--json"],
-      ["node", "openclaw", "doctor", "--lint", "--json"],
+      ["node", "carapace", "doctor", "--json"],
+      ["node", "carapace", "doctor", "--lint", "--json"],
     ]) {
       expect(isDoctorMachineOutput({ argv, stdoutIsTTY: true })).toBe(true);
     }
@@ -42,7 +42,7 @@ describe("built-in machine-output resolvers", () => {
   it.each(["--post-upgrade", "--state-sqlite=compact", "--session-sqlite=dry-run"])(
     "preserves registered-command JSON handling for doctor %s",
     (mode) => {
-      const argv = ["node", "openclaw", "doctor", mode, "--json"];
+      const argv = ["node", "carapace", "doctor", mode, "--json"];
       expect(isDoctorMachineOutput({ argv, stdoutIsTTY: true })).toBe(false);
     },
   );
@@ -50,21 +50,21 @@ describe("built-in machine-output resolvers", () => {
   it.each(["blob", "coverage", "purge", "query", "sessions"])(
     "detects proxy %s output",
     (command) => {
-      expect(isProxyMachineOutput(["node", "openclaw", "proxy", command])).toBe(true);
+      expect(isProxyMachineOutput(["node", "carapace", "proxy", command])).toBe(true);
     },
   );
 
   it("accepts supported root options after the command root", () => {
     expect(
-      isProxyMachineOutput(["node", "openclaw", "proxy", "--log-level", "debug", "sessions"]),
+      isProxyMachineOutput(["node", "carapace", "proxy", "--log-level", "debug", "sessions"]),
     ).toBe(true);
     expect(
-      isSkillsMachineOutput(["node", "openclaw", "skills", "--log-level", "debug", "verify", "x"]),
+      isSkillsMachineOutput(["node", "carapace", "skills", "--log-level", "debug", "verify", "x"]),
     ).toBe(true);
     expect(
       isGatewayMachineOutput([
         "node",
-        "openclaw",
+        "carapace",
         "gateway",
         "--log-level",
         "debug",
@@ -75,7 +75,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isGatewayMachineOutput([
         "node",
-        "openclaw",
+        "carapace",
         "gateway",
         "--log-level=debug",
         "restart-handoff",
@@ -85,30 +85,30 @@ describe("built-in machine-output resolvers", () => {
   });
 
   it("reserves raw cron scratch output", () => {
-    expect(isCronMachineOutput(["node", "openclaw", "cron", "scratch", "job"])).toBe(true);
+    expect(isCronMachineOutput(["node", "carapace", "cron", "scratch", "job"])).toBe(true);
     expect(
-      isCronMachineOutput(["node", "openclaw", "cron", "scratch", "job", "--set", "note"]),
+      isCronMachineOutput(["node", "carapace", "cron", "scratch", "job", "--set", "note"]),
     ).toBe(true);
-    expect(isCronMachineOutput(["node", "openclaw", "cron", "scratch", "job", "--unset"])).toBe(
+    expect(isCronMachineOutput(["node", "carapace", "cron", "scratch", "job", "--unset"])).toBe(
       true,
     );
   });
 
   it.each(["get", "file", "schema"])("reserves config %s machine output", (subcommand) => {
-    expect(isConfigMachineOutput(["node", "openclaw", "config", subcommand])).toBe(true);
+    expect(isConfigMachineOutput(["node", "carapace", "config", subcommand])).toBe(true);
     expect(
-      isConfigMachineOutput(["node", "openclaw", "config", "--section", "agents", subcommand]),
+      isConfigMachineOutput(["node", "carapace", "config", "--section", "agents", subcommand]),
     ).toBe(true);
   });
 
   it("treats config set --json as parse-only except for JSON dry-run reports", () => {
-    expect(isConfigMachineOutput(["node", "openclaw", "config", "set", "gateway.port"])).toBe(
+    expect(isConfigMachineOutput(["node", "carapace", "config", "set", "gateway.port"])).toBe(
       false,
     );
     expect(
       isConfigSetJsonParseOnly([
         "node",
-        "openclaw",
+        "carapace",
         "config",
         "set",
         "gateway.port",
@@ -119,7 +119,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isConfigSetJsonParseOnly([
         "node",
-        "openclaw",
+        "carapace",
         "config",
         "set",
         "gateway.port",
@@ -134,7 +134,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isSkillsMachineOutput([
         "node",
-        "openclaw",
+        "carapace",
         "skills",
         "--agent",
         "main",

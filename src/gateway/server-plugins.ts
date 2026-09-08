@@ -2,11 +2,11 @@
 // Loads plugin registries and builds fallback request context for non-WS paths.
 import { randomUUID } from "node:crypto";
 import { performance } from "node:perf_hooks";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import { allowsProcessHomeSessionScan } from "../config/paths.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import { extractPluginInstallRecordsFromInstalledPluginIndex } from "../plugins/installed-plugin-index-install-records.js";
 import { activatePluginRegistry } from "../plugins/loader-shared.js";
@@ -90,7 +90,7 @@ export async function dispatchTrustedPluginGatewayMethod<T>(
     throw new Error(
       `Gateway requests are only available to bundled or trusted official plugins. ${
         pluginId ? `Plugin "${pluginId}" is neither.` : "This call carries no plugin identity."
-      } See https://docs.openclaw.ai/plugins/sdk-runtime#api-runtime-gateway`,
+      } See https://github.com/Exaggarate/carapace#api-runtime-gateway`,
     );
   }
   const syntheticScopes = normalizeOperatorScopeList(options?.scopes);
@@ -256,8 +256,8 @@ function createGatewayPluginRegistrationLogger(params?: {
 }
 
 export function loadGatewayPlugins(params: {
-  cfg: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   autoEnabledReasons?: Readonly<Record<string, string[]>>;
   workspaceDir?: string;
   log: {

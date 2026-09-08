@@ -16,7 +16,7 @@ export function createGatewayRunChunkMetadataPlugin(rootDir = process.cwd()) {
     .resolve(rootDir, "src/cli/gateway-cli/run-command.ts")
     .replaceAll("\\", "/");
   return {
-    name: "openclaw:gateway-run-chunk-metadata",
+    name: "carapace:gateway-run-chunk-metadata",
     generateBundle: {
       order: "post",
       handler(_options, bundle) {

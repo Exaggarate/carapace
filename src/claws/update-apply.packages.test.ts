@@ -4,7 +4,7 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { PersistedClawInstall } from "./provenance.js";
 import type {
   ClawManifest,
-  ClawOpenClawProfile,
+  ClawCarapaceProfile,
   ClawPackage,
   ClawPackagePreflight,
   ClawSourceIdentity,
@@ -18,7 +18,7 @@ const source: ClawSourceIdentity = {
   name: "@acme/worker",
   version: "2.0.0",
   packageRoot: "/tmp/target",
-  manifestPath: "/tmp/target/openclaw.claw.json",
+  manifestPath: "/tmp/target/carapace.claw.json",
   integrityKind: "artifact",
   integrity: "sha256:target",
   byteLength: 1,
@@ -32,7 +32,7 @@ const manifest: ClawManifest = {
   cronJobs: [],
 };
 const install: PersistedClawInstall = {
-  schemaVersion: "openclaw.clawInstallRecord.v1",
+  schemaVersion: "carapace.clawInstallRecord.v1",
   claw: { ...source, version: "1.0.0", integrity: "sha256:current" },
   manifestSchemaVersion: 1,
   planIntegrity: "sha256:current-add-plan",
@@ -53,7 +53,7 @@ const weatherPackage: ClawPackage = {
 
 function plan(actions: ClawUpdateAction[]): ClawUpdatePlan {
   return {
-    schemaVersion: "openclaw.clawUpdatePlan.v1",
+    schemaVersion: "carapace.clawUpdatePlan.v1",
     stability: "experimental",
     dryRun: true,
     mutationAllowed: false,
@@ -96,11 +96,11 @@ function unchanged(id = "skill:@acme/weather"): ClawUpdateAction {
 }
 
 function targetSource(): ClawSourceIdentity {
-  const packageRoot = tempDirs.make("openclaw-claw-update-package-");
+  const packageRoot = tempDirs.make("carapace-claw-update-package-");
   return {
     ...source,
     packageRoot,
-    manifestPath: join(packageRoot, "openclaw.claw.json"),
+    manifestPath: join(packageRoot, "carapace.claw.json"),
   };
 }
 
@@ -221,14 +221,14 @@ describe("applyClawUpdatePlan package compatibility", () => {
   });
 
   it("keeps provenance blockers for unchanged profile extensions", async () => {
-    const targetOpenClawProfile: ClawOpenClawProfile = {
+    const targetCarapaceProfile: ClawCarapaceProfile = {
       schemaVersion: 1,
       agent: {},
       extensions: [
         {
           id: "weather",
           kind: "plugin",
-          format: "openclaw",
+          format: "carapace",
           source: "clawhub",
           ref: "@acme/weather",
           version: "1.0.0",
@@ -242,7 +242,7 @@ describe("applyClawUpdatePlan package compatibility", () => {
         updatePlan,
         {
           targetManifest: manifest,
-          targetOpenClawProfile,
+          targetCarapaceProfile,
           targetSource: targetSource(),
         },
         options(

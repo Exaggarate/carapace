@@ -8,13 +8,13 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { CONTEXT_WINDOW_HARD_MIN_TOKENS } from "../agents/context-window-guard.js";
 import { DEFAULT_PROVIDER } from "../agents/defaults.js";
 import { normalizeConfiguredProviderCatalogModelId } from "../agents/model-ref-shared.js";
 import { buildModelAliasIndex, modelKey, type ModelRef } from "../agents/model-selection.js";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
 import { applyPrimaryModel } from "../plugins/provider-model-primary.js";
@@ -181,15 +181,15 @@ export type CustomApiCompatibility = "openai" | "openai-responses" | "anthropic"
 
 /** Config mutation result for a custom API setup pass. */
 export type CustomApiResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   providerId: string;
   modelId: string;
   providerIdRenamedFrom?: string;
 };
 
-/** Inputs used to persist a custom provider in the OpenClaw config. */
+/** Inputs used to persist a custom provider in the Carapace config. */
 type ApplyCustomApiConfigParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   baseUrl: string;
   modelId: string;
   compatibility: CustomApiCompatibility;
@@ -242,7 +242,7 @@ export class CustomApiError extends Error {
 }
 
 type ResolveCustomProviderIdParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   baseUrl: string;
   providerId?: string;
 };
@@ -313,7 +313,7 @@ function configuredAliasModelKey(
 /** Returns a human-readable alias collision error for a custom model ref. */
 export function resolveCustomModelAliasError(params: {
   raw: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: ModelRef;
   manifestPlugins: readonly CustomAliasManifestPlugin[];
   agentId?: string;
@@ -694,7 +694,7 @@ export function applyCustomApiConfig(params: ApplyCustomApiConfigParams): Custom
   // Azure clients use api-key headers and no bearer Authorization header.
   const azureHeaders = isAzure && normalizedApiKey ? { "api-key": normalizedApiKey } : undefined;
 
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     ...params.config,
     models: {
       ...params.config.models,
@@ -714,7 +714,7 @@ export function applyCustomApiConfig(params: ApplyCustomApiConfigParams): Custom
     },
   };
 
-  const applyModelDefaults = (modelConfig: OpenClawConfig): OpenClawConfig => {
+  const applyModelDefaults = (modelConfig: CarapaceConfig): CarapaceConfig => {
     let updated =
       params.setAsPrimary === false ? modelConfig : applyPrimaryModel(modelConfig, modelRef);
     if (isAzure && isLikelyReasoningModel) {

@@ -1,29 +1,29 @@
 // Feishu plugin module implements outbound behavior.
 import path from "node:path";
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import {
   createMessageReceiptFromOutboundResults,
   createReplyToFanout,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   attachChannelToResult,
   createAttachedChannelResultAdapter,
-} from "openclaw/plugin-sdk/channel-send-result";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { resolveChunkMode, resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
+} from "carapace/plugin-sdk/channel-send-result";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { resolveChunkMode, resolveTextChunkLimit } from "carapace/plugin-sdk/reply-chunking";
 import {
   getReplyPayloadTtsSupplement,
   resolvePayloadMediaUrls,
   sendPayloadMediaSequenceAndFinalize,
   sendTextMediaPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-import { statRegularFileSync } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/reply-payload";
+import { statRegularFileSync } from "carapace/plugin-sdk/security-runtime";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { convertMarkdownTables } from "carapace/plugin-sdk/text-chunking";
 import type { ChannelOutboundAdapter } from "../runtime-api.js";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
@@ -77,7 +77,7 @@ import {
 // `sendFeishuFallbackPayload` reads it before calling `sendMedia`. This keeps
 // a direct-send attachment failure visible instead of degrading to a
 // fallback-text `ok:true` receipt (issue #112244, ClawSweeper P1).
-export const FEISHU_PROPAGATE_MEDIA_UPLOAD_FAILURE_MARKER = "__openclawPropagateMediaUploadFailure";
+export const FEISHU_PROPAGATE_MEDIA_UPLOAD_FAILURE_MARKER = "__carapacePropagateMediaUploadFailure";
 const FEISHU_TEXT_CHUNK_LIMIT = 4000;
 
 function normalizePossibleLocalImagePath(text: string | undefined): string | null {

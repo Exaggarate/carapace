@@ -3,10 +3,10 @@ import { Worker } from "node:worker_threads";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
   applySessionEntryLifecycleMutation,
   appendTranscriptMessage,
@@ -60,7 +60,7 @@ describe("SQLite session handle lifecycle", () => {
     scope = {
       sessionId: "handle-session",
       sessionKey: "agent:main:handle-session",
-      storePath: path.join(tempDirs.make("openclaw-session-handle-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-session-handle-"), "sessions.json"),
     };
     await replaceSessionEntry(scope, { sessionId: scope.sessionId, updatedAt: 1 });
     databasePath = resolveSqliteTargetFromSessionStorePath(scope.storePath).path!;
@@ -68,7 +68,7 @@ describe("SQLite session handle lifecycle", () => {
 
   afterEach(() => {
     archiveMaterializationHook.afterMaterialize = undefined;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it.each([0, 1])(
@@ -80,7 +80,7 @@ describe("SQLite session handle lifecycle", () => {
         { type: "message", id: "third", message: { role: "user", content: "third" } },
       ];
       await replaceTranscriptEvents(scope, events);
-      const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+      const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
       const row = database.db
         .prepare(
           "SELECT seq, event_json FROM transcript_events WHERE session_id = ? ORDER BY seq LIMIT 1 OFFSET ?",
@@ -118,7 +118,7 @@ describe("SQLite session handle lifecycle", () => {
 
       await withTranscriptWriteLock(scope, async (transcript) => {
         const before = await transcript.readEvents();
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
         if (kind === "events") {
           await expect(transcript.readEvents()).resolves.toEqual(before);
         } else {
@@ -137,7 +137,7 @@ describe("SQLite session handle lifecycle", () => {
         {
           message: { role: "user", content: "append after close" },
           shouldAppend: async () => {
-            expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+            expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
             return true;
           },
         },
@@ -189,8 +189,8 @@ describe("SQLite session handle lifecycle", () => {
     );
     expect(drains).not.toHaveLength(0);
 
-    expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
-    const replacement = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
+    const replacement = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     releaseWriter();
     await Promise.all([blockedWrite, ...drains]);
 
@@ -208,7 +208,7 @@ describe("SQLite session handle lifecycle", () => {
           {
             sessionKey: scope.sessionKey,
             buildEntry: async ({ currentEntry }) => {
-              expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+              expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
               return { ...currentEntry!, label: "built after close" };
             },
           },
@@ -224,7 +224,7 @@ describe("SQLite session handle lifecycle", () => {
       sessionKeys: [scope.sessionKey],
       includeLabelOwners: "Renamed",
       update: async ([snapshot]) => {
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
         return {
           result: undefined,
           replacements: [
@@ -246,12 +246,12 @@ describe("SQLite session handle lifecycle", () => {
       touchSessionEntry: false,
     });
     const databaseOptions = { agentId: "main", path: databasePath };
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     database.db.prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1").run();
     startSessionTranscriptIndexReconcile(databaseOptions);
     try {
       const ready = waitForSessionTranscriptProjection(scope);
-      expect(closeOpenClawAgentDatabaseByPath(database.path)).toBe(true);
+      expect(closeCarapaceAgentDatabaseByPath(database.path)).toBe(true);
       await ready;
       expect(
         readSessionTranscriptMessageEventPage(scope, { maxMessages: 0, offset: 0 }).totalMessages,
@@ -267,7 +267,7 @@ describe("SQLite session handle lifecycle", () => {
       touchSessionEntry: false,
     });
     const databaseOptions = { agentId: "main", path: databasePath };
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     database.db.prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1").run();
     let stalledWorker: Worker | undefined;
     startSessionTranscriptIndexReconcile({
@@ -317,7 +317,7 @@ describe("SQLite session handle lifecycle", () => {
       { sessionId: "current-session", updatedAt: 2 },
     );
     const closeHandle = vi.fn(() => {
-      expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+      expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
     });
     archiveMaterializationHook.afterMaterialize = closeHandle;
 

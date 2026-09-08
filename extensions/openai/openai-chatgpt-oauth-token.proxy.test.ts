@@ -9,8 +9,8 @@ const directLookup = vi.hoisted(() =>
   }),
 );
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     fetchWithSsrFGuard: (params: Parameters<typeof actual.fetchWithSsrFGuard>[0]) =>
@@ -54,8 +54,8 @@ describe.each(["exchange", "refresh"] as const)("OpenAI token %s proxy routing",
       "all_proxy",
       "NO_PROXY",
       "no_proxy",
-      "OPENCLAW_PROXY_ACTIVE",
-      "OPENCLAW_DEBUG_PROXY_ENABLED",
+      "CARAPACE_PROXY_ACTIVE",
+      "CARAPACE_DEBUG_PROXY_ENABLED",
     ]) {
       vi.stubEnv(key, undefined);
     }
@@ -83,7 +83,7 @@ describe.each(["exchange", "refresh"] as const)("OpenAI token %s proxy routing",
       vi.stubEnv("https_proxy", "");
     }
     if (scenario.managed) {
-      vi.stubEnv("OPENCLAW_PROXY_ACTIVE", "1");
+      vi.stubEnv("CARAPACE_PROXY_ACTIVE", "1");
     }
     const controller = new AbortController();
     if (scenario.aborted) {

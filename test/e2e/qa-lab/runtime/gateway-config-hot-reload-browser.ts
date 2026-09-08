@@ -35,7 +35,7 @@ export async function proveHotReloadBrowserSettings({
   });
   await context.addInitScript(
     ({ gatewayUrl, token }) => {
-      Object.assign(window, { __OPENCLAW_NATIVE_CONTROL_AUTH__: { gatewayUrl, token } });
+      Object.assign(window, { __CARAPACE_NATIVE_CONTROL_AUTH__: { gatewayUrl, token } });
     },
     { gatewayUrl: gateway.wsUrl, token: gateway.token },
   );
@@ -130,7 +130,7 @@ export async function proveHotReloadBrowserSettings({
     await ensureTranscript();
     for (const enabled of [false, true, false]) {
       await patch({ gateway: { controlUi: { automaticallyFetchFavicons: enabled } } });
-      const response = await http("/__openclaw__/link-favicon/example.com");
+      const response = await http("/__carapace__/link-favicon/example.com");
       assert.equal(response.status, enabled ? 200 : 404);
       await refreshPage();
       await page.getByText("fixture docs", { exact: true }).waitFor();

@@ -24,7 +24,7 @@ import {
 import {
   preparePerformanceFixture,
   type PerformanceFixtureOptions,
-} from "./openclaw-performance-workflow.test-support.js";
+} from "./carapace-performance-workflow.test-support.js";
 
 type Step = {
   name?: string;
@@ -261,7 +261,7 @@ export async function runCiGitStep(options: {
       if (docsPublish) {
         env.GITHUB_SHA = candidate;
         // Never let a caller's credential reach fixture command reports.
-        env.OPENCLAW_DOCS_SYNC_TOKEN = "fixture-docs-token";
+        env.CARAPACE_DOCS_SYNC_TOKEN = "fixture-docs-token";
         mkdirSync(path.join(workspace, "clawhub-source/.git"), { recursive: true });
         const publish = path.join(workspace, "publish");
         if (options.publishPath === "file") {

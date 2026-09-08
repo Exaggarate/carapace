@@ -2,7 +2,7 @@
 // Collects URL, auth, and handshake settings before constructing a GatewayClient.
 import { gatewayOriginScope } from "../../packages/gateway-client/src/gateway-origin-scope.js";
 import { resolveGatewayPublicOrigin } from "../config/gateway-public-origin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveGatewayInteractiveSurfaceAuth,
   resolveGatewayProbeSurfaceAuth,
@@ -28,7 +28,7 @@ function resolveGatewayUrlOverrideSource(urlSource: string): "cli" | "env" | und
   if (urlSource === "cli --url") {
     return "cli";
   }
-  if (urlSource === "env OPENCLAW_GATEWAY_URL") {
+  if (urlSource === "env CARAPACE_GATEWAY_URL") {
     return "env";
   }
   return undefined;
@@ -68,7 +68,7 @@ export function ensureExplicitGatewayAuth(params: {
   }
   const sourceHint =
     params.urlOverrideSource === "env"
-      ? "Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD alongside OPENCLAW_GATEWAY_URL; config credentials are intentionally not reused."
+      ? "Set CARAPACE_GATEWAY_TOKEN or CARAPACE_GATEWAY_PASSWORD alongside CARAPACE_GATEWAY_URL; config credentials are intentionally not reused."
       : "For the default local or SSH-tunneled Gateway, remove --url to use the configured target.";
   throw new GatewayExplicitAuthRequiredError(
     [
@@ -95,11 +95,11 @@ function appendControlUiBasePath(url: string, basePath: string): string {
 
 function resolveExactConfiguredGatewayTarget(params: {
   buildConnectionDetails: (options: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     ignoreEnvUrlOverride?: boolean;
     localPortOverride?: number;
   }) => GatewayConnectionDetails;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   explicitUrl: string;
   localPortOverride?: number;
 }): ConfiguredGatewayTargetIdentity | undefined {
@@ -162,7 +162,7 @@ export function resolveGatewayUrlOverride(params: {
   if (params.ignoreEnvUrlOverride || params.localPortOverride !== undefined) {
     return {};
   }
-  const envUrl = trimToUndefined((params.env ?? process.env).OPENCLAW_GATEWAY_URL);
+  const envUrl = trimToUndefined((params.env ?? process.env).CARAPACE_GATEWAY_URL);
   return envUrl ? { url: envUrl, source: "env" } : {};
 }
 
@@ -170,7 +170,7 @@ export function resolveGatewayUrlOverride(params: {
  * Resolves the URL, auth material, and handshake tuning needed to start a GatewayClient.
  */
 export async function resolveGatewayClientBootstrap(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   gatewayUrl?: string;
   explicitAuth?: ExplicitGatewayAuth;
   env?: NodeJS.ProcessEnv;
@@ -189,7 +189,7 @@ export async function resolveGatewayClientBootstrap(params: {
   allowStoredOriginAuth?: (scope: string) => boolean;
   overrideAuthErrorHint?: string;
   buildConnectionDetails?: (options: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     url?: string;
     configPath?: string;
     urlSource?: "cli" | "env";

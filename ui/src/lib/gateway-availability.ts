@@ -1,4 +1,4 @@
-import { GatewayProtocolRequestError } from "@openclaw/gateway-client/browser";
+import { GatewayProtocolRequestError } from "@carapace/gateway-client/browser";
 import {
   isGatewayRestartUnavailableError,
   isGatewaySuspendUnavailableError,

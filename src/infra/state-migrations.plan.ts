@@ -1,11 +1,11 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createConfigIO } from "../config/io.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "./errors.js";
 import { resolveRuntimeProcessEntrypointUrl } from "./runtime-process-url.js";
 import { resolveRuntimeWorkerArgv } from "./runtime-worker-url.js";
@@ -39,7 +39,7 @@ export async function captureLegacyStateSnapshotIdentity(
     let failure = "Snapshot worker returned no result";
     const child = execFile(
       process.execPath,
-      [...resolveRuntimeWorkerArgv(worker), "--openclaw-state-snapshot"],
+      [...resolveRuntimeWorkerArgv(worker), "--carapace-state-snapshot"],
       { encoding: "utf8" },
       (error, stdout, stderr) => {
         if (error) {
@@ -92,7 +92,7 @@ export async function readLegacyStateMigrationPlanConfig(params: {
   homeDir: string;
   env: NodeJS.ProcessEnv;
 }): Promise<{
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configIncludedPaths: string[];
   configDigest?: string;
   rootDigest?: string;
@@ -170,12 +170,12 @@ export function createLegacyStateMigrationCallerEnv(params: {
   const env = { ...(params.env ?? process.env) };
   // Direct execution treats an explicit state root as authoritative and skips
   // default-root relocation. Preserve that caller fact until discovery is complete.
-  for (const key of ["OPENCLAW_HOME", "OPENCLAW_OAUTH_DIR", "STATE_DIRECTORY"]) {
+  for (const key of ["CARAPACE_HOME", "CARAPACE_OAUTH_DIR", "STATE_DIRECTORY"]) {
     delete env[key];
   }
   env.HOME = path.resolve(params.snapshot.homeDir);
   env.USERPROFILE = env.HOME;
-  env.OPENCLAW_CONFIG_PATH = path.resolve(params.snapshot.configPath);
+  env.CARAPACE_CONFIG_PATH = path.resolve(params.snapshot.configPath);
   return env;
 }
 
@@ -184,7 +184,7 @@ export function createLegacyStateMigrationPlanEnv(params: {
   snapshot: LegacyStateMigrationPlan["snapshot"];
 }): NodeJS.ProcessEnv {
   const env = createLegacyStateMigrationCallerEnv(params);
-  env.OPENCLAW_STATE_DIR = path.resolve(params.snapshot.stateDir);
+  env.CARAPACE_STATE_DIR = path.resolve(params.snapshot.stateDir);
   return env;
 }
 

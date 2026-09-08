@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { bundledPluginFile, bundledPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledPluginFile, bundledPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { collectClawHubPublishablePluginPackages } from "../scripts/lib/plugin-clawhub-release.ts";
 import {
@@ -14,7 +14,7 @@ import {
   collectPluginReleaseVersionFloorErrors,
   collectPublishablePluginPackages,
   collectPublishablePluginPackageErrors,
-  OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+  CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
   parsePluginReleaseArgs,
   parsePluginNpmReleaseArgs,
   parsePluginReleaseSelection,
@@ -62,8 +62,8 @@ describe("parsePluginReleaseSelection", () => {
 
   it("dedupes and sorts comma or whitespace separated package names", () => {
     expect(
-      parsePluginReleaseSelection(" @openclaw/zalo, @openclaw/feishu  @openclaw/zalo "),
-    ).toEqual(["@openclaw/feishu", "@openclaw/zalo"]);
+      parsePluginReleaseSelection(" @carapace/zalo, @carapace/feishu  @carapace/zalo "),
+    ).toEqual(["@carapace/feishu", "@carapace/zalo"]);
   });
 });
 
@@ -119,7 +119,7 @@ describe("parsePluginReleaseArgs", () => {
         "--selection-mode",
         "all-publishable",
         "--plugins",
-        "@openclaw/zalo",
+        "@carapace/zalo",
       ]),
     ).toThrowError("`--selection-mode all-publishable` must not be combined with `--plugins`.");
   });
@@ -157,7 +157,7 @@ describe("parsePluginReleaseArgs", () => {
         "--selection-mode",
         "selected",
         "--plugins",
-        "@openclaw/slack",
+        "@carapace/slack",
         "--npm-dist-tag",
         "extended-stable",
       ]),
@@ -171,7 +171,7 @@ function externalPluginContract(version: string) {
       pluginApi: `>=${version}`,
     },
     build: {
-      openclawVersion: version,
+      carapaceVersion: version,
     },
   };
 }
@@ -184,18 +184,18 @@ describe("collectPublishablePluginPackageErrors", () => {
         packageDir: bundledPluginRoot("zalo"),
         readmeText: "# Zalo\n",
         packageJson: {
-          name: "@openclaw/zalo",
+          name: "@carapace/zalo",
           version: "2026.3.15",
           type: "module",
           repository: {
             type: "git",
-            url: OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+            url: CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
           },
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             ...externalPluginContract("2026.3.15"),
             install: {
-              npmSpec: "@openclaw/zalo",
+              npmSpec: "@carapace/zalo",
             },
             release: {
               publishToNpm: true,
@@ -216,7 +216,7 @@ describe("collectPublishablePluginPackageErrors", () => {
           name: "broken",
           version: "latest",
           private: true,
-          openclaw: {
+          carapace: {
             extensions: [""],
             ...externalPluginContract("2026.3.15"),
             install: {
@@ -229,13 +229,13 @@ describe("collectPublishablePluginPackageErrors", () => {
         },
       }),
     ).toEqual([
-      'package name must start with "@openclaw/"; found "broken".',
+      'package name must start with "@carapace/"; found "broken".',
       "package.json private must not be true.",
       'package.json type must be "module" so built .js runtime entries load as ESM.',
-      `package.json repository.url must be "${OPENCLAW_PLUGIN_NPM_REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing; found "<missing>".`,
+      `package.json repository.url must be "${CARAPACE_PLUGIN_NPM_REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing; found "<missing>".`,
       'package.json version must match YYYY.M.PATCH, YYYY.M.PATCH-N, YYYY.M.PATCH-alpha.N, or YYYY.M.PATCH-beta.N; found "latest".',
-      "openclaw.extensions must contain only non-empty strings.",
-      "openclaw.install.npmSpec must be a non-empty string for publishable plugins.",
+      "carapace.extensions must contain only non-empty strings.",
+      "carapace.install.npmSpec must be a non-empty string for publishable plugins.",
     ]);
   });
 
@@ -246,14 +246,14 @@ describe("collectPublishablePluginPackageErrors", () => {
         packageDir: bundledPluginRoot("twitch"),
         readmeText: "# Twitch\n",
         packageJson: {
-          name: "@openclaw/twitch",
+          name: "@carapace/twitch",
           version: "2026.5.1-beta.1",
           type: "module",
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             ...externalPluginContract("2026.5.1-beta.1"),
             install: {
-              npmSpec: "@openclaw/twitch",
+              npmSpec: "@carapace/twitch",
             },
             release: {
               publishToNpm: true,
@@ -262,7 +262,7 @@ describe("collectPublishablePluginPackageErrors", () => {
         },
       }),
     ).toEqual([
-      `package.json repository.url must be "${OPENCLAW_PLUGIN_NPM_REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing; found "<missing>".`,
+      `package.json repository.url must be "${CARAPACE_PLUGIN_NPM_REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing; found "<missing>".`,
     ]);
   });
 
@@ -273,14 +273,14 @@ describe("collectPublishablePluginPackageErrors", () => {
         packageDir: bundledPluginRoot("voice-call"),
         readmeText: "# Voice call\n",
         packageJson: {
-          name: "@openclaw/voice-call",
+          name: "@carapace/voice-call",
           version: "2026.5.1-beta.1",
           type: "module",
           repository: {
             type: "git",
-            url: OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+            url: CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
           },
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             ...externalPluginContract("2026.5.1-beta.1"),
             release: {
@@ -289,7 +289,7 @@ describe("collectPublishablePluginPackageErrors", () => {
           },
         },
       }),
-    ).toEqual(["openclaw.install.npmSpec must be a non-empty string for publishable plugins."]);
+    ).toEqual(["carapace.install.npmSpec must be a non-empty string for publishable plugins."]);
   });
 
   it("requires the external plugin package compatibility contract for npm publish", () => {
@@ -299,17 +299,17 @@ describe("collectPublishablePluginPackageErrors", () => {
         packageDir: bundledPluginRoot("voice-call"),
         readmeText: "# Voice call\n",
         packageJson: {
-          name: "@openclaw/voice-call",
+          name: "@carapace/voice-call",
           version: "2026.5.1-beta.1",
           type: "module",
           repository: {
             type: "git",
-            url: OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+            url: CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
           },
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             install: {
-              npmSpec: "@openclaw/voice-call",
+              npmSpec: "@carapace/voice-call",
             },
             release: {
               publishToNpm: true,
@@ -318,8 +318,8 @@ describe("collectPublishablePluginPackageErrors", () => {
         },
       }),
     ).toEqual([
-      "openclaw.compat.pluginApi is required for external code plugin packages.",
-      "openclaw.build.openclawVersion is required for external code plugin packages.",
+      "carapace.compat.pluginApi is required for external code plugin packages.",
+      "carapace.build.carapaceVersion is required for external code plugin packages.",
     ]);
   });
 
@@ -330,18 +330,18 @@ describe("collectPublishablePluginPackageErrors", () => {
         packageDir: bundledPluginRoot("zalo"),
         readmeText: " \n",
         packageJson: {
-          name: "@openclaw/zalo",
+          name: "@carapace/zalo",
           version: "2026.3.15",
           type: "module",
           repository: {
             type: "git",
-            url: OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+            url: CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
           },
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             ...externalPluginContract("2026.3.15"),
             install: {
-              npmSpec: "@openclaw/zalo",
+              npmSpec: "@carapace/zalo",
             },
             release: {
               publishToNpm: true,
@@ -359,21 +359,21 @@ describe("collectPublishablePluginPackageErrors", () => {
         packageDir: bundledPluginRoot("codex"),
         readmeText: "# Codex\n",
         packageJson: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: "2026.6.11",
           type: "module",
           repository: {
             type: "git",
-            url: OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+            url: CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
           },
           dependencies: {
             "@openai/codex": "0.142.5",
           },
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             ...externalPluginContract("2026.6.11"),
             install: {
-              npmSpec: "@openclaw/codex",
+              npmSpec: "@carapace/codex",
             },
             release: {
               publishToNpm: true,
@@ -383,8 +383,8 @@ describe("collectPublishablePluginPackageErrors", () => {
         },
       }),
     ).toEqual([
-      'openclaw.release.requireLatestDependencies must not contain duplicate package names; found "@openai/codex".',
-      'openclaw.release.requireLatestDependencies must reference package.json dependencies or optionalDependencies; "missing" is not a runtime dependency.',
+      'carapace.release.requireLatestDependencies must not contain duplicate package names; found "@openai/codex".',
+      'carapace.release.requireLatestDependencies must reference package.json dependencies or optionalDependencies; "missing" is not a runtime dependency.',
     ]);
   });
 });
@@ -394,12 +394,12 @@ describe("collectPluginReleaseVersionFloorErrors", () => {
     expect(
       collectPluginReleaseVersionFloorErrors([
         {
-          packageName: "@openclaw/demo",
+          packageName: "@carapace/demo",
           version: "2026.6.4-beta.1",
         },
       ]),
     ).toEqual([
-      '@openclaw/demo@2026.6.4-beta.1: June 2026 stable and beta release trains must use patch 5 or higher because 2026.6.5-beta.1 is already published; found "2026.6.4-beta.1".',
+      '@carapace/demo@2026.6.4-beta.1: June 2026 stable and beta release trains must use patch 5 or higher because 2026.6.5-beta.1 is already published; found "2026.6.4-beta.1".',
     ]);
   });
 
@@ -407,11 +407,11 @@ describe("collectPluginReleaseVersionFloorErrors", () => {
     expect(
       collectPluginReleaseVersionFloorErrors([
         {
-          packageName: "@openclaw/demo",
+          packageName: "@carapace/demo",
           version: "2026.6.4-alpha.1",
         },
         {
-          packageName: "@openclaw/demo",
+          packageName: "@carapace/demo",
           version: "2026.6.5-beta.2",
         },
       ]),
@@ -423,7 +423,7 @@ describe("collectPluginReleaseDependencyFreshnessWarnings", () => {
   const plugin: PublishablePluginPackage = {
     extensionId: "codex",
     packageDir: "extensions/codex",
-    packageName: "@openclaw/codex",
+    packageName: "@carapace/codex",
     version: "2026.6.11",
     channel: "stable",
     publishTag: "latest",
@@ -445,14 +445,14 @@ describe("collectPluginReleaseDependencyFreshnessWarnings", () => {
     childProcessMock.execFileSyncOverride = git as unknown as ExecFileSync;
     const resolveLatest = vi.fn(() => "0.153.0");
     const warnings = assertPluginReleaseDependencyFreshness(
-      [plugin, { ...plugin, packageName: "@openclaw/another-harness" }],
+      [plugin, { ...plugin, packageName: "@carapace/another-harness" }],
       "release check",
       resolveLatest,
     );
 
     expect(warnings).toEqual([
-      '@openclaw/codex@2026.6.11: @openai/codex pinned "0.139.0", npm latest is "0.153.0". Freshness is advisory; retain the release-validated pin.',
-      '@openclaw/another-harness@2026.6.11: @openai/codex pinned "0.139.0", npm latest is "0.153.0". Freshness is advisory; retain the release-validated pin.',
+      '@carapace/codex@2026.6.11: @openai/codex pinned "0.139.0", npm latest is "0.153.0". Freshness is advisory; retain the release-validated pin.',
+      '@carapace/another-harness@2026.6.11: @openai/codex pinned "0.139.0", npm latest is "0.153.0". Freshness is advisory; retain the release-validated pin.',
     ]);
     expect(warn.mock.calls).toEqual(
       warnings.map((warning) => [`release check: warning: ${warning}`]),
@@ -495,7 +495,7 @@ describe("collectPluginReleaseDependencyFreshnessWarnings", () => {
         throw new Error("registry unavailable");
       }),
     ).toEqual([
-      '@openclaw/codex@2026.6.11: could not resolve npm latest for @openai/codex (pinned "0.139.0"); freshness is advisory: registry unavailable',
+      '@carapace/codex@2026.6.11: could not resolve npm latest for @openai/codex (pinned "0.139.0"); freshness is advisory: registry unavailable',
     ]);
   });
 
@@ -512,7 +512,7 @@ describe("collectPluginReleaseDependencyFreshnessWarnings", () => {
         "dist-tags.latest",
         "--json",
         "--userconfig",
-        expect.stringContaining("openclaw-plugin-npm-view-"),
+        expect.stringContaining("carapace-plugin-npm-view-"),
       ]);
       expect(options).toMatchObject({
         killSignal: "SIGKILL",
@@ -522,7 +522,7 @@ describe("collectPluginReleaseDependencyFreshnessWarnings", () => {
     }) as unknown as ExecFileSync;
 
     expect(collectPluginReleaseDependencyFreshnessWarnings([plugin])).toEqual([
-      '@openclaw/codex@2026.6.11: could not resolve npm latest for @openai/codex (pinned "0.139.0"); freshness is advisory: npm view timed out after 60000ms.',
+      '@carapace/codex@2026.6.11: could not resolve npm latest for @openai/codex (pinned "0.139.0"); freshness is advisory: npm view timed out after 60000ms.',
     ]);
   });
 });
@@ -531,7 +531,7 @@ describe("collectPluginReleasePlan", () => {
   it.each(["stale", "unavailable"])(
     "keeps npm publish candidates when latest is %s",
     async (scenario) => {
-      const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+      const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
       writePublishablePluginFixture(repoDir, {
         version: "2026.9.1",
         publishTo: "npm",
@@ -551,7 +551,7 @@ describe("collectPluginReleasePlan", () => {
           selectionMode: "all-publishable",
         });
         expect(plan.candidates.map((plugin) => plugin.packageName)).toEqual([
-          "@openclaw/demo-plugin",
+          "@carapace/demo-plugin",
         ]);
         expect(plan.warnings).toHaveLength(1);
         expect(plan.warnings[0]).toContain("demo-runtime");
@@ -566,7 +566,7 @@ describe("collectPluginReleasePlan", () => {
   );
 
   it("fails closed when the registry refuses the published-version lookup", async () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writePublishablePluginFixture(repoDir, {
       version: "2026.4.10",
       publishTo: "npm",
@@ -579,7 +579,7 @@ describe("collectPluginReleasePlan", () => {
   });
 
   it("bounds parallel registry reads and partitions every selected package", async () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     const version = "2026.4.10";
     const names = Array.from({ length: 10 }, (_, index) => {
       const extensionId = `demo-${index}`;
@@ -629,23 +629,23 @@ describe("collectPluginReleasePlan", () => {
 
 describe("collectPublishablePluginPackages", () => {
   it("rejects duplicate npm package names from different plugin directories", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     for (const extensionId of ["demo-one", "demo-two"]) {
       writePublishablePluginFixture(repoDir, {
         extensionId,
-        packageName: "@openclaw/shared-plugin",
+        packageName: "@carapace/shared-plugin",
         version: "2026.4.10",
         publishTo: "npm",
       });
     }
 
     expect(() => collectPublishablePluginPackages(repoDir)).toThrow(
-      "package @openclaw/shared-plugin is declared by multiple plugin sources: demo-one (extensions/demo-one), demo-two (extensions/demo-two).",
+      "package @carapace/shared-plugin is declared by multiple plugin sources: demo-one (extensions/demo-one), demo-two (extensions/demo-two).",
     );
   });
 
   it("defers explicitly bundled plugins from npm and ClawHub release plans", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writePublishablePluginFixture(repoDir, {
       version: "2026.4.10",
       publishTo: "both",
@@ -670,13 +670,13 @@ describe("collectPublishablePluginPackages", () => {
       const packageJson = JSON.parse(
         readFileSync(join(plugin.packageDir, "package.json"), "utf8"),
       ) as {
-        openclaw?: {
+        carapace?: {
           build?: {
             bundledDist?: unknown;
           };
         };
       };
-      if (packageJson.openclaw?.build?.bundledDist === true) {
+      if (packageJson.carapace?.build?.bundledDist === true) {
         corePackageRuntimePluginIds.add(plugin.extensionId);
       }
     }
@@ -692,7 +692,7 @@ describe("collectPublishablePluginPackages", () => {
   });
 
   it("collects publishable npm plugins from extension package manifests", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writePublishablePluginFixture(repoDir, {
       version: "2026.4.10",
       publishTo: "npm",
@@ -702,17 +702,17 @@ describe("collectPublishablePluginPackages", () => {
       {
         extensionId: "demo-plugin",
         packageDir: "extensions/demo-plugin",
-        packageName: "@openclaw/demo-plugin",
+        packageName: "@carapace/demo-plugin",
         version: "2026.4.10",
         channel: "stable",
         publishTag: "latest",
-        installNpmSpec: "@openclaw/demo-plugin",
+        installNpmSpec: "@carapace/demo-plugin",
       },
     ]);
   });
 
   it("uses extended-stable for every publishable plugin at the exact root version", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writeJsonFile(join(repoDir, "package.json"), { version: "2026.7.33" });
     writePublishablePluginFixture(repoDir, {
       version: "2026.7.33",
@@ -725,7 +725,7 @@ describe("collectPublishablePluginPackages", () => {
   });
 
   it("rejects extended-stable plugins whose version differs from core", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writeJsonFile(join(repoDir, "package.json"), { version: "2026.7.34" });
     writePublishablePluginFixture(repoDir, {
       version: "2026.7.33",
@@ -738,7 +738,7 @@ describe("collectPublishablePluginPackages", () => {
   });
 
   it("collects release dependencies for advisory npm latest checks", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writePublishablePluginFixture(repoDir, {
       version: "2026.4.10",
       publishTo: "npm",
@@ -753,11 +753,11 @@ describe("collectPublishablePluginPackages", () => {
       {
         extensionId: "demo-plugin",
         packageDir: "extensions/demo-plugin",
-        packageName: "@openclaw/demo-plugin",
+        packageName: "@carapace/demo-plugin",
         version: "2026.4.10",
         channel: "stable",
         publishTag: "latest",
-        installNpmSpec: "@openclaw/demo-plugin",
+        installNpmSpec: "@carapace/demo-plugin",
         requiredLatestDependencies: [
           {
             packageName: "demo-runtime",
@@ -769,21 +769,21 @@ describe("collectPublishablePluginPackages", () => {
   });
 
   it("does not validate unselected publishable plugin manifests", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writePublishablePluginFixture(repoDir, {
       version: "2026.4.10-beta.1",
       publishTo: "npm",
     });
     mkdirSync(join(repoDir, "extensions", "private-plugin"), { recursive: true });
     writeJsonFile(join(repoDir, "extensions", "private-plugin", "package.json"), {
-      name: "@openclaw/private-plugin",
+      name: "@carapace/private-plugin",
       version: "2026.4.10-beta.1",
       private: true,
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         ...externalPluginContract("2026.4.10-beta.1"),
         install: {
-          npmSpec: "@openclaw/private-plugin",
+          npmSpec: "@carapace/private-plugin",
         },
         release: {
           publishToNpm: true,
@@ -793,15 +793,15 @@ describe("collectPublishablePluginPackages", () => {
 
     expect(
       collectPublishablePluginPackages(repoDir, {
-        packageNames: ["@openclaw/demo-plugin"],
+        packageNames: ["@carapace/demo-plugin"],
       }),
     ).toEqual([
       {
         extensionId: "demo-plugin",
         packageDir: "extensions/demo-plugin",
-        installNpmSpec: "@openclaw/demo-plugin",
+        installNpmSpec: "@carapace/demo-plugin",
         channel: "beta",
-        packageName: "@openclaw/demo-plugin",
+        packageName: "@carapace/demo-plugin",
         publishTag: "beta",
         version: "2026.4.10-beta.1",
       },
@@ -809,13 +809,13 @@ describe("collectPublishablePluginPackages", () => {
   });
 
   it("treats an explicit empty extension filter as no candidates", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     mkdirSync(join(repoDir, "extensions", "private-plugin"), { recursive: true });
     writeJsonFile(join(repoDir, "extensions", "private-plugin", "package.json"), {
-      name: "@openclaw/private-plugin",
+      name: "@carapace/private-plugin",
       version: "2026.4.10-beta.1",
       private: true,
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         ...externalPluginContract("2026.4.10-beta.1"),
         release: {
@@ -832,7 +832,7 @@ describe("collectPublishablePluginPackages", () => {
   });
 
   it("publishes alpha plugin packages to the alpha dist-tag", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-release-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-release-");
     writePublishablePluginFixture(repoDir, {
       version: "2026.4.10-alpha.1",
       publishTo: "npm",
@@ -842,8 +842,8 @@ describe("collectPublishablePluginPackages", () => {
       {
         extensionId: "demo-plugin",
         packageDir: "extensions/demo-plugin",
-        installNpmSpec: "@openclaw/demo-plugin",
-        packageName: "@openclaw/demo-plugin",
+        installNpmSpec: "@carapace/demo-plugin",
+        packageName: "@carapace/demo-plugin",
         channel: "alpha",
         publishTag: "alpha",
         version: "2026.4.10-alpha.1",
@@ -857,7 +857,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     {
       extensionId: "feishu",
       packageDir: bundledPluginRoot("feishu"),
-      packageName: "@openclaw/feishu",
+      packageName: "@carapace/feishu",
       version: "2026.3.15",
       channel: "stable",
       publishTag: "latest",
@@ -865,7 +865,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     {
       extensionId: "zalo",
       packageDir: bundledPluginRoot("zalo"),
-      packageName: "@openclaw/zalo",
+      packageName: "@carapace/zalo",
       version: "2026.3.15-beta.1",
       channel: "beta",
       publishTag: "beta",
@@ -885,7 +885,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     expect(
       resolveSelectedPublishablePluginPackages({
         plugins: publishablePlugins,
-        selection: ["@openclaw/zalo"],
+        selection: ["@carapace/zalo"],
       }),
     ).toEqual([publishablePlugins[1]]);
   });
@@ -894,9 +894,9 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     expect(() =>
       resolveSelectedPublishablePluginPackages({
         plugins: publishablePlugins,
-        selection: ["@openclaw/missing"],
+        selection: ["@carapace/missing"],
       }),
-    ).toThrowError("Unknown or non-publishable plugin package selection: @openclaw/missing.");
+    ).toThrowError("Unknown or non-publishable plugin package selection: @carapace/missing.");
   });
 
   it("rejects duplicate selected package provenance instead of choosing the last entry", () => {
@@ -914,7 +914,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
             packageDir: "extensions/feishu-shadow",
           },
         ],
-        selection: ["@openclaw/feishu"],
+        selection: ["@carapace/feishu"],
       }),
     ).toThrow("Plugin selection has conflicting plugin package provenance");
   });
@@ -945,7 +945,7 @@ describe("collectPluginNpmGitRangeSelection", () => {
     "scripts/plugin-npm-release-plan.ts",
     "src/plugins/package-entrypoints.ts",
   ])("selects all publishable plugins for an authority-only %s change", (changedPath) => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-range-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-range-");
     const absolutePath = join(repoDir, changedPath);
     mkdirSync(dirname(absolutePath), { recursive: true });
     writeFileSync(absolutePath, "// before\n");
@@ -955,9 +955,9 @@ describe("collectPluginNpmGitRangeSelection", () => {
       "git",
       [
         "-c",
-        "user.name=OpenClaw Tests",
+        "user.name=Carapace Tests",
         "-c",
-        "user.email=tests@openclaw.invalid",
+        "user.email=tests@carapace.invalid",
         "commit",
         "-qm",
         "base",
@@ -975,9 +975,9 @@ describe("collectPluginNpmGitRangeSelection", () => {
       "git",
       [
         "-c",
-        "user.name=OpenClaw Tests",
+        "user.name=Carapace Tests",
         "-c",
-        "user.email=tests@openclaw.invalid",
+        "user.email=tests@carapace.invalid",
         "commit",
         "-qm",
         "change",
@@ -1006,7 +1006,7 @@ describe("resolveChangedPublishablePluginPackages", () => {
     {
       extensionId: "feishu",
       packageDir: bundledPluginRoot("feishu"),
-      packageName: "@openclaw/feishu",
+      packageName: "@carapace/feishu",
       version: "2026.3.15",
       channel: "stable",
       publishTag: "latest",
@@ -1014,7 +1014,7 @@ describe("resolveChangedPublishablePluginPackages", () => {
     {
       extensionId: "zalo",
       packageDir: bundledPluginRoot("zalo"),
-      packageName: "@openclaw/zalo",
+      packageName: "@carapace/zalo",
       version: "2026.3.15-beta.1",
       channel: "beta",
       publishTag: "beta",

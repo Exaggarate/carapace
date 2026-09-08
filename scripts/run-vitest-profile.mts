@@ -22,7 +22,7 @@ function readOutputDirValue(argv: string[], index: number): string {
  */
 export function parseArgs(argv: string[]) {
   let mode = "";
-  let outputDir = process.env.OPENCLAW_VITEST_PROFILE_DIR?.trim() || "";
+  let outputDir = process.env.CARAPACE_VITEST_PROFILE_DIR?.trim() || "";
   let vitestArgs: string[] = [];
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -65,7 +65,7 @@ export function resolveVitestProfileDir({ mode, outputDir }: VitestProfileOption
     return path.resolve(outputDir);
   }
 
-  return fs.mkdtempSync(path.join(os.tmpdir(), `openclaw-vitest-${mode}-profile-`));
+  return fs.mkdtempSync(path.join(os.tmpdir(), `carapace-vitest-${mode}-profile-`));
 }
 
 /**

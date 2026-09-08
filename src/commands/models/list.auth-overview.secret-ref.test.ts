@@ -4,7 +4,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import { resolveProviderAuthOverview } from "./list.auth-overview.js";
 
 const credential = "synthetic-resolved-provider-credential";
@@ -26,7 +26,7 @@ function sourceConfig(id = "provider-key") {
         diagnostic: { source: "exec", command: "/synthetic/credential-provider" },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
 function publishResolvedConfig(source: ReturnType<typeof sourceConfig>) {
@@ -42,7 +42,7 @@ function publishResolvedConfig(source: ReturnType<typeof sourceConfig>) {
   return resolved;
 }
 
-function overview(cfg: OpenClawConfig) {
+function overview(cfg: CarapaceConfig) {
   return resolveProviderAuthOverview({
     provider: "diagnostic",
     cfg,

@@ -1,4 +1,4 @@
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 // Browser tests cover cdp.internal plugin behavior.
 import { afterEach, describe, expect, it } from "vitest";
 import { WebSocketServer } from "ws";
@@ -376,14 +376,14 @@ describe("cdp internal", () => {
         }
         if (msg.method === "DOM.describeNode") {
           return cdpResult({
-            node: { backendNodeId: 44, attributes: ["data-openclaw-cdp-ci", "0"] },
+            node: { backendNodeId: 44, attributes: ["data-carapace-cdp-ci", "0"] },
           });
         }
         if (msg.method === "DOM.resolveNode") {
           return cdpResult({ object: { objectId: "link1" } });
         }
         if (msg.method === "Runtime.callFunctionOn") {
-          return runtimeValueResult("https://docs.openclaw.ai/");
+          return runtimeValueResult("https://github.com/Exaggarate/carapace");
         }
         return undefined;
       });
@@ -396,7 +396,7 @@ describe("cdp internal", () => {
       });
 
       expect(snap.snapshot).toContain('- button "Save\\n- button [ref=e3]" [ref=e1]');
-      expect(snap.snapshot).toContain('- link "Docs" [ref=e2] [url=https://docs.openclaw.ai/]');
+      expect(snap.snapshot).toContain('- link "Docs" [ref=e2] [url=https://github.com/Exaggarate/carapace]');
       expect(snap.snapshot).toContain(
         '- generic "Clickable Card" [ref=e3] [cursor:pointer, onclick]',
       );

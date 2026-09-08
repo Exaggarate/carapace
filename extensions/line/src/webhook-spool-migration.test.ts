@@ -1,6 +1,6 @@
 // Line tests cover the pre-drain (#109655) spool upgrade migration.
 import type { webhook } from "@line/bot-sdk";
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { migrateLineLegacySpoolRows } from "./webhook-spool-migration.js";
 import { createLineWebhookSpool, type LineWebhookTurnAdoptionLifecycle } from "./webhook-spool.js";
@@ -14,7 +14,7 @@ import {
 
 describe("LINE webhook spool upgrade migration", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("delivers pre-drain rows once after the doctor migration", async () => {

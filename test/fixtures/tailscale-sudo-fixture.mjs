@@ -4,7 +4,7 @@ if (process.argv.includes("status")) {
   process.exit(0);
 }
 if (process.argv[2] === "-n") {
-  const mode = process.env.OPENCLAW_TEST_TAILSCALE_SUDO_FIXTURE_MODE;
+  const mode = process.env.CARAPACE_TEST_TAILSCALE_SUDO_FIXTURE_MODE;
   if (mode === "password") {
     process.stderr.write("sudo: a password is required\n");
   } else if (mode === "route-error") {

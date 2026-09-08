@@ -10,7 +10,7 @@ import {
   persistSessionTranscriptTurn,
   upsertSessionEntryCore,
 } from "../../../../src/config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { READ_SCOPE } from "../../../../src/gateway/method-scopes.js";
 import { clearModelAuthStatusUsageCache } from "../../../../src/gateway/server-methods/models-auth-status-usage-cache.js";
 import { testApi as usageTestApi } from "../../../../src/gateway/server-methods/usage.js";
@@ -27,11 +27,11 @@ import { readSessionCostUsageRollupRows } from "../../../../src/infra/session-co
 import type { CostUsageSummary } from "../../../../src/infra/session-cost-usage.js";
 import type { SessionUsageTimeSeries } from "../../../../src/shared/session-usage-timeseries-types.js";
 import type { SessionsUsageResult } from "../../../../src/shared/usage-types.js";
-import { resolveOpenClawAgentSqlitePath } from "../../../../src/state/openclaw-agent-db.paths.js";
+import { resolveCarapaceAgentSqlitePath } from "../../../../src/state/carapace-agent-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../../src/test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../../src/test-utils/carapace-test-state.js";
 
 const TEST_TIMEOUT_MS = 90_000;
 const FIXTURE_DATE = "2026-08-03";
@@ -73,12 +73,12 @@ type DoctorMemoryStatus = {
   };
 };
 
-async function seedCompletedUsageSession(state: OpenClawTestState): Promise<{
+async function seedCompletedUsageSession(state: CarapaceTestState): Promise<{
   databasePath: string;
 }> {
   const agentId = "main";
   const storePath = path.join(state.sessionsDir(agentId), "sessions.json");
-  const databasePath = resolveOpenClawAgentSqlitePath({ agentId, env: state.env });
+  const databasePath = resolveCarapaceAgentSqlitePath({ agentId, env: state.env });
   const sessionFile = formatSqliteSessionFileMarker({
     agentId,
     sessionId: FIXTURE_SESSION_ID,
@@ -153,17 +153,17 @@ describe("gateway usage and memory APIs", () => {
     async () => {
       const port = await getGatewayE2ePortBlock();
       const token = `gateway-usage-memory-${process.pid}-${process.env.VITEST_POOL_ID ?? "0"}`;
-      const state = await createOpenClawTestState({
+      const state = await createCarapaceTestState({
         label: "gateway-usage-memory-apis",
         env: {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         },
       });
       const config = {
@@ -182,7 +182,7 @@ describe("gateway usage and memory APIs", () => {
         session: {
           store: path.join(state.stateDir, "agents", "{agentId}", "sessions", "sessions.json"),
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
       let client: Awaited<ReturnType<typeof connectGatewayClient>> | undefined;
 

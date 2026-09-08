@@ -3,11 +3,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { maybeRefreshPromotionsFeed, recordPromotionClaim } from "../../infra/promotions-feed.js";
 import type { RuntimeEnv } from "../../runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import {
   applyPromotionClaimTags,
   printAvailablePromotionsSection,
@@ -75,17 +75,17 @@ async function seedFeedCache(entries: unknown[]) {
 }
 
 describe("models list promotion decorations", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-list-promotions-",
+      prefix: "carapace-list-promotions-",
     });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await testState.cleanup();
   });
 
@@ -127,7 +127,7 @@ describe("models list promotion decorations", () => {
     expect(text).toContain("Available via promotion:");
     expect(text).toContain("Free Example models");
     expect(text).toContain("example-provider/example/model-alpha");
-    expect(text).toContain("openclaw promos claim example-models-launch");
+    expect(text).toContain("carapace promos claim example-models-launch");
     expect(text).toContain("New promotional model offers");
   });
 
@@ -163,7 +163,7 @@ describe("models list promotion decorations", () => {
     });
     const text = lines.join("\n");
     expect(text).toContain("Available via promotion:");
-    expect(text).toContain("openclaw promos claim example-models-launch");
+    expect(text).toContain("carapace promos claim example-models-launch");
   });
 
   it("stays silent when the cached window has passed", async () => {

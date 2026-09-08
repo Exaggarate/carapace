@@ -10,11 +10,11 @@ import {
   insertOperatorApproval,
   resolveOperatorApproval,
 } from "../gateway/operator-approval-store.js";
-import { tableExists, tableHasColumn } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists, tableHasColumn } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   createWebPushVapidKeyPair,
@@ -59,7 +59,7 @@ function insertPendingApproval(id: string): void {
       createdAtMs: 1_000,
       expiresAtMs: 60_000,
     },
-    databaseOptions: { env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir } },
+    databaseOptions: { env: { ...process.env, CARAPACE_STATE_DIR: tmpDir } },
   });
   if (inserted.outcome !== "inserted") {
     throw new Error("expected pending approval insert");
@@ -97,7 +97,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  closeOpenClawStateDatabase();
+  closeCarapaceStateDatabase();
   await fs.rm(tmpDir, { recursive: true, force: true });
 });
 
@@ -140,12 +140,12 @@ describe("resolveVapidKeys", () => {
       createWebPushVapidKeyPair(
         "test-public-key-base64url",
         "test-private-key-base64url",
-        "https://openclaw.ai",
+        "https://github.com/Exaggarate/carapace",
       ),
     );
     expect(readPersistedVapidKeyPair(tmpDir)).toEqual(keys);
 
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
     await expect(resolveVapidKeys(tmpDir)).resolves.toEqual(keys);
     expect(vi.mocked(webPush.generateVAPIDKeys)).toHaveBeenCalledTimes(1);
     await expect(fs.stat(path.join(tmpDir, "push", "vapid-keys.json"))).rejects.toMatchObject({
@@ -159,17 +159,17 @@ describe("resolveVapidKeys", () => {
     await fs.mkdir(pushDir, { recursive: true });
     await fs.writeFile(legacyPath, "{}", "utf8");
 
-    await expect(resolveVapidKeys(tmpDir)).rejects.toThrow("openclaw doctor --fix");
+    await expect(resolveVapidKeys(tmpDir)).rejects.toThrow("carapace doctor --fix");
     expect(readPersistedVapidKeyPair(tmpDir)).toBeNull();
     expect(vi.mocked(webPush.generateVAPIDKeys)).not.toHaveBeenCalled();
 
     await fs.rename(legacyPath, `${legacyPath}.doctor-importing`);
-    await expect(resolveVapidKeys(tmpDir)).rejects.toThrow("openclaw doctor --fix");
+    await expect(resolveVapidKeys(tmpDir)).rejects.toThrow("carapace doctor --fix");
     expect(vi.mocked(webPush.generateVAPIDKeys)).not.toHaveBeenCalled();
 
     await fs.rm(`${legacyPath}.doctor-importing`);
     await fs.symlink(path.join(tmpDir, "missing-vapid-keys.json"), legacyPath);
-    await expect(resolveVapidKeys(tmpDir)).rejects.toThrow("openclaw doctor --fix");
+    await expect(resolveVapidKeys(tmpDir)).rejects.toThrow("carapace doctor --fix");
     expect(vi.mocked(webPush.generateVAPIDKeys)).not.toHaveBeenCalled();
   });
 
@@ -192,13 +192,13 @@ describe("resolveVapidKeys", () => {
       "mailto:env@test.com",
     );
     const envSnapshot = captureEnv([
-      "OPENCLAW_VAPID_PUBLIC_KEY",
-      "OPENCLAW_VAPID_PRIVATE_KEY",
-      "OPENCLAW_VAPID_SUBJECT",
+      "CARAPACE_VAPID_PUBLIC_KEY",
+      "CARAPACE_VAPID_PRIVATE_KEY",
+      "CARAPACE_VAPID_SUBJECT",
     ]);
-    setTestEnvValue("OPENCLAW_VAPID_PUBLIC_KEY", `  ${environmentKeys.publicKey}  `);
-    setTestEnvValue("OPENCLAW_VAPID_PRIVATE_KEY", `  ${environmentKeys.privateKey}  `);
-    setTestEnvValue("OPENCLAW_VAPID_SUBJECT", `  ${environmentKeys.subject}  `);
+    setTestEnvValue("CARAPACE_VAPID_PUBLIC_KEY", `  ${environmentKeys.publicKey}  `);
+    setTestEnvValue("CARAPACE_VAPID_PRIVATE_KEY", `  ${environmentKeys.privateKey}  `);
+    setTestEnvValue("CARAPACE_VAPID_SUBJECT", `  ${environmentKeys.subject}  `);
     try {
       await expect(resolveVapidKeys(tmpDir)).resolves.toEqual(environmentKeys);
       expect(readPersistedVapidKeyPair(tmpDir)).toBeNull();
@@ -210,20 +210,20 @@ describe("resolveVapidKeys", () => {
 
   it("treats blank environment values as unset", async () => {
     const envSnapshot = captureEnv([
-      "OPENCLAW_VAPID_PUBLIC_KEY",
-      "OPENCLAW_VAPID_PRIVATE_KEY",
-      "OPENCLAW_VAPID_SUBJECT",
+      "CARAPACE_VAPID_PUBLIC_KEY",
+      "CARAPACE_VAPID_PRIVATE_KEY",
+      "CARAPACE_VAPID_SUBJECT",
     ]);
-    setTestEnvValue("OPENCLAW_VAPID_PUBLIC_KEY", "   ");
-    setTestEnvValue("OPENCLAW_VAPID_PRIVATE_KEY", "   ");
-    setTestEnvValue("OPENCLAW_VAPID_SUBJECT", "   ");
+    setTestEnvValue("CARAPACE_VAPID_PUBLIC_KEY", "   ");
+    setTestEnvValue("CARAPACE_VAPID_PRIVATE_KEY", "   ");
+    setTestEnvValue("CARAPACE_VAPID_SUBJECT", "   ");
     try {
       const keys = await resolveVapidKeys(tmpDir);
       expect(keys).toEqual(
         createWebPushVapidKeyPair(
           "test-public-key-base64url",
           "test-private-key-base64url",
-          "https://openclaw.ai",
+          "https://github.com/Exaggarate/carapace",
         ),
       );
       expect(readPersistedVapidKeyPair(tmpDir)).toEqual(keys);
@@ -235,15 +235,15 @@ describe("resolveVapidKeys", () => {
 
   it("applies the current subject to a persisted identity", async () => {
     const initial = await resolveVapidKeys(tmpDir);
-    process.env.OPENCLAW_VAPID_SUBJECT = "mailto:changed@test.com";
+    process.env.CARAPACE_VAPID_SUBJECT = "mailto:changed@test.com";
     try {
       await expect(resolveVapidKeys(tmpDir)).resolves.toEqual({
         ...initial,
         subject: "mailto:changed@test.com",
       });
-      expect(readPersistedVapidKeyPair(tmpDir)?.subject).toBe("https://openclaw.ai");
+      expect(readPersistedVapidKeyPair(tmpDir)?.subject).toBe("https://github.com/Exaggarate/carapace");
     } finally {
-      delete process.env.OPENCLAW_VAPID_SUBJECT;
+      delete process.env.CARAPACE_VAPID_SUBJECT;
     }
   });
 });
@@ -266,14 +266,14 @@ describe("subscription CRUD", () => {
       keys: { p256dh: "new-p256dh", auth: "new-auth" },
     });
 
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
     expect(listWebPushSubscriptions(tmpDir)).toEqual([updated]);
     await expect(fs.stat(path.join(tmpDir, "push"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("lazily adds and persists authenticated device bindings", async () => {
-    const environment = { ...process.env, OPENCLAW_STATE_DIR: tmpDir };
-    const database = openOpenClawStateDatabase({ env: environment });
+    const environment = { ...process.env, CARAPACE_STATE_DIR: tmpDir };
+    const database = openCarapaceStateDatabase({ env: environment });
     database.db.exec("ALTER TABLE web_push_subscriptions DROP COLUMN device_id;");
     database.db.exec("ALTER TABLE web_push_subscriptions DROP COLUMN user_profile_id;");
     database.db.exec("ALTER TABLE web_push_subscriptions DROP COLUMN preferences_json;");
@@ -328,9 +328,9 @@ describe("subscription CRUD", () => {
       binding: { deviceId: "browser-device", userProfileId: "profile-1" },
       baseDir: tmpDir,
     });
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
 
-    const olderWriter = new DatabaseSync(path.join(tmpDir, "state", "openclaw.sqlite"));
+    const olderWriter = new DatabaseSync(path.join(tmpDir, "state", "carapace.sqlite"));
     olderWriter
       .prepare(
         "UPDATE web_push_subscriptions SET auth = ?, updated_at_ms = ? WHERE endpoint_hash = ?",
@@ -541,7 +541,7 @@ describe("subscription CRUD", () => {
 
     expect(listWebPushSubscriptions(tmpDir)).toEqual([]);
     await expect(broadcastWebPush({ title: "Blocked" }, tmpDir)).rejects.toThrow(
-      "openclaw doctor --fix",
+      "carapace doctor --fix",
     );
     expect(vi.mocked(webPush.sendNotification)).not.toHaveBeenCalled();
   });
@@ -560,14 +560,14 @@ describe("subscription CRUD", () => {
         expectedUserProfileId: null,
         baseDir: tmpDir,
       }),
-    ).rejects.toThrow("openclaw doctor --fix");
+    ).rejects.toThrow("carapace doctor --fix");
     await expect(
       registerWebPushSubscription({
         endpoint: "https://push.example.com/new",
         keys,
         baseDir: tmpDir,
       }),
-    ).rejects.toThrow("openclaw doctor --fix");
+    ).rejects.toThrow("carapace doctor --fix");
     expect(listWebPushSubscriptions(tmpDir)).toEqual([existing]);
   });
 });
@@ -602,8 +602,8 @@ describe("approval delivery target persistence", () => {
       userProfileId: null,
       devicePreferences: defaultDevicePreferences,
     };
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir },
+    const database = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: tmpDir },
     });
     expect(tableExists(database.db, "web_push_approval_deliveries")).toBe(false);
 
@@ -616,7 +616,7 @@ describe("approval delivery target persistence", () => {
       }),
     ).toBe(true);
     expect(tableExists(database.db, "web_push_approval_deliveries")).toBe(true);
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
 
     const expectedSubscriptionIds = [first, second]
       .toSorted(
@@ -634,7 +634,7 @@ describe("approval delivery target persistence", () => {
       subscriptionIds: [second.subscriptionId],
       stateDir: tmpDir,
     });
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
     expect(listWebPushApprovalDeliveryTargets({ approvalId, stateDir: tmpDir })).toEqual([
       firstBound,
     ]);
@@ -645,7 +645,7 @@ describe("approval delivery target persistence", () => {
         decision: "deny",
         resolver: { kind: "system", id: null },
         nowMs: 3_000,
-        databaseOptions: { env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir } },
+        databaseOptions: { env: { ...process.env, CARAPACE_STATE_DIR: tmpDir } },
       }).outcome,
     ).toBe("resolved");
     expect(listTerminalWebPushApprovalDeliveryIds({ stateDir: tmpDir })).toEqual({
@@ -728,10 +728,10 @@ describe("approval delivery target persistence", () => {
         decision: "deny",
         resolver: { kind: "system", id: null },
         nowMs: 3_000,
-        databaseOptions: { env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir } },
+        databaseOptions: { env: { ...process.env, CARAPACE_STATE_DIR: tmpDir } },
       }).outcome,
     ).toBe("resolved");
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
 
     const rebound = await registerWebPushSubscription({
       endpoint: original.endpoint,
@@ -844,8 +844,8 @@ describe("sending", () => {
     await resolveVapidKeys(tmpDir);
     await using broadcast = startExpiredWebPushBroadcast({ title: "Expired" });
     await broadcast.started;
-    closeOpenClawStateDatabase();
-    const databasePath = path.join(tmpDir, "state", "openclaw.sqlite");
+    closeCarapaceStateDatabase();
+    const databasePath = path.join(tmpDir, "state", "carapace.sqlite");
     await fs.rename(databasePath, `${databasePath}.backup`);
     await fs.mkdir(databasePath);
 

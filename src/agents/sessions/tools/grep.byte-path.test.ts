@@ -9,7 +9,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 it.skipIf(process.platform !== "linux")(
   "retains distinct byte filenames through real ripgrep context",
   async () => {
-    const cwd = tempDirs.make("openclaw-grep-byte-files-");
+    const cwd = tempDirs.make("carapace-grep-byte-files-");
     const paths = [0x80, 0x81].map((byte) =>
       Buffer.concat([
         Buffer.from(path.join(cwd, "report-")),

@@ -1,8 +1,8 @@
 /**
  * Retry and error policy for subagent announcement delivery.
  */
-import { clampTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { clampTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveDeliveryNotSentRetryability } from "../../../infra/delivery-recovery.shared.js";
 import { isFastTestRuntimeEnv } from "../../../infra/env.js";
 import {
@@ -33,7 +33,7 @@ export function sourceOwnerChangedResult(): SubagentAnnounceDeliveryResult {
   };
 }
 
-export function resolveSubagentAnnounceTimeoutMs(cfg: OpenClawConfig): number {
+export function resolveSubagentAnnounceTimeoutMs(cfg: CarapaceConfig): number {
   const configured = cfg.agents?.defaults?.subagents?.announceTimeoutMs;
   return clampTimerTimeoutMs(configured) ?? DEFAULT_SUBAGENT_ANNOUNCE_TIMEOUT_MS;
 }

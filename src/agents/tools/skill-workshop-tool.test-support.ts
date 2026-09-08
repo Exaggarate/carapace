@@ -1,7 +1,7 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { readSkillProposalRecord as readSkillProposalRecordImpl } from "../../skills/workshop/store.js";
 
-const workshopConfig: OpenClawConfig = {};
+const workshopConfig: CarapaceConfig = {};
 
 export function readSkillWorkshopTestProposalRecord(
   proposalId: string,

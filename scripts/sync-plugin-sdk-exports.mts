@@ -153,7 +153,7 @@ function syncPrivateDeclarationAliases(
   const privateEntries = new Set(privateLocalOnlyPluginSdkEntrypoints);
   const declarationRoot = `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/`;
   for (const [key, targets] of Object.entries(currentPaths)) {
-    const entry = /^openclaw\/plugin-sdk\/([^/*]+)$/u.exec(key)?.[1];
+    const entry = /^carapace\/plugin-sdk\/([^/*]+)$/u.exec(key)?.[1];
     // Only canonical generated targets identify retired private aliases. Custom
     // targets, public overrides, QA bridges and wildcard mappings stay owner-managed.
     if (
@@ -166,7 +166,7 @@ function syncPrivateDeclarationAliases(
     }
   }
   for (const entry of privateEntries) {
-    const key = `openclaw/plugin-sdk/${entry}`;
+    const key = `carapace/plugin-sdk/${entry}`;
     if (omitted.includes(entry)) {
       delete nextPaths[key];
     } else {

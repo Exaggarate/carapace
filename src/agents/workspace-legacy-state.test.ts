@@ -18,10 +18,10 @@ describe("legacy workspace reset cleanup", () => {
   afterEach(() => resetLegacyWorkspaceStateCheckForTest());
 
   function setup() {
-    const homeDir = tempDirs.make("openclaw-workspace-legacy-cleanup-");
+    const homeDir = tempDirs.make("carapace-workspace-legacy-cleanup-");
     const stateDir = path.join(homeDir, "state");
     const workspaceDir = path.join(homeDir, "workspace");
-    const env = { ...process.env, HOME: homeDir, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, HOME: homeDir, CARAPACE_STATE_DIR: stateDir };
     const homedir = () => homeDir;
     return {
       env,
@@ -166,7 +166,7 @@ describe("legacy workspace reset cleanup", () => {
     );
 
     expect(() => assertNoUnmigratedWorkspaceState({ workspaceDir: context.workspaceDir })).toThrow(
-      /run openclaw doctor --fix/u,
+      /run carapace doctor --fix/u,
     );
   });
 
@@ -176,7 +176,7 @@ describe("legacy workspace reset cleanup", () => {
     for (const workspaceDir of workspaceDirs) {
       await fs.mkdir(workspaceDir, { recursive: true });
       assertNoUnmigratedWorkspaceState({ workspaceDir });
-      await fs.writeFile(path.join(workspaceDir, "openclaw-workspace-state.json"), '{"version":1}');
+      await fs.writeFile(path.join(workspaceDir, "carapace-workspace-state.json"), '{"version":1}');
     }
     expect(() =>
       assertWorkspaceStateMigrationReady({
@@ -184,9 +184,9 @@ describe("legacy workspace reset cleanup", () => {
         env: context.env,
         homedir: context.homedir,
       }),
-    ).toThrow(`${workspaceDirs.join(", ")}; run openclaw doctor --fix`);
+    ).toThrow(`${workspaceDirs.join(", ")}; run carapace doctor --fix`);
     for (const workspaceDir of workspaceDirs) {
-      await fs.unlink(path.join(workspaceDir, "openclaw-workspace-state.json"));
+      await fs.unlink(path.join(workspaceDir, "carapace-workspace-state.json"));
     }
     expect(() =>
       assertWorkspaceStateMigrationReady({
@@ -223,7 +223,7 @@ describe("legacy workspace reset cleanup", () => {
       path.join(context.stateDir, "workspace-attestations", `${identity.workspaceKey}.attested`),
     );
     expect(() => assertNoUnmigratedWorkspaceState({ workspaceDir: context.workspaceDir })).toThrow(
-      /run openclaw doctor --fix/u,
+      /run carapace doctor --fix/u,
     );
     const cleanup = await removeLegacyWorkspaceStateForReset(prepare(context));
     expect(cleanup.removedPaths).toContain(canonicalSiblingPath);
@@ -240,7 +240,7 @@ describe("legacy workspace reset cleanup", () => {
       process.platform === "win32" ? "junction" : "dir",
     );
     const identity = resolveWorkspaceStateIdentity(targetDir);
-    const setupPath = path.join(targetDir, "openclaw-workspace-state.json");
+    const setupPath = path.join(targetDir, "carapace-workspace-state.json");
     const stateAttestationPath = path.join(
       context.stateDir,
       "workspace-attestations",

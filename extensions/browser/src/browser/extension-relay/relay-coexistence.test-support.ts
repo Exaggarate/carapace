@@ -1,9 +1,9 @@
 import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { setRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { withEnvAsync, withTempDir } from "openclaw/plugin-sdk/test-env";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { setRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { withEnvAsync, withTempDir } from "carapace/plugin-sdk/test-env";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { expect } from "vitest";
 import { WebSocket } from "ws";
 import { relayTestKey } from "../../../chrome-extension/relay-key.test-support.js";
@@ -120,7 +120,7 @@ export async function withConnectedDaemon(
     };
     setRuntimeConfigSnapshot(config, config);
     await withEnvAsync(
-      { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_OAUTH_DIR: credentials },
+      { CARAPACE_STATE_DIR: stateDir, CARAPACE_OAUTH_DIR: credentials },
       async () => {
         let daemon = startDaemon
           ? await startDaemon(port, stateDir, config)

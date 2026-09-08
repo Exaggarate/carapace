@@ -1,14 +1,14 @@
 import { EventEmitter } from "node:events";
 import type { ServerResponse } from "node:http";
-import { VERSION } from "openclaw/plugin-sdk/cli-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { VERSION } from "carapace/plugin-sdk/cli-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   createMockIncomingRequest,
   createMockServerResponse,
   postRawWebhook,
   withServer,
-} from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createA2aHttpHandler } from "./http.js";
 import { A2aTaskStore } from "./task-store.js";
@@ -36,7 +36,7 @@ afterEach(() => {
 });
 
 async function startHttpHarness(options?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   a2aConfig?: Partial<A2aChannelConfig>;
   onDispatch?: (message: {
     taskId: string;
@@ -201,8 +201,8 @@ describe("A2A HTTP agent discovery", () => {
         defaultInputModes: ["text/plain"],
         defaultOutputModes: ["text/plain"],
         skills: [
-          { id: "writer", name: "writer", tags: ["openclaw"] },
-          { id: "reviewer", name: "reviewer", tags: ["openclaw"] },
+          { id: "writer", name: "writer", tags: ["carapace"] },
+          { id: "reviewer", name: "reviewer", tags: ["carapace"] },
         ],
       });
       // A2A v1.0 AgentCapabilities has no stateTransitionHistory member; a
@@ -210,8 +210,8 @@ describe("A2A HTTP agent discovery", () => {
       expect(Object.keys(card.capabilities).toSorted()).toEqual(["pushNotifications", "streaming"]);
       // The card is served unauthenticated, so operator-authored descriptions
       // must never reach it - not the unexposed agent's, not the exposed one's.
-      expect(card.skills[0]?.description).toBe("OpenClaw agent writer.");
-      expect(card.skills[1]?.description).toBe("OpenClaw agent reviewer.");
+      expect(card.skills[0]?.description).toBe("Carapace agent writer.");
+      expect(card.skills[1]?.description).toBe("Carapace agent reviewer.");
       expect(JSON.stringify(card)).not.toContain(hiddenDescription);
       expect(JSON.stringify(card)).not.toContain("x".repeat(50));
       expect(card).not.toHaveProperty("protocolVersion");
@@ -240,7 +240,7 @@ describe("A2A HTTP agent discovery", () => {
     // reading only the list shape published a skill-less card to every peer.
     expect(card.skills.map((skill) => skill.id).toSorted()).toEqual(["main", "research"]);
     expect(card.skills.find((skill) => skill.id === "research")?.description).toBe(
-      "OpenClaw agent research.",
+      "Carapace agent research.",
     );
   });
 

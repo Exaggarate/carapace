@@ -1,13 +1,13 @@
-# IRC OpenClaw channel
+# IRC Carapace channel
 
-Official OpenClaw channel plugin for IRC.
+Official Carapace channel plugin for IRC.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/irc
+carapace plugins install @carapace/irc
 ```
 
 ## Docs
 
-See `docs/channels/irc.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/irc`.
+See `docs/channels/irc.md` in the Carapace repository, or the published docs at `../../docs/channels/irc.md`.

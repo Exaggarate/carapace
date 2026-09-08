@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { SessionEvent } from "@github/copilot-sdk";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import type {
   SessionTranscriptTargetParams,
   TranscriptTurnAdmission,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { vi, type Mock } from "vitest";
 import { createAttemptTranscriptJournal } from "./attempt-transcript-journal.js";
 import type { AttemptParamsLike } from "./attempt-types.js";
@@ -119,7 +119,7 @@ export async function createFixture(
   resultContentSourceByToolName?: ReadonlyMap<string, "network">,
 ): Promise<AttemptTranscriptJournalFixture> {
   const tempDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-copilot-journal-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-copilot-journal-"),
   );
   tempDirs.push(tempDir);
   const target: SessionTranscriptTargetParams = {

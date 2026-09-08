@@ -5,21 +5,21 @@ import {
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ExecAsk, ExecSecurity } from "../infra/exec-approvals-core.js";
 import { maxAsk, minSecurity } from "../infra/exec-approvals-policy.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 
 const note = vi.hoisted(() => vi.fn());
 vi.mock("../../packages/terminal-core/src/note.js", () => ({ note }));
 
 import { noteSessionTranscriptHealth } from "./doctor-session-transcripts.js";
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 
 afterEach(async () => {
   note.mockClear();
@@ -30,7 +30,7 @@ afterEach(async () => {
 describe("doctor legacy session exec policy", () => {
   it.each<{
     name: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     legacy: { execSecurity?: string; execAsk?: string };
     host?: SessionEntry["execHost"];
     sandbox?: SessionEntry["sandbox"];
@@ -109,7 +109,7 @@ describe("doctor legacy session exec policy", () => {
       expected: undefined,
     },
   ])("does not broaden $name", async ({ cfg, legacy, host, sandbox, oldPolicy, expected }) => {
-    state = await createOpenClawTestState({ prefix: "openclaw-doctor-exec-base-" });
+    state = await createCarapaceTestState({ prefix: "carapace-doctor-exec-base-" });
     const scope = { agentId: "worker", env: state.env, sessionKey: "agent:worker:exec-policy" };
     await replaceSessionEntry(scope, {
       sessionId: "legacy-policy",
@@ -125,7 +125,7 @@ describe("doctor legacy session exec policy", () => {
       sessionSqlite: true,
       shouldRepair: true,
     });
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const migrated = listSessionEntriesCore(scope)[0]?.entry;
     expect(migrated?.permissionMode).toBe(expected);
     expect(migrated).not.toHaveProperty("execSecurity");
@@ -145,7 +145,7 @@ describe("doctor legacy session exec policy", () => {
   });
 
   it("migrates persisted restrictions without granting full access and reports each session once", async () => {
-    state = await createOpenClawTestState({ prefix: "openclaw-doctor-exec-policy-" });
+    state = await createCarapaceTestState({ prefix: "carapace-doctor-exec-policy-" });
     const env = state.env;
     const cases: Array<{
       name: string;
@@ -226,7 +226,7 @@ describe("doctor legacy session exec policy", () => {
     note.mockClear();
 
     await run(true);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const repaired = read();
     const lines = note.mock.calls.flatMap(([message]) => String(message).split("\n"));
     for (const testCase of cases) {

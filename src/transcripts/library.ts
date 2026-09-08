@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import {
   asSafeIntegerInRange,
   parseDateStringTimestampMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   TRANSCRIPTS_EXPORT_MAX_BYTES,
   TRANSCRIPTS_LEGACY_MAX_TEXT_LENGTH,

@@ -48,15 +48,15 @@ run_linux_ci_mirror() {
   run_step node scripts/run-vitest.mjs run --config test/vitest/vitest.extensions.config.ts --maxWorkers=1
   run_step env CI=true node scripts/run-vitest.mjs run --config test/vitest/vitest.unit.config.ts --maxWorkers=1
 
-  log_step "OPENCLAW_VITEST_MAX_WORKERS=${OPENCLAW_VITEST_MAX_WORKERS:-1} NODE_OPTIONS=${NODE_OPTIONS:---max-old-space-size=6144} pnpm test"
-  OPENCLAW_VITEST_MAX_WORKERS="${OPENCLAW_VITEST_MAX_WORKERS:-1}" \
+  log_step "CARAPACE_VITEST_MAX_WORKERS=${CARAPACE_VITEST_MAX_WORKERS:-1} NODE_OPTIONS=${NODE_OPTIONS:---max-old-space-size=6144} pnpm test"
+  CARAPACE_VITEST_MAX_WORKERS="${CARAPACE_VITEST_MAX_WORKERS:-1}" \
   NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=6144}" \
     pnpm test
 }
 
 run_macos_ci_mirror() {
-  if [[ "${OPENCLAW_PREPUSH_SKIP_MACOS:-0}" == "1" ]]; then
-    log_step "Skipping macOS mirror because OPENCLAW_PREPUSH_SKIP_MACOS=1"
+  if [[ "${CARAPACE_PREPUSH_SKIP_MACOS:-0}" == "1" ]]; then
+    log_step "Skipping macOS mirror because CARAPACE_PREPUSH_SKIP_MACOS=1"
     return 0
   fi
 

@@ -3,19 +3,19 @@
  * allowlists, and display paths. Manifest policies are optional so tests can
  * isolate built-in normalization behavior.
  */
-import type { ProviderModelRef as ModelRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import type { ProviderModelRef as ModelRef } from "@carapace/model-catalog-core/model-catalog-refs";
 import {
   findNormalizedProviderKey as findNormalizedProviderKeyCore,
   normalizeProviderId as normalizeProviderIdCore,
   normalizeProviderIdForAuth as normalizeProviderIdForAuthCore,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeBuiltInProviderModelId,
   normalizeConfiguredProviderCatalogModelRef,
   normalizeStaticProviderModelIdWithPolicies,
   stripSelfProviderModelPrefix,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/model-catalog-core/provider-model-id-normalization";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   resolveManifestModelIdNormalizationPolicies,
   type ManifestModelIdNormalizationSource,
@@ -24,7 +24,7 @@ import { modelKey } from "../shared/model-key.js";
 import { normalizeProviderModelIdWithRuntime } from "./provider-model-normalization.runtime.js";
 export { modelKey } from "../shared/model-key.js";
 
-export type { ProviderModelRef as ModelRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+export type { ProviderModelRef as ModelRef } from "@carapace/model-catalog-core/model-catalog-refs";
 
 export type ModelManifestNormalizationContext = {
   manifestPlugins?: ManifestModelIdNormalizationSource;

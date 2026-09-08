@@ -1,4 +1,4 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { describe, expect, it } from "vitest";
 import type { AgentContextPruningConfig } from "../../config/types.agent-defaults.js";
 import { appendAttemptCacheTtlIfNeeded } from "./run/attempt-thread-helpers.js";
@@ -155,7 +155,7 @@ describe("cache-TTL tool-result projection", () => {
         const entries = [
           {
             type: "custom",
-            customType: "openclaw.cache-ttl",
+            customType: "carapace.cache-ttl",
             data: JSON.parse(markerData),
           },
         ];
@@ -313,7 +313,7 @@ describe("cache-TTL tool-result projection", () => {
     const entries = [
       {
         type: "custom",
-        customType: "openclaw.cache-ttl",
+        customType: "carapace.cache-ttl",
         data: serializeCacheTtlToolResultProjections(state),
       },
     ];
@@ -348,7 +348,7 @@ describe("cache-TTL tool-result projection", () => {
     const entries = [
       {
         type: "custom",
-        customType: "openclaw.cache-ttl",
+        customType: "carapace.cache-ttl",
         data: structuredClone(serializeCacheTtlToolResultProjections(state)),
       },
     ];
@@ -367,7 +367,7 @@ describe("cache-TTL tool-result projection", () => {
     restoreCacheTtlToolResultProjections(state, [
       {
         type: "custom",
-        customType: "openclaw.cache-ttl",
+        customType: "carapace.cache-ttl",
         data: { prunedToolResults: [{ key: "tool:old:42", mode: "soft" }] },
       },
     ]);
@@ -391,7 +391,7 @@ describe("cache-TTL tool-result projection", () => {
     const entries = [
       {
         type: "custom",
-        customType: "openclaw.cache-ttl",
+        customType: "carapace.cache-ttl",
         data: serializeCacheTtlToolResultProjections(state),
       },
     ];

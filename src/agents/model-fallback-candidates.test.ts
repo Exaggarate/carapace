@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createWarnLogCapture } from "../logging/test-helpers/warn-log-capture.js";
 import { resolveImageFallbackCandidates } from "./model-fallback-candidates.js";
 
 describe("resolveImageFallbackCandidates", () => {
   it("records unresolved configured entries without changing the resolved chain", async () => {
-    const warnLogs = createWarnLogCapture("openclaw-image-fallback-candidates-test");
+    const warnLogs = createWarnLogCapture("carapace-image-fallback-candidates-test");
     const cfg = {
       agents: {
         defaults: {
@@ -15,7 +15,7 @@ describe("resolveImageFallbackCandidates", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     try {
       expect(
@@ -47,7 +47,7 @@ describe("resolveImageFallbackCandidates", () => {
   });
 
   it("does not warn for resolved configured entries", async () => {
-    const warnLogs = createWarnLogCapture("openclaw-image-fallback-candidates-test");
+    const warnLogs = createWarnLogCapture("carapace-image-fallback-candidates-test");
     const cfg = {
       agents: {
         defaults: {
@@ -57,7 +57,7 @@ describe("resolveImageFallbackCandidates", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     try {
       expect(

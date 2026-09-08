@@ -1,8 +1,8 @@
 /** Converts auth-profile credentials into agent runtime credential maps. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import type { PreparedAgentCredentialModes } from "./agent-auth-credential-modes.js";
 import { resolveAuthProfileOrder } from "./auth-profiles/order.js";
@@ -26,10 +26,10 @@ export type AgentCredentialMap = Record<string, AgentCredential>;
 
 type ResolveAgentCredentialMapOptions = {
   includeSecretRefPlaceholders?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
-const AGENT_SECRET_REF_CONFIGURED_MARKER = "openclaw-secret-ref-configured";
+const AGENT_SECRET_REF_CONFIGURED_MARKER = "carapace-secret-ref-configured";
 
 /** Records only credential modes whose secret material is usable by a prepared runtime owner. */
 export function resolveUsableAgentCredentialModes(

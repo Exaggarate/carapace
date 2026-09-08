@@ -4,8 +4,8 @@ import path from "node:path";
 import type {
   CodexBundleMcpThreadConfig,
   EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { expect, vi } from "vitest";
 import { startCodexAttemptThread } from "./attempt-startup.js";
 import { withEphemeralCodexAuthStore } from "./auth-start-options.js";
@@ -139,7 +139,7 @@ export async function answerInitialize(harness: AttemptClientHarness): Promise<v
     timeout: HARNESS_REQUEST_TIMEOUT_MS,
   });
   const initialize = JSON.parse(harness.writes[0] ?? "{}") as { id?: number };
-  harness.send({ id: initialize.id, result: { userAgent: "openclaw/0.149.0 (macOS; test)" } });
+  harness.send({ id: initialize.id, result: { userAgent: "carapace/0.149.0 (macOS; test)" } });
 }
 
 export async function answerPreparedApiKeyLogin(harness: AttemptClientHarness): Promise<void> {
@@ -188,7 +188,7 @@ export async function captureExpectedRuntimeArtifact(
     before,
     startOptions,
     spawnIdentity,
-    runtimeIdentity: { serverVersion: "0.149.0", userAgent: "openclaw/0.149.0 (macOS; test)" },
+    runtimeIdentity: { serverVersion: "0.149.0", userAgent: "carapace/0.149.0 (macOS; test)" },
   });
 }
 
@@ -228,7 +228,7 @@ export type AttemptPaths = {
 };
 
 export function createAttemptPaths(tempRoots: Set<string>): AttemptPaths {
-  const root = path.join(os.tmpdir(), `openclaw-codex-attempt-startup-${randomUUID()}`);
+  const root = path.join(os.tmpdir(), `carapace-codex-attempt-startup-${randomUUID()}`);
   tempRoots.add(root);
   return {
     agentDir: path.join(root, "agent"),

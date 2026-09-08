@@ -9,7 +9,7 @@ import type { EditToolDetails } from "./tool-contracts.js";
 
 let tmpDir = "";
 beforeEach(async () => {
-  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-edit-formatting-"));
+  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-edit-formatting-"));
 });
 afterEach(async () => {
   await fs.rm(tmpDir, { recursive: true, force: true });

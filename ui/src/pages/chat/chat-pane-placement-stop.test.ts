@@ -159,7 +159,7 @@ describe("chat pane worker stop", () => {
       expect(stop?.textContent?.trim()).toBe(copy.stopLabel);
       stop?.click();
       const actions = await waitForConfirmDialogActions();
-      expect(document.querySelector("openclaw-modal-dialog")?.textContent).toContain(
+      expect(document.querySelector("carapace-modal-dialog")?.textContent).toContain(
         copy.confirmMessage,
       );
       expect(actions.querySelector(".btn.danger")?.textContent?.trim()).toBe(copy.confirmLabel);
@@ -305,7 +305,7 @@ describe("chat pane worker stop", () => {
       const reclaim = dialogs.track(pane.reclaimHeaderPlacement(session));
       const actions = await waitForConfirmDialogActions();
       const actionText = actions.textContent;
-      const confirmation = document.body.querySelector("openclaw-modal-dialog")?.textContent;
+      const confirmation = document.body.querySelector("carapace-modal-dialog")?.textContent;
       const pausesBeforeConfirmation = vi.mocked(pane.context.placementStartup.pause).mock.calls
         .length;
       answerConfirmDialog(actions, "confirm");

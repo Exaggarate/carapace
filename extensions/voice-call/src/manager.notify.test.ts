@@ -1,6 +1,6 @@
 // Voice Call tests cover manager.notify plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { createManagerHarness, FakeProvider } from "./manager.test-harness.js";
 

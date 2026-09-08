@@ -54,7 +54,7 @@ describe("base vitest config", () => {
   it("classifies Crabbox shared dependencies as external dependencies", () => {
     expect(baseConfig.test?.deps?.moduleDirectories).toEqual([
       "/node_modules/",
-      "/openclaw-pnpm-node-modules/",
+      "/carapace-pnpm-node-modules/",
     ]);
 
     const externalPatterns = baseConfig.test?.server?.deps?.external ?? [];
@@ -62,14 +62,14 @@ describe("base vitest config", () => {
       externalPatterns.some(
         (pattern) =>
           pattern instanceof RegExp &&
-          pattern.test("/tmp/openclaw-pnpm-node-modules/some-dep/dist/index.mjs"),
+          pattern.test("/tmp/carapace-pnpm-node-modules/some-dep/dist/index.mjs"),
       ),
     ).toBe(true);
     expect(
       externalPatterns.some(
         (pattern) =>
           pattern instanceof RegExp &&
-          pattern.test("/tmp/openclaw-pnpm-node-modules/vite/dist/client/env.mjs"),
+          pattern.test("/tmp/carapace-pnpm-node-modules/vite/dist/client/env.mjs"),
       ),
     ).toBe(false);
   });
@@ -115,7 +115,7 @@ describe("test scripts", () => {
       "node --import ./scripts/tsx.mjs scripts/test-force.ts",
     );
     expect(pkg.scripts?.["test:gateway"]).toBe(
-      "node --import ./scripts/tsx.mjs scripts/run-with-env.mts OPENCLAW_GATEWAY_PROJECT_SHARDS=1 -- node scripts/run-vitest.mjs run --config test/vitest/vitest.gateway.config.ts",
+      "node --import ./scripts/tsx.mjs scripts/run-with-env.mts CARAPACE_GATEWAY_PROJECT_SHARDS=1 -- node scripts/run-vitest.mjs run --config test/vitest/vitest.gateway.config.ts",
     );
     expect(pkg.scripts?.["test:single"]).toBeUndefined();
   });

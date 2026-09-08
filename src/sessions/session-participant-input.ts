@@ -2,7 +2,7 @@ import type { MsgContext } from "../auto-reply/templating.js";
 import type { SessionParticipantIdentity } from "../config/sessions/session-participant-identity.js";
 
 // Core and SDK chunks share one private key; context spreads retain the same consumed fact.
-export const sessionParticipantInput = Symbol.for("openclaw.sessionParticipantInput");
+export const sessionParticipantInput = Symbol.for("carapace.sessionParticipantInput");
 export type SessionParticipantInputContext = MsgContext & {
   [sessionParticipantInput]?: Array<{
     identity: SessionParticipantIdentity;

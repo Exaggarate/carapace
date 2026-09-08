@@ -13,8 +13,8 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 import { copyPrWrapperSources } from "./pr-wrapper.test-support.js";
 
 const temps = useAutoCleanupTempDirTracker(afterEach);
-const outcomeRef = "refs/openclaw/pr-merge-outcomes/123";
-const lockRef = "refs/openclaw/pr-operation-locks/123";
+const outcomeRef = "refs/carapace/pr-merge-outcomes/123";
+const lockRef = "refs/carapace/pr-operation-locks/123";
 const describePosix = process.platform === "win32" ? describe.skip : describe;
 
 function fixture() {
@@ -202,7 +202,7 @@ describePosix("native PR wrapper repository ownership", () => {
     expect(result.status, result.output).toBe(0);
     expect(result.output).toContain("completion pending");
     expect(existsSync(f.worktree)).toBe(false);
-    expect(f.git(f.caller, ["for-each-ref", "--format=%(refname)", "refs/openclaw"])).toBe("");
+    expect(f.git(f.caller, ["for-each-ref", "--format=%(refname)", "refs/carapace"])).toBe("");
   });
 
   it("rejects corrupt owner evidence even when the caller has a valid retained intent", () => {
@@ -239,7 +239,7 @@ describePosix("native PR wrapper repository ownership", () => {
       expect(f.readCalls()[0]).toContain(`${f.owner}\tpr view 123 --json `);
       expect(f.git(f.owner, ["rev-parse", outcomeRef])).toBe(f.intent);
       expect(f.git(f.owner, ["for-each-ref", "--format=%(refname)", lockRef])).toBe("");
-      expect(f.git(f.caller, ["for-each-ref", "--format=%(refname)", "refs/openclaw"])).toBe("");
+      expect(f.git(f.caller, ["for-each-ref", "--format=%(refname)", "refs/carapace"])).toBe("");
     },
   );
 });

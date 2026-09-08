@@ -3,12 +3,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resolveRequiredHomeDir } from "../infra/home-dir.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
-import { resolveOpenClawDevSourceRoot } from "./dev-source-root.js";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
+import { resolveCarapaceDevSourceRoot } from "./dev-source-root.js";
 import { PLUGIN_SOURCE_MODULE_EXTENSIONS } from "./native-module-require.js";
 import {
   parsePluginCacheJson,
@@ -109,9 +109,9 @@ function resolvePluginLoaderJitiNativeModules(): string[] {
     const nativeModules = Array.isArray(configured)
       ? configured.filter((entry): entry is string => typeof entry === "string")
       : [];
-    return [...new Set([...nativeModules, "openclaw"])];
+    return [...new Set([...nativeModules, "carapace"])];
   } catch {
-    return ["openclaw"];
+    return ["carapace"];
   }
 }
 
@@ -166,7 +166,7 @@ function resolvePluginLoaderJitiFsCacheDir(params: LoaderModuleResolveParams = {
   }
   return path.join(
     resolveJitiFsCacheRoot(),
-    "openclaw",
+    "carapace",
     "jiti",
     version,
     sanitizeJitiCachePathSegment(installMarker),
@@ -191,7 +191,7 @@ function listPluginSdkSubpathsFromPackageJson(pkg: PluginSdkPackageJson): string
     .toSorted();
 }
 
-function hasTrustedOpenClawRootIndicator(params: {
+function hasTrustedCarapaceRootIndicator(params: {
   packageRoot: string;
   packageJson: PluginSdkPackageJson;
 }): boolean {
@@ -207,16 +207,16 @@ function hasTrustedOpenClawRootIndicator(params: {
     return (facts.trustedRoot = false);
   }
   const hasCliEntryExport = Object.hasOwn(packageExports, "./cli-entry");
-  const hasOpenClawBin =
+  const hasCarapaceBin =
     (typeof params.packageJson.bin === "string" &&
-      normalizeLowercaseStringOrEmpty(params.packageJson.bin).includes("openclaw")) ||
+      normalizeLowercaseStringOrEmpty(params.packageJson.bin).includes("carapace")) ||
     (typeof params.packageJson.bin === "object" &&
       params.packageJson.bin !== null &&
-      typeof params.packageJson.bin.openclaw === "string");
+      typeof params.packageJson.bin.carapace === "string");
   return (facts.trustedRoot =
     hasCliEntryExport ||
-    hasOpenClawBin ||
-    pluginCacheExistsSync(path.join(params.packageRoot, "openclaw.mjs")));
+    hasCarapaceBin ||
+    pluginCacheExistsSync(path.join(params.packageRoot, "carapace.mjs")));
 }
 
 function readPluginSdkSubpathsFromPackageRoot(packageRoot: string): string[] | null {
@@ -228,21 +228,21 @@ function readPluginSdkSubpathsFromPackageRoot(packageRoot: string): string[] | n
   if (!pkg) {
     return (facts.exportedSubpaths = null);
   }
-  if (!hasTrustedOpenClawRootIndicator({ packageRoot, packageJson: pkg })) {
+  if (!hasTrustedCarapaceRootIndicator({ packageRoot, packageJson: pkg })) {
     return (facts.exportedSubpaths = null);
   }
   const subpaths = listPluginSdkSubpathsFromPackageJson(pkg);
   return (facts.exportedSubpaths = subpaths.length > 0 ? subpaths : null);
 }
 
-function resolveTrustedOpenClawRootFromArgvHint(params: {
+function resolveTrustedCarapaceRootFromArgvHint(params: {
   argv1?: string;
   cwd: string;
 }): string | null {
   if (!params.argv1) {
     return null;
   }
-  const packageRoot = resolveOpenClawPackageRootSync({
+  const packageRoot = resolveCarapacePackageRootSync({
     cwd: params.cwd,
     argv1: params.argv1,
   });
@@ -253,7 +253,7 @@ function resolveTrustedOpenClawRootFromArgvHint(params: {
   if (!packageJson) {
     return null;
   }
-  return hasTrustedOpenClawRootIndicator({ packageRoot, packageJson }) ? packageRoot : null;
+  return hasTrustedCarapaceRootIndicator({ packageRoot, packageJson }) ? packageRoot : null;
 }
 
 function findNearestPluginSdkPackageRoot(startDir: string, maxDepth = 12): string | null {
@@ -276,13 +276,13 @@ export function resolveLoaderPackageRoot(
   params: LoaderModuleResolveParams & { modulePath: string },
 ): string | null {
   const cwd = params.cwd ?? path.dirname(params.modulePath);
-  const fromModulePath = resolveOpenClawPackageRootSync({ cwd });
+  const fromModulePath = resolveCarapacePackageRootSync({ cwd });
   if (fromModulePath) {
     return fromModulePath;
   }
   const argv1 = params.argv1 ?? process.argv[1];
   const moduleUrl = params.moduleUrl ?? (params.modulePath ? undefined : import.meta.url);
-  return resolveOpenClawPackageRootSync({
+  return resolveCarapacePackageRootSync({
     cwd,
     ...(argv1 ? { argv1 } : {}),
     ...(moduleUrl ? { moduleUrl } : {}),
@@ -387,7 +387,7 @@ function listArgvRuntimeFallbackStartDirs(argv1: string | undefined): string[] {
 function resolveDevSourceRootParam(params: { devSourceRoot?: string | null }): string | null {
   return params.devSourceRoot !== undefined
     ? params.devSourceRoot
-    : resolveOpenClawDevSourceRoot(process.env);
+    : resolveCarapaceDevSourceRoot(process.env);
 }
 
 function resolveLoaderPluginSdkPackageRoot(
@@ -398,11 +398,11 @@ function resolveLoaderPluginSdkPackageRoot(
     return devSourceRoot;
   }
   const cwd = params.cwd ?? path.dirname(params.modulePath);
-  const fromCwd = resolveOpenClawPackageRootSync({ cwd });
+  const fromCwd = resolveCarapacePackageRootSync({ cwd });
   const fromExplicitHints =
-    resolveTrustedOpenClawRootFromArgvHint({ cwd, argv1: params.argv1 }) ??
+    resolveTrustedCarapaceRootFromArgvHint({ cwd, argv1: params.argv1 }) ??
     (params.moduleUrl
-      ? resolveOpenClawPackageRootSync({
+      ? resolveCarapacePackageRootSync({
           cwd,
           moduleUrl: params.moduleUrl,
         })
@@ -432,7 +432,7 @@ function resolvePluginSdkAliasCandidateOrder(params: {
   return isDistRuntime || params.isProduction ? ["dist", "src"] : ["src", "dist"];
 }
 
-const PLUGIN_SDK_PACKAGE_NAMES = ["openclaw/plugin-sdk", "@openclaw/plugin-sdk"] as const;
+const PLUGIN_SDK_PACKAGE_NAMES = ["carapace/plugin-sdk", "@carapace/plugin-sdk"] as const;
 const CODEX_MCP_PROJECTION_PLUGIN_SDK_SUBPATH = "codex-mcp-projection";
 const CODEX_SESSION_TRANSCRIPT_PLUGIN_SDK_SUBPATH = "codex-session-transcript-runtime";
 const NATIVE_HOOK_RELAY_RUNTIME_PLUGIN_SDK_SUBPATH = "native-hook-relay-runtime";
@@ -472,7 +472,7 @@ type PrivatePluginSdkSubpathOwner = {
 const PRIVATE_PLUGIN_SDK_SUBPATH_OWNERS: readonly PrivatePluginSdkSubpathOwner[] = [
   {
     bundledPluginId: "codex",
-    officialInstalledPackageName: "@openclaw/codex",
+    officialInstalledPackageName: "@carapace/codex",
     allowPrivateQaCli: true,
     subpaths: [
       CODEX_MCP_PROJECTION_PLUGIN_SDK_SUBPATH,
@@ -492,7 +492,7 @@ const PRIVATE_PLUGIN_SDK_SUBPATH_OWNERS: readonly PrivatePluginSdkSubpathOwner[]
   },
   {
     bundledPluginId: "llama-cpp",
-    officialInstalledPackageName: "@openclaw/llama-cpp-provider",
+    officialInstalledPackageName: "@carapace/llama-cpp-provider",
     allowPrivateQaCli: false,
     subpaths: [CONFIGURED_LOCAL_ORIGIN_RUNTIME_PLUGIN_SDK_SUBPATH],
   },
@@ -588,7 +588,7 @@ const WORKSPACE_PACKAGE_ALIAS_SUBPATHS = [
 const WORKSPACE_PACKAGE_ALIAS_ENTRIES: WorkspacePackageAliasEntry[] =
   WORKSPACE_PACKAGE_ALIAS_SUBPATHS.flatMap(([packageDir, subpaths]) =>
     subpaths.map((subpath): WorkspacePackageAliasEntry => ({
-      packageName: `@openclaw/${packageDir}`,
+      packageName: `@carapace/${packageDir}`,
       packageDir,
       subpath,
       srcFile: `${subpath || "index"}.ts`,
@@ -596,10 +596,10 @@ const WORKSPACE_PACKAGE_ALIAS_ENTRIES: WorkspacePackageAliasEntry[] =
     })),
   );
 const WORKSPACE_PACKAGE_ALIAS_NAMES = new Set([
-  ...WORKSPACE_PACKAGE_ALIAS_SUBPATHS.map(([name]) => `@openclaw/${name}`),
-  "@openclaw/media-core",
-  "@openclaw/normalization-core",
-  "@openclaw/acp-core",
+  ...WORKSPACE_PACKAGE_ALIAS_SUBPATHS.map(([name]) => `@carapace/${name}`),
+  "@carapace/media-core",
+  "@carapace/normalization-core",
+  "@carapace/acp-core",
 ]);
 const ROOT_PACKAGED_WORKSPACE_PACKAGE_DIRS = new Set([
   "acp-core",
@@ -788,7 +788,7 @@ function readPrivateLocalOnlyPluginSdkSubpaths(packageRoot: string): string[] {
 function readBundledPluginPackageName(packageJsonPath: string): string | null {
   const parsed = readPluginSdkPackageJson(path.dirname(packageJsonPath));
   const name = typeof parsed?.name === "string" ? parsed.name.trim() : "";
-  return name.startsWith("@openclaw/") ? name : null;
+  return name.startsWith("@carapace/") ? name : null;
 }
 
 function isBundledPluginPublicSurfaceSourceBasename(params: {
@@ -947,7 +947,7 @@ function resolveWorkspacePackageAliasMap(
     ...["media-core", "normalization-core", "acp-core"].flatMap((packageDir) =>
       listWorkspacePackageExportAliasEntries({
         packageRoot,
-        packageName: `@openclaw/${packageDir}`,
+        packageName: `@carapace/${packageDir}`,
         packageDir,
       }),
     ),
@@ -983,7 +983,7 @@ function resolveWorkspacePackageAliasMap(
 }
 
 function shouldIncludePrivateLocalOnlyPluginSdkSubpaths() {
-  return process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI === "1";
+  return process.env.CARAPACE_ENABLE_PRIVATE_QA_CLI === "1";
 }
 
 function isBundledPluginModulePath(params: {
@@ -1444,7 +1444,7 @@ function isPluginLoaderAliasSpecifier(specifier: string): boolean {
   return (
     isPluginSdkAliasSpecifier(specifier) ||
     WORKSPACE_PACKAGE_ALIAS_NAMES.has(packageName) ||
-    (packageName.startsWith("@openclaw/") &&
+    (packageName.startsWith("@carapace/") &&
       !basename.includes("/") &&
       basename.endsWith(".js") &&
       BUNDLED_PLUGIN_PUBLIC_SURFACE_SOURCE_PATTERN.test(basename.slice(0, -3)))
@@ -1565,7 +1565,7 @@ export function buildPluginLoaderJitiOptions(
     // Prefer Node's native sync ESM loader for built dist/*.js modules so
     // bundled plugins and plugin-sdk subpaths stay on the canonical module graph.
     tryNative: true,
-    // When jiti must transform a plugin entry, keep OpenClaw's own package
+    // When jiti must transform a plugin entry, keep Carapace's own package
     // chunks on the native module graph instead of re-evaluating them in jiti.
     nativeModules: resolvePluginLoaderJitiNativeModules(),
     extensions: [...PLUGIN_SOURCE_MODULE_EXTENSIONS, ".js", ".mjs", ".cjs", ".json"],

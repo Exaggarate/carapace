@@ -1,7 +1,7 @@
 // Memory Core plugin module implements concept vocabulary behavior.
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { escapeRegExp } from "openclaw/plugin-sdk/text-utility-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { escapeRegExp } from "carapace/plugin-sdk/text-utility-runtime";
 
 export const MAX_CONCEPT_TAGS = 8;
 

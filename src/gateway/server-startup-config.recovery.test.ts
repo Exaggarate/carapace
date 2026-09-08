@@ -1,12 +1,12 @@
 // Startup config recovery tests cover prepared snapshots, plugin metadata,
 // auto-enable behavior, model defaults, and recovery diagnostics.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConfigFileSnapshot, ModelDefinitionConfig, OpenClawConfig } from "../config/types.js";
+import type { ConfigFileSnapshot, ModelDefinitionConfig, CarapaceConfig } from "../config/types.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import { buildTestConfigSnapshot } from "./test-helpers.config-snapshots.js";
 
 const applyPluginAutoEnable = vi.hoisted(() =>
-  vi.fn((params: { config: OpenClawConfig }) => ({
+  vi.fn((params: { config: CarapaceConfig }) => ({
     config: params.config,
     changes: [] as string[],
     autoEnabledReasons: {} as Record<string, string[]>,
@@ -72,11 +72,11 @@ vi.mock("../config/paths.js", () => ({
   get isNixMode() {
     return configMocks.isNixMode.value;
   },
-  resolveStateDir: vi.fn(() => "/tmp/openclaw-state"),
+  resolveStateDir: vi.fn(() => "/tmp/carapace-state"),
 }));
 
 vi.mock("../config/runtime-overrides.js", () => ({
-  applyConfigOverrides: vi.fn((config: OpenClawConfig) => config),
+  applyConfigOverrides: vi.fn((config: CarapaceConfig) => config),
 }));
 
 vi.mock("../config/mutate.js", () => ({
@@ -84,21 +84,21 @@ vi.mock("../config/mutate.js", () => ({
 }));
 
 vi.mock("../config/plugin-auto-enable.js", () => ({
-  applyPluginAutoEnable: (params: { config: OpenClawConfig }) => applyPluginAutoEnable(params),
+  applyPluginAutoEnable: (params: { config: CarapaceConfig }) => applyPluginAutoEnable(params),
 }));
 
 let loadGatewayStartupConfigSnapshot: typeof import("./server-startup-config.js").loadGatewayStartupConfigSnapshot;
 let configIo: typeof import("../config/io.js");
 let configMutate: typeof import("../config/mutate.js");
 
-const configPath = "/tmp/openclaw-startup-recovery.json";
+const configPath = "/tmp/carapace-startup-recovery.json";
 const telegramAutoEnableChange = "Telegram configured, enabled automatically.";
 const runtimeOnlyAutoEnableLog = `gateway: auto-enabled plugins for this runtime without writing config:\n- ${telegramAutoEnableChange}`;
 const validConfig = {
   gateway: {
     mode: "local",
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function testModel(id: string, name: string): ModelDefinitionConfig {
   return {
@@ -120,7 +120,7 @@ function testModel(id: string, name: string): ModelDefinitionConfig {
 function buildSnapshot(params: {
   valid: boolean;
   raw: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): ConfigFileSnapshot {
   return buildTestConfigSnapshot({
     path: configPath,
@@ -128,7 +128,7 @@ function buildSnapshot(params: {
     raw: params.raw,
     parsed: params.config ?? null,
     valid: params.valid,
-    config: params.config ?? ({} as OpenClawConfig),
+    config: params.config ?? ({} as CarapaceConfig),
     issues: params.valid ? [] : [{ path: "gateway.mode", message: "Expected 'local' or 'remote'" }],
     legacyIssues: [],
   });
@@ -143,8 +143,8 @@ function buildDefaultSnapshot(): ConfigFileSnapshot {
 }
 
 function buildRuntimeSnapshot(
-  sourceConfig: OpenClawConfig,
-  runtimeConfig: OpenClawConfig = sourceConfig,
+  sourceConfig: CarapaceConfig,
+  runtimeConfig: CarapaceConfig = sourceConfig,
 ): ConfigFileSnapshot {
   return {
     ...buildTestConfigSnapshot({
@@ -191,7 +191,7 @@ async function expectStartupResult(params: {
   });
 }
 
-function expectPluginAutoEnableFor(config: OpenClawConfig) {
+function expectPluginAutoEnableFor(config: CarapaceConfig) {
   expect(applyPluginAutoEnable).toHaveBeenCalledWith({
     config,
     env: process.env,
@@ -199,7 +199,7 @@ function expectPluginAutoEnableFor(config: OpenClawConfig) {
   });
 }
 
-function mockRuntimeAutoEnable(config: OpenClawConfig) {
+function mockRuntimeAutoEnable(config: CarapaceConfig) {
   applyPluginAutoEnable.mockReturnValueOnce({
     config,
     changes: [telegramAutoEnableChange],
@@ -214,7 +214,7 @@ function expectRuntimeOnlyAutoEnableLogged(log: ReturnType<typeof testStartupLog
 
 function withRuntimeConfig(
   snapshot: ConfigFileSnapshot,
-  runtimeConfig: OpenClawConfig,
+  runtimeConfig: CarapaceConfig,
 ): ConfigFileSnapshot {
   return {
     ...snapshot,
@@ -225,7 +225,7 @@ function withRuntimeConfig(
 
 function buildInvalidConfigSnapshot(params: {
   rawConfig: unknown;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   issues: ConfigFileSnapshot["issues"];
   warnings?: ConfigFileSnapshot["warnings"];
   legacyIssues?: ConfigFileSnapshot["legacyIssues"];
@@ -236,7 +236,7 @@ function buildInvalidConfigSnapshot(params: {
     raw: `${JSON.stringify(params.rawConfig)}\n`,
     parsed: params.rawConfig,
     valid: false,
-    config: params.config ?? (params.rawConfig as OpenClawConfig),
+    config: params.config ?? (params.rawConfig as CarapaceConfig),
     issues: params.issues,
     warnings: params.warnings,
     legacyIssues: params.legacyIssues ?? [],
@@ -335,7 +335,7 @@ describe("gateway startup config validation", () => {
           browser: { enabled: false },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeConfig = {
       ...sourceConfig,
       plugins: {
@@ -351,7 +351,7 @@ describe("gateway startup config validation", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const snapshot = buildRuntimeSnapshot(sourceConfig, runtimeConfig);
     mockStartupSnapshot(snapshot);
     const log = testStartupLog();
@@ -413,13 +413,13 @@ describe("gateway startup config validation", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const autoEnabledConfig = {
       ...sourceConfig,
       channels: {
         telegram: { enabled: true },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const initialSnapshot = buildRuntimeSnapshot(sourceConfig);
     mockStartupSnapshot(initialSnapshot);
     mockRuntimeAutoEnable(autoEnabledConfig);
@@ -456,13 +456,13 @@ describe("gateway startup config validation", () => {
         },
       },
       gateway: { mode: "local" },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const autoEnabledConfig = {
       ...sourceConfig,
       plugins: {
         allow: ["telegram"],
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const snapshot = buildRuntimeSnapshot(sourceConfig);
     mockStartupSnapshot(snapshot);
     mockRuntimeAutoEnable(autoEnabledConfig);
@@ -484,7 +484,7 @@ describe("gateway startup config validation", () => {
     vi.mocked(configIo.readConfigFileSnapshot).mockResolvedValueOnce(invalidSnapshot);
 
     await expectStartupRejects(
-      `Invalid config at ${configPath}:\ngateway.mode: Expected 'local' or 'remote'\nRun "openclaw doctor --fix" to repair, then retry.\nIf startup is still blocked, inspect the adjacent .bak backup before restoring it manually.`,
+      `Invalid config at ${configPath}:\ngateway.mode: Expected 'local' or 'remote'\nRun "carapace doctor --fix" to repair, then retry.\nIf startup is still blocked, inspect the adjacent .bak backup before restoring it manually.`,
     );
   });
 
@@ -495,7 +495,7 @@ describe("gateway startup config validation", () => {
     };
     const invalidSnapshot = buildInvalidConfigSnapshot({
       rawConfig,
-      config: rawConfig as OpenClawConfig,
+      config: rawConfig as CarapaceConfig,
       issues: [
         {
           path: "gateway.mode",
@@ -508,7 +508,7 @@ describe("gateway startup config validation", () => {
 
     await expectStartupRejects(
       new RegExp(
-        'openclaw-startup-recovery\\.json:1 — gateway\\.mode: Invalid input \\(allowed: "local", "remote"\\), got: "nope".*Config was last written by OpenClaw 9999\\.1\\.1, but you are running',
+        'carapace-startup-recovery\\.json:1 — gateway\\.mode: Invalid input \\(allowed: "local", "remote"\\), got: "nope".*Config was last written by Carapace 9999\\.1\\.1, but you are running',
         "s",
       ),
     );
@@ -518,7 +518,7 @@ describe("gateway startup config validation", () => {
     const rawConfig = pluginSlotRawConfig("local");
     const invalidSnapshot = buildInvalidConfigSnapshot({
       rawConfig,
-      config: rawConfig as OpenClawConfig,
+      config: rawConfig as CarapaceConfig,
       issues: [
         {
           path: "plugins.slots.memory",
@@ -540,7 +540,7 @@ describe("gateway startup config validation", () => {
       `Invalid config at ${configPath}:\nplugins.slots.memory: plugin not found: source-only-pack\nThis is a plugin packaging issue, not a local config problem.\nUpdate or reinstall the plugin after the publisher ships compiled JavaScript, or disable/uninstall the plugin until then.`,
     );
     await start.catch((error: unknown) => {
-      expect(String(error)).not.toContain("openclaw doctor --fix");
+      expect(String(error)).not.toContain("carapace doctor --fix");
     });
   });
 
@@ -548,7 +548,7 @@ describe("gateway startup config validation", () => {
     const rawConfig = pluginSlotRawConfig("invalid");
     const invalidSnapshot = buildInvalidConfigSnapshot({
       rawConfig,
-      config: rawConfig as unknown as OpenClawConfig,
+      config: rawConfig as unknown as CarapaceConfig,
       issues: [
         {
           path: "plugins.slots.memory",
@@ -569,7 +569,7 @@ describe("gateway startup config validation", () => {
     });
     vi.mocked(configIo.readConfigFileSnapshot).mockResolvedValueOnce(invalidSnapshot);
 
-    await expectStartupRejects('Run "openclaw doctor --fix" to repair, then retry.');
+    await expectStartupRejects('Run "carapace doctor --fix" to repair, then retry.');
   });
 
   it("rejects legacy config entries in Nix mode", async () => {
@@ -577,7 +577,7 @@ describe("gateway startup config validation", () => {
       rawConfig: {
         heartbeat: { model: "anthropic/claude-3-5-haiku-20241022", every: "30m" },
       },
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       issues: [
         {
           path: "heartbeat",
@@ -605,12 +605,12 @@ describe("gateway startup config validation", () => {
     const rawConfig = enabledPluginRawConfig("local");
     const invalidSnapshot = buildInvalidConfigSnapshot({
       rawConfig,
-      config: rawConfig as OpenClawConfig,
+      config: rawConfig as CarapaceConfig,
       issues: [
         {
           path: "plugins.entries.feishu",
           message:
-            "plugin feishu: plugin requires OpenClaw >=2026.4.23, but this host is 2026.4.22; skipping load",
+            "plugin feishu: plugin requires Carapace >=2026.4.23, but this host is 2026.4.22; skipping load",
         },
       ],
     });
@@ -622,7 +622,7 @@ describe("gateway startup config validation", () => {
     const rawConfig = enabledPluginRawConfig("invalid");
     const invalidSnapshot = buildInvalidConfigSnapshot({
       rawConfig,
-      config: rawConfig as unknown as OpenClawConfig,
+      config: rawConfig as unknown as CarapaceConfig,
       issues: [
         {
           path: "gateway.mode",
@@ -667,7 +667,7 @@ describe("gateway startup config validation", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const invalidSnapshot = buildInvalidConfigSnapshot({
       rawConfig: config,
       config,

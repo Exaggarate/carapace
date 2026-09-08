@@ -28,7 +28,7 @@ it.each([
       fs.mkdirSync(pluginRoot);
       fs.writeFileSync(path.join(pluginRoot, "package.json"), '{"type":"commonjs"}\n');
       fs.writeFileSync(
-        path.join(pluginRoot, "openclaw.plugin.json"),
+        path.join(pluginRoot, "carapace.plugin.json"),
         JSON.stringify({ id, enabledByDefault: true }),
       );
       fs.writeFileSync(
@@ -40,7 +40,7 @@ it.each([
     }
     resetFacadeRuntimeStateForTest();
     testing.setFacadeActivationCheckRuntimeForTest(activationRuntime);
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", root);
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", root);
     const params = { dirName: "fixture", artifactBasename: "api.js" };
     const invoke = (request = params) => Promise.resolve().then(() => load(request));
     try {

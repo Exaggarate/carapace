@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { computeBackoff, sleepWithAbort } from "../../infra/backoff.js";
 import {
   NODE_WORKER_CAPACITY_EXHAUSTED_ERROR_CODE,

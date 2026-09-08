@@ -3,7 +3,7 @@
  *
  * Kept separate so hot Plugin SDK setup helpers never import plugin discovery.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   getOfficialExternalPluginCatalogEntry,
   getOfficialExternalPluginCatalogManifest,
@@ -14,7 +14,7 @@ import type { ChannelSetupPromotionSurface } from "./setup-promotion-helpers.js"
 
 export function resolveDiscoveredChannelSetupPromotionSurface(
   channelKey: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): ChannelSetupPromotionSurface | null {
   const registry = loadPluginManifestRegistryForPluginRegistry({
     config: cfg,

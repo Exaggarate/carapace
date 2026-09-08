@@ -14,7 +14,7 @@ describe("extractCanvasFromText", () => {
           kind: "canvas",
           view: {
             id: "cv_status",
-            url: "/__openclaw__/canvas/documents/cv_status/index.html",
+            url: "/__carapace__/canvas/documents/cv_status/index.html",
             boardWidgetName: "release-status",
           },
         }),
@@ -28,7 +28,7 @@ describe("extractCanvasFromText", () => {
         JSON.stringify({
           kind: "canvas",
           presentation: { target: "node_panel", title: "Status" },
-          view: { id: "cv_status", url: "/__openclaw__/canvas/documents/cv_status/index.html" },
+          view: { id: "cv_status", url: "/__carapace__/canvas/documents/cv_status/index.html" },
         }),
       ),
     ).toMatchObject({ surface: "node_panel", viewId: "cv_status", title: "Status" });

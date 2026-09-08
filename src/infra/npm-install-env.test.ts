@@ -38,7 +38,7 @@ describe("npm project install env", () => {
         expect(
           createNpmProjectInstallEnv(
             {
-              PATH: "/tmp/openclaw-npm-global/bin",
+              PATH: "/tmp/carapace-npm-global/bin",
             },
             {},
             FROZEN_NOW,
@@ -46,7 +46,7 @@ describe("npm project install env", () => {
         ).toEqual({
           ...EXPECTED_FRESHNESS_ENV,
           NPM_CONFIG_SCRIPT_SHELL: "/bin/sh",
-          PATH: "/tmp/openclaw-npm-global/bin",
+          PATH: "/tmp/carapace-npm-global/bin",
           npm_config_dry_run: "false",
           npm_config_fetch_retries: "5",
           npm_config_fetch_retry_maxtimeout: "120000",
@@ -108,7 +108,7 @@ describe("npm project install env", () => {
     });
   });
 
-  it("bypasses npm release-age filters for OpenClaw-managed installs", () => {
+  it("bypasses npm release-age filters for Carapace-managed installs", () => {
     const env = createNpmProjectInstallEnv(
       {
         NPM_CONFIG_BEFORE: "2026-01-01T00:00:00.000Z",
@@ -140,7 +140,7 @@ describe("npm project install env", () => {
   });
 
   it("uses a current before override for explicit npm before policy", async () => {
-    await withTempDir("openclaw-npmrc-", async (dir) => {
+    await withTempDir("carapace-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const npmrc = path.join(dir, "npmrc");
       fsSync.writeFileSync(npmrc, "before=2026-01-01T00:00:00.000Z\n", "utf-8");
@@ -177,7 +177,7 @@ describe("npm project install env", () => {
   });
 
   it("uses before args for stale npm before policies", async () => {
-    await withTempDir("openclaw-npmrc-", async (dir) => {
+    await withTempDir("carapace-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const npmrc = path.join(dir, "npmrc");
       fsSync.writeFileSync(npmrc, "before=2026-01-01T00:00:00.000Z\n", "utf-8");
@@ -196,7 +196,7 @@ describe("npm project install env", () => {
   });
 
   it("uses before args for expanded npm userconfig paths", async () => {
-    await withTempDir("openclaw-home-npmrc-", async (dir) => {
+    await withTempDir("carapace-home-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       // Keep user config outside the project scope so path expansion must succeed.
       fsSync.writeFileSync(
@@ -229,7 +229,7 @@ describe("npm project install env", () => {
   });
 
   it("uses before args for npm default globalconfig before policies", async () => {
-    await withTempDir("openclaw-npm-prefix-", async (dir) => {
+    await withTempDir("carapace-npm-prefix-", async (dir) => {
       const home = path.join(dir, "home");
       const npmrcDir = path.join(dir, "etc");
       fsSync.mkdirSync(home, { recursive: true });
@@ -254,7 +254,7 @@ describe("npm project install env", () => {
   });
 
   it("uses before args for command project npmrc before policies", async () => {
-    await withTempDir("openclaw-project-npmrc-", async (dir) => {
+    await withTempDir("carapace-project-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       fsSync.writeFileSync(path.join(dir, ".npmrc"), "before=2026-01-01T00:00:00.000Z\n", "utf-8");
 
@@ -269,7 +269,7 @@ describe("npm project install env", () => {
   });
 
   it("uses before args for the current project npmrc by default", async () => {
-    await withTempDir("openclaw-current-npmrc-", async (dir) => {
+    await withTempDir("carapace-current-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       fsSync.writeFileSync(path.join(dir, ".npmrc"), "before=2026-01-01T00:00:00.000Z\n", "utf-8");
       const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(dir);
@@ -282,7 +282,7 @@ describe("npm project install env", () => {
   });
 
   it("uses before args for scoped npm prefix before policies", async () => {
-    await withTempDir("openclaw-prefix-npmrc-", async (dir) => {
+    await withTempDir("carapace-prefix-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const npmrcDir = path.join(dir, "etc");
       fsSync.mkdirSync(npmrcDir, { recursive: true });
@@ -302,7 +302,7 @@ describe("npm project install env", () => {
   });
 
   it("prefers scoped npm prefix policy over parent npm prefix policy", async () => {
-    await withTempDir("openclaw-prefix-npmrc-", async (dir) => {
+    await withTempDir("carapace-prefix-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const scopedPrefix = path.join(dir, "scoped-prefix");
       const parentPrefix = path.join(dir, "parent-prefix");
@@ -329,7 +329,7 @@ describe("npm project install env", () => {
   });
 
   it("overrides stale npmrc before config without emitting release-age config", async () => {
-    await withTempDir("openclaw-npmrc-", async (dir) => {
+    await withTempDir("carapace-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const npmrc = path.join(dir, "npmrc");
       fsSync.writeFileSync(npmrc, "before=2026-01-01T00:00:00.000Z\n", "utf-8");
@@ -349,7 +349,7 @@ describe("npm project install env", () => {
   });
 
   it("uses release-age args for project policy over user before policy", async () => {
-    await withTempDir("openclaw-npmrc-", async (dir) => {
+    await withTempDir("carapace-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const npmrc = path.join(dir, "npmrc");
       fsSync.writeFileSync(npmrc, "before=2026-01-01T00:00:00.000Z\n", "utf-8");
@@ -369,7 +369,7 @@ describe("npm project install env", () => {
   });
 
   it("overrides npmrc release-age config without emitting before config", async () => {
-    await withTempDir("openclaw-npmrc-", async (dir) => {
+    await withTempDir("carapace-npmrc-", async (dir) => {
       const baseEnv = createIsolatedNpmConfigEnv(dir);
       const npmrc = path.join(dir, "npmrc");
       fsSync.writeFileSync(npmrc, "min-release-age=7\n", "utf-8");

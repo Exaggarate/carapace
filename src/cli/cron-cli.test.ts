@@ -547,7 +547,7 @@ describe("cron cli", () => {
     });
 
     expectRuntimeErrorContaining(
-      "Automation not found: missing. Run `openclaw cron list` to see recent automation ids.",
+      "Automation not found: missing. Run `carapace cron list` to see recent automation ids.",
     );
   });
 
@@ -857,14 +857,14 @@ describe("cron cli", () => {
       "--system-event",
       "Summarize the latest status",
       "--webhook",
-      " https://example.invalid/openclaw ",
+      " https://example.invalid/carapace ",
     ]);
 
     expect(params?.name).toBe("Webhook reminder");
     expect(params?.sessionTarget).toBe("main");
     expect(params?.delivery).toEqual({
       mode: "webhook",
-      to: "https://example.invalid/openclaw",
+      to: "https://example.invalid/carapace",
       channel: undefined,
       threadId: undefined,
       accountId: undefined,
@@ -965,7 +965,7 @@ describe("cron cli", () => {
       "--message",
       "hello",
       "--webhook",
-      "https://example.invalid/openclaw",
+      "https://example.invalid/carapace",
       "--to",
       "channel:C123",
     ]);

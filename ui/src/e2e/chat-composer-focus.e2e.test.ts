@@ -26,7 +26,7 @@ suite.define(() => {
       });
       await page.goto(`${suite.server.baseUrl}new?agent=main`);
 
-      const picker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const picker = page.locator(".new-session-page__select--agent carapace-agent-select");
       const trigger = picker.locator(".agent-select__trigger");
       await trigger.waitFor({ state: "visible" });
       await trigger.focus();
@@ -185,8 +185,8 @@ suite.define(() => {
       await composer.waitFor({ state: "visible" });
 
       for (const [label, selector] of [
-        ["Browser", "openclaw-browser-panel"],
-        ["Desktop", "openclaw-desktop-panel"],
+        ["Browser", "carapace-browser-panel"],
+        ["Desktop", "carapace-desktop-panel"],
       ] as const) {
         await openChatSidePanelType(page, label);
         const panel = page.locator(selector);

@@ -1,7 +1,7 @@
 // Respawns the CLI with adjusted process flags when startup requires it.
 import { spawn, type ChildProcess } from "node:child_process";
 import path from "node:path";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import { resolveNodeStartupTlsEnvironment } from "./bootstrap/node-startup-env.js";
 import {
   isTerminalInteractiveRespawnArgv,
@@ -17,8 +17,8 @@ import {
 } from "./process/respawn-child-runner.js";
 
 const EXPERIMENTAL_WARNING_FLAG = "--disable-warning=ExperimentalWarning";
-const OPENCLAW_NODE_OPTIONS_READY = "OPENCLAW_NODE_OPTIONS_READY";
-const OPENCLAW_NODE_EXTRA_CA_CERTS_READY = "OPENCLAW_NODE_EXTRA_CA_CERTS_READY";
+const CARAPACE_NODE_OPTIONS_READY = "CARAPACE_NODE_OPTIONS_READY";
+const CARAPACE_NODE_EXTRA_CA_CERTS_READY = "CARAPACE_NODE_EXTRA_CA_CERTS_READY";
 const WINDOWS_STACK_SIZE_FLAG = "--stack-size=8192";
 
 type CliRespawnPlan = {
@@ -93,7 +93,7 @@ export function buildCliRespawnPlan(
 
   if (
     shouldSkipStartupEnvironmentRespawnForArgv(normalizedArgv, platform) ||
-    isTruthyEnvValue(env.OPENCLAW_NO_RESPAWN)
+    isTruthyEnvValue(env.CARAPACE_NO_RESPAWN)
   ) {
     return null;
   }
@@ -132,20 +132,20 @@ export function buildCliRespawnPlan(
     }).NODE_EXTRA_CA_CERTS;
   if (
     autoNodeExtraCaCerts &&
-    !isTruthyEnvValue(env[OPENCLAW_NODE_EXTRA_CA_CERTS_READY]) &&
+    !isTruthyEnvValue(env[CARAPACE_NODE_EXTRA_CA_CERTS_READY]) &&
     !childEnv.NODE_EXTRA_CA_CERTS
   ) {
     childEnv.NODE_EXTRA_CA_CERTS = autoNodeExtraCaCerts;
-    childEnv[OPENCLAW_NODE_EXTRA_CA_CERTS_READY] = "1";
+    childEnv[CARAPACE_NODE_EXTRA_CA_CERTS_READY] = "1";
     needsRespawn = true;
   }
 
   if (
     !shouldSkipRespawnForArgv(argv, platform) &&
-    !isTruthyEnvValue(env[OPENCLAW_NODE_OPTIONS_READY]) &&
+    !isTruthyEnvValue(env[CARAPACE_NODE_OPTIONS_READY]) &&
     !hasExperimentalWarningSuppressed({ env, execArgv })
   ) {
-    childEnv[OPENCLAW_NODE_OPTIONS_READY] = "1";
+    childEnv[CARAPACE_NODE_OPTIONS_READY] = "1";
     childExecArgv.unshift(EXPERIMENTAL_WARNING_FLAG);
     needsRespawn = true;
   }
@@ -181,7 +181,7 @@ export function runCliRespawnPlan(
     runtime: resolvedRuntime,
     onError: (error) => {
       return resolvedRuntime.writeError(
-        "[openclaw] Failed to respawn CLI:",
+        "[carapace] Failed to respawn CLI:",
         error instanceof Error ? (error.stack ?? error.message) : error,
       );
     },

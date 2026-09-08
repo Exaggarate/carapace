@@ -1,5 +1,5 @@
 // Applies command feature gates before command handlers execute.
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
 import { formatCommandOwnerHint } from "../../commands/doctor-command-owner.js";
 import {
   isCommandFlagEnabled,

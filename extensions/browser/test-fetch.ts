@@ -10,7 +10,7 @@ type FetchPreconnectOptions = {
 
 type FetchWithPreconnect = {
   preconnect: (url: string | URL, options?: FetchPreconnectOptions) => void;
-  __openclawAcceptsDispatcher: true;
+  __carapaceAcceptsDispatcher: true;
 };
 
 type FetchFunction = (...args: unknown[]) => unknown;
@@ -41,7 +41,7 @@ export function withBrowserFetchPreconnect<T extends object>(
 export function withBrowserFetchPreconnect(fn: object) {
   const fetchFn = Object.assign(fn as FetchFunction, {
     preconnect: (_url: string | URL, _options?: FetchPreconnectOptions) => {},
-    __openclawAcceptsDispatcher: true as const,
+    __carapaceAcceptsDispatcher: true as const,
   });
   return new Proxy(fetchFn, {
     async apply(target, thisArg, args) {

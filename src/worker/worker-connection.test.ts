@@ -1,7 +1,7 @@
 import { EventEmitter, once } from "node:events";
 import { createServer as createHttpsServer } from "node:https";
 import net from "node:net";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { describe, expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
 import {
@@ -47,7 +47,7 @@ const FRAME_CONNECT_PARAMS: WorkerConnectParams = {
     rpcSetVersion: WORKER_RPC_SET_VERSION,
     handshake: {
       bundleHash: "a".repeat(64),
-      openclawVersion: "listener-isolation-test",
+      carapaceVersion: "listener-isolation-test",
       protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
     },
     sessionId: "session-1",
@@ -240,7 +240,7 @@ describe("worker connection endpoint failures", () => {
     const sockets: EventEmitter[] = [];
     const diagnostics: Array<Error | undefined> = [];
     const endpointUrl =
-      "wss://fixture-user:fixture-password@gateway.example:8443/private/__openclaw__/worker?token=fixture-token";
+      "wss://fixture-user:fixture-password@gateway.example:8443/private/__carapace__/worker?token=fixture-token";
     const connection = createWorkerConnection({
       endpoint: {
         kind: "websocket",
@@ -336,7 +336,7 @@ describe("worker connection endpoint failures", () => {
     const connection = createWorkerConnection({
       endpoint: {
         kind: "websocket",
-        url: "ws://gateway.example/__openclaw__/worker",
+        url: "ws://gateway.example/__carapace__/worker",
       },
       connectParams: FRAME_CONNECT_PARAMS,
       createSocket,

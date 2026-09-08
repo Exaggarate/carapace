@@ -2,8 +2,8 @@
 import {
   createOpenAiCompatibleSpeechProvider,
   type SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-provider";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/speech-provider";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { OPENROUTER_BASE_URL } from "./provider-defaults.js";
 
 const DEFAULT_OPENROUTER_TTS_MODEL = "hexgrad/kokoro-82m";
@@ -36,8 +36,8 @@ export function buildOpenRouterSpeechProvider(): SpeechProviderPlugin {
     voiceCompatibleResponseFormats: ["mp3"],
     baseUrlPolicy: { kind: "canonical", aliases: ["https://openrouter.ai/v1"], allowCustom: true },
     extraHeaders: {
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+      "X-OpenRouter-Title": "Carapace",
     },
     apiErrorLabel: "OpenRouter TTS API error",
     missingApiKeyError: "OpenRouter API key missing",

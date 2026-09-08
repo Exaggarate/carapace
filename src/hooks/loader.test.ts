@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { setLoggerOverride } from "../logging/logger.js";
 import { loggingState } from "../logging/state.js";
 import { createDeferredCore } from "../shared/deferred.js";
@@ -18,7 +18,7 @@ import {
   setInternalHooksEnabled,
 } from "./internal-hooks.js";
 import { prepareInternalHooks } from "./loader.js";
-import type { OpenClawHookMetadata } from "./types.js";
+import type { CarapaceHookMetadata } from "./types.js";
 
 async function commitPreparedHooks(...args: Parameters<typeof prepareInternalHooks>) {
   const prepared = await prepareInternalHooks(...args);
@@ -33,7 +33,7 @@ describe("loader", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hooks-loader-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-hooks-loader-"));
   });
 
   beforeEach(async () => {
@@ -44,8 +44,8 @@ describe("loader", () => {
     await fs.mkdir(tmpDir, { recursive: true });
 
     // Disable bundled hooks during tests by setting env var to non-existent directory
-    envSnapshot = captureEnv(["OPENCLAW_BUNDLED_HOOKS_DIR"]);
-    process.env.OPENCLAW_BUNDLED_HOOKS_DIR = "/nonexistent/bundled/hooks";
+    envSnapshot = captureEnv(["CARAPACE_BUNDLED_HOOKS_DIR"]);
+    process.env.CARAPACE_BUNDLED_HOOKS_DIR = "/nonexistent/bundled/hooks";
     setLoggerOverride({ level: "silent", consoleLevel: "error" });
     loggingState.rawConsole = {
       log: vi.fn(),
@@ -62,7 +62,7 @@ describe("loader", () => {
     events?: string[];
     exportName?: string;
     hookKey?: string;
-    requires?: OpenClawHookMetadata["requires"];
+    requires?: CarapaceHookMetadata["requires"];
   }): Promise<string> {
     const sourceDir = params.sourceDir ?? path.join(tmpDir, "hooks");
     const hookDir = path.join(sourceDir, params.hookName);
@@ -80,7 +80,7 @@ describe("loader", () => {
         "---",
         `name: ${params.hookName}`,
         `description: ${params.hookName} test hook`,
-        `metadata: ${JSON.stringify({ openclaw: metadata })}`,
+        `metadata: ${JSON.stringify({ carapace: metadata })}`,
         "---",
         "",
         `# ${params.hookName}`,
@@ -96,7 +96,7 @@ describe("loader", () => {
     return hookDir;
   }
 
-  function createEnabledHooksConfig(): OpenClawConfig {
+  function createEnabledHooksConfig(): CarapaceConfig {
     return { hooks: { internal: { enabled: true } } };
   }
 
@@ -117,7 +117,7 @@ describe("loader", () => {
   });
 
   describe("prepareInternalHooks", () => {
-    const expectNoCommandHookRegistration = async (cfg: OpenClawConfig) => {
+    const expectNoCommandHookRegistration = async (cfg: CarapaceConfig) => {
       const count = await commitPreparedHooks(cfg, tmpDir);
       expect(count).toBe(0);
       expect(getRegisteredEventKeys()).not.toContain("command:new");
@@ -125,7 +125,7 @@ describe("loader", () => {
 
     it("should return 0 when hooks are explicitly disabled", async () => {
       const count = await commitPreparedHooks(
-        { hooks: { internal: { enabled: false } } } satisfies OpenClawConfig,
+        { hooks: { internal: { enabled: false } } } satisfies CarapaceConfig,
         tmpDir,
       );
       expect(count).toBe(0);
@@ -133,9 +133,9 @@ describe("loader", () => {
 
     it("skips hook discovery until internal hooks are configured", async () => {
       for (const cfg of [
-        {} satisfies OpenClawConfig,
-        { hooks: {} } satisfies OpenClawConfig,
-        { hooks: { internal: {} } } satisfies OpenClawConfig,
+        {} satisfies CarapaceConfig,
+        { hooks: {} } satisfies CarapaceConfig,
+        { hooks: { internal: {} } } satisfies CarapaceConfig,
       ]) {
         const count = await commitPreparedHooks(cfg, tmpDir);
         expect(count).toBe(0);
@@ -157,7 +157,7 @@ describe("loader", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         tmpDir,
         { managedHooksDir: hooksDir, bundledHooksDir: "/nonexistent/bundled/hooks" },
       );
@@ -213,7 +213,7 @@ describe("loader", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         tmpDir,
         { managedHooksDir: hooksDir, bundledHooksDir: "/nonexistent/bundled/hooks" },
       );
@@ -255,7 +255,7 @@ describe("loader", () => {
             entries: { "reloadable-hook": { enabled: true } },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const options = { managedHooksDir: hooksDir, bundledHooksDir: "/nonexistent/bundled/hooks" };
 
       expect(await commitPreparedHooks(cfg, tmpDir, options)).toBe(1);
@@ -278,7 +278,7 @@ describe("loader", () => {
       const managedHooksDir = path.join(tmpDir, "managed-hooks");
       await writeDiscoveredHook({ sourceDir: managedHooksDir, hookName: "original" });
       const options = { managedHooksDir, bundledHooksDir: "/nonexistent/bundled/hooks" };
-      const config = (names: string[]): OpenClawConfig => ({
+      const config = (names: string[]): CarapaceConfig => ({
         hooks: {
           internal: { entries: Object.fromEntries(names.map((name) => [name, { enabled: true }])) },
         },
@@ -303,7 +303,7 @@ describe("loader", () => {
       await commitPreparedHooks(createEnabledHooksConfig(), tmpDir, options);
       const importStarted = createDeferredCore();
       const releaseImport = createDeferredCore();
-      vi.stubGlobal("openclawHookImportGate", {
+      vi.stubGlobal("carapaceHookImportGate", {
         started: importStarted.resolve,
         wait: releaseImport.promise,
       });
@@ -311,7 +311,7 @@ describe("loader", () => {
         sourceDir: managedHooksDir,
         hookName: "replacement",
         handlerCode:
-          'globalThis.openclawHookImportGate.started(); await globalThis.openclawHookImportGate.wait; export default async function(event) { event.messages.push("replacement"); }',
+          'globalThis.carapaceHookImportGate.started(); await globalThis.carapaceHookImportGate.wait; export default async function(event) { event.messages.push("replacement"); }',
       });
       const loading = prepareInternalHooks(
         {
@@ -348,7 +348,7 @@ describe("loader", () => {
           sourceDir: managedHooksDir,
           hookName: "original",
         });
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           hooks: { internal: { entries: { original: { enabled: true } } } },
         };
         await commitPreparedHooks(config, tmpDir, options);
@@ -402,7 +402,7 @@ describe("loader", () => {
           managedHooksDir:
             failure === "invalid keyed metadata" ? extraDir : path.join(tmpDir, "managed-none"),
         };
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           hooks: {
             internal: {
               load: { extraDirs: failure === "invalid keyed metadata" ? [] : [extraDir] },
@@ -500,7 +500,7 @@ describe("loader", () => {
             ? { "managed-selection": { enabled: selection !== "disabled" } }
             : {}),
         };
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           browser: { enabled: false },
           hooks: { internal: { entries } },
         };
@@ -570,7 +570,7 @@ describe("loader", () => {
           hookKey: "selected-name",
           requires: { config: ["browser.enabled"] },
         });
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           browser: { enabled: true },
           hooks: {
             internal: {
@@ -606,7 +606,7 @@ describe("loader", () => {
           if (removal === "install removal") {
             installed.mockReturnValue(undefined);
           }
-          const next: OpenClawConfig = {
+          const next: CarapaceConfig = {
             ...config,
             browser: { enabled: removal !== "ineligible" },
             hooks: {
@@ -630,7 +630,7 @@ describe("loader", () => {
 
     it("drops a lost workspace source when the selected workspace changes", async () => {
       const original = await writeDiscoveredHook({ hookName: "original" });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         hooks: { internal: { entries: { original: { enabled: true } } } },
       };
       await commitPreparedHooks(config, tmpDir);
@@ -792,7 +792,7 @@ describe("loader", () => {
             entries: { "named-export": { enabled: true } },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       const count = await commitPreparedHooks(cfg, tmpDir, {
         managedHooksDir: hooksDir,
@@ -873,7 +873,7 @@ describe("loader", () => {
           "---",
           "name: symlink-hook",
           "description: symlink test",
-          'metadata: {"openclaw":{"events":["command:new"]}}',
+          'metadata: {"carapace":{"events":["command:new"]}}',
           "---",
           "",
           "# Symlink Hook",
@@ -904,7 +904,7 @@ describe("loader", () => {
           "---",
           "name: hardlink-hook",
           "description: hardlink test",
-          'metadata: {"openclaw":{"events":["command:new"]}}',
+          'metadata: {"carapace":{"events":["command:new"]}}',
           "---",
           "",
           "# Hardlink Hook",

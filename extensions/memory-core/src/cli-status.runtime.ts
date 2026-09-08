@@ -2,14 +2,14 @@ import {
   formatMemoryIndexRebuildGuidance,
   resolveMemoryIndexIdentityDiagnostic,
   type MemoryEmbeddingProbeResult,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   resolveMemoryLightDreamingConfig,
   resolveMemoryRemDreamingConfig,
   resolveMemoryDeepDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import { formatByteSize } from "openclaw/plugin-sdk/number-runtime";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/memory-core-host-status";
+import { formatByteSize } from "carapace/plugin-sdk/number-runtime";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   formatAuditCounts,
   formatExtraPaths,
@@ -28,7 +28,7 @@ import {
   theme,
   withProgress,
   withProgressTotals,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "./cli.host.runtime.js";
 import type { MemoryCommandOptions } from "./cli.types.js";
 import {
@@ -76,7 +76,7 @@ function formatMemoryIndexIdentityWarning(
     fix: `Run: ${formatMemoryIndexRebuildGuidance(status, agentId)}`,
   };
 }
-function formatDreamingSummary(cfg: OpenClawConfig): string {
+function formatDreamingSummary(cfg: CarapaceConfig): string {
   const pluginConfig = resolveMemoryPluginConfig(cfg);
   const light = resolveMemoryLightDreamingConfig({ pluginConfig, cfg });
   const deep = resolveMemoryDeepDreamingConfig({ pluginConfig, cfg });
@@ -534,7 +534,7 @@ export async function runMemoryStatus(
       }
       if (!opts.fix) {
         if (audit.issues.some((issue) => issue.fixable)) {
-          lines.push(`  ${muted(`Fix: openclaw memory status --fix --agent ${agentId}`)}`);
+          lines.push(`  ${muted(`Fix: carapace memory status --fix --agent ${agentId}`)}`);
         }
       }
     }
@@ -546,7 +546,7 @@ export async function runMemoryStatus(
         lines.push(`  ${issue.severity === "error" ? warn(issue.message) : muted(issue.message)}`);
       }
       if (!opts.fix && dreamingAudit.issues.some((issue) => issue.fixable)) {
-        lines.push(`  ${muted(`Fix: openclaw memory status --fix --agent ${agentId}`)}`);
+        lines.push(`  ${muted(`Fix: carapace memory status --fix --agent ${agentId}`)}`);
       }
     }
     defaultRuntime.log(lines.join("\n"));

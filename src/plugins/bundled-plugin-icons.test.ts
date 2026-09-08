@@ -14,11 +14,11 @@ describe("bundled plugin icons", () => {
   it("packages a fixed local 512px PNG for every bundled plugin", () => {
     const manifestPaths = listGitTrackedFiles({
       repoRoot,
-      pathspecs: "extensions/*/openclaw.plugin.json",
+      pathspecs: "extensions/*/carapace.plugin.json",
     });
     expect(manifestPaths).not.toBeNull();
     const bundledManifestPaths = (manifestPaths ?? []).filter((manifestPath) =>
-      /^extensions\/[^/]+\/openclaw\.plugin\.json$/u.test(manifestPath),
+      /^extensions\/[^/]+\/carapace\.plugin\.json$/u.test(manifestPath),
     );
     expect(bundledManifestPaths.length).toBeGreaterThan(0);
 

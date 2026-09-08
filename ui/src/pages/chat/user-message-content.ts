@@ -1,5 +1,5 @@
 // Control UI chat module implements user message content behavior.
-import type { MediaKind } from "@openclaw/media-core/constants";
+import type { MediaKind } from "@carapace/media-core/constants";
 import type { ChatAttachment, HumanMention } from "../../lib/chat/chat-types.ts";
 import { trimHumanMentions } from "../../lib/chat/human-mentions.ts";
 import type { SenderIdentity } from "../../lib/chat/sender-label.ts";
@@ -88,7 +88,7 @@ type LocalUserMessage = {
   role: "user";
   content: UserChatMessageContentBlock[];
   timestamp: number;
-  __openclaw: Record<string, unknown> & {
+  __carapace: Record<string, unknown> & {
     idempotencyKey?: string;
   };
 };
@@ -123,7 +123,7 @@ export function buildLocalUserMessage(
     role: "user",
     content,
     timestamp: input.createdAt,
-    __openclaw: {
+    __carapace: {
       ...(input.runId ? { idempotencyKey: `${input.runId}:user` } : {}),
       ...(input.pending
         ? {

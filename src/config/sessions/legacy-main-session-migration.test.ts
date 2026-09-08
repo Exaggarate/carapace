@@ -14,16 +14,16 @@ import {
 } from "../../session-cards/progress-card-store.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { migrateLegacyMainSessionKeys } from "./legacy-main-session-migration.js";
 import { assignSessionOwner } from "./session-accessor.js";
 import { readExactSessionEntryRowForCanonicalRepair } from "./session-accessor.sqlite-canonical-repair.js";
@@ -40,7 +40,7 @@ const humanOwner = {
 } as const;
 
 type Fixture = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
 };
@@ -49,20 +49,20 @@ type LegacyMainSessionMigrationOutcomeKind = Awaited<
   ReturnType<typeof migrateLegacyMainSessionKeys>
 >["outcomes"][number]["kind"];
 
-function createFixture(cfg: OpenClawConfig = { agents: { entries: { ops: {} } } }): Fixture {
-  const rawRoot = tempDirs.make("openclaw-legacy-main-session-");
+function createFixture(cfg: CarapaceConfig = { agents: { entries: { ops: {} } } }): Fixture {
+  const rawRoot = tempDirs.make("carapace-legacy-main-session-");
   const root = fs.realpathSync.native(rawRoot);
   const stateDir = path.join(root, "state");
   fs.mkdirSync(stateDir, { recursive: true });
   return {
     cfg,
-    env: { ...process.env, OPENCLAW_AGENT_DIR: undefined, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_AGENT_DIR: undefined, CARAPACE_STATE_DIR: stateDir },
     stateDir,
   };
 }
 
 function databasePath(stateDir: string, agentId: string): string {
-  return path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+  return path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
 }
 
 function assignHumanOwner(storePath: string): void {
@@ -89,7 +89,7 @@ function seedClaim(params: {
     sessionId: `session-${params.key.replaceAll(":", "-")}`,
     updatedAt: 100,
   };
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       writeSessionEntry(database, params.key, entry, {
         allowStoredAliases: true,
@@ -115,7 +115,7 @@ function seedClaim(params: {
 }
 
 function readClaim(params: { databaseAgentId: string; databasePath: string; key: string }) {
-  return runOpenClawAgentWriteTransaction(
+  return runCarapaceAgentWriteTransaction(
     (database) => {
       const entry = readExactSessionEntryRowForCanonicalRepair(database, params.key)?.entry;
       return entry
@@ -172,7 +172,7 @@ async function recordHarnessDeletions<T>(
 }
 
 function setLedgerStatus(env: NodeJS.ProcessEnv, status: string): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       db.prepare("UPDATE migration_sources SET status = ? WHERE source_key = ?").run(
         status,
@@ -185,7 +185,7 @@ function setLedgerStatus(env: NodeJS.ProcessEnv, status: string): void {
 }
 
 function readLedgerReport(env: NodeJS.ProcessEnv): unknown {
-  return withExistingOpenClawStateDatabaseReadOnly(
+  return withExistingCarapaceStateDatabaseReadOnly(
     ({ db }) => {
       const row = db
         .prepare("SELECT report_json FROM migration_sources WHERE source_key = ?")
@@ -197,8 +197,8 @@ function readLedgerReport(env: NodeJS.ProcessEnv): unknown {
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("legacy main session migration", () => {
@@ -225,7 +225,7 @@ describe("legacy main session migration", () => {
           env: fixture.env,
           mode: "detect",
         });
-        expect(fs.existsSync(resolveOpenClawStateSqlitePath(fixture.env))).toBe(false);
+        expect(fs.existsSync(resolveCarapaceStateSqlitePath(fixture.env))).toBe(false);
         return result;
       },
     },
@@ -507,7 +507,7 @@ describe("legacy main session migration", () => {
     expect(fs.existsSync(path.join(fixture.stateDir, "shared.ops.sqlite"))).toBe(false);
     expect(fs.existsSync(storePath)).toBe(false);
     expect(
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => readTranscriptEventRows(database, entry.sessionId),
         { agentId: source.databaseAgentId, path: source.databasePath },
       ),
@@ -563,7 +563,7 @@ describe("legacy main session migration", () => {
       session: { store: storePath },
     });
     seedClaim({ databaseAgentId: "main", databasePath: storePath, key: "agent:main:chat" });
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         writeSessionProgressCard(database.db, "agent:main:chat", {
           markdown: "Keep working on the existing task",
@@ -593,7 +593,7 @@ describe("legacy main session migration", () => {
     expect(
       readClaim({ databaseAgentId: "main", databasePath: storePath, key: "agent:ops:chat" }),
     ).toBeDefined();
-    const migratedArtifacts = runOpenClawAgentWriteTransaction(
+    const migratedArtifacts = runCarapaceAgentWriteTransaction(
       (database) => ({
         heartbeat: database.db
           .prepare("SELECT session_key, run_session_key FROM heartbeat_outcomes")
@@ -809,7 +809,7 @@ describe("legacy main session migration", () => {
       env: fixture.env,
       mode: "detect",
     });
-    const changedMainKey: OpenClawConfig = {
+    const changedMainKey: CarapaceConfig = {
       ...fixture.cfg,
       session: { ...fixture.cfg.session, mainKey: "primary" },
     };
@@ -1035,7 +1035,7 @@ describe("legacy main session migration", () => {
       databasePath: databasePath(fixture.stateDir, "main"),
       key: "agent:main:chat",
     });
-    const env = { ...fixture.env, OPENCLAW_STATE_DIR: stateAlias };
+    const env = { ...fixture.env, CARAPACE_STATE_DIR: stateAlias };
 
     const result = await migrateLegacyMainSessionKeys({
       cfg: fixture.cfg,

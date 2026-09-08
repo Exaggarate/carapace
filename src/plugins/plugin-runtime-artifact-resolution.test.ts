@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { withEnv } from "../test-utils/env.js";
-import { clearPluginRegistryLoadCache, loadOpenClawPlugins } from "./loader.js";
+import { clearPluginRegistryLoadCache, loadCarapacePlugins } from "./loader.js";
 import { resetPluginLoaderTestStateForTest } from "./loader.test-fixtures.js";
 import {
   clearPluginRuntimeArtifactResolutionMemo,
@@ -19,7 +19,7 @@ function createBundledPluginFixture(builtExtension = ".js"): {
   builtSource: string;
 } {
   const packageRoot = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-runtime-artifact-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-runtime-artifact-")),
   );
   tempDirs.push(packageRoot);
   const rootDir = path.join(packageRoot, "extensions", "fixture");
@@ -38,11 +38,11 @@ function createBundledPluginFixture(builtExtension = ".js"): {
   fs.writeFileSync(
     path.join(path.dirname(builtSource), "package.json"),
     JSON.stringify({
-      openclaw: { extensions: [`./index${builtExtension}`], build: { runtimeFormat: "cjs" } },
+      carapace: { extensions: [`./index${builtExtension}`], build: { runtimeFormat: "cjs" } },
     }),
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "fixture",
       configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -217,7 +217,7 @@ describe("resolvePluginRuntimeArtifact", () => {
       fs.writeFileSync(
         path.join(packageRoot, "dist", "extensions", "fixture", "package.json"),
         JSON.stringify({
-          openclaw: { extensions: ["./index.ts"], runtimeExtensions: ["./dist/index.js"] },
+          carapace: { extensions: ["./index.ts"], runtimeExtensions: ["./dist/index.js"] },
         }),
       );
 
@@ -322,18 +322,18 @@ describe("resolvePluginRuntimeArtifact", () => {
 
     const [first, second] = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.dirname(fixture.rootDir),
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.dirname(fixture.rootDir),
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () => {
-        const sourceRegistry = loadOpenClawPlugins({
+        const sourceRegistry = loadCarapacePlugins({
           cache: false,
           config,
           onlyPluginIds: ["fixture"],
           preferBuiltPluginArtifacts: false,
         });
-        const builtPreferredRegistry = loadOpenClawPlugins({
+        const builtPreferredRegistry = loadCarapacePlugins({
           cache: false,
           config,
           onlyPluginIds: ["fixture"],
@@ -354,7 +354,7 @@ describe("resolvePluginRuntimeArtifact", () => {
 
   it("leaves dist-only installs unchanged because both preferences resolve the built entry", () => {
     const packageRoot = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-runtime-dist-only-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-runtime-dist-only-")),
     );
     tempDirs.push(packageRoot);
     const rootDir = path.join(packageRoot, "dist", "extensions", "fixture");

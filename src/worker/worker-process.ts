@@ -8,7 +8,7 @@ import {
 import { hasExactOwnKeys } from "./protocol-record.js";
 import { runWorkerCommand, type WorkerCommandLifetime } from "./worker-command.runtime.js";
 
-const WORKER_START_MESSAGE_TYPE = "openclaw-worker-start-v1";
+const WORKER_START_MESSAGE_TYPE = "carapace-worker-start-v1";
 
 function isWorkerStartMessage(value: unknown): boolean {
   return (

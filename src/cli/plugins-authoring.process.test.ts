@@ -14,15 +14,15 @@ async function createAuthoringFixture(root: string) {
   await fs.writeFile(
     path.join(project, "package.json"),
     JSON.stringify({
-      name: "openclaw-plugin-authoring-proof",
+      name: "carapace-plugin-authoring-proof",
       version: "1.0.0",
       type: "module",
-      openclaw: { extensions: ["./index.ts"] },
+      carapace: { extensions: ["./index.ts"] },
     }),
   );
   await fs.writeFile(
     path.join(project, "index.ts"),
-    `import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+    `import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 export default defineToolPlugin({
   id: "authoring-proof", name: "Authoring Proof", description: "Authoring fixture.",
   tools: (tool) => [tool({
@@ -34,7 +34,7 @@ export default defineToolPlugin({
 `,
   );
   await fs.writeFile(
-    path.join(project, "openclaw.plugin.json"),
+    path.join(project, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       name: "Authoring Proof",
@@ -49,7 +49,7 @@ export default defineToolPlugin({
 }
 
 async function runPlugins(root: string, args: string[]) {
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   await fs.writeFile(configPath, invalidConfig);
   return runCliProcessChild({
     nodeArgs: ["--import", "tsx", path.resolve("src", "entry.ts"), "plugins", ...args],
@@ -61,11 +61,11 @@ async function runPlugins(root: string, args: string[]) {
       NODE_ENV: undefined,
       NODE_OPTIONS: undefined,
       NO_COLOR: "1",
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_HIDE_BANNER: "1",
-      OPENCLAW_HOME: root,
-      OPENCLAW_NO_RESPAWN: "1",
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_HIDE_BANNER: "1",
+      CARAPACE_HOME: root,
+      CARAPACE_NO_RESPAWN: "1",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
       VITEST: undefined,
       VITEST_POOL_ID: undefined,
       VITEST_WORKER_ID: undefined,
@@ -77,11 +77,11 @@ describe("plugin authoring with invalid host config", () => {
   it.each(["init", "build", "validate"] as const)(
     "runs plugins %s against its target package",
     async (command) => {
-      const root = tempDirs.make("openclaw-plugin-authoring-process-");
+      const root = tempDirs.make("carapace-plugin-authoring-process-");
       const project =
         command === "init" ? path.join(root, "project") : await createAuthoringFixture(root);
       if (command === "build") {
-        await fs.unlink(path.join(project, "openclaw.plugin.json"));
+        await fs.unlink(path.join(project, "carapace.plugin.json"));
       }
       const args =
         command === "init"
@@ -91,9 +91,9 @@ describe("plugin authoring with invalid host config", () => {
       const result = await runPlugins(root, args);
 
       expect(result.code, result.stderr).toBe(0);
-      expect(await fs.readFile(path.join(root, "openclaw.json"), "utf8")).toBe(invalidConfig);
+      expect(await fs.readFile(path.join(root, "carapace.json"), "utf8")).toBe(invalidConfig);
       const manifest = JSON.parse(
-        await fs.readFile(path.join(project, "openclaw.plugin.json"), "utf8"),
+        await fs.readFile(path.join(project, "carapace.plugin.json"), "utf8"),
       );
       expect(manifest).toMatchObject({ id: pluginId, contracts: { tools: ["echo"] } });
       if (command === "validate") {
@@ -103,10 +103,10 @@ describe("plugin authoring with invalid host config", () => {
   );
 
   it("still rejects invalid host config for plugin enable", async () => {
-    const root = tempDirs.make("openclaw-plugin-enable-process-");
+    const root = tempDirs.make("carapace-plugin-enable-process-");
     const result = await runPlugins(root, ["enable", pluginId]);
     expect(result.code, result.stderr).toBe(1);
-    expect(result.stderr).toContain("OpenClaw config is invalid");
-    expect(await fs.readFile(path.join(root, "openclaw.json"), "utf8")).toBe(invalidConfig);
+    expect(result.stderr).toContain("Carapace config is invalid");
+    expect(await fs.readFile(path.join(root, "carapace.json"), "utf8")).toBe(invalidConfig);
   });
 });

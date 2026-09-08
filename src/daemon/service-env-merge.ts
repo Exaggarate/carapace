@@ -12,9 +12,9 @@ export function mergeGatewayServiceEnv(
     ...command.environment,
   };
   for (const key of [
-    "OPENCLAW_LAUNCHD_LABEL",
-    "OPENCLAW_SYSTEMD_UNIT",
-    "OPENCLAW_WINDOWS_TASK_NAME",
+    "CARAPACE_LAUNCHD_LABEL",
+    "CARAPACE_SYSTEMD_UNIT",
+    "CARAPACE_WINDOWS_TASK_NAME",
   ]) {
     // Explicit caller env selects the target service identity; installed command
     // env may come from a different profile or stale service file.

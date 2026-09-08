@@ -8,7 +8,7 @@ import {
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
 import { resolveSessionStorePathCore } from "../config/sessions.js";
 import { listSessionEntriesReadOnly } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { makeCronJob } from "../cron/delivery.test-helpers.js";
 import { loadCronStore, resolveCronJobsStorePath, saveCronStore } from "../cron/store.js";
 import { readExecApprovalsSnapshot, saveExecApprovals } from "../infra/exec-approvals.js";
@@ -17,13 +17,13 @@ import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
 import { readAgentProvenance, recordAgentProvenance } from "../state/agent-provenance.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import {
-  listOpenClawRegisteredAgentDatabases,
-  registerOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db-registry.js";
+  listCarapaceRegisteredAgentDatabases,
+  registerCarapaceAgentDatabase,
+} from "../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import {
   baseConfigSnapshot,
@@ -129,7 +129,7 @@ const arrangeAgentsDeleteTest = createAgentsDeleteFixture((cfg) => {
 const readJsonLogs = () => readAgentDeleteJsonLogs(runtime.log.mock.calls);
 
 function expectSessionStore(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   sessions: Record<string, { sessionId: string; updatedAt: number }>,
   agentId = "ops",
 ) {
@@ -183,8 +183,8 @@ describe("agents delete command", () => {
   });
 
   it("requires --force when confirmation cannot use an interactive terminal", async () => {
-    await withStateDirEnv("openclaw-agents-delete-non-tty-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-non-tty-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", default: true, workspace: path.join(stateDir, "workspace-main") },
@@ -206,16 +206,16 @@ describe("agents delete command", () => {
   });
 
   it("refuses deleting main even when another agent is default", async () => {
-    await withStateDirEnv("openclaw-agents-delete-gateway-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-gateway-", async ({ stateDir }) => {
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
             { id: "ops", default: true, workspace: path.join(stateDir, "workspace-ops") },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const sessions = {
         "agent:ops:main": { sessionId: "sess-ops-main", updatedAt: now + 1 },
         "agent:main:main": { sessionId: "sess-main", updatedAt: now + 2 },
@@ -238,7 +238,7 @@ describe("agents delete command", () => {
           error: {
             type: "cli_error",
             message:
-              'Agent "main" owns the legacy shared auth store and cannot be deleted. Run openclaw doctor --fix to migrate shared auth, then retry.',
+              'Agent "main" owns the legacy shared auth store and cannot be deleted. Run carapace doctor --fix to migrate shared auth, then retry.',
           },
         },
       ]);
@@ -251,19 +251,19 @@ describe("agents delete command", () => {
   it.each(["relocated", "agent directory"])(
     "refuses deleting a shared session database owner at a %s locator before any mutation",
     async (location) => {
-      await withStateDirEnv("openclaw-agents-delete-shared-owner-", async ({ stateDir }) => {
+      await withStateDirEnv("carapace-agents-delete-shared-owner-", async ({ stateDir }) => {
         const storePath =
           location === "relocated"
             ? path.join(stateDir, "shared.sqlite")
-            : path.join(stateDir, "agents", "alpha", "agent", "openclaw-agent.sqlite");
-        const cfg: OpenClawConfig = {
+            : path.join(stateDir, "agents", "alpha", "agent", "carapace-agent.sqlite");
+        const cfg: CarapaceConfig = {
           agents: {
             ownership: "explicit",
             entries: { alpha: {}, ops: {} },
           },
           session: { store: storePath },
         };
-        openOpenClawAgentDatabase({ agentId: "alpha", path: storePath });
+        openCarapaceAgentDatabase({ agentId: "alpha", path: storePath });
         const sessions = {
           "agent:alpha:main": { sessionId: "alpha-session", updatedAt: 1 },
           ...(location === "relocated"
@@ -295,8 +295,8 @@ describe("agents delete command", () => {
   );
 
   it("deletes main normally after shared auth ownership moves to state SQLite", async () => {
-    await withStateDirEnv("openclaw-agents-delete-relocated-auth-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-relocated-auth-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
@@ -349,8 +349,8 @@ describe("agents delete command", () => {
   });
 
   it("rejects an unrepresentable id before targeting or deleting an agent", async () => {
-    await withStateDirEnv("openclaw-agents-delete-invalid-id-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-invalid-id-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
@@ -367,7 +367,7 @@ describe("agents delete command", () => {
       await agentsDeleteCommand({ id: "агент✨", force: true }, runtime);
 
       expect(runtime.error).toHaveBeenCalledWith(
-        'Agent "агент✨" not found. Run openclaw agents list to see configured agents.',
+        'Agent "агент✨" not found. Run carapace agents list to see configured agents.',
       );
       expect(runtime.exit).toHaveBeenCalledWith(1);
       expect(gatewayMocks.callGateway).not.toHaveBeenCalled();
@@ -379,8 +379,8 @@ describe("agents delete command", () => {
   });
 
   it("refuses deleting the auth-inheritance owner until credentials are relocated", async () => {
-    await withStateDirEnv("openclaw-agents-delete-auth-owner-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-auth-owner-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: { authInheritance: { agentId: "ops" } },
           list: [{ id: "ops" }, { id: "research" }],
@@ -423,9 +423,9 @@ describe("agents delete command", () => {
   });
 
   it("warns about Gateway cleanup failures without failing committed deletion", async () => {
-    await withStateDirEnv("openclaw-agents-delete-gateway-warning-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-gateway-warning-", async ({ stateDir }) => {
       const workspace = path.join(stateDir, "workspace-ops");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main" }, { id: "ops", workspace }] },
       };
       await arrangeAgentsDeleteTest({ stateDir, cfg, sessions: {} });
@@ -452,8 +452,8 @@ describe("agents delete command", () => {
   });
 
   it("includes purge failure in delegated JSON output", async () => {
-    await withStateDirEnv("openclaw-agents-delete-gateway-purge-json-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-gateway-purge-json-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main" }, { id: "ops" }] },
       };
       await arrangeAgentsDeleteTest({ stateDir, cfg, sessions: {} });
@@ -484,8 +484,8 @@ describe("agents delete command", () => {
       }),
     },
   ])("surfaces $label without replaying deletion locally", async ({ error }) => {
-    await withStateDirEnv("openclaw-agents-delete-ambiguous-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = { agents: { list: [{ id: "main" }, { id: "ops" }] } };
+    await withStateDirEnv("carapace-agents-delete-ambiguous-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = { agents: { list: [{ id: "main" }, { id: "ops" }] } };
       const sessions = { "agent:ops:main": { sessionId: "sess-ops", updatedAt: Date.now() } };
       await arrangeAgentsDeleteTest({ stateDir, cfg, sessions });
       gatewayMocks.callGateway.mockRejectedValue(error);
@@ -499,9 +499,9 @@ describe("agents delete command", () => {
   });
 
   it("falls back to local deletion when the optional Gateway probe needs credentials", async () => {
-    await withStateDirEnv("openclaw-agents-delete-gateway-auth-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-gateway-auth-", async ({ stateDir }) => {
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             heartbeat: { agentId: "ops" },
@@ -513,7 +513,7 @@ describe("agents delete command", () => {
           ],
         },
         talk: { agentId: "ops", provider: "test-provider" },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await arrangeAgentsDeleteTest({
         stateDir,
         cfg,
@@ -541,7 +541,7 @@ describe("agents delete command", () => {
           {
             name: "GatewayCredentialsRequiredError",
             method: "agents.delete",
-            configPath: path.join(stateDir, "openclaw.json"),
+            configPath: path.join(stateDir, "carapace.json"),
           },
         ),
       );
@@ -570,7 +570,7 @@ describe("agents delete command", () => {
         "talk.agentId",
       ]);
       const replaceConfigFileCalls = configMocks.replaceConfigFile.mock.calls as unknown as Array<
-        [{ sourceConfig: OpenClawConfig }]
+        [{ sourceConfig: CarapaceConfig }]
       >;
       expect(
         replaceConfigFileCalls[0]?.[0].sourceConfig.agents?.defaults?.heartbeat,
@@ -585,16 +585,16 @@ describe("agents delete command", () => {
   });
 
   it("purges deleted agent entries from the session store", async () => {
-    await withStateDirEnv("openclaw-agents-delete-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-", async ({ stateDir }) => {
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
             { id: "ops", workspace: path.join(stateDir, "workspace-ops") },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await arrangeAgentsDeleteTest({
         stateDir,
         cfg,
@@ -611,7 +611,7 @@ describe("agents delete command", () => {
       expect(runtime.exit).not.toHaveBeenCalled();
       expect(configMocks.replaceConfigFile).toHaveBeenCalledOnce();
       const replaceConfigFileCalls = configMocks.replaceConfigFile.mock.calls as unknown as Array<
-        [{ sourceConfig: OpenClawConfig }]
+        [{ sourceConfig: CarapaceConfig }]
       >;
       expect(replaceConfigFileCalls[0]?.[0].sourceConfig).toEqual({
         agents: {
@@ -631,8 +631,8 @@ describe("agents delete command", () => {
   });
 
   it("removes only the deleted agent's cron jobs during offline deletion", async () => {
-    await withStateDirEnv("openclaw-agents-delete-cron-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-cron-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           defaults: { systemAgent: { agentId: "main" } },
@@ -671,9 +671,9 @@ describe("agents delete command", () => {
   });
 
   it("deregisters the agent database after offline deletion", async () => {
-    await withStateDirEnv("openclaw-agents-delete-registry-", async ({ tempRoot, stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-registry-", async ({ tempRoot, stateDir }) => {
       const mainAgentDir = path.join(tempRoot, "main-agent");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             {
@@ -686,7 +686,7 @@ describe("agents delete command", () => {
         },
       };
       await arrangeAgentsDeleteTest({ stateDir, cfg, sessions: {} });
-      const databasePath = path.join(stateDir, "agents", "ops", "agent", "openclaw-agent.sqlite");
+      const databasePath = path.join(stateDir, "agents", "ops", "agent", "carapace-agent.sqlite");
       const externalDatabaseDir = path.join(tempRoot, "external-databases");
       await fs.mkdir(externalDatabaseDir);
       await fs.mkdir(mainAgentDir);
@@ -706,14 +706,14 @@ describe("agents delete command", () => {
       );
       const canonicalExternalDatabaseDir = await fs.realpath(externalDatabaseDir);
       const canonicalMainAgentDir = await fs.realpath(mainAgentDir);
-      registerOpenClawAgentDatabase({ agentId: "ops", path: databasePath });
-      registerOpenClawAgentDatabase({ agentId: "ops", path: externalDatabasePath });
-      registerOpenClawAgentDatabase({ agentId: "ops", path: sharedDatabasePath });
-      registerOpenClawAgentDatabase({ agentId: "ops", path: survivorOwnedDatabasePath });
-      registerOpenClawAgentDatabase({ agentId: "main", path: sharedDatabasePath });
+      registerCarapaceAgentDatabase({ agentId: "ops", path: databasePath });
+      registerCarapaceAgentDatabase({ agentId: "ops", path: externalDatabasePath });
+      registerCarapaceAgentDatabase({ agentId: "ops", path: sharedDatabasePath });
+      registerCarapaceAgentDatabase({ agentId: "ops", path: survivorOwnedDatabasePath });
+      registerCarapaceAgentDatabase({ agentId: "main", path: sharedDatabasePath });
       recordAgentProvenance("ops", { createdVia: "operator" });
       recordAgentProvenance("child", { createdVia: "agent", creatorAgentId: "ops" });
-      expect(listOpenClawRegisteredAgentDatabases().map((entry) => entry.agentId)).toContain("ops");
+      expect(listCarapaceRegisteredAgentDatabases().map((entry) => entry.agentId)).toContain("ops");
 
       await agentsDeleteCommand({ id: "ops", force: true, json: true }, runtime);
 
@@ -737,7 +737,7 @@ describe("agents delete command", () => {
         expect.anything(),
       );
       expect((await fs.stat(survivorOwnedDatabasePath)).isFile()).toBe(true);
-      const registeredDatabases = listOpenClawRegisteredAgentDatabases();
+      const registeredDatabases = listCarapaceRegisteredAgentDatabases();
       expect(registeredDatabases.map((entry) => entry.agentId)).not.toContain("ops");
       expect(registeredDatabases).toEqual(
         expect.arrayContaining([
@@ -753,9 +753,9 @@ describe("agents delete command", () => {
   it.each(["agent", "sessions"])(
     "retains a deleted agent's %s directory containing a surviving database",
     async (directory) => {
-      await withStateDirEnv("openclaw-agents-delete-foreign-directory-", async ({ stateDir }) => {
+      await withStateDirEnv("carapace-agents-delete-foreign-directory-", async ({ stateDir }) => {
         const retainedDirectory = path.join(stateDir, "agents", "ops", directory);
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             entries: {
               main: { default: true, workspace: path.join(stateDir, "workspace-main") },
@@ -764,11 +764,11 @@ describe("agents delete command", () => {
           },
         };
         await arrangeAgentsDeleteTest({ stateDir, cfg, sessions: {} });
-        const foreign = openOpenClawAgentDatabase({
+        const foreign = openCarapaceAgentDatabase({
           agentId: "main",
           path: path.join(retainedDirectory, "kept.sqlite"),
         });
-        closeOpenClawAgentDatabaseByPath(foreign.path);
+        closeCarapaceAgentDatabaseByPath(foreign.path);
         fsSafeMocks.movePathToTrash.mockImplementation(async (targetPath) => {
           const destination = `${targetPath}.trashed`;
           await fs.rename(targetPath, destination);
@@ -789,8 +789,8 @@ describe("agents delete command", () => {
   );
 
   it("resumes offline deletion after cleanup was interrupted", async () => {
-    await withStateDirEnv("openclaw-agents-delete-recovery-", async ({ stateDir }) => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-agents-delete-recovery-", async ({ stateDir }) => {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
@@ -799,8 +799,8 @@ describe("agents delete command", () => {
         },
       };
       await arrangeAgentsDeleteTest({ stateDir, cfg, sessions: {} });
-      const databasePath = path.join(stateDir, "agents", "ops", "agent", "openclaw-agent.sqlite");
-      registerOpenClawAgentDatabase({ agentId: "ops", path: databasePath });
+      const databasePath = path.join(stateDir, "agents", "ops", "agent", "carapace-agent.sqlite");
+      registerCarapaceAgentDatabase({ agentId: "ops", path: databasePath });
       workspaceStateMocks.deleteWorkspaceState.mockImplementationOnce(() => {
         throw new Error("interrupted after filesystem cleanup");
       });
@@ -809,10 +809,10 @@ describe("agents delete command", () => {
         agentsDeleteCommand({ id: "ops", force: true, json: true }, runtime),
       ).rejects.toThrow("interrupted after filesystem cleanup");
       expect(readAgentDeletionJournal("ops")?.cleanupCompleted).toBe(false);
-      expect(listOpenClawRegisteredAgentDatabases().map((entry) => entry.agentId)).toContain("ops");
+      expect(listCarapaceRegisteredAgentDatabases().map((entry) => entry.agentId)).toContain("ops");
 
       const writeCalls = configMocks.replaceConfigFile.mock.calls as unknown as Array<
-        [{ sourceConfig?: OpenClawConfig }]
+        [{ sourceConfig?: CarapaceConfig }]
       >;
       const firstWrite = writeCalls[0]?.[0];
       const nextConfig = firstWrite?.sourceConfig;
@@ -827,7 +827,7 @@ describe("agents delete command", () => {
 
       await agentsDeleteCommand({ id: "ops", force: true, json: true }, runtime);
 
-      expect(listOpenClawRegisteredAgentDatabases().map((entry) => entry.agentId)).not.toContain(
+      expect(listCarapaceRegisteredAgentDatabases().map((entry) => entry.agentId)).not.toContain(
         "ops",
       );
       expect(readAgentDeletionJournal("ops")?.cleanupCompleted).toBe(true);

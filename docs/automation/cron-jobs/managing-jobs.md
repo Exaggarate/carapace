@@ -16,7 +16,7 @@ Day-to-day operation of stored jobs: copy-ready CLI examples, the management com
 <Tabs>
   <Tab title="One-shot reminder">
     ```bash
-    openclaw automations add \
+    carapace automations add \
       --name "Calendar check" \
       --at "20m" \
       --session main \
@@ -26,7 +26,7 @@ Day-to-day operation of stored jobs: copy-ready CLI examples, the management com
   </Tab>
   <Tab title="Recurring isolated job">
     ```bash
-    openclaw automations create "0 7 * * *" \
+    carapace automations create "0 7 * * *" \
       "Summarize overnight updates." \
       --name "Morning brief" \
       --tz "America/Los_Angeles" \
@@ -38,7 +38,7 @@ Day-to-day operation of stored jobs: copy-ready CLI examples, the management com
   </Tab>
   <Tab title="Model and thinking override">
     ```bash
-    openclaw automations add \
+    carapace automations add \
       --name "Deep analysis" \
       --cron "0 6 * * 1" \
       --tz "America/Los_Angeles" \
@@ -51,15 +51,15 @@ Day-to-day operation of stored jobs: copy-ready CLI examples, the management com
   </Tab>
   <Tab title="Webhook output">
     ```bash
-    openclaw automations create "0 18 * * 1-5" \
+    carapace automations create "0 18 * * 1-5" \
       "Summarize today's deploys as JSON." \
       --name "Deploy digest" \
-      --webhook "https://example.invalid/openclaw/cron"
+      --webhook "https://example.invalid/carapace/cron"
     ```
   </Tab>
   <Tab title="Command output">
     ```bash
-    openclaw automations create "*/15 * * * *" \
+    carapace automations create "*/15 * * * *" \
       --name "Queue depth probe" \
       --command "scripts/check-queue.sh" \
       --command-cwd "/srv/app" \
@@ -84,50 +84,50 @@ Each admin management request records its method, run, operational instance, and
 
 ```bash
 # List enabled jobs
-openclaw automations list
+carapace automations list
 
 # Include disabled jobs
-openclaw automations list --all
+carapace automations list --all
 
 # Get one stored job as JSON
-openclaw automations get <jobId>
+carapace automations get <jobId>
 
 # Show one job, including resolved delivery route
-openclaw automations show <jobId>
+carapace automations show <jobId>
 
 # Enable/disable without deleting
-openclaw automations enable <jobId>
-openclaw automations disable <jobId>
+carapace automations enable <jobId>
+carapace automations disable <jobId>
 
 # Edit a job
-openclaw automations edit <jobId> --message "Updated prompt" --model "opus"
+carapace automations edit <jobId> --message "Updated prompt" --model "opus"
 
 # Force run a job now
-openclaw automations run <jobId>
+carapace automations run <jobId>
 
 # Force run a job now and wait for its terminal status
-openclaw automations run <jobId> --wait --wait-timeout 10m --poll-interval 2s
+carapace automations run <jobId> --wait --wait-timeout 10m --poll-interval 2s
 
 # Run only if due
-openclaw automations run <jobId> --due
+carapace automations run <jobId> --due
 
 # View run history
-openclaw automations runs <jobId> --limit 50
+carapace automations runs <jobId> --limit 50
 
 # View one exact run
-openclaw automations runs <jobId> --run-id <runId>
+carapace automations runs <jobId> --run-id <runId>
 
 # Delete a job
-openclaw automations remove <jobId>
+carapace automations remove <jobId>
 
 # Agent selection (multi-agent setups)
-openclaw automations create "0 6 * * *" "Check ops queue" --name "Ops sweep" --session isolated --agent ops
-openclaw automations edit <jobId> --clear-agent
+carapace automations create "0 6 * * *" "Check ops queue" --name "Ops sweep" --session isolated --agent ops
+carapace automations edit <jobId> --clear-agent
 ```
 
-Archiving a session (Control UI, or `sessions.patch { key, archived: true, expectedSessionId }` using the durable ID from `sessions.list`) disables every enabled automation job bound to that session: its isolated `cron:<jobId>` session, a `session:<key>` target, or a delivery/wake `sessionKey` lane. Restoring the session requires the same observed identity and does not re-enable those jobs; use `openclaw automations enable <jobId>`. Sessions with an enabled bound job show a clock badge in the Control UI sidebar.
+Archiving a session (Control UI, or `sessions.patch { key, archived: true, expectedSessionId }` using the durable ID from `sessions.list`) disables every enabled automation job bound to that session: its isolated `cron:<jobId>` session, a `session:<key>` target, or a delivery/wake `sessionKey` lane. Restoring the session requires the same observed identity and does not re-enable those jobs; use `carapace automations enable <jobId>`. Sessions with an enabled bound job show a clock badge in the Control UI sidebar.
 
-`openclaw automations run <jobId>` returns after enqueueing the manual run. Use `--wait` for shutdown hooks, maintenance scripts, or other automation that must block until the queued run finishes; it polls the returned `runId` (default timeout `10m`, poll interval `2s`) and exits `0` only for `completionStatus: "succeeded"`. Failed or unknown completion and wait timeouts exit non-zero.
+`carapace automations run <jobId>` returns after enqueueing the manual run. Use `--wait` for shutdown hooks, maintenance scripts, or other automation that must block until the queued run finishes; it polls the returned `runId` (default timeout `10m`, poll interval `2s`) and exits `0` only for `completionStatus: "succeeded"`. Failed or unknown completion and wait timeouts exit non-zero.
 
 Run-now delivery measures lateness from when the manual request was accepted. An old pending scheduled slot does not make its fresh output stale; automatic and `--due` runs keep the original scheduled time for that check. A manual run still preserves the job's recurring cadence or future one-shot occurrence.
 
@@ -139,20 +139,20 @@ Direct Gateway event sources can use `cron.run` with `mode: "if-enabled"` to run
 
 The agent `automations` tool returns compact job summaries (`id`, `name`, `enabled`, `effectiveAgentId`, `nextRunAt`, `nextRunAtMs`, `scheduleKind`, `lastRunAt`, `lastRunStatus`) from `automations(action: "list")`. `effectiveAgentId` identifies the resolved execution owner, or is `null` when ownership is unresolved. Run dates are exact ISO timestamps, or `null` when absent; the millisecond fields remain available for programmatic callers. Time-based jobs also include their exact `schedule` (`at`, `every`, or `cron`), including disabled jobs with no next run. Event-driven schedules, payloads, and delivery definitions remain omitted; use `automations(action: "get", jobId: "...")` for one full job definition. Direct Gateway callers can pass `compact: true` to `cron.list`; omitting it preserves the full response with delivery previews. `cron.add` includes the same dry-run preview on the created job so create-time output names a resolved route or fail-closed outcome.
 
-`openclaw automations create` is an alias for `openclaw automations add`. New jobs can use a positional schedule (`"0 9 * * 1"`, `"every 1h"`, `"20m"`, or an ISO timestamp) followed by a positional agent prompt. Use `--webhook <url>` on `automations add|create` or `automations edit` to POST the finished run payload to an HTTP endpoint; webhook delivery cannot combine with chat delivery flags (`--announce`, `--channel`, `--to`, `--thread-id`, `--account`). On `automations edit`, `--clear-channel`, `--clear-to`, `--clear-thread-id`, and `--clear-account` unset those routing fields individually (each rejected alongside its matching set flag) — distinct from `--no-deliver`, which only disables runner fallback delivery.
+`carapace automations create` is an alias for `carapace automations add`. New jobs can use a positional schedule (`"0 9 * * 1"`, `"every 1h"`, `"20m"`, or an ISO timestamp) followed by a positional agent prompt. Use `--webhook <url>` on `automations add|create` or `automations edit` to POST the finished run payload to an HTTP endpoint; webhook delivery cannot combine with chat delivery flags (`--announce`, `--channel`, `--to`, `--thread-id`, `--account`). On `automations edit`, `--clear-channel`, `--clear-to`, `--clear-thread-id`, and `--clear-account` unset those routing fields individually (each rejected alongside its matching set flag) — distinct from `--no-deliver`, which only disables runner fallback delivery.
 
 The webhook URL remains subject to the [strict outbound policy](/automation/cron-jobs/delivery#delivery-and-output); configure `cron.webhookSsrfPolicy` for an intentional local or private receiver.
 
 <Note>
 Model override note:
 
-- `openclaw automations add|edit --model ...` changes the job's selected model.
+- `carapace automations add|edit --model ...` changes the job's selected model.
 - If the model is allowed, that exact provider/model reaches the isolated agent run.
 - If it is not allowed or cannot be resolved, the scheduler fails the run with an explicit validation error.
 - API `cron.update` payload patches can set `model: null` to clear a stored job model override.
-- `openclaw automations edit <job-id> --clear-model` clears that override from the CLI (same effect as the `model: null` patch) and cannot combine with `--model`.
+- `carapace automations edit <job-id> --clear-model` clears that override from the CLI (same effect as the `model: null` patch) and cannot combine with `--model`.
 - Configured fallback chains still apply because the automation `--model` is a job primary, not a session `/model` override.
-- `openclaw automations add|edit --fallbacks ...` sets payload `fallbacks`, replacing configured fallbacks for that job; `--fallbacks ""` disables fallback and makes the run strict. `openclaw automations edit <job-id> --clear-fallbacks` clears the per-job override.
+- `carapace automations add|edit --fallbacks ...` sets payload `fallbacks`, replacing configured fallbacks for that job; `--fallbacks ""` disables fallback and makes the run strict. `carapace automations edit <job-id> --clear-fallbacks` clears the per-job override.
 - A plain `--model` with no explicit or configured fallback list does not fall through to the agent primary as a silent extra retry target.
 
 </Note>
@@ -186,7 +186,7 @@ Automation jobs, run history, and quarantined malformed jobs live in the shared 
 
 Set `cron.skipMissedJobs: true` to skip recurring (`cron` and `every`) slots missed while the Gateway was offline. At startup, those jobs advance to their next future occurrence instead of catching up, avoiding stale reminders and unnecessary model calls at the cost of dropping missed work. The default is `false` (catch up); one-shot (`at`) jobs retain their normal catch-up behavior either way.
 
-Disable automations: `cron.enabled: false` or `OPENCLAW_SKIP_CRON=1`.
+Disable automations: `cron.enabled: false` or `CARAPACE_SKIP_CRON=1`.
 
 <AccordionGroup>
   <Accordion title="Retry behavior">
@@ -199,6 +199,6 @@ Disable automations: `cron.enabled: false` or `OPENCLAW_SKIP_CRON=1`.
     `cron.sessionRetention` (default `24h`, `false` or `"0h"` disables) prunes isolated run-session entries. Terminal run history is retained for 7 days (`lost` rows for 24 hours), with the newest 2000 rows per job and history class enforced as an additional ceiling.
   </Accordion>
   <Accordion title="Legacy store migration">
-    On upgrade, run `openclaw doctor --fix` to import historical `~/.openclaw/cron/jobs.json`, `jobs-state.json`, `jobs-quarantine.json`, and `runs/*.jsonl` files into SQLite and archive the originals with a `.migrated` suffix. Malformed job rows remain recoverable in SQLite while valid jobs keep running.
+    On upgrade, run `carapace doctor --fix` to import historical `~/.carapace/cron/jobs.json`, `jobs-state.json`, `jobs-quarantine.json`, and `runs/*.jsonl` files into SQLite and archive the originals with a `.migrated` suffix. Malformed job rows remain recoverable in SQLite while valid jobs keep running.
   </Accordion>
 </AccordionGroup>

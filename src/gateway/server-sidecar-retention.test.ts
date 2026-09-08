@@ -8,7 +8,7 @@ import {
 } from "../../scripts/lib/local-build-metadata.mts";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { getActiveSecretsRuntimeConfigSnapshot } from "../secrets/runtime-state.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { createGatewayKernel } from "./server-kernel.js";
 import type { GatewayServer } from "./server-public.js";
@@ -35,19 +35,19 @@ describe("createGatewayKernel", () => {
     "retains shutdown dependencies after connection-sidecar failure during %s close",
     async (entry) => {
       const port = await getFreePort();
-      const state = await createOpenClawTestState({
+      const state = await createCarapaceTestState({
         label: `gateway-${entry}-sidecar-retention`,
         layout: "home",
         env: {
-          OPENCLAW_GATEWAY_PASSWORD: undefined,
-          OPENCLAW_GATEWAY_TOKEN: undefined,
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
+          CARAPACE_GATEWAY_PASSWORD: undefined,
+          CARAPACE_GATEWAY_TOKEN: undefined,
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "0",
           VITEST: "1",
         },
       });

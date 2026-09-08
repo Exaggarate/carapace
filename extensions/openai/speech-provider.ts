@@ -1,19 +1,19 @@
 // Openai provider module implements model/runtime integration.
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
-import { parseSpeechDirectiveNumberOverride } from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-core";
+import { parseSpeechDirectiveNumberOverride } from "carapace/plugin-sdk/speech-provider";
 import {
   asFiniteNumber,
   asOptionalRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveOpenAIProviderConfigRecord } from "./realtime-provider-shared.js";
 import {
   DEFAULT_OPENAI_BASE_URL,
@@ -297,7 +297,7 @@ export function buildOpenAISpeechProvider(): SpeechProviderPlugin {
         config.responseFormat,
       );
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       const audioBuffer = await openaiTTS({
         text: req.text,
         apiKey,
@@ -312,7 +312,7 @@ export function buildOpenAISpeechProvider(): SpeechProviderPlugin {
         maxBytes: resolveGeneratedMediaMaxBytes(req.cfg, "audio"),
       });
       const fileExtension = responseFormatToFileExtension(responseFormat);
-      const { isVoiceMessageCompatibleAudio } = await import("openclaw/plugin-sdk/media-runtime");
+      const { isVoiceMessageCompatibleAudio } = await import("carapace/plugin-sdk/media-runtime");
       return {
         audioBuffer,
         outputFormat: responseFormat,
@@ -332,7 +332,7 @@ export function buildOpenAISpeechProvider(): SpeechProviderPlugin {
       const outputFormat = "pcm";
       const sampleRate = 24_000;
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       const audioBuffer = await openaiTTS({
         text: req.text,
         apiKey,

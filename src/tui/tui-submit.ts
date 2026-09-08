@@ -1,5 +1,5 @@
 // Handles TUI input submission and command dispatch.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type {
   TuiChatSubmitAdmission,
   TuiChatSubmitBlock,

@@ -5,15 +5,15 @@ import type { Readable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { readPersistedInstalledPluginIndex } from "./installed-plugin-index-store.js";
 import { withPluginLifecycleLease } from "./plugin-lifecycle-lease.js";
 
 type LeaseChild = ChildProcessByStdio<null, Readable, Readable>;
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function terminateLeaseChild(child: LeaseChild): Promise<void> {
@@ -112,12 +112,12 @@ describe("plugin lifecycle lease", () => {
     ["one state directory", false],
     ["an explicit database path across different state directories", true],
   ])("serializes lifecycle work sharing %s", async (_label, explicitPath) => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-lease" }, async (state) => {
+    await withCarapaceTestState({ label: "plugin-lifecycle-lease" }, async (state) => {
       const firstEntered = createDeferred();
       const releaseFirst = createDeferred();
       const events: string[] = [];
       const leaseOptions = (caller: string) => ({
-        env: explicitPath ? { ...state.env, OPENCLAW_STATE_DIR: state.path(caller) } : state.env,
+        env: explicitPath ? { ...state.env, CARAPACE_STATE_DIR: state.path(caller) } : state.env,
         ...(explicitPath ? { path: state.path("shared-plugin-lifecycle.sqlite") } : {}),
         leaseMs: 1_000,
         waitMs: 3_000,
@@ -152,7 +152,7 @@ describe("plugin lifecycle lease", () => {
   });
 
   it("serializes lifecycle work across processes", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-processes" }, async (state) => {
+    await withCarapaceTestState({ label: "plugin-lifecycle-processes" }, async (state) => {
       await withLeaseChildren(async (children) => {
         const releaseMarker = state.path("release-first");
         const secondMarker = state.path("second-entered");
@@ -166,7 +166,7 @@ describe("plugin lifecycle lease", () => {
           import fs from "node:fs/promises";
           import { withPluginLifecycleLease } from ${JSON.stringify(leaseModuleUrl)};
           const [role, stateDir, releaseMarker, secondMarker, secondResult] = process.argv.slice(2);
-          const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+          const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
           if (role === "second") {
             process.stdout.write("ready\\n");
             try {
@@ -207,7 +207,7 @@ describe("plugin lifecycle lease", () => {
         let assertionError: unknown;
         try {
           await expect(fs.readFile(secondResult, "utf8")).resolves.toBe(
-            "OPENCLAW_STATE_LEASE_TIMEOUT",
+            "CARAPACE_STATE_LEASE_TIMEOUT",
           );
           await expect(fs.access(secondMarker)).rejects.toMatchObject({ code: "ENOENT" });
         } catch (error) {
@@ -226,7 +226,7 @@ describe("plugin lifecycle lease", () => {
   });
 
   it("reloads install records after waiting for another process", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-record-cache" }, async (state) => {
+    await withCarapaceTestState({ label: "plugin-lifecycle-record-cache" }, async (state) => {
       await withLeaseChildren(async (children) => {
         const leaseModuleUrl = pathToFileURL(
           path.resolve("src/plugins/plugin-lifecycle-lease.ts"),
@@ -245,8 +245,8 @@ describe("plugin lifecycle lease", () => {
             writePersistedInstalledPluginIndexInstallRecords,
           } from ${JSON.stringify(recordsModuleUrl)};
           const [pluginId, stateDir, goMarker] = process.argv.slice(2);
-          process.env.OPENCLAW_STATE_DIR = stateDir;
-          const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+          process.env.CARAPACE_STATE_DIR = stateDir;
+          const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
           await loadInstalledPluginIndexInstallRecords();
           process.stdout.write("ready\\n");
           while (true) {
@@ -278,7 +278,7 @@ describe("plugin lifecycle lease", () => {
         await fs.writeFile(goMarker, "go");
         await Promise.all([alpha.completed, beta.completed]);
 
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         const persisted = await readPersistedInstalledPluginIndex({ env: state.env });
         expect(Object.keys(persisted?.installRecords ?? {}).toSorted()).toEqual(["alpha", "beta"]);
       });
@@ -286,7 +286,7 @@ describe("plugin lifecycle lease", () => {
   });
 
   it("reuses the active lease for nested lifecycle work", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-reentrant" }, async (state) => {
+    await withCarapaceTestState({ label: "plugin-lifecycle-reentrant" }, async (state) => {
       const events: string[] = [];
       await withPluginLifecycleLease(
         { env: state.env, leaseMs: 1_000, waitMs: 0 },
@@ -296,7 +296,7 @@ describe("plugin lifecycle lease", () => {
             events.push("inner");
             expect(innerLease).toBe(outerLease);
             expect(innerLease.databasePath).toBe(
-              path.resolve(state.stateDir, "state", "openclaw.sqlite"),
+              path.resolve(state.stateDir, "state", "carapace.sqlite"),
             );
           });
         },

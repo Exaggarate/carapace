@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/memory-core",
+  "name": "@carapace/memory-core",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw core memory search plugin",
+  "description": "Carapace core memory search plugin",
   "type": "module",
   "exports": {
     "./api.js": "./api.ts"
@@ -14,18 +14,18 @@
     "typebox": "1.3.18"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

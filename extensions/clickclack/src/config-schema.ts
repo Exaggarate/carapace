@@ -6,8 +6,8 @@ import {
   buildChannelConfigSchema,
   buildMultiAccountChannelSchema,
   ChannelBotLoopProtectionSchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import { buildSecretInputSchema } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/channel-config-schema";
+import { buildSecretInputSchema } from "carapace/plugin-sdk/secret-input";
 import { z } from "zod";
 
 const ClickClackAccountConfigSchema = z
@@ -69,7 +69,7 @@ const ClickClackConfigSchema = buildMultiAccountChannelSchema(
 );
 
 /**
- * Config schema exported to core so `openclaw doctor` and config validation
+ * Config schema exported to core so `carapace doctor` and config validation
  * understand both default and named ClickClack accounts.
  */
 export const clickClackConfigSchema = buildChannelConfigSchema(ClickClackConfigSchema);

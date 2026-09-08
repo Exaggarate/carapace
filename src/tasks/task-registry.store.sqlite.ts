@@ -1,4 +1,4 @@
-// Persists task registry records and events through the OpenClaw SQLite state database.
+// Persists task registry records and events through the Carapace SQLite state database.
 import type { DatabaseSync } from "node:sqlite";
 import type { Insertable, Selectable } from "kysely";
 import type { AdmittedRunContext } from "../agents/admitted-run-context.js";
@@ -18,16 +18,16 @@ import {
 import { assertSqliteTableIntegrity } from "../infra/sqlite-integrity.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
 import { runSqliteDeferredTransactionSync } from "../infra/sqlite-transaction.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { tableExists, tableHasColumns } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import { tableExists, tableHasColumns } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { normalizeTaskTimestamps } from "./task-registry-records.js";
 import { parseDeliveryContextJson, parseSqliteJsonValue } from "./task-registry.sqlite.shared.js";
 import type { TaskRegistryStoreSnapshot } from "./task-registry.store.types.js";
@@ -44,10 +44,10 @@ import {
   type TaskRuntime,
 } from "./task-registry.types.js";
 
-type TaskRunsTable = OpenClawStateKyselyDatabase["task_runs"];
-type TaskDeliveryStateTable = OpenClawStateKyselyDatabase["task_delivery_state"];
+type TaskRunsTable = CarapaceStateKyselyDatabase["task_runs"];
+type TaskDeliveryStateTable = CarapaceStateKyselyDatabase["task_delivery_state"];
 type TaskRegistryStoreDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "task_delivery_state" | "task_runs"
 >;
 
@@ -67,7 +67,7 @@ type TaskRegistryDatabase = {
   path: string;
 };
 
-// SQLite-backed task store mirrors task records and delivery state into openclaw-state.db.
+// SQLite-backed task store mirrors task records and delivery state into carapace-state.db.
 const TASK_RUN_SELECT_COLUMNS = [
   "task_id",
   "runtime",
@@ -294,7 +294,7 @@ function selectTaskDeliveryStateRows(db: DatabaseSync): TaskDeliveryStateRow[] {
 
 /** Upserts a prebound task on the exact supplied shared-state handle. */
 export function upsertTaskRunRowInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   row: BoundTaskRecord,
 ): void {
   const { db } = database;
@@ -337,7 +337,7 @@ function deleteTaskRowsWithDeliveryState(db: DatabaseSync, taskId: string): void
 }
 
 function openTaskRegistryDatabase(): TaskRegistryDatabase {
-  const database = openOpenClawStateDatabase();
+  const database = openCarapaceStateDatabase();
   const pathname = database.path;
   if (cachedDatabase && cachedDatabase.path === pathname && cachedDatabase.db.isOpen) {
     return cachedDatabase;
@@ -352,10 +352,10 @@ function openTaskRegistryDatabase(): TaskRegistryDatabase {
   return cachedDatabase;
 }
 
-function withWriteTransaction(write: (database: OpenClawStateDatabase) => void) {
+function withWriteTransaction(write: (database: CarapaceStateDatabase) => void) {
   // Open once before BEGIN; the callback receives that exact shared-state owner.
   openTaskRegistryDatabase();
-  runOpenClawStateWriteTransaction((database) => write(database));
+  runCarapaceStateWriteTransaction((database) => write(database));
 }
 
 function readTaskRegistrySnapshot({ db, path }: TaskRegistryDatabase): TaskRegistryStoreSnapshot {
@@ -385,7 +385,7 @@ export function loadTaskRegistryStateFromSqliteReadOnly(): TaskRegistryStoreSnap
 /** Reads task state only when the existing database already has the canonical task shape. */
 export function loadTaskRegistryStateFromSqliteReadOnlyResult(): TaskRegistryReadOnlyLoadResult {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db, path }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db, path }) => {
       const hasReadableSchema =
         tableExists(db, "task_runs") &&
         tableExists(db, "task_delivery_state") &&
@@ -426,7 +426,7 @@ export function listTaskRegistryRecordsByRuntimeSourceIdFromSqlite(params: {
     return [];
   }
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) =>
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) =>
       selectTaskRowsByRuntimeSourceId(db, params.runtime, sourceId).map(rowToTaskRecord),
     ) ?? []
   );
@@ -436,13 +436,13 @@ export function listTaskRegistryRecordsByRuntimeSourceIdFromSqlite(params: {
 export function bindTaskRunExecution(params: {
   admitted: AdmittedRunContext;
   taskId: string;
-  options?: OpenClawStateDatabaseOptions;
+  options?: CarapaceStateDatabaseOptions;
 }): ExecutionOwnerBindingResult {
   const binding = executionOwnerBindingFromAdmission(params.admitted);
   if (!binding) {
     return "disabled";
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getTaskRegistryKysely(db);
       const current = executeSqliteQueryTakeFirstSync(
@@ -502,5 +502,5 @@ export function upsertTaskDeliveryStateToSqlite(state: TaskDeliveryState) {
 
 export function closeTaskRegistryDatabase() {
   cachedDatabase = null;
-  closeOpenClawStateDatabase();
+  closeCarapaceStateDatabase();
 }

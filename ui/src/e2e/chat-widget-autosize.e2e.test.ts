@@ -12,7 +12,7 @@ const suite = createControlUiE2eSuite({
 });
 
 const documentId = "widget-autosize-proof";
-const documentPath = `/__openclaw__/canvas/documents/${documentId}/index.html`;
+const documentPath = `/__carapace__/canvas/documents/${documentId}/index.html`;
 // Taller than any viewport this suite uses, so a frame that fits the content
 // can only come from the reported height rather than from the layout box.
 const rowCount = 90;

@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveConfigEnvVars } from "../config/env-substitution.js";
 import { createConfigRuntimeEnv } from "../config/env-vars.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { resolveUserPath } from "../utils.js";
 import { resolvePluginActivationSourceConfig } from "./activation-source-config.js";
@@ -15,7 +15,7 @@ import {
   type PluginActivationConfigSource,
 } from "./config-state.js";
 import { getCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
-import { resolveOpenClawDevSourceRoot } from "./dev-source-root.js";
+import { resolveCarapaceDevSourceRoot } from "./dev-source-root.js";
 import { extractPluginInstallRecordsFromInstalledPluginIndex } from "./installed-plugin-index-install-records.js";
 import { loadInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
 import { resolvePluginRegistrationConfigKey } from "./loader-registration-config.js";
@@ -335,14 +335,14 @@ export function resolvePluginLoadCacheContext(options: PluginLoadOptions = {}) {
     shouldResolveRawConfigEnvVars
       ? (resolveConfigEnvVars(rawConfig, env, {
           onMissing: () => undefined,
-        }) as OpenClawConfig)
+        }) as CarapaceConfig)
       : rawConfig,
     env,
   );
   const activationSourceConfig = shouldResolveRawConfigEnvVars
     ? (resolveConfigEnvVars(rawActivationSourceConfig, env, {
         onMissing: () => undefined,
-      }) as OpenClawConfig)
+      }) as CarapaceConfig)
     : rawActivationSourceConfig;
   const normalized = normalizePluginsConfig(cfg.plugins);
   // Identical plugin inputs may share facts; source channel policy keeps its own root config.
@@ -397,7 +397,7 @@ export function resolvePluginLoadCacheContext(options: PluginLoadOptions = {}) {
       loadInstalledPluginIndexInstallRecordsSync({ env })),
     ...cfg.plugins?.installs,
   };
-  const devSourceRoot = resolveOpenClawDevSourceRoot(env);
+  const devSourceRoot = resolveCarapaceDevSourceRoot(env);
   const registrationConfigKey = resolvePluginRegistrationConfigKey({
     config: cfg,
     activationSourceConfig,

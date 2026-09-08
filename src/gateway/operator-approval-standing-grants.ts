@@ -4,7 +4,7 @@
 // one cron job re-execute without re-prompting while it revalidates.
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { resolveCronJobConfigRevision } from "../cron/config-revision.js";
 import { loadedCronStoreFromRows } from "../cron/store/row-codec.js";
 import {
@@ -13,17 +13,17 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { buildSystemRunApprovalEnvBinding } from "../infra/system-run-approval-binding.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 
 const STANDING_GRANT_TABLE = "operator_approval_standing_grants";
 
-// Mirrors the canonical declaration in openclaw-state-schema.sql; the table is
+// Mirrors the canonical declaration in carapace-state-schema.sql; the table is
 // a first-use lazy additive surface (FIRST_USE_STATE_TABLES) so older readers
 // stay valid without it and no schema-version bump is required.
 const STANDING_GRANT_SCHEMA_SQL = `
@@ -48,7 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_operator_approval_standing_grants_binding
 `;
 
 type StandingGrantDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "operator_approval_standing_grants" | "operator_approvals" | "cron_jobs"
 >;
 
@@ -147,7 +147,7 @@ function ensureStandingGrantSchema(db: DatabaseSync): void {
  * re-mint for the same (agent, job, binding) replaces prior grants.
  */
 export function mintCronStandingGrantLocked(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   params: CronStandingGrantMintSpec & {
     approvalId: string;
     nowMs: number;
@@ -200,7 +200,7 @@ type CronStandingGrantLookupParams = {
   jobConfigRevision: string;
   operationBinding: string;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 };
 
 /**
@@ -232,7 +232,7 @@ function lookupCronStandingGrant(
   params: CronStandingGrantLookupParams,
   opts: { recordUse: boolean },
 ): ConsumeCronStandingGrantResult {
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     if (!tableExists(database.db, STANDING_GRANT_TABLE)) {
       return { outcome: "no-grant" };
     }
@@ -359,11 +359,11 @@ export type CronStandingGrantListing = CronStandingGrantRecord & {
 export function listCronStandingGrants(
   params: {
     limit?: number;
-    databaseOptions?: OpenClawStateDatabaseOptions;
+    databaseOptions?: CarapaceStateDatabaseOptions;
   } = {},
 ): CronStandingGrantListing[] {
   const limit = Math.max(1, Math.min(params.limit ?? 200, 500));
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     if (!tableExists(database.db, STANDING_GRANT_TABLE)) {
       return [];
     }
@@ -412,9 +412,9 @@ export function revokeCronStandingGrant(params: {
   grantId: string;
   revokedBy: string;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): RevokeCronStandingGrantResult {
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     if (!tableExists(database.db, STANDING_GRANT_TABLE)) {
       return { outcome: "not-found" };
     }

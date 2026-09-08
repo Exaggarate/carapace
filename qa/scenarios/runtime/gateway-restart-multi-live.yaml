@@ -34,7 +34,7 @@ scenario:
     - src/agents/main-session-recovery/main-session-restart-recovery.ts
   execution:
     kind: flow
-    runtime: openclaw
+    runtime: carapace
     retryCount: 0
     summary: Run a fixture-backed audit with GPT-5.4 while replacing the Gateway child three times at durable wait checkpoints.
     suiteIsolation: isolated
@@ -100,7 +100,7 @@ flow:
             message:
               expr: "`expected ${config.requiredProvider}/${config.requiredModel}, got ${env.primaryModel}`"
         - assert:
-            expr: "Boolean(env.gateway.runtimeEnv.OPENAI_API_KEY?.trim() || env.gateway.runtimeEnv.OPENCLAW_LIVE_OPENAI_KEY?.trim())"
+            expr: "Boolean(env.gateway.runtimeEnv.OPENAI_API_KEY?.trim() || env.gateway.runtimeEnv.CARAPACE_LIVE_OPENAI_KEY?.trim())"
             message: live OpenAI API key did not reach the Gateway child
       detailsExpr: "`provider=${selected?.provider} model=${selected?.model} auth=env-api-key`"
 

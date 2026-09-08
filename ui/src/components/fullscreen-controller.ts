@@ -1,5 +1,5 @@
 import { html, type ReactiveController, type TemplateResult } from "lit";
-import type { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import type { CarapaceLitElement } from "../lit/carapace-element.ts";
 import { icons } from "./icons.ts";
 
 type FullscreenControllerOptions = {
@@ -23,7 +23,7 @@ export class FullscreenController implements ReactiveController {
   private readonly onFullscreenChange = () => this.handleFullscreenChange();
 
   constructor(
-    private readonly host: OpenClawLitElement,
+    private readonly host: CarapaceLitElement,
     private readonly options: FullscreenControllerOptions,
   ) {
     host.addController(this);
@@ -48,7 +48,7 @@ export class FullscreenController implements ReactiveController {
       : supported
         ? this.options.enterLabel()
         : this.options.unavailableLabel();
-    return html`<openclaw-tooltip .content=${label}>
+    return html`<carapace-tooltip .content=${label}>
       <button
         class=${this.options.buttonClass}
         type="button"
@@ -61,7 +61,7 @@ export class FullscreenController implements ReactiveController {
           ${this.active ? icons.minimize : icons.maximize}
         </span>
       </button>
-    </openclaw-tooltip>`;
+    </carapace-tooltip>`;
   }
 
   async exit(): Promise<void> {

@@ -1,5 +1,5 @@
 // Doctor consumes provider retirement facts only after selecting the exact auth route.
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   listAgentIds,
   resolveAgentDir,
@@ -25,7 +25,7 @@ import {
 import { mergeAgentModelEntryForConfig } from "../../../config/model-input.js";
 import { resolveMergedModelProviderConfig } from "../../../config/model-provider-config.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   loadManifestMetadataSnapshot,
   isManifestPluginAvailableForControlPlane,
@@ -59,8 +59,8 @@ export type ModelRefRepairResolver = (params: {
 
 /** Metadata and exact profile views stay scoped to Doctor's pre-transaction planning. */
 export function createRetiredModelRefRepairResolver(params: {
-  cfg: OpenClawConfig;
-  retiredModelRefConfig?: Pick<OpenClawConfig, "agents" | "models">;
+  cfg: CarapaceConfig;
+  retiredModelRefConfig?: Pick<CarapaceConfig, "agents" | "models">;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;
   agentIds?: readonly string[];
@@ -101,7 +101,7 @@ export function createRetiredModelRefRepairResolver(params: {
         string | undefined,
         ReturnType<typeof createModelAuthAvailabilityResolver>
       >();
-      const prepareModelResolver = (cfg: OpenClawConfig) => {
+      const prepareModelResolver = (cfg: CarapaceConfig) => {
         const modelOptions = {
           cfg,
           agentId,
@@ -200,7 +200,7 @@ export function createRetiredModelRefRepairResolver(params: {
         agentId,
       }).repairConfigPath.replace("*", agentId);
       warn(
-        `Retained model reference "${canonical}" for agent "${agentId}": "${replacement}" is not permitted. Allow "${replacement}" in ${policyPath} and rerun openclaw doctor --fix, or choose an allowed model override.`,
+        `Retained model reference "${canonical}" for agent "${agentId}": "${replacement}" is not permitted. Allow "${replacement}" in ${policyPath} and rerun carapace doctor --fix, or choose an allowed model override.`,
       );
       return { kind: "unchanged" };
     };
@@ -239,7 +239,7 @@ export function createRetiredModelRefRepairResolver(params: {
       const baseUrl = auth.selectedRoute?.baseUrl ?? configured?.baseUrl;
       if (!baseUrl) {
         warn(
-          `Retained ${canonical} for agent "${agentId}": its exact authentication route is unavailable. Restore that provider account and rerun openclaw doctor --fix, or choose a current model explicitly.`,
+          `Retained ${canonical} for agent "${agentId}": its exact authentication route is unavailable. Restore that provider account and rerun carapace doctor --fix, or choose a current model explicitly.`,
         );
         return validatePolicy(preserved);
       }
@@ -329,7 +329,7 @@ function createRetiredModelRefRewriter(params: ModelRefRewriteContext) {
       (path === `${params.path}.model` || path === `${params.path}.model.primary`)
     ) {
       params.warnings?.push(
-        `Retained retired ${path} "${modelRef}": no provider successor is declared and this global default has no agent default to inherit. Choose a supported default with openclaw models set.`,
+        `Retained retired ${path} "${modelRef}": no provider successor is declared and this global default has no agent default to inherit. Choose a supported default with carapace models set.`,
       );
       return undefined;
     }
@@ -484,7 +484,7 @@ export function repairRetiredModelSlots(params: RetiredModelSlotRepair): void {
 }
 
 export function repairRetiredConfigModelRefs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   resolve: ModelRefRepairResolver,
   warnings: string[] = [],
 ) {
@@ -605,7 +605,7 @@ export function repairRetiredSessionModelRef(
     entry.authProfileOverride &&
     (entry.authProfileOverrideSource === "user" || entry.authProfileOverrideSource === "user-link")
   ) {
-    const warning = `Retained retired ${decision.modelRef} for agent "${agentId}": clearing this session override would still select it with the same pinned account. Choose a supported default or an allowed model override, then rerun openclaw doctor --fix.`;
+    const warning = `Retained retired ${decision.modelRef} for agent "${agentId}": clearing this session override would still select it with the same pinned account. Choose a supported default or an allowed model override, then rerun carapace doctor --fix.`;
     if (!warnings.includes(warning)) {
       warnings.push(warning);
     }

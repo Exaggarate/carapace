@@ -6,7 +6,7 @@ import path from "node:path";
 export function resolveRepoBundledPluginEnv(bundledPluginsDir: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: path.join(os.tmpdir(), "openclaw-repo-bundled-plugin-state"),
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+    CARAPACE_STATE_DIR: path.join(os.tmpdir(), "carapace-repo-bundled-plugin-state"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
   };
 }

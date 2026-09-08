@@ -1,7 +1,7 @@
 // Runtime dependency adapters for status scans.
 // Keeps plugin/runtime modules outside the core scan files until a caller needs them.
 
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getTailnetHostname } from "../infra/tailscale.js";
 import type { MemoryProviderStatus } from "../memory-host-sdk/engine-storage.js";
 import { getActiveMemorySearchManagerCore } from "../plugins/memory-runtime.js";
@@ -17,7 +17,7 @@ type StatusMemoryManager = {
 
 /** Returns a narrow memory manager adapter for status probing. */
 export async function getMemorySearchManager(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   purpose: "status";
   inspectSources: true;

@@ -5,11 +5,11 @@ import {
   InMemorySpanExporter,
   SimpleSpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
-import { resetDiagnosticEventsForTest } from "openclaw/plugin-sdk/diagnostic-runtime";
+import { resetDiagnosticEventsForTest } from "carapace/plugin-sdk/diagnostic-runtime";
 import { afterEach, beforeEach } from "vitest";
 import { stopStartedOtelServices } from "./service.test-helpers.js";
 
-export const PRELOAD_ENV = "OPENCLAW_OTEL_PRELOADED";
+export const PRELOAD_ENV = "CARAPACE_OTEL_PRELOADED";
 const ENDPOINT_ENV_KEYS = [
   "OTEL_SDK_DISABLED",
   "OTEL_TRACES_EXPORTER",

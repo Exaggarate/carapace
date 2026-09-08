@@ -1,8 +1,8 @@
 import path from "node:path";
 import { fromMarkdown } from "mdast-util-from-markdown";
 
-export const WIKI_RELATED_START_MARKER = "<!-- openclaw:wiki:related:start -->";
-export const WIKI_RELATED_END_MARKER = "<!-- openclaw:wiki:related:end -->";
+export const WIKI_RELATED_START_MARKER = "<!-- carapace:wiki:related:start -->";
+export const WIKI_RELATED_END_MARKER = "<!-- carapace:wiki:related:end -->";
 
 const OBSIDIAN_LINK_PATTERN = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g;
 const MARKDOWN_LINK_PATTERN = /\[[^\]]+\]\(([^)]+)\)/g;

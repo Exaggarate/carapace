@@ -5,7 +5,7 @@ import { basename, dirname, isAbsolute, relative, resolve, sep } from "node:path
 import { MAX_WORKSPACE_BOOTSTRAP_FILE_BYTES } from "../agents/workspace-bootstrap-read.js";
 import { assertNoSymlinkParents } from "../infra/fs-safe-advanced.js";
 import { FsSafeError, root as fsSafeRoot, type OpenResult } from "../infra/fs-safe.js";
-import { readClawOpenClawProfile } from "./openclaw-profile.js";
+import { readClawCarapaceProfile } from "./carapace-profile.js";
 import { isCanonicalClawHubPackageName, isExactSemVer } from "./schema-portability.js";
 import { clawManifestWorkspaceConflictsWithPath, parseClawManifest } from "./schema.js";
 import {
@@ -25,7 +25,7 @@ import { parseClawYaml } from "./yaml-document.js";
 type PackageJson = {
   name: string;
   version: string;
-  openclaw: { claw: string };
+  carapace: { claw: string };
 };
 
 type ResolvedClawSource = Omit<ClawSourceIdentity, "integrity" | "integrityKind" | "byteLength"> & {
@@ -95,14 +95,14 @@ async function buildDevelopmentSnapshot(params: {
   source: ResolvedClawSource;
   manifest: ClawManifest;
   manifestRaw: Buffer;
-  openClawProfile?: { path: string; raw: Buffer };
+  carapaceProfile?: { path: string; raw: Buffer };
 }): Promise<
   | {
       ok: true;
       integrity: string;
       byteLength: number;
       manifest: { byteLength: number; digest: string };
-      openClawProfile?: { sourcePath: string; byteLength: number; digest: string };
+      carapaceProfile?: { sourcePath: string; byteLength: number; digest: string };
       workspaceSources: ClawWorkspaceSourceSnapshot[];
       packageBootstrap?: ClawWorkspaceSourceSnapshot;
     }
@@ -119,16 +119,16 @@ async function buildDevelopmentSnapshot(params: {
     digest: `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
   });
   const manifest = snapshotFile(params.manifestRaw);
-  const openClawProfile = params.openClawProfile
+  const carapaceProfile = params.carapaceProfile
     ? {
-        sourcePath: params.openClawProfile.path.replaceAll("\\", "/"),
-        ...snapshotFile(params.openClawProfile.raw),
+        sourcePath: params.carapaceProfile.path.replaceAll("\\", "/"),
+        ...snapshotFile(params.carapaceProfile.raw),
       }
     : undefined;
   add("canonical-source", Buffer.from(params.source.manifestPath, "utf8"));
   add("manifest", params.manifestRaw);
-  if (params.openClawProfile) {
-    add(`profile:${params.openClawProfile.path.replaceAll("\\", "/")}`, params.openClawProfile.raw);
+  if (params.carapaceProfile) {
+    add(`profile:${params.carapaceProfile.path.replaceAll("\\", "/")}`, params.carapaceProfile.raw);
   }
 
   if (params.source.kind === "package") {
@@ -286,7 +286,7 @@ async function buildDevelopmentSnapshot(params: {
     integrity: `sha256:${hash.digest("hex")}`,
     byteLength,
     manifest,
-    ...(openClawProfile ? { openClawProfile } : {}),
+    ...(carapaceProfile ? { carapaceProfile } : {}),
     workspaceSources,
     ...(packageBootstrap ? { packageBootstrap } : {}),
   };
@@ -297,11 +297,11 @@ function parsePackageJson(value: unknown): PackageJson | undefined {
     return undefined;
   }
   const record = value as Record<string, unknown>;
-  const openclaw = record.openclaw;
-  if (!openclaw || typeof openclaw !== "object" || Array.isArray(openclaw)) {
+  const carapace = record.carapace;
+  if (!carapace || typeof carapace !== "object" || Array.isArray(carapace)) {
     return undefined;
   }
-  const claw = (openclaw as Record<string, unknown>).claw;
+  const claw = (carapace as Record<string, unknown>).claw;
   if (
     typeof record.name !== "string" ||
     !isCanonicalClawHubPackageName(record.name) ||
@@ -312,7 +312,7 @@ function parsePackageJson(value: unknown): PackageJson | undefined {
   ) {
     return undefined;
   }
-  return { name: record.name, version: record.version, openclaw: { claw } };
+  return { name: record.name, version: record.version, carapace: { claw } };
 }
 
 async function readJson(
@@ -468,20 +468,20 @@ async function resolvePackageSource(
       diagnostics: [
         fileDiagnostic(
           "invalid_package_metadata",
-          "package.json must declare non-empty name, version, and openclaw.claw fields.",
+          "package.json must declare non-empty name, version, and carapace.claw fields.",
         ),
       ],
     };
   }
-  if (isAbsolute(packageJson.openclaw.claw)) {
+  if (isAbsolute(packageJson.carapace.claw)) {
     return {
       ok: false,
       diagnostics: [
-        fileDiagnostic("manifest_escapes_package", "openclaw.claw must be package-relative."),
+        fileDiagnostic("manifest_escapes_package", "carapace.claw must be package-relative."),
       ],
     };
   }
-  const declaredManifestPath = resolve(packageRootReal, packageJson.openclaw.claw);
+  const declaredManifestPath = resolve(packageRootReal, packageJson.carapace.claw);
   const manifestPath = await realpath(declaredManifestPath).catch(() => undefined);
   if (!manifestPath || !isContained(packageRootReal, manifestPath)) {
     return {
@@ -605,7 +605,7 @@ export async function readClawManifestFile(
           },
         })
       : false);
-  const profile = await readClawOpenClawProfile({
+  const profile = await readClawCarapaceProfile({
     packageRoot: sourceResult.source.packageRoot,
     metadata: parsed.manifest.metadata,
     ...(allowLegacyDynamicToolProfile ? { allowLegacyDynamicToolProfile: true } : {}),
@@ -618,7 +618,7 @@ export async function readClawManifestFile(
     manifest: parsed.manifest,
     manifestRaw: manifestResult.raw,
     ...(profile.raw && profile.path
-      ? { openClawProfile: { path: profile.path, raw: profile.raw } }
+      ? { carapaceProfile: { path: profile.path, raw: profile.raw } }
       : {}),
   });
   if (!snapshot.ok) {
@@ -640,12 +640,12 @@ export async function readClawManifestFile(
     manifest: parsed.manifest,
     ...(hasMarkdownBody ? { clawMarkdownBody: manifestResult.body } : {}),
     ...(snapshot.packageBootstrap ? { packageBootstrap: snapshot.packageBootstrap } : {}),
-    ...(profile.profile ? { openClawProfile: profile.profile } : {}),
-    ...(profile.legacyProfile ? { legacyOpenClawProfile: profile.legacyProfile } : {}),
+    ...(profile.profile ? { carapaceProfile: profile.profile } : {}),
+    ...(profile.legacyProfile ? { legacyCarapaceProfile: profile.legacyProfile } : {}),
     source,
     snapshot: {
       manifest: snapshot.manifest,
-      ...(snapshot.openClawProfile ? { openClawProfile: snapshot.openClawProfile } : {}),
+      ...(snapshot.carapaceProfile ? { carapaceProfile: snapshot.carapaceProfile } : {}),
       workspaceSources: snapshot.workspaceSources,
       ...(snapshot.packageBootstrap ? { packageBootstrap: snapshot.packageBootstrap } : {}),
     },

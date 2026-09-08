@@ -17,8 +17,8 @@ let sharedRunEmbeddedAgent: Promise<TestRunEmbeddedAgent> | undefined;
 export function loadSharedRunIntegrationHarness(): Promise<TestRunEmbeddedAgent> {
   sharedRunEmbeddedAgent ??= (async () => {
     const { runEmbeddedAgent } = await loadRunOverflowCompactionHarness();
-    const { withOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    await withOpenClawTestState({ label: "shared-run-warmup" }, async (state) => {
+    const { withCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    await withCarapaceTestState({ label: "shared-run-warmup" }, async (state) => {
       const guard = await guardRunWorkspaceOwnership(state);
       try {
         await warmRunOverflowCompactionHarness(runEmbeddedAgent, state);
@@ -36,19 +36,19 @@ export async function createSharedRunIntegrationSession(identity?: {
   sessionId: string;
   sessionKey: string;
 }) {
-  const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
+  const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
   const { loadSessionEntry, replaceSessionEntry } =
     await import("../../config/sessions/session-accessor.js");
   const { forgetActiveSessionForShutdown } =
     await import("../../gateway/active-sessions-shutdown-tracker.js");
-  const state = await createOpenClawTestState({ label: "run-integration-session" });
+  const state = await createCarapaceTestState({ label: "run-integration-session" });
   const baseRunParams = createOverflowRunParams(state);
   const { sessionId, sessionKey } = identity ?? baseRunParams;
   const sessionTarget = {
     agentId: "main",
     sessionId,
     sessionKey,
-    storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+    storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
   };
   try {
     await replaceSessionEntry(sessionTarget, { sessionId, updatedAt: 1 });

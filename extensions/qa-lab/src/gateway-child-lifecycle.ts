@@ -1,7 +1,7 @@
 import type { ChildProcess } from "node:child_process";
 import type { WriteStream } from "node:fs";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { QaSuiteInfraError } from "./errors.js";
 import {
   cleanupQaGatewayTempRoots,
@@ -52,7 +52,7 @@ export class QaGatewayChildLifecycle {
   private operation: Promise<unknown> | null = null;
   private stopping: Promise<QaGatewayStopResult> | null = null;
   private artifactsFinalized = false;
-  private readonly keepTemp = process.env.OPENCLAW_QA_KEEP_TEMP === "1";
+  private readonly keepTemp = process.env.CARAPACE_QA_KEEP_TEMP === "1";
 
   repoRoot?: string;
 

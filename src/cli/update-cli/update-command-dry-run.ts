@@ -5,7 +5,7 @@ import { getUpdateRun } from "../../infra/update-run-ledger.js";
 import type { UpdateRunRecord } from "../../infra/update-run-record.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { defaultRuntime } from "../../runtime.js";
-import type { OpenClawDatabaseSchemaPreflight } from "../../state/openclaw-database-preflight.js";
+import type { CarapaceDatabaseSchemaPreflight } from "../../state/carapace-database-preflight.js";
 import { printResult } from "./progress.js";
 import { formatSchemaRefusalLines, hasSchemaRefusal } from "./schema-preflight.js";
 import { UpdatePreMutationError, type UpdateCommandOptions } from "./shared.js";
@@ -15,7 +15,7 @@ export async function handleDryRunPreflightError(
   error: unknown,
   notes: string[],
   refuseUpdate: (reason: string, message: string) => Promise<void>,
-): Promise<OpenClawDatabaseSchemaPreflight> {
+): Promise<CarapaceDatabaseSchemaPreflight> {
   if (!(error instanceof UpdatePreMutationError)) {
     throw error;
   }
@@ -113,7 +113,7 @@ export function printUpdateDryRun(params: {
   fallbackToLatest: boolean;
   managedServiceRootRedirect: ManagedServiceRootRedirect | null;
   explicitTag: string | null;
-  packageSchemaPreflight: OpenClawDatabaseSchemaPreflight;
+  packageSchemaPreflight: CarapaceDatabaseSchemaPreflight;
   preflightNotes?: readonly string[];
   opts: Pick<UpdateCommandOptions, "tag" | "json" | "run">;
 }): void {

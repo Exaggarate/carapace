@@ -29,7 +29,7 @@ import {
 import type { SidebarPanelDefinition } from "./chat-sidebar-region-types.ts";
 import "./chat-sidebar-region.runtime.ts";
 
-type Region = HTMLElementTagNameMap["openclaw-chat-sidebar-region"] & {
+type Region = HTMLElementTagNameMap["carapace-chat-sidebar-region"] & {
   updateComplete: Promise<unknown>;
 };
 
@@ -41,7 +41,7 @@ async function createRegion(
 ) {
   const shell = document.createElement("div");
   shell.className = "sidebar-region";
-  const region = document.createElement("openclaw-chat-sidebar-region") as Region;
+  const region = document.createElement("carapace-chat-sidebar-region") as Region;
   region.layout = layout;
   region.panelTemplates = {
     detail: html`<div data-panel="detail">Detail panel</div>`,
@@ -107,7 +107,7 @@ describe("chat sidebar region", () => {
           pluginId: "fixture",
           name: "Fixture",
           revision: "one",
-          entryUrl: "/__openclaw__/plugins/control-ui/fixture/one/index.js",
+          entryUrl: "/__carapace__/plugins/control-ui/fixture/one/index.js",
           styles: [],
         },
         client: new GatewayBrowserClient({ url: "ws://fixture.invalid" }),
@@ -193,7 +193,7 @@ describe("chat sidebar region", () => {
       await refresh();
 
       const unavailable = root(region).querySelector(
-        `[data-panel-slot="${slot}"] openclaw-panel-empty-state`,
+        `[data-panel-slot="${slot}"] carapace-panel-empty-state`,
       );
       await (unavailable as HTMLElement & { updateComplete?: Promise<unknown> })?.updateComplete;
       expect(unavailable?.shadowRoot?.textContent).toContain(
@@ -225,7 +225,7 @@ describe("chat sidebar region", () => {
       await refresh();
       expect(region.availableSlots).toContain(slot);
       expect(
-        root(region).querySelector(`[data-panel-slot="${slot}"] openclaw-plugin-view`),
+        root(region).querySelector(`[data-panel-slot="${slot}"] carapace-plugin-view`),
       ).not.toBeNull();
       expect(root(region).querySelector('button[aria-label="Close Fixture notes"]')).not.toBeNull();
       expect(region.layout.columns[0]?.panels).toEqual(saved.columns[0]?.panels);
@@ -314,7 +314,7 @@ describe("chat sidebar region", () => {
       terminal: html`<div .handleToggleRequest=${handleToggleRequest}>Terminal panel</div>`,
     };
     await region.updateComplete;
-    const event = new CustomEvent("openclaw:terminal-toggle", {
+    const event = new CustomEvent("carapace:terminal-toggle", {
       detail: { catalog: { catalogId: "codex", hostId: "gateway:local", threadId: "thread-1" } },
     });
 
@@ -420,7 +420,7 @@ describe("chat sidebar region", () => {
       region.layout = openSlot({ columns: [] }, slot);
       await region.updateComplete;
       const empty = root(region).querySelector(".side-panel-empty--type");
-      const state = empty?.querySelector("openclaw-panel-empty-state");
+      const state = empty?.querySelector("carapace-panel-empty-state");
       await (state as HTMLElement & { updateComplete?: Promise<unknown> })?.updateComplete;
       expect(state?.querySelector("svg")).not.toBeNull();
       expect(state?.shadowRoot?.querySelector(".empty-state__title")?.textContent).toBe(label);

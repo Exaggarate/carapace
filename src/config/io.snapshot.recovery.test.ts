@@ -5,18 +5,18 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { acquireStartupMigrationLease } from "../infra/startup-migration-checkpoint.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
-import { withArtifactPreservingStateReads } from "../state/openclaw-state-db-readonly.js";
+import { withArtifactPreservingStateReads } from "../state/carapace-state-db-readonly.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createConfigIO } from "./io.factory.js";
 import type { ConfigIoFactoryOptions } from "./io.types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function manifest(root: string) {
@@ -33,8 +33,8 @@ function manifest(root: string) {
 }
 
 function fixture(options: ConfigIoFactoryOptions = {}) {
-  const root = tempDirs.make("openclaw-prepared-config-recovery-");
-  const configPath = path.join(root, "openclaw.json");
+  const root = tempDirs.make("carapace-prepared-config-recovery-");
+  const configPath = path.join(root, "carapace.json");
   const original = '{ "update": { "channel": "beta" } }\n';
   const backup = JSON.stringify({
     gateway: { mode: "local", port: 18720 },
@@ -45,13 +45,13 @@ function fixture(options: ConfigIoFactoryOptions = {}) {
   const env = {
     HOME: root,
     USERPROFILE: root,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: root,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: root,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     VITEST: "true",
   };
-  const databasePath = openOpenClawStateDatabase({ env }).path;
-  closeOpenClawStateDatabaseForTest();
+  const databasePath = openCarapaceStateDatabase({ env }).path;
+  closeCarapaceStateDatabaseForTest();
   const io = createConfigIO({
     env,
     configPath,
@@ -100,7 +100,7 @@ describe("prepared config recovery", () => {
       expect(fs.readFileSync(configPath, "utf8")).toBe(backup);
       const clobbered = fs
         .readdirSync(root)
-        .filter((name) => name.startsWith("openclaw.json.clobbered."));
+        .filter((name) => name.startsWith("carapace.json.clobbered."));
       expect(clobbered).toHaveLength(1);
       expect(fs.readFileSync(path.join(root, clobbered[0]!), "utf8")).toBe(original);
       const persisted = await io.readConfigFileSnapshotWithPluginMetadata();
@@ -177,7 +177,7 @@ describe("prepared config recovery", () => {
       );
       const clobbered = fs
         .readdirSync(root)
-        .filter((name) => name.startsWith("openclaw.json.clobbered."));
+        .filter((name) => name.startsWith("carapace.json.clobbered."));
       expect(clobbered).toHaveLength(1);
       expect(fs.readFileSync(path.join(root, clobbered[0]!), "utf8")).toBe(original);
     },
@@ -209,7 +209,7 @@ describe("prepared config recovery", () => {
     await expect(plan!.apply()).rejects.toThrow("recovery replacement denied");
     expect(fs.readFileSync(configPath, "utf8")).toBe(original);
     expect(
-      fs.readdirSync(root).filter((name) => name.startsWith("openclaw.json.clobbered.")),
+      fs.readdirSync(root).filter((name) => name.startsWith("carapace.json.clobbered.")),
     ).toHaveLength(1);
   });
 });

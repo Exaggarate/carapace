@@ -1,6 +1,6 @@
 // Exercises agent harness registration, ownership metadata, and selection handoff.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { markPluginRegistryRetired } from "../../plugins/registry-lifecycle.js";
 import {
@@ -35,7 +35,7 @@ vi.mock("../../plugins/provider-model-routes.js", () => ({
   resolveProviderModelRoutes: () => null,
 }));
 
-const originalRuntime = process.env.OPENCLAW_AGENT_RUNTIME;
+const originalRuntime = process.env.CARAPACE_AGENT_RUNTIME;
 
 beforeEach(() => {
   clearAgentHarnesses();
@@ -45,9 +45,9 @@ beforeEach(() => {
 afterEach(() => {
   clearAgentHarnesses();
   if (originalRuntime == null) {
-    delete process.env.OPENCLAW_AGENT_RUNTIME;
+    delete process.env.CARAPACE_AGENT_RUNTIME;
   } else {
-    process.env.OPENCLAW_AGENT_RUNTIME = originalRuntime;
+    process.env.CARAPACE_AGENT_RUNTIME = originalRuntime;
   }
 });
 
@@ -74,25 +74,25 @@ function makeHarness(
   };
 }
 
-function providerRuntimeConfig(provider: string, runtime: string): OpenClawConfig {
+function providerRuntimeConfig(provider: string, runtime: string): CarapaceConfig {
   return {
     models: {
       providers: {
         [provider]: {
-          baseUrl: "https://api.openclaw.test/v1",
+          baseUrl: "https://api.carapace.test/v1",
           agentRuntime: { id: runtime },
           models: [],
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("agent harness registry", () => {
   it("rejects the built-in runtime id before mutating the registry", () => {
     expect(() =>
-      registerAgentHarness(makeHarness("openclaw"), { ownerPluginId: "untrusted-plugin" }),
-    ).toThrow('agent harness id "openclaw" is reserved for the built-in runtime');
+      registerAgentHarness(makeHarness("carapace"), { ownerPluginId: "untrusted-plugin" }),
+    ).toThrow('agent harness id "carapace" is reserved for the built-in runtime');
     expect(listRegisteredAgentHarnesses()).toEqual([]);
   });
 
@@ -306,10 +306,10 @@ describe("agent harness registry", () => {
   it("keeps model-specific harnesses behind plugin registration in auto mode", () => {
     // Auto mode should not select a model-specific runtime until the owning
     // plugin has registered its harness in this process.
-    process.env.OPENCLAW_AGENT_RUNTIME = "auto";
+    process.env.CARAPACE_AGENT_RUNTIME = "auto";
 
     expect(selectAgentHarness({ provider: "plugin-models", modelId: "custom-1" }).id).toBe(
-      "openclaw",
+      "carapace",
     );
 
     registerAgentHarness(makeHarness("custom", { providers: ["plugin-models"] }), {
@@ -321,16 +321,16 @@ describe("agent harness registry", () => {
     );
   });
 
-  it("falls back to OpenClaw for other models", () => {
-    process.env.OPENCLAW_AGENT_RUNTIME = "auto";
+  it("falls back to Carapace for other models", () => {
+    process.env.CARAPACE_AGENT_RUNTIME = "auto";
 
     expect(selectAgentHarness({ provider: "anthropic", modelId: "sonnet-4.6" }).id).toBe(
-      "openclaw",
+      "carapace",
     );
   });
 
   it("lets a plugin harness win in auto mode by priority", () => {
-    process.env.OPENCLAW_AGENT_RUNTIME = "auto";
+    process.env.CARAPACE_AGENT_RUNTIME = "auto";
     registerAgentHarness(makeHarness("plugin-harness", { priority: 200 }), {
       ownerPluginId: "plugin-a",
     });
@@ -338,7 +338,7 @@ describe("agent harness registry", () => {
     expect(selectAgentHarness({ provider: "codex", modelId: "gpt-5.4" }).id).toBe("plugin-harness");
   });
 
-  it("honors explicit provider OpenClaw runtime policy", () => {
+  it("honors explicit provider Carapace runtime policy", () => {
     registerAgentHarness(makeHarness("plugin-harness", { priority: 200 }), {
       ownerPluginId: "plugin-a",
     });
@@ -347,9 +347,9 @@ describe("agent harness registry", () => {
       selectAgentHarness({
         provider: "codex",
         modelId: "gpt-5.4",
-        config: providerRuntimeConfig("codex", "openclaw"),
+        config: providerRuntimeConfig("codex", "carapace"),
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("honors explicit provider plugin runtime policy when the plugin harness is registered", () => {

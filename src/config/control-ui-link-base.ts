@@ -1,11 +1,11 @@
 import {
   buildControlUiSessionPath,
   normalizeControlUiBasePath,
-} from "@openclaw/session-url-contract";
+} from "@carapace/session-url-contract";
 import { resolveGatewayPublicOrigin } from "./gateway-public-origin.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
-type ControlUiLinkConfig = Pick<OpenClawConfig, "gateway"> | null | undefined;
+type ControlUiLinkConfig = Pick<CarapaceConfig, "gateway"> | null | undefined;
 
 export function resolveControlUiLinkLocation(
   cfg: ControlUiLinkConfig,

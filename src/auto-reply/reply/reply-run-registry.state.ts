@@ -1,5 +1,5 @@
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveActiveEmbeddedRunRecoveryBlocker } from "../../agents/embedded-agent-runner/run-state.js";
 import { createAbortError } from "../../infra/abort-signal.js";
 import {
@@ -11,7 +11,7 @@ import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-ke
 import type { SessionWorkAdmissionLease } from "../../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { resolveGlobalSingleton } from "../../shared/global-singleton.js";
-import type { OpenClawAgentDatabaseIdentity } from "../../state/openclaw-agent-db-identity.js";
+import type { CarapaceAgentDatabaseIdentity } from "../../state/carapace-agent-db-identity.js";
 import type { ReplyFollowupAdmissionBarrierTimeoutPolicy } from "./reply-dispatcher.types.js";
 import type { ReplyOperationStaleReason } from "./reply-run-finalization-lease.js";
 import {
@@ -32,18 +32,18 @@ export type ReplyRunAdmissionSource = {
   sessionId: string;
   sessionIds: Set<string>;
   operation: ReplyOperation;
-  databaseIdentity?: OpenClawAgentDatabaseIdentity;
+  databaseIdentity?: CarapaceAgentDatabaseIdentity;
 };
 
 export type ReplyRunAdmissionBarrier = {
   settled: Promise<void>;
   source: ReplyRunAdmissionSource;
-  sources: Map<OpenClawAgentDatabaseIdentity | undefined, ReplyRunAdmissionSource>;
+  sources: Map<CarapaceAgentDatabaseIdentity | undefined, ReplyRunAdmissionSource>;
 };
 
 type ReplyOperationAdmission = {
   lease?: SessionWorkAdmissionLease;
-  readonly databaseIdentity?: OpenClawAgentDatabaseIdentity;
+  readonly databaseIdentity?: CarapaceAgentDatabaseIdentity;
 };
 
 type ReplyRunState = {
@@ -59,7 +59,7 @@ type ReplyRunState = {
   lifecycleAdmissionByOperation?: WeakMap<ReplyOperation, ReplyOperationAdmission>;
 };
 
-const REPLY_RUN_STATE_KEY = Symbol.for("openclaw.replyRunRegistry");
+const REPLY_RUN_STATE_KEY = Symbol.for("carapace.replyRunRegistry");
 
 export const replyRunState = resolveGlobalSingleton<ReplyRunState>(REPLY_RUN_STATE_KEY, () => ({
   activeRunsByKey: new Map<string, ReplyOperation>(),

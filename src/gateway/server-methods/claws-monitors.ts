@@ -13,7 +13,7 @@ import {
   type ClawMonitorSnapshot,
 } from "../../claws/monitor-cleanup-contract.js";
 import { readClawInstallRecord } from "../../claws/provenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { hasActiveCronJobsForAgent } from "../../cron/active-jobs.js";
 import { resolveCronJobConfigRevision } from "../../cron/config-revision.js";
 import { resolveHeartbeatMonitorPlan } from "../../cron/heartbeat-monitor.js";
@@ -114,7 +114,7 @@ function inspectMonitors(
   });
 }
 
-function assertDeletionFence(agentId: string, operationId: string, config: OpenClawConfig) {
+function assertDeletionFence(agentId: string, operationId: string, config: CarapaceConfig) {
   const journal = readAgentDeletionJournal(agentId);
   const install = readClawInstallRecord(agentId);
   if (!journal || journal.operationId !== operationId || journal.cleanupCompleted) {

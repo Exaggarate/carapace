@@ -1,24 +1,24 @@
 // Telegram helper module supports helpers behavior.
 import type { Chat, Message } from "grammy/types";
-import { formatLocationText } from "openclaw/plugin-sdk/channel-inbound";
+import { formatLocationText } from "carapace/plugin-sdk/channel-inbound";
 import {
   resolveCommandAuthorization,
   type CommandAuthorization,
-} from "openclaw/plugin-sdk/command-auth-native";
+} from "carapace/plugin-sdk/command-auth-native";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   DmPolicy,
   TelegramDirectConfig,
   TelegramGroupConfig,
   TelegramTopicConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import { readChannelAllowFromStore } from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/config-contracts";
+import { readChannelAllowFromStore } from "carapace/plugin-sdk/conversation-runtime";
 import {
   asDateTimestampMs,
   parseStrictPositiveInteger,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/number-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
 import { expandTelegramAllowFromWithAccessGroups } from "../access-groups.js";
 import {
   firstDefined,
@@ -220,7 +220,7 @@ export function withResolvedTelegramForumFlag<T extends { chat: object }>(
 }
 
 export async function resolveTelegramGroupAllowFromContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   chatId: string | number;
   accountId?: string;
   dmPolicy?: DmPolicy;
@@ -239,7 +239,7 @@ export async function resolveTelegramGroupAllowFromContext(params: {
   resolveTelegramGroupConfig: (
     chatId: string | number,
     messageThreadId: number | undefined,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ) => {
     groupConfig?: TelegramGroupConfig | TelegramDirectConfig;
     topicConfig?: TelegramTopicConfig;
@@ -315,7 +315,7 @@ export async function resolveTelegramGroupAllowFromContext(params: {
 }
 
 async function isTelegramDmAllowedByConfiguredAllowFrom(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   allowFrom?: Array<string | number>;
   groupAllowOverride?: Array<string | number>;
   accountId: string;
@@ -352,7 +352,7 @@ export class TelegramPairingStoreReadError extends Error {
 
 // Could add bounded retries to absorb short FD-pressure spikes; deferred. See #85555.
 async function loadTelegramPairingStoreIfNeeded(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   allowFrom?: Array<string | number>;
   groupAllowOverride?: Array<string | number>;
   accountId: string;
@@ -564,7 +564,7 @@ export function buildTelegramGroupFrom(
   return `telegram:group:${buildTelegramGroupPeerId(chatId, thread)}`;
 }
 
-export function isTelegramCommandsAllowFromConfigured(cfg: OpenClawConfig): boolean {
+export function isTelegramCommandsAllowFromConfigured(cfg: CarapaceConfig): boolean {
   const commandsAllowFrom = cfg.commands?.allowFrom;
   return (
     commandsAllowFrom != null &&
@@ -574,7 +574,7 @@ export function isTelegramCommandsAllowFromConfigured(cfg: OpenClawConfig): bool
 }
 
 export function resolveTelegramCommandAuthorization(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   chatId: number;
   isGroup: boolean;

@@ -89,7 +89,7 @@ function writeQaEvidence(params: {
     path.join(params.dir, "qa-evidence.json"),
     `${JSON.stringify(
       {
-        kind: "openclaw.qa.evidence-summary",
+        kind: "carapace.qa.evidence-summary",
         schemaVersion: 2,
         generatedAt: "2026-06-23T00:00:00.000Z",
         evidenceMode: "full",
@@ -201,7 +201,7 @@ function expectedMaturityScorePercent(): number {
 
 describe("maturity docs renderer CLI", () => {
   it("renders mirror routes and public redirects with destination fragment precedence", () => {
-    const fixtureDir = tempDirs.make("openclaw-maturity-docs-links-");
+    const fixtureDir = tempDirs.make("carapace-maturity-docs-links-");
     const docsRoot = path.join(fixtureDir, "docs");
     const taxonomyPath = path.join(fixtureDir, "taxonomy.yaml");
     const scoresPath = path.join(fixtureDir, "scores.yaml");
@@ -355,7 +355,7 @@ describe("maturity docs renderer CLI", () => {
   });
 
   it("still requires QA evidence artifacts when rendering generated docs", () => {
-    const outputDir = tempDirs.make("openclaw-maturity-docs-test-");
+    const outputDir = tempDirs.make("carapace-maturity-docs-test-");
     const result = runCli("--output-dir", outputDir);
 
     expect(result.status).toBe(1);
@@ -366,8 +366,8 @@ describe("maturity docs renderer CLI", () => {
   });
 
   it("rejects scorecard evidence with failed or blocked entries", () => {
-    const outputDir = tempDirs.make("openclaw-maturity-docs-output-");
-    const evidenceDir = tempDirs.make("openclaw-maturity-docs-evidence-");
+    const outputDir = tempDirs.make("carapace-maturity-docs-output-");
+    const evidenceDir = tempDirs.make("carapace-maturity-docs-evidence-");
     writeQaEvidence({
       dir: evidenceDir,
       entries: [
@@ -387,8 +387,8 @@ describe("maturity docs renderer CLI", () => {
   });
 
   it("allows incomplete evidence without awarding Coverage to non-passing checks", () => {
-    const outputDir = tempDirs.make("openclaw-maturity-docs-output-");
-    const evidenceDir = tempDirs.make("openclaw-maturity-docs-evidence-");
+    const outputDir = tempDirs.make("carapace-maturity-docs-output-");
+    const evidenceDir = tempDirs.make("carapace-maturity-docs-evidence-");
     writeQaEvidence({
       dir: evidenceDir,
       entries: [
@@ -416,8 +416,8 @@ describe("maturity docs renderer CLI", () => {
   });
 
   it("renders passing evidence with unique section jump targets", () => {
-    const outputDir = tempDirs.make("openclaw-maturity-docs-output-");
-    const evidenceDir = tempDirs.make("openclaw-maturity-docs-evidence-");
+    const outputDir = tempDirs.make("carapace-maturity-docs-output-");
+    const evidenceDir = tempDirs.make("carapace-maturity-docs-evidence-");
     writeQaEvidence({
       dir: evidenceDir,
       entries: [
@@ -455,8 +455,8 @@ describe("maturity docs renderer CLI", () => {
   });
 
   it("renders the maturity score from quality and completeness without coverage", () => {
-    const outputDir = tempDirs.make("openclaw-maturity-docs-output-");
-    const evidenceDir = tempDirs.make("openclaw-maturity-docs-evidence-");
+    const outputDir = tempDirs.make("carapace-maturity-docs-output-");
+    const evidenceDir = tempDirs.make("carapace-maturity-docs-evidence-");
     writeQaEvidence({
       dir: evidenceDir,
       entries: [{ id: "passing-scenario", status: "pass" }],

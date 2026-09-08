@@ -4,7 +4,7 @@ import http from "node:http";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildGatewayReloadPlan } from "../gateway/config-reload-plan.js";
 import { createGatewayCronReconciliation } from "../gateway/server-cron-reconciled.js";
 import { createGatewayReloadHandlers } from "../gateway/server-reload-hot.js";
@@ -47,7 +47,7 @@ async function startAuthenticatedMcpProofServer() {
   const endpoints: AuthenticatedMcpProofEndpoint[] = [];
 
   const addEndpoint = async (owner: string, authorization: string) => {
-    const server = new McpServer({ name: `openclaw-${owner}-proof`, version: "1.0.0" });
+    const server = new McpServer({ name: `carapace-${owner}-proof`, version: "1.0.0" });
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: randomUUID,
     });
@@ -300,7 +300,7 @@ describe("mcp connection resolver helpers", () => {
             async start() {},
             stop() {},
           } as GatewayReloadProofState["cronState"]["cron"],
-          storePath: "/tmp/openclaw-mcp-gateway-reload-proof-cron",
+          storePath: "/tmp/carapace-mcp-gateway-reload-proof-cron",
           cronEnabled: false,
           reconcileExitWatchers: async () => {},
           reconcileStreamWatchers: async () => {},
@@ -310,7 +310,7 @@ describe("mcp connection resolver helpers", () => {
       };
       const reloadLog = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
       const requestRecoveryRestart = vi.fn(() => ({ status: "failed" as const }));
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         plugins: {
           entries: {
             "startup-mail": { enabled: false },

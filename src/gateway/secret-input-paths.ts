@@ -1,7 +1,7 @@
 // Gateway secret-input path helpers.
 // Lists config locations that may contain plaintext values or SecretRefs.
 import { copyConfigResolutionFactsExcept } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** Canonical Gateway config paths whose values may be plaintext or secret refs. */
 export type SupportedGatewaySecretInputPath =
@@ -27,7 +27,7 @@ export function isSupportedGatewaySecretInputPath(
 
 /** Read a Gateway secret input without assuming whether it is plaintext, a ref, or absent. */
 export function readGatewaySecretInputValue(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   path: SupportedGatewaySecretInputPath,
 ): unknown {
   if (path === "gateway.auth.token") {
@@ -44,7 +44,7 @@ export function readGatewaySecretInputValue(
 
 /** Replace one Gateway secret input and consume its pending authored provenance atomically. */
 export function assignResolvedGatewaySecretInput(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: SupportedGatewaySecretInputPath;
   value: string | undefined;
 }): void {

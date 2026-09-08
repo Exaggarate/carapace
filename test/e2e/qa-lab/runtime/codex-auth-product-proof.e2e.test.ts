@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createJsonlRequestTailer } from "../../../../scripts/e2e/lib/codex-media-path/jsonl-request-tail.mts";
 import { GatewayClient } from "../../../../src/gateway/client.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
 import { loadBundledPluginFacade } from "../../../../src/test-utils/bundled-plugin-public-surface.js";
 import {
   GATEWAY_CLIENT_MODES,
@@ -12,9 +12,9 @@ import {
 } from "../../../../src/utils/message-channel.js";
 import { connectGatewayStatusClient, postJson } from "../../../helpers/gateway-e2e-harness.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 import { runCodexAuthDoctorMigrationProof } from "./codex-auth-product-proof.test-support.js";
 
 const oauthAccess = "test-oauth-access";
@@ -22,12 +22,12 @@ const ACCOUNT_ID = "qa-codex-account";
 const MODEL = "openai/gpt-5.6-luna";
 const MISSING_PROFILE_ID = "openai:missing";
 const SELECTED_AUTH_PROFILE_UNAVAILABLE_USER_TEXT =
-  "The selected auth profile is unavailable in this agent's OpenClaw credential store. " +
-  "Import or migrate that credential into the agent, select another configured profile, or run `openclaw configure`, then retry.";
+  "The selected auth profile is unavailable in this agent's Carapace credential store. " +
+  "Import or migrate that credential into the agent, select another configured profile, or run `carapace configure`, then retry.";
 const PRODUCT_OUTPUT = "QA_CODEX_AUTH_PRODUCT_PROOF_OK";
 const REQUEST_TIMEOUT_MS = 60_000;
 
-let instance: OpenClawTestInstance | undefined;
+let instance: CarapaceTestInstance | undefined;
 
 type AppServerLogEntry = {
   id?: number | string;
@@ -63,7 +63,7 @@ function expectBoundedMissingProfileRecovery(
 }
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   await instance?.cleanup();
   instance = undefined;
 });
@@ -99,7 +99,7 @@ function chatgptAccessToken(accountId: string): string {
   ].join(".");
 }
 
-async function waitForAssistantHistory(testInstance: OpenClawTestInstance, expected: string) {
+async function waitForAssistantHistory(testInstance: CarapaceTestInstance, expected: string) {
   const client = await connectGatewayStatusClient(testInstance);
   try {
     return await vi.waitFor(
@@ -150,7 +150,7 @@ async function waitForAssistantHistory(testInstance: OpenClawTestInstance, expec
 }
 
 async function connectGatewayEventClient(
-  testInstance: OpenClawTestInstance,
+  testInstance: CarapaceTestInstance,
   events: GatewayEvent[],
 ) {
   return await new Promise<GatewayClient>((resolve, reject) => {
@@ -204,12 +204,12 @@ describe("Codex auth product proof", () => {
       const appServerFixture = fileURLToPath(
         new URL("./codex-auth-app-server.fixture.mjs", import.meta.url),
       );
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "qa-codex-auth-product-proof",
         env: {
-          OPENCLAW_AGENT_HARNESS_FALLBACK: "none",
-          OPENCLAW_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
-          OPENCLAW_SKIP_PROVIDERS: undefined,
+          CARAPACE_AGENT_HARNESS_FALLBACK: "none",
+          CARAPACE_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
+          CARAPACE_SKIP_PROVIDERS: undefined,
         },
         config: {
           plugins: {
@@ -244,7 +244,7 @@ describe("Codex auth product proof", () => {
       });
 
       const requestLog = instance.state.path("codex-auth-app-server.jsonl");
-      instance.env.OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG = requestLog;
+      instance.env.CARAPACE_QA_CODEX_AUTH_APP_SERVER_LOG = requestLog;
       const appServerLog = createJsonlRequestTailer<AppServerLogEntry>(requestLog);
       const canonicalStore = await runCodexAuthDoctorMigrationProof(instance, {
         accountId: ACCOUNT_ID,
@@ -369,12 +369,12 @@ describe("Codex auth product proof", () => {
       const appServerFixture = fileURLToPath(
         new URL("./codex-auth-app-server.fixture.mjs", import.meta.url),
       );
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "qa-codex-missing-auth-profile",
         env: {
-          OPENCLAW_AGENT_HARNESS_FALLBACK: "none",
-          OPENCLAW_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
-          OPENCLAW_SKIP_PROVIDERS: undefined,
+          CARAPACE_AGENT_HARNESS_FALLBACK: "none",
+          CARAPACE_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
+          CARAPACE_SKIP_PROVIDERS: undefined,
         },
         config: {
           plugins: {
@@ -409,7 +409,7 @@ describe("Codex auth product proof", () => {
       });
 
       const requestLog = instance.state.path("codex-auth-app-server.jsonl");
-      instance.env.OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG = requestLog;
+      instance.env.CARAPACE_QA_CODEX_AUTH_APP_SERVER_LOG = requestLog;
       const appServerLog = createJsonlRequestTailer<AppServerLogEntry>(requestLog);
       await instance.state.writeAuthProfiles({
         version: 1,

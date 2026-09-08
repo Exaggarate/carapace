@@ -87,7 +87,7 @@ function runRenderedProbe(
   plistMode: "unlabeled" | "same-label" | "malformed" | "unreadable",
   launchctlBody = absentQuery,
 ) {
-  const root = tempDirs.make("openclaw-launchd-probe-");
+  const root = tempDirs.make("carapace-launchd-probe-");
   const daemonsDir = path.join(root, "daemons");
   const binDir = path.join(root, "bin");
   const probeLog = path.join(root, "probe.log");
@@ -100,7 +100,7 @@ function runRenderedProbe(
   writeFileSync(
     plutilShim,
     `#!/bin/sh
-printf 'scan\\n' >> "$OPENCLAW_TEST_PROBE_LOG"
+printf 'scan\\n' >> "$CARAPACE_TEST_PROBE_LOG"
 mode=$1
 for last; do :; done
 case "$last" in
@@ -112,7 +112,7 @@ esac
 fixture=$(/bin/cat "$last")
 if [ "$mode" = "-extract" ]; then
   if [ "$fixture" = "same-label" ]; then
-    printf '%s\\n' "ai.openclaw.gateway"
+    printf '%s\\n' "ai.carapace.gateway"
     exit 0
   fi
   printf '%s\\n' "No value at that key path: Label" >&2
@@ -129,8 +129,8 @@ exit 1
   writeFileSync(
     launchctlShim,
     `#!/bin/sh
-printf 'query\\n' >> "$OPENCLAW_TEST_PROBE_LOG"
-query_count=$(/usr/bin/grep -c '^query$' "$OPENCLAW_TEST_PROBE_LOG")
+printf 'query\\n' >> "$CARAPACE_TEST_PROBE_LOG"
+query_count=$(/usr/bin/grep -c '^query$' "$CARAPACE_TEST_PROBE_LOG")
 ${launchctlBody}
 `,
     { mode: 0o700 },
@@ -140,11 +140,11 @@ ${launchctlBody}
   if (plistMode === "unreadable") {
     chmodSync(path.join(daemonsDir, plistName), 0o000);
   }
-  const script = renderSystemLaunchDaemonOwnershipShellProbe("ai.openclaw.gateway")
+  const script = renderSystemLaunchDaemonOwnershipShellProbe("ai.carapace.gateway")
     .replaceAll("/Library/LaunchDaemons", daemonsDir)
     .replaceAll("/usr/bin/plutil", plutilShim)
     .concat(
-      'printf "conflict=%s\\ndetail=%s\\n" "$openclaw_system_launchd_conflict" "$openclaw_system_launchd_detail"\n',
+      'printf "conflict=%s\\ndetail=%s\\n" "$carapace_system_launchd_conflict" "$carapace_system_launchd_detail"\n',
     );
   const shell = hostPlatform === "darwin" ? "/bin/sh" : "/bin/bash";
   const output = execFileSync(shell, ["-c", script], {
@@ -153,8 +153,8 @@ ${launchctlBody}
       HOME: root,
       TMPDIR: root,
       PATH: binDir,
-      OPENCLAW_TEST_PROBE_LOG: probeLog,
-      OPENCLAW_TEST_PROBE_DIR: root,
+      CARAPACE_TEST_PROBE_LOG: probeLog,
+      CARAPACE_TEST_PROBE_DIR: root,
     },
   });
   return {
@@ -192,45 +192,45 @@ describe("system LaunchDaemon ownership", () => {
   it("uses the readable system-domain query and reports a loaded owner", async () => {
     state.launchctl = { stdout: "state = running", stderr: "", code: 0 };
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "loaded",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
     });
-    expect(execLaunchctl).toHaveBeenCalledWith(["print", "system/ai.openclaw.gateway"], undefined);
+    expect(execLaunchctl).toHaveBeenCalledWith(["print", "system/ai.carapace.gateway"], undefined);
   });
 
   it("fails closed when launchctl cannot classify system ownership", async () => {
     state.launchctl = { stdout: "", stderr: "Operation not permitted", code: 1 };
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "unverifiable",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
       operation: "launchctl",
       detail: "Operation not permitted",
     });
   });
 
   it("detects the canonical unloaded plist by its structural Label", async () => {
-    const plistPath = "/Library/LaunchDaemons/ai.openclaw.gateway.plist";
+    const plistPath = "/Library/LaunchDaemons/ai.carapace.gateway.plist";
     state.files.set(plistPath, "bplist00-binary-payload");
-    state.plutilValues.set(plistPath, { Label: "ai.openclaw.gateway" });
+    state.plutilValues.set(plistPath, { Label: "ai.carapace.gateway" });
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "installed",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
       plistPath,
     });
   });
 
   it("detects a noncanonical XML plist by its decoded Label", async () => {
-    const plistPath = "/Library/LaunchDaemons/vendor-openclaw.plist";
+    const plistPath = "/Library/LaunchDaemons/vendor-carapace.plist";
     state.files.set(
       plistPath,
-      "<plist><dict><key>Label</key><string>ai.openclaw.gateway</string></dict></plist>",
+      "<plist><dict><key>Label</key><string>ai.carapace.gateway</string></dict></plist>",
     );
-    state.plutilValues.set(plistPath, { Label: "ai.openclaw.gateway" });
+    state.plutilValues.set(plistPath, { Label: "ai.carapace.gateway" });
 
-    const ownership = await inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway");
+    const ownership = await inspectSystemLaunchDaemonOwnership("ai.carapace.gateway");
 
     expect(ownership).toMatchObject({ status: "installed", plistPath });
     expect(execFileUtf8).toHaveBeenCalled();
@@ -240,22 +240,22 @@ describe("system LaunchDaemon ownership", () => {
     const plistPath = "/Library/LaunchDaemons/nested-label.plist";
     state.files.set(
       plistPath,
-      "<plist><dict><key>EnvironmentVariables</key><dict><key>Label</key><string>nested</string></dict><key>Label</key><string>ai.openclaw.gateway</string></dict></plist>",
+      "<plist><dict><key>EnvironmentVariables</key><dict><key>Label</key><string>nested</string></dict><key>Label</key><string>ai.carapace.gateway</string></dict></plist>",
     );
-    state.plutilValues.set(plistPath, { Label: "ai.openclaw.gateway" });
+    state.plutilValues.set(plistPath, { Label: "ai.carapace.gateway" });
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toMatchObject({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toMatchObject({
       status: "installed",
       plistPath,
     });
   });
 
   it("uses native plutil for binary and non-XML plist formats", async () => {
-    const plistPath = "/Library/LaunchDaemons/binary-openclaw.plist";
+    const plistPath = "/Library/LaunchDaemons/binary-carapace.plist";
     state.files.set(plistPath, "bplist00-binary-payload");
-    state.plutilValues.set(plistPath, { Label: "ai.openclaw.gateway" });
+    state.plutilValues.set(plistPath, { Label: "ai.carapace.gateway" });
 
-    const ownership = await inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway");
+    const ownership = await inspectSystemLaunchDaemonOwnership("ai.carapace.gateway");
 
     expect(ownership).toMatchObject({ status: "installed", plistPath });
     expect(execFileUtf8).toHaveBeenCalledWith("/usr/bin/plutil", [
@@ -270,15 +270,15 @@ describe("system LaunchDaemon ownership", () => {
 
   it("skips a valid plist without a string Label and detects a later owner", async () => {
     const unrelated = "/Library/LaunchDaemons/com.google.keystone.daemon.plist";
-    const owner = "/Library/LaunchDaemons/vendor-openclaw.plist";
+    const owner = "/Library/LaunchDaemons/vendor-carapace.plist";
     state.files.set(unrelated, "<plist><dict><key>RunAtLoad</key><true/></dict></plist>");
     state.plutilValues.set(unrelated, { RunAtLoad: true });
     state.files.set(owner, "<plist/>");
-    state.plutilValues.set(owner, { Label: "ai.openclaw.gateway" });
+    state.plutilValues.set(owner, { Label: "ai.carapace.gateway" });
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "installed",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
       plistPath: owner,
     });
     expect(execFileUtf8).toHaveBeenCalledTimes(2);
@@ -289,9 +289,9 @@ describe("system LaunchDaemon ownership", () => {
     state.files.set(unrelated, "<plist/>");
     state.plutilValues.set(unrelated, { Label: 42 });
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "absent",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
     });
     expect(execLaunchctl).toHaveBeenCalledTimes(2);
   });
@@ -302,27 +302,27 @@ describe("system LaunchDaemon ownership", () => {
     state.accessErrors.set(unrelated, "EACCES");
     state.plutilErrors.set(unrelated, "Operation not permitted");
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "absent",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
     });
     await expect(
-      assertNoSystemLaunchDaemonOwnership("ai.openclaw.gateway"),
+      assertNoSystemLaunchDaemonOwnership("ai.carapace.gateway"),
     ).resolves.toBeUndefined();
   });
 
   it("detects a readable owner after an unreadable foreign plist", async () => {
     const unrelated = "/Library/LaunchDaemons/com.vendor.locked.plist";
-    const owner = "/Library/LaunchDaemons/vendor-openclaw.plist";
+    const owner = "/Library/LaunchDaemons/vendor-carapace.plist";
     state.files.set(unrelated, "<plist/>");
     state.accessErrors.set(unrelated, "EACCES");
     state.plutilErrors.set(unrelated, "Operation not permitted");
     state.files.set(owner, "<plist/>");
-    state.plutilValues.set(owner, { Label: "ai.openclaw.gateway" });
+    state.plutilValues.set(owner, { Label: "ai.carapace.gateway" });
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "installed",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
       plistPath: owner,
     });
   });
@@ -332,63 +332,63 @@ describe("system LaunchDaemon ownership", () => {
       .mockResolvedValueOnce({ stdout: "", stderr: "Could not find service", code: 113 })
       .mockResolvedValueOnce({ stdout: "state = running", stderr: "", code: 0 });
 
-    await expect(inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway")).resolves.toEqual({
+    await expect(inspectSystemLaunchDaemonOwnership("ai.carapace.gateway")).resolves.toEqual({
       status: "loaded",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
     });
     expect(execLaunchctl).toHaveBeenCalledTimes(2);
   });
 
   it("can skip the installed-plist scan for read-only status probes", async () => {
-    const plistPath = "/Library/LaunchDaemons/ai.openclaw.gateway.plist";
+    const plistPath = "/Library/LaunchDaemons/ai.carapace.gateway.plist";
     state.files.set(plistPath, "<plist/>");
 
     await expect(
-      inspectSystemLaunchDaemonOwnership("ai.openclaw.gateway", {
+      inspectSystemLaunchDaemonOwnership("ai.carapace.gateway", {
         scanInstalledPlists: false,
       }),
     ).resolves.toEqual({
       status: "absent",
-      serviceTarget: "system/ai.openclaw.gateway",
+      serviceTarget: "system/ai.carapace.gateway",
     });
   });
 
   it("throws one typed recovery error and documents that force cannot bypass it", async () => {
     state.launchctl = { stdout: "state = running", stderr: "", code: 0 };
 
-    const error = await assertNoSystemLaunchDaemonOwnership("ai.openclaw.gateway").catch(
+    const error = await assertNoSystemLaunchDaemonOwnership("ai.carapace.gateway").catch(
       (caught: unknown) => caught,
     );
 
     expect(error).toMatchObject({
       name: "SystemLaunchDaemonOwnershipError",
       code: "SYSTEM_LAUNCH_DAEMON_OWNERSHIP",
-      ownership: { status: "loaded", serviceTarget: "system/ai.openclaw.gateway" },
+      ownership: { status: "loaded", serviceTarget: "system/ai.carapace.gateway" },
     });
     expect(String(error)).toContain("duplicate KeepAlive managers can restart-loop the gateway");
     expect(String(error)).toContain("--force does not override system ownership");
-    expect(String(error)).toContain("sudo launchctl bootout system/ai.openclaw.gateway");
+    expect(String(error)).toContain("sudo launchctl bootout system/ai.carapace.gateway");
   });
 
   it("renders a standalone loaded and structural same-label plist probe", () => {
-    const script = renderSystemLaunchDaemonOwnershipShellProbe("ai.openclaw.gateway");
+    const script = renderSystemLaunchDaemonOwnershipShellProbe("ai.carapace.gateway");
 
-    expect(script).toContain('launchctl print "$openclaw_system_launchd_target"');
+    expect(script).toContain('launchctl print "$carapace_system_launchd_target"');
     expect(script).toContain(
-      '/usr/bin/plutil -extract Label raw -o - -- "$openclaw_system_launchd_plist"',
+      '/usr/bin/plutil -extract Label raw -o - -- "$carapace_system_launchd_plist"',
     );
     expect(script).toContain(
-      '/usr/bin/plutil -lint -- "$openclaw_system_launchd_plist" >/dev/null 2>&1',
+      '/usr/bin/plutil -lint -- "$carapace_system_launchd_plist" >/dev/null 2>&1',
     );
     expect(script).toContain(
-      "/usr/bin/find \"$openclaw_system_launchd_dir\" -mindepth 1 -maxdepth 1 -name '*.plist' -print0",
+      "/usr/bin/find \"$carapace_system_launchd_dir\" -mindepth 1 -maxdepth 1 -name '*.plist' -print0",
     );
-    expect(script).toContain("while IFS= read -r -d '' openclaw_system_launchd_plist");
-    expect(script).toContain('[ ! -r "$openclaw_system_launchd_plist" ]');
-    expect(script).toContain('[ ! -x "$openclaw_system_launchd_dir" ]');
-    expect(script).not.toContain('"$openclaw_system_launchd_dir"/*.plist');
+    expect(script).toContain("while IFS= read -r -d '' carapace_system_launchd_plist");
+    expect(script).toContain('[ ! -r "$carapace_system_launchd_plist" ]');
+    expect(script).toContain('[ ! -x "$carapace_system_launchd_dir" ]');
+    expect(script).not.toContain('"$carapace_system_launchd_dir"/*.plist');
     expect(script).toContain(
-      'if [ "$openclaw_system_launchd_plist_label" != "$openclaw_system_launchd_label" ]',
+      'if [ "$carapace_system_launchd_plist_label" != "$carapace_system_launchd_label" ]',
     );
     expect(script).not.toContain("|| true");
   });
@@ -396,8 +396,8 @@ describe("system LaunchDaemon ownership", () => {
   it("executes the rendered probe across readable and unreadable plists", () => {
     expect(runRenderedProbe("com.google.keystone.daemon.plist", "unlabeled").conflict).toBe("");
     expect(runRenderedProbe("com.vendor.unreadable.plist", "unreadable").conflict).toBe("");
-    expect(runRenderedProbe("vendor-openclaw.plist", "same-label").conflict).toContain(
-      "vendor-openclaw.plist",
+    expect(runRenderedProbe("vendor-carapace.plist", "same-label").conflict).toContain(
+      "vendor-carapace.plist",
     );
     expect(runRenderedProbe("com.vendor.broken.plist", "malformed").conflict).toContain(
       "com.vendor.broken.plist",
@@ -411,13 +411,13 @@ describe("system LaunchDaemon ownership", () => {
     ["signal", 'printf "Could not find service\\n" >&2\nkill -TERM $$', 1, "could not verify"],
     [
       "execution failure",
-      'printf "Could not find service\\n" >&2\nexec "$OPENCLAW_TEST_PROBE_DIR/non-executable"',
+      'printf "Could not find service\\n" >&2\nexec "$CARAPACE_TEST_PROBE_DIR/non-executable"',
       1,
       "could not verify",
     ],
     [
       "missing command",
-      'printf "Could not find service\\n" >&2\nexec "$OPENCLAW_TEST_PROBE_DIR/missing"',
+      'printf "Could not find service\\n" >&2\nexec "$CARAPACE_TEST_PROBE_DIR/missing"',
       1,
       "could not verify",
     ],
@@ -437,7 +437,7 @@ describe("system LaunchDaemon ownership", () => {
     "executes the rendered ownership query with %s outcome",
     (_, body, queries, detail) => {
       const result = runRenderedProbe("foreign.plist", "unlabeled", body);
-      expect(result.conflict).toBe(detail ? "system/ai.openclaw.gateway" : "");
+      expect(result.conflict).toBe(detail ? "system/ai.carapace.gateway" : "");
       if (detail) {
         expect(result.detail).toContain(detail);
       } else {

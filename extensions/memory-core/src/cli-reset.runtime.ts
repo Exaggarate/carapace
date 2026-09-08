@@ -1,14 +1,14 @@
 import fs from "node:fs";
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   resolveAgentWorkspaceDir,
   resolveUserPath,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { createClackPrompter } from "openclaw/plugin-sdk/setup-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { createClackPrompter } from "carapace/plugin-sdk/setup-runtime";
 import {
-  assertOpenClawAgentDatabaseForMaintenance,
-  resolveOpenClawAgentSqlitePath,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+  assertCarapaceAgentDatabaseForMaintenance,
+  resolveCarapaceAgentSqlitePath,
+} from "carapace/plugin-sdk/sqlite-runtime";
 import { resolveMemoryAgentIds } from "./cli-runtime-common.js";
 import { defaultRuntime, getRuntimeConfig } from "./cli.host.runtime.js";
 import type { MemoryResetCommandOptions } from "./cli.types.js";
@@ -38,7 +38,7 @@ export async function runMemoryReset(opts: MemoryResetCommandOptions): Promise<v
     }
   }
   for (const agentId of agentIds) {
-    const dbPath = resolveOpenClawAgentSqlitePath({ agentId });
+    const dbPath = resolveCarapaceAgentSqlitePath({ agentId });
     if (!fs.existsSync(dbPath)) {
       defaultRuntime.log(`No memory index to reset (${agentId}).`);
       continue;
@@ -50,7 +50,7 @@ export async function runMemoryReset(opts: MemoryResetCommandOptions): Promise<v
     // Validate only: normal manager opens may repair unrelated session schema.
     const db = openMemoryDatabaseAtPath(dbPath, true);
     try {
-      assertOpenClawAgentDatabaseForMaintenance(db, { agentId, pathname: dbPath });
+      assertCarapaceAgentDatabaseForMaintenance(db, { agentId, pathname: dbPath });
       const changed = await resetMemoryDatabase({
         targetDb: db,
         dbPath,
@@ -59,11 +59,11 @@ export async function runMemoryReset(opts: MemoryResetCommandOptions): Promise<v
       });
       defaultRuntime.log(
         changed
-          ? `Memory index reset (${agentId}). Sessions preserved. Rebuild with: openclaw memory index --agent ${agentId}`
+          ? `Memory index reset (${agentId}). Sessions preserved. Rebuild with: carapace memory index --agent ${agentId}`
           : `No memory index to reset (${agentId}).`,
       );
       defaultRuntime.log(
-        `Reset does not shrink the database file. To reclaim space, back up data and stop the Gateway and other writers, then run: openclaw doctor --session-sqlite compact --session-sqlite-agent ${agentId}`,
+        `Reset does not shrink the database file. To reclaim space, back up data and stop the Gateway and other writers, then run: carapace doctor --session-sqlite compact --session-sqlite-agent ${agentId}`,
       );
     } finally {
       closeMemoryDatabase(db);

@@ -33,7 +33,7 @@ async function collectSkillFiles(): Promise<string[]> {
     ),
   );
   const manifestPaths = trackedFiles.filter((file) =>
-    /^extensions\/[^/]+\/openclaw\.plugin\.json$/u.test(file),
+    /^extensions\/[^/]+\/carapace\.plugin\.json$/u.test(file),
   );
 
   for (const manifestPath of manifestPaths) {

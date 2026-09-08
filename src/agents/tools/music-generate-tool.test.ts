@@ -2,7 +2,7 @@
 // duplicate guards, media persistence, and result delivery metadata.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseReplyDirectives } from "../../auto-reply/reply/reply-directives.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import * as mediaStore from "../../media/store.js";
 import * as webMedia from "../../media/web-media.js";
 import * as musicGenerationRuntime from "../../music-generation/runtime.js";
@@ -186,8 +186,8 @@ vi.mock("./media-generate-background.js", async (importOriginal) => ({
 vi.mock("../../tasks/runtime-internal.js", () => taskRuntimeInternalMocks);
 vi.mock("../../tasks/detached-task-runtime.js", () => taskExecutorMocks);
 
-function asConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asConfig(value: unknown): CarapaceConfig {
+  return value as CarapaceConfig;
 }
 
 function expectMusicGenerateTool(
@@ -1387,7 +1387,7 @@ describe("createMusicGenerateTool", () => {
     }
 
     const result = await tool.execute("call-google-generate", {
-      prompt: "OpenClaw anthem",
+      prompt: "Carapace anthem",
       instrumental: true,
       durationSeconds: 30,
       format: "wav",

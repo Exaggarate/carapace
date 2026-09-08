@@ -1,5 +1,5 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { WebSearchProviderPlugin } from "openclaw/plugin-sdk/provider-web-search-contract";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { WebSearchProviderPlugin } from "carapace/plugin-sdk/provider-web-search-contract";
 import { createOllamaWebSearchProvider as createOllamaWebSearchProviderContract } from "../web-search-contract-api.js";
 import {
   OLLAMA_WEB_SEARCH_TOOL_DESCRIPTION,

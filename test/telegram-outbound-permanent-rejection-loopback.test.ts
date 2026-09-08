@@ -1,23 +1,23 @@
 // Root-owned integration may combine the public Telegram plugin with the durable queue runtime.
 import { createServer, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { sendDurableMessageBatch } from "carapace/plugin-sdk/channel-outbound";
 import {
   createEmptyPluginRegistry,
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   resetGlobalHookRunner,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { drainPendingDeliveries } from "openclaw/plugin-sdk/delivery-queue-runtime";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { drainPendingDeliveries } from "carapace/plugin-sdk/delivery-queue-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { withStateDirEnv } from "openclaw/plugin-sdk/test-env";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { withStateDirEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getDeliveryQueueEntryStatus } from "../src/infra/delivery-queue-sqlite.js";
 import { OUTBOUND_DELIVERY_QUEUE_NAME } from "../src/infra/outbound/delivery-queue-media-staging.js";
@@ -32,8 +32,8 @@ type TelegramLoopback = {
 };
 
 function readQueueTerminal(stateDir: string): { retryCount: number; status: string } | undefined {
-  const { db } = openOpenClawStateDatabase({
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+  const { db } = openCarapaceStateDatabase({
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   const row = db
     // sqlite-allow-raw: The proof reads one exact queue owner after terminalization.
@@ -94,8 +94,8 @@ async function startTelegramMigrationLoopback(): Promise<TelegramLoopback> {
 
 describe("Telegram permanent rejection over real Bot API transport", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetGlobalHookRunner();
     resetPluginRuntimeStateForTest();
     setActivePluginRegistry(createEmptyPluginRegistry());
@@ -112,12 +112,12 @@ describe("Telegram permanent rejection over real Bot API transport", () => {
             apiRoot: loopback.apiRoot,
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       setActivePluginRegistry(
         createTestRegistry([{ pluginId: "telegram", plugin: telegramPlugin, source: "test" }]),
       );
 
-      await withStateDirEnv("openclaw-telegram-permanent-loopback-", async ({ stateDir }) => {
+      await withStateDirEnv("carapace-telegram-permanent-loopback-", async ({ stateDir }) => {
         try {
           const staged = await sendDurableMessageBatch({
             cfg,
@@ -172,8 +172,8 @@ describe("Telegram permanent rejection over real Bot API transport", () => {
           expect(loopback.requests[0]?.body).toContain("real transport permanent rejection");
           expect(readQueueTerminal(stateDir)).toEqual({ retryCount: 1, status: "failed" });
 
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
           expect(
             getDeliveryQueueEntryStatus(OUTBOUND_DELIVERY_QUEUE_NAME, DELIVERY_INTENT_ID, stateDir),
           ).toBe("failed");
@@ -204,8 +204,8 @@ describe("Telegram permanent rejection over real Bot API transport", () => {
             })}`,
           );
         } finally {
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       });
     } finally {

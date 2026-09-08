@@ -94,7 +94,7 @@ suite.define(() => {
         await activateSelfRemovingControl(page.getByRole("menuitem", { name: "New group" }));
         const input = page.getByLabel("New group name");
         await input.fill(group);
-        await capture("editing", page.locator("openclaw-modal-dialog dialog"), [input]);
+        await capture("editing", page.locator("carapace-modal-dialog dialog"), [input]);
         await input.press("Enter");
         await gateway.waitForRequest("sessions.groups.put");
 
@@ -142,7 +142,7 @@ suite.define(() => {
         const failure =
           surface === "header"
             ? page.getByText(/changed before patch\. Retry\./).first()
-            : page.locator('openclaw-modal-dialog [role="alert"]');
+            : page.locator('carapace-modal-dialog [role="alert"]');
         if (acceptedKeys.includes(original.key)) {
           await input.waitFor({ state: "detached" });
           await page
@@ -156,7 +156,7 @@ suite.define(() => {
         await capture(
           acceptedKeys.includes(original.key) ? "incorrectly-moved" : "rejected",
           !acceptedKeys.includes(original.key) && surface !== "header"
-            ? page.locator("openclaw-modal-dialog dialog")
+            ? page.locator("carapace-modal-dialog dialog")
             : page.locator(".shell"),
           [acceptedKeys.includes(original.key) ? row : failure],
         );

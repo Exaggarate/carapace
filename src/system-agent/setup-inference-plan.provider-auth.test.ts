@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { prepareAuthChoiceLoadedPluginProvider } from "../plugins/provider-auth-choice.js";
 import { buildTestPlan } from "./setup-inference-plan.js";
 
 vi.mock("../agents/model-runtime-aliases.js", () => ({
-  resolveCliRuntimeExecutionProvider: ({ cfg }: { cfg: OpenClawConfig }) =>
+  resolveCliRuntimeExecutionProvider: ({ cfg }: { cfg: CarapaceConfig }) =>
     cfg.agents?.defaults?.models?.["fixture/test-model"]?.agentRuntime?.id === "fixture-cli"
       ? "fixture-cli"
       : undefined,
@@ -24,14 +24,14 @@ vi.mock("../plugins/provider-install-catalog.js", () => ({
   }),
 }));
 
-const existingInstall = { source: "npm" as const, spec: "@openclaw/existing" };
-const config: OpenClawConfig = {
+const existingInstall = { source: "npm" as const, spec: "@carapace/existing" };
+const config: CarapaceConfig = {
   agents: { entries: { main: {} } },
   plugins: { installs: { existing: existingInstall } },
 };
 const installRecord = {
   source: "npm" as const,
-  spec: "@openclaw/fixture",
+  spec: "@carapace/fixture",
   installPath: "/tmp/fixture-plugin",
 };
 const persistAuthProfiles = vi.fn();
@@ -138,7 +138,7 @@ describe("catalog-only provider preparation", () => {
     },
   );
 
-  it.each(["openclaw", "fixture-cli"])(
+  it.each(["carapace", "fixture-cli"])(
     "normalizes the starter while retaining trusted installation and the selected %s runtime",
     async (runtimeId) => {
       const normalizeModelId = vi.fn(() => "test-model");

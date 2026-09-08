@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createChatRunState } from "../server-chat-state.js";
 import { broadcastChatDelta, broadcastChatError, broadcastChatFinal } from "./chat-broadcast.js";
 import type { GatewayRequestContext } from "./types.js";
@@ -216,7 +216,7 @@ describe("global chat broadcast ownership", () => {
             defaults: { sessionStore: { agentId: "ops" } },
             entries: { ops: {}, research: {} },
           },
-        }) satisfies OpenClawConfig,
+        }) satisfies CarapaceConfig,
       nodeSendToSession,
     };
 

@@ -27,7 +27,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("openclaw-ip-location", () => {
+describe("carapace-ip-location", () => {
   it("renders the city with its attribution link", async () => {
     vi.stubGlobal(
       "fetch",
@@ -40,7 +40,7 @@ describe("openclaw-ip-location", () => {
         }),
       ),
     );
-    const element = document.createElement("openclaw-ip-location");
+    const element = document.createElement("carapace-ip-location");
     element.ip = "203.0.113.20";
     document.body.append(element);
 
@@ -56,7 +56,7 @@ describe("openclaw-ip-location", () => {
       "fetch",
       vi.fn(async () => jsonResponse({ found: false })),
     );
-    const element = document.createElement("openclaw-ip-location");
+    const element = document.createElement("carapace-ip-location");
     element.ip = "203.0.113.21";
     document.body.append(element);
 
@@ -71,7 +71,7 @@ describe("openclaw-ip-location", () => {
   it("does not request anything without an address", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    const element = document.createElement("openclaw-ip-location");
+    const element = document.createElement("carapace-ip-location");
     document.body.append(element);
 
     await element.updateComplete;

@@ -1,17 +1,17 @@
 // Native GPT-Live browser sessions: WebRTC offer broker plus gateway-owned sideband control.
 import { randomBytes, randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { PluginLogger } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { PluginLogger } from "carapace/plugin-sdk/plugin-entry";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceBrowserSession,
   RealtimeVoiceBrowserSessionCreateRequest,
   RealtimeVoiceGatewayControl,
   RealtimeVoiceProviderCapabilities,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { readRequestBodyWithLimit } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/realtime-voice";
+import { readRequestBodyWithLimit } from "carapace/plugin-sdk/webhook-request-guards";
 import WebSocket, { type RawData } from "ws";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import { OpenAIQuicksilverDelegationController } from "./realtime-quicksilver-delegation-controller.js";
@@ -104,7 +104,7 @@ type OpenAIRealtimeOfferMetrics = {
 
 export function createOpenAIQuicksilverBrowserSessionBroker(
   params: {
-    getConfig: () => OpenClawConfig | undefined;
+    getConfig: () => CarapaceConfig | undefined;
     logger: Pick<PluginLogger, "debug" | "warn">;
     fetchImpl?: typeof fetch;
     webSocketFactory?: OpenAIQuicksilverSocketFactory;

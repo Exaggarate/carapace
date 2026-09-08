@@ -3,26 +3,26 @@ import type {
   ChannelApprovalCapabilityHandlerContext,
   ChannelApprovalKind,
   PendingApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { createChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import { createChannelApprovalNativeRuntimeAdapter } from "carapace/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "carapace/plugin-sdk/approval-native-runtime";
 import {
   buildPluginApprovalPendingReplyPayload,
   buildApprovalPresentationFromActionDescriptors,
   buildExecApprovalPendingReplyPayload,
   formatExecApprovalExpiresIn,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { ExecApprovalPendingReplyParams } from "openclaw/plugin-sdk/approval-reply-runtime";
+} from "carapace/plugin-sdk/approval-reply-runtime";
+import type { ExecApprovalPendingReplyParams } from "carapace/plugin-sdk/approval-reply-runtime";
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
   SystemAgentApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import { resolveGatewayPublicOrigin } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
+import { resolveGatewayPublicOrigin } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { buildTelegramApprovalCallbackData } from "./approval-callback-data.js";
 import {
   buildTelegramNativeExpiredApprovalText,
@@ -105,7 +105,7 @@ function buildPendingPayload(params: {
           )}/approve/${encodeURIComponent(params.request.id)}`
         : undefined;
     const lines = [
-      "🔒 OpenClaw change requires approval",
+      "🔒 Carapace change requires approval",
       `Change: ${view.operationSummary}`,
       `Agent: ${view.agentId ?? "unknown"}`,
       `Expires in: ${formatExecApprovalExpiresIn(params.request.expiresAtMs, params.nowMs)}`,

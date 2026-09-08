@@ -1,5 +1,5 @@
 // Acknowledges exact outbound custody before releasing its queue-owned media.
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { loadDeliveryQueueEntryInDatabase } from "../delivery-queue-sqlite-bound.js";
 import { transitionOwnedDeliveryQueueEntry } from "../delivery-queue-sqlite-claim.js";
 import {
@@ -88,8 +88,8 @@ export async function ackDelivery(
   // Read the media references before the row goes, then unlink only after the
   // delete commits. A crash in between leaves an orphan for the retention sweep;
   // unlinking first could strip media from a row that still has to replay.
-  const database = openOpenClawStateDatabase({
-    env: stateDir ? { ...process.env, OPENCLAW_STATE_DIR: stateDir } : process.env,
+  const database = openCarapaceStateDatabase({
+    env: stateDir ? { ...process.env, CARAPACE_STATE_DIR: stateDir } : process.env,
   });
   let spoolPaths: string[] = [];
   const settle = (current: QueuedDelivery | null): void => {

@@ -4,15 +4,15 @@ import type {
   EnvironmentSummary,
   EnvironmentsListResult,
   WorkerDesktopLaunchResult,
-} from "@openclaw/gateway-protocol";
-import type { ControlUiFocusBuildTarget } from "@openclaw/session-url-contract";
+} from "@carapace/gateway-protocol";
+import type { ControlUiFocusBuildTarget } from "@carapace/session-url-contract";
 import { html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import { t } from "../../i18n/index.ts";
 import { registerDesktopEnglish } from "../../i18n/locales/en-desktop.ts";
 import { formatUiError, formatUiExternalText } from "../../lib/format-error.ts";
-import { OpenClawLitElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../../lit/carapace-element.ts";
 import { DockLayoutController } from "../dock-layout-controller.ts";
 import {
   DESKTOP_PANEL_TOGGLE_EVENT,
@@ -47,8 +47,8 @@ import { desktopSourceForEnvironment } from "./desktop-source.ts";
 
 registerDesktopEnglish();
 
-/** `<openclaw-desktop-panel>` — dockable RFB access to Gateway desktop sources. */
-class OpenClawDesktopPanel extends OpenClawLitElement {
+/** `<carapace-desktop-panel>` — dockable RFB access to Gateway desktop sources. */
+class CarapaceDesktopPanel extends CarapaceLitElement {
   @property({ attribute: false }) client: GatewayBrowserClient | null = null;
   @property({ type: Boolean }) available = false;
   @property({ type: Boolean }) suppressed = false;
@@ -723,12 +723,12 @@ class OpenClawDesktopPanel extends OpenClawLitElement {
   }
 }
 
-if (!customElements.get("openclaw-desktop-panel")) {
-  customElements.define("openclaw-desktop-panel", OpenClawDesktopPanel);
+if (!customElements.get("carapace-desktop-panel")) {
+  customElements.define("carapace-desktop-panel", CarapaceDesktopPanel);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-desktop-panel": OpenClawDesktopPanel;
+    "carapace-desktop-panel": CarapaceDesktopPanel;
   }
 }

@@ -10,10 +10,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI Memory defaults mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -120,7 +120,7 @@ suite.define(() => {
 
         const engineRow = settingsRow(page, "Memory engine");
         const frequencyRow = settingsRow(page, "Dreaming frequency");
-        await expect.poll(() => engineRow.textContent()).toContain("Default: OpenClaw Memory");
+        await expect.poll(() => engineRow.textContent()).toContain("Default: Carapace Memory");
         await expect.poll(() => frequencyRow.textContent()).toContain("Default: 0 3 * * *");
         await expect.poll(() => frequencyRow.getByRole("textbox").inputValue()).toBe("0 6 * * *");
 
@@ -138,7 +138,7 @@ suite.define(() => {
           true,
         );
         await expect
-          .poll(() => page.locator("openclaw-settings-save-indicator").textContent())
+          .poll(() => page.locator("carapace-settings-save-indicator").textContent())
           .toContain("Saved");
 
         await page.reload();
@@ -146,7 +146,7 @@ suite.define(() => {
         const reloadedFrequencyRow = settingsRow(page, "Dreaming frequency");
         await expect
           .poll(() => reloadedEngineRow.textContent())
-          .toContain("Default: OpenClaw Memory");
+          .toContain("Default: Carapace Memory");
         await expect
           .poll(() => reloadedFrequencyRow.textContent())
           .toContain("Using default: 0 3 * * *");

@@ -1,26 +1,26 @@
 /**
- * Voice call response generator - uses the embedded OpenClaw agent for tool support.
+ * Voice call response generator - uses the embedded Carapace agent for tool support.
  * Routes voice responses through the same agent infrastructure as messaging.
  */
 
 import crypto from "node:crypto";
-import { resolveDefaultModelForAgent } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveDefaultModelForAgent } from "carapace/plugin-sdk/agent-runtime";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   applyModelOverrideWithAuthProfileCompatibility,
   ModelSelectionLockedError,
   resolvePersistedSessionRuntimeId,
-} from "openclaw/plugin-sdk/model-session-runtime";
-import { isValidAgentHarnessSessionStoreEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/model-session-runtime";
+import { isValidAgentHarnessSessionStoreEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
   isRecord,
   filterStringEntries,
   normalizeLowercaseStringOrEmpty,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
-import type { OpenClawPluginApi } from "../api.js";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
+import type { CarapacePluginApi } from "../api.js";
 import { resolveVoiceCallSessionKey, type VoiceCallConfig } from "./config.js";
 import { resolveCallAgentId } from "./resolve-call-agent-id.js";
 import { resolveVoiceResponseModel } from "./response-model.js";
@@ -28,10 +28,10 @@ import { resolveVoiceResponseModel } from "./response-model.js";
 type VoiceResponseParams = {
   /** Voice call config */
   voiceConfig: VoiceCallConfig;
-  /** Core OpenClaw config */
-  coreConfig: OpenClawConfig;
+  /** Core Carapace config */
+  coreConfig: CarapaceConfig;
   /** Injected host agent runtime */
-  agentRuntime: OpenClawPluginApi["runtime"]["agent"];
+  agentRuntime: CarapacePluginApi["runtime"]["agent"];
   /** Call ID for session tracking */
   callId: string;
   /** Persisted call session key */
@@ -77,7 +77,7 @@ function readExplicitToolsAllow(value: unknown): string[] | undefined {
 }
 
 function resolveVoiceAgentToolsAllow(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string,
 ): string[] | undefined {
   return readExplicitToolsAllow(resolveAgentConfig(config, agentId)?.tools);
@@ -300,7 +300,7 @@ function resolveVoiceSandboxSessionKey(agentId: string, sessionKey: string): str
 }
 
 /**
- * Generate a voice response using the embedded OpenClaw agent with full tool support.
+ * Generate a voice response using the embedded Carapace agent with full tool support.
  * Uses the same agent infrastructure as messaging for consistent behavior.
  */
 export async function generateVoiceResponse(

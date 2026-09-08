@@ -4,7 +4,7 @@ import {
   cloneConfigWithResolutionFacts,
   resolveConfigSecretRef,
 } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { materializeSecretInput } from "../secrets/resolve-secret-input-string.js";
 import {
   GatewaySecretRefUnavailableError,
@@ -27,7 +27,7 @@ import {
 } from "./secret-input-paths.js";
 
 type GatewayCredentialSecretInputOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   explicitAuth?: ExplicitGatewayAuth;
   urlOverride?: string;
   urlOverrideSource?: "cli" | "env";
@@ -49,7 +49,7 @@ type NormalizedGatewayCredentialSecretInputOptions = Omit<
 };
 
 async function resolveGatewaySecretInputString(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   value: unknown;
   path: string;
   env: NodeJS.ProcessEnv;
@@ -76,7 +76,7 @@ async function resolveGatewaySecretInputString(params: {
 }
 
 function hasConfiguredGatewaySecretRef(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   path: SupportedGatewaySecretInputPath,
 ): boolean {
   return Boolean(
@@ -90,7 +90,7 @@ function hasConfiguredGatewaySecretRef(
 }
 
 function resolveGatewayCredentialsFromConfigOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   options: NormalizedGatewayCredentialSecretInputOptions;
 }) {
@@ -133,7 +133,7 @@ function localAuthModeAllowsGatewaySecretInputPath(params: {
 function canGatewaySecretInputPathWin(params: {
   options: NormalizedGatewayCredentialSecretInputOptions;
   env: NodeJS.ProcessEnv;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: SupportedGatewaySecretInputPath;
 }): boolean {
   if (!hasConfiguredGatewaySecretRef(params.config, params.path)) {
@@ -150,7 +150,7 @@ function canGatewaySecretInputPathWin(params: {
   ) {
     return false;
   }
-  const sentinel = `__OPENCLAW_GATEWAY_SECRET_REF_PROBE_${params.path.replaceAll(".", "_")}__`;
+  const sentinel = `__CARAPACE_GATEWAY_SECRET_REF_PROBE_${params.path.replaceAll(".", "_")}__`;
   const probeConfig = cloneConfigWithResolutionFacts(params.config);
   for (const candidatePath of ALL_GATEWAY_SECRET_INPUT_PATHS) {
     if (!hasConfiguredGatewaySecretRef(probeConfig, candidatePath)) {
@@ -208,7 +208,7 @@ export function gatewaySecretInputPathCanWin(
 }
 
 async function resolveConfiguredGatewaySecretInput(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: SupportedGatewaySecretInputPath;
   env: NodeJS.ProcessEnv;
 }): Promise<string | undefined> {
@@ -223,8 +223,8 @@ async function resolveConfiguredGatewaySecretInput(params: {
 async function resolvePreferredGatewaySecretInputs(params: {
   options: NormalizedGatewayCredentialSecretInputOptions;
   env: NodeJS.ProcessEnv;
-  config: OpenClawConfig;
-}): Promise<OpenClawConfig> {
+  config: CarapaceConfig;
+}): Promise<CarapaceConfig> {
   let nextConfig = params.config;
   for (const path of ALL_GATEWAY_SECRET_INPUT_PATHS) {
     if (

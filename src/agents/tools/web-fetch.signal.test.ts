@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import type { WebFetchProviderToolDefinition } from "../../plugin-sdk/provider-web-fetch.js";

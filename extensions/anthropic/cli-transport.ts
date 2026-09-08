@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import type { CliBackendExecuteContext } from "openclaw/plugin-sdk/cli-backend";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { signalProcessTree } from "openclaw/plugin-sdk/process-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CliBackendExecuteContext } from "carapace/plugin-sdk/cli-backend";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { signalProcessTree } from "carapace/plugin-sdk/process-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { createClaudeCliProcessOwner, type ClaudeCliSecretInput } from "./cli-process.js";
 
 // Match the host's per-record JSONL budget, including large image/tool records.
@@ -168,7 +168,7 @@ export function createClaudeCliTransport(params: {
         response = () => ({
           subtype: "error",
           request_id: id,
-          error: "OpenClaw could not handle this Claude control request.",
+          error: "Carapace could not handle this Claude control request.",
         });
       }
       if (!closed) {

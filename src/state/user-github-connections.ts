@@ -18,13 +18,13 @@ import {
   githubOAuthDeviceFields,
   validGitHubDeviceTiming,
 } from "../shared/github-oauth-values.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB } from "./openclaw-state-db.generated.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB } from "./carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 import { selectResolvedUserProfileById } from "./user-profiles-internal.js";
 import type { UserProfilesDatabase } from "./user-profiles-schema.js";
 
@@ -157,7 +157,7 @@ function registerTokens(tokens: z.infer<typeof tokenPair>): void {
 /** Display fallback to a tombstone is never credential ownership. */
 export function resolvePersonalGitHubOwner(
   profile: string,
-  db = openOpenClawStateDatabase().db,
+  db = openCarapaceStateDatabase().db,
 ): string | undefined {
   if (!tableExists(db, "user_profiles")) {
     return undefined;
@@ -179,9 +179,9 @@ function readConnection(db: DatabaseSync, owner: string): UserGitHubConnection |
 
 export function readUserGitHubConnection(
   owner: string,
-  database?: OpenClawStateDatabaseOptions,
+  database?: CarapaceStateDatabaseOptions,
 ): UserGitHubConnection | undefined {
-  const db = openOpenClawStateDatabase(database).db;
+  const db = openCarapaceStateDatabase(database).db;
   requireOwner(db, owner);
   return readConnection(db, owner);
 }
@@ -190,9 +190,9 @@ export function updateUserGitHubConnection(
   owner: string,
   update: (current: UserGitHubConnection | undefined) => UserGitHubConnection,
   assertCurrent: () => void,
-  database?: OpenClawStateDatabaseOptions,
+  database?: CarapaceStateDatabaseOptions,
 ): UserGitHubConnection {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       requireOwner(db, owner);
       const current = readConnection(db, owner);
@@ -216,7 +216,7 @@ export function disconnectedUserGitHubConnection(): UserGitHubConnection {
 }
 
 export function disconnectUserGitHubConnection(owner: string, assertCurrent: () => void): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       requireOwner(db, owner);
       const previous = readConnectionForReplacement(db, owner);
@@ -282,7 +282,7 @@ export function updateUserGitHubRefresh(params: {
   operationId: string;
   update: (selection: UserGitHubConnected) => UserGitHubConnected;
 }): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const owner = resolvePersonalGitHubOwner(params.owner, db);
       if (!owner) {
@@ -313,7 +313,7 @@ export function listUserGitHubConnections(): Array<{
   owner: string;
   connection: UserGitHubConnection;
 }> {
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   if (!tableExists(db, "secret_store_entries") || !tableExists(db, "user_profiles")) {
     return [];
   }

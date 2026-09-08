@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runNodeScript } from "../../../test/helpers/run-node-script.js";
 import { createWarnLogCapture } from "../../logging/test-helpers/warn-log-capture.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { requireGit } from "./git.js";
 import { findLiveRegistryWorktreeByPath, getRegistryWorktree } from "./registry.js";
 import { IDLE_GC_MS, ManagedWorktreeService, SNAPSHOT_RETENTION_MS } from "./service.js";
@@ -64,23 +64,23 @@ describe("ManagedWorktreeService garbage collection", () => {
   ) => materializeDownstreamFixture(name, { ownerKind, ownerId });
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worktree-gc-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worktree-gc-"));
     repo = await initializeRepository(root);
     stateDir = path.join(root, "state");
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     now = 1_700_000_000_000;
     service = new ManagedWorktreeService({ env, now: () => now });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
   it("exempts manual worktrees and garbage collects idle run-owned worktrees", async () => {
     const manual = await materializeDownstreamFixture("manual-idle");
     const created = await materializeRunOwnedFixture("idle-dead", "workboard");
-    await git(repo, "worktree", "lock", "--reason", "openclaw pid=999999", created.path);
+    await git(repo, "worktree", "lock", "--reason", "carapace pid=999999", created.path);
     now += IDLE_GC_MS + 1;
 
     const result = await service.gc();
@@ -150,7 +150,7 @@ describe("ManagedWorktreeService garbage collection", () => {
     expect(await git(created.path, "ls-files", "--others", "--exclude-standard")).toBe("");
     now += IDLE_GC_MS + 1;
 
-    const warnLogs = createWarnLogCapture("openclaw-worktree-gc-nested-linked");
+    const warnLogs = createWarnLogCapture("carapace-worktree-gc-nested-linked");
     try {
       expect((await service.gc()).removed).toEqual([]);
       expect((await service.gc()).removed).toEqual([]);
@@ -187,7 +187,7 @@ describe("ManagedWorktreeService garbage collection", () => {
     expect(await git(created.path, "ls-files", "--others", "--exclude-standard")).toBe("");
     now += IDLE_GC_MS + 1;
 
-    const warnLogs = createWarnLogCapture("openclaw-worktree-gc-nested-foreign");
+    const warnLogs = createWarnLogCapture("carapace-worktree-gc-nested-foreign");
     try {
       expect((await service.gc()).removed).toEqual([]);
       expect((await service.gc()).removed).toEqual([]);
@@ -267,7 +267,7 @@ describe("ManagedWorktreeService garbage collection", () => {
     await fs.writeFile(path.join(nested, "local.txt"), "visible nested state\n");
     now += IDLE_GC_MS + 1;
 
-    const warnLogs = createWarnLogCapture("openclaw-worktree-gc-nested-visible");
+    const warnLogs = createWarnLogCapture("carapace-worktree-gc-nested-visible");
     try {
       expect((await service.gc()).removed).toEqual([removable.id]);
       expect(await warnLogs.findText(`idle cleanup failed for ${nestedRecord.id}`)).toBeUndefined();
@@ -346,7 +346,7 @@ describe("ManagedWorktreeService garbage collection", () => {
     const removable = await materializeRunOwnedFixture("limit-removable", "workboard");
     await fs.writeFile(path.join(removable.path, "blob.bin"), Buffer.alloc(100_000));
 
-    const warnLogs = createWarnLogCapture("openclaw-worktree-gc-nested-limit");
+    const warnLogs = createWarnLogCapture("carapace-worktree-gc-nested-limit");
     try {
       expect((await service.gc({ limits })).removed).toEqual([removable.id]);
       expect(
@@ -480,7 +480,7 @@ describe("ManagedWorktreeService garbage collection", () => {
     const manual = await materializeDownstreamFixture("archived-manual", {
       ownerId: "agent:main:archived",
     });
-    await git(repo, "worktree", "lock", "--reason", `openclaw pid=${process.pid}`, busy.path);
+    await git(repo, "worktree", "lock", "--reason", `carapace pid=${process.pid}`, busy.path);
     await fs.writeFile(path.join(retired.path, "uncommitted.txt"), "archived work\n");
     const result = await service.gc({ shouldRemoveOwner: () => true });
     expect(result.removed).toEqual([retired.id]);

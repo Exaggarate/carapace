@@ -1,5 +1,5 @@
 /** Projects the canonical conversation tool policy into raw native MCP identities. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { BundleMcpConfig } from "../plugins/bundle-mcp.js";
 import { getPluginToolMeta } from "../plugins/tool-metadata.js";
 import { buildBundleMcpToolsFromCatalog } from "./agent-bundle-mcp-materialize.js";
@@ -47,7 +47,7 @@ function buildPolicyProjectionTools(catalog: McpToolCatalog) {
 
 export async function prepareNativeMcpPolicy(params: {
   runtime: SessionMcpRuntime;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   capabilityProfile: ResolvedConversationCapabilityProfile;
   runtimeToolsAllow?: string[];
@@ -81,7 +81,7 @@ export async function prepareNativeMcpPolicy(params: {
       deniedTools: [],
     });
     const allowed =
-      !mcp.excludedFromOpenClawCatalog &&
+      !mcp.excludedFromCarapaceCatalog &&
       !mcp.deniedBySession &&
       effectiveAllowedNames.has(tool.name);
     (allowed ? server.allowedTools : server.deniedTools).push(mcp.toolName);

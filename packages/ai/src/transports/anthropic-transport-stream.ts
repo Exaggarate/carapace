@@ -4,14 +4,14 @@ import type {
   Model,
   SimpleStreamOptions,
   StreamFn,
-} from "@openclaw/llm-core";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+} from "@carapace/llm-core";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 /**
  * Native Anthropic Messages streaming transport.
- * Converts OpenClaw contexts/tools into Anthropic payloads, streams SSE events
+ * Converts Carapace contexts/tools into Anthropic payloads, streams SSE events
  * back into runtime output blocks, and applies provider request policy.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { getAiTransportHost } from "../host.js";
 import type { AnthropicOptions } from "../provider-options.js";

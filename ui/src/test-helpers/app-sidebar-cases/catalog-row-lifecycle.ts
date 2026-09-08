@@ -92,7 +92,7 @@ describe("AppSidebar catalog row lifecycle", () => {
       `[data-session-key="${adoptedKey}"] [data-session-menu]`,
     );
     const popup = sidebar.querySelector<HTMLElement & { trigger?: HTMLElement }>(
-      "openclaw-catalog-session-menu",
+      "carapace-catalog-session-menu",
     );
     expect(adoptedMenu?.getAttribute("aria-expanded")).toBe("true");
     expect(popup?.trigger).toBe(adoptedMenu);

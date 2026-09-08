@@ -1,14 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ChannelRuntimeSurface } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelRuntimeSurface } from "carapace/plugin-sdk/channel-contract";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
 // Slack helper module supports monitor helpers behavior.
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { vi } from "vitest";
 import type { Mock } from "vitest";
 import { setSlackRuntime } from "./runtime.js";
@@ -26,7 +26,7 @@ type SlackProviderMonitor = (params: {
 }) => Promise<unknown>;
 type SlackStartupAuthClientFactory = typeof import("./client.js").createSlackStartupAuthClient;
 
-const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "openclawIngressLifecycle";
+const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "carapaceIngressLifecycle";
 
 type SlackRunOnceOptions = {
   botToken?: string;
@@ -312,7 +312,7 @@ export function resetSlackTestState(config: Record<string, unknown> = defaultSla
   // message keys to the state DB, and fixture ts values repeat across tests,
   // so a carried-over DB would dedupe unrelated test messages. realpath keeps
   // macOS /var vs /private/var symlinks out of resolver assertions.
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   // Clear worker-global Bolt handler registrations from previous test files:
   // with isolate=false a stale "message" handler makes waitForSlackEvent
   // return before THIS test's provider registers, dispatching through the old
@@ -322,10 +322,10 @@ export function resetSlackTestState(config: Record<string, unknown> = defaultSla
     fs.rmSync(lastSlackTestStateDir, { recursive: true, force: true });
   }
   const stateDir = fs.realpathSync(
-    fs.mkdtempSync(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-slack-monitor-state-")),
+    fs.mkdtempSync(path.join(resolvePreferredCarapaceTmpDir(), "carapace-slack-monitor-state-")),
   );
   lastSlackTestStateDir = stateDir;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  process.env.CARAPACE_STATE_DIR = stateDir;
   setSlackRuntime({
     state: {
       openChannelIngressQueue: (
@@ -394,13 +394,13 @@ vi.mock("./monitor/config.runtime.js", async () => {
     readSessionUpdatedAt: vi.fn(() => undefined),
     getSessionEntry: vi.fn(() => undefined),
     recordSessionMetaFromInbound: vi.fn().mockResolvedValue(undefined),
-    resolveStorePath: vi.fn(() => "/tmp/openclaw-sessions.json"),
+    resolveStorePath: vi.fn(() => "/tmp/carapace-sessions.json"),
     updateLastRoute: (...args: unknown[]) => slackTestState.updateLastRouteMock(...args),
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   type DispatchParams = Parameters<typeof actual.dispatchChannelInboundTurn>[0];
   type ReplyResolver = NonNullable<DispatchParams["replyResolver"]>;
   const replyResolver: ReplyResolver = (...args) =>

@@ -118,7 +118,7 @@ describe("inline compaction motion", () => {
       }),
       container,
     );
-    await container.querySelector("openclaw-tooltip")!.updateComplete;
+    await container.querySelector("carapace-tooltip")!.updateComplete;
     const indicator = container.querySelector<HTMLElement>(".compaction-indicator")!;
     const icon = indicator.querySelector("svg")!;
     expect(getComputedStyle(indicator).borderTopWidth).toBe("1px");

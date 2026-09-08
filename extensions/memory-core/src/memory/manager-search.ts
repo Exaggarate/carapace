@@ -1,22 +1,22 @@
 // Memory Core plugin module implements manager search behavior.
 import type { DatabaseSync } from "node:sqlite";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   cosineSimilarity,
   parseEmbedding,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   normalizeStringEntries,
   normalizeStringEntriesLower,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { escapeRegExp } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { escapeRegExp } from "carapace/plugin-sdk/text-utility-runtime";
 import type { VectorKnnRequest, VectorKnnResponse } from "./manager-search-knn.js";
 
 const FTS_QUERY_TOKEN_RE = /[\p{L}\p{N}_]+/gu;
-const EXACT_PATH_SPECIFICITY_SQL_FUNCTION = "openclaw_memory_exact_path_specificity";
-const NORMALIZED_CONTAINS_SQL_FUNCTION = "openclaw_memory_normalized_contains";
+const EXACT_PATH_SPECIFICITY_SQL_FUNCTION = "carapace_memory_exact_path_specificity";
+const NORMALIZED_CONTAINS_SQL_FUNCTION = "carapace_memory_normalized_contains";
 
 // Scan fallback vector rows in bounded batches so large chunk tables (no usable
 // vec0 index) cannot pin the main thread for multi-second windows and starve

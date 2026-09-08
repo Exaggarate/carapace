@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 export type A2aPeerConfig = {
   token: string;
@@ -16,8 +16,8 @@ export type A2aChannelConfig = {
   peers?: Record<string, A2aPeerConfig>;
 };
 
-export type A2aCoreConfig = OpenClawConfig & {
-  channels?: OpenClawConfig["channels"] & {
+export type A2aCoreConfig = CarapaceConfig & {
+  channels?: CarapaceConfig["channels"] & {
     a2a?: A2aChannelConfig;
   };
 };

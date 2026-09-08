@@ -3,7 +3,7 @@ import codexPluginPackage from "../package.json" with { type: "json" };
 import { defineCodexBuildState } from "./build-state.js";
 
 const globalState = globalThis as Record<symbol, unknown>;
-const stateName = "openclaw.codexBuildStateTest";
+const stateName = "carapace.codexBuildStateTest";
 const currentKey = Symbol.for(`${stateName}@${codexPluginPackage.version}`);
 const olderKey = Symbol.for(`${stateName}@2026.7.1`);
 
@@ -44,10 +44,10 @@ describe("defineCodexBuildState", () => {
     // Another copy of this build (dist bundle beside the src bundle) already
     // wrote its record under the versioned key; this copy must find that one.
     const fromOtherCopy = { items: new Set<string>(["shared"]) };
-    globalState[Symbol.for(`openclaw.codexBuildStateTest@${codexPluginPackage.version}`)] =
+    globalState[Symbol.for(`carapace.codexBuildStateTest@${codexPluginPackage.version}`)] =
       fromOtherCopy;
 
-    const getState = defineCodexBuildState("openclaw.codexBuildStateTest", () => ({
+    const getState = defineCodexBuildState("carapace.codexBuildStateTest", () => ({
       items: new Set<string>(),
     }));
 
@@ -57,9 +57,9 @@ describe("defineCodexBuildState", () => {
   it("never hands this build a record from another key scheme, even with matching field names", () => {
     // The shipped 2026.8.1 build keyed by bare name; its record may carry the
     // same field names with a different entry contract.
-    globalState[Symbol.for("openclaw.codexBuildStateTest")] = { items: ["stale"] };
+    globalState[Symbol.for("carapace.codexBuildStateTest")] = { items: ["stale"] };
 
-    const getState = defineCodexBuildState("openclaw.codexBuildStateTest", () => ({
+    const getState = defineCodexBuildState("carapace.codexBuildStateTest", () => ({
       items: new Set<string>(),
     }));
 

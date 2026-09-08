@@ -1,6 +1,6 @@
 // Builds plugin activation context from config, discovery, and manifests.
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withBundledPluginEnablementCompat } from "./bundled-compat.js";
 import {
   createPluginActivationSource,
@@ -13,17 +13,17 @@ import type { PluginDiscoveryResult } from "./discovery.js";
 import type { PluginManifestRegistry } from "./manifest-registry.js";
 
 type PluginActivationInputs = {
-  rawConfig?: OpenClawConfig;
-  config?: OpenClawConfig;
+  rawConfig?: CarapaceConfig;
+  config?: CarapaceConfig;
   normalized: NormalizedPluginsConfig;
-  activationSourceConfig?: OpenClawConfig;
+  activationSourceConfig?: CarapaceConfig;
   activationSource: PluginActivationConfigSource;
   autoEnabledReasons: Record<string, string[]>;
 };
 
 type PluginActivationParams = {
-  rawConfig?: OpenClawConfig;
-  resolvedConfig?: OpenClawConfig;
+  rawConfig?: CarapaceConfig;
+  resolvedConfig?: CarapaceConfig;
   autoEnabledReasons?: Record<string, string[]>;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
@@ -36,7 +36,7 @@ type BundledCompatActivationParams = PluginActivationParams & {
   activation?: "defaults" | "selected";
   onlyPluginIds?: readonly string[];
   resolveBundledPluginIds: (params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
     onlyPluginIds?: readonly string[];
@@ -45,11 +45,11 @@ type BundledCompatActivationParams = PluginActivationParams & {
 };
 
 export function withActivatedPluginIds(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   pluginIds: readonly string[];
   overrideGlobalDisable?: boolean;
   overrideExplicitDisable?: boolean;
-}): OpenClawConfig | undefined {
+}): CarapaceConfig | undefined {
   if (params.pluginIds.length === 0) {
     return params.config;
   }
@@ -89,7 +89,7 @@ export function withActivatedPluginIds(params: {
 }
 
 function applyPluginAutoEnableForActivation(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
   discovery?: PluginDiscoveryResult;

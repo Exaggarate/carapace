@@ -1,29 +1,29 @@
-import type { WorkboardWorkspace, WorkboardWorkspaceAccess } from "@openclaw/workboard-contract";
+import type { WorkboardWorkspace, WorkboardWorkspaceAccess } from "@carapace/workboard-contract";
 import {
   listAgentIds,
   resolveAgentConfig,
   resolveAgentWorkspaceDir,
   resolveDefaultAgentId,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 // Workboard workspace access follows the caller's canonical filesystem boundary.
 import {
   canonicalPathFromExistingAncestor,
   isPathInside,
-} from "openclaw/plugin-sdk/file-access-runtime";
+} from "carapace/plugin-sdk/file-access-runtime";
 import type {
   AnyAgentTool,
-  OpenClawPluginApi,
-  OpenClawPluginToolContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+  CarapacePluginApi,
+  CarapacePluginToolContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
-export type { WorkboardWorkspaceAccess } from "@openclaw/workboard-contract";
+export type { WorkboardWorkspaceAccess } from "@carapace/workboard-contract";
 
-type WorkboardConfig = NonNullable<OpenClawPluginToolContext["config"]>;
+type WorkboardConfig = NonNullable<CarapacePluginToolContext["config"]>;
 type ResolveSandboxWorkspaceAuthority =
-  OpenClawPluginApi["runtime"]["sandbox"]["resolveWorkspaceAuthority"];
+  CarapacePluginApi["runtime"]["sandbox"]["resolveWorkspaceAuthority"];
 type PrepareSandboxWorkspaceAuthority =
-  OpenClawPluginApi["runtime"]["sandbox"]["prepareWorkspaceAuthority"];
+  CarapacePluginApi["runtime"]["sandbox"]["prepareWorkspaceAuthority"];
 
 export const WORKBOARD_TOOL_NAMES = [
   "workboard_list",
@@ -172,7 +172,7 @@ export function resolveCommandWorkboardWorkspaceAccess(params: {
 }
 
 function resolveToolWorkboardWorkspaceAccess(
-  context: OpenClawPluginToolContext | undefined,
+  context: CarapacePluginToolContext | undefined,
   resolveSandboxWorkspaceAuthority?: ResolveSandboxWorkspaceAuthority,
 ): WorkboardWorkspaceAccess {
   if (!context?.sandboxed && context?.fsPolicy?.workspaceOnly !== true) {
@@ -388,7 +388,7 @@ export async function assertWorkboardWorkspaceSourceAccess(
 
 export function guardWorkboardToolsForWorkspaceAccess(
   tools: AnyAgentTool[],
-  context: OpenClawPluginToolContext | undefined,
+  context: CarapacePluginToolContext | undefined,
   resolveSandboxWorkspaceAuthority?: ResolveSandboxWorkspaceAuthority,
 ): AnyAgentTool[] {
   const workspaceAccess = resolveToolWorkboardWorkspaceAccess(

@@ -1,5 +1,5 @@
 // Shared parser for CLI flags that select a local Gateway TCP port.
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import type { GatewayRpcOpts } from "./gateway-rpc.types.js";
 
 const MAX_TCP_PORT = 65_535;

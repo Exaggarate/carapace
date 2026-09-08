@@ -1,7 +1,7 @@
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { NativeCommandSpec } from "openclaw/plugin-sdk/native-command-registry";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { NativeCommandSpec } from "carapace/plugin-sdk/native-command-registry";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { describe, expect, it, vi } from "vitest";
 import { DISCORD_VOICE_COMMAND_SPEC } from "../voice/command.js";
 import { createDiscordProviderInteractionSurface } from "./provider.interactions.js";
@@ -26,7 +26,7 @@ function createInteractionHarness(params: {
       ({ name: options.command.name }) as ReturnType<CreateNativeCommand>,
   );
   const surface = createDiscordProviderInteractionSurface({
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     discordConfig: {
       agentComponents: { enabled: false },
       execApprovals: { enabled: false },

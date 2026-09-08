@@ -4,7 +4,7 @@ import {
   withOwnedSessionTranscriptWrites,
 } from "../config/sessions/transcript-write-context.js";
 import { appendExactAssistantMessageToSessionTranscript } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   hasAssistantDisplayableNonTextContent,
   isAssistantTextContentType,
@@ -23,7 +23,7 @@ type AssistantMessage = Extract<AgentMessage, { role: "assistant" }>;
 type TranscriptTarget = NonNullable<ReturnType<SessionManager["getSessionTarget"]>>;
 
 /** Holds attempt failures until the logical run decides whether recovery succeeded. */
-export function createAssistantErrorTranscript(params: { runId: string; config?: OpenClawConfig }) {
+export function createAssistantErrorTranscript(params: { runId: string; config?: CarapaceConfig }) {
   let pending:
     | { message: AssistantMessage; target: TranscriptTarget; assertActive: () => void }
     | undefined;
@@ -44,7 +44,7 @@ export function createAssistantErrorTranscript(params: { runId: string; config?:
         !hasAssistantDisplayableNonTextContent(message) &&
         !hasAssistantDisplayableNonTextContent({ content: displayContent }) &&
         !hasPersistedMedia(message) &&
-        !message.openclawDelivery?.mediaUrls?.length
+        !message.carapaceDelivery?.mediaUrls?.length
       ) {
         return undefined;
       }

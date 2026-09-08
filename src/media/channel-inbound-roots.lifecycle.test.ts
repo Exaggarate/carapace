@@ -21,8 +21,8 @@ describe("channel media artifact cache ownership", () => {
     "isolates an initially %s media artifact between operations while using current config",
     (initial) => {
       const channelId = `media-owner-${initial}`;
-      const firstRoot = tempDirs.make("openclaw-media-owner-first-");
-      const secondRoot = tempDirs.make("openclaw-media-owner-second-");
+      const firstRoot = tempDirs.make("carapace-media-owner-first-");
+      const secondRoot = tempDirs.make("carapace-media-owner-second-");
       const firstCache = createPluginCache();
       const secondCache = createPluginCache();
       caches.push(firstCache, secondCache);
@@ -47,9 +47,9 @@ describe("channel media artifact cache ownership", () => {
       ) =>
         withEnv(
           {
-            OPENCLAW_BUNDLED_PLUGINS_DIR: rootDir,
-            OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+            CARAPACE_BUNDLED_PLUGINS_DIR: rootDir,
+            CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
           },
           () =>
             withPluginCache(cache, () =>

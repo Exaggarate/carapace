@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { redactConfigObject } from "../../config/redact-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
-let configFingerprints = new WeakMap<OpenClawConfig, string>();
+let configFingerprints = new WeakMap<CarapaceConfig, string>();
 
-export function fingerprintSkillSnapshotConfig(config: OpenClawConfig): string {
+export function fingerprintSkillSnapshotConfig(config: CarapaceConfig): string {
   const cached = configFingerprints.get(config);
   if (cached) {
     return cached;

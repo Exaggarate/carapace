@@ -29,11 +29,11 @@ const ROOMY_HOST = {
 function makeEnv(overrides: Record<string, string | undefined> = {}) {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    OPENCLAW_LOCAL_CHECK: "1",
+    CARAPACE_LOCAL_CHECK: "1",
     ...overrides,
   };
-  if (!Object.hasOwn(overrides, "OPENCLAW_LOCAL_CHECK_MODE")) {
-    delete env.OPENCLAW_LOCAL_CHECK_MODE;
+  if (!Object.hasOwn(overrides, "CARAPACE_LOCAL_CHECK_MODE")) {
+    delete env.CARAPACE_LOCAL_CHECK_MODE;
   }
   if (!Object.hasOwn(overrides, "GITHUB_ACTIONS")) {
     delete env.GITHUB_ACTIONS;
@@ -43,8 +43,8 @@ function makeEnv(overrides: Record<string, string | undefined> = {}) {
 
 describe("local-check-runtime", () => {
   it("resolves repo tools from the primary checkout for dependency-less worktrees", () => {
-    const primaryRoot = createTempDir("openclaw-primary-checkout-");
-    const cwd = path.join(primaryRoot, ".codex", "worktrees", "task", "openclaw");
+    const primaryRoot = createTempDir("carapace-primary-checkout-");
+    const cwd = path.join(primaryRoot, ".codex", "worktrees", "task", "carapace");
     const commonDir = path.join(primaryRoot, ".git");
     const localPath = path.resolve(cwd, "node_modules", ".bin", "oxlint");
     const primaryPath = path.join(primaryRoot, "node_modules", ".bin", "oxlint");
@@ -71,7 +71,7 @@ describe("local-check-runtime", () => {
   ])(
     "links relocated $platform declaration output to its explicit package dependencies",
     ({ platform, linkType }) => {
-      const primaryRoot = createTempDir("openclaw-primary-toolchain-");
+      const primaryRoot = createTempDir("carapace-primary-toolchain-");
       const cwd = path.join(primaryRoot, ".artifacts", "declarations");
       const primaryTsgo = path.join(primaryRoot, "node_modules", ".bin", "tsgo");
       const primaryNodeModules = path.join(primaryRoot, "node_modules");
@@ -98,7 +98,7 @@ describe("local-check-runtime", () => {
   );
 
   it("leaves existing worktree node_modules directories locally owned", () => {
-    const primaryRoot = createTempDir("openclaw-primary-toolchain-");
+    const primaryRoot = createTempDir("carapace-primary-toolchain-");
     const primaryTsgo = path.join(primaryRoot, "node_modules", ".bin", "tsgo");
     const cwd = path.join(primaryRoot, "worktree");
     const localNodeModules = path.join(cwd, "node_modules");
@@ -112,12 +112,12 @@ describe("local-check-runtime", () => {
   });
 
   it("reenables local check policy for local wrapper entrypoints", () => {
-    expect(resolveLocalCheckEnv({ OPENCLAW_LOCAL_CHECK: "0", PATH: "/usr/bin" })).toEqual({
-      OPENCLAW_LOCAL_CHECK: "1",
+    expect(resolveLocalCheckEnv({ CARAPACE_LOCAL_CHECK: "0", PATH: "/usr/bin" })).toEqual({
+      CARAPACE_LOCAL_CHECK: "1",
       PATH: "/usr/bin",
     });
-    expect(resolveLocalCheckEnv({ OPENCLAW_LOCAL_CHECK: "false", PATH: "/usr/bin" })).toEqual({
-      OPENCLAW_LOCAL_CHECK: "1",
+    expect(resolveLocalCheckEnv({ CARAPACE_LOCAL_CHECK: "false", PATH: "/usr/bin" })).toEqual({
+      CARAPACE_LOCAL_CHECK: "1",
       PATH: "/usr/bin",
     });
   });
@@ -126,12 +126,12 @@ describe("local-check-runtime", () => {
     expect(
       resolveLocalCheckEnv({
         CI: "true",
-        OPENCLAW_LOCAL_CHECK: "0",
+        CARAPACE_LOCAL_CHECK: "0",
         PATH: "/usr/bin",
       }),
     ).toEqual({
       CI: "true",
-      OPENCLAW_LOCAL_CHECK: "0",
+      CARAPACE_LOCAL_CHECK: "0",
       PATH: "/usr/bin",
     });
   });
@@ -155,7 +155,7 @@ describe("local-check-runtime", () => {
   });
 
   it("skips declaration transforms for no-emit tsgo checks", () => {
-    const { args } = applyLocalTsgoPolicy([], makeEnv({ OPENCLAW_LOCAL_CHECK: "0" }), ROOMY_HOST);
+    const { args } = applyLocalTsgoPolicy([], makeEnv({ CARAPACE_LOCAL_CHECK: "0" }), ROOMY_HOST);
 
     expect(args).toEqual(["--declaration", "false"]);
   });
@@ -167,7 +167,7 @@ describe("local-check-runtime", () => {
         GOMAXPROCS: "3",
         GOGC: "80",
         GOMEMLIMIT: "5GiB",
-        OPENCLAW_TSGO_PPROF_DIR: "/tmp/profile",
+        CARAPACE_TSGO_PPROF_DIR: "/tmp/profile",
       }),
       CONSTRAINED_HOST,
     );
@@ -187,7 +187,7 @@ describe("local-check-runtime", () => {
   });
 
   it("keeps explicit tsgo declaration flags intact", () => {
-    const env = makeEnv({ OPENCLAW_LOCAL_CHECK_MODE: "full" });
+    const env = makeEnv({ CARAPACE_LOCAL_CHECK_MODE: "full" });
     const longFlag = applyLocalTsgoPolicy(["--declaration"], env, ROOMY_HOST);
     const shortFlag = applyLocalTsgoPolicy(["-d"], env, ROOMY_HOST);
 
@@ -214,8 +214,8 @@ describe("local-check-runtime", () => {
     const { args } = applyLocalTsgoPolicy(
       [],
       makeEnv({
-        OPENCLAW_LOCAL_CHECK_MODE: "full",
-        OPENCLAW_TSGO_BUILD_INFO_FILE: ".artifacts/custom/tsgo.tsbuildinfo",
+        CARAPACE_LOCAL_CHECK_MODE: "full",
+        CARAPACE_TSGO_BUILD_INFO_FILE: ".artifacts/custom/tsgo.tsbuildinfo",
       }),
       ROOMY_HOST,
     );
@@ -232,7 +232,7 @@ describe("local-check-runtime", () => {
   it("avoids incremental cache reuse for ad hoc tsgo runs", () => {
     const { args } = applyLocalTsgoPolicy(
       ["--extendedDiagnostics"],
-      makeEnv({ OPENCLAW_LOCAL_CHECK_MODE: "full" }),
+      makeEnv({ CARAPACE_LOCAL_CHECK_MODE: "full" }),
       ROOMY_HOST,
     );
 
@@ -243,7 +243,7 @@ describe("local-check-runtime", () => {
     const { args, env } = applyLocalTsgoPolicy(
       [],
       makeEnv({
-        OPENCLAW_LOCAL_CHECK_MODE: "throttled",
+        CARAPACE_LOCAL_CHECK_MODE: "throttled",
       }),
       ROOMY_HOST,
     );
@@ -264,7 +264,7 @@ describe("local-check-runtime", () => {
   });
 
   it("does not oversubscribe a single-CPU host", () => {
-    const { env } = applyLocalTsgoPolicy([], makeEnv({ OPENCLAW_LOCAL_CHECK_MODE: "throttled" }), {
+    const { env } = applyLocalTsgoPolicy([], makeEnv({ CARAPACE_LOCAL_CHECK_MODE: "throttled" }), {
       logicalCpuCount: 1,
       totalMemoryBytes: 16 * 1024 ** 3,
     });
@@ -276,7 +276,7 @@ describe("local-check-runtime", () => {
     const { args, env } = applyLocalTsgoPolicy(
       [],
       makeEnv({
-        OPENCLAW_LOCAL_CHECK_MODE: "full",
+        CARAPACE_LOCAL_CHECK_MODE: "full",
       }),
       ROOMY_HOST,
     );
@@ -355,7 +355,7 @@ describe("local-check-runtime", () => {
   ])("applies compiler memory policy for $name", ({ ci, cpus, gib, throttled }) => {
     const inputEnv = makeEnv({
       CI: ci,
-      OPENCLAW_LOCAL_CHECK: "0",
+      CARAPACE_LOCAL_CHECK: "0",
       GOMAXPROCS: "2",
       GOGC: undefined,
       GOMEMLIMIT: undefined,
@@ -380,7 +380,7 @@ describe("local-check-runtime", () => {
       makeEnv({
         CI: undefined,
         GITHUB_ACTIONS: "true",
-        OPENCLAW_LOCAL_CHECK: "0",
+        CARAPACE_LOCAL_CHECK: "0",
         GOMAXPROCS: "3",
         GOGC: "80",
         GOMEMLIMIT: "5GiB",
@@ -413,7 +413,7 @@ describe("local-check-runtime", () => {
   ])(
     "keeps prep and oxlint resource policies separate with $name",
     ({ goEnv, prepGoEnv, lintGoEnv }) => {
-      const cwd = createTempDir("openclaw-oxlint-go-limit-");
+      const cwd = createTempDir("carapace-oxlint-go-limit-");
       const binDir = path.join(cwd, "node_modules", ".bin");
       const scriptsDir = path.join(cwd, "scripts");
       const capturePath = path.join(cwd, "children.jsonl");
@@ -437,7 +437,7 @@ fs.appendFileSync(process.env.CAPTURE_PATH, JSON.stringify({ step, goEnv, args: 
       fs.chmodSync(oxlintPath, 0o755);
       const env = makeEnv({
         CAPTURE_PATH: capturePath,
-        OPENCLAW_OXLINT_SKIP_PREPARE: undefined,
+        CARAPACE_OXLINT_SKIP_PREPARE: undefined,
         ...goEnv,
       });
 
@@ -475,7 +475,7 @@ fs.appendFileSync(process.env.CAPTURE_PATH, JSON.stringify({ step, goEnv, args: 
     const { args, env } = applyLocalOxlintPolicy(
       [],
       makeEnv({
-        OPENCLAW_LOCAL_CHECK_MODE: "full",
+        CARAPACE_LOCAL_CHECK_MODE: "full",
       }),
       ROOMY_HOST,
     );
@@ -496,7 +496,7 @@ fs.appendFileSync(process.env.CAPTURE_PATH, JSON.stringify({ step, goEnv, args: 
       ["--", "src/example.ts"],
       makeEnv({
         GITHUB_ACTIONS: "true",
-        OPENCLAW_LOCAL_CHECK_MODE: "full",
+        CARAPACE_LOCAL_CHECK_MODE: "full",
       }),
       ROOMY_HOST,
     );
@@ -511,7 +511,7 @@ fs.appendFileSync(process.env.CAPTURE_PATH, JSON.stringify({ step, goEnv, args: 
         [formatArg],
         makeEnv({
           GITHUB_ACTIONS: "true",
-          OPENCLAW_LOCAL_CHECK_MODE: "full",
+          CARAPACE_LOCAL_CHECK_MODE: "full",
         }),
         ROOMY_HOST,
       );
@@ -528,7 +528,7 @@ describe("TypeScript bootstrap dependency ownership", () => {
     vi.stubEnv("PNPM_CONFIG_MODULES_DIR", undefined);
     vi.stubEnv("pnpm_config_modules_dir", undefined);
     vi.stubEnv("npm_config_modules_dir", undefined);
-    const root = fs.realpathSync(createTempDir("openclaw-toolchain-ownership-"));
+    const root = fs.realpathSync(createTempDir("carapace-toolchain-ownership-"));
     const primary = path.join(root, "primary");
     const checkout = path.join(root, "checkout");
     fs.mkdirSync(checkout);

@@ -1,5 +1,5 @@
 import type { FinishReason } from "@google/genai";
-import { appendAssistantThinking } from "@openclaw/llm-core/event-stream";
+import { appendAssistantThinking } from "@carapace/llm-core/event-stream";
 import { calculateCost } from "../model-utils.js";
 import {
   transportAbortError,

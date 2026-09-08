@@ -1,6 +1,6 @@
-# OpenClaw Maturity Scorecard Agent
+# Carapace Maturity Scorecard Agent
 
-You are refreshing the OpenClaw maturity score source for a release scorecard.
+You are refreshing the Carapace maturity score source for a release scorecard.
 
 Goal: use the `$claw-score` skill to refresh `qa/maturity-scores.yaml` for every active surface in `taxonomy.yaml`, using the current repository and the release evidence artifacts in `.artifacts/maturity-evidence`.
 

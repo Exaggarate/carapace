@@ -1,6 +1,6 @@
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import { readClaim } from "./legacy-main-session-migration-operations.js";
 import type { PhysicalStore, SessionClaim } from "./legacy-main-session-migration.contract.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
@@ -25,7 +25,7 @@ export function storeHasLegacyAgentSessionKey(params: {
   store: PhysicalStore;
   env: NodeJS.ProcessEnv;
 }): boolean {
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) =>
       executeSqliteQuerySync(
         database.db,
@@ -44,7 +44,7 @@ export function readClaimsFromStore(params: {
   store: PhysicalStore;
   env: NodeJS.ProcessEnv;
 }): { canonical: SessionClaim[]; legacy: SessionClaim[] } {
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => {
       const keys = executeSqliteQuerySync(
         database.db,

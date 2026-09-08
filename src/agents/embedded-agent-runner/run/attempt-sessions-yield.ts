@@ -1,5 +1,5 @@
 import type { AssistantMessage, AssistantMessageEventStreamLike } from "../../../llm/types.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../../shared/transcript-only-openclaw-assistant.js";
+import { isTranscriptOnlyCarapaceAssistantMessage } from "../../../shared/transcript-only-carapace-assistant.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import { buildSessionsYieldContextMessage } from "../../sessions-yield-context.js";
 import type { SessionManager } from "../../sessions/index.js";
@@ -9,7 +9,7 @@ import type { SessionManager } from "../../sessions/index.js";
 import { isRunnerAbortError } from "../abort.js";
 import { waitForEmbeddedAbortSettle } from "./attempt-subscription-cleanup.js";
 
-const SESSIONS_YIELD_INTERRUPT_CUSTOM_TYPE = "openclaw.sessions_yield_interrupt";
+const SESSIONS_YIELD_INTERRUPT_CUSTOM_TYPE = "carapace.sessions_yield_interrupt";
 
 export async function waitForSessionsYieldAbortSettle(params: {
   settlePromise: Promise<void> | null;
@@ -169,7 +169,7 @@ export function stripSessionsYieldArtifacts(activeSession: {
         entry.type === "custom" ||
         entry.type === "label" ||
         entry.type === "session_info" ||
-        (entry.type === "message" && isTranscriptOnlyOpenClawAssistantMessage(entry.message)),
+        (entry.type === "message" && isTranscriptOnlyCarapaceAssistantMessage(entry.message)),
     },
   );
   activeSession.agent.state.messages = strippedMessages;

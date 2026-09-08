@@ -16,7 +16,7 @@ import { defaultRuntime } from "../runtime.js";
 import { AGENT_HARNESS_SESSION_KEY_RESERVED_MESSAGE } from "../sessions/agent-harness-session-key.js";
 import { notifyListeners } from "../shared/listeners.js";
 import { withEnvAsync } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { EmbeddedTuiBackend as EmbeddedTuiBackendType } from "./embedded-backend.js";
 
 type EmbeddedAgentResult = {
@@ -69,7 +69,7 @@ const getSessionDefaultsMock = vi.fn(() => ({
   contextTokens: null,
 }));
 const loadCombinedSessionStoreForGatewayMock = vi.fn((_options?: unknown) => ({
-  storePath: "/tmp/openclaw-sessions.json",
+  storePath: "/tmp/carapace-sessions.json",
   store: {},
 }));
 const getRuntimeConfigMock = vi.fn(() => ({}));
@@ -100,7 +100,7 @@ const loadSessionEntryMock = vi.fn(
     cfg: {},
     agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
     canonicalKey: sessionKey,
-    storePath: "/tmp/openclaw-sessions.json",
+    storePath: "/tmp/carapace-sessions.json",
     store: {},
     entry: {},
   }),
@@ -155,7 +155,7 @@ vi.mock("../config/sessions.js", () => ({
     goal ? `Goal: ${goal.objective ?? ""}` : "No goal for this session.",
   getSessionGoal: (...args: unknown[]) => getSessionGoalMock(...args),
   resolveAgentMainSessionKey: () => "agent:main:main",
-  resolveSessionStorePathCore: () => "/tmp/openclaw-sessions.json",
+  resolveSessionStorePathCore: () => "/tmp/carapace-sessions.json",
   updateSessionGoalObjective: (...args: unknown[]) => updateSessionGoalObjectiveMock(...args),
   updateSessionGoalStatus: (...args: unknown[]) => updateSessionGoalStatusMock(...args),
   updateSessionStore: (...args: unknown[]) => updateSessionStoreMock(...args),
@@ -167,8 +167,8 @@ vi.mock("../config/sessions/session-accessor.js", () => ({
 
 vi.mock("../agents/agent-scope.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../agents/agent-scope.js")>()),
-  resolveAgentDir: (_cfg: unknown, agentId: string) => `/tmp/openclaw-agent-${agentId}/agent`,
-  resolveAgentWorkspaceDir: (_cfg: unknown, agentId: string) => `/tmp/openclaw-agent-${agentId}`,
+  resolveAgentDir: (_cfg: unknown, agentId: string) => `/tmp/carapace-agent-${agentId}/agent`,
+  resolveAgentWorkspaceDir: (_cfg: unknown, agentId: string) => `/tmp/carapace-agent-${agentId}`,
   resolveDefaultAgentId: (cfg?: {
     agents?: { list?: Array<{ id?: string; default?: boolean }> };
   }) =>
@@ -273,7 +273,7 @@ vi.mock("../gateway/session-utils.js", () => ({
     agentId: agentId ?? parseAgentSessionKey(key)?.agentId ?? "main",
     canonicalKey: key,
     storeKeys: [key],
-    storePath: "/tmp/openclaw-sessions.json",
+    storePath: "/tmp/carapace-sessions.json",
   }),
   resolveSessionModelRef: () => ({ provider: "openai", model: "gpt-5.4" }),
 }));
@@ -413,7 +413,7 @@ describe("EmbeddedTuiBackend", () => {
     listSessionsFromStoreAsyncMock.mockResolvedValue({ sessions: [] });
     loadCombinedSessionStoreForGatewayMock.mockReset();
     loadCombinedSessionStoreForGatewayMock.mockReturnValue({
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
     });
     applySessionPatchProjectionMock.mockReset();
@@ -458,7 +458,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: {},
     }));
@@ -948,7 +948,7 @@ describe("EmbeddedTuiBackend", () => {
     );
     expect(listSessionsFromStoreAsyncMock).toHaveBeenCalledWith({
       cfg: {},
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       opts: { agentId: "work", includeGlobal: true, search: "global" },
     });
@@ -982,7 +982,7 @@ describe("EmbeddedTuiBackend", () => {
   });
 
   it("rejects embedded session reads when the actual startup migration finds a legacy store", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = await state.writeText(
         "custom/sessions.json",
         JSON.stringify({
@@ -1118,7 +1118,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: { messages: { queue: { mode: "followup" } } },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: { queueDebounceMs: 0 },
     }));
@@ -1156,7 +1156,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
     });
 
     const backend = new EmbeddedTuiBackend();
@@ -1173,7 +1173,7 @@ describe("EmbeddedTuiBackend", () => {
     expect(createSessionGoalMock).toHaveBeenCalledWith({
       sessionKey: "agent:main:main",
       agentId: "main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       objective: "Ship Goal",
       actor: { type: "human" },
       fallbackEntry: {
@@ -1188,7 +1188,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "work",
       canonicalKey: "global",
-      storePath: "/tmp/openclaw-work-sessions.json",
+      storePath: "/tmp/carapace-work-sessions.json",
       entry: { sessionId: "session-work", updatedAt: embeddedEventTimestamp },
     });
 
@@ -1205,7 +1205,7 @@ describe("EmbeddedTuiBackend", () => {
     expect(loadSessionEntryMock).toHaveBeenCalledWith("global", { agentId: "work" });
     expect(getSessionGoalMock).toHaveBeenCalledWith({
       sessionKey: "global",
-      storePath: "/tmp/openclaw-work-sessions.json",
+      storePath: "/tmp/carapace-work-sessions.json",
     });
   });
 
@@ -1218,7 +1218,7 @@ describe("EmbeddedTuiBackend", () => {
         cfg,
         agentId: owner,
         canonicalKey: "global",
-        storePath: `/tmp/openclaw-${owner}-sessions.json`,
+        storePath: `/tmp/carapace-${owner}-sessions.json`,
         entry: sessionEntry,
       });
       const backend = new EmbeddedTuiBackend();
@@ -1236,7 +1236,7 @@ describe("EmbeddedTuiBackend", () => {
         sessionKey: "global",
         agentId: owner,
         sessionEntry,
-        storePath: `/tmp/openclaw-${owner}-sessions.json`,
+        storePath: `/tmp/carapace-${owner}-sessions.json`,
       });
       expect(agentCommandFromIngressMock).not.toHaveBeenCalled();
     },
@@ -1246,7 +1246,7 @@ describe("EmbeddedTuiBackend", () => {
     "records local goal mutations with the stored owner: $input.sessionKey",
     async ({ input, owner }) => {
       const entry = { sessionId: `session-${owner}`, updatedAt: embeddedEventTimestamp };
-      const storePath = `/tmp/openclaw-${owner}-sessions.json`;
+      const storePath = `/tmp/carapace-${owner}-sessions.json`;
       loadSessionEntryMock.mockReturnValueOnce({
         cfg: { session: { scope: "global" } },
         agentId: owner,
@@ -1304,7 +1304,7 @@ describe("EmbeddedTuiBackend", () => {
         cfg: { session: { scope: "global" } },
         agentId: owner,
         canonicalKey: "global",
-        storePath: `/tmp/openclaw-${owner}-sessions.json`,
+        storePath: `/tmp/carapace-${owner}-sessions.json`,
         entry,
       });
 
@@ -1339,7 +1339,7 @@ describe("EmbeddedTuiBackend", () => {
         cfg: { session: { scope: "global" } },
         agentId: owner,
         canonicalKey: "global",
-        storePath: `/tmp/openclaw-${owner}-sessions.json`,
+        storePath: `/tmp/carapace-${owner}-sessions.json`,
         store: {},
         entry: { sessionId: `session-${owner}-global` },
       });
@@ -1358,7 +1358,7 @@ describe("EmbeddedTuiBackend", () => {
           expect.objectContaining({
             sessionKey: "global",
             agentId: owner,
-            agentDir: `/tmp/openclaw-agent-${owner}/agent`,
+            agentDir: `/tmp/carapace-agent-${owner}/agent`,
           }),
         );
         expect(runBtwSideQuestionMock.mock.calls[0]?.[0]).not.toHaveProperty(
@@ -1375,7 +1375,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-work-sessions.json",
+      storePath: "/tmp/carapace-work-sessions.json",
       store: {},
       entry: { sessionId: "session-work-global" },
     }));
@@ -1427,7 +1427,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       entry: { sessionId: "sess-main" },
     });
 
@@ -1439,7 +1439,7 @@ describe("EmbeddedTuiBackend", () => {
       entry: { sessionId: "sess-main" },
       provider: "openai",
       sessionId: "sess-main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       sessionAgentId: "main",
       canonicalKey: "agent:main:main",
       max: 200,
@@ -1456,8 +1456,8 @@ describe("EmbeddedTuiBackend", () => {
       cfg,
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
-      entry: { spawnedWorkspaceDir: "/tmp/openclaw-custom-workspace" },
+      storePath: "/tmp/carapace-sessions.json",
+      entry: { spawnedWorkspaceDir: "/tmp/carapace-custom-workspace" },
     });
 
     const backend = new EmbeddedTuiBackend();
@@ -1467,7 +1467,7 @@ describe("EmbeddedTuiBackend", () => {
     });
     expect(loadAgentRuntimePluginRegistryHandleMock).toHaveBeenCalledWith({
       config: cfg,
-      workspaceDir: "/tmp/openclaw-agent-main",
+      workspaceDir: "/tmp/carapace-agent-main",
     });
   });
 
@@ -1479,7 +1479,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       entry: {},
     });
 
@@ -1539,7 +1539,7 @@ describe("EmbeddedTuiBackend", () => {
         cfg: { session: { scope: "global" } },
         agentId: owner,
         canonicalKey: "global",
-        storePath: `/tmp/openclaw-${owner}-sessions.json`,
+        storePath: `/tmp/carapace-${owner}-sessions.json`,
         entry,
       });
       agentCommandFromIngressMock.mockResolvedValueOnce({
@@ -1582,7 +1582,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-work-sessions.json",
+      storePath: "/tmp/carapace-work-sessions.json",
       store: {},
       entry: { sessionId: "session-work-global" },
     }));
@@ -1725,7 +1725,7 @@ describe("EmbeddedTuiBackend", () => {
   });
 
   it("aborts local post-turn maintenance when stop grace elapses", async () => {
-    await withEnvAsync({ OPENCLAW_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
+    await withEnvAsync({ CARAPACE_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
       const pending = deferred<EmbeddedAgentResult>();
       const abortListener = vi.fn();
       agentCommandFromIngressMock.mockImplementationOnce((opts: { abortSignal?: AbortSignal }) => {
@@ -1804,7 +1804,7 @@ describe("EmbeddedTuiBackend", () => {
   });
 
   it("queues same-session sends behind active local runs", async () => {
-    await withEnvAsync({ OPENCLAW_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
+    await withEnvAsync({ CARAPACE_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
       const first = deferred<EmbeddedAgentResult>();
       const second = deferred<EmbeddedAgentResult>();
       const firstAbortListener = vi.fn();
@@ -1853,7 +1853,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: { messages: { queue: { mode: "followup" } } },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: { queueDebounceMs: 0 },
     }));
@@ -1896,7 +1896,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: { messages: { queue: { mode: "followup" } } },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: { queueDebounceMs: 0 },
     }));
@@ -1954,7 +1954,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: {},
     }));
@@ -2022,7 +2022,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: {},
     }));
@@ -2057,7 +2057,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: { messages: { queue: { mode: "steer" } } },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: { queueMode: "followup", queueDebounceMs: 0 },
     }));
@@ -2089,7 +2089,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: { messages: { queue: { mode: "collect" } } },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: {},
     }));
@@ -2142,7 +2142,7 @@ describe("EmbeddedTuiBackend", () => {
           cfg: { messages: { queue: { mode: "collect", cap, drop: dropPolicy } } },
           agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
           canonicalKey: sessionKey,
-          storePath: "/tmp/openclaw-sessions.json",
+          storePath: "/tmp/carapace-sessions.json",
           store: {},
           entry: { queueDebounceMs: 0 },
         }),
@@ -2206,7 +2206,7 @@ describe("EmbeddedTuiBackend", () => {
       },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: {},
     }));
@@ -2248,7 +2248,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: { messages: { queue: { mode: "interrupt" } } },
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: {},
     }));
@@ -2277,7 +2277,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
       canonicalKey: sessionKey,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: { queueMode: "interrupt" },
     }));
@@ -3058,7 +3058,7 @@ describe("EmbeddedTuiBackend", () => {
       const target = {
         agentId: owner,
         canonicalKey: "global",
-        storePath: `/tmp/openclaw-${owner}-sessions.json`,
+        storePath: `/tmp/carapace-${owner}-sessions.json`,
         storeKeys: ["global"],
         store: { global: entry },
       };
@@ -3103,7 +3103,7 @@ describe("EmbeddedTuiBackend", () => {
   );
 
   it("fails a queued local send when the previous finishing run does not settle", async () => {
-    await withEnvAsync({ OPENCLAW_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
+    await withEnvAsync({ CARAPACE_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
       const first = deferred<EmbeddedAgentResult>();
       agentCommandFromIngressMock.mockReturnValueOnce(first.promise);
 
@@ -3145,7 +3145,7 @@ describe("EmbeddedTuiBackend", () => {
   });
 
   it("keeps the bounded post-turn timeout visible through canceled queue predecessors", async () => {
-    await withEnvAsync({ OPENCLAW_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
+    await withEnvAsync({ CARAPACE_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "5" }, async () => {
       const active = deferred<EmbeddedAgentResult>();
       agentCommandFromIngressMock.mockReturnValueOnce(active.promise);
       loadSessionEntryMock.mockImplementation(
@@ -3153,7 +3153,7 @@ describe("EmbeddedTuiBackend", () => {
           cfg: { messages: { queue: { mode: "followup" } } },
           agentId: opts?.agentId ?? parseAgentSessionKey(sessionKey)?.agentId ?? "main",
           canonicalKey: sessionKey,
-          storePath: "/tmp/openclaw-sessions.json",
+          storePath: "/tmp/carapace-sessions.json",
           store: {},
           entry: { queueDebounceMs: 0 },
         }),
@@ -3200,7 +3200,7 @@ describe("EmbeddedTuiBackend", () => {
   });
 
   it("fails a queued local send immediately when shutdown grace is zero", async () => {
-    await withEnvAsync({ OPENCLAW_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "0" }, async () => {
+    await withEnvAsync({ CARAPACE_TUI_LOCAL_RUN_SHUTDOWN_GRACE_MS: "0" }, async () => {
       const first = deferred<EmbeddedAgentResult>();
       agentCommandFromIngressMock.mockReturnValueOnce(first.promise);
 
@@ -3787,7 +3787,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {
         "agent:main:main": {
           sessionId: "session-main",
@@ -3858,7 +3858,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {
         "agent:main:main": {
           sessionId: "session-main",
@@ -4008,7 +4008,7 @@ describe("EmbeddedTuiBackend", () => {
       cfg: {},
       agentId: "main",
       canonicalKey: "agent:main:main",
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       entry: { sessionId: "session-main" },
     });

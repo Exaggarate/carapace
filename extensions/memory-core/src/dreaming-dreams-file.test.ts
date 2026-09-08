@@ -1,7 +1,7 @@
 // Memory Core tests cover managed Dream Diary artifacts.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   dedupeDreamDiaryEntries,
@@ -23,7 +23,7 @@ const { createTempWorkspace } = createMemoryCoreTestHarness();
 const EXPECTS_POSIX_PRIVATE_FILE_MODE = process.platform !== "win32";
 
 function setNarrativeTestEnv(stateDir: string): void {
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 }
 
 afterEach(() => {
@@ -91,8 +91,8 @@ describe("dream diary file behavior", () => {
     expect(written.written).toBe(1);
 
     const existing = await fs.readFile(written.dreamsPath, "utf8");
-    const startMarker = "<!-- openclaw:dreaming:diary:start -->";
-    const endMarker = "<!-- openclaw:dreaming:diary:end -->";
+    const startMarker = "<!-- carapace:dreaming:diary:start -->";
+    const endMarker = "<!-- carapace:dreaming:diary:end -->";
     const block = existing.slice(
       existing.indexOf(startMarker) + startMarker.length,
       existing.indexOf(endMarker),
@@ -154,14 +154,14 @@ describe("dream diary file behavior", () => {
       [
         "# Dream Diary",
         "",
-        "<!-- openclaw:dreaming:diary:start -->",
+        "<!-- carapace:dreaming:diary:start -->",
         "---",
         "",
         "*April 5, 2026*",
         "",
         "Symlink target diary text must not enter the prompt.",
         "",
-        "<!-- openclaw:dreaming:diary:end -->",
+        "<!-- carapace:dreaming:diary:end -->",
         "",
       ].join("\n"),
       "utf8",
@@ -232,7 +232,7 @@ describe("dream diary file behavior", () => {
       [
         "# Dream Diary",
         "",
-        "<!-- openclaw:dreaming:diary:start -->",
+        "<!-- carapace:dreaming:diary:start -->",
         "---",
         "",
         "*April 11, 2026, 8:00 AM*",
@@ -253,7 +253,7 @@ describe("dream diary file behavior", () => {
         "",
         "The server room smelled like rain.",
         "",
-        "<!-- openclaw:dreaming:diary:end -->",
+        "<!-- carapace:dreaming:diary:end -->",
         "",
       ].join("\n"),
       "utf8",
@@ -277,7 +277,7 @@ describe("dream diary file behavior", () => {
       [
         "# Dream Diary",
         "",
-        "<!-- openclaw:dreaming:diary:start -->",
+        "<!-- carapace:dreaming:diary:start -->",
         "---",
         "",
         "*April 11, 2026, 8:00 AM*",
@@ -290,7 +290,7 @@ describe("dream diary file behavior", () => {
         "",
         "The server room smelled like rain.",
         "",
-        "<!-- openclaw:dreaming:diary:end -->",
+        "<!-- carapace:dreaming:diary:end -->",
         "",
       ].join("\n"),
       "utf8",

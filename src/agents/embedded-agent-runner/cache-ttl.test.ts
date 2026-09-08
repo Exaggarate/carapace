@@ -98,7 +98,7 @@ describe("readLastCacheTtlTimestamp", () => {
       getEntries: () => [
         {
           type: "custom",
-          customType: "openclaw.cache-ttl",
+          customType: "carapace.cache-ttl",
           data: {
             timestamp: 1_700_000_000_000,
             provider: "anthropic",
@@ -109,7 +109,7 @@ describe("readLastCacheTtlTimestamp", () => {
         },
         {
           type: "custom",
-          customType: "openclaw.cache-ttl",
+          customType: "carapace.cache-ttl",
           data: {
             timestamp: 1_700_000_001_000,
             provider: "google",
@@ -118,7 +118,7 @@ describe("readLastCacheTtlTimestamp", () => {
         },
         {
           type: "custom",
-          customType: "openclaw.cache-ttl",
+          customType: "carapace.cache-ttl",
           data: {
             prunedToolResults: [],
             frozenToolResults: [{ key: "tool:new:43", sourceHash: "hash" }],
@@ -140,7 +140,7 @@ describe("readLastCacheTtlTimestamp", () => {
       getEntries: () => [
         {
           type: "custom",
-          customType: "openclaw.cache-ttl",
+          customType: "carapace.cache-ttl",
           data: {
             timestamp: 1_700_000_000_000,
           },

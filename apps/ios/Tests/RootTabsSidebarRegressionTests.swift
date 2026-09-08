@@ -17,15 +17,15 @@ struct RootTabsSidebarRegressionTests {
     }
 
     @Test func `sidebar controls keep a background-free icon inside their hit target`() throws {
-        let source = try String(contentsOf: Self.openClawProComponentsSourceURL(), encoding: .utf8)
+        let source = try String(contentsOf: Self.carapaceProComponentsSourceURL(), encoding: .utf8)
         let revealButton = try Self.extract(
             source,
-            from: "struct OpenClawSidebarControlButton: View",
-            to: "struct OpenClawSidebarHeaderLeadingSlot: View")
+            from: "struct CarapaceSidebarControlButton: View",
+            to: "struct CarapaceSidebarHeaderLeadingSlot: View")
         let toolbarItem = try Self.extract(
             source,
-            from: "struct OpenClawSidebarToolbarItem: ToolbarContent",
-            to: "struct OpenClawGlassControlGroup")
+            from: "struct CarapaceSidebarToolbarItem: ToolbarContent",
+            to: "struct CarapaceGlassControlGroup")
 
         let button = try Self.extract(
             revealButton,
@@ -39,10 +39,10 @@ struct RootTabsSidebarRegressionTests {
         #expect(revealButton.contains("self.identified(self.button.buttonStyle(.plain))"))
         #expect(button.contains(".frame(width: 44, height: 44)"))
         #expect(button.contains(".contentShape(Rectangle())"))
-        #expect(icon.contains(".foregroundStyle(OpenClawBrand.accent)"))
+        #expect(icon.contains(".foregroundStyle(CarapaceBrand.accent)"))
         #expect(!icon.contains(".glassEffect("))
         #expect(!icon.contains("Circle()"))
-        #expect(icon.contains("width: OpenClawProMetric.compactControlSize"))
+        #expect(icon.contains("width: CarapaceProMetric.compactControlSize"))
         #expect(toolbarItem.contains(".sharedBackgroundVisibility(.hidden)"))
     }
 
@@ -81,12 +81,12 @@ struct RootTabsSidebarRegressionTests {
         #expect(drawerSource.contains(".accessibilityHidden(!self.isPresented)"))
         #expect(drawerSource.contains(".accessibilityHidden(self.isPresented)"))
         #expect(drawerSource.contains(".onTapGesture(perform: self.onHide)"))
-        #expect(drawerSource.contains(".background(OpenClawSidebarPalette.background)"))
+        #expect(drawerSource.contains(".background(CarapaceSidebarPalette.background)"))
         #expect(drawerSource.contains(".ignoresSafeArea(.container, edges: .vertical)"))
         #expect(!drawerSource.contains("Color.black.opacity(0.35)"))
         #expect(!drawerSource.contains("UIScreenEdgePanGestureRecognizer"))
 
-        #expect(contentCard.contains(".background(OpenClawProBackground())"))
+        #expect(contentCard.contains(".background(CarapaceProBackground())"))
         #expect(contentCard.contains(".ignoresSafeArea(.container, edges: .vertical)"))
         #expect(contentCard.contains(".allowsHitTesting(!self.isPresented)"))
         #expect(contentCard.contains(".clipShape(shape)"))
@@ -111,7 +111,7 @@ struct RootTabsSidebarRegressionTests {
         #expect(!sidebarSource.contains("let showsDismissButton: Bool"))
         #expect(!sidebarSource.contains("let selectSettingsRoute:"))
         #expect(source.contains("isDismissButtonEnabled: self.isSidebarVisible"))
-        #expect(sidebarSource.contains("OpenClawSidebarControlButton(action: self.dismissAction)"))
+        #expect(sidebarSource.contains("CarapaceSidebarControlButton(action: self.dismissAction)"))
         #expect(sidebarSource.contains(".allowsHitTesting(self.isDismissButtonEnabled)"))
         #expect(sidebarSource.contains(".accessibilityHidden(!self.isDismissButtonEnabled)"))
         #expect(sidebarSource.contains("accessibilityIdentifier: self.isDismissButtonEnabled"))
@@ -171,7 +171,7 @@ struct RootTabsSidebarRegressionTests {
         let newChat = try #require(agents.range(of: "self.newChatButton"))
         #expect(agents[selectorValue.upperBound..<newChat.lowerBound].contains("\n            }"))
         #expect(!agents.contains(".background(.ultraThinMaterial"))
-        #expect(!agentSelector.contains(".background(OpenClawSidebarPalette.selection"))
+        #expect(!agentSelector.contains(".background(CarapaceSidebarPalette.selection"))
         #expect(!settings.contains("settings-appearance-sidebar-agents"))
 
         #expect(!brandHeader.contains("self.selectSidebarDestination(.settings)"))
@@ -236,11 +236,11 @@ struct RootTabsSidebarRegressionTests {
             .appendingPathComponent("Sources/RootSidebar.swift")
     }
 
-    private static func openClawProComponentsSourceURL() -> URL {
+    private static func carapaceProComponentsSourceURL() -> URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-            .appendingPathComponent("Sources/Design/OpenClawProComponents.swift")
+            .appendingPathComponent("Sources/Design/CarapaceProComponents.swift")
     }
 
     private static func settingsProTabSectionsSourceURL() -> URL {

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { clearBundledDiscoveryModeMemo } from "./bundled-discovery-state.js";
 import type { PluginCandidate } from "./discovery.js";
 import { refreshPersistedInstalledPluginIndex } from "./installed-plugin-index-store-write.js";
@@ -21,12 +21,12 @@ const tempDirs: string[] = [];
 
 afterEach(() => {
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function createFixture() {
-  const stateDir = makeTrackedTempDir("openclaw-provider-compat-index", tempDirs);
+  const stateDir = makeTrackedTempDir("carapace-provider-compat-index", tempDirs);
   const pluginDir = path.join(stateDir, PLUGIN_ID);
   fs.mkdirSync(pluginDir, { recursive: true });
   fs.writeFileSync(
@@ -35,7 +35,7 @@ function createFixture() {
     "utf8",
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: PLUGIN_ID,
       enabledByDefault: true,
@@ -51,8 +51,8 @@ function createFixture() {
     origin: "bundled",
   };
   const env = {
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
   };
   return { candidate, env, stateDir };
@@ -74,13 +74,13 @@ describe("bundled provider compatibility in installed plugin indexes", () => {
           packageDir: candidate.rootDir,
           packageManifest: {
             install: {
-              npmSpec: "@openclaw/contract-provider",
+              npmSpec: "@carapace/contract-provider",
               minHostVersion: ">=2099.1.1",
             },
           },
         },
       ],
-      env: { ...env, OPENCLAW_VERSION: "2099.1.1" },
+      env: { ...env, CARAPACE_VERSION: "2099.1.1" },
     });
 
     expect(index.plugins.map((plugin) => plugin.pluginId)).toEqual([PLUGIN_ID]);

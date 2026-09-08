@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { resolve } from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 const STATE_VERSION = 1;
 const DEPENDENCY_INPUTS = ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".npmrc"];
@@ -117,7 +117,7 @@ export function prepareTestboxLeaseFreshness({
   if (provider !== "blacksmith-testbox" || args[0] !== "run" || !id?.startsWith("tbx_")) {
     return null;
   }
-  const configuredStateDir = env.OPENCLAW_TESTBOX_LEASE_STATE_DIR?.trim();
+  const configuredStateDir = env.CARAPACE_TESTBOX_LEASE_STATE_DIR?.trim();
   if (env.VITEST && !configuredStateDir) {
     return null;
   }
@@ -127,9 +127,9 @@ export function prepareTestboxLeaseFreshness({
   if (existsSync(path)) {
     const saved: unknown = JSON.parse(readFileSync(path, "utf8"));
     const staleReasons = testboxLeaseStaleReasons(saved, current);
-    if (staleReasons.length > 0 && env.OPENCLAW_TESTBOX_ALLOW_STALE !== "1") {
+    if (staleReasons.length > 0 && env.CARAPACE_TESTBOX_ALLOW_STALE !== "1") {
       throw new Error(
-        `Testbox ${id} is stale (${staleReasons.join(", ")}); stop it and warm a fresh lease, or set OPENCLAW_TESTBOX_ALLOW_STALE=1 for an intentional diagnostic reuse`,
+        `Testbox ${id} is stale (${staleReasons.join(", ")}); stop it and warm a fresh lease, or set CARAPACE_TESTBOX_ALLOW_STALE=1 for an intentional diagnostic reuse`,
       );
     }
     return { current, path };

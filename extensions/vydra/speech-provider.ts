@@ -1,15 +1,15 @@
 // Vydra provider module implements model/runtime integration.
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
-import { resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-core";
+import { resolveSpeechProviderApiKey } from "carapace/plugin-sdk/speech-provider";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEFAULT_VYDRA_BASE_URL,
   DEFAULT_VYDRA_SPEECH_MODEL,
@@ -100,13 +100,13 @@ export function buildVydraSpeechProvider(): SpeechProviderPlugin {
         throw new Error("Vydra API key missing");
       }
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       const {
         assertOkOrThrowHttpError,
         postJsonRequest,
         readProviderJsonResponse,
         resolveProviderHttpRequestConfig,
-      } = await import("openclaw/plugin-sdk/provider-http");
+      } = await import("carapace/plugin-sdk/provider-http");
 
       const fetchFn = fetch;
       const { baseUrl, allowPrivateNetwork, headers, dispatcherPolicy } =

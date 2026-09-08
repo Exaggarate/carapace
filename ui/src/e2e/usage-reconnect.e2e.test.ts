@@ -20,7 +20,7 @@ const suite = createControlUiE2eSuite({
 // Mirrors the module-private default usage TTL asserted by this flow.
 const USAGE_PAYLOAD_TTL_MS = 5 * 60_000;
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = artifactRoot
@@ -223,7 +223,7 @@ suite.define(() => {
           )
           .toEqual({ visibility: "visible", focused: true });
         const refresh = page
-          .locator("openclaw-usage-page")
+          .locator("carapace-usage-page")
           .getByRole("button", { name: "Refresh", exact: true });
         for (const entry of ["route", "manual"] as const) {
           if (entry === "manual") {
@@ -279,7 +279,7 @@ suite.define(() => {
     try {
       const response = await page.goto(`${suite.server.baseUrl}chat`);
       expect(response?.status()).toBe(200);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.locator(".sidebar-identity-card").click();
       await sidebar
         .locator('wa-dropdown.sidebar-identity-menu wa-dropdown-item[value="command:usage"]')
@@ -331,7 +331,7 @@ suite.define(() => {
       await gateway.deferNext("sessions.usage");
       await gateway.deferNext("usage.cost");
       await page
-        .locator("openclaw-usage-page")
+        .locator("carapace-usage-page")
         .getByRole("button", { name: "Refresh", exact: true })
         .click();
       await waitForRequestCount(gateway, "sessions.usage", 3);
@@ -370,7 +370,7 @@ suite.define(() => {
       await gateway.deferNext("sessions.usage");
       await gateway.deferNext("usage.cost");
       await page
-        .locator("openclaw-usage-page")
+        .locator("carapace-usage-page")
         .getByRole("button", { name: "Refresh", exact: true })
         .click();
       await waitForRequestCount(gateway, "sessions.usage", 2);
@@ -383,7 +383,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page
-            .locator("openclaw-usage-page")
+            .locator("carapace-usage-page")
             .getByRole("button", { name: "Refresh", exact: true })
             .isEnabled(),
         )

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { loadTranscriptEvents, replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { readTranscriptEventMessage } from "../config/sessions/session-accessor.sqlite-read.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { commitBackgroundResultToSession } from "./background-session-result.js";
 import {
   beginSessionWorkAdmission,
@@ -14,13 +14,13 @@ import { onSessionTranscriptUpdate } from "./transcript-events.js";
 describe("commitBackgroundResultToSession", () => {
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
     afterEach(() => {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       cleanup();
     }),
   );
 
   async function createTarget() {
-    const dir = tempDirs.make("openclaw-background-result-");
+    const dir = tempDirs.make("carapace-background-result-");
     const storePath = path.join(dir, "agents", "main", "sessions", "sessions.json");
     const sessionKey = "agent:main:webchat:direct:owner";
     const sessionId = "source-session";
@@ -111,11 +111,11 @@ describe("commitBackgroundResultToSession", () => {
       expect.objectContaining({
         type: "message",
         message: expect.objectContaining({
-          api: "openclaw-transcript",
+          api: "carapace-transcript",
           idempotencyKey: "cron-current-completion:cron:job-1:1000",
           model: "automation-result",
-          openclawAutomation: { kind: "cron", jobId: "job-1", runId: "cron:job-1:1000" },
-          provider: "openclaw",
+          carapaceAutomation: { kind: "cron", jobId: "job-1", runId: "cron:job-1:1000" },
+          provider: "carapace",
           role: "assistant",
           stopReason: "stop",
           content: [{ type: "text", text: "Automation finished while the chat was active." }],
@@ -162,7 +162,7 @@ describe("commitBackgroundResultToSession", () => {
     );
     const message = readTranscriptEventMessage(messageEvent);
     expect(message?.content).toEqual([{ type: "text", text: "Example report\nreport.png" }]);
-    expect(message?.openclawDisplayContent).toEqual(content);
+    expect(message?.carapaceDisplayContent).toEqual(content);
   });
 
   it("refuses an archived target conversation", async () => {

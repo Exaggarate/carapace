@@ -2,7 +2,7 @@
 summary: "DeepSeek setup (auth + model selection)"
 title: "DeepSeek"
 read_when:
-  - You want to use DeepSeek with OpenClaw
+  - You want to use DeepSeek with Carapace
   - You need the API key env var or CLI auth choice
 ---
 
@@ -20,8 +20,8 @@ read_when:
 Install the official plugin, then restart Gateway:
 
 ```bash
-openclaw plugins install @openclaw/deepseek-provider
-openclaw gateway restart
+carapace plugins install @carapace/deepseek-provider
+carapace gateway restart
 ```
 
 ## Getting started
@@ -32,7 +32,7 @@ openclaw gateway restart
   </Step>
   <Step title="Run onboarding">
     ```bash
-    openclaw onboard --auth-choice deepseek-api-key
+    carapace onboard --auth-choice deepseek-api-key
     ```
 
     Prompts for your API key and sets `deepseek/deepseek-v4-pro` as the default model.
@@ -40,13 +40,13 @@ openclaw gateway restart
   </Step>
   <Step title="Verify models are available">
     ```bash
-    openclaw models list --provider deepseek
+    carapace models list --provider deepseek
     ```
 
     To inspect the plugin's static catalog without a running Gateway:
 
     ```bash
-    openclaw models list --all --provider deepseek
+    carapace models list --all --provider deepseek
     ```
 
   </Step>
@@ -59,7 +59,7 @@ Onboarding preserves your model entries and leaves generated catalog rows to dis
     For scripted or headless installations, pass all flags directly:
 
     ```bash
-    openclaw onboard --non-interactive \
+    carapace onboard --non-interactive \
       --mode local \
       --auth-choice deepseek-api-key \
       --deepseek-api-key "$DEEPSEEK_API_KEY" \
@@ -72,7 +72,7 @@ Onboarding preserves your model entries and leaves generated catalog rows to dis
 
 <Warning>
 If Gateway runs as a daemon (launchd/systemd), make sure `DEEPSEEK_API_KEY` is
-available to that process (for example, in `~/.openclaw/.env` or via
+available to that process (for example, in `~/.carapace/.env` or via
 `env.shellEnv`).
 </Warning>
 
@@ -90,7 +90,7 @@ DeepSeek retired `deepseek-chat` and `deepseek-reasoner` on July 24, 2026 at
 to `deepseek/deepseek-v4-flash` or `deepseek/deepseek-v4-pro`.
 </Warning>
 
-OpenClaw's local costs are estimates. The vision model's bundled estimate uses
+Carapace's local costs are estimates. The vision model's bundled estimate uses
 DeepSeek's peak rates; its published off-peak rates are half those amounts.
 DeepSeek can change rates; its
 [Models & Pricing](https://api-docs.deepseek.com/quick_start/pricing/) page is
@@ -102,7 +102,7 @@ PNG, JPEG, GIF, and WebP images through the same API and API key. See
 [DeepSeek vision](https://api-docs.deepseek.com/guides/vision) for image limits.
 
 <Tip>
-V4 models support DeepSeek's `thinking` control. OpenClaw also replays
+V4 models support DeepSeek's `thinking` control. Carapace also replays
 DeepSeek `reasoning_content` on follow-up turns so thinking sessions with tool
 calls can continue.
 Use `/think xhigh` or `/think max` with DeepSeek V4 models to request DeepSeek's
@@ -113,13 +113,13 @@ maximum `reasoning_effort`; both map to `"max"`.
 
 DeepSeek V4 thinking sessions require replayed assistant messages from a
 thinking-enabled turn to include `reasoning_content` on follow-up requests.
-OpenClaw's DeepSeek plugin backfills that field automatically, so normal
+Carapace's DeepSeek plugin backfills that field automatically, so normal
 multi-turn tool use works on `deepseek/deepseek-v4-flash`,
 `deepseek/deepseek-v4-flash-vision-exp`, and `deepseek/deepseek-v4-pro` even when history came from another
 OpenAI-compatible provider (no native `reasoning_content`) or from a plain
 assistant message. No `/new` required after switching providers mid-session.
 
-When thinking is disabled (including the UI **None** selection), OpenClaw
+When thinking is disabled (including the UI **None** selection), Carapace
 sends `thinking: { type: "disabled" }` and strips replayed `reasoning_content`
 from outgoing history, keeping the session on the non-thinking DeepSeek path.
 
@@ -132,8 +132,8 @@ maximum capability.
 To run only the DeepSeek V4 direct-model checks from the modern model live suite:
 
 ```bash
-OPENCLAW_LIVE_PROVIDERS=deepseek \
-OPENCLAW_LIVE_MODELS="deepseek/deepseek-v4-flash,deepseek/deepseek-v4-pro" \
+CARAPACE_LIVE_PROVIDERS=deepseek \
+CARAPACE_LIVE_MODELS="deepseek/deepseek-v4-flash,deepseek/deepseek-v4-pro" \
 pnpm test:live src/agents/models.profiles.live.test.ts
 ```
 
@@ -143,7 +143,7 @@ preserve the replay payload DeepSeek requires.
 To check the experimental vision model with the same `DEEPSEEK_API_KEY`:
 
 ```bash
-OPENCLAW_LIVE_DEEPSEEK_MODEL=deepseek-v4-flash-vision-exp \
+CARAPACE_LIVE_DEEPSEEK_MODEL=deepseek-v4-flash-vision-exp \
 pnpm test:live extensions/deepseek/deepseek.live.test.ts
 ```
 

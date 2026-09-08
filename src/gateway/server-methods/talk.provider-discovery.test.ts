@@ -1,7 +1,7 @@
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import {
   cleanupPluginLoaderFixturesForTest,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   resetPluginLoaderTestStateForTest,
 } from "../../plugins/loader.test-fixtures.js";
 import { createVoiceProviderFixture } from "../../talk/provider-discovery.test-fixtures.js";
@@ -26,7 +26,7 @@ describe("Talk catalog provider discovery", () => {
       },
     };
     await withEnvAsync(env, async () => {
-      const registry = loadOpenClawPlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
+      const registry = loadCarapacePlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
       const result = await callGatewayHandler(
         talkHandlers,
         "talk.catalog",

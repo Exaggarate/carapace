@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { patchSessionEntryCore } from "../config/sessions/session-accessor.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { deletePersonalGitHubSessionReceipts } from "../state/github-personal-publication-lifecycle.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
 import {
   callPersonalPublicationRpc,
@@ -855,7 +855,7 @@ describe("repository checkpoint GitHub publication", () => {
         agentId: "main",
         idempotencyKey: "different-claim",
       });
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       db.prepare(
         "UPDATE github_repository_publication_requests SET " + column + " = ? WHERE request_id = ?",
       ).run(column === "environment_id" ? "different-worker" : 999, accepted.requestId);

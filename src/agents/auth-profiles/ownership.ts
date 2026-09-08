@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { isSafeToAdoptMainStoreOAuthIdentity } from "./oauth-shared.js";
 import type { AuthProfileStore } from "./types.js";
 

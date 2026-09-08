@@ -14,12 +14,12 @@ const suite = createControlUiE2eSuite({
   name: "embedded terminal document",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 const requestedDeadSessionScreenshotPath =
-  process.env.OPENCLAW_TERMINAL_DEAD_SESSION_SCREENSHOT?.trim();
-const requestedDeadSessionVideoDir = process.env.OPENCLAW_TERMINAL_DEAD_SESSION_VIDEO_DIR?.trim();
+  process.env.CARAPACE_TERMINAL_DEAD_SESSION_SCREENSHOT?.trim();
+const requestedDeadSessionVideoDir = process.env.CARAPACE_TERMINAL_DEAD_SESSION_VIDEO_DIR?.trim();
 
 suite.define(() => {
   it.each(["chat", "focus/terminal"])("routes focused terminal keys in %s", async (route) => {
@@ -45,7 +45,7 @@ suite.define(() => {
         await page.keyboard.press("Control+Backquote");
       }
       const panel = page
-        .locator("openclaw-terminal-panel")
+        .locator("carapace-terminal-panel")
         .filter({ has: page.locator(".tp-host") });
       const terminal = panel.locator(".tp-host");
       await terminal.locator("canvas").waitFor();
@@ -58,13 +58,13 @@ suite.define(() => {
         await panel.locator(".tp-header").waitFor({ state: "hidden" });
         expect(await gateway.getRequests("terminal.input")).toEqual(before);
         await page.keyboard.press("Control+Backquote");
-        await page.locator("openclaw-terminal-panel .tp-header").waitFor();
+        await page.locator("carapace-terminal-panel .tp-header").waitFor();
       } else {
         await expect
           .poll(async () => (await gateway.getRequests("terminal.input")).length)
           .toBe(before.length + 1);
         expect(await panel.locator(".tp-header").isVisible()).toBe(true);
-        expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+        expect(await page.locator("carapace-app-shell").count()).toBe(0);
       }
     });
   });
@@ -73,11 +73,11 @@ suite.define(() => {
     await suite.withPage({ serviceWorkers: "block" }, async ({ page }) => {
       await installMockGateway(page);
       await page.goto(`${suite.server.baseUrl}dashboards`);
-      await page.locator("openclaw-app-shell").waitFor();
+      await page.locator("carapace-app-shell").waitFor();
       await page.goto(`${suite.server.baseUrl}?view=terminal`);
 
       await page.waitForURL(`${suite.server.baseUrl}focus/terminal`);
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
       expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
 
       await page
@@ -96,9 +96,9 @@ suite.define(() => {
       await page.addInitScript((url) => {
         (
           window as Window & {
-            ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+            ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
           }
-        )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+        )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
           gatewayUrl: url,
           token: "native-build-identity-token",
         };
@@ -114,14 +114,14 @@ suite.define(() => {
       expect(firstConnect.params).toMatchObject({ client: { buildId: "e2e" } });
       await page.waitForFunction(
         () =>
-          sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId") ===
+          sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId") ===
           "replacement-build",
       );
       await page.getByText("Server updated", { exact: true }).waitFor();
 
       expect(await gateway.getRequests("terminal.open")).toHaveLength(0);
       expect(
-        await page.locator("openclaw-terminal-panel").evaluate((element) => {
+        await page.locator("carapace-terminal-panel").evaluate((element) => {
           return (element as HTMLElement & { available: boolean }).available;
         }),
       ).toBe(false);
@@ -134,9 +134,9 @@ suite.define(() => {
       await page.addInitScript((url) => {
         (
           window as Window & {
-            ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+            ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
           }
-        )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+        )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
           gatewayUrl: url,
           token: "native-configured-ui-token",
         };
@@ -162,14 +162,14 @@ suite.define(() => {
       expect((await page.goto(`${suite.server.baseUrl}chat`))?.status()).toBe(200);
       await gateway.waitForRequest("connect");
       await page.waitForFunction(() => {
-        const panel = document.querySelector("openclaw-terminal-panel") as
+        const panel = document.querySelector("carapace-terminal-panel") as
           | (HTMLElement & { available: boolean })
           | null;
         return panel?.available === true;
       });
       await page.evaluate(() => {
         window.dispatchEvent(
-          new CustomEvent("openclaw:terminal-toggle", {
+          new CustomEvent("carapace:terminal-toggle", {
             detail: { agentId: "main", open: true },
           }),
         );
@@ -179,7 +179,7 @@ suite.define(() => {
       expect(terminalOpen.params).toMatchObject({ agentId: "main" });
       expect(
         await page.evaluate(() =>
-          sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId"),
+          sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId"),
         ),
       ).toBeNull();
     });
@@ -218,10 +218,10 @@ suite.define(() => {
       await gateway.waitForRequest("connect");
       await page.locator(".new-session-page__message").waitFor();
       await page.waitForFunction(() => {
-        const panel = document.querySelector("openclaw-terminal-panel") as
+        const panel = document.querySelector("carapace-terminal-panel") as
           | (HTMLElement & { available: boolean })
           | null;
-        const shell = document.querySelector("openclaw-app-shell") as
+        const shell = document.querySelector("carapace-app-shell") as
           | (HTMLElement & {
               runtime?: { context?: { agentSelection?: { set: (agentId: string) => void } } };
             })
@@ -231,7 +231,7 @@ suite.define(() => {
         );
       });
       await page.evaluate(() => {
-        const shell = document.querySelector("openclaw-app-shell") as HTMLElement & {
+        const shell = document.querySelector("carapace-app-shell") as HTMLElement & {
           runtime?: { context?: { agentSelection?: { set: (agentId: string) => void } } };
         };
         const setAgent = shell.runtime?.context?.agentSelection?.set;
@@ -240,7 +240,7 @@ suite.define(() => {
         }
         setAgent("research");
         window.dispatchEvent(
-          new CustomEvent("openclaw:terminal-toggle", {
+          new CustomEvent("carapace:terminal-toggle", {
             detail: { agentId: "research", open: true },
           }),
         );
@@ -256,12 +256,12 @@ suite.define(() => {
       await page.addInitScript(() => {
         (
           window as Window & {
-            ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: {
+            ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: {
               gatewayUrl: string;
               token: string;
             };
           }
-        )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+        )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
           gatewayUrl: "ws://gateway.example.test",
           token: "native-terminal-token",
         };
@@ -287,8 +287,8 @@ suite.define(() => {
       const connect = await gateway.waitForRequest("connect");
 
       expect(connect.params).toMatchObject({ auth: { token: "native-terminal-token" } });
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
-      expect(await page.locator("openclaw-terminal-panel").count()).toBe(1);
+      expect(await page.locator("carapace-login-gate").count()).toBe(0);
+      expect(await page.locator("carapace-terminal-panel").count()).toBe(1);
 
       await gateway.resolveDeferred("connect");
       const terminalOpen = await gateway.waitForRequest("terminal.open");
@@ -317,10 +317,10 @@ suite.define(() => {
             .join("/")}\u001b\\`,
         })),
       );
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
-      expect(await page.locator("openclaw-terminal-panel").count()).toBe(1);
+      expect(await page.locator("carapace-login-gate").count()).toBe(0);
+      expect(await page.locator("carapace-terminal-panel").count()).toBe(1);
       const closeControlMetrics = await page
-        .locator("openclaw-terminal-panel")
+        .locator("carapace-terminal-panel")
         .locator(".tabstrip-tab__close")
         .evaluate((close) => {
           const header = close.closest<HTMLElement>(".tp-header");
@@ -362,7 +362,7 @@ suite.define(() => {
       expect(closeControlMetrics.width).toBe(28);
       expect(closeControlMetrics.height).toBe(28);
       expect(closeControlMetrics.centerOffset).toBeLessThanOrEqual(0.5);
-      const closeControl = page.locator("openclaw-terminal-panel").locator(".tabstrip-tab__close");
+      const closeControl = page.locator("carapace-terminal-panel").locator(".tabstrip-tab__close");
       expect(await closeControl.getAttribute("aria-label")).toBe("Close terminal session: bash");
       await closeControl.click();
       const terminalClose = await gateway.waitForRequest("terminal.close");
@@ -404,17 +404,17 @@ suite.define(() => {
         await page.addInitScript(() => {
           (
             window as Window & {
-              ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: {
+              ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: {
                 gatewayUrl: string;
                 token: string;
               };
             }
-          )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+          )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
             gatewayUrl: "ws://gateway.example.test",
             token: "test",
           };
           window.sessionStorage.setItem(
-            "openclaw.terminal.sessions.v1",
+            "carapace.terminal.sessions.v1",
             JSON.stringify(["terminal-dead-after-restart"]),
           );
         });
@@ -445,22 +445,22 @@ suite.define(() => {
           if (deadSessionVideoDir) {
             await writeFile(
               deadSessionScreenshotPath,
-              await takeControlUiViewportScreenshot(page, page.locator("openclaw-terminal-panel"), [
-                page.locator("openclaw-terminal-panel .tabstrip-tab__status"),
+              await takeControlUiViewportScreenshot(page, page.locator("carapace-terminal-panel"), [
+                page.locator("carapace-terminal-panel .tabstrip-tab__status"),
               ]),
             );
           } else {
             await page.screenshot({ path: deadSessionScreenshotPath, fullPage: true });
           }
         }
-        const status = page.locator("openclaw-terminal-panel .tabstrip-tab__status");
+        const status = page.locator("carapace-terminal-panel .tabstrip-tab__status");
         await expect
           .poll(async () => await status.textContent(), { timeout: 5_000 })
           .toBe("exited");
         expect(await gateway.getRequests("terminal.attach")).toHaveLength(0);
         expect(await gateway.getRequests("terminal.open")).toHaveLength(0);
         expect(
-          await page.evaluate(() => window.sessionStorage.getItem("openclaw.terminal.sessions.v1")),
+          await page.evaluate(() => window.sessionStorage.getItem("carapace.terminal.sessions.v1")),
         ).toBe("[]");
       },
     );

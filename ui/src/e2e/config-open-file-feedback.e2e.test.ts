@@ -9,8 +9,8 @@ const suite = createControlUiE2eSuite({
   name: "Control UI config open-file feedback mocked Gateway E2E",
   startServerBeforeBrowser: true,
 });
-const configPath = "/tmp/openclaw-config-open-feedback/openclaw.json";
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const configPath = "/tmp/carapace-config-open-feedback/carapace.json";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 async function installClipboardProof(page: Page): Promise<void> {
   await page.addInitScript(() => {

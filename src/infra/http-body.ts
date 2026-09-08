@@ -4,7 +4,7 @@ import { clearTimeout as clearNodeTimeout, setTimeout as setNodeTimeout } from "
 import {
   parseStrictNonNegativeInteger,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { formatErrorMessage } from "./errors.js";
 import {
   isHttpConnectionClosing,

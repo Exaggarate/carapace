@@ -3,7 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, assert, beforeEach, describe, expect, it } from "vitest";
 import { resolveApiKeyForProfile } from "../agents/auth-profiles/oauth.js";
 import { loadAuthProfileStoreForSecretsRuntime } from "../agents/auth-profiles/store-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ensureMemoryIndexSchema } from "../plugin-sdk/memory-core-host-engine-storage.js";
 import { createPluginStateKeyedStoreForTests } from "../plugin-sdk/plugin-state-test-runtime.js";
 import { createTestPluginApi } from "../plugin-sdk/plugin-test-api.js";
@@ -21,20 +21,20 @@ import {
 import { resolveNativePluginModelAuth } from "../plugins/loader-runtime-load.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import type { OpenClawPluginDefinition } from "../plugins/types.js";
+import type { CarapacePluginDefinition } from "../plugins/types.js";
 import {
   activateSecretsRuntimeSnapshot,
   clearSecretsRuntimeSnapshot,
   prepareSecretsRuntimeSnapshot,
 } from "../secrets/runtime.js";
 import { writeSecretStoreEntry } from "../secrets/store/secret-store.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 
 beforeEach(async () => {
   setActivePluginRegistry(createEmptyPluginRegistry());
   // The shared loader resolves manifest-owned public artifacts from checkout source, never dist.
   const { default: openaiPlugin } = await loadBundledPluginPublicSurface<{
-    default: OpenClawPluginDefinition;
+    default: CarapacePluginDefinition;
   }>({ pluginId: "openai", artifactBasename: "index.js" });
   assert(openaiPlugin.register);
   openaiPlugin.register(
@@ -55,12 +55,12 @@ describe("Memory Core cold startup migrations", () => {
   it.each(["stored", "missing"] as const)(
     "preserves semantic data and reaches auth activation with a %s store SecretRef",
     async (entryState) => {
-      await withOpenClawTestState({ label: "memory-startup" }, async (state) => {
+      await withCarapaceTestState({ label: "memory-startup" }, async (state) => {
         clearSecretsRuntimeSnapshot();
         const profileId = "openai:memory-startup";
         const ref = { source: "store", provider: "default", id: "MEMORY_STARTUP_KEY" } as const;
         const value = "synthetic-memory-bootstrap-key";
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           agents: { entries: { main: { workspace: state.workspaceDir } } },
           auth: { profiles: { [profileId]: { provider: "openai", mode: "api_key" } } },
           memory: { search: { provider: "openai", fallback: "none" } },

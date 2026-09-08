@@ -1,4 +1,4 @@
-import { resolveRequestUrl } from "openclaw/plugin-sdk/request-url";
+import { resolveRequestUrl } from "carapace/plugin-sdk/request-url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { probeLineBot } from "./probe.js";
 import { createPendingLineResponse, stubLineApiFetch } from "./probe.test-support.js";

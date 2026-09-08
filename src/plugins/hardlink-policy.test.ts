@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { shouldRejectHardlinkedPluginFiles } from "./hardlink-policy.js";
 
-const nixEnv: NodeJS.ProcessEnv = { OPENCLAW_NIX_MODE: "1" };
+const nixEnv: NodeJS.ProcessEnv = { CARAPACE_NIX_MODE: "1" };
 
 describe("plugin hardlink policy", () => {
   it("does not reject bundled plugin files", () => {
@@ -25,7 +25,7 @@ describe("plugin hardlink policy", () => {
     ).toBe(true);
   });
 
-  it("does not treat OPENCLAW_NIX_MODE as enough by itself", () => {
+  it("does not treat CARAPACE_NIX_MODE as enough by itself", () => {
     expect(
       shouldRejectHardlinkedPluginFiles({
         origin: "config",
@@ -39,7 +39,7 @@ describe("plugin hardlink policy", () => {
     expect(
       shouldRejectHardlinkedPluginFiles({
         origin: "config",
-        rootDir: "/nix/store/openclaw-plugin",
+        rootDir: "/nix/store/carapace-plugin",
         env: nixEnv,
       }),
     ).toBe(false);

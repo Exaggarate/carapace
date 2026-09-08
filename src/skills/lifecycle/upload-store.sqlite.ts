@@ -6,17 +6,17 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawStateDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 
 export const SKILL_UPLOAD_LEASE_SCOPE = "skill-upload-install";
 
 export type SkillUploadDatabase = Pick<
-  OpenClawStateDatabase,
+  CarapaceStateDatabase,
   "skill_upload_chunks" | "skill_uploads" | "state_leases"
 >;
 // Archive bytes belong to the authoritative install claim, not metadata retries.
@@ -46,15 +46,15 @@ export type SkillUploadMetadataRow = InferResult<
 export function resolveSkillUploadDatabaseOptions(options: {
   env?: NodeJS.ProcessEnv;
   path?: string;
-}): OpenClawStateDatabaseOptions {
+}): CarapaceStateDatabaseOptions {
   return {
     ...(options.env ? { env: options.env } : {}),
     ...(options.path ? { path: options.path } : {}),
   };
 }
 
-export function openSkillUploadDatabase(options: OpenClawStateDatabaseOptions) {
-  const database = openOpenClawStateDatabase(options);
+export function openSkillUploadDatabase(options: CarapaceStateDatabaseOptions) {
+  const database = openCarapaceStateDatabase(options);
   return {
     database,
     kysely: getNodeSqliteKysely<SkillUploadDatabase>(database.db),
@@ -63,7 +63,7 @@ export function openSkillUploadDatabase(options: OpenClawStateDatabaseOptions) {
 
 export function readSkillUploadMetadata(
   uploadId: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): SkillUploadMetadataRow | undefined {
   const { database, kysely } = openSkillUploadDatabase(options);
   return executeSqliteQueryTakeFirstSync(
@@ -91,9 +91,9 @@ export function deleteOwnedSkillUpload(
   uploadId: string,
   owner: string,
   nowMs: number,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): "deleted" | "missing" | "not-owner" {
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
     const upload = executeSqliteQueryTakeFirstSync(
       db,
@@ -140,9 +140,9 @@ export function hasLiveSkillUploadInstallLease(
 export function deleteExpiredSkillUploadUnlessLeased(params: {
   uploadId: string;
   nowMs: number;
-  options: OpenClawStateDatabaseOptions;
+  options: CarapaceStateDatabaseOptions;
 }): "active" | "deleted" | "leased" | "missing" {
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
     const row = executeSqliteQueryTakeFirstSync(
       db,
@@ -170,9 +170,9 @@ export function renewSkillUploadInstallLease(params: {
   owner: string;
   heartbeatAt: number;
   expiresAt: number;
-  options: OpenClawStateDatabaseOptions;
+  options: CarapaceStateDatabaseOptions;
 }): boolean {
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
     return (
       executeSqliteQuerySync(
@@ -195,7 +195,7 @@ export function renewSkillUploadInstallLease(params: {
 
 export function readSkillUploadArchiveChunks(
   uploadId: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): Array<{ byte_offset: number; size_bytes: number; chunk_blob: Uint8Array }> {
   const { database, kysely } = openSkillUploadDatabase(options);
   return executeSqliteQuerySync(

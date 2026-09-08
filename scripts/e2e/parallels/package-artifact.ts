@@ -1,4 +1,4 @@
-// Package Artifact script supports OpenClaw repository automation.
+// Package Artifact script supports Carapace repository automation.
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -49,27 +49,27 @@ function resolveNpmPackTarballFilename(value: unknown): string {
   return filename;
 }
 
-export function resolveOpenClawRegistryVersion(specOrAlias: string): string {
+export function resolveCarapaceRegistryVersion(specOrAlias: string): string {
   const rawValue = specOrAlias.trim();
-  const value = rawValue.startsWith("openclaw@") ? rawValue.slice("openclaw@".length) : rawValue;
+  const value = rawValue.startsWith("carapace@") ? rawValue.slice("carapace@".length) : rawValue;
   if (!value) {
     return "";
   }
   if (value === "latest" || value === "beta" || /^\d/.test(value)) {
-    return npmViewVersion(`openclaw@${value}`);
+    return npmViewVersion(`carapace@${value}`);
   }
   const betaMatch = /^beta(\d+)$/u.exec(value);
   if (betaMatch) {
     const betaSuffix = `-beta.${betaMatch[1]}`;
     const versions = JSON.parse(
-      run("npm", ["view", "openclaw", "versions", "--json"], { quiet: true }).stdout,
+      run("npm", ["view", "carapace", "versions", "--json"], { quiet: true }).stdout,
     ) as string[];
     const match = versions
       .filter((version) => version.endsWith(betaSuffix))
       .toSorted((a, b) => a.localeCompare(b, undefined, { numeric: true }))
       .at(-1);
     if (!match) {
-      die(`no openclaw registry version found for alias ${value}`);
+      die(`no carapace registry version found for alias ${value}`);
     }
     return match;
   }
@@ -134,7 +134,7 @@ async function ensureCurrentBuildUnlocked(input: {
   }
 }
 
-export async function packOpenClaw(input: {
+export async function packCarapace(input: {
   destination: string;
   packageSpec?: string;
   requireControlUi?: boolean;
@@ -163,19 +163,19 @@ export async function packOpenClaw(input: {
     return { path: tgzPath, version };
   }
 
-  return await withPackageLock(path.join(tmpdir(), "openclaw-parallels-build.lock"), async () => {
+  return await withPackageLock(path.join(tmpdir(), "carapace-parallels-build.lock"), async () => {
     await ensureCurrentBuildUnlocked({
       checkDirty: true,
       requireControlUi: input.requireControlUi,
     });
     const shortHead = run("git", ["rev-parse", "--short", "HEAD"], { quiet: true }).stdout.trim();
-    const tgzPath = path.join(input.destination, `openclaw-main-${shortHead}.tgz`);
+    const tgzPath = path.join(input.destination, `carapace-main-${shortHead}.tgz`);
     // The canonical helper inventories the package, bundles private workspace runtime code,
     // and rejects tarballs that still depend on unpublished workspace packages.
     const packedPath = run(
       "node",
       [
-        "scripts/package-openclaw-for-docker.mjs",
+        "scripts/package-carapace-for-docker.mjs",
         "--allow-unreleased-changelog",
         "--skip-build",
         "--source-dir",
@@ -239,8 +239,8 @@ async function acquirePackageLock(
   ownerToken: string,
   params: { writeOwner?: (lockDir: string, ownerToken: string) => Promise<void> } = {},
 ): Promise<void> {
-  const timeoutMs = readPositiveIntEnv("OPENCLAW_PARALLELS_PACKAGE_LOCK_TIMEOUT_MS", 30 * 60_000);
-  const staleMs = readPositiveIntEnv("OPENCLAW_PARALLELS_PACKAGE_LOCK_STALE_MS", 2 * 60 * 60_000);
+  const timeoutMs = readPositiveIntEnv("CARAPACE_PARALLELS_PACKAGE_LOCK_TIMEOUT_MS", 30 * 60_000);
+  const staleMs = readPositiveIntEnv("CARAPACE_PARALLELS_PACKAGE_LOCK_STALE_MS", 2 * 60 * 60_000);
   const startedAt = Date.now();
   let waitAnnouncementBudget = 1;
   const consumeWaitAnnouncement = () => waitAnnouncementBudget-- > 0;

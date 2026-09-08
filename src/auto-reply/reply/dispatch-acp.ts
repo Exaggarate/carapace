@@ -1,14 +1,14 @@
 // Dispatches reply turns through ACP runtimes and projects their events.
-import { resolveAcpThreadSessionDetailLines } from "@openclaw/acp-core/runtime/session-identifiers";
+import { resolveAcpThreadSessionDetailLines } from "@carapace/acp-core/runtime/session-identifiers";
 import {
   isSessionIdentityPending,
   resolveSessionIdentityFromMeta,
-} from "@openclaw/acp-core/runtime/session-identity";
+} from "@carapace/acp-core/runtime/session-identity";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { AcpTurnAttachment } from "../../acp/control-plane/manager.types.js";
 import { resolveAcpAgentPolicyError, resolveAcpDispatchPolicyError } from "../../acp/policy.js";
 import {
@@ -37,7 +37,7 @@ import type { ChatType } from "../../channels/chat-type.js";
 import { readChannelContextAdmissionEvidence } from "../../channels/message-access/admission-evidence.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import type { PrepareAssistantTranscriptMessage } from "../../config/sessions/transcript-assistant-delivery.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { TtsAutoMode } from "../../config/types.tts.js";
 import { logVerbose } from "../../globals.js";
 import { isDiagnosticsEnabled } from "../../infra/diagnostic-events.js";
@@ -194,7 +194,7 @@ function isRestrictiveRuntimeToolsAllow(toolsAllow: string[] | undefined): boole
 }
 
 async function hasBoundConversationForSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   channelRaw: string | undefined;
   accountIdRaw: string | undefined;
@@ -306,7 +306,7 @@ async function maybeUnbindStaleBoundConversations(params: {
 }
 
 async function finalizeAcpTurnOutput(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   delivery: AcpDispatchDeliveryCoordinator;
@@ -444,7 +444,7 @@ async function finalizeAcpTurnOutput(params: {
 
 export async function tryDispatchAcpReplyCore(params: {
   ctx: FinalizedRuntimeMsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   dispatcher: ReplyDispatcher;
   runId?: string;
   sessionKey?: string;

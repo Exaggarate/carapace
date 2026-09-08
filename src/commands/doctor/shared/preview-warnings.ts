@@ -1,5 +1,5 @@
 // Doctor preview warning aggregation for config that can surprise users before repair.
-import { isRecord as hasRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as hasRecord } from "@carapace/normalization-core/record-coerce";
 import { listAgentEntries, resolveAgentConfig } from "../../../agents/agent-scope-config.js";
 import {
   normalizeToolProviderPolicyKey,
@@ -8,7 +8,7 @@ import {
 } from "../../../agents/provider-tool-policy.js";
 import { isToolAllowedByPolicyName } from "../../../agents/tool-policy-match.js";
 import { mergeAlsoAllowPolicy, resolveToolProfilePolicy } from "../../../agents/tool-policy.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { ToolPolicyConfig } from "../../../config/types.tools.js";
 import type { PluginMetadataSnapshotScopeRunner } from "../../../plugins/current-plugin-metadata-snapshot.js";
 import { collectChannelRouteTargets } from "../../../routing/channel-route-targets.js";
@@ -28,11 +28,11 @@ const channelDoctorModuleLoader = createLazyImportLoader<ChannelDoctorModule>(
   () => import("./channel-doctor.js"),
 );
 
-function listAgentRecords(cfg: OpenClawConfig) {
+function listAgentRecords(cfg: CarapaceConfig) {
   return listAgentEntries(cfg).filter(hasRecord);
 }
 
-function hasPluginLoadPaths(cfg: OpenClawConfig): boolean {
+function hasPluginLoadPaths(cfg: CarapaceConfig): boolean {
   const plugins = cfg.plugins;
   if (!hasRecord(plugins)) {
     return false;
@@ -41,7 +41,7 @@ function hasPluginLoadPaths(cfg: OpenClawConfig): boolean {
   return hasRecord(load) && Array.isArray(load.paths) && load.paths.length > 0;
 }
 
-function hasSubagentAllowlistConfig(cfg: OpenClawConfig): boolean {
+function hasSubagentAllowlistConfig(cfg: CarapaceConfig): boolean {
   if (Array.isArray(cfg.agents?.defaults?.subagents?.allowAgents)) {
     return true;
   }
@@ -66,7 +66,7 @@ function hasToolsBySenderKey(value: unknown): boolean {
   );
 }
 
-function hasConfiguredSafeBins(cfg: OpenClawConfig): boolean {
+function hasConfiguredSafeBins(cfg: CarapaceConfig): boolean {
   const globalExec = cfg.tools?.exec;
   if (
     hasRecord(globalExec) &&
@@ -83,7 +83,7 @@ function hasConfiguredSafeBins(cfg: OpenClawConfig): boolean {
   });
 }
 
-function resolveGroupVisibleReplyPolicy(cfg: OpenClawConfig): {
+function resolveGroupVisibleReplyPolicy(cfg: CarapaceConfig): {
   path: "messages.groupChat.visibleReplies" | "messages.visibleReplies";
   value: "automatic" | "message_tool";
 } {
@@ -115,7 +115,7 @@ function formatTargets(targets: string[]): string {
 }
 
 /** Warn when visible-reply policy selects message_tool but message is unavailable. */
-function collectVisibleReplyToolPolicyWarnings(cfg: OpenClawConfig): string[] {
+function collectVisibleReplyToolPolicyWarnings(cfg: CarapaceConfig): string[] {
   const groupPolicy = resolveGroupVisibleReplyPolicy(cfg);
   const warnings: string[] = [];
   if (groupPolicy.value === "message_tool") {
@@ -126,7 +126,7 @@ function collectVisibleReplyToolPolicyWarnings(cfg: OpenClawConfig): string[] {
     warnings.push(
       `- ${groupPolicy.path} is set to "message_tool", but the message tool is unavailable for ${formatTargets(
         targets,
-      )}; OpenClaw falls back to automatic visible replies, so normal replies may post to the source chat. Enable the message tool or set ${groupPolicy.path} to "automatic".`,
+      )}; Carapace falls back to automatic visible replies, so normal replies may post to the source chat. Enable the message tool or set ${groupPolicy.path} to "automatic".`,
     );
   }
 
@@ -139,14 +139,14 @@ function collectVisibleReplyToolPolicyWarnings(cfg: OpenClawConfig): string[] {
     warnings.push(
       `- messages.visibleReplies is set to "message_tool", but the message tool is unavailable for ${formatTargets(
         targets,
-      )}; OpenClaw falls back to automatic direct-chat replies, so normal replies may post to the source chat. Enable the message tool or set messages.visibleReplies to "automatic".`,
+      )}; Carapace falls back to automatic direct-chat replies, so normal replies may post to the source chat. Enable the message tool or set messages.visibleReplies to "automatic".`,
     );
   }
   return warnings;
 }
 
 /** Warn when routed channel agents lack the message tool required for channel actions. */
-function collectChannelBoundMessageToolPolicyWarnings(cfg: OpenClawConfig): string[] {
+function collectChannelBoundMessageToolPolicyWarnings(cfg: CarapaceConfig): string[] {
   return collectChannelRouteTargets(cfg).flatMap((target) => {
     const agentTools = resolveAgentConfig(cfg, target.agentId)?.tools;
     const runtimeMayAllowMessage =
@@ -416,7 +416,7 @@ function collectInheritedByProviderConfiguredToolSectionWarnings(params: {
 }
 
 /** Warn when configured tool sections no longer widen restrictive tool profiles. */
-function collectProfileConfiguredToolSectionWarnings(cfg: OpenClawConfig): string[] {
+function collectProfileConfiguredToolSectionWarnings(cfg: CarapaceConfig): string[] {
   const warnings: string[] = [];
   const globalTools = hasRecord(cfg.tools) ? cfg.tools : undefined;
   const globalAlsoAllow = Array.isArray(globalTools?.alsoAllow)
@@ -491,10 +491,10 @@ type DoctorPreviewNotes = {
 };
 
 export async function resolveDoctorChannelPreviewConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   allowExec?: boolean;
-}): Promise<{ cfg: OpenClawConfig; diagnostics: string[] }> {
+}): Promise<{ cfg: CarapaceConfig; diagnostics: string[] }> {
   const [{ resolveCommandSecretRefsViaGateway }, { getConfiguredChannelsCommandSecretTargetIds }] =
     await Promise.all([
       import("../../../cli/command-secret-gateway.js"),
@@ -517,8 +517,8 @@ export async function resolveDoctorChannelPreviewConfig(params: {
 
 /** Collect info and warning notes for doctor preview mode. */
 export async function collectDoctorPreviewNotes(params: {
-  cfg: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   doctorFixCommand: string;
   env?: NodeJS.ProcessEnv;
   allowExec?: boolean;

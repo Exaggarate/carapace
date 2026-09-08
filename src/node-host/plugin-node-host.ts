@@ -1,8 +1,8 @@
 /** Plugin node-host bridge for loading plugin registry commands and dispatching node capabilities. */
-import { asOptionalRecord as normalizeRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord as normalizeRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { NodePluginToolDescriptor } from "../../packages/gateway-protocol/src/schema/nodes.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   parseComputerUseCapabilityDescriptor,
   type ComputerUseCapabilityDescriptor,
@@ -14,10 +14,10 @@ import type {
 import { getActivePluginRegistry } from "../plugins/runtime.js";
 import { withPluginRuntimeRegistryScope } from "../plugins/runtime/gateway-request-scope.js";
 import type {
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeHostCommandIo,
+  CarapacePluginNodeHostCommandAvailabilityContext,
+  CarapacePluginNodeHostCommandIo,
 } from "../plugins/types.js";
-import type { OpenClawPluginNodeHostCommandContext } from "../plugins/types.node-host.js";
+import type { CarapacePluginNodeHostCommandContext } from "../plugins/types.node-host.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { preparePluginExecAuthorization } from "./plugin-exec-policy.js";
 
@@ -39,7 +39,7 @@ function resolveNodeHostPluginRegistry() {
 
 /** Ensure plugin registry data is loaded before node-host command dispatch. */
 export async function ensureNodeHostPluginRegistry(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<void> {
   const registry = (await loadPluginRegistryLoaderModule()).loadPluginRegistryHandle({
@@ -62,7 +62,7 @@ export async function ensureNodeHostPluginRegistry(params: {
 
 /** List registered node-host capabilities and command ids in deterministic order. */
 export function listRegisteredNodeHostCapsAndCommands(
-  context: OpenClawPluginNodeHostCommandAvailabilityContext,
+  context: CarapacePluginNodeHostCommandAvailabilityContext,
   options: { includeDuplex?: boolean } = {},
 ): {
   caps: string[];
@@ -111,7 +111,7 @@ export function listRegisteredNodeHostCapsAndCommands(
 
 /** Watch plugin-owned availability inputs that can change during this process. */
 export function watchRegisteredNodeHostCommandAvailability(
-  context: OpenClawPluginNodeHostCommandAvailabilityContext,
+  context: CarapacePluginNodeHostCommandAvailabilityContext,
   onChange: () => void,
 ): () => void {
   const registry = resolveNodeHostPluginRegistry();
@@ -197,8 +197,8 @@ function buildNodePluginToolDescriptor(
 export async function invokeRegisteredNodeHostCommand(
   command: string,
   paramsJSON?: string | null,
-  io?: OpenClawPluginNodeHostCommandIo,
-  context?: OpenClawPluginNodeHostCommandContext,
+  io?: CarapacePluginNodeHostCommandIo,
+  context?: CarapacePluginNodeHostCommandContext,
 ): Promise<string | null> {
   const registry = resolveNodeHostPluginRegistry();
   const match = (registry?.nodeHostCommands ?? []).find(
@@ -270,7 +270,7 @@ function resetNodeHostPluginRegistry(): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.nodeHostPluginTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.nodeHostPluginTestApi")] = {
     getNodeHostPluginRegistry: () => nodeHostPluginRegistry,
     resetNodeHostPluginRegistry,
   };

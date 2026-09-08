@@ -9,7 +9,7 @@ import { Command } from "commander";
 import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import { TEST_TLS_CERT_PEM, TEST_TLS_KEY_PEM } from "../../../test/helpers/tls-fixture.js";
-import type { StaleOpenClawUpdateLaunchdJob } from "../../daemon/launchd.js";
+import type { StaleCarapaceUpdateLaunchdJob } from "../../daemon/launchd.js";
 import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
 import { createMockGatewayService } from "../../daemon/service.test-helpers.js";
 import { gatewayEdgeAuthValueForTarget } from "../../gateway/edge-auth.js";
@@ -62,8 +62,8 @@ const inspectGatewayTlsCertificate = vi.fn(async (_cfg?: unknown) => ({
   value: { cert: "public-certificate", fingerprintSha256: "sha256:11:22:33:44" },
 }));
 const findExtraGatewayServices = vi.fn(async (_env?: unknown, _opts?: unknown) => []);
-const findStaleOpenClawUpdateLaunchdJobs = vi.fn<
-  (env?: NodeJS.ProcessEnv) => Promise<StaleOpenClawUpdateLaunchdJob[]>
+const findStaleCarapaceUpdateLaunchdJobs = vi.fn<
+  (env?: NodeJS.ProcessEnv) => Promise<StaleCarapaceUpdateLaunchdJob[]>
 >(async () => []);
 type PortUsageTestSummary = {
   port: number;
@@ -163,8 +163,8 @@ const serviceReadCommand = vi.fn<
 >(async (_env?: NodeJS.ProcessEnv) => ({
   programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
   environment: {
-    OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-    OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+    CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+    CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
   },
 }));
 const resolveGatewayBindHost = vi.fn(
@@ -177,10 +177,10 @@ const resolveAdvertisedControlUiLinks = vi.fn(async (_opts?: unknown) => ({
 const pickPrimaryTailnetIPv4 = vi.fn(() => "100.64.0.9");
 const resolveGatewayPort = vi.fn((_cfg?: unknown, _env?: unknown) => 18789);
 const resolveStateDir = vi.fn(
-  (env: NodeJS.ProcessEnv) => env.OPENCLAW_STATE_DIR ?? "/tmp/openclaw-cli",
+  (env: NodeJS.ProcessEnv) => env.CARAPACE_STATE_DIR ?? "/tmp/carapace-cli",
 );
 const resolveConfigPath = vi.fn((env: NodeJS.ProcessEnv, stateDir: string) => {
-  return env.OPENCLAW_CONFIG_PATH ?? `${stateDir}/openclaw.json`;
+  return env.CARAPACE_CONFIG_PATH ?? `${stateDir}/carapace.json`;
 });
 const createConfigIOCalls = vi.fn(
   (configPath: string, pluginValidation?: "full" | "skip", observe?: boolean) => ({
@@ -229,7 +229,7 @@ vi.mock("../../config/io.runtime.js", () => ({
     observe?: boolean;
     pluginValidation?: "full" | "skip";
   }) => {
-    const isDaemon = configPath.includes("/openclaw-daemon/");
+    const isDaemon = configPath.includes("/carapace-daemon/");
     const runtimeConfig = isDaemon ? daemonLoadedConfig : cliLoadedConfig;
     const warnings = isDaemon ? daemonConfigWarnings : cliConfigWarnings;
     createConfigIOCalls(configPath, pluginValidation, observe);
@@ -265,8 +265,8 @@ vi.mock("../../daemon/inspect.js", () => ({
 
 vi.mock("../../daemon/launchd.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../daemon/launchd.js")>()),
-  findStaleOpenClawUpdateLaunchdJobs: (env?: NodeJS.ProcessEnv) =>
-    findStaleOpenClawUpdateLaunchdJobs(env),
+  findStaleCarapaceUpdateLaunchdJobs: (env?: NodeJS.ProcessEnv) =>
+    findStaleCarapaceUpdateLaunchdJobs(env),
 }));
 
 vi.mock("../../daemon/service-audit.js", () => ({
@@ -384,20 +384,20 @@ async function withStatusConfig<T>(
   run: (configPath: string) => Promise<T>,
   includeServiceEnv = false,
 ): Promise<T> {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-status-config-"));
-  const configPath = path.join(tmp, "openclaw.json");
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-status-config-"));
+  const configPath = path.join(tmp, "carapace.json");
   if (rawConfig !== undefined) {
     await fs.writeFile(configPath, rawConfig);
   }
-  setTestEnvValue("OPENCLAW_STATE_DIR", tmp);
-  setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+  setTestEnvValue("CARAPACE_STATE_DIR", tmp);
+  setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
   serviceReadCommand.mockResolvedValueOnce({
     programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
     ...(includeServiceEnv
       ? {
           environment: {
-            OPENCLAW_STATE_DIR: tmp,
-            OPENCLAW_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: tmp,
+            CARAPACE_CONFIG_PATH: configPath,
           },
         }
       : {}),
@@ -415,28 +415,28 @@ describe("gatherDaemonStatus", () => {
   beforeEach(() => {
     readFileSpy = vi.spyOn(fs, "readFile").mockImplementation(async (filePath, options) => {
       if (
-        filePath === "/tmp/openclaw-cli/openclaw.json" ||
-        filePath === "/tmp/openclaw-daemon/openclaw.json"
+        filePath === "/tmp/carapace-cli/carapace.json" ||
+        filePath === "/tmp/carapace-daemon/carapace.json"
       ) {
         throw Object.assign(new Error("test config requires full IO"), { code: "EACCES" });
       }
       return await readFile(filePath, options);
     });
     envSnapshot = captureEnv([
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_GATEWAY_PORT",
-      "OPENCLAW_GATEWAY_URL",
-      "OPENCLAW_GATEWAY_TOKEN",
-      "OPENCLAW_GATEWAY_PASSWORD",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_CONFIG_PATH",
+      "CARAPACE_GATEWAY_PORT",
+      "CARAPACE_GATEWAY_URL",
+      "CARAPACE_GATEWAY_TOKEN",
+      "CARAPACE_GATEWAY_PASSWORD",
       "DAEMON_GATEWAY_TOKEN",
       "DAEMON_GATEWAY_PASSWORD",
     ]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", "/tmp/openclaw-cli");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", "/tmp/openclaw-cli/openclaw.json");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_PASSWORD");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_URL");
+    setTestEnvValue("CARAPACE_STATE_DIR", "/tmp/carapace-cli");
+    setTestEnvValue("CARAPACE_CONFIG_PATH", "/tmp/carapace-cli/carapace.json");
+    deleteTestEnvValue("CARAPACE_GATEWAY_TOKEN");
+    deleteTestEnvValue("CARAPACE_GATEWAY_PASSWORD");
+    deleteTestEnvValue("CARAPACE_GATEWAY_URL");
     deleteTestEnvValue("DAEMON_GATEWAY_TOKEN");
     deleteTestEnvValue("DAEMON_GATEWAY_PASSWORD");
     isDefaultInstallIdentity.mockReset().mockReturnValue(true);
@@ -454,8 +454,8 @@ describe("gatherDaemonStatus", () => {
     );
     resolveGatewayProbeAuthSafeWithSecretInputsCalls.mockClear();
     createConfigIOCalls.mockClear();
-    findStaleOpenClawUpdateLaunchdJobs.mockReset();
-    findStaleOpenClawUpdateLaunchdJobs.mockResolvedValue([]);
+    findStaleCarapaceUpdateLaunchdJobs.mockReset();
+    findStaleCarapaceUpdateLaunchdJobs.mockResolvedValue([]);
     loadInstalledPluginIndexInstallRecords.mockClear();
     loadInstalledPluginIndexInstallRecords.mockResolvedValue({});
     fetchNpmPackageTargetStatus.mockClear();
@@ -623,13 +623,13 @@ describe("gatherDaemonStatus", () => {
       serviceReadCommand.mockResolvedValueOnce({
         programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
         environment: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-          OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
-          OPENCLAW_GATEWAY_TOKEN: "service-env-token",
+          CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+          CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
+          CARAPACE_GATEWAY_TOKEN: "service-env-token",
         },
       });
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", "ambient-token");
-      setTestEnvValue("OPENCLAW_GATEWAY_URL", "wss://ambient.example:19444");
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", "ambient-token");
+      setTestEnvValue("CARAPACE_GATEWAY_URL", "wss://ambient.example:19444");
 
       const status = await gatherStatus({ requireRpc });
       const input = callArg(callGatewayStatusProbe) as Parameters<
@@ -694,7 +694,7 @@ describe("gatherDaemonStatus", () => {
         },
       };
       const originalConfig = structuredClone(daemonLoadedConfig);
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", "ambient-token");
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", "ambient-token");
       await gatherStatus({
         rpc: { url: "wss://explicit.example:19445", ...auth },
         allowExecSecretRefs: false,
@@ -892,7 +892,7 @@ describe("gatherDaemonStatus", () => {
               tls: undefined,
             },
           },
-          configPath: "/tmp/openclaw-cli/openclaw.json",
+          configPath: "/tmp/carapace-cli/carapace.json",
         }),
       );
       expect(writeJson).toHaveBeenCalledWith(
@@ -976,8 +976,8 @@ describe("gatherDaemonStatus", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "--max-heap-size=8192", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+        CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+        CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
         NODE_OPTIONS: "--max-old-space-size=6144",
       },
     });
@@ -1034,7 +1034,7 @@ describe("gatherDaemonStatus", () => {
       configPath?: string;
     };
     expect(probeInput.requireRpc).toBe(true);
-    expect(probeInput.configPath).toBe("/tmp/openclaw-daemon/openclaw.json");
+    expect(probeInput.configPath).toBe("/tmp/carapace-daemon/carapace.json");
   });
 
   it("reuses the shared CLI config snapshot when the daemon uses the same config path", async () => {
@@ -1045,7 +1045,7 @@ describe("gatherDaemonStatus", () => {
     await gatherStatus();
 
     expect(readConfigFileSnapshotCalls).toHaveBeenCalledTimes(1);
-    expect(readConfigFileSnapshotCalls).toHaveBeenCalledWith("/tmp/openclaw-cli/openclaw.json");
+    expect(readConfigFileSnapshotCalls).toHaveBeenCalledWith("/tmp/carapace-cli/carapace.json");
     expect(loadConfigCalls).not.toHaveBeenCalled();
   });
 
@@ -1120,19 +1120,19 @@ describe("gatherDaemonStatus", () => {
   ])(
     "uses the active %s context instead of an unrelated native service",
     async (_, isDefault, external) => {
-      setTestEnvValue("OPENCLAW_GATEWAY_PORT", "18900");
+      setTestEnvValue("CARAPACE_GATEWAY_PORT", "18900");
       isDefaultInstallIdentity.mockReturnValue(isDefault);
       isGatewayExternallySupervised.mockReturnValue(external);
       serviceReadCommand.mockResolvedValueOnce({
         programArguments: ["/bin/node", "cli", "gateway", "--port", "18789"],
         environment: {
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_CONFIG_PATH: "/tmp/legacy-openclaw/openclaw.json",
-          OPENCLAW_STATE_DIR: "/tmp/legacy-openclaw",
+          CARAPACE_GATEWAY_PORT: "18789",
+          CARAPACE_CONFIG_PATH: "/tmp/legacy-carapace/carapace.json",
+          CARAPACE_STATE_DIR: "/tmp/legacy-carapace",
         },
       });
       resolveGatewayPort.mockImplementation((_cfg?: unknown, env?: unknown) =>
-        Number((env as NodeJS.ProcessEnv | undefined)?.OPENCLAW_GATEWAY_PORT ?? 18789),
+        Number((env as NodeJS.ProcessEnv | undefined)?.CARAPACE_GATEWAY_PORT ?? 18789),
       );
       callGatewayStatusProbe.mockResolvedValueOnce({
         ok: false,
@@ -1142,7 +1142,7 @@ describe("gatherDaemonStatus", () => {
       loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
         whatsapp: {
           source: "npm",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@carapace/whatsapp",
           resolvedVersion: "2026.5.4",
         },
       } as never);
@@ -1171,13 +1171,13 @@ describe("gatherDaemonStatus", () => {
           tls: undefined,
         },
       });
-      expect(probeInput.configPath).toBe("/tmp/openclaw-cli/openclaw.json");
+      expect(probeInput.configPath).toBe("/tmp/carapace-cli/carapace.json");
       const authInput = callArg(resolveGatewayProbeAuthSafeWithSecretInputsCalls) as {
         cfg?: unknown;
         env?: NodeJS.ProcessEnv;
       };
       expect(authInput.cfg).toBe(cliLoadedConfig);
-      expect(authInput.env?.OPENCLAW_GATEWAY_PORT).toBe("18900");
+      expect(authInput.env?.CARAPACE_GATEWAY_PORT).toBe("18900");
       expect(status.service.targetRole).toBe("diagnostic-only");
       expect(status.pluginVersionRestartReadiness).toBeUndefined();
       expect(inspectGatewayRestart).not.toHaveBeenCalled();
@@ -1212,20 +1212,20 @@ describe("gatherDaemonStatus", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_GATEWAY_PORT: "19001",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+        CARAPACE_GATEWAY_PORT: "19001",
+        CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
+        CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
       } as Record<string, string>,
     });
     serviceReadRuntime.mockImplementationOnce(async (env?: NodeJS.ProcessEnv) => ({
-      status: env?.OPENCLAW_GATEWAY_PORT === "19001" ? "running" : "unknown",
-      detail: env?.OPENCLAW_GATEWAY_PORT ?? "missing-port",
+      status: env?.CARAPACE_GATEWAY_PORT === "19001" ? "running" : "unknown",
+      detail: env?.CARAPACE_GATEWAY_PORT ?? "missing-port",
     }));
 
     const status = await gatherStatus({ probe: false });
 
     expect(
-      serviceReadRuntime.mock.calls.some(([env]) => env?.OPENCLAW_GATEWAY_PORT === "19001"),
+      serviceReadRuntime.mock.calls.some(([env]) => env?.CARAPACE_GATEWAY_PORT === "19001"),
     ).toBe(true);
     expect(status.service.loaded).toBe(true);
     expect(status.service.runtime?.status).toBe("running");
@@ -1286,7 +1286,7 @@ describe("gatherDaemonStatus", () => {
     expect(status.service.loaded).toBeNull();
     expect(status.service.runtime).toEqual({
       status: "unknown",
-      detail: "service runtime inspection failed; retry with openclaw gateway status --deep",
+      detail: "service runtime inspection failed; retry with carapace gateway status --deep",
       inspectionFailure: {
         code: "service-runtime-inspection-failed",
         detail: "錯誤: 系統找不到指定的檔案。",
@@ -1310,7 +1310,7 @@ describe("gatherDaemonStatus", () => {
           },
           runtime: {
             status: "unknown",
-            detail: "service runtime inspection failed; retry with openclaw gateway status --deep",
+            detail: "service runtime inspection failed; retry with carapace gateway status --deep",
             inspectionFailure: {
               code: "service-runtime-inspection-failed",
               detail: "錯誤: 系統找不到指定的檔案。",
@@ -1330,7 +1330,7 @@ describe("gatherDaemonStatus", () => {
       expect(output).toContain("Service: LaunchAgent (unknown)");
       expect(output).not.toContain("Service: LaunchAgent (not loaded)");
       expect(output).toContain(
-        "Runtime: unknown (service runtime inspection failed; retry with openclaw gateway status --deep)",
+        "Runtime: unknown (service runtime inspection failed; retry with carapace gateway status --deep)",
       );
       expect(output).not.toContain("系統找不到指定的檔案");
     } finally {
@@ -1389,8 +1389,8 @@ describe("gatherDaemonStatus", () => {
     const status = await gatherStatus({ probe: false, deep: true });
 
     const handoffInput = callArg(readGatewayRestartHandoffSync) as NodeJS.ProcessEnv;
-    expect(handoffInput.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-daemon");
-    expect(handoffInput.OPENCLAW_CONFIG_PATH).toBe("/tmp/openclaw-daemon/openclaw.json");
+    expect(handoffInput.CARAPACE_STATE_DIR).toBe("/tmp/carapace-daemon");
+    expect(handoffInput.CARAPACE_CONFIG_PATH).toBe("/tmp/carapace-daemon/carapace.json");
     expect(status.service.restartHandoff?.reason).toBe("plugin source changed");
     expect(status.service.restartHandoff?.restartKind).toBe("full-process");
     expect(status.service.restartHandoff?.supervisorMode).toBe("launchd");
@@ -1402,35 +1402,35 @@ describe("gatherDaemonStatus", () => {
       serviceReadCommand.mockResolvedValueOnce({
         programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
         environment: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-          OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
-          OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.manual-update.gateway",
+          CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+          CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
+          CARAPACE_LAUNCHD_LABEL: "ai.carapace.manual-update.gateway",
         },
       });
-      findStaleOpenClawUpdateLaunchdJobs.mockResolvedValueOnce([
+      findStaleCarapaceUpdateLaunchdJobs.mockResolvedValueOnce([
         {
-          label: "ai.openclaw.update.2026.5.12",
+          label: "ai.carapace.update.2026.5.12",
           lastExitStatus: 127,
         },
         {
-          label: "ai.openclaw.manual-update.1717168800",
+          label: "ai.carapace.manual-update.1717168800",
           lastExitStatus: 0,
         },
       ]);
 
       const status = await gatherStatus({ probe: false, deep: true });
 
-      const staleScanEnv = findStaleOpenClawUpdateLaunchdJobs.mock.calls[0]?.[0];
-      expect(staleScanEnv?.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-daemon");
-      expect(staleScanEnv?.OPENCLAW_CONFIG_PATH).toBe("/tmp/openclaw-daemon/openclaw.json");
-      expect(staleScanEnv?.OPENCLAW_LAUNCHD_LABEL).toBe("ai.openclaw.manual-update.gateway");
+      const staleScanEnv = findStaleCarapaceUpdateLaunchdJobs.mock.calls[0]?.[0];
+      expect(staleScanEnv?.CARAPACE_STATE_DIR).toBe("/tmp/carapace-daemon");
+      expect(staleScanEnv?.CARAPACE_CONFIG_PATH).toBe("/tmp/carapace-daemon/carapace.json");
+      expect(staleScanEnv?.CARAPACE_LAUNCHD_LABEL).toBe("ai.carapace.manual-update.gateway");
       expect(status.service.staleUpdateLaunchdJobs).toEqual([
         {
-          label: "ai.openclaw.update.2026.5.12",
+          label: "ai.carapace.update.2026.5.12",
           lastExitStatus: 127,
         },
         {
-          label: "ai.openclaw.manual-update.1717168800",
+          label: "ai.carapace.manual-update.1717168800",
           lastExitStatus: 0,
         },
       ]);
@@ -1441,7 +1441,7 @@ describe("gatherDaemonStatus", () => {
     await gatherStatus({ probe: false });
 
     expect(readGatewayRestartHandoffSync).not.toHaveBeenCalled();
-    expect(findStaleOpenClawUpdateLaunchdJobs).not.toHaveBeenCalled();
+    expect(findStaleCarapaceUpdateLaunchdJobs).not.toHaveBeenCalled();
     expect(inspectPortConnections).not.toHaveBeenCalled();
   });
 
@@ -1453,7 +1453,7 @@ describe("gatherDaemonStatus", () => {
           pid: 4242,
           ppid: 1,
           command: "node",
-          commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+          commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
           address: "TCP 127.0.0.1:50123->127.0.0.1:19001 (ESTABLISHED)",
           direction: "client",
         },
@@ -1468,7 +1468,7 @@ describe("gatherDaemonStatus", () => {
         pid: 4242,
         ppid: 1,
         command: "node",
-        commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+        commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
         address: "TCP 127.0.0.1:50123->127.0.0.1:19001 (ESTABLISHED)",
         direction: "client",
       },
@@ -1638,12 +1638,12 @@ describe("gatherDaemonStatus", () => {
       serviceReadCommand.mockResolvedValueOnce({
         programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
         environment: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-          OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
-          OPENCLAW_GATEWAY_PASSWORD: "local-service-password",
+          CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+          CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
+          CARAPACE_GATEWAY_PASSWORD: "local-service-password",
         },
       });
-      setTestEnvValue("OPENCLAW_GATEWAY_PASSWORD", "ambient-password");
+      setTestEnvValue("CARAPACE_GATEWAY_PASSWORD", "ambient-password");
 
       await gatherStatus();
 
@@ -1766,7 +1766,7 @@ describe("gatherDaemonStatus", () => {
         },
       },
     };
-    setTestEnvValue("OPENCLAW_GATEWAY_PASSWORD", "ambient-password"); // pragma: allowlist secret
+    setTestEnvValue("CARAPACE_GATEWAY_PASSWORD", "ambient-password"); // pragma: allowlist secret
 
     const status = await gatherDaemonStatus({
       rpc: {},
@@ -1941,8 +1941,8 @@ describe("gatherDaemonStatus", () => {
         },
       },
     };
-    setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", "env-token");
-    setTestEnvValue("OPENCLAW_GATEWAY_PASSWORD", "env-password"); // pragma: allowlist secret
+    setTestEnvValue("CARAPACE_GATEWAY_TOKEN", "env-token");
+    setTestEnvValue("CARAPACE_GATEWAY_PASSWORD", "env-password"); // pragma: allowlist secret
 
     await gatherStatus();
 
@@ -1970,7 +1970,7 @@ describe("gatherDaemonStatus", () => {
       portUsage: {
         port: 19001,
         status: "busy",
-        listeners: [{ pid: 9000, ppid: 8999, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 9000, ppid: 8999, commandLine: "carapace-gateway" }],
         hints: [],
       },
       healthy: false,
@@ -1994,7 +1994,7 @@ describe("gatherDaemonStatus", () => {
           {
             port: 19001,
             status: "busy",
-            listeners: [{ pid: 8000, ppid: 1, commandLine: "openclaw gateway" }],
+            listeners: [{ pid: 8000, ppid: 1, commandLine: "carapace gateway" }],
             hints: [],
           },
         ],
@@ -2013,8 +2013,8 @@ describe("gatherDaemonStatus", () => {
 
     expect(readLastGatewayErrorLine).toHaveBeenCalledWith(
       expect.objectContaining({
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+        CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+        CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
       }),
       { requirePatternMatch: true },
     );
@@ -2072,7 +2072,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@carapace/whatsapp",
         resolvedVersion: "2026.5.4",
       },
     } as never);
@@ -2091,21 +2091,21 @@ describe("gatherDaemonStatus", () => {
     "compares Doctor plugin readiness with the installed service when the Gateway is $name",
     async ({ runtime, probeVersion }) => {
       const packageRoot = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-restart-readiness-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-restart-readiness-")),
       );
       try {
         await fs.mkdir(path.join(packageRoot, "dist"));
         await fs.writeFile(
           path.join(packageRoot, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "2026.6.1" }),
+          JSON.stringify({ name: "carapace", version: "2026.6.1" }),
         );
         const entrypoint = path.join(packageRoot, "dist", "index.js");
         await fs.writeFile(entrypoint, "gateway");
         serviceReadCommand.mockResolvedValueOnce({
           programArguments: [process.execPath, entrypoint, "gateway", "run"],
           environment: {
-            OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-            OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+            CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
+            CARAPACE_CONFIG_PATH: "/tmp/carapace-daemon/carapace.json",
           },
         });
         serviceReadRuntime.mockResolvedValueOnce({ status: runtime });
@@ -2120,7 +2120,7 @@ describe("gatherDaemonStatus", () => {
         loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
           whatsapp: {
             source: "npm",
-            resolvedName: "@openclaw/whatsapp",
+            resolvedName: "@carapace/whatsapp",
             resolvedVersion: "2026.5.4",
           },
         } as never);
@@ -2146,7 +2146,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@carapace/whatsapp",
         resolvedVersion: "2026.5.4",
       },
     } as never);
@@ -2174,7 +2174,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@carapace/whatsapp",
         resolvedVersion: "2026.5.4",
       },
     } as never);
@@ -2204,7 +2204,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@carapace/whatsapp",
         resolvedVersion: "2026.5.3",
       },
     } as never);
@@ -2227,8 +2227,8 @@ describe("gatherDaemonStatus", () => {
       loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
         brave: {
           source: "npm",
-          spec: "@openclaw/brave-plugin@2026.7.1-beta.2",
-          resolvedName: "@openclaw/brave-plugin",
+          spec: "@carapace/brave-plugin@2026.7.1-beta.2",
+          resolvedName: "@carapace/brave-plugin",
           resolvedVersion: "2026.7.1-beta.2",
         },
       } as never);
@@ -2249,13 +2249,13 @@ describe("gatherDaemonStatus", () => {
   it("reads install records from the merged daemon service environment, not the CLI process env", async () => {
     await gatherStatus({ deep: true });
 
-    // The mock daemon service command sets OPENCLAW_STATE_DIR=/tmp/openclaw-daemon,
-    // distinct from the CLI process OPENCLAW_STATE_DIR=/tmp/openclaw-cli. Drift
+    // The mock daemon service command sets CARAPACE_STATE_DIR=/tmp/carapace-daemon,
+    // distinct from the CLI process CARAPACE_STATE_DIR=/tmp/carapace-cli. Drift
     // detection must inspect the daemon profile's install records.
     expect(loadInstalledPluginIndexInstallRecords).toHaveBeenCalledWith(
       expect.objectContaining({
         env: expect.objectContaining({
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+          CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
         }),
       }),
     );
@@ -2265,7 +2265,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@carapace/whatsapp",
         resolvedVersion: "2026.5.3",
       },
     } as never);
@@ -2275,7 +2275,7 @@ describe("gatherDaemonStatus", () => {
     expect(loadInstalledPluginIndexInstallRecords).toHaveBeenCalledWith(
       expect.objectContaining({
         env: expect.objectContaining({
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+          CARAPACE_STATE_DIR: "/tmp/carapace-daemon",
         }),
       }),
     );

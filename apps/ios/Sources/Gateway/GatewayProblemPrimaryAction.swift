@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import UIKit
 
 enum GatewayProblemPrimaryAction {

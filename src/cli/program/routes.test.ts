@@ -80,13 +80,13 @@ vi.mock("../plugins-cli.js", () => {
 });
 
 function routeArgv(args = ""): string[] {
-  return ["node", "openclaw", ...(args ? args.split(" ") : [])];
+  return ["node", "carapace", ...(args ? args.split(" ") : [])];
 }
 
 describe("program routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv("OPENCLAW_LOG_LEVEL", undefined);
+    vi.stubEnv("CARAPACE_LOG_LEVEL", undefined);
   });
   afterEach(() => vi.unstubAllEnvs());
 
@@ -265,7 +265,7 @@ describe("program routes", () => {
   });
 
   it.each([
-    ["separate empty value", ["node", "openclaw", "sessions", "--store", ""]],
+    ["separate empty value", ["node", "carapace", "sessions", "--store", ""]],
     ["empty assigned value", routeArgv("sessions --store=")],
   ])("falls back to Commander for a sessions --store $0", async (_name, argv) => {
     await expectRunFalse(argv);
@@ -393,7 +393,7 @@ describe("program routes", () => {
   ] as const)(
     "routes models $name through the canonical status owner",
     async (_name, args, expected) => {
-      const argv = ["node", "openclaw", ...args];
+      const argv = ["node", "carapace", ...args];
 
       await expect(tryRouteCli(argv)).resolves.toBe(true);
       expect(modelsStatusCommandMock).toHaveBeenCalledWith(expected, defaultRuntime);
@@ -406,7 +406,7 @@ describe("program routes", () => {
     ["missing agent", ["models", "--agent"]],
     ["argument terminator", ["models", "--", "--status-json"]],
   ])("leaves models parent %s to Commander", async (_name, args) => {
-    await expectRunFalse(["node", "openclaw", ...args]);
+    await expectRunFalse(["node", "carapace", ...args]);
     expect(modelsStatusCommandMock).not.toHaveBeenCalled();
   });
 
@@ -414,7 +414,7 @@ describe("program routes", () => {
     await expect(
       tryRouteCli([
         "node",
-        "openclaw",
+        "carapace",
         "models",
         "status",
         "--probe-provider",
@@ -450,7 +450,7 @@ describe("program routes", () => {
 
   it("routes tasks list JSON through the lean task JSON command", async () => {
     await expect(
-      tryRouteCli(["node", "openclaw", "tasks", "--json", "--runtime", "cli", "--status=running"]),
+      tryRouteCli(["node", "carapace", "tasks", "--json", "--runtime", "cli", "--status=running"]),
     ).resolves.toBe(true);
     expect(tasksListJsonCommandMock).toHaveBeenCalledWith(
       { json: true, runtime: "cli", status: "running" },
@@ -458,7 +458,7 @@ describe("program routes", () => {
     );
 
     await expect(
-      tryRouteCli(["node", "openclaw", "tasks", "list", "--json", "--runtime=cron"]),
+      tryRouteCli(["node", "carapace", "tasks", "list", "--json", "--runtime=cron"]),
     ).resolves.toBe(true);
     expect(tasksListJsonCommandMock).toHaveBeenLastCalledWith(
       { json: true, runtime: "cron", status: undefined },
@@ -468,7 +468,7 @@ describe("program routes", () => {
     await expect(
       tryRouteCli([
         "node",
-        "openclaw",
+        "carapace",
         "tasks",
         "list",
         "--json",
@@ -487,7 +487,7 @@ describe("program routes", () => {
   it("routes parent task filter values that command-path discovery sees as positionals", async () => {
     const separateValueArgv = [
       "node",
-      "openclaw",
+      "carapace",
       "tasks",
       "--json",
       "--runtime",
@@ -503,7 +503,7 @@ describe("program routes", () => {
 
     const parentOptionBeforeSubcommandArgv = [
       "node",
-      "openclaw",
+      "carapace",
       "tasks",
       "--runtime",
       "cli",
@@ -521,7 +521,7 @@ describe("program routes", () => {
     await expect(
       tryRouteCli([
         "node",
-        "openclaw",
+        "carapace",
         "tasks",
         "audit",
         "--json",
@@ -540,7 +540,7 @@ describe("program routes", () => {
     await expect(
       tryRouteCli([
         "node",
-        "openclaw",
+        "carapace",
         "tasks",
         "audit",
         "--json",
@@ -557,11 +557,11 @@ describe("program routes", () => {
   });
 
   it("returns false for task JSON routes when option values are missing or unknown", async () => {
-    await expectRunFalse(["node", "openclaw", "tasks", "--json", "--runtime"]);
-    await expectRunFalse(["node", "openclaw", "tasks", "list"]);
-    await expectRunFalse(["node", "openclaw", "tasks", "audit", "--json", "--limit"]);
-    await expectRunFalse(["node", "openclaw", "tasks", "audit", "--json", "--limit", "5abc"]);
-    await expectRunFalse(["node", "openclaw", "tasks", "audit", "--json", "--unknown"]);
-    await expectRunFalse(["node", "openclaw", "tasks", "--runtime", "cli"]);
+    await expectRunFalse(["node", "carapace", "tasks", "--json", "--runtime"]);
+    await expectRunFalse(["node", "carapace", "tasks", "list"]);
+    await expectRunFalse(["node", "carapace", "tasks", "audit", "--json", "--limit"]);
+    await expectRunFalse(["node", "carapace", "tasks", "audit", "--json", "--limit", "5abc"]);
+    await expectRunFalse(["node", "carapace", "tasks", "audit", "--json", "--unknown"]);
+    await expectRunFalse(["node", "carapace", "tasks", "--runtime", "cli"]);
   });
 });

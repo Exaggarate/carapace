@@ -42,8 +42,8 @@ describe("release plan contract", () => {
     );
     expect(() => parseReleasePlanLockJson(nestedDuplicate)).toThrow("duplicate key");
     const arrayEntryDuplicate = lockText.replace(
-      '{"name":"@openclaw/example","targets":',
-      '{"name":"ignored","name":"@openclaw/example","targets":',
+      '{"name":"@carapace/example","targets":',
+      '{"name":"ignored","name":"@carapace/example","targets":',
     );
     expect(() => parseReleasePlanLockJson(arrayEntryDuplicate)).toThrow("duplicate key");
     expect(() =>
@@ -62,7 +62,7 @@ describe("release plan contract", () => {
       "exactly one trailing LF",
     );
     expect(() =>
-      parseReleasePlanLockJson(lockText.replace("openclaw/openclaw", "opénclaw")),
+      parseReleasePlanLockJson(lockText.replace("carapace/carapace", "opénclaw")),
     ).toThrow("printable ASCII");
   });
 
@@ -308,9 +308,9 @@ describe("release plan contract", () => {
         inventory: {
           ...(sourceFixture.inventory as Record<string, unknown>),
           packages: [
-            { name: "openclaw", targets: ["npm"], version: "2026.8.1-beta.2" },
+            { name: "carapace", targets: ["npm"], version: "2026.8.1-beta.2" },
             {
-              name: "@openclaw/example",
+              name: "@carapace/example",
               targets: ["clawhub", "npm"],
               version: "2026.8.1-beta.2",
             },

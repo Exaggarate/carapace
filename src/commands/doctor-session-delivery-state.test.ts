@@ -8,11 +8,11 @@ import {
   rewriteDoctorSessionEntries,
 } from "../config/sessions/session-accessor.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   repairCanonicalSessionDeliveryStates,
   repairCanonicalSessionResolvedSkills,
@@ -22,8 +22,8 @@ import { repairReservedIncognitoSessionKeys } from "./doctor-session-incognito-k
 const tempDirs = createTempDirTracker();
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -33,7 +33,7 @@ function insertSessionRow(
   entry: Record<string, unknown>,
   agentId = "main",
 ): void {
-  const database = openOpenClawAgentDatabase({ agentId, env });
+  const database = openCarapaceAgentDatabase({ agentId, env });
   database.db
     .prepare(
       "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at, parent_session_key, spawned_by) VALUES (?, ?, ?, ?, ?, ?)",
@@ -73,7 +73,7 @@ function insertSessionRow(
 }
 
 function readEntryJson(env: NodeJS.ProcessEnv, sessionKey: string, agentId = "main"): string {
-  const database = openOpenClawAgentDatabase({ agentId, env });
+  const database = openCarapaceAgentDatabase({ agentId, env });
   const row = database.db
     .prepare("SELECT entry_json FROM session_nodes WHERE session_key = ?")
     .get(sessionKey) as { entry_json: string };
@@ -81,7 +81,7 @@ function readEntryJson(env: NodeJS.ProcessEnv, sessionKey: string, agentId = "ma
 }
 
 function readEntryValidity(env: NodeJS.ProcessEnv, sessionKey: string): number {
-  const database = openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env });
   const row = database.db
     .prepare("SELECT entry_valid FROM session_nodes WHERE session_key = ?")
     .get(sessionKey) as { entry_valid: number };
@@ -90,8 +90,8 @@ function readEntryValidity(env: NodeJS.ProcessEnv, sessionKey: string): number {
 
 describe("doctor canonical session delivery state", () => {
   it("rewrites dense delivery migrations in bounded transactions without changing payloads", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-density-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-density-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const payload = "delivery-payload-".repeat(128);
     for (let index = 0; index < 130; index += 1) {
       insertSessionRow(env, `agent:main:delivery-density-${String(index).padStart(3, "0")}`, {
@@ -102,7 +102,7 @@ describe("doctor canonical session delivery state", () => {
         payload,
       });
     }
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     const originalExec = database.db.exec.bind(database.db);
     let writeTransactions = 0;
     vi.spyOn(database.db, "exec").mockImplementation((sql) => {
@@ -133,11 +133,11 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("warns and skips an unmigrated agent database", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-legacy-schema-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-legacy-schema-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     database.db.exec("PRAGMA user_version = 8;");
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     expect(repairCanonicalSessionDeliveryStates({ apply: true, cfg: {}, env })).toEqual({
       found: 0,
@@ -147,8 +147,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("keeps bare channel and origin metadata below explicit delivery context", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-fallback-order-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-fallback-order-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:explicit", {
       sessionId: "explicit-session",
       updatedAt: 10,
@@ -201,15 +201,15 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("keeps rewritten delivery rows valid for normal session reads", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-validity-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-validity-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const sessionKey = "agent:main:delivery-validity";
     insertSessionRow(env, sessionKey, {
       sessionId: "delivery-validity-session",
       updatedAt: 10,
       deliveryContext: { channel: "telegram", to: "recipient" },
     });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     database.db
       .prepare("UPDATE session_nodes SET entry_valid = 1 WHERE session_key = ?")
       .run(sessionKey);
@@ -220,7 +220,7 @@ describe("doctor canonical session delivery state", () => {
       scannedStores: 1,
     });
     expect(readEntryValidity(env, sessionKey)).toBe(1);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(listSessionEntriesCore({ agentId: "main", env })).toMatchObject([
       { sessionKey, entry: { sessionId: "delivery-validity-session", updatedAt: 10 } },
     ]);
@@ -232,8 +232,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("publishes repaired delivery accounts to the existing SQLite connection without aging sessions", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-warm-cache-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-warm-cache-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const sessionKey = "agent:main:delivery-warm-cache";
     insertSessionRow(env, sessionKey, {
       sessionId: "delivery-warm-cache-session",
@@ -266,8 +266,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("publishes cross-agent incognito parent rewrites to each existing SQLite connection", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-incognito-warm-cache-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-incognito-warm-cache-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const oldParentKey = "agent:main:dashboard:incognito-warm-cache";
     const newParentKey = "agent:main:dashboard:legacy-incognito-warm-cache";
     const childKey = "agent:work:dashboard:child";
@@ -304,8 +304,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("preserves shipped last-route precedence over stale explicit context", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-precedence-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-precedence-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:precedence", {
       sessionId: "precedence-session",
       updatedAt: 10,
@@ -342,8 +342,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("recovers a legacy route after an unrelated runtime write stamps delivery none", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-none-stamp-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-none-stamp-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:stamped-none", {
       sessionId: "stamped-none-session",
       updatedAt: 10,
@@ -365,8 +365,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("preserves explicit legacy channel ownership without a recipient", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-channel-only-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-channel-only-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:channel-only", {
       sessionId: "channel-only-session",
       updatedAt: 10,
@@ -386,8 +386,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("recovers an external legacy route after an internal transition stamp", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-internal-stamp-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-internal-stamp-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:stamped-internal", {
       sessionId: "stamped-internal-session",
       updatedAt: 10,
@@ -409,8 +409,8 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("promotes legacy internal origin chat type before removing origin", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-internal-chat-type-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-internal-chat-type-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:internal-chat", {
       sessionId: "internal-chat-session",
       updatedAt: 10,
@@ -430,14 +430,14 @@ describe("doctor canonical session delivery state", () => {
   });
 
   it("skips structurally invalid row JSON while repairing valid sessions", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-invalid-row-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-delivery-invalid-row-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     insertSessionRow(env, "agent:main:legacy", {
       sessionId: "legacy-session",
       updatedAt: 10,
       deliveryContext: { channel: "telegram", to: "-1001" },
     });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     const insertInvalid = database.db.prepare(
       "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at) VALUES (?, ?, ?, ?)",
     );
@@ -455,15 +455,15 @@ describe("doctor canonical session delivery state", () => {
     expect(readEntryJson(env, "agent:main:invalid")).toBe("null");
     expect(readEntryJson(env, "agent:main:invalid-object")).toBe(invalidObjectJson);
     expect(readEntryValidity(env, "agent:main:invalid-object")).toBe(0);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(() => listSessionEntriesCore({ agentId: "main", env })).toThrow(
       /invalid persisted session row requires repair/u,
     );
   });
 
   it("migrates a copied realistic store without touching the source or canonical row bytes", () => {
-    const sourceStateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-source-"));
-    const sourceEnv = { ...process.env, OPENCLAW_STATE_DIR: sourceStateDir };
+    const sourceStateDir = fs.realpathSync(tempDirs.make("carapace-delivery-source-"));
+    const sourceEnv = { ...process.env, CARAPACE_STATE_DIR: sourceStateDir };
     const canonicalEntry = {
       sessionId: "canonical-session",
       updatedAt: 30,
@@ -516,12 +516,12 @@ describe("doctor canonical session delivery state", () => {
     insertSessionRow(sourceEnv, "agent:main:canonical", canonicalEntry);
     const canonicalJson = JSON.stringify(canonicalEntry);
     const sourceLegacyJson = readEntryJson(sourceEnv, "agent:main:legacy");
-    const sourcePath = resolveOpenClawAgentSqlitePath({ agentId: "main", env: sourceEnv });
-    closeOpenClawAgentDatabasesForTest();
+    const sourcePath = resolveCarapaceAgentSqlitePath({ agentId: "main", env: sourceEnv });
+    closeCarapaceAgentDatabasesForTest();
 
-    const copiedStateDir = fs.realpathSync(tempDirs.make("openclaw-delivery-copy-"));
-    const copiedEnv = { ...process.env, OPENCLAW_STATE_DIR: copiedStateDir };
-    const copiedPath = resolveOpenClawAgentSqlitePath({ agentId: "main", env: copiedEnv });
+    const copiedStateDir = fs.realpathSync(tempDirs.make("carapace-delivery-copy-"));
+    const copiedEnv = { ...process.env, CARAPACE_STATE_DIR: copiedStateDir };
+    const copiedPath = resolveCarapaceAgentSqlitePath({ agentId: "main", env: copiedEnv });
     fs.mkdirSync(path.dirname(copiedPath), { recursive: true });
     fs.copyFileSync(sourcePath, copiedPath);
 
@@ -537,7 +537,7 @@ describe("doctor canonical session delivery state", () => {
       repaired: 3,
       scannedStores: 1,
     });
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(listSessionEntriesCore({ agentId: "main", env: copiedEnv })).toHaveLength(4);
     expect(repairCanonicalSessionDeliveryStates({ apply: true, cfg: {}, env: copiedEnv })).toEqual({
       found: 0,
@@ -596,20 +596,20 @@ describe("doctor canonical session delivery state", () => {
     });
     expect(readEntryJson(copiedEnv, "agent:main:canonical")).toBe(canonicalJson);
     expect(
-      openOpenClawAgentDatabase({ agentId: "main", env: copiedEnv })
+      openCarapaceAgentDatabase({ agentId: "main", env: copiedEnv })
         .db.prepare("SELECT channel, account_id FROM session_windows WHERE session_id = ?")
         .get("legacy-session"),
     ).toEqual({ channel: "telegram", account_id: "work" });
 
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(readEntryJson(sourceEnv, "agent:main:legacy")).toBe(sourceLegacyJson);
   });
 });
 
 describe("doctor canonical session resolved skills", () => {
   it("repairs all agents without mutating dry-run rows or losing compact snapshots", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-skills-all-agents-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-skills-all-agents-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const compactSnapshot = {
       prompt: "compact skill prompt",
       skills: [{ name: "demo" }],
@@ -671,7 +671,7 @@ describe("doctor canonical session resolved skills", () => {
       ).toEqual(compactSnapshot);
     }
 
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     for (const agentId of ["main", "work"]) {
       expect(
         listSessionEntriesCore({ agentId, clone: false, env })[0]?.entry.skillsSnapshot,

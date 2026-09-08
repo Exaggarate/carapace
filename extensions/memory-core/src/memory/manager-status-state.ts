@@ -4,8 +4,8 @@ import type { DatabaseSync } from "node:sqlite";
 import type {
   MemoryProviderStatus,
   MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { executeSqliteQuerySync, getNodeSqliteKysely } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { executeSqliteQuerySync, getNodeSqliteKysely } from "carapace/plugin-sdk/sqlite-runtime";
 
 type StatusProvider = {
   id: string;

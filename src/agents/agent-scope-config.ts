@@ -1,10 +1,10 @@
 /** Resolves configured agent ids, directories, workspaces, and merged agent defaults. */
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { formatCliCommand } from "../cli/command-format.js";
 import { getRetainedLegacyDefaultAgentId } from "../config/legacy.default-agent-owner-state.js";
 import { hasExplicitModelPolicyAllow } from "../config/model-policy-allowlist-migration.js";
@@ -13,14 +13,14 @@ import type {
   AgentContextLimitsConfig,
   AgentDefaultsConfig,
 } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { LEGACY_IMPLICIT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
 import { resolveUserPath } from "../utils.js";
 import { registerResolvedAgentDir } from "./agent-dir-registry.js";
 import { resolveDefaultAgentWorkspaceDir } from "./workspace-default.js";
 
-type AgentEntry = NonNullable<NonNullable<OpenClawConfig["agents"]>["list"]>[number];
-type AgentEntriesConfig = NonNullable<NonNullable<OpenClawConfig["agents"]>["entries"]>;
+type AgentEntry = NonNullable<NonNullable<CarapaceConfig["agents"]>["list"]>[number];
+type AgentEntriesConfig = NonNullable<NonNullable<CarapaceConfig["agents"]>["entries"]>;
 type MutableAgentEntry = AgentEntry | AgentEntriesConfig[string];
 type AgentRosterProperty = { kind: "entries" | "list"; value: unknown };
 export type ListedAgentEntry = {
@@ -99,7 +99,7 @@ type AgentRosterFacts = {
 };
 
 type AgentRosterFactsBatch = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   facts: AgentRosterFacts;
 };
 
@@ -112,7 +112,7 @@ let activeAgentRosterFactsBatch: AgentRosterFactsBatch | undefined;
  * their derived facts on this exact config and discard them before returning,
  * so later config mutations cannot observe a stale process cache.
  */
-export function withAgentRosterFactsBatch<T>(config: OpenClawConfig, callback: () => T): T {
+export function withAgentRosterFactsBatch<T>(config: CarapaceConfig, callback: () => T): T {
   const parent = activeAgentRosterFactsBatch;
   activeAgentRosterFactsBatch = parent?.config === config ? parent : { config, facts: {} };
   try {
@@ -122,14 +122,14 @@ export function withAgentRosterFactsBatch<T>(config: OpenClawConfig, callback: (
   }
 }
 
-function readAgentRosterFacts(cfg: OpenClawConfig): AgentRosterFacts | undefined {
+function readAgentRosterFacts(cfg: CarapaceConfig): AgentRosterFacts | undefined {
   return activeAgentRosterFactsBatch?.config === cfg
     ? activeAgentRosterFactsBatch.facts
     : undefined;
 }
 
 /** Lists valid configured agent entries from config. */
-export function listAgentEntriesWithSource(cfg: OpenClawConfig): ListedAgentEntry[] {
+export function listAgentEntriesWithSource(cfg: CarapaceConfig): ListedAgentEntry[] {
   const roster = readAgentRosterProperty(cfg);
   if (roster?.kind === "entries" && isRecord(roster.value)) {
     return Object.entries(roster.value).flatMap(([id, entry]) =>
@@ -154,7 +154,7 @@ export function listAgentEntriesWithSource(cfg: OpenClawConfig): ListedAgentEntr
 }
 
 /** Lists valid configured agent entries from either supported representation. */
-export function listAgentEntries(cfg: OpenClawConfig): AgentEntry[] {
+export function listAgentEntries(cfg: CarapaceConfig): AgentEntry[] {
   return listAgentEntriesWithSource(cfg).map(({ entry }) => entry);
 }
 
@@ -194,7 +194,7 @@ export function hasAgentRosterProperty(raw: unknown): boolean {
 }
 
 /** Lists unique configured agent ids. */
-export function listAgentIds(cfg: OpenClawConfig): string[] {
+export function listAgentIds(cfg: CarapaceConfig): string[] {
   const agents = listAgentEntries(cfg);
   if (agents.length === 0 && !hasAgentRosterProperty(cfg)) {
     // Match resolveDefaultAgentId's Plugin SDK compatibility for raw pre-roster configs.
@@ -214,18 +214,18 @@ export function listAgentIds(cfg: OpenClawConfig): string[] {
 }
 
 /** Returns a configured agent id or throws the canonical CLI selection error. */
-export function resolveConfiguredAgentId(cfg: OpenClawConfig, agentId: string): string {
+export function resolveConfiguredAgentId(cfg: CarapaceConfig, agentId: string): string {
   if (!listAgentIds(cfg).includes(agentId)) {
     // formatCliCommand, not a literal: under a profile or container the bare command is wrong,
     // so a hint that cannot be pasted back is worse than none.
     throw new Error(
-      `Unknown agent id "${agentId}". Run ${formatCliCommand("openclaw agents list")} to see configured agents.`,
+      `Unknown agent id "${agentId}". Run ${formatCliCommand("carapace agents list")} to see configured agents.`,
     );
   }
   return agentId;
 }
 
-export function tryResolveSoleAgentId(cfg: OpenClawConfig): string | undefined {
+export function tryResolveSoleAgentId(cfg: CarapaceConfig): string | undefined {
   const agents = listAgentEntries(cfg);
   if (agents.length === 0) {
     if (!hasAgentRosterProperty(cfg)) {
@@ -236,19 +236,19 @@ export function tryResolveSoleAgentId(cfg: OpenClawConfig): string | undefined {
   return agents.length === 1 ? normalizeAgentId(agents[0]!.id) : undefined;
 }
 
-export function resolveSoleAgentId(cfg: OpenClawConfig, context?: AgentSelectionContext): string {
+export function resolveSoleAgentId(cfg: CarapaceConfig, context?: AgentSelectionContext): string {
   const sole = tryResolveSoleAgentId(cfg);
   if (sole) {
     return sole;
   }
   const agentIds = listAgentIds(cfg);
   if (agentIds.length === 0) {
-    throw new Error("No agents configured. Run `openclaw onboard` or `openclaw agents add` first.");
+    throw new Error("No agents configured. Run `carapace onboard` or `carapace agents add` first.");
   }
   throw new AgentSelectionRequiredError(agentIds, context);
 }
 
-function tryResolveRawLegacyDefaultAgentId(cfg: OpenClawConfig): string | undefined {
+function tryResolveRawLegacyDefaultAgentId(cfg: CarapaceConfig): string | undefined {
   if (cfg.agents?.ownership === "explicit") {
     return undefined;
   }
@@ -257,7 +257,7 @@ function tryResolveRawLegacyDefaultAgentId(cfg: OpenClawConfig): string | undefi
 }
 
 /** Resolves sole/raw legacy owners plus the retained in-process migration owner. */
-export function tryResolveLegacyCompatibilityAgentId(cfg: OpenClawConfig): string | undefined {
+export function tryResolveLegacyCompatibilityAgentId(cfg: CarapaceConfig): string | undefined {
   const facts = readAgentRosterFacts(cfg);
   if (facts?.compatibilityAgentId) {
     return facts.compatibilityAgentId.value;
@@ -275,7 +275,7 @@ export function tryResolveLegacyCompatibilityAgentId(cfg: OpenClawConfig): strin
 
 /** Resolves the owner for ambient system work and explicit requests. */
 export function tryResolveAmbientOwnerAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requestedAgentId?: string,
 ): string | undefined {
   const explicitAgentId =
@@ -289,7 +289,7 @@ export function tryResolveAmbientOwnerAgentId(
 
 /** Ambient owner for surfaces that must fail loudly rather than act on the wrong agent. */
 export function resolveAmbientOwnerAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requestedAgentId?: string,
   context?: AgentSelectionContext,
 ): string {
@@ -298,7 +298,7 @@ export function resolveAmbientOwnerAgentId(
 
 /** Returns a CLI operation owner while preserving legacy defaults outside explicit fleets. */
 export function tryResolveAgentOperationAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requestedAgentId?: string,
 ): string | undefined {
   if (requestedAgentId !== undefined || cfg.agents?.ownership === "explicit") {
@@ -309,7 +309,7 @@ export function tryResolveAgentOperationAgentId(
 
 /** Resolves a CLI operation owner, requiring selection when no owner is configured. */
 export function resolveAgentOperationAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requestedAgentId?: string,
   context?: AgentSelectionContext,
 ): string {
@@ -322,18 +322,18 @@ export function resolveAgentOperationAgentId(
  * accepts raw shipped markers only for input compatibility.
  */
 export function resolveDefaultAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   context?: AgentSelectionContext,
 ): string {
   return tryResolveRawLegacyDefaultAgentId(cfg) ?? resolveSoleAgentId(cfg, context);
 }
 
 /** @deprecated Use tryResolveSoleAgentId; accepts raw shipped markers only for input compatibility. */
-export function tryResolveDefaultAgentId(cfg: OpenClawConfig): string | undefined {
+export function tryResolveDefaultAgentId(cfg: CarapaceConfig): string | undefined {
   return tryResolveRawLegacyDefaultAgentId(cfg) ?? tryResolveSoleAgentId(cfg);
 }
 
-export function resolveAgentEntry(cfg: OpenClawConfig, agentId: string): AgentEntry | undefined {
+export function resolveAgentEntry(cfg: CarapaceConfig, agentId: string): AgentEntry | undefined {
   const id = normalizeAgentId(agentId);
   const facts = readAgentRosterFacts(cfg);
   if (facts) {
@@ -375,7 +375,7 @@ export function resolveAgentEntry(cfg: OpenClawConfig, agentId: string): AgentEn
  * traversal semantics of `resolveAgentEntry` outside a batch.
  */
 function buildAgentEntryIndex(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Map<string, { clone: boolean; entry: AgentEntry }> {
   const index = new Map<string, { clone: boolean; entry: AgentEntry }>();
   for (const { entry, source } of listAgentEntriesWithSource(cfg)) {
@@ -389,7 +389,7 @@ function buildAgentEntryIndex(
 
 /** Resolves the authored entry object for in-place canonical config mutations. */
 export function resolveMutableAgentEntry(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): MutableAgentEntry | undefined {
   const id = normalizeAgentId(agentId);
@@ -407,7 +407,7 @@ export function resolveMutableAgentEntry(
 
 /** Resolves merged config for one agent id. */
 export function resolveAgentConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): ResolvedAgentConfig | undefined {
   const id = normalizeAgentId(agentId);
@@ -467,7 +467,7 @@ export function resolveAgentConfig(
 }
 
 export function resolveAgentContextLimits(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId?: string | null,
 ): AgentContextLimitsConfig | undefined {
   const defaults = cfg?.agents?.defaults?.contextLimits;
@@ -477,12 +477,12 @@ export function resolveAgentContextLimits(
   return resolveAgentConfig(cfg, agentId)?.contextLimits ?? defaults;
 }
 
-function tryResolveInheritedWorkspaceAgentId(cfg: OpenClawConfig): string | undefined {
+function tryResolveInheritedWorkspaceAgentId(cfg: CarapaceConfig): string | undefined {
   return tryResolveLegacyCompatibilityAgentId(cfg);
 }
 
 export function resolveAgentWorkspaceDir(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   env: NodeJS.ProcessEnv = process.env,
 ) {
@@ -508,7 +508,7 @@ export function resolveAgentWorkspaceDir(
 }
 
 /** Resolves the configured task directory without changing the agent workspace. */
-export function resolveAgentRunCwd(cfg: OpenClawConfig, agentId: string): string | undefined {
+export function resolveAgentRunCwd(cfg: CarapaceConfig, agentId: string): string | undefined {
   const cwd =
     normalizeOptionalString(resolveAgentEntry(cfg, agentId)?.cwd) ??
     normalizeOptionalString(cfg.agents?.defaults?.cwd);
@@ -536,7 +536,7 @@ export type AgentWorkspaceProvisioning = "standard" | "runtime-managed-implicit"
  * keeps standard provisioning.
  */
 export function resolveAgentWorkspaceProvisioning(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   invocation?: {
     /** Effective cwd for this invocation, if known. */
@@ -577,13 +577,13 @@ export function resolveAgentWorkspaceProvisioning(
  * ACP agents without an explicit workspace, so heavier invocation-cwd lookups
  * (configured binding resolution) stay off embedded/default agent turns.
  */
-export function isImplicitAcpWorkspaceCandidate(cfg: OpenClawConfig, agentId: string): boolean {
+export function isImplicitAcpWorkspaceCandidate(cfg: CarapaceConfig, agentId: string): boolean {
   const entry = resolveAgentConfig(cfg, normalizeAgentId(agentId));
   return entry?.runtime?.type === "acp" && !entry.workspace?.trim();
 }
 
 export function tryResolveConfiguredAgentWorkspaceDir(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
   const inheritedWorkspaceAgentId = tryResolveInheritedWorkspaceAgentId(cfg);
@@ -595,7 +595,7 @@ export function tryResolveConfiguredAgentWorkspaceDir(
 }
 
 export function resolveAgentDir(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   env: NodeJS.ProcessEnv = process.env,
 ) {
@@ -613,7 +613,7 @@ export function resolveAgentDir(
 }
 
 export function resolveDefaultAgentDir(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): string {
   return resolveAgentDir(cfg, resolveAmbientOwnerAgentId(cfg), env);

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
 import { describe, expect, it, vi } from "vitest";
 import { resolveAgentModelFallbacksOverride } from "../agents/agent-scope.js";
 import { loadPersistedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
@@ -332,7 +332,7 @@ describe("doctor retired model references", () => {
     });
     expect(result.changes.join("\n")).toContain("inherit");
     expect(saved.enabled).toBe(false);
-    expect(result.changes.join("\n")).toContain("openclaw automations enable retired-cron");
+    expect(result.changes.join("\n")).toContain("carapace automations enable retired-cron");
   });
 
   it.each([

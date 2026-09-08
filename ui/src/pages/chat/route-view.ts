@@ -71,7 +71,7 @@ export function renderChatRoute(data: unknown, _loaderPending = false, presented
   if (routeData.kind === "missing-session") {
     return renderMissingSession(routeData);
   }
-  return html`<openclaw-chat-page .data=${routeData} .presented=${presented}></openclaw-chat-page>`;
+  return html`<carapace-chat-page .data=${routeData} .presented=${presented}></carapace-chat-page>`;
 }
 
 export function sessionRenderOwnerKey(

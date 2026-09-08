@@ -1,16 +1,16 @@
 // Whatsapp plugin module implements auth store behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatCliCommand } from "openclaw/plugin-sdk/cli-runtime";
-import { isPathStrictlyInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
+import { formatCliCommand } from "carapace/plugin-sdk/cli-runtime";
+import { isPathStrictlyInside } from "carapace/plugin-sdk/file-access-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/routing";
 import {
   info,
   success,
   getChildLogger,
   defaultRuntime,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/runtime-env";
 import { resolveOAuthDir } from "./auth-store.runtime.js";
 import {
   assertWebCredsPathRegularFileOrMissing,
@@ -493,7 +493,7 @@ export async function pickWebChannel(
   }
   if (!auth.exists) {
     throw new Error(
-      `No WhatsApp Web session found. Run \`${formatCliCommand("openclaw channels login --channel whatsapp --verbose")}\` to link.`,
+      `No WhatsApp Web session found. Run \`${formatCliCommand("carapace channels login --channel whatsapp --verbose")}\` to link.`,
     );
   }
   return choice;

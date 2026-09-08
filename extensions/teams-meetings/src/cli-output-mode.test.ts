@@ -1,21 +1,21 @@
 import { Command } from "commander";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 afterEach(() => {
-  vi.doUnmock("openclaw/plugin-sdk/meeting-runtime");
+  vi.doUnmock("carapace/plugin-sdk/meeting-runtime");
   vi.resetModules();
 });
 
 describe("Teams meetings CLI output mode", () => {
   it("loads and registers metadata without the meeting runtime", async () => {
     vi.resetModules();
-    vi.doMock("openclaw/plugin-sdk/meeting-runtime", () => {
+    vi.doMock("carapace/plugin-sdk/meeting-runtime", () => {
       throw new Error("CLI metadata must not load the meeting runtime");
     });
     const { default: metadata } = await import("../cli-metadata.js");
-    const registerCli = vi.fn<OpenClawPluginApi["registerCli"]>();
+    const registerCli = vi.fn<CarapacePluginApi["registerCli"]>();
     const api = createTestPluginApi({ registerCli });
     metadata.register(api);
 
@@ -43,13 +43,13 @@ describe("Teams meetings CLI output mode", () => {
     const isMachineOutput = metadata.descriptor.machineOutput;
     expect(
       isMachineOutput({
-        argv: ["node", "openclaw", "teamsmeetings", "status"],
+        argv: ["node", "carapace", "teamsmeetings", "status"],
       }),
     ).toBe(true);
-    expect(isMachineOutput({ argv: ["node", "openclaw", "teamsmeetings"] })).toBe(false);
+    expect(isMachineOutput({ argv: ["node", "carapace", "teamsmeetings"] })).toBe(false);
     expect(
       isMachineOutput({
-        argv: ["node", "openclaw", "teamsmeetings", "--log-level", "debug", "future-action"],
+        argv: ["node", "carapace", "teamsmeetings", "--log-level", "debug", "future-action"],
       }),
     ).toBe(true);
   });

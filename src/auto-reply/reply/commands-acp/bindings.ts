@@ -2,8 +2,8 @@
 import {
   resolveAcpSessionCwd,
   resolveAcpThreadSessionDetailLines,
-} from "@openclaw/acp-core/runtime/session-identifiers";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/acp-core/runtime/session-identifiers";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveChannelDefaultBindingPlacement } from "../../../channels/conversation-resolution.js";
 import { getChannelPlugin, normalizeChannelId } from "../../../channels/plugins/index.js";
 import {
@@ -18,7 +18,7 @@ import {
   resolveThreadBindingSpawnPolicy,
 } from "../../../channels/thread-bindings-policy.js";
 import type { SessionAcpMeta } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import { normalizeConversationRef } from "../../../infra/outbound/session-binding-normalization.js";
 import {
@@ -65,7 +65,7 @@ export async function resolveBoundReplyPayload(params: {
 }
 
 function buildSpawnedAcpBindingMetadata(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId: string;
   sessionKey: string;

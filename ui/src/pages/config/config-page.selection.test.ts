@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ApplicationContext } from "../../app/context.ts";
@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  const mounted = document.querySelectorAll<ConfigPage>("openclaw-config-page");
+  const mounted = document.querySelectorAll<ConfigPage>("carapace-config-page");
   document.body.replaceChildren();
   await settleLitElements(mounted);
   resetServerUiPrefsSync();
@@ -156,7 +156,7 @@ function routeContext(): ApplicationContext {
     gateway,
     agentSelection: { state: { selectedId: "main" }, subscribe },
     config: {
-      current: { assistantIdentity: { name: "OpenClaw" }, serverVersion: "test" },
+      current: { assistantIdentity: { name: "Carapace" }, serverVersion: "test" },
       subscribe,
     },
     runtimeConfig: {
@@ -220,7 +220,7 @@ describe("ConfigPage route selections", () => {
       document.body.append(provider);
       render(module.render(data as ConfigRouteData), provider);
       const page = expectDefined(
-        provider.querySelector<ConfigPage>("openclaw-config-page"),
+        provider.querySelector<ConfigPage>("carapace-config-page"),
         "mounted config page",
       );
       await settleLitElement(page);

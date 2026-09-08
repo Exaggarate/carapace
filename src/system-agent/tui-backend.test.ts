@@ -1,7 +1,7 @@
-// OpenClaw TUI backend tests cover rescue status integration with the TUI backend.
+// Carapace TUI backend tests cover rescue status integration with the TUI backend.
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import * as preparedModelCatalog from "../agents/prepared-model-catalog.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { SystemAgentInferenceUnavailableError } from "./inference-error.js";
 import type { SystemAgentCommandDeps, SystemAgentOperation } from "./operations.js";
@@ -11,7 +11,7 @@ import { runSystemAgentTui, type SystemAgentTuiOptions } from "./tui-backend.js"
 import { resolveSystemAgentVerifiedInferenceState } from "./verified-inference.js";
 
 const verifiedInferenceMocks = vi.hoisted(() => ({
-  preparedBindings: new WeakMap<object, OpenClawConfig>(),
+  preparedBindings: new WeakMap<object, CarapaceConfig>(),
 }));
 
 vi.mock("../plugins/providers.js", () => ({
@@ -43,7 +43,7 @@ const overview: SystemAgentOverview = {
   defaultAgentId: "main",
   defaultModel: "openai/gpt-5.5",
   agents: [{ id: "main", isDefault: true, model: "openai/gpt-5.5" }],
-  config: { path: "/tmp/openclaw.json", exists: true, valid: true, issues: [], hash: null },
+  config: { path: "/tmp/carapace.json", exists: true, valid: true, issues: [], hash: null },
   tools: {
     codex: { command: "codex", found: false, error: "not found" },
     claude: { command: "claude", found: false, error: "not found" },
@@ -57,8 +57,8 @@ const overview: SystemAgentOverview = {
     error: "offline",
   },
   references: {
-    docsUrl: "https://docs.openclaw.ai",
-    sourceUrl: "https://github.com/openclaw/openclaw",
+    docsUrl: "https://github.com/Exaggarate/carapace",
+    sourceUrl: "https://github.com/Exaggarate/carapace",
   },
 };
 
@@ -74,13 +74,13 @@ const verifiedConfig = {
       },
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
-function configSnapshot(config: OpenClawConfig) {
+function configSnapshot(config: CarapaceConfig) {
   return {
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "h",
     config,
     runtimeConfig: config,
@@ -99,7 +99,7 @@ beforeAll(async () => {
 
 async function createVerifiedTuiOptions(
   deps: SystemAgentCommandDeps = {},
-  config: OpenClawConfig = verifiedConfig,
+  config: CarapaceConfig = verifiedConfig,
   useRealVerification = false,
 ) {
   const fixture =
@@ -152,7 +152,7 @@ describe("runSystemAgentTui", () => {
     expect(runChannelsAdd).not.toHaveBeenCalled();
   });
 
-  it("runs OpenClaw inside the shared TUI shell", async () => {
+  it("runs Carapace inside the shared TUI shell", async () => {
     let runTuiCalls = 0;
     let runTuiOptions: unknown;
     const verified = await createVerifiedTuiOptions(
@@ -196,12 +196,12 @@ describe("runSystemAgentTui", () => {
       backend?: unknown;
     };
     expect(options.local).toBe(true);
-    expect(options.session).toBe("agent:openclaw:main");
+    expect(options.session).toBe("agent:carapace:main");
     expect(options.historyLimit).toBe(200);
     expect(options.config).toEqual({});
-    expect(options.title).toBe("openclaw setup");
+    expect(options.title).toBe("carapace setup");
     if (!options.backend || typeof options.backend !== "object") {
-      throw new Error("expected openclaw TUI backend");
+      throw new Error("expected carapace TUI backend");
     }
   }, 240_000);
 
@@ -227,20 +227,20 @@ describe("runSystemAgentTui", () => {
 
           for (let index = 1; index <= 201; index += 1) {
             await backend.sendChat({
-              sessionKey: "agent:openclaw:main",
+              sessionKey: "agent:carapace:main",
               message: `message-${index}`,
             });
           }
 
           const retained = await backend.loadHistory({
-            sessionKey: "agent:openclaw:main",
+            sessionKey: "agent:carapace:main",
             limit: 500,
           });
           expect(retained.messages).toHaveLength(200);
           expect(retained.messages[0]?.content[0]?.text).toBe("message-2");
 
           const tail = await backend.loadHistory({
-            sessionKey: "agent:openclaw:main",
+            sessionKey: "agent:carapace:main",
             limit: 2,
           });
           expect(tail.messages.map((entry) => entry.content[0]?.text)).toEqual([
@@ -276,8 +276,8 @@ describe("runSystemAgentTui", () => {
       expect(runTui).toHaveBeenCalledWith(
         expect.objectContaining({
           local: true,
-          session: "agent:openclaw:main",
-          title: "openclaw setup",
+          session: "agent:carapace:main",
+          title: "carapace setup",
         }),
       );
     } finally {
@@ -296,7 +296,7 @@ describe("runSystemAgentTui", () => {
           thinkingDefault: "high",
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const profileQualifiedOverview = {
       ...overview,
       defaultModel: "openai/gpt-5.5@openai:setup-test",
@@ -322,7 +322,7 @@ describe("runSystemAgentTui", () => {
           };
 
           await expect(
-            backend.loadHistory({ sessionKey: "agent:openclaw:main" }),
+            backend.loadHistory({ sessionKey: "agent:carapace:main" }),
           ).resolves.toMatchObject({ thinkingLevel: "high" });
           await expect(backend.listSessions()).resolves.toMatchObject({
             sessions: [
@@ -344,7 +344,7 @@ describe("runSystemAgentTui", () => {
     const config = {
       ...verifiedConfig,
       agents: { defaults: { model: "openai/gpt-5.6-sol" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const verified = await createVerifiedTuiOptions(
       {
         loadOverview: async () => ({
@@ -391,7 +391,7 @@ describe("runSystemAgentTui", () => {
 
           await expect(
             backend.patchSession({
-              key: "agent:openclaw:main",
+              key: "agent:carapace:main",
               model: "anthropic/claude-opus-4-8",
             }),
           ).rejects.toThrow("cannot change the model inside its active verified session");
@@ -639,7 +639,7 @@ describe("runSystemAgentTui", () => {
         "disposed",
         expected,
         ...(handoff.target === "gateway"
-          ? ["log:Done — gateway settings saved. Run `openclaw gateway restart` to apply them."]
+          ? ["log:Done — gateway settings saved. Run `carapace gateway restart` to apply them."]
           : []),
       ]);
     }

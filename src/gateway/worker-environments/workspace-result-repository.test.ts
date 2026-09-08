@@ -12,11 +12,11 @@ import {
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { NodeWorkerWorkspaceRuntime } from "../../node-host/node-worker-workspace.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
-import type { DB } from "../../state/openclaw-state-db.generated.js";
+import type { DB } from "../../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
 import { createNodeWorkerWorkspaceActions } from "./node-worker-workspace-actions.js";
 import { createNodeWorkspaceTransferService } from "./node-workspace-transfer-service.js";
@@ -76,9 +76,9 @@ describe("repository workspace result ownership", () => {
     const origin = path.join(root, "origin");
     await fs.mkdir(origin);
     if (runSetupScript) {
-      await fs.mkdir(path.join(origin, ".openclaw"));
+      await fs.mkdir(path.join(origin, ".carapace"));
       await fs.writeFile(
-        path.join(origin, ".openclaw", "worktree-setup.sh"),
+        path.join(origin, ".carapace", "worktree-setup.sh"),
         "#!/bin/sh\nprintf 'prepared\\n' > setup.txt\n",
         { mode: 0o755 },
       );
@@ -533,7 +533,7 @@ describe("repository workspace result ownership", () => {
       const owned = f.beginTurn("interrupted", !materialized);
       const destination = path.join(root, "materialized-worktree");
       if (materialized) {
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         executeSqliteQuerySync(
           database.db,
           getNodeSqliteKysely<Pick<DB, "worker_environments">>(database.db)
@@ -601,7 +601,7 @@ describe("repository workspace result ownership", () => {
       ]);
       await fs.rm(f.remote, { recursive: true });
       if (materialized) {
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         executeSqliteQuerySync(
           database.db,
           getNodeSqliteKysely<Pick<DB, "worker_environments">>(database.db)
@@ -609,9 +609,9 @@ describe("repository workspace result ownership", () => {
             .where("environment_id", "=", owned.placement.environmentId),
         );
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const restarted = createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase(),
+        database: openCarapaceStateDatabase(),
       });
       const environments: WorkerDispatchEnvironmentService = {
         get: () => undefined,

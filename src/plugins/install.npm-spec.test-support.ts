@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const installedPackageTreePolicySource = `
 let input = "";
@@ -35,7 +35,7 @@ export async function createInstalledPackageTreePolicyExec(rootDir: string) {
 export function configWithInstalledPackageTreeBlockPolicy(exec: {
   command: string;
   args: string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     security: {
       installPolicy: {

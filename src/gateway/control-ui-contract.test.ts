@@ -21,22 +21,22 @@ const ROUTES = [
   {
     route: "catalogIcon",
     value: "https://cdn.example.test/icon.svg",
-    path: "/__openclaw__/catalog-icon/https%3A%2F%2Fcdn.example.test%2Ficon.svg",
+    path: "/__carapace__/catalog-icon/https%3A%2F%2Fcdn.example.test%2Ficon.svg",
   },
   {
     route: "channelAvatar",
     value: "agent:main:discord:direct:user-1",
-    path: "/__openclaw__/channel-avatar/agent%3Amain%3Adiscord%3Adirect%3Auser-1",
+    path: "/__carapace__/channel-avatar/agent%3Amain%3Adiscord%3Adirect%3Auser-1",
   },
   {
     route: "linkFavicon",
     value: "docs.example.test",
-    path: "/__openclaw__/link-favicon/docs.example.test",
+    path: "/__carapace__/link-favicon/docs.example.test",
   },
   {
     route: "pluginIcon",
     value: "@scope/plugin",
-    path: "/__openclaw__/plugin-icon/%40scope%2Fplugin",
+    path: "/__carapace__/plugin-icon/%40scope%2Fplugin",
   },
   {
     route: "userAvatar",
@@ -46,7 +46,7 @@ const ROUTES = [
   {
     route: "workspaceIcon",
     value: "agent:main:one",
-    path: "/__openclaw__/workspace-icon/agent%3Amain%3Aone",
+    path: "/__carapace__/workspace-icon/agent%3Amain%3Aone",
   },
 ] as const satisfies readonly {
   route: ControlUiResourceRoute;
@@ -66,9 +66,9 @@ describe("Control UI resource route contract", () => {
   });
 
   it.each([
-    ["blank segment", "/__openclaw__/workspace-icon/"],
-    ["raw nested segment", "/__openclaw__/workspace-icon/agent/main"],
-    ["malformed escape", "/__openclaw__/workspace-icon/%zz"],
+    ["blank segment", "/__carapace__/workspace-icon/"],
+    ["raw nested segment", "/__carapace__/workspace-icon/agent/main"],
+    ["malformed escape", "/__carapace__/workspace-icon/%zz"],
   ])("claims a %s without producing a route value", (_label, pathname) => {
     expect(parseControlUiResourcePath("workspaceIcon", pathname)).toEqual({
       matched: true,
@@ -78,7 +78,7 @@ describe("Control UI resource route contract", () => {
 
   it("does not claim another resource route", () => {
     expect(
-      parseControlUiResourcePath("workspaceIcon", "/__openclaw__/plugin-icon/firecrawl"),
+      parseControlUiResourcePath("workspaceIcon", "/__carapace__/plugin-icon/firecrawl"),
     ).toEqual({ matched: false });
   });
 
@@ -105,7 +105,7 @@ describe("Control UI resource route contract", () => {
 
   it("builds revision-aware channel avatar paths through the route contract", () => {
     expect(buildControlUiChannelAvatarUrl("/control", "agent:main/one", "hash/image")).toBe(
-      "/control/__openclaw__/channel-avatar/agent%3Amain%2Fone?v=hash%2Fimage",
+      "/control/__carapace__/channel-avatar/agent%3Amain%2Fone?v=hash%2Fimage",
     );
   });
 

@@ -1,7 +1,7 @@
 import type { InputFile } from "grammy";
 import type { InlineKeyboardMarkup, Message } from "grammy/types";
-import { createChannelApiRetryRunner } from "openclaw/plugin-sdk/retry-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import { createChannelApiRetryRunner } from "carapace/plugin-sdk/retry-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import {
   isTelegramSkippableChunkSendError,

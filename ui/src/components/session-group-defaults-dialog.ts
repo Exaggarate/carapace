@@ -197,7 +197,7 @@ export function showSessionGroupDefaultsDialog(options: Options): Promise<void> 
       const selectedEnvironment = environmentOptions[worktree ? 1 : 0];
       render(() => {
         return html`
-          <openclaw-modal-dialog
+          <carapace-modal-dialog
             label=${t("sessionsView.groupDefaultsTitle", { group: options.group })}
             @modal-cancel=${(event: Event) => {
               if (submitting) {
@@ -431,7 +431,7 @@ export function showSessionGroupDefaultsDialog(options: Options): Promise<void> 
                 </button>
               </div>
             </form>
-          </openclaw-modal-dialog>
+          </carapace-modal-dialog>
         `;
       });
     }

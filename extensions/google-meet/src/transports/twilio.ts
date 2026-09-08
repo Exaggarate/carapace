@@ -1,5 +1,5 @@
 // Google Meet plugin module implements twilio behavior.
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const DTMF_PATTERN = /^[0-9*#wWpP,]+$/;
 

@@ -1,13 +1,13 @@
 // Configured hook helpers combine config and install records into active hooks.
 import type { HookInstallRecord } from "../config/types.hooks.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import { shouldIncludeHook } from "./config.js";
 import { resolveHookKey } from "./frontmatter.js";
 import type { HookPolicyEntry } from "./types.js";
 
 /** Capture discovery and explicit selection from one config/install snapshot. */
-export function resolveInternalHookSelection(config: OpenClawConfig): {
+export function resolveInternalHookSelection(config: CarapaceConfig): {
   configured: boolean;
   names: Set<string> | null;
   declaredNames: Set<string>;
@@ -67,7 +67,7 @@ export function isHookNameSelected(
 /** Shared selection and eligibility gate; importing handlers remains the loader's job. */
 export function isHookLoadable(params: {
   entry: HookPolicyEntry;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   names: Set<string> | null;
 }): boolean {
   return (

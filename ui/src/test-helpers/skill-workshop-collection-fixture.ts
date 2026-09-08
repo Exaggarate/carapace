@@ -34,14 +34,14 @@ export function createSkillWorkshopCollectionFixture() {
   };
   const proposals = [pending, ...history];
   const manifest = {
-    schema: "openclaw.skill-workshop.proposals-manifest.v1",
+    schema: "carapace.skill-workshop.proposals-manifest.v1",
     updatedAt,
     installedSkills,
     proposals,
   };
   const emptyManifest = { ...manifest, installedSkills: [], proposals: [] };
   const historyStatus = {
-    schema: "openclaw.skill-workshop.history-scan.v1",
+    schema: "carapace.skill-workshop.history-scan.v1",
     hasScanned: false,
     reviewedSessions: 0,
     ideasFound: 0,

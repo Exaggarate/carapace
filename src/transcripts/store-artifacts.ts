@@ -96,7 +96,7 @@ export async function removeTranscriptArtifact(rootDir: string, fileName: string
 }
 
 export async function isCaseSensitiveDirectory(directory: string): Promise<boolean> {
-  const probeName = `.openclaw-case-probe-${randomUUID().toLowerCase()}`;
+  const probeName = `.carapace-case-probe-${randomUUID().toLowerCase()}`;
   const probePath = path.join(directory, probeName);
   const alternatePath = path.join(directory, probeName.toUpperCase());
   const handle = await fs.open(probePath, "wx", 0o600);

@@ -1,6 +1,6 @@
 // Deepinfra tests cover cache wrapper plugin behavior.
-import { buildOpenAICompletionsParams } from "@openclaw/ai/transports";
-import { createAssistantMessageEventStream, type Model } from "openclaw/plugin-sdk/llm";
+import { buildOpenAICompletionsParams } from "@carapace/ai/transports";
+import { createAssistantMessageEventStream, type Model } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { createDeepInfraAnthropicCacheWrapper } from "./cache-wrapper.js";
 

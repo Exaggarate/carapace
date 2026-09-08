@@ -2,11 +2,11 @@
 import { describe, expect, it } from "vitest";
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { createTestIngressQueue, withTempState } from "./ingress-drain.test-helpers.js";
 
-type ChannelIngressTestDatabase = Pick<OpenClawStateKyselyDatabase, "channel_ingress_events">;
+type ChannelIngressTestDatabase = Pick<CarapaceStateKyselyDatabase, "channel_ingress_events">;
 
 describe("channel ingress pruning", () => {
   it("can bound pending scans and prune stale pending rows", async () => {
@@ -59,7 +59,7 @@ describe("channel ingress pruning", () => {
           }
         }
 
-        const { db } = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: stateDir } });
+        const { db } = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: stateDir } });
         const reads = trackSqliteStatementExecutions(db, ["candidates"], (sql) =>
           sql.startsWith("select") && sql.includes('from "channel_ingress_events"')
             ? "candidates"

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { recordStartupMigrationWarnings } from "../../infra/state-migrations.messages.js";
 import { withStateDirEnv } from "../../test-helpers/state-dir-env.js";
 import { resolveRequestedSessionAgentId } from "../session-request-agent.js";
@@ -11,7 +11,7 @@ afterEach(() => {
   resetConfigRuntimeState();
 });
 
-async function callStatus(config: OpenClawConfig, scopes = ["operator.read"]) {
+async function callStatus(config: CarapaceConfig, scopes = ["operator.read"]) {
   setRuntimeConfigSnapshot(config, config);
   const respond = vi.fn();
   await healthHandlers.status!({
@@ -27,7 +27,7 @@ async function callStatus(config: OpenClawConfig, scopes = ["operator.read"]) {
 
 describe("Gateway status owner routing", () => {
   it("uses the configured system owner without making public main aliases implicit", async () => {
-    await withStateDirEnv("openclaw-gateway-status-owner-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-gateway-status-owner-", async ({ stateDir }) => {
       const config = {
         agents: {
           ownership: "explicit",
@@ -35,7 +35,7 @@ describe("Gateway status owner routing", () => {
           entries: { main: {}, molty: {} },
         },
         session: { store: path.join(stateDir, "agents", "{agentId}", "sessions.json") },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       const respond = await callStatus(config);
 
@@ -60,7 +60,7 @@ describe("Gateway status owner routing", () => {
   });
 
   it("keeps single-agent status unchanged", async () => {
-    await withStateDirEnv("openclaw-gateway-status-single-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-gateway-status-single-", async ({ stateDir }) => {
       const respond = await callStatus({
         agents: { entries: { main: {} } },
         session: { store: path.join(stateDir, "sessions.json") },
@@ -73,7 +73,7 @@ describe("Gateway status owner routing", () => {
   });
 
   it("limits startup migration details to admin status while readers retain the repair hint", async () => {
-    await withStateDirEnv("openclaw-gateway-status-warning-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-gateway-status-warning-", async ({ stateDir }) => {
       const warning = `EACCES: permission denied, open '${path.join(stateDir, "private-bindings.json")}'`;
       recordStartupMigrationWarnings([warning]);
       const config = {
@@ -81,7 +81,7 @@ describe("Gateway status owner routing", () => {
         session: { store: path.join(stateDir, "sessions.json") },
       };
       const hint =
-        'Run "openclaw doctor --fix" against the same state/config, then restart the gateway.';
+        'Run "carapace doctor --fix" against the same state/config, then restart the gateway.';
 
       const reader = await callStatus(config);
       const readerPayload = reader.mock.calls[0]?.[1];

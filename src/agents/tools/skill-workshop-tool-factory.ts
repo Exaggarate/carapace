@@ -1,12 +1,12 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SkillProposalOrigin, SkillWorkshopRunOptions } from "../../skills/workshop/types.js";
 import { getCanonicalSkillWorkspace } from "../skill-workshop-workspace-context.js";
 import { createSkillWorkshopTool } from "./skill-workshop-tool.js";
 
 export function createConfiguredSkillWorkshopTool(params: {
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   sessionKey?: string;
   runId?: string;

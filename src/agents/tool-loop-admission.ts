@@ -3,7 +3,7 @@ import type {
   InternalToolBatchCall,
   ToolLoopIntervention,
   ToolLoopWarning,
-} from "@openclaw/agent-core";
+} from "@carapace/agent-core";
 import type { SessionState } from "../logging/diagnostic-session-state.js";
 import {
   beforeToolCallLog as log,

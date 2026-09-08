@@ -1,4 +1,4 @@
-import type { AgentRunTimeoutPhase } from "@openclaw/normalization-core/agent-run-terminal-outcome";
+import type { AgentRunTimeoutPhase } from "@carapace/normalization-core/agent-run-terminal-outcome";
 import { createInlineCodeState } from "../../packages/markdown-core/src/code-spans.js";
 /**
  * Subscribes to embedded-agent sessions and streams formatted replies/events.

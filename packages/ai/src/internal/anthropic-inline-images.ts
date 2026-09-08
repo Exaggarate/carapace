@@ -1,5 +1,5 @@
-import type { ImageContent, TextContent } from "@openclaw/llm-core";
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
+import type { ImageContent, TextContent } from "@carapace/llm-core";
+import { estimateBase64DecodedBytes } from "@carapace/media-core/base64";
 import { getAiTransportHost } from "../host.js";
 
 const ANTHROPIC_IMAGE_MEDIA_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;

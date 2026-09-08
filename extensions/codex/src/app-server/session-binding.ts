@@ -7,11 +7,11 @@ import {
   AgentHarnessSessionSupersededError,
   embeddedAgentLog,
   type AgentHarnessSessionDeletionMutation,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   normalizeCodexAppServerBindingModelProvider,
   type CodexAppServerAuthProfileLookup,
@@ -69,7 +69,7 @@ export type CodexRunSessionBindingAuthority = "current" | "ephemeral" | "superse
 /** Decides whether a run may share the durable stable-key binding owner. */
 export function resolveCodexRunSessionBindingAuthority(params: {
   identity: Extract<CodexAppServerBindingIdentity, { kind: "session" }>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   storePath?: string;
 }): CodexRunSessionBindingAuthority {
   return captureCodexSessionGenerationAuthority(params)[0];
@@ -78,7 +78,7 @@ export function resolveCodexRunSessionBindingAuthority(params: {
 /** Host lineage is recorded in the same transaction as its successor generation. */
 function readCodexBindingSessionEntry(params: {
   identity: Extract<CodexAppServerBindingIdentity, { kind: "session" }>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   storePath?: string;
 }) {
   const { identity } = params;
@@ -101,7 +101,7 @@ function readCodexSessionOwnershipBinding(params: {
     read(identity: CodexAppServerBindingIdentity): CodexAppServerThreadBinding | undefined;
   };
   identity: CodexAppServerBindingIdentity;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   storePath?: string;
 }): CodexAppServerThreadBinding | undefined {
   const binding = params.bindingStore.read(params.identity);
@@ -152,7 +152,7 @@ function captureCodexSessionGenerationAuthority(
   return [authority, previousSessionId, assertHostCurrent, assertCurrent] as const;
 }
 
-/** Builds the terminal coordination error used when a newer OpenClaw session owns the binding. */
+/** Builds the terminal coordination error used when a newer Carapace session owns the binding. */
 export function createCodexSessionGenerationSupersededError(
   sessionId: string,
 ): AgentHarnessSessionSupersededError {
@@ -449,7 +449,7 @@ async function reclaimPreparedCodexSessionGeneration(
   );
 }
 
-/** Lets the authoritative OpenClaw session generation claim a stale stable binding row. */
+/** Lets the authoritative Carapace session generation claim a stale stable binding row. */
 export async function reclaimCurrentCodexSessionGeneration(
   params: CodexSessionGenerationReclaimParams,
 ): Promise<boolean> {
@@ -468,7 +468,7 @@ export async function reclaimCurrentCodexSessionGeneration(
 export async function resolveCodexSessionBinding(params: {
   bindingStore: CodexAppServerBindingStore;
   identity: CodexAppServerBindingIdentity;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   storePath?: string;
   reclaimStale?: boolean;
   signal?: AbortSignal;
@@ -897,7 +897,7 @@ export function createCodexAppServerBindingStore(
                   current.retired === true &&
                   current.sessionId === mutation.expectedPreviousSessionId
                 ) {
-                  // Reset boundaries now retain the OpenClaw session id. The
+                  // Reset boundaries now retain the Carapace session id. The
                   // authoritative session-store check above proves this fence
                   // belongs to the previous in-place lifecycle, not live work.
                   return {

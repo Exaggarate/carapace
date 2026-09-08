@@ -6,8 +6,8 @@ const mocks = vi.hoisted(() => ({
   getSharedCodexAppServerClient: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>()),
   embeddedAgentLog: { debug: mocks.debug },
 }));
 
@@ -29,7 +29,7 @@ function createInput(params?: {
     authBindingFingerprint: "auth-fingerprint",
     connection: {
       assertCurrent: vi.fn(),
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       appServer: {
         requestTimeoutMs: 12_345,
         start: { command: "codex", args: ["app-server"] },
@@ -68,7 +68,7 @@ describe("Codex attempt client prewarm", () => {
       authRequirement: "subscription",
       authProfileStore: { kind: "test-store" },
       authBindingFingerprint: "auth-fingerprint",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       config: { agents: { defaults: { workspace: "/tmp/workspace" } } },
       timeoutMs: 12_345,
       abandonSignal: input.connection.runAbortController.signal,

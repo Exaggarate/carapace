@@ -44,7 +44,7 @@ type FixtureJournal = {
 function fixtureSource(mode: FixtureMode, root: string): string {
   const stateImport =
     mode.startsWith("scenario-") || mode.startsWith("resources-")
-      ? `import { createOpenClawTestState } from ${JSON.stringify(path.join(repoRoot, "src/test-utils/openclaw-test-state.ts"))};`
+      ? `import { createCarapaceTestState } from ${JSON.stringify(path.join(repoRoot, "src/test-utils/carapace-test-state.ts"))};`
       : "";
   return `
 import fs from "node:fs";
@@ -105,7 +105,7 @@ const suite = createControlUiE2eSuite({ name: "owned context fixture",
     resources: {
       retainedState: () => sharedFixture?.root,
       run: async (signal) => {
-        sharedFixture = await createOpenClawTestState({ label: "native-shared-resource" });
+        sharedFixture = await createCarapaceTestState({ label: "native-shared-resource" });
         fs.writeFileSync(${JSON.stringify(path.join(root, "retained-root.txt"))}, sharedFixture.root);
         state.events.push("resource acquired"); record();
         if (${JSON.stringify(mode)} === "resources-late-setup") {
@@ -137,7 +137,7 @@ suite.define(() => {
   if (${JSON.stringify(mode)}.startsWith("resources-")) {
     it.for(["first", "second"])("uses shared resources: %s", async (name, context) => {
       await suite.runScenario(context, { run: async () => {
-        expect(process.env.OPENCLAW_STATE_DIR).toBe(sharedFixture.stateDir);
+        expect(process.env.CARAPACE_STATE_DIR).toBe(sharedFixture.stateDir);
         state.events.push(name); record();
       } });
     });
@@ -179,13 +179,13 @@ suite.define(() => {
   } else if (${JSON.stringify(mode)} === "late-setup") {
     it("never starts after setup timed out", () => { state.published = true; record(); });
   } else {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
     let fixture;
     it.fails("first usage-style attempt times out or fails cleanup", async (context) => {
       await suite.runScenario(context, {
         retainedState: () => fixture?.root,
         run: async (signal) => {
-          fixture = await createOpenClawTestState({ label: "native-scenario" });
+          fixture = await createCarapaceTestState({ label: "native-scenario" });
           fs.writeFileSync(${JSON.stringify(path.join(root, "retained-root.txt"))}, fixture.root);
           state.events.push("acquired"); record();
           if (${JSON.stringify(mode)} === "scenario-noncooperative") await new Promise(() => {});
@@ -212,7 +212,7 @@ suite.define(() => {
       fs.writeFileSync(${JSON.stringify(path.join(root, "successor.txt"))}, "started");
       expect(state.events).toEqual(["acquired", "gateway closed", "released"]);
       expect(state.nativeAbortObserved).toBe(true);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(previousStateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(previousStateDir);
     });
   }
 });
@@ -282,9 +282,9 @@ export default defineConfig({
         PATH: process.env.PATH,
         HOME: path.join(root, "home"),
         USERPROFILE: path.join(root, "home"),
-        OPENCLAW_HOME: path.join(root, "home"),
-        OPENCLAW_STATE_DIR: path.join(root, "home/.openclaw"),
-        OPENCLAW_CONFIG_PATH: path.join(root, "home/.openclaw/openclaw.json"),
+        CARAPACE_HOME: path.join(root, "home"),
+        CARAPACE_STATE_DIR: path.join(root, "home/.carapace"),
+        CARAPACE_CONFIG_PATH: path.join(root, "home/.carapace/carapace.json"),
         TMPDIR: path.join(root, "tmp"),
         TMP: path.join(root, "tmp"),
         TEMP: path.join(root, "tmp"),

@@ -1,6 +1,6 @@
 // Nostr tests cover the lightweight setup plugin behavior.
 import { nip19 } from "nostr-tools";
-import { withEnv } from "openclaw/plugin-sdk/test-env";
+import { withEnv } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { nostrSetupPlugin } from "./channel.setup.js";
 import { nostrSetupContract } from "./setup-surface.js";

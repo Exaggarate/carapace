@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import {
   buildIMessageInboundContext,
@@ -7,7 +7,7 @@ import {
 
 describe("buildIMessageInboundContext direct reply route", () => {
   it("uses the exact chat GUID when no numeric chat ID is available", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const message = {
       id: 12349,
       guid: "p:0/GUID-current-guid-only",

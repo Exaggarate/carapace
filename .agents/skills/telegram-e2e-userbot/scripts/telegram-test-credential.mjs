@@ -177,7 +177,7 @@ async function cleanupTemporaryCredential(leaseDir, upstreamRelease) {
 async function restoreTemporaryCredential(payload, upstreamRelease = async () => {}) {
   let leaseDir;
   try {
-    leaseDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tg-test-credential-"));
+    leaseDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-tg-test-credential-"));
   } catch (error) {
     await upstreamRelease();
     throw error;

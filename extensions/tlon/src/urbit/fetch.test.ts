@@ -1,10 +1,10 @@
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { urbitFetch } from "./fetch.js";
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => ({
-  ...(await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-    "openclaw/plugin-sdk/ssrf-runtime",
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async () => ({
+  ...(await vi.importActual<typeof import("carapace/plugin-sdk/ssrf-runtime")>(
+    "carapace/plugin-sdk/ssrf-runtime",
   )),
   fetchWithSsrFGuard: vi.fn(),
 }));

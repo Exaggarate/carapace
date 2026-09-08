@@ -94,7 +94,7 @@ async function admitTestReplyOperation(params: Parameters<typeof admitTestReplyT
 }
 
 function createSessionStore(entries: Record<string, object>): string {
-  const root = tempDirs.make("openclaw-reply-admission-");
+  const root = tempDirs.make("carapace-reply-admission-");
   // The store handle stays a sessions.json path; the sqlite-backed accessor
   // resolves it to the per-agent DB, so fixtures must seed through the accessor.
   const storePath = path.join(root, "sessions.json");

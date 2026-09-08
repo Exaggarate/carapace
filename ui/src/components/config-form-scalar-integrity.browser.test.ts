@@ -761,7 +761,7 @@ describe("config form scalar integrity", () => {
     render(
       renderTextInput({
         schema: { type: "string" },
-        value: "__OPENCLAW_REDACTED__",
+        value: "__CARAPACE_REDACTED__",
         path: ["secret"],
         hints: { secret: { sensitive: true } },
         unsupported: new Set(),
@@ -781,7 +781,7 @@ describe("config form scalar integrity", () => {
       container.querySelector<HTMLInputElement>("input"),
       "sentinel secret input",
     );
-    expect(input.value).not.toContain("__OPENCLAW_REDACTED__");
+    expect(input.value).not.toContain("__CARAPACE_REDACTED__");
     expect(input.readOnly).toBe(true);
     const eye = expectElement(
       container.querySelector<HTMLButtonElement>(".settings-secret__toggle"),

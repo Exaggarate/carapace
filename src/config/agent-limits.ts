@@ -1,6 +1,6 @@
 // Resolves per-agent runtime limits from config.
 import os from "node:os";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 const MIN_AGENT_MAX_CONCURRENT = 8;
 const MAX_AGENT_MAX_CONCURRENT = 16;
@@ -36,7 +36,7 @@ export function isSubagentSpawnDepthAllowed(
 }
 
 /** Resolves top-level agent concurrency, flooring finite values and clamping to at least one. */
-export function resolveAgentMaxConcurrent(cfg?: OpenClawConfig): number {
+export function resolveAgentMaxConcurrent(cfg?: CarapaceConfig): number {
   const raw = cfg?.agents?.defaults?.maxConcurrent;
   if (typeof raw === "number" && Number.isFinite(raw)) {
     return Math.max(1, Math.floor(raw));
@@ -45,7 +45,7 @@ export function resolveAgentMaxConcurrent(cfg?: OpenClawConfig): number {
 }
 
 /** Resolves subagent concurrency, flooring finite values and clamping to at least one. */
-export function resolveSubagentMaxConcurrent(cfg?: OpenClawConfig): number {
+export function resolveSubagentMaxConcurrent(cfg?: CarapaceConfig): number {
   const raw = cfg?.agents?.defaults?.subagents?.maxConcurrent;
   if (typeof raw === "number" && Number.isFinite(raw)) {
     return Math.max(1, Math.floor(raw));

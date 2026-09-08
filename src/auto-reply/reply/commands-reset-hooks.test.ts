@@ -2,10 +2,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as bootstrapCache from "../../agents/bootstrap-cache.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { loadSessionEntry, replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { MsgContext } from "../templating.js";
 import { buildCommandContext } from "./commands-context.js";
@@ -73,7 +73,7 @@ vi.mock("./route-reply.runtime.js", () => ({
 
 function buildResetParams(
   commandBody: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   ctxOverrides?: Partial<MsgContext>,
 ): HandleCommandsParams {
   const ctx = {
@@ -108,7 +108,7 @@ function buildResetParams(
     elevated: { enabled: true, allowed: true, failures: [] },
     sessionKey: "agent:main:main",
     agentId: "main",
-    workspaceDir: "/tmp/openclaw-commands",
+    workspaceDir: "/tmp/carapace-commands",
     defaultGroupActivation: () => "mention",
     resolvedVerboseLevel: "off",
     resolvedReasoningLevel: "off",
@@ -173,7 +173,7 @@ describe("handleCommands reset hooks", () => {
         params: buildResetParams("/new take notes", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         expectedEvent: { type: "command", action: "new" },
       },
       {
@@ -184,7 +184,7 @@ describe("handleCommands reset hooks", () => {
             {
               commands: { text: true },
               channels: { telegram: { allowFrom: ["*"] } },
-            } as OpenClawConfig,
+            } as CarapaceConfig,
             {
               Provider: "telegram",
               Surface: "telegram",
@@ -206,7 +206,7 @@ describe("handleCommands reset hooks", () => {
           sessionKey: "agent:main:telegram:direct:123",
         },
         expectedContext: {
-          workspaceDir: "/tmp/openclaw-commands",
+          workspaceDir: "/tmp/carapace-commands",
         },
       },
     ] as const;
@@ -238,7 +238,7 @@ describe("handleCommands reset hooks", () => {
       {
         commands: { text: true },
         channels: { discord: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         Provider: "discord",
         Surface: "discord",
@@ -283,7 +283,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/reset", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(await maybeHandleResetCommand(params)).toEqual({
       shouldContinue: false,
@@ -305,7 +305,7 @@ describe("handleCommands reset hooks", () => {
       {
         commands: { text: true },
         channels: { discord: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         Provider: "discord",
         Surface: "discord",
@@ -331,7 +331,7 @@ describe("handleCommands reset hooks", () => {
       {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         SenderId: "id:whatsapp:123",
         SenderName: "Alice",
@@ -371,7 +371,7 @@ describe("handleCommands reset hooks", () => {
       const params = buildResetParams("/new", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
       params.opts = { onObservedReplyDelivery };
 
       const result = await maybeHandleResetCommand(params);
@@ -397,7 +397,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/new", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.opts = { onObservedReplyDelivery };
 
     const result = await maybeHandleResetCommand(params);
@@ -420,7 +420,7 @@ describe("handleCommands reset hooks", () => {
       const params = buildResetParams("/new", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
       params.opts = { onObservedReplyDelivery };
 
       await maybeHandleResetCommand(params);
@@ -433,7 +433,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/reset", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.sessionEntry = {
       sessionId: "wrapper-session",
       updatedAt: Date.now(),
@@ -453,12 +453,12 @@ describe("handleCommands reset hooks", () => {
   });
 
   it("marks soft reset turns and emits reset hooks", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-soft-reset-tombstone-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-soft-reset-tombstone-"));
     const storePath = path.join(tempDir, "sessions.json");
     const params = buildResetParams("/reset soft", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     const sessionEntry: NonNullable<HandleCommandsParams["sessionEntry"]> = {
       sessionId: "session-1",
       lifecycleRevision: "soft-reset-revision",
@@ -604,7 +604,7 @@ describe("handleCommands reset hooks", () => {
         body,
         {
           commands: { text: true },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         {
           Provider: provider,
           Surface: surface,
@@ -662,7 +662,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/reset soft", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.sessionEntry = {
       sessionId: "session-direct",
       updatedAt: 1,
@@ -710,7 +710,7 @@ describe("handleCommands reset hooks", () => {
       {
         commands: { text: true },
         channels: { discord: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         Provider: "discord",
         Surface: "discord",
@@ -732,7 +732,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/RESET", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const result = await maybeHandleResetCommand(params);
 
@@ -747,7 +747,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/NEW", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const result = await maybeHandleResetCommand(params);
 
@@ -762,7 +762,7 @@ describe("handleCommands reset hooks", () => {
     const params = buildResetParams("/Reset take notes", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const result = await maybeHandleResetCommand(params);
 

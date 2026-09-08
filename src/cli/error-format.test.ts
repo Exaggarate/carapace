@@ -7,7 +7,7 @@ describe("formatStrictJsonParseFailure", () => {
     (value) => {
       const message = formatStrictJsonParseFailure({ value, cause: "invalid token" });
 
-      expect(message).toContain("openclaw config patch --file <path> --dry-run");
+      expect(message).toContain("carapace config patch --file <path> --dry-run");
       expect(message).toContain("JSON5 config patch object");
       expect(message).toContain("For plain strings, omit --strict-json.");
     },

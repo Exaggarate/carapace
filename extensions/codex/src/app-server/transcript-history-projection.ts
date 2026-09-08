@@ -1,9 +1,9 @@
 import { Buffer } from "node:buffer";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage, Usage } from "openclaw/plugin-sdk/llm";
-import type { SessionTranscriptMessageEntry } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf8Prefix } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage, Usage } from "carapace/plugin-sdk/llm";
+import type { SessionTranscriptMessageEntry } from "carapace/plugin-sdk/session-transcript-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf8Prefix } from "carapace/plugin-sdk/text-utility-runtime";
 import type { CodexThread, JsonValue } from "./protocol.js";
 import { attachCodexMirrorIdentity } from "./upstream-prompt-provenance.js";
 
@@ -179,7 +179,7 @@ function projectCodexThreadHistory(params: {
                   ? { errorMessage: turn.error.message }
                   : {}),
                 ...(phase ? { phase } : {}),
-                ...(asyncDelivery && itemId ? { openclawAsyncDelivery: { itemId } } : {}),
+                ...(asyncDelivery && itemId ? { carapaceAsyncDelivery: { itemId } } : {}),
                 timestamp,
               } satisfies AssistantMessage,
               identity,
@@ -252,7 +252,7 @@ export function projectBoundedCodexThreadHistory(params: {
           message.role !== "assistant" ||
           (message.stopReason !== "aborted" &&
             message.stopReason !== "error" &&
-            !("openclawAsyncDelivery" in message)),
+            !("carapaceAsyncDelivery" in message)),
       )
       .map(({ responseItem }) => responseItem),
     transcriptMessages: selected.map(({ message }) => message),
@@ -272,7 +272,7 @@ export function projectBoundedCodexVisibleSessionHistory(
       entry.role === "assistant" &&
       (("stopReason" in entry.message &&
         (entry.message.stopReason === "aborted" || entry.message.stopReason === "error")) ||
-        "openclawAsyncDelivery" in entry.message)
+        "carapaceAsyncDelivery" in entry.message)
     ) {
       continue;
     }

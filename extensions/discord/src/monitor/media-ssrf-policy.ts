@@ -1,5 +1,5 @@
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const DISCORD_CDN_HOSTNAMES = [
   "cdn.discordapp.com",

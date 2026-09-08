@@ -47,8 +47,8 @@ vi.mock("../plugins/plugin-lifecycle-lease.js", () => ({
 describe("exact system-agent plugin artifacts", () => {
   let fixture: string;
   beforeEach(async () => {
-    fixture = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-artifact-test-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(fixture, "state"));
+    fixture = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-artifact-test-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(fixture, "state"));
     mocks.install.mockReset();
     mocks.audit.mockReset();
     mocks.parsed = {};
@@ -68,12 +68,12 @@ describe("exact system-agent plugin artifacts", () => {
         name: "artifact-demo",
         version: "1.0.0",
         type: "module",
-        openclaw: { extensions: ["./dist/index.js"] },
+        carapace: { extensions: ["./dist/index.js"] },
         ...packageFields,
       }),
     );
     await fs.writeFile(
-      path.join(pkgDir, "openclaw.plugin.json"),
+      path.join(pkgDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "artifact-demo",
         name: "Artifact demo",
@@ -238,7 +238,7 @@ describe("exact system-agent plugin artifacts", () => {
           ? prepareSystemAgentPluginArtifact(operation)
           : executePluginArtifactActivation(operation, runtime, { approved: true });
       await expect(attempt).rejects.toThrow(
-        "Install the reviewed archive with openclaw plugins install",
+        "Install the reviewed archive with carapace plugins install",
       );
       expect(mocks.install).not.toHaveBeenCalled();
       expect(mocks.audit).not.toHaveBeenCalled();

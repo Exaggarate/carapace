@@ -456,9 +456,9 @@ def container_shell_probe(image, appdir, output):
             "--entrypoint",
             f"/bin/{shell}",
             "--env",
-            "LD_LIBRARY_PATH=/openclaw-libs",
+            "LD_LIBRARY_PATH=/carapace-libs",
             "--volume",
-            f"{appdir / 'usr/lib'}:/openclaw-libs:ro",
+            f"{appdir / 'usr/lib'}:/carapace-libs:ro",
             image,
             "-lc",
             f"printf '{shell}-ok\\n'",
@@ -675,7 +675,7 @@ def main():
     ):
         write_command(output, name, command)
 
-    with tempfile.TemporaryDirectory(prefix="openclaw-packaged-smoke-") as directory:
+    with tempfile.TemporaryDirectory(prefix="carapace-packaged-smoke-") as directory:
         root = Path(directory)
         env = isolated_environment(root / "home")
         fuse = launch_probe(
@@ -702,7 +702,7 @@ def main():
             raise RuntimeError(f"AppImage extraction exited with {extract.returncode}")
         appdir = root / "squashfs-root"
         apprun = appdir / "AppRun"
-        binary = appdir / "usr/bin/openclaw-desktop"
+        binary = appdir / "usr/bin/carapace-desktop"
         for required in (apprun, binary):
             if not required.is_file():
                 raise RuntimeError(f"Missing packaged runtime file: {required.relative_to(appdir)}")
@@ -816,7 +816,7 @@ def main():
             ui_env = dict(env)
             # AT-SPI creates a Unix socket below TMPDIR. The isolated HOME path
             # can exceed sockaddr_un's limit in deep CI workspaces.
-            with tempfile.TemporaryDirectory(prefix="openclaw-ui-") as ui_tmp:
+            with tempfile.TemporaryDirectory(prefix="carapace-ui-") as ui_tmp:
                 ui_env["TMPDIR"] = ui_tmp
                 ui_code, _ = write_command(
                     output,

@@ -12,11 +12,11 @@ import {
   beginAgentDeletionJournal,
   completeAgentDeletionJournalInDatabase,
 } from "../state/agent-deletion-journal.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import * as taskRegistryMaintenance from "../tasks/task-registry.maintenance.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
-import type { OpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
+import type { CarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runSessionRegistryMaintenance } from "./tasks-session-registry-maintenance.js";
 import { tasksMaintenanceCommand } from "./tasks.js";
 
@@ -39,7 +39,7 @@ vi.mock("../cron/store.js", async (importOriginal) => {
 });
 
 function writeAgentDeletion(
-  state: OpenClawTestState,
+  state: CarapaceTestState,
   agentId: string,
   cleanupCompleted: boolean,
 ): void {
@@ -52,7 +52,7 @@ function writeAgentDeletion(
     deleteFiles: false,
   });
   if (cleanupCompleted) {
-    runOpenClawStateWriteTransaction((database) =>
+    runCarapaceStateWriteTransaction((database) =>
       completeAgentDeletionJournalInDatabase(database, deletion.agentId, deletion.operationId),
     );
   }
@@ -67,9 +67,9 @@ async function writeStaleCronSession(storePath: string, agentId: string): Promis
   return sessionKey;
 }
 
-async function withMaintenanceState(run: (state: OpenClawTestState) => Promise<void>) {
-  await withOpenClawTestState(
-    { layout: "state-only", prefix: "openclaw-session-registry-maintenance-" },
+async function withMaintenanceState(run: (state: CarapaceTestState) => Promise<void>) {
+  await withCarapaceTestState(
+    { layout: "state-only", prefix: "carapace-session-registry-maintenance-" },
     async (state) => {
       resetConfigRuntimeState();
       await run(state);
@@ -91,7 +91,7 @@ describe("runSessionRegistryMaintenance", () => {
     taskRegistryMaintenance.stopTaskRegistryMaintenance();
     taskRegistryMaintenance.resetTaskRegistryMaintenanceRuntimeForTests();
     resetConfigRuntimeState();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("skips the sweep instead of pruning when the cron store is unreadable", async () => {
@@ -155,7 +155,7 @@ describe("runSessionRegistryMaintenance", () => {
         const mainKey = await writeStaleCronSession(mainStorePath, "main");
         await writeStaleCronSession(retiredStorePath, "retired");
         writeAgentDeletion(state, "retired", true);
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
 
         const summary = await runSessionRegistryMaintenance({ apply });
 
@@ -206,10 +206,10 @@ describe("runSessionRegistryMaintenance", () => {
       const retiredStorePath = path.join(state.sessionsDir("retired"), "sessions.json");
       await writeStaleCronSession(retiredStorePath, "retired");
       writeAgentDeletion(state, "retired", false);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       await expect(runSessionRegistryMaintenance({ apply: false })).rejects.toThrow(
-        "OpenClaw agent database is unavailable while agent retired is deleted.",
+        "Carapace agent database is unavailable while agent retired is deleted.",
       );
     });
   });

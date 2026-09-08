@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { getSkillsSnapshotVersion } from "../runtime/refresh-state.js";
 import type { CollectionBackupManifest } from "./collection-backup.js";
 import { seedLegacyCollectionBackup } from "./collection-backup.test-support.js";
@@ -21,12 +21,12 @@ vi.mock("../lifecycle/skill-change-hook.js", () => ({
   dispatchCommittedSkillChangeBestEffort: dispatchChange,
 }));
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let skillsRoot: string;
 let backupRoot: string;
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ layout: "state-only" });
+  state = await createCarapaceTestState({ layout: "state-only" });
   skillsRoot = resolveWorkshopSkillsDir({}, "main", state.env);
   backupRoot = resolveSkillCollectionBackupRoot({}, "main", state.env);
   snapshotArtifact.mockReset();

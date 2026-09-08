@@ -10,7 +10,7 @@ import {
  */
 import { resolveFreshSessionTotalTokens, type SessionEntry } from "../../config/sessions/types.js";
 import type { AgentCompactionMode } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildGenericCliContextEngineHostSupport } from "../../context-engine/host-compat.js";
 import { ensureContextEnginesInitialized as ensureContextEnginesInitializedImpl } from "../../context-engine/init.js";
 import { resolveContextEngine as resolveContextEngineImpl } from "../../context-engine/registry.js";
@@ -20,7 +20,7 @@ import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { withPluginRuntimeGenerationScope } from "../../plugins/runtime/generation-scope.js";
 import type { SkillSnapshot } from "../../skills/types.js";
 import { createPreparedEmbeddedAgentSettingsManager as createPreparedEmbeddedAgentSettingsManagerImpl } from "../agent-project-settings.js";
-import { OPENCLAW_AGENT_RUNTIME_ID, normalizeOptionalAgentRuntimeId } from "../agent-runtime-id.js";
+import { CARAPACE_AGENT_RUNTIME_ID, normalizeOptionalAgentRuntimeId } from "../agent-runtime-id.js";
 import {
   applyAgentAutoCompactionGuard as applyAgentAutoCompactionGuardImpl,
   resolveEffectiveCompactionMode,
@@ -73,11 +73,11 @@ type SettingsManagerLike = {
 type CliCompactionDeps = {
   openSessionManager: (target: SessionTranscriptRuntimeTarget) => SessionManagerLike;
   ensureContextEnginesInitialized: () => void;
-  resolveContextEngine: (cfg: OpenClawConfig) => Promise<ContextEngine>;
+  resolveContextEngine: (cfg: CarapaceConfig) => Promise<ContextEngine>;
   createPreparedEmbeddedAgentSettingsManager: (params: {
     cwd: string;
     agentDir: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     contextTokenBudget?: number;
   }) => SettingsManagerLike | Promise<SettingsManagerLike>;
   applyAgentAutoCompactionGuard: (params: {
@@ -117,7 +117,7 @@ type CliCompactionRuntimeContextParams = {
   workspaceDir: string;
   cwd?: string;
   agentDir: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   skillsSnapshot?: SkillSnapshot;
   senderIsOwner?: boolean;
   provider: string;
@@ -184,7 +184,7 @@ function isNativeHarnessCompactionSession(
   provider: string,
 ): sessionEntry is SessionEntry {
   const harnessId = sessionEntry?.agentHarnessId?.trim().toLowerCase();
-  if (!harnessId || normalizeOptionalAgentRuntimeId(harnessId) === OPENCLAW_AGENT_RUNTIME_ID) {
+  if (!harnessId || normalizeOptionalAgentRuntimeId(harnessId) === CARAPACE_AGENT_RUNTIME_ID) {
     return false;
   }
   const providerId = provider.trim().toLowerCase();
@@ -251,7 +251,7 @@ async function compactCliTranscript(params: {
   sessionFile: string;
   sessionManager: SessionManagerLike;
   storePath: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir: string;
   cwd?: string;
   agentDir: string;
@@ -415,7 +415,7 @@ async function compactCliTranscript(params: {
 }
 
 async function compactNativeHarnessCliTranscript(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionId: string;
   sessionKey: string;
   sessionFile: string;
@@ -586,7 +586,7 @@ async function compactNativeHarnessCliTranscript(params: {
 /** Runs pre-turn compaction for a CLI session and returns the updated session entry. */
 export async function runCliTurnCompactionLifecycle(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionId: string;
     sessionKey: string;
     sessionEntry: SessionEntry | undefined;
@@ -675,7 +675,7 @@ export async function runCliTurnCompactionLifecycle(
   const lockedHarnessRuntime = normalizeOptionalAgentRuntimeId(params.sessionEntry?.agentHarnessId);
   if (
     params.sessionEntry?.modelSelectionLocked === true &&
-    lockedHarnessRuntime !== OPENCLAW_AGENT_RUNTIME_ID &&
+    lockedHarnessRuntime !== CARAPACE_AGENT_RUNTIME_ID &&
     !isNativeHarnessCompactionSession(params.sessionEntry, params.provider)
   ) {
     throw new Error("CLI compaction cannot replace a model-locked native harness runtime");

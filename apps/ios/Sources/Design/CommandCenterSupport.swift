@@ -1,4 +1,4 @@
-import OpenClawChatUI
+import CarapaceChatUI
 import SwiftUI
 
 struct CommandPanel<Content: View>: View {
@@ -24,7 +24,7 @@ struct CommandPanel<Content: View>: View {
             tint: self.tint,
             isProminent: self.isProminent,
             padding: self.padding,
-            radius: OpenClawProMetric.cardRadius)
+            radius: CarapaceProMetric.cardRadius)
         {
             self.content
         }
@@ -33,7 +33,7 @@ struct CommandPanel<Content: View>: View {
 
 struct CommandControlBackground: View {
     var body: some View {
-        OpenClawProBackground()
+        CarapaceProBackground()
     }
 }
 
@@ -43,39 +43,39 @@ struct CommandSessionRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             Image(systemName: self.item.icon)
-                .font(OpenClawType.captionSemiBold)
+                .font(CarapaceType.captionSemiBold)
                 .foregroundStyle(self.item.color)
                 .frame(width: 30, height: 30)
                 .background {
-                    RoundedRectangle(cornerRadius: OpenClawRadius.sm, style: .continuous)
+                    RoundedRectangle(cornerRadius: CarapaceRadius.sm, style: .continuous)
                         .fill(self.item.color.opacity(0.12))
                 }
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     if self.item.isUnread {
                         Circle()
-                            .fill(OpenClawBrand.accent)
+                            .fill(CarapaceBrand.accent)
                             .frame(width: 7, height: 7)
                             .accessibilityHidden(true)
                     }
                     Text(verbatim: self.item.title)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.82)
                     Spacer(minLength: 6)
                     if self.item.isPinned {
                         Image(systemName: "pin.fill")
-                            .font(OpenClawType.caption2Medium)
-                            .foregroundStyle(OpenClawBrand.accent)
+                            .font(CarapaceType.caption2Medium)
+                            .foregroundStyle(CarapaceBrand.accent)
                             .accessibilityHidden(true)
                     }
                     Text(verbatim: self.item.trailing)
-                        .font(OpenClawType.caption2Medium)
+                        .font(CarapaceType.caption2Medium)
                         .foregroundStyle(.secondary)
                 }
                 HStack(spacing: 8) {
                     Text(verbatim: self.item.detail)
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                     Spacer(minLength: 6)
@@ -84,7 +84,7 @@ struct CommandSessionRow: View {
                             .frame(width: 68)
                     }
                     Text(self.progressLabel)
-                        .font(OpenClawType.captionSemiBold)
+                        .font(CarapaceType.captionSemiBold)
                         .foregroundStyle(self.item.color)
                         .lineLimit(1)
                         .frame(width: 48, alignment: .trailing)
@@ -94,7 +94,7 @@ struct CommandSessionRow: View {
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
         .overlay(alignment: .leading) {
-            OpenClawSessionColorStripe(color: self.item.sessionColor)
+            CarapaceSessionColorStripe(color: self.item.sessionColor)
         }
         .contentShape(Rectangle())
     }
@@ -135,7 +135,7 @@ struct CommandSessionActionsModifier: ViewModifier {
         case newGroup
     }
 
-    let session: OpenClawChatSessionEntry
+    let session: CarapaceChatSessionEntry
     let categories: [String]
     let isArchived: Bool
     let isEnabled: Bool
@@ -158,7 +158,7 @@ struct CommandSessionActionsModifier: ViewModifier {
     private func managedContent(_ content: Content) -> some View {
         content
             .contextMenu {
-                OpenClawSessionColorMenu(color: self.session.color, onSelect: self.actions.setColor)
+                CarapaceSessionColorMenu(color: self.session.color, onSelect: self.actions.setColor)
                 if self.isArchived {
                     if self.canArchive {
                         self.actionButton("Unarchive", systemImage: "archivebox") {
@@ -171,16 +171,16 @@ struct CommandSessionActionsModifier: ViewModifier {
                 } else {
                     self.actionButton(
                         self.session.pinned == true
-                            ? OpenClawTextValue.localized("Unpin")
-                            : OpenClawTextValue.localized("Pin"),
+                            ? CarapaceTextValue.localized("Unpin")
+                            : CarapaceTextValue.localized("Pin"),
                         systemImage: self.session.pinned == true ? "pin.slash" : "pin")
                     {
                         self.actions.togglePinned()
                     }
                     self.actionButton(
                         self.session.unread == true
-                            ? OpenClawTextValue.localized("Mark as Read")
-                            : OpenClawTextValue.localized("Mark as Unread"),
+                            ? CarapaceTextValue.localized("Mark as Read")
+                            : CarapaceTextValue.localized("Mark as Unread"),
                         systemImage: self.session.unread == true ? "envelope.open" : "envelope.badge")
                     {
                         self.actions.toggleUnread()
@@ -190,8 +190,8 @@ struct CommandSessionActionsModifier: ViewModifier {
                     }
                     self.actionButton(
                         self.session.hasActiveRun == true
-                            ? OpenClawTextValue.localized("Fork from last completed message")
-                            : OpenClawTextValue.localized("Fork"),
+                            ? CarapaceTextValue.localized("Fork from last completed message")
+                            : CarapaceTextValue.localized("Fork"),
                         systemImage: "arrow.triangle.branch")
                     {
                         self.actions.fork()
@@ -209,20 +209,20 @@ struct CommandSessionActionsModifier: ViewModifier {
             }
             .alert(self.editorTitle, isPresented: self.editorBinding) {
                 TextField(self.editorPlaceholder, text: self.$draftText)
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
                 Button {
                     self.commitEditor()
                 } label: {
                     Text(self.editor == .rename
                         ? LocalizedStringKey("Save")
                         : LocalizedStringKey("Create"))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 Button(role: .cancel) {
                     self.editor = nil
                 } label: {
                     Text("Cancel")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             }
             .confirmationDialog(
@@ -234,15 +234,15 @@ struct CommandSessionActionsModifier: ViewModifier {
                     self.actions.delete()
                 } label: {
                     Text("Delete Session")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 Button(role: .cancel) {} label: {
                     Text("Cancel")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             } message: {
                 Text("This permanently deletes the session and its transcript.")
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
             }
     }
 
@@ -264,7 +264,7 @@ struct CommandSessionActionsModifier: ViewModifier {
             }
         } label: {
             Label("Move to Group", systemImage: "folder")
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
         }
     }
 
@@ -273,7 +273,7 @@ struct CommandSessionActionsModifier: ViewModifier {
             self.confirmsDelete = true
         } label: {
             Label("Delete…", systemImage: "trash")
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
         }
     }
 
@@ -296,14 +296,14 @@ struct CommandSessionActionsModifier: ViewModifier {
     }
 
     private func actionButton(
-        _ title: OpenClawTextValue,
+        _ title: CarapaceTextValue,
         systemImage: String,
         action: @escaping () -> Void) -> some View
     {
         Button(action: action) {
             Label {
                 title.text
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
             } icon: {
                 Image(systemName: systemImage)
             }
@@ -344,7 +344,7 @@ struct CommandSessionActionsModifier: ViewModifier {
 
 extension View {
     func commandSessionActions(
-        session: OpenClawChatSessionEntry,
+        session: CarapaceChatSessionEntry,
         categories: [String],
         isArchived: Bool = false,
         isEnabled: Bool = true,
@@ -366,8 +366,8 @@ extension View {
 struct CommandViewMoreRow: View {
     var body: some View {
         Label("View More", systemImage: "chevron.right")
-            .font(OpenClawType.subheadBold)
-            .foregroundStyle(OpenClawBrand.accent)
+            .font(CarapaceType.subheadBold)
+            .foregroundStyle(CarapaceBrand.accent)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
             .contentShape(Rectangle())
@@ -376,25 +376,25 @@ struct CommandViewMoreRow: View {
 
 struct CommandEmptyStateRow: View {
     let icon: String
-    let title: OpenClawTextValue
-    let detail: OpenClawTextValue
+    let title: CarapaceTextValue
+    let detail: CarapaceTextValue
 
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: self.icon)
-                .font(OpenClawType.captionBold)
-                .foregroundStyle(OpenClawBrand.ok)
+                .font(CarapaceType.captionBold)
+                .foregroundStyle(CarapaceBrand.ok)
                 .frame(width: 30, height: 30)
                 .background {
-                    RoundedRectangle(cornerRadius: OpenClawRadius.xs, style: .continuous)
-                        .fill(OpenClawBrand.ok.opacity(0.10))
+                    RoundedRectangle(cornerRadius: CarapaceRadius.xs, style: .continuous)
+                        .fill(CarapaceBrand.ok.opacity(0.10))
                 }
             VStack(alignment: .leading, spacing: 2) {
                 self.title.text
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                     .lineLimit(1)
                 self.detail.text
-                    .font(OpenClawType.caption2Medium)
+                    .font(CarapaceType.caption2Medium)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }

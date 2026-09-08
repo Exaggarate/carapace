@@ -6,11 +6,11 @@ import { afterEach, expect, it, vi } from "vitest";
 import { clearAgentRunContext } from "../infra/agent-run-registry.js";
 import { beginSessionWorkAdmission } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  openOpenClawStateDatabase,
-  closeOpenClawStateDatabaseForTest,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  closeCarapaceStateDatabaseForTest,
+} from "../state/carapace-state-db.js";
 import { createGatewayWorkerDispatchAdmission } from "./server-worker-placement-dispatch-admission.js";
 import { createGatewayWorkerPlacementMoveBarrier } from "./server-worker-placement-move-barrier.js";
 import { createGatewayWorkerPlacementReclaimBarriers } from "./server-worker-placement-reclaim.js";
@@ -33,8 +33,8 @@ vi.mock("../config/config.js", async (importOriginal) => ({
 }));
 const roots: string[] = [];
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   lookup.value = undefined;
   await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
 });
@@ -272,7 +272,7 @@ async function cancellationLoadFixture(
 ) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "worker-stop-advance-"));
   roots.push(root);
-  const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+  const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
   const placements = createWorkerSessionPlacementStore({ database });
   const storePath = path.join(root, "sessions.sqlite");
   const entry = {

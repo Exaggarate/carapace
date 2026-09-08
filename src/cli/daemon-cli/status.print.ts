@@ -74,8 +74,8 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
   const spacer = () => defaultRuntime.log("");
   // Advice belongs to this shell, not the stored service environment or probe target.
   const installBlock = resolveDaemonInstallBlockMessage("gateway");
-  const installCommand = formatCliCommand("openclaw gateway install");
-  const reinstallCommand = formatCliCommand("openclaw gateway install --force");
+  const installCommand = formatCliCommand("carapace gateway install");
+  const reinstallCommand = formatCliCommand("carapace gateway install --force");
 
   const { service, rpc, extraServices } = status;
   const serviceTargetsProbe = service.targetRole !== "diagnostic-only";
@@ -147,7 +147,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     }
     const recommendation =
       installBlock ??
-      `Recommendation: run "${formatCliCommand("openclaw doctor")}" interactively for guided checks, or reinstall with "${reinstallCommand}".`;
+      `Recommendation: run "${formatCliCommand("carapace doctor")}" interactively for guided checks, or reinstall with "${reinstallCommand}".`;
     defaultRuntime.error(warnText(recommendation));
   }
 
@@ -200,7 +200,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
       );
       const recovery =
         installBlock ??
-        `Fix: rerun \`${reinstallCommand}\` from the same --profile / OPENCLAW_STATE_DIR you expect.`;
+        `Fix: rerun \`${reinstallCommand}\` from the same --profile / CARAPACE_STATE_DIR you expect.`;
       defaultRuntime.error(errorText(recovery));
     }
     spacer();
@@ -249,12 +249,12 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     if (status.cli?.version && status.cli.version !== gatewayVersion) {
       defaultRuntime.error(
         warnText(
-          `Warning: this OpenClaw command is version ${status.cli.version}, but the running Gateway is version ${gatewayVersion}.`,
+          `Warning: this Carapace command is version ${status.cli.version}, but the running Gateway is version ${gatewayVersion}.`,
         ),
       );
       defaultRuntime.error(
         warnText(
-          "Check `openclaw --version`, `which openclaw`, and `openclaw gateway status --deep`; if this mismatch is unexpected, update PATH so `openclaw` points to the version you want, or reinstall the Gateway service from that same OpenClaw install.",
+          "Check `carapace --version`, `which carapace`, and `carapace gateway status --deep`; if this mismatch is unexpected, update PATH so `carapace` points to the version you want, or reinstall the Gateway service from that same Carapace install.",
         ),
       );
     }
@@ -344,7 +344,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     );
     defaultRuntime.error(
       errorText(
-        `Fix: run ${formatCliCommand("openclaw gateway restart")} and re-check with ${formatCliCommand("openclaw gateway status --deep")}.`,
+        `Fix: run ${formatCliCommand("carapace gateway restart")} and re-check with ${formatCliCommand("carapace gateway status --deep")}.`,
       ),
     );
     spacer();
@@ -364,7 +364,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     }
     defaultRuntime.log(
       warnText(
-        "If logs show protocol mismatch after rollback, stop stale OpenClaw client processes listed here and re-run gateway status.",
+        "If logs show protocol mismatch after rollback, stop stale Carapace client processes listed here and re-run gateway status.",
       ),
     );
     spacer();
@@ -374,7 +374,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     service.loadState.status === "unknown" ? service.loadState.detail : undefined;
   if (serviceInspectionDetail) {
     defaultRuntime.error(errorText(`Service inspection failed: ${serviceInspectionDetail}`));
-    defaultRuntime.error(errorText(`Retry: ${formatCliCommand("openclaw gateway status --deep")}`));
+    defaultRuntime.error(errorText(`Retry: ${formatCliCommand("carapace gateway status --deep")}`));
     spacer();
   }
   const systemdUnavailableDetail =
@@ -416,7 +416,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
             ? // systemd gave up restarting after repeated crashes; sending the operator
               // to restart (which now clears the failed latch) beats "exited immediately".
               `systemd stopped restarting the gateway after repeated crashes; run ${formatCliCommand(
-                "openclaw gateway restart",
+                "carapace gateway restart",
               )} or inspect logs.`
             : "Service is loaded but not running (likely exited immediately).",
       ),
@@ -424,7 +424,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     const env = service.command?.environment ?? process.env;
     for (const hint of buildGatewayRuntimeRecoveryHints({
       kind: missingGuiSession ? "gui-session" : "stopped",
-      restartCommand: formatCliCommand("openclaw gateway restart", env),
+      restartCommand: formatCliCommand("carapace gateway restart", env),
       env,
       logFile: status.logFile,
     })) {
@@ -437,7 +437,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
 
   if (service.runtime?.cachedLabel) {
     const env = service.command?.environment ?? process.env;
-    const labelValue = resolveGatewayLaunchAgentLabel(env.OPENCLAW_PROFILE);
+    const labelValue = resolveGatewayLaunchAgentLabel(env.CARAPACE_PROFILE);
     const recovery =
       installBlock ??
       `Clear with: launchctl bootout gui/$UID/${labelValue}\nThen reinstall: ${installCommand}`;
@@ -446,7 +446,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
   }
 
   if (service.staleUpdateLaunchdJobs?.length) {
-    defaultRuntime.error(errorText("Stale OpenClaw updater launchd job(s) detected."));
+    defaultRuntime.error(errorText("Stale Carapace updater launchd job(s) detected."));
     for (const job of service.staleUpdateLaunchdJobs) {
       const exitStatus =
         job.lastExitStatus !== undefined ? `, last exit ${job.lastExitStatus}` : "";
@@ -455,7 +455,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     }
     defaultRuntime.error(
       errorText(
-        `Fix after confirming no update is running: launchctl remove <label>, then run ${formatCliCommand("openclaw gateway restart")}.`,
+        `Fix after confirming no update is running: launchctl remove <label>, then run ${formatCliCommand("carapace gateway restart")}.`,
       ),
     );
     spacer();
@@ -493,7 +493,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
       defaultRuntime.error(`${errorText("Last gateway error:")} ${status.lastError}`);
     }
     if (process.platform === "linux") {
-      const unit = resolveGatewaySystemdServiceName(serviceEnv.OPENCLAW_PROFILE);
+      const unit = resolveGatewaySystemdServiceName(serviceEnv.CARAPACE_PROFILE);
       defaultRuntime.error(
         errorText(`Logs: journalctl --user -u ${unit}.service -n 200 --no-pager`),
       );
@@ -566,7 +566,7 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
       }
       if (updateCommands.length === 1 && unresolvedRepairs.length === 0) {
         defaultRuntime.log(
-          `${label("Fix:")} ${updateCommands[0]} && ${formatCliCommand("openclaw gateway restart")}.`,
+          `${label("Fix:")} ${updateCommands[0]} && ${formatCliCommand("carapace gateway restart")}.`,
         );
       } else if (updateCommands.length > 0) {
         defaultRuntime.log(`${label("Fix:")} update each drifted plugin:`);
@@ -574,13 +574,13 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
           defaultRuntime.log(`- ${command}`);
         }
         if (unresolvedRepairs.length === 0) {
-          defaultRuntime.log(`Then run ${formatCliCommand("openclaw gateway restart")}.`);
+          defaultRuntime.log(`Then run ${formatCliCommand("carapace gateway restart")}.`);
         }
       }
     } else {
       defaultRuntime.log(
         infoText(
-          `Run ${formatCliCommand("openclaw gateway status --deep")} for affected plugin ids and fix commands.`,
+          `Run ${formatCliCommand("carapace gateway status --deep")} for affected plugin ids and fix commands.`,
         ),
       );
     }
@@ -601,6 +601,6 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean; d
     spacer();
   }
 
-  defaultRuntime.log(`${label("Troubles:")} run ${formatCliCommand("openclaw status")}`);
-  defaultRuntime.log(`${label("Troubleshooting:")} https://docs.openclaw.ai/troubleshooting`);
+  defaultRuntime.log(`${label("Troubles:")} run ${formatCliCommand("carapace status")}`);
+  defaultRuntime.log(`${label("Troubleshooting:")} https://github.com/Exaggarate/carapace`);
 }

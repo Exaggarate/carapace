@@ -24,7 +24,7 @@ import { persistenceRuntimeEntrypoint } from "../../src/skills/library/persisten
 import {
   agentDatabaseHeldRuntimeEntrypoint,
   stateLeaseProcessExitRuntimeEntrypoint,
-} from "../../src/state/openclaw-state-lease-runtime.test-support.ts";
+} from "../../src/state/carapace-state-lease-runtime.test-support.ts";
 import { tuiPtyRuntimeEntrypoints } from "../../src/tui/tui-pty-runtime-test-support.ts";
 import { channelIngressGatewayRestartEntrypoint } from "../../test/fixtures/channel-ingress-gateway-restart-entrypoint.ts";
 import { runtimeProcessBuildEntries } from "./runtime-process-build-entries.mts";

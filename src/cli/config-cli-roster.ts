@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { readAgentRosterProperty } from "../agents/agent-scope-config.js";
 import { parseLegacyAgentRoster } from "../config/legacy.roster.js";
 import type { ConfigSetOperation } from "./config-cli-input.js";

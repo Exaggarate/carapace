@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/a2a",
+  "name": "@carapace/a2a",
   "version": "2026.9.2",
-  "description": "OpenClaw A2A v1.0 Agent-to-Agent protocol channel plugin",
+  "description": "Carapace A2A v1.0 Agent-to-Agent protocol channel plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "exports": {
@@ -16,18 +16,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],

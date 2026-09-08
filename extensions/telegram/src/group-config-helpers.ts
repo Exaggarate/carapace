@@ -3,15 +3,15 @@ import {
   resolveToolsBySender,
   type GroupToolPolicyConfig,
   type ScopeTree,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-policy";
 // Telegram helper module supports group config helpers behavior.
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   TelegramAccountConfig,
   TelegramDirectConfig,
   TelegramGroupConfig,
   TelegramTopicConfig,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/config-contracts";
 import { firstDefined } from "./bot-access.js";
 
 export function resolveTelegramScopedGroupConfig(
@@ -49,7 +49,7 @@ export function resolveTelegramScopedGroupConfig(
 }
 
 export function resolveTelegramGroupIngestEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   chatId: string | number;
   accountId?: string;
   topicConfig?: TelegramTopicConfig;

@@ -121,7 +121,7 @@ suite.define(() => {
           '[data-session-section="catalog:claude"] .sidebar-recent-sessions__head',
         );
         const toggle = header.locator(".sidebar-session-group-toggle");
-        const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactRoot
           ? createControlUiE2eArtifactDir("claude-sessions", artifactRoot)
           : undefined;
@@ -275,7 +275,7 @@ suite.define(() => {
       });
       expect(touchAffordance.actionsColor).toBe(touchAffordance.toolbarButtonColor);
 
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("claude-sessions", artifactRoot)
         : undefined;
@@ -331,7 +331,7 @@ suite.define(() => {
       await connecting.waitFor();
       expect(await page.locator(".tabstrip-tab.is-connecting").count()).toBe(1);
 
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("claude-sessions", artifactRoot)
         : undefined;
@@ -404,7 +404,7 @@ suite.define(() => {
         );
       await page.getByRole("status", { name: "Connecting to session…" }).waitFor();
       await page
-        .locator("openclaw-terminal-panel .tabstrip-tab", {
+        .locator("carapace-terminal-panel .tabstrip-tab", {
           hasText: "claude --resume claude-termi…",
         })
         .waitFor();
@@ -418,14 +418,14 @@ suite.define(() => {
       await page.getByText("Session did not connect within 30 seconds.", { exact: true }).waitFor();
       const close = await gateway.waitForRequest("terminal.close");
       expect(close.params).toEqual({ sessionId: "claude-terminal-timeout" });
-      expect(await page.locator("openclaw-terminal-panel .tabstrip-tab").count()).toBe(0);
+      expect(await page.locator("carapace-terminal-panel .tabstrip-tab").count()).toBe(0);
     });
   });
 
   it("auto-loads older chat without moving the viewport and disables paired-node continuation", async () => {
     const page = await suite.browser.newPage();
     await page.clock.install();
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("claude-sessions", artifactRoot)
       : undefined;
@@ -583,7 +583,7 @@ suite.define(() => {
     await page.locator(".session-progress-hovercard").waitFor();
     await remote.click();
     await expect.poll(() => page.getByText("newer answer", { exact: true }).count()).toBe(1);
-    const catalogPane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+    const catalogPane = page.locator('carapace-chat-pane[aria-hidden="false"]');
     const thread = catalogPane.locator(".chat-thread");
     await expect
       .poll(() => thread.evaluate((element) => element.scrollHeight > element.clientHeight + 100))
@@ -676,7 +676,7 @@ suite.define(() => {
   });
 
   it("auto-pages an underfilled native transcript until it becomes scrollable", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("claude-sessions", artifactRoot)
       : undefined;
@@ -690,7 +690,7 @@ suite.define(() => {
     const page = await context.newPage();
     const proofVideo = page.video();
     const historyMessage = (seq: number, role: "assistant" | "user", text: string) => ({
-      __openclaw: { seq },
+      __carapace: { seq },
       content: [{ type: role === "assistant" ? "output_text" : "input_text", text }],
       role,
       timestamp: 1_800_000_000_000 + seq,
@@ -756,7 +756,7 @@ suite.define(() => {
 
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const thread = pane.locator(".chat-thread");
       await page.getByText("Recent answer", { exact: true }).waitFor();
       await expect
@@ -835,12 +835,12 @@ suite.define(() => {
 
   it("keeps the earlier-history action fixed while loading and reveals the fetched page", async () => {
     const page = await suite.browser.newPage({ viewport: { width: 1280, height: 800 } });
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("claude-sessions", artifactRoot)
       : undefined;
     const historyMessage = (seq: number, prefix: string) => ({
-      __openclaw: { seq },
+      __carapace: { seq },
       content: [
         {
           type: "text",
@@ -966,7 +966,7 @@ suite.define(() => {
     await expect
       .poll(() =>
         page
-          .locator("openclaw-chat-pane")
+          .locator("carapace-chat-pane")
           .evaluate(
             (element) =>
               (element as HTMLElement & { state: { chatMessages: unknown[] } }).state.chatMessages

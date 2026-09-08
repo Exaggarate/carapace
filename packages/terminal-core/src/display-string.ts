@@ -1,6 +1,6 @@
 import os from "node:os";
 import path from "node:path";
-import { lowercasePreservingWhitespace } from "@openclaw/normalization-core/string-coerce";
+import { lowercasePreservingWhitespace } from "@carapace/normalization-core/string-coerce";
 
 // Display-safe string helpers for shortening user home paths.
 
@@ -31,7 +31,7 @@ function resolveTermuxHome(env: NodeJS.ProcessEnv): string | undefined {
   return path.resolve(prefix, "..", "home");
 }
 
-/** Resolve the underlying OS home before applying OpenClaw overrides. */
+/** Resolve the underlying OS home before applying Carapace overrides. */
 function resolveRawOsHomeDir(env: NodeJS.ProcessEnv, homedir: () => string): string | undefined {
   return (
     normalize(env.HOME) ??
@@ -41,12 +41,12 @@ function resolveRawOsHomeDir(env: NodeJS.ProcessEnv, homedir: () => string): str
   );
 }
 
-/** Resolve raw home with OPENCLAW_HOME tilde expansion. */
+/** Resolve raw home with CARAPACE_HOME tilde expansion. */
 function resolveRawHomeDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = os.homedir,
 ): string | undefined {
-  const explicitHome = normalize(env.OPENCLAW_HOME);
+  const explicitHome = normalize(env.CARAPACE_HOME);
   if (explicitHome) {
     const fallbackHome = resolveRawOsHomeDir(env, homedir);
     return fallbackHome ? explicitHome.replace(/^~(?=$|[\\/])/, () => fallbackHome) : explicitHome;
@@ -69,8 +69,8 @@ function resolveHomeDisplayPrefix(): { home: string; prefix: string } | undefine
   if (!home) {
     return undefined;
   }
-  const explicitHome = process.env.OPENCLAW_HOME?.trim();
-  return explicitHome ? { home, prefix: "$OPENCLAW_HOME" } : { home, prefix: "~" };
+  const explicitHome = process.env.CARAPACE_HOME?.trim();
+  return explicitHome ? { home, prefix: "$CARAPACE_HOME" } : { home, prefix: "~" };
 }
 
 /** Find a case-insensitive Windows path without changing offsets in the original string. */

@@ -8,16 +8,16 @@ import {
   normalizeQuestionTimeoutSeconds,
   resolveToolExecutionErrorKind,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   hasPendingInternalDiagnosticEvent,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
 import {
   addTimerTimeoutGraceMs,
   parseStrictNonNegativeInteger,
-} from "openclaw/plugin-sdk/number-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   createFailedDynamicToolResponse,
   type CodexDynamicToolRuntimeResponse,
@@ -107,7 +107,7 @@ function formatDynamicToolTimeoutDetails(params: {
 
   if (tool !== "process" || !isJsonObject(params.call.arguments)) {
     return {
-      responseMessage: `OpenClaw dynamic tool call timed out after ${params.timeoutMs}ms while running tool ${tool}.`,
+      responseMessage: `Carapace dynamic tool call timed out after ${params.timeoutMs}ms while running tool ${tool}.`,
       consoleMessage: `codex dynamic tool timeout: tool=${tool} toolTimeoutMs=${params.timeoutMs}; per-tool-call watchdog, not session idle`,
       meta: baseMeta,
     };
@@ -130,7 +130,7 @@ function formatDynamicToolTimeoutDetails(params: {
       : " while waiting for the process tool";
 
   return {
-    responseMessage: `OpenClaw dynamic tool call timed out after ${params.timeoutMs}ms${responseTarget}. This is a tool RPC timeout, not a session idle timeout.`,
+    responseMessage: `Carapace dynamic tool call timed out after ${params.timeoutMs}ms${responseTarget}. This is a tool RPC timeout, not a session idle timeout.`,
     consoleMessage: `codex process tool timeout:${actionPart}${sessionPart} toolTimeoutMs=${params.timeoutMs}${requestedPart}; per-tool-call watchdog, not session idle${retryHint}`,
     meta: {
       ...baseMeta,
@@ -230,7 +230,7 @@ export async function handleDynamicToolCallWithTimeout(params: {
     });
   };
   if (params.signal.aborted) {
-    const message = "OpenClaw dynamic tool call aborted before execution.";
+    const message = "Carapace dynamic tool call aborted before execution.";
     const terminalReason = resolveCodexToolAbortTerminalReason(params.signal);
     params.onFallbackSelected?.();
     notifyFailedToolResult(message, terminalReason);
@@ -247,7 +247,7 @@ export async function handleDynamicToolCallWithTimeout(params: {
   let timedOut = false;
   let resolveAbort: ((response: CodexDynamicToolRuntimeResponse) => void) | undefined;
   const abortFromRun = () => {
-    const message = "OpenClaw dynamic tool call aborted.";
+    const message = "Carapace dynamic tool call aborted.";
     const terminalReason = resolveCodexToolAbortTerminalReason(params.signal);
     params.onFallbackSelected?.();
     controller.abort(params.signal.reason ?? new Error(message));
@@ -301,7 +301,7 @@ export async function handleDynamicToolCallWithTimeout(params: {
     const terminalReason = params.signal.aborted
       ? resolveCodexToolAbortTerminalReason(params.signal)
       : resolveToolExecutionErrorKind(error);
-    const message = formatToolExecutionErrorMessage(error, "OpenClaw dynamic tool call failed.");
+    const message = formatToolExecutionErrorMessage(error, "Carapace dynamic tool call failed.");
     notifyFailedToolResult(message, terminalReason);
     return finalizeTerminal(createFailedAfterPossibleDispatch(message, terminalReason));
   } finally {
@@ -311,7 +311,7 @@ export async function handleDynamicToolCallWithTimeout(params: {
     params.signal.removeEventListener("abort", abortFromRun);
     resolveAbort = undefined;
     if (!timedOut && !controller.signal.aborted) {
-      controller.abort(new Error("OpenClaw dynamic tool call finished."));
+      controller.abort(new Error("Carapace dynamic tool call finished."));
     }
   }
 }
@@ -323,10 +323,10 @@ function readDynamicToolResponseText(response: CodexDynamicToolCallResponse): st
     )
     .join("\n")
     .trim();
-  return text || "OpenClaw dynamic tool call failed.";
+  return text || "Carapace dynamic tool call failed.";
 }
 
-/** Strips OpenClaw-only metadata before sending a dynamic tool response to Codex. */
+/** Strips Carapace-only metadata before sending a dynamic tool response to Codex. */
 export function toCodexDynamicToolProtocolResponse(
   response: CodexDynamicToolRuntimeResponse,
 ): CodexDynamicToolCallResponse {
@@ -380,7 +380,7 @@ type TerminalDynamicToolReleaseState = {
   currentTurnHadNonTerminalDynamicToolResult: boolean;
   activeAppServerTurnRequests: number;
   activeTurnItemIdsCount: number;
-  pendingOpenClawDynamicToolCompletionIdsCount: number;
+  pendingCarapaceDynamicToolCompletionIdsCount: number;
 };
 
 /** Decides whether a terminal dynamic tool response can release the Codex turn. */
@@ -394,7 +394,7 @@ export function shouldReleaseTurnAfterTerminalDynamicTool(
     !state.currentTurnHadNonTerminalDynamicToolResult &&
     state.activeAppServerTurnRequests === 0 &&
     state.activeTurnItemIdsCount === 0 &&
-    state.pendingOpenClawDynamicToolCompletionIdsCount === 0
+    state.pendingCarapaceDynamicToolCompletionIdsCount === 0
   );
 }
 
@@ -415,7 +415,7 @@ type TerminalDynamicToolBatchAction =
 type TerminalDynamicToolBatchState = {
   activeAppServerTurnRequests: number;
   activeTurnItemIdsCount: number;
-  pendingOpenClawDynamicToolCompletionIdsCount: number;
+  pendingCarapaceDynamicToolCompletionIdsCount: number;
   currentTurnHadNonTerminalDynamicToolResult: boolean;
   hasPendingTerminalDynamicToolRelease: boolean;
 };
@@ -427,7 +427,7 @@ export function resolveTerminalDynamicToolBatchAction(
   if (
     state.activeAppServerTurnRequests > 0 ||
     state.activeTurnItemIdsCount > 0 ||
-    state.pendingOpenClawDynamicToolCompletionIdsCount > 0
+    state.pendingCarapaceDynamicToolCompletionIdsCount > 0
   ) {
     return "wait";
   }
@@ -509,15 +509,15 @@ export function resolveDynamicToolCallTimeoutMs(params: {
 }): number {
   const args = isJsonObject(params.call.arguments) ? params.call.arguments : undefined;
   if (
-    params.call.tool === "openclaw" ||
+    params.call.tool === "carapace" ||
     params.call.tool === "ask_user" ||
     (params.call.tool === "secrets" && args?.action === "request")
   ) {
     try {
       // Human entry owns a validated wait longer than ordinary tool execution.
-      // OpenClaw delegation uses that default for its ten-minute approval plus
+      // Carapace delegation uses that default for its ten-minute approval plus
       // staging/application; it has no model-authored timeout override.
-      const timeoutSeconds = params.call.tool === "openclaw" ? undefined : args?.timeoutSeconds;
+      const timeoutSeconds = params.call.tool === "carapace" ? undefined : args?.timeoutSeconds;
       return (
         normalizeQuestionTimeoutSeconds(timeoutSeconds) * 1_000 +
         CODEX_DYNAMIC_TOOL_TIMEOUT_SECONDS_GRACE_MS

@@ -1,7 +1,7 @@
 // Image runtime tests cover model-backed image routing, auth/profile handling,
 // provider payload transforms, and MiniMax/Copilot special paths.
-import { expectDefined } from "@openclaw/normalization-core/expect";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core/expect";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { createEmptyPluginMetadataSnapshot } from "../agents/test-helpers/embedded-agent-runner-e2e-mocks.js";
@@ -44,7 +44,7 @@ describe("describeImageWithModelCore", () => {
     await expect(
       describeImageWithModelCore({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "lmstudio",
         model: "text-only",
         buffer: Buffer.from("png-bytes"),
@@ -80,7 +80,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4",
       buffer: Buffer.from("png-bytes"),
@@ -148,7 +148,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4",
       buffer: Buffer.from("png-bytes"),
@@ -189,7 +189,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openrouter",
       model: "google/gemini-2.5-flash",
       buffer: Buffer.from("png-bytes"),
@@ -245,7 +245,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "qwen",
       model: "qwen3.6-plus",
       buffer: Buffer.from("png-bytes"),
@@ -367,7 +367,7 @@ describe("describeImageWithModelCore", () => {
 
       const result = await describeImageWithModelCore({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider,
         model: model.id,
         buffer: Buffer.from("png-bytes"),
@@ -426,7 +426,7 @@ describe("describeImageWithModelCore", () => {
     await expect(
       describeImageWithModelCore({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "openai",
         model: "gpt-5.4-mini",
         buffer: Buffer.from("png-bytes"),
@@ -461,7 +461,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -499,7 +499,7 @@ describe("describeImageWithModelCore", () => {
     const controller = new AbortController();
     const result = describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -553,7 +553,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -590,7 +590,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -639,7 +639,7 @@ describe("describeImageWithModelCore", () => {
       acquireAgentRunPreparedModelRuntimeMock.mockImplementationOnce(() =>
         delay({
           snapshot: {
-            agentDir: "/tmp/openclaw-agent",
+            agentDir: "/tmp/carapace-agent",
             config: {},
             metadataSnapshot: createEmptyPluginMetadataSnapshot(),
             createStores: () => ({ authStorage: preparedAuthStorage, modelRegistry: {} }),
@@ -665,7 +665,7 @@ describe("describeImageWithModelCore", () => {
     const controller = new AbortController();
     const pending = describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),

@@ -1,15 +1,15 @@
-import { buildChannelInboundEventContext } from "openclaw/plugin-sdk/channel-inbound";
-import { createTestInboundDebounceFlush } from "openclaw/plugin-sdk/channel-test-helpers";
+import { buildChannelInboundEventContext } from "carapace/plugin-sdk/channel-inbound";
+import { createTestInboundDebounceFlush } from "carapace/plugin-sdk/channel-test-helpers";
 // Feishu tests cover bot plugin behavior.
 import type {
   ensureConfiguredBindingRouteReady,
   getSessionBindingService,
   resolveConfiguredBindingRoute,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveAgentRoute, type ResolvedAgentRoute } from "openclaw/plugin-sdk/routing";
-import { resolveGroupSessionKey } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createRuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
+import { resolveAgentRoute, type ResolvedAgentRoute } from "carapace/plugin-sdk/routing";
+import { resolveGroupSessionKey } from "carapace/plugin-sdk/session-store-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClawdbotConfig, PluginRuntime } from "../runtime-api.js";
 import type { FeishuMessageEvent } from "./bot.js";
@@ -386,9 +386,9 @@ const {
 
 const finalizeInboundContextMock = mockBuildChannelInboundEventContext;
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("carapace/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/channel-inbound")>(
+    "carapace/plugin-sdk/channel-inbound",
   );
   return {
     ...actual,
@@ -407,16 +407,16 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/reply-runtime")>(
-    "openclaw/plugin-sdk/reply-runtime",
+vi.mock("carapace/plugin-sdk/reply-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/reply-runtime")>(
+    "carapace/plugin-sdk/reply-runtime",
   );
   return { ...actual, dispatchInboundMessage: mockDispatchInboundMessage };
 });
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("carapace/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/session-store-runtime")>(
+    "carapace/plugin-sdk/session-store-runtime",
   );
   return { ...actual, resolveStorePath: mockResolveStorePath };
 });
@@ -455,9 +455,9 @@ vi.mock("./bot-name.js", () => ({
   resolveFeishuBotName: mockResolveFeishuBotName,
 }));
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("carapace/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/conversation-runtime")>(
+    "carapace/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -504,7 +504,7 @@ afterAll(() => {
   vi.doUnmock("./audio-preflight.runtime.js");
   vi.doUnmock("./client.js");
   vi.doUnmock("./bot-name.js");
-  vi.doUnmock("openclaw/plugin-sdk/conversation-runtime");
+  vi.doUnmock("carapace/plugin-sdk/conversation-runtime");
   vi.resetModules();
 });
 
@@ -1802,18 +1802,18 @@ describe("handleFeishuMessage command authorization", () => {
         senderType: "bot",
         chatId: "oc-bot-group",
         chatType: "group",
-        text: mentionedOpenId ? "@_openclaw /status" : "/status",
+        text: mentionedOpenId ? "@_carapace /status" : "/status",
         message: {
           mentions: mentionedOpenId
-            ? [{ key: "@_openclaw", id: { open_id: mentionedOpenId }, name: "OpenClaw" }]
+            ? [{ key: "@_carapace", id: { open_id: mentionedOpenId }, name: "Carapace" }]
             : undefined,
         },
       });
 
     await dispatchMessage({
       cfg: createFeishuTestConfig(baseFeishuConfig),
-      event: createEvent("msg-bot-off", "ou-other-app-openclaw"),
-      botOpenId: "ou-openclaw",
+      event: createEvent("msg-bot-off", "ou-other-app-carapace"),
+      botOpenId: "ou-carapace",
     });
     expect(mockDispatchReplyFromConfig).not.toHaveBeenCalled();
 
@@ -1827,10 +1827,10 @@ describe("handleFeishuMessage command authorization", () => {
                 path.message_id === "msg-bot-mentioned"
                   ? [
                       {
-                        key: "@_openclaw",
-                        id: "ou-openclaw",
+                        key: "@_carapace",
+                        id: "ou-carapace",
                         id_type: "open_id",
-                        name: "OpenClaw",
+                        name: "Carapace",
                       },
                     ]
                   : [],
@@ -1844,7 +1844,7 @@ describe("handleFeishuMessage command authorization", () => {
     await dispatchMessage({
       cfg: createFeishuTestConfig({ ...baseFeishuConfig, allowBots: true }),
       event: createEvent("msg-bot-unmentioned"),
-      botOpenId: "ou-openclaw",
+      botOpenId: "ou-carapace",
     });
     expect(mockDispatchReplyFromConfig).not.toHaveBeenCalled();
 
@@ -1853,12 +1853,12 @@ describe("handleFeishuMessage command authorization", () => {
     await dispatchMessage({
       cfg: createFeishuTestConfig({ ...baseFeishuConfig, allowBots: true }),
       event: unrelatedMentionEvent,
-      botOpenId: "ou-openclaw",
+      botOpenId: "ou-carapace",
     });
     expect(mockDispatchReplyFromConfig).not.toHaveBeenCalled();
 
-    const admittedEvent = createEvent("msg-bot-mentioned", "ou-other-app-openclaw");
-    admittedEvent.message.content = JSON.stringify({ text: "@_openclaw @_alice /status" });
+    const admittedEvent = createEvent("msg-bot-mentioned", "ou-other-app-carapace");
+    admittedEvent.message.content = JSON.stringify({ text: "@_carapace @_alice /status" });
     admittedEvent.message.mentions?.push({
       key: "@_alice",
       id: { open_id: "ou-alice" },
@@ -1867,7 +1867,7 @@ describe("handleFeishuMessage command authorization", () => {
     await dispatchMessage({
       cfg: createFeishuTestConfig({ ...baseFeishuConfig, allowBots: true }),
       event: admittedEvent,
-      botOpenId: "ou-openclaw",
+      botOpenId: "ou-carapace",
     });
 
     expect(mockResolveFeishuBotName).toHaveBeenCalledWith(
@@ -1884,7 +1884,7 @@ describe("handleFeishuMessage command authorization", () => {
       0,
     );
     expect(inbound.CommandBody).toBe("/status");
-    expect(inbound.BodyForAgent).not.toContain("ou-other-app-openclaw");
+    expect(inbound.BodyForAgent).not.toContain("ou-other-app-carapace");
     expect(inbound.BodyForAgent).not.toContain("ou-alice");
     expect(getMessage).toHaveBeenCalledTimes(3);
     expect(mockDispatchReplyFromConfig).toHaveBeenCalledTimes(1);
@@ -1902,7 +1902,7 @@ describe("handleFeishuMessage command authorization", () => {
       senderType: "bot",
       chatId: "oc-bot-group",
       chatType: "group",
-      text: "@_openclaw ping",
+      text: "@_carapace ping",
     });
 
     await dispatchMessage({ cfg, event });
@@ -1937,9 +1937,9 @@ describe("handleFeishuMessage command authorization", () => {
         senderType: "bot",
         chatId: "oc-loop-group",
         chatType: "group",
-        text: "@_openclaw ping",
+        text: "@_carapace ping",
         message: {
-          mentions: [{ key: "@_openclaw", id: { open_id: "ou-loop-self" }, name: "OpenClaw" }],
+          mentions: [{ key: "@_carapace", id: { open_id: "ou-loop-self" }, name: "Carapace" }],
         },
       });
 

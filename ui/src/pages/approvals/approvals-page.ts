@@ -30,7 +30,7 @@ import {
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { i18n, t } from "../../i18n/index.ts";
 import { formatUiError } from "../../lib/format-error.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 
 const APPROVAL_HISTORY_PAGE_SIZE = 50;
@@ -68,7 +68,7 @@ function grantIsActive(grant: StandingGrantRow, nowMs: number): boolean {
   return grant.revokedAtMs === null && (grant.expiresAtMs === null || grant.expiresAtMs > nowMs);
 }
 const APPROVAL_HISTORY_REQUIRED_SCOPE = "operator.approvals";
-const APPROVALS_DOCS_URL = "https://docs.openclaw.ai/tools/exec-approvals";
+const APPROVALS_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 function formatResolvedAt(timestampMs: number): string {
   return new Intl.DateTimeFormat(i18n.getLocale(), {
@@ -157,7 +157,7 @@ function resolverLabel(item: TerminalApprovalSnapshot): string {
   return item.resolver.id ? `${item.resolver.kind} · ${item.resolver.id}` : item.resolver.kind;
 }
 
-class ApprovalsPage extends OpenClawLightDomElement {
+class ApprovalsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -580,6 +580,6 @@ class ApprovalsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-approvals-page")) {
-  customElements.define("openclaw-approvals-page", ApprovalsPage);
+if (!customElements.get("carapace-approvals-page")) {
+  customElements.define("carapace-approvals-page", ApprovalsPage);
 }

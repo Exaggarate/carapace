@@ -5,7 +5,7 @@ import {
   normalizeStringEntries,
   normalizeOptionalString,
   sortUniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { createSlackReadClient } from "./client.js";
 import { formatSlackError } from "./errors.js";
 

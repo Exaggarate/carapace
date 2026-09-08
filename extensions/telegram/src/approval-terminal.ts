@@ -1,14 +1,14 @@
 // Telegram plugin module renders terminal operator approval receipts.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
 import type {
   ExpiredApprovalView,
   ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   buildSystemAgentApprovalResolvedText,
   formatApprovalDecisionLabel,
-} from "openclaw/plugin-sdk/approval-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 
 const TELEGRAM_APPROVAL_DETAIL_MAX_CHARS = 2_800;
 const TELEGRAM_APPROVAL_ID_MAX_CHARS = 512;
@@ -82,16 +82,16 @@ export function buildTelegramCanonicalApprovalTerminalText(params: {
   const approval = params.result.approval;
   if (approval.presentation?.kind === "system-agent" && params.result.applied) {
     if (approval.status === "allowed") {
-      return `✅ OpenClaw change approved. Applying: ${truncateDetail(approval.presentation.description)}`;
+      return `✅ Carapace change approved. Applying: ${truncateDetail(approval.presentation.description)}`;
     }
     if (approval.status === "cancelled") {
-      return "⚠️ OpenClaw change was cancelled because its run ended. No change was made. Retry.";
+      return "⚠️ Carapace change was cancelled because its run ended. No change was made. Retry.";
     }
     if (approval.status === "denied") {
-      return "❌ OpenClaw change denied. No change was made.";
+      return "❌ Carapace change denied. No change was made.";
     }
     if (approval.status === "expired") {
-      return "⏱️ OpenClaw change expired. No change was made.";
+      return "⏱️ Carapace change expired. No change was made.";
     }
   }
   const approvalId = approval.id || params.fallbackApprovalId;
@@ -172,7 +172,7 @@ export function buildTelegramNativeResolvedApprovalText(view: ResolvedApprovalVi
 /** Render a canonical native expiration event while retaining safe request context. */
 export function buildTelegramNativeExpiredApprovalText(view: ExpiredApprovalView): string {
   if (view.approvalKind === "system-agent") {
-    return "⏱️ OpenClaw change expired. No change was made.";
+    return "⏱️ Carapace change expired. No change was made.";
   }
   const label = view.approvalKind === "exec" ? "Exec" : "Plugin";
   const lines = [

@@ -8,9 +8,9 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resolvePublishedModelCatalogOwner } from "./prepared-model-catalog-owner.js";
 import {
   getPreparedModelRuntimeAuthMaterializations,
@@ -26,11 +26,11 @@ import {
 } from "./prepared-model-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared model runtime config stamps", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
     mocks.configuredAgentIds = ["default"];
   });
@@ -78,7 +78,7 @@ describe("prepared model runtime config stamps", () => {
     await expect(loadPreparedModelRuntimeAuth(advanced, { providerIds: [] })).resolves.toEqual(
       loadedAuth,
     );
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
     await expect(
       loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" }),
     ).resolves.toMatchObject({ config: nextConfig });
@@ -127,7 +127,7 @@ describe("prepared model runtime config stamps", () => {
       supplierReady.resolve();
       await Promise.all([stalePublication, nextPublication]);
 
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
       await expect(
         prepareModelRuntimeSnapshot({
           agentId: "default",
@@ -179,7 +179,7 @@ describe("prepared model runtime config stamps", () => {
       await reader;
       await refreshPreparedModelRuntimeSnapshots(nextConfig, { gatewayLifecycle: true });
 
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
       await expect(
         prepareModelRuntimeSnapshot({
           agentId: "default",
@@ -204,7 +204,7 @@ describe("prepared model runtime config stamps", () => {
     await refreshPreparedModelRuntimeSnapshots(initialConfig, { gatewayLifecycle: true });
     const finishAuthRefreshGate = createDeferred();
     let finishAuthRefresh: (() => void) | undefined;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, agentDir) => {
       finishAuthRefresh = () => finishAuthRefreshGate.resolve();
       await finishAuthRefreshGate.promise;
       return { agentDir: String(agentDir), wrote: false };
@@ -228,7 +228,7 @@ describe("prepared model runtime config stamps", () => {
         workspaceDir: "/tmp/unused-workspace",
         config: nextConfig,
       });
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
     } finally {
       finishAuthRefreshGate.resolve();
       await Promise.allSettled([loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" })]);

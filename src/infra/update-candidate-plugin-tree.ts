@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolvePathViaExistingAncestorSync } from "./boundary-path.js";
 import { tryReadJson } from "./json-files.js";
 import { parseRegistryNpmSpec } from "./npm-registry-spec.js";
@@ -13,7 +13,7 @@ import {
 
 const isHostLauncher = (file: string) =>
   path.basename(path.dirname(file)) === ".bin" &&
-  ["openclaw", "openclaw.cmd", "openclaw.ps1"].includes(path.basename(file));
+  ["carapace", "carapace.cmd", "carapace.ps1"].includes(path.basename(file));
 
 async function dependencyOwner(target: string): Promise<string> {
   // A pnpm package resolves dependencies beside its package directory. Preserve
@@ -69,7 +69,7 @@ export async function copyUpdateCandidatePluginTrees(params: {
   const moduleAliases = new Map<string, string>();
   const moduleOwners = new Set<string>();
   const isOwnedHostEdge = (file: string) =>
-    path.basename(file) === "openclaw" && moduleOwners.has(path.dirname(file));
+    path.basename(file) === "carapace" && moduleOwners.has(path.dirname(file));
   const covered = (file: string) => [...roots.keys()].some((root) => isPathInside(root, file));
   const insideHost = (file: string) => [...hosts].some((root) => isPathInside(root, file));
   const excludesInferredRoot = (root: string) =>
@@ -203,7 +203,7 @@ export async function copyUpdateCandidatePluginTrees(params: {
   async function refreshHostEdges(): Promise<void> {
     const discovered: Array<{ source: string; real?: string }> = [];
     for (const owner of moduleOwners) {
-      const source = path.join(owner, "openclaw");
+      const source = path.join(owner, "carapace");
       const exists = await fs.lstat(source).then(
         () => true,
         (error: unknown) => {
@@ -289,7 +289,7 @@ export async function copyUpdateCandidatePluginTrees(params: {
         }));
       if (excludesInferredRoot(owner)) {
         throw new Error(
-          `Cannot privately copy host-owned plugin link ${file} -> ${real}; use the openclaw package/SDK import or a separately owned plugin dependency.`,
+          `Cannot privately copy host-owned plugin link ${file} -> ${real}; use the carapace package/SDK import or a separately owned plugin dependency.`,
         );
       }
       assertSource(owner);

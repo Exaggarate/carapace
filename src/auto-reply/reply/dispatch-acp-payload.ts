@@ -1,7 +1,7 @@
 // Prepares ACP reply payloads and applies TTS before delivery.
 import { createChannelReplyTransform } from "../../channels/message/reply-transform.js";
 import type { ChannelMessagingAdapter } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { TtsAutoMode } from "../../config/types.tts.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
 import { resolveStatusTtsSnapshot } from "../../tts/status-config.js";
@@ -17,7 +17,7 @@ const dispatchAcpTtsRuntimeLoader = createLazyImportLoader(
 );
 
 export function prepareAcpDeliveryPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   dispatcher: ReplyDispatcher;
   kind: ReplyDispatchKind;
   payload: ReplyPayload;
@@ -39,7 +39,7 @@ export function prepareAcpDeliveryPayload(params: {
 
 export async function maybeApplyAcpTts(params: {
   payload: ReplyPayload;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   channel?: string;
   accountId?: string;

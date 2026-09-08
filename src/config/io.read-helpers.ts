@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { asOptionalRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord, isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import JSON5 from "json5";
 import { sha256Hex } from "../infra/crypto-digest.js";
 import { loadDotEnv } from "../infra/dotenv.js";
@@ -33,7 +33,7 @@ import type { ConfigIoDeps, NormalizedConfigIoDeps, ParseConfigJson5Result } fro
 import { resolveConfigPath, resolveIncludeRoots, resolveStateDir } from "./paths.js";
 import { createConfigResolutionFacts, type ConfigResolutionFacts } from "./resolution-facts.js";
 import { getRuntimeConfigSourceSnapshot } from "./runtime-snapshot.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 export function hashConfigRaw(raw: string | null): string {
   // Present-file hashes stay compatible with last-known-good recovery metadata.
@@ -49,8 +49,8 @@ export function resolveConfigSnapshotHash(snapshot: {
   return hash ?? (typeof snapshot.raw === "string" ? hashConfigRaw(snapshot.raw) : null);
 }
 
-export function coerceConfig(value: unknown): OpenClawConfig {
-  return (asOptionalRecord(value) ?? {}) as OpenClawConfig;
+export function coerceConfig(value: unknown): CarapaceConfig {
+  return (asOptionalRecord(value) ?? {}) as CarapaceConfig;
 }
 
 export function hasConfigMeta(value: unknown): boolean {
@@ -160,8 +160,8 @@ export function normalizeConfigIoDeps(overrides: ConfigIoDeps = {}): NormalizedC
     measure: overrides.measure ?? (async (_name, run) => await run()),
     suppressFutureVersionWarning:
       overrides.suppressFutureVersionWarning ??
-      (isTruthyEnvValue(env.OPENCLAW_UPDATE_IN_PROGRESS) ||
-        isTruthyEnvValue(env.OPENCLAW_UPDATE_POST_CORE)),
+      (isTruthyEnvValue(env.CARAPACE_UPDATE_IN_PROGRESS) ||
+        isTruthyEnvValue(env.CARAPACE_UPDATE_POST_CORE)),
     observe: overrides.observe ?? true,
   };
 }
@@ -328,7 +328,7 @@ export function resolveConfigForRead(
   lowerPrecedenceEnv: Readonly<Record<string, string>> = {},
 ): ConfigReadResolution {
   if (resolvedIncludes && typeof resolvedIncludes === "object" && "env" in resolvedIncludes) {
-    applyConfigEnvVars(resolvedIncludes as OpenClawConfig, env, { lowerPrecedenceEnv });
+    applyConfigEnvVars(resolvedIncludes as CarapaceConfig, env, { lowerPrecedenceEnv });
   }
   const envWarnings: EnvSubstitutionWarning[] = [];
   const pendingEnvSecretRefs = new Map<string, string>();
@@ -367,7 +367,7 @@ export function replaceEnvSnapshot(
 
 export function resolveManagedRuntimeEnvBaseline(): {
   generation: number;
-  sourceConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
 } {
   // Accepted restart candidates publish env before the runtime snapshot advances.
   // Managed writes must stay on that publication generation to avoid mixed env refs.

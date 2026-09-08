@@ -12,7 +12,7 @@ import {
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createEmptyChangedLanes,
@@ -53,7 +53,7 @@ import { materializeNativeCompiler } from "./native-boundary-fixture.js";
 
 const tempDirs: string[] = [];
 const repoRoot = process.cwd();
-const githubActivityHelper = ".agents/skills/openclaw-pr-maintainer/scripts/github-activity.sh";
+const githubActivityHelper = ".agents/skills/carapace-pr-maintainer/scripts/github-activity.sh";
 const tsxImport = pathToFileURL(createRequire(import.meta.url).resolve("tsx")).href;
 type ExecFileSyncFailure = Error & { status?: number | null; stderr?: Buffer };
 const nestedGitEnvKeys = [
@@ -139,7 +139,7 @@ function writeRepoFile(repoDir: string, filePath: string, contents: string): voi
 const prettyJson = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
 
 function createRootTestLintFixture() {
-  const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-root-lint-");
+  const dir = makeTempRepoRoot(tempDirs, "carapace-changed-root-lint-");
   git(dir, ["init", "-q", "--initial-branch=main"]);
   writeRepoFile(dir, "README.md", "Synthetic changed-check fixture.\n");
   commitAll(dir, "fixture base");
@@ -208,8 +208,8 @@ function createRootTestLintFixture() {
     OXC_LOG: "debug",
     PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
   };
-  delete env.OPENCLAW_TESTBOX;
-  delete env.OPENCLAW_OXLINT_SKIP_PREPARE;
+  delete env.CARAPACE_TESTBOX;
+  delete env.CARAPACE_OXLINT_SKIP_PREPARE;
   return {
     dir,
     run: (script: string, args: string[]) =>
@@ -256,7 +256,7 @@ function runChangedCheckWithRecordedCommands(
   paths = ["src/gateway/server-runtime-state.ts"],
   cwd = repoRoot,
 ) {
-  const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-check-order-");
+  const dir = makeTempRepoRoot(tempDirs, "carapace-changed-check-order-");
   const binDir = path.join(dir, "bin");
   const eventsPath = path.join(dir, "events.jsonl");
   const childPath = path.join(dir, "command.cjs");
@@ -300,8 +300,8 @@ if (bin === "pnpm" && args[0] === ${JSON.stringify(failingCommand)}) {
       ...createNestedGitEnv(),
       CI: "",
       GITHUB_ACTIONS: "",
-      OPENCLAW_CHECK_CHANGED_REMOTE_CHILD: "1",
-      OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE: "",
+      CARAPACE_CHECK_CHANGED_REMOTE_CHILD: "1",
+      CARAPACE_CHECK_CHANGED_SKIP_DEADCODE: "",
       PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
     },
     cwd,
@@ -385,7 +385,7 @@ describe("scripts/changed-lanes", () => {
   ])("$name", ({ script, expected }) => {
     const result = runRepoScript(script, ["--help"], {
       ...createNestedGitEnv(),
-      OPENCLAW_TESTBOX: "1",
+      CARAPACE_TESTBOX: "1",
     });
 
     expect(result.status).toBe(0);
@@ -406,7 +406,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("delegates when the local checkout cannot resolve the default base ref", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-check-changed-missing-base-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-check-changed-missing-base-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
@@ -421,8 +421,8 @@ describe("scripts/changed-lanes", () => {
         ...createNestedGitEnv(),
         CI: "",
         GITHUB_ACTIONS: "",
-        OPENCLAW_CHECK_CHANGED_REMOTE_CHILD: "",
-        OPENCLAW_TESTBOX: "1",
+        CARAPACE_CHECK_CHANGED_REMOTE_CHILD: "",
+        CARAPACE_TESTBOX: "1",
         PATH: `${binDir}:${process.env.PATH ?? ""}`,
       },
     });
@@ -433,7 +433,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("delegates path-scoped release metadata when local diff refs are unavailable", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-check-changed-metadata-missing-base-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-check-changed-metadata-missing-base-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
@@ -454,8 +454,8 @@ describe("scripts/changed-lanes", () => {
           ...createNestedGitEnv(),
           CI: "",
           GITHUB_ACTIONS: "",
-          OPENCLAW_CHECK_CHANGED_REMOTE_CHILD: "",
-          OPENCLAW_TESTBOX: "",
+          CARAPACE_CHECK_CHANGED_REMOTE_CHILD: "",
+          CARAPACE_TESTBOX: "",
           PATH: `${binDir}:${process.env.PATH ?? ""}`,
         },
       },
@@ -484,7 +484,7 @@ describe("scripts/changed-lanes", () => {
   ])("$name", ({ script, option, expected }) => {
     const result = runRepoScript(script, [option], {
       ...createNestedGitEnv(),
-      OPENCLAW_TESTBOX: "1",
+      CARAPACE_TESTBOX: "1",
     });
 
     expect(result.status).toBe(1);
@@ -611,7 +611,7 @@ describe("scripts/changed-lanes", () => {
       selected: false,
     },
   ])("executes config-doc dependency selection for $name", ({ paths, selected, deleted }) => {
-    const cwd = makeTempRepoRoot(tempDirs, "openclaw-config-doc-dependencies-");
+    const cwd = makeTempRepoRoot(tempDirs, "carapace-config-doc-dependencies-");
     git(cwd, ["init", "-q", "--initial-branch=main"]);
     for (const [file, source] of Object.entries({
       "extensions/courier/src/config-schema.ts":
@@ -660,7 +660,7 @@ describe("scripts/changed-lanes", () => {
   it("keeps the hidden maintainer helper trio on tooling checks through both CLIs", () => {
     const paths = [
       githubActivityHelper,
-      ".agents/skills/openclaw-pr-maintainer/SKILL.md",
+      ".agents/skills/carapace-pr-maintainer/SKILL.md",
       "test/scripts/github-activity-helper.test.ts",
     ];
     const lanes = runChangedLanesCli(repoRoot, ["--json", "--", ...paths]);
@@ -695,7 +695,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("includes untracked worktree files in the default local diff", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
@@ -741,7 +741,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("falls back to a two-dot diff when a delegated checkout has no merge base", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-no-merge-base-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-no-merge-base-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
@@ -763,7 +763,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("prefers raw sync worktree paths over an implausibly broad no-merge-base diff", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-raw-sync-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-raw-sync-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     for (let index = 0; index < 250; index += 1) {
       writeFileSync(path.join(dir, `baseline-${index}.txt`), "baseline\n", "utf8");
@@ -785,29 +785,29 @@ describe("scripts/changed-lanes", () => {
     mkdirSync(path.join(dir, "src"), { recursive: true });
     writeFileSync(path.join(dir, "src", "feature.ts"), "export const value = 1;\n", "utf8");
 
-    const previousRawSync = process.env.OPENCLAW_CHANGED_LANES_RAW_SYNC;
-    delete process.env.OPENCLAW_CHANGED_LANES_RAW_SYNC;
+    const previousRawSync = process.env.CARAPACE_CHANGED_LANES_RAW_SYNC;
+    delete process.env.CARAPACE_CHANGED_LANES_RAW_SYNC;
     try {
       const normalPaths = listChangedPathsFromGit({ base: "origin/main", cwd: dir });
       expect(normalPaths.length).toBeGreaterThan(200);
       expect(normalPaths).toContain("baseline-0.txt");
       expect(normalPaths).toContain("src/feature.ts");
 
-      process.env.OPENCLAW_CHANGED_LANES_RAW_SYNC = "1";
+      process.env.CARAPACE_CHANGED_LANES_RAW_SYNC = "1";
       expect(listChangedPathsFromGit({ base: "origin/main", cwd: dir })).toEqual([
         "src/feature.ts",
       ]);
     } finally {
       if (previousRawSync === undefined) {
-        delete process.env.OPENCLAW_CHANGED_LANES_RAW_SYNC;
+        delete process.env.CARAPACE_CHANGED_LANES_RAW_SYNC;
       } else {
-        process.env.OPENCLAW_CHANGED_LANES_RAW_SYNC = previousRawSync;
+        process.env.CARAPACE_CHANGED_LANES_RAW_SYNC = previousRawSync;
       }
     }
   });
 
   it("includes committed and untracked added files in the changed format check", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-added-format-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-added-format-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeRepoFile(dir, "README.md", "initial\n");
     commitAll(dir, "initial");
@@ -836,7 +836,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("includes staged added, modified, and deleted files in the changed format check", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-staged-format-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-staged-format-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeRepoFile(dir, "src/modified.ts", "export const modified = { value: 1 };\n");
     writeRepoFile(dir, "src/removed.ts", "export const removed = { value: 1 };\n");
@@ -864,7 +864,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("fails the changed format check on a misformatted added file and passes once formatted", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-format-added-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-format-added-");
     writeRepoFile(dir, "src/added.test.ts", "export const added={value:1};\n");
 
     const dirty = runChangedFormatLaneWithRepoOxfmt(dir, ["src/added.test.ts"]);
@@ -877,7 +877,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("fails the changed format check on a misformatted modified file", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-format-modified-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-format-modified-");
     writeRepoFile(dir, "src/modified.ts", "export const modified={value:2};\n");
 
     const result = runChangedFormatLaneWithRepoOxfmt(dir, ["src/modified.ts"]);
@@ -886,7 +886,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("does not fail the changed format check for deleted paths", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-format-deleted-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-format-deleted-");
     writeRepoFile(dir, "src/kept.ts", "export const kept = { value: 1 };\n");
 
     const result = runChangedFormatLaneWithRepoOxfmt(dir, ["src/deleted.ts", "src/kept.ts"]);
@@ -912,7 +912,7 @@ describe("scripts/changed-lanes", () => {
       );
       const broken = targets[count - 1]!;
       const violation = [
-        'import { work } from "openclaw/plugin-sdk/discovery";',
+        'import { work } from "carapace/plugin-sdk/discovery";',
         "export function run(ready: boolean) {",
         "  if (ready) return;",
         "  work(); fromCore(); fromUi(); fromPackage();",
@@ -981,7 +981,7 @@ describe("scripts/changed-lanes", () => {
       writeRepoFile(
         dir,
         file,
-        'import { work } from "openclaw/plugin-sdk/discovery";\nwork(); fromCore(); fromUi(); fromPackage();\n',
+        'import { work } from "carapace/plugin-sdk/discovery";\nwork(); fromCore(); fromUi(); fromPackage();\n',
       );
     }
     writeRepoFile(dir, declarations[1]!, "export declare function work(): Promise<void>;\n");
@@ -1045,7 +1045,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("uses the merge commit first parent instead of a stale PR payload base", () => {
-    const { dir, staleBase } = createSyntheticMergeRepo("openclaw-changed-lanes-merge-");
+    const { dir, staleBase } = createSyntheticMergeRepo("carapace-changed-lanes-merge-");
 
     expect(listChangedPathsFromGit({ base: staleBase, cwd: dir, includeWorktree: false })).toEqual([
       "src/main-only.ts",
@@ -1062,7 +1062,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("ignores local Crabbox metadata in the default local diff", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-crabbox-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-crabbox-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, ".gitignore"), ".crabbox/\n", "utf8");
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
@@ -1079,7 +1079,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("includes deleted worktree files in the default local diff", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-deleted-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-deleted-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     mkdirSync(path.join(dir, "src", "shared"), { recursive: true });
     writeFileSync(
@@ -1098,7 +1098,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("includes deleted staged files in the staged diff", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-changed-lanes-staged-deleted-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-changed-lanes-staged-deleted-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     mkdirSync(path.join(dir, "src", "shared"), { recursive: true });
     writeFileSync(
@@ -1155,7 +1155,7 @@ describe("scripts/changed-lanes", () => {
   it.each([
     "extensions/whatsapp/src/config-ui-hints.ts",
     "extensions/mattermost/src/config-schema-core.ts",
-    "extensions/telegram/openclaw.plugin.json",
+    "extensions/telegram/carapace.plugin.json",
     "extensions/discord/package.json",
     "extensions/slack/security-contract-api.ts",
     "src/config/zod-schema.core.ts",
@@ -1264,8 +1264,8 @@ describe("scripts/changed-lanes", () => {
       "src/gateway/server-methods-list.ts",
       "src/gateway/events.ts",
       "apps/ios/Sources/RootTabs.swift",
-      "apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatGatewayPayloadCodec.swift",
-      "apps/android/app/src/main/java/ai/openclaw/app/gateway/GatewaySession.kt",
+      "apps/shared/CarapaceKit/Sources/CarapaceChatUI/ChatGatewayPayloadCodec.swift",
+      "apps/android/app/src/main/java/ai/carapace/app/gateway/GatewaySession.kt",
       "scripts/protocol-event-coverage.allowlist.json",
       "scripts/check-protocol-event-coverage.mjs",
       "scripts/check-protocol-event-coverage.mts",
@@ -1291,21 +1291,21 @@ describe("scripts/changed-lanes", () => {
       "test/scripts/check-protocol-event-coverage.test.ts",
       "docs/ci.md",
       "apps/ios/Tests/ProtocolTests.swift",
-      "apps/shared/OpenClawKit/Tests/ProtocolTests.swift",
+      "apps/shared/CarapaceKit/Tests/ProtocolTests.swift",
       "apps/ios/Sources/Nested/Tests/ProtocolTests.swift",
-      "apps/shared/OpenClawKit/Sources/.build/Generated.swift",
-      "apps/android/app/src/test/java/ai/openclaw/app/GatewayTest.kt",
-      "apps/android/app/src/main/java/ai/openclaw/app/build/Generated.kt",
-      "apps/android/app/src/main/java/ai/openclaw/application/Other.kt",
+      "apps/shared/CarapaceKit/Sources/.build/Generated.swift",
+      "apps/android/app/src/test/java/ai/carapace/app/GatewayTest.kt",
+      "apps/android/app/src/main/java/ai/carapace/app/build/Generated.kt",
+      "apps/android/app/src/main/java/ai/carapace/application/Other.kt",
       "apps/ios/Sources/README.md",
       "apps/android/app/src/main/AndroidManifest.xml",
-      "apps/macos/Sources/OpenClaw/AppDelegate.swift",
+      "apps/macos/Sources/Carapace/AppDelegate.swift",
       "scripts/check-protocol-event-coverage.mts.bak",
     ].map((file) => ({ name: file, paths: [file], selected: false })),
     { name: "no changes", paths: [], selected: false },
   ])("selects early protocol coverage=$selected for $name", ({ paths, selected }) => {
     const plan = createChangedCheckPlan(detectChangedLanes(paths), {
-      env: { OPENCLAW_LOCAL_CHECK: "0", PATH: "/usr/bin" },
+      env: { CARAPACE_LOCAL_CHECK: "0", PATH: "/usr/bin" },
     });
     const coverage = plan.commands.filter(
       (command) => command.args[0] === "scripts/check-protocol-event-coverage.mjs",
@@ -1317,7 +1317,7 @@ describe("scripts/changed-lanes", () => {
       expect(coverage[0]).toMatchObject({
         bin: "node",
         args: ["scripts/check-protocol-event-coverage.mjs"],
-        env: { OPENCLAW_LOCAL_CHECK: "1", PATH: "/usr/bin" },
+        env: { CARAPACE_LOCAL_CHECK: "1", PATH: "/usr/bin" },
       });
     }
   });
@@ -1348,7 +1348,7 @@ describe("scripts/changed-lanes", () => {
     expect(plan.commands.map((command) => command.args[0])).toContain("tsgo:core:test");
     expect(plan.commands.find((command) => command.args[0] === "tsgo:core")?.env).toEqual({
       PATH: "/usr/bin",
-      OPENCLAW_TSGO_SPARSE_SKIP: "1",
+      CARAPACE_TSGO_SPARSE_SKIP: "1",
     });
     expect(plan.commands.find((command) => command.name === "lint core changed file")).toEqual({
       name: "lint core changed file",
@@ -1781,12 +1781,12 @@ describe("scripts/changed-lanes", () => {
   it("reenables local-check policy for changed typecheck commands", () => {
     const result = detectChangedLanes(["packages/normalization-core/src/string-normalization.ts"]);
     const plan = createChangedCheckPlan(result, {
-      env: { OPENCLAW_LOCAL_CHECK: "0", PATH: "/usr/bin" },
+      env: { CARAPACE_LOCAL_CHECK: "0", PATH: "/usr/bin" },
     });
 
     expect(plan.commands.find((command) => command.args[0] === "tsgo:core")?.env).toEqual({
-      OPENCLAW_LOCAL_CHECK: "1",
-      OPENCLAW_TSGO_SPARSE_SKIP: "1",
+      CARAPACE_LOCAL_CHECK: "1",
+      CARAPACE_TSGO_SPARSE_SKIP: "1",
       PATH: "/usr/bin",
     });
   });
@@ -1811,7 +1811,7 @@ describe("scripts/changed-lanes", () => {
       "CI Corepack pnpm shim directory",
     );
 
-    expect(path.basename(shimDir)).toMatch(/^openclaw-corepack-pnpm-/u);
+    expect(path.basename(shimDir)).toMatch(/^carapace-corepack-pnpm-/u);
     expect(existsSync(path.join(shimDir, "pnpm"))).toBe(true);
 
     cleanupCorepackPnpmShimDir();
@@ -1838,7 +1838,7 @@ describe("scripts/changed-lanes", () => {
         { result },
       ),
     ).toBe(false);
-    expect(shouldDelegateChangedCheckToCrabbox([], { OPENCLAW_TESTBOX: "1" }, { result })).toBe(
+    expect(shouldDelegateChangedCheckToCrabbox([], { CARAPACE_TESTBOX: "1" }, { result })).toBe(
       true,
     );
 
@@ -1854,8 +1854,8 @@ describe("scripts/changed-lanes", () => {
       "--timing-json",
       "--",
       "env",
-      "OPENCLAW_CHECK_CHANGED_REMOTE_CHILD=1",
-      "OPENCLAW_CHANGED_LANES_RAW_SYNC=1",
+      "CARAPACE_CHECK_CHANGED_REMOTE_CHILD=1",
+      "CARAPACE_CHANGED_LANES_RAW_SYNC=1",
       "CI=1",
       "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false",
       "corepack",
@@ -1876,7 +1876,7 @@ describe("scripts/changed-lanes", () => {
 
   it("adds the dead export scan only for production source changes", () => {
     const command = {
-      name: "dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)",
+      name: "dead export scan (skip with CARAPACE_CHECK_CHANGED_SKIP_DEADCODE=1)",
       bin: "node",
       args: ["--import", "tsx", "scripts/check-deadcode-exports.mts"],
       env: expect.any(Object),
@@ -1888,7 +1888,7 @@ describe("scripts/changed-lanes", () => {
     expect(createChangedCheckPlan(toolingResult).commands).not.toContainEqual(command);
     expect(
       createChangedCheckPlan(sourceResult, {
-        env: { OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE: "1" },
+        env: { CARAPACE_CHECK_CHANGED_SKIP_DEADCODE: "1" },
       }).commands,
     ).not.toContainEqual(command);
   });
@@ -1905,7 +1905,7 @@ describe("scripts/changed-lanes", () => {
       expect(shouldDelegateChangedCheckToCrabbox([], {}, { result })).toBe(false);
     }
     for (const result of [docsResult, metadataResult, mixedResult]) {
-      expect(shouldDelegateChangedCheckToCrabbox([], { OPENCLAW_TESTBOX: "1" }, { result })).toBe(
+      expect(shouldDelegateChangedCheckToCrabbox([], { CARAPACE_TESTBOX: "1" }, { result })).toBe(
         true,
       );
     }
@@ -1920,7 +1920,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("delegates staged changed gates as explicit remote paths", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-check-changed-staged-delegate-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-check-changed-staged-delegate-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
@@ -1942,7 +1942,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("delegates empty staged changed gates without rediscovering unstaged paths", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-check-changed-empty-staged-delegate-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-check-changed-empty-staged-delegate-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
@@ -1959,7 +1959,7 @@ describe("scripts/changed-lanes", () => {
     expect(shouldDelegateChangedCheckToCrabbox([], { GITHUB_ACTIONS: "true" })).toBe(false);
     expect(shouldDelegateChangedCheckToCrabbox([], { CI: "1" })).toBe(false);
     expect(
-      shouldDelegateChangedCheckToCrabbox([], { OPENCLAW_CHECK_CHANGED_REMOTE_CHILD: "1" }),
+      shouldDelegateChangedCheckToCrabbox([], { CARAPACE_CHECK_CHANGED_REMOTE_CHILD: "1" }),
     ).toBe(false);
   });
 
@@ -2084,14 +2084,14 @@ describe("scripts/changed-lanes", () => {
 
   it.each([
     "pnpm-lock.yaml",
-    ".agents/skills/openclaw-pr-maintainer/scripts/unknown-helper.sh",
+    ".agents/skills/carapace-pr-maintainer/scripts/unknown-helper.sh",
     `${githubActivityHelper}.bak`,
     `${githubActivityHelper}/child.sh`,
     `other/${githubActivityHelper}`,
-    ".agents/skills/openclaw-pr-maintainer-extra/scripts/github-activity.sh",
+    ".agents/skills/carapace-pr-maintainer-extra/scripts/github-activity.sh",
     ".agents/config.json",
     ".agents/skills/autoreview/scripts/autoreview",
-    ".agents/skills/openclaw-changelog-update/scripts/verify-release-notes.mjs",
+    ".agents/skills/carapace-changelog-update/scripts/verify-release-notes.mjs",
   ])("fails safe for %s even alongside the hidden maintainer helper", (changedPath) => {
     for (const paths of [[changedPath], [githubActivityHelper, changedPath]]) {
       const result = detectChangedLanes(paths);
@@ -2140,7 +2140,7 @@ describe("scripts/changed-lanes", () => {
         "config/swiftlint.yml",
         "deploy/fly.private.toml",
         "docker-setup.sh",
-        "openclaw.podman.env",
+        "carapace.podman.env",
         "setup-podman.sh",
         "skills/pyproject.toml",
       ],
@@ -2220,7 +2220,7 @@ describe("scripts/changed-lanes", () => {
       // These live-Docker paths include `src/gateway/*.live.test.ts`, and the
       // full-tree knip scan sees test files, so a deleted last consumer can
       // orphan an export here too.
-      "dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)",
+      "dead export scan (skip with CARAPACE_CHECK_CHANGED_SKIP_DEADCODE=1)",
       "lint core",
       "lint scripts",
       "live Docker shell syntax",
@@ -2245,8 +2245,8 @@ describe("scripts/changed-lanes", () => {
     );
     expect(schedulerDryRun?.bin).toBe("node");
     expect(schedulerDryRun?.args).toEqual(["scripts/test-docker-all.mjs"]);
-    expect(schedulerDryRun?.env?.OPENCLAW_DOCKER_ALL_DRY_RUN).toBe("1");
-    expect(schedulerDryRun?.env?.OPENCLAW_DOCKER_ALL_LIVE_MODE).toBe("only");
+    expect(schedulerDryRun?.env?.CARAPACE_DOCKER_ALL_DRY_RUN).toBe("1");
+    expect(schedulerDryRun?.env?.CARAPACE_DOCKER_ALL_LIVE_MODE).toBe("only");
   });
 
   it.each([
@@ -2341,7 +2341,7 @@ describe("scripts/changed-lanes", () => {
   ])(
     "classifies $name through the Git CLI and changed-check plan",
     ({ before, after, expected }) => {
-      const result = classifyPackageJsonChange("openclaw-package-scripts-", before, after);
+      const result = classifyPackageJsonChange("carapace-package-scripts-", before, after);
       const plan = createChangedCheckPlan(result);
 
       expect(result.paths).toEqual(["package.json"]);
@@ -2367,7 +2367,7 @@ describe("scripts/changed-lanes", () => {
       "apps/android/fastlane/metadata/android/en-US/release_notes.txt",
       "apps/android/version.json",
       "apps/ios/CHANGELOG.md",
-      "apps/macos/Sources/OpenClaw/Resources/Info.plist",
+      "apps/macos/Sources/Carapace/Resources/Info.plist",
       "apps/mobile/version.json",
       "docs/.generated/config-baseline.counts.json",
       "docs/.generated/config-baseline.sha256",
@@ -2516,7 +2516,7 @@ describe("scripts/changed-lanes", () => {
       predicate: shouldRunDoctorContractOwnerTests,
       predicatePaths: [
         "extensions/telegram/doctor-contract-api.ts",
-        "extensions/telegram/openclaw.plugin.json",
+        "extensions/telegram/carapace.plugin.json",
         "extensions/codex/src/migration/session-binding-sidecars.ts",
       ],
       changedPath: "extensions/telegram/doctor-contract-api.ts",
@@ -2538,13 +2538,13 @@ describe("scripts/changed-lanes", () => {
       name: "runs SQLite sessions/transcripts schema baseline checks for baseline owner surfaces",
       predicate: shouldRunSqliteSessionSchemaBaselineCheck,
       predicatePaths: [
-        "src/state/openclaw-agent-schema.sql",
+        "src/state/carapace-agent-schema.sql",
         "scripts/generate-sqlite-session-schema-baseline.ts",
         "scripts/lib/sqlite-session-schema-baseline.ts",
         "test/scripts/sqlite-session-schema-baseline.test.ts",
         "docs/.generated/sqlite-session-transcript-schema-baseline.sha256",
       ],
-      changedPath: "src/state/openclaw-agent-schema.sql",
+      changedPath: "src/state/carapace-agent-schema.sql",
       expected: {
         exact: [
           {
@@ -2698,7 +2698,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("guards release metadata package changes to the top-level version field", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-release-metadata-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-release-metadata-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
     writeFileSync(
       path.join(dir, "package.json"),
@@ -2795,12 +2795,12 @@ describe("scripts/changed-lanes", () => {
 
   it("runs macOS app CI tests for macOS app dependency changes", () => {
     for (const changedPath of [
-      "apps/macos/Sources/OpenClawMac/AppDelegate.swift",
+      "apps/macos/Sources/CarapaceMac/AppDelegate.swift",
       "apps/macos/Package.swift",
-      "apps/macos/Tests/OpenClawIPCTests/Fixtures/state.json",
-      "apps/macos-mlx-tts/Sources/OpenClawMLXTTS/main.swift",
-      "apps/shared/OpenClawKit/Sources/OpenClawKit/Client.swift",
-      "apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift",
+      "apps/macos/Tests/CarapaceIPCTests/Fixtures/state.json",
+      "apps/macos-mlx-tts/Sources/CarapaceMLXTTS/main.swift",
+      "apps/shared/CarapaceKit/Sources/CarapaceKit/Client.swift",
+      "apps/shared/CarapaceKit/Sources/CarapaceProtocol/GatewayModels.swift",
       "apps/swabble/Sources/SwabbleKit/WakeWordGate.swift",
       "Swabble/Sources/SwabbleKit/WakeWordGate.swift",
     ]) {
@@ -2829,7 +2829,7 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("keeps exact Swift test-only changes out of local packaging tests", () => {
-    const changedPath = "apps/macos/Tests/OpenClawIPCTests/MacNodeHostWorkerTests.swift";
+    const changedPath = "apps/macos/Tests/CarapaceIPCTests/MacNodeHostWorkerTests.swift";
     const plan = createChangedCheckPlan(detectChangedLanes([changedPath]), {
       env: { PATH: "/usr/bin" },
       platform: "darwin",
@@ -2844,8 +2844,8 @@ describe("scripts/changed-lanes", () => {
   });
 
   it.each([
-    "./apps/macos/Tests/OpenClawIPCTests/RemovedTests.swift",
-    String.raw`apps\macos\Tests\OpenClawIPCTests\Nested\WorkerTests.swift`,
+    "./apps/macos/Tests/CarapaceIPCTests/RemovedTests.swift",
+    String.raw`apps\macos\Tests\CarapaceIPCTests\Nested\WorkerTests.swift`,
   ])("fails safe for noncanonical Swift path %s", (changedPath) => {
     const result = detectChangedLanes([changedPath]);
     const commands = createChangedCheckPlan(result).commands.map((command) => command.args[0]);
@@ -2861,7 +2861,7 @@ describe("scripts/changed-lanes", () => {
     const mixedPlan = createChangedCheckPlan(
       detectChangedLanes([
         "pnpm-lock.yaml",
-        "apps/macos/Tests/OpenClawIPCTests/MacNodeHostWorkerTests.swift",
+        "apps/macos/Tests/CarapaceIPCTests/MacNodeHostWorkerTests.swift",
       ]),
     );
     const withoutFormat = (plan: typeof fullPlan) =>
@@ -2903,8 +2903,8 @@ describe("scripts/changed-lanes", () => {
 
   it("runs the native state schema guard for either contract owner", () => {
     for (const changedPath of [
-      "apps/shared/OpenClawKit/Sources/OpenClawNativeState/OpenClawNativeStateSQLite.swift",
-      "src/state/openclaw-state-db-contract.ts",
+      "apps/shared/CarapaceKit/Sources/CarapaceNativeState/CarapaceNativeStateSQLite.swift",
+      "src/state/carapace-state-db-contract.ts",
     ]) {
       const plan = createChangedCheckPlan(detectChangedLanes([changedPath]), {
         env: { PATH: "/usr/bin" },
@@ -2964,7 +2964,7 @@ describe("scripts/changed-lanes", () => {
         const result = detectChangedLanes([
           changedPath,
           ...(includeSwiftTest
-            ? ["apps/macos/Tests/OpenClawIPCTests/MacNodeHostWorkerTests.swift"]
+            ? ["apps/macos/Tests/CarapaceIPCTests/MacNodeHostWorkerTests.swift"]
             : []),
         ]);
         const plan = createChangedCheckPlan(result, {
@@ -3031,9 +3031,9 @@ describe("scripts/changed-lanes", () => {
 
   it.each<[string, NodeJS.Platform, boolean, boolean]>([
     ["apps/ios/Sources/RootTabs.swift", "darwin", true, false],
-    ["apps/macos/Sources/OpenClawMac/AppDelegate.swift", "darwin", false, true],
-    ["apps/shared/OpenClawKit/Sources/OpenClawKit/Client.swift", "linux", true, true],
-    ["apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift", "linux", true, true],
+    ["apps/macos/Sources/CarapaceMac/AppDelegate.swift", "darwin", false, true],
+    ["apps/shared/CarapaceKit/Sources/CarapaceKit/Client.swift", "linux", true, true],
+    ["apps/shared/CarapaceKit/Sources/CarapaceProtocol/GatewayModels.swift", "linux", true, true],
   ])(
     "preserves Swift lint for %s on %s with SwiftLint=%s",
     (changedPath, platform, swiftlintAvailable, macosCi) => {
@@ -3052,16 +3052,16 @@ describe("scripts/changed-lanes", () => {
 
   it.each<[string, NodeJS.Platform, boolean]>([
     [
-      "apps/android/app/src/test/java/ai/openclaw/app/gateway/GatewaySessionReconnectTest.kt",
+      "apps/android/app/src/test/java/ai/carapace/app/gateway/GatewaySessionReconnectTest.kt",
       "darwin",
       true,
     ],
     [
-      "apps/android/app/src/test/java/ai/openclaw/app/gateway/GatewaySessionReconnectTest.kt",
+      "apps/android/app/src/test/java/ai/carapace/app/gateway/GatewaySessionReconnectTest.kt",
       "linux",
       false,
     ],
-    ["apps/android/app/src/main/java/ai/openclaw/app/MainActivity.kt", "darwin", false],
+    ["apps/android/app/src/main/java/ai/carapace/app/MainActivity.kt", "darwin", false],
     ["apps/android/app/src/main/AndroidManifest.xml", "linux", true],
     ["apps/android/app/build.gradle.kts", "linux", false],
     ["apps/android/settings.gradle.kts", "darwin", true],
@@ -3094,7 +3094,7 @@ describe("scripts/changed-lanes", () => {
         paths: [
           "apps/android/app/src/main/AndroidManifest.xml",
           "apps/ios/Sources/RootTabs.swift",
-          "apps/shared/OpenClawKit/Sources/OpenClawKit/Client.swift",
+          "apps/shared/CarapaceKit/Sources/CarapaceKit/Client.swift",
         ],
         androidLint: true,
         macosCi: true,

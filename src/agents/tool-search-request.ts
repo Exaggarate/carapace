@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { Guard } from "typebox/guard";
 import {
   MAX_TOOL_SEARCH_BATCH_QUERIES,

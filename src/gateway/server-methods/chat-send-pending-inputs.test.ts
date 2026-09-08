@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { stableStringify } from "@openclaw/normalization-core/stable-stringify";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core/stable-stringify";
 import type { Static } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChatSendParamsSchema } from "../../../packages/gateway-protocol/src/index.js";
@@ -34,8 +34,8 @@ import {
   createUserTurnTranscriptRecorder,
   type UserTurnTranscriptRecorder,
 } from "../../sessions/user-turn-transcript.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { ensureSessionPendingInputsSchema } from "../../state/openclaw-agent-pending-inputs-schema.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { ensureSessionPendingInputsSchema } from "../../state/carapace-agent-pending-inputs-schema.js";
 import { ensureProfileForEmail, setDisplayName } from "../../state/user-profiles.js";
 import { createMentionInbox } from "../mention-inbox.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
@@ -61,7 +61,7 @@ describe("ordinary browser input admission", () => {
     } = {},
   ) {
     const active = options.active !== false;
-    const storePath = path.join(temporaryDirs.make("openclaw-chat-custody-"), "sessions.json");
+    const storePath = path.join(temporaryDirs.make("carapace-chat-custody-"), "sessions.json");
     testState.sessionStorePath = storePath;
     const scope = {
       agentId: "main",
@@ -142,7 +142,7 @@ describe("ordinary browser input admission", () => {
         maxProtocol: 1,
         role: "operator",
         scopes: ["operator.read", "operator.write", "operator.admin"],
-        client: { id: "openclaw-control-ui", version: "test", platform: "web", mode: "webchat" },
+        client: { id: "carapace-control-ui", version: "test", platform: "web", mode: "webchat" },
       },
     };
     const params: Static<typeof ChatSendParamsSchema> = {
@@ -304,7 +304,7 @@ describe("ordinary browser input admission", () => {
       const recorder = await fixture.dispatchedRecorder;
       const committed = await recorder.persistApproved();
       expect(committed?.message.content).toBe(fixture.approvedContent);
-      expect(committed?.message["__openclaw"]?.humanMentions).toBeUndefined();
+      expect(committed?.message["__carapace"]?.humanMentions).toBeUndefined();
       expect(fixture.read()).toEqual([]);
     } finally {
       await fixture.cleanup();
@@ -458,7 +458,7 @@ describe("ordinary browser input admission", () => {
 
   it("retries a failed custody write with the same request identity without acknowledging lost input", async () => {
     const fixture = await createBrowserFollowupFixture();
-    const database = openOpenClawAgentDatabase(
+    const database = openCarapaceAgentDatabase(
       toDatabaseOptions(resolveSqliteScope(fixture.scope)),
     ).db;
     ensureSessionPendingInputsSchema(database);
@@ -652,7 +652,7 @@ describe("ordinary browser input admission", () => {
         const legacyHash = createHash("sha256")
           .update(stableStringify(stableMessage))
           .digest("hex");
-        const database = openOpenClawAgentDatabase(
+        const database = openCarapaceAgentDatabase(
           toDatabaseOptions(resolveSqliteScope(fixture.scope)),
         );
         const seeded = database.db

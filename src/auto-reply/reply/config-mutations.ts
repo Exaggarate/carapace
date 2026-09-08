@@ -1,12 +1,12 @@
-import { expectDefined } from "@openclaw/normalization-core";
-/** Config mutation helpers used by chat commands that edit OpenClaw config. */
+import { expectDefined } from "@carapace/normalization-core";
+/** Config mutation helpers used by chat commands that edit Carapace config. */
 import { setConfigValueAtPath, unsetConfigValueAtPath } from "../../config/config-paths.js";
 import {
   mutateConfigFileWithRetry,
   transformConfigFileWithRetry,
   validateConfigObjectWithPlugins,
 } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   resolvePluginCapabilityConsent,
   type PluginCapabilityConsentHandler,
@@ -22,7 +22,7 @@ export function formatAutoReplyConfigMutationError(error: unknown): string | nul
   return error instanceof AutoReplyConfigMutationError ? error.message : null;
 }
 
-function assertValidConfig(next: Record<string, unknown>, action: string): OpenClawConfig {
+function assertValidConfig(next: Record<string, unknown>, action: string): CarapaceConfig {
   const validated = validateConfigObjectWithPlugins(next);
   if (!validated.ok) {
     const issue = expectDefined(validated.issues[0], "issues entry at 0");
@@ -107,7 +107,7 @@ type AllowlistConfigEditResult =
 type MaybePromise<T> = T | Promise<T>;
 
 type ApplyAllowlistConfigEdit = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   parsedConfig: Record<string, unknown>;
   accountId?: string | null;
   scope: "dm" | "group";
@@ -117,7 +117,7 @@ type ApplyAllowlistConfigEdit = (params: {
 
 /** Applies a channel allowlist edit through a plugin-provided config mutation hook. */
 export async function applyAllowlistConfigMutation(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   scope: "dm" | "group";
   action: "add" | "remove";

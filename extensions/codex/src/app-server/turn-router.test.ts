@@ -1,5 +1,5 @@
 import { AsyncLocalStorage, AsyncResource } from "node:async_hooks";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CodexAppServerClient } from "./client.js";
 import type { JsonValue } from "./protocol.js";
@@ -653,7 +653,7 @@ describe("CodexAppServerTurnRouter", () => {
         contentItems: [
           {
             type: "inputText",
-            text: "OpenClaw did not register a handler for this app-server tool call.",
+            text: "Carapace did not register a handler for this app-server tool call.",
           },
         ],
         success: false,

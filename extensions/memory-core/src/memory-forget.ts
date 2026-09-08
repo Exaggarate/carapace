@@ -3,30 +3,30 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import {
   resolveAgentWorkspaceDir,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   buildSessionEntry,
   listSessionTranscriptCorpusEntriesForAgent,
   parseUsageCountedSessionIdFromFileName,
   resolveMemorySessionTargets,
-} from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
+} from "carapace/plugin-sdk/memory-core-host-engine-sessions";
 import {
   isFileMissingError,
   listMemoryFiles,
   loadSqliteVecExtension,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { listMemoryArtifactProvenance } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-paths";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { listMemoryArtifactProvenance } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-paths";
 import {
-  borrowOpenClawAgentDatabase,
+  borrowCarapaceAgentDatabase,
   executeSqliteQuerySync,
   getNodeSqliteKysely,
   openNodeSqliteDatabase,
   runSqliteImmediateTransactionSync,
   tableExists,
-  withOpenClawAgentDatabaseReadOnly,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+  withCarapaceAgentDatabaseReadOnly,
+} from "carapace/plugin-sdk/sqlite-runtime";
 import { readMemoryPreimages } from "./dreaming-consolidation-artifacts.js";
 import { DREAMS_FILENAMES } from "./dreaming-dreams-file.js";
 import {
@@ -88,8 +88,8 @@ type ForgetIndexPlan = {
   hasVectorTable: boolean;
 };
 
-const PROMOTION_MARKER = /^\s*<!--\s*openclaw-memory-promotion:([^\n]*?)\s*-->\s*$/u;
-const LINEAGE_MARKER = /^\s*<!--\s*openclaw-memory-lineage:[^\n]*?-->\s*$/u;
+const PROMOTION_MARKER = /^\s*<!--\s*carapace-memory-promotion:([^\n]*?)\s*-->\s*$/u;
+const LINEAGE_MARKER = /^\s*<!--\s*carapace-memory-lineage:[^\n]*?-->\s*$/u;
 
 function referencesSession(
   value: string,
@@ -186,7 +186,7 @@ async function planMemoryIndex(params: {
   excludedSessionIds: ReadonlySet<string>;
   matchesMemory: (content: string) => boolean;
 }): Promise<ForgetIndexPlan> {
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     ({ db, path: databasePath }) => {
       const kysely = getNodeSqliteKysely<ForgetDatabase>(db);
       const indexedChunks = executeSqliteQuerySync(
@@ -288,7 +288,7 @@ async function planMemoryIndex(params: {
     }
     // Preview must not create or migrate state; its owner-validated handle
     // stays read-only while exposing vec0.
-    const vectorResult = withOpenClawAgentDatabaseReadOnly(
+    const vectorResult = withCarapaceAgentDatabaseReadOnly(
       ({ db }) => {
         db.enableLoadExtension(true);
         db.loadExtension(extensionPath);
@@ -314,7 +314,7 @@ async function planMemoryIndex(params: {
 }
 
 type MemoryForgetParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionIds?: string[];
   hookSources?: string[];
@@ -594,7 +594,7 @@ async function forgetWorkspaceMemory(
     return report;
   }
 
-  const { db, release } = borrowOpenClawAgentDatabase({ agentId: params.agentId });
+  const { db, release } = borrowCarapaceAgentDatabase({ agentId: params.agentId });
   try {
     const kysely = getNodeSqliteKysely<ForgetDatabase>(db);
     const chunkIds = indexPlan.chunks.map((chunk) => chunk.id);

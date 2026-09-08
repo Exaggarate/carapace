@@ -81,7 +81,7 @@ function collectPages(entry: unknown, pages: string[] = []): string[] {
 
 describe("docs-sync-publish", () => {
   it("executes the copied MDX checker and shared anchor runtime closures", () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-docs-sync-runtime-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-docs-sync-runtime-"));
     const publishRoot = path.join(tempRoot, "publish");
     const clawhubRoot = path.join(tempRoot, "clawhub");
     const minimalMdx = path.join(tempRoot, "valid.mdx");
@@ -105,7 +105,7 @@ describe("docs-sync-publish", () => {
       );
       execFileSync(
         process.execPath,
-        [path.join(publishRoot, ".openclaw-sync", "check-docs-mdx.mjs"), minimalMdx],
+        [path.join(publishRoot, ".carapace-sync", "check-docs-mdx.mjs"), minimalMdx],
         { cwd: publishRoot, stdio: "pipe" },
       );
       const anchors = execFileSync(
@@ -115,8 +115,8 @@ describe("docs-sync-publish", () => {
           "-e",
           String.raw`
         import assert from 'node:assert/strict';
-        import { parseDocsDocument } from './.openclaw-sync/lib/docs-markdown.mjs';
-        import { resolveRedirects } from './.openclaw-sync/lib/docs-redirects.mjs';
+        import { parseDocsDocument } from './.carapace-sync/lib/docs-markdown.mjs';
+        import { resolveRedirects } from './.carapace-sync/lib/docs-redirects.mjs';
         const redirect = (source, destination) => resolveRedirects({
           redirects: [{ source, destination }], pages: [], localeCodes: ['en'], prefixes: [], publicPath: x => x,
         });
@@ -159,7 +159,7 @@ describe("docs-sync-publish", () => {
     { fault: "unrelated", error: "changed unrelated publisher dependencies" },
     { fault: "stale", error: "publisher manifest and lock must both pin" },
   ])("syncs an independent publisher lock with $fault outcome", async ({ fault, error }) => {
-    const fixture = tempDirs.make("openclaw-docs-sync-dependencies-");
+    const fixture = tempDirs.make("carapace-docs-sync-dependencies-");
     const publishRoot = path.join(fixture, "publish");
     const clawhubRoot = path.join(fixture, "clawhub");
     const bin = path.join(fixture, "bin");
@@ -213,7 +213,7 @@ fs.writeFileSync('package-lock.json', JSON.stringify(lock));
       );
     if (error) {
       expect(sync).toThrow(error);
-      expect(fs.existsSync(path.join(publishRoot, ".openclaw-sync", "source.json"))).toBe(false);
+      expect(fs.existsSync(path.join(publishRoot, ".carapace-sync", "source.json"))).toBe(false);
       return;
     }
     sync();
@@ -247,7 +247,7 @@ fs.writeFileSync('package-lock.json', JSON.stringify(lock));
     );
     expect(() => validateDocsSyncDependencies(publishRoot, freshMain)).not.toThrow();
     fs.appendFileSync(
-      path.join(publishRoot, ".openclaw-sync", "lib", "docs-markdown.mjs"),
+      path.join(publishRoot, ".carapace-sync", "lib", "docs-markdown.mjs"),
       "\n// drift\n",
     );
     expect(() => validateDocsSyncDependencies(publishRoot, freshMain)).toThrow(
@@ -256,7 +256,7 @@ fs.writeFileSync('package-lock.json', JSON.stringify(lock));
   });
 
   it("materializes the public docs map only in the publish tree", () => {
-    const targetDocsDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-docs-map-publish-"));
+    const targetDocsDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-docs-map-publish-"));
     try {
       const outputPath = writePublishedDocsMap(targetDocsDir);
       expect(fs.readFileSync(outputPath, "utf8")).toBe(
@@ -273,21 +273,21 @@ fs.writeFileSync('package-lock.json', JSON.stringify(lock));
         "--target",
         "generated-docs",
         "--source-repo",
-        "openclaw/openclaw",
+        "carapace/carapace",
         "--source-sha",
         "abc123",
         "--clawhub-repo",
         "../clawhub",
         "--clawhub-source-repo",
-        "openclaw/clawhub",
+        "carapace/clawhub",
         "--clawhub-source-sha",
         "def456",
       ]),
     ).toMatchObject({
       clawhubRepo: "../clawhub",
-      clawhubSourceRepo: "openclaw/clawhub",
+      clawhubSourceRepo: "carapace/clawhub",
       clawhubSourceSha: "def456",
-      sourceRepo: "openclaw/openclaw",
+      sourceRepo: "carapace/carapace",
       sourceSha: "abc123",
       target: "generated-docs",
     });
@@ -311,7 +311,7 @@ fs.writeFileSync('package-lock.json', JSON.stringify(lock));
   });
 
   it("defers orphan locale deletion to translation finalization", () => {
-    const docsDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-docs-sync-"));
+    const docsDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-docs-sync-"));
     const mirroredEnglish = path.join(docsDir, "clawhub", "api.md");
     const localizedMirror = path.join(docsDir, "de", "clawhub", "api.md");
     const orphan = path.join(docsDir, "de", "removed.md");

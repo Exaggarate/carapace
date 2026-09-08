@@ -8,7 +8,7 @@ import { loadThemeFromPath } from "./theme.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function loadColor(color: string | number, mode: "256color" | "truecolor") {
-  const themePath = join(tempDirs.make("openclaw-theme-"), "theme.json");
+  const themePath = join(tempDirs.make("carapace-theme-"), "theme.json");
   writeFileSync(
     themePath,
     JSON.stringify({

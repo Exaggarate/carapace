@@ -1,28 +1,28 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../../state/carapace-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../../../state/carapace-agent-db.js";
 import { withTestDir } from "../../../test-helpers/temp-dir.js";
 import { recordAcpParentStreamEvents } from "./acp-parent-stream-store.sqlite.js";
 import { listAcpParentStreamEventsForTest } from "./acp-parent-stream-store.sqlite.test-support.js";
 
 describe("ACP parent stream SQLite store", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("orders run events and removes them with the child session", async () => {
-    await withTestDir({ prefix: "openclaw-acp-parent-stream-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-acp-parent-stream-" }, async (stateDir) => {
       const options = {
         agentId: "codex",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       };
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         const db = getNodeSqliteKysely<
-          Pick<OpenClawAgentKyselyDatabase, "session_nodes" | "session_windows">
+          Pick<CarapaceAgentKyselyDatabase, "session_nodes" | "session_windows">
         >(database.db);
         executeSqliteQuerySync(
           database.db,
@@ -62,8 +62,8 @@ describe("ACP parent stream SQLite store", () => {
         { kind: "lifecycle", phase: "end" },
       ]);
 
-      runOpenClawAgentWriteTransaction((database) => {
-        const db = getNodeSqliteKysely<Pick<OpenClawAgentKyselyDatabase, "session_windows">>(
+      runCarapaceAgentWriteTransaction((database) => {
+        const db = getNodeSqliteKysely<Pick<CarapaceAgentKyselyDatabase, "session_windows">>(
           database.db,
         );
         executeSqliteQuerySync(
@@ -78,14 +78,14 @@ describe("ACP parent stream SQLite store", () => {
   });
 
   it("drops unserializable events without blocking later diagnostics", async () => {
-    await withTestDir({ prefix: "openclaw-acp-parent-stream-invalid-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-acp-parent-stream-invalid-" }, async (stateDir) => {
       const options = {
         agentId: "codex",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       };
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         const db = getNodeSqliteKysely<
-          Pick<OpenClawAgentKyselyDatabase, "session_nodes" | "session_windows">
+          Pick<CarapaceAgentKyselyDatabase, "session_nodes" | "session_windows">
         >(database.db);
         executeSqliteQuerySync(
           database.db,

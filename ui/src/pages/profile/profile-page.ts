@@ -37,7 +37,7 @@ import { t } from "../../i18n/index.ts";
 import { registerModelAccountsEnglish } from "../../i18n/locales/en-model-accounts.ts";
 import { formatUiError } from "../../lib/format-error.ts";
 import { IdentityAvatarController } from "../../lib/identity-avatar-loader.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PROFILE_SETTINGS_TARGET_IDS } from "../config/settings-targets.ts";
 import "../../styles/profile.css";
 import "../../features/github-connections/github-connections.ts";
@@ -49,7 +49,7 @@ import { renderProfileHero } from "./profile-hero.ts";
 
 registerModelAccountsEnglish();
 
-const PROFILE_DOCS_URL = "https://docs.openclaw.ai/concepts/user-model";
+const PROFILE_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type IdentityChange =
   | { kind: "display-name" }
@@ -60,7 +60,7 @@ function toIdentityErrorMessage(error: unknown): string {
   return formatUiError(error, t("profilePage.identity.profileUnavailable"));
 }
 
-export class ProfilePage extends OpenClawLightDomElement {
+export class ProfilePage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: false })
   private context!: ApplicationContext;
 
@@ -351,7 +351,7 @@ export class ProfilePage extends OpenClawLightDomElement {
   }
 
   private renderModelAccounts() {
-    return html`<openclaw-model-accounts
+    return html`<carapace-model-accounts
       .identityId=${this.selfUser?.id ?? null}
       .profileId=${this.ownProfile?.id ?? null}
       .personLabel=${
@@ -361,7 +361,7 @@ export class ProfilePage extends OpenClawLightDomElement {
             t("profilePage.modelAccounts.currentPerson")
           : null
       }
-    ></openclaw-model-accounts>`;
+    ></carapace-model-accounts>`;
   }
 
   private refreshManually() {
@@ -392,7 +392,7 @@ export class ProfilePage extends OpenClawLightDomElement {
     }
     return renderSettingsPage(html`
       ${this.renderHero()} ${this.renderIdentity()} ${this.renderModelAccounts()}
-      <openclaw-github-connections></openclaw-github-connections>
+      <carapace-github-connections></carapace-github-connections>
       ${renderSettingsGroup(
         renderSettingsNavRow({
           title: t("profilePage.usageStatistics"),
@@ -433,6 +433,6 @@ export class ProfilePage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-profile-page")) {
-  customElements.define("openclaw-profile-page", ProfilePage);
+if (!customElements.get("carapace-profile-page")) {
+  customElements.define("carapace-profile-page", ProfilePage);
 }

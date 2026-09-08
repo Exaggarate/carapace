@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, expect, onTestFinished, test, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { loadControlUiSessionPullRequests } from "./control-ui-session-prs.js";
 import { controlUiClient } from "./server.sessions.create.projects.test-support.js";
 import { dispatchInboundMessageMock, testState } from "./test-helpers.js";
@@ -25,16 +25,16 @@ const { createSessionStoreDir } = setupGatewaySessionsHandlerTestHarness();
 afterEach(() => {
   projectCloneMocks.materialize.mockReset();
   dispatchInboundMessageMock.mockReset();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = undefined;
 });
 
 test("sessions.create retains a cloud repository across replay without creating a Gateway checkout", async () => {
-  const root = tempDirs.make("openclaw-session-cloud-repository-");
+  const root = tempDirs.make("carapace-session-cloud-repository-");
   const workspace = path.join(root, "must-not-be-created");
   testState.agentConfig = { workspace };
   const { storePath } = await createSessionStoreDir();
-  const repository = { url: "git@github.com:OpenClaw/OpenClaw.git", ref: "release/next" };
+  const repository = { url: "git@github.com:Carapace/Carapace.git", ref: "release/next" };
   const created = await directSessionReq<{
     key: string;
     entry: { repositoryWorkspaceId: string };
@@ -56,7 +56,7 @@ test("sessions.create retains a cloud repository across replay without creating 
   ]) {
     expect(saved).not.toHaveProperty(field);
   }
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   const replay = await directSessionReq<{ entry: { repositoryWorkspaceId: string } }>(
     "sessions.create",
     { agentId: "main", key, repository },
@@ -75,9 +75,9 @@ test("sessions.create retains a cloud repository across replay without creating 
   expect(listed.payload?.sessions.find((row) => row.key === key)).toMatchObject({
     repositoryWorkspaceId: entry.repositoryWorkspaceId,
     repository: {
-      url: "https://github.com/openclaw/openclaw.git",
+      url: "https://github.com/Exaggarate/carapace.git",
       ref: "release/next",
-      branch: expect.stringMatching(/^openclaw\//u),
+      branch: expect.stringMatching(/^carapace\//u),
     },
   });
   const gitOutput = vi.fn().mockResolvedValue("unrelated-gateway-branch");
@@ -93,7 +93,7 @@ test("sessions.create retains a cloud repository across replay without creating 
       args[0] === "rev-parse"
         ? "previous-local-branch"
         : args[0] === "remote"
-          ? "https://github.com/openclaw/openclaw.git"
+          ? "https://github.com/Exaggarate/carapace.git"
           : "origin/main",
     resolveBranchLanding: async () => ({
       pushedSha: null,
@@ -110,9 +110,9 @@ test("sessions.create retains a cloud repository across replay without creating 
   });
   expect(getEventListeners(cacheLifetime.signal, "abort")).toHaveLength(1);
   expect(preview.branch).toMatchObject({
-    owner: "openclaw",
-    repo: "openclaw",
-    branch: `openclaw/${entry.repositoryWorkspaceId}`,
+    owner: "carapace",
+    repo: "carapace",
+    branch: `carapace/${entry.repositoryWorkspaceId}`,
   });
   expect(gitOutput).not.toHaveBeenCalled();
   expect(fetchImpl).toHaveBeenCalled();
@@ -137,14 +137,14 @@ test("sessions.create retains a cloud repository across replay without creating 
 
 test.each([
   { repository: { url: "file:///tmp/repository" } },
-  { repository: { url: "https://token@github.com/openclaw/openclaw.git" } },
+  { repository: { url: "https://token@github.com/Exaggarate/carapace.git" } },
   {
-    repository: { url: "https://github.com/openclaw/openclaw.git", ref: "--upload-pack=anything" },
+    repository: { url: "https://github.com/Exaggarate/carapace.git", ref: "--upload-pack=anything" },
   },
   { cwd: "/tmp/repository" },
   { execNode: "device" },
   { projectId: "workspace:main" },
-  { projectGitUrl: "https://github.com/openclaw/openclaw.git" },
+  { projectGitUrl: "https://github.com/Exaggarate/carapace.git" },
   { worktree: true },
   { worktreeBaseRef: "main" },
   { message: "Start before dispatch" },
@@ -156,7 +156,7 @@ test.each([
       "sessions.create",
       {
         agentId: "main",
-        repository: { url: "https://github.com/openclaw/openclaw.git" },
+        repository: { url: "https://github.com/Exaggarate/carapace.git" },
         ...options,
       },
       controlUiClient,

@@ -51,7 +51,7 @@ const AGENT_RUNTIME_LABELS: Readonly<Record<string, string>> = {
   codex: "Codex",
   "codex-cli": "Codex",
   "google-gemini-cli": "Gemini CLI",
-  openclaw: "OpenClaw",
+  carapace: "Carapace",
 };
 
 function formatAgentRuntimeLabel(id: string): string {
@@ -200,9 +200,9 @@ export function renderChatModelPickerOption(params: {
     </span>
   </button>`;
   return params.entry.supportsTools === false
-    ? html`<openclaw-tooltip .content=${t("chat.modelControls.chatOnlyHelp")}>
+    ? html`<carapace-tooltip .content=${t("chat.modelControls.chatOnlyHelp")}>
         ${option}
-      </openclaw-tooltip>`
+      </carapace-tooltip>`
     : option;
 }
 

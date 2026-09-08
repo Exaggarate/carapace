@@ -20,7 +20,7 @@ describe("resolveAgentHarnessBeforePromptBuildResult", () => {
         {
           role: "assistant",
           content: [{ type: "toolCall", arguments: { nested: { value: "original" } } }],
-          __openclaw: { upstreamUserText: "x".repeat(1024 * 1024), mirrorIdentity: "synthetic" },
+          __carapace: { upstreamUserText: "x".repeat(1024 * 1024), mirrorIdentity: "synthetic" },
         },
       ];
       const retained: (typeof messages)[] = [];
@@ -31,7 +31,7 @@ describe("resolveAgentHarnessBeforePromptBuildResult", () => {
             ...(authorized ? { requiresToolAuthority: true as const } : {}),
             handler: (event) => {
               const snapshot = (event as { messages: typeof messages }).messages;
-              expect(snapshot[0]!["__openclaw"]).toEqual({ mirrorIdentity: "synthetic" });
+              expect(snapshot[0]!["__carapace"]).toEqual({ mirrorIdentity: "synthetic" });
               expect(snapshot[0]!.content[0]!.arguments.nested.value).toBe("original");
               retained.push(snapshot);
               snapshot[0]!.content[0]!.arguments.nested.value = "immediate mutation";
@@ -139,7 +139,7 @@ describe("resolveAgentHarnessBeforePromptBuildResult", () => {
     expect(result).toMatchObject({
       toolsAllow: ["read"],
       developerInstructions:
-        "---\n\nOpenClaw plugin-injected system context. This block is not workspace file content.\n\nbefore replacement\n\n---\n\nhook replacement\n\n---\n\nOpenClaw plugin-injected system context. This block is not workspace file content.\n\nafter replacement\n\n---",
+        "---\n\nCarapace plugin-injected system context. This block is not workspace file content.\n\nbefore replacement\n\n---\n\nhook replacement\n\n---\n\nCarapace plugin-injected system context. This block is not workspace file content.\n\nafter replacement\n\n---",
     });
     expect(result.developerInstructions).not.toContain("policy-filtered base");
   });

@@ -5,8 +5,8 @@ import type {
   CliBackendExecuteContext,
   CliBackendLiveSessionHandle,
   CliBackendPreparedExecution,
-} from "openclaw/plugin-sdk/cli-backend";
-import { formatErrorMessageForDisplay } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/cli-backend";
+import { formatErrorMessageForDisplay } from "carapace/plugin-sdk/error-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import type { ClaudeCliSecretInput } from "./cli-process.js";
@@ -37,7 +37,7 @@ const PROTOCOL_CHILD = `
       if (text === "fail silently") process.exit(1);
       if (text === "fail noisily" || text === "exit without result") {
         writeSync(2, "PermissionError: current turn failed " + credential + "\\n");
-        writeSync(2, "process environment: " + process.env.OPENCLAW_MCP_TOKEN + "\\n");
+        writeSync(2, "process environment: " + process.env.CARAPACE_MCP_TOKEN + "\\n");
         process.exit(text === "exit without result" ? 0 : 1);
       }
       if (text === "success with stderr") writeSync(2, "previous turn diagnostic\\n");
@@ -63,7 +63,7 @@ afterEach(async () => {
 });
 
 async function contextForChild(source: string): Promise<CliBackendExecuteContext> {
-  const root = await mkdtemp(path.join(os.tmpdir(), "openclaw-claude-stderr-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "carapace-claude-stderr-"));
   roots.push(root);
   const command = path.join(root, "claude.mjs");
   await writeFile(command, source);
@@ -151,13 +151,13 @@ describe("Claude subprocess diagnostics through the direct CLI transport", () =>
       import { readFileSync, writeSync } from "node:fs";
       writeSync(1, "native stdout must stay private\\n");
       writeSync(2, "credential: " + readFileSync(3, "utf8") + "\\n");
-      writeSync(2, "environment: " + process.env.OPENCLAW_MCP_TOKEN + "\\n");
+      writeSync(2, "environment: " + process.env.CARAPACE_MCP_TOKEN + "\\n");
       writeSync(2, "PermissionError: denied resource 3\\n");
       process.exit(1);
     `);
     const credential = "opaque-descriptor-fixture-value";
     const grant = "opaque-mcp-fixture-value";
-    context.env.OPENCLAW_MCP_TOKEN = grant;
+    context.env.CARAPACE_MCP_TOKEN = grant;
     context.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR = "3";
     const buffers: Buffer[] = [];
     const running = collect(context, {
@@ -290,7 +290,7 @@ describe("Claude subprocess diagnostics through the direct CLI transport", () =>
         collect(
           {
             ...context,
-            env: { ...context.env, ...first.env, OPENCLAW_MCP_TOKEN: processGrant },
+            env: { ...context.env, ...first.env, CARAPACE_MCP_TOKEN: processGrant },
             prompt: firstPrompt,
           },
           undefined,
@@ -309,7 +309,7 @@ describe("Claude subprocess diagnostics through the direct CLI transport", () =>
         const error = await collect(
           {
             ...context,
-            env: { ...context.env, ...second.env, OPENCLAW_MCP_TOKEN: "opaque-next-grant-fixture" },
+            env: { ...context.env, ...second.env, CARAPACE_MCP_TOKEN: "opaque-next-grant-fixture" },
             prompt,
             useResume: true,
           },

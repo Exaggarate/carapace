@@ -16,17 +16,17 @@ describe("Control UI build chunking", () => {
       "markdown-runtime",
     );
     expect(
-      controlUiStableChunkName("/tmp/openclaw-pnpm-node-modules/dompurify/dist/purify.es.mjs"),
+      controlUiStableChunkName("/tmp/carapace-pnpm-node-modules/dompurify/dist/purify.es.mjs"),
     ).toBe("markdown-runtime");
-    expect(controlUiStableChunkName("/tmp/openclaw-pnpm-node-modules/zod/v4/core/schemas.js")).toBe(
+    expect(controlUiStableChunkName("/tmp/carapace-pnpm-node-modules/zod/v4/core/schemas.js")).toBe(
       "config-runtime",
     );
-    expect(controlUiStableChunkName("/tmp/openclaw-pnpm-node-modules/json5/dist/index.js")).toBe(
+    expect(controlUiStableChunkName("/tmp/carapace-pnpm-node-modules/json5/dist/index.js")).toBe(
       "config-runtime",
     );
     expect(
       controlUiStableChunkName(
-        "/tmp/openclaw-pnpm-node-modules/libphonenumber-js/max/exports/parsePhoneNumber.js",
+        "/tmp/carapace-pnpm-node-modules/libphonenumber-js/max/exports/parsePhoneNumber.js",
       ),
     ).toBe("phone-runtime");
     expect(
@@ -36,7 +36,7 @@ describe("Control UI build chunking", () => {
     expect(controlUiStableChunkName("/repo/ui/src/build-info.ts")).toBeUndefined();
     expect(controlUiStableChunkName("/repo/ui/src/build-info-normalizers.ts")).toBeUndefined();
     expect(
-      controlUiStableChunkName("/tmp/openclaw-pnpm-node-modules/@noble/ed25519/index.js"),
+      controlUiStableChunkName("/tmp/carapace-pnpm-node-modules/@noble/ed25519/index.js"),
     ).toBe("gateway-runtime");
     expect(controlUiStableChunkName("/repo/ui/src/lib/gateway-methods.ts")).toBe("gateway-runtime");
     expect(controlUiStableChunkName("/repo/ui/src/app/app-host.ts")).toBeUndefined();

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginAcceptedDeclaredSurface } from "../config/types.plugins.js";
 import { isRootFileMissingFailure } from "../infra/boundary-file-read.js";
 import {
@@ -18,7 +18,7 @@ import { resolvePackageExtensionEntries } from "./package-manifest.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 
 type PluginArtifactInspectionContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   currentArtifactDir?: string;
 };
 
@@ -45,7 +45,7 @@ function resolvePluginArtifactManifests(
       throw new Error(extensions.error);
     }
     if (extensions.status === "empty") {
-      throw new Error("package.json openclaw.extensions is empty");
+      throw new Error("package.json carapace.extensions is empty");
     }
   }
 

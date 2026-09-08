@@ -1,21 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withTempDirSync } from "../test-helpers/temp-dir.js";
 import { withEnv } from "../test-utils/env.js";
 import { shouldIncludeHook } from "./config.js";
 import { buildWorkspaceHookStatus } from "./hooks-status.js";
 import type { HookEntry } from "./types.js";
 
-const ENV_NAME = "OPENCLAW_TEST_HOOK_REQUIRED_ENV";
+const ENV_NAME = "CARAPACE_TEST_HOOK_REQUIRED_ENV";
 const HOOK_NAME = "required-env-hook";
 
 const entry: HookEntry = {
   hook: {
     name: HOOK_NAME,
     description: "Requires an environment variable",
-    source: "openclaw-bundled",
+    source: "carapace-bundled",
     filePath: "/tmp/HOOK.md",
     baseDir: "/tmp",
     handlerPath: "/tmp/handler.js",
@@ -27,7 +27,7 @@ const entry: HookEntry = {
   },
 };
 
-function configWithEnv(value: string): OpenClawConfig {
+function configWithEnv(value: string): CarapaceConfig {
   return {
     hooks: {
       internal: {
@@ -39,14 +39,14 @@ function configWithEnv(value: string): OpenClawConfig {
   };
 }
 
-function evaluate(config?: OpenClawConfig) {
+function evaluate(config?: CarapaceConfig) {
   const runtimeIncluded = shouldIncludeHook({ entry, config });
   const status = buildWorkspaceHookStatus("/tmp", { entries: [entry], config }).hooks[0];
   return { runtimeIncluded, status };
 }
 
 it("includes a hook after an accepted binary is installed on unchanged PATH", () => {
-  withTempDirSync({ prefix: "openclaw-hook-binary-" }, (binDir) => {
+  withTempDirSync({ prefix: "carapace-hook-binary-" }, (binDir) => {
     const binaryEntry: HookEntry = {
       ...entry,
       metadata: { events: ["command:new"], requires: { anyBins: ["fixture-hook-tool"] } },

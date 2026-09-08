@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenClawCodingTools } from "openclaw/plugin-sdk/agent-harness";
+import { createCarapaceCodingTools } from "carapace/plugin-sdk/agent-harness";
 import {
   abortAndDrainAgentHarnessRun,
   nativeHookRelayTesting,
@@ -10,21 +10,21 @@ import {
   resetAgentEventsForTest,
   runBeforeToolCallHook,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { clearRuntimeAuthProfileStoreSnapshots } from "openclaw/plugin-sdk/agent-runtime";
-import { resetDiagnosticEventsForTest } from "openclaw/plugin-sdk/diagnostic-runtime";
-import type { ExecApprovalsFile } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import { clearInternalHooks, resetGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
-import { clearMemoryPluginState } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { clearPluginCommands } from "openclaw/plugin-sdk/plugin-runtime";
-import { createAgentHarnessHostCapabilitiesForTest } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { clearRuntimeAuthProfileStoreSnapshots } from "carapace/plugin-sdk/agent-runtime";
+import { resetDiagnosticEventsForTest } from "carapace/plugin-sdk/diagnostic-runtime";
+import type { ExecApprovalsFile } from "carapace/plugin-sdk/exec-approvals-runtime";
+import { clearInternalHooks, resetGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
+import { clearMemoryPluginState } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { clearPluginCommands } from "carapace/plugin-sdk/plugin-runtime";
+import { createAgentHarnessHostCapabilitiesForTest } from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   deleteSessionEntry,
   resolveStorePath,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import { defaultCodexAppInventoryCache } from "./app-inventory-cache.js";
 import { CodexAppServerClient } from "./client.js";
@@ -75,7 +75,7 @@ function createHarnessHostCapabilities(
     version: 1,
     assertActive: () => {},
     bindToolSurface: (tools) => tools,
-    createToolSurface: (options) => createOpenClawCodingTools(options),
+    createToolSurface: (options) => createCarapaceCodingTools(options),
     runBeforeToolCall: async ({ nativeOperation: _nativeOperation, approvalMode, ...request }) =>
       await runBeforeToolCallHook({
         ...request,
@@ -102,9 +102,9 @@ function createHarnessHostCapabilities(
   });
 }
 
-vi.mock("openclaw/plugin-sdk/exec-approvals-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/exec-approvals-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/exec-approvals-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/exec-approvals-runtime")>();
   return {
     ...actual,
     loadExecApprovals: execApprovalsRuntimeMocks.loadExecApprovals,
@@ -408,7 +408,7 @@ export function getMockRuntimeIdentity() {
 export { mockClientRuntimeMethods, turnStartResult } from "./codex-app-server.test-fixtures.js";
 
 export function threadStartResult(threadId = "thread-1", options: { cwd?: string } = {}) {
-  const cwd = options.cwd ?? tempDir ?? "/tmp/openclaw-codex-test";
+  const cwd = options.cwd ?? tempDir ?? "/tmp/carapace-codex-test";
   return createThreadStartResult(threadId, cwd);
 }
 
@@ -708,10 +708,10 @@ export function setupRunAttemptTestHooks(): void {
     clearMemoryPluginState();
     resetAgentEventsForTest();
     resetDiagnosticEventsForTest();
-    vi.stubEnv("OPENCLAW_TRAJECTORY", "0");
+    vi.stubEnv("CARAPACE_TRAJECTORY", "0");
     vi.stubEnv("CODEX_API_KEY", "");
     vi.stubEnv("OPENAI_API_KEY", "");
-    tempDir = await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-codex-run-"));
+    tempDir = await fs.mkdtemp(path.join(resolvePreferredCarapaceTmpDir(), "carapace-codex-run-"));
     // createParams models an ordinary durable session; seeded native bindings
     // must have the same authoritative core owner as a real resumed conversation.
     await seedRunSessionOwnerForTest("session-1", "agent:main:session-1");
@@ -726,7 +726,7 @@ export function setupRunAttemptTestHooks(): void {
     resetCodexAppServerClientFactoryForTest();
     setManagedCodexPluginRoot(undefined);
     clearRuntimeAuthProfileStoreSnapshots();
-    dynamicToolBuildState.openClawCodingToolsFactory = undefined;
+    dynamicToolBuildState.carapaceCodingToolsFactory = undefined;
     codexWorkspaceDirCache.clear();
     nativeHookRelayUnregisterQueue.clear();
     nativeHookRelayTesting.clearNativeHookRelaysForTests();
@@ -745,7 +745,7 @@ export function setupRunAttemptTestHooks(): void {
     for (const owner of seededSessionOwnersForTest.splice(0)) {
       await deleteSessionEntry(owner);
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
   });
 }

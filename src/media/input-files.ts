@@ -3,14 +3,14 @@ import { MIMEType } from "node:util";
 import {
   classifyAttachmentBytes,
   type AttachmentClassification,
-} from "@openclaw/media-core/attachment-classify";
-import { canonicalizeBase64, estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { parseMediaContentLength } from "@openclaw/media-core/content-length";
-import { detectMime, normalizeMimeType } from "@openclaw/media-core/mime";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/media-core/attachment-classify";
+import { canonicalizeBase64, estimateBase64DecodedBytes } from "@carapace/media-core/base64";
+import { parseMediaContentLength } from "@carapace/media-core/content-length";
+import { detectMime, normalizeMimeType } from "@carapace/media-core/mime";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { cancelUnreadResponseBody, readResponseWithLimit } from "../infra/http-body.js";
 import { fetchWithSsrFGuard } from "../infra/net/fetch-guard.js";
 import { logWarn } from "../logger.js";
@@ -205,7 +205,7 @@ async function fetchWithGuard(
     signal,
     policy: { allowPrivateNetwork: false, hostnameAllowlist: limits.urlAllowlist },
     auditContext: `openresponses.${kind}`,
-    init: { headers: { "User-Agent": "OpenClaw-Gateway/1.0" } },
+    init: { headers: { "User-Agent": "Carapace-Gateway/1.0" } },
   });
 
   let result: InputFetchResult;
@@ -357,7 +357,7 @@ export async function extractImageContentFromSource(
 export async function extractFileContentFromSource(params: {
   source: InputFileSource;
   limits: InputFileLimits;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   signal?: AbortSignal;
 }): Promise<InputFileExtractResult> {
   const { source, limits, signal } = params;
@@ -405,7 +405,7 @@ export async function extractFileContentFromBuffer(params: {
   mimeType?: string;
   charset?: string;
   limits: InputFileLimits;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   classification?: AttachmentClassification;
 }): Promise<InputFileExtractResult> {
   const { buffer, limits } = params;

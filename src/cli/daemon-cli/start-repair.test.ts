@@ -14,8 +14,8 @@ const buildGatewayInstallPlanMock = vi.hoisted(() =>
       const preservedFileValue =
         params.existingEnvironmentValueSources?.TELEGRAM_DEFAULT_BOTTOKEN === "file";
       return {
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-        workingDirectory: "/tmp/openclaw",
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
+        workingDirectory: "/tmp/carapace",
         environment: {
           TELEGRAM_DEFAULT_BOTTOKEN: preservedFileValue
             ? params.existingEnvironment?.TELEGRAM_DEFAULT_BOTTOKEN
@@ -33,22 +33,22 @@ const readConfigFileSnapshotForWriteMock = vi.hoisted(() => vi.fn());
 const resolveGatewayPortMock = vi.hoisted(() =>
   vi.fn(
     (config: { gateway?: { port?: number } } | undefined, env: NodeJS.ProcessEnv = process.env) => {
-      const portMatch = env.OPENCLAW_GATEWAY_PORT?.trim().match(/(?:^|:)(\d+)$/);
+      const portMatch = env.CARAPACE_GATEWAY_PORT?.trim().match(/(?:^|:)(\d+)$/);
       return Number(portMatch?.[1]) || config?.gateway?.port || 18_789;
     },
   ),
 );
 const resolveStateDirMock = vi.hoisted(() =>
-  vi.fn((env: NodeJS.ProcessEnv) => env.OPENCLAW_STATE_DIR?.trim() || `${env.HOME}/.openclaw`),
+  vi.fn((env: NodeJS.ProcessEnv) => env.CARAPACE_STATE_DIR?.trim() || `${env.HOME}/.carapace`),
 );
 const resolveConfigPathCandidateMock = vi.hoisted(() =>
   vi.fn(
     (env: NodeJS.ProcessEnv) =>
-      env.OPENCLAW_CONFIG_PATH?.trim() ||
-      `${env.OPENCLAW_STATE_DIR?.trim() || `${env.HOME}/.openclaw`}/openclaw.json`,
+      env.CARAPACE_CONFIG_PATH?.trim() ||
+      `${env.CARAPACE_STATE_DIR?.trim() || `${env.HOME}/.carapace`}/carapace.json`,
   ),
 );
-const resolveOpenClawWrapperPathMock = vi.hoisted(() => vi.fn());
+const resolveCarapaceWrapperPathMock = vi.hoisted(() => vi.fn());
 const formatGatewayServiceStartRepairIssuesMock = vi.hoisted(() => vi.fn());
 const defaultRuntimeLogMock = vi.hoisted(() => vi.fn());
 const assertGatewayServiceMutationAllowedMock = vi.hoisted(() => vi.fn());
@@ -79,8 +79,8 @@ vi.mock("../../config/paths.js", () => ({
 }));
 
 vi.mock("../../daemon/program-args.js", () => ({
-  OPENCLAW_WRAPPER_ENV_KEY: "OPENCLAW_WRAPPER",
-  resolveOpenClawWrapperPath: resolveOpenClawWrapperPathMock,
+  CARAPACE_WRAPPER_ENV_KEY: "CARAPACE_WRAPPER",
+  resolveCarapaceWrapperPath: resolveCarapaceWrapperPathMock,
 }));
 
 vi.mock("../../daemon/runtime-paths.js", () => ({
@@ -111,17 +111,17 @@ function readFirstInstallPlanArg(): Record<string, unknown> {
 
 describe("repairLoadedGatewayServiceForStart", () => {
   beforeEach(() => {
-    vi.stubEnv("HOME", "/home/openclaw");
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", "");
-    vi.stubEnv("OPENCLAW_GATEWAY_PORT", "");
-    vi.stubEnv("OPENCLAW_HOME", "");
-    vi.stubEnv("OPENCLAW_PROFILE", "");
-    vi.stubEnv("OPENCLAW_STATE_DIR", "");
+    vi.stubEnv("HOME", "/home/carapace");
+    vi.stubEnv("CARAPACE_CONFIG_PATH", "");
+    vi.stubEnv("CARAPACE_GATEWAY_PORT", "");
+    vi.stubEnv("CARAPACE_HOME", "");
+    vi.stubEnv("CARAPACE_PROFILE", "");
+    vi.stubEnv("CARAPACE_STATE_DIR", "");
     buildGatewayInstallPlanMock.mockClear();
     resolveGatewayInstallTokenMock.mockReset();
     readConfigFileSnapshotForWriteMock.mockReset();
     resolveGatewayPortMock.mockClear();
-    resolveOpenClawWrapperPathMock.mockReset();
+    resolveCarapaceWrapperPathMock.mockReset();
     formatGatewayServiceStartRepairIssuesMock.mockReset();
     defaultRuntimeLogMock.mockClear();
     assertGatewayServiceMutationAllowedMock.mockReset();
@@ -133,9 +133,9 @@ describe("repairLoadedGatewayServiceForStart", () => {
     });
     readConfigFileSnapshotForWriteMock.mockResolvedValue({
       snapshot: { exists: true, valid: true, sourceConfig: {}, config: {} },
-      writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+      writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
     });
-    resolveOpenClawWrapperPathMock.mockResolvedValue("/usr/bin/openclaw");
+    resolveCarapaceWrapperPathMock.mockResolvedValue("/usr/bin/carapace");
     formatGatewayServiceStartRepairIssuesMock.mockReturnValue(
       "service port does not match current gateway config",
     );
@@ -180,10 +180,10 @@ describe("repairLoadedGatewayServiceForStart", () => {
         installed: true,
         loadState: { status: "loaded" },
         running: false,
-        env: { HOME: "/home/openclaw" },
+        env: { HOME: "/home/carapace" },
         command: {
-          programArguments: ["/usr/bin/openclaw", "gateway"],
-          environment: { HOME: "/home/openclaw" },
+          programArguments: ["/usr/bin/carapace", "gateway"],
+          environment: { HOME: "/home/carapace" },
         },
       };
       const params = {
@@ -216,20 +216,20 @@ describe("repairLoadedGatewayServiceForStart", () => {
       isLoaded: isLoadedMock,
     };
     const existingEnvironment = {
-      HOME: "/home/openclaw",
-      OPENCLAW_SERVICE_VERSION: "2026.4.24",
-      OPENCLAW_WRAPPER: "/usr/bin/openclaw",
+      HOME: "/home/carapace",
+      CARAPACE_SERVICE_VERSION: "2026.4.24",
+      CARAPACE_WRAPPER: "/usr/bin/carapace",
       TELEGRAM_DEFAULT_BOTTOKEN: "existing-env-file-token",
     };
     const existingEnvironmentValueSources = {
-      OPENCLAW_SERVICE_VERSION: "inline" as const,
+      CARAPACE_SERVICE_VERSION: "inline" as const,
       TELEGRAM_DEFAULT_BOTTOKEN: "file" as const,
     };
     const programArguments = [
       "/usr/bin/node",
       "--max-old-space-size=24576",
       "--require=/tmp/service-preload.js",
-      "/usr/local/bin/openclaw",
+      "/usr/local/bin/carapace",
       "gateway",
     ];
     const state: GatewayServiceState = {
@@ -241,7 +241,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
         programArguments,
         environment: {
           ...existingEnvironment,
-          OPENCLAW_WRAPPER: "/srv/operator/openclaw",
+          CARAPACE_WRAPPER: "/srv/operator/carapace",
           OPERATOR_DROPIN_ONLY: "operator-owned",
           NODE_OPTIONS: "--max-old-space-size=512",
           TELEGRAM_DEFAULT_BOTTOKEN: "operator-drop-in-token",
@@ -272,7 +272,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
     expect(planArg.existingEnvironment).toBe(existingEnvironment);
     expect(planArg.existingEnvironmentValueSources).toBe(existingEnvironmentValueSources);
     expect(planArg.env).not.toHaveProperty("OPERATOR_DROPIN_ONLY");
-    expect(resolveOpenClawWrapperPathMock).toHaveBeenCalledWith("/usr/bin/openclaw");
+    expect(resolveCarapaceWrapperPathMock).toHaveBeenCalledWith("/usr/bin/carapace");
     expect(installMock).toHaveBeenCalledWith(
       expect.objectContaining({
         environment: { TELEGRAM_DEFAULT_BOTTOKEN: "existing-env-file-token" },
@@ -301,13 +301,13 @@ describe("repairLoadedGatewayServiceForStart", () => {
         env: {},
         command: {
           programArguments: [
-            "/home/openclaw/.bun/bin/bun",
-            "/usr/lib/openclaw/dist/index.js",
+            "/home/carapace/.bun/bin/bun",
+            "/usr/lib/carapace/dist/index.js",
             "gateway",
             "--port",
             "18789",
           ],
-          environment: { HOME: "/home/openclaw", OPENCLAW_GATEWAY_PORT: "18789" },
+          environment: { HOME: "/home/carapace", CARAPACE_GATEWAY_PORT: "18789" },
         },
       };
 
@@ -329,7 +329,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
       const plan = readFirstInstallPlanArg();
       expect(plan.runtime).toBe(expectedRuntime);
       expect(plan.runtimePath).toBe(
-        expectedRuntime === "bun" ? "/home/openclaw/.bun/bin/bun" : undefined,
+        expectedRuntime === "bun" ? "/home/carapace/.bun/bin/bun" : undefined,
       );
     },
   );
@@ -339,8 +339,8 @@ describe("repairLoadedGatewayServiceForStart", () => {
     ["working directory", { launcher: "working-directory" as const }, undefined],
     [
       "gateway target environment",
-      { environment: { keys: ["OPENCLAW_STATE_DIR"] } },
-      { HOME: "/home/openclaw", OPENCLAW_STATE_DIR: "/srv/operator-state" },
+      { environment: { keys: ["CARAPACE_STATE_DIR"] } },
+      { HOME: "/home/carapace", CARAPACE_STATE_DIR: "/srv/operator-state" },
     ],
   ])(
     "refuses an ineffective stopped-service repair for a %s drop-in",
@@ -348,9 +348,9 @@ describe("repairLoadedGatewayServiceForStart", () => {
       const installMock = vi.fn(async () => {});
       const service = { install: installMock, isLoaded: vi.fn(async () => true) };
       const managedDefinition = {
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-        workingDirectory: "/srv/openclaw",
-        environment: { HOME: "/home/openclaw" },
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
+        workingDirectory: "/srv/carapace",
+        environment: { HOME: "/home/carapace" },
       };
       const state: GatewayServiceState = {
         installed: true,
@@ -360,7 +360,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
         command: {
           ...managedDefinition,
           ...(effectiveEnvironment ? { environment: effectiveEnvironment } : {}),
-          sourcePath: "/home/openclaw/.config/systemd/user/openclaw-work.service",
+          sourcePath: "/home/carapace/.config/systemd/user/carapace-work.service",
           managedDefinition,
           managedOverrides: overrides,
         },
@@ -374,7 +374,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
           json: true,
           stdout: process.stdout,
         }),
-      ).rejects.toThrow(/systemd drop-in.*systemctl --user cat openclaw-work\.service/);
+      ).rejects.toThrow(/systemd drop-in.*systemctl --user cat carapace-work\.service/);
 
       expect(readConfigFileSnapshotForWriteMock).not.toHaveBeenCalled();
       expect(resolveGatewayInstallTokenMock).not.toHaveBeenCalled();
@@ -386,8 +386,8 @@ describe("repairLoadedGatewayServiceForStart", () => {
   it.each(["start", "restart"] as const)(
     "refuses %s repair when ambient state, config, and port target a different service",
     async (action) => {
-      vi.stubEnv("OPENCLAW_STATE_DIR", "/home/openclaw/stress-state");
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", "/home/openclaw/stress-state/openclaw.json");
+      vi.stubEnv("CARAPACE_STATE_DIR", "/home/carapace/stress-state");
+      vi.stubEnv("CARAPACE_CONFIG_PATH", "/home/carapace/stress-state/carapace.json");
       readConfigFileSnapshotForWriteMock.mockResolvedValue({
         snapshot: {
           exists: true,
@@ -395,13 +395,13 @@ describe("repairLoadedGatewayServiceForStart", () => {
           sourceConfig: { gateway: { port: 18_999 } },
           config: { gateway: { port: 18_999 } },
         },
-        writeOptions: { expectedConfigPath: "/home/openclaw/stress-state/openclaw.json" },
+        writeOptions: { expectedConfigPath: "/home/carapace/stress-state/carapace.json" },
       });
 
       const originalUnit = [
-        "ExecStart=/usr/bin/openclaw gateway --port 18789",
-        "EnvironmentFile=-/home/openclaw/.openclaw/gateway.systemd.env",
-        "Environment=OPENCLAW_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY,OPENCLAW_GATEWAY_PASSWORD",
+        "ExecStart=/usr/bin/carapace gateway --port 18789",
+        "EnvironmentFile=-/home/carapace/.carapace/gateway.systemd.env",
+        "Environment=CARAPACE_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY,CARAPACE_GATEWAY_PASSWORD",
       ].join("\n");
       let unit = originalUnit;
       const installMock = vi.fn(async () => {
@@ -417,20 +417,20 @@ describe("repairLoadedGatewayServiceForStart", () => {
         running: false,
         env: {},
         command: {
-          programArguments: ["/usr/bin/openclaw", "gateway", "--port", "18789"],
+          programArguments: ["/usr/bin/carapace", "gateway", "--port", "18789"],
           environment: {
-            HOME: "/home/openclaw",
+            HOME: "/home/carapace",
             OPENAI_API_KEY: "file-backed-openai-key",
-            OPENCLAW_GATEWAY_PASSWORD: "file-backed-password",
-            OPENCLAW_GATEWAY_PORT: "18789",
-            OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "OPENAI_API_KEY,OPENCLAW_GATEWAY_PASSWORD",
+            CARAPACE_GATEWAY_PASSWORD: "file-backed-password",
+            CARAPACE_GATEWAY_PORT: "18789",
+            CARAPACE_SERVICE_MANAGED_ENV_KEYS: "OPENAI_API_KEY,CARAPACE_GATEWAY_PASSWORD",
           },
           environmentValueSources: {
             HOME: "inline",
             OPENAI_API_KEY: "file",
-            OPENCLAW_GATEWAY_PASSWORD: "file",
-            OPENCLAW_GATEWAY_PORT: "inline",
-            OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "inline",
+            CARAPACE_GATEWAY_PASSWORD: "file",
+            CARAPACE_GATEWAY_PORT: "inline",
+            CARAPACE_SERVICE_MANAGED_ENV_KEYS: "inline",
           },
         },
       };
@@ -449,10 +449,10 @@ describe("repairLoadedGatewayServiceForStart", () => {
       await expect(repair).rejects.toThrow(
         [
           "Refusing to repair the managed Gateway service because the current invocation targets a different Gateway:",
-          '- OPENCLAW_STATE_DIR: installed="/home/openclaw/.openclaw", ambient="/home/openclaw/stress-state"',
-          '- OPENCLAW_CONFIG_PATH: installed="/home/openclaw/.openclaw/openclaw.json", ambient="/home/openclaw/stress-state/openclaw.json"',
+          '- CARAPACE_STATE_DIR: installed="/home/carapace/.carapace", ambient="/home/carapace/stress-state"',
+          '- CARAPACE_CONFIG_PATH: installed="/home/carapace/.carapace/carapace.json", ambient="/home/carapace/stress-state/carapace.json"',
           '- gateway.port: installed="18789", ambient="18999"',
-          `Run \`openclaw gateway ${action}\` with the installed state directory, config path, and port (or unset conflicting environment overrides). To retarget intentionally, run \`openclaw gateway install --force\`.`,
+          `Run \`carapace gateway ${action}\` with the installed state directory, config path, and port (or unset conflicting environment overrides). To retarget intentionally, run \`carapace gateway install --force\`.`,
         ].join("\n"),
       );
 
@@ -464,7 +464,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
   );
 
   it("refuses a port-less stale service repair when ambient port overrides its config port", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_PORT", "18999");
+    vi.stubEnv("CARAPACE_GATEWAY_PORT", "18999");
     readConfigFileSnapshotForWriteMock.mockResolvedValue({
       snapshot: {
         exists: true,
@@ -472,7 +472,7 @@ describe("repairLoadedGatewayServiceForStart", () => {
         sourceConfig: { gateway: { port: 18_789 } },
         config: { gateway: { port: 18_789 } },
       },
-      writeOptions: { expectedConfigPath: "/home/openclaw/.openclaw/openclaw.json" },
+      writeOptions: { expectedConfigPath: "/home/carapace/.carapace/carapace.json" },
     });
     const installMock = vi.fn(async () => {});
     const service = {
@@ -485,8 +485,8 @@ describe("repairLoadedGatewayServiceForStart", () => {
       running: false,
       env: {},
       command: {
-        programArguments: ["/usr/bin/openclaw", "gateway"],
-        environment: { HOME: "/home/openclaw" },
+        programArguments: ["/usr/bin/carapace", "gateway"],
+        environment: { HOME: "/home/carapace" },
       },
     };
 
@@ -516,10 +516,10 @@ describe("repairLoadedGatewayServiceForStart", () => {
       running: false,
       env: {},
       command: {
-        programArguments: ["/usr/bin/openclaw", "gateway"],
+        programArguments: ["/usr/bin/carapace", "gateway"],
         environment: {
-          HOME: "/home/openclaw",
-          OPENCLAW_GATEWAY_PORT: "127.0.0.1:19000",
+          HOME: "/home/carapace",
+          CARAPACE_GATEWAY_PORT: "127.0.0.1:19000",
         },
       },
     };
@@ -551,8 +551,8 @@ describe("repairLoadedGatewayServiceForStart", () => {
       running: false,
       env: {},
       command: {
-        programArguments: ["/usr/bin/openclaw", "gateway", "--port", "18789"],
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        programArguments: ["/usr/bin/carapace", "gateway", "--port", "18789"],
+        environment: { CARAPACE_GATEWAY_PORT: "18789" },
       },
     };
 
@@ -594,8 +594,8 @@ describe("repairLoadedGatewayServiceForStart", () => {
         running: false,
         env: {},
         command: {
-          programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-          environment: { HOME: "/home/openclaw" },
+          programArguments: ["/usr/bin/carapace", "gateway", "run"],
+          environment: { HOME: "/home/carapace" },
         },
       };
       const params = {

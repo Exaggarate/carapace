@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
   getRuntimeConfigAppliedHash,
   setRuntimeConfigAppliedHash,
 } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetAgentRunRegistryForTest } from "../../infra/agent-run-registry.js";
 import { resetPluginStateStoreForTests } from "../../plugin-state/plugin-state-store.js";
 import { getCommandLaneSnapshot } from "../../process/command-queue.js";
@@ -78,7 +78,7 @@ export const defaultClient = {
   connect: { device: { id: "device-test" } },
 } as GatewayClient;
 
-export const verifiedConfig: OpenClawConfig = {
+export const verifiedConfig: CarapaceConfig = {
   agents: { defaults: { model: "openai/gpt-5.5@openai:verified" } },
   auth: { profiles: { "openai:verified": { provider: "openai", mode: "api_key" } } },
 };
@@ -103,7 +103,7 @@ export function useSystemAgentGatewayTestFixture() {
         ({
           exists: true,
           valid: true,
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           hash: "verified-config",
           config: verifiedConfig,
           runtimeConfig: verifiedConfig,
@@ -172,7 +172,7 @@ export function useSystemAgentGatewayTestFixture() {
       auditSequence: 0,
     });
     greetingMocks.resolveSystemAgentGreeting.mockReset().mockResolvedValue({
-      text: "I'm OpenClaw. All systems nominal.",
+      text: "I'm Carapace. All systems nominal.",
       source: "model",
     });
     onboardingWelcomeMocks.buildOnboardingWelcome.mockReset().mockResolvedValue({
@@ -205,7 +205,7 @@ export async function callChat(
   client: GatewayClient | null = defaultClient,
 ): Promise<RespondCall> {
   const { calls, respond } = makeRespond();
-  await systemAgentHandler("openclaw.chat")({
+  await systemAgentHandler("carapace.chat")({
     params,
     respond,
     context,

@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { createHostSandboxFsBridge } from "../test-helpers/host-sandbox-fs-bridge.js";
 import {
@@ -25,7 +25,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 // tests cover the real bundled contract loader.
 vi.mock("../../media/channel-inbound-roots.js", () => ({
   resolveChannelInboundAttachmentRootsForChannel: (params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     channelId?: string | null;
     accountId?: string | null;
   }) => {
@@ -71,11 +71,11 @@ describe("resolveGenerateAction", () => {
 
 describe("resolveMediaToolLocalRoots", () => {
   it("does not widen default local roots from media sources", async () => {
-    const stateDir = path.join("/tmp", "openclaw-media-tool-roots-state");
+    const stateDir = path.join("/tmp", "carapace-media-tool-roots-state");
     const picturesDir =
       process.platform === "win32" ? "C:\\Users\\peter\\Pictures" : "/Users/peter/Pictures";
 
-    const { localRoots } = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const { localRoots } = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       resolveMediaToolReferenceAccess({
         input: path.join(picturesDir, "photo.png"),
         isDataUrl: false,
@@ -93,8 +93,8 @@ describe("resolveMediaToolLocalRoots", () => {
   it("keeps channel inbound attachment roots separate from local roots", async () => {
     // Inbound channel roots may include broad chat attachment folders; keep them
     // out of local filesystem allowlists unless the channel context asks.
-    const accountRoot = path.join("/tmp", "openclaw-imessage-work");
-    const sharedRoot = path.join("/tmp", "openclaw-imessage-shared");
+    const accountRoot = path.join("/tmp", "carapace-imessage-work");
+    const sharedRoot = path.join("/tmp", "carapace-imessage-shared");
     const cfg = {
       channels: {
         imessage: {
@@ -197,8 +197,8 @@ describe("resolveMediaToolReferenceAccess", () => {
   it.each(["image_generate", "video_generate", "music_generate"] as const)(
     "loads a producer-staged bare handle for %s references",
     async (toolName) => {
-      const root = tempDirs.make("openclaw-media-tool-staged-");
-      const stagedPath = "media/inbound/openclaw-staged-proof/input-file_upload.png";
+      const root = tempDirs.make("carapace-media-tool-staged-");
+      const stagedPath = "media/inbound/carapace-staged-proof/input-file_upload.png";
       const fullPath = path.join(root, stagedPath);
       await fs.mkdir(path.dirname(fullPath), { recursive: true });
       await fs.writeFile(

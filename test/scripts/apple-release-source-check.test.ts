@@ -9,7 +9,7 @@ const BASH_BIN = process.platform === "win32" ? "bash" : "/bin/bash";
 const tempDirs: string[] = [];
 
 function makeRepository(): { root: string; commit: string } {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-apple-release-source-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-apple-release-source-"));
   tempDirs.push(root);
   execFileSync("git", ["init", "--quiet"], { cwd: root });
   writeFileSync(path.join(root, "tracked.txt"), "clean\n", "utf8");
@@ -20,9 +20,9 @@ function makeRepository(): { root: string; commit: string } {
       "-c",
       "commit.gpgsign=false",
       "-c",
-      "user.email=release-test@openclaw.test",
+      "user.email=release-test@carapace.test",
       "-c",
-      "user.name=OpenClaw Release Test",
+      "user.name=Carapace Release Test",
       "commit",
       "--quiet",
       "-m",

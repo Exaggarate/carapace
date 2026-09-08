@@ -1,17 +1,17 @@
 // Voice Call plugin module implements cli gateway calls.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   callGatewayFromCli,
   isGatewayClientRequestError,
   isGatewayTransportError,
   redactSensitiveUrlLikeString,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "carapace/plugin-sdk/gateway-runtime";
 import {
   addTimerTimeoutGraceMs,
   clampTimerTimeoutMs,
   MAX_TIMER_TIMEOUT_MS,
-} from "openclaw/plugin-sdk/number-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { sleep } from "../api.js";
 import { writeCliJson } from "./cli-command-io.js";
 import type { VoiceCallConfig } from "./config.js";
@@ -58,21 +58,21 @@ function gatewayOperationalError(err: unknown): Error {
   const message = formatErrorMessage(err);
   const detail = (() => {
     if (isGatewayClientRequestError(err)) {
-      return `Gateway responded but voicecall failed: ${message}\nThe running Gateway owns the voice-call runtime; check \`openclaw gateway status\` or restart it.`;
+      return `Gateway responded but voicecall failed: ${message}\nThe running Gateway owns the voice-call runtime; check \`carapace gateway status\` or restart it.`;
     }
     if (isGatewayCredentialFailure(err)) {
-      return `Gateway requires credentials: ${message}\nConfigure gateway.auth or pair this device with \`openclaw devices approve --latest\`.`;
+      return `Gateway requires credentials: ${message}\nConfigure gateway.auth or pair this device with \`carapace devices approve --latest\`.`;
     }
     if (isGatewayTransportError(err)) {
       const url = err.connectionDetails.url;
       if (err.kind === "timeout") {
         const timeout =
           err.timeoutMs === undefined ? "the configured timeout" : `${err.timeoutMs}ms`;
-        return `Gateway at ${url} did not answer within ${timeout}: ${message}\nIt may be starting or wedged; check \`openclaw gateway status\`.`;
+        return `Gateway at ${url} did not answer within ${timeout}: ${message}\nIt may be starting or wedged; check \`carapace gateway status\`.`;
       }
-      return `Gateway connection at ${url} failed: ${message}\nCheck gateway.auth and \`openclaw gateway status\`, then retry.`;
+      return `Gateway connection at ${url} failed: ${message}\nCheck gateway.auth and \`carapace gateway status\`, then retry.`;
     }
-    return `Gateway voicecall request failed: ${message}\nCheck \`openclaw gateway status\`, then retry.`;
+    return `Gateway voicecall request failed: ${message}\nCheck \`carapace gateway status\`, then retry.`;
   })();
   // Configured gateway URLs may embed userinfo/tokens, and close reasons are
   // remote-controlled text; redact once where the text becomes operator-visible.
@@ -225,7 +225,7 @@ async function ensureStandaloneRuntime(params: {
   } catch (err) {
     if (err instanceof Error && "code" in err && err.code === "EADDRINUSE") {
       throw new Error(
-        `Voice-call webhook port ${params.config.serve.port} is already in use. A running Gateway probably already serves it; operational commands route through that Gateway. Check \`openclaw gateway status\` and retry.`,
+        `Voice-call webhook port ${params.config.serve.port} is already in use. A running Gateway probably already serves it; operational commands route through that Gateway. Check \`carapace gateway status\` and retry.`,
         { cause: err },
       );
     }

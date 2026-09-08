@@ -49,7 +49,7 @@ describe("prepared channel turn lifecycle", () => {
 
   beforeEach(() => {
     storePath = path.join(
-      tempDirs.make("openclaw-channel-turn-prepared-lifecycle-"),
+      tempDirs.make("carapace-channel-turn-prepared-lifecycle-"),
       "sessions.json",
     );
   });

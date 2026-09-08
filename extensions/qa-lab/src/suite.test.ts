@@ -33,7 +33,7 @@ import { createTempDirHarness } from "./temp-dir.test-helper.js";
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 const tempDirs = createTempDirHarness();
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
@@ -391,53 +391,53 @@ describe("qa suite", () => {
     expect(resolveQaSuiteTransportReadyTimeoutMs(undefined, {})).toBe(120_000);
     expect(
       resolveQaSuiteTransportReadyTimeoutMs(undefined, {
-        OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000",
+        CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000",
       }),
     ).toBe(180_000);
     expect(
       resolveQaSuiteTransportReadyTimeoutMs(undefined, {
-        OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "bad",
+        CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "bad",
       }),
     ).toBe(120_000);
     for (const value of ["0x10", "1e3", "10.5"]) {
       expect(
         resolveQaSuiteTransportReadyTimeoutMs(undefined, {
-          OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: value,
+          CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: value,
         }),
       ).toBe(120_000);
     }
     expect(resolveQaSuiteTransportReadyTimeoutMs(90_000, {})).toBe(90_000);
   });
 
-  it("applies OPENCLAW_QA_SUITE_PROGRESS override and falls back on invalid values", () => {
+  it("applies CARAPACE_QA_SUITE_PROGRESS override and falls back on invalid values", () => {
     expect(
       shouldLogQaSuiteProgress({
         CI: "false",
-        OPENCLAW_QA_SUITE_PROGRESS: "true",
+        CARAPACE_QA_SUITE_PROGRESS: "true",
       }),
     ).toBe(true);
     expect(
       shouldLogQaSuiteProgress({
         CI: "true",
-        OPENCLAW_QA_SUITE_PROGRESS: "false",
+        CARAPACE_QA_SUITE_PROGRESS: "false",
       }),
     ).toBe(false);
     expect(
       shouldLogQaSuiteProgress({
         CI: "false",
-        OPENCLAW_QA_SUITE_PROGRESS: "on",
+        CARAPACE_QA_SUITE_PROGRESS: "on",
       }),
     ).toBe(true);
     expect(
       shouldLogQaSuiteProgress({
         CI: "true",
-        OPENCLAW_QA_SUITE_PROGRESS: "off",
+        CARAPACE_QA_SUITE_PROGRESS: "off",
       }),
     ).toBe(false);
     expect(
       shouldLogQaSuiteProgress({
         CI: "true",
-        OPENCLAW_QA_SUITE_PROGRESS: "definitely",
+        CARAPACE_QA_SUITE_PROGRESS: "definitely",
       }),
     ).toBe(true);
   });
@@ -642,7 +642,7 @@ describe("qa suite", () => {
 
     try {
       const partial = await writeQaSuiteArtifacts({ ...baseParams, status: "running" });
-      expect(partial.report).toContain("# OpenClaw QA Scenario Suite (In Progress)");
+      expect(partial.report).toContain("# Carapace QA Scenario Suite (In Progress)");
       expect(partial.report).toContain("- Status: running");
       expect(partial.report).toContain("- Updated: 2026-04-11T00:01:00.000Z");
       expect(partial.report).not.toContain("- Finished:");
@@ -652,7 +652,7 @@ describe("qa suite", () => {
       );
 
       const terminal = await writeQaSuiteArtifacts(baseParams);
-      expect(terminal.report).toContain("# OpenClaw QA Scenario Suite\n");
+      expect(terminal.report).toContain("# Carapace QA Scenario Suite\n");
       expect(terminal.report).toContain("- Finished: 2026-04-11T00:01:00.000Z");
       expect(terminal.report).not.toContain("In Progress");
       expect(terminal.report).not.toContain("- Status: running");
@@ -796,12 +796,12 @@ describe("qa suite", () => {
   it("arms gateway heap checkpoint env only when requested", () => {
     expect(
       buildQaGatewayHeapCheckpointRuntimeEnvPatch({
-        OPENCLAW_QA_GATEWAY_HEAP_CHECKPOINTS: "0",
+        CARAPACE_QA_GATEWAY_HEAP_CHECKPOINTS: "0",
       }),
     ).toBeUndefined();
     expect(
       buildQaGatewayHeapCheckpointRuntimeEnvPatch({
-        OPENCLAW_QA_GATEWAY_HEAP_CHECKPOINTS: "1",
+        CARAPACE_QA_GATEWAY_HEAP_CHECKPOINTS: "1",
         NODE_OPTIONS: "--max-old-space-size=4096",
       }),
     ).toEqual({
@@ -835,8 +835,8 @@ describe("qa suite", () => {
         },
       },
     });
-    const sutOpenClawCommand = {
-      executablePath: "/usr/local/bin/openclaw-telegram-sut-launcher",
+    const sutCarapaceCommand = {
+      executablePath: "/usr/local/bin/carapace-telegram-sut-launcher",
       usePackagedPlugins: true,
     };
 
@@ -855,7 +855,7 @@ describe("qa suite", () => {
           adapterFactories: [adapterFactory],
           channelId: "telegram",
           adapterOptions: { repoRoot: "/repo" },
-          sutOpenClawCommand,
+          sutCarapaceCommand,
           thinkingDefault: "minimal",
           claudeCliAuthMode: "subscription",
           enabledPluginIds: ["acpx"],
@@ -869,7 +869,7 @@ describe("qa suite", () => {
       adapterFactories: [adapterFactory],
       channelId: "telegram",
       adapterOptions: { repoRoot: "/repo" },
-      sutOpenClawCommand,
+      sutCarapaceCommand,
       concurrency: 1,
       startLab,
       controlUiEnabled: true,
@@ -954,7 +954,7 @@ describe("qa suite", () => {
       remapModelRefForForcedRuntime({
         modelRef: "mock-openai/gpt-5.6-luna",
         providerMode: "mock-openai",
-        forcedRuntime: "openclaw",
+        forcedRuntime: "carapace",
       }),
     ).toBe("mock-openai/gpt-5.6-luna");
   });

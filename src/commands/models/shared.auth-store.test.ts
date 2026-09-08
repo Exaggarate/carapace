@@ -5,19 +5,19 @@ import {
   resolveAuthProfileDatabasePath,
   writePersistedAuthProfileStateRaw,
 } from "../../agents/auth-profiles/sqlite.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { resolveModelsTargetAgent } from "./shared.js";
 
 describe("model inspection auth store ownership", () => {
   it("retains the configured owner when a read override selects the same custom directory", async () => {
-    await withOpenClawTestState({ label: "models-custom-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "models-custom-owner" }, async (state) => {
       const agentId = "helper";
       const agentDir = state.statePath("agents", agentId);
       const cfg = {
         agents: { ownership: "explicit" as const, entries: { [agentId]: { agentDir } } },
       };
-      openOpenClawAgentDatabase({ agentId, path: resolveAuthProfileDatabasePath(agentDir) });
+      openCarapaceAgentDatabase({ agentId, path: resolveAuthProfileDatabasePath(agentDir) });
       try {
         const target = resolveModelsTargetAgent(cfg, undefined, {
           kind: "read",
@@ -36,14 +36,14 @@ describe("model inspection auth store ownership", () => {
   });
 
   it("preserves an unrelated override without assigning it the configured agent's ownership", async () => {
-    await withOpenClawTestState({ label: "models-override-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "models-override-owner" }, async (state) => {
       const agentId = "helper";
       const agentDir = state.statePath("agents", agentId);
       const overrideDir = state.statePath("separate-auth");
       const cfg = {
         agents: { ownership: "explicit" as const, entries: { [agentId]: { agentDir } } },
       };
-      openOpenClawAgentDatabase({
+      openCarapaceAgentDatabase({
         agentId: "separate-owner",
         path: resolveAuthProfileDatabasePath(overrideDir),
       });

@@ -16,7 +16,7 @@ const install = {
 
 function packageRef(overrides: Partial<PersistedClawPackageRef> = {}): PersistedClawPackageRef {
   return {
-    schemaVersion: "openclaw.clawPackageRef.v1",
+    schemaVersion: "carapace.clawPackageRef.v1",
     agentId: "worker",
     clawName: "@acme/worker",
     kind: "plugin",
@@ -59,7 +59,7 @@ function packageRefStore(...initial: PersistedClawPackageRef[]) {
 }
 
 async function trackedQualifiedSkillFixture() {
-  const workspaceDir = tempDirs.make("openclaw-claw-skill-remove-");
+  const workspaceDir = tempDirs.make("carapace-claw-skill-remove-");
   const slug = "triage";
   const skillDir = join(workspaceDir, "skills", slug);
   const content = "---\nname: triage\ndescription: Triage incidents\n---\n";

@@ -1,11 +1,11 @@
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 /**
  * Usage-state and failure cooldown tests for auth profiles.
  * Covers unusable-window helpers, provider bypasses, WHAM probes, and store
  * persistence hooks without contacting real providers.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setLoggerOverride } from "../../logging/logger.js";
 import type { AuthProfileStore, ProfileUsageStats } from "./types.js";
 import { resolveProfileUnusableUntil } from "./usage-state.js";
@@ -913,7 +913,7 @@ describe("clearAuthProfileCooldown", () => {
 });
 
 describe("markAuthProfileFailure — active windows do not extend on retry", () => {
-  // Regression for https://github.com/openclaw/openclaw/issues/23516
+  // Regression for https://github.com/Exaggarate/carapace/issues/23516
   // When all providers are at saturation backoff (60 min) and retries fire every 30 min,
   // each retry was resetting cooldownUntil to now+60m, preventing recovery.
   type WindowStats = ProfileUsageStats;
@@ -922,7 +922,7 @@ describe("markAuthProfileFailure — active windows do not extend on retry", () 
     store: ReturnType<typeof makeStore>;
     now: number;
     reason: "rate_limit" | "timeout" | "billing" | "auth_permanent";
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
   }): Promise<void> {
     const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(params.now);
     mockLockedUpdateForStore(params.store);
@@ -1578,8 +1578,8 @@ describe("markAuthProfileFailure — WHAM-aware Codex cooldowns", () => {
     const headers = init.headers as Record<string, string>;
     expect(headers.Authorization).toBe("Bearer codex-access-token");
     expect(headers["ChatGPT-Account-Id"]).toBe("acct_test_123");
-    expect(headers.originator).toBe("openclaw");
-    expect(headers["User-Agent"]).toMatch(/^openclaw\//);
+    expect(headers.originator).toBe("carapace");
+    expect(headers["User-Agent"]).toMatch(/^carapace\//);
     const stats = store.usageStats?.["openai:default"];
     expect(stats?.lastProbeAt).toBe(now);
     if (exactBlocked) {

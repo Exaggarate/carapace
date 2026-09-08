@@ -4,7 +4,7 @@ import path from "node:path";
 import { assertWorkspaceStateMigrationReady } from "../agents/workspace-legacy-state.js";
 import { resolveCanonicalWorkspacePath } from "../agents/workspace-state-identity.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasErrnoCode, isMissingPathError } from "../infra/errors.js";
 import { removePathWithinRoot } from "../infra/fs-safe-remove.js";
 import { pathExists, root, type Root } from "../infra/fs-safe.js";
@@ -36,14 +36,14 @@ import {
   validateSkillProposalRollback,
 } from "../skills/workshop/store.js";
 import type { SkillProposalRecord, SkillProposalRollback } from "../skills/workshop/types.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openExistingOpenClawStateDatabaseReadOnly,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openExistingCarapaceStateDatabaseReadOnly,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   listPendingLegacyCollectionBackupRoots,
   migrateLegacyCollectionBackups,
@@ -107,15 +107,15 @@ async function readJson(rootDir: Root, relativePath: string, maxBytes: number): 
 }
 
 export async function inspectLegacySkillWorkshopMigration(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<LegacyWorkshopMigrationInspection> {
   const env = params.env ?? process.env;
-  const database = await openExistingOpenClawStateDatabaseReadOnly({ env });
+  const database = await openExistingCarapaceStateDatabaseReadOnly({ env });
   let records: LegacyWorkshopProposal[] = [];
   try {
     if (database && tableExists(database.db, "skill_workshop_proposals")) {
-      const kysely = getNodeSqliteKysely<Pick<OpenClawStateDatabase, "skill_workshop_proposals">>(
+      const kysely = getNodeSqliteKysely<Pick<CarapaceStateDatabase, "skill_workshop_proposals">>(
         database.db,
       );
       const rows = executeSqliteQuerySync(
@@ -150,13 +150,13 @@ export async function inspectLegacySkillWorkshopMigration(params: {
 }
 
 async function relocateLegacyWorkshopTargets(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   retireMissingDrafts: boolean,
 ): Promise<WorkshopRelocationResult> {
-  const database = openOpenClawStateDatabase({ env });
+  const database = openCarapaceStateDatabase({ env });
   const kysely = getNodeSqliteKysely<
-    Pick<OpenClawStateDatabase, "skill_workshop_proposals" | "skill_workshop_proposal_rollbacks">
+    Pick<CarapaceStateDatabase, "skill_workshop_proposals" | "skill_workshop_proposal_rollbacks">
   >(database.db);
   // Planning must not initialize optional Workshop tables or indexes on a no-op
   // startup. Actual proposal writes retain their feature-owned schema ensure.
@@ -289,7 +289,7 @@ async function relocateLegacyWorkshopTargets(
     }
     // Every proposal for one moved skill must commit together. Otherwise a
     // retry loses the create row that proves where its pending updates belong.
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         for (const update of updates) {
           const expected = initialRows.get(update.record.id);
@@ -370,7 +370,7 @@ async function readLegacyRollback(
 }
 
 async function verifyImportedProposal(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   record: SkillProposalRecord,
   rollback?: SkillProposalRollback,
@@ -391,7 +391,7 @@ async function verifyImportedProposal(
 }
 
 async function migrateProposal(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   proposalId: string;
   stateRoot: Root;
@@ -465,7 +465,7 @@ async function reconcileIncompleteProposal(params: {
 
 /** Import verified legacy proposal sidecars, then remove only the imported JSON metadata. */
 async function importLegacySkillProposalSidecars(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<MigrationResult> {
   const env = params.env ?? process.env;
@@ -509,8 +509,8 @@ async function importLegacySkillProposalSidecars(params: {
     .toSorted((left, right) => left.localeCompare(right));
   const warnings: string[] = [];
   const changes: string[] = [];
-  const database = openOpenClawStateDatabase({ env });
-  const kysely = getNodeSqliteKysely<Pick<OpenClawStateDatabase, "skill_workshop_proposals">>(
+  const database = openCarapaceStateDatabase({ env });
+  const kysely = getNodeSqliteKysely<Pick<CarapaceStateDatabase, "skill_workshop_proposals">>(
     database.db,
   );
   let migrated = 0;
@@ -577,7 +577,7 @@ async function importLegacySkillProposalSidecars(params: {
 }
 
 export async function migrateLegacySkillWorkshopProposals(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   retireMissingDrafts?: boolean;
 }): Promise<MigrationResult> {
@@ -585,7 +585,7 @@ export async function migrateLegacySkillWorkshopProposals(params: {
   // Plain Doctor can reach automatic migration without its repair scope.
   // Keep one owner through filesystem moves, receipt completion, and backup retirement.
   const coordinator = acquireStateDatabaseCoordinator({
-    databasePath: resolveOpenClawStateSqlitePath(env),
+    databasePath: resolveCarapaceStateSqlitePath(env),
   });
   try {
     const sidecars = await importLegacySkillProposalSidecars({ config: params.config, env });

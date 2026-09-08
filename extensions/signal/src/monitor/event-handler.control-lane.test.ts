@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { MsgContext } from "openclaw/plugin-sdk/reply-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { MsgContext } from "carapace/plugin-sdk/reply-runtime";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -25,9 +25,9 @@ vi.mock("../send.js", () => ({
   sendReadReceiptSignal: sendReadReceiptMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/reply-runtime")>(
-    "openclaw/plugin-sdk/reply-runtime",
+vi.mock("carapace/plugin-sdk/reply-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/reply-runtime")>(
+    "carapace/plugin-sdk/reply-runtime",
   );
   return {
     ...actual,
@@ -37,9 +37,9 @@ vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("carapace/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/channel-inbound")>(
+    "carapace/plugin-sdk/channel-inbound",
   );
   type RunParams = Parameters<typeof actual.runChannelInboundEvent>[0];
   return {
@@ -66,7 +66,7 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
         channel: resolved.channel,
         accountId: resolved.accountId,
         routeSessionKey: resolved.route.sessionKey,
-        storePath: "/tmp/openclaw/signal-sessions.json",
+        storePath: "/tmp/carapace/signal-sessions.json",
         ctxPayload: resolved.ctxPayload,
         recordInboundSession: recordInboundSessionMock,
         afterRecord: resolved.afterRecord,
@@ -82,9 +82,9 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("carapace/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/conversation-runtime")>(
+    "carapace/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -129,7 +129,7 @@ function holdNextDispatch() {
   return gate.resolve;
 }
 
-function createHandler(debounceMs: number, config?: OpenClawConfig) {
+function createHandler(debounceMs: number, config?: CarapaceConfig) {
   pendingDebounceMs = Math.max(pendingDebounceMs, debounceMs);
   const dmPolicy = "allowlist";
   const allowFrom = ["+15550001111"];
@@ -140,7 +140,7 @@ function createHandler(debounceMs: number, config?: OpenClawConfig) {
         ({
           messages: { inbound: { debounceMs } },
           channels: { signal: { dmPolicy, allowFrom } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
       dmPolicy,
       allowFrom,
       historyLimit: 0,
@@ -214,7 +214,7 @@ describe("Signal active-run control lane", () => {
   });
 
   it("updates Signal batching while keeping stop on the immediate control lane", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       messages: { inbound: { debounceMs: 0 } },
       channels: { signal: { dmPolicy: "allowlist", allowFrom: ["+15550001111"] } },
     };

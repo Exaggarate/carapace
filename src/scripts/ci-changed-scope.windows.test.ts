@@ -33,12 +33,12 @@ describe("detectChangedScope Windows routing", () => {
 
   it("routes source CLI invocation owners and their native proof to Windows", () => {
     for (const sourceCliPath of [
-      "src/infra/openclaw-cli-invocation.ts",
-      "src/infra/openclaw-cli-invocation.test.ts",
-      "src/infra/openclaw-cli-invocation.test-support.ts",
-      "src/infra/openclaw-cli-shim.ts",
-      "src/infra/openclaw-cli-shim.test.ts",
-      "src/infra/openclaw-cli-shim.windows.test.ts",
+      "src/infra/carapace-cli-invocation.ts",
+      "src/infra/carapace-cli-invocation.test.ts",
+      "src/infra/carapace-cli-invocation.test-support.ts",
+      "src/infra/carapace-cli-shim.ts",
+      "src/infra/carapace-cli-shim.test.ts",
+      "src/infra/carapace-cli-shim.windows.test.ts",
     ]) {
       expect(detectChangedScope([sourceCliPath]), sourceCliPath).toMatchObject({
         runNode: true,
@@ -49,9 +49,9 @@ describe("detectChangedScope Windows routing", () => {
     }
 
     for (const unrelatedPath of [
-      "src/infra/openclaw-root.ts",
-      "src/infra/openclaw-cli-other.test.ts",
-      "src/infra/openclaw-cli-shim-extra.ts",
+      "src/infra/carapace-root.ts",
+      "src/infra/carapace-cli-other.test.ts",
+      "src/infra/carapace-cli-shim-extra.ts",
     ]) {
       expect(detectChangedScope([unrelatedPath]).runWindows, unrelatedPath).toBe(false);
     }
@@ -119,7 +119,7 @@ describe("detectChangedScope Windows routing", () => {
         "src/commands/doctor-sqlite-compact.ts",
         "src/infra/node-sqlite.ts",
         "src/infra/update-managed-service-handoff.ts",
-        "src/state/openclaw-state-db.ts",
+        "src/state/carapace-state-db.ts",
       ],
     },
     {
@@ -127,7 +127,7 @@ describe("detectChangedScope Windows routing", () => {
       paths: [
         "src/infra/update-managed-service-handoff-command.test.ts",
         "src/infra/update-managed-service-handoff-lifecycle.test.ts",
-        "src/state/openclaw-database-paths.windows.test.ts",
+        "src/state/carapace-database-paths.windows.test.ts",
       ],
     },
     {
@@ -322,11 +322,11 @@ describe("detectChangedScope Windows routing", () => {
 
   it("routes shared test-state and process fixture owners to Windows", () => {
     for (const fixturePath of [
-      "src/test-utils/openclaw-test-state.ts",
-      "src/test-utils/openclaw-test-state.test.ts",
-      "test/helpers/openclaw-test-instance.ts",
-      "test/helpers/openclaw-test-instance.test.ts",
-      "test/helpers/openclaw-test-instance.cli.test-support.mjs",
+      "src/test-utils/carapace-test-state.ts",
+      "src/test-utils/carapace-test-state.test.ts",
+      "test/helpers/carapace-test-instance.ts",
+      "test/helpers/carapace-test-instance.test.ts",
+      "test/helpers/carapace-test-instance.cli.test-support.mjs",
       "scripts/lib/managed-child-process.mts",
       "scripts/lib/vitest-resource-ownership.mts",
     ]) {
@@ -337,7 +337,7 @@ describe("detectChangedScope Windows routing", () => {
     }
     expect(detectChangedScope(["test/helpers/promise.ts"]).runWindows).toBe(false);
     expect(
-      detectChangedScope(["test/helpers/openclaw-test-instance-extra.test.ts"]).runWindows,
+      detectChangedScope(["test/helpers/carapace-test-instance-extra.test.ts"]).runWindows,
     ).toBe(false);
   });
 

@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { BoardGetParams, BoardSnapshot } from "@openclaw/gateway-protocol";
+import type { BoardGetParams, BoardSnapshot } from "@carapace/gateway-protocol";
 import type { LitElement } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SIDEBAR_SESSION_ROSTER_LIMIT } from "../../../../src/shared/session-list-limits.ts";
@@ -97,14 +97,14 @@ function controlPreviewFrames(): () => void {
 async function settleDashboardPreviews(element: DashboardsPageElement, runFrame: () => void) {
   await settleLitElement(element);
   runFrame();
-  const previews = element.querySelectorAll<LitElement>("openclaw-dashboard-preview");
+  const previews = element.querySelectorAll<LitElement>("carapace-dashboard-preview");
   expect(previews.length).toBeGreaterThan(0);
   for (const preview of previews) {
     await settleLitElement(preview);
-    const board = preview.querySelector<LitElement>("openclaw-board-document")!;
+    const board = preview.querySelector<LitElement>("carapace-board-document")!;
     expect(board).not.toBeNull();
     await settleLitElement(board);
-    const view = board.querySelector<LitElement>("openclaw-board-view")!;
+    const view = board.querySelector<LitElement>("carapace-board-view")!;
     expect(view, board.textContent ?? "").not.toBeNull();
     await settleLitElement(view);
     expect(view.querySelector('[data-test-id="board-empty"]')).not.toBeNull();
@@ -165,7 +165,7 @@ describe("DashboardsPage", () => {
       },
       agents: { state: { agentsList: null } },
     } as unknown as ApplicationContext;
-    const element = document.createElement("openclaw-dashboards-page") as DashboardsPageElement;
+    const element = document.createElement("carapace-dashboards-page") as DashboardsPageElement;
     element.routeData = routeData(row("agent:main:before", "Before"));
     const provider = createApplicationContextProvider(context);
     provider.append(element);
@@ -287,7 +287,7 @@ describe("DashboardsPage", () => {
         },
         agents: { state: { agentsList: null } },
       } as unknown as ApplicationContext;
-      const element = document.createElement("openclaw-dashboards-page") as DashboardsPageElement;
+      const element = document.createElement("carapace-dashboards-page") as DashboardsPageElement;
       element.routeData = {
         result: first,
         error: null,
@@ -335,7 +335,7 @@ describe("DashboardsPage", () => {
   );
 
   it("filters by search and author and sorts visible cards by title", async () => {
-    const element = document.createElement("openclaw-dashboards-page") as DashboardsPageElement;
+    const element = document.createElement("carapace-dashboards-page") as DashboardsPageElement;
     element.routeData = {
       result: results([
         {

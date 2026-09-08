@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type {
   SessionCatalogHost,
   SessionCatalogSession,
@@ -20,9 +20,9 @@ import {
   type SessionCatalogProvider,
 } from "./session-catalog.js";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeInvokePolicy,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeHostCommandAvailabilityContext,
+  CarapacePluginNodeInvokePolicy,
 } from "./types.js";
 
 type SessionCatalogPage = {
@@ -553,8 +553,8 @@ export type SessionCatalogNodeHostBindingsOptions = {
   sessionIdPattern: RegExp;
   executable: string;
   args: (threadId: string) => string[];
-  listAvailable: (context: OpenClawPluginNodeHostCommandAvailabilityContext) => boolean;
-  terminalAvailable: (context: OpenClawPluginNodeHostCommandAvailabilityContext) => boolean;
+  listAvailable: (context: CarapacePluginNodeHostCommandAvailabilityContext) => boolean;
+  terminalAvailable: (context: CarapacePluginNodeHostCommandAvailabilityContext) => boolean;
   parseParams: (paramsJSON?: string | null) => unknown;
   list: (params: unknown) => Promise<SessionCatalogPage>;
   read: (params: unknown) => Promise<SessionsCatalogReadResult>;
@@ -568,10 +568,10 @@ export type SessionCatalogNodeHostBindingsOptions = {
 export function createSessionCatalogNodeHostBindings(
   options: SessionCatalogNodeHostBindingsOptions,
 ): {
-  commands: OpenClawPluginNodeHostCommand[];
-  policies: OpenClawPluginNodeInvokePolicy[];
+  commands: CarapacePluginNodeHostCommand[];
+  policies: CarapacePluginNodeInvokePolicy[];
 } {
-  const terminal: OpenClawPluginNodeHostCommand = {
+  const terminal: CarapacePluginNodeHostCommand = {
     command: options.terminalCommand,
     cap: options.capability,
     dangerous: false,

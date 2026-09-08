@@ -15,9 +15,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let artifactDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -88,7 +88,7 @@ async function expectHoverTooltip(button: Locator, text: string): Promise<void> 
     .poll(() =>
       button.evaluate((element) => {
         const tooltip = element
-          .closest("openclaw-tooltip")
+          .closest("carapace-tooltip")
           ?.shadowRoot?.querySelector<
             HTMLElement & { anchor?: Element | null; popup?: { active?: boolean } }
           >("wa-tooltip");
@@ -114,7 +114,7 @@ async function expectHoverTooltip(button: Locator, text: string): Promise<void> 
     });
   const bounds = await button.evaluate((element) => {
     const body = element
-      .closest("openclaw-tooltip")
+      .closest("carapace-tooltip")
       ?.shadowRoot?.querySelector<HTMLElement>("wa-tooltip")
       ?.shadowRoot?.querySelector<HTMLElement>('[part="body"]');
     const slot = body?.querySelector<HTMLSlotElement>("slot");
@@ -206,20 +206,20 @@ describeControlUiE2e("Control UI chat message actions", () => {
             role: "user",
             content: "Review the workspace dependencies.",
             timestamp: Date.now() - 2_000,
-            __openclaw: { id: "review-request", seq: 1 },
+            __carapace: { id: "review-request", seq: 1 },
           },
           {
             role: "assistant",
             content: message,
             timestamp: Date.now() - 1_000,
-            __openclaw: { id: "review-result", seq: 2 },
+            __carapace: { id: "review-result", seq: 2 },
           },
         ],
       });
       await page.goto(controlUiSessionUrl(server.baseUrl, child.key));
       await gateway.waitForRequest("chat.startup");
       await page.getByText("View-only subagent", { exact: true }).waitFor();
-      const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+      const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
       const bubble = activePane.locator('.chat-bubble[data-entry-id="review-result"]');
       await bubble.waitFor({ state: "visible" });
       if (viewport.name === "mobile") {
@@ -286,18 +286,18 @@ describeControlUiE2e("Control UI chat message actions", () => {
         await page.route("https://files.example.test/**", (route) => route.abort());
         const sourceId = `attachment-only-${role}-${kind}`;
         const runId = "attachment-reply-run";
-        const fileName = kind === "image" ? "openclaw-banner.png" : "report.pdf";
+        const fileName = kind === "image" ? "carapace-banner.png" : "report.pdf";
         const imageUrl =
           kind === "image"
             ? `data:image/png;base64,${(
-                await readFile(path.join(process.cwd(), "docs/assets/openclaw-banner-dark.png"))
+                await readFile(path.join(process.cwd(), "docs/assets/carapace-banner-dark.png"))
               ).toString("base64")}`
             : "";
         const source = {
           role,
           content:
             kind === "image"
-              ? [{ type: "image", url: imageUrl, fileName, alt: "OpenClaw banner" }]
+              ? [{ type: "image", url: imageUrl, fileName, alt: "Carapace banner" }]
               : role === "user"
                 ? []
                 : [
@@ -313,7 +313,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
                   ],
           timestamp: Date.now() - 2_000,
           ...(role === "assistant" ? { phase: "final_answer", stopReason: "stop" } : {}),
-          __openclaw: {
+          __carapace: {
             id: sourceId,
             seq: 2,
             ...(role === "assistant" ? { runId } : {}),
@@ -339,7 +339,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
                     role: "user",
                     content: "Create the requested file.",
                     timestamp: Date.now() - 3_000,
-                    __openclaw: {
+                    __carapace: {
                       id: "attachment-request",
                       seq: 1,
                       idempotencyKey: `${runId}:user`,
@@ -431,31 +431,31 @@ describeControlUiE2e("Control UI chat message actions", () => {
           role: "assistant",
           content: "Earlier assistant reply.",
           timestamp: Date.now() - 4_000,
-          __openclaw: { id: "earlier-assistant", seq: 1 },
+          __carapace: { id: "earlier-assistant", seq: 1 },
         },
         {
           role: "user",
           content: "A question between replies.",
           timestamp: Date.now() - 3_000,
-          __openclaw: { id: "middle-user", seq: 2 },
+          __carapace: { id: "middle-user", seq: 2 },
         },
         {
           role: "assistant",
           content: "Latest assistant lead-in.",
           timestamp: Date.now() - 2_000,
-          __openclaw: { id: "latest-assistant", seq: 3 },
+          __carapace: { id: "latest-assistant", seq: 3 },
         },
         {
           role: "assistant",
           content: "Latest assistant reply.",
           timestamp: Date.now() - 1_500,
-          __openclaw: { id: "latest-assistant-final", seq: 4 },
+          __carapace: { id: "latest-assistant-final", seq: 4 },
         },
         {
           role: "user",
           content: "A newer user follow-up.",
           timestamp: Date.now() - 1_000,
-          __openclaw: { id: "latest-user", seq: 5 },
+          __carapace: { id: "latest-user", seq: 5 },
         },
       ],
     });
@@ -564,7 +564,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
           timestamp: Date.now() - 5 * 60_000,
           model: "openai/gpt-5.6-luna",
           usage: { input: 12_000, output: 300, cost: { total: 0.12 } },
-          __openclaw: { id: "tooltip-proof", seq: 1 },
+          __carapace: { id: "tooltip-proof", seq: 1 },
         },
       ],
     });
@@ -658,13 +658,13 @@ describeControlUiE2e("Control UI chat message actions", () => {
           role: "assistant",
           content: [{ type: "text", text: messageText }],
           timestamp: Date.now(),
-          __openclaw: { id: "assistant-action-proof", seq: 1 },
+          __carapace: { id: "assistant-action-proof", seq: 1 },
         },
         {
           role: "user",
           content: [{ type: "text", text: "Keep the next assistant message separate." }],
           timestamp: Date.now() + 1,
-          __openclaw: { id: "user-action-separator", seq: 2 },
+          __carapace: { id: "user-action-separator", seq: 2 },
         },
         {
           role: "assistant",
@@ -675,19 +675,19 @@ describeControlUiE2e("Control UI chat message actions", () => {
             },
           ],
           timestamp: Date.now() + 2,
-          __openclaw: { id: "assistant-thinking-proof", seq: 3 },
+          __carapace: { id: "assistant-thinking-proof", seq: 3 },
         },
         {
           role: "user",
           content: [{ type: "text", text: "Keep the truncated message separate." }],
           timestamp: Date.now() + 3,
-          __openclaw: { id: "user-truncated-separator", seq: 4 },
+          __carapace: { id: "user-truncated-separator", seq: 4 },
         },
         {
           role: "assistant",
           content: [{ type: "text", text: rawOversizedMarker }],
           timestamp: Date.now() + 4,
-          __openclaw: {
+          __carapace: {
             id: "assistant-full-message",
             seq: 5,
             truncated: true,
@@ -698,7 +698,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
           role: "user",
           content: [{ type: "text", text: rawOversizedMarker }],
           timestamp: Date.now() + 5,
-          __openclaw: { id: "oversized-user", seq: 6, truncated: true, reason: "oversized" },
+          __carapace: { id: "oversized-user", seq: 6, truncated: true, reason: "oversized" },
         },
         {
           role: "toolResult",
@@ -706,7 +706,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
           toolName: "read_file",
           content: rawOversizedMarker,
           timestamp: Date.now() + 6,
-          __openclaw: { id: "oversized-tool-1", seq: 7, truncated: true, reason: "oversized" },
+          __carapace: { id: "oversized-tool-1", seq: 7, truncated: true, reason: "oversized" },
         },
         {
           role: "toolResult",
@@ -714,7 +714,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
           toolName: "run_command",
           content: rawOversizedMarker,
           timestamp: Date.now() + 7,
-          __openclaw: { id: "oversized-tool-2", seq: 8, truncated: true, reason: "oversized" },
+          __carapace: { id: "oversized-tool-2", seq: 8, truncated: true, reason: "oversized" },
         },
       ],
     });
@@ -742,7 +742,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
         "Open split view",
       );
       await page.evaluate(() => {
-        const tooltip = document.createElement("openclaw-tooltip");
+        const tooltip = document.createElement("carapace-tooltip");
         tooltip.setAttribute("content", "First line\nSecond line");
         const trigger = document.createElement("button");
         trigger.textContent = "Multiline tooltip probe";
@@ -759,7 +759,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
       expect(
         await multilineTooltipButton.evaluate((element) => {
           const content = element
-            .closest("openclaw-tooltip")
+            .closest("carapace-tooltip")
             ?.shadowRoot?.querySelector<HTMLElement>(".tooltip-content");
           if (!content) {
             return 0;
@@ -770,7 +770,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
         }),
       ).toBe(2);
       await multilineTooltipButton.evaluate((element) =>
-        element.closest("openclaw-tooltip")?.remove(),
+        element.closest("carapace-tooltip")?.remove(),
       );
       await screenshot(page, "00-header-tooltips.png");
       const group = page.locator(".chat-group.assistant").filter({ hasText: messageText });

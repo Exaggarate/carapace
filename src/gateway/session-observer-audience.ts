@@ -1,6 +1,6 @@
 import { tryResolveLegacyCompatibilityAgentId } from "../config/legacy.default-agent-owner.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   SessionEventSubscriberRegistry,
   SessionMessageSubscriberRegistry,
@@ -12,7 +12,7 @@ export function createSessionObserverAudience(params: {
   subscribers: SessionMessageSubscriberRegistry;
   sessionEventSubscribers?: SessionEventSubscriberRegistry;
   isVisible: (connId: string) => boolean;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
 }) {
   const messageSubscriberKeys = (sessionKey: string, agentId: string): string[] => {
     const canonicalKeys = resolveSessionSubscriptionKeys(sessionKey, agentId);

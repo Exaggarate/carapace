@@ -2,7 +2,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 import { gunzipSync, gzipSync } from "node:zlib";
-import type { PluginBlobStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginBlobStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import type { WikiFreshnessLevel } from "./claim-health.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import type { WikiPageKind, WikiPageSummary, WikiRelationship } from "./markdown.js";
@@ -171,8 +171,8 @@ type MemoryWikiDashboardPendingState = Exclude<MemoryWikiDashboardState, { state
 const DASHBOARD_UNAVAILABLE_MESSAGES: Record<MemoryWikiDashboardPendingState["state"], string> = {
   rebuilding: "Memory Wiki dashboards are rebuilding. Retry shortly.",
   "compile-required":
-    'Memory Wiki dashboards need a compiled snapshot. Run "openclaw wiki compile", then reload.',
-  failed: 'Memory Wiki dashboard rebuild failed. Run "openclaw wiki compile", then reload.',
+    'Memory Wiki dashboards need a compiled snapshot. Run "carapace wiki compile", then reload.',
+  failed: 'Memory Wiki dashboard rebuild failed. Run "carapace wiki compile", then reload.',
 };
 
 export class MemoryWikiDashboardUnavailableError extends Error {

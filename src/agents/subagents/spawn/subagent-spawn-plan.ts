@@ -4,7 +4,7 @@
  * Resolves model, thinking, and timeout choices before the sessions_spawn executor launches work.
  */
 import { formatThinkingLevels } from "../../../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { FastMode } from "../../../shared/fast-mode.js";
 import { splitTrailingAuthProfile } from "../../model-ref-profile.js";
 import {
@@ -39,7 +39,7 @@ export function splitModelRef(ref?: string) {
 
 /** Resolves the effective subagent run timeout from per-call override or config default. */
 export function resolveConfiguredSubagentRunTimeoutSeconds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runTimeoutSeconds?: number;
 }) {
   const cfgSubagentTimeout =
@@ -54,7 +54,7 @@ export function resolveConfiguredSubagentRunTimeoutSeconds(params: {
 
 /** Resolves the subagent model plus thinking patch to apply to the spawned session. */
 export function resolveSubagentModelAndThinkingPlan(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targetAgentId: string;
   requesterAgentConfig?: unknown;
   targetAgentConfig?: unknown;

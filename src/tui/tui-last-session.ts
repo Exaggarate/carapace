@@ -1,6 +1,6 @@
 // Stores and resolves the last TUI session per workspace.
 import { createHash } from "node:crypto";
-import { normalizeLowercaseStringOrEmpty as normalizeMarker } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty as normalizeMarker } from "@carapace/normalization-core/string-coerce";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import {
@@ -8,19 +8,19 @@ import {
   updateConfigMachineState,
 } from "../state/config-machine-state-write.js";
 import { readConfigMachineStateWithMetadata } from "../state/config-machine-state.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import type { TuiSessionList } from "./tui-backend.js";
 import type { SessionScope } from "./tui-types.js";
 
-type TuiLastSessionDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
+type TuiLastSessionDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
 
 const TUI_LAST_SESSION_STATE_KEY_PREFIX = "tui.lastSession.";
 
 function stateDatabaseOptions(stateDir?: string) {
   return stateDir
-    ? { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } }
+    ? { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } }
     : { env: process.env };
 }
 
@@ -127,7 +127,7 @@ export function clearTuiLastSessionPointers(params: {
     return 0;
   }
   const options = stateDatabaseOptions(params.stateDir);
-  const matchingKeys = withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+  const matchingKeys = withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
     const rows = executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<TuiLastSessionDatabase>(db)
@@ -154,7 +154,7 @@ export function clearTuiLastSessionPointers(params: {
 function clearTuiPointerIfRetired(
   stateKey: string,
   retiredSessionKeys: ReadonlySet<string>,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): boolean {
   let cleared = false;
   updateConfigMachineState<string>(

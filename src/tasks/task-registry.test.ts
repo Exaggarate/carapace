@@ -1,5 +1,5 @@
 // Covers task registry lifecycle, delivery, notification, and query behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AcpSessionStoreEntry } from "../acp/runtime/session-meta.js";
 import { emitAcpLifecycleStart } from "../agents/command/attempt-execution.js";
@@ -41,8 +41,8 @@ import {
   tryBeginGatewaySuspendAdmission,
 } from "../process/gateway-work-admission.js";
 import type { ParsedAgentSessionKey } from "../routing/session-key.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -330,7 +330,7 @@ function createAcpSessionStoreEntry(params: {
   } as const;
   return {
     cfg: {} as never,
-    storePath: "/tmp/openclaw-test-sessions.json",
+    storePath: "/tmp/carapace-test-sessions.json",
     sessionKey: params.sessionKey,
     storeSessionKey: params.sessionKey,
     entry: {
@@ -422,8 +422,8 @@ async function withTaskRegistryTempDir<T>(
   run: (root: string) => Promise<T>,
   options?: { durableStore?: boolean },
 ): Promise<T> {
-  return await withTestDir({ prefix: "openclaw-task-registry-" }, async (root) => {
-    return await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => {
+  return await withTestDir({ prefix: "carapace-task-registry-" }, async (root) => {
+    return await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => {
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
       if (options?.durableStore !== true) {
@@ -617,10 +617,10 @@ describe("task-registry", () => {
         resetPluginStateStoreForTests();
         vi.setSystemTime(1_200);
         const countExpiredRows = () => {
-          const database = openOpenClawStateDatabase();
+          const database = openCarapaceStateDatabase();
           const row = executeSqliteQueryTakeFirstSync(
             database.db,
-            getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "plugin_state_entries">>(
+            getNodeSqliteKysely<Pick<CarapaceStateKyselyDatabase, "plugin_state_entries">>(
               database.db,
             )
               .selectFrom("plugin_state_entries")
@@ -1266,7 +1266,7 @@ describe("task-registry", () => {
 
   it("clears terminal errors when explicitly updated without an error", async () => {
     await withTaskRegistryTempDir(async (root) => {
-      process.env.OPENCLAW_STATE_DIR = root;
+      process.env.CARAPACE_STATE_DIR = root;
       resetTaskRegistryForTests({ persist: false });
 
       const task = createTaskFixture("cron", {
@@ -2253,7 +2253,7 @@ describe("task-registry", () => {
     },
   ])("delivers delegated ACP completion directly to a $name thread origin", async (origin) => {
     await withTaskRegistryTempDir(async (root) => {
-      process.env.OPENCLAW_STATE_DIR = root;
+      process.env.CARAPACE_STATE_DIR = root;
       resetTaskRegistryForTests({ persist: false });
       const runId = `run-${origin.channel}-thread-terminal`;
       hoisted.sendMessageMock.mockResolvedValue({
@@ -2312,7 +2312,7 @@ describe("task-registry", () => {
 
   it("keeps delegated ACP completion queued when the transport does not declare thread delivery", async () => {
     await withTaskRegistryTempDir(async (root) => {
-      process.env.OPENCLAW_STATE_DIR = root;
+      process.env.CARAPACE_STATE_DIR = root;
       resetTaskRegistryForTests({ persist: false });
       const runId = "run-guildchat-thread-terminal";
       // guildchat is deliverable but declares no thread capability, so a thread-shaped
@@ -2363,7 +2363,7 @@ describe("task-registry", () => {
 
   it("keeps delegated ACP completion queued when the requester origin has no thread", async () => {
     await withTaskRegistryTempDir(async (root) => {
-      process.env.OPENCLAW_STATE_DIR = root;
+      process.env.CARAPACE_STATE_DIR = root;
       resetTaskRegistryForTests({ persist: false });
       const runId = "run-root-discord-terminal";
       const requesterOrigin = {
@@ -3405,14 +3405,14 @@ describe("task-registry", () => {
     });
   });
 
-  it("uses normal reconcile grace for OpenClaw-owned subagent tasks", async () => {
+  it("uses normal reconcile grace for Carapace-owned subagent tasks", async () => {
     await withTaskRegistryTempDir(async () => {
       resetTaskRegistryForTests({ persist: false });
       const now = Date.now();
       const task = createTaskFixture("subagent", {
         childSessionKey: "agent:main:subagent:missing",
-        runId: "openclaw-subagent:missing",
-        task: "OpenClaw-owned child",
+        runId: "carapace-subagent:missing",
+        task: "Carapace-owned child",
         notifyPolicy: "silent",
         lastEventAt: now - 10 * 60_000,
       });
@@ -5621,7 +5621,7 @@ describe("task-registry", () => {
 
   it.each([
     {
-      name: "cancels harness-owned tasks without routing through OpenClaw subagent sessions",
+      name: "cancels harness-owned tasks without routing through Carapace subagent sessions",
       taskKind: "external-harness",
       sourceId: "harness:child",
       task: "Harness-owned child",
@@ -5630,8 +5630,8 @@ describe("task-registry", () => {
     {
       name: "does not cancel childless subagent tasks without a harness task kind",
       taskKind: undefined,
-      sourceId: "openclaw-subagent:child",
-      task: "Childless OpenClaw row",
+      sourceId: "carapace-subagent:child",
+      task: "Childless Carapace row",
       cancellable: false,
     },
   ])("$name", async ({ taskKind, sourceId, task: taskName, cancellable }) => {

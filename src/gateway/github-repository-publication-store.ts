@@ -4,13 +4,13 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { ensureRepositoryGitHubPublicationSchema } from "../state/openclaw-state-db-schema-additive.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import { ensureRepositoryGitHubPublicationSchema } from "../state/carapace-state-db-schema-additive.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { createGitHubPublicationExecutionEffects } from "./github-publication-execution-effects.js";
 
 export type RepositoryGitHubPublicationRow = DB["github_repository_publication_requests"];
@@ -82,7 +82,7 @@ export function listRepositoryGitHubPublications(
     unreported?: boolean;
   } = {},
 ): RepositoryGitHubPublicationRow[] {
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   if (!tableExists(db, table)) {
     return [];
   }
@@ -148,7 +148,7 @@ export function readRepositoryGitHubPublicationBranch(input: {
 export function readRepositoryGitHubPublication(
   requestId: string,
 ): RepositoryGitHubPublicationRow | undefined {
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   if (!tableExists(db, table)) {
     return undefined;
   }
@@ -173,7 +173,7 @@ export function insertRepositoryGitHubPublication(
   row: RepositoryGitHubPublicationRow,
   assertCurrent: () => void,
 ) {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       assertCurrent();
       ensureRepositoryGitHubPublicationSchema(db);
@@ -236,7 +236,7 @@ export function bindRepositoryGitHubPublicationCheckpoint(
   checkpoint: Pick<RepositoryGitHubPublicationRow, (typeof checkpointColumns)[number]>,
   assertCurrent: () => void,
 ) {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       assertCurrent();
       const current = readRepositoryGitHubPublication(row.request_id);
@@ -280,7 +280,7 @@ export function failRepositoryGitHubPublicationPreparation(
   nextAction: string,
   assertCurrent: () => void,
 ): RepositoryGitHubPublicationRow {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       assertCurrent();
       const updated = executeSqliteQueryTakeFirstSync(
@@ -316,7 +316,7 @@ export function claimRepositoryGitHubPublication(
   assertCurrent: () => void,
 ) {
   const executionId = randomUUID();
-  const claimed = runOpenClawStateWriteTransaction(
+  const claimed = runCarapaceStateWriteTransaction(
     ({ db }) => {
       assertCurrent();
       if (!row.checkpoint_ref || !row.checkpoint_digest || !row.workspace_tree) {
@@ -360,7 +360,7 @@ export function claimRepositoryGitHubPublication(
     );
   };
   const write = (values: Partial<RepositoryGitHubPublicationRow>, requireAction: boolean) =>
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         if (requireAction) {
           assertCurrent();
@@ -416,11 +416,11 @@ export function claimRepositoryGitHubPublication(
 }
 
 export function markRepositoryGitHubPublicationReported(requestId: string): void {
-  const database = openOpenClawStateDatabase().db;
+  const database = openCarapaceStateDatabase().db;
   if (!tableExists(database, table)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -440,7 +440,7 @@ export function failStaleRepositoryGitHubPublication(
   row: RepositoryGitHubPublicationRow,
   sessionIsCurrent: () => boolean,
 ): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const current = readRepositoryGitHubPublication(row.request_id);
       if (
@@ -479,7 +479,7 @@ export function deferRepositoryGitHubPublicationClaims(requestIds: readonly stri
   if (requestIds.length === 0) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,

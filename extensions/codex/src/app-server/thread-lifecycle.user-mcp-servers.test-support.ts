@@ -60,7 +60,7 @@ export async function writePolicyProbeServer(dir: string): Promise<string> {
     filePath,
     `import readline from "node:readline";
 import { appendFileSync } from "node:fs";
-if (process.env.OPENCLAW_POLICY_PROBE_STARTED) appendFileSync(process.env.OPENCLAW_POLICY_PROBE_STARTED, "started\\n");
+if (process.env.CARAPACE_POLICY_PROBE_STARTED) appendFileSync(process.env.CARAPACE_POLICY_PROBE_STARTED, "started\\n");
 const lines = readline.createInterface({ input: process.stdin });
 const send = (id, result) => process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id, result }) + "\\n");
 lines.on("line", (line) => {

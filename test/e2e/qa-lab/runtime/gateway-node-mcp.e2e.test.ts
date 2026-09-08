@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import type { NodePluginToolDescriptor } from "../../../../packages/gateway-protocol/src/schema/nodes.js";
 import { createSessionMcpRuntime } from "../../../../src/agents/agent-bundle-mcp-runtime.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 import {
@@ -45,11 +45,11 @@ describe("Gateway and node-host MCP live process parity", () => {
     { timeout: TEST_TIMEOUT_MS },
     async () => {
       const repoRoot = process.cwd();
-      const taskRoot = tempDirs.make("openclaw-gateway-node-mcp-");
+      const taskRoot = tempDirs.make("carapace-gateway-node-mcp-");
       const taskPath = (...parts: string[]) => path.join(taskRoot, ...parts);
       const nodeHome = taskPath("node", "home");
       const nodeStateDir = taskPath("node", "state");
-      const nodeConfigPath = taskPath("node", "openclaw.json");
+      const nodeConfigPath = taskPath("node", "carapace.json");
       const nodeTempDir = taskPath("node", "tmp");
       const sessionWorkspace = taskPath("session", "workspace");
       const sessionHome = taskPath("session", "home");
@@ -103,7 +103,7 @@ describe("Gateway and node-host MCP live process parity", () => {
           repoRoot,
         });
 
-        const nodeConfig: OpenClawConfig = {
+        const nodeConfig: CarapaceConfig = {
           gateway: { mode: "local" },
           plugins: { enabled: false },
           nodeHost: { mcp: { servers: nodeMcpServers }, skills: { enabled: false } },
@@ -122,9 +122,9 @@ describe("Gateway and node-host MCP live process parity", () => {
           transportBaseUrl: "http://127.0.0.1",
           controlUiEnabled: false,
           runtimeEnvPatch: {
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "1",
           },
           mutateConfig: (cfg) => {
             return {
@@ -161,13 +161,13 @@ describe("Gateway and node-host MCP live process parity", () => {
           home: nodeHome,
           tempDir: nodeTempDir,
           extra: {
-            OPENCLAW_HOME: nodeHome,
-            OPENCLAW_STATE_DIR: nodeStateDir,
-            OPENCLAW_CONFIG_PATH: nodeConfigPath,
-            OPENCLAW_GATEWAY_TOKEN: gateway.token,
-            OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1",
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
+            CARAPACE_HOME: nodeHome,
+            CARAPACE_STATE_DIR: nodeStateDir,
+            CARAPACE_CONFIG_PATH: nodeConfigPath,
+            CARAPACE_GATEWAY_TOKEN: gateway.token,
+            CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
           },
         });
 

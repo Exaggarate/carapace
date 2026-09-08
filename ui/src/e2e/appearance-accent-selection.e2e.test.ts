@@ -96,7 +96,7 @@ suite.define(() => {
           .poll(() => defaultSwatch.locator(".settings-accent-swatch__reset").count())
           .toBe(0);
 
-        if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+        if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
           const artifactDir = createControlUiE2eArtifactDir("appearance-accent-selection");
           await page.screenshot({
             animations: "disabled",
@@ -121,17 +121,17 @@ suite.define(() => {
         await expect
           .poll(() => accentSection.locator("#settings-accent-status").textContent())
           .toContain("Using Coral");
-        const gatewayScope = `${suite.server.baseUrl.replace(/^http/u, "ws")}__openclaw_mock_gateway__`;
+        const gatewayScope = `${suite.server.baseUrl.replace(/^http/u, "ws")}__carapace_mock_gateway__`;
         await expect
           .poll(() =>
             page.evaluate(
               (key) => JSON.parse(localStorage.getItem(key) ?? "{}"),
-              `openclaw.control.settings.v1:${gatewayScope}`,
+              `carapace.control.settings.v1:${gatewayScope}`,
             ),
           )
           .toMatchObject({ accent: "#ff8066" });
 
-        if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+        if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
           const artifactDir = createControlUiE2eArtifactDir("appearance-accent-override");
           await page.screenshot({
             animations: "disabled",
@@ -149,7 +149,7 @@ suite.define(() => {
           .poll(() =>
             page.evaluate(
               (key) => JSON.parse(localStorage.getItem(key) ?? "{}"),
-              `openclaw.control.settings.v1:${gatewayScope}`,
+              `carapace.control.settings.v1:${gatewayScope}`,
             ),
           )
           .not.toHaveProperty("accent");

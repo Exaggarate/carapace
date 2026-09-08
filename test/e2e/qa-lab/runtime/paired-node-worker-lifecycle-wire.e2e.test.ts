@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import {
@@ -10,8 +10,8 @@ import {
   NODE_WORKER_ENVIRONMENT_STOP_COMMAND,
   NODE_WORKER_WORKSPACE_RETAIN_COMMAND,
 } from "../../../../src/infra/node-commands.js";
-import { withOpenClawStateDatabaseReadOnly } from "../../../../src/state/openclaw-state-db-readonly.js";
-import type { DB as StateDatabase } from "../../../../src/state/openclaw-state-db.generated.js";
+import { withCarapaceStateDatabaseReadOnly } from "../../../../src/state/carapace-state-db-readonly.js";
+import type { DB as StateDatabase } from "../../../../src/state/carapace-state-db.generated.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 import { PROOF_TIMEOUT_MS } from "./cloud-worker-midturn-loss-fixture.js";
@@ -186,7 +186,7 @@ describe("paired node worker lifecycle wire", () => {
     "keeps local control usable across bundle loss, disconnect, capacity, and role removal",
     { timeout: TEST_TIMEOUT_MS },
     async () => {
-      const root = tempDirs.make("openclaw-paired-node-worker-lifecycle-");
+      const root = tempDirs.make("carapace-paired-node-worker-lifecycle-");
       const provider = await startPairedNodeWorkerLifecycleProvider([HOLD_A, HOLD_B]);
       const published = await createPublishedWireWorkspace(root);
       const gatewayOwner = createQaGatewayChild();
@@ -410,7 +410,7 @@ describe("paired node worker lifecycle wire", () => {
           attachedSessionIds,
           tunnelStatus: "stopped",
         });
-        withOpenClawStateDatabaseReadOnly(
+        withCarapaceStateDatabaseReadOnly(
           ({ db }) => {
             const query = getNodeSqliteKysely<StateDatabase>(db);
             expect(

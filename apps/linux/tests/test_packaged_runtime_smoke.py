@@ -86,7 +86,7 @@ class PackagedRuntimeAbiTest(unittest.TestCase):
         host_machine="x86_64",
     ):
         appimage = self.write_elf(
-            self.root / "OpenClaw.AppImage",
+            self.root / "Carapace.AppImage",
             appimage_output,
             machine=machine,
         )
@@ -228,7 +228,7 @@ class PackagedRuntimeAbiTest(unittest.TestCase):
                     "GCC_99.0.0",
                 ),
             ),
-            "usr/bin/openclaw-desktop",
+            "usr/bin/carapace-desktop",
             "x86_64",
         )
 
@@ -244,7 +244,7 @@ class PackagedRuntimeAbiTest(unittest.TestCase):
 
     def test_report_includes_outer_runtime_and_sorts_relative_paths(self):
         appimage = self.write_elf(
-            self.root / "OpenClaw.AppImage",
+            self.root / "Carapace.AppImage",
             version_output(needs=("GLIBC_2.34",)),
         )
         self.write_elf(
@@ -265,7 +265,7 @@ class PackagedRuntimeAbiTest(unittest.TestCase):
         self.assertEqual(
             [(entry["path"], entry["source"]) for entry in report["files"]],
             [
-                ("OpenClaw.AppImage", "appimage-runtime"),
+                ("Carapace.AppImage", "appimage-runtime"),
                 ("usr/bin/a", "appdir"),
                 ("usr/lib/z.so", "appdir"),
             ],
@@ -318,7 +318,7 @@ class PackagedRuntimeAbiTest(unittest.TestCase):
 
     def test_readelf_errors_fail_closed(self):
         appimage = self.write_elf(
-            self.root / "OpenClaw.AppImage",
+            self.root / "Carapace.AppImage",
             version_output(),
         )
         Path(f"{appimage}.readelf-error").touch()

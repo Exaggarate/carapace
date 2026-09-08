@@ -1,6 +1,6 @@
 // OAuth TLS preflight doctor tests cover certificate warnings and repair notes.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 
 const note = vi.hoisted(() => vi.fn());
 
@@ -10,7 +10,7 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({
 
 import { noteOpenAIOAuthTlsPrerequisites } from "../plugins/provider-openai-chatgpt-oauth-tls.js";
 
-function buildOpenAICodexOAuthConfig(): OpenClawConfig {
+function buildOpenAICodexOAuthConfig(): CarapaceConfig {
   return {
     auth: {
       profiles: {
@@ -24,7 +24,7 @@ function buildOpenAICodexOAuthConfig(): OpenClawConfig {
   };
 }
 
-function buildOpenAIOAuthConfig(): OpenClawConfig {
+function buildOpenAIOAuthConfig(): CarapaceConfig {
   return {
     auth: {
       profiles: {

@@ -7,7 +7,7 @@ import { createDeferred } from "./promise.js";
 afterEach(() => {
   vi.doUnmock("vitest");
   vi.doUnmock("./gateway-e2e-harness.js");
-  vi.doUnmock("./openclaw-test-instance.js");
+  vi.doUnmock("./carapace-test-instance.js");
   vi.resetModules();
 });
 
@@ -106,8 +106,8 @@ describe("multi-Gateway suite acquisition ownership", () => {
           stopAndWait: stopClient,
         }),
       }));
-      vi.doMock("./openclaw-test-instance.js", () => ({
-        createOpenClawTestInstance: async () => instances[2],
+      vi.doMock("./carapace-test-instance.js", () => ({
+        createCarapaceTestInstance: async () => instances[2],
       }));
       let passive: Promise<unknown> | undefined;
       let cleanup: Promise<unknown> | undefined;
@@ -236,8 +236,8 @@ describe("multi-Gateway suite acquisition ownership", () => {
         waitForNodeStatus: vi.fn(),
         connectGatewayStatusClient: vi.fn(),
       }));
-      vi.doMock("./openclaw-test-instance.js", () => ({
-        createOpenClawTestInstance: () => {
+      vi.doMock("./carapace-test-instance.js", () => ({
+        createCarapaceTestInstance: () => {
           throw new Error("unselected suite must not start a Gateway");
         },
       }));

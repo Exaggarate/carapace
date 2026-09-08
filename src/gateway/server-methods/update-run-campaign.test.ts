@@ -1,9 +1,9 @@
 // update.run campaign tests cover failure release and concurrent campaign ownership.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { UpdateScheduleState } from "../../../packages/gateway-protocol/src/index.js";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RespawnSupervisor } from "../../infra/supervisor-markers.js";
 import type { UpdateCampaignController } from "../../infra/update-campaign.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
@@ -12,7 +12,7 @@ import { createTempHomeEnv, type TempHomeEnv } from "../../test-utils/temp-home.
 
 let ledgerHome: TempHomeEnv | undefined;
 beforeEach(async () => {
-  ledgerHome = await createTempHomeEnv("openclaw-update-campaign-rpc-");
+  ledgerHome = await createTempHomeEnv("carapace-update-campaign-rpc-");
 });
 afterEach(async () => {
   await ledgerHome?.restore();
@@ -56,10 +56,10 @@ const startManagedServiceUpdateHandoffMock = vi.fn<
 >(async () => ({
   status: "started" as const,
   pid: 12345,
-  command: "openclaw update --yes --timeout 1800",
-  logPath: "/tmp/openclaw-update-run-handoff/handoff.log",
+  command: "carapace update --yes --timeout 1800",
+  logPath: "/tmp/carapace-update-run-handoff/handoff.log",
   handoffId: "handoff-1",
-  installRoot: "/tmp/openclaw",
+  installRoot: "/tmp/carapace",
 }));
 const transferManagedServiceUpdateHandoffMock = vi.fn<
   typeof import("../../infra/update-managed-service-handoff.js").transferManagedServiceUpdateHandoff
@@ -133,7 +133,7 @@ vi.mock("../../infra/update-channels.js", async () => {
 
 vi.mock("../../infra/update-managed-service-handoff.js", () => ({
   buildManagedServiceHandoffUnavailableMessage: () => "handoff unavailable",
-  formatManagedServiceUpdateCommand: () => "openclaw update --yes",
+  formatManagedServiceUpdateCommand: () => "carapace update --yes",
   startManagedServiceUpdateHandoff: startManagedServiceUpdateHandoffMock,
   transferManagedServiceUpdateHandoff: transferManagedServiceUpdateHandoffMock,
   cancelManagedServiceUpdateHandoff: cancelManagedServiceUpdateHandoffMock,
@@ -214,13 +214,13 @@ beforeEach(() => {
   resolveUpdateInstallSurfaceMock.mockResolvedValue({
     kind: "git",
     mode: "git",
-    root: "/tmp/openclaw",
-    packageRoot: "/tmp/openclaw",
+    root: "/tmp/carapace",
+    packageRoot: "/tmp/carapace",
   });
   initializeGatewayUpdateStatusMock.mockReset();
   initializeGatewayUpdateStatusMock.mockResolvedValue({
-    root: "/tmp/openclaw",
-    status: { root: "/tmp/openclaw", installKind: "git", packageManager: "pnpm" },
+    root: "/tmp/carapace",
+    status: { root: "/tmp/carapace", installKind: "git", packageManager: "pnpm" },
     installReceipt: null,
   });
   detectRespawnSupervisorMock.mockReset();
@@ -267,7 +267,7 @@ function setDevCampaignSchedule(upstreamSha = "frozen-upstream-sha"): void {
 }
 
 function mockGitInstallStatus(upstreamSha: string, upstreamRef = "origin/main"): void {
-  const root = "/tmp/openclaw";
+  const root = "/tmp/carapace";
   initializeGatewayUpdateStatusMock.mockResolvedValueOnce({
     root,
     status: {
@@ -292,7 +292,7 @@ function mockGitInstallStatus(upstreamSha: string, upstreamRef = "origin/main"):
 }
 
 function mockPackageInstallSurface(kind: "global" | "package-root"): void {
-  const root = "/tmp/openclaw";
+  const root = "/tmp/carapace";
   initializeGatewayUpdateStatusMock.mockResolvedValueOnce({
     root,
     status: { root, installKind: "package", packageManager: "npm" },
@@ -322,7 +322,7 @@ async function invokeUpdateRun(
       connect: { client: { id: "control-ui" }, device: { id: "device-1" } },
     },
     context: {
-      getRuntimeConfig: () => ({ update: {} }) as OpenClawConfig,
+      getRuntimeConfig: () => ({ update: {} }) as CarapaceConfig,
       logGateway: { info: logGatewayInfoMock },
     },
   } as never);
@@ -365,7 +365,7 @@ describe("update.run campaign ownership", () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
     mockPackageInstallSurface("global");
 
-    await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, invokeUpdateRun);
+    await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, invokeUpdateRun);
 
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({ channel: "beta", tag: "2.0.0" }),
@@ -377,7 +377,7 @@ describe("update.run campaign ownership", () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
     mockPackageInstallSurface("global");
 
-    await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, invokeUpdateRun);
+    await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, invokeUpdateRun);
 
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({ channel: "extended-stable" }),
@@ -400,28 +400,28 @@ describe("update.run campaign ownership", () => {
   it("uses the prepared Git checkout instead of process artifacts", async () => {
     adoptCampaignMock.mockReturnValueOnce({ status: "absent" });
     initializeGatewayUpdateStatusMock.mockResolvedValueOnce({
-      root: "/tmp/openclaw-source",
+      root: "/tmp/carapace-source",
       status: {
-        root: "/tmp/openclaw-source",
+        root: "/tmp/carapace-source",
         installKind: "git",
         packageManager: "pnpm",
       },
       installReceipt: null,
     });
     resolveUpdateInstallSurfaceMock.mockImplementationOnce(async ({ root, installKind }) =>
-      root === "/tmp/openclaw-source" && installKind === "git"
+      root === "/tmp/carapace-source" && installKind === "git"
         ? { kind: "git", mode: "git", root, packageRoot: root }
         : {
             kind: "global",
             mode: "npm",
-            root: "/tmp/openclaw-launcher-package",
-            packageRoot: "/tmp/openclaw-launcher-package",
+            root: "/tmp/carapace-launcher-package",
+            packageRoot: "/tmp/carapace-launcher-package",
           },
     );
     runGatewayUpdateMock.mockResolvedValueOnce({
       status: "ok",
       mode: "git",
-      root: "/tmp/openclaw-source",
+      root: "/tmp/carapace-source",
       steps: [],
       durationMs: 100,
     });
@@ -429,7 +429,7 @@ describe("update.run campaign ownership", () => {
     await invokeUpdateRun();
 
     expect(runGatewayUpdateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ cwd: "/tmp/openclaw-source" }),
+      expect.objectContaining({ cwd: "/tmp/carapace-source" }),
     );
     expect(startManagedServiceUpdateHandoffMock).not.toHaveBeenCalled();
   });
@@ -469,7 +469,7 @@ describe("update.run campaign ownership", () => {
     setDevCampaignSchedule();
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
 
-    await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, invokeUpdateRun);
+    await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, invokeUpdateRun);
 
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -576,7 +576,7 @@ describe("update.run campaign ownership", () => {
       const response = await captureUpdateRun({ target: requestTarget });
 
       expect(runGatewayUpdatePreflightMock).toHaveBeenCalledWith(
-        "/tmp/openclaw",
+        "/tmp/carapace",
         undefined,
         trackedTarget,
       );
@@ -672,7 +672,7 @@ describe("update.run campaign ownership", () => {
     adoptCampaignMock.mockReturnValueOnce({ status: "absent" });
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
 
-    await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, invokeUpdateRun);
+    await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, invokeUpdateRun);
 
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.not.objectContaining({ env: expect.anything() }),
@@ -767,13 +767,13 @@ describe("update.run campaign ownership", () => {
     detectRespawnSupervisorMock.mockReturnValueOnce("launchd");
     mockPackageInstallSurface("global");
 
-    await withEnvAsync({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" }, invokeUpdateRun);
+    await withEnvAsync({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" }, invokeUpdateRun);
 
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledOnce();
     expect(transferManagedServiceUpdateHandoffMock).toHaveBeenCalledExactlyOnceWith({
       kind: "managed-update-handoff",
       handoffId: "handoff-1",
-      installRoot: "/tmp/openclaw",
+      installRoot: "/tmp/carapace",
     });
     expect(cancelManagedServiceUpdateHandoffMock).not.toHaveBeenCalled();
     expect(scheduleGatewaySigusr1RestartMock).not.toHaveBeenCalled();

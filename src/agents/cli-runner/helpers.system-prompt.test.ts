@@ -16,7 +16,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("uses config-backed sub-agent delegation mode", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       config: {
         agents: {
           defaults: {
@@ -37,20 +37,20 @@ describe("buildCliAgentSystemPrompt", () => {
     expect(prompt).not.toContain("Do not poll `subagents list` / `sessions_list` in a loop");
   });
 
-  it("uses CLI backend tool fallback instead of OpenClaw tool assumptions", () => {
+  it("uses CLI backend tool fallback instead of Carapace tool assumptions", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
-      docsPath: "/tmp/openclaw/docs",
+      workspaceDir: "/tmp/carapace",
+      docsPath: "/tmp/carapace/docs",
       tools: [],
       modelDisplay: "test/model",
     });
 
-    expect(prompt).not.toContain("OpenClaw lists the standard tools above");
+    expect(prompt).not.toContain("Carapace lists the standard tools above");
     expect(prompt).not.toContain("This runtime enables:");
     expect(prompt).not.toContain("For long waits, avoid rapid poll loops");
     expect(prompt).not.toContain("Larger work: use `sessions_spawn`");
     expect(prompt).not.toContain("Do not poll `subagents list` / `sessions_list` in a loop");
-    expect(prompt).toContain("No OpenClaw tool list is injected");
+    expect(prompt).toContain("No Carapace tool list is injected");
     expect(prompt).toContain("docs first via `read`");
     expect(prompt).not.toContain("exec approval-pending");
     expect(prompt).not.toContain("Config read: `gateway`");
@@ -59,7 +59,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("describes bundled exec as synchronous node execution", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [{ name: "exec" } as never],
       modelDisplay: "test/model",
     });
@@ -70,7 +70,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("distinguishes the CLI working directory from the agent workspace", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw-agent",
+      workspaceDir: "/tmp/carapace-agent",
       cwd: "/tmp/task-repo",
       tools: [],
       modelDisplay: "test/model",
@@ -78,20 +78,20 @@ describe("buildCliAgentSystemPrompt", () => {
 
     expect(prompt).toContain("## Directory Roles");
     expect(prompt).toContain("Working directory: /tmp/task-repo");
-    expect(prompt).toContain("Agent workspace: /tmp/openclaw-agent");
+    expect(prompt).toContain("Agent workspace: /tmp/carapace-agent");
     expect(prompt).not.toContain("## Workspace\n");
-    expect(prompt).not.toContain("Working directory: /tmp/openclaw-agent");
+    expect(prompt).not.toContain("Working directory: /tmp/carapace-agent");
   });
 
   it("renders the Bootstrap Pending gate for full bootstrap mode", () => {
     // CLI-backend runs must gate the first reply on a pending BOOTSTRAP.md the
     // same way the embedded runner does, not just inject the file as context.
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [],
       contextFiles: [
         {
-          path: "/tmp/openclaw/BOOTSTRAP.md",
+          path: "/tmp/carapace/BOOTSTRAP.md",
           content: "Figure out who you are, then delete this file.",
         },
       ],
@@ -107,7 +107,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("renders limited bootstrap guidance when the run cannot complete bootstrap", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [],
       bootstrapMode: "limited",
       modelDisplay: "test/model",
@@ -119,7 +119,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("omits the bootstrap gate when bootstrap mode is not provided", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [],
       modelDisplay: "test/model",
     });
@@ -129,7 +129,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("includes CLI-scoped plugin command guidance", () => {
     // Plugin command guidance is surface-filtered; CLI prompts must not leak
-    // OpenClaw-main command text into external CLI backends.
+    // Carapace-main command text into external CLI backends.
     registerPluginCommand("demo-plugin", {
       name: "demo_cli",
       description: "Demo CLI command",
@@ -139,26 +139,26 @@ describe("buildCliAgentSystemPrompt", () => {
           surfaces: ["cli_backend"],
         },
         {
-          text: "OpenClaw-only command guidance.",
-          surfaces: ["openclaw_main"],
+          text: "Carapace-only command guidance.",
+          surfaces: ["carapace_main"],
         },
       ],
       handler: async () => ({ text: "ok" }),
     });
 
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [{ name: "exec" } as never],
       modelDisplay: "test/model",
     });
 
     expect(prompt).toContain("CLI-only command guidance.");
-    expect(prompt).not.toContain("OpenClaw-only command guidance.");
+    expect(prompt).not.toContain("Carapace-only command guidance.");
   });
 
   it("includes session identity in runtime when provided", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       config: {
         agents: {
           entries: {
@@ -181,7 +181,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("includes Telegram channel context for CLI final replies without core rich guidance", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [],
       modelDisplay: "anthropic/claude-opus-4-8",
       runtimeChannel: "telegram",
@@ -196,7 +196,7 @@ describe("buildCliAgentSystemPrompt", () => {
 
   it("requires an explicit message target when the CLI turn policy requires one", () => {
     const prompt = buildCliAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       tools: [{ name: "message" } as never],
       modelDisplay: "test/model",
       sourceReplyDeliveryMode: "message_tool_only",

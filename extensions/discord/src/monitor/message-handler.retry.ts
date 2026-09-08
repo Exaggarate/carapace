@@ -1,4 +1,4 @@
-import type { SourceReplyDeliveryMode } from "openclaw/plugin-sdk/reply-runtime";
+import type { SourceReplyDeliveryMode } from "carapace/plugin-sdk/reply-runtime";
 
 const REPLY_SESSION_INIT_CONFLICT_MESSAGE_RE = /^reply session initialization conflicted for \S+$/u;
 const DISCORD_SESSION_CONFLICT_FAILURE_TEXT =

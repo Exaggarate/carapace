@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { isNixMode } from "../config/paths.js";
-import { clearGatewayAgentCliShim } from "../infra/openclaw-cli-shim.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { clearGatewayAgentCliShim } from "../infra/carapace-cli-shim.js";
+import { ensureCarapaceCliOnPath } from "../infra/path-env.js";
 import { createSubsystemLogger, runtimeForLogger } from "../logging/subsystem.js";
 import { captureRemoteModelCatalogStartupSnapshot } from "../model-catalog/remote-overlay.js";
 import { retainGatewayPluginMetadata } from "../plugins/plugin-metadata-lifecycle.js";
@@ -108,12 +108,12 @@ function formatRuntimeGatewayAuthTokenWarning(): string {
   const base =
     "Gateway auth token was missing. Generated a runtime token for this startup without changing config; restart will generate a different token.";
   if (!isNixMode) {
-    return `${base} Persist one with \`openclaw config set gateway.auth.mode token\` and \`openclaw config set gateway.auth.token <token>\`.`;
+    return `${base} Persist one with \`carapace config set gateway.auth.mode token\` and \`carapace config set gateway.auth.token <token>\`.`;
   }
   return [
     base,
-    "In Nix mode, set gateway.auth.token in your Nix-managed OpenClaw config and rebuild.",
-    "For the first-party Nix flow, see https://github.com/openclaw/nix-openclaw#quick-start and https://docs.openclaw.ai/install/nix.",
+    "In Nix mode, set gateway.auth.token in your Nix-managed Carapace config and rebuild.",
+    "For the first-party Nix flow, see https://github.com/Exaggarate/carapace/nix-carapace#quick-start and https://github.com/Exaggarate/carapace.",
   ].join(" ");
 }
 
@@ -139,7 +139,7 @@ export async function createGatewayKernel(
   const bootId = suppliedBootId ?? randomUUID();
   // Capture before bootstrap yields or creates workers; concurrent downloads need a restart.
   captureRemoteModelCatalogStartupSnapshot();
-  ensureOpenClawCliOnPath();
+  ensureCarapaceCliOnPath();
   const releasePluginMetadata = retainGatewayPluginMetadata();
   let lifecycleRuntime: Awaited<ReturnType<typeof prepareGatewayLifecycle>> | undefined;
   let kernelState: Awaited<ReturnType<typeof prepareGatewayKernelState>> | undefined;

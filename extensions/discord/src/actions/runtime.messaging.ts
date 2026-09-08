@@ -1,7 +1,7 @@
 // Discord plugin module implements runtime.messaging behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import type { ActionGate } from "openclaw/plugin-sdk/channel-actions";
-import type { DiscordActionConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import type { ActionGate } from "carapace/plugin-sdk/channel-actions";
+import type { DiscordActionConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { handleDiscordMessageManagementAction } from "./runtime.messaging.messages.js";
 import { handleDiscordReactionMessagingAction } from "./runtime.messaging.reactions.js";
 import { handleDiscordMessageSendAction } from "./runtime.messaging.send.js";
@@ -13,7 +13,7 @@ export async function handleDiscordMessagingAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: ActionGate<DiscordActionConfig>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options?: DiscordMessagingActionOptions,
 ): Promise<AgentToolResult<unknown>> {
   if (!cfg) {

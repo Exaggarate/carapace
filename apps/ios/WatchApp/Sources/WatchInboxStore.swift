@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import OpenClawKit
+import CarapaceKit
 import UserNotifications
 import WatchKit
 
@@ -83,7 +83,7 @@ import WatchKit
         var promptId: String?
         var sessionKey: String?
         var gatewayStableID: String?
-        var promptChatDeliveryContext: OpenClawWatchChatDeliveryContext?
+        var promptChatDeliveryContext: CarapaceWatchChatDeliveryContext?
         var kind: String?
         var details: String?
         var expiresAtMs: Int64?
@@ -116,12 +116,12 @@ import WatchKit
     private static let maxDeferredGatewayPayloads = 32
     private static let maxExecApprovalTerminalTombstones = 128
     private static let execApprovalTerminalTombstoneLifetime: TimeInterval = 24 * 60 * 60
-    private static let defaultTitle = "OpenClaw"
+    private static let defaultTitle = "Carapace"
     private static let defaultBody = "Waiting for messages from your iPhone."
     private let defaults: UserDefaults
-    let chatDeliveryJournal: OpenClawWatchChatDeliveryStore
-    var chatDeliveryEntries: [OpenClawWatchChatDeliveryStore.Entry] = []
-    var promptChatDeliveryEntries: [OpenClawWatchChatDeliveryStore.Entry] = []
+    let chatDeliveryJournal: CarapaceWatchChatDeliveryStore
+    var chatDeliveryEntries: [CarapaceWatchChatDeliveryStore.Entry] = []
+    var promptChatDeliveryEntries: [CarapaceWatchChatDeliveryStore.Entry] = []
     var chatDeliveryReloadID: UUID?
     var chatDeliveryMaintenanceID: UUID?
 
@@ -132,7 +132,7 @@ import WatchKit
     var promptId: String?
     var sessionKey: String?
     var gatewayStableID: String?
-    var promptChatDeliveryContext: OpenClawWatchChatDeliveryContext?
+    var promptChatDeliveryContext: CarapaceWatchChatDeliveryContext?
     var kind: String?
     var details: String?
     var expiresAtMs: Int64?
@@ -197,7 +197,7 @@ import WatchKit
     init(
         defaults: UserDefaults = .standard,
         requestNotificationAuthorization: Bool = true,
-        chatDeliveryJournal: OpenClawWatchChatDeliveryStore = OpenClawWatchChatDeliveryStore())
+        chatDeliveryJournal: CarapaceWatchChatDeliveryStore = CarapaceWatchChatDeliveryStore())
     {
         self.defaults = defaults
         self.chatDeliveryJournal = chatDeliveryJournal
@@ -343,7 +343,7 @@ import WatchKit
             sentAtMs: message.sentAtMs)
         guard deliveryKey != self.lastDeliveryKey else { return }
 
-        let normalizedTitle = message.title.isEmpty ? "OpenClaw" : message.title
+        let normalizedTitle = message.title.isEmpty ? "Carapace" : message.title
         self.title = normalizedTitle
         self.body = message.body
         self.transport = transport
@@ -1576,8 +1576,8 @@ extension WatchInboxStore {
     }
 
     func chatDeliveryPresentationEntry(
-        _ entries: [OpenClawWatchChatDeliveryStore.Entry], kind: OpenClawWatchChatDeliveryKind)
-        -> OpenClawWatchChatDeliveryStore.Entry?
+        _ entries: [CarapaceWatchChatDeliveryStore.Entry], kind: CarapaceWatchChatDeliveryKind)
+        -> CarapaceWatchChatDeliveryStore.Entry?
     {
         if kind == .quickReply, self.isReplySending { return nil }
         // A newer unsaved attempt has no row. Keep its failure; reopening has no live attempt.
@@ -1602,7 +1602,7 @@ extension WatchInboxStore {
         content.title = title
         content.body = body
         content.sound = .default
-        content.threadIdentifier = "openclaw-watch"
+        content.threadIdentifier = "carapace-watch"
 
         let request = UNNotificationRequest(
             identifier: identifier,

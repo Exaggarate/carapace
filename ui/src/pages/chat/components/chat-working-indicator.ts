@@ -92,10 +92,10 @@ export function renderChatWorkingIndicator(
           waitingApproval
             ? nothing
             : html`
-                <openclaw-elapsed-time
+                <carapace-elapsed-time
                   class="chat-working-indicator__elapsed"
                   .startMs=${part.startedAt}
-                ></openclaw-elapsed-time>
+                ></carapace-elapsed-time>
               `
         }
         ${
@@ -108,11 +108,11 @@ export function renderChatWorkingIndicator(
               `
             : working
               ? html`
-                  <openclaw-working-phrase
+                  <carapace-working-phrase
                     aria-hidden="true"
                     .startMs=${part.startedAt}
                     .seed=${part.key}
-                  ></openclaw-working-phrase>
+                  ></carapace-working-phrase>
                 `
               : nothing
         }

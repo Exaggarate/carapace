@@ -660,7 +660,7 @@ export function writeLegacyCliExitCompatChunks(
 
 function shouldCopyStaticExtensionAssets(params: RuntimePostBuildParams) {
   const env = params.env ?? process.env;
-  return env.OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS !== "0";
+  return env.CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS !== "0";
 }
 
 /**
@@ -674,7 +674,7 @@ export function runRuntimePostBuild(params: RuntimePostBuildParams = {}) {
   // any phase runs so a later unsafe root cannot leave earlier output changed.
   assertRealOutputRoot(path.join(rootDir, "dist"), { fs: fsImpl });
   assertRealOutputRoot(path.join(rootDir, "dist-runtime"), { fs: fsImpl });
-  const timingsSetting = params.timings ?? process.env.OPENCLAW_RUNTIME_POSTBUILD_TIMINGS;
+  const timingsSetting = params.timings ?? process.env.CARAPACE_RUNTIME_POSTBUILD_TIMINGS;
   const timingsEnabled = timingsSetting !== "0" && timingsSetting !== false;
   // Per-phase lines are debug detail; default output is one summary line so a
   // routine rebuild does not print nine near-identical timing rows.

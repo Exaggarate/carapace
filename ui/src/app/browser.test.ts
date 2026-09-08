@@ -8,9 +8,9 @@ afterEach(() => {
 
 describe("Control UI route and resource bases", () => {
   it("uses a configured Gateway mount for both routes and resources", () => {
-    document.documentElement.setAttribute(CONTROL_UI_BASE_PATH_ATTRIBUTE, "/openclaw");
+    document.documentElement.setAttribute(CONTROL_UI_BASE_PATH_ATTRIBUTE, "/carapace");
 
-    expect(resolveControlUiPaths("/openclaw/new")).toEqual(["/openclaw", "/openclaw"]);
+    expect(resolveControlUiPaths("/carapace/new")).toEqual(["/carapace", "/carapace"]);
   });
 
   it("retains pathname inference when no Gateway mount is declared", () => {

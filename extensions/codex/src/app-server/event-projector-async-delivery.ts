@@ -1,7 +1,7 @@
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import type { CodexAppServerEventProjectorOptions } from "./event-projector-options.js";
 import type { CodexThreadItem } from "./protocol.js";
 

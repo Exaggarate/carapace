@@ -10,7 +10,7 @@ if ! declare -F docker_e2e_timeout_cmd >/dev/null 2>&1; then
 fi
 
 docker_build_on_missing_enabled() {
-  case "${OPENCLAW_DOCKER_BUILD_ON_MISSING:-}" in
+  case "${CARAPACE_DOCKER_BUILD_ON_MISSING:-}" in
     1 | true | TRUE | yes | YES)
       return 0
       ;;
@@ -19,18 +19,18 @@ docker_build_on_missing_enabled() {
       ;;
   esac
 
-  [ "${OPENCLAW_TESTBOX:-0}" = "1" ]
+  [ "${CARAPACE_TESTBOX:-0}" = "1" ]
 }
 
 docker_build_command() {
   local build_cmd=(docker build)
-  if [ "${OPENCLAW_DOCKER_BUILD_USE_BUILDX:-0}" = "1" ] || docker_build_args_need_buildx "$@"; then
+  if [ "${CARAPACE_DOCKER_BUILD_USE_BUILDX:-0}" = "1" ] || docker_build_args_need_buildx "$@"; then
     build_cmd=(docker buildx build --load)
-    if [ -n "${OPENCLAW_DOCKER_BUILD_CACHE_FROM:-}" ]; then
-      build_cmd+=(--cache-from "${OPENCLAW_DOCKER_BUILD_CACHE_FROM}")
+    if [ -n "${CARAPACE_DOCKER_BUILD_CACHE_FROM:-}" ]; then
+      build_cmd+=(--cache-from "${CARAPACE_DOCKER_BUILD_CACHE_FROM}")
     fi
-    if [ -n "${OPENCLAW_DOCKER_BUILD_CACHE_TO:-}" ]; then
-      build_cmd+=(--cache-to "${OPENCLAW_DOCKER_BUILD_CACHE_TO}")
+    if [ -n "${CARAPACE_DOCKER_BUILD_CACHE_TO:-}" ]; then
+      build_cmd+=(--cache-to "${CARAPACE_DOCKER_BUILD_CACHE_TO}")
     fi
   fi
 
@@ -63,23 +63,23 @@ docker_build_resource_exhausted_failure() {
 docker_build_print_resource_exhausted_hint() {
   cat >&2 <<'EOF'
 Docker build failed because the builder ran out of memory.
-Try increasing the Docker/BuildKit memory limit, closing other memory-heavy processes, or rebuilding with a smaller OpenClaw build heap, for example:
-  OPENCLAW_DOCKER_BUILD_NODE_OPTIONS=--max-old-space-size=4096 OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=4096 ./scripts/docker/setup.sh
+Try increasing the Docker/BuildKit memory limit, closing other memory-heavy processes, or rebuilding with a smaller Carapace build heap, for example:
+  CARAPACE_DOCKER_BUILD_NODE_OPTIONS=--max-old-space-size=4096 CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=4096 ./scripts/docker/setup.sh
 EOF
 }
 
 docker_build_retry_count() {
-  local configured="${OPENCLAW_DOCKER_BUILD_RETRIES:-2}"
+  local configured="${CARAPACE_DOCKER_BUILD_RETRIES:-2}"
   if [[ "$configured" =~ ^[0-9]+$ ]]; then
     echo "$((10#$configured))"
     return 0
   fi
-  echo "invalid OPENCLAW_DOCKER_BUILD_RETRIES: $configured" >&2
+  echo "invalid CARAPACE_DOCKER_BUILD_RETRIES: $configured" >&2
   return 2
 }
 
 docker_build_timeout_required() {
-  case "${OPENCLAW_DOCKER_BUILD_REQUIRE_TIMEOUT:-0}" in
+  case "${CARAPACE_DOCKER_BUILD_REQUIRE_TIMEOUT:-0}" in
     1 | true | TRUE | yes | YES)
       return 0
       ;;
@@ -97,12 +97,12 @@ docker_build_signal_exit_status() {
 }
 
 docker_build_heartbeat_seconds() {
-  local configured="${OPENCLAW_DOCKER_BUILD_HEARTBEAT_SECONDS:-30}"
+  local configured="${CARAPACE_DOCKER_BUILD_HEARTBEAT_SECONDS:-30}"
   if [[ "$configured" =~ ^[0-9]+$ ]] && [ "$configured" -ge 1 ]; then
     echo "$((10#$configured))"
     return 0
   fi
-  echo "invalid OPENCLAW_DOCKER_BUILD_HEARTBEAT_SECONDS: $configured" >&2
+  echo "invalid CARAPACE_DOCKER_BUILD_HEARTBEAT_SECONDS: $configured" >&2
   return 2
 }
 
@@ -243,7 +243,7 @@ docker_build_with_retries() {
     command+=("$part")
   done < <(docker_build_command "$@")
 
-  local timeout_value="${OPENCLAW_DOCKER_BUILD_TIMEOUT:-3600s}"
+  local timeout_value="${CARAPACE_DOCKER_BUILD_TIMEOUT:-3600s}"
   while true; do
     log_file="$(docker_e2e_run_log "$label")"
     if docker_build_run_logged "$label" "$timeout_value" "$log_file" "${command[@]}"; then
@@ -283,6 +283,6 @@ docker_build_run() {
   local label="$1"
   shift
 
-  OPENCLAW_DOCKER_BUILD_REQUIRE_TIMEOUT="${OPENCLAW_DOCKER_BUILD_REQUIRE_TIMEOUT:-1}" \
+  CARAPACE_DOCKER_BUILD_REQUIRE_TIMEOUT="${CARAPACE_DOCKER_BUILD_REQUIRE_TIMEOUT:-1}" \
     docker_build_with_retries "$label" "$@"
 }

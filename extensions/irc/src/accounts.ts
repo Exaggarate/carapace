@@ -1,13 +1,13 @@
 // Irc plugin module implements accounts behavior.
-import { resolveAccountWithDefaultFallback } from "openclaw/plugin-sdk/account-core";
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { parseOptionalDelimitedEntries } from "openclaw/plugin-sdk/channel-core";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { isTruthyEnvValue } from "openclaw/plugin-sdk/runtime-env";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
-import { resolveSecretInputString } from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveAccountWithDefaultFallback } from "carapace/plugin-sdk/account-core";
+import { createAccountListHelpers } from "carapace/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { parseOptionalDelimitedEntries } from "carapace/plugin-sdk/channel-core";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { isTruthyEnvValue } from "carapace/plugin-sdk/runtime-env";
+import { tryReadSecretFileSync } from "carapace/plugin-sdk/secret-file-runtime";
+import { resolveSecretInputString } from "carapace/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CoreConfig, IrcAccountConfig, IrcNickServConfig } from "./types.js";
 
 type CredentialUnavailableDiagnostic = Extract<
@@ -182,12 +182,12 @@ export function resolveIrcAccount(params: {
       merged.username?.trim() ||
       (accountId === DEFAULT_ACCOUNT_ID ? process.env.IRC_USERNAME?.trim() : "") ||
       nick ||
-      "openclaw"
+      "carapace"
     ).trim();
     const realname = (
       merged.realname?.trim() ||
       (accountId === DEFAULT_ACCOUNT_ID ? process.env.IRC_REALNAME?.trim() : "") ||
-      "OpenClaw"
+      "Carapace"
     ).trim();
 
     const passwordResolution = resolvePassword(accountId, merged);

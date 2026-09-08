@@ -7,7 +7,7 @@ import {
   readCodexCliActiveApiKey,
 } from "../agents/cli-credentials.js";
 import { createMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { normalizePluginTargetConfig } from "../plugins/config-state.js";
@@ -153,17 +153,17 @@ async function activateSetupInferenceUnredacted(
   }
   // Missing-file snapshots still carry the load-time implicit-main roster.
   // Setup must probe against that runtime view without treating it as authored config.
-  const cfg: OpenClawConfig = snapshot.runtimeConfig ?? snapshot.config;
+  const cfg: CarapaceConfig = snapshot.runtimeConfig ?? snapshot.config;
   // The source snapshot includes raw compatibility migrations for comparison,
   // while the writer still projects changes back onto the untouched authored bytes.
-  const sourceCfg: OpenClawConfig = snapshot.sourceConfig ?? snapshot.config;
+  const sourceCfg: CarapaceConfig = snapshot.sourceConfig ?? snapshot.config;
   const routeAgentId = resolveAmbientOwnerAgentId(cfg, params.agentId);
   const workspace = params.workspace?.trim()
     ? resolveUserPath(params.workspace)
     : resolveSetupInferenceWorkspace(snapshot);
 
   const tempDir = await (
-    deps.createTempDir ?? (() => fs.mkdtemp(path.join(os.tmpdir(), "openclaw-setup-inference-")))
+    deps.createTempDir ?? (() => fs.mkdtemp(path.join(os.tmpdir(), "carapace-setup-inference-")))
   )();
   const testAgentDir = path.join(tempDir, "agent");
   let pendingCodexInstall: PluginInstallRecord | undefined;
@@ -363,7 +363,7 @@ async function activateSetupInferenceUnredacted(
               : {}),
             workspaceDir: workspace,
             policyPluginIds: ["codex"],
-            traceCommand: "openclaw-setup-probe",
+            traceCommand: "carapace-setup-probe",
             logger: { warn: (message) => (registryRefreshWarning = message) },
           });
           try {
@@ -431,7 +431,7 @@ async function activateSetupInferenceUnredacted(
                 ? testPlan.provider
                 : (testPlan.selectedAgentRuntimeId ??
                   testPlan.agentHarnessRuntimeOverride ??
-                  "openclaw"),
+                  "carapace"),
             agentId: testPlan.routeAgentId,
           },
           pendingPluginInstalls: plan.pendingPluginInstalls,
@@ -683,8 +683,8 @@ async function activateSetupInferenceUnredacted(
       const after = await readSnapshot().catch(() => null);
       try {
         await appendSystemAgentAuditEntry({
-          operation: "openclaw.setup",
-          summary: "Verified and configured AI access through OpenClaw setup",
+          operation: "carapace.setup",
+          summary: "Verified and configured AI access through Carapace setup",
           configPath: after?.path ?? snapshot.path,
           configHashBefore: snapshot.hash ?? null,
           configHashAfter: after?.hash ?? null,
@@ -693,7 +693,7 @@ async function activateSetupInferenceUnredacted(
       } catch (error) {
         // Inference is already verified and its route may already be durable.
         // Surface audit failure as a warning instead of misreporting setup failure.
-        const warning = `Inference setup completed, but OpenClaw could not record its audit entry: ${formatErrorMessage(error)}`;
+        const warning = `Inference setup completed, but Carapace could not record its audit entry: ${formatErrorMessage(error)}`;
         params.runtime.error?.(warning);
         lines = [...lines, warning];
       }

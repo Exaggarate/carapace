@@ -3,14 +3,14 @@ import path from "node:path";
 import {
   loadCodexBundleMcpThreadConfig,
   type EmbeddedRunAttemptParamsV2,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionUpstreamLink } from "openclaw/plugin-sdk/session-catalog";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { readVisibleSessionTranscriptMessageEntries } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { createCapturedPluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { upsertSessionUpstreamLink } from "carapace/plugin-sdk/session-catalog";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+import { readVisibleSessionTranscriptMessageEntries } from "carapace/plugin-sdk/session-transcript-runtime";
 import { continueLocalCodexSession } from "../session-catalog-adoption.js";
 import { createCodexSessionCatalogControl } from "../session-catalog-control.js";
 import { codexSessionCatalogRuntime } from "../session-catalog.js";
@@ -57,7 +57,7 @@ export async function createCanonicalForkFixture(params: {
   runtime: PluginRuntime;
   workspaceDir: string;
   agentDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   loading?: "searchable" | "direct";
   codexPlugins?: CodexPluginConfig["codexPlugins"];
   desktopGenerationFingerprint?: string;

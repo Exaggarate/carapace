@@ -1,5 +1,5 @@
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { extractCanvasFromDetails, extractCanvasFromText } from "../chat/canvas-render.js";
 import { isToolCallContentType, isToolResultContentType } from "../chat/tool-content.js";
 import { truncateChatHistoryText } from "./chat-display-projection.helpers.js";

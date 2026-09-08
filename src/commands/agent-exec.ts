@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import { findAgentRunTerminalOutcome } from "../agents/agent-run-terminal-error.js";
 import { createAgentToolExecutionBudget } from "../agents/agent-tool-source-execution-guard.js";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../agents/run-cleanup-timeout.js";
 import { isExecutionIdentityCollectionEnabled } from "../audit/audit-config.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   EmbeddedStateLockHandle,
   EmbeddedStateSignalProcess,
@@ -45,7 +45,7 @@ type AgentExecCommandResult = {
 
 type AgentExecCommandDeps = {
   /** In-process callers already resolved this snapshot without serializing credentials. */
-  baseConfig?: OpenClawConfig;
+  baseConfig?: CarapaceConfig;
   agentId?: string;
   abortSignal?: AbortSignal;
   timeoutMs?: number;
@@ -116,36 +116,36 @@ async function requireDirectory(value: string, label: string): Promise<string> {
 }
 
 function setAgentExecEnvironment(params: { stateDir: string; cwd: string }): () => void {
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+  const previousStateDir = process.env.CARAPACE_STATE_DIR;
   // Repointing the state dir would otherwise make the config resolve relative to
   // it (see `resolveConfigDir`), so clear any inherited path override and let the
   // published runtime snapshot own config for this run.
-  const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  const previousWorkspaceDir = process.env.OPENCLAW_WORKSPACE_DIR;
-  process.env.OPENCLAW_STATE_DIR = params.stateDir;
-  delete process.env.OPENCLAW_CONFIG_PATH;
-  process.env.OPENCLAW_WORKSPACE_DIR = params.cwd;
+  const previousConfigPath = process.env.CARAPACE_CONFIG_PATH;
+  const previousWorkspaceDir = process.env.CARAPACE_WORKSPACE_DIR;
+  process.env.CARAPACE_STATE_DIR = params.stateDir;
+  delete process.env.CARAPACE_CONFIG_PATH;
+  process.env.CARAPACE_WORKSPACE_DIR = params.cwd;
   return () => {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     if (previousConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.CARAPACE_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+      process.env.CARAPACE_CONFIG_PATH = previousConfigPath;
     }
     if (previousWorkspaceDir === undefined) {
-      delete process.env.OPENCLAW_WORKSPACE_DIR;
+      delete process.env.CARAPACE_WORKSPACE_DIR;
     } else {
-      process.env.OPENCLAW_WORKSPACE_DIR = previousWorkspaceDir;
+      process.env.CARAPACE_WORKSPACE_DIR = previousWorkspaceDir;
     }
   };
 }
 
 function formatActiveGatewayExecRefusal(identity: GatewayLockIdentity): string {
-  return `A Gateway is running for this state directory (pid ${identity.pid}, port ${identity.port}). Omit --state-dir to use isolated temporary state, or stop the Gateway first (${formatCliCommand("openclaw gateway stop")}).`;
+  return `A Gateway is running for this state directory (pid ${identity.pid}, port ${identity.port}). Omit --state-dir to use isolated temporary state, or stop the Gateway first (${formatCliCommand("carapace gateway stop")}).`;
 }
 
 function isStructuredTimeoutError(error: unknown): boolean {
@@ -273,7 +273,7 @@ export async function agentExecCommand(
     const cwd = await requireDirectory(opts.cwd ?? process.cwd(), "Working directory");
     const stateDir = opts.stateDir
       ? await requireDirectory(opts.stateDir, "State directory")
-      : await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-exec-"));
+      : await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-exec-"));
     // Only a state dir this command created is removed; `--state-dir` is the
     // caller's and is left alone.
     temporaryStateDir = opts.stateDir ? undefined : stateDir;
@@ -310,7 +310,7 @@ export async function agentExecCommand(
     const runConfig = buildExecRunConfig({ base: baseConfig, cwd, opts });
     // Installed plugins belong to the operator config resolved above, not to
     // the disposable state root used for this run. Capture all roots before
-    // OPENCLAW_STATE_DIR moves so discovery and the installed-index DB agree.
+    // CARAPACE_STATE_DIR moves so discovery and the installed-index DB agree.
     const inheritInstalledPlugins = opts.isolated !== true && opts.authEnvOnly !== true;
     const pluginInstallContext = inheritInstalledPlugins
       ? await import("../plugins/install-root-context.js")
@@ -382,7 +382,7 @@ export async function agentExecCommand(
     // The runtime snapshot is the only in-process config cache (`clearConfigCache`
     // is a no-op shim), so publishing the composed config here is what makes the
     // run use it. Serializing it to a temporary file and repointing
-    // OPENCLAW_CONFIG_PATH would only feed this same snapshot, while writing
+    // CARAPACE_CONFIG_PATH would only feed this same snapshot, while writing
     // env-substituted provider keys to disk where the run's own exec tool
     // could read them.
     snapshotIo.setRuntimeConfigSnapshot(runConfig);

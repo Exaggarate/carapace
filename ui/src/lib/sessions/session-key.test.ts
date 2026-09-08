@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { parseAgentSessionKeyParts } from "@openclaw/session-url-contract";
+import { parseAgentSessionKeyParts } from "@carapace/session-url-contract";
 import { describe, expect, it } from "vitest";
 import {
   canArchiveSessionRow,

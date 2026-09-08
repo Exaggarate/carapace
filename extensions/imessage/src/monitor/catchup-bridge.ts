@@ -1,6 +1,6 @@
 // Imessage plugin module implements catchup bridge behavior.
-import { timestampMsToIsoString } from "openclaw/plugin-sdk/number-runtime";
-import { warn } from "openclaw/plugin-sdk/runtime-env";
+import { timestampMsToIsoString } from "carapace/plugin-sdk/number-runtime";
+import { warn } from "carapace/plugin-sdk/runtime-env";
 import type { IMessageRpcClient } from "../client.js";
 import {
   type CatchupDispatchFn,

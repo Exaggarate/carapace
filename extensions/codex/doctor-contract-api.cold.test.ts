@@ -5,14 +5,14 @@ import { expect, it, vi } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 
 // Detection only locates legacy files; loading this barrel brings in session DB machinery.
-vi.mock("openclaw/plugin-sdk/session-store-runtime", () => {
+vi.mock("carapace/plugin-sdk/session-store-runtime", () => {
   throw new Error("legacy file detection must not load the session runtime");
 });
 
 it("detects Codex sidecars without loading session storage", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-doctor-cold-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-doctor-cold-"));
   const stateDir = path.join(root, "state");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const openStore = vi.fn(() => {
     throw new Error("detection must not open plugin state");
   });

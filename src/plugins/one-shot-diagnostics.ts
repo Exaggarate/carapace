@@ -1,5 +1,5 @@
 /** Starts diagnostics exporter plugin services for one-shot CLI embedded agent runs. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 
 const log = createSubsystemLogger("plugins");
@@ -17,7 +17,7 @@ export type OneShotDiagnosticsHandle = {
   stop: () => Promise<void>;
 };
 
-function suppressOtelStdoutLogSink(config: OpenClawConfig): OpenClawConfig {
+function suppressOtelStdoutLogSink(config: CarapaceConfig): CarapaceConfig {
   const diagnostics = config.diagnostics;
   const otel = diagnostics?.otel;
   if (otel?.logs !== true || (otel.logsExporter !== "stdout" && otel.logsExporter !== "both")) {
@@ -39,7 +39,7 @@ function suppressOtelStdoutLogSink(config: OpenClawConfig): OpenClawConfig {
   };
 }
 
-function isOtelExportConfigured(config: OpenClawConfig): boolean {
+function isOtelExportConfigured(config: CarapaceConfig): boolean {
   // Mirrors the diagnostics-otel service's own start() gate so disabled
   // configs skip plugin loading entirely on the CLI hot path.
   const diagnostics = config.diagnostics;
@@ -50,7 +50,7 @@ function isOtelExportConfigured(config: OpenClawConfig): boolean {
  * Start the diagnostics OTel exporter for a one-shot embedded agent run.
  *
  * Gateway processes start diagnostics exporters via startPluginServices at
- * startup; one-shot `openclaw agent --local` runs execute the agent in the CLI
+ * startup; one-shot `carapace agent --local` runs execute the agent in the CLI
  * process where no plugin service ever starts, so diagnostic events had no OTel
  * subscriber and spans were dropped.
  * Returns null when OTel export is not configured or the plugin is not
@@ -58,7 +58,7 @@ function isOtelExportConfigured(config: OpenClawConfig): boolean {
  * queue and shuts the SDK down (force-flush) before the process exits.
  */
 export async function startOneShotDiagnosticsExporters(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   suppressStdoutDiagnosticLogs?: boolean;
 }): Promise<OneShotDiagnosticsHandle | null> {
   const config =
@@ -68,14 +68,14 @@ export async function startOneShotDiagnosticsExporters(params: {
   if (!isOtelExportConfigured(config)) {
     return null;
   }
-  const [{ loadOpenClawPlugins }, { startPluginServices }] = await Promise.all([
+  const [{ loadCarapacePlugins }, { startPluginServices }] = await Promise.all([
     import("./loader.js"),
     import("./services.js"),
   ]);
   // Scoped, non-activating load: honors the same plugin enablement config as
   // the gateway's startup load without replacing the active runtime registry
   // the embedded run resolves providers/tools from.
-  const registry = loadOpenClawPlugins({
+  const registry = loadCarapacePlugins({
     config,
     onlyPluginIds: [...ONE_SHOT_DIAGNOSTICS_SERVICE_IDS],
     activate: false,

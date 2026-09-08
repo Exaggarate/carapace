@@ -1,17 +1,17 @@
 // Microsoft Foundry plugin module implements runtime behavior.
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
 import type {
   ProviderPreparedRuntimeAuth,
   ProviderPrepareRuntimeAuthContext,
-} from "openclaw/plugin-sdk/core";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/core";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   asDateTimestampMs,
   resolveDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { ensureAuthProfileStore } from "openclaw/plugin-sdk/provider-auth";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { ensureAuthProfileStore } from "carapace/plugin-sdk/provider-auth";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { getAccessTokenResultAsync } from "./cli.js";
 import {
   ANTHROPIC_MESSAGES_API,

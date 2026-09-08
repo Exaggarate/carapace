@@ -10,7 +10,7 @@ export {
   zalouserSetupWizard,
 } from "./api.js";
 export { setZalouserRuntime } from "./src/runtime.js";
-export type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+export type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 export type {
   BaseProbeResult,
   ChannelAccountSnapshot,
@@ -18,46 +18,46 @@ export type {
   ChannelGroupContext,
   ChannelMessageActionAdapter,
   ChannelStatusIssue,
-} from "openclaw/plugin-sdk/channel-contract";
+} from "carapace/plugin-sdk/channel-contract";
 export type {
-  OpenClawConfig,
+  CarapaceConfig,
   GroupToolPolicyConfig,
   MarkdownTableMode,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/config-contracts";
 export type {
   PluginRuntime,
   AnyAgentTool,
   ChannelPlugin,
-  OpenClawPluginToolContext,
-} from "openclaw/plugin-sdk/core";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+  CarapacePluginToolContext,
+} from "carapace/plugin-sdk/core";
+export type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
 export {
   DEFAULT_ACCOUNT_ID,
   buildChannelConfigSchema,
   normalizeAccountId,
-} from "openclaw/plugin-sdk/core";
-export { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
-export { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
+} from "carapace/plugin-sdk/core";
+export { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
+export { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
 export {
   resolveDefaultGroupPolicy,
   resolveOpenProviderRuntimeGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
+} from "carapace/plugin-sdk/runtime-group-policy";
 export {
   mergeAllowlist,
   summarizeMapping,
   formatAllowFromLowercase,
-} from "openclaw/plugin-sdk/allow-from";
-export { resolveInboundMentionDecision } from "openclaw/plugin-sdk/channel-inbound";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-export { createChannelMessageReplyPipeline } from "openclaw/plugin-sdk/channel-outbound";
-export { buildBaseAccountStatusSnapshot } from "openclaw/plugin-sdk/status-helpers";
-export { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
+} from "carapace/plugin-sdk/allow-from";
+export { resolveInboundMentionDecision } from "carapace/plugin-sdk/channel-inbound";
+export { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
+export { createChannelMessageReplyPipeline } from "carapace/plugin-sdk/channel-outbound";
+export { buildBaseAccountStatusSnapshot } from "carapace/plugin-sdk/status-helpers";
+export { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
 export {
   deliverTextOrMediaReply,
   isNumericTargetId,
   resolveSendableOutboundReplyParts,
   sendPayloadWithChunkedTextAndMedia,
   type OutboundReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-export { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/reply-payload";
+export { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";

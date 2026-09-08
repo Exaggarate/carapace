@@ -63,10 +63,10 @@ export function createVitestReportFixture(root: string, evidence = path.join(roo
   const env: NodeJS.ProcessEnv = {
     PATH: process.env.PATH,
     HOME: path.join(root, "home"),
-    OPENCLAW_HOME: path.join(root, "home"),
-    OPENCLAW_STATE_DIR: path.join(root, "state"),
-    OPENCLAW_CONFIG_PATH: path.join(root, "config/openclaw.json"),
-    OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
+    CARAPACE_HOME: path.join(root, "home"),
+    CARAPACE_STATE_DIR: path.join(root, "state"),
+    CARAPACE_CONFIG_PATH: path.join(root, "config/carapace.json"),
+    CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
     TMPDIR: path.join(root, "tmp"),
     TMP: path.join(root, "tmp"),
     TEMP: path.join(root, "tmp"),
@@ -84,18 +84,18 @@ export function createVitestReportFixture(root: string, evidence = path.join(roo
     NO_COLOR: "1",
     FORCE_COLOR: "0",
     TZ: "UTC",
-    OPENCLAW_TEST_PROJECTS_TIMINGS: "0",
-    OPENCLAW_VITEST_MAX_WORKERS: "1",
-    OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "cache"),
-    OPENCLAW_VITEST_NO_OUTPUT_RETRY: "0",
-    OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "20000",
+    CARAPACE_TEST_PROJECTS_TIMINGS: "0",
+    CARAPACE_VITEST_MAX_WORKERS: "1",
+    CARAPACE_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "cache"),
+    CARAPACE_VITEST_NO_OUTPUT_RETRY: "0",
+    CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "20000",
   };
   for (const [key, value] of Object.entries(env)) {
-    if (value?.startsWith(root) && key !== "OPENCLAW_CONFIG_PATH") {
+    if (value?.startsWith(root) && key !== "CARAPACE_CONFIG_PATH") {
       fs.mkdirSync(value, { recursive: true });
     }
   }
-  write(env.OPENCLAW_CONFIG_PATH!, "{}");
+  write(env.CARAPACE_CONFIG_PATH!, "{}");
 
   return async (
     mode: ReportFixtureMode,
@@ -115,12 +115,12 @@ export function createVitestReportFixture(root: string, evidence = path.join(roo
     const realHomeReplay = mode === "batch-real-home";
     if (realHomeReplay) {
       env.USERPROFILE = env.HOME;
-      env.OPENCLAW_LIVE_TEST = "1";
-      env.OPENCLAW_LIVE_USE_REAL_HOME = "1";
-      env.OPENCLAW_LIVE_TEST_QUIET = "1";
-      env.OPENCLAW_VITEST_INCLUDE_FILE = path.join(root, "includes.json");
+      env.CARAPACE_LIVE_TEST = "1";
+      env.CARAPACE_LIVE_USE_REAL_HOME = "1";
+      env.CARAPACE_LIVE_TEST_QUIET = "1";
+      env.CARAPACE_VITEST_INCLUDE_FILE = path.join(root, "includes.json");
       write(
-        env.OPENCLAW_VITEST_INCLUDE_FILE,
+        env.CARAPACE_VITEST_INCLUDE_FILE,
         JSON.stringify([path.join(root, "alpha.test.ts"), path.join(root, "beta.test.ts")]),
       );
       write(path.join(env.HOME!, "canary"), "synthetic caller home\n");
@@ -241,10 +241,10 @@ ${index === 0 ? "test('alpha/two',()=>expect(2).toBe(2));" : "test.skip('beta/sk
       }
       write(
         path.join(root, "test/vitest/vitest.extension-telegram.config.ts"),
-        `import fs from 'node:fs';const file=process.env.OPENCLAW_VITEST_INCLUDE_FILE;export default {root:${JSON.stringify(root)},cacheDir:${JSON.stringify(path.join(root, "vite-chunks"))},test:{name:'chunks',include:file?JSON.parse(fs.readFileSync(file,'utf8')):${JSON.stringify(files)},pool:'forks',maxWorkers:1,cache:false,fsModuleCache:false}};`,
+        `import fs from 'node:fs';const file=process.env.CARAPACE_VITEST_INCLUDE_FILE;export default {root:${JSON.stringify(root)},cacheDir:${JSON.stringify(path.join(root, "vite-chunks"))},test:{name:'chunks',include:file?JSON.parse(fs.readFileSync(file,'utf8')):${JSON.stringify(files)},pool:'forks',maxWorkers:1,cache:false,fsModuleCache:false}};`,
       );
-      env.OPENCLAW_VITEST_INCLUDE_FILE = path.join(root, "includes.json");
-      write(env.OPENCLAW_VITEST_INCLUDE_FILE, JSON.stringify(files));
+      env.CARAPACE_VITEST_INCLUDE_FILE = path.join(root, "includes.json");
+      write(env.CARAPACE_VITEST_INCLUDE_FILE, JSON.stringify(files));
       targets = ["test/vitest/vitest.extension-telegram.config.ts"];
     }
     const args = [
@@ -331,13 +331,13 @@ ${index === 0 ? "test('alpha/two',()=>expect(2).toBe(2));" : "test.skip('beta/sk
     }
     const childEnv = {
       ...env,
-      OPENCLAW_TEST_PROJECTS_PARALLEL: isParallel ? "2" : "1",
-      OPENCLAW_TEST_PROJECTS_SERIAL: isParallel ? "0" : "1",
-      OPENCLAW_EXTENSION_BATCH_PARALLEL: isParallel ? "2" : "1",
-      OPENCLAW_VITEST_NO_OUTPUT_RETRY:
-        mode === "watchdog" ? "1" : env.OPENCLAW_VITEST_NO_OUTPUT_RETRY,
-      OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS:
-        mode === "watchdog" ? "1500" : env.OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS,
+      CARAPACE_TEST_PROJECTS_PARALLEL: isParallel ? "2" : "1",
+      CARAPACE_TEST_PROJECTS_SERIAL: isParallel ? "0" : "1",
+      CARAPACE_EXTENSION_BATCH_PARALLEL: isParallel ? "2" : "1",
+      CARAPACE_VITEST_NO_OUTPUT_RETRY:
+        mode === "watchdog" ? "1" : env.CARAPACE_VITEST_NO_OUTPUT_RETRY,
+      CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS:
+        mode === "watchdog" ? "1500" : env.CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS,
     };
     const { child, completion } = spawnOwnedVitestProcess({
       command: process.execPath,

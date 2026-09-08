@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyWizardMetadata } from "../commands/onboard-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { initializeNativeSessionCatalogPreferences } from "../plugins/native-session-catalog-config.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import {
@@ -79,7 +79,7 @@ describe("native conversation setup preferences", () => {
   });
 
   it("preserves missing and mixed legacy preferences without inferring consent from a new agent", () => {
-    const configs: OpenClawConfig[] = [
+    const configs: CarapaceConfig[] = [
       { agents: { entries: { research: {} } } },
       { plugins: { entries: { anthropic: { config: { sessionCatalog: { enabled: false } } } } } },
       {

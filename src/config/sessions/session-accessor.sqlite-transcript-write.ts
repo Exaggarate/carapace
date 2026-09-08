@@ -1,10 +1,10 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import {
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { clearAllCliSessions } from "./cli-session-binding.js";
 import type {
   SessionTranscriptAccessScope,
@@ -118,7 +118,7 @@ export async function replaceTranscriptEvents(
 ): Promise<void> {
   const resolved = resolveSqliteTranscriptScope(scope);
   await runExclusiveSqliteSessionWrite(resolved, async () => {
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       replaceSqliteTranscriptEventsInTransaction(database, resolved, events);
     }, toDatabaseOptions(resolved));
   });
@@ -139,13 +139,13 @@ export async function replaceSessionWithBranchedTranscript(
   const resolved = resolveSqliteTranscriptScope(fencedScope);
   const databaseOptions = toDatabaseOptions(resolved);
   const expectedLifecycleRevision = readSessionEntryRow(
-    openOpenClawAgentDatabase(databaseOptions),
+    openCarapaceAgentDatabase(databaseOptions),
     resolved.sessionKey,
   )?.entry.lifecycleRevision;
   const nextScope = { ...fencedScope, sessionId: branch.sessionId };
   const nextResolved = { ...resolved, sessionId: branch.sessionId };
   await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const { publish, version } = runOpenClawAgentWriteTransaction((database) => {
+    const { publish, version } = runCarapaceAgentWriteTransaction((database) => {
       assertActive?.();
       const fresh = readSessionEntryRow(database, resolved.sessionKey)?.entry;
       if (
@@ -208,7 +208,7 @@ export async function rewriteTranscriptEventRowsExact(
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
     let result: { generation: string } | null = null;
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       const currentGeneration =
         readTranscriptGenerationInTransaction(database, resolved.sessionId) ?? null;
       const initialGenerationMaterialized =
@@ -243,7 +243,7 @@ export function replaceTranscriptEventsSnapshotSync(
 ): TranscriptWriteSnapshot<true> | undefined {
   const fencedScope = withOwnedSessionTranscriptWriterFence(scope);
   const resolved = resolveSqliteTranscriptScope(fencedScope);
-  const result = runOpenClawAgentWriteTransaction((database) => {
+  const result = runCarapaceAgentWriteTransaction((database) => {
     assertActive?.();
     assertOwnedTranscriptWriteCommit(fencedScope);
     const fresh = readSessionEntryRow(database, resolved.sessionKey);
@@ -286,7 +286,7 @@ export async function trimTranscriptForManualCompact(
 ): Promise<{ trimmed: false } | { kept: number; trimmed: true }> {
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const snapshotRows = readTranscriptEventRows(database, resolved.sessionId);
     const sessionSnapshot = readSessionEntrySelectionSnapshot(database, resolved.sessionKey, true);
     const lines = snapshotRows.map((row) => row.eventJson);
@@ -300,7 +300,7 @@ export async function trimTranscriptForManualCompact(
       );
     }
     const retainedEvents = retainedLines.map((line) => JSON.parse(line) as TranscriptEvent);
-    const publish = runOpenClawAgentWriteTransaction((writeDatabase) => {
+    const publish = runCarapaceAgentWriteTransaction((writeDatabase) => {
       assertSqliteTranscriptSnapshotUnchanged(writeDatabase, resolved.sessionId, snapshotRows);
       const freshSessionSnapshot = readSessionEntrySelectionSnapshot(
         writeDatabase,
@@ -354,7 +354,7 @@ export async function appendTranscriptEvent(
   assertNonMessageTranscriptEvent(event);
   const resolved = resolveSqliteTranscriptScope(scope);
   await runExclusiveSqliteSessionWrite(resolved, async () => {
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       options.beforeCommitInTransaction?.();
       appendTranscriptEventInTransaction(
         database,
@@ -399,14 +399,14 @@ export function appendTranscriptEventSnapshotSync(
 function runTranscriptWriteSnapshotSync<T>(
   scope: SessionTranscriptWriteScope,
   operation: (
-    database: OpenClawAgentDatabase,
+    database: CarapaceAgentDatabase,
     resolved: ReturnType<typeof resolveSqliteTranscriptScope>,
   ) => T,
   beforeCommitInTransaction?: () => void,
 ): Result<TranscriptWriteSnapshot<T>, TranscriptAppendRefusal> {
   const fencedScope = withOwnedSessionTranscriptWriterFence(scope);
   const resolved = resolveSqliteTranscriptScope(fencedScope);
-  const result = runOpenClawAgentWriteTransaction<
+  const result = runCarapaceAgentWriteTransaction<
     Result<TranscriptWriteSnapshot<T>, TranscriptAppendRefusal>
   >((database) => {
     beforeCommitInTransaction?.();
@@ -445,7 +445,7 @@ export function persistCompactionBoundaryWithSessionEntrySync(
 ): string {
   const fencedScope = withOwnedSessionTranscriptWriterFence(scope);
   const resolved = resolveSqliteTranscriptScope(fencedScope);
-  return runOpenClawAgentWriteTransaction(
+  return runCarapaceAgentWriteTransaction(
     (database) => {
       assertOwnedTranscriptWriteCommit(fencedScope);
       const firstAppendedSeq = readNextTranscriptSeq(database, resolved.sessionId);
@@ -480,7 +480,7 @@ export function persistCompactionBoundaryWithSessionEntrySync(
 }
 
 function resolveTranscriptEventAppendParent(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   event: TranscriptEvent,
   options: TranscriptEventAppendOptions,
@@ -523,7 +523,7 @@ export async function appendTranscriptMessage<TMessage>(
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
     let result: TranscriptMessageAppendResult<TMessage> | undefined;
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       result = appendTranscriptMessageInTransaction(database, resolved, options);
     }, toDatabaseOptions(resolved));
     return result;
@@ -563,21 +563,21 @@ export async function withTranscriptWriteLock<T>(
     let transcriptSnapshot: SqliteTranscriptSnapshotState | undefined;
     return await run({
       readEvents: async () => {
-        // openclaw-agent-db.ts cache rule: LRU eviction closes idle handles across caller awaits.
-        const database = openOpenClawAgentDatabase(databaseOptions);
+        // carapace-agent-db.ts cache rule: LRU eviction closes idle handles across caller awaits.
+        const database = openCarapaceAgentDatabase(databaseOptions);
         const snapshot = readTranscriptSnapshot(database, resolved.sessionId);
         transcriptSnapshot = { kind: "current", rows: snapshot.rows };
         return snapshot.events;
       },
-      // openclaw-agent-db.ts cache rule: never retain a handle across caller awaits; LRU may close it.
+      // carapace-agent-db.ts cache rule: never retain a handle across caller awaits; LRU may close it.
       readMessageFacts: async (params) =>
-        readTranscriptMirrorFacts(openOpenClawAgentDatabase(databaseOptions), resolved, params),
+        readTranscriptMirrorFacts(openCarapaceAgentDatabase(databaseOptions), resolved, params),
       replaceEvents: async (events) => {
         if (transcriptSnapshot?.kind === "stale") {
           throw new SqliteTranscriptMutationConflictError(resolved.sessionId);
         }
         const expectedSnapshot = transcriptSnapshot?.rows;
-        const nextSnapshot = runOpenClawAgentWriteTransaction((writeDatabase) => {
+        const nextSnapshot = runCarapaceAgentWriteTransaction((writeDatabase) => {
           assertLockedTranscriptWriteAllowed(writeDatabase, resolved, fencedScope);
           if (expectedSnapshot !== undefined) {
             // The writer queue is process-local. Revalidate after BEGIN IMMEDIATE
@@ -599,7 +599,7 @@ export async function withTranscriptWriteLock<T>(
         let result: TranscriptMessageAppendResult<unknown> | undefined;
         const snapshotState = transcriptSnapshot;
         let nextSnapshotState = snapshotState;
-        runOpenClawAgentWriteTransaction((writeDatabase) => {
+        runCarapaceAgentWriteTransaction((writeDatabase) => {
           assertLockedTranscriptWriteAllowed(writeDatabase, resolved, fencedScope);
           const snapshotStillCurrent =
             snapshotState?.kind === "current"
@@ -626,7 +626,7 @@ export async function withTranscriptWriteLock<T>(
       appendMessageWithMessageSequence: async (options) => {
         let result: TranscriptMessageAppendResult<unknown> | undefined;
         let messageSeq: number | undefined;
-        runOpenClawAgentWriteTransaction((writeDatabase) => {
+        runCarapaceAgentWriteTransaction((writeDatabase) => {
           assertLockedTranscriptWriteAllowed(writeDatabase, resolved, fencedScope);
           result = appendTranscriptMessageInTransaction(writeDatabase, resolved, options);
           if (result) {
@@ -655,7 +655,7 @@ export async function withTranscriptWriteTransaction<T>(
 ): Promise<T> {
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () =>
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       () =>
         run({
           agentId: resolved.agentId,
@@ -664,7 +664,7 @@ export async function withTranscriptWriteTransaction<T>(
           storePath:
             resolved.path ??
             scope.storePath ??
-            resolveOpenClawAgentSqlitePath({ agentId: resolved.agentId, env: resolved.env }),
+            resolveCarapaceAgentSqlitePath({ agentId: resolved.agentId, env: resolved.env }),
         }),
       toDatabaseOptions(resolved),
       { operationLabel: "session.transcript.batch" },
@@ -673,7 +673,7 @@ export async function withTranscriptWriteTransaction<T>(
 }
 
 function isSqliteTranscriptSnapshotUnchanged(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   expected: readonly SqliteTranscriptSnapshotRow[],
 ): boolean {
@@ -688,7 +688,7 @@ function isSqliteTranscriptSnapshotUnchanged(
 }
 
 function assertSqliteTranscriptSnapshotUnchanged(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   expected: readonly SqliteTranscriptSnapshotRow[],
 ): void {

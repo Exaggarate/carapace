@@ -4,7 +4,7 @@
  * Message fixtures reuse this zero-usage object when a test only cares about
  * message shape and not token accounting.
  */
-import type { Usage } from "openclaw/plugin-sdk/llm";
+import type { Usage } from "carapace/plugin-sdk/llm";
 
 export function createZeroUsageFixture(): Usage {
   return {

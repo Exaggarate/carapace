@@ -3,7 +3,7 @@
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { isMainThread, threadId } from "node:worker_threads";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { formatErrorMessageWithCode } from "../../infra/errors.js";
 import { getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { getChildLogger } from "../../logging/logger.js";
@@ -15,14 +15,14 @@ import {
   toAgentStoreSessionKey,
 } from "../../routing/session-key.js";
 import { runQueuedStoreWrite, type StoreWriterTiming } from "../../shared/store-writer-queue.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  resolveIncognitoOpenClawAgentSqlitePath,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  resolveIncognitoCarapaceAgentSqlitePath,
+  resolveCarapaceAgentSqlitePath,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import { formatSqliteSessionFileMarker } from "./legacy-sqlite-marker.js";
 import type {
   SessionAccessScope,
@@ -36,7 +36,7 @@ import { SQLITE_SESSION_WRITER_QUEUES } from "./store-writer-state.js";
 import type { SessionEntry } from "./types.js";
 
 type SessionSqliteDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   | "acp_parent_stream_events"
   | "board_tabs"
   | "board_widgets"
@@ -108,7 +108,7 @@ export async function runExclusiveSqliteSessionWrite<T>(
   reclamation?: SqliteSessionReclamationDiagnostics,
 ): Promise<T> {
   const databaseOptions = toDatabaseOptions(scope);
-  const storePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+  const storePath = resolveCarapaceAgentSqlitePath(databaseOptions);
   const startedAt = performance.now();
   const timing: StoreWriterTiming = {};
   const timingFields = (completedAt: number) => ({
@@ -171,7 +171,7 @@ export function resolveSqliteScope(
     ? resolveAgentIdFromSessionKey(scope.sessionKey)
     : undefined;
   const effectiveStorePath = incognitoAgentId
-    ? resolveIncognitoOpenClawAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
+    ? resolveIncognitoCarapaceAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
     : scope.storePath;
   const effectiveAgentId = incognitoAgentId ?? scopedAgentId;
   const storeTarget = effectiveStorePath
@@ -222,7 +222,7 @@ export function resolveSqliteReadScope(
     ? resolveAgentIdFromSessionKey(sessionKey)
     : undefined;
   const effectiveStorePath = incognitoAgentId
-    ? resolveIncognitoOpenClawAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
+    ? resolveIncognitoCarapaceAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
     : scope.storePath;
   const effectiveAgentId = incognitoAgentId ?? scopedAgentId;
   const storeTarget = effectiveStorePath
@@ -332,7 +332,7 @@ export function resolveSqliteAgentId(params: ResolveSqliteAgentIdParams): string
 export function resolveSqliteTranscriptArchiveDirectory(
   scope: Pick<ResolvedSqliteReadScope, "agentId" | "env" | "path">,
 ): string {
-  const databasePath = resolveOpenClawAgentSqlitePath(toDatabaseOptions(scope));
+  const databasePath = resolveCarapaceAgentSqlitePath(toDatabaseOptions(scope));
   const databaseDir = path.dirname(databasePath);
   if (path.basename(databaseDir) !== "agent") {
     return databaseDir;
@@ -379,20 +379,20 @@ export function resolveSqliteTranscriptReadScope(
 export function readSqliteTranscriptStoreBatches<T>(
   scopes: readonly SessionTranscriptReadScope[],
   readChunk: (
-    database: Pick<OpenClawAgentDatabase, "db" | "path">,
+    database: Pick<CarapaceAgentDatabase, "db" | "path">,
     sessionIds: readonly string[],
   ) => Map<string, T>,
 ): Array<T | undefined> {
   const results: Array<T | undefined> = Array.from({ length: scopes.length });
   const groups = new Map<
     string,
-    { indexes: Map<string, number[]>; options: OpenClawAgentDatabaseOptions }
+    { indexes: Map<string, number[]>; options: CarapaceAgentDatabaseOptions }
   >();
   const targetCache: SessionSqliteTargetResolutionCache = new Map();
   for (const [index, scope] of scopes.entries()) {
     const resolved = resolveSqliteTranscriptReadScope(scope, targetCache);
     const options = toDatabaseOptions(resolved);
-    const databasePath = resolveOpenClawAgentSqlitePath(options);
+    const databasePath = resolveCarapaceAgentSqlitePath(options);
     const group = groups.get(databasePath) ?? { indexes: new Map(), options };
     const indexes = group.indexes.get(resolved.sessionId) ?? [];
     indexes.push(index);
@@ -400,7 +400,7 @@ export function readSqliteTranscriptStoreBatches<T>(
     groups.set(databasePath, group);
   }
   for (const group of groups.values()) {
-    withOpenClawAgentDatabaseReadOnly(
+    withCarapaceAgentDatabaseReadOnly(
       (database) => {
         const sessionIds = [...group.indexes.keys()];
         for (
@@ -425,7 +425,7 @@ export function readSqliteTranscriptStoreBatches<T>(
 
 export function toDatabaseOptions(
   scope: Pick<ResolvedSqliteReadScope, "agentId" | "databaseAgentId" | "env" | "path">,
-): OpenClawAgentDatabaseOptions {
+): CarapaceAgentDatabaseOptions {
   return {
     agentId: scope.databaseAgentId ?? scope.agentId,
     ...(scope.env ? { env: scope.env } : {}),
@@ -450,6 +450,6 @@ export function formatLegacySqliteSessionMarkerForScope(scope: ResolvedTranscrip
   return formatSqliteSessionFileMarker({
     agentId: scope.agentId,
     sessionId: scope.sessionId,
-    storePath: scope.path ?? resolveOpenClawAgentSqlitePath(toDatabaseOptions(scope)),
+    storePath: scope.path ?? resolveCarapaceAgentSqlitePath(toDatabaseOptions(scope)),
   });
 }

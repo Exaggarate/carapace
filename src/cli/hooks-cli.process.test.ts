@@ -11,7 +11,7 @@ import {
   registerNativeHookRelay,
   testing as nativeHookRelayTesting,
 } from "../agents/harness/native-hook-relay.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { getFreePort } from "../test-utils/ports.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -40,7 +40,7 @@ async function createLingeringPluginFixture(): Promise<{
   markerPath: string;
   stateDir: string;
 }> {
-  const root = tempDirs.make("openclaw-hooks-cli-");
+  const root = tempDirs.make("carapace-hooks-cli-");
   const stateDir = path.join(root, "state");
   const pluginDir = path.join(root, "linger-plugin");
   const markerPath = path.join(root, "registered");
@@ -52,11 +52,11 @@ async function createLingeringPluginFixture(): Promise<{
       name: "linger-plugin",
       version: "1.0.0",
       type: "module",
-      openclaw: { extensions: ["./index.js"] },
+      carapace: { extensions: ["./index.js"] },
     }),
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "linger",
       name: "Linger",
@@ -80,7 +80,7 @@ async function createLingeringPluginFixture(): Promise<{
       "",
     ].join("\n"),
   );
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   await fs.writeFile(
     configPath,
     JSON.stringify({
@@ -100,7 +100,7 @@ async function createRelayPreloadFixture(
   preloadPath: string;
   stateDir: string;
 }> {
-  const root = tempDirs.make("openclaw-hooks-relay-");
+  const root = tempDirs.make("carapace-hooks-relay-");
   const markerPath = path.join(root, "loaded");
   const preloadPath = path.join(root, "linger.mjs");
   const stateDir = path.join(root, "state");
@@ -131,7 +131,7 @@ async function createTimeoutOwnershipFixture(): Promise<{
   readyMarkerPath: string;
   stateDir: string;
 }> {
-  const root = tempDirs.make("openclaw-hooks-timeout-owner-");
+  const root = tempDirs.make("carapace-hooks-timeout-owner-");
   const nodeWrapperPath = path.join(root, "node-with-tsx");
   const pidLogPath = path.join(root, "pids");
   const preloadPath = path.join(root, "track-relay-pid.mjs");
@@ -153,7 +153,7 @@ async function createTimeoutOwnershipFixture(): Promise<{
   );
   await fs.writeFile(
     nodeWrapperPath,
-    ["#!/bin/sh", 'exec "$OPENCLAW_TEST_NODE" --import tsx "$@"', ""].join("\n"),
+    ["#!/bin/sh", 'exec "$CARAPACE_TEST_NODE" --import tsx "$@"', ""].join("\n"),
   );
   await fs.chmod(nodeWrapperPath, 0o755);
   return { nodeWrapperPath, pidLogPath, preloadPath, readyMarkerPath, stateDir };
@@ -306,7 +306,7 @@ describe("hooks CLI process lifecycle", () => {
         env: {
           LINGER_MARKER: fixture.markerPath,
           NODE_OPTIONS: `--import=${pathToFileURL(fixture.preloadPath).href}`,
-          OPENCLAW_STATE_DIR: fixture.stateDir,
+          CARAPACE_STATE_DIR: fixture.stateDir,
         },
       });
       expect(result, result.stderr).toMatchObject({ code: 1, signal: null });
@@ -338,9 +338,9 @@ describe("hooks CLI process lifecycle", () => {
           VITEST: undefined,
           NODE_COMPILE_CACHE: path.join(fixture.stateDir, "node-compile-cache"),
           NODE_OPTIONS: `--import=${pathToFileURL(fixture.preloadPath).href}`,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: fixture.stateDir,
-          OPENCLAW_TEST_NODE: process.execPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: fixture.stateDir,
+          CARAPACE_TEST_NODE: process.execPath,
           RELAY_PID_LOG: fixture.pidLogPath,
           RELAY_READY_MARKER: fixture.readyMarkerPath,
         },
@@ -412,7 +412,7 @@ describe("hooks CLI process lifecycle", () => {
           "--relay-id",
           relay.relayId,
           "--state-db",
-          resolveOpenClawStateSqlitePath(),
+          resolveCarapaceStateSqlitePath(),
           "--generation",
           relay.generation,
           "--event",
@@ -425,8 +425,8 @@ describe("hooks CLI process lifecycle", () => {
         env: {
           LINGER_MARKER: fixture.markerPath,
           NODE_OPTIONS: `--import=${pathToFileURL(fixture.preloadPath).href}`,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: fixture.stateDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: fixture.stateDir,
         },
         stdin: JSON.stringify({ hook_event_name: "PostToolUse" }),
       });
@@ -449,10 +449,10 @@ describe("hooks CLI process lifecycle", () => {
       label: "hooks list",
       env: {
         LINGER_MARKER: fixture.markerPath,
-        OPENCLAW_CONFIG_PATH: fixture.configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_GATEWAY_PORT: String(unavailableGatewayPort),
-        OPENCLAW_STATE_DIR: fixture.stateDir,
+        CARAPACE_CONFIG_PATH: fixture.configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_GATEWAY_PORT: String(unavailableGatewayPort),
+        CARAPACE_STATE_DIR: fixture.stateDir,
       },
     });
 

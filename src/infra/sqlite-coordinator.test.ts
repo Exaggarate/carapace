@@ -47,7 +47,7 @@ const acquirePeer = `
 
 describe("data-free SQLite coordinator", () => {
   it("leaves an existing coordinator unchanged while excluding current and default-journal peers", () => {
-    const directory = tempDirs.make("openclaw-sqlite-coordinator-");
+    const directory = tempDirs.make("carapace-sqlite-coordinator-");
     const pathname = path.join(directory, "coordinator.sqlite");
     const initialize = openNodeSqliteDatabase(pathname);
     initialize.exec("BEGIN EXCLUSIVE; ROLLBACK;");
@@ -85,7 +85,7 @@ describe("data-free SQLite coordinator", () => {
   });
 
   it("creates a missing coordinator without a journal and permits retry after owner exit", () => {
-    const directory = tempDirs.make("openclaw-sqlite-coordinator-exit-");
+    const directory = tempDirs.make("carapace-sqlite-coordinator-exit-");
     const pathname = path.join(directory, "coordinator.sqlite");
     const coordinator = tryAcquireExclusiveSqliteCoordinator(pathname);
     expect(coordinator).not.toBeNull();
@@ -110,7 +110,7 @@ describe("data-free SQLite coordinator", () => {
   });
 
   it("does not change ordinary state connection durability", () => {
-    const directory = tempDirs.make("openclaw-sqlite-state-durability-");
+    const directory = tempDirs.make("carapace-sqlite-state-durability-");
     const pathname = path.join(directory, "state.sqlite");
     const database = openNodeSqliteDatabase(pathname);
     try {
@@ -141,7 +141,7 @@ describe.skipIf(process.platform === "win32")("private coordinator directory", (
   afterEach(() => vi.restoreAllMocks());
 
   it("does not mutate an already-private directory", () => {
-    const directory = tempDirs.make("openclaw-private-coordinator-");
+    const directory = tempDirs.make("carapace-private-coordinator-");
     fs.chmodSync(directory, 0o700);
     const before = observeDirectory(directory);
     const chmod = vi.spyOn(fs, "chmodSync");
@@ -151,14 +151,14 @@ describe.skipIf(process.platform === "win32")("private coordinator directory", (
   });
 
   it.each([0o755, 0o500, 0o1700])("still hardens mode %s", (mode) => {
-    const directory = tempDirs.make("openclaw-private-coordinator-mode-");
+    const directory = tempDirs.make("carapace-private-coordinator-mode-");
     fs.chmodSync(directory, mode);
     ensurePrivateSqliteCoordinatorDirectory(directory, "test");
     expect(fs.lstatSync(directory).mode & 0o7777).toBe(0o700);
   });
 
   it("rejects a symlink without changing its target", () => {
-    const directory = tempDirs.make("openclaw-private-coordinator-link-");
+    const directory = tempDirs.make("carapace-private-coordinator-link-");
     const target = path.join(directory, "target");
     const alias = path.join(directory, "alias");
     fs.mkdirSync(target, { mode: 0o755 });
@@ -169,7 +169,7 @@ describe.skipIf(process.platform === "win32")("private coordinator directory", (
   });
 
   it("refuses foreign ownership before chmod", () => {
-    const directory = tempDirs.make("openclaw-private-coordinator-owner-");
+    const directory = tempDirs.make("carapace-private-coordinator-owner-");
     fs.chmodSync(directory, 0o755);
     const before = observeDirectory(directory);
     vi.spyOn(process, "getuid").mockReturnValue(fs.lstatSync(directory).uid + 1);

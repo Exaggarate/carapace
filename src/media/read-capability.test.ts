@@ -5,7 +5,7 @@ import path from "node:path";
 import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { readOutboundMediaFile } from "./bounded-read-file.js";
 import { buildOutboundMediaLoadOptions } from "./load-options.js";
 import { getDefaultMediaLocalRoots } from "./local-roots.js";
@@ -40,7 +40,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
 
   it("preserves caller-provided workspaceDir from mediaAccess", () => {
     const result = resolveAgentScopedOutboundMediaAccess({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       mediaAccess: { workspaceDir: "/tmp/media-workspace" },
     });
 
@@ -55,7 +55,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
 
   it("prefers explicit workspaceDir over mediaAccess.workspaceDir", () => {
     const result = resolveAgentScopedOutboundMediaAccess({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       workspaceDir: "/tmp/explicit-workspace",
       mediaAccess: { workspaceDir: "/tmp/media-workspace" },
     });
@@ -70,13 +70,13 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   });
 
   it("keeps explicit workspaceDir in localRoots when agent id is unavailable", () => {
-    const workspaceDir = "/tmp/openclaw-home/workspace-xiaoqian";
+    const workspaceDir = "/tmp/carapace-home/workspace-xiaoqian";
     const result = resolveAgentScopedOutboundMediaAccess({
       cfg: {
         tools: {
           fs: { workspaceOnly: true },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       workspaceDir,
       mediaSources: [`${workspaceDir}/report.html`],
     });
@@ -86,7 +86,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   });
 
   it("does not enable host reads when sender group policy denies read", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         allow: ["read"],
       },
@@ -126,7 +126,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
           allow: ["read"],
           toolsBySender: { "id:attacker": { deny: ["read"] } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       identity: { messageProvider: "requestchat", requesterSenderId: "attacker" },
     },
     {
@@ -144,7 +144,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
             },
           ],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       identity: {
         agentId: "restricted",
         messageProvider: "requestchat",
@@ -158,7 +158,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
           allow: ["read"],
           toolsBySender: { "channel:requestchat:attacker": { deny: ["read"] } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       identity: {
         sessionKey: "agent:main:requestchat:group:ops",
         requesterSenderId: "attacker",
@@ -171,7 +171,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
           allow: ["read"],
           toolsBySender: { "*": { deny: ["read"] } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       identity: { messageProvider: "requestchat", requesterSenderId: "attacker" },
     },
     {
@@ -181,7 +181,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
           allow: ["read"],
           toolsBySender: { "*": { deny: ["read"] } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       identity: { messageProvider: "requestchat" },
     },
   ])("does not enable host reads for $name policy", ({ cfg, identity }) => {
@@ -196,7 +196,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   });
 
   it("keeps host reads enabled when agent sender policy allows the requester", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         allow: ["read"],
         toolsBySender: { "*": { deny: ["read"] } },
@@ -225,17 +225,17 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   });
 
   it("blocks denied workspace attachments while preserving managed artifacts", async () => {
-    const baseDir = tempDirs.make("openclaw-media-sender-policy-");
+    const baseDir = tempDirs.make("carapace-media-sender-policy-");
     const stateDir = path.join(baseDir, "state");
     const workspaceDir = path.join(baseDir, "workspace");
     const workspaceFile = path.join(workspaceDir, "private.bin");
     const managedFile = path.join(stateDir, "media", "tool-image-generation", "result.bin");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     await fs.mkdir(path.dirname(managedFile), { recursive: true });
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(workspaceFile, "private");
     await fs.writeFile(managedFile, "managed");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         allow: ["read"],
         toolsBySender: { "id:attacker": { deny: ["read"] } },
@@ -289,7 +289,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
     const access = resolveAgentScopedOutboundMediaAccess({
       cfg: {
         tools: { allow: ["read"], fs: { workspaceOnly: true } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       workspaceDir,
       mediaSources: [tempMediaPath],
       workspaceMediaAccess: {
@@ -318,7 +318,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
         tools: {
           allow: ["read"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:slack:group:C123",
       groupChannel: "#incidents",
       groupSpace: "team-a",
@@ -340,7 +340,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   });
 
   it("keeps host reads enabled when sender group policy allows read", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         allow: ["read"],
       },
@@ -376,7 +376,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
         tools: {
           allow: ["read"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       messageProvider: "requestchat",
       requesterSenderId: "trusted-user",
     });
@@ -385,7 +385,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   });
 
   it("enforces the caller byte cap before buffering host media", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-cap-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-media-cap-"));
     try {
       const filePath = path.join(workspaceDir, "oversized.bin");
       await fs.writeFile(filePath, Buffer.alloc(2));
@@ -394,7 +394,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
           tools: {
             allow: ["read"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir,
       });
 
@@ -409,7 +409,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
   it.runIf(process.platform !== "win32")(
     "rejects owned host reads when an allowed ancestor symlink retargets before open",
     async () => {
-      const base = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-host-media-race-"));
+      const base = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-host-media-race-"));
       const workspaceDir = path.join(base, "workspace");
       const insideDir = path.join(workspaceDir, "inside");
       const outsideDir = path.join(base, "outside");
@@ -421,7 +421,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
       await fs.writeFile(path.join(outsideDir, "report.csv"), "outside-secret");
       await fs.symlink(insideDir, aliasDir);
       const result = resolveAgentScopedOutboundMediaAccess({
-        cfg: { tools: { allow: ["read"] } } as OpenClawConfig,
+        cfg: { tools: { allow: ["read"] } } as CarapaceConfig,
         workspaceDir,
         mediaSources: [filePath],
       });
@@ -465,7 +465,7 @@ describe("resolveAgentScopedOutboundMediaAccess", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       messageProvider: "requestchat",
       requesterSenderId: "dm-sender",
     });

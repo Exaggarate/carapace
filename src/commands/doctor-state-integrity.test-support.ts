@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   resolveSessionStorePathCore,
   resolveSessionTranscriptsDirForAgent,
@@ -10,7 +10,7 @@ import { noteStateIntegrity as noteStateIntegrityRaw } from "./doctor-state-inte
 
 export const noteMock = vi.fn();
 
-export function withMainAgentRoster(cfg: OpenClawConfig): OpenClawConfig {
+export function withMainAgentRoster(cfg: CarapaceConfig): CarapaceConfig {
   if (cfg.agents?.entries || cfg.agents?.list) {
     return cfg;
   }
@@ -21,7 +21,7 @@ export function withMainAgentRoster(cfg: OpenClawConfig): OpenClawConfig {
 }
 
 export async function noteStateIntegrity(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   prompter: Parameters<typeof noteStateIntegrityRaw>[1],
   configPath?: string,
 ) {
@@ -29,7 +29,7 @@ export async function noteStateIntegrity(
 }
 
 export function setupSessionState(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   homeDir: string,
   agentId = "main",
@@ -74,7 +74,7 @@ export function hasRepairPromptMessage(
 }
 
 export function writeSessionStore(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   sessions: Record<string, { sessionId: string; updatedAt: number } & Record<string, unknown>>,
   agentId = "main",
 ) {
@@ -83,7 +83,7 @@ export function writeSessionStore(
   fs.writeFileSync(storePath, JSON.stringify(sessions, null, 2));
 }
 
-export async function runStateIntegrityText(cfg: OpenClawConfig): Promise<string> {
+export async function runStateIntegrityText(cfg: CarapaceConfig): Promise<string> {
   await noteStateIntegrity(withMainAgentRoster(cfg), {
     confirmRuntimeRepair: vi.fn(async () => false),
     note: noteMock,

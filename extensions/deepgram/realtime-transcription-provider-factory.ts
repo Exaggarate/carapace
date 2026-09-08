@@ -1,4 +1,4 @@
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
 // Deepgram provider module implements model/runtime integration.
 import type {
   RealtimeTranscriptionProviderConfig,
@@ -6,14 +6,14 @@ import type {
   RealtimeTranscriptionSession,
   RealtimeTranscriptionSessionCreateRequest,
   RealtimeTranscriptionWebSocketTransport,
-} from "openclaw/plugin-sdk/realtime-transcription-session";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/realtime-transcription-session";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import {
   asOptionalRecord as readRecord,
   normalizeOptionalString,
   parseBooleanValue as readBoolean,
   parseFiniteNumber as readFiniteNumber,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { DEFAULT_DEEPGRAM_AUDIO_BASE_URL, DEFAULT_DEEPGRAM_AUDIO_MODEL } from "./audio.js";
 
 type DeepgramRealtimeTranscriptionEncoding = "linear16" | "mulaw" | "alaw";

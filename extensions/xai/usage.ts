@@ -1,5 +1,5 @@
 // xAI plugin module implements SuperGrok provider usage behavior.
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import {
   buildUsageHttpErrorSnapshot,
   clampPercent,
@@ -7,11 +7,11 @@ import {
   type ProviderUsageBilling,
   type ProviderUsageSnapshot,
   type UsageWindow,
-} from "openclaw/plugin-sdk/provider-usage";
+} from "carapace/plugin-sdk/provider-usage";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const XAI_PROVIDER_ID = "xai";
 const SUPERGROK_BILLING_URL = "https://cli-chat-proxy.grok.com/v1/billing?format=credits";

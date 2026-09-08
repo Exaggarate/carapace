@@ -96,7 +96,7 @@ function resolveProviderAuthsForTest(
 }
 
 async function withTempHome<T>(fn: (homeDir: string) => Promise<T>): Promise<T> {
-  const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-provider-usage-"));
+  const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-provider-usage-"));
   try {
     return await fn(homeDir);
   } finally {
@@ -207,7 +207,7 @@ describe("resolveProviderAuths plugin boundary", () => {
 
     const result = await resolveProviderAuthsForTest({
       providers: ["anthropic"],
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
     });
     expect(resolveProviderUsageAuthWithPluginMock).toHaveBeenCalledOnce();
     expect(resolveAuthProfileOrderMock).toHaveBeenCalled();
@@ -215,7 +215,7 @@ describe("resolveProviderAuths plugin boundary", () => {
       cfg: {},
       store,
       profileId: "anthropic:admin",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
     });
     expect(result).toEqual([
       {

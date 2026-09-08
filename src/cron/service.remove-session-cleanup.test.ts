@@ -12,9 +12,9 @@ import {
   runExclusiveSqliteSessionWrite,
 } from "../config/sessions/session-accessor.sqlite-scope.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawAgentDatabasesForTest,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceAgentDatabasesForTest,
+} from "../state/carapace-agent-db.js";
 import { clearCronJobActive, markCronJobActive } from "./active-jobs.js";
 import { CronService } from "./service.js";
 import { setupCronServiceSuite } from "./service.test-harness.js";
@@ -88,7 +88,7 @@ const { logger, makeStorePath } = setupCronServiceSuite({
 
 afterEach(() => {
   gatewayTestState.targetBySessionKey.clear();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("CronService.remove session cleanup", () => {
@@ -127,7 +127,7 @@ describe("CronService.remove session cleanup", () => {
 
     expect(fs.existsSync(databasePath)).toBe(false);
     expect(
-      listOpenClawAgentDatabasesForTest().some((database) => database.path === databasePath),
+      listCarapaceAgentDatabasesForTest().some((database) => database.path === databasePath),
     ).toBe(false);
   });
 

@@ -48,7 +48,7 @@ export function resolveQaGatewayChildCommand(repoRoot: string): QaGatewayChildCo
   }
 
   throw new Error(
-    "OpenClaw CLI entry not found: expected scripts/run-node.mjs or dist/index.(m)js",
+    "Carapace CLI entry not found: expected scripts/run-node.mjs or dist/index.(m)js",
   );
 }
 
@@ -65,7 +65,7 @@ export async function runQaGatewayCliCommand(params: {
   const hasStdin = params.stdin !== undefined;
   const child = spawn(params.executablePath, [...params.argsPrefix, ...params.args], {
     cwd: params.cwd,
-    env: { ...params.env, OPENCLAW_CLI: "1" },
+    env: { ...params.env, CARAPACE_CLI: "1" },
     detached: process.platform !== "win32",
     stdio: [hasStdin ? "pipe" : "ignore", "pipe", "pipe"],
   });
@@ -145,7 +145,7 @@ async function readQaGatewayCliCommand(
   const stdoutText = readQaChildOutput(stdout);
   if (failure || exitCode !== 0) {
     // Preserve the first failure's reason, but include output drained during shutdown.
-    const reason = failure?.message ?? `OpenClaw CLI exited ${exitCode}`;
+    const reason = failure?.message ?? `Carapace CLI exited ${exitCode}`;
     const stderrText = formatQaChildOutputTail(stderr, "stderr");
     failure = createQaGatewayCliError(
       `${reason}: ${[stderrText, stdoutText].filter(Boolean).join("\n")}`,

@@ -2,7 +2,7 @@ import {
   runSessionStartupMigration,
   type SessionStartupMigrationLogger,
 } from "../config/sessions/startup-migration.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type SessionMigrationDeps = Parameters<typeof runSessionStartupMigration>[0]["deps"] & {
   reconcileSessionTranscriptIndexes?: typeof import("../config/sessions/session-transcript-reconcile.js").reconcileSessionTranscriptIndexes;
@@ -10,7 +10,7 @@ type SessionMigrationDeps = Parameters<typeof runSessionStartupMigration>[0]["de
 
 /** Await SQLite maintenance and projection repair before serving session history. */
 export async function runStartupSessionMigration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   log: SessionStartupMigrationLogger;
   deps?: SessionMigrationDeps;

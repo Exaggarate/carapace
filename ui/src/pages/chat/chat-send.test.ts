@@ -1,8 +1,8 @@
-import { reduceSessionProjection } from "@openclaw/gateway-client/browser";
+import { reduceSessionProjection } from "@carapace/gateway-client/browser";
 /* @vitest-environment jsdom */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { GatewayRequestError } from "../../api/gateway.ts";
@@ -2004,7 +2004,7 @@ describe("handleSendChat", () => {
       const persistedPeer = {
         role: "user",
         content: [{ type: "text", text: "same visible message" }],
-        __openclaw: { id: "peer-user", seq: 1, idempotencyKey: "peer-run:user" },
+        __carapace: { id: "peer-user", seq: 1, idempotencyKey: "peer-run:user" },
       };
       let rejectedRunId = "";
       const host = makeChatHost({
@@ -2019,7 +2019,7 @@ describe("handleSendChat", () => {
               message: {
                 role: "user",
                 content: [{ type: "text", text: "same visible message" }],
-                __openclaw: { idempotencyKey: `${rejectedRunId}:user` },
+                __carapace: { idempotencyKey: `${rejectedRunId}:user` },
               },
               scope,
             });
@@ -2416,7 +2416,7 @@ describe("handleSendChat", () => {
     );
     const patch = patchChatSessionSettings(host, "agent:main", { model: "next" });
     history.resolve({
-      messages: [{ role: "user", __openclaw: { idempotencyKey: "older-picker-run:user" } }],
+      messages: [{ role: "user", __carapace: { idempotencyKey: "older-picker-run:user" } }],
       sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
     });
 
@@ -5947,7 +5947,7 @@ describe("handleSendChat", () => {
     ).toEqual(["user", "assistant"]);
     expect(
       inactiveCached.filter((message) => {
-        const marker = requireRecord(message, "cached terminal transcript")["__openclaw"];
+        const marker = requireRecord(message, "cached terminal transcript")["__carapace"];
         return (
           marker &&
           typeof marker === "object" &&
@@ -5998,7 +5998,7 @@ describe("handleSendChat", () => {
         chatMessage: "summarize",
         chatAttachments: presentedAttachments,
       });
-      sessionStorage.setItem("openclaw.control.outboxTab.v1", "test-outbox-tab");
+      sessionStorage.setItem("carapace.control.outboxTab.v1", "test-outbox-tab");
       const stopSource = subscribeChatOutboxProjection(source);
       let stopVisible = () => {};
       let stopInactive = () => {};
@@ -6938,7 +6938,7 @@ describe("handleSendChat", () => {
           return Promise.resolve({
             messages:
               historyRequests > 2
-                ? [{ role: "user", __openclaw: { idempotencyKey: `${runId}:user` } }]
+                ? [{ role: "user", __carapace: { idempotencyKey: `${runId}:user` } }]
                 : [],
             sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
           });
@@ -7865,7 +7865,7 @@ describe("handleSendChat", () => {
           status: "started",
         }),
       });
-      sessionStorage.setItem("openclaw.control.outboxTab.v1", "test-outbox-tab");
+      sessionStorage.setItem("carapace.control.outboxTab.v1", "test-outbox-tab");
       const source = makeChatHost({
         client: clientWithRequest(request),
         connected: false,
@@ -8960,7 +8960,7 @@ describe("handleSendChat", () => {
               messages: [
                 {
                   role: "user",
-                  __openclaw: { idempotencyKey: "ambiguous-run:user" },
+                  __carapace: { idempotencyKey: "ambiguous-run:user" },
                 },
               ],
               sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
@@ -9023,7 +9023,7 @@ describe("handleSendChat", () => {
           };
         },
       });
-      sessionStorage.setItem("openclaw.control.outboxTab.v1", "test-outbox-tab");
+      sessionStorage.setItem("carapace.control.outboxTab.v1", "test-outbox-tab");
       const source = makeChatHost({
         client: clientWithRequest(request),
         chatMessage: "keep my admitted message visible",
@@ -9269,7 +9269,7 @@ describe("handleSendChat", () => {
       const aggregate = {
         role: "user",
         content: "Collected inputs",
-        __openclaw: {
+        __carapace: {
           id: "aggregate",
           seq: 1,
           idempotencyKey: "followup-collect:session:batch",
@@ -9360,7 +9360,7 @@ describe("handleSendChat", () => {
                 : [
                     {
                       role: "user",
-                      __openclaw: { idempotencyKey: "late-history-proof:user" },
+                      __carapace: { idempotencyKey: "late-history-proof:user" },
                     },
                   ],
             sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
@@ -9410,7 +9410,7 @@ describe("handleSendChat", () => {
             messages: [
               {
                 role: "user",
-                __openclaw: { idempotencyKey: "delivered-removal-failure:user" },
+                __carapace: { idempotencyKey: "delivered-removal-failure:user" },
               },
             ],
             sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
@@ -10527,7 +10527,7 @@ describe("handleSendChat", () => {
           },
         ],
         timestamp: expect.any(Number),
-        __openclaw: { idempotencyKey: expect.stringMatching(/:user$/) },
+        __carapace: { idempotencyKey: expect.stringMatching(/:user$/) },
       },
     ]);
   });
@@ -10569,7 +10569,7 @@ describe("handleSendChat", () => {
   });
 
   it("surfaces a terminal send failure through the global toast when the pane is not visible", async () => {
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
     const host = makeChatHost({
       requestHandlers: {
@@ -10733,7 +10733,7 @@ describe("handleSendChat", () => {
   });
 
   it("surfaces a failed local command globally after a route switch", async () => {
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
     const item = createQueuedLocalCommand("route-switched-command", "/think", {
       sessionKey: "agent:main:first",
@@ -10765,7 +10765,7 @@ describe("handleSendChat", () => {
   });
 
   it("names the failed agent's global session in the toast, not another agent's row", async () => {
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
     const host = makeChatHost({
       requestHandlers: {
@@ -10835,7 +10835,7 @@ describe("handleAbortChat", () => {
 
   it("aborts the exact selected session when no browser run id exists", async () => {
     const request = vi.fn(async () => ({ abortedRunId: null, status: "aborted" }));
-    const sessionKey = "agent:main:openclaw-weixin:direct:wechat-user";
+    const sessionKey = "agent:main:carapace-weixin:direct:wechat-user";
     const host = makeChatHost({
       client: clientWithRequest(request),
       chatRunId: null,

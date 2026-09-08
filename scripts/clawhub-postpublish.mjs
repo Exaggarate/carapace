@@ -19,8 +19,8 @@ import { readBoundedResponseText } from "./lib/bounded-response.mjs";
 import { verifyReleaseToolingIdentity } from "./release-tooling-identity.mjs";
 import { verifyPublishedClawHubPackage } from "./verify-clawhub-published-artifact.mjs";
 
-const REPOSITORY = "openclaw/openclaw";
-const PARENT_WORKFLOW = ".github/workflows/openclaw-release-publish.yml";
+const REPOSITORY = "carapace/carapace";
+const PARENT_WORKFLOW = ".github/workflows/carapace-release-publish.yml";
 const CHILD_WORKFLOW = ".github/workflows/plugin-clawhub-release.yml";
 const MAX_RECEIPT_BYTES = 64 * 1024;
 
@@ -184,7 +184,7 @@ export async function verifyClawHubPostpublish({
   const parent = await githubJson(`actions/runs/${runId}/attempts/${runAttempt}`, context);
   requireSuccessfulRun(parent, expectedParent);
   const artifacts = await listRunArtifacts(runId, context);
-  const dispatchName = `openclaw-release-children-${runId}-${runAttempt}`;
+  const dispatchName = `carapace-release-children-${runId}-${runAttempt}`;
   const dispatchArtifacts = artifacts.filter((artifact) => artifact.name === dispatchName);
   if (dispatchArtifacts.length !== 1) {
     throw new Error("Missing exact parent release dispatch record.");
@@ -266,7 +266,7 @@ export async function verifyClawHubPostpublish({
   }
   positiveId(dispatch.normalClawHubRunId, "dispatched child run");
   positiveId(dispatch.normalClawHubRunAttempt, "dispatched child attempt");
-  const prefix = `openclaw-clawhub-parent-authorization-v2-${runId}-${runAttempt}-`;
+  const prefix = `carapace-clawhub-parent-authorization-v2-${runId}-${runAttempt}-`;
   const receipts = artifacts.filter((artifact) => artifact.name?.startsWith(prefix));
   if (receipts.length !== 1) {
     throw new Error("Expected exactly one ClawHub parent authorization artifact for this attempt.");

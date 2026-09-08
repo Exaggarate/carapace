@@ -3,9 +3,9 @@
  * tools.
  */
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type { Page } from "playwright-core";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import { DEFAULT_BROWSER_DOWNLOAD_TIMEOUT_MS } from "./constants.js";
 import type { BrowserDownloadResult } from "./download-types.js";
 import { resolveStrictExistingUploadPaths } from "./paths.js";
@@ -70,7 +70,7 @@ function createExplicitDownloadCapture(params: {
 }
 
 function resolveImplicitDownloadRoot(): string {
-  return path.join(resolvePreferredOpenClawTmpDir(), "downloads");
+  return path.join(resolvePreferredCarapaceTmpDir(), "downloads");
 }
 
 type UploadOptions = NavigationTargetOptions & {

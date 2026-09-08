@@ -1,6 +1,6 @@
 // Irc tests cover client plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withTimeout } from "openclaw/plugin-sdk/security-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withTimeout } from "carapace/plugin-sdk/security-runtime";
 import { describe, expect, it } from "vitest";
 import { connectIrcClient } from "./client.js";
 import { onIrcTestLine, startIrcTestServer } from "./irc-server.test-support.js";
@@ -62,7 +62,7 @@ async function connectAndCollectRegistration(params: {
       tls: false,
       nick: "bot",
       username: "bot",
-      realname: "OpenClaw Bot",
+      realname: "Carapace Bot",
       nickserv: params.nickserv,
       onError: (error) => errors.push(error),
     });
@@ -86,7 +86,7 @@ async function connectAfterNickCollision(nick: string): Promise<string> {
       tls: false,
       nick,
       username: "bot",
-      realname: "OpenClaw Bot",
+      realname: "Carapace Bot",
     });
     const nickLines = server.lines.filter((line) => line.startsWith("NICK "));
     expect(nickLines).toHaveLength(2);
@@ -179,7 +179,7 @@ describe("irc client readiness timeout", () => {
           tls: false,
           nick: "bot",
           username: "bot",
-          realname: "OpenClaw Bot",
+          realname: "Carapace Bot",
           connectTimeoutMs: 50,
         }),
       ).rejects.toThrow(/IRC connect/);
@@ -210,9 +210,9 @@ describe("irc client fallback nick", () => {
     expect(nick).toMatch(/^mybot_\d*$/);
   });
 
-  it("falls back to openclaw when a colliding nick is entirely special characters", async () => {
+  it("falls back to carapace when a colliding nick is entirely special characters", async () => {
     const nick = await connectAfterNickCollision("!!!");
-    expect(nick).toMatch(/^openclaw_\d*$/);
+    expect(nick).toMatch(/^carapace_\d*$/);
   });
 
   it("truncates a long fallback nick to 30 characters", async () => {
@@ -234,7 +234,7 @@ async function collectPrivmsgBodies(
     tls: false,
     nick: "bot",
     username: "bot",
-    realname: "OpenClaw Bot",
+    realname: "Carapace Bot",
     connectTimeoutMs: 5000,
     messageChunkMaxChars,
   });

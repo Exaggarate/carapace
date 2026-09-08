@@ -6,7 +6,7 @@ import {
   setBoundedConfigIoWarningEntry,
   warnedFutureTouchedVersions,
 } from "./io.state.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 import { shouldWarnOnTouchedVersion } from "./version.js";
 
 export function warnOnConfigMiskeys(raw: unknown, logger: Pick<typeof console, "warn">): void {
@@ -49,7 +49,7 @@ export function logConfigWarningsOnce(params: {
 }
 
 export function warnIfConfigFromFuture(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   logger: Pick<typeof console, "warn">,
 ): void {
   const touched = cfg.meta?.lastTouchedVersion;
@@ -61,9 +61,9 @@ export function warnIfConfigFromFuture(
   }
   logger.warn(
     [
-      `Your OpenClaw config was written by version ${touched}, but this command is running ${VERSION}.`,
-      "Check: `openclaw --version`, `which openclaw`, and `openclaw gateway status --deep`.",
-      "If unexpected, update PATH so `openclaw` points to the version you want, or reinstall the Gateway service from that same OpenClaw install.",
+      `Your Carapace config was written by version ${touched}, but this command is running ${VERSION}.`,
+      "Check: `carapace --version`, `which carapace`, and `carapace gateway status --deep`.",
+      "If unexpected, update PATH so `carapace` points to the version you want, or reinstall the Gateway service from that same Carapace install.",
     ].join("\n"),
   );
 }

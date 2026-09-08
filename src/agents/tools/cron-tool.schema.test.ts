@@ -1,13 +1,13 @@
 import {
   findLlamacppGbnfSchemaViolations,
   normalizeToolParameterSchema,
-} from "@openclaw/ai/internal/tool-schema";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/ai/internal/tool-schema";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 // Cron tool schema tests cover the provider-facing parameter shape and runtime
 // validation compatibility for cron jobs.
 import { Value } from "typebox/value";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createCronTool } from "./cron-tool.js";
 
 /** Unwraps nullable anyOf unions to their object variant so paths can descend. */
@@ -497,7 +497,7 @@ describe("createCronToolSchema", () => {
 describe("createCronToolSchema with cron triggers disabled", () => {
   const triggersDisabledConfig = {
     cron: { enabled: true, triggers: { enabled: false } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const tool = createCronTool({ config: triggersDisabledConfig });
   const schemaRecord = tool.parameters as unknown as Record<string, unknown>;
 
@@ -541,7 +541,7 @@ describe("createCronToolSchema with cron triggers disabled", () => {
 
   it("keeps the full surface when config omits cron.triggers (enabled default)", () => {
     const defaultPostureSchema = createCronTool({
-      config: { cron: { enabled: true } } as OpenClawConfig,
+      config: { cron: { enabled: true } } as CarapaceConfig,
     }).parameters as unknown as Record<string, unknown>;
     expect(keysAt(defaultPostureSchema, "job")).toContain("trigger");
     expect(propertyAt(defaultPostureSchema, "job.schedule.kind")?.enum).toContain("stream");

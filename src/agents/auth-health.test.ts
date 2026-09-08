@@ -3,7 +3,7 @@
  * Covers OAuth/API-key status classification, external CLI bootstrap, provider
  * auth ordering, and prompt-free credential checks.
  */
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { OAuthCredential } from "./auth-profiles/types.js";
 import type { ProviderAuthAliasLookupParams } from "./provider-auth-aliases.js";
@@ -145,7 +145,7 @@ describe("buildAuthHealthSummary", () => {
           provider: "openai-codex",
           expires: now + DEFAULT_OAUTH_WARN_MS + 60_000,
           oauthRef: {
-            source: "openclaw-credentials" as const,
+            source: "carapace-credentials" as const,
             provider: "openai-codex" as const,
             id: "0123456789abcdef0123456789abcdef",
           },
@@ -326,7 +326,7 @@ describe("buildAuthHealthSummary", () => {
         "zai:default": {
           type: "api_key" as const,
           provider: "zai",
-          key: "openclaw onboard --auth-choice zai-coding-global",
+          key: "carapace onboard --auth-choice zai-coding-global",
         },
       },
     };

@@ -6,13 +6,13 @@ import { resolveTelegramQaRunOptions } from "./run-options.runtime.js";
 describe("resolveTelegramQaRunOptions", () => {
   it("drops blank model refs so live transports can use provider defaults", () => {
     const options = resolveTelegramQaRunOptions({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       providerMode: "live-frontier",
       primaryModel: " ",
       alternateModel: "",
       listScenarios: true,
     });
-    expect(options.repoRoot).toBe(path.resolve("/tmp/openclaw-repo"));
+    expect(options.repoRoot).toBe(path.resolve("/tmp/carapace-repo"));
     expect(options.providerMode).toBe("live-frontier");
     expect(options.primaryModel).toBeUndefined();
     expect(options.alternateModel).toBeUndefined();

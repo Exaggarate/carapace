@@ -22,23 +22,23 @@ describe("qa-e2e script", () => {
 
     enablePrivateQaScriptEnv(env);
 
-    expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBe("1");
-    expect(env.OPENCLAW_ENABLE_PRIVATE_QA_CLI).toBe("1");
-    expect(env.OPENCLAW_DISABLE_BUNDLED_PLUGINS).toBe("0");
+    expect(env.CARAPACE_BUILD_PRIVATE_QA).toBe("1");
+    expect(env.CARAPACE_ENABLE_PRIVATE_QA_CLI).toBe("1");
+    expect(env.CARAPACE_DISABLE_BUNDLED_PLUGINS).toBe("0");
   });
 
   it("overrides inherited environment that would break the private QA self-check", () => {
     const env: NodeJS.ProcessEnv = {
-      OPENCLAW_BUILD_PRIVATE_QA: "0",
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "0",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_BUILD_PRIVATE_QA: "0",
+      CARAPACE_ENABLE_PRIVATE_QA_CLI: "0",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
 
     enablePrivateQaScriptEnv(env);
 
-    expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBe("1");
-    expect(env.OPENCLAW_ENABLE_PRIVATE_QA_CLI).toBe("1");
-    expect(env.OPENCLAW_DISABLE_BUNDLED_PLUGINS).toBe("0");
+    expect(env.CARAPACE_BUILD_PRIVATE_QA).toBe("1");
+    expect(env.CARAPACE_ENABLE_PRIVATE_QA_CLI).toBe("1");
+    expect(env.CARAPACE_DISABLE_BUNDLED_PLUGINS).toBe("0");
   });
 
   it("resolves the default self-check report path", () => {
@@ -61,7 +61,7 @@ describe("qa-e2e script", () => {
 
     expect(loadRuntime).not.toHaveBeenCalled();
     expect(writeStdout).toHaveBeenCalledWith(expect.stringContaining("Usage: pnpm qa:e2e"));
-    expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBeUndefined();
+    expect(env.CARAPACE_BUILD_PRIVATE_QA).toBeUndefined();
   });
 
   it("rejects unknown options before enabling private QA or loading QA Lab", async () => {
@@ -75,7 +75,7 @@ describe("qa-e2e script", () => {
     );
 
     expect(loadRuntime).not.toHaveBeenCalled();
-    expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBeUndefined();
+    expect(env.CARAPACE_BUILD_PRIVATE_QA).toBeUndefined();
   });
 
   it("parses explicit output flags and package-manager separators", () => {
@@ -104,7 +104,7 @@ describe("qa-e2e script", () => {
     ).rejects.toThrow("qa:e2e output path was provided more than once");
 
     expect(loadRuntime).not.toHaveBeenCalled();
-    expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBeUndefined();
+    expect(env.CARAPACE_BUILD_PRIVATE_QA).toBeUndefined();
   });
 
   it.each([
@@ -131,7 +131,7 @@ describe("qa-e2e script", () => {
     expect(runQaE2eSelfCheck).toHaveBeenCalledWith({ outputPath: ".artifacts/custom.md" });
     expect(isQaSelfCheckSuccessful).toHaveBeenCalledWith(result);
     expect(writeStdout).toHaveBeenCalledWith("QA self-check report: /tmp/qa-self-check.md\n");
-    expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBe("1");
+    expect(env.CARAPACE_BUILD_PRIVATE_QA).toBe("1");
   });
 
   it("lets QA Lab choose the default self-check output path", async () => {

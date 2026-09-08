@@ -1,10 +1,10 @@
-import { onAgentEvent } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { onAgentEvent } from "carapace/plugin-sdk/agent-harness-runtime";
 // Codex tests cover native subagent monitor plugin behavior.
 import type {
   AgentHarnessScopedSetDeliveryStatusParams,
   AgentHarnessTaskRecord,
   AgentHarnessTaskRuntimeScope,
-} from "openclaw/plugin-sdk/agent-harness-task-runtime";
+} from "carapace/plugin-sdk/agent-harness-task-runtime";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import {
   claimCodexAppServerLiveThread,

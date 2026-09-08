@@ -1,7 +1,7 @@
 import { on, once } from "node:events";
 import type { IncomingMessage } from "node:http";
 import { performance } from "node:perf_hooks";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
 import { createEmptyPluginRegistry } from "../../../plugins/registry-empty.js";

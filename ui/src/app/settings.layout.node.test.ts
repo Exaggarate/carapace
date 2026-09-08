@@ -42,7 +42,7 @@ describe("settings layout persistence", () => {
     });
     const gwUrl = expectedGatewayUrl("");
     localStorage.setItem(
-      `openclaw.control.settings.v1:${gwUrl}`,
+      `carapace.control.settings.v1:${gwUrl}`,
       JSON.stringify({ gatewayUrl: gwUrl, chatSplitLayout: { columns: "invalid" } }),
     );
 
@@ -88,7 +88,7 @@ describe("settings layout persistence", () => {
     });
     const gwUrl = expectedGatewayUrl("");
     localStorage.setItem(
-      `openclaw.control.settings.v1:${gwUrl}`,
+      `carapace.control.settings.v1:${gwUrl}`,
       JSON.stringify({
         gatewayUrl: gwUrl,
         boardSessionViews: {
@@ -120,7 +120,7 @@ describe("settings layout persistence", () => {
     setTestLocation({ protocol: "https:", host: "gateway.example:8443", pathname: "/" });
     const gwUrl = expectedGatewayUrl("");
     localStorage.setItem(
-      `openclaw.control.settings.v1:${gwUrl}`,
+      `carapace.control.settings.v1:${gwUrl}`,
       JSON.stringify({
         gatewayUrl: gwUrl,
         sidebarSessionLayouts: { "agent:main:main": { columns: "invalid" } },

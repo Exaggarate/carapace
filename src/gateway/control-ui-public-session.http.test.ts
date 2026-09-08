@@ -1,7 +1,7 @@
 import type { Server } from "node:http";
-import { buildControlUiPublicSessionSharePath } from "@openclaw/session-url-contract/public-share";
+import { buildControlUiPublicSessionSharePath } from "@carapace/session-url-contract/public-share";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   getActiveGatewayRootWorkCount,
   resetGatewayWorkAdmission,
@@ -26,7 +26,7 @@ vi.mock("./control-ui-public-session-token.js", () => ({
   resolvePublicSessionShareToken: tokenResolver,
 }));
 
-const TEST_CONFIG: OpenClawConfig = {
+const TEST_CONFIG: CarapaceConfig = {
   gateway: { publicOrigin: "https://gateway.example.test" },
 };
 const LOCATOR = {
@@ -45,7 +45,7 @@ const PUBLIC_SESSION = {
   truncated: false,
 };
 
-function createPublicGateway(basePath = "", config: OpenClawConfig = TEST_CONFIG): Server {
+function createPublicGateway(basePath = "", config: CarapaceConfig = TEST_CONFIG): Server {
   return createTestGatewayServer({
     resolvedAuth: AUTH_TOKEN,
     overrides: {
@@ -130,7 +130,7 @@ describe("anonymous public session HTTP boundary", () => {
       const html = response.getBody();
       expect(html).toContain("Launch notes");
       expect(html).toContain("The public viewer is ready.");
-      expect(html).not.toMatch(/agent:demo|séssion\.123|<script|openclaw-app/);
+      expect(html).not.toMatch(/agent:demo|séssion\.123|<script|carapace-app/);
       expect(responseHeader(response, "Cache-Control")).toBe("no-store");
       expect(responseHeader(response, "Referrer-Policy")).toBe("no-referrer");
       expect(responseHeader(response, "Content-Security-Policy")).toContain("default-src 'none'");
@@ -144,7 +144,7 @@ describe("anonymous public session HTTP boundary", () => {
       expect(reader).not.toHaveBeenCalled();
 
       const privateApi = await send(server, {
-        path: `${basePath}/__openclaw__/assistant-media?source=missing.png`,
+        path: `${basePath}/__carapace__/assistant-media?source=missing.png`,
       });
       expect(privateApi.res.statusCode).toBe(401);
       reader.mockResolvedValueOnce({
@@ -199,7 +199,7 @@ describe("anonymous public session HTTP boundary", () => {
 
       const preview = await send(server, { path: "/share/dashboard/example/private-name" });
       expect(preview.res.statusCode).toBe(200);
-      expect(preview.getBody()).toContain("OpenClaw dashboard");
+      expect(preview.getBody()).toContain("Carapace dashboard");
       expect(reader).not.toHaveBeenCalled();
     } finally {
       suspension?.release();

@@ -1,5 +1,5 @@
 /** Public installed-plugin-index API for load, refresh, policy hash, and invalidation checks. */
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { resolveCompatibilityHostVersion } from "../version.js";
 import { withBundledPluginEnablementCompat } from "./bundled-compat.js";
 import { isBundledProviderCompatPlugin } from "./bundled-provider-compat.js";
@@ -10,7 +10,7 @@ import {
   type PluginActivationConfigSource,
 } from "./config-state.js";
 import { isPluginEnabledByDefaultForPlatform } from "./default-enablement.js";
-import { discoverOpenClawPlugins, type PluginDiscoveryResult } from "./discovery.js";
+import { discoverCarapacePlugins, type PluginDiscoveryResult } from "./discovery.js";
 import { normalizeInstallRecordMap } from "./installed-plugin-index-install-records.js";
 import {
   resolveCompatRegistryVersion,
@@ -71,7 +71,7 @@ function buildInstalledPluginIndex(
   const baseDiscovery = params.candidates
     ? { candidates: params.candidates, diagnostics: params.diagnostics ?? [] }
     : (params.discovery ??
-      discoverOpenClawPlugins({
+      discoverCarapacePlugins({
         workspaceDir: params.workspaceDir,
         extraPaths: normalizePluginsConfig(params.config?.plugins).loadPaths,
         env,
@@ -183,7 +183,7 @@ export function getInstalledPluginRecord(
 export function isInstalledPluginEnabled(
   index: InstalledPluginIndex,
   pluginId: string,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): boolean {
   const record = getInstalledPluginRecord(index, pluginId);
@@ -204,7 +204,7 @@ function isInstalledBundledProvider(record: InstalledPluginIndexRecord): boolean
 /** Prepare live policy for one synchronous operation, never across config/root changes. */
 export function createInstalledPluginEnabledPredicate(
   plugins: readonly InstalledPluginIndexRecord[],
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): (pluginId: string) => boolean {
   let source: PluginActivationConfigSource | undefined;

@@ -5,8 +5,8 @@ import {
   type AgentMessage,
   type BeforeToolCallFailureDisposition,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { readStringField as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { readStringField as readString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { persistCodexContextCompactionActivity } from "./context-compaction-activity.js";
 import {
   matchesCodexSnapshotTurn,
@@ -268,7 +268,7 @@ export class CodexAppServerEventProjector extends CodexTurnProjection {
     this.toolTranscriptProjection.recordDynamicToolCall(params);
   }
 
-  /** Projects a successful OpenClaw progress_card call through the native plan stream. */
+  /** Projects a successful Carapace progress_card call through the native plan stream. */
   async recordDynamicProgressCardUpdate(params: unknown): Promise<void> {
     const update = projectProgressCardChannelUpdate(params);
     if (update) {
@@ -276,7 +276,7 @@ export class CodexAppServerEventProjector extends CodexTurnProjection {
         plan: update.steps,
         ...(update.explanation ? { explanation: update.explanation } : {}),
       };
-      await this.reasoningProjection.handleTurnPlanUpdated(projected, "openclaw");
+      await this.reasoningProjection.handleTurnPlanUpdated(projected, "carapace");
     }
   }
 

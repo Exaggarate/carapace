@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerStatusHealthSessionsCommands } from "../cli/program/register.status-health-sessions.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { UsageSummary } from "../infra/provider-usage.types.js";
 import type { StatusUsageSummaryOptions } from "./status-usage.runtime.js";
 import type { StatusScanOverviewResult } from "./status.scan-overview.js";
@@ -93,7 +93,7 @@ vi.mock("../security/audit.runtime.js", () => ({
   }),
 }));
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   gateway: { mode: "local", bind: "loopback" },
   agents: {
     ownership: "explicit",
@@ -209,7 +209,7 @@ describe("status usage routing through Commander", () => {
     if (args.includes("--json")) {
       expect(JSON.parse(output).usage).toEqual(summary);
     } else {
-      expect(output).toContain("OpenClaw status");
+      expect(output).toContain("Carapace status");
       if (args.includes("--all")) {
         expect(output).toContain("Diagnosis (read-only)");
       }

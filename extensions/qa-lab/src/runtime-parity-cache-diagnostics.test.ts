@@ -1,11 +1,11 @@
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolveStorePath, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolveStorePath, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
+  closeCarapaceAgentDatabasesForTest,
   formatSqliteSessionFileMarker,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildRuntimeParityCacheDiagnostics } from "./runtime-parity-cache-diagnostics.js";
 import { captureRuntimeParityCell, type RuntimeParityUsage } from "./runtime-parity.js";
@@ -17,17 +17,17 @@ afterEach(async () => {
   // Fixtures point a state dir at these temp workspaces, so the shared and per-agent
   // SQLite handles stay cached and Windows fails the removal with EBUSY. The agent close
   // releases its leases through shared state and reopens it, so the store is released second.
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   await tempDirs.cleanup();
 });
 
 async function seedRuntimeParityCacheTranscript(messages: Array<Record<string, unknown>>) {
-  const tempRoot = await tempDirs.makeTempDir("openclaw-qa-runtime-parity-cache-");
+  const tempRoot = await tempDirs.makeTempDir("carapace-qa-runtime-parity-cache-");
   const agentId = "qa";
   const sessionId = "runtime-parity-cache-miss";
   const sessionKey = "agent:qa:runtime-parity-cache-miss";
-  const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(tempRoot, "state") };
+  const env = { ...process.env, CARAPACE_STATE_DIR: path.join(tempRoot, "state") };
   const storePath = resolveStorePath(undefined, { agentId, env });
   await upsertSessionEntry({
     agentId,
@@ -128,7 +128,7 @@ describe("runtime parity prompt-cache diagnostics", () => {
     ]);
 
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: { tempRoot },
       scenarioResult: { status: "pass" },
       wallClockMs: 10,
@@ -164,7 +164,7 @@ describe("runtime parity prompt-cache diagnostics", () => {
     ]);
 
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: { tempRoot },
       scenarioResult: { status: "pass" },
       wallClockMs: 10,
@@ -199,7 +199,7 @@ describe("runtime parity prompt-cache diagnostics", () => {
     ]);
 
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: { tempRoot },
       scenarioResult: { status: "pass" },
       wallClockMs: 10,

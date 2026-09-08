@@ -5,7 +5,7 @@ import { createDeferred, withTestTimeout } from "../../test/helpers/promise.js";
 import { clearSessionResetRuntimeState } from "../auto-reply/reply/session-reset-cleanup.js";
 import { drainFormattedSystemEvents } from "../auto-reply/reply/session-system-events.js";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { buildChannelOutboundSessionRoute } from "../plugin-sdk/core.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
@@ -76,7 +76,7 @@ function latestDeliveryRequest(): DeliveryRequest {
   return request as DeliveryRequest;
 }
 
-function makeIsolatedLastTargetConfig(tmpDir: string, storePath: string): OpenClawConfig {
+function makeIsolatedLastTargetConfig(tmpDir: string, storePath: string): CarapaceConfig {
   return {
     agents: {
       list: [{ id: "main", default: true }],

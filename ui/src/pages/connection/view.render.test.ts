@@ -74,9 +74,9 @@ describe("connection view rendering", () => {
       .querySelector('input[aria-label="Gateway secret"]')
       ?.closest(".settings-row__control");
     expect(control?.querySelector('[role="status"]')?.textContent).toContain(
-      "device setup code for the OpenClaw mobile app",
+      "device setup code for the Carapace mobile app",
     );
-    expect(control?.textContent).toContain("openclaw gateway auth-token --show");
+    expect(control?.textContent).toContain("carapace gateway auth-token --show");
     render(renderConnection(createConnectionProps()), container);
     expect(control?.querySelector('[role="status"]')).toBeNull();
   });
@@ -191,7 +191,7 @@ describe("connection view rendering", () => {
       memoryFreeBytes: 17_179_869_184,
       diskTotalBytes: 994_662_584_320,
       diskAvailableBytes: 497_331_292_160,
-      diskPath: "/Users/operator/.openclaw",
+      diskPath: "/Users/operator/.carapace",
       disks: [
         {
           path: "/",
@@ -274,7 +274,7 @@ describe("connection view rendering", () => {
         2 + (disks?.length ?? 0),
       );
       expect(container.textContent).not.toContain("/Volumes/Archive");
-      expect(container.textContent).not.toContain("/Users/operator/.openclaw");
+      expect(container.textContent).not.toContain("/Users/operator/.carapace");
     }
   });
 

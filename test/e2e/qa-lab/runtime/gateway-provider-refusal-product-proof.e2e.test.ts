@@ -128,9 +128,9 @@ describe("Gateway provider refusal product proof", () => {
       transportBaseUrl: "http://127.0.0.1",
       controlUiEnabled: false,
       runtimeEnvPatch: {
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
       },
       mutateConfig: ({ plugins: _plugins, ...config }) => config,
     });

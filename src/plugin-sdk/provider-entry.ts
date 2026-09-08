@@ -1,6 +1,6 @@
 // Provider entry contracts define provider plugin hooks, model catalogs, and runtime adapters.
-import type { UnifiedModelCatalogEntry } from "@openclaw/model-catalog-core/model-catalog-types";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import type { UnifiedModelCatalogEntry } from "@carapace/model-catalog-core/model-catalog-types";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeStringEntries,
   uniqueStrings,
@@ -33,9 +33,9 @@ import {
 import { createLazyRuntimeMethod, createLazyRuntimeModule } from "./lazy-runtime.js";
 import { definePluginEntry } from "./plugin-entry.js";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginDefinition,
+  CarapacePluginApi,
+  CarapacePluginConfigSchema,
+  CarapacePluginDefinition,
 } from "./plugin-entry.js";
 import type { OpenAICompatibleModelDiscoveryOptions } from "./provider-catalog-live-runtime.js";
 
@@ -223,26 +223,26 @@ export type SingleProviderPluginOptions = {
    */
   manifest?: SingleProviderPluginManifest;
   /**
-   * @deprecated Declare exclusive plugin kind in `openclaw.plugin.json` via
+   * @deprecated Declare exclusive plugin kind in `carapace.plugin.json` via
    * manifest `kind`. Runtime-entry `kind` remains only as a compatibility
    * fallback for older plugins.
    */
-  kind?: OpenClawPluginDefinition["kind"];
+  kind?: CarapacePluginDefinition["kind"];
   /**
    * Optional plugin configuration schema or lazy schema factory.
    */
-  configSchema?: OpenClawPluginConfigSchema | (() => OpenClawPluginConfigSchema);
+  configSchema?: CarapacePluginConfigSchema | (() => CarapacePluginConfigSchema);
   /**
    * Primary provider registration. Extra provider fields are forwarded after
    * the helper-owned id/auth/catalog fields are normalized.
    */
   provider?:
     | SingleProviderPluginDefinition
-    | ((api: OpenClawPluginApi) => SingleProviderPluginDefinition);
+    | ((api: CarapacePluginApi) => SingleProviderPluginDefinition);
   /**
    * Optional hook for registering companion capabilities with the same plugin entry.
    */
-  register?: (api: OpenClawPluginApi) => void;
+  register?: (api: CarapacePluginApi) => void;
 };
 
 function resolveManifestProviderAuth(params: {

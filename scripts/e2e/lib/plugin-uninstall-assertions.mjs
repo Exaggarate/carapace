@@ -16,7 +16,7 @@ export function hasExpectedPluginUninstallConfigState(config, pluginId) {
   // Only the source-qualified plugin harness can select this historical dialect.
   // Generic frozen-target authorization must not relax this package contract.
   return (
-    process.env.OPENCLAW_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE === "legacy" &&
+    process.env.CARAPACE_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE === "legacy" &&
     !Object.hasOwn(config.plugins?.entries ?? {}, pluginId)
   );
 }

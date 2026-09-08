@@ -3,7 +3,7 @@ import {
   configureExecutionDecisionWorkSink,
   type ExecutionDecisionWork,
 } from "../audit/execution-decision-work.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createOperationalRunInstanceRef,
   prepareAgentRunAdmission,
@@ -12,7 +12,7 @@ import { recordAdmittedModelRoutingDecision } from "./model-routing-decision.js"
 
 const auditConfig = {
   logging: { audit: { executionIdentity: true } },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 function prepareRoutingAdmission(runId: string) {
   return prepareAgentRunAdmission({

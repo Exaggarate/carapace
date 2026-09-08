@@ -1,7 +1,7 @@
 // Tlon tests cover sse client plugin behavior.
 import { Readable } from "node:stream";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ensureUrbitChannelOpen } from "./channel-ops.js";
 import { urbitFetch } from "./fetch.js";

@@ -1,7 +1,7 @@
 // Doctor config-flow test utilities share mock input symbols and config fixtures across repair suites.
 import type { ConfigIncludeOwnership } from "../config/includes.js";
 
-const DOCTOR_CONFIG_TEST_INPUT = Symbol.for("openclaw.doctorConfigFlow.testInput");
+const DOCTOR_CONFIG_TEST_INPUT = Symbol.for("carapace.doctorConfigFlow.testInput");
 
 type DoctorConfigTestInput = {
   config: Record<string, unknown>;
@@ -164,7 +164,7 @@ export async function runDoctorConfigWithInput<T>(params: {
       ? { includeProvenance: structuredClone(params.includeProvenance) }
       : {}),
     exists: params.exists ?? true,
-    path: "/virtual/.openclaw/openclaw.json",
+    path: "/virtual/.carapace/carapace.json",
     preflightMode: params.preflightMode ?? inferredPreflightMode,
   });
   try {

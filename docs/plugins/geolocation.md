@@ -7,7 +7,7 @@ read_when:
 title: "Geolocation plugin"
 ---
 
-The bundled `geolocation` plugin turns a connecting client's IP address into a coarse city. It ships with OpenClaw, downloads its database on first use, and answers entirely from that local copy, so a lookup never sends an address to a third party.
+The bundled `geolocation` plugin turns a connecting client's IP address into a coarse city. It ships with Carapace, downloads its database on first use, and answers entirely from that local copy, so a lookup never sends an address to a third party.
 
 It owns exactly one thing: address to place. It does not decide which addresses get looked up, does not store results, and is not an authorization input. The Control UI uses it to label the devices on a person's [Activity](/concepts/presence) card; anything else that needs a place can call the same route.
 
@@ -16,7 +16,7 @@ It owns exactly one thing: address to place. It does not decide which addresses 
 The plugin is bundled and active by default. To see it work, open **Activity**, pick a person, and look at their device row. A remote client shows its address and the resolved city:
 
 ```
-openclaw-control-ui  MacIntel · 8.8.8.8 · Europe/Vienna  Mountain View, California ⓘ
+carapace-control-ui  MacIntel · 8.8.8.8 · Europe/Vienna  Mountain View, California ⓘ
 ```
 
 The first view after a fresh install shows no city while the database downloads; the row fills itself in once it is ready, without a reload. To check the plugin directly:
@@ -112,7 +112,7 @@ Any MaxMind-format city database works, including a self-hosted mirror or a comm
 
 The default database is **DB-IP City Lite**, licensed **CC BY 4.0**. That license requires attribution, which is why the credit is part of every response and is rendered next to the value rather than buried in settings.
 
-OpenClaw downloads this database at runtime and never redistributes it, so the license attaches to your deployment's use of the data, not to OpenClaw itself. Plugin code and the `maxmind` reader it uses are MIT. No free city-level IP database is MIT-licensed; the obligation lives with the data.
+Carapace downloads this database at runtime and never redistributes it, so the license attaches to your deployment's use of the data, not to Carapace itself. Plugin code and the `maxmind` reader it uses are MIT. No free city-level IP database is MIT-licensed; the obligation lives with the data.
 
 Expect city-level accuracy in the 55-80% range, and worse for the mobile, VPN, and CGNAT cases above.
 

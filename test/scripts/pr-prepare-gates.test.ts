@@ -11,8 +11,8 @@ const tempDirs = createTempDirTracker();
 
 function sanitizedEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...process.env };
-  delete env.OPENCLAW_PR_GATES_REMOTE;
-  delete env.OPENCLAW_TESTBOX;
+  delete env.CARAPACE_PR_GATES_REMOTE;
+  delete env.CARAPACE_TESTBOX;
   return { ...env, ...overrides };
 }
 
@@ -51,7 +51,7 @@ function runGatesBash(
 }
 
 function makeRetryRepo(): { repoDir: string; headSha: string } {
-  const dir = tempDirs.make("openclaw-pr-gates-retry-");
+  const dir = tempDirs.make("carapace-pr-gates-retry-");
   const repoDir = join(dir, "repo");
   mkdirSync(repoDir);
   for (const args of [
@@ -73,7 +73,7 @@ function makeRetryRepo(): { repoDir: string; headSha: string } {
 }
 
 function makeSyncRepo(options: { needsRebase: boolean }): string {
-  const repoDir = join(tempDirs.make("openclaw-pr-sync-"), "repo");
+  const repoDir = join(tempDirs.make("carapace-pr-sync-"), "repo");
   mkdirSync(repoDir);
 
   const git = (...args: string[]) => {
@@ -124,7 +124,7 @@ function makePreparePushHeadDriftRepo(): {
   recordedHead: string;
   reviewedHead: string;
 } {
-  const repoDir = join(tempDirs.make("openclaw-pr-prepare-drift-"), "repo");
+  const repoDir = join(tempDirs.make("carapace-pr-prepare-drift-"), "repo");
   mkdirSync(repoDir);
 
   const git = (...args: string[]) => {
@@ -198,7 +198,7 @@ function prepareSyncHeadStubs(): string[] {
 }
 
 function makePublisherRepo() {
-  const root = tempDirs.make("openclaw-pr-publication-");
+  const root = tempDirs.make("carapace-pr-publication-");
   const repoDir = join(root, "repo");
   const remote = join(root, "remote.git");
   const env = sanitizedEnv({
@@ -206,8 +206,8 @@ function makePublisherRepo() {
     GIT_CONFIG_NOSYSTEM: "1",
     GIT_ALLOW_PROTOCOL: "file",
     GIT_TERMINAL_PROMPT: "0",
-    OPENCLAW_ALLOW_UNSIGNED_GIT_PUSH: "1",
-    OPENCLAW_PR_PUSH_MODE: "git",
+    CARAPACE_ALLOW_UNSIGNED_GIT_PUSH: "1",
+    CARAPACE_PR_PUSH_MODE: "git",
   });
   mkdirSync(repoDir);
   function git(...args: string[]) {
@@ -462,7 +462,7 @@ describe("PR publication ownership", () => {
     const graphql = [
       "PR_HEAD_OWNER=fixture",
       "PR_HEAD_REPO_NAME=repo",
-      "OPENCLAW_PR_PUSH_MODE=graphql",
+      "CARAPACE_PR_PUSH_MODE=graphql",
     ];
     const first = runPublisher(f, "prepare_sync_head 4242", graphql);
     expect(first.status, first.stdout + first.stderr).toBe(0);
@@ -496,7 +496,7 @@ describe("PR publication ownership", () => {
         "PR_HEAD_REPO_NAME=repo",
         ...(failure === "graphql-permission"
           ? [
-              "OPENCLAW_PR_PUSH_MODE=graphql",
+              "CARAPACE_PR_PUSH_MODE=graphql",
               'gh_plain() { echo graphql >> .local/events; echo "403 forbidden" >&2; return 74; }',
             ]
           : [
@@ -563,10 +563,10 @@ describe("resolve_pr_gates_remote_mode", () => {
     { value: "", expected: "local" },
     { value: "testbox", expected: "testbox" },
     { value: "crabbox-aws", expected: "crabbox-aws" },
-  ])("resolves OPENCLAW_PR_GATES_REMOTE=$value to $expected", ({ value, expected }) => {
+  ])("resolves CARAPACE_PR_GATES_REMOTE=$value to $expected", ({ value, expected }) => {
     const env: NodeJS.ProcessEnv = {};
     if (value !== undefined) {
-      env.OPENCLAW_PR_GATES_REMOTE = value;
+      env.CARAPACE_PR_GATES_REMOTE = value;
     }
     const result = runGatesBash("resolve_pr_gates_remote_mode", { env });
     expect(result.status).toBe(0);
@@ -575,32 +575,32 @@ describe("resolve_pr_gates_remote_mode", () => {
 
   it("rejects unsupported values", () => {
     const result = runGatesBash("resolve_pr_gates_remote_mode", {
-      env: { OPENCLAW_PR_GATES_REMOTE: "azure" },
+      env: { CARAPACE_PR_GATES_REMOTE: "azure" },
     });
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("Unsupported OPENCLAW_PR_GATES_REMOTE=azure");
+    expect(result.stderr).toContain("Unsupported CARAPACE_PR_GATES_REMOTE=azure");
   });
 
   it("rejects the hosted-gates conflict before touching the worktree", () => {
     const result = runGatesBash("prepare_gates 424242", {
-      env: { OPENCLAW_PR_GATES_REMOTE: "testbox", OPENCLAW_TESTBOX: "1" },
+      env: { CARAPACE_PR_GATES_REMOTE: "testbox", CARAPACE_TESTBOX: "1" },
     });
     expect(result.status).toBe(2);
-    expect(result.stdout).toContain("conflicts with OPENCLAW_TESTBOX=1");
+    expect(result.stdout).toContain("conflicts with CARAPACE_TESTBOX=1");
   });
 
   it("rejects the Crabbox AWS hosted-gates conflict before touching the worktree", () => {
     const result = runGatesBash("prepare_gates 424242", {
-      env: { OPENCLAW_PR_GATES_REMOTE: "crabbox-aws", OPENCLAW_TESTBOX: "1" },
+      env: { CARAPACE_PR_GATES_REMOTE: "crabbox-aws", CARAPACE_TESTBOX: "1" },
     });
     expect(result.status).toBe(2);
-    expect(result.stdout).toContain("OPENCLAW_PR_GATES_REMOTE=crabbox-aws conflicts");
+    expect(result.stdout).toContain("CARAPACE_PR_GATES_REMOTE=crabbox-aws conflicts");
   });
 });
 
 describe("remote Crabbox AWS gate contract", () => {
   it("builds the canonical deterministic proof command", () => {
-    const planPath = join(tempDirs.make("openclaw-crabbox-command-"), "plan.json");
+    const planPath = join(tempDirs.make("carapace-crabbox-command-"), "plan.json");
     writeFileSync(
       planPath,
       JSON.stringify({
@@ -626,23 +626,23 @@ describe("remote Crabbox AWS gate contract", () => {
     expect(result.stdout).toContain("pnpm build");
     expect(result.stdout).toContain("pnpm check");
     expect(result.stdout).toContain("test/scripts/pr-prepare-gates.test.ts");
-    expect(result.stdout).toContain(`OPENCLAW_CRABBOX_GATE_BASE=${"a".repeat(40)}`);
-    expect(result.stdout).toContain(`OPENCLAW_CRABBOX_GATE_HEAD=${"b".repeat(40)}`);
-    expect(result.stdout).not.toContain("OPENCLAW_CRABBOX_GATE_WORKFLOW=");
+    expect(result.stdout).toContain(`CARAPACE_CRABBOX_GATE_BASE=${"a".repeat(40)}`);
+    expect(result.stdout).toContain(`CARAPACE_CRABBOX_GATE_HEAD=${"b".repeat(40)}`);
+    expect(result.stdout).not.toContain("CARAPACE_CRABBOX_GATE_WORKFLOW=");
     expect(result.stdout).not.toContain("test/scripts/pr-wrappers.test.ts");
-    expect(result.stdout).not.toContain("OPENCLAW_TEST_PROJECTS_PARALLEL");
+    expect(result.stdout).not.toContain("CARAPACE_TEST_PROJECTS_PARALLEL");
     expect(result.stdout).not.toContain("pnpm test");
     expect(result.stdout).not.toContain("pnpm check:changed");
   });
 
   it("records only trusted publisher metadata after synchronous success", () => {
-    const dir = tempDirs.make("openclaw-pr-gates-aws-publisher-");
+    const dir = tempDirs.make("carapace-pr-gates-aws-publisher-");
     const workDir = join(dir, "work");
     mkdirSync(workDir);
     mkdirSync(join(workDir, ".local"));
     const base = "a".repeat(40);
     const head = "b".repeat(40);
-    const runUrl = "https://github.com/openclaw/openclaw/actions/runs/99";
+    const runUrl = "https://github.com/Exaggarate/carapace/actions/runs/99";
 
     const result = runGatesBash(
       [
@@ -676,7 +676,7 @@ describe("remote Crabbox AWS gate contract", () => {
   });
 
   it("keeps pending evidence when the protected publisher fails", () => {
-    const workDir = join(tempDirs.make("openclaw-pr-gates-aws-failure-"), "work");
+    const workDir = join(tempDirs.make("carapace-pr-gates-aws-failure-"), "work");
     mkdirSync(workDir, { recursive: true });
     mkdirSync(join(workDir, ".local"));
     writeFileSync(join(workDir, ".local/gates.env"), "GATES_MODE=remote_crabbox_aws_pending\n");
@@ -742,7 +742,7 @@ describe("prepare gate changed-file plan", () => {
   });
 
   it("scans changed files without temporary input storage", () => {
-    const workDir = tempDirs.make("openclaw-pr-gates-no-tmp-");
+    const workDir = tempDirs.make("carapace-pr-gates-no-tmp-");
     mkdirSync(join(workDir, ".local"));
     writeFileSync(join(workDir, ".local", "pr-meta.env"), "PR_AUTHOR=steipete\n");
     const result = runGatesBash(
@@ -775,7 +775,7 @@ describe("prepare gate changed-file plan", () => {
 
 describe("remote testbox gate delegation", () => {
   it("runs the full pnpm test through the worktree crabbox wrapper", () => {
-    const dir = tempDirs.make("openclaw-pr-gates-remote-");
+    const dir = tempDirs.make("carapace-pr-gates-remote-");
     const stubBin = join(dir, "bin");
     mkdirSync(stubBin);
     writeFileSync(
@@ -807,30 +807,30 @@ describe("remote testbox gate delegation", () => {
     expect(argLine).toBe(
       "scripts/crabbox-wrapper.mjs run " +
         "--provider blacksmith-testbox " +
-        "--blacksmith-org openclaw " +
+        "--blacksmith-org carapace " +
         "--blacksmith-workflow .github/workflows/ci-check-testbox.yml " +
         "--blacksmith-job check " +
         "--blacksmith-ref main " +
         "--idle-timeout 90m --ttl 240m --timing-json " +
         "--label pr-424242-gates " +
-        "-- env CI=1 OPENCLAW_TESTBOX_REMOTE_RUN=1 " +
+        "-- env CI=1 CARAPACE_TESTBOX_REMOTE_RUN=1 " +
         "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false corepack pnpm test",
     );
   });
 
   it("extracts the last successful blacksmith-testbox timing stamp", () => {
-    const dir = tempDirs.make("openclaw-pr-gates-stamp-");
+    const dir = tempDirs.make("carapace-pr-gates-stamp-");
     const log = join(dir, "gates-test.log");
     writeFileSync(
       log,
       [
         "provider=blacksmith-testbox id=tbx_first sync=delegated auth=blacksmith",
-        "GitHub Actions run: https://github.com/openclaw/openclaw/actions/runs/1234",
+        "GitHub Actions run: https://github.com/Exaggarate/carapace/actions/runs/1234",
         '{"not":"a stamp"}',
         "not json at all",
         '{"provider":"blacksmith-testbox","leaseId":"tbx_first","exitCode":1,"runStatus":"failed"}',
         '{"provider":"blacksmith-testbox","leaseId":"tbx_final","exitCode":0,"runStatus":"passed"}',
-        "GitHub Actions run: https://github.com/openclaw/openclaw/actions/runs/9999",
+        "GitHub Actions run: https://github.com/Exaggarate/carapace/actions/runs/9999",
         "GitHub Actions run: https://github.com/example/other/actions/runs/8888",
         "",
       ].join("\n"),
@@ -841,12 +841,12 @@ describe("remote testbox gate delegation", () => {
     );
     expect(result.status).toBe(0);
     expect(result.stdout.trim()).toBe(
-      "tbx_final\thttps://github.com/openclaw/openclaw/actions/runs/1234",
+      "tbx_final\thttps://github.com/Exaggarate/carapace/actions/runs/1234",
     );
   });
 
   it("fails when the gate log has no successful stamp", () => {
-    const dir = tempDirs.make("openclaw-pr-gates-stamp-");
+    const dir = tempDirs.make("carapace-pr-gates-stamp-");
     const log = join(dir, "gates-test.log");
     writeFileSync(
       log,
@@ -861,7 +861,7 @@ describe("remote testbox gate delegation", () => {
 
 describe("prepare review readiness", () => {
   it("rejects invalid review artifacts before any preparation side effects", () => {
-    const repoDir = tempDirs.make("openclaw-pr-prepare-invalid-review-");
+    const repoDir = tempDirs.make("carapace-pr-prepare-invalid-review-");
     mkdirSync(join(repoDir, ".local"));
     const result = runGatesBash(
       [
@@ -882,7 +882,7 @@ describe("prepare review readiness", () => {
   });
 
   it("rejects a non-ready review before taking the operation lock past validation", () => {
-    const repoDir = tempDirs.make("openclaw-pr-prepare-not-ready-");
+    const repoDir = tempDirs.make("carapace-pr-prepare-not-ready-");
     mkdirSync(join(repoDir, ".local"));
     const result = runGatesBash(
       [
@@ -977,7 +977,7 @@ describe("prepare sync-head transitions", () => {
         "grep -F 'PREP_REPLACED_HOSTED_ANCESTRY=false' .local/prep.env",
         "grep -F 'PREP_AUTHOR_ACCESS=external' .local/prep.env",
       ].join("\n"),
-      { cwd: repoDir, env: { OPENCLAW_TESTBOX: "1" }, sourcePrepareCore: true },
+      { cwd: repoDir, env: { CARAPACE_TESTBOX: "1" }, sourcePrepareCore: true },
     );
 
     expect(result.status, result.stderr).toBe(0);
@@ -1231,7 +1231,7 @@ describe("prepare gate stamp transitions", () => {
     }).stdout.trim();
     const result = runGatesBash(
       [
-        `gh() { if [ "$1" = pr ]; then printf '{"headRefName":"topic","headRefOid":"${currentHead}","isCrossRepository":false}\\n'; else printf 'openclaw/openclaw\\n'; fi; }`,
+        `gh() { if [ "$1" = pr ]; then printf '{"headRefName":"topic","headRefOid":"${currentHead}","isCrossRepository":false}\\n'; else printf 'carapace/carapace\\n'; fi; }`,
         "run_quiet_logged() { printf 'ARG:%s\\n' \"$@\"; }",
         "PR_MAIN_SHA=$(git rev-parse HEAD)",
         `run_hosted_prepare_gates 100606 ${currentHead} false`,
@@ -1251,7 +1251,7 @@ describe("prepare gate stamp transitions", () => {
     const { repoDir, headSha } = makeRetryRepo();
     const result = runGatesBash(
       [
-        `gh() { if [ "$1" = pr ]; then printf '{"headRefName":"topic","headRefOid":"${headSha}","isCrossRepository":false}\\n'; else printf 'openclaw/openclaw\\n'; fi; }`,
+        `gh() { if [ "$1" = pr ]; then printf '{"headRefName":"topic","headRefOid":"${headSha}","isCrossRepository":false}\\n'; else printf 'carapace/carapace\\n'; fi; }`,
         'rg() { command grep -F -q "$3" "$4"; }',
         `run_quiet_logged() { printf 'Missing successful recent CI workflow for ${headSha}. Observed: none\\n' > "$2"; return 1; }`,
         "PR_MAIN_SHA=$(git rev-parse HEAD)",
@@ -1271,7 +1271,7 @@ describe("prepare gate stamp transitions", () => {
     const { repoDir, headSha } = makeRetryRepo();
     const result = runGatesBash(
       [
-        `gh() { if [ "$1" = pr ]; then printf '{"headRefName":"topic","headRefOid":"${headSha}","isCrossRepository":true}\\n'; else printf 'openclaw/openclaw\\n'; fi; }`,
+        `gh() { if [ "$1" = pr ]; then printf '{"headRefName":"topic","headRefOid":"${headSha}","isCrossRepository":true}\\n'; else printf 'carapace/carapace\\n'; fi; }`,
         'rg() { command grep -F -q "$3" "$4"; }',
         `run_quiet_logged() { printf 'Missing successful recent CI workflow for ${headSha}. Observed: none\\n' > "$2"; return 1; }`,
         "PR_MAIN_SHA=$(git rev-parse HEAD)",
@@ -1364,7 +1364,7 @@ describe("prepare gate stamp transitions", () => {
         "prepare_gates 4242",
         "cat .local/gates.env",
       ].join("\n"),
-      { cwd: repoDir, env: { OPENCLAW_TESTBOX: "1" } },
+      { cwd: repoDir, env: { CARAPACE_TESTBOX: "1" } },
     );
 
     expect(result.status).toBe(0);

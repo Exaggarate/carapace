@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { resolveNodeHostExecutable } from "openclaw/plugin-sdk/node-host";
+import { resolveNodeHostExecutable } from "carapace/plugin-sdk/node-host";
 import { resolveClaudeCatalogHomeDir } from "./session-catalog-home.js";
 
 const BROKEN_NPM_SHIM_MARKER = "Error: claude native binary not installed.";

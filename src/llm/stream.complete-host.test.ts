@@ -1,11 +1,11 @@
-import { createApiRegistry, createLlmRuntime, getAiTransportHost } from "@openclaw/ai";
+import { createApiRegistry, createLlmRuntime, getAiTransportHost } from "@carapace/ai";
 import type {
   AssistantMessage,
   AssistantMessageEventStreamContract,
   Context,
   Model,
   SimpleStreamOptions,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import { createZeroUsageFixture } from "../agents/test-helpers/usage-fixtures.js";
 import { bindModelLlmRuntime } from "./model-runtime-binding.js";

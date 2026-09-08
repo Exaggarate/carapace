@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { threadId } from "node:worker_threads";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { serveWorkerTasks } from "./worker-task-pool.js";
 
 export type PoolFixtureInput = {

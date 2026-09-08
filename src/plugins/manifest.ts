@@ -1,6 +1,6 @@
-/** Loads and normalizes OpenClaw plugin manifests, including contracts and config schemas. */
+/** Loads and normalizes Carapace plugin manifests, including contracts and config schemas. */
 import path from "node:path";
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
+import { normalizeModelCatalog } from "@carapace/model-catalog-core/model-catalog-normalize";
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { normalizeTrimmedStringList } from "../../packages/normalization-core/src/string-normalization.js";
 import { matchRootFileOpenFailure } from "../infra/boundary-file-read.js";
@@ -27,7 +27,7 @@ export {
 } from "./manifest-setup-normalizers.js";
 
 /** Canonical plugin manifest filename inside plugin roots. */
-export const PLUGIN_MANIFEST_FILENAME = "openclaw.plugin.json";
+export const PLUGIN_MANIFEST_FILENAME = "carapace.plugin.json";
 const MAX_PLUGIN_MANIFEST_BYTES = 256 * 1024;
 const CORE_RESERVED_PLUGIN_IDS = new Set(["node-mcp"]);
 const VALID_PLUGIN_KINDS: ReadonlySet<string> = new Set<PluginKind>(["memory", "context-engine"]);
@@ -190,7 +190,7 @@ export function loadPluginManifest(
   if (isCoreReservedPluginId(id)) {
     return cacheResult({
       ok: false,
-      error: `plugin manifest id "${id}" is reserved by OpenClaw core`,
+      error: `plugin manifest id "${id}" is reserved by Carapace core`,
       manifestPath,
     });
   }

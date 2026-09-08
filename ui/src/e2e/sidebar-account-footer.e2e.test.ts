@@ -32,7 +32,7 @@ async function closeIdentityMenu(page: Page, sidebar: Locator) {
 async function assertSingleAccountTarget(page: Page, sidebar: Locator) {
   const identity = sidebar.locator(".sidebar-identity-card");
   const parts = [
-    identity.locator("openclaw-viewer-avatar"),
+    identity.locator("carapace-viewer-avatar"),
     identity.locator(".sidebar-identity-card__name"),
   ];
   for (const part of parts) {
@@ -45,7 +45,7 @@ async function assertSingleAccountTarget(page: Page, sidebar: Locator) {
 async function assertIdentityMenuContract(sidebar: Locator, menu: Locator) {
   expect(await menu.locator('wa-dropdown-item[value="command:recent-activity"]').count()).toBe(0);
   expect(
-    await menu.evaluate((dropdown) => dropdown.closest("openclaw-menu-surface") !== null),
+    await menu.evaluate((dropdown) => dropdown.closest("carapace-menu-surface") !== null),
   ).toBe(false);
 }
 
@@ -83,7 +83,7 @@ async function runAccountFooterProof(
     const buildPrefix = branch === "main" ? "git@0123456" : "feat/sidebar-f…@0123456";
     expect(buildLabel?.startsWith(`${buildPrefix} · `)).toBe(true);
     const buildLink = menu.getByRole("link", { name: "Control UI build details" });
-    const buildTooltip = sidebar.locator("openclaw-sidebar-build-chip openclaw-tooltip wa-tooltip");
+    const buildTooltip = sidebar.locator("carapace-sidebar-build-chip carapace-tooltip wa-tooltip");
     const buildTooltipCard = sidebar.locator(".sidebar-build-hover-card");
     await page.clock.install();
     await buildLink.hover();
@@ -295,7 +295,7 @@ suite.define(() => {
         name: "Control UI build details",
         exact: true,
       });
-      const tooltip = sidebar.locator("openclaw-sidebar-build-chip openclaw-tooltip wa-tooltip");
+      const tooltip = sidebar.locator("carapace-sidebar-build-chip carapace-tooltip wa-tooltip");
       await tooltip.evaluate((element) => {
         document.documentElement.dataset.buildTooltipOpenedByClick = "false";
         element.addEventListener(

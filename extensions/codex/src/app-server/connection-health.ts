@@ -1,7 +1,7 @@
 import type {
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginService,
+  CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
 import type { CodexAppServerClient } from "./client.js";
 import type { CodexAppServerRuntimeOptions } from "./config-contracts.js";
 
@@ -10,15 +10,15 @@ const MAX_RECONNECT_DELAY_MS = 30_000;
 
 type CodexAppServerConnectionHealthServiceOptions = {
   getPluginConfig: () => unknown;
-  getRuntimeConfig: () => OpenClawPluginServiceContext["config"] | undefined;
+  getRuntimeConfig: () => CarapacePluginServiceContext["config"] | undefined;
 };
 
 export function createCodexAppServerConnectionHealthService(
   options: CodexAppServerConnectionHealthServiceOptions,
-): OpenClawPluginService {
+): CarapacePluginService {
   let abortController: AbortController | undefined;
   let monitor: Promise<void> | undefined;
-  const run = async (ctx: OpenClawPluginServiceContext, signal: AbortSignal) => {
+  const run = async (ctx: CarapacePluginServiceContext, signal: AbortSignal) => {
     const { resolveCodexAppServerRuntimeOptions } = await import("./config-runtime.js");
     let consecutiveFailures = 0;
 

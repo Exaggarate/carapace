@@ -148,7 +148,7 @@ export function resolveBoardWidgetContentKindResourceUrls(
   try {
     const scoped = new URL(scopedHostUrl);
     const prefix = scoped.pathname.replace(/\/+$/u, "");
-    if (!/^\/__openclaw__\/cap\/[^/]+$/u.test(prefix)) {
+    if (!/^\/__carapace__\/cap\/[^/]+$/u.test(prefix)) {
       return undefined;
     }
     return Object.fromEntries(

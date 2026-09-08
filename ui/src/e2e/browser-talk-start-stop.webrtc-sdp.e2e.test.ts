@@ -23,7 +23,7 @@ async function waitForWebRtcSdpFetch(page: Page) {
     .poll(() =>
       page.evaluate(
         () =>
-          (window as Window & { openclawWebRtcSdpE2e?: WebRtcSdpE2eProof }).openclawWebRtcSdpE2e
+          (window as Window & { carapaceWebRtcSdpE2e?: WebRtcSdpE2eProof }).carapaceWebRtcSdpE2e
             ?.fetchCount ?? 0,
       ),
     )
@@ -62,8 +62,8 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(
             () =>
-              (window as Window & { openclawWebRtcSdpE2e?: WebRtcSdpE2eProof })
-                .openclawWebRtcSdpE2e,
+              (window as Window & { carapaceWebRtcSdpE2e?: WebRtcSdpE2eProof })
+                .carapaceWebRtcSdpE2e,
           ),
         )
         .toEqual({
@@ -114,8 +114,8 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(
             () =>
-              (window as Window & { openclawWebRtcSdpE2e?: WebRtcSdpE2eProof })
-                .openclawWebRtcSdpE2e,
+              (window as Window & { carapaceWebRtcSdpE2e?: WebRtcSdpE2eProof })
+                .carapaceWebRtcSdpE2e,
           ),
         )
         .toEqual({

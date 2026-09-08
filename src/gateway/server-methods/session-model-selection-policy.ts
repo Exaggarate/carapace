@@ -4,12 +4,12 @@ import {
 } from "../../agents/sticky-model-selection.js";
 import { resolveIsNixMode } from "../../config/paths.js";
 import type { ModelSelectionScope } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ADMIN_SCOPE } from "../operator-scopes.js";
 
 export function resolveGatewayModelSelectionPolicy(params: {
   callerScopes: readonly string[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   scope?: ModelSelectionScope;
 }): StickyModelSelectionPolicy {
   return resolveStickyModelSelectionPolicy({

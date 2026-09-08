@@ -1,11 +1,11 @@
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createStorageMock } from "../test-helpers/storage.ts";
 import { clearBootRecords, persistBootRecord, type BootRecord } from "./boot-record.ts";
 import { createGatewayStoreTestStore } from "./gateway-store.test-support.ts";
 import { loadSettings } from "./settings.ts";
 
-const BOOT_RECORD_PREFIX = "openclaw.control.bootRecord.v1:";
+const BOOT_RECORD_PREFIX = "carapace.control.bootRecord.v1:";
 
 beforeEach(() => {
   vi.useFakeTimers();

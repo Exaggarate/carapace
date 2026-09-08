@@ -3,7 +3,7 @@
 import http from "node:http";
 import { Readable } from "node:stream";
 
-// grammY supports client.environment="test", but OpenClaw does not expose it
+// grammY supports client.environment="test", but Carapace does not expose it
 // through Telegram config. Keep this adapter until that runtime seam exists.
 
 const HOP_BY_HOP_HEADERS = new Set([

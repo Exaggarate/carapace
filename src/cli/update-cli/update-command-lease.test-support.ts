@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import type { PostCorePluginUpdateResult } from "./update-command-plugins.js";
 
@@ -14,14 +14,14 @@ export type LeaseScenario = {
   failDoctor?: "pre" | "post";
   readinessFailure?: "finding" | "execution";
   hostVersion?: string;
-  writerConfig?: OpenClawConfig;
+  writerConfig?: CarapaceConfig;
   writerRecords?: Record<string, PluginInstallRecord>;
 };
 
 // A narrow child substitutes for the CLI, not for its cross-process lease.
 export async function runUpdateLeaseChild(): Promise<void> {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
+  const configPath = process.env.CARAPACE_CONFIG_PATH;
   assert.ok(stateDir && configPath);
   const scenario = JSON.parse(
     await fs.readFile(path.join(stateDir, "scenario.json"), "utf8"),
@@ -44,14 +44,14 @@ export async function runUpdateLeaseChild(): Promise<void> {
   const command = process.argv[2];
   if (command === "config") {
     assert.deepEqual(process.argv.slice(2), ["config", "validate", "--json"]);
-    assert.equal(process.env.OPENCLAW_UPDATE_IN_PROGRESS, "0");
+    assert.equal(process.env.CARAPACE_UPDATE_IN_PROGRESS, "0");
     await record("validate");
     process.exitCode = scenario.invalidConfig ? 1 : 0;
     return;
   }
   if (command === "doctor" && process.argv[3] === "--lint") {
     assert.deepEqual(process.argv.slice(3), ["--lint", "--json", "--severity-min", "error"]);
-    assert.equal(process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE, "1");
+    assert.equal(process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE, "1");
     await record("readiness");
     if (scenario.readinessFailure === "execution") {
       throw new Error("readiness fixture failure");
@@ -82,7 +82,7 @@ export async function runUpdateLeaseChild(): Promise<void> {
   const { withPluginLifecycleLease } = await import("../../plugins/plugin-lifecycle-lease.js");
   if (command === "update") {
     assert.equal(scenario.lane, "fresh-process");
-    const resultPath = process.env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH;
+    const resultPath = process.env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH;
     assert.ok(resultPath && scenario.pluginUpdate);
     await withPluginLifecycleLease({ waitMs: 0 }, async () => record("packages-acquired"));
     await record("packages-released");
@@ -93,21 +93,21 @@ export async function runUpdateLeaseChild(): Promise<void> {
     return;
   }
   if (command === "doctor") {
-    const phase = process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE === "1" ? "post" : "pre";
+    const phase = process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE === "1" ? "post" : "pre";
     assert.deepEqual(process.argv.slice(3), [
       "--repair",
       "--non-interactive",
       ...(scenario.lane === "repair" && phase === "pre" ? [] : ["--no-workspace-suggestions"]),
       "--yes",
     ]);
-    assert.equal(process.env.OPENCLAW_UPDATE_IN_PROGRESS, "1");
-    assert.equal(process.env.OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR, "1");
-    assert.equal(process.env.OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE, "1");
-    assert.equal(process.env.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION, "0");
-    assert.equal(process.env.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR, "0");
-    assert.equal(process.env.OPENCLAW_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART, "1");
+    assert.equal(process.env.CARAPACE_UPDATE_IN_PROGRESS, "1");
+    assert.equal(process.env.CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR, "1");
+    assert.equal(process.env.CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE, "1");
+    assert.equal(process.env.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION, "0");
+    assert.equal(process.env.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR, "0");
+    assert.equal(process.env.CARAPACE_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART, "1");
     if (scenario.hostVersion) {
-      assert.equal(process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION, scenario.hostVersion);
+      assert.equal(process.env.CARAPACE_COMPATIBILITY_HOST_VERSION, scenario.hostVersion);
     }
     await record(`${phase}-attempt`);
     // One real acquisition attempt makes the regression fail promptly, without changing parent budgets.
@@ -136,7 +136,7 @@ export async function runUpdateLeaseChild(): Promise<void> {
       if (!(error instanceof Error) || !("code" in error)) {
         throw error;
       }
-      assert.equal(error.code, "OPENCLAW_STATE_LEASE_TIMEOUT");
+      assert.equal(error.code, "CARAPACE_STATE_LEASE_TIMEOUT");
       process.stdout.write("excluded");
     }
     return;

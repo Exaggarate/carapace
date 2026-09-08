@@ -15,12 +15,12 @@ import {
   type SkillProposalRecord,
   type SkillProposalRollback,
 } from "../skills/workshop/types.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   inspectLegacySkillWorkshopMigration,
@@ -34,12 +34,12 @@ import {
 } from "./doctor-skill-workshop-sqlite.test-support.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-doctor-workshop-sqlite-",
+    prefix: "carapace-doctor-workshop-sqlite-",
   });
 });
 
@@ -51,7 +51,7 @@ afterEach(async () => {
 describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
   it("moves an applied legacy skill into the Workshop directory and converges", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-relocation-workspace-"),
+      await tempDirs.make("carapace-workshop-relocation-workspace-"),
     );
     const proposalId = "relocate-workshop-20260901-1234567890";
     const legacySkillDir = path.join(workspaceDir, "skills", "relocate-workshop");
@@ -103,7 +103,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
       target: {
         skillDir: path.dirname(workshopSkillFile),
         skillFile: workshopSkillFile,
-        source: "openclaw-workshop",
+        source: "carapace-workshop",
       },
     });
 
@@ -112,7 +112,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
 
   it("retargets a pending update for a relocated applied skill", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-relocation-update-workspace-"),
+      await tempDirs.make("carapace-workshop-relocation-update-workspace-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "relocate-update");
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -169,7 +169,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
         target: {
           skillDir: path.dirname(workshopSkillFile),
           skillFile: workshopSkillFile,
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         },
       },
     );
@@ -177,7 +177,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
 
   it("leaves an applied skill in place when its workspace has ambiguous owners", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-ambiguous-workspace-"),
+      await tempDirs.make("carapace-workshop-ambiguous-workspace-"),
     );
     const legacySkillDir = path.join(workspaceDir, "skills", "ambiguous-workshop");
     const skillContent =
@@ -214,7 +214,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
       fs.access(resolveWorkshopSkillsDir(config, "alpha", testState.env)),
     ).rejects.toThrow();
     expect(
-      openOpenClawStateDatabase({ env: testState.env })
+      openCarapaceStateDatabase({ env: testState.env })
         .db.prepare(
           "SELECT status, status_reason FROM skill_workshop_proposals WHERE proposal_id = ?",
         )
@@ -227,7 +227,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
 
   it("leaves an applied skill in place when its row owner is not configured", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-retired-owner-workspace-"),
+      await tempDirs.make("carapace-workshop-retired-owner-workspace-"),
     );
     const legacySkillDir = path.join(workspaceDir, "skills", "retired-owner-workshop");
     const skillContent =
@@ -278,7 +278,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
 
   it("persists each relocation before continuing after a later move fails", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-relocation-failure-workspace-"),
+      await tempDirs.make("carapace-workshop-relocation-failure-workspace-"),
     );
     const records = ["first-relocation", "second-relocation"].map((name) => {
       const skillDir = path.join(workspaceDir, "skills", name);
@@ -330,7 +330,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
     ).toMatchObject({
       skillDir: path.join(workshopRoot, "first-relocation"),
       skillFile: path.join(workshopRoot, "first-relocation", "SKILL.md"),
-      source: "openclaw-workshop",
+      source: "carapace-workshop",
     });
 
     const repaired = await migrateLegacySkillWorkshopProposals({
@@ -349,7 +349,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
         target: {
           skillDir: targetDir,
           skillFile: path.join(targetDir, "SKILL.md"),
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         },
       });
     }
@@ -358,7 +358,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
 
   it("keeps a released legacy skill user-owned through the v16 migration and Doctor repair", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-released-workspace-"),
+      await tempDirs.make("carapace-workshop-released-workspace-"),
     );
     const legacyRecord = (name: string, content: string) =>
       createAppliedLegacyProposal({
@@ -426,8 +426,8 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
   });
 
   it("imports verified sidecars, preserves review artifacts, and removes legacy JSON", async () => {
-    const oldWorkspace = await tempDirs.make("openclaw-workshop-old-workspace-");
-    const currentWorkspace = await tempDirs.make("openclaw-workshop-current-workspace-");
+    const oldWorkspace = await tempDirs.make("carapace-workshop-old-workspace-");
+    const currentWorkspace = await tempDirs.make("carapace-workshop-current-workspace-");
     const proposalId = "legacy-workshop-20260727-1234567890";
     const proposalDir = path.join(testState.stateDir, "skill-workshop", "proposals", proposalId);
     const targetDir = path.join(oldWorkspace, "skills", "legacy-workshop");
@@ -463,7 +463,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
         skillKey: "legacy-workshop",
         skillDir: targetDir,
         skillFile: path.join(targetDir, "SKILL.md"),
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       },
       scan: {
         state: "clean",
@@ -547,8 +547,8 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
     await expect(
       fs.access(path.join(testState.stateDir, "skill-workshop", "proposals.json")),
     ).rejects.toThrow();
-    expect(openOpenClawStateDatabase().db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+    expect(openCarapaceStateDatabase().db.prepare("PRAGMA user_version").get()).toEqual({
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
 
     const ambiguousId = "ambiguous-workshop-20260727-1234567890";
@@ -572,7 +572,7 @@ describe("doctor Skill Workshop SQLite relocation and legacy migration", () => {
       "utf8",
     );
     await fs.writeFile(path.join(ambiguousDir, "PROPOSAL.md"), content, "utf8");
-    const secondWorkspace = await tempDirs.make("openclaw-workshop-second-agent-");
+    const secondWorkspace = await tempDirs.make("carapace-workshop-second-agent-");
     const ambiguous = await migrateLegacySkillWorkshopProposals({
       config: {
         agents: {

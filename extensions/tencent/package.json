@@ -1,19 +1,19 @@
 {
-  "name": "@openclaw/tencent-provider",
+  "name": "@carapace/tencent-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw Tencent Cloud provider plugin (TokenHub + Token Plan)",
+  "description": "Carapace Tencent Cloud provider plugin (TokenHub + Token Plan)",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "setupEntry": "./setup-api.ts",
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/tencent-provider",
-      "npmSpec": "@openclaw/tencent-provider",
+      "clawhubSpec": "clawhub:@carapace/tencent-provider",
+      "npmSpec": "@carapace/tencent-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9"
     },
@@ -21,7 +21,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {
@@ -31,6 +31,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   }
 }

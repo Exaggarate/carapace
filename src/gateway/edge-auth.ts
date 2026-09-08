@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { gatewayOriginScope } from "../../packages/gateway-client/src/gateway-origin-scope.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   coerceSecretRef,
   normalizeSecretInputString,
@@ -45,7 +45,7 @@ export function normalizeEdgeAuthHeadersConfig(value: unknown): EdgeAuthHeadersC
 }
 
 export async function resolveEdgeAuthHeaders(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   value?: EdgeAuthHeadersConfig;
   targetUrl: string;
   env: NodeJS.ProcessEnv;
@@ -80,7 +80,7 @@ export async function resolveEdgeAuthHeaders(params: {
 }
 
 export function gatewayEdgeAuthValueForTarget(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   targetUrl: string;
 }): unknown {
   const remote = params.config.gateway?.remote;

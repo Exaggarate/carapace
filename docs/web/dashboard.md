@@ -34,11 +34,11 @@ The Control UI is an **admin surface** (chat, config, exec approvals). Do not ex
 ## Fast path (recommended)
 
 - After onboarding, the CLI auto-opens the dashboard and prints a clean link.
-- Re-open or repair a browser anytime: `openclaw dashboard`. It copies/opens a single-use pairing link
+- Re-open or repair a browser anytime: `carapace dashboard`. It copies/opens a single-use pairing link
   that grants administrator access to that exact signed browser, including recovery from a previously
   limited credential, without granting blanket remote auto-approval.
-- If clipboard and browser delivery both fail, `openclaw dashboard` either gives a safe manual-token
-  hint or tells you to run `openclaw dashboard --json` and open its short-lived `browserUrl`; it never
+- If clipboard and browser delivery both fail, `carapace dashboard` either gives a safe manual-token
+  hint or tells you to run `carapace dashboard --json` and open its short-lived `browserUrl`; it never
   prints the shared token value in interactive logs.
 - If the UI prompts for shared-secret auth, paste the configured token or type the password into **Gateway secret** on the login screen or in **Settings → Gateway**.
 
@@ -46,18 +46,18 @@ The Control UI is an **admin surface** (chat, config, exec approvals). Do not ex
 
 - **Localhost**: open `http://127.0.0.1:18789/`.
 - **Gateway TLS**: when `gateway.tls.enabled: true`, dashboard/status links use `https://` and Control UI WebSocket links use `wss://`.
-- **Shared-secret token source**: `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`). After a successful
+- **Shared-secret token source**: `gateway.auth.token` (or `CARAPACE_GATEWAY_TOKEN`). After a successful
   token-mode connection, manual entry is kept in sessionStorage for the current tab and selected
   Gateway URL, not localStorage.
-- **Host-authorized browser handoff**: `openclaw dashboard` issues a short-lived, single-use bootstrap
+- **Host-authorized browser handoff**: `carapace dashboard` issues a short-lived, single-use bootstrap
   instead of putting the shared Gateway token in the browser launch URL. The bootstrap is bound to
   that browser's signed device identity and exchanged for a durable administrator credential. A
   different browser profile cannot redeem the same handoff or inherit the resulting access.
-- **Missing-config runtime token**: if startup says it generated a runtime token, that token is ephemeral and cannot be recovered. Loopback still requires auth. Run `openclaw doctor --generate-gateway-token`, restart the Gateway, then run `openclaw gateway auth-token --show` in an interactive terminal and paste the output into Control UI settings.
+- **Missing-config runtime token**: if startup says it generated a runtime token, that token is ephemeral and cannot be recovered. Loopback still requires auth. Run `carapace doctor --generate-gateway-token`, restart the Gateway, then run `carapace gateway auth-token --show` in an interactive terminal and paste the output into Control UI settings.
 - If `gateway.auth.token` is SecretRef-managed, the interactive dashboard handoff still works because
   it carries only the short-lived browser bootstrap; the external shared token is not placed in
   terminal output, clipboard history, or browser-launch arguments.
-- **Shared-secret password**: use the configured `gateway.auth.password` (or `OPENCLAW_GATEWAY_PASSWORD`). The dashboard does not persist passwords across reloads.
+- **Shared-secret password**: use the configured `gateway.auth.password` (or `CARAPACE_GATEWAY_PASSWORD`). The dashboard does not persist passwords across reloads.
 - **Identity-bearing modes**: Tailscale Serve satisfies Control UI/WebSocket auth via identity headers when `gateway.auth.allowTailscale: true`; a non-loopback identity-aware reverse proxy satisfies `gateway.auth.mode: "trusted-proxy"`. Neither needs a pasted shared secret for the WebSocket.
 - **Not localhost**: use Tailscale Serve, a non-loopback shared-secret bind, a non-loopback identity-aware reverse proxy with `gateway.auth.mode: "trusted-proxy"`, or an SSH tunnel. HTTP APIs still use shared-secret auth unless you intentionally run private-ingress `gateway.auth.mode: "none"` or trusted-proxy HTTP auth. See [Web surfaces](/web).
 
@@ -66,13 +66,13 @@ The Control UI is an **admin surface** (chat, config, exec approvals). Do not ex
 An identity-aware HTTPS host can provide automatic login for direct dashboard links while
 keeping the Gateway's existing token and device authentication. After an initial connection
 fails because authentication is missing, the Control UI makes one same-origin request to
-`GET /.well-known/openclaw/browser-bootstrap` (under the Control UI base path, if configured).
+`GET /.well-known/carapace/browser-bootstrap` (under the Control UI base path, if configured).
 Existing credentials are tried first. Explicit credentials, remote Gateway selections,
 pairing failures, and rejected credentials do not trigger this recovery.
 
-This endpoint belongs to the deployment's authenticated proxy or handoff service. OpenClaw
+This endpoint belongs to the deployment's authenticated proxy or handoff service. Carapace
 does not expose an unauthenticated credential issuer. The service must independently verify
-the browser's identity and authorization before using the host's `openclaw dashboard --json`
+the browser's identity and authorization before using the host's `carapace dashboard --json`
 handoff. Return only its single-use browser credential:
 
 ```json
@@ -110,7 +110,7 @@ Non-goals for v1:
 
 ## If you see "unauthorized" / 1008
 
-- Confirm the gateway is reachable: local `openclaw status`; remote, SSH tunnel `ssh -N -L 18789:127.0.0.1:18789 user@gateway-host` then open `http://127.0.0.1:18789/`.
+- Confirm the gateway is reachable: local `carapace status`; remote, SSH tunnel `ssh -N -L 18789:127.0.0.1:18789 user@gateway-host` then open `http://127.0.0.1:18789/`.
 - For `AUTH_TOKEN_MISMATCH`, clients may do one trusted retry with a cached device token when the gateway returns retry hints; that retry reuses the token's cached approved scopes (explicit `deviceToken`/`scopes` callers keep their requested scope set). If auth still fails after that retry, resolve token drift manually.
 - For `AUTH_SCOPE_MISMATCH`, the device token was recognized but does not carry the requested scopes; re-pair or approve the new scope set instead of rotating the shared gateway token.
 - For **Proxy authentication required** or `AUTH_IDENTITY_HEADER_REQUIRED`, open the configured proxy/SSO dashboard URL and sign in there. Ask the Gateway administrator to check identity-header forwarding on WebSocket upgrades and account access. A Gateway token cannot override trusted-proxy mode; see [Trusted proxy troubleshooting](/gateway/trusted-proxy-auth#control-ui-says-proxy-authentication-required).
@@ -118,10 +118,10 @@ Non-goals for v1:
 - On the async Tailscale Serve path, failed attempts for the same `{scope, ip}` are serialized before the failed-auth limiter records them, so a second concurrent bad retry can already show `retry later`.
 - For token drift repair steps, see [Token drift recovery checklist](/cli/devices#token-drift-recovery-checklist).
 - For shared-secret authentication, retrieve or supply the configured secret from the gateway host:
-  - Token: run `openclaw gateway auth-token --show` in an interactive terminal on the Gateway host
-  - Password: resolve the configured `gateway.auth.password` or `OPENCLAW_GATEWAY_PASSWORD`
-  - SecretRef-managed token: run `openclaw gateway auth-token --show`; if resolution fails, repair the external secret provider and rerun it
-  - Runtime token generated because no shared secret was configured: run `openclaw doctor --generate-gateway-token`, restart the Gateway, then use the configured token
+  - Token: run `carapace gateway auth-token --show` in an interactive terminal on the Gateway host
+  - Password: resolve the configured `gateway.auth.password` or `CARAPACE_GATEWAY_PASSWORD`
+  - SecretRef-managed token: run `carapace gateway auth-token --show`; if resolution fails, repair the external secret provider and rerun it
+  - Runtime token generated because no shared secret was configured: run `carapace doctor --generate-gateway-token`, restart the Gateway, then use the configured token
 - In the dashboard settings, paste the token or password into **Gateway secret**, then connect.
 - The UI language picker lives in **Settings → Appearance → Language**.
 

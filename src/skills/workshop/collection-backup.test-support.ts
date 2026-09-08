@@ -13,7 +13,7 @@ export async function seedLegacyCollectionBackup(
   const id = "2026-09-01T00-00-00.000Z-legacy";
   const backupDir = path.join(backupRoot, id);
   const directories = () =>
-    loadSkillRootRecords({ dir: skillsRoot, source: "openclaw-workshop" }).map(({ skill }) =>
+    loadSkillRootRecords({ dir: skillsRoot, source: "carapace-workshop" }).map(({ skill }) =>
       path.relative(skillsRoot, skill.baseDir),
     );
   const skillDirs = directories();
@@ -26,7 +26,7 @@ export async function seedLegacyCollectionBackup(
     resultSkillHashes[dir] = await readSkillProposalTargetTreeSha256(path.join(skillsRoot, dir));
   }
   const manifest: CollectionBackupManifest = {
-    schema: "openclaw.skill-collection-backup.v2",
+    schema: "carapace.skill-collection-backup.v2",
     id,
     createdAt: "2026-09-01T00:00:00.000Z",
     skillDirs,

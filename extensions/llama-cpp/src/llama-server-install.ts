@@ -3,8 +3,8 @@ import { createHash, randomUUID } from "node:crypto";
 import fs, { type BigIntStats } from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveLlamaCppDataDir } from "./defaults.js";
 import {
   LLAMA_SERVER_BUILD,
@@ -160,7 +160,7 @@ export async function downloadVerifiedFile(params: {
   // Setup/doctor closure must not cold-load the SSRF barrel (DNS, proxy state,
   // logging); defer it to actual download time per the closure guard contract.
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedOrigin } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   try {
     const { response, release } = await fetchWithSsrFGuard({
       url: params.url,

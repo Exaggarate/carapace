@@ -1,5 +1,5 @@
 // Qa Lab Matrix module implements events behavior.
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 export type MatrixQaRoomEvent = {
   content?: Record<string, unknown>;
   event_id?: string;
@@ -72,7 +72,7 @@ export type MatrixQaObservedEvent = {
   approval?: MatrixQaObservedApproval;
 };
 
-const MATRIX_QA_APPROVAL_METADATA_KEY = "com.openclaw.approval";
+const MATRIX_QA_APPROVAL_METADATA_KEY = "com.carapace.approval";
 const MATRIX_QA_APPROVAL_COMMAND_PREVIEW_CHARS = 160;
 
 function normalizeMentionUserIds(value: unknown) {

@@ -7,7 +7,7 @@ title: "Channel routing"
 
 # Channels & routing
 
-OpenClaw routes replies **back to the channel where a message came from**. The
+Carapace routes replies **back to the channel where a message came from**. The
 model does not choose a channel; routing is deterministic and controlled by the
 host configuration. Under the default DM scope, direct messages from every
 channel converge on the agent's [main session](/concepts/main-session).
@@ -68,20 +68,20 @@ Examples:
 
 When `session.dmScope` is `main`, direct messages may share one main session.
 To prevent the session's `lastRoute` from being overwritten by non-owner DMs,
-OpenClaw infers a pinned owner from `allowFrom` when all of these are true:
+Carapace infers a pinned owner from `allowFrom` when all of these are true:
 
 - `allowFrom` has exactly one non-wildcard entry.
 - The entry can be normalized to a concrete sender ID for that channel.
 - The inbound DM sender does not match that pinned owner.
 
-In that mismatch case, OpenClaw still records inbound session metadata, but it
+In that mismatch case, Carapace still records inbound session metadata, but it
 skips updating the main session `lastRoute`.
 
 ## Guarded inbound recording
 
 Channel plugins can mark an inbound session record as `createIfMissing: false`
-when a guarded path must not create a new OpenClaw session. In that mode,
-OpenClaw may update metadata and `lastRoute` for an existing session, but it
+when a guarded path must not create a new Carapace session. In that mode,
+Carapace may update metadata and `lastRoute` for an existing session, but it
 does not create a route-only session entry just because a message was observed.
 
 ## Routing rules (how an agent is chosen)
@@ -106,7 +106,7 @@ The matched agent determines which workspace and session store are used.
 
 ## Broadcast groups (run multiple agents)
 
-Broadcast groups let you run **multiple agents** for the same peer **when OpenClaw would normally reply** (for example: in WhatsApp groups, after mention/activation gating).
+Broadcast groups let you run **multiple agents** for the same peer **when Carapace would normally reply** (for example: in WhatsApp groups, after mention/activation gating).
 
 Config:
 
@@ -136,7 +136,7 @@ Example:
       support: {
         default: true,
         name: "Support",
-        workspace: "~/.openclaw/workspace-support",
+        workspace: "~/.carapace/workspace-support",
       },
     },
   },
@@ -154,16 +154,16 @@ Example:
 ## Session storage
 
 Runtime session rows and transcripts live in each agent's SQLite database under
-the state directory (default `~/.openclaw`):
+the state directory (default `~/.carapace`):
 
-- `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+- `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite`
 
 Older installs may have legacy transcript JSONL files and a `sessions.json` row
-store under `~/.openclaw/agents/<agentId>/sessions/`. To import that history into
-SQLite, stop the Gateway, back up its state, and run `openclaw doctor --fix`
+store under `~/.carapace/agents/<agentId>/sessions/`. To import that history into
+SQLite, stop the Gateway, back up its state, and run `carapace doctor --fix`
 before restarting it. Gateway startup does not import legacy session files: if
 it finds a legacy store, it refuses readiness and prints the Doctor command for
-the active profile. Use `openclaw doctor --session-sqlite inspect
+the active profile. Use `carapace doctor --session-sqlite inspect
 --session-sqlite-all-agents` and the
 [Doctor](/cli/doctor#session-sqlite-migration) migration sequence for inspection
 and validation.
@@ -175,7 +175,7 @@ migration input or an explicit offline-maintenance target.
 Gateway session discovery can include on-disk stores under the default `agents/`
 root and templated `session.store` roots that use the
 `agents/<agentId>/sessions/sessions.json` layout. It recognizes the corresponding
-`agent/openclaw-agent.sqlite` database without requiring a legacy `sessions.json`
+`agent/carapace-agent.sqlite` database without requiring a legacy `sessions.json`
 file. Discovered store files must be regular files within the resolved agent
 root; symlinked store files and out-of-root paths are ignored.
 

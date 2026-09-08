@@ -20,8 +20,8 @@ import { withEnvAsync } from "../../../src/test-utils/env.ts";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
 import { resolvePlaywrightChromiumExecutablePath } from "../test-helpers/control-ui-e2e.ts";
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const useWebKit = process.env.OPENCLAW_CONTROL_UI_E2E_BROWSER === "webkit";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const useWebKit = process.env.CARAPACE_CONTROL_UI_E2E_BROWSER === "webkit";
 const browserName = useWebKit ? "webkit" : "chromium";
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 
@@ -61,7 +61,7 @@ async function writeOldDocumentBuild(root: string): Promise<void> {
         small { color: #94a3b8; } button { margin: 32px 0; padding: 12px 18px; }
         #route { border-left: 4px solid #4ade80; padding: 12px; }
       </style></head><body><main>
-      <small>OpenClaw update recovery proof</small><h1>Old document is still open</h1>
+      <small>Carapace update recovery proof</small><h1>Old document is still open</h1>
       <button type="button">Open Activity</button><div id="route">Activity not loaded yet</div>
       <script type="module" src="/assets/app-old.js"></script>
       </main></body></html>`,
@@ -119,7 +119,7 @@ it("keeps an old document's unvisited lazy module available across builds", asyn
   const artifactDir = captureUiProof
     ? createControlUiE2eArtifactDir(`retained-assets-${browserName}`)
     : "";
-  const fixture = await mkdtemp(path.join(os.tmpdir(), "openclaw-retained-assets-e2e-"));
+  const fixture = await mkdtemp(path.join(os.tmpdir(), "carapace-retained-assets-e2e-"));
   const buildA = path.join(fixture, "build-a");
   const buildB = path.join(fixture, "build-b");
   const stateDir = path.join(fixture, "state");
@@ -129,7 +129,7 @@ it("keeps an old document's unvisited lazy module available across builds", asyn
     await writeOldDocumentBuild(buildA);
     await writeReplacementBuild(buildB);
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const retainedA = createControlUiAssetRetention(buildA);
       await retainedA.prepare();
       const root: Extract<ControlUiRootState, { kind: "bundled" }> = {

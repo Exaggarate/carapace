@@ -1,12 +1,12 @@
 ---
-summary: "Use StepFun models with OpenClaw"
+summary: "Use StepFun models with Carapace"
 read_when:
-  - You want StepFun models in OpenClaw
+  - You want StepFun models in Carapace
   - You need StepFun setup guidance
 title: "StepFun"
 ---
 
-StepFun ships as an external official plugin (`@openclaw/stepfun-provider`) with two provider ids:
+StepFun ships as an external official plugin (`@carapace/stepfun-provider`) with two provider ids:
 
 - `stepfun` for the standard endpoint
 - `stepfun-plan` for the Step Plan endpoint
@@ -18,8 +18,8 @@ Standard and Step Plan are **separate providers** with different endpoints and m
 ## Install plugin
 
 ```bash
-openclaw plugins install @openclaw/stepfun-provider
-openclaw gateway restart
+carapace plugins install @carapace/stepfun-provider
+carapace gateway restart
 ```
 
 ## Region and endpoint overview
@@ -66,24 +66,24 @@ Step Plan (`stepfun-plan`):
       </Step>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice stepfun-standard-api-key-intl
+        carapace onboard --auth-choice stepfun-standard-api-key-intl
         ```
 
         China endpoint:
 
         ```bash
-        openclaw onboard --auth-choice stepfun-standard-api-key-cn
+        carapace onboard --auth-choice stepfun-standard-api-key-cn
         ```
       </Step>
       <Step title="Non-interactive alternative">
         ```bash
-        openclaw onboard --auth-choice stepfun-standard-api-key-intl \
+        carapace onboard --auth-choice stepfun-standard-api-key-intl \
           --stepfun-api-key "$STEPFUN_API_KEY"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider stepfun
+        carapace models list --provider stepfun
         ```
       </Step>
     </Steps>
@@ -105,24 +105,24 @@ Step Plan (`stepfun-plan`):
       </Step>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice stepfun-plan-api-key-intl
+        carapace onboard --auth-choice stepfun-plan-api-key-intl
         ```
 
         China endpoint:
 
         ```bash
-        openclaw onboard --auth-choice stepfun-plan-api-key-cn
+        carapace onboard --auth-choice stepfun-plan-api-key-cn
         ```
       </Step>
       <Step title="Non-interactive alternative">
         ```bash
-        openclaw onboard --auth-choice stepfun-plan-api-key-intl \
+        carapace onboard --auth-choice stepfun-plan-api-key-intl \
           --stepfun-api-key "$STEPFUN_API_KEY"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider stepfun-plan
+        carapace models list --provider stepfun-plan
         ```
       </Step>
     </Steps>
@@ -228,10 +228,10 @@ A single auth flow writes region-matched profiles for both `stepfun` and `stepfu
   </Accordion>
 
   <Accordion title="Notes">
-    - `step-3.7-flash` accepts text and image input through OpenClaw. StepFun's API also supports video, which is not yet a model input modality in OpenClaw.
+    - `step-3.7-flash` accepts text and image input through Carapace. StepFun's API also supports video, which is not yet a model input modality in Carapace.
     - Step 3.7 supports `low`, `medium`, and `high` reasoning effort. Because the model has no non-reasoning mode, `/think off` maps to `low`.
     - `step-3.5-flash-2603` is currently exposed only on `stepfun-plan`.
-    - Use `openclaw models list` and `openclaw models set <provider/model>` to inspect or switch models.
+    - Use `carapace models list` and `carapace models set <provider/model>` to inspect or switch models.
 
   </Accordion>
 </AccordionGroup>

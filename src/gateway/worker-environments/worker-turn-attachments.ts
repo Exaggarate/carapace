@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
-import { isPassThroughRemoteMediaSource } from "@openclaw/media-core/media-source-url";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isPassThroughRemoteMediaSource } from "@carapace/media-core/media-source-url";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { SessionPlacementTurnParams } from "../../agents/session-placement-admission.js";
 import { sanitizeUntrustedFileName } from "../../infra/fs-safe-advanced.js";
 import { readPersistedMediaFacts } from "../../media/media-facts.js";

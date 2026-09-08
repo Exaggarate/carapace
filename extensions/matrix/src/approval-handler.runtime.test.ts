@@ -2,7 +2,7 @@
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { matrixApprovalNativeRuntime } from "./approval-handler.runtime.js";
 import {
@@ -34,7 +34,7 @@ type MatrixPendingPluginApprovalView = Extract<
   { approvalKind: "plugin" }
 >;
 
-const MATRIX_APPROVAL_METADATA_KEY = "com.openclaw.approval";
+const MATRIX_APPROVAL_METADATA_KEY = "com.carapace.approval";
 
 function expectRecordFields(value: unknown, expected: Record<string, unknown>) {
   if (!value || typeof value !== "object") {
@@ -572,7 +572,7 @@ describe("matrixApprovalNativeRuntime", () => {
           approvalKind: "system-agent",
           id: "system-agent:change-1",
           request: {
-            title: "OpenClaw change",
+            title: "Carapace change",
             description: "restart the Gateway",
             command: "restart the Gateway",
             proposalHash: "a".repeat(64),
@@ -593,7 +593,7 @@ describe("matrixApprovalNativeRuntime", () => {
           approvalKind: "system-agent",
           approvalId: "system-agent:change-1",
           phase: "resolved",
-          title: "OpenClaw change",
+          title: "Carapace change",
           metadata: [],
           commandText: "restart the Gateway",
           operationSummary: "restart the Gateway",
@@ -606,7 +606,7 @@ describe("matrixApprovalNativeRuntime", () => {
 
       expect(result).toEqual({
         kind: "update",
-        payload: `OpenClaw change: ${label}\n\nChange\n\`\`\`\nrestart the Gateway\n\`\`\``,
+        payload: `Carapace change: ${label}\n\nChange\n\`\`\`\nrestart the Gateway\n\`\`\``,
       });
     },
   );

@@ -6,7 +6,7 @@ import { resolveHomeRelativePath, resolveRequiredHomeDir } from "../infra/home-d
 import { isFastTestRuntimeEnv } from "../infra/test-runtime-env.js";
 
 const LEGACY_STATE_DIRNAMES = [".clawdbot"] as const;
-const NEW_STATE_DIRNAME = ".openclaw";
+const NEW_STATE_DIRNAME = ".carapace";
 
 function resolveDefaultHomeDir(): string {
   return resolveRequiredHomeDir(process.env, os.homedir);
@@ -22,15 +22,15 @@ export function resolveNewStateDir(homedir: () => string = resolveDefaultHomeDir
 
 /**
  * State directory for mutable data (sessions, logs, caches).
- * Can be overridden via OPENCLAW_STATE_DIR.
- * Default: ~/.openclaw
+ * Can be overridden via CARAPACE_STATE_DIR.
+ * Default: ~/.carapace
  */
 export function resolveStateDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = () => resolveRequiredHomeDir(env, os.homedir),
 ): string {
   const effectiveHomedir = () => resolveRequiredHomeDir(env, homedir);
-  const override = env.OPENCLAW_STATE_DIR?.trim();
+  const override = env.CARAPACE_STATE_DIR?.trim();
   if (override) {
     return resolveHomeRelativePath(override, { env, homedir: effectiveHomedir });
   }

@@ -14,7 +14,7 @@ import {
   resolveBootstrapMaxChars,
   resolveBootstrapTotalMaxChars,
 } from "../agents/embedded-agent-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 // Every warning uses the same locale; silent checks never need a formatter.
 let integerFormatter: Intl.NumberFormat | undefined;
@@ -45,7 +45,7 @@ function formatCauses(causes: Array<"per-file-limit" | "total-limit">): string {
  *
  * Returns the raw budget analysis for tests and callers that need structured evidence.
  */
-export async function noteBootstrapFileSize(cfg: OpenClawConfig) {
+export async function noteBootstrapFileSize(cfg: CarapaceConfig) {
   const defaultAgentId = tryResolveDefaultAgentId(cfg);
   const agentIds = listAgentIds(cfg);
   const workspaces = agentIds.map((agentId) => ({

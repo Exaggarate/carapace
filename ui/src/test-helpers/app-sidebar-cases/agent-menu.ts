@@ -211,8 +211,8 @@ describe("AppSidebar agent chip", () => {
     const menu = sidebar.querySelector(".sidebar-agent-menu");
     expect(menu).not.toBeNull();
     expect(menu?.querySelector(".sidebar-pair-mobile")).toBeNull();
-    expect(menu?.querySelector("openclaw-sidebar-build-chip")).toBeNull();
-    expect(menu?.querySelector("openclaw-theme-mode-toggle")).toBeNull();
+    expect(menu?.querySelector("carapace-sidebar-build-chip")).toBeNull();
+    expect(menu?.querySelector("carapace-theme-mode-toggle")).toBeNull();
     expect(
       [...(menu?.querySelectorAll("wa-dropdown-item") ?? [])].map((element) =>
         element.getAttribute("value"),
@@ -438,7 +438,7 @@ describe("AppSidebar agent chip", () => {
       "panel",
       TWO_AGENTS,
     );
-    const card = sidebar.querySelector<HTMLElement>("openclaw-sidebar-agent-card");
+    const card = sidebar.querySelector<HTMLElement>("carapace-sidebar-agent-card");
     const trigger = card?.querySelector<HTMLElement>(".sidebar-agent-card__main");
     const label = card?.querySelector<HTMLElement>(".sidebar-agent-card__name");
     if (!card || !trigger || !label) {

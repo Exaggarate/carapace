@@ -13,23 +13,23 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const ENV_KEYS = [
   "HOME",
   "USERPROFILE",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 async function setupTempHome() {
   const env = captureEnv([...ENV_KEYS]);
-  const home = tempDirs.make("openclaw-rpc-models-");
-  const stateDir = path.join(home, ".openclaw");
+  const home = tempDirs.make("carapace-rpc-models-");
+  const stateDir = path.join(home, ".carapace");
   const workspace = path.join(home, "workspace");
   const bundledPlugins = path.join(home, "empty-bundled-plugins");
   await Promise.all([
@@ -39,19 +39,19 @@ async function setupTempHome() {
   ]);
   setTestEnvValue("HOME", home);
   setTestEnvValue("USERPROFILE", home);
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-  setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-  setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-  setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-  setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-  setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-  setTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledPlugins);
-  setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-  delete process.env.OPENCLAW_CONFIG_PATH;
-  delete process.env.OPENCLAW_SKIP_PROVIDERS;
-  delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+  setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+  setTestEnvValue("CARAPACE_SKIP_CHANNELS", "1");
+  setTestEnvValue("CARAPACE_SKIP_GMAIL_WATCHER", "1");
+  setTestEnvValue("CARAPACE_SKIP_CRON", "1");
+  setTestEnvValue("CARAPACE_SKIP_CANVAS_HOST", "1");
+  setTestEnvValue("CARAPACE_SKIP_BROWSER_CONTROL_SERVER", "1");
+  setTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR", bundledPlugins);
+  setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+  delete process.env.CARAPACE_CONFIG_PATH;
+  delete process.env.CARAPACE_SKIP_PROVIDERS;
+  delete process.env.CARAPACE_TEST_MINIMAL_GATEWAY;
   return {
-    configPath: path.join(stateDir, "openclaw.json"),
+    configPath: path.join(stateDir, "carapace.json"),
     env,
     home,
     workspace,

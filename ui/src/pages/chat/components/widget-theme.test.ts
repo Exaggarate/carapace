@@ -51,7 +51,7 @@ describe("widget theme bridge", () => {
     const [message, origin] = postedMessage(postMessage);
     expect(origin).toBe("*");
     expect(message).toEqual({
-      type: "openclaw:widget-theme",
+      type: "carapace:widget-theme",
       mode: "light",
       tokens: {
         surface: "#faf9f7",
@@ -79,7 +79,7 @@ describe("widget theme bridge", () => {
 
     const [message] = postedMessage(postMessage);
     expect(message).toEqual({
-      type: "openclaw:widget-theme",
+      type: "carapace:widget-theme",
       mode: "dark",
       tokens: { surface: "#0e1015" },
     });
@@ -95,7 +95,7 @@ describe("widget theme bridge", () => {
 
     expect(postedMessage(postMessage)).toEqual([
       {
-        type: "openclaw:widget-theme",
+        type: "carapace:widget-theme",
         mode: "dark",
         tokens: { surface: "#0e1015", accent: "#ff5c5c" },
       },

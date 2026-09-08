@@ -14,7 +14,7 @@ import {
   getRuntimeConfigSnapshotMetadata,
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ModelsConfigSchema } from "../config/zod-schema.core.js";
 import { getPath, setPathCreateStrict } from "../secrets/path-utils.js";
 import * as secretResolver from "../secrets/resolve.js";
@@ -32,9 +32,9 @@ import {
   refreshActiveProviderAuthRuntimeSnapshot,
 } from "../secrets/runtime.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resolveAgentRuntimeConfig } from "./agent-runtime-config.js";
 import { resolveApiKeyForProviderCore } from "./model-auth-provider.js";
 
@@ -42,9 +42,9 @@ const { callGatewayMock } = vi.hoisted(() => ({ callGatewayMock: vi.fn() }));
 vi.mock("../gateway/call.js", () => ({ callGateway: callGatewayMock }));
 
 const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
-function providerConfig(): OpenClawConfig {
+function providerConfig(): CarapaceConfig {
   return {
     plugins: { enabled: false },
     models: {
@@ -88,7 +88,7 @@ async function activateProviderConfig(config = providerConfig()) {
 }
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "agent-secret-owner" });
+  state = await createCarapaceTestState({ label: "agent-secret-owner" });
   clearSecretsRuntimeSnapshot();
   vi.stubEnv("TEST_HEALTHY_PROVIDER_KEY", undefined);
   vi.stubEnv("TEST_COLD_PROVIDER_KEY", undefined);
@@ -114,7 +114,7 @@ afterEach(async () => {
 
 describe("agent execution respects prepared secret owners", () => {
   it("reuses active config without copying source or reload-only plugin metadata", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       agents: { defaults: { workspace: "/fixture/workspace" } },
     };
@@ -132,7 +132,7 @@ describe("agent execution respects prepared secret owners", () => {
           origin: "bundled" as const,
           rootDir: "/fixture/plugin",
           source: "/fixture/plugin/index.js",
-          manifestPath: "/fixture/plugin/openclaw.plugin.json",
+          manifestPath: "/fixture/plugin/carapace.plugin.json",
         },
       ],
     };
@@ -491,7 +491,7 @@ describe("agent execution respects prepared secret owners", () => {
   ] as const)(
     "resolves a persona-only %s SecretRef for local %s commands",
     async (scope, command) => {
-      const config: OpenClawConfig = { plugins: { enabled: false } };
+      const config: CarapaceConfig = { plugins: { enabled: false } };
       const keyPath = [
         ...(scope === "agent" ? ["agents", "entries", "reader", "tts"] : ["tts"]),
         "personas",

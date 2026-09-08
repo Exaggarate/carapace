@@ -4,29 +4,29 @@ trap "" PIPE
 export TERM=xterm-256color
 export NO_COLOR=1
 
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/carapace-e2e-instance.sh
 source scripts/e2e/lib/external-package-transition.sh
 
-openclaw_e2e_eval_test_state_from_b64 "${OPENCLAW_TEST_STATE_SCRIPT_B64:?missing OPENCLAW_TEST_STATE_SCRIPT_B64}"
-openclaw_e2e_install_trash_shim
+carapace_e2e_eval_test_state_from_b64 "${CARAPACE_TEST_STATE_SCRIPT_B64:?missing CARAPACE_TEST_STATE_SCRIPT_B64}"
+carapace_e2e_install_trash_shim
 
 export NPM_CONFIG_PREFIX="$HOME/.npm-global"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
 export npm_config_loglevel=error
 export npm_config_fund=false
 export npm_config_audit=false
-export OPENAI_API_KEY="sk-openclaw-release-upgrade-user-journey"
+export OPENAI_API_KEY="sk-carapace-release-upgrade-user-journey"
 CLICKCLACK_TEST_TOKEN="clickclack-release-upgrade-token"
 unset CLICKCLACK_BOT_TOKEN
 
 PORT="18789"
 MOCK_PORT="44210"
 CLICKCLACK_PORT="44211"
-SUCCESS_MARKER="OPENCLAW_E2E_OK_RELEASE_UPGRADE"
-scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-release-upgrade-user-journey.XXXXXX")"
+SUCCESS_MARKER="CARAPACE_E2E_OK_RELEASE_UPGRADE"
+scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-release-upgrade-user-journey.XXXXXX")"
 LOG_DIR="$scenario_tmp/logs"
-if [ -n "${OPENCLAW_RELEASE_UPGRADE_ARTIFACT_DIR:-}" ]; then
-  LOG_DIR="$OPENCLAW_RELEASE_UPGRADE_ARTIFACT_DIR"
+if [ -n "${CARAPACE_RELEASE_UPGRADE_ARTIFACT_DIR:-}" ]; then
+  LOG_DIR="$CARAPACE_RELEASE_UPGRADE_ARTIFACT_DIR"
 fi
 mkdir -p "$LOG_DIR"
 BASELINE_INSTALL_LOG="$LOG_DIR/baseline-install.log"
@@ -50,14 +50,14 @@ CLICKCLACK_STATE="$scenario_tmp/clickclack.json"
 export SUCCESS_MARKER MOCK_REQUEST_LOG
 
 candidate_version="$(
-  tar -xOf "${OPENCLAW_CURRENT_PACKAGE_TGZ:?missing OPENCLAW_CURRENT_PACKAGE_TGZ}" package/package.json |
+  tar -xOf "${CARAPACE_CURRENT_PACKAGE_TGZ:?missing CARAPACE_CURRENT_PACKAGE_TGZ}" package/package.json |
     node -e 'let raw = ""; process.stdin.setEncoding("utf8"); process.stdin.on("data", (chunk) => { raw += chunk; }); process.stdin.on("end", () => { process.stdout.write(JSON.parse(raw).version); });'
 )"
-if [ -n "${OPENCLAW_RELEASE_UPGRADE_BASELINE_SPEC:-}" ]; then
-  BASELINE_SPEC="$OPENCLAW_RELEASE_UPGRADE_BASELINE_SPEC"
+if [ -n "${CARAPACE_RELEASE_UPGRADE_BASELINE_SPEC:-}" ]; then
+  BASELINE_SPEC="$CARAPACE_RELEASE_UPGRADE_BASELINE_SPEC"
 else
   BASELINE_SPEC="$(
-    openclaw_e2e_run_script_entrypoint \
+    carapace_e2e_run_script_entrypoint \
       scripts/lib/release-upgrade-baseline \
       --candidate-version "$candidate_version"
   )"
@@ -67,9 +67,9 @@ mock_pid=""
 clickclack_pid=""
 gateway_pid=""
 cleanup() {
-  openclaw_e2e_terminate_gateways "${gateway_pid:-}"
-  openclaw_e2e_stop_process "${clickclack_pid:-}"
-  openclaw_e2e_stop_process "${mock_pid:-}"
+  carapace_e2e_terminate_gateways "${gateway_pid:-}"
+  carapace_e2e_stop_process "${clickclack_pid:-}"
+  carapace_e2e_stop_process "${mock_pid:-}"
   rm -rf "$scenario_tmp"
 }
 trap cleanup EXIT
@@ -77,7 +77,7 @@ trap cleanup EXIT
 dump_debug_logs() {
   local status="$1"
   echo "release upgrade user journey failed with exit code $status" >&2
-  openclaw_e2e_dump_logs \
+  carapace_e2e_dump_logs \
     "$BASELINE_INSTALL_LOG" \
     "$CANDIDATE_INSTALL_LOG" \
     "$DOCTOR_LOG" \
@@ -102,13 +102,13 @@ dump_debug_logs() {
     "$LOG_DIR/transition/backup.err" \
     "$LOG_DIR/transition/doctor.log"
 }
-openclaw_e2e_enable_failure_diagnostics
+carapace_e2e_enable_failure_diagnostics
 
 record_baseline_setup() {
   node - "$LOG_DIR/baseline-setup-$1.json" <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
-const configPath = process.env.OPENCLAW_CONFIG_PATH ?? path.join(process.env.OPENCLAW_STATE_DIR ?? path.join(process.env.HOME, ".openclaw"), "openclaw.json");
+const configPath = process.env.CARAPACE_CONFIG_PATH ?? path.join(process.env.CARAPACE_STATE_DIR ?? path.join(process.env.HOME, ".carapace"), "carapace.json");
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 fs.writeFileSync(process.argv[2], JSON.stringify({
   clickclackEnvPresent: Boolean(process.env.CLICKCLACK_BOT_TOKEN),
@@ -124,23 +124,23 @@ NODE
 
 start_gateway() {
   local log_path="$1"
-  gateway_pid="$(openclaw_e2e_start_gateway "$entry" "$PORT" "$log_path")"
-  openclaw_e2e_wait_gateway_ready "$gateway_pid" "$log_path" 300 "$PORT"
+  gateway_pid="$(carapace_e2e_start_gateway "$entry" "$PORT" "$log_path")"
+  carapace_e2e_wait_gateway_ready "$gateway_pid" "$log_path" 300 "$PORT"
 }
 
 echo "Installing published baseline $BASELINE_SPEC..."
-if ! openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g "$BASELINE_SPEC" --no-fund --no-audit >"$BASELINE_INSTALL_LOG" 2>&1; then
+if ! carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g "$BASELINE_SPEC" --no-fund --no-audit >"$BASELINE_INSTALL_LOG" 2>&1; then
   cat "$BASELINE_INSTALL_LOG" >&2 || true
   exit 1
 fi
-command -v openclaw >/dev/null
-baseline_root="$(openclaw_e2e_package_root)"
-baseline_entry="$(openclaw_e2e_package_entrypoint "$baseline_root")"
+command -v carapace >/dev/null
+baseline_root="$(carapace_e2e_package_root)"
+baseline_entry="$(carapace_e2e_package_entrypoint "$baseline_root")"
 baseline_version="$(node -p 'require(process.argv[1]).version' "$baseline_root/package.json")"
-openclaw_e2e_enable_openclaw_cli_timeout
+carapace_e2e_enable_carapace_cli_timeout
 
-mock_pid="$(openclaw_e2e_start_mock_openai "$MOCK_PORT" "$OPENAI_LOG")"
-openclaw_e2e_wait_mock_openai "$MOCK_PORT"
+mock_pid="$(carapace_e2e_start_mock_openai "$MOCK_PORT" "$OPENAI_LOG")"
+carapace_e2e_wait_mock_openai "$MOCK_PORT"
 
 CLICKCLACK_FIXTURE_PORT="$CLICKCLACK_PORT" \
 CLICKCLACK_FIXTURE_TOKEN="$CLICKCLACK_TEST_TOKEN" \
@@ -148,14 +148,14 @@ CLICKCLACK_FIXTURE_STATE="$CLICKCLACK_STATE" \
   node scripts/e2e/lib/release-user-journey/clickclack-fixture.mjs >"$CLICKCLACK_SERVER_LOG" 2>&1 &
 clickclack_pid="$!"
 for _ in $(seq 1 100); do
-  if openclaw_e2e_probe_http_status "http://127.0.0.1:$CLICKCLACK_PORT/health" 200 >/dev/null 2>&1; then
+  if carapace_e2e_probe_http_status "http://127.0.0.1:$CLICKCLACK_PORT/health" 200 >/dev/null 2>&1; then
     break
   fi
   sleep 0.1
 done
-openclaw_e2e_probe_http_status "http://127.0.0.1:$CLICKCLACK_PORT/health" 200
+carapace_e2e_probe_http_status "http://127.0.0.1:$CLICKCLACK_PORT/health" 200
 
-openclaw_e2e_run_command node "$baseline_entry" onboard \
+carapace_e2e_run_command node "$baseline_entry" onboard \
   --non-interactive \
   --accept-risk \
   --flow quickstart \
@@ -179,8 +179,8 @@ node scripts/e2e/lib/release-scenarios/write-cli-plugin.mjs \
   "Release Upgrade Plugin" \
   release-upgrade \
   "release-upgrade-plugin:pong"
-openclaw_e2e_fixture_plugin_command openclaw -- plugins install "$plugin_dir" --force >"$PLUGIN_INSTALL_LOG" 2>&1
-openclaw release-upgrade ping >"$PLUGIN_CLI_BEFORE_LOG" 2>&1
+carapace_e2e_fixture_plugin_command carapace -- plugins install "$plugin_dir" --force >"$PLUGIN_INSTALL_LOG" 2>&1
+carapace release-upgrade ping >"$PLUGIN_CLI_BEFORE_LOG" 2>&1
 node scripts/e2e/lib/release-scenarios/assertions.mjs assert-file-contains "$PLUGIN_CLI_BEFORE_LOG" "release-upgrade-plugin:pong"
 record_baseline_setup plugin
 
@@ -190,7 +190,7 @@ entry="$baseline_entry"
 if [ "$baseline_version" = "2026.9.2" ]; then
   node scripts/e2e/lib/release-scenarios/assertions.mjs configure-mock-openai "$MOCK_PORT"
   record_baseline_setup model
-  openclaw agent --local --agent main --session-id release-upgrade-retained \
+  carapace agent --local --agent main --session-id release-upgrade-retained \
     --message "Return marker ${SUCCESS_MARKER}_BASELINE" --thinking off --json \
     >"$LOG_DIR/baseline-agent.json" 2>"$LOG_DIR/baseline-agent.err"
   node scripts/e2e/lib/release-scenarios/assertions.mjs assert-agent-turn \
@@ -199,19 +199,19 @@ if [ "$baseline_version" = "2026.9.2" ]; then
 fi
 start_gateway "$LOG_DIR/baseline-gateway.log"
 stopped_pid="$gateway_pid"
-openclaw_e2e_terminate_gateways "$gateway_pid"
+carapace_e2e_terminate_gateways "$gateway_pid"
 gateway_pid=""
-openclaw_e2e_external_package_transition \
+carapace_e2e_external_package_transition \
   "$baseline_version" "$candidate_version" "$LOG_DIR/transition" "$stopped_pid"
-package_root="$(openclaw_e2e_package_root)"
-entry="$(openclaw_e2e_package_entrypoint "$package_root")"
-openclaw_e2e_enable_openclaw_cli_timeout
+package_root="$(carapace_e2e_package_root)"
+entry="$(carapace_e2e_package_entrypoint "$package_root")"
+carapace_e2e_enable_carapace_cli_timeout
 node scripts/e2e/lib/release-scenarios/assertions.mjs assert-package-version "$package_root" "$candidate_version" candidate
 
 # Apply the candidate fixture model after its migrations finish.
 node scripts/e2e/lib/release-scenarios/assertions.mjs configure-mock-openai "$MOCK_PORT"
 
-openclaw agent --local \
+carapace agent --local \
   --agent main \
   --session-id release-upgrade-user-journey-agent \
   --message "Return marker $SUCCESS_MARKER" \
@@ -219,18 +219,18 @@ openclaw agent --local \
   --json >"$AGENT_LOG" 2>&1
 node scripts/e2e/lib/release-scenarios/assertions.mjs assert-agent-turn "$SUCCESS_MARKER" "$AGENT_LOG" "$MOCK_REQUEST_LOG"
 
-openclaw release-upgrade ping >"$PLUGIN_CLI_AFTER_LOG" 2>&1
+carapace release-upgrade ping >"$PLUGIN_CLI_AFTER_LOG" 2>&1
 node scripts/e2e/lib/release-scenarios/assertions.mjs assert-file-contains "$PLUGIN_CLI_AFTER_LOG" "release-upgrade-plugin:pong"
 
 clickclack_plugin_dir="$(mktemp -d "$scenario_tmp/clickclack-plugin.XXXXXX")"
 node scripts/e2e/lib/release-user-journey/write-clickclack-plugin.mjs "$clickclack_plugin_dir"
-openclaw_e2e_fixture_plugin_command openclaw -- plugins install "$clickclack_plugin_dir" --force >"$CLICKCLACK_PLUGIN_INSTALL_LOG" 2>&1
+carapace_e2e_fixture_plugin_command carapace -- plugins install "$clickclack_plugin_dir" --force >"$CLICKCLACK_PLUGIN_INSTALL_LOG" 2>&1
 export CLICKCLACK_BOT_TOKEN="$CLICKCLACK_TEST_TOKEN"
 node scripts/e2e/lib/release-user-journey/assertions.mjs configure-clickclack "http://127.0.0.1:$CLICKCLACK_PORT"
 
-openclaw channels status --json >"$STATUS_JSON" 2>"$STATUS_ERR"
+carapace channels status --json >"$STATUS_JSON" 2>"$STATUS_ERR"
 node scripts/e2e/lib/release-user-journey/assertions.mjs assert-channel-configured clickclack "$STATUS_JSON"
-openclaw message send \
+carapace message send \
   --channel clickclack \
   --target channel:general \
   --message "release upgrade outbound" \
@@ -238,10 +238,10 @@ openclaw message send \
 node scripts/e2e/lib/release-user-journey/assertions.mjs assert-clickclack-state outbound "$CLICKCLACK_STATE" "release upgrade outbound"
 
 start_gateway "$GATEWAY_LOG"
-openclaw sessions --json >"$LOG_DIR/sessions-after.json"
+carapace sessions --json >"$LOG_DIR/sessions-after.json"
 session_key="$(node scripts/e2e/lib/external-package-transition.mjs session-key \
   "$LOG_DIR/sessions-after.json" release-upgrade-user-journey-agent)"
-openclaw gateway call chat.history --json \
+carapace gateway call chat.history --json \
   --params "{\"sessionKey\":\"$session_key\",\"limit\":20}" \
   >"$LOG_DIR/candidate-history.json"
 node scripts/e2e/lib/external-package-transition.mjs history \
@@ -249,7 +249,7 @@ node scripts/e2e/lib/external-package-transition.mjs history \
 if [ "$baseline_version" = "2026.9.2" ]; then
   session_key="$(node scripts/e2e/lib/external-package-transition.mjs session-key \
     "$LOG_DIR/sessions-after.json" release-upgrade-retained)"
-  openclaw gateway call chat.history --json \
+  carapace gateway call chat.history --json \
     --params "{\"sessionKey\":\"$session_key\",\"limit\":20}" \
     >"$LOG_DIR/baseline-history-after.json"
   node scripts/e2e/lib/external-package-transition.mjs history \

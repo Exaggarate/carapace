@@ -23,7 +23,7 @@ const moveDestinationMocks = vi.hoisted(() => ({
     canonicalKey: "agent:main:move-source",
     store: {},
     storeKeys: ["agent:main:move-source"],
-    storePath: "/tmp/openclaw-worker-placement-session.sqlite",
+    storePath: "/tmp/carapace-worker-placement-session.sqlite",
   })),
   resolveSessionRuntime: vi.fn(() => "codex"),
   resolveSessionTarget: vi.fn(
@@ -41,7 +41,7 @@ const moveDestinationMocks = vi.hoisted(() => ({
         canonicalKey: "agent:main:move-source",
         store: {},
         storeKeys: ["agent:main:move-source"],
-        storePath: "/tmp/openclaw-worker-placement-session.sqlite",
+        storePath: "/tmp/carapace-worker-placement-session.sqlite",
       },
       worktree: { id: "worktree-recovery", path: "/gateway/workspace" },
       workspace: { kind: "local", path: "/gateway/workspace" },

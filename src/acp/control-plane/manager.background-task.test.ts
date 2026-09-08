@@ -2,19 +2,19 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { AdmittedRunContext } from "../../agents/admitted-run-context.js";
 import { createExecutionIdentityAdmissionToken } from "../../audit/execution-identity-admission.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { findTaskByRunId } from "../../tasks/task-registry.js";
 import { bindTaskRunExecution } from "../../tasks/task-registry.store.sqlite.js";
 import {
   resetTaskRegistryForTests,
   resetTaskFlowRegistryForTests,
 } from "../../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { AcpRuntimeError } from "../runtime/errors.js";
 import {
   appendBackgroundTaskProgressSummary,
@@ -30,7 +30,7 @@ import type { AcpSessionManagerDeps } from "./manager.types.js";
 const LOBSTER = "🦞";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetTaskRegistryForTests({ persist: false });
   resetTaskFlowRegistryForTests({ persist: false });
 });
@@ -70,7 +70,7 @@ describe("resolveBackgroundTaskContext", () => {
     // normalized length 164 puts the pair astride the 159-char cut point.
     const context = resolveBackgroundTaskContext({
       deps: fakeDeps(),
-      cfg: {} as unknown as OpenClawConfig,
+      cfg: {} as unknown as CarapaceConfig,
       sessionKey: "child-session",
       agentId: "qa",
       requestId: "run-1",
@@ -83,7 +83,7 @@ describe("resolveBackgroundTaskContext", () => {
   it("passes short task text through unchanged", () => {
     const context = resolveBackgroundTaskContext({
       deps: fakeDeps(),
-      cfg: {} as unknown as OpenClawConfig,
+      cfg: {} as unknown as CarapaceConfig,
       sessionKey: "child-session",
       agentId: "qa",
       requestId: "run-2",
@@ -112,8 +112,8 @@ describe("resolveBackgroundTaskFailureStatus", () => {
 
 describe("ACP background task execution binding", () => {
   it("binds the exact admitted execution only at prompt submission", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-acp-execution-binding-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-acp-execution-binding-" },
       async () => {
         resetTaskRegistryForTests();
         resetTaskFlowRegistryForTests();
@@ -140,7 +140,7 @@ describe("ACP background task execution binding", () => {
         if (!record || !task?.parentFlowId) {
           throw new Error("expected ACP task and owner flow");
         }
-        const db = openOpenClawStateDatabase().db;
+        const db = openCarapaceStateDatabase().db;
         expect(tableExists(db, "execution_owner_lifecycle_bindings")).toBe(false);
 
         bindBackgroundTaskExecution(record, admitted);
@@ -174,8 +174,8 @@ describe("ACP background task execution binding", () => {
   it.each(["missing", "mismatched"] as const)(
     "does not bind a live parent flow when the task owner is %s",
     async (taskOwnerState) => {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: `openclaw-acp-${taskOwnerState}-task-binding-` },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: `carapace-acp-${taskOwnerState}-task-binding-` },
         async () => {
           resetTaskRegistryForTests();
           resetTaskFlowRegistryForTests();
@@ -202,7 +202,7 @@ describe("ACP background task execution binding", () => {
           if (!record || !task?.parentFlowId) {
             throw new Error("expected ACP task and owner flow");
           }
-          const db = openOpenClawStateDatabase().db;
+          const db = openCarapaceStateDatabase().db;
           if (taskOwnerState === "missing") {
             db.prepare("DELETE FROM task_runs WHERE task_id = ?").run(task.taskId);
           } else {

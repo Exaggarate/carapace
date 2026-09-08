@@ -85,7 +85,7 @@ describe("CustodianAlertStore", () => {
     const provider = createApplicationContextProvider(context);
     const sessionStore = new CustodianSessionStore();
     const send = vi.spyOn(sessionStore, "send");
-    const surface = document.createElement("openclaw-custodian-surface");
+    const surface = document.createElement("carapace-custodian-surface");
     surface.store = sessionStore;
     provider.append(surface);
     document.body.append(provider);

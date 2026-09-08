@@ -6,7 +6,7 @@ import {
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import { saveCronStore } from "../cron/store.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { recoverStuckDiagnosticSession } from "./diagnostic-stuck-session-recovery.runtime.js";
 import {
   mocks,
@@ -158,11 +158,11 @@ describe("stuck session recovery", () => {
   });
 
   it("logs stopped cron context when aborting an active embedded run", async () => {
-    const openClawState = await createOpenClawTestState({
+    const carapaceState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-recovery-context-",
+      prefix: "carapace-recovery-context-",
     });
-    const tempDir = openClawState.stateDir;
+    const tempDir = carapaceState.stateDir;
     try {
       await saveCronStore(path.join(tempDir, "cron", "jobs.json"), {
         version: 1,
@@ -201,7 +201,7 @@ describe("stuck session recovery", () => {
         allowActiveAbort: true,
       });
     } finally {
-      await openClawState.cleanup();
+      await carapaceState.cleanup();
     }
 
     expect(warnLogMessages()).toEqual([

@@ -1,9 +1,9 @@
 // Doctor detection for legacy meeting transcript files, projections, and interrupted imports.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { withExistingOpenClawStateDatabaseArtifactPreservingReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { withExistingCarapaceStateDatabaseArtifactPreservingReadOnly } from "../state/carapace-state-db-readonly.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   TRANSCRIPT_EXPORT_FILE_NAMES,
   TRANSCRIPT_PATH_SEGMENT_MAX_BYTES,
@@ -116,7 +116,7 @@ export function detectLegacyMeetingTranscripts(params: {
     return { sourceDir, hasLegacy: false, pendingImportCount: 0 };
   }
   const databaseState = readMeetingTranscriptMigrationDetectionState({
-    env: { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir },
+    env: { ...(params.env ?? process.env), CARAPACE_STATE_DIR: params.stateDir },
     artifactPreservingReadOnly: params.artifactPreservingReadOnly,
   });
   const pendingImportCount = databaseState.pendingImportCount;
@@ -245,11 +245,11 @@ export function readMeetingTranscriptMigrationDetectionState(params: {
   };
   if (params.artifactPreservingReadOnly) {
     return (
-      withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(read, { env: params.env }) ??
+      withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(read, { env: params.env }) ??
       empty()
     );
   }
-  const databasePath = resolveOpenClawStateSqlitePath(params.env);
+  const databasePath = resolveCarapaceStateSqlitePath(params.env);
   if (!fs.existsSync(databasePath)) {
     return empty();
   }

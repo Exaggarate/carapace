@@ -1,7 +1,7 @@
 // Control UI E2E covers the real session-dashboard provider and transcript bridge.
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { WORKBOARD_STATUSES, type WorkboardCard } from "@openclaw/workboard-contract";
+import { WORKBOARD_STATUSES, type WorkboardCard } from "@carapace/workboard-contract";
 import type { Page } from "playwright";
 import { expect, it } from "vitest";
 import { GATEWAY_SERVER_CAPS } from "../../../packages/gateway-protocol/src/index.js";
@@ -63,7 +63,7 @@ async function showDashboard(page: Page): Promise<void> {
 }
 
 async function createProofContext(name: string) {
-  const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+  const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
   const proofDir = recordProof ? path.join(suite.artifactDir, name) : undefined;
   if (proofDir) {
     await mkdir(proofDir, { recursive: true });
@@ -81,7 +81,7 @@ function workboardConfigSnapshot(enabled = true) {
   return {
     config,
     hash: "workboard-cardboard-e2e",
-    path: "/tmp/openclaw-e2e/openclaw.json",
+    path: "/tmp/carapace-e2e/carapace.json",
     raw: JSON.stringify(config),
     resolved: config,
     sourceConfig: config,
@@ -213,7 +213,7 @@ suite.define(() => {
                 render: "url",
                 title: "Release status",
                 viewId: "cv_release",
-                url: "/__openclaw__/canvas/documents/cv_release/index.html",
+                url: "/__carapace__/canvas/documents/cv_release/index.html",
                 preferredHeight: 240,
                 sandbox: "scripts",
               },
@@ -380,7 +380,7 @@ suite.define(() => {
                 render: "url",
                 title: "Stale release status",
                 viewId: "cv_stale",
-                url: "/__openclaw__/canvas/documents/cv_stale/index.html",
+                url: "/__carapace__/canvas/documents/cv_stale/index.html",
                 preferredHeight: 240,
                 sandbox: "scripts",
               },
@@ -412,7 +412,7 @@ suite.define(() => {
     await pin.click();
 
     await expect.poll(async () => (await gateway.getRequests("board.widget.put")).length).toBe(1);
-    const toast = page.locator("openclaw-toast-host .app-toast");
+    const toast = page.locator("carapace-toast-host .app-toast");
     await toast.waitFor();
     expect(await toast.textContent()).toContain("Could not pin to dashboard. Try again.");
     expect(await pin.isEnabled()).toBe(true);
@@ -584,7 +584,7 @@ suite.define(() => {
         });
       }
 
-      const nativeCardView = page.locator("openclaw-plugin-view").filter({ has: cardWidget });
+      const nativeCardView = page.locator("carapace-plugin-view").filter({ has: cardWidget });
       const cardElement = await nativeCardView.elementHandle();
       expect(cardElement).not.toBeNull();
       await cardElement?.evaluate((element) => {
@@ -826,14 +826,14 @@ suite.define(() => {
       });
       await workboardCard.waitFor();
       await workboardCard.click();
-      const cardDashboard = page.locator("openclaw-plugin-session-dashboard");
+      const cardDashboard = page.locator("carapace-plugin-session-dashboard");
       await cardDashboard.waitFor();
       await expect
         .poll(() =>
           cardDashboard.locator(".plugin-session-dashboard__toggle").getAttribute("aria-expanded"),
         )
         .toBe("true");
-      await cardDashboard.locator("openclaw-board-view").waitFor();
+      await cardDashboard.locator("carapace-board-view").waitFor();
       if (recordProof) {
         await page.screenshot({
           path: path.join(

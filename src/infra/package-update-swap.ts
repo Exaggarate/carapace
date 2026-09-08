@@ -209,7 +209,7 @@ export async function swapStagedPackageInstall(params: {
   // Recovery artifacts must survive cleanupGlobalRenameDirs on a later update.
   const backupRoot = path.join(
     targetLayout.globalRoot,
-    `.openclaw.package-backup-${process.pid}-${Date.now()}`,
+    `.carapace.package-backup-${process.pid}-${Date.now()}`,
   );
   const discardBackup = async (backupPath: string, label: string): Promise<string | null> => {
     if (await removePackageUpdatePath(backupPath)) {
@@ -217,7 +217,7 @@ export async function swapStagedPackageInstall(params: {
     }
     const retiredPath = path.join(
       targetLayout.globalRoot,
-      path.basename(backupPath).replace(/^\.openclaw\./, ".openclaw-"),
+      path.basename(backupPath).replace(/^\.carapace\./, ".carapace-"),
     );
     try {
       // Only obsolete backups enter npm's disposable namespace, after restoration
@@ -411,7 +411,7 @@ export async function swapStagedPackageInstall(params: {
     }
     packageRollbackVerified = hadPackage && previousVersion !== null;
     await fs.mkdir(targetLayout.globalRoot, { recursive: true });
-    const shimNames = new Set([params.packageName, "openclaw"]);
+    const shimNames = new Set([params.packageName, "carapace"]);
     const shimEntries =
       params.installTarget.directNodeModulesRoot === true
         ? []
@@ -431,7 +431,7 @@ export async function swapStagedPackageInstall(params: {
             .toSorted();
     if (shimEntries.length > 0) {
       shimBackupDir = await fs.mkdtemp(
-        path.join(targetLayout.globalRoot, ".openclaw.shim-backup-"),
+        path.join(targetLayout.globalRoot, ".carapace.shim-backup-"),
       );
       await fs.mkdir(targetLayout.binDir, { recursive: true });
       // Capture every original before moving its package; relative npm shims can

@@ -16,15 +16,15 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const recordVisuals = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+const recordVisuals = process.env.CARAPACE_UI_E2E_RECORD === "1";
 let artifactDir: string;
 beforeEach(() => {
   if (recordVisuals) {
     artifactDir = createControlUiE2eArtifactDir(
       "model-providers-progressive",
-      process.env.OPENCLAW_UI_E2E_PROOF_DIR,
+      process.env.CARAPACE_UI_E2E_PROOF_DIR,
     );
   }
 });
@@ -136,7 +136,7 @@ describeControlUiE2e("Control UI progressive Model Providers loading", () => {
           await page.evaluate(async () => {
             const app = document.querySelector<
               HTMLElement & { runtime: { router: ApplicationRouter } }
-            >("openclaw-app");
+            >("carapace-app");
             const route = app?.runtime.router.getRoute("model-providers");
             if (!route) {
               throw new Error("Models route is unavailable");
@@ -156,7 +156,7 @@ describeControlUiE2e("Control UI progressive Model Providers loading", () => {
             .poll(async () => (await gateway.getRequests("config.get")).length)
             .toBeGreaterThan(previousConfigLoads);
         }
-        await page.locator("openclaw-model-providers-page").waitFor();
+        await page.locator("carapace-model-providers-page").waitFor();
         if (moduleState === "cached") {
           await expect
             .poll(() => page.locator('[data-provider-id="openai"]').textContent())
@@ -169,7 +169,7 @@ describeControlUiE2e("Control UI progressive Model Providers loading", () => {
           await writeFile(
             path.join(artifactDir, "route-pending.png"),
             await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-              page.locator("openclaw-model-providers-page"),
+              page.locator("carapace-model-providers-page"),
             ]),
           );
         }
@@ -218,7 +218,7 @@ describeControlUiE2e("Control UI progressive Model Providers loading", () => {
           await writeFile(
             path.join(artifactDir, "final.png"),
             await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-              page.locator("openclaw-model-providers-page"),
+              page.locator("carapace-model-providers-page"),
             ]),
           );
         }

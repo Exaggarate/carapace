@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { coerceErrorMessage, stableStringify } from "@openclaw/normalization-core";
+import { coerceErrorMessage, stableStringify } from "@carapace/normalization-core";
 import type { Selectable } from "kysely";
 import { setConfiguredMcpServer } from "../agents/mcp-config-mutation.js";
 import { withClawMcpLifecycleLease } from "../agents/mcp-lifecycle-lease.js";
@@ -12,17 +12,17 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import type { ClawReferencedCleanup } from "./package-remove.js";
 import type { ClawAddPlan, ClawMcpServer } from "./types.js";
 
-export const CLAW_MCP_REF_SCHEMA_VERSION = "openclaw.clawMcpServerRef.v1" as const;
+export const CLAW_MCP_REF_SCHEMA_VERSION = "carapace.clawMcpServerRef.v1" as const;
 
 export type PersistedClawMcpServerRef = {
   schemaVersion: typeof CLAW_MCP_REF_SCHEMA_VERSION;
@@ -120,11 +120,11 @@ function persistPendingRef(
   name: string,
   server: ClawMcpServer,
   ownership: Pick<PersistedClawMcpServerRef, "relationship" | "origin" | "independentOwner">,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number },
+  options: CarapaceStateDatabaseOptions & { nowMs?: number },
 ): { ref: PersistedClawMcpServerRef; existing: boolean } {
   const nowMs = options.nowMs ?? Date.now();
   const configDigest = digestClawMcpServer(server);
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   const { compiled, bind } = compileSqliteQueryBindings<{ agentId: string; name: string }>(
     (parameter) =>
       selectMcpRefs(database.db)
@@ -165,7 +165,7 @@ function persistPendingRef(
     createdAtMs: nowMs,
     updatedAtMs: nowMs,
   };
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<McpDatabase>(db).insertInto("claw_mcp_server_refs").values(refToRow(ref)),
@@ -177,10 +177,10 @@ function persistPendingRef(
 function updateRef(
   ref: PersistedClawMcpServerRef,
   update: { status: PersistedClawMcpServerRef["status"]; error?: string },
-  options: OpenClawStateDatabaseOptions & { nowMs?: number },
+  options: CarapaceStateDatabaseOptions & { nowMs?: number },
 ): PersistedClawMcpServerRef {
   const updated = { ...ref, ...update, updatedAtMs: options.nowMs ?? Date.now() };
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<McpDatabase>(db)
@@ -199,7 +199,7 @@ function updateRef(
 
 export async function installClawMcpServers(
   plan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     setMcpServer?: (params: {
       name: string;
       server: ClawMcpServer;
@@ -329,9 +329,9 @@ export async function installClawMcpServers(
 
 export function readClawMcpServerRefs(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PersistedClawMcpServerRef[] {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   if (options.readOnly && !tableExists(db, "claw_mcp_server_refs")) {
     return [];
   }
@@ -354,9 +354,9 @@ export function readClawMcpServerRefs(
 
 export function readClawMcpServerRefsByName(
   name: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PersistedClawMcpServerRef[] {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   if (options.readOnly && !tableExists(db, "claw_mcp_server_refs")) {
     return [];
   }
@@ -391,7 +391,7 @@ type ClawMcpServerRemovalDecision = {
 
 export function planClawMcpServerRemoval(
   ref: PersistedClawMcpServerRef,
-  options: OpenClawStateDatabaseOptions & { referencedCleanup?: ClawReferencedCleanup } = {},
+  options: CarapaceStateDatabaseOptions & { referencedCleanup?: ClawReferencedCleanup } = {},
 ): ClawMcpServerRemovalDecision {
   const otherRefs = readClawMcpServerRefsByName(ref.name, options).filter(
     (candidate) => candidate.agentId !== ref.agentId,
@@ -448,7 +448,7 @@ export function planClawMcpServerRemoval(
 export function reconcileClawMcpServerRefs(
   agentId: string,
   configuredServers: Record<string, Record<string, unknown>>,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: CarapaceStateDatabaseOptions & { nowMs?: number } = {},
 ): PersistedClawMcpServerRef[] {
   return readClawMcpServerRefs(agentId, options).map((ref) => {
     if (ref.status !== "pending") {
@@ -464,9 +464,9 @@ export function reconcileClawMcpServerRefs(
 export function deleteClawMcpServerRef(
   agentId: string,
   name: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<McpDatabase>(db)
@@ -479,9 +479,9 @@ export function deleteClawMcpServerRef(
 
 export function upsertClawMcpServerRef(
   ref: PersistedClawMcpServerRef,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<McpDatabase>(db)

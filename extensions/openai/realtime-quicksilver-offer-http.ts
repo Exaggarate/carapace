@@ -1,12 +1,12 @@
 // Transport helpers for the GPT-Live browser offer endpoint.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   isRequestBodyLimitError,
   requestBodyErrorToText,
   resolveAcceptedBrowserOrigin,
   sendHttpRequestRejection,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-request-guards";
 
 type ResponseDeliveryWaiter = {
   result: Promise<boolean>;
@@ -57,7 +57,7 @@ export function respondRealtimeOffer(
 export function applyRealtimeOfferCorsHeaders(
   req: IncomingMessage,
   res: ServerResponse,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
 ): boolean {
   if (!req.headers.origin) {
     return true;

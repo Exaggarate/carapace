@@ -1,6 +1,6 @@
 // Process supervisor tests cover lifecycle, restart, and termination behavior.
 import { performance } from "node:perf_hooks";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { mockProcessPlatform } from "../../test-utils/vitest-spies.js";
@@ -1021,8 +1021,8 @@ describe("process supervisor", () => {
     let streamedStdout = "";
     let streamedStderr = "";
     const maxCapturedOutputChars = 256;
-    const stdoutMarker = `[openclaw: captured stdout truncated to last ${maxCapturedOutputChars} chars]\n`;
-    const stderrMarker = `[openclaw: captured stderr truncated to last ${maxCapturedOutputChars} chars]\n`;
+    const stdoutMarker = `[carapace: captured stdout truncated to last ${maxCapturedOutputChars} chars]\n`;
+    const stderrMarker = `[carapace: captured stderr truncated to last ${maxCapturedOutputChars} chars]\n`;
     const retainedChars = maxCapturedOutputChars - stdoutMarker.length - 1;
     const stdoutChunk = `${"a".repeat(stdoutMarker.length)}😀${"s".repeat(retainedChars)}`;
     const stderrChunk = `${"b".repeat(stderrMarker.length)}😀${"e".repeat(retainedChars)}`;

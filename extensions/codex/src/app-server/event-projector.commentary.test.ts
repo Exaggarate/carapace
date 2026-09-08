@@ -303,18 +303,18 @@ describe("CodexAppServerEventProjector commentary projection", () => {
     expect(result.assistantTexts).toEqual(["final answer"]);
     const commentary = result.messagesSnapshot.find(
       (message) =>
-        (message as { openclawStreamFallback?: { itemId?: unknown } }).openclawStreamFallback
+        (message as { carapaceStreamFallback?: { itemId?: unknown } }).carapaceStreamFallback
           ?.itemId === "msg-commentary",
     );
     expect(commentary).toMatchObject({
       role: "assistant",
       content: [{ type: "text", text: commentaryText }],
-      openclawStreamFallback: {
+      carapaceStreamFallback: {
         replacementText: commentaryText,
         source: "segment",
         itemId: "msg-commentary",
       },
-      __openclaw: { mirrorIdentity: `${TURN_ID}:commentary:msg-commentary` },
+      __carapace: { mirrorIdentity: `${TURN_ID}:commentary:msg-commentary` },
     });
     expect((commentary as { phase?: unknown } | undefined)?.phase).toBeUndefined();
   });
@@ -341,7 +341,7 @@ describe("CodexAppServerEventProjector commentary projection", () => {
     expect(
       result.messagesSnapshot.some(
         (message) =>
-          (message as { openclawStreamFallback?: { itemId?: unknown } }).openclawStreamFallback
+          (message as { carapaceStreamFallback?: { itemId?: unknown } }).carapaceStreamFallback
             ?.itemId === "msg-commentary",
       ),
     ).toBe(false);
@@ -392,7 +392,7 @@ describe("CodexAppServerEventProjector commentary projection", () => {
 
     const result = projector.buildResult(buildEmptyToolTelemetry());
     const identities = result.messagesSnapshot.flatMap((message) => {
-      const identity = (message as { __openclaw?: { mirrorIdentity?: unknown } })["__openclaw"]
+      const identity = (message as { __carapace?: { mirrorIdentity?: unknown } })["__carapace"]
         ?.mirrorIdentity;
       return typeof identity === "string" &&
         (identity.includes(":commentary:") || identity.includes(":tool:"))

@@ -1,6 +1,6 @@
 // Covers machine name resolution fallback behavior.
 import os from "node:os";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const runExecMock = vi.hoisted(() => vi.fn());
@@ -33,7 +33,7 @@ describe("getMachineDisplayName", () => {
       name: "falls back to the default product name when hostname is blank",
       scope: "blank-hostname",
       hostname: "   ",
-      expected: "openclaw",
+      expected: "carapace",
       expectedCalls: 1,
       repeatLookup: false,
     },

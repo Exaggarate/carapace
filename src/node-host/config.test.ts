@@ -12,7 +12,7 @@ import {
   readConfigMachineState,
   readConfigMachineStateWithMetadata,
 } from "../state/config-machine-state.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { nodeHostConfigRuntimeEntrypoint } from "./config-runtime.test-support.js";
 import {
   configureNodeHost,
@@ -39,7 +39,7 @@ async function runConcurrentImplicitConfigures(
       runManagedCommand({
         bin: process.execPath,
         args: [...resolveRuntimeWorkerArgv(workerUrl), candidate, String(index + 1)],
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         shell: false,
         stdio: ["ignore", "ignore", "pipe", "ipc"],
         signal: childSignal,
@@ -100,13 +100,13 @@ async function runConcurrentImplicitConfigures(
 
 describe("node-host SQLite config", () => {
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fixture.cleanup();
   });
 
   function makeTestEnv(): { env: NodeJS.ProcessEnv; stateDir: string } {
-    const stateDir = fixture.createTempDir("openclaw-node-host-config-");
-    return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir }, stateDir };
+    const stateDir = fixture.createTempDir("carapace-node-host-config-");
+    return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir }, stateDir };
   }
 
   it("round-trips the complete gateway snapshot across database reopen", async () => {
@@ -120,7 +120,7 @@ describe("node-host SQLite config", () => {
         port: 18443,
         tls: false,
         tlsFingerprint: fixtureDigest,
-        contextPath: "/openclaw-gw",
+        contextPath: "/carapace-gw",
         cloudflareAccess: {
           clientId: { source: "env", provider: "default", id: "CF_ACCESS_CLIENT_ID" },
           clientSecret: {
@@ -144,7 +144,7 @@ describe("node-host SQLite config", () => {
         port: 18443,
         tls: false,
         tlsFingerprint: fixtureDigest,
-        contextPath: "/openclaw-gw",
+        contextPath: "/carapace-gw",
         cloudflareAccess: {
           clientId: { source: "env", provider: "default", id: "CF_ACCESS_CLIENT_ID" },
           clientSecret: {
@@ -162,7 +162,7 @@ describe("node-host SQLite config", () => {
       1_234,
     );
     expect(readConfigMachineState(NODE_HOST_CONFIG_KEY, { env })).not.toHaveProperty("token");
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(loadNodeHostConfig(env)).resolves.toEqual(configured);
     await expect(fs.stat(path.join(stateDir, "node.json"))).rejects.toMatchObject({
       code: "ENOENT",
@@ -187,7 +187,7 @@ describe("node-host SQLite config", () => {
       nowMs: 2,
     });
     expect(enabled.installedAppsSharing).toBe(true);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(loadNodeHostConfig(env)).resolves.toMatchObject({ installedAppsSharing: true });
   });
 
@@ -260,10 +260,10 @@ describe("node-host SQLite config", () => {
         await fs.symlink(path.join(stateDir, "missing-node.json"), sourcePath);
       }
 
-      await expect(loadNodeHostConfig(env)).rejects.toThrow("openclaw doctor --fix");
+      await expect(loadNodeHostConfig(env)).rejects.toThrow("carapace doctor --fix");
       await expect(
         configureNodeHost({ fallbackDisplayName: "node", gateway: {}, env }),
-      ).rejects.toThrow("openclaw doctor --fix");
+      ).rejects.toThrow("carapace doctor --fix");
     },
   );
 });

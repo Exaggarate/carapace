@@ -49,7 +49,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
     });
@@ -96,7 +96,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
     });
@@ -130,7 +130,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
     });
@@ -173,7 +173,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
       onFatalError,
@@ -218,7 +218,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
       channelIds: ["7c4a6d2a-2ed9-4b4e-a5e2-4d705ee9b34c"],
@@ -251,7 +251,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
       channelIds: ["7c4a6d2a-2ed9-4b4e-a5e2-4d705ee9b34c"],
@@ -284,7 +284,7 @@ describe("Buzz directory relay", () => {
       relayPublicKey: RELAY_PUBLIC_KEY,
       state: new BuzzDirectoryState({
         publicKey: BOT_PUBLIC_KEY,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [],
       }),
       onFatalError,

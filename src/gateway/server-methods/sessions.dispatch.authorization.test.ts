@@ -53,7 +53,7 @@ describe("sessions.dispatch authorization", () => {
     mocks.resolveTarget.mockReturnValue(
       makeSessionTarget({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({

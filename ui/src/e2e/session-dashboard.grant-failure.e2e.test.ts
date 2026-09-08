@@ -16,7 +16,7 @@ const sessionKey = "agent:main:dashboard-grant-failure";
 
 suite.define(() => {
   it("keeps a network-capability decision retryable and toasts when Allow fails", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
     if (recordProof) {
       await mkdir(path.join(suite.artifactDir, "workboard-grant-failure"), { recursive: true });
     }
@@ -93,7 +93,7 @@ suite.define(() => {
         decision: "granted",
         revision: 1,
       });
-      const toast = page.locator("openclaw-toast-host .app-toast");
+      const toast = page.locator("carapace-toast-host .app-toast");
       await toast.waitFor();
       expect(await toast.textContent()).toContain("Could not allow widget access. Try again.");
       expect(await toast.textContent()).not.toContain("internal capability service detail");

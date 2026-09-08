@@ -1,10 +1,10 @@
 import { ImapFlow, type FetchMessageObject } from "imapflow";
 import { simpleParser } from "mailparser";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
 import type { ImapAccountConfig } from "./config.js";
 import { renderImapPrompt } from "./prompt.js";
 import { evaluateImapSender, type MailAuthenticator } from "./sender-gate.js";
@@ -24,9 +24,9 @@ const MAX_RECONNECT_DELAY_MS = 60_000;
 type ImapWatcherOptions = {
   accountId: string;
   account: ImapAccountConfig;
-  runtime: OpenClawPluginApi["runtime"];
+  runtime: CarapacePluginApi["runtime"];
   state: ImapWatcherState;
-  context: OpenClawPluginServiceContext;
+  context: CarapacePluginServiceContext;
   authenticator?: MailAuthenticator;
   reconnectBaseMs?: number;
 };

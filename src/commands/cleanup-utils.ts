@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import type { AgentsDeleteResult } from "../../packages/gateway-protocol/src/schema/agents-models-skills.js";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../agents/agent-scope-config.js";
 import { resolveDefaultAgentWorkspaceDir } from "../agents/workspace-default.js";
@@ -14,14 +14,14 @@ import {
   deleteWorkspaceState,
   prepareWorkspaceStateDeletion,
 } from "../agents/workspace-state-store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage, isMissingPathError } from "../infra/errors.js";
 import { movePathToTrash } from "../infra/fs-safe.js";
 import { acquireGatewayLock, GatewayLockError } from "../infra/gateway-lock.js";
 import { hasNodeErrorCode, isPathInside } from "../infra/path-guards.js";
 import { acquireStateDatabaseCoordinator } from "../infra/state-database-coordinator.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { resolveHomeDir, shortenHomeInString, shortenHomePath } from "../utils.js";
 
 type RemovalResult = {
@@ -115,7 +115,7 @@ async function resolveMoveToTrashAllowedRoots(targetPath: string): Promise<strin
   return uniqueStrings(allowedRoots);
 }
 
-function collectWorkspaceDirs(cfg: OpenClawConfig | undefined): string[] {
+function collectWorkspaceDirs(cfg: CarapaceConfig | undefined): string[] {
   const dirs = new Set<string>();
   if (!cfg) {
     dirs.add(resolveDefaultAgentWorkspaceDir());
@@ -129,7 +129,7 @@ function collectWorkspaceDirs(cfg: OpenClawConfig | undefined): string[] {
 
 /** Determine which config, credential, and workspace paths cleanup should consider. */
 export function buildCleanupPlan(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   stateDir: string;
   configPath: string;
   oauthDir: string;
@@ -232,8 +232,8 @@ async function existingPaths(paths: readonly string[]): Promise<string[]> {
 async function acquireStateCleanupOwnership(cleanup: CleanupResolvedPaths) {
   const env = {
     ...process.env,
-    OPENCLAW_CONFIG_PATH: cleanup.configPath,
-    OPENCLAW_STATE_DIR: cleanup.stateDir,
+    CARAPACE_CONFIG_PATH: cleanup.configPath,
+    CARAPACE_STATE_DIR: cleanup.stateDir,
   };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
@@ -241,7 +241,7 @@ async function acquireStateCleanupOwnership(cleanup: CleanupResolvedPaths) {
       allowInTests: true,
       env,
       pollIntervalMs: STATE_CLEANUP_LOCK_POLL_INTERVAL_MS,
-      // Shipped readers validate this role as any live OpenClaw process. A new
+      // Shipped readers validate this role as any live Carapace process. A new
       // wire role would let mixed-version Gateways misclassify cleanup as stale.
       role: "agent-embedded",
       timeoutMs: STATE_CLEANUP_LOCK_TIMEOUT_MS,
@@ -249,14 +249,14 @@ async function acquireStateCleanupOwnership(cleanup: CleanupResolvedPaths) {
   } catch (error) {
     if (error instanceof GatewayLockError) {
       throw new Error(
-        "Cannot remove OpenClaw state while the Gateway or another state maintenance command owns this state directory. Stop the Gateway and retry.",
+        "Cannot remove Carapace state while the Gateway or another state maintenance command owns this state directory. Stop the Gateway and retry.",
         { cause: error },
       );
     }
     throw error;
   }
   if (!lock) {
-    throw new Error("Cannot remove OpenClaw state without exclusive state ownership.");
+    throw new Error("Cannot remove Carapace state without exclusive state ownership.");
   }
   return lock;
 }
@@ -332,7 +332,7 @@ async function detachStateLockDirectory(
     await fs.rename(lockDir, tombstone);
     return tombstone;
   } catch (error) {
-    const message = `Failed to finalize OpenClaw state cleanup because the lock directory changed: ${String(error)}`;
+    const message = `Failed to finalize Carapace state cleanup because the lock directory changed: ${String(error)}`;
     runtime.error(message);
     throw new Error(message, { cause: error });
   }
@@ -450,11 +450,11 @@ export async function removeStateAndLinkedPaths(
     }
     const lockDir = path.dirname(lock.stateLockPath);
     if (!isPathWithin(lockDir, stateDir)) {
-      throw new Error("Cannot remove OpenClaw state because its active lock is outside state.");
+      throw new Error("Cannot remove Carapace state because its active lock is outside state.");
     }
-    const databasePath = resolveOpenClawStateSqlitePath({
+    const databasePath = resolveCarapaceStateSqlitePath({
       ...process.env,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_STATE_DIR: stateDir,
     });
     stateCoordinator = acquireStateDatabaseCoordinator({
       databasePath,
@@ -472,7 +472,7 @@ export async function removeStateAndLinkedPaths(
     );
     if (overlappingPreservePath) {
       throw new Error(
-        `Cannot remove OpenClaw state while preserving ${shortenHomeInString(overlappingPreservePath)} because it overlaps the active state lock. Move the workspace outside the lock directory and retry.`,
+        `Cannot remove Carapace state while preserving ${shortenHomeInString(overlappingPreservePath)} because it overlaps the active state lock. Move the workspace outside the lock directory and retry.`,
       );
     }
     const stateRemoval = await removePathPreserving(
@@ -482,7 +482,7 @@ export async function removeStateAndLinkedPaths(
       { label: cleanup.stateDir },
     );
     if (!stateRemoval.ok) {
-      throw new Error("Failed to remove non-preserved OpenClaw state while ownership was held.");
+      throw new Error("Failed to remove non-preserved Carapace state while ownership was held.");
     }
 
     // Drop only the removable in-tree handles; external Gateway presence stays held
@@ -498,7 +498,7 @@ export async function removeStateAndLinkedPaths(
       (await pathExists(lockDir)) || (preservePaths.length === 0 && !stateDirRemoved);
     if (newStateOperationStarted) {
       throw new Error(
-        "OpenClaw state cleanup was interrupted by a new state operation. Stop other OpenClaw commands and retry.",
+        "Carapace state cleanup was interrupted by a new state operation. Stop other Carapace commands and retry.",
       );
     }
     if (stateDirRemoved) {

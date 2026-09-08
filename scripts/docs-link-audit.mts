@@ -6,8 +6,8 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createProcessor } from "@mdx-js/mdx";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import MarkdownIt from "markdown-it";
 import type { Nodes } from "mdast";
 import { resolveClawHubRepoPath, syncClawHubDocsTree } from "./docs-sync-publish.mjs";
@@ -410,7 +410,7 @@ export function prepareMirroredDocsDir(
     return { dir: sourceRoot, mirroredClawHub: false, cleanup: () => {} };
   }
 
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-docs-link-audit-"));
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-docs-link-audit-"));
   const tempDir = path.join(tempRoot, "docs");
   try {
     fs.cpSync(sourceRoot, tempDir, { recursive: true });
@@ -428,14 +428,14 @@ export function prepareMirroredDocsDir(
 
 function parseAuditUrl(
   href: string,
-  base = "https://docs.openclaw.ai",
+  base = "https://github.com/Exaggarate/carapace",
 ): Result<{ hostname: string; pathname: string; hash: string }, string> {
   try {
     const url = new URL(href, base);
     return ok({
       hostname: url.hostname,
       pathname:
-        url.hostname === "docs.openclaw.ai" ? decodeURIComponent(url.pathname) : url.pathname,
+        url.hostname === "github.com/Exaggarate/carapace" ? decodeURIComponent(url.pathname) : url.pathname,
       hash: url.hash,
     });
   } catch (error) {
@@ -512,7 +512,7 @@ function auditDocsLinks(
         continue;
       }
       const destination = destinationResult.value;
-      if (destination.hostname !== "docs.openclaw.ai") {
+      if (destination.hostname !== "github.com/Exaggarate/carapace") {
         continue;
       }
       const page = pages.get(destination.pathname);
@@ -534,8 +534,8 @@ function auditDocsLinks(
       if (!options.anchors && (!local || raw.startsWith("#"))) {
         continue;
       }
-      const urlResult = parseAuditUrl(raw, `https://docs.openclaw.ai${pageRoute(rel)}`);
-      if (urlResult.ok && urlResult.value.hostname !== "docs.openclaw.ai") {
+      const urlResult = parseAuditUrl(raw, `https://github.com/Exaggarate/carapace${pageRoute(rel)}`);
+      if (urlResult.ok && urlResult.value.hostname !== "github.com/Exaggarate/carapace") {
         continue;
       }
       checked++;
@@ -554,7 +554,7 @@ function auditDocsLinks(
         continue;
       }
       const destination = destinationResult.value;
-      if (destination.hostname !== "docs.openclaw.ai") {
+      if (destination.hostname !== "github.com/Exaggarate/carapace") {
         continue;
       }
       const terminal = pageRoute(destination.pathname).replace(/^\/en(?:\/|$)/, "/");

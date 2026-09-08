@@ -1,6 +1,6 @@
 // Discord plugin module implements runtime.moderation shared behavior.
 import { PermissionFlagsBits } from "discord-api-types/v10";
-import { readNonNegativeIntegerParam, readStringParam } from "openclaw/plugin-sdk/channel-actions";
+import { readNonNegativeIntegerParam, readStringParam } from "carapace/plugin-sdk/channel-actions";
 
 export type DiscordModerationAction = "timeout" | "kick" | "ban";
 

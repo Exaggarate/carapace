@@ -1,9 +1,9 @@
 // Codex tests cover thread lifecycle.binding plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { AgentHarnessPreflightError } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { patchSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { AgentHarnessPreflightError } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { patchSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { resumeThread } from "../command-handler-bindings.js";
 import { resolveCodexCommandDeps } from "../command-handler-deps.js";
@@ -110,9 +110,9 @@ function createThreadLifecycleAppServerOptions(): Parameters<
 function createNetworkProxyThreadLifecycleAppServerOptions() {
   const configPatch = {
     "features.network_proxy.enabled": true,
-    default_permissions: "openclaw-network",
+    default_permissions: "carapace-network",
     permissions: {
-      "openclaw-network": {
+      "carapace-network": {
         filesystem: {
           ":minimal": "read",
           ":project_roots": {
@@ -132,7 +132,7 @@ function createNetworkProxyThreadLifecycleAppServerOptions() {
   return {
     ...createThreadLifecycleAppServerOptions(),
     networkProxy: {
-      profileName: "openclaw-network",
+      profileName: "carapace-network",
       configFingerprint: "test-network-proxy",
       configPatch,
     },
@@ -213,7 +213,7 @@ function createDeferredNamedDynamicTool(
 ): Parameters<typeof startOrResumeThread>[0]["dynamicTools"][number] {
   return {
     type: "namespace",
-    name: "openclaw",
+    name: "carapace",
     description: "",
     tools: [{ ...createNamedDynamicTool(name), deferLoading: true }],
   };
@@ -340,7 +340,7 @@ async function createManualResumeFixture(
 ) {
   const dynamicTools = options.dynamicTools ?? [];
   vi.stubEnv("HOME", tempDir);
-  vi.stubEnv("OPENCLAW_STATE_DIR", path.join(tempDir, "isolated-state"));
+  vi.stubEnv("CARAPACE_STATE_DIR", path.join(tempDir, "isolated-state"));
   const sessionFile = path.join(tempDir, "manual-resume-session.jsonl");
   const workspaceDir = path.join(tempDir, "manual-resume-workspace");
   const agentDir = path.join(tempDir, "agent");
@@ -997,9 +997,9 @@ describe("Codex app-server thread lifecycle bindings", () => {
         ]);
         const policy = JSON.stringify(requests.at(-1)?.params);
         expect(policy).toContain(
-          developerInstructions || "earlier OpenClaw generic policy is withdrawn",
+          developerInstructions || "earlier Carapace generic policy is withdrawn",
         );
-        expect(policy).toContain("It replaces earlier OpenClaw-supplied generic policy");
+        expect(policy).toContain("It replaces earlier Carapace-supplied generic policy");
         expect((await readCodexAppServerBinding(sessionFile))?.threadId).toBe(threadId);
       } finally {
         releaseLeasedSharedCodexAppServerClient(wire.client);
@@ -1473,7 +1473,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
               hooks: [
                 {
                   type: "command",
-                  command: "openclaw hooks relay --event pre_tool_use",
+                  command: "carapace hooks relay --event pre_tool_use",
                 },
               ],
             },
@@ -1528,7 +1528,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     expect(resumeConfig).toMatchObject({
       config: { "features.hooks": true, "hooks.PreToolUse": [] },
     });
-    expect(JSON.stringify(resumeConfig)).not.toContain("openclaw hooks relay");
+    expect(JSON.stringify(resumeConfig)).not.toContain("carapace hooks relay");
   });
 
   it("cold-resumes a warm thread when final config adds an image-generation deny", async () => {
@@ -2134,7 +2134,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
 
   it("reuses an isolated retained thread without dropping native skill isolation", async () => {
     vi.stubEnv("HOME", tempDir);
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(tempDir, "isolated-state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(tempDir, "isolated-state"));
     const sessionFile = path.join(tempDir, "warm-isolated-session.jsonl");
     const workspaceDir = path.join(tempDir, "warm-isolated-workspace");
     const personalSkill = path.join(tempDir, ".claude", "skills", "personal", "SKILL.md");
@@ -2744,7 +2744,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       const params = createParams(sessionFile, workspaceDir);
       params.sessionKey = "agent:main:dashboard:incognito-two-turns";
       if (restricted) {
-        params.toolsAllow = ["openclaw"];
+        params.toolsAllow = ["carapace"];
       }
       let secondTurn = false;
       const request = vi.fn(async (method: string, _params?: unknown) => {
@@ -2839,7 +2839,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     },
   );
 
-  it("resumes the same restricted OpenClaw thread so turn two retains native memory", async () => {
+  it("resumes the same restricted Carapace thread so turn two retains native memory", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     await writeCodexAppServerBinding(sessionFile, {
@@ -2850,7 +2850,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       dynamicToolsFingerprint: "[]",
     });
     const params = createParams(sessionFile, workspaceDir);
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     let nextThread = 1;
     const respond = vi.fn(async (method: string, _requestParams?: unknown) => {
       if (method === "config/read") {
@@ -2900,7 +2900,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       client,
       params,
       cwd: workspaceDir,
-      dynamicTools: [createNamedDynamicTool("openclaw")],
+      dynamicTools: [createNamedDynamicTool("carapace")],
       appServer: createThreadLifecycleAppServerOptions(),
       nativeCodeModeEnabled: false,
       userMcpServersEnabled: false,
@@ -3191,11 +3191,11 @@ describe("Codex app-server thread lifecycle bindings", () => {
     });
   });
 
-  it("starts a fresh restricted OpenClaw thread for a new app-server client", async () => {
+  it("starts a fresh restricted Carapace thread for a new app-server client", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     const params = createParams(sessionFile, workspaceDir);
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     let nextThread = 1;
     const request = vi.fn(async (method: string, _requestParams?: unknown) => {
       if (method === "config/read") {
@@ -3215,7 +3215,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     const common = {
       params,
       cwd: workspaceDir,
-      dynamicTools: [createNamedDynamicTool("openclaw")],
+      dynamicTools: [createNamedDynamicTool("carapace")],
       appServer: createThreadLifecycleAppServerOptions(),
       nativeCodeModeEnabled: false,
       userMcpServersEnabled: false,
@@ -3247,7 +3247,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       const sessionFile = path.join(tempDir, "session.jsonl");
       const workspaceDir = path.join(tempDir, "workspace");
       const params = createParams(sessionFile, workspaceDir);
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["carapace"];
       const closeHost = await bindProductionHarnessHostCapabilitiesForTest(params);
       const cleanupEntered = createDeferred<void>();
       const cleanupProceed = createDeferred<void>();
@@ -3293,7 +3293,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
         abandonClient,
         params,
         cwd: workspaceDir,
-        dynamicTools: [createNamedDynamicTool("openclaw")],
+        dynamicTools: [createNamedDynamicTool("carapace")],
         appServer: createThreadLifecycleAppServerOptions(),
         nativeCodeModeEnabled: false,
         userMcpServersEnabled: false,
@@ -3343,7 +3343,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     },
   );
 
-  it("fails closed before starting OpenClaw when inherited MCP enumeration fails", async () => {
+  it("fails closed before starting Carapace when inherited MCP enumeration fails", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     await writeCodexAppServerBinding(sessionFile, {
@@ -3354,7 +3354,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       dynamicToolsFingerprint: "[]",
     });
     const params = createParams(sessionFile, workspaceDir);
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     const request = vi.fn(async (method: string) => {
       if (method === "config/read") {
         throw new Error("config unavailable");
@@ -3367,7 +3367,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
         client: { request } as never,
         params,
         cwd: workspaceDir,
-        dynamicTools: [createNamedDynamicTool("openclaw")],
+        dynamicTools: [createNamedDynamicTool("carapace")],
         appServer: createThreadLifecycleAppServerOptions(),
         nativeCodeModeEnabled: false,
         userMcpServersEnabled: false,
@@ -3403,12 +3403,12 @@ describe("Codex app-server thread lifecycle bindings", () => {
     },
     { expectedError: /config layers/u, name: "malformed", layer: { name: {} } },
   ])(
-    "fails closed on $name config layers before OpenClaw thread/start",
+    "fails closed on $name config layers before Carapace thread/start",
     async ({ expectedError, layer }) => {
       const sessionFile = path.join(tempDir, "session.jsonl");
       const workspaceDir = path.join(tempDir, "workspace");
       const params = createParams(sessionFile, workspaceDir);
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["carapace"];
       const request = vi.fn(async (method: string) => {
         if (method === "config/read") {
           return { config: {}, layers: [layer] };
@@ -3421,7 +3421,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
           client: { request } as never,
           params,
           cwd: workspaceDir,
-          dynamicTools: [createNamedDynamicTool("openclaw")],
+          dynamicTools: [createNamedDynamicTool("carapace")],
           appServer: createThreadLifecycleAppServerOptions(),
           nativeCodeModeEnabled: false,
           userMcpServersEnabled: false,
@@ -3433,12 +3433,12 @@ describe("Codex app-server thread lifecycle bindings", () => {
   );
 
   it.each(["hooks", "managed_hooks"] as const)(
-    "fails closed on non-empty %s requirements before OpenClaw thread/start",
+    "fails closed on non-empty %s requirements before Carapace thread/start",
     async (requirementsKey) => {
       const sessionFile = path.join(tempDir, "session.jsonl");
       const workspaceDir = path.join(tempDir, "workspace");
       const params = createParams(sessionFile, workspaceDir);
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["carapace"];
       const request = vi.fn(async (method: string) => {
         if (method === "config/read") {
           return { config: {}, layers: [] };
@@ -3460,7 +3460,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
           client: { request } as never,
           params,
           cwd: workspaceDir,
-          dynamicTools: [createNamedDynamicTool("openclaw")],
+          dynamicTools: [createNamedDynamicTool("carapace")],
           appServer: createThreadLifecycleAppServerOptions(),
           nativeCodeModeEnabled: false,
           userMcpServersEnabled: false,
@@ -3533,7 +3533,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     const params = createParams(sessionFile, workspaceDir);
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     const request = vi.fn(async (method: string) => {
       if (method === "config/read") {
         return { config: {}, layers: [] };
@@ -3549,7 +3549,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
         client: { request } as never,
         params,
         cwd: workspaceDir,
-        dynamicTools: [createNamedDynamicTool("openclaw")],
+        dynamicTools: [createNamedDynamicTool("carapace")],
         appServer: createThreadLifecycleAppServerOptions(),
         nativeCodeModeEnabled: false,
         userMcpServersEnabled: false,
@@ -3629,7 +3629,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     const params = createParams(sessionFile, workspaceDir);
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     const request = vi.fn(async (method: string) => {
       if (method === "config/read") {
         return { config: {}, layers: [] };
@@ -3645,7 +3645,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
         client: { request } as never,
         params,
         cwd: workspaceDir,
-        dynamicTools: [createNamedDynamicTool("openclaw")],
+        dynamicTools: [createNamedDynamicTool("carapace")],
         appServer: createThreadLifecycleAppServerOptions(),
         nativeCodeModeEnabled: false,
         userMcpServersEnabled: false,
@@ -3688,7 +3688,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
         dynamicToolsFingerprint: "[]",
       });
       const params = createParams(sessionFile, workspaceDir);
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["carapace"];
       if (ephemeral) {
         params.sessionKey = "agent:main:internal-session-effects:incognito-mcp-attestation";
       }
@@ -3724,7 +3724,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
           abandonClient,
           params,
           cwd: workspaceDir,
-          dynamicTools: [createNamedDynamicTool("openclaw")],
+          dynamicTools: [createNamedDynamicTool("carapace")],
           appServer: createThreadLifecycleAppServerOptions(),
           nativeCodeModeEnabled: false,
           userMcpServersEnabled: false,
@@ -4025,7 +4025,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       }),
       expect.objectContaining({
         type: "namespace",
-        name: "openclaw",
+        name: "carapace",
         tools: [
           expect.objectContaining({
             type: "function",
@@ -5792,7 +5792,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     const largeDynamicTools = [
       {
         type: "namespace",
-        name: "openclaw",
+        name: "carapace",
         description: "",
         tools: Array.from({ length: 200 }, (_, index) => ({
           ...createNamedDynamicTool(`tool_${index}`),
@@ -6057,7 +6057,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
     );
     const binding = await readCodexAppServerBinding(sessionFile);
     expect(binding?.threadId).toBe("thread-network-proxy");
-    expect(binding?.networkProxyProfileName).toBe("openclaw-network");
+    expect(binding?.networkProxyProfileName).toBe("carapace-network");
     expect(binding?.networkProxyConfigFingerprint).toBe(appServer.networkProxy.configFingerprint);
   });
 
@@ -6222,7 +6222,7 @@ describe("Codex app-server thread lifecycle bindings", () => {
       "features.hooks": true,
       "hooks.PreToolUse": [
         {
-          hooks: [{ type: "command", command: "openclaw-native-hook-relay", timeout: 5 }],
+          hooks: [{ type: "command", command: "carapace-native-hook-relay", timeout: 5 }],
         },
       ],
     };

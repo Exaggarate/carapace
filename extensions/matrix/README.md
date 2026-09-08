@@ -1,11 +1,11 @@
-# OpenClaw Matrix
+# Carapace Matrix
 
-Official OpenClaw channel plugin for Matrix rooms and direct messages.
+Official Carapace channel plugin for Matrix rooms and direct messages.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/matrix
+carapace plugins install @carapace/matrix
 ```
 
-Configure the Matrix homeserver and bot credentials in OpenClaw. The plugin lets agents join configured rooms, receive messages, and reply through Matrix.
+Configure the Matrix homeserver and bot credentials in Carapace. The plugin lets agents join configured rooms, receive messages, and reply through Matrix.

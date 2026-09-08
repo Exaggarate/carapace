@@ -9,7 +9,7 @@ import {
   pageOperatorApprovalReceiptsForRun,
   summarizeOperatorApprovalReceiptsForRun,
 } from "../gateway/operator-approval-store.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { parsePositiveAuditCursor } from "./audit-cursor.js";
 import {
   pageExecutionDecisionFactsForContext,
@@ -26,7 +26,7 @@ import {
   summarizeMessageDeliveryReceiptsForRun,
 } from "./message-delivery-receipts.js";
 
-type ExecutionDecisionReadOptions = OpenClawStateDatabaseOptions & { now?: number };
+type ExecutionDecisionReadOptions = CarapaceStateDatabaseOptions & { now?: number };
 
 export type InternalAuditRunInspectResult = AuditRunInspectResult & {
   decisions: DecisionReceiptV1[];

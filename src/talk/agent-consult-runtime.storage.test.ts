@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadSessionEntry, replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createRuntimeAgent } from "../plugins/runtime/runtime-agent.js";
 import { MODEL_SELECTION_LOCKED_MESSAGE } from "../sessions/model-overrides.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 import { consultRealtimeVoiceAgent } from "./agent-consult-runtime.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "voice-consult-store" });
+  state = await createCarapaceTestState({ label: "voice-consult-store" });
 });
 afterEach(async () => {
   await state.cleanup();
@@ -26,7 +26,7 @@ describe("voice consult concrete store ownership", () => {
   ])(
     "keeps parent $parentAgentId policy and routing in its configured store (locked=$locked)",
     async ({ parentAgentId, locked }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           entries: { main: { workspace: state.workspaceDir }, other: {} },
           ownership: "explicit",

@@ -1,9 +1,9 @@
 // Implements model listing and provider catalog commands.
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   resolveAgentDir,
   resolveAgentWorkspaceDir,
@@ -47,7 +47,7 @@ import type { PreparedModelRuntimeSnapshot } from "../../agents/prepared-model-r
 import { resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveAgentRuntimeLabel } from "../../status/agent-runtime-label.js";
 import { ABSOLUTE_DEADLINE_EXPIRED, awaitWithinDeadline } from "../../utils/absolute-deadline.js";
 import type { ReplyPayload } from "../types.js";
@@ -111,13 +111,13 @@ function isModelsBrowseVisibleProvider(provider: string): boolean {
 function normalizeRuntimeChoiceId(runtime: string | undefined): string {
   const normalized = normalizeLowercaseStringOrEmpty(runtime);
   if (!normalized || normalized === "auto" || normalized === "default") {
-    return "openclaw";
+    return "carapace";
   }
   return normalized;
 }
 
 function buildRuntimeChoice(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   runtime: string;
   cli?: boolean;
@@ -128,8 +128,8 @@ function buildRuntimeChoice(params: {
     id,
     label,
     description:
-      id === "openclaw"
-        ? "Use the built-in OpenClaw runtime."
+      id === "carapace"
+        ? "Use the built-in Carapace runtime."
         : params.cli
           ? `Run ${params.provider} models through ${label}.`
           : `Use the ${label} runtime selected by the effective harness policy.`,
@@ -137,7 +137,7 @@ function buildRuntimeChoice(params: {
 }
 
 function buildDefaultRuntimeChoice(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   provider: string;
   modelId?: string;
@@ -166,7 +166,7 @@ function addRuntimeChoice(
 }
 
 export function buildPreparedModelsProviderData(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId?: string,
   options: ModelsBrowseOptions = {},
 ): Promise<PreparedModelsProviderData> {
@@ -174,7 +174,7 @@ export function buildPreparedModelsProviderData(
 }
 
 async function buildPreparedModelsProviderDataWithContext(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
   options: ModelsBrowseOptions,
   agentDir?: string,
@@ -250,7 +250,7 @@ async function loadPublishedModelsOwner(params: {
 }
 
 async function buildPreparedDataForConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
   options: ModelsBrowseContext,
   control: { catalogFallback?: boolean; deadlineMs?: number },
@@ -291,7 +291,7 @@ async function buildPreparedDataForConfig(
 }
 
 async function projectPreparedModelsProviderData(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
   options: ModelsBrowseOptions,
   owner?: PreparedModelRuntimeSnapshot,
@@ -527,7 +527,7 @@ async function projectPreparedModelsProviderData(
         modelId: defaultModelId,
       }),
     ];
-    addRuntimeChoice(choices, buildRuntimeChoice({ cfg, provider, runtime: "openclaw" }));
+    addRuntimeChoice(choices, buildRuntimeChoice({ cfg, provider, runtime: "carapace" }));
     addRuntimeChoice(
       choices,
       buildRuntimeChoice({
@@ -632,7 +632,7 @@ function parseModelsArgs(raw: string): ParsedModelsCommand {
 
 function resolveProviderLabel(params: {
   provider: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -665,7 +665,7 @@ function resolveProviderLabel(params: {
 export function formatModelsAvailableHeader(params: {
   provider: string;
   total: number;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -711,7 +711,7 @@ function buildProviderInfos(params: {
 }
 
 export async function resolveModelsCommandReply(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   commandBodyNormalized: string;
   surface?: string;
   currentModel?: string;

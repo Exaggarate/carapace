@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import { withServer, withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withServer, withTempDir } from "carapace/plugin-sdk/test-env";
 import { expect, test } from "vitest";
 import {
   type MockOpenAiRequestSnapshot,
@@ -228,7 +228,7 @@ test("introduces itself once when Telegram reports joining an allowed supergroup
       });
     },
     async (apiRoot) =>
-      await withTempDir("openclaw-telegram-join-intro-", async (workspace) => {
+      await withTempDir("carapace-telegram-join-intro-", async (workspace) => {
         const gatewayOwner = createQaGatewayChild();
         let gateway: QaGatewayChild | undefined;
         try {
@@ -261,9 +261,9 @@ test("introduces itself once when Telegram reports joining an allowed supergroup
             },
             controlUiEnabled: false,
             runtimeEnvPatch: {
-              OPENCLAW_SKIP_CHANNELS: undefined,
-              OPENCLAW_SKIP_PROVIDERS: undefined,
-              OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+              CARAPACE_SKIP_CHANNELS: undefined,
+              CARAPACE_SKIP_PROVIDERS: undefined,
+              CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
               TELEGRAM_BOT_TOKEN: undefined,
             },
             mutateConfig: (cfg) => {

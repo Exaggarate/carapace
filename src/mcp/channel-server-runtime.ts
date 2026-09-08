@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { VERSION } from "../version.js";
-import { OpenClawChannelBridge } from "./channel-bridge.js";
+import { CarapaceChannelBridge } from "./channel-bridge.js";
 import { ClaudePermissionRequestSchema, type ClaudeChannelMode } from "./channel-shared.js";
 import { getChannelMcpCapabilities, registerChannelMcpTools } from "./channel-tools.js";
 
-async function resolveMcpConfig(config: OpenClawConfig | undefined): Promise<OpenClawConfig> {
+async function resolveMcpConfig(config: CarapaceConfig | undefined): Promise<CarapaceConfig> {
   if (config) {
     return config;
   }
@@ -18,13 +18,13 @@ export async function createChannelMcpRuntime(
     gatewayUrl?: string;
     gatewayToken?: string;
     gatewayPassword?: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     claudeChannelMode?: ClaudeChannelMode;
     verbose?: boolean;
   } = {},
 ): Promise<{
   server: McpServer;
-  bridge: OpenClawChannelBridge;
+  bridge: CarapaceChannelBridge;
   start: () => Promise<void>;
   close: () => Promise<void>;
 }> {
@@ -32,10 +32,10 @@ export async function createChannelMcpRuntime(
   const claudeChannelMode = opts.claudeChannelMode ?? "auto";
   const capabilities = getChannelMcpCapabilities(claudeChannelMode);
   const server = new McpServer(
-    { name: "openclaw", version: VERSION },
+    { name: "carapace", version: VERSION },
     capabilities ? { capabilities } : undefined,
   );
-  const bridge = new OpenClawChannelBridge(cfg, {
+  const bridge = new CarapaceChannelBridge(cfg, {
     gatewayUrl: opts.gatewayUrl,
     gatewayToken: opts.gatewayToken,
     gatewayPassword: opts.gatewayPassword,
@@ -70,7 +70,7 @@ export async function createChannelMcpRuntime(
         throw errors[0];
       }
       if (errors.length > 1) {
-        throw new AggregateError(errors, "OpenClaw channel MCP shutdown failed");
+        throw new AggregateError(errors, "Carapace channel MCP shutdown failed");
       }
     },
   };

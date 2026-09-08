@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
-import type { OpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { ModelCatalogSnapshot } from "./model-catalog.types.js";
 import {
   getPreparedModelFullCatalogAuth,
@@ -63,13 +63,13 @@ const preparedModelRuntimeMocks = vi.hoisted(() => ({
   createStaticCatalogResolver: vi.fn<CreateStaticCatalogResolver>(),
   discoverAuthStorage: vi.fn((..._args: unknown[]) => undefined as unknown),
   discoverModels: vi.fn(),
-  ensureOpenClawModelsJson: vi.fn(async (...args: unknown[]) => ({
+  ensureCarapaceModelsJson: vi.fn(async (...args: unknown[]) => ({
     agentDir: String(args[1]),
     wrote: false,
   })),
   loadAgentRuntimePluginRegistryHandle: vi.fn(),
   loadStaticCatalog: vi.fn<LoadStaticCatalog>(async () => []),
-  planOpenClawModelsJsonSource: vi.fn(async (...args: unknown[]) => ({
+  planCarapaceModelsJsonSource: vi.fn(async (...args: unknown[]) => ({
     agentDir: String(args[1]),
     modelsJsonContents: null,
     pluginCatalogs: [],
@@ -347,10 +347,10 @@ vi.mock("./model-discovery-context.js", () => ({
 }));
 
 vi.mock("./models-config.js", () => ({
-  ensureOpenClawModelsJson: (...args: unknown[]) =>
-    preparedModelRuntimeMocks.ensureOpenClawModelsJson(...args),
-  planOpenClawModelsJsonSource: (...args: unknown[]) =>
-    preparedModelRuntimeMocks.planOpenClawModelsJsonSource(...args),
+  ensureCarapaceModelsJson: (...args: unknown[]) =>
+    preparedModelRuntimeMocks.ensureCarapaceModelsJson(...args),
+  planCarapaceModelsJsonSource: (...args: unknown[]) =>
+    preparedModelRuntimeMocks.planCarapaceModelsJsonSource(...args),
 }));
 
 vi.mock("./models-config.providers.implicit.js", () => ({
@@ -395,11 +395,11 @@ export function getPreparedModelRuntimeMocks(): typeof preparedModelRuntimeMocks
 
 export function getPreparedModelRuntimeTestApi(): PreparedModelRuntimeTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.preparedModelRuntimeTestApi")
+    Symbol.for("carapace.preparedModelRuntimeTestApi")
   ] as PreparedModelRuntimeTestApi;
 }
 
-export async function resetPreparedModelRuntimeHarness(state: OpenClawTestState): Promise<void> {
+export async function resetPreparedModelRuntimeHarness(state: CarapaceTestState): Promise<void> {
   await getPreparedModelRuntimeTestApi().resetPreparedModelRuntimeSnapshotsForTest();
   agentScopeMocks.resolveAgentDir
     .mockReset()
@@ -430,7 +430,7 @@ export async function resetPreparedModelRuntimeHarness(state: OpenClawTestState)
     .mockReset()
     .mockImplementation(() => preparedModelRuntimeMocks.authStorage);
   preparedModelRuntimeMocks.discoverModels.mockReset();
-  preparedModelRuntimeMocks.ensureOpenClawModelsJson
+  preparedModelRuntimeMocks.ensureCarapaceModelsJson
     .mockReset()
     .mockImplementation(async (_config, agentDir) => ({
       agentDir: String(agentDir),
@@ -440,7 +440,7 @@ export async function resetPreparedModelRuntimeHarness(state: OpenClawTestState)
     .mockReset()
     .mockReturnValue(createEmptyPluginRegistry());
   preparedModelRuntimeMocks.loadStaticCatalog.mockReset().mockResolvedValue([]);
-  preparedModelRuntimeMocks.planOpenClawModelsJsonSource
+  preparedModelRuntimeMocks.planCarapaceModelsJsonSource
     .mockReset()
     .mockImplementation(async (_config, agentDir) => ({
       agentDir: String(agentDir),
@@ -469,7 +469,7 @@ export async function resetPreparedModelRuntimeHarness(state: OpenClawTestState)
 }
 
 export async function cleanupPreparedModelRuntimeHarness(
-  state: OpenClawTestState,
+  state: CarapaceTestState,
   failed: boolean,
 ): Promise<void> {
   // A failed assertion may precede an async owner's terminal join. Reset is not a drain;

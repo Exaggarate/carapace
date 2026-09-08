@@ -1,7 +1,7 @@
 import os from "node:os";
 import { setTimeout as sleep } from "node:timers/promises";
-import { isLinkLocalIpAddress, isUnspecifiedIpAddress } from "@openclaw/net-policy/ip";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isLinkLocalIpAddress, isUnspecifiedIpAddress } from "@carapace/net-policy/ip";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveGatewayPublicOrigin } from "../../config/gateway-public-origin.js";
 import { ensureDevicePairSetupBootstrapToken } from "../../infra/device-bootstrap.js";
 import { removePairedDeviceRole } from "../../infra/device-pairing.js";
@@ -164,7 +164,7 @@ export function createWorkerNodeEnrollmentManager(options: WorkerNodeEnrollmentM
   ) => ({
     nodeBootstrap: {
       ...grantArtifact(prepared, prepared.artifact, enrollmentSignal, isAuthorized),
-      openclawVersion: prepared.artifact.openclawVersion,
+      carapaceVersion: prepared.artifact.carapaceVersion,
       enabledPluginIds: prepared.artifact.enabledPluginIds,
     },
     signal: enrollmentSignal,
@@ -285,7 +285,7 @@ export function createWorkerNodeEnrollmentManager(options: WorkerNodeEnrollmentM
           enrollmentSignal,
           isAuthorized,
         ),
-        openclawVersion: prepared.artifact.openclawVersion,
+        carapaceVersion: prepared.artifact.carapaceVersion,
         displayName: truncateUtf16Safe(`Cloud worker ${owner.profileId}`, 64),
         signal: enrollmentSignal,
         waitForDeviceId: async () => {

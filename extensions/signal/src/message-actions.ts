@@ -4,13 +4,13 @@ import {
   jsonResult,
   readStringParam,
   resolveReactionMessageId,
-} from "openclaw/plugin-sdk/channel-actions";
+} from "carapace/plugin-sdk/channel-actions";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
-} from "openclaw/plugin-sdk/channel-contract";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { removeReactionSignal, sendReactionSignal } from "../reaction-runtime-api.js";
 import { listEnabledSignalAccounts, resolveSignalAccount } from "./accounts.js";
 import { normalizeSignalReactionRecipient } from "./normalize.js";

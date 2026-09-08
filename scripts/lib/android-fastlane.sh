@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # BASH_SOURCE may be relative, so resolve it before callers change directories.
-_OPENCLAW_ANDROID_FASTLANE_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+_CARAPACE_ANDROID_FASTLANE_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 run_android_fastlane() {
   local gemfile=""
-  gemfile="${_OPENCLAW_ANDROID_FASTLANE_REPO_ROOT}/apps/android/Gemfile"
+  gemfile="${_CARAPACE_ANDROID_FASTLANE_REPO_ROOT}/apps/android/Gemfile"
 
   local setup_hint=""
   setup_hint="Install Ruby 3.4.10, then run: cd apps/android && gem install bundler -v 2.6.9 && bundle _2.6.9_ install"
@@ -19,12 +19,12 @@ run_android_fastlane() {
   elif ! BUNDLE_GEMFILE="$gemfile" bundle _2.6.9_ check >/dev/null 2>&1; then
     bundle_error="The Android Fastlane bundle is not installed for ${gemfile}."
   else
-    _OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE=locked \
+    _CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE=locked \
       BUNDLE_GEMFILE="$gemfile" bundle _2.6.9_ exec fastlane "$@"
     return
   fi
 
-  local release_ref_mode="${OPENCLAW_MOBILE_RELEASE_REF_MODE:-}"
+  local release_ref_mode="${CARAPACE_MOBILE_RELEASE_REF_MODE:-}"
   if [[ "$release_ref_mode" =~ ^[[:space:]]*intent[[:space:]]*$ ]]; then
     echo "$bundle_error" >&2
     echo "$setup_hint" >&2
@@ -32,7 +32,7 @@ run_android_fastlane() {
   fi
 
   if command -v fastlane >/dev/null 2>&1 && fastlane --version >/dev/null 2>&1; then
-    _OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE=fallback fastlane "$@"
+    _CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE=fallback fastlane "$@"
     return
   fi
 
@@ -41,7 +41,7 @@ run_android_fastlane() {
     while IFS= read -r version; do
       if RBENV_VERSION="${version}" rbenv which fastlane >/dev/null 2>&1; then
         RBENV_VERSION="${version}" \
-          _OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE=fallback \
+          _CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE=fallback \
           rbenv exec fastlane "$@"
         return
       fi

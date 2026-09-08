@@ -1,13 +1,13 @@
 ---
 summary: "LINE Messaging API plugin setup, config, and usage"
 read_when:
-  - You want to connect OpenClaw to LINE
+  - You want to connect Carapace to LINE
   - You need LINE webhook + credential setup
   - You want LINE-specific message options
 title: LINE
 ---
 
-LINE connects to OpenClaw via the LINE Messaging API. The plugin runs as a webhook
+LINE connects to Carapace via the LINE Messaging API. The plugin runs as a webhook
 receiver on the Gateway and uses your channel access token + channel secret for
 authentication.
 
@@ -20,13 +20,13 @@ Reactions and threads are not supported.
 Install LINE before configuring the channel:
 
 ```bash
-openclaw plugins install @openclaw/line
+carapace plugins install @carapace/line
 ```
 
 Local checkout (when running from a git repo):
 
 ```bash
-openclaw plugins install ./path/to/local/line-plugin
+carapace plugins install ./path/to/local/line-plugin
 ```
 
 ## Setup
@@ -61,13 +61,13 @@ If you need a custom path, set `channels.line.webhookPath` or
 
 Security notes:
 
-- LINE signature verification is body-dependent (HMAC over the raw body), so OpenClaw applies a strict pre-auth body limit (64 KB) and read timeout before verification.
-- OpenClaw processes webhook events from the verified raw request bytes. Upstream middleware-transformed `req.body` values are ignored for signature-integrity safety.
+- LINE signature verification is body-dependent (HMAC over the raw body), so Carapace applies a strict pre-auth body limit (64 KB) and read timeout before verification.
+- Carapace processes webhook events from the verified raw request bytes. Upstream middleware-transformed `req.body` values are ignored for signature-integrity safety.
 
 ## Inbound durability
 
 The [Setup](#setup) webhook contract acknowledges an event only after it is durably
-queued. The durable `200` carries `x-openclaw-delivery-accepted: durable`; signed
+queued. The durable `200` carries `x-carapace-delivery-accepted: durable`; signed
 verification pings (empty event lists), standby-only batches, and error responses
 omit the marker, so
 reverse proxies can require it to distinguish durable acceptance from a generic
@@ -214,8 +214,8 @@ Direct messages default to pairing. Unknown senders get a pairing code and their
 messages are ignored until approved:
 
 ```bash
-openclaw pairing list line
-openclaw pairing approve line <CODE>
+carapace pairing list line
+carapace pairing approve line <CODE>
 ```
 
 Allowlists and policies:
@@ -240,9 +240,9 @@ LINE IDs are case-sensitive. Valid IDs look like:
 
 ## Directory
 
-`openclaw directory peers list --channel line` lists user IDs from the selected
+`carapace directory peers list --channel line` lists user IDs from the selected
 account's `allowFrom`, `groupAllowFrom`, and per-group `allowFrom` entries.
-`openclaw directory groups list --channel line` lists configured group and room
+`carapace directory groups list --channel line` lists configured group and room
 IDs. Prefixes normalize to sendable IDs, duplicates appear once, and `*` and
 `accessGroup:<name>` entries are omitted. Use `--account`, `--query`, `--limit`,
 and `--json` as described in [Directory](/cli/directory).
@@ -275,7 +275,7 @@ as untrusted.
   and rejects group and room ids — so a group reply arrives without one. Heartbeat
   turns also show the loading animation while the reply is generated.
 - Media downloads are capped by `channels.line.mediaMaxMb` (default 10).
-- Inbound media is saved under `~/.openclaw/media/inbound/` before it is passed
+- Inbound media is saved under `~/.carapace/media/inbound/` before it is passed
   to the agent, matching the shared media store used by other channel plugins.
 - LINE webhooks carry ids but no names, so the sender's display name and the
   group's name are fetched once and cached for five minutes. Group and room
@@ -376,7 +376,7 @@ The LINE plugin also ships a `/card` command for Flex message presets:
 /card info "Welcome" "Thanks for joining!"
 ```
 
-Card images and icons must use HTTPS. OpenClaw removes images with malformed or
+Card images and icons must use HTTPS. Carapace removes images with malformed or
 non-HTTPS URLs and adds an "Image unavailable" note when it fits within LINE's
 30 KB bubble and 50 KB carousel limits. Video
 heroes keep their required alternative content: an unusable video or preview URL
@@ -406,7 +406,7 @@ suffix. Native suffix inference supports JPEG/PNG, MP4, and MP3/M4A; suffixless 
 retain the image fallback. Other suffixed URLs and inferred MP4 without a preview
 become text links. Explicit video still requires `previewImageUrl`.
 
-Outbound media URLs must be public HTTPS URLs of at most 2000 characters. OpenClaw
+Outbound media URLs must be public HTTPS URLs of at most 2000 characters. Carapace
 validates the target hostname before handing the URL to LINE and rejects loopback,
 link-local, and private-network targets.
 
@@ -419,25 +419,25 @@ link-local, and private-network targets.
 - **Media download errors:** raise `channels.line.mediaMaxMb` if media exceeds the
   default limit.
 - **Pushes refused with HTTP 429:** Run
-  `openclaw channels status --channel line --probe --json`. For a limited allowance,
+  `carapace channels status --channel line --probe --json`. For a limited allowance,
   the account’s `quota` contains `used` and `limit`. Missing quota is unknown, not unlimited.
   A healthy bot identity can coexist with an exhausted push allowance. Check the
   account allowance or plan in LINE Official Account Manager before retrying;
   429 can also reflect rate limits or temporary message reservations. Ordinary
   reply-token messages do not consume this monthly allowance, unlike pushes.
   See [LINE message pricing](https://developers.line.biz/en/docs/messaging-api/pricing/).
-- **Bot silently skips messages (events dead-lettered):** `openclaw logs` shows
+- **Bot silently skips messages (events dead-lettered):** `carapace logs` shows
   `line: spooled update <id> ... dead-lettered` lines with the failure reason.
-  Inspect with `openclaw channels dead-letters list --channel line --account default`
+  Inspect with `carapace channels dead-letters list --channel line --account default`
   and check the failure reason before recovering: `resubmit` re-enqueues by event
   id without checking why the event failed. After fixing the cause of a failure
   with no committed side effects (for example `retry-limit-exceeded` after a
   provider outage), re-enqueue one event with
-  `openclaw channels dead-letters resubmit <event-id> --channel line --account default`.
+  `carapace channels dead-letters resubmit <event-id> --channel line --account default`.
   Never resubmit a `delivery-side-effects-committed` event: that reason means the
   delivery already adopted an agent turn or consumed its reply token, so
   re-enqueuing repeats the committed work — for example a second visible reply.
-  `openclaw health` reports dead-letter counts and `openclaw doctor` names
+  `carapace health` reports dead-letter counts and `carapace doctor` names
   affected accounts.
 - **`handler-timeout` retries:** the delivery was claimed but neither reached
   agent-turn adoption nor reported deferred progress for 5 minutes. This is a
@@ -446,12 +446,12 @@ link-local, and private-network targets.
   cause and is never cut off by it. Look at the dispatch path instead: the
   delivery preparation that runs between claim and adoption, such as inbound
   media download or a Gateway that is not accepting new work. This does not
-  dead-letter the event; `openclaw logs` shows
+  dead-letter the event; `carapace logs` shows
   `applying retry policy (handler-timeout)` and the event waits out its backoff
   with `handler-timeout` as its last error. A stall that keeps repeating is what
   eventually exhausts the retry limit, so an event that stalls its way to a dead
   letter lands under `retry-limit-exceeded`, not under a timeout reason. Check
-  `openclaw logs --follow` around the affected event id.
+  `carapace logs --follow` around the affected event id.
 
 ## Related
 

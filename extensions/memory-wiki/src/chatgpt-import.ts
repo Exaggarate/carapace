@@ -2,18 +2,18 @@
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   replaceManagedMarkdownBlock,
   withTrailingNewline,
-} from "openclaw/plugin-sdk/memory-host-markdown";
-import { timestampMsToIsoString } from "openclaw/plugin-sdk/number-runtime";
-import { FsSafeError, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/memory-host-markdown";
+import { timestampMsToIsoString } from "carapace/plugin-sdk/number-runtime";
+import { FsSafeError, root as fsRoot } from "carapace/plugin-sdk/security-runtime";
 import {
   asNullableRecord,
   isRecord,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { compileMemoryWikiVault } from "./compile.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import {
@@ -37,8 +37,8 @@ import { initializeMemoryWikiVault } from "./vault.js";
 
 const CHATGPT_PREFERENCE_SIGNAL_RE =
   /\b(prefer|prefers|preference|want|wants|need|needs|avoid|avoids|hate|hates|love|loves|default to|should default to|always use|don't want|does not want|likes|dislikes)\b/i;
-const HUMAN_START_MARKER = "<!-- openclaw:human:start -->";
-const HUMAN_END_MARKER = "<!-- openclaw:human:end -->";
+const HUMAN_START_MARKER = "<!-- carapace:human:start -->";
+const HUMAN_END_MARKER = "<!-- carapace:human:end -->";
 const MAX_ROLLBACK_RECREATE_ATTEMPTS = 32;
 
 const CHATGPT_RISK_RULES: Array<{ label: string; pattern: RegExp }> = [
@@ -834,7 +834,7 @@ async function importChatGptConversationsUnlocked(params: {
       const compile = await compileMemoryWikiVault(params.config).catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
         throw new Error(
-          `Memory Wiki ChatGPT import run ${importRunRecord.runId} changed source pages, but vault compilation failed: ${message}. After fixing the compile error, run \`openclaw wiki chatgpt rollback ${importRunRecord.runId}\` to restore the imported pages.`,
+          `Memory Wiki ChatGPT import run ${importRunRecord.runId} changed source pages, but vault compilation failed: ${message}. After fixing the compile error, run \`carapace wiki chatgpt rollback ${importRunRecord.runId}\` to restore the imported pages.`,
           { cause: error },
         );
       });

@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createConfiguredSkillWorkshopTool } from "./skill-workshop-tool-factory.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-projection-state-",
+    prefix: "carapace-skill-workshop-projection-state-",
   });
 });
 
@@ -40,7 +40,7 @@ describe("skill_workshop model projection", () => {
   ])(
     "projects complete per-artifact inspection for $provider/$model",
     async ({ modelContextWindowTokens, maxChars, contentIncluded }) => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-workshop-inspect-budget-");
+      const workspaceDir = await tempDirs.make("carapace-skill-workshop-inspect-budget-");
       const tool = createConfiguredSkillWorkshopTool({
         workspaceDir,
         config: {},
@@ -92,7 +92,7 @@ describe("skill_workshop model projection", () => {
   );
 
   it("keeps a selected small artifact complete when its manifest is oversized", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-manifest-budget-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-manifest-budget-");
     const supportFiles = Array.from({ length: 16 }, (_, index) => ({
       path: `references/${String(index).padStart(2, "0")}-${"x".repeat(140)}.txt`,
       content: index === 15 ? "SELECTED_SUPPORT_BODY" : `UNSELECTED_SUPPORT_${index}`,

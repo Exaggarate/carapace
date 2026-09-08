@@ -1,7 +1,7 @@
 // Slack plugin module implements action runtime behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import { readBooleanParam } from "carapace/plugin-sdk/boolean-param";
 import {
   createActionGate,
   imageResultFromFile,
@@ -10,13 +10,13 @@ import {
   readReactionParams,
   readStringParam,
   withNormalizedTimestamp,
-} from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { isSingleUseReplyToMode } from "openclaw/plugin-sdk/reply-reference";
-import { resolveOpenProviderRuntimeGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { isSingleUseReplyToMode } from "carapace/plugin-sdk/reply-reference";
+import { resolveOpenProviderRuntimeGroupPolicy } from "carapace/plugin-sdk/runtime-group-policy";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { ResolvedSlackAccount } from "./accounts.js";
 import {
   resolveSlackAutoThreadId,
@@ -89,7 +89,7 @@ export const slackActionRuntime = {
   removeSlackReaction: createLazySlackAction("removeSlackReaction"),
   resolveSlackConversationName: createLazySlackAction("resolveSlackConversationName"),
   resolveSlackConversationInfo: async (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
     channelId: string;
     teamId?: string;
@@ -97,7 +97,7 @@ export const slackActionRuntime = {
     requireFreshName?: boolean;
   }) => (await loadSlackChannelTypeRuntime()).resolveSlackConversationInfo(params),
   resolveSlackChannelType: async (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
     channelId: string;
   }) => (await loadSlackChannelTypeRuntime()).resolveSlackChannelType(params),
@@ -192,7 +192,7 @@ function normalizeConfiguredSlackDmUserId(value: unknown): string | undefined {
 
 async function isSlackDmTargetConfigured(params: {
   account: ResolvedSlackAccount;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: string;
   userId?: string;
 }): Promise<boolean> {
@@ -259,7 +259,7 @@ function assertSlackMemberInfoAllowed(params: {
 
 function resolveSlackChannelReadPolicy(params: {
   account: ResolvedSlackAccount;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: string;
   teamId?: string;
   channelName?: string;
@@ -333,7 +333,7 @@ function resolveSlackChannelReadPolicy(params: {
 
 async function assertSlackReadTargetAllowed(params: {
   account: ResolvedSlackAccount;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: string;
   teamId?: string;
   conversationReadOrigin?: ConversationReadInvocationOrigin;
@@ -542,7 +542,7 @@ function resolveSlackActionChannelTarget(
 
 export async function handleSlackAction(
   params: Record<string, unknown>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   context?: SlackActionContext,
 ): Promise<AgentToolResult<unknown>> {
   const action = readStringParam(params, "action", { required: true });

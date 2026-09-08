@@ -1,29 +1,29 @@
 // Ollama embedding runtime implements provider integration.
-import type { EmbeddingProvider } from "openclaw/plugin-sdk/embedding-providers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { EmbeddingProvider } from "carapace/plugin-sdk/embedding-providers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
 import {
   isKnownEnvApiKeyMarker,
   isNonSecretApiKeyMarker,
   normalizeOptionalSecretInput,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveEnvApiKey } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveEnvApiKey } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   readProviderJsonResponse,
   readProviderResponseErrorText,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-http";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
 import {
   coerceSecretRef,
   hasConfiguredSecretInput,
   normalizeResolvedSecretInputString,
   resolveConfiguredSecretInputString,
-} from "openclaw/plugin-sdk/secret-input-runtime";
+} from "carapace/plugin-sdk/secret-input-runtime";
 import {
   formatErrorMessage,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
   type SsrFPolicy,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { fetchConfiguredLocalOriginWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime-internal";
+} from "carapace/plugin-sdk/ssrf-runtime";
+import { fetchConfiguredLocalOriginWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime-internal";
 import { DEFAULT_OLLAMA_EMBEDDING_MODEL, OLLAMA_CLOUD_BASE_URL } from "./defaults.js";
 import { normalizeOllamaWireModelId } from "./model-id.js";
 import { readProviderBaseUrl } from "./provider-base-url.js";
@@ -41,7 +41,7 @@ type MemoryCoreAcquireLocalService = (
 ) => Promise<{ release: () => void } | undefined>;
 
 type OllamaEmbeddingOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir?: string;
   provider?: string;
   remote?: {
@@ -217,7 +217,7 @@ function resolveSourcedOllamaEmbeddingKey(params: {
 }
 
 async function resolveConfiguredOllamaEmbeddingSecret(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   value: unknown;
   path: string;
 }): Promise<string | undefined> {

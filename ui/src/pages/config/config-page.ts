@@ -1,7 +1,7 @@
 import "../../styles/config.css";
 import { consume } from "@lit/context";
 import { initialState, Task, TaskStatus } from "@lit/task";
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asConfigRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import type {
@@ -56,7 +56,7 @@ import {
   GatewayPageController,
   type GatewayPageChange,
 } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
@@ -184,15 +184,15 @@ function renderConfigPageSubtitle(pageId: ConfigPageId) {
   switch (pageId) {
     case "appearance":
       return html`${t("configView.appearance.intro")}
-      ${renderLearnMoreLink("https://docs.openclaw.ai/web/control-ui")}`;
+      ${renderLearnMoreLink("https://github.com/Exaggarate/carapace")}`;
     case "mcp":
-      return html`${t("mcpPage.intro")} ${renderLearnMoreLink("https://docs.openclaw.ai/tools/mcp")}`;
+      return html`${t("mcpPage.intro")} ${renderLearnMoreLink("https://github.com/Exaggarate/carapace")}`;
     case "security":
       return html`${t("quickSettings.security.intro")}
-      ${renderLearnMoreLink("https://docs.openclaw.ai/gateway/security")}`;
+      ${renderLearnMoreLink("https://github.com/Exaggarate/carapace")}`;
     case "talk":
       return html`${t("talkPage.intro")}
-      ${renderLearnMoreLink("https://docs.openclaw.ai/nodes/talk")}`;
+      ${renderLearnMoreLink("https://github.com/Exaggarate/carapace")}`;
     case "updates":
       return t("updates.page.intro");
     default:
@@ -254,7 +254,7 @@ function applyTextScale(value: unknown) {
   );
 }
 
-export class ConfigPage extends OpenClawLightDomElement {
+export class ConfigPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -1421,7 +1421,7 @@ export class ConfigPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-config-page")) {
-  customElements.define("openclaw-config-page", ConfigPage);
+if (!customElements.get("carapace-config-page")) {
+  customElements.define("carapace-config-page", ConfigPage);
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

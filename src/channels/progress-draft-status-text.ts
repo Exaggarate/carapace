@@ -1,5 +1,5 @@
 // Progress-draft status text normalization for reasoning, preamble, and commentary lanes.
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { formatReasoningMessage } from "../agents/embedded-agent-utils.js";
 import { compactProgressText } from "../shared/text-truncate.js";
 import { findCodeRegions, isInsideCode } from "../shared/text/code-regions.js";

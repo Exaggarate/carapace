@@ -30,7 +30,7 @@ async function runProof(repoRoot: string, appendLog: (text: string) => void) {
   await runQaGatewayFixture(
     async () => {
       assert.equal(
-        process.env.OPENCLAW_TESTBOX,
+        process.env.CARAPACE_TESTBOX,
         "1",
         "Retention proof requires a disposable Testbox",
       );

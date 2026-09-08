@@ -12,26 +12,26 @@ const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "../..");
 
 function buildConnectionReuseProbe(): string {
-  const agentDbUrl = pathToFileURL(path.join(repoRoot, "src/state/openclaw-agent-db.ts")).href;
-  const stateDbUrl = pathToFileURL(path.join(repoRoot, "src/state/openclaw-state-db.ts")).href;
+  const agentDbUrl = pathToFileURL(path.join(repoRoot, "src/state/carapace-agent-db.ts")).href;
+  const stateDbUrl = pathToFileURL(path.join(repoRoot, "src/state/carapace-state-db.ts")).href;
   return `
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 const agentDb = await import(${JSON.stringify(agentDbUrl)});
 const stateDb = await import(${JSON.stringify(stateDbUrl)});
-const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-connection-reuse-"));
-const env = { OPENCLAW_STATE_DIR: stateDir };
+const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-connection-reuse-"));
+const env = { CARAPACE_STATE_DIR: stateDir };
 let databasePath;
 let movedPath;
 try {
-  const database = agentDb.openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = agentDb.openCarapaceAgentDatabase({ agentId: "main", env });
   databasePath = database.path;
   movedPath = databasePath + ".connection-reuse-probe";
   // The live handle survives this rename; a fresh pathname open does not.
   fs.renameSync(databasePath, movedPath);
   const inspections = Array.from({ length: 40 }, () =>
-    agentDb.inspectOpenClawAgentDatabaseOwner(databasePath),
+    agentDb.inspectCarapaceAgentDatabaseOwner(databasePath),
   );
   if (inspections.some((entry) => entry.status !== "owned" || entry.agentId !== "main")) {
     throw new Error("unexpected ownership inspections: " + JSON.stringify(inspections));
@@ -41,8 +41,8 @@ try {
   if (databasePath && movedPath && fs.existsSync(movedPath)) {
     fs.renameSync(movedPath, databasePath);
   }
-  agentDb.closeOpenClawAgentDatabasesForTest();
-  stateDb.closeOpenClawStateDatabaseForTest();
+  agentDb.closeCarapaceAgentDatabasesForTest();
+  stateDb.closeCarapaceStateDatabaseForTest();
   fs.rmSync(stateDir, { recursive: true, force: true });
 }
 `;

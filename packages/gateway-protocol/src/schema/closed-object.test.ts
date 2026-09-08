@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { closedObject } from "./closed-object.js";
 
 function identity(schema: object): unknown {
-  return Object.getOwnPropertyDescriptor(schema, "~openclawClosedObjectIdentity")?.value;
+  return Object.getOwnPropertyDescriptor(schema, "~carapaceClosedObjectIdentity")?.value;
 }
 
 describe("closed schema identity", () => {

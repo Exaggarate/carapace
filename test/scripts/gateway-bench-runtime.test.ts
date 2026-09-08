@@ -7,7 +7,7 @@ import {
   formatStats,
   writeGatewayBenchConfig,
 } from "../../scripts/lib/gateway-bench-runtime.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import { startGatewayDiscovery } from "../../src/gateway/server-discovery-runtime.js";
 import { createGatewayPluginRuntimeGeneration } from "../../src/gateway/server-plugin-runtime-generation.js";
 import {
@@ -64,7 +64,7 @@ describe("gateway benchmark discovery isolation", () => {
     { name: "benchmark fixture", enabled: false },
     { name: "enabled minimal-discovery control", enabled: true },
   ])("$name reaches the publication boundary with the expected policy", async ({ enabled }) => {
-    const root = tempDirs.make("openclaw-bench-discovery-");
+    const root = tempDirs.make("carapace-bench-discovery-");
     const configPath = writeGatewayBenchConfig(
       root,
       {
@@ -73,25 +73,25 @@ describe("gateway benchmark discovery isolation", () => {
       },
       {},
     );
-    vi.stubEnv("OPENCLAW_WIDE_AREA_DOMAIN", "inherited.example.test");
+    vi.stubEnv("CARAPACE_WIDE_AREA_DOMAIN", "inherited.example.test");
     const childEnv = createGatewayBenchEnv(root, configPath, {});
     for (const key of [
       "HOME",
-      "OPENCLAW_HOME",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
+      "CARAPACE_HOME",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_CONFIG_PATH",
       "NODE_ENV",
       "VITEST",
-      "OPENCLAW_DISABLE_BONJOUR",
-      "OPENCLAW_WIDE_AREA_DOMAIN",
-      "OPENCLAW_TAILNET_DNS",
-      "OPENCLAW_CLI_PATH",
-      "OPENCLAW_SSH_PORT",
-      "OPENCLAW_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS",
+      "CARAPACE_DISABLE_BONJOUR",
+      "CARAPACE_WIDE_AREA_DOMAIN",
+      "CARAPACE_TAILNET_DNS",
+      "CARAPACE_CLI_PATH",
+      "CARAPACE_SSH_PORT",
+      "CARAPACE_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS",
     ]) {
       vi.stubEnv(key, childEnv[key]);
     }
-    const cfgAtStart: OpenClawConfig = JSON.parse(readFileSync(configPath, "utf8"));
+    const cfgAtStart: CarapaceConfig = JSON.parse(readFileSync(configPath, "utf8"));
     const stop = vi.fn();
     const advertise = vi.fn(async () => ({ stop }));
     const pluginRegistry = createEmptyPluginRegistry();
@@ -117,7 +117,7 @@ describe("gateway benchmark discovery isolation", () => {
     });
     await discovery.stop();
 
-    expect(childEnv.OPENCLAW_WIDE_AREA_DOMAIN).toBeUndefined();
+    expect(childEnv.CARAPACE_WIDE_AREA_DOMAIN).toBeUndefined();
     expect(resolveWideAreaDiscoveryDomain).not.toHaveBeenCalled();
     expect(writeWideAreaGatewayZone).not.toHaveBeenCalled();
     if (enabled) {

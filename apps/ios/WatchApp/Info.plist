@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>OpenClaw</string>
+	<string>Carapace</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,13 +17,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(OPENCLAW_MARKETING_VERSION)</string>
+	<string>$(CARAPACE_MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>$(OPENCLAW_BUILD_VERSION)</string>
+	<string>$(CARAPACE_BUILD_VERSION)</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>OpenClaw connects this Apple Watch directly to your Gateway on trusted local networks.</string>
+	<string>Carapace connects this Apple Watch directly to your Gateway on trusted local networks.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>OpenClaw uses the microphone for voice conversations you start on Apple Watch.</string>
+	<string>Carapace uses the microphone for voice conversations you start on Apple Watch.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>RedHatDisplay[wght].ttf</string>
@@ -40,7 +40,7 @@
 	<key>WKApplication</key>
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>$(OPENCLAW_COMPANION_APP_BUNDLE_ID)</string>
+	<string>$(CARAPACE_COMPANION_APP_BUNDLE_ID)</string>
 	<key>WKPrefersNetworkUponForeground</key>
 	<true/>
 </dict>

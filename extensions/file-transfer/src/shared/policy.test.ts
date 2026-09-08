@@ -6,14 +6,14 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vites
 // Mock the plugin-sdk runtime-config surface so we can drive the policy
 // reader from the test without booting a gateway. mutateConfigFile is also
 // mocked so literal-grant tests can assert what would have been written
-// without touching ~/.openclaw/openclaw.json.
+// without touching ~/.carapace/carapace.json.
 const getRuntimeConfigMock = vi.fn();
 const mutateConfigFileMock = vi.fn();
 
-vi.mock("openclaw/plugin-sdk/runtime-config-snapshot", () => ({
+vi.mock("carapace/plugin-sdk/runtime-config-snapshot", () => ({
   getRuntimeConfig: () => getRuntimeConfigMock(),
 }));
-vi.mock("openclaw/plugin-sdk/config-mutation", () => ({
+vi.mock("carapace/plugin-sdk/config-mutation", () => ({
   mutateConfigFile: (input: unknown) => mutateConfigFileMock(input),
 }));
 
@@ -30,8 +30,8 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/runtime-config-snapshot");
-  vi.doUnmock("openclaw/plugin-sdk/config-mutation");
+  vi.doUnmock("carapace/plugin-sdk/runtime-config-snapshot");
+  vi.doUnmock("carapace/plugin-sdk/config-mutation");
   vi.resetModules();
 });
 
@@ -134,7 +134,7 @@ describe("evaluateFilePolicy — default deny", () => {
       code: "POLICY_MIGRATION_REQUIRED",
       askable: false,
     });
-    expect(result.ok ? "" : result.reason).toContain("openclaw file-transfer approvals migrate");
+    expect(result.ok ? "" : result.reason).toContain("carapace file-transfer approvals migrate");
   });
 });
 

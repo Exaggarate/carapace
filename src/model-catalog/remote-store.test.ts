@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   markRemoteModelCatalogChecked,
   readRemoteModelCatalog,
@@ -12,7 +12,7 @@ import {
 
 const roots: string[] = [];
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const root of roots.splice(0)) {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -20,7 +20,7 @@ afterEach(() => {
 
 describe("remote model catalog store", () => {
   it("stores one machine-state snapshot and rejects stale refreshes", () => {
-    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-catalog-")));
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-catalog-")));
     roots.push(root);
     const options = { path: path.join(root, "state.sqlite") };
     expect(readRemoteModelCatalog(options)).toBeUndefined();

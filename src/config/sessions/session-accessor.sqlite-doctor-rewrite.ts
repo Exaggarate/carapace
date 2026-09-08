@@ -1,6 +1,6 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { runOpenClawAgentWriteTransaction } from "../../state/openclaw-agent-db.js";
+import { runCarapaceAgentWriteTransaction } from "../../state/carapace-agent-db.js";
 import { chunkItems } from "../../utils/chunk-items.js";
 import {
   deliveryContextFromSession,
@@ -36,7 +36,7 @@ export function rewriteDoctorSessionEntries(params: {
   const resolved = resolveSqliteScope({ ...params.scope, sessionKey: "" });
   let rewritten = 0;
   for (const batch of iterateDoctorSessionKeyBatches(params.sessionKeys)) {
-    rewritten += runOpenClawAgentWriteTransaction(
+    rewritten += runCarapaceAgentWriteTransaction(
       (database) => {
         const db = getSessionKysely(database.db);
         let batchRewritten = 0;

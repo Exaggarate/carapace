@@ -13,7 +13,7 @@ import { createTeamReportsStore, type TeamReportsStore } from "./store.js";
 import type { Period, Person, ReportDocument, SummaryDocument } from "./types.js";
 
 const runtimeScopeMock = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/plugin-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-runtime", () => ({
   getPluginRuntimeGatewayRequestScope: runtimeScopeMock,
 }));
 

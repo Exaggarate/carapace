@@ -1,18 +1,18 @@
 import {
   parseComputerActParamsJSON,
   type ComputerActParams,
-} from "openclaw/plugin-sdk/computer-use";
+} from "carapace/plugin-sdk/computer-use";
 import type {
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+  CarapacePluginNodeInvokePolicy,
+  CarapacePluginNodeInvokePolicyContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const COMPUTER_ACT_COMMAND = "computer.act";
 
 const HIGH_RISK_FAMILIES = new Map<
   ComputerActParams["action"],
-  NonNullable<OpenClawPluginNodeInvokePolicyContext["risk"]>["family"]
+  NonNullable<CarapacePluginNodeInvokePolicyContext["risk"]>["family"]
 >([
   ["kill_app", "process_termination"],
   ["browser_navigate", "browser_navigation"],
@@ -36,7 +36,7 @@ const OBSERVATION_ACTIONS = new Set<ComputerActParams["action"]>([
 
 function classifyCuaComputerActRisk(
   params: unknown,
-): NonNullable<OpenClawPluginNodeInvokePolicyContext["risk"]> {
+): NonNullable<CarapacePluginNodeInvokePolicyContext["risk"]> {
   // Node-host owns the exact close envelope. This internal action never enters
   // the model schema, but it still traverses the same classified policy seam.
   if (isRecord(params) && params.action === "__close_execution") {
@@ -64,7 +64,7 @@ function classifyCuaComputerActRisk(
   };
 }
 
-export function createCuaComputerNodeInvokePolicy(): OpenClawPluginNodeInvokePolicy {
+export function createCuaComputerNodeInvokePolicy(): CarapacePluginNodeInvokePolicy {
   return {
     commands: [COMPUTER_ACT_COMMAND],
     dangerous: true,

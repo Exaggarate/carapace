@@ -8,19 +8,19 @@ import {
 } from "./config.js";
 
 describe("Canvas presenter config", () => {
-  const originalSkipCanvasHost = process.env.OPENCLAW_SKIP_CANVAS_HOST;
+  const originalSkipCanvasHost = process.env.CARAPACE_SKIP_CANVAS_HOST;
 
   afterEach(() => {
     if (originalSkipCanvasHost === undefined) {
-      delete process.env.OPENCLAW_SKIP_CANVAS_HOST;
+      delete process.env.CARAPACE_SKIP_CANVAS_HOST;
     } else {
-      process.env.OPENCLAW_SKIP_CANVAS_HOST = originalSkipCanvasHost;
+      process.env.CARAPACE_SKIP_CANVAS_HOST = originalSkipCanvasHost;
     }
   });
 
   it("keeps the single host enablement switch manifest-owned", () => {
     const manifest = JSON.parse(
-      readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf8"),
+      readFileSync(new URL("../carapace.plugin.json", import.meta.url), "utf8"),
     ) as { uiHints?: Record<string, Record<string, unknown>> };
 
     expect(canvasConfigSchema).not.toHaveProperty("uiHints");
@@ -62,7 +62,7 @@ describe("Canvas presenter config", () => {
   });
 
   it("honors the internal skip-host test switch", () => {
-    process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
+    process.env.CARAPACE_SKIP_CANVAS_HOST = "1";
     expect(isCanvasHostEnabled()).toBe(false);
   });
 });

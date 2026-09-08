@@ -5,7 +5,7 @@ import {
   type MarkdownIR,
   markdownToIR,
   renderMarkdownWithMarkers,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import type { MarkdownTableMode } from "../runtime-api.js";
 
 const ESCAPED_MARKDOWN_RE = /\\[\\`*_{}[\]()#+\-.!|>~]/gu;

@@ -4,7 +4,7 @@ import {
   resolveClaudeMythos5ModelIdentity,
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
-} from "openclaw/plugin-sdk/claude-model-runtime";
+} from "carapace/plugin-sdk/claude-model-runtime";
 /**
  * Thinking-level policy for Claude models on Amazon Bedrock. It maps Bedrock
  * model ids to the provider SDK thinking levels that are actually supported.
@@ -12,7 +12,7 @@ import {
 import type {
   ProviderRuntimeModel,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 
 const BASE_CLAUDE_THINKING_LEVELS = [
   { id: "off" },

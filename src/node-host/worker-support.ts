@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import { z } from "zod";
 import { GatewayClientRequestError } from "../gateway/client.js";
 import type { GatewayClientRequestOptions } from "../gateway/client.js";

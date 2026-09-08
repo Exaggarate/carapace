@@ -1,10 +1,10 @@
-import type { AssistantMessage, Model } from "@openclaw/llm-core";
+import type { AssistantMessage, Model } from "@carapace/llm-core";
 /**
  * Tests Anthropic Messages transport streaming.
  * Covers request construction, SSE parsing, aborts, tool calls, usage, and
  * provider transport hooks.
  */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   configureAiTransportHost,
@@ -85,7 +85,7 @@ type RequestTransportConfig = {
   allowPrivateNetwork?: boolean;
 };
 const MODEL_PROVIDER_REQUEST_TRANSPORT_SYMBOL = Symbol.for(
-  "openclaw.modelProviderRequestTransport",
+  "carapace.modelProviderRequestTransport",
 );
 
 function attachModelProviderRequestTransport<TModel extends object>(
@@ -827,7 +827,7 @@ describe("anthropic transport stream", () => {
       } as AnthropicStreamContext,
       {
         apiKey: "sk-ant-api",
-        headers: { "User-Agent": "openclaw/2026.9.1", "X-Call": "1" },
+        headers: { "User-Agent": "carapace/2026.9.1", "X-Call": "1" },
       } as AnthropicStreamOptions,
     );
 
@@ -841,7 +841,7 @@ describe("anthropic transport stream", () => {
     expect(headers.get("content-type")).toBe("application/json");
     expect(headers.get("accept")).toBe("application/json");
     expect(headers.get("anthropic-dangerous-direct-browser-access")).toBe("true");
-    expect(headers.get("user-agent")).toBe("openclaw/2026.9.1");
+    expect(headers.get("user-agent")).toBe("carapace/2026.9.1");
     expect(headers.get("X-Provider")).toBe("anthropic");
     expect(headers.get("X-Call")).toBe("1");
     expect(latestAnthropicRequest().payload.model).toBe("claude-sonnet-4-6");
@@ -1637,7 +1637,7 @@ describe("anthropic transport stream", () => {
     );
 
     expect(result.stopReason).toBe("error");
-    expect(result.errorMessage).toBe("OpenClaw transport error: malformed_streaming_fragment");
+    expect(result.errorMessage).toBe("Carapace transport error: malformed_streaming_fragment");
   });
 
   it("reports every parsed Anthropic event as request activity", async () => {
@@ -3120,7 +3120,7 @@ describe("anthropic transport stream", () => {
       absent: ["reasoning_content"],
     },
     {
-      name: "backfills MiMo v2-flash tool-use replay when OpenClaw thinking is off",
+      name: "backfills MiMo v2-flash tool-use replay when Carapace thinking is off",
       model: {
         id: "mimo-v2-flash",
         name: "MiMo V2 Flash",

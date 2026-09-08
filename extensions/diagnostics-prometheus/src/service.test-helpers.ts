@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import type { DiagnosticEventPrivateData } from "openclaw/plugin-sdk/diagnostic-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import type { DiagnosticEventPrivateData } from "carapace/plugin-sdk/diagnostic-runtime";
 import type {
   DiagnosticEventMetadata,
   DiagnosticEventPayload,
-  OpenClawPluginServiceContext,
+  CarapacePluginServiceContext,
 } from "../api.js";
 import { createDiagnosticsPrometheusExporter } from "./service.js";
 
@@ -16,7 +16,7 @@ export type ExporterHealthReport = {
   reason?: "configured";
 };
 export type TrustedExporterInternalDiagnostics = NonNullable<
-  OpenClawPluginServiceContext["internalDiagnostics"]
+  CarapacePluginServiceContext["internalDiagnostics"]
 > & {
   reportExporterHealth?: (update: ExporterHealthReport) => void;
 };
@@ -27,9 +27,9 @@ export function baseEvent(): Pick<DiagnosticEventPayload, "seq" | "ts"> {
 
 export function createMetricsHarness(
   getRuntimeIdentity?: NonNullable<
-    OpenClawPluginServiceContext["internalDiagnostics"]
+    CarapacePluginServiceContext["internalDiagnostics"]
   >["getRuntimeIdentity"],
-  config: OpenClawPluginServiceContext["config"] = {},
+  config: CarapacePluginServiceContext["config"] = {},
 ) {
   const exporter = createDiagnosticsPrometheusExporter();
   let listener:
@@ -50,9 +50,9 @@ export function createMetricsHarness(
     },
     reportExporterHealth() {},
   };
-  const context: OpenClawPluginServiceContext = {
+  const context: CarapacePluginServiceContext = {
     config,
-    stateDir: "/tmp/openclaw-prometheus-test",
+    stateDir: "/tmp/carapace-prometheus-test",
     logger: {
       info() {},
       warn() {},

@@ -3,7 +3,7 @@ import type { CliDeps } from "../cli/deps.types.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { runWithoutOwnedSessionTranscriptWrites } from "../config/sessions/transcript-write-context.js";
 import { appendAssistantMessageToSessionTranscript } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { findDeliveryIntentOwner } from "../infra/outbound/delivery-queue-storage.js";
 import { recordUpdateRunStep, recordUpdateRunVerification } from "../infra/update-run-ledger.js";
@@ -18,7 +18,7 @@ const log = createSubsystemLogger("gateway/update-run");
 /** Prepare routing before an update can replace lazily loaded channel modules. */
 export function createUpdateRunNotifier(
   initial: UpdateRunRecord,
-  cfg: OpenClawConfig = getRuntimeConfig(),
+  cfg: CarapaceConfig = getRuntimeConfig(),
   deps: CliDeps = createDefaultDeps(),
   target = resolveUpdateRunNoticeTarget({
     cfg,

@@ -42,8 +42,8 @@ Top-level fields:
 | -------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `discovery`                | enabled                  | Model discovery settings for Codex app-server `model/list`.                                                                                    |
 | `appServer`                | managed stdio app-server | Transport, command, auth, approval, sandbox, and timeout settings. The ordinary harness defaults to agent-scoped state.                        |
-| `codexDynamicToolsLoading` | `"searchable"`           | Use `"direct"` to put OpenClaw dynamic tools directly in the initial Codex tool context.                                                       |
-| `codexDynamicToolsExclude` | `[]`                     | Additional OpenClaw dynamic tool names to omit from Codex app-server turns.                                                                    |
+| `codexDynamicToolsLoading` | `"searchable"`           | Use `"direct"` to put Carapace dynamic tools directly in the initial Codex tool context.                                                       |
+| `codexDynamicToolsExclude` | `[]`                     | Additional Carapace dynamic tool names to omit from Codex app-server turns.                                                                    |
 | `codexPlugins`             | disabled                 | Native Codex plugin/app support, including opt-in access to connected account apps. See [Native Codex plugins](/plugins/codex-native-plugins). |
 | `computerUse`              | disabled                 | Codex Computer Use setup. See [Codex Computer Use](/plugins/codex-computer-use).                                                               |
 | `sessionCatalog`           | enabled                  | Native Codex session discovery for the sidebar. Set `enabled: false` to disable it, or set `homes` to include additional local Codex stores.   |
@@ -72,10 +72,10 @@ computer and opted-in paired nodes by default. Disable only that catalog with:
 ```
 
 Discovery automatically covers the Gateway process Codex home (`CODEX_HOME` or
-`~/.codex`) and the Codex home of every configured OpenClaw agent. Register
-additional local Codex stores only when sessions live in a home OpenClaw does
+`~/.codex`) and the Codex home of every configured Carapace agent. Register
+additional local Codex stores only when sessions live in a home Carapace does
 not already know about, for example a store created with a custom `CODEX_HOME`
-outside OpenClaw:
+outside Carapace:
 
 ```json5
 {
@@ -102,7 +102,7 @@ ones, labeled `Local Codex · <label>` and grouped by each session's working
 directory. String entries and objects without `label` use the basename of the
 canonicalized home directory; an explicit `label` overrides that default.
 Sessions in these stores support the same view, continue, and archive actions,
-and the selected OpenClaw agent still owns the resulting connection; `homes`
+and the selected Carapace agent still owns the resulting connection; `homes`
 only adds catalog sources.
 
 Fresh native terminal sessions use the primary local profile, shown as
@@ -147,12 +147,12 @@ a model-locked Chat with bounded user and assistant history through the last
 terminal persisted source turn. Its private binding keeps the snapshot fork,
 canonical `appServer`-source branch, history injection, and later turns on that
 connection. The first canonical start uses the pair returned by the fork. Later
-resumes omit OpenClaw model and provider overrides so Codex restores the
+resumes omit Carapace model and provider overrides so Codex restores the
 canonical thread's persisted pair; a separate native change can update that
 pair, but the outer model and fallback chain never replace it. Stored and idle
 rows can be archived after no-other-runner confirmation, unless another active
-OpenClaw binding owns the exact target or one of its non-archived spawned
-descendants. OpenClaw follows Codex's descendant pagination and fails closed on
+Carapace binding owns the exact target or one of its non-archived spawned
+descendants. Carapace follows Codex's descendant pagination and fails closed on
 enumeration errors, cycles, or safety-limit exhaustion. Confirmation still
 covers unknown native clients and the status-to-archive race. A supervised
 model-locked Chat cannot be deleted while it protects the native binding.
@@ -176,13 +176,13 @@ falling back to the agent-home harness. The default connection shares stored
 sessions with native Codex clients, not their process-local activity state.
 
 Legacy `plugins.entries.codex-supervisor` settings are retired. Run
-`openclaw doctor --fix` to migrate the old entry, endpoint definitions, policy
+`carapace doctor --fix` to migrate the old entry, endpoint definitions, policy
 flags, and plugin allow/deny references into this block. Explicit canonical
 `codex.config.supervision` values win conflicts.
 
 ## App-server transport
 
-For ordinary harness turns, OpenClaw starts the managed Codex binary shipped
+For ordinary harness turns, Carapace starts the managed Codex binary shipped
 with the official plugin (currently `@openai/codex` `0.153.4`):
 
 ```bash
@@ -190,7 +190,7 @@ codex app-server --listen stdio://
 ```
 
 This keeps the app-server version tied to the official `codex` plugin instead of
-whichever separate Codex CLI happens to be installed locally. OpenClaw resolves
+whichever separate Codex CLI happens to be installed locally. Carapace resolves
 `@openai/codex/bin/codex.js` from the loader-selected plugin root using Node
 package resolution, including npm-hoisted and pnpm-linked dependencies. It does
 not search `.bin` shims or global `PATH` for managed startup. On Windows, Node
@@ -202,14 +202,14 @@ package even when a macOS desktop bundle is installed. When
 `"user"` and can load native Computer Use state, managed startup instead prefers
 the desktop app binary that owns the required macOS permissions. The same
 desktop-first rule applies when an isolated agent home's effective Codex config
-enables native Computer Use. If no desktop app bundle is installed, OpenClaw
+enables native Computer Use. If no desktop app bundle is installed, Carapace
 falls back to the pinned package binary.
 
-Before cutting over a staged OpenClaw package, run the opt-in managed-binary
+Before cutting over a staged Carapace package, run the opt-in managed-binary
 check against the candidate installation:
 
 ```bash
-openclaw doctor --lint --only codex/managed-app-server --json
+carapace doctor --lint --only codex/managed-app-server --json
 ```
 
 The check is read-only. For every configured Codex agent it applies the same
@@ -264,27 +264,27 @@ managed stdio or the local Unix control socket for production workloads.
 | Field                            | Default                                                | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | -------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `transport`                      | `"stdio"`                                              | `"stdio"` spawns Codex; explicit `"unix"` connects to the local control socket; `"websocket"` connects to `url`.                                                                                                                                                                                                                                                                                                                   |
-| `homeScope`                      | `"agent"`                                              | `"agent"` isolates ordinary harness state per OpenClaw agent. `"user"` is an explicit opt-in that shares the native `$CODEX_HOME` or `~/.codex`, uses native auth, and enables owner-only thread management. User scope supports local stdio or Unix transport. For the separate supervision connection, an unset value resolves to `"user"` for stdio or Unix and `"agent"` for WebSocket.                                        |
+| `homeScope`                      | `"agent"`                                              | `"agent"` isolates ordinary harness state per Carapace agent. `"user"` is an explicit opt-in that shares the native `$CODEX_HOME` or `~/.codex`, uses native auth, and enables owner-only thread management. User scope supports local stdio or Unix transport. For the separate supervision connection, an unset value resolves to `"user"` for stdio or Unix and `"agent"` for WebSocket.                                        |
 | `command`                        | managed Codex binary                                   | Executable for stdio transport. Leave unset to use the managed binary.                                                                                                                                                                                                                                                                                                                                                             |
 | `args`                           | `["app-server", "--listen", "stdio://"]`               | Arguments for stdio transport.                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `url`                            | unset                                                  | WebSocket App Server URL or `unix://` URL. An empty explicit Unix path selects the canonical user-home control socket.                                                                                                                                                                                                                                                                                                             |
 | `authToken`                      | unset                                                  | Bearer token for WebSocket transport. Accepts a literal string or SecretInput such as `${CODEX_APP_SERVER_TOKEN}`.                                                                                                                                                                                                                                                                                                                 |
 | `headers`                        | `{}`                                                   | Extra WebSocket headers. Header values accept literal strings or SecretInput values, for example `x-codex-client-session-token: "${CODEX_CLIENT_SESSION_TOKEN}"`.                                                                                                                                                                                                                                                                  |
-| `clearEnv`                       | `[]`                                                   | Extra environment variable names removed from the spawned stdio app-server process after OpenClaw builds its inherited environment.                                                                                                                                                                                                                                                                                                |
-| `remoteWorkspaceRoot`            | unset                                                  | Remote Codex app-server workspace root. OpenClaw maps the local cwd into this root and transfers authoritative remote attachments over an output-capped, no-shell `command/exec` reader. Paths escaping either workspace, symbolic links, oversized files, and unbounded attachment batches fail closed; uploads retain the configured channel identity and app-server request timeout.                                            |
-| `loopDetectionPreToolUseRelay`   | `true`                                                 | Enables the Codex `PreToolUse` relay for loop detection when OpenClaw loop detection is enabled. OpenClaw installs no `PreToolUse` relay when no before-tool plugin hook, trusted-tool policy, or enabled loop detector has local work. Set `false` to disable the loop-detection relay even when detection is enabled; before-tool plugin hooks and trusted-tool policy still install their required fail-closed relay.           |
+| `clearEnv`                       | `[]`                                                   | Extra environment variable names removed from the spawned stdio app-server process after Carapace builds its inherited environment.                                                                                                                                                                                                                                                                                                |
+| `remoteWorkspaceRoot`            | unset                                                  | Remote Codex app-server workspace root. Carapace maps the local cwd into this root and transfers authoritative remote attachments over an output-capped, no-shell `command/exec` reader. Paths escaping either workspace, symbolic links, oversized files, and unbounded attachment batches fail closed; uploads retain the configured channel identity and app-server request timeout.                                            |
+| `loopDetectionPreToolUseRelay`   | `true`                                                 | Enables the Codex `PreToolUse` relay for loop detection when Carapace loop detection is enabled. Carapace installs no `PreToolUse` relay when no before-tool plugin hook, trusted-tool policy, or enabled loop detector has local work. Set `false` to disable the loop-detection relay even when detection is enabled; before-tool plugin hooks and trusted-tool policy still install their required fail-closed relay.           |
 | `requestTimeoutMs`               | `60000`                                                | Timeout for app-server control-plane calls.                                                                                                                                                                                                                                                                                                                                                                                        |
 | `mode`                           | `"yolo"` unless local Codex requirements disallow YOLO | Preset for YOLO or guardian-reviewed execution.                                                                                                                                                                                                                                                                                                                                                                                    |
 | `approvalPolicy`                 | `"never"` or an allowed guardian approval policy       | Native Codex approval policy sent to thread start, resume, and turn.                                                                                                                                                                                                                                                                                                                                                               |
-| `sandbox`                        | `"danger-full-access"` or an allowed guardian sandbox  | Native Codex sandbox mode sent to thread start and resume. Active OpenClaw sandboxes narrow `danger-full-access` turns to Codex `workspace-write`; the turn network flag follows OpenClaw sandbox egress.                                                                                                                                                                                                                          |
+| `sandbox`                        | `"danger-full-access"` or an allowed guardian sandbox  | Native Codex sandbox mode sent to thread start and resume. Active Carapace sandboxes narrow `danger-full-access` turns to Codex `workspace-write`; the turn network flag follows Carapace sandbox egress.                                                                                                                                                                                                                          |
 | `approvalsReviewer`              | `"user"` or an allowed guardian reviewer               | Use `"auto_review"` to let Codex review native approval prompts when allowed.                                                                                                                                                                                                                                                                                                                                                      |
 | `defaultWorkspaceDir`            | current process directory                              | Workspace used by `/codex bind` when `--cwd` is omitted.                                                                                                                                                                                                                                                                                                                                                                           |
 | `serviceTier`                    | unset                                                  | Native Codex app-server preference only. Any non-empty string passes through for forward compatibility; documented values are `"priority"` and `"flex"`. `null` clears the override, and legacy `"fast"` normalizes to `"priority"`. This is neither the shared Fast-mode setting nor a direct embedded OpenAI setting. A shared Fast run control supersedes it with `priority` or `null`, or decides per model call in auto mode. |
-| `networkProxy`                   | disabled                                               | Opt into Codex permissions-profile networking for app-server commands. OpenClaw defines the selected `permissions.<profile>.network` config and selects it with `default_permissions` instead of sending `sandbox`.                                                                                                                                                                                                                |
-| `experimental.sandboxExecServer` | `false`                                                | Preview opt-in that registers an OpenClaw sandbox-backed Codex environment with the supported Codex app-server so native Codex execution can run inside the active OpenClaw sandbox.                                                                                                                                                                                                                                               |
+| `networkProxy`                   | disabled                                               | Opt into Codex permissions-profile networking for app-server commands. Carapace defines the selected `permissions.<profile>.network` config and selects it with `default_permissions` instead of sending `sandbox`.                                                                                                                                                                                                                |
+| `experimental.sandboxExecServer` | `false`                                                | Preview opt-in that registers an Carapace sandbox-backed Codex environment with the supported Codex app-server so native Codex execution can run inside the active Carapace sandbox.                                                                                                                                                                                                                                               |
 
 `appServer.args` accepts an array (recommended) or a quoted argument string.
-`OPENCLAW_CODEX_APP_SERVER_ARGS` uses the same string parsing on every platform:
+`CARAPACE_CODEX_APP_SERVER_ARGS` uses the same string parsing on every platform:
 single and double quotes group words, backslashes and `#` stay literal, and an
 unfinished quote groups the remaining text. This preserves the string grammar
 shipped in `v2026.9.1`; strings do not use shell escaping.
@@ -294,11 +294,11 @@ Use array entries for values containing embedded quotes, such as
 forms below pass the same path to Codex:
 
 ```json5 validate=false
-args: "app-server --listen stdio:// -c log_dir=/tmp/openclaw\\logs"
+args: "app-server --listen stdio:// -c log_dir=/tmp/carapace\\logs"
 ```
 
 ```json5 validate=false
-args: ["app-server", "--listen", "stdio://", "-c", "log_dir=/tmp/openclaw\\logs"]
+args: ["app-server", "--listen", "stdio://", "-c", "log_dir=/tmp/carapace\\logs"]
 ```
 
 The `\\` in JSON5 encodes one backslash. Array entries preserve embedded quotes
@@ -308,17 +308,17 @@ before converting existing strings to arrays.
 
 `appServer.serviceTier` is used only when no shared Fast-mode run control is
 supplied. On Codex harness turns, shared Fast on sends `priority`, Fast off
-sends `null` to clear the OpenClaw-owned tier, and auto decides for each model
+sends `null` to clear the Carapace-owned tier, and auto decides for each model
 call. `/codex fast off` is separate: it persists `flex` in the bound native
 conversation preference for later conversation-bound turns and does not change
-the shared OpenClaw session policy. These values describe native configuration
+the shared Carapace session policy. These values describe native configuration
 and preference state, not observed provider routing.
 
 `appServer.networkProxy` is explicit because it changes the Codex sandbox
-contract. When enabled, OpenClaw also sets `features.network_proxy.enabled` and
+contract. When enabled, Carapace also sets `features.network_proxy.enabled` and
 `default_permissions` in the Codex thread config so the generated permission
-profile can start Codex-managed networking. OpenClaw generates a
-collision-resistant `openclaw-network-<fingerprint>` profile name from the
+profile can start Codex-managed networking. Carapace generates a
+collision-resistant `carapace-network-<fingerprint>` profile name from the
 profile body by default; use `profileName` only when a stable local name is
 required.
 
@@ -358,14 +358,14 @@ parseable semantic version of `0.149.0` or newer. Older, malformed, and
 unversioned handshakes are rejected. Newer versions log a compatibility warning
 and continue through normal runtime and capability validation.
 
-OpenClaw treats non-loopback WebSocket app-server URLs as remote and requires
+Carapace treats non-loopback WebSocket app-server URLs as remote and requires
 identity-bearing WebSocket auth through `appServer.authToken` or an
 `Authorization` header. `appServer.authToken` and each `appServer.headers.*`
 value can be a SecretInput; the secrets runtime resolves SecretRefs and env
-shorthand before OpenClaw builds app-server start options, and unresolved
+shorthand before Carapace builds app-server start options, and unresolved
 structured SecretRefs fail before any token or header is sent.
 
-When native Codex plugins are configured, OpenClaw caches one
+When native Codex plugins are configured, Carapace caches one
 runtime-and-workspace-scoped `plugin/installed` snapshot. This snapshot covers
 installed plugins from Codex-discovered marketplaces, including disabled ownership;
 `plugin/read` resolves only exact configured plugin identities. Failed or
@@ -377,23 +377,23 @@ configured curated plugins retain their automatic recovery path. The model's
 plugin-discovery tool cannot install, enable, or authenticate a plugin.
 
 `app/installed` reports installed app runtime state, and `app/read` returns
-authenticated metadata for at most 100 requested app IDs per call. OpenClaw
+authenticated metadata for at most 100 requested app IDs per call. Carapace
 force-refreshes the first cold installed snapshot and consolidates successful
 curated installations into one app-inventory refresh. Later cached reads do
 not force repeated connector refreshes.
 
 Deny-by-default Codex app policy is evaluated per thread, so an explicitly
 allowed app can be installed and authenticated before it becomes callable.
-OpenClaw provisionally admits only ownership-proven, policy-approved apps,
+Carapace provisionally admits only ownership-proven, policy-approved apps,
 creates the thread with `_default.enabled = false` and explicit app overrides,
 then calls `app/installed` once with that thread's ID and `forceRefresh: false`.
-If that snapshot reports missing, disabled, or non-callable apps, OpenClaw logs
+If that snapshot reports missing, disabled, or non-callable apps, Carapace logs
 one warning and continues with the remaining tools. Codex still enforces
 managed restrictions, workspace policy, and app/tool permissions; unavailable
 apps gain no access.
 
-The check completes before OpenClaw injects history, starts a turn, or
-persists the native thread binding. If the snapshot request fails, OpenClaw deletes a persistent
+The check completes before Carapace injects history, starts a turn, or
+persists the native thread binding. If the snapshot request fails, Carapace deletes a persistent
 provisional thread with `thread/delete` or unsubscribes an ephemeral thread
 with `thread/unsubscribe`. If safe cleanup cannot be confirmed, it retires the
 owning app-server connection. Supervised branches also clean up their temporary
@@ -401,12 +401,12 @@ probe and retain recovery state when cleanup fails.
 
 With `allow_all_plugins`, an explicitly disabled configured workspace plugin
 still denies its owned apps. When `app/read` does not expose that ownership,
-OpenClaw uses its `plugin/installed` snapshot and reads only the exact
+Carapace uses its `plugin/installed` snapshot and reads only the exact
 configured plugin's details to reserve the denied app IDs. It does not scan
 unrelated marketplaces or install, enable, or authenticate the disabled plugin;
 missing ownership fails closed.
 
-Only connect OpenClaw to a `0.149.0` or newer remote app-server trusted to accept
+Only connect Carapace to a `0.149.0` or newer remote app-server trusted to accept
 configured marketplace plugin installs and inventory refreshes. Missing modern
 inventory methods and server, authentication, or transport failures fail closed.
 
@@ -415,11 +415,11 @@ inventory methods and server, authentication, or transport failures fail closed.
 Local stdio app-server sessions default to YOLO mode:
 `approvalPolicy: "never"`, `approvalsReviewer: "user"`, and
 `sandbox: "danger-full-access"`. This trusted local operator posture lets
-unattended OpenClaw turns and heartbeats make progress without native approval
+unattended Carapace turns and heartbeats make progress without native approval
 prompts that nobody is around to answer.
 
 If Codex's local system requirements file disallows implicit YOLO approval,
-reviewer, or sandbox values, OpenClaw treats the implicit default as guardian
+reviewer, or sandbox values, Carapace treats the implicit default as guardian
 instead and selects allowed guardian permissions. `tools.exec.mode: "auto"`
 also forces guardian-reviewed Codex approvals and does not preserve unsafe
 legacy `approvalPolicy: "never"` or `sandbox: "danger-full-access"` overrides;
@@ -453,23 +453,23 @@ values are allowed. Individual policy fields override `mode`. The older
 `guardian_subagent` reviewer value is still accepted as a compatibility alias,
 but new configs should use `auto_review`.
 
-When an OpenClaw sandbox is active, the local Codex app-server process still
-runs on the Gateway host. OpenClaw therefore disables Codex native Code Mode,
+When an Carapace sandbox is active, the local Codex app-server process still
+runs on the Gateway host. Carapace therefore disables Codex native Code Mode,
 user MCP servers, and app-backed plugin execution for that turn instead of
-treating Codex host-side sandboxing as equivalent to the OpenClaw sandbox
-backend. Shell access is exposed through OpenClaw sandbox-backed dynamic tools
+treating Codex host-side sandboxing as equivalent to the Carapace sandbox
+backend. Shell access is exposed through Carapace sandbox-backed dynamic tools
 such as `sandbox_exec` and `sandbox_process` when the normal exec/process tools
 are available.
 
 <Note>
-On Docker-backed OpenClaw sandbox hosts (`agents.defaults.sandbox.mode` set to
-a Docker backend), `openclaw doctor` probes whether the host allows the
+On Docker-backed Carapace sandbox hosts (`agents.defaults.sandbox.mode` set to
+a Docker backend), `carapace doctor` probes whether the host allows the
 unprivileged user (and, when Docker sandbox network egress is disabled,
 network) namespaces that nested Codex `bwrap` needs for `workspace-write`
 shell execution inside the sandbox container. A failed probe usually surfaces
 as `bwrap: setting up uid map: Permission denied` or
 `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted` on
-Ubuntu/AppArmor hosts. Fix the reported host namespace policy for the OpenClaw
+Ubuntu/AppArmor hosts. Fix the reported host namespace policy for the Carapace
 service user and restart the gateway; prefer a scoped AppArmor profile for the
 service process over the host-wide
 `kernel.apparmor_restrict_unprivileged_userns=0` fallback, and do not grant
@@ -478,10 +478,10 @@ broader Docker container privileges just to satisfy nested `bwrap`.
 
 ## Sandboxed native execution
 
-The stable default is fail-closed: active OpenClaw sandboxing disables native
+The stable default is fail-closed: active Carapace sandboxing disables native
 Codex execution surfaces that would otherwise run from the Codex app-server
 host. Use `appServer.experimental.sandboxExecServer: true` only when you want
-to try Codex's remote environment support with OpenClaw's sandbox backend.
+to try Codex's remote environment support with Carapace's sandbox backend.
 This preview path uses the pinned Codex `0.153.4` app-server.
 
 ```json5
@@ -503,19 +503,19 @@ This preview path uses the pinned Codex `0.153.4` app-server.
 }
 ```
 
-When the flag is on and the current OpenClaw session is sandboxed, OpenClaw
+When the flag is on and the current Carapace session is sandboxed, Carapace
 starts a local loopback exec-server backed by the active sandbox, registers it
 with Codex app-server, and starts the Codex thread and turn with that
-OpenClaw-owned environment. If the app-server cannot register the environment,
+Carapace-owned environment. If the app-server cannot register the environment,
 the run fails closed instead of silently falling back to host execution.
 
 Sandboxed process output streams as ordered stdout, stderr, or PTY
-notifications. OpenClaw retains only a bounded recent-output buffer for polling
+notifications. Carapace retains only a bounded recent-output buffer for polling
 and replay, so long-running processes cannot grow the app-server bridge without
 limit. Process exit and cleanup remain tied to the sandbox-owned process.
 
 This preview path is local-only. A remote WebSocket app-server cannot reach
-the loopback exec-server unless it is running on the same host, so OpenClaw
+the loopback exec-server unless it is running on the same host, so Carapace
 rejects that combination.
 
 Node-backed `remote-exec` placement on a paired device or enrolled Crabbox
@@ -538,7 +538,7 @@ or GitHub credentials. A lost node connection terminates the attempt and
 process instead of resuming it. Each node-backed attempt uses its own Gateway
 app-server client because Codex can register a remote environment but cannot
 remove one from a running app-server. The node exec-server does not consume an
-OpenClaw worker slot. HTTP requests containing authentication, cookies, API
+Carapace worker slot. HTTP requests containing authentication, cookies, API
 keys, or other credential-bearing headers are rejected before reaching the
 node; use a Gateway-owned authenticated request or a credential-free endpoint
 instead.
@@ -554,22 +554,22 @@ and [Run Codex on a cloud worker](/plugins/codex-harness/placement#run-codex-on-
 
 In the default per-agent home, stdio launches use Codex's ephemeral credential
 store, including custom commands selected by `appServer.command` or
-`OPENCLAW_CODEX_APP_SERVER_BIN`. Command wrappers must forward Codex's `-c`
+`CARAPACE_CODEX_APP_SERVER_BIN`. Command wrappers must forward Codex's `-c`
 configuration arguments. For stdio launches with an explicit `app-server`
-subcommand, OpenClaw groups `-c` / `--config` overrides before that subcommand,
+subcommand, Carapace groups `-c` / `--config` overrides before that subcommand,
 preserving their order and leaving wrapper prefixes and other arguments in place.
 This prevents Codex from dropping earlier overrides when flags appear on both
-sides of `app-server`. OpenClaw's ephemeral credential-store override remains
-last when OpenClaw owns auth; native user-home auth is unchanged.
+sides of `app-server`. Carapace's ephemeral credential-store override remains
+last when Carapace owns auth; native user-home auth is unchanged.
 Workspace-write turns also preserve explicit `sandbox_workspace_write` temporary
 root exclusions from these arguments, including attached `-ckey=value` flags
 and TOML comments after boolean values. The last explicit value wins.
 Explicit turn sandbox policies and network-proxy permission profiles keep their
 existing precedence.
 
-OpenClaw supplies auth in this order:
+Carapace supplies auth in this order:
 
-1. An explicit or ordered OpenClaw auth profile for the agent.
+1. An explicit or ordered Carapace auth profile for the agent.
 2. For an API-key route only, a prepared key or local stdio fallback from
    `CODEX_API_KEY`, then `OPENAI_API_KEY`.
 
@@ -584,20 +584,20 @@ profile is handed over as an `account/login/start` request of type
 than persisting; the ephemeral credential store covers the API-key login,
 which would otherwise write `CODEX_HOME/auth.json`.
 
-Token refresh is inverted so the long-lived secret never leaves OpenClaw. Codex
+Token refresh is inverted so the long-lived secret never leaves Carapace. Codex
 holds only a short-lived access token, and on an unauthorized response it sends
-an `account/chatgptAuthTokens/refresh` request back to OpenClaw over the same
-connection. OpenClaw refreshes against its own auth profile store and returns a
+an `account/chatgptAuthTokens/refresh` request back to Carapace over the same
+connection. Carapace refreshes against its own auth profile store and returns a
 fresh access token, so the refresh token stays in SQLite. A refresh that does
 not answer within the app-server's timeout fails that turn rather than falling
 back to another credential. A failed refresh retires the shared client from
 reuse; existing leases drain, and the next request starts a fresh client. If the
 workspace changed, retry the request. If credentials cannot refresh, sign in
-again with `openclaw models auth login --provider openai` and select that profile.
+again with `carapace models auth login --provider openai` and select that profile.
 Shared clients recheck the selected profile before reuse so changing accounts
 under the same profile ID also selects a new client.
 
-When OpenClaw sees a ChatGPT subscription-style Codex auth profile (OAuth or
+When Carapace sees a ChatGPT subscription-style Codex auth profile (OAuth or
 token credential type), it removes `CODEX_API_KEY` and `OPENAI_API_KEY` from
 the spawned Codex child process. That keeps Gateway-level API keys available
 for embeddings or direct OpenAI models without making native Codex app-server
@@ -608,29 +608,29 @@ app-server login instead of inherited child-process env. WebSocket app-server
 connections do not receive Gateway env API-key fallback; use an explicit auth
 profile or the remote app-server's own account.
 
-Stdio app-server launches inherit OpenClaw's process environment by default.
-OpenClaw owns the Codex app-server account bridge and sets `CODEX_HOME` to a
-per-agent directory under that agent's OpenClaw state. That keeps Codex
-config, accounts, plugin cache/data, and thread state scoped to the OpenClaw
+Stdio app-server launches inherit Carapace's process environment by default.
+Carapace owns the Codex app-server account bridge and sets `CODEX_HOME` to a
+per-agent directory under that agent's Carapace state. That keeps Codex
+config, accounts, plugin cache/data, and thread state scoped to the Carapace
 agent instead of leaking in from the operator's personal `~/.codex` home.
 
 Set `appServer.homeScope: "user"` to share native Codex state with Codex
 Desktop and the CLI. This local user-home mode supports managed stdio and
 explicit Unix transport. It uses `$CODEX_HOME` when set and `~/.codex`
 otherwise, including native auth, config, plugins, and threads.
-OpenClaw skips its auth-profile bridge for the app-server. Verified owner
+Carapace skips its auth-profile bridge for the app-server. Verified owner
 turns can use `codex_threads` to list (with an optional `search` filter),
 read, fork, rename, archive, and unarchive those threads. Fork a thread before
-continuing it in OpenClaw; independent Codex processes do not coordinate
+continuing it in Carapace; independent Codex processes do not coordinate
 concurrent writers for the same thread.
 
 That `homeScope` opt-in applies to ordinary harness sessions. Hosted web search
-and settled-turn finalization use private temporary homes and OpenClaw auth
+and settled-turn finalization use private temporary homes and Carapace auth
 even when ordinary sessions share the user home. A Chat created
 through Codex Sessions uses its private supervision connection instead, which
 preserves the native connection's auth and provider configuration for the
 canonical branch and future resumes. If that supervised turn finishes tool work
-without a final answer, OpenClaw does not borrow host credentials to generate
+without a final answer, Carapace does not borrow host credentials to generate
 one. It delivers the [settled-tool fallback](/plugins/codex-harness-runtime#final-answers-after-settled-tool-work)
 without repeating completed actions.
 
@@ -639,26 +639,26 @@ fork or archive the Chat's bound native thread. List and metadata-only read
 remain available. Raw transcript reads require `allowRawTranscripts`; when it
 is disabled, list search is also rejected because native search can match
 transcript previews. Rename, unarchive, detached fork, and archive of an
-unrelated thread not owned by another OpenClaw Chat require
+unrelated thread not owned by another Carapace Chat require
 `allowWriteControls`. Neither option bypasses a locked binding.
 
-OpenClaw does not rewrite `HOME` for normal local app-server launches.
-Codex-run subprocesses such as `openclaw`, `gh`, `git`, cloud CLIs, and shell
+Carapace does not rewrite `HOME` for normal local app-server launches.
+Codex-run subprocesses such as `carapace`, `gh`, `git`, cloud CLIs, and shell
 commands see the normal process home and can find user-home config and
 tokens. Codex may also discover `$HOME/.agents/skills` and
 `$HOME/.agents/plugins/marketplace.json`; that `.agents` discovery is
 intentionally shared with the operator home and is separate from isolated
 `~/.codex` state.
 
-In the default agent scope, OpenClaw plugins and OpenClaw skill snapshots
-still flow through OpenClaw's own plugin registry and skill loader; personal
+In the default agent scope, Carapace plugins and Carapace skill snapshots
+still flow through Carapace's own plugin registry and skill loader; personal
 Codex `~/.codex` assets do not. If you have useful Codex CLI skills or
-plugins from a Codex home that should become part of an isolated OpenClaw
+plugins from a Codex home that should become part of an isolated Carapace
 agent, inventory them explicitly:
 
 ```bash
-openclaw migrate codex --dry-run
-openclaw migrate apply codex --yes
+carapace migrate codex --dry-run
+carapace migrate apply codex --yes
 ```
 
 Credentials need the sensitive migration path because the default agent scope
@@ -666,8 +666,8 @@ does not consume a copied or mounted `codex-home/auth.json` directly. Replace
 `<agent-id>` with the configured agent that owns this Codex home:
 
 ```bash
-openclaw migrate plan codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai
-openclaw migrate apply codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai --yes
+carapace migrate plan codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai
+carapace migrate apply codex --from <codex-home> --agent <agent-id> --include-secrets --item auth:openai --yes
 ```
 
 If a deployment needs additional environment isolation, add those variables
@@ -691,14 +691,14 @@ to `appServer.clearEnv`:
 ```
 
 `appServer.clearEnv` only affects the spawned Codex app-server child process.
-OpenClaw removes `CODEX_HOME` and `HOME` from this list during local launch
+Carapace removes `CODEX_HOME` and `HOME` from this list during local launch
 normalization: `CODEX_HOME` stays pointed at the selected agent or user scope,
 and `HOME` stays inherited so subprocesses can use normal user-home state.
 
 ## Dynamic tools
 
 Codex dynamic tools default to `searchable` loading, exposed under the
-`openclaw` namespace with `deferLoading: true`. OpenClaw normally does not
+`carapace` namespace with `deferLoading: true`. Carapace normally does not
 expose dynamic tools that duplicate Codex-native workspace operations or
 Codex's own tool-search surface:
 
@@ -714,15 +714,15 @@ Codex's own tool-search surface:
 - `tool_search_code`
 
 `progress_card` is not filtered with those native workspace tools. It remains
-available through the OpenClaw dynamic-tool bridge as the durable session status
+available through the Carapace dynamic-tool bridge as the durable session status
 surface.
 
-When a finite runtime allowlist disables native Code Mode, OpenClaw sends an
+When a finite runtime allowlist disables native Code Mode, Carapace sends an
 empty execution-environment selection. In that direct, unsandboxed case,
-OpenClaw keeps its policy-filtered `exec` and `process` tools as the shell
+Carapace keeps its policy-filtered `exec` and `process` tools as the shell
 fallback. Runtime allowlists and `codexDynamicToolsExclude` still apply.
 
-Most remaining OpenClaw integration tools, such as messaging, media, cron,
+Most remaining Carapace integration tools, such as messaging, media, cron,
 browser, nodes, gateway, `heartbeat_respond`, and `web_search`, are available
 through Codex tool search under that namespace. This keeps the initial model
 context smaller. A small set of tools stay directly callable regardless of
@@ -730,18 +730,18 @@ context smaller. A small set of tools stay directly callable regardless of
 resolve a connector-only universe: `agents_list`, `sessions_spawn`, and
 `sessions_yield`. Developer instructions still steer normal Codex subagents
 toward native `spawn_agent` for Codex-native subagent work, while
-`sessions_spawn` remains available for explicit OpenClaw or ACP delegation.
+`sessions_spawn` remains available for explicit Carapace or ACP delegation.
 Message-tool-only source replies also stay direct, since that is a
 turn-control contract.
 
-Codex Code Mode projects generic OpenClaw dynamic-tool results as text. Parse a
+Codex Code Mode projects generic Carapace dynamic-tool results as text. Parse a
 JSON result before reading fields. Nested dynamic calls are serialized by the
 Codex runtime, so `Promise.all` does not submit them concurrently; use a
 bounded sequential launch loop when starting collector children.
 
-Tools marked `catalogMode: "direct-only"`, including the OpenClaw `computer`
-tool and regular-agent `openclaw` delegation, are grouped under `openclaw_direct`.
-OpenClaw adds that namespace to Codex's
+Tools marked `catalogMode: "direct-only"`, including the Carapace `computer`
+tool and regular-agent `carapace` delegation, are grouped under `carapace_direct`.
+Carapace adds that namespace to Codex's
 `features.code_mode.direct_only_tool_namespaces` list without replacing
 operator-supplied entries. Codex therefore exposes those tools as
 `DirectModelOnly` in normal and code-mode-only threads instead of routing them
@@ -756,7 +756,7 @@ the full tool payload.
 
 ## Timeouts
 
-OpenClaw-owned dynamic tool calls are bounded independently from
+Carapace-owned dynamic tool calls are bounded independently from
 `appServer.requestTimeoutMs`. Ordinary Codex `item/tool/call` requests use the
 first available timeout in this order:
 
@@ -776,13 +776,13 @@ request timeouts run inside that call and keep their own timeout semantics.
 Ordinary dynamic tool budgets are capped at 600000 ms. `agents_wait` adds 30000 ms
 of outer completion grace. Human-interaction tools use the validated question
 wait plus 30000 ms: `ask_user` and `secrets` credential requests honor their question
-timeout, while delegated `openclaw` calls use the fixed 930000 ms default. That
+timeout, while delegated `carapace` calls use the fixed 930000 ms default. That
 budget covers the ten-minute approval window plus staging and application;
 model-authored arguments cannot override it. The app-server request watchdog
 leaves another 30000 ms beyond the applicable tool budget for the result to reach
 Codex.
 
-On timeout, OpenClaw aborts the tool signal where supported and returns a failed
+On timeout, Carapace aborts the tool signal where supported and returns a failed
 dynamic-tool response to Codex so the turn can continue instead of leaving the
 session in `processing`. These wait budgets never preserve approval authority
 after the requesting run or tool closes.
@@ -790,11 +790,11 @@ after the requesting run or tool closes.
 ### Turn execution and settlement
 
 Native Codex owns provider-stream liveness, network recovery, and native turn
-completion. For ordinary turns, OpenClaw waits for `turn/completed` with the
+completion. For ordinary turns, Carapace waits for `turn/completed` with the
 exact thread and turn identity, or an authoritative failure or cancellation.
 Silence, completed tool output, and a completed-looking assistant message do
 not prove that the turn has finished. Partial output remains available on
-failure, but OpenClaw does not upgrade a timeout or lost client into success.
+failure, but Carapace does not upgrade a timeout or lost client into success.
 
 The existing `agents.defaults.timeoutSeconds` setting supplies one elapsed
 execution budget per attempt, defaulting to 48 hours. Progress does not reset
@@ -806,12 +806,12 @@ authoritative failure, or explicit Stop. Startup, app-server control requests,
 approvals, dynamic tools, and cancellation retain their independent deadlines.
 `/btw` side questions retain their separate ten-minute completion budget.
 
-On receipt of the exact native terminal event, OpenClaw starts an absolute
+On receipt of the exact native terminal event, Carapace starts an absolute
 two-minute local-settlement budget before asynchronous transcript and media
 projection. Later notifications do not reset it. Presentation callbacks start
 in order and join at settlement without blocking native notification processing.
 If the native turn completed successfully with a complete final answer, expiry
-preserves that answer as a degraded success. OpenClaw retires unfinished
+preserves that answer as a degraded success. Carapace retires unfinished
 projection and stale writes, then persists the answer through the existing
 transcript owner, preserving write ordering and hooks.
 Recovered replies retain native network-result provenance even when the
@@ -822,7 +822,7 @@ The `turn.settlement_warning` trajectory event records the pending presentation
 callback, transcript/checkpoint write, or media projection stage, together with
 the elapsed time and budget. Newly persisted recovered replies also carry the
 settlement warning. Final persistence retains its best-effort policy and the
-existing five-second drain grace; if the writer remains unavailable, OpenClaw
+existing five-second drain grace; if the writer remains unavailable, Carapace
 records `turn.settlement_persistence_unavailable` and delivers the completed
 text without leaving a stale write behind. Expiry without a native completed answer remains a timeout.
 After separately bounded abort cleanup, queued projection gets a five-second
@@ -833,24 +833,24 @@ bound cleanup before releasing its lane. A quiet turn or a local settlement
 failure does not establish that a shared app-server client is dead; unrelated
 thread leases on a healthy client remain isolated. Generic stale-run recovery
 also respects the exact active native owner, without exempting expired
-OpenClaw requests, tools, cancellation, terminal cleanup, or ownerless state.
+Carapace requests, tools, cancellation, terminal cleanup, or ownerless state.
 
 Replay-safe stdio app-server failures may be retried once on a fresh attempt.
 Assistant, tool, active-item, or side-effect evidence can make replay unsafe;
-OpenClaw then reports the failure rather than automatically rerunning the work.
+Carapace then reports the failure rather than automatically rerunning the work.
 Verify current state before retrying an unsafe failed turn.
 
 The former `appServer.turnCompletionIdleTimeoutMs`,
 `appServer.turnAssistantCompletionIdleTimeoutMs`, and
 `appServer.postToolRawAssistantCompletionIdleTimeoutMs` settings are retired.
-Run `openclaw doctor --fix` to remove them. Doctor preserves unrelated settings
+Run `carapace doctor --fix` to remove them. Doctor preserves unrelated settings
 and does not translate idle windows into an elapsed run budget.
 
 ## Model discovery
 
 By default, the Codex plugin asks the app-server for available models. Model
 availability is owned by Codex app-server, so the list can change when
-OpenClaw upgrades the bundled `@openai/codex` version or when a deployment
+Carapace upgrades the bundled `@openai/codex` version or when a deployment
 points `appServer.command` at a different Codex binary. Availability can also
 be account-scoped. Use `/codex models` on a running gateway to see the live
 catalog for that harness and account.
@@ -871,16 +871,16 @@ client leaves native models unavailable until discovery succeeds again.
 
 Use the Models page **Refresh** action (`models.list` with `view: "all"` and
 `refresh: true`) to publish the full catalog for the selected agent. Prepared-only
-reads do not start discovery. Native configuration changes outside OpenClaw
+reads do not start discovery. Native configuration changes outside Carapace
 require the native owner's supported reload/restart and a catalog refresh;
-OpenClaw does not poll native home files for readiness. Authored host routes and
+Carapace does not poll native home files for readiness. Authored host routes and
 explicit profile selections retain their existing auth and compatibility checks.
 
 Native catalog identifiers are runtime identifiers, not privacy labels. A
 deployment using a broker-owned alias must supply an alias-safe native catalog
 before starting app-server: both `id` and `model` in `model/list` must be the
 alias, with the desired `displayName`. Different native runtime identifiers are
-preserved in OpenClaw model parameters. Renaming the picker label does not hide
+preserved in Carapace model parameters. Renaming the picker label does not hide
 those identifiers from requests or session state.
 
 Codex's startup `model_catalog_json` setting can supply a native catalog; a
@@ -932,7 +932,7 @@ prove account entitlement. Available model IDs, input modalities, and reasoning
 efforts remain account-scoped. Run `/codex models` after starting or upgrading
 the gateway to inspect the actual public picker for your account.
 
-OpenClaw reasoning controls preserve supported native levels, including `ultra`.
+Carapace reasoning controls preserve supported native levels, including `ultra`.
 Codex owns Ultra's proactive delegation and model-specific inference effort;
 Platform API effort metadata does not downgrade the selected runtime mode.
 Hidden models can also appear in the app-server catalog for internal or
@@ -983,7 +983,7 @@ the fallback catalog:
 
 The Codex harness evaluates the effective tool policy for every turn. It marks
 the turn policy-restricted when any explicit policy would otherwise leave a
-Codex-native capability outside the OpenClaw policy boundary.
+Codex-native capability outside the Carapace policy boundary.
 
 Restriction sources include global, provider, agent, group, sender, sandbox,
 subagent, inherited, scheduled/runtime, and per-run tool policies. A finite
@@ -1003,22 +1003,22 @@ tts, video_generate, web_fetch, x_search
 ```
 
 A policy containing only those denies stays on the normal Codex native surface;
-the harness applies the named OpenClaw denial directly. Any other deny fails
+the harness applies the named Carapace denial directly. Any other deny fails
 closed into the restricted surface. For example, `tools.deny: ["nodes"]`
 restricts the native surface because `nodes` is not in the audited set.
 
 Policy-restricted turns have no Codex environment selection or native Code Mode.
-OpenClaw disables inherited and configured MCP servers, attests that they remain
+Carapace disables inherited and configured MCP servers, attests that they remain
 disabled, disables native hook relays, and applies the effective policy to its
 dynamic tools. A temporary restriction on an existing session uses a transient
 Codex thread and preserves the unrestricted binding for later resume.
 
 Ring zero is not a configurable policy profile. It is the host-scoped system
-agent path used by OpenClaw setup and repair flows. The host must activate the
+agent path used by Carapace setup and repair flows. The host must activate the
 system-agent authority and provide the exact single-tool allowlist
-`["openclaw"]`. Ring zero applies the restricted tool surface plus host-authored
+`["carapace"]`. Ring zero applies the restricted tool surface plus host-authored
 base instructions and zero project-document budget. It also suppresses
-OpenClaw's `AGENTS.md` developer-instruction carrier, so ambient workspace
+Carapace's `AGENTS.md` developer-instruction carrier, so ambient workspace
 instructions cannot enter the setup/repair turn.
 
 Message-only source replies also use the restricted tool surface. Lightweight
@@ -1031,7 +1031,7 @@ thread configuration overlaps.
 The full generic developer policy, including a `before_prompt_build.systemPrompt`
 replacement, remains native session configuration for compaction and native-child
 inheritance. Ordinary persistent cold or changed-configuration resumes require an
-uninterrupted managed local stdio process owner and observed native unload before OpenClaw injects the full
+uninterrupted managed local stdio process owner and observed native unload before Carapace injects the full
 current policy. Merely sending `developerInstructions` on `thread/resume` does not
 refresh the model-visible policy on stock Codex. Explicit `systemPrompt: ""` sends
 a withdrawal, not a fallback to older instructions.
@@ -1042,15 +1042,15 @@ conversation. Turn-scoped collaboration instructions remain a separate surface.
 See [Hook boundaries](/plugins/codex-harness-runtime#hook-boundaries) for recovery.
 
 Codex normally handles `AGENTS.md` itself through native project-doc discovery.
-OpenClaw does not write synthetic Codex project-doc files or depend on Codex
+Carapace does not write synthetic Codex project-doc files or depend on Codex
 fallback filenames for persona files, because Codex fallbacks only apply when
 `AGENTS.md` is missing. Ordinary policy-restricted turns have no native
-filesystem environment, so OpenClaw instead sends the bounded workspace
+filesystem environment, so Carapace instead sends the bounded workspace
 `AGENTS.md` snapshot as thread-level developer instructions. Ring-zero,
 lightweight, message-only, and tool-disabled internal turns suppress that
 carrier.
 
-For OpenClaw workspace parity, local tool notes live in the `## Tools` section
+For Carapace workspace parity, local tool notes live in the `## Tools` section
 of `AGENTS.md` and normally ride Codex's native project-doc discovery. The
 Codex harness forwards the other bootstrap files as developer instructions:
 
@@ -1058,7 +1058,7 @@ Codex harness forwards the other bootstrap files as developer instructions:
   collaboration instructions. Native Codex subagents do not inherit them,
   which keeps subagent turns from picking up the parent agent's persona and
   user profile.
-- The compact loaded OpenClaw skills list is also forwarded as turn-scoped
+- The compact loaded Carapace skills list is also forwarded as turn-scoped
   collaboration developer instructions, so native Codex subagents do not
   inherit it either.
 - Heartbeat turns receive generic initiative guidance through collaboration
@@ -1085,18 +1085,18 @@ Codex harness forwards the other bootstrap files as developer instructions:
 
 Environment overrides remain available for local testing:
 
-- `OPENCLAW_CODEX_APP_SERVER_BIN`
-- `OPENCLAW_CODEX_APP_SERVER_ARGS`
-- `OPENCLAW_CODEX_APP_SERVER_MODE=yolo|guardian`
-- `OPENCLAW_CODEX_APP_SERVER_APPROVAL_POLICY`
-- `OPENCLAW_CODEX_APP_SERVER_SANDBOX`
+- `CARAPACE_CODEX_APP_SERVER_BIN`
+- `CARAPACE_CODEX_APP_SERVER_ARGS`
+- `CARAPACE_CODEX_APP_SERVER_MODE=yolo|guardian`
+- `CARAPACE_CODEX_APP_SERVER_APPROVAL_POLICY`
+- `CARAPACE_CODEX_APP_SERVER_SANDBOX`
 
-`OPENCLAW_CODEX_APP_SERVER_BIN` bypasses the managed binary when
+`CARAPACE_CODEX_APP_SERVER_BIN` bypasses the managed binary when
 `appServer.command` is unset.
 
-`OPENCLAW_CODEX_APP_SERVER_GUARDIAN=1` was removed. Use
+`CARAPACE_CODEX_APP_SERVER_GUARDIAN=1` was removed. Use
 `plugins.entries.codex.config.appServer.mode: "guardian"` instead, or
-`OPENCLAW_CODEX_APP_SERVER_MODE=guardian` for one-off local testing. Config is
+`CARAPACE_CODEX_APP_SERVER_MODE=guardian` for one-off local testing. Config is
 preferred for repeatable deployments because it keeps the plugin behavior in
 the same reviewed file as the rest of the Codex harness setup.
 

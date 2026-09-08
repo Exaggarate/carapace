@@ -1,5 +1,5 @@
 import type { managedWorktrees } from "../agents/worktrees/service.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveWorkerPlacementSessionTarget } from "./server-worker-placement-session-target.js";
 import type * as sessionUtils from "./session-utils.js";
 import { resolveDevicePlacementEligibility } from "./worker-environments/device-placement-eligibility.js";
@@ -21,7 +21,7 @@ type MovePlacementSessionRuntime = {
 
 export function createGatewayWorkerPlacementMoveDestinationResolver(params: {
   environments: WorkerEnvironmentService;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   loadSessionRuntime: () => Promise<MovePlacementSessionRuntime>;
 }) {
   return async (

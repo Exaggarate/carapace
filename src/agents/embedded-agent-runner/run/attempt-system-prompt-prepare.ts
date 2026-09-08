@@ -9,7 +9,7 @@ import {
   buildBootstrapPromptWarningNotice,
   buildBootstrapTruncationReportMeta,
 } from "../../bootstrap-budget.js";
-import { resolveOpenClawReferencePaths } from "../../docs-path.js";
+import { resolveCarapaceReferencePaths } from "../../docs-path.js";
 import { prepareAgentMemoryPrompt } from "../../memory-prompt-prepare.js";
 import { buildModelToolsUnavailablePrompt } from "../../model-tool-support.js";
 import {
@@ -136,7 +136,7 @@ export async function prepareEmbeddedAttemptSystemPrompt(params: {
   const toolPolicyRestricted = toolPolicyRestrictsTools({ allow: attempt.toolsAllow });
   const effectivePromptMode = toolPolicyRestricted ? ("minimal" as const) : promptMode;
   const effectiveSkillsPrompt = toolPolicyRestricted ? undefined : params.skillsPrompt;
-  const openClawReferences = await resolveOpenClawReferencePaths({
+  const carapaceReferences = await resolveCarapaceReferencePaths({
     workspaceDir: params.setup.effectiveWorkspace,
     argv1: process.argv[1],
     cwd: params.setup.effectiveCwd,
@@ -235,8 +235,8 @@ export async function prepareEmbeddedAttemptSystemPrompt(params: {
       reasoningTagHint,
       skillsPrompt: effectiveSkillsPrompt,
       codeModeActive: params.codeModeActive,
-      docsPath: openClawReferences.docsPath ?? undefined,
-      sourcePath: openClawReferences.sourcePath ?? undefined,
+      docsPath: carapaceReferences.docsPath ?? undefined,
+      sourcePath: carapaceReferences.sourcePath ?? undefined,
       workspaceNotes: params.bootstrap.workspaceNotes.length
         ? params.bootstrap.workspaceNotes
         : undefined,

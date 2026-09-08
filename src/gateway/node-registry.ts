@@ -1,11 +1,11 @@
 // Gateway node registry.
 // Tracks connected node clients, invoke requests, broadcasts, and system.run approvals.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   addTimerTimeoutGraceMs,
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 // NodeSession is plugin-SDK-reachable; importing these types from the
 // gateway-protocol index would retain the whole ProtocolSchemas registry in
 // the public plugin-sdk dts (check-plugin-sdk-exports guards this).
@@ -14,7 +14,7 @@ import type {
   NodePluginToolDescriptor,
   NodeSkillDescriptor,
 } from "../../packages/gateway-protocol/src/schema/nodes.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setActiveNodeContext } from "../infra/active-node-context.js";
 import type { PairedDeviceNodeBinding } from "../infra/device-pairing-node-state.js";
 import { isPrivateNodeInvokeCommand, NODE_MCP_TOOLS_CALL_COMMAND } from "../infra/node-commands.js";
@@ -181,7 +181,7 @@ type PingableSocket = {
   ) => unknown;
 };
 
-const SERIALIZED_EVENT_PAYLOAD = Symbol("openclaw.serializedEventPayload");
+const SERIALIZED_EVENT_PAYLOAD = Symbol("carapace.serializedEventPayload");
 const AUTHORIZED_SYSTEM_RUN_EVENT_GRACE_MS = 5 * 60 * 1000;
 const SLOW_CONSUMER_CLOSE_CODE = 1008;
 const FAILED_EVENT_LOG_INTERVAL_MS = 30_000;
@@ -232,7 +232,7 @@ export type NodeRegistryOptions = {
   listRegisteredNodePluginToolCommands?:
     | (() => readonly RegisteredNodePluginToolCommand[] | undefined)
     | undefined;
-  getConfig?: () => OpenClawConfig;
+  getConfig?: () => CarapaceConfig;
   resolveCurrentPairingState?: (
     nodeId: string,
   ) => Promise<PairedDeviceNodeBindingSnapshot | undefined>;
@@ -341,7 +341,7 @@ export class NodeRegistry {
   });
   private authorizedSystemRunEvents = new Map<string, AuthorizedSystemRunEvent>();
   private pairingGenerationEventChains = new Map<string, Promise<void>>();
-  private committedConfig: OpenClawConfig | undefined;
+  private committedConfig: CarapaceConfig | undefined;
 
   constructor(private readonly options: NodeRegistryOptions = {}) {
     this.committedConfig = options.getConfig?.();
@@ -507,7 +507,7 @@ export class NodeRegistry {
     });
   }
 
-  private isCommandAllowed(nodeId: string, command: string, liveConfig?: OpenClawConfig): boolean {
+  private isCommandAllowed(nodeId: string, command: string, liveConfig?: CarapaceConfig): boolean {
     // Pending work uses the committed surface; only new dispatches check liveConfig.
     // A speculative candidate must not revoke an existing stream. Worker commands
     // retain their private operational owner outside this public command surface.
@@ -1358,7 +1358,7 @@ export class NodeRegistry {
     const node = this.nodesById.get(params.nodeId);
     return (
       node?.connId === params.connId &&
-      node.clientId === "openclaw-macos" &&
+      node.clientId === "carapace-macos" &&
       node.platform === "darwin"
     );
   }

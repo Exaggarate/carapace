@@ -21,11 +21,11 @@ import { setCanonicalSqliteSessionMainKey } from "../config/sessions/session-can
 import { preserveCreationStamp } from "../config/sessions/session-entry-provenance.js";
 import { serializeJsonlLines } from "../config/sessions/transcript-jsonl.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
   collectCanonicalSessionRepairGroups,
   listCanonicalSessionStores,
@@ -168,7 +168,7 @@ function mergeCanonicalSessionEntryCandidates<T>(
 
 function selectCanonicalSessionCandidate(
   candidates: readonly CanonicalSessionCandidate[],
-  params: { cfg: OpenClawConfig; env: NodeJS.ProcessEnv },
+  params: { cfg: CarapaceConfig; env: NodeJS.ProcessEnv },
 ) {
   const first = candidates[0];
   if (!first) {
@@ -221,7 +221,7 @@ type SingleDatabaseCanonicalRepairGroup = {
 
 function resolveSingleDatabaseCanonicalRepairGroup(
   candidates: readonly CanonicalSessionCandidate[],
-  params: { cfg: OpenClawConfig; env: NodeJS.ProcessEnv },
+  params: { cfg: CarapaceConfig; env: NodeJS.ProcessEnv },
 ): SingleDatabaseCanonicalRepairGroup | undefined {
   const selected = selectCanonicalSessionCandidate(candidates, params);
   if (
@@ -268,7 +268,7 @@ function listCanonicalDestinationAliasKeys(
 
 function applyCanonicalDestinationArtifacts(params: {
   copyWinnerAlias: boolean;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   destinationStore: readonly CanonicalSessionCandidate[];
   rehomeDeliveries: boolean;
   winner: CanonicalSessionCandidate;
@@ -356,7 +356,7 @@ async function repairCanonicalSessionGroupsInSingleDatabase(
 
 async function repairCanonicalSessionGroup(
   candidates: readonly CanonicalSessionCandidate[],
-  params: { cfg: OpenClawConfig; env: NodeJS.ProcessEnv },
+  params: { cfg: CarapaceConfig; env: NodeJS.ProcessEnv },
 ): Promise<string[]> {
   const selected = selectCanonicalSessionCandidate(candidates, params);
   if (!selected) {
@@ -429,7 +429,7 @@ async function repairCanonicalSessionGroup(
     }
   }
   setCanonicalSqliteSessionMainKey(
-    openOpenClawAgentDatabase({ agentId: destination.agentId, path: destination.sqlitePath }),
+    openCarapaceAgentDatabase({ agentId: destination.agentId, path: destination.sqlitePath }),
     params.cfg.session?.mainKey,
   );
   const winnerResult = await applySessionEntryLifecycleMutation({
@@ -498,7 +498,7 @@ async function repairCanonicalSessionGroup(
 /** Doctor-owned durable repair; process-held incognito databases are intentionally excluded. */
 export async function repairCanonicalSessionKeys(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<CanonicalSessionKeyRepairReport> {
   const env = params.env ?? process.env;
@@ -512,7 +512,7 @@ export async function repairCanonicalSessionKeys(params: {
   if (params.apply) {
     for (const store of stores) {
       setCanonicalSqliteSessionMainKey(
-        openOpenClawAgentDatabase({ agentId: store.agentId, path: store.sqlitePath }),
+        openCarapaceAgentDatabase({ agentId: store.agentId, path: store.sqlitePath }),
         params.cfg.session?.mainKey,
       );
     }

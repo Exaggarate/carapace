@@ -20,7 +20,7 @@ import {
 } from "../agents/github-tool-identity.js";
 import { hasErrnoCode } from "../infra/errno.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 import {
   disconnectedUserGitHubConnection,
   disconnectUserGitHubConnection,
@@ -41,7 +41,7 @@ export type PersonalGitHubAction = { owner: string; assertCurrent: () => void };
 const profileDir = (profileId: string) =>
   resolveManagedGitHubProfileDir({ agentId: "", scope: "personal", profileId });
 const withProfileLease = <T>(profileId: string, run: (assertOwned: () => void) => Promise<T>) =>
-  withOpenClawStateLease(
+  withCarapaceStateLease(
     {
       scope: "personal-github-profile",
       key: profileId,

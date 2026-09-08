@@ -23,7 +23,7 @@ import {
   formatCliParseErrorOutput,
 } from "./error-output.js";
 import { setCommandJsonMode } from "./json-mode.js";
-import { OpenClawCommand } from "./openclaw-command.js";
+import { CarapaceCommand } from "./carapace-command.js";
 import { registerLazyCommand } from "./register-lazy-command.js";
 
 async function parseLazyGroupError(params: {
@@ -32,11 +32,11 @@ async function parseLazyGroupError(params: {
   subcommands: Array<{ name: string; aliases?: string[] }>;
 }): Promise<{ error: CommanderError; output: string; stdout: string }> {
   const originalArgv = process.argv;
-  process.argv = ["node", "openclaw", ...params.argv];
+  process.argv = ["node", "carapace", ...params.argv];
   let output = "";
   let stdout = "";
   try {
-    const program = new OpenClawCommand().name("openclaw").exitOverride();
+    const program = new CarapaceCommand().name("carapace").exitOverride();
     program.configureOutput({
       writeOut: (value) => {
         stdout += value;
@@ -214,15 +214,15 @@ describe("formatCliParseErrorOutput", () => {
       args: ["system", "heartbeat", "last", "--unknown"],
       root: "system",
       children: ["heartbeat", "last"],
-      message: 'OpenClaw does not recognize option "--unknown".',
+      message: 'Carapace does not recognize option "--unknown".',
       machineOutput: isSystemMachineOutput,
     },
   ])("keeps $name parse failures machine-readable by default", async (testCase) => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", ...testCase.args];
+    process.argv = ["node", "carapace", ...testCase.args];
     try {
-      const program = new OpenClawCommand()
-        .name("openclaw")
+      const program = new CarapaceCommand()
+        .name("carapace")
         .enablePositionalOptions()
         .option("--profile <name>")
         .exitOverride();
@@ -277,9 +277,9 @@ describe("formatCliParseErrorOutput", () => {
 
   it("keeps a consumed JSON spelling machine-readable when the command owns JSON by default", async () => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "cron", "status", "--limit", "--json"];
+    process.argv = ["node", "carapace", "cron", "status", "--limit", "--json"];
     try {
-      const program = new OpenClawCommand().name("openclaw").exitOverride();
+      const program = new CarapaceCommand().name("carapace").exitOverride();
       program.configureOutput({ writeErr: () => {} });
       const cron = program.command("cron");
       setCommandJsonMode(cron, "output", ({ argv }) => isCronMachineOutput(argv));
@@ -323,9 +323,9 @@ describe("formatCliParseErrorOutput", () => {
     },
   ])("keeps $name parse failures on the human error path", async (testCase) => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", ...testCase.args];
+    process.argv = ["node", "carapace", ...testCase.args];
     try {
-      const program = new OpenClawCommand().name("openclaw").exitOverride();
+      const program = new CarapaceCommand().name("carapace").exitOverride();
       program.configureOutput({ writeErr: () => {} });
       const root = program.command(testCase.root);
       if (testCase.root === "cron") {
@@ -360,10 +360,10 @@ describe("formatCliParseErrorOutput", () => {
 
   it("keeps successful machine-command help outside the JSON failure path", async () => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "cron", "get", "--help"];
+    process.argv = ["node", "carapace", "cron", "get", "--help"];
     let stdout = "";
     try {
-      const program = new OpenClawCommand().name("openclaw").exitOverride();
+      const program = new CarapaceCommand().name("carapace").exitOverride();
       program.configureOutput({
         writeOut: (output) => {
           stdout += output;
@@ -383,7 +383,7 @@ describe("formatCliParseErrorOutput", () => {
 
           expect(error).toBeInstanceOf(CommanderError);
           expect((error as CommanderError).exitCode).toBe(0);
-          expect(stdout).toContain("Usage: openclaw cron get");
+          expect(stdout).toContain("Usage: carapace cron get");
           expect(isJsonOutputModeActive(process.argv)).toBe(false);
         },
         { machineOutput: true, restoreChanges: true },
@@ -415,7 +415,7 @@ describe("formatCliParseErrorOutput", () => {
     const originalArgv = process.argv;
     process.argv = [
       "node",
-      "openclaw",
+      "carapace",
       "--profile",
       "work",
       "p",
@@ -426,8 +426,8 @@ describe("formatCliParseErrorOutput", () => {
     ];
     let stderr = "";
     try {
-      const program = new OpenClawCommand()
-        .name("openclaw")
+      const program = new CarapaceCommand()
+        .name("carapace")
         .enablePositionalOptions()
         .option("--profile <name>")
         .exitOverride();
@@ -474,9 +474,9 @@ describe("formatCliParseErrorOutput", () => {
     { label: "after a consumed valued JSON token", args: ["--limit", "--json=true", "--json"] },
   ])("preserves a genuine JSON request $label", async ({ args }) => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "plugins", "search", ...args];
+    process.argv = ["node", "carapace", "plugins", "search", ...args];
     try {
-      const program = new OpenClawCommand().name("openclaw").exitOverride();
+      const program = new CarapaceCommand().name("carapace").exitOverride();
       program.configureOutput({ writeErr: () => {} });
       program
         .command("plugins")
@@ -497,9 +497,9 @@ describe("formatCliParseErrorOutput", () => {
 
   it("preserves JSON diagnostics for an unsupported but genuine output flag", async () => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "fleet", "logs", "--json"];
+    process.argv = ["node", "carapace", "fleet", "logs", "--json"];
     try {
-      const program = new OpenClawCommand().name("openclaw").exitOverride();
+      const program = new CarapaceCommand().name("carapace").exitOverride();
       program.configureOutput({ writeErr: () => {} });
       program
         .command("fleet")
@@ -517,57 +517,57 @@ describe("formatCliParseErrorOutput", () => {
 
   it("uses the same structured root diagnostic as the human renderer", () => {
     const error = createCliUnknownCommandError("pairng", {
-      argv: ["node", "openclaw", "pairng", "--json"],
+      argv: ["node", "carapace", "pairng", "--json"],
     });
 
-    expect(error.message).toBe('OpenClaw does not know the command "pairng".');
+    expect(error.message).toBe('Carapace does not know the command "pairng".');
     expect(error.humanOutput).toBe(
-      'OpenClaw does not know the command "pairng".\nDid you mean this?\n  openclaw pairing\nTry: openclaw --help\nPlugin command? openclaw plugins list\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace does not know the command "pairng".\nDid you mean this?\n  carapace pairing\nTry: carapace --help\nPlugin command? carapace plugins list\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
   it("strips Commander framing from structured nested diagnostics", () => {
     const error = createCliParseError("error: unknown command 'lst'", {
-      argv: ["node", "openclaw", "sessions", "lst", "--json"],
+      argv: ["node", "carapace", "sessions", "lst", "--json"],
       commandPath: ["sessions"],
       commandNames: ["list"],
     });
 
-    expect(error.message).toBe('OpenClaw sessions has no command "lst".');
+    expect(error.message).toBe('Carapace sessions has no command "lst".');
     expect(error.message).not.toMatch(/^error:/i);
-    expect(error.humanOutput).toContain("Did you mean this?\n  openclaw sessions list\n");
+    expect(error.humanOutput).toContain("Did you mean this?\n  carapace sessions list\n");
   });
 
   it("explains unknown commands with root help and plugin hints", () => {
     const output = formatCliParseErrorOutput("error: unknown command 'wat'\n", {
-      argv: ["node", "openclaw", "wat"],
+      argv: ["node", "carapace", "wat"],
     });
 
     expect(output).toBe(
-      'OpenClaw does not know the command "wat".\nTry: openclaw --help\nPlugin command? openclaw plugins list\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace does not know the command "wat".\nTry: carapace --help\nPlugin command? carapace plugins list\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
   it("explains unknown subcommands within the active command tree", () => {
     const output = formatCliParseErrorOutput("error: unknown command 'list'\n", {
-      argv: ["node", "openclaw", "webhooks", "list"],
+      argv: ["node", "carapace", "webhooks", "list"],
       commandPath: ["webhooks"],
     });
 
     expect(output).toBe(
-      'OpenClaw webhooks has no command "list".\nTry: openclaw webhooks --help\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace webhooks has no command "list".\nTry: carapace webhooks --help\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
   it("suggests sibling subcommands within the active command tree", () => {
     const output = formatCliParseErrorOutput("error: unknown command 'gmial'\n", {
-      argv: ["node", "openclaw", "webhooks", "gmial"],
+      argv: ["node", "carapace", "webhooks", "gmial"],
       commandPath: ["webhooks"],
       commandNames: ["gmail"],
     });
 
     expect(output).toBe(
-      'OpenClaw webhooks has no command "gmial".\nDid you mean this?\n  openclaw webhooks gmail\nTry: openclaw webhooks --help\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace webhooks has no command "gmial".\nDid you mean this?\n  carapace webhooks gmail\nTry: carapace webhooks --help\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
@@ -580,7 +580,7 @@ describe("formatCliParseErrorOutput", () => {
 
     expect(error.code).toBe("commander.unknownCommand");
     expect(output).toBe(
-      'OpenClaw sessions has no command "lst".\nDid you mean this?\n  openclaw sessions list\nTry: openclaw sessions --help\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace sessions has no command "lst".\nDid you mean this?\n  carapace sessions list\nTry: carapace sessions --help\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
@@ -593,7 +593,7 @@ describe("formatCliParseErrorOutput", () => {
 
     expect(error.code).toBe("commander.unknownCommand");
     expect(output).toBe(
-      'OpenClaw config has no command "gett".\nDid you mean this?\n  openclaw config get\nTry: openclaw config --help\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace config has no command "gett".\nDid you mean this?\n  carapace config get\nTry: carapace config --help\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
@@ -608,7 +608,7 @@ describe("formatCliParseErrorOutput", () => {
     expect(error.exitCode).toBe(1);
     expect(stdout).toBe("");
     expect(output).toBe(
-      'OpenClaw sessions has no command "lst".\nDid you mean this?\n  openclaw sessions list\nTry: openclaw sessions --help\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace sessions has no command "lst".\nDid you mean this?\n  carapace sessions list\nTry: carapace sessions --help\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
@@ -622,7 +622,7 @@ describe("formatCliParseErrorOutput", () => {
     expect(error.code).toBe("commander.helpDisplayed");
     expect(error.exitCode).toBe(0);
     expect(output).toBe("");
-    expect(stdout).toContain("Usage: openclaw sessions list [options]");
+    expect(stdout).toContain("Usage: carapace sessions list [options]");
   });
 
   it("suggests aliases from the live child command tree", async () => {
@@ -633,7 +633,7 @@ describe("formatCliParseErrorOutput", () => {
     });
 
     expect(error.code).toBe("commander.unknownCommand");
-    expect(output).toContain("Did you mean this?\n  openclaw cron remove\n");
+    expect(output).toContain("Did you mean this?\n  carapace cron remove\n");
   });
 
   it("keeps excess arguments on a matched lazy subcommand", async () => {
@@ -645,74 +645,74 @@ describe("formatCliParseErrorOutput", () => {
 
     expect(error.code).toBe("commander.excessArguments");
     expect(output).toBe(
-      "Too many arguments for this command.\nTry: openclaw sessions list --help\n",
+      "Too many arguments for this command.\nTry: carapace sessions list --help\n",
     );
   });
 
   it("suggests close known commands for unknown commands", () => {
     const output = formatCliParseErrorOutput("error: unknown command 'upate'\n", {
-      argv: ["node", "openclaw", "upate"],
+      argv: ["node", "carapace", "upate"],
     });
 
     expect(output).toBe(
-      'OpenClaw does not know the command "upate".\nDid you mean this?\n  openclaw update\nTry: openclaw --help\nPlugin command? openclaw plugins list\nDocs: https://docs.openclaw.ai/cli\n',
+      'Carapace does not know the command "upate".\nDid you mean this?\n  carapace update\nTry: carapace --help\nPlugin command? carapace plugins list\nDocs: https://github.com/Exaggarate/carapace\n',
     );
   });
 
   it("suggests explicit aliases for common adjacent terminology", () => {
     const output = formatCliParseErrorOutput("error: unknown command 'upgrade'\n", {
-      argv: ["node", "openclaw", "upgrade"],
+      argv: ["node", "carapace", "upgrade"],
     });
 
-    expect(output).toContain("Did you mean this?\n  openclaw update\n");
+    expect(output).toContain("Did you mean this?\n  carapace update\n");
   });
 
   it("preserves active profile context in command suggestions", () => {
-    const originalProfile = process.env.OPENCLAW_PROFILE;
-    process.env.OPENCLAW_PROFILE = "work";
+    const originalProfile = process.env.CARAPACE_PROFILE;
+    process.env.CARAPACE_PROFILE = "work";
     try {
       const output = formatCliParseErrorOutput("error: unknown command 'doctr'\n", {
-        argv: ["node", "openclaw", "doctr"],
+        argv: ["node", "carapace", "doctr"],
       });
 
-      expect(output).toContain("Did you mean this?\n  openclaw --profile work doctor\n");
+      expect(output).toContain("Did you mean this?\n  carapace --profile work doctor\n");
     } finally {
       if (originalProfile === undefined) {
-        delete process.env.OPENCLAW_PROFILE;
+        delete process.env.CARAPACE_PROFILE;
       } else {
-        process.env.OPENCLAW_PROFILE = originalProfile;
+        process.env.CARAPACE_PROFILE = originalProfile;
       }
     }
   });
 
   it("points unknown options at the active command help", () => {
     const output = formatCliParseErrorOutput("error: unknown option '--wat'\n", {
-      argv: ["node", "openclaw", "channels", "status", "--wat"],
+      argv: ["node", "carapace", "channels", "status", "--wat"],
     });
 
     expect(output).toBe(
-      'OpenClaw does not recognize option "--wat".\nTry: openclaw channels status --help\n',
+      'Carapace does not recognize option "--wat".\nTry: carapace channels status --help\n',
     );
   });
 
   it("points missing required arguments at command help", () => {
     const output = formatCliParseErrorOutput("error: missing required argument 'name'\n", {
-      argv: ["node", "openclaw", "plugins", "install"],
+      argv: ["node", "carapace", "plugins", "install"],
     });
 
     expect(output).toBe(
-      'Missing required argument "name".\nTry: openclaw plugins install --help\n',
+      'Missing required argument "name".\nTry: carapace plugins install --help\n',
     );
   });
 
   it("prefers the parsed Commander path over option-like argv values", () => {
     const output = formatCliParseErrorOutput("error: unknown option '--wat'\n", {
-      argv: ["node", "openclaw", "plugins", "--source", "install", "list", "--wat"],
+      argv: ["node", "carapace", "plugins", "--source", "install", "list", "--wat"],
       commandPath: ["plugins", "list"],
     });
 
     expect(output).toBe(
-      'OpenClaw does not recognize option "--wat".\nTry: openclaw plugins list --help\n',
+      'Carapace does not recognize option "--wat".\nTry: carapace plugins list --help\n',
     );
   });
 });

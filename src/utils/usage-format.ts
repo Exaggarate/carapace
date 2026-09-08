@@ -10,11 +10,11 @@ import {
   normalizeResolvedPricing,
   type ModelCostConfig,
   type RawModelCostConfig,
-} from "@openclaw/llm-core";
-import { buildModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeBuiltInProviderModelId } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/llm-core";
+import { buildModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeBuiltInProviderModelId } from "@carapace/model-catalog-core/provider-model-id-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   listAgentEntries,
   resolveAgentDir,
@@ -26,7 +26,7 @@ import { mergeModelCost } from "../config/model-cost.js";
 import { resolveStateDir } from "../config/paths.js";
 import { projectConfigOntoRuntimeSourceSnapshot } from "../config/runtime-source-projection.js";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { tryReadJsonSync } from "../infra/json-files.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import {
@@ -35,7 +35,7 @@ import {
   resolveModelPricingContext,
 } from "../model-catalog/pricing.js";
 export { formatTokenCount } from "./token-format.js";
-export type { ModelCostConfig } from "@openclaw/llm-core";
+export type { ModelCostConfig } from "@carapace/llm-core";
 
 type ModelKeyNormalizer = (provider: string, model: string) => string;
 type ModelsJsonCostCache = {
@@ -204,7 +204,7 @@ function loadModelsJsonCostIndex(options?: {
   }
 }
 
-function resolveCostAgentDir(config?: OpenClawConfig, agentDir?: string): string | undefined {
+function resolveCostAgentDir(config?: CarapaceConfig, agentDir?: string): string | undefined {
   if (agentDir) {
     return agentDir;
   }
@@ -246,7 +246,7 @@ function serializeCostIndex(
  * Consumers cache this value to know when resolved cost entries need recomputation.
  */
 export function resolveModelCostConfigFingerprint(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   agentDir?: string,
 ): string {
   const resolvedAgentDir = resolveCostAgentDir(config, agentDir);
@@ -280,7 +280,7 @@ export function resolveModelCostConfigFingerprint(
 export function resolveModelCostConfig(params: {
   provider?: string;
   model?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   allowPluginNormalization?: boolean;
 }): ModelCostConfig | undefined {

@@ -1,7 +1,7 @@
 import {
   clampTimerTimeoutMs,
   parseStrictPositiveInteger,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import type { DiscoveryConfig, MdnsDiscoveryMode } from "../config/types.gateway.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { pickPrimaryTailnetIPv4, pickPrimaryTailnetIPv6 } from "../infra/tailnet.js";
@@ -102,7 +102,7 @@ export async function startGatewayDiscovery(params: {
     }
     const localEnabled =
       generation.mode !== "off" &&
-      !isTruthyEnvValue(process.env.OPENCLAW_DISABLE_BONJOUR) &&
+      !isTruthyEnvValue(process.env.CARAPACE_DISABLE_BONJOUR) &&
       process.env.NODE_ENV !== "test" &&
       !process.env.VITEST;
     const minimal = generation.mode !== "full";
@@ -119,7 +119,7 @@ export async function startGatewayDiscovery(params: {
       gatewayTlsEnabled: params.gatewayTls?.enabled ?? false,
       gatewayTlsFingerprintSha256: params.gatewayTls?.fingerprintSha256,
       gatewayDirectReachable: params.gatewayDirectReachable === true,
-      sshPort: minimal ? undefined : (parseTcpPort(process.env.OPENCLAW_SSH_PORT) ?? undefined),
+      sshPort: minimal ? undefined : (parseTcpPort(process.env.CARAPACE_SSH_PORT) ?? undefined),
       tailnetDns,
       cliPath: minimal ? undefined : resolveBonjourCliPath(),
       minimal,
@@ -155,7 +155,7 @@ export async function startGatewayDiscovery(params: {
     const advertiseTimeoutMs =
       clampTimerTimeoutMs(
         parseStrictPositiveInteger(
-          process.env.OPENCLAW_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS?.trim(),
+          process.env.CARAPACE_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS?.trim(),
         ),
       ) ?? 5_000;
     for (;;) {

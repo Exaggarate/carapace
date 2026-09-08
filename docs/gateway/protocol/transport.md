@@ -16,21 +16,21 @@ What the wire looks like before any method call: the published packages, the fra
 The verified stable package release is `2026.8.1`. Follow
 [Install the packages](/gateway/clients#install-the-packages) for exact-version
 commands and compatibility guidance. Package release versions are separate from
-the wire protocol version and the root `openclaw` CLI release.
+the wire protocol version and the root `carapace` CLI release.
 
-- [`@openclaw/gateway-protocol`](https://www.npmjs.com/package/@openclaw/gateway-protocol)
+- [`@carapace/gateway-protocol`](https://www.npmjs.com/package/@carapace/gateway-protocol)
   publishes the schemas, validators, TypeScript types, lightweight frame and error
   helpers, and version constants. Its tarball includes the generated
-  [`protocol.schema.json`](https://unpkg.com/@openclaw/gateway-protocol@2026.8.1/protocol.schema.json)
+  [`protocol.schema.json`](https://unpkg.com/@carapace/gateway-protocol@2026.8.1/protocol.schema.json)
   machine-readable contract as a downloadable file, not an exported import subpath.
-- [`@openclaw/gateway-client`](https://www.npmjs.com/package/@openclaw/gateway-client)
+- [`@carapace/gateway-client`](https://www.npmjs.com/package/@carapace/gateway-client)
   publishes the reference Node client and a browser-safe entry at
-  `@openclaw/gateway-client/browser`.
+  `@carapace/gateway-client/browser`.
 
 For application lifecycle guidance, see
-[Building a Gateway client](https://docs.openclaw.ai/gateway/clients). For apps
+[Building a Gateway client](../clients.md). For apps
 that supervise the Gateway as a child process, see
-[Embedding OpenClaw](https://docs.openclaw.ai/gateway/embedding).
+[Embedding Carapace](../embedding.md).
 
 ## Transport and framing
 
@@ -88,11 +88,11 @@ missing-scope details:
 
 Clients should read `details` first and use the legacy message only as a compatibility
 fallback. `readMissingScopeError` and `readMissingScopeErrorDetails` are exported from
-`@openclaw/gateway-protocol/gateway-error-details`; the browser-safe gateway client
-re-exports them from `@openclaw/gateway-client/browser`.
+`@carapace/gateway-protocol/gateway-error-details`; the browser-safe gateway client
+re-exports them from `@carapace/gateway-client/browser`.
 
 The schemas are exported as `GatewayErrorDetailsSchema`,
-`MissingScopeErrorDetailsSchema` from `@openclaw/gateway-protocol/schema`.
+`MissingScopeErrorDetailsSchema` from `@carapace/gateway-protocol/schema`.
 HTTP scope failures mirror the `MISSING_SCOPE` object under `error.details` and
 use HTTP status `403`.
 

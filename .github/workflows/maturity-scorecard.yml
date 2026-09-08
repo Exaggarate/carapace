@@ -8,7 +8,7 @@ on:
         required: false
         type: string
       ref:
-        description: OpenClaw branch, tag, or SHA containing the maturity score source
+        description: Carapace branch, tag, or SHA containing the maturity score source
         required: true
         default: main
         type: string
@@ -35,7 +35,7 @@ on:
         default: ""
         type: string
       ref:
-        description: OpenClaw branch, tag, or SHA containing the maturity score source
+        description: Carapace branch, tag, or SHA containing the maturity score source
         required: true
         type: string
       expected_sha:
@@ -52,13 +52,13 @@ on:
       OPENAI_API_KEY:
         description: OpenAI API key used by live QA profile scenarios
         required: true
-      OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY:
+      CARAPACE_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY:
         description: Optional OpenAI API key used by maturity scorecard agent steps
         required: false
-      OPENCLAW_QA_CONVEX_SITE_URL:
+      CARAPACE_QA_CONVEX_SITE_URL:
         description: Optional Convex credential broker URL supplied by qa-live-shared
         required: false
-      OPENCLAW_QA_CONVEX_SECRET_CI:
+      CARAPACE_QA_CONVEX_SECRET_CI:
         description: Optional Convex CI credential supplied by qa-live-shared
         required: false
       # Mixed-trigger workflows must declare referenced secrets for actionlint. Reusable calls
@@ -108,13 +108,13 @@ jobs:
             const job = JSON.parse(process.env.JOB_CONTEXT ?? "{}");
             const callerWorkflowRef = process.env.CALLER_WORKFLOW_REF ?? "";
             const calledWorkflowRef =
-              "openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main";
+              "carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main";
             const trustedMainCaller =
               callerWorkflowRef !== calledWorkflowRef &&
-              /^openclaw\/openclaw\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
+              /^carapace\/carapace\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
                 callerWorkflowRef,
               ) &&
-              job.workflow_repository === "openclaw/openclaw" &&
+              job.workflow_repository === "carapace/carapace" &&
               job.workflow_ref === calledWorkflowRef;
             if (context.actor === "github-actions[bot]") {
               if (!trustedMainCaller) {
@@ -187,8 +187,8 @@ jobs:
           set -euo pipefail
 
           expected_file_path=".github/workflows/maturity-scorecard.yml"
-          expected_repository="openclaw/openclaw"
-          expected_workflow_ref="openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main"
+          expected_repository="carapace/carapace"
+          expected_workflow_ref="carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main"
           canonical_direct=false
           if [[ "$CALLER_EVENT_NAME" == "workflow_dispatch" &&
             "$CALLER_WORKFLOW_REF" == "$expected_workflow_ref" &&
@@ -203,7 +203,7 @@ jobs:
           fi
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout selected ref
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -343,10 +343,10 @@ jobs:
         if: >-
           ${{ inputs.publish_pull_request &&
             github.event_name == 'workflow_dispatch' &&
-            github.workflow_ref == 'openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
+            github.workflow_ref == 'carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
             needs.validate_selected_ref.outputs.workflow_file_path == '.github/workflows/maturity-scorecard.yml' &&
-            needs.validate_selected_ref.outputs.workflow_ref == 'openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
-            needs.validate_selected_ref.outputs.workflow_repository == 'openclaw/openclaw' }}
+            needs.validate_selected_ref.outputs.workflow_ref == 'carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
+            needs.validate_selected_ref.outputs.workflow_repository == 'carapace/carapace' }}
         uses: ./.github/actions/create-generated-pr-tokens
         with:
           contents-client-id: Iv23liOECG0slfuhz093
@@ -371,8 +371,8 @@ jobs:
       allow_failures: ${{ inputs.allow_failures }}
     secrets:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-      OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
+      CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+      CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
 
   publish:
     name: Publish maturity docs PR
@@ -529,11 +529,11 @@ jobs:
 
       - name: Ensure maturity scorecard agent key exists
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.CARAPACE_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
           if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-            echo "Missing OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY or OPENAI_API_KEY secret." >&2
+            echo "Missing CARAPACE_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY or OPENAI_API_KEY secret." >&2
             exit 1
           fi
 
@@ -544,9 +544,9 @@ jobs:
           MATURITY_SCORES_PATH: qa/maturity-scores.yaml
           MATURITY_TAXONOMY_PATH: taxonomy.yaml
         with:
-          openai-api-key: ${{ secrets.OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
+          openai-api-key: ${{ secrets.CARAPACE_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
           prompt-file: .github/codex/prompts/maturity-scorecard-agent.md
-          model: ${{ vars.OPENCLAW_CI_OPENAI_MODEL_BARE }}
+          model: ${{ vars.CARAPACE_CI_OPENAI_MODEL_BARE }}
           effort: high
           sandbox: workspace-write
           safety-strategy: drop-sudo
@@ -685,10 +685,10 @@ jobs:
         needs.publisher_preflight.result == 'success' &&
         needs.publish.result == 'success' &&
         github.event_name == 'workflow_dispatch' &&
-        github.workflow_ref == 'openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
+        github.workflow_ref == 'carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
         needs.validate_selected_ref.outputs.workflow_file_path == '.github/workflows/maturity-scorecard.yml' &&
-        needs.validate_selected_ref.outputs.workflow_ref == 'openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
-        needs.validate_selected_ref.outputs.workflow_repository == 'openclaw/openclaw' }}
+        needs.validate_selected_ref.outputs.workflow_ref == 'carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
+        needs.validate_selected_ref.outputs.workflow_repository == 'carapace/carapace' }}
     runs-on: ubuntu-24.04
     permissions:
       actions: read
@@ -784,10 +784,10 @@ jobs:
         if: >-
           ${{ inputs.publish_pull_request &&
             github.event_name == 'workflow_dispatch' &&
-            github.workflow_ref == 'openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
+            github.workflow_ref == 'carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
             needs.validate_selected_ref.outputs.workflow_file_path == '.github/workflows/maturity-scorecard.yml' &&
-            needs.validate_selected_ref.outputs.workflow_ref == 'openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
-            needs.validate_selected_ref.outputs.workflow_repository == 'openclaw/openclaw' }}
+            needs.validate_selected_ref.outputs.workflow_ref == 'carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main' &&
+            needs.validate_selected_ref.outputs.workflow_repository == 'carapace/carapace' }}
         uses: ./.github/actions/publish-generated-pr
         with:
           contents-client-id: Iv23liOECG0slfuhz093

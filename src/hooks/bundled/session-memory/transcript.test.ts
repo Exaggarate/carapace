@@ -200,7 +200,7 @@ describe("session-memory transcript extraction", () => {
           message: {
             role: "user",
             content: "Earlier restricted request",
-            __openclaw: { senderIsOwner: false },
+            __carapace: { senderIsOwner: false },
           },
         },
         message("assistant", "Earlier restricted response"),
@@ -209,7 +209,7 @@ describe("session-memory transcript extraction", () => {
           message: {
             role: "user",
             content: "Current owner request",
-            __openclaw: { senderIsOwner: true },
+            __carapace: { senderIsOwner: true },
           },
         },
         message("assistant", "Current owner response"),
@@ -285,7 +285,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "delivery-mirror",
           content: [{ type: "text", text: "Lights turned on" }],
         },
@@ -304,7 +304,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "claude",
           content: [
             { type: "thinking", text: "..." },
@@ -316,7 +316,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "delivery-mirror",
           content: [{ type: "text", text: "2+2 = 4" }],
         },
@@ -325,7 +325,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "gateway-injected",
           content: [{ type: "text", text: "standalone gateway reply" }],
         },
@@ -345,7 +345,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "delivery-mirror",
           content: [{ type: "text", text: "Your number is 123-4567" }],
         },
@@ -355,7 +355,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "delivery-mirror",
           content: [{ type: "text", text: "Your number is 123-4567" }],
         },
@@ -375,7 +375,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "delivery-mirror",
           content: [{ type: "text", text: "Done" }],
         },
@@ -385,7 +385,7 @@ describe("session-memory transcript extraction", () => {
         type: "message",
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "delivery-mirror",
           content: [{ type: "text", text: "Done" }],
         },

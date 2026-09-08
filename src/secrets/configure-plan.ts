@@ -1,7 +1,7 @@
-/** Builds the interactive `openclaw secrets configure` target list and apply plan. */
+/** Builds the interactive `carapace secrets configure` target list and apply plan. */
 import { isDeepStrictEqual } from "node:util";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveSecretInputRef,
   type SecretProviderConfig,
@@ -15,13 +15,13 @@ import {
   discoverConfigSecretTargets,
 } from "./target-registry.js";
 
-/** Credential target shown by `openclaw secrets configure` before a SecretRef is selected. */
+/** Credential target shown by `carapace secrets configure` before a SecretRef is selected. */
 export type ConfigureCandidate = {
   type: string;
   path: string;
   pathSegments: string[];
   label: string;
-  configFile: "openclaw.json" | "auth-profile-store";
+  configFile: "carapace.json" | "auth-profile-store";
   expectedResolvedValue: "string" | "string-or-object";
   existingRef?: SecretRef;
   isDerived?: boolean;
@@ -42,7 +42,7 @@ type ConfigureProviderChanges = {
   deletes: string[];
 };
 
-function getSecretProviders(config: OpenClawConfig): Record<string, SecretProviderConfig> {
+function getSecretProviders(config: CarapaceConfig): Record<string, SecretProviderConfig> {
   if (!isRecord(config.secrets?.providers)) {
     return {};
   }
@@ -54,7 +54,7 @@ function configureCandidateSortKey(candidate: ConfigureCandidate): string {
     const agentId = candidate.agentId ?? "";
     return `auth-profiles:${agentId}:${candidate.path}`;
   }
-  return `openclaw:${candidate.path}`;
+  return `carapace:${candidate.path}`;
 }
 
 function resolveAuthProfileProvider(
@@ -73,21 +73,21 @@ function resolveAuthProfileProvider(
   return provider.length > 0 ? provider : undefined;
 }
 
-/** Builds configure candidates for OpenClaw config plus an optional auth-profile scope. */
+/** Builds configure candidates for Carapace config plus an optional auth-profile scope. */
 export function buildConfigureCandidatesForScope(params: {
-  config: OpenClawConfig;
-  authoredOpenClawConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  authoredCarapaceConfig?: CarapaceConfig;
   authProfiles?: {
     agentId: string;
     store: AuthProfileStore;
   };
 }): ConfigureCandidate[] {
-  const authoredConfig = params.authoredOpenClawConfig ?? params.config;
+  const authoredConfig = params.authoredCarapaceConfig ?? params.config;
 
   const hasPathInAuthoredConfig = (pathSegments: string[]): boolean =>
     hasPath(authoredConfig, pathSegments);
 
-  const openclawCandidates = discoverConfigSecretTargets(params.config)
+  const carapaceCandidates = discoverConfigSecretTargets(params.config)
     .filter((entry) => entry.entry.includeInConfigure)
     .map((entry) => {
       const resolved = resolveSecretInputRef({
@@ -107,7 +107,7 @@ export function buildConfigureCandidatesForScope(params: {
           path: entry.path,
           pathSegments: [...entry.pathSegments],
           label: entry.path,
-          configFile: `openclaw.json` as const,
+          configFile: `carapace.json` as const,
           expectedResolvedValue: entry.entry.expectedResolvedValue,
         },
         resolved.ref ? { existingRef: resolved.ref } : {},
@@ -152,7 +152,7 @@ export function buildConfigureCandidatesForScope(params: {
             );
           });
 
-  return [...openclawCandidates, ...authCandidates].toSorted((a, b) =>
+  return [...carapaceCandidates, ...authCandidates].toSorted((a, b) =>
     configureCandidateSortKey(a).localeCompare(configureCandidateSortKey(b)),
   );
 }
@@ -191,8 +191,8 @@ function hasPath(root: unknown, segments: string[]): boolean {
 
 /** Computes provider upserts/deletes between original and edited config. */
 export function collectConfigureProviderChanges(params: {
-  original: OpenClawConfig;
-  next: OpenClawConfig;
+  original: CarapaceConfig;
+  next: CarapaceConfig;
 }): ConfigureProviderChanges {
   const originalProviders = getSecretProviders(params.original);
   const nextProviders = getSecretProviders(params.next);
@@ -242,7 +242,7 @@ export function buildSecretsConfigurePlan(params: {
     version: 1,
     protocolVersion: 1,
     generatedAt: params.generatedAt ?? new Date().toISOString(),
-    generatedBy: "openclaw secrets configure",
+    generatedBy: "carapace secrets configure",
     targets: [...params.selectedTargets.values()].map((entry) =>
       Object.assign(
         {

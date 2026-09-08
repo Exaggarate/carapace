@@ -23,34 +23,34 @@ printf '%s\\n' "\${DOCKER_E2E_RUN_RESOURCE_ARGS[@]}"
 
 describe("docker e2e update-check suppression", () => {
   it("suppresses automatic update checks inside every container", () => {
-    const args = injectedRunArgs(["-d", "--name", "openclaw-e2e", "openclaw:test"]);
+    const args = injectedRunArgs(["-d", "--name", "carapace-e2e", "carapace:test"]);
 
     expect(args).toContain("-e");
-    expect(args).toContain("OPENCLAW_NO_AUTO_UPDATE=1");
+    expect(args).toContain("CARAPACE_NO_AUTO_UPDATE=1");
   });
 
   it("still suppresses when resource limits are disabled", () => {
-    const args = injectedRunArgs(["-d", "openclaw:test"], {
-      OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS: "1",
+    const args = injectedRunArgs(["-d", "carapace:test"], {
+      CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS: "1",
     });
 
-    expect(args).toEqual(["-e", "OPENCLAW_NO_AUTO_UPDATE=1"]);
+    expect(args).toEqual(["-e", "CARAPACE_NO_AUTO_UPDATE=1"]);
   });
 
   it("keeps a caller-provided value so update lanes stay in control", () => {
     for (const callerArgs of [
-      ["-e", "OPENCLAW_NO_AUTO_UPDATE=0", "openclaw:test"],
-      ["-eOPENCLAW_NO_AUTO_UPDATE=0", "openclaw:test"],
-      ["--env", "OPENCLAW_NO_AUTO_UPDATE", "openclaw:test"],
-      ["--env=OPENCLAW_NO_AUTO_UPDATE=0", "openclaw:test"],
+      ["-e", "CARAPACE_NO_AUTO_UPDATE=0", "carapace:test"],
+      ["-eCARAPACE_NO_AUTO_UPDATE=0", "carapace:test"],
+      ["--env", "CARAPACE_NO_AUTO_UPDATE", "carapace:test"],
+      ["--env=CARAPACE_NO_AUTO_UPDATE=0", "carapace:test"],
     ]) {
-      expect(injectedRunArgs(callerArgs)).not.toContain("OPENCLAW_NO_AUTO_UPDATE=1");
+      expect(injectedRunArgs(callerArgs)).not.toContain("CARAPACE_NO_AUTO_UPDATE=1");
     }
   });
 
   it("does not mistake an image or unrelated flag value for the suppression variable", () => {
-    const args = injectedRunArgs(["-e", "SOMETHING_ELSE=1", "OPENCLAW_NO_AUTO_UPDATE", "-d"]);
+    const args = injectedRunArgs(["-e", "SOMETHING_ELSE=1", "CARAPACE_NO_AUTO_UPDATE", "-d"]);
 
-    expect(args).toContain("OPENCLAW_NO_AUTO_UPDATE=1");
+    expect(args).toContain("CARAPACE_NO_AUTO_UPDATE=1");
   });
 });

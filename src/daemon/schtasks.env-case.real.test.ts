@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { withTestTimeout } from "../../test/helpers/promise.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -33,13 +33,13 @@ vi.mock("node:child_process", async (importOriginal) => {
 
 describe("Windows Startup fallback environment", () => {
   it.for([
-    { name: "different casing", key: "openclaw_test_fallback_case" },
-    { name: "matching casing", key: "OPENCLAW_TEST_FALLBACK_CASE" },
+    { name: "different casing", key: "carapace_test_fallback_case" },
+    { name: "matching casing", key: "CARAPACE_TEST_FALLBACK_CASE" },
   ])("preserves the saved override with $name", async ({ key }, context) => {
     if (process.platform !== "win32" && key !== key.toUpperCase()) {
       context.skip("Case-insensitive environment names require Windows");
     }
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw fallback env "));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace fallback env "));
     const output = new PassThrough();
     output.resume();
     const children: LaunchedChild[] = [];
@@ -69,8 +69,8 @@ const fs = require("node:fs");
 const file = process.argv[2];
 fs.writeFileSync(file + ".tmp", JSON.stringify({
   pid: process.pid,
-  value: process.env.OPENCLAW_TEST_FALLBACK_CASE,
-  control: process.env.OPENCLAW_TEST_FALLBACK_CONTROL,
+  value: process.env.CARAPACE_TEST_FALLBACK_CASE,
+  control: process.env.CARAPACE_TEST_FALLBACK_CONTROL,
 }));
 fs.renameSync(file + ".tmp", file);
 `,
@@ -85,13 +85,13 @@ fs.renameSync(file + ".tmp", file);
           workingDirectory: dir,
           environment: {
             [key]: "configured",
-            OPENCLAW_TEST_FALLBACK_CONTROL: "control",
+            CARAPACE_TEST_FALLBACK_CONTROL: "control",
           },
         }),
       }),
     );
     launchCapture.observe = (child, options) => {
-      if (options?.cwd !== dir && options?.env?.OPENCLAW_TASK_SCRIPT !== scriptPath) {
+      if (options?.cwd !== dir && options?.env?.CARAPACE_TASK_SCRIPT !== scriptPath) {
         return;
       }
       // Observe close at spawn, before Startup discards its child handle.
@@ -102,8 +102,8 @@ fs.renameSync(file + ".tmp", file);
       );
       children.push({ child, closed });
     };
-    await withEnvAsync({ OPENCLAW_TEST_FALLBACK_CASE: "inherited" }, async () => {
-      await startStartupEntry({ OPENCLAW_TASK_SCRIPT: scriptPath }, output);
+    await withEnvAsync({ CARAPACE_TEST_FALLBACK_CASE: "inherited" }, async () => {
+      await startStartupEntry({ CARAPACE_TASK_SCRIPT: scriptPath }, output);
       expect(children).toHaveLength(1);
       const { child, closed } = expectDefined(children[0], "Startup fixture child");
       expect(await withTestTimeout(closed, 10_000, "Startup fixture child did not close")).toEqual({

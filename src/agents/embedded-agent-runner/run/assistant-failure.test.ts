@@ -2,7 +2,7 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Context, Model } from "../../../../packages/ai/src/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { AssistantMessage } from "../../../llm/types.js";
 import {
   PROVIDER_FAILURE_WITH_OUTPUT_ERROR_CODE,
@@ -112,7 +112,7 @@ function makeExhaustedCredentialFailureInput(options?: { replaySafe?: boolean })
     traceAttempts,
     suspendForFailure: vi.fn(),
     suspensionSessionId: "session:credential-enoent",
-    agentDir: "/tmp/openclaw-assistant-failure-test",
+    agentDir: "/tmp/carapace-assistant-failure-test",
     isProbeSession: false,
   };
   return {
@@ -443,7 +443,7 @@ describe("handleEmbeddedAssistantFailure", () => {
     const classification = classifyAssistantFailoverReason(assistant);
     const config = createModelFallbackConfig("mistral/mistral-large-latest", [
       "google/mock-2",
-    ]) satisfies OpenClawConfig;
+    ]) satisfies CarapaceConfig;
     const calls: string[] = [];
     let embeddedFailure: { reason: string; rawError?: string } | undefined;
     let embeddedTrace: AssistantFailureInput["traceAttempts"] = [];
@@ -526,7 +526,7 @@ describe("handleEmbeddedAssistantFailure", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const calls: string[] = [];
 
       const result = await runWithModelFallback({
@@ -755,13 +755,13 @@ describe("handleEmbeddedAssistantFailure", () => {
   });
 
   it("does not cache an exact credential-file failure from a fallback candidate", async () => {
-    const previous = process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS;
-    process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS = "60000";
+    const previous = process.env.CARAPACE_FALLBACK_SKIP_TTL_MS;
+    process.env.CARAPACE_FALLBACK_SKIP_TTL_MS = "60000";
     try {
       const config = createModelFallbackConfig("openai/mock-0", [
         "anthropic/mock-1",
         "groq/mock-2",
-      ]) satisfies OpenClawConfig;
+      ]) satisfies CarapaceConfig;
       const calls: string[] = [];
       const run = async (provider: string, model: string) => {
         calls.push(`${provider}/${model}`);
@@ -800,9 +800,9 @@ describe("handleEmbeddedAssistantFailure", () => {
       ]);
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS;
+        delete process.env.CARAPACE_FALLBACK_SKIP_TTL_MS;
       } else {
-        process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS = previous;
+        process.env.CARAPACE_FALLBACK_SKIP_TTL_MS = previous;
       }
     }
   });

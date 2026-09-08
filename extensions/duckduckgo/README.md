@@ -1,12 +1,12 @@
-# OpenClaw DuckDuckGo Plugin
+# Carapace DuckDuckGo Plugin
 
-Official OpenClaw plugin for DuckDuckGo web search.
+Official Carapace plugin for DuckDuckGo web search.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/duckduckgo-plugin
-openclaw gateway restart
+carapace plugins install @carapace/duckduckgo-plugin
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/duckduckgo-search> for setup and configuration.
+See <../../docs/tools/duckduckgo-search.md> for setup and configuration.

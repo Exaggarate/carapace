@@ -1,6 +1,6 @@
 /** Keeps plugin service failures scoped to the registry generation that owns them. */
 import { formatErrorMessage } from "../infra/errors.js";
-import type { OpenClawPluginServiceHealth } from "./plugin-registration.types.js";
+import type { CarapacePluginServiceHealth } from "./plugin-registration.types.js";
 import type { PluginServiceRegistration } from "./registry-types.js";
 import type { PluginRegistry } from "./registry.js";
 
@@ -24,7 +24,7 @@ export function createPluginServiceHealthGeneration(registry: PluginRegistry) {
 
   return {
     createReporter(service: PluginServiceRegistration): {
-      health: OpenClawPluginServiceHealth;
+      health: CarapacePluginServiceHealth;
       revoke: () => void;
     } {
       let active = true;

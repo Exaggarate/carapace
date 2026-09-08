@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { isIndexedSessionEntry } from "../../agents/sessions/session-manager-codec.js";
 import { openNodeSqliteDatabase } from "../../infra/node-sqlite.js";
 import { createPrivateSqliteTempDirectorySync } from "../../infra/sqlite-private-directory.js";
@@ -23,7 +23,7 @@ import {
 type StagedTranscriptRow = { seq: number; eventJson: string; createdAt: number | null };
 
 export function withSqliteSessionImportStage<T>(run: (stage: SqliteSessionImportStage) => T): T {
-  const directory = createPrivateSqliteTempDirectorySync(os.tmpdir(), "openclaw-session-import-");
+  const directory = createPrivateSqliteTempDirectorySync(os.tmpdir(), "carapace-session-import-");
   let database: DatabaseSync | undefined;
   try {
     const filename = path.join(directory, "transcripts.sqlite");

@@ -11,7 +11,7 @@ import { applyCliSessionBindingResult, getCliSessionBinding } from "../cli-sessi
 import { buildBlockedCliRunResult, buildCliRunResult } from "./cli-run-settlement.js";
 
 describe("isCliBindingFlushed", () => {
-  const workspaceDir = "/tmp/openclaw-workspace";
+  const workspaceDir = "/tmp/carapace-workspace";
 
   beforeEach(() => {
     vi.useRealTimers();

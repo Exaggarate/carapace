@@ -1,11 +1,11 @@
 // Policy doctor strictness comparisons for scoped policy overlays.
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeAccountId, normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeAccountId, normalizeAgentId } from "carapace/plugin-sdk/routing";
 import {
   hasNonEmptyString as nonEmptyString,
   isRecord,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { ROUTING_MATCH_KINDS } from "../policy-routing.js";
 import { expandPolicyToolRequirement, toolListCoversTool } from "../tool-policy-conformance.js";
 import { readExecApprovalAllowlistRequirements } from "./exec-approval-rules.js";

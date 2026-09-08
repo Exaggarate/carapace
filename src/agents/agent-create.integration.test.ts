@@ -15,7 +15,7 @@ import { listSessionEntriesReadOnly } from "../config/sessions/session-accessor.
 import { readExactSessionEntryRowForCanonicalRepair } from "../config/sessions/session-accessor.sqlite-canonical-repair.js";
 import { writeSessionEntry } from "../config/sessions/session-accessor.sqlite-entry-store.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   claimAgentRunDelegatedAuthority,
   releaseAgentRunDelegatedAuthority,
@@ -29,18 +29,18 @@ import {
 import { readAgentProvenance } from "../state/agent-provenance.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { executeSystemAgentOperation } from "../system-agent/operations-execute.js";
 import { createSystemAgentTestRuntime } from "../system-agent/system-agent.runtime.test-support.js";
 import { nodeFilePath } from "../test-utils/node-file-path.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createAgent } from "./agent-create.js";
 import { resolveSharedAuthStorePath } from "./auth-profiles/path-resolve.js";
 import { resolveAuthProfileDatabasePath } from "./auth-profiles/sqlite.js";
@@ -52,7 +52,7 @@ import {
 } from "./workspace.js";
 
 it("does not create an agent after delegated authority closes while awaiting the config lock", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     scenario: "minimal",
     label: "agent-create-closed-authority",
   });
@@ -102,13 +102,13 @@ it("does not create an agent after delegated authority closes while awaiting the
     expect.soft(await fs.stat(workspace).catch(() => null)).toBeNull();
     expect.soft(await fs.stat(state.sessionsDir("delegated")).catch(() => null)).toBeNull();
     expect.soft(readAgentProvenance("delegated", { env: state.env })).toBeUndefined();
-    expect.soft(lines).not.toContain("[openclaw] done: agents.create");
+    expect.soft(lines).not.toContain("[carapace] done: agents.create");
   } finally {
     releaseLock.resolve();
     await lock;
     await creation?.catch(() => undefined);
     releaseAgentRunDelegatedAuthority(authority);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });
@@ -116,7 +116,7 @@ it("does not create an agent after delegated authority closes while awaiting the
 it.each(["workspace", "workspace-write", "config"] as const)(
   "stops delegated creation after authority closes during %s preparation",
   async (phase) => {
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       scenario: "minimal",
       label: `agent-create-${phase}-authority`,
     });
@@ -148,7 +148,7 @@ it.each(["workspace", "workspace-write", "config"] as const)(
         phase === "workspace-write" &&
         filePath &&
         path.basename(filePath) === "AGENTS.md" &&
-        path.basename(path.dirname(filePath)).startsWith("openclaw-bootstrap-")
+        path.basename(path.dirname(filePath)).startsWith("carapace-bootstrap-")
       ) {
         await pause();
       }
@@ -199,14 +199,14 @@ it.each(["workspace", "workspace-write", "config"] as const)(
       write.mockRestore();
       access.mockRestore();
       releaseAgentRunDelegatedAuthority(authority);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await state.cleanup();
     }
   },
 );
 
 it("finishes creation bookkeeping when delegated authority closes after successful publication", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     scenario: "minimal",
     label: "agent-create-published",
   });
@@ -223,7 +223,7 @@ it("finishes creation bookkeeping when delegated authority closes after successf
     sessionsDir: state.sessionsDir("published"),
     deleteFiles: false,
   });
-  runOpenClawStateWriteTransaction((database) =>
+  runCarapaceStateWriteTransaction((database) =>
     completeAgentDeletionJournalInDatabase(database, deletion.agentId, deletion.operationId),
   );
   const rollback = vi.fn();
@@ -253,13 +253,13 @@ it("finishes creation bookkeeping when delegated authority closes after successf
     expect(rollback).not.toHaveBeenCalled();
   } finally {
     releaseAgentRunDelegatedAuthority(authority);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });
 
 it("preserves env references from guided staging when preparation changes the environment", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     scenario: "minimal",
     label: "guided-stage-env",
@@ -267,7 +267,7 @@ it("preserves env references from guided staging when preparation changes the en
   const oldToken = process.env.GUIDED_STAGE_TOKEN;
   try {
     process.env.GUIDED_STAGE_TOKEN = "synthetic-read-value";
-    const config = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+    const config = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
     await state.writeConfig({
       ...config,
       gateway: { ...config.gateway, auth: { mode: "token", token: "${GUIDED_STAGE_TOKEN}" } },
@@ -287,7 +287,7 @@ it("preserves env references from guided staging when preparation changes the en
       },
     });
     expect(created).toMatchObject({ status: "created", agentId: "guided" });
-    const saved = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+    const saved = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
     expect(saved.gateway?.auth?.token).toBe("${GUIDED_STAGE_TOKEN}");
     expect(saved.agents?.entries?.guided).toBeDefined();
   } finally {
@@ -296,13 +296,13 @@ it("preserves env references from guided staging when preparation changes the en
     } else {
       process.env.GUIDED_STAGE_TOKEN = oldToken;
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });
 
 it("keeps a fresh named workspace pending through the first run setup", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     scenario: "minimal",
     label: "named-agent-hatch",
@@ -325,13 +325,13 @@ it("keeps a fresh named workspace pending through the first run setup", async ()
       await fs.readFile(path.join(workspace, DEFAULT_IDENTITY_FILENAME), "utf8"),
     ).not.toContain("Researcher");
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });
 
 it("records operator and agent creation provenance after roster commits", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     scenario: "empty",
     label: "agent-creation-provenance",
@@ -357,14 +357,14 @@ it("records operator and agent creation provenance after roster commits", async 
       createdAtMs: expect.any(Number),
     });
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });
 
 describe("agent roster persistence", () => {
-  async function addWorkerToConfig(config: unknown): Promise<OpenClawConfig> {
-    const state = await createOpenClawTestState({
+  async function addWorkerToConfig(config: unknown): Promise<CarapaceConfig> {
+    const state = await createCarapaceTestState({
       layout: "state-only",
       scenario: "empty",
       label: "agent-roster-write",
@@ -373,9 +373,9 @@ describe("agent roster persistence", () => {
       await state.writeConfig(config);
       const result = await createAgent({ name: "Worker", workspace: state.path("worker") });
       expect(result).toMatchObject({ status: "created", agentId: "worker" });
-      return JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+      return JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await state.cleanup();
     }
   }
@@ -409,7 +409,7 @@ describe("agent roster persistence", () => {
   });
 
   it("preserves a legacy list byte-for-byte during a non-roster mutation", async () => {
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       layout: "state-only",
       scenario: "empty",
       label: "legacy-roster-non-roster-write",
@@ -426,28 +426,28 @@ describe("agent roster persistence", () => {
         },
       });
 
-      const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+      const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
       expect(JSON.stringify(persisted.agents?.list)).toBe(JSON.stringify(list));
       expect(persisted.agents).not.toHaveProperty("entries");
       expect(persisted.gateway?.port).toBe(19001);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await state.cleanup();
     }
   });
 });
 
 it("creates main as an ordinary fresh agent after doctor completes both ownership handoffs", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     scenario: "empty",
     label: "ordinary-main-agent",
   });
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { entries: { robby: { workspace: state.path("workspace-robby") } } },
   };
-  const legacyDatabasePath = path.join(state.agentDir("main"), "openclaw-agent.sqlite");
-  const ownerDatabasePath = path.join(state.agentDir("robby"), "openclaw-agent.sqlite");
+  const legacyDatabasePath = path.join(state.agentDir("main"), "carapace-agent.sqlite");
+  const ownerDatabasePath = path.join(state.agentDir("robby"), "carapace-agent.sqlite");
   const legacyKey = "agent:main:main";
   const canonicalKey = "agent:robby:main";
   const lateLegacyKey = "agent:main:late";
@@ -455,7 +455,7 @@ it("creates main as an ordinary fresh agent after doctor completes both ownershi
 
   try {
     await state.writeConfig(cfg);
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         writeSessionEntry(
           database,
@@ -468,7 +468,7 @@ it("creates main as an ordinary fresh agent after doctor completes both ownershi
     );
     await migrateLegacyMainSessionKeys({ cfg, env: state.env, mode: "doctor-fix" });
     writeConfigMachineState("auth.sharedStore", { location: "state-db" }, { env: state.env });
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         writeSessionEntry(
           database,
@@ -486,7 +486,7 @@ it("creates main as an ordinary fresh agent after doctor completes both ownershi
       reason: "legacy-session-migration-required",
     });
     expect(
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => readExactSessionEntryRowForCanonicalRepair(database, lateLegacyKey)?.entry,
         { agentId: "main", env: state.env, path: legacyDatabasePath },
       ),
@@ -500,14 +500,14 @@ it("creates main as an ordinary fresh agent after doctor completes both ownershi
     if (created.status !== "created") {
       throw new Error(`expected main creation, got ${JSON.stringify(created)}`);
     }
-    const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+    const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
     const mainSessionTarget = resolveSqliteTargetFromSessionStorePath(
       resolveSessionStorePathCore(persisted.session?.store, { agentId: "main", env: state.env }),
       { agentId: "main", env: state.env },
     );
     expect(mainSessionTarget).toMatchObject({ agentId: "main", path: legacyDatabasePath });
     expect(resolveAuthProfileDatabasePath(created.agentDir)).toBe(legacyDatabasePath);
-    expect(resolveSharedAuthStorePath(state.env)).toBe(resolveOpenClawStateSqlitePath(state.env));
+    expect(resolveSharedAuthStorePath(state.env)).toBe(resolveCarapaceStateSqlitePath(state.env));
     expect(resolveAuthProfileDatabasePath(created.agentDir)).not.toBe(
       resolveSharedAuthStorePath(state.env),
     );
@@ -519,20 +519,20 @@ it("creates main as an ordinary fresh agent after doctor completes both ownershi
       }).filter((entry) => entry.sessionKey.startsWith("agent:main:")),
     ).toEqual([]);
     expect(
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => readExactSessionEntryRowForCanonicalRepair(database, canonicalKey)?.entry,
         { agentId: "robby", env: state.env, path: ownerDatabasePath },
       ),
     ).toMatchObject({ sessionId: "legacy-before-main-reuse" });
     expect(
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => readExactSessionEntryRowForCanonicalRepair(database, lateCanonicalKey)?.entry,
         { agentId: "robby", env: state.env, path: ownerDatabasePath },
       ),
     ).toMatchObject({ sessionId: "late-legacy-before-main-reuse" });
   } finally {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });

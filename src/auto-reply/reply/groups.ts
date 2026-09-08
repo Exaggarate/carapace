@@ -1,9 +1,9 @@
 /** Group/direct chat prompt context, activation, and silent-reply helpers. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { getLoadedChannelPluginForRead } from "../../channels/plugins/registry-loaded.js";
 import { findChatChannelMeta, normalizeChatChannelId } from "../../channels/registry.js";
 import { resolveChannelGroupRequireMention } from "../../config/group-policy.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
 import type { SilentReplyPolicy } from "../../shared/silent-reply-policy.js";
 import { isInternalMessageChannel } from "../../utils/message-channel.js";
@@ -40,7 +40,7 @@ async function resolveRuntimeChannelId(raw?: string | null): Promise<string | nu
 
 /** Resolves whether a group/channel turn requires an explicit mention. */
 export async function resolveGroupRequireMention(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   group: PreparedReplyConversation["group"];
 }): Promise<boolean> {
   const { cfg, group } = params;

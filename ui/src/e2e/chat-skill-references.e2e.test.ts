@@ -13,7 +13,7 @@ const suite = createControlUiE2eSuite({
 
 suite.define(() => {
   it("references multiple skills inside a normal prompt and sends their raw names", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-skill-references", artifactRoot)
       : undefined;
@@ -70,7 +70,7 @@ suite.define(() => {
           methodResponses: {
             "chat.startup": {
               agentsList: {
-                agents: [{ id: "main", name: "OpenClaw" }],
+                agents: [{ id: "main", name: "Carapace" }],
                 defaultId: "main",
                 mainKey: "main",
                 scope: "agent",

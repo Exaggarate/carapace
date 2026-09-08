@@ -24,7 +24,7 @@ afterEach(async () => {
 
 function seedRunningProfileState(
   state: ReturnType<typeof makeState>,
-  profileName = "openclaw",
+  profileName = "carapace",
 ): void {
   (state.profiles as Map<string, unknown>).set(profileName, {
     profile: { name: profileName },
@@ -93,11 +93,11 @@ async function openManagedTabWithRunningProfile(params: {
   url?: string;
 }) {
   global.fetch = withBrowserFetchPreconnect(params.fetchMock);
-  const state = makeState("openclaw");
+  const state = makeState("carapace");
   seedRunningProfileState(state);
   const ctx = createTestBrowserRouteContext({ getState: () => state });
-  const openclaw = ctx.forProfile("openclaw");
-  return await openclaw.openTab(params.url ?? "http://127.0.0.1:3009");
+  const carapace = ctx.forProfile("carapace");
+  return await carapace.openTab(params.url ?? "http://127.0.0.1:3009");
 }
 
 describe("browser server-context tab selection state", () => {
@@ -135,11 +135,11 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    const opened = await openclaw.openTab("http://127.0.0.1:8080");
+    const opened = await carapace.openTab("http://127.0.0.1:8080");
     expect(opened.targetId).toBe("CREATED");
     expect((opened as { ownership?: unknown }).ownership).toMatchObject({
       status: "durable",
@@ -147,7 +147,7 @@ describe("browser server-context tab selection state", () => {
       profileFingerprint: expect.stringMatching(/^sha256:/),
       browserInstanceFingerprint: expect.stringMatching(/^sha256:/),
     });
-    expect(state.profiles.get("openclaw")?.lastTargetId).toBe("CREATED");
+    expect(state.profiles.get("carapace")?.lastTargetId).toBe("CREATED");
     expect(fetchCallUrls(fetchMock).some((url) => url.includes("/json/close/"))).toBe(false);
     expect(createTargetViaCdp).toHaveBeenCalledWith({
       cdpUrl: "http://127.0.0.1:18800",
@@ -202,22 +202,22 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.ssrfPolicy = {};
     seedRunningProfileState(state);
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    await expect(openclaw.openTab("about:blank", { label: "good" })).resolves.toEqual(
+    await expect(carapace.openTab("about:blank", { label: "good" })).resolves.toEqual(
       expect.objectContaining({ targetId: "GOOD" }),
     );
-    expect(state.profiles.get("openclaw")?.lastTargetId).toBe("GOOD");
-    const aliasesBefore = structuredClone(state.profiles.get("openclaw")?.tabAliases);
+    expect(state.profiles.get("carapace")?.lastTargetId).toBe("GOOD");
+    const aliasesBefore = structuredClone(state.profiles.get("carapace")?.tabAliases);
 
-    await expect(openclaw.openTab("https://example.com", { label: "blocked" })).rejects.toThrow(
+    await expect(carapace.openTab("https://example.com", { label: "blocked" })).rejects.toThrow(
       /private|blocked|ssrf/i,
     );
-    const profileState = state.profiles.get("openclaw");
+    const profileState = state.profiles.get("carapace");
     expect(profileState?.lastTargetId).toBe("GOOD");
     expect(profileState?.lastTargetId).not.toBe("BLOCKED");
     expect(profileState?.tabAliases).toEqual(aliasesBefore);
@@ -226,7 +226,7 @@ describe("browser server-context tab selection state", () => {
       "http://127.0.0.1:18800/json/close/BLOCKED",
     ]);
 
-    await expect(openclaw.ensureTabAvailable()).resolves.toEqual(
+    await expect(carapace.ensureTabAvailable()).resolves.toEqual(
       expect.objectContaining({ targetId: "GOOD" }),
     );
   });
@@ -257,20 +257,20 @@ describe("browser server-context tab selection state", () => {
       } as unknown as Response;
     });
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.ssrfPolicy = {};
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
 
-    await openclaw.openTab("about:blank", { label: "good" });
-    const aliasesBefore = structuredClone(state.profiles.get("openclaw")?.tabAliases);
+    await carapace.openTab("about:blank", { label: "good" });
+    const aliasesBefore = structuredClone(state.profiles.get("carapace")?.tabAliases);
 
-    await expect(openclaw.openTab("https://example.com", { label: "blocked" })).rejects.toThrow(
+    await expect(carapace.openTab("https://example.com", { label: "blocked" })).rejects.toThrow(
       /private|blocked|ssrf/i,
     );
 
-    const profileState = state.profiles.get("openclaw");
+    const profileState = state.profiles.get("carapace");
     expect(profileState?.lastTargetId).toBe("GOOD");
     expect(profileState?.tabAliases).toEqual(aliasesBefore);
     expect(profileState?.tabAliases?.byTargetId).toEqual({
@@ -303,20 +303,20 @@ describe("browser server-context tab selection state", () => {
       } as unknown as Response;
     });
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     seedRunningProfileState(state);
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
-    await openclaw.listTabs();
-    const profileState = state.profiles.get("openclaw");
+    await carapace.listTabs();
+    const profileState = state.profiles.get("carapace");
     if (!profileState) {
       throw new Error("expected profile state");
     }
     profileState.lastTargetId = "GOOD";
     const aliasesBefore = structuredClone(profileState.tabAliases);
 
-    const opening = openclaw.openTab("https://example.com/start", { label: "undiscovered" });
+    const opening = carapace.openTab("https://example.com/start", { label: "undiscovered" });
     await vi.advanceTimersByTimeAsync(2_100);
     await expect(opening).resolves.toEqual({
       targetId: "UNDISCOVERED",
@@ -333,7 +333,7 @@ describe("browser server-context tab selection state", () => {
     expect(profileState.tabAliases).toEqual(aliasesBefore);
     expect(profileState.tabAliases?.byTargetId.UNDISCOVERED).toBeUndefined();
     expect(fetchCallUrls(fetchMock).some((url) => url.includes("/json/close/"))).toBe(false);
-    await expect(openclaw.ensureTabAvailable()).resolves.toEqual(
+    await expect(carapace.ensureTabAvailable()).resolves.toEqual(
       expect.objectContaining({ targetId: "GOOD", tabId: "t1" }),
     );
   });
@@ -346,9 +346,9 @@ describe("browser server-context tab selection state", () => {
       throw new Error("navigation timeout must not start discovery or cleanup");
     });
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     seedRunningProfileState(state);
-    const profileState = state.profiles.get("openclaw");
+    const profileState = state.profiles.get("carapace");
     if (!profileState) {
       throw new Error("expected profile state");
     }
@@ -357,11 +357,11 @@ describe("browser server-context tab selection state", () => {
       nextTabNumber: 2,
       byTargetId: { GOOD: { tabId: "t1", label: "good", url: "about:blank" } },
     };
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
 
-    await expect(openclaw.openTab("https://example.com", { label: "unsettled" })).resolves.toEqual({
+    await expect(carapace.openTab("https://example.com", { label: "unsettled" })).resolves.toEqual({
       targetId: "UNSETTLED",
       title: "",
       url: "https://example.com",
@@ -386,18 +386,18 @@ describe("browser server-context tab selection state", () => {
       throw new Error("unexpected fetch");
     });
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const state = makeState("carapace");
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
 
-    await expect(openclaw.openTab("about:blank", { label: "not allowed" })).rejects.toThrow(
+    await expect(carapace.openTab("about:blank", { label: "not allowed" })).rejects.toThrow(
       /tab label/i,
     );
 
     expect(createTargetViaCdp).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(state.profiles.get("openclaw")?.tabAliases).toBeUndefined();
+    expect(state.profiles.get("carapace")?.tabAliases).toBeUndefined();
   });
 
   it("can bootstrap a managed loopback tab under strict SSRF because CDP control stays local", async () => {
@@ -430,12 +430,12 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.ssrfPolicy = {};
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    const selected = await openclaw.ensureTabAvailable();
+    const selected = await carapace.ensureTabAvailable();
     expect(selected.targetId).toBe("CREATED");
     expect(createTargetViaCdp).toHaveBeenCalledWith({
       cdpUrl: "http://127.0.0.1:18800",
@@ -490,13 +490,13 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    const selected = await openclaw.ensureTabAvailable();
+    const selected = await carapace.ensureTabAvailable();
     expect(selected.targetId).toBe("REAL");
-    expect(state.profiles.get("openclaw")?.lastTargetId).toBe("REAL");
+    expect(state.profiles.get("carapace")?.lastTargetId).toBe("REAL");
     expect(createTargetViaCdp).toHaveBeenCalledWith({
       cdpUrl: "http://127.0.0.1:18800",
       url: "about:blank",
@@ -563,12 +563,12 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     seedRunningProfileState(state);
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    const opened = await openclaw.openTab("http://127.0.0.1:3009");
+    const opened = await carapace.openTab("http://127.0.0.1:3009");
     expect(opened.targetId).toBe("NEW");
   });
 
@@ -586,12 +586,12 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.attachOnly = true;
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    const opened = await openclaw.openTab("http://127.0.0.1:3009");
+    const opened = await carapace.openTab("http://127.0.0.1:3009");
     expect(opened.targetId).toBe("NEW");
     expect(fetchCallUrls(fetchMock).filter((url) => url.includes("/json/close/"))).toEqual([]);
   });
@@ -633,11 +633,11 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    await expect(openclaw.openTab("file:///etc/passwd")).rejects.toBeInstanceOf(
+    await expect(carapace.openTab("file:///etc/passwd")).rejects.toBeInstanceOf(
       InvalidBrowserNavigationUrlError,
     );
     expect(fetchMock).not.toHaveBeenCalled();
@@ -657,12 +657,12 @@ describe("browser server-context tab selection state", () => {
       type: "page",
     });
 
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.ssrfPolicy = {};
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    const opened = await openclaw.openTab("https://example.com", { label: "raw" });
+    const opened = await carapace.openTab("https://example.com", { label: "raw" });
     expect(opened).toEqual(
       expect.objectContaining({
         targetId: "NEW",
@@ -671,7 +671,7 @@ describe("browser server-context tab selection state", () => {
         suggestedTargetId: "raw",
       }),
     );
-    expect(state.profiles.get("openclaw")?.lastTargetId).toBe("NEW");
+    expect(state.profiles.get("carapace")?.lastTargetId).toBe("NEW");
     expect(waitForCommittedNavigation).toHaveBeenCalledWith(
       expect.objectContaining({ requestedUrl: "https://example.com" }),
     );
@@ -700,9 +700,9 @@ describe("browser server-context tab selection state", () => {
       webSocketDebuggerUrl: "ws://127.0.0.1:18800/devtools/page/RAW_UNSETTLED",
       type: "page",
     });
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     seedRunningProfileState(state);
-    const profileState = state.profiles.get("openclaw");
+    const profileState = state.profiles.get("carapace");
     if (!profileState) {
       throw new Error("expected profile state");
     }
@@ -711,11 +711,11 @@ describe("browser server-context tab selection state", () => {
       nextTabNumber: 2,
       byTargetId: { GOOD: { tabId: "t1", label: "good", url: "about:blank" } },
     };
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
 
-    await expect(openclaw.openTab("https://example.com", { label: "unsettled" })).resolves.toEqual({
+    await expect(carapace.openTab("https://example.com", { label: "unsettled" })).resolves.toEqual({
       targetId: "RAW_UNSETTLED",
       title: "Unsettled",
       url: "https://example.com",
@@ -742,16 +742,16 @@ describe("browser server-context tab selection state", () => {
       webSocketDebuggerUrl: "ws://127.0.0.1:18800/devtools/page/RAW_BLOCKED",
       type: "page",
     });
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.ssrfPolicy = {};
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
 
-    await expect(openclaw.openTab("https://example.com", { label: "blocked" })).rejects.toThrow(
+    await expect(carapace.openTab("https://example.com", { label: "blocked" })).rejects.toThrow(
       /private|blocked|ssrf/i,
     );
-    const profileState = state.profiles.get("openclaw");
+    const profileState = state.profiles.get("carapace");
     expect(profileState?.lastTargetId).toBeNull();
     expect(profileState?.tabAliases).toBeUndefined();
   });
@@ -784,11 +784,11 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    expect(await openclaw.listTabs()).toEqual([
+    expect(await carapace.listTabs()).toEqual([
       expect.objectContaining({
         targetId: "DOCS_RAW",
         tabId: "t1",
@@ -801,7 +801,7 @@ describe("browser server-context tab selection state", () => {
       }),
     ]);
 
-    await expect(openclaw.labelTab("t1", "docs")).resolves.toEqual(
+    await expect(carapace.labelTab("t1", "docs")).resolves.toEqual(
       expect.objectContaining({
         targetId: "DOCS_RAW",
         tabId: "t1",
@@ -860,12 +860,12 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    expect((await openclaw.listTabs()).map((tab) => tab.tabId)).toEqual(["t1", "t2"]);
-    expect(await openclaw.listTabs()).toEqual([
+    expect((await carapace.listTabs()).map((tab) => tab.tabId)).toEqual(["t1", "t2"]);
+    expect(await carapace.listTabs()).toEqual([
       expect.objectContaining({ targetId: "FIRST_RAW", tabId: "t1" }),
       expect.objectContaining({ targetId: "THIRD_RAW", tabId: "t2" }),
     ]);
@@ -895,24 +895,24 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    await expect(openclaw.labelTab("OLD_RAW", "checkout")).resolves.toEqual(
+    await expect(carapace.labelTab("OLD_RAW", "checkout")).resolves.toEqual(
       expect.objectContaining({
         targetId: "OLD_RAW",
         tabId: "t1",
         suggestedTargetId: "checkout",
       }),
     );
-    const profileState = state.profiles.get("openclaw");
+    const profileState = state.profiles.get("carapace");
     if (!profileState) {
       throw new Error("expected profile state");
     }
     profileState.lastTargetId = "OLD_RAW";
 
-    await expect(openclaw.listTabs()).resolves.toEqual([
+    await expect(carapace.listTabs()).resolves.toEqual([
       expect.objectContaining({
         targetId: "NEW_RAW",
         tabId: "t1",
@@ -920,7 +920,7 @@ describe("browser server-context tab selection state", () => {
         suggestedTargetId: "checkout",
       }),
     ]);
-    expect(state.profiles.get("openclaw")?.lastTargetId).toBe("NEW_RAW");
+    expect(state.profiles.get("carapace")?.lastTargetId).toBe("NEW_RAW");
   });
 
   it("expires aliases when duplicate-URL targets are replaced ambiguously", async () => {
@@ -947,37 +947,37 @@ describe("browser server-context tab selection state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    expect((await openclaw.listTabs()).map((tab) => [tab.targetId, tab.tabId])).toEqual([
+    expect((await carapace.listTabs()).map((tab) => [tab.targetId, tab.tabId])).toEqual([
       ["OLD_LEFT", "t1"],
       ["OLD_RIGHT", "t2"],
     ]);
-    await openclaw.labelTab("t1", "left");
-    await openclaw.labelTab("t2", "right");
-    state.profiles.get("openclaw")!.lastTargetId = "OLD_LEFT";
+    await carapace.labelTab("t1", "left");
+    await carapace.labelTab("t2", "right");
+    state.profiles.get("carapace")!.lastTargetId = "OLD_LEFT";
 
     targets = [
       { id: "NEW_RIGHT", title: "Right", url: "https://app.example/same" },
       { id: "NEW_LEFT", title: "Left", url: "https://app.example/same" },
     ];
 
-    await expect(openclaw.listTabs()).resolves.toEqual([
+    await expect(carapace.listTabs()).resolves.toEqual([
       expect.objectContaining({ targetId: "NEW_RIGHT", tabId: "t3", suggestedTargetId: "t3" }),
       expect.objectContaining({ targetId: "NEW_LEFT", tabId: "t4", suggestedTargetId: "t4" }),
     ]);
-    expect(state.profiles.get("openclaw")?.lastTargetId).toBe("OLD_LEFT");
-    await expect(openclaw.ensureTabAvailable("left")).rejects.toThrow(/tab not found/i);
-    await expect(openclaw.ensureTabAvailable()).rejects.toThrow(/tab not found/i);
+    expect(state.profiles.get("carapace")?.lastTargetId).toBe("OLD_LEFT");
+    await expect(carapace.ensureTabAvailable("left")).rejects.toThrow(/tab not found/i);
+    await expect(carapace.ensureTabAvailable()).rejects.toThrow(/tab not found/i);
 
-    await openclaw.labelTab("t3", "fresh-right");
+    await carapace.labelTab("t3", "fresh-right");
     targets = [
       { id: "NEW_LEFT", title: "Left", url: "https://app.example/same" },
       { id: "NEWER_RIGHT", title: "Right", url: "https://app.example/same" },
     ];
-    await expect(openclaw.listTabs()).resolves.toEqual([
+    await expect(carapace.listTabs()).resolves.toEqual([
       expect.objectContaining({ targetId: "NEW_LEFT", tabId: "t4" }),
       expect.objectContaining({
         targetId: "NEWER_RIGHT",

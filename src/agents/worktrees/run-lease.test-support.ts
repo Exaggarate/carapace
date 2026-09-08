@@ -17,7 +17,7 @@ type WorktreeRunLeaseTestApi = {
 
 function getTestApi(): WorktreeRunLeaseTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.worktreeRunLeaseTestApi")
+    Symbol.for("carapace.worktreeRunLeaseTestApi")
   ] as WorktreeRunLeaseTestApi;
 }
 

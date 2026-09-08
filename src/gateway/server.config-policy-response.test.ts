@@ -1,37 +1,37 @@
 // A config writer receives the committed revision before its own policy retires its socket.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import * as restartSentinel from "../infra/restart-sentinel.js";
 import { resetLogger } from "../logging/logger.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { GatewayClient } from "./client.js";
 import { startGatewayServerCore } from "./server-start.js";
 
-type ConfigSnapshot = { hash: string; config: OpenClawConfig };
+type ConfigSnapshot = { hash: string; config: CarapaceConfig };
 type ConfigAck = { hash: string; sentinel: { payload: { stats: { requiresRestart: boolean } } } };
 
 describe("config writer policy-close ordering", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
   let server: Awaited<ReturnType<typeof startGatewayServerCore>> | undefined;
   const clients: GatewayClient[] = [];
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "config-policy-response",
       env: {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
     });
   });
@@ -85,7 +85,7 @@ describe("config writer policy-close ordering", () => {
         const client = new GatewayClient({
           url: `ws://127.0.0.1:${port}`,
           token: credential,
-          clientName: browser ? "openclaw-control-ui" : "gateway-client",
+          clientName: browser ? "carapace-control-ui" : "gateway-client",
           clientVersion: "1.0.0",
           mode: browser ? "webchat" : "backend",
           ...(browser ? { origin } : {}),

@@ -1,6 +1,6 @@
 // Transcript provider contracts for external and manual transcript sources.
-import type { Result } from "@openclaw/normalization-core/result";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { Result } from "@carapace/normalization-core/result";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /**
  * Public contracts for transcript source providers.
@@ -58,7 +58,7 @@ export type TranscriptSessionDescriptor = {
 
 /** Request passed to providers that can start live transcript capture. */
 export type TranscriptStartRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   session: TranscriptSessionDescriptor;
   abortSignal?: AbortSignal;
   startupWaitMs?: number;
@@ -74,7 +74,7 @@ export type TranscriptStartRequest = {
 
 /** Request to watch whether a live source currently has human participants. */
 export type TranscriptOccupancyWatchRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   source: TranscriptSourceLocator;
   abortSignal?: AbortSignal;
   startupWaitMs?: number;
@@ -104,7 +104,7 @@ export type TranscriptsStartResult =
 
 /** Request passed to providers that can stop live transcript capture. */
 export type TranscriptStopRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   sessionId: string;
   source: TranscriptSourceLocator;
   reason?: string;
@@ -132,7 +132,7 @@ export type TranscriptSourceStatus = {
 
 /** Request passed to providers that import post-hoc transcript text. */
 export type TranscriptImportRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   session: TranscriptSessionDescriptor;
   text: string;
   speakerLabel?: string;
@@ -168,14 +168,14 @@ export type TranscriptSourceAccessControl = {
   channelId: string;
   /** Resolve and validate the canonical account before persistence. */
   resolveAccountId: (params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     source: TranscriptSourceLocator;
   }) => Result<string | undefined, string>;
   /** Apply the provider's native access policy to the resolved source. */
   authorize: (params: {
     action: TranscriptToolAction;
     caller: TranscriptToolCaller;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     source: TranscriptSourceLocator;
   }) => Promise<Result<void, string>>;
 };
@@ -195,7 +195,7 @@ export type TranscriptSourceProvider = {
   stop?: (request: TranscriptStopRequest) => Promise<TranscriptsStopResult>;
   status?: (
     source: TranscriptSourceLocator,
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
   ) => Promise<TranscriptSourceStatus[]>;
   importTranscript?: (request: TranscriptImportRequest) => Promise<TranscriptUtterance[]>;
 };

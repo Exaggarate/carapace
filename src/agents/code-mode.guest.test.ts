@@ -1,6 +1,6 @@
 /** Tests Code Mode guest execution. */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -132,7 +132,7 @@ describe("Code Mode guest execution", () => {
           toolName: "fake_create_ticket",
           label: "fake_create_ticket",
           description: "Create a fake ticket",
-          source: "openclaw",
+          source: "carapace",
           input: "{ value?: string }",
           output: "{ ok: boolean }",
         },
@@ -141,7 +141,7 @@ describe("Code Mode guest execution", () => {
     });
     const serialized = JSON.stringify(details.value);
     expect(serialized).not.toContain("null");
-    expect(serialized).not.toContain("openclaw:");
+    expect(serialized).not.toContain("carapace:");
     expect(serialized).not.toContain("fake-code-mode");
     expect(testing.activeRuns.size).toBe(0);
     expect(testing.resumingRunIds.size).toBe(0);
@@ -236,7 +236,7 @@ describe("Code Mode guest execution", () => {
       execTool: expectDefined(codeModeTools[0], "codeModeTools[0] test invariant"),
       waitTool: expectDefined(codeModeTools[1], "codeModeTools[1] test invariant"),
       code: `
-        const result = await web_search({ query: "OpenClaw" });
+        const result = await web_search({ query: "Carapace" });
         const normalized = await llm_task({ prompt: "summarize" });
         return {
           result,
@@ -251,7 +251,7 @@ describe("Code Mode guest execution", () => {
     expect(details).toMatchObject({
       status: "completed",
       value: {
-        result: { name: "web_search", input: { query: "OpenClaw" } },
+        result: { name: "web_search", input: { query: "Carapace" } },
         normalized: { name: "llm-task", input: { prompt: "summarize" } },
         tools: "undefined",
         allTools: "undefined",
@@ -272,8 +272,8 @@ describe("Code Mode guest execution", () => {
       pluginTool("TextDecoder", "Collide with text decoding"),
       pluginTool("class", "Use a reserved word"),
       pluginTool("9patch", "Start with a digit"),
-      pluginTool("__openclawResult", "Collide with a private lifecycle hook"),
-      pluginTool("tool___openclawResult", "Keep the exact safe lifecycle-shaped name"),
+      pluginTool("__carapaceResult", "Collide with a private lifecycle hook"),
+      pluginTool("tool___carapaceResult", "Keep the exact safe lifecycle-shaped name"),
     ];
     const compacted = applyCodeModeCatalog({
       tools: [...codeModeTools, ...targets],
@@ -304,7 +304,7 @@ describe("Code Mode guest execution", () => {
     const value = details.value as { names: string[]; results: Record<string, unknown> };
     expect(value.names).toContain("llm_task");
     expect(value.names).toContain("tool_9patch");
-    expect(value.names).toContain("tool___openclawResult");
+    expect(value.names).toContain("tool___carapaceResult");
     expect(value.names).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/^llm_task_[a-f0-9]{8}$/u),
@@ -312,11 +312,11 @@ describe("Code Mode guest execution", () => {
         expect.stringMatching(/^TextEncoder_[a-f0-9]{8}$/u),
         expect.stringMatching(/^TextDecoder_[a-f0-9]{8}$/u),
         expect.stringMatching(/^class_[a-f0-9]{8}$/u),
-        expect.stringMatching(/^tool___openclawResult_[a-f0-9]{8}$/u),
+        expect.stringMatching(/^tool___carapaceResult_[a-f0-9]{8}$/u),
       ]),
     );
     for (const name of value.names) {
-      expect(name.startsWith("__openclaw")).toBe(false);
+      expect(name.startsWith("__carapace")).toBe(false);
       expect(compacted.tools[0]?.description).toContain(`- ${name} `);
     }
     expect(details).toMatchObject({ value: { encoding: "still works" } });
@@ -328,19 +328,19 @@ describe("Code Mode guest execution", () => {
       catalog: { name: "catalog", input: { ok: true } },
       class: { name: "class", input: { ok: true } },
       "9patch": { name: "9patch", input: { ok: true } },
-      __openclawResult: { name: "__openclawResult", input: { ok: true } },
-      tool___openclawResult: { name: "tool___openclawResult", input: { ok: true } },
+      __carapaceResult: { name: "__carapaceResult", input: { ok: true } },
+      tool___carapaceResult: { name: "tool___carapaceResult", input: { ok: true } },
     });
   });
 
   it("keeps private lifecycle hooks intact while invoking colliding catalog globals", async () => {
     const { config, catalogRef, tools: codeModeTools } = createCodeModeHarness();
     const privateNames = [
-      "__openclawResult",
-      "__openclawSerializeCatalogHandles",
-      "__openclawSettleBridge",
-      "__openclawTakeOutput",
-      "__openclawFuturePrivateHook",
+      "__carapaceResult",
+      "__carapaceSerializeCatalogHandles",
+      "__carapaceSettleBridge",
+      "__carapaceTakeOutput",
+      "__carapaceFuturePrivateHook",
     ];
     const targets = privateNames.map((name) => pluginTool(name, `Exercise ${name}`));
     applyCodeModeCatalog({
@@ -465,7 +465,7 @@ describe("Code Mode guest execution", () => {
         parameters: expect.any(Object),
       }),
     });
-    expect(JSON.stringify(details.value)).not.toContain("openclaw:fake-code-mode");
+    expect(JSON.stringify(details.value)).not.toContain("carapace:fake-code-mode");
     expect(details.telemetry).toMatchObject({ callCount: 2, describeCount: 1 });
     expect(ticket.execute).toHaveBeenCalledTimes(2);
   });
@@ -732,11 +732,11 @@ describe("Code Mode guest execution", () => {
     expect(details.status).toBe("failed");
     const error = String(details.error);
     // Regression guard: QuickJS stacks are frames only, so the error used to
-    // collapse to a bare "at openclaw-code-mode:user.js:..." location with the
+    // collapse to a bare "at carapace-code-mode:user.js:..." location with the
     // actual cause dropped. The model now sees the name and message.
     expect(error).toContain("SyntaxError");
     expect(error).toContain("unexpected token");
-    expect(error).toMatch(/openclaw-code-mode:user\.js:2:\d+/);
+    expect(error).toMatch(/carapace-code-mode:user\.js:2:\d+/);
     expect(error.startsWith("at ")).toBe(false);
   });
 
@@ -769,7 +769,7 @@ describe("Code Mode guest execution", () => {
     const error = String(details.error);
     expect(error).toContain(name);
     expect(error).toContain(cause);
-    expect(error).toMatch(/openclaw-code-mode:user\.js:2:\d+/);
+    expect(error).toMatch(/carapace-code-mode:user\.js:2:\d+/);
     expect(error).not.toContain("<eval>");
     expect(error.startsWith("at ")).toBe(false);
   });
@@ -788,7 +788,7 @@ describe("Code Mode guest execution", () => {
     const details = resultDetails(
       await expectDefined(codeModeTools[0], "codeModeTools[0] test invariant").execute(
         "code-hidden-host-request",
-        { code: "return typeof globalThis.__openclawHostRequest;" },
+        { code: "return typeof globalThis.__carapaceHostRequest;" },
       ),
     );
 

@@ -17,7 +17,7 @@ import { basename, dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 import { runInNewContext } from "node:vm";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parse } from "yaml";
 import { releaseBranchForTag } from "../../scripts/lib/release-context.mjs";
@@ -58,7 +58,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const publishWorkflowRef = "release-publish/bbbbbbbbbbbb-123";
 
 function candidateGitFixture(files: Record<string, string>) {
-  const root = tempDirs.make("openclaw-candidate-");
+  const root = tempDirs.make("carapace-candidate-");
   const git = (...args: string[]) => run("git", args, { cwd: root, capture: true }).trim();
   git("init", "--initial-branch=main");
   git("config", "user.name", "Release Fixture");
@@ -78,15 +78,15 @@ function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
 }
 
 async function withGithubApiTimeoutEnv<T>(value: string, fn: () => Promise<T>): Promise<T> {
-  const previous = process.env.OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS;
-  process.env.OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS = value;
+  const previous = process.env.CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS;
+  process.env.CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS = value;
   try {
     return await fn();
   } finally {
     if (previous === undefined) {
-      delete process.env.OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS;
+      delete process.env.CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS;
     } else {
-      process.env.OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS = previous;
+      process.env.CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS = previous;
     }
   }
 }
@@ -139,7 +139,7 @@ describe("release candidate checklist", () => {
       }
       options.outputDir = join(targetRoot, "evidence");
       mkdirSync(join(options.outputDir, "npm-preflight"), { recursive: true });
-      writeFileSync(join(options.outputDir, "npm-preflight", "openclaw.tgz"), "fixture");
+      writeFileSync(join(options.outputDir, "npm-preflight", "carapace.tgz"), "fixture");
       const source = readFileSync("scripts/release-candidate-checklist.mts", "utf8");
       const main = source.match(/^async function main\(\)[\s\S]*?^\}/mu)?.[0];
       const android =
@@ -148,7 +148,7 @@ describe("release candidate checklist", () => {
       const stages: string[] = [];
       const toolingSha = "b".repeat(40);
       const npmManifest = {
-        tarballName: "openclaw.tgz",
+        tarballName: "carapace.tgz",
         tarballSha256: "fixture-digest",
         corePackageTarballs: [],
         dependencyTarballs: [],
@@ -159,7 +159,7 @@ describe("release candidate checklist", () => {
         process: { argv: [], cwd: () => targetRoot, env: {} },
         console: { log, warn: log },
         TOOLING_ROOT: "/trusted/tooling",
-        TRUSTED_TOOLING_SHA_ENV: "OPENCLAW_RELEASE_CANDIDATE_TRUSTED_TOOLING_SHA",
+        TRUSTED_TOOLING_SHA_ENV: "CARAPACE_RELEASE_CANDIDATE_TRUSTED_TOOLING_SHA",
         RELEASE_CANDIDATE_STATE_FILE: "release-candidate-state.json",
         parseArgs: () => options,
         gitTopLevel: (root: string) => root,
@@ -254,7 +254,7 @@ describe("release candidate checklist", () => {
         "utf8",
       );
       const output = log.mock.calls.map(([line]) => line).join("\n");
-      expect(evidence.publishCommand).toContain("openclaw-release-publish.yml");
+      expect(evidence.publishCommand).toContain("carapace-release-publish.yml");
       if (!expected) {
         expect(evidence).not.toHaveProperty("androidVersionCheck");
         expect(summary + output).not.toContain("Android version");
@@ -376,7 +376,7 @@ describe("release candidate checklist", () => {
             console,
             targetRoot,
             argv: [scenario === "child failure" ? "--fail" : "--help"],
-            TRUSTED_TOOLING_SHA_ENV: "OPENCLAW_RELEASE_CANDIDATE_TRUSTED_TOOLING_SHA",
+            TRUSTED_TOOLING_SHA_ENV: "CARAPACE_RELEASE_CANDIDATE_TRUSTED_TOOLING_SHA",
             fetchTrustedWorkflowSha: () => trustedToolingSha,
             run: (command: string, args: string[], options: Parameters<typeof run>[2]) =>
               command === "pnpm" ? installs(command, args, options) : run(command, args, options),
@@ -425,7 +425,7 @@ describe("release candidate checklist", () => {
     { warnings: [] },
     {
       warnings: [
-        '@openclaw/example@2026.9.1: example-runtime pinned "1.2.3", npm latest is "1.2.4".',
+        '@carapace/example@2026.9.1: example-runtime pinned "1.2.3", npm latest is "1.2.4".',
       ],
     },
   ])("keeps plugin plan warnings advisory and visible: $warnings", ({ warnings }) => {
@@ -436,7 +436,7 @@ describe("release candidate checklist", () => {
     expect(summary).toBeDefined();
     const log = vi.fn();
     const runPlanner = vi.fn((_command, args, options) =>
-      JSON.stringify({ args, options, all: [{ packageName: "@openclaw/example" }], warnings }),
+      JSON.stringify({ args, options, all: [{ packageName: "@carapace/example" }], warnings }),
     );
     const result = runInNewContext(
       stripNodeTypeScriptTypes(
@@ -527,8 +527,8 @@ describe("release candidate checklist", () => {
 
     expect(
       isDirectReleaseCandidateExecution(
-        "/tmp/openclaw-release-tooling/checkout/scripts/release-candidate-checklist.mts",
-        "/private/tmp/openclaw-release-tooling/checkout/scripts/release-candidate-checklist.mts",
+        "/tmp/carapace-release-tooling/checkout/scripts/release-candidate-checklist.mts",
+        "/private/tmp/carapace-release-tooling/checkout/scripts/release-candidate-checklist.mts",
         realpath,
       ),
     ).toBe(true);
@@ -604,8 +604,8 @@ describe("release candidate checklist", () => {
   it("passes scoped environment overrides to release child commands", () => {
     const output = run(
       process.execPath,
-      ["-e", "process.stdout.write(process.env.OPENCLAW_RELEASE_TEST_VALUE ?? '')"],
-      { capture: true, env: { OPENCLAW_RELEASE_TEST_VALUE: "passed" } },
+      ["-e", "process.stdout.write(process.env.CARAPACE_RELEASE_TEST_VALUE ?? '')"],
+      { capture: true, env: { CARAPACE_RELEASE_TEST_VALUE: "passed" } },
     );
 
     expect(output).toBe("passed");
@@ -727,7 +727,7 @@ describe("release candidate checklist", () => {
         "",
         `- **PR #123** ${"record ".repeat(20_000)}`,
       ].join("\n"),
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       tag: "v2026.7.1-beta.3",
     });
     const source = readFileSync("scripts/release-candidate-checklist.mts", "utf8");
@@ -1096,16 +1096,16 @@ describe("release candidate checklist", () => {
   });
 
   it("runs Parallels against the exact prepared candidate tarball", () => {
-    expect(candidateParallelsArgs(".artifacts/preflight/openclaw.tgz", [], "/trusted")).toEqual([
+    expect(candidateParallelsArgs(".artifacts/preflight/carapace.tgz", [], "/trusted")).toEqual([
       "exec",
       "tsx",
       "/trusted/scripts/e2e/parallels/npm-update-smoke.ts",
       "--target-tarball",
-      ".artifacts/preflight/openclaw.tgz",
+      ".artifacts/preflight/carapace.tgz",
       "--json",
     ]);
     const command = candidateParallelsShellCommand(
-      ".artifacts/preflight/openclaw candidate.tgz",
+      ".artifacts/preflight/carapace candidate.tgz",
       "/opt/homebrew/bin/gtimeout",
     );
     expect(command).toContain(
@@ -1113,17 +1113,17 @@ describe("release candidate checklist", () => {
     );
     expect(
       candidateParallelsShellCommand(
-        ".artifacts/preflight/openclaw candidate.tgz",
+        ".artifacts/preflight/carapace candidate.tgz",
         "/opt/homebrew/bin/gtimeout",
-        [".artifacts/preflight/openclaw-ai candidate.tgz"],
+        [".artifacts/preflight/carapace-ai candidate.tgz"],
       ),
-    ).toContain("'--target-tarball' '.artifacts/preflight/openclaw candidate.tgz'");
+    ).toContain("'--target-tarball' '.artifacts/preflight/carapace candidate.tgz'");
     expect(
       candidateParallelsArgs(
-        ".artifacts/preflight/openclaw.tgz",
-        [".artifacts/preflight/openclaw-ai.tgz"],
+        ".artifacts/preflight/carapace.tgz",
+        [".artifacts/preflight/carapace-ai.tgz"],
         "/trusted",
-        [".artifacts/preflight/openclaw-codex.tgz"],
+        [".artifacts/preflight/carapace-codex.tgz"],
         "macOS 26.5 Node 24",
       ),
     ).toEqual([
@@ -1131,11 +1131,11 @@ describe("release candidate checklist", () => {
       "tsx",
       "/trusted/scripts/e2e/parallels/npm-update-smoke.ts",
       "--target-tarball",
-      ".artifacts/preflight/openclaw.tgz",
+      ".artifacts/preflight/carapace.tgz",
       "--dependency-tarball",
-      ".artifacts/preflight/openclaw-ai.tgz",
+      ".artifacts/preflight/carapace-ai.tgz",
       "--registry-package-tarball",
-      ".artifacts/preflight/openclaw-codex.tgz",
+      ".artifacts/preflight/carapace-codex.tgz",
       "--macos-snapshot-hint",
       "macOS 26.5 Node 24",
       "--json",
@@ -1156,25 +1156,25 @@ describe("release candidate checklist", () => {
   });
 
   it("binds Parallels registry packages to plugin preflight manifests", () => {
-    const artifactDir = tempDirs.make("openclaw-plugin-preflight-");
-    const tarballName = "openclaw-codex-2026.7.1-beta.3.tgz";
+    const artifactDir = tempDirs.make("carapace-plugin-preflight-");
+    const tarballName = "carapace-codex-2026.7.1-beta.3.tgz";
     const tarballPath = join(artifactDir, tarballName);
     const sourceDir = join(artifactDir, "source");
     const packageDir = join(sourceDir, "package");
     mkdirSync(packageDir, { recursive: true });
     writeFileSync(
       join(packageDir, "package.json"),
-      `${JSON.stringify({ name: "@openclaw/codex", version: "2026.7.1-beta.3" })}\n`,
+      `${JSON.stringify({ name: "@carapace/codex", version: "2026.7.1-beta.3" })}\n`,
     );
     execFileSync("tar", ["-czf", tarballPath, "-C", sourceDir, "package"]);
     rmSync(sourceDir, { force: true, recursive: true });
     const tarballSha256 = createHash("sha256").update(readFileSync(tarballPath)).digest("hex");
     const manifestPath = join(artifactDir, "plugin-publication-manifest.json");
     const manifest = {
-      schema: "openclaw.plugin-publication-artifact/v1",
+      schema: "carapace.plugin-publication-artifact/v1",
       schemaVersion: 1,
       targetSha: "candidate-sha",
-      package: { name: "@openclaw/codex", version: "2026.7.1-beta.3" },
+      package: { name: "@carapace/codex", version: "2026.7.1-beta.3" },
       artifact: {
         name: "plugin-npm-package-codex",
         tarball: tarballName,
@@ -1190,7 +1190,7 @@ describe("release candidate checklist", () => {
       }),
     ).toMatchObject({
       artifactName: "plugin-npm-package-codex",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       packageVersion: "2026.7.1-beta.3",
       tarballPath,
       tarballSha256,
@@ -1198,7 +1198,7 @@ describe("release candidate checklist", () => {
     mkdirSync(packageDir, { recursive: true });
     writeFileSync(
       join(packageDir, "package.json"),
-      `${JSON.stringify({ name: "@openclaw/matrix", version: "2026.7.1-beta.3" })}\n`,
+      `${JSON.stringify({ name: "@carapace/matrix", version: "2026.7.1-beta.3" })}\n`,
     );
     execFileSync("tar", ["-czf", tarballPath, "-C", sourceDir, "package"]);
     rmSync(sourceDir, { force: true, recursive: true });
@@ -1230,13 +1230,13 @@ describe("release candidate checklist", () => {
       releaseTag: "v2026.7.1-beta.3",
       releaseSha: "candidate-sha",
       npmDistTag: "beta",
-      tarballName: "openclaw-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-2026.7.1-beta.3.tgz",
       tarballSha256: "root-sha",
       dependencyTarballs: [
         {
-          packageName: "@openclaw/ai",
+          packageName: "@carapace/ai",
           packageVersion: "2026.7.1-beta.3",
-          tarballName: "openclaw-ai-2026.7.1-beta.3.tgz",
+          tarballName: "carapace-ai-2026.7.1-beta.3.tgz",
           tarballSha256: "ai-sha",
         },
       ],
@@ -1258,7 +1258,7 @@ describe("release candidate checklist", () => {
           dependencyTarballs: [
             {
               ...manifest.dependencyTarballs[0],
-              tarballName: "../openclaw-ai.tgz",
+              tarballName: "../carapace-ai.tgz",
             },
           ],
         },
@@ -1269,15 +1269,15 @@ describe("release candidate checklist", () => {
 
   it("prefers the complete core package tarball set with legacy manifest fallback", () => {
     const legacyTarball = {
-      packageName: "@openclaw/ai",
+      packageName: "@carapace/ai",
       packageVersion: "2026.7.1-beta.3",
-      tarballName: "openclaw-ai-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-ai-2026.7.1-beta.3.tgz",
       tarballSha256: "ai-sha",
     };
     const gatewayProtocolTarball = {
-      packageName: "@openclaw/gateway-protocol",
+      packageName: "@carapace/gateway-protocol",
       packageVersion: "2026.7.1-beta.3",
-      tarballName: "openclaw-gateway-protocol-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-gateway-protocol-2026.7.1-beta.3.tgz",
       tarballSha256: "protocol-sha",
     };
 
@@ -1300,21 +1300,21 @@ describe("release candidate checklist", () => {
 
   it("passes only root dependency tarballs to Parallels with legacy fallback", () => {
     const aiTarball = {
-      packageName: "@openclaw/ai",
+      packageName: "@carapace/ai",
       packageVersion: "2026.7.1-beta.3",
-      tarballName: "openclaw-ai-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-ai-2026.7.1-beta.3.tgz",
       tarballSha256: "ai-sha",
     };
     const gatewayProtocolTarball = {
-      packageName: "@openclaw/gateway-protocol",
+      packageName: "@carapace/gateway-protocol",
       packageVersion: "2026.7.1-beta.3",
-      tarballName: "openclaw-gateway-protocol-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-gateway-protocol-2026.7.1-beta.3.tgz",
       tarballSha256: "protocol-sha",
     };
     const gatewayClientTarball = {
-      packageName: "@openclaw/gateway-client",
+      packageName: "@carapace/gateway-client",
       packageVersion: "2026.7.1-beta.3",
-      tarballName: "openclaw-gateway-client-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-gateway-client-2026.7.1-beta.3.tgz",
       tarballSha256: "client-sha",
     };
     const corePackageTarballs = [aiTarball, gatewayProtocolTarball, gatewayClientTarball];
@@ -1330,7 +1330,7 @@ describe("release candidate checklist", () => {
       releaseTag: "v2026.7.1-beta.3",
       releaseSha: "candidate-sha",
       npmDistTag: "beta",
-      tarballName: "openclaw-2026.7.1-beta.3.tgz",
+      tarballName: "carapace-2026.7.1-beta.3.tgz",
       tarballSha256: "root-sha",
       corePackageTarballs,
       dependencyTarballs: [aiTarball],
@@ -1365,15 +1365,15 @@ describe("release candidate checklist", () => {
   });
 
   describe("npm preflight source", () => {
-    const repo = "openclaw/openclaw";
+    const repo = "carapace/carapace";
     const headSha = "a".repeat(40);
     const protectedRef = `release-publish/${headSha.slice(0, 12)}-123`;
     const workflowRun = {
       databaseId: 456,
       runAttempt: 2,
       repository: repo,
-      workflowName: "OpenClaw NPM Release",
-      workflowPath: ".github/workflows/openclaw-npm-release.yml",
+      workflowName: "Carapace NPM Release",
+      workflowPath: ".github/workflows/carapace-npm-release.yml",
       event: "workflow_dispatch",
       status: "completed",
       conclusion: "success",
@@ -1496,7 +1496,7 @@ describe("release candidate checklist", () => {
     it.each([
       { databaseId: 457 },
       { runAttempt: 0 },
-      { repository: "other/openclaw" },
+      { repository: "other/carapace" },
       { workflowName: "Other workflow" },
       { workflowPath: ".github/workflows/unrelated.yml" },
       { event: "push" },
@@ -1506,7 +1506,7 @@ describe("release candidate checklist", () => {
       { headBranch: "release/2026.7.1" },
       { headBranch: `release-publish/${"b".repeat(12)}-123` },
       { headBranch: `release-publish/${"a".repeat(12)}-0` },
-      { workflowPath: ".github/workflows/openclaw-npm-release.yml@refs/heads/other" },
+      { workflowPath: ".github/workflows/carapace-npm-release.yml@refs/heads/other" },
     ])("rejects mismatched npm preflight identity %j", async (override) => {
       await expect(
         Promise.resolve().then(() =>
@@ -1589,7 +1589,7 @@ describe("release candidate checklist", () => {
     const duplicateCases = [
       duplicateOption("--tag", "v2026.5.14-beta.3", "v2026.5.14-beta.4", []),
       duplicateOption("--workflow-ref", "release/a", "release/b"),
-      duplicateOption("--repo", "openclaw/openclaw", "fork/openclaw"),
+      duplicateOption("--repo", "carapace/carapace", "fork/carapace"),
       duplicateOption("--full-release-run", "111", "222"),
       duplicateOption("--npm-preflight-run", "111", "222"),
       duplicateOption("--windows-node-tag", "v0.6.3", "v0.6.4"),
@@ -1716,7 +1716,7 @@ describe("release candidate checklist", () => {
       };
       const dispatchWorkflow = vi.fn(() => "333");
       const waitForSuccessfulRun = vi.fn(async () => ({
-        run: { url: "https://github.com/openclaw/openclaw/actions/runs/333" },
+        run: { url: "https://github.com/Exaggarate/carapace/actions/runs/333" },
       }));
       // Execute the private owner and its real caller without exporting a test-only API.
       const result = (await runInNewContext(
@@ -1735,7 +1735,7 @@ describe("release candidate checklist", () => {
             workflowRunId: producerRunId,
           },
           npmManifest: {
-            tarballName: "openclaw.tgz",
+            tarballName: "carapace.tgz",
             tarballSha256: "b".repeat(64),
             packageVersion: options.tag.slice(1),
           },
@@ -1853,7 +1853,7 @@ describe("release candidate checklist", () => {
     expect(command).not.toContain("windows_node_tag=");
 
     const workflow = parse(
-      readFileSync(".github/workflows/openclaw-release-publish.yml", "utf8"),
+      readFileSync(".github/workflows/carapace-release-publish.yml", "utf8"),
     ) as {
       on: { workflow_dispatch: { inputs: Record<string, unknown> } };
     };
@@ -1890,7 +1890,7 @@ describe("release candidate checklist", () => {
 
     expect(command).toContain("'tag=v2026.5.14'");
     expect(command).toContain("'npm_dist_tag=latest'");
-    expect(command).toContain("'publish_openclaw_npm=true'");
+    expect(command).toContain("'publish_carapace_npm=true'");
     expect(command).not.toContain("windows_node_");
   });
 
@@ -1911,25 +1911,25 @@ describe("release candidate checklist", () => {
       workflowRef: "main",
       publishWorkflowRef,
       windowsNodeInstallerDigests: JSON.stringify({
-        "OpenClawCompanion-Setup-x64.exe": `sha256:${"a".repeat(64)}`,
-        "OpenClawCompanion-Setup-arm64.exe": `sha256:${"b".repeat(64)}`,
+        "CarapaceCompanion-Setup-x64.exe": `sha256:${"a".repeat(64)}`,
+        "CarapaceCompanion-Setup-arm64.exe": `sha256:${"b".repeat(64)}`,
       }),
     };
 
     expect(buildPublishCommand(options)).toContain("'windows_node_tag=v0.6.3'");
     expect(buildPublishCommand(options)).toContain(
-      `'windows_node_installer_digests={"OpenClawCompanion-Setup-x64.exe":"sha256:${"a".repeat(64)}","OpenClawCompanion-Setup-arm64.exe":"sha256:${"b".repeat(64)}"}'`,
+      `'windows_node_installer_digests={"CarapaceCompanion-Setup-x64.exe":"sha256:${"a".repeat(64)}","CarapaceCompanion-Setup-arm64.exe":"sha256:${"b".repeat(64)}"}'`,
     );
   });
 
   it("validates the stable Windows source release and immutable installer digests", async () => {
     const assets = [
       {
-        name: "OpenClawCompanion-Setup-x64.exe",
+        name: "CarapaceCompanion-Setup-x64.exe",
         digest: `sha256:${"a".repeat(64)}`,
       },
       {
-        name: "OpenClawCompanion-Setup-arm64.exe",
+        name: "CarapaceCompanion-Setup-arm64.exe",
         digest: `sha256:${"b".repeat(64)}`,
       },
     ];
@@ -1938,7 +1938,7 @@ describe("release candidate checklist", () => {
         tag_name: "v0.6.3",
         draft: false,
         prerelease: false,
-        html_url: "https://github.com/openclaw/openclaw-windows-node/releases/tag/v0.6.3",
+        html_url: "https://github.com/Exaggarate/carapace/carapace-windows-node/releases/tag/v0.6.3",
         assets,
       });
     });
@@ -1951,7 +1951,7 @@ describe("release candidate checklist", () => {
       }),
     ).resolves.toEqual({
       tag: "v0.6.3",
-      url: "https://github.com/openclaw/openclaw-windows-node/releases/tag/v0.6.3",
+      url: "https://github.com/Exaggarate/carapace/carapace-windows-node/releases/tag/v0.6.3",
       assets,
     });
   });
@@ -1962,35 +1962,35 @@ describe("release candidate checklist", () => {
     [{ tag_name: "v0.6.4" }, "Windows source release tag mismatch: expected v0.6.3, got v0.6.4"],
     [
       { assets: [] },
-      "must contain exactly one required asset OpenClawCompanion-Setup-x64.exe; found 0",
+      "must contain exactly one required asset CarapaceCompanion-Setup-x64.exe; found 0",
     ],
     [
       {
         assets: [
           {
-            name: "OpenClawCompanion-Setup-x64.exe",
+            name: "CarapaceCompanion-Setup-x64.exe",
             digest: `sha256:${"a".repeat(64)}`,
           },
           {
-            name: "OpenClawCompanion-Setup-x64.exe",
+            name: "CarapaceCompanion-Setup-x64.exe",
             digest: `sha256:${"c".repeat(64)}`,
           },
           {
-            name: "OpenClawCompanion-Setup-arm64.exe",
+            name: "CarapaceCompanion-Setup-arm64.exe",
             digest: `sha256:${"b".repeat(64)}`,
           },
         ],
       },
-      "must contain exactly one required asset OpenClawCompanion-Setup-x64.exe; found 2",
+      "must contain exactly one required asset CarapaceCompanion-Setup-x64.exe; found 2",
     ],
     [
       {
         assets: [
-          { name: "OpenClawCompanion-Setup-x64.exe", digest: "" },
-          { name: "OpenClawCompanion-Setup-arm64.exe", digest: `sha256:${"b".repeat(64)}` },
+          { name: "CarapaceCompanion-Setup-x64.exe", digest: "" },
+          { name: "CarapaceCompanion-Setup-arm64.exe", digest: `sha256:${"b".repeat(64)}` },
         ],
       },
-      "asset OpenClawCompanion-Setup-x64.exe is missing its SHA-256 digest",
+      "asset CarapaceCompanion-Setup-x64.exe is missing its SHA-256 digest",
     ],
   ])("rejects an invalid stable Windows source release", async (override, message) => {
     const fetchImpl = vi.fn(async () => {
@@ -1998,14 +1998,14 @@ describe("release candidate checklist", () => {
         tag_name: "v0.6.3",
         draft: false,
         prerelease: false,
-        html_url: "https://github.com/openclaw/openclaw-windows-node/releases/tag/v0.6.3",
+        html_url: "https://github.com/Exaggarate/carapace/carapace-windows-node/releases/tag/v0.6.3",
         assets: [
           {
-            name: "OpenClawCompanion-Setup-x64.exe",
+            name: "CarapaceCompanion-Setup-x64.exe",
             digest: `sha256:${"a".repeat(64)}`,
           },
           {
-            name: "OpenClawCompanion-Setup-arm64.exe",
+            name: "CarapaceCompanion-Setup-arm64.exe",
             digest: `sha256:${"b".repeat(64)}`,
           },
         ],
@@ -2057,15 +2057,15 @@ describe("release candidate checklist", () => {
         "--plugin-publish-scope",
         "selected",
         "--plugins",
-        "@openclaw/diffs",
+        "@carapace/diffs",
       ]),
-    ).toThrow("release candidates publish OpenClaw with --plugin-publish-scope all-publishable");
+    ).toThrow("release candidates publish Carapace with --plugin-publish-scope all-publishable");
   });
 
   it("extracts a workflow run id from gh dispatch output", () => {
     expect(
       parseRunIdFromDispatchOutput(
-        "https://github.com/openclaw/openclaw/actions/runs/25922042055\n",
+        "https://github.com/Exaggarate/carapace/actions/runs/25922042055\n",
       ),
     ).toBe("25922042055");
   });
@@ -2135,11 +2135,11 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
   it("falls back to a single compatible artifact from the same run", () => {
     expect(
       resolveArtifactName(
-        [{ name: "openclaw-npm-preflight-dba00", expired: false }],
-        "openclaw-npm-preflight-v2026.5.16-beta.2",
-        "openclaw-npm-preflight-",
+        [{ name: "carapace-npm-preflight-dba00", expired: false }],
+        "carapace-npm-preflight-v2026.5.16-beta.2",
+        "carapace-npm-preflight-",
       ),
-    ).toBe("openclaw-npm-preflight-dba00");
+    ).toBe("carapace-npm-preflight-dba00");
   });
 
   it("builds the complete immutable Telegram artifact identity tuple", () => {
@@ -2147,12 +2147,12 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
       artifact: {
         digest: `sha256:${"a".repeat(64)}`,
         id: 123,
-        name: "openclaw-npm-preflight-v2026.7.2-beta.1",
+        name: "carapace-npm-preflight-v2026.7.2-beta.1",
         workflowRunId: 456,
       },
       manifest: {
         packageVersion: "2026.7.2-beta.1",
-        tarballName: "openclaw-2026.7.2-beta.1.tgz",
+        tarballName: "carapace-2026.7.2-beta.1.tgz",
         tarballSha256: "b".repeat(64),
       },
       runAttempt: 2,
@@ -2162,10 +2162,10 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
     expect(buildTelegramArtifactInputs(input)).toEqual({
       package_artifact_digest: "a".repeat(64),
       package_artifact_id: 123,
-      package_artifact_name: "openclaw-npm-preflight-v2026.7.2-beta.1",
+      package_artifact_name: "carapace-npm-preflight-v2026.7.2-beta.1",
       package_artifact_run_attempt: 2,
       package_artifact_run_id: "456",
-      package_file_name: "openclaw-2026.7.2-beta.1.tgz",
+      package_file_name: "carapace-2026.7.2-beta.1.tgz",
       package_sha256: "b".repeat(64),
       package_source_sha: "c".repeat(40),
       package_version: "2026.7.2-beta.1",
@@ -2191,14 +2191,14 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
     });
 
     await expect(
-      githubApi("repos/openclaw/openclaw/actions/runs", {
+      githubApi("repos/carapace/carapace/actions/runs", {
         fetchImpl,
         timeoutMs: 1234,
         token: "test-token",
       }),
     ).resolves.toEqual({ workflow_runs: [] });
     expect(fetchImpl).toHaveBeenCalledWith(
-      "https://api.github.com/repos/openclaw/openclaw/actions/runs",
+      "https://api.github.com/repos/carapace/carapace/actions/runs",
       expect.objectContaining({
         signal: expect.any(AbortSignal),
       }),
@@ -2213,7 +2213,7 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
 
     await withGithubApiTimeoutEnv("2500", async () => {
       await expect(
-        githubApi("repos/openclaw/openclaw/actions/runs", {
+        githubApi("repos/carapace/carapace/actions/runs", {
           fetchImpl,
           token: "test-token",
         }),
@@ -2229,12 +2229,12 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
 
       await withGithubApiTimeoutEnv(raw, async () => {
         await expect(
-          githubApi("repos/openclaw/openclaw/actions/runs", {
+          githubApi("repos/carapace/carapace/actions/runs", {
             fetchImpl,
             token: "test-token",
           }),
         ).rejects.toThrow(
-          "OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS must be a positive integer",
+          "CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS must be a positive integer",
         );
       });
       expect(fetchImpl).not.toHaveBeenCalled();
@@ -2250,14 +2250,14 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
     });
 
     await expect(
-      githubApi("repos/openclaw/openclaw/actions/runs", {
+      githubApi("repos/carapace/carapace/actions/runs", {
         fetchImpl,
         maxBodyBytes: 64,
         timeoutMs: 1234,
         token: "test-token",
       }),
     ).rejects.toThrow(
-      "GitHub API repos/openclaw/openclaw/actions/runs response body exceeded 64 bytes",
+      "GitHub API repos/carapace/carapace/actions/runs response body exceeded 64 bytes",
     );
   });
 
@@ -2269,12 +2269,12 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
     });
 
     await expect(
-      githubApi("repos/openclaw/openclaw/actions/runs", {
+      githubApi("repos/carapace/carapace/actions/runs", {
         fetchImpl,
         timeoutMs: 25,
         token: "test-token",
       }),
-    ).rejects.toThrow("GitHub API repos/openclaw/openclaw/actions/runs timed out after 25ms");
+    ).rejects.toThrow("GitHub API repos/carapace/carapace/actions/runs timed out after 25ms");
   });
 
   it("includes the GitHub API path when a request times out", async () => {
@@ -2283,13 +2283,13 @@ ${declareIdentity ? "      trusted_workflow_json: {}\n" : ""}`;
     });
 
     await expect(
-      githubApi("repos/openclaw/openclaw/actions/runs/123/jobs", {
+      githubApi("repos/carapace/carapace/actions/runs/123/jobs", {
         fetchImpl,
         timeoutMs: 5,
         token: "test-token",
       }),
     ).rejects.toThrow(
-      "GitHub API repos/openclaw/openclaw/actions/runs/123/jobs timed out after 5ms",
+      "GitHub API repos/carapace/carapace/actions/runs/123/jobs timed out after 5ms",
     );
   });
 });
@@ -2306,7 +2306,7 @@ describe("GitHub API public fallback", () => {
         .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 
       await expect(
-        githubApi("repos/openclaw/openclaw/actions/runs/123", {
+        githubApi("repos/carapace/carapace/actions/runs/123", {
           token: "x",
           fetchImpl,
         }),

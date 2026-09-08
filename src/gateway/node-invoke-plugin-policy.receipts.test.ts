@@ -6,7 +6,7 @@ import { configureRuntimeActionDecisionSink } from "../audit/runtime-action-deci
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
-import type { OpenClawPluginNodeInvokePolicyContext } from "../plugins/types.js";
+import type { CarapacePluginNodeInvokePolicyContext } from "../plugins/types.js";
 import { ApprovalObserverClosedError } from "./exec-approval-lifecycle.js";
 import { applyPluginNodeInvokePolicy } from "./node-invoke-plugin-policy.js";
 import type { NodeInvokeResult, NodeSession } from "./node-registry.js";
@@ -113,7 +113,7 @@ describe("plugin node action receipts", () => {
   afterEach(resetPluginRuntimeStateForTest);
 
   it("records gate enforcement and successful action as attribution only", async () => {
-    registerPolicy((ctx: OpenClawPluginNodeInvokePolicyContext) => ctx.invokeNode());
+    registerPolicy((ctx: CarapacePluginNodeInvokePolicyContext) => ctx.invokeNode());
     const { result, receipts } = await runPolicy();
     expect(result).toMatchObject({ ok: true });
     expect(receipts).toMatchObject([
@@ -146,7 +146,7 @@ describe("plugin node action receipts", () => {
   });
 
   it("records node capability denial at the owning dispatch gate", async () => {
-    registerPolicy((ctx: OpenClawPluginNodeInvokePolicyContext) => ctx.invokeNode());
+    registerPolicy((ctx: CarapacePluginNodeInvokePolicyContext) => ctx.invokeNode());
     const { result, receipts, invoke } = await runPolicy(createNode([]));
     expect(result).toMatchObject({ ok: false, code: "NODE_COMMAND_REVOKED" });
     expect(invoke).not.toHaveBeenCalled();

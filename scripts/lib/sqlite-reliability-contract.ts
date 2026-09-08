@@ -2,15 +2,15 @@ type ProfileId = "smoke" | "default" | "large";
 
 export type IndexRepairJournalMode = "delete" | "wal";
 
-export const INDEX_REPAIR_INDEX_NAME = "idx_openclaw_reliability_records_identity";
+export const INDEX_REPAIR_INDEX_NAME = "idx_carapace_reliability_records_identity";
 export const INDEX_REPAIR_SCHEMA_SQL = `
-  CREATE TABLE IF NOT EXISTS openclaw_reliability_index_records (
+  CREATE TABLE IF NOT EXISTS carapace_reliability_index_records (
     id INTEGER PRIMARY KEY,
     identity TEXT NOT NULL,
     payload TEXT NOT NULL
   );
   CREATE UNIQUE INDEX IF NOT EXISTS ${INDEX_REPAIR_INDEX_NAME}
-    ON openclaw_reliability_index_records(identity);
+    ON carapace_reliability_index_records(identity);
 `;
 
 export type ProfileConfig = {
@@ -351,11 +351,11 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
 };
 
 export const STRESS_TABLE_SQL = `
-  CREATE TABLE IF NOT EXISTS openclaw_reliability_sentinel (
+  CREATE TABLE IF NOT EXISTS carapace_reliability_sentinel (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     payload TEXT NOT NULL
   );
-  CREATE TABLE IF NOT EXISTS openclaw_reliability_entries (
+  CREATE TABLE IF NOT EXISTS carapace_reliability_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     batch INTEGER NOT NULL,
     ordinal INTEGER NOT NULL,

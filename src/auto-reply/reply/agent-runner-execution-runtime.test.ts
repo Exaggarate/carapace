@@ -209,7 +209,7 @@ describe("executeAgentTurn: runtime selection", () => {
     ).not.toHaveProperty("agentHarnessId", "claude-cli");
   });
 
-  it.each([undefined, "codex", "openclaw"])(
+  it.each([undefined, "codex", "carapace"])(
     "keeps a plugin-owned runtime request separate from observed harness %s",
     async (agentHarnessId) => {
       state.runWithModelFallbackMock.mockImplementationOnce(

@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, expect, vi } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../../config/types.carapace.js";
 import type { RestartSentinelPayload } from "../../infra/restart-sentinel.js";
 import type { RespawnSupervisor } from "../../infra/supervisor-markers.js";
 import type { UpdateChannel } from "../../infra/update-channels.js";
@@ -10,7 +10,7 @@ import { createTempHomeEnv, type TempHomeEnv } from "../../test-utils/temp-home.
 
 let ledgerHome: TempHomeEnv | undefined;
 beforeEach(async () => {
-  ledgerHome = await createTempHomeEnv("openclaw-update-rpc-");
+  ledgerHome = await createTempHomeEnv("carapace-update-rpc-");
 });
 afterEach(async () => {
   await ledgerHome?.restore();
@@ -64,10 +64,10 @@ export const startManagedServiceUpdateHandoffMock = vi.fn<
 >(async (params) => ({
   status: "started",
   pid: 12345,
-  command: "openclaw update --yes --timeout 1800",
-  logPath: "/tmp/openclaw-update-run-handoff/handoff.log",
+  command: "carapace update --yes --timeout 1800",
+  logPath: "/tmp/carapace-update-run-handoff/handoff.log",
   handoffId: params?.handoffId ?? "handoff-default",
-  installRoot: params?.root ?? "/tmp/openclaw",
+  installRoot: params?.root ?? "/tmp/carapace",
 }));
 export const transferManagedServiceUpdateHandoffMock = vi.fn<
   typeof import("../../infra/update-managed-service-handoff.js").transferManagedServiceUpdateHandoff
@@ -104,8 +104,8 @@ export async function withTransferredUpdateHandoff(
     }, 5);
   `,
   );
-  const tempRoot = await import("../../infra/tmp-openclaw-dir.js");
-  const tmp = vi.spyOn(tempRoot, "resolvePreferredOpenClawTmpDir").mockReturnValue(root);
+  const tempRoot = await import("../../infra/tmp-carapace-dir.js");
+  const tmp = vi.spyOn(tempRoot, "resolvePreferredCarapaceTmpDir").mockReturnValue(root);
   const handoff = await vi.importActual<
     typeof import("../../infra/update-managed-service-handoff.js")
   >("../../infra/update-managed-service-handoff.js");
@@ -350,15 +350,15 @@ beforeEach(() => {
   adoptUpdateCampaignMock.mockReturnValue({ status: "absent" });
   readConfigFileSnapshotMock.mockReset();
   readConfigFileSnapshotMock.mockResolvedValue({
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     exists: true,
     raw: "{}",
     parsed: {},
-    resolved: {} as OpenClawConfig,
-    sourceConfig: {} as OpenClawConfig,
+    resolved: {} as CarapaceConfig,
+    sourceConfig: {} as CarapaceConfig,
     valid: true,
-    config: {} as OpenClawConfig,
-    runtimeConfig: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
+    runtimeConfig: {} as CarapaceConfig,
     issues: [],
     warnings: [],
     legacyIssues: [],
@@ -385,8 +385,8 @@ beforeEach(() => {
   );
   initializeGatewayUpdateStatusMock.mockReset();
   initializeGatewayUpdateStatusMock.mockResolvedValue({
-    root: "/tmp/openclaw",
-    status: { root: "/tmp/openclaw", installKind: "git", packageManager: "pnpm" },
+    root: "/tmp/carapace",
+    status: { root: "/tmp/carapace", installKind: "git", packageManager: "pnpm" },
     installReceipt: null,
   });
   getLatestUpdateRestartSentinelMock.mockClear();
@@ -399,10 +399,10 @@ beforeEach(() => {
   startManagedServiceUpdateHandoffMock.mockImplementation(async (params) => ({
     status: "started",
     pid: 12345,
-    command: "openclaw update --yes --timeout 1800",
-    logPath: "/tmp/openclaw-update-run-handoff/handoff.log",
+    command: "carapace update --yes --timeout 1800",
+    logPath: "/tmp/carapace-update-run-handoff/handoff.log",
     handoffId: params?.handoffId ?? "handoff-default",
-    installRoot: params?.root ?? "/tmp/openclaw",
+    installRoot: params?.root ?? "/tmp/carapace",
   }));
   scheduleGatewaySigusr1RestartMock.mockClear();
   scheduleGatewaySigusr1RestartMock.mockReturnValue({ scheduled: true });

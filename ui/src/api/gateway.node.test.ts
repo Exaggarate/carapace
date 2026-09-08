@@ -5,8 +5,8 @@ import {
   GATEWAY_CLIENT_CAPS,
   MIN_CLIENT_PROTOCOL_VERSION,
   PROTOCOL_VERSION,
-} from "@openclaw/gateway-client/browser";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "@carapace/gateway-client/browser";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
@@ -36,7 +36,7 @@ vi.mock("../lib/sessions/session-placement-recovery-migration.runtime.ts", () =>
 });
 
 const DEFAULT_GATEWAY_URL = "ws://127.0.0.1:18789";
-const LEGACY_DEVICE_AUTH_STORAGE_KEY = "openclaw.device.auth.v1";
+const LEGACY_DEVICE_AUTH_STORAGE_KEY = "carapace.device.auth.v1";
 const DEFAULT_DEVICE_AUTH_STORAGE_KEY = `${LEGACY_DEVICE_AUTH_STORAGE_KEY}:${DEFAULT_GATEWAY_URL}`;
 const STORED_CRED = "stored-device-token";
 const ROSITA_CRED = "rosita-device-token";
@@ -94,7 +94,7 @@ function storeDeviceAuthToken(params: {
 
 function storeDeviceIdentity(deviceId: string) {
   localStorage.setItem(
-    "openclaw-device-identity-v1",
+    "carapace-device-identity-v1",
     JSON.stringify({
       version: 1,
       deviceId,
@@ -284,7 +284,7 @@ function expectSignedPayloadFields(
   expect(payload?.split("|")).toEqual([
     "v2",
     "device-1",
-    "openclaw-control-ui",
+    "carapace-control-ui",
     "webchat",
     "operator",
     params.scopes.join(","),
@@ -564,7 +564,7 @@ describe("GatewayBrowserClient", () => {
   it("uses native client metadata and its existing operator scope grant", async () => {
     const client = new GatewayBrowserClient({
       url: "ws://127.0.0.1:18789",
-      clientName: "openclaw-ios",
+      clientName: "carapace-ios",
       mode: "ui",
       platform: "iOS 27.0.0",
       deviceFamily: "iPhone",
@@ -575,7 +575,7 @@ describe("GatewayBrowserClient", () => {
     const { connectFrame } = await startConnect(client);
 
     expect(connectFrame.params?.client).toMatchObject({
-      id: "openclaw-ios",
+      id: "carapace-ios",
       mode: "ui",
       platform: "iOS 27.0.0",
       deviceFamily: "iPhone",

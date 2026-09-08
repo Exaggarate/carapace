@@ -2,8 +2,8 @@
 import { stat } from "node:fs/promises";
 import path from "node:path";
 import { Readable, Writable } from "node:stream";
-import { toErrorObject as toLintErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import { toErrorObject as toLintErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 
 export type LobsterEnvelope =
   | {
@@ -120,7 +120,7 @@ function normalizeEnvelope(
     throw new Error(envelope.error?.message ?? "lobster runtime failed");
   }
   if (envelope.status === "needs_input") {
-    throw new Error("Lobster input requests are not supported by the OpenClaw Lobster tool yet");
+    throw new Error("Lobster input requests are not supported by the Carapace Lobster tool yet");
   }
   const normalized: Extract<LobsterEnvelope, { ok: true }> = {
     ok: true,

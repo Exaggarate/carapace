@@ -1,4 +1,4 @@
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { subscribeEmbeddedAgentSession } from "../embedded-agent-subscribe.js";
 import { guardSessionManager } from "../session-tool-result-guard-wrapper.js";
@@ -62,10 +62,10 @@ describe("AgentSession compaction correlation", () => {
           .getBranch()
           .filter((entry) => entry.type === "compaction");
         expect(compactions).toHaveLength(2);
-        const itemIds = compactions.map(({ __openclaw: metadata }) => metadata?.itemId);
+        const itemIds = compactions.map(({ __carapace: metadata }) => metadata?.itemId);
         expect(itemIds).toEqual([expect.any(String), expect.any(String)]);
         expect(new Set(itemIds).size).toBe(2);
-        expect(compactions.map(({ __openclaw: metadata }) => metadata?.runId)).toEqual([
+        expect(compactions.map(({ __carapace: metadata }) => metadata?.runId)).toEqual([
           runId,
           runId,
         ]);

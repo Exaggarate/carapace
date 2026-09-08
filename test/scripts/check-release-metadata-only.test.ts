@@ -55,7 +55,7 @@ describe("check-release-metadata-only", () => {
   });
 
   it("accepts only version-literal changes in the mobile manifest", () => {
-    const root = tempDirs.make("openclaw-release-metadata-mobile-");
+    const root = tempDirs.make("carapace-release-metadata-mobile-");
     const manifestPath = path.join(root, "apps/mobile/version.json");
     mkdirSync(path.dirname(manifestPath), { recursive: true });
     writeFileSync(manifestPath, '{\n  "version": "2026.8.1"\n}\n');
@@ -65,9 +65,9 @@ describe("check-release-metadata-only", () => {
       "git",
       [
         "-c",
-        "user.name=OpenClaw Test",
+        "user.name=Carapace Test",
         "-c",
-        "user.email=test@openclaw.invalid",
+        "user.email=test@carapace.invalid",
         "commit",
         "-qm",
         "baseline",
@@ -125,7 +125,7 @@ describe("check-release-metadata-only", () => {
   });
 
   itUnix("fails with an actionable timeout when git diff hangs", () => {
-    const tempDir = tempDirs.make("openclaw-release-metadata-git-");
+    const tempDir = tempDirs.make("carapace-release-metadata-git-");
     const gitPath = path.join(tempDir, "git");
     writeFileSync(
       gitPath,
@@ -144,7 +144,7 @@ if (process.argv.includes("diff")) {
       cwd: path.resolve(import.meta.dirname, "../.."),
       env: {
         ...process.env,
-        OPENCLAW_RELEASE_METADATA_GIT_TIMEOUT_MS: "500",
+        CARAPACE_RELEASE_METADATA_GIT_TIMEOUT_MS: "500",
         PATH: `${tempDir}${path.delimiter}${process.env.PATH ?? ""}`,
       },
       encoding: "utf8",
@@ -160,7 +160,7 @@ if (process.argv.includes("diff")) {
       cwd: path.resolve(import.meta.dirname, "../.."),
       env: {
         ...process.env,
-        OPENCLAW_RELEASE_METADATA_GIT_TIMEOUT_MS: "0.5",
+        CARAPACE_RELEASE_METADATA_GIT_TIMEOUT_MS: "0.5",
         PATH: `${tempDir}${path.delimiter}${process.env.PATH ?? ""}`,
       },
       encoding: "utf8",

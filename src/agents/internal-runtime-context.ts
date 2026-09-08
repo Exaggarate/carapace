@@ -5,21 +5,21 @@
  */
 import { escapeRegExp } from "../shared/regexp.js";
 
-/** Opening delimiter for protected OpenClaw runtime context blocks. */
-export const INTERNAL_RUNTIME_CONTEXT_BEGIN = "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>";
-/** Closing delimiter for protected OpenClaw runtime context blocks. */
-export const INTERNAL_RUNTIME_CONTEXT_END = "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+/** Opening delimiter for protected Carapace runtime context blocks. */
+export const INTERNAL_RUNTIME_CONTEXT_BEGIN = "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>";
+/** Closing delimiter for protected Carapace runtime context blocks. */
+export const INTERNAL_RUNTIME_CONTEXT_END = "<<<END_CARAPACE_INTERNAL_CONTEXT>>>";
 
-const ESCAPED_INTERNAL_RUNTIME_CONTEXT_BEGIN = "[[OPENCLAW_INTERNAL_CONTEXT_BEGIN]]";
-const ESCAPED_INTERNAL_RUNTIME_CONTEXT_END = "[[OPENCLAW_INTERNAL_CONTEXT_END]]";
+const ESCAPED_INTERNAL_RUNTIME_CONTEXT_BEGIN = "[[CARAPACE_INTERNAL_CONTEXT_BEGIN]]";
+const ESCAPED_INTERNAL_RUNTIME_CONTEXT_END = "[[CARAPACE_INTERNAL_CONTEXT_END]]";
 
 /** Notice inserted into runtime-generated context blocks. */
-export const OPENCLAW_RUNTIME_CONTEXT_NOTICE =
+export const CARAPACE_RUNTIME_CONTEXT_NOTICE =
   "This context is runtime-generated, not user-authored. Keep internal details private.";
 /** Header for runtime events passed as prompt context. */
-export const OPENCLAW_RUNTIME_EVENT_HEADER = "OpenClaw runtime event.";
+export const CARAPACE_RUNTIME_EVENT_HEADER = "Carapace runtime event.";
 /** Custom message type used for structured runtime-context messages. */
-export const OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE = "openclaw.runtime-context";
+export const CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE = "carapace.runtime-context";
 
 /** Provenance assigned by the context producer, never inferred from its text. */
 export type RuntimeContextFragment = {
@@ -28,7 +28,7 @@ export type RuntimeContextFragment = {
 };
 
 const LEGACY_INTERNAL_CONTEXT_HEADER =
-  ["OpenClaw runtime context (internal):", OPENCLAW_RUNTIME_CONTEXT_NOTICE, ""].join("\n") + "\n";
+  ["Carapace runtime context (internal):", CARAPACE_RUNTIME_CONTEXT_NOTICE, ""].join("\n") + "\n";
 
 const LEGACY_INTERNAL_EVENT_MARKER = "[Internal task completion event]";
 const LEGACY_INTERNAL_EVENT_SEPARATOR = "\n\n---\n\n";
@@ -213,13 +213,13 @@ function stripLegacyInternalRuntimeContext(text: string): string {
 
 // Prefaces of carriers persisted before the system prompt explained the markers; kept for stripping.
 const RUNTIME_CONTEXT_PROMPT_HEADERS: readonly string[] = [
-  "OpenClaw runtime context for the active user request in this turn. Do not reply to or describe this context. Use it to continue answering the active user request now. Do not wait for another message.",
-  "OpenClaw runtime context for the immediately preceding user message.",
-  OPENCLAW_RUNTIME_EVENT_HEADER,
+  "Carapace runtime context for the active user request in this turn. Do not reply to or describe this context. Use it to continue answering the active user request now. Do not wait for another message.",
+  "Carapace runtime context for the immediately preceding user message.",
+  CARAPACE_RUNTIME_EVENT_HEADER,
 ];
 
 const RUNTIME_CONTEXT_NOTICE_PATTERN = new RegExp(
-  OPENCLAW_RUNTIME_CONTEXT_NOTICE.split(/\s+/).map(escapeRegExp).join("\\s+"),
+  CARAPACE_RUNTIME_CONTEXT_NOTICE.split(/\s+/).map(escapeRegExp).join("\\s+"),
 );
 const RUNTIME_CONTEXT_PREFACE_PATTERN = new RegExp(
   `^[ \\t]*(?:${RUNTIME_CONTEXT_PROMPT_HEADERS.flatMap((header) => {
@@ -289,28 +289,28 @@ export function hasInternalRuntimeContext(text: string): boolean {
     findDelimitedTokenIndex(text, BEGIN_DELIMITER, 0) !== -1 ||
     text.includes(LEGACY_INTERNAL_CONTEXT_HEADER) ||
     RUNTIME_CONTEXT_PROMPT_HEADERS.some((header) =>
-      text.includes(`${header}\n${OPENCLAW_RUNTIME_CONTEXT_NOTICE}`),
+      text.includes(`${header}\n${CARAPACE_RUNTIME_CONTEXT_NOTICE}`),
     )
   );
 }
 
 /** Identifies hidden runtime context independently of its queue or transcript owner. */
-export function isOpenClawRuntimeContextCustomMessage(message: unknown): boolean {
+export function isCarapaceRuntimeContextCustomMessage(message: unknown): boolean {
   if (!message || typeof message !== "object") {
     return false;
   }
   const candidate = message as { role?: unknown; customType?: unknown };
   return (
-    candidate.role === "custom" && candidate.customType === OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE
+    candidate.role === "custom" && candidate.customType === CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE
   );
 }
 
 /** Remove all structured runtime-context custom messages. */
 export function stripRuntimeContextCustomMessages<T>(messages: T[]): T[] {
-  if (!messages.some(isOpenClawRuntimeContextCustomMessage)) {
+  if (!messages.some(isCarapaceRuntimeContextCustomMessage)) {
     return messages;
   }
-  return messages.filter((message) => !isOpenClawRuntimeContextCustomMessage(message));
+  return messages.filter((message) => !isCarapaceRuntimeContextCustomMessage(message));
 }
 
 function isUserMessage(message: unknown): message is { role: "user"; idempotencyKey?: unknown } {
@@ -333,7 +333,7 @@ export function resolvePendingRuntimeContextReplay<T>(params: {
     : -1;
   const replayPersistedCarrier =
     persistedUserIndex >= 0 &&
-    isOpenClawRuntimeContextCustomMessage(params.messages[persistedUserIndex + 1]);
+    isCarapaceRuntimeContextCustomMessage(params.messages[persistedUserIndex + 1]);
   return {
     persistedUserIndex,
     replayPersistedCarrier,
@@ -379,22 +379,22 @@ export function resolveRuntimeContextPromptOwner(messages: readonly unknown[]) {
 
 /** Keeps the live prompt's context and unretained context immediately before the active user. */
 export function stripHistoricalRuntimeContextCustomMessages<T>(messages: T[]): T[] {
-  if (!messages.some(isOpenClawRuntimeContextCustomMessage)) {
+  if (!messages.some(isCarapaceRuntimeContextCustomMessage)) {
     return messages;
   }
   const lastUserIndex = messages.findLastIndex(isUserMessage);
   if (lastUserIndex === -1) {
-    return messages.filter((message) => !isOpenClawRuntimeContextCustomMessage(message));
+    return messages.filter((message) => !isCarapaceRuntimeContextCustomMessage(message));
   }
   const currentRuntimeContextIndexes = new Set<number>();
   for (let index = lastUserIndex - 1; index >= 0; index -= 1) {
-    if (!isOpenClawRuntimeContextCustomMessage(messages[index])) {
+    if (!isCarapaceRuntimeContextCustomMessage(messages[index])) {
       break;
     }
     currentRuntimeContextIndexes.add(index);
   }
   return messages.filter((message, index) => {
-    if (!isOpenClawRuntimeContextCustomMessage(message)) {
+    if (!isCarapaceRuntimeContextCustomMessage(message)) {
       return true;
     }
     return currentRuntimeContextIndexes.has(index) || isRetainedRuntimeContextMessage(message);
@@ -408,7 +408,7 @@ export function stripHistoricalRuntimeContextCustomMessages<T>(messages: T[]): T
  * Runs after historical context stripping; already-placed carriers stay put.
  */
 export function relocateCurrentRuntimeContextCarrierToTail<T>(messages: T[]): T[] {
-  const carrierIndex = messages.findIndex(isOpenClawRuntimeContextCustomMessage);
+  const carrierIndex = messages.findIndex(isCarapaceRuntimeContextCustomMessage);
   const userIndex = messages.findIndex(
     (message, index) => index > carrierIndex && isUserMessage(message),
   );
@@ -421,13 +421,13 @@ export function relocateCurrentRuntimeContextCarrierToTail<T>(messages: T[]): T[
   const boundary = nextUserIndex < 0 ? messages.length : nextUserIndex;
   const prefix = messages
     .slice(0, boundary)
-    .filter((message) => !isOpenClawRuntimeContextCustomMessage(message));
-  const carriers = messages.filter(isOpenClawRuntimeContextCustomMessage);
+    .filter((message) => !isCarapaceRuntimeContextCustomMessage(message));
+  const carriers = messages.filter(isCarapaceRuntimeContextCustomMessage);
   return [
     ...prefix,
     ...carriers,
     ...messages
       .slice(boundary)
-      .filter((message) => !isOpenClawRuntimeContextCustomMessage(message)),
+      .filter((message) => !isCarapaceRuntimeContextCustomMessage(message)),
   ];
 }

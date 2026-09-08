@@ -3,14 +3,14 @@ import {
   callGatewayTool,
   embeddedAgentLog,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { codexTestTurnIds } from "./codex-app-server.test-fixtures.js";
 import { routeCodexAppServerElicitationRequest } from "./elicitation-bridge.js";
 import type { JsonObject } from "./protocol.js";
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>()),
   callGatewayTool: vi.fn(),
 }));
 
@@ -121,7 +121,7 @@ function buildCurrentCodexApprovalElicitation() {
       tool_title: "Create pull request",
       tool_description: "Creates a pull request in the selected repository.",
       tool_params_display: [
-        { name: "repo", display_name: "Repository", value: "openclaw/openclaw" },
+        { name: "repo", display_name: "Repository", value: "carapace/carapace" },
       ],
     },
     requestedSchema: {
@@ -394,7 +394,7 @@ describe("Codex app-server elicitation bridge", () => {
   it.each([
     {
       name: "raw tool identity",
-      display: [{ name: "repo", value: "openclaw/openclaw" }],
+      display: [{ name: "repo", value: "carapace/carapace" }],
       grant: true,
     },
     { name: "absent display metadata", display: undefined, grant: true },
@@ -427,7 +427,7 @@ describe("Codex app-server elicitation bridge", () => {
       id: "raw-call",
       server,
       tool: "_create.issue-v2",
-      arguments: { repo: "openclaw/openclaw", limit: 3 },
+      arguments: { repo: "carapace/carapace", limit: 3 },
     };
     let activeItem: typeof item | undefined = testCase.missingItem ? undefined : item;
     const result = await handleCodexAppServerElicitationRequest({
@@ -497,7 +497,7 @@ describe("Codex app-server elicitation bridge", () => {
     expect(result).toEqual({ action: "decline", content: null, _meta: null });
     expect(gatewayToolArg(0, 2)).toMatchObject({
       description: expect.stringContaining(
-        "openclaw mcp configure codex_apps__github --approval approve",
+        "carapace mcp configure codex_apps__github --approval approve",
       ),
     });
     expect(mockCallGatewayTool.mock.calls.map(([method]) => method)).toEqual([
@@ -577,7 +577,7 @@ describe("Codex app-server elicitation bridge", () => {
     };
     expect(approvalRequest.description).toContain("App: GitHub");
     expect(approvalRequest.description).toContain("Tool: Create pull request");
-    expect(approvalRequest.description).toContain("Repository: openclaw/openclaw");
+    expect(approvalRequest.description).toContain("Repository: carapace/carapace");
   });
 
   it("routes Computer Use app approvals through plugin approvals", async () => {
@@ -774,7 +774,7 @@ describe("Codex app-server elicitation bridge", () => {
     };
     expect(approvalRequest.title).toBe("Computer Use approval");
     expect(approvalRequest.description).toContain("MCP server: computer-use");
-    expect(approvalRequest.description).not.toContain("openclaw mcp configure");
+    expect(approvalRequest.description).not.toContain("carapace mcp configure");
     expect(approvalRequest.description).not.toContain("\u009b");
   });
 
@@ -797,7 +797,7 @@ describe("Codex app-server elicitation bridge", () => {
             {
               name: "repo",
               display_name: "Repository\u202e",
-              value: "\u001b]8;;https://evil.example\u001b\\openclaw/openclaw\u001b]8;;\u001b\\",
+              value: "\u001b]8;;https://evil.example\u001b\\carapace/carapace\u001b]8;;\u001b\\",
             },
           ],
         },
@@ -824,7 +824,7 @@ describe("Codex app-server elicitation bridge", () => {
     expect(approvalRequest.title).toBe("Approve hidden");
     expect(approvalRequest.description).toContain("GitHub Injected: approve");
     expect(approvalRequest.description).toContain("Tool: Visible tool");
-    expect(approvalRequest.description).toContain("Repository: openclaw/openclaw");
+    expect(approvalRequest.description).toContain("Repository: carapace/carapace");
     expect(approvalRequest.description).toContain("- Approve this tool call: Confirm access");
     expect(approvalRequest.description).not.toContain("https://evil.example");
     expect(approvalRequest.description).not.toContain("\u001b");
@@ -908,7 +908,7 @@ describe("Codex app-server elicitation bridge", () => {
             {
               name: "repo",
               display_name: "\u202e",
-              value: "openclaw/openclaw",
+              value: "carapace/carapace",
             },
           ],
         },
@@ -931,7 +931,7 @@ describe("Codex app-server elicitation bridge", () => {
     const approvalRequest = gatewayToolArg(0, 2) as {
       description: string;
     };
-    expect(approvalRequest.description).toContain("- repo: openclaw/openclaw");
+    expect(approvalRequest.description).toContain("- repo: carapace/carapace");
     expect(approvalRequest.description).toContain("- approve: Confirm access");
     expect(approvalRequest.description).not.toContain("- field: Confirm access");
   });

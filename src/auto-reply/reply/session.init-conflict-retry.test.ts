@@ -7,7 +7,7 @@ import {
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
 import { replaceSessionEntrySync } from "../../config/sessions/session-accessor.sqlite-entry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { finalizeInboundContext } from "./inbound-context.js";
 import {
   ReplySessionInitConflictError,
@@ -227,7 +227,7 @@ describe("runWithSessionInitConflictRetry", () => {
 
 describe("initSessionState conflict retry wiring", () => {
   it("retries a late same-session lifecycle conflict without losing either update", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-late-conflict-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-late-conflict-"));
     const storePath = path.join(root, "sessions.json");
     let lateWrites = 0;
     commitConflictControl.commitCalls = 0;
@@ -269,7 +269,7 @@ describe("initSessionState conflict retry wiring", () => {
       );
 
       const result = await initSessionState({
-        cfg: { session: { store: storePath } } as OpenClawConfig,
+        cfg: { session: { store: storePath } } as CarapaceConfig,
         commandAuthorized: true,
         ctx: {
           Body: "hello",
@@ -301,7 +301,7 @@ describe("initSessionState conflict retry wiring", () => {
   });
 
   it("cancels the production backoff through the initializer signal", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-conflict-abort-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-conflict-abort-"));
     const controller = new AbortController();
     commitConflictControl.abortController = controller;
     commitConflictControl.commitCalls = 0;
@@ -309,7 +309,7 @@ describe("initSessionState conflict retry wiring", () => {
 
     try {
       const initializing = initSessionState({
-        cfg: { session: { store: path.join(root, "sessions.json") } } as OpenClawConfig,
+        cfg: { session: { store: path.join(root, "sessions.json") } } as CarapaceConfig,
         commandAuthorized: true,
         ctx: {
           Body: "hello",

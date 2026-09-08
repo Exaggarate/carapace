@@ -1,6 +1,6 @@
 import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { resolveSlackAccount } from "../accounts.js";
 import type { SlackMessageEvent } from "../types.js";
@@ -8,8 +8,8 @@ import { createSlackMonitorContext } from "./context.js";
 
 const enqueue = vi.hoisted(() => vi.fn(async (_entry: unknown) => {}));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>()),
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>()),
   createChannelInboundDebouncer: () => ({
     debounceMs: 0,
     debouncer: {
@@ -90,7 +90,7 @@ describe("Slack message handler thread resolution", () => {
             threadInheritParent: false,
             slashCommand: {
               enabled: false,
-              name: "openclaw",
+              name: "carapace",
               ephemeral: true,
               sessionPrefix: "slack:slash",
             },

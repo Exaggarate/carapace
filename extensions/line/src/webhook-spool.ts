@@ -6,10 +6,10 @@ import {
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   DEFAULT_INGRESS_RETRY_MAX_ATTEMPTS,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { danger, type RuntimeEnv, warn } from "openclaw/plugin-sdk/runtime-env";
-import { runDetachedWebhookWork } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { danger, type RuntimeEnv, warn } from "carapace/plugin-sdk/runtime-env";
+import { runDetachedWebhookWork } from "carapace/plugin-sdk/webhook-request-guards";
 import { getLineRuntime } from "./runtime.js";
 import {
   eventIdFor,

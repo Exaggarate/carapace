@@ -1,8 +1,8 @@
 // Discord plugin module implements listeners.reactions behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { enqueueRoutedSystemEvent } from "openclaw/plugin-sdk/system-event-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import { danger, logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { enqueueRoutedSystemEvent } from "carapace/plugin-sdk/system-event-runtime";
 import {
   ChannelType,
   type Client,
@@ -25,8 +25,8 @@ import { runDiscordListenerWithSlowLog, type DiscordListenerLogger } from "./lis
 import type { DiscordLivePolicyReader } from "./live-policy.js";
 import { resolveFetchedDiscordThreadLikeChannelContext } from "./thread-channel-context.js";
 
-type LoadedConfig = OpenClawConfig;
-type RuntimeEnv = import("openclaw/plugin-sdk/runtime-env").RuntimeEnv;
+type LoadedConfig = CarapaceConfig;
+type RuntimeEnv = import("carapace/plugin-sdk/runtime-env").RuntimeEnv;
 
 type DiscordReactionEvent = Parameters<MessageReactionAddListener["handle"]>[0];
 

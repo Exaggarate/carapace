@@ -21,7 +21,7 @@ mode captures facts and rejects that flag.
 
 | Backend      | Use                                                                     |
 | ------------ | ----------------------------------------------------------------------- |
-| `mock`       | Default deterministic OpenClaw `mock-openai` turn.                      |
+| `mock`       | Default deterministic Carapace `mock-openai` turn.                      |
 | `qa-mock`    | QA fixtures for tools, delays, and scenario actions.                    |
 | `claude-cli` | Real Claude CLI path for progress behavior the mock lane cannot render. |
 
@@ -83,7 +83,7 @@ uv run "$TELEGRAM_E2E_SKILL_DIR/scripts/user-driver.py" probe \
 The leased credential supplies the group id, SUT token and identity, tester id,
 TDLib configuration, and authorized session. Credential state lives in a
 private runner directory. The shared cache at
-`~/.cache/openclaw/telegram-e2e-userbot/tdlib` contains only the TDLib binary.
+`~/.cache/carapace/telegram-e2e-userbot/tdlib` contains only the TDLib binary.
 
 `TELEGRAM_USER_DRIVER_TDLIB_PATH` selects a deliberate custom TDLib build.
 `login --qr` is an owner-repair action for a session that cannot be restored; it
@@ -120,9 +120,9 @@ not the model.
 - TDLib replays cached updates after connect; judge only events after the run's sent action.
 - The driver pins `@prebuilt-tdlib` `0.1008067.0`, which reports TDLib `1.8.67`.
 - TDLib 1.8.6 and later take the existing base64 database key in `setTdlibParameters`; re-encoding changes the key.
-- OpenClaw does not expose grammY's Test Server option, so the loopback proxy inserts `/test` after the bot token.
+- Carapace does not expose grammY's Test Server option, so the loopback proxy inserts `/test` after the bot token.
 - Broker calls time out after 15 seconds. A failed heartbeat fences the runner before later actions and stops an active probe.
 - Chunked broker payloads are authenticated per chunk and bounded to 64 MiB and 4096 chunks before JSON parsing.
-- Scope gateway logs with `logging.file`; the default `/tmp/openclaw/<date>.log` mixes concurrent runs.
+- Scope gateway logs with `logging.file`; the default `/tmp/carapace/<date>.log` mixes concurrent runs.
 - Gateway logs do not prove edit versus send; TDLib events do.
 - Progress drafts are provider-shaped; a single final-answer fixture correctly records no progress revisions.

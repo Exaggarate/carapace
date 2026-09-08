@@ -1,11 +1,11 @@
 import { z } from "zod";
 /** SQLite-backed persistence for durable per-agent Talk voice-call records. */
 import { compileSqliteQueryBindings, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { VOICE_TRANSCRIPT_MAX_UNRESOLVED } from "./voice-transcript.js";
 
 const VOICE_SESSION_CACHE_SCOPE = "talk-client-voice-sessions";
@@ -126,20 +126,20 @@ export function readVoiceSessionRecord(
   voiceSessionId: string,
 ): ClientVoiceSessionRecord | undefined {
   return readVoiceSessionRecordInTransaction(
-    openOpenClawAgentDatabase({ agentId }),
+    openCarapaceAgentDatabase({ agentId }),
     voiceSessionId,
   );
 }
 
-function voiceSessionRowsQuery(database: OpenClawAgentDatabase) {
-  return getNodeSqliteKysely<Pick<OpenClawAgentKyselyDatabase, "cache_entries">>(database.db)
+function voiceSessionRowsQuery(database: CarapaceAgentDatabase) {
+  return getNodeSqliteKysely<Pick<CarapaceAgentKyselyDatabase, "cache_entries">>(database.db)
     .selectFrom("cache_entries")
     .select("value_json")
     .where("scope", "=", VOICE_SESSION_CACHE_SCOPE);
 }
 
 export function readVoiceSessionRecordInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   voiceSessionId: string,
 ): ClientVoiceSessionRecord | undefined {
   const { compiled, bind } = compileSqliteQueryBindings<void>(() =>
@@ -152,7 +152,7 @@ export function readVoiceSessionRecordInTransaction(
 }
 
 export function readVoiceSessionRecordRows(agentId: string, updatedBefore?: number) {
-  const database = openOpenClawAgentDatabase({ agentId });
+  const database = openCarapaceAgentDatabase({ agentId });
   const query = voiceSessionRowsQuery(database);
   const { compiled, bind } = compileSqliteQueryBindings<void>(() =>
     updatedBefore === undefined
@@ -165,11 +165,11 @@ export function readVoiceSessionRecordRows(agentId: string, updatedBefore?: numb
 }
 
 export function writeVoiceSessionRecordInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   record: ClientVoiceSessionRecord,
 ): void {
   const { compiled, bind } = compileSqliteQueryBindings<ClientVoiceSessionRecord>((p) =>
-    getNodeSqliteKysely<Pick<OpenClawAgentKyselyDatabase, "cache_entries">>(database.db)
+    getNodeSqliteKysely<Pick<CarapaceAgentKyselyDatabase, "cache_entries">>(database.db)
       .insertInto("cache_entries")
       .values({
         scope: VOICE_SESSION_CACHE_SCOPE,

@@ -65,7 +65,7 @@ function createCaptureRuntime(): CaptureRuntime {
     log: (...args) => lines.push(args.join(" ")),
     error: (...args) => lines.push(args.join(" ")),
     exit: (code) => {
-      throw new Error(`OpenClaw operation exited with code ${String(code)}`);
+      throw new Error(`Carapace operation exited with code ${String(code)}`);
     },
     read: () => lines.join("\n").trim(),
   };
@@ -100,7 +100,7 @@ export function redactSensitiveCommandText(text: string): string {
 function formatPendingOperationForAssistant(operation: SystemAgentOperation): string {
   const description = describeSystemAgentPersistentOperation(operation);
   return operation.kind === "setup"
-    ? `${description}. Exact setup JSON: ${JSON.stringify(operation)}. Keep the verified model unless the user explicitly asks to leave OpenClaw and reconfigure inference.`
+    ? `${description}. Exact setup JSON: ${JSON.stringify(operation)}. Keep the verified model unless the user explicitly asks to leave Carapace and reconfigure inference.`
     : description;
 }
 
@@ -195,7 +195,7 @@ export class ChatTurnRouter {
       };
     }
     if (/^(quit|exit)$/i.test(trimmed)) {
-      return { text: "OpenClaw retracts into shell. Bye.", action: "exit" };
+      return { text: "Carapace retracts into shell. Bye.", action: "exit" };
     }
     if (this.awaitingSetupChannel) {
       if (/^(cancel|abort|stop)$/i.test(trimmed)) {
@@ -216,7 +216,7 @@ export class ChatTurnRouter {
       });
     }
     if (this.options.operatorApprovalOnly && this.getPendingOperatorProposal()) {
-      return { text: "Approval pending. Human must decide in OpenClaw UI.", action: "none" };
+      return { text: "Approval pending. Human must decide in Carapace UI.", action: "none" };
     }
     const typed = parseSystemAgentOperation(text);
     if (isInvalidConfigSetOperation(typed)) {
@@ -289,7 +289,7 @@ export class ChatTurnRouter {
     beforePersistentApply?: PersistentApplyGuard,
   ): Promise<SystemAgentChatReply> {
     if (!isPersistentSystemAgentOperation(operation)) {
-      throw new Error("OpenClaw host received a non-persistent approved operation.");
+      throw new Error("Carapace host received a non-persistent approved operation.");
     }
     const capture = createCaptureRuntime();
     const result = await this.executeOperation(operation, capture, true, beforePersistentApply);
@@ -338,7 +338,7 @@ export class ChatTurnRouter {
       : "";
     const loopInput = `${resolutionMarker}${uiContextMarker}${
       this.pending
-        ? `[pending-proposal] Awaiting the user's approval: ${formatPendingOperationForAssistant(this.pending)}. It is already host-seeded; if they want it (or a variant), drive it through the openclaw tool yourself.\n${text}`
+        ? `[pending-proposal] Awaiting the user's approval: ${formatPendingOperationForAssistant(this.pending)}. It is already host-seeded; if they want it (or a variant), drive it through the carapace tool yourself.\n${text}`
         : text
     }`;
     // The runtime already owns recovery; a terminal failure must not start another inference turn.
@@ -409,7 +409,7 @@ export class ChatTurnRouter {
         text:
           this.options.surface === "gateway"
             ? "Opening Settings → Profile → Connected accounts. Check the Gateway, person, and Personal scope, then sign in or select a saved account. Nothing has changed yet; never paste credentials into this conversation."
-            : "Run `openclaw models accounts list` to see your personal accounts, or `openclaw models accounts login <provider>` for protected sign-in. Check the Gateway and person shown before signing in. You can also use Settings → Profile → Connected accounts in the Control UI. Nothing has changed; never paste credentials into this conversation.",
+            : "Run `carapace models accounts list` to see your personal accounts, or `carapace models accounts login <provider>` for protected sign-in. Check the Gateway and person shown before signing in. You can also use Settings → Profile → Connected accounts in the Control UI. Nothing has changed; never paste credentials into this conversation.",
         action: "none",
         ...(this.options.surface === "gateway" ? { handoff: recordedOperation } : {}),
       };
@@ -418,13 +418,13 @@ export class ChatTurnRouter {
       this.clearPendingProposals();
       if (this.options.surface === "gateway") {
         return {
-          text: "Open Settings to change your model or connect a channel. To change providers from a shell, run `openclaw onboard` on the machine running OpenClaw.",
+          text: "Open Settings to change your model or connect a channel. To change providers from a shell, run `carapace onboard` on the machine running Carapace.",
           action: "none",
         };
       }
       if (!["channels", "search", "gateway"].includes(recordedOperation.target)) {
         return {
-          text: "Setup can replace the inference route powering this session. Exit OpenClaw and run `openclaw onboard`; it saves only a route that passes a live test. Then start OpenClaw again.",
+          text: "Setup can replace the inference route powering this session. Exit Carapace and run `carapace onboard`; it saves only a route that passes a live test. Then start Carapace again.",
           action: "none",
         };
       }
@@ -550,7 +550,7 @@ export class ChatTurnRouter {
     return {
       text: [
         "Changing provider credentials would replace the inference route powering this session.",
-        "Stop the OpenClaw host through whatever started it. Run `openclaw onboard` on the machine running OpenClaw: it stages credentials, live-tests the new route, and saves only a passing setup. Then restart the host and return to OpenClaw.",
+        "Stop the Carapace host through whatever started it. Run `carapace onboard` on the machine running Carapace: it stages credentials, live-tests the new route, and saves only a passing setup. Then restart the host and return to Carapace.",
       ].join("\n"),
       action: "none",
     };
@@ -565,10 +565,10 @@ export class ChatTurnRouter {
   }
 
   private agentHandoffReturnHint(): string {
-    // Only the TUI uses /openclaw for navigation; web chat runs rescue in place.
+    // Only the TUI uses /carapace for navigation; web chat runs rescue in place.
     return this.options.surface === "gateway"
-      ? "You can return through Settings → Ask OpenClaw."
-      : "Use /openclaw to come back.";
+      ? "You can return through Settings → Ask Carapace."
+      : "Use /carapace to come back.";
   }
 
   private clearPendingProposals(): void {
@@ -592,8 +592,8 @@ export class ChatTurnRouter {
   private armFollowUp(operation: SystemAgentOperation | undefined): string | null {
     return operation?.kind === "model-setup"
       ? [
-          "No usable inference route is configured, so OpenClaw cannot continue.",
-          "Run `openclaw onboard` on the machine running OpenClaw; it saves only a route that passes a live test.",
+          "No usable inference route is configured, so Carapace cannot continue.",
+          "Run `carapace onboard` on the machine running Carapace; it saves only a route that passes a live test.",
         ].join("\n")
       : null;
   }

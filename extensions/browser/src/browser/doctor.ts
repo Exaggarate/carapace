@@ -71,7 +71,7 @@ export function buildBrowserDoctorReport(params: {
     id: "profile",
     label: "Profile",
     status: "pass",
-    summary: `${status.profile ?? "openclaw"} via ${transport}`,
+    summary: `${status.profile ?? "carapace"} via ${transport}`,
   });
 
   if (transport === "chrome-mcp") {
@@ -95,13 +95,13 @@ export function buildBrowserDoctorReport(params: {
       label: "Chrome extension relay",
       status: status.running ? "pass" : "fail",
       summary: status.running
-        ? "OpenClaw Chrome extension is connected"
-        : "OpenClaw Chrome extension is not connected",
+        ? "Carapace Chrome extension is connected"
+        : "Carapace Chrome extension is not connected",
       ...(status.running
         ? {}
         : {
             fixHint:
-              "Install the OpenClaw Chrome extension (openclaw browser extension path), run openclaw browser extension pair, and paste the pairing string into the extension popup.",
+              "Install the Carapace Chrome extension (carapace browser extension path), run carapace browser extension pair, and paste the pairing string into the extension popup.",
           }),
     });
 
@@ -128,7 +128,7 @@ export function buildBrowserDoctorReport(params: {
       ...(mismatch
         ? {
             fixHint:
-              "Reload the OpenClaw extension from chrome://extensions. If the versions still differ, fully quit and reopen Chrome.",
+              "Reload the Carapace extension from chrome://extensions. If the versions still differ, fully quit and reopen Chrome.",
           }
         : {}),
     });
@@ -167,7 +167,7 @@ export function buildBrowserDoctorReport(params: {
         status: "warn",
         summary: `No DISPLAY or WAYLAND_DISPLAY is set while headed mode is selected (${status.headlessSource ?? "unknown"})`,
         fixHint:
-          "Use a desktop session, Xvfb, set OPENCLAW_BROWSER_HEADLESS=1, or remove the headed override.",
+          "Use a desktop session, Xvfb, set CARAPACE_BROWSER_HEADLESS=1, or remove the headed override.",
       });
     }
     if (platform === "linux" && uid === 0 && !status.noSandbox) {
@@ -192,7 +192,7 @@ export function buildBrowserDoctorReport(params: {
       ...(status.cdpHttp || !status.running
         ? {}
         : {
-            fixHint: "Run openclaw browser start or inspect browser.cdpUrl/CDP port reachability.",
+            fixHint: "Run carapace browser start or inspect browser.cdpUrl/CDP port reachability.",
           }),
     });
 
@@ -228,7 +228,7 @@ export function buildBrowserDoctorReport(params: {
 
   return {
     ok: checks.every((check) => check.status !== "fail"),
-    profile: status.profile ?? "openclaw",
+    profile: status.profile ?? "carapace",
     transport,
     checks,
     status,

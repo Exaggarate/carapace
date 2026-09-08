@@ -1,5 +1,5 @@
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { ProviderCatalogContext } from "carapace/plugin-sdk/plugin-entry";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterAll, afterEach, assert, describe, expect, it, vi } from "vitest";
 import plugin from "../index.js";
 import { fetchLmstudioModels } from "./models.fetch.js";
@@ -7,8 +7,8 @@ import { discoverLmstudioProvider } from "./setup.js";
 
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     fetchWithSsrFGuard: (...args: unknown[]) => fetchWithSsrFGuardMock(...args),
@@ -16,7 +16,7 @@ vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+  vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
   vi.resetModules();
 });
 

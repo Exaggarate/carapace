@@ -50,12 +50,12 @@ class ExternalPluginPage extends PluginPage {
   }
 }
 
-const deferredPluginPageTag = "openclaw-deferred-plugin-page-test";
+const deferredPluginPageTag = "carapace-deferred-plugin-page-test";
 if (!customElements.get(deferredPluginPageTag)) {
   customElements.define(deferredPluginPageTag, DeferredPluginPage);
 }
 
-const externalPluginPageTag = "openclaw-external-plugin-page-test";
+const externalPluginPageTag = "carapace-external-plugin-page-test";
 if (!customElements.get(externalPluginPageTag)) {
   customElements.define(externalPluginPageTag, ExternalPluginPage);
 }
@@ -180,7 +180,7 @@ describe("PluginPage", () => {
       gateway: { snapshot: { phase: "connected" }, subscribe: () => () => undefined },
     } as unknown as ApplicationContext;
     const provider = createApplicationContextProvider(context);
-    const page = document.createElement("openclaw-plugin-page") as PluginPage;
+    const page = document.createElement("carapace-plugin-page") as PluginPage;
     page.pluginId = pluginId;
     page.tabId = "notes";
     page.params = { document: "saved-draft" };

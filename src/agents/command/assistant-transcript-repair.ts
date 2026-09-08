@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { SessionEntry, PendingTranscriptRepairState } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { runAgentHarnessBeforeMessageWriteHook } from "../harness/hook-helpers.js";
@@ -15,7 +15,7 @@ type AssistantTranscriptRepairContext = {
   sessionStore?: Record<string, SessionEntry>;
   storePath: string;
   sessionAgentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 };
 
 const EMPTY_USAGE = {

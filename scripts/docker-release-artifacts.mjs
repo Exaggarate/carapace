@@ -29,7 +29,7 @@ const WORKFLOW_PATH = ".github/workflows/docker-release-prepare.yml";
 const PRODUCER_WORKFLOWS = new Set([
   ".github/workflows/full-release-validation.yml",
   ".github/workflows/full-release-artifacts.yml",
-  ".github/workflows/openclaw-release-publish.yml",
+  ".github/workflows/carapace-release-publish.yml",
   ".github/workflows/docker-image-refresh.yml",
   WORKFLOW_PATH,
 ]);
@@ -245,13 +245,13 @@ set -eu
 smoke_home="$(mktemp -d)"
 smoke_cwd="$(mktemp -d)"
 trap 'rm -rf "$smoke_home" "$smoke_cwd"' EXIT
-export HOME="$smoke_home" USERPROFILE="$smoke_home" OPENCLAW_HOME="$smoke_home"
-export OPENCLAW_NO_ONBOARD=1 OPENCLAW_SUPPRESS_NOTES=1 OPENCLAW_DISABLE_BUNDLED_PLUGINS=1
-export OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK=1 AWS_EC2_METADATA_DISABLED=true
+export HOME="$smoke_home" USERPROFILE="$smoke_home" CARAPACE_HOME="$smoke_home"
+export CARAPACE_NO_ONBOARD=1 CARAPACE_SUPPRESS_NOTES=1 CARAPACE_DISABLE_BUNDLED_PLUGINS=1
+export CARAPACE_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK=1 AWS_EC2_METADATA_DISABLED=true
 export AWS_CONFIG_FILE="$smoke_home/aws-config" AWS_SHARED_CREDENTIALS_FILE="$smoke_home/aws-credentials"
 cd "$smoke_cwd"
 set +e
-smoke_output="$(node /app/openclaw.mjs agent --message "workspace bootstrap smoke" --session-id workspace-bootstrap-smoke --local --timeout 1 --json 2>&1)"
+smoke_output="$(node /app/carapace.mjs agent --message "workspace bootstrap smoke" --session-id workspace-bootstrap-smoke --local --timeout 1 --json 2>&1)"
 smoke_status=$?
 set -e
 printf '%s\\n' "$smoke_output"
@@ -260,7 +260,7 @@ if [ "$smoke_status" -ne 0 ]; then echo "Agent exited $smoke_status after worksp
 `;
 
 function smokeImage(directory, architecture, variant, configDigest) {
-  const image = `openclaw-release-smoke:${architecture}-${variant}`;
+  const image = `carapace-release-smoke:${architecture}-${variant}`;
   // Only the smoke copy enters Docker's single-image store. The OCI artifact
   // retains the original index, SBOM, and provenance for digest-preserving promotion.
   run(
@@ -849,7 +849,7 @@ async function main() {
       const sourceDigests = await publishDockerRelease({
         manifest,
         payloadDirectory: values.directory,
-        images: [`ghcr.io/${env.GITHUB_REPOSITORY.toLowerCase()}`, "docker.io/openclaw/openclaw"],
+        images: [`ghcr.io/${env.GITHUB_REPOSITORY.toLowerCase()}`, "docker.io/carapace/carapace"],
       });
       appendFileSync(env.GITHUB_OUTPUT, `vcr_source_digests<<EOF\n${sourceDigests}\nEOF\n`);
       appendFileSync(

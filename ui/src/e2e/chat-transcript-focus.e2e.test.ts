@@ -10,7 +10,7 @@ suite.define(() => {
   it("keeps a focused message action mounted while its row scrolls out of view", async () => {
     const page = await suite.browser.newPage({ viewport: { width: 1280, height: 800 } });
     const messages = Array.from({ length: 200 }, (_, index) => ({
-      __openclaw: { seq: index + 1 },
+      __carapace: { seq: index + 1 },
       content: [
         {
           type: "text",

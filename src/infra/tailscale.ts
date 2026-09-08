@@ -5,12 +5,12 @@ import { fileURLToPath } from "node:url";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { asNullableObjectRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asNullableObjectRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { runExec } from "../process/exec.js";
 import { signalProcessTree } from "../process/kill-tree.js";
 import { extractTailscaleServeGatewayUrls } from "../shared/tailscale-status.js";
@@ -203,7 +203,7 @@ function getTestTailscaleBinaryOverride(env: NodeJS.ProcessEnv = process.env): s
   if (!isVitestRuntimeEnv(env)) {
     return null;
   }
-  const forcedBinary = env.OPENCLAW_TEST_TAILSCALE_BINARY?.trim();
+  const forcedBinary = env.CARAPACE_TEST_TAILSCALE_BINARY?.trim();
   return forcedBinary || null;
 }
 
@@ -434,7 +434,7 @@ export async function claimTailscaleRoute(
     }
   }
   if (adopted) {
-    info("Tailscale route adopted from a previous OpenClaw release");
+    info("Tailscale route adopted from a previous Carapace release");
   }
   return claim;
 }

@@ -17,28 +17,28 @@ suite.define(() => {
   it.each([
     {
       kind: "audio",
-      source: "/home/node/.openclaw/media/outbound/bootstrap-voice.mp3",
+      source: "/home/node/.carapace/media/outbound/bootstrap-voice.mp3",
       ticket: "ticket-bootstrap-audio",
     },
     {
       kind: "image",
-      source: "/home/node/.openclaw/media/outbound/bootstrap-image.png",
+      source: "/home/node/.carapace/media/outbound/bootstrap-image.png",
       ticket: "ticket-bootstrap-image",
     },
     {
       kind: "image",
-      source: "/projects/chat-worktree/.openclaw/tmp/review/preview.png",
+      source: "/projects/chat-worktree/.carapace/tmp/review/preview.png",
       ticket: "ticket-project-image",
       revalidatePolicy: true,
     },
     {
       kind: "image",
-      source: "FILE:///home/node/.openclaw/media/outbound/bootstrap-uppercase-image.png",
+      source: "FILE:///home/node/.carapace/media/outbound/bootstrap-uppercase-image.png",
       ticket: "ticket-bootstrap-uppercase-image",
     },
     {
       kind: "image",
-      source: "file:/home/node/.openclaw/media/outbound/bootstrap-authorityless-image.png",
+      source: "file:/home/node/.carapace/media/outbound/bootstrap-authorityless-image.png",
       ticket: "ticket-bootstrap-authorityless-image",
     },
     {
@@ -60,7 +60,7 @@ suite.define(() => {
       const expectedSource = "structured" in options ? new URL(source).pathname : source;
       let mediaAllowed = true;
 
-      await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+      await page.route("**/__carapace__/assistant-media?**", async (route) => {
         const request = route.request();
         const url = new URL(request.url());
         requestedMediaUrls.push(url);
@@ -131,7 +131,7 @@ suite.define(() => {
         const media =
           kind === "image"
             ? page.getByAltText("Local bootstrap image")
-            : page.locator("openclaw-chat-audio-player");
+            : page.locator("carapace-chat-audio-player");
         await media.waitFor({
           state: "visible",
           timeout: 10_000,
@@ -187,13 +187,13 @@ suite.define(() => {
           ).toHaveLength(3);
         }
 
-        if (process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()) {
+        if (process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()) {
           await page.screenshot({
             fullPage: true,
             path: path.join(suite.artifactDir, `bootstrap-local-${kind}-${ticket}.png`),
           });
         }
-        if (process.env.OPENCLAW_BEHAVIOR_PROOF === "1") {
+        if (process.env.CARAPACE_BEHAVIOR_PROOF === "1") {
           process.stdout.write(
             `${JSON.stringify({
               proof: "control-ui-local-media-bootstrap",
@@ -225,14 +225,14 @@ suite.define(() => {
     {
       code: "file-not-found",
       reason: "File not found",
-      source: "/home/node/.openclaw/media/outbound/bootstrap-missing.mp3",
+      source: "/home/node/.carapace/media/outbound/bootstrap-missing.mp3",
     },
   ] as const)("keeps server-rejected $code media blocked", async ({ code, reason, source }) => {
     const context = await suite.newBrowserContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
     const requestedMediaUrls: URL[] = [];
 
-    await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+    await page.route("**/__carapace__/assistant-media?**", async (route) => {
       const request = route.request();
       const url = new URL(request.url());
       requestedMediaUrls.push(url);
@@ -265,13 +265,13 @@ suite.define(() => {
       expect(await page.locator(".chat-assistant-attachment-card audio").count()).toBe(0);
       expect(await page.locator(".chat-assistant-attachment-card__download").count()).toBe(0);
 
-      if (process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()) {
+      if (process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()) {
         await page.screenshot({
           fullPage: true,
           path: path.join(suite.artifactDir, `bootstrap-blocked-${code}.png`),
         });
       }
-      if (process.env.OPENCLAW_BEHAVIOR_PROOF === "1") {
+      if (process.env.CARAPACE_BEHAVIOR_PROOF === "1") {
         process.stdout.write(
           `${JSON.stringify({
             proof: "control-ui-local-media-bootstrap",

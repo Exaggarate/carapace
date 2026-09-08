@@ -36,7 +36,7 @@ describe("plugin runtime symlink health findings", () => {
 
   beforeEach(async () => {
     tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-runtime-symlinks-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-runtime-symlinks-")),
     );
   });
 
@@ -47,7 +47,7 @@ describe("plugin runtime symlink health findings", () => {
   it.runIf(process.platform !== "win32")(
     "preserves POSIX relative runtime links across directory symlinks and ..",
     async () => {
-      const packageRoot = path.join(tempDir, "global", "node_modules", "openclaw");
+      const packageRoot = path.join(tempDir, "global", "node_modules", "carapace");
       const runtimeRoot = path.join(tempDir, "shared", "plugin-runtime-deps");
       const physicalRoot = path.join(tempDir, "physical");
       const dependency = path.join(physicalRoot, "dep");
@@ -83,18 +83,18 @@ describe("plugin runtime symlink health findings", () => {
       if (!(await canCreateDirectorySymlink(tempDir))) {
         return;
       }
-      const packageRoot = path.join(tempDir, "prefix", "lib", "node_modules", "openclaw");
+      const packageRoot = path.join(tempDir, "prefix", "lib", "node_modules", "carapace");
       const legacyRoot = path.join(tempDir, "state", "plugin-runtime-deps");
       const missingTarget = path.join(
         legacyRoot,
-        "openclaw-slack",
+        "carapace-slack",
         "node_modules",
         "@slack",
         "web-api",
       );
       const scopeRoot = path.join(path.dirname(packageRoot), "@slack");
       const staleLink = path.join(scopeRoot, "web-api");
-      const liveTarget = path.join(legacyRoot, "openclaw-live", "node_modules", "@slack", "bolt");
+      const liveTarget = path.join(legacyRoot, "carapace-live", "node_modules", "@slack", "bolt");
       const liveLink = path.join(scopeRoot, "bolt");
 
       await fs.mkdir(packageRoot, { recursive: true });
@@ -102,7 +102,7 @@ describe("plugin runtime symlink health findings", () => {
       await fs.mkdir(liveTarget, { recursive: true });
       await fs.writeFile(path.join(liveTarget, "package.json"), '{"name":"live-runtime"}\n');
       if (code === "ENOTDIR") {
-        await fs.writeFile(path.join(legacyRoot, "openclaw-slack"), "not a directory\n");
+        await fs.writeFile(path.join(legacyRoot, "carapace-slack"), "not a directory\n");
       }
       await fs.symlink(missingTarget, staleLink, "dir");
       await fs.symlink(liveTarget, liveLink, "dir");
@@ -115,7 +115,7 @@ describe("plugin runtime symlink health findings", () => {
           path: staleLink,
           target: staleLink,
           requirement: "stale-plugin-runtime-symlink-removed",
-          fixHint: "Run `openclaw doctor --fix` to remove stale plugin-runtime symlinks.",
+          fixHint: "Run `carapace doctor --fix` to remove stale plugin-runtime symlinks.",
         },
       ]);
       await expectSymlinkPresent(staleLink);

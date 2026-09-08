@@ -3,7 +3,7 @@
  * Discovers channel tools, message actions, prompt capabilities, reaction
  * guidance, and weakly-attached channel metadata for wrapped tools.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import type { ChatType } from "../channels/chat-type.js";
 import { getChannelPlugin, listChannelPlugins } from "../channels/plugins/index.js";
 import {
@@ -23,13 +23,13 @@ import type {
   ChannelMessageActionName,
 } from "../channels/plugins/types.public.js";
 import { normalizeAnyChannelId } from "../channels/registry.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setChannelAgentToolMeta } from "./channel-tool-metadata.js";
 
 export { getChannelAgentToolMeta } from "./channel-tool-metadata.js";
 
 type ChannelMessageActionDiscoveryParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   chatType?: ChatType | null;
   currentChannelId?: string | null;
   currentThreadTs?: string | null;
@@ -97,7 +97,7 @@ export function listAllChannelSupportedActions(
 }
 
 /** List agent tools contributed by registered channel plugins. */
-export function listChannelAgentTools(params: { cfg?: OpenClawConfig }): ChannelAgentTool[] {
+export function listChannelAgentTools(params: { cfg?: CarapaceConfig }): ChannelAgentTool[] {
   // Channel docking: aggregate channel-owned tools (login, etc.).
   const tools: ChannelAgentTool[] = [];
   for (const plugin of listChannelPlugins()) {
@@ -118,7 +118,7 @@ export function listChannelAgentTools(params: { cfg?: OpenClawConfig }): Channel
 
 /** Resolve channel-specific message tool hints for system prompt assembly. */
 export function resolveChannelMessageToolHints(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   channel?: string | null;
   accountId?: string | null;
 }): string[] {
@@ -130,13 +130,13 @@ export function resolveChannelMessageToolHints(params: {
   if (!resolve) {
     return [];
   }
-  const cfg = params.cfg ?? ({} as OpenClawConfig);
+  const cfg = params.cfg ?? ({} as CarapaceConfig);
   return normalizeStringEntries(resolve({ cfg, accountId: params.accountId }));
 }
 
 /** Resolve channel prompt capabilities, including native approval UI support. */
 export function resolveChannelPromptCapabilities(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   channel?: string | null;
   accountId?: string | null;
 }): string[] {
@@ -145,7 +145,7 @@ export function resolveChannelPromptCapabilities(params: {
     return [];
   }
   const plugin = getChannelPlugin(channelId);
-  const cfg = params.cfg ?? ({} as OpenClawConfig);
+  const cfg = params.cfg ?? ({} as CarapaceConfig);
   const capabilities = normalizePromptCapabilities(
     plugin?.agentPrompt?.messageToolCapabilities?.({ cfg, accountId: params.accountId }),
   );
@@ -161,7 +161,7 @@ function normalizePromptCapabilities(capabilities?: readonly string[] | null): s
 
 /** Resolve optional channel reaction guidance for assistant replies. */
 export function resolveChannelReactionGuidance(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   channel?: string | null;
   accountId?: string | null;
 }): { level: "minimal" | "extensive"; channel: string } | undefined {
@@ -173,7 +173,7 @@ export function resolveChannelReactionGuidance(params: {
   if (!resolve) {
     return undefined;
   }
-  const cfg = params.cfg ?? ({} as OpenClawConfig);
+  const cfg = params.cfg ?? ({} as CarapaceConfig);
   const resolved = resolve({ cfg, accountId: params.accountId });
   if (!resolved?.level) {
     return undefined;

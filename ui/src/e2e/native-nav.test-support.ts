@@ -5,7 +5,7 @@ export async function installNativeEmbed(
   host: { platform: "ios" | "macos" | "android"; formFactor: "phone" | "pad" | "desktop" },
 ): Promise<void> {
   await page.addInitScript((embed) => {
-    Object.assign(window, { __OPENCLAW_NATIVE_EMBED__: embed });
+    Object.assign(window, { __CARAPACE_NATIVE_EMBED__: embed });
   }, host);
 }
 
@@ -13,17 +13,17 @@ export async function installNativeEmbed(
 export async function installNativeWebChrome(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const nativeWindow = window as Window & {
-      __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-      __OPENCLAW_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
+      __CARAPACE_NATIVE_WEB_CHROME__?: boolean;
+      __CARAPACE_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
     };
-    nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-    nativeWindow["__OPENCLAW_NATIVE_HISTORY__"] = {
+    nativeWindow["__CARAPACE_NATIVE_WEB_CHROME__"] = true;
+    nativeWindow["__CARAPACE_NATIVE_HISTORY__"] = {
       canGoBack: false,
       canGoForward: false,
     };
     const stamp = () => {
-      document.documentElement.classList.add("openclaw-native-macos", "openclaw-native-web-chrome");
-      document.documentElement.style.setProperty("--openclaw-native-titlebar-height", "52px");
+      document.documentElement.classList.add("carapace-native-macos", "carapace-native-web-chrome");
+      document.documentElement.style.setProperty("--carapace-native-titlebar-height", "52px");
     };
     if (document.documentElement) {
       stamp();

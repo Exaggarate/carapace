@@ -1,7 +1,7 @@
 // LLM Task doctor contract migrates shipped plugin-local completion policy.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { parseModelRef } from "openclaw/plugin-sdk/model-ref-parse";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { parseModelRef } from "carapace/plugin-sdk/model-ref-parse";
+import { asObjectRecord } from "carapace/plugin-sdk/runtime-doctor-migrations";
 
 const ENTRY_PATH = "plugins.entries.llm-task";
 
@@ -21,11 +21,11 @@ function preserveLiteralLegacyModelRefs(values: string[]): string[] {
 export const legacyConfigRules = [
   {
     path: ["plugins", "entries", "llm-task", "config", "allowedModels"],
-    message: `${ENTRY_PATH}.config.allowedModels moved to ${ENTRY_PATH}.llm.allowedCompletionModels. Run "openclaw doctor --fix".`,
+    message: `${ENTRY_PATH}.config.allowedModels moved to ${ENTRY_PATH}.llm.allowedCompletionModels. Run "carapace doctor --fix".`,
   },
   {
     path: ["plugins", "entries", "llm-task"],
-    message: `${ENTRY_PATH} needs host-owned LLM model/profile permissions to preserve shipped tool parameters. Run "openclaw doctor --fix".`,
+    message: `${ENTRY_PATH} needs host-owned LLM model/profile permissions to preserve shipped tool parameters. Run "carapace doctor --fix".`,
     match: (value: unknown) => {
       const entry = asObjectRecord(value);
       const llm = asObjectRecord(entry?.llm);
@@ -34,8 +34,8 @@ export const legacyConfigRules = [
   },
 ];
 
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: CarapaceConfig }): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   const plugins = asObjectRecord(cfg.plugins);
@@ -103,7 +103,7 @@ export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): 
             config: nextPluginConfig,
           },
         },
-      } as OpenClawConfig["plugins"],
+      } as CarapaceConfig["plugins"],
     },
     changes,
   };

@@ -41,7 +41,7 @@ function expectConfiguredChannelPluginIdsParams(expected: {
   expect(params?.workspaceDir).toBe(expected.workspaceDir);
 }
 
-function expectLoadOpenClawPluginsCall(
+function expectLoadCarapacePluginsCall(
   callIndex: number,
   expected: {
     config?: unknown;
@@ -52,7 +52,7 @@ function expectLoadOpenClawPluginsCall(
     workspaceDir?: string;
   },
 ) {
-  const params = mocks.loadOpenClawPlugins.mock.calls[callIndex]?.[0] as
+  const params = mocks.loadCarapacePlugins.mock.calls[callIndex]?.[0] as
     | {
         config?: unknown;
         activationSourceConfig?: unknown;
@@ -79,7 +79,7 @@ function expectLoadOpenClawPluginsCall(
 }
 
 const mocks = vi.hoisted(() => ({
-  loadOpenClawPlugins: vi.fn<typeof import("../plugins/loader.js").loadOpenClawPlugins>(),
+  loadCarapacePlugins: vi.fn<typeof import("../plugins/loader.js").loadCarapacePlugins>(),
   resolveConfiguredChannelPluginIds:
     vi.fn<typeof import("../plugins/channel-plugin-ids.js").resolveConfiguredChannelPluginIds>(),
   resolveChannelPluginIds:
@@ -95,8 +95,8 @@ const mocks = vi.hoisted(() => ({
 let ensurePluginRegistryLoaded: typeof import("./plugin-registry.js").ensurePluginRegistryLoaded;
 
 vi.mock("../plugins/loader.js", () => ({
-  loadOpenClawPlugins: (...args: Parameters<typeof mocks.loadOpenClawPlugins>) =>
-    mocks.loadOpenClawPlugins(...args),
+  loadCarapacePlugins: (...args: Parameters<typeof mocks.loadCarapacePlugins>) =>
+    mocks.loadCarapacePlugins(...args),
 }));
 
 vi.mock("../plugins/channel-plugin-ids.js", () => ({
@@ -147,7 +147,7 @@ describe("ensurePluginRegistryLoaded", () => {
   });
 
   beforeEach(() => {
-    mocks.loadOpenClawPlugins.mockReset();
+    mocks.loadCarapacePlugins.mockReset();
     mocks.resolveConfiguredChannelPluginIds.mockReset();
     mocks.resolveChannelPluginIds.mockReset();
     mocks.resolveEffectivePluginIds.mockReset();
@@ -200,8 +200,8 @@ describe("ensurePluginRegistryLoaded", () => {
       config: autoEnabledConfig,
       workspaceDir: "/tmp/workspace",
     });
-    expect(mocks.loadOpenClawPlugins).toHaveBeenCalledTimes(1);
-    expectLoadOpenClawPluginsCall(0, {
+    expect(mocks.loadCarapacePlugins).toHaveBeenCalledTimes(1);
+    expectLoadCarapacePluginsCall(0, {
       config: autoEnabledConfig,
       activationSourceConfig: autoEnabledConfig,
       autoEnabledReasons: {
@@ -234,12 +234,12 @@ describe("ensurePluginRegistryLoaded", () => {
     ensurePluginRegistryLoaded({ scope: "configured-channels" });
     ensurePluginRegistryLoaded({ scope: "channels" });
 
-    expect(mocks.loadOpenClawPlugins).toHaveBeenCalledTimes(2);
-    expectLoadOpenClawPluginsCall(0, {
+    expect(mocks.loadCarapacePlugins).toHaveBeenCalledTimes(2);
+    expectLoadCarapacePluginsCall(0, {
       onlyPluginIds: ["demo-channel-a"],
       throwOnLoadError: true,
     });
-    expectLoadOpenClawPluginsCall(1, {
+    expectLoadCarapacePluginsCall(1, {
       onlyPluginIds: ["demo-channel-a", "demo-channel-b"],
       throwOnLoadError: true,
     });

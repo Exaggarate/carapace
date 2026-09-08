@@ -31,9 +31,9 @@ describe("Canvas A2UI board documents", () => {
       expect(readPublicResource).toHaveBeenLastCalledWith(resourcePath);
     }
     for (const resourcePath of [
-      "/__openclaw__/a2ui/private.json",
-      "/__openclaw__/a2ui/../config.json",
-      "/__openclaw__/canvas/documents/private/index.html",
+      "/__carapace__/a2ui/private.json",
+      "/__carapace__/a2ui/../config.json",
+      "/__carapace__/canvas/documents/private/index.html",
     ]) {
       await expect(
         canvasA2UIBoardWidgetKind.resources.readPublicResource?.(resourcePath),
@@ -42,10 +42,10 @@ describe("Canvas A2UI board documents", () => {
     expect(readPublicResource).toHaveBeenCalledTimes(2);
   });
   it.each([
-    ["v0.8", V08_SOURCE, "/__openclaw__/a2ui/a2ui.bundle.js"],
-    ["v0.9", V09_SOURCE, "/__openclaw__/a2ui/a2ui-v0.9.bundle.js"],
+    ["v0.8", V08_SOURCE, "/__carapace__/a2ui/a2ui.bundle.js"],
+    ["v0.9", V09_SOURCE, "/__carapace__/a2ui/a2ui-v0.9.bundle.js"],
   ])("composes %s with the capability-scoped renderer resource", (_name, source, path) => {
-    const resourceUrl = `/__openclaw__/cap/token${path}`;
+    const resourceUrl = `/__carapace__/cap/token${path}`;
     const document = canvasA2UIBoardWidgetKind.composeDocument?.({
       source,
       title: "A2UI",
@@ -53,7 +53,7 @@ describe("Canvas A2UI board documents", () => {
       promptGranted: false,
     });
 
-    expect(document).toContain("<openclaw-a2ui-host></openclaw-a2ui-host>");
+    expect(document).toContain("<carapace-a2ui-host></carapace-a2ui-host>");
     expect(document).toContain(resourceUrl);
     expect(document).toContain('"actionTier":"state"');
   });

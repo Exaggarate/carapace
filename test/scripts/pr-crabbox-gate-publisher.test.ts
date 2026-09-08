@@ -16,7 +16,7 @@ import {
   validateForwardAncestry,
 } from "../../scripts/pr-lib/crabbox-gate-contract.mjs";
 
-const repository = "openclaw/openclaw";
+const repository = "carapace/carapace";
 const workflowSha = "a".repeat(40);
 const baseSha = "c".repeat(40);
 const headSha = "b".repeat(40);
@@ -62,7 +62,7 @@ function env(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     GITHUB_SHA: workflowSha,
     GITHUB_TRIGGERING_ACTOR: "maintainer",
     GITHUB_WORKFLOW_REF:
-      "openclaw/openclaw/.github/workflows/pr-crabbox-gate-publisher.yml@refs/heads/main",
+      "carapace/carapace/.github/workflows/pr-crabbox-gate-publisher.yml@refs/heads/main",
     GITHUB_WORKFLOW_SHA: workflowSha,
     PATH: "/usr/bin:/bin",
     ...overrides,
@@ -112,17 +112,17 @@ function command() {
 
 function retainedLog() {
   return [
-    "OPENCLAW_CRABBOX_GATE_VERSION=1",
-    "OPENCLAW_CRABBOX_GATE_MODE=remote_crabbox_aws",
-    `OPENCLAW_CRABBOX_GATE_BASE=${baseSha}`,
-    `OPENCLAW_CRABBOX_GATE_HEAD=${headSha}`,
-    `OPENCLAW_CRABBOX_GATE_PLAN_SHA256=${crabboxGatePlanDigest(gatePlan())}`,
-    "OPENCLAW_CRABBOX_GATE_TARGET_COUNT=1",
-    `OPENCLAW_CRABBOX_BOOTSTRAP_SHA256=${bootstrapSha256}`,
-    "OPENCLAW_CRABBOX_GATE_STAGE=build:ok",
-    "OPENCLAW_CRABBOX_GATE_STAGE=check:ok",
-    "OPENCLAW_CRABBOX_GATE_STAGE=test:ok",
-    "OPENCLAW_CRABBOX_GATE_RESULT=success",
+    "CARAPACE_CRABBOX_GATE_VERSION=1",
+    "CARAPACE_CRABBOX_GATE_MODE=remote_crabbox_aws",
+    `CARAPACE_CRABBOX_GATE_BASE=${baseSha}`,
+    `CARAPACE_CRABBOX_GATE_HEAD=${headSha}`,
+    `CARAPACE_CRABBOX_GATE_PLAN_SHA256=${crabboxGatePlanDigest(gatePlan())}`,
+    "CARAPACE_CRABBOX_GATE_TARGET_COUNT=1",
+    `CARAPACE_CRABBOX_BOOTSTRAP_SHA256=${bootstrapSha256}`,
+    "CARAPACE_CRABBOX_GATE_STAGE=build:ok",
+    "CARAPACE_CRABBOX_GATE_STAGE=check:ok",
+    "CARAPACE_CRABBOX_GATE_STAGE=test:ok",
+    "CARAPACE_CRABBOX_GATE_RESULT=success",
   ].join("\n");
 }
 
@@ -133,10 +133,10 @@ function brokerRun(overrides: Record<string, unknown> = {}) {
     eventCount: 6,
     exitCode: 0,
     id: runId,
-    label: `openclaw-pr-gate:130481:${baseSha}:${headSha}`,
+    label: `carapace-pr-gate:130481:${baseSha}:${headSha}`,
     leaseID: leaseId,
     logTruncated: false,
-    org: "openclaw",
+    org: "carapace",
     owner: serviceOwner,
     phase: "released",
     provider: "aws",
@@ -205,7 +205,7 @@ function servicePrincipal(overrides: Record<string, unknown> = {}) {
   return {
     admin: false,
     auth: "bearer",
-    org: "openclaw",
+    org: "carapace",
     owner: serviceOwner,
     ...overrides,
   };
@@ -266,7 +266,7 @@ function crabboxRunner() {
         stdout: "",
         stderr: `${JSON.stringify({
           exitCode: 0,
-          label: `openclaw-pr-gate:130481:${baseSha}:${headSha}`,
+          label: `carapace-pr-gate:130481:${baseSha}:${headSha}`,
           leaseId,
           leaseStopped: true,
           provider: "aws",
@@ -471,7 +471,7 @@ describe("Crabbox gate publisher boundary", () => {
           expect(body).toMatchObject({
             conclusion: "success",
             head_sha: headSha,
-            name: "openclaw/crabbox-gate",
+            name: "carapace/crabbox-gate",
             output: {
               summary: formatCrabboxGateCheckSummary({
                 baseSha,
@@ -489,7 +489,7 @@ describe("Crabbox gate publisher boundary", () => {
             conclusion: "success",
             head_sha: headSha,
             id: 88,
-            name: "openclaw/crabbox-gate",
+            name: "carapace/crabbox-gate",
           };
         }
         throw new Error(`unexpected GitHub call: ${method} ${requestPath}`);
@@ -538,17 +538,17 @@ describe("Crabbox gate publisher boundary", () => {
     });
     expect(values.runCrabbox).toHaveBeenCalledTimes(2);
     expect(values.orderedCalls.slice(0, 6)).toEqual([
-      "organization:GET:/orgs/openclaw/memberships/maintainer",
-      "github:GET:/repos/openclaw/openclaw/pulls/130481",
-      `github:GET:/repos/openclaw/openclaw/compare/${baseSha}...${workflowSha}`,
-      "github:GET:/repos/openclaw/openclaw/git/ref/heads/main",
-      `github:GET:/repos/openclaw/openclaw/compare/${workflowSha}...${mainSha}`,
-      "github:GET:/repos/openclaw/openclaw/git/ref/heads/main",
+      "organization:GET:/orgs/carapace/memberships/maintainer",
+      "github:GET:/repos/carapace/carapace/pulls/130481",
+      `github:GET:/repos/carapace/carapace/compare/${baseSha}...${workflowSha}`,
+      "github:GET:/repos/carapace/carapace/git/ref/heads/main",
+      `github:GET:/repos/carapace/carapace/compare/${workflowSha}...${mainSha}`,
+      "github:GET:/repos/carapace/carapace/git/ref/heads/main",
     ]);
     expect(values.orderedCalls).toContain(
-      `github:GET:/repos/openclaw/openclaw/compare/${workflowSha}...${laterMainSha}`,
+      `github:GET:/repos/carapace/carapace/compare/${workflowSha}...${laterMainSha}`,
     );
-    expect(values.orderedCalls.at(-1)).toBe("github:POST:/repos/openclaw/openclaw/check-runs");
+    expect(values.orderedCalls.at(-1)).toBe("github:POST:/repos/carapace/carapace/check-runs");
   });
 
   it("evaluates proof freshness after the remote run completes", async () => {
@@ -607,7 +607,7 @@ describe("Crabbox gate publisher boundary", () => {
     ).rejects.toThrow(/protected main moved/u);
     expect(values.github.request).not.toHaveBeenCalledWith(
       "POST",
-      "/repos/openclaw/openclaw/check-runs",
+      "/repos/carapace/carapace/check-runs",
       expect.anything(),
     );
   });
@@ -712,9 +712,9 @@ describe("Crabbox gate workflow", () => {
     expect(job.steps.at(-1)).toMatchObject({
       env: {
         CRABBOX_COORDINATOR:
-          "${{ secrets.CRABBOX_COORDINATOR || secrets.OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR }}",
+          "${{ secrets.CRABBOX_COORDINATOR || secrets.CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR }}",
         CRABBOX_COORDINATOR_TOKEN:
-          "${{ secrets.CRABBOX_COORDINATOR_TOKEN || secrets.OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}",
+          "${{ secrets.CRABBOX_COORDINATOR_TOKEN || secrets.CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}",
       },
       run: "node scripts/pr-crabbox-gate-publisher.mjs",
     });

@@ -1,27 +1,27 @@
 ---
-summary: "OpenClaw CLI index: command list, global flags, and links to per-command pages"
+summary: "Carapace CLI index: command list, global flags, and links to per-command pages"
 read_when:
-  - Finding the right `openclaw` subcommand
+  - Finding the right `carapace` subcommand
   - Looking up global flags or output styling rules
 title: "CLI reference"
 ---
 
-`openclaw` is the main CLI entry point. Each core command has a dedicated
+`carapace` is the main CLI entry point. Each core command has a dedicated
 reference page or is documented with the command it aliases; this index lists
 the commands, global flags, and output styling rules that apply across the CLI.
 
 Setup commands by intent:
 
-- `openclaw setup` and `openclaw onboard` verify inference first, then start OpenClaw for Gateway, workspace, channels, skills, and health setup.
-- `openclaw setup --baseline` creates the baseline config and workspace without walking the guided onboarding flow.
-- `openclaw configure` changes targeted parts of an existing setup: model auth, gateway, channels, plugins, or skills.
-- `openclaw channels add` configures channel accounts after the baseline exists; a channel selection alone uses guided setup, while account, credential, or channel-config flags use the direct path for scripts.
+- `carapace setup` and `carapace onboard` verify inference first, then start Carapace for Gateway, workspace, channels, skills, and health setup.
+- `carapace setup --baseline` creates the baseline config and workspace without walking the guided onboarding flow.
+- `carapace configure` changes targeted parts of an existing setup: model auth, gateway, channels, plugins, or skills.
+- `carapace channels add` configures channel accounts after the baseline exists; a channel selection alone uses guided setup, while account, credential, or channel-config flags use the direct path for scripts.
 
 ## Command pages
 
 | Area                         | Commands                                                                                                                                                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Setup and onboarding         | [`openclaw`](/cli/openclaw) · [`setup`](/cli/setup) · [`onboard`](/cli/onboard) · [`configure`](/cli/configure) · [`config`](/cli/config) · [`completion`](/cli/completion) · [`doctor`](/cli/doctor) · [`dashboard`](/cli/dashboard) |
+| Setup and onboarding         | [`carapace`](/cli/carapace) · [`setup`](/cli/setup) · [`onboard`](/cli/onboard) · [`configure`](/cli/configure) · [`config`](/cli/config) · [`completion`](/cli/completion) · [`doctor`](/cli/doctor) · [`dashboard`](/cli/dashboard) |
 | Reset, backup, and migration | [`backup`](/cli/backup) · [`database`](/reference/database-schemas) · [`migrate`](/cli/migrate) · [`reset`](/cli/reset) · [`uninstall`](/cli/uninstall) · [`update`](/cli/update)                                                     |
 | Messaging and agents         | [`message`](/cli/message) · [`agent`](/cli/agent) · [`agents`](/cli/agents) · [`attach`](/cli/attach) · [`acp`](/cli/acp) · [`mcp`](/cli/mcp)                                                                                         |
 | Health and sessions          | [`status`](/cli/status) · [`health`](/cli/health) · [`triage`](/cli/triage) · [`sessions`](/cli/sessions) · [`resume`](/cli/resume) · [`audit`](/cli/audit)                                                                           |
@@ -40,22 +40,22 @@ Setup commands by intent:
 
 | Flag                    | Purpose                                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| `--dev`                 | Isolate state under `~/.openclaw-dev`, default gateway port 19001, and shift derived ports              |
-| `--profile <name>`      | Isolate state under `~/.openclaw-<name>` (`OPENCLAW_STATE_DIR`/`OPENCLAW_CONFIG_PATH`)                  |
-| `--container <name>`    | Run the CLI inside a running Podman/Docker container named `<name>` (default: env `OPENCLAW_CONTAINER`) |
+| `--dev`                 | Isolate state under `~/.carapace-dev`, default gateway port 19001, and shift derived ports              |
+| `--profile <name>`      | Isolate state under `~/.carapace-<name>` (`CARAPACE_STATE_DIR`/`CARAPACE_CONFIG_PATH`)                  |
+| `--container <name>`    | Run the CLI inside a running Podman/Docker container named `<name>` (default: env `CARAPACE_CONTAINER`) |
 | `--log-level <level>`   | Override the global log level for file + console output                                                 |
 | `--no-color`            | Disable ANSI colors (`NO_COLOR=1` is also respected)                                                    |
-| `--update`              | Shorthand for [`openclaw update`](/cli/update); works for both source checkouts and package installs    |
+| `--update`              | Shorthand for [`carapace update`](/cli/update); works for both source checkouts and package installs    |
 | `-V`, `--version`, `-v` | Print version and exit                                                                                  |
 
-Place command-specific options after their command name, for example `openclaw status --json`. Global options such as `--profile` can precede the command.
+Place command-specific options after their command name, for example `carapace status --json`. Global options such as `--profile` can precede the command.
 
 A named `--profile` replaces canonical state and config paths inherited from
 another profile, including a running Gateway service. Explicitly customized
 state directories and config paths remain unchanged.
 
 Use `--` to stop option parsing. Command words still dispatch after it: for example,
-`openclaw -- config get gateway.port` reads the configured port. A token such as
+`carapace -- config get gateway.port` reads the configured port. A token such as
 `--help` after `--` is a positional argument.
 
 ## Output modes
@@ -93,7 +93,7 @@ written to stderr, so scripts should parse stdout and still check the exit statu
 
 ## Color palette
 
-OpenClaw uses a lobster palette for CLI output:
+Carapace uses a lobster palette for CLI output:
 
 | Token          | Hex       | Used for                             |
 | -------------- | --------- | ------------------------------------ |
@@ -117,8 +117,8 @@ subcommands (for example under `skills`, `plugins`, and `wiki`) evolve
 independently; run `<command> --help` for the authoritative, current list.
 
 ```
-openclaw [--dev] [--profile <name>] <command>
-  openclaw
+carapace [--dev] [--profile <name>] <command>
+  carapace
   setup
   onboard
   configure
@@ -485,7 +485,7 @@ openclaw [--dev] [--profile <name>] <command>
 ```
 
 Plugins can add additional top-level commands, such as
-[`openclaw workboard`](/cli/workboard) or `openclaw voicecall`.
+[`carapace workboard`](/cli/workboard) or `carapace voicecall`.
 
 </Accordion>
 
@@ -502,7 +502,7 @@ Highlights:
 
 ## Usage tracking
 
-`openclaw status --usage` and the Control UI surface provider usage/quota when
+`carapace status --usage` and the Control UI surface provider usage/quota when
 OAuth/API credentials are available. Data comes directly from provider usage
 endpoints and is normalized to `X% left`. Providers with current usage
 windows: Anthropic, Gemini CLI, GitHub Copilot, MiniMax, OpenAI Codex,

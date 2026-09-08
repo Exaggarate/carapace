@@ -4,13 +4,13 @@ import {
   VerifierEvent,
 } from "matrix-js-sdk/lib/crypto-api/verification.js";
 import { VerificationMethod } from "matrix-js-sdk/lib/types.js";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 // Matrix plugin module implements verification manager behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   resolveDateTimestampMs,
   resolveTimestampMsToIsoString,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 
 export type MatrixVerificationMethod = "sas" | "show-qr" | "scan-qr";
 type MatrixVerificationPhase = VerificationPhase | -1;

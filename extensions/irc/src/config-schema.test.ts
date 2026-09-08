@@ -37,13 +37,13 @@ describe("irc config schema", () => {
     const config = expectValidConfig(
       parseIrcConfig({
         host: "irc.libera.chat",
-        nick: "openclaw-bot",
-        channels: ["#openclaw"],
+        nick: "carapace-bot",
+        channels: ["#carapace"],
       }),
     );
 
     expect(config.host).toBe("irc.libera.chat");
-    expect(config.nick).toBe("openclaw-bot");
+    expect(config.nick).toBe("carapace-bot");
   });
 
   it("accepts configWrites at channel and account level", () => {
@@ -170,12 +170,12 @@ describe("irc config schema", () => {
 describe("retired IRC mentionPatterns", () => {
   it("rejects the retired key at root and account scope", () => {
     expectInvalidConfig(
-      parseIrcConfig({ host: "irc.libera.chat", mentionPatterns: ["\\bopenclaw\\b"] }),
+      parseIrcConfig({ host: "irc.libera.chat", mentionPatterns: ["\\bcarapace\\b"] }),
     );
     expectInvalidConfig(
       parseIrcConfig({
         host: "irc.libera.chat",
-        accounts: { work: { nick: "openclaw-ops", mentionPatterns: ["\\bops\\b"] } },
+        accounts: { work: { nick: "carapace-ops", mentionPatterns: ["\\bops\\b"] } },
       }),
     );
   });
@@ -184,7 +184,7 @@ describe("retired IRC mentionPatterns", () => {
     expectValidConfig(
       parseIrcConfig({
         host: "irc.libera.chat",
-        accounts: { work: { nick: "openclaw-ops" } },
+        accounts: { work: { nick: "carapace-ops" } },
       }),
     );
   });

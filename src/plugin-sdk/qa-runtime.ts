@@ -24,16 +24,16 @@ export type {
 export async function closeQaRuntimeStores(tempRoot: string): Promise<void> {
   const [auth, agents, state, paths] = await Promise.all([
     import("../agents/auth-profiles/sqlite.js"),
-    import("../state/openclaw-agent-db.js"),
-    import("../state/openclaw-state-db.js"),
-    import("../state/openclaw-state-db.paths.js"),
+    import("../state/carapace-agent-db.js"),
+    import("../state/carapace-state-db.js"),
+    import("../state/carapace-state-db.paths.js"),
   ]);
   // Agent close releases leases through shared state. Keep that owner alive
   // until every scoped handle closes, or exit-time release can recreate the root.
   auth.closeAuthProfileReadPool({ kind: "root", rootPath: tempRoot });
-  await agents.closeOpenClawAgentDatabasesAsync(tempRoot);
-  state.closeOpenClawStateDatabaseByPath(
-    paths.resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: path.join(tempRoot, "state") }),
+  await agents.closeCarapaceAgentDatabasesAsync(tempRoot);
+  state.closeCarapaceStateDatabaseByPath(
+    paths.resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: path.join(tempRoot, "state") }),
   );
 }
 

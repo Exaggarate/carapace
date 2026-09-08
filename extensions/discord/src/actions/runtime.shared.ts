@@ -4,9 +4,9 @@ import {
   readNonNegativeIntegerParam,
   readPositiveIntegerParam,
   readStringParam,
-} from "openclaw/plugin-sdk/channel-actions";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asBoolean } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-actions";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { asBoolean } from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   DiscordChannelCreate,
   DiscordChannelEdit,
@@ -49,10 +49,10 @@ export function readDiscordAutoArchiveDurationParam(
 export function createDiscordActionOptions<
   T extends Record<string, unknown> = Record<string, never>,
 >(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   extra?: T;
-}): { cfg: OpenClawConfig; accountId?: string } & T {
+}): { cfg: CarapaceConfig; accountId?: string } & T {
   return {
     cfg: params.cfg,
     ...(params.accountId ? { accountId: params.accountId } : {}),

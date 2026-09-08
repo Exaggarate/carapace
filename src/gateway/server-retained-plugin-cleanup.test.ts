@@ -8,14 +8,14 @@ import {
   markRetainedManagedNpmInstall,
 } from "../plugins/managed-npm-retention.js";
 import { writeManagedNpmPlugin } from "../plugins/test-helpers/managed-npm-plugin.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { cleanupRetainedPluginInstallGenerations } from "./server-retained-plugin-cleanup.js";
 
 it("preserves package files retained by plugin uninstall", async () => {
-  await withOpenClawTestState({ label: "gateway-retained-plugin-cleanup" }, async (state) => {
+  await withCarapaceTestState({ label: "gateway-retained-plugin-cleanup" }, async (state) => {
     const packageDir = writeManagedNpmPlugin({
       stateDir: state.stateDir,
-      packageName: "@openclaw/kept-plugin",
+      packageName: "@carapace/kept-plugin",
       pluginId: "kept-plugin",
       version: "1.0.0",
     });
@@ -38,11 +38,11 @@ it("preserves package files retained by plugin uninstall", async () => {
 it.each(["project", "legacy"] as const)(
   "protects startup and desired %s packages when an update precedes idle cleanup",
   async (layout) => {
-    await withOpenClawTestState({ label: "gateway-retained-plugin-update" }, async (state) => {
+    await withCarapaceTestState({ label: "gateway-retained-plugin-update" }, async (state) => {
       const writePlugin = (pluginId: string) =>
         writeManagedNpmPlugin({
           stateDir: state.stateDir,
-          packageName: `@openclaw/${pluginId}`,
+          packageName: `@carapace/${pluginId}`,
           pluginId,
           version: "1.0.0",
           layout,
@@ -55,7 +55,7 @@ it.each(["project", "legacy"] as const)(
         {
           "desired-plugin": {
             source: "npm",
-            spec: "@openclaw/desired-plugin",
+            spec: "@carapace/desired-plugin",
             installPath: desiredPackage,
           },
         },

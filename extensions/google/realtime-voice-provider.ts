@@ -21,8 +21,8 @@ import {
 import {
   resolveExpiresAtMsFromDurationMs,
   timestampMsToIsoString,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-onboard";
+} from "carapace/plugin-sdk/number-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-onboard";
 import type {
   RealtimeVoiceAudioFormat,
   RealtimeVoiceBridge,
@@ -34,7 +34,7 @@ import type {
   RealtimeVoiceRole,
   RealtimeVoiceTool,
   RealtimeVoiceToolResultOptions,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import {
   convertPcmToMulaw8k,
   createRealtimeVoiceAudioQueue,
@@ -44,9 +44,9 @@ import {
   REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME,
   realtimeVoiceAudioDurationMs,
   resamplePcm,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
-import { warn } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/realtime-voice-provider";
+import { warn } from "carapace/plugin-sdk/runtime-env";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import {
   asBoolean,
   asFiniteNumber,
@@ -54,7 +54,7 @@ import {
   asSafeIntegerInRange,
   isRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { canonicalizeGoogleProviderBase64 } from "./base64.js";
 import { createGoogleGenAI } from "./google-genai-runtime.js";
 import { resolveGoogleGemini3ThinkingLevel } from "./thinking-api.js";
@@ -233,7 +233,7 @@ function resolveGoogleRealtimeProviderConfigRecord(
 
 function normalizeProviderConfig(
   config: RealtimeVoiceProviderConfig,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): GoogleRealtimeVoiceProviderConfig {
   const raw = resolveGoogleRealtimeProviderConfigRecord(config);
   return {

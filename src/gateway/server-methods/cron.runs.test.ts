@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import type { CronRunLogEntry } from "../../cron/run-log-types.js";
@@ -10,7 +10,7 @@ import {
   cronRunStatusToTaskStatus,
 } from "../../cron/task-run-detail.js";
 import type { TaskRecord } from "../../tasks/task-registry.types.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { seedTaskRegistryRowsForTests } from "../../test-utils/task-registry-sqlite.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { roleClient, rolePolicyConfig } from "../session-sharing.test-utils.js";
@@ -29,7 +29,7 @@ async function withCronHistory(
     viewer: GatewayClient;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const cfg = {
       ...rolePolicyConfig(),
       agents: { entries: { main: { workspace: state.workspaceDir } } },

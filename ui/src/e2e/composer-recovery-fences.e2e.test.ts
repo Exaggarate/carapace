@@ -40,7 +40,7 @@ suite.define(() => {
           .getByText("Split seed completed.", { exact: true })
           .waitFor();
         await page.getByRole("button", { name: "Open split view", exact: true }).click();
-        const panes = page.locator("openclaw-chat-pane.chat-split-view__pane");
+        const panes = page.locator("carapace-chat-pane.chat-split-view__pane");
         await expect.poll(() => panes.count()).toBe(2);
         const left = panes.nth(0);
         const right = panes.nth(1);
@@ -90,7 +90,7 @@ suite.define(() => {
         await expectRequestCountStable(gateway, "chat.send", 1);
         const original = await page.evaluate(() =>
           Object.keys(sessionStorage)
-            .filter((key) => key.startsWith("openclaw.control.chatComposer.v4:"))
+            .filter((key) => key.startsWith("carapace.control.chatComposer.v4:"))
             .flatMap((key) => {
               const store = JSON.parse(sessionStorage.getItem(key)!) as {
                 sessions: Record<string, { queue?: ChatQueueItem[] }>;
@@ -191,7 +191,7 @@ suite.define(() => {
             chatQueue: [],
           };
           sessionStorage.setItem(
-            `openclaw.control.chatComposer.v2:${encodeURIComponent(host.settings.gatewayUrl)}`,
+            `carapace.control.chatComposer.v2:${encodeURIComponent(host.settings.gatewayUrl)}`,
             JSON.stringify({
               version: 2,
               gatewayOwner: host.settings.gatewayUrl,
@@ -204,7 +204,7 @@ suite.define(() => {
               },
             }),
           );
-          const component = Object.assign(document.createElement("openclaw-chat-outbox-recovery"), {
+          const component = Object.assign(document.createElement("carapace-chat-outbox-recovery"), {
             host,
             identity: "unchanged-route-and-owner",
           });
@@ -213,14 +213,14 @@ suite.define(() => {
           document.body.append(component);
           return host;
         }, change === "incognito");
-        const notice = page.locator("openclaw-chat-outbox-recovery");
+        const notice = page.locator("carapace-chat-outbox-recovery");
         await notice.locator("summary").click();
         const restore = notice.getByRole("button", { name: "Restore here for review" });
         if (change === "incognito") {
           expect(await restore.isDisabled()).toBe(true);
         } else {
           await restore.click();
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           await dialog.getByText("agent:main:main (main)", { exact: true }).waitFor();
           await page.evaluate(
             ({ host: currentHost, change: retirement }) => {
@@ -247,7 +247,7 @@ suite.define(() => {
         }
         const records = await page.evaluate(() => {
           const raw = sessionStorage.getItem(
-            `openclaw.control.chatComposer.v4:${encodeURIComponent("ws://recovery-fence.test")}`,
+            `carapace.control.chatComposer.v4:${encodeURIComponent("ws://recovery-fence.test")}`,
           );
           if (!raw) {
             throw new Error("Missing migrated recovery state");

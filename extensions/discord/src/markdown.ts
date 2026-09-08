@@ -1,6 +1,6 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+import type { MarkdownTableMode } from "carapace/plugin-sdk/config-contracts";
+import { convertMarkdownTables } from "carapace/plugin-sdk/text-chunking";
 
 type PositionedMarkdownNode = {
   type: string;

@@ -4,8 +4,8 @@ import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { coerceErrorMessage, toErrorObject } from "@openclaw/normalization-core/error-coercion";
-import type { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { coerceErrorMessage, toErrorObject } from "@carapace/normalization-core/error-coercion";
+import type { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import {
   createQaBusState,
   createQaChannelTransport,
@@ -15,7 +15,7 @@ import {
   startQaMockOpenAiServer,
   type QaEvidenceSummaryJson,
 } from "../../../../extensions/qa-lab/api.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { collectErrorGraphCandidates } from "../../../../src/infra/errors.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import {
@@ -152,13 +152,13 @@ async function startAuthInspectingProxy(targetBaseUrl: string) {
 }
 
 function buildGenerationConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   generation: Generation;
   pluginDir: string;
   tracePath: string;
   barrierPath: string;
   mockProviderBaseUrl: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const { config, generation, pluginDir, tracePath, barrierPath, mockProviderBaseUrl } = params;
   const providerConfig = config.models?.providers?.[PROVIDER_ID];
   return {
@@ -219,7 +219,7 @@ function buildGenerationConfig(params: {
         model: { primary: MODEL_REF, fallbacks: [] },
         models: {
           ...config.agents?.defaults?.models,
-          [MODEL_REF]: { agentRuntime: { id: "openclaw" } },
+          [MODEL_REF]: { agentRuntime: { id: "carapace" } },
         },
       },
     },
@@ -236,13 +236,13 @@ async function hotPublishGeneration(params: {
   generation: Exclude<Generation, "A">;
 }): Promise<{ pidBefore: number; pidAfter: number }> {
   const before = (await params.gateway.call("system.info", {})) as { pid?: number };
-  const config = JSON.parse(await fs.readFile(params.gateway.configPath, "utf8")) as OpenClawConfig;
+  const config = JSON.parse(await fs.readFile(params.gateway.configPath, "utf8")) as CarapaceConfig;
   const pluginEntry = config.plugins?.entries?.[PLUGIN_ID];
   const providerConfig = config.models?.providers?.[PROVIDER_ID];
   if (!pluginEntry?.config || !providerConfig) {
     throw new Error("generation A config was not installed before hot publish");
   }
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...config,
     plugins: {
       ...config.plugins,
@@ -287,12 +287,12 @@ async function hotPublishChannelCredential(params: {
 }): Promise<{ pidBefore: number; pidAfter: number }> {
   const before = (await params.gateway.call("system.info", {})) as { pid?: number };
   const previous = (await params.gateway.call("config.get", {})) as { hash?: string };
-  const config = JSON.parse(await fs.readFile(params.gateway.configPath, "utf8")) as OpenClawConfig;
+  const config = JSON.parse(await fs.readFile(params.gateway.configPath, "utf8")) as CarapaceConfig;
   const providerConfig = config.models?.providers?.[PROVIDER_ID];
   if (!providerConfig) {
     throw new Error("worker generation provider was missing before credential reload");
   }
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...config,
     models: {
       ...config.models,
@@ -436,8 +436,8 @@ async function readMockRequests(baseUrl: string) {
 }
 
 async function runProof(options: ProducerOptions) {
-  // openclaw-temp-dir: standalone QA producer owns and removes this fixture root.
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-generation-"));
+  // carapace-temp-dir: standalone QA producer owns and removes this fixture root.
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-worker-generation-"));
   const tracePath = path.join(options.artifactBase, `${SCENARIO_ID}-trace.jsonl`);
   const barrierPath = path.join(root, "auth-preparation-barrier");
   const pluginDir = path.join(

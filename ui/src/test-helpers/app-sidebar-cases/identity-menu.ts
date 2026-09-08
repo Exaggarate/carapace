@@ -71,7 +71,7 @@ describe("AppSidebar footer identity menu", () => {
 
     sidebar.querySelector<HTMLButtonElement>(".sidebar-identity-card")?.click();
     await sidebar.updateComplete;
-    const buildChip = sidebar.querySelector<HTMLElement>("openclaw-sidebar-build-chip");
+    const buildChip = sidebar.querySelector<HTMLElement>("carapace-sidebar-build-chip");
     await (buildChip as (HTMLElement & { updateComplete?: Promise<unknown> }) | null)
       ?.updateComplete;
 
@@ -182,11 +182,11 @@ describe("AppSidebar footer identity menu", () => {
     ).toMatch(/^(⌘⇧,|Ctrl\+Shift\+,)$/u);
     expect(menu?.style.getPropertyValue("--sidebar-identity-menu-min-width")).toBe("212px");
     expect(menu?.querySelector(".sidebar-pair-mobile")?.hasAttribute("disabled")).toBe(true);
-    expect(menu?.querySelector("openclaw-sidebar-build-chip")).not.toBeNull();
+    expect(menu?.querySelector("carapace-sidebar-build-chip")).not.toBeNull();
     expect(
-      (menu?.querySelector("openclaw-sidebar-build-chip") as { variant?: string } | null)?.variant,
+      (menu?.querySelector("carapace-sidebar-build-chip") as { variant?: string } | null)?.variant,
     ).toBe("identity");
-    expect(menu?.querySelector("openclaw-theme-mode-toggle")).not.toBeNull();
+    expect(menu?.querySelector("carapace-theme-mode-toggle")).not.toBeNull();
     expect(menu?.textContent).not.toContain("Recent activity");
     expect(menu?.querySelectorAll(':scope > [role="separator"]')).toHaveLength(4);
     expect(identity?.querySelector(".sidebar-identity-card__more")).toBeNull();
@@ -200,10 +200,10 @@ describe("AppSidebar footer identity menu", () => {
         (link) => link.getAttribute("href"),
       ),
     ).toEqual([
-      "https://docs.openclaw.ai",
-      "https://docs.openclaw.ai/help",
+      "https://github.com/Exaggarate/carapace",
+      "https://github.com/Exaggarate/carapace",
       "https://discord.gg/clawd",
-      "https://docs.openclaw.ai/releases",
+      "https://github.com/Exaggarate/carapace",
     ]);
 
     menu?.querySelector<HTMLElement>('wa-dropdown-item[value="command:profile"]')?.focus();

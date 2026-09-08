@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { recordInstalledPluginIndexInstallOwner } from "./installed-plugin-index-install-owner.js";
 import type { InstalledPluginIndex, InstalledPluginIndexRecord } from "./installed-plugin-index.js";
 import {
@@ -16,7 +16,7 @@ function record(
   return recordInstalledPluginIndexInstallOwner(
     {
       pluginId,
-      manifestPath: `${rootDir}/openclaw.plugin.json`,
+      manifestPath: `${rootDir}/carapace.plugin.json`,
       manifestHash: pluginId,
       source: `${rootDir}/${pluginId.split("/").at(-1)}.js`,
       rootDir,
@@ -49,7 +49,7 @@ function index(rootDir: string, plugins: InstalledPluginIndexRecord[]): Installe
     policyHash: "test",
     generatedAtMs: 1,
     installRecords: {
-      pack: { source: "npm", installPath: rootDir, spec: "@openclaw/pack@latest" },
+      pack: { source: "npm", installPath: rootDir, spec: "@carapace/pack@latest" },
     },
     plugins,
     diagnostics: [],
@@ -77,7 +77,7 @@ describe("plugin package update policy reconciliation", () => {
     if (!snapshot.ok) {
       throw new Error(snapshot.error);
     }
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         allow: ["pack/one", "pack/two", "pack/old", "other"],
         deny: ["pack/two", "pack/old", "other-denied"],
@@ -236,11 +236,11 @@ describe("plugin package update policy reconciliation", () => {
     const before: InstalledPluginIndex = {
       ...index(rootDir, [record("qqbot", rootDir, { channels: ["qqbot"] })]),
       installRecords: {
-        qqbot: { source: "npm", installPath: rootDir, spec: "@openclaw/qqbot@1.9.0" },
-        "openclaw-qqbot": {
+        qqbot: { source: "npm", installPath: rootDir, spec: "@carapace/qqbot@1.9.0" },
+        "carapace-qqbot": {
           source: "npm",
           installPath: `${rootDir}-canonical`,
-          spec: "@tencent-connect/openclaw-qqbot@2.0.1",
+          spec: "@tencent-connect/carapace-qqbot@2.0.1",
         },
       },
     };
@@ -252,20 +252,20 @@ describe("plugin package update policy reconciliation", () => {
     ];
     const after: InstalledPluginIndex = {
       ...index(`${rootDir}-canonical`, [
-        record("openclaw-qqbot", `${rootDir}-canonical`, { channels: ["qqbot"] }),
+        record("carapace-qqbot", `${rootDir}-canonical`, { channels: ["qqbot"] }),
       ]),
       installRecords: {
-        "openclaw-qqbot": {
+        "carapace-qqbot": {
           source: "npm",
           installPath: `${rootDir}-canonical`,
-          spec: "@tencent-connect/openclaw-qqbot@2.0.3",
+          spec: "@tencent-connect/carapace-qqbot@2.0.3",
         },
       },
     };
     after.plugins = [
       recordInstalledPluginIndexInstallOwner(
-        record("openclaw-qqbot", `${rootDir}-canonical`, { channels: ["qqbot"] }),
-        "openclaw-qqbot",
+        record("carapace-qqbot", `${rootDir}-canonical`, { channels: ["qqbot"] }),
+        "carapace-qqbot",
       ),
     ];
     const snapshot = capturePluginPackageUpdateSnapshot({
@@ -290,7 +290,7 @@ describe("plugin package update policy reconciliation", () => {
       plugins: {
         load: { paths: [rootDir, `${rootDir}/qqbot.js`, "/plugins/unrelated.js"] },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const missingMigration = reconcilePluginPackageUpdateConfig({
       config,
       beforeIndex: before,
@@ -309,7 +309,7 @@ describe("plugin package update policy reconciliation", () => {
       beforeIndex: before,
       afterIndex: after,
       snapshot: snapshot.value,
-      installOwnerMigrations: { qqbot: "openclaw-qqbot" },
+      installOwnerMigrations: { qqbot: "carapace-qqbot" },
     });
     expect(migrated).toMatchObject({ ok: true });
     if (!migrated.ok) {

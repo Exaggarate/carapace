@@ -1,5 +1,5 @@
 import { writeSync } from "node:fs";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import {
   chromium,
   type Browser,
@@ -168,7 +168,7 @@ export function createControlUiE2eSuite(options: ControlUiE2eSuiteOptions): Cont
     throw new Error("Control UI E2E requires a Vitest fork with a finite cleanup deadline");
   }
   const cleanupTimeoutMs = cleanupPolicy.timeoutMs;
-  const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+  const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
   const describeControlUiE2e =
     chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
   const openBrowserContexts = new Map<BrowserContext, AbortController | undefined>();

@@ -1,25 +1,25 @@
 // Xai plugin module implements xai oauth behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { matchesNoProxy, resolveEnvHttpProxyAgentOptions } from "openclaw/plugin-sdk/fetch-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { matchesNoProxy, resolveEnvHttpProxyAgentOptions } from "carapace/plugin-sdk/fetch-runtime";
 import {
   positiveSecondsToSafeMilliseconds,
   resolveExpiresAtMsFromDurationSeconds,
   resolveExpiresAtMsFromEpochSeconds,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { ProviderAuthContext } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/number-runtime";
+import type { ProviderAuthContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   buildOauthProviderAuthResult,
   toFormUrlEncoded,
   type OAuthCredential,
   type ProviderAuthResult,
-} from "openclaw/plugin-sdk/provider-auth";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { sleep } from "openclaw/plugin-sdk/runtime-env";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { sleep } from "carapace/plugin-sdk/runtime-env";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { applyXaiOAuthConfig, XAI_OAUTH_DEFAULT_MODEL_REF } from "./onboard.js";
 import { buildLiveXaiOAuthProvider } from "./provider-catalog.js";
 import { xaiUserAgent } from "./src/xai-user-agent.js";
@@ -659,7 +659,7 @@ export async function loginXaiDeviceCode(ctx: ProviderAuthContext): Promise<Prov
       },
       notes: [
         "xAI OAuth uses device-code verification without requiring a localhost callback.",
-        "xAI may label the consent app as Grok Build because OpenClaw uses xAI's shared OAuth client.",
+        "xAI may label the consent app as Grok Build because Carapace uses xAI's shared OAuth client.",
       ],
     });
   } catch (err) {

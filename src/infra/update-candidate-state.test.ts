@@ -3,15 +3,15 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { afterEach, beforeEach, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runCommandBuffered } from "../process/exec.js";
 import { getFileLockProcessStartTime } from "../shared/pid-alive.js";
-import { withAgentDatabaseMaintenanceLease } from "../state/openclaw-agent-db.js";
+import { withAgentDatabaseMaintenanceLease } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { openNodeSqliteDatabase } from "./node-sqlite.js";
 import { hasNodeErrorCode } from "./path-guards.js";
 import { runtimeProcessEntrypoints } from "./runtime-process-entrypoints.js";
@@ -30,7 +30,7 @@ beforeEach(async () => {
   root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "candidate-state-")));
 });
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await fs.rm(root, { recursive: true, force: true });
 });
 
@@ -78,12 +78,12 @@ it.each(["DELETE", "WAL"])(
   async (journalMode) => {
     const source = path.join(root, "source");
     const target = path.join(root, "copy");
-    const shared = path.join(source, "state", "openclaw.sqlite");
-    const canonical = path.join(source, "agents", "main", "agent", "openclaw-agent.sqlite");
-    const external = path.join(root, "external", "openclaw-agent.sqlite");
+    const shared = path.join(source, "state", "carapace.sqlite");
+    const canonical = path.join(source, "agents", "main", "agent", "carapace-agent.sqlite");
+    const external = path.join(root, "external", "carapace-agent.sqlite");
     await createDatabase(canonical);
     await createDatabase(external);
-    const registry = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: source } }).db;
+    const registry = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: source } }).db;
     const insert = registry.prepare(
       "INSERT INTO agent_databases (agent_id, path, schema_version, last_seen_at) VALUES (?, ?, 3, 0)",
     );
@@ -113,7 +113,7 @@ it.each(["DELETE", "WAL"])(
         now,
         now,
       );
-    closeOpenClawStateDatabaseByPath(shared);
+    closeCarapaceStateDatabaseByPath(shared);
     const sources = [shared, canonical, external];
     for (const file of sources) {
       const database = openNodeSqliteDatabase(file);
@@ -141,15 +141,15 @@ it.each(["DELETE", "WAL"])(
       withAgentDatabaseMaintenanceLease(
         {
           env: {
-            OPENCLAW_STATE_DIR: target,
-            OPENCLAW_CONFIG_PATH: path.join(target, "openclaw.json"),
+            CARAPACE_STATE_DIR: target,
+            CARAPACE_CONFIG_PATH: path.join(target, "carapace.json"),
           },
         },
         async (maintenance) => maintenance.assertOwned(),
       ),
     ).resolves.toBeUndefined();
     expect(await artifacts()).toEqual(before);
-    const copiedRegistry = openNodeSqliteDatabase(path.join(target, "state", "openclaw.sqlite"));
+    const copiedRegistry = openNodeSqliteDatabase(path.join(target, "state", "carapace.sqlite"));
     expect(copiedRegistry.prepare("SELECT * FROM agent_database_leases").all()).toEqual([]);
     expect(copiedRegistry.prepare("SELECT * FROM state_leases").all()).toEqual([]);
     expect(
@@ -167,7 +167,7 @@ it.each(["DELETE", "WAL"])(
     expect(rebound.path).toMatch(/^candidate-external/);
     for (const file of [
       path.join(target, rebound.path),
-      path.join(target, "agents", "main", "agent", "openclaw-agent.sqlite"),
+      path.join(target, "agents", "main", "agent", "carapace-agent.sqlite"),
     ]) {
       const copied = openNodeSqliteDatabase(file);
       expect(copied.prepare("SELECT value FROM evidence").get()).toMatchObject({
@@ -180,7 +180,7 @@ it.each(["DELETE", "WAL"])(
 
 it("retains deferred content in both inspection and rehearsal snapshots", async () => {
   const stateDir = path.join(root, "deferred");
-  const file = path.join(stateDir, "state", "openclaw.sqlite");
+  const file = path.join(stateDir, "state", "carapace.sqlite");
   await createDatabase(
     file,
     `
@@ -206,7 +206,7 @@ it("retains deferred content in both inspection and rehearsal snapshots", async 
 
 it("reads committed WAL schemas without ending the live writer's transaction", async () => {
   const stateDir = path.join(root, "live");
-  const file = path.join(stateDir, "state", "openclaw.sqlite");
+  const file = path.join(stateDir, "state", "carapace.sqlite");
   await createDatabase(file, "PRAGMA journal_mode = WAL;");
   const writer = openNodeSqliteDatabase(file);
   try {
@@ -225,11 +225,11 @@ it("keeps absent stores explicit and observes newly created databases for rollba
   const stateDir = path.join(root, "state-owner");
   const before = await readUpdateStateSchemaVersions({ stateDir, config: {} });
   expect(before.every((entry) => entry.userVersion === null)).toBe(true);
-  const main = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const main = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   await createDatabase(main);
   const after = await readUpdateStateSchemaVersions({ stateDir, config: {} });
   expect(after.find((entry) => entry.path === main)?.userVersion).toBe(3);
-  const sharedPath = path.join(stateDir, "state", "openclaw.sqlite");
+  const sharedPath = path.join(stateDir, "state", "carapace.sqlite");
   expect(updateStateSchemaVersionsMatch(before, after, { sharedPath })).toBe(false);
   const candidate = { sharedPath, candidateSchemaVersions: { state: 7, agent: 3 } };
   expect(updateStateSchemaVersionsMatch(before, after, candidate)).toBe(true);
@@ -245,7 +245,7 @@ it("keeps absent stores explicit and observes newly created databases for rollba
 
 it("inspects with the installed candidate and selected Node after the old package is removed", async () => {
   const stateDir = path.join(root, "state-owner");
-  await createDatabase(path.join(stateDir, "state", "openclaw.sqlite"));
+  await createDatabase(path.join(stateDir, "state", "carapace.sqlite"));
   const previousRoot = path.join(root, "previous-package");
   const candidateRoot = path.join(root, "candidate-package");
   const worker = `
@@ -253,7 +253,7 @@ it("inspects with the installed candidate and selected Node after the old packag
     import { DatabaseSync } from "node:sqlite";
     let input = "";
     for await (const chunk of process.stdin) input += chunk;
-    const file = path.join(JSON.parse(input).stateDir, "state", "openclaw.sqlite");
+    const file = path.join(JSON.parse(input).stateDir, "state", "carapace.sqlite");
     const db = new DatabaseSync(file, { readOnly: true });
     try {
       console.log(JSON.stringify([{ path: file, userVersion: db.prepare("PRAGMA user_version").get().user_version }]));
@@ -275,7 +275,7 @@ it("inspects with the installed candidate and selected Node after the old packag
   try {
     const before = await readUpdateStateSchemaVersions({ stateDir, config: {} });
     expect(before).toEqual([
-      { path: path.join(stateDir, "state", "openclaw.sqlite"), userVersion: 3 },
+      { path: path.join(stateDir, "state", "carapace.sqlite"), userVersion: 3 },
     ]);
     await fs.rm(previousRoot, { recursive: true });
     const selectedNodeMarker = path.join(root, "selected-node-ran");
@@ -309,12 +309,12 @@ it.runIf(process.platform !== "win32")(
   async () => {
     const source = path.join(root, "source");
     const target = path.join(root, "copy");
-    const shared = path.join(source, "state", "openclaw.sqlite");
+    const shared = path.join(source, "state", "carapace.sqlite");
     const symlinkTarget = path.join(source, "external", "subdir");
     await fs.mkdir(symlinkTarget, { recursive: true });
     await fs.symlink(symlinkTarget, path.join(source, "link"), "dir");
-    const filesystemPath = path.join(source, "external", "x", "openclaw-agent.sqlite");
-    const lexicalPath = path.join(source, "x", "openclaw-agent.sqlite");
+    const filesystemPath = path.join(source, "external", "x", "carapace-agent.sqlite");
+    const lexicalPath = path.join(source, "x", "carapace-agent.sqlite");
     await createDatabase(filesystemPath, "UPDATE evidence SET value = 'filesystem';");
     await createDatabase(lexicalPath, "UPDATE evidence SET value = 'lexical';");
     await createDatabase(
@@ -323,13 +323,13 @@ it.runIf(process.platform !== "win32")(
     );
     const registry = openNodeSqliteDatabase(shared);
     const insert = registry.prepare("INSERT INTO agent_databases VALUES (?, ?)");
-    insert.run("filesystem", `link${path.sep}..${path.sep}x${path.sep}openclaw-agent.sqlite`);
+    insert.run("filesystem", `link${path.sep}..${path.sep}x${path.sep}carapace-agent.sqlite`);
     insert.run("lexical", lexicalPath);
     registry.close();
 
     await runSnapshotWorker({ stateDir: source, targetStateDir: target, config: {} });
 
-    const copiedRegistry = openNodeSqliteDatabase(path.join(target, "state", "openclaw.sqlite"));
+    const copiedRegistry = openNodeSqliteDatabase(path.join(target, "state", "carapace.sqlite"));
     try {
       for (const owner of ["filesystem", "lexical"]) {
         const row = copiedRegistry
@@ -367,8 +367,8 @@ it.each([
       : path.join(packageDir, "node_modules");
     await fs.mkdir(path.join(packageDir, "node_modules"), { recursive: true });
     for (const [directory, name, value] of [
-      [liveHost, "openclaw", "live"],
-      [candidateHost, "openclaw", "candidate"],
+      [liveHost, "carapace", "live"],
+      [candidateHost, "carapace", "candidate"],
       [dependency, "dependency", "preserved"],
     ]) {
       await fs.mkdir(directory!);
@@ -388,15 +388,15 @@ it.each([
         name: "demo",
         version: "1.0.0",
         type: "module",
-        peerDependencies: { openclaw: "*" },
+        peerDependencies: { carapace: "*" },
       }),
     );
     await fs.writeFile(
       path.join(packageDir, "index.js"),
-      'import host from "openclaw"; import dependency from "dependency"; export default {host, dependency};',
+      'import host from "carapace"; import dependency from "dependency"; export default {host, dependency};',
     );
-    await fs.symlink(liveHost, path.join(packageDir, "node_modules", "openclaw"), "junction");
-    const registry = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: source } }).db;
+    await fs.symlink(liveHost, path.join(packageDir, "node_modules", "carapace"), "junction");
+    const registry = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: source } }).db;
     registry
       .prepare(
         "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES (?, ?, ?)",
@@ -414,13 +414,13 @@ it.each([
         }),
         1,
       );
-    const shared = path.join(source, "state", "openclaw.sqlite");
-    closeOpenClawStateDatabaseByPath(shared);
+    const shared = path.join(source, "state", "carapace.sqlite");
+    closeCarapaceStateDatabaseByPath(shared);
     const before = await fs.readFile(shared);
     await runSnapshotWorker({ stateDir: source, targetStateDir: target, config: {} });
     expect(await fs.readFile(shared)).toEqual(before);
-    expect(await fs.realpath(path.join(packageDir, "node_modules", "openclaw"))).toBe(liveHost);
-    const copied = openNodeSqliteDatabase(path.join(target, "state", "openclaw.sqlite"));
+    expect(await fs.realpath(path.join(packageDir, "node_modules", "carapace"))).toBe(liveHost);
+    const copied = openNodeSqliteDatabase(path.join(target, "state", "carapace.sqlite"));
     try {
       const row = copied
         .prepare(
@@ -429,7 +429,7 @@ it.each([
         .get() as { value_json: string };
       const record = JSON.parse(row.value_json).index.installRecords.demo;
       expect(record.installPath).toBe(path.join(target, relative));
-      expect(await fs.realpath(path.join(record.installPath, "node_modules", "openclaw"))).toBe(
+      expect(await fs.realpath(path.join(record.installPath, "node_modules", "carapace"))).toBe(
         candidateHost,
       );
       const result = await runCommandBuffered(
@@ -512,7 +512,7 @@ it.each([
       await fs.symlink(path.dirname(realEntry), aliasDirectory, "junction");
       entry = path.join(aliasDirectory, path.basename(realEntry));
     }
-    const registry = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: source } }).db;
+    const registry = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: source } }).db;
     registry
       .prepare(
         "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES (?, ?, ?)",
@@ -522,8 +522,8 @@ it.each([
         JSON.stringify({ revision: 1, index: { installRecords: {} } }),
         1,
       );
-    closeOpenClawStateDatabaseByPath(path.join(source, "state", "openclaw.sqlite"));
-    const config: OpenClawConfig = {
+    closeCarapaceStateDatabaseByPath(path.join(source, "state", "carapace.sqlite"));
+    const config: CarapaceConfig = {
       plugins: {
         load: { paths: [entry] },
         installs: { demo: { source: "path", installPath: install, sourcePath: sourcePackage } },
@@ -535,7 +535,7 @@ it.each([
       candidateRoot: root,
     });
     try {
-      const copied: OpenClawConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
+      const copied: CarapaceConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
       const copiedEntry = copied.plugins!.load!.paths![0]!;
       expect(path.basename(copiedEntry)).toBe(path.basename(entry));
       if (directoryAlias) {
@@ -599,7 +599,7 @@ it("preserves an existing copied file behind a case-equivalent entry name", asyn
     candidateRoot: root,
   });
   try {
-    const copied: OpenClawConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
+    const copied: CarapaceConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
     const entry = copied.plugins!.load!.paths![0]!;
     expect(path.basename(entry)).toBe("ENTRY.js");
     const result = await runCommandBuffered(
@@ -696,7 +696,7 @@ it.each(["relative", "absolute", "external-store", "cycle"] as const)(
       candidateRoot: root,
     });
     try {
-      const config: OpenClawConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
+      const config: CarapaceConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
       const copiedPlugin = config.plugins!.load!.paths![0]!;
       expect(await readPlugin(copiedPlugin)).toBe("foo:bar");
       if (process.platform !== "win32") {
@@ -738,7 +738,7 @@ it.skipIf(process.platform === "win32")(
       candidateRoot: root,
     });
     try {
-      const config: OpenClawConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
+      const config: CarapaceConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
       const copied = path.join(config.plugins!.load!.paths![0]!, "config.txt");
       expect(await fs.readFile(copied, "utf8")).toBe("preserved");
       await fs.writeFile(copied, "private");
@@ -770,8 +770,8 @@ it.each([
         ? path.join(root, "external-modules")
         : path.join(repo, "node_modules");
     const dependency = path.join(modules, "@demo", "dependency");
-    const liveHost = shared ? path.join(modules, "openclaw") : path.join(root, "live-host");
-    const sourceHostLink = path.join(shared ? plugin : repo, "node_modules", "openclaw");
+    const liveHost = shared ? path.join(modules, "carapace") : path.join(root, "live-host");
+    const sourceHostLink = path.join(shared ? plugin : repo, "node_modules", "carapace");
     const candidateHost = path.join(root, "candidate-host");
     const expected = shadow ? "nearest" : "hoisted";
     await fs.mkdir(plugin, { recursive: true });
@@ -796,7 +796,7 @@ it.each([
       await fs.mkdir(directory);
       await fs.writeFile(
         path.join(directory, "package.json"),
-        JSON.stringify({ name: "openclaw", type: "module", exports: "./index.js" }),
+        JSON.stringify({ name: "carapace", type: "module", exports: "./index.js" }),
       );
       await fs.writeFile(
         path.join(directory, "index.js"),
@@ -819,12 +819,12 @@ it.each([
         type: "module",
         dependencies: { "@demo/dependency": "1.0.0" },
         optionalDependencies: { absent: "1.0.0" },
-        peerDependencies: { openclaw: "*" },
+        peerDependencies: { carapace: "*" },
       }),
     );
     await fs.writeFile(
       path.join(plugin, "index.js"),
-      'import value from "@demo/dependency"; import host from "openclaw"; console.log(JSON.stringify({value, host, dependency: import.meta.resolve("@demo/dependency")}));',
+      'import value from "@demo/dependency"; import host from "carapace"; console.log(JSON.stringify({value, host, dependency: import.meta.resolve("@demo/dependency")}));',
     );
     await fs.writeFile(
       path.join(dependency, "package.json"),
@@ -872,7 +872,7 @@ it.each([
       candidateRoot: candidateHost,
     });
     try {
-      const config: OpenClawConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
+      const config: CarapaceConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
       const copied = config.plugins!.load!.paths![paths.indexOf(locator)]!;
       if (shared) {
         expect(
@@ -958,7 +958,7 @@ it("keeps an optional-only linked node_modules copy bounded to its module owner"
     candidateRoot: root,
   });
   try {
-    const config: OpenClawConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
+    const config: CarapaceConfig = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8"));
     const copied = config.plugins!.load!.paths![0]!;
     expect(await readEntry(copied)).toBe("optional plugin ready");
     expect(
@@ -985,19 +985,19 @@ it("rejects an ordinary link that would repeatedly copy an immutable host packag
   await fs.mkdir(candidate);
   await fs.writeFile(
     path.join(plugin, "package.json"),
-    JSON.stringify({ name: "demo", type: "module", peerDependencies: { openclaw: "*" } }),
+    JSON.stringify({ name: "demo", type: "module", peerDependencies: { carapace: "*" } }),
   );
   await fs.writeFile(
     path.join(host, "package.json"),
-    JSON.stringify({ name: "openclaw", type: "module", exports: "./index.js" }),
+    JSON.stringify({ name: "carapace", type: "module", exports: "./index.js" }),
   );
   await fs.writeFile(path.join(host, "index.js"), 'export default "serving";');
   await fs.writeFile(
     path.join(plugin, "index.js"),
-    'import host from "openclaw"; console.log(host);',
+    'import host from "carapace"; console.log(host);',
   );
   await fs.writeFile(path.join(host, "docs", "marker.txt"), "source");
-  await fs.symlink(host, path.join(plugin, "node_modules", "openclaw"), "junction");
+  await fs.symlink(host, path.join(plugin, "node_modules", "carapace"), "junction");
   await fs.symlink(path.join(host, "docs"), path.join(plugin, "manual"), "junction");
   const source = await runCommandBuffered([process.execPath, path.join(plugin, "index.js")], {
     timeoutMs: 10_000,
@@ -1013,5 +1013,5 @@ it("rejects an ordinary link that would repeatedly copy an immutable host packag
     }),
   ).rejects.toThrow("Cannot privately copy host-owned plugin link");
   expect(await fs.readFile(path.join(host, "docs", "marker.txt"), "utf8")).toBe("source");
-  expect(await fs.realpath(path.join(plugin, "node_modules", "openclaw"))).toBe(host);
+  expect(await fs.realpath(path.join(plugin, "node_modules", "carapace"))).toBe(host);
 }, 20_000);

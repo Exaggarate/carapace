@@ -53,14 +53,14 @@ describe("buildSandboxContainerName", () => {
 
 describe("resolveSandboxWorkspaceLayoutPaths", () => {
   const sessionKey = "agent:poly:msteams:channel-1";
-  const workspaceA = "/tmp/openclaw-customers/atica/agents/poly/workspace";
-  const workspaceB = "/tmp/openclaw-customers/polytopic/agents/poly/workspace";
+  const workspaceA = "/tmp/carapace-customers/atica/agents/poly/workspace";
+  const workspaceB = "/tmp/carapace-customers/polytopic/agents/poly/workspace";
   const createLayout = (scope: "session" | "agent" | "shared", workspaceDir: string) =>
     resolveSandboxWorkspaceLayoutPaths({
       cfg: {
         scope,
         workspaceAccess: "rw",
-        workspaceRoot: "/tmp/openclaw-sandboxes",
+        workspaceRoot: "/tmp/carapace-sandboxes",
       },
       rawSessionKey: sessionKey,
       workspaceDir,
@@ -85,7 +85,7 @@ describe("resolveSandboxWorkspaceLayoutPaths", () => {
       cfg: {
         scope: "agent",
         workspaceAccess: "rw",
-        workspaceRoot: "/tmp/openclaw-sandboxes",
+        workspaceRoot: "/tmp/carapace-sandboxes",
       },
       rawSessionKey: "global",
       agentId: "research",
@@ -100,7 +100,7 @@ describe("resolveSandboxWorkspaceLayoutPaths", () => {
     (scope) => {
       const layoutForPrincipal = (sandboxPrincipalId: string) => {
         const layout = resolveSandboxWorkspaceLayoutPaths({
-          cfg: { scope, workspaceAccess: "ro", workspaceRoot: "/tmp/openclaw-sandboxes" },
+          cfg: { scope, workspaceAccess: "ro", workspaceRoot: "/tmp/carapace-sandboxes" },
           rawSessionKey: `agent:shared:${sandboxPrincipalId}`,
           agentId: "shared",
           isolationSubject: { kind: "profile", profileId: sandboxPrincipalId },
@@ -109,7 +109,7 @@ describe("resolveSandboxWorkspaceLayoutPaths", () => {
         return {
           ...layout,
           containerName: buildSandboxContainerName(
-            "openclaw-sbx-",
+            "carapace-sbx-",
             slugifySessionKey(layout.scopeKey),
           ),
         };
@@ -131,7 +131,7 @@ describe("resolveSandboxWorkspaceLayoutPaths", () => {
     (scope) => {
       const layoutForSession = (rawSessionKey: string) => {
         const layout = resolveSandboxWorkspaceLayoutPaths({
-          cfg: { scope, workspaceAccess: "ro", workspaceRoot: "/tmp/openclaw-sandboxes" },
+          cfg: { scope, workspaceAccess: "ro", workspaceRoot: "/tmp/carapace-sandboxes" },
           rawSessionKey,
           agentId: "shared",
           isolationSubject: { kind: "profile", profileId: "guest-a" },
@@ -140,7 +140,7 @@ describe("resolveSandboxWorkspaceLayoutPaths", () => {
         return {
           ...layout,
           containerName: buildSandboxContainerName(
-            "openclaw-sbx-",
+            "carapace-sbx-",
             slugifySessionKey(layout.scopeKey),
           ),
         };
@@ -158,7 +158,7 @@ describe("resolveSandboxWorkspaceLayoutPaths", () => {
   it("preserves the shared writable agent workspace without a required-sandbox principal", () => {
     const layoutForSession = (rawSessionKey: string) =>
       resolveSandboxWorkspaceLayoutPaths({
-        cfg: { scope: "agent", workspaceAccess: "rw", workspaceRoot: "/tmp/openclaw-sandboxes" },
+        cfg: { scope: "agent", workspaceAccess: "rw", workspaceRoot: "/tmp/carapace-sandboxes" },
         rawSessionKey,
         agentId: "shared",
         workspaceDir: workspaceA,

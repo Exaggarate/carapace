@@ -12,7 +12,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const recordVisuals = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+const recordVisuals = process.env.CARAPACE_UI_E2E_RECORD === "1";
 
 const totals = {
   input: 1_200_000,
@@ -880,7 +880,7 @@ suite.define(() => {
 
         await page.goto(`${suite.server.baseUrl}usage`);
         await page.locator(".daily-chart-compact").waitFor({ state: "visible", timeout: 10_000 });
-        const agentScope = page.locator(".agent-scope-control openclaw-agent-select");
+        const agentScope = page.locator(".agent-scope-control carapace-agent-select");
         await agentScope.locator(".agent-select__trigger").click();
         await agentScope
           .locator("wa-dropdown-item[data-agent-option]")
@@ -964,7 +964,7 @@ suite.define(() => {
         await expect.poll(() => topProviders.textContent()).toContain("No provider data");
         await expect.poll(() => topProviders.textContent()).not.toContain("openai");
 
-        if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+        if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
           const artifactDir = path.join(suite.artifactDir, "provider-plans");
           await page.locator(".usage-page").screenshot({
             path: path.join(artifactDir, "after.png"),

@@ -9,7 +9,7 @@ const { isDebugProxyGlobalFetchPatchInstalledMock } = vi.hoisted(() => ({
   isDebugProxyGlobalFetchPatchInstalledMock: vi.fn(() => false),
 }));
 
-vi.mock("openclaw/plugin-sdk/proxy-capture", () => ({
+vi.mock("carapace/plugin-sdk/proxy-capture", () => ({
   isDebugProxyGlobalFetchPatchInstalled: isDebugProxyGlobalFetchPatchInstalledMock,
 }));
 
@@ -40,7 +40,7 @@ let SLACK_DEFAULT_RETRY_OPTIONS: typeof import("./client.js").SLACK_DEFAULT_RETR
 let SLACK_WRITE_RETRY_OPTIONS: typeof import("./client.js").SLACK_WRITE_RETRY_OPTIONS;
 let WebClient: ReturnType<typeof vi.fn>;
 
-const SLACK_API_URL_KEYS = ["SLACK_API_URL", "OPENCLAW_SLACK_API_URL"] as const;
+const SLACK_API_URL_KEYS = ["SLACK_API_URL", "CARAPACE_SLACK_API_URL"] as const;
 const PROXY_KEYS = [
   "ALL_PROXY",
   "HTTPS_PROXY",
@@ -50,8 +50,8 @@ const PROXY_KEYS = [
   "http_proxy",
   "NO_PROXY",
   "no_proxy",
-  "OPENCLAW_PROXY_ACTIVE",
-  "OPENCLAW_PROXY_CA_FILE",
+  "CARAPACE_PROXY_ACTIVE",
+  "CARAPACE_PROXY_CA_FILE",
 ] as const;
 const originalEnv = { ...process.env };
 const tempDirs: string[] = [];
@@ -96,7 +96,7 @@ function requireFetch(options: WebClientOptions): NonNullable<WebClientOptions["
 }
 
 function writeTempCa(contents: string): string {
-  const dir = mkdtempSync(path.join(os.tmpdir(), "openclaw-slack-proxy-ca-"));
+  const dir = mkdtempSync(path.join(os.tmpdir(), "carapace-slack-proxy-ca-"));
   tempDirs.push(dir);
   const caFile = path.join(dir, "proxy-ca.pem");
   writeFileSync(caFile, contents, "utf8");
@@ -190,8 +190,8 @@ describe("slack web client config", () => {
     expect(resolveSlackWriteClientOptions().slackApiUrl).toBe("http://127.0.0.1:49152/api/");
   });
 
-  it("does not read OPENCLAW_SLACK_API_URL as a default Slack Web API root", () => {
-    process.env.OPENCLAW_SLACK_API_URL = "http://127.0.0.1:49152/api/";
+  it("does not read CARAPACE_SLACK_API_URL as a default Slack Web API root", () => {
+    process.env.CARAPACE_SLACK_API_URL = "http://127.0.0.1:49152/api/";
 
     expect(resolveSlackWebClientOptions().slackApiUrl).toBeUndefined();
     expect(resolveSlackWriteClientOptions().slackApiUrl).toBeUndefined();
@@ -463,8 +463,8 @@ describe("slack proxy dispatcher", () => {
   it("creates the dispatcher while managed proxy CA trust is active", async () => {
     const caFile = writeTempCa("slack-managed-proxy-ca");
     process.env.HTTPS_PROXY = "https://proxy.example.com:8443";
-    process.env.OPENCLAW_PROXY_ACTIVE = "1";
-    process.env.OPENCLAW_PROXY_CA_FILE = caFile;
+    process.env.CARAPACE_PROXY_ACTIVE = "1";
+    process.env.CARAPACE_PROXY_CA_FILE = caFile;
 
     const dispatcher = resolveSlackProxyDispatcher();
     expect(dispatcher?.constructor.name).toBe("EnvHttpProxyAgent");

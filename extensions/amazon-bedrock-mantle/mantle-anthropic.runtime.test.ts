@@ -1,11 +1,11 @@
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import type { Model } from "carapace/plugin-sdk/llm";
 // Amazon Bedrock Mantle tests cover mantle anthropic plugin behavior.
 import {
   notifyProviderStreamOpened,
   withProviderAcceptanceObserver,
-} from "openclaw/plugin-sdk/provider-transport-runtime";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/provider-transport-runtime";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { createMantleAnthropicStreamFn } from "./mantle-anthropic.runtime.js";
 
@@ -83,7 +83,7 @@ describe("createMantleAnthropicStreamFn", () => {
         await events.result();
         const request = requireRecord(payload, "Mantle payload");
         systems.push(request.system);
-        expect(JSON.stringify(request)).not.toContain("OPENCLAW_CACHE_BOUNDARY");
+        expect(JSON.stringify(request)).not.toContain("CARAPACE_CACHE_BOUNDARY");
         if (cacheRetention === "none") {
           expect(request.system).toEqual([{ type: "text", text: `Stable workspace\n${suffix}` }]);
           expect(JSON.stringify(request)).not.toContain("cache_control");

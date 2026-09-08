@@ -1,6 +1,6 @@
 // CLI persistence for hook-pack installs.
 import { replaceConfigFile } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { stageHookInstall } from "../hooks/install-record-transaction.js";
 import type { HookInstallUpdate } from "../hooks/installs.js";
 import type { PackageDirInstallTransaction } from "../infra/install-package-dir.js";
@@ -18,7 +18,7 @@ export async function persistHookPackInstall(params: {
   runtime?: RuntimeEnv;
   beforePersistentApply?: () => void;
   payloadTransaction?: PackageDirInstallTransaction;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const runtime = params.runtime ?? defaultRuntime;
   return await withPluginLifecycleLease({}, async (lease) => {
     const assertPersistentApply = () => {

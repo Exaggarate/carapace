@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
+import type { CarapaceCrablineChannelDriverSelection } from "@openclaw/crabline";
 import type { QaCliBackendAuthMode } from "./gateway-child.js";
 import type { QaLabLatestReport, QaLabServerHandle } from "./lab-server.types.js";
 import type { QaProviderMode } from "./model-selection.js";
@@ -58,7 +58,7 @@ export async function runQaRuntimeParitySuite(params: {
   claudeCliAuthMode?: QaCliBackendAuthMode;
   enabledPluginIds?: string[];
   channelDriver?: QaScorecardChannelDriver | null;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: CarapaceCrablineChannelDriverSelection | null;
   concurrency: number;
   selectedScenarios: ReturnType<typeof readQaBootstrapScenarioCatalog>["scenarios"];
   startLab?: QaSuiteStartLabFn;
@@ -66,7 +66,7 @@ export async function runQaRuntimeParitySuite(params: {
   progressEnabled: boolean;
   scenarioIds?: readonly string[];
   runtimePair: [RuntimeId, RuntimeId];
-  sutOpenClawCommand?: QaSuiteRunParams["sutOpenClawCommand"];
+  sutCarapaceCommand?: QaSuiteRunParams["sutCarapaceCommand"];
   mutateConfig?: QaSuiteRunParams["mutateConfig"];
   writeEvidenceFile?: boolean;
 }) {
@@ -166,7 +166,7 @@ export async function runQaRuntimeParitySuite(params: {
                 startLab,
                 controlUiEnabled: params.controlUiEnabled ?? scenarioRequiresControlUi(scenario),
                 mutateConfig: params.mutateConfig,
-                sutOpenClawCommand: params.sutOpenClawCommand,
+                sutCarapaceCommand: params.sutCarapaceCommand,
                 forcedRuntime: runtime,
                 captureRuntimeParityCell: true,
                 writeEvidenceFile: params.writeEvidenceFile,

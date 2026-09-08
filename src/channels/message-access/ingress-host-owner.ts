@@ -10,7 +10,7 @@ export type ChannelIngressHostOwner = Readonly<{
 }>;
 
 const owners = resolveGlobalSingleton(
-  Symbol.for("openclaw.channelIngressHostOwners"),
+  Symbol.for("carapace.channelIngressHostOwners"),
   () => new Map<string, ChannelIngressHostOwner>(),
 );
 

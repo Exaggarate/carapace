@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: openclaw-home-pvc
+  name: carapace-home-pvc
   labels:
-    app: openclaw
+    app: carapace
 spec:
   accessModes:
     - ReadWriteOnce

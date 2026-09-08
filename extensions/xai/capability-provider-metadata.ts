@@ -1,8 +1,8 @@
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   isProviderAuthProfileConfigured,
   isProviderApiKeyConfigured,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/provider-auth";
 import {
   createXaiVideoGenerationProviderMetadata as createXaiVideoGenerationProviderMetadataCore,
   createXaiRealtimeVoiceProviderMetadata as createXaiRealtimeVoiceProviderMetadataCore,

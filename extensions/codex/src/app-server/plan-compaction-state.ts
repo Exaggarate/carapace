@@ -1,8 +1,8 @@
 import { Buffer } from "node:buffer";
-import type { EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AgentPlanStep } from "openclaw/plugin-sdk/channel-outbound";
-import { truncateUtf8Prefix } from "openclaw/plugin-sdk/text-utility-runtime";
-import { stripInvisibleUnicode } from "openclaw/plugin-sdk/web-content-extractor";
+import type { EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AgentPlanStep } from "carapace/plugin-sdk/channel-outbound";
+import { truncateUtf8Prefix } from "carapace/plugin-sdk/text-utility-runtime";
+import { stripInvisibleUnicode } from "carapace/plugin-sdk/web-content-extractor";
 import type { CodexAppServerClient } from "./client.js";
 import { isJsonObject } from "./protocol.js";
 
@@ -10,7 +10,7 @@ type AgentEvent = Parameters<NonNullable<EmbeddedRunAttemptParams["onAgentEvent"
 type StoredPlan = { markdown?: string; steps: AgentPlanStep[] };
 
 const RESTORED_PLAN_PREAMBLE =
-  "OpenClaw restored the session progress card after context compaction. " +
+  "Carapace restored the session progress card after context compaction. " +
   "This is application state, not a new user request. Continue the current task and call " +
   "progress_card whenever the status meaningfully changes.";
 const PROGRESS_CARD_MAX_STEPS = 50;

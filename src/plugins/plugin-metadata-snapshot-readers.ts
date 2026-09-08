@@ -19,7 +19,7 @@ type SnapshotReaderSlot = {
 
 // globalThis-keyed so a require-loaded second module instance shares the slot.
 export const snapshotReaderSlot = resolveGlobalSingleton<SnapshotReaderSlot>(
-  Symbol.for("openclaw.pluginMetadataSnapshotReaders"),
+  Symbol.for("carapace.pluginMetadataSnapshotReaders"),
   () => ({}),
 );
 

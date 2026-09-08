@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { isDeepStrictEqual } from "node:util";
-import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import {
   createQaBusState,
   createQaChannelTransport,
@@ -275,8 +275,8 @@ function waitForChatError(events: readonly GatewayEvent[], runId: string) {
 
 async function runProof(options: ProducerOptions) {
   const state = createQaBusState();
-  // openclaw-temp-dir: allow standalone QA producer owns and removes this fixture root.
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cloud-midturn-loss-"));
+  // carapace-temp-dir: allow standalone QA producer owns and removes this fixture root.
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cloud-midturn-loss-"));
   let bus: Awaited<ReturnType<typeof startQaBusServer>> | undefined;
   let provider: Awaited<ReturnType<typeof startMidturnProvider>> | undefined;
   const gatewayOwner = createQaGatewayChild();

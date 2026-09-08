@@ -25,8 +25,8 @@ jobs:
   validate_release:
     name: Validate release tag
     if: >-
-      github.repository == 'openclaw/openclaw' &&
-      github.event.workflow_run.repository.full_name == 'openclaw/openclaw' &&
+      github.repository == 'carapace/carapace' &&
+      github.event.workflow_run.repository.full_name == 'carapace/carapace' &&
       github.event.workflow_run.event == 'workflow_dispatch' &&
       github.event.workflow_run.name == 'Linux App Release Request' &&
       github.event.workflow_run.head_branch == 'main' &&
@@ -66,7 +66,7 @@ jobs:
           echo "desktop_test_bundles=${BASH_REMATCH[3]}" >> "$GITHUB_OUTPUT"
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout selected tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -282,14 +282,14 @@ jobs:
 
       - name: Stage AppImage GStreamer plugins
         run: | # zizmor: ignore[github-env] static runner-temporary path consumed by the Tauri build in this secretless job
-          plugins="${RUNNER_TEMP}/openclaw-gstreamer-plugins"
+          plugins="${RUNNER_TEMP}/carapace-gstreamer-plugins"
           .release-tooling/apps/linux/scripts/stage-appimage-gstreamer.sh "$plugins" \
-            | tee "${RUNNER_TEMP}/openclaw-gstreamer-elements.tsv"
+            | tee "${RUNNER_TEMP}/carapace-gstreamer-elements.tsv"
           echo "GSTREAMER_PLUGINS_DIR=$plugins" >> "$GITHUB_ENV"
 
       - name: Prepare pinned AppImage tools
         env:
-          XDG_CACHE_HOME: ${{ runner.temp }}/openclaw-tauri-cache
+          XDG_CACHE_HOME: ${{ runner.temp }}/carapace-tauri-cache
         run: |
           set -euo pipefail
           .release-tooling/apps/linux/scripts/tauri-appimage-tools.sh prepare
@@ -300,9 +300,9 @@ jobs:
         env:
           # appimagetool strips fail on CI runners; Tauri documents NO_STRIP for Actions.
           NO_STRIP: "true"
-          LDAI_RUNTIME_FILE: ${{ runner.temp }}/openclaw-tauri-cache/tauri/.appimage-runtime-x86_64
+          LDAI_RUNTIME_FILE: ${{ runner.temp }}/carapace-tauri-cache/tauri/.appimage-runtime-x86_64
           RELEASE_TAG: ${{ needs.validate_release.outputs.release_tag }}
-          XDG_CACHE_HOME: ${{ runner.temp }}/openclaw-tauri-cache
+          XDG_CACHE_HOME: ${{ runner.temp }}/carapace-tauri-cache
         run: |
           set -euo pipefail
           version="${RELEASE_TAG#v}"
@@ -313,7 +313,7 @@ jobs:
 
       - name: Finalize AppImage
         env:
-          XDG_CACHE_HOME: ${{ runner.temp }}/openclaw-tauri-cache
+          XDG_CACHE_HOME: ${{ runner.temp }}/carapace-tauri-cache
         run: |
           set -euo pipefail
           bundle_dir=apps/linux/src-tauri/target/release/bundle/appimage
@@ -339,8 +339,8 @@ jobs:
             exit 1
           fi
           mkdir -p dist/linux-app/release dist/linux-app/unsigned
-          cp "${debs[0]}" "dist/linux-app/release/OpenClaw-${version}-amd64.deb"
-          cp "${appimages[0]}" "dist/linux-app/unsigned/OpenClaw-${version}-amd64.AppImage"
+          cp "${debs[0]}" "dist/linux-app/release/Carapace-${version}-amd64.deb"
+          cp "${appimages[0]}" "dist/linux-app/unsigned/Carapace-${version}-amd64.AppImage"
 
       - name: Test packaged AppImage runtime
         id: packaged-runtime
@@ -351,7 +351,7 @@ jobs:
           version="${RELEASE_TAG#v}"
           xvfb-run -a -s '-screen 0 1280x1024x24' dbus-run-session -- \
             /usr/bin/python3 .release-tooling/apps/linux/tests/packaged_runtime_smoke.py \
-            "dist/linux-app/unsigned/OpenClaw-${version}-amd64.AppImage" \
+            "dist/linux-app/unsigned/Carapace-${version}-amd64.AppImage" \
             --output "${RUNNER_TEMP}/linux-packaged-runtime" \
             --require-fuse \
             --shell-container \
@@ -441,7 +441,7 @@ jobs:
           printf '%s  %s\n' "$MINISIGN_BINARY_SHA256" "${RUNNER_TEMP}/bin/minisign" |
             sha256sum --check -
           version="${RELEASE_TAG#v}"
-          appimage="dist/signing-input/OpenClaw-${version}-amd64.AppImage"
+          appimage="dist/signing-input/Carapace-${version}-amd64.AppImage"
           mapfile -d '' inputs < <(find dist/signing-input -mindepth 1 -maxdepth 1 -print0)
           if [[ ! "${TAG_SHA}" =~ ^[0-9a-f]{40}$ || ${#inputs[@]} -ne 1 || ! -f "$appimage" || -L "$appimage" ]]; then
             echo "Signing input must be exactly one regular AppImage for validated tag ${RELEASE_TAG}"
@@ -463,9 +463,9 @@ jobs:
             exit 1
           fi
           mkdir -p dist/linux-app/release dist/linux-app/signatures
-          cp "$appimage" "dist/linux-app/release/OpenClaw-${version}-amd64.AppImage"
+          cp "$appimage" "dist/linux-app/release/Carapace-${version}-amd64.AppImage"
           cp "${appimage}.sig" \
-            "dist/linux-app/signatures/OpenClaw-${version}-amd64.AppImage.sig"
+            "dist/linux-app/signatures/Carapace-${version}-amd64.AppImage.sig"
 
       - name: Upload signed AppImage
         id: upload_signed_appimage
@@ -544,9 +544,9 @@ jobs:
             echo "macOS bundle version '${bundle_version}' does not match release version '${version}'"
             exit 1
           fi
-          archive="dist/macos-app/unsigned/OpenClaw-${version}-darwin-aarch64.app.tar.gz"
+          archive="dist/macos-app/unsigned/Carapace-${version}-darwin-aarch64.app.tar.gz"
           mkdir -p dist/macos-app/release dist/macos-app/unsigned
-          cp "${dmgs[0]}" "dist/macos-app/release/OpenClaw-${version}-darwin-aarch64.dmg"
+          cp "${dmgs[0]}" "dist/macos-app/release/Carapace-${version}-darwin-aarch64.dmg"
           # Match Tauri's updater archive contract: one .app root, gzip,
           # symlinks preserved rather than followed.
           tar -czf "$archive" -C "$(dirname "${apps[0]}")" "$(basename "${apps[0]}")"
@@ -632,7 +632,7 @@ jobs:
             throw "Windows bundle version '$($installer.VersionInfo.ProductVersion)' does not match release version '$version'"
           }
           New-Item -ItemType Directory -Force -Path "dist/windows-app/unsigned" | Out-Null
-          Copy-Item -LiteralPath $installer.FullName -Destination "dist/windows-app/unsigned/OpenClaw-$version-windows-x86_64.exe"
+          Copy-Item -LiteralPath $installer.FullName -Destination "dist/windows-app/unsigned/Carapace-$version-windows-x86_64.exe"
 
       - name: Upload unsigned Windows updater installer
         id: upload_updater
@@ -709,8 +709,8 @@ jobs:
           printf '%s  %s\n' "$MINISIGN_BINARY_SHA256" "${RUNNER_TEMP}/bin/minisign" |
             sha256sum --check -
           version="${RELEASE_TAG#v}"
-          macos="dist/signing-input/macos/OpenClaw-${version}-darwin-aarch64.app.tar.gz"
-          windows="dist/signing-input/windows/OpenClaw-${version}-windows-x86_64.exe"
+          macos="dist/signing-input/macos/Carapace-${version}-darwin-aarch64.app.tar.gz"
+          windows="dist/signing-input/windows/Carapace-${version}-windows-x86_64.exe"
           mapfile -d '' inputs < <(find dist/signing-input -type f -print0)
           if [[ ! "${TAG_SHA}" =~ ^[0-9a-f]{40}$ || ${#inputs[@]} -ne 2 ||
                 ! -f "$macos" || -L "$macos" || ! -f "$windows" || -L "$windows" ]]; then
@@ -745,13 +745,13 @@ jobs:
             dist/desktop-test/windows/release \
             dist/desktop-test/windows/signatures
           cp "$macos" \
-            "dist/desktop-test/macos/release/OpenClaw-${version}-darwin-aarch64.app.tar.gz"
+            "dist/desktop-test/macos/release/Carapace-${version}-darwin-aarch64.app.tar.gz"
           cp "${macos}.sig" \
-            "dist/desktop-test/macos/signatures/OpenClaw-${version}-darwin-aarch64.app.tar.gz.sig"
+            "dist/desktop-test/macos/signatures/Carapace-${version}-darwin-aarch64.app.tar.gz.sig"
           cp "$windows" \
-            "dist/desktop-test/windows/release/OpenClaw-${version}-windows-x86_64.exe"
+            "dist/desktop-test/windows/release/Carapace-${version}-windows-x86_64.exe"
           cp "${windows}.sig" \
-            "dist/desktop-test/windows/signatures/OpenClaw-${version}-windows-x86_64.exe.sig"
+            "dist/desktop-test/windows/signatures/Carapace-${version}-windows-x86_64.exe.sig"
 
       - name: Upload signed desktop updater bundles
         id: upload_signed_desktop
@@ -834,7 +834,7 @@ jobs:
           (cd dist/release && sha256sum ./* > SHA256SUMS.linux-app.txt)
           cat dist/release/SHA256SUMS.linux-app.txt
 
-          linux_signature=$(cat "dist/input/linux/signatures/OpenClaw-${version}-amd64.AppImage.sig")
+          linux_signature=$(cat "dist/input/linux/signatures/Carapace-${version}-amd64.AppImage.sig")
           url_base="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}"
           pub_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           # Capture the full body (no early-closing pipe under pipefail), then
@@ -848,22 +848,22 @@ jobs:
             --arg notes "${notes}" \
             --arg pub_date "${pub_date}" \
             --arg linux_signature "${linux_signature}" \
-            --arg linux_url "${url_base}/OpenClaw-${version}-amd64.AppImage" \
+            --arg linux_url "${url_base}/Carapace-${version}-amd64.AppImage" \
             '{version: $version, notes: ($notes | .[0:2000]), pub_date: $pub_date, platforms: {"linux-x86_64": {signature: $linux_signature, url: $linux_url}}}' \
             > dist/release/latest.json
           cat dist/release/latest.json
 
           if [[ "${DESKTOP_TEST_BUNDLES}" == "true" ]]; then
-            macos_signature=$(cat "dist/input/macos/signatures/OpenClaw-${version}-darwin-aarch64.app.tar.gz.sig")
-            windows_signature=$(cat "dist/input/windows/signatures/OpenClaw-${version}-windows-x86_64.exe.sig")
+            macos_signature=$(cat "dist/input/macos/signatures/Carapace-${version}-darwin-aarch64.app.tar.gz.sig")
+            windows_signature=$(cat "dist/input/windows/signatures/Carapace-${version}-windows-x86_64.exe.sig")
             jq -n \
               --arg version "${version}" \
               --arg notes "${notes}" \
               --arg pub_date "${pub_date}" \
               --arg macos_signature "${macos_signature}" \
-              --arg macos_url "${url_base}/OpenClaw-${version}-darwin-aarch64.app.tar.gz" \
+              --arg macos_url "${url_base}/Carapace-${version}-darwin-aarch64.app.tar.gz" \
               --arg windows_signature "${windows_signature}" \
-              --arg windows_url "${url_base}/OpenClaw-${version}-windows-x86_64.exe" \
+              --arg windows_url "${url_base}/Carapace-${version}-windows-x86_64.exe" \
               '{version: $version, notes: ($notes | .[0:2000]), pub_date: $pub_date, platforms: {"darwin-aarch64": {signature: $macos_signature, url: $macos_url}, "windows-x86_64": {signature: $windows_signature, url: $windows_url}}}' \
               > dist/release/latest-desktop-test.json
             cat dist/release/latest-desktop-test.json
@@ -915,7 +915,7 @@ jobs:
               --repo "${GITHUB_REPOSITORY}" \
               --target "${TAG_SHA}" \
               --prerelease \
-              --title "OpenClaw desktop test update channel" \
+              --title "Carapace desktop test update channel" \
               --notes "Opt-in updater manifest for unsigned macOS and Windows Tauri test builds."
           fi
           gh release upload "${DESKTOP_TEST_CHANNEL_TAG}" \

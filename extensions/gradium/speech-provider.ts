@@ -1,17 +1,17 @@
 // Gradium provider module implements model/runtime integration.
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
   SpeechTelephonySynthesisRequest,
-} from "openclaw/plugin-sdk/speech";
-import { resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech";
+import { resolveSpeechProviderApiKey } from "carapace/plugin-sdk/speech-provider";
 import {
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { DEFAULT_GRADIUM_VOICE_ID, GRADIUM_VOICES, normalizeGradiumBaseUrl } from "./shared.js";
 import { gradiumTTS } from "./tts.js";
 
@@ -57,7 +57,7 @@ async function synthesizeGradium(
     throw new Error("Gradium API key missing");
   }
   const { resolveGeneratedMediaMaxBytes } =
-    await import("openclaw/plugin-sdk/media-generation-runtime");
+    await import("carapace/plugin-sdk/media-generation-runtime");
   return await gradiumTTS({
     text: req.text,
     apiKey,

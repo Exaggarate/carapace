@@ -8,9 +8,9 @@ import {
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import { AgentHarnessPreflightError } from "../../agents/harness/errors.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { resetTaskRegistryForTests } from "../../tasks/task-runtime.test-helpers.js";
 import { CronService } from "../service.js";
 import { loadCronJobsStoreWithConfigJobs, loadCronStore, saveCronStore } from "../store.js";
@@ -32,7 +32,7 @@ const runtimeStoreFixtures = setupCronRegressionFixtures({ prefix: "cron-runtime
 
 function trackCronRowReads() {
   return trackSqliteStatementExecutions(
-    openOpenClawStateDatabase().db,
+    openCarapaceStateDatabase().db,
     ["jobs", "authorities"] as const,
     (sql) => {
       if (sql.includes('from "cron_jobs"')) {
@@ -60,7 +60,7 @@ describe("cron runtime row publication", () => {
     }));
     jobs.push({ ...jobs[0]!, id: "replacement-\ufffd" });
     await saveCronStore(storePath, { version: 1, jobs });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const storeKey = cronStoreKey(storePath);
     database
       .prepare(
@@ -167,7 +167,7 @@ describe("cron runtime row publication", () => {
       startedAtMs: now,
     });
     const reads = trackCronRowReads();
-    const handle = runOpenClawStateWriteTransaction(({ db }) =>
+    const handle = runCarapaceStateWriteTransaction(({ db }) =>
       claimCronRunReceiptInDatabase({
         database: db,
         prepared,
@@ -180,7 +180,7 @@ describe("cron runtime row publication", () => {
         resolveAgentId: (current) => current.agentId ?? "main",
       });
       expect(reads.rowCounts.jobs).toBeLessThanOrEqual(2);
-      openOpenClawStateDatabase()
+      openCarapaceStateDatabase()
         .db.prepare("UPDATE cron_jobs SET job_json = '{}' WHERE store_key = ? AND job_id = ?")
         .run(handle.storeKey, job.id);
       expect(() => assertCronRunReceiptCurrent({ handle, resolveAgentId: () => "main" })).toThrow(

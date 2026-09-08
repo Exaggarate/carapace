@@ -1,7 +1,7 @@
 // Bundled-discovery compatibility is machine-owned upgrade state.
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   hasActivePluginInstallRoots,
   resolveActivePluginInstallRoots,
@@ -9,7 +9,7 @@ import {
 import { registerPluginMetadataProcessMemoLifecycleClear } from "./plugin-metadata-lifecycle.js";
 
 export function readBundledDiscoveryMode(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
   behavior: { artifactPreservingReadOnly?: boolean } = {},
 ): "compat" | "allowlist" | undefined {
   const resolvedOptions =
@@ -19,7 +19,7 @@ export function readBundledDiscoveryMode(
           ...options,
           env: {
             ...(options.env ?? process.env),
-            OPENCLAW_STATE_DIR: resolveActivePluginInstallRoots(options.env).stateDir,
+            CARAPACE_STATE_DIR: resolveActivePluginInstallRoots(options.env).stateDir,
           },
         };
   const value = readConfigMachineState<unknown>(
@@ -45,9 +45,9 @@ registerPluginMetadataProcessMemoLifecycleClear(() => {
 
 function resolveBundledDiscoveryMemoKey(env: NodeJS.ProcessEnv): string {
   const scopedEnv = hasActivePluginInstallRoots()
-    ? { ...env, OPENCLAW_STATE_DIR: resolveActivePluginInstallRoots(env).stateDir }
+    ? { ...env, CARAPACE_STATE_DIR: resolveActivePluginInstallRoots(env).stateDir }
     : env;
-  return resolveOpenClawStateSqlitePath(scopedEnv);
+  return resolveCarapaceStateSqlitePath(scopedEnv);
 }
 
 /**

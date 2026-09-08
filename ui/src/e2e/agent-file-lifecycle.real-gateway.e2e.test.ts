@@ -3,18 +3,18 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { expect, it } from "vitest";
 import type { GatewayServer } from "../../../src/gateway/server-public.ts";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../src/test-utils/openclaw-test-state.ts";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../src/test-utils/carapace-test-state.ts";
 import { getFreePort } from "../../../src/test-utils/ports.ts";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import {
   captureAgentFileScreenshot,
@@ -29,7 +29,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-let catalogInstance: OpenClawTestInstance;
+let catalogInstance: CarapaceTestInstance;
 let inventoryModel = "inventory-before";
 const inventoryRequests: string[] = [];
 const refreshInventoryArgs = [
@@ -67,9 +67,9 @@ const catalogSuite = createControlUiE2eSuite({
     await new Promise<void>((resolve) => {
       inventory.listen(inventoryPort, "127.0.0.1", resolve);
     });
-    catalogInstance = await createOpenClawTestInstance({
+    catalogInstance = await createCarapaceTestInstance({
       name: "agents-catalog-publication",
-      env: { OPENCLAW_TEST_MINIMAL_GATEWAY: undefined, VITEST: undefined },
+      env: { CARAPACE_TEST_MINIMAL_GATEWAY: undefined, VITEST: undefined },
       config: {
         gateway: { controlUi: { enabled: true } },
         agents: {
@@ -212,7 +212,7 @@ catalogSuite.define(() => {
           });
           await page.goto(url.toString());
           await waitForControlUiGatewayReady(page);
-          const editor = page.locator("openclaw-agents-page");
+          const editor = page.locator("carapace-agents-page");
           const picker = editor.locator(".model-picker__select");
           await expect
             .poll(() => picker.locator('wa-option[value="fixture/retiring"]').count())
@@ -222,7 +222,7 @@ catalogSuite.define(() => {
             .fill("Keep this identity draft");
           await picker.click();
           await picker.locator('wa-option[value="fixture/selected"]').click();
-          const fallbackInput = editor.locator("openclaw-multi-select.agent-fallbacks input");
+          const fallbackInput = editor.locator("carapace-multi-select.agent-fallbacks input");
           await fallbackInput.fill("fixture/anchor");
           await fallbackInput.press("Enter");
           const selected = () => picker.evaluate((element) => (element as WaSelect).value);
@@ -344,7 +344,7 @@ catalogSuite.define(() => {
 
 suite.define(() => {
   it("reads and saves the selected agent workspace through an isolated Gateway", async (context) => {
-    let fixture: OpenClawTestState | undefined;
+    let fixture: CarapaceTestState | undefined;
     let gateway: Promise<GatewayServer> | undefined;
     await suite.runScenario(context, {
       retainedState: () => fixture?.root,
@@ -358,17 +358,17 @@ suite.define(() => {
       run: async (signal) => {
         const port = await getFreePort();
         signal.throwIfAborted();
-        const state = await createOpenClawTestState({
+        const state = await createCarapaceTestState({
           label: "control-ui-agent-files",
           layout: "home",
           env: {
-            OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-            OPENCLAW_SKIP_CANVAS_HOST: "1",
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_CRON: "1",
-            OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+            CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+            CARAPACE_SKIP_CANVAS_HOST: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_CRON: "1",
+            CARAPACE_SKIP_GMAIL_WATCHER: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "1",
             VITEST: "1",
           },
         });
@@ -426,7 +426,7 @@ suite.define(() => {
             const url = new URL("settings/agents/main/files", suite.server.baseUrl);
             url.searchParams.set("gatewayUrl", `ws://127.0.0.1:${port}`);
             await page.goto(url.toString());
-            const confirmation = page.locator("openclaw-gateway-url-confirmation");
+            const confirmation = page.locator("carapace-gateway-url-confirmation");
             await confirmation.waitFor();
             await confirmation
               .getByRole("button", { name: `Switch to 127.0.0.1:${port}`, exact: true })

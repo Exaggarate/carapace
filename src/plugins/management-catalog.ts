@@ -1,13 +1,13 @@
 // Prepares presentation-only catalog facts and owns their metadata-scoped cache.
-import { asSafeIntegerInRange } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asSafeIntegerInRange } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type {
   PluginCatalogEntry,
   PluginsListResult,
 } from "../../packages/gateway-protocol/src/schema/plugins.js";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import { parseRegistryNpmSpec } from "../infra/npm-registry-spec.js";
@@ -65,7 +65,7 @@ export function getManagedPluginCache(metadata?: PluginMetadataSnapshot) {
 }
 
 export function withManagedPluginCache<
-  TParams extends { config: OpenClawConfig; metadata?: PluginMetadataSnapshot },
+  TParams extends { config: CarapaceConfig; metadata?: PluginMetadataSnapshot },
   TResult,
 >(run: (params: TParams) => Promise<TResult>): (params: TParams) => Promise<TResult> {
   return (params) => withPluginCache(getManagedPluginCache(params.metadata), () => run(params));

@@ -16,7 +16,7 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function leaseDatabase(home: string) {
-  return path.join(home, ".openclaw-worker", "quiescence", "windows-shared-host.sqlite");
+  return path.join(home, ".carapace-worker", "quiescence", "windows-shared-host.sqlite");
 }
 
 function readLease(home: string, workspace: string) {
@@ -34,7 +34,7 @@ function readLease(home: string, workspace: string) {
 
 describe.runIf(process.platform === "win32")("Windows workspace quiescence", () => {
   it("serializes file-backed shared-host lease acquisition, renewal, and release", async () => {
-    const root = tempDirs.make("openclaw-windows-quiescence-test-");
+    const root = tempDirs.make("carapace-windows-quiescence-test-");
     const home = path.join(root, "home");
     const workspace = path.join(root, "workspace");
     await fs.mkdir(home);
@@ -152,7 +152,7 @@ describe.runIf(process.platform === "win32")("Windows workspace quiescence", () 
   });
 
   it("retains the active lease when a transactional renewal is interrupted", async () => {
-    const root = tempDirs.make("openclaw-windows-quiescence-recovery-test-");
+    const root = tempDirs.make("carapace-windows-quiescence-recovery-test-");
     const home = path.join(root, "home");
     const workspace = path.join(root, "workspace");
     await fs.mkdir(home);

@@ -3,7 +3,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { formatErrorMessage, isErrno, isMissingPathError } from "../infra/errors.js";
 import { withFileLock } from "../infra/file-lock.js";
 import { root as createFsRoot, type Root as FsSafeRoot } from "../infra/fs-safe.js";
@@ -85,7 +85,7 @@ import {
   copyRuntimeConfigWriteApplication,
   getRuntimeConfigWriteApplication,
 } from "./runtime-write-application.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 const CONFIG_MUTATION_LOCK_OPTIONS = {
@@ -109,7 +109,7 @@ export type ConfigReplaceResult = {
   path: string;
   previousHash: string | null;
   snapshot: ConfigFileSnapshot;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   persistedHash: string | null;
   afterWrite: ConfigWriteAfterWrite;
   followUp: ConfigWriteFollowUp;
@@ -119,7 +119,7 @@ export type ConfigMutationIO = {
   env?: NodeJS.ProcessEnv;
   readConfigFileSnapshotForWrite: typeof readConfigFileSnapshotForWrite;
   writeConfigFile: (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     options?: ConfigWriteOptions,
   ) => Promise<ConfigWriteResult | void>;
 };
@@ -131,12 +131,12 @@ export type ConfigMutationContext = {
 };
 
 export type ConfigTransformResult<T> = {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   result?: T;
 };
 
 export type ConfigMutationCommitParams = {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   snapshot: ConfigFileSnapshot;
   baseHash?: string;
   writeOptions?: ConfigWriteOptions;
@@ -145,7 +145,7 @@ export type ConfigMutationCommitParams = {
 };
 
 export type ConfigMutationCommitResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   persistedHash: string | null;
   afterWrite?: ConfigWriteAfterWrite;
 };
@@ -162,7 +162,7 @@ export type TransformConfigFileParams<T> = {
   io?: ConfigMutationIO;
   commit?: ConfigMutationCommit;
   transform: (
-    currentConfig: OpenClawConfig,
+    currentConfig: CarapaceConfig,
     context: ConfigMutationContext,
     // Read-time env stays with host transforms, outside public mutation callbacks.
     preservation: Pick<ConfigWriteOptions, "envSnapshotForRestore">,
@@ -245,7 +245,7 @@ export async function withConfigMutationLock<T>(
         throw error;
       }
       throw new Error(
-        `OpenClaw cannot write to the config directory ${configDir}. Fix its ownership or permissions, then try again. Underlying error: ${formatErrorMessage(error)}`,
+        `Carapace cannot write to the config directory ${configDir}. Fix its ownership or permissions, then try again. Underlying error: ${formatErrorMessage(error)}`,
         { cause: error },
       );
     });
@@ -378,7 +378,7 @@ async function withConfigMutationSnapshotLock<T>(
  * Nested mutation helpers are reentrant through activeConfigMutationLocks.
  */
 export async function withConfigMutationExclusive<T>(
-  fn: (config: OpenClawConfig) => Promise<T>,
+  fn: (config: CarapaceConfig) => Promise<T>,
 ): Promise<T> {
   return await withConfigMutationSnapshotLock(
     {},
@@ -427,10 +427,10 @@ function getLegacyTopLevelIncludeBoundary(params: {
  */
 function resolveIncludeOwnedWriteCandidate(params: {
   snapshot: ConfigFileSnapshot;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   writeOptions?: ConfigWriteOptions;
   io?: ConfigMutationIO;
-}): (IncludeWriteBoundary & { nextConfig: OpenClawConfig }) | null {
+}): (IncludeWriteBoundary & { nextConfig: CarapaceConfig }) | null {
   // A roster-format persist is a root write; an include-only commit cannot carry it.
   if (params.writeOptions?.persistCanonicalAgentRoster === true) {
     return null;
@@ -457,7 +457,7 @@ function resolveIncludeOwnedWriteCandidate(params: {
       ...projection,
       valueSource: projection.explicitSetValueSource,
       persistedCandidate: projectConfigWriteSource(projection),
-    }) as OpenClawConfig, // SAFETY: Projection and path edits preserve the config object.
+    }) as CarapaceConfig, // SAFETY: Projection and path edits preserve the config object.
     projection.unsetPaths,
   );
   const changed = collectChangedConfigPaths(params.snapshot.sourceConfig, nextConfig);
@@ -483,7 +483,7 @@ function resolveIncludeOwnedWriteCandidate(params: {
  */
 export function configWriteTargetsIncludeBoundary(params: {
   snapshot: ConfigFileSnapshot;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   persistCanonicalAgentRoster?: boolean;
 }): boolean {
   const includeWrite = resolveIncludeOwnedWriteCandidate({
@@ -778,11 +778,11 @@ async function writeRootBoundJsonFile(params: {
 
 async function tryWriteIncludeOwnedConfigMutation(params: {
   snapshot: ConfigFileSnapshot;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   afterWrite?: ConfigWriteOptions["afterWrite"];
   writeOptions?: ConfigWriteOptions;
   io?: ConfigMutationIO;
-}): Promise<{ persistedHash: string | null; persistedConfig: OpenClawConfig } | null> {
+}): Promise<{ persistedHash: string | null; persistedConfig: CarapaceConfig } | null> {
   const includeWrite = resolveIncludeOwnedWriteCandidate({
     snapshot: params.snapshot,
     nextConfig: params.nextConfig,
@@ -890,13 +890,13 @@ async function tryWriteIncludeOwnedConfigMutation(params: {
     nextConfig,
     params.snapshot.parsed,
     envForRestore,
-  ) as OpenClawConfig;
+  ) as CarapaceConfig;
   applyConfigEnvVars(authoredRuntimeCandidate, runtimeCandidateEnv);
   const runtimeCandidate = structuredClone(authoredRuntimeCandidate);
   setConfigValueAtPath(runtimeCandidate, [...boundaryPath], includedValueToWrite);
   const runtimeConfigToWrite = resolveConfigEnvVars(runtimeCandidate, runtimeCandidateEnv, {
     onMissing: () => {},
-  }) as OpenClawConfig;
+  }) as CarapaceConfig;
   const validated = validateConfigObjectWithPlugins(
     runtimeConfigToWrite,
     params.writeOptions?.skipPluginValidation ? { pluginValidation: "skip" } : undefined,
@@ -1082,8 +1082,8 @@ async function tryWriteIncludeOwnedConfigMutation(params: {
 
 function resolveConfigWriteResult(
   result: ConfigWriteResult | void,
-  fallbackConfig: OpenClawConfig,
-): { persistedHash: string | null; persistedConfig: OpenClawConfig } {
+  fallbackConfig: CarapaceConfig,
+): { persistedHash: string | null; persistedConfig: CarapaceConfig } {
   if (result) {
     return {
       persistedHash: result.persistedHash,
@@ -1094,8 +1094,8 @@ function resolveConfigWriteResult(
 }
 
 export type ConfigReplaceInput =
-  | { sourceConfig: OpenClawConfig; nextConfig?: never }
-  | { nextConfig: OpenClawConfig; sourceConfig?: never };
+  | { sourceConfig: CarapaceConfig; nextConfig?: never }
+  | { nextConfig: CarapaceConfig; sourceConfig?: never };
 
 type ConfigReplaceParams = ConfigReplaceInput & {
   baseHash?: string;
@@ -1354,7 +1354,7 @@ export async function transformConfigFileWithRetry<T = void>(
 }
 
 type MutateConfigFileParams<T> = Omit<TransformConfigFileParams<T>, "transform" | "commit"> & {
-  mutate: (draft: OpenClawConfig, context: ConfigMutationContext) => Promise<T | void> | T | void;
+  mutate: (draft: CarapaceConfig, context: ConfigMutationContext) => Promise<T | void> | T | void;
 };
 
 export async function mutateConfigFile<T = void>(

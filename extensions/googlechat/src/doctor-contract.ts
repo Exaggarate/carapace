@@ -2,15 +2,15 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   defineKeyMoveMigration,
   hasLegacyAccountStreamingAliases,
   normalizeChannelConfigEntries,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 
 // Google Chat's nested streaming schema is delivery-only ({chunkMode, block});
 // it has no preview mode (legacy streamMode is removed outright above), so
@@ -78,13 +78,13 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "googlechat"],
     message:
-      'channels.googlechat.actions.reactions is retired and ignored. Run "openclaw doctor --fix".',
+      'channels.googlechat.actions.reactions is retired and ignored. Run "carapace doctor --fix".',
     match: hasRetiredReactions,
   },
   {
     path: ["channels", "googlechat", "accounts"],
     message:
-      'channels.googlechat.accounts.<id>.actions.reactions is retired and ignored. Run "openclaw doctor --fix".',
+      'channels.googlechat.accounts.<id>.actions.reactions is retired and ignored. Run "carapace doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasRetiredReactions),
   },
   {
@@ -101,19 +101,19 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "googlechat"],
     message:
-      'channels.googlechat.groups.<id>.allow is legacy; use channels.googlechat.groups.<id>.enabled instead. Run "openclaw doctor --fix".',
+      'channels.googlechat.groups.<id>.allow is legacy; use channels.googlechat.groups.<id>.enabled instead. Run "carapace doctor --fix".',
     match: groupAllowMigration.hasLegacy,
   },
   {
     path: ["channels", "googlechat", "accounts"],
     message:
-      'channels.googlechat.accounts.<id>.groups.<id>.allow is legacy; use channels.googlechat.accounts.<id>.groups.<id>.enabled instead. Run "openclaw doctor --fix".',
+      'channels.googlechat.accounts.<id>.groups.<id>.allow is legacy; use channels.googlechat.accounts.<id>.groups.<id>.enabled instead. Run "carapace doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, groupAllowMigration.hasLegacy),
   },
   ...streamingAliasMigration.legacyConfigRules,
 ];
 
-function normalizeRetiredGoogleChatKeys(cfg: OpenClawConfig): ChannelDoctorConfigMutation {
+function normalizeRetiredGoogleChatKeys(cfg: CarapaceConfig): ChannelDoctorConfigMutation {
   return normalizeChannelConfigEntries({
     cfg,
     channelId: "googlechat",
@@ -124,7 +124,7 @@ function normalizeRetiredGoogleChatKeys(cfg: OpenClawConfig): ChannelDoctorConfi
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   const retired = normalizeRetiredGoogleChatKeys(cfg);
   return streamingAliasMigration.normalizeChannelConfig({

@@ -15,7 +15,7 @@ import { createDeferredCore } from "../shared/deferred.js";
 import type { NodeHostClient } from "./client.js";
 import { prepareNodeHostRuntime } from "./runtime.js";
 
-vi.mock("../infra/path-env.js", () => ({ ensureOpenClawCliOnPath: vi.fn() }));
+vi.mock("../infra/path-env.js", () => ({ ensureCarapaceCliOnPath: vi.fn() }));
 vi.mock("./mcp.js", () => ({
   startNodeHostMcpManager: vi.fn(async () => ({ descriptors: [], close: async () => {} })),
 }));

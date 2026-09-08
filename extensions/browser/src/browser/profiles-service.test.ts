@@ -1,12 +1,12 @@
 // Browser tests cover profiles service plugin behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test-support.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { BrowserProfileConfig, OpenClawConfig } from "../config/config.js";
-import { resolveOpenClawUserDataDir } from "./chrome.js";
+import type { BrowserProfileConfig, CarapaceConfig } from "../config/config.js";
+import { resolveCarapaceUserDataDir } from "./chrome.js";
 import type { BrowserRouteContext, BrowserServerState } from "./server-context.js";
 import {
   enqueueProfileStart,
@@ -19,18 +19,18 @@ import { movePathToTrash } from "./trash.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 const configMocks = vi.hoisted(() => ({
-  getRuntimeConfig: vi.fn<() => OpenClawConfig>(),
-  getRuntimeConfigSourceSnapshot: vi.fn<() => OpenClawConfig | null>(() => null),
-  writeConfigFile: vi.fn<(cfg: OpenClawConfig) => Promise<void>>(async (_cfg) => {}),
+  getRuntimeConfig: vi.fn<() => CarapaceConfig>(),
+  getRuntimeConfigSourceSnapshot: vi.fn<() => CarapaceConfig | null>(() => null),
+  writeConfigFile: vi.fn<(cfg: CarapaceConfig) => Promise<void>>(async (_cfg) => {}),
   mutateConfigFile: vi.fn(
     async (params: {
       mutate: (
-        draft: OpenClawConfig,
+        draft: CarapaceConfig,
         context: {
           snapshot: {
             path: string;
-            runtimeConfig: OpenClawConfig;
-            sourceConfig: OpenClawConfig;
+            runtimeConfig: CarapaceConfig;
+            sourceConfig: CarapaceConfig;
           };
         },
       ) => unknown;
@@ -39,17 +39,17 @@ const configMocks = vi.hoisted(() => ({
       const draft = structuredClone(currentConfig);
       const result = await params.mutate(draft, {
         snapshot: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           runtimeConfig: currentConfig,
           sourceConfig: currentConfig,
         },
       });
       await configMocks.writeConfigFile(draft);
       return {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         previousHash: "test-hash",
         persistedHash: "test-hash",
-        snapshot: { path: "/tmp/openclaw.json" },
+        snapshot: { path: "/tmp/carapace.json" },
         nextConfig: draft,
         result,
         attempts: 1,
@@ -62,14 +62,14 @@ const configMocks = vi.hoisted(() => ({
 const writeConfigFile = configMocks.writeConfigFile;
 const lifecycleMocks = vi.hoisted(() => ({
   closeChromeMcpSession: vi.fn(async () => false),
-  stopOpenClawChrome: vi.fn(async () => {}),
+  stopCarapaceChrome: vi.fn(async () => {}),
 }));
 
 vi.mock("../config/config.js", async () => {
   const actual = await vi.importActual<typeof import("../config/config.js")>("../config/config.js");
   return {
     ...actual,
-    replaceConfigFile: vi.fn(async ({ nextConfig }: { nextConfig: OpenClawConfig }) => {
+    replaceConfigFile: vi.fn(async ({ nextConfig }: { nextConfig: CarapaceConfig }) => {
       await configMocks.writeConfigFile(nextConfig);
     }),
     mutateConfigFile: configMocks.mutateConfigFile,
@@ -94,8 +94,8 @@ vi.mock("./pw-ai-module.js", () => ({
 }));
 
 vi.mock("./chrome.js", () => ({
-  resolveOpenClawUserDataDir: vi.fn(() => "/tmp/openclaw-test/openclaw/user-data"),
-  stopOpenClawChrome: lifecycleMocks.stopOpenClawChrome,
+  resolveCarapaceUserDataDir: vi.fn(() => "/tmp/carapace-test/carapace/user-data"),
+  stopCarapaceChrome: lifecycleMocks.stopCarapaceChrome,
 }));
 
 const [{ resolveBrowserConfig, resolveProfile }, { createBrowserProfilesService }] =
@@ -153,7 +153,7 @@ function writtenBrowserConfig(): Record<string, unknown> {
   return cfg.browser;
 }
 
-const OPENCLAW_PROFILE = { cdpPort: 18800, color: "#FF4500" } as const;
+const CARAPACE_PROFILE = { cdpPort: 18800, color: "#FF4500" } as const;
 
 function createDeletionFixture(params: {
   name?: string;
@@ -165,9 +165,9 @@ function createDeletionFixture(params: {
   const { ctx, state } = createCtx(resolved);
   vi.mocked(getRuntimeConfig).mockReturnValue({
     browser: {
-      defaultProfile: "openclaw",
+      defaultProfile: "carapace",
       profiles: {
-        openclaw: OPENCLAW_PROFILE,
+        carapace: CARAPACE_PROFILE,
         [name]: params.persistedProfile ?? params.resolvedProfile,
       },
     },
@@ -181,10 +181,10 @@ describe("BrowserProfilesService", () => {
     configMocks.getRuntimeConfigSourceSnapshot.mockReset().mockReturnValue(null);
     configMocks.writeConfigFile.mockReset().mockResolvedValue(undefined);
     lifecycleMocks.closeChromeMcpSession.mockReset().mockResolvedValue(false);
-    lifecycleMocks.stopOpenClawChrome.mockReset().mockResolvedValue(undefined);
-    vi.mocked(resolveOpenClawUserDataDir)
+    lifecycleMocks.stopCarapaceChrome.mockReset().mockResolvedValue(undefined);
+    vi.mocked(resolveCarapaceUserDataDir)
       .mockReset()
-      .mockReturnValue("/tmp/openclaw-test/openclaw/user-data");
+      .mockReturnValue("/tmp/carapace-test/carapace/user-data");
     vi.mocked(movePathToTrash)
       .mockReset()
       .mockImplementation(async (targetPath) => targetPath);
@@ -224,7 +224,7 @@ describe("BrowserProfilesService", () => {
       const createdProfile = expectDefined(createdProfiles[profileName], "created browser profile");
       vi.mocked(getRuntimeConfig).mockReturnValue({
         browser: {
-          defaultProfile: "openclaw",
+          defaultProfile: "carapace",
           profiles: { [profileName]: createdProfile },
         },
       });
@@ -327,13 +327,13 @@ describe("BrowserProfilesService", () => {
         browser: {
           profiles: {},
         },
-      } as OpenClawConfig)
+      } as CarapaceConfig)
       .mockReturnValue({
         browser: {
           cdpPortRangeEnd: 18801,
           profiles: {},
         },
-      } as unknown as OpenClawConfig);
+      } as unknown as CarapaceConfig);
 
     const service = createBrowserProfilesService(ctx);
     const result = await service.createProfile({ name: "work" });
@@ -451,7 +451,7 @@ describe("BrowserProfilesService", () => {
     const { ctx, state } = createCtx(resolved);
     vi.mocked(getRuntimeConfig).mockReturnValue({ browser: { profiles: {} } });
 
-    const tempDir = tempDirs.make("openclaw-profile-");
+    const tempDir = tempDirs.make("carapace-profile-");
     const userDataDir = path.join(tempDir, "BraveSoftware", "Brave-Browser");
     fs.mkdirSync(userDataDir, { recursive: true });
 
@@ -475,7 +475,7 @@ describe("BrowserProfilesService", () => {
     const { ctx } = createCtx(resolved);
     vi.mocked(getRuntimeConfig).mockReturnValue({ browser: { profiles: {} } });
 
-    const tempDir = tempDirs.make("openclaw-profile-");
+    const tempDir = tempDirs.make("carapace-profile-");
     const userDataDir = path.join(tempDir, "BraveSoftware", "Brave-Browser");
     fs.mkdirSync(userDataDir, { recursive: true });
 
@@ -508,10 +508,10 @@ describe("BrowserProfilesService", () => {
       undefined,
     ],
     [
-      "deletes attach-only openclaw profiles without touching local browser data",
+      "deletes attach-only carapace profiles without touching local browser data",
       "work",
       { cdpPort: 18801, color: "#0066CC" },
-      { cdpPort: 18801, color: "#0066CC", driver: "openclaw", attachOnly: true },
+      { cdpPort: 18801, color: "#0066CC", driver: "carapace", attachOnly: true },
     ],
   ] as Array<[string, string, BrowserProfileConfig, BrowserProfileConfig | undefined]>)(
     "%s",
@@ -525,7 +525,7 @@ describe("BrowserProfilesService", () => {
 
       expect(result.deleted).toBe(false);
       expect(ctx.forProfile).not.toHaveBeenCalled();
-      expect(resolveOpenClawUserDataDir).not.toHaveBeenCalled();
+      expect(resolveCarapaceUserDataDir).not.toHaveBeenCalled();
       expect(movePathToTrash).not.toHaveBeenCalled();
     },
   );
@@ -541,9 +541,9 @@ describe("BrowserProfilesService", () => {
     vi.mocked(getRuntimeConfig)
       .mockReturnValueOnce({
         browser: {
-          defaultProfile: "openclaw",
+          defaultProfile: "carapace",
           profiles: {
-            openclaw: { cdpPort: 18800, color: "#FF4500" },
+            carapace: { cdpPort: 18800, color: "#FF4500" },
             work: { cdpUrl: "http://10.0.0.42:9222", color: "#0066CC" },
           },
         },
@@ -552,7 +552,7 @@ describe("BrowserProfilesService", () => {
         browser: {
           defaultProfile: "work",
           profiles: {
-            openclaw: { cdpPort: 18800, color: "#FF4500" },
+            carapace: { cdpPort: 18800, color: "#FF4500" },
             work: { cdpUrl: "http://10.0.0.42:9222", color: "#0066CC" },
           },
         },
@@ -574,10 +574,10 @@ describe("BrowserProfilesService", () => {
     const { service } = createDeletionFixture({
       resolvedProfile: { cdpPort: 18801, color: "#0066CC" },
     });
-    const tempDir = tempDirs.make("openclaw-profile-");
+    const tempDir = tempDirs.make("carapace-profile-");
     const userDataDir = path.join(tempDir, "work", "user-data");
     fs.mkdirSync(path.dirname(userDataDir), { recursive: true });
-    vi.mocked(resolveOpenClawUserDataDir).mockReturnValue(userDataDir);
+    vi.mocked(resolveCarapaceUserDataDir).mockReturnValue(userDataDir);
 
     const result = await service.deleteProfile("work");
 
@@ -589,10 +589,10 @@ describe("BrowserProfilesService", () => {
     const { service, state } = createDeletionFixture({
       resolvedProfile: { cdpPort: 18801, color: "#0066CC" },
     });
-    const tempDir = tempDirs.make("openclaw-trash-failure-");
+    const tempDir = tempDirs.make("carapace-trash-failure-");
     const userDataDir = path.join(tempDir, "work", "user-data");
     fs.mkdirSync(path.dirname(userDataDir), { recursive: true });
-    vi.mocked(resolveOpenClawUserDataDir).mockReturnValue(userDataDir);
+    vi.mocked(resolveCarapaceUserDataDir).mockReturnValue(userDataDir);
     vi.mocked(movePathToTrash).mockRejectedValueOnce(new Error("Trash unavailable"));
 
     const result = await service.deleteProfile("work");
@@ -612,10 +612,10 @@ describe("BrowserProfilesService", () => {
       throw new Error("Expected work profile");
     }
     const runtime = getOrCreateProfileRuntime(state, profile);
-    const tempDir = tempDirs.make("openclaw-delete-race-");
+    const tempDir = tempDirs.make("carapace-delete-race-");
     const userDataDir = path.join(tempDir, "work", "user-data");
     fs.mkdirSync(userDataDir, { recursive: true });
-    vi.mocked(resolveOpenClawUserDataDir).mockReturnValue(userDataDir);
+    vi.mocked(resolveCarapaceUserDataDir).mockReturnValue(userDataDir);
     const launch = deferred();
     const entered = deferred();
     const running = {
@@ -641,7 +641,7 @@ describe("BrowserProfilesService", () => {
     const startExpectation = expect(starting).rejects.toThrow(/deletion|lifecycle changed/i);
     await entered.promise;
     const order: string[] = [];
-    lifecycleMocks.stopOpenClawChrome.mockImplementationOnce(async () => {
+    lifecycleMocks.stopCarapaceChrome.mockImplementationOnce(async () => {
       order.push("stop");
     });
     configMocks.writeConfigFile.mockImplementationOnce(async () => {
@@ -690,11 +690,11 @@ describe("BrowserProfilesService", () => {
 
   it("preserves a same-name replacement config that appears during lifecycle drain", async () => {
     const originalProfile = { cdpPort: 18801, color: "#0066CC" };
-    let currentConfig: OpenClawConfig = {
+    let currentConfig: CarapaceConfig = {
       browser: {
-        defaultProfile: "openclaw",
+        defaultProfile: "carapace",
         profiles: {
-          openclaw: { cdpPort: 18800, color: "#FF4500" },
+          carapace: { cdpPort: 18800, color: "#FF4500" },
           work: originalProfile,
         },
       },
@@ -729,9 +729,9 @@ describe("BrowserProfilesService", () => {
     );
     currentConfig = {
       browser: {
-        defaultProfile: "openclaw",
+        defaultProfile: "carapace",
         profiles: {
-          openclaw: { cdpPort: 18800, color: "#FF4500" },
+          carapace: { cdpPort: 18800, color: "#FF4500" },
           work: { cdpPort: 18802, color: "#00AA00" },
         },
       },

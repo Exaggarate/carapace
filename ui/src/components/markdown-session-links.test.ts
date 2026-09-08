@@ -63,7 +63,7 @@ describe("markdown session links", () => {
 
     expect(navigate).toHaveBeenCalledWith("chat", {
       pathname: "/chat/roboclaw/dashboard/2139bddb-3211-4641-b993-10f619f124e6",
-      search: "?__openclawSessionFacePreference=1",
+      search: "?__carapaceSessionFacePreference=1",
     });
   });
   it.each([
@@ -75,7 +75,7 @@ describe("markdown session links", () => {
     [" ", "code"],
   ])("routes a public-origin URL with %s on %s before hovercard initialization", (action, tag) => {
     const provider = Object.assign(
-      document.createElement("openclaw-session-progress-hovercard-provider"),
+      document.createElement("carapace-session-progress-hovercard-provider"),
       {
         context: {
           basePath: "/control",

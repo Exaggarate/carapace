@@ -23,12 +23,12 @@ vi.mock("../config/config.js", () => ({
 vi.mock("./agent-scope.js", () => ({
   listAgentIds: () => mocks.agentIds,
   resolveAgentDir: (_config: object, agentId: string, env?: NodeJS.ProcessEnv) =>
-    env?.OPENCLAW_STATE_DIR
-      ? `${env.OPENCLAW_STATE_DIR}/${agentId}`
+    env?.CARAPACE_STATE_DIR
+      ? `${env.CARAPACE_STATE_DIR}/${agentId}`
       : (mocks.agentDirs.get(agentId) ?? "/tmp/prepared-model-catalog-agent"),
   resolveAgentWorkspaceDir: (_config: object, agentId: string, env?: NodeJS.ProcessEnv) =>
-    env?.OPENCLAW_STATE_DIR
-      ? `${env.OPENCLAW_STATE_DIR}/workspace-${agentId}`
+    env?.CARAPACE_STATE_DIR
+      ? `${env.CARAPACE_STATE_DIR}/workspace-${agentId}`
       : "/tmp/prepared-model-catalog-workspace",
   resolveAmbientOwnerAgentId: () => "main",
   resolveDefaultAgentDir: () => "/tmp/prepared-model-catalog-agent",
@@ -159,7 +159,7 @@ describe("prepared model catalog access", () => {
 
   it("uses the requested environment for directory selection and workspace activation", async () => {
     mocks.agentIds = ["main", "worker"];
-    const env = { OPENCLAW_STATE_DIR: "/tmp/selected-catalog-state" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/selected-catalog-state" };
     mocks.prepareSnapshot.mockRejectedValue(new PreparedModelRuntimeOwnerNotPublishedError());
     mocks.loadSnapshot.mockResolvedValue(readOnlySnapshot);
 

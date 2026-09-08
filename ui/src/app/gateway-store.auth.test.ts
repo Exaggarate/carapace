@@ -101,11 +101,11 @@ describe("createApplicationGateway authentication diagnostics", () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(store.gateway.snapshot.phase).toBe("reload-required");
     expect(replace).not.toHaveBeenCalled();
-    expect(sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId")).toBeNull();
+    expect(sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId")).toBeNull();
 
     await vi.advanceTimersByTimeAsync(1_000);
     expect(replace).toHaveBeenCalledOnce();
-    expect(sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId")).toBe(
+    expect(sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId")).toBe(
       "replacement-build",
     );
     await vi.advanceTimersByTimeAsync(30_000);
@@ -128,7 +128,7 @@ describe("createApplicationGateway authentication diagnostics", () => {
     await vi.advanceTimersByTimeAsync(1_000);
     expect(replace).toHaveBeenCalledOnce();
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId")).toBe(
+    expect(sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId")).toBe(
       "replacement-build",
     );
   });
@@ -147,7 +147,7 @@ describe("createApplicationGateway authentication diagnostics", () => {
     await vi.advanceTimersByTimeAsync(30_000);
     expect(replace).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledOnce();
-    expect(sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId")).toBeNull();
+    expect(sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId")).toBeNull();
   });
 
   it("preserves an unfinished browser handoff across a build recovery reload", async () => {
@@ -230,7 +230,7 @@ describe("createApplicationGateway authentication diagnostics", () => {
       });
 
       expect(replace).not.toHaveBeenCalled();
-      expect(sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId")).toBeNull();
+      expect(sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId")).toBeNull();
     },
   );
 

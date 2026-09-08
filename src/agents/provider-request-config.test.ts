@@ -523,9 +523,9 @@ describe("provider request config", () => {
       precedence: "defaults-win",
     });
 
-    expect(resolved?.originator).toBe("openclaw");
+    expect(resolved?.originator).toBe("carapace");
     expect(typeof resolved?.version).toBe("string");
-    expect(resolved?.["User-Agent"]).toMatch(/^openclaw\//);
+    expect(resolved?.["User-Agent"]).toMatch(/^carapace\//);
     expect(resolved?.["X-Custom"]).toBe("1");
   });
 
@@ -543,8 +543,8 @@ describe("provider request config", () => {
     });
 
     expect(resolved).toEqual({
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+      "X-OpenRouter-Title": "Carapace",
       "X-OpenRouter-Categories":
         "cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent",
       "X-Custom": "1",
@@ -566,7 +566,7 @@ describe("provider request config", () => {
     });
 
     expect(resolved).toEqual({
-      "X-BILLING-INVOKE-ORIGIN": "OpenClaw",
+      "X-BILLING-INVOKE-ORIGIN": "Carapace",
       "X-Custom": "1",
     });
   });
@@ -595,14 +595,14 @@ describe("provider request config", () => {
       provider: "openai",
       api: "openai-responses" as const,
       baseUrl: "https://api.openai.com/v1",
-      expectedUserAgent: /^openclaw\//,
+      expectedUserAgent: /^carapace\//,
     },
     {
       label: "native OpenCode Go",
       provider: "opencode-go",
       api: "openai-completions" as const,
       baseUrl: "https://opencode.ai/zen/go/v1",
-      expectedUserAgent: /^openclaw\//,
+      expectedUserAgent: /^carapace\//,
     },
     {
       label: "proxied OpenCode Go",
@@ -676,9 +676,9 @@ describe("provider request config", () => {
     expect(resolved.capabilities.endpointClass).toBe("openai-public");
     expect(resolved.capabilities.allowsResponsesStore).toBe(true);
     expect(resolved.headers?.authorization).toBe("Bearer test-key");
-    expect(resolved.headers?.originator).toBe("openclaw");
+    expect(resolved.headers?.originator).toBe("carapace");
     expect(typeof resolved.headers?.version).toBe("string");
-    expect(resolved.headers?.["User-Agent"]).toMatch(/^openclaw\//);
+    expect(resolved.headers?.["User-Agent"]).toMatch(/^carapace\//);
     expect(resolved.headers?.["X-Custom"]).toBe("1");
   });
 

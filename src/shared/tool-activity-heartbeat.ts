@@ -2,7 +2,7 @@ import { resolveGlobalSingleton } from "./global-singleton.js";
 import { notifyListeners } from "./listeners.js";
 
 const { runListeners, runLastActivityMs } = resolveGlobalSingleton(
-  Symbol.for("openclaw.toolActivityHeartbeat"),
+  Symbol.for("carapace.toolActivityHeartbeat"),
   () => ({
     runListeners: new Map<string, Set<() => void>>(),
     runLastActivityMs: new Map<string, number>(),

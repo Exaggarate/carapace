@@ -95,7 +95,7 @@ describe("session workspace state", () => {
 
     expect(listFiles).toHaveBeenCalledOnce();
     const skeleton = mount.querySelector<HTMLElement & { variant: string }>(
-      "openclaw-panel-loading-skeleton",
+      "carapace-panel-loading-skeleton",
     );
     expect(skeleton).not.toBeNull();
     expect(skeleton?.variant).toBe("files");
@@ -114,7 +114,7 @@ describe("session workspace state", () => {
       mount,
     );
 
-    expect(mount.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
+    expect(mount.querySelector("carapace-panel-loading-skeleton")).toBeNull();
     expect(mount.textContent).toContain("src/slow.ts");
   });
 
@@ -394,7 +394,7 @@ describe("session workspace artifacts", () => {
     createSessionWorkspaceProps(state).onOpenArtifact("artifact-1");
     const content = await loadedSidebarContent(state);
     expect(content).toMatchObject({ kind: "markdown", rawText: source });
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: SidebarContent;
       updateComplete: Promise<unknown>;
     };

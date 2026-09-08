@@ -1,12 +1,12 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 // Firecrawl provider module implements model/runtime integration.
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
+import { readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
 import {
   createWebSearchProviderContractFields,
   enablePluginInConfig,
   type WebSearchProviderPlugin,
-} from "openclaw/plugin-sdk/provider-web-search-contract";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-web-search-contract";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const FIRECRAWL_CREDENTIAL_PATH = "plugins.entries.firecrawl.config.webSearch.apiKey";
 
@@ -62,7 +62,7 @@ function createFirecrawlSearchProvider(keyless: boolean): WebSearchProviderPlugi
           placeholder: "fc-...",
         }),
     signupUrl: "https://www.firecrawl.dev/",
-    docsUrl: "https://docs.openclaw.ai/tools/firecrawl",
+    docsUrl: "https://github.com/Exaggarate/carapace",
     ...(keyless ? {} : { autoDetectOrder: 60 }),
     credentialPath,
     ...createWebSearchProviderContractFields({

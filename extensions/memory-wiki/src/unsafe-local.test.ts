@@ -120,8 +120,8 @@ describe("syncMemoryWikiUnsafeLocalSources", () => {
       await fs.writeFile(
         firstPageAbsPath,
         firstPage.replace(
-          "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-          `<!-- openclaw:human:start -->\n${humanNotes}\n<!-- openclaw:human:end -->`,
+          "<!-- carapace:human:start -->\n<!-- carapace:human:end -->",
+          `<!-- carapace:human:start -->\n${humanNotes}\n<!-- carapace:human:end -->`,
         ),
         "utf8",
       );
@@ -176,8 +176,8 @@ describe("syncMemoryWikiUnsafeLocalSources", () => {
     await fs.writeFile(
       path.join(vaultDir, unavailablePage!.pagePath),
       unavailablePage!.content.replace(
-        "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-        "<!-- openclaw:human:start -->\nremember this\n<!-- openclaw:human:end -->",
+        "<!-- carapace:human:start -->\n<!-- carapace:human:end -->",
+        "<!-- carapace:human:start -->\nremember this\n<!-- carapace:human:end -->",
       ),
       "utf8",
     );
@@ -223,7 +223,7 @@ describe("syncMemoryWikiUnsafeLocalSources", () => {
     const previousPage = path.join(vaultDir, first.pagePaths[0] ?? "");
     const previousContent = await fs.readFile(previousPage, "utf8");
     const previousState = await readMemoryWikiSourceSyncState(vaultDir);
-    const logPath = path.join(vaultDir, ".openclaw-wiki", "log.jsonl");
+    const logPath = path.join(vaultDir, ".carapace-wiki", "log.jsonl");
     const previousLog = await fs.readFile(logPath, "utf8");
     await fs.rm(previousPath);
     await fs.writeFile(failingPath, "# Unreadable source\n", "utf8");

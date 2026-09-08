@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   safeTranscriptPathSegment,
   transcriptSessionExportKey,
@@ -28,7 +28,7 @@ export function insertMeetingTranscriptSnapshots(params: {
   env: NodeJS.ProcessEnv;
   stateDir: string;
 }): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: database }) => {
       const db = migrationDb(database);
       // Run-wide metadata is stored once here; per-source receipts below keep
@@ -136,7 +136,7 @@ export function insertMeetingTranscriptSnapshots(params: {
         });
       }
     },
-    { env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir } },
+    { env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir } },
     { operationLabel: "meeting-transcripts.legacy-import" },
   );
 }

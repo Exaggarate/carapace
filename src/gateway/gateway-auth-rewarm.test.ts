@@ -14,12 +14,12 @@ import {
 } from "../../scripts/lib/local-build-metadata.mts";
 import { acquireGatewayTestClient } from "../../test/helpers/gateway-client.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../test/helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../test/helpers/carapace-test-instance.js";
 import { runQaGatewayFixture } from "../../test/helpers/qa-gateway-cleanup.js";
 import { loadPersistedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildMockOpenAiResponsesProvider } from "./test-openai-responses-model.js";
 
 const REWARM_MESSAGE = "provider auth state re-warmed (auth-profile-failure)";
@@ -77,7 +77,7 @@ describe("Gateway profile failure recovery", () => {
           }),
         );
       });
-      let instance: OpenClawTestInstance | undefined;
+      let instance: CarapaceTestInstance | undefined;
       let client: Awaited<ReturnType<typeof acquireGatewayTestClient>> | undefined;
 
       await runQaGatewayFixture(
@@ -94,17 +94,17 @@ describe("Gateway profile failure recovery", () => {
             `http://127.0.0.1:${address.port}/v1`,
             "gpt-5.6-luna",
           );
-          instance = await createOpenClawTestInstance({
+          instance = await createCarapaceTestInstance({
             name: "auth-rewarm",
             cwd: repoRoot,
             stopTimeoutMs: 10_000,
             env: {
               VITEST: undefined,
               NODE_ENV: "production",
-              OPENCLAW_TEST_CONSOLE: "1",
-              OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-              OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-              OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+              CARAPACE_TEST_CONSOLE: "1",
+              CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+              CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+              CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
             },
           });
           const gateway = instance;
@@ -124,7 +124,7 @@ describe("Gateway profile failure recovery", () => {
                 model: { primary: provider.modelRef, fallbacks: [] },
                 models: {
                   [provider.modelRef]: {
-                    agentRuntime: { id: "openclaw" },
+                    agentRuntime: { id: "carapace" },
                     params: { transport: "sse", openaiWsWarmup: false },
                   },
                 },
@@ -156,7 +156,7 @@ describe("Gateway profile failure recovery", () => {
             },
             plugins: { slots: { memory: "none" } },
             tools: { profile: "minimal" },
-          } satisfies OpenClawConfig;
+          } satisfies CarapaceConfig;
           await gateway.state.writeConfig(cfg);
           // Exercise retry exhaustion without waiting through the default recovery window.
           await gateway.state.writeJson("agents/rate/agent/settings.json", {
@@ -283,7 +283,7 @@ describe("Gateway configured catalog authentication", () => {
         response.writeHead(200, { "content-type": "application/json" });
         response.end(JSON.stringify({ data: [] }));
       });
-      let instance: OpenClawTestInstance | undefined;
+      let instance: CarapaceTestInstance | undefined;
       let client: Awaited<ReturnType<typeof acquireGatewayTestClient>> | undefined;
       await runQaGatewayFixture(
         async () => {
@@ -304,17 +304,17 @@ describe("Gateway configured catalog authentication", () => {
             id: `synthetic-${index}`,
             name: `Synthetic ${index}`,
           }));
-          instance = await createOpenClawTestInstance({
+          instance = await createCarapaceTestInstance({
             name: "configured-catalog-auth",
             cwd: repoRoot,
             stopTimeoutMs: 10_000,
             env: {
               VITEST: undefined,
               NODE_ENV: "production",
-              OPENCLAW_TEST_CONSOLE: "1",
-              OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-              OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-              OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+              CARAPACE_TEST_CONSOLE: "1",
+              CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+              CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+              CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
             },
           });
           const gateway = instance;
@@ -335,7 +335,7 @@ describe("Gateway configured catalog authentication", () => {
                 models: Object.fromEntries(
                   models.map((model) => [
                     `${provider.providerId}/${model.id}`,
-                    { agentRuntime: { id: "openclaw" } },
+                    { agentRuntime: { id: "carapace" } },
                   ]),
                 ),
               },
@@ -354,7 +354,7 @@ describe("Gateway configured catalog authentication", () => {
             },
             plugins: { slots: { memory: "none" } },
             tools: { profile: "minimal" },
-          } satisfies OpenClawConfig;
+          } satisfies CarapaceConfig;
           await gateway.state.writeConfig(cfg);
           expect(await gateway.entrypoint()).toEqual(["dist/index.js"]);
           const startupStarted = performance.now();

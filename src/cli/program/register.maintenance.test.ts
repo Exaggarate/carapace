@@ -205,7 +205,7 @@ describe("registerMaintenanceCommands doctor action", () => {
       "--session-sqlite",
       "import",
       "--session-sqlite-store",
-      "/tmp/openclaw/sessions.json",
+      "/tmp/carapace/sessions.json",
       "--json",
     ]);
 
@@ -213,7 +213,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     const [runtimeArg, options] = commandCall(doctorCommand);
     expect(runtimeArg).toBe(runtime);
     expect(options.sessionSqlite).toBe("import");
-    expect(options.sessionSqliteStore).toBe("/tmp/openclaw/sessions.json");
+    expect(options.sessionSqliteStore).toBe("/tmp/carapace/sessions.json");
     expect(options.json).toBe(true);
     expect(runtime.exit).toHaveBeenCalledWith(0);
   });
@@ -330,7 +330,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     "rejects session sqlite selectors without session sqlite mode %s",
     async (_label, json, args) => {
       const message =
-        "doctor session SQLite options require --session-sqlite. Use `openclaw doctor --session-sqlite dry-run ...`.";
+        "doctor session SQLite options require --session-sqlite. Use `carapace doctor --session-sqlite dry-run ...`.";
 
       await runMaintenanceCli(["doctor", ...args]);
 
@@ -433,7 +433,7 @@ describe("registerMaintenanceCommands doctor action", () => {
       { name: `${name} before JSON`, args: [...selector, "--json"] },
     ]),
   )("rejects lint-only $name without explicit lint mode", async ({ args }) => {
-    const message = "doctor lint options require --lint. Use `openclaw doctor --lint ...`.";
+    const message = "doctor lint options require --lint. Use `carapace doctor --lint ...`.";
 
     await runMaintenanceCli(["doctor", ...args]);
 
@@ -541,12 +541,12 @@ describe("registerMaintenanceCommands doctor action", () => {
 
   it.each([
     ["agent selector", ["--session-sqlite-agent", "main"]],
-    ["store selector", ["--session-sqlite-store", "/tmp/openclaw/sessions.json"]],
+    ["store selector", ["--session-sqlite-store", "/tmp/carapace/sessions.json"]],
     ["all-agents selector", ["--session-sqlite-all-agents"]],
     ["GitHub issue creation", ["--github-issue"]],
   ])("rejects orphan session SQLite %s during explicit lint", async (_label, options) => {
     const message =
-      "doctor session SQLite options require --session-sqlite. Use `openclaw doctor --session-sqlite dry-run ...`.";
+      "doctor session SQLite options require --session-sqlite. Use `carapace doctor --session-sqlite dry-run ...`.";
 
     await runMaintenanceCli(["doctor", "--lint", ...options]);
 
@@ -575,13 +575,13 @@ describe("registerMaintenanceCommands doctor action", () => {
 
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+      "doctor lint options require --lint. Use `carapace doctor --lint ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });
 
   it("writes JSON when another Doctor machine mode rejects lint selectors", async () => {
-    const message = "doctor lint options require --lint. Use `openclaw doctor --lint ...`.";
+    const message = "doctor lint options require --lint. Use `carapace doctor --lint ...`.";
 
     await runMaintenanceCli(["doctor", "--post-upgrade", "--json", "--only", "core/example"]);
 
@@ -598,7 +598,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runDoctorLintCli).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+      "doctor lint options require --lint. Use `carapace doctor --lint ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });
@@ -639,7 +639,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runDoctorLintCli).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+      "doctor lint options require --lint. Use `carapace doctor --lint ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });

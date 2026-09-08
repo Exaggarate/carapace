@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { html, nothing, type TemplateResult } from "lit";
 import "../../../components/elapsed-time.ts";
 import { icons } from "../../../components/icons.ts";
@@ -115,7 +115,7 @@ function renderTaskHeader(
                 ${
                   active && startedMs > 0
                     ? html`<span aria-hidden="true">·</span>
-                        <openclaw-elapsed-time .startMs=${startedMs}></openclaw-elapsed-time>`
+                        <carapace-elapsed-time .startMs=${startedMs}></carapace-elapsed-time>`
                     : nothing
                 }
                 ${

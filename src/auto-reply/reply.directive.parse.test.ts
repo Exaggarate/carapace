@@ -33,7 +33,7 @@ describe("directive parsing", () => {
     "/exec host=auto security=deny",
     "/queue collect debounce:2s cap:5",
     "/model example/model -s",
-    "/sample --runtime openclaw -s",
+    "/sample --runtime carapace -s",
     "/status:",
   ])("preserves code and significant spacing around %s", (directive) => {
     const code =

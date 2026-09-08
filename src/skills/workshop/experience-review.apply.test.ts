@@ -19,7 +19,7 @@ import {
   deleteSessionEntryLifecycle,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { emitAgentEvent, onAgentRuntimeEvent } from "../../infra/agent-events.js";
 import { getAgentRunContext } from "../../infra/agent-run-registry.js";
 import * as agentRunRegistry from "../../infra/agent-run-registry.js";
@@ -30,9 +30,9 @@ import {
   tryBeginGatewayRootWorkAdmission,
 } from "../../process/gateway-work-admission.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { readSkillReviewOutcomes } from "./collection-review-state.js";
 import type { ExperienceReviewCandidate } from "./experience-review-scheduler.js";
@@ -114,12 +114,12 @@ function foregroundPromptContext(
 }
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-experience-maintenance-state-",
+    prefix: "carapace-experience-maintenance-state-",
   });
 });
 
@@ -131,7 +131,7 @@ afterEach(async () => {
 
 describe("experience review maintenance", () => {
   it("keeps completed maintenance edits when the Gateway resets", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-reset-");
+    const workspaceDir = await tempDirs.make("carapace-experience-reset-");
     const written = createDeferred();
     const release = createDeferred();
     const config = { skills: { workshop: { autonomous: { mode: "auto" as const } } } };
@@ -178,7 +178,7 @@ describe("experience review maintenance", () => {
   });
 
   it("does not review a captured session after its source is deleted", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-read-failure-");
+    const workspaceDir = await tempDirs.make("carapace-experience-read-failure-");
     const registration = vi.spyOn(agentRunRegistry, "registerAgentRunContext");
     const candidate = await captureReviewFixture({
       ctx: {
@@ -220,7 +220,7 @@ describe("experience review maintenance", () => {
   it.each(["session", "transcript"] as const)(
     "rejects a changed %s after context preparation",
     async (change) => {
-      const workspaceDir = await tempDirs.make("openclaw-experience-source-rotation-");
+      const workspaceDir = await tempDirs.make("carapace-experience-source-rotation-");
       const candidate = await captureReviewFixture({
         ctx: {
           sessionId: "foreground-session",
@@ -275,7 +275,7 @@ describe("experience review maintenance", () => {
   it.each(["delete", "replace", "permission", "restore", "append"] as const)(
     "revalidates source authority after a foreground %s",
     async (change) => {
-      const workspaceDir = await tempDirs.make("openclaw-experience-live-source-");
+      const workspaceDir = await tempDirs.make("carapace-experience-live-source-");
       const candidate = await captureReviewFixture({
         ctx: {
           sessionId: "foreground-session",
@@ -363,7 +363,7 @@ describe("experience review maintenance", () => {
   );
 
   it("does not occupy the foreground session lane", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-session-lane-");
+    const workspaceDir = await tempDirs.make("carapace-experience-session-lane-");
     const foregroundSessionKey = "agent:main:main";
     const reviewStarted = createDeferred();
     const releaseReview = createDeferred();
@@ -405,7 +405,7 @@ describe("experience review maintenance", () => {
   });
 
   it("keeps detached review events out of foreground session presentation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-hidden-events-");
+    const workspaceDir = await tempDirs.make("carapace-experience-hidden-events-");
     const observed: Array<
       [
         stream: string,
@@ -522,8 +522,8 @@ describe("experience review maintenance", () => {
   ] satisfies Array<{ name: string; result: EmbeddedAgentRunResult; error: string | undefined }>)(
     "$name",
     async ({ result, error }) => {
-      const workspaceDir = await tempDirs.make("openclaw-experience-auto-apply-workspace-");
-      const agentDir = await tempDirs.make("openclaw-experience-auto-apply-agent-dir-");
+      const workspaceDir = await tempDirs.make("carapace-experience-auto-apply-workspace-");
+      const agentDir = await tempDirs.make("carapace-experience-auto-apply-agent-dir-");
       const config = {
         agents: { entries: { main: { default: true, agentDir } } },
         skills: { workshop: { autonomous: { mode: "propose" as const } } },
@@ -641,7 +641,7 @@ describe("experience review maintenance", () => {
   it.each(["auto", "propose"] as const)(
     "records %s completion with provider usage",
     async (mode) => {
-      const workspaceDir = await tempDirs.make("openclaw-experience-usage-");
+      const workspaceDir = await tempDirs.make("carapace-experience-usage-");
       runEmbeddedAgent.mockResolvedValue({
         payloads: [{ text: "NO_REPLY" }],
         meta: {
@@ -674,8 +674,8 @@ describe("experience review maintenance", () => {
   );
 
   it("edits the agent Workshop directory from a session worktree", async () => {
-    const canonicalWorkspaceDir = await tempDirs.make("openclaw-experience-canonical-");
-    const worktreeWorkspaceDir = await tempDirs.make("openclaw-experience-worktree-");
+    const canonicalWorkspaceDir = await tempDirs.make("carapace-experience-canonical-");
+    const worktreeWorkspaceDir = await tempDirs.make("carapace-experience-worktree-");
     const config = {
       agents: { entries: { main: { default: true, workspace: canonicalWorkspaceDir } } },
       skills: { workshop: { autonomous: { mode: "auto" as const } } },
@@ -725,7 +725,7 @@ describe("experience review maintenance", () => {
   });
 
   it("re-enters gateway admission when fired from a released request root", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-admission-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-experience-admission-workspace-");
     let subordinateClosedInsideRun: boolean | undefined;
     runEmbeddedAgent.mockImplementation(async () => {
       subordinateClosedInsideRun = isGatewaySubordinateWorkAdmissionClosed();
@@ -759,12 +759,12 @@ describe("experience review maintenance", () => {
   });
 
   it("keeps a draft pending when auto mode is enabled during review", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-mode-change-");
-    const config: OpenClawConfig = {
+    const workspaceDir = await tempDirs.make("carapace-experience-mode-change-");
+    const config: CarapaceConfig = {
       skills: { workshop: { autonomous: { mode: "propose" } } },
     };
     runEmbeddedAgent.mockImplementation(
-      async (params: RunEmbeddedAgentParams & { config: OpenClawConfig; agentId: string }) => {
+      async (params: RunEmbeddedAgentParams & { config: CarapaceConfig; agentId: string }) => {
         const tool = createSkillWorkshopTool({
           workspaceDir: params.workspaceDir,
           config: params.config,
@@ -810,7 +810,7 @@ describe("experience review maintenance", () => {
   });
 
   it("does not auto-apply a manual proposal revised by the reviewer", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-experience-manual-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-experience-manual-workspace-");
     const manual = await proposeCreateSkill({
       workspaceDir,
       config: {},

@@ -4,15 +4,15 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as sharedAuthBootstrap from "../agents/auth-profiles/shared-store-bootstrap.js";
 import * as sessionTargets from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surfaces.types.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   createCallerModeSnapshot,
@@ -62,10 +62,10 @@ function writeLegacyDoctorSources(
 }
 
 async function makeFixture() {
-  const root = await tempDirs.make("openclaw-doctor-caller-refusal-");
+  const root = await tempDirs.make("carapace-doctor-caller-refusal-");
   const homeDir = path.join(root, "home");
   const stateDir = path.join(root, "copied-state");
-  const configPath = path.join(root, "copied-openclaw.json");
+  const configPath = path.join(root, "copied-carapace.json");
   fs.mkdirSync(homeDir, { recursive: true });
   fs.mkdirSync(stateDir, { recursive: true });
   fs.symlinkSync(
@@ -77,10 +77,10 @@ async function makeFixture() {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: homeDir,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
   };
   return { root, homeDir, stateDir, configPath, env };
 }
@@ -95,8 +95,8 @@ async function makeCallerModeFixture() {
 }
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
   vi.restoreAllMocks();
 });
@@ -208,7 +208,7 @@ describe("legacy state migration read-only refusals", () => {
       mode: "doctor",
       candidate: candidateAt(fixture.root),
       snapshot: createCallerModeSnapshot(fixture),
-      env: { ...fixture.env, OPENCLAW_OAUTH_DIR: externalOAuthDir },
+      env: { ...fixture.env, CARAPACE_OAUTH_DIR: externalOAuthDir },
     });
 
     const blockerIndex = plan.steps.findIndex((step) => step.id === "migration-detection");
@@ -235,7 +235,7 @@ describe("legacy state migration read-only refusals", () => {
       const fixture = await makeFixture();
       const outside = pathStyle !== "snapshot-bound";
       const authDir = path.join(outside ? fixture.homeDir : fixture.stateDir, "relocated-auth");
-      const sourcePath = path.join(authDir, "openclaw-agent.sqlite");
+      const sourcePath = path.join(authDir, "carapace-agent.sqlite");
       if (outside) {
         fs.mkdirSync(authDir);
         for (const suffix of ["", "-wal", "-shm"]) {
@@ -251,7 +251,7 @@ describe("legacy state migration read-only refusals", () => {
         snapshot: createCallerModeSnapshot(fixture),
         env: {
           ...fixture.env,
-          OPENCLAW_AGENT_DIR: pathStyle === "tilde" ? "~/relocated-auth" : authDir,
+          CARAPACE_AGENT_DIR: pathStyle === "tilde" ? "~/relocated-auth" : authDir,
         },
       });
 
@@ -288,7 +288,7 @@ describe("legacy state migration read-only refusals", () => {
       mode: "doctor",
       candidate: candidateAt(fixture.root),
       snapshot: createCallerModeSnapshot(fixture),
-      env: { ...fixture.env, OPENCLAW_OAUTH_DIR: oauthDir },
+      env: { ...fixture.env, CARAPACE_OAUTH_DIR: oauthDir },
     });
 
     expect(plan.steps.find((step) => step.id === "channel-pairing")?.source).toEqual([
@@ -378,7 +378,7 @@ describe("legacy state migration read-only refusals", () => {
     const pairingPath = path.join(fixture.stateDir, "credentials", "telegram-allowFrom.json");
     fs.mkdirSync(path.dirname(pairingPath), { recursive: true });
     fs.writeFileSync(pairingPath, '["legacy-user"]\n');
-    const cfg: OpenClawConfig = { channels: { telegram: { enabled: true } } };
+    const cfg: CarapaceConfig = { channels: { telegram: { enabled: true } } };
     fs.writeFileSync(fixture.configPath, `${JSON.stringify(cfg)}\n`);
 
     const plan = await planLegacyStateMigrationsReadOnly({
@@ -430,7 +430,7 @@ describe("legacy state migration read-only refusals", () => {
     const externalPluginRoot = path.join(fixture.root, "external-candidate-plugin");
     fs.mkdirSync(externalPluginRoot);
     fs.writeFileSync(
-      path.join(externalPluginRoot, "openclaw.plugin.json"),
+      path.join(externalPluginRoot, "carapace.plugin.json"),
       `${JSON.stringify({
         id: "matrix",
         configSchema: { type: "object", additionalProperties: true },
@@ -454,7 +454,7 @@ module.exports = { stateMigrations: [{
   },
 }] };\n`,
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         load: { paths: [externalPluginRoot] },
         entries: { matrix: { enabled: true } },
@@ -517,7 +517,7 @@ module.exports = { stateMigrations: [{
     fs.writeFileSync(externalDatabase, "external-bytes\n");
     fs.symlinkSync(externalDir, linkedDir);
     const configuredPath = path.join(linkedDir, "sessions.sqlite");
-    const cfg: OpenClawConfig = { session: { store: configuredPath } };
+    const cfg: CarapaceConfig = { session: { store: configuredPath } };
     fs.writeFileSync(fixture.configPath, `${JSON.stringify(cfg)}\n`);
 
     const plan = await planLegacyStateMigrationsReadOnly({
@@ -542,9 +542,9 @@ module.exports = { stateMigrations: [{
 
   it("records named-profile workspace endpoints without authorizing unbound writes", async () => {
     const fixture = await makeFixture();
-    fixture.env.OPENCLAW_PROFILE = "work";
-    const source = path.join(fixture.homeDir, ".openclaw", "workspace-work");
-    const target = path.join(fixture.homeDir, ".openclaw-work", "workspace");
+    fixture.env.CARAPACE_PROFILE = "work";
+    const source = path.join(fixture.homeDir, ".carapace", "workspace-work");
+    const target = path.join(fixture.homeDir, ".carapace-work", "workspace");
     fs.mkdirSync(source, { recursive: true });
     fs.writeFileSync(path.join(source, "AGENTS.md"), "profile workspace\n");
     const before = snapshotFiles(fixture.root);
@@ -651,9 +651,9 @@ module.exports = { stateMigrations: [{
       "agents",
       "legacy",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
-    const stateDatabase = openOpenClawStateDatabase({ env: fixture.env });
+    const stateDatabase = openCarapaceStateDatabase({ env: fixture.env });
     stateDatabase.db
       .prepare(
         `INSERT INTO agent_databases (
@@ -662,7 +662,7 @@ module.exports = { stateMigrations: [{
       )
       .run("legacy", agentDatabasePath, 1, 1, null);
     const stateDatabasePath = stateDatabase.path;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const legacy = new DatabaseSync(stateDatabasePath);
     try {
       legacy.exec(`
@@ -703,7 +703,7 @@ module.exports = { stateMigrations: [{
     const externalDatabasePath = path.join(fixture.root, "registered", "agent.sqlite");
     fs.mkdirSync(path.dirname(externalDatabasePath), { recursive: true });
     fs.writeFileSync(externalDatabasePath, "external\n");
-    const cfg: OpenClawConfig = { agents: { list: [{ id: "legacy", default: true }] } };
+    const cfg: CarapaceConfig = { agents: { list: [{ id: "legacy", default: true }] } };
     fs.writeFileSync(fixture.configPath, `${JSON.stringify(cfg)}\n`);
     vi.spyOn(sessionTargets, "resolveConfiguredAgentDatabaseTargets").mockReturnValue([
       { agentId: "legacy", path: externalDatabasePath },
@@ -795,7 +795,7 @@ module.exports = { stateMigrations: [{
       get() {
         throw new Error("synthetic config migration failure");
       },
-    }) as OpenClawConfig;
+    }) as CarapaceConfig;
     const emittedReceipts: LegacyStateMigrationStepReceipt[] = [];
 
     const result = await autoMigrateLegacyState({
@@ -843,7 +843,7 @@ module.exports = { stateMigrations: [{
       fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
       fs.writeFileSync(sourcePath, sourceBytes);
       if (!property) {
-        const databasePath = resolveOpenClawStateSqlitePath(fixture.env);
+        const databasePath = resolveCarapaceStateSqlitePath(fixture.env);
         fs.mkdirSync(path.dirname(databasePath), { recursive: true });
         const database = new DatabaseSync(databasePath);
         database.exec("CREATE TABLE agent_databases (broken TEXT)");
@@ -861,7 +861,7 @@ module.exports = { stateMigrations: [{
             get() {
               throw failure;
             },
-          }) as OpenClawConfig)
+          }) as CarapaceConfig)
         : {};
       const emittedReceipts: LegacyStateMigrationStepReceipt[] = [];
       const execution = autoMigrateLegacyState({
@@ -876,7 +876,7 @@ module.exports = { stateMigrations: [{
         await expect(execution).rejects.toBe(failure);
       } else {
         await expect(execution).rejects.toThrow(
-          "OpenClaw startup migrations did not complete cleanly",
+          "Carapace startup migrations did not complete cleanly",
         );
       }
       expectBlockedTailInPlanOrder({ plan, receipts: emittedReceipts, blockerId });
@@ -891,7 +891,7 @@ module.exports = { stateMigrations: [{
   it("returns target-discovery refusal after a completed schema step", async () => {
     const fixture = await makeCallerModeFixture();
     const { execPath } = writeLegacyDoctorSources(fixture.stateDir, {});
-    writeLegacyStateSchemaV1(resolveOpenClawStateSqlitePath(fixture.env));
+    writeLegacyStateSchemaV1(resolveCarapaceStateSqlitePath(fixture.env));
     const plan = await planLegacyStateMigrationsReadOnly({
       mode: "doctor",
       candidate: candidateAt(fixture.root),
@@ -903,7 +903,7 @@ module.exports = { stateMigrations: [{
       get() {
         throw new Error("synthetic agent target discovery failure");
       },
-    }) as OpenClawConfig;
+    }) as CarapaceConfig;
 
     const result = await autoMigrateLegacyState({
       cfg,

@@ -13,7 +13,7 @@ export type IrcAccountConfig = Omit<CommonChannelMessagingConfig, "mentionPatter
   nick?: string;
   /** IRC USER field username (defaults to nick). */
   username?: string;
-  /** IRC USER field realname (default: OpenClaw). */
+  /** IRC USER field realname (default: Carapace). */
   realname?: string;
   /** Optional IRC server password (sensitive). */
   password?: string;
@@ -34,7 +34,7 @@ export type IrcAccountConfig = Omit<CommonChannelMessagingConfig, "mentionPatter
     /** Email used with NickServ REGISTER. */
     registerEmail?: string;
   };
-  /** Auto-join channel list at connect (example: ["#openclaw"]). */
+  /** Auto-join channel list at connect (example: ["#carapace"]). */
   channels?: string[];
   /** Outbound text chunk size (chars). Default: 350. */
   textChunkLimit?: number;

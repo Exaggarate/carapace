@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, expect, test, vi } from "vitest";
 import { waitForFile } from "../../test/helpers/process-wait.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
@@ -25,8 +25,8 @@ import { ProjectCloneError } from "../projects/project-clone-runtime.js";
 import { registerProjectRegistry } from "../projects/project-registry.js";
 import { SESSION_WORK_ADMISSION_DRAIN_TIMEOUT_MS } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { ChatAbortControllerEntry } from "./chat-abort.js";
 import { createChatRunState } from "./server-chat-state.js";
 import {
@@ -60,7 +60,7 @@ afterEach(() => {
   titleMocks.generate.mockReset();
   projectCloneMocks.materialize.mockReset();
   dispatchInboundMessageMock.mockReset();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = undefined;
 });
 
@@ -71,7 +71,7 @@ test.each([
 ])(
   "sessions.create admits remote project work (worktree=$worktree, sandboxed=$sandboxed) before materialization and dispatches only after authoritative binding",
   async ({ worktree, sandboxed, image }) => {
-    const root = tempDirs.make("openclaw-session-remote-project-startup-");
+    const root = tempDirs.make("carapace-session-remote-project-startup-");
     const workspace = await initializeRepository(root, "workspace");
     const projectRoot = await initializeRepository(sandboxed ? workspace : root, "project");
     const alias = path.join(root, "workspace-alias");
@@ -119,7 +119,7 @@ test.each([
           agentId: "main",
           message: "Inspect the remote project",
           ...(attachments ? { attachments } : {}),
-          projectGitUrl: "git@github.com:OpenClaw/OpenClaw.git",
+          projectGitUrl: "git@github.com:Carapace/Carapace.git",
           ...(worktree ? { worktree: true, worktreeName: "remote-startup" } : {}),
         },
         { ...controlUiClient, context },
@@ -138,11 +138,11 @@ test.each([
       key = created.payload!.key;
       expect(loadSessionEntry({ agentId: "main", sessionKey: key, storePath })).toMatchObject({
         sessionId,
-        pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       });
       await vi.waitFor(() => expect(projectCloneMocks.materialize).toHaveBeenCalledOnce());
       expect(projectCloneMocks.materialize).toHaveBeenCalledWith(
-        expect.objectContaining({ gitUrl: "https://github.com/openclaw/openclaw.git" }),
+        expect.objectContaining({ gitUrl: "https://github.com/Exaggarate/carapace.git" }),
         expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
       expect(events).toContainEqual(
@@ -240,7 +240,7 @@ test.each([
 test.each([false, true])(
   "chat.abort cancels remote project preparation without late binding or agent dispatch (worktree=%s)",
   async (worktree) => {
-    const root = tempDirs.make("openclaw-session-remote-project-abort-");
+    const root = tempDirs.make("carapace-session-remote-project-abort-");
     const workspace = await initializeRepository(root, "workspace");
     const projectRoot = await initializeRepository(root, "project");
     testState.agentConfig = { workspace };
@@ -273,7 +273,7 @@ test.each([false, true])(
         {
           agentId: "main",
           message: "Cancel the remote project",
-          projectGitUrl: "https://github.com/openclaw/openclaw.git",
+          projectGitUrl: "https://github.com/Exaggarate/carapace.git",
           ...(worktree ? { worktree: true, worktreeName: "retry-worktree" } : {}),
         },
         { ...controlUiClient, context },
@@ -316,7 +316,7 @@ test.each([false, true])(
       expect(dispatchInboundMessageMock).not.toHaveBeenCalled();
       expect(loadSessionEntry({ agentId: "main", sessionKey: key, storePath })).toMatchObject({
         sessionId,
-        pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       });
       expect(loadSessionEntry({ agentId: "main", sessionKey: key, storePath })?.projectId).toBe(
         undefined,
@@ -332,7 +332,7 @@ test.each([false, true])(
 test.each([false, true])(
   "sessions.create survives Gateway restart after remote project failure and retries preparation on the same session (worktree=%s)",
   async (worktree) => {
-    const root = tempDirs.make("openclaw-session-remote-project-failure-");
+    const root = tempDirs.make("carapace-session-remote-project-failure-");
     const workspace = await initializeRepository(root, "workspace");
     const projectRoot = await initializeRepository(root, "project");
     testState.agentConfig = { workspace };
@@ -357,7 +357,7 @@ test.each([false, true])(
       {
         agentId: "main",
         message: "Inspect the unavailable project",
-        projectGitUrl: "https://github.com/openclaw/openclaw.git",
+        projectGitUrl: "https://github.com/Exaggarate/carapace.git",
         ...(worktree ? { worktree: true, worktreeName: "retry-worktree" } : {}),
       },
       { ...controlUiClient, context },
@@ -435,15 +435,15 @@ test.each([false, true])(
       expect(dispatchInboundMessageMock).not.toHaveBeenCalled();
       expect(entryAfterCreation).toMatchObject({
         sessionId,
-        pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       });
       expect(entryAfterFailure).toMatchObject({
         sessionId,
-        pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       });
       expect(loadSessionEntry({ agentId: "main", sessionKey: key, storePath })).toMatchObject({
         sessionId,
-        pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       });
 
       retriedMaterialization.resolve(project);
@@ -481,11 +481,11 @@ test.each([false, true])(
 test.each([false, true])(
   "concurrent sends retain one bound worktree after deferred setup (abort first=%s)",
   async (abortFirst) => {
-    const root = tempDirs.make("openclaw-session-worktree-concurrent-");
+    const root = tempDirs.make("carapace-session-worktree-concurrent-");
     const workspace = await initializeRepository(root, "workspace");
     testState.agentConfig = { workspace };
     const { storePath } = await createSessionStoreDir();
-    const setup = path.join(workspace, ".openclaw");
+    const setup = path.join(workspace, ".carapace");
     await fs.mkdir(setup);
     const firstStarted = path.join(setup, "first-started");
     const secondStarted = path.join(setup, "second-started");
@@ -493,7 +493,7 @@ test.each([false, true])(
     const release = path.join(setup, "release");
     await fs.writeFile(
       path.join(setup, "worktree-setup.sh"),
-      '#!/bin/sh\necho started >> "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/starts"\nif [ -f "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/first-started" ]; then touch "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/second-started"; else touch "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/first-started"; fi\nwhile [ ! -f "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/release" ]; do sleep 0.05; done\n',
+      '#!/bin/sh\necho started >> "$CARAPACE_SOURCE_TREE_PATH/.carapace/starts"\nif [ -f "$CARAPACE_SOURCE_TREE_PATH/.carapace/first-started" ]; then touch "$CARAPACE_SOURCE_TREE_PATH/.carapace/second-started"; else touch "$CARAPACE_SOURCE_TREE_PATH/.carapace/first-started"; fi\nwhile [ ! -f "$CARAPACE_SOURCE_TREE_PATH/.carapace/release" ]; do sleep 0.05; done\n',
       { mode: 0o755 },
     );
     const context = {
@@ -581,11 +581,11 @@ test.each([false, true])(
 );
 
 test("sessions.create rejects conflicting, unsupported, and invalid remote project preparation before admission", async () => {
-  const root = tempDirs.make("openclaw-session-remote-project-invalid-");
+  const root = tempDirs.make("carapace-session-remote-project-invalid-");
   const workspace = await initializeRepository(root, "workspace");
   testState.agentConfig = { workspace };
   await createSessionStoreDir();
-  const validRemote = "https://github.com/openclaw/openclaw.git";
+  const validRemote = "https://github.com/Exaggarate/carapace.git";
   const existing = await directSessionReq<{ key: string }>(
     "sessions.create",
     { agentId: "main", key: "agent:main:existing-project-session" },
@@ -599,7 +599,7 @@ test("sessions.create rejects conflicting, unsupported, and invalid remote proje
     { projectGitUrl: validRemote },
     { message: "Start", projectGitUrl: "   " },
     { message: "Start", projectGitUrl: "file:///tmp/untrusted-project" },
-    { message: "Start", projectGitUrl: "https://token@github.com/openclaw/openclaw.git" },
+    { message: "Start", projectGitUrl: "https://token@github.com/Exaggarate/carapace.git" },
     { key: existing.payload?.key, message: "Start", projectGitUrl: validRemote },
   ]) {
     const created = await directSessionReq(
@@ -618,7 +618,7 @@ test("sessions.create rejects conflicting, unsupported, and invalid remote proje
 });
 
 test("chat.send visibly rejects corrupt persisted project intent without default-workspace dispatch", async () => {
-  const root = tempDirs.make("openclaw-session-remote-project-corrupt-");
+  const root = tempDirs.make("carapace-session-remote-project-corrupt-");
   testState.agentConfig = { workspace: await initializeRepository(root, "workspace") };
   const { storePath } = await createSessionStoreDir();
   const created = await directSessionReq<{ key: string }>(
@@ -632,7 +632,7 @@ test("chat.send visibly rejects corrupt persisted project intent without default
   expect(entry).toBeDefined();
   await replaceSessionEntry(
     { agentId: "main", sessionKey, storePath },
-    { ...entry!, pendingProjectGitUrl: "https://token@github.com/openclaw/openclaw.git" },
+    { ...entry!, pendingProjectGitUrl: "https://token@github.com/Exaggarate/carapace.git" },
   );
   const broadcast = vi.fn();
   const context = { broadcast, chatAbortControllers: new Map<string, ChatAbortControllerEntry>() };
@@ -665,7 +665,7 @@ test("chat.send visibly rejects corrupt persisted project intent without default
 });
 
 test("sessions.create terminalizes remote project preparation outside a sandboxed agent workspace", async () => {
-  const root = tempDirs.make("openclaw-session-remote-project-sandbox-");
+  const root = tempDirs.make("carapace-session-remote-project-sandbox-");
   const workspace = await initializeRepository(root, "workspace");
   const outside = await initializeRepository(root, "outside");
   testState.agentConfig = { workspace, sandbox: { mode: "all" } };
@@ -683,7 +683,7 @@ test("sessions.create terminalizes remote project preparation outside a sandboxe
       {
         agentId: "main",
         message: "Inspect the sandboxed project",
-        projectGitUrl: "https://github.com/openclaw/openclaw.git",
+        projectGitUrl: "https://github.com/Exaggarate/carapace.git",
       },
       { ...controlUiClient, context },
     );
@@ -725,7 +725,7 @@ test("sessions.create terminalizes remote project preparation outside a sandboxe
 test.each(["workspace", "registered"])(
   "sessions.create starts in a sandboxed %s project through a workspace alias",
   async (kind) => {
-    const root = tempDirs.make("openclaw-session-workspace-project-");
+    const root = tempDirs.make("carapace-session-workspace-project-");
     const workspace = path.join(root, "workspace");
     const alias = path.join(root, "workspace-alias");
     await fs.mkdir(workspace);
@@ -761,7 +761,7 @@ test.each(["workspace", "registered"])(
 );
 
 test("sessions.create starts directly in an outside registered project at write scope", async () => {
-  const root = tempDirs.make("openclaw-session-direct-project-");
+  const root = tempDirs.make("carapace-session-direct-project-");
   const workspace = await initializeRepository(root, "workspace");
   const projectRoot = await initializeRepository(root, "project");
   testState.agentConfig = { workspace };
@@ -790,9 +790,9 @@ test("sessions.create starts directly in an outside registered project at write 
 });
 
 test("sessions.create with an empty message preserves its owned checkout above the 100 cleanup target", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-session-worktree-target-",
+    prefix: "carapace-session-worktree-target-",
   });
   try {
     const workspace = await initializeRepository(state.root, "workspace");
@@ -934,7 +934,7 @@ test("sessions.create with an empty message preserves its owned checkout above t
       await settleWorkspaceRuns(context, storePath, key, true);
     }
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
     testState.sessionConfig = undefined;
     await state.cleanup();
@@ -968,7 +968,7 @@ test("sessions.create returns a typed error for an unknown project", async () =>
 test.each(["missing", "non-directory"] as const)(
   "sessions.create reports an unavailable %s registered project with truthful recovery guidance",
   async (state) => {
-    const root = tempDirs.make("openclaw-session-stale-project-");
+    const root = tempDirs.make("carapace-session-stale-project-");
     const repo = await initializeRepository(root, "project");
     const project = await registerProjectRegistry({ path: repo });
     await fs.rm(repo, { recursive: true, force: true });
@@ -986,7 +986,7 @@ test.each(["missing", "non-directory"] as const)(
 );
 
 test("sessions.create rejects an outside project for a sandboxed agent", async () => {
-  const root = tempDirs.make("openclaw-session-sandbox-project-");
+  const root = tempDirs.make("carapace-session-sandbox-project-");
   const workspace = await initializeRepository(root, "workspace");
   const outside = await initializeRepository(root, "outside");
   testState.agentConfig = { workspace, sandbox: { mode: "all" } };

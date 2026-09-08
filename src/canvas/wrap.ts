@@ -28,7 +28,7 @@ const WIDGET_BASE_STYLES = `:root{color-scheme:light dark;
 --border:#1e2028;--border-strong:#2e3040;
 --accent:#ff5c5c;--accent-fill:#d13c3c;--accent-fg:#ffffff;
 --ok:#22c55e;--warn:#f59e0b;--danger:#ef4444;--info:#3b82f6}}
-*{box-sizing:border-box}@supports not selector(::-webkit-scrollbar-thumb){*{scrollbar-color:var(--scrollbar-thumb) transparent;scrollbar-width:thin}}html,body{margin:0}::-webkit-scrollbar{width:var(--scrollbar-size);height:var(--scrollbar-size);background:var(--surface)}::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}::-webkit-scrollbar-button{display:none}::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);background-clip:content-box;border:var(--scrollbar-thumb-inset) solid transparent;border-radius:var(--radius-full)}::-webkit-scrollbar-thumb:hover{background:var(--scrollbar-thumb-hover);background-clip:content-box}.openclaw-chat-host,.openclaw-chat-host body{scrollbar-width:none}.openclaw-chat-host::-webkit-scrollbar,.openclaw-chat-host body::-webkit-scrollbar{display:none}
+*{box-sizing:border-box}@supports not selector(::-webkit-scrollbar-thumb){*{scrollbar-color:var(--scrollbar-thumb) transparent;scrollbar-width:thin}}html,body{margin:0}::-webkit-scrollbar{width:var(--scrollbar-size);height:var(--scrollbar-size);background:var(--surface)}::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}::-webkit-scrollbar-button{display:none}::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);background-clip:content-box;border:var(--scrollbar-thumb-inset) solid transparent;border-radius:var(--radius-full)}::-webkit-scrollbar-thumb:hover{background:var(--scrollbar-thumb-hover);background-clip:content-box}.carapace-chat-host,.carapace-chat-host body{scrollbar-width:none}.carapace-chat-host::-webkit-scrollbar,.carapace-chat-host body::-webkit-scrollbar{display:none}
 body{font:14px/1.5 var(--font-body);color:var(--text)}
 h1,h2,h3{margin:0 0 8px;color:var(--text-strong);font-weight:600}
 h1{font-size:18px}h2{font-size:16px}h3{font-size:14px}
@@ -80,13 +80,13 @@ export function buildWidgetDocument(
     "const listen=window.addEventListener.bind(window);" +
     "const stop=Event.prototype.stopImmediatePropagation;let boardNonce='';" +
     'listen("message",event=>{const data=event.data;if(event.source!==parent||' +
-    'data?.type!=="openclaw:widget-board-host"||typeof data.nonce!=="string"||!data.nonce)return;' +
+    'data?.type!=="carapace:widget-board-host"||typeof data.nonce!=="string"||!data.nonce)return;' +
     "boardNonce=data.nonce;stop.call(event);},true);" +
     // documentElement.scrollHeight reports the viewport for short content, so
     // measure the body box, which tracks the actual widget height.
     "let last=0;const report=()=>{const b=document.body;if(!b)return;" +
     "const h=Math.ceil(Math.max(b.scrollHeight,b.offsetHeight,b.getBoundingClientRect().height));" +
-    'if(h&&h!==last){last=h;post({type:"openclaw:widget-size",height:h},"*");}};' +
+    'if(h&&h!==last){last=h;post({type:"carapace:widget-size",height:h},"*");}};' +
     "const remainder=(target,delta)=>{let value=delta;const root=document.scrollingElement;" +
     "let rootSeen=false;const consume=node=>{if(!value)return;const max=node.scrollHeight-node.clientHeight;" +
     "if(max<=1)return;const available=value<0?node.scrollTop:max-node.scrollTop;" +
@@ -98,7 +98,7 @@ export function buildWidgetDocument(
     "const scale=event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1;" +
     "const delta=event.deltaY*scale;if(!delta||Math.abs(delta)<=Math.abs(event.deltaX*scale))return;" +
     "const deltaY=remainder(event.target,delta);if(!deltaY)return;" +
-    'if(deltaY===delta)event.preventDefault();post({type:"openclaw:widget-scroll",deltaY,nonce:boardNonce},"*");},{passive:false});' +
+    'if(deltaY===delta)event.preventDefault();post({type:"carapace:widget-scroll",deltaY,nonce:boardNonce},"*");},{passive:false});' +
     "let touchId=-1;let lastX=0;let lastY=0;const findTouch=touches=>{" +
     "for(let index=0;index<touches.length;index++){const touch=touches.item(index);" +
     "if(touch?.identifier===touchId)return touch;}return null;};" +
@@ -109,7 +109,7 @@ export function buildWidgetDocument(
     "if(!touch)return;const deltaX=lastX-touch.clientX;const deltaY=lastY-touch.clientY;" +
     "lastX=touch.clientX;lastY=touch.clientY;if(!deltaY||Math.abs(deltaY)<=Math.abs(deltaX))return;" +
     "const remaining=remainder(event.target,deltaY);if(!remaining)return;" +
-    'if(remaining===deltaY)event.preventDefault();post({type:"openclaw:widget-scroll",deltaY:remaining,nonce:boardNonce},"*");},{passive:false});' +
+    'if(remaining===deltaY)event.preventDefault();post({type:"carapace:widget-scroll",deltaY:remaining,nonce:boardNonce},"*");},{passive:false});' +
     "const endTouch=event=>{if(touchId>=0&&!findTouch(event.touches))touchId=-1;};" +
     'listen("touchend",endTouch,{passive:true});listen("touchcancel",endTouch,{passive:true});' +
     "listen('load',report);new ResizeObserver(report).observe(document.body);" +
@@ -126,7 +126,7 @@ export function buildWidgetDocument(
   // links honor the same primary-click and middle-button contract; listening on
   // bubble rather than capture keeps a widget's own preventDefault effective.
   const widgetBridge =
-    '<script>(()=>{if(!window.parent||window.parent===window||Object.prototype.hasOwnProperty.call(window,"openclaw"))return;' +
+    '<script>(()=>{if(!window.parent||window.parent===window||Object.prototype.hasOwnProperty.call(window,"carapace"))return;' +
     "const parent=window.parent;const post=parent.postMessage.bind(parent);" +
     "const P=Promise;const then=P.prototype.then;const ErrorCtor=Error;" +
     "const stringify=String;const freeze=Object.freeze;const define=Object.defineProperty;" +
@@ -138,29 +138,29 @@ export function buildWidgetDocument(
     "const promptPost=c.port1.postMessage.bind(c.port1);" +
     "const b=new MessageChannel();const bridgePost=b.port1.postMessage.bind(b.port1);" +
     "const promptWaiting=[];let inlinePromptReady=false;" +
-    'c.port1.addEventListener("message",event=>{if(event.data?.type!=="openclaw:widget-prompt-host-ready"||inlinePromptReady)return;' +
+    'c.port1.addEventListener("message",event=>{if(event.data?.type!=="carapace:widget-prompt-host-ready"||inlinePromptReady)return;' +
     "inlinePromptReady=true;while(promptWaiting.length){const entry=shift.call(promptWaiting);if(entry)entry.inline();}});c.port1.start();" +
     "let act=null;" +
     "try{const ua=navigator.userActivation;" +
     'const d=ua&&Object.getOwnPropertyDescriptor(Object.getPrototypeOf(ua),"isActive");' +
     "if(d&&d.get)act=d.get.bind(ua);}catch{}" +
-    'post({type:"openclaw:widget-prompt-offer"},"*",[c.port2]);' +
-    'post({type:"openclaw:widget-bridge-port-offer"},"*",[b.port2]);' +
+    'post({type:"carapace:widget-prompt-offer"},"*",[c.port2]);' +
+    'post({type:"carapace:widget-bridge-port-offer"},"*",[b.port2]);' +
     "let ticket=null;let controlUiBaseUrl=null;let sequence=0;let hostInitExpired=false;const pending=new Map();const waiting=[];" +
     'const initTimer=later(()=>{hostInitExpired=true;while(waiting.length){const entry=shift.call(waiting);if(entry)entry.reject(new ErrorCtor("widget host capabilities unavailable"));}' +
     'while(promptWaiting.length){const entry=shift.call(promptWaiting);if(entry)entry.reject(new ErrorCtor("widget prompt host unavailable"));}},5000);' +
     'b.port1.addEventListener("message",event=>{const data=event.data;' +
-    'if(data?.type==="openclaw:widget-host-init"&&typeof data.ticket==="string"){ticket=data.ticket;' +
+    'if(data?.type==="carapace:widget-host-init"&&typeof data.ticket==="string"){ticket=data.ticket;' +
     'const base=data.controlUiBaseUrl;controlUiBaseUrl=typeof base==="string"&&/^https?:\\/\\//.test(base)?base:null;' +
-    'bridgePost({type:"openclaw:widget-host-init-ack",ticket});cancel(initTimer);' +
+    'bridgePost({type:"carapace:widget-host-init-ack",ticket});cancel(initTimer);' +
     "while(waiting.length){const entry=shift.call(waiting);if(entry)entry.send();}" +
     "while(promptWaiting.length){const entry=shift.call(promptWaiting);if(entry)entry.send();}return;}" +
-    'if(data?.type!=="openclaw:widget-bridge-response"||typeof data.id!=="string")return;' +
+    'if(data?.type!=="carapace:widget-bridge-response"||typeof data.id!=="string")return;' +
     "const entry=pending.get(data.id);if(!entry)return;pending.delete(data.id);" +
     'if(data.ok===true)entry.resolve(data.result);else entry.reject(new ErrorCtor(typeof data.error==="string"?data.error:"widget host request failed"));});b.port1.start();' +
     'const request=(method,params)=>new P((resolve,reject)=>{const send=()=>{const id="widget-"+(++sequence);' +
     "pending.set(id,{resolve,reject});" +
-    'try{bridgePost({type:"openclaw:widget-bridge-request",id,method,params,ticket});}' +
+    'try{bridgePost({type:"carapace:widget-bridge-request",id,method,params,ticket});}' +
     "catch(error){pending.delete(id);reject(error);}};" +
     'if(ticket)send();else if(hostInitExpired)reject(new ErrorCtor("widget host capabilities unavailable"));' +
     "else push.call(waiting,{send,reject});});" +
@@ -175,7 +175,7 @@ export function buildWidgetDocument(
     "const sendPrompt=text=>{if(!act||act()!==true)return P.resolve(false);const value=stringify(text);" +
     'if(ticket)return request("prompt.send",{text:value});return new P((resolve,reject)=>{' +
     'const send=()=>{const result=request("prompt.send",{text:value});then.call(result,resolve,reject);};' +
-    'const inline=()=>{promptPost({type:"openclaw:widget-prompt",prompt:value});resolve(true);};' +
+    'const inline=()=>{promptPost({type:"carapace:widget-prompt",prompt:value});resolve(true);};' +
     'if(inlinePromptReady)inline();else if(hostInitExpired)reject(new ErrorCtor("widget prompt host unavailable"));' +
     "else push.call(promptWaiting,{send,inline,reject});});};" +
     'const host={};define(host,"controlUiBaseUrl",{enumerable:true,get:()=>controlUiBaseUrl});freeze(host);' +
@@ -184,10 +184,10 @@ export function buildWidgetDocument(
     'data:freeze({read:(bindingId,params)=>request("data.read",{bindingId:stringify(bindingId),params})}),' +
     'action:freeze({run:(action,params)=>request("action.run",{action:stringify(action),params:params===undefined?{}:params})}),' +
     'cron:freeze({trigger:jobId=>request("cron.trigger",{jobId:stringify(jobId)})})});' +
-    'define(window,"openclaw",{value:api,writable:false,configurable:false});' +
+    'define(window,"carapace",{value:api,writable:false,configurable:false});' +
     "window.sendPrompt=text=>{void sendPrompt(text);};" +
     'define(window,"sendPrompt",{value:window.sendPrompt,writable:false,configurable:false});' +
-    'post({type:"openclaw:widget-bridge-ready"},"*");})();</script>';
+    'post({type:"carapace:widget-bridge-ready"},"*");})();</script>';
   /*
    * The host may push a new theme after every theme change. Each message is a
    * full snapshot: omitted or invalid tokens are removed so a theme switch
@@ -209,8 +209,8 @@ export function buildWidgetDocument(
     'if(data.mode==="light"||data.mode==="dark")set("color-scheme",data.mode);});})();</script>';
   const chatHostBridge =
     "<script>(()=>{if(!window.parent||window.parent===window)return;" +
-    'addEventListener("message",event=>{if(event.source===window.parent&&event.data?.type==="openclaw:widget-chat-host")' +
-    'document.documentElement.classList.add("openclaw-chat-host");});})();</script>';
+    'addEventListener("message",event=>{if(event.source===window.parent&&event.data?.type==="carapace:widget-chat-host")' +
+    'document.documentElement.classList.add("carapace-chat-host");});})();</script>';
   /*
    * Snapshot requests come from the embedding parent and replies return only
    * there. Capture the response channel and rendering primitives before widget
@@ -242,7 +242,7 @@ export function buildWidgetDocument(
     "const encode=encodeURIComponent;const P=Promise;const ErrorCtor=Error;const stringify=String;" +
     "const max=Math.max.bind(Math);const min=Math.min.bind(Math);const ceil=Math.ceil.bind(Math);" +
     'listen("message",event=>{if(event.source!==parent)return;' +
-    'const data=event.data;if(!data||data.type!=="openclaw:widget-snapshot-request"||typeof data.id!=="string")return;' +
+    'const data=event.data;if(!data||data.type!=="carapace:widget-snapshot-request"||typeof data.id!=="string")return;' +
     "void (async()=>{try{const body=document.body;" +
     "const width=max(1,body.scrollWidth);const height=max(1,body.scrollHeight);" +
     'const root=clone.call(document.documentElement,true);const scripts=query.call(root,"script");' +
@@ -267,8 +267,8 @@ export function buildWidgetDocument(
     'const context=getContext.call(canvas,"2d");if(!context||!setFill)throw new ErrorCtor("widget snapshot canvas unavailable");' +
     'setFill.call(context,getProperty.call(styles(document.documentElement),"--surface"));' +
     "fill.call(context,0,0,canvasWidth,canvasHeight);draw.call(context,image,0,0,canvasWidth,canvasHeight);" +
-    'post({type:"openclaw:widget-snapshot",id:data.id,dataUrl:toDataURL.call(canvas,"image/png"),width,height},"*");' +
-    '}catch(error){post({type:"openclaw:widget-snapshot",id:data.id,error:stringify(error)},"*");}})();});})();</script>';
+    'post({type:"carapace:widget-snapshot",id:data.id,dataUrl:toDataURL.call(canvas,"image/png"),width,height},"*");' +
+    '}catch(error){post({type:"carapace:widget-snapshot",id:data.id,error:stringify(error)},"*");}})();});})();</script>';
   const connectSources = options.connectOrigins?.length
     ? options.connectOrigins.join(" ")
     : "'none'";

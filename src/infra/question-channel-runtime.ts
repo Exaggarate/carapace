@@ -7,7 +7,7 @@ const log = createSubsystemLogger("gateway/questions");
 // Source-loaded plugin SDK chunks and Gateway chunks must share one delivery owner.
 // Per-Gateway retirement is separate from the reusable process-lifecycle reset.
 const questionChannelRuntime = resolveGlobalSingleton(
-  Symbol.for("openclaw.questionChannelRuntime"),
+  Symbol.for("carapace.questionChannelRuntime"),
   () =>
     createQuestionChannelRuntime({
       onFinalizeError: (error, questionId, deliveryId) => {

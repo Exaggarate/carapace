@@ -3,8 +3,8 @@ import type {
   TranscriptsExportParams,
   TranscriptsGetResult,
   TranscriptsListResult,
-} from "@openclaw/gateway-protocol";
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/gateway-protocol";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import { html, nothing } from "lit";
 import { live } from "lit/directives/live.js";
 import { repeat } from "lit/directives/repeat.js";
@@ -234,7 +234,7 @@ function renderLibrary(props: TranscriptsViewProps) {
             <h2>${t("meetings.emptyTitle")}</h2>
             <p>${t("transcripts.emptyHint")}</p>
             <a
-              href="https://docs.openclaw.ai/cli/transcripts"
+              href="https://github.com/Exaggarate/carapace"
               target="_blank"
               rel="noopener noreferrer"
               >${t("meetings.docs")}</a

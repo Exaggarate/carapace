@@ -17,7 +17,7 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { runExclusiveSessionStoreWrite } from "../config/sessions/store-writer.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { initializeGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import {
   getSessionWorkAdmissionRelease,
@@ -58,7 +58,7 @@ const client: GatewayClient = {
     maxProtocol: 1,
     role: "operator",
     scopes: ["operator.read", "operator.write", "operator.admin"],
-    client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+    client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
   },
 };
 let harness: Awaited<ReturnType<typeof createGatewaySuiteHarness>>;
@@ -76,7 +76,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  storePath = path.join(temporaryDirs.make("openclaw-goal-chat-"), "sessions.json");
+  storePath = path.join(temporaryDirs.make("carapace-goal-chat-"), "sessions.json");
   testState.sessionStorePath = storePath;
   await writeSessionStore({
     entries: { main: { sessionId, updatedAt: Date.now(), status: "done" } },
@@ -150,7 +150,7 @@ function freshGoalStart(message: string, idempotencyKey?: string) {
 }
 
 async function useFreshSessionStore() {
-  storePath = path.join(temporaryDirs.make("openclaw-fresh-goal-chat-"), "sessions.json");
+  storePath = path.join(temporaryDirs.make("carapace-fresh-goal-chat-"), "sessions.json");
   testState.sessionStorePath = storePath;
   await writeSessionStore({ entries: {} });
   await prepareGatewayReplyRuntimeForTest({ force: true });
@@ -364,7 +364,7 @@ describe("Goal chat admission and continuation", () => {
         },
       };
       const initialConfig = context.getRuntimeConfig();
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...initialConfig,
         gateway: {
           ...initialConfig.gateway,
@@ -462,7 +462,7 @@ describe("Goal chat admission and continuation", () => {
     },
     {
       caseName: "the session used an unknown harness",
-      entry: { agentHarnessId: "openclaw-custom" },
+      entry: { agentHarnessId: "carapace-custom" },
     },
   ])("leaves no Goal or turn when $caseName", async ({ entry }) => {
     await patchSessionEntryCore(scope(), () => entry);
@@ -634,10 +634,10 @@ describe("Goal chat admission and continuation", () => {
     expect(goal).toBeDefined();
     await patchSessionEntryCore(scope(), (entry) => ({
       status: "done",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       goal: entry.goal ? { ...entry.goal, status: "paused" } : undefined,
     }));
-    expect(loadSessionEntry(scope())?.agentHarnessId).toBe("openclaw");
+    expect(loadSessionEntry(scope())?.agentHarnessId).toBe("carapace");
     const request = {
       sessionKey,
       sessionId,

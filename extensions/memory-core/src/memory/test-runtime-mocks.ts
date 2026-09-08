@@ -5,7 +5,7 @@ import {
   resetMemoryCoreDreamingStateForTests,
 } from "../test-helpers.js";
 
-const nativeWatchFactoryKey = Symbol.for("openclaw.test.memoryNativeWatchFactory");
+const nativeWatchFactoryKey = Symbol.for("carapace.test.memoryNativeWatchFactory");
 let originalNativeWatchFactory: PropertyDescriptor | undefined;
 
 // Memory indexing reads flush provenance from plugin state. Manager tests use

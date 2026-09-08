@@ -84,7 +84,7 @@ describe("AppSidebar session mutation feedback", () => {
     }
     button.click();
     await sidebar.updateComplete;
-    const menu = sidebar.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = sidebar.querySelector<TestSessionMenu>("carapace-session-menu");
     if (!menu) {
       throw new Error("expected session menu");
     }
@@ -103,7 +103,7 @@ describe("AppSidebar session mutation feedback", () => {
   }
 
   async function mountToastHost() {
-    const host = document.createElement("openclaw-toast-host");
+    const host = document.createElement("carapace-toast-host");
     document.body.append(host);
     await host.updateComplete;
     return host;
@@ -390,7 +390,7 @@ describe("AppSidebar session mutation feedback", () => {
     const menu = await openSessionMenu(sidebar, row.key);
     menu.querySelector<HTMLElement>('[value="stop-cloud-worker"]')?.click();
     const actions = await waitForConfirmDialogActions();
-    expect(document.body.querySelector("openclaw-modal-dialog")?.textContent).toContain(
+    expect(document.body.querySelector("carapace-modal-dialog")?.textContent).toContain(
       'Stop the cloud worker for "a"?',
     );
     answerConfirmDialog(actions, "confirm");
@@ -492,7 +492,7 @@ describe("AppSidebar session mutation feedback", () => {
     const row = sidebar.querySelector('[data-session-key="agent:main:b"]');
     row?.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await sidebar.updateComplete;
-    const menu = sidebar.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = sidebar.querySelector<TestSessionMenu>("carapace-session-menu");
     await menu?.updateComplete;
     menu?.querySelector<HTMLButtonElement>('[data-shortcut="d"]')?.click();
     answerConfirmDialog(await waitForConfirmDialogActions(), "confirm");
@@ -525,7 +525,7 @@ describe("AppSidebar session mutation feedback", () => {
     const row = sidebar.querySelector('[data-session-key="agent:main:b"]');
     row?.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await sidebar.updateComplete;
-    const menu = sidebar.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = sidebar.querySelector<TestSessionMenu>("carapace-session-menu");
     await menu?.updateComplete;
     menu?.querySelector<HTMLButtonElement>('[data-shortcut="a"]')?.click();
 
@@ -567,7 +567,7 @@ describe("AppSidebar session mutation feedback", () => {
     const row = sidebar.querySelector('[data-session-key="agent:main:b"]');
     row?.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await sidebar.updateComplete;
-    const menu = sidebar.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = sidebar.querySelector<TestSessionMenu>("carapace-session-menu");
     await menu?.updateComplete;
     menu?.querySelector<HTMLButtonElement>('[data-shortcut="a"]')?.click();
     await waitForFast(() => expect(harness.patchMany).toHaveBeenCalledOnce());
@@ -600,14 +600,14 @@ describe("AppSidebar session mutation feedback", () => {
 
     row?.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await sidebar.updateComplete;
-    let menu = sidebar.querySelector<TestSessionMenu>("openclaw-session-menu");
+    let menu = sidebar.querySelector<TestSessionMenu>("carapace-session-menu");
     await menu?.updateComplete;
     menu?.querySelector<HTMLButtonElement>('[data-shortcut="a"]')?.click();
     await waitForFast(() => expect(harness.patchMany).toHaveBeenCalledOnce());
 
     row?.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await sidebar.updateComplete;
-    menu = sidebar.querySelector<TestSessionMenu>("openclaw-session-menu");
+    menu = sidebar.querySelector<TestSessionMenu>("carapace-session-menu");
     await menu?.updateComplete;
     menu?.querySelector<HTMLButtonElement>('[data-shortcut="u"]')?.click();
     await waitForFast(() => expect(harness.patchMany).toHaveBeenCalledTimes(2));
@@ -651,7 +651,7 @@ describe("AppSidebar session mutation feedback", () => {
     answerConfirmDialog(worktreeActions, "confirm");
 
     await waitForFast(() =>
-      expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull(),
+      expect(document.body.querySelector("carapace-modal-dialog")).toBeNull(),
     );
     expect(request).not.toHaveBeenCalled();
   });

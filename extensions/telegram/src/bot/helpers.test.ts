@@ -1,6 +1,6 @@
 // Telegram tests cover helpers plugin behavior.
 import type { MessageEntity } from "grammy/types";
-import { markdownToIR } from "openclaw/plugin-sdk/text-chunking";
+import { markdownToIR } from "carapace/plugin-sdk/text-chunking";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   describeReplyTarget,
@@ -494,7 +494,7 @@ describe("describeReplyTarget", () => {
             },
             {
               type: "photo",
-              caption: { text: "Chart", credit: "OpenClaw" },
+              caption: { text: "Chart", credit: "Carapace" },
             },
             {
               type: "buttons",
@@ -507,7 +507,7 @@ describe("describeReplyTarget", () => {
     } as never);
 
     expect(result?.body).toBe(
-      "Run summary\n1.\nCI clean\na^2+b^2=c^2\nChart\nOpenClaw\nCopy result",
+      "Run summary\n1.\nCI clean\na^2+b^2=c^2\nChart\nCarapace\nCopy result",
     );
     expect(result?.quoteSourceText).toBeUndefined();
   });

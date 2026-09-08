@@ -5,7 +5,7 @@ import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-ar
 
 let artifactDir: string | undefined;
 beforeEach(() => {
-  const parent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
   artifactDir = parent
     ? createControlUiE2eArtifactDir("chat-heartbeat-activity-rollup", parent)
     : undefined;

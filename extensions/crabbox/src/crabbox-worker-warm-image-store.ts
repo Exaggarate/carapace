@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import type { WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
-import { createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-store-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
+import { createPluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-store-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type WorkerNodeRuntimeIdentity = NonNullable<
   NonNullable<Parameters<WorkerProvider["provision"]>[2]>["nodeRuntimeIdentity"]
@@ -78,7 +78,7 @@ export function listCrabboxLegacyWarmLeases(env?: NodeJS.ProcessEnv) {
 export function assertCrabboxWarmImageMigrationReady(): void {
   if (listCrabboxLegacyWarmLeases().length > 0) {
     throw new Error(
-      "Crabbox has legacy worker allocations whose original image choices are unknown; run openclaw doctor --fix and follow its provider-cleanup recovery instructions before provisioning workers.",
+      "Crabbox has legacy worker allocations whose original image choices are unknown; run carapace doctor --fix and follow its provider-cleanup recovery instructions before provisioning workers.",
     );
   }
 }
@@ -86,7 +86,7 @@ export function assertCrabboxWarmImageMigrationReady(): void {
 function requireCanonicalProfile(record: WarmProfileRecord | undefined) {
   if (record && record.version !== 2) {
     throw new Error(
-      "Crabbox warm-image state requires migration; run openclaw doctor --fix before provisioning workers.",
+      "Crabbox warm-image state requires migration; run carapace doctor --fix before provisioning workers.",
     );
   }
   return record;
@@ -148,7 +148,7 @@ export function isCrabboxWarmImageCapturePaused(
 }
 
 export function crabboxWarmImageRecoveryHint(selector: string): string {
-  return `Stop the owning Gateway and capture processes, confirm any worker being recovered is stopped, and resolve any untracked checkpoint in the Crabbox catalog before running: openclaw crabbox warm-images --recover ${selector} --acknowledge-provider-cleanup. Then restart the Gateway; the next eligible worker can capture again.`;
+  return `Stop the owning Gateway and capture processes, confirm any worker being recovered is stopped, and resolve any untracked checkpoint in the Crabbox catalog before running: carapace crabbox warm-images --recover ${selector} --acknowledge-provider-cleanup. Then restart the Gateway; the next eligible worker can capture again.`;
 }
 
 export function listCrabboxWarmImages(env?: NodeJS.ProcessEnv) {
@@ -210,7 +210,7 @@ export function recoverCrabboxWarmImageCapture(
       !store.deleteIf(entry.key, (value) => legacyLeaseSelector(entry.key, value) === selector)
     ) {
       throw new Error(
-        "Legacy allocation selector is absent or changed; rerun openclaw crabbox warm-images --json. No state was changed.",
+        "Legacy allocation selector is absent or changed; rerun carapace crabbox warm-images --json. No state was changed.",
       );
     }
     return;
@@ -220,7 +220,7 @@ export function recoverCrabboxWarmImageCapture(
     .find(({ key, value }) => crabboxWarmImageCaptureStatus(key, value)?.selector === selector);
   if (!entry || !clearCrabboxWarmImageCapture(entry.key, selector)) {
     throw new Error(
-      "Capture selector is absent or changed; rerun openclaw crabbox warm-images --json. No state was changed.",
+      "Capture selector is absent or changed; rerun carapace crabbox warm-images --json. No state was changed.",
     );
   }
 }

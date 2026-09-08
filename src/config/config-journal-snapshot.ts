@@ -134,7 +134,7 @@ export function resolveConfigAuditStoreEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...params.env,
-    OPENCLAW_STATE_DIR: resolveStateDir(params.env, params.homedir),
+    CARAPACE_STATE_DIR: resolveStateDir(params.env, params.homedir),
   };
 }
 

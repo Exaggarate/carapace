@@ -14,7 +14,7 @@ generic policy: DM/group allowlists, pairing-store DM entries, route gates,
 command gates, event auth, mention activation, redacted diagnostics, and
 admission.
 
-Use `openclaw/plugin-sdk/channel-ingress-runtime` for receive paths.
+Use `carapace/plugin-sdk/channel-ingress-runtime` for receive paths.
 
 ## Runtime resolver
 
@@ -22,7 +22,7 @@ Use `openclaw/plugin-sdk/channel-ingress-runtime` for receive paths.
 import {
   defineStableChannelIngressIdentity,
   resolveChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 
 const identity = defineStableChannelIngressIdentity({
   key: "platform-user-id",
@@ -81,7 +81,7 @@ the finalized context message id identifies the last source result.
 An identity descriptor may provide `resolveParticipant(subject)`, returning
 `{ domain, idKind, id }` only when the plugin can prove those remote facts.
 The domain belongs to the remote service: for example, a Slack workspace or
-an application-scoped identity issuer. It is not OpenClaw's local `accountId`.
+an application-scoped identity issuer. It is not Carapace's local `accountId`.
 Keep user IDs, bot IDs, and proxy identities distinct when the service gives
 them different meanings. Names and successful Gateway profile lookups are
 not identity evidence.
@@ -157,7 +157,7 @@ execution-identity assurance strength. In particular, an identifier claim of
 `cryptographic`.
 
 Import the type and `meetsIdentifierAuthentication(actual, minimum)` from
-`openclaw/plugin-sdk/channel-ingress-runtime`. Downstream authentication mappers
+`carapace/plugin-sdk/channel-ingress-runtime`. Downstream authentication mappers
 should use this boolean comparator instead of maintaining their own rank tables.
 
 The meanings are normative:
@@ -189,7 +189,7 @@ Channels with static strength omit the map entirely.
 
 Expose `classifyEntryAuthentication: identityEntryAuthenticationClassifier(identity)`
 from the security adapter's `resolveDmPolicy` result, importing the helper from
-`openclaw/plugin-sdk/channel-ingress-runtime`. It uses the identity descriptor's
+`carapace/plugin-sdk/channel-ingress-runtime`. It uses the identity descriptor's
 entry normalizers and returns the strongest static claim among accepting fields,
 or `undefined` when none accepts the entry; wildcard entries are excluded.
 The [security audit](/gateway/security/audit-checks) counts configured `allowFrom`

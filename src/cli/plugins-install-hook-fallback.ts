@@ -1,6 +1,6 @@
 // Owns hook-pack probing and plugin-to-hook fallback during plugin installation.
 import fs from "node:fs";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import {
   installHooksFromNpmSpec,
@@ -328,7 +328,7 @@ export async function tryInstallPluginOrHookPackFromNpmSpec(params: {
     if (
       result.installSource?.source === "clawhub" ||
       (params.officialRequest &&
-        result.code !== PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS) ||
+        result.code !== PLUGIN_INSTALL_ERROR_CODE.MISSING_CARAPACE_EXTENSIONS) ||
       isTerminalPluginInstallFailure(result.code)
     ) {
       runtime.error(result.error);

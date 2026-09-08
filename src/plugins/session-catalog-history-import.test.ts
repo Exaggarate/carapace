@@ -17,7 +17,7 @@ describe("session catalog history import store selection", () => {
   it("imports and deduplicates in the supplied config store without polluting runtime or default stores", async () => {
     await withTempHome(
       async (home) => {
-        const stateDir = path.join(fs.realpathSync(home), ".openclaw");
+        const stateDir = path.join(fs.realpathSync(home), ".carapace");
         const identity = {
           agentId: "main",
           sessionId: "catalog-import-session",
@@ -36,7 +36,7 @@ describe("session catalog history import store selection", () => {
           "agents",
           "main",
           "agent",
-          "openclaw-agent.sqlite",
+          "carapace-agent.sqlite",
         );
         const config = { session: { store: supplied.storePath }, plugins: { enabled: false } };
         const runtimeConfig = {
@@ -45,7 +45,7 @@ describe("session catalog history import store selection", () => {
         };
         const previous = getRuntimeConfigSnapshot();
         const previousSource = getRuntimeConfigSourceSnapshot();
-        fs.writeFileSync(process.env.OPENCLAW_CONFIG_PATH!, JSON.stringify(runtimeConfig));
+        fs.writeFileSync(process.env.CARAPACE_CONFIG_PATH!, JSON.stringify(runtimeConfig));
         setRuntimeConfigSnapshot(runtimeConfig);
         try {
           for (const scope of [supplied, competing]) {
@@ -102,8 +102,8 @@ describe("session catalog history import store selection", () => {
         }
       },
       {
-        prefix: "openclaw-catalog-import-store-",
-        env: { OPENCLAW_CONFIG_PATH: (home) => path.join(home, ".openclaw", "openclaw.json") },
+        prefix: "carapace-catalog-import-store-",
+        env: { CARAPACE_CONFIG_PATH: (home) => path.join(home, ".carapace", "carapace.json") },
       },
     );
   });

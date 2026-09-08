@@ -2,11 +2,11 @@ import crypto from "node:crypto";
 import {
   AgentHarnessPreflightError,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { isCodexAppServerRequestTimeoutError, type CodexAppServerClient } from "./client.js";
 import type { CodexPluginDestructiveApprovalMode } from "./config.js";
 import { readCodexMcpToolConnectorId } from "./mcp-tool-metadata.js";
@@ -58,7 +58,7 @@ export function buildScheduledCodexAppServerConnectionIdentity(
   const start = appServer.start;
   return crypto
     .createHash("sha256")
-    .update("openclaw:codex:scheduled-app-server:v1\0")
+    .update("carapace:codex:scheduled-app-server:v1\0")
     .update(
       JSON.stringify({
         transport: start.transport,

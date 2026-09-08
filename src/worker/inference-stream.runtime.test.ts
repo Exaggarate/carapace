@@ -69,7 +69,7 @@ function createClient() {
           rpcSetVersion: WORKER_RPC_SET_VERSION,
           handshake: {
             bundleHash: "a".repeat(64),
-            openclawVersion: "test",
+            carapaceVersion: "test",
             protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
           },
           sessionId: "session-1",

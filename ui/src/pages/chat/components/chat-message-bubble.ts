@@ -1,5 +1,5 @@
-import { readSessionMessageIdentity } from "@openclaw/gateway-client/browser";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { readSessionMessageIdentity } from "@carapace/gateway-client/browser";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { ref } from "lit/directives/ref.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";

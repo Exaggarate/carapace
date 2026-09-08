@@ -5,10 +5,10 @@ import path from "node:path";
 import type { ISyncResponse } from "matrix-js-sdk/lib/matrix.js";
 import {
   createPluginStateKeyedStoreForTests,
-  openOpenClawStateDatabase,
+  openCarapaceStateDatabase,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMatrixRuntime } from "../../runtime.js";
 import { installMatrixTestRuntime } from "../../test-runtime.js";
@@ -59,7 +59,7 @@ function createSyncResponse(nextBatch: string): ISyncResponse {
       events: [
         {
           content: { theme: "dark" },
-          type: "com.openclaw.test",
+          type: "com.carapace.test",
         },
       ],
     },
@@ -70,7 +70,7 @@ describe("SqliteBackedMatrixSyncStore", () => {
   const tempDirs: string[] = [];
 
   function createStorageRoot(): string {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sync-store-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sync-store-"));
     tempDirs.push(tempDir);
     return tempDir;
   }
@@ -149,7 +149,7 @@ describe("SqliteBackedMatrixSyncStore", () => {
       const storageRoot = createStorageRoot();
       const response = createSyncResponse("large-cursor");
       response.account_data.events.push({
-        type: "com.openclaw.large",
+        type: "com.carapace.large",
         content: { value: "🦞".repeat(100_000) },
       });
       const writer = new SqliteBackedMatrixSyncStore(storageRoot);
@@ -193,7 +193,7 @@ describe("SqliteBackedMatrixSyncStore", () => {
       if (!laterChunk) {
         throw new Error("expected sync chunk 11");
       }
-      const { db } = openOpenClawStateDatabase({ env: options.env });
+      const { db } = openCarapaceStateDatabase({ env: options.env });
       db.prepare("UPDATE plugin_state_entries SET value_json = ? WHERE entry_key = ?").run(
         "invalid JSON",
         laterChunk.key,

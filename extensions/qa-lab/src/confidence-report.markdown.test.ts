@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { markdownToIRWithMeta } from "openclaw/plugin-sdk/text-chunking";
+import { markdownToIRWithMeta } from "carapace/plugin-sdk/text-chunking";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildQaConfidenceReport, renderQaConfidenceMarkdownReport } from "./confidence-report.js";
 

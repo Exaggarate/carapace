@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isMissingPathError } from "../../infra/errors.js";
 import { walkDirectorySync } from "../../infra/fs-safe.js";
 import { isPathInside } from "../../infra/path-guards.js";
@@ -60,7 +60,7 @@ type SkillDiscoveryBudget = {
   truncated: boolean;
 };
 
-export function resolveSkillDiscoveryLimits(config?: OpenClawConfig): ResolvedSkillDiscoveryLimits {
+export function resolveSkillDiscoveryLimits(config?: CarapaceConfig): ResolvedSkillDiscoveryLimits {
   const limits = config?.skills?.limits;
   return {
     maxCandidatesPerRoot: limits?.maxCandidatesPerRoot ?? DEFAULT_MAX_CANDIDATES_PER_ROOT,
@@ -240,7 +240,7 @@ function buildEscapedSkillPathReason(params: { source: string; candidatePath: st
   consoleHint: string;
 } {
   const candidateIsSymlink = isSymlinkPath(params.candidatePath);
-  if (params.source === "openclaw-bundled" && candidateIsSymlink) {
+  if (params.source === "carapace-bundled" && candidateIsSymlink) {
     return {
       reason: "bundled-symlink-escape",
       consoleHint:
@@ -250,7 +250,7 @@ function buildEscapedSkillPathReason(params: { source: string; candidatePath: st
   if (candidateIsSymlink) {
     return { reason: "symlink-escape", consoleHint: "reason=symlink-escape" };
   }
-  if (params.source === "openclaw-bundled") {
+  if (params.source === "carapace-bundled") {
     return {
       reason: "bundled-root-escape",
       consoleHint:
@@ -378,13 +378,13 @@ function resolveNestedSkillsRoot(dir: string, maxEntriesToScan: number): string 
 }
 
 function shouldEnforceConfiguredSkillRootContainment(source: string): boolean {
-  return source !== "openclaw-managed" && source !== "agents-skills-personal";
+  return source !== "carapace-managed" && source !== "agents-skills-personal";
 }
 
 function shouldUseConfiguredSymlinkTargets(source: string): boolean {
   return (
-    source === "openclaw-workspace" ||
-    source === "openclaw-extra" ||
+    source === "carapace-workspace" ||
+    source === "carapace-extra" ||
     source === "agents-skills-project"
   );
 }
@@ -457,7 +457,7 @@ export function discoverSkillCandidates(params: {
     return { candidates: [], rootIsSkill: false };
   }
   // Workshop roots are containers; promotion would hide a child skill named "skills".
-  const rootIsContainer = params.source === "openclaw-workshop";
+  const rootIsContainer = params.source === "carapace-workshop";
   const baseDir = rootIsContainer
     ? rootDir
     : resolveNestedSkillsRoot(params.dir, params.limits.maxCandidatesPerRoot);
@@ -598,7 +598,7 @@ export function discoverSkillCandidates(params: {
 
     const candidatePath = path.resolve(candidate.skillDir);
     const maxGroupedDepth =
-      params.source === "openclaw-extra" &&
+      params.source === "carapace-extra" &&
       !baseDirIsNestedSkillsRoot &&
       !baseDirLooksLikeSkillsRoot &&
       candidatePath !== nestedSkillsRootPath &&

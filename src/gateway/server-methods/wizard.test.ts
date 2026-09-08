@@ -1,7 +1,7 @@
 // Wizard server-method tests cover stable lifecycle errors for process-local sessions.
 import fs from "node:fs/promises";
 import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
@@ -268,8 +268,8 @@ describe("wizard setup ownership", () => {
 
     const activateRespond = vi.fn();
     await expectDefined(
-      systemAgentHandlers["openclaw.setup.activate"],
-      "openclaw.setup.activate test invariant",
+      systemAgentHandlers["carapace.setup.activate"],
+      "carapace.setup.activate test invariant",
     )({ params: { kind: "claude-cli" }, respond: activateRespond } as never);
     try {
       expect(activateRespond).toHaveBeenCalledWith(
@@ -608,7 +608,7 @@ describe("wizard step serialization", () => {
     const context = createWizardContext(async (_opts, _runtime, prompter) => {
       await prompter.text({
         message: "Display name",
-        initialValue: "OpenClaw",
+        initialValue: "Carapace",
       });
       await prompter.text({
         message: "Bot token",
@@ -617,7 +617,7 @@ describe("wizard step serialization", () => {
       });
     });
     const startResult = await invokeWizard("wizard.start", {}, context);
-    expect(startResult.step).toMatchObject({ initialValue: "OpenClaw" });
+    expect(startResult.step).toMatchObject({ initialValue: "Carapace" });
     const sessionId = startResult.sessionId;
     expect(typeof sessionId).toBe("string");
 

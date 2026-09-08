@@ -5,8 +5,8 @@
  */
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentTool } from "openclaw/plugin-sdk/agent-core";
+import { expectDefined } from "@carapace/normalization-core";
+import type { AgentTool } from "carapace/plugin-sdk/agent-core";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import { withTestTimeout } from "../../test/helpers/promise.js";
@@ -172,7 +172,7 @@ describe("agent tool definition adapter", () => {
       ask: "off",
     });
     const [definition] = toToolDefinitions([tool]);
-    const missingWorkdir = path.join(os.tmpdir(), `openclaw-missing-denied-cwd-${Date.now()}`);
+    const missingWorkdir = path.join(os.tmpdir(), `carapace-missing-denied-cwd-${Date.now()}`);
 
     const existing = await expectDefined(definition, "definition test invariant").execute(
       "call-denied-existing-cwd",
@@ -593,7 +593,7 @@ describe("client tool name conflict checks", () => {
     ).toEqual(["Weather", "weather"]);
   });
 
-  it("detects collisions with reserved OpenClaw built-in tool names", () => {
+  it("detects collisions with reserved Carapace built-in tool names", () => {
     expect(
       findClientToolNameConflicts({
         tools: [makeClientTool("Bash"), makeClientTool("grep")],

@@ -1,14 +1,14 @@
-// Keep the runtime class on the public package specifier so OpenClaw and
+// Keep the runtime class on the public package specifier so Carapace and
 // external consumers share one constructor identity.
-import { EventStream as LlmEventStream } from "@openclaw/ai/event-stream";
+import { EventStream as LlmEventStream } from "@carapace/ai/event-stream";
 import type {
   AssistantMessage,
   EventStream,
   ToolResultMessage,
   EventStream as SourceEventStream,
-} from "@openclaw/llm-core";
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/llm-core";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   streamAgentResponse,
   type AgentEventSink,
@@ -58,7 +58,7 @@ export type { AgentEventSink } from "./agent-stream-response.js";
 const EventStreamConstructor: typeof SourceEventStream = LlmEventStream;
 
 const TOOL_LOOP_RECOVERY_TERMINATED_MESSAGE =
-  "OpenClaw stopped this run because tool-loop recovery encountered another critical loop. No blocked tool action was executed.";
+  "Carapace stopped this run because tool-loop recovery encountered another critical loop. No blocked tool action was executed.";
 const STEERING_TOOL_SKIP_MESSAGE = "Skipped due to queued user message.";
 const TOOL_ADMISSION_FAILURE_MESSAGE = "Tool execution was blocked before launch.";
 const TOOL_ADMISSION_FAILURE_DETAILS = {
@@ -1610,7 +1610,7 @@ type TurnTaintMetadata = {
 };
 
 function readTurnTaintMetadata(message: AgentMessage): TurnTaintMetadata | undefined {
-  const metadata = Reflect.get(message, "__openclaw");
+  const metadata = Reflect.get(message, "__carapace");
   const record = asOptionalRecord(metadata);
   if (!record) {
     return undefined;
@@ -1646,8 +1646,8 @@ function withAssistantTurnTaint(message: AssistantMessage, tainted: boolean): As
   }
   const taintedMessage = {
     ...message,
-    __openclaw: { ...readTurnTaintMetadata(message), turnTainted: true },
-  } satisfies AssistantMessage & { __openclaw: TurnTaintMetadata };
+    __carapace: { ...readTurnTaintMetadata(message), turnTainted: true },
+  } satisfies AssistantMessage & { __carapace: TurnTaintMetadata };
   return taintedMessage;
 }
 
@@ -1660,7 +1660,7 @@ function withToolResultContentSource(
   }
   return {
     ...message,
-    __openclaw: { ...readTurnTaintMetadata(message), resultContentSource: source },
+    __carapace: { ...readTurnTaintMetadata(message), resultContentSource: source },
   } as ToolResultMessage;
 }
 

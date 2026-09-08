@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildEmptyToolTelemetry,
@@ -19,7 +19,7 @@ describe("CodexAppServerEventProjector async delivery", () => {
   it.each([
     { name: "disabled tools", disableTools: true },
     { name: "an empty tool allowlist", toolsAllow: [] },
-    { name: "the ring-zero system tool", toolsAllow: ["openclaw"] },
+    { name: "the ring-zero system tool", toolsAllow: ["carapace"] },
     { name: "an allowlist without message delivery", toolsAllow: ["read"] },
   ])("does not expose native async messages through $name", async (restriction) => {
     const params = await createParams();
@@ -59,7 +59,7 @@ describe("CodexAppServerEventProjector async delivery", () => {
     const onBlockReply = vi.fn();
     const params = await createParams();
     const sessionId = expectDefined(params.sessionId, "Codex async delivery test session");
-    const storePath = `${params.workspaceDir}/openclaw-agent.sqlite`;
+    const storePath = `${params.workspaceDir}/carapace-agent.sqlite`;
     params.sessionKey = "agent:main:session-1";
     const sessionTarget = {
       agentId: "main",
@@ -150,15 +150,15 @@ describe("CodexAppServerEventProjector async delivery", () => {
     expect(result.currentAttemptAssistant?.content).toEqual([{ type: "text", text: "Finished." }]);
     const asyncMessages = result.messagesSnapshot.filter(
       (message) =>
-        (message as { openclawAsyncDelivery?: { itemId?: unknown } }).openclawAsyncDelivery
+        (message as { carapaceAsyncDelivery?: { itemId?: unknown } }).carapaceAsyncDelivery
           ?.itemId === "async-update",
     );
     expect(asyncMessages).toHaveLength(1);
     expect(asyncMessages[0]).toMatchObject({
       role: "assistant",
       content: [{ type: "text", text: "Background agent update." }],
-      openclawAsyncDelivery: { itemId: "async-update" },
-      __openclaw: { mirrorIdentity: `${TURN_ID}:async:async-update` },
+      carapaceAsyncDelivery: { itemId: "async-update" },
+      __carapace: { mirrorIdentity: `${TURN_ID}:async:async-update` },
     });
     const transcriptMessages = (await readSessionTranscriptEvents(sessionTarget))
       .map((event) => (event as { message?: unknown }).message)
@@ -166,7 +166,7 @@ describe("CodexAppServerEventProjector async delivery", () => {
     expect(
       transcriptMessages.filter(
         (message) =>
-          (message.openclawAsyncDelivery as { itemId?: unknown } | undefined)?.itemId ===
+          (message.carapaceAsyncDelivery as { itemId?: unknown } | undefined)?.itemId ===
           "async-update",
       ),
     ).toHaveLength(1);
@@ -319,14 +319,14 @@ describe("CodexAppServerEventProjector async delivery", () => {
       expect(
         result.messagesSnapshot.filter(
           (message) =>
-            (message as { openclawAsyncDelivery?: { itemId?: unknown } }).openclawAsyncDelivery
+            (message as { carapaceAsyncDelivery?: { itemId?: unknown } }).carapaceAsyncDelivery
               ?.itemId === "async-reconnect",
         ),
       ).toMatchObject([
         {
           role: "assistant",
           content: [{ type: "text", text: "Delivered while the client was reconnecting." }],
-          __openclaw: { mirrorIdentity: `${TURN_ID}:async:async-reconnect` },
+          __carapace: { mirrorIdentity: `${TURN_ID}:async:async-reconnect` },
         },
       ]);
     }

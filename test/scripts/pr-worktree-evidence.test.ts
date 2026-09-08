@@ -59,7 +59,7 @@ function fixture() {
   const head = git(["rev-parse", "HEAD"]);
   const branches = () => git(["for-each-ref", "--format=%(refname) %(objectname)", "refs/heads/"]);
   const outcomes = () =>
-    git(["for-each-ref", "--format=%(refname) %(objectname)", "refs/openclaw/pr-merge-outcomes/"]);
+    git(["for-each-ref", "--format=%(refname) %(objectname)", "refs/carapace/pr-merge-outcomes/"]);
   const worktrees = () => git(["worktree", "list", "--porcelain"]);
   const add = (
     pr: number,
@@ -101,7 +101,7 @@ source "$FIXTURE_SCRIPTS/pr-lib/merge-outcome.sh"
 test "$(repo_root)" = "$FIXTURE_REPO"
 gh() {
   if [ "$#" = 7 ] && [ "$1 $2" = 'pr view' ] && [ "$4 $5 $6 $7" = '--json state --jq .state' ]; then
-    git show-ref --verify --quiet "refs/openclaw/pr-operation-locks/$3" || exit 97
+    git show-ref --verify --quiet "refs/carapace/pr-operation-locks/$3" || exit 97
     printf '%s\\n' "$*" >> "$FIXTURE_ROOT/gh-calls"
     printf '%s\\n' "$FIXTURE_STATE"
   else
@@ -159,13 +159,13 @@ ${commands.join("\n")}
     writeFileSync(file, JSON.stringify(value));
     const result = run([
       `acquire_pr_operation_lock ${pr}`,
-      `MERGE_OUTCOME_REF=refs/openclaw/pr-merge-outcomes/${pr}`,
+      `MERGE_OUTCOME_REF=refs/carapace/pr-merge-outcomes/${pr}`,
       'MERGE_OUTCOME_OID=""',
       'merge_outcome_write "$(cat "$FIXTURE_ROOT/outcome-input.json")"',
       "release_pr_operation_lock",
     ]);
     expect(result.status, result.output).toBe(0);
-    return `refs/openclaw/pr-merge-outcomes/${pr}`;
+    return `refs/carapace/pr-merge-outcomes/${pr}`;
   };
   return { root, repo, head, git, add, run, record, branches, outcomes, worktrees };
 }
@@ -231,7 +231,7 @@ describePosix("native worktree cleanup preserves merge evidence", () => {
       expect(actual.output).toContain("removed .worktrees/pr-910009");
       expect(f.outcomes()).toBe("");
       expect(
-        f.git(["for-each-ref", "--format=%(refname)", "refs/openclaw/pr-operation-locks/"]),
+        f.git(["for-each-ref", "--format=%(refname)", "refs/carapace/pr-operation-locks/"]),
       ).toBe("");
       expect(existsSync(join(f.root, "trash"))).toBe(false);
     },
@@ -338,7 +338,7 @@ describePosix("native worktree cleanup preserves merge evidence", () => {
     expect(f.outcomes()).toBe(before);
     expect(JSON.parse(f.git(["show", `${ref}:outcome.json`])).phase).toBe(phase);
     expect(
-      f.git(["for-each-ref", "--format=%(refname)", "refs/openclaw/pr-operation-locks/"]),
+      f.git(["for-each-ref", "--format=%(refname)", "refs/carapace/pr-operation-locks/"]),
     ).toBe("");
   });
 });

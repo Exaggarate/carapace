@@ -65,9 +65,9 @@ export const page = definePage({
     import("./model-providers-page.ts").then(() => ({
       header: true,
       render: (data: ModelProvidersRouteData | undefined, loaderPending = false) =>
-        html`<openclaw-model-providers-page
+        html`<carapace-model-providers-page
           .routeData=${data}
           .loaderPending=${loaderPending}
-        ></openclaw-model-providers-page>`,
+        ></carapace-model-providers-page>`,
     })),
 });

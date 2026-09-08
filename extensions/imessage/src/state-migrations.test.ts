@@ -3,16 +3,16 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { buildLegacyMigrationPreview } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { buildLegacyMigrationPreview } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspaceSync,
   type TempWorkspaceSync,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stateMigrations } from "../doctor-contract-api.js";
 import { resolveIMessageCatchupCursorKey } from "./state-contract.js";
@@ -23,17 +23,17 @@ describe("detectIMessageLegacyStateMigrations", () => {
 
   beforeEach(() => {
     stateWorkspace = tempWorkspaceSync({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-imsg-migration-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-imsg-migration-",
     });
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetPluginStateStoreForTests();
     stateWorkspace.cleanup();
     vi.doUnmock("./runtime.js");
-    vi.doUnmock("openclaw/plugin-sdk/routing");
+    vi.doUnmock("carapace/plugin-sdk/routing");
     vi.resetModules();
   });
 
@@ -46,7 +46,7 @@ describe("detectIMessageLegacyStateMigrations", () => {
           throw new Error("doctor detection must not materialize channel runtime");
         });
       } else {
-        vi.doMock("openclaw/plugin-sdk/routing", () => {
+        vi.doMock("carapace/plugin-sdk/routing", () => {
           throw new Error("account lookup must not materialize message routing");
         });
       }
@@ -249,7 +249,7 @@ describe("detectIMessageLegacyStateMigrations", () => {
     if (!migration) {
       throw new Error("expected iMessage migration");
     }
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const input = {
       config: {},
       env,

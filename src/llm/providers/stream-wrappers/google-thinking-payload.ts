@@ -2,9 +2,9 @@ import {
   isGoogleGemini3FlashModel,
   isGoogleGemini3ProModel,
   isGoogleGemini3ThinkingLevelModel,
-} from "@openclaw/ai/internal/google-model-family";
-import { googleFlashSupportsMinimalThinking } from "@openclaw/ai/transports";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/ai/internal/google-model-family";
+import { googleFlashSupportsMinimalThinking } from "@carapace/ai/transports";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 /** @deprecated Google provider-owned stream helper; do not use from third-party plugins. */
 export type GoogleThinkingLevel = "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";

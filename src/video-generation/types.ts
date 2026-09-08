@@ -1,7 +1,7 @@
 // Shared video-generation request, provider, capability, and normalization contracts.
 import type { MediaNormalizationEntry } from "../../packages/media-generation-core/src/normalization.js";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** Video asset returned by a provider after generation or transformation. */
 export type GeneratedVideoAsset = {
@@ -54,7 +54,7 @@ export type VideoGenerationSourceAsset = {
 
 /** Context passed when checking whether a video provider is configured. */
 export type VideoGenerationProviderConfiguredContext = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
 };
 
@@ -62,7 +62,7 @@ export type VideoGenerationProviderConfiguredContext = {
 export type VideoGenerationModelCapabilitiesContext = {
   provider: string;
   model: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   timeoutMs?: number;
@@ -73,7 +73,7 @@ export type VideoGenerationRequest = {
   provider: string;
   model: string;
   prompt: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   timeoutMs?: number;

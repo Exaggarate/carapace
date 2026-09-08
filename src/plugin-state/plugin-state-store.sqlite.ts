@@ -1,8 +1,8 @@
-// Plugin state SQLite helpers persist plugin state in the OpenClaw state database.
+// Plugin state SQLite helpers persist plugin state in the Carapace state database.
 import type { DatabaseSync } from "node:sqlite";
 import { toUSVString } from "node:util";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { resolveExpiresAtMsFromDurationMs } from "@carapace/normalization-core/number-coercion";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import type { Insertable, Selectable } from "kysely";
 import {
   executeSqliteQuerySync,
@@ -20,18 +20,18 @@ import {
 } from "../infra/sqlite-transaction.js";
 import { isSqliteSchemaVersionError } from "../infra/sqlite-user-version.js";
 import {
-  hasOpenClawStateTablesBeyondStartupCheckpoint,
-  withExistingOpenClawStateDatabaseReadOnly,
-} from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+  hasCarapaceStateTablesBeyondStartupCheckpoint,
+  withExistingCarapaceStateDatabaseReadOnly,
+} from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabase,
-  isOpenClawStateDatabaseOpen,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabase,
+  isCarapaceStateDatabaseOpen,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   PluginStateStoreError,
   type PluginStateEntry,
@@ -50,8 +50,8 @@ const PLUGIN_STATE_EXPIRY_BATCH_ROWS = 1_024;
 export const PLUGIN_STATE_DOCTOR_IMPORT_BATCH_ROWS = 500;
 let maxPluginStateEntriesPerPluginForTests: number | undefined;
 
-type PluginStateEntriesTable = OpenClawStateKyselyDatabase["plugin_state_entries"];
-type PluginStateStoreDatabase = Pick<OpenClawStateKyselyDatabase, "plugin_state_entries">;
+type PluginStateEntriesTable = CarapaceStateKyselyDatabase["plugin_state_entries"];
+type PluginStateStoreDatabase = Pick<CarapaceStateKyselyDatabase, "plugin_state_entries">;
 
 type PluginStateRow = Selectable<PluginStateEntriesTable>;
 
@@ -116,7 +116,7 @@ function wrapPluginStateError(
   operation: PluginStateStoreOperation,
   fallbackCode: PluginStateStoreErrorCode,
   message: string,
-  pathname = resolveOpenClawStateSqlitePath(process.env),
+  pathname = resolveCarapaceStateSqlitePath(process.env),
 ): PluginStateStoreError {
   if (error instanceof PluginStateStoreError) {
     return error;
@@ -127,10 +127,10 @@ function wrapPluginStateError(
   if (fallbackCode === "PLUGIN_STATE_OPEN_FAILED") {
     if (isSqliteSchemaVersionError(error)) {
       publicMessage +=
-        "\nThe state database uses a newer schema. Run an OpenClaw build that supports it.";
+        "\nThe state database uses a newer schema. Run an Carapace build that supports it.";
     } else if (error instanceof Error && isTerminalSqliteIntegrityError(error)) {
       publicMessage +=
-        "\nDatabase integrity verification failed. Restore or repair the state database, then run openclaw doctor --fix.";
+        "\nDatabase integrity verification failed. Restore or repair the state database, then run carapace doctor --fix.";
     }
   }
   return createPluginStateError({
@@ -427,12 +427,12 @@ function deleteOldestPluginStateNamespaceEntries(
 
 function openPluginStateDatabase(
   operation: PluginStateStoreOperation = "open",
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PluginStateDatabase {
   const env = options.env ?? process.env;
-  const pathname = resolveOpenClawStateSqlitePath(env);
+  const pathname = resolveCarapaceStateSqlitePath(env);
   try {
-    return openOpenClawStateDatabase(options);
+    return openCarapaceStateDatabase(options);
   } catch (error) {
     throw wrapPluginStateError(
       error,
@@ -456,12 +456,12 @@ function isMissingPluginStateTableError(error: unknown): boolean {
 function withPluginStateDatabaseReadOnly<T>(
   operationName: PluginStateStoreOperation,
   operation: (store: PluginStateDatabase) => T,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): T | undefined {
-  const pathname = resolveOpenClawStateSqlitePath(options.env ?? process.env);
+  const pathname = resolveCarapaceStateSqlitePath(options.env ?? process.env);
   let operationStarted = false;
   try {
-    return withExistingOpenClawStateDatabaseReadOnly(({ db, path }) => {
+    return withExistingCarapaceStateDatabaseReadOnly(({ db, path }) => {
       operationStarted = true;
       try {
         return operation({ db, path });
@@ -469,7 +469,7 @@ function withPluginStateDatabaseReadOnly<T>(
         if (isMissingPluginStateTableError(error)) {
           // The lease bootstrap creates exactly schema_meta + state_leases before the first write;
           // any other table means the missing plugin-state table is damage, not fresh state.
-          if (!hasOpenClawStateTablesBeyondStartupCheckpoint(db)) {
+          if (!hasCarapaceStateTablesBeyondStartupCheckpoint(db)) {
             return undefined;
           }
         }
@@ -490,21 +490,21 @@ function withPluginStateDatabaseReadOnly<T>(
   }
 }
 
-function envOptions(env?: NodeJS.ProcessEnv): OpenClawStateDatabaseOptions {
+function envOptions(env?: NodeJS.ProcessEnv): CarapaceStateDatabaseOptions {
   return env ? { env } : {};
 }
 
 function runWriteTransaction<T>(
   operation: PluginStateStoreOperation,
   write: (store: PluginStateDatabase) => T,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): T {
   // Only cold acquisition failures are open errors. A held owner's ownership or
   // transaction failure must remain a write error, with its callback supplying the handle.
-  if (!isOpenClawStateDatabaseOpen(resolveOpenClawStateSqlitePath(options.env ?? process.env))) {
+  if (!isCarapaceStateDatabaseOpen(resolveCarapaceStateSqlitePath(options.env ?? process.env))) {
     openPluginStateDatabase(operation, options);
   }
-  return runOpenClawStateWriteTransaction(write, options);
+  return runCarapaceStateWriteTransaction(write, options);
 }
 
 type PluginStateRetention = {
@@ -1129,7 +1129,7 @@ export function pluginStateLookup(params: {
   key: string;
   env?: NodeJS.ProcessEnv;
 }): unknown {
-  const pathname = resolveOpenClawStateSqlitePath(params.env ?? process.env);
+  const pathname = resolveCarapaceStateSqlitePath(params.env ?? process.env);
   try {
     return withPluginStateDatabaseReadOnly(
       "lookup",
@@ -1164,7 +1164,7 @@ export function pluginStateLookupMany(params: {
   if (params.keys.length === 0) {
     return [];
   }
-  const pathname = resolveOpenClawStateSqlitePath(params.env ?? process.env);
+  const pathname = resolveCarapaceStateSqlitePath(params.env ?? process.env);
   try {
     return (
       withPluginStateDatabaseReadOnly(
@@ -1404,7 +1404,7 @@ export function pluginStateEntries(params: {
   namespace: string;
   env?: NodeJS.ProcessEnv;
 }): PluginStateEntry<unknown>[] {
-  const pathname = resolveOpenClawStateSqlitePath(params.env ?? process.env);
+  const pathname = resolveCarapaceStateSqlitePath(params.env ?? process.env);
   try {
     return (
       withPluginStateDatabaseReadOnly(
@@ -1468,7 +1468,7 @@ function readPluginStateRowsInKeyRange<T>(
       message: "Plugin state key range must have an increasing exclusive upper bound.",
     });
   }
-  const pathname = resolveOpenClawStateSqlitePath(params.env ?? process.env);
+  const pathname = resolveCarapaceStateSqlitePath(params.env ?? process.env);
   try {
     return (
       withPluginStateDatabaseReadOnly(
@@ -1554,7 +1554,7 @@ function setMaxPluginStateEntriesPerPluginForTests(value?: number): void {
 }
 
 export function countPluginStateLiveEntries(pluginId: string, env?: NodeJS.ProcessEnv): number {
-  const pathname = resolveOpenClawStateSqlitePath(env ?? process.env);
+  const pathname = resolveCarapaceStateSqlitePath(env ?? process.env);
   try {
     return (
       withPluginStateDatabaseReadOnly(
@@ -1610,9 +1610,9 @@ function seedPluginStateDatabaseEntriesForTests(
 }
 
 function probePluginStateStore(): PluginStateStoreProbeResult {
-  const databasePath = resolveOpenClawStateSqlitePath(process.env);
+  const databasePath = resolveCarapaceStateSqlitePath(process.env);
   const steps: PluginStateStoreProbeStep[] = [];
-  const stateWasOpen = isOpenClawStateDatabaseOpen();
+  const stateWasOpen = isCarapaceStateDatabaseOpen();
 
   const pushOk = (name: string) => steps.push({ name, ok: true });
   const pushFailure = (name: string, error: unknown) => {
@@ -1682,7 +1682,7 @@ function probePluginStateStore(): PluginStateStoreProbeResult {
       });
     });
     pushOk("write-read-delete");
-    openOpenClawStateDatabase().walMaintenance.checkpoint();
+    openCarapaceStateDatabase().walMaintenance.checkpoint();
     pushOk("checkpoint");
   } catch (error) {
     pushFailure("probe", error);
@@ -1696,11 +1696,11 @@ function probePluginStateStore(): PluginStateStoreProbeResult {
 }
 
 export function closePluginStateDatabase(): void {
-  closeOpenClawStateDatabase();
+  closeCarapaceStateDatabase();
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.pluginStateSqliteTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.pluginStateSqliteTestApi")] = {
     probePluginStateStore,
     seedPluginStateDatabaseEntriesForTests,
     setMaxPluginStateEntriesPerPluginForTests,

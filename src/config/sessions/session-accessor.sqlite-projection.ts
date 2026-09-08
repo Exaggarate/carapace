@@ -1,14 +1,14 @@
 import path from "node:path";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { resolveStoredSessionOwnerAgentId } from "../../gateway/session-store-key.js";
 import {
   resolveAgentHarnessSessionStoreError,
   resolveAgentHarnessSessionStoreTransitionError,
 } from "../../sessions/agent-harness-session-key.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
   SessionEntryLifecycleUpsertConflictError,
   type SessionArchivedTranscriptCleanupRule,
@@ -34,7 +34,7 @@ import type {
 } from "./session-accessor.sqlite-contract.js";
 import {
   runPreparedSqliteSessionWrite,
-  runSqliteSessionDeletionTransaction as runOpenClawAgentWriteTransaction,
+  runSqliteSessionDeletionTransaction as runCarapaceAgentWriteTransaction,
   withSqliteSessionDeletions,
 } from "./session-accessor.sqlite-deletion.js";
 import { sqliteSessionEntriesEqual } from "./session-accessor.sqlite-entry-equality.js";
@@ -132,7 +132,7 @@ export async function applySessionStoreProjection<T>(params: {
     storePath: params.storePath,
   });
   const preparedWrite = await runPreparedSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const before = readSessionEntryStore(database);
     const projected = structuredClone(before);
     const operation = await params.update(projected);
@@ -172,7 +172,7 @@ export async function applySessionStoreProjection<T>(params: {
     return {
       deletedEntries: deletedOwners,
       commit: () => {
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (transactionDb) => {
             for (const sessionKey of changedKeys) {
               const current = readExactSessionEntryRow(transactionDb, sessionKey)?.entry;
@@ -218,7 +218,7 @@ export async function applySessionStoreProjection<T>(params: {
 }
 
 function readProjectedRemovalEntry(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   projected: ProjectedLifecycleMutation["removals"][number],
   allowCanonicalRepair = false,
 ): SessionEntry | undefined {
@@ -258,7 +258,7 @@ export async function applySessionEntryLifecycleMutation(params: {
   /** Doctor-only bypass while exact malformed rows are removed in the same transaction. */
   allowCanonicalRepair?: boolean;
   /** Doctor-only synchronous state transfer that commits with the destination entry. */
-  afterUpsertsInTransaction?: (database: OpenClawAgentDatabase) => void;
+  afterUpsertsInTransaction?: (database: CarapaceAgentDatabase) => void;
   /** Synchronous caller-authority guard checked immediately before lifecycle writes. */
   beforeCommitInTransaction?: () => void;
   /** Runs after the SQLite commit and before fallible artifact publication. */
@@ -329,7 +329,7 @@ export async function applySessionEntryLifecycleMutation(params: {
     const removedSessionKeys: string[] = [];
     let archivedTranscripts: SessionLifecycleArchivedTranscript[] = [];
     const maintenancePlans: SessionEntryMaintenancePlan[] = [];
-    const publish = runOpenClawAgentWriteTransaction((transactionDb) => {
+    const publish = runCarapaceAgentWriteTransaction((transactionDb) => {
       params.beforeCommitInTransaction?.();
       beforeCount = readSessionEntryCount(transactionDb);
       const validatedRemovals = projected.removals.filter((removal) => {
@@ -506,7 +506,7 @@ export async function applySessionEntryLifecycleMutation(params: {
     captureArtifactCleanupError(error);
   }
   const archivedTranscripts = [...publishedRemovalTranscripts, ...maintenanceArchivedTranscripts];
-  const afterCount = readSessionEntryCount(openOpenClawAgentDatabase(toDatabaseOptions(resolved)));
+  const afterCount = readSessionEntryCount(openCarapaceAgentDatabase(toDatabaseOptions(resolved)));
   emitArchivedTranscriptUpdates(archivedTranscripts);
   const archivedTranscriptDirectories = uniqueStrings(
     archivedTranscripts.map((transcript) => path.dirname(transcript.archivedPath)),
@@ -550,7 +550,7 @@ export async function purgeDeletedAgentSessionEntries(
     storePath: params.storePath,
   });
   const prepared = await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const store = readSessionEntryStore(database);
     const remainingStore = { ...store };
     const entryRemovals: SessionEntryRemovalPlan[] = [];
@@ -598,7 +598,7 @@ export async function purgeDeletedAgentSessionEntries(
       await runExclusiveSqliteSessionWrite(resolved, async () => {
         let archivedTranscripts: SessionLifecycleArchivedTranscript[] = [];
         const maintenancePlans: SessionEntryMaintenancePlan[] = [];
-        const publishRemovals = runOpenClawAgentWriteTransaction((transactionDb) => {
+        const publishRemovals = runCarapaceAgentWriteTransaction((transactionDb) => {
           const currentOwnedSessionKeys = Object.keys(readSessionEntryStore(transactionDb))
             .filter(
               (sessionKey) =>

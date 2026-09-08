@@ -10,7 +10,7 @@ const SHARED_AUTH_PROFILE_STORE_SCHEMA_VERSION = 7;
 const AUTH_PROFILE_MACHINE_STATE_SCHEMA_VERSION = 13;
 
 function readSharedAuthProfileStore(stateDir) {
-  const dbPath = path.join(stateDir, "state", "openclaw.sqlite");
+  const dbPath = path.join(stateDir, "state", "carapace.sqlite");
   if (!fs.existsSync(dbPath)) {
     return { ownsStore: false, text: "" };
   }
@@ -72,7 +72,7 @@ export function readSharedAuthProfileStoreText(stateDir) {
 }
 
 function readLegacyPrimaryAuthProfileStoreText(stateDir) {
-  const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   if (!fs.existsSync(dbPath)) {
     return "";
   }
@@ -113,7 +113,7 @@ export function assertNoLegacyPrimaryAuthRows(stateDir) {
   if (!readSharedAuthProfileStore(stateDir).ownsStore) {
     return;
   }
-  const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   if (!fs.existsSync(dbPath)) {
     return;
   }

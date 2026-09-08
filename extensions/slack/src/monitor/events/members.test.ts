@@ -11,11 +11,11 @@ let registerSlackMemberEvents: typeof import("./members.js").registerSlackMember
 let initSlackHarness: typeof import("./system-event-test-harness.js").createSlackSystemEventTestHarness;
 type MemberOverrides = import("./system-event-test-harness.js").SlackSystemEventTestOverrides;
 
-vi.mock("openclaw/plugin-sdk/channel-join-intro-runtime", () => ({
+vi.mock("carapace/plugin-sdk/channel-join-intro-runtime", () => ({
   reportChannelRoomJoin: memberMocks.reportJoin,
 }));
 
-vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
+vi.mock("carapace/plugin-sdk/system-event-runtime", () => ({
   enqueueRoutedSystemEvent: (
     text: unknown,
     route: { sessionKey: unknown },
@@ -182,7 +182,7 @@ describe("registerSlackMemberEvents", () => {
       }),
     );
     const request = memberMocks.reportJoin.mock.calls[0]?.[0] as Parameters<
-      typeof import("openclaw/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin
+      typeof import("carapace/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin
     >[0];
     await expect(request.resolveRoomContext({ messageLimit: 30 })).resolves.toEqual({
       title: "#deploys",
@@ -249,7 +249,7 @@ describe("registerSlackMemberEvents", () => {
     });
 
     const request = memberMocks.reportJoin.mock.calls[0]?.[0] as Parameters<
-      typeof import("openclaw/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin
+      typeof import("carapace/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin
     >[0];
     await expect(request.resolveRoomContext({ messageLimit: 30 })).resolves.toEqual({
       title: "#general",

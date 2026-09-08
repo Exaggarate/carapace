@@ -21,7 +21,7 @@ import {
   isAnthropicAssistantMessage,
   isOpenAiCompletionsAssistantMessage,
   isResponsesApiAssistantMessage,
-  isSubscribeTranscriptOnlyOpenClawAssistantMessage,
+  isSubscribeTranscriptOnlyCarapaceAssistantMessage,
   openReasoningStream,
   replaceBlockReplyBuffer,
   resolveAssistantStreamContentIndex,
@@ -54,7 +54,7 @@ export function handleMessageUpdate(
   evt: AgentEvent & { message: AgentMessage; assistantMessageEvent?: unknown },
 ): Promise<void> | undefined {
   const msg = evt.message;
-  if (msg?.role !== "assistant" || isSubscribeTranscriptOnlyOpenClawAssistantMessage(msg)) {
+  if (msg?.role !== "assistant" || isSubscribeTranscriptOnlyCarapaceAssistantMessage(msg)) {
     return undefined;
   }
 
@@ -193,7 +193,7 @@ export function handleMessageUpdate(
   const isCompletionsAssistant = isOpenAiCompletionsAssistantMessage(partialAssistant);
   const isPhasePendingCompletionsText = !deliveryPhase && isCompletionsAssistant;
   const isReasoningCompletionsText =
-    isCompletionsAssistant && partialAssistant.openclawDelivery?.textPhaseRequiresTerminal === true;
+    isCompletionsAssistant && partialAssistant.carapaceDelivery?.textPhaseRequiresTerminal === true;
   const hasResponsesContentIndex =
     streamContentIndex !== undefined && isResponsesApiAssistantMessage(partialAssistant);
   let streamItemChanged = false;

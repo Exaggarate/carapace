@@ -1,10 +1,10 @@
 // Irc tests cover doctor contract api plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract-api.js";
 
-function ircConfig(entry: Record<string, unknown>): OpenClawConfig {
+function ircConfig(entry: Record<string, unknown>): CarapaceConfig {
   return { channels: { irc: entry } } as never;
 }
 
@@ -64,8 +64,8 @@ describe("irc retired mentionPatterns migration", () => {
   it("flags and strips the retired key at root and account scope", () => {
     const cfg = ircConfig({
       host: "irc.libera.chat",
-      mentionPatterns: ["\\bopenclaw\\b"],
-      accounts: { work: { nick: "openclaw-ops", mentionPatterns: ["\\bops\\b"] } },
+      mentionPatterns: ["\\bcarapace\\b"],
+      accounts: { work: { nick: "carapace-ops", mentionPatterns: ["\\bops\\b"] } },
     });
 
     const rootRule = legacyConfigRules.find(
@@ -91,7 +91,7 @@ describe("irc retired mentionPatterns migration", () => {
     const accounts = irc.accounts as Record<string, Record<string, unknown> | undefined>;
     const workAccount = expectDefined(accounts.work, "channels.irc.accounts.work");
     expect(workAccount.mentionPatterns).toBeUndefined();
-    expect(workAccount.nick).toBe("openclaw-ops");
+    expect(workAccount.nick).toBe("carapace-ops");
     expect(result.changes.some((change) => change.includes("mentionPatterns"))).toBe(true);
   });
 

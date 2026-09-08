@@ -1,16 +1,16 @@
-export { createChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+export { createChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import {
   createEmptyPluginRegistry,
   withPluginRuntimeRegistryScope,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-export { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
-import { registerPluginCommand } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveChunkMode } from "openclaw/plugin-sdk/reply-dispatch-runtime";
-import { resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+export { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { getAgentScopedMediaLocalRoots } from "carapace/plugin-sdk/media-runtime";
+import { registerPluginCommand } from "carapace/plugin-sdk/plugin-runtime";
+import { resolveChunkMode } from "carapace/plugin-sdk/reply-dispatch-runtime";
+import { resolveThreadSessionKeys } from "carapace/plugin-sdk/routing";
 // Telegram tests cover bot native commands.session meta plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { expect, vi } from "vitest";
 import type { RegisterTelegramHandlerParams } from "./bot-handlers.types.js";
 import type { TelegramNativeCommandDeps } from "./bot-native-command-deps.runtime.js";
@@ -25,24 +25,24 @@ export { runWithTelegramUpdateProcessingFrame } from "./bot-processing-outcome.j
 // Shared executor test harness; each importing suite resets the state before use.
 
 type ResolveConfiguredBindingRouteFn =
-  typeof import("openclaw/plugin-sdk/conversation-runtime").resolveConfiguredBindingRoute;
+  typeof import("carapace/plugin-sdk/conversation-runtime").resolveConfiguredBindingRoute;
 type EnsureConfiguredBindingRouteReadyFn =
-  typeof import("openclaw/plugin-sdk/conversation-runtime").ensureConfiguredBindingRouteReady;
+  typeof import("carapace/plugin-sdk/conversation-runtime").ensureConfiguredBindingRouteReady;
 type DispatchReplyWithBufferedBlockDispatcherFn =
-  typeof import("openclaw/plugin-sdk/reply-dispatch-runtime").dispatchReplyWithBufferedBlockDispatcher;
+  typeof import("carapace/plugin-sdk/reply-dispatch-runtime").dispatchReplyWithBufferedBlockDispatcher;
 export type DispatchReplyWithBufferedBlockDispatcherParams =
   Parameters<DispatchReplyWithBufferedBlockDispatcherFn>[0];
 type DispatchReplyWithBufferedBlockDispatcherResult = Awaited<
   ReturnType<DispatchReplyWithBufferedBlockDispatcherFn>
 >;
 type DispatchChannelInboundTurnFn =
-  typeof import("openclaw/plugin-sdk/channel-inbound").dispatchChannelInboundTurn;
+  typeof import("carapace/plugin-sdk/channel-inbound").dispatchChannelInboundTurn;
 type ResolveCommandArgMenuFn =
-  typeof import("openclaw/plugin-sdk/command-auth-native").resolveCommandArgMenu;
+  typeof import("carapace/plugin-sdk/command-auth-native").resolveCommandArgMenu;
 type DeliverRepliesFn = typeof import("./bot/delivery.js").deliverReplies;
-type LoadModelCatalogFn = typeof import("openclaw/plugin-sdk/agent-runtime").loadModelCatalog;
+type LoadModelCatalogFn = typeof import("carapace/plugin-sdk/agent-runtime").loadModelCatalog;
 type ResolveDefaultModelForAgentFn =
-  typeof import("openclaw/plugin-sdk/agent-runtime").resolveDefaultModelForAgent;
+  typeof import("carapace/plugin-sdk/agent-runtime").resolveDefaultModelForAgent;
 
 export const dispatchReplyResult: DispatchReplyWithBufferedBlockDispatcherResult = {
   queuedFinal: false,
@@ -164,9 +164,9 @@ export const executorTestMocks = {
   sessionMocks,
 };
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("carapace/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/conversation-runtime")>(
+    "carapace/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -214,9 +214,9 @@ vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
     }),
   };
 });
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("carapace/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/session-store-runtime")>(
+    "carapace/plugin-sdk/session-store-runtime",
   );
   return {
     ...actual,
@@ -226,9 +226,9 @@ vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
     updateSessionStoreEntry: sessionMocks.updateSessionStoreEntry,
   };
 });
-vi.mock("openclaw/plugin-sdk/command-auth-native", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/command-auth-native")>(
-    "openclaw/plugin-sdk/command-auth-native",
+vi.mock("carapace/plugin-sdk/command-auth-native", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/command-auth-native")>(
+    "carapace/plugin-sdk/command-auth-native",
   );
   commandAuthMocks.resolveCommandArgMenu.mockImplementation(actual.resolveCommandArgMenu);
   return {
@@ -236,9 +236,9 @@ vi.mock("openclaw/plugin-sdk/command-auth-native", async () => {
     resolveCommandArgMenu: commandAuthMocks.resolveCommandArgMenu,
   };
 });
-vi.mock("openclaw/plugin-sdk/agent-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/agent-runtime")>(
-    "openclaw/plugin-sdk/agent-runtime",
+vi.mock("carapace/plugin-sdk/agent-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/agent-runtime")>(
+    "carapace/plugin-sdk/agent-runtime",
   );
   agentRuntimeMocks.resolveDefaultModelForAgent.mockImplementation(
     actual.resolveDefaultModelForAgent,
@@ -280,9 +280,9 @@ type TelegramPluginCommandSpecs = Array<{
 type TelegramLoginFlow = NonNullable<TelegramNativeCommandDeps["runModelsAuthLoginFlow"]>;
 
 export function registerAndResolveStatusHandler(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   dispatchReplyFromConfig?: NativeCommandTestParams["opts"]["dispatchReplyFromConfig"];
-  runtimeCfg?: OpenClawConfig;
+  runtimeCfg?: CarapaceConfig;
   allowFrom?: string[];
   groupAllowFrom?: string[];
   storeAllowFrom?: string[];
@@ -317,9 +317,9 @@ export function registerAndResolveStatusHandler(params: {
 
 function registerAndResolveCommandHandlerBase(params: {
   commandName: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   dispatchReplyFromConfig?: NativeCommandTestParams["opts"]["dispatchReplyFromConfig"];
-  runtimeCfg?: OpenClawConfig;
+  runtimeCfg?: CarapaceConfig;
   allowFrom: string[];
   groupAllowFrom: string[];
   storeAllowFrom?: string[];
@@ -403,7 +403,7 @@ function registerAndResolveCommandHandlerBase(params: {
 
 export function registerAndResolveCommandHandler(params: {
   commandName: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   allowFrom?: string[];
   groupAllowFrom?: string[];
   storeAllowFrom?: string[];
@@ -568,7 +568,7 @@ export function resetSessionMetaMocks() {
     return patch ? { ...current, ...patch } : current;
   });
   sessionMocks.recordSessionMetaFromInbound.mockClear().mockResolvedValue(undefined);
-  sessionMocks.resolveStorePath.mockClear().mockReturnValue("/tmp/openclaw-sessions.json");
+  sessionMocks.resolveStorePath.mockClear().mockReturnValue("/tmp/carapace-sessions.json");
   pluginRuntimeMocks.executePluginCommand.mockClear().mockResolvedValue({ text: "ok" });
   activePluginRegistry = createEmptyPluginRegistry();
   replyMocks.dispatchReplyWithBufferedBlockDispatcher

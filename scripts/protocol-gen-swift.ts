@@ -1,4 +1,4 @@
-// Protocol Gen Swift script supports OpenClaw repository automation.
+// Protocol Gen Swift script supports Carapace repository automation.
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,7 @@ import {
 import { writeGeneratedOutput } from "./lib/generated-output-utils.mts";
 
 type JsonSchema = {
-  "~openclawClosedObjectIdentity"?: symbol;
+  "~carapaceClosedObjectIdentity"?: symbol;
   type?: string | string[];
   const?: boolean | number | string | null;
   properties?: Record<string, JsonSchema>;
@@ -33,9 +33,9 @@ const outPaths = [
     repoRoot,
     "apps",
     "shared",
-    "OpenClawKit",
+    "CarapaceKit",
     "Sources",
-    "OpenClawProtocol",
+    "CarapaceProtocol",
     "GatewayModels.swift",
   ),
 ];
@@ -160,7 +160,7 @@ function registerNamedSchema(name: string, schema: JsonSchema): void {
   schemaNameByObject.set(schema as object, name);
   const signature = schemaSignature(schema);
   registerUniqueName(schemaNameBySignature, signature, name);
-  const identity = schema["~openclawClosedObjectIdentity"];
+  const identity = schema["~carapaceClosedObjectIdentity"];
   if (identity) {
     const names = schemaNamesByIdentity.get(identity) ?? new Map<string, string | undefined>();
     registerUniqueName(names, signature, name);
@@ -211,7 +211,7 @@ function swiftType(schema: JsonSchema, required: boolean, allowStructuralNamed =
   const isOptional = !required;
   let base: string;
   // Normalization spreads the schema, so retain its hidden identity before copying.
-  const identity = schema["~openclawClosedObjectIdentity"];
+  const identity = schema["~carapaceClosedObjectIdentity"];
   let named = namedSchema(normalizedSchema, allowStructuralNamed, identity);
   if (!named && nullableTypeArray && (normalizedSchema.anyOf || normalizedSchema.oneOf)) {
     const { type: _normalizedType, ...normalizedStructuralSchema } = normalizedSchema;

@@ -13,7 +13,7 @@ const externalDependencies = [
 
 const config = {
   clean: true,
-  dts: process.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD !== "1",
+  dts: process.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD !== "1",
   hooks: createDeclarationBoundaryHooks(),
   entry: {
     index: "packages/ai/src/index.ts",

@@ -1,11 +1,11 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
 import type {
   PluginConversationBindingResolvedEvent,
   PluginHookInboundClaimContext,
   PluginHookInboundClaimEvent,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/plugin-entry";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
 import type { resolveCodexAppServerAuthProfileIdForAgent } from "./app-server/auth-profile.js";
 import { assertCodexBindingMayBeReplaced } from "./app-server/session-binding-record.js";
 import type { CodexAppServerBindingStore } from "./app-server/session-binding.js";
@@ -31,7 +31,7 @@ type CodexConversationRunOptions = {
 };
 
 const getNodeConversationState = defineCodexBuildState(
-  "openclaw.codex.conversationBinding",
+  "carapace.codex.conversationBinding",
   () => ({ queue: new KeyedAsyncQueue() }),
 );
 
@@ -117,7 +117,7 @@ export async function handleCodexConversationInboundClaim(
         return { reply: { text: nativeExecutionBlock } };
       }
       const { getSessionBindingService } =
-        await import("openclaw/plugin-sdk/conversation-binding-runtime");
+        await import("carapace/plugin-sdk/conversation-binding-runtime");
       const { runBoundTurnWithMissingThreadRecovery } = await import("./conversation-binding.js");
       const currentPublicBinding = getSessionBindingService().resolveByConversation({
         channel: publicBinding.channel,

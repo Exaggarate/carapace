@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { setupCronServiceSuite, writeCronStoreSnapshot } from "../service.test-harness.js";
 import { loadCronStore, saveCronJobsStore } from "../store.js";
 import {
@@ -81,7 +81,7 @@ function claimReceipt(storePath: string, job: CronJob, startedAtMs: number) {
     agentId: job.agentId ?? "alpha",
     startedAtMs,
   });
-  return runOpenClawStateWriteTransaction(({ db }) =>
+  return runCarapaceStateWriteTransaction(({ db }) =>
     claimCronRunReceiptInDatabase({
       database: db,
       prepared,
@@ -127,7 +127,7 @@ describe("atomic cron run recovery", () => {
     await writeCronStoreSnapshot({ storePath, jobs });
     const owned = jobs[0]!;
     const receipt = claimReceipt(storePath, owned, nowMs);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const ownedRowBefore = database
       .prepare("SELECT * FROM cron_jobs WHERE store_key = ? AND job_id = ?")
       .get(receipt.storeKey, owned.id);
@@ -179,7 +179,7 @@ describe("atomic cron run recovery", () => {
     releaseLocalCronRunReceiptOwnership(receipt);
     const state = makeState(storePath, startedAtMs);
     const proposal = proposeCronRunRecovery(state, job.id, undefined, startedAtMs);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     // Fail the row write after receipt retirement, inside the real transaction.
     database.exec(`
       CREATE TEMP TRIGGER reject_pending_recovery
@@ -514,7 +514,7 @@ describe("atomic cron run recovery", () => {
     expect(recoverCronRunProposal(state, { jobId: job.id, receipt })).toMatchObject({
       kind: "repaired",
     });
-    const receiptRow = runOpenClawStateWriteTransaction(({ db }) =>
+    const receiptRow = runCarapaceStateWriteTransaction(({ db }) =>
       db
         .prepare("SELECT status FROM cron_run_receipts WHERE receipt_id = ?")
         .get(receipt.receiptId),
@@ -530,7 +530,7 @@ describe("atomic cron run recovery", () => {
     const state = makeState(storePath, startedAtMs + 30_000);
     const receipt = claimReceipt(storePath, job, startedAtMs);
     const proposal = proposeCronRunRecovery(state, job.id, undefined, startedAtMs);
-    runOpenClawStateWriteTransaction(({ db }) =>
+    runCarapaceStateWriteTransaction(({ db }) =>
       finishCronRunReceiptInDatabase({
         database: db,
         handle: receipt,
@@ -676,7 +676,7 @@ describe("atomic cron run recovery", () => {
     expect(persisted?.runningAtMs).toBeUndefined();
     expect(persisted?.lastRunAtMs).toBeUndefined();
     expect(persisted?.triggerState).toEqual({ ready: false });
-    const receiptRow = runOpenClawStateWriteTransaction(({ db }) =>
+    const receiptRow = runCarapaceStateWriteTransaction(({ db }) =>
       db
         .prepare("SELECT status FROM cron_run_receipts WHERE receipt_id = ?")
         .get(receipt.receiptId),
@@ -783,7 +783,7 @@ describe("atomic cron run recovery", () => {
       lastRunAtMs: startedAtMs,
       lastRunStatus: "ok",
     });
-    const receiptRow = runOpenClawStateWriteTransaction(({ db }) =>
+    const receiptRow = runCarapaceStateWriteTransaction(({ db }) =>
       db
         .prepare("SELECT status FROM cron_run_receipts WHERE receipt_id = ?")
         .get(receipt.receiptId),
@@ -836,7 +836,7 @@ describe("atomic cron run recovery", () => {
       receipt: { receiptId: successor.receiptId, startedAtMs },
     });
     expect((await loadCronStore(storePath)).jobs[0]?.state.runningAtMs).toBe(startedAtMs);
-    const successorRow = runOpenClawStateWriteTransaction(({ db }) =>
+    const successorRow = runCarapaceStateWriteTransaction(({ db }) =>
       db
         .prepare("SELECT status FROM cron_run_receipts WHERE receipt_id = ?")
         .get(successor.receiptId),

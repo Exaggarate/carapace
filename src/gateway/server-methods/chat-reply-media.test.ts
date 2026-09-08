@@ -7,14 +7,14 @@ import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { consumePendingToolMediaIntoReply } from "../../agents/embedded-agent-subscribe.handlers.messages.replies.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPinnedLookup } from "../../infra/net/ssrf.js";
 import { getAgentScopedMediaLocalRoots } from "../../media/local-roots.js";
 import { setMediaStoreNetworkDepsForTest } from "../../media/store.test-support.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createManagedOutgoingMediaBlocks as createManagedOutgoingImageBlocks } from "../managed-image-attachments.js";
 import { buildAssistantReplyContent } from "./chat-assistant-content.js";
 import { normalizeWebchatReplyMediaPathsForDisplay } from "./chat-reply-media.js";
@@ -35,16 +35,16 @@ type MediaTestContext = {
   stateDir: string;
   agentDir: string;
   workspaceDir: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 };
 
 describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-webchat-reply-media-",
+      prefix: "carapace-webchat-reply-media-",
     });
   });
 
@@ -57,7 +57,7 @@ describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
     agentDir: string;
     workspaceDir: string;
     allowRead: boolean;
-  }): OpenClawConfig {
+  }): CarapaceConfig {
     return {
       tools: params.allowRead ? { allow: ["read"] } : { fs: { workspaceOnly: true } },
       agents: {
@@ -108,7 +108,7 @@ describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
   }
 
   async function normalizeReplyMedia(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     payloads: ReplyMediaPayloads;
   }) {
     const [payload] = await normalizeWebchatReplyMediaPathsForDisplay({
@@ -134,7 +134,7 @@ describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
   }
 
   async function createManagedImageBlocks(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     mediaUrls: string[] | undefined;
   }) {
     return createManagedOutgoingImageBlocks({

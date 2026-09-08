@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { seedSkillLibrarySelection } from "../skills/library/selection.js";
 import type { TrustedSessionCreation } from "./server-methods/session-creation-provenance.js";
 import type { GatewayClient } from "./server-methods/shared-types.js";
@@ -6,7 +6,7 @@ import type { GatewayClient } from "./server-methods/shared-types.js";
 /** Selection is prepared from this request's real principal, never reconstructed from provenance. */
 export function prepareSkillLibrarySessionCreation(
   client: GatewayClient | null | undefined,
-  cfg: OpenClawConfig | (() => OpenClawConfig),
+  cfg: CarapaceConfig | (() => CarapaceConfig),
   creation: TrustedSessionCreation,
 ): TrustedSessionCreation {
   if (

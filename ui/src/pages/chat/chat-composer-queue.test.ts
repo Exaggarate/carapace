@@ -240,7 +240,7 @@ describe("chat composer queue reordering", () => {
     const dragOver = new Event("dragover", { bubbles: true });
     Object.defineProperties(dragOver, {
       clientY: { value: 99 },
-      dataTransfer: { value: { types: ["application/x-openclaw-queued-message"] } },
+      dataTransfer: { value: { types: ["application/x-carapace-queued-message"] } },
     });
     scroll.dispatchEvent(dragOver);
     expect(requestFrame).toHaveBeenCalledOnce();
@@ -638,7 +638,7 @@ describe("chat composer queue reordering", () => {
     ).toEqual(["false", "false", "true", "true"]);
 
     const dataTransfer = {
-      types: ["application/x-openclaw-queued-message"],
+      types: ["application/x-carapace-queued-message"],
       getData: () => "c",
       setData: vi.fn(),
       dropEffect: "none",
@@ -660,7 +660,7 @@ describe("chat composer queue reordering", () => {
     });
     const rows = [...container.querySelectorAll(".chat-queue__item")];
     const dataTransfer = {
-      types: ["application/x-openclaw-queued-message"],
+      types: ["application/x-carapace-queued-message"],
       getData: () => "c",
       setData: vi.fn(),
       dropEffect: "none",

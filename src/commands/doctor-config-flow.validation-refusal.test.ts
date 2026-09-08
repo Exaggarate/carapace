@@ -4,9 +4,9 @@
 // telling the operator exactly what to fix by hand.
 import fs from "node:fs/promises";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { withEnvOverride, withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withEnvOverride, withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { runWriteConfigHealth } from "../flows/doctor-health-contribution-runners.config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 
 const noteMock = vi.hoisted(() => vi.fn<(message: string, title?: string) => void>());
@@ -18,13 +18,13 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({
 describe("doctor --fix with a validation-blocked candidate", () => {
   afterEach(() => {
     noteMock.mockClear();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("never reports unpersisted fixes and leaves the config untouched", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
-        const configPath = await writeOpenClawConfig(home, {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        const configPath = await writeCarapaceConfig(home, {
           gatway: { port: 12345 },
           agents: { defaults: { heartbeat: { every: 5 } } },
         });

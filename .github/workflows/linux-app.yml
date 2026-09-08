@@ -104,15 +104,15 @@ jobs:
       - name: Stage AppImage GStreamer plugins
         if: github.event_name == 'workflow_dispatch'
         run: |
-          plugins="${RUNNER_TEMP}/openclaw-gstreamer-plugins"
+          plugins="${RUNNER_TEMP}/carapace-gstreamer-plugins"
           apps/linux/scripts/stage-appimage-gstreamer.sh "$plugins" \
-            | tee "${RUNNER_TEMP}/openclaw-gstreamer-elements.tsv"
+            | tee "${RUNNER_TEMP}/carapace-gstreamer-elements.tsv"
           echo "GSTREAMER_PLUGINS_DIR=$plugins" >> "$GITHUB_ENV"
 
       - name: Prepare pinned AppImage tools
         if: github.event_name == 'workflow_dispatch'
         env:
-          XDG_CACHE_HOME: ${{ runner.temp }}/openclaw-tauri-cache
+          XDG_CACHE_HOME: ${{ runner.temp }}/carapace-tauri-cache
         run: | # zizmor: ignore[github-env] trusted checked-in helper returns the native runtime path
           set -euo pipefail
           apps/linux/scripts/tauri-appimage-tools.sh prepare
@@ -126,7 +126,7 @@ jobs:
         env:
           # appimagetool strips fail on CI runners; Tauri documents NO_STRIP for Actions.
           NO_STRIP: "true"
-          XDG_CACHE_HOME: ${{ runner.temp }}/openclaw-tauri-cache
+          XDG_CACHE_HOME: ${{ runner.temp }}/carapace-tauri-cache
         # Validation builds have no TAURI_SIGNING_PRIVATE_KEY, and the configured updater
         # pubkey makes the bundler hard-require it. Skip updater artifacts here;
         # linux-app-release.yml builds the signed updater bundles.
@@ -135,7 +135,7 @@ jobs:
       - name: Finalize AppImage
         if: github.event_name == 'workflow_dispatch'
         env:
-          XDG_CACHE_HOME: ${{ runner.temp }}/openclaw-tauri-cache
+          XDG_CACHE_HOME: ${{ runner.temp }}/carapace-tauri-cache
         run: apps/linux/scripts/finalize-appimage.sh apps/linux/src-tauri/target/release/bundle/appimage
 
       - name: Test native first-run setup and failed Gateway startup
@@ -145,11 +145,11 @@ jobs:
         run: |
           xvfb-run -a -s '-screen 0 1280x1024x24' dbus-run-session -- \
             /usr/bin/python3 apps/linux/tests/first_run.py \
-            apps/linux/src-tauri/target/release/openclaw-desktop \
+            apps/linux/src-tauri/target/release/carapace-desktop \
             2>&1 | tee "${RUNNER_TEMP}/linux-first-run.log"
           xvfb-run -a -s '-screen 0 1280x1024x24' dbus-run-session -- \
             /usr/bin/python3 apps/linux/tests/first_run.py \
-            apps/linux/src-tauri/target/release/openclaw-desktop --local-start-failure \
+            apps/linux/src-tauri/target/release/carapace-desktop --local-start-failure \
             2>&1 | tee -a "${RUNNER_TEMP}/linux-first-run.log"
 
       - name: Upload first-run failure log
@@ -193,7 +193,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: openclaw-linux-companion
+          name: carapace-linux-companion
           retention-days: 14
           if-no-files-found: error
           path: |

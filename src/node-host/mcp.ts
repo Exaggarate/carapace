@@ -9,9 +9,9 @@ import {
   type ListToolsResult,
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { clampPositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { clampPositiveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import pLimit from "p-limit";
 import type { NodePluginToolDescriptor } from "../../packages/gateway-protocol/src/schema/nodes.js";
 import {
@@ -274,7 +274,7 @@ export async function startNodeHostMcpManager(
     deps.createClient ??
     ((_serverName, options) =>
       new Client(
-        { name: "openclaw-node-host", version: VERSION },
+        { name: "carapace-node-host", version: VERSION },
         {
           jsonSchemaValidator: createMcpJsonSchemaValidator(),
           listChanged: {

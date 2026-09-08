@@ -2,8 +2,8 @@ import {
   hasSessionProjectionAcceptedFinal,
   isSessionProjectionErrorMessage,
   reduceSessionProjectionRunEvent,
-} from "@openclaw/gateway-client/browser";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/gateway-client/browser";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import { t } from "../../i18n/index.ts";
 import { accumulatedStreamText } from "../../lib/chat/chat-types.ts";
 import { isAssistantHeartbeatAckForDisplay } from "../../lib/chat/heartbeat-display.ts";
@@ -319,7 +319,7 @@ function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
 
   // Terminal events for the active client run carry runId; missing-runId events are unowned.
   // Final from another run (e.g. sub-agent announce): refresh history to show new message.
-  // See https://github.com/openclaw/openclaw/issues/1909
+  // See https://github.com/Exaggarate/carapace/issues/1909
   if (state.chatRunId && payload.runId !== state.chatRunId) {
     if (payload.state === "final") {
       const finalMessage = normalizedFinalMessage;

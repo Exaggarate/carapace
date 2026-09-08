@@ -1,5 +1,5 @@
 /** Builds prompt body and envelope metadata for reply runs. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { CurrentInboundPromptContext } from "../../agents/embedded-agent-runner/run/params.js";
 import { appendCurrentInboundContext } from "../../agents/embedded-agent-runner/run/runtime-context-prompt.js";
 import type { RuntimeContextFragment } from "../../agents/internal-runtime-context.js";
@@ -14,7 +14,7 @@ import { buildInboundMediaNoteProjection } from "../media-note.js";
 import type { MsgContext, TemplateContext } from "../templating.js";
 import { appendChannelPromptContext } from "./channel-prompt-context.js";
 
-const ROOM_EVENT_PROMPT = "[OpenClaw room event]";
+const ROOM_EVENT_PROMPT = "[Carapace room event]";
 const ROOM_EVENT_PARTICIPATION_RULE =
   "Treat this message as observed room activity, not a request. You were not explicitly tagged or mentioned in this room event. Default: stay silent. Only respond if you have something useful, substantial, or important to add. A previous mention or reply is not an invitation to keep talking.";
 const RESUMABLE_ROOM_CONTEXT_OMITTED_PREFIXES = [
@@ -206,7 +206,7 @@ export function buildReplyPromptEnvelopeBase(
   const transcriptBody = params.isHeartbeat
     ? HEARTBEAT_TRANSCRIPT_PROMPT
     : params.isBareSessionReset
-      ? softResetTail || `[OpenClaw session ${params.startupAction}]`
+      ? softResetTail || `[Carapace session ${params.startupAction}]`
       : (roomEventBody ?? (params.hasUserBody ? params.baseBody : MEDIA_ONLY_USER_TEXT));
   const deliveryDirective = resolvePerTurnDeliveryDirective(params);
   const fragments: RuntimeContextFragment[] = [

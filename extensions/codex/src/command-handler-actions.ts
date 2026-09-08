@@ -2,10 +2,10 @@ import { isDeepStrictEqual } from "node:util";
 import {
   MODEL_SELECTION_LOCKED_MESSAGE,
   resolvePersistedSessionRuntimeId,
-} from "openclaw/plugin-sdk/model-session-runtime";
-import type { PluginCommandContext } from "openclaw/plugin-sdk/plugin-entry";
-import { getSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/model-session-runtime";
+import type { PluginCommandContext } from "carapace/plugin-sdk/plugin-entry";
+import { getSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveCodexBindingAppServerConnection } from "./app-server/binding-connection.js";
 import type { CodexComputerUseSetupParams } from "./app-server/computer-use.js";
 import { isJsonObject, type JsonValue } from "./app-server/protocol.js";
@@ -195,7 +195,7 @@ export async function handleNativeGoal(
     return "Cannot manage the Codex goal because this command has no stable binding identity.";
   }
   if (!binding?.threadId) {
-    return "No Codex thread is attached to this OpenClaw session yet.";
+    return "No Codex thread is attached to this Carapace session yet.";
   }
   const connection = resolveCodexBindingAppServerConnection({
     binding,
@@ -474,7 +474,7 @@ export async function startThreadAction(
     return `Cannot start Codex ${kind === "compact" ? "compaction" : "review"} because this command did not include a stable binding identity.`;
   }
   if (!binding?.threadId) {
-    return `No Codex thread is attached to this OpenClaw session yet.`;
+    return `No Codex thread is attached to this Carapace session yet.`;
   }
   if (kind === "compact") {
     const sessionTarget = ctx.sessionTarget;
@@ -497,7 +497,7 @@ export async function startThreadAction(
       currentSession?.sessionId !== ctx.sessionId ||
       resolvePersistedSessionRuntimeId(currentSession) !== "codex"
     ) {
-      return "Codex compaction is unavailable because the current OpenClaw session is not using the Codex runtime.";
+      return "Codex compaction is unavailable because the current Carapace session is not using the Codex runtime.";
     }
     if (target.identity.kind === "conversation") {
       if (!isSameCodexAppServerThreadOwner(binding, authority.currentSessionBinding)) {

@@ -1,11 +1,11 @@
 // Slack plugin module implements prepare routing behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   ConfiguredBindingRouteResult,
   RuntimeConversationBindingRouteResult,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { resolveAgentRoute, resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
-import { getConversationSession } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { resolveAgentRoute, resolveThreadSessionKeys } from "carapace/plugin-sdk/routing";
+import { getConversationSession } from "carapace/plugin-sdk/session-store-runtime";
 import { resolveSlackReplyToMode } from "../../account-reply-mode.js";
 import type { ResolvedSlackAccount } from "../../accounts.js";
 import {
@@ -27,7 +27,7 @@ import {
 } from "../workspace-routing.js";
 
 type SlackRoutingContextDeps = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   teamId: string;
   threadInheritParent: boolean;
   threadHistoryScope: "thread" | "channel";

@@ -1,5 +1,5 @@
-/** ACP runtime error exports wired to OpenClaw secret redaction. */
-import { configureAcpErrorRedactor } from "@openclaw/acp-core";
+/** ACP runtime error exports wired to Carapace secret redaction. */
+import { configureAcpErrorRedactor } from "@carapace/acp-core";
 import { redactToolPayloadText } from "../../logging/redact.js";
 
 // Core must import ACP errors and error text only through this barrel so the
@@ -7,5 +7,5 @@ import { redactToolPayloadText } from "../../logging/redact.js";
 // defaults so custom logging policy cannot disable provider-token coverage.
 configureAcpErrorRedactor(redactToolPayloadText);
 
-export * from "@openclaw/acp-core/runtime/errors";
-export * from "@openclaw/acp-core/runtime/error-text";
+export * from "@carapace/acp-core/runtime/errors";
+export * from "@carapace/acp-core/runtime/error-text";

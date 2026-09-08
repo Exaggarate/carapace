@@ -22,7 +22,7 @@ describe("CLI context-window ownership", () => {
     setCliRunnerPrepareTestDeps({
       isWorkspaceBootstrapPending: async () => false,
       resolveBootstrapContextForRun: async () => ({ bootstrapFiles: [], contextFiles: [] }),
-      resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+      resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
       prepareClaudeCliSkillsPlugin: async () => ({ args: [], cleanup: async () => {} }),
       loadManifestModelCatalog: () => [],
     });

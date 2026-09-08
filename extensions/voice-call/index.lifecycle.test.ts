@@ -1,8 +1,8 @@
 import os from "node:os";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./api.js";
+import type { CarapacePluginApi } from "./api.js";
 import type { VoiceCallRuntime } from "./runtime-entry.js";
 
 vi.mock("./runtime-entry.js", () => ({
@@ -12,8 +12,8 @@ vi.mock("./runtime-entry.js", () => ({
 import plugin from "./index.js";
 import { createVoiceCallRuntime } from "./runtime-entry.js";
 
-type VoiceCallService = Parameters<OpenClawPluginApi["registerService"]>[0];
-type VoiceCallGatewayHandler = Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1];
+type VoiceCallService = Parameters<CarapacePluginApi["registerService"]>[0];
+type VoiceCallGatewayHandler = Parameters<CarapacePluginApi["registerGatewayMethod"]>[1];
 type VoiceCallTool = {
   execute: (toolCallId: string, params: unknown) => Promise<VoiceCallToolResult>;
 };
@@ -63,7 +63,7 @@ function createRuntime(callId: string, toNumber: string, stopImpl?: () => Promis
 function registerVoiceCall(params: {
   config?: Record<string, unknown>;
   logger?: ReturnType<typeof createLogger>;
-  registrationMode?: OpenClawPluginApi["registrationMode"];
+  registrationMode?: CarapacePluginApi["registrationMode"];
 }) {
   let service: VoiceCallService | undefined;
   let toolFactory: VoiceCallToolFactory | undefined;
@@ -77,7 +77,7 @@ function registerVoiceCall(params: {
     registrationMode: params.registrationMode ?? "full",
     config: {},
     pluginConfig: { provider: "mock", ...params.config },
-    runtime: { tts: { textToSpeechTelephony: vi.fn() } } as unknown as OpenClawPluginApi["runtime"],
+    runtime: { tts: { textToSpeechTelephony: vi.fn() } } as unknown as CarapacePluginApi["runtime"],
     logger: params.logger ?? createLogger(),
     registerGatewayMethod: (method, handler) => {
       gatewayHandlers.set(method, handler);
@@ -136,7 +136,7 @@ describe("voice-call runtime lifecycle", () => {
 
   afterEach(() => {
     delete (globalThis as Record<PropertyKey, unknown>)[
-      Symbol.for("openclaw.voice-call.runtimeCoordinator")
+      Symbol.for("carapace.voice-call.runtimeCoordinator")
     ];
     vi.restoreAllMocks();
   });

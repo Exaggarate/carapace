@@ -5,7 +5,7 @@
 import { createHash } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateDevicePairRenameParams } from "@openclaw/gateway-protocol";
+import { validateDevicePairRenameParams } from "@carapace/gateway-protocol";
 import type { Page } from "playwright";
 import { expect, it } from "vitest";
 import type { GatewayServer } from "../../../src/gateway/server-public.ts";
@@ -15,7 +15,7 @@ import {
   requestDevicePairing,
   type PairedDevice,
 } from "../../../src/infra/device-pairing.js";
-import { createOpenClawTestState } from "../../../src/test-utils/openclaw-test-state.ts";
+import { createCarapaceTestState } from "../../../src/test-utils/carapace-test-state.ts";
 import { getFreePort } from "../../../src/test-utils/ports.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
@@ -23,12 +23,12 @@ const suite = createControlUiE2eSuite({
   name: "Control UI device alias rename with a real Gateway",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 // Visual proof rides the behavioral scenario so every captured state is one the
 // assertions above it already proved, at whatever SHA the lane ran.
-const captureEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 async function captureUiProof(page: Page, fileName: string, observed: Record<string, unknown>) {
   if (!captureEnabled) {
@@ -71,7 +71,7 @@ function pairedDeviceProof(device: PairedDevice | undefined) {
 
 /** Confirm the gateway URL dialog. Required on first load; after a reload the UI remembers the confirmed URL and may not ask again. */
 async function confirmGatewayUrl(page: Page, options: { required: boolean }) {
-  const confirmation = page.locator("openclaw-gateway-url-confirmation");
+  const confirmation = page.locator("carapace-gateway-url-confirmation");
   await confirmation
     .waitFor({ state: "visible", timeout: options.required ? 10_000 : 3_000 })
     .catch(() => undefined);
@@ -93,17 +93,17 @@ function devicesPageUrl(gatewayPort: number) {
 suite.define(() => {
   it("persists a Devices-page alias rename through the real Gateway across reload and restart", async () => {
     const port = await getFreePort();
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "control-ui-device-alias-rename",
       layout: "home",
       env: {
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         VITEST: "1",
       },
     });
@@ -170,7 +170,7 @@ suite.define(() => {
 
           await row.locator(".device-entry__menu-trigger").click();
           await page.locator('wa-dropdown-item[value="editAlias"]').click();
-          const dialog = page.locator("openclaw-modal-dialog").last();
+          const dialog = page.locator("carapace-modal-dialog").last();
           await dialog.locator('input[name="value"]').waitFor();
           await captureUiProof(page, "02-real-gateway-alias-dialog-open.png", {
             stage: "rename dialog opened",

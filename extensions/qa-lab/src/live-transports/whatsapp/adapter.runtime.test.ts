@@ -2,13 +2,13 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type {
   WhatsAppQaDriverObservedMessage,
   WhatsAppQaDriverSession,
-} from "@openclaw/whatsapp/api.js";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { runExec } from "openclaw/plugin-sdk/process-runtime";
+} from "@carapace/whatsapp/api.js";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { runExec } from "carapace/plugin-sdk/process-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createQaBusState } from "../../bus-state.js";
 import type { QaGatewayStopResult } from "../../gateway-child.js";
@@ -52,8 +52,8 @@ vi.mock("./whatsapp-live.driver.js", async (importOriginal) => ({
   startWhatsAppQaDriverSessionWithRetry: mocks.startDriver,
 }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/process-runtime")>();
+vi.mock("carapace/plugin-sdk/process-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/process-runtime")>();
   return { ...actual, runExec: vi.fn(actual.runExec) };
 });
 

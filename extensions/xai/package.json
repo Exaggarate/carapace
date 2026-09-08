@@ -1,17 +1,17 @@
 {
-  "name": "@openclaw/xai-plugin",
+  "name": "@carapace/xai-plugin",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw xAI plugin",
+  "description": "Carapace xAI plugin",
   "type": "module",
   "dependencies": {
     "typebox": "1.3.18",
     "ws": "8.21.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

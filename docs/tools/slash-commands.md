@@ -13,7 +13,7 @@ Host-only bash commands use `! <cmd>` (with `/bash <cmd>` as an alias).
 
 When a conversation is bound to an ACP session, normal text routes to the ACP
 harness. Gateway management commands remain local: `/acp ...` always reaches
-the OpenClaw command handler, and `/status` plus `/session` stay local whenever
+the Carapace command handler, and `/status` plus `/session` stay local whenever
 command handling is enabled for the surface.
 
 ## Three command types
@@ -115,11 +115,11 @@ command handling is enabled for the surface.
 </ParamField>
 
 <ParamField path="commands.config" type="boolean" default="false">
-  Enables `/config` (reads/writes `openclaw.json`). Owner-only.
+  Enables `/config` (reads/writes `carapace.json`). Owner-only.
 </ParamField>
 
 <ParamField path="commands.mcp" type="boolean" default="false">
-  Enables `/mcp` (reads/writes OpenClaw-managed MCP config under `mcp.servers`). Owner-only.
+  Enables `/mcp` (reads/writes Carapace-managed MCP config under `mcp.servers`). Owner-only.
 </ParamField>
 
 <ParamField path="commands.plugins" type="boolean" default="false">
@@ -141,13 +141,13 @@ command handling is enabled for the surface.
   non-owners receive a refusal with the exact configuration command for their
   sender ID when using an owner-only command such as `/restart` or `/update`.
   Use `channel:id` (for example, `discord:123456789012345678`). If an upgrade
-  leaves a legacy `channel:user:id` owner entry, run `openclaw doctor --fix`;
+  leaves a legacy `channel:user:id` owner entry, run `carapace doctor --fix`;
   Doctor rewrites recognized channel entries and reports their list positions.
 </ParamField>
 
 Channel plugins can enforce owner-only command access through their
 `enforceOwnerForCommands` policy. This is plugin behavior, not an
-`openclaw.json` setting. A wildcard command allowlist does not bypass it.
+`carapace.json` setting. A wildcard command allowlist does not bypass it.
 
 <ParamField path="commands.allowFrom" type="object">
   Per-provider allowlist for command authorization. When configured, it is the
@@ -282,7 +282,7 @@ plugins.
     | `/goal [status\|start\|edit\|pause\|resume\|complete\|block\|clear] ...` | Manage the current session's durable [goal](/tools/goal) |
     | `/dashboard [request]` | Create or update the current session's dashboard using the Control UI dashboard workflow |
     | `/diagnostics [note]` | Owner-only support-report flow. Asks for exec approval every time |
-    | `/openclaw <request>` | Run the OpenClaw setup and repair helper from an owner DM |
+    | `/carapace <request>` | Run the Carapace setup and repair helper from an owner DM |
     | `/tasks` | List active/recent background tasks for the current session |
     | `/context [list\|detail\|map\|json]` | Explain how context is assembled |
     | `/whoami` | Show your sender id. Alias: `/id` |
@@ -319,12 +319,12 @@ user skill directly.
   <Accordion title="Owner-only writes and admin">
     | Command | Requires | Description |
     | --- | --- | --- |
-    | `/config show\|get\|set\|unset` | `commands.config: true` | Read or write `openclaw.json`. Owner-only |
-    | `/mcp show\|get\|set\|unset` | `commands.mcp: true` | Read or write OpenClaw-managed MCP server config. Owner-only |
+    | `/config show\|get\|set\|unset` | `commands.config: true` | Read or write `carapace.json`. Owner-only |
+    | `/mcp show\|get\|set\|unset` | `commands.mcp: true` | Read or write Carapace-managed MCP server config. Owner-only |
     | `/plugins list\|inspect\|show\|get\|install\|enable\|disable` | `commands.plugins: true` | Inspect or mutate plugin state. Owner-only for writes. Alias: `/plugin` |
     | `/debug show\|set\|unset\|reset` | `commands.debug: true` | Runtime-only config overrides. Owner-only |
-    | `/restart` | `commands.restart: true` (default) | Restart OpenClaw |
-    | `/update` | `commands.restart: true` (default), owner | Update OpenClaw and restart; receive a completion or failure notice in the same chat |
+    | `/restart` | `commands.restart: true` (default) | Restart Carapace |
+    | `/update` | `commands.restart: true` (default), owner | Update Carapace and restart; receive a completion or failure notice in the same chat |
     | `/send on\|off\|inherit` | owner | Set send policy |
   </Accordion>
 
@@ -447,7 +447,7 @@ Without owner/admin authority, bare commands remain session-only and explicit
 /config show
 /config show channels.whatsapp.responsePrefix
 /config get channels.whatsapp.responsePrefix
-/config set channels.whatsapp.responsePrefix="[openclaw]"
+/config set channels.whatsapp.responsePrefix="[carapace]"
 /config unset channels.whatsapp.responsePrefix
 ```
 
@@ -467,7 +467,7 @@ updates persist across restarts.
 /mcp unset context7
 ```
 
-`/mcp` stores config in OpenClaw config, not embedded-agent project settings.
+`/mcp` stores config in Carapace config, not embedded-agent project settings.
 `/mcp show` redacts credential-bearing fields, recognized credential flag
 values, and known secret-shaped arguments. When run from a group, the
 configuration is routed privately to the owner. The group notice distinguishes
@@ -484,7 +484,7 @@ the command asks the owner to retry from a direct chat.
 
 ```text
 /debug show
-/debug set channels.whatsapp.responsePrefix="[openclaw]"
+/debug set channels.whatsapp.responsePrefix="[carapace]"
 /debug set channels.whatsapp.allowFrom=["+1555","+4477"]
 /debug unset channels.whatsapp.responsePrefix
 /debug reset
@@ -503,7 +503,7 @@ the command asks the owner to retry from a direct chat.
 /plugins enable context7
 /plugins disable context7
 /plugins install clawhub:<package>
-/plugins install npm:@openclaw/<official-package>
+/plugins install npm:@carapace/<official-package>
 /plugins install npm:<package> --force
 /plugins install git:<repository>@<ref> --force
 ```
@@ -580,7 +580,7 @@ See [BTW side questions](/tools/btw) for the full behavior.
 
   </Accordion>
   <Accordion title="Slack specifics">
-    `channels.slack.slashCommand` supports a single `/openclaw`-style command.
+    `channels.slack.slashCommand` supports a single `/carapace`-style command.
     With `commands.native: true`, create one Slack slash command per built-in
     command. Register `/agentstatus` (not `/status`) because Slack reserves
     `/status`. Text `/status` still works in Slack messages.
@@ -606,7 +606,7 @@ See [BTW side questions](/tools/btw) for the full behavior.
 
 - **Provider usage/quota** (e.g., "Claude 80% left") shows in `/status` for the current model provider when usage tracking is enabled.
 - **Token/cache lines** in `/status` can fall back to the latest transcript usage entry when the live session snapshot is sparse.
-- **Execution vs runtime:** `/status` reports `Execution` for the effective sandbox path and `Runtime` for who is running the session: `OpenClaw Default`, `OpenAI Codex`, a CLI backend, or an ACP backend.
+- **Execution vs runtime:** `/status` reports `Execution` for the effective sandbox path and `Runtime` for who is running the session: `Carapace Default`, `OpenAI Codex`, a CLI backend, or an ACP backend.
 - **Per-response tokens/cost:** controlled by `/usage off|tokens|full`.
 - `/model status` is about models/auth/endpoints, not usage.
 

@@ -40,7 +40,7 @@ vi.mock("./stale-chunk-reload.ts", async (importOriginal) => {
   };
 });
 
-const storageKey = "openclaw:lazy-event";
+const storageKey = "carapace:lazy-event";
 
 type ShellLifecycle = {
   connectedCallback(): void;
@@ -74,7 +74,7 @@ type PaletteShell = HTMLElement &
   };
 
 function paletteShell(element: TestOptionalCustomElement, open: () => void): PaletteShell {
-  const shell = document.createElement("openclaw-app-shell") as PaletteShell;
+  const shell = document.createElement("carapace-app-shell") as PaletteShell;
   shell.commandPaletteElement = element;
   Object.defineProperty(shell, "updateComplete", { get: () => Promise.resolve(true) });
   Object.defineProperty(shell, "commandPalette", {
@@ -97,7 +97,7 @@ describe("lazy shell action storage", () => {
   it.each([
     "{",
     JSON.stringify({ eventType: COMMAND_PALETTE_OPEN_EVENT, extra: true }),
-    JSON.stringify({ eventType: "openclaw:unknown", detail: {} }),
+    JSON.stringify({ eventType: "carapace:unknown", detail: {} }),
     JSON.stringify({ eventType: TERMINAL_PANEL_TOGGLE_EVENT, detail: [] }),
   ])("discards malformed state: %s", (raw) => {
     const storage = createStorageMock();
@@ -223,7 +223,7 @@ describe("shell lazy events", () => {
   it("requests the keyboard shortcuts dialog even from a focused text input", async () => {
     const requested = vi.fn();
     const toggled = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState &
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellKeyboardState &
       ShellLifecycle &
       HTMLElement;
     const dialog = document.createElement(KEYBOARD_SHORTCUTS_ELEMENT.tagName) as HTMLElement & {
@@ -273,7 +273,7 @@ describe("shell lazy events", () => {
 
   it("loads the debug overlay shortcut and ignores editable targets", async () => {
     const toggled = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState &
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellKeyboardState &
       ShellLifecycle &
       HTMLElement;
     const overlay = document.createElement(DEBUG_OVERLAY_ELEMENT.tagName) as HTMLElement & {
@@ -315,7 +315,7 @@ describe("shell lazy events", () => {
   it("opens approvals after the modal module loads", async () => {
     const element = createLazyElementSpec("exec approval modal");
     const show = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellLifecycle & {
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellLifecycle & {
       approvalOverlay?: { show(): void };
       execApprovalElement: TestOptionalCustomElement;
       openApprovals(): void;

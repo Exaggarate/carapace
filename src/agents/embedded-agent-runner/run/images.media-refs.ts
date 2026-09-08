@@ -23,14 +23,14 @@ export type MediaImageRef = MediaFileRef & {
   workspaceDir?: string;
 };
 
-export function isOpenClawCliImageCachePath(filePath: string): boolean {
+export function isCarapaceCliImageCachePath(filePath: string): boolean {
   const parts = filePath.replaceAll("\\", "/").split("/");
   return parts.some((part, index) => {
-    if (part === ".openclaw-cli-images") {
+    if (part === ".carapace-cli-images") {
       return true;
     }
     const parent = parts[index - 1] ?? "";
-    return part === "openclaw-cli-images" && /^openclaw(?:-\d+)?$/.test(parent);
+    return part === "carapace-cli-images" && /^carapace(?:-\d+)?$/.test(parent);
   });
 }
 
@@ -85,7 +85,7 @@ function mediaFactToImageRef(fact: MediaFact, factIndex: number): MediaImageRef 
   }
   const localRef = resolveMediaFactLocalRef(fact);
   const hydrate = fact.hydrationSuppressed !== true;
-  if (!localRef || isOpenClawCliImageCachePath(localRef.resolved)) {
+  if (!localRef || isCarapaceCliImageCachePath(localRef.resolved)) {
     return {
       aliases: [fact.path, fact.url].filter((value): value is string => Boolean(value)),
       detect: false,

@@ -1,5 +1,5 @@
-import type { AgentMessage, SessionTreeEntry } from "@openclaw/agent-core";
-import { isCompactionReplayCheckpoint } from "@openclaw/ai/transports";
+import type { AgentMessage, SessionTreeEntry } from "@carapace/agent-core";
+import { isCompactionReplayCheckpoint } from "@carapace/ai/transports";
 import { sql } from "kysely";
 import {
   iterateSessionContextEntries,
@@ -12,8 +12,8 @@ import {
 } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
 import type { UserTurnTranscriptAdmissionReceipt } from "../../sessions/user-turn-transcript.types.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type {
   SessionTranscriptReadScope,
   TranscriptEvent,
@@ -61,7 +61,7 @@ type TranscriptContextSnapshot = {
 const MODEL_CONTEXT_PAYLOAD_BATCH_SIZE = 400;
 
 function assertContextAnchor(
-  database: Pick<OpenClawAgentDatabase, "db" | "path">,
+  database: Pick<CarapaceAgentDatabase, "db" | "path">,
   resolved: ReturnType<typeof resolveSqliteTranscriptReadScope>,
   through: TranscriptEntryAnchor,
 ): void {
@@ -96,7 +96,7 @@ export function validateSessionTranscriptContextAnchor(
   through: TranscriptEntryAnchor,
 ): void {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => assertContextAnchor(database, resolved, through),
     toDatabaseOptions(resolved),
     { throwOnMissingTable: true },
@@ -112,7 +112,7 @@ export function validateSessionTranscriptContextVersion(
   version: SessionTranscriptContextVersion | undefined,
 ): void {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => readTranscriptContextVersionInTransaction(database, resolved.sessionId),
     toDatabaseOptions(resolved),
     { throwOnMissingTable: true },
@@ -133,7 +133,7 @@ export function validateSessionTranscriptContextAdmission(
   }
   const resolved = resolveSqliteTranscriptReadScope(scope);
   const result = runWithSessionTranscriptReadFence(admission, () =>
-    withOpenClawAgentDatabaseReadOnly(
+    withCarapaceAgentDatabaseReadOnly(
       (database) => resolveSqliteSessionTranscriptReadFence({ database, ...resolved }),
       toDatabaseOptions(resolved),
       { throwOnMissingTable: true },
@@ -207,7 +207,7 @@ function withTranscriptContextSnapshot<T>(
   through?: TranscriptEntryAnchor,
 ): { found: true; value: T } | { found: false } {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) =>
       runSqliteDeferredTransactionSync(
         database.db,

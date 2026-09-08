@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_OWNER_PROFILE_ID } from "../../../packages/gateway-protocol/src/schema/users.js";
 import { createDeferred } from "../../../test/helpers/promise.js";
@@ -15,7 +15,7 @@ import {
   finishUpdateRun,
   recordUpdateRunPhase,
 } from "../../infra/update-run-ledger.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createTempHomeEnv, type TempHomeEnv } from "../../test-utils/temp-home.js";
 import { createAgentRuntimeApprovalAuthorityValidator } from "../agent-runtime-identity-token.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
@@ -58,7 +58,7 @@ vi.mock("../server-restart-sentinel.js", () => ({
 
 const { updateReportHandler } = await import("./update-report.js");
 const runId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
-const issueUrl = "https://github.com/openclaw/openclaw/issues/123";
+const issueUrl = "https://github.com/Exaggarate/carapace/issues/123";
 let home: TempHomeEnv;
 
 type ClientAuthority = Pick<
@@ -151,7 +151,7 @@ async function preview(authority?: ClientAuthority) {
 
 async function reportFiles() {
   return await fs
-    .readdir(path.join(home.home, ".openclaw", "update-reports"))
+    .readdir(path.join(home.home, ".carapace", "update-reports"))
     .catch((error: unknown) => {
       if (isRecord(error) && error.code === "ENOENT") {
         return [];
@@ -161,7 +161,7 @@ async function reportFiles() {
 }
 
 beforeEach(async () => {
-  home = await createTempHomeEnv("openclaw-update-report-run-");
+  home = await createTempHomeEnv("carapace-update-report-run-");
   mocks.select.mockReset().mockResolvedValue("report");
   mocks.confirm.mockReset().mockResolvedValue(true);
   mocks.sentinel.mockReset().mockResolvedValue(null);
@@ -172,7 +172,7 @@ beforeEach(async () => {
   }));
 });
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await home.restore();
 });
 
@@ -329,7 +329,7 @@ describe("Report action from the authoritative update ledger", () => {
       const createPhases = () =>
         mocks.runGh.mock.calls.map(([args]) => args[0]).filter((kind) => kind !== "issue");
       expect(createPhases()).toEqual(["auth", "api"]);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(readUpdateFailureReportReceipt(runId)).toMatchObject({ status: outcome });
 
       const { body, previewDigest } = await preview();
@@ -463,7 +463,7 @@ describe("Report action from the authoritative update ledger", () => {
     });
     const params = { action: "submit", attemptId: runId, previewDigest };
     await invoke(params, () => true, authority);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(readUpdateFailureReportReceipt(runId)).toMatchObject({
       status: "created",
       url: issueUrl,

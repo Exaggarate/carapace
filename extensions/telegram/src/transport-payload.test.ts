@@ -1,12 +1,12 @@
 import { buffer } from "node:stream/consumers";
 import { Bot } from "grammy";
 import type { Message } from "grammy/types";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTelegramCallbackMessageActions } from "./bot-handlers.callback-actions.js";
 import { buildTelegramMessageContextForTest } from "./bot-message-context.test-harness.js";
@@ -49,8 +49,8 @@ const DIRECT_CHAT_ID = -100321;
 const DIRECT_TOPIC_ID = 77;
 const cfg = {
   channels: { telegram: { botToken: TOKEN } },
-  session: { store: "/tmp/openclaw-telegram-transport-payload-test.json" },
-} satisfies OpenClawConfig;
+  session: { store: "/tmp/carapace-telegram-transport-payload-test.json" },
+} satisfies CarapaceConfig;
 
 function directMessagesMessage(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
@@ -263,7 +263,7 @@ describe("Telegram topic transport payloads", () => {
     const richCfg = {
       ...cfg,
       channels: { telegram: { botToken: TOKEN, richMessages: true } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     await sendMessageTelegram(`${DIRECT_CHAT_ID}:direct-topic:${DIRECT_TOPIC_ID}`, "**rich**", {
       cfg: richCfg,
       token: TOKEN,

@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { gunzipSync } from "node:zlib";
 import { afterAll, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { repairAuditEventsSchema } from "../state/openclaw-state-db-audit-migration.js";
+import { repairAuditEventsSchema } from "../state/carapace-state-db-audit-migration.js";
 import {
   createSourceRuntime,
   runSourceRuntime,
@@ -35,7 +35,7 @@ function manifest(root: string): Record<string, string> {
 
 function schemaMetadata(databasePath: string) {
   // Inspect a private copy: opening a consolidated WAL database can itself create a WAL.
-  const root = tempDirs.make("openclaw-admission-schema-");
+  const root = tempDirs.make("carapace-admission-schema-");
   const copy = path.join(root, "database.sqlite");
   for (const suffix of ["", "-wal", "-shm"]) {
     if (fs.existsSync(`${databasePath}${suffix}`)) {
@@ -114,7 +114,7 @@ describe("startup admission before persistent writes", () => {
       config: "local",
       consolidated: true,
       invalidPlugin: true,
-      reason: "OpenClaw config is invalid",
+      reason: "Carapace config is invalid",
     },
     {
       name: "missing gateway.mode",
@@ -142,21 +142,21 @@ describe("startup admission before persistent writes", () => {
       repairedSession,
       restored,
     }) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-startup-admission-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-startup-admission-"));
       const runtimeRoot = createSourceRuntime(root);
       const stateDir = path.join(root, "state");
       const workspaceDir = path.join(
         stateDir,
         config === "clobbered" ? "recovered-workspace" : "workspace",
       );
-      const configPath = path.join(stateDir, "openclaw.json");
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const configPath = path.join(stateDir, "carapace.json");
+      const databasePath = path.join(stateDir, "state", "carapace.sqlite");
       fs.mkdirSync(path.dirname(databasePath), { recursive: true });
       fs.mkdirSync(path.join(stateDir, "agents", "main", "agent"), { recursive: true });
       fs.mkdirSync(workspaceDir);
       fs.writeFileSync(
         databasePath,
-        gunzipSync(fs.readFileSync("test/fixtures/sqlite/openclaw-state-v2026.7.1-2.sqlite.gz")),
+        gunzipSync(fs.readFileSync("test/fixtures/sqlite/carapace-state-v2026.7.1-2.sqlite.gz")),
       );
       // Repair only the audit blocker; released schema 1 still needs automatic migration.
       // Keeping this idle connection open retains a real WAL in the manifest.
@@ -196,7 +196,7 @@ describe("startup admission before persistent writes", () => {
             fs.copyFileSync(configPath, `${configPath}.bak`);
             fs.writeFileSync(
               configPath,
-              '{"update":{"channel":"stable"},"env":{"vars":{"OPENCLAW_GATEWAY_TOKEN":"discarded-test-token"}}}\n',
+              '{"update":{"channel":"stable"},"env":{"vars":{"CARAPACE_GATEWAY_TOKEN":"discarded-test-token"}}}\n',
             );
           }
         }
@@ -207,7 +207,7 @@ describe("startup admission before persistent writes", () => {
         }
         if (workspace) {
           fs.writeFileSync(
-            path.join(workspaceDir, "openclaw-workspace-state.json"),
+            path.join(workspaceDir, "carapace-workspace-state.json"),
             JSON.stringify({
               version: 1,
               bootstrapSeededAt: "2026-07-02T00:00:00.000Z",
@@ -222,7 +222,7 @@ describe("startup admission before persistent writes", () => {
         const schemaBefore = schemaMetadata(databasePath);
         const before = manifest(stateDir);
         expect(schemaBefore.userVersion).toBe(1);
-        expect(Boolean(before[path.join("state", "openclaw.sqlite-wal")])).toBe(!consolidated);
+        expect(Boolean(before[path.join("state", "carapace.sqlite-wal")])).toBe(!consolidated);
         const entry =
           workspace || repairedSession
             ? `
@@ -236,7 +236,7 @@ describe("startup admission before persistent writes", () => {
           commandPath: ["gateway", "run"],
           runtime: { log: console.log, error: console.error, exit(code) { throw new ExitError(code); } },
         });
-        if (${Boolean(restored)} && process.env.OPENCLAW_GATEWAY_TOKEN) {
+        if (${Boolean(restored)} && process.env.CARAPACE_GATEWAY_TOKEN) {
           throw new Error("Discarded clobbered config environment leaked through admission.");
         }
       `;
@@ -246,12 +246,12 @@ describe("startup admission before persistent writes", () => {
             PATH: process.env.PATH,
             HOME: root,
             USERPROFILE: root,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_WORKSPACE_DIR:
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_WORKSPACE_DIR:
               config === "clobbered" ? path.join(stateDir, "empty-workspace") : workspaceDir,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-            OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
             NO_COLOR: "1",
           },
           [

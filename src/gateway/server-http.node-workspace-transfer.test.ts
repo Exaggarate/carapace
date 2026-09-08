@@ -68,7 +68,7 @@ describe("node worker bundle transfer HTTP routing", () => {
       bundleCallback: callback,
       hooks,
       run: async (origin) => {
-        const url = `${origin}/__openclaw__/worker-bundle/v1/bundles/${"a".repeat(64)}`;
+        const url = `${origin}/__carapace__/worker-bundle/v1/bundles/${"a".repeat(64)}`;
         const missing = await fetch(url);
         const rejected = await fetch(url, {
           headers: { authorization: "Bearer rejected-transfer-token" },
@@ -105,7 +105,7 @@ describe("node worker bundle transfer HTTP routing", () => {
       run: async (origin) => {
         const bundleHash = "b".repeat(64);
         const response = await fetch(
-          `${origin}/__openclaw__/worker-bundle/v1/bundles/${bundleHash}`,
+          `${origin}/__carapace__/worker-bundle/v1/bundles/${bundleHash}`,
           { headers: { authorization: "Bearer valid-bundle-token" } },
         );
 
@@ -136,11 +136,11 @@ describe("cloud bootstrap artifact HTTP routing", () => {
       hooks,
       run: async (origin) => {
         const digest = "c".repeat(64);
-        const url = `${origin}/__openclaw__/worker-bootstrap/artifacts/${digest}`;
+        const url = `${origin}/__carapace__/worker-bootstrap/artifacts/${digest}`;
         for (const target of [
           url,
           `${url}?token=bootstrap-capability`,
-          `${origin}/__openclaw__/worker-bootstrap/invalid`,
+          `${origin}/__carapace__/worker-bootstrap/invalid`,
         ]) {
           const response = await fetch(target);
           expect(response.status).toBe(404);
@@ -168,7 +168,7 @@ describe("node workspace transfer HTTP routing", () => {
       callback,
       hooks,
       run: async (origin) => {
-        const path = `/__openclaw__/worker-transfer/v1/environments/worker%3Afixture/snapshots/${"a".repeat(64)}/pack`;
+        const path = `/__carapace__/worker-transfer/v1/environments/worker%3Afixture/snapshots/${"a".repeat(64)}/pack`;
         const missing = await fetch(`${origin}${path}`);
         const rejected = await fetch(`${origin}${path}`, {
           headers: { authorization: "Bearer rejected-transfer-token" },
@@ -207,7 +207,7 @@ describe("node workspace transfer HTTP routing", () => {
     await withTransferServer({
       callback,
       run: async (origin) => {
-        const base = `${origin}/__openclaw__/worker-transfer/v1/environments/worker%3Afixture`;
+        const base = `${origin}/__carapace__/worker-transfer/v1/environments/worker%3Afixture`;
         const authorization = { authorization: "Bearer valid-transfer-token" };
         const manifest = await fetch(`${base}/snapshots/${"a".repeat(64)}/manifest`, {
           headers: authorization,
@@ -275,7 +275,7 @@ describe("node workspace transfer HTTP routing", () => {
       callback,
       limiter,
       run: async (origin) => {
-        const transferRoot = `${origin}/__openclaw__/worker-transfer/v1/environments/worker%3Afixture`;
+        const transferRoot = `${origin}/__carapace__/worker-transfer/v1/environments/worker%3Afixture`;
         const url = `${transferRoot}/snapshots/${"a".repeat(64)}/pack`;
         const rejected = await fetch(url, {
           headers: { authorization: "Bearer rejected-transfer-token" },

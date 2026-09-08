@@ -1,4 +1,4 @@
-import type { Context } from "@openclaw/llm-core";
+import type { Context } from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   anthropicModel,

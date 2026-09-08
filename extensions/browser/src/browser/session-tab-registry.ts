@@ -2,7 +2,7 @@
  * Session-owned browser tabs. Host-local durable ownership is canonical in
  * plugin SQLite; all other tabs remain process-local.
  */
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CloseTrackedCdpTargetResult } from "./cdp.helpers.js";
 import type { BrowserTabOwnership } from "./client.types.js";
 import type { ResolvedBrowserConfig } from "./config.js";

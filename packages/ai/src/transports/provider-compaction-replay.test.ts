@@ -1,4 +1,4 @@
-import type { AssistantMessage, Context, Model, ProviderReplayState } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model, ProviderReplayState } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import { createZeroUsage } from "../usage.test-support.js";
 import {
@@ -208,7 +208,7 @@ describe("bounded compaction replay projection", () => {
   it.each([
     "azure-openai-responses",
     "openai-chatgpt-responses",
-    "openclaw-openai-responses-transport",
+    "carapace-openai-responses-transport",
   ])("preserves checkpoints on the %s Responses API route", (api) => {
     const route = { ...model, api };
     const owner = createAssistant([{ type: "text", text: "covered" }], 1);
@@ -283,7 +283,7 @@ describe("bounded compaction replay projection", () => {
     ).toThrow(CompactionReplayRefreshRequiredError);
   });
 
-  it.each(["anthropic-messages", "openclaw-anthropic-messages-transport"])(
+  it.each(["anthropic-messages", "carapace-anthropic-messages-transport"])(
     "projects %s summaries through their own replay owner",
     (api) => {
       const anthropic = {

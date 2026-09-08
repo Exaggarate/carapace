@@ -6,7 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { setImmediate } from "node:timers/promises";
 import { promisify } from "node:util";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createChromeMcpSession } from "./chrome-mcp-connect.js";
 import { buildChromeMcpSessionCacheKey } from "./chrome-mcp-options.js";

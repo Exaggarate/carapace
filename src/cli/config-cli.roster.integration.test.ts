@@ -25,7 +25,7 @@ describe("config cli roster integration", () => {
       secrets: { providers: { default: { source: "env" } } },
     });
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-renamed-ref-",
+      "carapace-config-cli-roster-renamed-ref-",
       raw,
       async ({ configPath }) => {
         const envSnapshot = captureEnv(["MISSING_TEST_SECRET"]);
@@ -116,7 +116,7 @@ describe("config cli roster integration", () => {
       };
       const raw = `${JSON.stringify({ agents })}\n`;
       await withConfigFileHarness(
-        "openclaw-config-cli-roster-",
+        "carapace-config-cli-roster-",
         raw,
         async ({ configPath, tempDir }) => {
           const patchPath = path.join(tempDir, "patch.json");
@@ -140,7 +140,7 @@ describe("config cli roster integration", () => {
     const entries = { "1": { name: "first" }, "2": { name: "second" } };
     const raw = `${JSON.stringify({ agents: { ownership: "explicit", entries } })}\n`;
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-order-",
+      "carapace-config-cli-roster-order-",
       raw,
       async ({ configPath }) => {
         const args = [
@@ -184,7 +184,7 @@ describe("config cli roster integration", () => {
         gateway: { port: 19001 },
       });
       await withConfigFileHarness(
-        "openclaw-config-cli-roster-env-",
+        "carapace-config-cli-roster-env-",
         raw,
         async ({ configPath, tempDir }) => {
           const envSnapshot = captureEnv(["ROSTER_WORKSPACE", "ROSTER_SKILL", "ROSTER_NAME"]);
@@ -230,7 +230,7 @@ describe("config cli roster integration", () => {
   ])("honors mixed patch ordering when $name", async ({ removed, main }) => {
     const raw = JSON.stringify({ agents: { ownership: "explicit", entries: originalEntries } });
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-patch-order-",
+      "carapace-config-cli-roster-patch-order-",
       raw,
       async ({ configPath, tempDir }) => {
         const patchPath = path.join(tempDir, "patch.json");
@@ -274,7 +274,7 @@ describe("config cli roster integration", () => {
       },
     });
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-source-order-",
+      "carapace-config-cli-roster-source-order-",
       raw,
       async ({ configPath }) => {
         const args =
@@ -339,7 +339,7 @@ describe("config cli roster integration", () => {
   ])("validates the final $name replacement instead of a discarded roster", async (scenario) => {
     const raw = JSON.stringify({ agents: { ownership: "explicit", entries: originalEntries } });
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-final-replacement-",
+      "carapace-config-cli-roster-final-replacement-",
       raw,
       async ({ configPath, tempDir }) => {
         const patchPath = path.join(tempDir, "replacement.json");
@@ -365,7 +365,7 @@ describe("config cli roster integration", () => {
     async (modelPath) => {
       const raw = JSON.stringify({ agents: { entries: { main: { name: "unchanged" } } } });
       await withConfigFileHarness(
-        "openclaw-config-cli-roster-model-",
+        "carapace-config-cli-roster-model-",
         raw,
         async ({ configPath }) => {
           await expect(
@@ -380,7 +380,7 @@ describe("config cli roster integration", () => {
           expect(registeredRuntimeErrors.join("\n")).toContain(
             'Cannot set model reference "<configured model reference>" at agents.entries.main.model',
           );
-          expect(registeredRuntimeErrors.join("\n")).toContain("openclaw models list");
+          expect(registeredRuntimeErrors.join("\n")).toContain("carapace models list");
         },
       );
     },
@@ -396,7 +396,7 @@ describe("config cli roster integration", () => {
   ])("does not write a legacy roster with $name", async ({ list, error }) => {
     const raw = JSON.stringify({ agents: { ownership: "explicit", entries: originalEntries } });
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-reject-",
+      "carapace-config-cli-roster-reject-",
       raw,
       async ({ configPath }) => {
         await expect(
@@ -437,7 +437,7 @@ describe("config cli roster integration", () => {
     const changedStore = input.endsWith("store");
     const prepareCronOwner = vi.spyOn(cronOwnerRefusal, "prepareCronOwnerWriteRefusal");
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-owner-",
+      "carapace-config-cli-roster-owner-",
       "{}",
       async ({ configPath, tempDir }) => {
         const workspace = path.join(fs.realpathSync(tempDir), "existing-workspace");
@@ -596,7 +596,7 @@ describe("config cli roster integration", () => {
   ])("refuses $name without changing the config", async (scenario) => {
     const raw = JSON.stringify({ agents: scenario.sourceAgents ?? { entries: { main: {} } } });
     await withConfigFileHarness(
-      "openclaw-config-cli-roster-invalid-owner-",
+      "carapace-config-cli-roster-invalid-owner-",
       raw,
       async ({ configPath }) => {
         const args = [

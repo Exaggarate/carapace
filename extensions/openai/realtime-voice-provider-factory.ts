@@ -1,13 +1,13 @@
-import type { PluginLogger } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginLogger } from "carapace/plugin-sdk/plugin-entry";
 import type {
   RealtimeVoiceBrowserSession,
   RealtimeVoiceBrowserSessionCreateRequest,
   RealtimeVoiceProviderCapabilities,
   RealtimeVoiceProviderConfig,
   RealtimeVoiceProviderPlugin,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ } from "openclaw/plugin-sdk/realtime-voice-provider";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/realtime-voice";
+import { REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ } from "carapace/plugin-sdk/realtime-voice-provider";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { projectRealtimeVoicePublicProjection } from "./provider-policy-api.js";
 import { resolveOpenAIChatGptSubscriptionAuth } from "./realtime-auth.js";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
@@ -113,7 +113,7 @@ type OpenAIInternalRealtimeVoiceProviderApi = {
   ) => Promise<void> | void;
 };
 
-const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("openclaw.internal.realtime-voice-provider.v1");
+const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("carapace.internal.realtime-voice-provider.v1");
 
 function buildOpenAIRealtimeBrowserSessionConfig(
   req: OpenAIInternalRealtimeBrowserSessionCreateRequest,

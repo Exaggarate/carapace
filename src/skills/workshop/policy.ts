@@ -1,7 +1,7 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { PLUGIN_APPROVAL_DESCRIPTION_MAX_LENGTH } from "../../infra/plugin-approvals.js";
 import { logDebug } from "../../logger.js";
 import type { PluginHookBeforeToolCallResult } from "../../plugins/hook-before-tool-call-result.js";
@@ -95,7 +95,7 @@ function buildLifecycleApprovalDescription(params: {
 async function resolveLifecycleApprovalDescription(params: {
   toolParams: unknown;
   workspaceDir?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   fallback: string;
 }): Promise<{
@@ -152,7 +152,7 @@ function lifecycleApprovalTimeoutReason(params: {
   return [
     "The Skill Workshop approval request expired without a decision.",
     `This lifecycle call left ${proposal} unchanged and pending; check its current status in case another operator acted on it.`,
-    "Decide in the Skill Workshop UI or run `openclaw skills workshop apply|reject|quarantine <id>`.",
+    "Decide in the Skill Workshop UI or run `carapace skills workshop apply|reject|quarantine <id>`.",
     "Do not retry this tool call in a loop.",
   ].join(" ");
 }
@@ -161,7 +161,7 @@ function lifecycleApprovalTimeoutReason(params: {
 export async function resolveSkillWorkshopToolApproval(params: {
   toolName: string;
   toolParams: unknown;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   agentId?: string;
 }): Promise<PluginHookBeforeToolCallResult | undefined> {

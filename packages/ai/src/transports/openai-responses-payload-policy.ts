@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 /**
  * OpenAI Responses payload policy.
  * Classifies endpoint capabilities and applies store, prompt-cache,
@@ -7,7 +7,7 @@ import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
 import {
   normalizeOptionalLowercaseString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { supportsOpenAIReasoningEffort } from "../providers/openai-reasoning-effort.js";
 import { OPENAI_RESPONSES_APIS } from "./openai-responses-contracts.js";
 import { parsePositiveInteger } from "./transport-utils.js";
@@ -246,7 +246,7 @@ function resolveOpenAIResponsesPayloadCapabilities(
   const usesExplicitProxyLikeEndpoint = usesConfiguredBaseUrl && !usesKnownNativeOpenAIEndpoint;
   // Recognizing a hostname (routing it to a named endpointClass) is not the
   // same as having confirmed that host's Responses API honors `instructions`
-  // -- OpenClaw bundles many named classes (Cerebras, Groq, Mistral,
+  // -- Carapace bundles many named classes (Cerebras, Groq, Mistral,
   // OpenCode, GitHub Copilot, ...) purely for SSRF/base-URL matching and
   // other unrelated capability detection, with no contract proof either way
   // for `instructions` specifically. Only two routes are actually verified:
@@ -280,18 +280,18 @@ function resolveOpenAIResponsesPayloadCapabilities(
   return {
     allowsOpenAIServiceTier:
       (provider === "openai" &&
-        (api === "openai-responses" || api === "openclaw-openai-responses-transport") &&
+        (api === "openai-responses" || api === "carapace-openai-responses-transport") &&
         endpointClass === "openai-public") ||
       (isOpenAIProvider &&
         (api === "openai-chatgpt-responses" ||
-          api === "openclaw-openai-chatgpt-responses-transport" ||
+          api === "carapace-openai-chatgpt-responses-transport" ||
           api === "openai-responses" ||
-          api === "openclaw-openai-responses-transport") &&
+          api === "carapace-openai-responses-transport") &&
         endpointClass === "openai"),
     allowsResponsesStore:
       supportsResponsesStoreField &&
       api !== "openai-chatgpt-responses" &&
-      api !== "openclaw-openai-chatgpt-responses-transport" &&
+      api !== "carapace-openai-chatgpt-responses-transport" &&
       provider !== undefined &&
       OPENAI_RESPONSES_PROVIDERS.has(provider) &&
       usesKnownNativeOpenAIEndpoint,

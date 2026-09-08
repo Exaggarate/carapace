@@ -6,8 +6,8 @@ import { constants as fsConstants, existsSync, realpathSync } from "node:fs";
 import { access } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/global-singleton";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { resolveGlobalSingleton } from "carapace/plugin-sdk/global-singleton";
 import type { CodexAppServerStartOptions, CodexManagedCommandOrder } from "./config.js";
 import { resolveMacOSDesktopCodexAppServerCommandCandidates } from "./desktop-app-paths.js";
 import { MANAGED_CODEX_APP_SERVER_PACKAGE } from "./version.js";
@@ -15,7 +15,7 @@ import { MANAGED_CODEX_APP_SERVER_PACKAGE } from "./version.js";
 // Registration and lazy runtime artifacts can load separate module copies.
 // They must resolve dependencies from the same loader-owned plugin root.
 const registeredCodexPlugin = resolveGlobalSingleton<{ root?: string }>(
-  Symbol.for("openclaw.codexManagedPluginRoot"),
+  Symbol.for("carapace.codexManagedPluginRoot"),
   () => ({}),
 );
 
@@ -32,7 +32,7 @@ type ResolveManagedCodexNativeCommandOptions = {
   resolvePackageJson?: (packageName: string, root: string) => string | undefined;
 };
 
-/** Records the process-stable plugin root prepared by OpenClaw's plugin loader. */
+/** Records the process-stable plugin root prepared by Carapace's plugin loader. */
 export function setManagedCodexPluginRoot(pluginRoot: string | undefined): void {
   registeredCodexPlugin.root = pluginRoot;
 }
@@ -258,8 +258,8 @@ async function findManagedCodexAppServerCommandPaths(params: {
   throw new Error(
     [
       `Managed Codex app-server binary was not found for ${MANAGED_CODEX_APP_SERVER_PACKAGE}.`,
-      "Reinstall or update OpenClaw, or run pnpm install in a source checkout.",
-      "Set plugins.entries.codex.config.appServer.command or OPENCLAW_CODEX_APP_SERVER_BIN to use a custom Codex binary.",
+      "Reinstall or update Carapace, or run pnpm install in a source checkout.",
+      "Set plugins.entries.codex.config.appServer.command or CARAPACE_CODEX_APP_SERVER_BIN to use a custom Codex binary.",
     ].join(" "),
   );
 }

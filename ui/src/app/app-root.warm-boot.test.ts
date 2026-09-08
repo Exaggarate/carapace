@@ -1,17 +1,17 @@
 /* @vitest-environment jsdom */
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "../components/login-gate.ts";
 import { i18n } from "../i18n/index.ts";
 import { createStorageMock } from "../test-helpers/storage.ts";
 import "./app-host.ts";
-import type { OpenClawApp } from "./app-root.ts";
+import type { CarapaceApp } from "./app-root.ts";
 import type { BootRecord } from "./boot-record.ts";
 import { bootstrapApplication, type ApplicationRuntime } from "./bootstrap.ts";
 import { loadSettings, persistSessionToken } from "./settings.ts";
 
-const BOOT_RECORD_PREFIX = "openclaw.control.bootRecord.v1:";
+const BOOT_RECORD_PREFIX = "carapace.control.bootRecord.v1:";
 
 let runtime: ApplicationRuntime | undefined;
 let previousUrl: string;
@@ -49,7 +49,7 @@ function createWarmSurface(warm = true) {
     localStorage.setItem(BOOT_RECORD_PREFIX + scope, JSON.stringify(record));
   }
   runtime = bootstrapApplication();
-  const app = document.createElement("openclaw-app") as OpenClawApp;
+  const app = document.createElement("carapace-app") as CarapaceApp;
   Object.assign(app, { runtime });
   const snapshot = runtime.context.gateway.snapshot;
   snapshot.phase = "connecting";
@@ -64,23 +64,23 @@ describe("warm boot app root", () => {
     const { container, draw } = createWarmSurface();
     draw();
 
-    expect(container.querySelector("openclaw-app-shell")).not.toBeNull();
+    expect(container.querySelector("carapace-app-shell")).not.toBeNull();
     expect(container.querySelector(".connect-splash")).toBeNull();
-    expect(container.querySelector("openclaw-login-gate")).toBeNull();
+    expect(container.querySelector("carapace-login-gate")).toBeNull();
   });
 
   it("returns to the login gate after a warm connection fails", () => {
     const { snapshot, container, draw } = createWarmSurface();
     draw();
-    expect(container.querySelector("openclaw-app-shell")).not.toBeNull();
+    expect(container.querySelector("carapace-app-shell")).not.toBeNull();
 
     snapshot.phase = "offline";
     snapshot.lastError = "Authentication rejected";
     snapshot.lastErrorCode = "AUTH_TOKEN_MISMATCH";
     draw();
 
-    expect(container.querySelector("openclaw-login-gate")).not.toBeNull();
-    expect(container.querySelector("openclaw-app-shell")).toBeNull();
+    expect(container.querySelector("carapace-login-gate")).not.toBeNull();
+    expect(container.querySelector("carapace-app-shell")).toBeNull();
   });
 
   it("keeps cold first connections on the existing splash", () => {
@@ -88,7 +88,7 @@ describe("warm boot app root", () => {
     draw();
 
     expect(container.querySelector(".connect-splash")).not.toBeNull();
-    expect(container.querySelector("openclaw-app-shell")).toBeNull();
+    expect(container.querySelector("carapace-app-shell")).toBeNull();
   });
 
   it.each(["connecting", "starting"] as const)(
@@ -99,9 +99,9 @@ describe("warm boot app root", () => {
       snapshot.phase = phase;
       draw();
 
-      expect(container.querySelector("openclaw-app-shell")).toBeNull();
+      expect(container.querySelector("carapace-app-shell")).toBeNull();
       expect(
-        container.querySelector(phase === "starting" ? ".connect-splash" : "openclaw-login-gate"),
+        container.querySelector(phase === "starting" ? ".connect-splash" : "carapace-login-gate"),
       ).not.toBeNull();
     },
   );

@@ -67,7 +67,7 @@ describe("GatewayChatClient", () => {
 
       expect(constructedOptions).toHaveLength(1);
       expect(constructedOptions[0]).toMatchObject({
-        clientName: "openclaw-tui",
+        clientName: "carapace-tui",
         caps: ["agent-kind", "plugin-approvals", "task-suggestions", "tool-events"],
         mode: "ui",
         scopes: ["operator.admin", "operator.read", "operator.write", "operator.approvals"],
@@ -99,7 +99,7 @@ describe("GatewayChatClient", () => {
       expect(onConnectError).toHaveBeenCalledExactlyOnceWith(connectError);
       expect(connectError.message).toContain("Pairing request sent.");
       expect(connectError.message).toContain("Control UI (Settings -> Devices)");
-      expect(connectError.message).toContain("openclaw devices approve --latest");
+      expect(connectError.message).toContain("carapace devices approve --latest");
       expect(connectError.details).toEqual({ code: "PAIRING_REQUIRED", requestId: "pair-1" });
       expect(onDisconnected).not.toHaveBeenCalled();
 

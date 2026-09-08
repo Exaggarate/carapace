@@ -7,13 +7,13 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { insertGitHubPublicationSessionLifecycle } from "../state/github-publication-session-lifecycles.js";
-import { ensureGitHubPublicationSchema } from "../state/openclaw-state-db-schema-additive.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as StateDatabase } from "../state/openclaw-state-db.generated.js";
+import { ensureGitHubPublicationSchema } from "../state/carapace-state-db-schema-additive.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as StateDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import type { WorkerSessionTurnClaim } from "./worker-environments/placement-store.js";
 
 type GitHubPublicationDatabase = Pick<
@@ -49,11 +49,11 @@ export const githubPublicationDatabase = (db: Parameters<typeof getNodeSqliteKys
   getNodeSqliteKysely<GitHubPublicationDatabase>(db);
 
 export function ensureGitHubPublicationStore(): void {
-  ensureGitHubPublicationSchema(openOpenClawStateDatabase().db);
+  ensureGitHubPublicationSchema(openCarapaceStateDatabase().db);
 }
 
 export function hasGitHubPublicationStore(): boolean {
-  return tableExists(openOpenClawStateDatabase().db, "github_publication_requests");
+  return tableExists(openCarapaceStateDatabase().db, "github_publication_requests");
 }
 
 export function readGitHubPublicationRequest(
@@ -75,7 +75,7 @@ export function listGitHubPublicationsForClaim(
   claim: WorkerSessionTurnClaim,
   options: { pendingOnly?: boolean } = {},
 ): GitHubPublicationRow[] {
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   let query = githubPublicationDatabase(db)
     .selectFrom("github_publication_requests")
     .selectAll()
@@ -93,7 +93,7 @@ export function claimGitHubPublicationExecution(
   requestId: string,
   gatewayInstanceId: string,
 ): GitHubPublicationRow {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const query = githubPublicationDatabase(db);
       const current = readGitHubPublicationRequest(db, { requestId });
@@ -247,7 +247,7 @@ export function createGitHubPublicationExecutionStore(instanceId: string) {
     values: Partial<GitHubPublicationRow> | undefined,
     transition: keyof typeof errors,
   ): GitHubPublicationRow =>
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         if (!values) {
           throw new Error("GitHub publication terminal result is invalid.");
@@ -344,7 +344,7 @@ export function deferGitHubPublicationRequests(requestIds: string[]): void {
   if (requestIds.length === 0) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const query = githubPublicationDatabase(db);
       const updatedAtMs = Date.now();
@@ -378,7 +378,7 @@ export function isGitHubPublicationExecutionOwner(
   gatewayInstanceId: string,
 ): boolean {
   ensureGitHubPublicationStore();
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   const row = executeSqliteQuerySync(
     db,
     githubPublicationDatabase(db)

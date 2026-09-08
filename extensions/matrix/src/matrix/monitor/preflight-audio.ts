@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createChannelPreflightAudio } from "openclaw/plugin-sdk/media-understanding-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createChannelPreflightAudio } from "carapace/plugin-sdk/media-understanding-runtime";
 
 export function isMatrixAudioContent(params: { msgtype?: string; mimetype?: string }): boolean {
   if (params.msgtype === "m.audio") {
@@ -19,7 +19,7 @@ const matrixPreflightAudio = createChannelPreflightAudio({
 export async function resolveMatrixPreflightAudioTranscript(params: {
   mediaPath: string;
   mediaContentType?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   chatType: "channel" | "direct";
   originatingTo: string;
@@ -48,7 +48,7 @@ export async function resolveMatrixPreflightAudioTranscript(params: {
 
 export async function sendMatrixPreflightAudioTranscriptEcho(params: {
   transcript: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   originatingTo: string;
   messageThreadId?: string;

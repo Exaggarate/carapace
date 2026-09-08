@@ -1,24 +1,24 @@
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicy,
+} from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
 
 describe("linux-node plugin registration", () => {
   it("registers node-host commands and preserves explicit arming for capture", () => {
-    const commands: OpenClawPluginNodeHostCommand[] = [];
-    const policies: OpenClawPluginNodeInvokePolicy[] = [];
+    const commands: CarapacePluginNodeHostCommand[] = [];
+    const policies: CarapacePluginNodeInvokePolicy[] = [];
     plugin.register({
       pluginConfig: {
         notify: { enabled: true },
         camera: { enabled: true },
         location: { enabled: true },
       },
-      registerNodeHostCommand: (command: OpenClawPluginNodeHostCommand) => commands.push(command),
-      registerNodeInvokePolicy: (policy: OpenClawPluginNodeInvokePolicy) => policies.push(policy),
-    } as unknown as OpenClawPluginApi);
+      registerNodeHostCommand: (command: CarapacePluginNodeHostCommand) => commands.push(command),
+      registerNodeInvokePolicy: (policy: CarapacePluginNodeInvokePolicy) => policies.push(policy),
+    } as unknown as CarapacePluginApi);
 
     expect(commands.map((command) => command.command)).toEqual([
       "system.notify",

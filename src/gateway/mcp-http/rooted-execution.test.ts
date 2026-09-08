@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { runQaGatewayFixture } from "../../../test/helpers/qa-gateway-cleanup.js";
 import "../../agents/test-helpers/fast-coding-tools.js";
-import "../../agents/test-helpers/fast-openclaw-tools.js";
+import "../../agents/test-helpers/fast-carapace-tools.js";
 import { prepareSystemAgentRunAdmission } from "../../agents/admitted-run-context.js";
 import { testing as cliBackendsTesting } from "../../agents/cli-backends.test-support.js";
 import {
@@ -23,9 +23,9 @@ import {
   getRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import * as fsSafe from "../../infra/fs-safe.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   activateMcpLoopbackClientGrantCapture,
   revokeMcpLoopbackClientGrant,
@@ -61,7 +61,7 @@ beforeEach(() => {
     isWorkspaceBootstrapPending: async () => false,
     makeBootstrapWarn: () => () => {},
     resolveBootstrapContextForRun: async () => ({ bootstrapFiles: [], contextFiles: [] }),
-    resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+    resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
     loadManifestModelCatalog: () => [],
   });
 });
@@ -86,7 +86,7 @@ async function withRootedCli(
   const parent = cli.session.dir;
   const root = path.join(parent, "workshop");
   const previousConfig = getRuntimeConfigSnapshot();
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: { defaults: { workspace: parent }, entries: { main: { default: true } } },
     plugins: { enabled: false },
     tools: { profile: "full", fs: { workspaceOnly: false } },
@@ -107,11 +107,11 @@ async function withRootedCli(
         preparedRunAdmission: admission,
         rootedExecution: { root },
         skillsSnapshot: { prompt: "", skills: [] },
-        cliToolAvailability: { native: [], openClaw: ["read", "write"] },
+        cliToolAvailability: { native: [], carapace: ["read", "write"] },
         trigger: "cron",
         timeoutMs: 60_000,
       });
-      const token = expectDefined(prepared.preparedBackend.env?.OPENCLAW_MCP_TOKEN, "CLI grant");
+      const token = expectDefined(prepared.preparedBackend.env?.CARAPACE_MCP_TOKEN, "CLI grant");
       const capture = {
         token,
         runtimeOwnerToken: runtime.ownerToken,
@@ -128,7 +128,7 @@ async function withRootedCli(
             headers: {
               authorization: `Bearer ${token}`,
               "content-type": "application/json",
-              "x-openclaw-cli-capture-key": capture.captureKey,
+              "x-carapace-cli-capture-key": capture.captureKey,
             },
             body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
           });
@@ -156,7 +156,7 @@ async function withRootedCli(
     () => admission.close(),
     () =>
       previousConfig ? setRuntimeConfigSnapshot(previousConfig) : clearRuntimeConfigSnapshot(),
-    () => closeOpenClawStateDatabaseForTest(),
+    () => closeCarapaceStateDatabaseForTest(),
     () => cli.cleanup(),
   );
 }

@@ -1,8 +1,8 @@
 import {
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import { normalizeAccountId } from "../../routing/account-id.js";
 import { outboundMessageIdentities } from "./outbound-echo-state.js";

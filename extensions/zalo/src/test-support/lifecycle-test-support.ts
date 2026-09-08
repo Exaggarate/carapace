@@ -3,9 +3,9 @@ import { request as httpRequest } from "node:http";
 import {
   createPluginRuntimeMediaMock,
   createPluginRuntimeMock,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
 import { expect, vi } from "vitest";
 import type { ResolvedZaloAccount } from "../types.js";
 
@@ -38,7 +38,7 @@ function createLifecycleAccountConfig(params: LifecycleMonitorSetupParams) {
   };
 }
 
-function createLifecycleConfig(params: LifecycleMonitorSetupParams): OpenClawConfig {
+function createLifecycleConfig(params: LifecycleMonitorSetupParams): CarapaceConfig {
   return {
     channels: {
       zalo: {
@@ -48,7 +48,7 @@ function createLifecycleConfig(params: LifecycleMonitorSetupParams): OpenClawCon
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function createLifecycleAccount(params: LifecycleMonitorSetupParams): ResolvedZaloAccount {

@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { retireSessionMcpRuntime } from "../../agents/agent-bundle-mcp-tools.js";
 import { resolveAgentWorkspaceDir, resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { clearBootstrapSnapshotOnSessionBoundary } from "../../agents/bootstrap-cache.js";
@@ -54,7 +54,7 @@ import {
   type SessionEntry,
   type SessionScope,
 } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   forgetActiveSessionForShutdown,
   noteActiveSessionForShutdown,
@@ -161,7 +161,7 @@ function resolveExplicitSessionEndReason(
 }
 
 function resolveSessionDefaultAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelRaw?: string;
   accountIdRaw?: string;
   persistedLastAccountId?: string;
@@ -219,7 +219,7 @@ export type SessionInitResult = {
 };
 
 type InitSessionStateParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   commandAuthorized: boolean;
   ctx: FinalizedRuntimeMsgContext;
   expectedExistingSessionId?: string;
@@ -250,7 +250,7 @@ type InitSessionStateAttemptOutcome =
     };
 
 function resolveSessionConversationBindingContext(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   ctx: MsgContext,
 ): {
   channel: string;
@@ -276,7 +276,7 @@ function resolveSessionConversationBindingContext(
 }
 
 function resolveBoundConversationSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   touch?: boolean;
   bindingContext?: {

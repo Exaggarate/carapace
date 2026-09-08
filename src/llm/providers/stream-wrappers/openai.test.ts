@@ -1,7 +1,7 @@
 // OpenAI stream wrapper tests cover streamed text, tools, and reasoning fields.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { Model } from "carapace/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const logger = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn() }));
@@ -130,7 +130,7 @@ describe("createOpenAICompletionsToolsCompatWrapper", () => {
 
 describe("createCodexNativeWebSearchWrapper", () => {
   it("keeps native_active web_search alongside the code mode tool surface", () => {
-    vi.stubEnv("OPENCLAW_DEBUG_CODE_MODE", "1");
+    vi.stubEnv("CARAPACE_DEBUG_CODE_MODE", "1");
     const secretFixture = `sk-${"fixture".repeat(6)}`;
     let observedOptions: Parameters<StreamFn>[2];
     const payloads: Array<Record<string, unknown>> = [];
@@ -201,8 +201,8 @@ describe("createCodexNativeWebSearchWrapper", () => {
       { type: "web_search" },
     ]);
     expect(
-      (observedOptions as { openclawCodeModeAllowedHostedToolTypes?: Set<string> } | undefined)
-        ?.openclawCodeModeAllowedHostedToolTypes,
+      (observedOptions as { carapaceCodeModeAllowedHostedToolTypes?: Set<string> } | undefined)
+        ?.carapaceCodeModeAllowedHostedToolTypes,
     ).toEqual(new Set(["web_search"]));
     expect(logger.info).toHaveBeenCalledOnce();
     const diagnostic = String(logger.info.mock.calls[0]?.[0]);
@@ -212,7 +212,7 @@ describe("createCodexNativeWebSearchWrapper", () => {
   });
 
   it("emits one complete diagnostic through composed wrappers after async replacement", async () => {
-    vi.stubEnv("OPENCLAW_DEBUG_CODE_MODE", "1");
+    vi.stubEnv("CARAPACE_DEBUG_CODE_MODE", "1");
     let payloadResult: unknown;
     const baseStreamFn: StreamFn = (model, _context, options) => {
       payloadResult = options?.onPayload?.(
@@ -274,7 +274,7 @@ describe("createCodexNativeWebSearchWrapper", () => {
   it.each(["", "0", "false", "off", "no"])(
     "does not emit dedicated diagnostics for false-like flag %j",
     (flag) => {
-      vi.stubEnv("OPENCLAW_DEBUG_CODE_MODE", flag);
+      vi.stubEnv("CARAPACE_DEBUG_CODE_MODE", flag);
       const baseStreamFn: StreamFn = (model, _context, options) => {
         options?.onPayload?.(
           {
@@ -378,8 +378,8 @@ describe("createCodexNativeWebSearchWrapper", () => {
       ],
     });
     expect(
-      (observedOptions as { openclawCodeModeAllowedHostedToolTypes?: Set<string> } | undefined)
-        ?.openclawCodeModeAllowedHostedToolTypes,
+      (observedOptions as { carapaceCodeModeAllowedHostedToolTypes?: Set<string> } | undefined)
+        ?.carapaceCodeModeAllowedHostedToolTypes,
     ).toEqual(new Set(["web_search"]));
   });
 
@@ -431,8 +431,8 @@ describe("createCodexNativeWebSearchWrapper", () => {
       { type: "function", name: "wait" },
     ]);
     expect(
-      (observedOptions as { openclawCodeModeAllowedHostedToolTypes?: Set<string> } | undefined)
-        ?.openclawCodeModeAllowedHostedToolTypes,
+      (observedOptions as { carapaceCodeModeAllowedHostedToolTypes?: Set<string> } | undefined)
+        ?.carapaceCodeModeAllowedHostedToolTypes,
     ).toEqual(new Set());
   });
 
@@ -464,7 +464,7 @@ describe("createCodexNativeWebSearchWrapper", () => {
       {},
     );
 
-    expect(observedOptions[0]?.openclawCodeModeToolSurface).toBeUndefined();
+    expect(observedOptions[0]?.carapaceCodeModeToolSurface).toBeUndefined();
     expect(payloads[0]).toEqual({ model: "gpt-5.5" });
   });
 
@@ -512,7 +512,7 @@ describe("createCodexNativeWebSearchWrapper", () => {
       {},
     );
 
-    expect(observedOptions[0]?.openclawCodeModeToolSurface).toBe(true);
+    expect(observedOptions[0]?.carapaceCodeModeToolSurface).toBe(true);
     expect(payloads[0]?.tools).toEqual([
       { type: "function", name: "exec" },
       { type: "function", name: "wait" },
@@ -941,7 +941,7 @@ describe("createOpenAIThinkingLevelWrapper", () => {
 });
 
 describe("createOpenAIAttributionHeadersWrapper", () => {
-  it("routes native Codex traffic through the OpenClaw transport so attribution survives OpenClaw defaults", () => {
+  it("routes native Codex traffic through the Carapace transport so attribution survives Carapace defaults", () => {
     let codexCalls = 0;
     let capturedHeaders: Record<string, string> | undefined;
     const codexTransport: StreamFn = (model, context, options) => {
@@ -961,15 +961,15 @@ describe("createOpenAIAttributionHeadersWrapper", () => {
       { messages: [] },
       {
         headers: {
-          originator: "openclaw",
-          "User-Agent": "openclaw",
+          originator: "carapace",
+          "User-Agent": "carapace",
         },
       },
     );
 
     expect(codexCalls).toBe(1);
-    expect(capturedHeaders?.originator).toBe("openclaw");
-    expect(capturedHeaders?.["User-Agent"]).toMatch(/^openclaw\//);
+    expect(capturedHeaders?.originator).toBe("carapace");
+    expect(capturedHeaders?.["User-Agent"]).toMatch(/^carapace\//);
   });
 
   it("keeps existing wrapped Codex streams so runtime OAuth injection is preserved", () => {
@@ -1003,8 +1003,8 @@ describe("createOpenAIAttributionHeadersWrapper", () => {
       {
         apiKey: "oauth-bearer-token",
         headers: {
-          originator: "openclaw",
-          "User-Agent": "openclaw",
+          originator: "carapace",
+          "User-Agent": "carapace",
         },
       },
     );
@@ -1012,7 +1012,7 @@ describe("createOpenAIAttributionHeadersWrapper", () => {
     expect(upstreamCalls).toBe(1);
     expect(codexCalls).toBe(0);
     expect(capturedOptions?.apiKey).toBe("oauth-bearer-token");
-    expect(capturedOptions?.headers?.originator).toBe("openclaw");
-    expect(capturedOptions?.headers?.["User-Agent"]).toMatch(/^openclaw\//);
+    expect(capturedOptions?.headers?.originator).toBe("carapace");
+    expect(capturedOptions?.headers?.["User-Agent"]).toMatch(/^carapace\//);
   });
 });

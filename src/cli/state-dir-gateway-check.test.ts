@@ -33,12 +33,12 @@ describe("state-dir-gateway-check", () => {
   let cliConfigPath: string;
 
   beforeEach(async () => {
-    root = tempDirs.make("openclaw-state-dir-check-");
+    root = tempDirs.make("carapace-state-dir-check-");
     cliStateDir = path.join(root, "cli");
-    cliConfigPath = path.join(cliStateDir, "openclaw.json");
+    cliConfigPath = path.join(cliStateDir, "carapace.json");
     await fs.mkdir(cliStateDir, { recursive: true });
-    vi.stubEnv("OPENCLAW_STATE_DIR", cliStateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", cliConfigPath);
+    vi.stubEnv("CARAPACE_STATE_DIR", cliStateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", cliConfigPath);
     mocks.callGateway.mockReset().mockRejectedValue(new Error("ECONNREFUSED"));
     mocks.probeGateway.mockReset().mockResolvedValue({ ok: false });
     mocks.resolveGatewayService
@@ -53,7 +53,7 @@ describe("state-dir-gateway-check", () => {
 
   it("uses canonical path identity for a missing config below a symlink", async () => {
     const gatewayStateDir = path.join(root, "gateway");
-    const gatewayConfigPath = path.join(gatewayStateDir, "openclaw.json");
+    const gatewayConfigPath = path.join(gatewayStateDir, "carapace.json");
     await fs.mkdir(gatewayStateDir);
     const stateLink = path.join(root, "gateway-link");
     await fs.symlink(gatewayStateDir, stateLink);
@@ -61,34 +61,34 @@ describe("state-dir-gateway-check", () => {
     expect(
       compareCliGatewayStateDirs({
         cliStateDir: stateLink,
-        cliConfigPath: path.join(stateLink, "openclaw.json"),
+        cliConfigPath: path.join(stateLink, "carapace.json"),
         gatewayStateDir,
         gatewayConfigPath,
         source: "live Gateway",
         mode: "refuse",
-        command: "openclaw configure",
+        command: "carapace configure",
       }),
     ).toEqual({ kind: "allow" });
   });
 
   it("refuses an installed service mismatch from its recorded environment", async () => {
     const gatewayStateDir = path.join(root, "service");
-    const gatewayConfigPath = path.join(gatewayStateDir, "openclaw.json");
+    const gatewayConfigPath = path.join(gatewayStateDir, "carapace.json");
     await fs.mkdir(gatewayStateDir);
     mocks.readServiceCommand.mockResolvedValue({
       programArguments: ["node", "gateway.js"],
       environment: {
-        OPENCLAW_STATE_DIR: gatewayStateDir,
-        OPENCLAW_CONFIG_PATH: gatewayConfigPath,
+        CARAPACE_STATE_DIR: gatewayStateDir,
+        CARAPACE_CONFIG_PATH: gatewayConfigPath,
       },
     });
 
     await expect(
-      checkCliGatewayStateDir({ command: "openclaw channels add", config: {} }),
+      checkCliGatewayStateDir({ command: "carapace channels add", config: {} }),
     ).resolves.toMatchObject({ kind: "refuse" });
     const inspectedEnv = mocks.readServiceCommand.mock.calls[0]?.[0];
-    expect(inspectedEnv).not.toHaveProperty("OPENCLAW_STATE_DIR");
-    expect(inspectedEnv).not.toHaveProperty("OPENCLAW_CONFIG_PATH");
+    expect(inspectedEnv).not.toHaveProperty("CARAPACE_STATE_DIR");
+    expect(inspectedEnv).not.toHaveProperty("CARAPACE_CONFIG_PATH");
     expect(mocks.readServiceCommand.mock.calls[0]?.[1]).toMatchObject({ requireEffective: true });
   });
 
@@ -96,19 +96,19 @@ describe("state-dir-gateway-check", () => {
     mocks.readServiceCommand.mockResolvedValue({
       programArguments: ["node", "gateway.js"],
       environment: {
-        OPENCLAW_STATE_DIR: cliStateDir,
-        OPENCLAW_CONFIG_PATH: cliConfigPath,
+        CARAPACE_STATE_DIR: cliStateDir,
+        CARAPACE_CONFIG_PATH: cliConfigPath,
       },
     });
 
     await expect(
-      checkCliGatewayStateDir({ command: "openclaw models auth", config: {} }),
+      checkCliGatewayStateDir({ command: "carapace models auth", config: {} }),
     ).resolves.toEqual({ kind: "allow" });
     expect(mocks.probeGateway).not.toHaveBeenCalled();
   });
 
   it.each([false, true])(
-    "refuses an offline home mismatch when the service sets OPENCLAW_HOME: %s",
+    "refuses an offline home mismatch when the service sets CARAPACE_HOME: %s",
     async (serviceSetsHome) => {
       const canonicalRoot = await fs.realpath(root);
       const serviceHome = path.join(canonicalRoot, "service-home");
@@ -117,29 +117,29 @@ describe("state-dir-gateway-check", () => {
       await fs.mkdir(serviceHome);
       await fs.mkdir(cliHome);
       vi.stubEnv("HOME", serviceHome);
-      vi.stubEnv("OPENCLAW_HOME", cliHome);
-      vi.stubEnv("OPENCLAW_STATE_DIR", undefined);
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", undefined);
+      vi.stubEnv("CARAPACE_HOME", cliHome);
+      vi.stubEnv("CARAPACE_STATE_DIR", undefined);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", undefined);
       mocks.readServiceCommand.mockResolvedValue({
         programArguments: ["node", "gateway.js"],
         environment: {
           HOME: serviceHome,
-          ...(serviceSetsHome ? { OPENCLAW_HOME: serviceRuntimeHome } : {}),
+          ...(serviceSetsHome ? { CARAPACE_HOME: serviceRuntimeHome } : {}),
         },
       });
 
       await expect(
-        checkCliGatewayStateDir({ command: "openclaw configure", config: {} }),
+        checkCliGatewayStateDir({ command: "carapace configure", config: {} }),
       ).resolves.toMatchObject({
         kind: "refuse",
-        message: expect.stringContaining(path.join(serviceRuntimeHome, ".openclaw")),
+        message: expect.stringContaining(path.join(serviceRuntimeHome, ".carapace")),
       });
     },
   );
 
   it("refuses paths from an authenticated hello without service fallback", async () => {
     const gatewayStateDir = path.join(root, "gateway");
-    const gatewayConfigPath = path.join(gatewayStateDir, "openclaw.json");
+    const gatewayConfigPath = path.join(gatewayStateDir, "carapace.json");
     await fs.mkdir(gatewayStateDir);
     mocks.callGateway.mockImplementation(
       async (options: {
@@ -153,7 +153,7 @@ describe("state-dir-gateway-check", () => {
     );
 
     await expect(
-      checkCliGatewayStateDir({ command: "openclaw channels add", config: {} }),
+      checkCliGatewayStateDir({ command: "carapace channels add", config: {} }),
     ).resolves.toMatchObject({ kind: "refuse" });
     expect(mocks.readServiceCommand).not.toHaveBeenCalled();
   });
@@ -166,7 +166,7 @@ describe("state-dir-gateway-check", () => {
 
     await expect(
       checkCliGatewayStateDir({
-        command: "openclaw models auth",
+        command: "carapace models auth",
         config: { gateway: { auth: { mode: "token" } } },
       }),
     ).resolves.toMatchObject({ kind: "warn" });
@@ -181,7 +181,7 @@ describe("state-dir-gateway-check", () => {
 
   it("allows an offline command and does not probe an ordinary transport failure", async () => {
     await expect(
-      checkCliGatewayStateDir({ command: "openclaw configure", config: {} }),
+      checkCliGatewayStateDir({ command: "carapace configure", config: {} }),
     ).resolves.toEqual({ kind: "allow" });
     expect(mocks.probeGateway).not.toHaveBeenCalled();
   });
@@ -189,7 +189,7 @@ describe("state-dir-gateway-check", () => {
   it("warns for a remote Gateway without local inspection", async () => {
     await expect(
       checkCliGatewayStateDir({
-        command: "openclaw configure",
+        command: "carapace configure",
         config: { gateway: { mode: "remote", remote: { url: "wss://gateway.example" } } },
       }),
     ).resolves.toMatchObject({ kind: "warn" });
@@ -201,7 +201,7 @@ describe("state-dir-gateway-check", () => {
     const error = new Error("private-service-inspection-canary");
     mocks.readServiceCommand.mockRejectedValue(error);
 
-    const result = await checkCliGatewayStateDir({ command: "openclaw configure", config: {} });
+    const result = await checkCliGatewayStateDir({ command: "carapace configure", config: {} });
     expect(result).toMatchObject({
       kind: "warn",
       message: expect.stringContaining("could not be verified"),
@@ -216,13 +216,13 @@ describe("state-dir-gateway-check", () => {
     });
 
     await expect(
-      checkCliGatewayStateDir({ command: "openclaw configure", config: {} }),
+      checkCliGatewayStateDir({ command: "carapace configure", config: {} }),
     ).resolves.toMatchObject({ kind: "warn" });
   });
 
   it("redacts credentials in remote target warnings", async () => {
     const result = await checkCliGatewayStateDir({
-      command: "openclaw configure",
+      command: "carapace configure",
       config: {
         gateway: {
           mode: "remote",

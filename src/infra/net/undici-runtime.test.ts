@@ -17,7 +17,7 @@ vi.mock("../../logger.js", () => ({ logDebug }));
 const poolCtor = vi.fn();
 const proxyAgentCtor = vi.fn();
 const proxyConnect = vi.fn();
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__CARAPACE_TEST_UNDICI_RUNTIME_DEPS__";
 const DESTINATION_AGENT = Symbol("destination agent");
 
 afterEach(() => {

@@ -23,7 +23,7 @@ class RejectedPluginPage extends PluginPage {
   }
 }
 
-const rejectedPluginPageTag = "openclaw-rejected-plugin-page-test";
+const rejectedPluginPageTag = "carapace-rejected-plugin-page-test";
 if (!customElements.get(rejectedPluginPageTag)) {
   customElements.define(rejectedPluginPageTag, RejectedPluginPage);
 }

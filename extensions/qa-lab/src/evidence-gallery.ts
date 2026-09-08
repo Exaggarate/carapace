@@ -4,13 +4,13 @@ import os from "node:os";
 import path from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { pathToFileURL } from "node:url";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   asNullableRecord as readRecord,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   QaEvidenceArtifactView,
   QaEvidenceGalleryEntryView,

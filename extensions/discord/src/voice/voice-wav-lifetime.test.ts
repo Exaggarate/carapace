@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, vi } from "vitest";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 
@@ -10,11 +10,11 @@ const workspace = vi.hoisted(() => ({
   rootDir: "",
   afterWrite: undefined as (() => Promise<void>) | undefined,
 }));
-vi.mock("openclaw/plugin-sdk/temp-path", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/temp-path")>();
+vi.mock("carapace/plugin-sdk/temp-path", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/temp-path")>();
   return {
     ...actual,
-    resolvePreferredOpenClawTmpDir: () => workspace.rootDir,
+    resolvePreferredCarapaceTmpDir: () => workspace.rootDir,
     // The receive owner must observe leave before its awaited WAV write returns.
     tempWorkspace: async (options: Parameters<typeof actual.tempWorkspace>[0]) => {
       const temporary = await actual.tempWorkspace(options);
@@ -48,7 +48,7 @@ defineDiscordVoiceTests(
     beforeEach(async () => {
       workspace.afterWrite = undefined;
       workspace.rootDir = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-voice-wav-lifetime-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-voice-wav-lifetime-")),
       );
     });
     afterEach(async () => {

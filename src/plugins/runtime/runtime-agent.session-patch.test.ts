@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createRuntimeAgent } from "./runtime-agent.js";
 
 describe("plugin runtime session patches", () => {
   it("rejects a patch whose owner closes during asynchronous preparation", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-patch-owner" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-patch-owner" }, async () => {
       const runtime = createRuntimeAgent();
       const scope = { agentId: "main", sessionKey: "agent:main:reef:group:room" };
       await runtime.session.upsertSessionEntry({

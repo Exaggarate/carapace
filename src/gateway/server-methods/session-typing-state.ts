@@ -38,7 +38,7 @@ function clearSessionTypingStateValue(state: SessionTypingState): void {
 }
 
 const sessionTypingState = resolveGlobalSingleton<SessionTypingState>(
-  Symbol.for("openclaw.sessionTypingState"),
+  Symbol.for("carapace.sessionTypingState"),
   () => ({ broadcasts: new Map(), connections: new Map() }),
   clearSessionTypingStateValue,
 );

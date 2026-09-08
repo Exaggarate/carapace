@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import * as subagentRegistryState from "../agents/subagents/registry/subagent-registry-state.js";
 import { canonicalSubagentRunFixtures } from "../agents/subagents/registry/subagent-registry.persistence.test-support.js";
@@ -14,17 +14,17 @@ import {
   addSubagentRunForTests,
   resetSubagentRegistryForTests,
 } from "../agents/subagents/registry/subagent-registry.test-helpers.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { canPrewarmCombinedSessionStoresForGateway } from "../config/sessions/combined-store-gateway.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { resetAgentEventsForTest } from "../infra/agent-events.js";
 import { registerAgentRunContext } from "../infra/agent-run-registry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { listSessionFixture } from "./session-list.test-support.js";
@@ -35,7 +35,7 @@ import {
 } from "./session-utils.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 async function seedSessionEntry(
@@ -50,7 +50,7 @@ async function seedSessionEntry(
 describe("session list subagent metadata", () => {
   afterEach(() => {
     resetAgentEventsForTest({ preserveListeners: true });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetSubagentRegistryForTests({ persist: false });
   });
   beforeEach(() => {
@@ -61,7 +61,7 @@ describe("session list subagent metadata", () => {
   const cfg = {
     session: { mainKey: "main" },
     agents: { list: [{ id: "main", default: true }] },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   test("searches channel-derived display names before row enrichment", async () => {
     const result = await listSessionFixture({
@@ -869,7 +869,7 @@ describe("session list subagent metadata", () => {
   });
 
   test("prefers persisted terminal session state when only stale active subagent snapshots remain", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-session-utils-subagent-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-session-utils-subagent-"));
     const stateDir = path.join(tempRoot, "state");
     fs.mkdirSync(stateDir, { recursive: true });
     try {
@@ -908,8 +908,8 @@ describe("session list subagent metadata", () => {
 
       const row = await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1",
         },
         async () => {
           saveSubagentRegistryToSqlite(canonicalSubagentRunFixtures(persistedRuns));
@@ -939,14 +939,14 @@ describe("session list subagent metadata", () => {
       expect(row?.endedAt).toBe(now - 1_800);
       expect(row?.runtimeMs).toBe(100);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
 
   test("reuses one SQLite registry snapshot across sessions.list filtering and row enrichment", async () => {
     const tempRoot = fs.mkdtempSync(
-      path.join(os.tmpdir(), "openclaw-session-utils-subagent-cache-"),
+      path.join(os.tmpdir(), "carapace-session-utils-subagent-cache-"),
     );
     const stateDir = path.join(tempRoot, "state");
     const now = Date.now();
@@ -1001,8 +1001,8 @@ describe("session list subagent metadata", () => {
     try {
       const result = await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1",
         },
         async () => {
           saveSubagentRegistryToSqlite(canonicalSubagentRunFixtures(persistedRuns));
@@ -1019,14 +1019,14 @@ describe("session list subagent metadata", () => {
       expect(snapshotSpy).toHaveBeenCalledTimes(1);
     } finally {
       snapshotSpy.mockRestore();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
 
   test("does not read the subagent registry when raw filters drop every session", async () => {
     const tempRoot = fs.mkdtempSync(
-      path.join(os.tmpdir(), "openclaw-session-utils-subagent-cache-empty-"),
+      path.join(os.tmpdir(), "carapace-session-utils-subagent-cache-empty-"),
     );
     const stateDir = path.join(tempRoot, "state");
 
@@ -1037,8 +1037,8 @@ describe("session list subagent metadata", () => {
     try {
       const result = await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1",
         },
         async () =>
           await listSessionFixture({
@@ -1058,7 +1058,7 @@ describe("session list subagent metadata", () => {
       expect(snapshotSpy).not.toHaveBeenCalled();
     } finally {
       snapshotSpy.mockRestore();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
@@ -1396,7 +1396,7 @@ describe("session list subagent metadata", () => {
 
 describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#32804)", () => {
   test("fixed stores retain a colliding unsuffixed database on the default owner", async () => {
-    await withStateDirEnv("openclaw-fixed-store-collision-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-fixed-store-collision-", async ({ stateDir }) => {
       const storePath = path.join(stateDir, "ops.json");
       const cfg = {
         session: { mainKey: "main", store: storePath },
@@ -1406,7 +1406,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
             ops: {},
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       await seedSessionEntry(
         storePath,
@@ -1434,7 +1434,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
   });
 
   test("fixed stores preserve a registered suffix while the default keeps the unsuffixed target", async () => {
-    await withStateDirEnv("openclaw-fixed-store-registered-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-fixed-store-registered-", async ({ stateDir }) => {
       const storePath = path.join(stateDir, "ops.json");
       const cfg = {
         session: { mainKey: "main", store: storePath },
@@ -1444,7 +1444,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
             ops: {},
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       await seedSessionEntry(
         storePath,
@@ -1465,7 +1465,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
   });
 
   test("fixed stores merge every configured agent's partition", async () => {
-    await withStateDirEnv("openclaw-fixed-store-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-fixed-store-", async ({ stateDir }) => {
       const storePath = path.join(stateDir, "shared-sessions.json");
       const cfg = {
         session: { mainKey: "main", store: storePath },
@@ -1475,7 +1475,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
             worker: {},
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       await seedSessionEntry(
         storePath,
@@ -1503,7 +1503,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
       );
       const dynamicIncognitoKey = "agent:dynamic:dashboard:incognito-child";
       await seedSessionEntry(
-        resolveIncognitoOpenClawAgentSqlitePath({ agentId: "dynamic" }),
+        resolveIncognitoCarapaceAgentSqlitePath({ agentId: "dynamic" }),
         dynamicIncognitoKey,
         {
           incognito: true,
@@ -1514,7 +1514,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
         "dynamic",
       );
       await seedSessionEntry(
-        resolveIncognitoOpenClawAgentSqlitePath({ agentId: "ops" }),
+        resolveIncognitoCarapaceAgentSqlitePath({ agentId: "ops" }),
         "dashboard:incognito-ops",
         { incognito: true, sessionId: "s-incognito-ops", updatedAt: 600 },
         "ops",
@@ -1558,7 +1558,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
   });
 
   test("ACP agent sessions are visible even when agents.list is configured", async () => {
-    await withStateDirEnv("openclaw-acp-vis-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-acp-vis-", async ({ stateDir }) => {
       const customRoot = path.join(stateDir, "custom-state");
       const agentsDir = path.join(customRoot, "agents");
       const mainDir = path.join(agentsDir, "main", "sessions");
@@ -1583,7 +1583,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
         agents: {
           list: [{ id: "main", default: true }],
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const { store } = loadCombinedSessionStoreForGatewayCore(cfg);
       expect(store["agent:main:main"]?.sessionId).toBe("s-main");
@@ -1592,7 +1592,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
   });
 
   test("agent-scoped loads read only matching agent stores", async () => {
-    await withStateDirEnv("openclaw-acp-scoped-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-acp-scoped-", async ({ stateDir }) => {
       const customRoot = path.join(stateDir, "custom-state");
       const agentsDir = path.join(customRoot, "agents");
       const mainDir = path.join(agentsDir, "main", "sessions");
@@ -1619,7 +1619,7 @@ describe("loadCombinedSessionStoreForGatewayCore includes disk-only agents (#328
         agents: {
           list: [{ id: "main", default: true }],
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const { store, storePath } = loadCombinedSessionStoreForGatewayCore(cfg, {
         agentId: "codex",

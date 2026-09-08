@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 type PointerTraceEntry = {
@@ -34,8 +34,8 @@ async function installPointerTrace(page: Page, button: Locator): Promise<void> {
   await button.evaluate((element) => {
     const target = element as HTMLButtonElement;
     const trace: PointerTraceEntry[] = [];
-    const traceWindow = window as Window & { openclawPointerTrace?: PointerTraceEntry[] };
-    traceWindow.openclawPointerTrace = trace;
+    const traceWindow = window as Window & { carapacePointerTrace?: PointerTraceEntry[] };
+    traceWindow.carapacePointerTrace = trace;
     const record = (event: Event) => {
       const pointerEvent = event as PointerEvent;
       const bounds = target.getBoundingClientRect();
@@ -76,7 +76,7 @@ async function installPointerTrace(page: Page, button: Locator): Promise<void> {
 async function readPointerTrace(page: Page): Promise<PointerTraceEntry[]> {
   return page.evaluate(
     () =>
-      (window as Window & { openclawPointerTrace?: PointerTraceEntry[] }).openclawPointerTrace ??
+      (window as Window & { carapacePointerTrace?: PointerTraceEntry[] }).carapacePointerTrace ??
       [],
   );
 }
@@ -138,7 +138,7 @@ describeControlUiE2e("Control UI composer pointer controls", () => {
     try {
       const page = await context.newPage();
       const gateway = await installMockGateway(page, {
-        assistantName: "OpenClaw",
+        assistantName: "Carapace",
         deferredMethods: ["chat.send"],
       });
       await page.goto(`${server.baseUrl}chat`);
@@ -221,7 +221,7 @@ describeControlUiE2e("Control UI composer pointer controls", () => {
     try {
       const page = await context.newPage();
       const gateway = await installMockGateway(page, {
-        assistantName: "OpenClaw",
+        assistantName: "Carapace",
         deferredMethods: ["chat.send"],
       });
       await page.goto(`${server.baseUrl}chat`);
@@ -296,7 +296,7 @@ describeControlUiE2e("Control UI composer pointer controls", () => {
     try {
       const page = await context.newPage();
       const gateway = await installMockGateway(page, {
-        assistantName: "OpenClaw",
+        assistantName: "Carapace",
         deferredMethods: ["chat.send"],
       });
       await page.goto(`${server.baseUrl}chat`);
@@ -374,7 +374,7 @@ describeControlUiE2e("Control UI composer pointer controls", () => {
     });
     try {
       const page = await context.newPage();
-      const gateway = await installMockGateway(page, { assistantName: "OpenClaw" });
+      const gateway = await installMockGateway(page, { assistantName: "Carapace" });
       await page.goto(`${server.baseUrl}chat`);
       await gateway.waitForRequest("chat.startup");
       await page.addStyleTag({

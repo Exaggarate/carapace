@@ -12,12 +12,12 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import { ensureContextEngineTurnOutboxSchema } from "../../state/openclaw-agent-context-engine-turn-outbox-schema.js";
-import type { DB as OpenClawAgentDatabaseSchema } from "../../state/openclaw-agent-db.generated.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { ensureContextEngineTurnOutboxSchema } from "../../state/carapace-agent-context-engine-turn-outbox-schema.js";
+import type { DB as CarapaceAgentDatabaseSchema } from "../../state/carapace-agent-db.generated.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 
 type ContextEngineTurnOutboxDatabase = Pick<
-  OpenClawAgentDatabaseSchema,
+  CarapaceAgentDatabaseSchema,
   "context_engine_turn_outbox"
 >;
 
@@ -87,7 +87,7 @@ export function isRetryableContextEngineTurnReadFailure(
   return kind === "projection-unavailable";
 }
 
-function outboxDb(database: OpenClawAgentDatabase) {
+function outboxDb(database: CarapaceAgentDatabase) {
   ensureContextEngineTurnOutboxSchema(database.db);
   return getNodeSqliteKysely<ContextEngineTurnOutboxDatabase>(database.db);
 }
@@ -106,7 +106,7 @@ function assertMatchingOutboxOwner(
 }
 
 function writeContextEngineTurnOutboxPayload(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   ownerPluginId?: string;
   payload: ContextEngineTurnOutboxPayload;
@@ -180,7 +180,7 @@ function writeContextEngineTurnOutboxPayload(params: {
 
 export function enqueueContextEngineTurnIntent(params: {
   admission: TranscriptTurnAdmission;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   isHeartbeat: boolean;
   ownerPluginId?: string;
@@ -197,7 +197,7 @@ export function enqueueContextEngineTurnIntent(params: {
 
 export function acceptContextEngineTurnIntent(params: {
   boundary: TranscriptTurnBoundary;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   isHeartbeat: boolean;
   ownerPluginId?: string;
@@ -213,7 +213,7 @@ export function acceptContextEngineTurnIntent(params: {
 }
 
 export function enqueueContextEngineTurnCommit(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   ownerPluginId?: string;
   payload: Omit<ReadyContextEngineTurnOutboxPayload, "state">;
@@ -226,7 +226,7 @@ export function enqueueContextEngineTurnCommit(params: {
 
 export function blockContextEngineTurnIntent(params: {
   boundary: TranscriptTurnBoundary;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   failure: BlockedContextEngineTurnOutboxPayload["failure"];
   isHeartbeat: boolean;
@@ -245,7 +245,7 @@ export function blockContextEngineTurnIntent(params: {
 
 export function discardContextEngineTurnIntent(params: {
   admission: TranscriptTurnAdmission;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   ownerPluginId?: string;
 }): void {
@@ -261,7 +261,7 @@ export function discardContextEngineTurnIntent(params: {
 }
 
 export function recoverContextEngineTurnOutbox(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engineId: string;
   ownerPluginId?: string;
   sessionId: string;
@@ -339,7 +339,7 @@ export function recoverContextEngineTurnOutbox(params: {
 }
 
 export async function drainContextEngineTurnOutbox(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   engine: ContextEngine;
   engineId: string;
   ownerPluginId?: string;

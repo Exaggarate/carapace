@@ -5,7 +5,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { URL } from "node:url";
-import { detectMime } from "@openclaw/media-core/mime";
+import { detectMime } from "@carapace/media-core/mime";
 import type { Static, TSchema } from "typebox";
 import { Value } from "typebox/value";
 import { isWindowsDrivePath } from "../infra/archive-path.js";
@@ -85,7 +85,7 @@ const MAX_ADAPTIVE_READ_PAGES = 4;
 // `.env` files are credential stores; `.envrc` and general config files remain source-shaped.
 const ENV_FILE_PATH_RE = /(?:^|[/\\])(?:\.env(?:\.[^/\\]+)?|[^/\\]+\.env)$/i;
 
-type OpenClawReadToolOptions = {
+type CarapaceReadToolOptions = {
   modelContextWindowTokens?: number;
   imageSanitization?: ImageSanitizationLimits;
   cwd?: string;
@@ -134,7 +134,7 @@ type ReadTruncationDetails = {
 const READ_CONTINUATION_NOTICE_RE =
   /\n\n\[(?:Showing (?:lines|part of line) [^\]]*|Read output capped [^\]]*|\d+ more lines? in file\. [^\]]*)\]\s*$/;
 
-export function resolveAdaptiveReadMaxBytes(options?: OpenClawReadToolOptions): number {
+export function resolveAdaptiveReadMaxBytes(options?: CarapaceReadToolOptions): number {
   const contextWindowTokens = options?.modelContextWindowTokens;
   if (
     typeof contextWindowTokens !== "number" ||
@@ -870,9 +870,9 @@ function withWorkspaceSafeTempHint(error: unknown): unknown {
   if (!isSandboxRootEscapeError(error)) {
     return error;
   }
-  const message = error.message.includes(".openclaw/tmp/")
+  const message = error.message.includes(".carapace/tmp/")
     ? error.message
-    : `${error.message}. Use a relative path under \`.openclaw/tmp/\` inside the workspace for scratch/temp/meta files that file tools need to read or write later.`;
+    : `${error.message}. Use a relative path under \`.carapace/tmp/\` inside the workspace for scratch/temp/meta files that file tools need to read or write later.`;
   return new Error(message, { cause: error });
 }
 
@@ -1015,7 +1015,7 @@ type SandboxToolParams = {
   modelHasVision?: boolean;
 };
 
-/** Create a sandbox-backed read tool with OpenClaw result normalization. */
+/** Create a sandbox-backed read tool with Carapace result normalization. */
 export function createSandboxedReadTool(params: SandboxToolParams) {
   const base = eraseSessionFileTool(
     createReadTool(params.root, {
@@ -1025,7 +1025,7 @@ export function createSandboxedReadTool(params: SandboxToolParams) {
       modelHasVision: params.modelHasVision,
     }),
   );
-  return createOpenClawReadTool(base, {
+  return createCarapaceReadTool(base, {
     modelContextWindowTokens: params.modelContextWindowTokens,
     imageSanitization: params.imageSanitization,
     cwd: params.root,
@@ -1089,10 +1089,10 @@ export function createHostWorkspaceEditTool(
   return wrapToolParamValidation(base, REQUIRED_PARAM_GROUPS.edit, root);
 }
 
-/** Wrap the base read tool with OpenClaw paging, MIME, and image handling. */
-export function createOpenClawReadTool(
+/** Wrap the base read tool with Carapace paging, MIME, and image handling. */
+export function createCarapaceReadTool(
   base: AnyAgentTool,
-  options?: OpenClawReadToolOptions,
+  options?: CarapaceReadToolOptions,
 ): AnyAgentTool {
   const modelBudget = resolveToolResultBudget(options?.modelContextWindowTokens);
   return {
@@ -1140,7 +1140,7 @@ export function createOpenClawReadTool(
 export function wrapReadToolWithSkillContent(
   tool: AnyAgentTool,
   skills: readonly SkillReadContent[] | undefined,
-  options?: OpenClawReadToolOptions & {
+  options?: CarapaceReadToolOptions & {
     cwd?: string;
     containerWorkdir?: string;
     instructionPaths?: readonly string[];
@@ -1236,7 +1236,7 @@ export function wrapReadToolWithSkillContent(
       };
       const instructionTool =
         typeof instructionContent.get(instructionPath) === "string"
-          ? (virtualRead ??= createOpenClawReadTool(
+          ? (virtualRead ??= createCarapaceReadTool(
               eraseSessionFileTool(
                 createReadTool("/", {
                   maxBytes: resolveAdaptiveReadMaxBytes(options),

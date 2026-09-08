@@ -1,4 +1,4 @@
-// Generate Prompt Snapshots script supports OpenClaw repository automation.
+// Generate Prompt Snapshots script supports Carapace repository automation.
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
@@ -223,7 +223,7 @@ function factorCodexDynamicToolSnapshotFiles(files: PromptSnapshotFile[]): Promp
 async function formatPromptSnapshotFiles(
   files: PromptSnapshotFile[],
 ): Promise<PromptSnapshotFile[]> {
-  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-prompt-snapshots-"));
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-prompt-snapshots-"));
   try {
     await writeSnapshotFiles(tmpRoot, files);
     await formatSnapshotFiles(tmpRoot, files);

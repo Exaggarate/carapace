@@ -13,8 +13,8 @@ import {
   TraceIdRatioBasedSampler,
 } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import { registerUnhandledRejectionHandler } from "openclaw/plugin-sdk/runtime-env";
-import type { DiagnosticTraceContext, OpenClawPluginService } from "../api.js";
+import { registerUnhandledRejectionHandler } from "carapace/plugin-sdk/runtime-env";
+import type { DiagnosticTraceContext, CarapacePluginService } from "../api.js";
 import {
   DEFAULT_SERVICE_NAME,
   OTEL_EXPORTER_OTLP_ENDPOINT_ENV,
@@ -195,7 +195,7 @@ type DiagnosticsOtelState = {
   retireExporterRoutes?: (preserveFailures?: boolean) => void;
 };
 
-export function createDiagnosticsOtelService(): OpenClawPluginService {
+export function createDiagnosticsOtelService(): CarapacePluginService {
   let state: DiagnosticsOtelState = {};
   let preserveExporterRoutesOnNextStop = false;
 
@@ -551,11 +551,11 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
       const meter = !metricsActive
         ? createNoopMeter()
         : active.meterProvider
-          ? active.meterProvider.getMeter("openclaw")
-          : metrics.getMeter("openclaw");
+          ? active.meterProvider.getMeter("carapace")
+          : metrics.getMeter("carapace");
       const tracer = active.traceProvider
-        ? active.traceProvider.getTracer("openclaw")
-        : trace.getTracer("openclaw");
+        ? active.traceProvider.getTracer("carapace")
+        : trace.getTracer("carapace");
       const diagnosticsTrace = createDiagnosticsTraceRuntime(tracer);
       active.stopActiveTrustedSpans = diagnosticsTrace.stopActiveTrustedSpans;
       const diagnosticMetrics = createDiagnosticsMetrics(meter, otel.metricNamePrefix);
@@ -689,5 +689,5 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
       preserveExporterRoutesOnNextStop = false;
       await stopStarted(preserveExporterRoutes ? { preserveExporterRoutes: true } : undefined);
     },
-  } satisfies OpenClawPluginService;
+  } satisfies CarapacePluginService;
 }

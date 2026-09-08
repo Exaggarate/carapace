@@ -1,5 +1,5 @@
 import type { WebClient as SlackWebClient } from "@slack/web-api";
-import { normalizeHostname } from "openclaw/plugin-sdk/host-runtime";
+import { normalizeHostname } from "carapace/plugin-sdk/host-runtime";
 
 /** Detects the isolated GovSlack API plane without consulting mutable config. */
 export function isGovSlackClient(client?: SlackWebClient): boolean {

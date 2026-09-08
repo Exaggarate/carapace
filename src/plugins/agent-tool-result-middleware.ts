@@ -15,7 +15,7 @@ import {
 } from "./tool-hook-matcher.js";
 
 const AGENT_TOOL_RESULT_MIDDLEWARE_RUNTIMES = [
-  "openclaw",
+  "carapace",
   "codex",
 ] as const satisfies AgentToolResultMiddlewareRuntime[];
 

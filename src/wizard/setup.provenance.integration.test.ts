@@ -1,13 +1,13 @@
 // Real classic wizard prompts and config IO across agent preparation; host effects are synthetic.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
 import { resetConfigRuntimeState } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import type { WizardSelectParams } from "./prompts.js";
 
 vi.mock("../plugins/manifest-registry.js", () => ({
@@ -33,7 +33,7 @@ vi.mock("./setup.shared.js", async (importOriginal) => {
   };
 });
 vi.mock("./setup.gateway-config.js", () => ({
-  configureGatewayForSetup: async ({ nextConfig }: { nextConfig: OpenClawConfig }) => {
+  configureGatewayForSetup: async ({ nextConfig }: { nextConfig: CarapaceConfig }) => {
     vi.stubEnv("CLASSIC_RESPONSE_PREFIX", "prefix-during-ensure");
     return {
       nextConfig: { ...nextConfig, gateway: { ...nextConfig.gateway, mode: "local", port: 19001 } },
@@ -76,8 +76,8 @@ const runtime = {
 };
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
   vi.unstubAllEnvs();
 });
@@ -91,15 +91,15 @@ describe("classic setup matched config bases", () => {
     "preserves consent and pending edits for $state (telemetry: $telemetry)",
     async ({ state, telemetry }) => {
       await withTempHome(async (home) => {
-        const stateDir = path.join(home, ".openclaw");
-        const configPath = path.join(stateDir, "openclaw.json");
+        const stateDir = path.join(home, ".carapace");
+        const configPath = path.join(stateDir, "carapace.json");
         const workspace = path.join(home, "workspace");
-        vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-        vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+        vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+        vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
         vi.stubEnv("CLASSIC_RESPONSE_PREFIX", "prefix-before");
         await fs.mkdir(stateDir, { recursive: true });
         if (state !== "fresh-config") {
-          const config: OpenClawConfig = {
+          const config: CarapaceConfig = {
             agents: {
               defaults: { workspace },
               ...(state === "retained-roster"
@@ -146,7 +146,7 @@ describe("classic setup matched config bases", () => {
           prompter,
         );
 
-        const saved = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+        const saved = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
         expect.soft(saved.wizard?.securityAcknowledgedAt).toEqual(expect.any(String));
         expect
           .soft(saved.telemetry)

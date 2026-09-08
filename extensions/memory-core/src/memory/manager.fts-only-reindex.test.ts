@@ -3,10 +3,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolveOpenClawAgentSqlitePath } from "openclaw/plugin-sdk/sqlite-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolveCarapaceAgentSqlitePath } from "carapace/plugin-sdk/sqlite-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeAllMemorySearchManagers, getMemorySearchManager } from "./index.js";
 import type { MemoryIndexMeta } from "./manager-reindex-state.js";
@@ -50,17 +50,17 @@ const createEmbeddingProviderMock = vi.hoisted(() =>
     };
   }),
 );
-const originalFtsOnlyStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalFtsOnlyStateDir = process.env.CARAPACE_STATE_DIR;
 
 function setFtsOnlyStateDir(stateDir: string): void {
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", stateDir);
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", stateDir);
 }
 
 function restoreFtsOnlyStateDir(): void {
   if (originalFtsOnlyStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalFtsOnlyStateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", originalFtsOnlyStateDir);
   }
 }
 
@@ -80,7 +80,7 @@ describe("memory manager FTS-only reindex", () => {
   let manager: MemoryIndexManager | null = null;
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mem-fts-only-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-mem-fts-only-"));
   });
 
   beforeEach(async () => {
@@ -94,7 +94,7 @@ describe("memory manager FTS-only reindex", () => {
     await fs.mkdir(path.join(workspaceDir, "memory"), { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), "Alpha topic\n\nKeep this note.");
     setFtsOnlyStateDir(path.join(workspaceDir, "state"));
-    indexPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    indexPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
   });
 
   afterEach(async () => {
@@ -110,7 +110,7 @@ describe("memory manager FTS-only reindex", () => {
     await closeAllMemorySearchManagers();
     // The agent close releases its leases through shared state and reopens it, so the
     // shared handle is released second; otherwise Windows fails the removal with EBUSY.
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     if (fixtureRoot) {
       await fs.rm(fixtureRoot, { recursive: true, force: true });
@@ -143,7 +143,7 @@ describe("memory manager FTS-only reindex", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const result = await getMemorySearchManager({ cfg, agentId: "main", purpose: params.purpose });
     if (!result.manager) {
       throw new Error(result.error ?? "manager missing");

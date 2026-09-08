@@ -2,11 +2,11 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
   createAccountScopedConversationBindingManager,
   resetAccountScopedConversationBindingsForTests,
@@ -17,13 +17,13 @@ import { getSessionBindingService } from "./session-binding-service.js";
 
 type TestBindingKind = "subagent" | "acp";
 
-const stateKey = Symbol("openclaw.accountScopedConversationBindingExpiry.test");
+const stateKey = Symbol("carapace.accountScopedConversationBindingExpiry.test");
 const startedAt = 1_700_000_000_000;
 const baseCfg = {
   session: { threadBindings: { idleHours: 1, maxAgeHours: 0 } },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
-function createManager(params: { accountId?: string; cfg?: OpenClawConfig } = {}) {
+function createManager(params: { accountId?: string; cfg?: CarapaceConfig } = {}) {
   return createAccountScopedConversationBindingManager<TestBindingKind>({
     channel: "imessage",
     cfg: params.cfg ?? baseCfg,
@@ -59,9 +59,9 @@ describe("account-scoped conversation binding expiry", () => {
   let testStateDir = "";
 
   beforeEach(async () => {
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-account-bindings-"));
-    process.env.OPENCLAW_STATE_DIR = testStateDir;
+    previousStateDir = process.env.CARAPACE_STATE_DIR;
+    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-account-bindings-"));
+    process.env.CARAPACE_STATE_DIR = testStateDir;
     resetAccountScopedConversationBindingsForTests({ stateKey });
     currentConversationBindingTesting.clearPersistedCurrentConversationBindingsForTests();
   });
@@ -69,11 +69,11 @@ describe("account-scoped conversation binding expiry", () => {
   afterEach(async () => {
     resetAccountScopedConversationBindingsForTests({ stateKey });
     currentConversationBindingTesting.clearPersistedCurrentConversationBindingsForTests();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     await fs.rm(testStateDir, { recursive: true, force: true });
     vi.restoreAllMocks();
@@ -93,7 +93,7 @@ describe("account-scoped conversation binding expiry", () => {
     );
 
     manager.stop();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const restarted = createManager();
     manager.stop();
@@ -112,7 +112,7 @@ describe("account-scoped conversation binding expiry", () => {
       const cfg = {
         ...baseCfg,
         agents: { entries: { alpha: {}, beta: {} } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const manager = createManager({ cfg });
       const metadata = {
         ...(ownerKind === "agent" ? { agentId: "alpha" } : {}),
@@ -151,7 +151,7 @@ describe("account-scoped conversation binding expiry", () => {
       ).resolves.toMatchObject({ metadata });
 
       manager.stop();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       createManager({ cfg });
 
       expect(getSessionBindingService().resolveByConversation(conversation)).toMatchObject({
@@ -168,7 +168,7 @@ describe("account-scoped conversation binding expiry", () => {
       conversationId: "chat:write-failure",
       targetSessionKey: "agent:main:subagent:committed-owner",
     });
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.exec("PRAGMA query_only = ON");
     try {
       expect(() =>
@@ -227,7 +227,7 @@ describe("account-scoped conversation binding expiry", () => {
         metadata: { label: "updated" },
       });
       manager.stop();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       createManager();
 
       expect(service.resolveByConversation(conversation)).toMatchObject({

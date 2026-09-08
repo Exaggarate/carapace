@@ -34,9 +34,9 @@ export function renderLibraryPinRead(props: {
   const { read } = props;
   const support = read.files.find((file) => file.path === props.file);
   const text = props.file === "SKILL.md" ? read.content : support ? libraryFileText(support) : null;
-  return html`<openclaw-modal-dialog
+  return html`<carapace-modal-dialog
     label=${read.entry.slug}
-    style="--openclaw-modal-width: 960px;"
+    style="--carapace-modal-width: 960px;"
     @modal-cancel=${props.onClose}
   >
     <div class="md-preview-dialog__panel">
@@ -92,5 +92,5 @@ export function renderLibraryPinRead(props: {
         ${renderLibraryIdentity(read.entry)}
       </div>
     </div>
-  </openclaw-modal-dialog>`;
+  </carapace-modal-dialog>`;
 }

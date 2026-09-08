@@ -1,10 +1,10 @@
 // Discord plugin module implements client behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import type { RetryConfig } from "carapace/plugin-sdk/retry-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   mergeDiscordAccountConfig,
   resolveDiscordAccount,
@@ -19,7 +19,7 @@ import type { DiscordRuntimeAccountContext } from "./send.types.js";
 import { normalizeDiscordToken } from "./token.js";
 
 export type DiscordClientOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   token?: string;
   accountId?: string;
   rest?: RequestClient;
@@ -30,7 +30,7 @@ export type DiscordClientOpts = {
 };
 
 export function createDiscordRuntimeAccountContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
 }): DiscordRuntimeAccountContext {
   return {
@@ -77,7 +77,7 @@ function resolveToken(params: {
 function resolveRest(
   token: string,
   account: ResolvedDiscordAccount,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   rest?: RequestClient,
   proxyFetch?: typeof fetch,
   signal?: AbortSignal,
@@ -95,7 +95,7 @@ function resolveRest(
 }
 
 function resolveAccountWithoutToken(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
 }): ResolvedDiscordAccount {
   const accountId = normalizeAccountId(params.accountId);

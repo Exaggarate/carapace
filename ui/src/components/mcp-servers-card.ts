@@ -17,7 +17,7 @@ import {
   type McpServersPatchBuildResult,
 } from "../lib/config/mcp-servers.ts";
 import { formatUiError } from "../lib/format-error.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import { icons } from "./icons.ts";
 import { renderMcpServerForm, type McpServerForm } from "./mcp-server-form.ts";
@@ -47,13 +47,13 @@ function tlsLabel(tls: McpServerSummary["tls"]): string | null {
   }
 }
 
-class McpServersCard extends OpenClawLightDomElement {
+class McpServersCard extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: ApplicationContext;
 
   @property() pluginsHref = "";
 
-  @property() docsUrl = "https://docs.openclaw.ai/tools/mcp";
+  @property() docsUrl = "https://github.com/Exaggarate/carapace";
 
   @state() private rows: McpServerSummary[] | null = null;
   @state() private busy = false;
@@ -186,7 +186,7 @@ class McpServersCard extends OpenClawLightDomElement {
   }
 
   private renderRow(server: McpServerSummary): TemplateResult {
-    const command = `openclaw mcp ${server.auth === "oauth" ? "login" : "probe"} ${quoteShellArg(
+    const command = `carapace mcp ${server.auth === "oauth" ? "login" : "probe"} ${quoteShellArg(
       server.name,
     )}`;
     const meta = [
@@ -311,12 +311,12 @@ class McpServersCard extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-mcp-servers-card")) {
-  customElements.define("openclaw-mcp-servers-card", McpServersCard);
+if (!customElements.get("carapace-mcp-servers-card")) {
+  customElements.define("carapace-mcp-servers-card", McpServersCard);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-mcp-servers-card": McpServersCard;
+    "carapace-mcp-servers-card": McpServersCard;
   }
 }

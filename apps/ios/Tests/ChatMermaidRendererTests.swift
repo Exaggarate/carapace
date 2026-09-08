@@ -1,7 +1,7 @@
 #if os(iOS) && canImport(WebKit)
 import Foundation
 import Testing
-@testable import OpenClawChatUI
+@testable import CarapaceChatUI
 
 @MainActor
 struct ChatMermaidRendererTests {

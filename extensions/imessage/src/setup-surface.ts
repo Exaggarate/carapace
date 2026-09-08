@@ -3,8 +3,8 @@ import {
   createDetectedBinaryStatus,
   setSetupChannelEnabled,
   type ChannelSetupWizard,
-} from "openclaw/plugin-sdk/setup";
-import { detectBinary } from "openclaw/plugin-sdk/setup-tools";
+} from "carapace/plugin-sdk/setup";
+import { detectBinary } from "carapace/plugin-sdk/setup-tools";
 import { resolveIMessageAccount } from "./accounts.js";
 import { installIMessageCli } from "./install-imsg.js";
 import {

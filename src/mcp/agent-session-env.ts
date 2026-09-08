@@ -1,18 +1,18 @@
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 
-export const OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV = "OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY";
+export const CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY_ENV = "CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY";
 
 /** Private generated-helper argv selects context, never approval or execution authority. */
 export function resolveToolsMcpAgentId(
   argv: readonly string[] = process.argv.slice(2),
 ): string | undefined {
-  const index = argv.indexOf("--openclaw-agent-id");
+  const index = argv.indexOf("--carapace-agent-id");
   if (index < 0) {
     return undefined;
   }
   const value = argv[index + 1]?.trim();
-  if (!value || value.startsWith("--") || argv.includes("--openclaw-agent-id", index + 1)) {
-    throw new Error("--openclaw-agent-id requires one OpenClaw agent owner");
+  if (!value || value.startsWith("--") || argv.includes("--carapace-agent-id", index + 1)) {
+    throw new Error("--carapace-agent-id requires one Carapace agent owner");
   }
   return normalizeAgentId(value);
 }
@@ -30,7 +30,7 @@ export function resolveToolsMcpSessionContext(params: {
     (!sessionKey && agentId)
   ) {
     throw new Error(
-      `${OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV} must be a canonical agent session key or have a matching explicit OpenClaw owner`,
+      `${CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY_ENV} must be a canonical agent session key or have a matching explicit Carapace owner`,
     );
   }
   return sessionKey ? { sessionKey, agentId } : {};
@@ -39,5 +39,5 @@ export function resolveToolsMcpSessionContext(params: {
 export function resolveToolsMcpAgentSessionKey(
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
-  return env[OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV]?.trim() || undefined;
+  return env[CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY_ENV]?.trim() || undefined;
 }

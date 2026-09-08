@@ -123,7 +123,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("rejects baseline growth even when the new suppression is listed", () => {
-    const root = tempDirs.make("openclaw-max-lines-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "src/a.ts\n");
@@ -145,7 +145,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("rejects replacing an explicit max-lines suppression with an all-rule disable", () => {
-    const root = tempDirs.make("openclaw-max-lines-all-rule-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-all-rule-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "src/a.ts\n");
@@ -159,7 +159,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("rejects a new all-rule disable without baseline growth", () => {
-    const root = tempDirs.make("openclaw-max-lines-all-rule-new-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-all-rule-new-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "");
@@ -173,7 +173,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("transfers grandfathered debt across a verified rename", () => {
-    const root = tempDirs.make("openclaw-max-lines-rename-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-rename-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "src/a.ts\n");
@@ -191,7 +191,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("defaults worktree comparisons to origin/main", () => {
-    const root = tempDirs.make("openclaw-max-lines-default-base-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-default-base-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "src/a.ts\n");
@@ -209,7 +209,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("compares an explicit moving base at the branch fork", () => {
-    const root = tempDirs.make("openclaw-max-lines-diverged-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-diverged-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "src/a.ts\nsrc/b.ts\n");
@@ -229,7 +229,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("falls back to main when no merge base is available", () => {
-    const root = tempDirs.make("openclaw-max-lines-disconnected-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-disconnected-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "src/a.ts\n");
@@ -248,7 +248,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("checks staged content instead of unstaged worktree edits", () => {
-    const root = tempDirs.make("openclaw-max-lines-staged-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-staged-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "");
@@ -266,7 +266,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it.skipIf(process.platform === "win32")("keeps staged filenames NUL-framed", () => {
-    const root = tempDirs.make("openclaw-max-lines-nul-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-nul-", os.tmpdir());
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     git(root, ["init"]);
     const filePath = "src/newline\nname.ts";
@@ -277,7 +277,7 @@ describe("check-max-lines-ratchet", () => {
   });
 
   it("checks untracked sources and tolerates unstaged deletions", () => {
-    const root = tempDirs.make("openclaw-max-lines-worktree-", os.tmpdir());
+    const root = tempDirs.make("carapace-max-lines-worktree-", os.tmpdir());
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/max-lines-baseline.txt"), "");

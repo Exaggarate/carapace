@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
@@ -51,7 +51,7 @@ describe("deliverOutboundPayloads queue integration: block intent recovery", () 
   });
 
   it("recovers one pending block intent once and dedupes completed producer replays", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const deliveryIntentId = "block-reply:v1:codex-app-server:thread-1:turn-1:restart-dedupe";
     await enqueueDeliveryOnce(
       {
@@ -71,14 +71,14 @@ describe("deliverOutboundPayloads queue integration: block intent recovery", () 
 
     await drainMatrixReconnect({ deliver, stateDir: tmpDir });
     await recoverPendingDeliveries({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       deliver,
       log: createRecoveryLog(),
       stateDir: tmpDir,
     });
     await expect(
       deliverOutboundPayloads({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         channel: "matrix",
         to: "!room:example",
         payloads: [{ text: "regenerated duplicate" }],

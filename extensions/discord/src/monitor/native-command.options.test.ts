@@ -1,12 +1,12 @@
 // Discord tests cover native command.options plugin behavior.
 import { ApplicationCommandType, ChannelType, InteractionContextType } from "discord-api-types/v10";
-import type { ChatCommandDefinition } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { ChatCommandDefinition } from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDiscordLivePolicyReader } from "./live-policy.js";
 import type { DiscordLivePolicy, DiscordLivePolicyReader } from "./live-policy.js";
@@ -20,9 +20,9 @@ const { loggerDebugMock, loggerWarnMock } = vi.hoisted(() => ({
   loggerWarnMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -37,14 +37,14 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-runtime", () => ({
   getPreparedModelCatalogSnapshot: loadModelCatalogMock,
-  resolveAgentDir: (_cfg: OpenClawConfig, agentId: string) => `/tmp/agents/${agentId}/agent`,
-  resolveAgentWorkspaceDir: (_cfg: OpenClawConfig, agentId: string) => `/tmp/workspaces/${agentId}`,
+  resolveAgentDir: (_cfg: CarapaceConfig, agentId: string) => `/tmp/agents/${agentId}/agent`,
+  resolveAgentWorkspaceDir: (_cfg: CarapaceConfig, agentId: string) => `/tmp/workspaces/${agentId}`,
   resolveHumanDelayConfig: () => undefined,
 }));
 
-let listNativeCommandSpecs: typeof import("openclaw/plugin-sdk/command-auth-native").listNativeCommandSpecs;
+let listNativeCommandSpecs: typeof import("carapace/plugin-sdk/command-auth-native").listNativeCommandSpecs;
 let createDiscordNativeCommand: typeof import("./native-command.js").createDiscordNativeCommand;
 let buildDiscordCommandOptions: typeof import("./native-command.options.js").buildDiscordCommandOptions;
 let resolveDiscordNativeAutocompleteAuthorized: typeof import("./native-command-auth.js").resolveDiscordNativeAutocompleteAuthorized;
@@ -54,8 +54,8 @@ function createNativeCommand(
   name: string,
   opts?: {
     readPolicy?: DiscordLivePolicyReader;
-    cfg?: OpenClawConfig;
-    discordConfig?: NonNullable<OpenClawConfig["channels"]>["discord"];
+    cfg?: CarapaceConfig;
+    discordConfig?: NonNullable<CarapaceConfig["channels"]>["discord"];
   },
 ): ReturnType<typeof import("./native-command.js").createDiscordNativeCommand> {
   const command = listNativeCommandSpecs({ provider: "discord" }).find(
@@ -64,8 +64,8 @@ function createNativeCommand(
   if (!command) {
     throw new Error(`missing native command: ${name}`);
   }
-  const baseCfg: OpenClawConfig = opts?.cfg ?? {};
-  const discordConfig: NonNullable<OpenClawConfig["channels"]>["discord"] =
+  const baseCfg: CarapaceConfig = opts?.cfg ?? {};
+  const discordConfig: NonNullable<CarapaceConfig["channels"]>["discord"] =
     opts?.discordConfig ?? baseCfg.channels?.discord ?? {};
   const cfg =
     opts?.discordConfig === undefined
@@ -135,8 +135,8 @@ function requireAutocomplete(option: CommandOption, errorMessage: string) {
 }
 
 function createAllowedGuildAutocompleteConfig(
-  commands: NonNullable<OpenClawConfig["commands"]>,
-): OpenClawConfig {
+  commands: NonNullable<CarapaceConfig["commands"]>,
+): CarapaceConfig {
   return {
     commands,
     channels: {
@@ -154,7 +154,7 @@ function createAllowedGuildAutocompleteConfig(
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 async function runAutocomplete(
@@ -198,7 +198,7 @@ async function runAutocomplete(
 }
 
 async function resolveAutocompleteAuthorized(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   userId: string;
   username?: string;
   globalName?: string;
@@ -229,7 +229,7 @@ async function resolveAutocompleteAuthorized(params: {
 
 describe("createDiscordNativeCommand option wiring", () => {
   beforeAll(async () => {
-    ({ listNativeCommandSpecs } = await import("openclaw/plugin-sdk/command-auth-native"));
+    ({ listNativeCommandSpecs } = await import("carapace/plugin-sdk/command-auth-native"));
     ({ createDiscordNativeCommand } = await import("./native-command.js"));
     ({ buildDiscordCommandOptions } = await import("./native-command.options.js"));
     ({ resolveDiscordNativeAutocompleteAuthorized } = await import("./native-command-auth.js"));
@@ -279,7 +279,7 @@ describe("createDiscordNativeCommand option wiring", () => {
           allowFrom: ["*"],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const command = createNativeCommand("think", { cfg });
     const level = requireOption(command, "level");
     const autocomplete = requireAutocomplete(level, "think level option did not wire autocomplete");
@@ -310,7 +310,7 @@ describe("createDiscordNativeCommand option wiring", () => {
           type: "string",
           choices: ({ agentRuntime: selectedRuntime }) => [
             "max",
-            ...(selectedRuntime === "openclaw" ? ["ultra"] : []),
+            ...(selectedRuntime === "carapace" ? ["ultra"] : []),
           ],
         },
       ],
@@ -350,9 +350,9 @@ describe("createDiscordNativeCommand option wiring", () => {
       agentDir: "/tmp/agents/agent-a/agent",
     });
 
-    agentRuntime = "openclaw";
-    const openclawRespond = await runAutocomplete(autocomplete, params);
-    expect(openclawRespond).toHaveBeenCalledWith([
+    agentRuntime = "carapace";
+    const carapaceRespond = await runAutocomplete(autocomplete, params);
+    expect(carapaceRespond).toHaveBeenCalledWith([
       { name: "max", value: "max" },
       { name: "ultra", value: "ultra" },
     ]);
@@ -442,7 +442,7 @@ describe("createDiscordNativeCommand option wiring", () => {
         },
       }),
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { discord: { dmPolicy: "pairing", allowFrom: [] } },
     };
     setRuntimeConfigSnapshot(cfg, cfg);
@@ -469,7 +469,7 @@ describe("createDiscordNativeCommand option wiring", () => {
       });
       await readStarted.promise;
       loadModelCatalogMock.mockClear();
-      const revoked: OpenClawConfig = {
+      const revoked: CarapaceConfig = {
         channels: { discord: { dmPolicy: "disabled", allowFrom: [] } },
       };
       setRuntimeConfigSnapshot(revoked, revoked);
@@ -493,7 +493,7 @@ describe("createDiscordNativeCommand option wiring", () => {
             discord: ["user:allowed-user"],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     const level = requireOption(command, "level");
     const autocomplete = requireAutocomplete(level, "think level option did not wire autocomplete");
@@ -629,7 +629,7 @@ describe("createDiscordNativeCommand option wiring", () => {
           dmPolicy: "disabled",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeCfg = {
       session: { dmScope: "per-channel-peer" },
       channels: {
@@ -639,7 +639,7 @@ describe("createDiscordNativeCommand option wiring", () => {
           allowFrom: ["*"],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const command = createDiscordNativeCommand({
       command: {
         name: "scope",
@@ -651,7 +651,7 @@ describe("createDiscordNativeCommand option wiring", () => {
             description: "Scope value",
             type: "string",
             preferAutocomplete: true,
-            choices: ({ cfg }: { cfg?: OpenClawConfig }) => {
+            choices: ({ cfg }: { cfg?: CarapaceConfig }) => {
               const dmScope = cfg?.session?.dmScope ?? "missing";
               return [{ label: dmScope, value: dmScope }];
             },
@@ -714,7 +714,7 @@ describe("createDiscordNativeCommand option wiring", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     const level = requireOption(command, "level");
     const autocomplete = requireAutocomplete(level, "think level option did not wire autocomplete");
@@ -740,7 +740,7 @@ describe("createDiscordNativeCommand option wiring", () => {
         groupEnabled: true,
         groupChannels: ["allowed-group"],
       },
-    } satisfies NonNullable<OpenClawConfig["channels"]>["discord"];
+    } satisfies NonNullable<CarapaceConfig["channels"]>["discord"];
     const command = createNativeCommand("think", {
       cfg: {
         commands: {
@@ -748,7 +748,7 @@ describe("createDiscordNativeCommand option wiring", () => {
             discord: ["user:allowed-user"],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       discordConfig,
     });
     const level = requireOption(command, "level");
@@ -768,8 +768,8 @@ describe("createDiscordNativeCommand option wiring", () => {
 
   it("truncates Discord command and option descriptions on a UTF-16 boundary", () => {
     const longDescription = `${"x".repeat(99)}😀 trailing`;
-    const cfg = {} as OpenClawConfig;
-    const discordConfig = {} as NonNullable<OpenClawConfig["channels"]>["discord"];
+    const cfg = {} as CarapaceConfig;
+    const discordConfig = {} as NonNullable<CarapaceConfig["channels"]>["discord"];
     const command = createDiscordNativeCommand({
       command: {
         name: "longdesc",
@@ -817,7 +817,7 @@ describe("createDiscordNativeCommand option wiring", () => {
         },
         acceptsArgs: false,
       },
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       discordConfig: {},
       accountId: "default",
       sessionPrefix: "discord:slash",

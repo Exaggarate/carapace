@@ -1,11 +1,11 @@
 import { accessSync, constants, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { resolveAcpSessionAvailability } from "openclaw/plugin-sdk/acp-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveNodeHostExecutable } from "openclaw/plugin-sdk/node-host";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { resolveAcpSessionAvailability } from "carapace/plugin-sdk/acp-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveNodeHostExecutable } from "carapace/plugin-sdk/node-host";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import {
   createSessionCatalogFamily,
   createSessionCatalogNodeHostBindings,
@@ -14,8 +14,8 @@ import {
   sessionCatalogAdoptedSessionKey,
   type SessionCatalogEntrySnapshot,
   type SessionCatalogSession,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   OPENCODE_LOCAL_SESSION_HOST_ID as LOCAL_HOST_ID,
   OPENCODE_NODE_INVOKE_TIMEOUT_MS as NODE_TIMEOUT_MS,
@@ -113,12 +113,12 @@ function assertOpenCodeLocalAccess(hostId: string, allowProcessHomeFallback?: bo
   }
 }
 
-function currentOpenCodeCatalogConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config ?? {}) as OpenClawConfig;
+function currentOpenCodeCatalogConfig(api: CarapacePluginApi): CarapaceConfig {
+  return (api.runtime.config?.current?.() ?? api.config ?? {}) as CarapaceConfig;
 }
 
 function listAdoptedOpenCodeSessions(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   agentId?: string,
   sessionEntries?: SessionCatalogEntrySnapshot,
 ): Map<string, string> {
@@ -142,7 +142,7 @@ function listAdoptedOpenCodeSessions(
 }
 
 async function loadContinuableOpenCodeSession(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   threadId: string,
 ): Promise<SessionCatalogSession> {
   const page = await listLocalOpenCodeSessionPage(
@@ -157,7 +157,7 @@ async function loadContinuableOpenCodeSession(
 }
 
 async function createAdoptedOpenCodeSession(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   agentId: string;
   threadId: string;
   session: SessionCatalogSession;
@@ -201,7 +201,7 @@ async function createAdoptedOpenCodeSession(params: {
   return { sessionKey: created.key };
 }
 
-function createOpenCodeNodeHostBindings(api: OpenClawPluginApi) {
+function createOpenCodeNodeHostBindings(api: CarapacePluginApi) {
   const available = ({ config, env }: { config: unknown; env: NodeJS.ProcessEnv }) =>
     fullConfigCatalogEnabled(config) && executableOnPath("opencode", env);
   return createSessionCatalogNodeHostBindings({
@@ -227,7 +227,7 @@ function createOpenCodeNodeHostBindings(api: OpenClawPluginApi) {
   });
 }
 
-export function registerOpenCodeSessionCatalog(api: OpenClawPluginApi): void {
+export function registerOpenCodeSessionCatalog(api: CarapacePluginApi): void {
   if (!isOpenCodeSessionCatalogEnabled(api.pluginConfig)) {
     return;
   }

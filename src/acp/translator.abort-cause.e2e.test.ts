@@ -8,13 +8,13 @@ import {
   ndJsonStream,
   type SessionNotification,
 } from "@agentclientprotocol/sdk";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import { writeOpenAiResponsesSse } from "../../test/helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../test/helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../test/helpers/carapace-test-instance.js";
 import { GatewayClient } from "../gateway/client.js";
 
 const ABORT_CAUSE = "session_status tool validation failed: invalid arguments";
@@ -65,7 +65,7 @@ async function listen(server: Server): Promise<number> {
   return address.port;
 }
 
-async function connectOperator(instance: OpenClawTestInstance): Promise<GatewayClient> {
+async function connectOperator(instance: CarapaceTestInstance): Promise<GatewayClient> {
   return await new Promise<GatewayClient>((resolve, reject) => {
     let settled = false;
     const client = new GatewayClient({
@@ -111,12 +111,12 @@ async function stopChild(child: ChildProcessWithoutNullStreams | undefined): Pro
   }
 }
 
-describe("openclaw acp abort causes", () => {
+describe("carapace acp abort causes", () => {
   it(
     "shows the carried tool-validation cause before cancelled settlement",
     { timeout: 120_000 },
     async () => {
-      let instance: OpenClawTestInstance | undefined;
+      let instance: CarapaceTestInstance | undefined;
       let operator: GatewayClient | undefined;
       let acpProcess: ChildProcessWithoutNullStreams | undefined;
       const stalledResponses = new Set<ServerResponse>();
@@ -149,7 +149,7 @@ describe("openclaw acp abort causes", () => {
 
       try {
         const providerPort = await listen(provider);
-        instance = await createOpenClawTestInstance({
+        instance = await createCarapaceTestInstance({
           name: "acp-abort-cause",
           config: {
             agents: {
@@ -189,8 +189,8 @@ describe("openclaw acp abort causes", () => {
             plugins: { slots: { memory: "none" } },
           },
           env: {
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
           },
         });
         await instance.startGateway();
@@ -227,7 +227,7 @@ describe("openclaw acp abort causes", () => {
         await client.initialize({
           protocolVersion: PROTOCOL_VERSION,
           clientCapabilities: { fs: { readTextFile: true, writeTextFile: true }, terminal: true },
-          clientInfo: { name: "openclaw-acp-abort-cause-test", version: "1.0.0" },
+          clientInfo: { name: "carapace-acp-abort-cause-test", version: "1.0.0" },
         });
         const sessionKey = `agent:main:acp-abort-cause-${process.pid}`;
         const session = await client.newSession({
@@ -252,7 +252,7 @@ describe("openclaw acp abort causes", () => {
         const result = await prompt;
         timeline.push(result.stopReason);
 
-        expect(timeline).toContain(`[OpenClaw interruption] ${ABORT_CAUSE}`);
+        expect(timeline).toContain(`[Carapace interruption] ${ABORT_CAUSE}`);
         expect(timeline.at(-1)).toBe("cancelled");
       } finally {
         for (const response of stalledResponses) {

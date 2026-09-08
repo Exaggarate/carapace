@@ -11,7 +11,7 @@ vi.mock("./cli/argv.js", () => ({
 vi.mock("./cli/container-target.js", () => ({
   parseCliContainerArgs: (argv: string[]) => ({ ok: true, container: null, argv }),
   resolveCliContainerTarget: (argv: string[], env: NodeJS.ProcessEnv = process.env) =>
-    argv.includes("--container") ? "demo" : (env.OPENCLAW_CONTAINER ?? null),
+    argv.includes("--container") ? "demo" : (env.CARAPACE_CONTAINER ?? null),
 }));
 
 describe("entry root version fast path", () => {
@@ -34,14 +34,14 @@ describe("entry root version fast path", () => {
     }));
 
     expect(
-      tryHandleRootVersionFastPath(["node", "openclaw", "--version"], {
+      tryHandleRootVersionFastPath(["node", "carapace", "--version"], {
         output,
         exit,
         resolveVersion,
       }),
     ).toBe(true);
     await taggedExit.promise;
-    expect(output).toHaveBeenCalledWith("OpenClaw 9.9.9-test (abc1234)");
+    expect(output).toHaveBeenCalledWith("Carapace 9.9.9-test (abc1234)");
     expect(exit).toHaveBeenCalledWith(0);
 
     output.mockClear();
@@ -52,20 +52,20 @@ describe("entry root version fast path", () => {
     });
 
     expect(
-      tryHandleRootVersionFastPath(["node", "openclaw", "--version"], {
+      tryHandleRootVersionFastPath(["node", "carapace", "--version"], {
         output,
         exit,
         resolveVersion,
       }),
     ).toBe(true);
     await plainExit.promise;
-    expect(output).toHaveBeenCalledWith("OpenClaw 9.9.9-test");
+    expect(output).toHaveBeenCalledWith("Carapace 9.9.9-test");
     expect(exit).toHaveBeenCalledWith(0);
 
     output.mockClear();
     exit.mockClear();
     expect(
-      tryHandleRootVersionFastPath(["node", "openclaw", "--container", "demo", "--version"], {
+      tryHandleRootVersionFastPath(["node", "carapace", "--container", "demo", "--version"], {
         output,
         exit,
         resolveVersion,
@@ -76,8 +76,8 @@ describe("entry root version fast path", () => {
     expect(exit).not.toHaveBeenCalled();
 
     expect(
-      tryHandleRootVersionFastPath(["node", "openclaw", "--version"], {
-        env: { OPENCLAW_CONTAINER: "demo" },
+      tryHandleRootVersionFastPath(["node", "carapace", "--version"], {
+        env: { CARAPACE_CONTAINER: "demo" },
         output,
         exit,
         resolveVersion,
@@ -107,7 +107,7 @@ describe("entry root version fast path", () => {
         .mockRejectedValue(new Error("version resolution failed"));
 
       try {
-        const handled = tryHandleRootVersionFastPath(["node", "openclaw", "--version"], {
+        const handled = tryHandleRootVersionFastPath(["node", "carapace", "--version"], {
           output,
           exit,
           resolveVersion,
@@ -136,7 +136,7 @@ describe("entry root version fast path", () => {
       logging.setLoggerOverride({ level: "silent", consoleLevel: "info", consoleStyle: "json" });
 
       try {
-        const handled = tryHandleRootVersionFastPath(["node", "openclaw", "--version"], {
+        const handled = tryHandleRootVersionFastPath(["node", "carapace", "--version"], {
           exit,
           resolveVersion,
         });
@@ -164,7 +164,7 @@ describe("entry root version fast path", () => {
       .mockRejectedValue(new Error("version resolution failed"));
 
     expect(
-      tryHandleRootVersionFastPath(["node", "openclaw", "--version"], {
+      tryHandleRootVersionFastPath(["node", "carapace", "--version"], {
         exit,
         onError,
         resolveVersion,

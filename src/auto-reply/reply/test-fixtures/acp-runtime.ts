@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 // Test fixture helpers for constructing ACP runtime session metadata.
 import type { SessionAcpMeta } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { ReplyDispatcher } from "../reply-dispatcher.types.js";
 
 const settledCounts = (delivered: number) => ({
@@ -49,7 +49,7 @@ export function createAcpTestReplyDispatcherFixture(): {
   };
 }
 
-export function createAcpTestConfig(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
+export function createAcpTestConfig(overrides?: Partial<CarapaceConfig>): CarapaceConfig {
   return {
     acp: {
       enabled: true,
@@ -59,7 +59,7 @@ export function createAcpTestConfig(overrides?: Partial<OpenClawConfig>): OpenCl
       },
     },
     ...overrides,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 export function createAcpSessionMeta(overrides?: Partial<SessionAcpMeta>): SessionAcpMeta {

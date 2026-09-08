@@ -143,7 +143,7 @@ describe("gateway CLI backend live probe helpers", () => {
     try {
       await expect(
         verifyCliCronMcpLoopbackPreflight(
-          preflightParams({ OPENCLAW_MCP_LOOPBACK_PROBE_TIMEOUT_MS: "100" }),
+          preflightParams({ CARAPACE_MCP_LOOPBACK_PROBE_TIMEOUT_MS: "100" }),
         ),
       ).rejects.toThrow(/aborted|AbortError/iu);
       expect(Date.now() - startedAt).toBeLessThan(2_500);
@@ -165,7 +165,7 @@ describe("gateway CLI backend live probe helpers", () => {
     try {
       await expect(
         verifyCliCronMcpLoopbackPreflight(
-          preflightParams({ OPENCLAW_MCP_LOOPBACK_PROBE_MAX_BODY_BYTES: "64" }),
+          preflightParams({ CARAPACE_MCP_LOOPBACK_PROBE_MAX_BODY_BYTES: "64" }),
         ),
       ).rejects.toThrow("mcp loopback response body exceeded 64 bytes");
     } finally {
@@ -197,7 +197,7 @@ describe("gateway CLI backend live probe helpers", () => {
     try {
       await expect(
         verifyCliCronMcpLoopbackPreflight(
-          preflightParams({ OPENCLAW_MCP_LOOPBACK_PROBE_MAX_BODY_BYTES: "64" }),
+          preflightParams({ CARAPACE_MCP_LOOPBACK_PROBE_MAX_BODY_BYTES: "64" }),
         ),
       ).rejects.toThrow("mcp loopback response body exceeded 64 bytes");
       expect(cancel).toHaveBeenCalledOnce();

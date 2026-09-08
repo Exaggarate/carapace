@@ -55,33 +55,33 @@ describe("scripts/ios-release-signing.mjs", () => {
   it("emits manual App Store profile settings for every signed target", () => {
     const output = runSigning("xcconfig");
 
-    expect(output).toContain("OPENCLAW_CODE_SIGN_STYLE = Manual");
-    expect(output).toContain("OPENCLAW_CODE_SIGN_IDENTITY = Apple Distribution");
-    expect(output).toContain("OPENCLAW_APP_GROUP_ID = group.ai.openclawfoundation.app.shared");
-    expect(output).toContain("OPENCLAW_APP_PROFILE = OpenClaw App Store ai.openclawfoundation.app");
+    expect(output).toContain("CARAPACE_CODE_SIGN_STYLE = Manual");
+    expect(output).toContain("CARAPACE_CODE_SIGN_IDENTITY = Apple Distribution");
+    expect(output).toContain("CARAPACE_APP_GROUP_ID = group.ai.carapacefoundation.app.shared");
+    expect(output).toContain("CARAPACE_APP_PROFILE = Carapace App Store ai.carapacefoundation.app");
     expect(output).toContain(
-      "OPENCLAW_SHARE_PROFILE = OpenClaw App Store ai.openclawfoundation.app.share",
+      "CARAPACE_SHARE_PROFILE = Carapace App Store ai.carapacefoundation.app.share",
     );
     expect(output).toContain(
-      "OPENCLAW_ACTIVITY_WIDGET_PROFILE = OpenClaw App Store ai.openclawfoundation.app.activitywidget",
+      "CARAPACE_ACTIVITY_WIDGET_PROFILE = Carapace App Store ai.carapacefoundation.app.activitywidget",
     );
     expect(output).toContain(
-      "OPENCLAW_WATCH_APP_PROFILE = OpenClaw App Store ai.openclawfoundation.app.watchkitapp",
+      "CARAPACE_WATCH_APP_PROFILE = Carapace App Store ai.carapacefoundation.app.watchkitapp",
     );
-    expect(output).not.toContain("OPENCLAW_WATCH_EXTENSION_PROFILE");
+    expect(output).not.toContain("CARAPACE_WATCH_EXTENSION_PROFILE");
   });
 
   it("documents the canonical release signing plan", () => {
     const output = runSigning("plan");
 
     expect(output).toContain("Team ID: FWJYW4S8P8");
-    expect(output).toContain("Signing repo: git@github.com:openclaw/apps-signing.git");
+    expect(output).toContain("Signing repo: git@github.com:carapace/apps-signing.git");
     expect(output).toContain("Signing branch: main");
     expect(output).toContain("Signing setup and sync: Fastlane match");
-    expect(output).not.toContain("OpenClawWatchExtension");
+    expect(output).not.toContain("CarapaceWatchExtension");
     expect(output).toContain(
       "capabilities: PUSH_NOTIFICATIONS, APP_GROUPS, APP_ATTEST, HEALTH_KIT",
     );
-    expect(output).toContain("app groups: group.ai.openclawfoundation.app.shared");
+    expect(output).toContain("app groups: group.ai.carapacefoundation.app.shared");
   });
 });

@@ -78,7 +78,7 @@ describe("embedded attempt backend", () => {
   it("preserves the built-in runner's completed settlement", async () => {
     harnessMocks.runAttempt.mockResolvedValueOnce(
       makeEmbeddedRunnerAttempt({
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         yieldDetected: true,
         requesterContinuationSettled: true,
       }),
@@ -124,7 +124,7 @@ describe("embedded attempt backend", () => {
     const operationalRunInstance = {};
     const attempt = markCoreTtsAttemptResult(
       {
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         toolMediaUrls: ["/tmp/reply.opus"],
       },
       ["/tmp/reply.opus"],
@@ -164,7 +164,7 @@ describe("embedded attempt backend", () => {
     },
   ])("$name", async ({ credentialSource, expected }) => {
     harnessMocks.runAttempt.mockResolvedValueOnce({
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       modelAttempt: {
         provider: "stale-provider",
         model: "stale-model",

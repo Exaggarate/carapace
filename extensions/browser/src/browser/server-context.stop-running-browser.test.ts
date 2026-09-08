@@ -19,7 +19,7 @@ const pwAiMocks = vi.hoisted(() => {
 });
 
 const chromeMocks = vi.hoisted(() => ({
-  stopOwnedOpenClawChrome: vi.fn(async () => false),
+  stopOwnedCarapaceChrome: vi.fn(async () => false),
 }));
 
 vi.mock("./pw-ai.js", () => ({ pwAi: pwAiMocks }));
@@ -27,12 +27,12 @@ vi.mock("./chrome.js", () => ({
   isChromeCdpOwnedByPid: vi.fn(async () => true),
   isChromeCdpReady: vi.fn(async () => true),
   isChromeReachable: vi.fn(async () => true),
-  launchOpenClawChrome: vi.fn(async () => {
+  launchCarapaceChrome: vi.fn(async () => {
     throw new Error("unexpected launch");
   }),
-  resolveOpenClawUserDataDir: vi.fn(() => "/tmp/openclaw-test"),
-  stopOwnedOpenClawChrome: chromeMocks.stopOwnedOpenClawChrome,
-  stopOpenClawChrome: vi.fn(async () => {}),
+  resolveCarapaceUserDataDir: vi.fn(() => "/tmp/carapace-test"),
+  stopOwnedCarapaceChrome: chromeMocks.stopOwnedCarapaceChrome,
+  stopCarapaceChrome: vi.fn(async () => {}),
 }));
 vi.mock("./chrome-mcp.js", () => ({
   closeChromeMcpSession: vi.fn(async () => false),
@@ -43,7 +43,7 @@ vi.mock("./chrome-mcp.js", () => ({
 
 afterEach(() => {
   vi.clearAllMocks();
-  chromeMocks.stopOwnedOpenClawChrome.mockResolvedValue(false);
+  chromeMocks.stopOwnedCarapaceChrome.mockResolvedValue(false);
 });
 
 function createStopHarness(profile: ReturnType<typeof makeBrowserProfile>) {
@@ -64,7 +64,7 @@ describe("createProfileAvailability.stopRunningBrowser", () => {
 
     await expect(profileCtx.stopRunningBrowser()).resolves.toEqual({ stopped: true });
     expect(pwAiMocks.closePlaywrightBrowserConnection).not.toHaveBeenCalled();
-    expect(chromeMocks.stopOwnedOpenClawChrome).not.toHaveBeenCalled();
+    expect(chromeMocks.stopOwnedCarapaceChrome).not.toHaveBeenCalled();
   });
 
   it("stops an unused remote CDP profile without loading Playwright", async () => {
@@ -78,7 +78,7 @@ describe("createProfileAvailability.stopRunningBrowser", () => {
 
     await expect(profileCtx.stopRunningBrowser()).resolves.toEqual({ stopped: true });
     expect(pwAiMocks.closePlaywrightBrowserConnection).not.toHaveBeenCalled();
-    expect(chromeMocks.stopOwnedOpenClawChrome).not.toHaveBeenCalled();
+    expect(chromeMocks.stopOwnedCarapaceChrome).not.toHaveBeenCalled();
   });
 
   it("keeps never-started local managed profiles as not stopped", async () => {
@@ -90,12 +90,12 @@ describe("createProfileAvailability.stopRunningBrowser", () => {
   });
 
   it("stops a local managed browser launched by another runtime", async () => {
-    chromeMocks.stopOwnedOpenClawChrome.mockResolvedValue(true);
+    chromeMocks.stopOwnedCarapaceChrome.mockResolvedValue(true);
     const profile = makeBrowserProfile();
     const { profileCtx } = createStopHarness(profile);
 
     await expect(profileCtx.stopRunningBrowser()).resolves.toEqual({ stopped: true });
-    expect(chromeMocks.stopOwnedOpenClawChrome).toHaveBeenCalledOnce();
+    expect(chromeMocks.stopOwnedCarapaceChrome).toHaveBeenCalledOnce();
     expect(pwAiMocks.closePlaywrightBrowserConnection).not.toHaveBeenCalled();
   });
 
@@ -107,7 +107,7 @@ describe("createProfileAvailability.stopRunningBrowser", () => {
 
       await profileCtx.stopRunningBrowser();
 
-      expect(chromeMocks.stopOwnedOpenClawChrome).not.toHaveBeenCalled();
+      expect(chromeMocks.stopOwnedCarapaceChrome).not.toHaveBeenCalled();
     },
   );
 });

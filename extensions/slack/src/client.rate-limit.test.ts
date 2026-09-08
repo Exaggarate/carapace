@@ -1,6 +1,6 @@
-// Real OpenClaw stream helpers and Slack SDK with synthetic HTTP responses.
+// Real Carapace stream helpers and Slack SDK with synthetic HTTP responses.
 import { WebClient, type WebClientOptions } from "@slack/web-api";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it } from "vitest";
 import { createSlackWriteClient, resolveSlackWriteClientOptions } from "./client.js";
 import { appendSlackStream, startSlackStream, stopSlackStream } from "./streaming.js";

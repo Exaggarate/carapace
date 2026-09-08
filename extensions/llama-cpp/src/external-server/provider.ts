@@ -3,9 +3,9 @@ import type {
   ProviderCatalogResult,
   ProviderPrepareDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { isNonSecretApiKeyMarker } from "openclaw/plugin-sdk/provider-auth";
-import * as liveCatalogRuntime from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { isNonSecretApiKeyMarker } from "carapace/plugin-sdk/provider-auth";
+import * as liveCatalogRuntime from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import { LLAMA_CPP_PROVIDER_ID } from "../defaults.js";
 import {
   hasLlamaServerAuthorizationHeader,

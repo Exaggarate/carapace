@@ -251,7 +251,7 @@ describe("application approval overlays", () => {
 
     expect(request).not.toHaveBeenCalledWith("exec.approval.list", {});
     expect(request).not.toHaveBeenCalledWith("plugin.approval.list", {});
-    expect(request).not.toHaveBeenCalledWith("openclaw.approval.list", {});
+    expect(request).not.toHaveBeenCalledWith("carapace.approval.list", {});
 
     harness.emitApproval("hidden-approval", 1_000);
     expect(overlays.snapshot.approvalQueue).toEqual([]);
@@ -279,7 +279,7 @@ describe("application approval overlays", () => {
 
     expect(request).toHaveBeenCalledWith("exec.approval.list", {});
     expect(request).toHaveBeenCalledWith("plugin.approval.list", {});
-    expect(request).toHaveBeenCalledWith("openclaw.approval.list", {});
+    expect(request).toHaveBeenCalledWith("carapace.approval.list", {});
     overlays.dispose();
   });
 
@@ -472,7 +472,7 @@ describe("application approval overlays", () => {
     overlays.dispose();
   });
 
-  it("resolves OpenClaw changes through unified human approval", async () => {
+  it("resolves Carapace changes through unified human approval", async () => {
     const request = vi.fn<RequestFn>(async (method) =>
       method.endsWith(".list") ? [] : { ok: true },
     );
@@ -514,7 +514,7 @@ describe("application approval overlays", () => {
     expect(execListRequests).toBe(1);
     expect(request).toHaveBeenCalledWith("exec.approval.list", {});
     expect(request).toHaveBeenCalledWith("plugin.approval.list", {});
-    expect(request).toHaveBeenCalledWith("openclaw.approval.list", {});
+    expect(request).toHaveBeenCalledWith("carapace.approval.list", {});
 
     harness.update({ phase: "stopped" });
     expect(overlays.snapshot.approvalQueue).toEqual([]);

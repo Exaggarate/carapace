@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDevicesViewProps } from "../../test-helpers/devices-fixtures.ts";
@@ -128,7 +128,7 @@ describe("devices exec approvals rendering", () => {
         onSelect: (value: string) => void;
         updateComplete: Promise<boolean>;
       }
-    >("openclaw-agent-select");
+    >("carapace-agent-select");
     await picker?.updateComplete;
 
     expect(picker?.options.map((option) => option.value)).toEqual([
@@ -241,7 +241,7 @@ describe("devices agent bindings", () => {
       name: "current-client preference",
       refs: ["Default worker", "Research worker"],
       competitors: true,
-      clientId: "openclaw-node",
+      clientId: "carapace-node",
     },
   ])("preserves $name across node loss and recovery", (scenario) => {
     const [defaultRef, agentRef] = scenario.refs;

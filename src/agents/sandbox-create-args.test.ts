@@ -4,7 +4,7 @@ import { SANDBOX_DOCKER_CREATE_ARGS_EPOCH } from "./sandbox/constants.js";
 import { buildSandboxCreateArgs } from "./sandbox/docker.js";
 import type { SandboxDockerConfig } from "./sandbox/types.js";
 
-const OPENCLAW_CLI_ENV_VALUE = "1";
+const CARAPACE_CLI_ENV_VALUE = "1";
 
 describe("buildSandboxCreateArgs", () => {
   function createSandboxConfig(
@@ -13,8 +13,8 @@ describe("buildSandboxCreateArgs", () => {
   ): SandboxDockerConfig {
     // Baseline config keeps each Docker argument case focused on one override.
     return {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "carapace-sandbox:bookworm-slim",
+      containerPrefix: "carapace-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -65,8 +65,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("includes hardening and resource flags", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "carapace-sandbox:bookworm-slim",
+      containerPrefix: "carapace-sbx-",
       workdir: "/workspace",
       readOnlyRoot: true,
       tmpfs: ["/tmp"],
@@ -84,27 +84,27 @@ describe("buildSandboxCreateArgs", () => {
         core: "0",
       },
       seccompProfile: "/tmp/seccomp.json",
-      apparmorProfile: "openclaw-sandbox",
+      apparmorProfile: "carapace-sandbox",
       dns: ["1.1.1.1"],
       extraHosts: ["internal.service:10.0.0.5"],
     };
 
     const { argv: args, env } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-test",
+      name: "carapace-sbx-test",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
-      labels: { "openclaw.sandboxBrowser": "1" },
+      labels: { "carapace.sandboxBrowser": "1" },
     });
 
     expect(args[0]).toBe("create");
-    expectFlagValues(args, "--name", ["openclaw-sbx-test"]);
+    expectFlagValues(args, "--name", ["carapace-sbx-test"]);
     expectFlagValues(args, "--label", [
-      "openclaw.sandbox=1",
-      "openclaw.sessionKey=main",
-      "openclaw.createdAtMs=1700000000000",
-      `openclaw.createArgsEpoch=${SANDBOX_DOCKER_CREATE_ARGS_EPOCH}`,
-      "openclaw.sandboxBrowser=1",
+      "carapace.sandbox=1",
+      "carapace.sessionKey=main",
+      "carapace.createdAtMs=1700000000000",
+      `carapace.createArgsEpoch=${SANDBOX_DOCKER_CREATE_ARGS_EPOCH}`,
+      "carapace.sandboxBrowser=1",
     ]);
     expect(args).toContain("--read-only");
     expectFlagValues(args, "--tmpfs", ["/tmp"]);
@@ -114,7 +114,7 @@ describe("buildSandboxCreateArgs", () => {
     expectFlagValues(args, "--security-opt", [
       "no-new-privileges",
       "seccomp=/tmp/seccomp.json",
-      "apparmor=openclaw-sandbox",
+      "apparmor=carapace-sandbox",
     ]);
     expectFlagValues(args, "--dns", ["1.1.1.1"]);
     expectFlagValues(args, "--add-host", ["internal.service:10.0.0.5"]);
@@ -123,7 +123,7 @@ describe("buildSandboxCreateArgs", () => {
     expectFlagValues(args, "--memory-swap", ["1024"]);
     expectFlagValues(args, "--cpus", ["1.5"]);
     expect(args).not.toContain("--env");
-    expect(env).toEqual({ LANG: "C.UTF-8", OPENCLAW_CLI: OPENCLAW_CLI_ENV_VALUE });
+    expect(env).toEqual({ LANG: "C.UTF-8", CARAPACE_CLI: CARAPACE_CLI_ENV_VALUE });
     expectFlagValues(args, "--ulimit", ["nofile=1024:2048", "nproc=128", "core=0"]);
   });
 
@@ -146,7 +146,7 @@ describe("buildSandboxCreateArgs", () => {
     });
 
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-non-finite-limits",
+      name: "carapace-sbx-non-finite-limits",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -176,7 +176,7 @@ describe("buildSandboxCreateArgs", () => {
     });
 
     const { argv: args, env } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-marker",
+      name: "carapace-sbx-marker",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -185,7 +185,7 @@ describe("buildSandboxCreateArgs", () => {
     expect(args).not.toContain("--env");
     expect(env).toEqual({
       ...cfg.env,
-      OPENCLAW_CLI: OPENCLAW_CLI_ENV_VALUE,
+      CARAPACE_CLI: CARAPACE_CLI_ENV_VALUE,
     });
   });
 
@@ -195,7 +195,7 @@ describe("buildSandboxCreateArgs", () => {
     });
 
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-gpu",
+      name: "carapace-sbx-gpu",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -206,8 +206,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("emits -v flags for safe custom binds", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "carapace-sandbox:bookworm-slim",
+      containerPrefix: "carapace-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -217,7 +217,7 @@ describe("buildSandboxCreateArgs", () => {
     };
 
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-binds",
+      name: "carapace-sbx-binds",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -240,43 +240,43 @@ describe("buildSandboxCreateArgs", () => {
   it.each([
     {
       name: "dangerous Docker socket bind mounts",
-      containerName: "openclaw-sbx-dangerous",
+      containerName: "carapace-sbx-dangerous",
       cfg: createSandboxConfig({}, ["/var/run/docker.sock:/var/run/docker.sock"]),
       expected: /blocked path/,
     },
     {
       name: "dangerous parent bind mounts",
-      containerName: "openclaw-sbx-dangerous-parent",
+      containerName: "carapace-sbx-dangerous-parent",
       cfg: createSandboxConfig({}, ["/run:/run"]),
       expected: /blocked path/,
     },
     {
       name: "bind source covering Docker socket directory",
-      containerName: "openclaw-sbx-covers-docker-socket-dir",
+      containerName: "carapace-sbx-covers-docker-socket-dir",
       cfg: createSandboxConfig({}, ["/var:/var"]),
       expected: /covers blocked path/,
     },
     {
       name: "network host mode",
-      containerName: "openclaw-sbx-host",
+      containerName: "carapace-sbx-host",
       cfg: createSandboxConfig({ network: "host" }),
       expected: /network mode "host" is blocked/,
     },
     {
       name: "network container namespace join",
-      containerName: "openclaw-sbx-container-network",
+      containerName: "carapace-sbx-container-network",
       cfg: createSandboxConfig({ network: "container:peer" }),
       expected: /network mode "container:peer" is blocked by default/,
     },
     {
       name: "seccomp unconfined",
-      containerName: "openclaw-sbx-seccomp",
+      containerName: "carapace-sbx-seccomp",
       cfg: createSandboxConfig({ seccompProfile: "unconfined" }),
       expected: /seccomp profile "unconfined" is blocked/,
     },
     {
       name: "apparmor unconfined",
-      containerName: "openclaw-sbx-apparmor",
+      containerName: "carapace-sbx-apparmor",
       cfg: createSandboxConfig({ apparmorProfile: "unconfined" }),
       expected: /apparmor profile "unconfined" is blocked/,
     },
@@ -286,8 +286,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("omits -v flags when binds is empty or undefined", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "carapace-sandbox:bookworm-slim",
+      containerPrefix: "carapace-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -297,7 +297,7 @@ describe("buildSandboxCreateArgs", () => {
     };
 
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-no-binds",
+      name: "carapace-sbx-no-binds",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -320,7 +320,7 @@ describe("buildSandboxCreateArgs", () => {
     const cfg = createSandboxConfig({}, ["/opt/external:/data:rw"]);
     expect(() =>
       buildSandboxCreateArgs({
-        name: "openclaw-sbx-outside-roots",
+        name: "carapace-sbx-outside-roots",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,
@@ -332,7 +332,7 @@ describe("buildSandboxCreateArgs", () => {
   it("allows bind sources outside runtime allowlist with explicit override", () => {
     const cfg = createSandboxConfig({}, ["/opt/external:/data:rw"]);
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-outside-roots-override",
+      name: "carapace-sbx-outside-roots-override",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -344,13 +344,13 @@ describe("buildSandboxCreateArgs", () => {
 
   it("blocks reserved /workspace target bind mounts by default", () => {
     const cfg = createSandboxConfig({}, ["/tmp/override:/workspace:rw"]);
-    expectBuildToThrow("openclaw-sbx-reserved-target", cfg, /reserved container path/);
+    expectBuildToThrow("carapace-sbx-reserved-target", cfg, /reserved container path/);
   });
 
   it("allows reserved /workspace target bind mounts with explicit dangerous override", () => {
     const cfg = createSandboxConfig({}, ["/tmp/override:/workspace:rw"]);
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-reserved-target-override",
+      name: "carapace-sbx-reserved-target-override",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -365,7 +365,7 @@ describe("buildSandboxCreateArgs", () => {
       dangerouslyAllowContainerNamespaceJoin: true,
     });
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-container-network-override",
+      name: "carapace-sbx-container-network-override",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -376,7 +376,7 @@ describe("buildSandboxCreateArgs", () => {
   it("passes one --init flag so Docker reaps orphaned processes", () => {
     const cfg = createSandboxConfig();
     const { argv: args } = buildSandboxCreateArgs({
-      name: "openclaw-sbx-init",
+      name: "carapace-sbx-init",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,

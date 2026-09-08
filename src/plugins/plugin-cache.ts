@@ -43,7 +43,7 @@ const state = resolveGlobalSingleton<{
   current?: PluginCache;
   scope: AsyncLocalStorage<PluginCache>;
   snapshotOwners: WeakMap<object, PluginCache>;
-}>(Symbol.for("openclaw.pluginCache"), () => ({
+}>(Symbol.for("carapace.pluginCache"), () => ({
   scope: new AsyncLocalStorage<PluginCache>(),
   snapshotOwners: new WeakMap(),
 }));

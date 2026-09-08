@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { assignSessionOwner, upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { ensureProfileForEmail, linkEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { GatewayClient, GatewayRequestContext } from "./server-methods/types.js";
 import { isSessionCreatorProfile } from "./session-creator.js";
 import {
@@ -17,11 +17,11 @@ import {
 
 describe("creator namespace authorization", () => {
   it("reuses caller alias facts across rows and refreshes them after a real merge", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const caller = ensureProfileForEmail("cached-caller@example.test");
       const other = ensureProfileForEmail("cached-other@example.test");
       const actor = { type: "human", source: "profile", id: other.id } as const;
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       const prepare = vi.spyOn(db, "prepare");
       try {
         expect(isSessionCreatorProfile({ ...actor, source: "channel" }, caller.id)).toBe(false);
@@ -43,13 +43,13 @@ describe("creator namespace authorization", () => {
   });
 
   it("never turns matching attribution or responsibility into a profile creator grant", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForEmail("creator@example.test");
       const client = {
         connect: { scopes: ["operator.read", "operator.write"] },
         authenticatedUserProfile: { profileId: profile.id },
       } as GatewayClient;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "reader",
@@ -125,7 +125,7 @@ describe("creator namespace authorization", () => {
   });
 
   it("resolves profile tombstones after warming event snapshots without rewriting creators", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const old = ensureProfileForEmail("old@example.test");
       const current = ensureProfileForEmail("current@example.test");
       const client = {

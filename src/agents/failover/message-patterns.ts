@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 type ErrorPattern = RegExp | string;
 
 // Both figures must be denominated in tokens and come from one clause. A message can state an RPM

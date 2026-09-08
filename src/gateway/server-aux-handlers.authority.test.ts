@@ -9,11 +9,11 @@ import {
   rotateAgentRunRegistryLifecycleGeneration,
   validateAgentRunDelegatedAuthority,
 } from "../infra/agent-run-registry.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createAgentRuntimeApprovalAuthorityValidator } from "./agent-runtime-identity-token.js";
 import { ApprovalObserverClosedError } from "./exec-approval-lifecycle.js";
 import { getOperatorApprovalDetailed } from "./operator-approval-store.js";
@@ -23,7 +23,7 @@ import { createWorkerSessionPlacementStore } from "./worker-environments/placeme
 type GatewayAux = ReturnType<typeof createGatewayAuxHandlers>;
 type GatewayAuxParams = Parameters<typeof createGatewayAuxHandlers>[0];
 const auxiliaries: GatewayAux[] = [];
-let fixture: OpenClawTestState | undefined;
+let fixture: CarapaceTestState | undefined;
 
 function createAuthorityHarness(
   params: Pick<
@@ -59,7 +59,7 @@ beforeEach(async () => {
   if (fixture) {
     throw new Error("Previous auxiliary owner cleanup did not finish");
   }
-  fixture = await createOpenClawTestState({ label: "gateway-aux-authority" });
+  fixture = await createCarapaceTestState({ label: "gateway-aux-authority" });
 });
 
 afterEach(async () => {
@@ -294,7 +294,7 @@ describe("gateway auxiliary authority lifecycle", () => {
   });
 
   it("settles and publishes both approval kinds from the production worker-claim observer", async () => {
-    const database = openOpenClawStateDatabase();
+    const database = openCarapaceStateDatabase();
     const placements = createWorkerSessionPlacementStore({ database });
     const identity = {
       sessionId: "session-worker-close",

@@ -10,7 +10,7 @@ import { resolveApiKeyForProviderCore } from "../agents/model-auth.js";
 import { prepareAgentRuntimeAuth } from "../agents/runtime-plan/prepare-auth.js";
 import { readConfigFileSnapshot } from "../config/config.js";
 import { cloneConfigWithResolutionFacts } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import {
   activateSecretsRuntimeSnapshotWithSource,
@@ -69,11 +69,11 @@ function storeKey(value: string) {
 }
 
 beforeEach(async () => {
-  temp = await createTempHomeEnv("openclaw-setup-runtime-");
-  configPath = path.join(temp.home, ".openclaw", "openclaw.json");
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-  vi.stubEnv("OPENCLAW_SECRET_SENTINELS", "1");
-  const config: OpenClawConfig = {
+  temp = await createTempHomeEnv("carapace-setup-runtime-");
+  configPath = path.join(temp.home, ".carapace", "carapace.json");
+  vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+  vi.stubEnv("CARAPACE_SECRET_SENTINELS", "1");
+  const config: CarapaceConfig = {
     plugins: { enabled: false },
     agents: {
       defaults: { model: "fixture/test-model" },
@@ -122,7 +122,7 @@ it("keeps protected credentials through a fresh setup read and verified-route re
     snapshot,
   );
   expect(route).not.toBeNull();
-  expect(route!.runConfig.agents?.entries).toHaveProperty("openclaw");
+  expect(route!.runConfig.agents?.entries).toHaveProperty("carapace");
   expect(snapshot.sourceConfig.agents?.defaults?.maxConcurrent).toBeUndefined();
   expect(route!.runConfig.agents?.defaults?.maxConcurrent).toBeGreaterThan(0);
   expect(
@@ -143,7 +143,7 @@ it("keeps protected credentials through a fresh setup read and verified-route re
     configuredRoute: route!,
     executionRoute: route!,
     auth: {
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       modelId: "test-model",
       modelApi: "openai-responses",
       authFingerprint: fingerprintResolvedProviderAuth(auth),
@@ -260,7 +260,7 @@ it.each([
       });
       expect(looksLikeSecretSentinel(auth.apiKey ?? "")).toBe(true);
       params.onSuccessfulAuthBinding?.({
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         modelId: "test-model",
         modelApi: "openai-responses",
         authFingerprint: fingerprintResolvedProviderAuth(auth),
@@ -325,7 +325,7 @@ it.each([
       if (entrypoint === "fallback") {
         expect(attemptedOwners).toEqual(["main", "engineering"]);
         expect(result.binding.execution.agentId).toBe("engineering");
-        expect(result.binding.execution.runConfig.agents?.entries?.openclaw?.params).toEqual({
+        expect(result.binding.execution.runConfig.agents?.entries?.carapace?.params).toEqual({
           temperature: 0.1,
         });
       }

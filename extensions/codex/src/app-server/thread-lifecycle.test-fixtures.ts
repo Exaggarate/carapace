@@ -1,5 +1,5 @@
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { AuthStorage, ModelRegistry } from "openclaw/plugin-sdk/agent-sessions";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import { AuthStorage, ModelRegistry } from "carapace/plugin-sdk/agent-sessions";
 import { expect, onTestFinished, vi } from "vitest";
 import { CodexAppServerClient, CodexAppServerRpcError } from "./client.js";
 import { threadStartResult as nativeThreadStartResult } from "./codex-app-server.test-fixtures.js";

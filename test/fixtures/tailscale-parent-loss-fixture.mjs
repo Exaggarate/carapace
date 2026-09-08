@@ -15,9 +15,9 @@ if (command === "gateway") {
   process.stdout.write("{}");
 } else if (command === "serve") {
   const server = net.createServer((socket) => socket.end());
-  server.listen(Number(process.env.OPENCLAW_TEST_ROUTE_PORT ?? 0), "127.0.0.1", () => {
+  server.listen(Number(process.env.CARAPACE_TEST_ROUTE_PORT ?? 0), "127.0.0.1", () => {
     writeFileSync(
-      process.env.OPENCLAW_TEST_ROUTE_MARKER,
+      process.env.CARAPACE_TEST_ROUTE_MARKER,
       JSON.stringify({ pid: process.pid, ownerPid: process.ppid, port: server.address().port }),
     );
     process.stdout.write("Press Ctrl+C to exit.\n");

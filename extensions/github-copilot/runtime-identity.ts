@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { buildCopilotIdeHeaders } from "openclaw/plugin-sdk/provider-auth";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { buildCopilotIdeHeaders } from "carapace/plugin-sdk/provider-auth";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 
 // GitHub's current fine-grained PAT contract is the Copilot CLI identity.
 // Keep this provider-owned instead of changing the legacy public SDK constant.
@@ -8,7 +8,7 @@ const COPILOT_RUNTIME_INTEGRATION_ID = "copilot-developer-cli";
 
 /** Keep catalog and inference identity aligned without forwarding unrelated configured secrets. */
 export function buildCopilotRuntimeHeaders(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   headers?: Record<string, string>;
 }): Record<string, string> {
   const provider = params?.config?.models?.providers?.["github-copilot"];

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ErrorCodes,
@@ -39,14 +39,14 @@ import { runExclusiveSessionLifecycleMutation } from "../../sessions/session-lif
 import { createDeferredCore } from "../../shared/deferred.js";
 import * as storeWriterQueue from "../../shared/store-writer-queue.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-  resolveIncognitoOpenClawAgentSqlitePath,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+  resolveIncognitoCarapaceAgentSqlitePath,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   resolveSessionMutationAuthorization,
   SessionMutationAuthorizationChangedError,
@@ -71,7 +71,7 @@ afterEach(() => resetPluginRuntimeStateForTest());
 it.each(mutationMethods)(
   "rejects %s while its source initializer is still running",
   async (method) => {
-    await withOpenClawTestState({ label: "message-cut-initializing-source" }, async (testState) => {
+    await withCarapaceTestState({ label: "message-cut-initializing-source" }, async (testState) => {
       await testState.writeConfig(cfg);
       const runtime = createRuntimeAgent();
       const key = "agent:main:dashboard:initializing-source";
@@ -188,7 +188,7 @@ it.each([
   { kind: "visible", hidden: false },
   { kind: "hidden internal-effects", hidden: true },
 ])("lists $kind session branches without decoding unrelated metadata", async ({ hidden }) => {
-  await withOpenClawTestState({ label: "branch-list-bounded-read" }, async (state) => {
+  await withCarapaceTestState({ label: "branch-list-bounded-read" }, async (state) => {
     await state.writeConfig(cfg);
     const identity = hidden
       ? resolveInternalSessionEffectsIdentity({ agentId: "main", runId: "branch-list-hidden" })
@@ -286,12 +286,12 @@ function invokeMessageCut(
 it.each(mutationMethods)(
   "observes initialization written by another process for %s",
   async (method) => {
-    await withOpenClawTestState({ label: "message-cut-initialization-cache" }, async (state) => {
+    await withCarapaceTestState({ label: "message-cut-initialization-cache" }, async (state) => {
       await state.writeConfig(cfg);
       const scope = await seedMessageCutSource();
       // Another process can publish a pending row without touching this process's entry cache.
       listSessionEntriesCore({ agentId: scope.agentId });
-      const database = openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope)));
+      const database = openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope)));
       const peer = new DatabaseSync(database.path);
       try {
         peer
@@ -320,7 +320,7 @@ it.each(mutationMethods)(
 );
 
 async function readMutationStorage(scope: SourceScope) {
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope)));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope)));
   const db = getSessionKysely(database.db);
   return {
     source: loadSessionEntry(scope),
@@ -452,13 +452,13 @@ it.each(
 )(
   "rejects local $method on model-locked history (lockWhileQueued=$lockWhileQueued)",
   async ({ method, lockWhileQueued }) => {
-    await withOpenClawTestState({ label: "message-cut-locked-owner" }, async (testState) => {
+    await withCarapaceTestState({ label: "message-cut-locked-owner" }, async (testState) => {
       await testState.writeConfig(cfg);
       const scope = await seedMessageCutSource();
       let before: Awaited<ReturnType<typeof readMutationStorage>> | undefined;
       const lockSource = async () => {
         // Simulate the harness claiming history after admission, without rotating identity.
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (database) => {
             writeSessionEntry(database, scope.sessionKey, {
               ...expectDefined(loadSessionEntry(scope), "source before harness lock"),
@@ -498,7 +498,7 @@ describe("sessions.fork storage ownership", () => {
   ])(
     "keeps the $kind child accessible in its source storage class",
     async ({ kind, incognito }) => {
-      await withOpenClawTestState({ label: "message-fork-storage" }, async (testState) => {
+      await withCarapaceTestState({ label: "message-fork-storage" }, async (testState) => {
         await testState.writeConfig(cfg);
         const sourceScope = await seedMessageCutSource(incognito);
         const { sessionKey } = sourceScope;
@@ -507,7 +507,7 @@ describe("sessions.fork storage ownership", () => {
             ? getSessionRepositoryWorkspaceStore().create({
                 agentId: "main",
                 sessionKey,
-                url: "https://github.com/openclaw/fixture.git",
+                url: "https://github.com/Exaggarate/carapace/fixture.git",
                 runSetupScript: false,
                 assertCurrent: () => {},
               })
@@ -572,10 +572,10 @@ describe("sessions.fork storage ownership", () => {
         ).resolves.toEqual(incognito ? [] : childEvents);
 
         const databasePath = incognito
-          ? resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" })
-          : resolveOpenClawAgentSqlitePath({ agentId: "main" });
+          ? resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" })
+          : resolveCarapaceAgentSqlitePath({ agentId: "main" });
         expect(fs.existsSync(databasePath)).toBe(!incognito);
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
         expect(loadSessionEntry(childScope)).toEqual(incognito ? undefined : child);
         await expect(loadTranscriptEvents(childTranscriptScope)).resolves.toEqual(
           incognito ? [] : childEvents,
@@ -591,11 +591,11 @@ describe.each(["sessionMutationCommitGuard", "sessionMutationAuthorization"] as 
     it.each(mutationMethods)(
       "revalidates %s authority inside the queued commit",
       async (method) => {
-        await withOpenClawTestState({ label: "message-cut-authority" }, async (testState) => {
+        await withCarapaceTestState({ label: "message-cut-authority" }, async (testState) => {
           await testState.writeConfig(cfg);
           const scope = await seedMessageCutSource();
           const before = await readMutationStorage(scope);
-          const database = openOpenClawAgentDatabase({ agentId: scope.agentId });
+          const database = openCarapaceAgentDatabase({ agentId: scope.agentId });
           const denied = new SessionMutationAuthorizationChangedError(
             errorShape(ErrorCodes.FORBIDDEN, "admitted mutation authority was revoked"),
           );
@@ -637,7 +637,7 @@ describe.each(["sessionMutationCommitGuard", "sessionMutationAuthorization"] as 
 it.each(["SQLite writer fault injection", "public lifecycle predecessor"] as const)(
   "sessions.fork revalidates source participation after %s",
   async (revocation) => {
-    await withOpenClawTestState({ label: "message-fork-participation" }, async (testState) => {
+    await withCarapaceTestState({ label: "message-fork-participation" }, async (testState) => {
       await testState.writeConfig(cfg);
       const scope = await seedMessageCutSource();
       addSessionMember(scope, {

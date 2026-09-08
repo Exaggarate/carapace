@@ -1,11 +1,11 @@
 import Foundation
 import Network
-import OpenClawChatUI
+import CarapaceChatUI
 import os
 import Testing
 import UIKit
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 private func percentEncodedPath(of url: URL?) -> String? {
     url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false)?.percentEncodedPath }
@@ -87,19 +87,19 @@ struct GatewayRegistryTestIsolation {
     }
 }
 
-private struct TemporaryOpenClawState {
+private struct TemporaryCarapaceState {
     private let previousStateDirectory: String?
     private let previousInstanceID: Any?
     private let instanceID: String?
     private let dir: URL
 
     init(instanceID: String? = nil) throws {
-        self.previousStateDirectory = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
+        self.previousStateDirectory = ProcessInfo.processInfo.environment["CARAPACE_STATE_DIR"]
         self.previousInstanceID = UserDefaults.standard.object(forKey: "node.instanceId")
         self.instanceID = instanceID
         self.dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: self.dir, withIntermediateDirectories: true)
-        setenv("OPENCLAW_STATE_DIR", self.dir.path, 1)
+        setenv("CARAPACE_STATE_DIR", self.dir.path, 1)
         if let instanceID {
             UserDefaults.standard.set(instanceID, forKey: "node.instanceId")
         }
@@ -113,9 +113,9 @@ private struct TemporaryOpenClawState {
         if let previousInstanceID {
             UserDefaults.standard.set(previousInstanceID, forKey: "node.instanceId")
         }
-        unsetenv("OPENCLAW_STATE_DIR")
+        unsetenv("CARAPACE_STATE_DIR")
         if let previousStateDirectory {
-            setenv("OPENCLAW_STATE_DIR", previousStateDirectory, 1)
+            setenv("CARAPACE_STATE_DIR", previousStateDirectory, 1)
         }
         try? FileManager.default.removeItem(at: self.dir)
     }
@@ -296,20 +296,20 @@ private func waitUntil(
             "node.instanceId": "ios-test",
             "node.displayName": "Test Node",
             "camera.enabled": true,
-            "location.enabledMode": OpenClawLocationMode.always.rawValue,
+            "location.enabledMode": CarapaceLocationMode.always.rawValue,
             VoiceWakePreferences.enabledKey: true,
         ]) {
             let appModel = NodeAppModel()
             let controller = GatewayConnectionController(appModel: appModel, startDiscovery: false)
             let caps = Set(controller._test_currentCaps())
 
-            #expect(!caps.contains(OpenClawCapability.canvas.rawValue))
-            #expect(caps.contains(OpenClawCapability.screen.rawValue))
-            #expect(!caps.contains(OpenClawGatewayClientCapability.inlineWidgets))
-            #expect(caps.contains(OpenClawCapability.camera.rawValue))
-            #expect(caps.contains(OpenClawCapability.location.rawValue))
-            #expect(caps.contains(OpenClawCapability.voiceWake.rawValue))
-            #expect(caps.contains(OpenClawCapability.talk.rawValue))
+            #expect(!caps.contains(CarapaceCapability.canvas.rawValue))
+            #expect(caps.contains(CarapaceCapability.screen.rawValue))
+            #expect(!caps.contains(CarapaceGatewayClientCapability.inlineWidgets))
+            #expect(caps.contains(CarapaceCapability.camera.rawValue))
+            #expect(caps.contains(CarapaceCapability.location.rawValue))
+            #expect(caps.contains(CarapaceCapability.voiceWake.rawValue))
+            #expect(caps.contains(CarapaceCapability.talk.rawValue))
 
             let commands = controller._test_currentCommands()
             #expect(!commands.contains(where: { $0.hasPrefix("canvas.") }))
@@ -319,13 +319,13 @@ private func waitUntil(
     @Test @MainActor func `current commands include location when enabled`() {
         withUserDefaults([
             "node.instanceId": "ios-test",
-            "location.enabledMode": OpenClawLocationMode.whileUsing.rawValue,
+            "location.enabledMode": CarapaceLocationMode.whileUsing.rawValue,
         ]) {
             let appModel = NodeAppModel()
             let controller = GatewayConnectionController(appModel: appModel, startDiscovery: false)
             let commands = Set(controller._test_currentCommands())
 
-            #expect(commands.contains(OpenClawLocationCommand.get.rawValue))
+            #expect(commands.contains(CarapaceLocationCommand.get.rawValue))
         }
     }
 
@@ -362,34 +362,34 @@ private func waitUntil(
         withUserDefaults([
             "node.instanceId": "ios-test",
             "camera.enabled": true,
-            "location.enabledMode": OpenClawLocationMode.whileUsing.rawValue,
+            "location.enabledMode": CarapaceLocationMode.whileUsing.rawValue,
         ]) {
             let appModel = NodeAppModel()
             let controller = GatewayConnectionController(appModel: appModel, startDiscovery: false)
             let commands = Set(controller._test_currentCommands())
 
             // iOS should expose notify, but not host shell/exec-approval commands.
-            #expect(commands.contains(OpenClawSystemCommand.notify.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.run.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.which.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.execApprovalsGet.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.execApprovalsSet.rawValue))
+            #expect(commands.contains(CarapaceSystemCommand.notify.rawValue))
+            #expect(!commands.contains(CarapaceSystemCommand.run.rawValue))
+            #expect(!commands.contains(CarapaceSystemCommand.which.rawValue))
+            #expect(!commands.contains(CarapaceSystemCommand.execApprovalsGet.rawValue))
+            #expect(!commands.contains(CarapaceSystemCommand.execApprovalsSet.rawValue))
         }
     }
 
     @Test @MainActor func `operator connect options only request approval scope when enabled`() {
         let appModel = NodeAppModel()
         let withoutApprovalScope = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "carapace-ios",
+            displayName: "Carapace iOS",
             includeApprovalScope: false)
         let withApprovalScope = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "carapace-ios",
+            displayName: "Carapace iOS",
             includeApprovalScope: true)
         let withAdminScope = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "carapace-ios",
+            displayName: "Carapace iOS",
             includeAdminScope: true,
             includeApprovalScope: false)
 
@@ -402,8 +402,8 @@ private func waitUntil(
         #expect(withoutApprovalScope.scopes.contains("operator.talk.secrets"))
         #expect(!withoutApprovalScope.scopesAreExplicit)
         #expect(withoutApprovalScope.caps == [
-            OpenClawGatewayClientCapability.agentKind,
-            OpenClawGatewayClientCapability.inlineWidgets,
+            CarapaceGatewayClientCapability.agentKind,
+            CarapaceGatewayClientCapability.inlineWidgets,
         ])
 
         #expect(withApprovalScope.scopes.contains("operator.approvals"))
@@ -414,8 +414,8 @@ private func waitUntil(
     @Test @MainActor func `operator talk permission upgrade uses explicit least privilege scopes`() {
         let appModel = NodeAppModel()
         let options = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "carapace-ios",
+            displayName: "Carapace iOS",
             includeApprovalScope: false,
             forceExplicitScopes: true)
 
@@ -878,7 +878,7 @@ private func waitUntil(
         let registryIsolation = GatewayRegistryTestIsolation()
         defer { registryIsolation.restore() }
         let instanceID = "ios-test-\(UUID().uuidString)"
-        let temporaryState = try TemporaryOpenClawState(instanceID: instanceID)
+        let temporaryState = try TemporaryCarapaceState(instanceID: instanceID)
         defer { temporaryState.restore() }
         GatewaySettingsStore.saveGatewayCredentials(
             token: "stored-token",
@@ -918,13 +918,13 @@ private func waitUntil(
         let registryIsolation = GatewayRegistryTestIsolation()
         defer { registryIsolation.restore() }
         let instanceID = "ios-context-path-\(UUID().uuidString)"
-        let temporaryState = try TemporaryOpenClawState(instanceID: instanceID)
+        let temporaryState = try TemporaryCarapaceState(instanceID: instanceID)
         defer { temporaryState.restore() }
         let link = GatewayConnectDeepLink(
             host: "192.168.1.41",
             port: 18789,
             tls: false,
-            contextPath: "/openclaw%2Fgateway",
+            contextPath: "/carapace%2Fgateway",
             bootstrapToken: nil,
             token: nil,
             password: nil)
@@ -941,16 +941,16 @@ private func waitUntil(
             authOverride: setupAuth.manualAuthOverride)
         await waitUntil { appModel.activeGatewayConnectConfig != nil }
 
-        #expect(percentEncodedPath(of: appModel.activeGatewayConnectConfig?.url) == "/openclaw%2Fgateway")
+        #expect(percentEncodedPath(of: appModel.activeGatewayConnectConfig?.url) == "/carapace%2Fgateway")
         #expect(appModel.activeGatewayConnectConfig?.effectiveStableID == setupAuth.targetStableID)
         let stored = try #require(GatewaySettingsStore.activeGatewayEntry())
-        #expect(stored.contextPath == "/openclaw%2Fgateway")
+        #expect(stored.contextPath == "/carapace%2Fgateway")
 
         appModel.disconnectGateway()
         await controller.connectActiveGateway()
         await waitUntil { appModel.activeGatewayConnectConfig != nil }
 
-        #expect(percentEncodedPath(of: appModel.activeGatewayConnectConfig?.url) == "/openclaw%2Fgateway")
+        #expect(percentEncodedPath(of: appModel.activeGatewayConnectConfig?.url) == "/carapace%2Fgateway")
         #expect(appModel.activeGatewayConnectConfig?.effectiveStableID == stored.stableID)
     }
 
@@ -958,7 +958,7 @@ private func waitUntil(
         let registryIsolation = GatewayRegistryTestIsolation()
         defer { registryIsolation.restore() }
         let instanceID = "legacy-relay-\(UUID().uuidString)"
-        let temporaryState = try TemporaryOpenClawState(instanceID: instanceID)
+        let temporaryState = try TemporaryCarapaceState(instanceID: instanceID)
         defer { temporaryState.restore() }
         let gatewayService = GatewaySettingsStore._testGatewayService
 
@@ -1077,7 +1077,7 @@ private func waitUntil(
         let previousStableID = "manual|previous.gateway.example.com|443"
         let stableID = "manual|new.gateway.example.com|443"
         let instanceID = "bootstrap-handoff-\(UUID().uuidString)"
-        let temporaryState = try TemporaryOpenClawState(instanceID: instanceID)
+        let temporaryState = try TemporaryCarapaceState(instanceID: instanceID)
         defer { temporaryState.restore() }
         let identity = DeviceIdentityStore.loadOrCreate()
         _ = DeviceAuthStore.storeToken(
@@ -1175,7 +1175,7 @@ private func waitUntil(
     @Test(arguments: [false, true]) @MainActor
     func `incomplete setup distinguishes missing roles from failed storage`(receivedOperator: Bool) async throws {
         let stableID = "manual|handoff.gateway.example.com|443"
-        let temporaryState = try TemporaryOpenClawState(instanceID: UUID().uuidString)
+        let temporaryState = try TemporaryCarapaceState(instanceID: UUID().uuidString)
         defer { temporaryState.restore() }
         let options = Self.makeNodeOptions(allowStoredDeviceAuth: false, deviceAuthGatewayID: stableID)
         let appModel = NodeAppModel()
@@ -1207,7 +1207,7 @@ private func waitUntil(
     }
 
     @Test @MainActor func `bootstrap pairing clears only the target gateway`() async throws {
-        let temporaryState = try TemporaryOpenClawState()
+        let temporaryState = try TemporaryCarapaceState()
         defer { temporaryState.restore() }
         let gatewayA = "manual|gateway-a-\(UUID().uuidString)|443"
         let gatewayB = "manual|gateway-b-\(UUID().uuidString)|443"
@@ -1568,7 +1568,7 @@ private func waitUntil(
         let stableID = "\u{0085}gateway-e\u{0301}"
         let endpoint: NWEndpoint = .service(
             name: "Exact Owner",
-            type: "_openclaw-gw._tcp",
+            type: "_carapace-gw._tcp",
             domain: "local.",
             interface: nil)
         let gateway = GatewayDiscoveryModel.DiscoveredGateway(
@@ -1639,7 +1639,7 @@ private func waitUntil(
         let appModel = NodeAppModel()
         defer { appModel.disconnectGateway() }
         let options = Self.makeNodeOptions(
-            client: ("openclaw-ios", nil),
+            client: ("carapace-ios", nil),
             deviceAuthGatewayID: stableID)
         let config = try GatewayConnectConfig(
             url: #require(URL(string: "wss://127.0.0.1:1")),
@@ -1988,7 +1988,7 @@ private func waitUntil(
             password: password,
             sessionKey: "main")))
 
-        let defaults = try #require(UserDefaults(suiteName: OpenClawAppGroup.identifier))
+        let defaults = try #require(UserDefaults(suiteName: CarapaceAppGroup.identifier))
         let persisted = try #require(defaults.data(forKey: "share.gatewayRelay.config.v1"))
         #expect(persisted.range(of: Data(token.utf8)) == nil)
         #expect(persisted.range(of: Data(password.utf8)) == nil)
@@ -2013,7 +2013,7 @@ private func waitUntil(
         defer { registryIsolation.restore() }
         let token = "legacy-token-\(UUID().uuidString)"
         let password = "legacy-password-\(UUID().uuidString)"
-        let defaults = try #require(UserDefaults(suiteName: OpenClawAppGroup.identifier))
+        let defaults = try #require(UserDefaults(suiteName: CarapaceAppGroup.identifier))
         let legacy = try JSONSerialization.data(withJSONObject: [
             "gatewayURLString": "wss://legacy-relay.example.com",
             "gatewayStableID": "manual|legacy-relay.example.com|443",
@@ -2244,7 +2244,7 @@ private func waitUntil(
         let registryIsolation = GatewayRegistryTestIsolation()
         defer { registryIsolation.restore() }
         let host = "context-path-trust.example.com"
-        let contextPath = "/openclaw-gateway"
+        let contextPath = "/carapace-gateway"
         let stableID = GatewayConnectionController.ManualAuthOverride.manualStableID(
             host: host,
             port: 443,
@@ -2583,7 +2583,7 @@ private func waitUntil(
     @Test @MainActor func `chat cache remains isolated when active gateway switches`() async throws {
         let registryIsolation = GatewayRegistryTestIsolation()
         defer { registryIsolation.restore() }
-        let temporaryState = try TemporaryOpenClawState()
+        let temporaryState = try TemporaryCarapaceState()
         defer { temporaryState.restore() }
         let gatewayA = "manual|gateway-a|18789"
         let gatewayB = "manual|gateway-b|18789"
@@ -2597,7 +2597,7 @@ private func waitUntil(
             useTLS: false,
             lastConnectedAtMs: nil))
         let appModel = NodeAppModel()
-        var session = OpenClawChatSessionEntry(
+        var session = CarapaceChatSessionEntry(
             key: "agent:main:a",
             kind: nil,
             displayName: "Gateway A session",

@@ -1,5 +1,5 @@
 const TELEGRAM_CALLBACK_QUERY_ANSWER_PROMISE = Symbol.for(
-  "openclaw.telegram.callbackQueryAnswerPromise",
+  "carapace.telegram.callbackQueryAnswerPromise",
 );
 type CallbackQueryAnswer = {
   promise: Promise<unknown>;

@@ -11,7 +11,7 @@ export function createPluginManifestRecordFixture(
     channels: [],
     cliBackends: [],
     hooks: [],
-    manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+    manifestPath: path.join(rootDir, "carapace.plugin.json"),
     origin: "bundled",
     providers: [],
     rootDir,

@@ -4,7 +4,7 @@
  * preserved secrets before touching models.json.
  */
 import { mergeModelCost } from "../config/model-cost.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import type { ProviderCatalogOutcome } from "../plugins/provider-catalog.types.js";
 import type { PreparedProviderStaticCatalog } from "../plugins/provider-discovery.js";
@@ -35,13 +35,13 @@ import {
   resolvePluginModelCatalogOwnerPluginId,
 } from "./plugin-model-catalog.js";
 
-type ModelsConfig = NonNullable<OpenClawConfig["models"]>;
+type ModelsConfig = NonNullable<CarapaceConfig["models"]>;
 
 export type PreparedModelsConfigContext = Readonly<{
-  cfg: OpenClawConfig;
-  discoveryAuthConfig: OpenClawConfig;
+  cfg: CarapaceConfig;
+  discoveryAuthConfig: CarapaceConfig;
   discoveryAuthEnv?: NodeJS.ProcessEnv;
-  sourceConfigForSecrets: OpenClawConfig;
+  sourceConfigForSecrets: CarapaceConfig;
   agentDir: string;
   env: NodeJS.ProcessEnv;
   envFingerprint: NodeJS.ProcessEnv | string;
@@ -61,10 +61,10 @@ export type PreparedModelsConfigContext = Readonly<{
 type ResolveImplicitProvidersForModelsJson = (params: {
   agentDir: string;
   authStore?: AuthProfileStore;
-  config: OpenClawConfig;
-  discoveryAuthConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  discoveryAuthConfig?: CarapaceConfig;
   discoveryAuthEnv?: NodeJS.ProcessEnv;
-  sourceConfigForSecrets?: OpenClawConfig;
+  sourceConfigForSecrets?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
   explicitProviders: Record<string, ProviderConfig>;
@@ -173,7 +173,7 @@ async function resolveProvidersForModelsJsonWithDeps(
   const sourceModelFields = buildSourceModelFields(context.cfg.models?.providers, manifestPlugins);
   // When models.mode is "replace" the user opts out of provider discovery, so
   // skip the (potentially slow) implicit-provider resolver entirely and return
-  // only the explicit providers. See openclaw#66957.
+  // only the explicit providers. See carapace#66957.
   if (cfg.models?.mode === "replace") {
     return mergeProviders({ implicit: {}, explicit: explicitProviders });
   }
@@ -275,7 +275,7 @@ function filterWritableProviders(
 }
 
 /** Plans root and plugin-owned model catalog writes with injectable provider discovery. */
-async function planOpenClawModelsJsonWithDeps(
+async function planCarapaceModelsJsonWithDeps(
   params: {
     context: PreparedModelsConfigContext;
     authStore?: AuthProfileStore;
@@ -369,15 +369,15 @@ async function planOpenClawModelsJsonWithDeps(
 }
 
 /** Plans root and plugin-owned model catalog writes for the current runtime. */
-export async function planOpenClawModelsJson(
-  params: Parameters<typeof planOpenClawModelsJsonWithDeps>[0],
+export async function planCarapaceModelsJson(
+  params: Parameters<typeof planCarapaceModelsJsonWithDeps>[0],
 ): Promise<ModelsJsonPlan> {
-  return planOpenClawModelsJsonWithDeps(params);
+  return planCarapaceModelsJsonWithDeps(params);
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.modelsConfigPlanTestApi")] = {
-    planOpenClawModelsJsonWithDeps,
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.modelsConfigPlanTestApi")] = {
+    planCarapaceModelsJsonWithDeps,
     resolveProvidersForModelsJsonWithDeps,
   };
 }

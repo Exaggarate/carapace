@@ -15,7 +15,7 @@ type CoreBoardWidgetElement = OptionalCustomElement & {
 export const CORE_BOARD_WIDGET_ELEMENTS: readonly CoreBoardWidgetElement[] = [
   {
     kind: "session:progress",
-    tagName: "openclaw-session-progress-widget",
+    tagName: "carapace-session-progress-widget",
     get label() {
       return t("sessionProgressCard.widgetLabel");
     },
@@ -24,7 +24,7 @@ export const CORE_BOARD_WIDGET_ELEMENTS: readonly CoreBoardWidgetElement[] = [
   },
   {
     kind: "session:report",
-    tagName: "openclaw-report-widget",
+    tagName: "carapace-report-widget",
     get label() {
       return t("board.widget.kindReport");
     },

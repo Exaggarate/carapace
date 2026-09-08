@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { registerTelemetryCli } from "./telemetry-cli.js";
 
 const mocks = await vi.hoisted(async () => {
@@ -26,7 +26,7 @@ vi.mock("../infra/telemetry.js", () => ({
 }));
 vi.mock("../runtime.js", () => ({ defaultRuntime: mocks.defaultRuntime }));
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   telemetry: { enabled: true, consentedAt: "2026-08-23T00:00:00.000Z" },
 };
 const payload = {
@@ -47,7 +47,7 @@ function createTelemetryProgram() {
   const stdout: string[] = [];
   const stderr: string[] = [];
   const program = new Command()
-    .name("openclaw")
+    .name("carapace")
     .exitOverride()
     .configureOutput({
       writeOut: (text) => stdout.push(text),
@@ -71,12 +71,12 @@ describe("telemetry cli", () => {
     mocks.getRuntimeConfig.mockReturnValue(config);
     mocks.buildTelemetryPayload.mockReturnValue(payload);
     mocks.buildTelemetryUserAgent.mockReturnValue(
-      "openclaw/2026.8.2 (darwin; node/26.0.1; arm64; gateway)",
+      "carapace/2026.8.2 (darwin; node/26.0.1; arm64; gateway)",
     );
     mocks.resolveTelemetryStatus.mockReturnValue({
       enabled: true,
       reason: "enabled",
-      endpoint: "https://telemetry.openclaw.ai/api/latest-version",
+      endpoint: "https://github.com/Exaggarate/carapace",
       lastPingAt: Date.parse("2026-08-22T12:00:00.000Z"),
     });
   });
@@ -89,7 +89,7 @@ describe("telemetry cli", () => {
     expect(mocks.runtimeLogs).toContain("Feature stats: enabled");
     expect(mocks.runtimeLogs).toContain("Last ping: 2026-08-22T12:00:00.000Z");
     expect(mocks.runtimeLogs).toContain(
-      "Request: POST https://telemetry.openclaw.ai/api/latest-version",
+      "Request: POST https://github.com/Exaggarate/carapace",
     );
   });
 
@@ -100,11 +100,11 @@ describe("telemetry cli", () => {
       {
         featureStatsEnabled: true,
         reason: "enabled",
-        endpoint: "https://telemetry.openclaw.ai/api/latest-version",
+        endpoint: "https://github.com/Exaggarate/carapace",
         lastPingAt: "2026-08-22T12:00:00.000Z",
         request: {
           method: "POST",
-          userAgent: "openclaw/2026.8.2 (darwin; node/26.0.1; arm64; gateway)",
+          userAgent: "carapace/2026.8.2 (darwin; node/26.0.1; arm64; gateway)",
           payload,
         },
       },
@@ -124,8 +124,8 @@ describe("telemetry cli", () => {
       method: null,
     },
   ])("reports the same request in JSON and text for $reason", async ({ reason, label, method }) => {
-    const endpoint = "https://telemetry.openclaw.ai/api/latest-version";
-    const userAgent = "openclaw/2026.8.2 (darwin; node/26.0.1; arm64; gateway)";
+    const endpoint = "https://github.com/Exaggarate/carapace";
+    const userAgent = "carapace/2026.8.2 (darwin; node/26.0.1; arm64; gateway)";
     mocks.resolveTelemetryStatus.mockReturnValue({
       enabled: false,
       reason,
@@ -165,13 +165,13 @@ describe("telemetry cli", () => {
   ])(
     "records operator consent when turning feature statistics $command",
     async ({ command, enabled }) => {
-      const originalConfig: OpenClawConfig = {
+      const originalConfig: CarapaceConfig = {
         update: { checkOnStart: false },
         telemetry: { enabled: !enabled, consentedAt: "2025-01-01T00:00:00.000Z" },
       };
       mocks.transformConfigFileWithRetry.mockImplementationOnce(
         async (options: {
-          transform: (current: OpenClawConfig) => { nextConfig: OpenClawConfig };
+          transform: (current: CarapaceConfig) => { nextConfig: CarapaceConfig };
         }) => options.transform(originalConfig),
       );
 
@@ -207,7 +207,7 @@ describe("telemetry cli", () => {
       }
 
       expect(exitCode).toEqual(0);
-      expect(stdout.join("")).toContain("Usage: openclaw telemetry [options] [command]");
+      expect(stdout.join("")).toContain("Usage: carapace telemetry [options] [command]");
       expect(stdout.join("")).toContain("Inspect and manage anonymous usage telemetry");
       expect(stderr).toEqual([]);
       expect(mocks.getRuntimeConfig).not.toHaveBeenCalled();
@@ -229,7 +229,7 @@ describe("telemetry cli", () => {
       await expect(
         program.parseAsync(["telemetry", ...args], { from: "user" }),
       ).rejects.toMatchObject({ exitCode: 0 });
-      expect(stdout.join("")).toContain(`Usage: openclaw ${usage}`);
+      expect(stdout.join("")).toContain(`Usage: carapace ${usage}`);
       expect(stderr).toEqual([]);
       expect(mocks.getRuntimeConfig).not.toHaveBeenCalled();
       expect(mocks.transformConfigFileWithRetry).not.toHaveBeenCalled();

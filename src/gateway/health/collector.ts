@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { listAgentEntries } from "../../agents/agent-scope.js";
 import { redactChannelStatusSummaryBaseUrl } from "../../channels/account-snapshot-fields.js";
 import { buildChannelAccountSnapshotFromInspection } from "../../channels/account-summary.js";
@@ -14,7 +14,7 @@ import { resolveUnavailableChannelAccountSnapshot } from "../../channels/status/
 import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import type { SessionEntrySummary } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isDiagnosticFlagEnabled } from "../../infra/diagnostic-flags.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { resolveHeartbeatSummariesForAgents } from "../../infra/heartbeat-summary-projection.js";
@@ -61,7 +61,7 @@ const healthLog = createSubsystemLogger("health");
 type HealthSnapshotAudience = "public" | "admin";
 
 const debugHealth = (
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   message: string,
   meta?: Record<string, unknown>,
 ) => {
@@ -70,7 +70,7 @@ const debugHealth = (
   }
 };
 
-export function resolveHealthAgentOrder(cfg: OpenClawConfig) {
+export function resolveHealthAgentOrder(cfg: CarapaceConfig) {
   const defaultAgentId = tryResolveLegacyCompatibilityAgentId(cfg);
   const entries = listAgentEntries(cfg);
   const seen = new Set<string>();
@@ -140,7 +140,7 @@ async function buildHealthSessionSummary(storePath: string, agentId?: string) {
 
 /** Shares one bounded session snapshot across every configured agent in this collection. */
 export async function buildHealthAgentSummaries(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   { defaultAgentId, ordered }: ReturnType<typeof resolveHealthAgentOrder>,
 ): Promise<AgentHealthSummary[]> {
   const agentIds = ordered.map((entry) => entry.id);
@@ -163,7 +163,7 @@ export async function buildHealthAgentSummaries(
   });
 }
 
-function buildPluginHealthSummary(cfg: OpenClawConfig): PluginHealthSummary | undefined {
+function buildPluginHealthSummary(cfg: CarapaceConfig): PluginHealthSummary | undefined {
   // Keep full internal diagnostics, but sanitize both load and service errors before public caching.
   function projectError(
     plugin: NonNullable<ReturnType<typeof getActivePluginRegistry>>["plugins"][number] | undefined,
@@ -265,7 +265,7 @@ function resolveHealthProbeTimeoutMs(deadlineAtMs: number): number {
 
 async function buildHealthAccountRecord(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   defaultAccountId: string;
   includeSensitive: boolean;
@@ -618,7 +618,7 @@ export async function collectGatewayHealthSnapshot(params: {
   };
 }
 
-async function readRuntimeHealthConfig(): Promise<OpenClawConfig> {
+async function readRuntimeHealthConfig(): Promise<CarapaceConfig> {
   const { getRuntimeConfig } = await import("../../config/config.js");
   return getRuntimeConfig();
 }

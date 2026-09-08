@@ -1,13 +1,13 @@
 // Zalo tests cover api plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { resolvePinnedHostnameWithPolicyMock } = vi.hoisted(() => ({
   resolvePinnedHostnameWithPolicyMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   resolvePinnedHostnameWithPolicy: (...args: unknown[]) =>
     resolvePinnedHostnameWithPolicyMock(...args),
 }));

@@ -21,7 +21,7 @@ merge_outcome_repo_identity() {
 merge_outcome_init() {
   local pr="$1" identity
   is_canonical_pr_number "$pr" || return 1
-  MERGE_OUTCOME_REF="refs/openclaw/pr-merge-outcomes/$pr"
+  MERGE_OUTCOME_REF="refs/carapace/pr-merge-outcomes/$pr"
   identity=$(gh_plain repo view --json id,nameWithOwner,url) || return 1
   MERGE_REPO=$(printf '%s\n' "$identity" | merge_outcome_repo_identity) || { merge_outcome_stop "invalid repository identity"; return 1; }
   MERGE_REPO_URL=$(printf '%s\n' "$MERGE_REPO" | jq -r .url)
@@ -36,7 +36,7 @@ merge_outcome_init() {
 merge_outcome_load_local() {
   local pr="$1" expected_repo="${2:-null}"
   is_canonical_pr_number "$pr" || return 1
-  MERGE_OUTCOME_REF="refs/openclaw/pr-merge-outcomes/$pr"
+  MERGE_OUTCOME_REF="refs/carapace/pr-merge-outcomes/$pr"
   MERGE_OUTCOME_OID=""
   MERGE_OUTCOME_RECORD=""
   if GIT_NO_LAZY_FETCH=1 git symbolic-ref -q "$MERGE_OUTCOME_REF" >/dev/null 2>&1; then
@@ -251,7 +251,7 @@ merge_outcome_reconcile() {
 merge_outcome_find_comment() {
   local pr="$1" comments marker matches
   MERGE_COMPLETION_COMMENT_URL=""
-  marker="<!-- openclaw-merge:$(printf '%s\n' "$MERGE_OUTCOME_RECORD" | jq -r .attempt) -->"
+  marker="<!-- carapace-merge:$(printf '%s\n' "$MERGE_OUTCOME_RECORD" | jq -r .attempt) -->"
   comments=$(gh_plain api --hostname "$MERGE_REPO_HOST" --paginate --slurp \
     "repos/$MERGE_REPO_NAME/issues/$pr/comments?per_page=100" -H 'Cache-Control: max-age=0') || return 1
   matches=$(printf '%s\n' "$comments" | jq -ce --arg marker "$marker" \
@@ -280,7 +280,7 @@ merge_outcome_comment_body() {
 
 merge_outcome_post_comment() {
   local pr="$1" body="$2"
-  body+=$'\n\n'"<!-- openclaw-merge:$(printf '%s\n' "$MERGE_OUTCOME_RECORD" | jq -r .attempt) -->"
+  body+=$'\n\n'"<!-- carapace-merge:$(printf '%s\n' "$MERGE_OUTCOME_RECORD" | jq -r .attempt) -->"
   # Persist intent before POST: an interrupted or lost reply is lookup-only on recovery.
   merge_outcome_write "$(printf '%s\n' "$MERGE_OUTCOME_RECORD" | jq -c '.phase="commenting"')" || return 1
   if ! MERGE_COMPLETION_COMMENT_URL=$(gh_plain api --hostname "$MERGE_REPO_HOST" --method POST \

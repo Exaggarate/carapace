@@ -5,8 +5,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
-import type { SandboxContext } from "openclaw/plugin-sdk/sandbox";
-import { useIsolatedStateGuard, withEnvAsync } from "openclaw/plugin-sdk/test-env";
+import type { SandboxContext } from "carapace/plugin-sdk/sandbox";
+import { useIsolatedStateGuard, withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const spawnMock = vi.hoisted(() => vi.fn());
@@ -18,8 +18,8 @@ vi.mock("node:child_process", async (importOriginal) => {
     spawn: (...args: Parameters<typeof actual.spawn>) => spawnMock(...args),
   };
 });
-vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/process-runtime")>();
+vi.mock("carapace/plugin-sdk/process-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/process-runtime")>();
   return {
     ...actual,
     killProcessTree: (...args: unknown[]) => killProcessTreeMock(...args),
@@ -33,7 +33,7 @@ import { CodexSandboxExecSession } from "./sandbox-exec-server/session.js";
 import type {
   CodexSandboxExecSessionNotifications,
   ManagedProcess,
-  OpenClawExecServer,
+  CarapaceExecServer,
 } from "./sandbox-exec-server/types.js";
 
 type FakeNotifications = CodexSandboxExecSessionNotifications & {
@@ -61,14 +61,14 @@ function createFakeNotifications(): FakeNotifications {
   };
 }
 
-function createExecServer(sandbox: SandboxContext): OpenClawExecServer {
+function createExecServer(sandbox: SandboxContext): CarapaceExecServer {
   return {
     sandbox,
     backend: sandbox.backend,
     fsBridge: sandbox.fsBridge,
     children: new Set(),
     cleanupTasks: new Set(),
-  } as OpenClawExecServer;
+  } as CarapaceExecServer;
 }
 
 function processStartParams(processId: string) {
@@ -103,12 +103,12 @@ afterEach(() => {
 describe("Codex sandbox exec-server lifecycle", () => {
   it.each([
     { key: "HOME", via: "path" },
-    { key: "OPENCLAW_STATE_DIR", via: "path" },
-    { key: "OPENCLAW_STATE_DIR", via: "symlink" },
+    { key: "CARAPACE_STATE_DIR", via: "path" },
+    { key: "CARAPACE_STATE_DIR", via: "symlink" },
   ] as const)(
     "refuses host metadata discovery outside the isolated home after $key changes ($via)",
     async ({ key, via }) => {
-      const testHome = process.env.OPENCLAW_TEST_HOME!;
+      const testHome = process.env.CARAPACE_TEST_HOME!;
       // The path cases only point outside the home; nothing is created there.
       let foreignRoot = path.join(testHome, "..", "foreign-state-path");
       let target = foreignRoot;
@@ -118,7 +118,7 @@ describe("Codex sandbox exec-server lifecycle", () => {
         if (via === "symlink") {
           // A state root that lexically sits inside the home but physically points outside.
           // Register each path before the next fallible call so a failed setup still cleans up.
-          foreignRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-foreign-state-"));
+          foreignRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-foreign-state-"));
           cleanup.push(foreignRoot);
           target = path.join(testHome, "linked-state");
           cleanup.push(target);
@@ -182,7 +182,7 @@ describe("Codex sandbox exec-server lifecycle", () => {
         id: 3,
         error: {
           code: -32601,
-          message: "Unsupported OpenClaw sandbox exec-server method: unsupported/method",
+          message: "Unsupported Carapace sandbox exec-server method: unsupported/method",
         },
       },
       { jsonrpc: "2.0", id: 4, result: { processId: "direct-session", sandboxType: "none" } },

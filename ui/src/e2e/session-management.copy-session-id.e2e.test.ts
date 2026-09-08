@@ -47,7 +47,7 @@ suite.define(() => {
       await row.hover();
       await row.getByRole("button", { name: "Open session menu: Copy session ID proof" }).click();
 
-      const menuHost = page.locator("openclaw-session-menu");
+      const menuHost = page.locator("carapace-session-menu");
       await openSessionMenuSubmenu(page, "Copy");
       const copyItem = menuHost.getByRole("menuitem", { name: "Session ID", exact: true });
       await expect.poll(() => copyItem.count()).toBe(1);

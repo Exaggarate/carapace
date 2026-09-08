@@ -1,6 +1,6 @@
 // Signal tests cover monitor.tool result.autostart plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toErrorObject as toLintErrorObject } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { toErrorObject as toLintErrorObject } from "carapace/plugin-sdk/error-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { SignalDaemonHandle } from "./daemon.js";
 import {
@@ -52,7 +52,7 @@ function createAutoAbortController() {
 
 async function runMonitorWithMocks(opts: MonitorSignalProviderOptions) {
   return monitorSignalProvider({
-    config: config as OpenClawConfig,
+    config: config as CarapaceConfig,
     waitForTransportReady:
       waitForTransportReadyMock as MonitorSignalProviderOptions["waitForTransportReady"],
     ...opts,
@@ -323,7 +323,7 @@ describe("monitorSignalProvider autostart", () => {
 
   it("passes managed transport configPath to signal-cli daemon startup", async () => {
     const runtime = createMonitorRuntime();
-    setSignalAutoStartConfig({ configPath: "~/.openclaw/signal-cli" });
+    setSignalAutoStartConfig({ configPath: "~/.carapace/signal-cli" });
     const abortController = createAutoAbortController();
 
     await runMonitorWithMocks({
@@ -335,7 +335,7 @@ describe("monitorSignalProvider autostart", () => {
 
     expect(spawnSignalDaemonMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        configPath: "~/.openclaw/signal-cli",
+        configPath: "~/.carapace/signal-cli",
       }),
     );
   });

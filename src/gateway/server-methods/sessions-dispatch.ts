@@ -1,5 +1,5 @@
 // Cloud-worker dispatch for session-owned workspaces.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -194,7 +194,7 @@ async function validateDispatchExecutionMode(params: {
   }
   respondInvalidWorkerSession(
     params.respond,
-    `runtime ${params.sessionRuntime} requires a cloud worker provider that supports ${params.executionMode}; choose a compatible provider, or select an agent/model route with agentRuntime.id "openclaw"`,
+    `runtime ${params.sessionRuntime} requires a cloud worker provider that supports ${params.executionMode}; choose a compatible provider, or select an agent/model route with agentRuntime.id "carapace"`,
   );
   return false;
 }

@@ -1,7 +1,7 @@
 import {
   createAccountPolicyInheritanceCases,
   validateTestChannelConfig,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 import { describe, expect, it } from "vitest";
 import { WhatsAppConfigSchema } from "../config-api.js";
 import { resolveMergedWhatsAppAccountConfig } from "./account-config.js";

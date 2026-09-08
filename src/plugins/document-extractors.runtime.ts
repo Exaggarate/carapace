@@ -1,5 +1,5 @@
 /** Resolves bundled document extractor providers from enabled manifest contracts. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveEnabledBundledManifestContractPlugins } from "./bundled-manifest-contract-plugins.js";
 import { normalizePluginsConfig } from "./config-state.js";
 import { loadBundledDocumentExtractorEntriesFromDir } from "./document-extractor-public-artifacts.js";
@@ -9,7 +9,7 @@ import { createPluginIdScopeSet } from "./plugin-scope.js";
 
 /** Returns enabled document extractors in deterministic auto-detect order. */
 export function resolvePluginDocumentExtractors(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   onlyPluginIds?: readonly string[];

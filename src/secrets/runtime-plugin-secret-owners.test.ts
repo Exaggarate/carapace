@@ -1,7 +1,7 @@
 /** Tests runtime isolation for manifest-owned plugin secrets. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { assertPluginCapabilitySecretAvailable } from "openclaw/plugin-sdk/secret-input-runtime";
+import { assertPluginCapabilitySecretAvailable } from "carapace/plugin-sdk/secret-input-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
@@ -94,7 +94,7 @@ describe("plugin secret owners", () => {
     if (process.platform === "win32") {
       return;
     }
-    const root = tempDirs.make("openclaw-tavily-secret-cold-");
+    const root = tempDirs.make("carapace-tavily-secret-cold-");
     const commandPath = path.join(root, "provider.sh");
     await writeTavilyExecProvider(commandPath, false);
 
@@ -119,7 +119,7 @@ describe("plugin secret owners", () => {
     if (process.platform === "win32") {
       return;
     }
-    const root = tempDirs.make("openclaw-tavily-secret-reload-");
+    const root = tempDirs.make("carapace-tavily-secret-reload-");
     const commandPath = path.join(root, "provider.sh");
     const config = tavilyToolSecretConfig(commandPath);
     const env = { PATH: process.env.PATH ?? "", TAVILY_API_KEY: "ambient-must-not-be-used" };

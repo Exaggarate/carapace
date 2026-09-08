@@ -5,7 +5,7 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { quoteCliArg } from "../cli/quote-cli-arg.js";
 import * as exec from "../process/exec.js";
 import { isPidAlive } from "../shared/pid-alive.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { UPDATE_RUN_ID_ENV } from "./update-control-plane-sentinel.js";
 import { prepareUpdateFailureTriage, runUpdateFailureTriage } from "./update-triage.js";
 
@@ -13,7 +13,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => vi.restoreAllMocks());
 
 async function createInstalledTriage(params: { hang?: boolean; promptPath?: string } = {}) {
-  const root = await fs.realpath(tempDirs.make("openclaw-triage-child-"));
+  const root = await fs.realpath(tempDirs.make("carapace-triage-child-"));
   const receiptPath = path.join(root, "receipt.json");
   const promptPath = params.promptPath ?? path.join(root, "triage-prompt.md");
   await fs.mkdir(path.join(root, "dist"));
@@ -31,7 +31,7 @@ async function createInstalledTriage(params: { hang?: boolean; promptPath?: stri
     target: {
       root,
       nodeRunner: process.execPath,
-      env: { HOME: root, USERPROFILE: root, OPENCLAW_STATE_DIR: path.join(root, "state") },
+      env: { HOME: root, USERPROFILE: root, CARAPACE_STATE_DIR: path.join(root, "state") },
     },
   };
 }
@@ -40,7 +40,7 @@ describe("update triage child lifecycle", () => {
   it.each(["abort", "owner closure"] as const)(
     "does not start prepared interactive triage after %s during cwd validation",
     async (closure) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const triage = await import("../commands/triage.js");
         const handoff = vi.spyOn(triage, "triageCommand").mockResolvedValue();
         const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
@@ -210,7 +210,7 @@ describe("update triage child lifecycle", () => {
     });
     expect(result).toMatchObject({
       status: "failed",
-      hint: expect.stringContaining("openclaw triage"),
+      hint: expect.stringContaining("carapace triage"),
     });
   });
 
@@ -219,13 +219,13 @@ describe("update triage child lifecycle", () => {
     async (platformName) => {
       const { target } = await createInstalledTriage();
       vi.spyOn(process, "platform", "get").mockReturnValue(platformName);
-      target.env.OPENCLAW_STATE_DIR = path.join(target.root, "state directory's");
+      target.env.CARAPACE_STATE_DIR = path.join(target.root, "state directory's");
       const configPath = path.join(target.root, "custom config.json");
       const workspaceDir = path.join(target.root, "custom workspace");
       const targetEnv = {
         ...target.env,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_WORKSPACE_DIR: workspaceDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_WORKSPACE_DIR: workspaceDir,
       };
       const credential = "synthetic-triage-bearer-value";
       vi.spyOn(exec, "runCommandWithTimeout").mockRejectedValueOnce(
@@ -247,18 +247,18 @@ describe("update triage child lifecycle", () => {
         expect(result.contextPath).toEqual(expect.any(String));
         if (platformName === "win32") {
           expect(guidance).toContain(
-            `& openclaw triage --update-result '${result.contextPath!.replaceAll("'", "''")}'`,
+            `& carapace triage --update-result '${result.contextPath!.replaceAll("'", "''")}'`,
           );
-          for (const selector of [targetEnv.OPENCLAW_STATE_DIR, configPath, workspaceDir]) {
+          for (const selector of [targetEnv.CARAPACE_STATE_DIR, configPath, workspaceDir]) {
             expect(guidance).toContain(`'${selector.replaceAll("'", "''")}'`);
           }
         } else {
           expect(guidance).toContain(`--update-result ${quoteCliArg(result.contextPath!)}`);
           expect(guidance).toContain(
-            `OPENCLAW_STATE_DIR=${quoteCliArg(targetEnv.OPENCLAW_STATE_DIR)}`,
+            `CARAPACE_STATE_DIR=${quoteCliArg(targetEnv.CARAPACE_STATE_DIR)}`,
           );
-          expect(guidance).toContain(`OPENCLAW_CONFIG_PATH=${quoteCliArg(configPath)}`);
-          expect(guidance).toContain(`OPENCLAW_WORKSPACE_DIR=${quoteCliArg(workspaceDir)}`);
+          expect(guidance).toContain(`CARAPACE_CONFIG_PATH=${quoteCliArg(configPath)}`);
+          expect(guidance).toContain(`CARAPACE_WORKSPACE_DIR=${quoteCliArg(workspaceDir)}`);
         }
         await expect(fs.stat(result.contextPath!)).resolves.toMatchObject({
           size: expect.any(Number),

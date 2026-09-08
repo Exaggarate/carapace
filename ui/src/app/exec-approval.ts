@@ -1,6 +1,6 @@
 // Application-owned approval parsing and queue state.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { ApprovalScope } from "../../../src/infra/approval-scope.ts";
 
 export type ExecApprovalRequestPayload = {
@@ -202,7 +202,7 @@ export function parseApprovalResolvedEvent(
   if (
     (event !== "exec.approval.resolved" &&
       event !== "plugin.approval.resolved" &&
-      event !== "openclaw.approval.resolved") ||
+      event !== "carapace.approval.resolved") ||
     !isRecord(payload)
   ) {
     return null;
@@ -302,7 +302,7 @@ export function parseApprovalRequestedEvent(
   if (event === "plugin.approval.requested") {
     return parsePluginApprovalRequested(payload);
   }
-  return event === "openclaw.approval.requested"
+  return event === "carapace.approval.requested"
     ? parseSystemAgentApprovalRequested(payload)
     : null;
 }
@@ -503,7 +503,7 @@ export async function refreshPendingApprovalQueue(
     const [execResult, pluginResult, systemAgentResult] = await Promise.allSettled([
       client.request("exec.approval.list", {}),
       client.request("plugin.approval.list", {}),
-      client.request("openclaw.approval.list", {}),
+      client.request("carapace.approval.list", {}),
     ]);
     const execApprovals =
       execResult.status === "fulfilled"

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -12,7 +12,7 @@ describe("cli json stdout contract", () => {
   ])("reports invalid config before discovering plugin command %s", async (...args) => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "openclaw.json");
+        const configPath = path.join(tempHome, "carapace.json");
         const stateDir = path.join(tempHome, "state");
         await fs.writeFile(configPath, JSON.stringify({ gateway: { port: "invalid-port" } }));
 
@@ -20,8 +20,8 @@ describe("cli json stdout contract", () => {
           tempHome,
           args,
           {
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
           },
           { inheritEnvironment: false },
         );
@@ -33,12 +33,12 @@ describe("cli json stdout contract", () => {
           error: { type: "cli_error", message: expect.stringContaining("Invalid config at") },
         });
         expect(result.stdout).toContain("gateway.port");
-        expect(result.stderr).toContain("openclaw doctor");
+        expect(result.stderr).toContain("carapace doctor");
         await expect(
-          fs.access(path.join(stateDir, "state", "openclaw.sqlite")),
+          fs.access(path.join(stateDir, "state", "carapace.sqlite")),
         ).rejects.toMatchObject({ code: "ENOENT" });
       },
-      { prefix: "openclaw-plugin-invalid-config-" },
+      { prefix: "carapace-plugin-invalid-config-" },
     );
   });
 
@@ -57,30 +57,30 @@ describe("cli json stdout contract", () => {
     {
       name: "Commander config get",
       args: ["config", "get", "gateway.port", "--json"],
-      overrides: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" },
+      overrides: { CARAPACE_DISABLE_ROUTE_FIRST: "1" },
     },
     {
       name: "Nix config get",
       args: ["config", "get", "gateway.port", "--json"],
-      overrides: { OPENCLAW_NIX_MODE: "1" },
+      overrides: { CARAPACE_NIX_MODE: "1" },
     },
     { name: "config schema", args: ["config", "schema"], overrides: {} },
     {
       name: "Nix config schema",
       args: ["config", "schema"],
-      overrides: { OPENCLAW_NIX_MODE: "1" },
+      overrides: { CARAPACE_NIX_MODE: "1" },
     },
     { name: "config validate", args: ["config", "validate", "--json"], overrides: {} },
     {
       name: "Nix config validate",
       args: ["config", "validate", "--json"],
-      overrides: { OPENCLAW_NIX_MODE: "1" },
+      overrides: { CARAPACE_NIX_MODE: "1" },
     },
   ])("does not initialize shared SQLite for $name", async (testCase) => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "read-only-state");
-        const configPath = path.join(tempHome, "read-only-openclaw.json");
+        const configPath = path.join(tempHome, "read-only-carapace.json");
         const config = `${JSON.stringify({
           gateway: {
             mode: "local",
@@ -90,7 +90,7 @@ describe("cli json stdout contract", () => {
           plugins: { enabled: false },
           browser: { enabled: false },
           discovery: { mdns: { mode: "off" } },
-          logging: { file: path.join(stateDir, "openclaw.log") },
+          logging: { file: path.join(stateDir, "carapace.log") },
         })}\n`;
         await fs.writeFile(configPath, config, "utf8");
         const configBefore = await fs.stat(configPath);
@@ -101,10 +101,10 @@ describe("cli json stdout contract", () => {
           tempHome,
           testCase.args,
           {
-            OPENCLAW_HOME: tempHome,
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_TEST_FAST: undefined,
+            CARAPACE_HOME: tempHome,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_TEST_FAST: undefined,
             TMPDIR: tmpDir,
             TMP: tmpDir,
             TEMP: tmpDir,
@@ -123,7 +123,7 @@ describe("cli json stdout contract", () => {
           expect(() => JSON.parse(result.stdout)).not.toThrow();
         }
         await expect(
-          fs.access(path.join(stateDir, "state", "openclaw.sqlite")),
+          fs.access(path.join(stateDir, "state", "carapace.sqlite")),
         ).rejects.toMatchObject({
           code: "ENOENT",
         });
@@ -135,7 +135,7 @@ describe("cli json stdout contract", () => {
           ctimeMs: configBefore.ctimeMs,
         });
       },
-      { prefix: "openclaw-read-only-config-e2e-" },
+      { prefix: "carapace-read-only-config-e2e-" },
     );
   });
 
@@ -143,21 +143,21 @@ describe("cli json stdout contract", () => {
     { name: "routed malformed config get", overrides: {} },
     {
       name: "Commander malformed config get",
-      overrides: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" },
+      overrides: { CARAPACE_DISABLE_ROUTE_FIRST: "1" },
     },
   ])("returns actionable JSON without creating state for $name", async (testCase) => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "read-only-state");
-        const configPath = path.join(tempHome, "read-only-openclaw.json");
+        const configPath = path.join(tempHome, "read-only-carapace.json");
         await fs.writeFile(configPath, "{}\n", "utf8");
 
         const result = runBuiltCli(
           tempHome,
           ["config", "get", "gateway.__proto__.token", "--json"],
           {
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
             ...testCase.overrides,
           },
         );
@@ -172,12 +172,12 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stderr).toBe("");
         await expect(
-          fs.access(path.join(stateDir, "state", "openclaw.sqlite")),
+          fs.access(path.join(stateDir, "state", "carapace.sqlite")),
         ).rejects.toMatchObject({
           code: "ENOENT",
         });
       },
-      { prefix: "openclaw-read-only-invalid-config-e2e-" },
+      { prefix: "carapace-read-only-invalid-config-e2e-" },
     );
   });
 
@@ -185,13 +185,13 @@ describe("cli json stdout contract", () => {
     { name: "routed invalid config get", overrides: {} },
     {
       name: "Commander invalid config get",
-      overrides: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" },
+      overrides: { CARAPACE_DISABLE_ROUTE_FIRST: "1" },
     },
   ])("reports invalid configuration as JSON without creating state for $name", async (testCase) => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "read-only-state");
-        const configPath = path.join(tempHome, "read-only-openclaw.json");
+        const configPath = path.join(tempHome, "read-only-carapace.json");
         await fs.writeFile(
           configPath,
           `${JSON.stringify({ gateway: { bind: "not-a-supported-mode" } })}\n`,
@@ -199,8 +199,8 @@ describe("cli json stdout contract", () => {
         );
 
         const result = runBuiltCli(tempHome, ["config", "get", "gateway.port", "--json"], {
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_STATE_DIR: stateDir,
           ...testCase.overrides,
         });
 
@@ -209,7 +209,7 @@ describe("cli json stdout contract", () => {
           ok: false,
           error: {
             type: "cli_error",
-            message: expect.stringContaining("OpenClaw config is invalid"),
+            message: expect.stringContaining("Carapace config is invalid"),
           },
           issues: expect.arrayContaining([
             expect.objectContaining({ path: "gateway.bind", message: expect.any(String) }),
@@ -217,42 +217,42 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stderr).toBe("");
         await expect(
-          fs.access(path.join(stateDir, "state", "openclaw.sqlite")),
+          fs.access(path.join(stateDir, "state", "carapace.sqlite")),
         ).rejects.toMatchObject({
           code: "ENOENT",
         });
       },
-      { prefix: "openclaw-read-only-invalid-snapshot-e2e-" },
+      { prefix: "carapace-read-only-invalid-snapshot-e2e-" },
     );
   });
 
   it.each([
-    { name: "default service", inheritedProfile: undefined, inheritedStateName: ".openclaw" },
-    { name: "named service", inheritedProfile: "main", inheritedStateName: ".openclaw-main" },
+    { name: "default service", inheritedProfile: undefined, inheritedStateName: ".carapace" },
+    { name: "named service", inheritedProfile: "main", inheritedStateName: ".carapace-main" },
   ])("resolves the requested profile from inherited $name state", async (inherited) => {
     await withTempHome(
       async (tempHome) => {
         const inheritedStateDir = path.join(tempHome, inherited.inheritedStateName);
         const result = runBuiltCli(tempHome, ["--profile", "work", "config", "file"], {
-          OPENCLAW_PROFILE: inherited.inheritedProfile,
-          OPENCLAW_STATE_DIR: inheritedStateDir,
-          OPENCLAW_CONFIG_PATH: path.join(inheritedStateDir, "openclaw.json"),
+          CARAPACE_PROFILE: inherited.inheritedProfile,
+          CARAPACE_STATE_DIR: inheritedStateDir,
+          CARAPACE_CONFIG_PATH: path.join(inheritedStateDir, "carapace.json"),
         });
 
         expect(result.status, result.stderr).toBe(0);
-        expect(result.stdout.trim()).toBe(path.join(tempHome, ".openclaw-work", "openclaw.json"));
-        await expect(fs.access(path.join(tempHome, ".openclaw-work"))).rejects.toMatchObject({
+        expect(result.stdout.trim()).toBe(path.join(tempHome, ".carapace-work", "carapace.json"));
+        await expect(fs.access(path.join(tempHome, ".carapace-work"))).rejects.toMatchObject({
           code: "ENOENT",
         });
       },
-      { prefix: "openclaw-profile-isolation-e2e-" },
+      { prefix: "carapace-profile-isolation-e2e-" },
     );
   });
 
   it("keeps default-profile exec approvals untouched for a scratch-state config query", async () => {
     await withTempHome(
       async (tempHome) => {
-        const defaultStateDir = path.join(tempHome, ".openclaw");
+        const defaultStateDir = path.join(tempHome, ".carapace");
         const scratchStateDir = path.join(tempHome, "scratch-state");
         const approvalsPath = path.join(defaultStateDir, "exec-approvals.json");
         const approvals = '{"version":1,"approvals":{"demo":true}}\n';
@@ -261,11 +261,11 @@ describe("cli json stdout contract", () => {
         await fs.writeFile(approvalsPath, approvals, "utf8");
 
         const result = runBuiltCli(tempHome, ["config", "file"], {
-          OPENCLAW_STATE_DIR: scratchStateDir,
+          CARAPACE_STATE_DIR: scratchStateDir,
         });
 
         expect(result.status, result.stderr).toBe(0);
-        expect(result.stdout.trim()).toBe(path.join(scratchStateDir, "openclaw.json"));
+        expect(result.stdout.trim()).toBe(path.join(scratchStateDir, "carapace.json"));
         await expect(fs.readFile(approvalsPath, "utf8")).resolves.toBe(approvals);
         await expect(fs.access(`${approvalsPath}.migrated`)).rejects.toMatchObject({
           code: "ENOENT",
@@ -274,19 +274,19 @@ describe("cli json stdout contract", () => {
           fs.access(path.join(scratchStateDir, "exec-approvals.json")),
         ).rejects.toMatchObject({ code: "ENOENT" });
         await expect(
-          fs.access(path.join(scratchStateDir, "state", "openclaw.sqlite")),
+          fs.access(path.join(scratchStateDir, "state", "carapace.sqlite")),
         ).rejects.toMatchObject({ code: "ENOENT" });
       },
-      { prefix: "openclaw-read-only-state-e2e-" },
+      { prefix: "carapace-read-only-state-e2e-" },
     );
   });
 
   it("keeps representative success payload bytes unchanged", async () => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "openclaw.json");
+        const configPath = path.join(tempHome, "carapace.json");
         await fs.writeFile(configPath, '{"gateway":{"port":28789}}\n', "utf8");
-        const env = { OPENCLAW_CONFIG_PATH: configPath };
+        const env = { CARAPACE_CONFIG_PATH: configPath };
 
         const getResult = runBuiltCli(tempHome, ["config", "get", "gateway.port", "--json"], env);
         const validateResult = runBuiltCli(tempHome, ["config", "validate", "--json"], env);
@@ -298,7 +298,7 @@ describe("cli json stdout contract", () => {
           `${JSON.stringify({ valid: true, path: configPath, warnings: [] })}\n`,
         );
       },
-      { prefix: "openclaw-json-success-bytes-e2e-" },
+      { prefix: "carapace-json-success-bytes-e2e-" },
     );
   });
 
@@ -306,7 +306,7 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const result = runBuiltCli(tempHome, ["config", "schema"], {
-          OPENCLAW_LOG_LEVEL: "debug",
+          CARAPACE_LOG_LEVEL: "debug",
         });
 
         expect(result.status).toBe(0);
@@ -317,18 +317,18 @@ describe("cli json stdout contract", () => {
         expect(result.stdout).not.toContain("possibly sensitive key found");
         expect(result.stderr).not.toContain("possibly sensitive key found");
       },
-      { prefix: "openclaw-config-schema-json-e2e-" },
+      { prefix: "carapace-config-schema-json-e2e-" },
     );
   });
 
   it("keeps `config validate --json` stdout parseable at debug log level", async () => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "openclaw.json");
+        const configPath = path.join(tempHome, "carapace.json");
         await fs.writeFile(configPath, "{}", "utf8");
         const result = runBuiltCli(tempHome, ["config", "validate", "--json"], {
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_LOG_LEVEL: "debug",
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_LOG_LEVEL: "debug",
         });
 
         expect(result.status).toBe(0);
@@ -338,7 +338,7 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stdout).not.toContain("possibly sensitive key found");
       },
-      { prefix: "openclaw-config-validate-json-e2e-" },
+      { prefix: "carapace-config-validate-json-e2e-" },
     );
   });
 });

@@ -11,8 +11,8 @@ import {
   writePersistedAuthProfileStateRaw,
   writePersistedAuthProfileStoreRaw,
 } from "../../src/agents/auth-profiles/sqlite.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../src/state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../src/state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../src/state/carapace-state-db.js";
 import { stageLiveAuthProfiles } from "./stage-live-auth-profiles.js";
 
 const tempDirs = new Set<string>();
@@ -35,7 +35,7 @@ function createAuthSource(stateDir: string): string {
             "openai:test": {
               type: "api_key",
               provider: "openai",
-              keyRef: { source: "env", provider: "default", id: "OPENCLAW_LIVE_OPENAI_KEY" },
+              keyRef: { source: "env", provider: "default", id: "CARAPACE_LIVE_OPENAI_KEY" },
             },
           },
         },
@@ -50,14 +50,14 @@ function createAuthSource(stateDir: string): string {
     },
     { stateDir },
   );
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   return agentDir;
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const dir of tempDirs) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -68,8 +68,8 @@ describe("stage-live-auth-profiles", () => {
   it.each(["auth_profile_store", "auth_profile_state"] as const)(
     "fails closed when %s is the only missing auth table",
     (missingTable) => {
-      const sourceStateDir = createStateDir("openclaw-live-auth-partial-source-");
-      const targetStateDir = createStateDir("openclaw-live-auth-partial-target-");
+      const sourceStateDir = createStateDir("carapace-live-auth-partial-source-");
+      const targetStateDir = createStateDir("carapace-live-auth-partial-target-");
       const sourceAgentDir = createAuthSource(sourceStateDir);
       const database = new DatabaseSync(resolveAuthProfileDatabasePath(sourceAgentDir));
       database.exec(`DROP TABLE ${missingTable};`);
@@ -87,8 +87,8 @@ describe("stage-live-auth-profiles", () => {
   );
 
   it("fails closed when both auth tables are absent", () => {
-    const sourceStateDir = createStateDir("openclaw-live-auth-legacy-source-");
-    const targetStateDir = createStateDir("openclaw-live-auth-legacy-target-");
+    const sourceStateDir = createStateDir("carapace-live-auth-legacy-source-");
+    const targetStateDir = createStateDir("carapace-live-auth-legacy-target-");
     const sourceAgentDir = createAuthSource(sourceStateDir);
     const database = new DatabaseSync(resolveAuthProfileDatabasePath(sourceAgentDir));
     database.exec("DROP TABLE auth_profile_store; DROP TABLE auth_profile_state;");
@@ -105,8 +105,8 @@ describe("stage-live-auth-profiles", () => {
   });
 
   it("stages a readable store when the state row is absent", () => {
-    const sourceStateDir = createStateDir("openclaw-live-auth-row-source-");
-    const targetStateDir = createStateDir("openclaw-live-auth-row-target-");
+    const sourceStateDir = createStateDir("carapace-live-auth-row-source-");
+    const targetStateDir = createStateDir("carapace-live-auth-row-target-");
     const sourceAgentDir = createAuthSource(sourceStateDir);
     const database = new DatabaseSync(resolveAuthProfileDatabasePath(sourceAgentDir));
     database.exec("DELETE FROM auth_profile_state;");

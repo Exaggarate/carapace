@@ -351,12 +351,12 @@
     .chat-workspace-rail,
     .chat-tasks-rail,
     .chat-task-detail,
-    openclaw-chat-detail-panel,
-    openclaw-chat-session-rail,
-    openclaw-session-discussion,
-    openclaw-terminal-panel,
-    openclaw-browser-panel,
-    openclaw-desktop-panel
+    carapace-chat-detail-panel,
+    carapace-chat-session-rail,
+    carapace-session-discussion,
+    carapace-terminal-panel,
+    carapace-browser-panel,
+    carapace-desktop-panel
   ) {
   display: flex;
   width: 100%;

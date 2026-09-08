@@ -5,7 +5,7 @@
  */
 import type { CliSessionBinding, SessionEntry } from "../config/sessions.js";
 import { getCliSessionBinding } from "../config/sessions/cli-session-binding.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSessionPinnedHarnessId } from "../sessions/agent-harness-session-key.js";
 import { isDefaultAgentRuntimeId, normalizeOptionalAgentRuntimeId } from "./agent-runtime-id.js";
 import { isCliRuntimeAliasForProvider } from "./model-runtime-aliases.js";
@@ -50,17 +50,17 @@ export function resolvePersistedSessionRuntimeId(
 export function resolveCompatibleAgentRuntimeForProvider(params: {
   provider?: string | null;
   runtime?: string | null;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): string | undefined {
   const runtime = normalizeOptionalAgentRuntimeId(params.runtime);
   if (!runtime || isDefaultAgentRuntimeId(runtime)) {
     return undefined;
   }
-  if (runtime === "openclaw") {
+  if (runtime === "carapace") {
     return runtime;
   }
   const provider = params.provider?.trim().toLowerCase() ?? "";
-  // The Codex harness owns both OpenClaw's virtual Codex namespace and canonical OpenAI routes.
+  // The Codex harness owns both Carapace's virtual Codex namespace and canonical OpenAI routes.
   if (runtime === "codex" && (provider === "codex" || provider === "openai")) {
     return runtime;
   }
@@ -70,7 +70,7 @@ export function resolveCompatibleAgentRuntimeForProvider(params: {
 export function resolveSessionRuntimeOverrideForProvider(params: {
   provider?: string | null;
   entry?: SessionRuntimeCompatEntry;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): string | undefined {
   const lockedHarness = resolveSessionPinnedHarnessId(params.entry);
   if (lockedHarness && !isDefaultAgentRuntimeId(lockedHarness)) {
@@ -92,7 +92,7 @@ export function resolveSessionRuntimeOverrideForProvider(params: {
 export function resolveManualCompactionCliTarget(params: {
   provider?: string | null;
   entry?: ManualCompactionRuntimeEntry;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): ManualCompactionCliTarget {
   const runtimeOverride = normalizeOptionalAgentRuntimeId(params.entry?.agentRuntimeOverride);
   const runtimeConfig =

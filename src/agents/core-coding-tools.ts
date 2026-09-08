@@ -5,7 +5,7 @@ import { bindAgentToolActionDescriptor } from "./agent-tool-metadata.js";
 import {
   createHostWorkspaceEditTool,
   createHostWorkspaceWriteTool,
-  createOpenClawReadTool,
+  createCarapaceReadTool,
   createSandboxedEditTool,
   createSandboxedReadTool,
   createSandboxedWriteTool,
@@ -185,7 +185,7 @@ export function createCoreCodingTools(options: CoreCodingToolsOptions): AnyAgent
     // the guard forwards its checked absolute path to the filesystem reader.
     const wrapped = sandboxRoot
       ? guarded
-      : createOpenClawReadTool(guarded, {
+      : createCarapaceReadTool(guarded, {
           modelContextWindowTokens: options.modelContextWindowTokens,
           imageSanitization: options.imageSanitization,
           cwd: options.codingRoot,

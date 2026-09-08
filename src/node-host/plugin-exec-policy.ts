@@ -5,14 +5,14 @@ import {
   loadExecApprovals,
   recordAllowlistMatchesUse,
 } from "../infra/exec-approvals.js";
-import type { OpenClawPluginNodeHostCommandContext } from "../plugins/types.node-host.js";
+import type { CarapacePluginNodeHostCommandContext } from "../plugins/types.node-host.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import { resolveNodeExecConfigPolicy } from "./exec-policy.js";
 
 /** Local policy stays on the executor; Gateway approval never overrides a local deny. */
 export function preparePluginExecAuthorization(params: {
   source: Parameters<
-    NonNullable<OpenClawPluginNodeHostCommandContext["prepareExecAuthorization"]>
+    NonNullable<CarapacePluginNodeHostCommandContext["prepareExecAuthorization"]>
   >[0];
   command: string;
   sessionKey?: string;

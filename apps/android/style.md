@@ -1,4 +1,4 @@
-# OpenClaw Android UI Style Guide
+# Carapace Android UI Style Guide
 
 Scope: all native Android UI in `apps/android` (Jetpack Compose).
 Goal: one coherent visual system across onboarding, settings, and future screens.
@@ -151,19 +151,19 @@ Hard rule: avoid ultra-thin weights on light backgrounds.
 
 Tokens and shared components:
 
-- `app/src/main/java/ai/openclaw/app/ui/design/ClawTheme.kt` (palette, spacing, radii,
+- `app/src/main/java/ai/carapace/app/ui/design/ClawTheme.kt` (palette, spacing, radii,
   type, and the Material color-scheme bridge)
-- `app/src/main/java/ai/openclaw/app/ui/design/ClawSurfaces.kt`
-- `app/src/main/java/ai/openclaw/app/ui/design/ClawComponents.kt`
-- `app/src/main/java/ai/openclaw/app/ui/design/ClawNavigation.kt`
+- `app/src/main/java/ai/carapace/app/ui/design/ClawSurfaces.kt`
+- `app/src/main/java/ai/carapace/app/ui/design/ClawComponents.kt`
+- `app/src/main/java/ai/carapace/app/ui/design/ClawNavigation.kt`
 
 Shell and screens:
 
-- `app/src/main/java/ai/openclaw/app/ui/SidebarShell.kt`
-- `app/src/main/java/ai/openclaw/app/ui/SidebarContent.kt`
-- `app/src/main/java/ai/openclaw/app/ui/ShellScreen.kt`
-- `app/src/main/java/ai/openclaw/app/ui/SettingsScreens.kt`
-- `app/src/main/java/ai/openclaw/app/ui/OnboardingFlow.kt`
-- `app/src/main/java/ai/openclaw/app/MainViewModel.kt`
+- `app/src/main/java/ai/carapace/app/ui/SidebarShell.kt`
+- `app/src/main/java/ai/carapace/app/ui/SidebarContent.kt`
+- `app/src/main/java/ai/carapace/app/ui/ShellScreen.kt`
+- `app/src/main/java/ai/carapace/app/ui/SettingsScreens.kt`
+- `app/src/main/java/ai/carapace/app/ui/OnboardingFlow.kt`
+- `app/src/main/java/ai/carapace/app/MainViewModel.kt`
 
 If style and implementation diverge, update both in the same change.

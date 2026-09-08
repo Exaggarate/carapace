@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { captureEnv } from "openclaw/plugin-sdk/test-env";
+import { captureEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { hasAnyWhatsAppAuth, listWhatsAppAuthDirs, resolveWhatsAppAuthDir } from "./accounts.js";
 
@@ -16,9 +16,9 @@ describe("hasAnyWhatsAppAuth", () => {
   };
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_OAUTH_DIR"]);
-    tempOauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oauth-"));
-    process.env.OPENCLAW_OAUTH_DIR = tempOauthDir;
+    envSnapshot = captureEnv(["CARAPACE_OAUTH_DIR"]);
+    tempOauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-oauth-"));
+    process.env.CARAPACE_OAUTH_DIR = tempOauthDir;
   });
 
   afterEach(() => {
@@ -78,7 +78,7 @@ describe("hasAnyWhatsAppAuth", () => {
   });
 
   it("includes authDir overrides", () => {
-    const customDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-wa-auth-"));
+    const customDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-wa-auth-"));
     try {
       writeCreds(customDir);
       const cfg = {

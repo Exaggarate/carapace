@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { chmod, link, mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, type TestContext } from "vitest";
 import {
   machoFixture,
@@ -67,7 +67,7 @@ describe("codesign-mac-app temp file hygiene", () => {
 
   it.concurrent("does not allocate entitlement temp files for help output", ({ mac, expect }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-help-");
+      const tempRoot = mac.createTempDir("carapace-codesign-help-");
       const result = await runCodesignWithoutAllocation(mac, expect, ["--help"], tempRoot);
 
       expect(result.status).toBe(0);
@@ -79,7 +79,7 @@ describe("codesign-mac-app temp file hygiene", () => {
     expect,
   }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-missing-");
+      const tempRoot = mac.createTempDir("carapace-codesign-missing-");
       const missingApp = path.join(tempRoot, "Missing.app");
       const result = await runCodesignWithoutAllocation(mac, expect, [missingApp], tempRoot);
 
@@ -89,7 +89,7 @@ describe("codesign-mac-app temp file hygiene", () => {
 
   it.concurrent("rejects unknown options before app validation", ({ mac, expect }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-unknown-");
+      const tempRoot = mac.createTempDir("carapace-codesign-unknown-");
       const result = await runCodesignWithoutAllocation(mac, expect, ["--wat"], tempRoot);
 
       expect(result.status).toBe(1);
@@ -98,7 +98,7 @@ describe("codesign-mac-app temp file hygiene", () => {
 
   it.concurrent("rejects extra app bundle arguments before signing", ({ mac, expect }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-extra-");
+      const tempRoot = mac.createTempDir("carapace-codesign-extra-");
       const app = path.join(tempRoot, "Fake.app");
       await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
       const result = await runCodesignWithoutAllocation(mac, expect, [app, "extra"], tempRoot);
@@ -109,7 +109,7 @@ describe("codesign-mac-app temp file hygiene", () => {
 
   macIt.concurrent("keeps helper signing plain and seals app code once", ({ mac, expect }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-success-");
+      const tempRoot = mac.createTempDir("carapace-codesign-success-");
       const app = path.join(tempRoot, "Fake.app");
       const binDir = path.join(tempRoot, "bin");
       const captureDir = path.join(app, "Contents", "test-capture");
@@ -117,9 +117,9 @@ describe("codesign-mac-app temp file hygiene", () => {
       await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
       await mkdir(binDir);
       await mkdir(captureDir);
-      await writeFile(path.join(app, "Contents", "MacOS", "openclaw-mac"), "#!/bin/sh\n");
-      await writeFile(path.join(app, "Contents", "MacOS", "openclaw-mlx-tts"), "#!/bin/sh\n");
-      await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+      await writeFile(path.join(app, "Contents", "MacOS", "carapace-mac"), "#!/bin/sh\n");
+      await writeFile(path.join(app, "Contents", "MacOS", "carapace-mlx-tts"), "#!/bin/sh\n");
+      await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
       await installFakeCodesign(binDir);
 
       const result = await mac.run("bash", [scriptPath, app], {
@@ -141,9 +141,9 @@ describe("codesign-mac-app temp file hygiene", () => {
 
       const signLines = readFileSync(logPath, "utf8").trim().split("\n");
       expect(signLines).toHaveLength(3);
-      expect(signLines[0]).toBe(`plain\t${path.join(app, "Contents", "MacOS", "openclaw-mac")}`);
+      expect(signLines[0]).toBe(`plain\t${path.join(app, "Contents", "MacOS", "carapace-mac")}`);
       expect(signLines[1]).toBe(
-        `plain\t${path.join(app, "Contents", "MacOS", "openclaw-mlx-tts")}`,
+        `plain\t${path.join(app, "Contents", "MacOS", "carapace-mlx-tts")}`,
       );
       expect(signLines[2]).toContain(`entitled\t${app}\t`);
       for (const line of signLines.slice(2)) {
@@ -159,7 +159,7 @@ describe("codesign-mac-app temp file hygiene", () => {
           "copied codesign entitlement path",
         );
         const copiedEntitlements = readFileSync(copiedEntitlementSource, "utf8");
-        expect(entitlementSource).toContain("openclaw-entitlements");
+        expect(entitlementSource).toContain("carapace-entitlements");
         expect(existsSync(entitlementSource)).toBe(false);
         expect(existsSync(path.dirname(entitlementSource))).toBe(false);
         expect(copiedEntitlements).toContain("com.apple.security.automation.apple-events");
@@ -175,14 +175,14 @@ describe("codesign-mac-app temp file hygiene", () => {
     "rejects elevation-host %s bypasses before app validation",
     ([key, diagnostic], { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const tempRoot = mac.createTempDir("openclaw-codesign-elevation-bypass-");
+        const tempRoot = mac.createTempDir("carapace-codesign-elevation-bypass-");
         const result = await runCodesignWithoutAllocation(
           mac,
           expect,
           [path.join(tempRoot, "Missing.app")],
           tempRoot,
           {
-            OPENCLAW_MAC_SIGNING_VARIANT: "elevation-host",
+            CARAPACE_MAC_SIGNING_VARIANT: "elevation-host",
             [key]: "1",
           },
         );
@@ -201,7 +201,7 @@ describe("codesign-mac-app temp file hygiene", () => {
       );
 
       expect(script).toContain(
-        'ELEVATION_IDENTITY="Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)"',
+        'ELEVATION_IDENTITY="Developer ID Application: Carapace Foundation (FWJYW4S8P8)"',
       );
       expect(script).toContain('ELEVATION_TEAM_ID="FWJYW4S8P8"');
       expect(elevationProfile).toContain("<dict/>");
@@ -214,14 +214,14 @@ describe("codesign-mac-app temp file hygiene", () => {
     "rejects an elevation-host CUA driver %s before signing",
     (kind, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const tempRoot = mac.createTempDir(`openclaw-codesign-elevation-cua-${kind}-`);
+        const tempRoot = mac.createTempDir(`carapace-codesign-elevation-cua-${kind}-`);
         const app = path.join(tempRoot, "Fake.app");
         const binDir = path.join(tempRoot, "bin");
         const resources = path.join(app, "Contents", "Resources");
         await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
         await mkdir(resources, { recursive: true });
         await mkdir(binDir);
-        await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+        await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
         const cuaDriver = path.join(resources, "cua-driver");
         if (kind === "file") {
           await writeFile(cuaDriver, "driver\n");
@@ -235,9 +235,9 @@ describe("codesign-mac-app temp file hygiene", () => {
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_MAC_SIGNING_VARIANT: "elevation-host",
+            CARAPACE_MAC_SIGNING_VARIANT: "elevation-host",
             PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-            SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+            SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
             TMPDIR: tempRoot,
           },
         });
@@ -251,12 +251,12 @@ describe("codesign-mac-app temp file hygiene", () => {
     "consumes complete codesign metadata under pipefail before validating authority",
     ({ mac, expect }) =>
       mac.lifetime.run(async () => {
-        const tempRoot = mac.createTempDir("openclaw-codesign-elevation-metadata-");
+        const tempRoot = mac.createTempDir("carapace-codesign-elevation-metadata-");
         const app = path.join(tempRoot, "Fake.app");
         const binDir = path.join(tempRoot, "bin");
         await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
         await mkdir(binDir);
-        await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+        await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
         await installElevationFakeCodesign(binDir);
 
         const result = await mac.run("bash", [scriptPath, app], {
@@ -265,9 +265,9 @@ describe("codesign-mac-app temp file hygiene", () => {
           env: {
             ...process.env,
             CODESIGN_FAKE_SECOND_AUTHORITY: "1",
-            OPENCLAW_MAC_SIGNING_VARIANT: "elevation-host",
+            CARAPACE_MAC_SIGNING_VARIANT: "elevation-host",
             PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-            SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+            SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
             TMPDIR: tempRoot,
           },
         });
@@ -283,12 +283,12 @@ describe("codesign-mac-app temp file hygiene", () => {
     "preserves the precise diagnostic when codesign omits Authority",
     ({ mac, expect }) =>
       mac.lifetime.run(async () => {
-        const tempRoot = mac.createTempDir("openclaw-codesign-elevation-no-authority-");
+        const tempRoot = mac.createTempDir("carapace-codesign-elevation-no-authority-");
         const app = path.join(tempRoot, "Fake.app");
         const binDir = path.join(tempRoot, "bin");
         await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
         await mkdir(binDir);
-        await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+        await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
         await installElevationFakeCodesign(binDir);
 
         const result = await mac.run("bash", [scriptPath, app], {
@@ -297,9 +297,9 @@ describe("codesign-mac-app temp file hygiene", () => {
           env: {
             ...process.env,
             CODESIGN_FAKE_NO_AUTHORITY: "1",
-            OPENCLAW_MAC_SIGNING_VARIANT: "elevation-host",
+            CARAPACE_MAC_SIGNING_VARIANT: "elevation-host",
             PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-            SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+            SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
             TMPDIR: tempRoot,
           },
         });
@@ -311,12 +311,12 @@ describe("codesign-mac-app temp file hygiene", () => {
 
   macIt.concurrent("preserves a codesign failure after metadata output", ({ mac, expect }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-elevation-failed-metadata-");
+      const tempRoot = mac.createTempDir("carapace-codesign-elevation-failed-metadata-");
       const app = path.join(tempRoot, "Fake.app");
       const binDir = path.join(tempRoot, "bin");
       await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
       await mkdir(binDir);
-      await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+      await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
       await installElevationFakeCodesign(binDir);
 
       const result = await mac.run("bash", [scriptPath, app], {
@@ -325,9 +325,9 @@ describe("codesign-mac-app temp file hygiene", () => {
         env: {
           ...process.env,
           CODESIGN_FAKE_FAIL_AFTER_METADATA: "1",
-          OPENCLAW_MAC_SIGNING_VARIANT: "elevation-host",
+          CARAPACE_MAC_SIGNING_VARIANT: "elevation-host",
           PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-          SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+          SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
           TMPDIR: tempRoot,
         },
       });
@@ -341,14 +341,14 @@ describe("codesign-mac-app temp file hygiene", () => {
 
   macIt.concurrent("retries only transient Apple timestamp failures", ({ mac, expect }) =>
     mac.lifetime.run(async () => {
-      const tempRoot = mac.createTempDir("openclaw-codesign-retry-");
+      const tempRoot = mac.createTempDir("carapace-codesign-retry-");
       const app = path.join(tempRoot, "Fake.app");
       const binDir = path.join(tempRoot, "bin");
       const countFile = path.join(app, "Contents", "codesign-count");
       await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
       await mkdir(binDir);
-      await writeFile(path.join(app, "Contents", "MacOS", "openclaw-mlx-tts"), "#!/bin/sh\n");
-      await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+      await writeFile(path.join(app, "Contents", "MacOS", "carapace-mlx-tts"), "#!/bin/sh\n");
+      await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
       await installTransientFakeCodesign(binDir);
 
       const result = await mac.run("bash", [scriptPath, app], {
@@ -361,7 +361,7 @@ describe("codesign-mac-app temp file hygiene", () => {
           CODESIGN_TIMESTAMP_RETRY_DELAY_SECONDS: "0",
           CODESIGN_TRANSIENT_FAILURES: "2",
           PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-          SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+          SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
           SKIP_TEAM_ID_CHECK: "1",
           TMPDIR: tempRoot,
         },
@@ -377,14 +377,14 @@ describe("codesign-mac-app temp file hygiene", () => {
     "cleans signing resources without retrying non-timestamp %s failures",
     (target, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const tempRoot = mac.createTempDir("openclaw-codesign-permanent-");
+        const tempRoot = mac.createTempDir("carapace-codesign-permanent-");
         const app = path.join(tempRoot, "Fake.app");
         const binDir = path.join(tempRoot, "bin");
         const countFile = path.join(app, "Contents", "codesign-count");
         await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
         await mkdir(binDir);
         if (target === "helper") {
-          await writeFile(path.join(app, "Contents", "MacOS", "openclaw-mlx-tts"), "#!/bin/sh\n");
+          await writeFile(path.join(app, "Contents", "MacOS", "carapace-mlx-tts"), "#!/bin/sh\n");
         }
         await installTransientFakeCodesign(binDir);
         // Keep identity lookup and attribute cleanup inert even if signing setup changes.
@@ -402,7 +402,7 @@ describe("codesign-mac-app temp file hygiene", () => {
             CODESIGN_TIMESTAMP_RETRY_DELAY_SECONDS: "0",
             CODESIGN_TRANSIENT_FAILURES: "0",
             PATH: `${binDir}:/usr/bin:/bin`,
-            SIGN_IDENTITY: "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)",
+            SIGN_IDENTITY: "Developer ID Application: Carapace Foundation (FWJYW4S8P8)",
             SKIP_TEAM_ID_CHECK: "1",
             TMPDIR: tempRoot,
           },
@@ -425,7 +425,7 @@ describe("codesign-mac-app temp file hygiene", () => {
           }
         } finally {
           // Clean a regression's task-created leak, never an unexpected system path.
-          if (path.basename(directory).startsWith("openclaw-entitlements.")) {
+          if (path.basename(directory).startsWith("carapace-entitlements.")) {
             await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 20 });
           }
         }
@@ -469,7 +469,7 @@ describe("codesign-mac-app temp file hygiene", () => {
     "applies automatic timestamp policy to $label",
     ({ identity, timestamp, mode }, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const tempRoot = mac.createTempDir("openclaw-codesign-timestamp-");
+        const tempRoot = mac.createTempDir("carapace-codesign-timestamp-");
         const app = path.join(tempRoot, "Fake.app");
         const binDir = path.join(tempRoot, "bin");
         const captureDir = path.join(app, "Contents", "test-capture");
@@ -477,7 +477,7 @@ describe("codesign-mac-app temp file hygiene", () => {
         await mkdir(path.join(app, "Contents", "MacOS"), { recursive: true });
         await mkdir(binDir);
         await mkdir(captureDir);
-        await writeFile(path.join(app, "Contents", "MacOS", "OpenClaw"), "#!/bin/sh\n");
+        await writeFile(path.join(app, "Contents", "MacOS", "Carapace"), "#!/bin/sh\n");
         await installFakeCodesign(binDir);
         const fakeSecurity = path.join(binDir, "security");
         await writeFile(
@@ -525,13 +525,13 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     "limits worker JIT entitlements to known JS runtime executables on $arch",
     ({ arch, sdkArch, cpuType }, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const fixture = await makeSigningFixture(mac, mac.createTempDir("openclaw-inventory-jit-"));
-        const modules = "lib/node_modules/openclaw/node_modules";
+        const fixture = await makeSigningFixture(mac, mac.createTempDir("carapace-inventory-jit-"));
+        const modules = "lib/node_modules/carapace/node_modules";
         const sdkRuntime = `node_modules/@anthropic-ai/claude-agent-sdk-darwin-${sdkArch}/claude`;
         const expected = new Map<string, boolean>();
         for (const [relative, fileType, jit] of [
           ["bin/node", 2, true],
-          [`lib/node_modules/openclaw/${sdkRuntime}`, 2, true],
+          [`lib/node_modules/carapace/${sdkRuntime}`, 2, true],
           [`${modules}/nested/${sdkRuntime}`, 2, true],
           [
             `${modules}/@lydell/node-pty-darwin-${sdkArch}/prebuilds/darwin-${sdkArch}/spawn-helper`,
@@ -594,7 +594,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
       mac.lifetime.run(async () => {
         const fixture = await makeSigningFixture(
           mac,
-          mac.createTempDir("openclaw-inventory-formats-"),
+          mac.createTempDir("carapace-inventory-formats-"),
         );
         const expected = new Map<string, boolean>();
         const candidates: string[] = [];
@@ -669,7 +669,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
       mac.lifetime.run(async () => {
         const fixture = await makeSigningFixture(
           mac,
-          mac.createTempDir("openclaw-inventory-swapped-fat-"),
+          mac.createTempDir("carapace-inventory-swapped-fat-"),
         );
         const bytes = machoFixture(bits, true, true);
         await fixture.put(workerPath + "invalid-fat.node", bytes);
@@ -689,7 +689,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
       mac.lifetime.run(async () => {
         const fixture = await makeSigningFixture(
           mac,
-          mac.createTempDir("openclaw-inventory-real-fat64-"),
+          mac.createTempDir("carapace-inventory-real-fat64-"),
         );
         const native = await fixture.put(workerPath + "bin/node");
         const bytes = await writeFat64Fixture(native, mac);
@@ -723,7 +723,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     expect,
   }) =>
     mac.lifetime.run(async () => {
-      const fixture = await makeSigningFixture(mac, mac.createTempDir("openclaw-macho-filetypes-"));
+      const fixture = await makeSigningFixture(mac, mac.createTempDir("carapace-macho-filetypes-"));
       const resources = new Map<string, Buffer>();
       const candidates: string[] = [];
       for (const fileType of [1, 2, 4, 5, 6, 7, 8, 9, 10, 11]) {
@@ -756,7 +756,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     "resource-seals real %s linker objects without direct signing",
     (format, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const root = mac.createTempDir("openclaw-real-object-");
+        const root = mac.createTempDir("carapace-real-object-");
         const fixture = await makeSigningFixture(mac, root);
         const node = await fixture.put(workerPath + "bin/node");
         const bytes = await nativeObjectFixture(path.join(root, "object-inputs"), format, mac);
@@ -778,7 +778,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     "rejects object/image containers in either slice order (fat64: $fat64, image: $imageSlice)",
     ({ fat64, imageSlice }, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const root = mac.createTempDir("openclaw-mixed-object-");
+        const root = mac.createTempDir("carapace-mixed-object-");
         const fixture = await makeSigningFixture(mac, root);
         const bytes = await nativeObjectFixture(
           path.join(root, "object-inputs"),
@@ -807,7 +807,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     "resource-seals static archives and rejects mixed images (fat64: $fat64, $content)",
     ({ fat64, content }, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const root = mac.createTempDir("openclaw-inventory-archive-");
+        const root = mac.createTempDir("carapace-inventory-archive-");
         const fixture = await makeSigningFixture(mac, root);
         const node = await fixture.put(workerPath + "node");
         const bytes = await universalArchiveFixture(
@@ -853,7 +853,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     expect,
   }) =>
     mac.lifetime.run(async () => {
-      const fixture = await makeSigningFixture(mac, mac.createTempDir("openclaw-inventory-scale-"));
+      const fixture = await makeSigningFixture(mac, mac.createTempDir("carapace-inventory-scale-"));
       for (let i = 0; i < 24; i++) {
         await fixture.put(`${workerPath}native-${i}`, machoFixture(64, true, false, i % 2 ? 6 : 2));
       }
@@ -891,7 +891,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     "rejects a symlink bundle root with suffix %j before signing",
     (suffix, { mac, expect }) =>
       mac.lifetime.run(async () => {
-        const root = mac.createTempDir("openclaw-inventory-root-link-");
+        const root = mac.createTempDir("carapace-inventory-root-link-");
         const fixture = await makeSigningFixture(mac, root);
         await fixture.put(workerPath + "node");
         const alias = path.join(root, "Alias.app");
@@ -911,7 +911,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     "before-sign",
   ])("rejects directory swaps without mutating external files (%s)", (swapStage, { mac, expect }) =>
     mac.lifetime.run(async () => {
-      const root = mac.createTempDir("openclaw-inventory-swap-");
+      const root = mac.createTempDir("carapace-inventory-swap-");
       const fixture = await makeSigningFixture(mac, root);
       const swapDirectory = path.join(fixture.worker, "package");
       const externalDirectory = path.join(root, "external");
@@ -921,7 +921,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
       await mkdir(externalDirectory);
       const original = machoFixture();
       await writeFile(external, original);
-      const attribute = "org.openclaw.signing-fixture";
+      const attribute = "org.carapace.signing-fixture";
       expect(
         (await mac.run("/usr/bin/xattr", ["-w", attribute, "untouched", external])).status,
       ).toBe(0);
@@ -966,7 +966,7 @@ describe.runIf(process.platform === "darwin")("Mac native inventory", () => {
     expect,
   }) =>
     mac.lifetime.run(async () => {
-      const root = mac.createTempDir("openclaw-inventory-descriptors-");
+      const root = mac.createTempDir("carapace-inventory-descriptors-");
       const fixture = await makeSigningFixture(mac, root);
       const native = await fixture.put(workerPath + "node");
       const signed = await fixture.run({ writeTarget: native });
@@ -1007,11 +1007,11 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
     expect,
   }) =>
     mac.lifetime.run(async () => {
-      const root = mac.createTempDir("openclaw-inventory-hardlink-");
+      const root = mac.createTempDir("carapace-inventory-hardlink-");
       const fixture = await makeSigningFixture(mac, root);
       const external = path.join(root, "external");
       await writeFile(external, machoFixture());
-      const attribute = "org.openclaw.signing-fixture";
+      const attribute = "org.carapace.signing-fixture";
       expect(
         (await mac.run("/usr/bin/xattr", ["-w", attribute, "untouched", external])).status,
       ).toBe(0);
@@ -1030,7 +1030,7 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
     expect,
   }) =>
     mac.lifetime.run(async () => {
-      const root = mac.createTempDir("openclaw-inventory-fifo-");
+      const root = mac.createTempDir("carapace-inventory-fifo-");
       const fixture = await makeSigningFixture(mac, root);
       expect((await mac.run("/usr/bin/mkfifo", [path.join(fixture.worker, "fifo")])).status).toBe(
         0,
@@ -1056,12 +1056,12 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
       mac.lifetime.run(async () => {
         const fixture = await makeSigningFixture(
           mac,
-          mac.createTempDir("openclaw-inventory-order-"),
+          mac.createTempDir("carapace-inventory-order-"),
         );
-        const helper = await fixture.put("Contents/MacOS/openclaw-mlx-tts");
+        const helper = await fixture.put("Contents/MacOS/carapace-mlx-tts");
         const cua = await fixture.put("Contents/Resources/cua-driver");
         const worker = await fixture.put(workerPath + "node");
-        await fixture.put("Contents/MacOS/OpenClaw");
+        await fixture.put("Contents/MacOS/Carapace");
         const sparkle = "Contents/Frameworks/Sparkle.framework";
         for (const member of [
           "Sparkle",
@@ -1137,7 +1137,7 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
     "entitlementFailure",
   ])("fails closed on %s at the signing/audit boundary", (failure, { mac, expect }) =>
     mac.lifetime.run(async () => {
-      const fixture = await makeSigningFixture(mac, mac.createTempDir("openclaw-inventory-gates-"));
+      const fixture = await makeSigningFixture(mac, mac.createTempDir("carapace-inventory-gates-"));
       const native = await fixture.put(workerPath + "node");
       const config =
         failure === "formatSkipTeam"
@@ -1169,8 +1169,8 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
       mac.lifetime.run(async () => {
         const fixture = await makeSigningFixture(
           mac,
-          mac.createTempDir("openclaw-metadata-"),
-          "Injected\nFormat=Mach-O thin (arm64)\nCodeDirectory v=20400\nTeamIdentifier=FWJYW4S8P8\nAuthority=Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)\n.app",
+          mac.createTempDir("carapace-metadata-"),
+          "Injected\nFormat=Mach-O thin (arm64)\nCodeDirectory v=20400\nTeamIdentifier=FWJYW4S8P8\nAuthority=Developer ID Application: Carapace Foundation (FWJYW4S8P8)\n.app",
         );
         const native = await fixture.put(workerPath + "node");
         const configs: Record<string, Record<string, unknown>> = {
@@ -1212,7 +1212,7 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
         ]) {
           const fixture = await makeSigningFixture(
             mac,
-            mac.createTempDir("openclaw-inventory-failure-"),
+            mac.createTempDir("carapace-inventory-failure-"),
           );
           const native = await fixture.put(workerPath + "node");
           await fixture.put(workerPath + "addon", machoFixture(64, true, false, 6));
@@ -1232,7 +1232,7 @@ with open(sys.argv[1], 'ab', buffering=0) as stream:
       mac.lifetime.run(async () => {
         const fixture = await makeSigningFixture(
           mac,
-          mac.createTempDir("openclaw-inventory-fresh-"),
+          mac.createTempDir("carapace-inventory-fresh-"),
         );
         await fixture.put(workerPath + "node");
         const generated = path.join(fixture.worker, "generated-after-sign.node");

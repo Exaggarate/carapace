@@ -1,7 +1,7 @@
 // Active subagent prompt tests cover the compact current-turn facts that tells
 // a parent session which child runs are still in flight.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { buildActiveSubagentRuntimeContext } from "./subagent-active-context.js";
 import {
   addSubagentRunForTests,
@@ -21,7 +21,7 @@ describe("buildActiveSubagentRuntimeContext", () => {
   it("returns nothing without active children", () => {
     expect(
       buildActiveSubagentRuntimeContext({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         controllerSessionKey: "agent:main:main",
       }),
     ).toBeUndefined();
@@ -48,7 +48,7 @@ describe("buildActiveSubagentRuntimeContext", () => {
       addSubagentRunForTests(run);
 
       const prompt = buildActiveSubagentRuntimeContext({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         controllerSessionKey: "agent:main:main",
       });
 
@@ -78,7 +78,7 @@ describe("buildActiveSubagentRuntimeContext", () => {
     addSubagentRunForTests(run);
 
     const prompt = buildActiveSubagentRuntimeContext({
-      cfg: { session: { mainKey: "agent:main:main" } } as OpenClawConfig,
+      cfg: { session: { mainKey: "agent:main:main" } } as CarapaceConfig,
       controllerSessionKey: "main",
     });
 
@@ -102,7 +102,7 @@ describe("buildActiveSubagentRuntimeContext", () => {
     addSubagentRunForTests(run);
 
     const prompt = buildActiveSubagentRuntimeContext({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       controllerSessionKey: "agent:main:main",
     });
 

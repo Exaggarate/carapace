@@ -1,12 +1,12 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 /** Provider setup wizard helpers shared by provider plugins and CLI setup flows. */
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { DEFAULT_PROVIDER } from "../agents/defaults.js";
 import { normalizeProviderId } from "../agents/model-selection.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { resolvePluginProvidersCore } from "./providers.runtime.js";
 import { resolvePluginSetupProviderCore } from "./setup-registry.js";
@@ -39,7 +39,7 @@ export type ProviderModelPickerEntry = {
 };
 
 type ProviderWizardProvidersResolver = (params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   providerRefs?: readonly string[];
@@ -132,7 +132,7 @@ export function buildProviderPluginMethodChoice(providerId: string, methodId: st
 }
 
 function resolveProviderWizardProviders(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   providerRefs?: readonly string[];
@@ -150,7 +150,7 @@ function resolveProviderWizardProviders(params: {
 }
 
 export function resolveProviderWizardOptions(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): ProviderWizardOption[] {
@@ -221,7 +221,7 @@ function resolveModelPickerChoiceValue(
 }
 
 export function resolveProviderModelPickerEntries(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): ProviderModelPickerEntry[] {
@@ -305,7 +305,7 @@ export function resolveProviderPluginChoiceCore(params: {
 }
 
 export async function runProviderModelSelectedHookCore(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   model: string;
   prompter: WizardPrompter;
   agentDir?: string;

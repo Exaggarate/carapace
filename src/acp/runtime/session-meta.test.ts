@@ -3,12 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { loadSessionEntry, replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { claimOpenClawStateOwnership } from "../../state/openclaw-state-ownership-operations.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { claimCarapaceStateOwnership } from "../../state/carapace-state-ownership-operations.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import {
   listAcpSessionEntries,
@@ -51,12 +51,12 @@ function readStoredAcpSessionEntry(params: {
 
 describe("ACP session metadata SQLite store", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("persists bare global metadata under a configured fixed-store owner", async () => {
-    await withTestDir({ prefix: "openclaw-acp-global-owner-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-global-owner-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const cfg = {
         session: { scope: "global", store: storePath },
@@ -65,8 +65,8 @@ describe("ACP session metadata SQLite store", () => {
           defaults: { sessionStore: { agentId: "ops" } },
           entries: { ops: {}, research: {} },
         },
-      } satisfies OpenClawConfig;
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
+      } satisfies CarapaceConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
       await replaceSessionEntry(
         {
           agentId: "ops",
@@ -113,7 +113,7 @@ describe("ACP session metadata SQLite store", () => {
       const ownerlessCfg = {
         ...cfg,
         agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const ownerlessMutate = vi.fn(mutate);
       await expect(
         upsertAcpSessionMeta({
@@ -128,14 +128,14 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("reads metadata under external state ownership without write admission", async () => {
-    await withTestDir({ prefix: "openclaw-acp-read-only-owner-" }, async (dir) => {
-      const env = { OPENCLAW_STATE_DIR: dir };
-      const externalEnv = { ...env, OPENCLAW_SUPERVISOR_MODE: "external" };
+    await withTestDir({ prefix: "carapace-acp-read-only-owner-" }, async (dir) => {
+      const env = { CARAPACE_STATE_DIR: dir };
+      const externalEnv = { ...env, CARAPACE_SUPERVISOR_MODE: "external" };
       const cfg = {
         agents: { ownership: "explicit", entries: { main: {} } },
-      } satisfies OpenClawConfig;
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const storePath = path.join(dir, "agents", "main", "agent", "openclaw-agent.sqlite");
+      } satisfies CarapaceConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const storePath = path.join(dir, "agents", "main", "agent", "carapace-agent.sqlite");
       const sessionKey = "agent:main:proof";
       await replaceSessionEntry(
         { agentId: "main", storePath, sessionKey },
@@ -155,9 +155,9 @@ describe("ACP session metadata SQLite store", () => {
           lastActivityAt: 100,
         }),
       });
-      closeOpenClawStateDatabaseForTest();
-      claimOpenClawStateOwnership("test-supervisor", { env: externalEnv });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
+      claimCarapaceStateOwnership("test-supervisor", { env: externalEnv });
+      closeCarapaceStateDatabaseForTest();
       const before = fs.readFileSync(databasePath);
 
       expect(readAcpSessionMeta({ cfg, databasePath, env, sessionKey })).toMatchObject({
@@ -168,13 +168,13 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("keeps identical bare keys isolated by explicit agent owner", async () => {
-    await withTestDir({ prefix: "openclaw-acp-pair-owner-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-pair-owner-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
       const cfg = {
         session: { store: storePath },
         agents: { ownership: "explicit", entries: { research: {}, ops: {} } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       for (const agentId of ["research", "ops"]) {
         await replaceSessionEntry(
           { agentId, storePath, sessionKey: "global" },
@@ -220,8 +220,8 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("batch-loads legacy bare metadata without rekeying during a read", async () => {
-    await withTestDir({ prefix: "openclaw-acp-batch-owner-" }, async (dir) => {
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
+    await withTestDir({ prefix: "carapace-acp-batch-owner-" }, async (dir) => {
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
       const cfg = {
         session: { store: path.join(dir, "sessions.json") },
         agents: {
@@ -229,7 +229,7 @@ describe("ACP session metadata SQLite store", () => {
           defaults: { sessionStore: { agentId: "ops" } },
           entries: { ops: {}, research: {} },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const entry: SessionEntry = {
         sessionId: "ops-global",
         lifecycleRevision: "ops-revision",
@@ -283,9 +283,9 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("deletes the legacy row selected by fallback when metadata is cleared", async () => {
-    await withTestDir({ prefix: "openclaw-acp-clear-legacy-owner-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-clear-legacy-owner-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
       const cfg = {
         session: { scope: "global", store: storePath },
         agents: {
@@ -293,7 +293,7 @@ describe("ACP session metadata SQLite store", () => {
           defaults: { sessionStore: { agentId: "ops" } },
           entries: { ops: {}, research: {} },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const entry: SessionEntry = {
         sessionId: "ops-global",
         lifecycleRevision: "ops-revision",
@@ -329,8 +329,8 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("escapes composite identities from legacy raw keys that use the old prefix", async () => {
-    await withTestDir({ prefix: "openclaw-acp-prefix-collision-" }, async (dir) => {
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
+    await withTestDir({ prefix: "carapace-acp-prefix-collision-" }, async (dir) => {
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
       const rawSessionKey = "@agent:research:foo";
       const rawEntry: SessionEntry = {
         sessionId: "raw-session",
@@ -375,10 +375,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("persists ACP metadata in SQLite without writing sessions.json acp blocks", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const sessionKey = "agent:codex:acp:binding:discord:default:feedface";
       await seedAcpSessionEntry({
         storePath,
@@ -425,10 +425,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("clears legacy embedded ACP metadata through the session accessor", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const sessionKey = "agent:codex:acp:binding:discord:default:feedface";
       await seedAcpSessionEntry({
         storePath,
@@ -474,10 +474,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("creates a session-store row for new SQLite ACP sessions without embedding ACP metadata", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const sessionKey = "agent:codex:acp:new-session";
 
       const result = await upsertAcpSessionMeta({
@@ -513,10 +513,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("normalizes ACP metadata lookups and writes to the resolved session-store key", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const storeSessionKey = "agent:codex:acp:binding:discord:default:feedface";
       const rawSessionKey = storeSessionKey.toUpperCase();
       await seedAcpSessionEntry({
@@ -606,10 +606,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("keeps SQLite ACP metadata visible when legacy store keys are canonicalized", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const legacyStoreSessionKey = "agent:CODEX:acp:legacy-runtime";
       const canonicalSessionKey = "agent:codex:acp:legacy-runtime";
       await seedAcpSessionEntry({
@@ -651,10 +651,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("binds ACP metadata to the final accessor-selected entry for alias writes", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const canonicalSessionKey = "agent:codex:acp:alias-runtime";
       const legacyStoreSessionKey = "agent:CODEX:acp:alias-runtime";
       await seedAcpSessionEntry({
@@ -704,10 +704,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("ignores SQLite ACP metadata rows from an older lifecycle revision", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const sessionKey = "agent:codex:acp:binding:discord:default:feedface";
       await seedAcpSessionEntry({
         storePath,
@@ -758,10 +758,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("reads ACP metadata rows written with the legacy session-id binding", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const sessionKey = "agent:codex:acp:binding:discord:default:legacy";
       await seedAcpSessionEntry({
         storePath,
@@ -835,8 +835,8 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("keeps a session-id fence when ACP metadata is written before a lifecycle revision", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
       const sessionKey = "agent:codex:acp:pre-revision";
       writeAcpSessionMetaForMigration({
         databasePath,
@@ -879,10 +879,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("repairs ACP metadata rows when session-store keys are canonicalized", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const legacyKey = "agent:CODEX:acp:legacy-runtime";
       const canonicalKey = "agent:codex:acp:legacy-runtime";
       await seedAcpSessionEntry({
@@ -932,10 +932,10 @@ describe("ACP session metadata SQLite store", () => {
   });
 
   it("lists SQLite ACP rows while joining current session-store entries", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
-      const databasePath = path.join(dir, "state", "openclaw.sqlite");
-      const cfg = { session: { store: storePath } } as OpenClawConfig;
+      const databasePath = path.join(dir, "state", "carapace.sqlite");
+      const cfg = { session: { store: storePath } } as CarapaceConfig;
       const sessionKey = "agent:codex:acp:s1";
       await seedAcpSessionEntry({
         storePath,
@@ -982,10 +982,10 @@ describe("ACP session metadata SQLite store", () => {
     });
   });
 
-  it("honors OPENCLAW_STATE_DIR when joining listed SQLite rows to session stores", async () => {
-    await withTestDir({ prefix: "openclaw-acp-meta-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir } as NodeJS.ProcessEnv;
-      const cfg = {} as OpenClawConfig;
+  it("honors CARAPACE_STATE_DIR when joining listed SQLite rows to session stores", async () => {
+    await withTestDir({ prefix: "carapace-acp-meta-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir } as NodeJS.ProcessEnv;
+      const cfg = {} as CarapaceConfig;
       const sessionKey = "agent:codex:acp:s1";
       const storePath = path.join(dir, "agents", "codex", "sessions", "sessions.json");
       await seedAcpSessionEntry({

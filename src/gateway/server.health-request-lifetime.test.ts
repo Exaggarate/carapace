@@ -1,7 +1,7 @@
 // Real Gateway proof: run only with isolated SQLite coordination.
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
 import { resolveStateDir } from "../config/paths.js";
@@ -30,7 +30,7 @@ describe("public Gateway close health lifetime", () => {
     const entered = createDeferredCore();
     const release = createDeferredCore();
     const initialRoot = path.join(os.tmpdir(), "gateway-health-lifetime", "fixture");
-    const selection = { OPENCLAW_STATE_DIR: initialRoot };
+    const selection = { CARAPACE_STATE_DIR: initialRoot };
     const selectedRoots: string[] = [];
     const collections: Promise<HealthSummary>[] = [];
     let healthSignal: AbortSignal | undefined;
@@ -84,7 +84,7 @@ describe("public Gateway close health lifetime", () => {
         closing.push(
           gateway.server.close({ reason: "health lifetime proof" }).then(() => {
             finishedAtClose.push(selectedRoots.length);
-            selection.OPENCLAW_STATE_DIR = path.join(
+            selection.CARAPACE_STATE_DIR = path.join(
               os.tmpdir(),
               "gateway-health-lifetime",
               "restored",

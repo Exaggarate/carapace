@@ -1,4 +1,4 @@
-import { buildChannelConfigSchema } from "openclaw/plugin-sdk/channel-config-schema";
+import { buildChannelConfigSchema } from "carapace/plugin-sdk/channel-config-schema";
 import { z } from "zod";
 
 const a2aPeerNamePattern = /^[a-z0-9][a-z0-9._-]{0,63}$/;

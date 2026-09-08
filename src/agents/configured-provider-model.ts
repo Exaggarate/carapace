@@ -1,17 +1,17 @@
 /** Configured provider rows own exact model ids before plugin normalization. */
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type ConfiguredProviderModelParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   model: string;
 };
 
 /** Find the first configured provider without rediscovering its normalized key. */
 export function findConfiguredModelProvider(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   provider: string,
 ): ModelProviderConfig | undefined {
   return provider.trim()

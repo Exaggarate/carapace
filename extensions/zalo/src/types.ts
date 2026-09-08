@@ -1,6 +1,6 @@
 // Zalo type declarations define plugin contracts.
-import type { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
-import type { SecretInput } from "openclaw/plugin-sdk/secret-input";
+import type { tryReadSecretFileSync } from "carapace/plugin-sdk/secret-file-runtime";
+import type { SecretInput } from "carapace/plugin-sdk/secret-input";
 
 export type ZaloAccountConfig = {
   /** Optional display name for this account (used in CLI/UI lists). */

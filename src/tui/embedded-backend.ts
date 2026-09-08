@@ -44,7 +44,7 @@ import { createDefaultDeps } from "../cli/deps.js";
 import { getRuntimeConfig, registerConfigWriteListener } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { applySessionPatchProjection } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   mergeAssistantText,
   resolveAssistantTextInput,
@@ -181,7 +181,7 @@ const embeddedSessionStartupMigrationLog = {
   warn: (message: string) => logWarn(message, silentRuntime),
 };
 
-function hasProviderWildcardModelAllowlist(cfg: OpenClawConfig) {
+function hasProviderWildcardModelAllowlist(cfg: CarapaceConfig) {
   const modelMaps = [
     cfg.agents?.defaults?.models,
     ...listAgentEntries(cfg).map((agent) => agent.models),
@@ -192,7 +192,7 @@ function hasProviderWildcardModelAllowlist(cfg: OpenClawConfig) {
 }
 
 function ensureEmbeddedHistoryRuntimePluginsLoaded(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionAgentId: string;
 }): { status: "warmed" } | { status: "failed"; error: string } {
   try {
@@ -207,7 +207,7 @@ function ensureEmbeddedHistoryRuntimePluginsLoaded(params: {
   }
 }
 
-async function loadEmbeddedTuiModelCatalog(cfg: OpenClawConfig, agentId?: string) {
+async function loadEmbeddedTuiModelCatalog(cfg: CarapaceConfig, agentId?: string) {
   const replaceMode = cfg.models?.mode === "replace";
   const fullDiscovery = replaceMode && hasProviderWildcardModelAllowlist(cfg);
   if (replaceMode && !fullDiscovery) {
@@ -1461,7 +1461,7 @@ export class EmbeddedTuiBackend implements TuiBackend {
           // The per-message timestamp prefix is applied at the single LLM
           // boundary (normalizeMessagesForLlmBoundary) from each message's own
           // timestamp, so the current turn and historical turns carry identical
-          // bytes on the wire. See: https://github.com/openclaw/openclaw/issues/3658
+          // bytes on the wire. See: https://github.com/Exaggarate/carapace/issues/3658
           message,
           sessionKey: canonicalKey,
           agentId,

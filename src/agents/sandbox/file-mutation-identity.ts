@@ -7,7 +7,7 @@ type SandboxFileIdentityParams = {
   signal?: AbortSignal;
 };
 
-export const SANDBOX_FILE_IDENTITY = Symbol.for("openclaw.sandboxFileIdentity");
+export const SANDBOX_FILE_IDENTITY = Symbol.for("carapace.sandboxFileIdentity");
 
 type SandboxFileIdentityBridge = SandboxFsBridge & {
   [SANDBOX_FILE_IDENTITY](params: SandboxFileIdentityParams): string | Promise<string>;

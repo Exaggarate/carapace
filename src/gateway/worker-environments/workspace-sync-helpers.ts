@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { redactSensitiveText } from "../../logging/redact.js";
 import type { CommandOptions, SpawnResult } from "../../process/exec.js";
 import { WORKER_BUNDLE_RSYNC_RECEIVER_PATH } from "../../shared/worker-bundle-hash.js";
@@ -26,7 +26,7 @@ import { REMOTE_WORKSPACE_MANIFEST_JS } from "./workspace-sync-scripts.js";
 const MANIFEST_REF_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const INBOUND_QUOTA_INITIAL_POLL_MS = 25;
 const INBOUND_QUOTA_MAX_POLL_MS = 250;
-export const WORKER_WORKSPACE_RSYNC_DESTINATION = "openclaw-rsync-destination";
+export const WORKER_WORKSPACE_RSYNC_DESTINATION = "carapace-rsync-destination";
 
 export type WorkerWorkspaceActionsOptions = {
   environmentId: string;
@@ -129,7 +129,7 @@ export function workerAcceptedWorkspaceRsyncReceiverPath(params: {
   remoteWorkspaceDir: string;
   nonce: string;
 }): string {
-  const workspaceRootMarker = "/.openclaw-worker/workspaces/";
+  const workspaceRootMarker = "/.carapace-worker/workspaces/";
   const markerIndex = params.remoteWorkspaceDir.lastIndexOf(workspaceRootMarker);
   if (markerIndex < 1) {
     throw new Error("Accepted workspace path is outside the managed workspace root");
@@ -150,7 +150,7 @@ export function workerWorkspaceRsyncReceiverEntryPath(bundleHash: string): strin
   if (!/^[a-f0-9]{64}$/u.test(bundleHash)) {
     throw new Error("Worker workspace rsync receiver bundle hash is invalid");
   }
-  return `.openclaw-worker/${bundleHash}/${WORKER_BUNDLE_RSYNC_RECEIVER_PATH}`;
+  return `.carapace-worker/${bundleHash}/${WORKER_BUNDLE_RSYNC_RECEIVER_PATH}`;
 }
 
 export function workerWorkspaceSshArgv(
@@ -352,7 +352,7 @@ export function parseRemoteWorkspaceSetup(
   const canonicalHome = record?.canonicalHome;
   const remoteWorkspaceDir = record?.canonicalWorkspace;
   if (
-    record?.tag !== "openclaw-workspace-setup-v1" ||
+    record?.tag !== "carapace-workspace-setup-v1" ||
     typeof canonicalHome !== "string" ||
     !path.posix.isAbsolute(canonicalHome) ||
     path.posix.normalize(canonicalHome) !== canonicalHome ||

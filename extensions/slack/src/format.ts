@@ -1,6 +1,6 @@
 // Slack helper module supports format behavior.
 import { eastAsianWidthType } from "get-east-asian-width";
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
+import type { MarkdownTableMode } from "carapace/plugin-sdk/config-contracts";
 import {
   chunkTextForOutbound,
   FormatCapabilityProfile,
@@ -9,7 +9,7 @@ import {
   type MarkdownLinkSpan,
   renderMarkdownIRChunksWithinLimit,
   renderMarkdownWithMarkers,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import { escapeSlackMrkdwn } from "./monitor/mrkdwn.js";
 
 const SLACK_ANGLE_TOKEN_RE = /<[^>\n]+>/g;

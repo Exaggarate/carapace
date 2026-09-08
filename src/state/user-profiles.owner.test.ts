@@ -2,10 +2,10 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "./carapace-state-db.js";
 import { readUserProfileVersion } from "./user-profile-events.js";
 import { mergeOwnerIntoPerson, profileState } from "./user-profiles-owner.test-support.js";
 import { UserProfileOwnerError } from "./user-profiles-schema.js";
@@ -22,18 +22,18 @@ import {
 
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanup();
   });
 });
 
 function stateOptions() {
-  const directory = tempDirs.make("openclaw-user-profiles-owner-");
-  return { path: join(directory, "openclaw.sqlite") };
+  const directory = tempDirs.make("carapace-user-profiles-owner-");
+  return { path: join(directory, "carapace.sqlite") };
 }
 
 function seedOwnerTombstone(ownerId: string, options: ReturnType<typeof stateOptions>) {
-  openOpenClawStateDatabase(options)
+  openCarapaceStateDatabase(options)
     .db.prepare(
       "INSERT INTO user_profiles (id, merged_into, created_at, updated_at) VALUES (?, ?, 1, 1)",
     )
@@ -69,7 +69,7 @@ describe("gateway owner profiles", () => {
     const options = stateOptions();
     const owner = ensureGatewayOwnerProfile("Local Owner", options);
     const person = ensureProfileForEmail("person@example.test", options);
-    const insertAlias = openOpenClawStateDatabase(options).db.prepare(
+    const insertAlias = openCarapaceStateDatabase(options).db.prepare(
       "INSERT INTO user_profile_emails (email, profile_id, created_at) VALUES (?, ?, 1)",
     );
     for (let index = 0; index < aliasCount; index++) {
@@ -122,7 +122,7 @@ describe("gateway owner profiles", () => {
           options,
         );
       }
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare(
           "INSERT INTO user_profile_emails (email, profile_id, created_at) VALUES (?, ?, 1)",
         )
@@ -153,7 +153,7 @@ describe("gateway owner profiles", () => {
       const options = stateOptions();
       const owner = ensureGatewayOwnerProfile("Local Owner", options);
       ensureProfileForEmail("person@example.test", options);
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare(
           "INSERT INTO user_profile_identities (provider, subject, profile_id, canonical_login, created_at) VALUES ('github', '10', ?, 'person', 1)",
         )
@@ -194,7 +194,7 @@ describe("gateway owner profiles", () => {
         identityTarget === "misdirected"
           ? ensureProfileForEmail("person@example.test", options)
           : mergeOwnerIntoPerson(legacy?.id ?? owner.id, options);
-      const db = openOpenClawStateDatabase(options).db;
+      const db = openCarapaceStateDatabase(options).db;
       if (identityTarget === "legacy") {
         db.prepare(
           "INSERT INTO user_profile_identities (provider, subject, profile_id, created_at) VALUES ('gateway.local', 'owner', ?, 1)",
@@ -218,7 +218,7 @@ describe("gateway owner profiles", () => {
       expect(() => ensureGatewayOwnerProfile("Host Renamed", options)).toThrow(
         expect.objectContaining({
           code: "repair-required",
-          message: expect.stringContaining("openclaw doctor --fix"),
+          message: expect.stringContaining("carapace doctor --fix"),
         }),
       );
       expect(profileState(options)).toEqual(before);
@@ -235,7 +235,7 @@ describe("gateway owner profiles", () => {
     expect(ensureGatewayOwnerProfile("Host Renamed", options)).toEqual(owner);
     expect(readUserProfileVersion()).toBe(version + 1);
     setDisplayName(owner.id, "User Chosen", options);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(ensureGatewayOwnerProfile("Host Renamed", options)).toMatchObject({
       id: owner.id,
@@ -246,11 +246,11 @@ describe("gateway owner profiles", () => {
     ]);
     expect(readUserProfileVersion()).toBe(version + 2);
     expect(
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare("SELECT provider, subject, profile_id FROM user_profile_identities")
         .all(),
     ).toEqual([{ provider: "gateway.local", subject: "owner", profile_id: owner.id }]);
-    openOpenClawStateDatabase(options)
+    openCarapaceStateDatabase(options)
       .db.prepare("DELETE FROM user_profile_identities WHERE provider = 'gateway.local'")
       .run();
     expect(ensureGatewayOwnerProfile(null, options).id).toBe(owner.id);
@@ -262,7 +262,7 @@ describe("gateway owner profiles", () => {
     ensureProfileForEmail("person@example.test", options);
     const version = readUserProfileVersion();
     expect(() =>
-      runOpenClawStateWriteTransaction(() => {
+      runCarapaceStateWriteTransaction(() => {
         ensureGatewayOwnerProfile("Local Owner", options);
         expect(readUserProfileVersion()).toBe(version);
         throw new Error("rollback owner");
@@ -271,7 +271,7 @@ describe("gateway owner profiles", () => {
     expect(readUserProfileVersion()).toBe(version);
     expect(listProfiles(options).some((profile) => profile.id === "gateway-owner")).toBe(false);
 
-    runOpenClawStateWriteTransaction(() => {
+    runCarapaceStateWriteTransaction(() => {
       ensureGatewayOwnerProfile("Local Owner", options);
       expect(readUserProfileVersion()).toBe(version);
     }, options);
@@ -281,7 +281,7 @@ describe("gateway owner profiles", () => {
   it("reuses the existing provider identity without creating another owner", () => {
     const options = stateOptions();
     const existing = ensureProfileForEmail("existing-owner@example.test", options);
-    openOpenClawStateDatabase(options)
+    openCarapaceStateDatabase(options)
       .db.prepare(
         "INSERT INTO user_profile_identities (provider, subject, profile_id, created_at) VALUES (?, ?, ?, ?)",
       )

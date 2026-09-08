@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PluginStateKeyedStore } from "../api.js";
 import { VisitorPolicyClient } from "./cloudflare.js";
@@ -12,7 +12,7 @@ const config: VisitorAccessConfig = {
   accountId: "test-account",
   appId: "test-app",
   apiToken: "test-token",
-  policyName: "Visitors (openclaw-managed)",
+  policyName: "Visitors (carapace-managed)",
   defaultTtlDays: 14,
   maxVisitors: 50,
 };
@@ -186,7 +186,7 @@ describe("VisitorAccessService", () => {
     expect(result).toContain("@visitor");
     expect(result).toContain("visitor@example.com");
     expect(result).toContain("2026-09-11T12:00:00.000Z");
-    expect(result).toContain("https://team.openclaw.ai");
+    expect(result).toContain("https://github.com/Exaggarate/carapace");
     expect(result).toContain("GitHub account");
   });
 

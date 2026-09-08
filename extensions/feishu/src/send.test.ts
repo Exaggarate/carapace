@@ -29,20 +29,20 @@ const {
   mockRuntimeResolveMarkdownTableMode: vi.fn(() => "preserve"),
 }));
 
-vi.mock("openclaw/plugin-sdk/markdown-table-runtime", () => ({
+vi.mock("carapace/plugin-sdk/markdown-table-runtime", () => ({
   resolveMarkdownTableMode: mockResolveMarkdownTableMode,
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   return {
     ...actual,
     logVerbose: mockLogVerbose,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/text-chunking", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/text-chunking")>();
+vi.mock("carapace/plugin-sdk/text-chunking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/text-chunking")>();
   return {
     ...actual,
     convertMarkdownTables: mockConvertMarkdownTables,
@@ -88,9 +88,9 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/markdown-table-runtime");
-  vi.doUnmock("openclaw/plugin-sdk/runtime-env");
-  vi.doUnmock("openclaw/plugin-sdk/text-chunking");
+  vi.doUnmock("carapace/plugin-sdk/markdown-table-runtime");
+  vi.doUnmock("carapace/plugin-sdk/runtime-env");
+  vi.doUnmock("carapace/plugin-sdk/text-chunking");
   vi.doUnmock("./client.js");
   vi.doUnmock("./accounts.js");
   vi.doUnmock("./runtime.js");

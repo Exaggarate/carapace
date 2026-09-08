@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { availableParallelism } from "node:os";
 import { parentPort, Worker, type Transferable, type WorkerOptions } from "node:worker_threads";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createDeferredCore, type Deferred } from "../shared/deferred.js";
 
 // Reusable workers must not retain the first submitting caller's async scope.

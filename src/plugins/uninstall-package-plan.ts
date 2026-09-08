@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
-const PLUGIN_PACKAGE_UNINSTALL_PLAN = Symbol.for("openclaw.pluginPackageUninstallPlan");
+const PLUGIN_PACKAGE_UNINSTALL_PLAN = Symbol.for("carapace.pluginPackageUninstallPlan");
 
 type PluginPackageUninstallPlanMetadata = {
   runtimePluginIds: readonly string[];
@@ -28,10 +28,10 @@ export function resolvePluginPackageUninstallPlan(
 }
 
 export function prepareConfigForDisabledPluginSet(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginIds: readonly string[],
-  plannedUninstall?: OpenClawConfig,
-): OpenClawConfig {
+  plannedUninstall?: CarapaceConfig,
+): CarapaceConfig {
   const entries = { ...config.plugins?.entries };
   for (const entryId of new Set(pluginIds)) {
     entries[entryId] = {

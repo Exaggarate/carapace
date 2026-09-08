@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { resolveRuntimeWorkerUrl } from "./runtime-worker-url.js";
 import { triageTestRuntimeEntrypoints } from "./triage-runtime.test-support.js";
 import { UPDATE_RUN_ID_ENV } from "./update-control-plane-sentinel.js";
 import { createTriageBoundary } from "./update-managed-service-triage.test-support.js";
 import { createUpdateRun, getUpdateRun } from "./update-run-ledger.js";
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 it.runIf(process.platform !== "win32")(
   "finishes the original update before the native fixer starts without lending its run identity",
@@ -55,7 +55,7 @@ it.runIf(process.platform !== "win32")(
       },
     );
     try {
-      expect(await boundary.response()).toBe("OPENCLAW_UPDATE_HANDOFF_READY");
+      expect(await boundary.response()).toBe("CARAPACE_UPDATE_HANDOFF_READY");
       expect(await boundary.control("park")).toBe("parked");
       expect(await boundary.control("commit")).toBe("committed");
       boundary.parent.kill();

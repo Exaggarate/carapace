@@ -1,6 +1,6 @@
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { describe, expect, it } from "vitest";
 import { WebSocketServer } from "ws";
 import { GatewayClientTransport } from "./transport.js";

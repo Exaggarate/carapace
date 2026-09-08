@@ -13,7 +13,7 @@ describe("Android Mermaid asset generation", () => {
 
     expect(task).toContain('commandLine("pnpm", "--dir", "packages/mermaid-renderer", "build")');
     expect(task).not.toContain(
-      'commandLine("pnpm", "--filter", "@openclaw/mermaid-renderer", "build")',
+      'commandLine("pnpm", "--filter", "@carapace/mermaid-renderer", "build")',
     );
   });
 });

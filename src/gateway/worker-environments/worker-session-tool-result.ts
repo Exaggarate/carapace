@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   WORKER_PROTOCOL_MAX_FRAME_ID_LENGTH,
   WORKER_PROTOCOL_MAX_PAYLOAD_BYTES,

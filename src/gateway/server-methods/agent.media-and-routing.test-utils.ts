@@ -1,6 +1,6 @@
 // Imported by agent.test.ts to keep its mocked suite in one Vitest module graph.
 import fs from "node:fs/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import type { SessionEntry } from "../../config/sessions.js";
@@ -84,7 +84,7 @@ describe("gateway agent handler", () => {
     setDateOnlyFakeClockActive(true);
     vi.setSystemTime(now);
 
-    await withTestDir({ prefix: "openclaw-gateway-stale-failed-session-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-gateway-stale-failed-session-" }, async (root) => {
       const sessionsDir = `${root}/sessions`;
       const storePath = `${sessionsDir}/sessions.json`;
       await fs.mkdir(sessionsDir, { recursive: true });
@@ -160,7 +160,7 @@ describe("gateway agent handler", () => {
     setDateOnlyFakeClockActive(true);
     vi.setSystemTime(now);
 
-    await withTestDir({ prefix: "openclaw-gateway-failed-session-file-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-gateway-failed-session-file-" }, async (root) => {
       const sessionsDir = `${root}/sessions`;
       await fs.mkdir(sessionsDir, { recursive: true });
       mocks.readTranscriptStatsSync.mockReturnValue({ eventCount: 1, maxSeq: 1, sizeBytes: 32 });
@@ -886,7 +886,7 @@ describe("gateway agent handler", () => {
 
   it("recovers terminal failed agent API sessions with SQLite transcript rows", async () => {
     const sessionId = "failed-agent-session";
-    await withTestDir({ prefix: "openclaw-gateway-terminal-recovery-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-gateway-terminal-recovery-" }, async (root) => {
       const sessionsDir = `${root}/sessions`;
       await fs.mkdir(sessionsDir, { recursive: true });
       mocks.readTranscriptStatsSync.mockReturnValue({ eventCount: 1, maxSeq: 1, sizeBytes: 32 });
@@ -1889,7 +1889,7 @@ describe("gateway agent handler", () => {
       modelProvider: "openai",
       model: "gpt-5.4",
       contextTokens: 128_000,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       cliSessionBindings: { "openai-cli": { sessionId: "native-a" } },
       cronRunContinuation: {
         lifecycleRevision: "revision-1",
@@ -1956,7 +1956,7 @@ describe("gateway agent handler", () => {
         modelProvider: "openai",
         model: "gpt-5.4",
         contextTokens: 128_000,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         cliSessionBindings: { "openai-cli": { sessionId: "native-a" } },
       });
       expect(

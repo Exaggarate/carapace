@@ -1,6 +1,6 @@
 // Model command shared tests cover shared config and provider helper behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, TransformConfigFileParams } from "../../config/config.js";
+import type { CarapaceConfig, TransformConfigFileParams } from "../../config/config.js";
 import { loadValidConfigOrThrow, resolveModelsTargetAgent, updateConfig } from "./shared.js";
 
 const mocks = vi.hoisted(() => ({
@@ -13,7 +13,7 @@ vi.mock("../../config/config.js", () => ({
   transformConfigFile: async ({ transform }: TransformConfigFileParams<unknown>) => {
     const loaded = await mocks.readConfigFileSnapshot();
     const snapshot = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       parsed: loaded.sourceConfig ?? loaded.config,
       runtimeConfig: loaded.config,
       ...loaded,
@@ -35,7 +35,7 @@ describe("models/shared", () => {
   });
 
   it("returns config when snapshot is valid", async () => {
-    const cfg = { providers: {} } as unknown as OpenClawConfig;
+    const cfg = { providers: {} } as unknown as CarapaceConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: true,
       runtimeConfig: cfg,
@@ -48,12 +48,12 @@ describe("models/shared", () => {
   it("throws formatted issues when snapshot is invalid", async () => {
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: false,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       issues: [{ path: "providers.openai.apiKey", message: "Required" }],
     });
 
     await expect(loadValidConfigOrThrow()).rejects.toThrowError(
-      "Invalid config at /tmp/openclaw.json\n- providers.openai.apiKey: Required",
+      "Invalid config at /tmp/carapace.json\n- providers.openai.apiKey: Required",
     );
   });
 
@@ -72,7 +72,7 @@ describe("models/shared", () => {
   });
 
   it("resolves unscoped model reads through the configured system agent", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         defaults: { systemAgent: { agentId: "helper" } },
@@ -113,7 +113,7 @@ describe("models/shared", () => {
   });
 
   it("updateConfig writes mutated config", async () => {
-    const cfg = { update: { channel: "stable" } } as unknown as OpenClawConfig;
+    const cfg = { update: { channel: "stable" } } as unknown as CarapaceConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: true,
       hash: "config-1",
@@ -136,14 +136,14 @@ describe("models/shared", () => {
   it("updateConfig exposes runtime config without writing runtime defaults", async () => {
     const sourceConfig = {
       agents: { defaults: { models: { "anthropic/claude-sonnet-4-6": {} } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const runtimeConfig = {
       agents: {
         defaults: {
           models: { "anthropic/claude-sonnet-4-6": { alias: "sonnet" } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: true,
       hash: "config-2",

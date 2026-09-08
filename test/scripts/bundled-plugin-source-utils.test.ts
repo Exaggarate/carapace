@@ -32,11 +32,11 @@ describe("scripts/lib/bundled-plugin-source-utils.mts", () => {
   });
 
   it("ignores tracked plugin manifests deleted by the current change", async () => {
-    const repoRoot = tempDirs.make("openclaw-bundled-plugin-sources-");
+    const repoRoot = tempDirs.make("carapace-bundled-plugin-sources-");
     const pluginDir = path.join(repoRoot, "extensions", "retired");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({ id: "retired", configSchema: {} }),
     );
     await fs.writeFile(path.join(pluginDir, "package.json"), JSON.stringify({ name: "retired" }));

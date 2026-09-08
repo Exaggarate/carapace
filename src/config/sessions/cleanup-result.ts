@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { formatErrorMessage } from "../../infra/errors.js";
 import type {
   SessionDiskBudgetSweepResult,

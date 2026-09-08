@@ -2,14 +2,14 @@ import { execFileSync } from "node:child_process";
 // Openshell tests cover backend-owned exec workdir validation behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { SandboxBackendHandle } from "openclaw/plugin-sdk/sandbox";
+import { expectDefined } from "@carapace/normalization-core";
+import type { SandboxBackendHandle } from "carapace/plugin-sdk/sandbox";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
-import { createSandboxTestContext } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/temp-path";
+import { createSandboxTestContext } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createOpenShellSandboxBackendFactory } from "./backend.js";
 import { resolveOpenShellPluginConfig } from "./config.js";
@@ -26,8 +26,8 @@ const cliMocks = vi.hoisted(() => ({
   createOpenShellSshSession: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/sandbox", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/sandbox")>();
+vi.mock("carapace/plugin-sdk/sandbox", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/sandbox")>();
   return {
     ...actual,
     runSshSandboxCommand: sdkMocks.runSshSandboxCommand,
@@ -83,8 +83,8 @@ async function createOpenShellBackendFixture(params: {
 
 async function createWorkspace(prefix = "workspace") {
   const workspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
-    prefix: `openclaw-openshell-${prefix}-`,
+    rootDir: resolvePreferredCarapaceTmpDir(),
+    prefix: `carapace-openshell-${prefix}-`,
   });
   tempWorkspaces.push(workspace);
   return await fs.realpath(workspace.dir);
@@ -99,7 +99,7 @@ describe("openshell backend exec workdir validation", () => {
     vi.clearAllMocks();
     cliMocks.createOpenShellSshSession.mockResolvedValue({
       command: "ssh",
-      configPath: "/tmp/openclaw-openshell-test-ssh-config",
+      configPath: "/tmp/carapace-openshell-test-ssh-config",
       host: "openshell-test",
     });
     cliMocks.runOpenShellCli.mockResolvedValue({
@@ -114,13 +114,13 @@ describe("openshell backend exec workdir validation", () => {
           "-F",
           params.session.configPath,
           params.session.host,
-          "'/bin/sh' '/tmp/openclaw-synthetic-staging/run.sh'",
+          "'/bin/sh' '/tmp/carapace-synthetic-staging/run.sh'",
         ],
         cleanup: async () => {},
       }),
     );
     sdkMocks.runSshSandboxCommand.mockImplementation(async ({ remoteCommand }) => ({
-      stdout: String(remoteCommand).includes("openclaw-validate-workdir")
+      stdout: String(remoteCommand).includes("carapace-validate-workdir")
         ? Buffer.from("/sandbox\n")
         : Buffer.alloc(0),
       stderr: Buffer.alloc(0),
@@ -142,8 +142,8 @@ describe("openshell backend exec workdir validation", () => {
     vi.stubEnv("LANG", "en_US.UTF-8");
     vi.stubEnv("NODE_ENV", "test");
     const workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-openshell-workspace-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-openshell-workspace-",
     });
     tempWorkspaces.push(workspace);
     const workspaceDir = workspace.dir;
@@ -320,28 +320,28 @@ describe("openshell backend exec workdir validation", () => {
     },
     {
       name: "generated skills ancestor",
-      target: "/sandbox/.openclaw",
-      expected: "/sandbox/.openclaw",
+      target: "/sandbox/.carapace",
+      expected: "/sandbox/.carapace",
     },
     {
       name: "materialized skills root",
-      target: "/sandbox/.openclaw/sandbox-skills",
-      expected: "/sandbox/.openclaw/sandbox-skills",
+      target: "/sandbox/.carapace/sandbox-skills",
+      expected: "/sandbox/.carapace/sandbox-skills",
     },
     {
       name: "materialized skills child",
-      target: "/sandbox/.openclaw/sandbox-skills/skills/demo",
-      expected: "/sandbox/.openclaw/sandbox-skills/skills/demo",
+      target: "/sandbox/.carapace/sandbox-skills/skills/demo",
+      expected: "/sandbox/.carapace/sandbox-skills/skills/demo",
     },
     {
       name: "missing materialized child",
-      target: "/sandbox/.openclaw/sandbox-skills/skills/missing",
+      target: "/sandbox/.carapace/sandbox-skills/skills/missing",
       expected: null,
       workspaceFallback: true,
     },
     {
       name: "symlinked materialized source",
-      target: "/sandbox/.openclaw/sandbox-skills/nested",
+      target: "/sandbox/.carapace/sandbox-skills/nested",
       expected: null,
       sourceLink: true,
       workspaceFallback: true,
@@ -713,8 +713,8 @@ describe("openshell backend exec workdir validation", () => {
     },
   ])("creates compatible persistent sandboxes for $label CLIs", async (scenario) => {
     const workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-openshell-create-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-openshell-create-",
     });
     tempWorkspaces.push(workspace);
     cliMocks.runOpenShellCli.mockImplementation(async ({ args }: { args: string[] }) => {
@@ -763,8 +763,8 @@ describe("openshell backend exec workdir validation", () => {
     const workspaces = await Promise.all(
       ["first", "second"].map(async (label) =>
         tempWorkspace({
-          rootDir: resolvePreferredOpenClawTmpDir(),
-          prefix: `openclaw-openshell-${label}-`,
+          rootDir: resolvePreferredCarapaceTmpDir(),
+          prefix: `carapace-openshell-${label}-`,
         }),
       ),
     );
@@ -859,8 +859,8 @@ describe("openshell backend exec workdir validation", () => {
     const workspaces = await Promise.all(
       ["first", "second"].map(async (label) =>
         tempWorkspace({
-          rootDir: resolvePreferredOpenClawTmpDir(),
-          prefix: `openclaw-openshell-${label}-`,
+          rootDir: resolvePreferredCarapaceTmpDir(),
+          prefix: `carapace-openshell-${label}-`,
         }),
       ),
     );

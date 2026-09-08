@@ -3,9 +3,9 @@
  *
  * Merges global, agent, and default allow/deny lists into normalized policy plus source diagnostics.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveAgentConfig } from "../agent-scope.js";
 import { compileGlobPatterns, matchesAnyGlobPattern } from "../glob-pattern.js";
 import { expandToolGroups, normalizeToolPolicyName } from "../tool-policy.js";
@@ -184,7 +184,7 @@ export function isToolAllowed(policy: SandboxToolPolicy, name: string) {
 }
 
 export function resolveSandboxToolPolicyForAgent(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   agentId?: string,
   options?: { containedToolNames?: readonly string[] },
 ): SandboxToolPolicyResolved {

@@ -5,9 +5,9 @@ import path from "node:path";
 import {
   embeddedAgentLog,
   type HarnessContextEngine as ContextEngine,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { patchSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { patchSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   consumeCodexAppServerLiveThread,
@@ -208,7 +208,7 @@ async function expectExternalMutationBlockedDuringNativeRequest(params: {
 describe("maybeCompactCodexAppServerSession", () => {
   beforeEach(async () => {
     resetCodexTestBindingStore();
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-compact-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-compact-"));
   });
 
   afterEach(async () => {
@@ -1317,7 +1317,7 @@ describe("maybeCompactCodexAppServerSession", () => {
       expect(result.ok).toBe(false);
       expect(result.compacted).toBe(false);
       expect(result.reason).toContain(
-        "Codex-native native compaction is unavailable because OpenClaw sandboxing is active for this session.",
+        "Codex-native native compaction is unavailable because Carapace sandboxing is active for this session.",
       );
     }
     expect(fake.request).not.toHaveBeenCalled();
@@ -1333,7 +1333,7 @@ describe("maybeCompactCodexAppServerSession", () => {
     expect(result.ok).toBe(false);
     expect(result.compacted).toBe(false);
     expect(result.reason).toContain(
-      "Codex-native native compaction is unavailable because OpenClaw exec host=node is active for this session.",
+      "Codex-native native compaction is unavailable because Carapace exec host=node is active for this session.",
     );
     expect(fake.request).not.toHaveBeenCalled();
   });
@@ -1373,7 +1373,7 @@ describe("maybeCompactCodexAppServerSession", () => {
       expect(result.ok).toBe(false);
       expect(result.compacted).toBe(false);
       expect(result.reason).toContain(
-        "Codex-native native compaction is unavailable because OpenClaw exec host=node is active for this session.",
+        "Codex-native native compaction is unavailable because Carapace exec host=node is active for this session.",
       );
       expect(fake.request).not.toHaveBeenCalled();
     },
@@ -2453,7 +2453,7 @@ describe("maybeCompactCodexAppServerSession", () => {
     expect(await readCodexAppServerBinding(sessionFile)).toBeDefined();
   });
 
-  it("warns when stale OpenClaw compaction overrides are ignored", async () => {
+  it("warns when stale Carapace compaction overrides are ignored", async () => {
     const warn = vi.spyOn(embeddedAgentLog, "warn").mockImplementation(() => undefined);
     const fake = createFakeCodexClient();
     setCodexAppServerClientFactoryForTest(async () => fake.client);
@@ -2484,7 +2484,7 @@ describe("maybeCompactCodexAppServerSession", () => {
       { assertCurrent: expect.any(Function) },
     );
     expect(warn).toHaveBeenCalledWith(
-      "ignoring OpenClaw compaction overrides for Codex app-server compaction; Codex uses native server-side compaction",
+      "ignoring Carapace compaction overrides for Codex app-server compaction; Codex uses native server-side compaction",
       {
         sessionId: "session-1",
         sessionKey: "agent:main:session-1",
@@ -2539,7 +2539,7 @@ describe("maybeCompactCodexAppServerSession", () => {
       { assertCurrent: expect.any(Function) },
     );
     expect(warn).toHaveBeenCalledWith(
-      "ignoring OpenClaw compaction overrides for Codex app-server compaction; Codex uses native server-side compaction",
+      "ignoring Carapace compaction overrides for Codex app-server compaction; Codex uses native server-side compaction",
       {
         sessionId: "session-1",
         sessionKey: "agent:lossless:session-1",

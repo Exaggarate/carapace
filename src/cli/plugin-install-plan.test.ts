@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { installedPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { installedPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { PLUGIN_INSTALL_ERROR_CODE } from "../plugins/install.js";
 import {
@@ -19,13 +19,13 @@ function createSourceCheckoutPlugin(pluginId: string): {
   packageRoot: string;
   pluginRoot: string;
 } {
-  const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-plan-"));
+  const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-plan-"));
   fs.mkdirSync(path.join(packageRoot, ".git"));
   fs.mkdirSync(path.join(packageRoot, "src"));
   fs.mkdirSync(path.join(packageRoot, "extensions"));
   const pluginRoot = path.join(packageRoot, "dist", "extensions", pluginId);
   fs.mkdirSync(pluginRoot, { recursive: true });
-  fs.writeFileSync(path.join(packageRoot, "package.json"), JSON.stringify({ name: "openclaw" }));
+  fs.writeFileSync(path.join(packageRoot, "package.json"), JSON.stringify({ name: "carapace" }));
   fs.writeFileSync(path.join(packageRoot, "pnpm-workspace.yaml"), "packages: []\n");
   return { packageRoot, pluginRoot };
 }
@@ -58,7 +58,7 @@ describe("plugin install plan helpers", () => {
   it.skipIf(process.platform === "win32")(
     "keeps an existing ClawHub-prefixed local path on the local install path",
     () => {
-      const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-plan-clawhub-"));
+      const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-plan-clawhub-"));
       const localPath = path.join(tempRoot, "clawhub:demo@");
       fs.mkdirSync(localPath);
 
@@ -86,15 +86,15 @@ describe("plugin install plan helpers", () => {
   });
 
   it("resolves exact official external plugin ids before npm fallback", () => {
-    const result = resolveCatalogOfficialExternalInstallPlan("wecom-openclaw-plugin");
+    const result = resolveCatalogOfficialExternalInstallPlan("wecom-carapace-plugin");
 
     expect(result).toMatchObject({
-      pluginId: "wecom-openclaw-plugin",
-      spec: "@wecom/wecom-openclaw-plugin@2026.7.2",
+      pluginId: "wecom-carapace-plugin",
+      spec: "@wecom/wecom-carapace-plugin@2026.7.2",
       installSources: [
         expect.objectContaining({
           source: "npm",
-          spec: "@wecom/wecom-openclaw-plugin@2026.7.2",
+          spec: "@wecom/wecom-carapace-plugin@2026.7.2",
           expectedIntegrity:
             "sha512-7kqdBIOF3SgDDoBoFtO6jxnxofbYSgbKdxZDNabD0y0jg2xKcVqlXZOOJ9+XQho/QOtIFrnRH2IRnPukFEYwJg==",
         }),
@@ -102,34 +102,34 @@ describe("plugin install plan helpers", () => {
     });
   });
 
-  it.each(["matrix@latest", "@openclaw/matrix@latest"])(
+  it.each(["matrix@latest", "@carapace/matrix@latest"])(
     "uses declared sources and retains default intent for %s",
     (rawSpec) => {
       expect(resolveCatalogOfficialExternalInstallPlan(rawSpec)).toEqual({
         pluginId: "matrix",
-        spec: "@openclaw/matrix@latest",
+        spec: "@carapace/matrix@latest",
         installSources: [
-          { source: "npm", spec: "@openclaw/matrix@latest" },
-          { source: "clawhub", spec: "clawhub:@openclaw/matrix@latest" },
+          { source: "npm", spec: "@carapace/matrix@latest" },
+          { source: "clawhub", spec: "clawhub:@carapace/matrix@latest" },
         ],
       });
     },
   );
 
   it("skips official external plan for explicit npm selectors", () => {
-    expect(resolveCatalogOfficialExternalInstallPlan("wecom-openclaw-plugin@beta")).toBeNull();
+    expect(resolveCatalogOfficialExternalInstallPlan("wecom-carapace-plugin@beta")).toBeNull();
     expect(
-      resolveCatalogOfficialExternalInstallPlan("@wecom/wecom-openclaw-plugin@2026.7.2"),
+      resolveCatalogOfficialExternalInstallPlan("@wecom/wecom-carapace-plugin@2026.7.2"),
     ).toBeNull();
   });
 
   it("trusts exact official external npm packages without remapping the spec", () => {
     const result = resolveCatalogOfficialExternalNpmPackageTrust(
-      "@wecom/wecom-openclaw-plugin@2026.7.2",
+      "@wecom/wecom-carapace-plugin@2026.7.2",
     );
 
     expect(result).toEqual({
-      pluginId: "wecom-openclaw-plugin",
+      pluginId: "wecom-carapace-plugin",
       expectedIntegrity:
         "sha512-7kqdBIOF3SgDDoBoFtO6jxnxofbYSgbKdxZDNabD0y0jg2xKcVqlXZOOJ9+XQho/QOtIFrnRH2IRnPukFEYwJg==",
       trustedSourceLinkedOfficialInstall: true,
@@ -150,7 +150,7 @@ describe("plugin install plan helpers", () => {
           return {
             pluginId: "voice-call",
             localPath: installedPluginRoot("/tmp", "voice-call"),
-            npmSpec: "@openclaw/voice-call",
+            npmSpec: "@carapace/voice-call",
           };
         }
         return undefined;
@@ -158,7 +158,7 @@ describe("plugin install plan helpers", () => {
 
     const result = resolveBundledInstallPlanForCatalogEntry({
       pluginId: "voice-call",
-      npmSpec: "@openclaw/voice-call",
+      npmSpec: "@carapace/voice-call",
       findBundledSource,
     });
 
@@ -174,7 +174,7 @@ describe("plugin install plan helpers", () => {
           return {
             pluginId: "not-voice-call",
             localPath: installedPluginRoot("/tmp", "not-voice-call"),
-            npmSpec: "@openclaw/voice-call",
+            npmSpec: "@carapace/voice-call",
           };
         }
         return undefined;
@@ -182,7 +182,7 @@ describe("plugin install plan helpers", () => {
 
     const result = resolveBundledInstallPlanForCatalogEntry({
       pluginId: "voice-call",
-      npmSpec: "@openclaw/voice-call",
+      npmSpec: "@carapace/voice-call",
       findBundledSource,
     });
 
@@ -197,7 +197,7 @@ describe("plugin install plan helpers", () => {
           return {
             pluginId: "whatsapp",
             localPath: installedPluginRoot("/tmp", "whatsapp"),
-            npmSpec: "@openclaw/whatsapp",
+            npmSpec: "@carapace/whatsapp",
           };
         }
         return undefined;
@@ -216,17 +216,17 @@ describe("plugin install plan helpers", () => {
     const findBundledSource = vi.fn().mockReturnValue({
       pluginId: "voice-call",
       localPath: installedPluginRoot("/tmp", "voice-call"),
-      npmSpec: "@openclaw/voice-call",
+      npmSpec: "@carapace/voice-call",
     });
     const result = resolveBundledInstallPlanForNpmFailure({
-      rawSpec: "@openclaw/voice-call",
+      rawSpec: "@carapace/voice-call",
       code: PLUGIN_INSTALL_ERROR_CODE.NPM_PACKAGE_NOT_FOUND,
       findBundledSource,
     });
 
     expect(findBundledSource).toHaveBeenCalledWith({
       kind: "npmSpec",
-      value: "@openclaw/voice-call",
+      value: "@carapace/voice-call",
     });
     expect(result?.warning).toContain("npm package unavailable");
   });
@@ -237,11 +237,11 @@ describe("plugin install plan helpers", () => {
       const findBundledSource = vi.fn().mockReturnValue({
         pluginId: "codex",
         localPath: pluginRoot,
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@carapace/codex",
       });
 
       const result = resolveBundledInstallPlanForNpmFailure({
-        rawSpec: "@openclaw/codex",
+        rawSpec: "@carapace/codex",
         code: PLUGIN_INSTALL_ERROR_CODE.NPM_PACKAGE_NOT_FOUND,
         findBundledSource,
       });
@@ -258,7 +258,7 @@ describe("plugin install plan helpers", () => {
       const findBundledSource = vi.fn().mockReturnValue({
         pluginId: "codex",
         localPath: pluginRoot,
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@carapace/codex",
       });
 
       const result = resolveBundledInstallPlanForNpmFailure({
@@ -276,7 +276,7 @@ describe("plugin install plan helpers", () => {
   it("skips fallback for non-not-found npm failures", () => {
     const findBundledSource = vi.fn();
     const result = resolveBundledInstallPlanForNpmFailure({
-      rawSpec: "@openclaw/voice-call",
+      rawSpec: "@carapace/voice-call",
       code: "INSTALL_FAILED",
       findBundledSource,
     });

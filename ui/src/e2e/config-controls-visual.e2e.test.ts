@@ -16,10 +16,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI Settings controls mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -425,17 +425,17 @@ suite.define(() => {
             await page.context().addInitScript(() => {
               const messages: unknown[] = [];
               const appWindow = window as Window & {
-                openclawNativeLinkMessages?: unknown[];
+                carapaceNativeLinkMessages?: unknown[];
                 webkit?: {
                   messageHandlers?: {
-                    openclawLink?: { postMessage: (message: unknown) => void };
+                    carapaceLink?: { postMessage: (message: unknown) => void };
                   };
                 };
               };
-              appWindow.openclawNativeLinkMessages = messages;
+              appWindow.carapaceNativeLinkMessages = messages;
               appWindow.webkit = {
                 messageHandlers: {
-                  openclawLink: { postMessage: (message: unknown) => messages.push(message) },
+                  carapaceLink: { postMessage: (message: unknown) => messages.push(message) },
                 },
               };
             });
@@ -500,7 +500,7 @@ suite.define(() => {
               },
             },
           });
-          await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+          await page.route("**/__carapace__/assistant-media?**", async (route) => {
             await route.fulfill({
               body: Buffer.from(
                 "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
@@ -562,8 +562,8 @@ suite.define(() => {
             expect(
               await page.evaluate(
                 () =>
-                  (window as Window & { openclawNativeLinkMessages?: unknown[] })
-                    .openclawNativeLinkMessages,
+                  (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+                    .carapaceNativeLinkMessages,
               ),
             ).toEqual([]);
           }
@@ -592,7 +592,7 @@ suite.define(() => {
             method: "POST",
             path: "/tabs/open",
           });
-          const browserPanel = page.locator("openclaw-browser-panel[embedded]");
+          const browserPanel = page.locator("carapace-browser-panel[embedded]");
           await browserPanel.waitFor();
           expect(
             await browserPanel.evaluate(
@@ -603,7 +603,7 @@ suite.define(() => {
           await expect
             .poll(() =>
               browserPanel
-                .locator('openclaw-panel-loading-skeleton[data-panel-skeleton="browser"]')
+                .locator('carapace-panel-loading-skeleton[data-panel-skeleton="browser"]')
                 .count(),
             )
             .toBe(0);
@@ -613,8 +613,8 @@ suite.define(() => {
             expect(
               await page.evaluate(
                 () =>
-                  (window as Window & { openclawNativeLinkMessages?: unknown[] })
-                    .openclawNativeLinkMessages,
+                  (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+                    .carapaceNativeLinkMessages,
               ),
             ).toEqual([]);
           }

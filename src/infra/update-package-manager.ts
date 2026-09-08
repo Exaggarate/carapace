@@ -116,7 +116,7 @@ async function bootstrapPnpmViaNpm(params: {
   timeoutMs: number;
   baseEnv?: NodeJS.ProcessEnv;
 }): Promise<{ env: NodeJS.ProcessEnv; cleanup: () => Promise<void> } | null> {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-pnpm-"));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-pnpm-"));
   const cleanup = async () => {
     await fs.rm(tempRoot, { recursive: true, force: true }).catch(() => {});
   };

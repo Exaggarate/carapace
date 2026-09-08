@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { HealthCheck } from "openclaw/plugin-sdk/health";
-import { resolveOpenClawRoot } from "./src/crabbox-worker-profile.js";
+import type { HealthCheck } from "carapace/plugin-sdk/health";
+import { resolveCarapaceRoot } from "./src/crabbox-worker-profile.js";
 import {
   CRABBOX_CLOUD_WORKER_PROFILE_CHECK_ID,
   registerCrabboxWorkerProviderDoctorChecks as registerChecks,
@@ -17,6 +17,6 @@ export function registerWorkerProviderDoctorChecks(host: {
 }): void {
   registerChecks({
     ...host,
-    openclawRoot: resolveOpenClawRoot(CRABBOX_PLUGIN_ROOT),
+    carapaceRoot: resolveCarapaceRoot(CRABBOX_PLUGIN_ROOT),
   });
 }

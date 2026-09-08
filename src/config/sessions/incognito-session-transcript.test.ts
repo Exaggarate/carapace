@@ -4,15 +4,15 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SessionManager } from "../../agents/sessions/session-manager.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  inspectOpenClawAgentDatabaseOwner,
-  listOpenClawRegisteredAgentDatabases,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  inspectCarapaceAgentDatabaseOwner,
+  listCarapaceRegisteredAgentDatabases,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { resolveSessionStorePathCore } from "./paths.js";
 import {
   createSessionEntryWithTranscript,
@@ -29,25 +29,25 @@ import { replaceTranscriptEvents } from "./session-accessor.sqlite-transcript-wr
 const sessionKey = "agent:main:dashboard:incognito-round-trip";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("session creation scope", () => {
-  let ambient: OpenClawTestState;
-  let explicit: OpenClawTestState;
+  let ambient: CarapaceTestState;
+  let explicit: CarapaceTestState;
   const agentId = "secondary";
   const key = "agent:secondary:dashboard:incognito-fresh-session";
 
   beforeEach(async () => {
-    ambient = await createOpenClawTestState({ prefix: "session-creation-env-ambient-" });
-    explicit = await createOpenClawTestState({
+    ambient = await createCarapaceTestState({ prefix: "session-creation-env-ambient-" });
+    explicit = await createCarapaceTestState({
       prefix: "session-creation-env-explicit-",
       applyEnv: false,
     });
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await explicit.cleanup();
     await ambient.cleanup();
   });
@@ -57,7 +57,7 @@ describe("session creation scope", () => {
     async (variant) => {
       const state = variant === "ambient" ? ambient : explicit;
       const env = variant === "ambient" ? undefined : explicit.env;
-      const sentinel = resolveIncognitoOpenClawAgentSqlitePath({ agentId, env });
+      const sentinel = resolveIncognitoCarapaceAgentSqlitePath({ agentId, env });
       const scope = {
         agentId,
         env,
@@ -69,7 +69,7 @@ describe("session creation scope", () => {
             : {}),
       };
       const entry = { incognito: true as const, sessionId: "created-incognito", updatedAt: 1 };
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(ambient.stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(ambient.stateDir);
       expect(explicit.stateDir).not.toBe(ambient.stateDir);
 
       const created = await createSessionEntryWithTranscript(
@@ -85,7 +85,7 @@ describe("session creation scope", () => {
       expect(created).toEqual({ ok: true, entry, sessionFile: key });
       // Inspect before reading: a bad creation can open the sentinel under the wrong agent.
       expect
-        .soft(inspectOpenClawAgentDatabaseOwner(sentinel))
+        .soft(inspectCarapaceAgentDatabaseOwner(sentinel))
         .toEqual({ status: "owned", agentId });
       expect.soft(fs.readdirSync(explicit.stateDir, { recursive: true })).toEqual([]);
       expect.soft(fs.readdirSync(ambient.stateDir, { recursive: true })).toEqual([]);
@@ -120,7 +120,7 @@ describe("session creation scope", () => {
       ).resolves.toMatchObject({ ok: true, sessionFile: key });
       expect(loadSessionEntry(scope)).toMatchObject(updated);
 
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(loadSessionEntry(scope)).toBeUndefined();
       await expect(loadTranscriptEvents(transcriptScope)).resolves.toEqual([]);
       expect(fs.readdirSync(explicit.stateDir, { recursive: true })).toEqual([]);
@@ -137,10 +137,10 @@ describe("session creation scope", () => {
           : explicit.statePath(variant === "exact" ? "shared.sqlite" : "custom/sessions.json");
       const databasePath =
         variant === "default"
-          ? explicit.statePath("agents/secondary/agent/openclaw-agent.sqlite")
+          ? explicit.statePath("agents/secondary/agent/carapace-agent.sqlite")
           : variant === "exact"
             ? explicit.statePath("shared.sqlite")
-            : explicit.statePath("custom/openclaw-agent.secondary.sqlite");
+            : explicit.statePath("custom/carapace-agent.secondary.sqlite");
       const physicalOwner = variant === "exact" ? "main" : agentId;
       const scope = {
         agentId,
@@ -153,15 +153,15 @@ describe("session creation scope", () => {
         createSessionEntryWithTranscript(scope, () => ({ ok: true, entry })),
       ).resolves.toMatchObject({ ok: true, sessionFile: scope.sessionKey });
 
-      expect(inspectOpenClawAgentDatabaseOwner(databasePath)).toEqual({
+      expect(inspectCarapaceAgentDatabaseOwner(databasePath)).toEqual({
         status: "owned",
         agentId: physicalOwner,
       });
-      expect(listOpenClawRegisteredAgentDatabases({ env: explicit.env })).toEqual([
+      expect(listCarapaceRegisteredAgentDatabases({ env: explicit.env })).toEqual([
         expect.objectContaining({ agentId: physicalOwner, path: databasePath }),
       ]);
       expect(fs.existsSync(databasePath)).toBe(true);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(loadSessionEntry(scope)).toMatchObject(entry);
       await expect(loadTranscriptEvents({ ...scope, sessionId: entry.sessionId })).resolves.toEqual(
         [expect.objectContaining({ type: "session", id: entry.sessionId })],
@@ -278,8 +278,8 @@ describe("incognito transcript access", () => {
     const stateDir = fs.realpathSync(
       fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "incognito-maintenance-")),
     );
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const storePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main", env });
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const storePath = resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main", env });
     const archiveDirectory = path.join(path.dirname(path.dirname(storePath)), "sessions");
     const staleScope = {
       agentId: "main",
@@ -359,7 +359,7 @@ describe("incognito transcript access", () => {
       ]);
       expect(fs.readdirSync(stateDir, { recursive: true })).toEqual([]);
 
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(listSessionEntriesCore({ agentId: "main", env, storePath })).toEqual([]);
       await expect(
         loadTranscriptEvents({
@@ -371,7 +371,7 @@ describe("incognito transcript access", () => {
       expect(fs.existsSync(archiveDirectory)).toBe(false);
       expect(fs.readdirSync(stateDir, { recursive: true })).toEqual([]);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       fs.rmSync(stateDir, { force: true, recursive: true });
     }
   });

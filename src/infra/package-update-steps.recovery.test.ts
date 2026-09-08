@@ -18,10 +18,10 @@ describe("npm lifecycle policy preflight", () => {
   it.each([false, true])(
     "verifies the original package before recovery from preflight refusal (corrupt=%s)",
     async (corrupt) => {
-      await withTestDir({ prefix: "openclaw-recovery-preflight-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-recovery-preflight-" }, async (base) => {
         const globalRoot = path.join(base, "lib", "node_modules");
         const target = createNpmTarget(globalRoot);
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         if (corrupt) {
           await fs.rm(path.join(packageRoot, "dist", "index.js"));
@@ -35,8 +35,8 @@ describe("npm lifecycle policy preflight", () => {
         const runCommand = vi.fn(createRootRunner(globalRoot));
         const result = await runGlobalPackageUpdateSteps({
           installTarget: target,
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           runCommand,
           runStep,
           timeoutMs: 1000,
@@ -60,9 +60,9 @@ describe("package update recovery safety", () => {
   it.each(["validation", "activation", "transaction"] as const)(
     "refuses an unsupported layout before mutation when %s requires staging",
     async (hook) => {
-      await withTestDir({ prefix: "openclaw-package-unsupported-stage-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-unsupported-stage-" }, async (base) => {
         const globalRoot = path.join(base, "unsupported-global-root");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         const validateCandidate = vi.fn(async () => []);
         const beforeActivate = vi.fn(async () => {});
@@ -73,8 +73,8 @@ describe("package update recovery safety", () => {
         });
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           runCommand: createRootRunner(globalRoot),
           runStep,
           timeoutMs: 1000,
@@ -110,11 +110,11 @@ describe("package update recovery safety", () => {
   ] as const)(
     "keeps the original serving through validation and retains recovery until %s",
     async (outcome) => {
-      await withTestDir({ prefix: "openclaw-package-transaction-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-transaction-" }, async (base) => {
         const prefix = path.join(base, "prefix");
         const globalRoot = path.join(prefix, "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
-        const launcher = path.join(prefix, "bin", "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
+        const launcher = path.join(prefix, "bin", "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         await fs.mkdir(path.dirname(launcher), { recursive: true });
         await fs.writeFile(launcher, "old launcher\n");
@@ -126,8 +126,8 @@ describe("package update recovery safety", () => {
         const activationError = new Error("service did not stop");
         const update = runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: outcome === "already current" ? "./candidate.tgz" : "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: outcome === "already current" ? "./candidate.tgz" : "carapace@2.0.0",
+          packageName: "carapace",
           runCommand: createRootRunner(globalRoot),
           timeoutMs: 1000,
           runStep: async ({ name, argv }) => {
@@ -135,13 +135,13 @@ describe("package update recovery safety", () => {
             if (!stagePrefix) {
               throw new Error("missing stage prefix");
             }
-            stageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
+            stageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
             await writePackageRoot(
               stageRoot,
               outcome === "already current" || outcome === "wrong target" ? "1.0.0" : "2.0.0",
             );
             await fs.mkdir(path.join(stagePrefix, "bin"), { recursive: true });
-            stageLauncher = path.join(stagePrefix, "bin", "openclaw");
+            stageLauncher = path.join(stagePrefix, "bin", "carapace");
             await fs.writeFile(stageLauncher, "new launcher\n");
             return { name, command: argv.join(" "), cwd: stagePrefix, durationMs: 0, exitCode: 0 };
           },
@@ -278,11 +278,11 @@ describe("package update recovery safety", () => {
   );
 
   it("replaces equal-version package bytes and rolls them back after verification fails", async () => {
-    await withTestDir({ prefix: "openclaw-package-equal-version-replacement-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-equal-version-replacement-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
-      const launcher = path.join(prefix, "bin", "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
+      const launcher = path.join(prefix, "bin", "carapace");
       await writePackageRoot(packageRoot, "1.0.0");
       await fs.writeFile(path.join(packageRoot, "dist", "index.js"), "old runtime\n");
       await fs.mkdir(path.dirname(launcher), { recursive: true });
@@ -290,8 +290,8 @@ describe("package update recovery safety", () => {
 
       const result = await runGlobalPackageUpdateSteps({
         installTarget: createNpmTarget(globalRoot),
-        installSpec: "openclaw@1.0.0",
-        packageName: "openclaw",
+        installSpec: "carapace@1.0.0",
+        packageName: "carapace",
         packageRoot,
         requirePackageReplacement: true,
         runCommand: createRootRunner(globalRoot),
@@ -300,11 +300,11 @@ describe("package update recovery safety", () => {
           if (!stagePrefix) {
             throw new Error("missing stage prefix");
           }
-          const stageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
+          const stageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
           await writePackageRoot(stageRoot, "1.0.0");
           await fs.writeFile(path.join(stageRoot, "dist", "index.js"), "new runtime\n");
           await fs.mkdir(path.join(stagePrefix, "bin"), { recursive: true });
-          await fs.writeFile(path.join(stagePrefix, "bin", "openclaw"), "new launcher\n");
+          await fs.writeFile(path.join(stagePrefix, "bin", "carapace"), "new launcher\n");
           return { name, command: argv.join(" "), cwd: stagePrefix, durationMs: 0, exitCode: 0 };
         },
         validateCandidate: async (candidateRoot) => {
@@ -347,9 +347,9 @@ describe("package update recovery safety", () => {
   });
 
   it("recovers the verified original when staging preparation fails before hooks run", async () => {
-    await withTestDir({ prefix: "openclaw-package-stage-recovery-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-stage-recovery-" }, async (base) => {
       const globalRoot = path.join(base, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await writePackageRoot(packageRoot, "1.0.0");
       const stage = vi
         .spyOn(fs, "mkdtemp")
@@ -358,8 +358,8 @@ describe("package update recovery safety", () => {
       try {
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep,
@@ -389,25 +389,25 @@ describe("package update recovery safety", () => {
   )(
     "verifies $manager recovery after $failure with $stagingSideEffect staging side effect",
     async ({ manager, failure, stagingSideEffect }) => {
-      await withTestDir({ prefix: "openclaw-package-recovery-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-recovery-" }, async (base) => {
         const globalRoot =
           manager === "npm" ? path.join(base, "lib", "node_modules") : path.join(base, "global");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         const params = {
           installTarget:
             manager === "npm"
               ? createNpmTarget(globalRoot)
               : { manager, command: manager, globalRoot, packageRoot },
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv }: { name: string; argv: string[] }) => {
             const prefix = argv[argv.indexOf("--prefix") + 1];
             const installRoot =
               manager === "npm" && prefix
-                ? path.join(prefix, "lib", "node_modules", "openclaw")
+                ? path.join(prefix, "lib", "node_modules", "carapace")
                 : packageRoot;
             await writePackageRoot(installRoot, "2.0.0");
             if (stagingSideEffect === "replaced") {
@@ -462,9 +462,9 @@ describe("package update recovery safety", () => {
   it.each(["backup", "activation"] as const)(
     "handles a %s move rejected after staged lifecycle mutates state",
     async (failure) => {
-      await withTestDir({ prefix: "openclaw-package-move-recovery-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-move-recovery-" }, async (base) => {
         const globalRoot = path.join(base, "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         const stateCanary = path.join(base, "synthetic-state");
         let source = failure === "backup" ? packageRoot : "";
@@ -496,8 +496,8 @@ describe("package update recovery safety", () => {
         try {
           result = await runGlobalPackageUpdateSteps({
             installTarget: createNpmTarget(globalRoot),
-            installSpec: "openclaw@2.0.0",
-            packageName: "openclaw",
+            installSpec: "carapace@2.0.0",
+            packageName: "carapace",
             packageRoot,
             runCommand: createRootRunner(globalRoot),
             timeoutMs: 1000,
@@ -506,7 +506,7 @@ describe("package update recovery safety", () => {
               if (!prefix) {
                 throw new Error("missing stage prefix");
               }
-              const staged = path.join(prefix, "lib", "node_modules", "openclaw");
+              const staged = path.join(prefix, "lib", "node_modules", "carapace");
               await writePackageRoot(staged, "2.0.0");
               await fs.writeFile(stateCanary, "migrated by staged lifecycle");
               if (failure === "activation") {
@@ -539,12 +539,12 @@ describe("package update recovery safety", () => {
   it.each(["blocking", "throwing", "missing", "success"] as const)(
     "commits staged npm only after a %s Doctor outcome",
     async (outcome) => {
-      await withTestDir({ prefix: "openclaw-package-recovery-swap-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-recovery-swap-" }, async (base) => {
         const prefix = path.join(base, "prefix");
         const globalRoot = path.join(prefix, "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         const binDir = path.join(prefix, "bin");
-        const shimNames = ["openclaw", "openclaw.cmd", "openclaw.ps1"];
+        const shimNames = ["carapace", "carapace.cmd", "carapace.ps1"];
         const stateCanary = path.join(base, "candidate-doctor-state");
         await writePackageRoot(packageRoot, "1.0.0");
         await fs.mkdir(binDir, { recursive: true });
@@ -554,8 +554,8 @@ describe("package update recovery safety", () => {
 
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv }) => {
@@ -564,7 +564,7 @@ describe("package update recovery safety", () => {
               throw new Error("missing stage prefix");
             }
             await writePackageRoot(
-              path.join(stagePrefix, "lib", "node_modules", "openclaw"),
+              path.join(stagePrefix, "lib", "node_modules", "carapace"),
               "2.0.0",
             );
             const stagedBinDir = path.join(stagePrefix, "bin");
@@ -600,8 +600,8 @@ describe("package update recovery safety", () => {
               return null;
             }
             return {
-              name: "openclaw doctor",
-              command: "openclaw doctor --non-interactive --fix",
+              name: "carapace doctor",
+              command: "carapace doctor --non-interactive --fix",
               cwd: candidateRoot,
               durationMs: 0,
               exitCode: outcome === "blocking" ? 1 : 0,
@@ -635,7 +635,7 @@ describe("package update recovery safety", () => {
           });
           expect(
             result.steps.find((step) => step.name === "global install swap")?.stdoutTail,
-          ).toContain("restored previous openclaw package and affected launchers");
+          ).toContain("restored previous carapace package and affected launchers");
           expect(
             result.steps.find((step) => step.name === "global install swap")?.stdoutTail,
           ).toContain("candidate Doctor may have changed persistent state");
@@ -645,23 +645,23 @@ describe("package update recovery safety", () => {
   );
 
   it("retains launcher backup evidence when post-Doctor rollback fails", async () => {
-    await withTestDir({ prefix: "openclaw-package-recovery-failed-rollback-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-recovery-failed-rollback-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       const binDir = path.join(prefix, "bin");
-      const targetShim = path.join(binDir, "openclaw");
-      const targetCmdShim = path.join(binDir, "openclaw.cmd");
+      const targetShim = path.join(binDir, "carapace");
+      const targetCmdShim = path.join(binDir, "carapace.cmd");
       await writePackageRoot(packageRoot, "1.0.0");
       await fs.mkdir(binDir, { recursive: true });
-      await fs.writeFile(targetShim, "old openclaw\n", "utf8");
-      await fs.writeFile(targetCmdShim, "old openclaw.cmd\n", "utf8");
+      await fs.writeFile(targetShim, "old carapace\n", "utf8");
+      await fs.writeFile(targetCmdShim, "old carapace.cmd\n", "utf8");
       const copyFile = fs.copyFile.bind(fs);
       const copyFileSpy = vi.spyOn(fs, "copyFile").mockImplementation(async (...args) => {
         const source = String(args[0]);
         if (
           String(args[1]) === targetCmdShim &&
-          path.basename(path.dirname(source)).startsWith(".openclaw.shim-backup-")
+          path.basename(path.dirname(source)).startsWith(".carapace.shim-backup-")
         ) {
           throw Object.assign(new Error("launcher restoration denied"), { code: "EACCES" });
         }
@@ -671,8 +671,8 @@ describe("package update recovery safety", () => {
       try {
         result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv }) => {
@@ -681,15 +681,15 @@ describe("package update recovery safety", () => {
               throw new Error("missing stage prefix");
             }
             await writePackageRoot(
-              path.join(stagePrefix, "lib", "node_modules", "openclaw"),
+              path.join(stagePrefix, "lib", "node_modules", "carapace"),
               "2.0.0",
             );
             const stagedBinDir = path.join(stagePrefix, "bin");
             await fs.mkdir(stagedBinDir, { recursive: true });
-            await fs.writeFile(path.join(stagedBinDir, "openclaw"), "new openclaw\n", "utf8");
+            await fs.writeFile(path.join(stagedBinDir, "carapace"), "new carapace\n", "utf8");
             await fs.writeFile(
-              path.join(stagedBinDir, "openclaw.cmd"),
-              "new openclaw.cmd\n",
+              path.join(stagedBinDir, "carapace.cmd"),
+              "new carapace.cmd\n",
               "utf8",
             );
             return {
@@ -701,8 +701,8 @@ describe("package update recovery safety", () => {
             };
           },
           postVerifyStep: async (candidateRoot) => ({
-            name: "openclaw doctor",
-            command: "openclaw doctor --non-interactive --fix",
+            name: "carapace doctor",
+            command: "carapace doctor --non-interactive --fix",
             cwd: candidateRoot,
             durationMs: 0,
             exitCode: 1,
@@ -723,15 +723,15 @@ describe("package update recovery safety", () => {
         packageRollbackVerified: false,
       });
       expect(result.afterVersion).toBe("1.0.0");
-      await expect(fs.readFile(targetShim, "utf8")).resolves.toBe("old openclaw\n");
+      await expect(fs.readFile(targetShim, "utf8")).resolves.toBe("old carapace\n");
       await expect(fs.readFile(targetCmdShim, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
       const backupDirs = (await fs.readdir(globalRoot)).filter((entry) =>
-        entry.startsWith(".openclaw.shim-backup-"),
+        entry.startsWith(".carapace.shim-backup-"),
       );
       expect(backupDirs).toHaveLength(1);
       await expect(
-        fs.readFile(path.join(globalRoot, backupDirs[0] ?? "", "openclaw.cmd"), "utf8"),
-      ).resolves.toBe("old openclaw.cmd\n");
+        fs.readFile(path.join(globalRoot, backupDirs[0] ?? "", "carapace.cmd"), "utf8"),
+      ).resolves.toBe("old carapace.cmd\n");
     });
   });
 });

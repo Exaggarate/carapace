@@ -1,6 +1,6 @@
 import type { WebAPICallResult, WebClient } from "@slack/web-api";
-import { defaultRuntime, logVerbose, warn, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { defaultRuntime, logVerbose, warn, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { formatSlackError } from "./errors.js";
 
 type SlackSessionStatus = "processing" | "active" | "suspended";
@@ -54,7 +54,7 @@ export async function setSlackSessionStatus(params: {
       warnedMissingStopSubscription = true;
       (params.runtime ?? defaultRuntime).log?.(
         warn(
-          "Slack's Stop button is unavailable until the app subscribes to agent_session_stopped. See https://docs.openclaw.ai/channels/slack#additional-manifest-settings",
+          "Slack's Stop button is unavailable until the app subscribes to agent_session_stopped. See https://github.com/Exaggarate/carapace#additional-manifest-settings",
         ),
       );
     }

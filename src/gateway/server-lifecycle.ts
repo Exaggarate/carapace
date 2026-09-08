@@ -4,7 +4,7 @@ import { fenceSessionSuspensionWritesForGatewayShutdown } from "../agents/sessio
 import { getTotalPendingReplies } from "../auto-reply/reply/dispatcher-registry.js";
 import { listLoadedChannelPluginsForRegistry } from "../channels/plugins/registry-loaded.js";
 import { getRuntimeConfig } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isDiagnosticsEnabled,
   setDiagnosticsEnabledForProcess,
@@ -630,7 +630,7 @@ export async function prepareGatewayLifecycle(params: {
     });
   };
 
-  const configureDiagnostics = (config: OpenClawConfig) => {
+  const configureDiagnostics = (config: CarapaceConfig) => {
     if (lifecycle.closePreludeStarted) {
       return;
     }

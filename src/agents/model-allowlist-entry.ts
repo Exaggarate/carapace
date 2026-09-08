@@ -2,16 +2,16 @@
  * Updates static per-model config entries in agent defaults. Setup uses this
  * helper to keep both raw and canonical provider/model keys present.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { DEFAULT_PROVIDER } from "./defaults.js";
 import { resolveStaticAllowlistModelKey } from "./model-ref-shared.js";
 
 /** Ensures a static per-model config entry exists in agent defaults. */
 export function ensureStaticModelAllowlistEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: string;
   defaultProvider?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const rawModelRef = params.modelRef.trim();
   if (!rawModelRef) {
     return params.cfg;

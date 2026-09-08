@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { buildSessionCreationStamp } from "../../../config/sessions/session-entry-provenance.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../../../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
+import { resolveIncognitoCarapaceAgentSqlitePath } from "../../../state/carapace-agent-db.js";
 import { resolveUserPath } from "../../../utils.js";
 import {
   inheritedToolAllowPatch,
@@ -113,7 +113,7 @@ export function loadSubagentConfig() {
 }
 
 export async function createInitialSubagentSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targetAgentId: string;
   childSessionKey: string;
   label?: string;
@@ -171,7 +171,7 @@ export async function createInitialSubagentSession(params: {
           agentId: params.targetAgentId,
           canonicalKey: params.childSessionKey,
           storeKeys: [params.childSessionKey],
-          storePath: resolveIncognitoOpenClawAgentSqlitePath({ agentId: params.targetAgentId }),
+          storePath: resolveIncognitoCarapaceAgentSqlitePath({ agentId: params.targetAgentId }),
         }
       : resolveGatewaySessionStoreTarget({
           cfg: params.cfg,

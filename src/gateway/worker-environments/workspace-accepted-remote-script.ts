@@ -12,7 +12,7 @@ const action = "receiver";
 ${REMOTE_WORKSPACE_MUTATION_CONTEXT_JS}
 const transaction = path.join(
   transactionRoot,
-  ".openclaw-accepted-" + workspaceKey + "-" + nonce,
+  ".carapace-accepted-" + workspaceKey + "-" + nonce,
 );
 const receiverRoot = path.join(transaction, "next");
 function validateReceiverTarget() {
@@ -53,8 +53,8 @@ if (transactionRootStats.isSymbolicLink() || !transactionRootStats.isDirectory()
 }
 const workspaceKey = crypto.createHash("sha256").update(root).digest("hex");
 const lockOwnerPid = process.pid;
-const transactionPrefix = ".openclaw-accepted-" + workspaceKey + "-";
-const cleanupPrefix = ".openclaw-accepted-cleanup-" + workspaceKey + "-";
+const transactionPrefix = ".carapace-accepted-" + workspaceKey + "-";
+const cleanupPrefix = ".carapace-accepted-cleanup-" + workspaceKey + "-";
 const transaction = path.join(transactionRoot, transactionPrefix + nonce);
 const cleanup = path.join(transactionRoot, cleanupPrefix + nonce);
 const nextRoot = path.join(transaction, "next");

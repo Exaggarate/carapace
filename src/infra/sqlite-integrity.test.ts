@@ -239,7 +239,7 @@ describe("confirmSqliteFileIntegrity", () => {
 describe("SQLite integrity child", () => {
   afterEach(() => vi.restoreAllMocks());
   it("kills a stuck scan at its deadline before releasing ownership", async () => {
-    const root = tempDirs.make("openclaw-integrity-timeout-");
+    const root = tempDirs.make("carapace-integrity-timeout-");
     const source = path.join(root, "source.sqlite");
     fs.writeFileSync(source, "retained source");
     const worker = path.join(root, "blocked.mjs");
@@ -267,7 +267,7 @@ describe("SQLite integrity child", () => {
   ])(
     "requires a final result independently of progress: $messages",
     async ({ messages, completes }) => {
-      const root = tempDirs.make("openclaw-integrity-protocol-");
+      const root = tempDirs.make("carapace-integrity-protocol-");
       const source = path.join(root, "source.sqlite");
       fs.writeFileSync(source, "retained source");
       const worker = path.join(root, "messages.mjs");
@@ -297,7 +297,7 @@ describe("SQLite integrity child", () => {
   it.each([false, true])(
     "preserves native errors and closes the database when closing diagnostics fail=%s",
     async (failClosingPhase) => {
-      const root = tempDirs.make("openclaw-integrity-native-");
+      const root = tempDirs.make("carapace-integrity-native-");
       const source = path.join(root, "source.sqlite");
       const db = new (requireNodeSqlite().DatabaseSync)(source);
       db.exec(

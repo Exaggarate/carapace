@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { hostname as readHostName } from "node:os";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isLoopbackHost } from "openclaw/plugin-sdk/request-url";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isLoopbackHost } from "carapace/plugin-sdk/request-url";
 import type {
   CodexAppServerConnectionClass,
   CodexAppServerDefaultPolicy,
@@ -11,7 +11,7 @@ import type {
   CodexAppServerRuntimeOptions,
   CodexAppServerSandboxMode,
   CodexAppServerTransportMode,
-  OpenClawExecMode,
+  CarapaceExecMode,
   ResolvedCodexAppServerNetworkProxyConfig,
 } from "./config-contracts.js";
 import { selectGuardianSandbox } from "./config-exec-policy.js";
@@ -138,7 +138,7 @@ function stableStringifyJson(value: JsonValue): string {
 
 /** Explicit MCP prompting must bypass Codex's unconditional Never-policy approval. */
 export function hasCodexMcpToolApprovalOverrides(
-  servers: NonNullable<OpenClawConfig["mcp"]>["servers"],
+  servers: NonNullable<CarapaceConfig["mcp"]>["servers"],
   serverNames?: readonly string[],
   projectedMcpServers?: Record<string, Record<string, unknown>>,
 ): boolean {
@@ -280,8 +280,8 @@ export function resolveDefaultCodexAppServerPolicy(params: {
   transport: CodexAppServerTransportMode;
   forceGuardian?: boolean;
   forceUserReviewer?: boolean;
-  execModeRequiringPromptingApprovals?: Extract<OpenClawExecMode, "auto" | "ask">;
-  execModeRequiringUserReviewer?: OpenClawExecMode;
+  execModeRequiringPromptingApprovals?: Extract<CarapaceExecMode, "auto" | "ask">;
+  execModeRequiringUserReviewer?: CarapaceExecMode;
   env?: NodeJS.ProcessEnv;
   requirementsToml?: string | null;
   requirementsPath?: string;

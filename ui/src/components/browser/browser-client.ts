@@ -4,9 +4,9 @@
 // that is dispatched against the browser plugin's control routes, either
 // locally or via a browser-capable node. This module narrows the handful of
 // routes the browser panel needs and keeps route-path knowledge in one place.
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import { GatewayRequestError, type GatewayBrowserClient } from "../../api/gateway.ts";
 import { buildAssistantMediaUrl } from "../../app/assistant-media.ts";
 import { t } from "../../i18n/index.ts";
@@ -355,7 +355,7 @@ export async function inspectBrowserElementAt(
   const result = asRecord(
     await evaluateInBrowser(client, {
       targetId: params.targetId,
-      fn: `() => { ${browserInspectScript}\nreturn openclawInspectBrowserElement(${x}, ${y}); }`,
+      fn: `() => { ${browserInspectScript}\nreturn carapaceInspectBrowserElement(${x}, ${y}); }`,
     }),
   );
   return readBrowserInspectedNode(result);

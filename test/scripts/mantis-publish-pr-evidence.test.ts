@@ -83,7 +83,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
   it("selects only Mantis-owned status comments", () => {
     const source = readFileSync("scripts/mantis/publish-pr-evidence.mjs", "utf8");
 
-    expect(source).toContain('.user.login == "openclaw-mantis[bot]"');
+    expect(source).toContain('.user.login == "carapace-mantis[bot]"');
   });
 
   it("keeps required booleans for sibling trusted evidence producers", () => {
@@ -100,13 +100,13 @@ describe("scripts/mantis/publish-pr-evidence", () => {
   it("renders a manifest-driven PR comment with inline screenshots and video links", () => {
     const manifest = loadEvidenceManifest(writeFixtureManifest());
     const body = renderEvidenceComment({
-      artifactUrl: "https://github.com/openclaw/openclaw/actions/runs/1/artifacts/2",
+      artifactUrl: "https://github.com/Exaggarate/carapace/actions/runs/1/artifacts/2",
       manifest,
       marker: "<!-- mantis-discord-status-reactions -->",
-      rawBase: "https://qa.openclaw.ai/mantis/discord/pr-1/run-1",
+      rawBase: "https://github.com/Exaggarate/carapace",
       requestSource: "workflow_dispatch",
-      runUrl: "https://github.com/openclaw/openclaw/actions/runs/1",
-      treeUrl: "https://qa.openclaw.ai/mantis/discord/pr-1/run-1",
+      runUrl: "https://github.com/Exaggarate/carapace/actions/runs/1",
+      treeUrl: "https://github.com/Exaggarate/carapace",
     });
 
     expect(body).toContain("<!-- mantis-discord-status-reactions -->");
@@ -115,10 +115,10 @@ describe("scripts/mantis/publish-pr-evidence", () => {
     expect(body).toContain('<th width="50%">Baseline queued-only</th>');
     expect(body).toContain('<th width="50%">Candidate queued -> thinking -> done</th>');
     expect(body).toContain(
-      '<td width="50%" align="center"><img src="https://qa.openclaw.ai/mantis/discord/pr-1/run-1/baseline.png" width="100%"',
+      '<td width="50%" align="center"><img src="https://github.com/Exaggarate/carapace" width="100%"',
     );
     expect(body).toContain(
-      "[Baseline change MP4](https://qa.openclaw.ai/mantis/discord/pr-1/run-1/baseline-change.mp4)",
+      "[Baseline change MP4](https://github.com/Exaggarate/carapace)",
     );
     expect(body).not.toContain("raw.githubusercontent.com");
     expect(body).toContain("- Overall: `pass`");
@@ -151,7 +151,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
     const body = renderEvidenceComment({
       manifest,
       marker: "<!-- mantis-discord-status-reactions -->",
-      rawBase: "https://qa.openclaw.ai/mantis/discord/pr-1/run-1",
+      rawBase: "https://github.com/Exaggarate/carapace",
     });
 
     expect(body).toContain(
@@ -196,7 +196,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
         accessKeyId: "access",
         bucket: "qa-artifacts",
         endpoint: "https://example.r2.cloudflarestorage.com",
-        publicBaseUrl: "https://qa.openclaw.ai",
+        publicBaseUrl: "https://github.com/Exaggarate/carapace",
         region: "auto",
         secretAccessKey: "secret",
       },
@@ -204,8 +204,8 @@ describe("scripts/mantis/publish-pr-evidence", () => {
 
     expect(published).toEqual({
       artifactRoot: "mantis/discord/pr-1/run-1",
-      rawBase: "https://qa.openclaw.ai/mantis/discord/pr-1/run-1",
-      treeUrl: "https://qa.openclaw.ai/mantis/discord/pr-1/run-1/index.json",
+      rawBase: "https://github.com/Exaggarate/carapace",
+      treeUrl: "https://github.com/Exaggarate/carapace",
     });
     expect(requests.map((request) => request.method)).toEqual(["PUT", "PUT", "PUT", "PUT", "PUT"]);
     expect(requests.every((request) => request.signal instanceof AbortSignal)).toBe(true);
@@ -224,7 +224,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
       "Credential=access/",
     );
     expect(String(requests[4]?.body)).toContain(
-      '"url": "https://qa.openclaw.ai/mantis/discord/pr-1/run-1/baseline.png"',
+      '"url": "https://github.com/Exaggarate/carapace"',
     );
   });
 
@@ -247,7 +247,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
         accessKeyId: "access",
         bucket: "qa-artifacts",
         endpoint: "https://example.r2.cloudflarestorage.com",
-        publicBaseUrl: "https://qa.openclaw.ai",
+        publicBaseUrl: "https://github.com/Exaggarate/carapace",
         region: "auto",
         secretAccessKey: "secret",
       },
@@ -284,7 +284,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
         accessKeyId: "access",
         bucket: "qa-artifacts",
         endpoint: "https://example.r2.cloudflarestorage.com",
-        publicBaseUrl: "https://qa.openclaw.ai",
+        publicBaseUrl: "https://github.com/Exaggarate/carapace",
         region: "auto",
         secretAccessKey: "secret",
       },
@@ -326,7 +326,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
         accessKeyId: "access",
         bucket: "qa-artifacts",
         endpoint: "https://example.r2.cloudflarestorage.com",
-        publicBaseUrl: "https://qa.openclaw.ai",
+        publicBaseUrl: "https://github.com/Exaggarate/carapace",
         region: "auto",
         secretAccessKey: "secret",
       },
@@ -359,7 +359,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
         accessKeyId: "access",
         bucket: "qa-artifacts",
         endpoint: "https://example.r2.cloudflarestorage.com",
-        publicBaseUrl: "https://qa.openclaw.ai",
+        publicBaseUrl: "https://github.com/Exaggarate/carapace",
         region: "auto",
         secretAccessKey: "secret",
       },
@@ -385,7 +385,7 @@ describe("scripts/mantis/publish-pr-evidence", () => {
         id: "slack-desktop-smoke",
         title: "Mantis Slack Desktop Smoke QA",
         summary: "Mantis could not finish VM setup.",
-        scenario: "slack-openclaw-desktop-smoke",
+        scenario: "slack-carapace-desktop-smoke",
         comparison: {
           candidate: {
             expected: "Slack QA and VM gateway setup pass",
@@ -431,13 +431,13 @@ describe("scripts/mantis/publish-pr-evidence", () => {
       "mantis-evidence.json",
     ]);
     const body = renderEvidenceComment({
-      artifactUrl: "https://github.com/openclaw/openclaw/actions/runs/1/artifacts/2",
+      artifactUrl: "https://github.com/Exaggarate/carapace/actions/runs/1/artifacts/2",
       manifest,
       marker: "<!-- mantis-slack-desktop-smoke -->",
-      rawBase: "https://qa.openclaw.ai/mantis/slack/pr-1/run-1",
+      rawBase: "https://github.com/Exaggarate/carapace",
       requestSource: "workflow_dispatch",
-      runUrl: "https://github.com/openclaw/openclaw/actions/runs/1",
-      treeUrl: "https://qa.openclaw.ai/mantis/slack/pr-1/run-1",
+      runUrl: "https://github.com/Exaggarate/carapace/actions/runs/1",
+      treeUrl: "https://github.com/Exaggarate/carapace",
     });
 
     expect(body).toContain("Summary: Mantis could not finish VM setup.");

@@ -1,6 +1,6 @@
 // Daemon lifecycle core tests cover service lifecycle transitions and platform adapters.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { GatewayServiceControlArgs } from "../../daemon/service-types.js";
 import type { GatewayService } from "../../daemon/service.js";
 import { mockSystemAccountHome } from "../../daemon/service.test-helpers.js";
@@ -16,7 +16,7 @@ import {
   stubEmptyGatewayEnv,
 } from "./test-helpers/lifecycle-core-harness.js";
 
-const loadConfig = vi.fn<() => OpenClawConfig>(() => ({
+const loadConfig = vi.fn<() => CarapaceConfig>(() => ({
   gateway: {
     auth: {
       token: "config-token",
@@ -26,12 +26,12 @@ const loadConfig = vi.fn<() => OpenClawConfig>(() => ({
 const writeGatewayRestartIntentSync = vi.fn();
 const clearGatewayRestartIntentSync = vi.fn();
 const appendGatewayLifecycleAudit = vi.fn();
-const MISSING_SERVICE_PROGRAM = "/openclaw-test-missing-runtime/node";
+const MISSING_SERVICE_PROGRAM = "/carapace-test-missing-runtime/node";
 const SERVICE_REPAIR_COMMAND_CASES = [
-  ["Gateway", "", "", "openclaw gateway", "restart"],
-  ["Node", "", "", "openclaw node", "install --force"],
-  ["Node", "work", "", "openclaw --profile work node", "install --force"],
-  ["Node", "work", "demo", "openclaw --container demo node", "install --force"],
+  ["Gateway", "", "", "carapace gateway", "restart"],
+  ["Node", "", "", "carapace node", "install --force"],
+  ["Node", "work", "", "carapace --profile work node", "install --force"],
+  ["Node", "work", "demo", "carapace --container demo node", "install --force"],
 ] as const;
 const createGatewayLifecycleMutationAudit = vi.fn(
   (params: { action: string; source?: string }) => (mutation: { mode: string; pid?: number }) =>
@@ -114,7 +114,7 @@ function stubServiceGatewayTokenEnv() {
   service.readCommand.mockResolvedValue({
     programArguments: [],
     environment: {
-      OPENCLAW_GATEWAY_TOKEN: "service-token",
+      CARAPACE_GATEWAY_TOKEN: "service-token",
       SERVICE_GATEWAY_TOKEN: "service-token",
     },
   });
@@ -168,7 +168,7 @@ describe("runServiceRestart token drift", () => {
     clearGatewayRestartIntentSync.mockClear();
     service.readCommand.mockResolvedValue({
       programArguments: [],
-      environment: { OPENCLAW_GATEWAY_TOKEN: "service-token" },
+      environment: { CARAPACE_GATEWAY_TOKEN: "service-token" },
     });
     stubEmptyGatewayEnv();
   });
@@ -185,7 +185,7 @@ describe("runServiceRestart token drift", () => {
         runServiceStart({
           serviceNoun: "Gateway",
           service: unsupportedService,
-          renderStartHints: () => ["openclaw gateway install"],
+          renderStartHints: () => ["carapace gateway install"],
           opts: { json: true },
           onNotLoaded,
         }),
@@ -229,7 +229,7 @@ describe("runServiceRestart token drift", () => {
         runServiceRestart({
           serviceNoun: "Gateway",
           service: unsupportedService,
-          renderStartHints: () => ["openclaw gateway install"],
+          renderStartHints: () => ["carapace gateway install"],
           opts: { json: true },
           onNotLoaded,
           postRestartCheck,
@@ -298,15 +298,15 @@ describe("runServiceRestart token drift", () => {
     service.isLoaded.mockResolvedValue(false);
     service.readCommand.mockResolvedValue(null);
     const hasInstalledDefinition = vi.fn(async () => false);
-    vi.stubEnv("OPENCLAW_CONTAINER_HINT", "openclaw-demo-container");
+    vi.stubEnv("CARAPACE_CONTAINER_HINT", "carapace-demo-container");
 
     await expect(
       runServiceRestart({
         serviceNoun: "Gateway",
         service: { ...service, hasInstalledDefinition } as GatewayService,
         renderStartHints: () => [
-          "Restart the container or the service that manages it for openclaw-demo-container.",
-          "openclaw gateway install",
+          "Restart the container or the service that manages it for carapace-demo-container.",
+          "carapace gateway install",
         ],
         opts: { json: true },
       }),
@@ -325,7 +325,7 @@ describe("runServiceRestart token drift", () => {
       error: "Gateway service not loaded.",
     });
     expect(payload.hints).toContain(
-      "Restart the container or the service that manages it for openclaw-demo-container.",
+      "Restart the container or the service that manages it for carapace-demo-container.",
     );
     expect(payload.hintItems).toContainEqual(
       expect.objectContaining({ kind: "container-restart" }),
@@ -337,7 +337,7 @@ describe("runServiceRestart token drift", () => {
     service.isLoaded.mockResolvedValue(false);
     const hasInstalledDefinition = vi.fn(async () => true);
     const onNotLoaded = vi.fn(async () => null);
-    const renderStartHints = vi.fn(() => ["openclaw gateway install"]);
+    const renderStartHints = vi.fn(() => ["carapace gateway install"]);
     service.restart.mockImplementationOnce(async (args?: GatewayServiceControlArgs) => {
       args?.onMutation?.({ mode: "systemctl-restart" });
       return { outcome: "completed" };
@@ -447,8 +447,8 @@ describe("runServiceRestart token drift", () => {
   it("repairs managed port drift before restarting", async () => {
     service.readRuntime.mockResolvedValue({ status: "running", pid: 1234 });
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
-      environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+      programArguments: ["carapace", "gateway", "--port", "18789"],
+      environment: { CARAPACE_GATEWAY_PORT: "18789" },
     });
     type RepairLoadedService = NonNullable<
       Parameters<typeof runServiceRestart>[0]["repairLoadedService"]
@@ -493,7 +493,7 @@ describe("runServiceRestart token drift", () => {
   it.each([true, false])(
     "keeps Nix restart available without suggesting a forbidden token reinstall (json=%s)",
     async (json) => {
-      await withEnvAsync({ OPENCLAW_NIX_MODE: "1" }, async () => {
+      await withEnvAsync({ CARAPACE_NIX_MODE: "1" }, async () => {
         await expect(
           runServiceRestart({ ...createServiceRunArgs(true), opts: { json } }),
         ).resolves.toBe(true);
@@ -529,9 +529,9 @@ describe("runServiceRestart token drift", () => {
     });
     service.readCommand.mockResolvedValue({
       programArguments: [],
-      environment: { OPENCLAW_GATEWAY_TOKEN: "env-token" },
+      environment: { CARAPACE_GATEWAY_TOKEN: "env-token" },
     });
-    vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "env-token");
+    vi.stubEnv("CARAPACE_GATEWAY_TOKEN", "env-token");
 
     await runServiceRestart(createServiceRunArgs(true));
 
@@ -815,11 +815,11 @@ describe("runServiceRestart token drift", () => {
   it.each(SERVICE_REPAIR_COMMAND_CASES)(
     "warns in json with the %s service repair command and active context",
     async (serviceNoun, profile, container, command, repairAction) => {
-      vi.stubEnv("OPENCLAW_PROFILE", profile);
-      vi.stubEnv("OPENCLAW_CONTAINER_HINT", container);
+      vi.stubEnv("CARAPACE_PROFILE", profile);
+      vi.stubEnv("CARAPACE_CONTAINER_HINT", container);
       service.readRuntime.mockResolvedValue({ status: "running", pid: 4242 });
       service.readCommand.mockResolvedValue({
-        programArguments: [MISSING_SERVICE_PROGRAM, "openclaw", serviceNoun.toLowerCase()],
+        programArguments: [MISSING_SERVICE_PROGRAM, "carapace", serviceNoun.toLowerCase()],
       });
 
       await runServiceStart({
@@ -845,7 +845,7 @@ describe("runServiceRestart token drift", () => {
     async (serviceNoun, repairAction) => {
       service.readRuntime.mockResolvedValue({ status: "running", pid: 4242 });
       service.readCommand.mockResolvedValue({
-        programArguments: [MISSING_SERVICE_PROGRAM, "openclaw", serviceNoun.toLowerCase()],
+        programArguments: [MISSING_SERVICE_PROGRAM, "carapace", serviceNoun.toLowerCase()],
       });
 
       await runServiceStart({
@@ -862,7 +862,7 @@ describe("runServiceRestart token drift", () => {
       );
       expect(repairWarnings).toHaveLength(1);
       expect(repairWarnings[0]).toContain(
-        `run \`openclaw ${serviceNoun.toLowerCase()} ${repairAction}\` to apply.`,
+        `run \`carapace ${serviceNoun.toLowerCase()} ${repairAction}\` to apply.`,
       );
       expect(service.start).not.toHaveBeenCalled();
     },
@@ -941,7 +941,7 @@ describe("runServiceRestart token drift", () => {
 
   it("repairs loaded services with port drift during start before reporting success", async () => {
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
+      programArguments: ["carapace", "gateway", "--port", "18789"],
     });
     type RepairLoadedService = NonNullable<
       Parameters<typeof runServiceStart>[0]["repairLoadedService"]
@@ -989,10 +989,10 @@ describe("runServiceRestart token drift", () => {
   it.each(SERVICE_REPAIR_COMMAND_CASES)(
     "fails %s service start with its own install hint when repair is required",
     async (serviceNoun, profile, container, command) => {
-      vi.stubEnv("OPENCLAW_PROFILE", profile);
-      vi.stubEnv("OPENCLAW_CONTAINER_HINT", container);
+      vi.stubEnv("CARAPACE_PROFILE", profile);
+      vi.stubEnv("CARAPACE_CONTAINER_HINT", container);
       service.readCommand.mockResolvedValue({
-        programArguments: [MISSING_SERVICE_PROGRAM, "openclaw", serviceNoun.toLowerCase()],
+        programArguments: [MISSING_SERVICE_PROGRAM, "carapace", serviceNoun.toLowerCase()],
       });
 
       await expect(runServiceStart({ ...createServiceRunArgs(), serviceNoun })).rejects.toThrow(
@@ -1053,7 +1053,7 @@ describe("runServiceRestart token drift", () => {
       runServiceStart({
         serviceNoun: "Gateway",
         service,
-        renderStartHints: () => ["openclaw gateway install"],
+        renderStartHints: () => ["carapace gateway install"],
         opts: { json: true },
       }),
     ).rejects.toThrow("__exit__:1");
@@ -1066,10 +1066,10 @@ describe("runServiceRestart token drift", () => {
     }>();
     expect(payload.ok).toBe(false);
     expect(payload.error).toBe("Gateway service not loaded.");
-    expect(payload.hints?.includes("openclaw gateway install")).toBe(true);
+    expect(payload.hints?.includes("carapace gateway install")).toBe(true);
     expect(
       payload.hintItems?.some(
-        (item) => item.kind === "install" && item.text === "openclaw gateway install",
+        (item) => item.kind === "install" && item.text === "carapace gateway install",
       ),
     ).toBe(true);
     expect(service.start).not.toHaveBeenCalled();

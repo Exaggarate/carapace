@@ -1,14 +1,14 @@
 // Broad coverage for embedded runner model resolution behavior.
 import fs from "node:fs";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadBundledPluginPublicSurface } from "../../plugin-sdk/test-helpers/public-surface-loader.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import type { ProviderPlugin } from "../../plugins/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { discoverAuthStorage, discoverModels } from "../agent-model-discovery.js";
 import {
   clearRuntimeAuthProfileStoreSnapshots,
@@ -24,10 +24,10 @@ import type { PreparedModelRuntimeSnapshot } from "../prepared-model-runtime.own
 import { guardModelFixtureAuth } from "./model.fixture.test-support.js";
 import { createProviderRuntimeTestMock } from "./model.provider-runtime.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let auth: ReturnType<typeof guardModelFixtureAuth>;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "model-resolution" });
+  state = await createCarapaceTestState({ label: "model-resolution" });
   auth = guardModelFixtureAuth(state.root);
 });
 afterEach(async () => {
@@ -82,7 +82,7 @@ vi.mock("../../plugins/provider-runtime.js", () => ({
 
 vi.mock("../model-suppression.js", () => {
   // Mirrors the canonical manifest-driven suppression in
-  // extensions/qwen/openclaw.plugin.json and src/plugins/manifest-model-suppression.ts.
+  // extensions/qwen/carapace.plugin.json and src/plugins/manifest-model-suppression.ts.
   function isQwenCodingPlanBaseUrl(value: string | undefined): boolean {
     const trimmed = value?.trim();
     if (!trimmed) {
@@ -178,10 +178,10 @@ vi.mock("../model-suppression.js", () => {
         (provider === "openai" || provider === "azure-openai-responses" || provider === "openai") &&
         id?.trim().toLowerCase() === "gpt-5.3-codex-spark"
       ) {
-        return `Unknown model: ${provider}/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run \`openclaw models auth login --provider openai\` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.`;
+        return `Unknown model: ${provider}/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run \`carapace models auth login --provider openai\` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.`;
       }
       if (isUnsupportedXaiMultiAgentModel(provider, id)) {
-        return "Unknown model: xai/grok-4.20-multi-agent-0309. OpenClaw does not currently support xAI multi-agent models; choose another xAI model. See https://docs.openclaw.ai/providers/xai.";
+        return "Unknown model: xai/grok-4.20-multi-agent-0309. Carapace does not currently support xAI multi-agent models; choose another xAI model. See https://github.com/Exaggarate/carapace.";
       }
       return undefined;
     },
@@ -196,7 +196,7 @@ vi.mock("../prepared-model-runtime.js", async () => {
   const createSnapshot = (input: {
     agentId?: string;
     agentDir: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
   }) => {
     const workspaceDir = discoveryContext.resolveModelWorkspaceDir(
@@ -281,7 +281,7 @@ vi.mock("./openrouter-model-capabilities.js", () => ({
     mockLoadOpenRouterModelCapabilities(modelId),
 }));
 
-import type { OpenClawConfig, OpenClawConfigInput } from "../../config/config.js";
+import type { CarapaceConfig, CarapaceConfigInput } from "../../config/config.js";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "../../config/types.models.js";
 import type { Model } from "../../llm/types.js";
 import { getModelProviderLocalService } from "../provider-local-service.js";
@@ -292,7 +292,7 @@ import { buildInlineProviderModels } from "./model.inline-provider.js";
 import { resolveModelAsync, resolveModelWithRegistry } from "./model.js";
 import {
   buildOpenAICodexForwardCompatExpectation,
-  makeOpenClawConfigFixture,
+  makeCarapaceConfigFixture,
   makeModel,
   mockDiscoveredModel,
   OPENAI_CODEX_TEMPLATE_MODEL,
@@ -360,7 +360,7 @@ async function resolveModelForTest(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ) {
   // Most tests use fixed auth storage to keep assertions focused on model
   // resolution rather than auth discovery.
@@ -396,7 +396,7 @@ function resolveModelAsyncForTest(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   options?: {
     allowBundledStaticCatalogFallback?: boolean;
     preferBundledStaticCatalogTransport?: boolean;
@@ -495,8 +495,8 @@ function mockMinimalModelDiscovery(
 function makeProviderConfig(
   provider: string,
   overrides: Record<string, unknown> = {},
-): OpenClawConfig {
-  return makeOpenClawConfigFixture({
+): CarapaceConfig {
+  return makeCarapaceConfigFixture({
     models: {
       providers: {
         [provider]: { models: [], ...overrides },
@@ -565,7 +565,7 @@ function makeConfiguredDeepSeekModel(
 function makeDeepSeekConfig(
   modelOverrides: Partial<ModelDefinitionConfig> = {},
   providerOverrides: Partial<ModelProviderConfig> = {},
-): OpenClawConfig {
+): CarapaceConfig {
   return makeProviderConfig("deepseek", {
     models: [makeConfiguredDeepSeekModel(modelOverrides)],
     ...providerOverrides,
@@ -575,7 +575,7 @@ function makeDeepSeekConfig(
 function makeVllmQwenConfig(
   modelOverrides: Record<string, unknown> = {},
   providerOverrides: Record<string, unknown> = {},
-): OpenClawConfig {
+): CarapaceConfig {
   return makeProviderConfig("vllm", {
     baseUrl: "http://localhost:9000",
     api: "openai-completions",
@@ -743,7 +743,7 @@ describe("resolveModel", () => {
     mockModelDiscovery();
     const cfg = {
       agents: { defaults: { workspace: state.path("config-derived-workspace") } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await resolveModelAsync("openai", "gpt-5.5", state.agentDir(), cfg, {
       agentId: "main",
@@ -788,7 +788,7 @@ describe("resolveModel", () => {
             },
           },
         },
-      }) as OpenClawConfig;
+      }) as CarapaceConfig;
 
     const first = await resolveModelAsync(
       "openai",
@@ -849,7 +849,7 @@ describe("resolveModel", () => {
     const defaultAgentDir = state.agentDir();
     fs.mkdirSync(agentDir, { recursive: true });
     fs.mkdirSync(defaultAgentDir, { recursive: true });
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         list: [
           { id: "main", default: true, agentDir: defaultAgentDir },
@@ -885,7 +885,7 @@ describe("resolveModel", () => {
     const workspaceDir = state.workspaceDir;
     fs.mkdirSync(agentDir, { recursive: true });
     mockModelDiscovery();
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         list: [{ id: "workspace-agent", default: true, agentDir, workspace: workspaceDir }],
       },
@@ -917,7 +917,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     mockModelDiscovery();
 
     const options = {
@@ -1006,7 +1006,7 @@ describe("resolveModel", () => {
     expect(discoverModels).toHaveBeenCalledTimes(1);
   });
 
-  it("skips OpenClaw auth and model discovery during dynamic model resolution", async () => {
+  it("skips Carapace auth and model discovery during dynamic model resolution", async () => {
     const result = await resolveModelAsync(
       "openrouter",
       "openrouter/auto",
@@ -1319,7 +1319,7 @@ describe("resolveModel", () => {
   });
 
   it("falls back to bundled static catalog rows without agent discovery", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -1452,7 +1452,7 @@ describe("resolveModel", () => {
     );
   });
 
-  it("prefers user openclaw.json config over the Fireworks manifest for the same id", async () => {
+  it("prefers user carapace.json config over the Fireworks manifest for the same id", async () => {
     resolveBundledStaticCatalogModelMock.mockReturnValue({
       ...makeModel("accounts/fireworks/models/kimi-k2p6"),
       provider: "fireworks",
@@ -1463,7 +1463,7 @@ describe("resolveModel", () => {
       contextWindow: 262_144,
       maxTokens: 262_144,
     });
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           fireworks: {
@@ -1687,7 +1687,7 @@ describe("resolveModel", () => {
         image: { maxSidePx: 2048, preferredSidePx: 1536, tokenMode: "provider" },
       },
     });
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           mistral: {
@@ -1816,7 +1816,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as CarapaceConfig);
 
     expect((expectResolvedModel(result) as { mediaInput?: unknown }).mediaInput).toEqual({
       image: { maxBytes: 1, maxSidePx: 2048, preferredSidePx: 1536, tokenMode: "provider" },
@@ -1872,13 +1872,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as CarapaceConfig);
 
     expect(expectResolvedModel(result).input).toEqual(["text"]);
   });
 
-  it("defaults missing model cost before handing models to OpenClaw", async () => {
-    const cfg: OpenClawConfig = {
+  it("defaults missing model cost before handing models to Carapace", async () => {
+    const cfg: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -2077,7 +2077,7 @@ describe("resolveModel", () => {
   });
 
   it("leaves maxTokens undefined when no configured or catalog value is available (regression: #98295)", async () => {
-    // Regression for https://github.com/openclaw/openclaw/issues/98295.
+    // Regression for https://github.com/Exaggarate/carapace/issues/98295.
     // A custom provider entry without maxTokens (and no matching bundled
     // static catalog row) must not synthesize an oversized output cap from
     // DEFAULT_CONTEXT_TOKENS. Leaving maxTokens undefined lets the transport
@@ -2339,13 +2339,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies CarapaceConfigInput;
 
     const result = await resolveModelForTest(
       "typoProvider",
       "typoed-model",
       state.agentDir(),
-      makeOpenClawConfigFixture(cfg),
+      makeCarapaceConfigFixture(cfg),
     );
 
     expect(result.model).toBeUndefined();
@@ -2361,13 +2361,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies CarapaceConfigInput;
 
     const result = await resolveModelForTest(
       "openai",
       "typoed-model",
       state.agentDir(),
-      makeOpenClawConfigFixture(cfg),
+      makeCarapaceConfigFixture(cfg),
     );
 
     expect(result.model).toBeUndefined();
@@ -2401,7 +2401,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const claude = await resolveModelForTest(
       "my-router",
@@ -2442,7 +2442,7 @@ describe("resolveModel", () => {
   });
 
   it("defaults baseUrl-only local custom fallback models to chat completions", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         defaults: {
           model: { primary: "local-agent-proxy/gpt-5.2" },
@@ -2515,7 +2515,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("qwen", "qwen3.6-plus", state.agentDir(), cfg);
 
@@ -2562,7 +2562,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.4-mini", state.agentDir(), cfg);
 
@@ -2732,7 +2732,7 @@ describe("resolveModel", () => {
     mockMinimalModelDiscovery("ollama", "qwen3:32b", {
       params: { num_ctx: 4096, keep_alive: "1m" },
     });
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         defaults: {
           models: {
@@ -2810,13 +2810,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies CarapaceConfigInput;
 
     const result = await resolveModelForTest(
       "openai",
       "gpt-5.5",
       state.agentDir(),
-      makeOpenClawConfigFixture(cfg),
+      makeCarapaceConfigFixture(cfg),
     );
 
     expect(result.error).toBeUndefined();
@@ -2835,13 +2835,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies CarapaceConfigInput;
 
     const result = await resolveModelForTest(
       "openai",
       "gpt-5.5",
       state.agentDir(),
-      makeOpenClawConfigFixture(cfg),
+      makeCarapaceConfigFixture(cfg),
     );
 
     expect(result.error).toBeUndefined();
@@ -2898,7 +2898,7 @@ describe("resolveModel", () => {
 
   it("applies agent default model params without explicit provider config", async () => {
     mockMinimalModelDiscovery("ollama", "llama3.2");
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         defaults: {
           models: {
@@ -3093,7 +3093,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await resolveModelForTest(
       "azure-openai-responses",
@@ -3343,7 +3343,7 @@ describe("resolveModel", () => {
   );
 
   it("does not treat arbitrary namespaced model ids as provider prefixes", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           custom: {
@@ -3368,7 +3368,7 @@ describe("resolveModel", () => {
 
   it("resolves custom MLX-style Hugging Face ids without adding the provider prefix", async () => {
     const modelId = "mlx-community/Qwen3-30B-A3B-6bit";
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         defaults: {
           model: { primary: `mlx/${modelId}` },
@@ -3405,7 +3405,7 @@ describe("resolveModel", () => {
 
   it("prefers provider-prefixed configured metadata over discovered text-only models", async () => {
     mockMinimalModelDiscovery("custom", "vision-model", { input: ["text"] });
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           custom: {
@@ -3433,7 +3433,7 @@ describe("resolveModel", () => {
   });
 
   it("keeps unknown fallback models text-only instead of borrowing image input from another configured model", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           custom: {
@@ -3467,7 +3467,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelAsync(
       "microsoft-foundry",
@@ -3481,7 +3481,7 @@ describe("resolveModel", () => {
     );
 
     expect(result.error).toBe(
-      'Unknown model: microsoft-foundry/Kimi-K2.6-1. Found agents.defaults.models["microsoft-foundry/Kimi-K2.6-1"], but no matching models.providers["microsoft-foundry"].models[] entry. Add { "id": "Kimi-K2.6-1", "name": "Kimi-K2.6-1" } to models.providers["microsoft-foundry"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: microsoft-foundry/Kimi-K2.6-1. Found agents.defaults.models["microsoft-foundry/Kimi-K2.6-1"], but no matching models.providers["microsoft-foundry"].models[] entry. Add { "id": "Kimi-K2.6-1", "name": "Kimi-K2.6-1" } to models.providers["microsoft-foundry"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://github.com/Exaggarate/carapace.',
     );
   });
 
@@ -3515,7 +3515,7 @@ describe("resolveModel", () => {
       "openai-codex",
       "gpt-5.4",
       state.agentDir(),
-      cfg as unknown as OpenClawConfig,
+      cfg as unknown as CarapaceConfig,
       {
         runtimeHooks: createRuntimeHooks(),
         skipAgentDiscovery: true,
@@ -3523,12 +3523,12 @@ describe("resolveModel", () => {
     );
 
     expect(result.error).toBe(
-      'Unknown model: openai-codex/gpt-5.4. "openai-codex" is a legacy provider ID. Run `openclaw doctor --fix` to migrate legacy model and provider config to the current OpenAI format. If the provider has no authenticated profile, run `openclaw models status` to check provider auth and re-authenticate if needed. See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: openai-codex/gpt-5.4. "openai-codex" is a legacy provider ID. Run `carapace doctor --fix` to migrate legacy model and provider config to the current OpenAI format. If the provider has no authenticated profile, run `carapace models status` to check provider auth and re-authenticate if needed. See https://github.com/Exaggarate/carapace.',
     );
   });
 
   it("suggests adding config entry when a non-bundled provider model is missing", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         defaults: {
           models: {
@@ -3544,12 +3544,12 @@ describe("resolveModel", () => {
     });
 
     expect(result.error).toBe(
-      'Unknown model: custom-provider/some-model. Found agents.defaults.models["custom-provider/some-model"], but no matching models.providers["custom-provider"].models[] entry. Add { "id": "some-model", "name": "some-model" } to models.providers["custom-provider"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: custom-provider/some-model. Found agents.defaults.models["custom-provider/some-model"], but no matching models.providers["custom-provider"].models[] entry. Add { "id": "some-model", "name": "some-model" } to models.providers["custom-provider"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://github.com/Exaggarate/carapace.',
     );
   });
 
   it("points runtime-bound model entries at the runtime catalog instead of provider registration", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       agents: {
         defaults: {
           models: {
@@ -3567,12 +3567,12 @@ describe("resolveModel", () => {
     });
 
     expect(result.error).toBe(
-      'Unknown model: openai/gpt-5.3-codex. Found agents.defaults.models["openai/gpt-5.3-codex"] bound to the "codex" agent runtime. Models served by an agent runtime come from that runtime and its linked account, not from models.providers["openai"].models[] — registering it there will not make it usable. Confirm "gpt-5.3-codex" is still offered by the "codex" runtime and switch agents.defaults.model.primary to a currently available model (run `openclaw models list --provider openai` to list them). See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: openai/gpt-5.3-codex. Found agents.defaults.models["openai/gpt-5.3-codex"] bound to the "codex" agent runtime. Models served by an agent runtime come from that runtime and its linked account, not from models.providers["openai"].models[] — registering it there will not make it usable. Confirm "gpt-5.3-codex" is still offered by the "codex" runtime and switch agents.defaults.model.primary to a currently available model (run `carapace models list --provider openai` to list them). See https://github.com/Exaggarate/carapace.',
     );
   });
 
   it("repairs stale text-only Foundry fallback rows for GPT-family models", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           "microsoft-foundry": {
@@ -3597,7 +3597,7 @@ describe("resolveModel", () => {
   });
 
   it("repairs stale text-only Anthropic fallback rows for Claude vision models", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           anthropic: {
@@ -3627,7 +3627,7 @@ describe("resolveModel", () => {
   });
 
   it("repairs stale text-only Foundry discovered rows for GPT-family models", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           "microsoft-foundry": {
@@ -3692,7 +3692,7 @@ describe("resolveModel", () => {
   });
 
   it("matches prefixed OpenRouter native ids in configured fallback models", () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openrouter: {
@@ -3911,7 +3911,7 @@ describe("resolveModel", () => {
 
   it("threads the model id through inline configured transport normalization", async () => {
     const normalizeProviderTransportWithPlugin = vi.fn(() => undefined);
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -3965,7 +3965,7 @@ describe("resolveModel", () => {
       },
     });
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           onehub: {
@@ -4017,7 +4017,7 @@ describe("resolveModel", () => {
       },
     });
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           "amazon-bedrock": {
@@ -4151,7 +4151,7 @@ describe("resolveModel", () => {
   it("applies canonical openai overrides when resolving the gpt-5.4-codex alias", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -4189,7 +4189,7 @@ describe("resolveModel", () => {
   it("prefers alias-specific overrides over canonical ones for gpt-5.4-codex", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -4242,12 +4242,12 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
   it("does not build a configured fallback for unsupported xAI multi-agent models", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           xai: {
@@ -4268,7 +4268,7 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: xai/grok-4.20-multi-agent-0309. OpenClaw does not currently support xAI multi-agent models; choose another xAI model. See https://docs.openclaw.ai/providers/xai.",
+      "Unknown model: xai/grok-4.20-multi-agent-0309. Carapace does not currently support xAI multi-agent models; choose another xAI model. See https://github.com/Exaggarate/carapace.",
     );
   });
 
@@ -4279,7 +4279,7 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -4306,7 +4306,7 @@ describe("resolveModel", () => {
   it("lets official openai metadata override stale configured model rows", async () => {
     mockOpenAIForwardCompatDiscovery();
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -4370,7 +4370,7 @@ describe("resolveModel", () => {
       contextWindow: 400_000,
     });
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -4515,7 +4515,7 @@ describe("resolveModel", () => {
           workspace: state.workspaceDir,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await resolveModelAsync("openai", "gpt-5.4", state.agentDir("state"), cfg, {
       authStorage: { mocked: true } as never,
@@ -4577,7 +4577,7 @@ describe("resolveModel", () => {
           workspace: state.workspaceDir,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveModelWithRegistry({
       provider: "openai",
@@ -4639,7 +4639,7 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -4733,7 +4733,7 @@ describe("resolveModel", () => {
       }),
     });
 
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           openai: {
@@ -4759,7 +4759,7 @@ describe("resolveModel", () => {
   });
 
   it("applies configured overrides to github-copilot dynamic models", async () => {
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           "github-copilot": {

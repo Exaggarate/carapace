@@ -1,8 +1,8 @@
 // Memory Core tests cover prompt-only dreaming and publication boundaries.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { RequestScopedSubagentRuntimeError } from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { RequestScopedSubagentRuntimeError } from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readRecentDreamDiaryEntries, writeBackfillDiaryEntries } from "./dreaming-dreams-file.js";
 import { runDreamNarrative, type DreamingCompletion } from "./dreaming-narrative.js";
@@ -13,7 +13,7 @@ import { createMemoryCoreTestHarness } from "./test-helpers.js";
 
 const { createTempWorkspace } = createMemoryCoreTestHarness();
 function setNarrativeTestEnv(stateDir: string): void {
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 }
 function createLogger() {
   return { info: vi.fn(), warn: vi.fn(), error: vi.fn() };

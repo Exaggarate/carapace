@@ -1,11 +1,11 @@
 /** Doctor health note for Claude CLI binary, auth, and workspace/project directories. */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   resolvePrimaryStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { resolveModelAgentRuntimeMetadata } from "../agents/agent-runtime-metadata.js";
 import {
@@ -16,7 +16,7 @@ import {
 import { resolveCliBackendConfig } from "../agents/cli-backends.js";
 import { resolveClaudeCliProjectDirForWorkspace } from "../agents/command/claude-cli-project-dir.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveExecutablePath } from "../infra/executable-path.js";
 import { shortenHomePath } from "../utils.js";
 
@@ -43,7 +43,7 @@ function isClaudeCliAuthenticated(commandPath: string, env: NodeJS.ProcessEnv): 
   }
 }
 
-function usesClaudeCliModelSelection(cfg: OpenClawConfig): boolean {
+function usesClaudeCliModelSelection(cfg: CarapaceConfig): boolean {
   const primary = resolvePrimaryStringValue(cfg.agents?.defaults?.model);
   if (normalizeOptionalLowercaseString(primary)?.startsWith(`${CLAUDE_CLI_PROVIDER}/`)) {
     return true;
@@ -93,7 +93,7 @@ function formatDirectoryProblemLine(
   return `- ${label}: ${display} is not writable by this user.`;
 }
 
-function resolveClaudeCliAgentIds(cfg: OpenClawConfig): string[] {
+function resolveClaudeCliAgentIds(cfg: CarapaceConfig): string[] {
   const agentIds = listAgentIds(cfg);
   const runtimeAgentIds = agentIds.filter(
     (agentId) => resolveModelAgentRuntimeMetadata({ cfg, agentId }).id === CLAUDE_CLI_PROVIDER,
@@ -117,7 +117,7 @@ type ClaudeCliWorkspaceTarget = {
 };
 
 function resolveClaudeCliWorkspaceTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   homeDir?: string;
   workspaceDir?: string;
@@ -158,7 +158,7 @@ function resolveClaudeCliWorkspaceTargets(params: {
  * The optional deps let tests inject the CLI status probe, PATH resolution, and workspace roots.
  */
 export function noteClaudeCliHealth(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps?: {
     noteFn?: typeof note;
     env?: NodeJS.ProcessEnv;

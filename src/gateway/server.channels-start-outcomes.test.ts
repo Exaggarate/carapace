@@ -63,8 +63,8 @@ describe("channels.start account outcomes", () => {
         BREAKER_RESOLVED_CHANNEL_TOKEN: "resolved-channel-token",
         BREAKER_MISSING_CHANNEL_TOKEN: undefined,
         TELEGRAM_BOT_TOKEN: "ambient-token-must-not-win",
-        OPENCLAW_SKIP_CHANNELS: undefined,
-        OPENCLAW_SKIP_PROVIDERS: undefined,
+        CARAPACE_SKIP_CHANNELS: undefined,
+        CARAPACE_SKIP_PROVIDERS: undefined,
       },
       async () => {
         const startAccount = vi.fn(
@@ -214,7 +214,7 @@ describe("channels.start account outcomes", () => {
 
   it("reports skips and in-flight ownership while manual recovery bypasses the breaker", async () => {
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
         const stopEntered = createDeferred();
         const releaseStop = createDeferred();

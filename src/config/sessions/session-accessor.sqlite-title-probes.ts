@@ -1,8 +1,8 @@
 import { sql } from "kysely";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type {
   SessionTranscriptReadScope,
   TranscriptEvent,
@@ -10,14 +10,14 @@ import type {
 import { readSqliteTranscriptStoreBatches } from "./session-accessor.sqlite-scope.js";
 
 type TitleProbeDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   | "session_transcript_active_events"
   | "session_transcript_index_state"
   | "session_windows"
   | "transcript_events"
   | "transcript_rewrite_watermarks"
 > & {
-  transcript_event_identities: OpenClawAgentKyselyDatabase["transcript_event_identities"] & {
+  transcript_event_identities: CarapaceAgentKyselyDatabase["transcript_event_identities"] & {
     rowid: number;
   };
 };
@@ -39,7 +39,7 @@ function sqliteTitleBoundaryType() {
 }
 
 function readTitleProbeChunk(
-  database: Pick<OpenClawAgentDatabase, "db" | "path">,
+  database: Pick<CarapaceAgentDatabase, "db" | "path">,
   sessionIds: readonly string[],
 ): Map<string, SessionTranscriptTitleProbe> {
   const db = getNodeSqliteKysely<TitleProbeDatabase>(database.db);

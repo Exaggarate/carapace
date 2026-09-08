@@ -1,6 +1,6 @@
 // Doctor Tailscale tests cover safe migration of shipped external Serve routes.
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { TailscaleStatusCommandRunner } from "../shared/tailscale-status.js";
 import { prepareTailscaleConfigMigration } from "./doctor-tailscale.js";
 
@@ -37,7 +37,7 @@ function runner(stdout: string): TailscaleStatusCommandRunner {
 
 describe("prepareTailscaleConfigMigration", () => {
   it("does not adopt a canonical-looking route without ownership proof", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         mode: "local",
         bind: "lan",
@@ -56,7 +56,7 @@ describe("prepareTailscaleConfigMigration", () => {
     expect(result.config).toBe(cfg);
     expect(result.changes).toEqual([]);
     const warning = result.warnings.join("\n");
-    expect(warning).toContain("cannot prove that OpenClaw owns");
+    expect(warning).toContain("cannot prove that Carapace owns");
     expect(warning).toContain("confirm the route belongs to the current Tailscale hostname");
     expect(warning).toContain("leave managed Tailscale ingress off");
   });
@@ -64,7 +64,7 @@ describe("prepareTailscaleConfigMigration", () => {
   it.each([443, 18789, 19001])(
     "recognizes the predecessor of managed Gateway port %s",
     async (port) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: { bind: "loopback", port, tailscale: { mode: "serve" } },
       };
       const result = await prepareTailscaleConfigMigration({
@@ -81,14 +81,14 @@ describe("prepareTailscaleConfigMigration", () => {
   it.each([
     ["no matching route", {}, "{}"],
     ["Funnel route", {}, serveStatus({ funnel: true })],
-    ["non-root route", {}, serveStatus({ path: "/openclaw" })],
+    ["non-root route", {}, serveStatus({ path: "/carapace" })],
     ["non-loopback backend", {}, serveStatus({ proxyHost: "192.0.2.10" })],
     ["different backend port", {}, serveStatus({ backendPort: 19000 })],
     ["non-LAN bind", { bind: "loopback" as const }, serveStatus()],
     ["managed mode", { tailscale: { mode: "serve" as const } }, serveStatus()],
     ["remote Gateway", { mode: "remote" as const }, serveStatus()],
   ])("does not migrate a %s", async (_label, gatewayOverrides, stdout) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         mode: "local",
         bind: "lan",
@@ -120,7 +120,7 @@ describe("prepareTailscaleConfigMigration", () => {
   ])(
     "warns instead of guessing how to migrate %s",
     async (_label, gatewayOverrides, stdout, httpsPort) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           mode: "local",
           bind: "lan",
@@ -145,7 +145,7 @@ describe("prepareTailscaleConfigMigration", () => {
   );
 
   it("warns on malformed status but stays quiet when Tailscale is unavailable", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         bind: "lan",
         auth: { mode: "token", token: "secret" },

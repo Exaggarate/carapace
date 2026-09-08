@@ -18,8 +18,8 @@ import { canReceiveSessionEvent } from "./session-sharing.js";
 /** Creates transport-independent connection, subscription, and run state. */
 export function createGatewayConnectionState(params: {
   bootId: string;
-  cfg: import("../config/config.js").OpenClawConfig;
-  getRuntimeConfig?: () => import("../config/config.js").OpenClawConfig;
+  cfg: import("../config/config.js").CarapaceConfig;
+  getRuntimeConfig?: () => import("../config/config.js").CarapaceConfig;
 }) {
   const loadRuntimeConfig = params.getRuntimeConfig ?? (() => params.cfg);
   const clients = new GatewayClientRegistry();

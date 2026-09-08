@@ -22,7 +22,7 @@ function createMessage(
   return {
     role,
     content: [{ type: "text", text }],
-    ...(metadata ? { __openclaw: metadata } : {}),
+    ...(metadata ? { __carapace: metadata } : {}),
   };
 }
 

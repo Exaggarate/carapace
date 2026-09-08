@@ -58,8 +58,8 @@ import type { PluginRuntime } from "./runtime/types.js";
 import type { SessionCatalogProvider } from "./session-catalog.js";
 import type { PluginDependencyStatus } from "./status-dependencies-core.js";
 import type {
-  OpenClawPluginHttpRouteAuth,
-  OpenClawPluginHttpRouteUpgradeHandler,
+  CarapacePluginHttpRouteAuth,
+  CarapacePluginHttpRouteUpgradeHandler,
 } from "./types.js";
 import type { PluginMcpServerConnectionResolverRegistration } from "./types.mcp-connection.js";
 type ChannelPlugin = import("../channels/plugins/types.plugin.js").ChannelPlugin;
@@ -68,23 +68,23 @@ type ImageGenerationProviderPlugin = import("./types.js").ImageGenerationProvide
 type MediaUnderstandingProviderPlugin = import("./types.js").MediaUnderstandingProviderPlugin;
 type TranscriptSourceProvider = import("./types.js").TranscriptSourceProvider;
 type MusicGenerationProviderPlugin = import("./types.js").MusicGenerationProviderPlugin;
-type OpenClawPluginCliRootCommandDescriptor =
-  import("./types.js").OpenClawPluginCliRootCommandDescriptor;
-type OpenClawPluginCliRegistrar = import("./types.js").OpenClawPluginCliRegistrar;
-type OpenClawPluginCommandDefinition = import("./types.js").OpenClawPluginCommandDefinition;
+type CarapacePluginCliRootCommandDescriptor =
+  import("./types.js").CarapacePluginCliRootCommandDescriptor;
+type CarapacePluginCliRegistrar = import("./types.js").CarapacePluginCliRegistrar;
+type CarapacePluginCommandDefinition = import("./types.js").CarapacePluginCommandDefinition;
 type PluginInteractiveHandlerRegistration =
   import("./types.js").PluginInteractiveHandlerRegistration;
-type OpenClawPluginGatewayRuntimeScopeSurface =
-  import("./types.js").OpenClawPluginGatewayRuntimeScopeSurface;
-type OpenClawGatewayDiscoveryService = import("./types.js").OpenClawGatewayDiscoveryService;
-type OpenClawPluginHttpRouteHandler = import("./types.js").OpenClawPluginHttpRouteHandler;
-type OpenClawPluginHttpRouteMatch = import("./types.js").OpenClawPluginHttpRouteMatch;
-type OpenClawPluginHostedMediaResolver = import("./types.js").OpenClawPluginHostedMediaResolver;
-type OpenClawPluginReloadRegistration = import("./types.js").OpenClawPluginReloadRegistration;
-type OpenClawPluginSecurityAuditCollector =
-  import("./types.js").OpenClawPluginSecurityAuditCollector;
-type OpenClawPluginService = import("./types.js").OpenClawPluginService;
-type OpenClawPluginToolFactory = import("./types.js").OpenClawPluginToolFactory;
+type CarapacePluginGatewayRuntimeScopeSurface =
+  import("./types.js").CarapacePluginGatewayRuntimeScopeSurface;
+type CarapaceGatewayDiscoveryService = import("./types.js").CarapaceGatewayDiscoveryService;
+type CarapacePluginHttpRouteHandler = import("./types.js").CarapacePluginHttpRouteHandler;
+type CarapacePluginHttpRouteMatch = import("./types.js").CarapacePluginHttpRouteMatch;
+type CarapacePluginHostedMediaResolver = import("./types.js").CarapacePluginHostedMediaResolver;
+type CarapacePluginReloadRegistration = import("./types.js").CarapacePluginReloadRegistration;
+type CarapacePluginSecurityAuditCollector =
+  import("./types.js").CarapacePluginSecurityAuditCollector;
+type CarapacePluginService = import("./types.js").CarapacePluginService;
+type CarapacePluginToolFactory = import("./types.js").CarapacePluginToolFactory;
 type PluginConversationBindingResolvedEvent =
   import("./types.js").PluginConversationBindingResolvedEvent;
 type TypedPluginHookRegistration = import("./types.js").PluginHookRegistration;
@@ -105,7 +105,7 @@ type UnifiedModelCatalogProviderPlugin = import("./types.js").UnifiedModelCatalo
 export type PluginToolRegistration = {
   pluginId: string;
   pluginName?: string;
-  factory: OpenClawPluginToolFactory;
+  factory: CarapacePluginToolFactory;
   names: string[];
   declaredNames?: string[];
   optional: boolean;
@@ -117,10 +117,10 @@ export type PluginToolRegistration = {
 type PluginCliRegistration = {
   pluginId: string;
   pluginName?: string;
-  register: OpenClawPluginCliRegistrar;
+  register: CarapacePluginCliRegistrar;
   parentPath: string[];
   commands: string[];
-  descriptors: OpenClawPluginCliRootCommandDescriptor[];
+  descriptors: CarapacePluginCliRootCommandDescriptor[];
   source: string;
   rootDir?: string;
 };
@@ -131,11 +131,11 @@ export type PluginHttpRouteRegistration = {
   handoff?: true;
   pluginId?: string;
   path: string;
-  handler: OpenClawPluginHttpRouteHandler;
-  handleUpgrade?: OpenClawPluginHttpRouteUpgradeHandler;
-  auth: OpenClawPluginHttpRouteAuth;
-  match: OpenClawPluginHttpRouteMatch;
-  gatewayRuntimeScopeSurface?: OpenClawPluginGatewayRuntimeScopeSurface;
+  handler: CarapacePluginHttpRouteHandler;
+  handleUpgrade?: CarapacePluginHttpRouteUpgradeHandler;
+  auth: CarapacePluginHttpRouteAuth;
+  match: CarapacePluginHttpRouteMatch;
+  gatewayRuntimeScopeSurface?: CarapacePluginGatewayRuntimeScopeSurface;
   gatewayMethodDispatchAllowed?: boolean;
   nodeCapability?: {
     surface: string;
@@ -147,7 +147,7 @@ export type PluginHttpRouteRegistration = {
 type PluginHostedMediaResolverRegistration = {
   pluginId: string;
   pluginName?: string;
-  resolver: OpenClawPluginHostedMediaResolver;
+  resolver: CarapacePluginHostedMediaResolver;
   source: string;
   rootDir?: string;
 };
@@ -212,7 +212,7 @@ export type PluginBoardWidgetContentKindRegistration = {
 type PluginCliBackendRegistration = {
   pluginId: string;
   pluginName?: string;
-  builtWithOpenClawVersion?: string;
+  builtWithCarapaceVersion?: string;
   backend: CliBackendPlugin;
   source: string;
   rootDir?: string;
@@ -298,7 +298,7 @@ type PluginHookRegistration = {
 export type PluginServiceRegistration = {
   pluginId: string;
   pluginName?: string;
-  service: OpenClawPluginService;
+  service: CarapacePluginService;
   source: string;
   origin: PluginOrigin;
   trustedOfficialInstall?: boolean;
@@ -308,7 +308,7 @@ export type PluginServiceRegistration = {
 export type PluginGatewayDiscoveryServiceRegistration = {
   pluginId: string;
   pluginName?: string;
-  service: OpenClawGatewayDiscoveryService;
+  service: CarapaceGatewayDiscoveryService;
   source: string;
   rootDir?: string;
 };
@@ -316,7 +316,7 @@ export type PluginGatewayDiscoveryServiceRegistration = {
 type PluginReloadRegistration = {
   pluginId: string;
   pluginName?: string;
-  registration: OpenClawPluginReloadRegistration;
+  registration: CarapacePluginReloadRegistration;
   source: string;
   rootDir?: string;
 };
@@ -324,7 +324,7 @@ type PluginReloadRegistration = {
 export type PluginNodeHostCommandRegistration = {
   pluginId: string;
   pluginName?: string;
-  command: import("./types.js").OpenClawPluginNodeHostCommand;
+  command: import("./types.js").CarapacePluginNodeHostCommand;
   source: string;
   rootDir?: string;
 };
@@ -332,7 +332,7 @@ export type PluginNodeHostCommandRegistration = {
 type PluginNodeInvokePolicyRegistration = {
   pluginId: string;
   pluginName?: string;
-  policy: import("./types.js").OpenClawPluginNodeInvokePolicy;
+  policy: import("./types.js").CarapacePluginNodeInvokePolicy;
   pluginConfig?: Record<string, unknown>;
   source: string;
   rootDir?: string;
@@ -349,7 +349,7 @@ export type PluginWidgetPresenterRegistration = {
 type PluginSecurityAuditCollectorRegistration = {
   pluginId: string;
   pluginName?: string;
-  collector: OpenClawPluginSecurityAuditCollector;
+  collector: CarapacePluginSecurityAuditCollector;
   source: string;
   rootDir?: string;
 };
@@ -357,7 +357,7 @@ type PluginSecurityAuditCollectorRegistration = {
 export type PluginCommandRegistration = {
   pluginId: string;
   pluginName?: string;
-  command: OpenClawPluginCommandDefinition;
+  command: CarapacePluginCommandDefinition;
   source: string;
   rootDir?: string;
   trustedOwnerStatusExposure?: true;
@@ -462,7 +462,7 @@ export type PluginRecord = {
   name: string;
   packageVersion?: string;
   version?: string;
-  builtWithOpenClawVersion?: string;
+  builtWithCarapaceVersion?: string;
   packageName?: string;
   description?: string;
   format?: PluginFormat;

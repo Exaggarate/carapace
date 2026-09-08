@@ -6,13 +6,13 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { FILE_LOCK_TIMEOUT_ERROR_CODE, resetFileLockStateForTest } from "../../infra/file-lock.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import { OAuthRefreshFailureError } from "./oauth-refresh-failure.js";
 import { buildRefreshContentionError } from "./oauth-refresh-lock-errors.js";
@@ -167,7 +167,7 @@ describe("resolveApiKeyForProfile openai refresh fallback", () => {
   let caseIndex = 0;
 
   beforeAll(async () => {
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-refresh-fallback-"));
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-refresh-fallback-"));
     ({ resolveApiKeyForProfile } = await import("./oauth.js"));
     ({ hasAvailableAuthForProvider, resolveApiKeyForProviderCore } =
       await import("../model-auth.js"));
@@ -192,20 +192,20 @@ describe("resolveApiKeyForProfile openai refresh fallback", () => {
     const caseRoot = path.join(tempRoot, `case-${++caseIndex}`);
     agentDir = path.join(caseRoot, "agents", "main", "agent");
     await fs.mkdir(agentDir, { recursive: true });
-    setTestEnvValue("OPENCLAW_STATE_DIR", caseRoot);
-    setTestEnvValue("OPENCLAW_AGENT_DIR", agentDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", caseRoot);
+    setTestEnvValue("CARAPACE_AGENT_DIR", agentDir);
     deleteTestEnvValue("OPENAI_API_KEY");
   });
 
   afterEach(async () => {
     resetFileLockStateForTest();
     clearRuntimeAuthProfileStoreSnapshots();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     envSnapshot.restore();
   });
 
   afterAll(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
 
@@ -1102,7 +1102,7 @@ describe("resolveApiKeyForProfile openai refresh fallback", () => {
       agentDir,
     );
     const store = ensureAuthProfileStore(agentDir);
-    openOpenClawAgentDatabase({
+    openCarapaceAgentDatabase({
       agentId: "main",
       path: resolveAuthProfileDatabasePath(agentDir),
     }).db.exec("ALTER TABLE auth_profile_state DROP COLUMN updated_at");

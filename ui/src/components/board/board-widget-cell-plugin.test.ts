@@ -76,7 +76,7 @@ describe("plugin board widget cells", () => {
           subscribe: () => () => undefined,
         },
       } as unknown as ApplicationContext);
-      const cell = document.createElement("openclaw-board-widget-cell");
+      const cell = document.createElement("carapace-board-widget-cell");
       cell.widget = widget;
       cell.rect = { name: widget.name, x: 0, y: 0, w: 6, h: 4 };
       cell.sessionKey = "agent:main:test";
@@ -126,7 +126,7 @@ describe("plugin board widget cells", () => {
       },
       plugins: { registrations, isLoading: () => false, errors: [], subscribe: () => () => {} },
     } as unknown as ApplicationContext);
-    const cell = document.createElement("openclaw-board-widget-cell");
+    const cell = document.createElement("carapace-board-widget-cell");
     cell.widget = {
       name: "summary",
       tabId: "main",
@@ -146,7 +146,7 @@ describe("plugin board widget cells", () => {
     document.body.append(provider);
     await vi.waitFor(
       () =>
-        expect(cell.querySelector("openclaw-report-widget")?.textContent).toContain(
+        expect(cell.querySelector("carapace-report-widget")?.textContent).toContain(
           "Saved report content",
         ),
       CHUNK_LOAD_WAIT,
@@ -271,7 +271,7 @@ describe("plugin board widget cells", () => {
         revision: 1,
       };
       const provider = createApplicationContextProvider(context);
-      const cell = document.createElement("openclaw-board-widget-cell");
+      const cell = document.createElement("carapace-board-widget-cell");
       cell.widget = widget;
       cell.rect = { name: widget.name, x: 0, y: index * 4, w: 6, h: 4 };
       cell.sessionKey = scenario.dashboardSessionKey;
@@ -304,7 +304,7 @@ describe("plugin board widget cells", () => {
       );
       await vi.waitFor(
         () =>
-          expect(cell.querySelector("openclaw-session-progress-widget")?.textContent).toContain(
+          expect(cell.querySelector("carapace-session-progress-widget")?.textContent).toContain(
             scenario.text,
           ),
         CHUNK_LOAD_WAIT,
@@ -388,7 +388,7 @@ describe("plugin board widget cells", () => {
       revision: 1,
     };
     const provider = createApplicationContextProvider(context);
-    const cell = document.createElement("openclaw-board-widget-cell");
+    const cell = document.createElement("carapace-board-widget-cell");
     cell.widget = widget;
     cell.rect = { name: widget.name, x: 0, y: 0, w: 6, h: 4 };
     cell.sessionKey = "agent:main:dashboard";
@@ -407,7 +407,7 @@ describe("plugin board widget cells", () => {
 
     await vi.waitFor(
       () =>
-        expect(cell.querySelector("openclaw-session-progress-widget")?.textContent).toContain(
+        expect(cell.querySelector("carapace-session-progress-widget")?.textContent).toContain(
           "Recovered progress",
         ),
       CHUNK_LOAD_WAIT,

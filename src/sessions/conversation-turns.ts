@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 
 type ConversationTurnReply = {
@@ -46,7 +46,7 @@ type ConversationTurnReplyClaim = {
 // Gateway RPC execution and inbound dispatch can live in different bundled chunks.
 // Keep one process-wide registry so either chunk observes the same pending turn.
 const pendingTurns = resolveGlobalSingleton(
-  Symbol.for("openclaw.pendingConversationTurns"),
+  Symbol.for("carapace.pendingConversationTurns"),
   () => new Map<string, PendingConversationTurn>(),
   (turns) => {
     for (const pending of turns.values()) {
@@ -55,7 +55,7 @@ const pendingTurns = resolveGlobalSingleton(
   },
 );
 const pendingTurnsByOutboundId = resolveGlobalSingleton(
-  Symbol.for("openclaw.pendingConversationTurnsByOutboundId"),
+  Symbol.for("carapace.pendingConversationTurnsByOutboundId"),
   () => new Map<string, Set<PendingConversationTurn>>(),
   (turns) => turns.clear(),
 );

@@ -50,7 +50,7 @@ describe("block HTML islands", () => {
 
   it.each([
     ["headings", "# Steps", "heading"],
-    ["fenced code", "```bash\nopenclaw doctor\n```", "pre"],
+    ["fenced code", "```bash\ncarapace doctor\n```", "pre"],
     ["blockquotes", "> quoted output", "blockquote"],
     ["tables", "| item | done |\n| --- | --- |\n| lint | yes |", "table"],
   ])("keeps Markdown %s inside <details> islands", (_label, body, type) => {
@@ -75,7 +75,7 @@ describe("block HTML islands", () => {
         "# Inner heading",
         "",
         "```bash",
-        "openclaw doctor",
+        "carapace doctor",
         "```",
         "",
         "> inner quote",
@@ -232,7 +232,7 @@ describe("block HTML islands", () => {
 
   it("preserves rich Markdown table cells inside a disclosure", () => {
     const block = single(
-      "<details><summary>Rich</summary>\n\n| item | note |\n| --- | --- |\n| **bold** | [link](https://openclaw.ai) |\n| `code` | *italic* |\n\n</details>",
+      "<details><summary>Rich</summary>\n\n| item | note |\n| --- | --- |\n| **bold** | [link](https://github.com/Exaggarate/carapace) |\n| `code` | *italic* |\n\n</details>",
     );
     expect(block).toMatchObject({
       type: "details",
@@ -246,7 +246,7 @@ describe("block HTML islands", () => {
             ],
             [
               { text: { type: "bold", text: "bold" } },
-              { text: { type: "url", text: "link", url: "https://openclaw.ai" } },
+              { text: { type: "url", text: "link", url: "https://github.com/Exaggarate/carapace" } },
             ],
             [
               { text: { type: "code", text: "code" } },

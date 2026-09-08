@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../../../../src/config/config.js";
 import { resetConfigOverrides } from "../../../../src/config/runtime-overrides.js";
 import { clearSessionStoreCacheForTest } from "../../../../src/config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { createCronServiceState } from "../../../../src/cron/service/state.js";
 import {
   tryCreateCronTaskRunHandle,
@@ -18,24 +18,24 @@ import {
 } from "../../../../src/gateway/test-helpers.e2e.js";
 import { resetAgentEventsForTest } from "../../../../src/infra/agent-events.js";
 import { resetSystemEventsForTest } from "../../../../src/infra/system-events.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../../src/state/carapace-state-db.js";
 import { resetTaskRegistryForTests } from "../../../../src/tasks/task-runtime.test-helpers.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../../../../src/test-utils/env.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 
 const GATEWAY_ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -80,10 +80,10 @@ describe("Gateway cron startup recovery", () => {
 
   it("reports lifecycle-owned retry and disable state through cron.list", async () => {
     const envSnapshot = captureEnv([...GATEWAY_ENV_KEYS]);
-    const tempHome = tempDirs.make("openclaw-gateway-cron-recovery-");
-    const stateDir = path.join(tempHome, ".openclaw");
+    const tempHome = tempDirs.make("carapace-gateway-cron-recovery-");
+    const stateDir = path.join(tempHome, ".carapace");
     const bundledPluginsDir = path.join(tempHome, "empty-bundled-plugins");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     await Promise.all([
       fs.mkdir(stateDir, { recursive: true }),
       fs.mkdir(bundledPluginsDir, { recursive: true }),
@@ -92,21 +92,21 @@ describe("Gateway cron startup recovery", () => {
     const token = `gateway-cron-recovery-${process.pid}`;
     for (const [key, value] of Object.entries({
       HOME: tempHome,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_GATEWAY_TOKEN: token,
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_CRON: "0",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_GATEWAY_TOKEN: token,
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_CRON: "0",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     })) {
       setTestEnvValue(key, value);
     }
-    deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
-    closeOpenClawStateDatabaseForTest();
+    deleteTestEnvValue("CARAPACE_CONFIG_PATH");
+    closeCarapaceStateDatabaseForTest();
     resetTaskRegistryForTests({ persist: false });
 
     const startedAtMs = Date.now() - 30_000;
@@ -186,7 +186,7 @@ describe("Gateway cron startup recovery", () => {
       },
       gateway: { auth: { mode: "token", token } },
       plugins: { slots: { memory: "none" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     let gateway: Awaited<ReturnType<typeof startGatewayWithClient>> | undefined;
     try {
@@ -243,7 +243,7 @@ describe("Gateway cron startup recovery", () => {
         await disconnectGatewayClient(gateway.client);
         await gateway.server.close({ reason: "Gateway cron startup recovery test complete" });
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot.restore();
     }
   });

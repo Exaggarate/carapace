@@ -1,19 +1,19 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import UIKit
 
-typealias OpenClawCameraSnapResult = (format: String, base64: String, width: Int, height: Int)
-typealias OpenClawCameraClipResult = (format: String, base64: String, durationMs: Int, hasAudio: Bool)
+typealias CarapaceCameraSnapResult = (format: String, base64: String, width: Int, height: Int)
+typealias CarapaceCameraClipResult = (format: String, base64: String, durationMs: Int, hasAudio: Bool)
 
 protocol CameraServicing: Sendable {
     func listDevices() async -> [CameraController.CameraDeviceInfo]
     func snap(
-        params: OpenClawCameraSnapParams,
-        defaultFacing: OpenClawCameraFacing) async throws -> OpenClawCameraSnapResult
+        params: CarapaceCameraSnapParams,
+        defaultFacing: CarapaceCameraFacing) async throws -> CarapaceCameraSnapResult
     func clip(
-        params: OpenClawCameraClipParams,
-        defaultFacing: OpenClawCameraFacing) async throws -> OpenClawCameraClipResult
+        params: CarapaceCameraClipParams,
+        defaultFacing: CarapaceCameraFacing) async throws -> CarapaceCameraClipResult
 }
 
 protocol ScreenRecordingServicing: Sendable {
@@ -31,11 +31,11 @@ protocol LocationServicing: Sendable {
     func accuracyAuthorization() -> CLAccuracyAuthorization
     func authorizationSnapshot() -> LocationAuthorizationSnapshot
     func ensureAuthorization(
-        mode: OpenClawLocationMode,
+        mode: CarapaceLocationMode,
         isCurrent: @MainActor () -> Bool) async -> CLAuthorizationStatus
     func currentLocation(
-        params: OpenClawLocationGetParams,
-        desiredAccuracy: OpenClawLocationAccuracy,
+        params: CarapaceLocationGetParams,
+        desiredAccuracy: CarapaceLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     func setBackgroundLocationUpdatesEnabled(_ enabled: Bool)
@@ -55,32 +55,32 @@ extension LocationServicing {
 
 @MainActor
 protocol DeviceStatusServicing: Sendable {
-    func status() async throws -> OpenClawDeviceStatusPayload
-    func info() -> OpenClawDeviceInfoPayload
+    func status() async throws -> CarapaceDeviceStatusPayload
+    func info() -> CarapaceDeviceInfoPayload
 }
 
 protocol PhotosServicing: Sendable {
-    func latest(params: OpenClawPhotosLatestParams) async throws -> OpenClawPhotosLatestPayload
+    func latest(params: CarapacePhotosLatestParams) async throws -> CarapacePhotosLatestPayload
 }
 
 protocol ContactsServicing: Sendable {
-    func search(params: OpenClawContactsSearchParams) async throws -> OpenClawContactsSearchPayload
-    func add(params: OpenClawContactsAddParams) async throws -> OpenClawContactsAddPayload
+    func search(params: CarapaceContactsSearchParams) async throws -> CarapaceContactsSearchPayload
+    func add(params: CarapaceContactsAddParams) async throws -> CarapaceContactsAddPayload
 }
 
 protocol CalendarServicing: Sendable {
-    func events(params: OpenClawCalendarEventsParams) async throws -> OpenClawCalendarEventsPayload
-    func add(params: OpenClawCalendarAddParams) async throws -> OpenClawCalendarAddPayload
+    func events(params: CarapaceCalendarEventsParams) async throws -> CarapaceCalendarEventsPayload
+    func add(params: CarapaceCalendarAddParams) async throws -> CarapaceCalendarAddPayload
 }
 
 protocol RemindersServicing: Sendable {
-    func list(params: OpenClawRemindersListParams) async throws -> OpenClawRemindersListPayload
-    func add(params: OpenClawRemindersAddParams) async throws -> OpenClawRemindersAddPayload
+    func list(params: CarapaceRemindersListParams) async throws -> CarapaceRemindersListPayload
+    func add(params: CarapaceRemindersAddParams) async throws -> CarapaceRemindersAddPayload
 }
 
 protocol MotionServicing: Sendable {
-    func activities(params: OpenClawMotionActivityParams) async throws -> OpenClawMotionActivityPayload
-    func pedometer(params: OpenClawPedometerParams) async throws -> OpenClawPedometerPayload
+    func activities(params: CarapaceMotionActivityParams) async throws -> CarapaceMotionActivityPayload
+    func pedometer(params: CarapacePedometerParams) async throws -> CarapacePedometerPayload
 }
 
 struct WatchMessagingStatus: Equatable, Sendable {
@@ -95,7 +95,7 @@ struct WatchExecApprovalResolveEvent: Codable, Equatable, Sendable {
     var replyId: String
     var approvalId: String
     var gatewayStableID: String?
-    var decision: OpenClawWatchExecApprovalDecision
+    var decision: CarapaceWatchExecApprovalDecision
     var sentAtMs: Int64?
     var transport: String
 }
@@ -135,7 +135,7 @@ struct WatchAppSnapshotRequestEvent: Equatable, Sendable {
 
 struct WatchAppCommandEvent: Codable, Equatable, Sendable {
     var commandId: String
-    var command: OpenClawWatchAppCommand
+    var command: CarapaceWatchAppCommand
     var sessionKey: String?
     var gatewayStableID: String?
     var text: String?
@@ -153,9 +153,9 @@ protocol WatchMessagingServicing: AnyObject, Sendable {
     func status() async -> WatchMessagingStatus
     func setStatusHandler(_ handler: (@Sendable (WatchMessagingStatus) -> Void)?)
     func setChatDeliveryHandler(
-        _ handler: (@Sendable (OpenClawWatchChatDeliveryCommand) async throws -> Void)?)
+        _ handler: (@Sendable (CarapaceWatchChatDeliveryCommand) async throws -> Void)?)
     func setChatDeliveryReceiptAckHandler(
-        _ handler: (@Sendable (OpenClawWatchChatDeliveryReceiptAck) async throws -> Void)?)
+        _ handler: (@Sendable (CarapaceWatchChatDeliveryReceiptAck) async throws -> Void)?)
     func setLegacyChatRejectedHandler(_ handler: (@Sendable () -> Void)?)
     func setExecApprovalResolveHandler(_ handler: (@Sendable (WatchExecApprovalResolveEvent) -> Void)?)
     func setExecApprovalSnapshotRequestHandler(
@@ -165,21 +165,21 @@ protocol WatchMessagingServicing: AnyObject, Sendable {
     func sendDirectNodeSetup(setupCode: String) async throws -> WatchNotificationSendResult
     func sendNotification(
         id: String,
-        params: OpenClawWatchNotifyParams,
+        params: CarapaceWatchNotifyParams,
         gatewayStableID: String?,
-        chatDeliveryContext: OpenClawWatchChatDeliveryContext?) async throws -> WatchNotificationSendResult
+        chatDeliveryContext: CarapaceWatchChatDeliveryContext?) async throws -> WatchNotificationSendResult
     func sendExecApprovalPrompt(
-        _ message: OpenClawWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
     func sendExecApprovalResolved(
-        _ message: OpenClawWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
     func sendExecApprovalExpired(
-        _ message: OpenClawWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
     func syncExecApprovalSnapshot(
-        _ message: OpenClawWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
     func syncAppSnapshot(
-        _ message: OpenClawWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
     func sendChatDeliveryReceipt(
-        _ receipt: OpenClawWatchChatDeliveryReceipt) async throws -> WatchNotificationSendResult
+        _ receipt: CarapaceWatchChatDeliveryReceipt) async throws -> WatchNotificationSendResult
 }
 
 extension CameraController: CameraServicing {}

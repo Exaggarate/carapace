@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Resolves CLI command path policy from the declarative command catalog.
 import { getCommandPathWithRootOptions } from "./argv.js";
 import {
@@ -41,7 +41,7 @@ function isCommandPathPrefix(commandPath: string[], pattern: readonly string[]):
 }
 
 function resolveCliCatalogCommandPath(argv: string[]): string[] {
-  // Gateway `run openclaw ...` argv needs catalog routing against the embedded command path.
+  // Gateway `run carapace ...` argv needs catalog routing against the embedded command path.
   const tokens =
     resolveGatewayCatalogCommandPath(argv) ??
     resolveCliParentCommandPath(argv) ??

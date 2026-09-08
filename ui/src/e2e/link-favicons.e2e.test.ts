@@ -23,7 +23,7 @@ suite.define(() => {
       }
     });
     let faviconRequests = 0;
-    await page.route("**/__openclaw__/link-favicon/docs.example.com", async (route) => {
+    await page.route("**/__carapace__/link-favicon/docs.example.com", async (route) => {
       faviconRequests += 1;
       expect(route.request().headers()["authorization"]).toBe("Bearer e2e-device-token");
       await route.fulfill({ body: ONE_PIXEL_PNG, contentType: "image/png", status: 200 });
@@ -56,7 +56,7 @@ suite.define(() => {
     const context = await suite.newBrowserContext({ serviceWorkers: "block" });
     const page = await context.newPage();
     let faviconRequests = 0;
-    await page.route("**/__openclaw__/link-favicon/**", async (route) => {
+    await page.route("**/__carapace__/link-favicon/**", async (route) => {
       faviconRequests += 1;
       await route.abort();
     });

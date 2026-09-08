@@ -69,8 +69,8 @@ describe("Android Fastlane release upload gates", () => {
 
     expect(validation).toContain('":app:validateSigningPlayRelease"');
     expect(validation).toContain('":wear:validateSigningRelease"');
-    expect(validation).toContain('"-PopenclawBuildCommit=#{build_commit}"');
-    expect(validation).toContain('"-PopenclawBuildTimestamp=#{build_timestamp}"');
+    expect(validation).toContain('"-PcarapaceBuildCommit=#{build_commit}"');
+    expect(validation).toContain('"-PcarapaceBuildTimestamp=#{build_timestamp}"');
     expect(validation).not.toContain("--dry-run");
     expect(validation).not.toContain(":app:bundlePlayRelease");
     expect(validation).not.toContain(":wear:bundleRelease");
@@ -125,10 +125,10 @@ describe("Android Fastlane release upload gates", () => {
     expect(fastfile).toContain("%w(phoneScreenshots wearScreenshots)");
     expect(booleanEnv).toContain('["1", "yes", "true", "on"]');
     expect(booleanEnv).toContain('["0", "no", "false", "off"]');
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_REF_MODE");
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_INTENT_PATH");
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST");
-    expect(intentContext).toContain("OPENCLAW_MOBILE_RELEASE_TARGET_REF");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_REF_MODE");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_INTENT_PATH");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST");
+    expect(intentContext).toContain("CARAPACE_MOBILE_RELEASE_TARGET_REF");
     expect(atomicUpload).toContain(
       'fastlane_boolean_env("ACK_BUNDLE_INSTALLATION_WARNING", default: false)',
     );
@@ -163,13 +163,13 @@ describe("Android Fastlane release upload gates", () => {
 
   it("requires locked wrapper provenance after loading intent mode from .env", () => {
     const fastfile = readFastfile();
-    const marker = "_OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE";
+    const marker = "_CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE";
     const loader = functionBody(fastfile, "load_env_file");
     const provenance = functionBody(fastfile, "validate_android_fastlane_execution_provenance!");
-    const envPath = path.join(tempDirs.make("openclaw-android-fastlane-env-"), ".env");
+    const envPath = path.join(tempDirs.make("carapace-android-fastlane-env-"), ".env");
     writeFileSync(
       envPath,
-      ["OPENCLAW_MOBILE_RELEASE_REF_MODE=intent", `${marker}=locked`, ""].join("\n"),
+      ["CARAPACE_MOBILE_RELEASE_REF_MODE=intent", `${marker}=locked`, ""].join("\n"),
     );
     const source = `
 module UI
@@ -181,7 +181,7 @@ ANDROID_FASTLANE_EXECUTION_PROVENANCE_ENV = "${marker}"
 def load_env_file${loader}
 def validate_android_fastlane_execution_provenance!${provenance}
 def run_case(path, provenance)
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_REF_MODE")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_REF_MODE")
   ENV.delete(ANDROID_FASTLANE_EXECUTION_PROVENANCE_ENV)
   ENV[ANDROID_FASTLANE_EXECUTION_PROVENANCE_ENV] = provenance unless provenance == "missing"
   load_env_file(path)
@@ -227,32 +227,32 @@ end
 def mobile_release_intent_context!${intentContext}
 cases = [
   {},
-  { "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "invalid" },
-  { "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent" },
+  { "CARAPACE_MOBILE_RELEASE_REF_MODE" => "invalid" },
+  { "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent" },
   {
-    "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent",
-    "OPENCLAW_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
-    "OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:receipt",
-    "OPENCLAW_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
+    "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent",
+    "CARAPACE_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
+    "CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:receipt",
+    "CARAPACE_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
   },
   {
-    "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent",
-    "OPENCLAW_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
-    "OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
-    "OPENCLAW_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.3-mobile"
+    "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent",
+    "CARAPACE_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
+    "CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
+    "CARAPACE_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.3-mobile"
   },
   {
-    "OPENCLAW_MOBILE_RELEASE_REF_MODE" => "intent",
-    "OPENCLAW_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
-    "OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
-    "OPENCLAW_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
+    "CARAPACE_MOBILE_RELEASE_REF_MODE" => "intent",
+    "CARAPACE_MOBILE_RELEASE_INTENT_PATH" => "/tmp/intent.json",
+    "CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST" => "sha256:#{"a" * 64}",
+    "CARAPACE_MOBILE_RELEASE_TARGET_REF" => "release/2026.9.2-mobile"
   }
 ]
 cases.each do |values|
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_REF_MODE")
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_INTENT_PATH")
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST")
-  ENV.delete("OPENCLAW_MOBILE_RELEASE_TARGET_REF")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_REF_MODE")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_INTENT_PATH")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST")
+  ENV.delete("CARAPACE_MOBILE_RELEASE_TARGET_REF")
   values.each { |key, value| ENV[key] = value }
   begin
     context = mobile_release_intent_context!(gateway_version: "2026.9.2")
@@ -267,10 +267,10 @@ end
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout.trim().split("\n")).toEqual([
       "ok:local",
-      "error:OPENCLAW_MOBILE_RELEASE_REF_MODE must be empty or intent.",
-      "error:OPENCLAW_MOBILE_RELEASE_INTENT_PATH is required in intent mode.",
-      "error:OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST must be a canonical SHA-256 digest.",
-      "error:OPENCLAW_MOBILE_RELEASE_TARGET_REF must exactly match the mobile gateway version.",
+      "error:CARAPACE_MOBILE_RELEASE_REF_MODE must be empty or intent.",
+      "error:CARAPACE_MOBILE_RELEASE_INTENT_PATH is required in intent mode.",
+      "error:CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST must be a canonical SHA-256 digest.",
+      "error:CARAPACE_MOBILE_RELEASE_TARGET_REF must exactly match the mobile gateway version.",
       "ok:release/2026.9.2-mobile",
     ]);
   });

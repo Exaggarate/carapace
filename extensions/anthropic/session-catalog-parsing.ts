@@ -1,7 +1,7 @@
 import {
   isRecord,
   normalizeBoundedOptionalString as readBoundedString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { CLAUDE_LOCAL_SESSION_HOST_ID } from "./session-catalog-adoption.js";
 import { isExactClaudeSessionCursor } from "./session-catalog-cursor.js";
 import { MAX_STRING_LENGTH, parsePullRequestSummary } from "./session-catalog-desktop.js";

@@ -3,7 +3,7 @@
  *
  * Stores process-wide backend factories so core and plugins can register local container, SSH, or custom sandbox providers.
  */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import type {
   RegisteredSandboxBackend,
   SandboxBackendFactory,
@@ -43,7 +43,7 @@ export type {
   SandboxBackendWorkdirValidator,
 } from "./backend-handle.types.js";
 
-const SANDBOX_BACKEND_FACTORIES_STATE_KEY = Symbol.for("openclaw.sandboxBackendFactories");
+const SANDBOX_BACKEND_FACTORIES_STATE_KEY = Symbol.for("carapace.sandboxBackendFactories");
 
 type SandboxBackendRegistrationGeneration = {
   registration: RegisteredSandboxBackend;

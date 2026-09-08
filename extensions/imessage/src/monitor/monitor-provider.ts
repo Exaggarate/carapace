@@ -1,8 +1,8 @@
 // Imessage provider module implements model/runtime integration.
-import { resolveAgentConfig, resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
-import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "openclaw/plugin-sdk/approval-handler-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import { logTypingFailure } from "openclaw/plugin-sdk/channel-feedback";
+import { resolveAgentConfig, resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
+import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "carapace/plugin-sdk/approval-handler-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import { logTypingFailure } from "carapace/plugin-sdk/channel-feedback";
 import {
   createChannelInboundDebouncer,
   resolveInboundDebounceMs,
@@ -12,53 +12,53 @@ import {
   shouldDebounceTextInbound,
   type ChannelInboundTurnPlan,
   type ChannelInboundMediaInput,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { fanInChannelIngressLifecycles } from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   bindIngressLifecycleToReplyOptions,
   createChannelMessageReplyPipeline,
   resolveChannelStreamingBlockEnabled,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createChannelPairingChallengeIssuer } from "openclaw/plugin-sdk/channel-pairing";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createChannelPairingChallengeIssuer } from "carapace/plugin-sdk/channel-pairing";
 import {
   resolveChannelGroups,
   resolveChannelGroupsConfigPath,
-} from "openclaw/plugin-sdk/channel-policy";
-import { registerChannelRuntimeContext } from "openclaw/plugin-sdk/channel-runtime-context";
+} from "carapace/plugin-sdk/channel-policy";
+import { registerChannelRuntimeContext } from "carapace/plugin-sdk/channel-runtime-context";
 import {
   ensureConfiguredBindingRouteReady,
   readChannelAllowFromStore,
   upsertChannelPairingRequest,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
-import { redactIdentifier } from "openclaw/plugin-sdk/logging-core";
-import { isInboundPathAllowed, kindFromMime } from "openclaw/plugin-sdk/media-runtime";
-import { DEFAULT_GROUP_HISTORY_LIMIT, type HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import { resolveTextChunkLimit, type GetReplyOptions } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveInboundLastRouteSessionKey } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
+import { redactIdentifier } from "carapace/plugin-sdk/logging-core";
+import { isInboundPathAllowed, kindFromMime } from "carapace/plugin-sdk/media-runtime";
+import { DEFAULT_GROUP_HISTORY_LIMIT, type HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import { resolveTextChunkLimit, type GetReplyOptions } from "carapace/plugin-sdk/reply-runtime";
+import { resolveInboundLastRouteSessionKey } from "carapace/plugin-sdk/routing";
 import {
   createRuntimeConfigReader,
   getRuntimeConfig,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { danger, logVerbose, shouldLogVerbose, warn } from "openclaw/plugin-sdk/runtime-env";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { danger, logVerbose, shouldLogVerbose, warn } from "carapace/plugin-sdk/runtime-env";
 import {
   resolveOpenProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/runtime-group-policy";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "carapace/plugin-sdk/security-runtime";
 import {
   getSessionEntry,
   readSessionUpdatedAt,
   resolveSendPolicy,
   resolveStorePath,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
-import { waitForTransportReady } from "openclaw/plugin-sdk/transport-ready-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
+import { waitForTransportReady } from "carapace/plugin-sdk/transport-ready-runtime";
 import { resolveIMessageAccount } from "../accounts.js";
 import { iMessageApprovalControlBindings } from "../approval-control-binding-window.js";
 import type { IMessageApprovalGatewayRuntime } from "../approval-gateway-types.js";
@@ -139,7 +139,7 @@ const IMESSAGE_TYPING_KEEPALIVE_INTERVAL_MS = 8_000;
 const IMESSAGE_TYPING_KEEPALIVE_MAX_DURATION_MS = 10 * 60_000;
 type IMessageTypingController = Parameters<NonNullable<GetReplyOptions["onTypingController"]>>[0];
 
-function resolveConfiguredIMessageTypingMode(cfg: OpenClawConfig, agentId: string) {
+function resolveConfiguredIMessageTypingMode(cfg: CarapaceConfig, agentId: string) {
   return resolveAgentConfig(cfg, agentId)?.typingMode ?? cfg.agents?.defaults?.typingMode;
 }
 

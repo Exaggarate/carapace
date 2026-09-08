@@ -208,7 +208,7 @@ suite.define(() => {
       const storedWorktree = await page.evaluate(() => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("carapace.new-session.preferences.v1:"));
         const value = key
           ? (JSON.parse(localStorage.getItem(key) ?? "null") as {
               agents?: Record<string, { worktree?: boolean }>;
@@ -469,7 +469,7 @@ suite.define(() => {
             // Navigation selects the accepted session before awaiting route preparation.
             await expect
               .poll(() =>
-                page.locator("openclaw-app").evaluate((element) => {
+                page.locator("carapace-app").evaluate((element) => {
                   const app = element as HTMLElement & {
                     runtime: { context: ApplicationContext };
                   };
@@ -482,7 +482,7 @@ suite.define(() => {
 
           await page.evaluate(() => window.dispatchEvent(new Event("test-release-recovery-scope")));
           await waitForGatewayRecoveryScope(page);
-          await page.locator("openclaw-new-session-page").evaluate(async (element) => {
+          await page.locator("carapace-new-session-page").evaluate(async (element) => {
             await (element as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
           });
           expect(await page.locator(".new-session-page__error").allTextContents()).toEqual([]);
@@ -585,7 +585,7 @@ suite.define(() => {
           await gateway.setGatewayBootId("different-gateway-process");
         } else {
           const hello = await page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime: { context: ApplicationContext };
             };
             return app.runtime.context.gateway.snapshot.hello;
@@ -704,7 +704,7 @@ suite.define(() => {
       });
 
       await pollLocatorText(page.locator(".new-session-page__runtime")).toContain("Claude Code");
-      await pollLocatorText(folderLabel).toBe("openclaw");
+      await pollLocatorText(folderLabel).toBe("carapace");
       await page.locator(".new-session-page__message").fill("retarget this draft");
       await page.getByRole("button", { name: "Start in terminal" }).click();
 

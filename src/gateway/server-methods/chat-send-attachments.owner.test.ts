@@ -2,14 +2,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { expect, it, vi } from "vitest";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { prepareChatSendAttachments } from "./chat-send-attachments.js";
 import { normalizeChatSendRequest } from "./chat-send-request.js";
 
 it.each(["off", "all"] as const)(
   "prepares both owners' global attachments with sandbox %s",
   async (mode) => {
-    await withOpenClawTestState({ label: "gateway-media-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "gateway-media-owner" }, async (state) => {
       const cfg = {
         agents: {
           ownership: "explicit" as const,

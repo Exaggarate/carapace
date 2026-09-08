@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   appendTranscriptEventSync,
   appendTranscriptMessageSync,
@@ -18,14 +18,14 @@ import {
 } from "./transcript-write-context.js";
 
 async function withWriteTarget(run: (target: SessionTranscriptRuntimeTarget) => Promise<void>) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "owned-transcript-commit", scenario: "minimal" },
     async (state) => {
       await run({
         agentId: "main",
         sessionId: "owned-session",
         sessionKey: "agent:main:owned-transcript-commit",
-        storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
       });
     },
   );
@@ -140,7 +140,7 @@ describe("owned transcript writer fence scope", () => {
   const runningTarget = {
     agentId: "main",
     sessionKey: "agent:main:running",
-    storePath: "/state/agents/main/openclaw-agent.sqlite",
+    storePath: "/state/agents/main/carapace-agent.sqlite",
     expectedLifecycleRevision: "rev-3",
     expectedWriterRunId: "run-running",
   };
@@ -188,7 +188,7 @@ describe("owned transcript writer fence scope", () => {
         getOwnedSessionTranscriptWriterFence({
           sessionTarget: {
             ...runningTarget,
-            storePath: "/state/agents/other/openclaw-agent.sqlite",
+            storePath: "/state/agents/other/carapace-agent.sqlite",
           },
         }),
       ).toBeUndefined();

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const loadQaRunnerBundledPluginTestApi = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/qa-runner-runtime", () => ({
+vi.mock("carapace/plugin-sdk/qa-runner-runtime", () => ({
   loadQaRunnerBundledPluginTestApi,
 }));
 

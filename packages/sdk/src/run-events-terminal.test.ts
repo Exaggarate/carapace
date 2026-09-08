@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { EventHub, OpenClaw } from "./index.js";
-import type { GatewayEvent, OpenClawEvent, OpenClawTransport } from "./types.js";
+import { EventHub, Carapace } from "./index.js";
+import type { GatewayEvent, CarapaceEvent, CarapaceTransport } from "./types.js";
 
 const runId = "sdk-observed-run";
 
@@ -9,17 +9,17 @@ async function collectSdkRunFixture(
   frames: readonly [GatewayEvent, ...GatewayEvent[]],
 ) {
   const hub = new EventHub<GatewayEvent>({ replayLimit: 10 });
-  const transport: OpenClawTransport = {
+  const transport: CarapaceTransport = {
     request: async () => {
       throw new Error("This stream test must not issue RPC requests");
     },
     events: (filter) => hub.stream(filter, { replay: true }),
     close: () => hub.close(),
   };
-  const oc = new OpenClaw({ transport });
+  const oc = new Carapace({ transport });
   const run = await oc.runs.get(runId);
   const iterator = run.events()[Symbol.asyncIterator]();
-  const observed: OpenClawEvent[] = [];
+  const observed: CarapaceEvent[] = [];
   const collect = async () => {
     while (true) {
       const next = await iterator.next();

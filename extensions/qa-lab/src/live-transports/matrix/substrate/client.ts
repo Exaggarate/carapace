@@ -1,10 +1,10 @@
 // Qa Lab Matrix module implements client behavior.
 import { randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { uniqueValues } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { uniqueValues } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildMatrixQaMediaMessageContent,
   buildMatrixQaMessageContent,
@@ -584,19 +584,19 @@ export async function provisionMatrixQaRoom(params: {
   });
   const [driver, sut, observer] = await Promise.all([
     anonClient.registerWithToken({
-      deviceName: "OpenClaw Matrix QA Driver",
+      deviceName: "Carapace Matrix QA Driver",
       localpart: params.driverLocalpart,
       password: `driver-${randomUUID()}`,
       registrationToken: params.registrationToken,
     }),
     anonClient.registerWithToken({
-      deviceName: "OpenClaw Matrix QA SUT",
+      deviceName: "Carapace Matrix QA SUT",
       localpart: params.sutLocalpart,
       password: `sut-${randomUUID()}`,
       registrationToken: params.registrationToken,
     }),
     anonClient.registerWithToken({
-      deviceName: "OpenClaw Matrix QA Observer",
+      deviceName: "Carapace Matrix QA Observer",
       localpart: params.observerLocalpart,
       password: `observer-${randomUUID()}`,
       registrationToken: params.registrationToken,
@@ -629,7 +629,7 @@ export async function provisionMatrixQaRoom(params: {
   // ignores them. Passive readers must never share the encrypted actor's device.
   const createObservationAccount = (account: MatrixQaRegisteredAccount) =>
     anonClient.loginWithPassword({
-      deviceName: "OpenClaw Matrix QA Room Observation",
+      deviceName: "Carapace Matrix QA Room Observation",
       password: account.password,
       userId: account.userId,
     });

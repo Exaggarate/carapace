@@ -4,7 +4,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   claimAgentRunDelegatedAuthority,
   releaseAgentRunDelegatedAuthority,
@@ -13,18 +13,18 @@ import {
 } from "../infra/agent-run-registry.js";
 import { loadExecApprovalsReadOnly } from "../infra/exec-approvals-store.js";
 import { registerMcpToolApprovalBinding } from "../infra/mcp-tool-approval-binding.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createGatewayAuxHandlers } from "./server-aux-handlers.js";
 import { createPluginApprovalHandlers } from "./server-methods/plugin-approval.js";
 import type { GatewayRequestHandlerOptions } from "./server-methods/types.js";
 
 const auxiliaries: ReturnType<typeof createGatewayAuxHandlers>[] = [];
-let fixture: OpenClawTestState | undefined;
-const cfg: OpenClawConfig = {
+let fixture: CarapaceTestState | undefined;
+const cfg: CarapaceConfig = {
   agents: { list: [{ id: "main" }, { id: "other" }] },
   mcp: { servers: { "project.docs": { command: "docs-mcp" } } },
 };
@@ -55,7 +55,7 @@ beforeEach(async () => {
   if (fixture) {
     throw new Error("Previous auxiliary owner cleanup did not finish");
   }
-  fixture = await createOpenClawTestState({ label: "mcp-tool-grants" });
+  fixture = await createCarapaceTestState({ label: "mcp-tool-grants" });
   setRuntimeConfigSnapshot(cfg);
 });
 afterEach(async () => {
@@ -64,7 +64,7 @@ afterEach(async () => {
   }
   auxiliaries.length = 0;
   resetAgentRunRegistryForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   clearRuntimeConfigSnapshot();
   await fixture?.cleanup();
   fixture = undefined;
@@ -162,7 +162,7 @@ describe("gateway MCP tool grants", () => {
     expect(loadExecApprovalsReadOnly().agents).toEqual({ main: { mcpTools: [expected] } });
     expect(aux.pluginApprovalManager.resolve(record.id, "allow-always")).toBe(false);
     await aux.stopOperatorInteractions();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const restarted = gateway();
     expect(restarted.pluginApprovalManager.runtimeEpoch).not.toBe(
       aux.pluginApprovalManager.runtimeEpoch,

@@ -4,14 +4,14 @@
  * Lets channel plugins hide generic local prompts while native approval routes are active.
  */
 import type { ReplyPayload } from "../../auto-reply/reply-payload.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getGatewayNativeApprovalRuntime } from "../../infra/approval-gateway-runtime-context.js";
 import { hasActiveApprovalNativeRouteRuntime } from "../../infra/approval-native-route-coordinator.js";
 import { getChannelPlugin, normalizeChannelId } from "./registry.js";
 
 export function shouldSuppressLocalExecApprovalPrompt(params: {
   channel?: string | null;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   payload: ReplyPayload;
 }): boolean {

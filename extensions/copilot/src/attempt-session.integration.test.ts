@@ -1,6 +1,6 @@
 import type { CopilotClient } from "@github/copilot-sdk";
-import type { AgentHarnessAttemptParamsV2 } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+import type { AgentHarnessAttemptParamsV2 } from "carapace/plugin-sdk/agent-harness-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   cleanupAttemptTranscriptJournalFixtures,

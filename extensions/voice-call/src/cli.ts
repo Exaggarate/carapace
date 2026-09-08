@@ -1,13 +1,13 @@
 // Voice Call plugin module implements cli behavior.
 import path from "node:path";
 import type { Command } from "commander";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { MAX_TCP_PORT } from "openclaw/plugin-sdk/number-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { MAX_TCP_PORT } from "carapace/plugin-sdk/number-runtime";
 import {
   isRecord,
   normalizeOptionalLowercaseString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { registerVoiceCallLogs } from "./cli-call-log.js";
 import { parseCliInteger, writeCliJson, writeCliLine } from "./cli-command-io.js";
 import {
@@ -69,7 +69,7 @@ function resolveDefaultStorePath(config: VoiceCallConfig): string {
   return path.join(base, "calls.jsonl");
 }
 
-function buildSetupStatus(config: VoiceCallConfig, coreConfig: OpenClawConfig): SetupStatus {
+function buildSetupStatus(config: VoiceCallConfig, coreConfig: CarapaceConfig): SetupStatus {
   const validation = validateProviderConfig(config);
   const webhookExposure = resolveWebhookExposureStatus(config);
   const checks: SetupCheck[] = [
@@ -134,7 +134,7 @@ function writeSetupStatus(status: SetupStatus): void {
 export function registerVoiceCallCli(params: {
   program: Command;
   config: VoiceCallConfig;
-  coreConfig: OpenClawConfig;
+  coreConfig: CarapaceConfig;
   ensureRuntime: () => Promise<VoiceCallRuntime>;
   stateRuntime?: VoiceCallStateRuntime["state"];
   logger: Logger;
@@ -148,7 +148,7 @@ export function registerVoiceCallCli(params: {
   const root = program
     .command("voicecall")
     .description("Voice call utilities")
-    .addHelpText("after", () => `\nDocs: https://docs.openclaw.ai/cli/voicecall\n`);
+    .addHelpText("after", () => `\nDocs: https://github.com/Exaggarate/carapace\n`);
 
   root
     .command("setup")
@@ -170,7 +170,7 @@ export function registerVoiceCallCli(params: {
     .option(
       "--message <text>",
       "Message to speak during the smoke call",
-      "OpenClaw voice call smoke test.",
+      "Carapace voice call smoke test.",
     )
     .option("--mode <mode>", "Call mode: notify or conversation", "notify")
     .option("--yes", "Actually place the live outbound call")

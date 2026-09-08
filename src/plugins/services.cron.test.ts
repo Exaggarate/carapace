@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CronService } from "../cron/service.js";
 import { createCronStoreHarness, createNoopLogger } from "../cron/service.test-harness.js";
@@ -6,7 +6,7 @@ import { loadCronStore } from "../cron/store.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { createEmptyPluginRegistry } from "./registry.js";
 import { startPluginServices, type PluginServicesHandle } from "./services.js";
-import type { OpenClawPluginServiceContext } from "./types.js";
+import type { CarapacePluginServiceContext } from "./types.js";
 
 const { makeStorePath } = createCronStoreHarness({ prefix: "plugin-service-cron-" });
 const handles = new Set<PluginServicesHandle>();
@@ -42,7 +42,7 @@ async function createScheduler() {
 
 async function startService(getCronService?: () => CronService) {
   const registry = createEmptyPluginRegistry();
-  let context: OpenClawPluginServiceContext | undefined;
+  let context: CarapacePluginServiceContext | undefined;
   registry.services.push({
     pluginId: "test-plugin",
     origin: "workspace",

@@ -1,6 +1,6 @@
 // Context-engine registry owns engine registration, resolution, compatibility, and quarantine.
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type {
   ContextEngineFactory,
   ContextEngineFactoryContext,
@@ -211,7 +211,7 @@ function wrapResolvedContextEngine(
 // Registry (module-level singleton)
 // ---------------------------------------------------------------------------
 
-const CONTEXT_ENGINE_REGISTRY_STATE = Symbol.for("openclaw.contextEngineRegistryState");
+const CONTEXT_ENGINE_REGISTRY_STATE = Symbol.for("carapace.contextEngineRegistryState");
 const CORE_CONTEXT_ENGINE_OWNER = "core";
 
 type ContextEngineRuntimeQuarantine = {
@@ -624,7 +624,7 @@ async function resolveRawContextEngineRef(
  * process quarantine. A failed configured engine is retried by the next turn.
  */
 export async function resolveLogicalTurnContextEngines(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   options?: ResolveContextEngineOptions,
 ): Promise<LogicalTurnContextEngineResolution> {
   const defaultEngineId = defaultSlotIdForKey("contextEngine");
@@ -691,7 +691,7 @@ export async function resolveLogicalTurnContextEngines(
  * Throws only when the default engine itself cannot be resolved.
  */
 export async function resolveContextEngine(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   options?: ResolveContextEngineOptions,
 ): Promise<ContextEngine> {
   const defaultEngineId = defaultSlotIdForKey("contextEngine");

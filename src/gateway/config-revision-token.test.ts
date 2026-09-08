@@ -3,32 +3,32 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { assertSqliteSchemaContains } from "../infra/sqlite-schema-contract.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { getOpenClawStateRuntimeSchema } from "../state/openclaw-state-schema-compatibility.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { getCarapaceStateRuntimeSchema } from "../state/carapace-state-schema-compatibility.js";
 import { loadGatewayConfigRevisionProjector } from "./config-revision-token.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function stateOptions() {
-  return { path: join(tempDirs.make("openclaw-config-revision-"), "openclaw.sqlite") };
+  return { path: join(tempDirs.make("carapace-config-revision-"), "carapace.sqlite") };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("Gateway config revision tokens", () => {
   it("lazily persists one opaque domain-separated key without changing schema version", () => {
     const options = stateOptions();
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     const schemaVersion = database.prepare("PRAGMA user_version").get()?.user_version;
     database.exec("DROP TABLE config_revision_keys;");
-    closeOpenClawStateDatabaseForTest();
-    const reopened = openOpenClawStateDatabase(options).db;
+    closeCarapaceStateDatabaseForTest();
+    const reopened = openCarapaceStateDatabase(options).db;
     expect(tableExists(reopened, "config_revision_keys")).toBe(false);
 
     const projector = loadGatewayConfigRevisionProjector(options);
@@ -52,18 +52,18 @@ describe("Gateway config revision tokens", () => {
       assertSqliteSchemaContains(
         reopened,
         "previous state-schema reader",
-        getOpenClawStateRuntimeSchema({ includeVersionLazyAdditiveTables: false }),
+        getCarapaceStateRuntimeSchema({ includeVersionLazyAdditiveTables: false }),
       ),
     ).not.toThrow();
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(loadGatewayConfigRevisionProjector(options).projectRawHash(rawHash)).toBe(rawToken);
   });
 
   it("fails closed instead of replacing corrupt persisted key material", () => {
     const options = stateOptions();
     loadGatewayConfigRevisionProjector(options);
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     database.exec("PRAGMA ignore_check_constraints = ON;");
     database
       .prepare("UPDATE config_revision_keys SET hmac_key = ? WHERE id = 1")

@@ -2,14 +2,14 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   hasLegacyAccountStreamingAliases,
   stripRetiredChannelKeys,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { normalizeCompatibilityConfig as normalizeAckReactionConfig } from "./doctor.js";
 
 // WhatsApp's nested streaming schema is delivery-only ({chunkMode, block});
@@ -34,28 +34,28 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "whatsapp", "ackReaction"],
     message:
-      'channels.whatsapp.ackReaction moved to global message acknowledgement settings. Run "openclaw doctor --fix".',
+      'channels.whatsapp.ackReaction moved to global message acknowledgement settings. Run "carapace doctor --fix".',
   },
   {
     path: ["channels", "whatsapp", "accounts"],
     message:
-      'channels.whatsapp.accounts.<id>.ackReaction moved to global message acknowledgement settings. Run "openclaw doctor --fix".',
+      'channels.whatsapp.accounts.<id>.ackReaction moved to global message acknowledgement settings. Run "carapace doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasAckReaction),
   },
   {
     path: ["channels", "whatsapp", "exposeErrorText"],
     message:
-      'channels.whatsapp.exposeErrorText is retired and ignored. Run "openclaw doctor --fix".',
+      'channels.whatsapp.exposeErrorText is retired and ignored. Run "carapace doctor --fix".',
   },
   {
     path: ["channels", "whatsapp", "accounts"],
     message:
-      'channels.whatsapp.accounts.<id>.exposeErrorText is retired and ignored. Run "openclaw doctor --fix".',
+      'channels.whatsapp.accounts.<id>.exposeErrorText is retired and ignored. Run "carapace doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasExposeErrorText),
   },
 ];
 
-function removeExposeErrorText(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+function removeExposeErrorText(cfg: CarapaceConfig, changes: string[]): CarapaceConfig {
   return stripRetiredChannelKeys({
     cfg,
     channelId: "whatsapp",
@@ -68,7 +68,7 @@ function removeExposeErrorText(cfg: OpenClawConfig, changes: string[]): OpenClaw
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   const ackReaction = normalizeAckReactionConfig({ cfg });
   const retiredConfig = removeExposeErrorText(ackReaction.config, ackReaction.changes);

@@ -3031,12 +3031,12 @@ describe("tui-event-handlers: handleAgentEvent", () => {
       const sourceReply = {
         role: "assistant",
         content: [{ type: "text", text: "Visible progress from the targetless message tool." }],
-        ...(sourceMetadata ? { __openclaw: sourceMetadata } : {}),
+        ...(sourceMetadata ? { __carapace: sourceMetadata } : {}),
       };
       const automaticReply = {
         role: "assistant",
         content: [{ type: "text", text: "Visible automatic final reply." }],
-        ...(finalMetadata ? { __openclaw: finalMetadata } : {}),
+        ...(finalMetadata ? { __carapace: finalMetadata } : {}),
       };
       const sourceEvent = makeChatEvent(state, {
         runId: "run-message-tool",
@@ -3351,7 +3351,7 @@ describe("tui-event-handlers: handleAgentEvent", () => {
         message: {
           role: "user",
           content: [{ type: "text", text: "Canonical cross-client prompt." }],
-          ...(metadata ? { __openclaw: metadata } : {}),
+          ...(metadata ? { __carapace: metadata } : {}),
         },
       });
 
@@ -3386,7 +3386,7 @@ describe("tui-event-handlers: handleAgentEvent", () => {
         message: {
           role: "user",
           content: "Partially imported prompt.",
-          __openclaw: {
+          __carapace: {
             id: "provider-local-id",
             importedFrom: "claude-cli",
             ...(persistedSequence === null ? {} : { seq: persistedSequence }),
@@ -3420,7 +3420,7 @@ describe("tui-event-handlers: handleAgentEvent", () => {
           message: {
             ...(includeMessageMetadata
               ? {
-                  __openclaw: {
+                  __carapace: {
                     id: "shared-session-user",
                     idempotencyKey: `${runId}:user`,
                     seq: 1,
@@ -3555,7 +3555,7 @@ describe("tui-event-handlers: handleAgentEvent", () => {
         message: {
           role: "user",
           content: "private previous-session prompt",
-          __openclaw: { id: "previous-session-message", seq: 1 },
+          __carapace: { id: "previous-session-message", seq: 1 },
         },
       });
 

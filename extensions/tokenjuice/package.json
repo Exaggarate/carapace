@@ -1,34 +1,34 @@
 {
-  "name": "@openclaw/tokenjuice",
+  "name": "@carapace/tokenjuice",
   "version": "2026.9.2",
-  "description": "OpenClaw tokenjuice exec output compaction plugin",
+  "description": "Carapace tokenjuice exec output compaction plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
     "tokenjuice": "0.8.1"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/tokenjuice",
-      "npmSpec": "@openclaw/tokenjuice",
+      "clawhubSpec": "clawhub:@carapace/tokenjuice",
+      "npmSpec": "@carapace/tokenjuice",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.5.28"
     },
@@ -36,7 +36,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {

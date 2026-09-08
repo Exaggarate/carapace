@@ -17,7 +17,7 @@ afterEach(cleanup);
 
 describe("qa runner model catalog", () => {
   it("filters catalog output and prefers gpt-5.6-luna first", async () => {
-    const repoRoot = await makeTempDir("openclaw-qa-model-catalog-output-");
+    const repoRoot = await makeTempDir("carapace-qa-model-catalog-output-");
     await fs.mkdir(path.join(repoRoot, "dist"), { recursive: true });
     await fs.writeFile(
       path.join(repoRoot, "dist", "index.js"),
@@ -62,7 +62,7 @@ describe("qa runner model catalog", () => {
   });
 
   it("reports malformed catalog JSON with an owned error", async () => {
-    const repoRoot = await makeTempDir("openclaw-qa-model-catalog-malformed-");
+    const repoRoot = await makeTempDir("carapace-qa-model-catalog-malformed-");
     await fs.mkdir(path.join(repoRoot, "dist"), { recursive: true });
     await fs.writeFile(
       path.join(repoRoot, "dist", "index.js"),
@@ -78,7 +78,7 @@ describe("qa runner model catalog", () => {
   it.runIf(process.platform !== "win32")(
     "kills aborted catalog process groups when the catalog child exits first",
     async () => {
-      const repoRoot = await makeTempDir("openclaw-qa-model-catalog-");
+      const repoRoot = await makeTempDir("carapace-qa-model-catalog-");
       const pidPath = path.join(repoRoot, "descendant.pid");
       let descendantPid: number | undefined;
       const controller = new AbortController();
@@ -118,7 +118,7 @@ describe("qa runner model catalog", () => {
   it.runIf(process.platform !== "win32")(
     "preserves abort grace when catalog descendants exit cleanly",
     async () => {
-      const repoRoot = await makeTempDir("openclaw-qa-model-catalog-clean-");
+      const repoRoot = await makeTempDir("carapace-qa-model-catalog-clean-");
       const readyPath = path.join(repoRoot, "descendant.ready");
       const cleanupPath = path.join(repoRoot, "descendant.cleanup");
       const pidPath = path.join(repoRoot, "descendant.pid");

@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { ModelCatalogEntry } from "../agents/model-catalog.js";
 import { resolveSessionModelIdentityRef } from "../agents/session-model-ref.js";
 import { getSessionDisplaySubagentRunByChildSessionKey } from "../agents/subagents/registry/subagent-registry-read.js";
@@ -12,7 +12,7 @@ import {
   type SessionEntry,
 } from "../config/sessions.js";
 import type { GatewayStoredSessionTargets } from "../config/sessions/combined-store-gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatAgentRuntimeLabel } from "../shared/agent-runtime-display.js";
 import { formatGoalSummary } from "../shared/session-goal-display.js";
 import { isSessionRunActive } from "../shared/session-run-state.js";
@@ -103,7 +103,7 @@ export function resolveSessionListRowContext(params: {
 
 function resolveSessionListSearchModelFields(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   entry?: SessionEntry;
   rowContext?: SessionListRowContext;
@@ -148,7 +148,7 @@ function resolveSessionListSearchModelFields(params: {
 }
 
 export function createSessionListSearchMatcher(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   search: string;
   targetsBySessionKey: GatewayStoredSessionTargets;
   now: number;
@@ -332,7 +332,7 @@ export function loadGatewaySessionRow(
 }
 
 export function buildGatewaySessionInfo(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   storePath: string;
   store: Record<string, SessionEntry>;
   key: string;

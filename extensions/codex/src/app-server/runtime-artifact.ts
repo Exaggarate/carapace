@@ -3,19 +3,19 @@ import { createHash } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AgentHarnessRuntimeArtifactBinding } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import type { AgentHarnessRuntimeArtifactBinding } from "carapace/plugin-sdk/agent-harness-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   resolveWindowsExecutablePath,
   resolveWindowsSpawnProgram,
-} from "openclaw/plugin-sdk/windows-spawn";
+} from "carapace/plugin-sdk/windows-spawn";
 import type { CodexAppServerClient, CodexAppServerRuntimeIdentity } from "./client.js";
 import type { CodexAppServerStartOptions } from "./config.js";
 import { resolvePackagedCodexNativeCommand } from "./managed-binary.js";
 import { resolveCodexAppServerSpawnEnv } from "./transport-stdio.js";
 
 const ARTIFACT_ID_PREFIX = "codex-app-server:v1:";
-const ARTIFACT_HASH_DOMAIN = "openclaw-codex-app-server-runtime-artifact-v1\0";
+const ARTIFACT_HASH_DOMAIN = "carapace-codex-app-server-runtime-artifact-v1\0";
 const MAX_ARTIFACT_ID_BYTES = 32 * 1024;
 const MAX_ARTIFACT_PATH_BYTES = 4096;
 const MAX_ARTIFACT_INVOCATION_PATHS = 8;
@@ -47,7 +47,7 @@ const SAFE_NODE_OPTIONS_NUMERIC_FLAGS = new Set([
   "--stack-trace-limit",
 ]);
 const SAFE_NODE_OPTIONS_DNS_RESULT_ORDERS = new Set(["ipv4first", "ipv6first", "verbatim"]);
-const ARTIFACT_BINDINGS_SYMBOL = Symbol.for("openclaw.codexAppServerRuntimeArtifactBindings");
+const ARTIFACT_BINDINGS_SYMBOL = Symbol.for("carapace.codexAppServerRuntimeArtifactBindings");
 
 type CodexRuntimeArtifactSpawnIdentity = Readonly<{
   command: string;

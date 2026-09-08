@@ -81,7 +81,7 @@ try {
     ...restrictions,
     // Match the canonical mock Gateway build identity, not a live-server claim.
     "--env",
-    "OPENCLAW_CONTROL_UI_BUILD_ID=e2e",
+    "CARAPACE_CONTROL_UI_BUILD_ID=e2e",
     "--env",
     `GITHUB_SHA=${candidate}`,
     "--workdir",

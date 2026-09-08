@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withEnv, withPathResolutionEnv } from "../../test-utils/env.js";
 import { createFixtureSuite } from "../../test-utils/fixture-suite.js";
 import { createTempHomeEnv, type TempHomeEnv } from "../../test-utils/temp-home.js";
@@ -21,7 +21,7 @@ vi.mock("./plugin-skills.js", () => ({
   resolvePluginSkillRoots: () => [],
 }));
 
-const fixtureSuite = createFixtureSuite("openclaw-skills-snapshot-suite-");
+const fixtureSuite = createFixtureSuite("carapace-skills-snapshot-suite-");
 const directorySymlinkType = process.platform === "win32" ? "junction" : "dir";
 let truncationWorkspaceTemplateDir = "";
 let tempHome: TempHomeEnv | null = null;
@@ -29,7 +29,7 @@ let skillsHomeEnv: SkillsHomeEnvSnapshot | null = null;
 
 beforeAll(async () => {
   await fixtureSuite.setup();
-  tempHome = await createTempHomeEnv("openclaw-skills-snapshot-home-");
+  tempHome = await createTempHomeEnv("carapace-skills-snapshot-home-");
   skillsHomeEnv = setMockSkillsHomeEnv(tempHome.home);
   truncationWorkspaceTemplateDir = await fixtureSuite.createCaseDir(
     "template-truncation-workspace",
@@ -89,7 +89,7 @@ async function writeCustodianSkillFixture(workspaceDir: string): Promise<void> {
 
 function buildAgentSnapshot(params: {
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
 }) {
   return buildSnapshot(params.workspaceDir, {
@@ -155,7 +155,7 @@ describe("buildSkillSnapshot", () => {
   it("keeps custodian skills absent from every non-custodian discovery surface", async () => {
     const workspaceDir = await fixtureSuite.createCaseDir("custodian-gate");
     await writeCustodianSkillFixture(workspaceDir);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         defaults: { systemAgent: { agentId: "ops" } },
         entries: { ops: {}, writer: {} },
@@ -178,7 +178,7 @@ describe("buildSkillSnapshot", () => {
 
     expect(firstCustodianSnapshot.skills.map((skill) => skill.name)).toEqual(CUSTODIAN_SKILL_NAMES);
     expect(firstCustodianSnapshot.resolvedSkills?.map((skill) => skill.source)).toEqual(
-      CUSTODIAN_SKILL_NAMES.map(() => "openclaw-custodian"),
+      CUSTODIAN_SKILL_NAMES.map(() => "carapace-custodian"),
     );
     expect(secondCustodianSnapshot.skills).toEqual(firstCustodianSnapshot.skills);
     expect(secondCustodianSnapshot.prompt).toBe(firstCustodianSnapshot.prompt);
@@ -186,10 +186,10 @@ describe("buildSkillSnapshot", () => {
     expect(writerSnapshot.prompt).toBe("");
     expect(
       custodianStatus.skills
-        .filter((skill) => skill.source === "openclaw-custodian")
+        .filter((skill) => skill.source === "carapace-custodian")
         .map((skill) => skill.name),
     ).toEqual(CUSTODIAN_SKILL_NAMES);
-    expect(writerStatus.skills.filter((skill) => skill.source === "openclaw-custodian")).toEqual(
+    expect(writerStatus.skills.filter((skill) => skill.source === "carapace-custodian")).toEqual(
       [],
     );
   });
@@ -198,10 +198,10 @@ describe("buildSkillSnapshot", () => {
     const workspaceDir = await fixtureSuite.createCaseDir("custodian-owner-fallback");
     await writeCustodianSkillFixture(workspaceDir);
 
-    const soleAgentConfig: OpenClawConfig = {
+    const soleAgentConfig: CarapaceConfig = {
       agents: { entries: { caretaker: {} } },
     };
-    const ambiguousConfig: OpenClawConfig = {
+    const ambiguousConfig: CarapaceConfig = {
       agents: { entries: { ops: {}, writer: {} } },
     };
     const soleSnapshot = buildAgentSnapshot({
@@ -225,7 +225,7 @@ describe("buildSkillSnapshot", () => {
   it("applies per-skill disabled overrides to custodian skills", async () => {
     const workspaceDir = await fixtureSuite.createCaseDir("custodian-disabled");
     await writeCustodianSkillFixture(workspaceDir);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         defaults: { systemAgent: { agentId: "ops" } },
         entries: { ops: {} },
@@ -348,7 +348,7 @@ describe("buildSkillSnapshot", () => {
       });
     try {
       const defaultSnapshot = withEnv(
-        { HOME: home, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") },
+        { HOME: home, CARAPACE_STATE_DIR: path.join(home, ".carapace") },
         buildHomeSnapshot,
       );
       expectSnapshotNamesAndPrompt(defaultSnapshot, { contains: ["personal-compat"] });
@@ -357,7 +357,7 @@ describe("buildSkillSnapshot", () => {
       );
 
       const isolatedSnapshot = withEnv(
-        { HOME: home, OPENCLAW_STATE_DIR: path.join(home, "scratch-state") },
+        { HOME: home, CARAPACE_STATE_DIR: path.join(home, "scratch-state") },
         buildHomeSnapshot,
       );
       expectSnapshotNamesAndPrompt(isolatedSnapshot, { omits: ["personal-compat"] });

@@ -11,15 +11,15 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { resolveAgentDir, resolveDefaultAgentDir } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveAgentDir, resolveDefaultAgentDir } from "carapace/plugin-sdk/agent-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   validateJsonSchemaValue,
   type JsonSchemaObject,
-} from "openclaw/plugin-sdk/json-schema-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/json-schema-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   createCapturedPluginRegistration,
   createEmptyPluginRegistry,
@@ -27,14 +27,14 @@ import {
   getActivePluginRegistry,
   setActivePluginRegistry,
   resetPluginRuntimeStateForTest,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { SessionCatalogProvider as RegisteredSessionCatalogProvider } from "openclaw/plugin-sdk/session-catalog";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { SessionCatalogProvider as RegisteredSessionCatalogProvider } from "carapace/plugin-sdk/session-catalog";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, vi } from "vitest";
 import { createCodexAppServerAgentHarness } from "../harness.js";
 import {
@@ -91,7 +91,7 @@ export const tempDirs: string[] = [];
 beforeEach(() => {
   const stateDir = fsSync.mkdtempSync(path.join(os.tmpdir(), "codex-catalog-owner-"));
   tempDirs.push(stateDir);
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   nodeHostMocks.runNodePtyCommand.mockClear();
   nodeHostMocks.userShellPaths.clear();
   commandRpcMocks.codexControlRequest.mockReset();
@@ -107,8 +107,8 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetPluginRuntimeStateForTest();
   vi.unstubAllEnvs();
   process.env.PATH = originalPath;
@@ -245,7 +245,7 @@ export function registerCodexSessionCatalog(
       ? baseControl
       : (() => {
           const resolver = createCodexCatalogHomeResolver({
-            config: params.getRuntimeConfig() ?? (params.api.config as OpenClawConfig),
+            config: params.getRuntimeConfig() ?? (params.api.config as CarapaceConfig),
             getRuntimeConfig: params.getRuntimeConfig,
             getPluginConfig,
           });
@@ -344,21 +344,21 @@ function bindTestCatalogOwner(provider: RegisteredSessionCatalogProvider): Sessi
   } as SessionCatalogProvider;
 }
 
-export const config = {} as OpenClawConfig;
+export const config = {} as CarapaceConfig;
 
-export function compatibilityOwnerConfig(owner = "alpha"): OpenClawConfig {
+export function compatibilityOwnerConfig(owner = "alpha"): CarapaceConfig {
   return {
     agents: {
       list: ["alpha", "beta"].map((id) => (id === owner ? { id, default: true } : { id })),
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 export async function normalizeCodexManifestConfig(
   value: unknown,
 ): Promise<Record<string, unknown>> {
   const manifest = JSON.parse(
-    await fs.readFile(new URL("../openclaw.plugin.json", import.meta.url), "utf8"),
+    await fs.readFile(new URL("../carapace.plugin.json", import.meta.url), "utf8"),
   ) as { configSchema: JsonSchemaObject };
   const result = validateJsonSchemaValue({
     cacheKey: "codex.session-catalog.manifest-config",
@@ -441,7 +441,7 @@ export function adoptedEntry(params: {
   sessionId?: string;
 }) {
   return {
-    sessionId: params.sessionId ?? "openclaw-session-existing",
+    sessionId: params.sessionId ?? "carapace-session-existing",
     updatedAt: 1,
     agentHarnessId: "codex",
     modelSelectionLocked: true,
@@ -630,7 +630,7 @@ export function createRuntime(
 export function archiveTestSession(params: {
   control: CodexSessionCatalogControl;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   bindingStore?: CodexAppServerBindingStore;
   runtime?: PluginRuntime;
   threadId?: string;
@@ -647,7 +647,7 @@ export function archiveTestSession(params: {
   });
 }
 
-export function createGatewayApi(runtime: PluginRuntime, apiConfig: OpenClawConfig = {}) {
+export function createGatewayApi(runtime: PluginRuntime, apiConfig: CarapaceConfig = {}) {
   let provider: SessionCatalogProvider | undefined;
   const registerSessionCatalog = vi.fn((candidate: RegisteredSessionCatalogProvider) => {
     provider = bindTestCatalogOwner(candidate);
@@ -656,7 +656,7 @@ export function createGatewayApi(runtime: PluginRuntime, apiConfig: OpenClawConf
     config: apiConfig,
     runtime,
     registerSessionCatalog,
-  } as unknown as OpenClawPluginApi;
+  } as unknown as CarapacePluginApi;
   return { api, getProvider: () => provider, registerSessionCatalog };
 }
 
@@ -695,6 +695,6 @@ export type {
   CodexAppServerThreadBinding,
   CodexCatalogHome,
   CodexThread,
-  OpenClawConfig,
+  CarapaceConfig,
   PluginRuntime,
 };

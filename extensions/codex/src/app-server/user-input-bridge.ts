@@ -6,7 +6,7 @@ import {
   type AgentHarnessUserInputOption,
   type AgentHarnessUserInputQuestion,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { formatCodexDisplayText } from "../command-formatters.js";
 import { createCodexElicitationResponse } from "./elicitation-response.js";
 import {
@@ -168,12 +168,12 @@ export function createCodexUserInputBridge(params: {
           requestId: request.id,
           abort: new AbortController(),
           cancelValue,
-          failureValue: declineElicitation("OpenClaw could not handle this elicitation."),
+          failureValue: declineElicitation("Carapace could not handle this elicitation."),
           run: async (signal) => {
             const result = await execute(
               {
                 kind: "unsupported",
-                message: "OpenClaw declined a malformed or over-limit MCP elicitation request.",
+                message: "Carapace declined a malformed or over-limit MCP elicitation request.",
               },
               params.paramsForRun.timeoutMs ?? DEFAULT_USER_INPUT_TIMEOUT_MS,
               signal,
@@ -201,7 +201,7 @@ export function createCodexUserInputBridge(params: {
         requestId: request.id,
         abort: new AbortController(),
         cancelValue,
-        failureValue: declineElicitation("OpenClaw could not handle this elicitation."),
+        failureValue: declineElicitation("Carapace could not handle this elicitation."),
         run: async (signal) => {
           const result = await execute(compiled.input, timeoutMs, signal);
           if (result.status === "answered") {

@@ -10,9 +10,9 @@ const script = fileURLToPath(
 );
 
 it("checks generated drift and removes retired local declarations without changing external ownership", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-native-catalog-generator-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-native-catalog-generator-"));
   try {
-    const manifestPath = path.join(root, "extensions/owned/openclaw.plugin.json");
+    const manifestPath = path.join(root, "extensions/owned/carapace.plugin.json");
     const feedPath = path.join(root, "scripts/lib/official-external-plugin-catalog.json");
     await fs.mkdir(path.dirname(manifestPath), { recursive: true });
     await fs.mkdir(path.dirname(feedPath), { recursive: true });
@@ -29,8 +29,8 @@ it("checks generated drift and removes retired local declarations without changi
       feedPath,
       JSON.stringify({
         entries: [
-          { openclaw: { plugin: { id: "owned" }, setup: { requiresRuntime: false } } },
-          { openclaw: unknown },
+          { carapace: { plugin: { id: "owned" }, setup: { requiresRuntime: false } } },
+          { carapace: unknown },
         ],
       }),
     );
@@ -45,7 +45,7 @@ it("checks generated drift and removes retired local declarations without changi
     expect(run().status).toBe(0);
     expect(run("--check").status).toBe(0);
     const beforeRemoval = await fs.readFile(feedPath, "utf8");
-    expect(JSON.parse(beforeRemoval).entries[0].openclaw.setup.nativeSessionCatalog).toEqual(
+    expect(JSON.parse(beforeRemoval).entries[0].carapace.setup.nativeSessionCatalog).toEqual(
       catalog,
     );
     await fs.writeFile(manifestPath, JSON.stringify({ id: "owned" }));
@@ -53,8 +53,8 @@ it("checks generated drift and removes retired local declarations without changi
     expect(await fs.readFile(feedPath, "utf8")).toBe(beforeRemoval);
     expect(run().status).toBe(0);
     const feed = JSON.parse(await fs.readFile(feedPath, "utf8"));
-    expect(feed.entries[0].openclaw.setup).toEqual({ requiresRuntime: false });
-    expect(feed.entries[1].openclaw).toEqual(unknown);
+    expect(feed.entries[0].carapace.setup).toEqual({ requiresRuntime: false });
+    expect(feed.entries[1].carapace).toEqual(unknown);
     expect(
       JSON.parse(
         await fs.readFile(path.join(root, "scripts/lib/native-session-catalogs.json"), "utf8"),
@@ -62,7 +62,7 @@ it("checks generated drift and removes retired local declarations without changi
     ).toEqual([]);
     expect(
       await fs.readFile(
-        path.join(root, "apps/macos/Sources/OpenClaw/Resources/NativeSessionCatalogs.json"),
+        path.join(root, "apps/macos/Sources/Carapace/Resources/NativeSessionCatalogs.json"),
         "utf8",
       ),
     ).toBe("[]\n");

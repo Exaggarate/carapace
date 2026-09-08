@@ -4,11 +4,11 @@ import { expect, onTestFinished, test } from "vitest";
 import { SqliteBoardStore } from "../boards/sqlite-board-store.js";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.entry.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
+  closeCarapaceAgentDatabaseByPath,
   listOpenIncognitoAgentDatabases,
-  openOpenClawAgentDatabase,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { boardStore } from "./board-store.js";
 import { rpcReq, testState, writeSessionStore } from "./test-helpers.js";
@@ -140,10 +140,10 @@ test("sessions.list filters dashboard sessions by board existence instead of sav
 test("sessions.list includes boards stored with incognito sessions", async () => {
   await createSessionStoreDir();
   const sessionKey = "agent:main:dashboard:incognito-board";
-  const incognitoPath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" });
-  openOpenClawAgentDatabase({ agentId: "main", path: incognitoPath });
+  const incognitoPath = resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" });
+  openCarapaceAgentDatabase({ agentId: "main", path: incognitoPath });
   onTestFinished(() => {
-    closeOpenClawAgentDatabaseByPath(incognitoPath);
+    closeCarapaceAgentDatabaseByPath(incognitoPath);
   });
   replaceSessionEntrySync(
     { agentId: "main", sessionKey, storePath: incognitoPath },
@@ -180,12 +180,12 @@ test("sessions.list includes boards stored with incognito sessions", async () =>
 test.each(["first", "later"] as const)(
   "sessions.list checks a same-owner sentinel board only in its selected store (board=%s)",
   async (boardStoreName) => {
-    const rootStateDir = process.env.OPENCLAW_STATE_DIR;
+    const rootStateDir = process.env.CARAPACE_STATE_DIR;
     if (!rootStateDir) {
-      throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+      throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
     }
     const stateDir = path.join(rootStateDir, `board-selected-store-${boardStoreName}`);
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const firstPath = path.join(stateDir, "a-first.sqlite");
       const laterPath = path.join(stateDir, "z-later.sqlite");
       for (const [storePath, sessionId] of [

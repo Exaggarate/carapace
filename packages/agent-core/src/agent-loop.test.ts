@@ -1,5 +1,5 @@
 // Agent Core tests cover agent loop behavior.
-import { EventStream } from "@openclaw/ai/event-stream";
+import { EventStream } from "@carapace/ai/event-stream";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
@@ -165,7 +165,7 @@ describe("agentLoop EventStream failures", () => {
 
     expect(agent.state.messages.at(-1)).toMatchObject({
       role: "custom",
-      customType: "openclaw:turn-aborted",
+      customType: "carapace:turn-aborted",
     });
 
     let replayedMessages: Message[] = [];
@@ -202,7 +202,7 @@ describe("agentLoop EventStream failures", () => {
       expect.arrayContaining([
         expect.objectContaining({
           role: "custom",
-          customType: "openclaw:turn-aborted",
+          customType: "carapace:turn-aborted",
         }),
       ]),
     );
@@ -1087,7 +1087,7 @@ describe("agentLoop tool termination", () => {
     expect(queuedMessageStarts.at(-1)?.message).toBe(secondSteer);
     expect(
       requestMessages[1]?.find((message) => message.role === "toolResult" && message.isError),
-    ).not.toHaveProperty("__openclaw");
+    ).not.toHaveProperty("__carapace");
     expect(afterToolOutcome).toHaveBeenCalledWith(
       expect.objectContaining({
         toolCall: expect.objectContaining({ id: "call-second" }),
@@ -2263,7 +2263,7 @@ describe("agentLoop tool termination", () => {
     expect(turn).toBe(2);
     expect(executed).toEqual([]);
     const readTaint = (message: unknown) =>
-      (message as Record<string, unknown>)["__openclaw"] as
+      (message as Record<string, unknown>)["__carapace"] as
         | { resultContentSource?: string; turnTainted?: boolean }
         | undefined;
     const toolResultMessage = events.find(
@@ -2657,7 +2657,7 @@ describe("agentLoop tool termination", () => {
         (message): message is AssistantMessage => message.role === "assistant",
       );
       const metadata = (message: AgentMessage | undefined) =>
-        message ? (message as unknown as Record<string, unknown>)["__openclaw"] : undefined;
+        message ? (message as unknown as Record<string, unknown>)["__carapace"] : undefined;
 
       expect(metadata(toolResult)).toEqual(
         tainted ? { resultContentSource: "network" } : undefined,
@@ -2843,8 +2843,8 @@ describe("agentLoop tool termination", () => {
       expect(events).toContainEqual(
         expect.objectContaining({ type: "tool_execution_end", executionStarted: false }),
       );
-      expect((toolResult as unknown as { __openclaw?: unknown })?.["__openclaw"]).toBeUndefined();
-      expect((assistant as unknown as { __openclaw?: unknown })?.["__openclaw"]).toBeUndefined();
+      expect((toolResult as unknown as { __carapace?: unknown })?.["__carapace"]).toBeUndefined();
+      expect((assistant as unknown as { __carapace?: unknown })?.["__carapace"]).toBeUndefined();
     },
   );
 
@@ -2886,7 +2886,7 @@ describe("agentLoop tool termination", () => {
       expect(events).toContainEqual(
         expect.objectContaining({ type: "tool_execution_end", executionStarted: true }),
       );
-      expect((toolResult as unknown as { __openclaw?: unknown })?.["__openclaw"]).toEqual(
+      expect((toolResult as unknown as { __carapace?: unknown })?.["__carapace"]).toEqual(
         tainted ? { resultContentSource: "network" } : undefined,
       );
     },
@@ -3400,7 +3400,7 @@ describe("agentLoop tool termination", () => {
     expect(messages.at(-2)).toMatchObject({ role: "assistant", stopReason: "aborted" });
     expect(messages.at(-1)).toMatchObject({
       role: "custom",
-      customType: "openclaw:turn-aborted",
+      customType: "carapace:turn-aborted",
       display: false,
       content: expect.stringContaining("may have partially executed"),
     });
@@ -3786,7 +3786,7 @@ describe("agentLoop tool termination", () => {
     expect(
       abortedMessages
         .filter((message) => message.role === "toolResult")
-        .every((message) => !(message as unknown as { __openclaw?: unknown })["__openclaw"]),
+        .every((message) => !(message as unknown as { __carapace?: unknown })["__carapace"]),
     ).toBe(true);
     expect(endEvents).toHaveLength(2);
     expect(endEvents).toEqual(
@@ -3864,7 +3864,7 @@ describe("agentLoop tool termination", () => {
     expect(messages.at(-2)).toMatchObject({ role: "assistant", stopReason: "aborted" });
     expect(messages.at(-1)).toMatchObject({
       role: "custom",
-      customType: "openclaw:turn-aborted",
+      customType: "carapace:turn-aborted",
     });
     expect(events.map((event) => event.type)).toEqual([
       "agent_start",

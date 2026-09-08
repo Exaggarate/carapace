@@ -1,19 +1,19 @@
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
 import {
   readPositiveIntegerParam,
   readStringArrayParam,
   readStringParam,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
-import { resolveReactionMessageId } from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
+} from "carapace/plugin-sdk/agent-runtime";
+import { readBooleanParam } from "carapace/plugin-sdk/boolean-param";
+import { resolveReactionMessageId } from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
 import {
   adaptMessagePresentationForChannel,
   normalizeLegacyInteractiveReply,
   normalizeMessagePresentation,
   renderMessagePresentationFallbackText,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import { normalizeOptionalStringifiedId } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
+import { normalizeOptionalStringifiedId } from "carapace/plugin-sdk/string-coerce-runtime";
 import { handleDiscordAction } from "../../action-runtime-api.js";
 import {
   notifyDiscordActiveTurnThreadCreated,

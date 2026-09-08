@@ -1,6 +1,6 @@
 // Tests runtime-loaded fast-path command behavior for get-reply.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -26,7 +26,7 @@ vi.mock("./model-selection.js", async (importOriginal) => ({
 
 let getReplyFromConfig: typeof import("./get-reply.js").getReplyFromConfig;
 const agentMocks = createReplyRuntimeMocks();
-const { withTempHome } = createTempHomeHarness({ prefix: "openclaw-getreply-fast-" });
+const { withTempHome } = createTempHomeHarness({ prefix: "carapace-getreply-fast-" });
 
 installReplyRuntimeMocks(agentMocks);
 
@@ -46,7 +46,7 @@ describe("getReplyFromConfig fast-path runtime", () => {
   beforeAll(async () => {
     installRuntimeChannels();
     ({ getReplyFromConfig } = await loadGetReplyModuleForTest({ cacheKey: import.meta.url }));
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     resetReplyRuntimeMocks(agentMocks);
     agentMocks.runEmbeddedAgent.mockResolvedValue(makeEmbeddedTextResult("warm runtime"));
     await withTempHome(async (home) => {
@@ -64,14 +64,14 @@ describe("getReplyFromConfig fast-path runtime", () => {
           ChatType: "direct",
         },
         {},
-        makeReplyConfig(home) as OpenClawConfig,
+        makeReplyConfig(home) as CarapaceConfig,
       );
     });
     vi.unstubAllEnvs();
   });
 
   beforeEach(async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     resetReplyRuntimeMocks(agentMocks);
     installRuntimeChannels();
   });
@@ -108,7 +108,7 @@ describe("getReplyFromConfig fast-path runtime", () => {
           ChatType: "direct",
         },
         {},
-        makeReplyConfig(home) as OpenClawConfig,
+        makeReplyConfig(home) as CarapaceConfig,
       );
 
       const text = Array.isArray(res) ? res[0]?.text : res?.text;
@@ -140,7 +140,7 @@ describe("getReplyFromConfig fast-path runtime", () => {
           ChatType: "direct",
         },
         {},
-        makeReplyConfig(home) as OpenClawConfig,
+        makeReplyConfig(home) as CarapaceConfig,
       );
 
       expect(agentMocks.runEmbeddedAgent).toHaveBeenCalledWith(
@@ -174,7 +174,7 @@ describe("getReplyFromConfig fast-path runtime", () => {
           ChatType: "direct",
         },
         {},
-        makeReplyConfig(home) as OpenClawConfig,
+        makeReplyConfig(home) as CarapaceConfig,
       );
 
       expect(agentMocks.runEmbeddedAgent).toHaveBeenCalledWith(

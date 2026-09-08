@@ -3,7 +3,7 @@ import {
   ConversationRole,
   StopReason as BedrockStopReason,
 } from "@aws-sdk/client-bedrock-runtime";
-import { withProviderAcceptanceObserver } from "openclaw/plugin-sdk/provider-transport-runtime";
+import { withProviderAcceptanceObserver } from "carapace/plugin-sdk/provider-transport-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { streamSimpleBedrock } from "./stream.runtime.js";
 

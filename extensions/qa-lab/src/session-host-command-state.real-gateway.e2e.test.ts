@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, expect, it, vi } from "vitest";
 import {
   GATEWAY_CLIENT_MODES,
@@ -17,7 +17,7 @@ const NODE_WORKER_ENVIRONMENT_SESSION_VERSION = 1;
 const NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE = "node-worker-supervisor-v6";
 const REQUEST_TIMEOUT_MS = 20_000;
 const TEST_TIMEOUT_MS = 180_000;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const helloCounts = new WeakMap<GatewayClient, number>();
 
 const gatewayOwners: ReturnType<typeof createQaGatewayChild>[] = [];
@@ -173,7 +173,7 @@ suite.define(() => {
             const url = new URL("new", suite.server.baseUrl);
             url.searchParams.set("gatewayUrl", gateway.wsUrl);
             await page.goto(url.toString());
-            const confirmation = page.locator("openclaw-gateway-url-confirmation");
+            const confirmation = page.locator("carapace-gateway-url-confirmation");
             await confirmation.waitFor();
             await confirmation.getByRole("button", { name: /^Switch to /u }).click();
 

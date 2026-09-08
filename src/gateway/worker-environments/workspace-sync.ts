@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { withTimeout } from "../../infra/fs-safe.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import type { CommandOptions, SpawnResult } from "../../process/exec.js";
 import { isWorkspaceInspectionCommand } from "../../worker/workspace-inspection-protocol.js";
 import { type PreparedWorkerSsh, runWorkerSshCandidates, workerSshCommandOptions } from "./ssh.js";
@@ -84,8 +84,8 @@ const REMOTE_SETUP_TIMEOUT_MS = 20_000;
 const WORKSPACE_TIMEOUT_MS = 10 * 60_000;
 // Relative to the canonical worker $HOME owned by REMOTE_WORKSPACE_SETUP_SCRIPT;
 // rsync targets must use the returned absolute directory, never this relative path.
-const REMOTE_WORKSPACE_ROOT = ".openclaw-worker/workspaces";
-const REMOTE_GIT_PACK_NAME = ".openclaw-base.pack";
+const REMOTE_WORKSPACE_ROOT = ".carapace-worker/workspaces";
+const REMOTE_GIT_PACK_NAME = ".carapace-base.pack";
 const GIT_COMMIT_PATTERN = /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/u;
 const INBOUND_RSYNC_BW_LIMIT_KIB = 65_536;
 
@@ -247,7 +247,7 @@ export function createWorkerWorkspaceActions(
       runTask,
     });
     const temporaryDirectory = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-worker-workspace-sync-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-worker-workspace-sync-"),
     );
     try {
       const receiverContext = {
@@ -465,7 +465,7 @@ export function createWorkerWorkspaceActions(
       "Worker tunnel did not reconnect within the workspace reconciliation timeout",
     );
     const temporaryDirectory = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-worker-workspace-reconcile-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-worker-workspace-reconcile-"),
     );
     const stagingRoot = path.join(temporaryDirectory, "staging");
     const manifestRoot = path.join(temporaryDirectory, "manifests");
@@ -496,7 +496,7 @@ export function createWorkerWorkspaceActions(
           "-e",
           rsyncSsh,
           "--",
-          `${prepared.scpTarget}:.openclaw-worker/manifests/${baseDigest}.json`,
+          `${prepared.scpTarget}:.carapace-worker/manifests/${baseDigest}.json`,
           baseManifestPath,
         ],
         destinationRoot: manifestRoot,
@@ -556,7 +556,7 @@ export function createWorkerWorkspaceActions(
             "-e",
             rsyncSsh,
             "--",
-            `${prepared.scpTarget}:.openclaw-worker/manifests/${currentDigest}.json`,
+            `${prepared.scpTarget}:.carapace-worker/manifests/${currentDigest}.json`,
             currentManifestPath,
           ],
           destinationRoot: manifestRoot,

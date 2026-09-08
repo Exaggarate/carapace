@@ -1,6 +1,6 @@
 // Minimax plugin module implements tts behavior.
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { asOptionalRecord, readStringField } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { asOptionalRecord, readStringField } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const DEFAULT_MINIMAX_TTS_BASE_URL = "https://api.minimax.io";
 
@@ -63,9 +63,9 @@ export async function minimaxTTS(params: {
   } = params;
   const safeTimeoutMs = resolveTimerTimeoutMs(timeoutMs, 1);
   const { assertOkOrThrowProviderError, readProviderJsonObjectResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const { assertMinimaxBaseResp, normalizeMinimaxHexAudio } =
     await import("./media-provider-runtime.js");
 

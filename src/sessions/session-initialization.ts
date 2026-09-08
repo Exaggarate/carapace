@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { capturePluginLifecycleAuthority } from "../plugins/registry-lifecycle.js";
 import { getPluginRegistryState } from "../plugins/runtime-state.js";
 import {
@@ -40,7 +40,7 @@ type Owner = {
 };
 // Built core chunks and source plugins must redeem the same process-local owner.
 const { rollbackOwner, sources } = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionInitialization"),
+  Symbol.for("carapace.sessionInitialization"),
   () => ({
     rollbackOwner: new AsyncLocalStorage<Owner>(),
     sources: new AsyncLocalStorage<() => void>(),
@@ -100,7 +100,7 @@ export function captureSessionInitializationOwner(harnessId: string | undefined)
 export function createSessionInitialization(
   target: Target,
   assertOwner: (deleted: boolean) => void,
-  preparation: { config: OpenClawConfig; agentId: string; entry: SessionEntry },
+  preparation: { config: CarapaceConfig; agentId: string; entry: SessionEntry },
 ) {
   const registry =
     getPluginRuntimeGenerationRegistry() ??

@@ -6,8 +6,8 @@
  * snapshot, and sensitive controls require an explicit model confirmation.
  */
 import crypto from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { Type } from "typebox";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {

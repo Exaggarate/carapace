@@ -1,5 +1,5 @@
 // Cron tool type declarations shared with the cron tool implementation.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { CronRuntimeAuthority } from "../../cron/runtime-authority.js";
 import type { CronCreatorAuthorityGrant } from "../../gateway/cron-creator-authority-grant.types.js";
 import type { DeliveryContext } from "../../utils/delivery-context.shared.js";
@@ -52,7 +52,7 @@ export type CronToolOptions = {
    * (trigger, script payloads, stream schedules) are not advertised. Omitting
    * config keeps the full surface for config-less callers.
    */
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   currentDeliveryContext?: DeliveryContext;
   /**
    * Effective tool surface visible to the caller that created or edited a cron job.

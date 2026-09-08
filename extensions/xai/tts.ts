@@ -1,11 +1,11 @@
 // Xai plugin module implements tts behavior.
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
-import { canonicalizeBase64, rawDataToString } from "openclaw/plugin-sdk/realtime-voice-provider";
-import type { SpeechVoiceOption } from "openclaw/plugin-sdk/speech";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
+import { canonicalizeBase64, rawDataToString } from "carapace/plugin-sdk/realtime-voice-provider";
+import type { SpeechVoiceOption } from "carapace/plugin-sdk/speech";
 import {
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { XAI_BASE_URL } from "./model-definitions.js";
 import {
   isValidXaiTtsVoice,
@@ -25,9 +25,9 @@ export async function listXaiTtsVoices(params: {
 }): Promise<SpeechVoiceOption[]> {
   const baseUrl = normalizeXaiTtsBaseUrl(params.baseUrl);
   const { assertOkOrThrowProviderError, readProviderJsonResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedOrigin } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const { response, release } = await fetchWithSsrFGuard({
     url: `${baseUrl}/tts/voices`,
     init: {
@@ -443,9 +443,9 @@ export async function xaiTTS(params: {
 
   const ttsBaseUrl = normalizeXaiTtsBaseUrl(baseUrl);
   const { assertOkOrThrowProviderError, postJsonRequest, readProviderBinaryResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { ssrfPolicyFromHttpBaseUrlAllowedOrigin } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const { response, release } = await postJsonRequest({
     url: `${ttsBaseUrl}/tts`,
     headers: new Headers({

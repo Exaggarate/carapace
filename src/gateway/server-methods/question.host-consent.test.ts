@@ -5,7 +5,7 @@ import {
   readSecretStoreValue,
   writeSecretStoreEntry,
 } from "../../secrets/store/secret-store.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   broadcast,
   callQuestionRpc as call,
@@ -75,7 +75,7 @@ describe("question host consent", () => {
   ])(
     "shows and saves the consented policy: $scenario",
     async ({ existing, proposal, override, shown, saved }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const oldValue = "test-secret-value-existing-123";
         if (existing) {
           writeSecretStoreEntry({
@@ -133,7 +133,7 @@ describe("question host consent", () => {
   ])(
     "keeps the displayed policy when $scenario while pending",
     async ({ existingHosts, shown }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const entry = {
           scope: { kind: "team" as const },
           ...binding,

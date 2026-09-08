@@ -1,12 +1,12 @@
-# OpenClaw DeepSeek Provider
+# Carapace DeepSeek Provider
 
-Official OpenClaw provider plugin for DeepSeek.
+Official Carapace provider plugin for DeepSeek.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/deepseek-provider
-openclaw gateway restart
+carapace plugins install @carapace/deepseek-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/deepseek> for setup and configuration.
+See <../../docs/providers/deepseek.md> for setup and configuration.

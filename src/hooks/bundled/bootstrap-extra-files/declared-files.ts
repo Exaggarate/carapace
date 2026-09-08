@@ -1,13 +1,13 @@
 // The bundled handler and diagnostics read the same declared extra files.
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { loadExtraBootstrapFilesWithDiagnostics } from "../../../agents/workspace.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveHookConfig } from "../../config.js";
 
 const HOOK_KEY = "bootstrap-extra-files";
 
 /** Resolve legacy and current config keys for extra bootstrap file patterns. */
-function resolveExtraBootstrapPatterns(cfg: OpenClawConfig | undefined): string[] {
+function resolveExtraBootstrapPatterns(cfg: CarapaceConfig | undefined): string[] {
   const hookConfig = resolveHookConfig(cfg, HOOK_KEY);
   if (!hookConfig || hookConfig.enabled === false) {
     return [];
@@ -25,7 +25,7 @@ function resolveExtraBootstrapPatterns(cfg: OpenClawConfig | undefined): string[
 
 /** Loads the extra bootstrap files the hook config declares for a workspace. */
 export async function loadDeclaredExtraBootstrapFiles(params: {
-  config: OpenClawConfig | undefined;
+  config: CarapaceConfig | undefined;
   workspaceDir: string;
 }): ReturnType<typeof loadExtraBootstrapFilesWithDiagnostics> {
   const patterns = resolveExtraBootstrapPatterns(params.config);

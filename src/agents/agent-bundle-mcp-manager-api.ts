@@ -1,7 +1,7 @@
 /** Module-level session MCP runtime manager entry APIs. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SessionToolOverrides } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { logWarn } from "../logger.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
@@ -32,7 +32,7 @@ export async function acquireSessionMcpRuntime(params: {
   sessionKey?: string;
   workspaceDir: string;
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   requesterSenderId?: string | null;
   agentAccountId?: string | null;
@@ -51,7 +51,7 @@ export async function acquireRequesterScopedMcpRuntime(params: {
   sessionKey?: string;
   workspaceDir: string;
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   requesterSenderId?: string | null;
   agentAccountId?: string | null;

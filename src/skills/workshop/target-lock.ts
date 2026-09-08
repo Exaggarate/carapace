@@ -1,7 +1,7 @@
 import {
-  withOpenClawStateLease,
-  type OpenClawStateLeaseContext,
-} from "../../state/openclaw-state-lease.js";
+  withCarapaceStateLease,
+  type CarapaceStateLeaseContext,
+} from "../../state/carapace-state-lease.js";
 import { hashSkillProposalContent } from "./proposal-hash.js";
 import {
   databaseOptions,
@@ -23,11 +23,11 @@ function requireAgentId(options: SkillWorkshopStoreOptions): string {
 
 /** Each agent owns one collection lease; writers for different agents do not contend. */
 export async function withSkillCollectionLock<T>(
-  fn: (lease: OpenClawStateLeaseContext) => Promise<T>,
+  fn: (lease: CarapaceStateLeaseContext) => Promise<T>,
   options: SkillWorkshopStoreOptions = {},
 ): Promise<T> {
   ensureSkillWorkshopSchema(options);
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: "skill-collection",
       key: requireAgentId(options),
@@ -47,7 +47,7 @@ export async function withSkillProposalTargetLock<T>(
   options: SkillWorkshopStoreOptions = {},
 ): Promise<T> {
   ensureSkillWorkshopSchema(options);
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: "skill-workshop-target",
       key: `${requireAgentId(options)}:${hashSkillProposalContent(record.target.skillFile)}`,

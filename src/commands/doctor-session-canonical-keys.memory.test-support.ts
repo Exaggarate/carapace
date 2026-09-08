@@ -9,8 +9,8 @@ async function main(): Promise<void> {
   if (!stateDir || !storeTemplate) {
     throw new Error("usage: <state-dir> <store-template>");
   }
-  process.env.OPENCLAW_STATE_DIR = stateDir;
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  process.env.CARAPACE_STATE_DIR = stateDir;
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const result = await repairCanonicalSessionKeys({
     apply: false,
     cfg: {

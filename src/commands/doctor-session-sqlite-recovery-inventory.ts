@@ -6,7 +6,7 @@ import { resolveStateDir } from "../config/paths.js";
 import { isMigrationArchiveArtifactName } from "../config/sessions/artifacts.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { resolveUnsuffixedSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPathInside } from "../infra/path-guards.js";
 import {
   isPendingMigrationArtifactClaim,
@@ -82,7 +82,7 @@ export function resolveRecoveryArtifact(
 }
 
 export function collectRecoveryInventory(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): RecoveryInventory {
   const stateDir = canonicalMigrationFilePath(path.join(resolveStateDir(params.env), "anchor"));
@@ -439,7 +439,7 @@ export function summarizeRecoveryCleanup(
 }
 
 export function inspectSessionSqliteRecovery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): RecoveryCleanupReport {
   return collectRecoveryInventory(params).report;

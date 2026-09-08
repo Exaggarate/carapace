@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { bundledPluginRootAt } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { bundledPluginRootAt } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { SpawnResult } from "../process/exec.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -181,8 +181,8 @@ function createSuccessfulNpmUpdateResult(params?: {
 }) {
   return {
     ok: true,
-    pluginId: params?.pluginId ?? "opik-openclaw",
-    targetDir: params?.targetDir ?? "/tmp/opik-openclaw",
+    pluginId: params?.pluginId ?? "opik-carapace",
+    targetDir: params?.targetDir ?? "/tmp/opik-carapace",
     version: params?.version ?? "0.2.6",
     extensions: ["index.ts"],
     ...(params?.npmResolution ? { npmResolution: params.npmResolution } : {}),
@@ -198,7 +198,7 @@ function createSuccessfulClawHubUpdateResult(params?: {
   return {
     ok: true,
     pluginId: params?.pluginId ?? "legacy-chat",
-    targetDir: params?.targetDir ?? "/tmp/openclaw-plugins/legacy-chat",
+    targetDir: params?.targetDir ?? "/tmp/carapace-plugins/legacy-chat",
     version: params?.version ?? "2026.5.1-beta.2",
     extensions: ["index.ts"],
     packageName: params?.clawhubPackage ?? "legacy-chat",
@@ -235,7 +235,7 @@ function createNpmInstallConfig(params: {
   resolvedName?: string;
   resolvedSpec?: string;
   resolvedVersion?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     plugins: {
       installs: {
@@ -262,7 +262,7 @@ function createMarketplaceInstallConfig(params: {
   marketplaceSource: string;
   marketplacePlugin: string;
   marketplaceName?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     plugins: {
       installs: {
@@ -288,7 +288,7 @@ function createClawHubInstallConfig(
     clawhubChannel?: "community" | "official" | "private";
     spec?: string;
   } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const pluginId = params.pluginId ?? "demo";
   const clawhubPackage = params.clawhubPackage ?? pluginId;
   return {
@@ -308,7 +308,7 @@ function createClawHubInstallConfig(
   };
 }
 
-function createEnabledDemoClawHubInstallConfig(): OpenClawConfig {
+function createEnabledDemoClawHubInstallConfig(): CarapaceConfig {
   const installPath = createInstalledPackageDir({
     name: "demo",
     version: "1.2.3",
@@ -335,7 +335,7 @@ function createGitInstallConfig(params: {
   spec: string;
   installPath: string;
   commit?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     plugins: {
       installs: {
@@ -355,7 +355,7 @@ function createBundledPathInstallConfig(params: {
   installPath: string;
   sourcePath?: string;
   spec?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     plugins: {
       load: { paths: params.loadPaths },
@@ -379,10 +379,10 @@ function createCodexAppServerInstallConfig(params: {
   return {
     plugins: {
       installs: {
-        "openclaw-codex-app-server": {
+        "carapace-codex-app-server": {
           source: "npm" as const,
           spec: params.spec,
-          installPath: "/tmp/openclaw-codex-app-server",
+          installPath: "/tmp/carapace-codex-app-server",
           ...(params.resolvedName ? { resolvedName: params.resolvedName } : {}),
           ...(params.resolvedSpec ? { resolvedSpec: params.resolvedSpec } : {}),
         },
@@ -399,7 +399,7 @@ function createInstalledPackageDir(params: {
   installPath?: string;
 }): string {
   const dir =
-    params.installPath ?? fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-update-test-"));
+    params.installPath ?? fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-update-test-"));
   if (params.installPath) {
     fs.mkdirSync(dir, { recursive: true });
   } else {
@@ -412,7 +412,7 @@ function createInstalledPackageDir(params: {
         name: params.name ?? "test-plugin",
         version: params.version,
         ...(params.peerDependencies ? { peerDependencies: params.peerDependencies } : {}),
-        ...(params.runnable ? { openclaw: { extensions: ["./index.js"] } } : {}),
+        ...(params.runnable ? { carapace: { extensions: ["./index.js"] } } : {}),
       },
       null,
       2,
@@ -438,13 +438,13 @@ function createCapabilityConsentPackage(params: {
     JSON.stringify({
       name: packageName,
       version: params.version,
-      openclaw: { extensions: ["./index.js", "./children/addon/addon.js"] },
+      carapace: { extensions: ["./index.js", "./children/addon/addon.js"] },
     }),
   );
   fs.writeFileSync(path.join(rootDir, "index.js"), "export default () => {};\n");
   fs.writeFileSync(path.join(childDir, "addon.js"), "export default () => {};\n");
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: params.pluginId,
       name: "Consent fixture",
@@ -454,7 +454,7 @@ function createCapabilityConsentPackage(params: {
     }),
   );
   fs.writeFileSync(
-    path.join(childDir, "openclaw.plugin.json"),
+    path.join(childDir, "carapace.plugin.json"),
     JSON.stringify({
       id: `${params.pluginId}-addon`,
       providers: params.childProviders,
@@ -464,8 +464,8 @@ function createCapabilityConsentPackage(params: {
   return rootDir;
 }
 
-function createOpenClawPeerLinkFixtures(plugins: Array<{ pluginId: string; packageName: string }>) {
-  const stateDir = makeTrackedTempDir("openclaw-plugin-update-owner", tempDirs);
+function createCarapacePeerLinkFixtures(plugins: Array<{ pluginId: string; packageName: string }>) {
+  const stateDir = makeTrackedTempDir("carapace-plugin-update-owner", tempDirs);
   const peerTarget = fs.realpathSync(process.cwd());
   const installPaths = Object.fromEntries(
     plugins.map(({ pluginId, packageName }) => [
@@ -473,7 +473,7 @@ function createOpenClawPeerLinkFixtures(plugins: Array<{ pluginId: string; packa
       createInstalledPackageDir({
         name: packageName,
         version: "2026.5.4",
-        peerDependencies: { openclaw: ">=2026.5.4" },
+        peerDependencies: { carapace: ">=2026.5.4" },
         installPath: path.join(stateDir, "extensions", pluginId),
       }),
     ]),
@@ -482,7 +482,7 @@ function createOpenClawPeerLinkFixtures(plugins: Array<{ pluginId: string; packa
     path.join(
       expectDefined(installPaths[pluginId], "installPaths[pluginId] test invariant"),
       "node_modules",
-      "openclaw",
+      "carapace",
     );
   const linkPeer = (pluginId: string) => {
     fs.mkdirSync(path.dirname(peerLinkPath(pluginId)), { recursive: true });
@@ -495,7 +495,7 @@ function createPeerLinkInstallConfig(params: {
   plugins: Array<{ pluginId: string; packageName: string }>;
   installPaths: Record<string, string>;
   extraInstalls?: Record<string, PluginInstallRecord>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     plugins: {
       installs: {
@@ -525,7 +525,7 @@ function mockNpmViewMetadata(params: {
   version: string;
   integrity?: string;
   shasum?: string;
-  openclaw?: Record<string, unknown>;
+  carapace?: Record<string, unknown>;
 }) {
   runCommandWithTimeoutMock.mockResolvedValueOnce({
     code: 0,
@@ -534,7 +534,7 @@ function mockNpmViewMetadata(params: {
       version: params.version,
       ...(params.integrity ? { "dist.integrity": params.integrity } : {}),
       ...(params.shasum ? { "dist.shasum": params.shasum } : {}),
-      ...(params.openclaw ? { openclaw: params.openclaw } : {}),
+      ...(params.carapace ? { carapace: params.carapace } : {}),
     }),
     stderr: "",
   });
@@ -547,7 +547,7 @@ function createNpmUpdateFixture(params: {
   registryVersion?: string;
   registryIntegrity?: string;
   registryShasum?: string;
-  registryOpenClaw?: Record<string, unknown>;
+  registryCarapace?: Record<string, unknown>;
   spec?: string;
   resolvedSpec?: string;
   integrity?: string;
@@ -569,7 +569,7 @@ function createNpmUpdateFixture(params: {
       version: params.registryVersion,
       ...(params.registryIntegrity ? { integrity: params.registryIntegrity } : {}),
       ...(params.registryShasum ? { shasum: params.registryShasum } : {}),
-      ...(params.registryOpenClaw ? { openclaw: params.registryOpenClaw } : {}),
+      ...(params.registryCarapace ? { carapace: params.registryCarapace } : {}),
     });
   }
   if (params.installerVersion) {
@@ -676,14 +676,14 @@ function createBundledSource(params?: { pluginId?: string; localPath?: string; n
   return {
     pluginId,
     localPath: params?.localPath ?? appBundledPluginRoot(pluginId),
-    npmSpec: params?.npmSpec ?? `@openclaw/${pluginId}`,
+    npmSpec: params?.npmSpec ?? `@carapace/${pluginId}`,
   };
 }
 
 type ExternalizedPluginBridge = NonNullable<
   Parameters<typeof syncPluginsForUpdateChannel>[0]["externalizedBundledPluginBridges"]
 >[number];
-function createDisabledPluginConfig(install: PluginInstallRecord): OpenClawConfig {
+function createDisabledPluginConfig(install: PluginInstallRecord): CarapaceConfig {
   return {
     plugins: {
       entries: { demo: { enabled: false, config: { preserved: true } } },
@@ -697,7 +697,7 @@ function createExternalizedPluginBridge(
 ): ExternalizedPluginBridge {
   return {
     bundledPluginId: "legacy-chat",
-    npmSpec: "@openclaw/legacy-chat",
+    npmSpec: "@carapace/legacy-chat",
     channelIds: ["legacy-chat"],
     ...overrides,
   };
@@ -710,7 +710,7 @@ function createExternalizedPluginConfig(params?: {
   includeLoad?: boolean;
   loadPaths?: string[];
   install?: PluginInstallRecord;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const pluginId = params?.pluginId ?? "legacy-chat";
   const bundledRoot = appBundledPluginRoot(pluginId);
   return {
@@ -732,7 +732,7 @@ function createExternalizedPluginConfig(params?: {
 }
 
 function syncExternalizedPlugin(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   bridge?: Partial<ExternalizedPluginBridge>;
   channel?: "stable" | "beta" | "extended-stable";
   coreVersion?: string;
@@ -771,10 +771,10 @@ function expectCodexAppServerInstallState(params: {
   version: string;
   resolvedSpec?: string;
 }) {
-  const install = params.result.config.plugins?.installs?.["openclaw-codex-app-server"];
+  const install = params.result.config.plugins?.installs?.["carapace-codex-app-server"];
   expect(install?.source).toBe("npm");
   expect(install?.spec).toBe(params.spec);
-  expect(install?.installPath).toBe("/tmp/openclaw-codex-app-server");
+  expect(install?.installPath).toBe("/tmp/carapace-codex-app-server");
   expect(install?.version).toBe(params.version);
   if (params.resolvedSpec) {
     expect(install?.resolvedSpec).toBe(params.resolvedSpec);
@@ -784,7 +784,7 @@ function expectCodexAppServerInstallState(params: {
 type UpdateInstalledPluginParams = Parameters<typeof updateNpmInstalledPlugins>[0];
 
 function updatePlugin(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginId: string,
   params: Omit<UpdateInstalledPluginParams, "config" | "pluginIds"> = {},
 ) {
@@ -796,27 +796,27 @@ function createDuplicateQqbotConfig(
     canonicalFirst?: boolean;
     canonicalInstallPath?: string;
   } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const qqbot = {
     source: "npm",
-    spec: "@openclaw/qqbot@1.9.0",
-    resolvedName: "@openclaw/qqbot",
-    resolvedSpec: "@openclaw/qqbot@1.9.0",
-    installPath: "/tmp/openclaw-qqbot-legacy",
+    spec: "@carapace/qqbot@1.9.0",
+    resolvedName: "@carapace/qqbot",
+    resolvedSpec: "@carapace/qqbot@1.9.0",
+    installPath: "/tmp/carapace-qqbot-legacy",
   } satisfies PluginInstallRecord;
   const canonical = {
     source: "npm",
-    spec: "@tencent-connect/openclaw-qqbot@2.0.1",
-    resolvedName: "@tencent-connect/openclaw-qqbot",
-    resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
-    installPath: params.canonicalInstallPath ?? "/tmp/openclaw-qqbot-canonical",
+    spec: "@tencent-connect/carapace-qqbot@2.0.1",
+    resolvedName: "@tencent-connect/carapace-qqbot",
+    resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.1",
+    installPath: params.canonicalInstallPath ?? "/tmp/carapace-qqbot-canonical",
   } satisfies PluginInstallRecord;
   return {
     plugins: {
       entries: { qqbot: { enabled: true } },
       installs: params.canonicalFirst
-        ? { "openclaw-qqbot": canonical, qqbot }
-        : { qqbot, "openclaw-qqbot": canonical },
+        ? { "carapace-qqbot": canonical, qqbot }
+        : { qqbot, "carapace-qqbot": canonical },
     },
   };
 }
@@ -1063,7 +1063,7 @@ describe("updateNpmInstalledPlugins", () => {
         installedDir,
         "children",
         "addon",
-        "openclaw.plugin.json",
+        "carapace.plugin.json",
       );
       const previousChildManifest = fs.readFileSync(childManifestPath, "utf8");
       const config = {
@@ -1092,11 +1092,11 @@ describe("updateNpmInstalledPlugins", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       if (previousPayload === "missing") {
         fs.rmSync(installedDir, { recursive: true, force: true });
       } else if (previousPayload === "corrupt") {
-        fs.writeFileSync(path.join(installedDir, "openclaw.plugin.json"), "{");
+        fs.writeFileSync(path.join(installedDir, "carapace.plugin.json"), "{");
       }
       mockNpmViewMetadata({ name: packageName, version: "2.0.0", integrity: "sha512-next" });
       installPluginFromNpmSpecMock.mockImplementationOnce(
@@ -1163,7 +1163,7 @@ describe("updateNpmInstalledPlugins", () => {
               expect(details.source?.integrity).not.toBe("sha512-previous");
               if (review === "mutate") {
                 fs.writeFileSync(
-                  path.join(stagedDir, "children", "addon", "openclaw.plugin.json"),
+                  path.join(stagedDir, "children", "addon", "carapace.plugin.json"),
                   JSON.stringify({
                     id: `${pluginId}-addon`,
                     providers: [...nextProviders, "changed-during-review"],
@@ -1327,7 +1327,7 @@ describe("updateNpmInstalledPlugins", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updateNpmInstalledPlugins({ config, pluginIds: ["demo"] });
 
@@ -1345,7 +1345,7 @@ describe("updateNpmInstalledPlugins", () => {
   });
 
   it("does not treat inherited prototype names as install records", async () => {
-    const config: OpenClawConfig = { plugins: { installs: {} } };
+    const config: CarapaceConfig = { plugins: { installs: {} } };
 
     const result = await updatePlugin(config, "constructor");
 
@@ -1365,52 +1365,52 @@ describe("updateNpmInstalledPlugins", () => {
     {
       name: "skips integrity drift checks for unpinned npm specs during dry-run updates",
       config: createNpmInstallConfig({
-        pluginId: "opik-openclaw",
-        spec: "@opik/opik-openclaw",
+        pluginId: "opik-carapace",
+        spec: "@opik/opik-carapace",
         integrity: "sha512-old",
-        installPath: "/tmp/opik-openclaw",
+        installPath: "/tmp/opik-carapace",
       }),
-      pluginIds: ["opik-openclaw"],
+      pluginIds: ["opik-carapace"],
       dryRun: true,
       expectedCall: {
-        spec: "@opik/opik-openclaw",
+        spec: "@opik/opik-carapace",
         expectedIntegrity: undefined,
       },
     },
     {
       name: "keeps integrity drift checks for exact-version npm specs during dry-run updates",
       config: createNpmInstallConfig({
-        pluginId: "opik-openclaw",
-        spec: "@opik/opik-openclaw@0.2.5",
+        pluginId: "opik-carapace",
+        spec: "@opik/opik-carapace@0.2.5",
         integrity: "sha512-old",
-        installPath: "/tmp/opik-openclaw",
+        installPath: "/tmp/opik-carapace",
       }),
-      pluginIds: ["opik-openclaw"],
+      pluginIds: ["opik-carapace"],
       dryRun: true,
       expectedCall: {
-        spec: "@opik/opik-openclaw@0.2.5",
+        spec: "@opik/opik-carapace@0.2.5",
         expectedIntegrity: "sha512-old",
       },
     },
     {
       name: "skips recorded integrity checks when an explicit npm version override changes the spec",
       config: createNpmInstallConfig({
-        pluginId: "openclaw-codex-app-server",
-        spec: "openclaw-codex-app-server@0.2.0-beta.3",
+        pluginId: "carapace-codex-app-server",
+        spec: "carapace-codex-app-server@0.2.0-beta.3",
         integrity: "sha512-old",
-        installPath: "/tmp/openclaw-codex-app-server",
+        installPath: "/tmp/carapace-codex-app-server",
       }),
-      pluginIds: ["openclaw-codex-app-server"],
+      pluginIds: ["carapace-codex-app-server"],
       specOverrides: {
-        "openclaw-codex-app-server": "openclaw-codex-app-server@0.2.0-beta.4",
+        "carapace-codex-app-server": "carapace-codex-app-server@0.2.0-beta.4",
       },
       installerResult: createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-codex-app-server",
-        targetDir: "/tmp/openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
+        targetDir: "/tmp/carapace-codex-app-server",
         version: "0.2.0-beta.4",
       }),
       expectedCall: {
-        spec: "openclaw-codex-app-server@0.2.0-beta.4",
+        spec: "carapace-codex-app-server@0.2.0-beta.4",
         expectedIntegrity: undefined,
       },
     },
@@ -1444,20 +1444,20 @@ describe("updateNpmInstalledPlugins", () => {
   it("trusts official catalog npm updates when the installed package matches the catalog", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.5.2-beta.1",
       registryVersion: "2026.5.2-beta.2",
       installerVersion: "2026.5.2-beta.2",
-      installerResolvedSpec: "@openclaw/acpx@2026.5.2-beta.2",
+      installerResolvedSpec: "@carapace/acpx@2026.5.2-beta.2",
     });
     runCommandWithTimeoutMock.mockResolvedValueOnce(failedNpmVersionQueryResult);
 
     const result = await updatePlugin(config, "acpx", { syncOfficialPluginInstalls: true });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/acpx");
+    expect(npmInstallCall()?.spec).toBe("@carapace/acpx");
     expect(npmInstallCall()?.expectedPluginId).toBe("acpx");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(result.config.plugins?.installs?.acpx?.spec).toBe("@openclaw/acpx");
+    expect(result.config.plugins?.installs?.acpx?.spec).toBe("@carapace/acpx");
   });
 
   it.each([
@@ -1466,35 +1466,35 @@ describe("updateNpmInstalledPlugins", () => {
       channel: "beta" as const,
       configuredChannel: undefined,
       registryVersion: "2026.5.3-beta.1",
-      expectedSpec: "@openclaw/codex@2026.5.3-beta.1",
+      expectedSpec: "@carapace/codex@2026.5.3-beta.1",
     },
     {
       name: "inferred stable",
       channel: "stable" as const,
       configuredChannel: undefined,
       registryVersion: "2026.5.3",
-      expectedSpec: "@openclaw/codex",
+      expectedSpec: "@carapace/codex",
     },
     {
       name: "configured stable over inferred beta",
       channel: "beta" as const,
       configuredChannel: "stable" as const,
       registryVersion: "2026.5.3",
-      expectedSpec: "@openclaw/codex",
+      expectedSpec: "@carapace/codex",
     },
   ])(
     "uses the $name channel for a targeted floating official npm update",
     async ({ channel, configuredChannel, registryVersion, expectedSpec }) => {
       const { config } = createNpmUpdateFixture({
         pluginId: "codex",
-        packageName: "@openclaw/codex",
+        packageName: "@carapace/codex",
         installedVersion: "2026.5.2",
         registryVersion,
         installerVersion: registryVersion,
-        installerResolvedSpec: `@openclaw/codex@${registryVersion}`,
+        installerResolvedSpec: `@carapace/codex@${registryVersion}`,
       });
       if (channel === "beta" && !configuredChannel) {
-        mockNpmViewMetadata({ name: "@openclaw/codex", version: "2026.5.2" });
+        mockNpmViewMetadata({ name: "@carapace/codex", version: "2026.5.2" });
       }
 
       const result = await updatePlugin(config, "codex", {
@@ -1503,9 +1503,9 @@ describe("updateNpmInstalledPlugins", () => {
       });
 
       expect(npmInstallCall()?.spec).toBe(expectedSpec);
-      expect(result.config.plugins?.installs?.codex?.spec).toBe("@openclaw/codex");
+      expect(result.config.plugins?.installs?.codex?.spec).toBe("@carapace/codex");
       expect(result.config.plugins?.installs?.codex?.resolvedSpec).toBe(
-        `@openclaw/codex@${registryVersion}`,
+        `@carapace/codex@${registryVersion}`,
       );
     },
   );
@@ -1513,25 +1513,25 @@ describe("updateNpmInstalledPlugins", () => {
   it.each([undefined, "2026.8.1-beta.3"])(
     "selects latest before installing a targeted official update with a stale beta tag (core=%s)",
     async (coreVersion) => {
-      mockNpmViewMetadata({ name: "@openclaw/codex", version: "2026.9.1-beta.1" });
-      mockNpmViewMetadata({ name: "@openclaw/codex", version: "2026.9.2" });
+      mockNpmViewMetadata({ name: "@carapace/codex", version: "2026.9.1-beta.1" });
+      mockNpmViewMetadata({ name: "@carapace/codex", version: "2026.9.2" });
       installPluginFromNpmSpecMock.mockResolvedValue(
         createSuccessfulNpmUpdateResult({
           pluginId: "codex",
           targetDir: "/tmp/codex",
           version: "2026.9.2",
           npmResolution: {
-            name: "@openclaw/codex",
+            name: "@carapace/codex",
             version: "2026.9.2",
-            resolvedSpec: "@openclaw/codex@2026.9.2",
+            resolvedSpec: "@carapace/codex@2026.9.2",
           },
         }),
       );
       const config = createNpmInstallConfig({
         pluginId: "codex",
-        spec: "@openclaw/codex",
+        spec: "@carapace/codex",
         installPath: "/tmp/codex",
-        resolvedName: "@openclaw/codex",
+        resolvedName: "@carapace/codex",
       });
 
       const result = await updatePlugin(config, "codex", {
@@ -1540,29 +1540,29 @@ describe("updateNpmInstalledPlugins", () => {
       });
 
       expect(installPluginFromNpmSpecMock).toHaveBeenCalledTimes(1);
-      expect(npmInstallCall()?.spec).toBe("@openclaw/codex@2026.9.2");
-      expect(result.config.plugins?.installs?.codex?.spec).toBe("@openclaw/codex");
-      expect(result.config.plugins?.installs?.codex?.resolvedSpec).toBe("@openclaw/codex@2026.9.2");
+      expect(npmInstallCall()?.spec).toBe("@carapace/codex@2026.9.2");
+      expect(result.config.plugins?.installs?.codex?.spec).toBe("@carapace/codex");
+      expect(result.config.plugins?.installs?.codex?.resolvedSpec).toBe("@carapace/codex@2026.9.2");
     },
   );
 
-  it.each(["@openclaw/codex", "@openclaw/codex@latest", "@openclaw/codex@2026.9.3"])(
+  it.each(["@carapace/codex", "@carapace/codex@latest", "@carapace/codex@2026.9.3"])(
     "targets the activated core for version-bound post-update plugins while preserving %s",
     async (spec) => {
       const targetVersion = spec.endsWith("@2026.9.3") ? "2026.9.3" : "2026.9.4";
       const { config } = createNpmUpdateFixture({
         pluginId: "codex",
-        packageName: "@openclaw/codex",
+        packageName: "@carapace/codex",
         installedVersion: "2026.9.2",
         spec,
         installerVersion: targetVersion,
-        installerResolvedSpec: `@openclaw/codex@${targetVersion}`,
+        installerResolvedSpec: `@carapace/codex@${targetVersion}`,
       });
       runCommandWithTimeoutMock.mockImplementation(async (argv) => ({
         code: 0,
         stdout: JSON.stringify({
-          name: "@openclaw/codex",
-          version: argv.includes(`@openclaw/codex@${targetVersion}`) ? targetVersion : "2026.9.2",
+          name: "@carapace/codex",
+          version: argv.includes(`@carapace/codex@${targetVersion}`) ? targetVersion : "2026.9.2",
         }),
         stderr: "",
       }));
@@ -1572,14 +1572,14 @@ describe("updateNpmInstalledPlugins", () => {
         versionBoundPluginIds: new Set(["codex"]),
         syncOfficialPluginInstalls: true,
       });
-      expect(npmInstallCall()?.spec).toBe(`@openclaw/codex@${targetVersion}`);
+      expect(npmInstallCall()?.spec).toBe(`@carapace/codex@${targetVersion}`);
     },
   );
 
   it("preserves floating official npm records during official sync", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.5.2",
       registryVersion: "2026.5.2",
       registryIntegrity: "sha512-old",
@@ -1591,16 +1591,16 @@ describe("updateNpmInstalledPlugins", () => {
 
     expect(result.changed).toBe(false);
     expect(result.outcomes[0]?.status).toBe("unchanged");
-    expect(result.config.plugins?.installs?.acpx?.spec).toBe("@openclaw/acpx");
+    expect(result.config.plugins?.installs?.acpx?.spec).toBe("@carapace/acpx");
     expect(result.config.plugins?.installs?.acpx?.installedAt).toBe("2026-05-01T00:00:00.000Z");
     expect(result.config.plugins?.installs?.acpx?.resolvedAt).toBe("2026-05-01T00:00:01.000Z");
     expect(npmInstallCall()).toBeUndefined();
   });
 
-  it.each(["@openclaw/codex", "@openclaw/codex@beta"])(
+  it.each(["@carapace/codex", "@carapace/codex@beta"])(
     "converges after one beta-channel update when latest is newer and preserves %s",
     async (spec) => {
-      const packageName = "@openclaw/codex";
+      const packageName = "@carapace/codex";
       const { config, installPath } = createNpmUpdateFixture({
         pluginId: "codex",
         packageName,
@@ -1658,14 +1658,14 @@ describe("updateNpmInstalledPlugins", () => {
     async (channel) => {
       const { config } = createNpmUpdateFixture({
         pluginId: "acpx",
-        packageName: "@openclaw/acpx",
+        packageName: "@carapace/acpx",
         installedVersion: "2026.5.2",
         registryVersion: "2026.5.2",
         registryIntegrity: "sha512-new",
-        spec: "@openclaw/acpx@2026.5.2",
+        spec: "@carapace/acpx@2026.5.2",
         integrity: "sha512-old",
         installerVersion: "2026.5.2",
-        installerResolvedSpec: "@openclaw/acpx@2026.5.2",
+        installerResolvedSpec: "@carapace/acpx@2026.5.2",
       });
       await updatePlugin(config, "acpx", {
         syncOfficialPluginInstalls: true,
@@ -1673,7 +1673,7 @@ describe("updateNpmInstalledPlugins", () => {
         coreVersion: "2026.7.33",
       });
       expectNpmUpdateCall({
-        spec: "@openclaw/acpx@2026.5.2",
+        spec: "@carapace/acpx@2026.5.2",
         expectedPluginId: "acpx",
         expectedIntegrity: "sha512-old",
       });
@@ -1719,21 +1719,21 @@ describe("updateNpmInstalledPlugins", () => {
   it("does not skip trusted official default updates when latest resolves to the installed prerelease", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.5.2-beta.2",
       registryVersion: "2026.5.2-beta.2",
       registryIntegrity: "sha512-beta",
       registryShasum: "beta",
-      spec: "@openclaw/acpx",
+      spec: "@carapace/acpx",
       integrity: "sha512-beta",
       shasum: "beta",
       installerVersion: "2026.5.2",
-      installerResolvedSpec: "@openclaw/acpx@2026.5.2",
+      installerResolvedSpec: "@carapace/acpx@2026.5.2",
     });
     runCommandWithTimeoutMock.mockResolvedValueOnce(failedNpmVersionQueryResult);
     const result = await updatePlugin(config, "acpx", { syncOfficialPluginInstalls: true });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/acpx");
+    expect(npmInstallCall()?.spec).toBe("@carapace/acpx");
     expect(npmInstallCall()?.expectedIntegrity).toBeUndefined();
     expect(npmInstallCall()?.expectedPluginId).toBe("acpx");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
@@ -1746,17 +1746,17 @@ describe("updateNpmInstalledPlugins", () => {
   it("updates trusted official npm plugins when latest resolves to a stable correction release", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.5.3",
       registryVersion: "2026.5.3-1",
       registryIntegrity: "sha512-correction",
       registryShasum: "correction",
       installerVersion: "2026.5.3-1",
-      installerResolvedSpec: "@openclaw/acpx@2026.5.3-1",
+      installerResolvedSpec: "@carapace/acpx@2026.5.3-1",
     });
     const result = await updatePlugin(config, "acpx");
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/acpx");
+    expect(npmInstallCall()?.spec).toBe("@carapace/acpx");
     expect(npmInstallCall()?.expectedPluginId).toBe("acpx");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
     expect(result.outcomes[0]?.pluginId).toBe("acpx");
@@ -1801,7 +1801,7 @@ describe("updateNpmInstalledPlugins", () => {
       "version",
       "dist.integrity",
       "dist.shasum",
-      "openclaw",
+      "carapace",
       "--json",
     ]);
     if (npmViewCall()?.[1] === undefined) {
@@ -1843,7 +1843,7 @@ describe("updateNpmInstalledPlugins", () => {
       {
         ...release,
         pluginId: "acpx",
-        packageName: "@openclaw/acpx",
+        packageName: "@carapace/acpx",
         syncOfficialPluginInstalls: true,
       },
     ]),
@@ -1895,7 +1895,7 @@ describe("updateNpmInstalledPlugins", () => {
         "version",
         "dist.integrity",
         "dist.shasum",
-        "openclaw",
+        "carapace",
         "--json",
       ]);
       expect(result.changed).toBe(false);
@@ -1909,7 +1909,7 @@ describe("updateNpmInstalledPlugins", () => {
           message:
             `${pluginId} is pinned to ${packageName}@1.2.3 (installed 1.2.3); ` +
             `registry ${updateChannel === "beta" ? "beta" : "latest"} resolves to ${registryVersion}. ` +
-            `Pass \`openclaw plugins update ${overrideSpec}\` to replace this version pin.`,
+            `Pass \`carapace plugins update ${overrideSpec}\` to replace this version pin.`,
         },
       ]);
     },
@@ -1933,7 +1933,7 @@ describe("updateNpmInstalledPlugins", () => {
     async ({ updateChannel, coreVersion, newerVersion, dryRun }) => {
       const { config } = createNpmUpdateFixture({
         pluginId: "acpx",
-        packageName: "@openclaw/acpx",
+        packageName: "@carapace/acpx",
         installedVersion: coreVersion,
         registryVersion: dryRun ? newerVersion : coreVersion,
         registryIntegrity: "sha512-same",
@@ -1941,10 +1941,10 @@ describe("updateNpmInstalledPlugins", () => {
         integrity: "sha512-same",
         shasum: "same",
         installerVersion: coreVersion,
-        installerResolvedSpec: `@openclaw/acpx@${coreVersion}`,
+        installerResolvedSpec: `@carapace/acpx@${coreVersion}`,
       });
       if (!dryRun) {
-        mockNpmViewMetadata({ name: "@openclaw/acpx", version: newerVersion });
+        mockNpmViewMetadata({ name: "@carapace/acpx", version: newerVersion });
       }
 
       const result = await updatePlugin(config, "acpx", {
@@ -1962,7 +1962,7 @@ describe("updateNpmInstalledPlugins", () => {
           message: `acpx is up to date (${coreVersion}).`,
         },
       ]);
-      expect(result.config.plugins?.installs?.acpx?.spec).toBe("@openclaw/acpx");
+      expect(result.config.plugins?.installs?.acpx?.spec).toBe("@carapace/acpx");
       expect(runCommandWithTimeoutMock).toHaveBeenCalledTimes(dryRun ? 0 : 1);
     },
   );
@@ -2002,7 +2002,7 @@ describe("updateNpmInstalledPlugins", () => {
       "version",
       "dist.integrity",
       "dist.shasum",
-      "openclaw",
+      "carapace",
       "--json",
     ]);
     expect(result.outcomes).toEqual([
@@ -2013,7 +2013,7 @@ describe("updateNpmInstalledPlugins", () => {
         nextVersion: "1.2.4",
         message:
           "demo is pinned to @acme/demo@1.2.3 (installed 1.2.3); registry latest resolves to 1.2.4. " +
-          "Pass `openclaw plugins update @acme/demo@latest` to replace this version pin.",
+          "Pass `carapace plugins update @acme/demo@latest` to replace this version pin.",
       },
     ]);
   });
@@ -2030,25 +2030,25 @@ describe("updateNpmInstalledPlugins", () => {
       assertFullOutcome: false,
     },
   ] as const)("$name", async ({ compatibility, assertFullOutcome }) => {
-    vi.stubEnv("OPENCLAW_COMPATIBILITY_HOST_VERSION", "2026.5.28-beta.3");
+    vi.stubEnv("CARAPACE_COMPATIBILITY_HOST_VERSION", "2026.5.28-beta.3");
     const { config } = createNpmUpdateFixture({
       pluginId: "msteams",
-      packageName: "@openclaw/msteams",
+      packageName: "@carapace/msteams",
       installedVersion: "2026.5.28-beta.4",
       registryVersion: "2026.5.28-beta.4",
       registryIntegrity: "sha512-newer",
       registryShasum: "newer",
-      registryOpenClaw: { extensions: ["./dist/index.js"], ...compatibility },
+      registryCarapace: { extensions: ["./dist/index.js"], ...compatibility },
       integrity: "sha512-newer",
       shasum: "newer",
       installerVersion: "2026.5.28-beta.3",
-      installerResolvedSpec: "@openclaw/msteams@2026.5.28-beta.3",
+      installerResolvedSpec: "@carapace/msteams@2026.5.28-beta.3",
     });
     runCommandWithTimeoutMock.mockResolvedValueOnce(failedNpmVersionQueryResult);
 
     const result = await updatePlugin(config, "msteams");
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/msteams");
+    expect(npmInstallCall()?.spec).toBe("@carapace/msteams");
     expect(npmInstallCall()?.mode).toBe("update");
     if (assertFullOutcome) {
       expect(npmInstallCall()?.expectedPluginId).toBe("msteams");
@@ -2057,9 +2057,9 @@ describe("updateNpmInstalledPlugins", () => {
     expectRecordFields(result.config.plugins?.installs?.msteams, {
       source: "npm",
       version: "2026.5.28-beta.3",
-      resolvedName: "@openclaw/msteams",
+      resolvedName: "@carapace/msteams",
       resolvedVersion: "2026.5.28-beta.3",
-      resolvedSpec: "@openclaw/msteams@2026.5.28-beta.3",
+      resolvedSpec: "@carapace/msteams@2026.5.28-beta.3",
     });
     if (assertFullOutcome) {
       expect(result.outcomes).toEqual([
@@ -2074,14 +2074,14 @@ describe("updateNpmInstalledPlugins", () => {
     }
   });
 
-  it("repairs missing openclaw peer links before skipping unchanged npm plugins", async () => {
+  it("repairs missing carapace peer links before skipping unchanged npm plugins", async () => {
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.3",
-      peerDependencies: { openclaw: ">=2026.5.3" },
+      peerDependencies: { carapace: ">=2026.5.3" },
     });
     mockNpmViewMetadata({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.3",
       integrity: "sha512-same",
       shasum: "same",
@@ -2092,22 +2092,22 @@ describe("updateNpmInstalledPlugins", () => {
         targetDir: installPath,
         version: "2026.5.3",
         npmResolution: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: "2026.5.3",
-          resolvedSpec: "@openclaw/codex@2026.5.3",
+          resolvedSpec: "@carapace/codex@2026.5.3",
         },
       }),
     );
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         installs: {
           codex: {
             source: "npm",
-            spec: "@openclaw/codex",
+            spec: "@carapace/codex",
             installPath,
-            resolvedName: "@openclaw/codex",
+            resolvedName: "@carapace/codex",
             resolvedVersion: "2026.5.3",
-            resolvedSpec: "@openclaw/codex@2026.5.3",
+            resolvedSpec: "@carapace/codex@2026.5.3",
             integrity: "sha512-same",
             shasum: "same",
           },
@@ -2117,7 +2117,7 @@ describe("updateNpmInstalledPlugins", () => {
 
     const result = await updatePlugin(config, "codex");
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/codex");
+    expect(npmInstallCall()?.spec).toBe("@carapace/codex");
     expect(npmInstallCall()?.mode).toBe("update");
     expect(npmInstallCall()?.expectedPluginId).toBe("codex");
     expect(result.changed).toBe(true);
@@ -2132,20 +2132,20 @@ describe("updateNpmInstalledPlugins", () => {
     ]);
   });
 
-  it("skips unchanged npm plugins when the openclaw peer link already resolves", async () => {
+  it("skips unchanged npm plugins when the carapace peer link already resolves", async () => {
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.3",
-      peerDependencies: { openclaw: ">=2026.5.3" },
+      peerDependencies: { carapace: ">=2026.5.3" },
     });
     fs.mkdirSync(path.join(installPath, "node_modules"), { recursive: true });
     fs.symlinkSync(
       fs.realpathSync(process.cwd()),
-      path.join(installPath, "node_modules", "openclaw"),
+      path.join(installPath, "node_modules", "carapace"),
       "junction",
     );
     mockNpmViewMetadata({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.3",
       integrity: "sha512-same",
       shasum: "same",
@@ -2158,11 +2158,11 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex",
+              spec: "@carapace/codex",
               installPath,
-              resolvedName: "@openclaw/codex",
+              resolvedName: "@carapace/codex",
               resolvedVersion: "2026.5.3",
-              resolvedSpec: "@openclaw/codex@2026.5.3",
+              resolvedSpec: "@carapace/codex@2026.5.3",
               integrity: "sha512-same",
               shasum: "same",
             },
@@ -2188,23 +2188,23 @@ describe("updateNpmInstalledPlugins", () => {
   it.each(["peerDependencies", "dependencies"] as const)(
     "repairs every copied stale %s host for unchanged npm plugins without reinstalling them",
     async (dependencyField) => {
-      const stateDir = makeTrackedTempDir("openclaw-plugin-update-legacy", tempDirs);
+      const stateDir = makeTrackedTempDir("carapace-plugin-update-legacy", tempDirs);
       const plugins = ["email", "calendar"].map((pluginId) => {
         const packageName = `@clawemail/${pluginId}`;
         const installPath = path.join(stateDir, "extensions", pluginId);
-        const staleHostDir = path.join(installPath, "node_modules", "openclaw");
+        const staleHostDir = path.join(installPath, "node_modules", "carapace");
         fs.mkdirSync(staleHostDir, { recursive: true });
         fs.writeFileSync(
           path.join(installPath, "package.json"),
           JSON.stringify({
             name: packageName,
             version: "2026.7.1",
-            [dependencyField]: { openclaw: ">=2026.7.1" },
+            [dependencyField]: { carapace: ">=2026.7.1" },
           }),
         );
         fs.writeFileSync(
           path.join(staleHostDir, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "2026.7.1-beta.2" }),
+          JSON.stringify({ name: "carapace", version: "2026.7.1-beta.2" }),
         );
         mockNpmViewMetadata({
           name: packageName,
@@ -2216,7 +2216,7 @@ describe("updateNpmInstalledPlugins", () => {
       });
       installPluginFromNpmSpecMock.mockRejectedValue(new Error("installer should not run"));
 
-      const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () =>
+      const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () =>
         updateNpmInstalledPlugins({
           config: {
             plugins: {
@@ -2253,14 +2253,14 @@ describe("updateNpmInstalledPlugins", () => {
     },
   );
 
-  it("repairs openclaw peer links after batch npm updates prune earlier plugin links", async () => {
+  it("repairs carapace peer links after batch npm updates prune earlier plugin links", async () => {
     const plugins = [
-      { pluginId: "brave", packageName: "@openclaw/brave-plugin" },
-      { pluginId: "codex", packageName: "@openclaw/codex" },
-      { pluginId: "discord", packageName: "@openclaw/discord" },
+      { pluginId: "brave", packageName: "@carapace/brave-plugin" },
+      { pluginId: "codex", packageName: "@carapace/codex" },
+      { pluginId: "discord", packageName: "@carapace/discord" },
     ];
     const { stateDir, installPaths, peerLinkPath, linkPeer } =
-      createOpenClawPeerLinkFixtures(plugins);
+      createCarapacePeerLinkFixtures(plugins);
     for (const { packageName } of plugins) {
       mockNpmViewMetadata({
         name: packageName,
@@ -2292,7 +2292,7 @@ describe("updateNpmInstalledPlugins", () => {
       },
     );
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () =>
       updateNpmInstalledPlugins({
         config: createPeerLinkInstallConfig({ plugins, installPaths }),
         pluginIds: plugins.map((plugin) => plugin.pluginId),
@@ -2314,18 +2314,18 @@ describe("updateNpmInstalledPlugins", () => {
     );
   });
 
-  it("repairs sibling openclaw peer links after a targeted npm update prunes the shared install tree", async () => {
+  it("repairs sibling carapace peer links after a targeted npm update prunes the shared install tree", async () => {
     const plugins = [
-      { pluginId: "brave", packageName: "@openclaw/brave-plugin" },
-      { pluginId: "codex", packageName: "@openclaw/codex" },
-      { pluginId: "discord", packageName: "@openclaw/discord" },
+      { pluginId: "brave", packageName: "@carapace/brave-plugin" },
+      { pluginId: "codex", packageName: "@carapace/codex" },
+      { pluginId: "discord", packageName: "@carapace/discord" },
     ];
     const { stateDir, installPaths, peerLinkPath, linkPeer } =
-      createOpenClawPeerLinkFixtures(plugins);
+      createCarapacePeerLinkFixtures(plugins);
     linkPeer("brave");
     linkPeer("discord");
     mockNpmViewMetadata({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.5",
       integrity: "sha512-same",
       shasum: "same",
@@ -2341,15 +2341,15 @@ describe("updateNpmInstalledPlugins", () => {
           targetDir: installPaths.codex,
           version: "2026.5.5",
           npmResolution: {
-            name: "@openclaw/codex",
+            name: "@carapace/codex",
             version: "2026.5.5",
-            resolvedSpec: "@openclaw/codex@2026.5.5",
+            resolvedSpec: "@carapace/codex@2026.5.5",
           },
         }),
       );
     });
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () =>
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () =>
       updateNpmInstalledPlugins({
         config: createPeerLinkInstallConfig({ plugins, installPaths }),
         pluginIds: ["codex"],
@@ -2370,30 +2370,30 @@ describe("updateNpmInstalledPlugins", () => {
         { pluginId: "updated", packageName: "@acme/updated" },
       ];
       const { stateDir, installPaths, peerLinkPath, linkPeer } =
-        createOpenClawPeerLinkFixtures(plugins);
+        createCarapacePeerLinkFixtures(plugins);
       linkPeer("sibling");
 
       const outsideInstallPath = createInstalledPackageDir({
         name: "@acme/outside",
         version: "2026.5.4",
-        peerDependencies: { openclaw: ">=2026.5.4" },
+        peerDependencies: { carapace: ">=2026.5.4" },
       });
       const developerInstallPath = createInstalledPackageDir({
         name: "@acme/developer",
         version: "2026.5.4",
-        peerDependencies: { openclaw: ">=2026.5.4" },
+        peerDependencies: { carapace: ">=2026.5.4" },
         installPath: path.join(stateDir, "extensions", "developer"),
       });
       const marketplaceInstallPath = createInstalledPackageDir({
         name: "@acme/marketplace",
         version: "2026.5.4",
-        peerDependencies: { openclaw: ">=2026.5.4" },
+        peerDependencies: { carapace: ">=2026.5.4" },
         installPath: path.join(stateDir, "extensions", "marketplace"),
       });
       const clawhubInstallPath = createInstalledPackageDir({
         name: "@acme/clawhub",
         version: "2026.5.4",
-        peerDependencies: { openclaw: ">=2026.5.4" },
+        peerDependencies: { carapace: ">=2026.5.4" },
         installPath: path.join(stateDir, "extensions", "clawhub"),
       });
       const copiedHosts = [
@@ -2402,11 +2402,11 @@ describe("updateNpmInstalledPlugins", () => {
         marketplaceInstallPath,
         clawhubInstallPath,
       ].map((installPath) => {
-        const copiedHostDir = path.join(installPath, "node_modules", "openclaw");
+        const copiedHostDir = path.join(installPath, "node_modules", "carapace");
         fs.mkdirSync(copiedHostDir, { recursive: true });
         fs.writeFileSync(
           path.join(copiedHostDir, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "2026.4.1" }),
+          JSON.stringify({ name: "carapace", version: "2026.4.1" }),
         );
         return copiedHostDir;
       });
@@ -2439,7 +2439,7 @@ describe("updateNpmInstalledPlugins", () => {
         );
       });
 
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () =>
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () =>
         updateNpmInstalledPlugins({
           config: createPeerLinkInstallConfig({
             plugins,
@@ -2464,31 +2464,31 @@ describe("updateNpmInstalledPlugins", () => {
         expect(fs.lstatSync(copiedHostDir).isDirectory()).toBe(true);
         expect(
           JSON.parse(fs.readFileSync(path.join(copiedHostDir, "package.json"), "utf8")),
-        ).toEqual({ name: "openclaw", version: "2026.4.1" });
+        ).toEqual({ name: "carapace", version: "2026.4.1" });
       }
     },
   );
 
-  it("continues repairing sibling openclaw peer links after one recorded npm install cannot be relinked", async () => {
+  it("continues repairing sibling carapace peer links after one recorded npm install cannot be relinked", async () => {
     const plugins = [
-      { pluginId: "brave", packageName: "@openclaw/brave-plugin" },
-      { pluginId: "codex", packageName: "@openclaw/codex" },
+      { pluginId: "brave", packageName: "@carapace/brave-plugin" },
+      { pluginId: "codex", packageName: "@carapace/codex" },
     ];
     const { stateDir, installPaths, peerLinkPath, linkPeer } =
-      createOpenClawPeerLinkFixtures(plugins);
+      createCarapacePeerLinkFixtures(plugins);
     const malformedInstallPath = path.join(stateDir, "extensions", "aardvark");
     fs.mkdirSync(malformedInstallPath, { recursive: true });
     fs.writeFileSync(path.join(malformedInstallPath, "package.json"), "{ malformed");
     const brokenInstallPath = createInstalledPackageDir({
-      name: "@openclaw/broken-plugin",
+      name: "@carapace/broken-plugin",
       version: "2026.5.4",
-      peerDependencies: { openclaw: ">=2026.5.4" },
+      peerDependencies: { carapace: ">=2026.5.4" },
       installPath: path.join(stateDir, "extensions", "broken"),
     });
     fs.writeFileSync(path.join(brokenInstallPath, "node_modules"), "not a directory");
     linkPeer("brave");
     mockNpmViewMetadata({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.5",
       integrity: "sha512-same",
       shasum: "same",
@@ -2504,16 +2504,16 @@ describe("updateNpmInstalledPlugins", () => {
           targetDir: installPaths.codex,
           version: "2026.5.5",
           npmResolution: {
-            name: "@openclaw/codex",
+            name: "@carapace/codex",
             version: "2026.5.5",
-            resolvedSpec: "@openclaw/codex@2026.5.5",
+            resolvedSpec: "@carapace/codex@2026.5.5",
           },
         }),
       );
     });
     const warnMessages: string[] = [];
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () =>
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () =>
       updateNpmInstalledPlugins({
         config: createPeerLinkInstallConfig({
           plugins,
@@ -2522,11 +2522,11 @@ describe("updateNpmInstalledPlugins", () => {
             aardvark: { source: "npm", installPath: malformedInstallPath },
             broken: {
               source: "npm",
-              spec: "@openclaw/broken-plugin",
+              spec: "@carapace/broken-plugin",
               installPath: brokenInstallPath,
-              resolvedName: "@openclaw/broken-plugin",
+              resolvedName: "@carapace/broken-plugin",
               resolvedVersion: "2026.5.4",
-              resolvedSpec: "@openclaw/broken-plugin@2026.5.4",
+              resolvedSpec: "@carapace/broken-plugin@2026.5.4",
             },
           },
         }),
@@ -2540,9 +2540,9 @@ describe("updateNpmInstalledPlugins", () => {
     expect(fs.existsSync(peerLinkPath("codex"))).toBe(true);
     expect(warnMessages).toEqual([
       expect.stringContaining(
-        `Could not repair openclaw peer link at ${malformedInstallPath}: SyntaxError:`,
+        `Could not repair carapace peer link at ${malformedInstallPath}: SyntaxError:`,
       ),
-      `Skipping openclaw peerDependency link because ${path.join(brokenInstallPath, "node_modules")} is not a real directory.`,
+      `Skipping carapace peerDependency link because ${path.join(brokenInstallPath, "node_modules")} is not a real directory.`,
     ]);
   });
 
@@ -2597,9 +2597,9 @@ describe("updateNpmInstalledPlugins", () => {
   });
 
   it("expands home-relative install paths before checking installed npm versions", async () => {
-    const home = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-update-home-"));
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-update-home-"));
     tempDirs.push(home);
-    const installPath = path.join(home, ".openclaw", "extensions", "lossless-claw");
+    const installPath = path.join(home, ".carapace", "extensions", "lossless-claw");
     fs.mkdirSync(installPath, { recursive: true });
     fs.writeFileSync(
       path.join(installPath, "package.json"),
@@ -2618,7 +2618,7 @@ describe("updateNpmInstalledPlugins", () => {
         config: createNpmInstallConfig({
           pluginId: "lossless-claw",
           spec: "@martian-engineering/lossless-claw",
-          installPath: "~/.openclaw/extensions/lossless-claw",
+          installPath: "~/.carapace/extensions/lossless-claw",
           resolvedName: "@martian-engineering/lossless-claw",
           resolvedVersion: "0.9.0",
           resolvedSpec: "@martian-engineering/lossless-claw@0.9.0",
@@ -2862,7 +2862,7 @@ describe("updateNpmInstalledPlugins", () => {
     });
 
     const message =
-      'Disabled "lossless-claw" after plugin update failure; OpenClaw will continue without it. Failed to check lossless-claw: npm view failed: registry timeout';
+      'Disabled "lossless-claw" after plugin update failure; Carapace will continue without it. Failed to check lossless-claw: npm view failed: registry timeout';
     expect(warn).toHaveBeenCalledWith(message);
     expect(result.changed).toBe(true);
     expect(result.config.plugins?.entries?.["lossless-claw"]).toEqual({
@@ -2925,7 +2925,7 @@ describe("updateNpmInstalledPlugins", () => {
 
   it("disables a missing plugin payload when metadata probing also fails", async () => {
     const warn = vi.fn();
-    const installPath = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-update-missing-"));
+    const installPath = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-update-missing-"));
     tempDirs.push(installPath);
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: false,
@@ -2951,7 +2951,7 @@ describe("updateNpmInstalledPlugins", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updatePlugin(config, "demo", {
       disableOnFailure: true,
@@ -2959,7 +2959,7 @@ describe("updateNpmInstalledPlugins", () => {
     });
 
     const message =
-      'Disabled "demo" after plugin update failure; OpenClaw will continue without it. Failed to update demo: npm view failed: registry timeout';
+      'Disabled "demo" after plugin update failure; Carapace will continue without it. Failed to update demo: npm view failed: registry timeout';
     expect(warn).toHaveBeenCalledWith(message);
     expect(result.changed).toBe(true);
     expect(result.config.plugins?.entries?.demo).toEqual({
@@ -3073,11 +3073,11 @@ describe("updateNpmInstalledPlugins", () => {
 
   it("updates disabled trusted official npm installs from the channel spec when requested", async () => {
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.3",
     });
     mockNpmViewMetadata({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.4",
       integrity: "sha512-next",
       shasum: "next",
@@ -3088,9 +3088,9 @@ describe("updateNpmInstalledPlugins", () => {
         targetDir: installPath,
         version: "2026.5.4",
         npmResolution: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: "2026.5.4",
-          resolvedSpec: "@openclaw/codex@2026.5.4",
+          resolvedSpec: "@carapace/codex@2026.5.4",
         },
       }),
     );
@@ -3107,7 +3107,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@2026.5.3",
+              spec: "@carapace/codex@2026.5.3",
               installPath,
             },
           },
@@ -3117,7 +3117,7 @@ describe("updateNpmInstalledPlugins", () => {
       syncOfficialPluginInstalls: true,
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/codex@2026.5.3");
+    expect(npmInstallCall()?.spec).toBe("@carapace/codex@2026.5.3");
     expect(npmInstallCall()?.expectedPluginId).toBe("codex");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
     expect(result.changed).toBe(true);
@@ -3127,11 +3127,11 @@ describe("updateNpmInstalledPlugins", () => {
     });
     expectRecordFields(result.config.plugins?.installs?.codex, {
       source: "npm",
-      spec: "@openclaw/codex@2026.5.3",
+      spec: "@carapace/codex@2026.5.3",
       version: "2026.5.4",
-      resolvedName: "@openclaw/codex",
+      resolvedName: "@carapace/codex",
       resolvedVersion: "2026.5.4",
-      resolvedSpec: "@openclaw/codex@2026.5.4",
+      resolvedSpec: "@carapace/codex@2026.5.4",
     });
     expectRecordFields(result.outcomes[0], {
       pluginId: "codex",
@@ -3144,18 +3144,18 @@ describe("updateNpmInstalledPlugins", () => {
   it("preserves exact official npm pins on an inferred beta channel", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "codex",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       installedVersion: "2026.5.28",
-      spec: "@openclaw/codex@2026.5.28",
+      spec: "@carapace/codex@2026.5.28",
       installerVersion: "2026.5.28",
-      installerResolvedSpec: "@openclaw/codex@2026.5.28",
+      installerResolvedSpec: "@carapace/codex@2026.5.28",
     });
     const result = await updatePlugin(config, "codex", {
       dryRun: true,
       officialPluginUpdateChannel: "beta",
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/codex@2026.5.28");
+    expect(npmInstallCall()?.spec).toBe("@carapace/codex@2026.5.28");
     expect(npmInstallCall()?.expectedPluginId).toBe("codex");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
     expect(result.changed).toBe(false);
@@ -3168,7 +3168,7 @@ describe("updateNpmInstalledPlugins", () => {
   });
 
   it("reinstalls missing exact official npm pins without official install sync", async () => {
-    const extensionsDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-missing-plugin-"));
+    const extensionsDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-missing-plugin-"));
     tempDirs.push(extensionsDir);
     const installPath = path.join(extensionsDir, "codex");
     installPluginFromNpmSpecMock.mockResolvedValue(
@@ -3177,9 +3177,9 @@ describe("updateNpmInstalledPlugins", () => {
         targetDir: installPath,
         version: "2026.5.28",
         npmResolution: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: "2026.5.28",
-          resolvedSpec: "@openclaw/codex@2026.5.28",
+          resolvedSpec: "@carapace/codex@2026.5.28",
         },
       }),
     );
@@ -3187,25 +3187,25 @@ describe("updateNpmInstalledPlugins", () => {
     const result = await updateNpmInstalledPlugins({
       config: createNpmInstallConfig({
         pluginId: "codex",
-        spec: "@openclaw/codex@2026.5.28",
+        spec: "@carapace/codex@2026.5.28",
         installPath,
-        resolvedName: "@openclaw/codex",
-        resolvedSpec: "@openclaw/codex@2026.5.28",
+        resolvedName: "@carapace/codex",
+        resolvedSpec: "@carapace/codex@2026.5.28",
         resolvedVersion: "2026.5.28",
       }),
       pluginIds: ["codex"],
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/codex@2026.5.28");
+    expect(npmInstallCall()?.spec).toBe("@carapace/codex@2026.5.28");
     expect(npmInstallCall()?.extensionsDir).toBe(extensionsDir);
     expect(runCommandWithTimeoutMock).not.toHaveBeenCalled();
     expectRecordFields(result.config.plugins?.installs?.codex, {
       source: "npm",
-      spec: "@openclaw/codex@2026.5.28",
+      spec: "@carapace/codex@2026.5.28",
       installPath,
       version: "2026.5.28",
-      resolvedName: "@openclaw/codex",
-      resolvedSpec: "@openclaw/codex@2026.5.28",
+      resolvedName: "@carapace/codex",
+      resolvedSpec: "@carapace/codex@2026.5.28",
       resolvedVersion: "2026.5.28",
     });
     expectRecordFields(result.outcomes[0], {
@@ -3216,11 +3216,11 @@ describe("updateNpmInstalledPlugins", () => {
   });
 
   it("keeps integrity checks when official sync repairs missing exact npm pins", async () => {
-    const extensionsDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-missing-plugin-"));
+    const extensionsDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-missing-plugin-"));
     tempDirs.push(extensionsDir);
     const installPath = path.join(extensionsDir, "codex");
     mockNpmViewMetadata({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.5.28",
       integrity: "sha512-old",
     });
@@ -3230,9 +3230,9 @@ describe("updateNpmInstalledPlugins", () => {
         targetDir: installPath,
         version: "2026.5.28",
         npmResolution: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: "2026.5.28",
-          resolvedSpec: "@openclaw/codex@2026.5.28",
+          resolvedSpec: "@carapace/codex@2026.5.28",
         },
       }),
     );
@@ -3240,10 +3240,10 @@ describe("updateNpmInstalledPlugins", () => {
     await updateNpmInstalledPlugins({
       config: createNpmInstallConfig({
         pluginId: "codex",
-        spec: "@openclaw/codex@2026.5.28",
+        spec: "@carapace/codex@2026.5.28",
         installPath,
-        resolvedName: "@openclaw/codex",
-        resolvedSpec: "@openclaw/codex@2026.5.28",
+        resolvedName: "@carapace/codex",
+        resolvedSpec: "@carapace/codex@2026.5.28",
         resolvedVersion: "2026.5.28",
         integrity: "sha512-old",
       }),
@@ -3251,7 +3251,7 @@ describe("updateNpmInstalledPlugins", () => {
       syncOfficialPluginInstalls: true,
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/codex@2026.5.28");
+    expect(npmInstallCall()?.spec).toBe("@carapace/codex@2026.5.28");
     expect(npmInstallCall()?.expectedIntegrity).toBe("sha512-old");
   });
 
@@ -3328,7 +3328,7 @@ describe("updateNpmInstalledPlugins", () => {
       {
         version,
         pluginId: "acpx",
-        packageName: "@openclaw/acpx",
+        packageName: "@carapace/acpx",
         syncOfficialPluginInstalls: true,
       },
     ]),
@@ -3359,7 +3359,7 @@ describe("updateNpmInstalledPlugins", () => {
         "version",
         "dist.integrity",
         "dist.shasum",
-        "openclaw",
+        "carapace",
         "--json",
       ]);
       expectRecordFields(result.outcomes[0], {
@@ -3367,7 +3367,7 @@ describe("updateNpmInstalledPlugins", () => {
         status: "unchanged",
         currentVersion: "1.2.3",
         nextVersion: "1.2.4",
-        message: `${pluginId} is pinned to ${spec} (installed 1.2.3); registry latest resolves to 1.2.4. Pass \`openclaw plugins update ${packageName}@latest\` to replace this version pin.`,
+        message: `${pluginId} is pinned to ${spec} (installed 1.2.3); registry latest resolves to 1.2.4. Pass \`carapace plugins update ${packageName}@latest\` to replace this version pin.`,
       });
     },
   );
@@ -3378,14 +3378,14 @@ describe("updateNpmInstalledPlugins", () => {
         pluginId: "diagnostics-otel",
         targetDir: "/tmp/diagnostics-otel",
         version: "2026.5.4",
-        clawhubPackage: "@openclaw/diagnostics-otel",
+        clawhubPackage: "@carapace/diagnostics-otel",
       }),
     );
 
     const config = createClawHubInstallConfig({
       pluginId: "diagnostics-otel",
-      clawhubPackage: "@openclaw/diagnostics-otel",
-      spec: "clawhub:@openclaw/diagnostics-otel@2026.5.3",
+      clawhubPackage: "@carapace/diagnostics-otel",
+      spec: "clawhub:@carapace/diagnostics-otel@2026.5.3",
     });
     const result = await updateNpmInstalledPlugins({
       config: {
@@ -3404,13 +3404,13 @@ describe("updateNpmInstalledPlugins", () => {
       syncOfficialPluginInstalls: true,
     });
 
-    expect(clawHubInstallCall()?.spec).toBe("clawhub:@openclaw/diagnostics-otel@2026.5.3");
+    expect(clawHubInstallCall()?.spec).toBe("clawhub:@carapace/diagnostics-otel@2026.5.3");
     expect(clawHubInstallCall()?.expectedPluginId).toBe("diagnostics-otel");
     expectRecordFields(result.config.plugins?.installs?.["diagnostics-otel"], {
       source: "clawhub",
-      spec: "clawhub:@openclaw/diagnostics-otel@2026.5.3",
+      spec: "clawhub:@carapace/diagnostics-otel@2026.5.3",
       version: "2026.5.4",
-      clawhubPackage: "@openclaw/diagnostics-otel",
+      clawhubPackage: "@carapace/diagnostics-otel",
       clawhubChannel: "official",
     });
     expect(result.config.plugins?.entries?.["diagnostics-otel"]).toEqual({
@@ -3425,7 +3425,7 @@ describe("updateNpmInstalledPlugins", () => {
         pluginId: "diagnostics-prometheus",
         targetDir: "/tmp/diagnostics-prometheus",
         version: "2026.5.4",
-        clawhubPackage: "@openclaw/diagnostics-prometheus",
+        clawhubPackage: "@carapace/diagnostics-prometheus",
       }),
     );
 
@@ -3435,7 +3435,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             "diagnostics-prometheus": {
               source: "clawhub",
-              spec: "clawhub:@openclaw/diagnostics-prometheus@2026.5.3",
+              spec: "clawhub:@carapace/diagnostics-prometheus@2026.5.3",
               installPath: "/tmp/diagnostics-prometheus",
             },
           },
@@ -3444,13 +3444,13 @@ describe("updateNpmInstalledPlugins", () => {
       syncOfficialPluginInstalls: true,
     });
 
-    expect(clawHubInstallCall()?.spec).toBe("clawhub:@openclaw/diagnostics-prometheus@2026.5.3");
+    expect(clawHubInstallCall()?.spec).toBe("clawhub:@carapace/diagnostics-prometheus@2026.5.3");
     expect(clawHubInstallCall()?.expectedPluginId).toBe("diagnostics-prometheus");
     expectRecordFields(result.config.plugins?.installs?.["diagnostics-prometheus"], {
       source: "clawhub",
-      spec: "clawhub:@openclaw/diagnostics-prometheus@2026.5.3",
+      spec: "clawhub:@carapace/diagnostics-prometheus@2026.5.3",
       version: "2026.5.4",
-      clawhubPackage: "@openclaw/diagnostics-prometheus",
+      clawhubPackage: "@carapace/diagnostics-prometheus",
       clawhubChannel: "official",
     });
   });
@@ -3475,7 +3475,7 @@ describe("updateNpmInstalledPlugins", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updateNpmInstalledPlugins({
       config,
@@ -3525,7 +3525,7 @@ describe("updateNpmInstalledPlugins", () => {
           contextEngine: "demo",
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updateNpmInstalledPlugins({
       config,
@@ -3537,7 +3537,7 @@ describe("updateNpmInstalledPlugins", () => {
     expect(npmInstallCall()?.spec).toBe("@acme/demo");
     expect(npmInstallCall()?.expectedPluginId).toBe("demo");
     const message =
-      'Disabled "demo" after plugin update failure; OpenClaw will continue without it. Failed to update demo: registry timeout';
+      'Disabled "demo" after plugin update failure; Carapace will continue without it. Failed to update demo: registry timeout';
     expect(warn).toHaveBeenCalledWith(message);
     expect(result.changed).toBe(true);
     expect(result.config.plugins?.entries?.demo).toEqual({
@@ -3660,7 +3660,7 @@ describe("updateNpmInstalledPlugins", () => {
     expect(result.config.plugins?.allow).toEqual(["demo"]);
     expect(result.config.plugins?.slots).toBeUndefined();
     const message =
-      'Disabled "demo" after plugin update failure; OpenClaw will continue without it. Failed to update demo: ClawHub blocked this release; update was not started. (ClawHub clawhub:demo).';
+      'Disabled "demo" after plugin update failure; Carapace will continue without it. Failed to update demo: ClawHub blocked this release; update was not started. (ClawHub clawhub:demo).';
     expect(warn).toHaveBeenCalledWith(message);
     expect(result.outcomes).toEqual([
       {
@@ -3684,14 +3684,14 @@ describe("updateNpmInstalledPlugins", () => {
           actualIntegrity: "sha512-new",
           resolution: {
             integrity: "sha512-new",
-            resolvedSpec: "@opik/opik-openclaw@0.2.5",
+            resolvedSpec: "@opik/opik-carapace@0.2.5",
             version: "0.2.5",
           },
         });
         if (proceed === false) {
           return {
             ok: false,
-            error: "aborted: npm package integrity drift detected for @opik/opik-openclaw@0.2.5",
+            error: "aborted: npm package integrity drift detected for @opik/opik-carapace@0.2.5",
           };
         }
         return createSuccessfulNpmUpdateResult();
@@ -3699,24 +3699,24 @@ describe("updateNpmInstalledPlugins", () => {
     );
 
     const config = createNpmInstallConfig({
-      pluginId: "opik-openclaw",
-      spec: "@opik/opik-openclaw@0.2.5",
+      pluginId: "opik-carapace",
+      spec: "@opik/opik-carapace@0.2.5",
       integrity: "sha512-old",
-      installPath: "/tmp/opik-openclaw",
+      installPath: "/tmp/opik-carapace",
     });
-    const result = await updatePlugin(config, "opik-openclaw", { logger: { warn } });
+    const result = await updatePlugin(config, "opik-carapace", { logger: { warn } });
 
     expect(warn).toHaveBeenCalledWith(
-      'Integrity drift for "opik-openclaw" (@opik/opik-openclaw@0.2.5): expected sha512-old, got sha512-new',
+      'Integrity drift for "opik-carapace" (@opik/opik-carapace@0.2.5): expected sha512-old, got sha512-new',
     );
     expect(result.changed).toBe(false);
     expect(result.config).toBe(config);
     expect(result.outcomes).toEqual([
       {
-        pluginId: "opik-openclaw",
+        pluginId: "opik-carapace",
         status: "error",
         message:
-          "Failed to update opik-openclaw: aborted: npm package integrity drift detected for @opik/opik-openclaw@0.2.5",
+          "Failed to update opik-carapace: aborted: npm package integrity drift detected for @opik/opik-carapace@0.2.5",
       },
     ]);
   });
@@ -3727,15 +3727,15 @@ describe("updateNpmInstalledPlugins", () => {
       installerResult: {
         ok: false,
         code: "npm_package_not_found",
-        error: "Package not found on npm: @openclaw/missing.",
+        error: "Package not found on npm: @carapace/missing.",
       },
       config: createNpmInstallConfig({
         pluginId: "missing",
-        spec: "@openclaw/missing",
+        spec: "@carapace/missing",
         installPath: "/tmp/missing",
       }),
       pluginId: "missing",
-      expectedMessage: "Failed to check missing: npm package not found for @openclaw/missing.",
+      expectedMessage: "Failed to check missing: npm package not found for @carapace/missing.",
     },
     {
       name: "falls back to raw installer error for unknown error codes",
@@ -3775,43 +3775,43 @@ describe("updateNpmInstalledPlugins", () => {
       name: "reuses a recorded npm dist-tag spec for id-based updates",
       installerResult: {
         ok: true,
-        pluginId: "openclaw-codex-app-server",
-        targetDir: "/tmp/openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
+        targetDir: "/tmp/carapace-codex-app-server",
         version: "0.2.0-beta.4",
         extensions: ["index.ts"],
       },
       config: createCodexAppServerInstallConfig({
-        spec: "openclaw-codex-app-server@beta",
-        resolvedName: "openclaw-codex-app-server",
-        resolvedSpec: "openclaw-codex-app-server@0.2.0-beta.3",
+        spec: "carapace-codex-app-server@beta",
+        resolvedName: "carapace-codex-app-server",
+        resolvedSpec: "carapace-codex-app-server@0.2.0-beta.3",
       }),
-      expectedSpec: "openclaw-codex-app-server@beta",
+      expectedSpec: "carapace-codex-app-server@beta",
       expectedVersion: "0.2.0-beta.4",
     },
     {
       name: "uses and persists an explicit npm spec override during updates",
       installerResult: {
         ok: true,
-        pluginId: "openclaw-codex-app-server",
-        targetDir: "/tmp/openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
+        targetDir: "/tmp/carapace-codex-app-server",
         version: "0.2.0-beta.4",
         extensions: ["index.ts"],
         npmResolution: {
-          name: "openclaw-codex-app-server",
+          name: "carapace-codex-app-server",
           version: "0.2.0-beta.4",
-          resolvedSpec: "openclaw-codex-app-server@0.2.0-beta.4",
+          resolvedSpec: "carapace-codex-app-server@0.2.0-beta.4",
         },
       },
       config: createCodexAppServerInstallConfig({
-        spec: "openclaw-codex-app-server",
+        spec: "carapace-codex-app-server",
       }),
       specOverrides: {
-        "openclaw-codex-app-server": "openclaw-codex-app-server@beta",
+        "carapace-codex-app-server": "carapace-codex-app-server@beta",
       },
-      expectedSpec: "openclaw-codex-app-server@beta",
-      expectedRecordSpec: "openclaw-codex-app-server@beta",
+      expectedSpec: "carapace-codex-app-server@beta",
+      expectedRecordSpec: "carapace-codex-app-server@beta",
       expectedVersion: "0.2.0-beta.4",
-      expectedResolvedSpec: "openclaw-codex-app-server@0.2.0-beta.4",
+      expectedResolvedSpec: "carapace-codex-app-server@0.2.0-beta.4",
     },
   ] as const)(
     "$name",
@@ -3828,13 +3828,13 @@ describe("updateNpmInstalledPlugins", () => {
 
       const result = await updatePlugin(
         config,
-        "openclaw-codex-app-server",
+        "carapace-codex-app-server",
         specOverrides ? { specOverrides } : {},
       );
 
       expectNpmUpdateCall({
         spec: expectedSpec,
-        expectedPluginId: "openclaw-codex-app-server",
+        expectedPluginId: "carapace-codex-app-server",
       });
       expectCodexAppServerInstallState({
         result,
@@ -3848,41 +3848,41 @@ describe("updateNpmInstalledPlugins", () => {
   it("preserves explicit official npm tag overrides during manual updates", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.5.2",
       registryVersion: "2026.5.3-beta.1",
       installerVersion: "2026.5.3-beta.1",
-      installerResolvedSpec: "@openclaw/acpx@2026.5.3-beta.1",
+      installerResolvedSpec: "@carapace/acpx@2026.5.3-beta.1",
     });
     const result = await updatePlugin(config, "acpx", {
-      specOverrides: { acpx: "@openclaw/acpx@beta" },
+      specOverrides: { acpx: "@carapace/acpx@beta" },
     });
 
     expectNpmUpdateCall({
-      spec: "@openclaw/acpx@beta",
+      spec: "@carapace/acpx@beta",
       expectedPluginId: "acpx",
     });
     expectRecordFields(result.config.plugins?.installs?.acpx, {
-      spec: "@openclaw/acpx@beta",
+      spec: "@carapace/acpx@beta",
       version: "2026.5.3-beta.1",
-      resolvedSpec: "@openclaw/acpx@2026.5.3-beta.1",
+      resolvedSpec: "@carapace/acpx@2026.5.3-beta.1",
     });
   });
 
-  it.each(["openclaw-codex-app-server", "openclaw-codex-app-server@latest"])(
+  it.each(["carapace-codex-app-server", "carapace-codex-app-server@latest"])(
     "selects a newer npm beta release and preserves recorded intent %s",
     async (spec) => {
-      mockNpmViewMetadata({ name: "openclaw-codex-app-server", version: "0.2.0-beta.4" });
-      mockNpmViewMetadata({ name: "openclaw-codex-app-server", version: "0.1.9" });
+      mockNpmViewMetadata({ name: "carapace-codex-app-server", version: "0.2.0-beta.4" });
+      mockNpmViewMetadata({ name: "carapace-codex-app-server", version: "0.1.9" });
       installPluginFromNpmSpecMock.mockResolvedValue(
         createSuccessfulNpmUpdateResult({
-          pluginId: "openclaw-codex-app-server",
-          targetDir: "/tmp/openclaw-codex-app-server",
+          pluginId: "carapace-codex-app-server",
+          targetDir: "/tmp/carapace-codex-app-server",
           version: "0.2.0-beta.4",
           npmResolution: {
-            name: "openclaw-codex-app-server",
+            name: "carapace-codex-app-server",
             version: "0.2.0-beta.4",
-            resolvedSpec: "openclaw-codex-app-server@0.2.0-beta.4",
+            resolvedSpec: "carapace-codex-app-server@0.2.0-beta.4",
           },
         }),
       );
@@ -3891,19 +3891,19 @@ describe("updateNpmInstalledPlugins", () => {
         config: createCodexAppServerInstallConfig({
           spec,
         }),
-        pluginIds: ["openclaw-codex-app-server"],
+        pluginIds: ["carapace-codex-app-server"],
         updateChannel: "beta",
       });
 
       expectNpmUpdateCall({
-        spec: "openclaw-codex-app-server@0.2.0-beta.4",
-        expectedPluginId: "openclaw-codex-app-server",
+        spec: "carapace-codex-app-server@0.2.0-beta.4",
+        expectedPluginId: "carapace-codex-app-server",
       });
       expectCodexAppServerInstallState({
         result,
         spec,
         version: "0.2.0-beta.4",
-        resolvedSpec: "openclaw-codex-app-server@0.2.0-beta.4",
+        resolvedSpec: "carapace-codex-app-server@0.2.0-beta.4",
       });
     },
   );
@@ -3921,7 +3921,7 @@ describe("updateNpmInstalledPlugins", () => {
         selectedVersion: "2026.8.1-beta.4",
       },
     ].flatMap(({ channel, coreVersion, selectedVersion }) =>
-      ["@openclaw/acpx", "@openclaw/acpx@latest"].map((spec) => ({
+      ["@carapace/acpx", "@carapace/acpx@latest"].map((spec) => ({
         channel,
         coreVersion,
         selectedVersion,
@@ -3933,15 +3933,15 @@ describe("updateNpmInstalledPlugins", () => {
     async ({ channel, coreVersion, selectedVersion, spec }) => {
       const { config } = createNpmUpdateFixture({
         pluginId: "acpx",
-        packageName: "@openclaw/acpx",
+        packageName: "@carapace/acpx",
         spec,
         installedVersion: "2026.7.21",
         registryVersion: selectedVersion,
         installerVersion: selectedVersion,
-        installerResolvedSpec: `@openclaw/acpx@${selectedVersion}`,
+        installerResolvedSpec: `@carapace/acpx@${selectedVersion}`,
       });
       if (channel === "beta") {
-        mockNpmViewMetadata({ name: "@openclaw/acpx", version: "2026.8.0" });
+        mockNpmViewMetadata({ name: "@carapace/acpx", version: "2026.8.0" });
       }
       const result = await updatePlugin(config, "acpx", {
         syncOfficialPluginInstalls: true,
@@ -3950,13 +3950,13 @@ describe("updateNpmInstalledPlugins", () => {
       });
 
       expectNpmUpdateCall({
-        spec: `@openclaw/acpx@${selectedVersion}`,
+        spec: `@carapace/acpx@${selectedVersion}`,
         expectedPluginId: "acpx",
       });
       expectRecordFields(result.config.plugins?.installs?.acpx, {
         spec,
         version: selectedVersion,
-        resolvedSpec: `@openclaw/acpx@${selectedVersion}`,
+        resolvedSpec: `@carapace/acpx@${selectedVersion}`,
       });
     },
   );
@@ -3964,9 +3964,9 @@ describe("updateNpmInstalledPlugins", () => {
   it("preserves an explicit official pin during extended-stable updates", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.6.33",
-      spec: "@openclaw/acpx@2026.6.33",
+      spec: "@carapace/acpx@2026.6.33",
       installerVersion: "2026.6.33",
     });
     await updatePlugin(config, "acpx", {
@@ -3977,7 +3977,7 @@ describe("updateNpmInstalledPlugins", () => {
     });
 
     expectNpmUpdateCall({
-      spec: "@openclaw/acpx@2026.6.33",
+      spec: "@carapace/acpx@2026.6.33",
       expectedPluginId: "acpx",
     });
   });
@@ -3985,28 +3985,28 @@ describe("updateNpmInstalledPlugins", () => {
   it("lets an explicit bare official spec opt a legacy pin into exact-core tracking", async () => {
     const { config } = createNpmUpdateFixture({
       pluginId: "acpx",
-      packageName: "@openclaw/acpx",
+      packageName: "@carapace/acpx",
       installedVersion: "2026.6.21",
       registryVersion: "2026.7.33",
-      spec: "@openclaw/acpx@2026.6.21",
+      spec: "@carapace/acpx@2026.6.21",
       installerVersion: "2026.7.33",
-      installerResolvedSpec: "@openclaw/acpx@2026.7.33",
+      installerResolvedSpec: "@carapace/acpx@2026.7.33",
     });
     const result = await updatePlugin(config, "acpx", {
-      specOverrides: { acpx: "@openclaw/acpx" },
+      specOverrides: { acpx: "@carapace/acpx" },
       syncOfficialPluginInstalls: true,
       officialPluginUpdateChannel: "extended-stable",
       coreVersion: "2026.7.33",
     });
 
     expectNpmUpdateCall({
-      spec: "@openclaw/acpx@2026.7.33",
+      spec: "@carapace/acpx@2026.7.33",
       expectedPluginId: "acpx",
     });
     expectRecordFields(result.config.plugins?.installs?.acpx, {
-      spec: "@openclaw/acpx",
+      spec: "@carapace/acpx",
       version: "2026.7.33",
-      resolvedSpec: "@openclaw/acpx@2026.7.33",
+      resolvedSpec: "@carapace/acpx@2026.7.33",
     });
   });
 
@@ -4018,32 +4018,32 @@ describe("updateNpmInstalledPlugins", () => {
         stdout: "",
         stderr: "npm error code E404",
       });
-      mockNpmViewMetadata({ name: "openclaw-codex-app-server", version: "0.2.6" });
+      mockNpmViewMetadata({ name: "carapace-codex-app-server", version: "0.2.6" });
       installPluginFromNpmSpecMock.mockResolvedValue(
         createSuccessfulNpmUpdateResult({
-          pluginId: "openclaw-codex-app-server",
-          targetDir: "/tmp/openclaw-codex-app-server",
+          pluginId: "carapace-codex-app-server",
+          targetDir: "/tmp/carapace-codex-app-server",
           version: "0.2.6",
           npmResolution: {
-            name: "openclaw-codex-app-server",
+            name: "carapace-codex-app-server",
             version: "0.2.6",
-            resolvedSpec: "openclaw-codex-app-server@0.2.6",
+            resolvedSpec: "carapace-codex-app-server@0.2.6",
           },
         }),
       );
       const config = createCodexAppServerInstallConfig({
-        spec: "openclaw-codex-app-server",
+        spec: "carapace-codex-app-server",
       });
-      const result = await updatePlugin(config, "openclaw-codex-app-server", {
+      const result = await updatePlugin(config, "carapace-codex-app-server", {
         updateChannel: "beta",
         dryRun,
       });
 
       expect(installPluginFromNpmSpecMock).toHaveBeenCalledTimes(1);
-      expect(npmInstallCall()?.spec).toBe("openclaw-codex-app-server@0.2.6");
+      expect(npmInstallCall()?.spec).toBe("carapace-codex-app-server@0.2.6");
       expect(npmInstallCall()?.config).toBe(config);
       expect(result.outcomes[0]?.message).toBe(
-        `${dryRun ? "Would update" : "Updated"} openclaw-codex-app-server: unknown -> 0.2.6.`,
+        `${dryRun ? "Would update" : "Updated"} carapace-codex-app-server: unknown -> 0.2.6.`,
       );
       if (dryRun) {
         expect(result.config).toBe(config);
@@ -4051,9 +4051,9 @@ describe("updateNpmInstalledPlugins", () => {
       } else {
         expectCodexAppServerInstallState({
           result,
-          spec: "openclaw-codex-app-server",
+          spec: "carapace-codex-app-server",
           version: "0.2.6",
-          resolvedSpec: "openclaw-codex-app-server@0.2.6",
+          resolvedSpec: "carapace-codex-app-server@0.2.6",
         });
       }
     },
@@ -4066,12 +4066,12 @@ describe("updateNpmInstalledPlugins", () => {
     { error: "Integrity mismatch" },
     { code: "incompatible_host_version", error: "ETARGET in untrusted validation text" },
   ])("does not retry a refused beta artifact ($error)", async (failure) => {
-    mockNpmViewMetadata({ name: "openclaw-codex-app-server", version: "0.2.0-beta.4" });
-    mockNpmViewMetadata({ name: "openclaw-codex-app-server", version: "0.1.9" });
+    mockNpmViewMetadata({ name: "carapace-codex-app-server", version: "0.2.0-beta.4" });
+    mockNpmViewMetadata({ name: "carapace-codex-app-server", version: "0.1.9" });
     installPluginFromNpmSpecMock.mockResolvedValue({ ok: false, ...failure });
     const result = await updatePlugin(
-      createCodexAppServerInstallConfig({ spec: "openclaw-codex-app-server" }),
-      "openclaw-codex-app-server",
+      createCodexAppServerInstallConfig({ spec: "carapace-codex-app-server" }),
+      "carapace-codex-app-server",
       { updateChannel: "beta" },
     );
     expect(installPluginFromNpmSpecMock).toHaveBeenCalledTimes(1);
@@ -4085,24 +4085,24 @@ describe("updateNpmInstalledPlugins", () => {
   it("preserves explicit npm tags when updating on the beta channel", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-codex-app-server",
-        targetDir: "/tmp/openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
+        targetDir: "/tmp/carapace-codex-app-server",
         version: "0.2.0-rc.1",
       }),
     );
 
     await updateNpmInstalledPlugins({
       config: createCodexAppServerInstallConfig({
-        spec: "openclaw-codex-app-server@rc",
+        spec: "carapace-codex-app-server@rc",
       }),
-      pluginIds: ["openclaw-codex-app-server"],
+      pluginIds: ["carapace-codex-app-server"],
       updateChannel: "beta",
       dryRun: true,
     });
 
     expectNpmUpdateCall({
-      spec: "openclaw-codex-app-server@rc",
-      expectedPluginId: "openclaw-codex-app-server",
+      spec: "carapace-codex-app-server@rc",
+      expectedPluginId: "carapace-codex-app-server",
     });
   });
 
@@ -4220,32 +4220,32 @@ describe("updateNpmInstalledPlugins", () => {
   it.each([
     {
       channel: "beta",
-      spec: "clawhub:@openclaw/discord",
-      expectedSpec: "clawhub:@openclaw/discord@beta",
+      spec: "clawhub:@carapace/discord",
+      expectedSpec: "clawhub:@carapace/discord@beta",
       version: "2026.5.4-beta.1",
     },
     {
       channel: "extended-stable",
-      spec: "clawhub:@openclaw/discord",
-      expectedSpec: "clawhub:@openclaw/discord@2026.7.33",
+      spec: "clawhub:@carapace/discord",
+      expectedSpec: "clawhub:@carapace/discord@2026.7.33",
       version: "2026.7.33",
     },
     {
       channel: "extended-stable",
-      spec: "clawhub:@openclaw/discord@latest",
-      expectedSpec: "clawhub:@openclaw/discord@2026.7.33",
+      spec: "clawhub:@carapace/discord@latest",
+      expectedSpec: "clawhub:@carapace/discord@2026.7.33",
       version: "2026.7.33",
     },
     {
       channel: "extended-stable",
-      spec: "clawhub:@openclaw/discord@rc",
-      expectedSpec: "clawhub:@openclaw/discord@rc",
+      spec: "clawhub:@carapace/discord@rc",
+      expectedSpec: "clawhub:@carapace/discord@rc",
       version: "2026.7.34-rc.1",
     },
     {
       channel: "extended-stable",
-      spec: "clawhub:@openclaw/discord@2026.6.33",
-      expectedSpec: "clawhub:@openclaw/discord@2026.6.33",
+      spec: "clawhub:@carapace/discord@2026.6.33",
+      expectedSpec: "clawhub:@carapace/discord@2026.6.33",
       version: "2026.6.33",
     },
   ] as const)(
@@ -4256,14 +4256,14 @@ describe("updateNpmInstalledPlugins", () => {
           pluginId: "discord",
           targetDir: "/tmp/discord",
           version,
-          clawhubPackage: "@openclaw/discord",
+          clawhubPackage: "@carapace/discord",
         }),
       );
 
       const result = await updatePlugin(
         createClawHubInstallConfig({
           pluginId: "discord",
-          clawhubPackage: "@openclaw/discord",
+          clawhubPackage: "@carapace/discord",
           spec,
         }),
         "discord",
@@ -4276,7 +4276,7 @@ describe("updateNpmInstalledPlugins", () => {
         source: "clawhub",
         spec,
         version,
-        clawhubPackage: "@openclaw/discord",
+        clawhubPackage: "@carapace/discord",
       });
     },
   );
@@ -4293,14 +4293,14 @@ describe("updateNpmInstalledPlugins", () => {
           pluginId: "discord",
           targetDir: "/tmp/discord",
           version: "2026.5.4",
-          clawhubPackage: "@openclaw/discord",
+          clawhubPackage: "@carapace/discord",
         }),
       );
 
       await updatePlugin(
         createClawHubInstallConfig({
           pluginId: "discord",
-          clawhubPackage: "@openclaw/discord",
+          clawhubPackage: "@carapace/discord",
           clawhubUrl: "https://custom-clawhub.example",
         }),
         "discord",
@@ -4310,7 +4310,7 @@ describe("updateNpmInstalledPlugins", () => {
         },
       );
 
-      expect(clawHubInstallCall()?.spec).toBe("clawhub:@openclaw/discord");
+      expect(clawHubInstallCall()?.spec).toBe("clawhub:@carapace/discord");
     },
   );
 
@@ -4356,14 +4356,14 @@ describe("updateNpmInstalledPlugins", () => {
   it("does not fall back to npm for blocked official ClawHub artifact downloads", async () => {
     const warnMessages: string[] = [];
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/discord",
+      name: "@carapace/discord",
       version: "2026.5.12",
     });
     installPluginFromClawHubMock.mockResolvedValueOnce({
       ok: false,
       code: "clawhub_download_blocked",
       error:
-        'ClawHub blocked artifact download for "@openclaw/discord@2026.5.16-beta.5"; install was not started. ClawHub /api/v1/packages/%40openclaw%2Fdiscord/versions/2026.5.16-beta.5/artifact/download failed (403): Blocked: this package release has been flagged as malicious and cannot be downloaded.',
+        'ClawHub blocked artifact download for "@carapace/discord@2026.5.16-beta.5"; install was not started. ClawHub /api/v1/packages/%40carapace%2Fdiscord/versions/2026.5.16-beta.5/artifact/download failed (403): Blocked: this package release has been flagged as malicious and cannot be downloaded.',
       version: "2026.5.16-beta.5",
     });
 
@@ -4371,7 +4371,7 @@ describe("updateNpmInstalledPlugins", () => {
       createClawHubInstallConfig({
         pluginId: "discord",
         installPath,
-        clawhubPackage: "@openclaw/discord",
+        clawhubPackage: "@carapace/discord",
       }),
       "discord",
       {
@@ -4381,14 +4381,14 @@ describe("updateNpmInstalledPlugins", () => {
       },
     );
 
-    expect(clawHubInstallCall()?.spec).toBe("clawhub:@openclaw/discord@beta");
+    expect(clawHubInstallCall()?.spec).toBe("clawhub:@carapace/discord@beta");
     expect(installPluginFromNpmSpecMock).not.toHaveBeenCalled();
     expect(result.config.plugins?.entries?.discord?.enabled).toBeUndefined();
     expectRecordFields(result.config.plugins?.installs?.discord, {
       source: "clawhub",
-      spec: "clawhub:@openclaw/discord",
+      spec: "clawhub:@carapace/discord",
       installPath,
-      clawhubPackage: "@openclaw/discord",
+      clawhubPackage: "@carapace/discord",
     });
     expect(result.outcomes).toEqual([
       {
@@ -4397,7 +4397,7 @@ describe("updateNpmInstalledPlugins", () => {
         code: "clawhub_download_blocked",
         currentVersion: "2026.5.12",
         message:
-          'Skipped discord ClawHub update: ClawHub blocked artifact download for "@openclaw/discord@2026.5.16-beta.5"; install was not started. ClawHub /api/v1/packages/%40openclaw%2Fdiscord/versions/2026.5.16-beta.5/artifact/download failed (403): Blocked: this package release has been flagged as malicious and cannot be downloaded. Existing installed plugin left unchanged.',
+          'Skipped discord ClawHub update: ClawHub blocked artifact download for "@carapace/discord@2026.5.16-beta.5"; install was not started. ClawHub /api/v1/packages/%40carapace%2Fdiscord/versions/2026.5.16-beta.5/artifact/download failed (403): Blocked: this package release has been flagged as malicious and cannot be downloaded. Existing installed plugin left unchanged.',
       },
     ]);
     expect(warnMessages).toStrictEqual([]);
@@ -4408,7 +4408,7 @@ describe("updateNpmInstalledPlugins", () => {
     async (channel) => {
       const config = createClawHubInstallConfig({
         pluginId: "discord",
-        clawhubPackage: "@openclaw/discord",
+        clawhubPackage: "@carapace/discord",
       });
       installPluginFromClawHubMock.mockResolvedValue({
         ok: false,
@@ -4432,7 +4432,7 @@ describe("updateNpmInstalledPlugins", () => {
 
   it("does not fall back to trusted npm from custom ClawHub provenance", async () => {
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/discord",
+      name: "@carapace/discord",
       version: "2026.5.12",
     });
     installPluginFromClawHubMock.mockResolvedValueOnce({
@@ -4446,7 +4446,7 @@ describe("updateNpmInstalledPlugins", () => {
         pluginId: "discord",
         installPath,
         clawhubUrl: "https://custom-clawhub.example",
-        clawhubPackage: "@openclaw/discord",
+        clawhubPackage: "@carapace/discord",
       }),
       "discord",
       { updateChannel: "beta" },
@@ -4458,7 +4458,7 @@ describe("updateNpmInstalledPlugins", () => {
         pluginId: "discord",
         status: "error",
         message:
-          "Failed to update discord: artifact unavailable (ClawHub clawhub:@openclaw/discord@beta).",
+          "Failed to update discord: artifact unavailable (ClawHub clawhub:@carapace/discord@beta).",
       },
     ]);
   });
@@ -4575,8 +4575,8 @@ describe("updateNpmInstalledPlugins", () => {
   it("migrates legacy unscoped install keys when a scoped npm package updates", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: true,
-      pluginId: "@openclaw/voice-call",
-      targetDir: "/tmp/openclaw-voice-call",
+      pluginId: "@carapace/voice-call",
+      targetDir: "/tmp/carapace-voice-call",
       version: "0.0.2",
       extensions: ["index.ts"],
     });
@@ -4596,7 +4596,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             "voice-call": {
               source: "npm",
-              spec: "@openclaw/voice-call",
+              spec: "@carapace/voice-call",
               installPath: "/tmp/voice-call",
             },
           },
@@ -4605,20 +4605,20 @@ describe("updateNpmInstalledPlugins", () => {
       pluginIds: ["voice-call"],
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/voice-call");
+    expect(npmInstallCall()?.spec).toBe("@carapace/voice-call");
     expect(npmInstallCall()?.expectedPluginId).toBe("voice-call");
-    expect(result.config.plugins?.allow).toEqual(["@openclaw/voice-call"]);
-    expect(result.config.plugins?.deny).toEqual(["@openclaw/voice-call"]);
-    expect(result.config.plugins?.slots?.memory).toBe("@openclaw/voice-call");
-    expect(result.config.plugins?.entries?.["@openclaw/voice-call"]).toEqual({
+    expect(result.config.plugins?.allow).toEqual(["@carapace/voice-call"]);
+    expect(result.config.plugins?.deny).toEqual(["@carapace/voice-call"]);
+    expect(result.config.plugins?.slots?.memory).toBe("@carapace/voice-call");
+    expect(result.config.plugins?.entries?.["@carapace/voice-call"]).toEqual({
       enabled: false,
       hooks: { allowPromptInjection: false },
     });
     expect(result.config.plugins?.entries?.["voice-call"]).toBeUndefined();
-    expectRecordFields(result.config.plugins?.installs?.["@openclaw/voice-call"], {
+    expectRecordFields(result.config.plugins?.installs?.["@carapace/voice-call"], {
       source: "npm",
-      spec: "@openclaw/voice-call",
-      installPath: "/tmp/openclaw-voice-call",
+      spec: "@carapace/voice-call",
+      installPath: "/tmp/carapace-voice-call",
       version: "0.0.2",
     });
     expect(result.config.plugins?.installs?.["voice-call"]).toBeUndefined();
@@ -4628,14 +4628,14 @@ describe("updateNpmInstalledPlugins", () => {
     {
       name: "beta",
       params: { officialPluginUpdateChannel: "beta" as const },
-      expectedInstallSpec: "@openclaw/fish-audio-speech@2026.8.1",
-      expectedRecordSpec: "@openclaw/fish-audio-speech",
+      expectedInstallSpec: "@carapace/fish-audio-speech@2026.8.1",
+      expectedRecordSpec: "@carapace/fish-audio-speech",
     },
     {
       name: "stable",
       params: { officialPluginUpdateChannel: "stable" as const },
-      expectedInstallSpec: "@openclaw/fish-audio-speech",
-      expectedRecordSpec: "@openclaw/fish-audio-speech",
+      expectedInstallSpec: "@carapace/fish-audio-speech",
+      expectedRecordSpec: "@carapace/fish-audio-speech",
     },
     {
       name: "extended-stable",
@@ -4643,24 +4643,24 @@ describe("updateNpmInstalledPlugins", () => {
         officialPluginUpdateChannel: "extended-stable" as const,
         coreVersion: "2026.8.1",
       },
-      expectedInstallSpec: "@openclaw/fish-audio-speech@2026.8.1",
-      expectedRecordSpec: "@openclaw/fish-audio-speech",
+      expectedInstallSpec: "@carapace/fish-audio-speech@2026.8.1",
+      expectedRecordSpec: "@carapace/fish-audio-speech",
     },
     {
       name: "explicit override",
       params: {
         officialPluginUpdateChannel: "beta" as const,
-        specOverrides: { "fish-audio": "@openclaw/fish-audio-speech@next" },
+        specOverrides: { "fish-audio": "@carapace/fish-audio-speech@next" },
       },
-      expectedInstallSpec: "@openclaw/fish-audio-speech@next",
-      expectedRecordSpec: "@openclaw/fish-audio-speech@next",
+      expectedInstallSpec: "@carapace/fish-audio-speech@next",
+      expectedRecordSpec: "@carapace/fish-audio-speech@next",
     },
   ])(
     "selects the $name package line when migrating a manifest-declared legacy id",
     async ({ params, expectedInstallSpec, expectedRecordSpec }) => {
       if (params.officialPluginUpdateChannel === "beta" && !params.specOverrides) {
-        mockNpmViewMetadata({ name: "@openclaw/fish-audio-speech", version: "2026.8.1-beta.1" });
-        mockNpmViewMetadata({ name: "@openclaw/fish-audio-speech", version: "2026.8.1" });
+        mockNpmViewMetadata({ name: "@carapace/fish-audio-speech", version: "2026.8.1-beta.1" });
+        mockNpmViewMetadata({ name: "@carapace/fish-audio-speech", version: "2026.8.1" });
       }
       installPluginFromNpmSpecMock.mockResolvedValue({
         ok: true,
@@ -4678,9 +4678,9 @@ describe("updateNpmInstalledPlugins", () => {
             installs: {
               "fish-audio": {
                 source: "npm",
-                spec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
-                resolvedName: "@openclaw/fish-audio-speech",
-                resolvedSpec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
+                spec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
+                resolvedName: "@carapace/fish-audio-speech",
+                resolvedSpec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
                 installPath: "/tmp/fish-audio",
               },
             },
@@ -4709,54 +4709,54 @@ describe("updateNpmInstalledPlugins", () => {
     },
   );
 
-  it("rewrites @openclaw/qqbot under the canonical plugin id", async () => {
+  it("rewrites @carapace/qqbot under the canonical plugin id", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-qqbot",
-        targetDir: "/tmp/openclaw-qqbot",
+        pluginId: "carapace-qqbot",
+        targetDir: "/tmp/carapace-qqbot",
         version: "2.0.3",
         npmResolution: {
-          name: "@tencent-connect/openclaw-qqbot",
+          name: "@tencent-connect/carapace-qqbot",
           version: "2.0.3",
-          resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+          resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.3",
         },
       }),
     );
 
     const result = await updatePlugin(
       createNpmInstallConfig({
-        pluginId: "openclaw-qqbot",
-        spec: "@openclaw/qqbot@1.9.0",
-        installPath: "/tmp/openclaw-qqbot",
-        resolvedName: "@openclaw/qqbot",
-        resolvedSpec: "@openclaw/qqbot@1.9.0",
+        pluginId: "carapace-qqbot",
+        spec: "@carapace/qqbot@1.9.0",
+        installPath: "/tmp/carapace-qqbot",
+        resolvedName: "@carapace/qqbot",
+        resolvedSpec: "@carapace/qqbot@1.9.0",
         resolvedVersion: "1.9.0",
       }),
-      "openclaw-qqbot",
+      "carapace-qqbot",
     );
 
     expectNpmUpdateCall({
-      spec: "@tencent-connect/openclaw-qqbot@2.0.3",
+      spec: "@tencent-connect/carapace-qqbot@2.0.3",
       expectedIntegrity: QQBOT_EXPECTED_INTEGRITY,
-      expectedPluginId: "openclaw-qqbot",
+      expectedPluginId: "carapace-qqbot",
     });
     expect(npmInstallCall()?.expectedReplacementPluginId).toBeUndefined();
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expectRecordFields(result.config.plugins?.installs?.["openclaw-qqbot"], {
+    expectRecordFields(result.config.plugins?.installs?.["carapace-qqbot"], {
       source: "npm",
-      spec: "@tencent-connect/openclaw-qqbot@2.0.3",
-      installPath: "/tmp/openclaw-qqbot",
+      spec: "@tencent-connect/carapace-qqbot@2.0.3",
+      installPath: "/tmp/carapace-qqbot",
       version: "2.0.3",
     });
   });
 
   it("aborts a renamed official package update when its artifact differs from the catalog pin", async () => {
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/qqbot",
+      name: "@carapace/qqbot",
       version: "1.9.0",
     });
     mockNpmViewMetadata({
-      name: "@tencent-connect/openclaw-qqbot",
+      name: "@tencent-connect/carapace-qqbot",
       version: "2.0.3",
       integrity: "sha512-republished",
     });
@@ -4772,7 +4772,7 @@ describe("updateNpmInstalledPlugins", () => {
           actualIntegrity: "sha512-republished",
           resolution: {
             integrity: "sha512-republished",
-            resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+            resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.3",
             version: "2.0.3",
           },
         });
@@ -4780,17 +4780,17 @@ describe("updateNpmInstalledPlugins", () => {
           ? {
               ok: false as const,
               error:
-                "aborted: npm package integrity drift detected for @tencent-connect/openclaw-qqbot@2.0.3",
+                "aborted: npm package integrity drift detected for @tencent-connect/carapace-qqbot@2.0.3",
             }
           : createSuccessfulNpmUpdateResult();
       },
     );
     const config = createNpmInstallConfig({
       pluginId: "qqbot",
-      spec: "@openclaw/qqbot@1.9.0",
+      spec: "@carapace/qqbot@1.9.0",
       installPath,
-      resolvedName: "@openclaw/qqbot",
-      resolvedSpec: "@openclaw/qqbot@1.9.0",
+      resolvedName: "@carapace/qqbot",
+      resolvedSpec: "@carapace/qqbot@1.9.0",
       resolvedVersion: "1.9.0",
     });
     const warn = vi.fn();
@@ -4798,13 +4798,13 @@ describe("updateNpmInstalledPlugins", () => {
     const result = await updatePlugin(config, "qqbot", { logger: { warn } });
 
     expectNpmUpdateCall({
-      spec: "@tencent-connect/openclaw-qqbot@2.0.3",
+      spec: "@tencent-connect/carapace-qqbot@2.0.3",
       expectedIntegrity: QQBOT_EXPECTED_INTEGRITY,
       expectedPluginId: "qqbot",
     });
-    expect(npmInstallCall()?.expectedReplacementPluginId).toBe("openclaw-qqbot");
+    expect(npmInstallCall()?.expectedReplacementPluginId).toBe("carapace-qqbot");
     expect(warn).toHaveBeenCalledWith(
-      `Integrity drift for "qqbot" (@tencent-connect/openclaw-qqbot@2.0.3): expected ${QQBOT_EXPECTED_INTEGRITY}, got sha512-republished`,
+      `Integrity drift for "qqbot" (@tencent-connect/carapace-qqbot@2.0.3): expected ${QQBOT_EXPECTED_INTEGRITY}, got sha512-republished`,
     );
     expect(result.changed).toBe(false);
     expect(result.config).toBe(config);
@@ -4813,7 +4813,7 @@ describe("updateNpmInstalledPlugins", () => {
         pluginId: "qqbot",
         status: "error",
         message:
-          "Failed to update qqbot: aborted: npm package integrity drift detected for @tencent-connect/openclaw-qqbot@2.0.3",
+          "Failed to update qqbot: aborted: npm package integrity drift detected for @tencent-connect/carapace-qqbot@2.0.3",
       },
     ]);
   });
@@ -4821,42 +4821,42 @@ describe("updateNpmInstalledPlugins", () => {
   it("does not apply the catalog pin to an explicit renamed-package override", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-qqbot",
-        targetDir: "/tmp/openclaw-qqbot",
+        pluginId: "carapace-qqbot",
+        targetDir: "/tmp/carapace-qqbot",
         version: "2.0.4",
       }),
     );
     const config = createNpmInstallConfig({
-      pluginId: "openclaw-qqbot",
-      spec: "@openclaw/qqbot@1.9.0",
-      installPath: "/tmp/openclaw-qqbot",
-      resolvedName: "@openclaw/qqbot",
-      resolvedSpec: "@openclaw/qqbot@1.9.0",
+      pluginId: "carapace-qqbot",
+      spec: "@carapace/qqbot@1.9.0",
+      installPath: "/tmp/carapace-qqbot",
+      resolvedName: "@carapace/qqbot",
+      resolvedSpec: "@carapace/qqbot@1.9.0",
       resolvedVersion: "1.9.0",
     });
 
-    await updatePlugin(config, "openclaw-qqbot", {
+    await updatePlugin(config, "carapace-qqbot", {
       specOverrides: {
-        "openclaw-qqbot": "@tencent-connect/openclaw-qqbot@2.0.4",
+        "carapace-qqbot": "@tencent-connect/carapace-qqbot@2.0.4",
       },
     });
 
     expectNpmUpdateCall({
-      spec: "@tencent-connect/openclaw-qqbot@2.0.4",
-      expectedPluginId: "openclaw-qqbot",
+      spec: "@tencent-connect/carapace-qqbot@2.0.4",
+      expectedPluginId: "carapace-qqbot",
     });
   });
 
   it("migrates the qqbot install id and preserves root plus multi-account channel config", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-qqbot",
-        targetDir: "/tmp/openclaw-qqbot",
+        pluginId: "carapace-qqbot",
+        targetDir: "/tmp/carapace-qqbot",
         version: "2.0.3",
         npmResolution: {
-          name: "@tencent-connect/openclaw-qqbot",
+          name: "@tencent-connect/carapace-qqbot",
           version: "2.0.3",
-          resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+          resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.3",
         },
       }),
     );
@@ -4871,10 +4871,10 @@ describe("updateNpmInstalledPlugins", () => {
     };
     const config = createNpmInstallConfig({
       pluginId: "qqbot",
-      spec: "@openclaw/qqbot@1.9.0",
-      installPath: "/tmp/openclaw-qqbot",
-      resolvedName: "@openclaw/qqbot",
-      resolvedSpec: "@openclaw/qqbot@1.9.0",
+      spec: "@carapace/qqbot@1.9.0",
+      installPath: "/tmp/carapace-qqbot",
+      resolvedName: "@carapace/qqbot",
+      resolvedSpec: "@carapace/qqbot@1.9.0",
       resolvedVersion: "1.9.0",
     });
     config.channels = { qqbot: qqbotConfig };
@@ -4882,40 +4882,40 @@ describe("updateNpmInstalledPlugins", () => {
     const result = await updatePlugin(config, "qqbot");
 
     expectNpmUpdateCall({
-      spec: "@tencent-connect/openclaw-qqbot@2.0.3",
+      spec: "@tencent-connect/carapace-qqbot@2.0.3",
       expectedIntegrity: QQBOT_EXPECTED_INTEGRITY,
       expectedPluginId: "qqbot",
     });
-    expect(npmInstallCall()?.expectedReplacementPluginId).toBe("openclaw-qqbot");
+    expect(npmInstallCall()?.expectedReplacementPluginId).toBe("carapace-qqbot");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
     expect(result.config.channels?.qqbot).toEqual(qqbotConfig);
     expect(result.config.plugins?.installs?.qqbot).toBeUndefined();
-    expectRecordFields(result.config.plugins?.installs?.["openclaw-qqbot"], {
+    expectRecordFields(result.config.plugins?.installs?.["carapace-qqbot"], {
       source: "npm",
-      spec: "@tencent-connect/openclaw-qqbot@2.0.3",
-      installPath: "/tmp/openclaw-qqbot",
+      spec: "@tencent-connect/carapace-qqbot@2.0.3",
+      installPath: "/tmp/carapace-qqbot",
       version: "2.0.3",
     });
   });
 
   it.each([
     { name: "npm-pack archive", provenance: { artifactKind: "npm-pack" as const } },
-    { name: "local source path", provenance: { sourcePath: "/tmp/local-openclaw-qqbot" } },
+    { name: "local source path", provenance: { sourcePath: "/tmp/local-carapace-qqbot" } },
   ])("does not migrate a legacy $name install into official ownership", async ({ provenance }) => {
     const installPath = createInstalledPackageDir({
-      name: "@openclaw/qqbot",
+      name: "@carapace/qqbot",
       version: "1.9.0",
     });
-    mockNpmViewMetadata({ name: "@openclaw/qqbot", version: "1.9.1" });
+    mockNpmViewMetadata({ name: "@carapace/qqbot", version: "1.9.1" });
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "qqbot",
         targetDir: installPath,
         version: "1.9.1",
         npmResolution: {
-          name: "@openclaw/qqbot",
+          name: "@carapace/qqbot",
           version: "1.9.1",
-          resolvedSpec: "@openclaw/qqbot@1.9.1",
+          resolvedSpec: "@carapace/qqbot@1.9.1",
         },
       }),
     );
@@ -4925,26 +4925,26 @@ describe("updateNpmInstalledPlugins", () => {
         installs: {
           qqbot: {
             source: "npm",
-            spec: "@openclaw/qqbot@1.9.0",
+            spec: "@carapace/qqbot@1.9.0",
             installPath,
-            resolvedName: "@openclaw/qqbot",
-            resolvedSpec: "@openclaw/qqbot@1.9.0",
+            resolvedName: "@carapace/qqbot",
+            resolvedSpec: "@carapace/qqbot@1.9.0",
             ...provenance,
           },
-          "openclaw-qqbot": {
+          "carapace-qqbot": {
             source: "npm",
-            spec: "@tencent-connect/openclaw-qqbot@2.0.3",
-            resolvedName: "@tencent-connect/openclaw-qqbot",
-            resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+            spec: "@tencent-connect/carapace-qqbot@2.0.3",
+            resolvedName: "@tencent-connect/carapace-qqbot",
+            resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.3",
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updatePlugin(config, "qqbot");
 
     expectNpmUpdateCall({
-      spec: "@openclaw/qqbot@1.9.0",
+      spec: "@carapace/qqbot@1.9.0",
       expectedPluginId: "qqbot",
     });
     expect(npmInstallCall()?.expectedIntegrity).toBeUndefined();
@@ -4952,8 +4952,8 @@ describe("updateNpmInstalledPlugins", () => {
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).not.toBe(true);
     expect(result.config.plugins?.entries?.qqbot).toEqual({ enabled: true });
     expect(result.config.plugins?.installs?.qqbot).toBeDefined();
-    expect(result.config.plugins?.installs?.["openclaw-qqbot"]).toEqual(
-      config.plugins.installs["openclaw-qqbot"],
+    expect(result.config.plugins?.installs?.["carapace-qqbot"]).toEqual(
+      config.plugins.installs["carapace-qqbot"],
     );
     expect(resolvePluginInstallOwnerMigrations(result)).toBeUndefined();
     expect(result.outcomes).not.toEqual(
@@ -4967,21 +4967,21 @@ describe("updateNpmInstalledPlugins", () => {
     "drops a duplicate qqbot record after canonical success (canonicalFirst=%s)",
     async (canonicalFirst) => {
       const canonicalInstallPath = createInstalledPackageDir({
-        name: "@tencent-connect/openclaw-qqbot",
+        name: "@tencent-connect/carapace-qqbot",
         version: "2.0.0",
         runnable: true,
       });
-      mockNpmViewMetadata({ name: "@tencent-connect/openclaw-qqbot", version: "2.0.1" });
+      mockNpmViewMetadata({ name: "@tencent-connect/carapace-qqbot", version: "2.0.1" });
       validatePackageExtensionEntriesForInstallMock.mockResolvedValueOnce({ ok: true });
       installPluginFromNpmSpecMock.mockResolvedValue(
         createSuccessfulNpmUpdateResult({
-          pluginId: "openclaw-qqbot",
+          pluginId: "carapace-qqbot",
           targetDir: canonicalInstallPath,
           version: "2.0.1",
           npmResolution: {
-            name: "@tencent-connect/openclaw-qqbot",
+            name: "@tencent-connect/carapace-qqbot",
             version: "2.0.1",
-            resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
+            resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.1",
           },
         }),
       );
@@ -4991,8 +4991,8 @@ describe("updateNpmInstalledPlugins", () => {
       });
 
       expectNpmUpdateCall({
-        spec: "@tencent-connect/openclaw-qqbot@2.0.1",
-        expectedPluginId: "openclaw-qqbot",
+        spec: "@tencent-connect/carapace-qqbot@2.0.1",
+        expectedPluginId: "carapace-qqbot",
       });
       expect(result.outcomes).toEqual(
         expect.arrayContaining([
@@ -5000,19 +5000,19 @@ describe("updateNpmInstalledPlugins", () => {
             pluginId: "qqbot",
             status: "skipped",
             message:
-              'Removed duplicate "qqbot" install record; "openclaw-qqbot" is the canonical plugin id.',
+              'Removed duplicate "qqbot" install record; "carapace-qqbot" is the canonical plugin id.',
           }),
         ]),
       );
       expect(result.config.plugins?.installs?.qqbot).toBeUndefined();
-      expectRecordFields(result.config.plugins?.installs?.["openclaw-qqbot"], {
+      expectRecordFields(result.config.plugins?.installs?.["carapace-qqbot"], {
         source: "npm",
-        spec: "@tencent-connect/openclaw-qqbot@2.0.1",
+        spec: "@tencent-connect/carapace-qqbot@2.0.1",
         installPath: canonicalInstallPath,
         version: "2.0.1",
       });
       expect(resolvePluginInstallOwnerMigrations(result)).toEqual({
-        qqbot: "openclaw-qqbot",
+        qqbot: "carapace-qqbot",
       });
     },
   );
@@ -5035,15 +5035,15 @@ describe("updateNpmInstalledPlugins", () => {
       expect(resolvePluginInstallOwnerMigrations(result)).toBeUndefined();
       expect(result.outcomes).toEqual([
         {
-          pluginId: "openclaw-qqbot",
+          pluginId: "carapace-qqbot",
           status: "error",
-          message: "Failed to update openclaw-qqbot: canonical package install failed",
+          message: "Failed to update carapace-qqbot: canonical package install failed",
         },
         {
           pluginId: "qqbot",
           status: "skipped",
           message:
-            'Kept duplicate "qqbot" install record because "openclaw-qqbot" did not complete a runnable canonical update.',
+            'Kept duplicate "qqbot" install record because "carapace-qqbot" did not complete a runnable canonical update.',
         },
       ]);
     },
@@ -5056,9 +5056,9 @@ describe("updateNpmInstalledPlugins", () => {
   ])("handles a skipped canonical $payload payload", async ({ payload, removesAlias }) => {
     const canonicalInstallPath =
       payload === "missing"
-        ? path.join(makeTrackedTempDir("openclaw-plugin-update-missing", tempDirs), "missing")
+        ? path.join(makeTrackedTempDir("carapace-plugin-update-missing", tempDirs), "missing")
         : createInstalledPackageDir({
-            name: "@tencent-connect/openclaw-qqbot",
+            name: "@tencent-connect/carapace-qqbot",
             version: "2.0.1",
             runnable: payload === "runnable",
           });
@@ -5068,13 +5068,13 @@ describe("updateNpmInstalledPlugins", () => {
     const result = await updateNpmInstalledPlugins({
       config: createDuplicateQqbotConfig({ canonicalInstallPath }),
       pluginIds: ["qqbot"],
-      skipIds: new Set(["openclaw-qqbot"]),
+      skipIds: new Set(["carapace-qqbot"]),
     });
 
     expect(result.changed).toBe(removesAlias);
     expect(result.config.plugins?.installs?.qqbot === undefined).toBe(removesAlias);
     expect(resolvePluginInstallOwnerMigrations(result)).toEqual(
-      removesAlias ? { qqbot: "openclaw-qqbot" } : undefined,
+      removesAlias ? { qqbot: "carapace-qqbot" } : undefined,
     );
   });
 
@@ -5095,7 +5095,7 @@ describe("updateNpmInstalledPlugins", () => {
         expect.objectContaining({
           pluginId: "qqbot",
           message:
-            'Kept duplicate "qqbot" install record because "openclaw-qqbot" did not complete a runnable canonical update.',
+            'Kept duplicate "qqbot" install record because "carapace-qqbot" did not complete a runnable canonical update.',
         }),
       ]),
     );
@@ -5104,12 +5104,12 @@ describe("updateNpmInstalledPlugins", () => {
   it("reports duplicate removal without mutating on dry-run", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-qqbot",
+        pluginId: "carapace-qqbot",
         version: "2.0.3",
         npmResolution: {
-          name: "@tencent-connect/openclaw-qqbot",
+          name: "@tencent-connect/carapace-qqbot",
           version: "2.0.3",
-          resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+          resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.3",
         },
       }),
     );
@@ -5118,19 +5118,19 @@ describe("updateNpmInstalledPlugins", () => {
         installs: {
           qqbot: {
             source: "npm",
-            spec: "@openclaw/qqbot@1.9.0",
-            resolvedName: "@openclaw/qqbot",
-            resolvedSpec: "@openclaw/qqbot@1.9.0",
+            spec: "@carapace/qqbot@1.9.0",
+            resolvedName: "@carapace/qqbot",
+            resolvedSpec: "@carapace/qqbot@1.9.0",
           },
-          "openclaw-qqbot": {
+          "carapace-qqbot": {
             source: "npm",
-            spec: "@tencent-connect/openclaw-qqbot@2.0.1",
-            resolvedName: "@tencent-connect/openclaw-qqbot",
-            resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
+            spec: "@tencent-connect/carapace-qqbot@2.0.1",
+            resolvedName: "@tencent-connect/carapace-qqbot",
+            resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.1",
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updatePlugin(config, "qqbot", { dryRun: true });
 
@@ -5140,7 +5140,7 @@ describe("updateNpmInstalledPlugins", () => {
           pluginId: "qqbot",
           status: "skipped",
           message:
-            'Would remove duplicate "qqbot" install record; "openclaw-qqbot" is the canonical plugin id.',
+            'Would remove duplicate "qqbot" install record; "carapace-qqbot" is the canonical plugin id.',
         }),
       ]),
     );
@@ -5156,19 +5156,19 @@ describe("updateNpmInstalledPlugins", () => {
         installs: {
           qqbot: {
             source: "npm",
-            spec: "@openclaw/qqbot@1.9.0",
-            resolvedName: "@openclaw/qqbot",
-            resolvedSpec: "@openclaw/qqbot@1.9.0",
+            spec: "@carapace/qqbot@1.9.0",
+            resolvedName: "@carapace/qqbot",
+            resolvedSpec: "@carapace/qqbot@1.9.0",
           },
-          "openclaw-qqbot": {
+          "carapace-qqbot": {
             source: "npm",
-            spec: "@vendor/openclaw-qqbot@1.0.0",
-            resolvedName: "@tencent-connect/openclaw-qqbot",
-            resolvedSpec: "@vendor/openclaw-qqbot@1.0.0",
+            spec: "@vendor/carapace-qqbot@1.0.0",
+            resolvedName: "@tencent-connect/carapace-qqbot",
+            resolvedSpec: "@vendor/carapace-qqbot@1.0.0",
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updatePlugin(config, "qqbot");
 
@@ -5183,7 +5183,7 @@ describe("updateNpmInstalledPlugins", () => {
         pluginId: "qqbot",
         status: "error",
         message:
-          'Cannot replace "qqbot" with "openclaw-qqbot" because both plugin install records exist. Remove one of the conflicting installs, then retry the update.',
+          'Cannot replace "qqbot" with "carapace-qqbot" because both plugin install records exist. Remove one of the conflicting installs, then retry the update.',
       },
     ]);
   });
@@ -5194,21 +5194,21 @@ describe("updateNpmInstalledPlugins", () => {
         installs: {
           "fish-audio": {
             source: "npm",
-            spec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
-            resolvedName: "@openclaw/fish-audio-speech",
-            resolvedSpec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
+            spec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
+            resolvedName: "@carapace/fish-audio-speech",
+            resolvedSpec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
             installPath: "/tmp/fish-audio-legacy",
           },
           "fish-audio-speech": {
             source: "npm",
-            spec: "@openclaw/fish-audio-speech@2026.8.1-beta.1",
-            resolvedName: "@openclaw/fish-audio-speech",
-            resolvedSpec: "@openclaw/fish-audio-speech@2026.8.1-beta.1",
+            spec: "@carapace/fish-audio-speech@2026.8.1-beta.1",
+            resolvedName: "@carapace/fish-audio-speech",
+            resolvedSpec: "@carapace/fish-audio-speech@2026.8.1-beta.1",
             installPath: "/tmp/fish-audio-canonical",
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await updatePlugin(config, "fish-audio");
 
@@ -5238,8 +5238,8 @@ describe("updateNpmInstalledPlugins", () => {
     await updatePlugin(
       createNpmInstallConfig({
         pluginId: "acpx",
-        spec: "@openclaw/acpx@2026.7.2",
-        resolvedName: "@openclaw/acpx",
+        spec: "@carapace/acpx@2026.7.2",
+        resolvedName: "@carapace/acpx",
         installPath: "/tmp/acpx",
       }),
       "acpx",
@@ -5247,7 +5247,7 @@ describe("updateNpmInstalledPlugins", () => {
     );
 
     expectNpmUpdateCall({
-      spec: "@openclaw/acpx@2026.7.2",
+      spec: "@carapace/acpx@2026.7.2",
       expectedPluginId: "acpx",
     });
   });
@@ -5255,8 +5255,8 @@ describe("updateNpmInstalledPlugins", () => {
   it("keeps authored plugin config shape when only the install key migrates", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: true,
-      pluginId: "@openclaw/voice-call",
-      targetDir: "/tmp/openclaw-voice-call",
+      pluginId: "@carapace/voice-call",
+      targetDir: "/tmp/carapace-voice-call",
       version: "0.0.2",
       extensions: ["index.ts"],
     });
@@ -5267,7 +5267,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             "voice-call": {
               source: "npm",
-              spec: "@openclaw/voice-call",
+              spec: "@carapace/voice-call",
               installPath: "/tmp/voice-call",
             },
           },
@@ -5278,10 +5278,10 @@ describe("updateNpmInstalledPlugins", () => {
 
     expect(result.config.plugins).toEqual({
       installs: {
-        "@openclaw/voice-call": expect.objectContaining({
+        "@carapace/voice-call": expect.objectContaining({
           source: "npm",
-          spec: "@openclaw/voice-call",
-          installPath: "/tmp/openclaw-voice-call",
+          spec: "@carapace/voice-call",
+          installPath: "/tmp/carapace-voice-call",
         }),
       },
     });
@@ -5290,8 +5290,8 @@ describe("updateNpmInstalledPlugins", () => {
   it("migrates context engine slot when a plugin id changes during update", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: true,
-      pluginId: "@openclaw/context-engine",
-      targetDir: "/tmp/openclaw-context-engine",
+      pluginId: "@carapace/context-engine",
+      targetDir: "/tmp/carapace-context-engine",
       version: "0.0.2",
       extensions: ["index.ts"],
     });
@@ -5303,20 +5303,20 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             "context-engine": {
               source: "npm",
-              spec: "@openclaw/context-engine",
+              spec: "@carapace/context-engine",
               installPath: "/tmp/context-engine",
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       pluginIds: ["context-engine"],
     });
 
-    expect(result.config.plugins?.slots?.contextEngine).toBe("@openclaw/context-engine");
-    expectRecordFields(result.config.plugins?.installs?.["@openclaw/context-engine"], {
+    expect(result.config.plugins?.slots?.contextEngine).toBe("@carapace/context-engine");
+    expectRecordFields(result.config.plugins?.installs?.["@carapace/context-engine"], {
       source: "npm",
-      spec: "@openclaw/context-engine",
-      installPath: "/tmp/openclaw-context-engine",
+      spec: "@carapace/context-engine",
+      installPath: "/tmp/carapace-context-engine",
       version: "0.0.2",
     });
     expect(result.config.plugins?.installs?.["context-engine"]).toBeUndefined();
@@ -5448,28 +5448,28 @@ describe("updateNpmInstalledPlugins", () => {
   it("forwards dangerous force unsafe install to plugin update installers", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-codex-app-server",
-        targetDir: "/tmp/openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
+        targetDir: "/tmp/carapace-codex-app-server",
         version: "0.2.0-beta.4",
       }),
     );
 
     await updatePlugin(
       createCodexAppServerInstallConfig({
-        spec: "openclaw-codex-app-server@beta",
+        spec: "carapace-codex-app-server@beta",
       }),
-      "openclaw-codex-app-server",
+      "carapace-codex-app-server",
       { dangerouslyForceUnsafeInstall: true },
     );
 
-    expect(npmInstallCall()?.spec).toBe("openclaw-codex-app-server@beta");
+    expect(npmInstallCall()?.spec).toBe("carapace-codex-app-server@beta");
     expect(npmInstallCall()?.dangerouslyForceUnsafeInstall).toBe(true);
-    expect(npmInstallCall()?.expectedPluginId).toBe("openclaw-codex-app-server");
+    expect(npmInstallCall()?.expectedPluginId).toBe("carapace-codex-app-server");
   });
 
   it("reuses the recorded managed extensions root when updating external plugins", async () => {
-    const installPath = "/var/openclaw/extensions/demo";
-    const extensionsDir = "/var/openclaw/extensions";
+    const installPath = "/var/carapace/extensions/demo";
+    const extensionsDir = "/var/carapace/extensions";
     const expectedExtensionsDir = path.resolve(extensionsDir);
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
@@ -5566,7 +5566,7 @@ describe("syncPluginsForUpdateChannel", () => {
       config: createBundledPathInstallConfig({
         loadPaths: [appBundledPluginRoot("feishu")],
         installPath: appBundledPluginRoot("feishu"),
-        spec: "@openclaw/feishu",
+        spec: "@carapace/feishu",
       }),
       expectedChanged: false,
       expectedLoadPaths: [appBundledPluginRoot("feishu")],
@@ -5577,7 +5577,7 @@ describe("syncPluginsForUpdateChannel", () => {
       config: createBundledPathInstallConfig({
         loadPaths: [],
         installPath: "/tmp/old-feishu",
-        spec: "@openclaw/feishu",
+        spec: "@carapace/feishu",
       }),
       expectedChanged: true,
       expectedLoadPaths: [appBundledPluginRoot("feishu")],
@@ -5601,14 +5601,14 @@ describe("syncPluginsForUpdateChannel", () => {
         install: result.config.plugins?.installs?.feishu,
         sourcePath: appBundledPluginRoot("feishu"),
         installPath: expectedInstallPath,
-        spec: "@openclaw/feishu",
+        spec: "@carapace/feishu",
       });
     },
   );
 
   it("forwards an explicit env to bundled plugin source resolution", async () => {
     resolveBundledPluginSourcesMock.mockReturnValue(new Map());
-    const env = { OPENCLAW_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { CARAPACE_HOME: "/srv/carapace-home" } as NodeJS.ProcessEnv;
 
     await syncPluginsForUpdateChannel({
       channel: "beta",
@@ -5624,7 +5624,7 @@ describe("syncPluginsForUpdateChannel", () => {
   });
 
   it("uses the provided env when matching bundled load and install paths", async () => {
-    const bundledHome = "/tmp/openclaw-home";
+    const bundledHome = "/tmp/carapace-home";
     mockBundledSources(
       createBundledSource({
         localPath: `${bundledHome}/plugins/feishu`,
@@ -5636,7 +5636,7 @@ describe("syncPluginsForUpdateChannel", () => {
         channel: "beta",
         env: {
           ...process.env,
-          OPENCLAW_HOME: bundledHome,
+          CARAPACE_HOME: bundledHome,
           HOME: "/tmp/ignored-home",
         },
         config: {
@@ -5647,7 +5647,7 @@ describe("syncPluginsForUpdateChannel", () => {
                 source: "path",
                 sourcePath: "~/plugins/feishu",
                 installPath: "~/plugins/feishu",
-                spec: "@openclaw/feishu",
+                spec: "@carapace/feishu",
               },
             },
           },
@@ -5669,19 +5669,19 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "legacy-chat",
-        targetDir: "/tmp/openclaw-plugins/legacy-chat",
+        targetDir: "/tmp/carapace-plugins/legacy-chat",
         version: "2.0.0",
         npmResolution: {
-          name: "@openclaw/legacy-chat",
+          name: "@carapace/legacy-chat",
           version: "2.0.0",
-          resolvedSpec: "@openclaw/legacy-chat@2.0.0",
+          resolvedSpec: "@carapace/legacy-chat@2.0.0",
         },
       }),
     );
 
     const result = await syncExternalizedPlugin({});
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/legacy-chat");
+    expect(npmInstallCall()?.spec).toBe("@carapace/legacy-chat");
     expect(npmInstallCall()?.mode).toBe("update");
     expect(npmInstallCall()?.expectedPluginId).toBe("legacy-chat");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).not.toBe(true);
@@ -5691,12 +5691,12 @@ describe("syncPluginsForUpdateChannel", () => {
     expect(result.config.plugins?.load?.paths).toStrictEqual([]);
     expectRecordFields(result.config.plugins?.installs?.["legacy-chat"], {
       source: "npm",
-      spec: "@openclaw/legacy-chat",
-      installPath: "/tmp/openclaw-plugins/legacy-chat",
+      spec: "@carapace/legacy-chat",
+      installPath: "/tmp/carapace-plugins/legacy-chat",
       version: "2.0.0",
-      resolvedName: "@openclaw/legacy-chat",
+      resolvedName: "@carapace/legacy-chat",
       resolvedVersion: "2.0.0",
-      resolvedSpec: "@openclaw/legacy-chat@2.0.0",
+      resolvedSpec: "@carapace/legacy-chat@2.0.0",
     });
   });
 
@@ -5704,8 +5704,8 @@ describe("syncPluginsForUpdateChannel", () => {
     resolveBundledPluginSourcesMock.mockReturnValue(new Map());
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
-        pluginId: "openclaw-qqbot",
-        targetDir: "/tmp/openclaw-plugins/openclaw-qqbot",
+        pluginId: "carapace-qqbot",
+        targetDir: "/tmp/carapace-plugins/carapace-qqbot",
         version: "2.0.1",
       }),
     );
@@ -5715,8 +5715,8 @@ describe("syncPluginsForUpdateChannel", () => {
       externalizedBundledPluginBridges: [
         {
           bundledPluginId: "qqbot",
-          pluginId: "openclaw-qqbot",
-          npmSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
+          pluginId: "carapace-qqbot",
+          npmSpec: "@tencent-connect/carapace-qqbot@2.0.1",
           expectedIntegrity: "sha512-qqbot-catalog-pin",
           channelIds: ["qqbot"],
         },
@@ -5737,16 +5737,16 @@ describe("syncPluginsForUpdateChannel", () => {
       },
     });
 
-    expect(npmInstallCall()?.expectedPluginId).toBe("openclaw-qqbot");
+    expect(npmInstallCall()?.expectedPluginId).toBe("carapace-qqbot");
     expect(npmInstallCall()?.expectedIntegrity).toBe("sha512-qqbot-catalog-pin");
-    expect(result.summary.switchedToNpm).toEqual(["openclaw-qqbot"]);
+    expect(result.summary.switchedToNpm).toEqual(["carapace-qqbot"]);
     expect(result.config.plugins?.entries?.qqbot).toBeUndefined();
-    expect(result.config.plugins?.entries?.["openclaw-qqbot"]).toEqual({ enabled: true });
+    expect(result.config.plugins?.entries?.["carapace-qqbot"]).toEqual({ enabled: true });
     expect(result.config.plugins?.installs?.qqbot).toBeUndefined();
-    expectRecordFields(result.config.plugins?.installs?.["openclaw-qqbot"], {
+    expectRecordFields(result.config.plugins?.installs?.["carapace-qqbot"], {
       source: "npm",
-      spec: "@tencent-connect/openclaw-qqbot@2.0.1",
-      installPath: "/tmp/openclaw-plugins/openclaw-qqbot",
+      spec: "@tencent-connect/carapace-qqbot@2.0.1",
+      installPath: "/tmp/carapace-plugins/carapace-qqbot",
       version: "2.0.1",
     });
   });
@@ -5756,7 +5756,7 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "voice-call",
-        targetDir: "/tmp/openclaw-plugins/voice-call",
+        targetDir: "/tmp/carapace-plugins/voice-call",
         version: "0.0.2-beta.1",
       }),
     );
@@ -5764,13 +5764,13 @@ describe("syncPluginsForUpdateChannel", () => {
     await syncExternalizedPlugin({
       bridge: {
         bundledPluginId: "voice-call",
-        npmSpec: "@openclaw/voice-call",
+        npmSpec: "@carapace/voice-call",
         channelIds: ["voice-call"],
       },
       config: createExternalizedPluginConfig({ pluginId: "voice-call" }),
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/voice-call");
+    expect(npmInstallCall()?.spec).toBe("@carapace/voice-call");
     expect(npmInstallCall()?.expectedPluginId).toBe("voice-call");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
   });
@@ -5780,7 +5780,7 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromClawHubMock.mockResolvedValue(
       createSuccessfulClawHubUpdateResult({
         pluginId: "legacy-chat",
-        targetDir: "/tmp/openclaw-plugins/legacy-chat",
+        targetDir: "/tmp/carapace-plugins/legacy-chat",
         version: "2026.5.1-beta.2",
         clawhubPackage: "legacy-chat",
       }),
@@ -5806,7 +5806,7 @@ describe("syncPluginsForUpdateChannel", () => {
     expectRecordFields(result.config.plugins?.installs?.["legacy-chat"], {
       source: "clawhub",
       spec: "clawhub:legacy-chat@2026.5.1-beta.2",
-      installPath: "/tmp/openclaw-plugins/legacy-chat",
+      installPath: "/tmp/carapace-plugins/legacy-chat",
       version: "2026.5.1-beta.2",
       integrity: "sha256-clawpack",
       clawhubUrl: "https://clawhub.ai",
@@ -5830,7 +5830,7 @@ describe("syncPluginsForUpdateChannel", () => {
     async (source) => {
       resolveBundledPluginSourcesMock.mockReturnValue(new Map());
       const pluginId = "diagnostics-otel";
-      const npmSpec = "@openclaw/diagnostics-otel";
+      const npmSpec = "@carapace/diagnostics-otel";
       const clawhubSpec = `clawhub:${npmSpec}`;
       const coreVersion = "2026.8.1-beta.3";
       const clawhubBetaSpec = `${clawhubSpec}@beta`;
@@ -5846,7 +5846,7 @@ describe("syncPluginsForUpdateChannel", () => {
             ? { ok: false, code: "npm_package_not_found", error: "target unavailable" }
             : createSuccessfulNpmUpdateResult({
                 pluginId,
-                targetDir: `/tmp/openclaw-plugins/${pluginId}`,
+                targetDir: `/tmp/carapace-plugins/${pluginId}`,
                 version: "2026.8.0",
               });
         },
@@ -5857,7 +5857,7 @@ describe("syncPluginsForUpdateChannel", () => {
           ? { ok: false, code: "version_not_found", error: "beta unavailable" }
           : createSuccessfulClawHubUpdateResult({
               pluginId,
-              targetDir: `/tmp/openclaw-plugins/${pluginId}`,
+              targetDir: `/tmp/carapace-plugins/${pluginId}`,
               version: "2026.8.0",
               clawhubPackage: npmSpec,
             });
@@ -5907,7 +5907,7 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "legacy-chat",
-        targetDir: "/tmp/openclaw-plugins/legacy-chat",
+        targetDir: "/tmp/carapace-plugins/legacy-chat",
         version: "2.0.0",
       }),
     );
@@ -5918,7 +5918,7 @@ describe("syncPluginsForUpdateChannel", () => {
       },
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/legacy-chat");
+    expect(npmInstallCall()?.spec).toBe("@carapace/legacy-chat");
     expect(npmInstallCall()?.mode).toBe("update");
     expect(npmInstallCall()?.expectedPluginId).toBe("legacy-chat");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).not.toBe(true);
@@ -5930,8 +5930,8 @@ describe("syncPluginsForUpdateChannel", () => {
     expect(result.summary.errors).toStrictEqual([]);
     expectRecordFields(result.config.plugins?.installs?.["legacy-chat"], {
       source: "npm",
-      spec: "@openclaw/legacy-chat",
-      installPath: "/tmp/openclaw-plugins/legacy-chat",
+      spec: "@carapace/legacy-chat",
+      installPath: "/tmp/carapace-plugins/legacy-chat",
       version: "2.0.0",
     });
   });
@@ -5946,12 +5946,12 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "voice-call",
-        targetDir: "/tmp/openclaw-plugins/voice-call",
+        targetDir: "/tmp/carapace-plugins/voice-call",
         version: "2026.7.33",
         npmResolution: {
-          name: "@openclaw/voice-call",
+          name: "@carapace/voice-call",
           version: "2026.7.33",
-          resolvedSpec: "@openclaw/voice-call@2026.7.33",
+          resolvedSpec: "@carapace/voice-call@2026.7.33",
         },
       }),
     );
@@ -5961,20 +5961,20 @@ describe("syncPluginsForUpdateChannel", () => {
       coreVersion: "2026.7.33",
       bridge: {
         bundledPluginId: "voice-call",
-        clawhubSpec: "clawhub:@openclaw/voice-call",
-        npmSpec: "@openclaw/voice-call",
+        clawhubSpec: "clawhub:@carapace/voice-call",
+        npmSpec: "@carapace/voice-call",
         channelIds: ["voice-call"],
       },
       config: createExternalizedPluginConfig({ pluginId: "voice-call", includeLoad: false }),
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/voice-call@2026.7.33");
+    expect(npmInstallCall()?.spec).toBe("@carapace/voice-call@2026.7.33");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
     expectRecordFields(result.config.plugins?.installs?.["voice-call"], {
       source: "npm",
-      spec: "@openclaw/voice-call",
+      spec: "@carapace/voice-call",
       version: "2026.7.33",
-      resolvedSpec: "@openclaw/voice-call@2026.7.33",
+      resolvedSpec: "@carapace/voice-call@2026.7.33",
     });
   });
 
@@ -6005,7 +6005,7 @@ describe("syncPluginsForUpdateChannel", () => {
         pluginId: "legacy-chat",
         code: "package_not_found",
         message:
-          'Failed to update legacy-chat: Package not found on ClawHub. (ClawHub clawhub:legacy-chat@2026.5.1-beta.2).\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "openclaw update repair".',
+          'Failed to update legacy-chat: Package not found on ClawHub. (ClawHub clawhub:legacy-chat@2026.5.1-beta.2).\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "carapace update repair".',
       },
     ]);
   });
@@ -6020,7 +6020,7 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "voice-call",
-        targetDir: "/tmp/openclaw-plugins/voice-call",
+        targetDir: "/tmp/carapace-plugins/voice-call",
         version: "0.0.2-beta.1",
       }),
     );
@@ -6028,14 +6028,14 @@ describe("syncPluginsForUpdateChannel", () => {
     await syncExternalizedPlugin({
       bridge: {
         bundledPluginId: "voice-call",
-        clawhubSpec: "clawhub:@openclaw/voice-call",
-        npmSpec: "@openclaw/voice-call",
+        clawhubSpec: "clawhub:@carapace/voice-call",
+        npmSpec: "@carapace/voice-call",
         channelIds: ["voice-call"],
       },
       config: createExternalizedPluginConfig({ pluginId: "voice-call" }),
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/voice-call");
+    expect(npmInstallCall()?.spec).toBe("@carapace/voice-call");
     expect(npmInstallCall()?.expectedPluginId).toBe("voice-call");
     expect(npmInstallCall()?.trustedSourceLinkedOfficialInstall).toBe(true);
   });
@@ -6045,7 +6045,7 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromClawHubMock.mockResolvedValue(
       createSuccessfulClawHubUpdateResult({
         pluginId: "legacy-chat",
-        targetDir: "/tmp/openclaw-plugins/legacy-chat",
+        targetDir: "/tmp/carapace-plugins/legacy-chat",
         version: "2026.5.1-beta.2",
         clawhubPackage: "legacy-chat",
       }),
@@ -6059,8 +6059,8 @@ describe("syncPluginsForUpdateChannel", () => {
         includeLoad: false,
         install: {
           source: "npm",
-          spec: "@openclaw/legacy-chat",
-          installPath: "/tmp/openclaw-plugins/legacy-chat",
+          spec: "@carapace/legacy-chat",
+          installPath: "/tmp/carapace-plugins/legacy-chat",
         },
       }),
     });
@@ -6070,7 +6070,7 @@ describe("syncPluginsForUpdateChannel", () => {
     expect(result.changed).toBe(false);
     expectRecordFields(result.config.plugins?.installs?.["legacy-chat"], {
       source: "npm",
-      spec: "@openclaw/legacy-chat",
+      spec: "@carapace/legacy-chat",
     });
   });
 
@@ -6101,7 +6101,7 @@ describe("syncPluginsForUpdateChannel", () => {
         pluginId: "legacy-chat",
         code: "archive_integrity_mismatch",
         message:
-          'Failed to update legacy-chat: ClawHub ClawPack integrity mismatch. (ClawHub clawhub:legacy-chat@2026.5.1-beta.2).\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "openclaw update repair".',
+          'Failed to update legacy-chat: ClawHub ClawPack integrity mismatch. (ClawHub clawhub:legacy-chat@2026.5.1-beta.2).\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "carapace update repair".',
       },
     ]);
   });
@@ -6111,7 +6111,7 @@ describe("syncPluginsForUpdateChannel", () => {
     installPluginFromNpmSpecMock.mockResolvedValue(
       createSuccessfulNpmUpdateResult({
         pluginId: "default-chat",
-        targetDir: "/tmp/openclaw-plugins/default-chat",
+        targetDir: "/tmp/carapace-plugins/default-chat",
         version: "2.0.0",
       }),
     );
@@ -6122,22 +6122,22 @@ describe("syncPluginsForUpdateChannel", () => {
         {
           bundledPluginId: "default-chat",
           enabledByDefault: true,
-          npmSpec: "@openclaw/default-chat",
+          npmSpec: "@carapace/default-chat",
           channelIds: ["default-chat"],
         },
       ],
       config: {},
     });
 
-    expect(npmInstallCall()?.spec).toBe("@openclaw/default-chat");
+    expect(npmInstallCall()?.spec).toBe("@carapace/default-chat");
     expect(npmInstallCall()?.mode).toBe("update");
     expect(npmInstallCall()?.expectedPluginId).toBe("default-chat");
     expect(result.changed).toBe(true);
     expect(result.summary.switchedToNpm).toEqual(["default-chat"]);
     expectRecordFields(result.config.plugins?.installs?.["default-chat"], {
       source: "npm",
-      spec: "@openclaw/default-chat",
-      installPath: "/tmp/openclaw-plugins/default-chat",
+      spec: "@carapace/default-chat",
+      installPath: "/tmp/carapace-plugins/default-chat",
       version: "2.0.0",
     });
   });
@@ -6175,7 +6175,7 @@ describe("syncPluginsForUpdateChannel", () => {
       {
         pluginId: "legacy-chat",
         message:
-          'Failed to update legacy-chat: package unavailable\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "openclaw update repair".',
+          'Failed to update legacy-chat: package unavailable\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "carapace update repair".',
       },
     ]);
   });
@@ -6223,7 +6223,7 @@ describe("syncPluginsForUpdateChannel", () => {
     "migrates already-externalized records to prototype-named plugin id %s",
     async (targetPluginId) => {
       const legacyPluginId = `legacy-${targetPluginId}`;
-      const npmPackageName = `openclaw-plugin-${targetPluginId}`;
+      const npmPackageName = `carapace-plugin-${targetPluginId}`;
       resolveBundledPluginSourcesMock.mockReturnValue(new Map());
 
       const result = await syncPluginsForUpdateChannel({
@@ -6274,10 +6274,10 @@ describe("syncPluginsForUpdateChannel", () => {
       name: "removes stale bundled load paths for already-externalized npm installs",
       install: {
         source: "npm",
-        spec: "@openclaw/legacy-chat",
-        installPath: "/tmp/openclaw-plugins/legacy-chat",
+        spec: "@carapace/legacy-chat",
+        installPath: "/tmp/carapace-plugins/legacy-chat",
       },
-      expectedInstall: { source: "npm", spec: "@openclaw/legacy-chat" },
+      expectedInstall: { source: "npm", spec: "@carapace/legacy-chat" },
       bridge: {},
       expectClawHubNotCalled: false,
     },
@@ -6285,10 +6285,10 @@ describe("syncPluginsForUpdateChannel", () => {
       name: "removes stale bundled load paths for already-externalized resolved-name-only npm installs",
       install: {
         source: "npm",
-        resolvedName: "@openclaw/legacy-chat",
-        installPath: "/tmp/openclaw-plugins/legacy-chat",
+        resolvedName: "@carapace/legacy-chat",
+        installPath: "/tmp/carapace-plugins/legacy-chat",
       },
-      expectedInstall: { source: "npm", resolvedName: "@openclaw/legacy-chat" },
+      expectedInstall: { source: "npm", resolvedName: "@carapace/legacy-chat" },
       bridge: {},
       expectClawHubNotCalled: false,
     },
@@ -6296,11 +6296,11 @@ describe("syncPluginsForUpdateChannel", () => {
       name: "removes stale bundled load paths for already-externalized pinned npm installs",
       install: {
         source: "npm",
-        spec: "@openclaw/legacy-chat@1.2.3",
-        resolvedSpec: "@openclaw/legacy-chat@1.2.3",
-        installPath: "/tmp/openclaw-plugins/legacy-chat",
+        spec: "@carapace/legacy-chat@1.2.3",
+        resolvedSpec: "@carapace/legacy-chat@1.2.3",
+        installPath: "/tmp/carapace-plugins/legacy-chat",
       },
-      expectedInstall: { source: "npm", spec: "@openclaw/legacy-chat@1.2.3" },
+      expectedInstall: { source: "npm", spec: "@carapace/legacy-chat@1.2.3" },
       bridge: {},
       expectClawHubNotCalled: false,
     },
@@ -6310,7 +6310,7 @@ describe("syncPluginsForUpdateChannel", () => {
         source: "clawhub",
         spec: "clawhub:legacy-chat@2026.5.1",
         clawhubPackage: "legacy-chat",
-        installPath: "/tmp/openclaw-plugins/legacy-chat",
+        installPath: "/tmp/carapace-plugins/legacy-chat",
       },
       expectedInstall: { source: "clawhub", spec: "clawhub:legacy-chat@2026.5.1" },
       bridge: { clawhubSpec: "clawhub:legacy-chat" },

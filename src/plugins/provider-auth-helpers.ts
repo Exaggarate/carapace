@@ -1,7 +1,7 @@
 // Builds provider auth credentials from config and plugin metadata.
 import fs from "node:fs";
 import path from "node:path";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { resolveDefaultAgentDir } from "../agents/agent-scope-config.js";
 import { buildAuthProfileId } from "../agents/auth-profiles/identity.js";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../agents/auth-profiles/profiles.js";
 import { resolveProviderIdForAuth } from "../agents/provider-auth-aliases.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   coerceSecretRef,
   DEFAULT_SECRET_PROVIDER_ALIAS,
@@ -26,12 +26,12 @@ import { isValidSecretRef } from "../secrets/ref-contract.js";
 import { normalizeSecretInput } from "../utils/normalize-secret-input.js";
 import type { SecretInputMode } from "./provider-auth-types.js";
 
-const resolveAuthAgentDir = (agentDir?: string, config?: OpenClawConfig) =>
+const resolveAuthAgentDir = (agentDir?: string, config?: CarapaceConfig) =>
   agentDir ?? resolveDefaultAgentDir(config ?? {});
 
 export type ApiKeyStorageOptions = {
   secretInputMode?: SecretInputMode;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
 export type WriteOAuthCredentialsOptions = {
@@ -44,7 +44,7 @@ function buildEnvSecretRef(id: string): SecretRef {
   return { source: "env", provider: DEFAULT_SECRET_PROVIDER_ALIAS, id };
 }
 
-function resolveProviderDefaultEnvSecretRef(provider: string, config?: OpenClawConfig): SecretRef {
+function resolveProviderDefaultEnvSecretRef(provider: string, config?: CarapaceConfig): SecretRef {
   const envVars = getProviderEnvVars(provider, {
     ...(config ? { config } : {}),
     includeUntrustedWorkspacePlugins: false,
@@ -143,7 +143,7 @@ export function upsertApiKeyProfile(params: {
 }
 
 export function applyAuthProfileConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: {
     profileId: string;
     provider: string;
@@ -152,7 +152,7 @@ export function applyAuthProfileConfig(
     displayName?: string;
     preferProfileFirst?: boolean;
   },
-): OpenClawConfig {
+): CarapaceConfig {
   const profiles = {
     ...cfg.auth?.profiles,
     [params.profileId]: {
@@ -216,7 +216,7 @@ export function applyAuthProfileConfig(
 }
 
 /** Returns true when config still names a removed auth profile. */
-export function configReferencesAuthProfile(cfg: OpenClawConfig, profileId: string): boolean {
+export function configReferencesAuthProfile(cfg: CarapaceConfig, profileId: string): boolean {
   return (
     Boolean(cfg.auth?.profiles?.[profileId]) ||
     Object.values(cfg.auth?.order ?? {}).some((order) => order.includes(profileId)) ||
@@ -229,7 +229,7 @@ export function configReferencesAuthProfile(cfg: OpenClawConfig, profileId: stri
  * `apiKey` references. An emptied provider order is deleted rather than left as
  * `[]`, because an authored empty order is a hard "select no profiles" instruction.
  */
-export function removeAuthProfileConfig(cfg: OpenClawConfig, profileId: string): OpenClawConfig {
+export function removeAuthProfileConfig(cfg: CarapaceConfig, profileId: string): CarapaceConfig {
   if (!configReferencesAuthProfile(cfg, profileId)) {
     return cfg;
   }

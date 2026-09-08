@@ -1,7 +1,7 @@
-// Guided channel-setup wizard flow shared by `openclaw channels add` (clack
+// Guided channel-setup wizard flow shared by `carapace channels add` (clack
 // prompter) and the gateway `wizard.start {flow:"channels"}` RPC (session
 // prompter driving the Control UI / native clients).
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   resolveConfiguredAgentId,
   tryResolveAgentOperationAgentId,
@@ -9,7 +9,7 @@ import {
 import { getLoadedChannelPlugin } from "../../channels/plugins/index.js";
 import type { ChannelSetupPlugin } from "../../channels/plugins/setup-wizard-types.js";
 import { formatUnknownChannelMessage } from "../../cli/error-format.js";
-import { readConfigFileSnapshotForWrite, type OpenClawConfig } from "../../config/config.js";
+import { readConfigFileSnapshotForWrite, type CarapaceConfig } from "../../config/config.js";
 import { commitConfigWithPendingPluginInstalls } from "../../plugins/install-record-commit.js";
 import { refreshPluginRegistryAfterConfigMutation } from "../../plugins/registry-refresh.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
@@ -32,7 +32,7 @@ function unresolvedInitialWizardChannelTarget(channel: string): InitialWizardCha
 /** Resolve omitted, matched, and unmatched channel targets without collapsing caller intent. */
 export async function resolveInitialWizardChannelTarget(
   raw: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   workspaceDir?: string,
 ): Promise<InitialWizardChannelTarget> {
   if (raw === undefined) {
@@ -125,7 +125,7 @@ export async function runChannelsAddWizardFlow(params: ChannelsAddWizardFlowPara
       resolvedPlugins.set(channel, plugin);
     },
   });
-  const commitWizardConfig = async (config: OpenClawConfig) => {
+  const commitWizardConfig = async (config: CarapaceConfig) => {
     return await channelSetup.commit(config, async (configToCommit) => {
       const committed = await commitConfigWithPendingPluginInstalls({
         sourceConfig: configToCommit,
@@ -284,7 +284,7 @@ export async function runChannelsSetupWizard(
   const { snapshot } = writeSnapshot;
   if (snapshot.exists && !snapshot.valid) {
     throw new Error(
-      "OpenClaw config is invalid; run `openclaw doctor --fix`, then retry channel setup.",
+      "Carapace config is invalid; run `carapace doctor --fix`, then retry channel setup.",
     );
   }
   const cfg = snapshot.sourceConfig;

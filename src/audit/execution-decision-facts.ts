@@ -9,21 +9,21 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { createOpenClawStateSchemaEnsurer } from "../state/openclaw-state-feature-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { createCarapaceStateSchemaEnsurer } from "../state/carapace-state-feature-schema.js";
 
 type ExecutionDecisionDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "execution_decision_facts" | "execution_identity_contexts"
 >;
-type ExecutionDecisionRow = Selectable<OpenClawStateKyselyDatabase["execution_decision_facts"]>;
+type ExecutionDecisionRow = Selectable<CarapaceStateKyselyDatabase["execution_decision_facts"]>;
 type ExecutionDecisionMetadataRow = Omit<ExecutionDecisionRow, "receipt_json"> & {
   receipt_rowid: number;
   payload_bytes: number;
@@ -47,13 +47,13 @@ const EXECUTION_DECISION_FACT_PRUNE_BATCH_ROWS = 1_024;
 const EXECUTION_DECISION_FACT_SUMMARY_MAX_ROWS = 128;
 const EXECUTION_DECISION_SELECTOR_PREFIX = "decision-fact:";
 
-const ensureExecutionDecisionFactSchema = createOpenClawStateSchemaEnsurer({
+const ensureExecutionDecisionFactSchema = createCarapaceStateSchemaEnsurer({
   table: "execution_decision_facts",
   endMarker: "  ON execution_decision_facts (run_id, occurred_at, receipt_id);\n",
   operationLabel: "audit.execution-decision.schema.ensure",
 });
 
-type ExecutionDecisionFactOptions = OpenClawStateDatabaseOptions & {
+type ExecutionDecisionFactOptions = CarapaceStateDatabaseOptions & {
   now?: number;
   limits?: { maxRows: number; pruneBatchRows: number };
 };
@@ -128,7 +128,7 @@ function unknownDecisionReceipt(
     remediation: [
       {
         code: "inspect_state_integrity",
-        text: "Run openclaw doctor and inspect the shared state database before trusting this decision.",
+        text: "Run carapace doctor and inspect the shared state database before trusting this decision.",
       },
     ],
   };
@@ -209,7 +209,7 @@ export function recordExecutionDecisionFact(
   if (receipt.source.owner === "operator_approvals") {
     throw new Error("operator approvals must be read from their owner-native table");
   }
-  const opened = openOpenClawStateDatabase(options);
+  const opened = openCarapaceStateDatabase(options);
   if (!hasExactExecutionContext(opened.db, receipt)) {
     throw new Error("execution decision fact requires an exact retained execution context");
   }
@@ -219,7 +219,7 @@ export function recordExecutionDecisionFact(
     throw new Error("execution decision fact exceeds 16 KiB");
   }
   ensureExecutionDecisionFactSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = decisionDb(db);
       // The context is the authoritative tuple owner; reread it inside the commit section.
@@ -405,14 +405,14 @@ function projectDecisionMetadata(
 export function summarizeExecutionDecisionFactsForContext(params: {
   context: ExecutionDecisionContext;
   now?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): {
   count: number;
   coverageState?: "enforced" | "unknown" | "unsupported";
   missingEvidence: string[];
 } {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "execution_decision_facts")) {
         return { count: 0, missingEvidence: [] };
       }
@@ -459,10 +459,10 @@ export function summarizeExecutionDecisionFactsForContext(params: {
 export function hasExecutionDecisionFactsForRun(params: {
   runId: string;
   now?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): boolean {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "execution_decision_facts")) {
         return false;
       }
@@ -491,10 +491,10 @@ export function pageExecutionDecisionFactsForContext(params: {
   offset?: number;
   limit: number;
   now?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): ExecutionDecisionFactPage {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "execution_decision_facts")) {
         return { entries: [], receipts: [] };
       }
@@ -530,14 +530,14 @@ export function pageExecutionDecisionFactsForContext(params: {
 
 /** Delete one bounded batch without creating the optional table. */
 export function pruneExpiredExecutionDecisionFacts(
-  params: { now?: number; database?: OpenClawStateDatabaseOptions } = {},
+  params: { now?: number; database?: CarapaceStateDatabaseOptions } = {},
 ): number {
   const databaseOptions = params.database ?? {};
-  const database = openOpenClawStateDatabase(databaseOptions);
+  const database = openCarapaceStateDatabase(databaseOptions);
   if (!tableExists(database.db, "execution_decision_facts")) {
     return 0;
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) =>
       Number(
         deleteExpiredDecisionFacts(

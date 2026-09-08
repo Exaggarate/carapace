@@ -1,6 +1,6 @@
 // Tests group prompt helpers and lazy runtime loading for group metadata.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -11,7 +11,7 @@ import * as groups from "./groups.js";
 import { prepareReplyConversation } from "./prompt-session-context.js";
 
 async function requireMentionForConversation(
-  params: Parameters<typeof prepareReplyConversation>[0] & { cfg: OpenClawConfig },
+  params: Parameters<typeof prepareReplyConversation>[0] & { cfg: CarapaceConfig },
 ) {
   const { cfg, ...input } = params;
   const currentGroups = await import("./groups.js");
@@ -272,7 +272,7 @@ describe("group runtime loading", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx: {
           Provider: "slack",
           From: "slack:channel:C123",
@@ -296,7 +296,7 @@ describe("group runtime loading", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx: { InternalTurnSource: "heartbeat" },
         sessionEntry: persistedSessionEntry,
       }),
@@ -312,7 +312,7 @@ describe("group runtime loading", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx: {
           InternalTurnSource: "heartbeat",
           OriginatingChannel: "slack",
@@ -332,7 +332,7 @@ describe("group runtime loading", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx: { InternalTurnSource: "heartbeat" },
         sessionEntry: persistedSessionEntry,
       }),
@@ -348,7 +348,7 @@ describe("group runtime loading", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx: { Provider: "slack", From: "slack:channel:C456" },
         sessionEntry: persistedSessionEntry,
       }),
@@ -399,7 +399,7 @@ describe("group runtime loading", () => {
     };
     const resolveForThread = (messageThreadId: number) =>
       requireMentionForConversation({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         ctx: {
           Provider: "telegram",
           From: "heartbeat",
@@ -444,7 +444,7 @@ describe("group runtime loading", () => {
 
     await expect(
       requireMentionForConversation({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         ctx: {
           Provider: "zalouser",
           From: "heartbeat",

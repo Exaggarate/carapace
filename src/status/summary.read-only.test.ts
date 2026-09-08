@@ -15,14 +15,14 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   createDirectOutboundTestAdapter,
   createOutboundTestPlugin,
   createTestRegistry,
 } from "../test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getStatusSummary } from "./summary.js";
 
 describe("getStatusSummary read-only session access", () => {
@@ -51,8 +51,8 @@ describe("getStatusSummary read-only session access", () => {
 
   afterEach(() => {
     cliBackendsTesting.resetDepsForTest();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   afterAll(() => {
@@ -62,8 +62,8 @@ describe("getStatusSummary read-only session access", () => {
   });
 
   it("does not create the heartbeat session database while checking its route", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-status-heartbeat-"));
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-status-heartbeat-"));
+    const databasePath = path.join(tempDir, "carapace-agent.sqlite");
 
     try {
       const summary = await getStatusSummary({
@@ -81,8 +81,8 @@ describe("getStatusSummary read-only session access", () => {
   it.each([undefined, "owner"])(
     "resolves the configured owner DM without writing session state for target %s",
     async (target) => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-status-owner-"));
-      const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-status-owner-"));
+      const databasePath = path.join(tempDir, "carapace-agent.sqlite");
 
       try {
         const summary = await getStatusSummary({
@@ -106,7 +106,7 @@ describe("getStatusSummary read-only session access", () => {
   it.each(["sessions.json", "shared.sqlite"])(
     "reports each agent's activity and reads each physical session store once for %s",
     async (fileName) => {
-      const tempDir = tempDirs.make("openclaw-status-session-stores-");
+      const tempDir = tempDirs.make("carapace-status-session-stores-");
       const storePath = path.join(tempDir, fileName);
       const config = {
         agents: {
@@ -124,7 +124,7 @@ describe("getStatusSummary read-only session access", () => {
             { sessionId: `${agentId}-session`, updatedAt: agentId === "main" ? 10 : 20 },
           );
         }
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
 
         const expectedPaths = ["main", "ops"].map(
           (agentId) => resolveSqliteTargetFromSessionStorePath(storePath, { agentId }).path,
@@ -171,15 +171,15 @@ describe("getStatusSummary read-only session access", () => {
           now.mockRestore();
         }
       } finally {
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );
 
   it("does not reread ambient config while projecting prepared session runtime state", async () => {
-    await withOpenClawTestState(
-      { prefix: "openclaw-status-prepared-config-", layout: "split" },
+    await withCarapaceTestState(
+      { prefix: "carapace-status-prepared-config-", layout: "split" },
       async (state) => {
         const storePath = state.path("sessions.json");
         const config = { session: { store: storePath } };
@@ -188,7 +188,7 @@ describe("getStatusSummary read-only session access", () => {
           { agentId: "main", sessionKey: "agent:main:main", storePath },
           { sessionId: "prepared-config", updatedAt: 10 },
         );
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         clearRuntimeConfigSnapshot();
         const readFileSync = vi.spyOn(fs, "readFileSync");
         try {
@@ -222,7 +222,7 @@ describe("getStatusSummary read-only session access", () => {
       },
       resolveRuntimeCliBackends: () => [],
     });
-    await withOpenClawTestState({ prefix: "openclaw-status-runtime-alias-cap-" }, async (state) => {
+    await withCarapaceTestState({ prefix: "carapace-status-runtime-alias-cap-" }, async (state) => {
       const storePath = resolveSessionStorePathCore(undefined, {
         agentId: "main",
         env: state.env,
@@ -265,7 +265,7 @@ describe("getStatusSummary read-only session access", () => {
           totalTokensVersion: 1,
         },
       );
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       const summary = await getStatusSummary({ includeChannelSummary: false, config });
       const session = summary.sessions.recent[0];
@@ -276,7 +276,7 @@ describe("getStatusSummary read-only session access", () => {
   });
 
   it("bounds session payload hydration to the recent status window", async () => {
-    await withOpenClawTestState({ prefix: "openclaw-status-recent-window-" }, async (state) => {
+    await withCarapaceTestState({ prefix: "carapace-status-recent-window-" }, async (state) => {
       const config = {
         agents: { defaults: { heartbeat: { every: "0m" } }, entries: { main: {} } },
       };

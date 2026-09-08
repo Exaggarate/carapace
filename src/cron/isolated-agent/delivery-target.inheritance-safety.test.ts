@@ -5,7 +5,7 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseTelegramTargetForTest } from "../../../test/helpers/infra/telegram-targets.js";
 import type { ChannelOutboundAdapter } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import {
   forumMessagingForTest,
@@ -153,7 +153,7 @@ beforeEach(() => {
           config: {
             listAccountIds: () => [],
             resolveAccount: () => ({}),
-            resolveAllowFrom: ({ cfg }: { cfg: OpenClawConfig }) =>
+            resolveAllowFrom: ({ cfg }: { cfg: CarapaceConfig }) =>
               (cfg.channels?.alpha as { allowFrom?: string[] } | undefined)?.allowFrom,
           },
         },
@@ -167,12 +167,12 @@ afterEach(() => {
   resetPluginRuntimeStateForTest();
 });
 
-function makeCfg(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
+function makeCfg(overrides?: Partial<CarapaceConfig>): CarapaceConfig {
   return {
     bindings: [],
     channels: {},
     ...overrides,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 const AGENT_ID = "agent-b";
@@ -209,7 +209,7 @@ function setLastSessionEntry(params: {
   });
 }
 
-async function resolveLastTarget(cfg: OpenClawConfig) {
+async function resolveLastTarget(cfg: CarapaceConfig) {
   // Implicit/keyless cron: delivery.channel="last", no per-job target, no sessionKey.
   return resolveDeliveryTarget(cfg, AGENT_ID, { channel: "last", to: undefined });
 }

@@ -7,7 +7,7 @@ set -eEuo pipefail
 umask 077
 
 VERSION=""
-PREFIX="${OPENCLAW_PREFIX:-}"
+PREFIX="${CARAPACE_PREFIX:-}"
 DISPLAY_NAME=""
 JOIN_TARGET=""
 TEMP_DIR=""
@@ -18,18 +18,18 @@ print_usage() {
   cat <<'EOF'
 Usage: connect.sh --version <exact-version> [--prefix <path>] [--display-name <name>] <join-target>
 
-Installs an exact OpenClaw CLI version, connects the machine as a worker-session
-host, and installs the node service. The join target is handed to OpenClaw through
+Installs an exact Carapace CLI version, connects the machine as a worker-session
+host, and installs the node service. The join target is handed to Carapace through
 a private temporary file, never as a child-process argument.
 
 Options:
   --version <exact-version>  Required exact version, for example 2026.8.1
-  --prefix <path>            Install prefix (default: ~/.openclaw or $OPENCLAW_PREFIX)
+  --prefix <path>            Install prefix (default: ~/.carapace or $CARAPACE_PREFIX)
   --display-name <name>      Override the node display name
   -h, --help                 Show this help
 
 Environment:
-  OPENCLAW_INSTALL_CLI_URL   HTTPS installer URL, file:// URL, or local installer path
+  CARAPACE_INSTALL_CLI_URL   HTTPS installer URL, file:// URL, or local installer path
 EOF
 }
 
@@ -81,11 +81,11 @@ require_home_for_prefix() {
 resolve_prefix() {
   case "$PREFIX" in
     \~)
-      require_home_for_prefix "Cannot expand prefix '~': HOME is unavailable. Pass an absolute --prefix or set OPENCLAW_PREFIX."
+      require_home_for_prefix "Cannot expand prefix '~': HOME is unavailable. Pass an absolute --prefix or set CARAPACE_PREFIX."
       PREFIX="$HOME"
       ;;
     \~/*)
-      require_home_for_prefix "Cannot expand prefix '${PREFIX}': HOME is unavailable. Pass an absolute --prefix or set OPENCLAW_PREFIX."
+      require_home_for_prefix "Cannot expand prefix '${PREFIX}': HOME is unavailable. Pass an absolute --prefix or set CARAPACE_PREFIX."
       PREFIX="${HOME}${PREFIX:1}"
       ;;
     /*) ;;
@@ -122,7 +122,7 @@ download_installer() {
       fi
       ;;
     *)
-      fail "OPENCLAW_INSTALL_CLI_URL must be HTTPS or a readable local installer path."
+      fail "CARAPACE_INSTALL_CLI_URL must be HTTPS or a readable local installer path."
       ;;
   esac
 }
@@ -165,32 +165,32 @@ done
 if ! is_exact_version "$VERSION"; then
   fail "Invalid --version '${VERSION}'. Use an exact registry version such as 2026.8.1; leading v, moving tags, ranges, and wildcards are not allowed."
 fi
-[[ -n "$JOIN_TARGET" ]] || fail "A join target is required. Mint one with 'openclaw devices join-code' and retry."
+[[ -n "$JOIN_TARGET" ]] || fail "A join target is required. Mint one with 'carapace devices join-code' and retry."
 if [[ -z "$PREFIX" ]]; then
-  require_home_for_prefix "Cannot resolve the default install prefix: pass --prefix, set OPENCLAW_PREFIX, or provide an existing HOME directory."
-  PREFIX="${HOME}/.openclaw"
+  require_home_for_prefix "Cannot resolve the default install prefix: pass --prefix, set CARAPACE_PREFIX, or provide an existing HOME directory."
+  PREFIX="${HOME}/.carapace"
 fi
 
 resolve_prefix
-TEMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-connect.XXXXXX")"
+TEMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/carapace-connect.XXXXXX")"
 chmod 0700 "$TEMP_DIR"
 INSTALLER_PATH="${TEMP_DIR}/install-cli.sh"
 TARGET_FILE="${TEMP_DIR}/join-target"
-INSTALLER_SOURCE="${OPENCLAW_INSTALL_CLI_URL:-https://openclaw.ai/install-cli.sh}"
+INSTALLER_SOURCE="${CARAPACE_INSTALL_CLI_URL:-https://github.com/Exaggarate/carapace}"
 
-FAILURE_CONTEXT="Could not obtain the OpenClaw CLI installer. Check network access or OPENCLAW_INSTALL_CLI_URL, then retry."
+FAILURE_CONTEXT="Could not obtain the Carapace CLI installer. Check network access or CARAPACE_INSTALL_CLI_URL, then retry."
 download_installer "$INSTALLER_SOURCE" "$INSTALLER_PATH"
-[[ -s "$INSTALLER_PATH" ]] || fail "The OpenClaw CLI installer was empty. Check the installer source and retry."
+[[ -s "$INSTALLER_PATH" ]] || fail "The Carapace CLI installer was empty. Check the installer source and retry."
 chmod 0700 "$INSTALLER_PATH"
 
-FAILURE_CONTEXT="OpenClaw CLI installation failed. Verify the exact version and install prefix, then retry."
+FAILURE_CONTEXT="Carapace CLI installation failed. Verify the exact version and install prefix, then retry."
 bash "$INSTALLER_PATH" --version "$VERSION" --prefix "$PREFIX" --no-onboard
 
-OPENCLAW_BIN="${PREFIX}/bin/openclaw"
-[[ -x "$OPENCLAW_BIN" ]] || fail "Installed OpenClaw CLI is missing at ${OPENCLAW_BIN}. Check the installer output and retry."
+CARAPACE_BIN="${PREFIX}/bin/carapace"
+[[ -x "$CARAPACE_BIN" ]] || fail "Installed Carapace CLI is missing at ${CARAPACE_BIN}. Check the installer output and retry."
 
 CAPABILITY_ERROR="The selected exact version ${VERSION} does not support session-host onboarding. Choose a newer supporting exact version and retry."
-if ! CONNECT_HELP="$("$OPENCLAW_BIN" connect --help 2>&1)"; then
+if ! CONNECT_HELP="$("$CARAPACE_BIN" connect --help 2>&1)"; then
   fail "$CAPABILITY_ERROR"
 fi
 for required_flag in --target-file --service --session-host; do
@@ -210,7 +210,7 @@ if [[ -n "$DISPLAY_NAME" ]]; then
   CONNECT_ARGS+=(--display-name "$DISPLAY_NAME")
 fi
 
-FAILURE_CONTEXT="OpenClaw could not connect or install the session-host service. Mint a fresh join target, verify Gateway reachability, and retry."
-"$OPENCLAW_BIN" "${CONNECT_ARGS[@]}"
+FAILURE_CONTEXT="Carapace could not connect or install the session-host service. Mint a fresh join target, verify Gateway reachability, and retry."
+"$CARAPACE_BIN" "${CONNECT_ARGS[@]}"
 
-printf 'OpenClaw session-host service installed.\n'
+printf 'Carapace session-host service installed.\n'

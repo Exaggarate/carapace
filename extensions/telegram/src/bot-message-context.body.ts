@@ -13,27 +13,27 @@ import {
   type BuildMentionRegexesOptions,
   type InboundEventKind,
   type NormalizedLocation,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { hasControlCommand } from "openclaw/plugin-sdk/command-detection";
-import { isAbortRequestText } from "openclaw/plugin-sdk/command-primitives-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { hasControlCommand } from "carapace/plugin-sdk/command-detection";
+import { isAbortRequestText } from "carapace/plugin-sdk/command-primitives-runtime";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   TelegramDirectConfig,
   TelegramGroupConfig,
   TelegramTopicConfig,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/config-contracts";
 import {
   createInternalHookEvent,
   fireAndForgetHook,
   toInternalMessageReceivedContext,
   triggerInternalHook,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { formatAudioTranscriptForAgent } from "openclaw/plugin-sdk/media-understanding-runtime";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import type { MsgContext } from "openclaw/plugin-sdk/reply-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/hook-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { formatAudioTranscriptForAgent } from "carapace/plugin-sdk/media-understanding-runtime";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import type { MsgContext } from "carapace/plugin-sdk/reply-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { NormalizedAllowFrom } from "./bot-access.js";
 import type {
   TelegramLogger,
@@ -123,7 +123,7 @@ function resolveTelegramMentionFacts(params: {
 }
 
 async function resolveStickerVisionSupport(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
 }): Promise<boolean> {
   try {
@@ -135,7 +135,7 @@ async function resolveStickerVisionSupport(params: {
 }
 
 export async function resolveTelegramInboundBody(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   primaryCtx: TelegramContext;
   msg: TelegramContext["message"];
   allMedia: TelegramMediaRef[];

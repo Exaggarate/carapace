@@ -1,11 +1,11 @@
 // Irc plugin module implements setup surface behavior.
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/routing";
 import type {
   ChannelSetupDmPolicy,
   ChannelSetupWizard,
   WizardPrompter,
-} from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/setup";
 import {
   createAllowFromSection,
   createPromptParsedAllowFromForAccount,
@@ -13,13 +13,13 @@ import {
   createStandardChannelSetupStatus,
   formatDocsLink,
   setSetupChannelEnabled,
-} from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/setup";
 import {
   normalizeOptionalString,
   normalizeStringEntries,
   normalizeStringifiedOptionalString,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultIrcAccountId, resolveIrcAccount } from "./accounts.js";
 import {
   isChannelTarget,
@@ -309,7 +309,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
       initialValue: ({ cfg, accountId, credentialValues }) =>
         resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.username ||
         credentialValues.token ||
-        "openclaw",
+        "carapace",
       validate: ({ value }) => (normalizeStringifiedOptionalString(value) ? undefined : "Required"),
       normalizeValue: ({ value }) => normalizeStringifiedOptionalString(value) ?? "",
       applySet: async ({ cfg, accountId, value }) =>
@@ -325,7 +325,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
         resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.realname || undefined,
       shouldPrompt: ({ credentialValues }) => credentialValues[USE_ENV_FLAG] !== "1",
       initialValue: ({ cfg, accountId }) =>
-        resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.realname || "OpenClaw",
+        resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.realname || "Carapace",
       validate: ({ value }) => (normalizeStringifiedOptionalString(value) ? undefined : "Required"),
       normalizeValue: ({ value }) => normalizeStringifiedOptionalString(value) ?? "",
       applySet: async ({ cfg, accountId, value }) =>
@@ -337,7 +337,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
     {
       inputKey: "groupChannels",
       message: t("wizard.irc.autoJoinPrompt"),
-      placeholder: "#openclaw, #ops",
+      placeholder: "#carapace, #ops",
       required: false,
       applyEmptyValue: true,
       currentValue: ({ cfg, accountId }) =>
@@ -363,7 +363,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
   ],
   groupAccess: {
     label: "IRC channels",
-    placeholder: "#openclaw, #ops, *",
+    placeholder: "#carapace, #ops, *",
     currentPolicy: ({ cfg, accountId }) =>
       resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.groupPolicy ?? "allowlist",
     currentEntries: ({ cfg, accountId }) =>

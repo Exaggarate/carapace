@@ -1,5 +1,5 @@
 // WhatsApp monitor inbox behavior split by ownership.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearWhatsAppApprovalReactionTargetsForTest,
@@ -25,7 +25,7 @@ import {
 } from "./monitor-inbox.test-harness.js";
 
 const approvalResolver = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: approvalResolver,
 }));
 

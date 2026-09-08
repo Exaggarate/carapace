@@ -1,11 +1,11 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { createAssistantMessageEventStream, type Model } from "openclaw/plugin-sdk/llm";
+import { createAssistantMessageEventStream, type Model } from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it } from "vitest";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
-  createOpenClawReadTool,
+  createCarapaceReadTool,
   createSandboxedReadTool,
   wrapReadToolWithSkillContent,
 } from "./agent-tools.read.js";
@@ -207,7 +207,7 @@ describe("fresh producer results through persistence and model guards", () => {
       const context = "context" in scenario ? scenario.context! : model.contextWindow;
       const fail = "fail" in scenario && scenario.fail;
       const value = "value" in scenario ? scenario.value : true;
-      const state = await createOpenClawTestState({ label: "code-mode-result-budget" });
+      const state = await createCarapaceTestState({ label: "code-mode-result-budget" });
       const runtime = createAgentHarnessToolSurfaceRuntimeCore({
         config: { tools: { codeMode: { enabled: true, maxOutputBytes: cap } } },
         model,
@@ -331,7 +331,7 @@ describe("fresh producer results through persistence and model guards", () => {
   ])(
     "keeps the read owner's exact cursor through the downstream result guard: $name",
     async ({ name, sandbox, source, context }) => {
-      const state = await createOpenClawTestState({ label: "read-result-budget" });
+      const state = await createCarapaceTestState({ label: "read-result-budget" });
       try {
         const resolved = name === "sandbox resolved filename";
         const file = join(state.workspaceDir, resolved ? "notes 3.04 PM.txt" : "long-line.txt");
@@ -342,7 +342,7 @@ describe("fresh producer results through persistence and model guards", () => {
               bridge: createHostSandboxFsBridge(state.workspaceDir),
               modelContextWindowTokens: context,
             })
-          : createOpenClawReadTool(createReadTool(state.workspaceDir), {
+          : createCarapaceReadTool(createReadTool(state.workspaceDir), {
               modelContextWindowTokens: context,
               cwd: state.workspaceDir,
             });

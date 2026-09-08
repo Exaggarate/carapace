@@ -3,7 +3,7 @@ import { resolveAgentDir } from "../agents/agent-scope.js";
 import { clearAgentHarnesses, registerAgentHarness } from "../agents/harness/registry.js";
 import { selectAgentHarness } from "../agents/harness/selection.js";
 import { resolveRunWorkspaceDir } from "../agents/workspace-run.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { SYSTEM_AGENT_ID } from "./agent-id.js";
 import {
   projectDefaultInferenceRoute,
@@ -11,7 +11,7 @@ import {
   sameDefaultInferenceRoute,
 } from "./inference-route.js";
 
-function devConfig(agentRuntime?: string): OpenClawConfig {
+function devConfig(agentRuntime?: string): CarapaceConfig {
   return {
     agents: {
       defaults: { model: "openai/gpt-5.5" },
@@ -48,16 +48,16 @@ afterEach(() => {
 
 describe("resolveSystemAgentConfiguredRouteFromConfig", () => {
   it("treats a setup-materialized first-agent roster as inference-route neutral", async () => {
-    const withoutRoster: OpenClawConfig = {
+    const withoutRoster: CarapaceConfig = {
       agents: { defaults: { model: "openai/gpt-5.5" } },
     };
-    const withFirstAgent: OpenClawConfig = {
+    const withFirstAgent: CarapaceConfig = {
       agents: {
         defaults: withoutRoster.agents?.defaults,
         entries: {
           main: {
             default: true,
-            workspace: "/tmp/openclaw-main",
+            workspace: "/tmp/carapace-main",
             agentDir: resolveAgentDir(withoutRoster, "main"),
           },
         },
@@ -131,7 +131,7 @@ describe("resolveSystemAgentConfiguredRouteFromConfig", () => {
             ? implicitRoute!.agentHarnessRuntimeOverride
             : undefined,
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
 
     const explicitRoute = await resolveSystemAgentConfiguredRouteFromConfig(devConfig("codex"));
     expect(explicitRoute).toMatchObject({

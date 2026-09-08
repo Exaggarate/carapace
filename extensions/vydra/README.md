@@ -1,13 +1,13 @@
-# OpenClaw Vydra Provider
+# Carapace Vydra Provider
 
-Official OpenClaw provider plugin for Vydra image, video, and speech generation.
+Official Carapace provider plugin for Vydra image, video, and speech generation.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/vydra-provider
-openclaw gateway restart
+carapace plugins install @carapace/vydra-provider
+carapace gateway restart
 ```
 
 Set `VYDRA_API_KEY`, then configure an image, video, or speech model. See
-<https://docs.openclaw.ai/providers/vydra> for capability details and examples.
+<../../docs/providers/vydra.md> for capability details and examples.

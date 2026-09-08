@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { logWarn } from "../logger.js";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
+import type { CarapacePluginNodeHostCommandIo } from "../plugins/types.js";
 import { getProcessSupervisor } from "../process/supervisor/index.js";
 import type { RunExit, SpawnSecretInput } from "../process/supervisor/types.js";
 import { truncateUtf8Suffix } from "../utils/utf8-truncate.js";
@@ -39,7 +39,7 @@ export async function runClaudeCliNodeCommand(params: {
   secretInput?: SpawnSecretInput;
   timeoutMs: number | undefined;
   signal?: AbortSignal;
-  skillIo?: OpenClawPluginNodeHostCommandIo;
+  skillIo?: CarapacePluginNodeHostCommandIo;
 }): Promise<RunResult> {
   const cancelledResult = (): RunResult => ({
     exitCode: 130,
@@ -72,7 +72,7 @@ export async function runClaudeCliNodeCommand(params: {
           .join("\n\n")
       : params.request.systemPrompt;
     if (systemPrompt !== undefined) {
-      promptDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-claude-prompt-"));
+      promptDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-claude-prompt-"));
       const promptPath = path.join(promptDir, "system-prompt.md");
       await fs.writeFile(promptPath, systemPrompt, { mode: 0o600 });
       argv = [...argv, "--append-system-prompt-file", promptPath];

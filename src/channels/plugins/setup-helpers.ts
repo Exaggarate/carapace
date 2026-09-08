@@ -3,7 +3,7 @@
  *
  * Applies account names and validates setup results for channel onboarding adapters.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import { writeChannelSection } from "./config-helpers.js";
 import { resolveSingleAccountPromotion } from "./setup-promotion-helpers.js";
@@ -17,7 +17,7 @@ type ChannelSectionBase = Record<string, unknown> & {
 };
 
 function getChannelSection(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channelKey: string,
 ): ChannelSectionBase | undefined {
   const section = (cfg.channels as Record<string, unknown> | undefined)?.[channelKey];
@@ -25,12 +25,12 @@ function getChannelSection(
 }
 
 export function applyAccountNameToChannelSection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   accountId: string;
   name?: string;
   alwaysUseAccounts?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const trimmed = params.name?.trim();
   if (!trimmed) {
     return params.cfg;
@@ -57,10 +57,10 @@ export function applyAccountNameToChannelSection(params: {
 
 /** Moves a root-level channel name into `accounts.default` before adding named accounts. */
 export function migrateBaseNameToDefaultAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   alwaysUseAccounts?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   if (params.alwaysUseAccounts) {
     return params.cfg;
   }
@@ -82,13 +82,13 @@ export function migrateBaseNameToDefaultAccount(params: {
 
 /** Applies setup-time account naming and optional root-name migration in one step. */
 export function prepareScopedSetupConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   accountId: string;
   name?: string;
   alwaysUseAccounts?: boolean;
   migrateBaseName?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const namedConfig = applyAccountNameToChannelSection({
     cfg: params.cfg,
     channelKey: params.channelKey,
@@ -108,11 +108,11 @@ export function prepareScopedSetupConfig(params: {
 
 /** Applies a setup patch using account-scoped config semantics. */
 export function applySetupAccountConfigPatch(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   accountId: string;
   patch: Record<string, unknown>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return patchScopedAccountConfig(params);
 }
 
@@ -179,7 +179,7 @@ export function createSetupInputPresenceValidator<
 >(params: {
   defaultAccountOnlyEnvError?: string;
   whenNotUseEnv?: SetupInputPresenceRequirement[];
-  validate?: (params: { cfg: OpenClawConfig; accountId: string; input: Input }) => string | null;
+  validate?: (params: { cfg: CarapaceConfig; accountId: string; input: Input }) => string | null;
 }): NonNullable<ChannelSetupAdapter<Input>["validateInput"]> {
   return (inputParams) => {
     if (
@@ -234,7 +234,7 @@ export function createEnvPatchedAccountSetupAdapter(params: {
 
 /** Patches channel config at root for default accounts or under `accounts.<id>` for named accounts. */
 export function patchScopedAccountConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   accountId: string;
   patch: Record<string, unknown>;
@@ -243,7 +243,7 @@ export function patchScopedAccountConfig(params: {
   ensureChannelEnabled?: boolean;
   ensureAccountEnabled?: boolean;
   scopeDefaultToAccounts?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const accountId = normalizeAccountId(params.accountId);
   const base = getChannelSection(params.cfg, params.channelKey);
   const ensureChannelEnabled = params.ensureChannelEnabled ?? true;
@@ -292,14 +292,14 @@ export function patchScopedAccountConfig(params: {
 }
 
 function moveSingleAccountKeysIntoAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   channel: ChannelSectionBase;
   accounts: Record<string, Record<string, unknown>>;
   keysToMove: string[];
   targetAccountId: string;
   baseAccount?: Record<string, unknown>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const nextAccount: Record<string, unknown> = { ...params.baseAccount };
   const nextChannel: ChannelSectionBase = { ...params.channel };
   for (const key of params.keysToMove) {
@@ -355,10 +355,10 @@ function resolveSingleAccountPromotionTarget(params: {
  * Promotes legacy single-account channel fields into the account map for multi-account setup.
  */
 export function moveSingleAccountChannelSectionToDefaultAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelKey: string;
   setupSurface?: ChannelSetupAdapter;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const base = getChannelSection(params.cfg, params.channelKey);
   if (!base) {
     return params.cfg;

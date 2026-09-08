@@ -1,6 +1,6 @@
 // Qa Lab tests cover QA evidence summary behavior.
 import { execFileSync } from "node:child_process";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   QA_EVIDENCE_SUMMARY_KIND,
@@ -36,8 +36,8 @@ describe("evidence summary", () => {
       channelId: "qa-channel",
       channelDriver: "local-shim",
       env: {
-        OPENCLAW_QA_CHANNEL_DRIVER: "local-shim",
-        OPENCLAW_QA_REF: "abc123",
+        CARAPACE_QA_CHANNEL_DRIVER: "local-shim",
+        CARAPACE_QA_REF: "abc123",
       } as NodeJS.ProcessEnv,
       generatedAt: "2026-06-07T12:00:00.000Z",
       primaryModel: "mock-openai/gpt-5.6-luna",
@@ -243,7 +243,7 @@ describe("evidence summary", () => {
       "explicit synthetic driver ignores requested environment metadata",
       "telegram",
       "qa-channel",
-      { OPENCLAW_QA_CHANNEL_DRIVER: "live" },
+      { CARAPACE_QA_CHANNEL_DRIVER: "live" },
       "qa-channel",
       false,
     ],
@@ -309,7 +309,7 @@ describe("evidence summary", () => {
         { kind: "runner-result", path: "vitest-results/runtime-boundary.vitest.json" },
       ],
       env: {
-        OPENCLAW_QA_REF: "abc123",
+        CARAPACE_QA_REF: "abc123",
       } as NodeJS.ProcessEnv,
       generatedAt: "2026-06-07T12:06:00.000Z",
       primaryModel: "mock-openai/gpt-5.6-luna",
@@ -485,7 +485,7 @@ describe("evidence summary", () => {
       ],
       channelId: "qa-channel",
       env: {
-        OPENCLAW_QA_PROFILE: "experimental-profile",
+        CARAPACE_QA_PROFILE: "experimental-profile",
       } as NodeJS.ProcessEnv,
       generatedAt: "2026-06-07T12:09:00.000Z",
       primaryModel: "mock-openai/gpt-5.6-luna",

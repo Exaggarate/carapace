@@ -2,13 +2,13 @@ import fs from "node:fs";
 import { expect, it, vi } from "vitest";
 import { createConfigIO } from "../config/io.factory.js";
 import { hashConfigRaw } from "../config/io.read-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { DoctorHealthFlowContext } from "./doctor-health-contributions.js";
 
 const mocks = vi.hoisted(() => ({
   outro: vi.fn(),
-  config: vi.fn<() => OpenClawConfig>(),
+  config: vi.fn<() => CarapaceConfig>(),
   runContributions: vi.fn<(ctx: DoctorHealthFlowContext) => Promise<void>>(),
   writeUpdatePostInstallDoctorResult: vi.fn(),
   service: vi.fn(),
@@ -31,9 +31,9 @@ vi.mock("../commands/doctor-prompter.js", () => ({
   createDoctorPrompter: () => ({ confirm: async () => true }),
 }));
 
-vi.mock("../infra/openclaw-root.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../infra/openclaw-root.js")>()),
-  resolveOpenClawPackageRoot: async () => mocks.packageRoot(),
+vi.mock("../infra/carapace-root.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../infra/carapace-root.js")>()),
+  resolveCarapacePackageRoot: async () => mocks.packageRoot(),
 }));
 
 vi.mock("../daemon/service.js", async (importOriginal) => ({
@@ -129,13 +129,13 @@ vi.mock("../commands/doctor-config-flow.js", () => ({
 
 vi.mock("../config/config.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../config/config.js")>()),
-  CONFIG_PATH: "/tmp/openclaw.json",
+  CONFIG_PATH: "/tmp/carapace.json",
 }));
 
 vi.mock("../infra/update-doctor-result.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../infra/update-doctor-result.js")>()),
   UPDATE_POST_INSTALL_DOCTOR_ADVISORY_EXIT_CODE: 86,
-  UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH_ENV: "OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH",
+  UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH_ENV: "CARAPACE_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH",
   writeUpdatePostInstallDoctorResult: mocks.writeUpdatePostInstallDoctorResult,
 }));
 
@@ -152,9 +152,9 @@ export function registerDoctorConfigReceiptTests(
   it.each(["unchanged", "ok", "error", "advisory", "interleaved"] as const)(
     "reports the consumed input and last committed Doctor config hash before exiting (%s)",
     async (outcome) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const resultPath = state.path("doctor-result.json");
-        vi.stubEnv("OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH", resultPath);
+        vi.stubEnv("CARAPACE_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH", resultPath);
         const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
         let expectedHash = "unchanged";
         const expectedInputHash = hashConfigRaw(

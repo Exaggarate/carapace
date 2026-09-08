@@ -6,7 +6,7 @@ import {
 } from "../../agents/agent-scope.js";
 import { applyPluginAutoEnable } from "../../config/plugin-auto-enable.js";
 import { resolveRuntimeConfigCacheKey } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withActivatedPluginIds } from "../../plugins/activation-context.js";
 import { resolveDiscoverableScopedChannelPluginIds } from "../../plugins/channel-plugin-ids.js";
 import { loadPluginRegistryHandle } from "../../plugins/loader.js";
@@ -36,7 +36,7 @@ function resolveBootstrapRegistryGeneration(): string {
   return String(getActivePluginRegistryVersion());
 }
 
-function resolveBootstrapRegistries(cfg: OpenClawConfig): Map<string, PluginRegistry | null> {
+function resolveBootstrapRegistries(cfg: CarapaceConfig): Map<string, PluginRegistry | null> {
   const registryGeneration = resolveBootstrapRegistryGeneration();
   if (registryGeneration !== bootstrapRegistryGeneration) {
     bootstrapRegistryGeneration = registryGeneration;
@@ -86,7 +86,7 @@ function resolveSendCapableRegistry(
 /** Loads runtime plugins on demand when a selected outbound channel has only a setup shell. */
 export function bootstrapOutboundChannelPlugin(params: {
   channel: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentId?: string;
 }): PluginRegistry | undefined {
   const cfg = params.cfg;

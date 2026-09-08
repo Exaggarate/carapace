@@ -1,13 +1,13 @@
 // Legacy Talk config normalizer for provider shape and generic realtime aliases.
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { normalizeTalkSection } from "../../../config/talk.js";
-import type { OpenClawConfig } from "../../../config/types.js";
+import type { CarapaceConfig } from "../../../config/types.js";
 
 function buildLegacyRealtimeTalkCompat(
   talk: Record<string, unknown>,
-  normalizedTalk: NonNullable<OpenClawConfig["talk"]>,
-): NonNullable<OpenClawConfig["talk"]>["realtime"] {
+  normalizedTalk: NonNullable<CarapaceConfig["talk"]>,
+): NonNullable<CarapaceConfig["talk"]>["realtime"] {
   if (talk.realtime !== undefined) {
     return undefined;
   }
@@ -29,18 +29,18 @@ function buildLegacyRealtimeTalkCompat(
   if (normalizedTalk.providers !== undefined) {
     compat.providers = normalizedTalk.providers;
   }
-  return normalizeTalkSection({ realtime: compat } as OpenClawConfig["talk"])?.realtime;
+  return normalizeTalkSection({ realtime: compat } as CarapaceConfig["talk"])?.realtime;
 }
 
 /** Normalize Talk provider shape and move only core-owned legacy realtime fields. */
-export function normalizeLegacyTalkConfig(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+export function normalizeLegacyTalkConfig(cfg: CarapaceConfig, changes: string[]): CarapaceConfig {
   const rawTalk: unknown = cfg.talk;
   if (!isRecord(rawTalk)) {
     return cfg;
   }
 
-  const normalizedTalk: Record<string, unknown> & NonNullable<OpenClawConfig["talk"]> =
-    normalizeTalkSection(rawTalk as OpenClawConfig["talk"]) ?? {};
+  const normalizedTalk: Record<string, unknown> & NonNullable<CarapaceConfig["talk"]> =
+    normalizeTalkSection(rawTalk as CarapaceConfig["talk"]) ?? {};
   for (const key of ["voiceId", "voiceAliases", "modelId", "outputFormat", "apiKey"] as const) {
     if (rawTalk[key] !== undefined) {
       normalizedTalk[key] = rawTalk[key];

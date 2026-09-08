@@ -4,9 +4,9 @@ import path from "node:path";
 import {
   replaceManagedMarkdownBlock,
   withTrailingNewline,
-} from "openclaw/plugin-sdk/memory-host-markdown";
-import { replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/memory-host-markdown";
+import { replaceFileAtomic } from "carapace/plugin-sdk/security-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   assessPageFreshness,
   buildClaimContradictionClusters,
@@ -497,8 +497,8 @@ async function writeLintReport(rootDir: string, issues: MemoryWikiLintIssue[]): 
   const updated = replaceManagedMarkdownBlock({
     original,
     heading: "## Generated",
-    startMarker: "<!-- openclaw:wiki:lint:start -->",
-    endMarker: "<!-- openclaw:wiki:lint:end -->",
+    startMarker: "<!-- carapace:wiki:lint:start -->",
+    endMarker: "<!-- carapace:wiki:lint:end -->",
     body: buildLintReportBody(issues),
   });
   await replaceFileAtomic({

@@ -6,16 +6,16 @@ import {
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import {
-  openOpenClawAgentDatabase,
-  closeOpenClawAgentDatabasesForTest,
-} from "../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  closeCarapaceAgentDatabasesForTest,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { setUserPreferences } from "../state/user-preferences.js";
 import { ensureProfileForEmail, linkEmail, syncGitHubIdentity } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   appendGitCoauthorContext,
   prepareGitCoauthorAttribution,
@@ -23,13 +23,13 @@ import {
 } from "./git-coauthor-attribution.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("Git co-author attribution", () => {
   it("derives exact bounded trailers only from canonical profile-backed humans", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:coauthors";
       // "default" writes no preference row: credit is on unless the person opts out.
       const profile = (
@@ -72,7 +72,7 @@ describe("Git co-author attribution", () => {
       const malformed = profile("malformed@example.test", 45, "malformed", "malformed");
       const unlinked = profile("unlinked@example.test");
       const legacy = ensureProfileForEmail("legacy@example.test", { env: state.env });
-      openOpenClawStateDatabase({ env: state.env })
+      openCarapaceStateDatabase({ env: state.env })
         .db.prepare(
           "INSERT INTO user_profile_identities (provider, subject, profile_id, canonical_login, created_at) VALUES (?, ?, ?, ?, ?)",
         )
@@ -135,7 +135,7 @@ describe("Git co-author attribution", () => {
         currentProfileId: current.id,
         env: state.env,
         sessionKey,
-        storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+        storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
       });
       const structured = resolveGitCoauthorAttribution({
         agentId: "main",
@@ -151,7 +151,7 @@ describe("Git co-author attribution", () => {
         currentProfileId: current.id,
         env: state.env,
         sessionKey,
-        storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+        storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
       });
 
       const personalPublisher = resolveGitCoauthorAttribution({
@@ -167,7 +167,7 @@ describe("Git co-author attribution", () => {
         excludeAccountId: 20,
         env: state.env,
         sessionKey,
-        storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+        storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
       });
       expect(personalPublisher?.trailers).toContain(
         "Co-authored-by: primary <30+primary@users.noreply.github.com>",
@@ -214,7 +214,7 @@ describe("Git co-author attribution", () => {
   });
 
   it("combines historical profile contributions under one verified GitHub account", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:merged-coauthors";
       const scope = { agentId: "main", env: state.env, sessionKey };
       await upsertSessionEntryCore(scope, { sessionId: "merged-coauthors", updatedAt: 1 });
@@ -252,7 +252,7 @@ describe("Git co-author attribution", () => {
         promptedAt: 80,
       });
       // A contaminated historical time stays unknown even after profile aliases merge.
-      openOpenClawAgentDatabase({ agentId: "main", env: state.env })
+      openCarapaceAgentDatabase({ agentId: "main", env: state.env })
         .db.prepare(
           "UPDATE session_participants SET first_prompted_at = NULL, last_prompted_at = NULL WHERE actor_id = ?",
         )
@@ -265,7 +265,7 @@ describe("Git co-author attribution", () => {
           config: {},
           env: state.env,
           sessionKey,
-          storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+          storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
         }),
       ).toMatchObject({
         logins: ["other", "merged"],
@@ -278,7 +278,7 @@ describe("Git co-author attribution", () => {
   });
 
   it("discloses unresolved legacy membership without dropping the authenticated current profile", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:legacy-coauthors";
       const scope = { agentId: "main", env: state.env, sessionKey };
       await upsertSessionEntryCore(scope, { sessionId: "legacy-coauthors", updatedAt: 1 });
@@ -291,7 +291,7 @@ describe("Git co-author attribution", () => {
           config: {},
           env: state.env,
           sessionKey,
-          storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+          storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
         }),
       ).toContain("participant history may be incomplete");
       const current = ensureProfileForEmail("current@example.test", { env: state.env });
@@ -309,7 +309,7 @@ describe("Git co-author attribution", () => {
         currentProfileId: current.id,
         env: state.env,
         sessionKey,
-        storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+        storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
       });
       expect(attribution).toContain("Co-authored-by: current");
       expect(attribution).toContain("participant history may be incomplete");
@@ -317,7 +317,7 @@ describe("Git co-author attribution", () => {
   });
 
   it("makes the participant bound visible without guessing beyond it", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:coauthor-cap";
       const scope = { agentId: "main", env: state.env, sessionKey };
       await upsertSessionEntryCore(scope, { sessionId: "coauthor-cap", updatedAt: 1 });
@@ -344,7 +344,7 @@ describe("Git co-author attribution", () => {
         currentProfileId: current.id,
         env: state.env,
         sessionKey,
-        storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+        storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
       });
 
       expect(attribution).toContain("bounded participant history may be incomplete");

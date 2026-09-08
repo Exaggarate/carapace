@@ -1,24 +1,24 @@
 // Imessage API module exposes the plugin public contract.
-import type { OpenClawConfig as RuntimeApiOpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig as RuntimeApiCarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 export {
   DEFAULT_ACCOUNT_ID,
   getChatChannelMeta,
   type ChannelPlugin,
-} from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/core";
 export { buildChannelConfigSchema, IMessageConfigSchema } from "./config-api.js";
-export { PAIRING_APPROVED_MESSAGE } from "openclaw/plugin-sdk/channel-status";
+export { PAIRING_APPROVED_MESSAGE } from "carapace/plugin-sdk/channel-status";
 export {
   buildComputedAccountStatusSnapshot,
   collectStatusIssuesFromLastError,
-} from "openclaw/plugin-sdk/status-helpers";
-export { formatTrimmedAllowFromEntries } from "openclaw/plugin-sdk/channel-config-helpers";
+} from "carapace/plugin-sdk/status-helpers";
+export { formatTrimmedAllowFromEntries } from "carapace/plugin-sdk/channel-config-helpers";
 export {
   resolveIMessageConfigAllowFrom,
   resolveIMessageConfigDefaultTo,
 } from "./src/config-accessors.js";
 export { looksLikeIMessageTargetId, normalizeIMessageMessagingTarget } from "./src/normalize.js";
-export { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
+export { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
 export {
   resolveIMessageGroupRequireMention,
   resolveIMessageGroupToolPolicy,
@@ -31,8 +31,8 @@ export type { IMessageProbe } from "./src/probe.js";
 export { sendMessageIMessage } from "./src/send.js";
 export { imessageMessageActions } from "./src/actions.js";
 export { setIMessageRuntime } from "./src/runtime.js";
-export { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+export { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 export type IMessageAccountConfig = Omit<
-  NonNullable<NonNullable<RuntimeApiOpenClawConfig["channels"]>["imessage"]>,
+  NonNullable<NonNullable<RuntimeApiCarapaceConfig["channels"]>["imessage"]>,
   "accounts" | "defaultAccount"
 >;

@@ -1,12 +1,12 @@
 /** Discovers plugin candidates from bundled, workspace, global, package, and bundle roots. */
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { resolveIsNixMode } from "../config/paths.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { resolveUserPath } from "../utils.js";
@@ -35,7 +35,7 @@ import {
   loadPluginManifest,
   type PluginManifest,
   resolvePackageExtensionEntries,
-  type OpenClawPackageManifest,
+  type CarapacePackageManifest,
   type PackageExtensionResolution,
   type PackageManifest,
 } from "./manifest.js";
@@ -578,7 +578,7 @@ function pushInvalidPackageExtensionDiagnostic(params: {
     params.diagnostics.push({
       level: "error",
       source: params.source,
-      message: "package.json openclaw.extensions is empty",
+      message: "package.json carapace.extensions is empty",
       ...(params.pluginId ? { pluginId: params.pluginId } : {}),
     });
     return true;
@@ -614,14 +614,14 @@ function addLegacyNpmDeclarationDiagnostic(params: {
     level: "warn",
     pluginId: declaration.pluginId,
     source: declaration.source,
-    message: `legacy npm plugin declaration ignored for "${declaration.pluginId}"; run "openclaw doctor --fix" to install ${declaration.npmSpec} into the managed plugin root`,
+    message: `legacy npm plugin declaration ignored for "${declaration.pluginId}"; run "carapace doctor --fix" to install ${declaration.npmSpec} into the managed plugin root`,
   });
   return true;
 }
 
 function shouldSkipIncompatiblePackagePluginApi(params: {
   origin: PluginOrigin;
-  packageManifest: OpenClawPackageManifest | undefined;
+  packageManifest: CarapacePackageManifest | undefined;
   pluginId: string;
   packageDir: string;
   env: NodeJS.ProcessEnv;
@@ -635,7 +635,7 @@ function shouldSkipIncompatiblePackagePluginApi(params: {
     params.diagnostics.push({
       level: "warn",
       source: path.join(params.packageDir, "package.json"),
-      message: `invalid package plugin API metadata: ${packagePluginApiRangeCheck.error}; skipping discovery (check package.json openclaw.compat.pluginApi)`,
+      message: `invalid package plugin API metadata: ${packagePluginApiRangeCheck.error}; skipping discovery (check package.json carapace.compat.pluginApi)`,
       pluginId: params.pluginId,
     });
     return true;
@@ -651,7 +651,7 @@ function shouldSkipIncompatiblePackagePluginApi(params: {
   params.diagnostics.push({
     level: "warn",
     source: path.join(params.packageDir, "package.json"),
-    message: `plugin requires plugin API ${packagePluginApiRange}, but this host is ${compatibilityHostVersion}; skipping discovery (check "openclaw --version", OPENCLAW_COMPATIBILITY_HOST_VERSION, or run "openclaw doctor")`,
+    message: `plugin requires plugin API ${packagePluginApiRange}, but this host is ${compatibilityHostVersion}; skipping discovery (check "carapace --version", CARAPACE_COMPATIBILITY_HOST_VERSION, or run "carapace doctor")`,
     pluginId: params.pluginId,
   });
   return true;
@@ -803,7 +803,7 @@ function createPluginScanner(env: NodeJS.ProcessEnv, ownershipUid?: number | nul
       setupSource: params.setupSource,
       rootDir: resolvedRoot,
       origin: params.origin,
-      format: params.format ?? "openclaw",
+      format: params.format ?? "carapace",
       bundleFormat: params.bundleFormat,
       workspaceDir: params.workspaceDir,
       packageName: normalizeOptionalString(manifest?.name),
@@ -1292,8 +1292,8 @@ function discoveryPolicy(
     // Configured-path classification depends on the host's bundled tree.
     bundledRoot: bundledRoot ?? resolveBundledPluginsDir(env) ?? "",
     nix: resolveIsNixMode(env),
-    sourceOverlaysDisabled: env.OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS ?? "",
-    home: env.OPENCLAW_HOME ?? "",
+    sourceOverlaysDisabled: env.CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS ?? "",
+    home: env.CARAPACE_HOME ?? "",
     userHome: env.HOME ?? "",
     userProfile: env.USERPROFILE ?? "",
     cwd: process.cwd(),
@@ -1328,7 +1328,7 @@ export function discoverConfiguredPluginLoadPaths(params: {
   return result;
 }
 
-export function discoverOpenClawPlugins(params: {
+export function discoverCarapacePlugins(params: {
   workspaceDir?: string;
   extraPaths?: string[];
   installRecords?: Record<string, PluginInstallRecord>;
@@ -1368,7 +1368,7 @@ export function discoverOpenClawPlugins(params: {
         scanner.discoverConfiguredPaths(params.extraPaths ?? [], workspaceDir);
         const workspaceMatchesBundledRoot = resolvesToSameDirectory(workspaceRoot, roots.stock);
         if (roots.workspace && workspaceRoot && !workspaceMatchesBundledRoot) {
-          // Keep workspace auto-discovery constrained to the OpenClaw extensions root.
+          // Keep workspace auto-discovery constrained to the Carapace extensions root.
           // Recursively scanning the full workspace treats arbitrary project folders as
           // plugin candidates and causes noisy "plugin manifest not found" validation failures.
           discoverInDirectory({

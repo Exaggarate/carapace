@@ -11,14 +11,14 @@ const legacyAbsenceCache = new Set<string>();
 
 /**
  * Doctor repairs whichever state directory its own environment resolves to, so a bare
- * `openclaw doctor --fix` repairs the default root while a scoped install stays blocked.
+ * `carapace doctor --fix` repairs the default root while a scoped install stays blocked.
  * Name the directory whenever this process is scoped to a non-default one. Say it in
  * prose rather than as a `VAR=value cmd` one-liner, which no Windows shell accepts.
  */
 function doctorFixInstruction(filePath: string): string {
-  const command = "Run `openclaw doctor --fix`";
-  return process.env.OPENCLAW_STATE_DIR?.trim()
-    ? `${command} with OPENCLAW_STATE_DIR set to ${path.dirname(filePath)}`
+  const command = "Run `carapace doctor --fix`";
+  return process.env.CARAPACE_STATE_DIR?.trim()
+    ? `${command} with CARAPACE_STATE_DIR set to ${path.dirname(filePath)}`
     : command;
 }
 

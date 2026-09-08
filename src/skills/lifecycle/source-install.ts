@@ -1,10 +1,10 @@
 // Source install helpers install skills from source directories and repositories.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeForLog } from "../../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { acquireGitSource } from "../../infra/git-source.js";
 import { sanitizeHostExecEnv } from "../../infra/host-env-security.js";
 import { withInstallWorkspace } from "../../infra/install-source-utils.js";
@@ -45,7 +45,7 @@ type SkillSourceInstallResult =
     }
   | { ok: false; error: string };
 
-const SKILL_SOURCE_ORIGIN_RELATIVE_PATH = path.join(".openclaw", "source-origin.json");
+const SKILL_SOURCE_ORIGIN_RELATIVE_PATH = path.join(".carapace", "source-origin.json");
 
 function createGitCommandEnv(): NodeJS.ProcessEnv {
   return sanitizeHostExecEnv({
@@ -132,7 +132,7 @@ async function installLocalSkillDir(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
   git?: SkillSourceOrigin["git"];
 }): Promise<SkillSourceInstallResult> {
@@ -201,7 +201,7 @@ async function installGitSkill(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
 }): Promise<SkillSourceInstallResult> {
   const parsed = parseGitPluginSpec(params.spec);
@@ -209,7 +209,7 @@ async function installGitSkill(params: {
     return { ok: false, error: `Unsupported git skill spec: ${params.spec}` };
   }
 
-  return await withInstallWorkspace("openclaw-git-skill-", async (tmpDir) => {
+  return await withInstallWorkspace("carapace-git-skill-", async (tmpDir) => {
     const repoDir = path.join(tmpDir, "repo");
     const exportDir = path.join(tmpDir, "export");
     params.logger?.info?.(
@@ -261,7 +261,7 @@ async function installPathSkill(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
 }): Promise<SkillSourceInstallResult> {
   const sourceDir = resolveUserPath(params.spec);
@@ -307,7 +307,7 @@ export async function installSkillFromSource(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
 }): Promise<SkillSourceInstallResult> {
   const spec = params.spec.trim();

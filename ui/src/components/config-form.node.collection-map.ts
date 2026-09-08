@@ -109,7 +109,7 @@ export function renderMapField(
         </div>
       </div>
 
-      <openclaw-config-form-collection-draft
+      <carapace-config-form-collection-draft
         id=${draftId}
         .props=${draftProps}
         @config-collection-draft-commit=${(event: CustomEvent<ConfigFormCollectionDraftCommit>) => {
@@ -123,7 +123,7 @@ export function renderMapField(
             event.preventDefault();
           }
         }}
-      ></openclaw-config-form-collection-draft>
+      ></carapace-config-form-collection-draft>
       ${
         visibleEntries.length === 0
           ? renderSettingsEmpty(t("configForm.noCustomEntries"))
@@ -185,7 +185,7 @@ export function renderMapField(
                         />
                       </div>
                       <div class="settings-row__control">
-                        <openclaw-tooltip .content=${t("configForm.removeEntry")}>
+                        <carapace-tooltip .content=${t("configForm.removeEntry")}>
                           <button
                             type="button"
                             class="btn btn--icon"
@@ -200,7 +200,7 @@ export function renderMapField(
                           >
                             ${icons.trash}
                           </button>
-                        </openclaw-tooltip>
+                        </carapace-tooltip>
                       </div>
                     </div>
                     ${

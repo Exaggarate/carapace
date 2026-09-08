@@ -16,7 +16,7 @@ const resolvePinnedHostnameWithPolicyMock = vi.hoisted(() =>
   }),
 );
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   resolvePinnedHostnameWithPolicy: resolvePinnedHostnameWithPolicyMock,
 }));
@@ -29,8 +29,8 @@ vi.mock("./client.js", () => ({
   createFeishuClient: createFeishuClientMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-outbound", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/channel-outbound")>()),
+vi.mock("carapace/plugin-sdk/channel-outbound", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/channel-outbound")>()),
   createReplyPrefixContext: createReplyPrefixContextMock,
 }));
 
@@ -60,11 +60,11 @@ describe("createFeishuCommentReplyDispatcher", () => {
   afterAll(() => {
     vi.doUnmock("./accounts.js");
     vi.doUnmock("./client.js");
-    vi.doUnmock("openclaw/plugin-sdk/channel-outbound");
+    vi.doUnmock("carapace/plugin-sdk/channel-outbound");
     vi.doUnmock("./comment-reaction.js");
     vi.doUnmock("./drive.js");
     vi.doUnmock("./runtime.js");
-    vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+    vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
     vi.resetModules();
   });
 

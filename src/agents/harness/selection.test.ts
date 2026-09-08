@@ -1,10 +1,10 @@
 // Covers agent harness selection, fallback behavior, and compaction routing.
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
@@ -15,7 +15,7 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import type { TranscriptEntryAnchor } from "../../config/sessions/transcript-entry-anchor.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import type { GatewayRequestContext } from "../../gateway/server-methods/types.js";
 import { resetAgentRunRegistryForTest } from "../../infra/agent-run-registry.js";
@@ -24,7 +24,7 @@ import {
   claimHeartbeatOutcomeForRun,
   persistHeartbeatOutcome,
 } from "../../infra/heartbeat-outcome-store.js";
-import { createOpenClawCodingTools } from "../../plugin-sdk/agent-harness.js";
+import { createCarapaceCodingTools } from "../../plugin-sdk/agent-harness.js";
 import { createPluginRecord } from "../../plugins/loader-records.js";
 import { getActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -36,12 +36,12 @@ import {
 import { mintSecretSentinel } from "../../secrets/sentinel.js";
 import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
 import type { UserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { loadSqliteTrajectoryRuntimeEvents } from "../../trajectory/runtime-store.sqlite.js";
 import { createTrajectoryRuntimeRecorder } from "../../trajectory/runtime.js";
 import {
@@ -78,8 +78,8 @@ import { resolveAgentHarnessPolicy } from "./policy.js";
 import { clearAgentHarnesses, registerAgentHarness } from "./registry.js";
 import { ensureSelectedAgentHarnessPlugin } from "./runtime-plugin.js";
 import {
-  agentHarnessBuildsOpenClawTools,
-  agentHarnessExposesOpenClawTools,
+  agentHarnessBuildsCarapaceTools,
+  agentHarnessExposesCarapaceTools,
   resolveAvailableAgentHarnessPolicy,
   resolvePluginHarnessPolicyToolsAllow,
   runAgentHarnessAttempt,
@@ -103,7 +103,7 @@ type TestNativeCompactionParams = AgentHarnessCompactParams & {
 };
 
 const agentRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async () =>
-  createAttemptResult("openclaw"),
+  createAttemptResult("carapace"),
 );
 const compactAuthMocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(),
@@ -120,7 +120,7 @@ const contextEngineTurnAttemptMocks = vi.hoisted(() => ({
 }));
 const builtInHarnesses = vi.hoisted(() => new WeakSet<object>());
 const privateHarnessParamCases = [
-  { field: "__openclawSourceReplyDeliveryRuntime", value: { currentMode: "automatic" } },
+  { field: "__carapaceSourceReplyDeliveryRuntime", value: { currentMode: "automatic" } },
   { field: "compactionCountOwner", value: "caller" },
   { field: "onContextAccountingEvent", value: () => undefined },
   { field: "onCompactionRequestBudget", value: () => undefined },
@@ -150,30 +150,30 @@ function createTranscriptRecorder(
   };
 }
 
-it("identifies harnesses that expose OpenClaw tools", () => {
-  expect(agentHarnessBuildsOpenClawTools("openclaw")).toBe(false);
-  expect(agentHarnessBuildsOpenClawTools("codex")).toBe(true);
-  expect(agentHarnessBuildsOpenClawTools("copilot")).toBe(true);
-  expect(agentHarnessBuildsOpenClawTools("custom")).toBe(false);
-  expect(agentHarnessExposesOpenClawTools("openclaw")).toBe(true);
-  expect(agentHarnessExposesOpenClawTools("codex")).toBe(true);
-  expect(agentHarnessExposesOpenClawTools("copilot")).toBe(true);
-  expect(agentHarnessExposesOpenClawTools("custom")).toBe(false);
+it("identifies harnesses that expose Carapace tools", () => {
+  expect(agentHarnessBuildsCarapaceTools("carapace")).toBe(false);
+  expect(agentHarnessBuildsCarapaceTools("codex")).toBe(true);
+  expect(agentHarnessBuildsCarapaceTools("copilot")).toBe(true);
+  expect(agentHarnessBuildsCarapaceTools("custom")).toBe(false);
+  expect(agentHarnessExposesCarapaceTools("carapace")).toBe(true);
+  expect(agentHarnessExposesCarapaceTools("codex")).toBe(true);
+  expect(agentHarnessExposesCarapaceTools("copilot")).toBe(true);
+  expect(agentHarnessExposesCarapaceTools("custom")).toBe(false);
 });
 
-vi.mock("./builtin-openclaw.js", () => ({
-  createOpenClawAgentHarness: (): AgentHarness => {
+vi.mock("./builtin-carapace.js", () => ({
+  createCarapaceAgentHarness: (): AgentHarness => {
     const harness: AgentHarness = {
-      id: "openclaw",
-      label: "OpenClaw embedded agent",
-      contextEngineHostCapabilities: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST.capabilities,
+      id: "carapace",
+      label: "Carapace embedded agent",
+      contextEngineHostCapabilities: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST.capabilities,
       supports: () => ({ supported: true, priority: 0 }),
       runAttempt: agentRunAttempt,
     };
     builtInHarnesses.add(harness);
     return harness;
   },
-  isBuiltInOpenClawAgentHarness: (harness: AgentHarness) => builtInHarnesses.has(harness),
+  isBuiltInCarapaceAgentHarness: (harness: AgentHarness) => builtInHarnesses.has(harness),
 }));
 vi.mock("../model-auth.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../model-auth.js")>()),
@@ -205,14 +205,14 @@ vi.mock("../tools/gateway.js", () => ({ callGatewayTool: vi.fn() }));
 
 const mockCallGatewayTool = vi.mocked(callGatewayTool);
 
-const originalRuntime = process.env.OPENCLAW_AGENT_RUNTIME;
+const originalRuntime = process.env.CARAPACE_AGENT_RUNTIME;
 const trajectoryTempDirs = createTempDirTracker();
-let generationState: OpenClawTestState;
+let generationState: CarapaceTestState;
 let selectionAdmission: PreparedAgentRunAdmission;
 let selectionAdmittedRunContext: AdmittedRunContext;
 
 beforeEach(async () => {
-  generationState = await createOpenClawTestState({
+  generationState = await createCarapaceTestState({
     label: "harness-model-generation",
     applyEnv: false,
   });
@@ -275,8 +275,8 @@ beforeEach(async () => {
 afterEach(async () => {
   vi.unstubAllEnvs();
   clearRuntimeConfigSnapshot();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   trajectoryTempDirs.cleanup();
   selectionAdmission.close();
   resetAgentRunRegistryForTest();
@@ -292,14 +292,14 @@ afterEach(async () => {
   providerOwnerMocks.resolveProviderRefOwnership.mockReset();
   contextEngineTurnAttemptMocks.drainPendingContextEngineTurnsBeforeRun.mockReset();
   if (originalRuntime == null) {
-    delete process.env.OPENCLAW_AGENT_RUNTIME;
+    delete process.env.CARAPACE_AGENT_RUNTIME;
   } else {
-    process.env.OPENCLAW_AGENT_RUNTIME = originalRuntime;
+    process.env.CARAPACE_AGENT_RUNTIME = originalRuntime;
   }
   await generationState.cleanup();
 });
 
-function createAttemptParams(config?: OpenClawConfig): EmbeddedRunAttemptParams {
+function createAttemptParams(config?: CarapaceConfig): EmbeddedRunAttemptParams {
   return {
     admittedRunContext: selectionAdmittedRunContext,
     prompt: "hello",
@@ -346,7 +346,7 @@ function createTranscriptAnchor(
     agentId: "main",
     sessionId: "session-1",
     sessionKey: "agent:main:session-1",
-    storePath: "/tmp/openclaw-agent.sqlite",
+    storePath: "/tmp/carapace-agent.sqlite",
     generation: "generation-1",
     entryId,
     effectiveParentId: rawSeq === 1 ? null : "user-1",
@@ -425,7 +425,7 @@ function registerSuccessfulCodexHarness(): void {
   );
 }
 
-function groupSenderDenyAllConfig(): OpenClawConfig {
+function groupSenderDenyAllConfig(): CarapaceConfig {
   // Mirrors Telegram sender policy shape used when selection must preserve
   // channel/group sender tool constraints across fallback attempts.
   return {
@@ -440,10 +440,10 @@ function groupSenderDenyAllConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function groupDenyAllConfig(): OpenClawConfig {
+function groupDenyAllConfig(): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -454,10 +454,10 @@ function groupDenyAllConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function providerRuntimeConfig(provider: string, runtime: string): OpenClawConfig {
+function providerRuntimeConfig(provider: string, runtime: string): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -468,14 +468,14 @@ function providerRuntimeConfig(provider: string, runtime: string): OpenClawConfi
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function agentModelRuntimeConfig(
   modelRef: string,
   runtime: string,
   agentId?: string,
-): OpenClawConfig {
+): CarapaceConfig {
   if (agentId) {
     return {
       agents: {
@@ -484,7 +484,7 @@ function agentModelRuntimeConfig(
           { id: agentId, models: { [modelRef]: { agentRuntime: { id: runtime } } } },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
   return {
     agents: {
@@ -494,7 +494,7 @@ function agentModelRuntimeConfig(
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function maybeCompactAgentHarnessSession(
@@ -579,11 +579,11 @@ function registerTestCompactor(
 }
 
 describe("runAgentHarnessAttempt", () => {
-  it.each(["openclaw", "codex"])(
+  it.each(["carapace", "codex"])(
     "carries silent heartbeat outcome into the %s host boundary exactly once per retry",
     async (harnessId) => {
       const root = trajectoryTempDirs.make("harness-heartbeat-outcome-");
-      vi.stubEnv("OPENCLAW_STATE_DIR", root);
+      vi.stubEnv("CARAPACE_STATE_DIR", root);
       const target = {
         agentId: "main",
         sessionId: "session-1",
@@ -625,7 +625,7 @@ describe("runAgentHarnessAttempt", () => {
         agentHarnessId: harnessId,
         currentInboundContext,
       };
-      const captured = harnessId === "openclaw" ? agentRunAttempt : runAttempt;
+      const captured = harnessId === "carapace" ? agentRunAttempt : runAttempt;
       for (let retry = 0; retry < 2; retry++) {
         await runAgentHarnessAttempt(params);
         const received = captured.mock.calls.at(-1)?.[0];
@@ -657,7 +657,7 @@ describe("runAgentHarnessAttempt", () => {
     "does not consume silent heartbeat context for a %s host attempt",
     async (kind) => {
       const root = trajectoryTempDirs.make("harness-heartbeat-control-");
-      vi.stubEnv("OPENCLAW_STATE_DIR", root);
+      vi.stubEnv("CARAPACE_STATE_DIR", root);
       const target = {
         agentId: "main",
         sessionId: "session-1",
@@ -691,7 +691,7 @@ describe("runAgentHarnessAttempt", () => {
     },
   );
 
-  it.each(["openclaw", "codex"])(
+  it.each(["carapace", "codex"])(
     "prepares direct tool authority before the %s harness executes",
     async (harnessId) => {
       const runAttempt = vi.fn<AgentHarness["runAttempt"]>(async () =>
@@ -715,7 +715,7 @@ describe("runAgentHarnessAttempt", () => {
         agentHarnessId: harnessId,
       };
       await runAgentHarnessAttempt(attempt);
-      const received = (harnessId === "openclaw" ? agentRunAttempt : runAttempt).mock.calls.at(
+      const received = (harnessId === "carapace" ? agentRunAttempt : runAttempt).mock.calls.at(
         -1,
       )?.[0];
       expect(received?.toolAuthorityFingerprint).toEqual(expect.stringMatching(/^[a-f0-9]{64}$/));
@@ -726,7 +726,7 @@ describe("runAgentHarnessAttempt", () => {
   it.each(["workspace", "explicit cwd"] as const)(
     "binds native provenance to staged input before dispatch and preserves it on a suppressed retry (%s)",
     async (directorySource) => {
-      const root = trajectoryTempDirs.make("openclaw-harness-staged-annotation-");
+      const root = trajectoryTempDirs.make("carapace-harness-staged-annotation-");
       const workspaceDir = path.join(root, "workspace");
       const cwd = directorySource === "explicit cwd" ? path.join(root, "worktree") : undefined;
       const target = {
@@ -802,7 +802,7 @@ describe("runAgentHarnessAttempt", () => {
               role: "user",
               content: "hello",
               idempotencyKey: "run-1:user",
-              __openclaw: expect.objectContaining({ ...annotation, runId: "run-1" }),
+              __carapace: expect.objectContaining({ ...annotation, runId: "run-1" }),
             }),
           }),
         );
@@ -852,7 +852,7 @@ describe("runAgentHarnessAttempt", () => {
   it.each(["declared", "unlisted", "missing", "expanded"] as const)(
     "limits selected harness Full authority to its captured node commands (%s)",
     async (descriptor) => {
-      const root = trajectoryTempDirs.make("openclaw-harness-node-authority-");
+      const root = trajectoryTempDirs.make("carapace-harness-node-authority-");
       const sessionTarget = {
         agentId: "main",
         sessionId: "session-1",
@@ -959,7 +959,7 @@ describe("runAgentHarnessAttempt", () => {
       let hostAuthorityActive = true;
       const finalizeSettledTurn = vi.fn<NonNullable<AgentHarness["finalizeSettledTurn"]>>(
         async ({ attempt, settledAttempt: _settledAttempt }) => {
-          hostAuthorityActive = isHostScopedAgentToolActive("openclaw");
+          hostAuthorityActive = isHostScopedAgentToolActive("carapace");
           expect(attempt.operation).toBe("settled-tool-finalization");
           expect(attempt).not.toHaveProperty("hostCapabilities");
           expect(attempt).not.toHaveProperty(field);
@@ -1020,7 +1020,7 @@ describe("runAgentHarnessAttempt", () => {
   });
 
   it.each(["codex", "copilot"] as const)(
-    "binds the host OpenClaw tool to the %s SDK construction path without leaking authority",
+    "binds the host Carapace tool to the %s SDK construction path without leaking authority",
     async (harnessId) => {
       let receivedPrivateAuthority = true;
       let hostScopeActive = false;
@@ -1028,15 +1028,15 @@ describe("runAgentHarnessAttempt", () => {
       const pluginRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async (attemptParams) => {
         receivedPrivateAuthority = "systemAgentTool" in attemptParams;
         await Promise.resolve();
-        hostScopeActive = isHostScopedAgentToolActive("openclaw");
-        toolNames = createOpenClawCodingTools({
-          config: { tools: { allow: ["read"], deny: ["openclaw"], toolSearch: true } },
-          runtimeToolAllowlist: ["openclaw"],
+        hostScopeActive = isHostScopedAgentToolActive("carapace");
+        toolNames = createCarapaceCodingTools({
+          config: { tools: { allow: ["read"], deny: ["carapace"], toolSearch: true } },
+          runtimeToolAllowlist: ["carapace"],
           toolConstructionPlan: {
             includeBaseCodingTools: false,
             includeShellTools: false,
             includeChannelTools: false,
-            includeOpenClawTools: true,
+            includeCarapaceTools: true,
             includePluginTools: false,
           },
         }).map((tool) => tool.name);
@@ -1054,7 +1054,7 @@ describe("runAgentHarnessAttempt", () => {
       const params = createAttemptParams(
         providerRuntimeConfig("codex", harnessId),
       ) as EmbeddedRunAttemptParams & { systemAgentTool?: SystemAgentToolOptions };
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["carapace"];
       params.systemAgentTool = { surface: "cli", proposalRef: {}, directiveRef: {} };
 
       await runAgentHarnessAttempt(params);
@@ -1062,8 +1062,8 @@ describe("runAgentHarnessAttempt", () => {
       expect(pluginRunAttempt).toHaveBeenCalledTimes(1);
       expect(receivedPrivateAuthority).toBe(false);
       expect(hostScopeActive).toBe(true);
-      expect(toolNames).toEqual(["openclaw"]);
-      expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+      expect(toolNames).toEqual(["carapace"]);
+      expect(isHostScopedAgentToolActive("carapace")).toBe(false);
     },
   );
 
@@ -1095,7 +1095,7 @@ describe("runAgentHarnessAttempt", () => {
   );
 
   it("persists plugin trajectory events through the selected harness host capability", async () => {
-    const tempDir = trajectoryTempDirs.make("openclaw-harness-trajectory-");
+    const tempDir = trajectoryTempDirs.make("carapace-harness-trajectory-");
     const storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
     const sessionKey = "agent:main:main";
     await replaceSessionEntry({ sessionKey, storePath }, { sessionId: "session-1", updatedAt: 10 });
@@ -1284,8 +1284,8 @@ describe("runAgentHarnessAttempt", () => {
 
   it.each([
     { name: "missing", toolsAllow: undefined },
-    { name: "broad", toolsAllow: ["openclaw", "read"] },
-  ])("rejects $name allowlists for private OpenClaw authority", async ({ toolsAllow }) => {
+    { name: "broad", toolsAllow: ["carapace", "read"] },
+  ])("rejects $name allowlists for private Carapace authority", async ({ toolsAllow }) => {
     const pluginRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async () =>
       createAttemptResult("codex"),
     );
@@ -1305,13 +1305,13 @@ describe("runAgentHarnessAttempt", () => {
     params.systemAgentTool = { surface: "cli", proposalRef: {}, directiveRef: {} };
 
     await expect(runAgentHarnessAttempt(params)).rejects.toThrow(
-      'OpenClaw host authority requires toolsAllow: ["openclaw"]',
+      'Carapace host authority requires toolsAllow: ["carapace"]',
     );
     expect(pluginRunAttempt).not.toHaveBeenCalled();
-    expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+    expect(isHostScopedAgentToolActive("carapace")).toBe(false);
   });
 
-  it("keeps the host OpenClaw allowlist across global, agent, and sandbox deny-all policy", async () => {
+  it("keeps the host Carapace allowlist across global, agent, and sandbox deny-all policy", async () => {
     const received: Array<{
       toolsAllow: string[] | undefined;
       extraSystemPrompt: string | undefined;
@@ -1321,7 +1321,7 @@ describe("runAgentHarnessAttempt", () => {
       received.push({
         toolsAllow: attemptParams.toolsAllow,
         extraSystemPrompt: attemptParams.extraSystemPrompt,
-        hostScopeActive: isHostScopedAgentToolActive("openclaw"),
+        hostScopeActive: isHostScopedAgentToolActive("carapace"),
       });
       return createAttemptResult("codex");
     });
@@ -1335,22 +1335,22 @@ describe("runAgentHarnessAttempt", () => {
       { ownerPluginId: "codex" },
     );
     const cases: Array<{
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       agentId?: string;
       sessionKey?: string;
     }> = [
-      { config: { tools: { deny: ["*"] } } as OpenClawConfig },
+      { config: { tools: { deny: ["*"] } } as CarapaceConfig },
       {
         config: {
           agents: { list: [{ id: "worker", tools: { deny: ["*"] } }] },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         agentId: "worker",
       },
       {
         config: {
           agents: { defaults: { sandbox: { mode: "all" } } },
           tools: { sandbox: { tools: { deny: ["*"] } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         sessionKey: "agent:main:session-1",
       },
     ];
@@ -1363,40 +1363,40 @@ describe("runAgentHarnessAttempt", () => {
       params.agentHarnessRuntimeOverride = "codex";
       params.agentId = testCase.agentId;
       params.sessionKey = testCase.sessionKey;
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["carapace"];
       params.systemAgentTool = { surface: "cli", proposalRef: {}, directiveRef: {} };
       await runAgentHarnessAttempt(params);
     }
 
     expect(received).toEqual([
-      { toolsAllow: ["openclaw"], extraSystemPrompt: undefined, hostScopeActive: true },
-      { toolsAllow: ["openclaw"], extraSystemPrompt: undefined, hostScopeActive: true },
-      { toolsAllow: ["openclaw"], extraSystemPrompt: undefined, hostScopeActive: true },
+      { toolsAllow: ["carapace"], extraSystemPrompt: undefined, hostScopeActive: true },
+      { toolsAllow: ["carapace"], extraSystemPrompt: undefined, hostScopeActive: true },
+      { toolsAllow: ["carapace"], extraSystemPrompt: undefined, hostScopeActive: true },
     ]);
-    expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+    expect(isHostScopedAgentToolActive("carapace")).toBe(false);
   });
 
-  it("binds the same host OpenClaw scope to the built-in OpenClaw harness", async () => {
+  it("binds the same host Carapace scope to the built-in Carapace harness", async () => {
     let toolNames: string[] = [];
     agentRunAttempt.mockImplementationOnce(async () => {
       await Promise.resolve();
-      toolNames = createOpenClawCodingTools({
-        config: { tools: { allow: ["read"], deny: ["openclaw"], toolSearch: true } },
-        runtimeToolAllowlist: ["openclaw"],
+      toolNames = createCarapaceCodingTools({
+        config: { tools: { allow: ["read"], deny: ["carapace"], toolSearch: true } },
+        runtimeToolAllowlist: ["carapace"],
         toolConstructionPlan: {
           includeBaseCodingTools: false,
           includeShellTools: false,
           includeChannelTools: false,
-          includeOpenClawTools: true,
+          includeCarapaceTools: true,
           includePluginTools: false,
         },
       }).map((tool) => tool.name);
-      return createAttemptResult("openclaw");
+      return createAttemptResult("carapace");
     });
     const params = createAttemptParams(
-      providerRuntimeConfig("codex", "openclaw"),
+      providerRuntimeConfig("codex", "carapace"),
     ) as EmbeddedRunAttemptParams & { systemAgentTool?: SystemAgentToolOptions };
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     params.systemAgentTool = { surface: "gateway", proposalRef: {}, directiveRef: {} };
     const onContextAccountingEvent = vi.fn();
     const onCompactionRequestBudget = vi.fn();
@@ -1408,7 +1408,7 @@ describe("runAgentHarnessAttempt", () => {
 
     const result = await runAgentHarnessAttempt(params);
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
     expect(agentRunAttempt).toHaveBeenCalledWith(
       expect.objectContaining({
         compactionCountOwner: "caller",
@@ -1416,8 +1416,8 @@ describe("runAgentHarnessAttempt", () => {
         onCompactionRequestBudget,
       }),
     );
-    expect(toolNames).toEqual(["openclaw"]);
-    expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+    expect(toolNames).toEqual(["carapace"]);
+    expect(isHostScopedAgentToolActive("carapace")).toBe(false);
   });
 
   it("unwraps sentinels only at the plugin harness handoff", async () => {
@@ -1452,7 +1452,7 @@ describe("runAgentHarnessAttempt", () => {
   });
 
   it("fails when a forced plugin harness is unavailable and fallback is omitted", async () => {
-    process.env.OPENCLAW_AGENT_RUNTIME = "codex";
+    process.env.CARAPACE_AGENT_RUNTIME = "codex";
 
     await expect(
       runAgentHarnessAttempt(createAttemptParams(providerRuntimeConfig("codex", "codex"))),
@@ -1460,24 +1460,24 @@ describe("runAgentHarnessAttempt", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("falls back to the OpenClaw harness in auto mode when no plugin harness matches", async () => {
+  it("falls back to the Carapace harness in auto mode when no plugin harness matches", async () => {
     const result = await runAgentHarnessAttempt(createAttemptParams());
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("allows the selected OpenClaw harness to satisfy context-engine pre-prompt assembly", async () => {
+  it("allows the selected Carapace harness to satisfy context-engine pre-prompt assembly", async () => {
     const result = await runAgentHarnessAttempt({
-      ...createAttemptParams(providerRuntimeConfig("codex", "openclaw")),
+      ...createAttemptParams(providerRuntimeConfig("codex", "carapace")),
       contextEngine: createContextEngineRequiringAssembly(),
     });
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("surfaces an auto-selected plugin harness failure instead of replaying through OpenClaw", async () => {
+  it("surfaces an auto-selected plugin harness failure instead of replaying through Carapace", async () => {
     registerFailingCodexHarness();
 
     await expect(runAgentHarnessAttempt(createAttemptParams())).rejects.toThrow(
@@ -1520,7 +1520,7 @@ describe("runAgentHarnessAttempt", () => {
         harnessAuthProvider: "openai",
         deferredRouteSupport: {
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         },
       },
     } as never;
@@ -1532,14 +1532,14 @@ describe("runAgentHarnessAttempt", () => {
       expect.objectContaining({
         modelProvider: expect.objectContaining({
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
           preparedAuth: { source: "harness" },
         }),
       }),
     );
   });
 
-  it("surfaces a forced plugin harness failure instead of replaying through OpenClaw", async () => {
+  it("surfaces a forced plugin harness failure instead of replaying through Carapace", async () => {
     registerFailingCodexHarness();
 
     await expect(
@@ -1620,13 +1620,13 @@ describe("runAgentHarnessAttempt", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("falls back to OpenClaw when the implicit OpenAI Codex harness is unavailable", async () => {
+  it("falls back to Carapace when the implicit OpenAI Codex harness is unavailable", async () => {
     expect(resolveAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4" })).toEqual({
       runtime: "codex",
       runtimeSource: "implicit",
     });
     expect(resolveAvailableAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4" })).toEqual({
-      runtime: "openclaw",
+      runtime: "carapace",
       runtimeSource: "implicit",
     });
 
@@ -1643,29 +1643,29 @@ describe("runAgentHarnessAttempt", () => {
       modelId: "gpt-5.4",
     });
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("honors explicit OpenClaw runtime for OpenAI agent model runs", async () => {
+  it("honors explicit Carapace runtime for OpenAI agent model runs", async () => {
     const result = await runAgentHarnessAttempt({
-      ...createAttemptParams(providerRuntimeConfig("openai", "openclaw")),
+      ...createAttemptParams(providerRuntimeConfig("openai", "carapace")),
       provider: "openai",
       modelId: "gpt-5.4",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("honors provider wildcard OpenClaw runtime policy for OpenAI agent model runs", async () => {
+  it("honors provider wildcard Carapace runtime policy for OpenAI agent model runs", async () => {
     registerSuccessfulCodexHarness();
 
     const result = await runAgentHarnessAttempt({
-      ...createAttemptParams(agentModelRuntimeConfig("openai/*", "openclaw")),
+      ...createAttemptParams(agentModelRuntimeConfig("openai/*", "carapace")),
       provider: "openai",
       modelId: "gpt-5.4",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
@@ -1889,29 +1889,29 @@ describe("runAgentHarnessAttempt", () => {
     );
 
     const cases: Array<{
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       conversationToolPolicy?: EmbeddedRunAttemptParams["conversationToolPolicy"];
       agentId?: string;
       sessionKey?: string;
       swarmCollector?: boolean;
     }> = [
       {},
-      { config: { tools: { profile: "coding" } } as OpenClawConfig },
+      { config: { tools: { profile: "coding" } } as CarapaceConfig },
       { conversationToolPolicy: {} },
       { conversationToolPolicy: { allow: ["*"] } },
       { swarmCollector: false },
       { swarmCollector: true },
       { conversationToolPolicy: { deny: ["exec"] } },
-      { config: { tools: { deny: ["exec"] } } as OpenClawConfig },
+      { config: { tools: { deny: ["exec"] } } as CarapaceConfig },
       {
         config: {
           agents: { list: [{ id: "worker", tools: { deny: ["exec"] } }] },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         agentId: "worker",
         sessionKey: "agent:worker:session-1",
       },
       {
-        config: { tools: { deny: ["exec"] } } as OpenClawConfig,
+        config: { tools: { deny: ["exec"] } } as CarapaceConfig,
         conversationToolPolicy: {},
       },
     ];
@@ -1984,23 +1984,23 @@ describe("runAgentHarnessAttempt", () => {
   it.each([
     {
       name: "narrow allowlist",
-      config: { tools: { allow: ["message"] } } as OpenClawConfig,
+      config: { tools: { allow: ["message"] } } as CarapaceConfig,
     },
     {
       name: "specific denylist",
-      config: { tools: { deny: ["exec"] } } as OpenClawConfig,
+      config: { tools: { deny: ["exec"] } } as CarapaceConfig,
     },
     {
       name: "narrow profile",
-      config: { tools: { profile: "coding" } } as OpenClawConfig,
+      config: { tools: { profile: "coding" } } as CarapaceConfig,
     },
   ])("marks plugin side questions restricted for a $name", ({ config }) => {
     expect(resolvePluginHarnessPolicyToolsAllow(createAttemptParams(config))).toEqual([]);
   });
 
   it.each([
-    { name: "full tool profile", config: { tools: { profile: "full" } } as OpenClawConfig },
-    { name: "explicit empty allowlist", config: { tools: { allow: [] } } as OpenClawConfig },
+    { name: "full tool profile", config: { tools: { profile: "full" } } as CarapaceConfig },
+    { name: "explicit empty allowlist", config: { tools: { allow: [] } } as CarapaceConfig },
   ])("leaves plugin side questions unrestricted for an $name", ({ config }) => {
     expect(resolvePluginHarnessPolicyToolsAllow(createAttemptParams(config))).toBeUndefined();
   });
@@ -2012,7 +2012,7 @@ describe("runAgentHarnessAttempt", () => {
           "*": { deny: ["*"] },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolvePluginHarnessPolicyToolsAllow({
@@ -2030,7 +2030,7 @@ describe("runAgentHarnessAttempt", () => {
           "*": { deny: ["*"] },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolvePluginHarnessPolicyToolsAllow({
@@ -2041,7 +2041,7 @@ describe("runAgentHarnessAttempt", () => {
     ).toEqual([]);
   });
 
-  it("leaves OpenClaw harness params unchanged for channel group sender deny-all policy", async () => {
+  it("leaves Carapace harness params unchanged for channel group sender deny-all policy", async () => {
     await runAgentHarnessAttempt({
       ...createAttemptParams(groupSenderDenyAllConfig()),
       sessionKey: "agent:main:telegram:group:test-deny-room",
@@ -2061,7 +2061,7 @@ describe("runAgentHarnessAttempt", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("does not let a strict agent model plugin runtime fall back to OpenClaw", async () => {
+  it("does not let a strict agent model plugin runtime fall back to Carapace", async () => {
     await expect(
       runAgentHarnessAttempt({
         ...createAttemptParams(agentModelRuntimeConfig("codex/gpt-5.4", "codex", "strict")),
@@ -2105,7 +2105,7 @@ describe("selectAgentHarness", () => {
       runtimeSource: "implicit",
     });
     expect(selectAgentHarness({ provider: "custom", modelId: "gpt-5.4-codex" }).id).toBe(
-      "openclaw",
+      "carapace",
     );
   });
 
@@ -2138,7 +2138,7 @@ describe("selectAgentHarness", () => {
     });
 
     expect(selectAgentHarness({ provider: "deepseek", modelId: "deepseek-v4-pro" }).id).toBe(
-      "openclaw",
+      "carapace",
     );
     expect(supports).not.toHaveBeenCalled();
     expect(providerOwnerMocks.resolveProviderRefOwnership).not.toHaveBeenCalled();
@@ -2198,7 +2198,7 @@ describe("selectAgentHarness", () => {
     expect(unsupportedSupports).toHaveBeenCalledTimes(1);
   });
 
-  it("honors session-level OpenClaw pins when selecting a harness", () => {
+  it("honors session-level Carapace pins when selecting a harness", () => {
     const supports = vi.fn(() => ({ supported: true as const, priority: 100 }));
     registerAgentHarness({
       id: "codex",
@@ -2210,10 +2210,10 @@ describe("selectAgentHarness", () => {
     const harness = selectAgentHarness({
       provider: "codex",
       modelId: "gpt-5.4",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
     });
 
-    expect(harness.id).toBe("openclaw");
+    expect(harness.id).toBe("carapace");
     expect(supports).not.toHaveBeenCalled();
   });
 
@@ -2322,7 +2322,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     registerAgentHarness({
       id: "copilot",
       label: "Copilot",
@@ -2379,7 +2379,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     registerAgentHarness({
       id: "copilot",
       label: "Copilot",
@@ -2431,7 +2431,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       buildAgentHarnessSupportContext({
@@ -2443,7 +2443,7 @@ describe("selectAgentHarness", () => {
     ).toMatchObject({
       api: "openai-completions",
       requestTransportOverrides: "present",
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["carapace"] },
     });
   });
 
@@ -2463,7 +2463,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       buildAgentHarnessSupportContext({
@@ -2476,7 +2476,7 @@ describe("selectAgentHarness", () => {
       api: "openai-completions",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "present",
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["carapace"] },
     });
   });
 
@@ -2492,7 +2492,7 @@ describe("selectAgentHarness", () => {
         requestedRuntime: "codex",
       }).modelProvider,
     ).toMatchObject({
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["carapace", "codex"] },
     });
   });
 
@@ -2517,7 +2517,7 @@ describe("selectAgentHarness", () => {
             },
           },
         },
-      }) satisfies OpenClawConfig;
+      }) satisfies CarapaceConfig;
     const sourceConfig = createConfig();
     const runtimeConfig = createConfig({ supportsStore: false });
     setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
@@ -2531,7 +2531,7 @@ describe("selectAgentHarness", () => {
       }).modelProvider,
     ).toMatchObject({
       requestTransportOverrides: "none",
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["carapace", "codex"] },
     });
   });
 
@@ -2584,12 +2584,12 @@ describe("selectAgentHarness", () => {
             requestTransportOverrides: "none",
           },
           requestedRuntime: "codex",
-          config: config as OpenClawConfig,
+          config: config as CarapaceConfig,
           ...identity,
         }).modelProvider,
       ).toMatchObject({
         requestTransportOverrides: "present",
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["carapace"] },
       });
     },
   );
@@ -2600,7 +2600,7 @@ describe("selectAgentHarness", () => {
   ] as const)(
     "keeps authored reasoning metadata and native controls on %s Codex",
     (_label, api, baseUrl) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             openai: {
@@ -2639,11 +2639,11 @@ describe("selectAgentHarness", () => {
         label: "Codex",
         supports: (ctx) =>
           ctx.modelProvider?.requestTransportOverrides === "present"
-            ? { supported: false, fallbackRuntime: "openclaw" }
+            ? { supported: false, fallbackRuntime: "carapace" }
             : { supported: true },
         runAttempt: async () => createAttemptResult("codex"),
       });
-      for (const runtime of [undefined, "codex", "openclaw"]) {
+      for (const runtime of [undefined, "codex", "carapace"]) {
         expect(
           selectAgentHarness({
             provider: "openai",
@@ -2662,7 +2662,7 @@ describe("selectAgentHarness", () => {
         }).modelProvider,
       ).toMatchObject({
         requestTransportOverrides: "none",
-        runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+        runtimePolicy: { compatibleIds: ["carapace", "codex"] },
       });
     },
   );
@@ -2695,7 +2695,7 @@ describe("selectAgentHarness", () => {
           ? {
               supported: false as const,
               reason: "authored request params are unsupported",
-              fallbackRuntime: "openclaw" as const,
+              fallbackRuntime: "carapace" as const,
             }
           : { supported: true as const },
       );
@@ -2714,7 +2714,7 @@ describe("selectAgentHarness", () => {
             api: "openai-responses",
             baseUrl: "https://api.openai.com/v1",
             requestTransportOverrides: "none",
-            runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+            runtimePolicy: { compatibleIds: ["carapace", "codex"] },
           },
           config: {
             models: {
@@ -2748,7 +2748,7 @@ describe("selectAgentHarness", () => {
             },
           },
         }).id,
-      ).toBe("openclaw");
+      ).toBe("carapace");
       expect(supports).toHaveBeenCalledWith(
         expect.objectContaining({
           modelProvider: expect.objectContaining({ requestTransportOverrides: "present" }),
@@ -2758,15 +2758,15 @@ describe("selectAgentHarness", () => {
   );
 
   it("keeps a private-QA forced runtime despite a plugin-declared fallback", () => {
-    vi.stubEnv("OPENCLAW_BUILD_PRIVATE_QA", "1");
-    vi.stubEnv("OPENCLAW_QA_FORCE_RUNTIME", "codex");
+    vi.stubEnv("CARAPACE_BUILD_PRIVATE_QA", "1");
+    vi.stubEnv("CARAPACE_QA_FORCE_RUNTIME", "codex");
     registerAgentHarness({
       id: "codex",
       label: "Codex",
       supports: () => ({
         supported: false,
         reason: "authored request params are unsupported",
-        fallbackRuntime: "openclaw",
+        fallbackRuntime: "carapace",
       }),
       runAttempt: vi.fn(async () => createAttemptResult("codex")),
     });
@@ -2779,13 +2779,13 @@ describe("selectAgentHarness", () => {
           api: "openai-responses",
           baseUrl: "http://127.0.0.1:43123/v1",
           requestTransportOverrides: "present",
-          runtimePolicy: { compatibleIds: ["openclaw"] },
+          runtimePolicy: { compatibleIds: ["carapace"] },
         },
       }).id,
     ).toBe("codex");
   });
 
-  it("keeps request-scoped transport overrides on the implicit OpenClaw runtime", () => {
+  it("keeps request-scoped transport overrides on the implicit Carapace runtime", () => {
     registerAgentHarness({
       id: "codex",
       label: "Codex",
@@ -2802,7 +2802,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const modelProvider = {
       api: "openai-responses",
       baseUrl: "https://api.openai.com/v1",
@@ -2816,7 +2816,7 @@ describe("selectAgentHarness", () => {
         modelProvider,
         config,
       }),
-    ).toEqual({ runtime: "openclaw", runtimeSource: "implicit" });
+    ).toEqual({ runtime: "carapace", runtimeSource: "implicit" });
     expect(
       selectAgentHarness({
         provider: "openai",
@@ -2824,7 +2824,7 @@ describe("selectAgentHarness", () => {
         modelProvider,
         config,
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
     expect(
       selectAgentHarness({
         provider: "openai",
@@ -2864,13 +2864,13 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveAvailableAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.5", config }),
-    ).toEqual({ runtime: "openclaw", runtimeSource: "implicit" });
+    ).toEqual({ runtime: "carapace", runtimeSource: "implicit" });
     expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.5", config }).id).toBe(
-      "openclaw",
+      "carapace",
     );
     expect(() =>
       selectAgentHarness({
@@ -2898,11 +2898,11 @@ describe("selectAgentHarness", () => {
       api: "openai-completions",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["carapace"] },
     };
 
     expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.5", modelProvider }).id).toBe(
-      "openclaw",
+      "carapace",
     );
     expect(() =>
       selectAgentHarness({
@@ -2927,7 +2927,7 @@ describe("selectAgentHarness", () => {
       runAttempt: vi.fn(async () => createAttemptResult("codex")),
     });
 
-    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-future" }).id).toBe("openclaw");
+    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-future" }).id).toBe("carapace");
     expect(supports).toHaveBeenCalledWith(
       expect.objectContaining({
         modelProvider: expect.objectContaining({ runtimePolicy: undefined }),
@@ -2938,7 +2938,7 @@ describe("selectAgentHarness", () => {
   it("projects a harness-owned auth plan as a closed harness source", () => {
     const deferredRouteSupport = {
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["carapace", "codex"] },
     };
     expect(
       resolveAgentHarnessPreparedAuthSupport({
@@ -2997,7 +2997,7 @@ describe("selectAgentHarness", () => {
         modelId: "gpt-future",
         modelProvider: {
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
           preparedAuth: { source: "harness" },
         },
         agentHarnessRuntimeOverride: "codex",
@@ -3007,7 +3007,7 @@ describe("selectAgentHarness", () => {
       expect.objectContaining({
         modelProvider: expect.objectContaining({
           preparedAuth: { source: "harness" },
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         }),
       }),
     );
@@ -3027,14 +3027,14 @@ describe("selectAgentHarness", () => {
       api: "openai-responses",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["carapace", "codex"] },
       preparedAuth: { source: "direct" as const, mode: "api-key", requirement: "api-key" as const },
     };
     const incompatible = {
       api: "openai-completions",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["carapace"] },
       preparedAuth: { source: "direct" as const, mode: "api-key", requirement: "api-key" as const },
     };
     const base = { provider: "openai", modelId: "gpt-5.5" };
@@ -3050,7 +3050,7 @@ describe("selectAgentHarness", () => {
         ...base,
         modelProviders: [compatible, incompatible],
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it.each([
@@ -3076,13 +3076,13 @@ describe("selectAgentHarness", () => {
             api: "openai-responses",
             baseUrl: "https://api.openai.com/v1",
             requestTransportOverrides: "none",
-            runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+            runtimePolicy: { compatibleIds: ["carapace", "codex"] },
           },
           {
             api: "openai-completions",
             baseUrl: "https://api.openai.com/v1",
             requestTransportOverrides: "none",
-            runtimePolicy: { compatibleIds: ["openclaw"] },
+            runtimePolicy: { compatibleIds: ["carapace"] },
           },
         ],
         ...pin,
@@ -3099,7 +3099,7 @@ describe("selectAgentHarness", () => {
       label: "Codex",
       supports: (ctx) =>
         ctx.modelProvider?.requestTransportOverrides === "present"
-          ? { supported: false, fallbackRuntime: "openclaw" }
+          ? { supported: false, fallbackRuntime: "carapace" }
           : { supported: true },
       runAttempt: vi.fn(async () => createAttemptResult("codex")),
     });
@@ -3114,18 +3114,18 @@ describe("selectAgentHarness", () => {
         ],
         ...pin,
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("keeps private-QA forced Codex across prepared routes that declare fallback", () => {
-    vi.stubEnv("OPENCLAW_BUILD_PRIVATE_QA", "1");
-    vi.stubEnv("OPENCLAW_QA_FORCE_RUNTIME", "codex");
+    vi.stubEnv("CARAPACE_BUILD_PRIVATE_QA", "1");
+    vi.stubEnv("CARAPACE_QA_FORCE_RUNTIME", "codex");
     registerAgentHarness({
       id: "codex",
       label: "Codex",
       supports: (ctx) =>
         ctx.modelProvider?.requestTransportOverrides === "present"
-          ? { supported: false, fallbackRuntime: "openclaw" }
+          ? { supported: false, fallbackRuntime: "carapace" }
           : { supported: true },
       runAttempt: vi.fn(async () => createAttemptResult("codex")),
     });
@@ -3197,28 +3197,28 @@ describe("selectAgentHarness", () => {
     },
   );
 
-  it("honors explicit OpenClaw runtime overrides when selecting a harness", async () => {
+  it("honors explicit Carapace runtime overrides when selecting a harness", async () => {
     registerSuccessfulCodexHarness();
 
     const harness = selectAgentHarness({
       provider: "openai",
       modelId: "gpt-5.4",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
     });
 
-    expect(harness.id).toBe("openclaw");
+    expect(harness.id).toBe("carapace");
     expect(providerOwnerMocks.resolveProviderRefOwnership).not.toHaveBeenCalled();
 
     const result = await runAgentHarnessAttempt({
       ...createAttemptParams(),
       provider: "openai",
       modelId: "gpt-5.4",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
   });
 
-  it("treats legacy PI runtime overrides as the built-in OpenClaw harness", async () => {
+  it("treats legacy PI runtime overrides as the built-in Carapace harness", async () => {
     registerSuccessfulCodexHarness();
 
     const harness = selectAgentHarness({
@@ -3227,7 +3227,7 @@ describe("selectAgentHarness", () => {
       agentHarnessRuntimeOverride: "pi",
     });
 
-    expect(harness.id).toBe("openclaw");
+    expect(harness.id).toBe("carapace");
 
     const result = await runAgentHarnessAttempt({
       ...createAttemptParams(),
@@ -3235,7 +3235,7 @@ describe("selectAgentHarness", () => {
       modelId: "gpt-5.4",
       agentHarnessRuntimeOverride: "pi",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("carapace");
   });
 
   it("allows per-agent model runtime policy overrides", () => {
@@ -3250,16 +3250,16 @@ describe("selectAgentHarness", () => {
       }),
     ).toThrow('Requested agent harness "codex" is not registered');
     expect(selectAgentHarness({ provider: "anthropic", modelId: "sonnet-4.6", config }).id).toBe(
-      "openclaw",
+      "carapace",
     );
   });
 
-  it("selects OpenClaw when the implicit OpenAI Codex harness is unavailable", () => {
-    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4" }).id).toBe("openclaw");
+  it("selects Carapace when the implicit OpenAI Codex harness is unavailable", () => {
+    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4" }).id).toBe("carapace");
   });
 
   it.each(["default", "auto"] as const)(
-    "falls back from configured %s to OpenClaw when implicit Codex is unavailable or unsupported",
+    "falls back from configured %s to Carapace when implicit Codex is unavailable or unsupported",
     async (runtime) => {
       const config = providerRuntimeConfig("openai", runtime);
       expect(resolveAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4", config })).toEqual(
@@ -3273,7 +3273,7 @@ describe("selectAgentHarness", () => {
         pluginRegistry: getActivePluginRegistry() ?? undefined,
       });
       expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4", config }).id).toBe(
-        "openclaw",
+        "carapace",
       );
 
       const supports = vi.fn(() => ({ supported: false as const, reason: "unsupported route" }));
@@ -3287,14 +3287,14 @@ describe("selectAgentHarness", () => {
         { ownerPluginId: "codex" },
       );
       expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4", config }).id).toBe(
-        "openclaw",
+        "carapace",
       );
       expect(supports).toHaveBeenCalledOnce();
     },
   );
 
   it.each(["default", "auto"] as const)(
-    "keeps a custom OpenAI route on implicit OpenClaw with configured %s",
+    "keeps a custom OpenAI route on implicit Carapace with configured %s",
     (runtime) => {
       const supports = vi.fn(() => ({ supported: true as const, priority: 100 }));
       registerAgentHarness(
@@ -3317,13 +3317,13 @@ describe("selectAgentHarness", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       expect(resolveAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4", config })).toEqual(
-        { runtime: "openclaw", runtimeSource: "implicit" },
+        { runtime: "carapace", runtimeSource: "implicit" },
       );
       expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4", config }).id).toBe(
-        "openclaw",
+        "carapace",
       );
       expect(supports).not.toHaveBeenCalled();
     },
@@ -3336,7 +3336,7 @@ describe("selectAgentHarness", () => {
           agentRuntime: { id: "codex" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       selectAgentHarness({
@@ -3344,12 +3344,12 @@ describe("selectAgentHarness", () => {
         modelId: "sonnet-4.6",
         config,
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("ignores legacy agent CLI runtime aliases for OpenAI agent model runs", async () => {
     registerSuccessfulCodexHarness();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         defaults: {
           agentRuntime: { id: "claude-cli" },
@@ -3368,21 +3368,21 @@ describe("selectAgentHarness", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("keeps an existing session OpenClaw pin when provider policy forces a plugin harness", () => {
+  it("keeps an existing session Carapace pin when provider policy forces a plugin harness", () => {
     registerFailingCodexHarness();
 
     expect(
       selectAgentHarness({
         provider: "codex",
         modelId: "gpt-5.4",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         config: providerRuntimeConfig("codex", "codex"),
       }).id,
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
-  it("ignores env-forced OpenClaw for OpenAI default runtime selection", () => {
-    process.env.OPENCLAW_AGENT_RUNTIME = "openclaw";
+  it("ignores env-forced Carapace for OpenAI default runtime selection", () => {
+    process.env.CARAPACE_AGENT_RUNTIME = "carapace";
     registerFailingCodexHarness();
 
     expect(
@@ -3422,11 +3422,11 @@ describe("selectAgentHarness", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("keeps host auth on the built-in OpenClaw compaction fallback", async () => {
+  it("keeps host auth on the built-in Carapace compaction fallback", async () => {
     await expect(
       maybeCompactAgentHarnessSession(
         createCompactionParams({
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           authProfileId: "openai:work",
           authProfileIdSource: "user",
           runtimeAuthPlan: {
@@ -3606,11 +3606,11 @@ describe("selectAgentHarness", () => {
             list: [{ id: "main", default: true, agentDir: "/tmp/main-agent" }],
             defaults: {
               models: {
-                "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       }),
     ).resolves.toEqual({ ok: true, compacted: false });
     expect(compact).toHaveBeenCalledTimes(1);
@@ -3892,7 +3892,7 @@ describe("selectAgentHarness", () => {
         model: "gpt-5.5",
         authProfileId: "deleted-profile",
         agentHarnessId: "codex",
-        config: agentModelRuntimeConfig("openai/gpt-5.5", "openclaw"),
+        config: agentModelRuntimeConfig("openai/gpt-5.5", "carapace"),
       }),
     ).resolves.toEqual({ ok: true, compacted: false });
     expect(compact).toHaveBeenCalledTimes(1);
@@ -4075,7 +4075,7 @@ describe("selectAgentHarness", () => {
   });
 
   it("keeps auth-route rematerialization on the caller-owned prepared generation", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const createStores = () => ({ authStorage: {} as never, modelRegistry: {} as never });
     const generationA = createModelGenerationFixture({
       agentDir: generationState.agentDir(),
@@ -4183,7 +4183,7 @@ describe("selectAgentHarness", () => {
     );
   });
 
-  it("does not compact a selected plugin harness through OpenClaw when the plugin has no compactor", async () => {
+  it("does not compact a selected plugin harness through Carapace when the plugin has no compactor", async () => {
     registerFailingCodexHarness();
 
     await expect(
@@ -4310,7 +4310,7 @@ describe("selectAgentHarness", () => {
     { provider: "anthropic", modelId: "sonnet-4.6", alias: "claude-cli" },
     { provider: "google", modelId: "gemini-3-pro-preview", alias: "google-gemini-cli" },
   ])(
-    "returns OpenClaw for explicit CLI runtime alias $alias on $provider instead of throwing MissingAgentHarnessError",
+    "returns Carapace for explicit CLI runtime alias $alias on $provider instead of throwing MissingAgentHarnessError",
     ({ provider, modelId, alias }) => {
       expect(
         selectAgentHarness({
@@ -4318,7 +4318,7 @@ describe("selectAgentHarness", () => {
           modelId,
           agentHarnessRuntimeOverride: alias,
         }).id,
-      ).toBe("openclaw");
+      ).toBe("carapace");
     },
   );
 

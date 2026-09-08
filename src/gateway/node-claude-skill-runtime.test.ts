@@ -16,7 +16,7 @@ import { decodeClaudeCliNodeRunParams } from "../node-host/invoke-agent-cli-clau
 import { runClaudeCliNodeCommand } from "../node-host/invoke-agent-cli-claude.js";
 import type { NodeInvokeRequestPayload } from "../node-host/invoke-types.js";
 import { withPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
+import type { CarapacePluginNodeHostCommandIo } from "../plugins/types.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import {
   loadSkillLibrarySelection,
@@ -24,8 +24,8 @@ import {
 } from "../skills/library/selection.js";
 import { listSkillLibrary, readSkillLibrary, saveSkillLibrary } from "../skills/library/service.js";
 import { buildSkillSnapshot } from "../skills/loading/workspace-skill-prompt.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
 import { invokeNodeClaudeCliRun } from "./node-agent-cli-runtime.js";
 import { NodeRegistry, type NodeRegistryOptions } from "./node-registry.js";
@@ -41,8 +41,8 @@ import { createWorkerSessionPlacementStore } from "./worker-environments/placeme
 const temps = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(async () => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     cleanup();
   }),
@@ -60,7 +60,7 @@ async function fixture(
   } = {},
 ) {
   const root = await fs.realpath(temps.make("node-skill-wire-"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", root);
+  vi.stubEnv("CARAPACE_STATE_DIR", root);
   const workspace = path.join(root, "project");
   await fs.mkdir(workspace);
   const executable = path.join(root, "claude.cjs");
@@ -200,7 +200,7 @@ async function fixture(
             progress(text, seq++);
           },
         });
-        const io: OpenClawPluginNodeHostCommandIo = {
+        const io: CarapacePluginNodeHostCommandIo = {
           signal: controller.signal,
           emitChunk: async () => {
             throw new Error("unexpected raw duplex output");
@@ -451,7 +451,7 @@ let input = ''; process.stdin.on('data', b => input += b); process.stdin.on('end
   it("requires the additive node capability before dispatching a selected bundle", async () => {
     const f = await fixture("process.exit(99)", { managed: true, capability: false });
     try {
-      await expect(f.execute()).rejects.toThrow("Upgrade OpenClaw on the paired node");
+      await expect(f.execute()).rejects.toThrow("Upgrade Carapace on the paired node");
       expect(f.requests).toEqual([]);
     } finally {
       await f.close();
@@ -460,7 +460,7 @@ let input = ''; process.stdin.on('data', b => input += b); process.stdin.on('end
 
   const authorScript = `
 const fs=require('node:fs'); const config=JSON.parse(fs.readFileSync(process.argv[process.argv.indexOf('--mcp-config')+1],'utf8'));
-async function call(method,params,id){const r=await fetch(config.mcpServers.openclaw.url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json, text/event-stream'},body:JSON.stringify({jsonrpc:'2.0',id,method,params})});return r.json();}
+async function call(method,params,id){const r=await fetch(config.mcpServers.carapace.url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json, text/event-stream'},body:JSON.stringify({jsonrpc:'2.0',id,method,params})});return r.json();}
 (async()=>{await call('initialize',{protocolVersion:'2025-03-26',capabilities:{},clientInfo:{name:'synthetic-claude',version:'1'}},1);
  const listed=await call('tools/list',{},2);
  const created=await call('tools/call',{name:'skill_workshop',arguments:{action:'create',name:'node-created',proposal_content:${JSON.stringify(content)},files:[{path:'scripts/task.sh',content:'#!/bin/sh\\nprintf owned',executable:true}]}},3);

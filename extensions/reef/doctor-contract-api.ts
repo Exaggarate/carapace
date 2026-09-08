@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import {
   parseReefRelayUrl,
@@ -100,7 +100,7 @@ type ConfiguredReefIdentityBinding =
   | { status: "invalid" }
   | { status: "valid"; binding: ReefIdentityBinding };
 
-function configuredReefIdentityBinding(cfg: OpenClawConfig): ConfiguredReefIdentityBinding {
+function configuredReefIdentityBinding(cfg: CarapaceConfig): ConfiguredReefIdentityBinding {
   const reef = cfg.channels?.reef;
   if (!isRecord(reef) || !Object.hasOwn(reef, "handle") || reef.handle === undefined) {
     return { status: "absent" };
@@ -121,7 +121,7 @@ function configuredReefIdentityBinding(cfg: OpenClawConfig): ConfiguredReefIdent
   };
 }
 
-function inspectLegacyReefFriends(cfg: OpenClawConfig) {
+function inspectLegacyReefFriends(cfg: CarapaceConfig) {
   const reef = cfg.channels?.reef;
   if (!isRecord(reef) || !Object.hasOwn(reef, "friends")) {
     return null;

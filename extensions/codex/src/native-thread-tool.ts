@@ -1,15 +1,15 @@
 /**
  * Owner-only access to native Codex threads stored in the user's Codex home.
  */
-import type { AnyAgentTool, PluginRuntime } from "openclaw/plugin-sdk/core";
-import { readStringParam } from "openclaw/plugin-sdk/param-readers";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool, PluginRuntime } from "carapace/plugin-sdk/core";
+import { readStringParam } from "carapace/plugin-sdk/param-readers";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   asBoolean,
   asOptionalRecord,
   asSafeIntegerInRange,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { jsonResult } from "openclaw/plugin-sdk/tool-results";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { jsonResult } from "carapace/plugin-sdk/tool-results";
 import { Type } from "typebox";
 import { CODEX_CONTROL_METHODS } from "./app-server/capabilities.js";
 import { readCodexPluginConfig } from "./app-server/config-parsing.js";
@@ -53,7 +53,7 @@ const ForkParamsSchema = Type.Object(
     attach: Type.Optional(
       Type.Boolean({
         default: true,
-        description: "Attach the fork to this OpenClaw session for its next turn.",
+        description: "Attach the fork to this Carapace session for its next turn.",
       }),
     ),
   },
@@ -99,7 +99,7 @@ const CodexThreadsParamsSchema = Type.Union([
 
 type CodexThreadsToolOptions = {
   bindingStore: CodexAppServerBindingStore;
-  context: OpenClawPluginToolContext;
+  context: CarapacePluginToolContext;
   runtime: PluginRuntime;
   getPluginConfig: () => unknown;
   request?: typeof codexControlRequest;
@@ -249,7 +249,7 @@ export function createCodexThreadsTool(options: CodexThreadsToolOptions): AnyAge
       }) => {
         const request = options.request ?? (await import("./command-rpc.js")).codexControlRequest;
         const { isModelSelectionLocked, ModelSelectionLockedError } =
-          await import("openclaw/plugin-sdk/model-session-runtime");
+          await import("carapace/plugin-sdk/model-session-runtime");
         const { resolveCodexBindingAppServerConnection } =
           await import("./app-server/binding-connection.js");
         const { resolveCodexSupervisionAppServerRuntimeOptions } =
@@ -375,7 +375,7 @@ export function createCodexThreadsTool(options: CodexThreadsToolOptions): AnyAge
           assertThreadMayBeArchived(current, threadId);
           if (await options.bindingStore.hasOtherThreadOwner(threadId, identity)) {
             throw new Error(
-              "cannot archive a native Codex thread owned by another OpenClaw session",
+              "cannot archive a native Codex thread owned by another Carapace session",
             );
           }
           await assertCodexArchiveDescendantsUnowned({
@@ -418,7 +418,7 @@ export function createCodexThreadsTool(options: CodexThreadsToolOptions): AnyAge
 
         const attach = asBoolean(params.attach) ?? true;
         if (attach && !session) {
-          throw new Error("cannot attach a Codex fork without an active OpenClaw session");
+          throw new Error("cannot attach a Codex fork without an active Carapace session");
         }
         if (attach && isModelSelectionLocked(session?.entry)) {
           throw new ModelSelectionLockedError();

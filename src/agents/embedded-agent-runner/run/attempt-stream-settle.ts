@@ -5,7 +5,7 @@
 import {
   isAnthropicServerToolClearingEnabled,
   resolveCompactionReplayEligibility,
-} from "@openclaw/ai/transports";
+} from "@carapace/ai/transports";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import { createCodexNativeWebSearchWrapper } from "../../../llm/providers/stream-wrappers/openai.js";
 import type { AssistantMessage } from "../../../llm/types.js";
@@ -363,7 +363,7 @@ export async function settleEmbeddedAttemptStream(input: {
 
     if (promptError && promptErrorSource === "prompt" && !compactionOccurredThisAttempt) {
       try {
-        sessionManager.appendCustomEntry("openclaw:prompt-error", {
+        sessionManager.appendCustomEntry("carapace:prompt-error", {
           timestamp: Date.now(),
           runId: attempt.runId,
           sessionId: attempt.sessionId,

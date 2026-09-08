@@ -1,6 +1,6 @@
 // Msteams tests cover message handler.thread parent plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { CarapaceConfig } from "../../runtime-api.js";
 // Preserve module setup before modules that consume it.
 // oxfmt-ignore
 import { getRuntimeApiMockState } from "./message-handler-mock-support.test-support.js";
@@ -85,9 +85,9 @@ describe("msteams thread parent context injection", () => {
     runtimeApiMockState.dispatchReplyWithBufferedBlockDispatcher.mockClear();
   });
 
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     channels: { msteams: { groupPolicy: "open" } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it.each(["explicit", "conversation", "nested"] as const)(
     "hydrates the canonical root and replies for %s thread addressing",
@@ -195,7 +195,7 @@ describe("msteams thread parent context injection", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     const handler = createMSTeamsMessageHandler(deps);
 
     await handler({
@@ -246,7 +246,7 @@ describe("msteams thread parent context injection", () => {
     });
     const { conversationStore, deps, enqueueSystemEvent } = createMessageHandlerDeps({
       channels: { msteams: { allowFrom: ["*"], replyStyle: "thread" } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     const handler = createMSTeamsMessageHandler(deps);
 
     await handler({

@@ -109,7 +109,7 @@ export function validateSkillLibraryPath(filePath: string): void {
   if (
     filePath
       .split("/")
-      .some((part) => [".git", "node_modules", ".openclaw"].includes(part.toLowerCase()))
+      .some((part) => [".git", "node_modules", ".carapace"].includes(part.toLowerCase()))
   ) {
     throw new SkillLibraryError("INVALID_BUNDLE", `Non-portable skill file path: ${filePath}`);
   }
@@ -197,7 +197,7 @@ export function prepareSkillBundle(files: readonly SkillLibraryFile[]): Prepared
   // Preserve the managed revision encoding: only exact artifact bytes and metadata enter the hash.
   const manifest = prepared.map(({ bytes: _bytes, ...file }) => file);
   return {
-    revision: sha256(JSON.stringify(["openclaw.skill-library.tree.v1", manifest])),
+    revision: sha256(JSON.stringify(["carapace.skill-library.tree.v1", manifest])),
     files: prepared,
   };
 }

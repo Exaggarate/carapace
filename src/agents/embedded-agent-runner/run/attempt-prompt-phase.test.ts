@@ -1,9 +1,9 @@
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Context, Model, SimpleStreamOptions } from "../../../llm/types.js";
 import { createUserTurnTranscriptRecorder } from "../../../sessions/user-turn-transcript.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../state/carapace-agent-db.js";
 import type { StreamFn } from "../../runtime/index.js";
 import {
   createAssistant,
@@ -259,7 +259,7 @@ function createFixture({ pendingPrompt = "hello", pendingImageCount = 1 } = {}) 
           role: "user",
           content: "hello",
           timestamp: 100,
-          __openclaw: { senderName: "Alice" },
+          __carapace: { senderName: "Alice" },
         },
         sessionManager,
         sessionPromptState: {},
@@ -329,7 +329,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   vi.unstubAllEnvs();
 });
 
@@ -742,7 +742,7 @@ describe("runEmbeddedAttemptPromptPhase", () => {
         preparedUserTurnMessage: expect.objectContaining({
           content: "hello",
           timestamp: 100,
-          __openclaw: { senderName: "Alice" },
+          __carapace: { senderName: "Alice" },
         }),
       }),
     );

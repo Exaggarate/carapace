@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { CHAT_PENDING_INPUT_MESSAGE_PREFIX } from "../../../packages/gateway-protocol/src/schema/chat-history-constants.js";
 import type { ChatPendingInputsPage } from "../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import {
@@ -22,14 +22,14 @@ export function projectPendingInputMessage(input: SessionPendingInput, maxChars:
   if (!message) {
     return undefined;
   }
-  const metadata = { ...asOptionalRecord(message["__openclaw"]) };
+  const metadata = { ...asOptionalRecord(message["__carapace"]) };
   delete metadata.idempotencyKey;
   delete metadata.runId;
   return {
     ...message,
     timestamp: input.acceptedAt,
     idempotencyKey: undefined,
-    __openclaw: { ...metadata, id: `${CHAT_PENDING_INPUT_MESSAGE_PREFIX}${input.id}` },
+    __carapace: { ...metadata, id: `${CHAT_PENDING_INPUT_MESSAGE_PREFIX}${input.id}` },
   };
 }
 

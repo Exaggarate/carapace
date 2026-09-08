@@ -18,7 +18,7 @@ import type { SystemAgentOverview } from "./overview.js";
 
 function createOverview(overrides: Partial<SystemAgentOverview> = {}): SystemAgentOverview {
   return {
-    config: { path: "/tmp/openclaw.json", exists: true, valid: true, issues: [], hash: "hash" },
+    config: { path: "/tmp/carapace.json", exists: true, valid: true, issues: [], hash: "hash" },
     agents: [{ id: "main", name: "Main", isDefault: true, model: "openai/gpt-5.5" }],
     defaultAgentId: "main",
     defaultModel: "openai/gpt-5.5",
@@ -30,8 +30,8 @@ function createOverview(overrides: Partial<SystemAgentOverview> = {}): SystemAge
     },
     gateway: { url: "ws://127.0.0.1:18789", source: "test", reachable: true },
     references: {
-      docsUrl: "https://docs.openclaw.ai",
-      sourceUrl: "https://github.com/openclaw/openclaw",
+      docsUrl: "https://github.com/Exaggarate/carapace",
+      sourceUrl: "https://github.com/Exaggarate/carapace",
     },
     ...overrides,
   };
@@ -561,7 +561,7 @@ describe("system agent greeting cache", () => {
       name: "missing config",
       overview: createOverview({
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           exists: false,
           valid: false,
           issues: [],
@@ -574,7 +574,7 @@ describe("system agent greeting cache", () => {
       name: "invalid config",
       overview: createOverview({
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           exists: true,
           valid: false,
           issues: ["invalid"],
@@ -686,9 +686,9 @@ describe("system agent greeting cache", () => {
 });
 
 describe("system agent greeting identity", () => {
-  it("identifies OpenClaw as the machine caretaker and describes every mild fact", () => {
+  it("identifies Carapace as the machine caretaker and describes every mild fact", () => {
     expect(SYSTEM_AGENT_GREETING_SYSTEM_PROMPT).toContain(
-      "You are OpenClaw, the system itself — caretaker of this machine's gateway, config, channels, and agents.",
+      "You are Carapace, the system itself — caretaker of this machine's gateway, config, channels, and agents.",
     );
     expect(SYSTEM_AGENT_GREETING_SYSTEM_PROMPT).toContain("nominal systems get one calm line");
     expect(SYSTEM_AGENT_GREETING_SYSTEM_PROMPT).toContain("If an update is available");
@@ -810,7 +810,7 @@ describe("system agent quick actions", () => {
       name: "missing config",
       overview: createOverview({
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           exists: false,
           valid: true,
           issues: [],
@@ -824,7 +824,7 @@ describe("system agent quick actions", () => {
       name: "invalid config",
       overview: createOverview({
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           exists: true,
           valid: false,
           issues: ["invalid"],

@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 struct WatchMessagingStartupBuffer<Event> {
     private let maxCount: Int
@@ -41,7 +41,7 @@ enum WatchMessagingError: LocalizedError {
         case .notPaired:
             "WATCH_UNAVAILABLE: no paired Apple Watch"
         case .watchAppNotInstalled:
-            "WATCH_UNAVAILABLE: OpenClaw watch companion app is not installed"
+            "WATCH_UNAVAILABLE: Carapace watch companion app is not installed"
         case .admissionUnavailable:
             "WATCH_UNAVAILABLE: Watch chat storage is not ready"
         }
@@ -57,8 +57,8 @@ final class WatchMessagingService: @preconcurrency WatchMessagingServicing {
         maxCount: WatchMessagingService.maxStartupEvents)
     private var statusHandler: (@Sendable (WatchMessagingStatus) -> Void)?
     private var lastEmittedStatus: WatchMessagingStatus?
-    private var chatDeliveryHandler: (@Sendable (OpenClawWatchChatDeliveryCommand) async throws -> Void)?
-    private var chatDeliveryReceiptAckHandler: (@Sendable (OpenClawWatchChatDeliveryReceiptAck) async throws -> Void)?
+    private var chatDeliveryHandler: (@Sendable (CarapaceWatchChatDeliveryCommand) async throws -> Void)?
+    private var chatDeliveryReceiptAckHandler: (@Sendable (CarapaceWatchChatDeliveryReceiptAck) async throws -> Void)?
     private var legacyChatRejectedHandler: (@Sendable () -> Void)?
     private var hasRejectedLegacyChat = false
     private var execApprovalResolveHandler: (@Sendable (WatchExecApprovalResolveEvent) -> Void)?
@@ -107,13 +107,13 @@ final class WatchMessagingService: @preconcurrency WatchMessagingServicing {
     }
 
     func setChatDeliveryHandler(
-        _ handler: (@Sendable (OpenClawWatchChatDeliveryCommand) async throws -> Void)?)
+        _ handler: (@Sendable (CarapaceWatchChatDeliveryCommand) async throws -> Void)?)
     {
         self.chatDeliveryHandler = handler
     }
 
     func setChatDeliveryReceiptAckHandler(
-        _ handler: (@Sendable (OpenClawWatchChatDeliveryReceiptAck) async throws -> Void)?)
+        _ handler: (@Sendable (CarapaceWatchChatDeliveryReceiptAck) async throws -> Void)?)
     {
         self.chatDeliveryReceiptAckHandler = handler
     }
@@ -147,9 +147,9 @@ final class WatchMessagingService: @preconcurrency WatchMessagingServicing {
 
     func sendNotification(
         id: String,
-        params: OpenClawWatchNotifyParams,
+        params: CarapaceWatchNotifyParams,
         gatewayStableID: String?,
-        chatDeliveryContext: OpenClawWatchChatDeliveryContext? = nil) async throws -> WatchNotificationSendResult
+        chatDeliveryContext: CarapaceWatchChatDeliveryContext? = nil) async throws -> WatchNotificationSendResult
     {
         let payload = WatchMessagingPayloadCodec.encodeNotificationPayload(
             id: id,
@@ -165,45 +165,45 @@ final class WatchMessagingService: @preconcurrency WatchMessagingServicing {
     }
 
     func sendExecApprovalPrompt(
-        _ message: OpenClawWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
     {
         try await self.transport.sendPayload(
             WatchMessagingPayloadCodec.encodeExecApprovalPromptPayload(message))
     }
 
     func sendExecApprovalResolved(
-        _ message: OpenClawWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
     {
         try await self.transport.sendPayload(
             WatchMessagingPayloadCodec.encodeExecApprovalResolvedPayload(message))
     }
 
     func sendExecApprovalExpired(
-        _ message: OpenClawWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
     {
         try await self.transport.sendPayload(
             WatchMessagingPayloadCodec.encodeExecApprovalExpiredPayload(message))
     }
 
     func syncExecApprovalSnapshot(
-        _ message: OpenClawWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
     {
         try await self.transport.sendSnapshotPayload(
             WatchMessagingPayloadCodec.encodeExecApprovalSnapshotPayload(message))
     }
 
     func syncAppSnapshot(
-        _ message: OpenClawWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
     {
         try await self.transport.sendSnapshotPayload(
             WatchMessagingPayloadCodec.encodeAppSnapshotPayload(message))
     }
 
     func sendChatDeliveryReceipt(
-        _ receipt: OpenClawWatchChatDeliveryReceipt) async throws -> WatchNotificationSendResult
+        _ receipt: CarapaceWatchChatDeliveryReceipt) async throws -> WatchNotificationSendResult
     {
         try await self.transport.sendPayload(
-            OpenClawWatchChatDeliveryCodec.encode(receipt))
+            CarapaceWatchChatDeliveryCodec.encode(receipt))
     }
 
     private func emitStatusIfChanged(_ snapshot: WatchMessagingStatus) {
@@ -260,9 +260,9 @@ final class WatchMessagingService: @preconcurrency WatchMessagingServicing {
         case .legacyChat:
             self.hasRejectedLegacyChat = true
             self.legacyChatRejectedHandler?()
-            throw OpenClawWatchChatDeliveryError(
+            throw CarapaceWatchChatDeliveryError(
                 code: "upgrade_required",
-                message: "Update OpenClaw on iPhone and Apple Watch before sending Watch messages.")
+                message: "Update Carapace on iPhone and Apple Watch before sending Watch messages.")
         default:
             for event in self.startupEvents.receive(event) {
                 self.dispatchStartupEvent(event)

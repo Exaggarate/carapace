@@ -8,10 +8,10 @@ import {
   createSandboxBrowserConfig,
   createSandboxPruneConfig,
   createSandboxSshConfig,
-} from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActiveDegradedSecretOwners } from "../../secrets/runtime-degraded-state.js";
 import { captureFullEnv } from "../../test-utils/env.js";
 import type { SandboxConfig } from "./types.js";
@@ -49,7 +49,7 @@ const {
 } = await import("./ssh-backend.js");
 const tempDirs = createTempDirTracker();
 
-function createConfig(): OpenClawConfig {
+function createConfig(): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -61,7 +61,7 @@ function createConfig(): OpenClawConfig {
           ssh: {
             target: "peter@example.com:2222",
             command: "ssh",
-            workspaceRoot: "/remote/openclaw",
+            workspaceRoot: "/remote/carapace",
             strictHostKeyChecking: true,
             updateHostKeys: true,
           },
@@ -74,8 +74,8 @@ function createConfig(): OpenClawConfig {
 function createSession() {
   return {
     command: "ssh",
-    configPath: path.join(os.tmpdir(), "openclaw-test-ssh-config"),
-    host: "openclaw-sandbox",
+    configPath: path.join(os.tmpdir(), "carapace-test-ssh-config"),
+    host: "carapace-sandbox",
   };
 }
 
@@ -116,7 +116,7 @@ function createBackendSandboxConfig(params?: { binds?: string[]; target?: string
     backend: "ssh",
     scope: "session",
     workspaceAccess: "rw" as const,
-    workspaceRoot: "~/.openclaw/sandboxes",
+    workspaceRoot: "~/.carapace/sandboxes",
     dockerTmpfsSource: "configured",
     docker: {
       image: "img",
@@ -131,7 +131,7 @@ function createBackendSandboxConfig(params?: { binds?: string[]; target?: string
     },
     ssh: {
       ...createSandboxSshConfig(
-        "/remote/openclaw",
+        "/remote/carapace",
         params?.target ? { target: params.target } : {},
       ),
     },
@@ -199,21 +199,21 @@ describe("ssh sandbox backend", () => {
   });
 
   it("preserves shared runtime identity and hashes workspace-qualified scopes", () => {
-    expect(resolveSshRuntimePaths("/remote/openclaw", "shared").runtimeId).toBe(
-      "openclaw-ssh-shared-8198076c",
+    expect(resolveSshRuntimePaths("/remote/carapace", "shared").runtimeId).toBe(
+      "carapace-ssh-shared-8198076c",
     );
     expect(
-      resolveSshRuntimePaths("/remote/openclaw", `agent:main:workspace:${"a".repeat(32)}`)
+      resolveSshRuntimePaths("/remote/carapace", `agent:main:workspace:${"a".repeat(32)}`)
         .runtimeId,
-    ).toMatch(/^openclaw-ssh-workspace-[a-f0-9]{32}$/);
+    ).toMatch(/^carapace-ssh-workspace-[a-f0-9]{32}$/);
   });
 
   it("describes runtimes via the configured ssh target", async () => {
     const result = await sshSandboxBackendManager.describeRuntime({
       entry: {
-        containerName: "openclaw-ssh-worker-abcd1234",
+        containerName: "carapace-ssh-worker-abcd1234",
         backendId: "ssh",
-        runtimeLabel: "openclaw-ssh-worker-abcd1234",
+        runtimeLabel: "carapace-ssh-worker-abcd1234",
         sessionKey: "agent:worker",
         createdAtMs: 1,
         lastUsedAtMs: 1,
@@ -234,9 +234,9 @@ describe("ssh sandbox backend", () => {
       "ssh session settings",
     );
     expect(sessionSettings.target).toBe("peter@example.com:2222");
-    expect(sessionSettings.workspaceRoot).toBe("/remote/openclaw");
+    expect(sessionSettings.workspaceRoot).toBe("/remote/carapace");
     const commandParams = requireSshRunCommandParams();
-    expect(commandParams.remoteCommand).toContain("/remote/openclaw/openclaw-ssh-agent-worker");
+    expect(commandParams.remoteCommand).toContain("/remote/carapace/carapace-ssh-agent-worker");
   });
 
   it("uses the derived registry agent for both validation and SSH settings", async () => {
@@ -259,9 +259,9 @@ describe("ssh sandbox backend", () => {
 
     await sshSandboxBackendManager.describeRuntime({
       entry: {
-        containerName: "openclaw-ssh-worker-abcd1234",
+        containerName: "carapace-ssh-worker-abcd1234",
         backendId: "ssh",
-        runtimeLabel: "openclaw-ssh-worker-abcd1234",
+        runtimeLabel: "carapace-ssh-worker-abcd1234",
         sessionKey: "agent:worker",
         createdAtMs: 1,
         lastUsedAtMs: 1,
@@ -292,9 +292,9 @@ describe("ssh sandbox backend", () => {
     await expect(
       sshSandboxBackendManager.describeRuntime({
         entry: {
-          containerName: "openclaw-ssh-worker-abcd1234",
+          containerName: "carapace-ssh-worker-abcd1234",
           backendId: "ssh",
-          runtimeLabel: "openclaw-ssh-worker-abcd1234",
+          runtimeLabel: "carapace-ssh-worker-abcd1234",
           sessionKey: "agent:worker",
           createdAtMs: 1,
           lastUsedAtMs: 1,
@@ -325,9 +325,9 @@ describe("ssh sandbox backend", () => {
     await expect(
       sshSandboxBackendManager.removeRuntime({
         entry: {
-          containerName: "openclaw-ssh-shared-abcd1234",
+          containerName: "carapace-ssh-shared-abcd1234",
           backendId: "ssh",
-          runtimeLabel: "openclaw-ssh-shared-abcd1234",
+          runtimeLabel: "carapace-ssh-shared-abcd1234",
           sessionKey: "shared",
           createdAtMs: 1,
           lastUsedAtMs: 1,
@@ -360,9 +360,9 @@ describe("ssh sandbox backend", () => {
 
     await sshSandboxBackendManager.removeRuntime({
       entry: {
-        containerName: "openclaw-ssh-shared-abcd1234",
+        containerName: "carapace-ssh-shared-abcd1234",
         backendId: "ssh",
-        runtimeLabel: "openclaw-ssh-shared-abcd1234",
+        runtimeLabel: "carapace-ssh-shared-abcd1234",
         sessionKey: "shared",
         createdAtMs: 1,
         lastUsedAtMs: 1,
@@ -378,9 +378,9 @@ describe("ssh sandbox backend", () => {
   it("removes runtimes by deleting the remote scope root", async () => {
     await sshSandboxBackendManager.removeRuntime({
       entry: {
-        containerName: "openclaw-ssh-worker-abcd1234",
+        containerName: "carapace-ssh-worker-abcd1234",
         backendId: "ssh",
-        runtimeLabel: "openclaw-ssh-worker-abcd1234",
+        runtimeLabel: "carapace-ssh-worker-abcd1234",
         sessionKey: "agent:worker",
         createdAtMs: 1,
         lastUsedAtMs: 1,
@@ -410,9 +410,9 @@ describe("ssh sandbox backend", () => {
       await expect(
         sshSandboxBackendManager.removeRuntime({
           entry: {
-            containerName: "openclaw-ssh-worker-abcd1234",
+            containerName: "carapace-ssh-worker-abcd1234",
             backendId: "ssh",
-            runtimeLabel: "openclaw-ssh-worker-abcd1234",
+            runtimeLabel: "carapace-ssh-worker-abcd1234",
             sessionKey: "agent:worker",
             createdAtMs: 1,
             lastUsedAtMs: 1,
@@ -439,7 +439,7 @@ describe("ssh sandbox backend", () => {
       },
       {
         runtimeId: "remote-exec:environment-1:7:11",
-        remoteWorkspaceDir: "/srv/openclaw/workspaces/session-1",
+        remoteWorkspaceDir: "/srv/carapace/workspaces/session-1",
       },
     );
 
@@ -471,7 +471,7 @@ describe("ssh sandbox backend", () => {
 
     expect(sshMocks.spawnCommand).toHaveBeenCalledTimes(2);
     const cleanup = requirePreparedSshInvocation(1);
-    expect(cleanup.argv.at(-1)).toContain("openclaw-sandbox-exec-cleanup");
+    expect(cleanup.argv.at(-1)).toContain("carapace-sandbox-exec-cleanup");
     expect(cleanup.argv.join(" ")).not.toContain(sentinel);
     expect(sshMocks.disposeSshSandboxSession).toHaveBeenCalledOnce();
   });
@@ -487,7 +487,7 @@ describe("ssh sandbox backend", () => {
       },
       {
         runtimeId: "remote-exec:environment-1:7:11",
-        remoteWorkspaceDir: "/srv/openclaw/workspaces/session-1",
+        remoteWorkspaceDir: "/srv/carapace/workspaces/session-1",
       },
     );
 
@@ -539,7 +539,7 @@ describe("ssh sandbox backend", () => {
         stderr: Buffer.alloc(0),
         code: 0,
       });
-    const skillsWorkspaceDir = tempDirs.make("openclaw-ssh-skills-");
+    const skillsWorkspaceDir = tempDirs.make("carapace-ssh-skills-");
     await fs.mkdir(path.join(skillsWorkspaceDir, "skills"), { recursive: true });
 
     const backend = await createSshSandboxBackend({
@@ -553,11 +553,11 @@ describe("ssh sandbox backend", () => {
         backend: "ssh",
         scope: "session",
         workspaceAccess: "rw",
-        workspaceRoot: "~/.openclaw/sandboxes",
+        workspaceRoot: "~/.carapace/sandboxes",
         dockerTmpfsSource: "configured",
         docker: {
-          image: "openclaw-sandbox:bookworm-slim",
-          containerPrefix: "openclaw-sbx-",
+          image: "carapace-sandbox:bookworm-slim",
+          containerPrefix: "carapace-sbx-",
           workdir: "/workspace",
           readOnlyRoot: true,
           tmpfs: ["/tmp"],
@@ -568,14 +568,14 @@ describe("ssh sandbox backend", () => {
         ssh: {
           target: "peter@example.com:2222",
           command: "ssh",
-          workspaceRoot: "/remote/openclaw",
+          workspaceRoot: "/remote/carapace",
           strictHostKeyChecking: true,
           updateHostKeys: true,
         },
         browser: {
           enabled: false,
-          image: "openclaw-browser",
-          containerPrefix: "openclaw-browser-",
+          image: "carapace-browser",
+          containerPrefix: "carapace-browser-",
           network: "bridge",
           cdpPort: 9222,
           vncPort: 5900,
@@ -600,7 +600,7 @@ describe("ssh sandbox backend", () => {
     expect(execSpec.argv.slice(0, 4)).toEqual(["ssh", "-F", createSession().configPath, "-T"]);
     expect(execSpec.argv).toContain(createSession().host);
     expect(requirePreparedSshInvocation().stdin).toContain(
-      "/remote/openclaw/openclaw-ssh-agent-worker",
+      "/remote/carapace/carapace-ssh-agent-worker",
     );
     expect(sshMocks.uploadDirectoryToSshTarget).toHaveBeenCalledTimes(3);
     const workspaceUploadParams = requireSshUploadParams(0, "workspace upload params");
@@ -617,7 +617,7 @@ describe("ssh sandbox backend", () => {
       "skills upload params",
     );
     expect(skillsUploadParams.localDir).toBe(skillsWorkspaceDir);
-    expect(skillsUploadParams.remoteDir).toContain("/workspace/.openclaw/sandbox-skills");
+    expect(skillsUploadParams.remoteDir).toContain("/workspace/.carapace/sandbox-skills");
 
     await backend.finalizeExec?.({
       status: "completed",
@@ -630,7 +630,7 @@ describe("ssh sandbox backend", () => {
   });
 
   it("adopts a preprovisioned workdir without clearing or uploading placement files", async () => {
-    const remoteWorkspaceDir = "/srv/openclaw/workspaces/session-1";
+    const remoteWorkspaceDir = "/srv/carapace/workspaces/session-1";
     const backend = await createPreprovisionedSshSandboxBackend(
       {
         sessionKey: "agent:worker:task",
@@ -662,7 +662,7 @@ describe("ssh sandbox backend", () => {
     await backend.runShellCommand({ script: "pwd" });
     expect(sshMocks.uploadDirectoryToSshTarget).not.toHaveBeenCalled();
     expect(String(requireSshRunCommandParams().remoteCommand)).not.toContain(
-      "openclaw-sandbox-clear",
+      "carapace-sandbox-clear",
     );
 
     await backend.finalizeExec?.({
@@ -681,7 +681,7 @@ describe("ssh sandbox backend", () => {
         code: 0,
       })
       .mockResolvedValueOnce({
-        stdout: Buffer.from("/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/workspace/src\n"),
+        stdout: Buffer.from("/remote/carapace/carapace-ssh-agent-worker-abcd1234/workspace/src\n"),
         stderr: Buffer.alloc(0),
         code: 0,
       })
@@ -691,7 +691,7 @@ describe("ssh sandbox backend", () => {
         code: 1,
       })
       .mockResolvedValueOnce({
-        stdout: Buffer.from("/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/agent/src\n"),
+        stdout: Buffer.from("/remote/carapace/carapace-ssh-agent-worker-abcd1234/agent/src\n"),
         stderr: Buffer.alloc(0),
         code: 0,
       });
@@ -708,31 +708,31 @@ describe("ssh sandbox backend", () => {
 
     await expect(
       backend.validateWorkdir?.(
-        "/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/workspace/src",
+        "/remote/carapace/carapace-ssh-agent-worker-abcd1234/workspace/src",
       ),
-    ).resolves.toBe("/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/workspace/src");
+    ).resolves.toBe("/remote/carapace/carapace-ssh-agent-worker-abcd1234/workspace/src");
     await expect(
       backend.validateWorkdir?.(
-        "/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/workspace/missing",
+        "/remote/carapace/carapace-ssh-agent-worker-abcd1234/workspace/missing",
       ),
     ).resolves.toBeNull();
     await expect(
-      backend.validateWorkdir?.("/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/agent/src"),
-    ).resolves.toBe("/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/agent/src");
+      backend.validateWorkdir?.("/remote/carapace/carapace-ssh-agent-worker-abcd1234/agent/src"),
+    ).resolves.toBe("/remote/carapace/carapace-ssh-agent-worker-abcd1234/agent/src");
 
     const validationCommand = String(requireSshRunCommandParams(1).remoteCommand);
-    expect(validationCommand).toContain("openclaw-validate-workdir");
+    expect(validationCommand).toContain("carapace-validate-workdir");
     expect(validationCommand).toContain("remote directory must stay under root");
     const agentValidationCommand = String(requireSshRunCommandParams(3).remoteCommand);
     expect(agentValidationCommand).toContain(
-      "/remote/openclaw/openclaw-ssh-agent-worker-abcd1234/agent",
+      "/remote/carapace/carapace-ssh-agent-worker-abcd1234/agent",
     );
   });
 
   it("refreshes materialized skills before validating a skills workdir", async () => {
-    const skillsWorkspaceDir = tempDirs.make("openclaw-ssh-skills-");
+    const skillsWorkspaceDir = tempDirs.make("carapace-ssh-skills-");
     await fs.mkdir(path.join(skillsWorkspaceDir, "skills", "demo"), { recursive: true });
-    const runtimePaths = resolveSshRuntimePaths("/remote/openclaw", "agent:worker");
+    const runtimePaths = resolveSshRuntimePaths("/remote/carapace", "agent:worker");
     const skillsWorkdir = path.posix.join(runtimePaths.remoteSkillsWorkspaceDir, "skills", "demo");
     sshMocks.runSshSandboxCommand
       .mockResolvedValueOnce({
@@ -784,9 +784,9 @@ describe("ssh sandbox backend", () => {
   });
 
   it("discards validated materialized skills refreshes that do not launch", async () => {
-    const skillsWorkspaceDir = tempDirs.make("openclaw-ssh-skills-");
+    const skillsWorkspaceDir = tempDirs.make("carapace-ssh-skills-");
     await fs.mkdir(path.join(skillsWorkspaceDir, "skills", "demo"), { recursive: true });
-    const runtimePaths = resolveSshRuntimePaths("/remote/openclaw", "agent:worker");
+    const runtimePaths = resolveSshRuntimePaths("/remote/carapace", "agent:worker");
     const skillsWorkdir = path.posix.join(runtimePaths.remoteSkillsWorkspaceDir, "skills", "demo");
     sshMocks.runSshSandboxCommand
       .mockResolvedValueOnce({
@@ -841,7 +841,7 @@ describe("ssh sandbox backend", () => {
   });
 
   it("refreshes materialized skills before each exec and remote fs command", async () => {
-    const skillsWorkspaceDir = tempDirs.make("openclaw-ssh-skills-");
+    const skillsWorkspaceDir = tempDirs.make("carapace-ssh-skills-");
     await fs.mkdir(path.join(skillsWorkspaceDir, "skills"), { recursive: true });
     const backend = await createSshSandboxBackend({
       sessionKey: "agent:worker:task",
@@ -871,7 +871,7 @@ describe("ssh sandbox backend", () => {
     expect(sshMocks.uploadDirectoryToSshTarget).toHaveBeenCalledTimes(3);
     const skillsUploadParams = requireSshUploadParams(0, "skills upload params");
     expect(skillsUploadParams.localDir).toBe(skillsWorkspaceDir);
-    expect(skillsUploadParams.remoteDir).toContain("/workspace/.openclaw/sandbox-skills");
+    expect(skillsUploadParams.remoteDir).toContain("/workspace/.carapace/sandbox-skills");
     await backend.finalizeExec?.({
       status: "completed",
       exitCode: 0,
@@ -887,7 +887,7 @@ describe("ssh sandbox backend", () => {
   });
 
   it("clears stale remote materialized skills when the local copy is missing", async () => {
-    const tmpDir = tempDirs.make("openclaw-ssh-skills-");
+    const tmpDir = tempDirs.make("carapace-ssh-skills-");
     const skillsWorkspaceDir = path.join(tmpDir, "missing");
     const backend = await createSshSandboxBackend({
       sessionKey: "agent:worker:task",
@@ -908,8 +908,8 @@ describe("ssh sandbox backend", () => {
 
     expect(sshMocks.uploadDirectoryToSshTarget).not.toHaveBeenCalled();
     const commandParams = requireSshRunCommandParams(1);
-    expect(commandParams.remoteCommand).toContain("openclaw-sandbox-clear");
-    expect(commandParams.remoteCommand).toContain("/workspace/.openclaw/sandbox-skills");
+    expect(commandParams.remoteCommand).toContain("carapace-sandbox-clear");
+    expect(commandParams.remoteCommand).toContain("/workspace/.carapace/sandbox-skills");
     await backend.finalizeExec?.({
       status: "completed",
       exitCode: 0,
@@ -919,7 +919,7 @@ describe("ssh sandbox backend", () => {
   });
 
   it("disposes the exec ssh session when materialized skills refresh fails", async () => {
-    const skillsWorkspaceDir = tempDirs.make("openclaw-ssh-skills-");
+    const skillsWorkspaceDir = tempDirs.make("carapace-ssh-skills-");
     await fs.mkdir(path.join(skillsWorkspaceDir, "skills"), { recursive: true });
     const backend = await createSshSandboxBackend({
       sessionKey: "agent:worker:task",

@@ -71,7 +71,7 @@ function createGatewayHistoryMessageToolResult(id: string, content: unknown, tim
 function createGatewayHistoryDeliveryMirror(text: unknown, timestamp: number) {
   return {
     role: "assistant",
-    provider: "openclaw",
+    provider: "carapace",
     model: "delivery-mirror",
     content: [{ type: "text", text }],
     timestamp,
@@ -82,7 +82,7 @@ function hasGatewayHistoryMessageToolMirror(message: unknown) {
   return Boolean(
     message &&
     typeof message === "object" &&
-    (message as { openclawMessageToolMirror?: unknown }).openclawMessageToolMirror,
+    (message as { carapaceMessageToolMirror?: unknown }).carapaceMessageToolMirror,
   );
 }
 
@@ -173,7 +173,7 @@ describe("gateway server chat", () => {
     run: (dir: string) => Promise<T>,
     options?: { archivedAt?: number; sessionId?: string },
   ): Promise<T> => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
     try {
       const sessionId = options?.sessionId ?? "sess-main";
       testState.sessionStorePath = path.join(dir, "sessions.json");
@@ -533,7 +533,7 @@ describe("gateway server chat", () => {
     async ({ method, message }) => {
       const sessionKey = `agent:main:dashboard:test-${method}`;
       const runId = `idem-sessions-${method}-1`;
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), `openclaw-sessions-${method}-`));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), `carapace-sessions-${method}-`));
       testState.sessionStorePath = path.join(dir, "sessions.json");
       try {
         await writeSessionStore({
@@ -563,7 +563,7 @@ describe("gateway server chat", () => {
         );
         expect(users).toHaveLength(1);
         const user = expectRecordFields(users[0], { role: "user" });
-        expectRecordFields(user["__openclaw"], { seq: 1, idempotencyKey: `${runId}:user` });
+        expectRecordFields(user["__carapace"], { seq: 1, idempotencyKey: `${runId}:user` });
         expect(collectHistoryTextValues(users)).toEqual([message]);
       } finally {
         // A failed ACK assertion must not retire storage before detached work finishes.
@@ -756,7 +756,7 @@ describe("gateway server chat", () => {
   });
 
   test("sessions.send creates a configured agent main session before sending", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-send-agent-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-send-agent-"));
     testState.sessionStorePath = path.join(dir, "sessions.json");
     testState.agentsConfig = {
       list: [{ id: "main", default: true }, { id: "orion" }],
@@ -788,7 +788,7 @@ describe("gateway server chat", () => {
   });
 
   test("sessions.abort stops active dashboard runs", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-abort-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-abort-"));
     testState.sessionStorePath = path.join(dir, "sessions.json");
     try {
       await writeSessionStore({
@@ -864,7 +864,7 @@ describe("gateway server chat", () => {
   });
 
   test("sessions.abort resolves active runs by runId without a caller session key", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-abort-runid-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-abort-runid-"));
     testState.sessionStorePath = path.join(dir, "sessions.json");
     try {
       await writeSessionStore({
@@ -975,7 +975,7 @@ describe("gateway server chat", () => {
       expect(sessionRes.payload?.runId).toBe("idem-session-key-1");
       await waitForAgentRunDrained("idem-session-key-1");
 
-      const sendPolicyDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+      const sendPolicyDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
       tempDirs.push(sendPolicyDir);
       testState.sessionStorePath = path.join(sendPolicyDir, "sessions.json");
       testState.sessionConfig = {
@@ -1014,7 +1014,7 @@ describe("gateway server chat", () => {
       testState.sessionStorePath = undefined;
       testState.sessionConfig = undefined;
 
-      const agentBlockedDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+      const agentBlockedDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
       tempDirs.push(agentBlockedDir);
       testState.sessionStorePath = path.join(agentBlockedDir, "sessions.json");
       testState.sessionConfig = {
@@ -1105,7 +1105,7 @@ describe("gateway server chat", () => {
         { runId: "idem-img-only", images: [expect.anything()] },
       ]);
 
-      const historyDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+      const historyDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
       tempDirs.push(historyDir);
       testState.sessionStorePath = path.join(historyDir, "sessions.json");
       await writeSessionStore({
@@ -1566,7 +1566,7 @@ describe("gateway server chat", () => {
       expect.objectContaining({
         role: "assistant",
         content: [{ type: "text", text: replyText }],
-        openclawMessageToolMirror: {
+        carapaceMessageToolMirror: {
           toolName: "message",
           toolCallId: "call-message-internal-source",
           sourceReplySink: "internal-ui",
@@ -1597,7 +1597,7 @@ describe("gateway server chat", () => {
     expect(collectHistoryTextValues(historyMessages)).toEqual(["send once", replyText]);
     expect(historyMessages.some(hasGatewayHistoryMessageToolMirror)).toBe(true);
     expect(historyMessages).not.toContainEqual(
-      expect.objectContaining({ provider: "openclaw", model: "delivery-mirror" }),
+      expect.objectContaining({ provider: "carapace", model: "delivery-mirror" }),
     );
   });
 
@@ -1623,7 +1623,7 @@ describe("gateway server chat", () => {
       ),
       {
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         content: [{ type: "text", text: replyText }, ...imageBlocks],
         timestamp: 2,
@@ -1646,14 +1646,14 @@ describe("gateway server chat", () => {
       expect.objectContaining({
         role: "assistant",
         content: [{ type: "text", text: replyText }, ...imageBlocks],
-        openclawMessageToolMirror: expect.objectContaining({
+        carapaceMessageToolMirror: expect.objectContaining({
           toolCallId: "call-message-images",
           sourceReplySink: "internal-ui",
         }),
       }),
     );
     expect(historyMessages).not.toContainEqual(
-      expect.objectContaining({ provider: "openclaw", model: "delivery-mirror" }),
+      expect.objectContaining({ provider: "carapace", model: "delivery-mirror" }),
     );
   });
 
@@ -1696,10 +1696,10 @@ describe("gateway server chat", () => {
       })),
       ...["first", "second"].map((name, index) => ({
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         content: [{ type: "text", text: replyText }, imageBlocks[index]],
-        openclawDeliveryMirror: {
+        carapaceDeliveryMirror: {
           kind: "message-tool-source-reply",
           toolCallId: `call-message-${name}`,
         },
@@ -1712,19 +1712,19 @@ describe("gateway server chat", () => {
     expect(mirrors).toEqual([
       expect.objectContaining({
         content: [{ type: "text", text: replyText }, imageBlocks[0]],
-        openclawMessageToolMirror: expect.objectContaining({
+        carapaceMessageToolMirror: expect.objectContaining({
           toolCallId: "call-message-first",
         }),
       }),
       expect.objectContaining({
         content: [{ type: "text", text: replyText }, imageBlocks[1]],
-        openclawMessageToolMirror: expect.objectContaining({
+        carapaceMessageToolMirror: expect.objectContaining({
           toolCallId: "call-message-second",
         }),
       }),
     ]);
     expect(historyMessages).not.toContainEqual(
-      expect.objectContaining({ provider: "openclaw", model: "delivery-mirror" }),
+      expect.objectContaining({ provider: "carapace", model: "delivery-mirror" }),
     );
   });
 
@@ -1751,10 +1751,10 @@ describe("gateway server chat", () => {
       ),
       {
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         content: [{ type: "text", text: replyText }, wrongImage],
-        openclawDeliveryMirror: {
+        carapaceDeliveryMirror: {
           kind: "message-tool-source-reply",
           toolCallId: "call-message-other",
         },
@@ -1766,14 +1766,14 @@ describe("gateway server chat", () => {
     expect(historyMessages).toContainEqual(
       expect.objectContaining({
         content: [{ type: "text", text: replyText }],
-        openclawMessageToolMirror: expect.objectContaining({
+        carapaceMessageToolMirror: expect.objectContaining({
           toolCallId: "call-message-expected",
         }),
       }),
     );
     expect(historyMessages).toContainEqual(
       expect.objectContaining({
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         content: [{ type: "text", text: replyText }, wrongImage],
       }),
@@ -1799,7 +1799,7 @@ describe("gateway server chat", () => {
     expect(collectHistoryTextValues(historyMessages)).toEqual([replyText]);
     expect(historyMessages.some(hasGatewayHistoryMessageToolMirror)).toBe(true);
     expect(historyMessages).not.toContainEqual(
-      expect.objectContaining({ provider: "openclaw", model: "delivery-mirror" }),
+      expect.objectContaining({ provider: "carapace", model: "delivery-mirror" }),
     );
   });
 
@@ -1822,7 +1822,7 @@ describe("gateway server chat", () => {
     expect(collectHistoryTextValues(historyMessages)).toEqual([replyText]);
     expect(historyMessages.some(hasGatewayHistoryMessageToolMirror)).toBe(true);
     expect(historyMessages).not.toContainEqual(
-      expect.objectContaining({ provider: "openclaw", model: "delivery-mirror" }),
+      expect.objectContaining({ provider: "carapace", model: "delivery-mirror" }),
     );
   });
 
@@ -1871,7 +1871,7 @@ describe("gateway server chat", () => {
     expect(collectHistoryTextValues(historyMessages)).toEqual([firstText, secondText]);
     expect(historyMessages.filter(hasGatewayHistoryMessageToolMirror)).toHaveLength(2);
     expect(historyMessages).not.toContainEqual(
-      expect.objectContaining({ provider: "openclaw", model: "delivery-mirror" }),
+      expect.objectContaining({ provider: "carapace", model: "delivery-mirror" }),
     );
   });
 
@@ -1967,7 +1967,7 @@ describe("gateway server chat", () => {
       expect.objectContaining({
         role: "assistant",
         content: [{ type: "text", text: sourceReply }],
-        openclawMessageToolMirror: expect.objectContaining({
+        carapaceMessageToolMirror: expect.objectContaining({
           toolCallId: "call-message-current-source",
         }),
       }),
@@ -2482,7 +2482,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.history uses the owning agent thinkingDefault for non-default agent sessions", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
     try {
       testState.sessionStorePath = path.join(dir, "sessions.json");
       testState.agentConfig = {
@@ -2713,7 +2713,7 @@ describe("gateway server chat", () => {
   });
 
   test("agent.wait ignores stale chat dedupe when an agent run with the same runId is in flight", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
     let resolveAgentRun: (() => void) | undefined;
     const blockedAgentRun = new Promise<void>((resolve) => {
       resolveAgentRun = resolve;
@@ -2947,7 +2947,7 @@ describe("gateway server chat", () => {
   });
 
   test("agent events include sessionKey and agent.wait covers lifecycle flows", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-"));
     testState.sessionStorePath = path.join(dir, "sessions.json");
     await writeSessionStore({
       entries: {

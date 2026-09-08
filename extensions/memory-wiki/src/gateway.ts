@@ -1,9 +1,9 @@
 // Memory Wiki plugin module implements gateway behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { ErrorCodes, errorShape } from "openclaw/plugin-sdk/gateway-runtime";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/memory-host-core";
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import type { OpenClawConfig, OpenClawPluginApi } from "../api.js";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { ErrorCodes, errorShape } from "carapace/plugin-sdk/gateway-runtime";
+import { resolveDefaultAgentId } from "carapace/plugin-sdk/memory-host-core";
+import { readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
+import type { CarapaceConfig, CarapacePluginApi } from "../api.js";
 import { applyMemoryWikiMutation, normalizeMemoryWikiMutationInput } from "./apply.js";
 import { compileMemoryWikiVault } from "./compile.js";
 import {
@@ -38,7 +38,7 @@ const WRITE_SCOPE = "operator.write" as const;
 const ADMIN_SCOPE = "operator.admin" as const;
 const LOCAL_FILE_INGEST_SCOPE = ADMIN_SCOPE;
 type GatewayMethodContext = Parameters<
-  Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1]
+  Parameters<CarapacePluginApi["registerGatewayMethod"]>[1]
 >[0];
 type GatewayRespond = GatewayMethodContext["respond"];
 
@@ -100,18 +100,18 @@ function respondError(respond: GatewayRespond, error: unknown) {
 }
 
 export function registerMemoryWikiGatewayMethods(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   config: ResolvedMemoryWikiConfig;
-  appConfig?: OpenClawConfig;
-  getAppConfig?: () => OpenClawConfig | undefined;
-  resolveConfig?: (agentId?: string, appConfig?: OpenClawConfig) => ResolvedMemoryWikiConfig;
+  appConfig?: CarapaceConfig;
+  getAppConfig?: () => CarapaceConfig | undefined;
+  resolveConfig?: (agentId?: string, appConfig?: CarapaceConfig) => ResolvedMemoryWikiConfig;
   resolveSourceSyncSignal?: () => AbortSignal | undefined;
 }) {
   const { api, config: baseConfig } = params;
 
   const syncImportedSourcesInBackground = (
     config: ResolvedMemoryWikiConfig,
-    appConfig?: OpenClawConfig,
+    appConfig?: CarapaceConfig,
   ) => {
     const signal = params.resolveSourceSyncSignal?.();
     if (params.resolveSourceSyncSignal && !signal) {
@@ -135,7 +135,7 @@ export function registerMemoryWikiGatewayMethods(params: {
       return params.getAppConfig();
     }
     if (typeof api.runtime.config?.current === "function") {
-      return api.runtime.config.current() as OpenClawConfig;
+      return api.runtime.config.current() as CarapaceConfig;
     }
     return params.appConfig;
   };

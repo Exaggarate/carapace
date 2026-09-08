@@ -5,10 +5,10 @@
 // resolution) except the one true external boundary: the Gateway
 // approval-resolution call.
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearIMessageApprovalReactionTargetsForTest,
@@ -24,12 +24,12 @@ const resolverMocks = vi.hoisted(() => ({
   isApprovalNotFoundError: vi.fn(() => false),
 }));
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: resolverMocks.resolveApprovalOverGateway,
 }));
-vi.mock("openclaw/plugin-sdk/error-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/error-runtime")>(
-    "openclaw/plugin-sdk/error-runtime",
+vi.mock("carapace/plugin-sdk/error-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/error-runtime")>(
+    "carapace/plugin-sdk/error-runtime",
   );
   return {
     ...actual,
@@ -53,13 +53,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function withQueue<T>(fn: (queue: IMessageIngressQueue) => Promise<T>): Promise<T> {
-  const stateDir = tempDirs.make("openclaw-imessage-ingress-replay-");
+  const stateDir = tempDirs.make("carapace-imessage-ingress-replay-");
   const queue = createChannelIngressQueueForTests<IMessageIngressPayload>({
     channelId: "imessage",
     accountId: "default",
@@ -68,7 +68,7 @@ async function withQueue<T>(fn: (queue: IMessageIngressQueue) => Promise<T>): Pr
   try {
     return await fn(queue);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
 }
 

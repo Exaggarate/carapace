@@ -84,7 +84,7 @@ defineDiscordVoiceTests(
             client,
           ),
         expectedOwner: false,
-        toolNames: { include: ["exec"], exclude: ["gateway", "nodes", "openclaw"] },
+        toolNames: { include: ["exec"], exclude: ["gateway", "nodes", "carapace"] },
       },
       ...["*", " * "].map((allowFrom, index) => ({
         name:
@@ -116,7 +116,7 @@ defineDiscordVoiceTests(
             },
           ),
         expectedOwner: true,
-        toolNames: { include: ["gateway", "nodes", "openclaw"], exclude: [] },
+        toolNames: { include: ["gateway", "nodes", "carapace"], exclude: [] },
       },
       {
         name: "admits the Discord command-owner wildcard without owner voice authority",
@@ -131,7 +131,7 @@ defineDiscordVoiceTests(
             },
           ),
         expectedOwner: false,
-        toolNames: { include: ["exec"], exclude: ["gateway", "nodes", "openclaw"] },
+        toolNames: { include: ["exec"], exclude: ["gateway", "nodes", "carapace"] },
       },
       {
         name: "does not use another provider's command owners for Discord voice",
@@ -263,7 +263,7 @@ defineDiscordVoiceTests(
     });
 
     it("runs voice replies under Discord voice output policy", async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-discord-voice-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-discord-voice-"));
       const audioPath = path.join(tempDir, "reply.mp3");
       await fs.writeFile(audioPath, "voice");
       textToSpeechMock.mockResolvedValueOnce({ success: true, audioPath });
@@ -745,7 +745,7 @@ defineDiscordVoiceTests(
         {
           itemId: "item-stale-consult",
           callId: "call-stale-consult",
-          name: "openclaw_agent_consult",
+          name: "carapace_agent_consult",
           args: { question: "check stale state" },
         },
         realtimeSessionMock,

@@ -87,13 +87,13 @@ suite.define(() => {
         const input = page.locator(
           surface === "header"
             ? ".chat-pane__session-title-input"
-            : 'openclaw-modal-dialog[label="Rename session"] input',
+            : 'carapace-modal-dialog[label="Rename session"] input',
         );
         await expect.poll(() => input.inputValue()).toBe(original.label);
         await input.fill("Stale rename");
         await capture(
           "editing",
-          surface === "header" ? input : page.locator("openclaw-modal-dialog dialog"),
+          surface === "header" ? input : page.locator("carapace-modal-dialog dialog"),
           [input],
         );
 

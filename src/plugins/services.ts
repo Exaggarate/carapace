@@ -1,6 +1,6 @@
 /** Starts, stops, and inspects plugin service registrations. */
 import { STATE_DIR } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getGatewayProcessInstanceId } from "../gateway/process-instance.js";
 import type { GatewayPluginEventBroadcastFn } from "../gateway/server-broadcast-types.js";
 import {
@@ -29,7 +29,7 @@ import type { PluginRegistry } from "./registry.js";
 import { createPluginServiceCronGetter, type PluginServiceCronHost } from "./service-cron.js";
 import { createPluginServiceHealthGeneration } from "./service-health.js";
 import { encodeStartupTraceSegment } from "./startup-trace-segment.js";
-import type { OpenClawPluginServiceContext, PluginLogger } from "./types.js";
+import type { CarapacePluginServiceContext, PluginLogger } from "./types.js";
 
 const log = createSubsystemLogger("plugins");
 export const PLUGIN_SERVICE_REPLACEMENT_STOP_TIMEOUT_MS = 5_000;
@@ -37,7 +37,7 @@ export const PLUGIN_SERVICE_REPLACEMENT_STOP_TIMEOUT_MS = 5_000;
 class PluginServiceStopTimeoutError extends Error {}
 
 type TrustedExporterInternalDiagnostics = NonNullable<
-  OpenClawPluginServiceContext["internalDiagnostics"]
+  CarapacePluginServiceContext["internalDiagnostics"]
 > & {
   reportExporterHealth: (update: DiagnosticExporterHealthUpdate) => void;
 };
@@ -52,15 +52,15 @@ function createPluginLogger(): PluginLogger {
 }
 
 function createServiceContext(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   startupTrace?: PluginServiceStartupTrace;
   workspaceDir?: string;
   service: PluginServiceRegistration;
-  serviceHealth: NonNullable<OpenClawPluginServiceContext["serviceHealth"]>;
-  gatewayEvents?: OpenClawPluginServiceContext["gatewayEvents"];
-  getCron?: OpenClawPluginServiceContext["getCron"];
+  serviceHealth: NonNullable<CarapacePluginServiceContext["serviceHealth"]>;
+  gatewayEvents?: CarapacePluginServiceContext["gatewayEvents"];
+  getCron?: CarapacePluginServiceContext["getCron"];
   lease: PluginRuntimeCapabilityLease;
-}): OpenClawPluginServiceContext {
+}): CarapacePluginServiceContext {
   const isDiagnosticsExporter =
     params.service?.pluginId === params.service?.service.id &&
     (params.service?.service.id === "diagnostics-otel" ||
@@ -128,7 +128,7 @@ function createScopedGatewayEvents(params: {
   broadcast?: GatewayPluginEventBroadcastFn;
   lease: PluginRuntimeCapabilityLease;
 }): {
-  gatewayEvents?: OpenClawPluginServiceContext["gatewayEvents"];
+  gatewayEvents?: CarapacePluginServiceContext["gatewayEvents"];
 } {
   // No broadcaster means no gateway events at all: emits have nowhere to go and
   // sessions.changed is queued by the broadcaster itself. Omitting the facade
@@ -189,7 +189,7 @@ function createScopedPluginServiceStartupTrace(
 }
 
 export type PluginServicesHandle = {
-  reload: (config: OpenClawConfig, serviceIds: ReadonlySet<string>) => Promise<void>;
+  reload: (config: CarapaceConfig, serviceIds: ReadonlySet<string>) => Promise<void>;
   stop: (options?: { strict: true; deadlineAtMs: number }) => Promise<void>;
 };
 
@@ -200,7 +200,7 @@ type PluginServiceStartupTrace = {
 
 export async function startPluginServices(params: {
   registry: PluginRegistry;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   startupTrace?: PluginServiceStartupTrace;
   broadcastPluginEvent?: GatewayPluginEventBroadcastFn;
@@ -405,7 +405,7 @@ export async function startPluginServices(params: {
 
   const startService = async (
     entry: PluginServiceRegistration,
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     strict = false,
     index = ownedServices.length,
   ): Promise<boolean> => {

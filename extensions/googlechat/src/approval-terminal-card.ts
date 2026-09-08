@@ -1,9 +1,9 @@
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { escapeGoogleChatApprovalCardText as escapeGoogleChatText } from "./approval-card-text.js";
 import type { GoogleChatCardV2 } from "./types.js";
 
-const GOOGLECHAT_APPROVAL_CARD_ID = "openclaw-approval";
+const GOOGLECHAT_APPROVAL_CARD_ID = "carapace-approval";
 const MAX_TEXT_PARAGRAPH_CHARS = 1800;
 
 function truncateText(text: string): string {

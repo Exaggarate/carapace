@@ -17,13 +17,13 @@ describe("runEmbeddedAttempt bootstrap warning prompt assembly", () => {
         bootstrapFiles: [
           {
             name: "AGENTS.md",
-            path: "/tmp/openclaw-warning-workspace/AGENTS.md",
+            path: "/tmp/carapace-warning-workspace/AGENTS.md",
             content: "A".repeat(200),
             missing: false,
           },
         ],
         injectedFiles: [
-          { path: "/tmp/openclaw-warning-workspace/AGENTS.md", content: "A".repeat(20) },
+          { path: "/tmp/carapace-warning-workspace/AGENTS.md", content: "A".repeat(20) },
         ],
       }),
       bootstrapMaxChars: 50,

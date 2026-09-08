@@ -1,4 +1,4 @@
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import type { CronConfig } from "../../config/types.cron.js";
 import { resolveCronDeliveryPlan } from "../delivery-plan.js";
 import { type CronRetryOn, resolveCronExecutionRetryHint } from "../retry-hint.js";

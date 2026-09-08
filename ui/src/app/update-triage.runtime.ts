@@ -21,7 +21,7 @@ export function presentUpdateFailureTriage(
   if (!admission.isCurrent()) {
     return;
   }
-  if (!canCallGatewayMethod(context.gateway.snapshot, "openclaw.chat", "operator.admin")) {
+  if (!canCallGatewayMethod(context.gateway.snapshot, "carapace.chat", "operator.admin")) {
     context.navigate("updates");
     return;
   }

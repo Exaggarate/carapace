@@ -5,15 +5,15 @@ import {
   createChannelIngressMonitor,
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { isRecord } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { isRecord } from "carapace/plugin-sdk/channel-secret-basic-runtime";
 import {
   collectErrorGraphCandidates,
   extractErrorCode,
   formatErrorMessage,
-} from "openclaw/plugin-sdk/error-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { normalizeNullableString as nonEmptyString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/error-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import { normalizeNullableString as nonEmptyString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { getZalouserRuntime } from "./runtime.js";
 import type { ZaloInboundMessage } from "./types.js";
 import { normalizeZaloInboundMessage } from "./zalo-js.js";

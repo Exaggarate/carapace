@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isManagedGitHubProfileId } from "../config/github-identity-profile-id.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasErrnoCode } from "../infra/errno.js";
 import { listAgentIds, resolveAgentConfig } from "./agent-scope.js";
 import { listGitHubOAuthRecords } from "./github-oauth-records.js";
@@ -194,7 +194,7 @@ async function cleanupAgentProfileRegistry(params: {
 
 /** Retires only generations unreferenced by the immutable startup config snapshot. */
 export async function cleanupRetiredManagedGitHubProfiles(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<GitHubProfileCleanupResult> {
   const warnings: string[] = [];

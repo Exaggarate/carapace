@@ -4,7 +4,7 @@
  * Decides whether group/channel activity should wake the agent or remain a passive room event.
  */
 import { resolveAgentConfig } from "../../agents/agent-scope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ConversationFacts } from "../turn/types.js";
 import type { InboundEventKind } from "./kind.js";
 
@@ -49,7 +49,7 @@ export function classifyChannelInboundEvent(
  * Resolves the configured policy for unmentioned group/channel inbound events.
  */
 export function resolveUnmentionedGroupInboundPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
 }): InboundEventKind {
   const agentGroupChat = params.agentId

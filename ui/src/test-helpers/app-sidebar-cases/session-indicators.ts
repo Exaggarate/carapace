@@ -88,7 +88,7 @@ describe("AppSidebar session indicators", () => {
       row.createdActor = { type: "human", id: "profile-ada", label: "Ada" };
       row.owner = { actor: row.createdActor };
       if (row.key !== ownerKey) {
-        row.channelAvatarUrl = `/__openclaw__/channel-avatar/${encodeURIComponent(row.key)}`;
+        row.channelAvatarUrl = `/__carapace__/channel-avatar/${encodeURIComponent(row.key)}`;
       }
     }
     const iconRow = result.sessions.find((row) => row.key === iconKey);
@@ -126,7 +126,7 @@ describe("AppSidebar session indicators", () => {
 
     const icon = sidebar.querySelector(`[data-session-key="${iconKey}"]`);
     expect(icon?.querySelector(".session-glyph__emoji")?.textContent).toBe("🦞");
-    expect(icon?.querySelector("openclaw-channel-avatar")).toBeNull();
+    expect(icon?.querySelector("carapace-channel-avatar")).toBeNull();
     expect(icon?.querySelector(".session-owner-chip")).toBeNull();
 
     const avatar = sidebar.querySelector(`[data-session-key="${avatarKey}"]`);
@@ -137,10 +137,10 @@ describe("AppSidebar session indicators", () => {
     expect(avatar?.querySelector(".session-owner-chip")).toBeNull();
 
     const owner = sidebar.querySelector(`[data-session-key="${ownerKey}"]`);
-    expect(owner?.querySelector("openclaw-channel-avatar")).toBeNull();
+    expect(owner?.querySelector("carapace-channel-avatar")).toBeNull();
     expect(owner?.querySelector(".session-owner-chip")).not.toBeNull();
     expect(fetchMock).toHaveBeenCalledWith(
-      `/__openclaw__/channel-avatar/${encodeURIComponent(avatarKey)}`,
+      `/__carapace__/channel-avatar/${encodeURIComponent(avatarKey)}`,
       {
         headers: { Authorization: "Bearer avatar-token" },
         signal: expect.any(AbortSignal),
@@ -150,8 +150,8 @@ describe("AppSidebar session indicators", () => {
 
   it("refetches a mounted channel avatar when its route revision changes", async () => {
     const avatarKey = "agent:main:avatar-revision";
-    const missingUrl = `/__openclaw__/channel-avatar/${encodeURIComponent(avatarKey)}?v=old`;
-    const restoredUrl = `/__openclaw__/channel-avatar/${encodeURIComponent(avatarKey)}?v=new`;
+    const missingUrl = `/__carapace__/channel-avatar/${encodeURIComponent(avatarKey)}?v=old`;
+    const restoredUrl = `/__carapace__/channel-avatar/${encodeURIComponent(avatarKey)}?v=new`;
     const sessions = createSessionsHarness("main", [avatarKey]);
     const result = sessions.sessions.state.result;
     if (!result) {
@@ -237,7 +237,7 @@ describe("AppSidebar session indicators", () => {
     if (!row) {
       throw new Error("expected avatar row");
     }
-    row.channelAvatarUrl = `/__openclaw__/channel-avatar/${encodeURIComponent(avatarKey)}`;
+    row.channelAvatarUrl = `/__carapace__/channel-avatar/${encodeURIComponent(avatarKey)}`;
     row.createdActor = { type: "human", id: "profile-ada", label: "Ada" };
     row.owner = { actor: row.createdActor };
     result.owners = [
@@ -255,7 +255,7 @@ describe("AppSidebar session indicators", () => {
     const { sidebar } = await mountSidebar(gatewayHarness.gateway, sessions.sessions);
 
     const pendingRow = sidebar.querySelector(`[data-session-key="${avatarKey}"]`);
-    expect(pendingRow?.querySelector("openclaw-channel-avatar")).not.toBeNull();
+    expect(pendingRow?.querySelector("carapace-channel-avatar")).not.toBeNull();
     expect(pendingRow?.querySelector(".channel-avatar")).toBeNull();
     await waitForFast(() => {
       expect(pendingRow?.querySelector(".session-owner-chip")).not.toBeNull();
@@ -585,8 +585,8 @@ describe("AppSidebar session indicators", () => {
             pullRequests: [
               {
                 number: 1,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 branch: "feature/test",
                 title: "Test",
                 url: "https://example.test/pr/1",

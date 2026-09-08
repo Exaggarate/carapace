@@ -1,6 +1,6 @@
-import { normalizeUsage, type AgentHarnessV2 } from "openclaw/plugin-sdk/agent-harness-runtime";
-import * as agentAuth from "openclaw/plugin-sdk/agent-runtime";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { normalizeUsage, type AgentHarnessV2 } from "carapace/plugin-sdk/agent-harness-runtime";
+import * as agentAuth from "carapace/plugin-sdk/agent-runtime";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import * as authBridge from "./auth-bridge.js";

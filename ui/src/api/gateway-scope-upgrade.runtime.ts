@@ -1,5 +1,5 @@
-import type { GatewayProtocolRequestOptions } from "@openclaw/gateway-client/browser";
-import { GatewayScopeUpgrade } from "@openclaw/gateway-client/scope-upgrade";
+import type { GatewayProtocolRequestOptions } from "@carapace/gateway-client/browser";
+import { GatewayScopeUpgrade } from "@carapace/gateway-client/scope-upgrade";
 import {
   clearDeviceAuthToken,
   loadDeviceAuthToken,

@@ -11,7 +11,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import * as z from "zod/v4";
 
-const READY_TYPE = "openclaw-mcp-parity-ready";
+const READY_TYPE = "carapace-mcp-parity-ready";
 const APP_URI = "ui://parity/app";
 
 function readOption(name) {
@@ -108,7 +108,7 @@ function createProbeServer(label, catalogState = { rotated: false }, control = {
   catalogState.generations ??= {};
   const generation = (catalogState.generations[label] ?? 0) + 1;
   catalogState.generations[label] = generation;
-  const server = new McpServer({ name: `openclaw-mcp-parity-${label}`, version: "1.0.0" });
+  const server = new McpServer({ name: `carapace-mcp-parity-${label}`, version: "1.0.0" });
   const initialToolConfig = {
     description: `MCP parity probe for ${label}`,
     inputSchema: { marker: z.string() },

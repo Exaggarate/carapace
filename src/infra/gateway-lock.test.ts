@@ -20,7 +20,7 @@ import { openNodeSqliteDatabase } from "./node-sqlite.js";
 type GatewayLock = NonNullable<Awaited<ReturnType<typeof acquireGatewayLock>>>;
 type GatewayLockOptions = NonNullable<Parameters<typeof acquireGatewayLock>[0]>;
 
-const fixtureRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-gateway-lock-" });
+const fixtureRootTracker = createSuiteTempRootTracker({ prefix: "carapace-gateway-lock-" });
 const realNow = Date.now.bind(Date);
 
 function resolveTestLockDir(env: NodeJS.ProcessEnv) {
@@ -29,12 +29,12 @@ function resolveTestLockDir(env: NodeJS.ProcessEnv) {
 
 async function makeEnv() {
   const dir = await fixtureRootTracker.make("case");
-  const configPath = path.join(dir, "openclaw.json");
+  const configPath = path.join(dir, "carapace.json");
   await fs.writeFile(configPath, "{}", "utf8");
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: dir,
-    OPENCLAW_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: dir,
+    CARAPACE_CONFIG_PATH: configPath,
   };
 }
 
@@ -162,7 +162,7 @@ describe("gateway lock", () => {
 
     const pending = acquireForTest(env, {
       timeoutMs: 15,
-      readProcessCmdline: () => ["openclaw", "gateway", "run"],
+      readProcessCmdline: () => ["carapace", "gateway", "run"],
     });
     await expect(pending).rejects.toBeInstanceOf(GatewayLockError);
 
@@ -179,13 +179,13 @@ describe("gateway lock", () => {
     await fs.writeFile(configB, "{}", "utf8");
     const envA = {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: configA,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configA,
+      CARAPACE_STATE_DIR: stateDir,
     };
     const envB = {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: configB,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configB,
+      CARAPACE_STATE_DIR: stateDir,
     };
     const lock = expectGatewayLock(
       await acquireForTest(envA, {
@@ -197,7 +197,7 @@ describe("gateway lock", () => {
       await expect(
         acquireForTest(envB, {
           platform: "darwin",
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
           timeoutMs: 15,
         }),
       ).rejects.toBeInstanceOf(GatewayLockError);
@@ -219,13 +219,13 @@ describe("gateway lock", () => {
       await fs.symlink(stateDir, stateAlias);
       const envA = {
         ...process.env,
-        OPENCLAW_CONFIG_PATH: configA,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configA,
+        CARAPACE_STATE_DIR: stateDir,
       };
       const envB = {
         ...process.env,
-        OPENCLAW_CONFIG_PATH: configB,
-        OPENCLAW_STATE_DIR: stateAlias,
+        CARAPACE_CONFIG_PATH: configB,
+        CARAPACE_STATE_DIR: stateAlias,
       };
       const lock = expectGatewayLock(await acquireForTest(envA, { platform: "darwin" }));
 
@@ -233,7 +233,7 @@ describe("gateway lock", () => {
         await expect(
           acquireForTest(envB, {
             platform: "darwin",
-            readProcessCmdline: () => ["openclaw-gateway"],
+            readProcessCmdline: () => ["carapace-gateway"],
             timeoutMs: 15,
           }),
         ).rejects.toBeInstanceOf(GatewayLockError);
@@ -249,7 +249,7 @@ describe("gateway lock", () => {
       await acquireForTest(env, {
         platform: "darwin",
         port: 48789,
-        readProcessCmdline: () => ["openclaw-gateway"],
+        readProcessCmdline: () => ["carapace-gateway"],
       }),
     );
 
@@ -259,7 +259,7 @@ describe("gateway lock", () => {
           env,
           lockDir: resolveTestLockDir(env),
           platform: "darwin",
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
         }),
       ).resolves.toBe(48789);
     } finally {
@@ -272,7 +272,7 @@ describe("gateway lock", () => {
     const options = {
       platform: "darwin" as const,
       port: 48789,
-      readProcessCmdline: () => ["openclaw-gateway"],
+      readProcessCmdline: () => ["carapace-gateway"],
     };
     const firstLock = expectGatewayLock(await acquireForTest(env, options));
     const firstConfigPayload = JSON.parse(await fs.readFile(firstLock.lockPath, "utf8")) as {
@@ -323,14 +323,14 @@ describe("gateway lock", () => {
   it("reads the active runtime port from state ownership without a config lock", async () => {
     const env = {
       ...(await makeEnv()),
-      OPENCLAW_ALLOW_MULTI_GATEWAY: "1",
+      CARAPACE_ALLOW_MULTI_GATEWAY: "1",
       VITEST: "",
     };
     const lock = expectGatewayLock(
       await acquireForTest(env, {
         platform: "darwin",
         port: 48789,
-        readProcessCmdline: () => ["openclaw-gateway"],
+        readProcessCmdline: () => ["carapace-gateway"],
       }),
     );
 
@@ -342,7 +342,7 @@ describe("gateway lock", () => {
           env,
           lockDir: resolveTestLockDir(env),
           platform: "darwin",
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
         }),
       ).resolves.toBe(48789);
     } finally {
@@ -354,12 +354,12 @@ describe("gateway lock", () => {
     const envA = await makeEnv();
     const configB = path.join(resolveStateDir(envA), "gateway-b.json");
     await fs.writeFile(configB, "{}", "utf8");
-    const envB = { ...envA, OPENCLAW_CONFIG_PATH: configB };
+    const envB = { ...envA, CARAPACE_CONFIG_PATH: configB };
     const lock = expectGatewayLock(
       await acquireForTest(envA, {
         platform: "darwin",
         port: 48789,
-        readProcessCmdline: () => ["openclaw-gateway"],
+        readProcessCmdline: () => ["carapace-gateway"],
       }),
     );
 
@@ -371,7 +371,7 @@ describe("gateway lock", () => {
           env: envB,
           lockDir: resolveTestLockDir(envB),
           platform: "darwin",
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
         }),
       ).resolves.toBe(48789);
     } finally {
@@ -390,7 +390,7 @@ describe("gateway lock", () => {
           platform: "darwin",
           port: 48789,
           timeoutMs: 15,
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
         }),
       ).rejects.toBeInstanceOf(GatewayLockError);
       expect(connectSpy).not.toHaveBeenCalled();
@@ -415,7 +415,7 @@ describe("gateway lock", () => {
           platform: "darwin",
           port: 28789,
           timeoutMs: 15,
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
         }),
       ).rejects.toBeInstanceOf(GatewayLockError);
       expect(connectSpy).not.toHaveBeenCalled();
@@ -441,7 +441,7 @@ describe("gateway lock", () => {
           platform: "darwin",
           port: 18789,
           timeoutMs: 15,
-          readProcessCmdline: () => ["openclaw", "doctor", "--state-sqlite", "compact"],
+          readProcessCmdline: () => ["carapace", "doctor", "--state-sqlite", "compact"],
         }),
       ).rejects.toBeInstanceOf(GatewayLockError);
       expect(connectSpy).not.toHaveBeenCalled();
@@ -493,7 +493,7 @@ describe("gateway lock", () => {
         lockDir: resolveTestLockDir(env),
         platform: "linux" as const,
         readProcessStartTime: () => (state === "dead" ? 222 : null),
-        readProcessCmdline: () => (state === "unknown owner" ? null : ["openclaw-gateway"]),
+        readProcessCmdline: () => (state === "unknown owner" ? null : ["carapace-gateway"]),
       };
       await expect(readActiveGatewayLockPort(options)).resolves.toBe(
         expected === "active" ? 48789 : undefined,
@@ -662,7 +662,7 @@ describe("gateway lock", () => {
         readProcessStartTime: () => null,
         readProcessCmdline: () => [
           "node",
-          "/srv/openclaw/openclaw.mjs",
+          "/srv/carapace/carapace.mjs",
           "doctor",
           "--state-sqlite",
           "compact",
@@ -714,7 +714,7 @@ describe("gateway lock", () => {
 
     const lock = await acquireForTest(env, {
       platform: "win32",
-      readProcessCmdline: () => ["openclaw", "doctor", "--state-sqlite", "compact"],
+      readProcessCmdline: () => ["carapace", "doctor", "--state-sqlite", "compact"],
       readProcessStartTime: () => 222,
       timeoutMs: 80,
     });
@@ -852,7 +852,7 @@ describe("gateway lock", () => {
         staleMs: 10_000,
         platform: "darwin",
         port: 18789,
-        readProcessCmdline: () => ["/usr/local/bin/openclaw", "gateway", "run"],
+        readProcessCmdline: () => ["/usr/local/bin/carapace", "gateway", "run"],
         readProcessStartTime: () => 111,
       });
       await expect(pending).rejects.toBeInstanceOf(GatewayLockError);
@@ -881,7 +881,7 @@ describe("gateway lock", () => {
           now = 10;
         },
         lockDir: resolveTestLockDir(env),
-        readProcessCmdline: () => ["/usr/local/bin/openclaw", "gateway", "run"],
+        readProcessCmdline: () => ["/usr/local/bin/carapace", "gateway", "run"],
         readProcessStartTime: () => 111,
       }),
     ).rejects.toBeInstanceOf(GatewayLockError);
@@ -895,7 +895,7 @@ describe("gateway lock", () => {
     const lock = expectGatewayLock(
       await acquireGatewayLock({
         allowInTests: true,
-        env: { ...env, OPENCLAW_ALLOW_MULTI_GATEWAY: "1", VITEST: "" },
+        env: { ...env, CARAPACE_ALLOW_MULTI_GATEWAY: "1", VITEST: "" },
         lockDir: resolveTestLockDir(env),
       }),
     );
@@ -910,7 +910,7 @@ describe("gateway lock", () => {
           env,
           lockDir: resolveTestLockDir(env),
           platform: "darwin",
-          readProcessCmdline: () => ["openclaw-gateway"],
+          readProcessCmdline: () => ["carapace-gateway"],
           timeoutMs: 15,
         }),
       ).rejects.toBeInstanceOf(GatewayLockError);
@@ -1033,7 +1033,7 @@ describe("gateway lock", () => {
       platform: "win32",
       port: 18789,
       readProcessCmdline: () => [
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\openclaw.cmd",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\carapace.cmd",
         "gateway",
         "run",
       ],
@@ -1098,7 +1098,7 @@ describe("gateway lock", () => {
       staleMs: 10_000,
       platform: "darwin",
       port: 18789,
-      readProcessCmdline: () => ["/usr/local/bin/openclaw", "gateway", "run", "--port", "18789"],
+      readProcessCmdline: () => ["/usr/local/bin/carapace", "gateway", "run", "--port", "18789"],
       readProcessStartTime: () => 111,
     });
     await expect(pending).rejects.toBeInstanceOf(GatewayLockError);

@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginDoctorStateMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { resolvePreferredOpenClawTmpDir, tempWorkspace } from "openclaw/plugin-sdk/temp-path";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginDoctorStateMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { resolvePreferredCarapaceTmpDir, tempWorkspace } from "carapace/plugin-sdk/temp-path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   legacyConfigRules,
@@ -12,12 +12,12 @@ import {
 } from "./doctor-contract-api.js";
 
 const migration = stateMigrations[0];
-const canvasDoctorWorkspaceRoot = resolvePreferredOpenClawTmpDir();
+const canvasDoctorWorkspaceRoot = resolvePreferredCarapaceTmpDir();
 
 function createCanvasDoctorWorkspace(kind: "state" | "custom") {
   return tempWorkspace({
     rootDir: canvasDoctorWorkspaceRoot,
-    prefix: `openclaw-canvas-doctor-${kind}-`,
+    prefix: `carapace-canvas-doctor-${kind}-`,
   });
 }
 
@@ -45,7 +45,7 @@ describe("Canvas doctor config repair", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = normalizeCompatibilityConfig({ cfg });
 
@@ -77,8 +77,8 @@ function migrationParams(params: {
             canvas: { config: { host: { root: params.customRoot } } },
           },
         },
-      } as OpenClawConfig)
-    : ({} as OpenClawConfig);
+      } as CarapaceConfig)
+    : ({} as CarapaceConfig);
   return {
     config,
     env: process.env,

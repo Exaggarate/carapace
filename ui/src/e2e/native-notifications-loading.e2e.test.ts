@@ -45,10 +45,10 @@ suite.define(() => {
               const messages: NotificationProof[] = [];
               Object.assign(window, {
                 notificationProof: messages,
-                __OPENCLAW_NATIVE_NOTIFICATIONS__: { permission: "notDetermined" },
+                __CARAPACE_NATIVE_NOTIFICATIONS__: { permission: "notDetermined" },
                 webkit: {
                   messageHandlers: {
-                    openclawNotifications: {
+                    carapaceNotifications: {
                       postMessage(message: { type: string }) {
                         messages.push({
                           type: message.type,

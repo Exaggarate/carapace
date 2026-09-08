@@ -1,13 +1,13 @@
 // Discord plugin module implements send.components behavior.
 import { ChannelType } from "discord-api-types/v10";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import type { MarkdownTableMode, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import type { OutboundMediaAccess } from "openclaw/plugin-sdk/media-runtime";
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { ChunkMode } from "openclaw/plugin-sdk/reply-chunking";
-import { hasNonEmptyString, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { recordChannelActivity } from "carapace/plugin-sdk/channel-activity-runtime";
+import type { MarkdownTableMode, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
+import type { OutboundMediaAccess } from "carapace/plugin-sdk/media-runtime";
+import { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import type { ChunkMode } from "carapace/plugin-sdk/reply-chunking";
+import { hasNonEmptyString, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { registerDiscordComponentEntries } from "./components-registry.js";
 import {
   buildDiscordComponentMessage,
@@ -136,7 +136,7 @@ function collapseClassicComponentText(spec: DiscordComponentMessageSpec): string
 }
 
 type DiscordComponentSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   token?: string;
   rest?: RequestClient;

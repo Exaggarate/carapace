@@ -1,8 +1,8 @@
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 /**
  * Handles assistant message lifecycle boundaries, and final reconciliation.
  */
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
+import { resolveSendableOutboundReplyParts } from "carapace/plugin-sdk/reply-payload";
 import { createInlineCodeState } from "../../packages/markdown-core/src/code-spans.js";
 import { parseReplyDirectives } from "../auto-reply/reply/reply-directives.js";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
@@ -23,7 +23,7 @@ import {
   extractStandaloneMessageToolText,
   hasMessageToolOnlySourceDelivery,
   isOpenAiCompletionsAssistantMessage,
-  isSubscribeTranscriptOnlyOpenClawAssistantMessage,
+  isSubscribeTranscriptOnlyCarapaceAssistantMessage,
   replaceBlockReplyBuffer,
   scopeAssistantMessageToStreamBlock,
   shouldSuppressDeterministicApprovalOutput,
@@ -44,7 +44,7 @@ export function handleMessageStart(
   evt: AgentEvent & { message: AgentMessage },
 ) {
   const msg = evt.message;
-  if (msg?.role !== "assistant" || isSubscribeTranscriptOnlyOpenClawAssistantMessage(msg)) {
+  if (msg?.role !== "assistant" || isSubscribeTranscriptOnlyCarapaceAssistantMessage(msg)) {
     return;
   }
 
@@ -60,7 +60,7 @@ export function handleMessageEnd(
   evt: AgentEvent & { message: AgentMessage },
 ): void | Promise<void> {
   const msg = evt.message;
-  if (msg?.role !== "assistant" || isSubscribeTranscriptOnlyOpenClawAssistantMessage(msg)) {
+  if (msg?.role !== "assistant" || isSubscribeTranscriptOnlyCarapaceAssistantMessage(msg)) {
     return;
   }
 

@@ -43,12 +43,12 @@ type MatrixReactionClient = MatrixReactionParams["client"];
 type MatrixReactionCore = MatrixReactionParams["core"];
 type MatrixReactionEvent = MatrixReactionParams["event"];
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: (...args: unknown[]) => resolveMatrixApproval(...args),
 }));
-vi.mock("openclaw/plugin-sdk/error-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/error-runtime")>(
-    "openclaw/plugin-sdk/error-runtime",
+vi.mock("carapace/plugin-sdk/error-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/error-runtime")>(
+    "carapace/plugin-sdk/error-runtime",
   );
   return {
     ...actual,

@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 extension GatewayConnectionController {
     static func resolvedManualPort(host: String, port: Int) -> Int? {

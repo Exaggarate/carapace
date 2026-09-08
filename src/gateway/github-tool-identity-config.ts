@@ -7,7 +7,7 @@ import { resolveMutableAgentEntry } from "../agents/agent-scope.js";
 import { applyAgentConfig } from "../commands/agents.config.js";
 import { unsetConfigValueAtPath } from "../config/config-paths.js";
 import { mutateConfigFileWithRetry } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GitHubToolIdentityConfig } from "../config/types.tools.js";
 
 function sameIdentity(
@@ -23,7 +23,7 @@ export async function updateGitHubToolIdentityConfig(params: {
   identity?: GitHubToolIdentityConfig;
   expectedIdentity?: GitHubToolIdentityConfig | null;
   agentLifecycleBinding?: AgentLifecycleBinding;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const mutation = await mutateConfigFileWithRetry({
     afterWrite: { mode: "auto" },
     mutate: (draft) => {

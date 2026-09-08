@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { createTestApprovalManager } from "./exec-approval-manager.test-support.js";
 
@@ -19,7 +19,7 @@ describe("ExecApprovalManager timeout expiry publication", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     for (const dir of tempDirs.splice(0)) {
-      closeOpenClawStateDatabaseByPath(path.join(dir, "s.sqlite"));
+      closeCarapaceStateDatabaseByPath(path.join(dir, "s.sqlite"));
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
@@ -48,7 +48,7 @@ describe("ExecApprovalManager timeout expiry publication", () => {
     const timers = installTimerMocks();
     vi.spyOn(Date, "now").mockReturnValue(1_000);
     const expirations: Array<{ recordId: string; status: string; requestCommand?: string }> = [];
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-expired-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-expired-"));
     tempDirs.push(dir);
     const manager = new ExecApprovalManager({
       approvalKind: "exec",

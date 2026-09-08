@@ -1,13 +1,13 @@
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createTestPluginApi } from "../plugin-sdk/plugin-test-api.js";
 import { clearLiveCatalogCacheForTests } from "../plugin-sdk/provider-catalog-shared.js";
 import { loadBundledPluginPublicSurface } from "../plugin-sdk/test-helpers/public-surface-loader.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
-import type { OpenClawPluginDefinition, ProviderPlugin } from "../plugins/types.js";
+import type { CarapacePluginDefinition, ProviderPlugin } from "../plugins/types.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { withFetchPreconnect } from "../test-utils/fetch-mock.js";
 import {
@@ -16,7 +16,7 @@ import {
 } from "./auth-profiles/runtime-snapshots.js";
 import type { AuthProfileStore } from "./auth-profiles/types.js";
 import { NON_ENV_SECRETREF_MARKER } from "./model-auth-markers.js";
-import { planOpenClawModelsJson } from "./models-config.plan.js";
+import { planCarapaceModelsJson } from "./models-config.plan.js";
 import { encodePluginModelCatalogRelativePath } from "./plugin-model-catalog.js";
 
 const discovery = vi.hoisted(() => ({ providers: new Array<ProviderPlugin>() }));
@@ -28,7 +28,7 @@ describe("registered Ollama catalog SecretRef ownership", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
   beforeAll(async () => {
     const { default: plugin } = await loadBundledPluginPublicSurface<{
-      default: OpenClawPluginDefinition;
+      default: CarapacePluginDefinition;
     }>({ pluginId: "ollama", artifactBasename: "index.js" });
     expectDefined(
       plugin.register,
@@ -72,7 +72,7 @@ describe("registered Ollama catalog SecretRef ownership", () => {
     "keeps $owner refs out of writable plans at $baseUrl (explicit=$explicitModels, value=$runtimeKey)",
     async ({ owner, baseUrl, explicitModels, runtimeKey }) => {
       const stateDir = tempDirs.make("ollama-catalog-ref-");
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir, OLLAMA_API_KEY: undefined }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir, OLLAMA_API_KEY: undefined }, async () => {
         const agentDir = path.join(stateDir, "agent");
         const ref = { source: "store", provider: "default", id: "OLLAMA_DISCOVERY_KEY" } as const;
         const profile = {
@@ -103,14 +103,14 @@ describe("registered Ollama catalog SecretRef ownership", () => {
           maxTokens: 2048,
         };
         const provider = { baseUrl, models: explicitModels ? [model] : [] };
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           models: {
             providers: {
               ollama: { ...provider, ...(owner === "config" ? { apiKey: ref } : {}) },
             },
           },
         };
-        const discoveryAuthConfig: OpenClawConfig =
+        const discoveryAuthConfig: CarapaceConfig =
           owner === "config"
             ? { models: { providers: { ollama: { ...provider, apiKey: runtimeKey } } } }
             : cfg;
@@ -129,7 +129,7 @@ describe("registered Ollama catalog SecretRef ownership", () => {
         });
         vi.stubGlobal("fetch", withFetchPreconnect(fetchMock));
         try {
-          const plan = await planOpenClawModelsJson({
+          const plan = await planCarapaceModelsJson({
             context: {
               cfg,
               discoveryAuthConfig,

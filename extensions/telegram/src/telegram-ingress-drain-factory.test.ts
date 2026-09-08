@@ -1,8 +1,8 @@
 /** Verifies callback admission and the grammY terminal outcome handoff. */
 import type { ServerResponse } from "node:http";
 import { Api } from "grammy";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ensureTelegramMessageProcessingResult,

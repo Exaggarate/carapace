@@ -3,13 +3,13 @@ import * as sessionsConfig from "../config/sessions.js";
 import * as sessionAccessor from "../config/sessions/session-accessor.js";
 import { setCanonicalSqliteSessionMainKey } from "../config/sessions/session-canonical-key.js";
 import { addSessionMember, removeSessionMember } from "../config/sessions/session-sharing-store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { GatewayClient } from "./server-methods/types.js";
 import {
   authorizeResolvedSessionMutation,
@@ -24,7 +24,7 @@ import { canAccessTaskRequesterSession } from "./task-session-access.js";
 afterEach(() => {
   vi.restoreAllMocks();
   invalidateSessionSharingSnapshot();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 function identifiedClient(userId: string): GatewayClient {
@@ -33,7 +33,7 @@ function identifiedClient(userId: string): GatewayClient {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -55,7 +55,7 @@ describe("session event authorization store work", () => {
   it.each([1, 2, 32])(
     "bounds metadata work for %i event targets while refreshing membership",
     async (targetCount) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const keys = Array.from(
           { length: 64 },
           (_, index) => `agent:main:event-${targetCount}-${index}`,
@@ -130,7 +130,7 @@ describe("session mutation authorization store caches", () => {
   it.each(["sessions.patch", "chat.send", "sessions.patchMany"])(
     "bounds single-target metadata work and refreshes every %s guard",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const sessionKey = "agent:main:scalar-authorization";
         const entry = { sessionId: "scalar-authorization", updatedAt: 1 };
         await sessionAccessor.upsertSessionEntryCore({ agentId: "main", sessionKey }, entry);
@@ -182,8 +182,8 @@ describe("session mutation authorization store caches", () => {
     { key: "agent:research:ordinary", agentId: " ", expectedAgent: "research" },
     { key: "agent:main:main", agentId: " ", expectedAgent: "ops" },
   ])("preserves the requested owner for $key with explicit agent $agentId", async (target) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const cfg: CarapaceConfig = {
         session: { scope: "global" },
         agents: { entries: { ops: { default: true }, research: {} } },
       };
@@ -221,8 +221,8 @@ describe("session mutation authorization store caches", () => {
   it.each(["research", "ops"])(
     "checks %s participation in the selected global publication",
     async (viewer) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-        const cfg: OpenClawConfig = {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+        const cfg: CarapaceConfig = {
           session: { scope: "global" },
           agents: { entries: { ops: { default: true }, research: {} } },
         };
@@ -276,13 +276,13 @@ describe("session mutation authorization store caches", () => {
   it.each(["warm", "cold canonical", "cold main alias"] as const)(
     "bounds task visibility reads and rereads changed access with %s stores",
     async (mode) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const sessionKey = "agent:main:task-requester";
         const cfg = rolePolicyConfig();
         if (mode === "cold main alias") {
           cfg.session = { mainKey: "task-requester" };
           setCanonicalSqliteSessionMainKey(
-            openOpenClawAgentDatabase({ agentId: "main" }),
+            openCarapaceAgentDatabase({ agentId: "main" }),
             "task-requester",
           );
         }
@@ -310,7 +310,7 @@ describe("session mutation authorization store caches", () => {
             sessionAccessor.loadExactSessionEntryReadOnly({ agentId: "main", sessionKey }),
           ).toBeDefined();
         } else {
-          closeOpenClawAgentDatabasesForTest();
+          closeCarapaceAgentDatabasesForTest();
         }
         const access = {
           cfg,
@@ -329,7 +329,7 @@ describe("session mutation authorization store caches", () => {
           parseSpy.mock.calls.filter(([value]) => value.includes("unrelated-task-access-session-")),
         ).toHaveLength(mode === "warm" ? 0 : 48);
         if (mode !== "warm") {
-          expect(listOpenClawAgentDatabasesForTest()).toHaveLength(0);
+          expect(listCarapaceAgentDatabasesForTest()).toHaveLength(0);
         }
         await sessionAccessor.upsertSessionEntryCore(
           { agentId: "main", sessionKey },
@@ -342,7 +342,7 @@ describe("session mutation authorization store caches", () => {
   );
 
   it("fails a patchMany request when a nested target is incognito", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:dashboard:incognito-patch-many";
       await sessionAccessor.upsertSessionEntryCore(
         { agentId: "main", sessionKey },
@@ -362,7 +362,7 @@ describe("session mutation authorization store caches", () => {
   });
 
   it("authorizes every patchMany target before dispatch", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sharedKey = "agent:main:batch-shared";
       const draftKey = "agent:main:batch-private";
       await sessionAccessor.upsertSessionEntryCore(
@@ -398,7 +398,7 @@ describe("session mutation authorization store caches", () => {
   });
 
   it("reuses metadata for padded patchMany targets and fences replacements", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:padded-batch-target";
       const prompt = "authorization does not need this prompt snapshot".repeat(512);
       await sessionAccessor.upsertSessionEntryCore(
@@ -441,7 +441,7 @@ describe("session mutation authorization store caches", () => {
   });
 
   it("bounds malformed patchMany target discovery before schema validation", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const hiddenKey = "agent:main:dashboard:incognito-over-limit";
       await sessionAccessor.upsertSessionEntryCore(
         { agentId: "main", sessionKey: hiddenKey },
@@ -465,7 +465,7 @@ describe("session mutation authorization store caches", () => {
   });
 
   it("materializes and discovers each store once when one request resolves multiple targets", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       for (const [sessionKey, sessionId] of [
         ["agent:main:cache-one", "session-cache-one"],
         ["agent:main:cache-two", "session-cache-two"],
@@ -542,7 +542,7 @@ describe("session mutation authorization store caches", () => {
       },
     },
   ])("matches uncached $name authorization", async ({ sessionKey, entry }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await sessionAccessor.upsertSessionEntryCore({ agentId: "main", sessionKey }, entry);
       const cfg = {};
       const requestClient = identifiedClient("viewer@example.com");

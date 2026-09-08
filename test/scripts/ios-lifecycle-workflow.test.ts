@@ -16,7 +16,7 @@ const watchStep = workflow.jobs["ios-build"]?.steps.find(
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function runWatchStep(mode = "ready") {
-  const root = tempDirs.make("openclaw-watch-workflow-");
+  const root = tempDirs.make("carapace-watch-workflow-");
   const bin = path.join(root, "bin");
   const product = path.join(root, "project derived data", "Watch Product.app");
   mkdirSync(bin, { recursive: true });
@@ -43,7 +43,7 @@ if (tool === "xcrun") {
   }
 } else if (args.includes("-showBuildSettings")) {
   const product = {
-    target: "OpenClawWatchApp",
+    target: "CarapaceWatchApp",
     buildSettings: {
       TARGET_BUILD_DIR: mode === "relative-product" ? "relative" : path.join(root, "project derived data"),
       FULL_PRODUCT_NAME: "Watch Product.app"
@@ -55,7 +55,7 @@ if (tool === "xcrun") {
 } else if (args.includes("build-for-testing")) {
   const derivedIndex = args.indexOf("-derivedDataPath");
   if (derivedIndex >= 0) {
-    mkdirSync(path.join(args[derivedIndex + 1], "Build/Products/Debug-watchsimulator/OpenClawWatchApp.app"), { recursive: true });
+    mkdirSync(path.join(args[derivedIndex + 1], "Build/Products/Debug-watchsimulator/CarapaceWatchApp.app"), { recursive: true });
   }
 }
 `,
@@ -115,21 +115,21 @@ describe.skipIf(process.platform === "win32")("Watch simulator workflow", () => 
     )) {
       expect(command.args).toEqual(
         expect.arrayContaining([
-          "OpenClawWatchApp",
+          "CarapaceWatchApp",
           "Debug",
           "platform=watchOS Simulator,id=watch-fixture",
           "-parallel-testing-enabled",
           "NO",
-          "-only-testing:OpenClawWatchTests/WatchInboxStoreOperationTests",
-          "-only-testing:OpenClawWatchTests/WatchRealtimeMediaTests",
-          "-only-testing:OpenClawWatchTests/WatchGatewayConfigurationTests",
+          "-only-testing:CarapaceWatchTests/WatchInboxStoreOperationTests",
+          "-only-testing:CarapaceWatchTests/WatchRealtimeMediaTests",
+          "-only-testing:CarapaceWatchTests/WatchGatewayConfigurationTests",
           "CODE_SIGNING_ALLOWED=NO",
         ]),
       );
     }
     expect(
       xcodeCommands.find((command) => command.args.includes("test-without-building"))?.args,
-    ).toContain("apps/ios/build/LifecycleTestResults/OpenClawWatchOperationTests.xcresult");
+    ).toContain("apps/ios/build/LifecycleTestResults/CarapaceWatchOperationTests.xcresult");
   });
 
   it.each(["missing-product", "ambiguous-product", "relative-product"])(

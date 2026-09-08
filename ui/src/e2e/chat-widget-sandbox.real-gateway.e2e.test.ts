@@ -8,27 +8,27 @@ import { appendTranscriptMessage } from "../../../src/config/sessions/session-ac
 import { encodePngRgba } from "../../../src/media/png-encode.js";
 import { ensureGatewayOwnerProfile, setAvatar } from "../../../src/state/user-profiles.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { runQaGatewayFixture } from "../../../test/helpers/qa-gateway-cleanup.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { controlUiSessionUrl } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
-const captureEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-let instance: OpenClawTestInstance | undefined;
+const captureEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+let instance: CarapaceTestInstance | undefined;
 const suite = createControlUiE2eSuite({
   name: "Control UI widget sandbox with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    const owner = await createOpenClawTestInstance({
+    const owner = await createCarapaceTestInstance({
       name: "control-ui-widget-sandbox",
       config: {
         gateway: { controlUi: { enabled: true } },
         agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
       },
-      env: { OPENCLAW_SKIP_CANVAS_HOST: "0", OPENCLAW_TEST_MINIMAL_GATEWAY: "0" },
+      env: { CARAPACE_SKIP_CANVAS_HOST: "0", CARAPACE_TEST_MINIMAL_GATEWAY: "0" },
     });
     instance = owner;
     try {
@@ -54,7 +54,7 @@ const suite = createControlUiE2eSuite({
 });
 
 async function cliJson(
-  owner: OpenClawTestInstance,
+  owner: CarapaceTestInstance,
   args: string[],
 ): Promise<Record<string, unknown>> {
   const result = await owner.cli(["--no-color", ...args]);
@@ -102,7 +102,7 @@ suite.define(() => {
       { stateDir: owner.stateDir },
     );
     const a2uiDocId = `${docId}-a2ui`;
-    const a2uiBundlePath = "/__openclaw__/a2ui/a2ui-v0.9.bundle.js";
+    const a2uiBundlePath = "/__carapace__/a2ui/a2ui-v0.9.bundle.js";
     const a2uiBoot = JSON.stringify({
       messages: [
         {
@@ -136,7 +136,7 @@ suite.define(() => {
           type: "html",
           value: buildWidgetDocument(
             "A2UI live proof",
-            `<script>globalThis.openclawA2UIBoot=${a2uiBoot};</script><style>html,body{height:100%;overflow:hidden;background:transparent}openclaw-a2ui-host{display:block;height:100%}</style><openclaw-a2ui-host></openclaw-a2ui-host><script>(()=>{const match=location.pathname.match(/^\\/__openclaw__\\/cap\\/[^/]+/u);const script=document.createElement("script");script.src=(match?.[0]??"")+${JSON.stringify(a2uiBundlePath)};document.head.appendChild(script);})();</script>`,
+            `<script>globalThis.carapaceA2UIBoot=${a2uiBoot};</script><style>html,body{height:100%;overflow:hidden;background:transparent}carapace-a2ui-host{display:block;height:100%}</style><carapace-a2ui-host></carapace-a2ui-host><script>(()=>{const match=location.pathname.match(/^\\/__carapace__\\/cap\\/[^/]+/u);const script=document.createElement("script");script.src=(match?.[0]??"")+${JSON.stringify(a2uiBundlePath)};document.head.appendChild(script);})();</script>`,
             { scriptOrigins: ["'self'"] },
           ),
         },
@@ -203,7 +203,7 @@ suite.define(() => {
         expect(response?.status()).toBe(200);
         await waitForControlUiGatewayReady(page);
         const outer = page
-          .locator("openclaw-canvas-widget-view .chat-tool-card__preview-frame")
+          .locator("carapace-canvas-widget-view .chat-tool-card__preview-frame")
           .first();
         const inner = outer.contentFrame().frameLocator("iframe");
         await inner.getByRole("heading", { name: "Live widget proof" }).waitFor();
@@ -211,7 +211,7 @@ suite.define(() => {
           .getByRole("textbox", { name: "Local note" })
           .fill("Persisted bytes, isolated UI");
         const a2uiOuter = page
-          .locator("openclaw-canvas-widget-view .chat-tool-card__preview-frame")
+          .locator("carapace-canvas-widget-view .chat-tool-card__preview-frame")
           .nth(1);
         const a2uiInner = a2uiOuter.contentFrame().frameLocator("iframe");
         await a2uiInner.getByText("A2UI live proof", { exact: true }).waitFor();
@@ -326,7 +326,7 @@ suite.define(() => {
         const response = await page.goto(url.toString());
         expect(response?.status()).toBe(200);
         await waitForControlUiGatewayReady(page);
-        const board = page.locator("openclaw-board-view").first();
+        const board = page.locator("carapace-board-view").first();
         const outer = board.locator(
           `.board-widget[data-widget-name="${widgetName}"] .board-widget__frame`,
         );
@@ -345,7 +345,7 @@ suite.define(() => {
           throw new Error("Daily Claw frame and board were not mounted");
         }
         const composer = page.locator(
-          "openclaw-chat-pane.chat-pane-cache__pane--visible .agent-chat__composer-combobox textarea",
+          "carapace-chat-pane.chat-pane-cache__pane--visible .agent-chat__composer-combobox textarea",
         );
         await capture("01-daily-claw-warmed.png");
         for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -370,9 +370,9 @@ suite.define(() => {
           expect(await readingNote.inputValue()).toBe(note);
           expect(await article.evaluate((element) => element.scrollTop)).toBe(articleScrollTop);
         }
-        await page.locator("openclaw-app-sidebar .sidebar-identity-card").click();
+        await page.locator("carapace-app-sidebar .sidebar-identity-card").click();
         await page
-          .locator('openclaw-app-sidebar wa-dropdown-item[value="command:settings"]')
+          .locator('carapace-app-sidebar wa-dropdown-item[value="command:settings"]')
           .click();
         await page.locator(".settings-sidebar__back").waitFor();
         const parked = {

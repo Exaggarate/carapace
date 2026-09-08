@@ -23,7 +23,7 @@ import {
   getMcpAppViewLeaseForSession,
   type McpAppViewLease,
 } from "../agents/mcp-ui-resource.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { racePromiseWithAbortSignal } from "../infra/abort-signal.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { logWarn } from "../logger.js";
@@ -123,7 +123,7 @@ export async function resolveMcpAppActiveView(params: {
   sessionKey: string;
   agentId?: string;
   viewId: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): Promise<McpAppActiveView> {
   if (params.cfg && params.cfg.mcp?.apps?.enabled !== true) {
     throw new Error("MCP App runtime is unavailable");

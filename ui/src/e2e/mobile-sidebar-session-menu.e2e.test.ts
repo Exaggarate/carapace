@@ -55,12 +55,12 @@ suite.define(() => {
       await menu.waitFor({ state: "visible" });
       await captureUiProof(suite, page, "mobile-sidebar-session-menu-after-root.png");
 
-      expect(await page.locator("openclaw-session-menu [slot='submenu']").count()).toBe(0);
+      expect(await page.locator("carapace-session-menu [slot='submenu']").count()).toBe(0);
       await page.getByRole("menuitem", { name: "Move to group" }).click();
       const back = page.getByRole("menuitem", { name: "Back" });
       await back.waitFor({ state: "visible" });
       await page.getByRole("menuitemradio", { name: "Operations" }).waitFor({ state: "visible" });
-      expect(await page.locator("openclaw-session-menu [slot='submenu']").count()).toBe(0);
+      expect(await page.locator("carapace-session-menu [slot='submenu']").count()).toBe(0);
       const menuBox = await menu.boundingBox();
       if (!menuBox) {
         throw new Error("expected visible compact sidebar session menu");

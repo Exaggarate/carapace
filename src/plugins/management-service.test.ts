@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   configSnapshot,
@@ -34,7 +34,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../config/config.js", () => ({
   assertConfigWriteAllowedInCurrentMode: (params?: { env?: NodeJS.ProcessEnv }) => {
-    if (params?.env?.OPENCLAW_NIX_MODE === "1") {
+    if (params?.env?.CARAPACE_NIX_MODE === "1") {
       throw new Error("Config is managed by Nix");
     }
   },
@@ -162,7 +162,7 @@ describe("plugin management service", () => {
         version: "2.0.0",
         featured: true,
         order: 40,
-        install: { source: "clawhub", packageName: "@openclaw/diffs" },
+        install: { source: "clawhub", packageName: "@carapace/diffs" },
       }),
     ]);
   });
@@ -197,8 +197,8 @@ describe("plugin management service", () => {
       {
         ...hostedDiffsEntry,
         name: "community/impostor",
-        openclaw: {
-          ...hostedDiffsEntry.openclaw,
+        carapace: {
+          ...hostedDiffsEntry.carapace,
           install: { clawhubSpec: "clawhub:community/impostor", defaultChoice: "clawhub" },
         },
       },
@@ -219,14 +219,14 @@ describe("plugin management service", () => {
         entries: [
           {
             name: "community/partial",
-            openclaw: {
+            carapace: {
               plugin: { id: "partial", label: "Partial" },
               catalog: { featured: "yes", order: 25 },
             },
           },
           {
             name: "community/invalid",
-            openclaw: {
+            carapace: {
               plugin: { id: "invalid", label: "Invalid" },
               catalog: { featured: "yes", order: "first" },
             },
@@ -256,7 +256,7 @@ describe("plugin management service", () => {
     expect(catalog.plugins).toEqual([
       expect.objectContaining({
         id: "workboard",
-        packageName: "@openclaw/workboard",
+        packageName: "@carapace/workboard",
         installed: true,
         enabled: false,
         state: "disabled",
@@ -312,7 +312,7 @@ describe("plugin management service", () => {
         ],
       },
     };
-    const env = { HOME: "/tmp/openclaw-managed-plugin-home" };
+    const env = { HOME: "/tmp/carapace-managed-plugin-home" };
     const metadata = metadataSnapshot({ enabled: false });
     const manifest = metadata.byPluginId.get("workboard");
     expect(manifest).toBeDefined();
@@ -339,12 +339,12 @@ describe("plugin management service", () => {
     expect(mocks.metadata).toHaveBeenNthCalledWith(1, {
       config,
       env,
-      workspaceDir: "/tmp/openclaw-managed-plugin-home/research-workspace",
+      workspaceDir: "/tmp/carapace-managed-plugin-home/research-workspace",
     });
     expect(mocks.metadata).toHaveBeenNthCalledWith(2, {
       config,
       env,
-      workspaceDir: "/tmp/openclaw-managed-plugin-home/research-workspace",
+      workspaceDir: "/tmp/carapace-managed-plugin-home/research-workspace",
     });
   });
 
@@ -353,9 +353,9 @@ describe("plugin management service", () => {
     const officialCatalog = {
       entries: [
         {
-          name: "@openclaw/firecrawl",
+          name: "@carapace/firecrawl",
           description: "Web extraction and crawling.",
-          openclaw: {
+          carapace: {
             plugin: { id: "firecrawl", label: "FireCrawl" },
             catalog: { featured: true, order: 60 },
             icon,
@@ -444,7 +444,7 @@ describe("plugin management service", () => {
       setManagedPluginEnabled({
         pluginId: "workboard",
         enabled: true,
-        env: { OPENCLAW_NIX_MODE: "1" },
+        env: { CARAPACE_NIX_MODE: "1" },
       }),
     ).rejects.toThrow("managed by Nix");
     expect(mocks.readConfig).not.toHaveBeenCalled();
@@ -465,7 +465,7 @@ describe("plugin management service", () => {
   });
 
   it("preserves config hash and include ownership when enabling Workboard", async () => {
-    const env = { HOME: "/tmp/openclaw-managed-toggle-home" };
+    const env = { HOME: "/tmp/carapace-managed-toggle-home" };
     const prepared = configSnapshot({
       agents: { defaults: { workspace: "~/managed-toggle-workspace" } },
     });
@@ -487,14 +487,14 @@ describe("plugin management service", () => {
       expect.objectContaining({
         config: prepared.snapshot.sourceConfig,
         env,
-        workspaceDir: "/tmp/openclaw-managed-toggle-home/managed-toggle-workspace",
+        workspaceDir: "/tmp/carapace-managed-toggle-home/managed-toggle-workspace",
       }),
     );
     expect(mocks.metadata).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         env,
-        workspaceDir: "/tmp/openclaw-managed-toggle-home/managed-toggle-workspace",
+        workspaceDir: "/tmp/carapace-managed-toggle-home/managed-toggle-workspace",
       }),
     );
     expect(mocks.replaceConfig).toHaveBeenCalledWith(
@@ -658,10 +658,10 @@ describe("plugin management service", () => {
   });
 
   it("uninstalls an external plugin through commit, file removal, and registry refresh", async () => {
-    const env = { HOME: "/tmp/openclaw-managed-uninstall-home" };
+    const env = { HOME: "/tmp/carapace-managed-uninstall-home" };
     const installRecord = {
       source: "clawhub",
-      spec: "clawhub:@openclaw/diffs",
+      spec: "clawhub:@carapace/diffs",
       installPath: "/tmp/extensions/diffs",
     };
     const prepared = configSnapshot({
@@ -709,7 +709,7 @@ describe("plugin management service", () => {
     expect(mocks.metadata).toHaveBeenCalledWith(
       expect.objectContaining({
         env,
-        workspaceDir: "/tmp/openclaw-managed-uninstall-home/managed-uninstall-workspace",
+        workspaceDir: "/tmp/carapace-managed-uninstall-home/managed-uninstall-workspace",
       }),
     );
     expect(mocks.planUninstall).toHaveBeenCalledWith(

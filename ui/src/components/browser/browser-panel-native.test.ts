@@ -35,8 +35,8 @@ function fakeNativeBrowser(tabs: NativeBrowserTab[] = []) {
   let state: NativeBrowserState = { revision: 0, tabs };
   const publish = (nextTabs: NativeBrowserTab[]) => {
     state = { revision: state.revision + 1, tabs: nextTabs };
-    vi.stubGlobal("__OPENCLAW_NATIVE_BROWSER__", state);
-    window.dispatchEvent(new CustomEvent("openclaw:native-browser-state", { detail: state }));
+    vi.stubGlobal("__CARAPACE_NATIVE_BROWSER__", state);
+    window.dispatchEvent(new CustomEvent("carapace:native-browser-state", { detail: state }));
   };
   const postMessage = vi.fn(async (message: NativeBrowserMessage) => {
     switch (message.type) {
@@ -66,8 +66,8 @@ function fakeNativeBrowser(tabs: NativeBrowserTab[] = []) {
     }
     return { ok: true };
   });
-  vi.stubGlobal("webkit", { messageHandlers: { openclawBrowser: { postMessage } } });
-  vi.stubGlobal("__OPENCLAW_NATIVE_BROWSER__", state);
+  vi.stubGlobal("webkit", { messageHandlers: { carapaceBrowser: { postMessage } } });
+  vi.stubGlobal("__CARAPACE_NATIVE_BROWSER__", state);
   return {
     publish,
     postMessage,
@@ -314,7 +314,7 @@ describe("native Browser panel ownership", () => {
 
   it("opens and presents a user link through the actual panel when the old preference is off", async () => {
     const native = fakeNativeBrowser();
-    const panel = document.createElement("openclaw-browser-panel");
+    const panel = document.createElement("carapace-browser-panel");
     panel.available = true;
     panel.remoteAvailable = false;
     document.body.append(panel);
@@ -352,7 +352,7 @@ describe("native Browser panel ownership", () => {
     "hides the embedded native view when %s changes",
     async (property) => {
       const native = fakeNativeBrowser([nativeTab("mac-one")]);
-      const panel = document.createElement("openclaw-browser-panel");
+      const panel = document.createElement("carapace-browser-panel");
       panel.available = true;
       panel.remoteAvailable = false;
       panel.embedded = true;

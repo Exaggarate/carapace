@@ -1,14 +1,14 @@
-// Xiaomi plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Xiaomi plugin entrypoint registers its Carapace integration.
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   ProviderAuthContext,
   ProviderAuthMethod,
   ProviderAuthMethodNonInteractiveContext,
   ProviderCatalogContext,
   ProviderAuthResult,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   applyAuthProfileConfig,
   buildApiKeyCredential,
@@ -18,13 +18,13 @@ import {
   type SecretInput,
   upsertAuthProfileWithLockOrThrow,
   validateApiKeyInput,
-} from "openclaw/plugin-sdk/provider-auth-api-key";
-import { buildOpenAICompatibleLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/provider-auth-api-key";
+import { buildOpenAICompatibleLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   applyModelCompatPatch,
   buildProviderReplayFamilyHooks,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { PROVIDER_LABELS } from "openclaw/plugin-sdk/provider-usage";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { PROVIDER_LABELS } from "carapace/plugin-sdk/provider-usage";
 import {
   applyXiaomiConfig,
   applyXiaomiTokenPlanConfig,
@@ -171,7 +171,7 @@ async function runXiaomiApiKeyAuth(
     promptMessage: string;
     expectedKind: "payg" | "token-plan";
     defaultModel: string;
-    applyConfig: (cfg: OpenClawConfig) => OpenClawConfig;
+    applyConfig: (cfg: CarapaceConfig) => CarapaceConfig;
   },
 ): Promise<ProviderAuthResult> {
   let capturedSecretInput: SecretInput | undefined;
@@ -238,7 +238,7 @@ async function runXiaomiApiKeyAuthNonInteractive(
     flagName: `--${string}`;
     envVar: string;
     expectedKind: "payg" | "token-plan";
-    applyConfig: (cfg: OpenClawConfig) => OpenClawConfig;
+    applyConfig: (cfg: CarapaceConfig) => CarapaceConfig;
   },
 ) {
   const resolved = await ctx.resolveApiKey({

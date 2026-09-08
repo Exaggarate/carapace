@@ -2,17 +2,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { collectRetainedUnconfiguredAgentDatabaseWarnings } from "./doctor-unconfigured-agent-databases.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-function configWithAgents(...agentIds: string[]): OpenClawConfig {
+function configWithAgents(...agentIds: string[]): CarapaceConfig {
   return {
     agents: {
       ownership: "explicit",
@@ -22,18 +22,18 @@ function configWithAgents(...agentIds: string[]): OpenClawConfig {
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("unconfigured agent database diagnostics", () => {
   it("reports a custom registered database that is no longer configured", () => {
     const stateDir = fs.realpathSync.native(tempDirs.make("doctor-unconfigured-agent-database-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const databasePath = path.join(stateDir, "retired.sqlite");
-    openOpenClawAgentDatabase({ agentId: "retired", env, path: databasePath });
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    openCarapaceAgentDatabase({ agentId: "retired", env, path: databasePath });
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(
       collectRetainedUnconfiguredAgentDatabaseWarnings({
@@ -47,10 +47,10 @@ describe("unconfigured agent database diagnostics", () => {
 
   it("leaves default-layout orphan reporting to the state-directory check", () => {
     const stateDir = fs.realpathSync.native(tempDirs.make("doctor-default-agent-database-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    openOpenClawAgentDatabase({ agentId: "retired", env });
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    openCarapaceAgentDatabase({ agentId: "retired", env });
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(
       collectRetainedUnconfiguredAgentDatabaseWarnings({
@@ -62,18 +62,18 @@ describe("unconfigured agent database diagnostics", () => {
 
   it("reports a custom database whose suffix resembles the default layout", () => {
     const stateDir = fs.realpathSync.native(tempDirs.make("doctor-default-shaped-custom-store-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const databasePath = path.join(
       stateDir,
       "custom",
       "agents",
       "retired",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
-    openOpenClawAgentDatabase({ agentId: "retired", env, path: databasePath });
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    openCarapaceAgentDatabase({ agentId: "retired", env, path: databasePath });
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(
       collectRetainedUnconfiguredAgentDatabaseWarnings({
@@ -89,11 +89,11 @@ describe("unconfigured agent database diagnostics", () => {
     const stateDir = fs.realpathSync.native(
       tempDirs.make("doctor-configured-shared-agent-database-"),
     );
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const databasePath = path.join(stateDir, "shared.sqlite");
-    openOpenClawAgentDatabase({ agentId: "retired", env, path: databasePath });
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    openCarapaceAgentDatabase({ agentId: "retired", env, path: databasePath });
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(
       collectRetainedUnconfiguredAgentDatabaseWarnings({
@@ -108,10 +108,10 @@ describe("unconfigured agent database diagnostics", () => {
 
   it("ignores missing registered databases owned by migration hygiene", () => {
     const stateDir = fs.realpathSync.native(tempDirs.make("doctor-missing-agent-database-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const databasePath = openOpenClawAgentDatabase({ agentId: "retired", env }).path;
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const databasePath = openCarapaceAgentDatabase({ agentId: "retired", env }).path;
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.unlinkSync(databasePath);
 
     expect(
@@ -126,12 +126,12 @@ describe("unconfigured agent database diagnostics", () => {
     const stateDir = fs.realpathSync.native(tempDirs.make("doctor-unreadable-registry-"));
     const sqliteDir = path.join(stateDir, "state");
     fs.mkdirSync(sqliteDir);
-    fs.writeFileSync(path.join(sqliteDir, "openclaw.sqlite"), "not a database");
+    fs.writeFileSync(path.join(sqliteDir, "carapace.sqlite"), "not a database");
 
     expect(
       collectRetainedUnconfiguredAgentDatabaseWarnings({
         cfg: configWithAgents("main"),
-        env: { OPENCLAW_STATE_DIR: stateDir },
+        env: { CARAPACE_STATE_DIR: stateDir },
       }),
     ).toEqual([expect.stringContaining("Could not inspect retained unconfigured agent databases")]);
   });

@@ -13,16 +13,16 @@ import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   activateSecretsRuntimeSnapshotWithSource,
   clearSecretsRuntimeSnapshot,
   prepareSecretsRuntimeSnapshot,
 } from "../secrets/runtime.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createGatewaySecretsReloader } from "./server-secrets-reload.js";
 import {
   enforceSharedGatewaySessionGenerationForConfigWrite,
@@ -30,7 +30,7 @@ import {
 } from "./server-shared-auth-generation.js";
 import { createRuntimeSecretsActivator } from "./server-startup-config.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 const recoveredRef = { source: "env", provider: "default", id: "TEST_RELOADED_MODEL_KEY" } as const;
 
 function sourceConfig() {
@@ -65,10 +65,10 @@ function sourceConfig() {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
-function requireRuntimeConfig(): OpenClawConfig {
+function requireRuntimeConfig(): CarapaceConfig {
   const config = getRuntimeConfigSnapshot();
   if (!config) {
     throw new Error("Expected active runtime config");
@@ -79,7 +79,7 @@ function requireRuntimeConfig(): OpenClawConfig {
 beforeEach(async () => {
   await resetPreparedModelRuntimeSnapshotsForTest();
   clearSecretsRuntimeSnapshot();
-  state = await createOpenClawTestState({ label: "secrets-model-publication" });
+  state = await createCarapaceTestState({ label: "secrets-model-publication" });
   vi.stubEnv("TEST_RELOADED_MODEL_KEY", undefined);
   await state.writeAuthProfiles({ version: 1, profiles: {} });
 });
@@ -95,7 +95,7 @@ afterEach(async () => {
 async function coldRuntime(clients: SharedGatewayAuthClient[] = []) {
   const config = sourceConfig();
   await state.writeConfig(config);
-  const runtimeConfig: OpenClawConfig = structuredClone(config);
+  const runtimeConfig: CarapaceConfig = structuredClone(config);
   runtimeConfig.models!.providers!["healthy-fixture"]!.models[0]!.compat = { supportsStore: false };
   const initial = await prepareSecretsRuntimeSnapshot({
     config: runtimeConfig,

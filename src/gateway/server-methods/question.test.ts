@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { addSessionMember } from "../../config/sessions/session-sharing-store.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   claimAgentRunDelegatedAuthority,
   getAgentRunContext,
@@ -14,7 +14,7 @@ import { isSecretValueRegisteredForRedaction } from "../../logging/secret-redact
 import * as secretsRuntimeState from "../../secrets/runtime-state.js";
 import { listSecretStoreEntries, readSecretStoreValue } from "../../secrets/store/secret-store.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   abortChatRunById,
   registerChatAbortController,
@@ -71,7 +71,7 @@ function mockReferencedStoreSnapshot() {
 
 describe("question gateway methods", () => {
   it("conceals foreign session questions for role-none readers while preserving global prompts", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const owner = ensureProfileForEmail("owner@example.test");
       const guest = ensureProfileForEmail("guest@example.test");
       await upsertSessionEntryCore(
@@ -89,7 +89,7 @@ describe("question gateway methods", () => {
         id: "global-question",
         timeoutMs: 100,
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "guest",
@@ -133,7 +133,7 @@ describe("question gateway methods", () => {
   it.each(["view", "suggest"] as const)(
     "prevents a %s-capped guest from resolving a shared question until explicitly added",
     async (others) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const owner = ensureProfileForEmail("owner@example.test");
         const guest = ensureProfileForEmail("guest@example.test");
         await upsertSessionEntryCore(
@@ -146,7 +146,7 @@ describe("question gateway methods", () => {
           },
         );
         manager.request({ ...requestParams, id: "foreign-question" });
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           gateway: {
             roles: {
               default: "guest",
@@ -188,7 +188,7 @@ describe("question gateway methods", () => {
   );
 
   it("scopes requested and resolved questions to operators allowed to see their session", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const owner = ensureProfileForEmail("question-owner@example.test");
       const viewer = ensureProfileForEmail("question-viewer@example.test");
       const guest = ensureProfileForEmail("question-guest@example.test");
@@ -202,7 +202,7 @@ describe("question gateway methods", () => {
           createdActor: { type: "human", source: "profile", id: owner.id },
         },
       );
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "guest",
@@ -516,7 +516,7 @@ describe("question gateway methods", () => {
   it.each(["release", "replacement", "rotation", "abort"] as const)(
     "fences a pending credential on exact requester %s while preserving ordinary questions",
     async (closure) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const id = await requestSecretQuestion();
         const ordinary = await call("question.request", requestParams);
         const ordinaryId = (ordinary[1] as { id: string }).id;
@@ -633,7 +633,7 @@ describe("question gateway methods", () => {
   });
 
   it("uses admitted requester provenance instead of caller-supplied correlation fields", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const response = await call(
         "question.request",
         {
@@ -654,7 +654,7 @@ describe("question gateway methods", () => {
   });
 
   it("diverts operator-entered credentials into the store and exposes only a stored marker", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const id = await requestSecretQuestion();
       const value = "test-secret-value-gateway-diversion-123";
       const client = {
@@ -696,7 +696,7 @@ describe("question gateway methods", () => {
   });
 
   it("uses operator-edited hosts and keeps invalid store submissions pending for retry", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const id = await requestSecretQuestion();
       const value = "test-secret-value-retry-123";
       const answers = { answers: { secret_value: [value] } };
@@ -737,7 +737,7 @@ describe("question gateway methods", () => {
       answers: { secret_value: ["test-secret-value-only"], destination: ["Home"] },
     },
   ])("keeps a secret question pending when there is $behavior", async ({ answers }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const id = await requestSecretQuestion();
 
       expect(await call("question.resolve", { id, answers: { answers } })).toMatchObject([
@@ -751,7 +751,7 @@ describe("question gateway methods", () => {
   });
 
   it("rejects masked env requests while preserving ordinary question host validation and cancellation", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       expect(
         await call(
           "question.request",
@@ -786,7 +786,7 @@ describe("question gateway methods", () => {
   });
 
   it("cold-refreshes configured SecretRefs after a store-bound question is answered", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       mockReferencedStoreSnapshot();
       const id = await requestSecretQuestion();
 
@@ -808,7 +808,7 @@ describe("question gateway methods", () => {
   it.each(["second answer", "cancel", "expiry"] as const)(
     "settles the SQLite commit before deferred refresh can race with %s",
     async (racer) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         mockReferencedStoreSnapshot();
         const reload = createDeferred<{ warningCount: number }>();
         reloadSecrets.mockReturnValue(reload.promise);
@@ -854,7 +854,7 @@ describe("question gateway methods", () => {
   );
 
   it("keeps a committed answer terminal and reports refresh failure without inviting overwrite", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       mockReferencedStoreSnapshot();
       reloadSecrets.mockRejectedValue(new Error("synthetic refresh failure"));
       const id = await requestSecretQuestion();
@@ -898,7 +898,7 @@ describe("question gateway methods", () => {
   });
 
   it("keeps store-bound questions pending when the write service is unavailable", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       vi.spyOn(storeWriteService, "write").mockImplementation(() => {
         throw new Error("database unavailable");
       });

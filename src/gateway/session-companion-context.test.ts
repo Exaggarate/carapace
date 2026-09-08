@@ -9,10 +9,10 @@ import * as activeTranscriptEvents from "../config/sessions/session-accessor.sql
 import { waitForSessionTranscriptIndexReconcilesInStateDir } from "../config/sessions/session-transcript-reconcile.js";
 import * as redact from "../logging/redact.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { defaultSessionCompanionContextReader } from "./session-companion-context.js";
 import { createSessionCompanion } from "./session-companion.js";
 import { notifyGatewaySessionReset } from "./session-reset-notifications.js";
@@ -24,17 +24,17 @@ afterEach(async () => {
   for (const stateDir of tempDirs.dirs) {
     await waitForSessionTranscriptIndexReconcilesInStateDir(stateDir);
   }
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 
 function createScope(prefix: string) {
   const stateDir = tempDirs.make(prefix);
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   return {
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     sessionId: `${prefix}-session`,
     sessionKey: `agent:main:${prefix}`,
   };
@@ -143,7 +143,7 @@ describe("session companion context", () => {
     }));
     await persistSessionTranscriptTurn(scope, { messages, touchSessionEntry: true });
 
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     database.db
       .prepare("UPDATE transcript_events SET event_json = '{' WHERE session_id = ? AND seq = 1")
       .run(scope.sessionId);
@@ -506,7 +506,7 @@ describe("session companion context", () => {
       ],
       touchSessionEntry: true,
     });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     database.db
       .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
       .run(scope.sessionId);

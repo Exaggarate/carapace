@@ -2,7 +2,7 @@
 summary: "Cerebras setup (auth + model selection)"
 title: "Cerebras"
 read_when:
-  - You want to use Cerebras with OpenClaw
+  - You want to use Cerebras with Carapace
   - You need the Cerebras API key env var or CLI auth choice
 ---
 
@@ -11,7 +11,7 @@ read_when:
 | Property        | Value                                                     |
 | --------------- | --------------------------------------------------------- |
 | Provider id     | `cerebras`                                                |
-| Plugin          | official external package (`@openclaw/cerebras-provider`) |
+| Plugin          | official external package (`@carapace/cerebras-provider`) |
 | Auth env var    | `CEREBRAS_API_KEY`                                        |
 | Onboarding flag | `--auth-choice cerebras-api-key`                          |
 | Direct CLI flag | `--cerebras-api-key <key>`                                |
@@ -22,8 +22,8 @@ read_when:
 ## Install plugin
 
 ```bash
-openclaw plugins install @openclaw/cerebras-provider
-openclaw gateway restart
+carapace plugins install @carapace/cerebras-provider
+carapace gateway restart
 ```
 
 ## Getting started
@@ -36,11 +36,11 @@ openclaw gateway restart
     <CodeGroup>
 
 ```bash Onboarding
-openclaw onboard --auth-choice cerebras-api-key
+carapace onboard --auth-choice cerebras-api-key
 ```
 
 ```bash Direct flag
-openclaw onboard --non-interactive --accept-risk --skip-health \
+carapace onboard --non-interactive --accept-risk --skip-health \
   --auth-choice cerebras-api-key \
   --cerebras-api-key "$CEREBRAS_API_KEY"
 ```
@@ -54,10 +54,10 @@ export CEREBRAS_API_KEY=csk-...
   </Step>
   <Step title="Verify models are available">
     ```bash
-    openclaw models list --provider cerebras
+    carapace models list --provider cerebras
     ```
 
-    Lists the configured Cerebras models. If `CEREBRAS_API_KEY` is unresolved, `openclaw models status --json` reports the missing credential under `auth.unusableProfiles`.
+    Lists the configured Cerebras models. If `CEREBRAS_API_KEY` is unresolved, `carapace models status --json` reports the missing credential under `auth.unusableProfiles`.
 
   </Step>
 </Steps>
@@ -65,7 +65,7 @@ export CEREBRAS_API_KEY=csk-...
 ## Non-interactive setup
 
 ```bash
-openclaw onboard --non-interactive --accept-risk --skip-health \
+carapace onboard --non-interactive --accept-risk --skip-health \
   --mode local \
   --auth-choice cerebras-api-key \
   --cerebras-api-key "$CEREBRAS_API_KEY"
@@ -74,7 +74,7 @@ openclaw onboard --non-interactive --accept-risk --skip-health \
 ## Discovery and pricing
 
 When Cerebras auth is configured and the inference base URL is the canonical
-`https://api.cerebras.ai/v1`, OpenClaw reads
+`https://api.cerebras.ai/v1`, Carapace reads
 [`GET /public/v1/models`](https://inference-docs.cerebras.ai/api-reference/models/public-models).
 This request uses public headers only: inference API keys and discovery
 credentials are never sent to the metadata endpoint. A custom base URL skips
@@ -84,12 +84,12 @@ metadata listing does not establish account entitlement.
 
 Live rows supply the native context and completion limits, reasoning and vision
 capabilities, and prompt/completion prices. Cerebras returns those prices as USD
-per-token strings; OpenClaw converts them to USD per million tokens. The public
-feed does not provide cache tariffs. Zero cache fields in OpenClaw's runtime
+per-token strings; Carapace converts them to USD per million tokens. The public
+feed does not provide cache tariffs. Zero cache fields in Carapace's runtime
 estimate are not a claim about enterprise caching or billing.
 
 Successful catalogs are cached for 60 seconds. If discovery fails, returns an
-empty catalog, or has no usable model rows, OpenClaw uses the bundled offline
+empty catalog, or has no usable model rows, Carapace uses the bundled offline
 seed. In the default `models.mode: "merge"`, fresh onboarding does not copy
 generated model rows or prices into your config, allowing prices to refresh.
 Explicitly authored model rows and costs remain intact. In
@@ -110,11 +110,11 @@ August 31, 2026 response; absent legacy references retain their seed snapshots.
 | `cerebras/gemma-4-31b`  | Gemma 4 31B  | yes       | Default; preview; text-and-image input                    |
 
 Cerebras's [deprecation notice](https://inference-docs.cerebras.ai/support/deprecation)
-marks `zai-glm-4.7` deprecated without naming a replacement. OpenClaw keeps the
+marks `zai-glm-4.7` deprecated without naming a replacement. Carapace keeps the
 shipped reference rather than deleting it or rewriting existing selections;
 retention does not guarantee upstream availability.
 
-Fresh onboarding follows Cerebras's current [Gemma 4 recommendation](https://www.cerebras.ai/blog/gemma-4-on-cerebras-the-fastest-inference-is-now-multimodal). Cerebras describes Gemma 4 31B as its reference medium-size model for equal-or-higher intelligence than GPT OSS, with multimodal agentic support. It is a public-preview model and may change or be discontinued on shorter notice than the production GPT OSS endpoint; existing OpenClaw configurations keep their selected model.
+Fresh onboarding follows Cerebras's current [Gemma 4 recommendation](https://www.cerebras.ai/blog/gemma-4-on-cerebras-the-fastest-inference-is-now-multimodal). Cerebras describes Gemma 4 31B as its reference medium-size model for equal-or-higher intelligence than GPT OSS, with multimodal agentic support. It is a public-preview model and may change or be discontinued on shorter notice than the production GPT OSS endpoint; existing Carapace configurations keep their selected model.
 
 ## Manual config
 
@@ -143,7 +143,7 @@ Most setups only need the API key. Use explicit `models.providers.cerebras` conf
 ```
 
 <Note>
-If the Gateway runs as a daemon (launchd, systemd, Docker), make sure `CEREBRAS_API_KEY` is available to that process — for example in `~/.openclaw/.env` or through `env.shellEnv`. A key exported only in an interactive shell will not help a managed service unless the env is imported separately.
+If the Gateway runs as a daemon (launchd, systemd, Docker), make sure `CEREBRAS_API_KEY` is available to that process — for example in `~/.carapace/.env` or through `env.shellEnv`. A key exported only in an interactive shell will not help a managed service unless the env is imported separately.
 </Note>
 
 ## Related

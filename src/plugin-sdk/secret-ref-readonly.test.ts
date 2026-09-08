@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "./config-contracts.js";
+import type { CarapaceConfig } from "./config-contracts.js";
 import { resolveReadOnlyEnvSecretRef } from "./secret-ref-readonly.js";
 
-type SecretProvider = NonNullable<NonNullable<OpenClawConfig["secrets"]>["providers"]>[string];
+type SecretProvider = NonNullable<NonNullable<CarapaceConfig["secrets"]>["providers"]>[string];
 const collisionProviders = [
   { source: "file", path: "/unused" },
   { source: "exec", command: "/unused" },

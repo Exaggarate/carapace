@@ -2,8 +2,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 
 const args = process.argv.slice(2);
-const marker = process.env.OPENCLAW_TEST_TAILSCALE_FIXTURE_MARKER;
-const mode = process.env.OPENCLAW_TEST_TAILSCALE_FIXTURE_MODE;
+const marker = process.env.CARAPACE_TEST_TAILSCALE_FIXTURE_MARKER;
+const mode = process.env.CARAPACE_TEST_TAILSCALE_FIXTURE_MODE;
 if (!marker || (mode !== "serve" && mode !== "funnel")) {
   process.stderr.write("missing fixture state\n");
   process.exit(2);

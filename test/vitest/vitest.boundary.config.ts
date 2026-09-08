@@ -17,7 +17,7 @@ export function createBoundaryVitestConfig(
       isolate: false,
       runner: nonIsolatedRunnerPath,
       include:
-        loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env) ??
+        loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env) ??
         cliIncludePatterns ??
         boundaryTestFiles,
       ...(cliIncludePatterns?.length === 0 ? { passWithNoTests: true } : {}),

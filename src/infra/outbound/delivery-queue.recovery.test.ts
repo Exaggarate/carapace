@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { controlNextRecoverySleep } from "../../../test/helpers/infra/delivery-recovery.js";
 import type { TrustedMessageAuditEvent } from "../../audit/message-audit-events.js";
@@ -19,11 +19,11 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { buildConversationRef } from "../../routing/conversation-ref.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { normalizeSessionDeliveryState } from "../../utils/delivery-context.shared.js";
 import {
   OutboundDeliveryError,
@@ -137,8 +137,8 @@ async function runIf(condition: unknown, action: () => unknown) {
   }
 }
 function readOutboundQueueStatus(tmpDir: string, id: string): string | undefined {
-  const { db } = openOpenClawStateDatabase({
-    env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir },
+  const { db } = openCarapaceStateDatabase({
+    env: { ...process.env, CARAPACE_STATE_DIR: tmpDir },
   });
   const row = db
     .prepare("SELECT status FROM delivery_queue_entries WHERE queue_name = ? AND id = ?")
@@ -309,8 +309,8 @@ describe("delivery-queue recovery", () => {
       return { summary, log };
     } finally {
       // Reset modules gives recovery its own SQLite cache; close that handle before discarding it.
-      const { closeOpenClawStateDatabaseForTest: closeRecoveryDatabase } =
-        await import("../../state/openclaw-state-db.js");
+      const { closeCarapaceStateDatabaseForTest: closeRecoveryDatabase } =
+        await import("../../state/carapace-state-db.js");
       closeRecoveryDatabase();
       vi.doUnmock("./delivery-queue-storage.js");
       vi.resetModules();
@@ -471,7 +471,7 @@ describe("delivery-queue recovery", () => {
       });
       expect(await loadPendingDeliveries(tmpDir())).toHaveLength(0);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
   it("settles an explicit recovered no-send as suppression without replay", async () => {
@@ -511,8 +511,8 @@ describe("delivery-queue recovery", () => {
         },
       ]);
 
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       const second = await runRecovery({ deliver });
       expect(second.result).toEqual(RECOVERY_SUMMARY.empty);
       expect(deliver).toHaveBeenCalledOnce();
@@ -520,7 +520,7 @@ describe("delivery-queue recovery", () => {
       expect(auditEvents).toHaveLength(1);
     } finally {
       unsubscribe();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
   it.each([undefined, "adapter_returned_no_identity"] as const)(
@@ -670,8 +670,8 @@ describe("delivery-queue recovery", () => {
         markConversationDeliverySent(scope, operationId, "reef-platform"),
       );
       const deliver = vi.fn();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       const { auditEvents, unsubscribe } = captureAuditEvents();
       try {
         const { result } = await runRecovery({ deliver });
@@ -690,13 +690,13 @@ describe("delivery-queue recovery", () => {
               ? { outcome: "sent", resultCount: 1 }
               : { outcome: "suppressed", reasonCode: "no_visible_payload", resultCount: 0 },
         ]);
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
         expect((await runRecovery({ deliver })).result).toEqual(RECOVERY_SUMMARY.empty);
         expect(auditEvents).toHaveLength(1);
       } finally {
         unsubscribe();
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       }
     },
   );
@@ -706,8 +706,8 @@ describe("delivery-queue recovery", () => {
       { sessionKey: completion.sessionKey, storePath: completion.storePath },
       { sessionId: "replacement-session", updatedAt: Date.now() },
     );
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     const { auditEvents, unsubscribe } = captureAuditEvents();
     const deliver = vi.fn();
     try {
@@ -717,7 +717,7 @@ describe("delivery-queue recovery", () => {
       expect(auditEvents).toEqual([]);
     } finally {
       unsubscribe();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
   it.each([
@@ -885,7 +885,7 @@ describe("delivery-queue recovery", () => {
       expect(readOutboundQueueStatus(tmpDir(), id)).toBe("failed");
       expect(readQueuedEntry(tmpDir(), id)).not.toHaveProperty("settlement");
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
   it("audits max-retry deadletters as unknown when platform send may have started", async () => {
@@ -1559,7 +1559,7 @@ describe("delivery-queue recovery", () => {
       expect(await loadPendingDeliveries(tmpDir())).toHaveLength(0);
       expect(readOutboundQueueStatus(tmpDir(), operationId)).toBe("failed");
 
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const replay = vi.fn();
       const second = await runRecovery({ deliver: replay });
       expect(second.result).toEqual(RECOVERY_SUMMARY.empty);
@@ -1570,7 +1570,7 @@ describe("delivery-queue recovery", () => {
       });
       expect(readOutboundQueueStatus(tmpDir(), operationId)).toBe("failed");
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
   it("passes skipQueue: true to prevent re-enqueueing during recovery", async () => {
@@ -1691,7 +1691,7 @@ describe("delivery-queue recovery", () => {
     if (mode === "zero-result-ack") {
       expect(recoveryStateAtAck).toBe("send_attempt_started");
       const clock = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 60_000);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const { auditEvents, unsubscribe } = captureAuditEvents();
       try {
         const replay = await runRecovery({ deliver });

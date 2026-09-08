@@ -17,7 +17,7 @@ function successTail(scriptPath: string): string {
 }
 
 function runSuccessTail(scriptPath: string) {
-  const tempDir = tempDirs.make("openclaw-docker-e2e-observability-");
+  const tempDir = tempDirs.make("carapace-docker-e2e-observability-");
   const clientLog = path.join(tempDir, "client.log");
   writeFileSync(clientLog, "client proof log\n", "utf8");
   const harness = [
@@ -35,7 +35,7 @@ function runSuccessTail(scriptPath: string) {
 
 describe("Docker E2E observability", () => {
   it("prints the bounded heartbeat log before signal cleanup", () => {
-    const tempDir = tempDirs.make("openclaw-heartbeat-signal-log-");
+    const tempDir = tempDirs.make("carapace-heartbeat-signal-log-");
     const result = spawnSync(
       "bash",
       [
@@ -49,7 +49,7 @@ run_logged_print_heartbeat signal-proof 30 bash -c 'printf "old log head%0256dre
       {
         encoding: "utf8",
         timeout: 5_000,
-        env: { ...process.env, TMPDIR: tempDir, OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "64" },
+        env: { ...process.env, TMPDIR: tempDir, CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "64" },
       },
     );
     expect(result.status, result.stderr).toBe(143);
@@ -69,7 +69,7 @@ run_logged_print_heartbeat signal-proof 30 bash -c 'printf "old log head%0256dre
   ] as const)(
     "preserves redirected Codex run diagnostics on exit %i (%s, long=%s)",
     (status, signal, long) => {
-      const tempDir = tempDirs.make("openclaw-codex-run-cleanup-");
+      const tempDir = tempDirs.make("carapace-codex-run-cleanup-");
       const script = readFileSync("scripts/e2e/codex-npm-plugin-live-docker.sh", "utf8");
       const cleanupSetup = script.slice(
         script.indexOf('run_log=""'),
@@ -127,7 +127,7 @@ fi
           encoding: "utf8",
           timeout: 5_000,
           killSignal: "SIGKILL",
-          env: { ...process.env, TMPDIR: tempDir, OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "64" },
+          env: { ...process.env, TMPDIR: tempDir, CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "64" },
         },
       );
       expect(result.status, JSON.stringify({ stderr: result.stderr, signal: result.signal })).toBe(

@@ -1,13 +1,13 @@
 import fsp from "node:fs/promises";
-import type { SandboxContext } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { SandboxContext } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   buildAgentHookContextChannelFields,
   buildEmbeddedForegroundPromptContext,
   isHostScopedAgentToolActive,
   resolveAgentDir,
   resolveSandboxContext as defaultResolveSandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
 import { readNonEmptyString, readResolvedAttemptPath, resolveModelRef } from "./attempt-config.js";
 import type {
   AttemptParamsLike,
@@ -50,11 +50,11 @@ export function prepareCopilotAttemptContext(
   ) as AttemptParamsLike;
   const createToolBridge = deps.createToolBridge ?? createCopilotToolBridge;
   const hostSystemAgentActive =
-    deps.isHostScopedToolActive?.("openclaw") ?? isHostScopedAgentToolActive("openclaw");
+    deps.isHostScopedToolActive?.("carapace") ?? isHostScopedAgentToolActive("carapace");
   const ringZeroSystemAgentRun =
     hostSystemAgentActive &&
     input.toolsAllow?.length === 1 &&
-    input.toolsAllow[0]?.trim().toLowerCase() === "openclaw";
+    input.toolsAllow[0]?.trim().toLowerCase() === "carapace";
   const messages = Array.isArray(input.messages) ? [...input.messages] : [];
   const modelRef = resolveModelRef(input);
   const resolvedWorkspaceForSandbox =

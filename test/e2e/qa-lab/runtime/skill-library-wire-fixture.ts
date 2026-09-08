@@ -6,9 +6,9 @@ import { PROTOCOL_VERSION } from "../../../../packages/gateway-protocol/src/inde
 import type { SkillLibraryFile } from "../../../../packages/gateway-protocol/src/schema/skill-library.js";
 import { VERSION } from "../../../../src/version.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 
 export const SKILL_LIBRARY_ALICE = "alice@skills.example.invalid";
 export const SKILL_LIBRARY_BOB = "bob@skills.example.invalid";
@@ -76,7 +76,7 @@ export class SkillLibraryWireClient {
   }
 
   static async connect(
-    instance: OpenClawTestInstance,
+    instance: CarapaceTestInstance,
     options: {
       email?: string;
       scopes?: string[];
@@ -95,7 +95,7 @@ export class SkillLibraryWireClient {
               "x-forwarded-for": "198.51.100.40",
               "x-forwarded-proto": "http",
               "x-forwarded-host": `127.0.0.1:${instance.port}`,
-              "x-openclaw-scopes": (options.scopes ?? SKILL_LIBRARY_WRITER_SCOPES).join(","),
+              "x-carapace-scopes": (options.scopes ?? SKILL_LIBRARY_WRITER_SCOPES).join(","),
             },
           }
         : {}),
@@ -126,7 +126,7 @@ export class SkillLibraryWireClient {
         minProtocol: PROTOCOL_VERSION,
         maxProtocol: PROTOCOL_VERSION,
         client: {
-          id: options.email ? "openclaw-control-ui" : "gateway-client",
+          id: options.email ? "carapace-control-ui" : "gateway-client",
           version: VERSION,
           ...(options.buildId ? { buildId: options.buildId } : {}),
           platform: "web",
@@ -171,16 +171,16 @@ export class SkillLibraryWireClient {
   }
 }
 
-export async function createSkillLibraryWireInstance(): Promise<OpenClawTestInstance> {
-  const instance = await createOpenClawTestInstance({
+export async function createSkillLibraryWireInstance(): Promise<CarapaceTestInstance> {
+  const instance = await createCarapaceTestInstance({
     name: "skill-library-wire",
     startTimeoutMs: 120_000,
     env: {
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-      OPENCLAW_SKIP_CHANNELS: undefined,
-      OPENCLAW_SKIP_PROVIDERS: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_SKIP_CHANNELS: undefined,
+      CARAPACE_SKIP_PROVIDERS: undefined,
       VITEST: undefined,
       VITEST_POOL_ID: undefined,
       VITEST_WORKER_ID: undefined,
@@ -188,7 +188,7 @@ export async function createSkillLibraryWireInstance(): Promise<OpenClawTestInst
       CODEX_HOME: undefined,
       OPENAI_API_KEY: undefined,
       ANTHROPIC_API_KEY: undefined,
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
+      CARAPACE_BUILD_PRIVATE_QA: "1",
     },
   });
   await instance.state.writeConfig({

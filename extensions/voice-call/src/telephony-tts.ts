@@ -1,7 +1,7 @@
 // Voice Call plugin module implements telephony tts behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import type { TtsDirectiveOverrides, TtsDirectiveParseResult } from "openclaw/plugin-sdk/speech";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import type { TtsDirectiveOverrides, TtsDirectiveParseResult } from "carapace/plugin-sdk/speech";
 import type { VoiceCallTtsConfig } from "./config.js";
 import { convertPcmToMulaw8k } from "./telephony-audio.js";
 
@@ -10,16 +10,16 @@ import { convertPcmToMulaw8k } from "./telephony-audio.js";
 /** Core runtime TTS API used by the telephony adapter. */
 export type TelephonyTtsRuntime = {
   prepareTtsRequest: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     override?: VoiceCallTtsConfig;
     text: string;
   }) => Promise<{
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     directives: TtsDirectiveParseResult;
   }>;
   textToSpeechTelephony: (params: {
     text: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     prefsPath?: string;
     overrides?: TtsDirectiveOverrides;
   }) => Promise<{
@@ -84,7 +84,7 @@ function convertTelephonyTtsOutput(result: {
 
 /** Create a TTS provider that honors voice-call overrides and converts PCM to mulaw. */
 export async function createTelephonyTtsProvider(params: {
-  coreConfig: OpenClawConfig;
+  coreConfig: CarapaceConfig;
   ttsOverride?: VoiceCallTtsConfig;
   runtime: TelephonyTtsRuntime;
   logger?: {

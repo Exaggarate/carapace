@@ -1,4 +1,4 @@
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import { describe, expect, it } from "vitest";
 import { toFeishuSendResult } from "./send-result.js";
 

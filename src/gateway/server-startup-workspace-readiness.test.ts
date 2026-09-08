@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { ensureAgentWorkspace } from "../agents/workspace.js";
-import { getRuntimeConfig, writeConfigFile, type OpenClawConfig } from "../config/config.js";
+import { getRuntimeConfig, writeConfigFile, type CarapaceConfig } from "../config/config.js";
 import { readConfigFileSnapshotWithPluginMetadata } from "../config/io.js";
 import {
   detectLegacyWorkspaceState,
@@ -12,7 +12,7 @@ import {
 } from "../infra/state-migrations.workspace-setup.js";
 import { resetLogger } from "../logging/logger.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { gatewayKernelLogs } from "./server-kernel.js";
 // Exercise the lifecycle owner; the minimal boot smoke owns lazy-entrypoint import timing.
@@ -20,26 +20,26 @@ import { startGatewayServerCore as startGatewayServer } from "./server-start.js"
 import { connectGatewayClient, disconnectGatewayClient } from "./test-helpers.e2e.js";
 
 describe("Gateway workspace migration readiness", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
   let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
   let client: Awaited<ReturnType<typeof connectGatewayClient>> | undefined;
   const requestRecoveryRestart = vi.fn(() => {
     throw new Error("workspace readiness must not request a recovery restart");
   });
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "ws-readiness",
       env: {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
     });
   });
@@ -76,7 +76,7 @@ describe("Gateway workspace migration readiness", () => {
     async (source) => {
       const stateDir = state.stateDir;
       const workspaceDir = path.join(stateDir, "workspace-secondary");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: { mode: "local", bind: "loopback", auth: { mode: "none" } },
         agents: {
           ownership: "explicit",
@@ -88,7 +88,7 @@ describe("Gateway workspace migration readiness", () => {
       };
       await writeConfigFile(cfg);
       await fs.mkdir(workspaceDir, { recursive: true });
-      const sourcePath = path.join(workspaceDir, "openclaw-workspace-state.json");
+      const sourcePath = path.join(workspaceDir, "carapace-workspace-state.json");
       await fs.writeFile(
         sourcePath,
         JSON.stringify({ version: 1, setupCompletedAt: "2026-07-15T00:00:00.000Z" }),
@@ -139,12 +139,12 @@ describe("Gateway workspace migration readiness", () => {
     "rejects an unmigrated workspace switch before publication via %s",
     async (ingress) => {
       // The live candidate boundary needs the real managed reloader, not the minimal stub.
-      state.envVars.OPENCLAW_TEST_MINIMAL_GATEWAY = undefined;
+      state.envVars.CARAPACE_TEST_MINIMAL_GATEWAY = undefined;
       state.applyEnv();
       const oldWorkspace = state.workspaceDir;
       const nextWorkspace = state.path("retained");
       const reloadError = vi.spyOn(gatewayKernelLogs.logReload, "error");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: { mode: "local", bind: "loopback", auth: { mode: "none" } },
         logging: { level: "silent", consoleLevel: "silent" },
         agents: {
@@ -158,7 +158,7 @@ describe("Gateway workspace migration readiness", () => {
       const personaPath = path.join(nextWorkspace, "SOUL.md");
       const persona = "Retained workspace persona.\n";
       await fs.writeFile(personaPath, persona);
-      const sourcePath = path.join(nextWorkspace, "openclaw-workspace-state.json");
+      const sourcePath = path.join(nextWorkspace, "carapace-workspace-state.json");
       const legacyBytes = JSON.stringify({
         version: 1,
         setupCompletedAt: "2026-07-15T00:00:00.000Z",
@@ -171,7 +171,7 @@ describe("Gateway workspace migration readiness", () => {
         url: `ws://127.0.0.1:${port}`,
         scopes: ["operator.admin"],
       });
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...cfg,
         agents: { ...cfg.agents, entries: { main: { workspace: nextWorkspace } } },
       };
@@ -184,8 +184,8 @@ describe("Gateway workspace migration readiness", () => {
             raw: JSON.stringify(nextConfig),
             baseHash: snapshot.hash,
           }),
-        ).rejects.toThrow("openclaw doctor --fix");
-        await expect(writeConfigFile(nextConfig)).rejects.toThrow("openclaw doctor --fix");
+        ).rejects.toThrow("carapace doctor --fix");
+        await expect(writeConfigFile(nextConfig)).rejects.toThrow("carapace doctor --fix");
         expect(await fs.readFile(state.configPath, "utf8")).toBe(originalBytes);
       } else {
         await state.writeConfig(nextConfig);
@@ -197,7 +197,7 @@ describe("Gateway workspace migration readiness", () => {
             { timeout: 5_000 },
           )
           .toBe(true);
-        expect(reloadError).toHaveBeenCalledWith(expect.stringContaining("openclaw doctor --fix"));
+        expect(reloadError).toHaveBeenCalledWith(expect.stringContaining("carapace doctor --fix"));
         expect(JSON.parse(await fs.readFile(state.configPath, "utf8"))).toEqual(nextConfig);
       }
       expect(resolveAgentWorkspaceDir(getRuntimeConfig(), "main")).toBe(oldWorkspace);

@@ -17,45 +17,45 @@ import {
 describe("plugin install root context", () => {
   it("keeps discovery roots on the operator install while runtime state is redirected", async () => {
     const operatorRoots = resolvePluginInstallRoots(
-      { OPENCLAW_STATE_DIR: "/operator/openclaw" },
+      { CARAPACE_STATE_DIR: "/operator/carapace" },
       () => "/unused-home",
     );
-    const redirectedEnv = { OPENCLAW_STATE_DIR: "/tmp/ephemeral-run" };
+    const redirectedEnv = { CARAPACE_STATE_DIR: "/tmp/ephemeral-run" };
 
     await withPluginInstallRoots(operatorRoots, async () => {
       await Promise.resolve();
       expect(resolveDefaultPluginExtensionsDir(redirectedEnv)).toBe(
-        "/operator/openclaw/extensions",
+        "/operator/carapace/extensions",
       );
-      expect(resolveDefaultPluginNpmDir(redirectedEnv)).toBe("/operator/openclaw/npm");
-      expect(resolveDefaultPluginGitDir(redirectedEnv)).toBe("/operator/openclaw/git");
+      expect(resolveDefaultPluginNpmDir(redirectedEnv)).toBe("/operator/carapace/npm");
+      expect(resolveDefaultPluginGitDir(redirectedEnv)).toBe("/operator/carapace/git");
       expect(resolveInstalledPluginIndexStorePath({ env: redirectedEnv })).toBe(
-        "/operator/openclaw/state/openclaw.sqlite",
+        "/operator/carapace/state/carapace.sqlite",
       );
       expect(
         resolveInstalledPluginIndexStateDatabaseOptions({ env: redirectedEnv }).env
-          ?.OPENCLAW_STATE_DIR,
-      ).toBe("/operator/openclaw");
+          ?.CARAPACE_STATE_DIR,
+      ).toBe("/operator/carapace");
     });
 
     expect(resolveDefaultPluginExtensionsDir(redirectedEnv)).toBe("/tmp/ephemeral-run/extensions");
     expect(resolveInstalledPluginIndexStorePath({ env: redirectedEnv })).toBe(
-      "/tmp/ephemeral-run/state/openclaw.sqlite",
+      "/tmp/ephemeral-run/state/carapace.sqlite",
     );
     expect(
       resolveInstalledPluginIndexStateDatabaseOptions({ env: redirectedEnv }).env
-        ?.OPENCLAW_STATE_DIR,
+        ?.CARAPACE_STATE_DIR,
     ).toBe("/tmp/ephemeral-run");
   });
 
   it("isolates concurrent install-root scopes", async () => {
     const resolveScopedRoot = async (stateDir: string) => {
-      const roots = resolvePluginInstallRoots({ OPENCLAW_STATE_DIR: stateDir });
+      const roots = resolvePluginInstallRoots({ CARAPACE_STATE_DIR: stateDir });
       return await withPluginInstallRoots(roots, async () => {
         await new Promise<void>((resolve) => {
           setTimeout(resolve, 0);
         });
-        return resolveDefaultPluginExtensionsDir({ OPENCLAW_STATE_DIR: "/redirected" });
+        return resolveDefaultPluginExtensionsDir({ CARAPACE_STATE_DIR: "/redirected" });
       });
     };
 
@@ -67,7 +67,7 @@ describe("plugin install root context", () => {
 
 describe("managed npm plugin install paths", () => {
   it("keeps generation project names compact for nested Windows runtime binaries", () => {
-    const packageName = "@openclaw/codex";
+    const packageName = "@carapace/codex";
     const generationKey = [
       packageName,
       "2026.6.10",
@@ -76,22 +76,22 @@ describe("managed npm plugin install paths", () => {
       "codexshasum",
     ].join("\n");
     const projectDir = resolvePluginNpmGenerationProjectDir({
-      npmDir: String.raw`C:\Users\Administrator\.openclaw\npm`,
+      npmDir: String.raw`C:\Users\Administrator\.carapace\npm`,
       packageName,
       generationKey,
     });
     const projectName = path.basename(projectDir);
 
     expect(projectName).toMatch(
-      /^openclaw-codex-[a-f0-9]{10}__openclaw-generation__g-[a-f0-9]{16}$/u,
+      /^carapace-codex-[a-f0-9]{10}__carapace-generation__g-[a-f0-9]{16}$/u,
     );
     expect(projectName.length).toBeLessThanOrEqual(66);
 
     const nestedCodexBinaryPath = path.win32.join(
-      String.raw`C:\Users\Administrator\.openclaw\npm\projects`,
+      String.raw`C:\Users\Administrator\.carapace\npm\projects`,
       projectName,
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "codex",
       "node_modules",
       "@openai",
@@ -105,9 +105,9 @@ describe("managed npm plugin install paths", () => {
   });
 
   it("keeps generation project names under the recoverable package prefix", () => {
-    const packageName = "@openclaw/codex";
+    const packageName = "@carapace/codex";
     const projectDir = resolvePluginNpmGenerationProjectDir({
-      npmDir: "/tmp/openclaw/npm",
+      npmDir: "/tmp/carapace/npm",
       packageName,
       generationKey: "codex-v2",
     });

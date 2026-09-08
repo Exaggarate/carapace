@@ -3,7 +3,7 @@
 import {
   MAX_DATE_TIMESTAMP_MS,
   MAX_TIMER_TIMEOUT_MS,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { VERSION } from "../version.js";
 
@@ -578,8 +578,8 @@ describe("resolveProviderHttpRequestConfig", () => {
     expect(resolved.allowPrivateNetwork).toBe(false);
     expect(resolved.headers.get("authorization")).toBe("Bearer override");
     expect(resolved.headers.get("x-default")).toBe("1");
-    expect(resolved.headers.get("user-agent")).toBe(`openclaw/${VERSION}`);
-    expect(resolved.headers.get("originator")).toBe("openclaw");
+    expect(resolved.headers.get("user-agent")).toBe(`carapace/${VERSION}`);
+    expect(resolved.headers.get("originator")).toBe("carapace");
     expect(resolved.headers.get("version")).toBe(VERSION);
   });
 

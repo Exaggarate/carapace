@@ -232,7 +232,7 @@ export async function submitUpdateFailureReport(
   }
   const env = options.env ?? process.env;
   const stateDir = options.stateDir ?? resolveStateDir(env);
-  const stateEnv = { ...env, OPENCLAW_STATE_DIR: stateDir };
+  const stateEnv = { ...env, CARAPACE_STATE_DIR: stateDir };
   if (options.hasCurrentAuthority && !options.hasCurrentAuthority()) {
     throw new Error("Update report submission requires a current authenticated client.");
   }

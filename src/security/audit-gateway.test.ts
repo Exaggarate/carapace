@@ -1,6 +1,6 @@
 // Covers gateway security audit aggregation.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { setConfigResolutionFacts } from "../config/resolution-facts.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { collectGatewayConfigFindings } from "./audit-gateway-config.js";
@@ -23,7 +23,7 @@ describe("security audit gateway config findings", () => {
     { bind: "loopback", allowTailscale: false, missingAuth: true },
     { bind: "lan", allowTailscale: true, missingAuth: true },
   ] as const)("limits Tailscale auth to its enabled loopback path: %j", (testCase) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         bind: testCase.bind,
         auth: { allowTailscale: testCase.allowTailscale },
@@ -37,12 +37,12 @@ describe("security audit gateway config findings", () => {
   });
 
   describe.each(["token", "password"] as const)("%s strength", (credential) => {
-    const envKey = credential === "token" ? "OPENCLAW_GATEWAY_TOKEN" : "OPENCLAW_GATEWAY_PASSWORD";
+    const envKey = credential === "token" ? "CARAPACE_GATEWAY_TOKEN" : "CARAPACE_GATEWAY_PASSWORD";
     const inactiveCredential = credential === "token" ? "password" : "token";
     it.each(["undefined", "null", "  undefined  ", "", "  "])(
       'flags a stringified nullish gateway secret as critical: "%s"',
       (secret) => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           gateway: {
             bind: "loopback",
             auth: { mode: credential, [credential]: secret },
@@ -59,7 +59,7 @@ describe("security audit gateway config findings", () => {
 
     describe("SecretRef secret inspection", () => {
       const ref = { source: "exec", provider: "fixture", id: "gateway" } as const;
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: CarapaceConfig = {
         gateway: { auth: { mode: credential, [credential]: ref } },
         secrets: { providers: { fixture: { source: "exec", command: "/usr/bin/printf" } } },
       };
@@ -72,7 +72,7 @@ describe("security audit gateway config findings", () => {
       ])(
         "does not audit an ambient credential over a $name reference",
         ({ secret, unresolved }) => {
-          const cfg: OpenClawConfig = {
+          const cfg: CarapaceConfig = {
             ...sourceConfig,
             gateway: { auth: { mode: credential, [credential]: secret } },
           };
@@ -94,7 +94,7 @@ describe("security audit gateway config findings", () => {
         { secret: "short", critical: false, short: true },
         { secret: "${LITERAL}", critical: false, short: true },
       ])("audits materialized reference value $secret", ({ secret, critical, short }) => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           ...sourceConfig,
           gateway: { auth: { mode: credential, [credential]: secret } },
         };
@@ -111,7 +111,7 @@ describe("security audit gateway config findings", () => {
       it.each(["undefined", "short"])(
         "audits explicit override %s over an unresolved reference",
         (secret) => {
-          const cfg: OpenClawConfig = { ...sourceConfig, gateway: { auth: { mode: credential } } };
+          const cfg: CarapaceConfig = { ...sourceConfig, gateway: { auth: { mode: credential } } };
           setConfigResolutionFacts(cfg, new Set([`gateway.auth.${credential}`]));
           const findings = collectGatewayConfigFindings(
             cfg,
@@ -130,7 +130,7 @@ describe("security audit gateway config findings", () => {
     });
 
     it("keeps a valid environment fallback authoritative over a blank inline secret", () => {
-      const cfg: OpenClawConfig = { gateway: { auth: { mode: credential, [credential]: " " } } };
+      const cfg: CarapaceConfig = { gateway: { auth: { mode: credential, [credential]: " " } } };
       expect(
         hasFinding(
           `gateway.${credential}_placeholder_value`,
@@ -140,7 +140,7 @@ describe("security audit gateway config findings", () => {
     });
 
     it("does not report an inactive or overridden secret as the active credential", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           auth: {
             mode: inactiveCredential,
@@ -171,7 +171,7 @@ describe("security audit gateway config findings", () => {
     });
 
     it("keeps the short-secret warning for a real short gateway secret", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           bind: "loopback",
           auth: { mode: credential, [credential]: "undefined-ish" },
@@ -189,8 +189,8 @@ describe("security audit gateway config findings", () => {
     await Promise.all([
       withEnvAsync(
         {
-          OPENCLAW_GATEWAY_TOKEN: undefined,
-          OPENCLAW_GATEWAY_PASSWORD: undefined,
+          CARAPACE_GATEWAY_TOKEN: undefined,
+          CARAPACE_GATEWAY_PASSWORD: undefined,
         },
         async () => {
           const findings = collectGatewayConfigFindings(
@@ -212,14 +212,14 @@ describe("security audit gateway config findings", () => {
         },
       ),
       (async () => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           gateway: {
             bind: "lan",
             auth: {
               password: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_GATEWAY_PASSWORD",
+                id: "CARAPACE_GATEWAY_PASSWORD",
               },
             },
           },
@@ -228,14 +228,14 @@ describe("security audit gateway config findings", () => {
         expect(hasFinding("gateway.bind_no_auth", findings)).toBe(false);
       })(),
       (async () => {
-        const sourceConfig: OpenClawConfig = {
+        const sourceConfig: CarapaceConfig = {
           gateway: {
             bind: "lan",
             auth: {
               token: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_GATEWAY_TOKEN",
+                id: "CARAPACE_GATEWAY_TOKEN",
               },
             },
           },
@@ -245,7 +245,7 @@ describe("security audit gateway config findings", () => {
             },
           },
         };
-        const resolvedConfig: OpenClawConfig = {
+        const resolvedConfig: CarapaceConfig = {
           gateway: {
             bind: "lan",
             auth: {},
@@ -256,7 +256,7 @@ describe("security audit gateway config findings", () => {
         expect(hasFinding("gateway.bind_no_auth", findings)).toBe(false);
       })(),
       (async () => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           gateway: {
             bind: "lan",
             auth: { token: "secret" },
@@ -266,7 +266,7 @@ describe("security audit gateway config findings", () => {
         expect(hasFindingWithSeverity("gateway.auth_no_rate_limit", "warn", findings)).toBe(true);
       })(),
       (async () => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           gateway: {
             bind: "lan",
             auth: {
@@ -282,7 +282,7 @@ describe("security audit gateway config findings", () => {
   });
 
   it("honors runtime password auth override for bind auth checks", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         bind: "lan",
         auth: {},
@@ -304,31 +304,31 @@ describe("security audit gateway config findings", () => {
     expect(hasFinding("gateway.bind_no_auth", findings)).toBe(false);
   });
 
-  it("warns when OPENCLAW_GATEWAY_TOKEN shadows a different configured token source", () => {
-    const cfg: OpenClawConfig = {
+  it("warns when CARAPACE_GATEWAY_TOKEN shadows a different configured token source", () => {
+    const cfg: CarapaceConfig = {
       gateway: { auth: { token: "config-token" } },
     };
     const findings = collectGatewayConfigFindings(cfg, cfg, {
-      OPENCLAW_GATEWAY_TOKEN: "env-token",
+      CARAPACE_GATEWAY_TOKEN: "env-token",
     });
 
     expect(hasFinding("gateway.env_token_overrides_config", findings)).toBe(true);
   });
 
   it("does not warn inside the managed gateway service credential context", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: { auth: { token: "config-token" } },
     };
     const findings = collectGatewayConfigFindings(cfg, cfg, {
-      OPENCLAW_GATEWAY_TOKEN: "env-token",
-      OPENCLAW_SERVICE_KIND: "gateway",
+      CARAPACE_GATEWAY_TOKEN: "env-token",
+      CARAPACE_SERVICE_KIND: "gateway",
     });
 
     expect(hasFinding("gateway.env_token_overrides_config", findings)).toBe(false);
   });
 
   it("does not count an unresolved token as configured auth", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: { bind: "lan", auth: { mode: "token", token: "${MISSING_TOKEN}" } },
     };
     setConfigResolutionFacts(config, new Set(["gateway.auth.token"]));
@@ -341,20 +341,20 @@ describe("security audit gateway config findings", () => {
     expect(hasFinding("gateway.bind_no_auth", literal)).toBe(false);
   });
 
-  it("does not warn when gateway.auth.token resolves from OPENCLAW_GATEWAY_TOKEN", () => {
-    const cfg: OpenClawConfig = {
-      gateway: { auth: { token: "${OPENCLAW_GATEWAY_TOKEN}" } },
+  it("does not warn when gateway.auth.token resolves from CARAPACE_GATEWAY_TOKEN", () => {
+    const cfg: CarapaceConfig = {
+      gateway: { auth: { token: "${CARAPACE_GATEWAY_TOKEN}" } },
       secrets: { providers: { default: { source: "env" } } },
     };
     const findings = collectGatewayConfigFindings(cfg, cfg, {
-      OPENCLAW_GATEWAY_TOKEN: "env-token",
+      CARAPACE_GATEWAY_TOKEN: "env-token",
     });
 
     expect(hasFinding("gateway.env_token_overrides_config", findings)).toBe(false);
   });
 
   it("does not warn about local gateway auth token precedence in remote mode", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         mode: "remote",
         remote: { token: "remote-token" },
@@ -362,7 +362,7 @@ describe("security audit gateway config findings", () => {
       },
     };
     const findings = collectGatewayConfigFindings(cfg, cfg, {
-      OPENCLAW_GATEWAY_TOKEN: "env-token",
+      CARAPACE_GATEWAY_TOKEN: "env-token",
     });
 
     expect(hasFinding("gateway.env_token_overrides_config", findings)).toBe(false);

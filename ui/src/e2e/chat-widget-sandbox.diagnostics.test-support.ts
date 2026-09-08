@@ -6,7 +6,7 @@ import type { BrowserContext, Page } from "playwright";
 export async function installWidgetPromptDiagnostics(context: BrowserContext): Promise<void> {
   await context.addInitScript(() => {
     const events: unknown[] = [];
-    Object.defineProperty(window, "openclawSyntheticWidgetTimeline", { value: events });
+    Object.defineProperty(window, "carapaceSyntheticWidgetTimeline", { value: events });
     const element = (value: EventTarget | null) =>
       value instanceof Element ? { tag: value.tagName, id: value.id.slice(0, 32) } : null;
     const record = (kind: string, detail: Record<string, unknown> = {}) => {
@@ -42,30 +42,30 @@ export async function installWidgetPromptDiagnostics(context: BrowserContext): P
     window.addEventListener("message", (event) => {
       const type = event.data?.type;
       if (
-        type !== "openclaw:widget-size" &&
-        type !== "openclaw:widget-prompt-offer" &&
-        type !== "openclaw:widget-bridge-ready"
+        type !== "carapace:widget-size" &&
+        type !== "carapace:widget-prompt-offer" &&
+        type !== "carapace:widget-bridge-ready"
       ) {
         return;
       }
       record(type, {
         ports: event.ports.length,
-        ...(type === "openclaw:widget-size" && Number.isFinite(event.data.height)
+        ...(type === "carapace:widget-size" && Number.isFinite(event.data.height)
           ? { height: Math.min(10000, Math.max(0, event.data.height)) }
           : {}),
       });
-      if (type === "openclaw:widget-prompt-offer") {
+      if (type === "carapace:widget-prompt-offer") {
         // Observe the transferred port without starting it or changing its owner.
         for (const port of event.ports) {
           port.addEventListener("message", (message) => {
-            if (message.data?.type === "openclaw:widget-prompt") {
+            if (message.data?.type === "carapace:widget-prompt") {
               record("prompt-received");
             }
           });
         }
       }
     });
-    document.addEventListener("openclaw-widget-prompt", () => record("prompt-dispatched"), true);
+    document.addEventListener("carapace-widget-prompt", () => record("prompt-dispatched"), true);
   });
 }
 
@@ -78,8 +78,8 @@ export async function retainWidgetPromptFailure(page: Page, artifactDir: string)
         try {
           const events = await frame.evaluate(
             () =>
-              (window as Window & { openclawSyntheticWidgetTimeline?: unknown[] })
-                .openclawSyntheticWidgetTimeline ?? [],
+              (window as Window & { carapaceSyntheticWidgetTimeline?: unknown[] })
+                .carapaceSyntheticWidgetTimeline ?? [],
           );
           return { index, events };
         } catch {

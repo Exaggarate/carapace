@@ -2,14 +2,14 @@
  * Bundled Codex plugin entry: app-server harness, media understanding,
  * migration provider, CLI-session commands, and binding hooks.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizePluginsConfig,
   resolveEffectiveEnableState,
   resolveLivePluginConfigObject,
-} from "openclaw/plugin-sdk/plugin-config-runtime";
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-config-runtime";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import { registerCodexCliMetadata } from "./cli-metadata.js";
 import {
   createCodexAppServerAgentHarness,
@@ -81,8 +81,8 @@ export default definePluginEntry({
     // cannot identify the owning plugin package or its pinned dependencies.
     setManagedCodexPluginRoot(api.rootDir);
     const resolveCurrentConfig = () =>
-      api.runtime.config?.current ? (api.runtime.config.current() as OpenClawConfig) : undefined;
-    const resolvePluginConfig = (resolveConfig: () => OpenClawConfig | undefined) => {
+      api.runtime.config?.current ? (api.runtime.config.current() as CarapaceConfig) : undefined;
+    const resolvePluginConfig = (resolveConfig: () => CarapaceConfig | undefined) => {
       const liveConfig = resolveConfig();
       // Codex plugin config can change at runtime. A missing live entry is an
       // explicit removal, while an unavailable runtime snapshot uses startup config.
@@ -178,7 +178,7 @@ export default definePluginEntry({
     const sessionCatalogControlFactory = createCodexSessionCatalogControl({
       resolveRuntimeOptions: resolveCodexSupervisionAppServerRuntimeOptions,
       managedThreads: bindingStore.managedThreads,
-      config: api.config as OpenClawConfig,
+      config: api.config as CarapaceConfig,
       getPluginConfig: resolveCurrentPluginConfig,
       getRuntimeConfig: resolveCurrentConfig,
     });
@@ -197,7 +197,7 @@ export default definePluginEntry({
         sessionCatalogControlFactory,
         {
           getPluginConfig: resolveCurrentPluginConfig,
-          getRuntimeConfig: () => resolveCurrentConfig() ?? (api.config as OpenClawConfig),
+          getRuntimeConfig: () => resolveCurrentConfig() ?? (api.config as CarapaceConfig),
           resolveRuntimeOptions: resolveCodexSupervisionAppServerRuntimeOptions,
         },
         bindingStore,
@@ -303,7 +303,7 @@ export default definePluginEntry({
             resolveCodexCliSessionForBindingOnNode({ runtime: api.runtime, ...params }),
           codexPluginsManagementIo: {
             readConfig: () => {
-              const current = (api.runtime.config?.current?.() ?? {}) as OpenClawConfig;
+              const current = (api.runtime.config?.current?.() ?? {}) as CarapaceConfig;
               const plugins = (current as Record<string, unknown>).plugins;
               if (!plugins || typeof plugins !== "object") {
                 return Promise.resolve({});
@@ -336,7 +336,7 @@ export default definePluginEntry({
               });
             },
             mutate: async (update) => {
-              const { mutateConfigFile } = await import("openclaw/plugin-sdk/config-mutation");
+              const { mutateConfigFile } = await import("carapace/plugin-sdk/config-mutation");
               await mutateConfigFile({
                 mutate: (draft) => {
                   // Create the nested plugin config path on demand so codex

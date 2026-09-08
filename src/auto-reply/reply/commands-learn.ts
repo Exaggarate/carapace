@@ -3,7 +3,7 @@ import { resolveCliBackendConfig } from "../../agents/cli-backends.js";
 import { detectNodeClaudePlacement } from "../../agents/cli-runner/prepare-claude.js";
 import { resolveConversationCapabilityProfile } from "../../agents/conversation-capability-profile.js";
 import {
-  agentHarnessExposesOpenClawTools,
+  agentHarnessExposesCarapaceTools,
   selectAgentHarness,
 } from "../../agents/harness/selection.js";
 import {
@@ -24,9 +24,9 @@ import { resolveRuntimePolicySessionKey } from "./runtime-policy-session-key.js"
 const LEARN_COMMAND_PREFIX = "/learn";
 const SKILL_WORKSHOP_TOOL_NAME = "skill_workshop";
 const SKILL_WORKSHOP_UNAVAILABLE_REPLY =
-  "Skill workshop is not available on this agent. Use a non-sandboxed agent where the skill_workshop tool is available, or use the openclaw skills workshop CLI.";
+  "Skill workshop is not available on this agent. Use a non-sandboxed agent where the skill_workshop tool is available, or use the carapace skills workshop CLI.";
 const PERSONAL_WORKSHOP_LEARN_REPLY =
-  "This turn cannot stage a pending workspace proposal, so /learn made no change. Ordinary explicit personal skill creation publishes a revision. Ask for that directly if intended, or use the existing administrator UI or openclaw skills workshop CLI for workspace proposal review.";
+  "This turn cannot stage a pending workspace proposal, so /learn made no change. Ordinary explicit personal skill creation publishes a revision. Ask for that directly if intended, or use the existing administrator UI or carapace skills workshop CLI for workspace proposal review.";
 
 function parseLearnRequest(raw: string): string | null {
   const trimmed = raw.trim();
@@ -112,7 +112,7 @@ function resolveWorkshopSurface(
         agentId: params.agentId,
         sessionKey: params.sessionKey,
       });
-      if (!agentHarnessExposesOpenClawTools(harness.id)) {
+      if (!agentHarnessExposesCarapaceTools(harness.id)) {
         return undefined;
       }
     }

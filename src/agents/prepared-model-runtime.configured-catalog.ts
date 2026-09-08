@@ -1,4 +1,4 @@
-import type { ModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import type { ModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
 import type { InlineModelEntry } from "./embedded-agent-runner/model.inline-provider.js";
 import type { ModelCatalogEntry } from "./model-catalog.js";
 import type { ModelCatalogSnapshot } from "./model-catalog.types.js";

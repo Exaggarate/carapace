@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_IDS } from "../../../packages/gateway-protocol/src/client-info.js";
 import { NODE_WORKER_SUPERVISOR_STATUS_COMMAND } from "../../infra/node-commands.js";
@@ -537,7 +537,7 @@ describe("nodeHandlers node.runnerInventory.update", () => {
       undefined,
       expect.objectContaining({
         code: "INVALID_REQUEST",
-        message: expect.stringContaining("openclaw update"),
+        message: expect.stringContaining("carapace update"),
       }),
     );
     expect(inventoryChanged).toHaveBeenLastCalledWith("node-1", {
@@ -644,7 +644,7 @@ describe("nodeHandlers node.runnerInventory.update", () => {
     expect(opts.respond).toHaveBeenCalledWith(
       false,
       undefined,
-      expect.objectContaining({ message: expect.stringContaining("openclaw update") }),
+      expect.objectContaining({ message: expect.stringContaining("carapace update") }),
     );
     expect(runtime.nodeWorkerSupervisorTransport.getIssue?.("node-1")).toEqual(
       NODE_RUNNER_UPDATE_REQUIRED_ISSUE,

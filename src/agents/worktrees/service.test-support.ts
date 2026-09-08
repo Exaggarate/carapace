@@ -17,8 +17,8 @@ async function git(cwd: string, ...args: string[]): Promise<void> {
 async function initializeRepository(repo: string): Promise<void> {
   await fs.mkdir(repo, { recursive: true });
   await git(repo, "init", "-b", "main");
-  await git(repo, "config", "user.name", "OpenClaw Test");
-  await git(repo, "config", "user.email", "openclaw-test@example.invalid");
+  await git(repo, "config", "user.name", "Carapace Test");
+  await git(repo, "config", "user.email", "carapace-test@example.invalid");
   await fs.writeFile(path.join(repo, "README.md"), "base\n");
   await git(repo, "add", "README.md");
   await git(repo, "commit", "-m", "initial");
@@ -42,7 +42,7 @@ export function useManagedWorktreeTestRepository(): (root: string) => Promise<st
   const templateDirs = useAutoCleanupTempDirTracker(afterAll);
   let templateRepo: string;
   beforeAll(async () => {
-    const templateRoot = templateDirs.make("openclaw-worktree-template-");
+    const templateRoot = templateDirs.make("carapace-worktree-template-");
     const repo = path.join(templateRoot, "repo");
     await initializeRepository(repo);
     templateRepo = repo;
@@ -86,7 +86,7 @@ export async function materializeManagedWorktreeFixture(params: {
 }): Promise<ManagedWorktreeRecord> {
   const repoFingerprint = "downstream-fixture";
   const worktreePath = path.join(params.stateDir, "worktrees", repoFingerprint, params.name);
-  const branch = `openclaw/${params.name}`;
+  const branch = `carapace/${params.name}`;
   await fs.mkdir(path.dirname(worktreePath), { recursive: true });
   await git(params.repoRoot, "worktree", "add", "-b", branch, "--", worktreePath, "HEAD");
   const provisionedPaths = params.provisionedPaths ?? [];

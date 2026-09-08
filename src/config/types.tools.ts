@@ -1,5 +1,5 @@
 // Defines tool availability and allowlist configuration types.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { ChatType } from "../channels/chat-type.js";
 import type { SafeBinProfileFixture } from "../infra/exec-safe-bin-policy.js";
 import type { AgentModelConfig } from "./types.agents-shared.js";
@@ -182,7 +182,7 @@ export type CodeModeConfig =
   | boolean
   | "auto"
   | {
-      /** OpenClaw Code Mode default, overridden by per-model codeMode. Default: false; "auto" engages catalog-preferred models. */
+      /** Carapace Code Mode default, overridden by per-model codeMode. Default: false; "auto" engages catalog-preferred models. */
       enabled?: boolean | "auto";
       /** Guest runtime. Only quickjs-wasi is supported. */
       runtime?: "quickjs-wasi";
@@ -542,7 +542,7 @@ export type ToolsConfig = {
   fs?: FsToolsConfig;
   /** Runtime loop detection for repetitive/ stuck tool-call patterns. */
   loopDetection?: ToolLoopDetectionConfig;
-  /** Compact large OpenClaw, MCP, and client tool catalogs behind search/call tools. */
+  /** Compact large Carapace, MCP, and client tool catalogs behind search/call tools. */
   toolSearch?: ToolSearchConfig;
   /** Global Code Mode defaults and limits; agent/model settings can override activation. */
   codeMode?: CodeModeConfig;

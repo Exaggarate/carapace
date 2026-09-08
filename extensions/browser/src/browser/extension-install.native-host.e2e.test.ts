@@ -22,7 +22,7 @@ describe.skipIf(process.platform === "win32")("native host registration", () => 
   it("launches with the exact custom installation context when Chrome has no selectors", async () => {
     const value = await fixture();
     const stateDir = path.join(value.root, "custom state's dir");
-    const configPath = path.join(value.root, "custom config's dir", "openclaw.json");
+    const configPath = path.join(value.root, "custom config's dir", "carapace.json");
     const launchFixture = await nativeHostFixture(value.root, BUILT_NATIVE_HOST_PATH);
     const relayPort = 19_031;
     const token = relayTestKey(4);
@@ -32,8 +32,8 @@ describe.skipIf(process.platform === "win32")("native host registration", () => 
       ...launchFixture,
       env: {
         ...value.deps.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
       },
     };
     await fs.mkdir(path.join(stateDir, "credentials"), { recursive: true, mode: 0o700 });

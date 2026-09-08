@@ -9,7 +9,7 @@ import { mockGatewayTest as it } from "./mock-gateway-page.test-support.ts";
 it.for([
   { kind: "exec", resolve: "exec.approval.resolve" },
   { kind: "plugin", resolve: "plugin.approval.resolve" },
-  { kind: "openclaw", resolve: "approval.resolve" },
+  { kind: "carapace", resolve: "approval.resolve" },
   { kind: "exec", resolve: "approval.resolve" },
   { kind: "plugin", resolve: "approval.resolve" },
 ])(
@@ -17,8 +17,8 @@ it.for([
   async ({ kind, resolve }, { gatewayPage }) => {
     const { window, execute } = gatewayPage;
     execute(createControlUiMockGatewayInitScript());
-    const gateway = (window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway })
-      .openclawControlUiE2eGateway;
+    const gateway = (window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway })
+      .carapaceControlUiE2eGateway;
     if (!gateway) {
       throw new Error("Mock Gateway was not installed");
     }
@@ -54,7 +54,7 @@ it.for([
       id: approval.id,
       decision: "deny",
       ...(resolve === "approval.resolve"
-        ? { kind: kind === "openclaw" ? "system-agent" : kind }
+        ? { kind: kind === "carapace" ? "system-agent" : kind }
         : {}),
     };
 

@@ -3,13 +3,13 @@ import crypto from "node:crypto";
 import type {
   ChannelAccountSnapshot,
   ChannelOutboundContext,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { readResponseTextLimited } from "openclaw/plugin-sdk/provider-http";
-import { runChannelProbe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { readResponseTextLimited } from "carapace/plugin-sdk/provider-http";
+import { runChannelProbe } from "carapace/plugin-sdk/text-utility-runtime";
 import { monitorTlonProvider } from "./monitor/index.js";
 import { tlonSetupWizard } from "./setup-surface.js";
 import { formatTargetHint, normalizeShip, parseTlonTarget } from "./targets.js";
@@ -85,7 +85,7 @@ async function createHttpPokeApi(params: {
 }
 
 function resolveOutboundContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   to: string;
 }) {

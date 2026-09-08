@@ -1,16 +1,16 @@
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { normalizeMessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { normalizeMessagePresentation } from "carapace/plugin-sdk/interactive-runtime";
 import {
   isFastModeAutoProgressPayload,
   isReplyPayloadNonTerminalToolErrorWarning,
   resolveAskUserQuestionOptionIndices,
   resolveSendableOutboundReplyParts,
   type ReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/reply-payload";
+import { danger } from "carapace/plugin-sdk/runtime-env";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import {
   applyTextToPayload,

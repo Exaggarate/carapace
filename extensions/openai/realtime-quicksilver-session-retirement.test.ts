@@ -2,7 +2,7 @@ import { ServerResponse } from "node:http";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceGatewayControl,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { openAIRealtimeHost } from "./realtime-host.js";
 import {

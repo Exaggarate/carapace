@@ -11,7 +11,7 @@ describe("resolvePluginControlPlaneWorkspace", () => {
             entries: { alpha: {}, beta: {} },
           },
         },
-        env: { OPENCLAW_STATE_DIR: "/tmp/openclaw-control-plane" },
+        env: { CARAPACE_STATE_DIR: "/tmp/carapace-control-plane" },
       }),
     ).toMatchObject({
       workspaceScope: "omitted",

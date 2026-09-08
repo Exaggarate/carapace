@@ -1,5 +1,5 @@
 name: Setup Android toolchain
-description: Set up the pinned Java and Android SDK toolchain used by OpenClaw builds.
+description: Set up the pinned Java and Android SDK toolchain used by Carapace builds.
 inputs:
   cache-mode:
     description: Cache authority for this job (off, restore, or read-write).

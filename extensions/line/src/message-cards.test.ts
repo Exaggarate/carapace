@@ -1,7 +1,7 @@
 // Line tests cover message cards plugin behavior.
 import { messagingApi } from "@line/bot-sdk";
-import { expectDefined } from "@openclaw/normalization-core";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { expectDefined } from "@carapace/normalization-core";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import {
   datetimePickerAction,

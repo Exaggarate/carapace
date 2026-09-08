@@ -36,7 +36,7 @@ describe("Claude Desktop overlay cache", () => {
   let closeWatch = vi.fn();
 
   beforeEach(async () => {
-    home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-desktop-overlay-"));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-desktop-overlay-"));
     now = Date.UTC(2026, 0, 1);
     dirty = new Set();
     closeWatch = vi.fn();

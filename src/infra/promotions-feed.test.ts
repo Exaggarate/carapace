@@ -2,12 +2,12 @@
 // sequence monotonicity, notified markers, and claim provenance.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { updateConfigMachineState } from "../state/config-machine-state-write.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { useMockHttp } from "../test-utils/mock-http.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   listLivePromotionEntries,
   markPromotionSlugsNotified,
@@ -45,17 +45,17 @@ function feedPayload(overrides: Record<string, unknown> = {}) {
 }
 
 describe("promotions feed state", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-promotions-feed-",
+      prefix: "carapace-promotions-feed-",
     });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await testState.cleanup();
   });
 

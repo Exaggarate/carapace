@@ -24,7 +24,7 @@ import { parseSessionDiffPatch, type ParsedFilePatch } from "../../../lib/chat/s
 import type { DiffLine } from "../../../lib/chat/tool-call-diff.ts";
 import { openEditor } from "../../../lib/editor-links.ts";
 import { formatUiError } from "../../../lib/format-error.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../../lit/carapace-element.ts";
 import { getSafeLocalStorage } from "../../../local-storage.ts";
 import { renderDiffBlock, renderDiffStatChips } from "./chat-diff-render.ts";
 import type {
@@ -50,7 +50,7 @@ type SessionDiffTaskResult = {
 };
 
 type SessionDiffPreferences = { split: boolean; wrap: boolean };
-const PREFERENCES_KEY = "openclaw.control.sessionDiff.v1";
+const PREFERENCES_KEY = "carapace.control.sessionDiff.v1";
 
 function loadPreferences(): SessionDiffPreferences {
   try {
@@ -149,7 +149,7 @@ function taskResult(result: SessionsDiffResult): SessionDiffTaskResult {
   };
 }
 
-class SessionDiffPanel extends OpenClawLightDomElement {
+class SessionDiffPanel extends CarapaceLightDomElement {
   @property({ attribute: false }) execNode: string | null = null;
   @property({ attribute: false }) loader: SessionDiffLoader | null = null;
   @property({ attribute: false }) loadFileText: SessionDiffFileTextLoader | null = null;
@@ -307,7 +307,7 @@ class SessionDiffPanel extends OpenClawLightDomElement {
               </button>`
             : nothing
         }
-        <openclaw-tooltip .content=${t("chat.sessionDiff.viewOptions")}>
+        <carapace-tooltip .content=${t("chat.sessionDiff.viewOptions")}>
           <button
             class="btn btn--ghost btn--icon session-diff__toolbar-icon"
             type="button"
@@ -321,8 +321,8 @@ class SessionDiffPanel extends OpenClawLightDomElement {
           >
             ${icons.moreHorizontal}
           </button>
-        </openclaw-tooltip>
-        <openclaw-tooltip .content=${t("chat.sessionDiff.refresh")}>
+        </carapace-tooltip>
+        <carapace-tooltip .content=${t("chat.sessionDiff.refresh")}>
           <button
             class="btn btn--ghost btn--icon session-diff__refresh"
             type="button"
@@ -332,7 +332,7 @@ class SessionDiffPanel extends OpenClawLightDomElement {
           >
             ${icons.refresh}
           </button>
-        </openclaw-tooltip>
+        </carapace-tooltip>
       </div>
     `;
   }
@@ -663,13 +663,13 @@ class SessionDiffPanel extends OpenClawLightDomElement {
           this.menu
             ? keyed(
                 this.menu,
-                html`<openclaw-session-diff-menu
+                html`<carapace-session-diff-menu
                   .menu=${this.menu}
                   .onAction=${(action: SessionDiffMenuAction) => this.handleMenuAction(action)}
                   .onClose=${() => {
                     this.menu = null;
                   }}
-                ></openclaw-session-diff-menu>`,
+                ></carapace-session-diff-menu>`,
               )
             : nothing
         }
@@ -678,12 +678,12 @@ class SessionDiffPanel extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-session-diff")) {
-  customElements.define("openclaw-session-diff", SessionDiffPanel);
+if (!customElements.get("carapace-session-diff")) {
+  customElements.define("carapace-session-diff", SessionDiffPanel);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-session-diff": SessionDiffPanel;
+    "carapace-session-diff": SessionDiffPanel;
   }
 }

@@ -42,6 +42,6 @@ export const page = definePage({
     import("./devices-page.ts").then(() => ({
       header: true,
       render: (data: DevicesRouteData | undefined) =>
-        html`<openclaw-devices-page .routeData=${data}></openclaw-devices-page>`,
+        html`<carapace-devices-page .routeData=${data}></carapace-devices-page>`,
     })),
 });

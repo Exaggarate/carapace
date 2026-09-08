@@ -1,9 +1,9 @@
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { beforeEach, expect, it, vi } from "vitest";
 import { createGithubSource } from "./index.js";
 import { config, logger } from "./responses.fixtures.js";
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({ fetchWithSsrFGuard: vi.fn() }));
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({ fetchWithSsrFGuard: vi.fn() }));
 beforeEach(() => vi.clearAllMocks());
 
 it.each([true, false])(

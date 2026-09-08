@@ -288,7 +288,7 @@ src/agents/agent-hooks/compaction-safeguard.ts
 src/agents/agent-scope.test.ts
 src/agents/agent-tools.before-tool-call.e2e.test.ts
 src/agents/agent-tools.before-tool-call.integration.e2e.test.ts
-src/agents/agent-tools.create-openclaw-coding-tools.test.ts
+src/agents/agent-tools.create-carapace-coding-tools.test.ts
 src/agents/agent-tools.read.ts
 src/agents/agent-tools.schema.test.ts
 src/agents/agent-tools.ts
@@ -358,8 +358,8 @@ src/agents/model-selection.test.ts
 src/agents/models.profiles.live.test.ts
 src/agents/openai-transport-stream.base.test.ts
 src/agents/openai-transport-stream.replay-and-tools.test.ts
-src/agents/openclaw-tools.session-status.test.ts
-src/agents/openclaw-tools.sessions.test.ts
+src/agents/carapace-tools.session-status.test.ts
+src/agents/carapace-tools.sessions.test.ts
 src/agents/provider-attribution.test.ts
 src/agents/provider-request-config.ts
 src/agents/provider-transport-fetch.test.ts
@@ -782,8 +782,8 @@ src/skills/security/scanner.ts
 src/skills/workshop/service.test.ts
 src/snapshot/local-repository.test.ts
 src/snapshot/local-repository.ts
-src/state/openclaw-agent-db.test.ts
-src/state/openclaw-state-db.test.ts
+src/state/carapace-agent-db.test.ts
+src/state/carapace-state-db.test.ts
 src/status/status-message.ts
 src/system-agent/setup-inference.test.ts
 src/system-agent/verified-inference.ts

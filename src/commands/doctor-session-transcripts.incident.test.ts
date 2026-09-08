@@ -8,7 +8,7 @@ import {
   loadExactSessionEntryReadOnly,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createPluginStateKeyedStore,
   getPluginStateCapacity,
@@ -17,7 +17,7 @@ import {
 } from "../plugin-state/plugin-state-store.js";
 import { seedPluginStateEntriesForTests } from "../plugin-state/plugin-state-store.test-helpers.js";
 import type { PluginDoctorStateMigration } from "../plugins/doctor-contract-registry.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 
 const note = vi.hoisted(() => vi.fn());
 
@@ -51,7 +51,7 @@ const stableKey = (sessionKey: string, agentId = "main") =>
   `session-key:${agentId}:${createHash("sha256").update(sessionKey).digest("base64url")}`;
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   vi.unstubAllEnvs();
   note.mockClear();
@@ -64,11 +64,11 @@ afterEach(async () => {
 describe("doctor incident-scale Codex binding repair", () => {
   it("repairs a full store of mixed stable bindings without losing current or uncertain ownership", async () => {
     incidentStateDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-doctor-incident-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-doctor-incident-")),
     );
-    vi.stubEnv("OPENCLAW_STATE_DIR", incidentStateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", incidentStateDir);
     const env = process.env;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { entries: { main: { default: true } } },
       plugins: { entries: { codex: { enabled: true } } },
     };

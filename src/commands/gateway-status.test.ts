@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Gateway status command tests cover probe targets, JSON/text output, SSH tunnels, and warnings.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayProbeResult } from "../gateway/probe.js";
 import type { GatewayBonjourBeacon } from "../infra/bonjour-discovery.js";
@@ -489,13 +489,13 @@ describe("gateway-status command", () => {
     {
       source: "environment token",
       auth: { mode: "token" },
-      env: { OPENCLAW_GATEWAY_TOKEN: "ambient-local-token" },
+      env: { CARAPACE_GATEWAY_TOKEN: "ambient-local-token" },
       options: {},
     },
     {
       source: "environment password",
       auth: { mode: "password" },
-      env: { OPENCLAW_GATEWAY_PASSWORD: "ambient-local-password" },
+      env: { CARAPACE_GATEWAY_PASSWORD: "ambient-local-password" },
       options: {},
     },
     {
@@ -523,8 +523,8 @@ describe("gateway-status command", () => {
 
       await withEnvAsync(
         {
-          OPENCLAW_GATEWAY_TOKEN: undefined,
-          OPENCLAW_GATEWAY_PASSWORD: undefined,
+          CARAPACE_GATEWAY_TOKEN: undefined,
+          CARAPACE_GATEWAY_PASSWORD: undefined,
           ...env,
         },
         async () => {
@@ -581,8 +581,8 @@ describe("gateway-status command", () => {
 
       await withEnvAsync(
         {
-          OPENCLAW_GATEWAY_TOKEN: "ambient-local-token",
-          OPENCLAW_GATEWAY_PASSWORD: "ambient-local-password",
+          CARAPACE_GATEWAY_TOKEN: "ambient-local-token",
+          CARAPACE_GATEWAY_PASSWORD: "ambient-local-password",
         },
         async () => {
           const { runtime } = createRuntimeCapture();
@@ -622,7 +622,7 @@ describe("gateway-status command", () => {
       warnings?: Array<{ code?: string; message?: string }>;
     };
     const warning = parsed.warnings?.find((entry) => entry.code === "no_gateway_reachable");
-    expect(warning?.message).toContain("openclaw gateway status --deep --require-rpc");
+    expect(warning?.message).toContain("carapace gateway status --deep --require-rpc");
     expect(warning?.message).toContain("ss -ltnp");
   });
 
@@ -724,7 +724,7 @@ describe("gateway-status command", () => {
   it("suppresses unresolved SecretRef auth warnings when probe is reachable", async () => {
     const { runtime, runtimeLogs, runtimeErrors } = createRuntimeCapture();
     await withEnvAsync(
-      { MISSING_GATEWAY_TOKEN: undefined, OPENCLAW_GATEWAY_TOKEN: undefined },
+      { MISSING_GATEWAY_TOKEN: undefined, CARAPACE_GATEWAY_TOKEN: undefined },
       async () => {
         mockLocalTokenEnvRefConfig();
 
@@ -743,7 +743,7 @@ describe("gateway-status command", () => {
     const defaultProbeGateway = probeGateway.getMockImplementation();
     try {
       await withEnvAsync(
-        { MISSING_GATEWAY_TOKEN: undefined, OPENCLAW_GATEWAY_TOKEN: undefined },
+        { MISSING_GATEWAY_TOKEN: undefined, CARAPACE_GATEWAY_TOKEN: undefined },
         async () => {
           readBestEffortConfig.mockReset();
           probeGateway.mockReset();
@@ -775,11 +775,11 @@ describe("gateway-status command", () => {
     expect(unresolvedWarning.message).not.toContain("missing or empty");
   });
 
-  it("does not replace an unresolved local token SecretRef with OPENCLAW_GATEWAY_TOKEN", async () => {
+  it("does not replace an unresolved local token SecretRef with CARAPACE_GATEWAY_TOKEN", async () => {
     const { runtime, runtimeErrors } = createRuntimeCapture();
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_TOKEN: "env-token",
+        CARAPACE_GATEWAY_TOKEN: "env-token",
         MISSING_GATEWAY_TOKEN: undefined,
       },
       async () => {
@@ -798,7 +798,7 @@ describe("gateway-status command", () => {
     const { runtime, runtimeLogs, runtimeErrors } = createRuntimeCapture();
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_TOKEN: "env-token",
+        CARAPACE_GATEWAY_TOKEN: "env-token",
         MISSING_GATEWAY_PASSWORD: undefined,
       },
       async () => {
@@ -839,7 +839,7 @@ describe("gateway-status command", () => {
     await withEnvAsync(
       {
         CUSTOM_GATEWAY_TOKEN: "resolved-gateway-token",
-        OPENCLAW_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
       },
       async () => {
         readBestEffortConfig.mockResolvedValueOnce({
@@ -914,7 +914,7 @@ describe("gateway-status command", () => {
         config: {
           ...createSecretRefGatewayConfig({ gatewayMode: "remote" }),
           discovery: {
-            wideArea: { domain: "openclaw.internal" },
+            wideArea: { domain: "carapace.internal" },
           },
         },
         issues: [],
@@ -1107,8 +1107,8 @@ describe("gateway-status command", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_PORT: "19001",
-        OPENCLAW_GATEWAY_URL: "wss://env-gateway.example/ws",
+        CARAPACE_GATEWAY_PORT: "19001",
+        CARAPACE_GATEWAY_URL: "wss://env-gateway.example/ws",
       },
       async () => {
         await runGatewayStatus(runtime, { timeout: "15000", json: true, port: "19080" });

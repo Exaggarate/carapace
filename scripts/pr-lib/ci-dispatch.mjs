@@ -8,9 +8,9 @@ import {
   parseCrabboxGateCheckSummary,
 } from "./crabbox-gate-contract.mjs";
 
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const CRABBOX_WORKFLOW = ".github/workflows/pr-crabbox-gate-publisher.yml";
-const CRABBOX_CHECK = "openclaw/crabbox-gate";
+const CRABBOX_CHECK = "carapace/crabbox-gate";
 const CRABBOX_CHECK_APP_ID = 15368;
 const SHA_PATTERN = /^[0-9a-f]{40}$/u;
 

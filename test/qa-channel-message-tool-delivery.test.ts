@@ -1,4 +1,4 @@
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getQaBusState,
@@ -12,7 +12,7 @@ import { createMessageTool } from "../src/agents/tools/message-tool-execution.js
 import { buildThreadingToolContext } from "../src/auto-reply/reply/agent-runner-utils.js";
 import { resolveReplyToMode } from "../src/auto-reply/reply/reply-threading.js";
 import * as bootstrapRegistry from "../src/channels/plugins/bootstrap-registry.js";
-import type { OpenClawConfig } from "../src/config/config.js";
+import type { CarapaceConfig } from "../src/config/config.js";
 import {
   mintMessageActionTurnCapability,
   revokeMessageActionTurnCapability,
@@ -22,7 +22,7 @@ import { createStartAccountContext } from "../src/plugin-sdk/test-helpers/start-
 import { setActivePluginRegistry } from "../src/plugins/runtime.js";
 import { createRuntimeChannel } from "../src/plugins/runtime/runtime-channel.js";
 import { createTestRegistry } from "../src/test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../src/test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../src/test-utils/carapace-test-state.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -52,7 +52,7 @@ async function withQaMessageTool(
     baseUrl: string;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ prefix: "message-tool-qa-target-" }, async (state) => {
+  await withCarapaceTestState({ prefix: "message-tool-qa-target-" }, async (state) => {
     const busState = createQaBusState();
     const bus = await startQaBusServer({ state: busState });
     const controller = new AbortController();
@@ -70,7 +70,7 @@ async function withQaMessageTool(
         channels: {
           "qa-channel": { baseUrl: bus.baseUrl, accounts: { secondary: {} } },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       // External-plugin canonicalization would hide a kind lost by the QA
       // producer. Match the bundled runtime's authorization path.
       setActivePluginRegistry(
@@ -326,7 +326,7 @@ describe("QA message-tool current conversation delivery", () => {
           accountId,
           conversation: inbound.conversation,
           text: "edited",
-          reactions: [expect.objectContaining({ emoji: "white_check_mark", senderId: "openclaw" })],
+          reactions: [expect.objectContaining({ emoji: "white_check_mark", senderId: "carapace" })],
         });
         expect(edited?.threadId).toBe(threadId);
         expect(snapshot.messages.find((message) => message.id === inbound.id)).toEqual(inbound);

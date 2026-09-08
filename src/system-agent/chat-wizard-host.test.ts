@@ -11,7 +11,7 @@ import {
   countCancelHints,
   expectDefined,
   SystemAgentWizardAnswerError,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type WizardPrompter,
 } from "./chat-engine.test-support.js";
 
@@ -153,7 +153,7 @@ describe("SystemAgentChatEngine wizard", () => {
     const reply = await engine.handle("connect telegram");
 
     expect(reply.text).toContain("Sensitive input is not accepted");
-    expect(reply.text).toContain("openclaw channels add --channel telegram");
+    expect(reply.text).toContain("carapace channels add --channel telegram");
     expect(reply.sensitive).toBeUndefined();
 
     const handoff = await engine.handle("open channel wizard");
@@ -208,7 +208,7 @@ describe("SystemAgentChatEngine wizard", () => {
       const cliReply = await cli.handle(command);
       expect(cliReply.action).toBe("none");
       expect(cliReply.handoff).toBeUndefined();
-      expect(cliReply.text).toContain("run `openclaw onboard`");
+      expect(cliReply.text).toContain("run `carapace onboard`");
     }
 
     const gateway = new SystemAgentChatEngine({ ...common, surface: "gateway" });
@@ -219,9 +219,9 @@ describe("SystemAgentChatEngine wizard", () => {
     // rather than sending the reader to a terminal they may not have.
     expect(gatewayReply.text).toContain("Settings");
     expect(gatewayReply.text).toContain("change providers from a shell");
-    expect(gatewayReply.text).toContain("machine running OpenClaw");
+    expect(gatewayReply.text).toContain("machine running Carapace");
     expect(gatewayReply.text).not.toContain("does the same job");
-    expect(gatewayReply.text).not.toContain("Exit OpenClaw");
+    expect(gatewayReply.text).not.toContain("Exit Carapace");
   });
 
   it("keeps hosted-wizard validation errors on the current prompt", async () => {
@@ -481,12 +481,12 @@ describe("SystemAgentChatEngine wizard", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const changedConfig = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const verifiedInference = await createAmbientVerifiedBinding(baseConfig);
-    let currentConfig: OpenClawConfig = baseConfig;
+    let currentConfig: CarapaceConfig = baseConfig;
     const engine = new SystemAgentChatEngine({
       surface: "gateway",
       verifiedInference,

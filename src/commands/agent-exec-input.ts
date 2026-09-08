@@ -1,8 +1,8 @@
 import { createReadStream, existsSync } from "node:fs";
 import path from "node:path";
 import { TextDecoder } from "node:util";
-import { readByteStreamWithLimit } from "@openclaw/media-core/read-byte-stream-with-limit";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { readByteStreamWithLimit } from "@carapace/media-core/read-byte-stream-with-limit";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { mergeDeep } from "../infra/deep-merge.js";
 
 const AGENT_EXEC_MESSAGE_MAX_BYTES = 4 * 1024 * 1024;
@@ -94,7 +94,7 @@ export async function resolveAgentExecPrompt(
  * `agents.bindings[].acp.cwd` needs no equivalent because exec runs no channel,
  * so no binding matches.
  */
-function stripInheritedAgentLocations(base: OpenClawConfig): OpenClawConfig {
+function stripInheritedAgentLocations(base: CarapaceConfig): CarapaceConfig {
   const { session, ...root } = base;
   const { store: _store, ...sessionWithoutStore } = session ?? {};
   const withoutSessionStore = session ? { ...root, session: sessionWithoutStore } : base;
@@ -121,10 +121,10 @@ function stripInheritedAgentLocations(base: OpenClawConfig): OpenClawConfig {
 }
 
 function buildExecRunOverlay(params: {
-  base: OpenClawConfig;
+  base: CarapaceConfig;
   cwd: string;
   opts: Pick<AgentExecCliOptions, "localModelLean">;
-}): OpenClawConfig {
+}): CarapaceConfig {
   // A per-agent `workspace` outranks `agents.defaults`, so pinning only the
   // defaults would let an inherited entry silently run the turn against a
   // different repository. Override every configured entry as well.
@@ -151,7 +151,7 @@ function buildExecRunOverlay(params: {
  * operator who configured a tool profile, shell env, or sandbox keeps it;
  * notably exec must never downgrade a configured sandbox to `off`.
  */
-function buildExecConfigDefaults(): OpenClawConfig {
+function buildExecConfigDefaults(): CarapaceConfig {
   return {
     env: { shellEnv: { enabled: false } },
     agents: { defaults: { sandbox: { mode: "off" } } },
@@ -180,7 +180,7 @@ function buildExecConfigDefaults(): OpenClawConfig {
  */
 export async function resolveExecBaseConfig(
   opts: Pick<AgentExecCliOptions, "authEnvOnly" | "config" | "isolated">,
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   // `--isolated` and `--auth-env-only` both mean "read no config", so pairing
   // either with `--config` is a contradiction. Failing beats silently ignoring
   // the pinned file, which would run a CI invocation on bare exec defaults.
@@ -217,14 +217,14 @@ export async function resolveExecBaseConfig(
 }
 
 export function buildExecRunConfig(params: {
-  base: OpenClawConfig;
+  base: CarapaceConfig;
   cwd: string;
   opts?: Pick<AgentExecCliOptions, "localModelLean">;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const opts = params.opts ?? {};
   const base = stripInheritedAgentLocations(params.base);
   return mergeDeep(
     mergeDeep(buildExecConfigDefaults(), base),
     buildExecRunOverlay({ base, cwd: params.cwd, opts }),
-  ) as OpenClawConfig; // SAFETY: Merging three typed configs preserves the OpenClawConfig shape.
+  ) as CarapaceConfig; // SAFETY: Merging three typed configs preserves the CarapaceConfig shape.
 }

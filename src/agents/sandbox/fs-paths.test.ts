@@ -214,7 +214,7 @@ describe("resolveSandboxFsPathWithMounts", () => {
 
   it("keeps non-home workspace roots in the native host format", () => {
     const root = path.parse(os.homedir()).root;
-    const workspaceDir = path.join(root, "openclaw-non-home-workspace");
+    const workspaceDir = path.join(root, "carapace-non-home-workspace");
     const sandbox = createSandbox({
       workspaceDir,
       agentWorkspaceDir: workspaceDir,
@@ -222,7 +222,7 @@ describe("resolveSandboxFsPathWithMounts", () => {
 
     expect(() =>
       resolveSandboxFsPathWithMounts({
-        filePath: path.join(root, "openclaw-outside", "secret.txt"),
+        filePath: path.join(root, "carapace-outside", "secret.txt"),
         cwd: sandbox.workspaceDir,
         defaultWorkspaceRoot: sandbox.workspaceDir,
         defaultContainerRoot: sandbox.containerWorkdir,
@@ -252,8 +252,8 @@ describe("resolveSandboxFsPathWithMounts", () => {
   });
 
   it("omits binds that collide with protected skill mounts", () => {
-    const workspaceDir = tempDirs.make("openclaw-fs-mounts-");
-    const customRoot = tempDirs.make("openclaw-fs-mounts-");
+    const workspaceDir = tempDirs.make("carapace-fs-mounts-");
+    const customRoot = tempDirs.make("carapace-fs-mounts-");
     fs.mkdirSync(path.join(workspaceDir, "skills", "demo"), { recursive: true });
     const sandbox = createSandbox({
       workspaceDir,

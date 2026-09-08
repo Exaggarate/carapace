@@ -104,7 +104,7 @@ function createMockChannelPlugin(overrides: {
 function createCatalogEntry(id: string, label: string): ChannelPluginCatalogEntry {
   return {
     id,
-    pluginId: `@openclaw/${id}`,
+    pluginId: `@carapace/${id}`,
     meta: {
       id,
       label,
@@ -112,7 +112,7 @@ function createCatalogEntry(id: string, label: string): ChannelPluginCatalogEntr
       docsPath: `/channels/${id}`,
       blurb: label,
     },
-    install: { npmSpec: `@openclaw/${id}` },
+    install: { npmSpec: `@carapace/${id}` },
   };
 }
 
@@ -490,11 +490,11 @@ describe("channels list", () => {
       pluginId: "discord",
       channelId: "discord",
       label: "Discord",
-      installSpec: "@openclaw/discord",
-      installCommand: "openclaw plugins install @openclaw/discord",
-      doctorFixCommand: "openclaw doctor --fix",
+      installSpec: "@carapace/discord",
+      installCommand: "carapace plugins install @carapace/discord",
+      doctorFixCommand: "carapace doctor --fix",
       repairHint:
-        "Install the official external plugin with: openclaw plugins install @openclaw/discord, or run: openclaw doctor --fix.",
+        "Install the official external plugin with: carapace plugins install @carapace/discord, or run: carapace doctor --fix.",
     });
     mocks.readConfigFileSnapshot.mockResolvedValue(
       createTestConfigSnapshot({
@@ -523,7 +523,7 @@ describe("channels list", () => {
     expect(output).toContain("configured");
     expect(output).toContain("disabled");
     expect(output).toContain(
-      "run openclaw plugins install @openclaw/discord or openclaw doctor --fix",
+      "run carapace plugins install @carapace/discord or carapace doctor --fix",
     );
     expect(output).not.toContain("no configured chat channels");
   });
@@ -539,11 +539,11 @@ describe("channels list", () => {
       pluginId: "discord",
       channelId: "discord",
       label: "Discord",
-      installSpec: "@openclaw/discord",
-      installCommand: "openclaw plugins install @openclaw/discord",
-      doctorFixCommand: "openclaw doctor --fix",
+      installSpec: "@carapace/discord",
+      installCommand: "carapace plugins install @carapace/discord",
+      doctorFixCommand: "carapace doctor --fix",
       repairHint:
-        "Install the official external plugin with: openclaw plugins install @openclaw/discord, or run: openclaw doctor --fix.",
+        "Install the official external plugin with: carapace plugins install @carapace/discord, or run: carapace doctor --fix.",
     });
     mocks.readConfigFileSnapshot.mockResolvedValue(
       createTestConfigSnapshot({

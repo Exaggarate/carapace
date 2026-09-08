@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import {
   getMainSessionRecoveryRetryCount,
@@ -20,7 +20,7 @@ import {
   type SessionEntryPatchOptions,
 } from "../../config/sessions/session-accessor.js";
 import { buildSessionCreationStamp } from "../../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   normalizeCronScheduledToolCallerOrigin,
   normalizeCronScheduledToolPolicy,
@@ -85,7 +85,7 @@ type AgentSessionPersistResult = {
 export async function persistAgentSessionPhase(params: {
   assertAdmissionCurrent?: () => void;
   request: AgentRunRequest;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   storePath: string;
   storeKeys?: string[];
   entry?: SessionEntry;

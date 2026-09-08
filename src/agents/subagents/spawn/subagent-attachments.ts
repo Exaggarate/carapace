@@ -6,8 +6,8 @@
 import crypto from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { privateFileStore } from "../../../infra/private-file-store.js";
 import { resolveAgentWorkspaceDir } from "../../agent-scope.js";
 import {
@@ -103,7 +103,7 @@ type SubagentAttachmentRequest =
   | { status: "forbidden"; error: string }
   | { status: "error"; error: string };
 
-function resolveAttachmentLimits(config: OpenClawConfig): AttachmentLimits {
+function resolveAttachmentLimits(config: CarapaceConfig): AttachmentLimits {
   const attachmentsCfg = config.tools?.sessions_spawn?.attachments;
   return {
     enabled: attachmentsCfg?.enabled === true,
@@ -126,7 +126,7 @@ function resolveAttachmentLimits(config: OpenClawConfig): AttachmentLimits {
 }
 
 function resolveSubagentAttachmentRequest(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   attachments?: SubagentInlineAttachment[];
 }): SubagentAttachmentRequest {
   const requestedAttachments = Array.isArray(params.attachments) ? params.attachments : [];
@@ -277,7 +277,7 @@ function prepareSubagentAttachments(params: {
 }
 
 export function resolveAcpSessionsSpawnImageAttachments(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   attachments?: SubagentInlineAttachment[];
 }):
   | { status: "ok"; attachments: AcpInlineImageAttachment[] }
@@ -315,7 +315,7 @@ export function resolveAcpSessionsSpawnImageAttachments(params: {
 
 export async function materializeSubagentAttachments(params: {
   assertActive?: () => void;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   targetAgentId: string;
   workspaceDir?: string;
   attachments?: SubagentInlineAttachment[];
@@ -333,8 +333,8 @@ export async function materializeSubagentAttachments(params: {
   const childWorkspaceDir =
     normalizeOptionalString(params.workspaceDir) ??
     resolveAgentWorkspaceDir(params.config, params.targetAgentId);
-  const absRootDir = path.join(childWorkspaceDir, ".openclaw", "attachments");
-  const relDir = path.posix.join(".openclaw", "attachments", attachmentId);
+  const absRootDir = path.join(childWorkspaceDir, ".carapace", "attachments");
+  const relDir = path.posix.join(".carapace", "attachments", attachmentId);
   const absDir = path.join(absRootDir, attachmentId);
 
   try {

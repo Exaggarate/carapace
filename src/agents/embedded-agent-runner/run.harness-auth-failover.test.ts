@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { AgentHarness } from "../harness/types.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
@@ -53,7 +53,7 @@ function prepareAuthFailoverRun(
         return {
           supported: false,
           reason: "native transport cannot reproduce authored requests",
-          fallbackRuntime: "openclaw",
+          fallbackRuntime: "carapace",
         };
       }
       return provider === "openai" ? { supported: true, priority: 100 } : { supported: false };
@@ -98,12 +98,12 @@ function prepareAuthFailoverRun(
 }
 
 describe("native harness auth failover", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let guard: Awaited<ReturnType<typeof guardRunWorkspaceOwnership>>;
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "harness-auth-failover" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "harness-auth-failover" });
     guard = await guardRunWorkspaceOwnership(state);
   });
   afterEach(async () => {

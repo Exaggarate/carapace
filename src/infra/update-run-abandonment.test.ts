@@ -5,7 +5,7 @@ import { createUpdateRunProgress } from "../cli/update-cli/update-command-run.js
 import { createDeferredCore } from "../shared/deferred.js";
 import * as pidAlive from "../shared/pid-alive.js";
 import { getFileLockProcessStartTime } from "../shared/pid-alive.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { inspectUpdateRunAbandonment } from "./update-run-activity.js";
 import { readUpdateRunDriver, type UpdateRunDriver } from "./update-run-driver.js";
 import {
@@ -25,7 +25,7 @@ import type { CommandRunner } from "./update-runner-types.js";
 const tempDirs = createTempDirTracker();
 
 function isolatedOptions() {
-  return { env: { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-update-abandonment-") } };
+  return { env: { CARAPACE_STATE_DIR: tempDirs.make("carapace-update-abandonment-") } };
 }
 
 function currentDriver(): UpdateRunDriver {
@@ -50,7 +50,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -118,7 +118,7 @@ describe("abandoned update runs", () => {
         },
         name,
         argv: ["pnpm", name],
-        cwd: options.env.OPENCLAW_STATE_DIR,
+        cwd: options.env.CARAPACE_STATE_DIR,
         timeoutMs: ABANDONED_UPDATE_RUN_MS,
         progress,
         stepIndex: 0,
@@ -567,7 +567,7 @@ describe("abandoned update runs", () => {
         runCommand: () => command.promise,
         name: "build",
         argv: ["pnpm", "build"],
-        cwd: options.env.OPENCLAW_STATE_DIR,
+        cwd: options.env.CARAPACE_STATE_DIR,
         timeoutMs: ABANDONED_UPDATE_RUN_MS * 2,
         progress,
         stepIndex: 0,

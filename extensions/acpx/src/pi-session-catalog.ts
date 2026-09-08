@@ -3,13 +3,13 @@ import type {
   SessionCatalogSession,
   SessionCatalogTranscriptItem,
   SessionsCatalogReadResult,
-} from "openclaw/plugin-sdk/session-catalog";
-import { sessionCatalogPaging } from "openclaw/plugin-sdk/session-catalog-paging";
+} from "carapace/plugin-sdk/session-catalog";
+import { sessionCatalogPaging } from "carapace/plugin-sdk/session-catalog-paging";
 import {
   isRecord,
   normalizeBoundedOptionalString as optionalPiString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   PI_LOCAL_SESSION_HOST_ID as LOCAL_HOST_ID,
   PI_SESSION_ID_PATTERN as SESSION_ID_PATTERN,

@@ -2,7 +2,7 @@ import { mkdtemp, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { loadBundledPluginPublicSurface } from "../../../plugin-sdk/test-helpers/public-surface-loader.js";
 import { setCurrentPluginMetadataSnapshot } from "../../../plugins/current-plugin-metadata.test-support.js";
 import { loadPluginManifest } from "../../../plugins/manifest.js";
@@ -49,12 +49,12 @@ vi.mock("../../auth-profiles.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../auth-profiles.js")>()),
   ensureAuthProfileStore: () => fixtures.authStore,
 }));
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: async () => ({ mode: "token", apiKey: "fixture-token" }),
   resolveProviderAuthProfileMetadata: () => ({}),
 }));
-vi.mock("openclaw/plugin-sdk/provider-catalog-live-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-catalog-live-runtime")>()),
+vi.mock("carapace/plugin-sdk/provider-catalog-live-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-catalog-live-runtime")>()),
   getCachedLiveProviderModelRows: async () => [
     {
       slug: "gpt-5.6-luna",
@@ -94,7 +94,7 @@ describe("selected route thinking metadata at runtime preparation", () => {
       buildOpenAIProvider: () => ProviderPlugin;
     }>({ pluginId: "openai", artifactBasename: "api.js" });
     provider = buildOpenAIProvider();
-    root = await realpath(await mkdtemp(path.join(tmpdir(), "openclaw-effort-route-")));
+    root = await realpath(await mkdtemp(path.join(tmpdir(), "carapace-effort-route-")));
     const pluginDir = path.resolve("extensions/openai");
     const loaded = loadPluginManifest(pluginDir);
     if (!loaded.ok) {
@@ -105,7 +105,7 @@ describe("selected route thinking metadata at runtime preparation", () => {
     });
     const pluginRegistry = createEmptyPluginRegistry();
     pluginRegistry.providers.push({ pluginId: "openai", source: pluginDir, provider });
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     setCurrentPluginMetadataSnapshot(metadataSnapshot, { config, workspaceDir: root });
     setActivePluginRegistry(pluginRegistry, "effort-route", "default", root);
     const model = resolveBundledStaticCatalogModel({

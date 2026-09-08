@@ -20,7 +20,7 @@ type UpdateCase = {
 };
 
 async function runUpdate(testCase: UpdateCase): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-apply-patch-update-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-apply-patch-update-"));
   tempDirs.add(dir);
   const file = testCase.file ?? "source.txt";
   const filePath = path.join(dir, file);

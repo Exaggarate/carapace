@@ -1,6 +1,6 @@
 // Memory Wiki tests cover config compat plugin behavior.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 import {
   legacyConfigRules,
   migrateMemoryWikiLegacyConfig,
@@ -30,7 +30,7 @@ describe("memory-wiki config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const migration = migrateMemoryWikiLegacyConfig(config);
 
@@ -63,7 +63,7 @@ describe("memory-wiki config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const migration = normalizeCompatibilityConfig({ cfg: config });
 

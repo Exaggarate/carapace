@@ -5,7 +5,7 @@ import { createApplicationOverlays } from "./overlays.ts";
 
 export type RequestFn = (...args: Parameters<GatewayBrowserClient["request"]>) => Promise<unknown>;
 
-const SYSTEM_APPROVAL_TITLE = "OpenClaw change";
+const SYSTEM_APPROVAL_TITLE = "Carapace change";
 const SYSTEM_APPROVAL_COMMAND = "Set gateway.port to 19001";
 
 export function deferred<T = unknown>() {
@@ -98,7 +98,7 @@ export function createGatewayHarness(
     },
     emitSystemApproval(id: string, createdAtMs: number) {
       const event: GatewayEventFrame = {
-        event: "openclaw.approval.requested",
+        event: "carapace.approval.requested",
         payload: {
           id,
           createdAtMs,

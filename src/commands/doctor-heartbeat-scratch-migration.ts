@@ -6,7 +6,7 @@ import { note } from "../../packages/terminal-core/src/note.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { CRON_JOB_SCRATCH_MAX_BYTES } from "../cron/scratch-contract.js";
 import {
   deleteCronJobScratch,
@@ -42,7 +42,7 @@ type HeartbeatSource = {
   sha256: string;
 };
 
-async function resolveHeartbeatScratchMigrationOwners(cfg: OpenClawConfig) {
+async function resolveHeartbeatScratchMigrationOwners(cfg: CarapaceConfig) {
   const migrationAgents: ReturnType<typeof resolveHeartbeatAgents> = [];
   const disabledEntryKeys = new Set<string>();
   for (const agent of resolveHeartbeatAgents(cfg)) {
@@ -60,7 +60,7 @@ async function resolveHeartbeatScratchMigrationOwners(cfg: OpenClawConfig) {
 }
 
 async function readHeartbeatSource(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   options?: { recoverClaims?: boolean },
 ): Promise<HeartbeatSource | undefined> {
@@ -91,7 +91,7 @@ async function readHeartbeatSource(
     }
     if (!options?.recoverClaims) {
       throw new Error(
-        `an interrupted migration claim exists at ${staleClaim}; run openclaw doctor --fix to restore it`,
+        `an interrupted migration claim exists at ${staleClaim}; run carapace doctor --fix to restore it`,
         { cause: error },
       );
     }
@@ -400,13 +400,13 @@ function migrationFinding(params: {
     path: params.path,
     target: params.agentId,
     requirement: params.requirement,
-    fixHint: `Run ${formatCliCommand("openclaw doctor --fix")} to migrate HEARTBEAT.md into cron scratch.`,
+    fixHint: `Run ${formatCliCommand("carapace doctor --fix")} to migrate HEARTBEAT.md into cron scratch.`,
   };
 }
 
 /** Reports remaining workspace heartbeat files without changing them. */
 export async function collectHeartbeatScratchMigrationFindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<readonly HealthFinding[]> {
   const findings: HealthFinding[] = [];
   const { migrationAgents, disabledEntryKeys } = await resolveHeartbeatScratchMigrationOwners(cfg);
@@ -448,7 +448,7 @@ export async function collectHeartbeatScratchMigrationFindings(
 
 /** Migrates each enrolled agent's heartbeat file into its stable monitor job. */
 export async function maybeMigrateHeartbeatFilesToScratch(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   shouldRepair: boolean;
   env?: NodeJS.ProcessEnv;
 }): Promise<HeartbeatScratchMigrationResult> {

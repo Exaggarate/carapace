@@ -63,15 +63,15 @@ async function call(
 
 function withProfile<T>(profile: string | undefined, run: () => Promise<T>): Promise<T> {
   const home = os.userInfo().homedir;
-  const stateDir = path.join(home, profile ? `.openclaw-${profile}` : ".openclaw");
+  const stateDir = path.join(home, profile ? `.carapace-${profile}` : ".carapace");
   return withEnvAsync(
     {
       HOME: home,
       USERPROFILE: home,
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_PROFILE: profile,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+      CARAPACE_HOME: undefined,
+      CARAPACE_PROFILE: profile,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
     },
     run,
   );

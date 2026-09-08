@@ -1,15 +1,15 @@
 import type { messagingApi } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   assertOkOrThrowHttpError,
   createProviderOperationDeadline,
   createProviderOperationTimeoutResolver,
   fetchWithTimeout,
   readProviderJsonResponse,
-} from "openclaw/plugin-sdk/provider-http";
-import { fetchWithRuntimeDispatcherOrMockedGlobal } from "openclaw/plugin-sdk/runtime-fetch";
-import { runChannelProbe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { fetchWithRuntimeDispatcherOrMockedGlobal } from "carapace/plugin-sdk/runtime-fetch";
+import { runChannelProbe } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveLineAccount } from "./accounts.js";
 import { resolveLineChannelAccessToken } from "./channel-access-token.js";
 import type { LineMessageQuota, LineProbeResult } from "./types.js";
@@ -76,7 +76,7 @@ async function readLineMessageQuota(
 }
 
 export async function readLineAccountMessageQuota(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): Promise<LineMessageQuota | undefined> {
   try {

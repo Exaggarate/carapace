@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as deviceTokens from "../../../infra/device-pairing-tokens.js";
 import { createSubsystemLogger } from "../../../logging/subsystem.js";

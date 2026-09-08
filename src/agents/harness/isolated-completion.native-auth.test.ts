@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   isolatedAssistant,
@@ -113,7 +113,7 @@ describe("runIsolatedCompletion native authorization", () => {
       } else {
         await expect(pending).rejects.toMatchObject({
           reason: "model_not_found",
-          message: expect.stringContaining("openclaw doctor --fix"),
+          message: expect.stringContaining("carapace doctor --fix"),
         });
         expect(runIsolatedCompletionV2).not.toHaveBeenCalled();
         expect(mocks.prepareSimpleCompletionModel).not.toHaveBeenCalled();

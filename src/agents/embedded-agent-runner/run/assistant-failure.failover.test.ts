@@ -47,7 +47,7 @@ function makeInput(
     runParams: {
       sessionId: "session:assistant-failover",
       runId: "run:assistant-failover",
-      workspaceDir: "/tmp/openclaw-assistant-failover-test",
+      workspaceDir: "/tmp/carapace-assistant-failover-test",
       prompt: "Respond to the user",
       timeoutMs: 60_000,
     },
@@ -83,7 +83,7 @@ function makeInput(
     traceAttempts: [],
     suspendForFailure: vi.fn(),
     suspensionSessionId: "session:assistant-failover",
-    agentDir: "/tmp/openclaw-assistant-failover-test",
+    agentDir: "/tmp/carapace-assistant-failover-test",
     isProbeSession: false,
   };
 }

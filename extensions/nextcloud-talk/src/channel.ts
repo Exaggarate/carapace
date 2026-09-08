@@ -1,17 +1,17 @@
 // Nextcloud Talk plugin module implements channel behavior.
-import { describeWebhookAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import { createLoggedPairingApprovalNotifier } from "openclaw/plugin-sdk/channel-pairing";
+import { describeWebhookAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import { createChatChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import { createLoggedPairingApprovalNotifier } from "carapace/plugin-sdk/channel-pairing";
 import {
   createAllowlistProviderRouteAllowlistWarningCollector,
   createConditionalWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-policy";
 import {
   buildWebhookChannelStatusSummary,
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/status-helpers";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import { isNextcloudTalkAccountConfigured, type ResolvedNextcloudTalkAccount } from "./accounts.js";
 import { nextcloudTalkApprovalAuth } from "./approval-auth.js";
 import { probeNextcloudTalkBotResponseFeature } from "./bot-preflight.js";

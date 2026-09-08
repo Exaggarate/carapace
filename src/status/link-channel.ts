@@ -1,12 +1,12 @@
 // Resolves the first channel that can report linked/unlinked auth state for status summaries.
 // Channel-specific linking logic stays inside plugin status hooks.
 
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveInspectedChannelAccount } from "../channels/account-inspection.js";
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import { listReadOnlyChannelPluginsForConfig } from "../channels/plugins/read-only.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type LinkChannelContext = {
   linked: boolean;
@@ -18,8 +18,8 @@ type LinkChannelContext = {
 
 /** Returns link status for the first configured read-only channel that exposes linked state. */
 export async function resolveLinkChannelContext(
-  cfg: OpenClawConfig,
-  options: { sourceConfig?: OpenClawConfig } = {},
+  cfg: CarapaceConfig,
+  options: { sourceConfig?: CarapaceConfig } = {},
 ): Promise<LinkChannelContext | null> {
   const sourceConfig = options.sourceConfig ?? cfg;
   for (const plugin of listReadOnlyChannelPluginsForConfig(cfg, {

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import "./local.js";
 
 type GatewayHealthProbeAuth = {
@@ -8,12 +8,12 @@ type GatewayHealthProbeAuth = {
 };
 
 type TestApi = {
-  resolveGatewayHealthProbeToken(nextConfig: OpenClawConfig): Promise<GatewayHealthProbeAuth>;
+  resolveGatewayHealthProbeToken(nextConfig: CarapaceConfig): Promise<GatewayHealthProbeAuth>;
 };
 
 function getTestApi(): TestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.onboardNonInteractiveLocalTestApi")
+    Symbol.for("carapace.onboardNonInteractiveLocalTestApi")
   ] as TestApi;
 }
 

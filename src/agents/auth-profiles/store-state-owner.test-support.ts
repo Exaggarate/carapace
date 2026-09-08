@@ -4,8 +4,8 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, expect, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { clearSecretsRuntimeSnapshotState } from "../../secrets/runtime-state.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { withEnv } from "../../test-utils/env.js";
 import { clearAuthProfileMigrationDiagnostics } from "./legacy-source-diagnostic.js";
 import { resolveSharedAuthStorePath } from "./path-resolve.js";
@@ -40,15 +40,15 @@ export function createAuthOwnerTestFixtures() {
     clearSecretsRuntimeSnapshotState();
     clearRuntimeAuthProfileStoreSnapshots();
     clearAuthProfileMigrationDiagnostics();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     tempDirs.cleanup();
   });
 
   function unreadableOuter(kind: "future" | "invalid") {
-    const stateDir = tempDirs.make("openclaw-auth-owner-outer-");
-    const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+    const stateDir = tempDirs.make("carapace-auth-owner-outer-");
+    const databasePath = path.join(stateDir, "state", "carapace.sqlite");
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     if (kind === "future") {
       const database = new DatabaseSync(databasePath);
@@ -59,21 +59,21 @@ export function createAuthOwnerTestFixtures() {
     }
     const original = fs.readFileSync(databasePath);
     const relocated = path.join(stateDir, "unrelated-relocated-agent");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_AGENT_DIR", relocated);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_AGENT_DIR", relocated);
     return () => {
       expect(fs.readFileSync(databasePath)).toEqual(original);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(stateDir);
-      expect(process.env.OPENCLAW_AGENT_DIR).toBe(relocated);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(stateDir);
+      expect(process.env.CARAPACE_AGENT_DIR).toBe(relocated);
       expect(fs.existsSync(relocated)).toBe(false);
     };
   }
 
   async function seedRoot(key: string) {
-    const stateDir = tempDirs.make("openclaw-auth-owner-root-");
+    const stateDir = tempDirs.make("carapace-auth-owner-root-");
     // Deliberately outside the state root: directory ancestry cannot identify inheritance.
-    const agentDir = tempDirs.make("openclaw-auth-owner-custom-agent-");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_AGENT_DIR: undefined };
+    const agentDir = tempDirs.make("carapace-auth-owner-custom-agent-");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir, CARAPACE_AGENT_DIR: undefined };
     await persistAuthProfileBatch({
       stateDir,
       profiles: [{ profileId: "shared", credential: apiKey(key) }],

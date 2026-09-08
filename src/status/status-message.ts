@@ -1,11 +1,11 @@
 // Status message helpers read and format stored status messages.
-import { asNonNegativeFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { asNonNegativeFiniteNumber } from "@carapace/normalization-core/number-coercion";
 import {
   type FastMode,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveAuthoredModelContextTokens } from "../agents/context-resolution.js";
 import { resolveContextTokensForModel } from "../agents/context.js";
 import { resolveCronStyleNow } from "../agents/current-time.js";
@@ -52,7 +52,7 @@ import {
   hasSessionAutoModelFallbackProvenance,
   hasUserPinnedModelSelection,
 } from "../config/sessions/model-override-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readRecentSessionUsageFromTranscript } from "../gateway/session-transcript-readers.js";
 import { formatDurationCompact } from "../infra/format-time/format-duration.ts";
 import { formatTimeAgo } from "../infra/format-time/format-relative.ts";
@@ -80,7 +80,7 @@ import { resolveRuntimeServiceCommit, VERSION } from "../version.js";
 import { resolveAgentRuntimeLabel } from "./agent-runtime-label.js";
 import { resolveActiveFallbackState } from "./fallback-notice-state.js";
 
-type AgentDefaults = NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]>;
+type AgentDefaults = NonNullable<NonNullable<CarapaceConfig["agents"]>["defaults"]>;
 type AgentConfig = Partial<AgentDefaults> & {
   model?: AgentDefaults["model"] | string;
 };
@@ -95,7 +95,7 @@ type QueueStatus = {
 };
 
 type StatusArgs = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agent: AgentConfig;
   agentId?: string;
   configuredDefaultModelLabel?: string;
@@ -170,7 +170,7 @@ function normalizeAuthMode(value?: string): NormalizedAuthMode | undefined {
 }
 
 function resolveConfiguredTextVerbosity(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   provider?: string | null;
   model?: string | null;
@@ -321,7 +321,7 @@ const readUsageFromSessionLog = (
       model?: string;
     }
   | undefined => {
-  // Transcripts are stored at the session file path (fallback: ~/.openclaw/sessions/<SessionId>.jsonl)
+  // Transcripts are stored at the session file path (fallback: ~/.carapace/sessions/<SessionId>.jsonl)
   if (!sessionId) {
     return undefined;
   }
@@ -466,7 +466,7 @@ const formatMediaUnderstandingLine = (decisions?: ReadonlyArray<MediaUnderstandi
 };
 
 const formatVoiceModeLine = (
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   sessionEntry?: SessionEntry,
   agentId?: string,
 ): string | null => {
@@ -506,7 +506,7 @@ const formatVoiceModeLine = (
 };
 
 function resolveChannelModelNote(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   entry?: SessionEntry;
   selectedProvider: string;
   selectedModel: string;
@@ -583,7 +583,7 @@ export function buildStatusMessageParts(args: StatusArgs): StatusMessageParts {
     agents: {
       defaults: args.agent ?? {},
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const contextConfig = args.config
     ? ({
         ...args.config,
@@ -594,12 +594,12 @@ export function buildStatusMessageParts(args: StatusArgs): StatusMessageParts {
             ...args.agent,
           },
         },
-      } as OpenClawConfig)
+      } as CarapaceConfig)
     : ({
         agents: {
           defaults: args.agent ?? {},
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
   const resolved = resolveConfiguredModelRef({
     cfg: selectionConfig,
     defaultProvider: DEFAULT_PROVIDER,
@@ -1017,7 +1017,7 @@ export function buildStatusMessageParts(args: StatusArgs): StatusMessageParts {
     : null;
   const fallbackLine = fallbackValue ? `↪️ Fallback: ${fallbackValue}` : null;
   const commit = resolveRuntimeServiceCommit();
-  const versionLine = `🦞 OpenClaw ${VERSION}${commit ? ` (${commit})` : ""}`;
+  const versionLine = `🦞 Carapace ${VERSION}${commit ? ` (${commit})` : ""}`;
   const tokensValue = formatTokensPairValue(inputTokens, outputTokens);
   const usagePair = tokensValue ? `🧮 Tokens: ${tokensValue}` : null;
   const cacheValue = formatCacheHitValue(inputTokens, cacheRead, cacheWrite);

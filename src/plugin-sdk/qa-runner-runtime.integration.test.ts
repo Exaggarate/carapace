@@ -14,11 +14,11 @@ import {
 import { listQaRunnerCliContributions } from "./qa-runner-runtime.js";
 
 const ORIGINAL_ENV = {
-  OPENCLAW_ENABLE_PRIVATE_QA_CLI: process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI,
-  OPENCLAW_DISABLE_BUNDLED_PLUGINS: process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS,
-  OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-  OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
-  OPENCLAW_TEST_FAST: process.env.OPENCLAW_TEST_FAST,
+  CARAPACE_ENABLE_PRIVATE_QA_CLI: process.env.CARAPACE_ENABLE_PRIVATE_QA_CLI,
+  CARAPACE_DISABLE_BUNDLED_PLUGINS: process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS,
+  CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+  CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
+  CARAPACE_TEST_FAST: process.env.CARAPACE_TEST_FAST,
 } as const;
 
 const tempDirs = createTempDirTracker();
@@ -31,8 +31,8 @@ function resetQaRunnerRuntimeState() {
 describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   beforeEach(() => {
     resetQaRunnerRuntimeState();
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
-    process.env.OPENCLAW_TEST_FAST = "1";
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
+    process.env.CARAPACE_TEST_FAST = "1";
   });
 
   afterEach(() => {
@@ -48,9 +48,9 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   });
 
   it("loads an activated qa runner from a linked plugin path without a bundled install fallback", async () => {
-    const stateDir = tempDirs.make("openclaw-qa-runner-state-");
+    const stateDir = tempDirs.make("carapace-qa-runner-state-");
     const pluginDir = path.join(stateDir, "extensions", "qa-linked");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
 
     fs.writeFileSync(
       configPath,
@@ -59,12 +59,12 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
       }),
       "utf8",
     );
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
 
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "qa-linked",
         qaRunners: [
@@ -84,12 +84,12 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/qa-linked",
+        name: "@carapace/qa-linked",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
           install: {
-            npmSpec: "@openclaw/qa-linked",
+            npmSpec: "@carapace/qa-linked",
           },
         },
       }),
@@ -141,17 +141,17 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   });
 
   it("loads a legacy runtime-api runner from an installed linked plugin", () => {
-    const stateDir = tempDirs.make("openclaw-qa-runner-legacy-state-");
+    const stateDir = tempDirs.make("carapace-qa-runner-legacy-state-");
     const pluginDir = path.join(stateDir, "extensions", "qa-legacy");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
 
     fs.writeFileSync(configPath, JSON.stringify({ plugins: {} }), "utf8");
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
 
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "qa-legacy",
         qaRunners: [{ commandName: "legacy" }],
@@ -166,12 +166,12 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/qa-legacy",
+        name: "@carapace/qa-legacy",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
           install: {
-            npmSpec: "@openclaw/qa-legacy",
+            npmSpec: "@carapace/qa-legacy",
           },
         },
       }),
@@ -213,15 +213,15 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   });
 
   it("ignores operator runner metadata and state during private QA discovery", () => {
-    const stateDir = tempDirs.make("openclaw-private-qa-operator-state-");
+    const stateDir = tempDirs.make("carapace-private-qa-operator-state-");
     const pluginDir = path.join(stateDir, "extensions", "operator-runner");
-    const stateDatabasePath = path.join(stateDir, "openclaw.sqlite");
+    const stateDatabasePath = path.join(stateDir, "carapace.sqlite");
     const stateDatabaseSentinel = "operator-state-must-remain-unopened";
 
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(stateDatabasePath, stateDatabaseSentinel, "utf8");
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "operator-runner",
         qaRunners: [{ commandName: "operator-sentinel" }],
@@ -236,18 +236,18 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/operator-runner",
+        name: "@carapace/operator-runner",
         type: "module",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
       "utf8",
     );
     fs.writeFileSync(path.join(pluginDir, "index.js"), "export default {};\n", "utf8");
 
-    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "0";
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+    process.env.CARAPACE_ENABLE_PRIVATE_QA_CLI = "1";
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "0";
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = path.join(stateDir, "carapace.json");
 
     const contributions = listQaRunnerCliContributions();
 

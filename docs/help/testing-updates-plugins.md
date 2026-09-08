@@ -1,7 +1,7 @@
 ---
-summary: "How OpenClaw validates update paths, package migrations, and plugin install/update behavior"
+summary: "How Carapace validates update paths, package migrations, and plugin install/update behavior"
 read_when:
-  - Changing OpenClaw update, doctor, package acceptance, or plugin install behavior
+  - Changing Carapace update, doctor, package acceptance, or plugin install behavior
   - Preparing or approving a release candidate
   - Debugging package update, plugin dependency cleanup, or plugin install regressions
 title: "Testing: updates and plugins"
@@ -22,7 +22,7 @@ keys and network-touching suites, see [Testing live](/help/testing-live).
 - A user can move from an older published package to the candidate package
   without losing config, agents, sessions, workspaces, plugin allowlists, or
   channel config.
-- `openclaw doctor --fix --non-interactive` owns legacy migrations and repairs,
+- `carapace doctor --fix --non-interactive` owns legacy migrations and repairs,
   including genuinely dangling plugin-runtime aliases. Package postinstall owns
   package-local dependency debris; both preserve valid shared runtime roots that
   another installation or profile may use. Startup should not grow hidden
@@ -102,24 +102,24 @@ Important lanes:
   moving-ref updates, npm registry installs with hoisted transitive
   dependencies, npm update no-ops, malformed npm package metadata rejection,
   local ClawHub fixture installs and update no-ops, marketplace update behavior,
-  and Claude-bundle enable/inspect. Set `OPENCLAW_PLUGINS_E2E_CLAWHUB=0` to
+  and Claude-bundle enable/inspect. Set `CARAPACE_PLUGINS_E2E_CLAWHUB=0` to
   keep the ClawHub block hermetic/offline.
 - `test:docker:plugin-lifecycle-matrix` installs the candidate package in a bare
   container, runs an npm plugin through install, inspect, disable, enable,
   explicit upgrade, explicit downgrade, and uninstall after deleting the plugin
   code. It logs RSS and CPU metrics per phase.
 - `test:docker:plugin-update` validates that an unchanged installed plugin does
-  not reinstall or lose install metadata during `openclaw plugins update`.
+  not reinstall or lose install metadata during `carapace plugins update`.
 - `test:docker:upgrade-survivor` installs the candidate tarball over a dirty
   old-user fixture, runs package update plus non-interactive doctor, then starts
   a loopback Gateway and checks state preservation.
 - `test:docker:published-upgrade-survivor` first installs the latest stable release,
-  configures it through a baked `openclaw config set` recipe, updates it to the
+  configures it through a baked `carapace config set` recipe, updates it to the
   candidate tarball, runs doctor, checks legacy cleanup, starts the Gateway, and
   probes `/healthz`, `/readyz`, and RPC status.
 - `test:docker:update-restart-auth` installs the candidate package, starts a
   managed token-auth Gateway, unsets caller gateway auth env for
-  `openclaw update --yes --json`, and requires the candidate update command to
+  `carapace update --yes --json`, and requires the candidate update command to
   restart the Gateway before the normal probes.
 - `test:docker:update-migration` is the cleanup-heavy published-update lane. It
   installs the latest stable release by default, starts from a configured
@@ -131,31 +131,31 @@ Important lanes:
 Useful published-upgrade survivor variants:
 
 ```bash
-OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC=openclaw@2026.4.23 \
-OPENCLAW_UPGRADE_SURVIVOR_SCENARIO=versioned-runtime-deps \
+CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC=carapace@2026.4.23 \
+CARAPACE_UPGRADE_SURVIVOR_SCENARIO=versioned-runtime-deps \
 pnpm test:docker:published-upgrade-survivor
 
-OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC=openclaw@latest \
-OPENCLAW_UPGRADE_SURVIVOR_SCENARIO=bootstrap-persona \
+CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC=carapace@latest \
+CARAPACE_UPGRADE_SURVIVOR_SCENARIO=bootstrap-persona \
 pnpm test:docker:published-upgrade-survivor
 
-OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC=openclaw@2026.7.1-2 \
-OPENCLAW_UPGRADE_SURVIVOR_SCENARIO=sqlite-volume \
+CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC=carapace@2026.7.1-2 \
+CARAPACE_UPGRADE_SURVIVOR_SCENARIO=sqlite-volume \
 pnpm test:docker:published-upgrade-survivor
 
-OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC=openclaw@2026.6.34 \
-OPENCLAW_UPGRADE_SURVIVOR_SCENARIO=legacy-operator-state \
+CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC=carapace@2026.6.34 \
+CARAPACE_UPGRADE_SURVIVOR_SCENARIO=legacy-operator-state \
 pnpm test:docker:published-upgrade-survivor
 ```
 
-Available scenarios: `base`, `acpx-openclaw-tools-bridge`, `feishu-channel`,
+Available scenarios: `base`, `acpx-carapace-tools-bridge`, `feishu-channel`,
 `bootstrap-persona`, `channel-post-core-restore`, `plugin-deps-cleanup`,
 `configured-plugin-installs`, `stale-source-plugin-shadow`, `tilde-log-path`,
 `meeting-transcripts-sqlite`, `versioned-runtime-deps`, `cron-scheduled-authority`,
 `legacy-operator-state`, and `sqlite-volume`. In aggregate runs,
-`OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS=reported-issues` expands the release-soak
+`CARAPACE_UPGRADE_SURVIVOR_SCENARIOS=reported-issues` expands the release-soak
 fixtures but excludes the expensive `sqlite-volume` scenario. Use
-`OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS=far-reaching` to include it.
+`CARAPACE_UPGRADE_SURVIVOR_SCENARIOS=far-reaching` to include it.
 
 The `legacy-operator-state` scenario uses the published baseline's own CLI to
 create a second agent, allowlist exec approvals, and two command cron jobs: one
@@ -182,7 +182,7 @@ the baseline CLI before comparison: JSON-era reads can assign IDs without
 persisting them. The final seeded state still has both agents, both jobs, and no
 explicit `systemAgent`.
 
-The PR/main gate uses `OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth`.
+The PR/main gate uses `CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth`.
 For this scenario, the baseline updater must replace its running managed Gateway;
 the harness checks process replacement and configured authentication. Cron owners
 are queried immediately after that first update, before any consent repair can
@@ -261,11 +261,11 @@ status; external installation is not evidence of an internal updater outcome.
 Agent-schema and unsupported shared-state migration refusals remain covered by
 the Doctor owner tests.
 
-Scale the fixture with `OPENCLAW_UPGRADE_SURVIVOR_VOLUME_SESSIONS`,
-`OPENCLAW_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION`, and
-`OPENCLAW_UPGRADE_SURVIVOR_VOLUME_CRON_JOBS`. The default budget for the
+Scale the fixture with `CARAPACE_UPGRADE_SURVIVOR_VOLUME_SESSIONS`,
+`CARAPACE_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION`, and
+`CARAPACE_UPGRADE_SURVIVOR_VOLUME_CRON_JOBS`. The default budget for the
 idempotent Doctor pass is 60 seconds; override it with
-`OPENCLAW_UPGRADE_SURVIVOR_VOLUME_IDEMPOTENCE_BUDGET_SECONDS` on slower hosts.
+`CARAPACE_UPGRADE_SURVIVOR_VOLUME_IDEMPOTENCE_BUDGET_SECONDS` on slower hosts.
 
 The `Update Migration` workflow runs weekly and supports manual dispatch. Its
 default `supported-lines` baseline set resolves npm dist-tags and published
@@ -296,8 +296,8 @@ older trusted releases.
 
 Candidate sources:
 
-- `source=npm`: validate `openclaw@extended-stable`, `openclaw@beta`,
-  `openclaw@latest`, or an exact published version.
+- `source=npm`: validate `carapace@extended-stable`, `carapace@beta`,
+  `carapace@latest`, or an exact published version.
 - `source=ref`: pack a trusted branch, tag, or commit with the selected current
   harness.
 - `source=url`: validate a public HTTPS tarball with required `package_sha256`.
@@ -308,12 +308,12 @@ Candidate sources:
   in `.github/package-trusted-sources.json`. Use this for enterprise/private
   mirrors instead of weakening `source=url` with an input-level allow-private
   switch. Bearer auth, when configured by policy, uses the fixed
-  `OPENCLAW_TRUSTED_PACKAGE_TOKEN` secret.
+  `CARAPACE_TRUSTED_PACKAGE_TOKEN` secret.
 - `source=artifact`: reuse a tarball uploaded by another Actions run.
 
 Full Release Validation uses `source=artifact` by default, built from the
 resolved release SHA. For post-publish proof, pass
-`package_acceptance_package_spec=openclaw@YYYY.M.PATCH` so the same upgrade matrix
+`package_acceptance_package_spec=carapace@YYYY.M.PATCH` so the same upgrade matrix
 targets the shipped npm package instead.
 
 Release checks call Package Acceptance with the package/update/restart/plugin set:
@@ -379,14 +379,14 @@ gh workflow run package-acceptance.yml \
   --ref main \
   -f workflow_ref=main \
   -f source=npm \
-  -f package_spec=openclaw@beta \
+  -f package_spec=carapace@beta \
   -f suite_profile=package \
   -f published_upgrade_survivor_scenarios=reported-issues \
   -f telegram_mode=mock-openai
 ```
 
 For a published extended-stable canary, set
-`package_spec=openclaw@extended-stable`. Package Acceptance resolves that
+`package_spec=carapace@extended-stable`. Package Acceptance resolves that
 selector into an exact tarball before the Docker lanes run.
 
 Use `suite_profile=product` when the release question includes MCP channels,

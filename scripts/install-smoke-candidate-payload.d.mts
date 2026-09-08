@@ -11,7 +11,7 @@ type InstallSmokeCandidatePayloadManifest = {
   repository: string;
   runAttempt: string;
   runId: string;
-  schema: "openclaw.install-smoke-candidate-payload/v1";
+  schema: "carapace.install-smoke-candidate-payload/v1";
   sourceArchiveSha256: string;
   targetSha: string;
 };

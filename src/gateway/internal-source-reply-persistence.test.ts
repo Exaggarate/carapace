@@ -18,11 +18,11 @@ import {
   type SessionTranscriptUpdate,
 } from "../sessions/transcript-events.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { persistInternalSourceReply } from "./internal-source-reply-persistence.js";
 import {
   MANAGED_OUTGOING_IMAGE_ARTIFACT_ID_PREFIX,
@@ -37,7 +37,7 @@ import {
 const TINY_PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII=";
 
-async function createSourceReplyFixture(state: OpenClawTestState) {
+async function createSourceReplyFixture(state: CarapaceTestState) {
   const sessionKey = "agent:main:webchat:dm:partial-promotion";
   const sessionId = "partial-promotion-session";
   const scope = {
@@ -58,8 +58,8 @@ async function createSourceReplyFixture(state: OpenClawTestState) {
     imagePaths.map((file) => fs.writeFile(file, Buffer.from(TINY_PNG_BASE64, "base64"))),
   );
   await replaceSessionEntry(scope, entry);
-  const database = openOpenClawStateDatabase({
-    env: { ...process.env, OPENCLAW_STATE_DIR: state.stateDir },
+  const database = openCarapaceStateDatabase({
+    env: { ...process.env, CARAPACE_STATE_DIR: state.stateDir },
   });
   const records = () => listManagedImageRecordEntries({ stateDir: state.stateDir, sessionKey });
   const updates: SessionTranscriptUpdate[] = [];
@@ -209,7 +209,7 @@ describe("internal source reply persistence", () => {
   it.each(["partial-promotion", "owned-drain", "ordinary", "canonical-key", "text-only"] as const)(
     "completes exact replay and refreshes history after %s",
     async (mode) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", prefix: "source-reply-replay-" },
         async (state) => {
           const fixture = await createSourceReplyFixture(state);
@@ -233,7 +233,7 @@ describe("internal source reply persistence", () => {
             );
             expect(assistants).toHaveLength(1);
             expect(readTranscriptEventMessage(assistants[0])).toMatchObject({
-              __openclaw: { runId: "original-run" },
+              __carapace: { runId: "original-run" },
             });
             const messageId = readTranscriptEventId(assistants[0]);
             const originalIds = fixture
@@ -293,7 +293,7 @@ describe("internal source reply persistence", () => {
   ] as const)(
     "rejects replay after %s changes while its real owned write is queued",
     async (changed) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", prefix: "source-reply-stale-" },
         async (state) => {
           const fixture = await createSourceReplyFixture(state);

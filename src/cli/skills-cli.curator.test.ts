@@ -37,7 +37,7 @@ vi.mock("../gateway/call.js", () => ({
   isGatewayCredentialsRequiredError: (error: unknown) =>
     error instanceof Error && error.name === "GatewayCredentialsRequiredError",
   isImplicitLocalGatewayTarget: async ({ config }: { config?: { gateway?: { mode?: string } } }) =>
-    !process.env.OPENCLAW_GATEWAY_URL && config?.gateway?.mode !== "remote",
+    !process.env.CARAPACE_GATEWAY_URL && config?.gateway?.mode !== "remote",
 }));
 vi.mock("../infra/gateway-lock.js", () => ({
   acquireGatewayLock: mocks.acquireGatewayLock,
@@ -50,7 +50,7 @@ vi.mock("../config/config.js", () => ({
   getRuntimeConfig: () => mocks.config,
   resetConfigRuntimeState: () => undefined,
 }));
-vi.mock("../terminal/links.js", () => ({ formatDocsLink: () => "docs.openclaw.ai/cli/skills" }));
+vi.mock("../terminal/links.js", () => ({ formatDocsLink: () => "github.com/Exaggarate/carapace" }));
 vi.mock("../terminal/theme.js", () => ({
   theme: {
     command: (value: string) => value,
@@ -194,7 +194,7 @@ describe("skills curator cli", () => {
       if (target === "configured remote") {
         mocks.config.gateway = { mode: "remote" };
       } else {
-        vi.stubEnv("OPENCLAW_GATEWAY_URL", "ws://127.0.0.1:9");
+        vi.stubEnv("CARAPACE_GATEWAY_URL", "ws://127.0.0.1:9");
       }
       mocks.callGateway.mockRejectedValue(new Error("remote unavailable"));
 
@@ -220,7 +220,7 @@ describe("skills curator cli", () => {
       error: Object.assign(new Error("gateway requires credentials"), {
         name: "GatewayCredentialsRequiredError",
         method: "skills.curator.status",
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       }),
     },
     { label: "close", error: createGatewayTransportError("closed") },
@@ -265,7 +265,7 @@ describe("skills curator cli", () => {
       error: Object.assign(new Error("gateway requires credentials"), {
         name: "GatewayCredentialsRequiredError",
         method: "skills.curator.pin",
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       }),
     },
     { label: "an ambiguous transport close", error: createGatewayTransportError("closed") },

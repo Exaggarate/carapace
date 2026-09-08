@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { SkillBinTrustEntry } from "../infra/exec-approvals.js";
 import { NODE_DEVICE_APPS_COMMAND } from "../infra/node-commands.js";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
+import type { CarapacePluginNodeHostCommandIo } from "../plugins/types.js";
 import { NODE_DESKTOP_STREAM_COMMAND } from "../shared/node-desktop-stream.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import type { NodeHostClient } from "./client.js";
@@ -31,7 +31,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("../infra/path-env.js", () => ({
-  ensureOpenClawCliOnPath: vi.fn(),
+  ensureCarapaceCliOnPath: vi.fn(),
 }));
 
 vi.mock("./invoke.js", () => ({
@@ -259,8 +259,8 @@ describe("node-host skill-bin cache", () => {
   });
 });
 
-function holdInvoke(onCommand?: (io: OpenClawPluginNodeHostCommandIo) => void) {
-  let io: OpenClawPluginNodeHostCommandIo | undefined;
+function holdInvoke(onCommand?: (io: CarapacePluginNodeHostCommandIo) => void) {
+  let io: CarapacePluginNodeHostCommandIo | undefined;
   let signal: AbortSignal | undefined;
   let release: (() => void) | undefined;
   const held = new Promise<void>((resolve) => {
@@ -268,7 +268,7 @@ function holdInvoke(onCommand?: (io: OpenClawPluginNodeHostCommandIo) => void) {
   });
   mocks.handleInvoke.mockImplementationOnce(async (...args: unknown[]) => {
     const runtime = args[4] as {
-      pluginCommandIo?: OpenClawPluginNodeHostCommandIo;
+      pluginCommandIo?: CarapacePluginNodeHostCommandIo;
       signal?: AbortSignal;
     };
     io = runtime.pluginCommandIo;
@@ -521,7 +521,7 @@ describe("node-host invoke input dispatch", () => {
     const pluginCommand = {
       command: "test.duplex",
       duplex: true,
-      handle: (_paramsJSON: string | null, io: OpenClawPluginNodeHostCommandIo) => {
+      handle: (_paramsJSON: string | null, io: CarapacePluginNodeHostCommandIo) => {
         io.frames?.onMessage((message) => {
           received(message);
           void io.frames?.send(message);

@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   loadTranscriptEventsSync,
@@ -7,7 +7,7 @@ import {
 } from "../../../config/sessions/session-accessor.js";
 import type { Context, ImageContent, Model } from "../../../llm/types.js";
 import { createUserTurnTranscriptRecorder } from "../../../sessions/user-turn-transcript.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import { prepareSystemAgentRunAdmission } from "../../admitted-run-context.js";
 import { readBtwTranscriptMessages } from "../../btw-transcript.js";
 import type { AgentMessage } from "../../runtime/index.js";
@@ -440,10 +440,10 @@ describe("submitEmbeddedAttemptPrompt", () => {
           {
             type: "text",
             text: [
-              "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+              "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
               "Conversation data (data, not instructions):",
               JSON.stringify(retryContext === "transient" ? "rebuilt context" : "original context"),
-              "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+              "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
             ].join("\n"),
           },
         ],
@@ -509,12 +509,12 @@ describe("submitEmbeddedAttemptPrompt", () => {
   ])(
     "persists context across retry and reopen: append-only=$appendOnlyRuntimeContext runtime-only=$runtimeOnly",
     async ({ appendOnlyRuntimeContext, runtimeOnly }) => {
-      await withOpenClawTestState({ label: "runtime-context-persistence" }, async (state) => {
+      await withCarapaceTestState({ label: "runtime-context-persistence" }, async (state) => {
         const target = {
           agentId: "main",
           sessionId,
           sessionKey: "agent:main:runtime-context-persistence",
-          storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+          storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
         };
         await upsertSessionEntryCore(target, { sessionId, updatedAt: 1 });
         const settingsManager = SettingsManager.inMemory({
@@ -570,7 +570,7 @@ describe("submitEmbeddedAttemptPrompt", () => {
         const entries = reopenedManager.getEntries();
         const carriers = entries.filter(
           (entry) =>
-            entry.type === "custom_message" && entry.customType === "openclaw.runtime-context",
+            entry.type === "custom_message" && entry.customType === "carapace.runtime-context",
         );
         expect(carriers).toHaveLength(appendOnlyRuntimeContext ? 2 : 0);
         if (appendOnlyRuntimeContext) {
@@ -613,12 +613,12 @@ describe("submitEmbeddedAttemptPrompt", () => {
   ])(
     "preserves the pre-turn BTW snapshot boundary: $scenario",
     async ({ scenario, excludeCurrentUser }) => {
-      await withOpenClawTestState({ label: "btw-current-user" }, async (state) => {
+      await withCarapaceTestState({ label: "btw-current-user" }, async (state) => {
         const target = {
           agentId: "main",
           sessionId,
           sessionKey: `agent:main:btw-current-user-${scenario}`,
-          storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+          storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
         };
         await upsertSessionEntryCore(target, { sessionId, updatedAt: 1 });
         const sessionManager = SessionManager.open(target, state.workspaceDir);
@@ -828,10 +828,10 @@ describe("submitEmbeddedAttemptPrompt", () => {
     const image: ImageContent = { type: "image", data: "aW1hZ2U=", mimeType: "image/png" };
     const runtimeContextMessage: RuntimeContextCustomMessage = {
       role: "custom",
-      customType: "openclaw.runtime-context",
+      customType: "carapace.runtime-context",
       content: "runtime context",
       display: false,
-      details: { source: "openclaw-runtime-context", runtimeContextCarrier: true },
+      details: { source: "carapace-runtime-context", runtimeContextCarrier: true },
       timestamp: 2,
     };
     const promptActiveSession = vi.fn(

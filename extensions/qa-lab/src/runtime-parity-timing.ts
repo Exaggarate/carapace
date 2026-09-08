@@ -12,10 +12,10 @@ type QaRuntimeSpeedComparison = {
 };
 
 export type QaRuntimeTiming = QaRuntimeSpeedComparison & {
-  openclaw: QaRuntimeWallClockMetrics;
+  carapace: QaRuntimeWallClockMetrics;
   codex: QaRuntimeWallClockMetrics;
   bootstrap?: {
-    openclaw: QaRuntimeWallClockMetrics;
+    carapace: QaRuntimeWallClockMetrics;
     codex: QaRuntimeWallClockMetrics;
   };
 };
@@ -47,18 +47,18 @@ export function measureRuntimeParityCellTiming(params: {
 }
 
 export function compareRuntimeWallClockMs(
-  openclawWallClockMs: number | null,
+  carapaceWallClockMs: number | null,
   codexWallClockMs: number | null,
 ): QaRuntimeSpeedComparison {
-  if (openclawWallClockMs === null || codexWallClockMs === null) {
+  if (carapaceWallClockMs === null || codexWallClockMs === null) {
     return { fasterRuntime: null, speedupPercent: null };
   }
-  if (openclawWallClockMs === codexWallClockMs) {
+  if (carapaceWallClockMs === codexWallClockMs) {
     return { fasterRuntime: "tie", speedupPercent: 0 };
   }
-  const fasterRuntime = openclawWallClockMs < codexWallClockMs ? "openclaw" : "codex";
-  const fasterWallClockMs = Math.min(openclawWallClockMs, codexWallClockMs);
-  const slowerWallClockMs = Math.max(openclawWallClockMs, codexWallClockMs);
+  const fasterRuntime = carapaceWallClockMs < codexWallClockMs ? "carapace" : "codex";
+  const fasterWallClockMs = Math.min(carapaceWallClockMs, codexWallClockMs);
+  const slowerWallClockMs = Math.max(carapaceWallClockMs, codexWallClockMs);
   return {
     fasterRuntime,
     speedupPercent:
@@ -84,15 +84,15 @@ function summarizeRuntimeWallClock(values: number[]): QaRuntimeWallClockMetrics 
 
 export function summarizeRuntimeParityTiming(
   scenarios: readonly {
-    openclawWallClockMs: number | null;
+    carapaceWallClockMs: number | null;
     codexWallClockMs: number | null;
-    openclawBootstrapWallClockMs?: number | null;
+    carapaceBootstrapWallClockMs?: number | null;
     codexBootstrapWallClockMs?: number | null;
   }[],
 ): QaRuntimeTiming {
-  const openclaw = summarizeRuntimeWallClock(
-    scenarios.flatMap(({ openclawWallClockMs }) =>
-      openclawWallClockMs === null ? [] : [openclawWallClockMs],
+  const carapace = summarizeRuntimeWallClock(
+    scenarios.flatMap(({ carapaceWallClockMs }) =>
+      carapaceWallClockMs === null ? [] : [carapaceWallClockMs],
     ),
   );
   const codex = summarizeRuntimeWallClock(
@@ -100,31 +100,31 @@ export function summarizeRuntimeParityTiming(
       codexWallClockMs === null ? [] : [codexWallClockMs],
     ),
   );
-  const pairedTimingCaptures = scenarios.flatMap(({ openclawWallClockMs, codexWallClockMs }) =>
-    openclawWallClockMs === null || codexWallClockMs === null
+  const pairedTimingCaptures = scenarios.flatMap(({ carapaceWallClockMs, codexWallClockMs }) =>
+    carapaceWallClockMs === null || codexWallClockMs === null
       ? []
-      : [{ openclawWallClockMs, codexWallClockMs }],
+      : [{ carapaceWallClockMs, codexWallClockMs }],
   );
-  const openclawBootstrapValues = scenarios.flatMap(({ openclawBootstrapWallClockMs }) =>
-    openclawBootstrapWallClockMs == null ? [] : [openclawBootstrapWallClockMs],
+  const carapaceBootstrapValues = scenarios.flatMap(({ carapaceBootstrapWallClockMs }) =>
+    carapaceBootstrapWallClockMs == null ? [] : [carapaceBootstrapWallClockMs],
   );
   const codexBootstrapValues = scenarios.flatMap(({ codexBootstrapWallClockMs }) =>
     codexBootstrapWallClockMs == null ? [] : [codexBootstrapWallClockMs],
   );
   return {
-    openclaw,
+    carapace,
     codex,
-    ...(openclawBootstrapValues.length > 0 || codexBootstrapValues.length > 0
+    ...(carapaceBootstrapValues.length > 0 || codexBootstrapValues.length > 0
       ? {
           bootstrap: {
-            openclaw: summarizeRuntimeWallClock(openclawBootstrapValues),
+            carapace: summarizeRuntimeWallClock(carapaceBootstrapValues),
             codex: summarizeRuntimeWallClock(codexBootstrapValues),
           },
         }
       : {}),
     ...compareRuntimeWallClockMs(
       pairedTimingCaptures.length > 0
-        ? pairedTimingCaptures.reduce((total, capture) => total + capture.openclawWallClockMs, 0)
+        ? pairedTimingCaptures.reduce((total, capture) => total + capture.carapaceWallClockMs, 0)
         : null,
       pairedTimingCaptures.length > 0
         ? pairedTimingCaptures.reduce((total, capture) => total + capture.codexWallClockMs, 0)

@@ -1,9 +1,9 @@
 // Cron CLI pagination exercises real Gateway handlers and canonical cron snapshots.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { tryResolveAmbientOwnerAgentId } from "../../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createMockCronStateForJobs } from "../../cron/service.test-harness.js";
 import { listPage } from "../../cron/service/ops-read.js";
 import type { CronJob } from "../../cron/types.js";
@@ -58,7 +58,7 @@ function createJob(index: number, overrides: Partial<CronJob> = {}): CronJob {
 function installRealCronGateway(
   jobs: CronJob[],
   options: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     beforeList?: (params: Record<string, unknown>, listCall: number, jobs: CronJob[]) => void;
     transformListPage?: (page: unknown, listCall: number) => unknown;
   } = {},
@@ -142,7 +142,7 @@ async function runCron(args: string[]): Promise<void> {
 
 async function runCronWithJsonOwner(args: string[]): Promise<void> {
   const originalArgv = process.argv;
-  process.argv = ["node", "openclaw", "cron", ...args];
+  process.argv = ["node", "carapace", "cron", ...args];
   try {
     await withConsoleLogsRoutedToStderrForJson(process.argv, () => runCron(args));
   } finally {

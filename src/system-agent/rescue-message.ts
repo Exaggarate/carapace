@@ -1,12 +1,12 @@
-// OpenClaw rescue messages expose approved setup-helper commands over message channels.
+// Carapace rescue messages expose approved setup-helper commands over message channels.
 import { createHash } from "node:crypto";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { hasNonEmptyString as isNonEmptyString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { hasNonEmptyString as isNonEmptyString } from "@carapace/normalization-core/string-coerce";
 import type { CommandContext } from "../auto-reply/reply/commands-types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createCorePluginStateSyncKeyedStore } from "../plugin-state/plugin-state-store.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
@@ -21,9 +21,9 @@ import { classifySystemAgentApprovalText } from "./operator-approval.js";
 import { resolveSystemAgentRescuePolicy } from "./rescue-policy.js";
 
 /**
- * Message-channel rescue command handling for OpenClaw.
+ * Message-channel rescue command handling for Carapace.
  *
- * Rescue mode accepts `/openclaw` commands from approved message contexts,
+ * Rescue mode accepts `/carapace` commands from approved message contexts,
  * stores pending persistent operations for explicit confirmation, and captures
  * command output without exposing local TUI or plugin-install flows remotely.
  */
@@ -32,9 +32,9 @@ type RescuePendingOperation = {
   operation: SystemAgentOperation;
 };
 
-/** Input required to process one possible `/openclaw` rescue message. */
+/** Input required to process one possible `/carapace` rescue message. */
 type SystemAgentRescueMessageInput = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   command: CommandContext;
   commandBody: string;
   agentId?: string;
@@ -43,7 +43,7 @@ type SystemAgentRescueMessageInput = {
   deps?: SystemAgentCommandDeps;
 };
 
-const SYSTEM_AGENT_COMMAND = "/openclaw";
+const SYSTEM_AGENT_COMMAND = "/carapace";
 const RESCUE_PENDING_NAMESPACE = "rescue-pending";
 const RESCUE_PENDING_MAX_ENTRIES = 1_024;
 
@@ -57,14 +57,14 @@ function createCaptureRuntime(): { runtime: RuntimeEnv; read: () => string } {
       log: push,
       error: push,
       exit: (code) => {
-        throw new Error(`OpenClaw operation exited with code ${code}`);
+        throw new Error(`Carapace operation exited with code ${code}`);
       },
     },
     read: () => lines.join("\n").trim(),
   };
 }
 
-/** Extract the command body after `/openclaw`, or null when the message is not for rescue. */
+/** Extract the command body after `/carapace`, or null when the message is not for rescue. */
 export function extractSystemAgentRescueMessage(commandBody: string): string | null {
   const normalized = commandBody.trim();
   const lower = normalized.toLowerCase();
@@ -214,39 +214,39 @@ function buildAuditDetails(input: SystemAgentRescueMessageInput): Record<string,
 function formatPersistentPlan(operation: SystemAgentOperation): string {
   return formatSystemAgentPersistentPlan(operation).replace(
     "Say yes to apply.",
-    "Reply /openclaw yes to apply.",
+    "Reply /carapace yes to apply.",
   );
 }
 
 function formatUnsupportedRemoteOperation(operation: SystemAgentOperation): string | null {
   if (operation.kind === "open-tui") {
     return [
-      "OpenClaw rescue cannot open the local TUI from a message channel.",
-      "Use local `openclaw` for agent handoff, or ask for status, doctor, config, gateway, agents, or models.",
+      "Carapace rescue cannot open the local TUI from a message channel.",
+      "Use local `carapace` for agent handoff, or ask for status, doctor, config, gateway, agents, or models.",
     ].join(" ");
   }
   if (operation.kind === "channel-setup") {
     return [
-      "OpenClaw rescue cannot host the interactive channel setup from a message channel.",
-      "Run `openclaw setup` locally and say `connect " + operation.channel + "` instead.",
+      "Carapace rescue cannot host the interactive channel setup from a message channel.",
+      "Run `carapace setup` locally and say `connect " + operation.channel + "` instead.",
     ].join(" ");
   }
   if (operation.kind === "model-setup") {
     return [
-      "OpenClaw rescue cannot host model-provider credential setup from a message channel.",
-      "Run `openclaw onboard` locally; it live-tests the candidate route before saving it.",
+      "Carapace rescue cannot host model-provider credential setup from a message channel.",
+      "Run `carapace onboard` locally; it live-tests the candidate route before saving it.",
     ].join(" ");
   }
   if (operation.kind === "doctor-fix") {
     return [
-      "OpenClaw rescue cannot run doctor repairs from a message channel because they can change the inference route powering this session.",
-      "On the machine running OpenClaw, with OpenClaw stopped, run `openclaw doctor --fix`.",
+      "Carapace rescue cannot run doctor repairs from a message channel because they can change the inference route powering this session.",
+      "On the machine running Carapace, with Carapace stopped, run `carapace doctor --fix`.",
     ].join(" ");
   }
   if (operation.kind === "plugin-install") {
     return [
-      "OpenClaw rescue cannot install plugins from a message channel by default because plugin install downloads executable code.",
-      "Use local `openclaw setup` or `openclaw plugins install` instead.",
+      "Carapace rescue cannot install plugins from a message channel by default because plugin install downloads executable code.",
+      "Use local `carapace setup` or `carapace plugins install` instead.",
     ].join(" ");
   }
   return null;
@@ -280,7 +280,7 @@ export async function runSystemAgentRescueMessage(
     // capability, and a failed execution cannot leave a replayable write.
     const operation = parsePendingOperation(pendingStore.consume(pendingKey));
     if (!operation) {
-      return "No pending OpenClaw rescue change is waiting for approval.";
+      return "No pending Carapace rescue change is waiting for approval.";
     }
     const unsupported = formatUnsupportedRemoteOperation(operation);
     if (unsupported) {
@@ -292,14 +292,14 @@ export async function runSystemAgentRescueMessage(
       auditDetails: buildAuditDetails(input),
       deps: input.deps,
     });
-    return capture.read() || "OpenClaw rescue change applied.";
+    return capture.read() || "Carapace rescue change applied.";
   }
 
   if (approvalIntent === "decline") {
     const pending = parsePendingOperation(pendingStore.consume(pendingKey));
     return pending
-      ? "Dropped the pending OpenClaw rescue change."
-      : "No pending OpenClaw rescue change is waiting for approval.";
+      ? "Dropped the pending Carapace rescue change."
+      : "No pending Carapace rescue change is waiting for approval.";
   }
 
   // Any fresh command revokes the previous capability for this exact route.
@@ -321,7 +321,7 @@ export async function runSystemAgentRescueMessage(
         ? undefined
         : resolveExpiresAtMsFromDurationMs(policy.pendingTtlMinutes * 60_000, { nowMs });
     if (nowMs === undefined || expiresAtMs === undefined) {
-      return "OpenClaw rescue could not create a pending approval because the expiry clock is invalid.";
+      return "Carapace rescue could not create a pending approval because the expiry clock is invalid.";
     }
     const ttlMs = expiresAtMs - nowMs;
     pendingStore.register(
@@ -341,5 +341,5 @@ export async function runSystemAgentRescueMessage(
     auditDetails: buildAuditDetails(input),
     deps: input.deps,
   });
-  return capture.read() || "OpenClaw listened, clicked a claw, and found nothing to change.";
+  return capture.read() || "Carapace listened, clicked a claw, and found nothing to change.";
 }

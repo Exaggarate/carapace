@@ -56,7 +56,7 @@ export function registerInstallRootTransitionTests(getFixture: () => InstallRoot
       await fs.mkdir(path.dirname(replacementEntry), { recursive: true });
       await fs.writeFile(
         path.join(replacementRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", version: VERSION }),
+        JSON.stringify({ name: "carapace", version: VERSION }),
       );
       await fs.writeFile(replacementEntry, "export {};\n");
       mocks.capability.mockResolvedValue(
@@ -66,7 +66,7 @@ export function registerInstallRootTransitionTests(getFixture: () => InstallRoot
       );
       if (scenario === "original unresolved launcher") {
         mocks.command.mockResolvedValue({
-          programArguments: ["openclaw-wrapper", "gateway"],
+          programArguments: ["carapace-wrapper", "gateway"],
           environment: { HOME: root },
         });
       }
@@ -481,7 +481,7 @@ export function registerPluginMaintenanceTests(getFixture: () => PluginMaintenan
         "older than the config",
       );
 
-      process.env.OPENCLAW_UPDATE_RUN_HANDOFF = "1";
+      process.env.CARAPACE_UPDATE_RUN_HANDOFF = "1";
       mocks.child.mockImplementation(async () => {
         mocks.events.push("fresh CLI stop");
         mocks.running = false;

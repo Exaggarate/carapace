@@ -5,14 +5,14 @@ import {
   asSafeIntegerInRange,
   resolveExpiresAtMsFromDurationOrEpoch,
   resolvePositiveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { generatePkceVerifierChallenge, toFormUrlEncoded } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/number-runtime";
+import { generatePkceVerifierChallenge, toFormUrlEncoded } from "carapace/plugin-sdk/provider-auth";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { ensureGlobalUndiciEnvProxyDispatcher } from "openclaw/plugin-sdk/runtime-env";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { ensureGlobalUndiciEnvProxyDispatcher } from "carapace/plugin-sdk/runtime-env";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 
 export type MiniMaxRegion = "cn" | "global";
 

@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 import Network
-import OpenClawWatchRTC
+import CarapaceWatchRTC
 
 enum WatchRealtimeMediaEvent: Sendable {
     case connected
@@ -73,7 +73,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
     // is 0.11.0 retains at most 100 candidate pairs. Reject a larger discovery
     // plan instead of silently choosing the first interface or remote endpoint.
     private static let pairBudget = 100
-    private let queue = DispatchQueue(label: "ai.openclaw.watch.realtime.media", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "ai.carapace.watch.realtime.media", qos: .userInitiated)
     private let onEvent: @Sendable (WatchRealtimeMediaEvent) -> Void
     private let cancellationLock = NSLock()
     private var cancelled = false
@@ -95,7 +95,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
     deinit {
         self.timer?.cancel()
         self.flows.values.forEach { $0.connection.cancel() }
-        if let rtc { openclaw_rtc_free(rtc) }
+        if let rtc { carapace_rtc_free(rtc) }
     }
 
     func makeOffer() async throws -> String {
@@ -127,7 +127,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
                     do {
                         let data = Data(answer.utf8)
                         try data.withUnsafeBytes { bytes in
-                            try self.mutate { openclaw_rtc_answer(
+                            try self.mutate { carapace_rtc_answer(
                                 $0,
                                 bytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
                                 bytes.count) }
@@ -171,7 +171,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
             guard self.rtc != nil else { return }
             do {
                 try data.withUnsafeBytes { bytes in
-                    try self.mutate { openclaw_rtc_send_opus(
+                    try self.mutate { carapace_rtc_send_opus(
                         $0,
                         bytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
                         bytes.count,
@@ -201,7 +201,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
             guard !self.cancelled else { throw CancellationError() }
             self.started = true
             self.generation &+= 1
-            guard let rtc = openclaw_rtc_create() else {
+            guard let rtc = carapace_rtc_create() else {
                 throw WatchRealtimeMediaError.unavailable(String(localized: "Unable to initialize secure voice."))
             }
             self.rtc = rtc
@@ -209,11 +209,11 @@ final class WatchRealtimeTransport: @unchecked Sendable {
         try self.drain()
         // No invented port is advertised. The answer must be ICE-lite, so our
         // authenticated checks let it discover the candidates gathered afterward.
-        try self.mutate { openclaw_rtc_offer($0) }
+        try self.mutate { carapace_rtc_offer($0) }
         return try self.cancellationLock.withLock {
             guard !self.cancelled else { throw CancellationError() }
             var length = 0
-            guard let rtc, let bytes = openclaw_rtc_description(rtc, &length),
+            guard let rtc, let bytes = carapace_rtc_description(rtc, &length),
                   let offer = String(data: Data(bytes: bytes, count: length), encoding: .utf8)
             else {
                 throw WatchRealtimeMediaError.unavailable(String(localized: "Voice negotiation could not be created."))
@@ -225,10 +225,10 @@ final class WatchRealtimeTransport: @unchecked Sendable {
     private func remoteAddresses() throws -> [NWEndpoint] {
         var remotes: [NWEndpoint] = []
         for index in 0...Self.pairBudget {
-            var address = OpenClawRTCAddress()
+            var address = CarapaceRTCAddress()
             let result = try self.cancellationLock.withLock {
                 guard !self.cancelled, let rtc else { throw CancellationError() }
-                return openclaw_rtc_remote_address(rtc, index, &address)
+                return carapace_rtc_remote_address(rtc, index, &address)
             }
             if result == 1 { break }
             guard result == 0 else {
@@ -285,7 +285,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
         self.remoteDestinations = plan.destinations
         for alias in plan.aliases {
             let address = try Self.nativeAddress(alias.address)
-            try self.mutate { openclaw_rtc_resolve_remote_address($0, alias.index, address) }
+            try self.mutate { carapace_rtc_resolve_remote_address($0, alias.index, address) }
         }
         for pair in plan.pairs {
             try self.openFlow(.discover(source: pair.source, destination: pair.destination))
@@ -310,10 +310,10 @@ final class WatchRealtimeTransport: @unchecked Sendable {
 
     private func drain() throws {
         while true {
-            var output = OpenClawRTCOutput()
+            var output = CarapaceRTCOutput()
             try self.cancellationLock.withLock {
                 guard !self.cancelled, let rtc else { throw CancellationError() }
-                guard openclaw_rtc_poll(rtc, &output) == 0 else {
+                guard carapace_rtc_poll(rtc, &output) == 0 else {
                     throw WatchRealtimeMediaError.unavailable(String(localized: "The secure voice connection failed."))
                 }
             }
@@ -351,7 +351,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
         timer.setEventHandler { [weak self] in
             guard let self, self.generation == generation else { return }
             do {
-                try self.mutate { openclaw_rtc_timeout($0) }
+                try self.mutate { carapace_rtc_timeout($0) }
             } catch { self.fail(error) }
         }
         self.timer = timer
@@ -424,7 +424,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
             try self.receive(id)
             if case .discover = flow.binding, self.localCandidates.insert(route.source).inserted {
                 let native = try Self.nativeAddress(route.source)
-                try self.mutate { openclaw_rtc_add_candidate($0, native) }
+                try self.mutate { carapace_rtc_add_candidate($0, native) }
             }
             if let pending { try self.send(pending, id: id) }
         } catch { self.fail(error) }
@@ -541,7 +541,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
                             let source = try Self.nativeAddress(route.destination)
                             let destination = try Self.nativeAddress(route.source)
                             try data.withUnsafeBytes { bytes in
-                                try self.mutate { openclaw_rtc_receive(
+                                try self.mutate { carapace_rtc_receive(
                                     $0,
                                     source,
                                     destination,
@@ -574,7 +574,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
                       self.localCandidates.remove(route.source) != nil else { return }
                 do {
                     let native = try Self.nativeAddress(route.source)
-                    try self.mutate { openclaw_rtc_remove_candidate($0, native) }
+                    try self.mutate { carapace_rtc_remove_candidate($0, native) }
                 } catch { self.fail(error) }
             }
         }
@@ -605,7 +605,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
         self.remoteDestinations.removeAll()
         self.failedRoutes.removeAll()
         self.activeRoute = nil
-        if let rtc { openclaw_rtc_free(rtc) }
+        if let rtc { carapace_rtc_free(rtc) }
         self.rtc = nil
         pendingAnswer?.resume(throwing: error)
     }
@@ -623,12 +623,12 @@ final class WatchRealtimeTransport: @unchecked Sendable {
         }
     }
 
-    private static func nativeAddress(_ endpoint: NWEndpoint) throws -> OpenClawRTCAddress {
+    private static func nativeAddress(_ endpoint: NWEndpoint) throws -> CarapaceRTCAddress {
         guard case let .hostPort(host, port) = endpoint else {
             throw WatchRealtimeMediaError.unavailable(String(localized: "Voice received an invalid network address."))
         }
         let bytes: Data
-        var result = OpenClawRTCAddress()
+        var result = CarapaceRTCAddress()
         switch host {
         case let .ipv4(address): bytes = address.rawValue
             result.family = 4
@@ -642,7 +642,7 @@ final class WatchRealtimeTransport: @unchecked Sendable {
         return result
     }
 
-    private static func endpoint(_ address: OpenClawRTCAddress) throws -> NWEndpoint {
+    private static func endpoint(_ address: CarapaceRTCAddress) throws -> NWEndpoint {
         var address = address
         let data = withUnsafeBytes(of: &address.address) { Data($0.prefix(address.family == 4 ? 4 : 16)) }
         let host: NWEndpoint.Host

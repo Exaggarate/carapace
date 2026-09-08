@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
-import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createQaGatewayChild,
@@ -15,7 +15,7 @@ import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
 } from "../../../../packages/gateway-protocol/src/client-info.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { runQaGatewayFixture, stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 import {
@@ -141,7 +141,7 @@ function proofShellCommand(params: {
           "anthropicKeyPresent:Boolean(process.env.ANTHROPIC_API_KEY),",
           "forgeTokenPresent:Boolean(process.env.GITHUB_TOKEN||process.env.GH_TOKEN),",
           "cloudKeyPresent:Boolean(process.env.AWS_ACCESS_KEY_ID),",
-          "gatewayTokenPresent:Boolean(process.env.OPENCLAW_GATEWAY_TOKEN),",
+          "gatewayTokenPresent:Boolean(process.env.CARAPACE_GATEWAY_TOKEN),",
           "runtimeInjectionPresent:Boolean(process.env.NODE_OPTIONS),",
           "ordinary:process.env.NODE_ENV||null,",
           `privateHome:process.env.HOME!==${JSON.stringify(params.nodeHome)},`,
@@ -437,12 +437,12 @@ describe("Codex paired-device exec-server carrier", () => {
     "keeps approved native execution on the real node, reconciles files, and never resumes a disconnect",
     { timeout: 360_000 },
     async () => {
-      const root = tempDirs.make("openclaw-codex-node-exec-server-");
+      const root = tempDirs.make("carapace-codex-node-exec-server-");
       const nodeRoot = path.join(root, "node");
       const nodeHome = path.join(nodeRoot, "home");
       const nodeState = path.join(nodeRoot, "state");
       const nodeTmp = path.join(nodeRoot, "tmp");
-      const nodeConfigPath = path.join(nodeRoot, "openclaw.json");
+      const nodeConfigPath = path.join(nodeRoot, "carapace.json");
       await Promise.all(
         [nodeHome, nodeState, nodeTmp].map(async (dir) => await fs.mkdir(dir, { recursive: true })),
       );
@@ -509,7 +509,7 @@ describe("Codex paired-device exec-server carrier", () => {
         requester = await connectApprovalReviewer(gateway);
         reviewer = await connectApprovalReviewer(gateway);
 
-        const nodeConfig: OpenClawConfig = {
+        const nodeConfig: CarapaceConfig = {
           gateway: { mode: "local" },
           plugins: { allow: ["codex"], entries: { codex: { enabled: false } } },
           nodeHost: { workerRuns: { enabled: true }, skills: { enabled: false } },
@@ -519,11 +519,11 @@ describe("Codex paired-device exec-server carrier", () => {
           home: nodeHome,
           tempDir: nodeTmp,
           extra: {
-            OPENCLAW_HOME: nodeHome,
-            OPENCLAW_STATE_DIR: nodeState,
-            OPENCLAW_CONFIG_PATH: nodeConfigPath,
-            OPENCLAW_GATEWAY_TOKEN: gateway.token,
-            OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1",
+            CARAPACE_HOME: nodeHome,
+            CARAPACE_STATE_DIR: nodeState,
+            CARAPACE_CONFIG_PATH: nodeConfigPath,
+            CARAPACE_GATEWAY_TOKEN: gateway.token,
+            CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1",
             NODE_ENV: "ordinary-node-process-value",
             OPENAI_API_KEY: "codex-node-device-fake-canary",
             ANTHROPIC_API_KEY: "codex-node-device-fake-anthropic-canary",

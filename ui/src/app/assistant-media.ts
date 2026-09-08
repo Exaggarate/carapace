@@ -19,5 +19,5 @@ export function buildAssistantMediaUrl(
   if (context?.agentId) {
     params.set("agentId", context.agentId);
   }
-  return `${normalizeRouteBasePath(resourceBasePath)}/__openclaw__/assistant-media?${params.toString()}`;
+  return `${normalizeRouteBasePath(resourceBasePath)}/__carapace__/assistant-media?${params.toString()}`;
 }

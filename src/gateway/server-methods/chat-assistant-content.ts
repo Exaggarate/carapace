@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   getReplyPayloadMetadata,
   readPairingQrReplyChannelData,
@@ -77,10 +77,10 @@ async function buildPairingQrAssistantContentBlock(
     renderQrTerminal(qr.setupCode, { small: true }),
   ]);
   return {
-    type: "openclaw_pairing_qr",
+    type: "carapace_pairing_qr",
     image_url: imageUrl,
     terminalText,
-    alt: "OpenClaw pairing QR code",
+    alt: "Carapace pairing QR code",
     expiresAtMs: qr.expiresAtMs,
     sensitive: true,
   };

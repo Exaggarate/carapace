@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ContextEngineTurnAttemptFacts } from "../harness/context-engine-turn-attempt.js";
 import { runEmbeddedAgentEntry } from "./run-entry.js";
 import {
@@ -235,7 +235,7 @@ describe("runEmbeddedAgentEntry", () => {
   });
 
   it("keeps shared fallback and terminal behavior aligned across entry modes", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const runMode = async (behavior: "channel-delivery" | "command-rpc") => {
       const candidateCalls: Array<{
         provider: string;

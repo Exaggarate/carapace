@@ -4,9 +4,9 @@
  * It reports workspace skill readiness, offers safe dependency installs, and
  * leaves per-skill credentials to the agent when a skill actually needs them.
  */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveBrewExecutable } from "../infra/brew.js";
 import { isContainerEnvironment } from "../infra/container-environment.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -113,11 +113,11 @@ function isBrewOnlyInstallableSkill(skill: {
 function isTrustedAutoInstallableSkill(skill: { bundled: boolean; source: string }): boolean {
   // Onboarding can offer bundled recipes in its explicit consent prompt. Workspace
   // skill metadata is mutable project input, so those installs stay excluded.
-  return skill.bundled && skill.source === "openclaw-bundled";
+  return skill.bundled && skill.source === "carapace-bundled";
 }
 
 function resolveDefaultNodeManager(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   requested: NodeManagerChoice | undefined,
   runtime: RuntimeEnv,
 ) {
@@ -134,7 +134,7 @@ function resolveDefaultNodeManager(
 
 /** Runs the interactive skills setup step and returns the updated config. */
 export async function setupSkills(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   workspaceDir: string,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
@@ -142,7 +142,7 @@ export async function setupSkills(
     nodeManager?: NodeManagerChoice;
     beforePersistentEffect?: () => Promise<void>;
   } = {},
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   const report = buildWorkspaceSkillStatus(workspaceDir, { config: cfg });
   const eligible = report.skills.filter((s) => s.eligible);
   const unsupportedOs = report.skills.filter(
@@ -214,13 +214,13 @@ export async function setupSkills(
     const readiness = await resolveKindReadinessOnce(primaryInstall.kind);
     readinessBySkillName.set(skill.name, readiness);
   }
-  let next: OpenClawConfig = cfg;
+  let next: CarapaceConfig = cfg;
   if (candidateInstallable.length === 0 && missing.length === 0) {
     await prompter.note(
       [
         "No missing skill dependencies to install.",
-        `To inspect available skills, run: ${formatCliCommand("openclaw skills list --verbose")}`,
-        `To check skill status, run: ${formatCliCommand("openclaw skills check")}`,
+        `To inspect available skills, run: ${formatCliCommand("carapace skills list --verbose")}`,
+        `To check skill status, run: ${formatCliCommand("carapace skills check")}`,
       ].join("\n"),
       t("wizard.skills.allReadyTitle") ?? "All skills ready",
     );
@@ -286,7 +286,7 @@ export async function setupSkills(
         continue;
       }
       // Onboarding installs the primary recipe only; alternative recipes remain
-      // visible through `openclaw skills list --verbose`.
+      // visible through `carapace skills list --verbose`.
       await options.beforePersistentEffect?.();
       const spin = prompter.progress(t("wizard.skills.installing", { name: target.name }));
       const result = await installSkill({
@@ -338,7 +338,7 @@ export async function setupSkills(
         runtime.log(result.stdout.trim());
       }
       runtime.log(
-        `Tip: run \`${formatCliCommand("openclaw doctor")}\` to review skills + requirements.`,
+        `Tip: run \`${formatCliCommand("carapace doctor")}\` to review skills + requirements.`,
       );
       runtime.log(t("wizard.skills.docsLine"));
     }

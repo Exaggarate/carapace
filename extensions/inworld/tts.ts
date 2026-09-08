@@ -1,8 +1,8 @@
 // Inworld plugin module implements tts behavior.
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import type { SpeechVoiceOption } from "openclaw/plugin-sdk/speech-core";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/speech-provider";
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import type { SpeechVoiceOption } from "carapace/plugin-sdk/speech-core";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/speech-provider";
+import type { SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 
 const DEFAULT_INWORLD_BASE_URL = "https://api.inworld.ai";
 export const DEFAULT_INWORLD_VOICE_ID = "Sarah";
@@ -101,7 +101,7 @@ export async function inworldTTS(params: {
   temperature?: number;
   timeoutMs?: number;
 }): Promise<Buffer> {
-  const { canonicalizeBase64, MAX_AUDIO_BYTES } = await import("openclaw/plugin-sdk/media-runtime");
+  const { canonicalizeBase64, MAX_AUDIO_BYTES } = await import("carapace/plugin-sdk/media-runtime");
   // The streaming TTS endpoint returns newline-delimited JSON whose audio is
   // base64-encoded, so the wire body is ~4/3 larger than the decoded audio plus a
   // JSON envelope. Cap the read at double the shared 16 MiB audio limit so a
@@ -121,7 +121,7 @@ export async function inworldTTS(params: {
     },
     ...(params.temperature != null && { temperature: params.temperature }),
   });
-  const { fetchWithSsrFGuard } = await import("openclaw/plugin-sdk/ssrf-runtime");
+  const { fetchWithSsrFGuard } = await import("carapace/plugin-sdk/ssrf-runtime");
 
   const { response, release } = await fetchWithSsrFGuard({
     url,
@@ -215,7 +215,7 @@ export async function listInworldVoices(params: {
   language?: string;
   timeoutMs?: number;
 }): Promise<SpeechVoiceOption[]> {
-  const { MAX_AUDIO_BYTES } = await import("openclaw/plugin-sdk/media-runtime");
+  const { MAX_AUDIO_BYTES } = await import("carapace/plugin-sdk/media-runtime");
   // The voices listing is a small JSON catalog, so the shared 16 MiB audio limit
   // is already generous headroom while still closing the unbounded
   // `await response.json()` read.
@@ -223,7 +223,7 @@ export async function listInworldVoices(params: {
   const baseUrl = normalizeInworldBaseUrl(params.baseUrl);
   const langParam = params.language ? `?languages=${encodeURIComponent(params.language)}` : "";
   const url = `${baseUrl}/voices/v1/voices${langParam}`;
-  const { fetchWithSsrFGuard } = await import("openclaw/plugin-sdk/ssrf-runtime");
+  const { fetchWithSsrFGuard } = await import("carapace/plugin-sdk/ssrf-runtime");
 
   const { response, release } = await fetchWithSsrFGuard({
     url,

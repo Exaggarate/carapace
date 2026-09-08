@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { RelayFetch } from "./relay-fetch.js";
 import { RelayRuntime } from "./relay-runtime.js";
 import { RelayTarget } from "./relay-target.js";
@@ -247,7 +247,7 @@ export class RelaySessionOwner {
     ) {
       return;
     }
-    const id = `openclaw-child-${this.nextAlias++}`;
+    const id = `carapace-child-${this.nextAlias++}`;
     this.announce(
       parent.client,
       id,

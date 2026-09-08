@@ -9,6 +9,6 @@
     }
   },
   "metadata": {
-    "openclaw.config": "profiles/minimal-agent.openclaw.yml"
+    "carapace.config": "profiles/minimal-agent.carapace.yml"
   }
 }

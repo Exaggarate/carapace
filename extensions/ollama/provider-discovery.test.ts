@@ -2,8 +2,8 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withFetchPreconnect } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { withFetchPreconnect } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createModel } from "./model.test-support.js";
 import { ollamaProviderDiscovery } from "./provider-discovery.js";
@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 describe("Ollama provider", () => {
-  const createAgentDir = () => mkdtempSync(join(tmpdir(), "openclaw-test-"));
+  const createAgentDir = () => mkdtempSync(join(tmpdir(), "carapace-test-"));
 
   const countFetchCallUrls = (fetchMock: ReturnType<typeof vi.fn>, suffix: string): number =>
     fetchMock.mock.calls.filter(([input]) => String(input).endsWith(suffix)).length;
@@ -46,7 +46,7 @@ describe("Ollama provider", () => {
   }
 
   async function runOllamaCatalog(params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     env?: NodeJS.ProcessEnv;
     providerIds?: readonly string[];
     resolveProviderApiKey?: () => { apiKey: string | undefined; discoveryApiKey?: string };

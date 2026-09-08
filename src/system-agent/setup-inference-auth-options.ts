@@ -3,7 +3,7 @@ import type { ProviderAuthChoiceMetadata } from "../plugins/provider-auth-choice
 import type { ProviderInstallCatalogEntry } from "../plugins/provider-install-catalog.js";
 
 export type SetupInferenceManualProvider = {
-  /** Provider-auth choice id sent back to `openclaw.setup.activate`. */
+  /** Provider-auth choice id sent back to `carapace.setup.activate`. */
   id: string;
   /** Canonical provider identity for clients with bundled brand artwork. */
   brandId?: string;
@@ -16,7 +16,7 @@ export type SetupInferenceManualProvider = {
 };
 
 export type SetupInferenceAuthOption = {
-  /** Provider-auth choice id sent to `openclaw.setup.auth.start`. */
+  /** Provider-auth choice id sent to `carapace.setup.auth.start`. */
   id: string;
   /** Canonical provider identity for clients with bundled brand artwork. */
   brandId?: string;
@@ -66,7 +66,7 @@ export function listSetupInferenceInstallOptions(
 }
 
 export type SetupInferencePrepareOption = {
-  /** Provider-auth choice id sent to `openclaw.setup.prepare.start`. */
+  /** Provider-auth choice id sent to `carapace.setup.prepare.start`. */
   id: string;
   /** Canonical provider identity for clients with bundled brand artwork. */
   brandId?: string;

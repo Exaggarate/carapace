@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { renderAssistantAttachments } from "./chat-message-attachments.ts";
@@ -123,7 +123,7 @@ describe("attachment sidebar source ownership", () => {
           kind,
           label: "photo.png",
           mimeType: "image/png",
-          url: `/tmp/openclaw/${crypto.randomUUID()}.png`,
+          url: `/tmp/carapace/${crypto.randomUUID()}.png`,
         },
       };
       const rerender = () =>
@@ -197,7 +197,7 @@ describe("attachment sidebar source ownership", () => {
       container,
     );
 
-    expect(container.querySelector("openclaw-chat-svg-attachment")).not.toBeNull();
+    expect(container.querySelector("carapace-chat-svg-attachment")).not.toBeNull();
     expect(container.querySelector("img.chat-message-image")).toBeNull();
     container.remove();
   });
@@ -222,7 +222,7 @@ describe("attachment sidebar source ownership", () => {
       container,
     );
 
-    expect(container.querySelector("openclaw-chat-svg-attachment")).toBeNull();
+    expect(container.querySelector("carapace-chat-svg-attachment")).toBeNull();
     expect(container.querySelector(".chat-assistant-attachment-card")).not.toBeNull();
     container.remove();
   });
@@ -380,7 +380,7 @@ describe("attachment sidebar source ownership", () => {
         "blob:svg-first",
       ),
     );
-    const attachment = container.querySelector("openclaw-chat-svg-attachment")!;
+    const attachment = container.querySelector("carapace-chat-svg-attachment")!;
     attachment.remove();
     container.append(attachment);
     await intersectAttachment();
@@ -783,12 +783,12 @@ describe("attachment sidebar source ownership", () => {
   });
 
   it.each([
-    ["audio", "recording.mp3", "audio/mpeg", "openclaw-chat-audio-player", undefined],
-    ["audio", "recording.ogg", "audio/ogg", "openclaw-chat-audio-player", "transcode"],
-    ["audio", "recording.m4a", "audio/x-m4a", "openclaw-chat-audio-player", undefined],
-    ["audio", "recording.flac", "audio/flac", "openclaw-chat-audio-player", "transcode"],
-    ["video", "demo.mp4", "video/mp4", "openclaw-chat-video-player", undefined],
-    ["video", "demo.webm", "video/webm", "openclaw-chat-video-player", "transcode"],
+    ["audio", "recording.mp3", "audio/mpeg", "carapace-chat-audio-player", undefined],
+    ["audio", "recording.ogg", "audio/ogg", "carapace-chat-audio-player", "transcode"],
+    ["audio", "recording.m4a", "audio/x-m4a", "carapace-chat-audio-player", undefined],
+    ["audio", "recording.flac", "audio/flac", "carapace-chat-audio-player", "transcode"],
+    ["video", "demo.mp4", "video/mp4", "carapace-chat-video-player", undefined],
+    ["video", "demo.webm", "video/webm", "carapace-chat-video-player", "transcode"],
   ] as const)(
     "renders %s attachment %s with inline playback",
     (kind, label, mimeType, player, requestedPlayback) => {
@@ -829,8 +829,8 @@ describe("attachment sidebar source ownership", () => {
       container,
     );
 
-    expect(container.querySelector("openclaw-chat-audio-player")).toBeNull();
-    expect(container.querySelector("openclaw-chat-video-player")).toBeNull();
+    expect(container.querySelector("carapace-chat-audio-player")).toBeNull();
+    expect(container.querySelector("carapace-chat-video-player")).toBeNull();
     expect(container.querySelector("audio, video")).toBeNull();
     expect(container.querySelector(".chat-assistant-attachment-card--blocked")).not.toBeNull();
     expect(container.querySelector(".chat-assistant-attachment-card__download")).toBeNull();
@@ -945,7 +945,7 @@ describe("attachment sidebar source ownership", () => {
       container,
     );
 
-    const player = container.querySelector("openclaw-chat-audio-player");
+    const player = container.querySelector("carapace-chat-audio-player");
     expect(player).toMatchObject({
       label: "inline.wav",
       mimeType: "audio/wav",
@@ -965,7 +965,7 @@ describe("attachment sidebar source ownership", () => {
   });
 
   it("resolves an open local sidebar attachment with the current runtime credentials", async () => {
-    const source = "/tmp/openclaw/clip.mp3";
+    const source = "/tmp/carapace/clip.mp3";
     const container = document.body.appendChild(document.createElement("div"));
     const fetchMock = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
       const token = new Headers(init?.headers).get("Authorization")?.replace("Bearer ", "") ?? "";

@@ -19,7 +19,7 @@ function createHost() {
   return { state, refresh };
 }
 
-const text = "Opened https://github.com/openclaw/openclaw/pull/111532";
+const text = "Opened https://github.com/Exaggarate/carapace/pull/111532";
 const message = { role: "assistant", content: [{ type: "text", text }] };
 
 describe("PR refresh emission receipts", () => {
@@ -51,15 +51,15 @@ describe("PR refresh emission receipts", () => {
     { name: "legacy text normalization", first: { text }, second: message, expected: 1 },
     {
       name: "distinct native IDs",
-      first: { ...message, __openclaw: { id: "first" } },
-      second: { ...message, __openclaw: { id: "second" } },
+      first: { ...message, __carapace: { id: "first" } },
+      second: { ...message, __carapace: { id: "second" } },
       expected: 2,
     },
     {
       name: "import identity before native IDs",
       first: {
         ...message,
-        __openclaw: {
+        __carapace: {
           id: "first",
           importedFrom: "fixture",
           cliSessionId: "source",
@@ -68,7 +68,7 @@ describe("PR refresh emission receipts", () => {
       },
       second: {
         ...message,
-        __openclaw: {
+        __carapace: {
           id: "second",
           importedFrom: "fixture",
           cliSessionId: "source",
@@ -79,8 +79,8 @@ describe("PR refresh emission receipts", () => {
     },
     {
       name: "distinct sequence identities",
-      first: { ...message, __openclaw: { seq: 1 } },
-      second: { ...message, __openclaw: { seq: 2 } },
+      first: { ...message, __carapace: { seq: 1 } },
+      second: { ...message, __carapace: { seq: 2 } },
       expected: 2,
     },
   ])("reuses canonical final identity for $name", ({ first, second, expected }) => {

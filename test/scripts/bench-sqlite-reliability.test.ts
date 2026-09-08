@@ -16,9 +16,9 @@ import {
 } from "../../scripts/lib/sqlite-reliability-worker-paths.js";
 import { openNodeSqliteDatabase } from "../../src/infra/node-sqlite.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../src/state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../src/state/carapace-state-db.js";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -127,7 +127,7 @@ describe("scripts/bench-sqlite-reliability", () => {
 
   it("detects a transient WAL overrun before the file shrinks", async () => {
     const walPath = path.join(
-      tempDirs.make("openclaw-sqlite-reliability-test-"),
+      tempDirs.make("carapace-sqlite-reliability-test-"),
       "database.sqlite-wal",
     );
     let stopRequests = 0;
@@ -171,7 +171,7 @@ describe("scripts/bench-sqlite-reliability", () => {
   });
 
   reliabilitySmokeTest("proves snapshot reliability while safely reusing state", () => {
-    const stateDir = tempDirs.make("openclaw-sqlite-reliability-test-");
+    const stateDir = tempDirs.make("carapace-sqlite-reliability-test-");
     const previousSyncedRepository = path.join(
       stateDir,
       "sqlite-reliability-runs",
@@ -182,18 +182,18 @@ describe("scripts/bench-sqlite-reliability", () => {
     fs.mkdirSync(previousSyncedRepository, { recursive: true, mode: 0o700 });
     fs.writeFileSync(previousArtifact, "retained");
 
-    const existingDatabase = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const existingDatabase = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     try {
       existingDatabase.db.exec(STRESS_TABLE_SQL);
       existingDatabase.db
         .prepare(
-          "INSERT INTO openclaw_reliability_entries (batch, ordinal, payload) VALUES (?, ?, ?)",
+          "INSERT INTO carapace_reliability_entries (batch, ordinal, payload) VALUES (?, ?, ?)",
         )
         .run(999_999, 0, "stale-profile-row");
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
 
     const output = path.join(stateDir, "report.json");
@@ -249,7 +249,7 @@ describe("scripts/bench-sqlite-reliability", () => {
     ).toBe(true);
     expect(firstReport.indexRepairInterruptionProof.rollbackJournal).toMatchObject({
       recoveryVerified: true,
-      repairedIndexes: ["idx_openclaw_reliability_records_identity"],
+      repairedIndexes: ["idx_carapace_reliability_records_identity"],
     });
     expect(
       firstReport.indexRepairInterruptionProof.rollbackJournal.journalBytesObserved,
@@ -260,7 +260,7 @@ describe("scripts/bench-sqlite-reliability", () => {
     ).toBe(true);
     expect(firstReport.indexRepairInterruptionProof.wal).toMatchObject({
       recoveryVerified: true,
-      repairedIndexes: ["idx_openclaw_reliability_records_identity"],
+      repairedIndexes: ["idx_carapace_reliability_records_identity"],
     });
     expect(firstReport.indexRepairInterruptionProof.wal.walBytesObserved).toBeGreaterThan(0);
     expect(
@@ -432,7 +432,7 @@ describe("scripts/bench-sqlite-reliability", () => {
     const database = openNodeSqliteDatabase(firstReport.paths.sourceDatabase, { readOnly: true });
     try {
       const staleRows = database
-        .prepare("SELECT COUNT(*) AS rows FROM openclaw_reliability_entries WHERE batch = ?")
+        .prepare("SELECT COUNT(*) AS rows FROM carapace_reliability_entries WHERE batch = ?")
         .get(999_999) as { rows?: unknown };
       expect(Number(staleRows.rows)).toBe(0);
     } finally {
@@ -441,8 +441,8 @@ describe("scripts/bench-sqlite-reliability", () => {
   });
 
   it("matches crash barriers across filesystem path aliases", () => {
-    const realRoot = tempDirs.make("openclaw-sqlite-reliability-test-");
-    const aliasRoot = path.join(tempDirs.make("openclaw-sqlite-reliability-test-"), "alias");
+    const realRoot = tempDirs.make("carapace-sqlite-reliability-test-");
+    const aliasRoot = path.join(tempDirs.make("carapace-sqlite-reliability-test-"), "alias");
     fs.symlinkSync(realRoot, aliasRoot, process.platform === "win32" ? "junction" : "dir");
     const repositoryPath = path.join(realRoot, "snapshots");
     const snapshotPath = path.join(repositoryPath, "snapshot");
@@ -468,7 +468,7 @@ describe("scripts/bench-sqlite-reliability", () => {
 
   it("stops the writer when its parent IPC channel disconnects", async () => {
     const databasePath = path.join(
-      tempDirs.make("openclaw-sqlite-reliability-test-"),
+      tempDirs.make("carapace-sqlite-reliability-test-"),
       "writer.sqlite",
     );
     const child = fork(

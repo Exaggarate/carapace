@@ -12,7 +12,7 @@ import type {
   SnapshotRef,
   SnapshotSummary,
 } from "../snapshot/snapshot-provider.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { shortenHomePath } from "../utils.js";
 import {
   recordBackupOutcomeBestEffort,
@@ -71,7 +71,7 @@ type ResolvedSnapshotDatabase = {
   identity: { role: "global" } | { role: "agent"; agentId: string };
 };
 
-const OPENCLAW_SNAPSHOT_READ_OPTIONS = {
+const CARAPACE_SNAPSHOT_READ_OPTIONS = {
   allowedDatabaseRoles: ["global", "agent"],
 } as const;
 
@@ -113,7 +113,7 @@ export async function backupSqliteListCommand(
   const repositoryPath = resolveRequiredBackupPath(options.repository, "--repository");
   const snapshots = await createLocalSqliteSnapshotProvider({
     repositoryPath,
-    ...OPENCLAW_SNAPSHOT_READ_OPTIONS,
+    ...CARAPACE_SNAPSHOT_READ_OPTIONS,
   }).list();
   const report: BackupSqliteListResult = {
     ok: true,
@@ -173,7 +173,7 @@ async function resolveSnapshotDatabase(
   }
   if (options.global === true) {
     return {
-      path: await fs.realpath(resolveOpenClawStateSqlitePath()),
+      path: await fs.realpath(resolveCarapaceStateSqlitePath()),
       identity: { role: "global" },
     };
   }
@@ -202,7 +202,7 @@ function resolveSnapshot(
     provider: createLocalSqliteSnapshotProvider({
       repositoryPath,
       validationRootPath,
-      ...OPENCLAW_SNAPSHOT_READ_OPTIONS,
+      ...CARAPACE_SNAPSHOT_READ_OPTIONS,
     }),
     ref: { path: snapshotPath },
   };

@@ -12,23 +12,23 @@ import {
   type AuthProfileMigrationSourceReceipt,
 } from "../commands/doctor-auth-migration-receipts.js";
 import type { DoctorPrompter } from "../commands/doctor-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   createDoctorHealthFlowContext,
   resolveDoctorHealthContributions,
 } from "./doctor-health-contributions.test-support.js";
 
 vi.mock("../commands/doctor-auth-legacy-oauth.js", () => ({
-  maybeRepairLegacyOAuthProfileIds: vi.fn(async (config: OpenClawConfig) => ({
+  maybeRepairLegacyOAuthProfileIds: vi.fn(async (config: CarapaceConfig) => ({
     config,
     retiredProfileCleanupPlans: [],
   })),
@@ -44,9 +44,9 @@ vi.mock("../commands/doctor-auth.js", () => ({
   noteSharedAuthStoreStatus: vi.fn(() => undefined),
 }));
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 const { recordAuthProfileMigrationImported } = (globalThis as Record<PropertyKey, unknown>)[
-  Symbol.for("openclaw.authProfileMigrationReceiptsTestApi")
+  Symbol.for("carapace.authProfileMigrationReceiptsTestApi")
 ] as {
   recordAuthProfileMigrationImported: (receipt: AuthProfileMigrationSourceReceipt) => void;
 };
@@ -70,7 +70,7 @@ function makePrompter(shouldRepair: boolean): DoctorPrompter {
   };
 }
 
-function makeLegacyConfig(): OpenClawConfig {
+function makeLegacyConfig(): CarapaceConfig {
   return {
     auth: {
       profiles: {
@@ -85,20 +85,20 @@ function makeLegacyConfig(): OpenClawConfig {
       },
       order: { "openai-codex": ["openai-codex:bravo"] },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-async function makeState(): Promise<OpenClawTestState> {
-  const state = await createOpenClawTestState({
+async function makeState(): Promise<CarapaceTestState> {
+  const state = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-doctor-auth-import-order-",
-    env: { OPENCLAW_AGENT_DIR: undefined },
+    prefix: "carapace-doctor-auth-import-order-",
+    env: { CARAPACE_AGENT_DIR: undefined },
   });
   states.push(state);
   return state;
 }
 
-async function writeLegacyRotationState(state: OpenClawTestState): Promise<string> {
+async function writeLegacyRotationState(state: CarapaceTestState): Promise<string> {
   return await state.writeText(
     "agents/main/agent/auth-state.json",
     `${JSON.stringify({
@@ -110,7 +110,7 @@ async function writeLegacyRotationState(state: OpenClawTestState): Promise<strin
   );
 }
 
-async function writeLegacyCredentialStore(state: OpenClawTestState): Promise<string> {
+async function writeLegacyCredentialStore(state: CarapaceTestState): Promise<string> {
   return await state.writeText(
     "agents/main/agent/auth-profiles.json",
     `${JSON.stringify({
@@ -133,7 +133,7 @@ async function writeLegacyCredentialStore(state: OpenClawTestState): Promise<str
   );
 }
 
-function loadMigratedStore(state: OpenClawTestState) {
+function loadMigratedStore(state: CarapaceTestState) {
   return (
     loadPersistedAuthProfileStore(state.agentDir()) ??
     loadPersistedSharedAuthProfileStore(state.env)
@@ -153,8 +153,8 @@ function authProfilesContribution() {
 afterEach(async () => {
   vi.restoreAllMocks();
   clearRuntimeAuthProfileStoreSnapshots();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const state of states.splice(0)) {
     await state.cleanup();
   }
@@ -171,14 +171,14 @@ describe("interactive Doctor auth migration", () => {
         sourcePath,
         sourceBytes,
         sourceRecordCount: 0,
-        targetDatabasePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+        targetDatabasePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
         targetTable: "auth_profile_store",
         env: state.env,
       });
       recordAuthProfileMigrationImported(receipt);
       if (outcome === "failed") {
         // A persisted receipt with an invalid target cannot be safely resumed.
-        openOpenClawStateDatabase({ env: state.env })
+        openCarapaceStateDatabase({ env: state.env })
           .db.prepare("UPDATE migration_sources SET target_table = ? WHERE source_key = ?")
           .run("invalid_target", receipt.sourceKey);
       }
@@ -188,7 +188,7 @@ describe("interactive Doctor auth migration", () => {
         cfg: {},
         prompter,
         env: state.env,
-        configPath: path.join(state.stateDir, "openclaw.json"),
+        configPath: path.join(state.stateDir, "carapace.json"),
       });
       const stdout = vi.spyOn(process.stdout, "write").mockReturnValue(true);
 
@@ -233,7 +233,7 @@ describe("interactive Doctor auth migration", () => {
       cfgForPersistence: structuredClone(cfg),
       prompter: makePrompter(true),
       env: state.env,
-      configPath: path.join(state.stateDir, "openclaw.json"),
+      configPath: path.join(state.stateDir, "carapace.json"),
     });
 
     await authProfilesContribution().run(ctx);
@@ -262,7 +262,7 @@ describe("interactive Doctor auth migration", () => {
       cfgForPersistence: structuredClone(cfg),
       prompter: makePrompter(false),
       env: state.env,
-      configPath: path.join(state.stateDir, "openclaw.json"),
+      configPath: path.join(state.stateDir, "carapace.json"),
     });
 
     await authProfilesContribution().run(ctx);

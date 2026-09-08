@@ -5,18 +5,18 @@ import {
   TRANSCRIPTS_EXPORT_MAX_BYTES,
   TRANSCRIPTS_RESULT_MAX_BYTES,
 } from "../../../packages/gateway-protocol/src/schema/transcripts.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
-  createOpenClawTestState,
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { activeSessions, startTranscripts } from "../../transcripts/capture.js";
 import { resolveTranscriptsConfig } from "../../transcripts/config.js";
 import * as transcriptProviders from "../../transcripts/provider-registry.js";
@@ -27,7 +27,7 @@ import { handleGatewayRequest } from "../server-methods.js";
 import { transcriptsHandlers } from "./transcripts.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 const logGateway = { warn: vi.fn() };
 
 function client(profileId?: string, scopes = ["operator.read"]): GatewayClient {
@@ -35,7 +35,7 @@ function client(profileId?: string, scopes = ["operator.read"]): GatewayClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes,
     },
@@ -51,7 +51,7 @@ function client(profileId?: string, scopes = ["operator.read"]): GatewayClient {
       : {}),
   };
 }
-function roles(others: "none" | "view"): OpenClawConfig {
+function roles(others: "none" | "view"): CarapaceConfig {
   return {
     gateway: {
       roles: {
@@ -66,7 +66,7 @@ function roles(others: "none" | "view"): OpenClawConfig {
 async function request(
   method: string,
   params: Record<string, unknown> = {},
-  cfg: OpenClawConfig = {},
+  cfg: CarapaceConfig = {},
   caller = client(),
 ) {
   const respond = vi.fn<RespondFn>();
@@ -104,7 +104,7 @@ describe("transcript Gateway read authorization and errors", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("returns explicit byte-limit errors without a partial read or download", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const { store, session, selector } = await seed(state.stateDir);
       await store.appendUtteranceForSession(session, {
         text: "x".repeat(TRANSCRIPTS_EXPORT_MAX_BYTES + 1),
@@ -133,7 +133,7 @@ describe("transcript Gateway read authorization and errors", () => {
   });
 
   it("keeps configured capture intent out of RPC results and durable session metadata", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const source = { providerId: "fixture-voice", channelId: "room" };
       const cfg = { transcripts: { autoStart: [source] } };
       const provider = vi
@@ -175,7 +175,7 @@ describe("transcript Gateway read authorization and errors", () => {
   });
 
   it("denies every global archive read for sessions.others:none even with allowed or forged agent filters", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const { selector } = await seed(state.stateDir);
       const profile = ensureProfileForEmail("transcript-guest@example.test");
       const cfg = roles("none");
@@ -201,7 +201,7 @@ describe("transcript Gateway read authorization and errors", () => {
   });
 
   it("preserves global reads for view roles and admins without treating the creation agent allowlist as read scope", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const { selector } = await seed(state.stateDir);
       const profile = ensureProfileForEmail("transcript-reader@example.test");
       const caller = client(profile.id);
@@ -239,7 +239,7 @@ describe("transcript Gateway read authorization and errors", () => {
   });
 
   it("does not expose hidden legacy URL content through authorized search, reads or exports", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const hidden = [
         "fixture-user-amber",
         "fixture-pass-cobalt",
@@ -267,7 +267,7 @@ describe("transcript Gateway read authorization and errors", () => {
       });
       const profile = ensureProfileForEmail("url-reader@example.test");
       const caller = client(profile.id);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const selector = transcriptSessionSelector(session);
       const publicOutputs: string[] = [];
       for (const query of ["PLANNING", "public-session", "public-channel", "fixture-provider"]) {
@@ -332,7 +332,7 @@ describe("transcript Gateway read authorization and errors", () => {
   });
 
   it("uses the normal operator role and scope fence and never advertises a capture mutation method", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       for (const [method, params] of [
         ["transcripts.list", {}],
         ["transcripts.get", { selector: "missing" }],
@@ -374,7 +374,7 @@ describe("transcript Gateway read authorization and errors", () => {
   });
 
   it("rejects invalid requests and missing selectors, and redacts archive failures", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const { session, selector } = await seed(state.stateDir);
       for (const [method, params] of [
         ["transcripts.list", { limit: 201 }],
@@ -397,7 +397,7 @@ describe("transcript Gateway read authorization and errors", () => {
         });
       }
       expect(logGateway.warn).not.toHaveBeenCalled();
-      const { db } = openOpenClawStateDatabase();
+      const { db } = openCarapaceStateDatabase();
       executeSqliteQuerySync(
         db,
         meetingTranscriptDb(db)
@@ -453,20 +453,20 @@ describe("meeting transcript RPC", () => {
     return response;
   }
 
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   beforeEach(async () => {
-    state = await createOpenClawTestState({ scenario: "minimal" });
+    state = await createCarapaceTestState({ scenario: "minimal" });
     const stateDir = state.stateDir;
     vi.spyOn(transcriptProviders, "getTranscriptSourceProvider").mockReturnValue(undefined);
     store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     await store.writeSession(session);
   });
   afterEach(async () => {
     activeSessions.clear();
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   });
 
@@ -614,7 +614,7 @@ describe("meeting transcript RPC", () => {
   it("reads older stored notes without participant or model attribution fields", async () => {
     const summary = summarizeTranscripts({ session, utterances: [{ text: "Legacy notes." }] });
     await store.writeSummary(summary, session);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     executeSqliteQuerySync(
       database,
       meetingTranscriptDb(database)

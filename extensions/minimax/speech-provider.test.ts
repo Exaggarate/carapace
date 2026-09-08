@@ -6,13 +6,13 @@ import {
   clearRuntimeAuthProfileStoreSnapshots,
   saveAuthProfileStore,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { isProviderAuthProfileConfigured } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/agent-runtime";
+import { isProviderAuthProfileConfigured } from "carapace/plugin-sdk/provider-auth";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const transcodeAudioBufferToOpusMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/media-runtime", () => ({
+vi.mock("carapace/plugin-sdk/media-runtime", () => ({
   transcodeAudioBufferToOpus: transcodeAudioBufferToOpusMock,
 }));
 
@@ -116,11 +116,11 @@ describe("buildMinimaxSpeechProvider", () => {
     });
 
     beforeEach(async () => {
-      tempStateDir = await mkdtemp(path.join(tmpdir(), "openclaw-minimax-tts-auth-"));
+      tempStateDir = await mkdtemp(path.join(tmpdir(), "carapace-minimax-tts-auth-"));
       tempAgentDir = path.join(tempStateDir, "agents", "main", "agent");
       await mkdir(tempAgentDir, { recursive: true });
-      vi.stubEnv("OPENCLAW_STATE_DIR", tempStateDir);
-      vi.stubEnv("OPENCLAW_AGENT_DIR", tempAgentDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", tempStateDir);
+      vi.stubEnv("CARAPACE_AGENT_DIR", tempAgentDir);
       clearMinimaxAuthEnv();
       clearRuntimeAuthProfileStoreSnapshots();
     });
@@ -357,11 +357,11 @@ describe("buildMinimaxSpeechProvider", () => {
     let tempAgentDir: string;
 
     beforeEach(async () => {
-      tempStateDir = await mkdtemp(path.join(tmpdir(), "openclaw-minimax-tts-synth-"));
+      tempStateDir = await mkdtemp(path.join(tmpdir(), "carapace-minimax-tts-synth-"));
       tempAgentDir = path.join(tempStateDir, "agents", "main", "agent");
       await mkdir(tempAgentDir, { recursive: true });
-      vi.stubEnv("OPENCLAW_AGENT_DIR", tempAgentDir);
-      vi.stubEnv("OPENCLAW_STATE_DIR", tempStateDir);
+      vi.stubEnv("CARAPACE_AGENT_DIR", tempAgentDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", tempStateDir);
       clearMinimaxAuthEnv();
       clearRuntimeAuthProfileStoreSnapshots();
       vi.stubGlobal("fetch", vi.fn());

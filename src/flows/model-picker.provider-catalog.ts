@@ -1,10 +1,10 @@
 // Model picker provider choices projected from the lifecycle-owned catalog.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { resolveDefaultAgentDir } from "../agents/agent-scope.js";
 import { createPreparedModelCatalogProviderNormalizer } from "../agents/model-catalog-provider-normalizer.js";
 import type { ModelCatalogSnapshot } from "../agents/model-catalog.types.js";
 import { loadPreparedModelCatalogSnapshot } from "../agents/prepared-model-catalog.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 
 function filterProviderSnapshot(
@@ -28,7 +28,7 @@ function filterProviderSnapshot(
 
 /** Loads committed catalog models for the user's preferred provider. */
 export async function loadPreferredProviderPickerCatalog(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   preferredProvider: string;
   agentDir?: string;
   workspaceDir?: string;

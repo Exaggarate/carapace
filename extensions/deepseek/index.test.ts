@@ -1,13 +1,13 @@
 // Deepseek tests cover index plugin behavior.
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "carapace/plugin-sdk/llm";
 import {
   registerSingleProviderPlugin,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
-import { createProviderUsageFetch, makeResponse } from "openclaw/plugin-sdk/test-env";
-import { createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
+import { createProviderUsageFetch, makeResponse } from "carapace/plugin-sdk/test-env";
+import { createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import { runSingleProviderCatalog } from "../test-support/provider-model-test-helpers.js";
 import deepseekPlugin from "./index.js";

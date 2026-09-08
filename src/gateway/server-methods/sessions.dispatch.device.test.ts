@@ -20,9 +20,9 @@ import {
   setActivePluginRegistry,
 } from "../../plugins/runtime.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { NodeWorkerSupervisorNodeProof } from "../node-registry-private.js";
 import {
   bindDeviceWorkerAvailability,
@@ -58,7 +58,7 @@ function useDeviceSession(agentRuntimeOverride?: string): void {
             providerOverride: "openai",
           }
         : {}),
-      worktree: { id: "worktree-1", branch: "openclaw/device-test", repoRoot: "/repo" },
+      worktree: { id: "worktree-1", branch: "carapace/device-test", repoRoot: "/repo" },
     }),
   );
   dispatchTestMocks.findLiveByOwner.mockReturnValue({
@@ -345,10 +345,10 @@ describe("sessions.dispatch device targets", () => {
 
     it("redispatches to the next host when the first disappears at the inner eligibility fence", async () => {
       const root = await fs.mkdtemp(
-        path.join(await fs.realpath(os.tmpdir()), "openclaw-session-auto-device-"),
+        path.join(await fs.realpath(os.tmpdir()), "carapace-session-auto-device-"),
       );
       try {
-        const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+        const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
         const placements = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
         // A local row starts at generation one; failed and retried dispatches advance it twice.
         const harness = createHarness(placements, { environmentGeneration: 3 });
@@ -385,7 +385,7 @@ describe("sessions.dispatch device targets", () => {
         dispatchTestMocks.resolveTarget.mockReturnValue(
           makeSessionTarget({
             sessionId: "session-1",
-            worktree: { id: "worktree-1", branch: "openclaw/device-test", repoRoot: "/repo" },
+            worktree: { id: "worktree-1", branch: "carapace/device-test", repoRoot: "/repo" },
           }),
         );
         dispatchTestMocks.findLiveByOwner.mockReturnValue({
@@ -427,7 +427,7 @@ describe("sessions.dispatch device targets", () => {
         expect(harness.environments.createFromProfileSnapshot).toHaveBeenCalledOnce();
         expect(placements.get("session-1")).toMatchObject({ state: "active" });
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         await fs.rm(root, { recursive: true, force: true });
       }
     });
@@ -748,10 +748,10 @@ describe("sessions.dispatch device targets", () => {
     "rejects a $name node before mutating placement or provisioning",
     async ({ nodes, expectedMessage, rejectedMessage }) => {
       const root = await fs.mkdtemp(
-        path.join(await fs.realpath(os.tmpdir()), "openclaw-session-dispatch-device-"),
+        path.join(await fs.realpath(os.tmpdir()), "carapace-session-dispatch-device-"),
       );
       try {
-        const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+        const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
         const placements = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
         const harness = createHarness(placements);
         const runtime = createDeviceWorkerRuntime({
@@ -793,7 +793,7 @@ describe("sessions.dispatch device targets", () => {
           expect.objectContaining({ message: expect.stringContaining(rejectedMessage) }),
         );
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         await fs.rm(root, { recursive: true, force: true });
       }
     },

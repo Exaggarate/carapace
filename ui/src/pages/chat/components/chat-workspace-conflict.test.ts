@@ -8,7 +8,7 @@ import { renderWorkspaceConflictNotice } from "./chat-workspace-conflict.ts";
 
 const conflict = {
   paths: ["src/local.ts"],
-  stagedResultRef: "refs/openclaw/worker-results/claim-test",
+  stagedResultRef: "refs/carapace/worker-results/claim-test",
 };
 
 afterEach(async () => {
@@ -74,7 +74,7 @@ describe("workspace conflict copy actions", () => {
     await vi.waitFor(() => expect(button?.textContent?.trim()).toBe(expected));
     expect(button?.getAttribute("aria-label")).toBeNull();
     expect(writeText).toHaveBeenCalledWith(
-      "git show 'refs/openclaw/worker-results/claim-test:src/local.ts'",
+      "git show 'refs/carapace/worker-results/claim-test:src/local.ts'",
     );
   });
 });

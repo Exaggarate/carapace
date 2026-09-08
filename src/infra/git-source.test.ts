@@ -16,7 +16,7 @@ async function git(cwd: string, ...args: string[]): Promise<string> {
 
 describe("Git source acquisition", () => {
   it("preserves each caller's ref selection against a local repository", async () => {
-    await withTestDir({ prefix: "openclaw-git-source-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-git-source-" }, async (root) => {
       const sourceDir = path.join(root, "source");
       await fs.mkdir(sourceDir);
       await git(sourceDir, "init", "--initial-branch=main");
@@ -26,9 +26,9 @@ describe("Git source acquisition", () => {
         await git(
           sourceDir,
           "-c",
-          "user.name=OpenClaw Test",
+          "user.name=Carapace Test",
           "-c",
-          "user.email=test@openclaw.invalid",
+          "user.email=test@carapace.invalid",
           "-c",
           "commit.gpgsign=false",
           "commit",

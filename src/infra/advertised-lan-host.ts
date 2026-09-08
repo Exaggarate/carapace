@@ -1,6 +1,6 @@
-// Resolves the LAN host OpenClaw should advertise to nearby devices.
-import { isRfc1918Ipv4Address } from "@openclaw/net-policy/ip";
-import { normalizeLowercaseStringOrEmpty as normalizeInterfaceName } from "@openclaw/normalization-core/string-coerce";
+// Resolves the LAN host Carapace should advertise to nearby devices.
+import { isRfc1918Ipv4Address } from "@carapace/net-policy/ip";
+import { normalizeLowercaseStringOrEmpty as normalizeInterfaceName } from "@carapace/normalization-core/string-coerce";
 import { runCommandWithTimeout as defaultRunCommandWithTimeout } from "../process/exec.js";
 import {
   listExternalInterfaceAddresses,

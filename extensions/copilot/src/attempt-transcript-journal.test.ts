@@ -2,14 +2,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import type { SessionEvent } from "@github/copilot-sdk";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/hook-runtime";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   cleanupAttemptTranscriptJournalFixtures,
@@ -32,7 +32,7 @@ describe("Copilot attempt transcript journal", () => {
     const rewrittenText = `${sourceText}\nMEDIA:./hook-only.json`;
     const prepareAssistantTranscriptMessage = vi.fn((message: AssistantMessage) => ({
       ...message,
-      openclawDelivery: { mediaUrls: ["./artifact.json"] },
+      carapaceDelivery: { mediaUrls: ["./artifact.json"] },
     }));
     initializeGlobalHookRunner(
       createMockPluginRegistry([
@@ -89,10 +89,10 @@ describe("Copilot attempt transcript journal", () => {
       "assistant",
     ]);
     expect(persisted[0]).toMatchObject({ role: "user", content: sourceText });
-    expect(persisted.slice(0, -1).some((message) => "openclawDelivery" in message)).toBe(false);
+    expect(persisted.slice(0, -1).some((message) => "carapaceDelivery" in message)).toBe(false);
     expect(persisted.at(-1)).toMatchObject({
       content: [{ type: "text", text: rewrittenText }],
-      openclawDelivery: { mediaUrls: ["./artifact.json"] },
+      carapaceDelivery: { mediaUrls: ["./artifact.json"] },
       idempotencyKey: "copilot-sdk:sdk-session:final-assistant",
     });
     expect(journal.snapshot().messagesSnapshot).toEqual(persisted);
@@ -205,7 +205,7 @@ describe("Copilot attempt transcript journal", () => {
         content: "Hi @Taylor",
         timestamp: 3,
         provenance: { kind: "external_user" as const },
-        __openclaw: { humanMentions: mentions },
+        __carapace: { humanMentions: mentions },
       };
       const sourceRecorder = {
         ...recorder,
@@ -224,7 +224,7 @@ describe("Copilot attempt transcript journal", () => {
               }
               if (rewrite === "hook-metadata") {
                 Object.assign(message, {
-                  __openclaw: {
+                  __carapace: {
                     humanMentions: [{ profileId: "profile-other", start: 3, end: 10 }],
                   },
                 });
@@ -251,9 +251,9 @@ describe("Copilot attempt transcript journal", () => {
         provenance: sourceMessage.provenance,
       });
       if (contentChanged) {
-        expect(persisted?.message).not.toHaveProperty("__openclaw.humanMentions");
+        expect(persisted?.message).not.toHaveProperty("__carapace.humanMentions");
       } else {
-        expect(persisted?.message).toHaveProperty("__openclaw.humanMentions", mentions);
+        expect(persisted?.message).toHaveProperty("__carapace.humanMentions", mentions);
       }
       expect(sourceRecorder.markRuntimePersisted).toHaveBeenCalledExactlyOnceWith(
         persisted?.message,
@@ -666,9 +666,9 @@ describe("Copilot attempt transcript journal", () => {
       isError: true,
       toolCallId: "call-a",
       content: [{ type: "text", text: "A failed" }],
-      __openclaw: { resultContentSource: "network" },
+      __carapace: { resultContentSource: "network" },
     });
-    expect(rows[5]?.message).toMatchObject({ __openclaw: { turnTainted: true } });
+    expect(rows[5]?.message).toMatchObject({ __carapace: { turnTainted: true } });
     expect(journal.snapshot()).toMatchObject({
       assistantTranscriptOwned: true,
       assistantTranscriptIdempotencyKey: "copilot-sdk:sdk-session:assistant-final",
@@ -1119,7 +1119,7 @@ describe("Copilot attempt transcript journal", () => {
       role: "user",
       content: "continue",
       display: false,
-      __openclaw: {
+      __carapace: {
         copilotSource: "future-source-kind",
         media: [{ path: "/tmp/notes.txt", contentType: "text/plain" }],
         copilotAttachments: [
@@ -1131,7 +1131,7 @@ describe("Copilot attempt transcript journal", () => {
     expect(rows[2]?.message).toMatchObject({ display: false });
     expect(rows[3]?.message).not.toHaveProperty("display", false);
     expect(rows[3]?.message).toMatchObject({
-      __openclaw: { copilotSource: "future-visible-source" },
+      __carapace: { copilotSource: "future-visible-source" },
     });
     expect(journal.snapshot().replayInvalid).toBe(true);
   });

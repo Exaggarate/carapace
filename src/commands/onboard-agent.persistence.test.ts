@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   prepareSystemAgentRunAdmission,
@@ -24,15 +24,15 @@ import {
 } from "../state/agent-deletion-journal.js";
 import { readAgentProvenance } from "../state/agent-provenance.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { ensureOnboardingAgent } from "./onboard-agent.js";
 
@@ -59,15 +59,15 @@ describe("onboarding authored config persistence", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_AGENT_DIR", "OPENCLAW_STATE_DIR", "OPENCLAW_TOKEN"]);
+    envSnapshot = captureEnv(["CARAPACE_AGENT_DIR", "CARAPACE_STATE_DIR", "CARAPACE_TOKEN"]);
   });
 
   afterEach(() => {
     migrationWindow.afterPublication = undefined;
     resetAgentRunRegistryForTest();
     envSnapshot.restore();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetConfigRuntimeState();
   });
 
@@ -76,8 +76,8 @@ describe("onboarding authored config persistence", () => {
     async (configShape) => {
       await withTempHome(async (rawHome) => {
         const home = await fs.realpath(rawHome);
-        const configDir = path.join(home, ".openclaw");
-        const configPath = path.join(configDir, "openclaw.json");
+        const configDir = path.join(home, ".carapace");
+        const configPath = path.join(configDir, "carapace.json");
         const includePath = path.join(configDir, "channels.json");
         const includeRaw = JSON.stringify({ channels: { telegram: { enabled: true } } });
         await fs.mkdir(configDir, { recursive: true });
@@ -86,10 +86,10 @@ describe("onboarding authored config persistence", () => {
           configPath,
           `{
           $include: "./channels.json",
-          gateway: { auth: { mode: "token", token: "\${OPENCLAW_TOKEN}" } }
+          gateway: { auth: { mode: "token", token: "\${CARAPACE_TOKEN}" } }
         }`,
         );
-        setTestEnvValue("OPENCLAW_TOKEN", "plaintext-secret");
+        setTestEnvValue("CARAPACE_TOKEN", "plaintext-secret");
         resetConfigRuntimeState();
 
         const snapshot = await readConfigFileSnapshot();
@@ -114,7 +114,7 @@ describe("onboarding authored config persistence", () => {
             workspace: path.join(home, "workspace"),
           }),
         });
-        expect(persistedRaw).toContain("${OPENCLAW_TOKEN}");
+        expect(persistedRaw).toContain("${CARAPACE_TOKEN}");
         expect(persistedRaw).not.toContain("plaintext-secret");
         expect(persistedRaw).toContain("./channels.json");
         expect(await fs.readFile(includePath, "utf8")).toBe(includeRaw);
@@ -134,8 +134,8 @@ describe("onboarding authored config persistence", () => {
     },
   ])("leaves an existing roster config byte-identical: %j", async (agents) => {
     await withTempHome(async (home) => {
-      const configDir = path.join(home, ".openclaw");
-      const configPath = path.join(configDir, "openclaw.json");
+      const configDir = path.join(home, ".carapace");
+      const configPath = path.join(configDir, "carapace.json");
       const raw = `${JSON.stringify({ agents }, null, 2)}\n`;
       await fs.mkdir(configDir, { recursive: true });
       await fs.writeFile(configPath, raw);
@@ -159,9 +159,9 @@ describe("onboarding authored config persistence", () => {
   it("renames a legacy install and converges its main session before returning", async () => {
     await withTempHome(async (rawHome) => {
       const home = await fs.realpath(rawHome);
-      const stateDir = path.join(home, ".openclaw");
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+      const stateDir = path.join(home, ".carapace");
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+      deleteTestEnvValue("CARAPACE_AGENT_DIR");
       resetConfigRuntimeState();
       await replaceConfigFile({ nextConfig: {}, afterWrite: { mode: "auto" } });
 
@@ -172,10 +172,10 @@ describe("onboarding authored config persistence", () => {
         "agents",
         "main",
         "agent",
-        "openclaw-agent.sqlite",
+        "carapace-agent.sqlite",
       );
       const entry = { sessionId: "legacy-main-session", updatedAt: 100 };
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => {
           writeSessionEntry(database, legacyKey, entry, {
             allowStoredAliases: true,
@@ -206,10 +206,10 @@ describe("onboarding authored config persistence", () => {
         "agents",
         "robby",
         "agent",
-        "openclaw-agent.sqlite",
+        "carapace-agent.sqlite",
       );
       const readEntry = (databasePath: string, agentId: string, key: string) =>
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (database) => readExactSessionEntryRowForCanonicalRepair(database, key)?.entry,
           { agentId, path: databasePath },
         );
@@ -218,7 +218,7 @@ describe("onboarding authored config persistence", () => {
       expect(readEntry(ownerDatabasePath, "robby", canonicalKey)).toMatchObject(entry);
       expect(readEntry(legacyDatabasePath, "main", legacyKey)).toBeUndefined();
       expect(
-        withExistingOpenClawStateDatabaseReadOnly(
+        withExistingCarapaceStateDatabaseReadOnly(
           ({ db }) =>
             db
               .prepare(
@@ -235,9 +235,9 @@ describe("onboarding authored config persistence", () => {
     async (boundary) => {
       await withTempHome(async (rawHome) => {
         const home = await fs.realpath(rawHome);
-        const stateDir = path.join(home, ".openclaw");
-        setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-        deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+        const stateDir = path.join(home, ".carapace");
+        setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+        deleteTestEnvValue("CARAPACE_AGENT_DIR");
         resetConfigRuntimeState();
         await replaceConfigFile({ nextConfig: {}, afterWrite: { mode: "auto" } });
 
@@ -248,10 +248,10 @@ describe("onboarding authored config persistence", () => {
           "agents",
           "main",
           "agent",
-          "openclaw-agent.sqlite",
+          "carapace-agent.sqlite",
         );
         const entry = { sessionId: "locked-legacy-session", updatedAt: 100 };
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (database) => {
             writeSessionEntry(database, legacyKey, entry, {
               allowStoredAliases: true,
@@ -271,7 +271,7 @@ describe("onboarding authored config persistence", () => {
           },
           { agentId: "main", path: legacyDatabasePath },
         );
-        const sourceDatabase = openOpenClawAgentDatabase({
+        const sourceDatabase = openCarapaceAgentDatabase({
           agentId: "main",
           path: legacyDatabasePath,
         });
@@ -291,7 +291,7 @@ describe("onboarding authored config persistence", () => {
             sessionsDir: path.join(stateDir, "agents", "robby", "sessions"),
             workspaceDir: path.join(stateDir, "workspace"),
           });
-          runOpenClawStateWriteTransaction((sharedStateDatabase) =>
+          runCarapaceStateWriteTransaction((sharedStateDatabase) =>
             completeAgentDeletionJournalInDatabase(sharedStateDatabase, "robby", "previous-robby"),
           );
           migrationWindow.afterPublication = () => {
@@ -320,7 +320,7 @@ describe("onboarding authored config persistence", () => {
         if (boundary === "locked") {
           expect(failure).toBeUndefined();
           expect(result?.sessionMigrationWarnings).toEqual([
-            expect.stringMatching(/incomplete.*openclaw doctor --fix/),
+            expect.stringMatching(/incomplete.*carapace doctor --fix/),
           ]);
         } else {
           expect.soft(failure).toEqual(new Error("admitted run authority is no longer active"));
@@ -333,13 +333,13 @@ describe("onboarding authored config persistence", () => {
           expect
             .soft(
               await fs
-                .stat(path.join(stateDir, "agents", "robby", "agent", "openclaw-agent.sqlite"))
+                .stat(path.join(stateDir, "agents", "robby", "agent", "carapace-agent.sqlite"))
                 .catch(() => null),
             )
             .toBeNull();
         }
         const readLedgerStatus = () =>
-          withExistingOpenClawStateDatabaseReadOnly(
+          withExistingCarapaceStateDatabaseReadOnly(
             ({ db }) =>
               db
                 .prepare(
@@ -364,10 +364,10 @@ describe("onboarding authored config persistence", () => {
           "agents",
           "robby",
           "agent",
-          "openclaw-agent.sqlite",
+          "carapace-agent.sqlite",
         );
         const readEntry = (databasePath: string, agentId: string, key: string) =>
-          runOpenClawAgentWriteTransaction(
+          runCarapaceAgentWriteTransaction(
             (database) => readExactSessionEntryRowForCanonicalRepair(database, key)?.entry,
             { agentId, path: databasePath },
           );

@@ -3,7 +3,7 @@ import fsNode from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { readConfigFileSnapshotForWrite, writeConfigFile } from "./io.runtime.js";
 import {
@@ -18,13 +18,13 @@ describe("writeConfigFile canonical reread", () => {
   afterEach(() => {
     setRuntimeConfigSnapshotRefreshHandler(null);
     clearRuntimeConfigSnapshot();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.restoreAllMocks();
   });
 
   it("preserves committed source provenance when the post-write reread is invalid", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       const initialConfig = {
         gateway: { mode: "local", port: 18789 },
@@ -63,7 +63,7 @@ describe("writeConfigFile canonical reread", () => {
       setRuntimeConfigSnapshotRefreshHandler({ preflight, refresh });
 
       await withEnvAsync(
-        { OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_TEST_FAST: "1" },
+        { CARAPACE_CONFIG_PATH: configPath, CARAPACE_TEST_FAST: "1" },
         async () => {
           const { snapshot } = await readConfigFileSnapshotForWrite();
           expect(snapshot.config.agents?.defaults?.compaction?.mode).toBe("safeguard");

@@ -1,6 +1,6 @@
 // Covers cross-store session-key resolution for multi-agent session stores.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { retainLegacyDefaultAgentId } from "../../config/legacy.default-agent-owner.js";
 import { migratePersistedImplicitMainRoster } from "../../config/legacy.roster.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
@@ -74,7 +74,7 @@ function expectResolvedRequestSession(params: {
       session: {
         store: "/stores/{agentId}.json",
       },
-    } satisfies OpenClawConfig,
+    } satisfies CarapaceConfig,
     sessionId: params.sessionId,
   });
 
@@ -145,7 +145,7 @@ describe("resolveSessionKeyForRequest", () => {
         session: {
           store: "/stores/{agentId}.json",
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionId: "resume-agent-1",
       agentId: "embedded-agent",
     });
@@ -171,7 +171,7 @@ describe("resolveSessionKeyForRequest", () => {
           defaults: { sessionStore: { agentId: "ops" } },
           entries: { research: {}, ops: {} },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionId: "ops-session",
     });
 
@@ -224,7 +224,7 @@ describe("resolveSessionKeyForRequest", () => {
         defaults: { sessionStore: { agentId: "ops" } },
         entries: { research: {}, ops: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() =>
       resolveStoredSessionKeyForSessionId({
@@ -318,7 +318,7 @@ describe("resolveSessionKeyForRequest", () => {
         defaults: { sessionStore: { agentId: "ops" } },
         entries: { research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() => resolveSessionKeyForRequest({ cfg, sessionId: "retired-session" })).toThrowError(
       expect.objectContaining({ code: "AGENT_SELECTION_REQUIRED" }),
@@ -334,7 +334,7 @@ describe("resolveSessionKeyForRequest", () => {
     const migrated = migratePersistedImplicitMainRoster({
       session: { store: "/stores/shared.sqlite" },
       agents: { entries: { main: { default: true }, research: {} } },
-    }).config as OpenClawConfig;
+    }).config as CarapaceConfig;
     expect(migrated.agents?.defaults?.sessionStore?.agentId).toBe("main");
     const afterMainRemoval = {
       ...migrated,
@@ -343,7 +343,7 @@ describe("resolveSessionKeyForRequest", () => {
         ownership: "explicit" as const,
         entries: { research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() =>
       resolveSessionKeyForRequest({ cfg: afterMainRemoval, sessionId: "legacy-main-session" }),
@@ -365,7 +365,7 @@ describe("resolveSessionKeyForRequest", () => {
           defaults: { sessionStore: { agentId: "ops" } },
           entries: { ops: {} },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionId: "ops-session",
     });
 
@@ -382,7 +382,7 @@ describe("resolveSessionKeyForRequest", () => {
         defaults: { sessionStore: { agentId: "ops" } },
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() =>
       resolveSessionKeyForRequest({ cfg, agentId: "research", sessionKey: "global" }),
@@ -412,7 +412,7 @@ describe("resolveSessionKeyForRequest", () => {
         ownership: "explicit",
         entries: { research: {}, ops: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() => resolveSessionKeyForRequest({ cfg, sessionId: "ownerless-session" })).toThrowError(
       expect.objectContaining({ code: "AGENT_SELECTION_REQUIRED" }),
@@ -432,7 +432,7 @@ describe("resolveSessionKeyForRequest", () => {
         ownership: "explicit",
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() =>
       resolveSessionKeyForRequest({ cfg, sessionKey: "global", sessionId: "missing-session" }),
@@ -454,7 +454,7 @@ describe("resolveSessionKeyForRequest", () => {
         ownership: "explicit",
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       resolveSessionKeyForRequest({
@@ -484,7 +484,7 @@ describe("resolveSessionKeyForRequest", () => {
           ownership: "explicit",
           entries: { research: {}, ops: {} },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionId: "ops-session",
       agentId: "ops",
     });
@@ -512,7 +512,7 @@ describe("resolveSessionKeyForRequest", () => {
         ownership: "explicit",
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       resolveSessionKeyForRequest({ cfg, agentId: "ops", sessionId: "duplicate-session" }),
@@ -556,7 +556,7 @@ describe("resolveSessionKeyForRequest", () => {
         ownership: "explicit",
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(() => resolveSessionKeyForRequest({ cfg, sessionId: "new-session" })).toThrowError(
       expect.objectContaining({ code: "AGENT_SELECTION_REQUIRED" }),
@@ -584,7 +584,7 @@ describe("resolveSessionKeyForRequest", () => {
         session: {
           store: "/stores/{agentId}.json",
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionId: "sid",
     });
 

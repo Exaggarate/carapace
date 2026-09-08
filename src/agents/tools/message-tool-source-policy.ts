@@ -1,8 +1,8 @@
 import {
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
-} from "@openclaw/normalization-core/string-coerce";
-import { uniqueValues } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { uniqueValues } from "@carapace/normalization-core/string-normalization";
 import { Type, type TObject } from "typebox";
 import { stripPlainTextToolCallBlocks } from "../../../packages/tool-call-repair/src/index.js";
 import { parseReplyDirectives } from "../../auto-reply/reply/reply-directives.js";

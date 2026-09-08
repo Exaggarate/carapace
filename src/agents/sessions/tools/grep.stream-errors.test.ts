@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { PassThrough } from "node:stream";
-import { validateToolArguments } from "@openclaw/llm-core/validation";
+import { validateToolArguments } from "@carapace/llm-core/validation";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
 import { spawnCommand } from "../../../process/exec.js";
@@ -145,7 +145,7 @@ describe("grep tool streaming", () => {
     },
   );
   it.each([1, 3])("keeps colliding byte-path context separate at match limit %s", async (limit) => {
-    const cwd = tempDirs.make("openclaw-grep-byte-path-");
+    const cwd = tempDirs.make("carapace-grep-byte-path-");
     const child = createChild();
     vi.mocked(spawnCommand).mockReturnValue(child as never);
     vi.mocked(ensureTool).mockResolvedValue("rg");
@@ -202,7 +202,7 @@ describe("grep tool streaming", () => {
   it.each(["..notes/sub/sample.txt", ...(path.sep === "/" ? ["literal\\name.txt"] : [])])(
     "preserves readable result path %s",
     async (relativePath) => {
-      const cwd = tempDirs.make("openclaw-grep-path-");
+      const cwd = tempDirs.make("carapace-grep-path-");
       const filePath = path.join(cwd, relativePath);
       await mkdir(path.dirname(filePath), { recursive: true });
       await writeFile(filePath, "needle\n");
@@ -228,7 +228,7 @@ describe("grep tool streaming", () => {
   it.each(["utf8", "utf16le", "utf16be", "byte-form"] as const)(
     "renders the searched %s context without decoding the file again",
     async (encoding) => {
-      const cwd = tempDirs.make("openclaw-grep-context-");
+      const cwd = tempDirs.make("carapace-grep-context-");
       const filePath = path.join(cwd, "sample.txt");
       const text = "before\nneedle中\nafter\n";
       const bytes =
@@ -286,7 +286,7 @@ describe("grep tool streaming", () => {
   );
 
   it.each([3, 4, 5])("captures context before stopping at sentinel line %s", async (sentinel) => {
-    const cwd = tempDirs.make("openclaw-grep-sentinel-");
+    const cwd = tempDirs.make("carapace-grep-sentinel-");
     const filePath = path.join(cwd, "sample.txt");
     const lines = ["before", "foo retained", "middle", "tail", "outside"];
     lines[sentinel - 1] = "foo extra";
@@ -329,7 +329,7 @@ describe("grep tool streaming", () => {
   });
 
   it("keeps exact-limit overlapping windows in match order", async () => {
-    const cwd = tempDirs.make("openclaw-grep-overlap-");
+    const cwd = tempDirs.make("carapace-grep-overlap-");
     const filePath = path.join(cwd, "match.txt");
     await writeFile(filePath, "before\nfoo first\nfoo second\nafter");
     const child = createChild();
@@ -363,7 +363,7 @@ describe("grep tool streaming", () => {
   it.each(["", "\n"])(
     "finishes a retained window at file end with terminator %j",
     async (terminator) => {
-      const cwd = tempDirs.make("openclaw-grep-eof-");
+      const cwd = tempDirs.make("carapace-grep-eof-");
       const filePath = path.join(cwd, "sample.txt");
       await writeFile(filePath, `before\nfoo retained\nfoo extra${terminator}`);
       const child = createChild();

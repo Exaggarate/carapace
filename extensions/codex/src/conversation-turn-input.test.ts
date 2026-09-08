@@ -32,7 +32,7 @@ describe("codex conversation turn input", () => {
 
   it("uses staged remote-cache paths for remote iMessage image attachments", () => {
     const rawPath = "/Users/demo/Library/Messages/Attachments/ab/cd/photo.jpg";
-    const stagedPath = "/tmp/openclaw-proof/.openclaw/media/remote-cache/imessage/photo.jpg";
+    const stagedPath = "/tmp/carapace-proof/.carapace/media/remote-cache/imessage/photo.jpg";
 
     const input = buildCodexConversationTurnInput({
       prompt: "what is this?",
@@ -96,7 +96,7 @@ describe("codex conversation turn input", () => {
   it.each(localFileCases)(
     "decodes $scheme URLs from $field for local images",
     ({ scheme, field }) => {
-      const imagePath = path.resolve("OpenClaw QA", "photo #1?.png");
+      const imagePath = path.resolve("Carapace QA", "photo #1?.png");
       expect(
         buildCodexConversationTurnInput({
           prompt: "look",
@@ -172,7 +172,7 @@ describe("codex conversation turn input", () => {
   );
 
   it("treats local media URLs as Codex local image input", () => {
-    const secondImagePath = path.resolve("OpenClaw QA", "second.jpg");
+    const secondImagePath = path.resolve("Carapace QA", "second.jpg");
     expect(
       buildCodexConversationTurnInput({
         prompt: "look",
@@ -202,14 +202,14 @@ describe("codex conversation turn input", () => {
           channel: "webchat",
           isGroup: false,
           metadata: {
-            mediaUrl: "C:\\OpenClaw QA\\photo.png",
+            mediaUrl: "C:\\Carapace QA\\photo.png",
             mediaType: "image/png",
           },
         },
       }),
     ).toEqual([
       { type: "text", text: "look", text_elements: [] },
-      { type: "localImage", path: "C:\\OpenClaw QA\\photo.png" },
+      { type: "localImage", path: "C:\\Carapace QA\\photo.png" },
     ]);
   });
 });

@@ -1,7 +1,7 @@
 // Renders chat canvas payloads into text and metadata for transcript output.
-import { expectDefined, safeParseJsonRecord } from "@openclaw/normalization-core";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined, safeParseJsonRecord } from "@carapace/normalization-core";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { parseFenceSpans } from "../../packages/markdown-core/src/fences.js";
 
 // Extracts assistant-message canvas previews from tool JSON or markdown embed
@@ -224,7 +224,7 @@ function parseCanvasAttributes(raw: string): Record<string, string> {
 
 function defaultCanvasEntryUrl(ref: string): string {
   const encoded = encodeURIComponent(ref.trim());
-  return `/__openclaw__/canvas/documents/${encoded}/index.html`;
+  return `/__carapace__/canvas/documents/${encoded}/index.html`;
 }
 
 function previewFromShortcode(attrs: Record<string, string>): CanvasPreview | undefined {

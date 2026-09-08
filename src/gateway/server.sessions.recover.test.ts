@@ -18,7 +18,7 @@ import {
   runExclusiveSessionLifecycleMutation,
 } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   ensureGatewayOwnerProfile,
   ensureProfileForEmail,
@@ -45,7 +45,7 @@ import type { WorkerSessionPlacementRecord } from "./worker-environments/placeme
 const { createSessionStoreDir } = setupGatewaySessionsHandlerTestHarness();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function recoveryWorkerPlacement(params: {
@@ -110,7 +110,7 @@ test("sessions.recover settles its active placement before archiving a real sess
   const { dir, storePath } = await createSessionStoreDir();
   const sourceKey = "agent:main:dashboard:recovery-cloud-active";
   const sourceSessionId = "recovery-cloud-active-source";
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("gateway test state directory is unavailable");
   }
@@ -260,7 +260,7 @@ test.each(["before-interrupt", "before-drain"] as const)(
     const { dir, storePath } = await createSessionStoreDir();
     const sessionKey = `agent:main:dashboard:idle-reclaim-${phase}`;
     const sessionId = `idle-reclaim-${phase}`;
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
       throw new Error("gateway test state directory is unavailable");
     }

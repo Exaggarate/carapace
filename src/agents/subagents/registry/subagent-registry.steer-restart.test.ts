@@ -1,11 +1,11 @@
 // Subagent registry steer-restart tests cover replacing child runs after steer
 // commands while preserving lifecycle hooks and completion delivery.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ContextEngine } from "../../../context-engine/types.js";
-import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../../state/carapace-state-db.js";
 import {
   resetTaskFlowRegistryForTests,
   resetTaskRegistryForTests,
@@ -804,7 +804,7 @@ describe("subagent registry steer restarts", () => {
       childSessionKey: "agent:main:subagent:generation-persist",
       task: "preserve the source owner",
     });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`CREATE TEMP TRIGGER reject_generation_replacement
       BEFORE INSERT ON subagent_runs
       WHEN NEW.run_id = 'run-generation-persist-new'

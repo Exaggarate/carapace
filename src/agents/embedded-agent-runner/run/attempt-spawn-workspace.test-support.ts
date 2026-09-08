@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { vi, type Mock } from "vitest";
 import type {
   AssembleResult,
@@ -103,7 +103,7 @@ type AttemptSpawnWorkspaceHoisted = {
   ensureGlobalUndiciEnvProxyDispatcherMock: UnknownMock;
   ensureGlobalUndiciDispatcherStreamTimeoutsMock: UnknownMock;
   ensureGlobalUndiciStreamTimeoutsMock: UnknownMock;
-  createOpenClawCodingToolsMock: UnknownMock;
+  createCarapaceCodingToolsMock: UnknownMock;
   subscribeEmbeddedAgentSessionMock: Mock<SubscribeEmbeddedAgentSessionFn>;
   installToolResultContextGuardMock: UnknownMock;
   installContextEngineLoopHookMock: UnknownMock;
@@ -225,7 +225,7 @@ const hoisted = vi.hoisted((): AttemptSpawnWorkspaceHoisted => {
   const ensureGlobalUndiciEnvProxyDispatcherMock = vi.fn();
   const ensureGlobalUndiciDispatcherStreamTimeoutsMock = vi.fn();
   const ensureGlobalUndiciStreamTimeoutsMock = vi.fn();
-  const createOpenClawCodingToolsMock = vi.fn(() => []);
+  const createCarapaceCodingToolsMock = vi.fn(() => []);
   const installToolResultContextGuardMock = vi.fn(() => () => {});
   const installContextEngineLoopHookMock = vi.fn(() => () => {});
   const flushPendingToolResultsAfterIdleMock = vi.fn(async () => {});
@@ -314,7 +314,7 @@ const hoisted = vi.hoisted((): AttemptSpawnWorkspaceHoisted => {
     ensureGlobalUndiciEnvProxyDispatcherMock,
     ensureGlobalUndiciDispatcherStreamTimeoutsMock,
     ensureGlobalUndiciStreamTimeoutsMock,
-    createOpenClawCodingToolsMock,
+    createCarapaceCodingToolsMock,
     subscribeEmbeddedAgentSessionMock,
     installToolResultContextGuardMock,
     installContextEngineLoopHookMock,
@@ -571,7 +571,7 @@ vi.mock("../context-engine-maintenance.js", () => ({
 }));
 
 vi.mock("../../docs-path.js", () => ({
-  resolveOpenClawReferencePaths: async () => ({ docsPath: undefined, sourcePath: undefined }),
+  resolveCarapaceReferencePaths: async () => ({ docsPath: undefined, sourcePath: undefined }),
 }));
 
 vi.mock("../../agent-project-settings.js", () => ({
@@ -723,8 +723,8 @@ vi.mock("../../cache-trace.js", () => ({
 }));
 
 vi.mock("../../agent-tools.js", () => ({
-  createOpenClawCodingTools: (options?: { workspaceDir?: string; spawnWorkspaceDir?: string }) =>
-    hoisted.createOpenClawCodingToolsMock(options),
+  createCarapaceCodingTools: (options?: { workspaceDir?: string; spawnWorkspaceDir?: string }) =>
+    hoisted.createCarapaceCodingToolsMock(options),
   resolveToolLoopDetectionConfig: () => undefined,
 }));
 
@@ -811,7 +811,7 @@ vi.mock("../cache-ttl.js", () => ({
   appendCacheTtlTimestamp: (
     sessionManager: { appendCustomEntry?: (customType: string, data: unknown) => void },
     data: unknown,
-  ) => sessionManager.appendCustomEntry?.("openclaw.cache-ttl", data),
+  ) => sessionManager.appendCustomEntry?.("carapace.cache-ttl", data),
   isCacheTtlEligibleProvider: (provider?: string) => provider === "anthropic",
   readLastCacheTtlTimestamp: (
     sessionManager: {
@@ -822,7 +822,7 @@ vi.mock("../cache-ttl.js", () => ({
     const calls = sessionManager.appendCustomEntry?.mock?.calls ?? [];
     for (let index = calls.length - 1; index >= 0; index -= 1) {
       const [customType, data] = calls[index] ?? [];
-      if (customType !== "openclaw.cache-ttl") {
+      if (customType !== "carapace.cache-ttl") {
         continue;
       }
       const entry = data as
@@ -1067,7 +1067,7 @@ export function resetEmbeddedAttemptHarness(
   hoisted.ensureGlobalUndiciEnvProxyDispatcherMock.mockReset();
   hoisted.ensureGlobalUndiciDispatcherStreamTimeoutsMock.mockReset();
   hoisted.ensureGlobalUndiciStreamTimeoutsMock.mockReset();
-  hoisted.createOpenClawCodingToolsMock.mockReset().mockImplementation((...args: unknown[]) => {
+  hoisted.createCarapaceCodingToolsMock.mockReset().mockImplementation((...args: unknown[]) => {
     const options = args[0] as
       | {
           workspaceDir?: string;
@@ -1381,8 +1381,8 @@ export async function createContextEngineAttemptRunner(params: {
   trajectory?: boolean;
 }) {
   const { maintain: rawMaintain, ...contextEngineRest } = params.contextEngine;
-  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ctx-engine-workspace-"));
-  const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ctx-engine-agent-"));
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ctx-engine-workspace-"));
+  const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ctx-engine-agent-"));
   const sessionStore = path.join(workspaceDir, "sessions.json");
   params.tempPaths.push(workspaceDir, agentDir);
   const seedMessages: AgentMessage[] =
@@ -1424,14 +1424,14 @@ export async function createContextEngineAttemptRunner(params: {
     return { session };
   });
 
-  const previousTrajectoryEnv = process.env.OPENCLAW_TRAJECTORY;
-  const previousTrajectoryDirEnv = process.env.OPENCLAW_TRAJECTORY_DIR;
+  const previousTrajectoryEnv = process.env.CARAPACE_TRAJECTORY;
+  const previousTrajectoryDirEnv = process.env.CARAPACE_TRAJECTORY_DIR;
   if (params.trajectory !== true) {
-    process.env.OPENCLAW_TRAJECTORY = "0";
-    delete process.env.OPENCLAW_TRAJECTORY_DIR;
+    process.env.CARAPACE_TRAJECTORY = "0";
+    delete process.env.CARAPACE_TRAJECTORY_DIR;
   } else {
-    delete process.env.OPENCLAW_TRAJECTORY;
-    process.env.OPENCLAW_TRAJECTORY_DIR = workspaceDir;
+    delete process.env.CARAPACE_TRAJECTORY;
+    process.env.CARAPACE_TRAJECTORY_DIR = workspaceDir;
   }
   try {
     const attempt: Omit<EmbeddedRunAttemptParams, "admittedRunContext"> = {
@@ -1499,14 +1499,14 @@ export async function createContextEngineAttemptRunner(params: {
     }
   } finally {
     if (previousTrajectoryEnv === undefined) {
-      delete process.env.OPENCLAW_TRAJECTORY;
+      delete process.env.CARAPACE_TRAJECTORY;
     } else {
-      process.env.OPENCLAW_TRAJECTORY = previousTrajectoryEnv;
+      process.env.CARAPACE_TRAJECTORY = previousTrajectoryEnv;
     }
     if (previousTrajectoryDirEnv === undefined) {
-      delete process.env.OPENCLAW_TRAJECTORY_DIR;
+      delete process.env.CARAPACE_TRAJECTORY_DIR;
     } else {
-      process.env.OPENCLAW_TRAJECTORY_DIR = previousTrajectoryDirEnv;
+      process.env.CARAPACE_TRAJECTORY_DIR = previousTrajectoryDirEnv;
     }
   }
 }

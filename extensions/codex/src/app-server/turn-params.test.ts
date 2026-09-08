@@ -1,4 +1,4 @@
-import { resolveThinkingDefault } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveThinkingDefault } from "carapace/plugin-sdk/agent-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createAppServerOptions,
@@ -77,11 +77,11 @@ describe("buildTurnStartParams temporal context", () => {
     const firstTurn = buildTurnStartParams(params, options);
     expect(firstTurn.input).toEqual([{ type: "text", text: "run exactly", text_elements: [] }]);
     expect(firstTurn.additionalContext).toEqual({
-      openclaw_source_delivery: {
+      carapace_source_delivery: {
         kind: "application",
         value: expect.stringContaining("reply normally in your final assistant message"),
       },
-      openclaw_temporal_context: {
+      carapace_temporal_context: {
         kind: "application",
         value:
           "## Temporal Context\nCurrent date: 2026-09-01\nTime zone: America/Los_Angeles\nFor the exact current time, use `session_status`.",
@@ -91,7 +91,7 @@ describe("buildTurnStartParams temporal context", () => {
     clock.mockReturnValue(Date.parse("2026-09-03T00:30:00.000Z"));
     const nextTurn = buildTurnStartParams(params, options);
     expect(nextTurn.input).toEqual(firstTurn.input);
-    expect(nextTurn.additionalContext?.openclaw_temporal_context?.value).toContain(
+    expect(nextTurn.additionalContext?.carapace_temporal_context?.value).toContain(
       "Current date: 2026-09-02",
     );
   });
@@ -115,13 +115,13 @@ describe("buildTurnStartParams temporal context", () => {
     );
     const fallback = buildTurnStartParams(createParams("/tmp/session.jsonl", "/repo"), options);
 
-    expect(configured.additionalContext?.openclaw_temporal_context?.value).toContain(
+    expect(configured.additionalContext?.carapace_temporal_context?.value).toContain(
       `Time zone: ${configuredTimezone}`,
     );
-    expect(fallback.additionalContext?.openclaw_temporal_context?.value).toContain(
+    expect(fallback.additionalContext?.carapace_temporal_context?.value).toContain(
       `Time zone: ${hostTimezone}`,
     );
-    expect(fallback.additionalContext?.openclaw_temporal_context?.value).not.toContain(
+    expect(fallback.additionalContext?.carapace_temporal_context?.value).not.toContain(
       configuredTimezone,
     );
   });
@@ -152,8 +152,8 @@ describe("buildTurnStartParams source-delivery context", () => {
       const turns = (["automatic", "message_tool_only", undefined] as const).map((mode) =>
         buildTurnStartParams({ ...params, sourceReplyDeliveryMode: mode }, options),
       );
-      const values = turns.map((turn) => turn.additionalContext?.openclaw_source_delivery?.value);
-      expect(values[0]).toContain("OpenClaw delivers your final response automatically");
+      const values = turns.map((turn) => turn.additionalContext?.carapace_source_delivery?.value);
+      expect(values[0]).toContain("Carapace delivers your final response automatically");
       expect(values[0]).toContain("sending a message doesn’t end your task");
       expect(values[1]).toContain("Use `message(action=send)`");
       expect(values[1]).toContain("For progress, set `final=false`");
@@ -162,14 +162,14 @@ describe("buildTurnStartParams source-delivery context", () => {
       expect(values[2]).toBe(values[0]);
       for (const turn of turns) {
         expect(turn.input).toEqual([{ type: "text", text: params.prompt, text_elements: [] }]);
-        expect(turn.additionalContext?.openclaw_temporal_context).toBeDefined();
-        expect(turn.additionalContext?.openclaw_permission_change).toEqual({
+        expect(turn.additionalContext?.carapace_temporal_context).toBeDefined();
+        expect(turn.additionalContext?.carapace_permission_change).toEqual({
           kind: "application",
           value: "Permission changed.",
         });
-        expect(turn.additionalContext?.openclaw_source_delivery?.kind).toBe("application");
+        expect(turn.additionalContext?.carapace_source_delivery?.kind).toBe("application");
         expect(
-          Buffer.byteLength(turn.additionalContext!.openclaw_source_delivery!.value, "utf8"),
+          Buffer.byteLength(turn.additionalContext!.carapace_source_delivery!.value, "utf8"),
         ).toBeLessThan(1_000);
         if (preserveNativeTurnSettings) {
           expect(turn).not.toHaveProperty("collaborationMode");
@@ -179,20 +179,20 @@ describe("buildTurnStartParams source-delivery context", () => {
         { ...params, sourceReplyDeliveryMode: "message_tool_only" },
         { ...options, requireExplicitMessageTarget: true },
       );
-      expect(required.additionalContext?.openclaw_source_delivery?.value).toContain(
+      expect(required.additionalContext?.carapace_source_delivery?.value).toContain(
         "target required this turn",
       );
       const unavailable = buildTurnStartParams(
         { ...params, sourceReplyDeliveryMode: "message_tool_only" },
         { ...options, messageToolAvailable: false, requireExplicitMessageTarget: true },
       );
-      expect(unavailable.additionalContext?.openclaw_source_delivery?.value).toContain(
+      expect(unavailable.additionalContext?.carapace_source_delivery?.value).toContain(
         "remains private",
       );
-      expect(unavailable.additionalContext?.openclaw_source_delivery?.value).not.toContain(
+      expect(unavailable.additionalContext?.carapace_source_delivery?.value).not.toContain(
         "Use `message`",
       );
-      expect(unavailable.additionalContext?.openclaw_source_delivery?.value).not.toContain(
+      expect(unavailable.additionalContext?.carapace_source_delivery?.value).not.toContain(
         "target required",
       );
     },

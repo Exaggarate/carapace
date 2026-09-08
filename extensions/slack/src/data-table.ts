@@ -3,11 +3,11 @@ import type { Block } from "@slack/web-api";
 import {
   renderMessagePresentationTableFallbackText,
   type MessagePresentationTableBlock,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import {
   asOptionalRecord,
   readNonBlankString as readNonEmptyString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { escapeSlackMrkdwn } from "./monitor/mrkdwn.js";
 import { renderSlackMessagePresentationTableFallbackText } from "./presentation-fallback.js";
 import { renderSlackRichText } from "./rich-text.js";

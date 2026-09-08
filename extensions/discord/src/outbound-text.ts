@@ -1,5 +1,5 @@
-import type { MarkdownTableMode, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
+import type { MarkdownTableMode, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
 import type { ResolvedDiscordAccount } from "./accounts.js";
 import { renderDiscordMarkdown } from "./markdown.js";
 import { rewriteDiscordKnownMentions } from "./mentions.js";
@@ -7,7 +7,7 @@ import { rewriteDiscordKnownMentions } from "./mentions.js";
 export function prepareDiscordOutboundText(
   text: string,
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     account: Pick<ResolvedDiscordAccount, "accountId" | "config">;
     tableMode?: MarkdownTableMode;
   },

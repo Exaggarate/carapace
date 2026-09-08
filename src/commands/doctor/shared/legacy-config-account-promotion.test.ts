@@ -2,18 +2,18 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { widenOfficialExternalChannelSecretSchema } from "../../../config/official-external-channel-secret-schema.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { clearPluginMetadataLifecycleCaches } from "../../../plugins/plugin-metadata-lifecycle.js";
 import { resetPluginRuntimeStateForTest } from "../../../plugins/runtime.js";
 import { validateJsonSchemaValue } from "../../../plugins/schema-validator.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../test-utils/carapace-test-state.js";
 import { normalizeCompatibilityConfigValues } from "./legacy-config-core-migrate.js";
 import { seedMissingDefaultAccountsFromSingleAccountBase } from "./legacy-config-core-normalizers.js";
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 
 afterEach(async () => {
   clearPluginMetadataLifecycleCaches();
@@ -26,13 +26,13 @@ afterEach(async () => {
 it.each([true, false])(
   "promotes installed channel credentials without loading runtime (enabled=%s)",
   async (enabled) => {
-    state = await createOpenClawTestState({ label: "doctor-installed-promotion", applyEnv: true });
+    state = await createCarapaceTestState({ label: "doctor-installed-promotion", applyEnv: true });
     const pluginDir = state.statePath("extensions", "promotion");
     const bundledDir = state.path("empty-bundled");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.mkdir(bundledDir, { recursive: true });
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledDir);
-    vi.stubEnv("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", bundledDir);
+    vi.stubEnv("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
     await fs.writeFile(
       path.join(pluginDir, "index.js"),
       "throw new Error('Doctor must not execute the channel runtime');\n",
@@ -53,7 +53,7 @@ it.each([true, false])(
         name: "@example/promotion",
         version: "1.0.0",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
           setupEntry: "./setup-entry.js",
           setupFeatures: { configPromotion: true },
@@ -62,7 +62,7 @@ it.each([true, false])(
       }),
     );
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "promotion",
         channels: ["promotion-chat"],
@@ -70,7 +70,7 @@ it.each([true, false])(
         channelConfigs: { "promotion-chat": { schema: { type: "object" } } },
       }),
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: { allow: ["promotion"], entries: { promotion: { enabled } } },
       channels: {
         "promotion-chat": {
@@ -112,13 +112,13 @@ it.each([
 ])(
   "honors cold installed plugin promotion metadata without loading runtime: %j",
   async ({ enabled, configPromotion }) => {
-    state = await createOpenClawTestState({ label: "doctor-preserved-account", applyEnv: true });
+    state = await createCarapaceTestState({ label: "doctor-preserved-account", applyEnv: true });
     const pluginDir = state.statePath("extensions", "preserved");
     const bundledDir = state.path("empty-bundled");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.mkdir(bundledDir, { recursive: true });
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledDir);
-    vi.stubEnv("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", bundledDir);
+    vi.stubEnv("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
     await fs.writeFile(
       path.join(pluginDir, "index.js"),
       "throw new Error('Doctor must not execute this plugin runtime');\n",
@@ -129,7 +129,7 @@ it.each([
         name: "@example/preserved",
         version: "1.0.0",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
           channel: { id: "preserved-chat" },
           setupFeatures: { configPromotion },
@@ -137,7 +137,7 @@ it.each([
       }),
     );
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "preserved",
         configSchema: { type: "object" },
@@ -146,7 +146,7 @@ it.each([
       }),
     );
     // Only generic fields: undeclared-key deferral cannot hide a missing static contract.
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: { allow: ["preserved"], entries: { preserved: { enabled } } },
       channels: {
         "preserved-chat": {
@@ -189,14 +189,14 @@ it.each([
   { state: "disabled", enabled: false },
   { state: "cold", enabled: undefined },
 ])("preserves the official QQBot root through $state discovery", async ({ enabled }) => {
-  state = await createOpenClawTestState({ label: "doctor-qqbot-promotion", applyEnv: true });
+  state = await createCarapaceTestState({ label: "doctor-qqbot-promotion", applyEnv: true });
   const bundledDir = state.path("empty-bundled");
   await fs.mkdir(bundledDir, { recursive: true });
-  vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledDir);
-  vi.stubEnv("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+  vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", bundledDir);
+  vi.stubEnv("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
 
   if (enabled !== undefined) {
-    const pluginDir = state.statePath("extensions", "openclaw-qqbot");
+    const pluginDir = state.statePath("extensions", "carapace-qqbot");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.writeFile(
       path.join(pluginDir, "index.js"),
@@ -205,20 +205,20 @@ it.each([
     await fs.writeFile(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@tencent-connect/openclaw-qqbot",
+        name: "@tencent-connect/carapace-qqbot",
         version: "2.0.3",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
-          plugin: { id: "openclaw-qqbot" },
+          plugin: { id: "carapace-qqbot" },
           channel: { id: "qqbot" },
         },
       }),
     );
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
-        id: "openclaw-qqbot",
+        id: "carapace-qqbot",
         configSchema: { type: "object" },
         channels: ["qqbot"],
         channelConfigs: { qqbot: { schema: { type: "object", additionalProperties: true } } },
@@ -226,13 +226,13 @@ it.each([
     );
   }
 
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     ...(enabled === undefined
       ? {}
       : {
           plugins: {
-            allow: ["openclaw-qqbot"],
-            entries: { "openclaw-qqbot": { enabled } },
+            allow: ["carapace-qqbot"],
+            entries: { "carapace-qqbot": { enabled } },
           },
         }),
     channels: {

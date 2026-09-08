@@ -13,7 +13,7 @@ import { sanitizeBinaryOutput } from "./shell-utils.js";
 
 const isWin = process.platform === "win32";
 const FOREGROUND_TEST_YIELD_MS = 120_000;
-const ENV_KEYS = ["OPENCLAW_EXEC_SHELL_SNAPSHOT", "PATH", "SHELL", "SSLKEYLOGFILE"] as const;
+const ENV_KEYS = ["CARAPACE_EXEC_SHELL_SNAPSHOT", "PATH", "SHELL", "SSLKEYLOGFILE"] as const;
 type GetShellPathFromLoginShell = typeof import("../infra/shell-env.js").getShellPathFromLoginShell;
 const shellEnvMocks = vi.hoisted(() => ({
   getShellPathFromLoginShell: vi.fn<GetShellPathFromLoginShell>(() => "/custom/bin:/opt/bin"),
@@ -84,8 +84,8 @@ vi.mock("../process/supervisor/index.js", () => ({
       const env = input.env ?? {};
       if (command.includes("GIT_PAGER")) {
         input.onStdout?.(JSON.stringify({ GIT_PAGER: env.GIT_PAGER, PAGER: env.PAGER }));
-      } else if (command.includes("OPENCLAW_SHELL")) {
-        input.onStdout?.(env.OPENCLAW_SHELL ?? "");
+      } else if (command.includes("CARAPACE_SHELL")) {
+        input.onStdout?.(env.CARAPACE_SHELL ?? "");
       } else if (command.includes("SSLKEYLOGFILE")) {
         input.onStdout?.(env.SSLKEYLOGFILE ?? "");
       } else if (command.includes("$PATH")) {
@@ -188,7 +188,7 @@ describe("exec PATH login shell merge", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([...ENV_KEYS]);
-    process.env.OPENCLAW_EXEC_SHELL_SNAPSHOT = "0";
+    process.env.CARAPACE_EXEC_SHELL_SNAPSHOT = "0";
     shellEnvMocks.getShellPathFromLoginShell.mockReset();
     shellEnvMocks.getShellPathFromLoginShell.mockReturnValue("/custom/bin:/opt/bin");
     shellEnvMocks.resolveShellEnvFallbackTimeoutMs.mockReset();
@@ -200,7 +200,7 @@ describe("exec PATH login shell merge", () => {
   });
 
   it("strips malformed XML arg-value suffixes from exec command and routing options", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-exec-xml-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-exec-xml-"));
     try {
       const tool = createExecTool({ host: "gateway", security: "full", ask: "off" });
       const malformedArgs = {
@@ -231,7 +231,7 @@ describe("exec PATH login shell merge", () => {
   it("fails without running when an explicit workdir is unavailable", async () => {
     const missingWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-missing-workdir-${process.pid}-${Date.now()}`,
+      `carapace-missing-workdir-${process.pid}-${Date.now()}`,
     );
     fs.rmSync(missingWorkdir, { recursive: true, force: true });
 
@@ -272,14 +272,14 @@ describe("exec PATH login shell merge", () => {
     expect(shellPathMock).toHaveBeenCalledTimes(1);
   });
 
-  it("sets OPENCLAW_SHELL for host=gateway commands", async () => {
+  it("sets CARAPACE_SHELL for host=gateway commands", async () => {
     if (isWin) {
       return;
     }
 
     const tool = createExecTool({ host: "gateway", security: "full", ask: "off" });
-    const result = await tool.execute("call-openclaw-shell", {
-      command: 'printf "%s" "${OPENCLAW_SHELL:-}"',
+    const result = await tool.execute("call-carapace-shell", {
+      command: 'printf "%s" "${CARAPACE_SHELL:-}"',
       yieldMs: FOREGROUND_TEST_YIELD_MS,
     });
     const value = normalizeText(result.content.find((c) => c.type === "text")?.text);
@@ -341,7 +341,7 @@ describe("exec PATH login shell merge", () => {
       return;
     }
     process.env.PATH = "/usr/bin";
-    const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-shell-env-"));
+    const shellDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-shell-env-"));
     const unregisteredShellPath = path.join(shellDir, "unregistered-shell");
     fs.writeFileSync(unregisteredShellPath, '#!/bin/sh\nexec /bin/sh "$@"\n', {
       encoding: "utf8",
@@ -379,7 +379,7 @@ describe("exec host env validation", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([...ENV_KEYS]);
-    process.env.OPENCLAW_EXEC_SHELL_SNAPSHOT = "0";
+    process.env.CARAPACE_EXEC_SHELL_SNAPSHOT = "0";
   });
 
   afterEach(() => {
@@ -418,7 +418,7 @@ describe("exec host env validation", () => {
       return;
     }
     const original = process.env.SSLKEYLOGFILE;
-    process.env.SSLKEYLOGFILE = "/tmp/openclaw-ssl-keys.log";
+    process.env.SSLKEYLOGFILE = "/tmp/carapace-ssl-keys.log";
     try {
       const tool = createExecTool({ host: "gateway", security: "full", ask: "off" });
       const result = await tool.execute("call1", {
@@ -426,7 +426,7 @@ describe("exec host env validation", () => {
         yieldMs: FOREGROUND_TEST_YIELD_MS,
       });
       const output = normalizeText(result.content.find((c) => c.type === "text")?.text);
-      expect(output).not.toContain("/tmp/openclaw-ssl-keys.log");
+      expect(output).not.toContain("/tmp/carapace-ssl-keys.log");
     } finally {
       if (original === undefined) {
         delete process.env.SSLKEYLOGFILE;
@@ -471,16 +471,16 @@ describe("exec host env validation", () => {
     "env -iS'/approve abc123' deny",
     "command /approve abc123 deny",
     "command -p /approve abc123 deny",
-    "exec -a openclaw /approve abc123 deny",
+    "exec -a carapace /approve abc123 deny",
     "sudo /approve abc123 allow-once",
     "sudo -E /approve abc123 allow-once",
     "sudo -EH /approve abc123 allow-once",
     "sudo -k /approve abc123 allow-once",
     "sudo --reset-timestamp /approve abc123 allow-once",
     "sudo --command-timeout=1 /approve abc123 allow-once",
-    "sudo OPENCLAW_APPROVE=1 /approve abc123 allow-once",
+    "sudo CARAPACE_APPROVE=1 /approve abc123 allow-once",
     "sudo -uroot bash -lc '/approve abc123 allow-once'",
-    "sudo -u root OPENCLAW_APPROVE=1 bash -lc '/approve abc123 allow-once'",
+    "sudo -u root CARAPACE_APPROVE=1 bash -lc '/approve abc123 allow-once'",
     "sudo -EH bash -lc '/approve abc123 allow-once'",
     "doas -uroot bash -lc '/approve abc123 deny'",
     "env env env env env env /approve abc123 allow-once",

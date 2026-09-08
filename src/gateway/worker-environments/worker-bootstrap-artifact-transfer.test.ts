@@ -22,7 +22,7 @@ describe("worker bootstrap artifact transfer", () => {
   let rateLimiter: AuthRateLimiter | undefined;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-bootstrap-wire-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-bootstrap-wire-"));
     authorized = true;
     now = 1_000;
     service = createWorkerBootstrapArtifactTransferService({ now: () => now });
@@ -75,7 +75,7 @@ describe("worker bootstrap artifact transfer", () => {
     return {
       artifact,
       receipt,
-      url: `${origin}/__openclaw__/worker-bootstrap/artifacts/${artifact.tarballSha256}`,
+      url: `${origin}/__carapace__/worker-bootstrap/artifacts/${artifact.tarballSha256}`,
       headers: { authorization: `Bearer ${receipt.token}` },
     };
   }
@@ -89,7 +89,7 @@ describe("worker bootstrap artifact transfer", () => {
     for (const rejectedUrl of [
       url.replace(artifact.tarballSha256, "a".repeat(64)),
       `${url}?token=not-a-header`,
-      `${origin}/__openclaw__/worker-bootstrap/other`,
+      `${origin}/__carapace__/worker-bootstrap/other`,
     ]) {
       const response = await fetch(rejectedUrl, { headers });
       expect(response.status).toBe(404);
@@ -99,11 +99,11 @@ describe("worker bootstrap artifact transfer", () => {
     expect((await fetch(url)).status).toBe(404);
     const response = await fetch(url, { headers });
     expect(response.status).toBe(200);
-    expect(response.headers.get("x-openclaw-content-sha256")).toBe(artifact.tarballSha256);
+    expect(response.headers.get("x-carapace-content-sha256")).toBe(artifact.tarballSha256);
     expect(response.headers.get("content-length")).toBe(String(artifact.tarballBytes));
     await expect(response.text()).resolves.toBe("source-runtime");
     expect((await fetch(url, { headers })).status).toBe(404);
-    expect((await fetch(`${origin}/__openclaw__/worker-bootstrap-other`)).status).toBe(418);
+    expect((await fetch(`${origin}/__carapace__/worker-bootstrap-other`)).status).toBe(418);
   });
 
   it.each(["owner", "expiry", "signal", "shutdown"] as const)(

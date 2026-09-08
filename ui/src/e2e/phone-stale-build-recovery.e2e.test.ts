@@ -34,7 +34,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI phone stale-build recovery E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 const RETAINED_IMAGE_ALT = "Generated image retained after timeout";
 const RETAINED_TIMEOUT_TEXT =
@@ -76,7 +76,7 @@ suite.define(() => {
           documentRequests.push({
             method: request.method(),
             pathname: url.pathname,
-            recoveryMarker: url.searchParams.has("openclaw_mount_recovery"),
+            recoveryMarker: url.searchParams.has("carapace_mount_recovery"),
             url: url.href,
           });
         }
@@ -100,7 +100,7 @@ suite.define(() => {
         "/api/chat/media/outgoing/agent%3Amain%3Amain/phone-proof-generated/full";
       const retainedImageTicketedUrl = `${retainedImagePath}?mediaTicket=phone-proof`;
       const retainedImageBytes = await readFile(
-        path.join(process.cwd(), "docs/assets/openclaw-banner-dark.png"),
+        path.join(process.cwd(), "docs/assets/carapace-banner-dark.png"),
       );
       const retainedImageRequestUrls: string[] = [];
       let blockedUnticketedRequestCount = 0;
@@ -366,9 +366,9 @@ suite.define(() => {
         await gateway.rejectDeferred("connect", mismatch);
         await page.waitForFunction(
           () =>
-            sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId") ===
+            sessionStorage.getItem("carapace.controlUi.staleChunkReloadBuildId") ===
               "replacement-build" &&
-            sessionStorage.getItem("openclaw.control-ui-e2e.build-rejection-loads") === "2",
+            sessionStorage.getItem("carapace.control-ui-e2e.build-rejection-loads") === "2",
         );
 
         await waitForConnect();
@@ -376,13 +376,13 @@ suite.define(() => {
         const recovery = page.getByRole("button", { name: /Server updated/u });
         await recovery.waitFor({ timeout: 10_000 });
         expect(await recovery.count()).toBe(1);
-        expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+        expect(await page.locator("carapace-login-gate").count()).toBe(0);
         expect(await page.locator("#control-ui-main").getAttribute("inert")).toBeNull();
-        expect(await page.locator("openclaw-router-outlet").getAttribute("inert")).not.toBeNull();
+        expect(await page.locator("carapace-router-outlet").getAttribute("inert")).not.toBeNull();
         const recoveryAccess = await recovery.evaluate((button) => {
           const bounds = button.getBoundingClientRect();
           const liveRegion = button.closest<HTMLElement>("[role='status']");
-          const outlet = document.querySelector("openclaw-router-outlet");
+          const outlet = document.querySelector("carapace-router-outlet");
           return {
             ariaLive: liveRegion?.getAttribute("aria-live"),
             disabled: (button as HTMLButtonElement).disabled,
@@ -412,7 +412,7 @@ suite.define(() => {
         const terminalInvocationCount = (await gateway.getRequests("terminal.open")).length;
         expect(
           await recovery.evaluate((button) => button.closest("[role='status']")?.textContent ?? ""),
-        ).not.toMatch(/openclaw (?:triage|update)|terminal command|run .*terminal/iu);
+        ).not.toMatch(/carapace (?:triage|update)|terminal command|run .*terminal/iu);
         observation.reloadRequired = {
           actionCount: await recovery.count(),
           access: recoveryAccess,
@@ -432,7 +432,7 @@ suite.define(() => {
           window.fetch = async (input, init) => {
             if (remainingFailures > 0 && init?.method === "HEAD") {
               remainingFailures -= 1;
-              sessionStorage.setItem("openclaw.control-ui-e2e.failed-refresh-probes", "1");
+              sessionStorage.setItem("carapace.control-ui-e2e.failed-refresh-probes", "1");
               return new Response(null, { status: 503 });
             }
             return originalFetch(input, init);
@@ -440,7 +440,7 @@ suite.define(() => {
         });
         await recovery.tap();
         await page.waitForFunction(
-          () => sessionStorage.getItem("openclaw.control-ui-e2e.failed-refresh-probes") === "1",
+          () => sessionStorage.getItem("carapace.control-ui-e2e.failed-refresh-probes") === "1",
         );
         const failedRecovery = page.locator(".sidebar-update-card--floating .sidebar-update-card");
         await expect.poll(() => failedRecovery.getByRole("button").isEnabled()).toBe(true);
@@ -451,7 +451,7 @@ suite.define(() => {
           await failedRecovery.evaluate(
             (card) => card.closest("[role='status']")?.textContent ?? "",
           ),
-        ).not.toMatch(/openclaw (?:triage|update)|terminal command|run .*terminal/iu);
+        ).not.toMatch(/carapace (?:triage|update)|terminal command|run .*terminal/iu);
 
         await recovery.tap();
         await expect.poll(() => documentRequests.length).toBe(3);
@@ -467,7 +467,7 @@ suite.define(() => {
         await waitForConnect();
         await gateway.resolveDeferred("connect");
 
-        await page.locator("openclaw-app-shell").waitFor();
+        await page.locator("carapace-app-shell").waitFor();
         expect(documentRequests.map((request) => request.recoveryMarker)).toEqual([
           false,
           true,
@@ -476,12 +476,12 @@ suite.define(() => {
         ]);
         expect(await page.getByRole("button", { name: /Server updated/u }).count()).toBe(0);
         await expect
-          .poll(() => page.locator("openclaw-router-outlet").getAttribute("inert"))
+          .poll(() => page.locator("carapace-router-outlet").getAttribute("inert"))
           .toBeNull();
         await waitForControlUiRoute(page, { pathname: "/chat/main", routeId: "chat" });
         expect(
           await page.evaluate(() =>
-            sessionStorage.getItem("openclaw.control-ui-e2e.build-rejection-loads"),
+            sessionStorage.getItem("carapace.control-ui-e2e.build-rejection-loads"),
           ),
         ).toBe("4");
         await expect.poll(() => documentResponses.length).toBe(4);
@@ -584,12 +584,12 @@ suite.define(() => {
           ).length;
           observation.final = {
             appShellCount: await page
-              .locator("openclaw-app-shell")
+              .locator("carapace-app-shell")
               .count()
               .catch(() => 0),
             connectRequestCount,
             loginGateCount: await page
-              .locator("openclaw-login-gate")
+              .locator("carapace-login-gate")
               .count()
               .catch(() => 0),
             mainInert: await page
@@ -604,7 +604,7 @@ suite.define(() => {
             reloadCount: await page
               .evaluate(() => {
                 const value = sessionStorage.getItem(
-                  "openclaw.control-ui-e2e.build-rejection-loads",
+                  "carapace.control-ui-e2e.build-rejection-loads",
                 );
                 if (value === null) {
                   return null;
@@ -615,7 +615,7 @@ suite.define(() => {
               .catch(() => null),
             routePath: new URL(page.url()).pathname,
             routerOutletInert: await page
-              .locator("openclaw-router-outlet")
+              .locator("carapace-router-outlet")
               .evaluate((element) => element.hasAttribute("inert"))
               .catch(() => null),
             terminalInvocationCount: (await gateway.getRequests("terminal.open")).length,

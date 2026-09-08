@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   completeGatewayBootLifecycle,
   inspectGatewayCrashLoopBreaker,
@@ -20,16 +20,16 @@ import { migrateLegacyMediaPersistence } from "./state-migrations.media-persiste
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("media persistence gateway lifecycle recovery", () => {
   it("leaves maintenance completion to Doctor after a successful media migration", async () => {
     const stateDir = tempDirs.make("media-persistence-startup-recovery-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const databasePath = openOpenClawAgentDatabase({ agentId: "main", env }).path;
-    closeOpenClawAgentDatabasesForTest();
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const databasePath = openCarapaceAgentDatabase({ agentId: "main", env }).path;
+    closeCarapaceAgentDatabasesForTest();
 
     const { DatabaseSync } = requireNodeSqlite();
     const database = new DatabaseSync(databasePath);
@@ -60,7 +60,7 @@ describe("media persistence gateway lifecycle recovery", () => {
 
     expect(result.warnings).toEqual([]);
     expect(
-      openOpenClawStateDatabase({ env })
+      openCarapaceStateDatabase({ env })
         .db.prepare(
           "SELECT COUNT(*) AS count FROM gateway_boot_lifecycle WHERE outcome = 'startup_failed'",
         )

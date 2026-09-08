@@ -1,5 +1,5 @@
 // Model list row tests cover rendered row construction for model listing output.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.types.js";
 import type { ModelRow } from "./list.types.js";
@@ -59,7 +59,7 @@ function createRowContext(
 ): RowBuilderContext {
   return {
     cfg: {},
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
     canonicalizeProvider: normalizeProviderId,
     configuredByKey: new Map(),
     discoveredKeys: new Set(),
@@ -253,9 +253,9 @@ describe("appendPreparedModelCatalogRows", () => {
       seenKeys: new Set(),
       context: createRowContext({
         agentId: "worker",
-        agentDir: "/tmp/openclaw-worker",
-        inheritedAuthDir: "/tmp/openclaw-default",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-worker",
+        inheritedAuthDir: "/tmp/carapace-default",
+        workspaceDir: "/tmp/carapace-workspace",
         providerDiscoveryProviderIds: ["anthropic"],
         providerRuntimeDiscoveryProviderIds: ["anthropic"],
         providerManifestFallbackProviderIds: ["anthropic"],
@@ -270,9 +270,9 @@ describe("appendPreparedModelCatalogRows", () => {
     expect(mocks.loadScopedModelCatalogSnapshot).toHaveBeenCalledExactlyOnceWith({
       cfg: {},
       agentId: "worker",
-      agentDir: "/tmp/openclaw-worker",
-      inheritedAuthDir: "/tmp/openclaw-default",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-worker",
+      inheritedAuthDir: "/tmp/carapace-default",
+      workspaceDir: "/tmp/carapace-workspace",
       providerIds: ["anthropic"],
       runtimeProviderIds: ["anthropic"],
       manifestFallbackProviderIds: ["anthropic"],
@@ -944,7 +944,7 @@ describe("appendAuthenticatedCatalogRows", () => {
       rows,
       seenKeys: new Set(),
       context: createRowContext({
-        workspaceDir: "/tmp/openclaw-workspace",
+        workspaceDir: "/tmp/carapace-workspace",
         providerDiscoveryProviderIds: ["local-openai"],
         providerRuntimeDiscoveryProviderIds: ["local-openai"],
         authIndex: {
@@ -965,8 +965,8 @@ describe("appendAuthenticatedCatalogRows", () => {
     });
     expect(mocks.loadScopedModelCatalogSnapshot).toHaveBeenCalledWith({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-agent",
+      workspaceDir: "/tmp/carapace-workspace",
       providerIds: ["local-openai"],
       runtimeProviderIds: ["local-openai"],
       configuredKeys: [],

@@ -49,7 +49,7 @@ describe("official external channel secret schema", () => {
     const registry = {
       plugins: [
         {
-          id: "openclaw-qqbot",
+          id: "carapace-qqbot",
           origin: "global",
           channels: ["qqbot"],
           channelConfigs: {
@@ -97,13 +97,13 @@ describe("official external channel secret schema", () => {
     expect(validate({ defaultAccount: "ops", allowFrom: ["OWNER"] })).toBe(false);
     expect(
       validate({
-        allowFrom: ["openclaw:approval-disabled"],
+        allowFrom: ["carapace:approval-disabled"],
         accounts: { default: { allowFrom: ["OWNER"] } },
       }),
     ).toBe(false);
     expect(
       validate({
-        allowFrom: ["openclaw:approval-disabled"],
+        allowFrom: ["carapace:approval-disabled"],
         accounts: { ops: { allowFrom: ["OWNER"] } },
       }),
     ).toBe(true);

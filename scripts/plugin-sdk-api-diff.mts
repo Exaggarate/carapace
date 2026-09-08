@@ -17,7 +17,7 @@ import {
 import { runTasksWithConcurrency } from "../src/utils/run-with-concurrency.js";
 import { isConstrainedCiCheckHost } from "./lib/local-check-runtime.mts";
 import { isRecord } from "./lib/record-shared.mjs";
-import { resolveNpmPreflightSdkSelectors } from "./openclaw-npm-extended-stable-release.mjs";
+import { resolveNpmPreflightSdkSelectors } from "./carapace-npm-extended-stable-release.mjs";
 import {
   createPluginSdkApiReleaseEvidence,
   createPluginSdkApiReleaseEvidenceSet,
@@ -195,7 +195,7 @@ async function runAbortableChild(params: {
 async function installRevisionDependencies(repoRoot: string, signal: AbortSignal): Promise<void> {
   await runAbortableChild({
     command: "pnpm",
-    args: ["install", "--frozen-lockfile", "--ignore-scripts", "--filter", "openclaw"],
+    args: ["install", "--frozen-lockfile", "--ignore-scripts", "--filter", "carapace"],
     cwd: repoRoot,
     failureMessage: "Plugin SDK revision install failed",
     signal,
@@ -262,7 +262,7 @@ async function main(): Promise<void> {
   const temporaryParent = process.env.RUNNER_TEMP ?? os.tmpdir();
   await fs.mkdir(temporaryParent, { recursive: true });
   const temporaryRoot = await fs.mkdtemp(
-    path.join(temporaryParent, "openclaw-plugin-sdk-api-diff-"),
+    path.join(temporaryParent, "carapace-plugin-sdk-api-diff-"),
   );
   // A regular release compares two npm predecessors against one frozen head.
   // Install and render each commit once, including selectors already at that head.

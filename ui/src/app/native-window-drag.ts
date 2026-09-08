@@ -3,7 +3,7 @@ import { webKitHostWindow } from "./native-webkit-bridge.ts";
 function getNativeWindowDragPoster() {
   // Native macOS hosts install this handler before navigation; its absence
   // (plain browsers, other hosts) keeps default mouse behavior.
-  const handler = webKitHostWindow()?.webkit?.messageHandlers?.openclawWindowDrag;
+  const handler = webKitHostWindow()?.webkit?.messageHandlers?.carapaceWindowDrag;
   return handler?.postMessage.bind(handler);
 }
 

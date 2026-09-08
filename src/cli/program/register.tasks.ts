@@ -1,5 +1,5 @@
 // Background task and TaskFlow command registration.
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import type { Command } from "commander";
 import { defaultRuntime } from "../../runtime.js";
 import { TASK_FLOW_STATUSES } from "../../tasks/task-flow-registry.types.js";

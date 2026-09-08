@@ -11,16 +11,16 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function waitForChipUpdate(chip: HTMLElementTagNameMap["openclaw-session-owner-chip"]) {
+async function waitForChipUpdate(chip: HTMLElementTagNameMap["carapace-session-owner-chip"]) {
   await chip.updateComplete;
   // The parent's update does not include the nested avatar's render.
   await Promise.all(
-    [...chip.querySelectorAll("openclaw-viewer-avatar")].map((avatar) => avatar.updateComplete),
+    [...chip.querySelectorAll("carapace-viewer-avatar")].map((avatar) => avatar.updateComplete),
   );
 }
 
 async function mount(params: { participants?: SessionParticipant[]; participantCount?: number }) {
-  const chip = document.createElement("openclaw-session-owner-chip");
+  const chip = document.createElement("carapace-session-owner-chip");
   chip.owner = { type: "human", id: "profile-ada", label: "Ada" };
   chip.attribution = "owned";
   chip.size = "row";

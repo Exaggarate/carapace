@@ -36,25 +36,25 @@ function setup(
   action: "triage" | "report" | "dismiss" | Array<"triage" | "report" | "dismiss">,
   confirmed: boolean,
 ) {
-  const stateDir = tempDirs.make("openclaw-update-report-cli-");
+  const stateDir = tempDirs.make("carapace-update-report-cli-");
   const prepared = {
     attemptId: "attempt-cli",
     body: "sanitized preview",
     previewDigest: "a".repeat(64),
-    marker: `openclaw-report:${"b".repeat(64)}`,
+    marker: `carapace-report:${"b".repeat(64)}`,
     browserFallback: {
       status: "available" as const,
-      url: "https://github.com/openclaw/openclaw/issues/new",
+      url: "https://github.com/Exaggarate/carapace/issues/new",
     },
     savedReportPath: `${stateDir}/report.md`,
     title: "Update failure",
-    url: "https://github.com/openclaw/openclaw/issues/new",
+    url: "https://github.com/Exaggarate/carapace/issues/new",
   };
   const prepare = mocks.prepare.mockReset().mockResolvedValue(prepared);
   const submit = mocks.submit.mockReset().mockResolvedValue({
     savedReportPath: prepared.savedReportPath,
     status: "created" as const,
-    url: "https://github.com/openclaw/openclaw/issues/123",
+    url: "https://github.com/Exaggarate/carapace/issues/123",
   });
   const runtime = { log: vi.fn(), error: vi.fn() };
   const actions = Array.isArray(action) ? [...action] : [action];
@@ -65,7 +65,7 @@ function setup(
   const run = () =>
     runInteractiveUpdateFailureAction({
       attemptId: "attempt-cli",
-      env: { OPENCLAW_STATE_DIR: stateDir },
+      env: { CARAPACE_STATE_DIR: stateDir },
       result: failure,
       runtime,
     });
@@ -102,7 +102,7 @@ describe("interactive update failure action", () => {
       expect.any(Object),
     );
     expect(fixture.runtime.log).toHaveBeenCalledWith(
-      "Created GitHub issue: https://github.com/openclaw/openclaw/issues/123",
+      "Created GitHub issue: https://github.com/Exaggarate/carapace/issues/123",
     );
   });
 
@@ -118,7 +118,7 @@ describe("interactive update failure action", () => {
       .mockResolvedValueOnce({
         savedReportPath: fixture.prepared.savedReportPath,
         status: "created",
-        url: "https://github.com/openclaw/openclaw/issues/123",
+        url: "https://github.com/Exaggarate/carapace/issues/123",
       });
 
     await expect(fixture.run()).resolves.toBe("handled");
@@ -128,7 +128,7 @@ describe("interactive update failure action", () => {
     expect(mocks.confirm).toHaveBeenCalledTimes(2);
     expect(fixture.runtime.log).toHaveBeenCalledWith("spawn gh EAGAIN");
     expect(fixture.runtime.log).toHaveBeenCalledWith(
-      "Created GitHub issue: https://github.com/openclaw/openclaw/issues/123",
+      "Created GitHub issue: https://github.com/Exaggarate/carapace/issues/123",
     );
   });
 

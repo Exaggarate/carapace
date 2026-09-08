@@ -1,8 +1,8 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
   MemorySearchManager,
   MemorySearchResult,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { afterEach, expect, it, vi } from "vitest";
 import { executeMemorySearchToolQuery } from "./memory-search-tool-query.js";
 import { filterMemorySearchHitsBySessionVisibility } from "./session-search-visibility.js";

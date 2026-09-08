@@ -1,4 +1,4 @@
-import { CompactionReplayRefreshRequiredError } from "@openclaw/ai/transports";
+import { CompactionReplayRefreshRequiredError } from "@carapace/ai/transports";
 import { describe, expect, it, vi } from "vitest";
 import { buildAgentRunTerminalOutcomeFromLifecycleEvent } from "../../agent-run-terminal-outcome.js";
 import { FailoverError } from "../../failover-error.js";
@@ -35,7 +35,7 @@ function makeParams(
     },
     sessionIdUsed: "session:prompt-failure-test",
     lane: "test",
-    agentDir: "/tmp/openclaw-prompt-failure-test",
+    agentDir: "/tmp/carapace-prompt-failure-test",
     suspensionSessionId: "session:prompt-failure-test",
     runtimeAuthRetry: false,
     maybeRefreshRuntimeAuthForAuthError: vi.fn(async () => false),

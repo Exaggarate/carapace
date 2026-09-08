@@ -2,12 +2,12 @@
 import type {
   DiscordAccountConfig,
   DiscordConfig,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/config-contracts";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/config-contracts";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { inspectDiscordAccount } from "./account-inspect.js";
 import {
@@ -79,7 +79,7 @@ describe("Discord defaultAccount omission contract", () => {
           accounts: { work: { enabled: false, token: "token-work" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listDiscordAccountIds(cfg)).toEqual(["default", "work"]);
     expect(resolveDefaultDiscordAccountId(cfg)).toBe("default");
@@ -336,7 +336,7 @@ describe("resolveDiscordAccount runtime config selection", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const runtimeCfg = {
       channels: {
         discord: {
@@ -344,7 +344,7 @@ describe("resolveDiscordAccount runtime config selection", () => {
           accounts: { work: { name: "Work", token: "Bot runtime-work-token" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     setRuntimeConfigSnapshot(runtimeCfg, sourceCfg);
 
     const resolved = resolveDiscordAccount({ cfg: sourceCfg });
@@ -364,7 +364,7 @@ describe("resolveDiscordAccount runtime config selection", () => {
             token: { source: "env", provider: "default", id: "DISCORD_BOT_TOKEN" },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       accountId: "default",
     });
 

@@ -10,15 +10,15 @@ let previousStateDir: string | undefined;
 
 beforeEach(() => {
   tmpDir = fsSync.mkdtempSync(path.join(os.tmpdir(), "session-path-test-"));
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", tmpDir);
+  previousStateDir = process.env.CARAPACE_STATE_DIR;
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", tmpDir);
 });
 
 afterEach(() => {
   if (previousStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", previousStateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", previousStateDir);
   }
   fsSync.rmSync(tmpDir, { recursive: true, force: true });
 });

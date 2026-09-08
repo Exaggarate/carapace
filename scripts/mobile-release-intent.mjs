@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const MOBILE_RELEASE_INTENT_KIND = "openclaw-mobile-release-ref-intent";
+const MOBILE_RELEASE_INTENT_KIND = "carapace-mobile-release-ref-intent";
 export const MOBILE_RELEASE_INTENT_MAX_BYTES = 4 * 1024;
 
 const VERSION_RE = /^20[0-9]{2}\.(?:[1-9]|1[0-2])\.[1-9][0-9]*$/u;
@@ -231,9 +231,9 @@ export function validateMobileReleaseIntent(value) {
 export function mobileReleaseRefForIntent(value) {
   const intent = validateMobileReleaseIntent(value);
   if (intent.platform === "ios") {
-    return `refs/openclaw/mobile-releases/ios/${intent.appStoreVersion}-${intent.buildNumber}`;
+    return `refs/carapace/mobile-releases/ios/${intent.appStoreVersion}-${intent.buildNumber}`;
   }
-  return `refs/openclaw/mobile-releases/android/${intent.versionName}-${intent.phoneVersionCode}`;
+  return `refs/carapace/mobile-releases/android/${intent.versionName}-${intent.phoneVersionCode}`;
 }
 
 function canonicalMobileReleaseIntentBytes(value) {

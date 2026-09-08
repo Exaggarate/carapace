@@ -1,7 +1,7 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveConfiguredAgentId } from "../agents/agent-scope-config.js";
 import { resolveAgentMainSessionKey } from "../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveTalkSessionAgentId } from "../talk/agent-target.js";
 import { resolveSessionStoreIdentity } from "./session-store-key.js";
 import { resolveGatewaySessionStoreTargetWithStore } from "./session-utils-store-lookup.js";
@@ -18,7 +18,7 @@ export function requirePreparedTalkSessionTarget(
 
 /** Resolve Talk ownership before aliases collapse, then retain the exact storage target. */
 export function prepareTalkSessionTarget(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requestedSessionKey?: string,
 ): PreparedTalkSessionTarget {
   const requestedKey = normalizeOptionalString(requestedSessionKey);
@@ -34,7 +34,7 @@ export function prepareTalkSessionTarget(
 
 /** Revalidate a retained owner without consulting the current ambient Talk default. */
 export function assertTalkSessionStorageTarget(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   target: PreparedTalkSessionTarget,
 ): void {
   const current = resolveTalkSessionStorageTarget(cfg, target.canonicalKey, target.agentId);
@@ -47,7 +47,7 @@ export function assertTalkSessionStorageTarget(
   }
 }
 
-function resolveTalkSessionStorageTarget(cfg: OpenClawConfig, sessionKey: string, owner: string) {
+function resolveTalkSessionStorageTarget(cfg: CarapaceConfig, sessionKey: string, owner: string) {
   const { agentId, canonicalKey } = resolveSessionStoreIdentity({
     cfg,
     sessionKey,

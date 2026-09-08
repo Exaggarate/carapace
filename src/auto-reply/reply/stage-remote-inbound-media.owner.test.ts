@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import * as mediaRoots from "../../media/channel-inbound-roots.js";
 import * as processExec from "../../process/exec.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { stageRemoteInboundMediaIfNeeded } from "./stage-remote-inbound-media.js";
 
 afterEach(() => vi.restoreAllMocks());
@@ -15,7 +15,7 @@ it.each([
 ] as const)(
   "stages remote global media after a transient SCP failure for $agentId in $remoteMediaMode mode",
   async ({ agentId, remoteMediaMode }) => {
-    await withOpenClawTestState({ label: "remote-media-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "remote-media-owner" }, async (state) => {
       const cfg = {
         agents: {
           ownership: "explicit" as const,

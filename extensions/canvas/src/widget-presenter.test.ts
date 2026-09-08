@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createCanvasWidgetPresenter } from "./widget-presenter.js";
 
@@ -43,7 +43,7 @@ describe("Canvas widget presenter", () => {
         document: {
           kind: "html",
           html: "<p>Status</p>",
-          hostedUrl: "/__openclaw__/canvas/documents/cv_1/index.html",
+          hostedUrl: "/__carapace__/canvas/documents/cv_1/index.html",
         },
         title: "Status",
         context: { sessionKey: "agent:main:status" },
@@ -57,7 +57,7 @@ describe("Canvas widget presenter", () => {
       expect.objectContaining({
         nodeId: "mac-local",
         command: "canvas.present",
-        params: { url: "/__openclaw__/canvas/documents/cv_1/index.html" },
+        params: { url: "/__carapace__/canvas/documents/cv_1/index.html" },
         sessionKey: "agent:main:status",
         idempotencyKey: expect.any(String),
       }),
@@ -98,7 +98,7 @@ describe("Canvas widget presenter", () => {
         document: {
           kind: "html",
           html: "<p>Status</p>",
-          hostedUrl: "/__openclaw__/canvas/documents/cv_2/index.html",
+          hostedUrl: "/__carapace__/canvas/documents/cv_2/index.html",
         },
         title: "Status",
         context: {},
@@ -110,7 +110,7 @@ describe("Canvas widget presenter", () => {
   });
 
   it("leaves no stale visible content when atomic presentation fails", async () => {
-    const documentUrlPath = "/__openclaw__/canvas/documents/cv_partial/index.html";
+    const documentUrlPath = "/__carapace__/canvas/documents/cv_partial/index.html";
     const panel = { visible: false, url: undefined as string | undefined };
     const transcript: Array<{ command: string; params: unknown }> = [];
     const runtime = createNodesRuntime([
@@ -172,7 +172,7 @@ describe("Canvas widget presenter", () => {
         document: {
           kind: "html",
           html: "<p>Status</p>",
-          hostedUrl: "/__openclaw__/canvas/documents/cv_linux/index.html",
+          hostedUrl: "/__carapace__/canvas/documents/cv_linux/index.html",
         },
         title: "Status",
         context: {},

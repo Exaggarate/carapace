@@ -8,26 +8,26 @@ import {
   markConversationDeliverySent,
 } from "../../config/sessions/conversation-delivery-store.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildConversationRef } from "../../routing/conversation-ref.js";
 import { registerPendingConversationTurn } from "../../sessions/conversation-turns.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { normalizeSessionDeliveryState } from "../../utils/delivery-context.shared.js";
 import type { FinalizedRuntimeMsgContext } from "../templating.js";
 import { capturePendingConversationTurnReply } from "./conversation-turn-capture.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function setupReefConversation() {
-  const stateDir = tempDirs.make("openclaw-conversation-capture-");
+  const stateDir = tempDirs.make("carapace-conversation-capture-");
   const storePath = path.join(stateDir, "sessions.json");
   const sessionKey = "agent:main:reef:direct:peer-agent";
   const sessionId = "reef-session";
-  const cfg = { session: { store: storePath } } as OpenClawConfig;
+  const cfg = { session: { store: storePath } } as CarapaceConfig;
   await sessionAccessor.upsertSessionEntryCore(
     { agentId: "main", sessionKey, storePath },
     {
@@ -90,7 +90,7 @@ describe("conversation turn capture", () => {
 
     await expect(
       capturePendingConversationTurnReply({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         ctx: {
           SessionKey: "agent:main:reef:direct:untrusted",
           ChatType: "direct",
@@ -174,7 +174,7 @@ describe("conversation turn capture", () => {
     expect(events).toContainEqual(
       expect.objectContaining({
         type: "custom",
-        customType: "openclaw.conversation-turn-reply",
+        customType: "carapace.conversation-turn-reply",
         appendMode: "side",
         data: expect.objectContaining({
           turnId: operationId,
@@ -470,12 +470,12 @@ describe("conversation turn capture", () => {
   });
 
   it("captures a threaded reply only for the exact conversation and message", async () => {
-    const stateDir = tempDirs.make("openclaw-conversation-capture-");
+    const stateDir = tempDirs.make("carapace-conversation-capture-");
     const storePath = path.join(stateDir, "sessions.json");
     const scope = { agentId: "main", storePath };
     const sessionKey = "agent:main:discord:channel:ops-room:thread:user-context";
     const sessionId = "discord-thread-session";
-    const cfg = { session: { store: storePath } } as OpenClawConfig;
+    const cfg = { session: { store: storePath } } as CarapaceConfig;
     await sessionAccessor.upsertSessionEntryCore(
       { ...scope, sessionKey },
       {
@@ -552,7 +552,7 @@ describe("conversation turn capture", () => {
   });
 
   it("falls through without claiming when the inbound session cannot be resolved", async () => {
-    const stateDir = tempDirs.make("openclaw-conversation-capture-");
+    const stateDir = tempDirs.make("carapace-conversation-capture-");
     const pending = registerPendingConversationTurn({
       agentId: "main",
       id: "turn-missing",
@@ -570,7 +570,7 @@ describe("conversation turn capture", () => {
 
     await expect(
       capturePendingConversationTurnReply({
-        cfg: { session: { store: path.join(stateDir, "sessions.json") } } as OpenClawConfig,
+        cfg: { session: { store: path.join(stateDir, "sessions.json") } } as CarapaceConfig,
         ctx: {
           SessionKey: "agent:main:reef:direct:missing",
           ChatType: "direct",

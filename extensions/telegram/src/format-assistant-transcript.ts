@@ -1,4 +1,4 @@
-import { markdownToIR, tokenizeHtmlTags } from "openclaw/plugin-sdk/text-chunking";
+import { markdownToIR, tokenizeHtmlTags } from "carapace/plugin-sdk/text-chunking";
 import {
   decodeTelegramHtmlEntities,
   findTelegramHtmlEntityEnd,

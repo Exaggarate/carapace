@@ -1,6 +1,6 @@
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { Model } from "../../llm/types.js";
 import { setCurrentPluginMetadataSnapshot } from "../../plugins/current-plugin-metadata.test-support.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
@@ -33,7 +33,7 @@ function model(overrides: Partial<Model> = {}): Model {
   };
 }
 
-function toolSearchEnabled(resolvedModel: Model, config: OpenClawConfig = {}): boolean {
+function toolSearchEnabled(resolvedModel: Model, config: CarapaceConfig = {}): boolean {
   return resolveAgentToolSurfacePlan({
     config,
     model: resolvedModel,
@@ -47,7 +47,7 @@ function toolSearchEnabled(resolvedModel: Model, config: OpenClawConfig = {}): b
 
 describe("resolved model Tool Search policy", () => {
   beforeAll(() => {
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", path.resolve("extensions"));
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", path.resolve("extensions"));
     setCurrentPluginMetadataSnapshot(createPluginMetadataSnapshotFixture());
   });
   afterAll(() => {
@@ -64,7 +64,7 @@ describe("resolved model Tool Search policy", () => {
     { provider: "custom-host", api: "ollama", id: "model:cloud", expected: false },
     { provider: "custom-host", api: "openai-responses", id: "hosted-model", expected: false },
   ] as const)("prepares $provider/$id using its $api policy", ({ expected, ...route }) => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { defaults: { experimental: { localModelLean: false } } },
     };
     const resolved = normalizeResolvedModel({
@@ -104,7 +104,7 @@ describe("resolved model Tool Search policy", () => {
   ] as const)(
     "limits managed inference defaults to $finalBaseUrl",
     ({ finalBaseUrl, api, expected }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         models: {
           providers: {
             " CUSTOM-HOST ": {

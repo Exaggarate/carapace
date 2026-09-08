@@ -3,10 +3,10 @@
  * Normalizes legacy JSON stores, SQLite/raw payloads, runtime state metadata,
  * legacy OAuth files, and merged main/agent stores.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { coerceSecretRef } from "../../config/types.secrets.js";
 import { isUserModelAuthProfileId } from "../../state/user-model-account-id.js";
 import { asBoolean } from "../../utils/boolean.js";

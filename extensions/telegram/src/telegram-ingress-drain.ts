@@ -5,9 +5,9 @@ import {
   type ChannelIngressMonitorLifecycle,
   type ChannelIngressQueue,
   type ChannelIngressQueueRecord,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { clampPositiveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { clampPositiveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
 import {
   fitsTelegramCallbackData,
   hasTelegramApprovalCallbackPrefix,
@@ -42,7 +42,7 @@ import {
 } from "./telegram-ingress-spool.payload.js";
 import { createShouldSupersedeTelegramSpooledPending } from "./telegram-ingress-supersede.js";
 
-const TELEGRAM_SPOOLED_HANDLER_TIMEOUT_ENV = "OPENCLAW_TELEGRAM_SPOOLED_HANDLER_TIMEOUT_MS";
+const TELEGRAM_SPOOLED_HANDLER_TIMEOUT_ENV = "CARAPACE_TELEGRAM_SPOOLED_HANDLER_TIMEOUT_MS";
 const TELEGRAM_SPOOLED_DRAIN_START_LIMIT = 100;
 const TELEGRAM_SPOOLED_DRAIN_SCAN_LIMIT = TELEGRAM_SPOOLED_DRAIN_START_LIMIT * 10;
 const TELEGRAM_SPOOLED_DRAIN_POLL_INTERVAL_MS = 500;
@@ -263,7 +263,7 @@ type TelegramIngressDrainDispatch = (
 type CreateTelegramIngressMonitorParams = {
   queue: ChannelIngressQueue<TelegramSpooledUpdatePayload>;
   /** Required for authorization-gated supersede (numeric allowlist). */
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   botInfo?: TelegramBotInfo;
   adoptionStallTimeoutMs?: number;

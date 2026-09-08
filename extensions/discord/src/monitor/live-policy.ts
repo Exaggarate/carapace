@@ -1,8 +1,8 @@
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-import { createRuntimeConfigReader } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { createNonExitingRuntime, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { resolveOpenProviderRuntimeGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
+import { createRuntimeConfigReader } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { createNonExitingRuntime, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { resolveOpenProviderRuntimeGroupPolicy } from "carapace/plugin-sdk/runtime-group-policy";
 import {
   mergeDiscordAccountConfig,
   resolveDiscordAccountAllowFrom,
@@ -17,7 +17,7 @@ type ResolvedAllowlist = Awaited<ReturnType<typeof resolveDiscordAllowlistConfig
 export type DiscordLivePolicy = {
   isCurrent: () => boolean;
   accountId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   guildEntries: ResolvedAllowlist["guildEntries"];
   allowFrom: string[];
@@ -32,8 +32,8 @@ export type DiscordLivePolicyReader = () => Promise<DiscordLivePolicy>;
 
 /** One reader belongs to one admitted account; transport and lifetime remain its startup owners. */
 export function createDiscordLivePolicyReader(params: {
-  cfg: OpenClawConfig;
-  readConfig?: () => OpenClawConfig;
+  cfg: CarapaceConfig;
+  readConfig?: () => CarapaceConfig;
   accountId: string;
   discordConfig?: DiscordAccountConfig;
   token?: string;
@@ -50,7 +50,7 @@ export function createDiscordLivePolicyReader(params: {
     params.token ?? resolveDiscordToken(params.cfg, { accountId: params.accountId }).token;
   const fetcher = params.discordRestFetch ?? resolveDiscordRestFetch(startupConfig.proxy, runtime);
   const startupPolicy = selectDiscordLivePolicyConfig(startupConfig);
-  const authoredPolicyRevision = (cfg: OpenClawConfig) =>
+  const authoredPolicyRevision = (cfg: CarapaceConfig) =>
     JSON.stringify({
       policy: selectDiscordLivePolicyConfig(mergeDiscordAccountConfig(cfg, params.accountId)),
       defaultGroupPolicy: cfg.channels?.defaults?.groupPolicy,
@@ -59,7 +59,7 @@ export function createDiscordLivePolicyReader(params: {
   // Public callers may supply prepared policy separately from cfg. Unrelated writes
   // preserve that seed; after an authored policy edit, omission means removal.
   let initialPolicyActive = true;
-  let cachedConfig: OpenClawConfig | undefined;
+  let cachedConfig: CarapaceConfig | undefined;
   let cachedPolicy: DiscordLivePolicy | undefined;
   let resolutionKey = JSON.stringify({
     guildEntries: startupPolicy.guilds,

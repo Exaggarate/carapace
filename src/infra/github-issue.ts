@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-/** Prepares and submits bounded issue content to openclaw/openclaw. */
+/** Prepares and submits bounded issue content to carapace/carapace. */
 import { createHash } from "node:crypto";
 import { truncateUtf8Prefix } from "../utils/utf8-truncate.js";
 
@@ -60,15 +60,15 @@ export type GithubIssueSubmitHooks = GithubIssueReconcileHooks & {
   beforeIssueCreate?: () => Promise<() => undefined> | (() => undefined);
 };
 
-const GITHUB_REPOSITORY = "github.com/openclaw/openclaw";
-const GITHUB_REPOSITORY_ISSUES_API = "repos/openclaw/openclaw/issues";
+const GITHUB_REPOSITORY = "github.com/Exaggarate/carapace";
+const GITHUB_REPOSITORY_ISSUES_API = "repos/carapace/carapace/issues";
 const GITHUB_ISSUE_CREATE_TIMEOUT_MS = 30_000;
 const GITHUB_OUTPUT_MAX_BYTES = 1024 * 1024;
 const GITHUB_ISSUE_BODY_MAX_BYTES = 20_000;
 const GITHUB_ISSUE_TITLE_MAX_BYTES = 512;
 const GITHUB_PREFILL_URL_MAX_BYTES = 8_000;
 const GITHUB_BODY_TRUNCATED_SUFFIX = "\n\n...<truncated>";
-const GITHUB_MARKER_RE = /^openclaw-report:[a-f0-9]{64}$/u;
+const GITHUB_MARKER_RE = /^carapace-report:[a-f0-9]{64}$/u;
 const GITHUB_AUTH_ARGS = ["auth", "status", "--active", "--hostname", "github.com"] as const;
 const inflightSubmissions = new Map<string, Promise<GithubIssueSubmitResult>>();
 
@@ -82,7 +82,7 @@ function boundUtf8(value: string, maxBytes: number, suffix: string): string {
 
 function buildPrefilledUrl(title: string, body: string): string {
   const query = new URLSearchParams({ body, title });
-  return `https://github.com/openclaw/openclaw/issues/new?${query.toString()}`;
+  return `https://github.com/Exaggarate/carapace/issues/new?${query.toString()}`;
 }
 
 /** Builds an exact browser fallback when its encoded request stays within a safe bound. */
@@ -106,7 +106,7 @@ export function prepareGithubIssue(input: { body: string; title: string }): Prep
     GITHUB_ISSUE_BODY_MAX_BYTES,
     GITHUB_BODY_TRUNCATED_SUFFIX,
   );
-  const marker = `openclaw-report:${createHash("sha256")
+  const marker = `carapace-report:${createHash("sha256")
     .update(title)
     .update("\0")
     .update(boundedBody)
@@ -177,7 +177,7 @@ function createdIssueUrl(value: unknown): string | undefined {
       url.origin === "https://github.com" &&
       !url.search &&
       !url.hash &&
-      /^\/openclaw\/openclaw\/issues\/\d+$/u.test(url.pathname)
+      /^\/carapace\/carapace\/issues\/\d+$/u.test(url.pathname)
     ) {
       return url.toString();
     }

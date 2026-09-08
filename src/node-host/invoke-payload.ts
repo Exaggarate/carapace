@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { NodeInvokeRequestPayload } from "./invoke-types.js";
 
 const MAX_INVOKE_INPUT_BYTES = 16 * 1024;

@@ -60,8 +60,8 @@ const EVENT_SCOPE_GUARDS: Record<string, string[]> = {
   heartbeat: [],
   "plugin.approval.requested": [APPROVALS_SCOPE],
   "plugin.approval.resolved": [APPROVALS_SCOPE],
-  "openclaw.approval.requested": [APPROVALS_SCOPE],
-  "openclaw.approval.resolved": [APPROVALS_SCOPE],
+  "carapace.approval.requested": [APPROVALS_SCOPE],
+  "carapace.approval.resolved": [APPROVALS_SCOPE],
   // The frame cadence itself exposes person activity; match system-presence access.
   presence: [READ_SCOPE],
   shutdown: [],

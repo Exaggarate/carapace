@@ -75,7 +75,7 @@ describe("clawhub client", () => {
   }
 
   afterEach(() => {
-    delete process.env.OPENCLAW_CLAWHUB_URL;
+    delete process.env.CARAPACE_CLAWHUB_URL;
     delete process.env.CLAWHUB_TOKEN;
     delete process.env.CLAWHUB_AUTH_TOKEN;
     delete process.env.CLAWHUB_CONFIG_PATH;
@@ -86,7 +86,7 @@ describe("clawhub client", () => {
   });
 
   it("loads ClawHub request auth from config.json", async () => {
-    await withTestDir({ prefix: "openclaw-clawhub-config-" }, async (configRoot) => {
+    await withTestDir({ prefix: "carapace-clawhub-config-" }, async (configRoot) => {
       const configPath = path.join(configRoot, "clawhub", "config.json");
       process.env.CLAWHUB_CONFIG_PATH = configPath;
       await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -101,7 +101,7 @@ describe("clawhub client", () => {
   });
 
   it("loads ClawHub request auth from the legacy config path override", async () => {
-    await withTestDir({ prefix: "openclaw-clawdhub-config-" }, async (configRoot) => {
+    await withTestDir({ prefix: "carapace-clawdhub-config-" }, async (configRoot) => {
       const configPath = path.join(configRoot, "config.json");
       process.env.CLAWDHUB_CONFIG_PATH = configPath;
       await fs.writeFile(configPath, JSON.stringify({ token: "fixture-legacy-token" }), "utf8");
@@ -113,7 +113,7 @@ describe("clawhub client", () => {
   it.each(["clawhub", "clawdhub"])(
     "loads ClawHub request auth from the Windows AppData %s config path",
     async (configDirectory) => {
-      await withTestDir({ prefix: "openclaw-clawhub-appdata-" }, async (appDataRoot) => {
+      await withTestDir({ prefix: "carapace-clawhub-appdata-" }, async (appDataRoot) => {
         const configPath = path.join(appDataRoot, configDirectory, "config.json");
         const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
         setTestEnvValue("APPDATA", appDataRoot);
@@ -135,8 +135,8 @@ describe("clawhub client", () => {
   );
 
   it("keeps XDG_CONFIG_HOME ahead of AppData on Windows", async () => {
-    await withTestDir({ prefix: "openclaw-clawhub-appdata-" }, async (appDataRoot) => {
-      await withTestDir({ prefix: "openclaw-clawhub-xdg-" }, async (xdgRoot) => {
+    await withTestDir({ prefix: "carapace-clawhub-appdata-" }, async (appDataRoot) => {
+      await withTestDir({ prefix: "carapace-clawhub-xdg-" }, async (xdgRoot) => {
         const appDataConfigPath = path.join(appDataRoot, "clawhub", "config.json");
         const xdgConfigPath = path.join(xdgRoot, "clawhub", "config.json");
         const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
@@ -170,7 +170,7 @@ describe("clawhub client", () => {
   ])(
     "does not fall back to a legacy token when the canonical config exists %s",
     async (_, contents) => {
-      await withTestDir({ prefix: "openclaw-clawhub-appdata-" }, async (appDataRoot) => {
+      await withTestDir({ prefix: "carapace-clawhub-appdata-" }, async (appDataRoot) => {
         const canonicalConfigPath = path.join(appDataRoot, "clawhub", "config.json");
         const legacyConfigPath = path.join(appDataRoot, "clawdhub", "config.json");
         const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
@@ -197,7 +197,7 @@ describe("clawhub client", () => {
   it.runIf(process.platform === "darwin")(
     "loads ClawHub request auth from the macOS Application Support path",
     async () => {
-      await withTestDir({ prefix: "openclaw-clawhub-home-" }, async (fakeHome) => {
+      await withTestDir({ prefix: "carapace-clawhub-home-" }, async (fakeHome) => {
         const configPath = path.join(
           fakeHome,
           "Library",
@@ -221,8 +221,8 @@ describe("clawhub client", () => {
   it.runIf(process.platform === "darwin")(
     "falls back to XDG_CONFIG_HOME for ClawHub request auth on macOS",
     async () => {
-      await withTestDir({ prefix: "openclaw-clawhub-home-" }, async (fakeHome) => {
-        await withTestDir({ prefix: "openclaw-clawhub-xdg-" }, async (xdgRoot) => {
+      await withTestDir({ prefix: "carapace-clawhub-home-" }, async (fakeHome) => {
+        await withTestDir({ prefix: "carapace-clawhub-xdg-" }, async (xdgRoot) => {
           const configPath = path.join(xdgRoot, "clawhub", "config.json");
           const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue(fakeHome);
           setTestEnvValue("XDG_CONFIG_HOME", xdgRoot);
@@ -255,7 +255,7 @@ describe("clawhub client", () => {
   });
 
   it("preserves the configured ClawHub base URL path prefix", async () => {
-    process.env.OPENCLAW_CLAWHUB_URL = "https://internal.example.com/clawhub";
+    process.env.CARAPACE_CLAWHUB_URL = "https://internal.example.com/clawhub";
     let requestedUrl = "";
 
     await expect(
@@ -278,7 +278,7 @@ describe("clawhub client", () => {
   });
 
   it("annotates 429 errors with the reset hint and a sign-in hint when unauthenticated", async () => {
-    process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "openclaw-no-clawhub-config");
+    process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "carapace-no-clawhub-config");
     await expect(
       searchClawHubSkills({
         query: "calendar",
@@ -296,7 +296,7 @@ describe("clawhub client", () => {
   });
 
   it("degrades gracefully on 429 when the response carries no rate-limit headers", async () => {
-    process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "openclaw-no-clawhub-config");
+    process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "carapace-no-clawhub-config");
     await expect(
       searchClawHubSkills({
         query: "calendar",
@@ -308,7 +308,7 @@ describe("clawhub client", () => {
   it.each(["0x10", "1e3", "-1", "-0", "+7", "0.5", "9007199254740993"])(
     "does not describe malformed RateLimit-Reset values as seconds: %s",
     async (reset) => {
-      process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "openclaw-no-clawhub-config");
+      process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "carapace-no-clawhub-config");
       await expect(
         searchClawHubSkills({
           query: "calendar",
@@ -325,7 +325,7 @@ describe("clawhub client", () => {
   it.each(["invalid", "+7", "-0"])(
     "uses a valid Retry-After hint when RateLimit-Reset is malformed: %s",
     async (reset) => {
-      process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "openclaw-no-clawhub-config");
+      process.env.CLAWHUB_CONFIG_PATH = path.join(os.tmpdir(), "carapace-no-clawhub-config");
       await expect(
         searchClawHubSkills({
           query: "calendar",

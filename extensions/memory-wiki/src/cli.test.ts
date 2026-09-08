@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerWikiCli } from "./cli.js";
@@ -23,7 +23,7 @@ const afterCompileHook = vi.hoisted(
     },
 );
 
-vi.mock("openclaw/plugin-sdk/gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/gateway-runtime", () => ({
   callGatewayFromCli: callGatewayFromCliMock,
 }));
 
@@ -47,7 +47,7 @@ let caseIndex = 0;
 let stdoutWriteMock: ReturnType<typeof vi.fn>;
 
 function resolveLegacyImportRunRecordPath(vaultRoot: string, runId: string): string {
-  return path.join(vaultRoot, ".openclaw-wiki", "import-runs", `${runId}.json`);
+  return path.join(vaultRoot, ".carapace-wiki", "import-runs", `${runId}.json`);
 }
 
 describe("memory-wiki cli", () => {
@@ -460,9 +460,9 @@ Orders join to [customers](/tables/customers.md).
         body: `# Alpha
 
 ## Notes
-<!-- openclaw:human:start -->
+<!-- carapace:human:start -->
 cli note
-<!-- openclaw:human:end -->
+<!-- carapace:human:end -->
 `,
       }),
       "utf8",
@@ -919,7 +919,7 @@ cli note
     expect(failedRunId).toBeDefined();
     expect(failedRunId).not.toBe(firstRunId);
     expect(message).toContain("changed source pages, but vault compilation failed");
-    expect(message).toContain(`openclaw wiki chatgpt rollback ${failedRunId}`);
+    expect(message).toContain(`carapace wiki chatgpt rollback ${failedRunId}`);
     await expect(fs.readFile(pagePath, "utf8")).resolves.not.toBe(firstContent);
 
     await fs.writeFile(reportPath, validReport, "utf8");

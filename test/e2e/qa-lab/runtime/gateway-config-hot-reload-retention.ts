@@ -23,7 +23,7 @@ export async function startHotReloadAttachmentRetention({
     process.stdout.write(text);
   };
   assert.equal(gateway.cfg.attachments?.ttlHours, 24, "Retention proof requires startup TTL 24h");
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   assert(stateDir && path.isAbsolute(stateDir), "Gateway must have an isolated absolute state dir");
   const mediaDir = path.join(stateDir, "media");
   await fs.mkdir(mediaDir, { recursive: true });

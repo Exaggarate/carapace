@@ -9,9 +9,9 @@ import { SESSION_PULL_REQUESTS_SUBSCRIBE_METHOD } from "../lib/session-pull-requ
 import { sessionProgressHoverTargetFromEvent } from "./session-progress-hovercard-target.ts";
 import { SessionProgressHovercardProvider } from "./session-progress-hovercard.runtime.ts";
 
-if (!customElements.get("openclaw-session-progress-hovercard-provider")) {
+if (!customElements.get("carapace-session-progress-hovercard-provider")) {
   customElements.define(
-    "openclaw-session-progress-hovercard-provider",
+    "carapace-session-progress-hovercard-provider",
     SessionProgressHovercardProvider,
   );
 }
@@ -83,11 +83,11 @@ function mountHovercard(sessionKey = "global", holdProgress = false) {
     },
   } as unknown as ApplicationContext;
   const provider = document.createElement(
-    "openclaw-session-progress-hovercard-provider",
+    "carapace-session-progress-hovercard-provider",
   ) as SessionProgressHovercardProvider;
   provider.context = context;
   provider.gateway = gateway;
-  const sidebar = Object.assign(document.createElement("openclaw-app-sidebar"), {
+  const sidebar = Object.assign(document.createElement("carapace-app-sidebar"), {
     expandedAgentId: () => selectedId,
     findSidebarHovercardRowByKey: () => ({
       key: sessionKey,

@@ -1,5 +1,5 @@
-import { readOpenAIResponsesCompactionWindow } from "@openclaw/ai/internal/openai-responses-payload-policy";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { readOpenAIResponsesCompactionWindow } from "@carapace/ai/internal/openai-responses-payload-policy";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type TranscriptReplayRoute = {
   api?: string;
@@ -15,8 +15,8 @@ type TranscriptReplaySanitizerHelpers = {
   isOpenAIResponsesRoute: (route: TranscriptReplayRoute | undefined) => boolean;
   isPlainTranscriptObject: (value: object) => value is Record<string, unknown>;
   isStructurallyValidOpaqueReplayToken: (value: string) => boolean;
-  redactTranscriptStructuredValue: (value: unknown, cfg?: OpenClawConfig) => unknown;
-  redactTranscriptText: (value: string, cfg?: OpenClawConfig) => string;
+  redactTranscriptStructuredValue: (value: unknown, cfg?: CarapaceConfig) => unknown;
+  redactTranscriptText: (value: string, cfg?: CarapaceConfig) => string;
 };
 
 type TranscriptReplayDescriptor = {
@@ -33,7 +33,7 @@ type TranscriptReplayDescriptor = {
   ) => boolean;
   sanitizeData: (
     data: string,
-    cfg: OpenClawConfig | undefined,
+    cfg: CarapaceConfig | undefined,
     helpers: TranscriptReplaySanitizerHelpers,
   ) => string | undefined;
   readId?: (
@@ -70,7 +70,7 @@ const REPLAY_DESCRIPTORS = [OPENAI_REPLAY_DESCRIPTOR, ANTHROPIC_REPLAY_DESCRIPTO
 
 function sanitizeCompactedWindow(
   replay: { data: string; id?: string; compactedWindow?: unknown },
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   helpers: TranscriptReplaySanitizerHelpers,
 ) {
   const window = replay.compactedWindow;
@@ -96,7 +96,7 @@ function sanitizeCompactedWindow(
 export function sanitizeCompactionReplayState(
   value: unknown,
   route: TranscriptReplayRoute | undefined,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   helpers: TranscriptReplaySanitizerHelpers,
 ): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || !helpers.isPlainTranscriptObject(value)) {

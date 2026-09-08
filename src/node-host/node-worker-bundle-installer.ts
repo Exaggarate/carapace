@@ -5,7 +5,7 @@ import fsp from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { CloudflareAccessCredentials } from "../../packages/gateway-client/src/cloudflare-access.js";
 import {
   validateWorkerAdmissionHandshake,
@@ -14,7 +14,7 @@ import {
 import { resolveStateDir } from "../config/paths.js";
 import { hasErrnoCode } from "../infra/errors.js";
 import { FsSafeError, root as fsSafeRoot } from "../infra/fs-safe.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { redactSensitiveText } from "../logging/redact.js";
 import { KeyedAsyncQueue } from "../plugin-sdk/keyed-async-queue.js";
@@ -255,7 +255,7 @@ export class NodeWorkerBundleInstaller {
   constructor(options: { root?: string; env?: NodeJS.ProcessEnv } = {}) {
     const env = options.env ?? process.env;
     this.#root = path.resolve(options.root ?? path.join(resolveStateDir(env), "node-host"));
-    this.#packageRoot = resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url });
+    this.#packageRoot = resolveCarapacePackageRootSync({ moduleUrl: import.meta.url });
     this.#workerEnv = snapshotNodeWorkerEnv(env);
   }
 

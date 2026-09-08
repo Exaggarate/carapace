@@ -17,7 +17,7 @@ afterEach(async () => {
 
 describe("FileSettingsStorage", () => {
   it("preserves provider retry settings across an upgraded settings write", async () => {
-    const root = fixtures.createTempDir("openclaw-settings-retry-migration-");
+    const root = fixtures.createTempDir("carapace-settings-retry-migration-");
     const agentDir = join(root, "agent");
     const settingsPath = join(agentDir, "settings.json");
     mkdirSync(agentDir);
@@ -41,11 +41,11 @@ describe("FileSettingsStorage", () => {
   });
 
   it("keeps the original settings when a write fails partway", () => {
-    const root = fixtures.createTempDir("openclaw-settings-partial-write-");
+    const root = fixtures.createTempDir("carapace-settings-partial-write-");
     const agentDir = join(root, "agent");
     const settingsPath = join(agentDir, "settings.json");
-    const original = JSON.stringify({ packages: ["npm:@openclaw/keep"] });
-    const replacement = JSON.stringify({ packages: ["npm:@openclaw/replacement"] });
+    const original = JSON.stringify({ packages: ["npm:@carapace/keep"] });
+    const replacement = JSON.stringify({ packages: ["npm:@carapace/replacement"] });
     mkdirSync(agentDir);
     fs.writeFileSync(settingsPath, original);
 
@@ -69,14 +69,14 @@ describe("FileSettingsStorage", () => {
   it.runIf(process.platform !== "win32")(
     "preserves existing settings and parent directory modes",
     () => {
-      const root = fixtures.createTempDir("openclaw-settings-modes-");
+      const root = fixtures.createTempDir("carapace-settings-modes-");
       const agentDir = join(root, "agent");
       const settingsPath = join(agentDir, "settings.json");
       mkdirSync(agentDir, { mode: 0o751 });
       fs.writeFileSync(settingsPath, "{}", { mode: 0o640 });
 
       new FileSettingsStorage(root, agentDir).withLock("global", () =>
-        JSON.stringify({ packages: ["npm:@openclaw/new"] }),
+        JSON.stringify({ packages: ["npm:@carapace/new"] }),
       );
 
       expect(fs.statSync(settingsPath).mode & 0o777).toBe(0o640);
@@ -86,7 +86,7 @@ describe("FileSettingsStorage", () => {
 
   it.runIf(process.platform !== "win32")("uses the current umask when creating settings", () =>
     fixtures.run(async () => {
-      const root = fixtures.createTempDir("openclaw-settings-umask-");
+      const root = fixtures.createTempDir("carapace-settings-umask-");
       const agentDir = join(root, "agent");
       const result = await runNodeScript(
         [
@@ -120,15 +120,15 @@ describe("FileSettingsStorage", () => {
   it.runIf(process.platform !== "win32")(
     "preserves a settings symlink chain under a symlinked parent",
     () => {
-      const root = fixtures.createTempDir("openclaw-settings-symlinks-");
+      const root = fixtures.createTempDir("carapace-settings-symlinks-");
       const realAgentDir = join(root, "real-agent");
       const linkedAgentDir = join(root, "linked-agent");
       const settingsPath = join(realAgentDir, "settings.json");
       const intermediatePath = join(realAgentDir, "settings-target-link.json");
       const targetPath = join(realAgentDir, "operator-settings.json");
-      const replacement = JSON.stringify({ packages: ["npm:@openclaw/new"] });
+      const replacement = JSON.stringify({ packages: ["npm:@carapace/new"] });
       mkdirSync(realAgentDir);
-      fs.writeFileSync(targetPath, JSON.stringify({ packages: ["npm:@openclaw/old"] }));
+      fs.writeFileSync(targetPath, JSON.stringify({ packages: ["npm:@carapace/old"] }));
       fs.symlinkSync(targetPath, intermediatePath);
       fs.symlinkSync(intermediatePath, settingsPath);
       fs.symlinkSync(realAgentDir, linkedAgentDir);
@@ -143,20 +143,20 @@ describe("FileSettingsStorage", () => {
   );
 
   it("loads missing settings without creating their directories", () => {
-    const root = fixtures.createTempDir("openclaw-settings-read-");
+    const root = fixtures.createTempDir("carapace-settings-read-");
     const settingsDir = join(root, "agent");
 
     SettingsManager.create(root, settingsDir);
 
     expect(existsSync(settingsDir)).toBe(false);
-    expect(existsSync(join(root, ".openclaw"))).toBe(false);
+    expect(existsSync(join(root, ".carapace"))).toBe(false);
   });
 
   it("loads absent unlocked settings without syncing writer sidecars", () => {
-    const root = fixtures.createTempDir("openclaw-settings-unlocked-");
+    const root = fixtures.createTempDir("carapace-settings-unlocked-");
     const agentDir = join(root, "agent");
     mkdirSync(agentDir);
-    mkdirSync(join(root, ".openclaw"));
+    mkdirSync(join(root, ".carapace"));
     const fsync = vi.spyOn(fs, "fsyncSync");
     syncBuiltinESMExports();
     try {
@@ -175,9 +175,9 @@ describe("FileSettingsStorage", () => {
     "reads committed %s settings from an already-owned first write",
     (scope) =>
       fixtures.run(async () => {
-        const root = fixtures.createTempDir("openclaw-settings-first-writer-");
+        const root = fixtures.createTempDir("carapace-settings-first-writer-");
         const agentDir = join(root, "agent");
-        const settingsDir = scope === "global" ? agentDir : join(root, ".openclaw");
+        const settingsDir = scope === "global" ? agentDir : join(root, ".carapace");
         const settingsPath = join(settingsDir, "settings.json");
         const readyPath = join(root, "writer-ready");
         const continuePath = join(root, "writer-continue");
@@ -284,7 +284,7 @@ describe("FileSettingsStorage", () => {
   it.each([".lock", ".lock.reclaim"])(
     "does not skip an existing %s namespace when settings are absent",
     (suffix) => {
-      const root = fixtures.createTempDir("openclaw-settings-lock-namespace-");
+      const root = fixtures.createTempDir("carapace-settings-lock-namespace-");
       const settingsDir = join(root, "agent");
       mkdirSync(settingsDir);
       mkdirSync(join(settingsDir, `settings.json${suffix}`));
@@ -296,7 +296,7 @@ describe("FileSettingsStorage", () => {
   );
 
   it.skipIf(process.platform === "win32")("does not skip a dangling lock symlink", () => {
-    const root = fixtures.createTempDir("openclaw-settings-lock-symlink-");
+    const root = fixtures.createTempDir("carapace-settings-lock-symlink-");
     const settingsDir = join(root, "agent");
     mkdirSync(settingsDir);
     fs.symlinkSync(join(root, "missing"), join(settingsDir, "settings.json.lock"));
@@ -306,7 +306,7 @@ describe("FileSettingsStorage", () => {
   });
 
   it("locks before reading when the settings directory exists", () => {
-    const root = fixtures.createTempDir("openclaw-settings-lock-");
+    const root = fixtures.createTempDir("carapace-settings-lock-");
     const settingsDir = join(root, "agent");
     const settingsPath = join(settingsDir, "settings.json");
     mkdirSync(settingsDir);
@@ -327,9 +327,9 @@ describe("FileSettingsStorage", () => {
     "preserves independent concurrent first writes to %s settings",
     (scope) =>
       fixtures.run(async () => {
-        const root = fixtures.createTempDir("openclaw-settings-concurrent-create-");
+        const root = fixtures.createTempDir("carapace-settings-concurrent-create-");
         const agentDir = join(root, "agent");
-        const settingsDir = scope === "global" ? agentDir : join(root, ".openclaw");
+        const settingsDir = scope === "global" ? agentDir : join(root, ".carapace");
         const settingsPath = join(settingsDir, "settings.json");
         const firstEntered = join(root, "first-entered");
         const contenderReady = join(root, "contender-ready");

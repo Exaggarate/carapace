@@ -4,7 +4,7 @@ import { loadGetReplyFromConfigRuntime } from "../auto-reply/reply/dispatch-from
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import type { CliDeps } from "../cli/deps.types.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveInternalHookSelection } from "../hooks/configured.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import type { GatewayActiveWorkInspectors } from "../infra/gateway-active-work.js";
@@ -12,7 +12,7 @@ import { hasRestartSentinel } from "../infra/restart-sentinel.js";
 import type { createGatewayUpdateCheck } from "../infra/update-startup.js";
 import type { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import type { PluginHookGatewayCronService } from "../plugins/hook-types.js";
-import type { loadOpenClawPlugins } from "../plugins/loader.js";
+import type { loadCarapacePlugins } from "../plugins/loader.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import { getPluginModuleLoaderStats } from "../plugins/plugin-module-loader-cache.js";
@@ -59,7 +59,7 @@ const ACP_BACKEND_READY_POLL_MS = 50;
 const PROVIDER_AUTH_PREWARM_START_DELAY_MS = 5_000;
 const PROVIDER_AUTH_REWARM_DELAY_MS = 1_000;
 const DEFERRED_SIDECAR_START_DELAY_MS = 100;
-const SKIP_STARTUP_MODEL_PREWARM_ENV = "OPENCLAW_SKIP_STARTUP_MODEL_PREWARM";
+const SKIP_STARTUP_MODEL_PREWARM_ENV = "CARAPACE_SKIP_STARTUP_MODEL_PREWARM";
 type Awaitable<T> = T | Promise<T>;
 
 const loadMainSessionRestartRecoveryModule = createLazyRuntimeModule(
@@ -119,7 +119,7 @@ function shouldSkipStartupModelPrewarm(env: NodeJS.ProcessEnv = process.env): bo
 }
 
 function scheduleProviderAuthStatePrewarm(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   log: {
     info: (msg: string) => void;
     warn: (msg: string) => void;
@@ -357,8 +357,8 @@ function scheduleRestartSentinelWakeAfterReady(params: {
 }
 
 function scheduleTranscriptsAutoStartSidecar(params: {
-  cfg: OpenClawConfig;
-  getConfig: () => OpenClawConfig;
+  cfg: CarapaceConfig;
+  getConfig: () => CarapaceConfig;
   startupTrace?: GatewayStartupTrace;
   log: { warn: (msg: string) => void };
   waitForPostReadyWork?: () => Promise<void>;
@@ -406,7 +406,7 @@ async function refreshLatestUpdateRestartSentinelIfPresent(): Promise<Awaited<
   return await (await loadGatewayRestartSentinelModule()).refreshLatestUpdateRestartSentinel();
 }
 
-function hasGatewayStartHooks(pluginRegistry: ReturnType<typeof loadOpenClawPlugins>): boolean {
+function hasGatewayStartHooks(pluginRegistry: ReturnType<typeof loadCarapacePlugins>): boolean {
   return pluginRegistry.typedHooks.some((hook) => hook.hookName === "gateway_start");
 }
 
@@ -443,8 +443,8 @@ async function waitForAcpRuntimeBackendReady(params: {
 }
 
 async function prewarmConfiguredPrimaryModel(params: {
-  cfg: OpenClawConfig;
-  getConfig?: () => OpenClawConfig | Promise<OpenClawConfig>;
+  cfg: CarapaceConfig;
+  getConfig?: () => CarapaceConfig | Promise<CarapaceConfig>;
   isCurrent?: () => boolean;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
   workspaceDir?: string;
@@ -455,17 +455,17 @@ async function prewarmConfiguredPrimaryModel(params: {
 }
 
 type StartupExternalAuthHydrationDeps = {
-  listAgentIds: (cfg: OpenClawConfig) => string[];
-  resolveAgentDir: (cfg: OpenClawConfig, agentId: string) => string;
-  collectConfiguredRefs: (cfg: OpenClawConfig, agentId: string) => readonly { value: string }[];
-  hydrate: (cfg: OpenClawConfig, agentDir: string, providers: readonly string[]) => void;
+  listAgentIds: (cfg: CarapaceConfig) => string[];
+  resolveAgentDir: (cfg: CarapaceConfig, agentId: string) => string;
+  collectConfiguredRefs: (cfg: CarapaceConfig, agentId: string) => readonly { value: string }[];
+  hydrate: (cfg: CarapaceConfig, agentDir: string, providers: readonly string[]) => void;
 };
 
 async function hydrateConfiguredExternalCliAuth(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   log: { warn: (msg: string) => void };
   deps?: StartupExternalAuthHydrationDeps | Promise<StartupExternalAuthHydrationDeps>;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const deps: StartupExternalAuthHydrationDeps =
     (await params.deps) ??
     (await Promise.all([
@@ -477,7 +477,7 @@ async function hydrateConfiguredExternalCliAuth(params: {
       listAgentIds: scope.listAgentIds,
       resolveAgentDir: scope.resolveAgentDir,
       collectConfiguredRefs: configured.collectPreparedModelRuntimeConfiguredRefs,
-      hydrate: (cfg: OpenClawConfig, agentDir: string, providers: readonly string[]) => {
+      hydrate: (cfg: CarapaceConfig, agentDir: string, providers: readonly string[]) => {
         const discovery = external.externalCliDiscoveryForProviders({ cfg, providers });
         if (discovery.mode === "none") {
           return;
@@ -515,8 +515,8 @@ async function hydrateConfiguredExternalCliAuth(params: {
 }
 
 async function publishConfiguredModelRuntimeSnapshots(params: {
-  cfg: OpenClawConfig;
-  getConfig?: () => OpenClawConfig | Promise<OpenClawConfig>;
+  cfg: CarapaceConfig;
+  getConfig?: () => CarapaceConfig | Promise<CarapaceConfig>;
   isCurrent?: () => boolean;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
   workspaceDir?: string;
@@ -570,8 +570,8 @@ async function publishConfiguredModelRuntimeSnapshots(params: {
 
 async function publishStartupModelRuntime(
   params: {
-    cfg: OpenClawConfig;
-    getConfig?: () => OpenClawConfig | Promise<OpenClawConfig>;
+    cfg: CarapaceConfig;
+    getConfig?: () => CarapaceConfig | Promise<CarapaceConfig>;
     isCurrent?: () => boolean;
     pluginMetadataSnapshot?: PluginMetadataSnapshot;
     workspaceDir?: string;
@@ -588,10 +588,10 @@ async function publishStartupModelRuntime(
 
 /** Start post-ready sidecars such as channels, hooks, plugin services, and cleanup tasks. */
 export async function startGatewaySidecars(params: {
-  cfg: OpenClawConfig;
-  getModelRuntimeConfig?: () => OpenClawConfig;
+  cfg: CarapaceConfig;
+  getModelRuntimeConfig?: () => CarapaceConfig;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
-  pluginRegistry: ReturnType<typeof loadOpenClawPlugins>;
+  pluginRegistry: ReturnType<typeof loadCarapacePlugins>;
   defaultWorkspaceDir: string;
   deps: CliDeps;
   startChannels: () => Promise<void>;
@@ -667,8 +667,8 @@ export async function startGatewaySidecars(params: {
   const mainSessionRecoveryStartupCheckedStorePaths =
     params.mainSessionRecoveryStartupCheckedStorePaths ?? new Set<string>();
   const skipChannels =
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS);
+    isTruthyEnvValue(process.env.CARAPACE_SKIP_CHANNELS) ||
+    isTruthyEnvValue(process.env.CARAPACE_SKIP_PROVIDERS);
   // These runs were orphaned by the previous Gateway lifecycle. Record that fact
   // even if this process later fails model preparation and never starts channels.
   await measureStartup(params.startupTrace, "sidecars.main-session-recovery", async () => {
@@ -733,7 +733,7 @@ export async function startGatewaySidecars(params: {
     const channelStart = skipChannels
       ? measureStartup(params.startupTrace, "sidecars.channel-skip", () =>
           params.logChannels.info(
-            "skipping channel start (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+            "skipping channel start (CARAPACE_SKIP_CHANNELS=1 or CARAPACE_SKIP_PROVIDERS=1)",
           ),
         )
       : shouldStartChannels
@@ -887,7 +887,7 @@ export async function startGatewaySidecars(params: {
         const [{ getAcpSessionManager }, { ACP_SESSION_IDENTITY_RENDERER_VERSION }] =
           await Promise.all([
             import("../acp/control-plane/manager.js"),
-            import("@openclaw/acp-core/runtime/session-identifiers"),
+            import("@carapace/acp-core/runtime/session-identifiers"),
           ]);
         if (params.shouldCreatePostReadySidecars?.() === false) {
           return;
@@ -1060,7 +1060,7 @@ const defaultGatewayPostAttachRuntimeDeps: GatewayPostAttachRuntimeDeps = {
 function createDeferredGatewayUpdateCheck(params: {
   startupTrace?: GatewayStartupTrace;
   runtimeDeps: GatewayPostAttachRuntimeDeps;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   log: {
     info: (msg: string) => void;
     warn: (msg: string) => void;
@@ -1200,8 +1200,8 @@ export async function startGatewayPostAttachRuntime(
   params: {
     minimalTestGateway: boolean;
     updateCanary?: boolean;
-    cfgAtStart: OpenClawConfig;
-    getConfig: () => OpenClawConfig;
+    cfgAtStart: CarapaceConfig;
+    getConfig: () => CarapaceConfig;
     bindHost: string;
     bindHosts: string[];
     port: number;
@@ -1217,12 +1217,12 @@ export async function startGatewayPostAttachRuntime(
     broadcastPluginEvent?: import("./server-broadcast-types.js").GatewayPluginEventBroadcastFn;
     controlUiBasePath: string;
     controlUiRootLifecycle?: GatewayControlUiRootLifecycle;
-    gatewayPluginConfigAtStart: OpenClawConfig;
-    activationSourceConfig: OpenClawConfig;
+    gatewayPluginConfigAtStart: CarapaceConfig;
+    activationSourceConfig: CarapaceConfig;
     pluginManifestRecords: readonly PluginManifestRecord[];
     pluginMetadataSnapshot?: PluginMetadataSnapshot;
     ambientEnvTriggers?: AmbientEnvTriggerPolicy;
-    pluginRegistry: ReturnType<typeof loadOpenClawPlugins>;
+    pluginRegistry: ReturnType<typeof loadCarapacePlugins>;
     defaultWorkspaceDir: string;
     deps: CliDeps;
     startChannels: () => Promise<void>;
@@ -1250,7 +1250,7 @@ export async function startGatewayPostAttachRuntime(
     pluginRuntimeClaim?: GatewayPluginRuntimeClaim;
     getCurrentPluginRegistry?: () => PluginRegistry;
     getCurrentPluginMetadataSnapshot?: () => PluginMetadataSnapshot | undefined;
-    getCurrentActivationSourceConfig?: () => OpenClawConfig | null;
+    getCurrentActivationSourceConfig?: () => CarapaceConfig | null;
     getCronService?: () => PluginServiceCronHost | null | undefined;
     onChannelsStarted?: () => Awaitable<void>;
     onPluginServices?: (pluginServices: PluginServicesHandle | null) => void;
@@ -1266,7 +1266,7 @@ export async function startGatewayPostAttachRuntime(
     providerAuthPrewarm?: {
       enabled?: boolean;
       delayMs?: number;
-      getConfig?: () => OpenClawConfig;
+      getConfig?: () => CarapaceConfig;
     };
     waitForPostReadyWork?: () => Promise<void>;
     activeWorkInspectors?: Partial<GatewayActiveWorkInspectors>;

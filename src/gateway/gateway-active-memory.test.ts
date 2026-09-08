@@ -11,12 +11,12 @@ import {
   RUNTIME_POSTBUILD_STAMP_FILE,
 } from "../../scripts/lib/local-build-metadata.mts";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../test/helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../test/helpers/carapace-test-instance.js";
 import { createDeferred, withTestTimeout } from "../../test/helpers/promise.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { generateStoredDeviceIdentity } from "../infra/device-identity-store.js";
 import {
   publicKeyRawBase64UrlFromEd25519Pem,
@@ -66,7 +66,7 @@ describe("Gateway Active Memory", () => {
         ) as Record<string, unknown>;
         expect(metadata[field], file).toBe(head);
       }
-      const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-active-memory-gateway-"));
+      const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-active-memory-gateway-"));
       const workspace = path.join(home, "workspace");
       const memoryFact = "The user's usual lunch is ginger ramen.";
       const mainReply = "ACTIVE_MEMORY_RUNTIME_PROOF_OK";
@@ -75,7 +75,7 @@ describe("Gateway Active Memory", () => {
       const providerErrors: unknown[] = [];
       let recallRequests = 0;
       let memoryToolIssued = false;
-      let instance: OpenClawTestInstance | undefined;
+      let instance: CarapaceTestInstance | undefined;
       let phase = "preparing fixture";
       let statusLines: string[] | undefined;
       let sessionFound = false;
@@ -208,23 +208,23 @@ describe("Gateway Active Memory", () => {
             },
           },
           tools: { profile: "full" },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         phase = "starting Gateway";
-        instance = await createOpenClawTestInstance({
+        instance = await createCarapaceTestInstance({
           name: "active-memory-gateway",
           cwd: repoRoot,
           config: cfg,
           gatewayToken: token,
           env: {
-            OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-            OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-            OPENCLAW_GATEWAY_STARTUP_TRACE: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+            CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+            CARAPACE_GATEWAY_STARTUP_TRACE: "1",
           },
         });
         const preparedConfig = JSON.parse(
           await fs.readFile(instance.configPath, "utf8"),
-        ) as OpenClawConfig;
+        ) as CarapaceConfig;
         const preparedPlugin = preparedConfig.plugins?.entries?.["active-memory"];
         preparedRecallConfig = {
           pluginAllowed: preparedConfig.plugins?.allow?.includes("active-memory") === true,
@@ -280,7 +280,7 @@ describe("Gateway Active Memory", () => {
           agentId: "main",
           sessionKey,
           env: instance.env,
-          storePath: path.join(instance.state.agentDir("main"), "openclaw-agent.sqlite"),
+          storePath: path.join(instance.state.agentDir("main"), "carapace-agent.sqlite"),
         });
         sessionFound = entry !== undefined;
         modelSelectionLocked = entry?.modelSelectionLocked === true;

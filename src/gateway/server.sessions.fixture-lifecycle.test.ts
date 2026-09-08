@@ -4,10 +4,10 @@ import path from "node:path";
 import { vi } from "vitest";
 import { createDeferredCore } from "../shared/deferred.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
 import { captureEnv } from "../test-utils/env.js";
 import { runGatewayFixtureFork } from "./server.fixture-lifetime.test-support.js";
 
@@ -67,19 +67,19 @@ beforeEach(() => {
   env = captureEnv([
     "HOME",
     "USERPROFILE",
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_AGENT_DIR",
-    "OPENCLAW_GATEWAY_TOKEN",
-    "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-    "OPENCLAW_SKIP_GMAIL_WATCHER",
-    "OPENCLAW_SKIP_CANVAS_HOST",
-    "OPENCLAW_SKIP_CHANNELS",
-    "OPENCLAW_SKIP_PROVIDERS",
-    "OPENCLAW_SKIP_CRON",
-    "OPENCLAW_TEST_MINIMAL_GATEWAY",
-    "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-    "OPENCLAW_BUNDLED_PLUGINS_DIR",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_CONFIG_PATH",
+    "CARAPACE_AGENT_DIR",
+    "CARAPACE_GATEWAY_TOKEN",
+    "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+    "CARAPACE_SKIP_GMAIL_WATCHER",
+    "CARAPACE_SKIP_CANVAS_HOST",
+    "CARAPACE_SKIP_CHANNELS",
+    "CARAPACE_SKIP_PROVIDERS",
+    "CARAPACE_SKIP_CRON",
+    "CARAPACE_TEST_MINIMAL_GATEWAY",
+    "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+    "CARAPACE_BUNDLED_PLUGINS_DIR",
   ]);
 });
 afterEach(async () => {
@@ -136,13 +136,13 @@ test("partial session setup closes its acquired server before removing its envir
   const mkdtemp = fs.mkdtemp.bind(fs);
   const mkdtempSync = fsSync.mkdtempSync.bind(fsSync);
   const asyncTemp = vi.spyOn(fs, "mkdtemp").mockImplementation(async (prefix, options) => {
-    if (prefix.includes("openclaw-sessions-")) {
+    if (prefix.includes("carapace-sessions-")) {
       throw failure;
     }
     return await mkdtemp(prefix, options);
   });
   const syncTemp = vi.spyOn(fsSync, "mkdtempSync").mockImplementation((prefix, options) => {
-    if (prefix.includes("openclaw-sessions-")) {
+    if (prefix.includes("carapace-sessions-")) {
       throw failure;
     }
     return mkdtempSync(prefix, options);
@@ -190,14 +190,14 @@ test("teardown joins delayed server acquisition before cleaning session director
   const mkdtempSync = fsSync.mkdtempSync.bind(fsSync);
   const asyncTemp = vi.spyOn(fs, "mkdtemp").mockImplementation(async (prefix, options) => {
     const dir = await mkdtemp(prefix, options);
-    if (typeof dir === "string" && path.basename(dir).startsWith("openclaw-sessions-")) {
+    if (typeof dir === "string" && path.basename(dir).startsWith("carapace-sessions-")) {
       roots.add(dir);
     }
     return dir;
   });
   const syncTemp = vi.spyOn(fsSync, "mkdtempSync").mockImplementation((prefix, options) => {
     const dir = mkdtempSync(prefix, options);
-    if (typeof dir === "string" && path.basename(dir).startsWith("openclaw-sessions-")) {
+    if (typeof dir === "string" && path.basename(dir).startsWith("carapace-sessions-")) {
       roots.add(dir);
     }
     return dir;
@@ -251,7 +251,7 @@ test("teardown leaves delayed template initialization alive until its writes set
   let removedDuringInitialization = false;
   const mkdirSpy = vi.spyOn(fs, "mkdir").mockImplementation(async (dir, options) => {
     if (
-      String(dir).includes("openclaw-session-git-template-") &&
+      String(dir).includes("carapace-session-git-template-") &&
       path.basename(String(dir)) === "workspace"
     ) {
       templateRoot = path.dirname(String(dir));
@@ -309,7 +309,7 @@ test("teardown joins pending home acquisition before restoring the environment",
   let home: string | undefined;
   const temp = vi.spyOn(fs, "mkdtemp").mockImplementation(async (prefix, options) => {
     const dir = await mkdtemp(prefix, options);
-    if (prefix.includes("openclaw-gateway-home-")) {
+    if (prefix.includes("carapace-gateway-home-")) {
       home = dir;
       acquired.resolve();
       await release.promise;
@@ -342,16 +342,16 @@ test("a server cleanup error does not skip session directory or environment clea
   const homeBefore = process.env.HOME;
   const failure = new Error("injected server cleanup failure");
   let restoreClose: (() => void) | undefined;
-  const databases: ReturnType<typeof openOpenClawAgentDatabase>[] = [];
+  const databases: ReturnType<typeof openCarapaceAgentDatabase>[] = [];
   try {
     await setup(fixture);
     const home = process.env.HOME!;
     const { dir } = await fixtureApi.createSessionStoreDir();
     for (const databasePath of [
-      path.join(dir, "openclaw-agent.sqlite"),
-      resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" }),
+      path.join(dir, "carapace-agent.sqlite"),
+      resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" }),
     ]) {
-      databases.push(openOpenClawAgentDatabase({ agentId: "main", path: databasePath }));
+      databases.push(openCarapaceAgentDatabase({ agentId: "main", path: databasePath }));
     }
     const server = fixtureApi.getHarness();
     const closeServer = server.close;
@@ -368,7 +368,7 @@ test("a server cleanup error does not skip session directory or environment clea
   } finally {
     restoreClose?.();
     for (const database of databases) {
-      closeOpenClawAgentDatabaseByPath(database.path);
+      closeCarapaceAgentDatabaseByPath(database.path);
     }
     await emergencyCleanup(fixture);
   }
@@ -449,13 +449,13 @@ test("observes retained Gateway owners through fixture teardown", async () => {
   const { dir } = await fixtureApi.createSessionStoreDir();
   const { ws } = await harness.openClient();
   const home = process.env.HOME;
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!home || !stateDir) throw new Error("expected isolated Gateway fixture selectors");
   // A changed synthetic selector makes the harness's earlier token snapshot observable.
-  process.env.OPENCLAW_GATEWAY_TOKEN = "synthetic-retained-gateway-token";
+  process.env.CARAPACE_GATEWAY_TOKEN = "synthetic-retained-gateway-token";
   const selectors = new Map([
-    "HOME", "USERPROFILE", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_AGENT_DIR", "OPENCLAW_GATEWAY_TOKEN",
+    "HOME", "USERPROFILE", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH",
+    "CARAPACE_AGENT_DIR", "CARAPACE_GATEWAY_TOKEN",
   ].map(key => [key, process.env[key]]));
   const markers = { home: path.join(home, "owned.txt"), state: path.join(stateDir, "owned.txt"),
     sessions: path.join(dir, "owned.txt") };

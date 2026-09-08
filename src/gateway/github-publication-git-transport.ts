@@ -58,7 +58,7 @@ export function createGitHubPublicationCommandRunner(assertCurrent?: () => void)
   };
 }
 
-// A recursive tree listing scales with repository size (openclaw itself is
+// A recursive tree listing scales with repository size (carapace itself is
 // ~3.3MB), far past the default per-command cap above. Without this explicit
 // bound the attribute scan dies as an output-limit "verification" failure on
 // any real repository.
@@ -224,7 +224,7 @@ export async function captureGitHubPublicationWorkspaceSnapshot(params: {
     cwd: params.cwd,
   });
   const index = path.resolve(params.cwd, await git(["rev-parse", "--git-path", "index"]));
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-github-snapshot-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-github-snapshot-"));
   try {
     const env = {
       GIT_ATTR_NOSYSTEM: "1",

@@ -2,9 +2,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { commitPluginInstallRecordsOnly } from "./install-record-commit.js";
 import { writePersistedInstalledPluginIndexInstallRecordsWithLease } from "./installed-plugin-index-records.js";
@@ -20,15 +20,15 @@ const priorJson = `{ "revision": 41, "index": {
 } }`;
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function makeEnv() {
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: makeTrackedTempDir("openclaw-plugin-row-receipt", tempDirs),
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: makeTrackedTempDir("carapace-plugin-row-receipt", tempDirs),
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
   };
 }
 
@@ -57,7 +57,7 @@ describe("installed plugin index mutation receipts", () => {
       const otherEnv = makeEnv();
       await withPluginLifecycleLease({ env }, async (lease) => {
         if (valueJson !== null) {
-          runOpenClawStateWriteTransaction(
+          runCarapaceStateWriteTransaction(
             ({ db }) => {
               db.prepare(
                 "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES (?, ?, ?)",
@@ -91,7 +91,7 @@ describe("installed plugin index mutation receipts", () => {
         expect(JSON.parse(receipt.mutation.after.value_json).revision).toBe(receipt.revision);
         expect(receipt.previous?.policyHash ?? null).toBe(valueJson === priorJson ? "prior" : null);
         expect(lease.databasePath).toBe(
-          path.join(env.OPENCLAW_STATE_DIR, "state", "openclaw.sqlite"),
+          path.join(env.CARAPACE_STATE_DIR, "state", "carapace.sqlite"),
         );
         const captured = JSON.stringify(receipt.mutation);
         await writePersistedInstalledPluginIndexInstallRecordsWithLease(
@@ -176,7 +176,7 @@ describe("installed plugin index mutation receipts", () => {
         expect(receipt).toBeUndefined();
         expect(readRow(lease.databasePath)).toBeNull();
       } finally {
-        runOpenClawStateWriteTransaction(
+        runCarapaceStateWriteTransaction(
           ({ db }) => {
             db.exec(`DROP TRIGGER IF EXISTS temp.receipt_commit_failure;
             DROP TABLE IF EXISTS temp.receipt_child;

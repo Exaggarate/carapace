@@ -5,19 +5,19 @@ import { expect, it, vi } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 
 // Feedback discovery reads files; the session runtime is reserved for actual session operations.
-vi.mock("openclaw/plugin-sdk/session-store-runtime", () => {
+vi.mock("carapace/plugin-sdk/session-store-runtime", () => {
   throw new Error("legacy file detection must not load the session runtime");
 });
 
 it("detects Teams feedback files without loading session storage", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-msteams-doctor-cold-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-msteams-doctor-cold-"));
   const stateDir = path.join(root, "state");
   const openStore = vi.fn(() => {
     throw new Error("detection must not open plugin state");
   });
   const params = {
     config: { agents: { list: [{ id: "work" }] } },
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     stateDir,
     oauthDir: path.join(stateDir, "oauth"),
     context: { openPluginStateKeyedStore: openStore },

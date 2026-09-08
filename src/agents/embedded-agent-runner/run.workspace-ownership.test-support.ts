@@ -1,10 +1,10 @@
 import { expect, vi } from "vitest";
 import { isPathInside } from "../../infra/path-guards.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 
 /** Guard the real consumers before discovery can touch an unowned workspace. */
 export async function guardRunWorkspaceOwnership(
-  state: Pick<OpenClawTestState, "root" | "home" | "stateDir">,
+  state: Pick<CarapaceTestState, "root" | "home" | "stateDir">,
 ) {
   // Import after the harness reset so the spies intercept the runner's graph.
   const metadata = await import("../../plugins/plugin-metadata-snapshot.js");
@@ -17,7 +17,7 @@ export async function guardRunWorkspaceOwnership(
     }
     requests.push(workspaceDir);
     expect(process.env.HOME, "fixture home survives runner reset/warmup").toBe(state.home);
-    expect(process.env.OPENCLAW_STATE_DIR, "fixture state survives runner reset/warmup").toBe(
+    expect(process.env.CARAPACE_STATE_DIR, "fixture state survives runner reset/warmup").toBe(
       state.stateDir,
     );
     if (!isPathInside(state.root, workspaceDir)) {

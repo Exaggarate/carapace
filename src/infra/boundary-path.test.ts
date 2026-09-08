@@ -26,7 +26,7 @@ function createSeededRandom(seed: number): () => number {
 
 describe("resolveRealpathOrAbsolute", () => {
   it("canonicalizes existing symlinks", async () => {
-    await withTestDir({ prefix: "openclaw-boundary-path-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-" }, async (base) => {
       const target = path.join(base, "target");
       const alias = path.join(base, "alias");
       await fs.mkdir(target);
@@ -36,7 +36,7 @@ describe("resolveRealpathOrAbsolute", () => {
   });
 
   it("keeps missing paths lexical and falls back on non-missing errors", async () => {
-    await withTestDir({ prefix: "openclaw-boundary-path-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-" }, async (base) => {
       const alias = path.join(base, "alias");
       await fs.symlink(path.join(base, "target"), alias);
       const missing = path.join(alias, "missing");
@@ -102,7 +102,7 @@ describe("resolveRootPath", () => {
       return;
     }
 
-    await withTestDir({ prefix: "openclaw-boundary-path-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-" }, async (base) => {
       const root = path.join(base, "workspace");
       const targetDir = path.join(root, "target-dir");
       const linkPath = path.join(root, "alias");
@@ -129,7 +129,7 @@ describe("resolveRootPath", () => {
       return;
     }
 
-    await withTestDir({ prefix: "openclaw-boundary-path-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-" }, async (base) => {
       const root = path.join(base, "workspace");
       const outside = path.join(base, "outside");
       const linkPath = path.join(root, "alias-out");
@@ -160,7 +160,7 @@ describe("resolveRootPath", () => {
       return;
     }
 
-    await withTestDir({ prefix: "openclaw-boundary-path-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-" }, async (base) => {
       const root = path.join(base, "workspace");
       const outside = path.join(base, "outside");
       const outsideFile = path.join(outside, "target.txt");
@@ -196,7 +196,7 @@ describe("resolveRootPath", () => {
       return;
     }
 
-    await withTestDir({ prefix: "openclaw-boundary-path-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-" }, async (base) => {
       const root = path.join(base, "workspace");
       const aliasRoot = path.join(base, "workspace-alias");
       const fileName = "plugin.js";
@@ -227,7 +227,7 @@ describe("resolveRootPath", () => {
       return;
     }
 
-    await withTestDir({ prefix: "openclaw-boundary-path-fuzz-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-boundary-path-fuzz-" }, async (base) => {
       const root = path.join(base, "workspace");
       const outside = path.join(base, "outside");
       const safeTarget = path.join(root, "safe-target");

@@ -7,7 +7,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createModelAuthAvailabilityResolver } from "./model-auth-availability.js";
 import {
   authStore,
@@ -56,7 +56,7 @@ describe("model auth unavailability reasons", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       if (pending) {
         setConfigResolutionFacts(
           sourceConfig,
@@ -76,7 +76,7 @@ describe("model auth unavailability reasons", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const store = authStore({
         bound: { type: "api_key", provider: "other", key: "profile-key" },
       });
@@ -265,9 +265,9 @@ describe("model auth unavailability reasons", () => {
               },
             },
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         if (source === "hydrated-inline") {
-          const sourceConfig: OpenClawConfig = {
+          const sourceConfig: CarapaceConfig = {
             models: {
               providers: {
                 anthropic: {

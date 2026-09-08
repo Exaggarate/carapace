@@ -8,7 +8,7 @@ import {
 import { resolveConfigWidePluginMetadataSnapshot } from "../config/io.plugin-metadata.js";
 import { createConfigFileSnapshot } from "../config/io.snapshot-shared.js";
 import { hashRuntimeConfigValue } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   acquireStartupMigrationLease,
   readMigrationCheckpointStatus,
@@ -17,7 +17,7 @@ import {
 } from "../infra/startup-migration-checkpoint.js";
 import { autoMigrateLegacyPluginDoctorState } from "../infra/state-migrations.plugin-doctor.js";
 import { resetAutoMigrateLegacyStateDirForTest } from "../infra/state-migrations.state-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { clearPluginDoctorContractRegistryCache } from "./doctor-contract-registry.test-fixtures.js";
 import { writePersistedInstalledPluginIndexSync } from "./installed-plugin-index-store-write.js";
 import { readPersistedInstalledPluginIndexSync } from "./installed-plugin-index-store.js";
@@ -45,12 +45,12 @@ afterEach(() => {
   clearPluginDoctorContractRegistryCache();
   clearPluginMetadataLifecycleCaches();
   resetAutoMigrateLegacyStateDirForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function makeTempDir(): string {
-  return makeTrackedTempDir("openclaw-plugin-registry-migration", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-registry-migration", tempDirs);
 }
 
 function checkpointIdentity(snapshot: PluginMetadataSnapshot): MigrationCheckpointIdentity {
@@ -85,7 +85,7 @@ describe("persisted plugin registry Doctor contract freshness", () => {
       ["shared-plugin", configuredPluginDir],
       [
         "secondary-plugin",
-        path.join(secondaryWorkspace, ".openclaw", "extensions", "secondary-plugin"),
+        path.join(secondaryWorkspace, ".carapace", "extensions", "secondary-plugin"),
       ],
     ] as const) {
       mkdirSafeDir(pluginRoot);
@@ -97,13 +97,13 @@ describe("persisted plugin registry Doctor contract freshness", () => {
     }
     const env = {
       HOME: rootDir,
-      OPENCLAW_HOME: rootDir,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.7.1",
+      CARAPACE_HOME: rootDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.7.1",
       VITEST: "true",
     };
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: {
@@ -118,7 +118,7 @@ describe("persisted plugin registry Doctor contract freshness", () => {
       },
     };
     const snapshot = createConfigFileSnapshot({
-      path: path.join(stateDir, "openclaw.json"),
+      path: path.join(stateDir, "carapace.json"),
       exists: true,
       raw: JSON.stringify(config),
       parsed: config,
@@ -182,16 +182,16 @@ describe("persisted plugin registry Doctor contract freshness", () => {
     const stateDir = path.join(rootDir, "state");
     const env = {
       HOME: rootDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_VERSION: "2026.7.1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_VERSION: "2026.7.1",
       VITEST: "true",
     };
     const pluginId = "doctor-replay";
     const pluginDir = writeManagedNpmPlugin({
       stateDir,
-      packageName: "@openclaw/doctor-replay",
+      packageName: "@carapace/doctor-replay",
       pluginId,
       version: "1.0.0",
     });

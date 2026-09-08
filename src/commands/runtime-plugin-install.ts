@@ -3,7 +3,7 @@ import path from "node:path";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { modelSelectionShouldEnsureCopilotRuntimePlugin } from "../agents/copilot-routing.js";
 import { modelSelectionShouldEnsureCodexPlugin } from "../agents/openai-routing.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import type { PluginCapabilityConsentHandler } from "../plugins/capability-consent.js";
@@ -20,26 +20,26 @@ type RuntimePluginInstallDescriptor = {
   label: string;
   npmSpec: string;
   warningLabel: string;
-  /** Keep this official runtime package on the same release cohort as OpenClaw. */
-  versionBoundToOpenClaw?: boolean;
+  /** Keep this official runtime package on the same release cohort as Carapace. */
+  versionBoundToCarapace?: boolean;
 };
 
 type RuntimePluginInstallResult =
-  | { ok: true; cfg: OpenClawConfig; required: boolean }
+  | { ok: true; cfg: CarapaceConfig; required: boolean }
   | { ok: false; status: "skipped" | "failed" | "timed_out"; message: string };
 
 type ModelSelectionRuntimePluginsResult =
-  | { ok: true; cfg: OpenClawConfig; codexInstalled: boolean }
+  | { ok: true; cfg: CarapaceConfig; codexInstalled: boolean }
   | { ok: false; message: string };
 
 type RuntimePluginSelection = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   model?: string;
   agentId?: string;
 }) => boolean;
 
 type RuntimePluginEnsureParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   model?: string;
   agentId?: string;
   prompter: WizardPrompter;
@@ -51,7 +51,7 @@ type RuntimePluginEnsureParams = {
 };
 
 type RuntimePluginRepairParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   model?: string;
   agentId?: string;
   env?: NodeJS.ProcessEnv;
@@ -62,14 +62,14 @@ export const CODEX_RUNTIME_PLUGIN_ID = "codex";
 const CODEX_RUNTIME_PLUGIN_DESCRIPTOR = {
   pluginId: CODEX_RUNTIME_PLUGIN_ID,
   label: "Codex",
-  npmSpec: "@openclaw/codex",
+  npmSpec: "@carapace/codex",
   warningLabel: "Codex",
-  versionBoundToOpenClaw: true,
+  versionBoundToCarapace: true,
 };
 const COPILOT_RUNTIME_PLUGIN_DESCRIPTOR = {
   pluginId: "copilot",
   label: "GitHub Copilot agent runtime",
-  npmSpec: "@openclaw/copilot",
+  npmSpec: "@carapace/copilot",
   warningLabel: "GitHub Copilot",
 };
 
@@ -87,7 +87,7 @@ function isInstalledRecordPresentOnDisk(
 function finalizeRequiredRuntimePluginInstall(
   descriptor: RuntimePluginInstallDescriptor,
   result: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     installed: boolean;
     status: "installed" | "skipped" | "failed" | "timed_out";
     reason?: string;
@@ -202,7 +202,7 @@ async function ensureRuntimePluginForModelSelection(
         defaultChoice: "npm",
       },
       trustedSourceLinkedOfficialInstall: true,
-      ...(params.descriptor.versionBoundToOpenClaw ? { versionBoundToOpenClaw: true } : {}),
+      ...(params.descriptor.versionBoundToCarapace ? { versionBoundToCarapace: true } : {}),
     },
     prompter: io.prompter,
     runtime: io.runtime,
@@ -223,7 +223,7 @@ async function ensureRuntimePluginForModelSelection(
 
 /** Repairs missing install records for runtime plugins required by model selection. */
 async function repairRuntimePluginInstallForModelSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   model?: string;
   agentId?: string;
   env?: NodeJS.ProcessEnv;

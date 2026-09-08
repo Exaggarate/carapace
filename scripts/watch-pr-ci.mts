@@ -161,7 +161,7 @@ export function parseArgs(argv: string[]) {
       args: argv,
       allowPositionals: true,
       options: {
-        repo: { type: "string", default: "openclaw/openclaw" },
+        repo: { type: "string", default: "carapace/carapace" },
         after: { type: "string" },
         "attach-timeout": { type: "string", default: "900" },
         timeout: { type: "string", default: "3600" },

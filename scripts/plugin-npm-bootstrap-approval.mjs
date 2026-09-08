@@ -1,7 +1,7 @@
 import { parseReleaseVersion } from "./lib/release-version.mjs";
 
 const SHA = /^[a-f0-9]{40}$/u;
-const PACKAGE = /^@openclaw\/[a-z0-9][a-z0-9._-]*$/u;
+const PACKAGE = /^@carapace\/[a-z0-9][a-z0-9._-]*$/u;
 
 export function createStablePluginNpmBootstrapApproval(input) {
   const version = typeof input.releaseTag === "string" ? input.releaseTag.slice(1) : "";
@@ -18,7 +18,7 @@ export function createStablePluginNpmBootstrapApproval(input) {
     );
   }
   if (
-    input.repository !== "openclaw/openclaw" ||
+    input.repository !== "carapace/carapace" ||
     !SHA.test(input.targetSha ?? "") ||
     !SHA.test(input.parentWorkflowSha ?? "") ||
     !new RegExp(`^release-publish/${input.parentWorkflowSha.slice(0, 12)}-[1-9][0-9]*$`, "u").test(
@@ -42,7 +42,7 @@ export function createStablePluginNpmBootstrapApproval(input) {
     input.packages.some((name) => typeof name !== "string" || !PACKAGE.test(name)) ||
     new Set(input.packages).size !== input.packages.length
   ) {
-    throw new Error("Stable npm bootstrap requires a unique publishable @openclaw package set.");
+    throw new Error("Stable npm bootstrap requires a unique publishable @carapace package set.");
   }
   return {
     version: 1,

@@ -14,7 +14,7 @@ type Entry = (typeof entries)[number];
 type Mode = "success" | "nonzero" | "signal" | "wait" | "throw" | "unjoined";
 
 function createLintFixture(mode: Mode, phase: string, timeout: boolean) {
-  const root = fs.realpathSync(fixture.createTempDir("openclaw-lint-status-"));
+  const root = fs.realpathSync(fixture.createTempDir("carapace-lint-status-"));
   const write = (relative: string, content: string) => {
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -129,13 +129,13 @@ process.stderr.write = (chunk, ...args) => {
 };
 `,
   );
-  const env: NodeJS.ProcessEnv = { ...process.env, OPENCLAW_OXLINT_SHARDS_SERIAL: "1" };
+  const env: NodeJS.ProcessEnv = { ...process.env, CARAPACE_OXLINT_SHARDS_SERIAL: "1" };
   for (const key of [
     "NODE_OPTIONS",
     "NODE_PATH",
     "PNPM_CONFIG_MODULES_DIR",
     "npm_config_modules_dir",
-    "OPENCLAW_OXLINT_SKIP_PREPARE",
+    "CARAPACE_OXLINT_SKIP_PREPARE",
   ]) {
     delete env[key];
   }
@@ -197,9 +197,9 @@ async function runLintFixture(
       ],
       {
         ...env,
-        OPENCLAW_OXLINT_SHARDS_SERIAL: parallel ? "0" : "1",
-        OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0",
-        OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: timeout ? "1500" : "0",
+        CARAPACE_OXLINT_SHARDS_SERIAL: parallel ? "0" : "1",
+        CARAPACE_OXLINT_SHARD_HEARTBEAT_MS: "0",
+        CARAPACE_OXLINT_SHARD_TIMEOUT_MS: timeout ? "1500" : "0",
       },
       10_000,
       {

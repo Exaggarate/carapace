@@ -11,7 +11,7 @@ import {
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import {
   isCanonicalTerminalUploadBase64,
   MAX_TERMINAL_UPLOAD_BASE64_LENGTH,
@@ -25,16 +25,16 @@ import { getFileLockProcessStartTime } from "../shared/pid-alive.js";
 import { hasErrnoCode } from "./errno.js";
 import { createFileLockManager } from "./file-lock-manager.js";
 import { isLockOwnerDefinitelyStale } from "./stale-lock-file.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
-const TERMINAL_UPLOAD_PREFIX = "openclaw-terminal-upload-";
+const TERMINAL_UPLOAD_PREFIX = "carapace-terminal-upload-";
 const TERMINAL_UPLOAD_CLEANUP_RETRY_MS = 60 * 60 * 1000;
 const MAX_RETAINED_BYTES = 256 * 1024 * 1024;
 const MAX_RETAINED_DIRECTORIES = 64;
 const MAX_STAGED_NAME_BYTES = 180;
 const PORTABLE_NAME_FORBIDDEN = new RegExp(String.raw`[\u0000-\u001f\u007f<>:"/\\|?*%!]`, "g");
 const WINDOWS_RESERVED_NAME = /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/iu;
-const uploadLocks = createFileLockManager("openclaw.terminal-upload");
+const uploadLocks = createFileLockManager("carapace.terminal-upload");
 const uploadQueue = new BoundedSerialQueue({
   maxPendingCount: MAX_RETAINED_DIRECTORIES,
   maxPendingWeight: Math.ceil(MAX_RETAINED_BYTES / 3) * 4,
@@ -60,7 +60,7 @@ type TerminalUploadRootOptions = {
 /** Windows temp variables can point at a shared directory; inherit the user's profile ACL instead. */
 function resolveTerminalUploadRoot(options?: TerminalUploadRootOptions): string {
   return (options?.platform ?? process.platform) === "win32"
-    ? path.join(options?.homeDir ?? homedir(), ".openclaw", "tmp")
+    ? path.join(options?.homeDir ?? homedir(), ".carapace", "tmp")
     : (options?.tempDir ?? tmpdir());
 }
 
@@ -154,8 +154,8 @@ async function withUploadLock<T>(
   run: (assertHeld: () => Promise<void>) => Promise<T>,
 ): Promise<T> {
   const uid = typeof process.getuid === "function" ? process.getuid() : "user";
-  const privateRoot = resolvePreferredOpenClawTmpDir({
-    preferredDir: path.join(root, `.openclaw-terminal-staging-${uid}`),
+  const privateRoot = resolvePreferredCarapaceTmpDir({
+    preferredDir: path.join(root, `.carapace-terminal-staging-${uid}`),
     tmpdir: () => root,
   });
   const lockDirectory = path.join(privateRoot, "terminal-upload-lock");

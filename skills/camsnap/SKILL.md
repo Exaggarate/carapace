@@ -4,7 +4,7 @@ description: "Capture frames or clips from RTSP/ONVIF cameras and local webcams,
 homepage: https://camsnap.ai
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "📸",
         "requires": { "bins": ["camsnap"] },

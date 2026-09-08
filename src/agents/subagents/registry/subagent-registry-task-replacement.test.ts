@@ -23,7 +23,7 @@ import {
   getAgentRunContextOwnerStatus,
 } from "../../../infra/agent-run-registry.js";
 import { onSessionLifecycleEvent } from "../../../sessions/session-lifecycle-events.js";
-import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../../state/carapace-state-db.js";
 import { reloadTaskRuntimeStateFromStore } from "../../../tasks/runtime-internal.js";
 import { failFlow, getTaskFlowById } from "../../../tasks/task-flow-registry.js";
 import { getTaskActivitySnapshot } from "../../../tasks/task-registry-activity.js";
@@ -306,7 +306,7 @@ it.each(["successor", "task activation", "flow activation"] as const)(
         parentEvents(event);
       }
     });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const triggerName = `reject_replacement_${
       rejectedWrite === "successor" ? "run" : rejectedWrite === "task activation" ? "task" : "flow"
     }`;

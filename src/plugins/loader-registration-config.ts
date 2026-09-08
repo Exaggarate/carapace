@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizePluginsConfig } from "./config-state.js";
 
 /** Configuration consumed during registration, independent of activation and load scope. */
 export function resolvePluginRegistrationConfigKey(params: {
-  config?: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config?: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
 }): string {
   const runtimeEntries = normalizePluginsConfig(params.config?.plugins).entries;
   const sourceEntries = normalizePluginsConfig(params.activationSourceConfig?.plugins).entries;

@@ -20,10 +20,10 @@ import {
 } from "../config/sessions/session-transcript-read-fence.js";
 import { appendSessionTranscriptMessageByIdentity } from "../plugin-sdk/session-transcript-runtime.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   cleanupManagedOutgoingMediaRecords,
@@ -132,15 +132,15 @@ function archive(
 }
 
 beforeEach(() => {
-  savedEnv = captureEnv(["OPENCLAW_STATE_DIR"]);
+  savedEnv = captureEnv(["CARAPACE_STATE_DIR"]);
   stateDir = fs.realpathSync(tempDirs.make("managed-visibility-"));
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   setRuntimeConfigSnapshot({ agents: { list: [{ id: "main" }] } });
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   clearRuntimeConfigSnapshot();
   savedEnv.restore();
 });
@@ -184,7 +184,7 @@ describe("managed attachment SQLite visibility", () => {
       reason: "raw managed attachment identity",
       allowResetArchiveFallback: true,
     });
-    expect(full.messages).toMatchObject([{ __openclaw: { id: messageId } }]);
+    expect(full.messages).toMatchObject([{ __carapace: { id: messageId } }]);
     expect((await f.download())?.artifactId).toBe(
       `${MANAGED_OUTGOING_IMAGE_ARTIFACT_ID_PREFIX}${f.attachmentId}`,
     );
@@ -199,7 +199,7 @@ describe("managed attachment SQLite visibility", () => {
         message: {
           role: "assistant",
           content: [f.block],
-          __openclaw: { id: f.messageId },
+          __carapace: { id: f.messageId },
         },
       };
       await seed(f, source === "active" ? [event] : []);
@@ -211,7 +211,7 @@ describe("managed attachment SQLite visibility", () => {
         reason: "retained message metadata ID",
         allowResetArchiveFallback: true,
       });
-      expect(full.messages).toMatchObject([{ __openclaw: { id: f.messageId } }]);
+      expect(full.messages).toMatchObject([{ __carapace: { id: f.messageId } }]);
       expect(await f.download()).not.toBeNull();
     },
   );
@@ -303,7 +303,7 @@ describe("managed attachment SQLite visibility", () => {
         });
         expect(await readSessionMessagesMatchingIdAsync(f.scope, id)).toEqual(
           full.messages.filter(
-            (row) => (row as { __openclaw: { id: string } })["__openclaw"].id === id,
+            (row) => (row as { __carapace: { id: string } })["__carapace"].id === id,
           ),
         );
       });
@@ -313,7 +313,7 @@ describe("managed attachment SQLite visibility", () => {
         ),
       ).rejects.toBeInstanceOf(SessionTranscriptReadFenceError);
     }
-    expect(openOpenClawAgentDatabase({ agentId: "main" }).db.isTransaction).toBe(false);
+    expect(openCarapaceAgentDatabase({ agentId: "main" }).db.isTransaction).toBe(false);
   });
 
   it("keeps validation, presence and selected content on one snapshot across a writer", async () => {
@@ -321,7 +321,7 @@ describe("managed attachment SQLite visibility", () => {
     const other = message("other", null, "snapshot writer trigger");
     const attached = message(f.messageId, "other", [f.block]);
     await seed(f, [other, attached]);
-    const database = openOpenClawAgentDatabase({ agentId: "main" });
+    const database = openCarapaceAgentDatabase({ agentId: "main" });
     const row = database.db
       .prepare(
         "SELECT seq, event_json FROM transcript_events WHERE session_id = ? AND seq = (SELECT seq FROM transcript_event_identities WHERE session_id = ? AND event_id = ?)",
@@ -391,7 +391,7 @@ describe("managed attachment SQLite visibility", () => {
         allowResetArchiveFallback: true,
       });
       expect(
-        full.messages.map((m) => (m as { __openclaw?: { id?: string } })["__openclaw"]?.id),
+        full.messages.map((m) => (m as { __carapace?: { id?: string } })["__carapace"]?.id),
       ).toEqual(kind === "reset-only" ? ["reset"] : ["root", "replacement"]);
       expect((await f.download()) === null).toBe(true);
       expect(
@@ -422,7 +422,7 @@ describe("managed attachment SQLite visibility", () => {
           message(f.messageId, "reset", [f.block]),
         ]);
       }
-      openOpenClawAgentDatabase({ agentId: "main" })
+      openCarapaceAgentDatabase({ agentId: "main" })
         .db.prepare(`UPDATE transcript_events SET event_json = event_json || ? WHERE session_id = ? AND seq = (
           SELECT seq FROM transcript_event_identities WHERE session_id = ? AND event_id = 'hidden'
         )`)
@@ -434,7 +434,7 @@ describe("managed attachment SQLite visibility", () => {
       });
       expect(full.messages).toContainEqual(
         expect.objectContaining({
-          __openclaw: expect.objectContaining({ id: f.messageId }),
+          __carapace: expect.objectContaining({ id: f.messageId }),
         }),
       );
       expect(await f.download()).not.toBeNull();
@@ -468,7 +468,7 @@ describe("managed attachment SQLite visibility", () => {
         "multiple values": sourceJson + ",{}",
         "premature envelope close": sourceJson + "]\u0000trailing",
       }[corruption];
-      const database = openOpenClawAgentDatabase({ agentId: "main" });
+      const database = openCarapaceAgentDatabase({ agentId: "main" });
       database.db
         .prepare(`UPDATE transcript_events SET event_json = ? WHERE session_id = ? AND seq = (
         SELECT seq FROM transcript_event_identities WHERE session_id = ? AND event_id = ?

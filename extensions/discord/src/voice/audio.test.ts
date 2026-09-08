@@ -17,15 +17,15 @@ vi.mock("node:child_process", async (importOriginal) => ({
   ...(await importOriginal<typeof import("node:child_process")>()),
   spawn: spawnMock,
 }));
-vi.mock("openclaw/plugin-sdk/media-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/media-runtime")>()),
+vi.mock("carapace/plugin-sdk/media-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/media-runtime")>()),
   resolveFfmpegBin: () => "ffmpeg",
 }));
-vi.mock("openclaw/plugin-sdk/temp-path", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/temp-path")>();
+vi.mock("carapace/plugin-sdk/temp-path", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/temp-path")>();
   return {
     ...actual,
-    resolvePreferredOpenClawTmpDir: () => voiceWorkspaceFixture.rootDir,
+    resolvePreferredCarapaceTmpDir: () => voiceWorkspaceFixture.rootDir,
     tempWorkspace: async (options: Parameters<typeof actual.tempWorkspace>[0]) => {
       const workspace = await actual.tempWorkspace({
         ...options,
@@ -209,7 +209,7 @@ describe("Discord voice WAV workspace ownership", () => {
     run: (params: { rootDir: string }) => Promise<void>,
   ): Promise<void> {
     const rootDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-discord-voice-workspace-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-discord-voice-workspace-")),
     );
     voiceWorkspaceFixture.rootDir = rootDir;
     voiceWorkspaceFixture.writeError = undefined;

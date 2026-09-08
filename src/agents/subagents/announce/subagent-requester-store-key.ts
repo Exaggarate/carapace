@@ -4,13 +4,13 @@
  * Converts raw requester session keys into the canonical registry key shape.
  */
 import { resolveAgentMainSessionKey } from "../../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { normalizeMainKey } from "../../../routing/session-key.js";
 import { resolveSessionAgentId } from "../../agent-scope.js";
 
 /** Resolve the canonical store key for a subagent requester session. */
 export function resolveRequesterStoreKey(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requesterSessionKey: string,
   explicitAgentId?: string,
 ): string {

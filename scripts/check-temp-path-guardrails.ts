@@ -1,4 +1,4 @@
-// Check Temp Path Guardrails script supports OpenClaw repository automation.
+// Check Temp Path Guardrails script supports Carapace repository automation.
 import fs from "node:fs/promises";
 import path from "node:path";
 import pMap, { pMapSkip } from "p-map";

@@ -1,7 +1,7 @@
 // Reply-payload normalization projects loose tool/agent objects onto the
 // outbound-supported reply payload fields.
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import type { ReplyPayload as InternalReplyPayload } from "../../auto-reply/reply-payload.js";
 import { normalizeOutboundLocation } from "../../channels/location.js";
 

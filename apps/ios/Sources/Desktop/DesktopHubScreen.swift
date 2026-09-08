@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 /// Control-hub Desktop destination: embeds the gateway-served desktop page in
@@ -7,14 +7,14 @@ struct DesktopHubScreen: View {
     @Environment(NodeAppModel.self) private var appModel
     let source: String?
     let session: String?
-    let headerSidebarAction: OpenClawSidebarHeaderAction?
+    let headerSidebarAction: CarapaceSidebarHeaderAction?
     let usesNativeNavigationChrome: Bool
     let gatewayAction: (() -> Void)?
 
     init(
         source: String? = nil,
         session: String? = nil,
-        headerSidebarAction: OpenClawSidebarHeaderAction? = nil,
+        headerSidebarAction: CarapaceSidebarHeaderAction? = nil,
         usesNativeNavigationChrome: Bool = false,
         gatewayAction: (() -> Void)? = nil)
     {
@@ -29,7 +29,7 @@ struct DesktopHubScreen: View {
         let config = self.appModel.activeGatewayConnectConfig
         let storedOperatorToken = AuthenticatedControlUI.storedOperatorToken(config: config)
         ZStack {
-            OpenClawProBackground()
+            CarapaceProBackground()
             if let url = Self.desktopURL(config: config, source: self.source, session: self.session) {
                 AuthenticatedControlUIWebView(
                     url: url,
@@ -59,13 +59,13 @@ struct DesktopHubScreen: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: gatewayAction) {
                         Image(systemName: "antenna.radiowaves.left.and.right")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                     }
                     .accessibilityLabel("Gateway settings")
                 }
             }
             if let headerSidebarAction {
-                OpenClawSidebarToolbarItem(
+                CarapaceSidebarToolbarItem(
                     action: headerSidebarAction,
                     placement: .topBarLeading)
             }
@@ -74,20 +74,20 @@ struct DesktopHubScreen: View {
 
     private var unavailableCard: some View {
         VStack(spacing: 12) {
-            ProIconBadge(systemName: "display", color: OpenClawBrand.accent)
+            ProIconBadge(systemName: "display", color: CarapaceBrand.accent)
             Text("Desktop needs a connected gateway")
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
             Text("Connect to your gateway to view an observable machine.")
-                .font(OpenClawType.caption)
+                .font(CarapaceType.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             if let gatewayAction {
                 Button(action: gatewayAction) {
                     Text("Open Gateway Settings")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(OpenClawBrand.accent)
+                .tint(CarapaceBrand.accent)
             }
         }
         .padding(24)

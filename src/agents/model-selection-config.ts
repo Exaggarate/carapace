@@ -1,5 +1,5 @@
 /** Pure configured-model selection helpers safe for config validation. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
 import type { ModelManifestNormalizationContext, ModelRef } from "./model-ref-shared.js";
@@ -7,7 +7,7 @@ import { normalizeModelSelection, resolveConfiguredModelRef } from "./model-sele
 
 export function resolveDefaultModelForAgent(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     allowManifestNormalization?: boolean;
     allowPluginNormalization?: boolean;
@@ -25,7 +25,7 @@ export function resolveDefaultModelForAgent(
 }
 
 export function resolveSubagentConfiguredModelSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   includeAgentPrimary?: boolean;
 }): string | undefined {

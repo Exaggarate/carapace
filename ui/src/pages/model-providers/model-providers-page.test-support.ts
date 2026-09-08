@@ -274,7 +274,7 @@ export function createEmptyModelProvidersRouteData(
 
 export function appendPage(context: ApplicationContext) {
   const page = document.createElement(
-    "openclaw-model-providers-page",
+    "carapace-model-providers-page",
   ) as ModelProvidersPageTestElement;
   page.context = context;
   page.routeData = createEmptyModelProvidersRouteData(context);

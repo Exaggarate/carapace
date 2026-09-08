@@ -1,6 +1,6 @@
 // Covers diagnostic event emission and metadata handling.
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   hasInternalDiagnosticEventInterest,
@@ -392,7 +392,7 @@ describe("diagnostic-events", () => {
   it("does not expose mutable diagnostic state on the obsolete global symbol", async () => {
     const globalStore = globalThis as Record<PropertyKey, unknown>;
     const events: boolean[] = [];
-    globalStore[Symbol.for("openclaw.diagnosticEventsState")] = {
+    globalStore[Symbol.for("carapace.diagnosticEventsState")] = {
       listeners: new Set([() => events.push(true)]),
     };
     onInternalDiagnosticEvent((eventValue, metadata) => {
@@ -409,7 +409,7 @@ describe("diagnostic-events", () => {
 
     await yieldToEventLoop();
     expect(events).toEqual([false]);
-    delete globalStore[Symbol.for("openclaw.diagnosticEventsState")];
+    delete globalStore[Symbol.for("carapace.diagnosticEventsState")];
   });
 
   it("keeps trusted internal events off the public diagnostic stream", async () => {

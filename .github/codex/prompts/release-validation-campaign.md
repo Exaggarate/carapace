@@ -1,6 +1,6 @@
 # Release-validation campaign
 
-Read `.agents/skills/openclaw-release-validation/SKILL.md` completely. Run its
+Read `.agents/skills/carapace-release-validation/SKILL.md` completely. Run its
 **Campaign artifact** workflow for `RELEASE_VALIDATION_TAG`. The workflow has
 already resolved the immutable release commit and guidance-main commit in
 `RELEASE_VALIDATION_RELEASE_COMMIT` and `RELEASE_VALIDATION_GUIDANCE_MAIN_SHA`.

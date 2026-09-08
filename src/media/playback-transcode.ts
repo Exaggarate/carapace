@@ -2,8 +2,8 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { maxBytesForKind, type MediaKind } from "@openclaw/media-core/constants";
-import { extensionForMime, normalizeMimeType } from "@openclaw/media-core/mime";
+import { maxBytesForKind, type MediaKind } from "@carapace/media-core/constants";
+import { extensionForMime, normalizeMimeType } from "@carapace/media-core/mime";
 import { hasErrnoCode } from "../infra/errno.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { fileStore } from "../infra/file-store.js";
@@ -11,7 +11,7 @@ import { sameFileIdentity } from "../infra/fs-safe-advanced.js";
 import { openLocalFileSafely } from "../infra/fs-safe.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { withTempWorkspace } from "../infra/private-temp-workspace.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
 import { runFfmpeg } from "./ffmpeg-exec.js";
@@ -179,7 +179,7 @@ function resolvePlaybackMode(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.playbackTranscodeTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.playbackTranscodeTestApi")] = {
     createPlaybackTranscodeCacheKey,
     getPlaybackTranscodeJobs: (): Promise<void>[] => [...playbackJobs.values()],
   };
@@ -495,7 +495,7 @@ async function transcodePlaybackSource(params: {
     }
     const outputBuffer = await withTempWorkspace(
       {
-        rootDir: resolvePreferredOpenClawTmpDir(),
+        rootDir: resolvePreferredCarapaceTmpDir(),
         prefix: "playback-transcode-",
       },
       async (workspace) => {

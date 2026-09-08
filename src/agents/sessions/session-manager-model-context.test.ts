@@ -11,18 +11,18 @@ import {
 import { runWithSessionTranscriptReadFence } from "../../config/sessions/session-transcript-read-fence.js";
 import { waitForSessionTranscriptProjection } from "../../config/sessions/session-transcript-reconcile.js";
 import { WorkerTaskPool } from "../../infra/worker-task-pool.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAgentAssistantMessage } from "../test-helpers/agent-message-fixtures.js";
 import { CURRENT_SESSION_VERSION, SessionManager } from "./session-manager.js";
 
 it("acquires a long sparse context with bounded queries and preserved message order", async () => {
-  await withOpenClawTestState({ label: "model-context-batch" }, async (state) => {
+  await withCarapaceTestState({ label: "model-context-batch" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "batched-context",
       sessionKey: "agent:main:batched-context",
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
     const messages = Array.from({ length: 1_200 }, (_, index) => ({
@@ -41,7 +41,7 @@ it("acquires a long sparse context with bounded queries and preserved message or
       { type: "session", version: CURRENT_SESSION_VERSION, id: scope.sessionId, cwd: "/synthetic" },
       ...messages,
     ]);
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: scope.storePath });
     const prototype = Object.getPrototypeOf(database.db.prepare("SELECT 1")) as StatementSync;
     const spy = vi.spyOn(prototype, "iterate");
     try {
@@ -65,12 +65,12 @@ it("acquires a long sparse context with bounded queries and preserved message or
 it.each(["whole", "reset", "compaction", "reset-compaction", "leaf", "opaque"])(
   "acquires detached %s context without native payloads or changing stored evidence",
   async (scenario) => {
-    await withOpenClawTestState({ label: "model-context" }, async (state) => {
+    await withCarapaceTestState({ label: "model-context" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "model-view",
         sessionKey: "agent:main:model-view",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);
@@ -89,7 +89,7 @@ it.each(["whole", "reset", "compaction", "reset-compaction", "leaf", "opaque"])(
         role: "user",
         content: "old",
         timestamp: 1,
-        __openclaw: metadata,
+        __carapace: metadata,
       } as Parameters<SessionManager["appendMessage"]>[0]);
       const excluded = source.appendMessage({
         role: "custom",
@@ -103,7 +103,7 @@ it.each(["whole", "reset", "compaction", "reset-compaction", "leaf", "opaque"])(
         role: "user",
         content: "kept",
         timestamp: 2,
-        __openclaw: metadata,
+        __carapace: metadata,
       } as Parameters<SessionManager["appendMessage"]>[0]);
       source.appendMessage(
         makeAgentAssistantMessage({
@@ -182,7 +182,7 @@ it.each(["whole", "reset", "compaction", "reset-compaction", "leaf", "opaque"])(
           content: "content" in message ? message.content : undefined,
           summary: "summary" in message ? message.summary : undefined,
         }));
-      const database = openOpenClawAgentDatabase({ agentId: scope.agentId, path: scope.storePath });
+      const database = openCarapaceAgentDatabase({ agentId: scope.agentId, path: scope.storePath });
       const fingerprint = () => {
         const hash = createHash("sha256");
         for (const row of database.db
@@ -229,7 +229,7 @@ it.each(["whole", "reset", "compaction", "reset-compaction", "leaf", "opaque"])(
         (message) => message.role === "user" && message.content === "kept",
       );
       expect(retainedUser).toMatchObject({
-        __openclaw: {
+        __carapace: {
           mirrorIdentity: "synthetic-identity",
           mirrorOrigin: "synthetic-origin",
           turnTainted: true,
@@ -239,14 +239,14 @@ it.each(["whole", "reset", "compaction", "reset-compaction", "leaf", "opaque"])(
       });
       expect(
         Object.hasOwn(
-          (retainedUser as unknown as { __openclaw: object })["__openclaw"],
+          (retainedUser as unknown as { __carapace: object })["__carapace"],
           "upstreamUserText",
         ),
       ).toBe(false);
       if (scenario === "reset") {
         expect(
           (retainedUser as unknown as Record<symbol, unknown>)[
-            Symbol.for("openclaw.sessionHistoryPrelude")
+            Symbol.for("carapace.sessionHistoryPrelude")
           ],
         ).toBe(true);
       }
@@ -320,12 +320,12 @@ it.each(
     (["user", "assistant", "toolResult"] as const).map((role) => ({ boundary, role })),
   ),
 )("preserves excluded $role payload selection across $boundary", async ({ boundary, role }) => {
-  await withOpenClawTestState({ label: "model-excluded-retention" }, async (state) => {
+  await withCarapaceTestState({ label: "model-excluded-retention" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "excluded-retention",
       sessionKey: "agent:main:excluded-retention",
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
     const source = SessionManager.open(scope);
@@ -352,7 +352,7 @@ it.each(
               timestamp: 1,
             }),
       excludeFromContext: true,
-      __openclaw: { upstreamUserText: "private-retained:" + "x".repeat(256 * 1024) },
+      __carapace: { upstreamUserText: "private-retained:" + "x".repeat(256 * 1024) },
     };
     const retained = source.appendMessage(message);
     if (boundary === "reset") {
@@ -374,7 +374,7 @@ it.each(
         (entry) => "excludeFromContext" in entry && entry.excludeFromContext === true,
       ),
     ).toBe(boundary === "reset");
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, path: scope.storePath });
     const fingerprint = () => {
       const hash = createHash("sha256");
       for (const row of database.db
@@ -412,12 +412,12 @@ it.each(
 });
 
 it.each([false, true])("keeps model reads non-persisting (incognito=%s)", async (incognito) => {
-  await withOpenClawTestState({ label: "model-readonly" }, async (state) => {
+  await withCarapaceTestState({ label: "model-readonly" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "readonly",
       sessionKey: incognito ? "agent:main:dashboard:incognito-readonly" : "agent:main:readonly",
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     expect(SessionManager.openModelContext(scope).buildSessionContext().messages).toEqual([]);
     expect(
@@ -443,7 +443,7 @@ it.each([false, true])("keeps model reads non-persisting (incognito=%s)", async 
     if (incognito) {
       expect(fs.existsSync(scope.storePath)).toBe(false);
     } else {
-      const database = openOpenClawAgentDatabase({ agentId: "main", path: scope.storePath });
+      const database = openCarapaceAgentDatabase({ agentId: "main", path: scope.storePath });
       // A transient reader reconstructs navigation from its own read snapshot, not a stale cache.
       database.db
         .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
@@ -485,14 +485,14 @@ it.each([false, true])("keeps model reads non-persisting (incognito=%s)", async 
 it.each([false, true])(
   "releases aborted context reads before the next read (incognito=%s)",
   async (incognito) => {
-    await withOpenClawTestState({ label: "context-worker-lifecycle" }, async (state) => {
+    await withCarapaceTestState({ label: "context-worker-lifecycle" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "worker-lifecycle",
         sessionKey: incognito
           ? "agent:main:dashboard:incognito-worker-lifecycle"
           : "agent:main:worker-lifecycle",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);
@@ -526,14 +526,14 @@ it.each(
 )(
   "validates admission before accepting context (incognito=$incognito mutation=$mutation)",
   async ({ incognito, mutation }) => {
-    await withOpenClawTestState({ label: "context-worker-fence" }, async (state) => {
+    await withCarapaceTestState({ label: "context-worker-fence" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: incognito ? "incognito-worker-fence" : "worker-fence",
         sessionKey: incognito
           ? "agent:main:dashboard:incognito-worker-fence"
           : "agent:main:worker-fence",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);
@@ -601,14 +601,14 @@ it.each(
 )(
   "validates unadmitted context before acceptance (incognito=$incognito mutation=$mutation)",
   async ({ incognito, mutation }) => {
-    await withOpenClawTestState({ label: "unadmitted-context-fence" }, async (state) => {
+    await withCarapaceTestState({ label: "unadmitted-context-fence" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "unadmitted-context",
         sessionKey: incognito
           ? "agent:main:dashboard:incognito-unadmitted-context"
           : "agent:main:unadmitted-context",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);
@@ -671,12 +671,12 @@ it.each(
 it.each([false, true])(
   "closes lazy context without acquiring unread payloads (rejected=%s)",
   async (rejected) => {
-    await withOpenClawTestState({ label: "context-reader-lifetime" }, async (state) => {
+    await withCarapaceTestState({ label: "context-reader-lifetime" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "lazy-context",
         sessionKey: "agent:main:lazy-context",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);
@@ -723,12 +723,12 @@ it.each([false, true])(
 );
 
 it("keeps the real result when reset retention replaces a synthetic missing result", async () => {
-  await withOpenClawTestState({ label: "model-pairing" }, async (state) => {
+  await withCarapaceTestState({ label: "model-pairing" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "pairing",
       sessionKey: "agent:main:pairing",
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
     const source = SessionManager.open(scope);
@@ -743,7 +743,7 @@ it("keeps the real result when reset retention replaces a synthetic missing resu
       toolName: "read",
       isError: true,
       content: [{ type: "text", text: "missing" }],
-      details: { openclawSyntheticMissingToolResult: true },
+      details: { carapaceSyntheticMissingToolResult: true },
       timestamp: 1,
     });
     source.appendMessage({
@@ -787,12 +787,12 @@ it("keeps the real result when reset retention replaces a synthetic missing resu
 it.each(["reset", "compaction"])(
   "does not acquire checkpoints invalidated by %s",
   async (boundary) => {
-    await withOpenClawTestState({ label: "model-checkpoint" }, async (state) => {
+    await withCarapaceTestState({ label: "model-checkpoint" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "checkpoint",
         sessionKey: "agent:main:checkpoint",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);

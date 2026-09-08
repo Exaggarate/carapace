@@ -1,11 +1,11 @@
 // Source reply mirroring records successful same-conversation message-tool
 // sends back into the owning session transcript.
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeOptionalTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeOptionalTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import type { ReplyPayload } from "../../auto-reply/types.js";
 import { normalizeOutboundLocation } from "../../channels/location.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
@@ -22,7 +22,7 @@ import {
   type RestartRecoveryTerminalDeliveryScope,
 } from "../../config/sessions/restart-recovery-receipt.js";
 import { getOwnedSessionTranscriptWriterFence } from "../../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeAccountId, resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import { readTrimmedStringAlias } from "../../utils/string-readers.js";
 import { createOutboundPayloadPlan, projectOutboundPayloadPlanForMirror } from "./payloads.js";
@@ -31,7 +31,7 @@ type SourceReplyTranscriptMirrorParams = {
   action: string;
   channel: string;
   actionParams: Record<string, unknown>;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   currentAccountId?: string | null;
   sessionKey?: string;

@@ -2,12 +2,12 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
+import { canonicalizeBase64 } from "carapace/plugin-sdk/media-runtime";
 import type {
-  OpenClawConfig,
-  OpenClawPluginApi,
+  CarapaceConfig,
+  CarapacePluginApi,
   PluginLogger,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   CARD_LOOKBACK_MS,
   MAX_FRAMES_PER_CALL,
@@ -96,8 +96,8 @@ export class LogbookService {
   constructor(
     private readonly config: LogbookConfig,
     private readonly deps: {
-      runtime: NonNullable<OpenClawPluginApi["runtime"]>;
-      fullConfig: OpenClawConfig;
+      runtime: NonNullable<CarapacePluginApi["runtime"]>;
+      fullConfig: CarapaceConfig;
       logger: PluginLogger;
       dataDir: string;
     },

@@ -1,4 +1,4 @@
-import { MAX_TIMER_TIMEOUT_MS, resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS, resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
 import { TURN_TERMINAL_SETTLEMENT_TIMEOUT_MS } from "./attempt-timeouts.js";
 
 export type CodexAttemptTimeout = {

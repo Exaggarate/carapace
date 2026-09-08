@@ -1,11 +1,11 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
+import CarapaceChatUI
+import CarapaceKit
 import Synchronization
 import Testing
 @preconcurrency import WatchConnectivity
 import XCTest
-@testable import OpenClaw
+@testable import Carapace
 
 struct WatchSessionActivationGateTests {
     @Test func `reachable delivery requires an accepted acknowledgment`() throws {
@@ -139,8 +139,8 @@ struct WatchSessionActivationGateTests {
     #if targetEnvironment(simulator)
     @Test(
         .enabled(
-            if: ProcessInfo.processInfo.environment["OPENCLAW_LIVE_TEST"] == "1",
-            "Requires an isolated, unpaired iPhone Simulator; run with OPENCLAW_LIVE_TEST=1."),
+            if: ProcessInfo.processInfo.environment["CARAPACE_LIVE_TEST"] == "1",
+            "Requires an isolated, unpaired iPhone Simulator; run with CARAPACE_LIVE_TEST=1."),
         .serialized,
         arguments: [false, true])
     func `native watch snapshot cancellation fences a contended context lock`(
@@ -149,7 +149,7 @@ struct WatchSessionActivationGateTests {
         let session = WCSession.default
         try #require(!session.isPaired, "Do not probe a paired Watch session")
         try #require(!session.isReachable, "Do not probe a reachable Watch session")
-        let marker = "openclaw.test.cancelled-snapshot-admission"
+        let marker = "carapace.test.cancelled-snapshot-admission"
         let originalContext = session.applicationContext
         defer {
             if session.applicationContext["type"] as? String == marker {
@@ -165,7 +165,7 @@ struct WatchSessionActivationGateTests {
         let holderEntered = XCTestExpectation(description: "snapshot lock held")
         let holderFinished = XCTestExpectation(description: "snapshot lock released")
         let holderWasSignalled = Mutex<Bool?>(nil)
-        DispatchQueue(label: "openclaw.test.snapshot-lock-holder").async {
+        DispatchQueue(label: "carapace.test.snapshot-lock-holder").async {
             snapshotLock.withLock {
                 holderEntered.fulfill()
                 let signalled = releaseLock.wait(timeout: .now() + 15) == .success
@@ -227,8 +227,8 @@ struct WatchSessionActivationGateTests {
 
     @Test(
         .enabled(
-            if: ProcessInfo.processInfo.environment["OPENCLAW_LIVE_TEST"] == "1",
-            "Requires an isolated, unpaired iPhone Simulator; run with OPENCLAW_LIVE_TEST=1."),
+            if: ProcessInfo.processInfo.environment["CARAPACE_LIVE_TEST"] == "1",
+            "Requires an isolated, unpaired iPhone Simulator; run with CARAPACE_LIVE_TEST=1."),
         arguments: [false, true])
     @MainActor
     func `native watch sender rejects cancellation before SDK admission`(cancelBeforeStart: Bool) async throws {
@@ -241,7 +241,7 @@ struct WatchSessionActivationGateTests {
             #expect(Task.isCancelled == cancelBeforeStart)
             do {
                 try await sendReachableWatchMessage(
-                    ["type": "openclaw.test.cancelled-delivery-admission"],
+                    ["type": "carapace.test.cancelled-delivery-admission"],
                     with: session)
                 return .success(())
             } catch {
@@ -428,23 +428,23 @@ struct WatchMessagingInboundTransportTests {
         let opaqueApprovalID = "approval.e\u{301}/opaque"
         let cases: [([String: Any], String, String)] = [
             ([
-                "type": OpenClawWatchPayloadType.execApprovalResolve.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalResolve.rawValue,
                 "replyId": "resolve/opaque",
                 "approvalId": opaqueApprovalID,
-                "decision": OpenClawWatchExecApprovalDecision.allowOnce.rawValue,
+                "decision": CarapaceWatchExecApprovalDecision.allowOnce.rawValue,
             ], "resolve", opaqueApprovalID),
             ([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
                 "requestId": "approval-snapshot/opaque",
                 "heldApprovals": [],
             ], "approvalSnapshot", "approval-snapshot/opaque"),
             ([
-                "type": OpenClawWatchPayloadType.appSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.appSnapshotRequest.rawValue,
                 "requestId": "app-snapshot/opaque",
             ], "appSnapshot", "app-snapshot/opaque"),
             ([
-                "type": OpenClawWatchPayloadType.appCommand.rawValue,
-                "command": OpenClawWatchAppCommand.refresh.rawValue,
+                "type": CarapaceWatchPayloadType.appCommand.rawValue,
+                "command": CarapaceWatchAppCommand.refresh.rawValue,
                 "commandId": "app-command/opaque",
             ], "appCommand", "app-command/opaque"),
         ]
@@ -503,8 +503,8 @@ struct WatchMessagingInboundTransportTests {
         #expect(events.snapshot().count == countBeforeInvalid + 1)
     }
 
-    @Test(arguments: [OpenClawWatchChatDeliveryKind.chat, .quickReply])
-    func `interactive chat transfer ACK follows SQLite admission`(kind: OpenClawWatchChatDeliveryKind) async throws {
+    @Test(arguments: [CarapaceWatchChatDeliveryKind.chat, .quickReply])
+    func `interactive chat transfer ACK follows SQLite admission`(kind: CarapaceWatchChatDeliveryKind) async throws {
         let fixture = try await WatchDeliveryFixture()
         do {
             let transport = WatchConnectivityTransport()
@@ -519,10 +519,10 @@ struct WatchMessagingInboundTransportTests {
                 _ = try await journal.admit(command, nowMs: WatchMessagingPayloadCodec.nowMs())
                 order.append("committed")
             }
-            let body: OpenClawWatchChatDeliveryBody = kind == .chat ? .chat(text: "Keep this chat")
+            let body: CarapaceWatchChatDeliveryBody = kind == .chat ? .chat(text: "Keep this chat")
                 : .quickReply(promptId: "prompt", actionId: "done", actionLabel: nil, note: nil)
             let command = fixture.command(body: body)
-            let payload = try OpenClawWatchChatDeliveryCodec.encode(command)
+            let payload = try CarapaceWatchChatDeliveryCodec.encode(command)
             transport.session(WCSession.default, didReceiveMessage: payload, replyHandler: { receipt in
                 order.append(receipt["ok"] as? Bool == true ? "ok" : "rejected")
             })
@@ -552,9 +552,9 @@ struct WatchMessagingInboundTransportTests {
         service.setChatDeliveryHandler { _ in Issue.record("legacy payload entered new admission") }
         service.setAppCommandHandler { _ in Issue.record("legacy chat entered ephemeral commands") }
         for payload: [String: Any] in [
-            ["type": OpenClawWatchPayloadType.reply.rawValue, "actionId": "done"],
-            ["type": OpenClawWatchPayloadType.appCommand.rawValue, "command": "send-chat"],
-            ["type": OpenClawWatchPayloadType.appCommand.rawValue, "command": " send-chat "],
+            ["type": CarapaceWatchPayloadType.reply.rawValue, "actionId": "done"],
+            ["type": CarapaceWatchPayloadType.appCommand.rawValue, "command": "send-chat"],
+            ["type": CarapaceWatchPayloadType.appCommand.rawValue, "command": " send-chat "],
         ] {
             let before = failures.snapshot().count
             transport.session(WCSession.default, didReceiveMessage: payload)
@@ -582,7 +582,7 @@ struct WatchMessagingInboundTransportTests {
             let replies = Recorder()
             try transport.session(
                 WCSession.default,
-                didReceiveMessage: OpenClawWatchChatDeliveryCodec.encode(command),
+                didReceiveMessage: CarapaceWatchChatDeliveryCodec.encode(command),
                 replyHandler: { reply in
                     #expect(reply["ok"] as? Bool == false)
                     #expect(reply["error"] as? String == "stale_route")

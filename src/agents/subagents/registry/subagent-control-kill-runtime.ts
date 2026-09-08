@@ -6,7 +6,7 @@ import {
   patchSessionEntryCore,
 } from "../../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { logVerbose } from "../../../globals.js";
 import { isAgentEventLifecycleGenerationCurrent } from "../../../infra/agent-events.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
@@ -130,7 +130,7 @@ function markSubagentRunTerminatedBestEffort(
   }
 }
 
-export function resolveSubagentKillSession(cfg: OpenClawConfig, sessionKey: string) {
+export function resolveSubagentKillSession(cfg: CarapaceConfig, sessionKey: string) {
   const storePath = resolveSessionStorePathCore(cfg.session?.store, {
     agentId: parseAgentSessionKey(sessionKey)?.agentId,
   });
@@ -141,7 +141,7 @@ export function resolveSubagentKillSession(cfg: OpenClawConfig, sessionKey: stri
 }
 
 export async function killSubagentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SubagentRunRecord;
   session: ReturnType<typeof resolveSubagentKillSession>;
   suppressTaskDelivery?: boolean;

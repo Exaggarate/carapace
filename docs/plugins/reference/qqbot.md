@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw QQ Bot channel plugin for group and direct-message workflows."
+summary: "Carapace QQ Bot channel plugin for group and direct-message workflows."
 read_when:
   - You are installing, configuring, or auditing the qqbot plugin
 title: "QQ Bot plugin reference"
@@ -7,14 +7,14 @@ title: "QQ Bot plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw QQ Bot channel plugin for group and direct-message workflows.
+Carapace QQ Bot channel plugin for group and direct-message workflows.
 
 ## Distribution
 
-- Package: `@tencent-connect/openclaw-qqbot`
+- Package: `@tencent-connect/carapace-qqbot`
 - Install route: npm
 
 ## Surface

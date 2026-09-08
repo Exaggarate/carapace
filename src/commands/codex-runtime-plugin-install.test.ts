@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   emptyMetadataSnapshot,
   metadataSnapshot,
@@ -75,7 +75,7 @@ describe("Codex runtime plugin install repair", () => {
   ])(
     "honors runtime capabilities, enabled=$enabled accepted=$accepted promptError=$promptError",
     async ({ enabled, accepted, usable, promptError }) => {
-      await withTestDir({ prefix: "openclaw-runtime-consent-" }, async (artifactDir) => {
+      await withTestDir({ prefix: "carapace-runtime-consent-" }, async (artifactDir) => {
         createColdPluginFixture({
           rootDir: artifactDir,
           pluginId: "codex",
@@ -101,7 +101,7 @@ describe("Codex runtime plugin install repair", () => {
         manifest.contracts = { tools: ["runtime.write"] };
         metadata.index.plugins[0]!.rootDir = artifactDir;
         mocks.metadata.mockReturnValue(metadata);
-        const cfg: OpenClawConfig = { plugins: { entries: { codex: { enabled } } } };
+        const cfg: CarapaceConfig = { plugins: { entries: { codex: { enabled } } } };
         const beforePersistentEffect = vi.fn();
         const confirm = vi.fn(async () => {
           expect(beforePersistentEffect).not.toHaveBeenCalled();
@@ -259,7 +259,7 @@ describe("Codex runtime plugin install repair", () => {
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue({
       codex: { source: "npm", installPath: process.cwd() },
     });
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         allow: ["codex"],
         entries: { codex: { enabled: false } },
@@ -288,7 +288,7 @@ describe("Codex runtime plugin install repair", () => {
       installed: false,
       pluginId: "codex",
       status: "failed",
-      error: "npm registry returned EAI_AGAIN while fetching @openclaw/codex",
+      error: "npm registry returned EAI_AGAIN while fetching @carapace/codex",
     });
     const { ensureCodexRuntimePluginForModelSelection } =
       await import("./codex-runtime-plugin-install.js");
@@ -304,7 +304,7 @@ describe("Codex runtime plugin install repair", () => {
       ok: false,
       status: "failed",
       message: expect.stringContaining(
-        "npm registry returned EAI_AGAIN while fetching @openclaw/codex",
+        "npm registry returned EAI_AGAIN while fetching @carapace/codex",
       ),
     });
   });
@@ -386,9 +386,9 @@ describe("Codex runtime plugin install repair", () => {
         entry: {
           pluginId: "codex",
           label: "Codex",
-          install: { npmSpec: "@openclaw/codex", defaultChoice: "npm" },
+          install: { npmSpec: "@carapace/codex", defaultChoice: "npm" },
           trustedSourceLinkedOfficialInstall: true,
-          versionBoundToOpenClaw: true,
+          versionBoundToCarapace: true,
         },
       }),
     );

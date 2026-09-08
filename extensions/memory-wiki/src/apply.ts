@@ -3,14 +3,14 @@ import path from "node:path";
 import {
   replaceManagedMarkdownBlock,
   withTrailingNewline,
-} from "openclaw/plugin-sdk/memory-host-markdown";
-import { readFiniteNumberParam } from "openclaw/plugin-sdk/param-readers";
-import { FsSafeError, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/memory-host-markdown";
+import { readFiniteNumberParam } from "carapace/plugin-sdk/param-readers";
+import { FsSafeError, root as fsRoot } from "carapace/plugin-sdk/security-runtime";
 import {
   asNonArrayRecord,
   normalizeStringEntries,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { compileMemoryWikiVault, type CompileMemoryWikiResult } from "./compile.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import {
@@ -30,10 +30,10 @@ import {
 } from "./query.js";
 import { initializeMemoryWikiVault } from "./vault.js";
 
-const GENERATED_START = "<!-- openclaw:wiki:generated:start -->";
-const GENERATED_END = "<!-- openclaw:wiki:generated:end -->";
-const HUMAN_START = "<!-- openclaw:human:start -->";
-const HUMAN_END = "<!-- openclaw:human:end -->";
+const GENERATED_START = "<!-- carapace:wiki:generated:start -->";
+const GENERATED_END = "<!-- carapace:wiki:generated:end -->";
+const HUMAN_START = "<!-- carapace:human:start -->";
+const HUMAN_END = "<!-- carapace:human:end -->";
 
 type CreateSynthesisMemoryWikiMutation = {
   op: "create_synthesis";

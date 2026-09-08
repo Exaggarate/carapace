@@ -1,6 +1,6 @@
 // Signal plugin module implements outbound session behavior.
-import type { RoutePeer } from "openclaw/plugin-sdk/routing";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { RoutePeer } from "carapace/plugin-sdk/routing";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveSignalPeerId, resolveSignalRecipient, resolveSignalSender } from "./identity.js";
 import { normalizeSignalMessagingTarget } from "./normalize.js";
 import { looksLikeUuid } from "./uuid.js";

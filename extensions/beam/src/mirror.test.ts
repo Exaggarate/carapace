@@ -1,9 +1,9 @@
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { SessionCatalogTranscriptItem } from "openclaw/plugin-sdk/session-catalog";
-import * as sessionCatalogRuntime from "openclaw/plugin-sdk/session-catalog-runtime";
-import * as ssrfRuntime from "openclaw/plugin-sdk/ssrf-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import type { SessionCatalogTranscriptItem } from "carapace/plugin-sdk/session-catalog";
+import * as sessionCatalogRuntime from "carapace/plugin-sdk/session-catalog-runtime";
+import * as ssrfRuntime from "carapace/plugin-sdk/ssrf-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   beamTestLogger,
@@ -22,9 +22,9 @@ import {
 } from "./mirror.js";
 import { BEAM_MAX_ITEMS, parseBeamUpload, type BeamUpload } from "./types.js";
 
-vi.mock("openclaw/plugin-sdk/session-catalog-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-catalog-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-catalog-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-catalog-runtime")>();
   return { ...actual, listActiveSessionCatalogs: vi.fn(actual.listActiveSessionCatalogs) };
 });
 

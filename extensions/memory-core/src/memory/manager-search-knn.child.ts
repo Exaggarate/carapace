@@ -3,7 +3,7 @@ import {
   loadSqliteVecExtension,
   openNodeSqliteDatabase,
   supportsNodeSqliteExtensionLoading,
-} from "openclaw/plugin-sdk/memory-core-host-engine-knn";
+} from "carapace/plugin-sdk/memory-core-host-engine-knn";
 import {
   runVectorKnnQuery,
   validateVectorKnnRequest,

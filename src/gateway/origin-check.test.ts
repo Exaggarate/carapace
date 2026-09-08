@@ -169,7 +169,7 @@ describe("checkBrowserOrigin", () => {
     "tauri://localhost?mode=admin",
     "tauri://localhost#admin",
     "tauri://user@localhost",
-    "file:///tmp/openclaw.html",
+    "file:///tmp/carapace.html",
     "data:text/plain,hello",
   ])("rejects a non-origin URL value: %s", (origin) => {
     expect(checkBrowserOrigin({ origin, allowedOrigins: [origin] })).toEqual({

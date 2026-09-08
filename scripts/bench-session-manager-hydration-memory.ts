@@ -7,10 +7,10 @@ import {
   persistSessionTranscriptTurn,
   upsertSessionEntryCore,
 } from "../src/config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../src/test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../src/test-utils/carapace-test-state.js";
 
 const scriptPath = fileURLToPath(import.meta.url);
-const readerSentinel = "OPENCLAW_SESSION_HYDRATION_MEMORY:";
+const readerSentinel = "CARAPACE_SESSION_HYDRATION_MEMORY:";
 
 type ReaderResult = {
   mode: "bounded" | "full";
@@ -181,16 +181,16 @@ async function main(): Promise<void> {
     await runReader();
     return;
   }
-  const eventCount = Number.parseInt(process.env.OPENCLAW_BENCH_EVENTS ?? "2048", 10);
-  const eventBytes = Number.parseInt(process.env.OPENCLAW_BENCH_EVENT_BYTES ?? "65536", 10);
+  const eventCount = Number.parseInt(process.env.CARAPACE_BENCH_EVENTS ?? "2048", 10);
+  const eventBytes = Number.parseInt(process.env.CARAPACE_BENCH_EVENT_BYTES ?? "65536", 10);
   if (!Number.isInteger(eventCount) || eventCount < 1 || eventCount > 10_000) {
-    throw new Error("OPENCLAW_BENCH_EVENTS must be between 1 and 10000");
+    throw new Error("CARAPACE_BENCH_EVENTS must be between 1 and 10000");
   }
   if (!Number.isInteger(eventBytes) || eventBytes < 1024 || eventBytes > 1024 * 1024) {
-    throw new Error("OPENCLAW_BENCH_EVENT_BYTES must be between 1024 and 1048576");
+    throw new Error("CARAPACE_BENCH_EVENT_BYTES must be between 1024 and 1048576");
   }
 
-  await withOpenClawTestState({ label: "session-hydration-memory" }, async (state) => {
+  await withCarapaceTestState({ label: "session-hydration-memory" }, async (state) => {
     const sessionId = "hydration-memory";
     const sessionKey = "agent:main:hydration-memory";
     const storePath = path.join(state.sessionsDir("main"), "sessions.json");

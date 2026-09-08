@@ -1,20 +1,20 @@
-// SQLite query-plan tests pin hot OpenClaw state indexes used by perf proof.
+// SQLite query-plan tests pin hot Carapace state indexes used by perf proof.
 import type { DatabaseSync } from "node:sqlite";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "./openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "./carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "./carapace-state-db.js";
 
 const planTempDirs: string[] = [];
 
 function createTempStateDir(): string {
-  return makeTempDir(planTempDirs, "openclaw-sqlite-plan-");
+  return makeTempDir(planTempDirs, "carapace-sqlite-plan-");
 }
 
 function explainQueryPlan(
@@ -53,15 +53,15 @@ afterAll(() => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("sqlite hot query plans", () => {
   it("uses shared state indexes for list and queue queries", () => {
     const stateDir = createTempStateDir();
-    const database = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: stateDir },
+    const database = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: stateDir },
     });
 
     expectPlanUsesIndex({
@@ -116,9 +116,9 @@ describe("sqlite hot query plans", () => {
 
   it("uses per-agent cache indexes for session metadata and expiry scans", () => {
     const stateDir = createTempStateDir();
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: "worker-1",
-      env: { OPENCLAW_STATE_DIR: stateDir },
+      env: { CARAPACE_STATE_DIR: stateDir },
     });
 
     expectPlanIncludes({

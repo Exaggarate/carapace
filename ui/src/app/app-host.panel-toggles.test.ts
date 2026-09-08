@@ -37,12 +37,12 @@ function configurePanelShell(
   kind: "terminal" | "browser" = "terminal",
 ): ShellPanelToggleState {
   window.history.replaceState(null, "", "/usage");
-  const shell = document.createElement("openclaw-app-shell") as unknown as ShellPanelToggleState;
+  const shell = document.createElement("carapace-app-shell") as unknown as ShellPanelToggleState;
   if (kind === "browser") {
     shell.browserPanelElement = element;
     Object.defineProperty(window, "webkit", {
       configurable: true,
-      value: { messageHandlers: { openclawBrowser: { postMessage: vi.fn() } } },
+      value: { messageHandlers: { carapaceBrowser: { postMessage: vi.fn() } } },
     });
   } else {
     shell.terminalPanelElement = element;
@@ -83,7 +83,7 @@ afterEach(() => {
   resetAppHostTestGlobals();
 });
 
-describe("OpenClaw shell panel toggles", () => {
+describe("Carapace shell panel toggles", () => {
   it.each([false, true])(
     "captures the terminal chord once before a consuming target (defined: %s)",
     async (defined) => {
@@ -160,7 +160,7 @@ describe("OpenClaw shell panel toggles", () => {
 
   it("buffers panel toggle events until the active chat pane mounts", () => {
     const terminalElement = createLazyElementSpec("session terminal panel");
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellPanelToggleState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellPanelToggleState;
     shell.terminalPanelElement = terminalElement;
     shell.routeState = { routeId: "chat" };
 
@@ -175,7 +175,7 @@ describe("OpenClaw shell panel toggles", () => {
     "does not repeat a dismissed restoration until the %s lifecycle resets",
     async (lifecycle) => {
       vi.stubGlobal("localStorage", createStorageMock());
-      localStorage.setItem("openclaw.terminal.panel.v1", JSON.stringify({ open: true }));
+      localStorage.setItem("carapace.terminal.panel.v1", JSON.stringify({ open: true }));
       const element = createLazyElementSpec("restored terminal", {
         firstError: new Error("offline"),
       });

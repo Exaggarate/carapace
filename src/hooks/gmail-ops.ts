@@ -2,7 +2,7 @@
 import { formatCliCommand } from "../cli/command-format.js";
 import {
   getRuntimeConfig,
-  type OpenClawConfig,
+  type CarapaceConfig,
   CONFIG_PATH,
   readConfigFileSnapshot,
   replaceConfigFile,
@@ -192,7 +192,7 @@ export async function runGmailSetup(opts: GmailSetupOptions) {
 
   await startGmailWatch({ account: opts.account, label, topic: topicPath });
 
-  const nextConfig: OpenClawConfig = {
+  const nextConfig: CarapaceConfig = {
     ...baseConfig,
     hooks: {
       ...baseConfig.hooks,
@@ -263,7 +263,7 @@ export async function runGmailSetup(opts: GmailSetupOptions) {
   defaultRuntime.log(`- push endpoint: ${pushEndpoint}`);
   defaultRuntime.log(`- hook url: ${hookUrl}`);
   defaultRuntime.log(`- config: ${displayPath(CONFIG_PATH)}`);
-  defaultRuntime.log(`Next: ${formatCliCommand("openclaw webhooks gmail run")}`);
+  defaultRuntime.log(`Next: ${formatCliCommand("carapace webhooks gmail run")}`);
 }
 
 export async function runGmailService(opts: GmailRunOptions) {

@@ -1,10 +1,10 @@
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   telegramBotInfoForTest,
@@ -23,9 +23,9 @@ const { triggerInternalHookMock } = vi.hoisted(() => ({
   triggerInternalHookMock: vi.fn<(event: unknown) => Promise<void>>(async () => undefined),
 }));
 
-vi.mock("openclaw/plugin-sdk/hook-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/hook-runtime")>(
-    "openclaw/plugin-sdk/hook-runtime",
+vi.mock("carapace/plugin-sdk/hook-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/hook-runtime")>(
+    "carapace/plugin-sdk/hook-runtime",
   );
   return {
     ...actual,
@@ -33,7 +33,7 @@ vi.mock("openclaw/plugin-sdk/hook-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/file-access-runtime", () => ({
+vi.mock("carapace/plugin-sdk/file-access-runtime", () => ({
   root: async (rootDir: string) => ({
     read: async (relativePath: string, options?: { maxBytes?: number }) =>
       await rootRead({ rootDir, relativePath, maxBytes: options?.maxBytes }),
@@ -150,7 +150,7 @@ function createChannelPostContext(params: {
       ...(params.mediaGroupId ? { media_group_id: params.mediaGroupId } : {}),
       ...(photoFileId ? { photo: [{ file_id: photoFileId }] } : {}),
     },
-    me: { username: "openclaw_bot" },
+    me: { username: "carapace_bot" },
     getFile: async () =>
       params.getFileResult ?? (photoFileId ? { file_path: `photos/${photoFileId}.jpg` } : {}),
   };
@@ -293,7 +293,7 @@ async function dispatchTelegramGroupPhoto(params: {
       photo: [{ file_id: `photo-${params.messageId}` }],
       from: { id: 55, is_bot: false, first_name: "u" },
     },
-    me: { id: 999, username: "openclaw_bot" },
+    me: { id: 999, username: "carapace_bot" },
     getFile: params.getFile ?? (async () => ({ file_path: `photos/${params.messageId}.jpg` })),
   });
 }
@@ -356,7 +356,7 @@ function createTelegramPrivateMediaContext(params: {
         : { photo: [{ file_id: params.fileId }] }),
       from: { id: 55, is_bot: false, first_name: "u" },
     },
-    me: { username: "openclaw_bot" },
+    me: { username: "carapace_bot" },
     getFile: params.getFile ?? (async () => ({ file_path: `documents/${params.fileId}` })),
   };
 }
@@ -487,7 +487,7 @@ describe("createTelegramBot channel_post media", () => {
           date: 1736380800,
           text: part1,
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "carapace_bot" },
         getFile: async () => ({}),
       });
 
@@ -498,7 +498,7 @@ describe("createTelegramBot channel_post media", () => {
           date: 1736380801,
           text: part2,
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "carapace_bot" },
         getFile: async () => ({}),
       });
 
@@ -680,7 +680,7 @@ describe("createTelegramBot channel_post media", () => {
     async (_name, groupIngest, wildcardIngest, topicIngest, shouldIngest) => {
       const unauthorizedCommand = _name.startsWith("unauthorized");
       const command = `${_name.includes("prefixed") ? "[Tue 2026-06-02 12:34] " : ""}${
-        _name === "unauthorized mentioned command" ? "/reset@openclaw_bot" : "/reset"
+        _name === "unauthorized mentioned command" ? "/reset@carapace_bot" : "/reset"
       }`;
       const commandOffset = command.indexOf("/");
       const topics = topicIngest === undefined ? undefined : { "42": { ingest: topicIngest } };
@@ -772,7 +772,7 @@ describe("createTelegramBot channel_post media", () => {
           messageId,
           albumId: "ingested-album",
           caption: commandCaption
-            ? "/reset@openclaw_bot"
+            ? "/reset@carapace_bot"
             : unauthorizedCommand
               ? "ordinary caption"
               : testCase.deniedMention && messageId === testCase.messageIds[0]
@@ -853,26 +853,26 @@ describe("createTelegramBot channel_post media", () => {
     {
       name: "a native mention",
       messageId: 81182,
-      caption: "@openclaw_bot check this",
+      caption: "@carapace_bot check this",
       ingest: false,
     },
     {
       name: "a native mention with ingestion",
       messageId: 81186,
-      caption: "@openclaw_bot check this",
+      caption: "@carapace_bot check this",
       ingest: true,
     },
     {
       name: "a native mention with denied patterns",
       messageId: 81185,
-      caption: "@openclaw_bot check this",
+      caption: "@carapace_bot check this",
       ingest: true,
       denyPatterns: true,
     },
     {
       name: "a targeted bot command",
       messageId: 81184,
-      caption: "/inspect@openclaw_bot",
+      caption: "/inspect@carapace_bot",
       extraMessage: { caption_entities: [{ type: "bot_command", offset: 0, length: 21 }] },
       ingest: false,
     },
@@ -883,7 +883,7 @@ describe("createTelegramBot channel_post media", () => {
         reply_to_message: {
           message_id: 99,
           text: "previous bot reply",
-          from: { id: 999, is_bot: true, first_name: "OpenClaw" },
+          from: { id: 999, is_bot: true, first_name: "Carapace" },
         },
       },
       ingest: false,

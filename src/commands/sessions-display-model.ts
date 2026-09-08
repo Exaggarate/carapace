@@ -15,7 +15,7 @@ import {
   type CliProviderClassifier,
 } from "../agents/model-selection.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type SessionDisplayModelRow = {
   key: string;
@@ -32,7 +32,7 @@ type SessionDisplayDefaults = {
 type SessionDisplayModelRef = { provider: string; model: string };
 
 function resolveAgentPrimaryModel(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
 ): string | undefined {
   if (!agentId) {
@@ -41,7 +41,7 @@ function resolveAgentPrimaryModel(
   return resolveAgentModelPrimaryValue(resolveAgentConfig(cfg, agentId)?.model);
 }
 
-function resolveDefaultModelRef(cfg: OpenClawConfig, agentId?: string): SessionDisplayModelRef {
+function resolveDefaultModelRef(cfg: CarapaceConfig, agentId?: string): SessionDisplayModelRef {
   const primary =
     resolveAgentPrimaryModel(cfg, agentId) ??
     resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model) ??
@@ -56,7 +56,7 @@ function resolveDefaultModelRef(cfg: OpenClawConfig, agentId?: string): SessionD
 
 /** Resolves default display values for a session table scoped to an agent. */
 export function resolveSessionDisplayDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId?: string,
 ): SessionDisplayDefaults {
   return {
@@ -65,7 +65,7 @@ export function resolveSessionDisplayDefaults(
 }
 
 function normalizeCliRuntimeDisplayRef(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
   ref: SessionDisplayModelRef,
   defaultRef: SessionDisplayModelRef,
@@ -106,7 +106,7 @@ function normalizeCliRuntimeDisplayRef(
 
 /** Resolves only the model id to show for a session row. */
 export function resolveSessionDisplayModel(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   row: SessionDisplayModelRow,
   classifyCliProvider?: CliProviderClassifier,
 ): string {
@@ -115,7 +115,7 @@ export function resolveSessionDisplayModel(
 
 /** Resolves provider/model display metadata for a session row. */
 export function resolveSessionDisplayModelRef(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   row: SessionDisplayModelRow,
   classifyCliProvider: CliProviderClassifier = (provider) => isCliProvider(provider, cfg),
   ownerAgentId?: string,

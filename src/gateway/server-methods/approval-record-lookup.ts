@@ -1,7 +1,7 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ChannelApprovalKind } from "../../infra/approval-types.js";
 import type {
   ExecApprovalIdLookupResult,
@@ -44,7 +44,7 @@ export function normalizeApprovalIdentities(
 }
 
 export function canAccessApprovalSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   sessionKey?: string | null;
   agentId?: string | null;
@@ -72,7 +72,7 @@ export function canAccessApprovalSession(params: {
 export function isApprovalRecordVisibleToClient<TPayload>(params: {
   record: ExecApprovalRecord<TPayload>;
   client: GatewayClient | null;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): boolean {
   const scopes = Array.isArray(params.client?.connect?.scopes) ? params.client.connect.scopes : [];
   if (scopes.includes(ADMIN_SCOPE)) {
@@ -122,7 +122,7 @@ export function isApprovalRecordVisibleToClient<TPayload>(params: {
 export function listVisiblePendingApprovalRequests<TPayload>(params: {
   manager: ExecApprovalManager<TPayload>;
   client?: GatewayClient | null;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   approvalKind?: ChannelApprovalKind;
 }): Array<{
   approvalKind?: ChannelApprovalKind;
@@ -169,7 +169,7 @@ function resolveApprovalRecordForState<TPayload>(
     manager: ExecApprovalManager<TPayload>;
     inputId: string;
     client?: GatewayClient | null;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     exposeAmbiguousPrefixError?: boolean;
     recordFilter?: (record: ExecApprovalRecord<TPayload>) => boolean;
   },
@@ -199,7 +199,7 @@ export function resolvePendingApprovalRecord<TPayload>(params: {
   manager: ExecApprovalManager<TPayload>;
   inputId: string;
   client?: GatewayClient | null;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   exposeAmbiguousPrefixError?: boolean;
   recordFilter?: (record: ExecApprovalRecord<TPayload>) => boolean;
 }): ApprovalRecordLookupResult<TPayload> {

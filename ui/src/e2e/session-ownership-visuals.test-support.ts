@@ -8,7 +8,7 @@ import {
   waitForControlUiProofSurface,
 } from "../test-helpers/control-ui-e2e-screenshot.ts";
 
-export const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+export const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 export function createSessionOwnershipProofContext(
   owner: { readonly artifactDir: string; readonly browser: Browser },
@@ -46,7 +46,7 @@ export async function routeAvatarFixtures(page: Page, fixtures: readonly AvatarF
 
 export async function avatarLabelCenterDelta(row: Locator) {
   return row.evaluate((element) => {
-    const avatar = element.querySelector<HTMLElement>("openclaw-session-owner-chip");
+    const avatar = element.querySelector<HTMLElement>("carapace-session-owner-chip");
     const label = element.querySelector<HTMLElement>(".session-menu__text");
     if (!avatar || !label) {
       throw new Error("expected a complete owner filter row");

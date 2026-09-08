@@ -24,7 +24,7 @@ const buildId = "startup-recovery-proof";
 const suite = createControlUiE2eSuite({
   name: "Control UI startup recovery production E2E",
   startServer: async () => {
-    const outDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-startup-recovery-"));
+    const outDir = await mkdtemp(path.join(os.tmpdir(), "carapace-startup-recovery-"));
     try {
       const server = await startProductionControlUiE2eServer(outDir, buildId);
       return {
@@ -98,7 +98,7 @@ suite.define(() => {
         const composer = page.locator(".agent-chat__composer-combobox textarea");
         await expect.poll(() => composer.isDisabled()).toBe(false);
         const owner = await page.evaluate(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime: { context: ApplicationContext };
           };
           const { gateway: applicationGateway } = app.runtime.context;
@@ -163,7 +163,7 @@ suite.define(() => {
         }
         const readStartup = () =>
           page.evaluate((key) => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime: { context: ApplicationContext };
             };
             return app.runtime.context.placementStartup.get(key);
@@ -172,7 +172,7 @@ suite.define(() => {
         await expect.poll(() => page.evaluate(() => Date.now())).toBeGreaterThan(failed!.startedAt);
         for (const selectedKey of ["agent:main:another-task", sessionKey]) {
           await page.evaluate((key) => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime: { context: ApplicationContext };
             };
             app.runtime.context.gateway.setSessionKey(key);
@@ -311,7 +311,7 @@ suite.define(() => {
           // Only these explicit actions authorize discarding the unsaved Incognito start.
           if (escape === "toast") {
             await page
-              .locator("openclaw-toast-host")
+              .locator("carapace-toast-host")
               .getByRole("button", { name: "Discard unsaved starts and reload", exact: true })
               .click();
           } else {
@@ -341,7 +341,7 @@ suite.define(() => {
         if (incognito) {
           expect(
             await page.evaluate((key) => {
-              const app = document.querySelector("openclaw-app") as HTMLElement & {
+              const app = document.querySelector("carapace-app") as HTMLElement & {
                 runtime: { context: ApplicationContext };
               };
               return app.runtime.context.placementStartup.hasPendingTurn(key);

@@ -2,14 +2,14 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { describe, expect, it, vi } from "vitest";
 
 const runHostPreparedIsolatedCompletion = vi.hoisted(() => vi.fn());
 const runCodexIsolatedCompletion = vi.hoisted(() => vi.fn());
 const runCodexAppServerAttempt = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/simple-completion-runtime", () => ({
+vi.mock("carapace/plugin-sdk/simple-completion-runtime", () => ({
   runHostPreparedIsolatedCompletion,
 }));
 vi.mock("./src/app-server/isolated-completion.js", () => ({
@@ -173,7 +173,7 @@ describe("Codex agent harness supports()", () => {
     expect(harness.delegatedExecutionPluginIds).toEqual(["voice-call"]);
   });
 
-  it("supports openai as the primary OpenClaw routing id", () => {
+  it("supports openai as the primary Carapace routing id", () => {
     expect(harness.supports({ provider: "openai", requestedRuntime: "codex" })).toEqual({
       supported: true,
       priority: 100,
@@ -221,7 +221,7 @@ describe("Codex agent harness supports()", () => {
           api: "openai-responses",
           baseUrl: "https://api.openai.com/v1",
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         },
       }),
     ).toEqual({ supported: true, priority: 100 });
@@ -350,7 +350,7 @@ describe("Codex agent harness supports()", () => {
             ? "https://api.openai.com/v1"
             : "https://chatgpt.com/backend-api/codex",
         requestTransportOverrides: "none",
-        runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+        runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         preparedAuth,
       },
     });
@@ -368,7 +368,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-responses",
         baseUrl: "https://relay.example.test/v1",
         requestTransportOverrides: "none" as const,
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["carapace"] },
       },
     },
     {
@@ -377,7 +377,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-completions",
         baseUrl: "https://api.openai.com/v1",
         requestTransportOverrides: "none" as const,
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["carapace"] },
       },
     },
     {
@@ -386,7 +386,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-responses",
         baseUrl: "http://api.openai.com/v1",
         requestTransportOverrides: "none" as const,
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["carapace"] },
       },
     },
   ])("rejects a $name that Codex cannot reproduce", ({ modelProvider }) => {
@@ -407,14 +407,14 @@ describe("Codex agent harness supports()", () => {
         api: "openai-responses",
         baseUrl: "https://api.openai.com/v1",
         requestTransportOverrides: "present",
-        runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+        runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         preparedAuth: { source: "harness" },
       },
     });
     expect(result).toEqual({
       supported: false,
       reason: "Codex cannot reproduce authored request transport overrides",
-      fallbackRuntime: "openclaw",
+      fallbackRuntime: "carapace",
     });
   });
 
@@ -529,7 +529,7 @@ describe("Codex agent harness reset()", () => {
   });
 
   it("repairs a retirement fence left by an earlier in-place reset", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-harness-reset-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-harness-reset-"));
     const storePath = path.join(root, "sessions.json");
     const bindingStore = createCodexTestBindingStore();
     const sessionKey = "agent:worker:main";
@@ -655,9 +655,9 @@ describe("Codex agent harness dispose()", () => {
     // The disposer slot is keyed by plugin version like the client table: an old build's
     // harness must close that build's clients even after a newer build's module evaluated.
     const versionedSlot = Symbol.for(
-      `openclaw.codexAppServerClientDisposer@${codexPluginPackage.version}`,
+      `carapace.codexAppServerClientDisposer@${codexPluginPackage.version}`,
     );
-    const bareSlot = Symbol.for("openclaw.codexAppServerClientDisposer");
+    const bareSlot = Symbol.for("carapace.codexAppServerClientDisposer");
     const globalState = globalThis as Record<symbol, unknown>;
     const previous = { versioned: globalState[versionedSlot], bare: globalState[bareSlot] };
     const versioned = vi.fn(async () => {});

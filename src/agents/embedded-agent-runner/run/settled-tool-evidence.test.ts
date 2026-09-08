@@ -270,7 +270,7 @@ describe("runEmbeddedAgent incomplete-turn safety", () => {
             ? {
                 ...attempt,
                 settledTurnFinalizationContext: {
-                  source: "openclaw-transcript",
+                  source: "carapace-transcript",
                   messages: attempt.messagesSnapshot,
                 },
               }

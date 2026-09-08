@@ -10,9 +10,9 @@ import * as processExec from "../../process/exec.js";
 import { isPidAlive } from "../../shared/pid-alive.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import {
   killPidIfAlive,
   readPidFile,
@@ -36,7 +36,7 @@ const SUCCESS = {
 const hasUnpairedUtf16Surrogate = (text: string): boolean =>
   /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(text);
 
-function remoteStageParams(state: OpenClawTestState, abortSignal?: AbortSignal) {
+function remoteStageParams(state: CarapaceTestState, abortSignal?: AbortSignal) {
   vi.spyOn(mediaRoots, "resolveChannelRemoteInboundAttachmentRoots").mockReturnValue([
     "/synthetic/attachments",
   ]);
@@ -75,7 +75,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("stageSandboxMedia SCP", () => {
   it("stages bytes and both contexts through the strict bounded SCP command", async () => {
-    await withOpenClawTestState({ label: "scp-stage" }, async (state) => {
+    await withCarapaceTestState({ label: "scp-stage" }, async (state) => {
       const params = remoteStageParams(state);
       let download = "";
       const runScp = vi
@@ -117,7 +117,7 @@ describe("stageSandboxMedia SCP", () => {
   });
 
   it("logs a bounded UTF-16-safe diagnostic without publishing failed media", async () => {
-    await withOpenClawTestState({ label: "scp-stderr" }, async (state) => {
+    await withCarapaceTestState({ label: "scp-stderr" }, async (state) => {
       const params = remoteStageParams(state);
       const before = structuredClone([params.ctx, params.sessionCtx]);
       // The retained window starts on the emoji's low surrogate.
@@ -148,7 +148,7 @@ describe("stageSandboxMedia SCP", () => {
   ])(
     "retains an ordinary $failure error when cancellation coincides: $cancel",
     async ({ failure, cancel }) => {
-      await withOpenClawTestState({ label: "scp-error" }, async (state) => {
+      await withCarapaceTestState({ label: "scp-error" }, async (state) => {
         const controller = new AbortController();
         const params = remoteStageParams(state, controller.signal);
         const before = structuredClone([params.ctx, params.sessionCtx]);
@@ -194,7 +194,7 @@ describe("stageSandboxMedia SCP", () => {
   );
 
   it("retains cancellation when the final source is skipped by path policy", async () => {
-    await withOpenClawTestState({ label: "stage-skipped-source-cancel" }, async (state) => {
+    await withCarapaceTestState({ label: "stage-skipped-source-cancel" }, async (state) => {
       const sourcePath = await state.writeText("outside/blocked.txt", "must not be staged");
       const ctx: RuntimeMsgContext = { media: [{ path: sourcePath }] };
       const sessionCtx: TemplateContext = structuredClone(ctx);
@@ -236,7 +236,7 @@ describe("stageSandboxMedia SCP", () => {
   });
 
   it("rejects a pre-aborted request without starting SCP or publishing media", async () => {
-    await withOpenClawTestState({ label: "scp-pre-aborted" }, async (state) => {
+    await withCarapaceTestState({ label: "scp-pre-aborted" }, async (state) => {
       const controller = new AbortController();
       const params = remoteStageParams(state, controller.signal);
       const before = structuredClone([params.ctx, params.sessionCtx]);
@@ -257,7 +257,7 @@ describe("stageSandboxMedia SCP", () => {
   });
 
   it("preserves cancellation after the runner has settled without retrying", async () => {
-    await withOpenClawTestState({ label: "scp-cancelled-result" }, async (state) => {
+    await withCarapaceTestState({ label: "scp-cancelled-result" }, async (state) => {
       const controller = new AbortController();
       const params = remoteStageParams(state, controller.signal);
       const before = structuredClone([params.ctx, params.sessionCtx]);
@@ -284,7 +284,7 @@ describe("stageSandboxMedia SCP", () => {
       followingFile: true,
     },
   ])("$name", async ({ followingFile }) => {
-    await withOpenClawTestState({ label: "stage-alias-cancel" }, async (state) => {
+    await withCarapaceTestState({ label: "stage-alias-cancel" }, async (state) => {
       const fileName = "alias-source.txt";
       const sourcePath = await state.writeText(`media/inbound/${fileName}`, "local attachment");
       const alias = `media://inbound/${fileName}`;
@@ -343,7 +343,7 @@ describe("stageSandboxMedia SCP", () => {
   it.runIf(process.platform !== "win32")(
     "owns the real SCP tree through cancellation and cleanup",
     async () => {
-      await withOpenClawTestState({ label: "scp-process-tree" }, async (state) => {
+      await withCarapaceTestState({ label: "scp-process-tree" }, async (state) => {
         const params = remoteStageParams(state);
         const before = structuredClone([params.ctx, params.sessionCtx]);
         const binDir = state.path("bin");

@@ -1,14 +1,14 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeOptionalAgentRuntimeId } from "../agents/agent-runtime-id.js";
 import { resolveDefaultModelForAgent } from "../agents/model-selection.js";
 import { inheritSessionSelection } from "../config/sessions/session-entry-selection.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewaySessionTitleModelSelection } from "./session-lifecycle-preparation.js";
 import { resolveSessionPatchModelSelection } from "./sessions-patch.js";
 
 export function resolveSessionCreateModelSelection(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   input: string | { model: string; agentRuntime?: string } | undefined,
   parentEntry?: SessionEntry,

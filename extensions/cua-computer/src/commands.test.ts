@@ -1,6 +1,6 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resizeToJpeg } from "openclaw/plugin-sdk/media-runtime";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resizeToJpeg } from "carapace/plugin-sdk/media-runtime";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { createCuaComputerProvider } from "./commands.js";
 import {

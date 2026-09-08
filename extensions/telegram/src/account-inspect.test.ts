@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withEnv } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { withEnv } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { inspectTelegramAccount } from "./account-inspect.js";
 import { createTelegramPluginConfig } from "./config-adapter.js";
@@ -19,7 +19,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
     "preserves owner status for $accountId without resolving credentials",
     ({ accountId, configured, tokenStatus }) => {
       withEnv({ TELEGRAM_BOT_TOKEN: undefined, TG_INSPECTION_MISSING: undefined }, () => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           channels: {
             telegram: {
               defaultAccount: "alerts",
@@ -65,7 +65,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
 
   it("resolves default env SecretRef templates in read-only status paths", () => {
     withEnv({ TG_STATUS_TOKEN: "123:token" }, () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           telegram: {
             botToken: "${TG_STATUS_TOKEN}",
@@ -82,7 +82,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
 
   it("respects env provider allowlists in read-only status paths", () => {
     withEnv({ TG_NOT_ALLOWED: "123:token" }, () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         secrets: {
           defaults: {
             env: "secure-env",
@@ -116,7 +116,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
     "inspects env-template default $provider shadowing exec ($expected)",
     ({ provider, value, expected }) => {
       withEnv({ TG_EXEC_PROVIDER: value, TELEGRAM_BOT_TOKEN: "123:fallback" }, () => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           secrets: {
             defaults: provider === "default" ? undefined : { env: provider },
             providers: {
@@ -143,7 +143,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
   );
 
   it("matches runtime token lookup for account keys that need full normalization", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         telegram: {
           accounts: {
@@ -170,7 +170,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
 
   it("routes omitted-account inspection through the configured defaultAccount (#61012)", () => {
     withEnv({ TELEGRAM_BOT_TOKEN: "123:env" }, () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           telegram: {
             botToken: "123:channel",
@@ -190,7 +190,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
   });
 
   it("blocks channel-token fallback for unknown scoped accounts in multi-account config", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         telegram: {
           botToken: "123:channel",
@@ -212,13 +212,13 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
   it.runIf(process.platform !== "win32")(
     "treats symlinked token files as configured_unavailable",
     () => {
-      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-inspect-"));
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-telegram-inspect-"));
       const tokenFile = path.join(dir, "token.txt");
       const tokenLink = path.join(dir, "token-link.txt");
       fs.writeFileSync(tokenFile, "123:token\n", "utf8");
       fs.symlinkSync(tokenFile, tokenLink);
 
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           telegram: {
             tokenFile: tokenLink,

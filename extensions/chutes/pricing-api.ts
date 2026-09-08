@@ -1,6 +1,6 @@
-import { normalizeModelPricingCatalog } from "openclaw/plugin-sdk/model-catalog-pricing";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { asFiniteNumberInRange, asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeModelPricingCatalog } from "carapace/plugin-sdk/model-catalog-pricing";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import { asFiniteNumberInRange, asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 /** Chutes publishes numeric USD-per-million rates, not OpenRouter's per-token strings. */
 export function normalizeChutesModelPricing(

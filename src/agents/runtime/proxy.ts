@@ -10,8 +10,8 @@ import {
   parseTerminalToolCallArguments,
   type SseByteGuard,
   type ToolArgumentPreviewSchedule,
-} from "@openclaw/ai/internal/runtime";
-import { resolvePositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/ai/internal/runtime";
+import { resolvePositiveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { readResponseWithLimit } from "../../infra/http-body.js";
 // Internal import for JSON parsing utility
 import type {

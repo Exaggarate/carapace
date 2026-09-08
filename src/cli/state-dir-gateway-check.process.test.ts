@@ -16,13 +16,13 @@ afterEach(async () => {
 
 describe("CLI Gateway state target guard", () => {
   it("refuses a model credential write when the live Gateway reports another state tree", async () => {
-    const root = tempDirs.make("openclaw-auth-state-mismatch-");
+    const root = tempDirs.make("carapace-auth-state-mismatch-");
     const stateDir = path.join(root, "cli-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const gatewayStateDir = path.join(root, "gateway-state");
     const gateway = await startStateDirStatusGateway({
       stateDir: gatewayStateDir,
-      configPath: path.join(gatewayStateDir, "openclaw.json"),
+      configPath: path.join(gatewayStateDir, "carapace.json"),
     });
     await fs.mkdir(stateDir, { recursive: true });
     await fs.writeFile(
@@ -54,14 +54,14 @@ describe("CLI Gateway state target guard", () => {
         NODE_DISABLE_COMPILE_CACHE: "1",
         NODE_ENV: undefined,
         NODE_OPTIONS: undefined,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_URL: undefined,
-        OPENCLAW_HOME: root,
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_URL: undefined,
+        CARAPACE_HOME: root,
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_STATE_DIR: stateDir,
         VITEST: undefined,
       },
       input: "not-a-real-token\n",

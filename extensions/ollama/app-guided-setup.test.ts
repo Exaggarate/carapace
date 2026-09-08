@@ -1,6 +1,6 @@
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
 

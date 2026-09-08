@@ -23,8 +23,8 @@ import {
   type DiagnosticEventPayload,
 } from "../src/infra/diagnostic-events.js";
 import type {
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  CarapacePluginService,
+  CarapacePluginServiceContext,
 } from "../src/plugin-sdk/plugin-entry.js";
 import { createTestPluginApi } from "../src/plugin-sdk/plugin-test-api.js";
 import { createEmptyPluginRegistry } from "../src/plugins/registry-empty.js";
@@ -57,13 +57,13 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
           .filter(
             (key) =>
               key.startsWith("OTEL_") ||
-              key.startsWith("OPENCLAW_PROXY_") ||
+              key.startsWith("CARAPACE_PROXY_") ||
               /^(?:https?|all|no)_proxy$/i.test(key) ||
               key === "NODE_USE_ENV_PROXY",
           )
           .map((key) => [key, undefined]),
       ),
-      OPENCLAW_OTEL_PRELOADED: "0",
+      CARAPACE_OTEL_PRELOADED: "0",
       OTEL_SDK_DISABLED: "false",
       OTEL_NODE_RESOURCE_DETECTORS: "none",
     },
@@ -80,8 +80,8 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
       let server: Awaited<ReturnType<typeof startTestGatewayServer>> | undefined;
       let ws: WebSocket | undefined;
       let unsubscribe: (() => void) | undefined;
-      let serviceContext: OpenClawPluginServiceContext | undefined;
-      let prometheus: OpenClawPluginService | undefined;
+      let serviceContext: CarapacePluginServiceContext | undefined;
+      let prometheus: CarapacePluginService | undefined;
       const cleanupFailures: unknown[] = [];
       try {
         const receiverPort = await receiver.listen();
@@ -102,7 +102,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
             };
           },
         });
-        const services: OpenClawPluginService[] = [];
+        const services: CarapacePluginService[] = [];
         prometheusPlugin.register(
           createTestPluginApi({
             registerService: (service) => {
@@ -122,7 +122,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         if (!prometheus) {
           throw new Error("Prometheus plugin did not register its service");
         }
-        const stateDir = process.env.OPENCLAW_STATE_DIR;
+        const stateDir = process.env.CARAPACE_STATE_DIR;
         if (!stateDir) {
           throw new Error("Gateway test hooks did not create an isolated state directory");
         }
@@ -173,7 +173,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         const firstTraceparent = `00-${firstTraceId}-1111111111111111-01`;
         const secondTraceId = "22222222222222222222222222222222";
         const rpcSpans = () =>
-          receiver.capturedSpans.filter((span) => span.name.startsWith("openclaw.gateway.rpc."));
+          receiver.capturedSpans.filter((span) => span.name.startsWith("carapace.gateway.rpc."));
         const scrape = async () => {
           const response = await fetch(`http://127.0.0.1:${port}/api/diagnostics/prometheus`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -221,24 +221,24 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         ]);
         await waitForDiagnosticEventsDrained();
         const preparing = await scrape();
-        expect(preparing).toContain('openclaw_gateway_rpc_requests_total{method="other"} 1');
+        expect(preparing).toContain('carapace_gateway_rpc_requests_total{method="other"} 1');
         expect(preparing).not.toContain(
-          'openclaw_gateway_rpc_first_response_seconds_count{method="other"}',
+          'carapace_gateway_rpc_first_response_seconds_count{method="other"}',
         );
         expect(preparing).not.toContain(
-          'openclaw_gateway_rpc_handler_seconds_count{method="other"}',
+          'carapace_gateway_rpc_handler_seconds_count{method="other"}',
         );
         const familyHeldMs = performance.now() - familyStartedAt;
         releaseFamily.resolve();
         expect(await firstResponse).toMatchObject({ ok: true });
         await waitForDiagnosticEventsDrained();
         const acknowledged = await scrape();
-        expect(acknowledged).toContain('openclaw_gateway_rpc_requests_total{method="other"} 1');
+        expect(acknowledged).toContain('carapace_gateway_rpc_requests_total{method="other"} 1');
         expect(acknowledged).toContain(
-          'openclaw_gateway_rpc_first_response_seconds_count{method="other"} 1',
+          'carapace_gateway_rpc_first_response_seconds_count{method="other"} 1',
         );
         expect(acknowledged).not.toContain(
-          'openclaw_gateway_rpc_handler_seconds_count{method="other"}',
+          'carapace_gateway_rpc_handler_seconds_count{method="other"}',
         );
         await vi.waitFor(
           () =>
@@ -246,7 +246,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
               rpcSpans()
                 .filter((span) => span.traceId === firstTraceId)
                 .map((span) => span.name),
-            ).toEqual(["openclaw.gateway.rpc.response"]),
+            ).toEqual(["carapace.gateway.rpc.response"]),
           { timeout: 10_000 },
         );
 
@@ -275,9 +275,9 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
                 .at(-1),
             );
           return {
-            count: value("openclaw_gateway_event_loop_delay_max_seconds_count"),
-            sum: value("openclaw_gateway_event_loop_delay_max_seconds_sum"),
-            observed: value("openclaw_gateway_event_loop_observed_seconds_total"),
+            count: value("carapace_gateway_event_loop_delay_max_seconds_count"),
+            sum: value("carapace_gateway_event_loop_delay_max_seconds_sum"),
+            observed: value("carapace_gateway_event_loop_observed_seconds_total"),
           };
         };
         const completedWindow = windowMetrics(await scrape());
@@ -307,7 +307,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         const settled = await scrape();
         for (const metric of ["first_response", "handler", "admission", "queue_wait"]) {
           expect(settled).toContain(
-            `openclaw_gateway_rpc_${metric}_seconds_count{method="other"} 2`,
+            `carapace_gateway_rpc_${metric}_seconds_count{method="other"} 2`,
           );
         }
         const measured = events.filter((event) => event.method === "other");
@@ -322,7 +322,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
           const sample = settled
             .split("\n")
             .find((line) =>
-              line.startsWith(`openclaw_gateway_rpc_${metric}_seconds_sum{method="other"} `),
+              line.startsWith(`carapace_gateway_rpc_${metric}_seconds_sum{method="other"} `),
             );
           expect(Number(sample?.split(" ").at(-1))).toBeCloseTo(totalMs / 1000, 6);
         }
@@ -358,7 +358,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
             .split("\n")
             .filter(
               (line) =>
-                line.startsWith("openclaw_gateway_rpc_") && line.includes('method="unknown"'),
+                line.startsWith("carapace_gateway_rpc_") && line.includes('method="unknown"'),
             )
             .map((line) => line.slice(0, line.lastIndexOf(" ")))
             .toSorted();
@@ -379,7 +379,7 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         for (const key of ["count", "sum", "observed"] as const) {
           expect(retainedWindows[key]).toBeGreaterThanOrEqual(completedWindow[key]);
         }
-        expect(flooded).toContain('openclaw_gateway_rpc_requests_total{method="unknown"} 65');
+        expect(flooded).toContain('carapace_gateway_rpc_requests_total{method="unknown"} 65');
         expect(unknownSeries(flooded)).toEqual(initialUnknown);
         expect(flooded).not.toMatch(
           /private-rpc-proof|held-rpc-proof|concurrent-rpc-proof|11111111111111111111111111111111|22222222222222222222222222222222/,
@@ -391,13 +391,13 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         ]) {
           const spans = rpcSpans().filter((span) => span.traceId === traceId);
           expect(spans.map((span) => span.name).toSorted()).toEqual([
-            "openclaw.gateway.rpc.dispatch",
-            "openclaw.gateway.rpc.handler",
-            "openclaw.gateway.rpc.response",
+            "carapace.gateway.rpc.dispatch",
+            "carapace.gateway.rpc.handler",
+            "carapace.gateway.rpc.response",
           ]);
           expect(spans.every((span) => span.parentSpanId === parentSpanId)).toBe(true);
           for (const span of spans) {
-            const phase = span.name.slice("openclaw.gateway.rpc.".length);
+            const phase = span.name.slice("carapace.gateway.rpc.".length);
             const event = events.find(
               (observed) => observed.trace?.traceId === traceId && observed.phase === phase,
             );
@@ -406,14 +406,14 @@ it("exports RPC phases and completed event-loop windows through the same Gateway
         }
         expect(receiver.capturedMetrics.map((metric) => metric.name)).toEqual(
           expect.arrayContaining([
-            "openclaw.gateway.rpc.requests",
-            "openclaw.gateway.rpc.first_response_ms",
-            "openclaw.gateway.rpc.handler_ms",
-            "openclaw.gateway.rpc.admission_ms",
-            "openclaw.gateway.rpc.queue_wait_ms",
-            "openclaw.gateway.rpc.outcomes",
-            "openclaw.gateway.event_loop.delay_max_ms",
-            "openclaw.gateway.event_loop.observed_ms",
+            "carapace.gateway.rpc.requests",
+            "carapace.gateway.rpc.first_response_ms",
+            "carapace.gateway.rpc.handler_ms",
+            "carapace.gateway.rpc.admission_ms",
+            "carapace.gateway.rpc.queue_wait_ms",
+            "carapace.gateway.rpc.outcomes",
+            "carapace.gateway.event_loop.delay_max_ms",
+            "carapace.gateway.event_loop.observed_ms",
           ]),
         );
         expect(receiver.capturedSpans.some((span) => span.name.includes("event_loop"))).toBe(false);

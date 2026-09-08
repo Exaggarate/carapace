@@ -94,7 +94,7 @@ describe("Node package tool commands", () => {
   )(
     "runs $directory $script with $layout dependencies and package-local shims",
     ({ directory, script, tool, args, layout }) => {
-      const root = fs.realpathSync(createTempDir("openclaw-package-bin-"));
+      const root = fs.realpathSync(createTempDir("carapace-package-bin-"));
       const cwd = path.resolve(root, directory);
       const capture = path.join(root, "capture.json");
       const expectedExit = tool === "vitest" ? 17 : 0;
@@ -164,7 +164,7 @@ describe("Node package tool commands", () => {
   it.each(["hoisted", "isolated"])(
     "installs browser dependencies from %s packages without following stale UI shims",
     (layout) => {
-      const root = fs.realpathSync(createTempDir("openclaw-playwright-bin-"));
+      const root = fs.realpathSync(createTempDir("carapace-playwright-bin-"));
       const ui = path.join(root, "ui");
       const capture = path.join(root, "capture.json");
       fs.mkdirSync(path.join(root, ".git"));

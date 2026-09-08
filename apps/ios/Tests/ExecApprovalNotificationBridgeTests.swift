@@ -1,9 +1,9 @@
 import Foundation
-import OpenClawProtocol
+import CarapaceProtocol
 import Testing
 import UserNotifications
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 private final class MockNotificationCenter: NotificationCentering, @unchecked Sendable {
     var authorization: NotificationAuthorizationStatus = .authorized
@@ -38,7 +38,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
         let prompt = ExecApprovalNotificationBridge.parsePrompt(
             actionIdentifier: UNNotificationDefaultActionIdentifier,
             userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-123",
                     "gatewayDeviceId": "gateway-a",
@@ -54,7 +54,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
         let prompt = ExecApprovalNotificationBridge.parsePrompt(
             actionIdentifier: ExecApprovalNotificationBridge.reviewActionIdentifier,
             userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-456",
                     "gatewayDeviceId": "gateway-b",
@@ -68,9 +68,9 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 
     @Test func `parse prompt ignores unexpected action identifiers`() {
         let prompt = ExecApprovalNotificationBridge.parsePrompt(
-            actionIdentifier: "openclaw.exec-approval.allow-once",
+            actionIdentifier: "carapace.exec-approval.allow-once",
             userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-789",
                 ],
@@ -85,7 +85,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "remote-approval-1",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "approval-123",
                         "gatewayDeviceId": "gateway-a",
@@ -94,7 +94,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "remote-other",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "approval-123",
                         "gatewayDeviceId": "gateway-b",
@@ -125,7 +125,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             "approval\u{FEFF}",
         ] {
             let prompt = try #require(ExecApprovalNotificationBridge.parseRequestedPush(userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": approvalID,
                 ],
@@ -135,7 +135,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 
         for approvalID in ["", ".", ".."] {
             #expect(ExecApprovalNotificationBridge.parseRequestedPush(userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": approvalID,
                 ],
@@ -146,7 +146,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
     @Test func `gateway device owners preserve all nonempty exact bytes`() throws {
         for exactOwner in ["\u{0085}gateway-e\u{0301}\u{0085}", " gateway", "gateway\u{FEFF}"] {
             let prompt = try #require(ExecApprovalNotificationBridge.parseRequestedPush(userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-owner-exact",
                     "gatewayDeviceId": exactOwner,
@@ -157,7 +157,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 
         for invalidOwner in [""] {
             #expect(ExecApprovalNotificationBridge.parseRequestedPush(userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-owner-invalid",
                     "gatewayDeviceId": invalidOwner,
@@ -184,7 +184,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "composed-request",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": composedID,
                         "gatewayDeviceId": "gateway-a",
@@ -193,7 +193,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "decomposed-request",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": decomposedID,
                         "gatewayDeviceId": "gateway-a",
@@ -241,7 +241,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 
     @Test func `legacy ownerless approval pushes remain parseable for authenticated route validation`() {
         let userInfo: [AnyHashable: Any] = [
-            "openclaw": [
+            "carapace": [
                 "kind": ExecApprovalNotificationBridge.requestedKind,
                 "approvalId": "approval-ownerless",
             ],
@@ -260,7 +260,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "legacy-ownerless",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "approval-shared",
                     ],
@@ -268,7 +268,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "other-owner",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "approval-shared",
                         "gatewayDeviceId": "gateway-b",
@@ -297,14 +297,14 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 @Suite(.serialized) struct PluginApprovalNotificationBridgeTests {
     @Test func `parses requested and resolved plugin pushes with kind tag`() throws {
         let requested = try #require(PluginApprovalNotificationBridge.parseRequestedPush(userInfo: [
-            "openclaw": [
+            "carapace": [
                 "kind": PluginApprovalNotificationBridge.requestedKind,
                 "approvalId": "plugin-approval-1",
                 "gatewayDeviceId": "gateway-a",
             ],
         ]))
         let resolved = try #require(PluginApprovalNotificationBridge.parseResolvedPush(userInfo: [
-            "openclaw": [
+            "carapace": [
                 "kind": PluginApprovalNotificationBridge.resolvedKind,
                 "approvalId": "plugin-approval-1",
                 "gatewayDeviceId": "gateway-a",
@@ -320,7 +320,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 
     @Test func `routes default tap and plugin review action`() {
         let userInfo: [AnyHashable: Any] = [
-            "openclaw": [
+            "carapace": [
                 "kind": PluginApprovalNotificationBridge.requestedKind,
                 "approvalId": "plugin-approval-2",
             ],
@@ -339,13 +339,13 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
 
     @Test func `exec and plugin bridges do not cross match`() {
         let execUserInfo: [AnyHashable: Any] = [
-            "openclaw": [
+            "carapace": [
                 "kind": ExecApprovalNotificationBridge.requestedKind,
                 "approvalId": "shared-approval-id",
             ],
         ]
         let pluginUserInfo: [AnyHashable: Any] = [
-            "openclaw": [
+            "carapace": [
                 "kind": PluginApprovalNotificationBridge.requestedKind,
                 "approvalId": "shared-approval-id",
             ],
@@ -367,7 +367,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "plugin-request",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": PluginApprovalNotificationBridge.requestedKind,
                         "approvalId": "shared-approval-id",
                         "gatewayDeviceId": "gateway-a",
@@ -376,7 +376,7 @@ private final class MockNotificationCenter: NotificationCentering, @unchecked Se
             NotificationSnapshot(
                 identifier: "exec-request",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "shared-approval-id",
                         "gatewayDeviceId": "gateway-a",

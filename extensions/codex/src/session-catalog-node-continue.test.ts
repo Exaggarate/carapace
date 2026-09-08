@@ -32,7 +32,7 @@ import {
   createCodexSessionCatalogNodeHostCommands,
   CODEX_LOCAL_SESSION_HOST_ID,
   createCodexSessionCatalogNodeInvokePolicies,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type PluginRuntime,
 } from "./session-catalog.test-helpers.js";
 
@@ -45,7 +45,7 @@ describe("Codex supervision actions", () => {
           models: { "openai/gpt-5.6-sol": {} },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const { runtime } = createRuntime();
     const { api, getProvider } = createGatewayApi(runtime, startupConfig);
     registerCodexSessionCatalog({
@@ -210,7 +210,7 @@ describe("Codex supervision actions", () => {
     adopted.archiveReason = "manual";
     runtimeConfig = {
       agents: { list: [{ id: "alpha" }, { id: "beta", default: true }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const second = await provider?.continueSession?.({
       agentId: "alpha",
       hostId: "node:devbox",
@@ -286,7 +286,7 @@ describe("Codex supervision actions", () => {
   it("does not join concurrent paired-node continues across explicit agent owners", async () => {
     const runtimeConfig = {
       agents: { ownership: "explicit", list: [{ id: "alpha" }, { id: "beta" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const invoke = vi.fn<PluginRuntime["nodes"]["invoke"]>(async ({ command }) => {
       if (command === CODEX_APP_SERVER_THREADS_LIST_COMMAND) {
         return {
@@ -495,7 +495,7 @@ describe("Codex supervision actions", () => {
 
   it("builds local and paired-node terminal plans from verified catalog records", async () => {
     const threadId = "123e4567-e89b-12d3-a456-426614174000";
-    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-terminal-"));
+    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-terminal-"));
     tempDirs.push(binDir);
     process.env.PATH = "";
     nodeHostMocks.userShellPaths.set("codex", binDir);

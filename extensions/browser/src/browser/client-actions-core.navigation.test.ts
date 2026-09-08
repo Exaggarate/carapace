@@ -30,13 +30,13 @@ describe("browser navigation client actions", () => {
       url: "https://example.com/slow",
       targetId: "tab-1",
       timeoutMs: 45_000,
-      profile: "openclaw",
+      profile: "carapace",
     };
 
     await browserNavigate(undefined, options);
 
     const request = lastNavigationRequest();
-    expect(request.url).toBe("/navigate?profile=openclaw");
+    expect(request.url).toBe("/navigate?profile=carapace");
     expect(request.options.timeoutMs).toBe(50_000);
     expect(JSON.parse(request.options.body ?? "{}")).toEqual({
       url: "https://example.com/slow",

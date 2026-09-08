@@ -8,7 +8,7 @@ import { createPluginRecord } from "../plugins/loader-records.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import * as version from "../version.js";
 import { createDesktopSessionRegistry } from "./desktop/session-registry.js";
@@ -23,13 +23,13 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
 });
 
 describe("cloud bootstrap plugin generations", () => {
   it("refreshes registry and metadata generations, retires old artifacts, and drains them on shutdown", async () => {
-    const stateDir = await fs.realpath(tempDirs.make("openclaw-bootstrap-generation-"));
+    const stateDir = await fs.realpath(tempDirs.make("carapace-bootstrap-generation-"));
     const metadata = createPluginMetadataSnapshotFixture({
       plugins: ["runtime-a", "runtime-b"].map((id) => ({
         id,
@@ -91,7 +91,7 @@ describe("cloud bootstrap plugin generations", () => {
           tarballPath: path.join(stateDir, `runtime-${number}.tgz`),
           tarballSha256: String(number).repeat(64),
           tarballBytes: 1,
-          openclawVersion: "2026.8.1",
+          carapaceVersion: "2026.8.1",
           buildId: "gateway-source-build",
           enabledPluginIds: plugins.map(({ id }) => id),
         };
@@ -114,7 +114,7 @@ describe("cloud bootstrap plugin generations", () => {
       },
     );
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       setRuntimeConfigSnapshot({ gateway: { publicOrigin: "https://gateway.example.test" } });
       const startup = await loadGatewayWorkerEnvironmentStartupState();
       const runtime = await createGatewayWorkerEnvironmentRuntime({

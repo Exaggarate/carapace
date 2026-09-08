@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Channel login/logout command helpers for local config and gateway reconciliation.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import {
@@ -11,7 +11,7 @@ import {
 import { resolveInstallableChannelPlugin } from "../commands/channel-setup/channel-plugin-resolution.js";
 import { assertAccountSelectorForMutation } from "../commands/channels/account-selector.js";
 import { requireValidConfigForWrite } from "../commands/config-validation.js";
-import { getRuntimeConfig, type OpenClawConfig } from "../config/config.js";
+import { getRuntimeConfig, type CarapaceConfig } from "../config/config.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import { callGateway } from "../gateway/call.js";
 import type { ChannelAccountStartOutcome } from "../gateway/server-channel-runtime.types.js";
@@ -38,7 +38,7 @@ function supportsChannelAuthMode(plugin: ChannelPlugin, mode: ChannelAuthMode): 
   return mode === "login" ? Boolean(plugin.auth?.login) : Boolean(plugin.gateway?.logoutAccount);
 }
 
-function isConfiguredAuthPlugin(plugin: ChannelPlugin, cfg: OpenClawConfig): boolean {
+function isConfiguredAuthPlugin(plugin: ChannelPlugin, cfg: CarapaceConfig): boolean {
   const key = plugin.id;
   if (isBlockedObjectKey(key)) {
     return false;
@@ -85,7 +85,7 @@ function resolveConfiguredAuthChannelInput(mode: ChannelAuthMode): string {
   }
   if (configured.length === 0) {
     throw new Error(
-      `No configured channel supports ${mode}. Run ${formatCliCommand("openclaw channels status")} to inspect channels or ${formatCliCommand("openclaw channels add --channel <channel>")} to add one.`,
+      `No configured channel supports ${mode}. Run ${formatCliCommand("carapace channels status")} to inspect channels or ${formatCliCommand("carapace channels add --channel <channel>")} to add one.`,
     );
   }
   const safeIds = configured.map(sanitizeForLog);
@@ -99,7 +99,7 @@ async function resolveChannelPluginForMode(
   mode: ChannelAuthMode,
   runtime: RuntimeEnv,
 ): Promise<{
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelInput: string;
   channelId: string;
   plugin: ChannelPlugin;
@@ -131,7 +131,7 @@ async function resolveChannelPluginForMode(
   const channelId = resolved.channelId ?? normalizedChannelId;
   if (!channelId) {
     throw new Error(
-      `Unsupported channel "${channelInput}". Run ${formatCliCommand("openclaw channels list")} to see available channels.`,
+      `Unsupported channel "${channelInput}". Run ${formatCliCommand("carapace channels list")} to see available channels.`,
     );
   }
   const plugin = resolved.plugin;
@@ -140,7 +140,7 @@ async function resolveChannelPluginForMode(
       formatUnsupportedChannelActionMessage({
         channel: channelId,
         action: mode,
-        inspectCommand: "openclaw channels status --channel " + channelId,
+        inspectCommand: "carapace channels status --channel " + channelId,
       }),
     );
   }
@@ -163,7 +163,7 @@ async function resolveChannelPluginForMode(
 function resolveAccountContext(
   plugin: ChannelPlugin,
   opts: ChannelAuthOptions,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ) {
   const accountId =
     normalizeOptionalString(opts.account) || resolveChannelDefaultAccountId({ plugin, cfg });
@@ -181,7 +181,7 @@ function isChannelMissingFromGatewayRegistry(error: unknown): error is Error {
 }
 
 async function reconcileGatewayRuntimeAfterLocalLogin(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   plugin: ChannelPlugin;
   channelId: string;
   accountId: string;
@@ -212,7 +212,7 @@ async function reconcileGatewayRuntimeAfterLocalLogin(params: {
     // Older Gateways return only the runtime snapshot, without a start decision.
     if (result.outcome && result.outcome.status !== "handed-off") {
       params.runtime.log(
-        `Local login saved auth for ${params.channelId}/${params.accountId}. Gateway start: ${result.outcome.reason}. Check ${formatCliCommand(`openclaw channels status --channel ${params.channelId} --probe`)}.`,
+        `Local login saved auth for ${params.channelId}/${params.accountId}. Gateway start: ${result.outcome.reason}. Check ${formatCliCommand(`carapace channels status --channel ${params.channelId} --probe`)}.`,
       );
     }
   } catch (error) {
@@ -243,7 +243,7 @@ async function reconcileGatewayRuntimeAfterLocalLogin(params: {
 }
 
 async function logoutViaGatewayRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: string;
   accountId: string;
   runtime: RuntimeEnv;
@@ -286,7 +286,7 @@ export async function runChannelLogin(
       formatUnsupportedChannelActionMessage({
         channel: channelInput,
         action: "login",
-        inspectCommand: "openclaw channels status --channel " + channelInput,
+        inspectCommand: "carapace channels status --channel " + channelInput,
       }),
     );
   }
@@ -324,7 +324,7 @@ export async function runChannelLogout(
       formatUnsupportedChannelActionMessage({
         channel: channelInput,
         action: "logout",
-        inspectCommand: "openclaw channels status --channel " + channelInput,
+        inspectCommand: "carapace channels status --channel " + channelInput,
       }),
     );
   }

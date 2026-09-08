@@ -59,7 +59,7 @@ flow:
           value:
             expr: "(await qaImport('node:child_process')).execFileSync('git', ['rev-parse', 'HEAD'], { cwd: env.repoRoot, encoding: 'utf8' }).trim()"
         - set: imageUrl
-          value: https://artifacts.openclaw.ai/mantis/qa30-media-markdown/83b55b46f3b3575690f7bc2252ef66d78323cd517079da66aef9b9d475e934c9/markdown-image(chart.png)
+          value: https://github.com/Exaggarate/carapace(chart.png)
         - set: imageMarkdown
           value:
             expr: "`![chart](${imageUrl})`"

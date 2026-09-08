@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { emitSessionLifecycleEvent } from "../sessions/session-lifecycle-events.js";
 import {
   captureAgentToolSourceExecutionGuard,

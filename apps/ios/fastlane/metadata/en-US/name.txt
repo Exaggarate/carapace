@@ -1,1 +1,1 @@
-OpenClaw - iOS Client
+Carapace - iOS Client

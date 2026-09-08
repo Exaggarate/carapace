@@ -1,4 +1,4 @@
-// Runtime implementations for `openclaw plugins` subcommands. Heavy plugin modules stay
+// Runtime implementations for `carapace plugins` subcommands. Heavy plugin modules stay
 // lazy-loaded so the base CLI can start without activating the plugin registry.
 import { formatDocsLink } from "../../packages/terminal-core/src/links.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
@@ -13,7 +13,7 @@ import {
   readConfigFileSnapshot,
 } from "../config/config.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { emitDiagnosticsTimelineEvent } from "../infra/diagnostics-timeline.js";
 import { resolvePluginInstallSources } from "../plugins/install-channel-specs.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
@@ -102,14 +102,14 @@ function pluginIdListIncludes(list: readonly string[] | undefined, pluginId: str
 }
 
 function formatBlockedRuntimePluginGuidance(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
 }): string | undefined {
   const pluginId = params.pluginId;
   const alternative =
     pluginId === "acpx"
       ? "disable ACP/acpx in acp config"
-      : 'change the runtime policy to "openclaw"';
+      : 'change the runtime policy to "carapace"';
   if (params.cfg.plugins?.enabled === false) {
     return `Enable plugin loading and the "${pluginId}" plugin, or ${alternative}.`;
   }
@@ -123,14 +123,14 @@ function formatBlockedRuntimePluginGuidance(params: {
 }
 
 function formatDisabledRuntimePluginGuidance(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
 }): string {
   const allow = params.cfg.plugins?.allow;
   const alternative =
     params.pluginId === "acpx"
       ? "disable ACP/acpx in acp config"
-      : 'change the runtime policy to "openclaw"';
+      : 'change the runtime policy to "carapace"';
   if (Array.isArray(allow) && allow.length > 0 && !allow.includes(params.pluginId)) {
     return `Add "${params.pluginId}" to plugins.allow and enable the plugin, or ${alternative}.`;
   }
@@ -138,7 +138,7 @@ function formatDisabledRuntimePluginGuidance(params: {
 }
 
 function collectConfiguredRuntimePluginWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   plugins: readonly { enabled?: boolean; id: string; status?: string }[];
 }): string[] {
   const enabledPluginIds = new Set(
@@ -170,7 +170,7 @@ function collectConfiguredRuntimePluginWarnings(params: {
     }
     const installSpec = formatConfiguredRuntimePluginInstallSpec(candidate);
     return [
-      `- Configured runtime "${runtimeId}" requires the ${candidate.label} plugin, but no enabled "${runtimeId}" plugin was found. Run "openclaw doctor --fix" to install ${installSpec}, or install it manually with "openclaw plugins install ${installSpec}".`,
+      `- Configured runtime "${runtimeId}" requires the ${candidate.label} plugin, but no enabled "${runtimeId}" plugin was found. Run "carapace doctor --fix" to install ${installSpec}, or install it manually with "carapace plugins install ${installSpec}".`,
     ];
   });
 }
@@ -278,7 +278,7 @@ export async function runPluginsRegistryCommand(opts: PluginRegistryOptions): Pr
         const message = [
           "Plugin registry refresh could not verify the persisted replacement.",
           ...differenceLines.map((difference) => `- ${difference}`),
-          "Stop plugin package changes, then run `openclaw plugins registry --refresh` again.",
+          "Stop plugin package changes, then run `carapace plugins registry --refresh` again.",
         ].join("\n");
         if (opts.json) {
           defaultRuntime.writeJson({
@@ -334,7 +334,7 @@ export async function runPluginsRegistryCommand(opts: PluginRegistryOptions): Pr
   if (inspection.refreshReasons.length > 0) {
     lines.push(`${theme.muted("Refresh reasons:")} ${inspection.refreshReasons.join(", ")}`);
     lines.push(...formatDifferences(inspection.differences).map((difference) => `- ${difference}`));
-    lines.push(`${theme.muted("Repair:")} ${theme.command("openclaw plugins registry --refresh")}`);
+    lines.push(`${theme.muted("Repair:")} ${theme.command("carapace plugins registry --refresh")}`);
   }
   defaultRuntime.log(lines.join("\n"));
 }
@@ -369,7 +369,7 @@ export async function runPluginsDoctorCommand(opts: PluginDoctorOptions = {}): P
     ),
     ...collectStalePluginConfigWarnings({
       hits: scanStalePluginConfig(sourceCfg, process.env),
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
       autoRepairBlocked: isStalePluginAutoRepairBlocked(sourceCfg, process.env),
     }),
     ...collectConfiguredRuntimePluginWarnings({ cfg: sourceCfg, plugins: report.plugins }),
@@ -412,10 +412,10 @@ export async function runPluginsDoctorCommand(opts: PluginDoctorOptions = {}): P
             : {}),
           ...(entry.source ? { shadowedSource: shortenHomeInString(entry.source) } : {}),
           repair: [
-            `openclaw plugins inspect ${entry.pluginId ?? "<plugin-id>"}`,
+            `carapace plugins inspect ${entry.pluginId ?? "<plugin-id>"}`,
             "edit or remove the config-selected plugin source",
-            "openclaw plugins registry --refresh",
-            "openclaw gateway restart --force",
+            "carapace plugins registry --refresh",
+            "carapace gateway restart --force",
           ],
         };
       }),
@@ -430,7 +430,7 @@ export async function runPluginsDoctorCommand(opts: PluginDoctorOptions = {}): P
 
   const healthyMessage =
     "Plugin discovery, module loading, compatibility, and configuration checks passed. " +
-    'Run "openclaw health" to check the running Gateway, including runtime quarantines and fallbacks.';
+    'Run "carapace health" to check the running Gateway, including runtime quarantines and fallbacks.';
   if (!hasInstallTreeIssues && pluginConfigWarnings.size === 0 && compatibility.length === 0) {
     defaultRuntime.log(healthyMessage);
     return;
@@ -473,10 +473,10 @@ export async function runPluginsDoctorCommand(opts: PluginDoctorOptions = {}): P
         lines.push(`  shadowed: ${shortenHomeInString(diag.source)}`);
       }
       lines.push("  repair:");
-      lines.push("    openclaw plugins inspect " + (diag.pluginId ?? "<plugin-id>"));
+      lines.push("    carapace plugins inspect " + (diag.pluginId ?? "<plugin-id>"));
       lines.push("    edit or remove the config-selected plugin source");
-      lines.push("    openclaw plugins registry --refresh");
-      lines.push("    openclaw gateway restart --force");
+      lines.push("    carapace plugins registry --refresh");
+      lines.push("    carapace gateway restart --force");
     }
   }
   if (compatibility.length > 0) {
@@ -501,7 +501,7 @@ export async function runPluginsDoctorCommand(opts: PluginDoctorOptions = {}): P
       : healthyMessage;
     lines.push("", summary);
   }
-  const docs = formatDocsLink("/plugin", "docs.openclaw.ai/plugin");
+  const docs = formatDocsLink("/plugin", "github.com/Exaggarate/carapace");
   lines.push("");
   lines.push(`${theme.muted("Docs:")} ${docs}`);
   defaultRuntime.log(lines.join("\n"));
@@ -581,7 +581,7 @@ function emitMarketplaceFeedTelemetry(params: {
   entryCount?: number;
   failedPinnedRefresh?: boolean;
   opts: MarketplaceFeedTelemetryOptions;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   payload: MarketplaceRefreshPayload;
 }): void {
   const attributes: Record<string, string | number | boolean | null> = {
@@ -813,9 +813,9 @@ function formatPinnedMarketplaceRefreshFailure(payload: MarketplaceRefreshPayloa
 }
 
 const MARKETPLACE_GATEWAY_RESTART_GUIDANCE =
-  'The running Gateway could not refresh its marketplace catalog. Run "openclaw gateway restart" to apply the current catalog state.';
+  'The running Gateway could not refresh its marketplace catalog. Run "carapace gateway restart" to apply the current catalog state.';
 
-/** List entries from the configured OpenClaw marketplace feed. */
+/** List entries from the configured Carapace marketplace feed. */
 export async function runPluginMarketplaceEntriesCommand(
   opts: PluginMarketplaceEntriesOptions,
 ): Promise<void> {
@@ -873,7 +873,7 @@ export async function runPluginMarketplaceEntriesCommand(
   defaultRuntime.log(lines.join("\n"));
 }
 
-/** Refresh the configured OpenClaw marketplace feed snapshot. */
+/** Refresh the configured Carapace marketplace feed snapshot. */
 export async function runPluginMarketplaceRefreshCommand(
   opts: PluginMarketplaceRefreshOptions,
 ): Promise<void> {

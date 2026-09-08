@@ -3,7 +3,7 @@ import path from "node:path";
 import {
   buildControlUiFocusPath,
   type ControlUiFocusBuildTarget,
-} from "@openclaw/session-url-contract";
+} from "@carapace/session-url-contract";
 import type { Page, Route, Video } from "playwright";
 import { beforeEach, expect, it } from "vitest";
 import { ConnectErrorDetailCodes } from "../../../packages/gateway-protocol/src/connect-error-details.js";
@@ -26,8 +26,8 @@ beforeEach(() => {
     artifactDir = createControlUiE2eArtifactDir("lazy-custom-element-recovery");
   }
 });
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const railProofDirParent = process.env.OPENCLAW_UI_RAIL_PROOF_DIR?.trim();
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const railProofDirParent = process.env.CARAPACE_UI_RAIL_PROOF_DIR?.trim();
 let railProofDir: string | undefined;
 beforeEach(() => {
   railProofDir = railProofDirParent
@@ -116,7 +116,7 @@ const focusedCases = [
       },
       terminalEnabled: true,
     },
-    ready: (page: Page) => page.locator("openclaw-terminal-panel .tp-header").waitFor(),
+    ready: (page: Page) => page.locator("carapace-terminal-panel .tp-header").waitFor(),
   },
   {
     name: "desktop",
@@ -161,7 +161,7 @@ const focusedCases = [
         "board.get": { sessionKey, revision: 1, tabs: [], widgets: [] },
       },
     },
-    ready: (page: Page) => page.locator("openclaw-board-document openclaw-board-view").waitFor(),
+    ready: (page: Page) => page.locator("carapace-board-document carapace-board-view").waitFor(),
   },
 ];
 
@@ -207,7 +207,7 @@ suite.define(() => {
         await gateway.waitForRequest("connect", { after: connectCount });
         await gateway.resolveDeferred("connect");
         await waitForControlUiGatewayReady(page);
-        expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+        expect(await page.locator("carapace-login-gate").count()).toBe(0);
       },
     );
   });
@@ -262,7 +262,7 @@ suite.define(() => {
           await error.getByRole("button", { name: "Retry", exact: true }).click();
           await expect.poll(failure.headCount).toBe(2);
           await page.keyboard.press("Escape");
-          const paletteModal = page.locator('openclaw-modal-dialog[label="command palette"]');
+          const paletteModal = page.locator('carapace-modal-dialog[label="command palette"]');
           await expect.poll(() => paletteModal.count()).toBe(0);
           releaseProbe();
           await expect
@@ -292,7 +292,7 @@ suite.define(() => {
           expect(documentRequests).toBe(1);
           expect(await paletteModal.count()).toBe(0);
           expect(
-            await page.evaluate(() => sessionStorage.getItem("openclaw:lazy-event")),
+            await page.evaluate(() => sessionStorage.getItem("carapace:lazy-event")),
           ).toBeNull();
         },
       );
@@ -357,7 +357,7 @@ suite.define(() => {
       await waitForControlUiGatewayReady(page);
 
       await page.evaluate(() => {
-        window.dispatchEvent(new CustomEvent("openclaw:command-palette-open"));
+        window.dispatchEvent(new CustomEvent("carapace:command-palette-open"));
       });
       const error = await expectRealChunkFailure(page, "command palette");
       await expect.poll(failure.headCount).toBe(1);
@@ -375,7 +375,7 @@ suite.define(() => {
       await page.getByRole("combobox", { name: "Search chats and commands…" }).waitFor();
 
       await expect.poll(failure.chunkRequestCount).toBe(2);
-      expect(await page.locator("openclaw-command-palette").count()).toBe(1);
+      expect(await page.locator("carapace-command-palette").count()).toBe(1);
       if (captureUiProof) {
         await writeFile(
           path.join(artifactDir, "recovered.png"),
@@ -413,15 +413,15 @@ suite.define(() => {
           expect(response?.status()).toBe(200);
           await page.locator(".sidebar-brand").waitFor({ state: "attached" });
           await held.request;
-          const element = page.locator("openclaw-macos-titlebar-controls");
+          const element = page.locator("carapace-macos-titlebar-controls");
           expect(await element.evaluate((node) => node.matches(":defined"))).toBe(false);
           await page.evaluate(() => {
             window.dispatchEvent(
-              new CustomEvent("openclaw:native-history-state", {
+              new CustomEvent("carapace:native-history-state", {
                 detail: { canGoBack: true, canGoForward: false },
               }),
             );
-            window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+            window.dispatchEvent(new CustomEvent("carapace:native-toggle-sidebar"));
           });
           await expect
             .poll(() => page.locator(".shell").getAttribute("class"))
@@ -458,7 +458,7 @@ suite.define(() => {
     {
       name: "native titlebar",
       chunk: nativeTitlebarChunk,
-      label: "openclaw-macos-titlebar-controls",
+      label: "carapace-macos-titlebar-controls",
       webChrome: true,
       pathname: "",
       readySelector: ".sidebar-brand",

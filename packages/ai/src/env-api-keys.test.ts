@@ -47,7 +47,7 @@ describe("getEnvApiKey", () => {
   });
 
   it("detects Google Vertex ADC credentials on the first synchronous lookup", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-vertex-adc-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-vertex-adc-"));
     tempDirs.push(dir);
     const credentialsPath = join(dir, "application_default_credentials.json");
     await writeFile(credentialsPath, "{}", "utf-8");
@@ -145,7 +145,7 @@ describe("getEnvApiKey", () => {
   });
 
   it("requires non-blank Google Vertex project and location markers", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-vertex-adc-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-vertex-adc-"));
     tempDirs.push(dir);
     const credentialsPath = join(dir, "application_default_credentials.json");
     await writeFile(credentialsPath, "{}", "utf-8");
@@ -164,7 +164,7 @@ describe("getEnvApiKey", () => {
   });
 
   it("does not cache missing Google Vertex ADC credentials", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-vertex-adc-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-vertex-adc-"));
     tempDirs.push(dir);
     const credentialsPath = join(dir, "application_default_credentials.json");
     await withEnvAsync(
@@ -185,7 +185,7 @@ describe("getEnvApiKey", () => {
   });
 
   it("trims the Google Vertex credentials path before checking it", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-vertex-adc-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-vertex-adc-"));
     tempDirs.push(dir);
     const credentialsPath = join(dir, "application_default_credentials.json");
     await writeFile(credentialsPath, "{}", "utf-8");

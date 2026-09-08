@@ -1,6 +1,6 @@
-// Host-owned authorization for exact delegated OpenClaw changes.
+// Host-owned authorization for exact delegated Carapace changes.
 import { createHash } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { isPersistentSystemAgentOperation, type SystemAgentOperation } from "./operations-parse.js";
 
 export type SystemAgentProposalRef = { current?: string; operation?: SystemAgentOperation };

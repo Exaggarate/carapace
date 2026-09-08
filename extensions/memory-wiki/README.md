@@ -1,6 +1,6 @@
-# @openclaw/memory-wiki
+# @carapace/memory-wiki
 
-Persistent wiki compiler and Obsidian-friendly knowledge vault for **OpenClaw**.
+Persistent wiki compiler and Obsidian-friendly knowledge vault for **Carapace**.
 
 This plugin is separate from the active memory plugin. The active memory plugin still handles recall, promotion, and dreaming. `memory-wiki` compiles durable knowledge into a navigable markdown vault with deterministic indexes, provenance, structured claim/evidence metadata, and optional Obsidian CLI workflows.
 
@@ -28,14 +28,14 @@ Put config under `plugins.entries.memory-wiki.config`:
 
   vault: {
     scope: "global", // or "agent"
-    path: "~/.openclaw/wiki/main",
+    path: "~/.carapace/wiki/main",
     renderMode: "obsidian", // or "native"
   },
 
   obsidian: {
     enabled: true,
     useOfficialCli: true,
-    vaultName: "OpenClaw Wiki",
+    vaultName: "Carapace Wiki",
     openAfterWrites: false,
   },
 
@@ -78,7 +78,7 @@ Put config under `plugins.entries.memory-wiki.config`:
 
 ### Per-agent vaults
 
-In agent scope, `vault.path` is a parent directory. OpenClaw appends the
+In agent scope, `vault.path` is a parent directory. Carapace appends the
 normalized agent id:
 
 ```json5
@@ -86,7 +86,7 @@ normalized agent id:
   vaultMode: "bridge",
   vault: {
     scope: "agent",
-    path: "~/.openclaw/wiki",
+    path: "~/.carapace/wiki",
   },
   bridge: {
     enabled: true,
@@ -99,10 +99,10 @@ normalized agent id:
 ```
 
 This resolves agents such as `support` and `marketing` to
-`~/.openclaw/wiki/support` and `~/.openclaw/wiki/marketing`. With no explicit
+`~/.carapace/wiki/support` and `~/.carapace/wiki/marketing`. With no explicit
 path, the parent defaults to `<state-dir>/wiki`; the default `main` agent
-therefore uses `<state-dir>/wiki/main`. The state directory is `~/.openclaw` by
-default and follows `OPENCLAW_STATE_DIR` when configured. In global scope,
+therefore uses `<state-dir>/wiki/main`. The state directory is `~/.carapace` by
+default and follows `CARAPACE_STATE_DIR` when configured. In global scope,
 `vault.path` remains the exact shared vault path; explicit paths and `~/`
 expansion keep their existing behavior.
 
@@ -140,52 +140,52 @@ The plugin initializes a vault like this:
   reports/
   _attachments/
   _views/
-  .openclaw-wiki/
+  .carapace-wiki/
 ```
 
 Generated content stays inside managed blocks. Human note blocks are preserved.
 
-Key beliefs can live in structured `claims` frontmatter with per-claim evidence, confidence, and status. Compile also persists a machine-readable snapshot in OpenClaw plugin state so agent/runtime consumers do not have to scrape markdown pages.
+Key beliefs can live in structured `claims` frontmatter with per-claim evidence, confidence, and status. Compile also persists a machine-readable snapshot in Carapace plugin state so agent/runtime consumers do not have to scrape markdown pages.
 
 When `render.createBacklinks` is enabled, compile adds deterministic `## Related` blocks to pages. Those blocks list source pages, pages that reference the current page, and nearby pages that share the same source ids.
 
 When `render.createDashboards` is enabled, compile also maintains report dashboards under `reports/` for open questions, contradictions, low-confidence pages, and stale pages.
 
-Unmanaged raw Markdown can live under `sources/` without OpenClaw page frontmatter. Add `<!-- openclaw:wiki:raw-source -->` near the top of the page body to opt it out of wiki page metadata and freshness lint; generated or source-sync tracked imports still require their structured metadata.
+Unmanaged raw Markdown can live under `sources/` without Carapace page frontmatter. Add `<!-- carapace:wiki:raw-source -->` near the top of the page body to opt it out of wiki page metadata and freshness lint; generated or source-sync tracked imports still require their structured metadata.
 
 ## CLI
 
 ```bash
-openclaw wiki status
-openclaw wiki doctor
-openclaw wiki init
-openclaw wiki ingest ./notes/alpha.md
-openclaw wiki compile
-openclaw wiki lint
-openclaw wiki search "alpha"
-openclaw wiki get entity.alpha --from 1 --lines 80
+carapace wiki status
+carapace wiki doctor
+carapace wiki init
+carapace wiki ingest ./notes/alpha.md
+carapace wiki compile
+carapace wiki lint
+carapace wiki search "alpha"
+carapace wiki get entity.alpha --from 1 --lines 80
 
-openclaw wiki apply synthesis "Alpha Summary" \
+carapace wiki apply synthesis "Alpha Summary" \
   --body "Short synthesis body" \
   --source-id source.alpha
 
-openclaw wiki apply metadata entity.alpha \
+carapace wiki apply metadata entity.alpha \
   --source-id source.alpha \
   --status review \
   --question "Still active?"
 
-openclaw wiki bridge import
-openclaw wiki unsafe-local import
+carapace wiki bridge import
+carapace wiki unsafe-local import
 
-openclaw wiki obsidian status
-openclaw wiki obsidian search "alpha"
-openclaw wiki obsidian open syntheses/alpha-summary.md
-openclaw wiki obsidian command workspace:quick-switcher
-openclaw wiki obsidian daily
+carapace wiki obsidian status
+carapace wiki obsidian search "alpha"
+carapace wiki obsidian open syntheses/alpha-summary.md
+carapace wiki obsidian command workspace:quick-switcher
+carapace wiki obsidian daily
 
 # Agent-scoped vault
-openclaw wiki status --agent support
-openclaw wiki search "refund policy" --agent support
+carapace wiki status --agent support
+carapace wiki search "refund policy" --agent support
 ```
 
 ## Agent tools

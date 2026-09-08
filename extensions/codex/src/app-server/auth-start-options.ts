@@ -1,6 +1,6 @@
 import { homedir as readHomeDir } from "node:os";
 import path from "node:path";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexAppServerStartOptions } from "./config-contracts.js";
 import { normalizeCodexAppServerArgs } from "./launch-args.js";
 
@@ -35,7 +35,7 @@ export function resolveCodexAppServerLocalHomeDir(
     : resolveCodexAppServerHomeDir(agentDir);
 }
 
-/** Forces OpenClaw-owned Codex auth to remain process-local. */
+/** Forces Carapace-owned Codex auth to remain process-local. */
 export function withEphemeralCodexAuthStore(params: {
   startOptions: CodexAppServerStartOptions;
   preparedAuth?: unknown;

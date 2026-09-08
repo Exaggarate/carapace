@@ -16,8 +16,8 @@ describe("qa channel transport", () => {
         "qa-channel": {
           enabled: true,
           baseUrl: "http://127.0.0.1:43123",
-          botUserId: "openclaw",
-          botDisplayName: "OpenClaw QA",
+          botUserId: "carapace",
+          botDisplayName: "Carapace QA",
           allowFrom: ["*"],
           pollTimeoutMs: 250,
         },
@@ -25,7 +25,7 @@ describe("qa channel transport", () => {
       messages: {
         visibleReplies: "automatic",
         groupChat: {
-          mentionPatterns: ["\\b@?openclaw\\b"],
+          mentionPatterns: ["\\b@?carapace\\b"],
           visibleReplies: "automatic",
         },
       },

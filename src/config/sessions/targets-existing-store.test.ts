@@ -2,10 +2,10 @@
 import nodeFs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import type { OpenClawConfig } from "../config.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import type { CarapaceConfig } from "../config.js";
 import { replaceSessionEntry } from "./session-accessor.js";
 import * as sessionEntryStatus from "./session-accessor.sqlite-status.js";
 import { resolveExistingAgentSessionStoreTargetsSync } from "./targets.js";
@@ -21,9 +21,9 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
           { sessionId: `session-${agentId}`, updatedAt: Date.now() },
         );
       }
-      const database = openOpenClawAgentDatabase({ agentId: "main", path: storePath });
+      const database = openCarapaceAgentDatabase({ agentId: "main", path: storePath });
       database.db.prepare("UPDATE session_nodes SET entry_valid = 0").run();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storePath },
       };
@@ -44,11 +44,11 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
 
   it("validates a configured canonical SQLite target once", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".carapace");
       const storePaths = await createAgentSessionStores(stateDir, ["main"]);
       const agentsRoot = path.join(stateDir, "agents");
-      const sqlitePath = path.join(agentsRoot, "main", "agent", "openclaw-agent.sqlite");
-      const cfg: OpenClawConfig = {
+      const sqlitePath = path.join(agentsRoot, "main", "agent", "carapace-agent.sqlite");
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }] },
       };
       const lstat = vi.spyOn(nodeFs, "lstatSync");
@@ -80,13 +80,13 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
 
   it("does not resolve unrelated registered store identities", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".carapace");
       const unrelatedAgentIds = Array.from({ length: 12 }, (_, index) => `extra-${index}`);
       const storePaths = await createAgentSessionStores(stateDir, [
         "retired",
         ...unrelatedAgentIds,
       ]);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }] },
       };
       const lstat = vi.spyOn(nodeFs, "lstatSync");
@@ -118,7 +118,7 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
     await withTempHome(async (home) => {
       const storesRoot = path.join(home, "stores");
       const storePaths = await createAgentSessionStores(path.join(storesRoot, "work"), ["old"]);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: {
           store: path.join(
             storesRoot,

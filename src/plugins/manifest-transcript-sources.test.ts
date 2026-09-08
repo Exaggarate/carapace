@@ -9,7 +9,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 function loadDescriptor(descriptor: unknown, declared = ["captions"]) {
   const root = tempDirs.make("manifest-transcript-sources-");
   fs.writeFileSync(
-    path.join(root, "openclaw.plugin.json"),
+    path.join(root, "carapace.plugin.json"),
     JSON.stringify({
       id: "fixture",
       configSchema: { type: "object" },

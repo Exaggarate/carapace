@@ -1,9 +1,9 @@
 {
   "base": "codex-dynamic-tools.telegram-direct.json",
   "replace": {
-    "openclaw_direct": {
+    "carapace_direct": {
       "description": "",
-      "name": "openclaw_direct",
+      "name": "carapace_direct",
       "tools": [
         {
           "description": "Accept heartbeat result for post-turn handling. `notify=false` no visible send. `notify=true` needs concise notificationText. Scratch is monitor prose only.",

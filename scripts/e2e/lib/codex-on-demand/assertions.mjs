@@ -19,8 +19,8 @@ import {
 import { assertCodexReleasePackageContract } from "../codex-release-package-assertions.mjs";
 
 const cfg = readJson(configPath());
-const onboard = readJson("/tmp/openclaw-onboard.json");
-const inspect = readJson("/tmp/openclaw-codex-inspect.json");
+const onboard = readJson("/tmp/carapace-onboard.json");
+const inspect = readJson("/tmp/carapace-codex-inspect.json");
 const records = readInstallRecords();
 const codexRecord = records.codex;
 if (onboard.ok !== true || onboard.mode !== "local" || onboard.authChoice !== "openai-api-key") {
@@ -35,8 +35,8 @@ if (!codexRecord) {
 if (codexRecord.source !== "npm") {
   throw new Error(`expected npm codex install record, got ${codexRecord.source}`);
 }
-if (!codexRecord.spec?.includes("@openclaw/codex")) {
-  throw new Error(`expected @openclaw/codex install spec, got ${codexRecord.spec}`);
+if (!codexRecord.spec?.includes("@carapace/codex")) {
+  throw new Error(`expected @carapace/codex install spec, got ${codexRecord.spec}`);
 }
 
 const npmRoot = managedNpmRoot();
@@ -48,14 +48,14 @@ assertPathInside(npmRoot, installPath, "codex install path");
 
 const codexPackageJson = path.join(installPath, "package.json");
 if (!fs.existsSync(codexPackageJson)) {
-  throw new Error(`missing npm-installed @openclaw/codex package: ${codexPackageJson}`);
+  throw new Error(`missing npm-installed @carapace/codex package: ${codexPackageJson}`);
 }
 const codexPackage = readJson(codexPackageJson);
-if (codexPackage.name !== "@openclaw/codex") {
+if (codexPackage.name !== "@carapace/codex") {
   throw new Error(`unexpected codex package name: ${codexPackage.name}`);
 }
 
-const npmProjectRoot = npmProjectRootForInstalledPackage(installPath, "@openclaw/codex");
+const npmProjectRoot = npmProjectRootForInstalledPackage(installPath, "@carapace/codex");
 const openAiCodexPackageJson = findPackageJson("@openai/codex", [
   installPath,
   npmProjectRoot,
@@ -71,7 +71,7 @@ assertCodexReleasePackageContract({
   managedRoot: npmRoot,
 });
 
-const list = readJson("/tmp/openclaw-plugins-list.json");
+const list = readJson("/tmp/carapace-plugins-list.json");
 const plugin = (list.plugins || []).find((entry) => entry.id === "codex");
 if (!plugin || plugin.enabled !== true || plugin.status !== "loaded") {
   throw new Error(`codex plugin was not enabled+loaded: ${JSON.stringify(plugin)}`);
@@ -100,14 +100,14 @@ if (providerRuntime && providerRuntime !== "codex") {
   throw new Error(`unexpected OpenAI provider runtime: ${providerRuntime}`);
 }
 
-const openClawStateDir = stateDir();
-assertNoLegacyPrimaryAuthRows(openClawStateDir);
-const authRaw = readCanonicalAuthProfileStoreText(openClawStateDir);
+const carapaceStateDir = stateDir();
+assertNoLegacyPrimaryAuthRows(carapaceStateDir);
+const authRaw = readCanonicalAuthProfileStoreText(carapaceStateDir);
 if (!authRaw) {
   throw new Error("auth profile SQLite store row was not persisted");
 }
 assertOpenAiEnvAuthProfileStore(authRaw, {
   envRefMessage: "auth profile did not persist OPENAI_API_KEY env ref",
   rawKeyMessage: "auth profile persisted the raw OpenAI test key",
-  rawKeyNeedle: "sk-openclaw-codex-on-demand-e2e",
+  rawKeyNeedle: "sk-carapace-codex-on-demand-e2e",
 });

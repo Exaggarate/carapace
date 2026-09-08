@@ -70,10 +70,10 @@ defineDiscordVoiceTests(
       const bridgeParams = lastRealtimeBridgeParams();
       expect(bridgeParams?.cfg).toBe(cfg);
       expect(bridgeParams?.autoRespondToAudio).toBe(false);
-      expect(bridgeParams?.instructions).toContain("same OpenClaw agent");
+      expect(bridgeParams?.instructions).toContain("same Carapace agent");
       expect(bridgeParams?.instructions).toContain("short natural backchannel");
-      expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("openclaw_agent_consult");
-      expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("openclaw_agent_control");
+      expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("carapace_agent_consult");
+      expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("carapace_agent_control");
       const player = getLastAudioPlayer();
       bridgeParams?.audioSink?.sendAudio(Buffer.alloc(24_000));
       expect(player.play).toHaveBeenCalled();
@@ -83,7 +83,7 @@ defineDiscordVoiceTests(
         {
           itemId: "item-1",
           callId: "call-1",
-          name: "openclaw_agent_consult",
+          name: "carapace_agent_consult",
           args: { question: "what did I ask?" },
         },
         realtimeSessionMock,
@@ -123,7 +123,7 @@ defineDiscordVoiceTests(
         {
           itemId: "item-control",
           callId: "call-control",
-          name: "openclaw_agent_control",
+          name: "carapace_agent_control",
           args: { text: "revísalo en WebUI", mode: "steer" },
         },
         realtimeSessionMock,
@@ -187,7 +187,7 @@ defineDiscordVoiceTests(
         {
           itemId: "item-control",
           callId: "call-control",
-          name: "openclaw_agent_control",
+          name: "carapace_agent_control",
           args: { text: "check this", mode: "steer" },
         },
         realtimeSessionMock,
@@ -209,7 +209,7 @@ defineDiscordVoiceTests(
           {
             itemId: "item-empty-consult",
             callId: "call-empty-consult",
-            name: "openclaw_agent_consult",
+            name: "carapace_agent_consult",
             args: {},
           },
           realtimeSessionMock,
@@ -237,7 +237,7 @@ defineDiscordVoiceTests(
         {
           itemId: "item-exact",
           callId: "call-exact",
-          name: "openclaw_agent_consult",
+          name: "carapace_agent_consult",
           args: {
             question: "Should I repeat the previous voice result?",
             context: 'The retained answer was "already answered".',
@@ -249,10 +249,10 @@ defineDiscordVoiceTests(
         {
           itemId: "item-internal",
           callId: "call-internal",
-          name: "openclaw_agent_consult",
+          name: "carapace_agent_consult",
           args: {
             question: [
-              "Speak this exact OpenClaw answer to the Discord voice channel, without adding, removing, or rephrasing words.",
+              "Speak this exact Carapace answer to the Discord voice channel, without adding, removing, or rephrasing words.",
               'Answer: "direct internal answer"',
             ].join("\n"),
           },

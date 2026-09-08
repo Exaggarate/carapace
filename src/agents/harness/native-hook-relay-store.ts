@@ -4,12 +4,12 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import { withOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import { withCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import {
   readNativeHookRelayBridgeRecordRow,
   type NativeHookRelayBridgeRecord,
@@ -23,9 +23,9 @@ type NativeHookRelayBridgePruneResult = {
   reason: "dead-pid" | "expired";
 };
 
-type NativeHookRelayBridgeDatabase = Pick<OpenClawStateKyselyDatabase, "native_hook_relay_bridges">;
+type NativeHookRelayBridgeDatabase = Pick<CarapaceStateKyselyDatabase, "native_hook_relay_bridges">;
 
-type NativeHookRelayBridgeRow = OpenClawStateKyselyDatabase["native_hook_relay_bridges"];
+type NativeHookRelayBridgeRow = CarapaceStateKyselyDatabase["native_hook_relay_bridges"];
 
 type NativeHookRelayBridgeSnapshot = {
   record: NativeHookRelayBridgeRecord;
@@ -85,7 +85,7 @@ function sameNativeHookRelayBridgeSnapshot(
 export function readNativeHookRelayBridgeRecord(
   params: { relayId: string } & NativeHookRelayBridgeStoreOptions,
 ): NativeHookRelayBridgeRecord | undefined {
-  return withOpenClawStateDatabaseReadOnly(
+  return withCarapaceStateDatabaseReadOnly(
     (database) =>
       readNativeHookRelayBridgeSnapshotFromDatabase({
         database,
@@ -104,7 +104,7 @@ export function writeNativeHookRelayBridgeRecord(
   const updatedAtMs = params.updatedAtMs ?? Date.now();
   const record = params.record;
   const { token } = record;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<NativeHookRelayBridgeDatabase>(database.db);
       executeSqliteQuerySync(
@@ -145,7 +145,7 @@ export function renewOrRestoreNativeHookRelayBridgeRecord(
   const { record } = params;
   const { token } = record;
   const updatedAtMs = params.updatedAtMs ?? Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<NativeHookRelayBridgeDatabase>(database.db);
       const current = readNativeHookRelayBridgeSnapshotFromDatabase({
@@ -200,7 +200,7 @@ export function deleteNativeHookRelayBridgeRecordIfOwned(params: {
   token: string;
   stateDbPath?: string;
 }): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const current = readNativeHookRelayBridgeSnapshotFromDatabase({
         database,
@@ -232,7 +232,7 @@ export function pruneNativeHookRelayBridgeRecords(params: {
   stateDbPath?: string;
 }): NativeHookRelayBridgePruneResult[] {
   const nowMs = params.nowMs ?? Date.now();
-  const database = openOpenClawStateDatabase({ path: params.stateDbPath });
+  const database = openCarapaceStateDatabase({ path: params.stateDbPath });
   const db = getNodeSqliteKysely<NativeHookRelayBridgeDatabase>(database.db);
   const snapshots = executeSqliteQuerySync(
     database.db,
@@ -255,7 +255,7 @@ export function pruneNativeHookRelayBridgeRecords(params: {
     return [];
   }
 
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (writeDatabase) => {
       const writeDb = getNodeSqliteKysely<NativeHookRelayBridgeDatabase>(writeDatabase.db);
       const pruned: NativeHookRelayBridgePruneResult[] = [];
@@ -296,7 +296,7 @@ export function pruneNativeHookRelayBridgeRecords(params: {
 export function clearNativeHookRelayBridgeRecordsForTests(
   options: NativeHookRelayBridgeStoreOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<NativeHookRelayBridgeDatabase>(database.db);
       executeSqliteQuerySync(database.db, db.deleteFrom("native_hook_relay_bridges"));

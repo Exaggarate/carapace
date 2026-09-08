@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../../test-utils/env.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { SkillEntry, SkillInstallSpec } from "../types.js";
 import { installSkill } from "./install.js";
 import { skillsInstallTesting } from "./install.test-support.js";
@@ -28,7 +28,7 @@ afterEach(() => {
 
 describe.each(["uv", "go"] as const)("%s bootstrap cache freshness", (kind) => {
   it.each([0, 1])("reuses the prerequisite after the first recipe exits %i", async (firstCode) => {
-    await withOpenClawTestState({ label: "skill-bootstrap-probe" }, async (state) => {
+    await withCarapaceTestState({ label: "skill-bootstrap-probe" }, async (state) => {
       vi.spyOn(os, "homedir").mockReturnValue(state.home);
       const prefix = path.join(state.home, ".local");
       const binDir = path.join(prefix, "bin");
@@ -52,7 +52,7 @@ describe.each(["uv", "go"] as const)("%s bootstrap cache freshness", (kind) => {
             description: "Binary probe fixture",
             filePath,
             baseDir: path.dirname(filePath),
-            source: "openclaw-workspace",
+            source: "carapace-workspace",
             sourceInfo: { path: filePath, source: "test", scope: "temporary", origin: "top-level" },
             disableModelInvocation: false,
           },

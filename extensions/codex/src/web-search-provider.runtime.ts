@@ -4,9 +4,9 @@ import {
   type SearchConfigRecord,
   type WebSearchProviderToolExecutionContext,
   wrapWebContent,
-} from "openclaw/plugin-sdk/provider-web-search";
-import type { WebSearchProviderPlugin } from "openclaw/plugin-sdk/provider-web-search-contract";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-web-search";
+import type { WebSearchProviderPlugin } from "carapace/plugin-sdk/provider-web-search-contract";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   runBoundedCodexAppServerTurn,
   type CodexBoundedTurnOptions,
@@ -34,7 +34,7 @@ export async function executeCodexWebSearchProviderTool(
     options,
     taskLabel: "hosted search",
     developerInstructions:
-      "You are OpenClaw's bounded web-search worker. You must use Codex hosted web_search to answer the user's search query. Return a concise grounded answer with source URLs. Do not call other tools, edit files, or ask follow-up questions.",
+      "You are Carapace's bounded web-search worker. You must use Codex hosted web_search to answer the user's search query. Return a concise grounded answer with source URLs. Do not call other tools, edit files, or ask follow-up questions.",
     input: [{ type: "text", text: query, text_elements: [] }],
     requiredModalities: ["text"],
     isolation: "private-stdio",

@@ -1,6 +1,6 @@
 // Discord tests cover message handler.preflight plugin behavior.
 import { ComponentType, MessageReferenceType } from "discord-api-types/v10";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import * as discordMessagesApi from "../internal/api.messages.js";
 import { ChannelType, MessageType } from "../internal/discord.js";
@@ -15,9 +15,9 @@ const saveRemoteMediaMock = vi.hoisted(() => vi.fn());
 vi.mock("../pluralkit.js", () => ({
   fetchPluralKitMessageInfo: (...args: unknown[]) => fetchPluralKitMessageInfoMock(...args),
 }));
-vi.mock("openclaw/plugin-sdk/media-understanding-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/media-understanding-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/media-understanding-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/media-understanding-runtime")>();
   return {
     ...actual,
     createChannelPreflightAudio: (
@@ -39,12 +39,12 @@ vi.mock("./dm-command-decision.js", () => ({
 import {
   isRecentOutboundMessageIdentity,
   recordOutboundMessageIdentity,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   testing as sessionBindingTesting,
   registerSessionBindingAdapter,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { saveRemoteMedia } from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { saveRemoteMedia } from "carapace/plugin-sdk/media-runtime";
 import {
   createDiscordMessage,
   createDiscordPreflightArgs,
@@ -56,7 +56,7 @@ import {
   type DiscordMessageEvent,
 } from "./message-handler.preflight.test-helpers.js";
 
-vi.mock("openclaw/plugin-sdk/media-runtime", { spy: true });
+vi.mock("carapace/plugin-sdk/media-runtime", { spy: true });
 let preflightDiscordMessage: typeof import("./message-handler.preflight.js").preflightDiscordMessage;
 let resolvePreflightMentionRequirement: typeof import("./message-handler.preflight.js").resolvePreflightMentionRequirement;
 let shouldIgnoreBoundThreadWebhookMessage: typeof import("./message-handler.preflight.js").shouldIgnoreBoundThreadWebhookMessage;
@@ -79,7 +79,7 @@ beforeEach(() => {
   saveRemoteMediaMock.mockImplementation(
     async (options: { fallbackContentType?: string; filePathHint?: string }) => ({
       id: "test-media",
-      path: `/tmp/openclaw-discord-test/${options.filePathHint ?? "media"}`,
+      path: `/tmp/carapace-discord-test/${options.filePathHint ?? "media"}`,
       size: 5,
       contentType: options.fallbackContentType,
     }),
@@ -88,7 +88,7 @@ beforeEach(() => {
 });
 
 function createThreadBinding(
-  overrides?: Partial<import("openclaw/plugin-sdk/conversation-runtime").SessionBindingRecord>,
+  overrides?: Partial<import("carapace/plugin-sdk/conversation-runtime").SessionBindingRecord>,
 ) {
   return {
     bindingId: "default:thread-1",
@@ -109,11 +109,11 @@ function createThreadBinding(
       webhookToken: "tok-1",
     },
     ...overrides,
-  } satisfies import("openclaw/plugin-sdk/conversation-runtime").SessionBindingRecord;
+  } satisfies import("carapace/plugin-sdk/conversation-runtime").SessionBindingRecord;
 }
 
 function createPreflightArgs(params: {
-  cfg: import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+  cfg: import("carapace/plugin-sdk/config-contracts").CarapaceConfig;
   discordConfig: DiscordConfig;
   data: DiscordMessageEvent;
   client: DiscordClient;
@@ -190,7 +190,7 @@ async function runThreadBoundPreflight(params: {
   threadId: string;
   parentId: string;
   message: import("../internal/discord.js").Message;
-  threadBinding: import("openclaw/plugin-sdk/conversation-runtime").SessionBindingRecord;
+  threadBinding: import("carapace/plugin-sdk/conversation-runtime").SessionBindingRecord;
   discordConfig: DiscordConfig;
   registerBindingAdapter?: boolean;
 }) {
@@ -232,7 +232,7 @@ async function runGuildPreflight(params: {
   guildId: string;
   message: import("../internal/discord.js").Message;
   discordConfig: DiscordConfig;
-  cfg?: import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+  cfg?: import("carapace/plugin-sdk/config-contracts").CarapaceConfig;
   guildEntries?: Parameters<typeof preflightDiscordMessage>[0]["guildEntries"];
   includeGuildObject?: boolean;
   abortSignal?: AbortSignal;
@@ -253,7 +253,7 @@ async function runGuildPreflight(params: {
     }),
     guildEntries: params.guildEntries,
     abortSignal: params.abortSignal,
-    botUserId: params.botUserId ?? "openclaw-bot",
+    botUserId: params.botUserId ?? "carapace-bot",
   });
 }
 
@@ -277,7 +277,7 @@ async function runDmPreflight(params: {
 }
 
 async function runUnresolvedDmPreflight(params: {
-  cfg?: import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+  cfg?: import("carapace/plugin-sdk/config-contracts").CarapaceConfig;
   channelId: string;
   message: import("../internal/discord.js").Message;
   discordConfig: DiscordConfig;
@@ -297,7 +297,7 @@ async function runUnresolvedDmPreflight(params: {
 }
 
 async function runMentionOnlyBotPreflight(params: {
-  cfg?: import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+  cfg?: import("carapace/plugin-sdk/config-contracts").CarapaceConfig;
   channelId: string;
   guildId: string;
   message: import("../internal/discord.js").Message;
@@ -426,7 +426,7 @@ describe("preflightDiscordMessage", () => {
       author: {
         id: "relay-bot-1",
         bot: true,
-        username: "OpenClaw",
+        username: "Carapace",
       },
     });
 
@@ -458,8 +458,8 @@ describe("preflightDiscordMessage", () => {
               },
               metadata: {
                 pluginBindingOwner: "plugin",
-                pluginId: "openclaw-codex-app-server",
-                pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+                pluginId: "carapace-codex-app-server",
+                pluginRoot: "/Users/huntharo/github/carapace-app-server",
               },
             })
           : null,
@@ -497,8 +497,8 @@ describe("preflightDiscordMessage", () => {
       boundAt: 1,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
       },
     });
   });
@@ -579,7 +579,7 @@ describe("preflightDiscordMessage", () => {
   });
 
   it("preflights direct-message voice notes without mention gating", async () => {
-    transcribeFirstAudioMock.mockResolvedValue("hello openclaw from dm audio");
+    transcribeFirstAudioMock.mockResolvedValue("hello carapace from dm audio");
 
     const result = await runDmPreflight({
       channelId: "dm-channel-audio-1",
@@ -618,7 +618,7 @@ describe("preflightDiscordMessage", () => {
     ]);
     const preflight = expectPreflightResult(result);
     expect(preflight.isDirectMessage).toBe(true);
-    expect(preflight.preflightAudioTranscript).toBe("hello openclaw from dm audio");
+    expect(preflight.preflightAudioTranscript).toBe("hello carapace from dm audio");
   });
 
   it("downloads attachments during preflight, before the message reaches the run queue", async () => {
@@ -654,7 +654,7 @@ describe("preflightDiscordMessage", () => {
     const preflight = expectPreflightResult(result);
     expect(preflight.preparedMedia).toEqual([
       {
-        path: "/tmp/openclaw-discord-test/photo.png",
+        path: "/tmp/carapace-discord-test/photo.png",
         contentType: "image/png",
         fileName: "photo.png",
       },
@@ -755,8 +755,8 @@ describe("preflightDiscordMessage", () => {
     const message = createDiscordMessage({
       id: "m-loop-1",
       channelId,
-      content: "chatter <@openclaw-bot>",
-      mentionedUsers: [{ id: "openclaw-bot" }],
+      content: "chatter <@carapace-bot>",
+      mentionedUsers: [{ id: "carapace-bot" }],
       author: { id: senderBotId, bot: true, username: "Relay" },
       timestamp: messageTimestamp,
     });
@@ -786,8 +786,8 @@ describe("preflightDiscordMessage", () => {
     const repeatedMessage = createDiscordMessage({
       id: "m-loop-2",
       channelId,
-      content: "more chatter <@openclaw-bot>",
-      mentionedUsers: [{ id: "openclaw-bot" }],
+      content: "more chatter <@carapace-bot>",
+      mentionedUsers: [{ id: "carapace-bot" }],
       attachments: [
         {
           id: "att-loop",
@@ -829,8 +829,8 @@ describe("preflightDiscordMessage", () => {
         message: createDiscordMessage({
           id,
           channelId,
-          content: "relay <@openclaw-bot>",
-          mentionedUsers: [{ id: "openclaw-bot" }],
+          content: "relay <@carapace-bot>",
+          mentionedUsers: [{ id: "carapace-bot" }],
           author: { id: "relay-bot-defaults", bot: true, username: "Relay" },
         }),
         discordConfig,
@@ -953,9 +953,9 @@ describe("preflightDiscordMessage", () => {
     const message = createDiscordMessage({
       id: "m-binding-lookup-once",
       channelId,
-      content: "ordinary human message <@openclaw-bot>",
+      content: "ordinary human message <@carapace-bot>",
       author: { id: "user-1", bot: false, username: "alice" },
-      mentionedUsers: [{ id: "openclaw-bot" }],
+      mentionedUsers: [{ id: "carapace-bot" }],
     });
 
     const result = await preflightDiscordMessage({
@@ -1086,14 +1086,14 @@ describe("preflightDiscordMessage", () => {
       message: createDiscordMessage({
         id: "proxy-456",
         channelId: "c1",
-        content: "<@openclaw-bot> hello",
+        content: "<@carapace-bot> hello",
         webhookId: "pluralkit-webhook-1",
         author: {
           id: "webhook-author",
           bot: true,
           username: "PluralKit",
         },
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
       }),
       discordConfig: {
         pluralkit: { enabled: true },
@@ -1121,13 +1121,13 @@ describe("preflightDiscordMessage", () => {
       message: createDiscordMessage({
         id: "ordinary-human-1",
         channelId: "c1",
-        content: "<@openclaw-bot> hello",
+        content: "<@carapace-bot> hello",
         author: {
           id: "human-1",
           bot: false,
           username: "Human",
         },
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
       }),
       discordConfig: {
         pluralkit: { enabled: true },
@@ -1145,13 +1145,13 @@ describe("preflightDiscordMessage", () => {
       message: createDiscordMessage({
         id: "ordinary-bot-1",
         channelId: "c1",
-        content: "<@openclaw-bot> hello",
+        content: "<@carapace-bot> hello",
         author: {
           id: "bot-1",
           bot: true,
           username: "Bot",
         },
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
       }),
       discordConfig: {
         allowBots: true,
@@ -1284,7 +1284,7 @@ describe("preflightDiscordMessage", () => {
       createPreflightArgs({
         cfg: {
           ...DEFAULT_PREFLIGHT_CFG,
-        } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+        } as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
         discordConfig: {
           allowBots: true,
         } as DiscordConfig,
@@ -1326,7 +1326,7 @@ describe("preflightDiscordMessage", () => {
       channelId: "channel-bot-mentions-on",
       guildId: "guild-bot-mentions-on",
       messageId: "m-bot-mentions-on",
-      content: "hi <@openclaw-bot>",
+      content: "hi <@carapace-bot>",
       mentioned: true,
       accepted: true,
     },
@@ -1343,7 +1343,7 @@ describe("preflightDiscordMessage", () => {
       channelId: "channel-bot-command-with-mention",
       guildId: "guild-bot-command-with-mention",
       messageId: "m-bot-command-with-mention",
-      content: "<@openclaw-bot> /new incident room",
+      content: "<@carapace-bot> /new incident room",
       mentioned: true,
       accepted: true,
     },
@@ -1352,7 +1352,7 @@ describe("preflightDiscordMessage", () => {
       id: messageId,
       channelId,
       content,
-      ...(mentioned ? { mentionedUsers: [{ id: "openclaw-bot" }] } : {}),
+      ...(mentioned ? { mentionedUsers: [{ id: "carapace-bot" }] } : {}),
       author: { id: "relay-bot-1", bot: true, username: "Relay" },
     });
     const result = await runMentionOnlyBotPreflight({ channelId, guildId, message });
@@ -1374,16 +1374,16 @@ describe("preflightDiscordMessage", () => {
       id: `m-bot-reply-ping-${includeParent ? "available" : "deleted"}`,
       channelId,
       content: "reply without an inline mention",
-      mentionedUsers: [{ id: "openclaw-bot" }],
+      mentionedUsers: [{ id: "carapace-bot" }],
       type: MessageType.Reply,
       author: { id: "relay-bot-1", bot: true, username: "Relay" },
       ...(includeParent
         ? {
             referencedMessage: createDiscordMessage({
-              id: "m-openclaw-parent",
+              id: "m-carapace-parent",
               channelId,
               content: "parent message",
-              author: { id: "openclaw-bot", bot: true, username: "OpenClaw" },
+              author: { id: "carapace-bot", bot: true, username: "Carapace" },
             }),
           }
         : {}),
@@ -1393,11 +1393,11 @@ describe("preflightDiscordMessage", () => {
   });
 
   it.each([
-    { name: "message content", content: "hi <@openclaw-bot>", components: undefined },
+    { name: "message content", content: "hi <@carapace-bot>", components: undefined },
     {
       name: "component text",
       content: "",
-      components: [{ type: ComponentType.TextDisplay, content: "hi <@openclaw-bot>" }],
+      components: [{ type: ComponentType.TextDisplay, content: "hi <@carapace-bot>" }],
     },
   ])("allows an active native mention in reply $name", async ({ content, components }) => {
     const channelId = "channel-bot-reply-native-mention";
@@ -1407,7 +1407,7 @@ describe("preflightDiscordMessage", () => {
         id: `m-bot-reply-native-${components ? "component" : "content"}`,
         channelId,
         content,
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
         type: MessageType.Reply,
         author: { id: "relay-bot-1", bot: true, username: "Relay" },
       }),
@@ -1420,17 +1420,17 @@ describe("preflightDiscordMessage", () => {
   });
 
   it.each([
-    { name: "inline code", content: "`openclaw`" },
-    { name: "fenced code", content: "```text\nopenclaw\n```" },
-    { name: "tilde-fenced code", content: "~~~\nopenclaw\n~~~" },
-    { name: "indented code", content: "    openclaw" },
+    { name: "inline code", content: "`carapace`" },
+    { name: "fenced code", content: "```text\ncarapace\n```" },
+    { name: "tilde-fenced code", content: "~~~\ncarapace\n~~~" },
+    { name: "indented code", content: "    carapace" },
     { name: "escaped native token", content: "\\<@123456789012345678>" },
     { name: "code-formatted native token", content: "`<@123456789012345678>`" },
   ])("does not re-admit reply-ping metadata through $name", async ({ content }) => {
     const channelId = "channel-bot-reply-inactive-pattern";
     const guildId = "guild-bot-reply-inactive-pattern";
     const botUserId = "123456789012345678";
-    const mentionedBotUser = { id: botUserId, username: "OpenClaw" };
+    const mentionedBotUser = { id: botUserId, username: "Carapace" };
     const message = createDiscordMessage({
       id: `m-bot-reply-inactive-${content.length}`,
       channelId,
@@ -1443,7 +1443,7 @@ describe("preflightDiscordMessage", () => {
     const result = await runMentionOnlyBotPreflight({
       cfg: {
         ...DEFAULT_PREFLIGHT_CFG,
-        messages: { groupChat: { mentionPatterns: ["openclaw"] } },
+        messages: { groupChat: { mentionPatterns: ["carapace"] } },
       },
       channelId,
       guildId,
@@ -1455,15 +1455,15 @@ describe("preflightDiscordMessage", () => {
   });
 
   it.each([
-    { content: "openclaw, take over", pattern: "openclaw", accepted: true },
-    { content: "`example`\nopenclaw", pattern: "^openclaw$", accepted: false },
-    { content: "openclaw\n`example`", pattern: "^openclaw$", accepted: false },
-    { content: "`example` openclaw", pattern: "(?<=`example` )openclaw", accepted: true },
-    { content: "openclaw `example`", pattern: "openclaw\\s", accepted: true },
-    { content: "`openclaw` openclaw", pattern: "openclaw", accepted: true },
-    { content: "hello `openclaw`", pattern: "hello.*openclaw", accepted: false },
-    { content: "\u200b`openclaw`", pattern: "openclaw", accepted: false },
-    { content: "İ `openclaw`", pattern: "openclaw", accepted: false },
+    { content: "carapace, take over", pattern: "carapace", accepted: true },
+    { content: "`example`\ncarapace", pattern: "^carapace$", accepted: false },
+    { content: "carapace\n`example`", pattern: "^carapace$", accepted: false },
+    { content: "`example` carapace", pattern: "(?<=`example` )carapace", accepted: true },
+    { content: "carapace `example`", pattern: "carapace\\s", accepted: true },
+    { content: "`carapace` carapace", pattern: "carapace", accepted: true },
+    { content: "hello `carapace`", pattern: "hello.*carapace", accepted: false },
+    { content: "\u200b`carapace`", pattern: "carapace", accepted: false },
+    { content: "İ `carapace`", pattern: "carapace", accepted: false },
   ])(
     "matches reply pattern $pattern against the whole document $content",
     async ({ content, pattern, accepted }) => {
@@ -1473,7 +1473,7 @@ describe("preflightDiscordMessage", () => {
         id: "m-bot-reply-active-pattern",
         channelId,
         content,
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
         type: MessageType.Reply,
         author: { id: "relay-bot-1", bot: true, username: "Relay" },
       });
@@ -1506,27 +1506,27 @@ describe("preflightDiscordMessage", () => {
     expectedText?: string;
   }>([
     {
-      contents: ["    openclaw", "    openclaw"],
+      contents: ["    carapace", "    carapace"],
       mentions: [true, true],
-      patterns: ["openclaw"],
+      patterns: ["carapace"],
       accepted: false,
     },
     {
-      contents: ["<@openclaw-bot> take over", "continuation"],
+      contents: ["<@carapace-bot> take over", "continuation"],
       mentions: [true, false],
       patterns: [],
       accepted: true,
     },
     {
-      contents: ["<@openclaw-bot> without native mention metadata", "reply ping"],
+      contents: ["<@carapace-bot> without native mention metadata", "reply ping"],
       mentions: [false, true],
       patterns: [],
       accepted: false,
     },
     {
-      contents: ["~~~\nexample", "openclaw"],
+      contents: ["~~~\nexample", "carapace"],
       mentions: [true, true],
-      patterns: ["^openclaw$"],
+      patterns: ["^carapace$"],
       accepted: true,
     },
     {
@@ -1536,16 +1536,16 @@ describe("preflightDiscordMessage", () => {
       accepted: true,
       botId: "123456789012345678",
       hydrate: { content: "<@123456789012345678> take over", native: true },
-      expectedText: "prior context\n@OpenClaw take over",
+      expectedText: "prior context\n@Carapace take over",
     },
     {
       contents: ["prior context", "<@123456789012345678> missing content"],
       mentions: [false, false],
-      patterns: ["^openclaw take over$"],
+      patterns: ["^carapace take over$"],
       accepted: true,
       botId: "123456789012345678",
-      hydrate: { content: "openclaw take over", native: false },
-      expectedText: "prior context\nopenclaw take over",
+      hydrate: { content: "carapace take over", native: false },
+      expectedText: "prior context\ncarapace take over",
     },
   ])(
     "preserves mention documents through a reply batch: $contents",
@@ -1554,7 +1554,7 @@ describe("preflightDiscordMessage", () => {
       mentions,
       patterns,
       accepted,
-      botId = "openclaw-bot",
+      botId = "carapace-bot",
       hydrate,
       expectedText,
     }) => {
@@ -1585,7 +1585,7 @@ describe("preflightDiscordMessage", () => {
             ? [
                 {
                   id: botId,
-                  username: "OpenClaw",
+                  username: "Carapace",
                   discriminator: "0",
                   global_name: null,
                   avatar: null,
@@ -1667,8 +1667,8 @@ describe("preflightDiscordMessage", () => {
   );
 
   it.each([
-    { requireMention: true, transcript: "hey openclaw", accepted: true },
-    { requireMention: false, transcript: "hey openclaw", accepted: true },
+    { requireMention: true, transcript: "hey carapace", accepted: true },
+    { requireMention: false, transcript: "hey carapace", accepted: true },
     { requireMention: false, transcript: "hello everyone", accepted: false },
   ])(
     "gates bot audio replies by transcript: $requireMention, $transcript",
@@ -1681,12 +1681,12 @@ describe("preflightDiscordMessage", () => {
         channelId,
         content: "",
         type: MessageType.Reply,
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
         referencedMessage: createDiscordMessage({
           id: "m-audio-parent",
           channelId,
           content: "audio handoff",
-          author: { id: "openclaw-bot", bot: true },
+          author: { id: "carapace-bot", bot: true },
         }),
         attachments: [
           {
@@ -1708,10 +1708,10 @@ describe("preflightDiscordMessage", () => {
           ...DEFAULT_PREFLIGHT_CFG,
           messages: {
             groupChat: {
-              mentionPatterns: ["openclaw"],
+              mentionPatterns: ["carapace"],
             },
           },
-        } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+        } as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
         channelId,
         guildId,
         message,
@@ -1738,14 +1738,14 @@ describe("preflightDiscordMessage", () => {
         id: "m-bot-reply-component-documents",
         channelId,
         content: "",
-        mentionedUsers: [{ id: "openclaw-bot" }],
+        mentionedUsers: [{ id: "carapace-bot" }],
         type: MessageType.Reply,
         author: { id: "relay-bot-1", bot: true, username: "Relay" },
       }),
       {
         components: [
           { type: ComponentType.TextDisplay, content: "~~~\nexample" },
-          { type: ComponentType.TextDisplay, content: "hi <@openclaw-bot>" },
+          { type: ComponentType.TextDisplay, content: "hi <@carapace-bot>" },
         ],
       },
     );
@@ -1775,7 +1775,7 @@ describe("preflightDiscordMessage", () => {
       get: vi.fn(async () => ({
         id: message.id,
         content: message.content,
-        mentions: [{ id: botId, username: "OpenClaw", bot: true }],
+        mentions: [{ id: botId, username: "Carapace", bot: true }],
         mention_roles: [],
         mention_everyone: false,
       })),
@@ -2016,7 +2016,7 @@ describe("preflightDiscordMessage", () => {
             unmentionedInbound: "room_event",
           },
         },
-      } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+      } as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
       guildEntries: {
         [guildId]: {
           channels: {
@@ -2097,10 +2097,10 @@ describe("preflightDiscordMessage", () => {
           ...DEFAULT_PREFLIGHT_CFG,
           messages: {
             groupChat: {
-              mentionPatterns: ["openclaw"],
+              mentionPatterns: ["carapace"],
             },
           },
-        } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+        } as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
         discordConfig: {} as DiscordConfig,
         data: createGuildEvent({
           channelId,
@@ -2146,7 +2146,7 @@ describe("preflightDiscordMessage", () => {
       guildId,
       message,
       discordConfig: {
-        botId: "openclaw-bot",
+        botId: "carapace-bot",
       } as DiscordConfig,
       guildEntries: {
         [guildId]: {
@@ -2385,7 +2385,7 @@ describe("preflightDiscordMessage", () => {
         id: "m-current-bot",
         channelId,
         content: "earlier answer",
-        author: { id: "openclaw-bot", bot: true, username: "OpenClaw" },
+        author: { id: "carapace-bot", bot: true, username: "Carapace" },
       }),
     });
 
@@ -2400,8 +2400,8 @@ describe("preflightDiscordMessage", () => {
     const message = createDiscordMessage({
       id: "m-other-bot-reply-override",
       channelId,
-      content: "<@openclaw-bot> please weigh in",
-      mentionedUsers: [{ id: "openclaw-bot" }],
+      content: "<@carapace-bot> please weigh in",
+      mentionedUsers: [{ id: "carapace-bot" }],
       author: { id: "user-1", bot: false, username: "Alice" },
       referencedMessage: createDiscordMessage({
         id: "m-other-bot-override-target",
@@ -2494,7 +2494,7 @@ describe("preflightDiscordMessage", () => {
     const guildHistories = new Map();
     saveRemoteMediaMock.mockResolvedValueOnce({
       id: "test-media",
-      path: "C:\\openclaw\\media\\history.png",
+      path: "C:\\carapace\\media\\history.png",
       size: 5,
       contentType: "image/png",
     });
@@ -2573,7 +2573,7 @@ describe("preflightDiscordMessage", () => {
     });
     expect(entries?.[0]?.media?.[0]?.path).toContain("history");
     expect(entries?.[0]?.media?.[0]?.path).not.toMatch(/^https?:/);
-    expect(entries?.[0]?.media?.[0]?.path).toBe("C:\\openclaw\\media\\history.png");
+    expect(entries?.[0]?.media?.[0]?.path).toBe("C:\\carapace\\media\\history.png");
     expect(saveRemoteMediaMock).toHaveBeenCalledTimes(1);
   });
 
@@ -2644,7 +2644,7 @@ describe("preflightDiscordMessage", () => {
     const guildHistories = new Map();
     saveRemoteMediaMock.mockResolvedValueOnce({
       id: "test-sticker",
-      path: "/tmp/openclaw-discord-test/sticker.png",
+      path: "/tmp/carapace-discord-test/sticker.png",
       size: 5,
       contentType: "image/png",
     });
@@ -2704,7 +2704,7 @@ describe("preflightDiscordMessage", () => {
         messageId: "m-history-sticker",
         media: [
           {
-            path: "/tmp/openclaw-discord-test/sticker.png",
+            path: "/tmp/carapace-discord-test/sticker.png",
             contentType: "image/png",
             kind: "sticker",
             messageId: "m-history-sticker",
@@ -2881,7 +2881,7 @@ describe("preflightDiscordMessage", () => {
   });
 
   it("uses attachment content_type for guild audio preflight mention detection", async () => {
-    transcribeFirstAudioMock.mockResolvedValue("hey openclaw");
+    transcribeFirstAudioMock.mockResolvedValue("hey carapace");
 
     const channelId = "channel-audio-1";
     const client = createGuildTextClient(channelId);
@@ -2911,10 +2911,10 @@ describe("preflightDiscordMessage", () => {
           ...DEFAULT_PREFLIGHT_CFG,
           messages: {
             groupChat: {
-              mentionPatterns: ["openclaw"],
+              mentionPatterns: ["carapace"],
             },
           },
-        } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+        } as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
         discordConfig: {} as DiscordConfig,
         data: createGuildEvent({
           channelId,
@@ -2948,7 +2948,7 @@ describe("preflightDiscordMessage", () => {
     ]);
     const preflight = expectPreflightResult(result);
     expect(preflight.wasMentioned).toBe(true);
-    expect(preflight.preflightAudioTranscript).toBe("hey openclaw");
+    expect(preflight.preflightAudioTranscript).toBe("hey carapace");
   });
 
   it("does not transcribe guild audio from unauthorized members", async () => {
@@ -2981,10 +2981,10 @@ describe("preflightDiscordMessage", () => {
           ...DEFAULT_PREFLIGHT_CFG,
           messages: {
             groupChat: {
-              mentionPatterns: ["openclaw"],
+              mentionPatterns: ["carapace"],
             },
           },
-        } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+        } as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
         discordConfig: {} as DiscordConfig,
         data: createGuildEvent({
           channelId,
@@ -3012,7 +3012,7 @@ describe("preflightDiscordMessage", () => {
   });
 
   it("drops guild message without mention when channel has configuredBinding and requireMention: true", async () => {
-    const conversationRuntime = await import("openclaw/plugin-sdk/conversation-runtime");
+    const conversationRuntime = await import("carapace/plugin-sdk/conversation-runtime");
     const channelId = "ch-binding-1";
     const bindingRoute = {
       bindingResolution: {
@@ -3055,7 +3055,7 @@ describe("preflightDiscordMessage", () => {
   });
 
   it("allows guild message with mention when channel has configuredBinding and requireMention: true", async () => {
-    const conversationRuntime = await import("openclaw/plugin-sdk/conversation-runtime");
+    const conversationRuntime = await import("carapace/plugin-sdk/conversation-runtime");
     const channelId = "ch-binding-2";
     const bindingRoute = {
       bindingResolution: {
@@ -3082,9 +3082,9 @@ describe("preflightDiscordMessage", () => {
         message: createDiscordMessage({
           id: "m-binding-2",
           channelId,
-          content: "hello <@openclaw-bot>",
+          content: "hello <@carapace-bot>",
           author: { id: "user-1", bot: false, username: "alice" },
-          mentionedUsers: [{ id: "openclaw-bot" }],
+          mentionedUsers: [{ id: "carapace-bot" }],
         }),
         discordConfig: {} as DiscordConfig,
         guildEntries: {
@@ -3204,7 +3204,7 @@ describe("shouldIgnoreBoundThreadWebhookMessage", () => {
       author: {
         id: "relay-bot-1",
         bot: true,
-        username: "OpenClaw",
+        username: "Carapace",
       },
     });
     const result = await preflightDiscordMessage({

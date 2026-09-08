@@ -1,5 +1,5 @@
 import { collectConfiguredNpmPluginTargets } from "../../commands/doctor/shared/missing-configured-plugin-install.targets.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { resolveNpmSpecMetadata } from "../../infra/install-source-utils.js";
 import { resolveRegistryUpdateChannel, type UpdateChannel } from "../../infra/update-channels.js";
@@ -9,7 +9,7 @@ import { withOwnedManagedUpdateEnv } from "./update-command-managed-context.js";
 
 /** Admit configured npm targets without installing plugins or changing live state. */
 export async function preflightConfiguredNpmPluginTargets(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   targetVersion: string | null;
   channel: UpdateChannel;
@@ -65,7 +65,7 @@ export async function preflightConfiguredNpmPluginTargets(params: {
       [
         "Update refused: configured npm plugin targets are unavailable.",
         ...failures,
-        "Retry after the packages or registry are available, use `openclaw update --tag <older-version>`, or disable the affected plugin and retry.",
+        "Retry after the packages or registry are available, use `carapace update --tag <older-version>`, or disable the affected plugin and retry.",
         ...(params.channel === "extended-stable"
           ? ["Extended-stable does not accept --tag; retry later or explicitly switch channels."]
           : []),

@@ -59,7 +59,7 @@ export async function waitForCommittedComposerDraft(
   await waitForCommittedState(
     page,
     async (expected) => {
-      const app = document.querySelector("openclaw-app") as HTMLElement & {
+      const app = document.querySelector("carapace-app") as HTMLElement & {
         runtime?: {
           context: {
             gateway: {
@@ -74,7 +74,7 @@ export async function waitForCommittedComposerDraft(
       if (
         !gateway ||
         !recoveryScope ||
-        !(await indexedDB.databases()).some((db) => db.name === "openclaw-control-ui")
+        !(await indexedDB.databases()).some((db) => db.name === "carapace-control-ui")
       ) {
         return false;
       }
@@ -82,7 +82,7 @@ export async function waitForCommittedComposerDraft(
       // Browser probes cannot import Vitest-transformed modules. Read the exact
       // durable owner/key and await the transaction, independently of the renderer.
       const database = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open("openclaw-control-ui");
+        const request = indexedDB.open("carapace-control-ui");
         request.addEventListener("success", () => resolve(request.result), { once: true });
         request.addEventListener(
           "error",

@@ -1,6 +1,6 @@
 // Hook update helpers refresh installed hook records and config references.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   requestDeferredPackageDirInstall,
   resolvePackageDirInstallTransaction,
@@ -42,7 +42,7 @@ type HookPackUpdateOutcome = {
 
 /** Aggregate update result with the possibly updated config. */
 type HookPackUpdateSummary = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changed: boolean;
   outcomes: HookPackUpdateOutcome[];
 };
@@ -84,7 +84,7 @@ function createHookPackUpdateIntegrityDriftHandler(params: {
 
 /** Update npm-installed hook packs and return config changes plus per-pack outcomes. */
 export async function updateNpmInstalledHookPacks(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   dangerouslyForceUnsafeInstall?: boolean;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
   logger?: HookPackUpdateLogger;

@@ -16,19 +16,19 @@ import {
 } from "../agents/auth-profiles/store-runtime.js";
 import { upsertAuthProfileWithLockOrThrow } from "../agents/auth-profiles/upsert-with-lock.js";
 import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surfaces.types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import * as stateDb from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import * as stateDb from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { readMainDatabasePosixLocks } from "./sqlite-posix-locks.test-support.js";
 import * as doctor from "./state-migrations.doctor.js";
 import * as migration from "./state-migrations.shared-auth-store.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const ownerStates: OpenClawTestState[] = [];
+const ownerStates: CarapaceTestState[] = [];
 let ownerFixtureRun: Promise<void> | undefined;
 
 function makeStore(profileId: string, key: string) {
@@ -47,8 +47,8 @@ describe("shared auth store relocation", () => {
     ownerFixtureRun = undefined;
     vi.restoreAllMocks();
     sqlite.closeAuthProfileReadPool();
-    closeOpenClawAgentDatabasesForTest();
-    stateDb.closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    stateDb.closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     for (const state of ownerStates.splice(0).toReversed()) {
       await state.cleanup();
@@ -57,10 +57,10 @@ describe("shared auth store relocation", () => {
   });
 
   async function createFixture() {
-    const stateDir = tempDirs.make("openclaw-shared-auth-relocate-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_AGENT_DIR", "");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_AGENT_DIR: undefined };
+    const stateDir = tempDirs.make("carapace-shared-auth-relocate-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_AGENT_DIR", "");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir, CARAPACE_AGENT_DIR: undefined };
     const mainAgentDir = paths.resolveSharedMainAuthAgentDir(env);
     const opsAgentDir = path.join(stateDir, "agents", "ops", "agent");
     const sharedStore = makeStore("openai:shared", "shared-key");
@@ -88,10 +88,10 @@ describe("shared auth store relocation", () => {
   }
 
   async function createEmptyFixture(createSourceDatabase: boolean) {
-    const stateDir = tempDirs.make("openclaw-shared-auth-empty-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_AGENT_DIR", "");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_AGENT_DIR: undefined };
+    const stateDir = tempDirs.make("carapace-shared-auth-empty-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_AGENT_DIR", "");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir, CARAPACE_AGENT_DIR: undefined };
     const mainAgentDir = paths.resolveSharedMainAuthAgentDir(env);
     const sourcePath = sqlite.resolveAuthProfileDatabasePath(mainAgentDir);
     if (createSourceDatabase) {
@@ -105,8 +105,8 @@ describe("shared auth store relocation", () => {
     "preserves copied auth SQLite artifacts during %s inspection",
     async (location) => {
       const fixture = await createEmptyFixture(false);
-      const statePath = resolveOpenClawStateSqlitePath(fixture.env);
-      const seedPath = path.join(tempDirs.make("openclaw-auth-wal-seed-"), "seed.sqlite");
+      const statePath = resolveCarapaceStateSqlitePath(fixture.env);
+      const seedPath = path.join(tempDirs.make("carapace-auth-wal-seed-"), "seed.sqlite");
       for (const target of [fixture.sourcePath, statePath]) {
         fs.mkdirSync(path.dirname(target), { recursive: true });
         const seed = new DatabaseSync(seedPath);
@@ -171,7 +171,7 @@ describe("shared auth store relocation", () => {
         artifactPreservingReadOnly: true,
       }),
     ).toEqual({ sourcePath: fixture.sourcePath, hasLegacy: true });
-    const statePath = resolveOpenClawStateSqlitePath(fixture.env);
+    const statePath = resolveCarapaceStateSqlitePath(fixture.env);
     expect(fs.existsSync(statePath)).toBe(false);
     fs.mkdirSync(path.dirname(statePath), { recursive: true });
     const database = new DatabaseSync(statePath);
@@ -276,7 +276,7 @@ describe("shared auth store relocation", () => {
       ops: effectiveBytes(fixture.opsAgentDir),
     }).toEqual(before);
 
-    const database = fixture.stateDb.openOpenClawStateDatabase({ env: fixture.env }).db;
+    const database = fixture.stateDb.openCarapaceStateDatabase({ env: fixture.env }).db;
     expect(
       database
         .prepare(
@@ -312,7 +312,7 @@ describe("shared auth store relocation", () => {
       credential: {
         type: "api_key",
         provider: "openai",
-        keyRef: { source: "env", provider: "default", id: "OPENCLAW_SHARED_AUTH_TEST_KEY" },
+        keyRef: { source: "env", provider: "default", id: "CARAPACE_SHARED_AUTH_TEST_KEY" },
       },
       stateDir: fixture.stateDir,
     });
@@ -370,7 +370,7 @@ describe("shared auth store relocation", () => {
     const sourcePath = fixture.sqlite.resolveAuthProfileDatabasePath(fixture.mainAgentDir);
     const source = new DatabaseSync(sourcePath);
     try {
-      const target = fixture.stateDb.openOpenClawStateDatabase({ env: fixture.env }).db;
+      const target = fixture.stateDb.openCarapaceStateDatabase({ env: fixture.env }).db;
       const sourceStore =
         scenario === "empty subset" ? { version: 1, profiles: {} } : fixture.sharedStore;
       const escapedProfileId = 'a"\nprofile';
@@ -450,10 +450,10 @@ describe("shared auth store relocation", () => {
       };
       if (!converges) {
         expect(result.warnings[0]).toContain(conflictDetails[scenario]);
-        expect(result.warnings[0]).toContain("openclaw doctor --fix");
+        expect(result.warnings[0]).toContain("carapace doctor --fix");
         expect(result.warnings[0]).toContain(JSON.stringify(sourcePath));
         expect(result.warnings[0]).toContain(
-          JSON.stringify(path.join(fixture.stateDir, "state", "openclaw.sqlite")),
+          JSON.stringify(path.join(fixture.stateDir, "state", "carapace.sqlite")),
         );
         expect(result.warnings[0]).not.toMatch(/shared-key|extra-key|different-key|legacyMetadata/);
       }
@@ -585,14 +585,14 @@ describe("shared auth store relocation", () => {
     (pathStyle) =>
       (ownerFixtureRun = (async () => {
         const createOwner = async () => {
-          const owner = await createOpenClawTestState({
-            prefix: "openclaw-shared-auth-source-owner-",
+          const owner = await createCarapaceTestState({
+            prefix: "carapace-shared-auth-source-owner-",
             layout: "split",
             applyEnv: false,
             env: {
-              OPENCLAW_AGENT_DIR: undefined,
+              CARAPACE_AGENT_DIR: undefined,
               PI_CODING_AGENT_DIR: undefined,
-              OPENCLAW_OAUTH_DIR: undefined,
+              CARAPACE_OAUTH_DIR: undefined,
             },
           });
           ownerStates.push(owner);
@@ -604,14 +604,14 @@ describe("shared auth store relocation", () => {
         const ambientDir = path.join(ambient.home, "relocated-auth");
         const selectedEnv = {
           ...selected.env,
-          OPENCLAW_AGENT_DIR: pathStyle === "tilde" ? "~/relocated-auth" : selectedDir,
+          CARAPACE_AGENT_DIR: pathStyle === "tilde" ? "~/relocated-auth" : selectedDir,
         };
         const ambientEnv = {
           ...ambient.env,
-          OPENCLAW_AGENT_DIR: pathStyle === "tilde" ? "~/relocated-auth" : ambientDir,
+          CARAPACE_AGENT_DIR: pathStyle === "tilde" ? "~/relocated-auth" : ambientDir,
         };
         ambient.applyEnv();
-        vi.stubEnv("OPENCLAW_AGENT_DIR", ambientEnv.OPENCLAW_AGENT_DIR);
+        vi.stubEnv("CARAPACE_AGENT_DIR", ambientEnv.CARAPACE_AGENT_DIR);
         const profileId = "openai:source";
         const selectedStore = makeStore(profileId, `fake-selected-${randomUUID()}`);
         const ambientStore = makeStore(profileId, `fake-ambient-${randomUUID()}`);
@@ -666,7 +666,7 @@ describe("shared auth store relocation", () => {
         expect.soft(sqlite.readPersistedAuthProfileStoreRaw(ambientDir)).toEqual(ambientStore);
         expect.soft(sqlite.readPersistedAuthProfileStateRaw(ambientDir)).toEqual(ambientState);
         const receipts = stateDb
-          .openOpenClawStateDatabase({ env: selectedEnv })
+          .openCarapaceStateDatabase({ env: selectedEnv })
           .db.prepare("SELECT source_path, status, removed_source FROM migration_sources")
           .all();
         expect.soft(receipts).toHaveLength(2);
@@ -682,7 +682,7 @@ describe("shared auth store relocation", () => {
 
   it("defers shared auth inspection while the selected state schema needs repair", async () => {
     const fixture = await createEmptyFixture(false);
-    const stateDatabasePath = resolveOpenClawStateSqlitePath(fixture.env);
+    const stateDatabasePath = resolveCarapaceStateSqlitePath(fixture.env);
     fs.mkdirSync(path.dirname(stateDatabasePath), { recursive: true });
     const legacyDatabase = new DatabaseSync(stateDatabasePath);
     try {
@@ -703,9 +703,9 @@ describe("shared auth store relocation", () => {
     const sourceBytes = "not a SQLite database";
     fs.mkdirSync(path.dirname(fixture.sourcePath), { recursive: true });
     fs.writeFileSync(fixture.sourcePath, sourceBytes);
-    const ambientStateDir = tempDirs.make("openclaw-shared-auth-pending-ambient-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", ambientStateDir);
-    vi.stubEnv("OPENCLAW_AGENT_DIR", path.join(ambientStateDir, "relocated-auth"));
+    const ambientStateDir = tempDirs.make("carapace-shared-auth-pending-ambient-");
+    vi.stubEnv("CARAPACE_STATE_DIR", ambientStateDir);
+    vi.stubEnv("CARAPACE_AGENT_DIR", path.join(ambientStateDir, "relocated-auth"));
 
     const detected = await doctor.detectLegacyStateMigrations({
       cfg: { plugins: { enabled: false } },
@@ -720,7 +720,7 @@ describe("shared auth store relocation", () => {
     expect(detected.sharedAuthStore).toEqual({ sourcePath: fixture.sourcePath, hasLegacy: false });
     expect(fs.readFileSync(fixture.sourcePath, "utf8")).toBe(sourceBytes);
     expect(fs.readFileSync(stateDatabasePath)).toEqual(stateBytes);
-    expect(fs.existsSync(resolveOpenClawStateSqlitePath())).toBe(false);
+    expect(fs.existsSync(resolveCarapaceStateSqlitePath())).toBe(false);
   });
 
   for (const crashState of [
@@ -743,7 +743,7 @@ describe("shared auth store relocation", () => {
           "SELECT state_json, updated_at FROM auth_profile_state WHERE state_key = 'primary'",
         )
         .get() as { state_json: string; updated_at: number };
-      const target = fixture.stateDb.openOpenClawStateDatabase({ env: fixture.env }).db;
+      const target = fixture.stateDb.openCarapaceStateDatabase({ env: fixture.env }).db;
       const targetStoreJson =
         crashState === "flipped-cleaned-not-finalized"
           ? JSON.stringify({
@@ -886,7 +886,7 @@ describe("shared auth store relocation", () => {
   it("fails closed when the legacy source is a dangling symlink", async () => {
     const fixture = await createFixture();
     const sourcePath = fixture.sqlite.resolveAuthProfileDatabasePath(fixture.mainAgentDir);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     fs.unlinkSync(sourcePath);
     fs.symlinkSync(`${sourcePath}.missing`, sourcePath);
 
@@ -899,13 +899,13 @@ describe("shared auth store relocation", () => {
       expect.objectContaining({
         name: "SharedAuthStoreSourceInspectionError",
         code: "SHARED_AUTH_STORE_SOURCE_UNREADABLE",
-        action: "openclaw doctor --fix",
+        action: "carapace doctor --fix",
         sourcePath,
       }),
     );
     expect(
       fixture.stateDb
-        .openOpenClawStateDatabase({ env: fixture.env })
+        .openCarapaceStateDatabase({ env: fixture.env })
         .db.prepare(
           "SELECT value_json FROM config_machine_state WHERE state_key = 'auth.sharedStore'",
         )
@@ -944,7 +944,7 @@ describe("shared auth store relocation", () => {
     );
     expect(
       fixture.stateDb
-        .openOpenClawStateDatabase({ env: fixture.env })
+        .openCarapaceStateDatabase({ env: fixture.env })
         .db.prepare(
           "SELECT value_json FROM config_machine_state WHERE state_key = 'auth.sharedStore'",
         )

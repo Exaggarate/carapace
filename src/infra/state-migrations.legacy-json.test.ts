@@ -5,9 +5,9 @@ import { defineLegacyJsonStateMigration } from "../plugin-sdk/runtime-doctor-mig
 import type { PluginDoctorStateMigration } from "../plugins/doctor-contract-module.js";
 import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surfaces.types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { detectLegacyStateMigrations } from "./state-migrations.doctor.js";
 import { autoMigrateLegacyPluginDoctorState } from "./state-migrations.plugin-doctor.js";
 import { resetAutoMigrateLegacyStateDirForTest } from "./state-migrations.state-dir.js";
@@ -25,11 +25,11 @@ vi.mock("../plugins/doctor-contract-registry.js", async (importOriginal) => {
 });
 
 describe("legacy JSON plugin migration diagnostics", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let sourcePath: string;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "legacy-json-doctor" });
+    state = await createCarapaceTestState({ label: "legacy-json-doctor" });
     sourcePath = state.statePath("legacy.json");
     registry.entries = [
       {

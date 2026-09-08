@@ -4,7 +4,7 @@ import path from "node:path";
 import { zstdCompressSync } from "node:zlib";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CodexThread } from "./app-server/protocol.js";
-import { isOpenClawManagedCodexThread } from "./session-catalog-provenance.js";
+import { isCarapaceManagedCodexThread } from "./session-catalog-provenance.js";
 import {
   config,
   idleThread,
@@ -33,7 +33,7 @@ afterEach(async () => {
 });
 
 async function writeRollout(payload: Record<string, unknown>): Promise<string> {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-provenance-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-provenance-"));
   temporaryDirectories.push(directory);
   const file = path.join(directory, "rollout.jsonl");
   await fs.writeFile(file, `${JSON.stringify({ type: "session_meta", payload })}\n`);
@@ -41,15 +41,15 @@ async function writeRollout(payload: Record<string, unknown>): Promise<string> {
 }
 
 describe("Codex catalog provenance", () => {
-  it("recognizes an OpenClaw-originated rollout even when Codex reports vscode", async () => {
+  it("recognizes an Carapace-originated rollout even when Codex reports vscode", async () => {
     const file = await writeRollout({
       id: "managed-thread",
-      originator: "openclaw",
+      originator: "carapace",
       source: "vscode",
     });
 
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "managed-thread", path: file } as CodexThread,
         path.dirname(file),
       ),
@@ -58,22 +58,22 @@ describe("Codex catalog provenance", () => {
 
   it("does not inspect a rollout outside the selected local sessions root", async () => {
     const sessionsRoot = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-codex-provenance-root-"),
+      path.join(os.tmpdir(), "carapace-codex-provenance-root-"),
     );
     temporaryDirectories.push(sessionsRoot);
     const file = await writeRollout({
       id: "outside-managed-thread",
-      originator: "openclaw",
+      originator: "carapace",
       source: "vscode",
     });
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "outside-managed-thread", path: file } as CodexThread,
         sessionsRoot,
       ),
     ).resolves.toBe(false);
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "outside-managed-thread", path: file } as CodexThread,
         undefined,
       ),
@@ -82,19 +82,19 @@ describe("Codex catalog provenance", () => {
 
   it("does not follow a rollout symlink outside the selected local sessions root", async () => {
     const sessionsRoot = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-codex-provenance-root-"),
+      path.join(os.tmpdir(), "carapace-codex-provenance-root-"),
     );
     temporaryDirectories.push(sessionsRoot);
     const outside = await writeRollout({
       id: "symlinked-managed-thread",
-      originator: "openclaw",
+      originator: "carapace",
       source: "vscode",
     });
     const linked = path.join(sessionsRoot, "rollout.jsonl");
     await fs.symlink(outside, linked);
 
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "symlinked-managed-thread", path: linked } as CodexThread,
         sessionsRoot,
       ),
@@ -104,12 +104,12 @@ describe("Codex catalog provenance", () => {
   it("reads the complete session-meta line when embedded instructions exceed one chunk", async () => {
     const file = await writeRollout({
       id: "large-managed-thread",
-      originator: "openclaw",
+      originator: "carapace",
       base_instructions: { text: "x".repeat(80 * 1024) },
     });
 
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "large-managed-thread", path: file } as CodexThread,
         path.dirname(file),
       ),
@@ -119,7 +119,7 @@ describe("Codex catalog provenance", () => {
   it("reads a compressed rollout when Codex retains the missing plain path", async () => {
     const file = await writeRollout({
       id: "compressed-managed-thread",
-      originator: "openclaw",
+      originator: "carapace",
       source: "vscode",
     });
     const compressed = `${file}.zst`;
@@ -127,7 +127,7 @@ describe("Codex catalog provenance", () => {
     await fs.rm(file);
 
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         {
           id: "compressed-managed-thread",
           path: file,
@@ -145,24 +145,24 @@ describe("Codex catalog provenance", () => {
     });
     const mismatched = await writeRollout({
       id: "different-thread",
-      originator: "openclaw",
+      originator: "carapace",
       source: "vscode",
     });
 
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "native-thread", path: native } as CodexThread,
         path.dirname(native),
       ),
     ).resolves.toBe(false);
     await expect(
-      isOpenClawManagedCodexThread(
+      isCarapaceManagedCodexThread(
         { id: "requested-thread", path: mismatched } as CodexThread,
         path.dirname(mismatched),
       ),
     ).resolves.toBe(false);
     await expect(
-      isOpenClawManagedCodexThread({ id: "missing-path" } as CodexThread, path.dirname(native)),
+      isCarapaceManagedCodexThread({ id: "missing-path" } as CodexThread, path.dirname(native)),
     ).resolves.toBe(false);
   });
 });
@@ -303,7 +303,7 @@ describe("Codex exact local eligibility", () => {
     } else if (kind === "managed") {
       f.managedThreads.has.mockResolvedValue(true);
     } else {
-      await f.writeMetadata({ ...f.metadata, originator: "openclaw" });
+      await f.writeMetadata({ ...f.metadata, originator: "carapace" });
     }
     pinnedConnectionMocks.request.mockImplementation(async ({ method, requestParams }) => {
       if (method === "thread/read") {

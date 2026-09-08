@@ -18,7 +18,7 @@ import {
 } from "./new-session-page.test-support.ts";
 
 const suite = createNewSessionPageE2eSuite();
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 suite.define(() => {
   it("retries an ambiguous cloud create with the same account, session key and machine class", async () => {
@@ -267,7 +267,7 @@ suite.define(() => {
     const readRecovery = () =>
       page.evaluate(() => {
         const key = Object.keys(sessionStorage).find((candidate) =>
-          candidate.startsWith("openclaw.new-session.session-placement-recovery.v1:"),
+          candidate.startsWith("carapace.new-session.session-placement-recovery.v1:"),
         );
         return key ? (JSON.parse(sessionStorage.getItem(key) ?? "null") as unknown) : null;
       });
@@ -395,7 +395,7 @@ suite.define(() => {
       const readRecovery = () =>
         page.evaluate(() => {
           const key = Object.keys(sessionStorage).find((candidate) =>
-            candidate.startsWith("openclaw.new-session.session-placement-recovery.v1:"),
+            candidate.startsWith("carapace.new-session.session-placement-recovery.v1:"),
           );
           return key
             ? (JSON.parse(sessionStorage.getItem(key) ?? "null") as {
@@ -607,8 +607,8 @@ suite.define(() => {
         const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
         Storage.prototype.setItem = function (key: string, value: string) {
           if (
-            key.startsWith("openclaw.new-session.session-placement-recovery.v1:") ||
-            key.startsWith("openclaw.control-ui-e2e.")
+            key.startsWith("carapace.new-session.session-placement-recovery.v1:") ||
+            key.startsWith("carapace.control-ui-e2e.")
           ) {
             originalSetItem(key, value);
             return;
@@ -657,7 +657,7 @@ suite.define(() => {
         .toBe(true);
       const recovery = await page.evaluate(() => {
         const key = Object.keys(sessionStorage).find((candidate) =>
-          candidate.startsWith("openclaw.new-session.session-placement-recovery.v1:"),
+          candidate.startsWith("carapace.new-session.session-placement-recovery.v1:"),
         );
         return key ? JSON.parse(sessionStorage.getItem(key) ?? "null") : null;
       });

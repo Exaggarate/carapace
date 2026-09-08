@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   classifySessionKeyShape,
   isUnscopedSessionKeySentinel,
@@ -10,7 +10,7 @@ export function resolveExplicitAgentCommandSessionKey(params: {
   rawExplicitSessionKey?: string;
   agentIdOverride?: string;
   shouldScopeDefaultAgentKey?: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): string | undefined {
   // Storage sentinels keep their logical key; resolveSession validates the separate owner.
   if (isUnscopedSessionKeySentinel(params.rawExplicitSessionKey)) {

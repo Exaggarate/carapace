@@ -1,14 +1,14 @@
-# @openclaw/mxc-sandbox
+# @carapace/mxc-sandbox
 
-Official MXC sandbox execution plugin for OpenClaw.
+Official MXC sandbox execution plugin for Carapace.
 
-This plugin lets OpenClaw run tool execution through MXC on Windows hosts with
+This plugin lets Carapace run tool execution through MXC on Windows hosts with
 ProcessContainer support.
 
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/mxc-sandbox
+carapace plugins install @carapace/mxc-sandbox
 ```
 
 Restart the Gateway after installing or updating the plugin.
@@ -37,8 +37,8 @@ readiness behavior to change as MXC host support matures.
 ## Package
 
 - Plugin id: `mxc`
-- Package: `@openclaw/mxc-sandbox`
-- Minimum OpenClaw host: `2026.6.11`
+- Package: `@carapace/mxc-sandbox`
+- Minimum Carapace host: `2026.6.11`
 
 ## Plugin config
 
@@ -55,8 +55,8 @@ and out-of-range values fail plugin activation with an actionable error
 | `debug`          | `boolean`                         | `false`                                | Forwards debug output from the MXC SDK launcher.                                                                                                              |
 | `mxcPolicyPaths` | `string[]`                        | unset (built-in baseline only)         | Every entry must be a non-empty absolute path. See [Sandbox policy files](#sandbox-policy-files).                                                             |
 
-Any other key is rejected. `openclaw.plugin.json` publishes the same schema
-(enums, `minimum`/`maximum` bounds) so `openclaw config` validation and CLI
+Any other key is rejected. `carapace.plugin.json` publishes the same schema
+(enums, `minimum`/`maximum` bounds) so `carapace config` validation and CLI
 help stay in sync with plugin runtime validation.
 
 ## Supported
@@ -71,7 +71,7 @@ help stay in sync with plugin runtime validation.
     read-only mount of the real agent workspace whenever it differs from the
     sandbox workdir.
   - `rw`: the active agent workspace is mounted read-write. If protected
-    OpenClaw skill roots (`skills`, `.agents/skills`, or the materialized
+    Carapace skill roots (`skills`, `.agents/skills`, or the materialized
     sandbox skills workspace) exist beneath it, MXC fails the command before
     launch because ProcessContainer cannot enforce a nested read-only grant
     beneath a writable parent. The filesystem bridge also rejects writes to
@@ -79,11 +79,11 @@ help stay in sync with plugin runtime validation.
   - Use policy `filesystem.additionalReadwritePaths` for additional explicit
     writable host paths shared by every MXC sandbox.
 - `scope` workspace selection:
-  - `session`, `agent`, and `shared` choose the OpenClaw workspace directory
+  - `session`, `agent`, and `shared` choose the Carapace workspace directory
     passed to MXC.
 - SDK-only executor discovery from `@microsoft/mxc-sdk/bin/<arch>` or
   `@microsoft/mxc-sdk/bin`; use `mxcBinaryPath` only for an explicit override.
-- OpenClaw passes per-run command, environment, and filesystem config to the
+- Carapace passes per-run command, environment, and filesystem config to the
   plugin's Node launcher through a short-lived local payload file, and deletes
   that file and its temp directory when the launcher or run finishes.
 - `@microsoft/mxc-sdk@0.7.0` then carries the full base64 request envelope on
@@ -103,10 +103,10 @@ help stay in sync with plugin runtime validation.
 
 ## Test setup
 
-Use an already configured OpenClaw installation with MXC installed and enabled
+Use an already configured Carapace installation with MXC installed and enabled
 on a supported Windows host. These commands create a uniquely named test agent
 and a new temporary workspace, leaving existing agents and workspaces alone.
-[`openclaw config patch --stdin`](https://docs.openclaw.ai/cli/config#config-patch)
+[`carapace config patch --stdin`](../../docs/cli/config.md#config-patch)
 applies sandbox settings only to that agent. Installation-wide MXC settings
 and policy files remain unchanged; review them before testing because they
 apply to the test agent too.
@@ -120,7 +120,7 @@ $mxcAgent = "mxc-test-" + [guid]::NewGuid().ToString("N")
 $mxcWorkspace = Join-Path ([System.IO.Path]::GetTempPath()) $mxcAgent
 New-Item -ItemType Directory -Path $mxcWorkspace -ErrorAction Stop | Out-Null
 
-openclaw agents add $mxcAgent `
+carapace agents add $mxcAgent `
   --workspace $mxcWorkspace `
   --non-interactive
 if ($LASTEXITCODE -ne 0) { throw "Agent creation failed; stop without patching or deleting an existing agent." }
@@ -143,9 +143,9 @@ $mxcConfigPatch = @"
 }
 "@
 
-$mxcConfigPatch | openclaw config patch --stdin --dry-run
+$mxcConfigPatch | carapace config patch --stdin --dry-run
 if ($LASTEXITCODE -ne 0) { throw "Sandbox validation failed; use Cleanup to remove the new test agent." }
-$mxcConfigPatch | openclaw config patch --stdin
+$mxcConfigPatch | carapace config patch --stdin
 if ($LASTEXITCODE -ne 0) { throw "Sandbox setup failed; use Cleanup to remove the new test agent." }
 ```
 
@@ -183,8 +183,8 @@ Example policy:
 {
   "filesystem": {
     "restrictToProjectDir": true,
-    "additionalReadonlyPaths": ["C:\\Tools\\OpenClaw\\shared-readonly"],
-    "additionalReadwritePaths": ["D:\\OpenClawScratch"]
+    "additionalReadonlyPaths": ["C:\\Tools\\Carapace\\shared-readonly"],
+    "additionalReadwritePaths": ["D:\\CarapaceScratch"]
   },
   "process": {
     "timeoutSeconds": 120
@@ -211,7 +211,7 @@ Only the `filesystem` and `process` sections are supported. Unknown sections or
 unknown fields are rejected so policy files fail closed when they drift from the
 implemented MXC ProcessContainer surface.
 
-When multiple configured policy files exist, OpenClaw layers them
+When multiple configured policy files exist, Carapace layers them
 deterministically in `mxcPolicyPaths` array order:
 
 - readonly and read-write path arrays are appended and de-duplicated while
@@ -220,7 +220,7 @@ deterministically in `mxcPolicyPaths` array order:
   policy files.
 - `restrictToProjectDir` remains enabled because the field is hardening-only.
 
-The filesystem bridge keeps protected OpenClaw skill overlays read-only. For
+The filesystem bridge keeps protected Carapace skill overlays read-only. For
 command execution, MXC fails closed before launch when `workspaceAccess: "rw"`
 or a configured read-write path overlaps a protected skill root, because
 ProcessContainer cannot safely enforce the nested read-only grant.
@@ -228,13 +228,13 @@ ProcessContainer cannot safely enforce the nested read-only grant.
 Run the TUI as that agent:
 
 ```powershell
-openclaw tui --session "agent:${mxcAgent}:main"
+carapace tui --session "agent:${mxcAgent}:main"
 ```
 
 For local embedded testing without a Gateway:
 
 ```powershell
-openclaw tui --local --session "agent:${mxcAgent}:main"
+carapace tui --local --session "agent:${mxcAgent}:main"
 ```
 
 ## Cleanup
@@ -245,7 +245,7 @@ In the same PowerShell session, remove only the agent created by setup:
 if (-not $mxcAgentCreated) {
   throw "No successfully created test agent in this session; do not delete an existing agent."
 }
-openclaw agents delete $mxcAgent --force
+carapace agents delete $mxcAgent --force
 if ($LASTEXITCODE -ne 0) { throw "Agent cleanup failed; inspect the error before retrying." }
 $mxcAgentCreated = $false
 ```

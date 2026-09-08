@@ -113,7 +113,7 @@ describe("Chrome Store installation request", () => {
     const value = await setup();
     await fs.mkdir(value.chrome.nativeManifestDir, { recursive: true, mode: 0o700 });
     await fs.writeFile(
-      path.join(value.chrome.nativeManifestDir, "ai.openclaw.browser_bootstrap.json"),
+      path.join(value.chrome.nativeManifestDir, "ai.carapace.browser_bootstrap.json"),
       "{}",
       { mode: 0o600 },
     );

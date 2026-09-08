@@ -253,7 +253,7 @@ For a regular final package on its matching release branch or tag, `all` with
 `release_profile=stable` records `coveragePolicy=npm-stable-v1` and uses CI's
 `npm-stable` scope. Numeric corrections qualify, including an unchanged base
 package whose base tag resolves to the same source SHA. This policy defers only
-macOS Swift/OpenClawKit, iOS/Watch, Android, and native i18n. Linux, macOS, and
+macOS Swift/CarapaceKit, iOS/Watch, Android, and native i18n. Linux, macOS, and
 Windows Node coverage, Control UI, plugins, package and installer acceptance,
 QA, stable soak, and blocking product performance remain required. Extended-stable,
 `main` without release context, `full`, and explicit `ci` runs retain full CI.
@@ -262,7 +262,7 @@ context, and effective inputs; a beta or historical full receipt cannot silently
 replace stable npm qualification.
 
 Native publication owns the deferred qualification. For an npm-stable release,
-`OpenClaw Release Publish` starts an exact-source full CI run with Android enabled
+`Carapace Release Publish` starts an exact-source full CI run with Android enabled
 in parallel with core publication. Only successful native qualification and core
 publication permit the separate Android job to issue a v3 approval receipt and
 dispatch the tag-owned APK publisher. The receipt binds the exact native CI run,
@@ -285,12 +285,12 @@ assets remain required before the regular GitHub release leaves draft.
 
 Package Acceptance normally builds the candidate tarball from the resolved
 `ref`, including full-SHA runs dispatched with `pnpm ci:full-release`. After a
-beta publish, pass `release_package_spec=openclaw@YYYY.M.PATCH-beta.N` to reuse
+beta publish, pass `release_package_spec=carapace@YYYY.M.PATCH-beta.N` to reuse
 the shipped npm package across release checks, Package Acceptance, cross-OS,
 release-path Docker, and package Telegram. Use `package_acceptance_package_spec`
 only when Package Acceptance should intentionally prove a different package.
 The Codex plugin live package lane follows the same state: published
-`release_package_spec` values derive `codex_plugin_spec=npm:@openclaw/codex@<version>`;
+`release_package_spec` values derive `codex_plugin_spec=npm:@carapace/codex@<version>`;
 SHA/artifact runs pack `extensions/codex` from the selected ref; and operators
 can set `codex_plugin_spec` directly for `npm:`, `npm-pack:`, or `git:` plugin
 sources. The lane grants the explicit Codex CLI install approval required by
@@ -325,7 +325,7 @@ reviewed code change; a matching `<target-version>-owner-approved` string alone
 is not authorization. The value must name the validated target's actual
 `package.json` version, the sealed candidate version must match, and the profile
 must be `stable` or `full`. Beta, prerelease, and unlisted targets are rejected.
-Package-spec overrides must be exactly `openclaw@<target-version>`; blank specs
+Package-spec overrides must be exactly `carapace@<target-version>`; blank specs
 select the sealed candidate.
 It omits source Telegram QA, Package Acceptance Telegram E2E, and the
 published-package Telegram E2E; their evidence states **waived / not run**,
@@ -362,10 +362,10 @@ sequential. Target resolution and reuse checkouts include only their tooling
 and release metadata; neither needs the complete source tree.
 
 Full validation starts independent npm and Docker producer runs through
-`full-release-artifacts.yml`. The read-only `openclaw-npm-preflight.yml` starts
+`full-release-artifacts.yml`. The read-only `carapace-npm-preflight.yml` starts
 source, SDK, dependency, and package preparation together. Package-content and
 lifecycle checks start when the single root/core build and pack finishes. The
-early `openclaw-npm-package-descriptor-<run-id>-<attempt>` artifact also unblocks
+early `carapace-npm-package-descriptor-<run-id>-<attempt>` artifact also unblocks
 candidate preparation while qualification continues. Final qualification joins
 every successful exact-source proof and seals the same tarball bytes.
 The SDK consumer install retains its smaller dependency context. The final manifest records its immutable descriptor in
@@ -375,7 +375,7 @@ sharing the target snapshot. Publication selects its channel's report and
 acknowledgement without rebuilding. Alpha, beta prerelease, and extended-stable
 targets keep their required channel.
 
-For directly dispatched `OpenClaw NPM Release` preflight-only runs, if qualification
+For directly dispatched `Carapace NPM Release` preflight-only runs, if qualification
 fails after source checks and package preparation succeed, rerun the failed
 qualification job. It reuses the exact successful producer jobs
 and package bytes from the earlier attempt, even if that attempt failed or was
@@ -415,7 +415,7 @@ standalone candidate producer that calls `Full Release Candidate`. Its registry 
 unpublished core dependencies and selected plugins. Installers start that
 registry before resolving the root package, including npm, pnpm, Bun, and
 cross-OS lanes. Published baseline versions remain available through the
-upstream registry. Plugin Prerelease and OpenClaw Release Checks each dispatch an
+upstream registry. Plugin Prerelease and Carapace Release Checks each dispatch an
 independent phase immediately, while their candidate phases wait for acquisition.
 Both candidate phases verify the same package SHA, artifact IDs, service digests,
 producer run attempt, and Docker archive digest before use. The package-independent
@@ -443,7 +443,7 @@ Decision alone does not authorize publication.
 
 For alpha targets with `rerun_group=all`, a `Verify Docker runtime image assets`
 job builds the `runtime-assets` Docker target with
-`OPENCLAW_EXTENSIONS=diagnostics-otel,codex`. It runs in parallel with the other
+`CARAPACE_EXTENSIONS=diagnostics-otel,codex`. It runs in parallel with the other
 stages and remains enforced by the umbrella verifier. Other release types
 validate that same target inside mandatory Docker image preparation on both
 native architectures, avoiding a duplicate build. A narrower `rerun_group`
@@ -455,11 +455,11 @@ skips the standalone preflight.
 | Publication preparation | **Jobs:** `Prepare release npm artifacts`, `Qualify release npm artifacts`, and `Prepare release Docker artifacts`<br />**Child workflow:** separate npm and Docker `Full Release Artifacts` runs<br />**Proves:** qualifies the exact root/core npm tarballs and both native Docker architectures before publication. Parent retries recover the original producer records and receipts.<br />**Rerun:** continue failed validation children when preparation succeeded; failed or unavailable preparation requires a fresh validation. |
 | Shared candidate        | **Job:** `Acquire full release candidate`<br />**Child workflow:** `Full Release Artifacts` calls `Full Release Candidate`, which reuses a trusted candidate or prepares one on a proven miss<br />**Proves:** validates the exact npm tarball, registry, functional image, and producer/publisher binding. Preparation starts after raw npm bytes are ready, before qualification finishes.<br />**Rerun:** rerun the affected package, plugin-prerelease, cross-OS, or live/E2E group using the same candidate.                        |
 | Docker assets preflight | **Job:** `Verify Docker runtime image assets`<br />**Child workflow:** none<br />**Proves:** for alpha targets, the `runtime-assets` Docker build target succeeds in parallel with other stages and remains enforced by the umbrella verifier. Runs only for `rerun_group=all`; other release types cover this target in mandatory Docker image preparation.<br />**Rerun:** rerun the umbrella with `rerun_group=all`.                                                                                                                  |
-| Vitest and normal CI    | **Job:** `Run normal full CI`<br />**Child workflow:** `CI`<br />**Proves:** the selected CI graph against the target ref. `npm-beta-v1` and `npm-stable-v1` retain Linux/macOS/Windows Node, plugin and channel contracts, Node compatibility, checks, built-artifact smoke, docs, Python skills, and Control UI; they defer macOS Swift/OpenClawKit, iOS, Android, and native i18n. Other coverage policies use full CI.<br />**Rerun:** `rerun_group=ci`.                                                                             |
+| Vitest and normal CI    | **Job:** `Run normal full CI`<br />**Child workflow:** `CI`<br />**Proves:** the selected CI graph against the target ref. `npm-beta-v1` and `npm-stable-v1` retain Linux/macOS/Windows Node, plugin and channel contracts, Node compatibility, checks, built-artifact smoke, docs, Python skills, and Control UI; they defer macOS Swift/CarapaceKit, iOS, Android, and native i18n. Other coverage policies use full CI.<br />**Rerun:** `rerun_group=ci`.                                                                             |
 | Plugin prerelease       | **Jobs:** `Run plugin prerelease independent validation` and `Run plugin prerelease candidate validation`<br />**Child workflow:** `Plugin Prerelease`<br />**Proves:** independent static and agentic coverage can start before acquisition, while candidate-dependent Docker lanes consume the sealed package and plugin registry identities.<br />**Rerun:** `rerun_group=plugin-prerelease`.                                                                                                                                         |
-| Release checks          | **Jobs:** `Run release checks independent validation` and `Run release checks candidate validation`<br />**Child workflow:** `OpenClaw Release Checks`<br />**Proves:** independent install, QA, and live coverage can start before acquisition, while package, cross-OS, and candidate-dependent Docker lanes consume the sealed candidate. Stable and full profiles retain exhaustive live/E2E and release-path coverage.<br />**Rerun:** classify the failed surface and select one concrete release-check group.                     |
+| Release checks          | **Jobs:** `Run release checks independent validation` and `Run release checks candidate validation`<br />**Child workflow:** `Carapace Release Checks`<br />**Proves:** independent install, QA, and live coverage can start before acquisition, while package, cross-OS, and candidate-dependent Docker lanes consume the sealed candidate. Stable and full profiles retain exhaustive live/E2E and release-path coverage.<br />**Rerun:** classify the failed surface and select one concrete release-check group.                     |
 | Package Telegram        | **Job:** `Run package Telegram E2E`<br />**Child workflow:** `NPM Telegram Beta E2E`<br />**Proves:** a focused published-package Telegram E2E when `release_package_spec` or `npm_telegram_package_spec` is set. `npm-beta-v1` defers this child; explicit `npm-telegram` and soak retain it. Package Acceptance owns Telegram proof for unpublished candidates when selected.<br />**Rerun:** `rerun_group=npm-telegram` with `release_package_spec` or `npm_telegram_package_spec`.                                                   |
-| Product performance     | **Job:** `Run product performance evidence`<br />**Child workflow:** `OpenClaw Performance`<br />**Proves:** release-profile performance (`profile=release`, `repeat=3`, `publish_reports=false`) against the target SHA. Selected for `all` except `npm-beta-v1`, or explicit `performance`; stable/full regressions block, beta results remain advisory. Selected children still finish and prove their report publisher was skipped.<br />**Rerun:** `rerun_group=performance`.                                                       |
+| Product performance     | **Job:** `Run product performance evidence`<br />**Child workflow:** `Carapace Performance`<br />**Proves:** release-profile performance (`profile=release`, `repeat=3`, `publish_reports=false`) against the target SHA. Selected for `all` except `npm-beta-v1`, or explicit `performance`; stable/full regressions block, beta results remain advisory. Selected children still finish and prove their report publisher was skipped.<br />**Rerun:** `rerun_group=performance`.                                                       |
 | Release decision        | **Job:** `Release Decision`<br />**Child workflow:** none<br />**Proves:** polls the exact recorded child run IDs and attempts, enforces release policy, and publishes an attempt-bound decision artifact. A decisive failure becomes `blocked_diagnostics_running` while unrelated child diagnostics continue.<br />**Rerun:** fix or rerun only the blocking surface.                                                                                                                                                                  |
 | Diagnostic drain        | **Job:** `Diagnostic Drain`<br />**Child workflow:** none<br />**Proves:** with `fail_fast=false`, follows every selected exact child to terminal without cancellation and writes timing, failed-job, run-attempt, and Tooling-SHA evidence. Collector cancellation instead writes an immediate `cancelled_with_children` handoff containing active child identities.<br />**Rerun:** recover collection only for `orchestration_error`; product failures do not invalidate the drain.                                                   |
 | Execution plan          | **Job:** `Seal release execution plan`<br />**Child workflow:** none<br />**Proves:** persists the original parent attempt, exact child identities and titles, required coverage, gates, reuse identity, and fresh candidate request with exact producer and publisher binding in a stable run-bound artifact. Attempt-two collector recovery restores this artifact instead of redispatching.<br />**Rerun:** restore the existing plan only; a missing plan is an orchestration error.                                                 |
@@ -483,7 +483,7 @@ redispatch. `blocked_complete` means diagnostics are complete; it does not
 claim a drain is still running.
 
 When selected, the umbrella dispatches product performance in artifact-only mode.
-`OpenClaw Performance` permits report publication only for scheduled runs or a
+`Carapace Performance` permits report publication only for scheduled runs or a
 manual dispatch that explicitly sets `publish_reports=true`. The artifact-only
 guard must complete successfully, proving the publisher job stayed skipped.
 Evidence for a selected performance child records
@@ -517,7 +517,7 @@ parent was dispatched separately.
 
 ## Release checks stages
 
-`OpenClaw Release Checks` is the largest child workflow. It resolves the target
+`Carapace Release Checks` is the largest child workflow. It resolves the target
 once and validates the umbrella's shared package artifact when available. A
 direct or focused dispatch prepares its own `release-package-under-test`
 artifact when package or Docker-facing stages need it.
@@ -527,20 +527,20 @@ artifact when package or Docker-facing stages need it.
 | Release target           | **Job:** `Resolve target ref`<br />**Backing workflow:** none<br />**Tests:** selected ref, optional expected Validation SHA, profile, concrete release-check groups, and focused live suite filter.<br />**Rerun:** select the concrete group for the failed surface.                                                                                                                                                                                                                                                                                                                                      |
 | Package artifact         | **Job:** `Prepare release package artifact`<br />**Backing workflow:** none<br />**Tests:** validates the umbrella's immutable package tuple, or packs one candidate tarball for a direct/focused Release Checks dispatch, then exposes it to downstream package-facing checks.<br />**Rerun:** the affected package, cross-OS, or live/E2E group.                                                                                                                                                                                                                                                          |
 | Install smoke            | **Job:** `Run install smoke`<br />**Backing workflow:** `Install Smoke`<br />**Tests:** full install path with root Dockerfile smoke image reuse, QR package install, root and gateway Docker smokes, installer Docker tests, and Bun global install plus CLI/local-agent/Gateway runtime smoke.<br />**Rerun:** `rerun_group=install-smoke`.                                                                                                                                                                                                                                                               |
-| Cross-OS                 | **Job:** `cross_os_release_checks`<br />**Backing workflow:** `OpenClaw Cross-OS Release Checks (Reusable)`<br />**Tests:** fresh and upgrade lanes on Linux, Windows, and macOS for the selected provider and mode, using the candidate tarball plus a baseline package. Linux gates publication; Windows/macOS are parallel advisory coverage with recorded pass/fail conclusions.<br />**Rerun:** `rerun_group=cross-os`.                                                                                                                                                                                |
-| Repo and live E2E        | **Job:** `Run repo/live E2E validation`<br />**Backing workflow:** `OpenClaw Live And E2E Checks (Reusable)`<br />**Tests:** repository E2E, live cache, OpenAI websocket streaming, native live provider and plugin shards, and Docker-backed live model/backend/gateway harnesses selected by `release_profile`.<br />**Runs:** `run_release_soak=true`, `release_profile=full`, or focused `rerun_group=live-e2e`.<br />**Rerun:** `rerun_group=live-e2e`, optionally with `live_suite_filter`.                                                                                                          |
-| Docker release path      | **Job:** `Run Docker release-path validation`<br />**Backing workflow:** `OpenClaw Live And E2E Checks (Reusable)`<br />**Tests:** release-path Docker chunks against the shared package artifact.<br />**Runs:** `run_release_soak=true`, `release_profile=full`, or focused `rerun_group=live-e2e`.<br />**Rerun:** `rerun_group=live-e2e`.                                                                                                                                                                                                                                                               |
+| Cross-OS                 | **Job:** `cross_os_release_checks`<br />**Backing workflow:** `Carapace Cross-OS Release Checks (Reusable)`<br />**Tests:** fresh and upgrade lanes on Linux, Windows, and macOS for the selected provider and mode, using the candidate tarball plus a baseline package. Linux gates publication; Windows/macOS are parallel advisory coverage with recorded pass/fail conclusions.<br />**Rerun:** `rerun_group=cross-os`.                                                                                                                                                                                |
+| Repo and live E2E        | **Job:** `Run repo/live E2E validation`<br />**Backing workflow:** `Carapace Live And E2E Checks (Reusable)`<br />**Tests:** repository E2E, live cache, OpenAI websocket streaming, native live provider and plugin shards, and Docker-backed live model/backend/gateway harnesses selected by `release_profile`.<br />**Runs:** `run_release_soak=true`, `release_profile=full`, or focused `rerun_group=live-e2e`.<br />**Rerun:** `rerun_group=live-e2e`, optionally with `live_suite_filter`.                                                                                                          |
+| Docker release path      | **Job:** `Run Docker release-path validation`<br />**Backing workflow:** `Carapace Live And E2E Checks (Reusable)`<br />**Tests:** release-path Docker chunks against the shared package artifact.<br />**Runs:** `run_release_soak=true`, `release_profile=full`, or focused `rerun_group=live-e2e`.<br />**Rerun:** `rerun_group=live-e2e`.                                                                                                                                                                                                                                                               |
 | Package Acceptance       | **Job:** `Run package acceptance`<br />**Backing workflow:** `Package Acceptance`<br />**Tests:** offline plugin package fixtures, plugin update, and published-upgrade survivor checks against the same tarball. The canonical mock-OpenAI Telegram package E2E is deferred for beta `all` without soak; explicit `package` and soak select it by default. Blocking release checks use the default latest published baseline; soak checks (`run_release_soak=true`) resolve the latest stable baseline once and run the reported-issue upgrade fixtures against it.<br />**Rerun:** `rerun_group=package`. |
 | Maturity scorecard       | **Job:** `Render maturity scorecard release docs`<br />**Backing workflow:** `maturity-scorecard.yml`<br />**Tests:** renders the advisory maturity scorecard docs against the target ref. Only runs when `run_maturity_scorecard=true` is passed.<br />**Rerun:** direct manual `rerun_group=qa` with `run_maturity_scorecard=true`.                                                                                                                                                                                                                                                                       |
 | QA parity                | **Job:** `Run QA Lab parity lane` and `Run QA Lab parity report`<br />**Backing workflow:** direct jobs<br />**Tests:** candidate and baseline agentic parity packs, then the parity report.<br />**Rerun:** `rerun_group=qa-parity`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                                                                                                                                                 |
-| QA runtime parity        | **Job:** `Verify QA Lab runtime-pair lanes`<br />**Backing workflow:** direct job<br />**Tests:** the canonical core `openclaw`/`codex` lane (`pnpm openclaw qa suite --runtime-pair openclaw,codex --runtime-pair-lane core`) and, with `run_release_soak=true`, the soak lane. Includes the OpenClaw core restart proof. The release verifier enforces the recorded lane status.<br />**Rerun:** `rerun_group=qa-parity`; direct manual child dispatch may aggregate with `qa`.                                                                                                                           |
-| QA runtime tool coverage | **Job:** `Enforce QA Lab runtime tool coverage`<br />**Backing workflow:** direct job<br />**Tests:** dynamic tool drift between `openclaw` and `codex` in the canonical core runtime-pair lane (`pnpm openclaw qa coverage --tools`), using that lane's output. Blocking: this job is not advisory-overridable.<br />**Rerun:** `rerun_group=qa-parity`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                             |
+| QA runtime parity        | **Job:** `Verify QA Lab runtime-pair lanes`<br />**Backing workflow:** direct job<br />**Tests:** the canonical core `carapace`/`codex` lane (`pnpm carapace qa suite --runtime-pair carapace,codex --runtime-pair-lane core`) and, with `run_release_soak=true`, the soak lane. Includes the Carapace core restart proof. The release verifier enforces the recorded lane status.<br />**Rerun:** `rerun_group=qa-parity`; direct manual child dispatch may aggregate with `qa`.                                                                                                                           |
+| QA runtime tool coverage | **Job:** `Enforce QA Lab runtime tool coverage`<br />**Backing workflow:** direct job<br />**Tests:** dynamic tool drift between `carapace` and `codex` in the canonical core runtime-pair lane (`pnpm carapace qa coverage --tools`), using that lane's output. Blocking: this job is not advisory-overridable.<br />**Rerun:** `rerun_group=qa-parity`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                             |
 | QA live Matrix           | **Job:** `Run QA Live Matrix catalog`<br />**Backing workflow:** `QA-Lab - All Lanes` reusable workflow<br />**Tests:** catalog-derived YAML scenarios through the shared Matrix live adapter in the `qa-live-shared` environment, distributed across deterministic shards.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-matrix`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                            |
 | QA live Buzz             | **Job:** `Run QA Lab live Buzz lane`<br />**Backing workflow:** `QA-Lab - All Lanes` reusable workflow<br />**Tests:** signed canary and mention-gating round trips through the real Buzz plugin using dedicated Convex-leased identities and a hosted relay room.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-buzz`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                                       |
-| QA live Telegram         | **Job:** `Run QA Lab live Telegram lane`<br />**Backing workflow:** trusted `OpenClaw Release Telegram QA` dispatch<br />**Tests:** live Telegram QA with Convex CI credential leases.<br />**Rerun:** `rerun_group=qa-live`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                                                                                                                                                         |
-| QA live Discord          | **Job:** `Run QA Lab live Discord lane`<br />**Backing workflow:** direct job with recorded status enforced by the release verifier<br />**Tests:** live Discord QA with Convex CI credential leases when `OPENCLAW_RELEASE_QA_DISCORD_LIVE_CI_ENABLED` is enabled.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-discord`.                                                                                                                                                                                                                                                         |
-| QA live WhatsApp         | **Job:** `Run QA Lab live WhatsApp lane`<br />**Backing workflow:** direct job with recorded status enforced by the release verifier<br />**Tests:** live WhatsApp QA with Convex CI credential leases when `OPENCLAW_RELEASE_QA_WHATSAPP_LIVE_CI_ENABLED` is enabled.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-whatsapp`.                                                                                                                                                                                                                                                     |
-| QA live Slack            | **Job:** `Run QA Lab live Slack lane`<br />**Backing workflow:** direct job with recorded status enforced by the release verifier<br />**Tests:** live Slack QA with Convex CI credential leases when `OPENCLAW_RELEASE_QA_SLACK_LIVE_CI_ENABLED` is enabled.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-slack`.                                                                                                                                                                                                                                                                 |
+| QA live Telegram         | **Job:** `Run QA Lab live Telegram lane`<br />**Backing workflow:** trusted `Carapace Release Telegram QA` dispatch<br />**Tests:** live Telegram QA with Convex CI credential leases.<br />**Rerun:** `rerun_group=qa-live`; direct manual child dispatch may aggregate with `qa`.                                                                                                                                                                                                                                                                                                                         |
+| QA live Discord          | **Job:** `Run QA Lab live Discord lane`<br />**Backing workflow:** direct job with recorded status enforced by the release verifier<br />**Tests:** live Discord QA with Convex CI credential leases when `CARAPACE_RELEASE_QA_DISCORD_LIVE_CI_ENABLED` is enabled.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-discord`.                                                                                                                                                                                                                                                         |
+| QA live WhatsApp         | **Job:** `Run QA Lab live WhatsApp lane`<br />**Backing workflow:** direct job with recorded status enforced by the release verifier<br />**Tests:** live WhatsApp QA with Convex CI credential leases when `CARAPACE_RELEASE_QA_WHATSAPP_LIVE_CI_ENABLED` is enabled.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-whatsapp`.                                                                                                                                                                                                                                                     |
+| QA live Slack            | **Job:** `Run QA Lab live Slack lane`<br />**Backing workflow:** direct job with recorded status enforced by the release verifier<br />**Tests:** live Slack QA with Convex CI credential leases when `CARAPACE_RELEASE_QA_SLACK_LIVE_CI_ENABLED` is enabled.<br />**Rerun:** `rerun_group=qa-live` with `live_suite_filter=qa-live-slack`.                                                                                                                                                                                                                                                                 |
 | Release verifier         | **Job:** `Verify release checks`<br />**Backing workflow:** none<br />**Tests:** required release-check jobs for the selected rerun group.<br />**Rerun:** rerun after focused child jobs pass.                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## Docker release-path chunks
@@ -637,7 +637,7 @@ Use `live_suite_filter` with `rerun_group=live-e2e` when one live suite failed.
 The former `release-checks` aggregate retry handle is invalid. It silently
 expanded to every release-check lane, including package and Docker setup. Pick
 one concrete group after classifying the failed surface.
-The umbrella/controller also rejects `qa`; direct `OpenClaw Release Checks`
+The umbrella/controller also rejects `qa`; direct `Carapace Release Checks`
 dispatches may use it only as a deliberate manual aggregate of `qa-parity` and
 `qa-live`. Live and QA-live filters must match their owning group; cross-OS
 filters are also accepted for `all`.
@@ -682,10 +682,10 @@ are advisory: third-party model deployments change underneath a release, so
 beta surfaces their failures as warnings while stable and full profiles keep
 them blocking. When
 `live_suite_filter` explicitly requests a gated QA live lane such as Discord,
-WhatsApp, or Slack, the matching `OPENCLAW_RELEASE_QA_*_LIVE_CI_ENABLED` repo
+WhatsApp, or Slack, the matching `CARAPACE_RELEASE_QA_*_LIVE_CI_ENABLED` repo
 variable must be enabled; otherwise input capture fails instead of silently skipping the lane.
 Use controller groups `qa-parity` or `qa-live` for fresh QA evidence. A direct
-manual `OpenClaw Release Checks` dispatch may use `qa` to aggregate both.
+manual `Carapace Release Checks` dispatch may use `qa` to aggregate both.
 
 ## Evidence to keep
 
@@ -710,7 +710,7 @@ frozen-target compatibility repair or intentional omission.
 
 Useful artifacts:
 
-- `release-package-under-test` from `OpenClaw Release Checks`
+- `release-package-under-test` from `Carapace Release Checks`
 - Docker release-path artifacts under `.artifacts/docker-tests/`
 - Package Acceptance `package-under-test` and Docker acceptance artifacts
 - Cross-OS release-check artifacts for each OS and suite
@@ -721,12 +721,12 @@ Useful artifacts:
 
 - `.github/workflows/full-release-validation.yml`
 - `.github/workflows/full-release-candidate.yml`
-- `.github/workflows/openclaw-release-checks.yml`
-- `.github/workflows/openclaw-live-and-e2e-checks-reusable.yml`
+- `.github/workflows/carapace-release-checks.yml`
+- `.github/workflows/carapace-live-and-e2e-checks-reusable.yml`
 - `.github/workflows/plugin-prerelease.yml`
 - `.github/workflows/install-smoke.yml`
 - `.github/workflows/install-smoke-reusable.yml`
-- `.github/workflows/openclaw-cross-os-release-checks-reusable.yml`
+- `.github/workflows/carapace-cross-os-release-checks-reusable.yml`
 - `.github/workflows/package-acceptance.yml`
-- `.github/workflows/openclaw-performance.yml`
+- `.github/workflows/carapace-performance.yml`
 - `.github/workflows/npm-telegram-beta-e2e.yml`

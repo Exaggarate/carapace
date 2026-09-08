@@ -3,13 +3,13 @@ import type {
   RealtimeVoiceBridge,
   RealtimeVoiceSessionConnection,
   RealtimeVoiceToolResultOptions,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import {
   coerceErrorMessage,
   RealtimeVoiceSessionLifecycle,
   sleepWithAbort,
   toStringifiedError,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
+} from "carapace/plugin-sdk/realtime-voice-provider";
 import WebSocket from "ws";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {

@@ -22,7 +22,7 @@ const keyMetricIds = [
   "peakRssMb",
   "resourcePeakGatewayRssMb",
   "cpuPercentMax",
-  "openclawEventLoopMaxMs",
+  "carapaceEventLoopMaxMs",
   "agentTurnP95Ms",
   "coldAgentTurnMs",
   "warmAgentTurnMs",
@@ -79,7 +79,7 @@ function renderSummary(reportLocal: KovaReport, options: SummaryOptions) {
       .map(([status, count]) => `${status}: ${value(count)}`)
       .join(", ") || "unknown";
 
-  lines.push(`# OpenClaw Performance Report`);
+  lines.push(`# Carapace Performance Report`);
   lines.push("");
   lines.push(`- Lane: ${options.lane}`);
   lines.push(`- Run: ${value(reportLocal.runId)}`);

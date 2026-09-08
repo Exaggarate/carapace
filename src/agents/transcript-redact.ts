@@ -1,12 +1,12 @@
-import { OPENAI_RESPONSES_APIS } from "@openclaw/ai/internal/openai-responses-payload-policy";
+import { OPENAI_RESPONSES_APIS } from "@carapace/ai/internal/openai-responses-payload-policy";
 /**
  * Agent transcript redaction helpers.
  *
  * Applies logging redaction rules to persisted messages while preserving unchanged object identity.
  */
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readLoggingConfig } from "../logging/config.js";
 import { redactSourceInputTextWithConfig } from "../logging/redact-source.js";
 import {
@@ -33,7 +33,7 @@ import {
 } from "./transcript-redact-images.js";
 import { sanitizeCompactionReplayState } from "./transcript-redact-replay.js";
 
-function resolveTranscriptLoggingConfig(cfg?: OpenClawConfig) {
+function resolveTranscriptLoggingConfig(cfg?: CarapaceConfig) {
   const configuredLogging = readLoggingConfig();
   const redactPatterns = cfg?.logging?.redactPatterns ?? configuredLogging?.redactPatterns;
   return redactPatterns ? { redactPatterns } : undefined;
@@ -41,7 +41,7 @@ function resolveTranscriptLoggingConfig(cfg?: OpenClawConfig) {
 
 function redactTranscriptText(
   value: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   modelVisibleToolResult = false,
 ): string {
   const loggingConfig = resolveTranscriptLoggingConfig(cfg);
@@ -53,7 +53,7 @@ function redactTranscriptText(
 function redactTranscriptStructuredFieldValue(
   key: string,
   value: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   modelVisibleToolResult = false,
 ): string {
   // Preserve pagination state only in transcripts; value-pattern and global log redaction remain.
@@ -91,16 +91,16 @@ const GOOGLE_REASONING_APIS = new Set([
   "google-generative-ai",
   "google-vertex",
   "google-gemini-cli",
-  "openclaw-google-generative-ai-transport",
+  "carapace-google-generative-ai-transport",
 ]);
 const ANTHROPIC_REASONING_APIS = new Set([
   "anthropic-messages",
   "bedrock-converse-stream",
-  "openclaw-anthropic-messages-transport",
+  "carapace-anthropic-messages-transport",
 ]);
 const OPENAI_COMPLETIONS_APIS = new Set([
   "openai-completions",
-  "openclaw-openai-completions-transport",
+  "carapace-openai-completions-transport",
 ]);
 const OPAQUE_REPLAY_TOKEN_RE = /^[A-Za-z0-9+/_-]+={0,2}$/;
 const GOOGLE_THOUGHT_SIGNATURE_RE =
@@ -164,7 +164,7 @@ function isCustomProviderRoute(route: TranscriptAssistantRoute | undefined): boo
 
 function isGitHubCopilotResponsesRoute(route: TranscriptAssistantRoute | undefined): boolean {
   return (
-    (route?.api === "openai-responses" || route?.api === "openclaw-openai-responses-transport") &&
+    (route?.api === "openai-responses" || route?.api === "carapace-openai-responses-transport") &&
     route.provider === "github-copilot"
   );
 }
@@ -200,7 +200,7 @@ function isGoogleThoughtSignature(value: string): boolean {
 
 function resolveTranscriptAssistantRoute(
   source: Record<string, unknown>,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
 ): TranscriptAssistantRoute {
   const api = typeof source.api === "string" ? source.api : undefined;
   const model = typeof source.model === "string" ? source.model : undefined;
@@ -290,7 +290,7 @@ const OPENAI_REASONING_REPLAY_METADATA_KEYS = new Set([
   "sessionHash",
   "authProfileHash",
 ]);
-const OPENAI_REASONING_REPLAY_METADATA_KEY = "__openclaw_replay";
+const OPENAI_REASONING_REPLAY_METADATA_KEY = "__carapace_replay";
 
 function sanitizeOpenAIReasoningReplayMetadata(
   value: unknown,
@@ -486,7 +486,7 @@ function sanitizeOpenAICompletionsToolSignature(
 
 function redactTranscriptStructuredValue(
   value: unknown,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   fieldKey?: string,
   seen: WeakSet<object> = new WeakSet<object>(),
   preserveImageDataUrlFields = false,
@@ -595,7 +595,7 @@ function redactTranscriptStructuredValue(
       (isOpenAIResponsesRoute(currentAssistantRoute) ||
         isCustomProviderRoute(currentAssistantRoute)) &&
       source.type === "thinking" &&
-      key === "openclawReasoningReplay"
+      key === "carapaceReasoningReplay"
     ) {
       const sanitizedMetadata = sanitizeOpenAIReasoningReplayMetadata(item, currentAssistantRoute);
       if (sanitizedMetadata !== undefined) {
@@ -714,7 +714,7 @@ function redactTranscriptStructuredValue(
   }
   // Redacted source facts no longer identify the producer's sender. Keep display
   // redaction, but never qualify the replacement bytes as a person or remote actor.
-  if (fieldKey === "__openclaw" && next) {
+  if (fieldKey === "__carapace" && next) {
     if (next.senderIdentity !== source.senderIdentity || next.senderId !== source.senderId) {
       delete next.senderIdentity;
     }
@@ -723,12 +723,12 @@ function redactTranscriptStructuredValue(
     }
   }
   if (location === "root" && source.role === "user" && next && next.content !== source.content) {
-    const metadata = asOptionalRecord(next["__openclaw"]);
+    const metadata = asOptionalRecord(next["__carapace"]);
     if (metadata?.humanMentions !== undefined) {
       // UTF-16 selections cannot retain their binding after storage redacts the content.
       const retained = { ...metadata };
       delete retained.humanMentions;
-      next["__openclaw"] = retained;
+      next["__carapace"] = retained;
     }
   }
   seen.delete(value);
@@ -738,7 +738,7 @@ function redactTranscriptStructuredValue(
 /** Return a redacted transcript message according to logging config. */
 export function redactTranscriptMessage(
   message: AgentMessage,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   sourceAppend?: CodeModeSourceAppend,
 ): AgentMessage {
   const redacted = redactTranscriptStructuredValue(

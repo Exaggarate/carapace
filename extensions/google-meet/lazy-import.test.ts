@@ -1,19 +1,19 @@
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { TranscriptSourceProvider } from "openclaw/plugin-sdk/transcripts";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicy,
+  CarapacePluginNodeInvokePolicyContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import type { TranscriptSourceProvider } from "carapace/plugin-sdk/transcripts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GoogleMeetConfig } from "./src/config.js";
 import { GOOGLE_MEET_NODE_COMMAND } from "./src/transports/google-meet-platform-constants.js";
 
-type GatewayHandler = Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1];
-type CliRegistrar = Parameters<OpenClawPluginApi["registerCli"]>[0];
-type ToolFactory = Parameters<OpenClawPluginApi["registerTool"]>[0];
+type GatewayHandler = Parameters<CarapacePluginApi["registerGatewayMethod"]>[1];
+type CliRegistrar = Parameters<CarapacePluginApi["registerCli"]>[0];
+type ToolFactory = Parameters<CarapacePluginApi["registerTool"]>[0];
 
 describe("google-meet lazy imports", () => {
   afterEach(() => {
@@ -23,10 +23,10 @@ describe("google-meet lazy imports", () => {
       "./src/node-host.js",
       "./src/node-invoke-policy.js",
       "./src/cli.js",
-      "openclaw/plugin-sdk/gateway-runtime",
-      "openclaw/plugin-sdk/param-readers",
-      "openclaw/plugin-sdk/routing",
-      "openclaw/plugin-sdk/transcripts",
+      "carapace/plugin-sdk/gateway-runtime",
+      "carapace/plugin-sdk/param-readers",
+      "carapace/plugin-sdk/routing",
+      "carapace/plugin-sdk/transcripts",
     ]) {
       vi.doUnmock(moduleId);
     }
@@ -93,34 +93,34 @@ describe("google-meet lazy imports", () => {
         registerGoogleMeetCli: () => {},
       };
     });
-    vi.doMock("openclaw/plugin-sdk/gateway-runtime", () => {
+    vi.doMock("carapace/plugin-sdk/gateway-runtime", () => {
       gatewayRuntimeImports += 1;
       return {
         callGatewayFromCli: async () => ({ ok: true }),
       };
     });
-    vi.doMock("openclaw/plugin-sdk/param-readers", () => {
+    vi.doMock("carapace/plugin-sdk/param-readers", () => {
       paramReaderImports += 1;
       return {
         readPositiveIntegerParam: () => 2_500,
       };
     });
-    vi.doMock("openclaw/plugin-sdk/routing", () => {
+    vi.doMock("carapace/plugin-sdk/routing", () => {
       routingImports += 1;
       return {
         normalizeAgentId: vi.fn((value: string) => value),
         parseAgentSessionKey: () => ({ agentId: "main" }),
       };
     });
-    vi.doMock("openclaw/plugin-sdk/transcripts", () => {
+    vi.doMock("carapace/plugin-sdk/transcripts", () => {
       transcriptSdkImports += 1;
       return {};
     });
 
     const { default: googleMeetPlugin } = await import("./index.js");
     const gatewayMethods = new Map<string, GatewayHandler>();
-    const nodeCommands: OpenClawPluginNodeHostCommand[] = [];
-    const nodePolicies: OpenClawPluginNodeInvokePolicy[] = [];
+    const nodeCommands: CarapacePluginNodeHostCommand[] = [];
+    const nodePolicies: CarapacePluginNodeInvokePolicy[] = [];
     const cliRegistrars: CliRegistrar[] = [];
     const transcriptProviders: TranscriptSourceProvider[] = [];
     let toolFactory: ToolFactory | undefined;
@@ -231,11 +231,11 @@ describe("google-meet lazy imports", () => {
   });
 
   it("loads and caches the node policy delegate", async () => {
-    const delegateHandle = vi.fn<OpenClawPluginNodeInvokePolicy["handle"]>(async () => ({
+    const delegateHandle = vi.fn<CarapacePluginNodeInvokePolicy["handle"]>(async () => ({
       ok: true,
     }));
     const loadPolicy = vi.fn(
-      async (_config: GoogleMeetConfig): Promise<OpenClawPluginNodeInvokePolicy> => ({
+      async (_config: GoogleMeetConfig): Promise<CarapacePluginNodeInvokePolicy> => ({
         commands: [GOOGLE_MEET_NODE_COMMAND],
         dangerous: true,
         handle: delegateHandle,
@@ -248,10 +248,10 @@ describe("google-meet lazy imports", () => {
     expect(policy.dangerous).toBe(true);
     expect(loadPolicy).not.toHaveBeenCalled();
 
-    await expect(policy.handle({} as OpenClawPluginNodeInvokePolicyContext)).resolves.toEqual({
+    await expect(policy.handle({} as CarapacePluginNodeInvokePolicyContext)).resolves.toEqual({
       ok: true,
     });
-    await expect(policy.handle({} as OpenClawPluginNodeInvokePolicyContext)).resolves.toEqual({
+    await expect(policy.handle({} as CarapacePluginNodeInvokePolicyContext)).resolves.toEqual({
       ok: true,
     });
     expect(loadPolicy).toHaveBeenCalledTimes(1);
@@ -264,7 +264,7 @@ describe("google-meet lazy imports", () => {
       throw new Error("load failed");
     });
 
-    await expect(policy.handle({} as OpenClawPluginNodeInvokePolicyContext)).resolves.toMatchObject(
+    await expect(policy.handle({} as CarapacePluginNodeInvokePolicyContext)).resolves.toMatchObject(
       {
         ok: false,
         code: "PLUGIN_POLICY_UNAVAILABLE",
@@ -285,10 +285,10 @@ describe("google-meet lazy imports", () => {
           handle: async () => {
             throw delegateError;
           },
-        }) satisfies OpenClawPluginNodeInvokePolicy,
+        }) satisfies CarapacePluginNodeInvokePolicy,
     );
 
-    await expect(policy.handle({} as OpenClawPluginNodeInvokePolicyContext)).rejects.toBe(
+    await expect(policy.handle({} as CarapacePluginNodeInvokePolicyContext)).rejects.toBe(
       delegateError,
     );
   });

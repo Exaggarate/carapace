@@ -1,11 +1,11 @@
-import { createChannelConfigUiHints } from "openclaw/plugin-sdk/channel-core";
+import { createChannelConfigUiHints } from "carapace/plugin-sdk/channel-core";
 // Irc helper module supports config ui hints behavior.
-import type { ChannelConfigUiHint } from "openclaw/plugin-sdk/core";
+import type { ChannelConfigUiHint } from "carapace/plugin-sdk/core";
 
 export const ircChannelConfigUiHints = {
   "": {
     label: "IRC",
-    help: "IRC channel provider configuration and compatibility settings for classic IRC transport workflows. Use this section when bridging legacy chat infrastructure into OpenClaw.",
+    help: "IRC channel provider configuration and compatibility settings for classic IRC transport workflows. Use this section when bridging legacy chat infrastructure into Carapace.",
   },
   ...createChannelConfigUiHints({ channelLabel: "IRC", dmPolicy: { channelKey: "irc" } }),
   "nickserv.enabled": {

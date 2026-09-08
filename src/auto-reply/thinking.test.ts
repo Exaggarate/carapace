@@ -127,11 +127,11 @@ describe("listThinkingLevels", () => {
       levels: [
         { id: "off" },
         { id: "max" },
-        ...(context.agentRuntime === "openclaw" ? [{ id: "ultra" as const }] : []),
+        ...(context.agentRuntime === "carapace" ? [{ id: "ultra" as const }] : []),
       ],
     }));
 
-    expect(listThinkingLevels("openai", "gpt-5.6-luna", undefined, "openclaw")).toContain("ultra");
+    expect(listThinkingLevels("openai", "gpt-5.6-luna", undefined, "carapace")).toContain("ultra");
     expect(listThinkingLevels("openai", "gpt-5.6-luna", undefined, "codex")).not.toContain("ultra");
     expect(providerRuntimeMocks.resolveProviderThinkingProfile).toHaveBeenLastCalledWith({
       provider: "openai",
@@ -399,7 +399,7 @@ describe("listThinkingLevels", () => {
   });
 
   it("exposes Claude Opus xhigh on custom anthropic-messages providers without a plugin profile", () => {
-    // Regression for openclaw#91975: a renamed provider serving Claude Opus over
+    // Regression for carapace#91975: a renamed provider serving Claude Opus over
     // anthropic-messages used to fall back to a base profile (no xhigh) and silently
     // clamp `--thinking xhigh` to `off`.
     const catalog = [
@@ -603,7 +603,7 @@ describe("listThinkingLevels", () => {
     ).toEqual(["off", "minimal", "low", "medium", "high"]);
   });
 
-  it("honors provider-owned thinking maps before compat and derives OpenClaw Ultra", () => {
+  it("honors provider-owned thinking maps before compat and derives Carapace Ultra", () => {
     const catalog = [
       {
         provider: "custom",
@@ -622,7 +622,7 @@ describe("listThinkingLevels", () => {
       },
     ];
 
-    expect(listThinkingLevels("custom", "reasoning-model", catalog, "openclaw")).toEqual([
+    expect(listThinkingLevels("custom", "reasoning-model", catalog, "carapace")).toEqual([
       "off",
       "high",
       "max",
@@ -633,7 +633,7 @@ describe("listThinkingLevels", () => {
         provider: "custom",
         model: "reasoning-model",
         catalog,
-        agentRuntime: "openclaw",
+        agentRuntime: "carapace",
       }),
     ).toBe("high");
     expect(listThinkingLevels("custom", "reasoning-model", catalog, "codex")).toEqual([
@@ -653,7 +653,7 @@ describe("listThinkingLevels", () => {
       },
     ];
 
-    expect(listThinkingLevels("custom", "mapped-model", catalog, "openclaw")).toEqual([
+    expect(listThinkingLevels("custom", "mapped-model", catalog, "carapace")).toEqual([
       "minimal",
       "low",
       "medium",
@@ -718,7 +718,7 @@ describe("listThinkingLevels", () => {
     ).toBe(true);
   });
 
-  it("uses advanced catalog efforts and derives OpenClaw Ultra from Max", () => {
+  it("uses advanced catalog efforts and derives Carapace Ultra from Max", () => {
     const catalog = [
       {
         provider: "myazure",
@@ -732,7 +732,7 @@ describe("listThinkingLevels", () => {
       },
     ];
 
-    expect(listThinkingLevels("myazure", "gpt-5.6-sol", catalog, "openclaw")).toEqual([
+    expect(listThinkingLevels("myazure", "gpt-5.6-sol", catalog, "carapace")).toEqual([
       "off",
       "minimal",
       "low",
@@ -748,7 +748,7 @@ describe("listThinkingLevels", () => {
         model: "gpt-5.6-sol",
         level: "max",
         catalog,
-        agentRuntime: "openclaw",
+        agentRuntime: "carapace",
       }),
     ).toBe(true);
     expect(
@@ -757,13 +757,13 @@ describe("listThinkingLevels", () => {
         model: "gpt-5.6-sol",
         level: "ultra",
         catalog,
-        agentRuntime: "openclaw",
+        agentRuntime: "carapace",
       }),
     ).toBe(true);
     expect(listThinkingLevels("myazure", "gpt-5.6-sol", catalog, "codex")).not.toContain("ultra");
   });
 
-  it("preserves catalog-advertised Ultra for non-OpenClaw runtimes", () => {
+  it("preserves catalog-advertised Ultra for non-Carapace runtimes", () => {
     const catalog = [
       {
         provider: "myazure",

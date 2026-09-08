@@ -11,17 +11,17 @@ import { SqliteBoardStore } from "../../boards/sqlite-board-store.js";
 import { configureSqliteWalMaintenance } from "../../infra/sqlite-wal.js";
 import { flushLogger, setLoggerOverride } from "../../logging/logger.js";
 import { onSessionIdentityMutation } from "../../sessions/session-lifecycle-events.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-  getOpenClawAgentDatabaseIfOpen,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+  getCarapaceAgentDatabaseIfOpen,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { loadTranscriptEvents } from "./session-accessor.js";
 import { runSqliteTranscriptArchiveWorkerOperation } from "./session-accessor.sqlite-archive.js";
 import type { SqliteSessionReclamationDiagnostics } from "./session-accessor.sqlite-contract.js";
@@ -80,10 +80,10 @@ afterEach(() => {
 });
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 function createFixture(alias = false) {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-reclamation-writers-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-reclamation-writers-") };
   const options = { agentId: "main", env };
   const scopes = ["parent", "child"].map((sessionId) => ({
     agentId: options.agentId,
@@ -94,14 +94,14 @@ function createFixture(alias = false) {
   for (const scope of scopes) {
     ensureSessionEntrySync(scope, { sessionId: scope.sessionId, updatedAt: 1 });
   }
-  const database = openOpenClawAgentDatabase(options);
+  const database = openCarapaceAgentDatabase(options);
   const databaseOptions = { ...options, path: database.path };
   const aliasPath = alias
     ? path.join(path.dirname(database.path), "writer-alias.sqlite")
     : undefined;
   if (aliasPath) {
     symlinkSync(database.path, aliasPath);
-    openOpenClawAgentDatabase({ ...options, path: aliasPath });
+    openCarapaceAgentDatabase({ ...options, path: aliasPath });
   }
   const plan = createHistoryEvictionReclamationPlan({
     databaseOptions,
@@ -322,9 +322,9 @@ test.each([false, true])(
       entries: [{ sessionKey: removed.sessionKey, expectedEntry }],
       materializedPlans: [],
     });
-    const stateDatabase = openOpenClawStateDatabase({ env: databaseOptions.env });
+    const stateDatabase = openCarapaceStateDatabase({ env: databaseOptions.env });
     const inspect = () => {
-      const opened = withOpenClawAgentDatabaseReadOnly(
+      const opened = withCarapaceAgentDatabaseReadOnly(
         ({ db }) => ({
           entries: db
             .prepare("SELECT session_key, entry_json FROM session_nodes ORDER BY session_key")
@@ -350,7 +350,7 @@ test.each([false, true])(
       }
       return {
         ...opened.value,
-        writerOpen: getOpenClawAgentDatabaseIfOpen(databaseOptions)?.db.isOpen ?? false,
+        writerOpen: getCarapaceAgentDatabaseIfOpen(databaseOptions)?.db.isOpen ?? false,
         leases: stateDatabase.db
           .prepare("SELECT lease_id FROM agent_database_leases WHERE path = ? ORDER BY lease_id")
           .all(database.path),
@@ -358,7 +358,7 @@ test.each([false, true])(
     };
     // The prepared operation loses its warm handle before it can enter the FIFO.
     database.db.exec("DROP INDEX idx_agent_cache_expiry");
-    expect(closeOpenClawAgentDatabaseByPath(database.path)).toBe(true);
+    expect(closeCarapaceAgentDatabaseByPath(database.path)).toBe(true);
     const before = inspect();
     expect(before).toMatchObject({ writerOpen: false, leases: [], repairIndex: undefined });
     const survivorEntry = loadSessionEntryReadOnly(survivor);
@@ -395,8 +395,8 @@ test.each([false, true])(
       expect(database.db.isOpen).toBe(false);
       expect(loadSessionEntryReadOnly(survivor)).toEqual(survivorEntry);
     } finally {
-      closeOpenClawAgentDatabaseByPath(database.path);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabaseByPath(database.path);
+      closeCarapaceStateDatabaseForTest();
     }
   },
 );
@@ -556,7 +556,7 @@ test("one reclamation pass leaves a large freelist for bounded later maintenance
     expect(budgetBefore - freePages()).toBeGreaterThan(0);
     expect(budgetBefore - freePages()).toBeLessThanOrEqual(512);
     expect(database.db.isTransaction).toBe(false);
-    closeOpenClawAgentDatabaseByPath(database.path);
+    closeCarapaceAgentDatabaseByPath(database.path);
     for (const scope of scopes) {
       expect(appendTranscriptEventSync(scope, { type: "budget-progress" })).toEqual({
         ok: true,
@@ -565,7 +565,7 @@ test("one reclamation pass leaves a large freelist for bounded later maintenance
     }
   });
   await Promise.all([reclaimSqliteFreePages(databaseOptions), duringDrain]);
-  const reopened = openOpenClawAgentDatabase(databaseOptions);
+  const reopened = openCarapaceAgentDatabase(databaseOptions);
   expect(Number(reopened.db.prepare("PRAGMA freelist_count").get()?.freelist_count)).toBe(0);
 });
 
@@ -617,7 +617,7 @@ test("in-process reclamation and rejected worker construction do not invent a wo
 
 test("file warnings link an awaited native worker without attributing it to the queued successor", async () => {
   const { databaseOptions, plan } = createFixture();
-  const file = path.join(tempDirs.make("openclaw-writer-log-"), "writer.log");
+  const file = path.join(tempDirs.make("carapace-writer-log-"), "writer.log");
   const diagnostics: SqliteSessionReclamationDiagnostics = {};
   const workers: Array<{ worker: Worker; id: number }> = [];
   const observeWorker = (worker: Worker) => workers.push({ worker, id: worker.threadId });

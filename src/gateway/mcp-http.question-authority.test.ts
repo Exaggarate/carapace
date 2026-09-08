@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { runQaGatewayFixture } from "../../test/helpers/qa-gateway-cleanup.js";
@@ -23,8 +23,8 @@ import { withQuestionGateway } from "../agents/harness/gateway-question.test-sup
 import { resetPendingAskUserQuestionsForTest } from "../agents/tools/ask-user-tool.test-support.js";
 import type { ReplyToolAuthorityOverlay } from "../auto-reply/reply/reply-run-registry.contracts.js";
 import { getRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   activateMcpLoopbackClientGrantCapture,
   bindMcpLoopbackClientGrantAdmission,
@@ -96,7 +96,7 @@ beforeEach(() => {
     isWorkspaceBootstrapPending: async () => false,
     makeBootstrapWarn: () => () => {},
     resolveBootstrapContextForRun: async () => ({ bootstrapFiles: [], contextFiles: [] }),
-    resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+    resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
     prepareClaudeCliSkillsPlugin: async () => ({ args: [], cleanup: async () => {} }),
     loadManifestModelCatalog: () => [],
   });
@@ -144,7 +144,7 @@ async function withCliQuestionLoopback(
   await runQaGatewayFixture(
     async () =>
       await withQuestionGateway(async (gateway) => {
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           ...expectDefined(getRuntimeConfigSnapshot(), "isolated question gateway config"),
           agents: { defaults: { workspace: dir }, entries: { main: { default: true } } },
           plugins: { enabled: false },
@@ -191,7 +191,7 @@ async function withCliQuestionLoopback(
             headers: {
               authorization: `Bearer ${token}`,
               "content-type": "application/json",
-              ...(attached ? {} : { "x-openclaw-cli-capture-key": captureKey }),
+              ...(attached ? {} : { "x-carapace-cli-capture-key": captureKey }),
             },
             body: JSON.stringify({
               jsonrpc: "2.0",
@@ -234,7 +234,7 @@ async function withCliQuestionLoopback(
                 });
                 contexts.push(context);
                 const token = expectDefined(
-                  context.preparedBackend.env?.OPENCLAW_MCP_TOKEN,
+                  context.preparedBackend.env?.CARAPACE_MCP_TOKEN,
                   "prepared CLI grant",
                 );
                 context.preparedBackend.mcpClientGrantCapture?.activate(captureKey);
@@ -308,7 +308,7 @@ async function withCliQuestionLoopback(
           () => resolutions.mockRestore(),
         );
       }),
-    () => closeOpenClawStateDatabaseForTest(),
+    () => closeCarapaceStateDatabaseForTest(),
     () => cli.cleanup(),
   );
 }

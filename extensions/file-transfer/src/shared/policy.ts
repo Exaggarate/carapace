@@ -1,7 +1,7 @@
 // Path policy for file-transfer node.invoke calls.
 //
 // Default behavior is DENY. The operator must explicitly opt in by adding
-// a config block to ~/.openclaw/openclaw.json under
+// a config block to ~/.carapace/carapace.json under
 // `plugins.entries.file-transfer.config.nodes`. Without a matching block,
 // every file operation is rejected before reaching the node.
 //
@@ -49,12 +49,12 @@
 import os from "node:os";
 import path from "node:path";
 import { minimatch } from "minimatch";
-import { mutateConfigFile } from "openclaw/plugin-sdk/config-mutation";
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { mutateConfigFile } from "carapace/plugin-sdk/config-mutation";
+import { getRuntimeConfig } from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   asNullableRecord,
   asOptionalObjectRecord,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   FILE_TRANSFER_NODE_INVOKE_COMMANDS,
   type FileTransferNodeInvokeCommand,
@@ -395,7 +395,7 @@ function evaluateFilePolicyInternal(
       ok: false,
       code: "POLICY_MIGRATION_REQUIRED",
       reason:
-        "older file-transfer permissions need review; run `openclaw file-transfer approvals migrate`",
+        "older file-transfer permissions need review; run `carapace file-transfer approvals migrate`",
       askable: false,
     };
   }
@@ -554,7 +554,7 @@ export async function persistLiteralGrant(input: PersistLiteralGrantInput): Prom
         hasLegacyPositiveRules(policyConfig)
       ) {
         throw new Error(
-          "older file-transfer permissions need review; run `openclaw file-transfer approvals migrate`",
+          "older file-transfer permissions need review; run `carapace file-transfer approvals migrate`",
         );
       }
       policyConfig.policyVersion = FILE_TRANSFER_POLICY_VERSION;

@@ -1,7 +1,7 @@
 /** Filesystem ownership guards for isolated Computer Use service provisioning. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { assertNoSymlinkParents } from "openclaw/plugin-sdk/security-runtime";
+import { assertNoSymlinkParents } from "carapace/plugin-sdk/security-runtime";
 
 type OwnedServiceParent = {
   logicalPath: string;

@@ -44,7 +44,7 @@ describe("public session document", () => {
       },
       { role: "assistant", content: "NO_REPLY" },
       { role: "assistant", content: "HEARTBEAT_OK" },
-      { role: "user", content: "[OpenClaw heartbeat poll]" },
+      { role: "user", content: "[Carapace heartbeat poll]" },
       {
         role: "user",
         provenance: { kind: "external_user" },
@@ -53,7 +53,7 @@ describe("public session document", () => {
           { type: "image", data: "private image bytes" },
           { type: "text", text: "Second public question" },
         ],
-        __openclaw: { senderIdentity: "private sender identity" },
+        __carapace: { senderIdentity: "private sender identity" },
       },
       {
         role: "assistant",
@@ -96,7 +96,7 @@ describe("public session document", () => {
         [
           {
             role: "user",
-            content: `<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nprivate runtime context\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>\nVisible user request ${token}`,
+            content: `<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nprivate runtime context\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>\nVisible user request ${token}`,
           },
           { role: "assistant", content: `Visible response ${token} ${operatorSecret}` },
         ],
@@ -105,7 +105,7 @@ describe("public session document", () => {
       expect(html).toContain("Visible user request");
       expect(html).toContain("Visible response");
       expect(html).not.toContain("private runtime context");
-      expect(html).not.toContain("OPENCLAW_INTERNAL_CONTEXT");
+      expect(html).not.toContain("CARAPACE_INTERNAL_CONTEXT");
       expect(html).not.toContain(token);
       expect(html).not.toContain(operatorSecret);
     } finally {

@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createResolverContext } from "openclaw/plugin-sdk/secret-ref-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createResolverContext } from "carapace/plugin-sdk/secret-ref-runtime";
 import { describe, expect, it } from "vitest";
 import {
   channelSecrets,
@@ -36,7 +36,7 @@ describe("Nostr public secret contract", () => {
             privateKey: { source: "env", provider: "default", id: "NOSTR_TEST_PRIVATE_KEY" },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const config = structuredClone(sourceConfig);
       const context = createResolverContext({ sourceConfig, env: {} });
 
@@ -67,7 +67,7 @@ describe("Nostr public secret contract", () => {
             privateKey: { source, provider: "vault", id: "NOSTR_TEST_PRIVATE_KEY" },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const context = createResolverContext({ sourceConfig, env: {} });
 
       collectRuntimeConfigAssignments({ config: structuredClone(sourceConfig), context });

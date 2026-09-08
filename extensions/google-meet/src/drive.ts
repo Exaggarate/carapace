@@ -1,6 +1,6 @@
-import { readProviderTextResponse } from "openclaw/plugin-sdk/provider-http";
+import { readProviderTextResponse } from "carapace/plugin-sdk/provider-http";
 // Google Meet plugin module implements drive behavior.
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { googleApiError } from "./google-api-errors.js";
 
 const GOOGLE_DRIVE_API_BASE_URL = "https://www.googleapis.com/drive/v3";

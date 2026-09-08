@@ -6,8 +6,8 @@ import type {
   WorkboardLink,
   WorkboardMetadata,
   WorkboardStatus,
-} from "@openclaw/workboard-contract";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "@carapace/workboard-contract";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { isWorkboardCardStore } from "./persistence-types.js";
 import type {
   PersistedWorkboardAttachment,
@@ -666,7 +666,7 @@ export class WorkboardCoreStore extends WorkboardStoreRuntime {
         return restored.card;
       }
       const digest = createHash("sha256")
-        .update("openclaw.workboard.session-capture.v1\0")
+        .update("carapace.workboard.session-capture.v1\0")
         .update(sessionKey)
         .digest();
       // RFC 9562 version 8 keeps the documented UUID-shaped card id while the

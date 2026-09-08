@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
 import { setImmediate as nextTurn } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
 import { GATEWAY_CLIENT_CAPS } from "../../packages/gateway-protocol/src/client-info.js";

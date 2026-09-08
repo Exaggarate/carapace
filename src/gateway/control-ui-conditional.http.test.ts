@@ -145,7 +145,7 @@ describe.each([
   let baseUrl: string;
 
   beforeAll(async () => {
-    const root = tempDirs.make("openclaw-ui-conditional-");
+    const root = tempDirs.make("carapace-ui-conditional-");
     const assetPath = path.join(root, "assets", "app-fixture.js");
     await fs.mkdir(path.dirname(assetPath));
     await fs.writeFile(assetPath, assetBody);
@@ -175,7 +175,7 @@ describe.each([
     }
     await fs.writeFile(
       path.join(root, "index.html"),
-      `<html data-openclaw-control-ui-build-id="source-build"><head><link rel="icon" href="./favicon.svg"><link rel="icon" href="${basePath}/favicon-32.png"></head></html>`,
+      `<html data-carapace-control-ui-build-id="source-build"><head><link rel="icon" href="./favicon.svg"><link rel="icon" href="${basePath}/favicon-32.png"></head></html>`,
     );
     server = createServer((req, res) => {
       res.setHeader(
@@ -260,7 +260,7 @@ describe.each([
       if (method === "GET") {
         const html = document.body.toString();
         expect(html).not.toContain("source-build");
-        expect(html.includes('data-openclaw-control-ui-build-id="fixture-build"')).toBe(
+        expect(html.includes('data-carapace-control-ui-build-id="fixture-build"')).toBe(
           kind === "bundled",
         );
         expect(html).toContain(

@@ -36,7 +36,7 @@ export function installMockGateway(
   });
 }
 
-export const WORKSPACE = "/home/peter/openclaw";
+export const WORKSPACE = "/home/peter/carapace";
 
 export const LOCAL_GIT_WORKSPACE_RESPONSES = {
   "agents.list": {
@@ -59,15 +59,15 @@ export const LOCAL_GIT_WORKSPACE_RESPONSES = {
     repositoryStatus: "git",
   },
 };
-export const PICKED = "/home/peter/openclaw/packages";
+export const PICKED = "/home/peter/carapace/packages";
 export const SOURCE_REPO = "/tmp/source-repo";
 export const TARGET_REPO = "/tmp/target-repo";
 export const REFRESHED_RESEARCH_WORKSPACE = "/home/peter/research-next";
-export const MOVED_WORKSPACE = "/home/peter/openclaw-next";
+export const MOVED_WORKSPACE = "/home/peter/carapace-next";
 const LOCATOR_TEXT_READ_TIMEOUT_MS = 500;
 const LOCATOR_TEXT_POLL_TIMEOUT_MS = 10_000;
 
-export const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+export const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 type NewSessionProofSurface = { surface: Locator; content: readonly Locator[] };
 
@@ -279,7 +279,7 @@ export async function captureEnvironmentMetadataUiProof(
   owner: { readonly artifactDir: string },
   page: Page,
 ) {
-  const proofName = process.env.OPENCLAW_ENVIRONMENT_METADATA_PROOF;
+  const proofName = process.env.CARAPACE_ENVIRONMENT_METADATA_PROOF;
   if (proofName !== "before" && proofName !== "after") {
     return;
   }
@@ -371,7 +371,7 @@ export async function waitForCommittedNewSessionDraft(
 
 export async function waitForGatewayRecoveryScope(page: Page, ready = true) {
   await page.waitForFunction((expected) => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("carapace-app") as HTMLElement & {
       runtime?: { context: ApplicationContext };
     };
     return app.runtime?.context.gateway.snapshot.client?.recoveryScopeReady === expected;
@@ -380,11 +380,11 @@ export async function waitForGatewayRecoveryScope(page: Page, ready = true) {
 
 export async function replaceGatewayClient(page: Page) {
   await page.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("carapace-app") as HTMLElement & {
       runtime?: { context: { gateway: { connect: () => void } } };
     };
     if (!app.runtime) {
-      throw new Error("OpenClaw application runtime is unavailable");
+      throw new Error("Carapace application runtime is unavailable");
     }
     app.runtime.context.gateway.connect();
   });
@@ -401,7 +401,7 @@ export async function openNewSessionPlusMenu(page: Page) {
 export async function navigateInApp(page: Page, routeId: string, search = "") {
   await page.evaluate(
     ({ targetRouteId, targetSearch }) => {
-      const app = document.querySelector("openclaw-app") as HTMLElement & {
+      const app = document.querySelector("carapace-app") as HTMLElement & {
         runtime?: {
           context: {
             navigate: (routeId: string, options?: { search?: string }) => void;
@@ -409,7 +409,7 @@ export async function navigateInApp(page: Page, routeId: string, search = "") {
         };
       };
       if (!app.runtime) {
-        throw new Error("OpenClaw application runtime is unavailable");
+        throw new Error("Carapace application runtime is unavailable");
       }
       app.runtime.context.navigate(targetRouteId, { search: targetSearch });
     },

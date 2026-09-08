@@ -1,9 +1,9 @@
 // Github Copilot plugin module implements model metadata behavior.
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { supportsClaudeAdaptiveThinking } from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import { supportsClaudeAdaptiveThinking } from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 type CopilotRuntimeApi = "anthropic-messages" | "openai-completions" | "openai-responses";
 type CopilotReasoningCompat = {

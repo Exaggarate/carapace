@@ -216,7 +216,7 @@ describe("renderChatComposer controls", () => {
         onToggleRealtimeTalk: vi.fn(),
       });
       const voice = button(container, t("chat.composer.startVoiceInput"));
-      const tooltip = voice.closest("openclaw-tooltip") as
+      const tooltip = voice.closest("carapace-tooltip") as
         | (HTMLElement & {
             content?: string;
           })
@@ -549,7 +549,7 @@ describe("renderChatComposer controls", () => {
         sendShortcut: "enter",
       });
       const availablePrimary = primaryButton(available.container);
-      const availableTooltip = availablePrimary.closest("openclaw-tooltip") as
+      const availableTooltip = availablePrimary.closest("carapace-tooltip") as
         | (HTMLElement & { content?: string })
         | null;
       expect(availablePrimary.getAttribute("aria-label")).toBe(
@@ -615,7 +615,7 @@ describe("renderChatComposer controls", () => {
     ];
     for (const testCase of unavailable) {
       const view = renderComposer(testCase.overrides);
-      const tooltip = primaryButton(view.container).closest("openclaw-tooltip") as
+      const tooltip = primaryButton(view.container).closest("carapace-tooltip") as
         | (HTMLElement & { content?: string })
         | null;
       expect(tooltip?.content).toBe(testCase.tooltip);

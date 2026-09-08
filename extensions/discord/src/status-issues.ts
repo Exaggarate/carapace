@@ -2,14 +2,14 @@
 import type {
   ChannelAccountSnapshot,
   ChannelStatusIssue,
-} from "openclaw/plugin-sdk/channel-contract";
+} from "carapace/plugin-sdk/channel-contract";
 import {
   appendMatchMetadata,
   isRecord,
   readAccountStatusSnapshot,
   resolveEnabledConfiguredAccountId,
-} from "openclaw/plugin-sdk/status-helpers";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/status-helpers";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type DiscordIntentSummary = {
   messageContent?: "enabled" | "limited" | "disabled";

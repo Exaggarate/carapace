@@ -8,7 +8,7 @@ import { resolveSenderToolPolicy } from "../agents/sender-tool-policy.js";
 import { resolveEffectiveToolFsRootExpansionAllowed } from "../agents/tool-fs-policy.js";
 import { isToolAllowedByPolicies } from "../agents/tool-policy-match.js";
 import { resolveWorkspaceRoot } from "../agents/workspace-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { resolveConfigDir } from "../utils.js";
 import { createBoundedOutboundMediaReadFile, readOutboundMediaFile } from "./bounded-read-file.js";
@@ -31,7 +31,7 @@ type OutboundHostMediaPolicyContext = {
 
 function isAgentScopedMediaReadAllowedByToolPolicy(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
   } & OutboundHostMediaPolicyContext,
 ): boolean {
@@ -67,7 +67,7 @@ function isAgentScopedMediaReadAllowedByToolPolicy(
 /** Creates a host reader bound to the agent workspace and configured local-file safety checks. */
 function createAgentScopedHostMediaReadFile(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     localRoots: readonly string[];
     workspaceDir?: string;
@@ -153,7 +153,7 @@ function createWorkspaceAwareMediaReadFile(params: {
 /** Resolves roots and optional host read capability for outbound media in an agent context. */
 export function resolveAgentScopedOutboundMediaAccess(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     mediaSources?: readonly string[];
     workspaceDir?: string;

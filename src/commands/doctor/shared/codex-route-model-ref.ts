@@ -1,6 +1,6 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asOptionalRecord as asMutableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@carapace/normalization-core/string-coerce";
 import { normalizeOptionalAgentRuntimeId } from "../../../agents/agent-runtime-id.js";
 import { resolveConfiguredProviderFallback } from "../../../agents/configured-provider-fallback.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../../../agents/defaults.js";
@@ -9,7 +9,7 @@ import { normalizeConfiguredProviderCatalogModelId } from "../../../agents/model
 import { configuredModelRouteNeedsCodex } from "../../../config/codex-plugin-diagnostics.js";
 import { isLegacyCodexProviderId } from "../../../config/legacy-codex-provider.js";
 import type { AgentRuntimePolicyConfig } from "../../../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
 import { listMutableCodexRouteAgentEntries } from "./codex-route-agent-entries.js";
 import type { MutableRecord } from "./codex-route-types.js";
@@ -172,7 +172,7 @@ export function readAgentPrimaryModelRef(agent: unknown, fallback?: string): str
 }
 
 export function modelRefUsesCodexRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: string | undefined;
   agentId?: string;
   env?: NodeJS.ProcessEnv;
@@ -194,7 +194,7 @@ export function modelRefUsesCodexRuntime(params: {
 }
 
 export function resolveRuntimeModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: string;
   agentId?: string;
 }): string {
@@ -241,7 +241,7 @@ function resolveKnownCompatModelAliasRef(modelRef: string): string | undefined {
 }
 
 function resolveConfiguredModelAliasRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: string;
   agentId?: string;
 }): string | undefined {
@@ -261,7 +261,7 @@ function resolveConfiguredModelAliasRef(params: {
 }
 
 function resolveDefaultProviderForAliasContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
 }): string {
   const primaryModelRef =
@@ -295,7 +295,7 @@ function resolveDefaultProviderForAliasContext(params: {
 }
 
 function findAgentById(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
 ): MutableRecord | undefined {
   if (!agentId) {
@@ -327,7 +327,7 @@ function resolveAliasFromModelsMap(
 }
 
 function resolveConfiguredBareModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: string;
   agentId?: string;
 }): string | undefined {
@@ -392,7 +392,7 @@ function normalizeProviderModelRef(provider: string, modelId: string): string {
   return `${normalizedProvider}/${normalizedModelId}`;
 }
 
-export function resolveImplicitDefaultAgentModelRef(cfg: OpenClawConfig): string {
+export function resolveImplicitDefaultAgentModelRef(cfg: CarapaceConfig): string {
   const fallbackProvider = resolveConfiguredProviderFallback({
     cfg,
     defaultProvider: DEFAULT_PROVIDER,
@@ -404,7 +404,7 @@ export function resolveImplicitDefaultAgentModelRef(cfg: OpenClawConfig): string
 }
 
 export function agentUsesCodexRuntimeForCompaction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agent: unknown;
   agentId?: string;
   currentRuntime?: string;
@@ -441,7 +441,7 @@ export function parseCodexRouteModelRef(
 }
 
 export function canonicalOpenAIModelUsesCodexRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: string;
   agentId?: string;
   env?: NodeJS.ProcessEnv;

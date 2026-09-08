@@ -1,5 +1,5 @@
 /** Rewrites transcript entries by branching and re-appending the active suffix. */
-import { stripCompactionReplayCheckpoint } from "@openclaw/ai/transports";
+import { stripCompactionReplayCheckpoint } from "@carapace/ai/transports";
 import { withSessionPendingInputRelocation } from "../../config/sessions/session-accessor.js";
 import type {
   TranscriptRewriteReplacement,
@@ -67,7 +67,7 @@ function appendBranchEntry(params: {
     return withSessionPendingInputRelocation(entry.id, message, () => appendMessage(message));
   }
   if (entry.type === "compaction") {
-    const { __openclaw: identity } = entry;
+    const { __carapace: identity } = entry;
     return sessionManager.appendCompaction(
       entry.summary,
       remapEntryId(entry.firstKeptEntryId, rewrittenEntryIds) ?? entry.firstKeptEntryId,

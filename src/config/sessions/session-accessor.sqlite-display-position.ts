@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { TranscriptDisplayPosition } from "../../chat/transcript-display-position.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { readNestedToolActivity } from "../../sessions/nested-tool-activity.js";

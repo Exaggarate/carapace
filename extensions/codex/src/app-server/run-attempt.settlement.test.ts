@@ -1,13 +1,13 @@
 // Native terminal settlement bounds projection and checkpoint work without harming sibling runs.
 import path from "node:path";
-import { resolveActiveEmbeddedRunSessionId } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { onInternalSessionTranscriptUpdate } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { resolveActiveEmbeddedRunSessionId } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { onInternalSessionTranscriptUpdate } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import {
   readSessionTranscriptEvents,
   withSessionTranscriptWriteLock,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import {
@@ -181,7 +181,7 @@ describe("Codex app-server terminal settlement", () => {
       const initialize = await waitForHarnessRequest(physical, "initialize");
       physical.send({
         id: initialize.id,
-        result: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
+        result: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
       });
       const firstConfig = await waitForHarnessRequest(physical, "config/read");
       physical.send({ id: firstConfig.id, result: { config: {}, origins: {}, layers: [] } });
@@ -386,7 +386,7 @@ describe("Codex app-server terminal settlement", () => {
       // Whole-message preparation must not erase the terminal owner's warning.
       params.prepareAssistantTranscriptMessage = (message) => ({
         ...message,
-        __openclaw: undefined,
+        __carapace: undefined,
       });
       params.timeoutMs = 60 * 60_000;
       vi.useFakeTimers();
@@ -525,8 +525,8 @@ describe("Codex app-server terminal settlement", () => {
               isJsonObject(event) &&
               isJsonObject(event.message) &&
               event.message.role === "assistant" &&
-              isJsonObject(event.message["__openclaw"]) &&
-              event.message["__openclaw"].mirrorIdentity === "turn-1:assistant",
+              isJsonObject(event.message["__carapace"]) &&
+              event.message["__carapace"].mirrorIdentity === "turn-1:assistant",
           );
           if (assistantCommitted) {
             expect(assistantRows).toEqual([
@@ -542,7 +542,7 @@ describe("Codex app-server terminal settlement", () => {
             if (termination === "timeout") {
               expect(assistantRows[0]).toMatchObject({
                 message: {
-                  __openclaw: {
+                  __carapace: {
                     settlementWarning: expect.objectContaining({
                       timeoutMs: TURN_TERMINAL_SETTLEMENT_TIMEOUT_MS,
                     }),
@@ -551,7 +551,7 @@ describe("Codex app-server terminal settlement", () => {
               });
               if (queuedNetworkResult) {
                 expect(assistantRows[0]).toMatchObject({
-                  message: { __openclaw: { turnTainted: true } },
+                  message: { __carapace: { turnTainted: true } },
                 });
               }
             }

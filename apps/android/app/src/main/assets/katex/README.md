@@ -5,7 +5,7 @@
 - Release archive: https://github.com/KaTeX/KaTeX/releases/download/v0.18.5/katex.tar.gz
 - Published and verified archive SHA-256: `a4122a3f8879fd2b9db5de6a8f19113b2287ab305ee20ed9ca60bd9caf8ae369`
 
-Only the minified runtime, its stylesheet, and the WOFF2 fonts referenced by that stylesheet are copied from the release archive. `index.html` and `renderer.js` are OpenClaw's local rendering shell. No auto-render extension, mhchem extension, source map, WOFF, or TTF file is bundled.
+Only the minified runtime, its stylesheet, and the WOFF2 fonts referenced by that stylesheet are copied from the release archive. `index.html` and `renderer.js` are Carapace's local rendering shell. No auto-render extension, mhchem extension, source map, WOFF, or TTF file is bundled.
 
 ## SHA-256
 

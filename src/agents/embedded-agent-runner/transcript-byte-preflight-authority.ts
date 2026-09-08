@@ -19,7 +19,7 @@ export type TranscriptBytePreflightClaim = {
 
 const claims = resolveGlobalSingleton<
   WeakMap<ContextEngineRuntimeContext, TranscriptBytePreflightClaim>
->(Symbol.for("openclaw.transcriptBytePreflightClaims"), () => new WeakMap());
+>(Symbol.for("carapace.transcriptBytePreflightClaims"), () => new WeakMap());
 
 export function resolveTranscriptBytePreflightAuthority(
   harness: AgentHarness,

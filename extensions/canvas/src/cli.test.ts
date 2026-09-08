@@ -1,7 +1,7 @@
 import {
   GatewayClientRequestError,
   GatewayClientRequestTimeoutError,
-} from "@openclaw/gateway-client";
+} from "@carapace/gateway-client";
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,8 +9,8 @@ const gatewayMocks = vi.hoisted(() => ({
   callGatewayFromCli: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/gateway-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/gateway-runtime")>()),
+vi.mock("carapace/plugin-sdk/gateway-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/gateway-runtime")>()),
   callGatewayFromCli: gatewayMocks.callGatewayFromCli,
 }));
 
@@ -78,9 +78,9 @@ describe("nodes canvas CLI", () => {
       message: "canvas hide ok",
     },
     {
-      args: ["navigate", "/__openclaw__/canvas/documents/cv_1/index.html"],
+      args: ["navigate", "/__carapace__/canvas/documents/cv_1/index.html"],
       command: "canvas.navigate",
-      params: { url: "/__openclaw__/canvas/documents/cv_1/index.html" },
+      params: { url: "/__carapace__/canvas/documents/cv_1/index.html" },
       message: "canvas navigate ok",
     },
   ])(
@@ -122,7 +122,7 @@ describe("nodes canvas CLI", () => {
         "--node",
         "mac-1",
         "--target",
-        "openclaw://widget/local",
+        "carapace://widget/local",
         "--x",
         "10.5",
         "--y",
@@ -141,7 +141,7 @@ describe("nodes canvas CLI", () => {
       expect.objectContaining({
         command: "canvas.present",
         params: {
-          url: "openclaw://widget/local",
+          url: "carapace://widget/local",
           placement: { x: 10.5, y: -2, width: 640, height: 480 },
         },
       }),

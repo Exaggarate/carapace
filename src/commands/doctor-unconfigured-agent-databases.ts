@@ -3,10 +3,10 @@ import path from "node:path";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { resolveStateDir } from "../config/paths.js";
 import { resolveConfiguredAgentDatabaseTargets } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { discoverAgentDatabaseMigrationTargets } from "../infra/state-migrations.media-persistence-targets.js";
-import { listOpenClawRegisteredAgentDatabases } from "../state/openclaw-agent-db-registry.js";
+import { listCarapaceRegisteredAgentDatabases } from "../state/carapace-agent-db-registry.js";
 
 function isDefaultAgentDatabasePath(pathname: string, stateDir: string): boolean {
   const relativePath = path.relative(stateDir, pathname);
@@ -15,19 +15,19 @@ function isDefaultAgentDatabasePath(pathname: string, stateDir: string): boolean
     segments.length === 4 &&
     segments[0] === "agents" &&
     segments[2] === "agent" &&
-    segments[3] === "openclaw-agent.sqlite"
+    segments[3] === "carapace-agent.sqlite"
   );
 }
 
 /** Report retained stores without turning roster absence into deletion authority. */
 export function collectRetainedUnconfiguredAgentDatabaseWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): string[] {
   const env = params.env ?? process.env;
   try {
     const stateDir = fs.realpathSync.native(resolveStateDir(env));
-    const registeredAgentDatabases = listOpenClawRegisteredAgentDatabases({
+    const registeredAgentDatabases = listCarapaceRegisteredAgentDatabases({
       env,
       includeIncompatibleSchemaVersions: true,
     });

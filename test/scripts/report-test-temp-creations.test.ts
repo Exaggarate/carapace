@@ -104,7 +104,7 @@ describe("report-test-temp-creations", () => {
     const sources = [
       ["const root = await fs.promises.", "mkdtemp", '(path.join(os.tmpdir(), "case-"));'].join(""),
       ["const root = await fs.", "mkdtemp", '(path.join(os.tmpdir(), "case-"));'].join(""),
-      ["const root = await fsPromises.", "mkdtemp", '("/tmp/openclaw-case-");'].join(""),
+      ["const root = await fsPromises.", "mkdtemp", '("/tmp/carapace-case-");'].join(""),
       ["const root = await ", "mkdtemp", '(path.join(tmpdir(), "case-"));'].join(""),
       ["const root = ", "mkdtemp", 'Sync(join(tmpdir(), "case-"));'].join(""),
     ];
@@ -130,16 +130,16 @@ describe("report-test-temp-creations", () => {
     const mkdtempCall = ["fs.", "mkdtemp", 'Sync("case-")'].join("");
     const tmpDirCall = ["tmp.", "dir", 'Sync({ prefix: "case-" })'].join("");
     const allowedSource = `const allowed = ${mkdtempCall};`;
-    const inlineAllowedSource = `const inlineAllowed = ${tmpDirCall}; // openclaw-temp-dir: allow verifies tmp API behavior`;
+    const inlineAllowedSource = `const inlineAllowed = ${tmpDirCall}; // carapace-temp-dir: allow verifies tmp API behavior`;
     const blockedSource = `const blocked = ${mkdtempCall};`;
-    const stringMarkerSource = `const stringMarker = ${mkdtempCall}; const note = "openclaw-temp-dir: allow quoted text";`;
+    const stringMarkerSource = `const stringMarker = ${mkdtempCall}; const note = "carapace-temp-dir: allow quoted text";`;
     const emptyReasonSource = `const emptyReason = ${mkdtempCall};`;
     const diff = [
       "diff --git a/test/helpers/raw-temp.test.ts b/test/helpers/raw-temp.test.ts",
       "--- a/test/helpers/raw-temp.test.ts",
       "+++ b/test/helpers/raw-temp.test.ts",
       "@@ -1,0 +2,5 @@",
-      "+// openclaw-temp-dir: allow verifies raw fs cleanup behavior",
+      "+// carapace-temp-dir: allow verifies raw fs cleanup behavior",
       `+${allowedSource}`,
       `+${inlineAllowedSource}`,
       `+${blockedSource}`,
@@ -148,7 +148,7 @@ describe("report-test-temp-creations", () => {
       "--- a/test/helpers/empty-allow.test.ts",
       "+++ b/test/helpers/empty-allow.test.ts",
       "@@ -1,0 +2,2 @@",
-      "+// openclaw-temp-dir: allow",
+      "+// carapace-temp-dir: allow",
       `+${emptyReasonSource}`,
     ].join("\n");
 
@@ -372,7 +372,7 @@ describe("report-test-temp-creations", () => {
         file: "test/helpers/temp,fixture.ts",
         line: 12,
         reason: "new mkdtemp temp directory creation",
-        // openclaw-temp-dir: allow test fixture for GitHub warning formatting
+        // carapace-temp-dir: allow test fixture for GitHub warning formatting
         source: "const tempRoot = fs.mkdtempSync();",
       }),
     ).toBe(
@@ -381,7 +381,7 @@ describe("report-test-temp-creations", () => {
   });
 
   it("ignores large non-test diffs in staged and branch reports", () => {
-    const root = tempDirs.make("openclaw-temp-report-large-diff-");
+    const root = tempDirs.make("carapace-temp-report-large-diff-");
     const env = createNestedGitEnv();
     const git = (...args: string[]) =>
       execFileSync(
@@ -421,7 +421,7 @@ describe("report-test-temp-creations", () => {
   });
 
   it.each(["rename", "copy"])("preserves added-line scope for %s into and out of tests", (mode) => {
-    const root = tempDirs.make("openclaw-temp-report-renames-");
+    const root = tempDirs.make("carapace-temp-report-renames-");
     const env = createNestedGitEnv();
     const git = (...args: string[]) =>
       execFileSync(
@@ -465,7 +465,7 @@ describe("report-test-temp-creations", () => {
   });
 
   it("reads staged source for manual helper scans", () => {
-    const root = tempDirs.make("openclaw-temp-report-staged-source-");
+    const root = tempDirs.make("carapace-temp-report-staged-source-");
     const env = createNestedGitEnv();
     execFileSync("git", ["init", "-q", "--initial-branch=main"], { cwd: root, env });
     execFileSync(
@@ -531,7 +531,7 @@ describe("report-test-temp-creations", () => {
   });
 
   it("exits non-zero for staged findings when requested", () => {
-    const root = tempDirs.make("openclaw-temp-report-");
+    const root = tempDirs.make("carapace-temp-report-");
     const env = createNestedGitEnv();
     execFileSync("git", ["init", "-q", "--initial-branch=main"], { cwd: root, env });
     fs.mkdirSync(path.join(root, "test", "helpers"), { recursive: true });
@@ -579,7 +579,7 @@ describe("report-test-temp-creations", () => {
   });
 
   it("falls back to a two-dot diff when refs have no merge base", () => {
-    const root = tempDirs.make("openclaw-temp-report-no-merge-base-");
+    const root = tempDirs.make("carapace-temp-report-no-merge-base-");
     const env = createNestedGitEnv();
     const git = (...args: string[]) =>
       execFileSync(

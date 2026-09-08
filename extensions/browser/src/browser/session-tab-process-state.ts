@@ -1,4 +1,4 @@
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { BrowserTabOwnership } from "./client.types.js";
 import { clearVolatileTabAliases } from "./session-tab-ephemeral-aliases.js";
 import { browserSessionTabRouteKey, type BrowserSessionTabRoute } from "./session-tab-route.js";
@@ -41,11 +41,11 @@ export function sameVolatileSessionTab(
   );
 }
 
-const volatileStateSymbol = Symbol.for("openclaw.browser.session-tabs.volatile");
-const volatileCleanupStateSymbol = Symbol.for("openclaw.browser.session-tabs.volatile-cleanup");
-const activeDurableStateSymbol = Symbol.for("openclaw.browser.session-tabs.active-durable-keys");
+const volatileStateSymbol = Symbol.for("carapace.browser.session-tabs.volatile");
+const volatileCleanupStateSymbol = Symbol.for("carapace.browser.session-tabs.volatile-cleanup");
+const activeDurableStateSymbol = Symbol.for("carapace.browser.session-tabs.active-durable-keys");
 const coldNativeActivityStateSymbol = Symbol.for(
-  "openclaw.browser.session-tabs.cold-native-activity",
+  "carapace.browser.session-tabs.cold-native-activity",
 );
 
 export function activeDurableStorageKeys(): Set<string> {

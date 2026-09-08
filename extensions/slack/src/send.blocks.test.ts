@@ -352,7 +352,7 @@ describe("sendMessageSlack blocks", () => {
   it("records question action identities on the exact delivered Block Kit card", async () => {
     const client = createSlackSendTestClient();
     const onDeliveryResult = vi.fn();
-    const questionActionId = "openclaw:question_button:2:1";
+    const questionActionId = "carapace:question_button:2:1";
     const result = await sendMessageSlack("channel:C123", "Pick one", {
       token: "xoxb-test",
       cfg: SLACK_TEST_CFG,
@@ -365,7 +365,7 @@ describe("sendMessageSlack blocks", () => {
           elements: [
             {
               type: "button",
-              action_id: "openclaw:reply_button:1:1",
+              action_id: "carapace:reply_button:1:1",
               text: { type: "plain_text", text: "Reply" },
             },
             {
@@ -402,7 +402,7 @@ describe("sendMessageSlack blocks", () => {
       ts: `171234.${String(++messageCount).padStart(3, "0")}`,
     }));
     client.chat.postMessage.mockRejectedValueOnce({ data: { error: "invalid_blocks" } });
-    const questionActionId = "openclaw:question_button:2:1";
+    const questionActionId = "carapace:question_button:2:1";
     const blocks = interleavedNativeDataBlocks();
     const actionBlock = blocks.at(-1) as { elements: Array<{ action_id: string }> };
     actionBlock.elements[0]!.action_id = questionActionId;
@@ -820,8 +820,8 @@ describe("sendMessageSlack blocks", () => {
         event_type: "assistant_thread_context",
         event_payload: {
           team_id: "T123",
-          openclaw_delivery_part_index: 0,
-          openclaw_delivery_part_count: 1,
+          carapace_delivery_part_index: 0,
+          carapace_delivery_part_count: 1,
         },
       },
       mrkdwn: false,
@@ -1055,26 +1055,26 @@ describe("sendMessageSlack blocks", () => {
     expect(fallbackPosts.map((post) => post.metadata)).toEqual([
       expect.objectContaining({
         event_payload: expect.objectContaining({
-          openclaw_delivery_part_count: 4,
-          openclaw_delivery_part_index: 0,
+          carapace_delivery_part_count: 4,
+          carapace_delivery_part_index: 0,
         }),
       }),
       expect.objectContaining({
         event_payload: expect.objectContaining({
-          openclaw_delivery_part_count: 4,
-          openclaw_delivery_part_index: 1,
+          carapace_delivery_part_count: 4,
+          carapace_delivery_part_index: 1,
         }),
       }),
       expect.objectContaining({
         event_payload: expect.objectContaining({
-          openclaw_delivery_part_count: 4,
-          openclaw_delivery_part_index: 2,
+          carapace_delivery_part_count: 4,
+          carapace_delivery_part_index: 2,
         }),
       }),
       expect.objectContaining({
         event_payload: expect.objectContaining({
-          openclaw_delivery_part_count: 4,
-          openclaw_delivery_part_index: 3,
+          carapace_delivery_part_count: 4,
+          carapace_delivery_part_index: 3,
         }),
       }),
     ]);

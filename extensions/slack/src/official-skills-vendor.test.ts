@@ -33,7 +33,7 @@ describe("official Slack skill vendor", () => {
 
   it("publishes only the Slack conversation and Block Kit skills", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(path.join(pluginRoot, "openclaw.plugin.json"), "utf8"),
+      fs.readFileSync(path.join(pluginRoot, "carapace.plugin.json"), "utf8"),
     ) as { skills?: string[] };
     const published = listPublishedSkills();
 
@@ -67,7 +67,7 @@ describe("official Slack skill vendor", () => {
     }
   });
 
-  it("keeps the official guide adapted to OpenClaw's available capabilities", () => {
+  it("keeps the official guide adapted to Carapace's available capabilities", () => {
     const guide = fs.readFileSync(
       path.join(skillsRoot, "block-kit", "references", "official-block-kit.md"),
       "utf8",

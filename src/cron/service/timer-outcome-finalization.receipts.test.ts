@@ -6,9 +6,9 @@ import {
   setupCronRegressionFixtures,
 } from "../../../test/helpers/cron/service-regression-fixtures.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { advanceCronActiveJobGeneration, markCronJobActive } from "../active-jobs.js";
 import { loadCronStore, saveCronStore } from "../store.js";
 import { cronStoreKey } from "../store/key.js";
@@ -36,7 +36,7 @@ function claimReceipt(storePath: string, job: CronJob, startedAtMs: number) {
     agentId: job.agentId ?? "main",
     startedAtMs,
   });
-  return runOpenClawStateWriteTransaction(({ db }) =>
+  return runCarapaceStateWriteTransaction(({ db }) =>
     claimCronRunReceiptInDatabase({
       database: db,
       prepared,
@@ -233,7 +233,7 @@ describe("cron outcome receipt finalization", () => {
     await onTimer(state);
 
     expect(runIsolatedAgentJob).not.toHaveBeenCalled();
-    const receipt = openOpenClawStateDatabase()
+    const receipt = openCarapaceStateDatabase()
       .db.prepare(
         "SELECT status FROM cron_run_receipts WHERE store_key = ? AND job_id = ? ORDER BY started_at_ms DESC LIMIT 1",
       )
@@ -311,7 +311,7 @@ describe("cron outcome receipt finalization", () => {
       runIsolatedAgentJob: vi.fn(),
       onEvent: (event) => events.push(event),
     });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TEMP TRIGGER reject_post_finalization_maintenance
       BEFORE UPDATE ON cron_jobs

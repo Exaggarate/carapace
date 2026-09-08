@@ -1,5 +1,5 @@
-import { jsonResult } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
+import { jsonResult } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
 import {
   cancelStandingIntent,
   createStandingIntent,

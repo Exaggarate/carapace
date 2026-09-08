@@ -60,7 +60,7 @@ describe("SessionManager user idempotency", () => {
   it.each([false, true])(
     "rejects a keyed user collision outside the current SQLite append parent (excluded: %s)",
     async (excludeFromContext) => {
-      const dir = tempDirs.make("openclaw-session-manager-user-idempotency-");
+      const dir = tempDirs.make("carapace-session-manager-user-idempotency-");
       const scope = {
         agentId: "main",
         sessionId: "sqlite-runtime-user-ancestor",
@@ -117,7 +117,7 @@ describe("SessionManager user idempotency", () => {
   );
 
   it("adopts a keyed user persisted after the manager loaded", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-user-idempotency-");
+    const dir = tempDirs.make("carapace-session-manager-user-idempotency-");
     const scope = {
       agentId: "main",
       sessionId: "sqlite-runtime-user-concurrent-ingress",
@@ -188,7 +188,7 @@ describe("SessionManager user idempotency", () => {
   it.each([false, true])(
     "adopts a persisted user across context-free session setup metadata (excluded: %s)",
     async (excludeFromContext) => {
-      const dir = tempDirs.make("openclaw-session-manager-user-idempotency-");
+      const dir = tempDirs.make("carapace-session-manager-user-idempotency-");
       const scope = {
         agentId: "main",
         sessionId: "sqlite-runtime-user-setup-metadata",
@@ -254,7 +254,7 @@ describe("SessionManager user idempotency", () => {
   );
 
   it("adopts the current keyed user across a compaction boundary", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-user-idempotency-");
+    const dir = tempDirs.make("carapace-session-manager-user-idempotency-");
     const scope = {
       agentId: "main",
       sessionId: "sqlite-runtime-user-compaction",

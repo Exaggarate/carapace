@@ -5,12 +5,12 @@ import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { resolveConfiguredChannelAutoEnableCandidates } from "./plugin-auto-enable.channels.js";
 import { materializePluginAutoEnableCandidatesInternal } from "./plugin-auto-enable.materialize.js";
 import { getRuntimeConfigSnapshot } from "./runtime-snapshot.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 /** Select metadata owners through the same preference and eligibility policy as channel startup. */
 export function resolveChannelSchemaSelection(
   registry: PluginManifestRegistry,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): ReadonlySet<string> {
   const activationSourceConfig = resolvePluginActivationSourceConfig({ config });

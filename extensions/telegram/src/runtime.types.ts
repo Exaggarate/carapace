@@ -1,5 +1,5 @@
 // Telegram type declarations define plugin contracts.
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
 import type { TelegramMonitorFn } from "./monitor.types.js";
 
 type TelegramProbeFn = typeof import("./probe.js").probeTelegram;

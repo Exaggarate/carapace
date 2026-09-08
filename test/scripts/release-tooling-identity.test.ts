@@ -33,7 +33,7 @@ function protectedIdentity(
   overrides: Partial<Parameters<typeof verifyReleaseToolingIdentity>[0]> = {},
 ) {
   return {
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     workflowFullRef: FULL_REF,
     workflowRef: REF,
     workflowSha: SHA,
@@ -152,7 +152,7 @@ describe("release tooling identity", () => {
     });
     expect(runGh).toHaveBeenCalledWith([
       "api",
-      `repos/openclaw/openclaw/git/ref/tags/${REF}`,
+      `repos/carapace/carapace/git/ref/tags/${REF}`,
       "--method",
       "GET",
     ]);
@@ -214,7 +214,7 @@ describe("release tooling identity", () => {
       const runGh = vi.fn(() => JSON.stringify({ status }));
       expect(
         verifyReleaseToolingIdentity({
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runGh,
           workflowFullRef: "refs/heads/main",
           workflowRef: "main",
@@ -223,7 +223,7 @@ describe("release tooling identity", () => {
       ).toMatchObject({ route: "main", sha: SHA });
       expect(runGh).toHaveBeenCalledWith([
         "api",
-        `repos/openclaw/openclaw/compare/${SHA}...main`,
+        `repos/carapace/carapace/compare/${SHA}...main`,
         "--method",
         "GET",
         "--jq",
@@ -253,7 +253,7 @@ describe("release tooling identity", () => {
     expect(
       verifyReleaseToolingIdentity({
         allowPrevalidatedRef: true,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runGh,
         workflowFullRef: "refs/heads/release/2026.8.1",
         workflowRef: "release/2026.8.1",
@@ -262,7 +262,7 @@ describe("release tooling identity", () => {
     ).toMatchObject({ route: "prevalidated-branch" });
     expect(runGh).toHaveBeenCalledWith([
       "api",
-      "repos/openclaw/openclaw/git/ref/heads/release/2026.8.1",
+      "repos/carapace/carapace/git/ref/heads/release/2026.8.1",
       "--method",
       "GET",
     ]);
@@ -272,7 +272,7 @@ describe("release tooling identity", () => {
     expect(() =>
       verifyReleaseToolingIdentity({
         allowPrevalidatedRef: true,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runGh: () =>
           JSON.stringify({
             ref: "refs/heads/release/2026.8.1",
@@ -298,8 +298,8 @@ describe("release tooling identity", () => {
       return JSON.stringify({
         id: Number(PARENT_RUN_ID),
         run_attempt: Number(PARENT_RUN_ATTEMPT),
-        repository: { full_name: "openclaw/openclaw" },
-        path: ".github/workflows/openclaw-release-publish.yml@refs/heads/main",
+        repository: { full_name: "carapace/carapace" },
+        path: ".github/workflows/carapace-release-publish.yml@refs/heads/main",
         event: "workflow_dispatch",
         head_branch: "main",
         head_sha: SHA,
@@ -322,7 +322,7 @@ describe("release tooling identity", () => {
     expect(PARENT_RUN_ID).not.toBe(RUN_ID);
     expect(calls).toContainEqual([
       "api",
-      `repos/openclaw/openclaw/actions/runs/${PARENT_RUN_ID}`,
+      `repos/carapace/carapace/actions/runs/${PARENT_RUN_ID}`,
       "--method",
       "GET",
     ]);
@@ -353,12 +353,12 @@ describe("release tooling identity", () => {
           releasePublishRef: "main",
           releasePublishRunAttempt: PARENT_RUN_ATTEMPT,
           releasePublishRunId: PARENT_RUN_ID,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           run: {
             id: Number(PARENT_RUN_ID),
             run_attempt: Number(PARENT_RUN_ATTEMPT),
-            repository: { full_name: "openclaw/openclaw" },
-            path: ".github/workflows/openclaw-release-publish.yml@refs/heads/main",
+            repository: { full_name: "carapace/carapace" },
+            path: ".github/workflows/carapace-release-publish.yml@refs/heads/main",
             event: "workflow_dispatch",
             head_branch: "main",
             head_sha: SHA,
@@ -403,12 +403,12 @@ describe("release tooling identity", () => {
         releasePublishRef: parentRef,
         releasePublishRunAttempt: PARENT_RUN_ATTEMPT,
         releasePublishRunId: PARENT_RUN_ID,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         run: {
           id: Number(PARENT_RUN_ID),
           run_attempt: Number(PARENT_RUN_ATTEMPT),
-          repository: { full_name: "openclaw/openclaw" },
-          path: ".github/workflows/openclaw-release-publish.yml@refs/heads/main",
+          repository: { full_name: "carapace/carapace" },
+          path: ".github/workflows/carapace-release-publish.yml@refs/heads/main",
           event: "workflow_dispatch",
           head_branch: "main",
           head_sha: SHA,
@@ -422,8 +422,8 @@ describe("release tooling identity", () => {
 
 describe("historical npm preflight tooling", () => {
   const producer = {
-    repository: "openclaw/openclaw",
-    workflowRef: `openclaw/openclaw/.github/workflows/openclaw-npm-release.yml@${FULL_REF}`,
+    repository: "carapace/carapace",
+    workflowRef: `carapace/carapace/.github/workflows/carapace-npm-release.yml@${FULL_REF}`,
     workflowSha: SHA,
     runId: RUN_ID,
     runAttempt: "1",
@@ -474,7 +474,7 @@ describe("historical npm preflight tooling", () => {
       ...overrides,
     };
     const runGh = vi.fn((args: string[]) => {
-      const route = args[1]?.replace("repos/openclaw/openclaw/", "");
+      const route = args[1]?.replace("repos/carapace/carapace/", "");
       if (!route || !(route in responses)) {
         throw new Error("unavailable provenance");
       }
@@ -491,10 +491,10 @@ describe("historical npm preflight tooling", () => {
       route: "protected-tag",
     });
     expect(options.runGh.mock.calls.map(([args]) => args[1])).toEqual([
-      `repos/openclaw/openclaw/git/ref/tags/${REF}`,
-      `repos/openclaw/openclaw/git/matching-refs/heads/${REF}`,
-      `repos/openclaw/openclaw/compare/${SHA}...main`,
-      `repos/openclaw/openclaw/compare/${SHA}...${OTHER_SHA}`,
+      `repos/carapace/carapace/git/ref/tags/${REF}`,
+      `repos/carapace/carapace/git/matching-refs/heads/${REF}`,
+      `repos/carapace/carapace/compare/${SHA}...main`,
+      `repos/carapace/carapace/compare/${SHA}...${OTHER_SHA}`,
     ]);
   });
 
@@ -552,36 +552,36 @@ describe.each([
   },
 ])("$label npm qualification", ({ workflowPath, fullRunId, fullRunAttempt }) => {
   const producer = {
-    repository: "openclaw/openclaw",
-    workflowRef: `openclaw/openclaw/${workflowPath}@refs/heads/main`,
+    repository: "carapace/carapace",
+    workflowRef: `carapace/carapace/${workflowPath}@refs/heads/main`,
     workflowSha: SHA,
     runId: RUN_ID,
     runAttempt: "1",
     jobId: "999",
     jobName: "Qualify release npm artifacts / Qualify prepared npm package",
-    producerWorkflowPath: ".github/workflows/openclaw-npm-preflight.yml",
+    producerWorkflowPath: ".github/workflows/carapace-npm-preflight.yml",
   };
   const manifest = {
     version: 3,
     releaseSha: OTHER_SHA,
-    tarballName: "openclaw.tgz",
+    tarballName: "carapace.tgz",
     tarballSha256: "c".repeat(64),
     producer,
     preparedBundle: {
-      schema: "openclaw.prepared-npm-bundle/v1",
+      schema: "carapace.prepared-npm-bundle/v1",
       source: { sha: OTHER_SHA },
       package: { sha256: "c".repeat(64) },
       producer: { repository: producer.repository, workflowSha: SHA },
     },
   };
   const qualified = {
-    schema: "openclaw.qualified-npm-preflight/v1",
+    schema: "carapace.qualified-npm-preflight/v1",
     source: { sha: OTHER_SHA },
     producer,
     manifestSha256: "d".repeat(64),
     artifact: {
       id: "555",
-      name: `openclaw-npm-preflight-${OTHER_SHA}`,
+      name: `carapace-npm-preflight-${OTHER_SHA}`,
       digest: "e".repeat(64),
       runId: RUN_ID,
       runAttempt: "1",
@@ -671,7 +671,7 @@ describe.each([
       artifact: { id: 555 },
     });
     expect(runGh.mock.calls.map(([args]) => args[1])).toContain(
-      `repos/openclaw/openclaw/actions/runs/${RUN_ID}/attempts/1`,
+      `repos/carapace/carapace/actions/runs/${RUN_ID}/attempts/1`,
     );
     expect(verifyNpmPreflightProducer({ ...input, runGh: reader() })).toMatchObject({
       provenance: "immutable-manifest",

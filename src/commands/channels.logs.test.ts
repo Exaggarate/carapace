@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getChildLogger, setLoggerOverride } from "../logging.js";
 import { flushLogger } from "../logging/logger.js";
@@ -65,8 +65,8 @@ describe("channelsLogsCommand", () => {
   let logPath: string;
 
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-channels-logs-"));
-    logPath = path.join(tempDir, "openclaw.log");
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-channels-logs-"));
+    logPath = path.join(tempDir, "carapace.log");
     setLoggerOverride({ file: logPath });
     runtime.log.mockClear();
     runtime.error.mockClear();
@@ -267,9 +267,9 @@ describe("channelsLogsCommand", () => {
   });
 
   it("falls back to the latest rolling log when the configured rolling file is missing", async () => {
-    const configuredFile = path.join(tempDir, "openclaw-2026-04-26.log");
-    const fallbackFile = path.join(tempDir, "openclaw-2026-04-25.log");
-    const staleFile = path.join(tempDir, "openclaw-2026-04-24.log");
+    const configuredFile = path.join(tempDir, "carapace-2026-04-26.log");
+    const fallbackFile = path.join(tempDir, "carapace-2026-04-25.log");
+    const staleFile = path.join(tempDir, "carapace-2026-04-24.log");
     setLoggerOverride({ file: configuredFile });
     await fs.writeFile(
       fallbackFile,
@@ -301,13 +301,13 @@ describe("channelsLogsCommand", () => {
   });
 
   it("reads the active writer file instead of a newer stale configured rolling log", async () => {
-    const configuredFile = path.join(tempDir, "openclaw-2026-04-26.log");
+    const configuredFile = path.join(tempDir, "carapace-2026-04-26.log");
     setLoggerOverride({ file: configuredFile, level: "info" });
     getChildLogger({ module: "gateway/channels/external-chat/send" }).warn("current sent");
     await flushLogger();
 
     const writtenFiles = await fs.readdir(tempDir);
-    expect(writtenFiles).toEqual([expect.stringMatching(/^openclaw-\d{4}-\d{2}-\d{2}\.log$/)]);
+    expect(writtenFiles).toEqual([expect.stringMatching(/^carapace-\d{4}-\d{2}-\d{2}\.log$/)]);
     const activeFile = path.join(tempDir, expectDefined(writtenFiles[0], "active log file"));
     expect(activeFile).not.toBe(configuredFile);
 
@@ -327,7 +327,7 @@ describe("channelsLogsCommand", () => {
 
   it("does not fall back to rolling logs for a missing custom log file", async () => {
     const configuredFile = path.join(tempDir, "custom-channel.log");
-    const fallbackFile = path.join(tempDir, "openclaw-2026-04-25.log");
+    const fallbackFile = path.join(tempDir, "carapace-2026-04-25.log");
     setLoggerOverride({ file: configuredFile });
     await fs.writeFile(
       fallbackFile,

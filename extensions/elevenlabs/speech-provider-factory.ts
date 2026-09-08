@@ -1,7 +1,7 @@
-import { parseStrictFiniteNumber, parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
+import { parseStrictFiniteNumber, parseStrictInteger } from "carapace/plugin-sdk/number-runtime";
 // Elevenlabs provider module implements model/runtime integration.
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
@@ -9,14 +9,14 @@ import type {
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
   SpeechVoiceOption,
-} from "openclaw/plugin-sdk/speech";
+} from "carapace/plugin-sdk/speech";
 import {
   normalizeApplyTextNormalization,
   normalizeLanguageCode,
   normalizeSeed,
   requireInRange,
   resolveSpeechProviderApiKey,
-} from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-provider";
 import {
   asBoolean,
   asFiniteNumber,
@@ -24,7 +24,7 @@ import {
   normalizeOptionalString as trimToUndefined,
   normalizeLowercaseStringOrEmpty,
   parseBooleanValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveElevenLabsApiKeyWithProfileFallback } from "./config-api.js";
 import { isValidElevenLabsVoiceId, normalizeElevenLabsBaseUrl } from "./shared.js";
 import { elevenLabsTTS, elevenLabsTTSStream } from "./tts.js";
@@ -350,9 +350,9 @@ async function listElevenLabsVoices(params: {
 }): Promise<SpeechVoiceOption[]> {
   const normalizedBaseUrl = normalizeElevenLabsBaseUrl(params.baseUrl);
   const { assertOkOrThrowProviderError, readProviderJsonResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const { response, release } = await fetchWithSsrFGuard({
     url: `${normalizedBaseUrl}/v1/voices`,
     init: {

@@ -1,22 +1,22 @@
 ---
-summary: "Run the OpenClaw Gateway on EasyRunner with Podman and Caddy"
+summary: "Run the Carapace Gateway on EasyRunner with Podman and Caddy"
 read_when:
-  - Deploying OpenClaw on EasyRunner
+  - Deploying Carapace on EasyRunner
   - Running the Gateway behind EasyRunner's Caddy proxy
   - Choosing persistent volumes and auth for a hosted Gateway
 title: "EasyRunner"
 ---
 
-EasyRunner hosts the OpenClaw Gateway as a small containerized app behind its
+EasyRunner hosts the Carapace Gateway as a small containerized app behind its
 Caddy proxy. This guide assumes an EasyRunner host that runs Podman-compatible
 Compose apps and terminates HTTPS through Caddy.
 
 ## Before you begin
 
 - An EasyRunner server with a domain routed to it.
-- The official OpenClaw image (`ghcr.io/openclaw/openclaw`) or your own build.
-- A persistent config volume for `/home/node/.openclaw`.
-- A persistent workspace volume for `/home/node/.openclaw/workspace`.
+- The official Carapace image (`ghcr.io/carapace/carapace`) or your own build.
+- A persistent config volume for `/home/node/.carapace`.
+- A persistent workspace volume for `/home/node/.carapace/workspace`.
 - A strong Gateway token or password.
 
 Keep device auth enabled when possible. If your reverse proxy cannot carry
@@ -30,35 +30,35 @@ Create an EasyRunner app with a Compose file shaped like this:
 
 ```yaml
 services:
-  openclaw:
-    image: ghcr.io/openclaw/openclaw:latest
+  carapace:
+    image: ghcr.io/carapace/carapace:latest
     restart: unless-stopped
     environment:
-      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
-      OPENCLAW_HOME: /home/node
-      OPENCLAW_STATE_DIR: /home/node/.openclaw
-      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/openclaw.json
-      OPENCLAW_WORKSPACE_DIR: /home/node/.openclaw/workspace
+      CARAPACE_GATEWAY_TOKEN: ${CARAPACE_GATEWAY_TOKEN}
+      CARAPACE_HOME: /home/node
+      CARAPACE_STATE_DIR: /home/node/.carapace
+      CARAPACE_CONFIG_PATH: /home/node/.carapace/carapace.json
+      CARAPACE_WORKSPACE_DIR: /home/node/.carapace/workspace
     volumes:
-      - openclaw-config:/home/node/.openclaw
-      - openclaw-workspace:/home/node/.openclaw/workspace
+      - carapace-config:/home/node/.carapace
+      - carapace-workspace:/home/node/.carapace/workspace
     labels:
-      caddy: openclaw.example.com
+      caddy: carapace.example.com
       caddy.reverse_proxy: "{{upstreams 1455}}"
-    command: ["node", "openclaw.mjs", "gateway", "--bind", "lan", "--port", "1455"]
+    command: ["node", "carapace.mjs", "gateway", "--bind", "lan", "--port", "1455"]
 
 volumes:
-  openclaw-config:
-  openclaw-workspace:
+  carapace-config:
+  carapace-workspace:
 ```
 
-Replace `openclaw.example.com` with your Gateway hostname. Store
-`OPENCLAW_GATEWAY_TOKEN` in EasyRunner's secret/environment manager instead of
+Replace `carapace.example.com` with your Gateway hostname. Store
+`CARAPACE_GATEWAY_TOKEN` in EasyRunner's secret/environment manager instead of
 committing it to the app definition. The image binds to loopback by default,
 so the explicit `--bind lan --port 1455` in `command` is required for Caddy to
 reach the container.
 
-## Configure OpenClaw
+## Configure Carapace
 
 Inside the persistent config volume, keep the Gateway reachable only through
 the proxy and require auth:
@@ -69,7 +69,7 @@ the proxy and require auth:
     bind: "lan",
     port: 1455,
     auth: {
-      token: "${OPENCLAW_GATEWAY_TOKEN}",
+      token: "${CARAPACE_GATEWAY_TOKEN}",
     },
   },
 }
@@ -84,8 +84,8 @@ the exact proxy path rather than disabling auth checks globally. See
 From your workstation:
 
 ```bash
-openclaw gateway probe --url https://openclaw.example.com --token <token>
-openclaw gateway status --url https://openclaw.example.com --token <token>
+carapace gateway probe --url https://carapace.example.com --token <token>
+carapace gateway status --url https://carapace.example.com --token <token>
 ```
 
 From the EasyRunner host, `GET /healthz` (liveness) and `GET /readyz`
@@ -95,12 +95,12 @@ SecretRef, plugin, or channel auth failures.
 
 ## Updates and backups
 
-- Pull or build the new OpenClaw image, then redeploy the EasyRunner app.
-- Back up the `openclaw-config` volume before updates. It holds
-  `openclaw.json`, shared auth in `state/openclaw.sqlite`, agent-local profiles
-  in `agents/<agentId>/agent/openclaw-agent.sqlite`, and installed plugin package state.
-- Back up `openclaw-workspace` if agents write durable project data there.
-- Run `openclaw doctor` after major updates to catch config migrations and
+- Pull or build the new Carapace image, then redeploy the EasyRunner app.
+- Back up the `carapace-config` volume before updates. It holds
+  `carapace.json`, shared auth in `state/carapace.sqlite`, agent-local profiles
+  in `agents/<agentId>/agent/carapace-agent.sqlite`, and installed plugin package state.
+- Back up `carapace-workspace` if agents write durable project data there.
+- Run `carapace doctor` after major updates to catch config migrations and
   service warnings.
 
 ## Troubleshooting
@@ -111,7 +111,7 @@ SecretRef, plugin, or channel auth failures.
   command together.
 - Files are root-owned after restore: the image runs as `node` (uid 1000);
   repair the mounted volumes so that user can write
-  `/home/node/.openclaw` and `/home/node/.openclaw/workspace`.
+  `/home/node/.carapace` and `/home/node/.carapace/workspace`.
 - Browser or channel plugins fail: check whether the required external
   binaries, network egress, and mounted credentials are available inside the
   container.

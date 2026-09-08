@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceKit
+import CarapaceProtocol
 
 struct IOSMediaArtifactLoader: Sendable {
     struct Connection: Sendable {
@@ -48,9 +48,9 @@ struct IOSMediaArtifactLoader: Sendable {
 
     func load(
         response: ArtifactsDownloadResult,
-        kind: OpenClawChatMediaKind,
-        playback: OpenClawChatPlaybackMode? = nil,
-        expectedGatewayID: String) async throws -> OpenClawChatLoadedMedia
+        kind: CarapaceChatMediaKind,
+        playback: CarapaceChatPlaybackMode? = nil,
+        expectedGatewayID: String) async throws -> CarapaceChatLoadedMedia
     {
         let maximumBytes = Self.maximumBytes(for: kind)
         let declaredMIME = response.artifact.mimetype?.lowercased()
@@ -64,13 +64,13 @@ struct IOSMediaArtifactLoader: Sendable {
                   let data = Data(base64Encoded: encoded)
             else { throw LoadError.invalidResponse }
             guard data.count <= maximumBytes else { throw LoadError.payloadTooLarge }
-            return .data(OpenClawChatMediaData(data: data, mimeType: declaredMIME))
+            return .data(CarapaceChatMediaData(data: data, mimeType: declaredMIME))
         }
 
         let path = response.url?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard let connection = await self.connectionProvider(),
               connection.gatewayID == expectedGatewayID,
-              let url = OpenClawChatMediaURL.resolve(
+              let url = CarapaceChatMediaURL.resolve(
                   gatewayURL: connection.config.url,
                   ticketedPath: path,
                   playback: playback)
@@ -87,7 +87,7 @@ struct IOSMediaArtifactLoader: Sendable {
             headers.isEmpty &&
             declaredMIME?.hasPrefix(kind.mimeTypePrefix) == true
         if canStreamDirectly, playback != .transcode, let declaredMIME {
-            return .stream(OpenClawChatMediaStream(
+            return .stream(CarapaceChatMediaStream(
                 url: url,
                 mimeType: declaredMIME,
                 sizeBytes: response.artifact.sizebytes))
@@ -125,16 +125,16 @@ struct IOSMediaArtifactLoader: Sendable {
               mimeType.hasPrefix(kind.mimeTypePrefix)
         else { throw LoadError.unsupportedMediaType }
         if canStreamDirectly {
-            return .stream(OpenClawChatMediaStream(
+            return .stream(CarapaceChatMediaStream(
                 url: url,
                 mimeType: mimeType,
                 sizeBytes: response.artifact.sizebytes))
         }
         guard data.count <= maximumBytes else { throw LoadError.payloadTooLarge }
-        return .data(OpenClawChatMediaData(data: data, mimeType: mimeType))
+        return .data(CarapaceChatMediaData(data: data, mimeType: mimeType))
     }
 
-    private static func maximumBytes(for kind: OpenClawChatMediaKind) -> Int {
+    private static func maximumBytes(for kind: CarapaceChatMediaKind) -> Int {
         switch kind {
         case .image: self.maximumImageBytes
         case .audio: self.maximumAudioBytes

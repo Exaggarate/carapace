@@ -1,10 +1,10 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 /**
  * Skill Workshop built-in tool.
  *
  * Exposes proposal create/update/review/apply actions while the workshop service owns persistence.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import { AUTONOMOUS_SKILL_MAX_CHARS } from "../../skills/workshop/collection-contracts.js";
 import { resolveSkillWorkshopConfig } from "../../skills/workshop/config.js";
@@ -129,7 +129,7 @@ function bindProposalRevisionConstraint(
 type SkillWorkshopToolOptions = {
   libraryAuthoring?: import("../../skills/library/authoring.js").SkillLibraryAuthoringCapability;
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   agentId: string;
   origin?: SkillProposalOrigin;

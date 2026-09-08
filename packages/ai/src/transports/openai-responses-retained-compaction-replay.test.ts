@@ -1,4 +1,4 @@
-import type { AssistantMessage, Context, Model, ProviderReplayState } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model, ProviderReplayState } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import { convertResponsesMessages as convertProviderResponsesMessages } from "../providers/openai-responses-shared.js";
 import { createZeroUsage } from "../usage.test-support.js";

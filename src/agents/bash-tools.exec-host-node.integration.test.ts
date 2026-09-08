@@ -14,9 +14,9 @@ import type { Deferred } from "../shared/deferred.js";
 import { createChannelTestPluginBase, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { withEnv, withEnvAsync } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { executeNodeHostCommand } from "./bash-tools.exec-host-node.js";
 import type { ExecuteNodeHostCommandParams } from "./bash-tools.exec-host-node.types.js";
 import { resolvePreparedExecEnvironment } from "./bash-tools.exec-request-preparation.js";
@@ -35,7 +35,7 @@ vi.mock("./tools/nodes-utils.js", () => ({
   resolveNodeIdFromList: () => "node-1",
 }));
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let invokeCount: number;
 let afterPrepare: () => Promise<void>;
 let request: ExecuteNodeHostCommandParams & { workdir: string };
@@ -53,7 +53,7 @@ beforeEach(async ({ onTestFinished }) => {
     null,
     "default",
   );
-  state = await createOpenClawTestState({ label: "node-exec-policy" });
+  state = await createCarapaceTestState({ label: "node-exec-policy" });
   await state.writeConfig({});
   saveExecApprovals({ version: 1, defaults: { security: "full", ask: "off" } });
   invokeCount = 0;

@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeOptionalAccountId } from "../routing/account-id.js";
 import { snapshotOwnCronRecord } from "./own-record.js";
 
@@ -163,8 +163,8 @@ export function resolveCronToolsAllowExecTargetRecoveryError(params: {
   }
   const subject = params.jobId ? `Automation ${params.jobId}` : "This automation";
   const recoveryCommand = params.jobId
-    ? `openclaw automations edit ${params.jobId} --tools <tool,...>`
-    : "openclaw automations list --all";
+    ? `carapace automations edit ${params.jobId} --tools <tool,...>`
+    : "carapace automations list --all";
   return (
     `${subject} cannot run because its captured exec restriction is missing or invalid. ` +
     "No trigger, script, or agent action was executed. Recreate it from a fresh authenticated creator turn, " +

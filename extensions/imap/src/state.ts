@@ -1,11 +1,11 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 
 export type ImapCursor = { uidValidity: string; lastSeenUid: number; updatedAt: number };
 export type ImapClaim = { accountId: string; uid: number; recordedAt: number };
 export type ImapAttempt = { count: number; reason: string };
 export type ImapMessageRing = { messageIds: string[] };
 
-export function createImapState(runtime: OpenClawPluginApi["runtime"]) {
+export function createImapState(runtime: CarapacePluginApi["runtime"]) {
   return {
     cursors: runtime.state.openKeyedStore<ImapCursor>({
       namespace: "cursor",

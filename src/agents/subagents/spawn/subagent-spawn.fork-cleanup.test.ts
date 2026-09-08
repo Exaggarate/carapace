@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExecutionDecisionWork } from "../../../audit/execution-decision-work.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
 import { loadSubagentSpawnModuleForTest } from "./subagent-spawn.test-helpers.js";
 
@@ -19,7 +19,7 @@ describe("subagent fork context through SQLite and tool boundaries", () => {
   const parentId = "parent-session";
   let tempDir: string;
   let storePath: string;
-  let config: OpenClawConfig;
+  let config: CarapaceConfig;
   let threadBindingAvailable: boolean;
   let sessions: typeof import("../../../config/sessions/session-accessor.js");
   let forkSession: ForkSession;
@@ -113,10 +113,10 @@ describe("subagent fork context through SQLite and tool boundaries", () => {
     sessions = await import("../../../config/sessions/session-accessor.js");
     ({ forkSessionEntryFromParent: forkSession } =
       await import("../../../auto-reply/reply/session-fork.js"));
-    ({ closeOpenClawAgentDatabasesForTest: closeAgentDatabases } =
-      await import("../../../state/openclaw-agent-db.js"));
-    ({ closeOpenClawStateDatabaseForTest: closeStateDatabase } =
-      await import("../../../state/openclaw-state-db.js"));
+    ({ closeCarapaceAgentDatabasesForTest: closeAgentDatabases } =
+      await import("../../../state/carapace-agent-db.js"));
+    ({ closeCarapaceStateDatabaseForTest: closeStateDatabase } =
+      await import("../../../state/carapace-state-db.js"));
     swarmScheduler = await import("../swarm/swarm-scheduler.js");
     const { testing } = await import("../swarm/swarm-scheduler.test-support.js");
     resetScheduler = () => testing.reset();
@@ -134,7 +134,7 @@ describe("subagent fork context through SQLite and tool boundaries", () => {
   });
 
   beforeEach(async () => {
-    tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-fork-cleanup-")));
+    tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-fork-cleanup-")));
     storePath = path.join(tempDir, "sessions.json");
     config = {
       session: { store: storePath, mainKey: "main", scope: "per-sender" },

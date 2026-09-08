@@ -21,7 +21,7 @@ import {
   shouldPreserveLocalCliSharedAuthScopes,
   shouldSkipLocalBackendSelfPairing,
 } from "../../gateway/server/ws-connection/handshake-auth-helpers.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { waitForGatewayHealthyRestart } from "./restart-health.js";
 
 // Exercise the real client over a socket and apply the Gateway's actual identity
@@ -30,12 +30,12 @@ describe("restart verifier local control identity", () => {
   it.each(["token", "password", "none"] as const)(
     "reads health and served identity with %s auth without creating device state",
     async (mode) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           env: {
-            OPENCLAW_GATEWAY_TOKEN: undefined,
-            OPENCLAW_GATEWAY_PASSWORD: undefined,
-            OPENCLAW_GATEWAY_URL: "wss://remote.example.invalid",
+            CARAPACE_GATEWAY_TOKEN: undefined,
+            CARAPACE_GATEWAY_PASSWORD: undefined,
+            CARAPACE_GATEWAY_URL: "wss://remote.example.invalid",
           },
         },
         async (state) => {

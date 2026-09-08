@@ -4,7 +4,7 @@
  */
 
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import * as authProfileClone from "./clone.js";
 import {
@@ -70,7 +70,7 @@ function expectOpenAICodexSnapshotCredential(
 
 describe("runtime auth profile snapshots", () => {
   it("carries the canonical database identity through snapshot enumeration", () => {
-    const databasePath = "/tmp/openclaw-auth-runtime-enumeration/custom.sqlite";
+    const databasePath = "/tmp/carapace-auth-runtime-enumeration/custom.sqlite";
     const store = createStore("enumerated");
     replaceRuntimeAuthProfileStoreSnapshots([
       {
@@ -116,7 +116,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("publishes successful-auth facts without impersonating credential rotation", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-materialized";
+    const agentDir = "/tmp/carapace-auth-runtime-materialized";
     const pluginStoreListener = vi.fn();
     const materializationListener = vi.fn();
     setRuntimeAuthProfileStoreSnapshot(createStore("materialized"), agentDir);
@@ -186,7 +186,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("notifies listeners only when credential ownership changes", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-listener";
+    const agentDir = "/tmp/carapace-auth-runtime-listener";
     const listener = vi.fn();
     const unregister = registerRuntimeAuthProfileStoreMutationListener(listener);
     try {
@@ -222,7 +222,7 @@ describe("runtime auth profile snapshots", () => {
     { change: "provider priority", state: { order: { openai: [] } } },
     { change: "provider priority ownership", state: { runtimeLocalOrderProviderIds: [] } },
   ])("notifies when $change changes", ({ state }) => {
-    const agentDir = "/tmp/openclaw-auth-runtime-order";
+    const agentDir = "/tmp/carapace-auth-runtime-order";
     const store = { ...createStore("order"), runtimeLocalOrderProviderIds: ["openai"] };
     setRuntimeAuthProfileStoreSnapshot(store, agentDir);
     const listener = vi.fn();
@@ -250,7 +250,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("notifies when identical external credentials change from CLI to plugin ownership", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-external-owner";
+    const agentDir = "/tmp/carapace-auth-runtime-external-owner";
     const store: RuntimeAuthProfileStore = {
       ...createStore("same-credential"),
       runtimeExternalProfileIds: ["openai:default"],
@@ -283,7 +283,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("notifies when an empty runtime snapshot starts or stops shadowing persisted auth", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-empty-owner";
+    const agentDir = "/tmp/carapace-auth-runtime-empty-owner";
     const listener = vi.fn();
     const unregister = registerRuntimeAuthProfileStoreMutationListener(listener);
     const emptyStore: AuthProfileStore = { version: 1, profiles: {} };
@@ -327,7 +327,7 @@ describe("runtime auth profile snapshots", () => {
 
   it("isolates set/get/replace snapshot mutations without structuredClone", () => {
     const structuredCloneSpy = vi.spyOn(globalThis, "structuredClone");
-    const agentDir = "/tmp/openclaw-auth-runtime-snapshot-agent";
+    const agentDir = "/tmp/carapace-auth-runtime-snapshot-agent";
     try {
       const stored = { ...createStore("access-1"), runtimeLocalOrderProviderIds: ["openai"] };
       setRuntimeAuthProfileStoreSnapshot(stored, agentDir);
@@ -376,8 +376,8 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("merges inherited and agent prepared stores without persisted fallback", () => {
-    const inheritedAuthDir = "/tmp/openclaw-auth-runtime-inherited";
-    const agentDir = "/tmp/openclaw-auth-runtime-agent";
+    const inheritedAuthDir = "/tmp/carapace-auth-runtime-inherited";
+    const agentDir = "/tmp/carapace-auth-runtime-agent";
     try {
       setRuntimeAuthProfileStoreSnapshot(
         {
@@ -405,8 +405,8 @@ describe("runtime auth profile snapshots", () => {
       });
       expect(
         getPreparedRuntimeAuthProfileStoreSnapshotCore(
-          "/tmp/openclaw-auth-runtime-missing",
-          "/tmp/openclaw-auth-runtime-also-missing",
+          "/tmp/carapace-auth-runtime-missing",
+          "/tmp/carapace-auth-runtime-also-missing",
         ),
       ).toBeUndefined();
     } finally {
@@ -415,8 +415,8 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("does not attribute shared order to an agent without its own snapshot", () => {
-    const inheritedAuthDir = "/tmp/openclaw-auth-order-inherited";
-    const agentDir = "/tmp/openclaw-auth-order-missing-agent";
+    const inheritedAuthDir = "/tmp/carapace-auth-order-inherited";
+    const agentDir = "/tmp/carapace-auth-order-missing-agent";
     const inherited = {
       ...createStore("inherited-order"),
       runtimeLocalOrderProviderIds: ["openai"],
@@ -438,7 +438,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("copies a prepared same-owner snapshot only once and keeps the result isolated", () => {
-    const agentDir = "/tmp/openclaw-auth-prepared-same-owner";
+    const agentDir = "/tmp/carapace-auth-prepared-same-owner";
     const store = createStore("prepared");
     setRuntimeAuthProfileStoreSnapshot(store, agentDir);
     const clone = vi.spyOn(authProfileClone, "cloneAuthProfileStore");
@@ -462,7 +462,7 @@ describe("runtime auth profile snapshots", () => {
   it.each(["present", "empty", "missing"] as const)(
     "resolves omitted-agent preparation with a %s shared snapshot",
     (shared) => {
-      const inheritedAuthDir = "/tmp/openclaw-auth-prepared-omitted-agent";
+      const inheritedAuthDir = "/tmp/carapace-auth-prepared-omitted-agent";
       const inherited = createStore("inherited");
       const requested = shared === "empty" ? { version: 1, profiles: {} } : createStore("shared");
       try {
@@ -480,8 +480,8 @@ describe("runtime auth profile snapshots", () => {
   );
 
   it("clears one agent snapshot without disturbing other stores", () => {
-    const firstAgentDir = "/tmp/openclaw-auth-runtime-snapshot-first";
-    const secondAgentDir = "/tmp/openclaw-auth-runtime-snapshot-second";
+    const firstAgentDir = "/tmp/carapace-auth-runtime-snapshot-first";
+    const secondAgentDir = "/tmp/carapace-auth-runtime-snapshot-second";
     try {
       setRuntimeAuthProfileStoreSnapshot(createStore("main"));
       setRuntimeAuthProfileStoreSnapshot(createStore("first"), firstAgentDir);
@@ -503,14 +503,14 @@ describe("runtime auth profile snapshots", () => {
 
   it("bounds persisted mutation lineage by owner and profile", () => {
     for (let index = 0; index <= testing.MAX_PERSISTED_MUTATION_OWNERS; index += 1) {
-      noteRuntimeAuthProfileStorePersistedMutation(`/tmp/openclaw-mutation-owner-${index}`, {
+      noteRuntimeAuthProfileStorePersistedMutation(`/tmp/carapace-mutation-owner-${index}`, {
         credentialsChanged: true,
         stateChanged: false,
         profileIds: ["openai:default"],
       });
     }
     for (let index = 0; index <= testing.MAX_PERSISTED_MUTATION_PROFILES_PER_OWNER; index += 1) {
-      noteRuntimeAuthProfileStorePersistedMutation("/tmp/openclaw-mutation-profile-owner", {
+      noteRuntimeAuthProfileStorePersistedMutation("/tmp/carapace-mutation-profile-owner", {
         credentialsChanged: true,
         stateChanged: false,
         profileIds: [`openai:${index}`],

@@ -8,7 +8,7 @@ import {
   resolveOAuthDir,
   resolveStateDir,
 } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   resolveActivatedPluginBackupInventory,
@@ -139,7 +139,7 @@ function formatBackupArchiveTimestamp(
 
 /** Build the root directory name stored inside a backup tarball. */
 export function buildBackupArchiveRoot(nowMs = Date.now()): string {
-  return `${formatBackupArchiveTimestamp(nowMs)}-openclaw-backup`;
+  return `${formatBackupArchiveTimestamp(nowMs)}-carapace-backup`;
 }
 
 /** Build the default `.tar.gz` filename for a backup archive. */
@@ -447,7 +447,7 @@ function resolveManagedSkillSymlinkTargetCandidates(params: {
   const targets = new Set<string>();
   const discovered = discoverSkillCandidates({
     dir: managedSkillsDir,
-    source: "openclaw-managed",
+    source: "carapace-managed",
     limits: params.limits,
     allowedSymlinkTargetRealPaths: [],
   });
@@ -455,7 +455,7 @@ function resolveManagedSkillSymlinkTargetCandidates(params: {
     if (
       !loadSingleSkillDirectory({
         skillDir: candidate.skillDir,
-        source: "openclaw-managed",
+        source: "carapace-managed",
         rootRealPath: candidate.skillDirRealPath,
         maxBytes: params.limits.maxSkillFileBytes,
       })
@@ -529,25 +529,25 @@ export async function canonicalizePathForContainment(targetPath: string): Promis
 
 /** Resolve one configured agent's canonical backup root and owner database path. */
 export async function resolveBackupAgentRoot(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string,
 ): Promise<BackupAgentRoot> {
   const sourcePath = await canonicalizePathForContainment(resolveAgentDir(config, agentId));
   return {
     agentId,
     sourcePath,
-    databasePath: path.join(sourcePath, "openclaw-agent.sqlite"),
+    databasePath: path.join(sourcePath, "carapace-agent.sqlite"),
   };
 }
 
 /** Resolve configured agent storage roots and their canonical database paths for backup ownership. */
-export async function resolveBackupAgentRoots(config: OpenClawConfig): Promise<BackupAgentRoot[]> {
+export async function resolveBackupAgentRoots(config: CarapaceConfig): Promise<BackupAgentRoot[]> {
   return await Promise.all(
     listAgentIds(config).map((agentId) => resolveBackupAgentRoot(config, agentId)),
   );
 }
 
-/** Resolve the backup plan from the current OpenClaw state/config/workspace paths on disk. */
+/** Resolve the backup plan from the current Carapace state/config/workspace paths on disk. */
 export async function resolveBackupPlanFromDisk(
   params: {
     includeWorkspace?: boolean;
@@ -577,7 +577,7 @@ export async function resolveBackupPlanFromDisk(
   const discoverySnapshot = resolveStartupConfigSnapshot(configSnapshot) ?? configSnapshot;
   if (includeWorkspace && discoverySnapshot.exists && !discoverySnapshot.valid) {
     throw new Error(
-      `Config invalid at ${shortenHomePath(discoverySnapshot.path)}. OpenClaw cannot reliably discover custom workspaces for backup. Fix the config or rerun with --no-include-workspace for a partial backup.`,
+      `Config invalid at ${shortenHomePath(discoverySnapshot.path)}. Carapace cannot reliably discover custom workspaces for backup. Fix the config or rerun with --no-include-workspace for a partial backup.`,
     );
   }
   const cleanupPlan = buildCleanupPlan({

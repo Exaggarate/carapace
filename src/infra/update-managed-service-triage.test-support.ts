@@ -51,7 +51,7 @@ export async function createTriageBoundary(
   const primaryFile = path.join(root, "primary.json");
   const bin = path.join(root, "bin");
   const metaPath = path.join(root, "meta.json");
-  const stateDir = path.join(root, ".openclaw");
+  const stateDir = path.join(root, ".carapace");
   await fs.mkdir(stateDir);
   await fs.writeFile(
     metaPath,
@@ -72,8 +72,8 @@ export async function createTriageBoundary(
     parent.once("exit", resolve);
   });
   const parentPid = parent.pid!;
-  const unit = "openclaw-gateway.service";
-  const scope = `openclaw-triage-${path.basename(root)}.scope`;
+  const unit = "carapace-gateway.service";
+  const scope = `carapace-triage-${path.basename(root)}.scope`;
   const updateScope = scope.replace("triage-", "update-");
   await fs.writeFile(primaryFile, JSON.stringify({ active: true, pid: parentPid }));
   await fs.writeFile(
@@ -89,7 +89,7 @@ if (/systemctl$|systemd-run$|launchctl$/.test(process.argv[1] || '')) {
   fs.writeFileSync(controller, '');
   process.once('exit', () => fs.rmSync(controller, {force:true}));
 }
-const event = (kind, data = {}) => fs.appendFileSync(${JSON.stringify(events)}, JSON.stringify({kind, pid:process.pid, handoff:process.env.OPENCLAW_UPDATE_RUN_HANDOFF ?? null, sentinel:process.env.OPENCLAW_CONTROL_PLANE_UPDATE_SENTINEL_META ?? null, ...data})+'\\n');
+const event = (kind, data = {}) => fs.appendFileSync(${JSON.stringify(events)}, JSON.stringify({kind, pid:process.pid, handoff:process.env.CARAPACE_UPDATE_RUN_HANDOFF ?? null, sentinel:process.env.CARAPACE_CONTROL_PLANE_UPDATE_SENTINEL_META ?? null, ...data})+'\\n');
 `;
   // HOME does not fence macOS's gui/UID namespace if a service mock misses.
   await fs.writeFile(
@@ -153,7 +153,7 @@ if (action === 'show') {
   if (!name.endsWith('.scope')) {
     primary.active = false; fs.writeFileSync(primaryFile,JSON.stringify(primary));
   }
-  if (name.endsWith('.scope') || scope.name.startsWith('openclaw-triage-')) {
+  if (name.endsWith('.scope') || scope.name.startsWith('carapace-triage-')) {
     scope.active=false; fs.writeFileSync(scopeFile,JSON.stringify(scope));
     event('scope-stopped');
     for (const member of fs.readdirSync(root+'/members')) {
@@ -195,7 +195,7 @@ import { buildCliRespawnPlan } from ${JSON.stringify(resolveRuntimeWorkerUrl(tri
 if (buildCliRespawnPlan()) throw new Error('Installed child would respawn and lose its IPC claim');
 import fs from 'node:fs';
 import { spawn } from 'node:child_process';
-const event=(kind,data={})=>fs.appendFileSync(${JSON.stringify(events)},JSON.stringify({kind,pid:process.pid,handoff:process.env.OPENCLAW_UPDATE_RUN_HANDOFF ?? null,sentinel:process.env.OPENCLAW_CONTROL_PLANE_UPDATE_SENTINEL_META ?? null,...data})+'\\n');
+const event=(kind,data={})=>fs.appendFileSync(${JSON.stringify(events)},JSON.stringify({kind,pid:process.pid,handoff:process.env.CARAPACE_UPDATE_RUN_HANDOFF ?? null,sentinel:process.env.CARAPACE_CONTROL_PLANE_UPDATE_SENTINEL_META ?? null,...data})+'\\n');
 const admission=await acceptTriageContinuation();
 if (!admission) throw new Error('No live triage admission');
 event('fixer', {failure:admission.failure});
@@ -209,7 +209,7 @@ if (${Boolean(maintenance)}) {
   const exit=await new Promise(resolve=>child.once('exit',(code,signal)=>resolve({code,signal})));
   event('maintenance-exit',exit);
 }
-const branch=spawn(process.execPath,['-e',${JSON.stringify(common + "event('descendant', {stateDir:process.env.OPENCLAW_STATE_DIR, workspace:process.env.OPENCLAW_WORKSPACE_DIR, shell:process.env.OPENCLAW_SHELL, compileCache:process.env.NODE_DISABLE_COMPILE_CACHE}); const {spawn}=require('node:child_process'); spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'}); setInterval(()=>{},1000)")}],{detached:true,stdio:'ignore'});
+const branch=spawn(process.execPath,['-e',${JSON.stringify(common + "event('descendant', {stateDir:process.env.CARAPACE_STATE_DIR, workspace:process.env.CARAPACE_WORKSPACE_DIR, shell:process.env.CARAPACE_SHELL, compileCache:process.env.NODE_DISABLE_COMPILE_CACHE}); const {spawn}=require('node:child_process'); spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'}); setInterval(()=>{},1000)")}],{detached:true,stdio:'ignore'});
 event('branch',{child:branch.pid});
 admission.signal.addEventListener('abort',()=>{event('cancelled');void admission.finish("uncertain");process.exitCode=1;});
 await new Promise(resolve=>admission.signal.addEventListener('abort',resolve,{once:true}));
@@ -249,16 +249,16 @@ process.stdout.write(JSON.stringify({status:'error',reason:'original failure'})+
   const childEnv = {
     ...process.env,
     HOME: root,
-    OPENCLAW_HOME: "",
-    OPENCLAW_PROFILE: "default",
-    OPENCLAW_SUPERVISOR_MODE: "",
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-    OPENCLAW_WORKSPACE_DIR: path.join(stateDir, "workspace"),
-    OPENCLAW_SYSTEMD_UNIT: unit,
-    OPENCLAW_SHELL: "exec",
-    OPENCLAW_UPDATE_RUN_HANDOFF: "1",
-    OPENCLAW_CONTROL_PLANE_UPDATE_SENTINEL_META: metaPath,
+    CARAPACE_HOME: "",
+    CARAPACE_PROFILE: "default",
+    CARAPACE_SUPERVISOR_MODE: "",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+    CARAPACE_WORKSPACE_DIR: path.join(stateDir, "workspace"),
+    CARAPACE_SYSTEMD_UNIT: unit,
+    CARAPACE_SHELL: "exec",
+    CARAPACE_UPDATE_RUN_HANDOFF: "1",
+    CARAPACE_CONTROL_PLANE_UPDATE_SENTINEL_META: metaPath,
     PATH: `${bin}${path.delimiter}${process.env.PATH ?? ""}`,
     TSX_TSCONFIG_PATH: path.resolve("tsconfig.json"),
     NODE_OPTIONS: [triageRuntimeNodeOptions(), `--require ${preload}`].filter(Boolean).join(" "),
@@ -525,8 +525,8 @@ async function stagedHandoffScript(root: string): Promise<string> {
       argv1: path.join(root, "dist/index.js"),
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: root,
-        OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
+        CARAPACE_STATE_DIR: root,
+        CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
       },
       meta: {},
     });
@@ -552,7 +552,7 @@ async function writeTriageMaintenanceProbe(params: {
   const { root, primaryFile, unit, events } = params;
   await fs.mkdir(path.join(root, "dist"));
   await fs.writeFile(path.join(root, "dist", "index.js"), "");
-  await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+  await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
   const script = path.join(root, "maintenance.mjs");
   await fs.writeFile(
     script,

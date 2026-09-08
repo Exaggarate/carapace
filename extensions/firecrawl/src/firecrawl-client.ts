@@ -1,7 +1,7 @@
 // Firecrawl plugin module implements firecrawl client behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { parseFiniteNumber } from "openclaw/plugin-sdk/number-runtime";
-import { readProviderJsonObjectResponse } from "openclaw/plugin-sdk/provider-http";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { parseFiniteNumber } from "carapace/plugin-sdk/number-runtime";
+import { readProviderJsonObjectResponse } from "carapace/plugin-sdk/provider-http";
 import {
   DEFAULT_CACHE_TTL_MINUTES,
   markdownToText,
@@ -12,22 +12,22 @@ import {
   withSelfHostedWebToolsEndpoint,
   withStrictWebToolsEndpoint,
   writeCache,
-} from "openclaw/plugin-sdk/provider-web-fetch";
-import { resolveSiteName } from "openclaw/plugin-sdk/provider-web-search";
-import { normalizeSecretInput } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/provider-web-fetch";
+import { resolveSiteName } from "carapace/plugin-sdk/provider-web-search";
+import { normalizeSecretInput } from "carapace/plugin-sdk/secret-input";
 import {
   truncateSanitizedExternalContent,
   wrapExternalContent,
   wrapWebContent,
-} from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/security-runtime";
 import {
   SsrFBlockedError,
   isBlockedHostnameOrIp,
   isPrivateIpAddress,
   resolvePinnedHostnameWithPolicy,
   type LookupFn,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import {
   DEFAULT_FIRECRAWL_BASE_URL,
@@ -73,7 +73,7 @@ type FirecrawlSearchItem = {
 };
 
 type FirecrawlSearchParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   query: string;
   count?: number;
   timeoutSeconds?: number;
@@ -90,7 +90,7 @@ type FirecrawlSearchParams = {
 };
 
 type FirecrawlScrapeParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   url: string;
   extractMode: "markdown" | "text";
   access?: "credential" | "keyless";

@@ -1,13 +1,13 @@
 // Memory Core plugin module implements the concrete memory index manager.
-import { formatErrorMessage, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage, toErrorObject } from "carapace/plugin-sdk/error-runtime";
 import {
   createSubsystemLogger,
   resolveAgentWorkspaceDir,
   resolveMemorySearchConfig,
   resolveUserPath,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   readMemoryFile,
   MEMORY_EMBEDDING_CACHE_TABLE,
@@ -19,9 +19,9 @@ import {
   type MemorySearchManager,
   type MemorySessionSyncTarget,
   type MemorySyncParams,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { borrowOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
+import { borrowCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import { runInMemoryBackgroundContext } from "./background-context.js";
 import type { MemoryCoreAcquireLocalService } from "./embedding-local-service.js";
 import type { EmbeddingProvider, EmbeddingProviderRequest } from "./embeddings.js";
@@ -84,7 +84,7 @@ export class MemoryIndexManager extends MemorySearchOrchestration implements Mem
   protected readonly cacheKey: string;
   protected readonly purpose: MemoryIndexManagerPurpose;
   protected override readonly acquireLocalService?: MemoryCoreAcquireLocalService;
-  protected readonly cfg: OpenClawConfig;
+  protected readonly cfg: CarapaceConfig;
   protected readonly agentId: string;
   protected readonly workspaceDir: string;
   protected readonly settings: ResolvedMemorySearchConfig;
@@ -123,7 +123,7 @@ export class MemoryIndexManager extends MemorySearchOrchestration implements Mem
   protected indexIdentityState: MemoryIndexIdentityState;
 
   static async get(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId: string;
     purpose?: MemoryIndexManagerPurpose;
     inspectSources?: boolean;
@@ -186,7 +186,7 @@ export class MemoryIndexManager extends MemorySearchOrchestration implements Mem
 
   private constructor(params: {
     cacheKey: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId: string;
     workspaceDir: string;
     settings: ResolvedMemorySearchConfig;
@@ -220,7 +220,7 @@ export class MemoryIndexManager extends MemorySearchOrchestration implements Mem
     }
     const connection = readOnly
       ? openMemoryDatabaseReadOnlyAtPath(dbPath, vectorEnabled, this.agentId)
-      : borrowOpenClawAgentDatabase({ agentId: this.agentId, path: dbPath });
+      : borrowCarapaceAgentDatabase({ agentId: this.agentId, path: dbPath });
     if (source && connection.db !== source.publishedDatabase.db) {
       connection.release();
       throw new Error("Memory maintenance source connection changed");

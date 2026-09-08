@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { EmbeddedRunAttemptParams } from "../embedded-agent-runner/run/types.js";
 import type { AgentHarnessHostCapabilities } from "./host-capability-types.js";
 
 /** Captures media policy before plugin invocation while keeping extraction dependencies lazy. */
 export function bindHarnessContextMedia(params: {
   attempt: Partial<EmbeddedRunAttemptParams>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   assertActive: () => void;
 }): AgentHarnessHostCapabilities["prepareContextMedia"] {
   const { attempt, config, assertActive } = params;

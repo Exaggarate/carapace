@@ -40,17 +40,17 @@ describe("board session shell", () => {
     };
 
     render(renderBoardSessionSurface(props), container);
-    const board = container.querySelector("openclaw-board-view");
+    const board = container.querySelector("carapace-board-view");
 
     render(renderBoardSessionSurface({ ...props, active: false }), container);
     const hiddenSurface = container.querySelector<HTMLElement>(".board-session-surface");
     expect(hiddenSurface?.hidden).toBe(true);
     expect(hiddenSurface?.hasAttribute("inert")).toBe(true);
-    expect(container.querySelector("openclaw-board-view")).toBe(board);
+    expect(container.querySelector("carapace-board-view")).toBe(board);
     expect(board?.active).toBe(false);
 
     render(renderBoardSessionSurface(props), container);
-    expect(container.querySelector("openclaw-board-view")).toBe(board);
+    expect(container.querySelector("carapace-board-view")).toBe(board);
     expect(container.querySelector<HTMLElement>(".board-session-surface")?.hidden).toBe(false);
     expect(board?.active).toBe(true);
   });

@@ -124,12 +124,12 @@ export function dockerExecResult(stdout: string) {
 export function createSandbox(overrides?: Partial<SandboxContext>): SandboxContext {
   return createSandboxTestContext({
     overrides: {
-      containerName: "openclaw-sbx-test",
+      containerName: "carapace-sbx-test",
       ...overrides,
     },
     dockerOverrides: {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "carapace-sandbox:bookworm-slim",
+      containerPrefix: "carapace-sbx-",
     },
   });
 }
@@ -190,7 +190,7 @@ function installDockerReadMock(params?: { canonicalPath?: string }) {
       return dockerExecResult("content");
     }
     if (script.includes("mktemp")) {
-      return dockerExecResult("/workspace/.openclaw-write-b.txt.ABC123\n");
+      return dockerExecResult("/workspace/.carapace-write-b.txt.ABC123\n");
     }
     return dockerExecResult("");
   });
@@ -209,7 +209,7 @@ export async function createHostEscapeFixture(stateDir: string) {
 export async function expectMkdirpAllowsExistingDirectory(params?: {
   forceBoundaryIoFallback?: boolean;
 }) {
-  await withTempDir("openclaw-fs-bridge-mkdirp-", async (stateDir) => {
+  await withTempDir("carapace-fs-bridge-mkdirp-", async (stateDir) => {
     const workspaceDir = path.join(stateDir, "workspace");
     const nestedDir = path.join(workspaceDir, "memory", "kemik");
     await fs.mkdir(nestedDir, { recursive: true });

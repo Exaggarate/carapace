@@ -58,8 +58,8 @@ export function buildGatewayRuntimeRecoveryHints(params: {
       ...buildPlatformRuntimeLogHints({
         platform: params.platform,
         env: params.env,
-        systemdServiceName: resolveGatewaySystemdServiceName(params.env.OPENCLAW_PROFILE),
-        windowsTaskName: resolveGatewayWindowsTaskName(params.env.OPENCLAW_PROFILE),
+        systemdServiceName: resolveGatewaySystemdServiceName(params.env.CARAPACE_PROFILE),
+        windowsTaskName: resolveGatewayWindowsTaskName(params.env.CARAPACE_PROFILE),
       }),
     );
   }
@@ -76,7 +76,7 @@ export function buildPlatformServiceStartHints(params: {
 }): string[] {
   const platform = params.platform ?? process.platform;
   const base = [params.installHint, params.startCommand];
-  // Install guidance and the OpenClaw start command stay first; native manager
+  // Install guidance and the Carapace start command stay first; native manager
   // commands are supplemental because they do not resolve profile/env paths.
   switch (platform) {
     case "darwin":

@@ -1,10 +1,10 @@
-import { GatewayClient, type GatewayClientOptions } from "@openclaw/gateway-client";
+import { GatewayClient, type GatewayClientOptions } from "@carapace/gateway-client";
 import { EventHub } from "./event-hub.js";
 import type {
-  ConnectableOpenClawTransport,
+  ConnectableCarapaceTransport,
   GatewayEvent,
   GatewayRequestOptions,
-  OpenClawTransport,
+  CarapaceTransport,
 } from "./types.js";
 
 // Gateway transport adapter that converts the lower-level GatewayClient into the
@@ -63,8 +63,8 @@ function toGatewayEvent(event: unknown): GatewayEvent {
   };
 }
 
-/** Connectable SDK transport backed by @openclaw/gateway-client. */
-export class GatewayClientTransport implements ConnectableOpenClawTransport {
+/** Connectable SDK transport backed by @carapace/gateway-client. */
+export class GatewayClientTransport implements ConnectableCarapaceTransport {
   private readonly eventsHub = new EventHub<GatewayEvent>({
     replayLimit: RAW_EVENT_REPLAY_LIMIT,
   });
@@ -181,7 +181,7 @@ export class GatewayClientTransport implements ConnectableOpenClawTransport {
 
 /** Narrow an SDK transport to one that supports explicit connect. */
 export function isConnectableTransport(
-  transport: OpenClawTransport,
-): transport is ConnectableOpenClawTransport {
+  transport: CarapaceTransport,
+): transport is ConnectableCarapaceTransport {
   return typeof (transport as { connect?: unknown }).connect === "function";
 }

@@ -79,7 +79,7 @@ function mockSnapshot(
   },
 ) {
   readConfigFileSnapshotMock.mockResolvedValue({
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     exists: true,
     raw: "{}",
     parsed: {},
@@ -123,7 +123,7 @@ describe("dashboardCommand", () => {
     });
     waitForControlUiDocumentMock.mockReset();
     waitForControlUiDocumentMock.mockResolvedValue({ ready: true });
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    delete process.env.CARAPACE_GATEWAY_TOKEN;
     delete process.env.CUSTOM_GATEWAY_TOKEN;
   });
 
@@ -171,7 +171,7 @@ describe("dashboardCommand", () => {
       "http://127.0.0.1:18789/#bootstrapToken=browser-bootstrap&bootstrapProfile=owner&gatewayUrl=ws%3A%2F%2F127.0.0.1%3A18789",
     );
     expect(runtime.log).toHaveBeenCalledWith(
-      "Opened in your browser. Keep that tab to control OpenClaw.",
+      "Opened in your browser. Keep that tab to control Carapace.",
     );
   });
 
@@ -322,7 +322,7 @@ describe("dashboardCommand", () => {
     expect(allLogs).not.toContain("#token=");
 
     // UX: user must be pointed to where their token lives so they can self-recover.
-    expect(allLogs).toMatch(/OPENCLAW_GATEWAY_TOKEN/);
+    expect(allLogs).toMatch(/CARAPACE_GATEWAY_TOKEN/);
     // UX: hint must name the URL fragment key so the user knows the syntax.
     expect(allLogs).toContain("key `token`");
   });
@@ -350,7 +350,7 @@ describe("dashboardCommand", () => {
     expect(runtime.log).not.toHaveBeenCalledWith(
       "Browser launch disabled (--no-open). Use the URL above.",
     );
-    expectLogWith("OPENCLAW_GATEWAY_TOKEN");
+    expectLogWith("CARAPACE_GATEWAY_TOKEN");
   });
 
   it("guides no-token users to the explicit JSON handoff when clipboard delivery fails", async () => {
@@ -363,7 +363,7 @@ describe("dashboardCommand", () => {
       "Browser launch disabled (--no-open). Use the URL above.",
     );
     expect(runtime.log).toHaveBeenCalledWith(
-      "One-time pairing URL not delivered. Run `openclaw dashboard --json` and open its `browserUrl` within ten minutes.",
+      "One-time pairing URL not delivered. Run `carapace dashboard --json` and open its `browserUrl` within ten minutes.",
     );
   });
 
@@ -393,7 +393,7 @@ describe("dashboardCommand", () => {
       provider: "default",
       id: "MISSING_GATEWAY_TOKEN",
     });
-    process.env.OPENCLAW_GATEWAY_TOKEN = "fallback-token";
+    process.env.CARAPACE_GATEWAY_TOKEN = "fallback-token";
     copyToClipboardMock.mockResolvedValue(true);
     detectBrowserOpenSupportMock.mockResolvedValue({ ok: true });
     openUrlMock.mockResolvedValue(true);

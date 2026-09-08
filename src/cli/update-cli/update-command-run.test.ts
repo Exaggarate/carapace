@@ -1,20 +1,20 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { createUpdateRun, finishUpdateRun, getUpdateRun } from "../../infra/update-run-ledger.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { completeUpdateCommandRun } from "./update-command-run.js";
 
 const dirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 
 it.each([false, true])(
   "keeps restored-generation completion with its helper across CLI unwind (handoff=%s)",
   (handoff) => {
-    vi.stubEnv("OPENCLAW_UPDATE_RUN_HANDOFF", handoff ? "1" : undefined);
-    const env = { OPENCLAW_STATE_DIR: dirs.make("update-rollback-owner-") };
+    vi.stubEnv("CARAPACE_UPDATE_RUN_HANDOFF", handoff ? "1" : undefined);
+    const env = { CARAPACE_STATE_DIR: dirs.make("update-rollback-owner-") };
     const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
     const result = {
       status: "error" as const,

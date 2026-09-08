@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/deepgram-provider",
+  "name": "@carapace/deepgram-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw Deepgram media-understanding provider",
+  "description": "Carapace Deepgram media-understanding provider",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

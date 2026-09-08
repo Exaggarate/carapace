@@ -25,7 +25,7 @@ function splitTokens(raw) {
 function sanitizeLabel(value) {
   return (
     String(value)
-      .replace(/^openclaw@/u, "")
+      .replace(/^carapace@/u, "")
       .replace(/[^A-Za-z0-9._-]+/g, "-")
       .replace(/^-+|-+$/g, "") || "targeted"
   );
@@ -78,7 +78,7 @@ export function planTargetedDockerLaneGroups({
     selectedLanes.some((lane) => BASELINE_SHARDED_LANES.has(lane))
   ) {
     const predecessor = normalizeUpgradeSurvivorBaselineSpec(upgradeSurvivorBaseline);
-    if (!predecessor || !/^openclaw@\d{4}\.\d+\.\d+(?:-\d+)?$/u.test(predecessor)) {
+    if (!predecessor || !/^carapace@\d{4}\.\d+\.\d+(?:-\d+)?$/u.test(predecessor)) {
       throw new Error("Supported-line pairing requires an exact published predecessor.");
     }
     if (baselineSpecs.length === 0) {
@@ -201,10 +201,10 @@ if (isMain) {
       planTargetedDockerLaneGroups({
         groupSize: process.env.GROUP_SIZE,
         lanes: process.env.LANES,
-        upgradeSurvivorBaseline: process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC,
-        upgradeSurvivorBaselineScope: process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SCOPE,
-        upgradeSurvivorBaselines: process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS,
-        upgradeSurvivorScenarios: process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS,
+        upgradeSurvivorBaseline: process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC,
+        upgradeSurvivorBaselineScope: process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SCOPE,
+        upgradeSurvivorBaselines: process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS,
+        upgradeSurvivorScenarios: process.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIOS,
       }),
     ),
   );

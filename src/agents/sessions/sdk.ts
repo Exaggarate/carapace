@@ -5,7 +5,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { clampThinkingLevel } from "@openclaw/ai/internal/runtime";
+import { clampThinkingLevel } from "@carapace/ai/internal/runtime";
 import { resolveThinkingDefaultForModel } from "../../auto-reply/thinking.js";
 import { createSessionEntryWithTranscript } from "../../config/sessions/session-accessor.js";
 import { bindStreamLlmRuntime } from "../../llm/model-runtime-binding.js";
@@ -48,7 +48,7 @@ import type { ToolName } from "./tools/index.js";
 export interface CreateAgentSessionOptions {
   /** Working directory for project-local discovery. Default: process.cwd() */
   cwd?: string;
-  /** Global config directory. Default: ~/.openclaw/agents/default */
+  /** Global config directory. Default: ~/.carapace/agents/default */
   agentDir?: string;
 
   /** Auth storage for credentials. Default: canonical per-agent SQLite auth profiles. */
@@ -74,7 +74,7 @@ export interface CreateAgentSessionOptions {
   /**
    * Optional allowlist of tool names.
    *
-   * When omitted, OpenClaw enables the default built-in tools (read, bash, edit, write)
+   * When omitted, Carapace enables the default built-in tools (read, bash, edit, write)
    * and leaves extension/custom tools enabled unless `noTools` changes that default.
    * When provided, only the listed tool names are enabled.
    */
@@ -200,8 +200,8 @@ function getAttributionHeaders(
 
   if (model.provider === "openrouter" || baseUrl.includes("openrouter.ai")) {
     return {
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+      "X-OpenRouter-Title": "Carapace",
       "X-OpenRouter-Categories": "cli-agent",
     };
   }
@@ -213,7 +213,7 @@ function getAttributionHeaders(
     baseUrl.includes("gateway.ai.cloudflare.com")
   ) {
     return {
-      "User-Agent": "openclaw",
+      "User-Agent": "carapace",
     };
   }
 
@@ -561,7 +561,7 @@ async function createDefaultSdkSessionManager(
     agentId: "main",
     sessionId,
     sessionKey: `agent:main:sdk:${sessionId}`,
-    storePath: join(agentDir, "openclaw-agent.sqlite"),
+    storePath: join(agentDir, "carapace-agent.sqlite"),
   };
   const created = await createSessionEntryWithTranscript(
     target,

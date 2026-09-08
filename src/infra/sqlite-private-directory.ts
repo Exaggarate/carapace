@@ -4,7 +4,7 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveRequiredOsHomeDir } from "./home-dir.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 import { createPrivateWindowsDirectory } from "./windows-private-directory.js";
 
 const SQLITE_DIRECTORY_MODE = 0o700;
@@ -24,8 +24,8 @@ export function resolvePrivateSqliteSnapshotStagingRoot(): string {
   const cacheRoot =
     [process.env.XDG_CACHE_HOME?.trim(), appData].find((root) => root && path.isAbsolute(root)) ??
     path.join(resolveRequiredOsHomeDir(), platformRoot);
-  return resolvePreferredOpenClawTmpDir({
-    preferredDir: path.join(cacheRoot, "openclaw"),
+  return resolvePreferredCarapaceTmpDir({
+    preferredDir: path.join(cacheRoot, "carapace"),
     tmpdir: () => cacheRoot,
   });
 }

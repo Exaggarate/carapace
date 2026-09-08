@@ -1,6 +1,6 @@
 /** Shared runtime helpers for embedding provider lookup across core and plugin capabilities. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolvePluginCapabilityProvider,
   resolvePluginCapabilityProviders,
@@ -15,8 +15,8 @@ type RegisteredAdapterEntry<TAdapter> = {
 /** Builds lookup ids for embedding providers, including configured API aliases. */
 export function resolveRuntimeEmbeddingProviderLookupIds(params: {
   id: string;
-  cfg?: OpenClawConfig;
-  resolveConfiguredProviderId: (id: string, cfg?: OpenClawConfig) => string | undefined;
+  cfg?: CarapaceConfig;
+  resolveConfiguredProviderId: (id: string, cfg?: CarapaceConfig) => string | undefined;
 }): string[] {
   const ids = [params.id];
   const configuredProviderId = params.resolveConfiguredProviderId(params.id, params.cfg);
@@ -34,7 +34,7 @@ export function listRuntimeEmbeddingProviderAdapters<
   K extends EmbeddingProviderCapabilityKey,
 >(params: {
   key: K;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   registered: CapabilityProviderFor<K>[];
 }): CapabilityProviderFor<K>[] {
   const merged = new Map(params.registered.map((adapter) => [adapter.id, adapter]));
@@ -55,7 +55,7 @@ export function getRuntimeEmbeddingProviderAdapter<
   K extends EmbeddingProviderCapabilityKey,
 >(params: {
   key: K;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   lookupIds: string[];
   getRegisteredProvider: (
     id: string,

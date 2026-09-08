@@ -5,7 +5,7 @@
  * splitting multi-byte characters in display output.
  */
 import { Buffer } from "node:buffer";
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveIntegerOption } from "@carapace/normalization-core/number-coercion";
 import { truncateUtf8Suffix } from "../../../utils/utf8-truncate.js";
 
 /** Normalizes optional positive numeric limits to a finite integer. */

@@ -1,7 +1,7 @@
 import {
   normalizeAgentRunTimeoutPhase,
   normalizeProviderStarted,
-} from "@openclaw/normalization-core/agent-run-terminal-outcome";
+} from "@carapace/normalization-core/agent-run-terminal-outcome";
 /**
  * Gateway-backed agent run wait helpers.
  * Normalizes run wait responses, reads the latest assistant reply, and drains
@@ -14,15 +14,15 @@ import {
   parseFiniteNumber,
   resolveDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { callGateway } from "../gateway/call.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { hasRetryableConnectionErrorCode } from "../infra/retryable-network-errors.js";
 import { normalizeBlockedLivenessWaitStatus } from "../shared/agent-liveness.js";
 import {
-  isOpenClawMessageToolMirrorAssistantMessage,
-  isTranscriptOnlyOpenClawAssistantMessage,
-} from "../shared/transcript-only-openclaw-assistant.js";
+  isCarapaceMessageToolMirrorAssistantMessage,
+  isTranscriptOnlyCarapaceAssistantMessage,
+} from "../shared/transcript-only-carapace-assistant.js";
 import {
   buildAgentRunTerminalOutcomeFromWaitResult,
   type AgentRunTerminalOutcome,
@@ -152,8 +152,8 @@ function normalizePendingRunIds(runIds: Iterable<string>): string[] {
 
 function isAssistantReplyTranscriptArtifact(message: unknown): boolean {
   return (
-    isTranscriptOnlyOpenClawAssistantMessage(message) ||
-    isOpenClawMessageToolMirrorAssistantMessage(message) ||
+    isTranscriptOnlyCarapaceAssistantMessage(message) ||
+    isCarapaceMessageToolMirrorAssistantMessage(message) ||
     isInterSessionInputMessage(message)
   );
 }

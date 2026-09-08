@@ -1,7 +1,7 @@
 import { consume } from "@lit/context";
 import { initialState, Task, TaskStatus } from "@lit/task";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { html, nothing, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -68,7 +68,7 @@ import { searchVisibleSessionTranscripts } from "../../lib/sessions/transcript-s
 import { formatPreservedWorktreesNotice } from "../../lib/sessions/worktree-preservation.ts";
 import { showToast } from "../../lib/toast.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   pluginSessionMenuActions,
@@ -80,7 +80,7 @@ import { loadStoredGroupBy, saveStoredGroupBy } from "./page-state.ts";
 import { sessionsPageListQuery, type SessionsRouteData } from "./route.ts";
 import { renderSessions, type SessionsProps } from "./view.ts";
 
-const SESSIONS_DOCS_URL = "https://docs.openclaw.ai/concepts/session";
+const SESSIONS_DOCS_URL = "https://github.com/Exaggarate/carapace";
 const SESSION_SEARCH_DEBOUNCE_MS = 200;
 
 type SessionsPageRequestScope = {
@@ -105,7 +105,7 @@ type SessionsPageListBinding = {
   transcriptKey: string;
 };
 
-class SessionsPage extends OpenClawLightDomElement {
+class SessionsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: ApplicationContext;
 
@@ -1463,7 +1463,7 @@ class SessionsPage extends OpenClawLightDomElement {
     );
     const pinnable = isPinnableUiSessionRow(row);
     return html`
-      <openclaw-session-menu
+      <carapace-session-menu
         .session=${{
           label: normalizeOptionalString(row.label) ?? row.key,
           sessionId: normalizeOptionalString(row.sessionId) ?? null,
@@ -1567,7 +1567,7 @@ class SessionsPage extends OpenClawLightDomElement {
               break;
           }
         }}
-      ></openclaw-session-menu>
+      ></carapace-session-menu>
     `;
   }
 
@@ -1793,7 +1793,7 @@ class SessionsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-sessions-page")) {
-  customElements.define("openclaw-sessions-page", SessionsPage);
+if (!customElements.get("carapace-sessions-page")) {
+  customElements.define("carapace-sessions-page", SessionsPage);
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

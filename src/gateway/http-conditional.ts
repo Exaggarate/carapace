@@ -1,6 +1,6 @@
 // HTTP validators share strict date admission and weak entity-tag comparison.
 import type { IncomingMessage } from "node:http";
-import { parseHttpDateInstant } from "@openclaw/ai/internal/retry-after";
+import { parseHttpDateInstant } from "@carapace/ai/internal/retry-after";
 import { splitHttpHeaderValue } from "./http-header-value.js";
 
 export function matchesHttpIfModifiedSince(

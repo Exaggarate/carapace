@@ -2,10 +2,10 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { MANIFEST_REF, type PlacementStore, REQUEST } from "./placement-dispatch-test-fixtures.js";
 import { createHarness as createPlacementHarness } from "./placement-dispatch-test-harness.js";
 import { createWorkerSessionPlacementStore } from "./placement-store.js";
@@ -30,7 +30,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("worker placement dispatch conflict lookup", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let placementStore: PlacementStore;
   const createTestHarness = (
     options: Parameters<typeof createPlacementHarness>[1] = {},
@@ -39,13 +39,13 @@ describe("worker placement dispatch conflict lookup", () => {
 
   beforeEach(async () => {
     workerPlacementWarn.mockClear();
-    root = tempDirs.make("openclaw-dispatch-");
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = tempDirs.make("carapace-dispatch-");
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placementStore = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("reclaims an unchanged worker with unknown conflict state without silently clearing its report", async () => {

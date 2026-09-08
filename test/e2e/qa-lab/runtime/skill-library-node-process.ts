@@ -4,9 +4,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { runManagedCommand } from "../../../../scripts/lib/managed-child-process.mts";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 import { waitFor } from "./cloud-worker-midturn-loss-fixture.js";
 import type { SkillLibraryWireClient } from "./skill-library-wire-fixture.js";
 
@@ -21,17 +21,17 @@ type ListedNode = {
 };
 
 export async function startSkillLibraryNodeProcess(
-  gateway: OpenClawTestInstance,
+  gateway: CarapaceTestInstance,
   admin: SkillLibraryWireClient,
 ) {
-  const node = await createOpenClawTestInstance({
+  const node = await createCarapaceTestInstance({
     name: "skill-library-node",
     env: {
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: gateway.gatewayToken,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-      OPENCLAW_SKIP_PROVIDERS: undefined,
-      OPENCLAW_SKIP_CHANNELS: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: gateway.gatewayToken,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_SKIP_PROVIDERS: undefined,
+      CARAPACE_SKIP_CHANNELS: undefined,
       VITEST: undefined,
       VITEST_POOL_ID: undefined,
       VITEST_WORKER_ID: undefined,

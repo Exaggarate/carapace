@@ -17,7 +17,7 @@ const suite = createChatFlowE2eSuite();
 
 suite.define(() => {
   it("drains an inactive agent outbox while the selected global agent is active", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-outbox-agent-scope", artifactRoot)
       : undefined;
@@ -125,7 +125,7 @@ suite.define(() => {
       }
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, "agent:main:main"));
       await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: { context: { agentSelection: { set: (agentId: string) => void } } };
         };
         app.runtime?.context.agentSelection.set("main");
@@ -137,7 +137,7 @@ suite.define(() => {
         )
         .waitFor({ state: "detached", timeout: 10_000 });
       await page.evaluate(async () => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: { context: { sessions: { refresh: (options: unknown) => Promise<void> } } };
         };
         await app.runtime?.context.sessions.refresh({ agentId: "main", force: true });
@@ -194,7 +194,7 @@ suite.define(() => {
       }
       const workPath = controlUiSessionPath("agent:work:main");
       await page.evaluate((pathname) => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               agentSelection: { set: (agentId: string) => void };
@@ -203,7 +203,7 @@ suite.define(() => {
           };
         };
         if (!app.runtime) {
-          throw new Error("OpenClaw application runtime is unavailable");
+          throw new Error("Carapace application runtime is unavailable");
         }
         app.runtime.context.agentSelection.set("work");
         app.runtime.context.navigate("chat", { pathname });
@@ -222,7 +222,7 @@ suite.define(() => {
         clientRunId: runId,
         hasActiveRun: true,
         message: {
-          __openclaw: { id: "work-outbox-user", idempotencyKey: `${runId}:user`, seq: 1 },
+          __carapace: { id: "work-outbox-user", idempotencyKey: `${runId}:user`, seq: 1 },
           content: [{ text: prompt, type: "text" }],
           role: "user",
           timestamp: Date.now(),

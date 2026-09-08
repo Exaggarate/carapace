@@ -32,7 +32,7 @@ export function createPluginRecord(params: {
   description?: string;
   packageVersion?: string;
   version?: string;
-  builtWithOpenClawVersion?: string;
+  builtWithCarapaceVersion?: string;
   packageName?: string;
   format?: PluginFormat;
   bundleFormat?: PluginBundleFormat;
@@ -62,9 +62,9 @@ export function createPluginRecord(params: {
     description: params.description,
     packageVersion: params.packageVersion,
     version: params.version,
-    builtWithOpenClawVersion: params.builtWithOpenClawVersion,
+    builtWithCarapaceVersion: params.builtWithCarapaceVersion,
     packageName: params.packageName,
-    format: params.format ?? "openclaw",
+    format: params.format ?? "carapace",
     bundleFormat: params.bundleFormat,
     bundleCapabilities: params.bundleCapabilities,
     source: params.source,
@@ -173,29 +173,29 @@ function resolvePluginImportHint(
   try {
     const text = String(node).replaceAll("\\", "/");
     const seam =
-      /(?:The requested module ['"]openclaw\/|Package subpath ['"]\.\/)(plugin-sdk\/[\w./-]{1,160})['"] (?:does not provide an export named|is not defined by ["']exports["'] in .*\/openclaw\/package\.json)/.exec(
+      /(?:The requested module ['"]carapace\/|Package subpath ['"]\.\/)(plugin-sdk\/[\w./-]{1,160})['"] (?:does not provide an export named|is not defined by ["']exports["'] in .*\/carapace\/package\.json)/.exec(
         text,
       )?.[1];
     if (seam) {
       const sdkCompatibility = {
-        seam: `openclaw/${seam}`,
+        seam: `carapace/${seam}`,
         coreVersion: VERSION,
-        builtWithOpenClawVersion: record.builtWithOpenClawVersion,
+        builtWithCarapaceVersion: record.builtWithCarapaceVersion,
         nestedSdk: Boolean(
           record.rootDir &&
           text.includes(
-            `${record.rootDir.replaceAll("\\", "/")}/node_modules/openclaw/package.json`,
+            `${record.rootDir.replaceAll("\\", "/")}/node_modules/carapace/package.json`,
           ),
         ),
       };
       // Plugin ids need not be shell-safe; keep unsafe ids out of copy-paste commands.
       const repair = sdkCompatibility.nestedSdk
-        ? "this plugin bundles an incompatible OpenClaw SDK; update it or contact its author"
+        ? "this plugin bundles an incompatible Carapace SDK; update it or contact its author"
         : /^[a-z0-9_][a-z0-9_.-]*$/i.test(record.id)
-          ? `run \`openclaw plugins update ${record.id}\``
+          ? `run \`carapace plugins update ${record.id}\``
           : "update this plugin or contact its author";
       return {
-        hint: `Plugin ${record.id} cannot import ${sdkCompatibility.seam} (built with OpenClaw ${record.builtWithOpenClawVersion ?? "unknown"}; running core ${VERSION}); ${repair}`,
+        hint: `Plugin ${record.id} cannot import ${sdkCompatibility.seam} (built with Carapace ${record.builtWithCarapaceVersion ?? "unknown"}; running core ${VERSION}); ${repair}`,
         sdkCompatibility,
       };
     }
@@ -316,7 +316,7 @@ export function formatMissingPluginRegisterError(
   env: NodeJS.ProcessEnv,
 ): string {
   const message = "plugin export missing register/activate";
-  if (parseBooleanValue(env.OPENCLAW_PLUGIN_LOAD_DEBUG) !== true) {
+  if (parseBooleanValue(env.CARAPACE_PLUGIN_LOAD_DEBUG) !== true) {
     return message;
   }
   return `${message} (module shape: ${describePluginModuleExportShape(moduleExport).join("; ")})`;

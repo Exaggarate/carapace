@@ -17,7 +17,7 @@ import {
 import { resolveSessionStorePathForScope } from "../../config/sessions/session-store-path.js";
 import { SessionTranscriptWriterClaimReboundError } from "../../config/sessions/transcript-write-context.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { CompactResult } from "../../context-engine/types.js";
 import {
   forgetActiveSessionForShutdown,
@@ -36,7 +36,7 @@ import { log } from "./logger.js";
 
 /** Resolve a context engine's successor without letting it cross the active store binding. */
 export async function resolveContextEngineCompactionSuccessor(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   currentSessionFile: string;
   currentTarget: SessionTranscriptRuntimeTarget;
   result: CompactResult;
@@ -185,7 +185,7 @@ export async function acceptCompactionSuccessor(params: {
     activeWriterRunId: InternalSessionEntry["activeWriterRunId"];
   }>;
   assertActive: () => void;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onCommitted?: (accepted: AcceptedCompactionSuccessor) => void;
 }): Promise<AcceptedCompactionSuccessor> {
   const currentTarget = { ...params.currentTarget };
@@ -288,7 +288,7 @@ export async function acceptCompactionSuccessor(params: {
 
 function emitCompactionSessionLifecycleHooks(params: {
   agentId?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   storePath?: string;
   previousEntry: InternalSessionEntry;

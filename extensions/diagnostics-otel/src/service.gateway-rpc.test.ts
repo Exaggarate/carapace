@@ -14,7 +14,7 @@ import {
   emitDiagnosticEvent,
   emitTrustedDiagnosticEventWithPrivateData,
   waitForDiagnosticEventsDrained,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
 import { expect, test } from "vitest";
 import { installRealOtelSdkTestHarness } from "./service.real-sdk.test-support.js";
 import { startOtelService, stopStartedOtelServices } from "./service.test-helpers.js";
@@ -56,7 +56,7 @@ test.each([
       });
       await waitForDiagnosticEventsDrained();
 
-      for (const name of ["openclaw.gateway.rpc.response", "openclaw.model.usage"]) {
+      for (const name of ["carapace.gateway.rpc.response", "carapace.model.usage"]) {
         expect(Boolean(spanNamed(sdk.exporter.getFinishedSpans(), name))).toBe(traces);
       }
       const { resourceMetrics, errors } = await reader.collect();
@@ -66,7 +66,7 @@ test.each([
       );
       if (metricsEnabled) {
         expect(names).toEqual(
-          expect.arrayContaining(["openclaw.gateway.rpc.first_response_ms", "openclaw.tokens"]),
+          expect.arrayContaining(["carapace.gateway.rpc.first_response_ms", "carapace.tokens"]),
         );
       } else {
         expect(names).toEqual([]);
@@ -122,11 +122,11 @@ test("keeps parentless Gateway RPC spans out of unrelated ambient OpenTelemetry 
 
     const spans = sdk.exporter
       .getFinishedSpans()
-      .filter((span) => span.name.startsWith("openclaw.gateway.rpc."));
+      .filter((span) => span.name.startsWith("carapace.gateway.rpc."));
     expect(spans.map((span) => span.name).toSorted()).toEqual([
-      "openclaw.gateway.rpc.dispatch",
-      "openclaw.gateway.rpc.handler",
-      "openclaw.gateway.rpc.response",
+      "carapace.gateway.rpc.dispatch",
+      "carapace.gateway.rpc.handler",
+      "carapace.gateway.rpc.response",
     ]);
     for (const span of spans) {
       expect(span.parentSpanContext).toBeUndefined();
@@ -188,15 +188,15 @@ test("exports Gateway RPC phase metrics with real SDK aggregation and upstream t
     expect(errors).toEqual([]);
     const rpcMetrics = resourceMetrics.scopeMetrics
       .flatMap((scope) => scope.metrics)
-      .filter((metric) => metric.descriptor.name.startsWith("openclaw.gateway.rpc."));
-    const methodAttrs = { "openclaw.gateway.rpc.method": "sessions.list" };
+      .filter((metric) => metric.descriptor.name.startsWith("carapace.gateway.rpc."));
+    const methodAttrs = { "carapace.gateway.rpc.method": "sessions.list" };
     expect(
       rpcMetrics.find((metric) => metric.descriptor.name.endsWith(".requests"))?.dataPoints,
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ attributes: methodAttrs, value: 1 }),
         expect.objectContaining({
-          attributes: { "openclaw.gateway.rpc.method": "unknown" },
+          attributes: { "carapace.gateway.rpc.method": "unknown" },
           value: 1,
         }),
       ]),
@@ -208,7 +208,7 @@ test("exports Gateway RPC phase metrics with real SDK aggregation and upstream t
       ["queue_wait", 75],
     ]) {
       const points = rpcMetrics.find(
-        (entry) => entry.descriptor.name === `openclaw.gateway.rpc.${metric}_ms`,
+        (entry) => entry.descriptor.name === `carapace.gateway.rpc.${metric}_ms`,
       )?.dataPoints;
       expect(points).toEqual(
         expect.arrayContaining([
@@ -219,7 +219,7 @@ test("exports Gateway RPC phase metrics with real SDK aggregation and upstream t
         ]),
       );
       expect(
-        points?.some((point) => point.attributes["openclaw.gateway.rpc.method"] === "unknown"),
+        points?.some((point) => point.attributes["carapace.gateway.rpc.method"] === "unknown"),
       ).toBe(false);
     }
     const outcomes = rpcMetrics.find((metric) =>
@@ -231,7 +231,7 @@ test("exports Gateway RPC phase metrics with real SDK aggregation and upstream t
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          attributes: { "openclaw.gateway.rpc.method": "health" },
+          attributes: { "carapace.gateway.rpc.method": "health" },
           value: expect.objectContaining({ count: 2, sum: 30 }),
         }),
       ]),
@@ -240,21 +240,21 @@ test("exports Gateway RPC phase metrics with real SDK aggregation and upstream t
       expect.arrayContaining([
         expect.objectContaining({
           attributes: {
-            "openclaw.gateway.rpc.phase": "response",
-            "openclaw.gateway.rpc.outcome": "ok",
+            "carapace.gateway.rpc.phase": "response",
+            "carapace.gateway.rpc.outcome": "ok",
           },
           value: 2,
         }),
         expect.objectContaining({
           attributes: {
-            "openclaw.gateway.rpc.phase": "dispatch",
-            "openclaw.gateway.rpc.outcome": "rejected",
+            "carapace.gateway.rpc.phase": "dispatch",
+            "carapace.gateway.rpc.outcome": "rejected",
           },
           value: 1,
         }),
       ]),
     );
-    expect(outcomes?.every((point) => !("openclaw.gateway.rpc.method" in point.attributes))).toBe(
+    expect(outcomes?.every((point) => !("carapace.gateway.rpc.method" in point.attributes))).toBe(
       true,
     );
     expect(
@@ -264,11 +264,11 @@ test("exports Gateway RPC phase metrics with real SDK aggregation and upstream t
     ).not.toContain(parent.traceId);
     const rpcSpans = sdk.exporter
       .getFinishedSpans()
-      .filter((span) => span.attributes["openclaw.gateway.rpc.method"] === "sessions.list");
+      .filter((span) => span.attributes["carapace.gateway.rpc.method"] === "sessions.list");
     expect(rpcSpans.map((span) => span.name).toSorted()).toEqual([
-      "openclaw.gateway.rpc.dispatch",
-      "openclaw.gateway.rpc.handler",
-      "openclaw.gateway.rpc.response",
+      "carapace.gateway.rpc.dispatch",
+      "carapace.gateway.rpc.handler",
+      "carapace.gateway.rpc.response",
     ]);
     expect(
       rpcSpans.every(

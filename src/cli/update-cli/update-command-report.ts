@@ -79,7 +79,7 @@ export async function runInteractiveUpdateFailureAction(params: {
       params.runtime.log("Sanitized update failure report preview:");
       params.runtime.log(prepared.body);
       const confirmed = await confirm({
-        message: "Submit this sanitized report to openclaw/openclaw now?",
+        message: "Submit this sanitized report to carapace/carapace now?",
         initialValue: false,
       });
       if (isCancel(confirmed) || !confirmed) {

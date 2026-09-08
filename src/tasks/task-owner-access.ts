@@ -1,7 +1,7 @@
 // Normalizes task owner keys and checks requester access to task records.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import {
   findTaskByRunId,
@@ -18,7 +18,7 @@ import { buildTaskStatusSnapshot } from "./task-status.js";
 type TaskOwnerIdentity = {
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
 function canOwnerAccessTask(task: TaskRecord, identity: TaskOwnerIdentity): boolean {
@@ -51,7 +51,7 @@ export function getTaskByIdForOwner(params: {
   taskId: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): TaskRecord | undefined {
   const task = getTaskById(params.taskId);
   return task && canOwnerAccessTask(task, params) ? task : undefined;
@@ -61,7 +61,7 @@ export function findTaskByRunIdForOwner(params: {
   runId: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): TaskRecord | undefined {
   const task = findTaskByRunId(params.runId);
   return task && canOwnerAccessTask(task, params) ? task : undefined;
@@ -72,7 +72,7 @@ export function updateTaskNotifyPolicyForOwner(params: {
   taskId: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   notifyPolicy: TaskNotifyPolicy;
 }): TaskRecord | null {
   const task = getTaskByIdForOwner({
@@ -95,7 +95,7 @@ export function cancelTaskByIdForOwner(params: {
   taskId: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   endedAt: number;
   terminalSummary?: string | null;
 }): TaskRecord | null {
@@ -120,7 +120,7 @@ export function listTasksForRelatedSessionKeyForOwner(params: {
   relatedSessionKey: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): TaskRecord[] {
   return listTasksForRelatedSessionKey(params.relatedSessionKey).filter((task) =>
     canOwnerAccessTask(task, params),
@@ -131,7 +131,7 @@ export function buildTaskStatusSnapshotForRelatedSessionKeyForOwner(params: {
   relatedSessionKey: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }) {
   return buildTaskStatusSnapshot(
     listTasksForRelatedSessionKeyForOwner({
@@ -147,7 +147,7 @@ export function findLatestTaskForRelatedSessionKeyForOwner(params: {
   relatedSessionKey: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): TaskRecord | undefined {
   return listTasksForRelatedSessionKeyForOwner(params)[0];
 }
@@ -156,7 +156,7 @@ export function resolveTaskForLookupTokenForOwner(params: {
   token: string;
   callerOwnerKey: string;
   callerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): TaskRecord | undefined {
   const direct = getTaskByIdForOwner({
     taskId: params.token,

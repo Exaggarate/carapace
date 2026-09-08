@@ -3,7 +3,7 @@ import { note } from "../../packages/terminal-core/src/note.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { resolveGatewayPort } from "../config/config.js";
 import { isDefaultInstallIdentity } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveGatewayLaunchAgentLabel,
   resolveNodeLaunchAgentLabel,
@@ -134,10 +134,10 @@ async function maybeRepairLaunchAgentBootstrap(params: {
 
 function renderBlockingSystemGatewayServices(services: ExtraGatewayService[]): string {
   return [
-    "System-level OpenClaw gateway service detected while the user gateway service is not installed.",
+    "System-level Carapace gateway service detected while the user gateway service is not installed.",
     ...services.map((svc) => `- ${svc.label} (${svc.detail})`),
-    "OpenClaw will not install a second user-level gateway service automatically.",
-    "Run `openclaw gateway status --deep` or `openclaw doctor --deep` to inspect duplicate services.",
+    "Carapace will not install a second user-level gateway service automatically.",
+    "Run `carapace gateway status --deep` or `carapace doctor --deep` to inspect duplicate services.",
     `Set ${SERVICE_REPAIR_POLICY_ENV}=external if a system supervisor owns the gateway lifecycle.`,
   ].join("\n");
 }
@@ -154,12 +154,12 @@ function renderEstablishedGatewayConnections(connections: PortConnection[]): str
       return `- ${pid} ${direction}${command}${address}${commandLine}`;
     }),
     ...(connections.length > 8 ? [`- ... ${connections.length - 8} more connection(s)`] : []),
-    "If logs show protocol mismatch after rollback, stop stale OpenClaw client processes listed here and rerun doctor.",
+    "If logs show protocol mismatch after rollback, stop stale Carapace client processes listed here and rerun doctor.",
   ].join("\n");
 }
 
 async function maybeReportEstablishedGatewayClients(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deep: boolean,
   port?: number,
 ): Promise<void> {
@@ -174,7 +174,7 @@ async function maybeReportEstablishedGatewayClients(
   }
 }
 
-async function noteGatewayPortDiagnostics(cfg: OpenClawConfig, deep: boolean): Promise<boolean> {
+async function noteGatewayPortDiagnostics(cfg: CarapaceConfig, deep: boolean): Promise<boolean> {
   const port = resolveGatewayPort(cfg, process.env);
   const bindHost = await resolveGatewayBindHost(
     cfg.gateway?.bind ?? "loopback",
@@ -201,7 +201,7 @@ async function noteGatewayServiceInspectionFailure(
   if (kind) {
     lines.push(...renderSystemdUnavailableHints({ wsl: await isWSL(), kind }));
   }
-  lines.push(`Run ${formatCliCommand("openclaw gateway status --deep")} and retry doctor.`);
+  lines.push(`Run ${formatCliCommand("carapace gateway status --deep")} and retry doctor.`);
   note(lines.join("\n"), "Gateway");
 }
 
@@ -212,7 +212,7 @@ async function noteGatewayServiceInspectionFailure(
  * services, report port conflicts, or restart unhealthy supervision when policy allows.
  */
 export async function maybeRepairGatewayDaemon(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   prompter: DoctorPrompter;
   options: DoctorOptions;
@@ -281,7 +281,7 @@ export async function maybeRepairGatewayDaemon(params: {
     await maybeRepairLaunchAgentBootstrap({
       env: {
         ...process.env,
-        OPENCLAW_LAUNCHD_LABEL: resolveNodeLaunchAgentLabel(),
+        CARAPACE_LAUNCHD_LABEL: resolveNodeLaunchAgentLabel(),
       },
       title: "Node",
       runtime: params.runtime,
@@ -359,7 +359,7 @@ export async function maybeRepairGatewayDaemon(params: {
     );
     if (!install) {
       note(
-        `Run ${formatCliCommand("openclaw gateway install")} when you want to install the gateway service.`,
+        `Run ${formatCliCommand("carapace gateway install")} when you want to install the gateway service.`,
         "Gateway",
       );
     }
@@ -450,9 +450,9 @@ export async function maybeRepairGatewayDaemon(params: {
   }
 
   if (process.platform === "darwin") {
-    const label = resolveGatewayLaunchAgentLabel(process.env.OPENCLAW_PROFILE);
+    const label = resolveGatewayLaunchAgentLabel(process.env.CARAPACE_PROFILE);
     note(
-      `LaunchAgent loaded; stopping requires "${formatCliCommand("openclaw gateway stop")}" or launchctl bootout gui/$UID/${label}.`,
+      `LaunchAgent loaded; stopping requires "${formatCliCommand("carapace gateway stop")}" or launchctl bootout gui/$UID/${label}.`,
       "Gateway",
     );
   }

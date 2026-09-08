@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { callGatewayHandler } from "../../gateway/server-methods/skills.test-helpers.js";
 import {
   initializeGlobalHookRunner,
@@ -43,7 +43,7 @@ async function writeInstallableSkill(
     `---
 name: ${name}
 description: test skill
-metadata: ${JSON.stringify({ openclaw: { install: Array.isArray(installSpec) ? installSpec : [installSpec] } })}
+metadata: ${JSON.stringify({ carapace: { install: Array.isArray(installSpec) ? installSpec : [installSpec] } })}
 ---
 
 # ${name}
@@ -73,7 +73,7 @@ function lastRunCommandCall(): unknown[] | undefined {
   return calls[calls.length - 1];
 }
 
-const workspaceSuite = createFixtureSuite("openclaw-skills-install-");
+const workspaceSuite = createFixtureSuite("carapace-skills-install-");
 
 beforeAll(async () => {
   await workspaceSuite.setup();
@@ -90,9 +90,9 @@ async function withWorkspaceCase(
 ): Promise<void> {
   const workspaceDir = await workspaceSuite.createCaseDir("case");
   const stateDir = path.join(workspaceDir, "state");
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   try {
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     await run({ workspaceDir, stateDir });
   } finally {
     envSnapshot.restore();
@@ -106,9 +106,9 @@ describe("installSkill before_install hooks", () => {
     skillsInstallTesting.setDepsForTest({
       loadWorkspaceSkills: loadTestWorkspaceSkillEntries,
       resolveNodeInstallStateDir: () => {
-        const stateDir = process.env.OPENCLAW_STATE_DIR;
+        const stateDir = process.env.CARAPACE_STATE_DIR;
         if (!stateDir) {
-          throw new Error("OPENCLAW_STATE_DIR missing in skills install test");
+          throw new Error("CARAPACE_STATE_DIR missing in skills install test");
         }
         return stateDir;
       },
@@ -122,7 +122,7 @@ describe("installSkill before_install hooks", () => {
     });
   });
 
-  it("runs npm node installs with an OpenClaw-managed user prefix", async () => {
+  it("runs npm node installs with an Carapace-managed user prefix", async () => {
     await withWorkspaceCase(async ({ workspaceDir, stateDir }) => {
       await writeInstallableSkill(workspaceDir, "node-prefix-skill");
 
@@ -152,7 +152,7 @@ describe("installSkill before_install hooks", () => {
         loadWorkspaceSkills,
         resolveNodeInstallStateDir: () => stateDir,
       });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           list: [
@@ -188,7 +188,7 @@ describe("installSkill before_install hooks", () => {
           skills: expect.arrayContaining([
             expect.objectContaining({
               name: skillName,
-              source: "openclaw-workshop",
+              source: "carapace-workshop",
               install: expect.arrayContaining([expect.objectContaining({ id: "deps" })]),
             }),
           ]),
@@ -271,10 +271,10 @@ describe("installSkill before_install hooks", () => {
   );
 
   it("keeps the default npm prefix out of env-overridden state paths", () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]);
     try {
-      process.env.OPENCLAW_STATE_DIR = "/tmp/untrusted-state";
-      process.env.OPENCLAW_CONFIG_PATH = "/tmp/untrusted-config/openclaw.json";
+      process.env.CARAPACE_STATE_DIR = "/tmp/untrusted-state";
+      process.env.CARAPACE_CONFIG_PATH = "/tmp/untrusted-config/carapace.json";
 
       expect(
         skillsInstallTesting.resolveDefaultNodeInstallStateDir({
@@ -282,7 +282,7 @@ describe("installSkill before_install hooks", () => {
           homedir: () => "/Users/tester",
           platform: "darwin",
         }),
-      ).toBe("/Users/tester/.openclaw");
+      ).toBe("/Users/tester/.carapace");
     } finally {
       envSnapshot.restore();
     }
@@ -291,12 +291,12 @@ describe("installSkill before_install hooks", () => {
   it("uses a fixed system state root for root npm installs", () => {
     expect(
       skillsInstallTesting.resolveDefaultNodeInstallStateDir({
-        cwd: "/workspace/openclaw",
+        cwd: "/workspace/carapace",
         getuid: () => 0,
         homedir: () => "/root",
         platform: "linux",
       }),
-    ).toBe("/var/lib/openclaw");
+    ).toBe("/var/lib/carapace");
   });
 
   it("surfaces plugin hook findings from before_install", async () => {
@@ -342,7 +342,7 @@ describe("installSkill before_install hooks", () => {
         | undefined;
       expect(payload?.targetName).toBe("policy-skill");
       expect(payload?.targetType).toBe("skill");
-      expect(payload?.origin).toBe("openclaw-workspace");
+      expect(payload?.origin).toBe("carapace-workspace");
       expect(payload?.sourcePath).toContain("policy-skill");
       expect(payload?.sourcePathKind).toBe("directory");
       expect(payload?.request).toEqual({
@@ -356,7 +356,7 @@ describe("installSkill before_install hooks", () => {
       expect(payload?.skill?.installSpec?.kind).toBe("node");
       expect(payload?.skill?.installSpec?.package).toBe("example-package");
       expect(handlerCall?.[1]).toEqual({
-        origin: "openclaw-workspace",
+        origin: "carapace-workspace",
         targetType: "skill",
         requestKind: "skill-install",
       });

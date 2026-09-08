@@ -1,10 +1,10 @@
 // Node status/list/describe commands and paired-node display formatting.
-import { formatByteSize } from "@openclaw/normalization-core";
+import { formatByteSize } from "@carapace/normalization-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import { sanitizeTerminalText } from "../../../packages/terminal-core/src/safe-text.js";
 import { getTerminalTableWidth, renderTable } from "../../../packages/terminal-core/src/table.js";

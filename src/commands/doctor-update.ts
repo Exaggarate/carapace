@@ -1,7 +1,7 @@
 /** Optional pre-doctor update prompt for source checkouts and package installs. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { exitCliAfterOutput } from "../cli/one-shot-exit.js";
@@ -37,7 +37,7 @@ import { loadInstalledPluginIndexInstallRecords } from "../plugins/installed-plu
 import { runCommandWithTimeout } from "../process/exec.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { classifyUpdateOutcome } from "../shared/update-outcome.js";
-import type { OpenClawSchemaVersions } from "../state/openclaw-schema-versions.js";
+import type { CarapaceSchemaVersions } from "../state/carapace-schema-versions.js";
 import type { DoctorOptions } from "./doctor-prompter.js";
 import {
   EXTERNAL_SERVICE_REPAIR_NOTE,
@@ -48,7 +48,7 @@ async function resolveComparablePath(target: string): Promise<string> {
   return await fs.realpath(target).catch(() => path.resolve(target));
 }
 
-async function detectOpenClawGitCheckout(root: string): Promise<"git" | "not-git" | "unknown"> {
+async function detectCarapaceGitCheckout(root: string): Promise<"git" | "not-git" | "unknown"> {
   const res = await runCommandWithTimeout(["git", "-C", root, "rev-parse", "--show-toplevel"], {
     timeoutMs: 5000,
   }).catch(() => null);
@@ -69,7 +69,7 @@ async function detectOpenClawGitCheckout(root: string): Promise<"git" | "not-git
     : "not-git";
 }
 
-/** Offers to update OpenClaw before doctor when running interactively from an updatable install. */
+/** Offers to update Carapace before doctor when running interactively from an updatable install. */
 export async function maybeOfferUpdateBeforeDoctor(params: {
   runtime: RuntimeEnv;
   options: DoctorOptions;
@@ -77,7 +77,7 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
   confirm: (p: { message: string; initialValue: boolean }) => Promise<boolean>;
   outro: (message: string) => void;
 }) {
-  const updateInProgress = isTruthyEnvValue(process.env.OPENCLAW_UPDATE_IN_PROGRESS);
+  const updateInProgress = isTruthyEnvValue(process.env.CARAPACE_UPDATE_IN_PROGRESS);
   const canOfferUpdate =
     !updateInProgress &&
     params.options.nonInteractive !== true &&
@@ -88,10 +88,10 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
     return { updated: false };
   }
 
-  const git = await detectOpenClawGitCheckout(params.root);
+  const git = await detectCarapaceGitCheckout(params.root);
   if (git === "git") {
     const shouldUpdate = await params.confirm({
-      message: "Update OpenClaw from git before running doctor?",
+      message: "Update Carapace from git before running doctor?",
       initialValue: true,
     });
     if (!shouldUpdate) {
@@ -135,7 +135,7 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
     let ledgerHandoffOwned = false;
     let stateInspected = false;
     let schemaVersions: Awaited<ReturnType<typeof readUpdateStateSchemaVersions>> | undefined;
-    let candidateSchemaVersions: OpenClawSchemaVersions | undefined;
+    let candidateSchemaVersions: CarapaceSchemaVersions | undefined;
     let configSnapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>> | undefined;
     let preUpdatePluginInstallRecords: Awaited<
       ReturnType<typeof loadInstalledPluginIndexInstallRecords>
@@ -160,7 +160,7 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
           ...(result?.steps ?? []),
           {
             name: reason,
-            command: "openclaw update",
+            command: "carapace update",
             cwd: updateRoot,
             durationMs,
             exitCode: 1,
@@ -423,10 +423,10 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
         });
         if (activated !== "ok") {
           throw new Error(
-            "Gateway restart was not verified; run `openclaw gateway status --deep` before restarting manually.",
+            "Gateway restart was not verified; run `carapace gateway status --deep` before restarting manually.",
           );
         }
-        note("Restarted the running gateway service after updating OpenClaw.", "Update");
+        note("Restarted the running gateway service after updating Carapace.", "Update");
       } catch (err) {
         restartSafe = false;
         const message = "Update completed, but gateway service restart failed";
@@ -448,7 +448,7 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
     note(
       [
         "This install is not a git checkout.",
-        `Run \`${formatCliCommand("openclaw update")}\` to update via your package manager (npm/pnpm), then rerun doctor.`,
+        `Run \`${formatCliCommand("carapace update")}\` to update via your package manager (npm/pnpm), then rerun doctor.`,
       ].join("\n"),
       "Update",
     );

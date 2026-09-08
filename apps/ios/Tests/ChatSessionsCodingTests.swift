@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawChatUI
+import CarapaceChatUI
 import Testing
 
 struct ChatSessionsCodingTests {
@@ -16,7 +16,7 @@ struct ChatSessionsCodingTests {
         }
         """#.utf8)
 
-        let response = try JSONDecoder().decode(OpenClawChatSessionsListResponse.self, from: data)
+        let response = try JSONDecoder().decode(CarapaceChatSessionsListResponse.self, from: data)
 
         #expect(response.defaults?.modelSelectionTarget == "agent")
     }
@@ -32,7 +32,7 @@ struct ChatSessionsCodingTests {
         }
         """#.utf8)
 
-        let response = try JSONDecoder().decode(OpenClawChatSessionsListResponse.self, from: data)
+        let response = try JSONDecoder().decode(CarapaceChatSessionsListResponse.self, from: data)
 
         #expect(response.defaults?.modelSelectionTarget == nil)
     }
@@ -52,7 +52,7 @@ struct ChatSessionsCodingTests {
         }
         """#.utf8)
 
-        let entry = try JSONDecoder().decode(OpenClawChatSessionEntry.self, from: data)
+        let entry = try JSONDecoder().decode(CarapaceChatSessionEntry.self, from: data)
 
         #expect(entry.label == "Release room")
         #expect(entry.category == "Operations")

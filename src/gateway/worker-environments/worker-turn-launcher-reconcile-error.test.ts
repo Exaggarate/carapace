@@ -4,7 +4,7 @@ import {
   WORKER_RPC_SET_VERSION,
 } from "../../../packages/gateway-protocol/src/schema/worker-admission.js";
 import { NODE_WORKER_ENVIRONMENT_STOP_COMMAND } from "../../infra/node-commands.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { installWorkerPlacementReconcileGuard } from "../server-worker-placement-reconcile-guard.js";
 import { StaleWorkerBuildError } from "./admission.js";
 import { hashWorkerCredential } from "./credential.js";
@@ -39,7 +39,7 @@ describe("worker turn recovery after environment reconciliation errors", () => {
   afterEach(cleanupWorkerTurnLauncherTest);
 
   it("settles a stale-build turn when a lost shared node rejects its stop acknowledgement", async () => {
-    const store = createWorkerEnvironmentStore({ database: openOpenClawStateDatabase() });
+    const store = createWorkerEnvironmentStore({ database: openCarapaceStateDatabase() });
     let installation = {
       ...BUNDLE_ARTIFACT,
       protocolFeatures: [WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE],
@@ -131,7 +131,7 @@ describe("worker turn recovery after environment reconciliation errors", () => {
           },
           bootstrapReceipt: {
             bundleHash: installation.bundleHash,
-            openclawVersion: installation.openclawVersion,
+            carapaceVersion: installation.carapaceVersion,
             protocolFeatures: installation.protocolFeatures,
             installKind: "bundle",
           },

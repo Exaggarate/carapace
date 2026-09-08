@@ -11,8 +11,8 @@ import {
 import { onAgentEvent } from "../infra/agent-events.js";
 import { clearAgentRunContext } from "../infra/agent-run-registry.js";
 import type { SubsystemLogger } from "../logging/subsystem.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   createChatRunState,
   createSessionEventSubscriberRegistry,
@@ -254,7 +254,7 @@ it.each(["success", "failed-write", "setup-failed-write"] as const)(
         { phase: "end", status: "cancelled", aborted: true, stopReason: "rpc" },
       ]);
       expect(context.chatAbortControllers.has(runId)).toBe(false);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const persisted = loadSessionEntry({ ...target, readConsistency: "latest" });
       expect(persisted).toMatchObject({ status: "killed", lastRunId: runId, abortedLastRun: true });
       expect(persisted?.endedAt).toBeTypeOf("number");
@@ -279,8 +279,8 @@ it.each(["success", "failed-write", "setup-failed-write"] as const)(
       subscriptions?.transcriptUnsub();
       subscriptions?.lifecycleUnsub();
       await subscriptions?.taskUnsub();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       persistenceSpy?.mockRestore();
       routing.load.mockReset();
       await fs.rm(root, { recursive: true, force: true });

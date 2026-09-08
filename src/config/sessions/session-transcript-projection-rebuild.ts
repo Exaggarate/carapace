@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { ColumnType, Generated, InferResult } from "kysely";
 import {
   executeSqliteQuerySync,
@@ -9,7 +9,7 @@ import {
   prepareSqliteQuerySync,
 } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
   isCanonicalSessionTranscriptEntry,
   parseSessionTranscriptTreeEntry,
@@ -18,14 +18,14 @@ import {
 } from "./transcript-tree.js";
 
 type TranscriptProjectionDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "session_windows" | "session_transcript_index_state" | "transcript_events"
 > & {
-  session_transcript_active_events: OpenClawAgentKyselyDatabase["session_transcript_active_events"] & {
+  session_transcript_active_events: CarapaceAgentKyselyDatabase["session_transcript_active_events"] & {
     rowid: Generated<number>;
   };
   session_transcript_fts: Omit<
-    OpenClawAgentKyselyDatabase["session_transcript_fts"],
+    CarapaceAgentKyselyDatabase["session_transcript_fts"],
     "timestamp"
   > & {
     rowid: Generated<number>;

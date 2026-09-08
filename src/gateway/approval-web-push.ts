@@ -1,9 +1,9 @@
 // Delivers generic approval notifications to Web Push subscriptions whose
 // persisted browser binding still has current approval and visibility access.
 import { createHash } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   WEB_PUSH_USER_PREFERENCES_KEY,
   isWebPushQuietHours,
@@ -58,7 +58,7 @@ function approvalPreferences(params: {
     ? getUserPreferences(
         profileId,
         [WEB_PUSH_USER_PREFERENCES_KEY],
-        params.stateDir ? { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } } : {},
+        params.stateDir ? { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } } : {},
       )[WEB_PUSH_USER_PREFERENCES_KEY]
     : undefined;
   return resolveEffectiveWebPushPreferences({
@@ -76,7 +76,7 @@ function approvalNotificationCopy(params: {
   const agent = params.agentLabel ? ` for ${params.agentLabel}` : "";
   if (params.terminal) {
     return {
-      title: `${label}OpenClaw approval updated`,
+      title: `${label}Carapace approval updated`,
       body:
         params.preferences.detailLevel === "private"
           ? "This approval is no longer pending."
@@ -84,11 +84,11 @@ function approvalNotificationCopy(params: {
     };
   }
   return {
-    title: `${label}OpenClaw approval requested`,
+    title: `${label}Carapace approval requested`,
     body:
       params.preferences.detailLevel === "private"
-        ? "Open OpenClaw to review this request."
-        : `Open OpenClaw to review an approval${agent}.`,
+        ? "Open Carapace to review this request."
+        : `Open Carapace to review an approval${agent}.`,
   };
 }
 
@@ -97,19 +97,19 @@ type ApprovalWebPushDeliveryState = {
 };
 
 function approvalWebPushTag(approvalId: string): string {
-  return `openclaw-approval-${approvalId}`;
+  return `carapace-approval-${approvalId}`;
 }
 
 function approvalWebPushTopic(approvalId: string): string {
   return createHash("sha256")
-    .update(`openclaw-approval:${approvalId}`)
+    .update(`carapace-approval:${approvalId}`)
     .digest("base64url")
     .slice(0, 32);
 }
 
 async function deliverBoundApprovalWebPush<TPayload>(params: {
   record: ExecApprovalRecord<TPayload>;
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
   stateDir?: string;
 }): Promise<ApprovalRequestWebPushDelivery | null> {
   if (params.record.resolvedAtMs !== undefined || params.record.expiresAtMs <= Date.now()) {
@@ -217,7 +217,7 @@ async function deliverBoundApprovalWebPush<TPayload>(params: {
 
 /** Retains successful request targets so terminal state replaces their tagged alert. */
 export function createApprovalWebPushDelivery(params: {
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
   log?: { warn?: (message: string) => void };
   stateDir?: string;
 }) {
@@ -258,7 +258,7 @@ export function createApprovalWebPushDelivery(params: {
         : getOperatorApprovalDetailed({
             id: approval.id,
             databaseOptions: params.stateDir
-              ? { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } }
+              ? { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } }
               : undefined,
           });
       const durableRecord = durableLookup?.outcome === "found" ? durableLookup.record : null;

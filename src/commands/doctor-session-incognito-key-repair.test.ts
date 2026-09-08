@@ -3,40 +3,40 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { listSessionEntriesCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { repairReservedIncognitoSessionKeys } from "./doctor-session-incognito-key-repair.js";
 
 const tempDirs = createTempDirTracker();
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
 describe("doctor reserved incognito session key repair", () => {
   it("renames durable collisions and every key-bearing linkage idempotently", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-doctor-incognito-key-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const sqlitePath = resolveOpenClawAgentSqlitePath({ agentId: "main", env });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env, path: sqlitePath });
-    const secondaryPath = resolveOpenClawAgentSqlitePath({ agentId: "work", env });
-    const secondaryDatabase = openOpenClawAgentDatabase({
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-doctor-incognito-key-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const sqlitePath = resolveCarapaceAgentSqlitePath({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env, path: sqlitePath });
+    const secondaryPath = resolveCarapaceAgentSqlitePath({ agentId: "work", env });
+    const secondaryDatabase = openCarapaceAgentDatabase({
       agentId: "work",
       env,
       path: secondaryPath,
     });
-    const stateDatabase = openOpenClawStateDatabase({ env });
+    const stateDatabase = openCarapaceStateDatabase({ env });
     const oldKey = "agent:main:dashboard:incognito-collision";
     const baseLegacyKey = "agent:main:dashboard:legacy-incognito-collision";
     const newKey = `${baseLegacyKey}-1`;
@@ -236,7 +236,7 @@ describe("doctor reserved incognito session key repair", () => {
           .prepare("SELECT entry_valid FROM session_nodes WHERE session_key = ?")
           .get("agent:work:dashboard:regular"),
       ).toEqual({ entry_valid: 1 });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(listSessionEntriesCore({ agentId: "main", env })).toMatchObject([
         { sessionKey: newKey, entry: { sessionId: "session-old", updatedAt: 1 } },
       ]);
@@ -252,31 +252,31 @@ describe("doctor reserved incognito session key repair", () => {
       });
       expect(
         stateDatabase.db
-          .prepare("SELECT scope FROM state_leases WHERE owner = 'openclaw-doctor'")
+          .prepare("SELECT scope FROM state_leases WHERE owner = 'carapace-doctor'")
           .get(),
       ).toBeUndefined();
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
 
   it.each([false, true])(
     "resumes an interrupted repair from its journal (shared owner: %s)",
     (shared) => {
-      const stateDir = fs.realpathSync(tempDirs.make("openclaw-doctor-incognito-resume-"));
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = fs.realpathSync(tempDirs.make("carapace-doctor-incognito-resume-"));
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const sqlitePath = shared
         ? path.join(stateDir, "shared.sqlite")
-        : resolveOpenClawAgentSqlitePath({ agentId: "main", env });
-      const cfg: OpenClawConfig = shared
+        : resolveCarapaceAgentSqlitePath({ agentId: "main", env });
+      const cfg: CarapaceConfig = shared
         ? { agents: { entries: { beta: {} } }, session: { store: sqlitePath } }
         : {};
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: shared ? "alpha" : "main",
         env,
         path: sqlitePath,
       });
-      const stateDatabase = openOpenClawStateDatabase({ env });
+      const stateDatabase = openCarapaceStateDatabase({ env });
       const oldKey = "agent:main:dashboard:incognito-interrupted";
       const newCollisionKey = "agent:main:dashboard:incognito-new";
       const resumedKey = "agent:main:dashboard:legacy-incognito-interrupted-resumed";
@@ -302,7 +302,7 @@ describe("doctor reserved incognito session key repair", () => {
         .run(newCollisionKey);
       stateDatabase.db
         .prepare(
-          "INSERT INTO state_leases (scope, lease_key, owner, payload_json, created_at, updated_at) VALUES ('doctor-session-key-migration', 'reserved-incognito-v1', 'openclaw-doctor', ?, 1, 1)",
+          "INSERT INTO state_leases (scope, lease_key, owner, payload_json, created_at, updated_at) VALUES ('doctor-session-key-migration', 'reserved-incognito-v1', 'carapace-doctor', ?, 1, 1)",
         )
         .run(
           JSON.stringify({
@@ -332,16 +332,16 @@ describe("doctor reserved incognito session key repair", () => {
       ).toEqual([resumedKey, "agent:main:dashboard:legacy-incognito-new"].toSorted());
       expect(
         stateDatabase.db
-          .prepare("SELECT scope FROM state_leases WHERE owner = 'openclaw-doctor'")
+          .prepare("SELECT scope FROM state_leases WHERE owner = 'carapace-doctor'")
           .get(),
       ).toBeUndefined();
     },
   );
 
   it("rewrites dense incognito references in bounded batches without changing payloads", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-doctor-incognito-density-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-doctor-incognito-density-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     const oldKey = "agent:main:dashboard:incognito-density";
     const newKey = "agent:main:dashboard:legacy-incognito-density";
     const payload = "incognito-payload-".repeat(128);

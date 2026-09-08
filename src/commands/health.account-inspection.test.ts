@@ -23,7 +23,7 @@ describe("collectGatewayHealthSnapshot account inspection", () => {
   });
 
   beforeEach(() => {
-    sessionStorePath = path.join(tempDirs.make("openclaw-health-inspection-"), "sessions.json");
+    sessionStorePath = path.join(tempDirs.make("carapace-health-inspection-"), "sessions.json");
     plugins = [];
     health.setActiveDegradedPlugins([]);
     health.setActivePluginRegistry(health.createTestRegistry([]));

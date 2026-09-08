@@ -1,5 +1,5 @@
-// Fal plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Fal plugin entrypoint registers its Carapace integration.
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { buildFalImageGenerationProvider } from "./image-generation-provider.js";
 import { buildFalMusicGenerationProvider } from "./music-generation-provider.js";
 import { createFalProvider } from "./provider-registration.js";

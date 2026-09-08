@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core/stable-stringify";
+import { stableStringify } from "@carapace/normalization-core/stable-stringify";
 import { sql } from "kysely";
 import { MAX_PAYLOAD_BYTES } from "../../gateway/server-constants.js";
 import { getAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
@@ -9,17 +9,17 @@ import {
 } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
 import type { PersistedUserTurnMessage } from "../../sessions/user-turn-transcript.types.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import {
   ensureSessionPendingInputsSchema,
   hasPendingInputConsumptionColumn,
   hasSessionPendingInputsSchema,
-} from "../../state/openclaw-agent-pending-inputs-schema.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+} from "../../state/carapace-agent-pending-inputs-schema.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import type { SessionAccessScope } from "./session-accessor.sqlite-contract.js";
 import { readSessionEntryRow } from "./session-accessor.sqlite-entry-store.js";
 import {
@@ -161,7 +161,7 @@ export async function stageSessionPendingInput(
     prepareMessageAfterIdempotencyCheck?: (
       message: PersistedUserTurnMessage,
     ) => PersistedUserTurnMessage | undefined;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     assertCurrent: () => void;
   },
 ): Promise<SessionPendingInputReceipt | undefined> {
@@ -180,7 +180,7 @@ export async function stageSessionPendingInput(
     : createHash("sha256").update(stableStringify(stableMessage)).digest("hex");
   return runExclusiveSqliteSessionWrite(resolved, async () => {
     options.assertCurrent();
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     if (readSessionEntryRow(database, resolved.sessionKey)?.entry.sessionId !== scope.sessionId) {
       return undefined;
     }
@@ -252,7 +252,7 @@ export async function stageSessionPendingInput(
     }
     const inputId = existing?.input_id ?? randomUUID();
     ensureSessionPendingInputsSchema(database.db);
-    const inserted = runOpenClawAgentWriteTransaction((current) => {
+    const inserted = runCarapaceAgentWriteTransaction((current) => {
       options.assertCurrent();
       if (readSessionEntryRow(current, resolved.sessionKey)?.entry.sessionId !== scope.sessionId) {
         return false;
@@ -317,7 +317,7 @@ export async function stageSessionPendingInput(
         finished = true;
         // Release authority even if recording the terminal disposition fails.
         releaseSessionPendingInputOwner(owner);
-        runOpenClawAgentWriteTransaction((current) => {
+        runCarapaceAgentWriteTransaction((current) => {
           executeSqliteQuerySync(
             current.db,
             getSessionKysely(current.db)
@@ -344,7 +344,7 @@ function readPendingInputRows(
   const resolved = resolveSqliteTranscriptScope(scope);
   const databaseOptions = toDatabaseOptions(resolved);
   const limit = Math.max(1, Math.min(20, Math.trunc(options.limit ?? 20)));
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     if (!hasSessionPendingInputsSchema(database.db)) {
       return { rows: [], total: 0, staleIds: [], nextBefore: undefined };
     }
@@ -412,7 +412,7 @@ function readPendingInputRows(
   }
   const snapshot = result.value;
   if (snapshot.staleIds.length) {
-    const interrupted = runOpenClawAgentWriteTransaction((database) => {
+    const interrupted = runCarapaceAgentWriteTransaction((database) => {
       const db = getSessionKysely(database.db);
       const candidates = executeSqliteQuerySync(
         database.db,
@@ -472,7 +472,7 @@ export function claimSessionPendingInputDedupeRecovery(
   runId: string,
 ): boolean {
   const resolved = resolveSqliteTranscriptScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => claimCurrentSessionPendingInputDedupeRecovery(database, resolved, runId),
     toDatabaseOptions(resolved),
   );
@@ -486,7 +486,7 @@ export function readSessionSubmittedInput(
 ): PersistedUserTurnMessage | undefined {
   try {
     const resolved = resolveSqliteTranscriptScope(scope);
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withCarapaceAgentDatabaseReadOnly(
       (database) =>
         runSqliteDeferredTransactionSync(database.db, () => {
           const db = getSessionKysely(database.db);
@@ -591,7 +591,7 @@ export function listSessionPendingInputReceipts(
     return [];
   }
   const resolved = resolveSqliteTranscriptScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     if (
       !hasSessionPendingInputsSchema(database.db) ||
       !hasPendingInputConsumptionColumn(database.db)

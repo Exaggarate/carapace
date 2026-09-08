@@ -1,4 +1,4 @@
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { nonEmptyString } from "./crabbox-worker-profile.js";
 import type { WarmImageRecord } from "./crabbox-worker-warm-image-store.js";
 

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { isSubagentSessionKey } from "../../routing/session-key.js";
 import type { SessionEntry } from "./types.js";
 

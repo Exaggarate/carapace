@@ -20,7 +20,7 @@ describe("worker connection endpoint", () => {
     { name: "astral Unicode", char: "😀" },
   ])("bounds maximal $name endpoint and Access fields", ({ char }) => {
     const prefix = "wss://worker.invalid/";
-    const suffix = "/__openclaw__/worker";
+    const suffix = "/__carapace__/worker";
     const fill = (length: number) => char.repeat(Math.ceil(length / char.length)).slice(0, length);
     const input = {
       kind: "websocket",
@@ -62,26 +62,26 @@ describe("worker connection endpoint", () => {
   it("resolves Unix sockets through the existing ws+unix carrier", () => {
     const endpoint = parseWorkerConnectionEndpoint({
       kind: "unix",
-      socketPath: "/tmp/openclaw-worker/gateway.sock",
+      socketPath: "/tmp/carapace-worker/gateway.sock",
     });
     expect(endpoint).toBeDefined();
 
     expect(resolveWorkerConnectionTarget(endpoint!)).toMatchObject({
-      url: "ws+unix:///tmp/openclaw-worker/gateway.sock:/",
+      url: "ws+unix:///tmp/carapace-worker/gateway.sock:/",
       options: {},
     });
   });
 
   it("rejects endpoint fields inherited from the prototype", () => {
     const endpoint = Object.assign(Object.create({ kind: "unix" }) as Record<string, unknown>, {
-      socketPath: "/tmp/openclaw-worker/gateway.sock",
+      socketPath: "/tmp/carapace-worker/gateway.sock",
     });
 
     expect(parseWorkerConnectionEndpoint(endpoint)).toBeUndefined();
 
     const websocketEndpoint = Object.assign(Object.create({ tlsFingerprint: fingerprint }), {
       kind: "websocket",
-      url: "wss://gateway.example/__openclaw__/worker",
+      url: "wss://gateway.example/__carapace__/worker",
     });
 
     expect(parseWorkerConnectionEndpoint(websocketEndpoint)).toBeUndefined();
@@ -95,7 +95,7 @@ describe("worker connection endpoint", () => {
   ])("normalizes the worker TLS pin %s", (tlsFingerprint) => {
     const endpoint = parseWorkerConnectionEndpoint({
       kind: "websocket",
-      url: "wss://gateway.example/tenant/__openclaw__/worker",
+      url: "wss://gateway.example/tenant/__carapace__/worker",
       tlsFingerprint,
     });
     expect(endpoint).toMatchObject({ tlsFingerprint: fingerprint });
@@ -106,7 +106,7 @@ describe("worker connection endpoint", () => {
     const clientSecret = ["cf", "worker", "secret"].join("-");
     const endpoint = parseWorkerConnectionEndpoint({
       kind: "websocket",
-      url: "wss://gateway.example/__openclaw__/worker",
+      url: "wss://gateway.example/__carapace__/worker",
       cloudflareAccess: { clientId, clientSecret },
     });
 
@@ -120,18 +120,18 @@ describe("worker connection endpoint", () => {
   it("rejects public plaintext while retaining the private-network break-glass", () => {
     const endpoint = {
       kind: "websocket" as const,
-      url: "ws://gateway.example/__openclaw__/worker",
+      url: "ws://gateway.example/__carapace__/worker",
     };
     expect(() => resolveWorkerConnectionTarget(endpoint, {})).toThrow("SECURITY ERROR");
     expect(() =>
-      resolveWorkerConnectionTarget(endpoint, { OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1" }),
+      resolveWorkerConnectionTarget(endpoint, { CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1" }),
     ).not.toThrow();
   });
 
   it("rejects Access credentials on plaintext worker endpoints", () => {
     const endpoint = {
       kind: "websocket" as const,
-      url: "ws://127.0.0.1/__openclaw__/worker",
+      url: "ws://127.0.0.1/__carapace__/worker",
       cloudflareAccess: {
         clientId: "cf-worker-plaintext-id",
         clientSecret: "cf-worker-plaintext-secret",

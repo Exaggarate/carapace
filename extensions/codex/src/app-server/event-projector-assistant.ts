@@ -1,7 +1,7 @@
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
-import { isSilentReplyPayloadText } from "openclaw/plugin-sdk/reply-chunking";
-import { readStringField as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
+import { isSilentReplyPayloadText } from "carapace/plugin-sdk/reply-chunking";
+import { readStringField as readString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   createAssistantAsyncMessage as buildAssistantAsyncMessage,
   createAssistantCommentaryMessage as buildAssistantCommentaryMessage,

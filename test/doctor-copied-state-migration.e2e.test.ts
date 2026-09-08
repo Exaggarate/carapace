@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../src/state/openclaw-state-schema.js";
-import { createOpenClawTestInstance } from "./helpers/openclaw-test-instance.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../src/state/carapace-state-schema.js";
+import { createCarapaceTestInstance } from "./helpers/carapace-test-instance.js";
 
 const HISTORICAL_DEVICE_BOOTSTRAP_TOKENS_SQL = `
 CREATE TABLE device_bootstrap_tokens (
@@ -150,11 +150,11 @@ CREATE INDEX idx_operator_approvals_runtime_pending
 `;
 
 function writeHistoricalCopiedStateFixture(stateDir: string): void {
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const database = new DatabaseSync(databasePath);
   try {
-    database.exec(OPENCLAW_STATE_SCHEMA_SQL);
+    database.exec(CARAPACE_STATE_SCHEMA_SQL);
     database.exec(`
       DROP TABLE device_bootstrap_tokens;
       ${HISTORICAL_DEVICE_BOOTSTRAP_TOKENS_SQL}
@@ -177,7 +177,7 @@ describe("doctor copied-state migration", () => {
     "repairs the retained 2026.6.1-beta.1 shared state before gateway readiness",
     { timeout: 180_000 },
     async () => {
-      const instance = await createOpenClawTestInstance({ name: "doctor-copied-state" });
+      const instance = await createCarapaceTestInstance({ name: "doctor-copied-state" });
       try {
         writeHistoricalCopiedStateFixture(instance.stateDir);
 

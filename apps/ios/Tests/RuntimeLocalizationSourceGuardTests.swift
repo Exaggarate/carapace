@@ -1,24 +1,24 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct RuntimeLocalizationSourceGuardTests {
     @Test func `live activity state persists semantics and external detail`() throws {
-        for status in OpenClawActivityAttributes.ContentState.Status.allCases {
-            let state = OpenClawActivityAttributes.ContentState(
+        for status in CarapaceActivityAttributes.ContentState.Status.allCases {
+            let state = CarapaceActivityAttributes.ContentState(
                 status: status,
                 verbatimDetail: status == .attention ? "Backend supplied detail" : nil,
                 startedAt: Date(timeIntervalSince1970: 1234),
                 voiceSamples: status == .voiceSpeaking ? [12, 96, 240] : nil)
             let data = try JSONEncoder().encode(state)
-            let decoded = try JSONDecoder().decode(OpenClawActivityAttributes.ContentState.self, from: data)
+            let decoded = try JSONDecoder().decode(CarapaceActivityAttributes.ContentState.self, from: data)
 
             #expect(decoded == state)
         }
     }
 
     @Test func `live activity state decodes shipped legacy payloads`() throws {
-        let cases: [(LegacyContentState, OpenClawActivityAttributes.ContentState.Status, String?)] = [
+        let cases: [(LegacyContentState, CarapaceActivityAttributes.ContentState.Status, String?)] = [
             (LegacyContentState(statusText: "Disconnected", isDisconnected: true), .disconnected, nil),
             (LegacyContentState(statusText: "Idle", isIdle: true), .idle, nil),
             (LegacyContentState(statusText: "Reconnecting...", isConnecting: true), .reconnecting, nil),
@@ -34,7 +34,7 @@ struct RuntimeLocalizationSourceGuardTests {
 
         for (legacy, expectedStatus, expectedDetail) in cases {
             let data = try JSONEncoder().encode(legacy)
-            let decoded = try JSONDecoder().decode(OpenClawActivityAttributes.ContentState.self, from: data)
+            let decoded = try JSONDecoder().decode(CarapaceActivityAttributes.ContentState.self, from: data)
 
             #expect(decoded.status == expectedStatus)
             #expect(decoded.verbatimDetail == expectedDetail)
@@ -43,13 +43,13 @@ struct RuntimeLocalizationSourceGuardTests {
     }
 
     @Test func `runtime owned copy remains localizable at render time`() throws {
-        let attributes = try Self.source("Sources/LiveActivity/OpenClawActivityAttributes.swift")
+        let attributes = try Self.source("Sources/LiveActivity/CarapaceActivityAttributes.swift")
         let manager = try Self.source("Sources/LiveActivity/LiveActivityManager.swift")
-        let widget = try Self.source("ActivityWidget/OpenClawLiveActivity.swift")
+        let widget = try Self.source("ActivityWidget/CarapaceLiveActivity.swift")
         let project = try Self.source("project.yml")
         let talkManager = try Self.source("Sources/Voice/TalkModeManager.swift")
         let watchInbox = try Self.source("WatchApp/Sources/WatchInboxView.swift")
-        let chat = try Self.sharedSource("OpenClawChatUI/ChatMessageViews.swift")
+        let chat = try Self.sharedSource("CarapaceChatUI/ChatMessageViews.swift")
 
         #expect(attributes.contains("var verbatimDetail: String?"))
         #expect(attributes.contains("private enum LegacyCodingKeys"))
@@ -57,7 +57,7 @@ struct RuntimeLocalizationSourceGuardTests {
         #expect(!manager.contains("statusText: String(localized: \"Disconnected\")"))
         #expect(widget.contains("Text(verbatim: detail)"))
         #expect(project.contains("""
-          OpenClawActivityWidget:
+          CarapaceActivityWidget:
         """))
         #expect(project.contains("""
               - path: Resources/Localizable.xcstrings
@@ -74,12 +74,12 @@ struct RuntimeLocalizationSourceGuardTests {
     }
 
     @Test func `voice waveform stays on avatar without expanded contour`() throws {
-        let widget = try Self.source("ActivityWidget/OpenClawLiveActivity.swift")
+        let widget = try Self.source("ActivityWidget/CarapaceLiveActivity.swift")
 
         #expect(!widget.contains("DynamicIslandExpandedRegion(.bottom)"))
         #expect(!widget.contains("expandedVoiceContour"))
         #expect(widget.contains(".keylineTint(self.islandKeylineTint(state: state))"))
-        #expect(widget.contains("case .voiceListening, .voiceActive:\n            OpenClawActivityStyle.sea"))
+        #expect(widget.contains("case .voiceListening, .voiceActive:\n            CarapaceActivityStyle.sea"))
         #expect(widget.contains("TalkAvatarWaveformView("))
         #expect(widget.contains("Text(\"LIVE\")"))
         #expect(!widget.contains("compactVoiceLeading"))
@@ -97,7 +97,7 @@ struct RuntimeLocalizationSourceGuardTests {
         try String(
             contentsOf: self.iosRoot
                 .deletingLastPathComponent()
-                .appendingPathComponent("shared/OpenClawKit/Sources")
+                .appendingPathComponent("shared/CarapaceKit/Sources")
                 .appendingPathComponent(path),
             encoding: .utf8)
     }

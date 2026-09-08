@@ -4,27 +4,27 @@ import {
   type ChannelApprovalCapabilityHandlerContext,
   type PendingApprovalView,
   type ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "carapace/plugin-sdk/approval-native-runtime";
 import {
   buildExecApprovalPendingReplyPayload,
   buildPluginApprovalPendingReplyPayload,
   type ExecApprovalReplyDecision,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
+} from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   buildApprovalPendingReplyPayload,
   buildPluginApprovalResolvedReplyPayload,
   formatChannelApprovalResolvedLabel,
   type ExecApprovalRequest,
   type PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
 import {
   listMessageReceiptPlatformIds,
   resolveMessageReceiptPrimaryId,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
-import { normalizeUniqueStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
+import { normalizeUniqueStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildMatrixApprovalReactionHint,
   listMatrixApprovalReactionBindings,
@@ -47,8 +47,8 @@ import {
 import { resolveMatrixTargetIdentity } from "./matrix/target-ids.js";
 import type { CoreConfig } from "./types.js";
 
-// OpenClaw Matrix custom event content for capable clients; body and reactions remain fallback.
-const MATRIX_APPROVAL_METADATA_KEY = "com.openclaw.approval" as const;
+// Carapace Matrix custom event content for capable clients; body and reactions remain fallback.
+const MATRIX_APPROVAL_METADATA_KEY = "com.carapace.approval" as const;
 
 type PendingMessage = {
   roomId: string;
@@ -342,7 +342,7 @@ function buildPendingApprovalContent(params: {
       approvalKind: "system-agent",
       approvalId: params.view.approvalId,
       approvalSlug: params.view.approvalId.slice(0, 8),
-      text: `OpenClaw change requires approval:\n${params.view.operationSummary}`,
+      text: `Carapace change requires approval:\n${params.view.operationSummary}`,
       agentId: params.view.agentId,
       allowedDecisions,
       sessionKey: params.view.sessionKey,
@@ -395,7 +395,7 @@ function buildResolvedApprovalText(view: ResolvedApprovalView): string {
   }
   const decisionLabel = formatChannelApprovalResolvedLabel(view);
   return [
-    `${view.approvalKind === "system-agent" ? "OpenClaw change" : "Exec approval"}: ${decisionLabel}`,
+    `${view.approvalKind === "system-agent" ? "Carapace change" : "Exec approval"}: ${decisionLabel}`,
     "",
     view.approvalKind === "system-agent" ? "Change" : "Command",
     buildMarkdownCodeBlock(view.commandText),

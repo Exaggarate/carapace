@@ -1,11 +1,11 @@
 import { access, mkdir } from "node:fs/promises";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { applyClawAddPlan } from "./add.js";
 import { persistClawInstallRecord, readClawInstallRecord } from "./provenance.js";
 import { makeProvenancePlan, stateEnv } from "./provenance.test-helpers.js";
@@ -13,12 +13,12 @@ import { makeProvenancePlan, stateEnv } from "./provenance.test-helpers.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("Claw add legacy plan resume", () => {
   it("records a failed config commit only after persistence resolves", async () => {
-    const root = tempDirs.make("openclaw-claw-add-commit-failure-");
+    const root = tempDirs.make("carapace-claw-add-commit-failure-");
     const env = stateEnv(root);
     const { plan } = await makeProvenancePlan(root, {
       schemaVersion: 1,
@@ -46,7 +46,7 @@ describe("Claw add legacy plan resume", () => {
   });
 
   it("replaces committed legacy config before upgrading v1 plan identity", async () => {
-    const root = tempDirs.make("openclaw-claw-add-v1-resume-");
+    const root = tempDirs.make("carapace-claw-add-v1-resume-");
     const env = stateEnv(root);
     const { plan } = await makeProvenancePlan(root, {
       schemaVersion: 1,
@@ -76,15 +76,15 @@ describe("Claw add legacy plan resume", () => {
     };
     await mkdir(boundedPlan.agent.workspace, { recursive: true });
     persistClawInstallRecord(legacyPlan, { env, status: "workspace_ready", nowMs: 1 });
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db /* sqlite-allow-raw: test-only downgrade simulates an interrupted v1 add. */
       .prepare("UPDATE claw_installs SET schema_version = ? WHERE agent_id = ?")
-      .run("openclaw.clawInstallRecord.v1", "worker");
+      .run("carapace.clawInstallRecord.v1", "worker");
     const legacyRecord = readClawInstallRecord("worker", { env });
     if (!legacyRecord) {
       throw new Error("expected legacy install record");
     }
-    let config: OpenClawConfig = {
+    let config: CarapaceConfig = {
       agents: {
         entries: {
           worker: Object.fromEntries(
@@ -114,14 +114,14 @@ describe("Claw add legacy plan resume", () => {
       tools: { profile: "full", allow: ["read"] },
     });
     expect(readClawInstallRecord("worker", { env })).toMatchObject({
-      schemaVersion: "openclaw.clawInstallRecord.v2",
+      schemaVersion: "carapace.clawInstallRecord.v2",
       planIntegrity: boundedPlan.planIntegrity,
       status: "complete",
     });
   });
 
   it("retries after v1 promotion fails behind the bounded config commit", async () => {
-    const root = tempDirs.make("openclaw-claw-add-v1-promotion-retry-");
+    const root = tempDirs.make("carapace-claw-add-v1-promotion-retry-");
     const env = stateEnv(root);
     const { plan } = await makeProvenancePlan(root, {
       schemaVersion: 1,
@@ -151,15 +151,15 @@ describe("Claw add legacy plan resume", () => {
     };
     await mkdir(boundedPlan.agent.workspace, { recursive: true });
     persistClawInstallRecord(legacyPlan, { env, status: "workspace_ready", nowMs: 1 });
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db /* sqlite-allow-raw: test-only downgrade simulates an interrupted v1 add. */
       .prepare("UPDATE claw_installs SET schema_version = ? WHERE agent_id = ?")
-      .run("openclaw.clawInstallRecord.v1", "worker");
+      .run("carapace.clawInstallRecord.v1", "worker");
     const legacyRecord = readClawInstallRecord("worker", { env });
     if (!legacyRecord) {
       throw new Error("expected legacy install record");
     }
-    let config: OpenClawConfig = {
+    let config: CarapaceConfig = {
       agents: {
         entries: {
           worker: Object.fromEntries(
@@ -168,7 +168,7 @@ describe("Claw add legacy plan resume", () => {
         },
       },
     };
-    const commitConfig = async (transform: (config: OpenClawConfig) => OpenClawConfig) => {
+    const commitConfig = async (transform: (config: CarapaceConfig) => CarapaceConfig) => {
       config = transform(config);
     };
     const dependencies = {
@@ -201,7 +201,7 @@ describe("Claw add legacy plan resume", () => {
       tools: { profile: "full", allow: ["read"] },
     });
     expect(readClawInstallRecord("worker", { env })).toMatchObject({
-      schemaVersion: "openclaw.clawInstallRecord.v1",
+      schemaVersion: "carapace.clawInstallRecord.v1",
       planIntegrity: legacyPlan.planIntegrity,
       status: "workspace_ready",
     });
@@ -210,7 +210,7 @@ describe("Claw add legacy plan resume", () => {
 
     expect(second.status).toBe("complete");
     expect(readClawInstallRecord("worker", { env })).toMatchObject({
-      schemaVersion: "openclaw.clawInstallRecord.v2",
+      schemaVersion: "carapace.clawInstallRecord.v2",
       planIntegrity: boundedPlan.planIntegrity,
       status: "complete",
     });

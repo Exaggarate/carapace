@@ -1,24 +1,24 @@
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { TranscriptEvent } from "../config/sessions/session-accessor.sqlite-contract.js";
 import { updateSqliteTranscriptEventJsonInTransaction } from "../config/sessions/session-accessor.sqlite-transcript-store.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
 import {
-  OpenClawAgentDatabaseLeaseActiveError,
+  CarapaceAgentDatabaseLeaseActiveError,
   assertAgentDatabaseMaintenanceAuthority,
-  assertNoOpenClawAgentDatabaseLeases,
-} from "../state/openclaw-agent-db-lease.js";
+  assertNoCarapaceAgentDatabaseLeases,
+} from "../state/carapace-agent-db-lease.js";
 import {
-  assertOpenClawAgentDatabaseForMaintenance,
-  migrateOpenClawAgentDatabaseForMaintenance,
-} from "../state/openclaw-agent-db-maintenance.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+  assertCarapaceAgentDatabaseForMaintenance,
+  migrateCarapaceAgentDatabaseForMaintenance,
+} from "../state/carapace-agent-db-maintenance.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  type OpenClawAgentDatabase,
+  type CarapaceAgentDatabase,
   withAgentDatabaseMaintenanceLease,
-} from "../state/openclaw-agent-db.js";
-import { OPENCLAW_SQLITE_BUSY_TIMEOUT_MS } from "../state/openclaw-state-db.js";
-import type { OpenClawStateLeaseContext } from "../state/openclaw-state-lease.js";
+} from "../state/carapace-agent-db.js";
+import { CARAPACE_SQLITE_BUSY_TIMEOUT_MS } from "../state/carapace-state-db.js";
+import type { CarapaceStateLeaseContext } from "../state/carapace-state-lease.js";
 import {
   clearNodeSqliteKyselyCacheForDatabase,
   executeSqliteQuerySync,
@@ -39,7 +39,7 @@ import type { MigrationMessages } from "./state-migrations.types.js";
 const MIGRATION_META_KEY = "historical-transcript-directives-v1";
 
 type TranscriptDirectiveMigrationDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "schema_meta" | "transcript_events"
 >;
 
@@ -63,7 +63,7 @@ function createMigrationDatabaseHandle(
   database: DatabaseSync,
   agentId: string,
   pathname: string,
-): OpenClawAgentDatabase {
+): CarapaceAgentDatabase {
   return {
     agentId,
     db: database,
@@ -248,10 +248,10 @@ function transcriptSessionsNeedMigration(
 
 function hasActiveAgentDatabaseLease(agentId: string, env: NodeJS.ProcessEnv): boolean {
   try {
-    assertNoOpenClawAgentDatabaseLeases(agentId, { env });
+    assertNoCarapaceAgentDatabaseLeases(agentId, { env });
     return false;
   } catch (error) {
-    if (error instanceof OpenClawAgentDatabaseLeaseActiveError) {
+    if (error instanceof CarapaceAgentDatabaseLeaseActiveError) {
       return true;
     }
     throw error;
@@ -267,7 +267,7 @@ async function yieldBetweenTranscriptBatches(): Promise<void> {
 async function migrateTranscriptSessions(params: {
   agentId: string;
   database: DatabaseSync;
-  owner: OpenClawAgentDatabase;
+  owner: CarapaceAgentDatabase;
   pathname: string;
   start: Extract<MigrationCursor, { phase: "transcripts" }>;
 }): Promise<number> {
@@ -310,7 +310,7 @@ async function migrateTranscriptSessions(params: {
           assertAgentDatabaseMaintenanceAuthority();
         },
         {
-          busyTimeoutMs: OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
+          busyTimeoutMs: CARAPACE_SQLITE_BUSY_TIMEOUT_MS,
           databaseLabel: params.pathname,
           operationLabel: "historical-transcript-directives",
         },
@@ -326,14 +326,14 @@ async function migrateTranscriptSessions(params: {
 
 async function migrateAgentDatabase(
   params: { agentId: string; pathname: string },
-  maintenance: OpenClawStateLeaseContext,
+  maintenance: CarapaceStateLeaseContext,
 ): Promise<DatabaseMigrationResult> {
-  await migrateOpenClawAgentDatabaseForMaintenance(params, maintenance);
+  await migrateCarapaceAgentDatabaseForMaintenance(params, maintenance);
   maintenance.assertOwned();
   const database = openNodeSqliteDatabase(params.pathname);
   try {
-    database.exec(`PRAGMA busy_timeout = ${OPENCLAW_SQLITE_BUSY_TIMEOUT_MS};`);
-    assertOpenClawAgentDatabaseForMaintenance(database, params);
+    database.exec(`PRAGMA busy_timeout = ${CARAPACE_SQLITE_BUSY_TIMEOUT_MS};`);
+    assertCarapaceAgentDatabaseForMaintenance(database, params);
     const cursor = readMigrationCursor(database, params.pathname);
     if (cursor.phase === "complete") {
       return { archivedTranscripts: 0, transcriptSessions: 0 };
@@ -380,11 +380,11 @@ function agentDatabaseNeedsTranscriptDirectiveMigration(params: {
   const database = openNodeSqliteDatabase(params.pathname, { readOnly: true });
   try {
     const userVersion = Number(database.prepare("PRAGMA user_version").get()?.user_version ?? 0);
-    if (userVersion !== OPENCLAW_AGENT_SCHEMA_VERSION) {
+    if (userVersion !== CARAPACE_AGENT_SCHEMA_VERSION) {
       return true;
     }
     try {
-      assertOpenClawAgentDatabaseForMaintenance(database, params);
+      assertCarapaceAgentDatabaseForMaintenance(database, params);
     } catch {
       return true;
     }

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createStreamingResponse } from "../../test-support/streaming-error-response.js";
 type EndpointCall = {
@@ -22,8 +22,8 @@ const endpointMockState = vi.hoisted(() => ({
   effects: [] as Array<(() => void) | undefined>,
   responses: [] as Response[],
 }));
-vi.mock("openclaw/plugin-sdk/provider-web-search", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/provider-web-search")>();
+vi.mock("carapace/plugin-sdk/provider-web-search", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/provider-web-search")>();
   return {
     ...actual,
     withTrustedWebSearchEndpoint: vi.fn(
@@ -215,11 +215,11 @@ describe("parallel web search provider", () => {
     );
   });
   it("returns a stable missing-key payload that points at the real config path", async () => {
-    await expect(paidTool({}).execute({ search_queries: ["openclaw"] })).resolves.toEqual({
+    await expect(paidTool({}).execute({ search_queries: ["carapace"] })).resolves.toEqual({
       error: "missing_parallel_api_key",
       message:
         "web_search (parallel) needs a Parallel API key. Set PARALLEL_API_KEY in the Gateway environment, or configure plugins.entries.parallel.config.webSearch.apiKey.",
-      docs: "https://docs.openclaw.ai/tools/parallel-search",
+      docs: "https://github.com/Exaggarate/carapace",
     });
     expect(endpointMockState.calls).toHaveLength(0);
   });
@@ -227,12 +227,12 @@ describe("parallel web search provider", () => {
     enqueueJson();
     await paidTool({
       parallel: { apiKey: "par-secret", baseUrl: "proxy.example/parallel/v1/search/" },
-    }).execute({ search_queries: ["openclaw"] });
+    }).execute({ search_queries: ["carapace"] });
     expect(endpointCall(0).url).toBe("https://proxy.example/parallel/v1/search");
     await expect(
       paidTool({
         parallel: { apiKey: "par-secret", baseUrl: "ftp://proxy.example/parallel" },
-      }).execute({ search_queries: ["openclaw"] }),
+      }).execute({ search_queries: ["carapace"] }),
     ).resolves.toMatchObject({ error: "invalid_base_url" });
     expect(endpointMockState.calls).toHaveLength(1);
   });
@@ -284,11 +284,11 @@ describe("parallel web search provider", () => {
   });
   it("treats objective as optional and omits it from the request when absent", async () => {
     enqueueJson();
-    const result = await paidTool().execute({ search_queries: ["openclaw"] });
+    const result = await paidTool().execute({ search_queries: ["carapace"] });
     expect(endpointMockState.calls).toHaveLength(1);
     const body = readBody();
     expect(body).not.toHaveProperty("objective");
-    expect(body).toMatchObject({ search_queries: ["openclaw"] });
+    expect(body).toMatchObject({ search_queries: ["carapace"] });
     expect(result).not.toHaveProperty("objective");
     expect(result).toMatchObject({ provider: "parallel" });
   });
@@ -318,22 +318,22 @@ describe("parallel web search provider", () => {
   });
   it("returns an error payload when search_queries is missing or empty", async () => {
     const tool = paidTool();
-    expect(await tool.execute({ objective: "Find OpenClaw on GitHub" })).toMatchObject({
+    expect(await tool.execute({ objective: "Find Carapace on GitHub" })).toMatchObject({
       error: "invalid_search_queries",
     });
     expect(
-      await tool.execute({ objective: "Find OpenClaw on GitHub", search_queries: [] }),
+      await tool.execute({ objective: "Find Carapace on GitHub", search_queries: [] }),
     ).toMatchObject({ error: "invalid_search_queries" });
     expect(endpointMockState.calls).toHaveLength(0);
   });
   it("promotes a generic `query` arg into search_queries when search_queries is absent (no synthesized objective)", async () => {
     enqueueJson();
-    const result = await paidTool().execute({ query: "OpenClaw GitHub", count: 3 });
+    const result = await paidTool().execute({ query: "Carapace GitHub", count: 3 });
     expect(endpointMockState.calls).toHaveLength(1);
     const body = readBody();
     expect(body).not.toHaveProperty("objective");
     expect(body).toMatchObject({
-      search_queries: ["OpenClaw GitHub"],
+      search_queries: ["Carapace GitHub"],
       advanced_settings: { max_results: 3 },
     });
     expect(result).not.toHaveProperty("objective");
@@ -375,21 +375,21 @@ describe("parallel web search provider", () => {
       maxResults: 3,
       timeoutSeconds: 5,
     }).execute({
-      objective: "Find the OpenClaw repository on GitHub",
-      search_queries: ["openclaw github", "openclaw repository"],
+      objective: "Find the Carapace repository on GitHub",
+      search_queries: ["carapace github", "carapace repository"],
     });
     expect(endpointMockState.calls).toHaveLength(1);
     const call = endpointCall(0);
     expect(call.url).toBe("https://api.parallel.ai/v1/search");
     expect(call.timeoutSeconds).toBe(5);
     expect(readBody(call)).toEqual({
-      objective: "Find the OpenClaw repository on GitHub",
-      search_queries: ["openclaw github", "openclaw repository"],
+      objective: "Find the Carapace repository on GitHub",
+      search_queries: ["carapace github", "carapace repository"],
       advanced_settings: { max_results: 3 },
     });
     const headers = (call.init.headers ?? {}) as Record<string, string>;
     expect(headers["x-api-key"]).toBe("par-secret");
-    expect(headers["User-Agent"]).toMatch(/^openclaw-parallel\/\d+\.\d+\.\d+/);
+    expect(headers["User-Agent"]).toMatch(/^carapace-parallel\/\d+\.\d+\.\d+/);
     expect(result).toMatchObject({
       provider: "parallel",
       searchId: "search_test",
@@ -400,22 +400,22 @@ describe("parallel web search provider", () => {
   it("threads caller-supplied session_id and client_model through to Parallel", async () => {
     enqueueJson({ search_id: "search_test", session_id: "session-caller-supplied", results: [] });
     const result = await paidTool().execute({
-      objective: "Find the OpenClaw repository on GitHub",
-      search_queries: ["openclaw github"],
+      objective: "Find the Carapace repository on GitHub",
+      search_queries: ["carapace github"],
       session_id: "session-caller-supplied",
       client_model: "claude-opus-4-7",
     });
     expect(readBody()).toMatchObject({
-      objective: "Find the OpenClaw repository on GitHub",
-      search_queries: ["openclaw github"],
+      objective: "Find the Carapace repository on GitHub",
+      search_queries: ["carapace github"],
       session_id: "session-caller-supplied",
       client_model: "claude-opus-4-7",
     });
     expect(result).toMatchObject({ sessionId: "session-caller-supplied" });
   });
-  it("always sends max_results matching the OpenClaw web_search default when no count is provided", async () => {
+  it("always sends max_results matching the Carapace web_search default when no count is provided", async () => {
     enqueueJson();
-    await paidTool().execute({ objective: "Find OpenClaw", search_queries: ["openclaw"] });
+    await paidTool().execute({ objective: "Find Carapace", search_queries: ["carapace"] });
     expect(endpointMockState.calls).toHaveLength(1);
     const body = readBody() as { advanced_settings?: { max_results?: number } };
     expect(body.advanced_settings?.max_results).toBe(5);
@@ -430,7 +430,7 @@ describe("parallel web search provider", () => {
     const error = await paidTool()
       .execute({
         objective: `parallel-error-body-${Date.now()}`,
-        search_queries: ["openclaw"],
+        search_queries: ["carapace"],
       })
       .catch((cause: unknown) => cause);
     expect(error).toBeInstanceOf(Error);
@@ -455,7 +455,7 @@ describe("parallel web search provider", () => {
     const error = await paidTool({ parallel: { apiKey } })
       .execute({
         objective: `parallel-error-redact-${Date.now()}`,
-        search_queries: ["openclaw"],
+        search_queries: ["carapace"],
       })
       .catch((cause: unknown) => cause);
     expect(error).toBeInstanceOf(Error);
@@ -473,7 +473,7 @@ describe("parallel web search provider", () => {
     const error = await paidTool({ parallel: { apiKey } })
       .execute({
         objective: `parallel-error-redact-reason-${Date.now()}`,
-        search_queries: ["openclaw"],
+        search_queries: ["carapace"],
       })
       .catch((cause: unknown) => cause);
     expect(error).toBeInstanceOf(Error);
@@ -487,14 +487,14 @@ describe("parallel web search provider", () => {
     const orgSecret = "acme-internal-bluefin-042";
     const apiKey = "par-live-4c9d2e7ab1f0c9d2e7ab1f0c9d2e7";
     const configDir = fs.mkdtempSync(path.join(os.tmpdir(), "parallel-redact-config-"));
-    const configPath = path.join(configDir, "openclaw.json");
+    const configPath = path.join(configDir, "carapace.json");
     fs.writeFileSync(
       configPath,
       JSON.stringify({
         logging: { redactPatterns: ["acme-internal-[a-z0-9-]+", "api[_-]?key"] },
       }),
     );
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
     try {
       endpointMockState.responses.push(
         new Response(
@@ -509,7 +509,7 @@ describe("parallel web search provider", () => {
       const error = await paidTool({ parallel: { apiKey } })
         .execute({
           objective: `parallel-error-redact-config-${Date.now()}`,
-          search_queries: ["openclaw"],
+          search_queries: ["carapace"],
         })
         .catch((cause: unknown) => cause);
       expect(error).toBeInstanceOf(Error);
@@ -532,7 +532,7 @@ describe("parallel web search provider", () => {
     const error = await paidTool()
       .execute({
         objective: `parallel-success-body-${Date.now()}-${Math.random()}`,
-        search_queries: ["openclaw"],
+        search_queries: ["carapace"],
       })
       .catch((cause: unknown) => cause);
     expect(error).toBeInstanceOf(Error);
@@ -550,7 +550,7 @@ describe("parallel web search provider", () => {
     });
     const result = await paidTool().execute({
       objective: `parallel-success-ok-${Date.now()}-${Math.random()}`,
-      search_queries: ["openclaw"],
+      search_queries: ["carapace"],
     });
     expect(result).toMatchObject({ provider: "parallel", searchId: "ok", count: 1 });
   });
@@ -558,9 +558,9 @@ describe("parallel web search provider", () => {
     const objective = `parallel-cache-isolation-${Date.now()}-${Math.random()}`;
     enqueueJson({ search_id: "first", session_id: "session-generated-by-parallel", results: [] });
     const tool = paidTool();
-    const firstResult = await tool.execute({ objective, search_queries: ["openclaw github"] });
+    const firstResult = await tool.execute({ objective, search_queries: ["carapace github"] });
     expect(firstResult.sessionId).toBe("session-generated-by-parallel");
-    const secondResult = await tool.execute({ objective, search_queries: ["openclaw github"] });
+    const secondResult = await tool.execute({ objective, search_queries: ["carapace github"] });
     expect(endpointMockState.calls).toHaveLength(1);
     expect(secondResult.sessionId).toBeUndefined();
   });
@@ -569,10 +569,10 @@ describe("parallel web search provider", () => {
     const sessionId = `session-${Date.now()}`;
     enqueueJson({ search_id: "first", session_id: sessionId, results: [] });
     const tool = paidTool();
-    await tool.execute({ objective, search_queries: ["openclaw github"], session_id: sessionId });
+    await tool.execute({ objective, search_queries: ["carapace github"], session_id: sessionId });
     const cached = await tool.execute({
       objective,
-      search_queries: ["openclaw github"],
+      search_queries: ["carapace github"],
       session_id: sessionId,
     });
     expect(endpointMockState.calls).toHaveLength(1);
@@ -665,7 +665,7 @@ describe("runParallelMcpSearch", () => {
     expect(headerOf(endpointCall(2), "MCP-Protocol-Version")).toBe("2025-06-18");
     expect(headerOf(endpointCall(0), "Authorization")).toBeUndefined();
     for (const call of endpointMockState.calls) {
-      expect(headerOf(call, "User-Agent")).toMatch(/^openclaw-parallel\//);
+      expect(headerOf(call, "User-Agent")).toMatch(/^carapace-parallel\//);
     }
     const args = callArguments();
     expect(args).toMatchObject({

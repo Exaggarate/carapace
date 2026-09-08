@@ -20,7 +20,7 @@ import {
   replaceSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetAgentEventsForTest } from "../../infra/agent-events.js";
 import { registerAgentRunCapacityWait } from "../../infra/agent-run-capacity-wait.js";
 import {
@@ -28,8 +28,8 @@ import {
   getAgentRunLifecycleGeneration,
   registerAgentRunContext,
 } from "../../infra/agent-run-registry.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import * as sessionUtils from "../session-utils.js";
 import {
   identifiedClient,
@@ -46,8 +46,8 @@ afterEach(() => {
 });
 
 it("selects current work before pagination and represents an isolated cron run once", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
-    const config: OpenClawConfig = {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
+    const config: CarapaceConfig = {
       agents: { list: [{ id: "main", default: true }, { id: "work" }] },
     };
     const context = requestContext(config);
@@ -160,8 +160,8 @@ it("selects current work before pagination and represents an isolated cron run o
 it.each(["global", "unknown"] as const)(
   "keeps %s activity with its agent when physical stores share a session ID",
   async (sessionKey) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const config: OpenClawConfig = {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const config: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }, { id: "ops" }] },
         session: { scope: "global", store: state.statePath("{agentId}.sqlite") },
       };
@@ -224,9 +224,9 @@ it.each(["global", "unknown"] as const)(
 it.each(["global", "unknown"] as const)(
   "keeps active %s owners and their physical transcript, board, and sharing rows distinct",
   async (sentinel) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const agents = ["main", "ops", "research", "private"] as const;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         session: { scope: "global", store: state.statePath("{agentId}.sqlite") },
         agents: { list: agents.map((id) => ({ id, ...(id === "main" ? { default: true } : {}) })) },
       };
@@ -237,7 +237,7 @@ it.each(["global", "unknown"] as const)(
       for (const [index, agentId] of agents.entries()) {
         const sessionId = `${sentinel}-${agentId}`;
         const storePath = storePathFor(agentId);
-        openOpenClawAgentDatabase({ agentId, path: storePath });
+        openCarapaceAgentDatabase({ agentId, path: storePath });
         const scope = { agentId, storePath, sessionKey: sentinel };
         const entry = await upsertSessionEntryCore(scope, {
           sessionId,
@@ -431,7 +431,7 @@ it.each(["global", "unknown"] as const)(
 it.each([{ activeMinutes: 1 }, { activeOnly: true }])(
   "collapses concurrent filtered requests into one projection: %j",
   async (filter: SessionsListParams) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const { clock, config } = await seedSessionsWithActivityTimes();
       const context = requestContext(config);
       const loads = vi.spyOn(sessionUtils, "loadCombinedSessionStoreForGatewayCore");
@@ -458,7 +458,7 @@ it.each([{ activeMinutes: 1 }, { activeOnly: true }])(
 it.each(["settled", "replaced"] as const)(
   "refills active work after the selected run is %s during projection",
   async (transition) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const config = await seedSessions();
       const context = requestContext(config);
       const client = identifiedClient("viewer@example.com");

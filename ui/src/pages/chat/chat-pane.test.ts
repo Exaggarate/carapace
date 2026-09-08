@@ -187,7 +187,7 @@ describe("chat pane header state", () => {
 
       expect(deleteOne).not.toHaveBeenCalled();
       // The stale dialog must dismiss itself, not merely stop sending its request.
-      expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(document.body.querySelector("carapace-modal-dialog")).toBeNull();
       // The abort resolves the dialog to `false`, same as a user cancel, so the
       // operator needs a distinct, visible outcome or their lost intent reads
       // as a click that simply did nothing.
@@ -303,10 +303,10 @@ describe("chat pane header state", () => {
       updatedAt: 0,
     } satisfies GatewaySessionRow;
     const copy = vi.fn(async () => true);
-    pane.handleHeaderMenuAction("copy-path", session, "/src/openclaw", "feature/header", copy);
-    pane.handleHeaderMenuAction("copy-branch", session, "/src/openclaw", "feature/header", copy);
+    pane.handleHeaderMenuAction("copy-path", session, "/src/carapace", "feature/header", copy);
+    pane.handleHeaderMenuAction("copy-branch", session, "/src/carapace", "feature/header", copy);
     await Promise.resolve();
-    expect(copy).toHaveBeenNthCalledWith(1, "/src/openclaw");
+    expect(copy).toHaveBeenNthCalledWith(1, "/src/carapace");
     expect(copy).toHaveBeenNthCalledWith(2, "feature/header");
   });
 
@@ -324,7 +324,7 @@ describe("chat pane header state", () => {
       } satisfies GatewaySessionRow;
       const copy = vi.fn(async () => false);
 
-      pane.handleHeaderMenuAction(action, session, "/src/openclaw", "feature/header", copy);
+      pane.handleHeaderMenuAction(action, session, "/src/carapace", "feature/header", copy);
 
       await vi.waitFor(() => expect(state.chatError).toBe("Copy failed"));
       expect(state.lastError).toBe(state.chatError);
@@ -367,7 +367,7 @@ describe("chat pane header state", () => {
       key: "agent:main:worktree",
       kind: "direct",
       updatedAt: 0,
-      worktree: { id: "wt-1", branch: "feature", repoRoot: "/src/openclaw" },
+      worktree: { id: "wt-1", branch: "feature", repoRoot: "/src/carapace" },
     } satisfies GatewaySessionRow;
     await pane.loadHeaderMenuData(session, "/src/default", true);
     await pane.loadHeaderMenuData(session, "/src/default", true);
@@ -388,8 +388,8 @@ describe("chat pane header state", () => {
       kind: "direct",
       updatedAt: 0,
     } satisfies GatewaySessionRow;
-    await pane.loadHeaderMenuData(session, "/src/openclaw", true);
-    await pane.loadHeaderMenuData(session, "/src/openclaw", true);
+    await pane.loadHeaderMenuData(session, "/src/carapace", true);
+    await pane.loadHeaderMenuData(session, "/src/carapace", true);
     expect(request).toHaveBeenCalledTimes(2);
   });
 
@@ -434,7 +434,7 @@ describe("chat pane header state", () => {
       key: "agent:main:reused",
       kind: "direct",
       updatedAt: 0,
-      worktree: { id: "wt-1", branch: "feature", repoRoot: "/src/openclaw" },
+      worktree: { id: "wt-1", branch: "feature", repoRoot: "/src/carapace" },
     } satisfies GatewaySessionRow;
     await pane.loadHeaderMenuData(worktreeRow, "/src/agent-workspace", true);
 
@@ -463,7 +463,7 @@ describe("chat pane header state", () => {
       updatedAt: 0,
       placement: { state: "active" } as GatewaySessionRow["placement"],
     } satisfies GatewaySessionRow;
-    await pane.loadHeaderMenuData(dispatched, "/src/openclaw", true);
+    await pane.loadHeaderMenuData(dispatched, "/src/carapace", true);
     expect(request).not.toHaveBeenCalled();
   });
 
@@ -481,8 +481,8 @@ describe("chat pane header state", () => {
       kind: "direct",
       updatedAt: 0,
     } satisfies GatewaySessionRow;
-    await pane.loadHeaderMenuData(session, "/src/openclaw", true);
-    await pane.loadHeaderMenuData(session, "/src/openclaw", true);
+    await pane.loadHeaderMenuData(session, "/src/carapace", true);
+    await pane.loadHeaderMenuData(session, "/src/carapace", true);
     expect(request).toHaveBeenCalledTimes(2);
   });
 
@@ -497,7 +497,7 @@ describe("chat pane header state", () => {
       kind: "direct",
       updatedAt: 0,
     } satisfies GatewaySessionRow;
-    pane.handleHeaderMenuAction("reveal", session, "/src/openclaw", null);
+    pane.handleHeaderMenuAction("reveal", session, "/src/carapace", null);
     await vi.waitFor(() => expect(state.chatError).toBe("No desktop available."));
     expect(state.lastError).toBe(state.chatError);
   });
@@ -529,7 +529,7 @@ describe("chat pane header state", () => {
       updatedAt: 0,
     } satisfies GatewaySessionRow;
 
-    pane.handleHeaderMenuAction("reveal", session, "/src/openclaw", null);
+    pane.handleHeaderMenuAction("reveal", session, "/src/carapace", null);
     await vi.waitFor(() => expect(request).toHaveBeenCalledOnce());
     retire(pane);
     revealed.resolve({ ok: false, error: "No desktop available." });
@@ -542,7 +542,7 @@ describe("chat pane header state", () => {
 
 describe("chat pane initialization", () => {
   it("sets the pane route before attaching outbox projection", () => {
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
     const targetSessionKey = "agent:main:pane-b";
     const sharedMessages = new Map();
     pane.sessionKey = targetSessionKey;
@@ -567,7 +567,7 @@ describe("chat pane initialization", () => {
   });
 
   it("hydrates a new split pane from the shared session snapshot before startup", () => {
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
     const targetSessionKey = "agent:main:pane-b";
     const messages = [nativeHistoryMessage(1, "retained split history")];
     const sharedMessages: ChatMessageCache = new Map();
@@ -620,7 +620,7 @@ describe("chat pane initialization", () => {
       await vi.waitFor(() => expect(request).toHaveBeenCalledOnce());
       window.dispatchEvent(
         new StorageEvent("storage", {
-          key: "openclaw.control.chatSnapshots.invalidate.v1",
+          key: "carapace.control.chatSnapshots.invalidate.v1",
           newValue: "other-tab",
         }),
       );
@@ -777,7 +777,7 @@ describe("chat pane keyboard shortcuts", () => {
     const canvasContent: SidebarContent = {
       kind: "canvas",
       docId: "canvas-1",
-      entryUrl: "/__openclaw__/canvas/canvas-1/index.html",
+      entryUrl: "/__carapace__/canvas/canvas-1/index.html",
     };
     pane.active = true;
     state.connected = false;

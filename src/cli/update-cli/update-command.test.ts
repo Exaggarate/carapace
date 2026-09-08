@@ -8,7 +8,7 @@ import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint
 import type { GatewayService } from "../../daemon/service.js";
 import { createUpdateRun, getUpdateRun } from "../../infra/update-run-ledger.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   updatePluginsAfterCoreUpdate,
   type PostCorePluginUpdateResult,
@@ -31,13 +31,13 @@ import { testing as updateCommandServiceTesting } from "./update-command-service
 
 const tempDirs = createTempDirTracker();
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
 describe("resolveGatewayInstallEntrypoint", () => {
   it("prefers dist/index.js over dist/entry.js when both exist", async () => {
-    const root = "/tmp/openclaw-root";
+    const root = "/tmp/carapace-root";
     const indexPath = path.join(root, "dist", "index.js");
     const entryPath = path.join(root, "dist", "entry.js");
 
@@ -50,7 +50,7 @@ describe("resolveGatewayInstallEntrypoint", () => {
   });
 
   it("falls back to dist/entry.js when index.js is missing", async () => {
-    const root = "/tmp/openclaw-root";
+    const root = "/tmp/carapace-root";
     const entryPath = path.join(root, "dist", "entry.js");
 
     await expect(
@@ -81,7 +81,7 @@ describe("applyPostPluginConfigValidation", () => {
       reason: "post-plugin-doctor-invalid-config",
       warnings: [
         {
-          guidance: ["Run `openclaw doctor --fix`, then rerun `openclaw update repair`."],
+          guidance: ["Run `carapace doctor --fix`, then rerun `carapace update repair`."],
         },
       ],
     });
@@ -162,8 +162,8 @@ describe("resolveUpdatedGatewayRestartPort", () => {
     expect(
       await resolveUpdatedGatewayRestartPort({
         config: { gateway: { port: 19000 } } as never,
-        processEnv: { OPENCLAW_GATEWAY_PORT: "19001" },
-        serviceEnv: { OPENCLAW_GATEWAY_PORT: "19002" },
+        processEnv: { CARAPACE_GATEWAY_PORT: "19001" },
+        serviceEnv: { CARAPACE_GATEWAY_PORT: "19002" },
       }),
     ).toBe(19002);
   });
@@ -183,8 +183,8 @@ describe("resolvePostUpdateServiceStateReadEnv", () => {
   it.each(["git", "npm", "pnpm", "bun"] as const)(
     "keeps %s restart preparation anchored to the pre-update service env",
     (updateMode) => {
-      const processEnv = { OPENCLAW_STATE_DIR: "/source/state" };
-      const preManagedServiceEnv = { OPENCLAW_STATE_DIR: "/managed/state" };
+      const processEnv = { CARAPACE_STATE_DIR: "/source/state" };
+      const preManagedServiceEnv = { CARAPACE_STATE_DIR: "/managed/state" };
       expect(
         resolvePostUpdateServiceStateReadEnv({ updateMode, processEnv, preManagedServiceEnv }),
       ).toEqual(preManagedServiceEnv);
@@ -192,7 +192,7 @@ describe("resolvePostUpdateServiceStateReadEnv", () => {
   );
 
   it("uses the caller environment when no managed service context was captured", () => {
-    const processEnv = { OPENCLAW_STATE_DIR: "/source/state" };
+    const processEnv = { CARAPACE_STATE_DIR: "/source/state" };
     expect(resolvePostUpdateServiceStateReadEnv({ updateMode: "git", processEnv })).toEqual(
       processEnv,
     );
@@ -208,34 +208,34 @@ describe("update environment snapshots", () => {
       try {
         const caller = {
           Home: "/caller/home",
-          OpenClaw_State_Dir: "/caller/state",
-          OpenClaw_Config_Path: "/caller/config.json",
-          OpenClaw_Profile: "caller",
+          Carapace_State_Dir: "/caller/state",
+          Carapace_Config_Path: "/caller/config.json",
+          Carapace_Profile: "caller",
         };
         const snapshot = resolveServiceRefreshEnv(caller);
-        caller.OpenClaw_State_Dir = "/later/state";
+        caller.Carapace_State_Dir = "/later/state";
         if (platform === "win32") {
           expect(snapshot).toEqual({
             HOME: "/caller/home",
-            OPENCLAW_STATE_DIR: "/caller/state",
-            OPENCLAW_CONFIG_PATH: "/caller/config.json",
-            OPENCLAW_PROFILE: "caller",
+            CARAPACE_STATE_DIR: "/caller/state",
+            CARAPACE_CONFIG_PATH: "/caller/config.json",
+            CARAPACE_PROFILE: "caller",
           });
           const owned = resolveOwnedManagedUpdateEnv({
             processEnv: snapshot,
-            serviceEnv: { OpenClaw_State_Dir: "/service/state" },
+            serviceEnv: { Carapace_State_Dir: "/service/state" },
           });
-          expect(owned.OPENCLAW_STATE_DIR).toBe("/service/state");
-          expect(owned.OPENCLAW_CONFIG_PATH).toBeUndefined();
-          expect(owned.OPENCLAW_PROFILE).toBeUndefined();
+          expect(owned.CARAPACE_STATE_DIR).toBe("/service/state");
+          expect(owned.CARAPACE_CONFIG_PATH).toBeUndefined();
+          expect(owned.CARAPACE_PROFILE).toBeUndefined();
           expect(
-            resolveUpdateTargetEnv({ baseEnv: caller, serviceEnv: { OPENCLAW_PROFILE: "work" } }),
-          ).toMatchObject({ HOME: "/caller/home", OPENCLAW_PROFILE: "work" });
+            resolveUpdateTargetEnv({ baseEnv: caller, serviceEnv: { CARAPACE_PROFILE: "work" } }),
+          ).toMatchObject({ HOME: "/caller/home", CARAPACE_PROFILE: "work" });
         } else {
-          expect(snapshot.OpenClaw_State_Dir).toBe("/caller/state");
-          expect(snapshot.OPENCLAW_STATE_DIR).toBeUndefined();
-          expect(snapshot.OPENCLAW_CONFIG_PATH).toBeUndefined();
-          expect(snapshot.OPENCLAW_PROFILE).toBeUndefined();
+          expect(snapshot.Carapace_State_Dir).toBe("/caller/state");
+          expect(snapshot.CARAPACE_STATE_DIR).toBeUndefined();
+          expect(snapshot.CARAPACE_CONFIG_PATH).toBeUndefined();
+          expect(snapshot.CARAPACE_PROFILE).toBeUndefined();
         }
       } finally {
         Object.defineProperty(process, "platform", descriptor);
@@ -247,69 +247,69 @@ describe("update environment snapshots", () => {
 describe("resolveUpdateTargetEnv", () => {
   it("uses the managed service profile paths for post-install doctor", () => {
     const env = resolveUpdateTargetEnv({
-      invocationCwd: "/srv/openclaw",
+      invocationCwd: "/srv/carapace",
       baseEnv: {
         PATH: "/bin",
-        OPENCLAW_SERVICE_REPAIR_POLICY: "external",
-        OPENCLAW_STATE_DIR: "/wrong/state",
-        OPENCLAW_CONFIG_PATH: "/wrong/openclaw.json",
-        OPENCLAW_PROFILE: "wrong",
-        OPENCLAW_SYSTEMD_UNIT: "wrong.service",
+        CARAPACE_SERVICE_REPAIR_POLICY: "external",
+        CARAPACE_STATE_DIR: "/wrong/state",
+        CARAPACE_CONFIG_PATH: "/wrong/carapace.json",
+        CARAPACE_PROFILE: "wrong",
+        CARAPACE_SYSTEMD_UNIT: "wrong.service",
       },
       serviceEnv: {
-        OPENCLAW_STATE_DIR: "daemon-state",
-        OPENCLAW_CONFIG_PATH: "daemon-state/openclaw.json",
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-work.service",
+        CARAPACE_STATE_DIR: "daemon-state",
+        CARAPACE_CONFIG_PATH: "daemon-state/carapace.json",
+        CARAPACE_PROFILE: "work",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway-work.service",
       },
     });
 
     expect(env.PATH).toBe("/bin");
-    expect(env.OPENCLAW_SERVICE_REPAIR_POLICY).toBe("external");
+    expect(env.CARAPACE_SERVICE_REPAIR_POLICY).toBe("external");
     expect(env.NODE_DISABLE_COMPILE_CACHE).toBe("1");
-    expect(env.OPENCLAW_STATE_DIR).toBe(path.join("/srv/openclaw", "daemon-state"));
-    expect(env.OPENCLAW_CONFIG_PATH).toBe(
-      path.join("/srv/openclaw", "daemon-state", "openclaw.json"),
+    expect(env.CARAPACE_STATE_DIR).toBe(path.join("/srv/carapace", "daemon-state"));
+    expect(env.CARAPACE_CONFIG_PATH).toBe(
+      path.join("/srv/carapace", "daemon-state", "carapace.json"),
     );
-    expect(env.OPENCLAW_PROFILE).toBe("work");
-    expect(env.OPENCLAW_SYSTEMD_UNIT).toBe("openclaw-gateway-work.service");
+    expect(env.CARAPACE_PROFILE).toBe("work");
+    expect(env.CARAPACE_SYSTEMD_UNIT).toBe("carapace-gateway-work.service");
   });
 
   it("keeps the caller env when no managed service env is available", () => {
     const env = resolveUpdateTargetEnv({
       baseEnv: {
         PATH: "/bin",
-        OPENCLAW_SERVICE_REPAIR_POLICY: "external",
-        OPENCLAW_STATE_DIR: "/caller/state",
-        OPENCLAW_PROFILE: "caller",
+        CARAPACE_SERVICE_REPAIR_POLICY: "external",
+        CARAPACE_STATE_DIR: "/caller/state",
+        CARAPACE_PROFILE: "caller",
       },
     });
 
     expect(env.PATH).toBe("/bin");
-    expect(env.OPENCLAW_SERVICE_REPAIR_POLICY).toBe("external");
+    expect(env.CARAPACE_SERVICE_REPAIR_POLICY).toBe("external");
     expect(env.NODE_DISABLE_COMPILE_CACHE).toBe("1");
-    expect(env.OPENCLAW_STATE_DIR).toBe("/caller/state");
-    expect(env.OPENCLAW_PROFILE).toBe("caller");
+    expect(env.CARAPACE_STATE_DIR).toBe("/caller/state");
+    expect(env.CARAPACE_PROFILE).toBe("caller");
   });
 });
 
 describe("resolveUpdatedInstallCommandEnv", () => {
   it("keeps runtime SecretRef inputs while applying managed service overrides", () => {
     const env = resolveUpdatedInstallCommandEnv({
-      invocationCwd: "/srv/openclaw",
+      invocationCwd: "/srv/carapace",
       processEnv: {
-        OPENCLAW_GATEWAY_AUTH_TOKEN: "runtime-token",
-        OPENCLAW_STATE_DIR: "/wrong/state",
+        CARAPACE_GATEWAY_AUTH_TOKEN: "runtime-token",
+        CARAPACE_STATE_DIR: "/wrong/state",
         PATH: "/caller/bin",
       },
       serviceEnv: {
-        OPENCLAW_STATE_DIR: "daemon-state",
+        CARAPACE_STATE_DIR: "daemon-state",
         PATH: "/daemon/bin",
       },
     });
 
-    expect(env.OPENCLAW_GATEWAY_AUTH_TOKEN).toBe("runtime-token");
-    expect(env.OPENCLAW_STATE_DIR).toBe(path.join("/srv/openclaw", "daemon-state"));
+    expect(env.CARAPACE_GATEWAY_AUTH_TOKEN).toBe("runtime-token");
+    expect(env.CARAPACE_STATE_DIR).toBe(path.join("/srv/carapace", "daemon-state"));
     expect(env.PATH).toBe("/daemon/bin");
     expect(env.NODE_DISABLE_COMPILE_CACHE).toBe("1");
     expect(resolveUpdatedInstallCommandEnv({ processEnv: env })).toEqual(env);
@@ -319,48 +319,48 @@ describe("resolveUpdatedInstallCommandEnv", () => {
     const env = resolveOwnedManagedUpdateEnv({
       processEnv: {
         HOME: "/home/operator",
-        OPENCLAW_HOME: "/home/operator/openclaw-home",
-        OPENCLAW_PROFILE: "personal",
-        OPENCLAW_STATE_DIR: "/home/operator/.openclaw-personal",
-        OPENCLAW_CONFIG_PATH: "/home/operator/.openclaw-personal/openclaw.json",
-        OPENCLAW_GATEWAY_PORT: "19111",
+        CARAPACE_HOME: "/home/operator/carapace-home",
+        CARAPACE_PROFILE: "personal",
+        CARAPACE_STATE_DIR: "/home/operator/.carapace-personal",
+        CARAPACE_CONFIG_PATH: "/home/operator/.carapace-personal/carapace.json",
+        CARAPACE_GATEWAY_PORT: "19111",
       },
       serviceEnv: {
         HOME: "/home/operator",
-        OPENCLAW_HOME: "/home/operator/openclaw-home",
-        OPENCLAW_PROFILE: "personal",
-        OPENCLAW_STATE_DIR: "/home/operator/.openclaw-personal",
-        OPENCLAW_CONFIG_PATH: "/effective/openclaw.json",
-        OPENCLAW_GATEWAY_PORT: "19111",
+        CARAPACE_HOME: "/home/operator/carapace-home",
+        CARAPACE_PROFILE: "personal",
+        CARAPACE_STATE_DIR: "/home/operator/.carapace-personal",
+        CARAPACE_CONFIG_PATH: "/effective/carapace.json",
+        CARAPACE_GATEWAY_PORT: "19111",
       },
-      serviceDefinitionEnv: { OPENCLAW_CONFIG_PATH: "/managed/openclaw.json" },
+      serviceDefinitionEnv: { CARAPACE_CONFIG_PATH: "/managed/carapace.json" },
     });
 
     expect(env.HOME).toBe("/home/operator");
-    expect(env.OPENCLAW_HOME).toBeUndefined();
-    expect(env.OPENCLAW_PROFILE).toBeUndefined();
-    expect(env.OPENCLAW_STATE_DIR).toBeUndefined();
-    expect(env.OPENCLAW_CONFIG_PATH).toBe("/effective/openclaw.json");
-    expect(env.OPENCLAW_GATEWAY_PORT).toBeUndefined();
+    expect(env.CARAPACE_HOME).toBeUndefined();
+    expect(env.CARAPACE_PROFILE).toBeUndefined();
+    expect(env.CARAPACE_STATE_DIR).toBeUndefined();
+    expect(env.CARAPACE_CONFIG_PATH).toBe("/effective/carapace.json");
+    expect(env.CARAPACE_GATEWAY_PORT).toBeUndefined();
   });
 });
 
 describe("collectMissingPluginInstallPayloads", () => {
   it("reports tracked npm install records whose package payload is absent", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
-    const presentDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "present");
-    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "missing");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
+    const presentDir = path.join(tmpDir, "state", "npm", "node_modules", "@carapace", "present");
+    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@carapace", "missing");
     const noPackageJsonDir = path.join(
       tmpDir,
       "state",
       "npm",
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "no-package-json",
     );
     try {
       await fs.mkdir(presentDir, { recursive: true });
-      await fs.writeFile(path.join(presentDir, "package.json"), '{"name":"@openclaw/present"}\n');
+      await fs.writeFile(path.join(presentDir, "package.json"), '{"name":"@carapace/present"}\n');
       await fs.mkdir(noPackageJsonDir, { recursive: true });
 
       await expect(
@@ -369,22 +369,22 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             present: {
               source: "npm",
-              spec: "@openclaw/present@beta",
+              spec: "@carapace/present@beta",
               installPath: presentDir,
             },
             missing: {
               source: "npm",
-              spec: "@openclaw/missing@beta",
+              spec: "@carapace/missing@beta",
               installPath: missingDir,
             },
             "no-package-json": {
               source: "npm",
-              spec: "@openclaw/no-package-json@beta",
+              spec: "@carapace/no-package-json@beta",
               installPath: noPackageJsonDir,
             },
             "missing-install-path": {
               source: "npm",
-              spec: "@openclaw/missing-install-path@beta",
+              spec: "@carapace/missing-install-path@beta",
             },
             local: {
               source: "path",
@@ -415,7 +415,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("accepts tracked bundle records validated by the shared bundle loader", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "clawhub", "cursor-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".cursor-plugin"), { recursive: true });
@@ -442,7 +442,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("accepts persisted marketplace bundle records without transient format metadata", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "marketplace", "cursor-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".cursor-plugin"), { recursive: true });
@@ -471,7 +471,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps dual-format bundle records on the native package payload path", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "clawhub", "dual-format-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".codex-plugin"), { recursive: true });
@@ -484,7 +484,7 @@ describe("collectMissingPluginInstallPayloads", () => {
         path.join(bundleDir, "package.json"),
         JSON.stringify({
           name: "dual-format-bundle",
-          openclaw: { extensions: ["./missing-extension.js"] },
+          carapace: { extensions: ["./missing-extension.js"] },
         }),
         "utf8",
       );
@@ -506,7 +506,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps corrupt tracked bundle records eligible for payload repair", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "clawhub", "bad-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".codex-plugin"), { recursive: true });
@@ -535,8 +535,8 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("skips disabled tracked records when requested", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
-    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "missing");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
+    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@carapace", "missing");
     try {
       await expect(
         updateCommandPluginsTesting.collectMissingPluginInstallPayloads({
@@ -554,7 +554,7 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             missing: {
               source: "npm",
-              spec: "@openclaw/missing@beta",
+              spec: "@carapace/missing@beta",
               installPath: missingDir,
             },
           },
@@ -566,8 +566,8 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps disabled trusted official npm records eligible for payload repair when requested", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
-    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "codex");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
+    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@carapace", "codex");
     try {
       await expect(
         updateCommandPluginsTesting.collectMissingPluginInstallPayloads({
@@ -586,9 +586,9 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@2026.5.3",
-              resolvedName: "@openclaw/codex",
-              resolvedSpec: "@openclaw/codex@2026.5.3",
+              spec: "@carapace/codex@2026.5.3",
+              resolvedName: "@carapace/codex",
+              resolvedSpec: "@carapace/codex@2026.5.3",
               installPath: missingDir,
             },
           },
@@ -606,7 +606,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps disabled trusted official ClawHub records eligible for payload repair when requested", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-plugin-payload-"));
     const missingDir = path.join(tmpDir, "state", "clawhub", "diagnostics-otel");
     try {
       await expect(
@@ -626,7 +626,7 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             "diagnostics-otel": {
               source: "clawhub",
-              spec: "clawhub:@openclaw/diagnostics-otel@2026.5.3",
+              spec: "clawhub:@carapace/diagnostics-otel@2026.5.3",
               installPath: missingDir,
             },
           },
@@ -659,9 +659,9 @@ describe("formatPostUpdateGatewayRecoveryInstructions", () => {
     );
 
     expect(line).toContain("the systemd user service");
-    expect(line).toContain("openclaw gateway restart");
-    expect(line).toContain("openclaw gateway install --force");
-    expect(line).toContain("openclaw gateway status --deep");
+    expect(line).toContain("carapace gateway restart");
+    expect(line).toContain("carapace gateway install --force");
+    expect(line).toContain("carapace gateway status --deep");
     expect(line).not.toContain("Linux reports");
     expect(line).not.toContain("macOS");
     expect(line).not.toContain("LaunchAgent");
@@ -706,8 +706,8 @@ describe("recoverInstalledLaunchAgentAfterUpdate", () => {
     "reports installed-but-not-loaded LaunchAgent recovery: %s",
     async (outcome) => {
       const service = {} as never;
-      const serviceEnv = { OPENCLAW_PROFILE: "stomme" };
-      const recoveredEnv = { ...serviceEnv, OPENCLAW_PORT: "18790" };
+      const serviceEnv = { CARAPACE_PROFILE: "stomme" };
+      const recoveredEnv = { ...serviceEnv, CARAPACE_PORT: "18790" };
       const readState = vi.fn(async () => ({
         installed: true,
         loadState: { status: "not-loaded" },
@@ -718,7 +718,7 @@ describe("recoverInstalledLaunchAgentAfterUpdate", () => {
       }));
       const message =
         "Gateway LaunchAgent was installed but not loaded; re-bootstrapped launchd service.";
-      const guidance = "System LaunchDaemon system/ai.openclaw.stomme owns this label";
+      const guidance = "System LaunchDaemon system/ai.carapace.stomme owns this label";
       const recover = vi.fn(async () => {
         if (outcome === "system owner") {
           throw new Error(guidance);
@@ -773,7 +773,7 @@ describe("recoverInstalledLaunchAgentAfterUpdate", () => {
       installed: true,
       loadState: { status: "loaded" },
       running: true,
-      env: { OPENCLAW_PROFILE: "stomme" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_PROFILE: "stomme" } as NodeJS.ProcessEnv,
       command: null,
       runtime: { status: "running" },
     }));
@@ -799,9 +799,9 @@ describe("recoverLaunchAgentAndRecheckGatewayHealth", () => {
     "records only attempted native repair before rechecking update health (%s)",
     async (outcome) => {
       const env = {
-        OPENCLAW_STATE_DIR: tempDirs.make("update-native-repair-"),
-        OPENCLAW_PROFILE: "stomme",
-        OPENCLAW_PORT: "18790",
+        CARAPACE_STATE_DIR: tempDirs.make("update-native-repair-"),
+        CARAPACE_PROFILE: "stomme",
+        CARAPACE_PORT: "18790",
       };
       const runId = createUpdateRun({ trigger: "cli" }, { env }).runId;
       const service = {} as never;
@@ -927,7 +927,7 @@ describe("hasLoadedLaunchdKeepAliveSupervisor", () => {
     await expect(
       updateCommandServiceTesting.hasLoadedLaunchdKeepAliveSupervisor({
         service,
-        env: { OPENCLAW_PROFILE: "work" },
+        env: { CARAPACE_PROFILE: "work" },
       }),
     ).resolves.toBe(false);
     isLoaded.mockResolvedValue(true);
@@ -957,7 +957,7 @@ describe("resolvePostCoreUpdateChildStdio", () => {
   it('returns "pipe" on Windows so the child never inherits the parent console handles', () => {
     // On Windows, stdio:"inherit" passes the parent's console HANDLE to the child process.
     // PowerShell/CMD will not return the prompt until every holder of those handles exits,
-    // causing the terminal to hang after `openclaw update` completes (#78445).
+    // causing the terminal to hang after `carapace update` completes (#78445).
     expect(resolvePostCoreUpdateChildStdio("win32")).toBe("pipe");
   });
 
@@ -975,7 +975,7 @@ describe("resolvePostCoreUpdateChildStdio", () => {
 describe("updatePluginsAfterCoreUpdate (invalid config)", () => {
   it("reports invalid config as an error with repair guidance", async () => {
     const result = await updatePluginsAfterCoreUpdate({
-      root: "/tmp/openclaw-test",
+      root: "/tmp/carapace-test",
       channel: "stable",
       configWriteOptions: {},
       configSnapshot: {
@@ -997,8 +997,8 @@ describe("updatePluginsAfterCoreUpdate (invalid config)", () => {
         message:
           "Plugin post-update convergence skipped because the config is invalid; refusing to restart the gateway with an unverified plugin set.",
         guidance: [
-          "Run `openclaw doctor` to inspect the config validation errors.",
-          "Once the config parses, rerun `openclaw update repair`.",
+          "Run `carapace doctor` to inspect the config validation errors.",
+          "Once the config parses, rerun `carapace update repair`.",
         ],
       },
     ]);
@@ -1016,8 +1016,8 @@ describe("buildInvalidConfigPostCoreUpdateResult", () => {
   it("surfaces actionable repair guidance in both the structural warnings and the message string", () => {
     const built = updateCommandPluginsTesting.buildInvalidConfigPostCoreUpdateResult();
     expect(built.guidance).toStrictEqual([
-      "Run `openclaw doctor` to inspect the config validation errors.",
-      "Once the config parses, rerun `openclaw update repair`.",
+      "Run `carapace doctor` to inspect the config validation errors.",
+      "Once the config parses, rerun `carapace update repair`.",
     ]);
     expect(built.result.warnings).toStrictEqual([
       {

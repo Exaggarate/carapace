@@ -4,7 +4,7 @@ import { bindGatewayContextResolver } from "../plugins/runtime/gateway-request-s
 import { normalizeDeliveryContext } from "../utils/delivery-context.shared.js";
 import type { DeliveryContext } from "../utils/delivery-context.types.js";
 
-const scopeRegistryKey = Symbol.for("openclaw.agentHarnessTaskRuntimeScope.registry");
+const scopeRegistryKey = Symbol.for("carapace.agentHarnessTaskRuntimeScope.registry");
 
 // Host-issued scopes prevent plugins from fabricating requester ownership for task runs.
 type ScopeRegistry = {

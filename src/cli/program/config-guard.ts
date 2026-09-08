@@ -120,7 +120,7 @@ function hasLegacyStateMigrationInputs(): boolean {
   const stateDir = resolveStateDir(process.env, os.homedir);
   const oauthDir = resolveOAuthDir(process.env, stateDir);
   if (
-    !process.env.OPENCLAW_STATE_DIR?.trim() &&
+    !process.env.CARAPACE_STATE_DIR?.trim() &&
     resolveLegacyStateDirs(() => resolveRequiredHomeDir(process.env, os.homedir)).some(
       fileOrDirExists,
     )
@@ -143,7 +143,7 @@ function hasLegacyStateMigrationInputs(): boolean {
       path.join(stateDir, "restart-sentinel.json"),
       path.join(stateDir, "restart-sentinel.json.doctor-importing"),
       path.join(stateDir, "sessions"),
-      path.join(stateDir, "state", "openclaw.sqlite"),
+      path.join(stateDir, "state", "carapace.sqlite"),
     ].some(fileOrDirExists) ||
     sqliteSidecarPaths.some(
       (sourcePath) => fileOrDirExists(sourcePath) || hasPendingSqliteSidecarArchive(sourcePath),
@@ -392,7 +392,7 @@ export async function ensureConfigReady(
   const heading = (value: string) => colorize(rich, theme.heading, value);
   const commandText = (value: string) => colorize(rich, theme.command, value);
 
-  params.runtime.error(heading("OpenClaw config is invalid"));
+  params.runtime.error(heading("Carapace config is invalid"));
   params.runtime.error(`${muted("File:")} ${muted(shortenHomePath(snapshot.path))}`);
   if (issues.length > 0) {
     params.runtime.error(muted("Problem:"));
@@ -416,11 +416,11 @@ export async function ensureConfigReady(
         ? new (await import("../../config/nix-mode-write-guard.js")).NixModeConfigMutationError({
             configPath: snapshot.path,
           }).message
-        : commandText(formatCliCommand("openclaw doctor --fix"));
+        : commandText(formatCliCommand("carapace doctor --fix"));
     params.runtime.error(`${muted("Fix:")} ${fixHint}`);
   }
   params.runtime.error(
-    `${muted("Inspect:")} ${commandText(formatCliCommand("openclaw config validate"))}`,
+    `${muted("Inspect:")} ${commandText(formatCliCommand("carapace config validate"))}`,
   );
   params.runtime.error(
     muted(
@@ -433,7 +433,7 @@ export async function ensureConfigReady(
   ) {
     const { formatCliJsonFailure } = await import("../failure-output.js");
     writeRuntimeJson(params.runtime, {
-      ...formatCliJsonFailure(`OpenClaw config is invalid: ${shortenHomePath(snapshot.path)}`),
+      ...formatCliJsonFailure(`Carapace config is invalid: ${shortenHomePath(snapshot.path)}`),
       issues: normalizeConfigIssues(snapshot.issues),
     });
   }

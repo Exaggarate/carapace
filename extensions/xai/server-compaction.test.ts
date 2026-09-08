@@ -2,10 +2,10 @@ import {
   captureOpenAIResponsesCompaction,
   createOpenAIResponsesTransportStreamFn,
   requestPreparedOpenAIResponsesCompaction,
-} from "@openclaw/ai/transports";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { AssistantMessage, Context, Model } from "openclaw/plugin-sdk/llm";
-import { createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+} from "@carapace/ai/transports";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { AssistantMessage, Context, Model } from "carapace/plugin-sdk/llm";
+import { createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { wrapXaiProviderStream } from "./stream.js";
 

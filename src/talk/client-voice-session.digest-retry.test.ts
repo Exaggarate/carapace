@@ -7,8 +7,8 @@ import {
   emitTrustedDiagnosticEvent,
   waitForDiagnosticEventsDrained,
 } from "../infra/diagnostic-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   normalizeSessionDeliveryState,
@@ -30,7 +30,7 @@ vi.mock("../channels/message/runtime.js", () => ({
   sendDurableMessageBatchCore: sendDurableMessageBatch,
 }));
 
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 let tempDir: string;
 
 async function seedSession(sessionKey: string, context: DeliveryContext = {}): Promise<void> {
@@ -80,16 +80,16 @@ async function completeRun(runId: string): Promise<void> {
 describe("client voice session digest retry", () => {
   beforeEach(async () => {
     tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-voice-digest-retry-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-voice-digest-retry-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     sendDurableMessageBatch.mockReset().mockResolvedValue({ status: "sent" });
   });
 
   afterEach(async () => {
     clientVoiceSessionTesting.reset();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     await fs.rm(tempDir, { recursive: true, force: true });
   });

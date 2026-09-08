@@ -250,11 +250,11 @@ async function reproduce(denyGroupSignals: boolean, surface: "gateway" | "bootst
       };
     },
   };
-  vi.stubEnv("OPENCLAW_QA_CONVEX_SITE_URL", baseUrl);
-  vi.stubEnv("OPENCLAW_QA_CONVEX_SECRET_CI", "synthetic-only");
-  vi.stubEnv("OPENCLAW_QA_ALLOW_INSECURE_HTTP", "1");
-  vi.stubEnv("OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
-  vi.stubEnv("OPENCLAW_LIVE_SETUP_TOKEN_VALUE", undefined);
+  vi.stubEnv("CARAPACE_QA_CONVEX_SITE_URL", baseUrl);
+  vi.stubEnv("CARAPACE_QA_CONVEX_SECRET_CI", "synthetic-only");
+  vi.stubEnv("CARAPACE_QA_ALLOW_INSECURE_HTTP", "1");
+  vi.stubEnv("CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
+  vi.stubEnv("CARAPACE_LIVE_SETUP_TOKEN_VALUE", undefined);
   const killSpy = vi.spyOn(process, "kill").mockImplementation((pid, signal) => {
     const identity = readIdentity(root);
     if (identity && pid === -identity.pgid) {
@@ -298,7 +298,7 @@ async function reproduce(denyGroupSignals: boolean, surface: "gateway" | "bootst
           channelDriver: "live",
           channelId: "startup-lease-fixture",
           adapterFactories: [factory],
-          sutOpenClawCommand: {
+          sutCarapaceCommand: {
             executablePath: process.execPath,
             argsPrefix: [fixturePath, root, surface],
             tempParentDir,
@@ -466,7 +466,7 @@ describe.skipIf(process.platform === "win32")(
         expect(JSON.stringify(serializeError(result.suiteError))).toContain(
           surface === "gateway"
             ? "gateway exited before listening (exitCode=17"
-            : "OpenClaw CLI exited 17",
+            : "Carapace CLI exited 17",
         );
         expect(
           result.releases.every((release) => !release.descendantAlive),

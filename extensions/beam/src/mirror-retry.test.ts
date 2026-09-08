@@ -1,8 +1,8 @@
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker, withServer } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker, withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   beamTestNow,
@@ -157,7 +157,7 @@ describe("Beam terminal retry policy", () => {
     const targetThreadId = "session-273";
     const targetBeamId = beamMirrorId("claude", "gateway:local", targetThreadId);
     const stateDir = tempDirs.make("beam-capacity-");
-    const stateEnv: NodeJS.ProcessEnv = { OPENCLAW_STATE_DIR: stateDir };
+    const stateEnv: NodeJS.ProcessEnv = { CARAPACE_STATE_DIR: stateDir };
     resetPluginStateStoreForTests();
     const keyedStore = createPluginStateKeyedStoreForTests<BeamStoredSession>("beam-capacity", {
       namespace: "sessions",

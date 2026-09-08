@@ -3,20 +3,20 @@ import { createHash } from "node:crypto";
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { listSessionTranscriptCorpusEntriesForAgent } from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import { listMemoryArtifactProvenance } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { extractErrorCode } from "carapace/plugin-sdk/error-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { listSessionTranscriptCorpusEntriesForAgent } from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import { listMemoryArtifactProvenance } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 import {
   formatMemoryDreamingDay,
   resolveMemoryDreamingWorkspaces,
   resolveMemoryLightDreamingConfig,
   resolveMemoryRemDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/memory-core-host-status";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeStringEntries, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeConceptToken } from "./concept-vocabulary.js";
 import { isPromotionOriginBlocked } from "./dreaming-consolidation-candidates.js";
 import { readRecentDreamDiaryEntries } from "./dreaming-dreams-file.js";
@@ -76,7 +76,7 @@ import {
   type ShortTermRecallEntry,
 } from "./short-term-promotion.js";
 
-type Logger = Pick<OpenClawPluginApi["logger"], "info" | "warn" | "error">;
+type Logger = Pick<CarapacePluginApi["logger"], "info" | "warn" | "error">;
 type DreamingPhaseStorageConfig = {
   timezone?: string;
   storage: { mode: "inline" | "separate" | "both"; separateReports: boolean };
@@ -97,7 +97,7 @@ type RemDreamingConfig = DreamingPhaseStorageConfig & {
 type DreamingPhaseRunParams<TConfig extends LightDreamingConfig | RemDreamingConfig> = {
   agentId?: string;
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   primaryWorkspaceDir?: string;
   config: TConfig;
   logger: Logger;
@@ -119,13 +119,13 @@ const GENERIC_DAY_HEADING_RE =
 const MANAGED_DAILY_DREAMING_BLOCKS = [
   {
     heading: "## Light Sleep",
-    startMarker: "<!-- openclaw:dreaming:light:start -->",
-    endMarker: "<!-- openclaw:dreaming:light:end -->",
+    startMarker: "<!-- carapace:dreaming:light:start -->",
+    endMarker: "<!-- carapace:dreaming:light:end -->",
   },
   {
     heading: "## REM Sleep",
-    startMarker: "<!-- openclaw:dreaming:rem:start -->",
-    endMarker: "<!-- openclaw:dreaming:rem:end -->",
+    startMarker: "<!-- carapace:dreaming:rem:start -->",
+    endMarker: "<!-- carapace:dreaming:rem:end -->",
   },
 ] as const;
 
@@ -578,7 +578,7 @@ function isCheckpointSessionTranscriptPath(absolutePath: string): boolean {
 }
 
 function resolveSessionAgentsForWorkspace(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir: string;
   primaryWorkspaceDir?: string;
 }): string[] {
@@ -599,7 +599,7 @@ function resolveSessionAgentsForWorkspace(params: {
 
 async function collectSessionIngestionBatches(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   primaryWorkspaceDir?: string;
   lookbackDays: number;
   nowMs: number;
@@ -756,7 +756,7 @@ async function collectSessionIngestionBatches(params: {
 
 async function ingestSessionTranscriptSignals(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   primaryWorkspaceDir?: string;
   lookbackDays: number;
   nowMs: number;
@@ -1552,7 +1552,7 @@ export async function runDreamingSweepPhases(params: {
   agentId?: string;
   workspaceDir: string;
   pluginConfig?: Record<string, unknown>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   logger: Logger;
   subagent?: DreamNarrativeRequest["subagent"];
   detachNarratives?: boolean;

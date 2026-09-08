@@ -1,7 +1,7 @@
 // Provider startup must preserve Teams thread identities in group-only allowlists.
 import { EventEmitter } from "node:events";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, RuntimeEnv } from "../runtime-api.js";
+import type { CarapaceConfig, RuntimeEnv } from "../runtime-api.js";
 import type { MSTeamsConversationStore } from "./conversation-store.js";
 import type { MSTeamsActivityHandler } from "./monitor-handler.js";
 import type { MSTeamsMessageHandlerDeps } from "./monitor-handler.types.js";
@@ -156,7 +156,7 @@ vi.mock("./sso-token-store.js", () => ({
 
 import { monitorMSTeamsProvider } from "./monitor.js";
 
-function createConfig(patch: Record<string, unknown>): OpenClawConfig {
+function createConfig(patch: Record<string, unknown>): CarapaceConfig {
   return {
     channels: {
       msteams: {
@@ -168,7 +168,7 @@ function createConfig(patch: Record<string, unknown>): OpenClawConfig {
         ...patch,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function createRuntime(): RuntimeEnv {
@@ -181,7 +181,7 @@ function createRuntime(): RuntimeEnv {
   };
 }
 
-function requireRegisteredMSTeamsConfig(): OpenClawConfig {
+function requireRegisteredMSTeamsConfig(): CarapaceConfig {
   const registered = registerMSTeamsHandlers.mock.calls[0]?.[1];
   if (!registered?.cfg) {
     throw new Error("expected registered MSTeams handler config");
@@ -190,8 +190,8 @@ function requireRegisteredMSTeamsConfig(): OpenClawConfig {
 }
 
 async function withStartedProvider(
-  cfg: OpenClawConfig,
-  verify: (registeredCfg: OpenClawConfig) => void,
+  cfg: CarapaceConfig,
+  verify: (registeredCfg: CarapaceConfig) => void,
 ): Promise<void> {
   const abort = new AbortController();
   const task = monitorMSTeamsProvider({

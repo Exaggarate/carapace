@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   resolveAutoMediaKeyProviders,
   resolveDefaultMediaModel,
@@ -44,7 +44,7 @@ type ImageWebMediaRuntime = {
 };
 
 type ResolveImageCompressionPolicy = (params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   imageModelConfig?: ImageModelConfig | null;
   modelOverride?: string;
   imageCount: number;
@@ -63,7 +63,7 @@ type ImageToolProviderDeps = {
   resolveModelAsync: ResolveModelAsync;
   resolveRegisteredMediaUnderstandingProvider(params: {
     providerId: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
   }): MediaUnderstandingProvider | undefined;
   resolveImageCompressionPolicy: ResolveImageCompressionPolicy;
   loadImageWebMediaRuntime: () => Promise<ImageWebMediaRuntime>;
@@ -80,7 +80,7 @@ type ImageToolTestApi = {
   resolveImageCompressionPolicy: ResolveImageCompressionPolicy;
   setProviderDepsForTest(overrides?: Partial<ImageToolProviderDeps>): void;
   resolveImageModelConfigForTool(params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentDir: string;
     workspaceDir?: string;
     authStore?: AuthProfileStore;
@@ -89,7 +89,7 @@ type ImageToolTestApi = {
 };
 
 function getTestApi(): ImageToolTestApi {
-  const api = (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.imageToolTestApi")];
+  const api = (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.imageToolTestApi")];
   if (!api) {
     throw new Error("image tool test API is unavailable");
   }

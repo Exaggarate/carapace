@@ -1,11 +1,11 @@
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   parseStrictPositiveInteger,
   resolveIntegerOption,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/number-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import {
   asOptionalRecord,
   normalizeLowercaseStringOrEmpty,
@@ -13,7 +13,7 @@ import {
   normalizeStringEntries,
   normalizeTrimmedStringList,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   ACTIVE_MEMORY_RESERVED_TOOLS_ALLOW,
   DEFAULT_ACTIVE_MEMORY_TOOLS_ALLOW,
@@ -104,13 +104,13 @@ function isReservedActiveMemoryToolsAllowEntry(value: string): boolean {
   return normalized.startsWith("group:") || ACTIVE_MEMORY_RESERVED_TOOLS_ALLOW.has(normalized);
 }
 
-function resolveDefaultToolsAllow(cfg: OpenClawConfig | undefined): string[] {
+function resolveDefaultToolsAllow(cfg: CarapaceConfig | undefined): string[] {
   return cfg?.plugins?.slots?.memory === "memory-lancedb"
     ? [...LANCEDB_ACTIVE_MEMORY_TOOLS_ALLOW]
     : [...DEFAULT_ACTIVE_MEMORY_TOOLS_ALLOW];
 }
 
-function resolveToolsAllow(params: { pluginToolsAllow: unknown; cfg?: OpenClawConfig }): string[] {
+function resolveToolsAllow(params: { pluginToolsAllow: unknown; cfg?: CarapaceConfig }): string[] {
   return (
     normalizeConfiguredToolsAllow(params.pluginToolsAllow) ?? resolveDefaultToolsAllow(params.cfg)
   );
@@ -139,7 +139,7 @@ function toSafeTranscriptAgentDirName(agentId: string): string {
   return encoded ? encoded : "unknown-agent";
 }
 
-function resolvePersistentTranscriptBaseDir(api: OpenClawPluginApi, agentId: string): string {
+function resolvePersistentTranscriptBaseDir(api: CarapacePluginApi, agentId: string): string {
   return path.join(
     api.runtime.state.resolveStateDir(),
     "plugins",
@@ -179,7 +179,7 @@ function isMissingRegisteredMemoryToolsError(
 
 function normalizePluginConfig(
   pluginConfig: unknown,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): ResolvedActiveRecallPluginConfig {
   const raw = (
     pluginConfig && typeof pluginConfig === "object" ? pluginConfig : {}
@@ -254,9 +254,9 @@ function normalizePluginConfig(
   };
 }
 
-function readActiveMemoryConfig(api: OpenClawPluginApi): OpenClawConfig {
+function readActiveMemoryConfig(api: CarapacePluginApi): CarapaceConfig {
   try {
-    return (api.runtime.config?.current?.() as OpenClawConfig | undefined) ?? api.config;
+    return (api.runtime.config?.current?.() as CarapaceConfig | undefined) ?? api.config;
   } catch {
     return api.config;
   }

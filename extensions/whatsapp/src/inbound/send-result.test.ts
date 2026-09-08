@@ -3,8 +3,8 @@ import type { WAMessage } from "baileys";
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import { describe, expect, it } from "vitest";
 import {
   combineWhatsAppSendResults,

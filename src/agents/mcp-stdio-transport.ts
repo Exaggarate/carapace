@@ -1,5 +1,5 @@
 /**
- * OpenClaw stdio transport wrapper for MCP server subprocesses.
+ * Carapace stdio transport wrapper for MCP server subprocesses.
  */
 import fs from "node:fs/promises";
 import process from "node:process";
@@ -22,7 +22,7 @@ type McpStdioDecoder = Pick<ReadBuffer, "append" | "readMessage" | "clear">;
 
 type McpStdioExit = { code: number | null; signal: NodeJS.Signals | null };
 
-type OpenClawStdioServerParameters = {
+type CarapaceStdioServerParameters = {
   command: string;
   args?: string[];
   env?: NodeJS.ProcessEnv;
@@ -35,7 +35,7 @@ type OpenClawStdioServerParameters = {
   stderr?: "pipe" | "overlapped" | "inherit" | "ignore";
 };
 
-export class OpenClawStdioClientTransport implements Transport {
+export class CarapaceStdioClientTransport implements Transport {
   onclose?: () => void;
   onerror?: (error: Error) => void;
   onmessage?: (message: JSONRPCMessage) => void;
@@ -51,7 +51,7 @@ export class OpenClawStdioClientTransport implements Transport {
   private readonly startupAbort = new AbortController();
   private startupCleanupError?: OwnedStdioCleanupError;
 
-  constructor(private readonly serverParams: OpenClawStdioServerParameters) {
+  constructor(private readonly serverParams: CarapaceStdioServerParameters) {
     this.readBuffer = serverParams.decoder ?? new ReadBuffer();
     if (serverParams.stderr === "pipe" || serverParams.stderr === "overlapped") {
       this.stderrStream = new PassThrough();
@@ -61,7 +61,7 @@ export class OpenClawStdioClientTransport implements Transport {
   async start(): Promise<void> {
     if (this.starting || this.closing) {
       throw new Error(
-        "OpenClawStdioClientTransport already started or closed; Client.connect() starts transports automatically.",
+        "CarapaceStdioClientTransport already started or closed; Client.connect() starts transports automatically.",
       );
     }
     this.starting = this.startProcess();

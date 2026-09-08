@@ -1,5 +1,5 @@
 // TTS provider registry resolves configured speech providers at runtime.
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { getActiveRuntimePluginRegistry } from "../plugins/active-runtime-registry.js";
 import {
   resolvePluginCapabilityProvider,
@@ -14,7 +14,7 @@ import {
 export { normalizeSpeechProviderId } from "./provider-registry-core.js";
 
 /** Resolve speech providers from configured plugin capabilities. */
-function resolveSpeechProviderPluginEntries(cfg?: OpenClawConfig): SpeechProviderPlugin[] {
+function resolveSpeechProviderPluginEntries(cfg?: CarapaceConfig): SpeechProviderPlugin[] {
   return resolvePluginCapabilityProviders({
     key: "speechProviders",
     cfg,
@@ -39,7 +39,7 @@ const defaultSpeechProviderRegistry = createSpeechProviderRegistry(
 /** List configured speech providers using manifest/capability discovery. */
 export const listSpeechProviders = defaultSpeechProviderRegistry.listSpeechProviders;
 /** List currently loaded speech providers from the active runtime registry. */
-export function listLoadedSpeechProviders(_cfg?: OpenClawConfig): SpeechProviderPlugin[] {
+export function listLoadedSpeechProviders(_cfg?: CarapaceConfig): SpeechProviderPlugin[] {
   const providers = (getActiveRuntimePluginRegistry()?.speechProviders ?? []).map(
     (entry) => entry.provider,
   );

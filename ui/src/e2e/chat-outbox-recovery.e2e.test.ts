@@ -20,7 +20,7 @@ suite.define(() => {
   it.each(["retry", "discard", "exact authoritative history proof"] as const)(
     "parks an ACK-lost send for review until %s",
     async (action) => {
-      const proofRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const proofRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = proofRoot
         ? createControlUiE2eArtifactDir("chat-outbox-recovery", proofRoot)
         : undefined;
@@ -183,7 +183,7 @@ suite.define(() => {
         }
         sessionStorage.setItem("outbox-recovery-seeded", "yes");
         sessionStorage.setItem(
-          `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
+          `carapace.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
           JSON.stringify({
             version: 2,
             gatewayOwner: gatewayUrl,
@@ -220,7 +220,7 @@ suite.define(() => {
         path: `${artifacts}/before-confirmation.png`,
       });
       await notice.getByRole("button", { name: "Restore here for review" }).click();
-      const dialog = page.locator("openclaw-modal-dialog");
+      const dialog = page.locator("carapace-modal-dialog");
       await dialog.getByText("agent:main:main (main)", { exact: true }).waitFor();
       await page.screenshot({
         animations: "disabled",
@@ -341,7 +341,7 @@ suite.define(() => {
       );
       await page.goto(`${suite.server.baseUrl}outbox-recovery-seed`);
       const seededDatabaseVersion = await page.evaluate(async (gatewayOwner) => {
-        const request = indexedDB.open("openclaw-control-ui", 1);
+        const request = indexedDB.open("carapace-control-ui", 1);
         request.addEventListener(
           "upgradeneeded",
           () => {
@@ -398,7 +398,7 @@ suite.define(() => {
       await notice.getByText("legacy-note.txt", { exact: true }).waitFor();
       await notice.getByRole("button", { name: "Restore here for review" }).click();
       await page
-        .locator("openclaw-modal-dialog")
+        .locator("carapace-modal-dialog")
         .getByRole("button", { name: "Restore here for review" })
         .click();
       const composer = page.locator(".agent-chat__composer-combobox textarea");

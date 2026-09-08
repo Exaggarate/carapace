@@ -222,7 +222,7 @@ suite.define(() => {
         // can open while transcripts arrive. Establish which surface Escape owns.
         await textarea.hover();
         await textarea.focus();
-        const openTooltips = page.locator("openclaw-tooltip[open]");
+        const openTooltips = page.locator("carapace-tooltip[open]");
         await expect.poll(() => openTooltips.count()).toBe(0);
         if (tooltipOpen) {
           const stop = page.getByRole("button", { name: "Stop and keep text" });

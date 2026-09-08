@@ -144,7 +144,7 @@ jobs:
           import { validateDockerReleaseIdentity } from './workflow-source/scripts/docker-release-artifacts.mjs';
           const env = process.env;
           const policy = validateDockerReleaseIdentity({ tag: env.RELEASE_TAG, sourceSha: env.RELEASE_SHA, imageTagSuffix: env.IMAGE_TAG_SUFFIX, packageVersion: JSON.parse(readFileSync('release-source/package.json', 'utf8')).version });
-          const includeBrowser = /^ARG OPENCLAW_INSTALL_BROWSER/m.test(readFileSync('release-source/Dockerfile', 'utf8'));
+          const includeBrowser = /^ARG CARAPACE_INSTALL_BROWSER/m.test(readFileSync('release-source/Dockerfile', 'utf8'));
           appendFileSync(env.GITHUB_OUTPUT, `version=${policy.version}\ninclude_browser=${includeBrowser}\n`);
           NODE
 

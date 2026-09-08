@@ -34,7 +34,7 @@ const status = {
 };
 
 async function expectLibraryDialogOpen(page: Page) {
-  const dialog = page.locator("openclaw-modal-dialog dialog");
+  const dialog = page.locator("carapace-modal-dialog dialog");
   await dialog.evaluate(async (element) => {
     await Promise.allSettled(element.getAnimations().map((animation) => animation.finished));
     await new Promise<void>((resolve) => {
@@ -48,7 +48,7 @@ async function expectSkillNameValidation(page: Page) {
   const input = page.getByLabel("Skill name", { exact: true });
   await input.hover();
   await page
-    .locator("openclaw-tooltip[open] .tooltip-content")
+    .locator("carapace-tooltip[open] .tooltip-content")
     .getByText("Use 1–63 lowercase letters, digits, or hyphens; start with a letter or digit.", {
       exact: true,
     })
@@ -225,7 +225,7 @@ suite.define(() => {
       });
       await page.getByRole("button", { name: "Close", exact: true }).click();
       await page.getByRole("button", { name: "Import skill", exact: true }).click();
-      const importer = page.locator("openclaw-modal-dialog");
+      const importer = page.locator("carapace-modal-dialog");
       await importer.getByLabel("Skill name", { exact: true }).waitFor();
       expect(await importer.getByLabel("Skill name", { exact: true }).inputValue()).toBe("");
       expect(await importer.getByRole("alert").allTextContents()).toEqual([]);
@@ -254,7 +254,7 @@ suite.define(() => {
       await importer.getByRole("button", { name: "Close", exact: true }).click();
       await page.getByRole("button", { name: "Create skill", exact: true }).click();
       expect(await page.getByLabel("SKILL.md", { exact: true }).inputValue()).toBe("");
-      expect(await page.locator("openclaw-modal-dialog").getByRole("alert").count()).toBe(0);
+      expect(await page.locator("carapace-modal-dialog").getByRole("alert").count()).toBe(0);
       await page.getByRole("button", { name: "Close", exact: true }).click();
       await page.getByRole("button", { name: /release-notes Draft concise/u }).click();
       await expect
@@ -370,7 +370,7 @@ suite.define(() => {
         { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("untouched\r\n") },
       ]);
       await page
-        .locator("openclaw-modal-dialog")
+        .locator("carapace-modal-dialog")
         .getByRole("button", { name: "Import skill", exact: true })
         .click();
       await page.getByRole("button", { name: "Save skill", exact: true }).click();
@@ -442,7 +442,7 @@ suite.define(() => {
       expect(await gateway.getRequests("skills.library.upload")).toHaveLength(0);
       await gateway.deferNext("skills.library.upload");
       await page
-        .locator("openclaw-modal-dialog")
+        .locator("carapace-modal-dialog")
         .getByRole("button", { name: "Import skill", exact: true })
         .click();
       await gateway.waitForRequest("skills.library.upload");

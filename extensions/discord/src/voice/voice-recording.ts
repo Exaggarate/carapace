@@ -1,7 +1,7 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { VOICE_WAV_HEADER_BYTES, writeVoiceWavFile } from "./audio.js";
 import type { DiscordVoiceIngressContext } from "./ingress.js";
 import type { DiscordVoiceAudioReceipt, DiscordVoiceSegmentOutcome } from "./recording-types.js";
@@ -47,7 +47,7 @@ export class DiscordVoiceRecording {
   constructor(
     private readonly params: {
       entry: VoiceSessionEntry;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       userId: string;
       isInputComplete: () => boolean;
       minimumSeconds: () => number;

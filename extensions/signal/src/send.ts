@@ -1,23 +1,23 @@
-import type { MediaPlaceholderTextFact } from "openclaw/plugin-sdk/channel-inbound";
+import type { MediaPlaceholderTextFact } from "carapace/plugin-sdk/channel-inbound";
 // Signal plugin module implements send behavior.
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
 import {
   kindFromMime,
   type OutboundMediaAccess,
   resolveOutboundAttachmentFromUrl,
-} from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
+} from "carapace/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveSignalAccount } from "./accounts.js";
 import { signalRpcRequest, type SignalTransportKind } from "./client-adapter.js";
 import { markdownToSignalText, type SignalTextStyleRange } from "./format.js";
@@ -26,7 +26,7 @@ import { registerSignalReplyContext } from "./reply-authors.js";
 import { resolveSignalRpcContext } from "./rpc-context.js";
 
 export type SignalSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   baseUrl?: string;
   transportKind?: SignalTransportKind;
   account?: string;

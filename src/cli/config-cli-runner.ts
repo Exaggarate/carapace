@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveManagedUnsetPathsForWrite } from "../config/config-path-mutation.js";
 import { replaceConfigFile } from "../config/config.js";
 import { AUTO_MANAGED_CONFIG_META_PATHS } from "../config/io.meta.js";
@@ -7,7 +7,7 @@ import { prepareConfigWriteTopology } from "../config/io.write-topology.js";
 import { ConfigMutationConflictError } from "../config/mutation-conflict.js";
 import { resolveConfigPath } from "../config/paths.js";
 import { readBestEffortRuntimeConfigSchema } from "../config/runtime-schema.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { diffConfigPaths } from "../gateway/config-diff.js";
 import { buildGatewayReloadPlan } from "../gateway/config-reload-plan.js";
 import { resolveGatewayReloadSettings } from "../gateway/config-reload-settings.js";
@@ -128,9 +128,9 @@ function formatAutoManagedMetaError(paths: readonly PathSegment[][]): string {
   const targets = paths.map(toDotPath);
   const subject = targets.length === 1 ? targets[0] : targets.join(", ");
   return [
-    `${subject} is auto-managed by OpenClaw and cannot be edited; the value would be overwritten on the next config write.`,
+    `${subject} is auto-managed by Carapace and cannot be edited; the value would be overwritten on the next config write.`,
     "",
-    "These fields are stamped on every config write to record the OpenClaw version and timestamp that produced the file.",
+    "These fields are stamped on every config write to record the Carapace version and timestamp that produced the file.",
   ].join("\n");
 }
 
@@ -183,8 +183,8 @@ function collectChangedLeafPaths(value: unknown, prefix: string): string[] {
 function expandActualChangedPaths(
   actualPaths: string[],
   requestedPaths: string[],
-  before: OpenClawConfig,
-  after: OpenClawConfig,
+  before: CarapaceConfig,
+  after: CarapaceConfig,
 ): string[] {
   const expanded = new Set<string>();
   for (const actualPath of actualPaths) {
@@ -210,8 +210,8 @@ function expandActualChangedPaths(
 
 function configApplyHintForOperations(
   operations: readonly ConfigSetOperation[],
-  beforeConfig: OpenClawConfig,
-  afterConfig: OpenClawConfig,
+  beforeConfig: CarapaceConfig,
+  afterConfig: CarapaceConfig,
 ): string {
   const requestedPaths = operations.map(({ requestedPath }) => toDotPath(requestedPath));
   const paths = expandActualChangedPaths(
@@ -247,7 +247,7 @@ async function loadMutationSchema(): Promise<JsonSchemaRecord | undefined> {
 }
 
 function assertConfigSetCurrentExpectation(params: {
-  authoredConfig: OpenClawConfig;
+  authoredConfig: CarapaceConfig;
   operation: ConfigSetOperation;
   expectation: ConfigSetCurrentExpectation;
 }): void {
@@ -406,7 +406,7 @@ export async function runConfigOperations(params: {
   // Only final deletions may be replayed by the persistence owner.
   unsetPaths = unsetPaths.filter((path) => !getAtPath(next, path).found);
   const removedGatewayAuthPaths = pruneInactiveGatewayAuthCredentials({ root: next, operations });
-  let nextConfig = normalizeConfigMutationModelRefs(next as OpenClawConfig);
+  let nextConfig = normalizeConfigMutationModelRefs(next as CarapaceConfig);
   const normalizedExplicitSetPaths = explicitSetPaths.map(normalizeConfigMutationExplicitSetPath);
   if (options.dryRun) {
     nextConfig = prepareConfigWriteTopology({

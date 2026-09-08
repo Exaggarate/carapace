@@ -4,13 +4,13 @@
 import {
   buildManifestModelProviderConfig,
   readManifestProviderDefaultModelRef,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/provider-catalog-shared";
 import type {
   ModelCompatConfig,
   ModelDefinitionConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { asNonArrayRecord, filterStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/provider-model-shared";
+import { asNonArrayRecord, filterStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const BASETEN_MANIFEST_CATALOG = manifest.modelCatalog.providers.baseten;
 const DEFAULT_CONTEXT_WINDOW = 128_000;
@@ -203,7 +203,7 @@ function projectLiveModel(
   };
 }
 
-/** Projects Baseten's authenticated `/models` response into OpenClaw model rows. */
+/** Projects Baseten's authenticated `/models` response into Carapace model rows. */
 export function projectBasetenLiveModels(rows: readonly unknown[]): ModelDefinitionConfig[] {
   const fallbacks = new Map(buildStaticBasetenModels().map((model) => [model.id, model]));
   const seen = new Set<string>();

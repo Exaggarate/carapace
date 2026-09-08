@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/baseten-provider",
+  "name": "@carapace/baseten-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw Baseten provider plugin.",
+  "description": "Carapace Baseten provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/baseten-provider",
-      "npmSpec": "@openclaw/baseten-provider",
+      "clawhubSpec": "clawhub:@carapace/baseten-provider",
+      "npmSpec": "@carapace/baseten-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {

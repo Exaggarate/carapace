@@ -1,10 +1,10 @@
 // Slack tests cover message handler plugin behavior.
-import { createTestInboundDebounceFlush } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { createTestInboundDebounceFlush } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type InboundDebounceFlush = { admission: Promise<void>; completion: Promise<void> };
@@ -34,9 +34,9 @@ const resolveThreadTsMock = vi.fn(async ({ message }: { message: Record<string, 
 }));
 const { createSlackMessageHandler } = await import("./message-handler.js");
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("carapace/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/channel-inbound")>(
+    "carapace/plugin-sdk/channel-inbound",
   );
   return {
     ...actual,
@@ -83,7 +83,7 @@ vi.mock("./message-handler/pipeline.runtime.js", () => ({
 }));
 
 function createContext(overrides?: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   rememberSlackChannelType?: (
     channel: string | null | undefined,
     channelType: string | null | undefined,
@@ -104,7 +104,7 @@ function createContext(overrides?: {
 }
 
 function createHandlerWithTracker(overrides?: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   abortSignal?: AbortSignal;
   rememberSlackChannelType?: (
     channel: string | null | undefined,
@@ -154,8 +154,8 @@ describe("createSlackMessageHandler", () => {
   });
 
   it("uses the latest runtime config for messages without restarting the monitor", async () => {
-    const startupConfig: OpenClawConfig = { agents: { defaults: { thinkingDefault: "max" } } };
-    const updatedConfig: OpenClawConfig = {
+    const startupConfig: CarapaceConfig = { agents: { defaults: { thinkingDefault: "max" } } };
+    const updatedConfig: CarapaceConfig = {
       agents: { defaults: { thinkingDefault: "ultra", fastModeDefault: true } },
     };
     setRuntimeConfigSnapshot(startupConfig, startupConfig);
@@ -190,8 +190,8 @@ describe("createSlackMessageHandler", () => {
   });
 
   it("keeps cached runtime contexts synchronized with mutable monitor state", async () => {
-    const startupConfig: OpenClawConfig = { agents: { defaults: { thinkingDefault: "max" } } };
-    const runtimeConfig: OpenClawConfig = { agents: { defaults: { thinkingDefault: "ultra" } } };
+    const startupConfig: CarapaceConfig = { agents: { defaults: { thinkingDefault: "max" } } };
+    const runtimeConfig: CarapaceConfig = { agents: { defaults: { thinkingDefault: "ultra" } } };
     const initialChannels = { C_OLD: { enabled: true } };
     const resolvedChannels = { C_RESOLVED: { enabled: true } };
     setRuntimeConfigSnapshot(startupConfig, startupConfig);
@@ -255,11 +255,11 @@ describe("createSlackMessageHandler", () => {
       messageTs: "1709000000.009005",
     },
   ])("preserves explicit monitor config $label", async ({ includeSourceSnapshot, messageTs }) => {
-    const explicitConfig: OpenClawConfig = {
+    const explicitConfig: CarapaceConfig = {
       agents: { defaults: { thinkingDefault: "ultra" } },
       messages: { responsePrefix: "scoped" },
     };
-    const unrelatedRuntimeConfig: OpenClawConfig = {
+    const unrelatedRuntimeConfig: CarapaceConfig = {
       agents: { defaults: { thinkingDefault: "low" } },
     };
     setRuntimeConfigSnapshot(
@@ -293,13 +293,13 @@ describe("createSlackMessageHandler", () => {
   });
 
   it("follows runtime updates when the monitor config matches the runtime source", async () => {
-    const startupSourceConfig: OpenClawConfig = {
+    const startupSourceConfig: CarapaceConfig = {
       agents: { defaults: { thinkingDefault: "max" } },
     };
-    const startupRuntimeConfig: OpenClawConfig = {
+    const startupRuntimeConfig: CarapaceConfig = {
       agents: { defaults: { thinkingDefault: "max", fastModeDefault: false } },
     };
-    const updatedRuntimeConfig: OpenClawConfig = {
+    const updatedRuntimeConfig: CarapaceConfig = {
       agents: { defaults: { thinkingDefault: "ultra", fastModeDefault: true } },
     };
     setRuntimeConfigSnapshot(startupRuntimeConfig, startupSourceConfig);
@@ -334,9 +334,9 @@ describe("createSlackMessageHandler", () => {
   });
 
   it("keeps each in-flight message on its captured config snapshot", async () => {
-    const startupConfig: OpenClawConfig = { agents: { defaults: { thinkingDefault: "max" } } };
-    const firstConfig: OpenClawConfig = { agents: { defaults: { thinkingDefault: "high" } } };
-    const secondConfig: OpenClawConfig = { agents: { defaults: { thinkingDefault: "ultra" } } };
+    const startupConfig: CarapaceConfig = { agents: { defaults: { thinkingDefault: "max" } } };
+    const firstConfig: CarapaceConfig = { agents: { defaults: { thinkingDefault: "high" } } };
+    const secondConfig: CarapaceConfig = { agents: { defaults: { thinkingDefault: "ultra" } } };
     setRuntimeConfigSnapshot(startupConfig, startupConfig);
     const context = createContext({ cfg: startupConfig });
     const handler = createSlackMessageHandler({
@@ -932,7 +932,7 @@ describe("createSlackMessageHandler", () => {
         ),
       }),
     );
-    const cfg: OpenClawConfig = { messages: { ackReactionScope: "off" } };
+    const cfg: CarapaceConfig = { messages: { ackReactionScope: "off" } };
     setRuntimeConfigSnapshot(cfg, cfg);
     const { handler } = createHandlerWithTracker({ cfg });
     await handler(
@@ -955,7 +955,7 @@ describe("createSlackMessageHandler", () => {
         () => "failed",
       );
       await vi.advanceTimersByTimeAsync(0);
-      const next: OpenClawConfig = { messages: { ackReactionScope: "all" } };
+      const next: CarapaceConfig = { messages: { ackReactionScope: "all" } };
       setRuntimeConfigSnapshot(next, next);
       await vi.advanceTimersByTimeAsync(1000);
       expect(
@@ -973,7 +973,7 @@ describe("createSlackMessageHandler", () => {
 
   it("keeps later same-key messages behind a retry with the original policy", async () => {
     useRealDebouncer = true;
-    const cfg: OpenClawConfig = { messages: { ackReactionScope: "off" } };
+    const cfg: CarapaceConfig = { messages: { ackReactionScope: "off" } };
     setRuntimeConfigSnapshot(cfg, cfg);
     const abort = new AbortController();
     const { handler } = createHandlerWithTracker({ cfg, abortSignal: abort.signal });
@@ -992,7 +992,7 @@ describe("createSlackMessageHandler", () => {
       const first = handler(message, { source: "message" });
       await vi.advanceTimersByTimeAsync(0);
       expect(prepareSlackMessageMock).toHaveBeenCalledTimes(1);
-      const next: OpenClawConfig = { messages: { ackReactionScope: "all" } };
+      const next: CarapaceConfig = { messages: { ackReactionScope: "all" } };
       setRuntimeConfigSnapshot(next, next);
       const second = handler({ ...message, ts: "123.002", text: "second" }, { source: "message" });
       await vi.advanceTimersByTimeAsync(0);

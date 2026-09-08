@@ -1,1 +1,1 @@
-export { isIncognitoSessionKey } from "openclaw/plugin-sdk/session-key-runtime";
+export { isIncognitoSessionKey } from "carapace/plugin-sdk/session-key-runtime";

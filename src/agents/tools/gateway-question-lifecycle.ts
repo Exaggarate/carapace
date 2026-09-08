@@ -1,5 +1,5 @@
 /** Shared registration, wait, and cancellation for blocking Gateway questions. */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { Value } from "typebox/value";
 import {
   QuestionWaitAnswerResultSchema,

@@ -25,7 +25,7 @@ import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts"
  * silently to the fallback stack and looks merely "a bit off".
  */
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 // Every pair JetBrains Mono ligates, each closed by the trailing space that
 // triggers the corruption reported in issue #137473.
@@ -73,7 +73,7 @@ async function openThemedChat(
       }
       sessionStorage.setItem("typography-seeded", "1");
       localStorage.setItem(
-        `openclaw.control.settings.v1:${gatewayUrl}`,
+        `carapace.control.settings.v1:${gatewayUrl}`,
         JSON.stringify({ gatewayUrl, theme: initialTheme, themeMode: initialMode }),
       );
     },
@@ -272,7 +272,7 @@ suite.define(() => {
         const primary = (value: string) =>
           (value.split(",")[0] ?? "").trim().replace(/^["']|["']$/gu, "");
         return {
-          buildId: document.documentElement.getAttribute("data-openclaw-control-ui-build-id"),
+          buildId: document.documentElement.getAttribute("data-carapace-control-ui-build-id"),
           chatFontFamily: lastChat ? primary(getComputedStyle(lastChat).fontFamily) : null,
           codeFontFamily: lastChat?.querySelector("code")
             ? primary(getComputedStyle(lastChat.querySelector("code")!).fontFamily)
@@ -282,7 +282,7 @@ suite.define(() => {
             : null,
           bodyFontFamily: primary(getComputedStyle(document.body).fontFamily),
           stylesheets: [
-            ...document.querySelectorAll<HTMLLinkElement>('link[id^="openclaw-typeface-"]'),
+            ...document.querySelectorAll<HTMLLinkElement>('link[id^="carapace-typeface-"]'),
           ].map((link) => {
             const url = new URL(link.href);
             return { pathname: url.pathname, version: url.searchParams.get("v") };
@@ -585,7 +585,7 @@ suite.define(() => {
         await page.route("**/assets/**.js", (route) => route.abort());
         await page.goto(`${suite.server.baseUrl}chat`);
         const report = await page.evaluate(() => ({
-          buildId: document.documentElement.getAttribute("data-openclaw-control-ui-build-id"),
+          buildId: document.documentElement.getAttribute("data-carapace-control-ui-build-id"),
           background: getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),
           resolvedTheme: document.documentElement.dataset.theme,
           palette: performance
@@ -645,7 +645,7 @@ suite.define(() => {
     await page.locator(".agent-chat__composer-combobox textarea").waitFor();
     await expectChrome(chatColor);
     await page.locator(".chat-pane__nav-toggle").first().click();
-    await page.locator("openclaw-app-sidebar .sidebar-brand__new-thread").click();
+    await page.locator("carapace-app-sidebar .sidebar-brand__new-thread").click();
     await page.locator(".new-session-page__message").waitFor();
     await expectChrome(chatColor);
 
@@ -660,7 +660,7 @@ suite.define(() => {
     }
 
     // Runtime removal renders nothing; restoration must rebind the existing router.
-    const runtimeLifecycle = await page.locator("openclaw-app-shell").evaluate(async (element) => {
+    const runtimeLifecycle = await page.locator("carapace-app-shell").evaluate(async (element) => {
       const shell = element as HTMLElement & {
         runtime?: import("../app/bootstrap.ts").ApplicationRuntime;
         updateComplete: Promise<boolean>;
@@ -688,7 +688,7 @@ suite.define(() => {
     });
     await expectChrome(chatColor);
 
-    const reconnect = await page.locator("openclaw-app-shell").evaluate(async (element) => {
+    const reconnect = await page.locator("carapace-app-shell").evaluate(async (element) => {
       const shell = element as HTMLElement & { updateComplete: Promise<boolean> };
       const parent = shell.parentNode!;
       const next = shell.nextSibling;
@@ -702,7 +702,7 @@ suite.define(() => {
         return {
           removed,
           reconnected: color(),
-          sameShell: document.querySelector("openclaw-app-shell") === shell,
+          sameShell: document.querySelector("carapace-app-shell") === shell,
         };
       } finally {
         if (!shell.isConnected) {
@@ -782,7 +782,7 @@ suite.define(() => {
     // A gateway mounted at a base path serves the bundle below that prefix, so
     // root-absolute font URLs 404 there and the theme silently falls back to
     // system faces while its palette still applies.
-    const basePath = "/openclaw";
+    const basePath = "/carapace";
     const { page } = await openThemedChat("absolutely", "dark", { basePath });
     const requested: string[] = [];
     // The preview server does not stamp Gateway HTML. Reproduce the actual
@@ -798,7 +798,7 @@ suite.define(() => {
       const response = await route.fetch();
       const html = (await response.text()).replace(
         /<html\b/u,
-        `<html data-openclaw-control-ui-base-path="${basePath}"`,
+        `<html data-carapace-control-ui-base-path="${basePath}"`,
       );
       await route.fulfill({ response, body: html });
     });
@@ -821,10 +821,10 @@ suite.define(() => {
 
     const linkHref = await page.evaluate(
       () =>
-        document.getElementById("openclaw-typeface-space-grotesk")?.getAttribute("href") ?? null,
+        document.getElementById("carapace-typeface-space-grotesk")?.getAttribute("href") ?? null,
     );
 
-    const buildId = await page.locator("html").getAttribute("data-openclaw-control-ui-build-id");
+    const buildId = await page.locator("html").getAttribute("data-carapace-control-ui-build-id");
     if (buildId !== null) {
       expect(buildId).not.toBe("");
     }
@@ -835,7 +835,7 @@ suite.define(() => {
     // the gateway stamps on <html>, so it has to follow the mount too.
     const paletteHref = await page.evaluate(
       () =>
-        document.getElementById("openclaw-theme-palette-absolutely")?.getAttribute("href") ?? null,
+        document.getElementById("carapace-theme-palette-absolutely")?.getAttribute("href") ?? null,
     );
     const paletteUrl = new URL(paletteHref ?? "", suite.server.baseUrl);
     expect(paletteUrl.pathname).toBe(`${basePath}/themes/absolutely.css`);

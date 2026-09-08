@@ -3,13 +3,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const unitName = "openclaw-gateway.service";
+const unitName = "carapace-gateway.service";
 const unitPath = path.join(process.env.HOME, ".config/systemd/user", unitName);
 // Native clients omit fixture-only env; loaded state must follow the inspected unit.
 const loadedPath = `${unitPath}.loaded-unit`;
 const manager = "org.freedesktop.systemd1";
 const root = "/org/freedesktop/systemd1";
-const object = `${root}/unit/openclaw_2dgateway_2eservice`;
+const object = `${root}/unit/carapace_2dgateway_2eservice`;
 
 function fail(message = "Unsupported survivor manager request or generated unit grammar.") {
   throw new Error(message);

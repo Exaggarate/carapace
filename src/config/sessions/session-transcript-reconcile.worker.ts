@@ -1,11 +1,11 @@
 /** Worker entrypoint for transcript parsing and active-branch resolution only. */
 import { parentPort, workerData } from "node:worker_threads";
 import {
-  claimOpenClawAgentDatabaseLease,
-  releaseOpenClawAgentDatabaseLease,
-} from "../../state/openclaw-agent-db-lease.js";
-import { openOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import { closeOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+  claimCarapaceAgentDatabaseLease,
+  releaseCarapaceAgentDatabaseLease,
+} from "../../state/carapace-agent-db-lease.js";
+import { openCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import { closeCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { listSessionsNeedingTranscriptIndexReconcile } from "./session-transcript-index.js";
 import {
   prepareSessionTranscriptProjection,
@@ -122,15 +122,15 @@ const port = parentPort;
 const input: SessionTranscriptReconcileWorkerInput = parsedInput;
 function resolveLeaseEnvironment(owner: ReconcileWorkerOwner) {
   return {
-    OPENCLAW_STATE_DIR: owner.stateDir,
-    ...(owner.externallySupervised ? { OPENCLAW_SUPERVISOR_MODE: "external" } : {}),
+    CARAPACE_STATE_DIR: owner.stateDir,
+    ...(owner.externallySupervised ? { CARAPACE_SUPERVISOR_MODE: "external" } : {}),
   };
 }
 
 function releaseLease(owner: ReconcileWorkerOwner & { leaseId: string }): void {
   try {
-    releaseOpenClawAgentDatabaseLease(owner.leaseId, { env: resolveLeaseEnvironment(owner) });
-    closeOpenClawStateDatabase();
+    releaseCarapaceAgentDatabaseLease(owner.leaseId, { env: resolveLeaseEnvironment(owner) });
+    closeCarapaceStateDatabase();
     port.postMessage({ type: "lease-released" } satisfies SessionTranscriptReconcileWorkerMessage);
   } catch (error) {
     port.postMessage({
@@ -285,8 +285,8 @@ async function run(): Promise<void> {
         env: resolveLeaseEnvironment(reconcileInput),
       };
       // The parent knows this identity before admission, even if native exit prevents a reply.
-      claimOpenClawAgentDatabaseLease(options, reconcileInput.leaseId);
-      const opened = openOpenClawAgentDatabaseReadOnly(options);
+      claimCarapaceAgentDatabaseLease(options, reconcileInput.leaseId);
+      const opened = openCarapaceAgentDatabaseReadOnly(options);
       if (!opened.found) {
         throw new Error(`Cannot prepare transcript indexes: ${opened.reason}`);
       }

@@ -52,20 +52,20 @@ function registerBackend(overrides: Partial<CliBackendPlugin> = {}) {
 }
 
 function compactParams(overrides: Record<string, unknown> = {}) {
-  const dir = tempDirs.make("openclaw-compact-native-cli-");
+  const dir = tempDirs.make("carapace-compact-native-cli-");
   const cliSessionBinding = {
     sessionId: "native-session",
     authProfileId: "anthropic:subscription",
   };
   const sessionEntry = { execHost: "node", execNode: "paired-node" };
   return {
-    sessionId: "openclaw-session",
+    sessionId: "carapace-session",
     sessionKey: "agent:main:main",
     sessionTarget: {
       agentId: "main",
-      sessionId: "openclaw-session",
+      sessionId: "carapace-session",
       sessionKey: "agent:main:main",
-      storePath: join(dir, "openclaw.sqlite"),
+      storePath: join(dir, "carapace.sqlite"),
     },
     sessionFile: "agent:main:main",
     agentId: "main",
@@ -107,7 +107,7 @@ describe("native CLI manual compaction", () => {
       expect.objectContaining({
         preparedRunAdmission: expect.objectContaining({
           operationalRunInstance: expect.objectContaining({
-            runId: "openclaw-session:native-compact",
+            runId: "carapace-session:native-compact",
           }),
         }),
         prompt: "/compact keep decisions",

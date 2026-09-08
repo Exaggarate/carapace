@@ -14,12 +14,12 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const NATIVE_UPDATE_DECLINED_EVENT = "openclaw:native-update-declined";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const NATIVE_UPDATE_DECLINED_EVENT = "carapace:native-update-declined";
 async function openUpdateConfirmation(page: Page): Promise<void> {
   await page.locator(".sidebar-issues-button").click();
   const updateIssue = page.locator(
-    'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+    'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
   );
   await updateIssue.locator("summary").click();
   await updateIssue.locator(".sidebar-update-card__action").click();
@@ -71,7 +71,7 @@ suite.define(() => {
 
         await page.locator(".sidebar-issues-button").click();
         const updateIssue = page.locator(
-          'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+          'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
         );
         await updateIssue.locator("summary").click();
         const action = updateIssue.locator(".sidebar-update-card__action");
@@ -81,7 +81,7 @@ suite.define(() => {
         );
         await captureUpdateProof(page, artifactDir, "disabled-update.png");
 
-        const tooltip = updateIssue.locator("openclaw-tooltip wa-tooltip");
+        const tooltip = updateIssue.locator("carapace-tooltip wa-tooltip");
         await tooltip.evaluate((element) => {
           element.addEventListener(
             "wa-after-show",
@@ -151,27 +151,27 @@ suite.define(() => {
 
         await openUpdateConfirmation(page);
         await page
-          .locator("openclaw-modal-dialog")
+          .locator("carapace-modal-dialog")
           .getByRole("button", { name: "Update and restart", exact: true })
           .click();
-        const dialog = page.locator("openclaw-modal-dialog");
+        const dialog = page.locator("carapace-modal-dialog");
         await dialog
-          .getByText("⚠️ OpenClaw update failed: global-install-failed.", { exact: true })
+          .getByText("⚠️ Carapace update failed: global-install-failed.", { exact: true })
           .first()
           .waitFor();
-        expect(await dialog.textContent()).toContain("openclaw triage");
+        expect(await dialog.textContent()).toContain("carapace triage");
         expect(await dialog.textContent()).toContain("Package install did not verify on disk.");
         expect(await gateway.getRequests("update.run")).toHaveLength(1);
-        expect(await gateway.getRequests("openclaw.chat")).toHaveLength(0);
+        expect(await gateway.getRequests("carapace.chat")).toHaveLength(0);
         await gateway.setMethodResponse("update.status", { activeRun: null, lastRun: run });
         await dialog.getByRole("button", { name: "Review update", exact: true }).click();
         await page.waitForURL("**/settings/updates");
-        await page.locator("openclaw-config-page").waitFor();
+        await page.locator("carapace-config-page").waitFor();
         expect(await dialog.count()).toBe(0);
-        expect(await page.locator("openclaw-sidebar-attention").count()).toBe(0);
+        expect(await page.locator("carapace-sidebar-attention").count()).toBe(0);
         await page
-          .locator("openclaw-update-run-view")
-          .getByText("⚠️ OpenClaw update failed: global-install-failed.", { exact: true })
+          .locator("carapace-update-run-view")
+          .getByText("⚠️ Carapace update failed: global-install-failed.", { exact: true })
           .first()
           .waitFor();
         expect(pageErrors).toEqual([]);
@@ -222,7 +222,7 @@ suite.define(() => {
 
         await openUpdateConfirmation(page);
         await page
-          .locator("openclaw-modal-dialog")
+          .locator("carapace-modal-dialog")
           .getByRole("button", { name: "Update and restart", exact: true })
           .click();
         await page.getByRole("button", { name: "Updating…", exact: true }).waitFor();
@@ -230,17 +230,17 @@ suite.define(() => {
         await page.getByRole("button", { name: "Close", exact: true }).click();
         await page.locator(".sidebar-issues-button").click();
         const updateIssue = page.locator(
-          'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+          'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
         );
         await updateIssue.locator("summary").click();
         await updateIssue
-          .getByText("⬆️ OpenClaw update in progress: restarting.", { exact: true })
+          .getByText("⬆️ Carapace update in progress: restarting.", { exact: true })
           .first()
           .waitFor();
         await updateIssue.locator(".sidebar-update-card__action").click();
         await page
-          .locator("openclaw-modal-dialog")
-          .getByText("⬆️ OpenClaw update in progress: restarting.", { exact: true })
+          .locator("carapace-modal-dialog")
+          .getByText("⬆️ Carapace update in progress: restarting.", { exact: true })
           .waitFor();
         expect(await gateway.getRequests("update.run")).toHaveLength(1);
         expect(await page.locator(".sidebar-issues-button__count").count()).toBe(1);
@@ -305,7 +305,7 @@ suite.define(() => {
 
         await openUpdateConfirmation(page);
         await page
-          .locator("openclaw-modal-dialog")
+          .locator("carapace-modal-dialog")
           .getByRole("button", { name: "Update and restart", exact: true })
           .click();
         await gateway.waitForRequest("update.run");
@@ -336,7 +336,7 @@ suite.define(() => {
         await gateway.setOnline(true);
 
         try {
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           await dialog.getByText(expectedText, { exact: false }).first().waitFor();
           expect(await dialog.locator('[data-oracle="version"]').getAttribute("data-state")).toBe(
             "fail",
@@ -370,16 +370,16 @@ suite.define(() => {
       });
       await context.addInitScript(() => {
         const nativeWindow = window as unknown as {
-          openClawUpdateMessages: unknown[];
+          carapaceUpdateMessages: unknown[];
           webkit: {
-            messageHandlers: { openclawUpdate: { postMessage: (message: unknown) => void } };
+            messageHandlers: { carapaceUpdate: { postMessage: (message: unknown) => void } };
           };
         };
-        nativeWindow.openClawUpdateMessages = [];
+        nativeWindow.carapaceUpdateMessages = [];
         nativeWindow.webkit = {
           messageHandlers: {
-            openclawUpdate: {
-              postMessage: (message) => nativeWindow.openClawUpdateMessages.push(message),
+            carapaceUpdate: {
+              postMessage: (message) => nativeWindow.carapaceUpdateMessages.push(message),
             },
           },
         };
@@ -396,7 +396,7 @@ suite.define(() => {
               finishedAtMs: Date.now(),
             });
       const gateway = await installMockGateway(page, {
-        featureMethods: ["openclaw.chat", "update.run"],
+        featureMethods: ["carapace.chat", "update.run"],
         methodResponses: {
           "update.status": { activeRun: null, lastRun: run },
           "update.runs.get": { run },
@@ -423,7 +423,7 @@ suite.define(() => {
         if (run) {
           await page.getByRole("button", { name: "Retry update", exact: true }).click();
         }
-        expect(await page.locator("openclaw-modal-dialog").getAttribute("label")).toBe(
+        expect(await page.locator("carapace-modal-dialog").getAttribute("label")).toBe(
           "Update Mac app + Gateway",
         );
         expect(await gateway.getRequests("update.run")).toHaveLength(0);
@@ -432,14 +432,14 @@ suite.define(() => {
         expect(
           await page.evaluate(
             () =>
-              (window as unknown as { openClawUpdateMessages: unknown[] }).openClawUpdateMessages,
+              (window as unknown as { carapaceUpdateMessages: unknown[] }).carapaceUpdateMessages,
           ),
         ).toEqual([{ type: "start-update" }]);
         expect(await gateway.getRequests("update.run")).toHaveLength(0);
 
         await page.keyboard.press("Control+Shift+,");
         await page.locator(".shell--settings").waitFor();
-        expect(await page.locator("openclaw-sidebar-attention").count()).toBe(0);
+        expect(await page.locator("carapace-sidebar-attention").count()).toBe(0);
         await page.evaluate(
           (eventName) => window.dispatchEvent(new CustomEvent(eventName)),
           NATIVE_UPDATE_DECLINED_EVENT,

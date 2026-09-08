@@ -18,11 +18,11 @@ const suite = createControlUiE2eSuite({
 function fileList(agentId: string) {
   return {
     agentId,
-    workspace: `/tmp/openclaw-e2e/workspace-${agentId}`,
+    workspace: `/tmp/carapace-e2e/workspace-${agentId}`,
     files: [
       {
         name: "AGENTS.md",
-        path: `/tmp/openclaw-e2e/workspace-${agentId}/AGENTS.md`,
+        path: `/tmp/carapace-e2e/workspace-${agentId}/AGENTS.md`,
         missing: false,
       },
     ],

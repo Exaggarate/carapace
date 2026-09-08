@@ -4,7 +4,7 @@
 import { once } from "node:events";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { connect } from "node:net";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";

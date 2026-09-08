@@ -67,7 +67,7 @@ describe("plain node plugin tool invocation deadline", () => {
       const connectNode = async () =>
         await connectGatewayClient({
           url: `ws://127.0.0.1:${port}`,
-          token: process.env.OPENCLAW_GATEWAY_TOKEN,
+          token: process.env.CARAPACE_GATEWAY_TOKEN,
           role: "node",
           clientName: GATEWAY_CLIENT_NAMES.NODE_HOST,
           clientVersion: "1.0.0",
@@ -130,7 +130,7 @@ describe("plain node plugin tool invocation deadline", () => {
       const node = await connectNode();
       // The shared Gateway fixture snapshots no such key, so leaving it set would
       // point later tests in this worker at this stopped ephemeral server.
-      const gatewayUrlEnv = captureEnv(["OPENCLAW_GATEWAY_URL"]);
+      const gatewayUrlEnv = captureEnv(["CARAPACE_GATEWAY_URL"]);
 
       try {
         const nodeId = (await findNodeId()) ?? provisionalNodeId;
@@ -150,7 +150,7 @@ describe("plain node plugin tool invocation deadline", () => {
             },
           ],
         });
-        setTestEnvValue("OPENCLAW_GATEWAY_URL", `ws://127.0.0.1:${port}`);
+        setTestEnvValue("CARAPACE_GATEWAY_URL", `ws://127.0.0.1:${port}`);
 
         const tool = createNodePluginTools({})[0];
         if (!tool) {

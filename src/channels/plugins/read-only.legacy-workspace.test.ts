@@ -57,8 +57,8 @@ describe("read-only channel plugin legacy workspace discovery", () => {
       name: "Research Chat",
       description: "Research workspace channel",
       version: "1.0.0",
-      rootDir: "/srv/research/.openclaw/extensions/research-chat-plugin",
-      source: "/srv/research/.openclaw/extensions/research-chat-plugin/index.js",
+      rootDir: "/srv/research/.carapace/extensions/research-chat-plugin",
+      source: "/srv/research/.carapace/extensions/research-chat-plugin/index.js",
       origin: "workspace" as const,
       channels: ["research-chat"],
     };

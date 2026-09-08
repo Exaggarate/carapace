@@ -29,7 +29,7 @@ describe("runtime parity outcomes", () => {
     const cell = await captureRuntimeParityCell({
       runtime: "codex",
       gateway: {
-        tempRoot: `/tmp/openclaw-qa-runtime-parity-missing-${process.pid}`,
+        tempRoot: `/tmp/carapace-qa-runtime-parity-missing-${process.pid}`,
       },
       scenarioResult: {
         status: "skip",
@@ -71,7 +71,7 @@ describe("runtime parity outcomes", () => {
 
     expect(result).toMatchObject({
       cells: {
-        openclaw: { status: "skip", details: "implementation unavailable" },
+        carapace: { status: "skip", details: "implementation unavailable" },
         codex: { status: "skip", details: "implementation unavailable" },
       },
       drift: "failure-mode",
@@ -97,7 +97,7 @@ describe("runtime parity outcomes", () => {
 
     expect(result).toMatchObject({
       cells: {
-        openclaw: { status: "pass" },
+        carapace: { status: "pass" },
         codex: { status: "skip" },
       },
       drift: "structural",
@@ -109,13 +109,13 @@ describe("runtime parity outcomes", () => {
   it("keeps unannotated, doubly skipped, and failed known-gap cells blocking", async () => {
     const run = (params: {
       codexDetails?: string;
-      openclawStatus?: "pass" | "skip";
+      carapaceStatus?: "pass" | "skip";
       codexRuntimeErrorClass?: string;
     }) =>
       runRuntimeParityScenario({
         scenarioId: "blocking-skip",
         runCell: async (runtime) => ({
-          status: runtime === "openclaw" ? (params.openclawStatus ?? "pass") : ("skip" as const),
+          status: runtime === "carapace" ? (params.carapaceStatus ?? "pass") : ("skip" as const),
           ...(runtime === "codex" && params.codexDetails ? { details: params.codexDetails } : {}),
           cell: {
             ...makeRuntimeParityCell(runtime),
@@ -132,7 +132,7 @@ describe("runtime parity outcomes", () => {
 
     const bothSkipped = await run({
       codexDetails: "known-harness-gap exec: tracked",
-      openclawStatus: "skip",
+      carapaceStatus: "skip",
     });
     expect(bothSkipped.drift).toBe("failure-mode");
     expect(isRuntimeParityResultPass(bothSkipped)).toBe(false);
@@ -169,7 +169,7 @@ describe("runtime parity outcomes", () => {
     expect(
       isRuntimeParityResultPass({
         ...result,
-        cells: { openclaw: result.cells.openclaw } as typeof result.cells,
+        cells: { carapace: result.cells.carapace } as typeof result.cells,
       }),
     ).toBe(false);
   });

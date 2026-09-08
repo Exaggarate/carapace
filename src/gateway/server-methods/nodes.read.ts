@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -7,7 +7,7 @@ import {
   validateNodePluginToolsUpdateParams,
   validateNodeSkillsUpdateParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { updatePairedNodeSessionHost } from "../../infra/device-pairing-node-facts.js";
 import { projectPairedDeviceNodeBindings } from "../../infra/device-pairing-node-state.js";
 import { listNodePairing, projectNodePairing } from "../../infra/device-pairing-node.js";
@@ -200,7 +200,7 @@ const handlePluginSurfaceRefresh: GatewayRequestHandler = ({ params, respond, cl
 export function refreshConnectedNodeSurfaceCaches(params: {
   context: GatewayRequestContext;
   nodeSession: NodeSession;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }) {
   const cfg = params.cfg ?? params.context.getRuntimeConfig();
   const { nodeSession } = params;
@@ -398,7 +398,7 @@ export const nodeReadHandlers: GatewayRequestHandlers = {
       respondRunnerInventoryRetry(
         respond,
         pendingSurface
-          ? `node capability surface is awaiting operator approval; run \`openclaw nodes approve ${pendingSurface.requestId}\` (see \`openclaw nodes pending\`), then this node retries automatically`
+          ? `node capability surface is awaiting operator approval; run \`carapace nodes approve ${pendingSurface.requestId}\` (see \`carapace nodes pending\`), then this node retries automatically`
           : "node runner inventory publication is not current; retry after pairing completes",
       );
       return;

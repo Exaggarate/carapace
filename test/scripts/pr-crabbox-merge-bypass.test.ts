@@ -40,19 +40,19 @@ function input() {
         {
           app: { id: 15368 },
           conclusion: "skipped",
-          details_url: `https://github.com/openclaw/openclaw/actions/runs/${ciRunId}/job/${ciGateJobId}`,
+          details_url: `https://github.com/Exaggarate/carapace/actions/runs/${ciRunId}/job/${ciGateJobId}`,
           head_sha: headSha,
           id: 20,
-          name: "openclaw/ci-gate",
+          name: "carapace/ci-gate",
           status: "completed",
         },
         {
           app: { id: 15368 },
           conclusion: "success",
-          details_url: "https://github.com/openclaw/openclaw/actions/runs/8001",
+          details_url: "https://github.com/Exaggarate/carapace/actions/runs/8001",
           head_sha: headSha,
           id: 21,
-          name: "openclaw/crabbox-gate",
+          name: "carapace/crabbox-gate",
           output: {
             summary: formatCrabboxGateCheckSummary({
               baseSha,
@@ -76,7 +76,7 @@ function input() {
         {
           conclusion: "skipped",
           id: ciGateJobId,
-          name: "openclaw/ci-gate",
+          name: "carapace/ci-gate",
           status: "completed",
         },
         {
@@ -105,9 +105,9 @@ function input() {
     },
     mainRef: { object: { sha: mainSha }, ref: "refs/heads/main" },
     pullRequest: {
-      base: { ref: "main", repo: { full_name: "openclaw/openclaw" }, sha: baseSha },
+      base: { ref: "main", repo: { full_name: "carapace/carapace" }, sha: baseSha },
       draft: false,
-      head: { repo: { full_name: "openclaw/openclaw" }, sha: headSha },
+      head: { repo: { full_name: "carapace/carapace" }, sha: headSha },
       number: 131091,
       state: "open",
     },
@@ -120,7 +120,7 @@ function input() {
       path: ".github/workflows/pr-crabbox-gate-publisher.yml",
       status: "completed",
     },
-    requiredChecks: [{ bucket: "skipping", name: "openclaw/ci-gate", state: "SKIPPED" }],
+    requiredChecks: [{ bucket: "skipping", name: "carapace/ci-gate", state: "SKIPPED" }],
     workflowRun: {
       conclusion: "failure",
       event: "pull_request",
@@ -160,7 +160,7 @@ describe("Crabbox admin merge bypass verifier", () => {
       (value: ReturnType<typeof input>) => {
         value.checkRuns.check_runs.pop();
       },
-      /missing exact-head openclaw\/crabbox-gate/u,
+      /missing exact-head carapace\/crabbox-gate/u,
     ],
     [
       "wrong app",
@@ -181,7 +181,7 @@ describe("Crabbox admin merge bypass verifier", () => {
       (value: ReturnType<typeof input>) => {
         value.membership.role = "member";
       },
-      /not an active openclaw organization admin/u,
+      /not an active carapace organization admin/u,
     ],
     [
       "pull-ref publisher workflow",
@@ -356,7 +356,7 @@ const value = JSON.parse(fs.readFileSync("input.json", "utf8"));
 const save = () => fs.writeFileSync("input.json", JSON.stringify(value));
 const fail = (message, code = 19) => { console.error(message); process.exit(code); };
 const out = (data) => console.log(typeof data === "string" ? data : JSON.stringify(data));
-const repo = {id:123,nameWithOwner:"openclaw/openclaw",url:"https://github.com/openclaw/openclaw"};
+const repo = {id:123,nameWithOwner:"carapace/carapace",url:"https://github.com/Exaggarate/carapace"};
 const reviewComments = ${JSON.stringify(reviewComments)};
 const pr = {id:"fixture-pr",number:131091,url:repo.url+"/pull/131091",state:"OPEN",isDraft:false,
   headRefOid:value.headSha,headRefName:"topic",baseRefName:"main",baseRefOid:"${baseSha}",
@@ -390,7 +390,7 @@ else if (endpoint === "graphql" && args.includes("query=query { viewer { login }
   if (endpoint.includes("/check-runs?") || endpoint.includes("/jobs?") || endpoint.includes("/issues/131091/comments?")) {
     if (!args.includes("--paginate") || !args.includes("--slurp")) fail("missing pagination");
   }
-  const prefix = "repos/openclaw/openclaw/";
+  const prefix = "repos/carapace/carapace/";
   if (endpoint === prefix + "pulls/131091") out(value.pullRequest);
   else if (endpoint === prefix + "issues/131091/comments?per_page=100") out(reviewComments);
   else if (endpoint === prefix + "commits/" + value.headSha + "/check-runs?filter=latest&per_page=100") out(value.checkRuns.check_runs.map(check => ({check_runs:[check]})));
@@ -398,12 +398,12 @@ else if (endpoint === "graphql" && args.includes("query=query { viewer { login }
   else if (endpoint === prefix + "actions/runs/8001") out({...value.publisherRun,html_url:repo.url+"/actions/runs/8001"});
   else if (endpoint === prefix + "actions/runs/7001") out(value.workflowRun);
   else if (endpoint === prefix + "actions/runs/7001/jobs?filter=latest&per_page=100") out(value.jobs.jobs.map(job => ({jobs:[job]})));
-  else if (endpoint === "orgs/openclaw/memberships/maintainer") {
+  else if (endpoint === "orgs/carapace/memberships/maintainer") {
     value.membershipReads = (value.membershipReads || 0) + 1;
     if (process.env.FAKE_REVOKE && value.membershipReads === 2) value.membership.role = "member";
     save(); out(value.membership);
   }
-  else if (endpoint === "orgs/openclaw/memberships/relay-reader") out({role:"admin",state:"active",user:{login:"relay-reader"}});
+  else if (endpoint === "orgs/carapace/memberships/relay-reader") out({role:"admin",state:"active",user:{login:"relay-reader"}});
   else if (endpoint === prefix + "git/ref/heads/main") out(value.mainRef);
   else if (endpoint === prefix + "compare/${workflowSha}...${mainSha}") out(value.mainComparison);
   else if (endpoint === "repos/prepared/base/commits/${headSha}") out({parents:[{sha:"${mainSha}"}]});
@@ -456,7 +456,7 @@ else if (endpoint === "graphql" && args.includes("query=query { viewer { login }
           HOME: root,
           PATH: `${bin}${delimiter}${process.env.PATH ?? ""}`,
           GH_TOKEN: "synthetic-token",
-          OPENCLAW_GH_BIN: override ? selected : "",
+          CARAPACE_GH_BIN: override ? selected : "",
           FAKE_DENIED: denied,
           FAKE_DISPATCH: command.includes("finalize_remote_crabbox_aws_gate") ? "1" : "",
           FAKE_REVOKE: revoke ? "1" : "",
@@ -497,7 +497,7 @@ describe("Crabbox protected gh request producers", () => {
     const result = runProtectedShell(`verify_crabbox_admin_merge_bypass 131091 ${headSha}`);
     expect(result.status, result.stdout + result.stderr).toBe(0);
     expect(result.proof).toMatchObject({ actor: "maintainer", mainSha, workflowSha, ciRunId });
-    expect(result.calls.at(-1)).toContain("repos/openclaw/openclaw/git/ref/heads/main");
+    expect(result.calls.at(-1)).toContain("repos/carapace/carapace/git/ref/heads/main");
     expect(result.calls.filter((args) => args.includes("--paginate"))).toHaveLength(2);
   });
 
@@ -516,7 +516,7 @@ describe("Crabbox protected gh request producers", () => {
   ])("rejects writer membership $state/$role despite the relay's admin identity", (membership) => {
     const result = runProtectedShell("require_active_org_admin_for_crabbox_gate", membership);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("requires an active openclaw organization admin");
+    expect(result.stderr).toContain("requires an active carapace organization admin");
   });
 
   it("keeps protected refusal terminal without alternate identity or dispatch", () => {
@@ -569,7 +569,7 @@ describe("Crabbox authorization before final effects", () => {
     expect(result.status, result.stdout + result.stderr).toBe(role === "admin" ? 0 : 1);
     const viewer = result.calls.findIndex((args) => args.includes("graphql"));
     const membership = result.calls.findIndex((args) =>
-      args.includes("orgs/openclaw/memberships/maintainer"),
+      args.includes("orgs/carapace/memberships/maintainer"),
     );
     const dispatches = result.calls.filter((args) => args[0] === "workflow" && args[1] === "run");
     expect(viewer).toBeGreaterThanOrEqual(0);
@@ -593,7 +593,7 @@ describe("Crabbox authorization before final effects", () => {
         `base_sha=${baseSha}`,
       ]);
     } else {
-      expect(result.stderr).toContain("requires an active openclaw organization admin");
+      expect(result.stderr).toContain("requires an active carapace organization admin");
     }
   });
 
@@ -612,7 +612,7 @@ describe("Crabbox authorization before final effects", () => {
         args.includes("query=query { viewer { login } }"),
       );
       const memberships = result.calls.filter((args) =>
-        args.includes("orgs/openclaw/memberships/maintainer"),
+        args.includes("orgs/carapace/memberships/maintainer"),
       );
       const requests = result.calls.filter((args) => args[0] === "pr" && args[1] === "merge");
       expect(viewers, output).toHaveLength(reads);
@@ -627,7 +627,7 @@ describe("Crabbox authorization before final effects", () => {
           "merge",
           "131091",
           "--repo",
-          "https://github.com/openclaw/openclaw",
+          "https://github.com/Exaggarate/carapace",
           "--squash",
           "--admin",
           "--match-head-commit",
@@ -642,7 +642,7 @@ describe("Crabbox authorization before final effects", () => {
         // The fake accepts the request without claiming a real merge receipt.
         expect(output).toContain("prior dispatch unresolved");
       } else {
-        expect(output).toContain("maintainer is not an active openclaw organization admin");
+        expect(output).toContain("maintainer is not an active carapace organization admin");
         expect(result.intent).toBeUndefined();
       }
       if (revoke) {

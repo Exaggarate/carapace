@@ -73,7 +73,7 @@ describe("cron edit command", () => {
 
   it("rethrows contradictory options in JSON mode without accessing the Gateway", async () => {
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "cron", "edit", "job-1", "--json"];
+    process.argv = ["node", "carapace", "cron", "edit", "job-1", "--json"];
     try {
       await expect(
         createCronProgram()

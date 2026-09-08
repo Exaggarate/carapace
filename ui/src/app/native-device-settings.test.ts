@@ -19,13 +19,13 @@ afterEach(() => {
 
 function installBridge(snapshot: unknown = createNativeDeviceSettingsSnapshot()) {
   const post = vi.fn<(message: unknown) => Promise<unknown>>().mockResolvedValue(snapshot);
-  vi.stubGlobal("webkit", { messageHandlers: { openclawDeviceSettings: { postMessage: post } } });
-  vi.stubGlobal("__OPENCLAW_NATIVE_DEVICE_SETTINGS__", snapshot);
+  vi.stubGlobal("webkit", { messageHandlers: { carapaceDeviceSettings: { postMessage: post } } });
+  vi.stubGlobal("__CARAPACE_NATIVE_DEVICE_SETTINGS__", snapshot);
   capability = createNativeDeviceSettingsCapability();
   return post;
 }
 function publish(detail: unknown) {
-  window.dispatchEvent(new CustomEvent("openclaw:native-device-settings-changed", { detail }));
+  window.dispatchEvent(new CustomEvent("carapace:native-device-settings-changed", { detail }));
 }
 
 describe("native device settings wire contract", () => {

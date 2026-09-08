@@ -25,14 +25,14 @@ vi.mock("../internal/voice.js", () => ({
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/dangerous-name-runtime", () => ({
+vi.mock("carapace/plugin-sdk/dangerous-name-runtime", () => ({
   isDangerousNameMatchingEnabled: () => false,
 }));
 
 // Suite runs isolate=false: a partial factory here poisons the shared module
 // cache for later files in the worker (#123025), so spread the real module.
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   return {
     ...actual,
     danger: (value: string) => value,

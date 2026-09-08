@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { SessionCompanionExchange } from "../../packages/gateway-protocol/src/schema/sessions.js";
 import { prepareSystemAgentRunAdmission } from "../agents/admitted-run-context.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { resolveSimpleCompletionSelectionForAgent } from "../agents/simple-completion-runtime.js";
 import { resolveUtilityModelRefForAgent } from "../agents/utility-model.js";
 import { resolveSessionStorePathCore } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { Message, Usage } from "../llm/types.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -40,7 +40,7 @@ type SessionCompanionPromptMessage = {
 };
 
 type SessionCompanionRunParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   modelRef: string;
   sessionKey: string;
@@ -51,7 +51,7 @@ type SessionCompanionRunParams = {
 };
 
 export type SessionCompanionAskDeps = {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   sessionObserver: {
     getCompanionSnapshot: (
       sessionKey: string,
@@ -203,7 +203,7 @@ async function defaultRun(params: SessionCompanionRunParams): Promise<string> {
       provider: selection.runtimeProvider ?? selection.provider,
       model: selection.modelId,
       modelFallbacksOverride: [],
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       authProfileId: selection.profileId,
       authProfileIdSource: selection.profileId ? "user" : undefined,
       timeoutMs: ASK_TIMEOUT_MS,

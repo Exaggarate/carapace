@@ -7,16 +7,16 @@ import {
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import { withOwnedSessionTranscriptWrites } from "../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  resolveIncognitoOpenClawAgentSqlitePath,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  resolveIncognitoCarapaceAgentSqlitePath,
+  resolveCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   appendSessionTranscriptMessageByIdentityStrict,
   appendSessionTranscriptMessagesByIdentity,
@@ -25,16 +25,16 @@ import {
 } from "./session-transcript-runtime.js";
 
 describe("guarded session transcript runtime SDK", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let storePath: string;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "openclaw-sdk-transcript-", applyEnv: false });
+    state = await createCarapaceTestState({ prefix: "carapace-sdk-transcript-", applyEnv: false });
     storePath = state.path("sessions.json");
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await state.cleanup();
   });
 
@@ -55,14 +55,14 @@ describe("guarded session transcript runtime SDK", () => {
     const incognito = store.startsWith("incognito");
     const explicitEnv = store === "env" || store.startsWith("incognito-env");
     const explicitStore = store === "explicit" || store === "incognito-env-explicit";
-    let scope: SessionTranscriptReadParams & { config?: OpenClawConfig };
+    let scope: SessionTranscriptReadParams & { config?: CarapaceConfig };
     let persistedScope: SessionTranscriptReadParams & { storePath: string };
 
     beforeEach(async () => {
       if (!explicitEnv) {
         state.applyEnv();
       }
-      const config: OpenClawConfig | undefined =
+      const config: CarapaceConfig | undefined =
         store === "configured" || store === "snapshot" || store === "explicit"
           ? { session: { store: state.path("configured", "{agentId}", "sessions.json") } }
           : undefined;
@@ -71,7 +71,7 @@ describe("guarded session transcript runtime SDK", () => {
       }
       const resolvedStorePath =
         store === "incognito-env-explicit"
-          ? resolveIncognitoOpenClawAgentSqlitePath({ agentId, env: state.env })
+          ? resolveIncognitoCarapaceAgentSqlitePath({ agentId, env: state.env })
           : store === "explicit"
             ? storePath
             : resolveSessionStorePathCore(config?.session?.store, { agentId, env: state.env });
@@ -105,8 +105,8 @@ describe("guarded session transcript runtime SDK", () => {
     afterEach(() => {
       if (incognito) {
         const target = { agentId, env: state.env };
-        expect(fs.existsSync(resolveOpenClawAgentSqlitePath(target))).toBe(false);
-        expect(fs.existsSync(resolveIncognitoOpenClawAgentSqlitePath(target))).toBe(false);
+        expect(fs.existsSync(resolveCarapaceAgentSqlitePath(target))).toBe(false);
+        expect(fs.existsSync(resolveIncognitoCarapaceAgentSqlitePath(target))).toBe(false);
       }
     });
 

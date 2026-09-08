@@ -1,4 +1,4 @@
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 /**
  * Shared parameter and metric types for embedded-agent compaction.
  */
@@ -7,7 +7,7 @@ import type { ReasoningLevel, ThinkLevel } from "../../auto-reply/thinking.js";
 import type { ChatType } from "../../channels/chat-type.js";
 import type { CliSessionBinding, SessionEntry } from "../../config/sessions.js";
 import type { SessionToolOverrides } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GroupToolPolicyConfig } from "../../config/types.tools.js";
 import type { ContextEngine, ContextEngineRuntimeContext } from "../../context-engine/types.js";
 import type { RuntimePluginToolGrant } from "../../plugins/runtime/tool-grant.js";
@@ -89,7 +89,7 @@ export type CompactEmbeddedAgentSessionParams = Pick<
   permissionMode?: SessionEntry["permissionMode"];
   sessionRoot?: string;
   agentDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   toolOverrides?: SessionToolOverrides;
   skillsSnapshot?: SkillSnapshot;
   senderIsOwner?: boolean;
@@ -115,7 +115,7 @@ export type CompactEmbeddedAgentSessionParams = Pick<
   sessionEntry?: SessionEntry;
   /** Keep the concrete model fixed; native runtime ownership is a separate session fact. */
   modelSelectionLocked?: boolean;
-  /** OpenClaw-owned runtime policy prepared for this compaction path. */
+  /** Carapace-owned runtime policy prepared for this compaction path. */
   runtimePlan?: AgentRuntimePlan;
   /** Host-prepared route and credential selection for native harness compaction. */
   runtimeAuthPlan?: AgentRuntimeAuthPlan;

@@ -1,8 +1,8 @@
 // Discord plugin module implements ingress behavior.
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveRealtimeBootstrapContextInstructions } from "openclaw/plugin-sdk/realtime-bootstrap-context";
-import { createSubsystemLogger, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveRealtimeBootstrapContextInstructions } from "carapace/plugin-sdk/realtime-bootstrap-context";
+import { createSubsystemLogger, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { formatMention } from "../mentions.js";
 import { normalizeDiscordSlug } from "../monitor/allow-list.js";
 import { buildDiscordGroupSystemPrompt } from "../monitor/inbound-context.js";
@@ -67,7 +67,7 @@ export async function resolveDiscordVoiceIngressContext(params: {
   readPolicy?: DiscordLivePolicyReader;
   entry: VoiceSessionEntry;
   userId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   admissionAllowFrom?: string[];
   fetchGuildName: (guildId: string) => Promise<string | undefined>;
@@ -113,7 +113,7 @@ export async function runDiscordVoiceAgentTurn(params: {
   accountId: string;
   userId: string;
   message: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   runtime: RuntimeEnv;
   context?: DiscordVoiceIngressContext;
@@ -174,7 +174,7 @@ export async function runDiscordVoiceAgentTurn(params: {
 
 export async function resolveDiscordVoiceRealtimeBootstrapContext(params: {
   entry: VoiceSessionEntry;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
 }): Promise<string | undefined> {
   const realtimeConfig = params.discordConfig.voice?.realtime;

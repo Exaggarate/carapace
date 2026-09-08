@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { relocateCurrentRuntimeContextCarrierToTail } from "../../internal-runtime-context.js";
 import { Agent, type AgentMessage } from "../../runtime/index.js";
@@ -259,7 +259,7 @@ describe("active prompt steering context", () => {
     );
     const cleanup = installRuntimeContextMessageForPrompt({ session, message });
     const promptText =
-      'Conversation info: ⟦openclaw:ctx⟧\n```json\n{"channel":"discord"}\n```\n\nOriginal ask';
+      'Conversation info: ⟦carapace:ctx⟧\n```json\n{"channel":"discord"}\n```\n\nOriginal ask';
     const prompt: AgentMessage = {
       role: "user",
       content: promptText,

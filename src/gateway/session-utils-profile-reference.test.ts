@@ -5,9 +5,9 @@ import type { SessionsListParams } from "../../packages/gateway-protocol/src/ind
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { SessionEntry } from "../config/sessions.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { ensureProfileForEmail, linkEmail, resolveUserProfileId } from "../state/user-profiles.js";
 import type { GatewayClient } from "./server-methods/types.js";
 import { listSessionFixture } from "./session-list.test-support.js";
@@ -17,17 +17,17 @@ const roots = createTempDirTracker();
 let stateRoot: string;
 beforeEach(() => {
   stateRoot = roots.make("activity-profile-reference-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateRoot);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateRoot);
 });
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   roots.cleanup();
 });
 
 function createProfile(id: string): void {
   const profile = ensureProfileForEmail(`${id}@activity.test`);
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   // Deterministic IDs exercise real prefix collisions without weakening the UUID producer.
   db.prepare("UPDATE user_profiles SET id = ? WHERE id = ?").run(id, profile.id);
   db.prepare("UPDATE user_profile_emails SET profile_id = ? WHERE profile_id = ?").run(
@@ -141,7 +141,7 @@ it.each(["12345678-a123-4123-8123-123456789abc", "12345678-A123-4123-8123-123456
       expect(empty.involvingProfileId, reference).toBe(retained);
       expect(empty.sessions, reference).toEqual([]);
     }
-    expect(fs.existsSync(path.join(stateRoot, "state", "openclaw.sqlite"))).toBe(false);
+    expect(fs.existsSync(path.join(stateRoot, "state", "carapace.sqlite"))).toBe(false);
     createProfile("12345678-a123-4123-8123-123456789def");
     await expect(
       listActivity([retained], "12345678a123", { search: "no-matching-session" }),
@@ -188,7 +188,7 @@ it("leaves missing and invalid person references unresolved without creating pro
     expect(result.involvingProfileId).toBeUndefined();
     expect(result.sessions).toEqual([]);
   }
-  expect(fs.existsSync(path.join(stateRoot, "state", "openclaw.sqlite"))).toBe(false);
+  expect(fs.existsSync(path.join(stateRoot, "state", "carapace.sqlite"))).toBe(false);
 });
 
 it.each([

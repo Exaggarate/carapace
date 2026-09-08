@@ -8,7 +8,7 @@ export type ProviderLocalServiceReconciler = (
 ) => Promise<void>;
 
 const MODEL_PROVIDER_LOCAL_SERVICE_RECONCILER_SYMBOL = Symbol.for(
-  "openclaw.modelProviderLocalServiceReconciler",
+  "carapace.modelProviderLocalServiceReconciler",
 );
 
 type ModelWithProviderLocalServiceReconciler = {

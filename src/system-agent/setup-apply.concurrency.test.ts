@@ -4,9 +4,9 @@ import { resolveAgentDir } from "../agents/agent-scope.js";
 import * as onboarding from "../commands/onboard-agent.js";
 import { readConfigFileSnapshot, resetConfigRuntimeState } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { applySystemAgentSetup } from "./setup-apply.js";
 
 const runtime: RuntimeEnv = {
@@ -30,7 +30,7 @@ describe("applySystemAgentSetup first-agent concurrency", () => {
   ] as const)(
     "rejects a roster changed $phase first-agent creation",
     async ({ phase, agentId, error }) => {
-      const state = await createOpenClawTestState({ label: "setup-first-agent-race" });
+      const state = await createCarapaceTestState({ label: "setup-first-agent-race" });
       try {
         await state.writeConfig({ agents: { defaults: { model } } });
         const initial = await readConfigFileSnapshot();
@@ -67,8 +67,8 @@ describe("applySystemAgentSetup first-agent concurrency", () => {
         const after: unknown = JSON.parse(await fs.readFile(state.configPath, "utf8"));
         expect(after).toHaveProperty("agents.entries", { [agentId]: {} });
       } finally {
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
         await state.cleanup();
       }
     },

@@ -11,7 +11,7 @@ import {
 } from "../../../components/panel-toggle-contract.ts";
 import "../../../components/tooltip.ts";
 import { t } from "../../../i18n/index.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../../lit/carapace-element.ts";
 import { sidebarPanelDefinitions } from "../chat-pane-embedded-panels.ts";
 import {
   SIDEBAR_GEOMETRY_COMMIT_EVENT,
@@ -65,7 +65,7 @@ function panelsOf(layout: SidebarLayout): SidebarPanel[] {
   return layout.columns[0]?.panels ?? [];
 }
 
-class ChatSidebarRegion extends OpenClawLightDomElement {
+class ChatSidebarRegion extends CarapaceLightDomElement {
   @property({ attribute: false }) layout: SidebarLayout = { columns: [] };
   @property({ attribute: false }) panelDefinitions = sidebarPanelDefinitions();
   @property({ attribute: false }) panelTemplates: SidebarPanelTemplates = {};
@@ -197,7 +197,7 @@ class ChatSidebarRegion extends OpenClawLightDomElement {
           : nothing
       }
       <span class="side-panel__action-group side-panel__action-group--close">
-        <openclaw-tooltip .content=${t("common.close")}>
+        <carapace-tooltip .content=${t("common.close")}>
           <button
             class="rail-header__action side-panel__minimize"
             type="button"
@@ -206,7 +206,7 @@ class ChatSidebarRegion extends OpenClawLightDomElement {
           >
             ${icons.x}
           </button>
-        </openclaw-tooltip>
+        </carapace-tooltip>
       </span>
     </div>`;
   }
@@ -366,12 +366,12 @@ class ChatSidebarRegion extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-sidebar-region")) {
-  customElements.define("openclaw-chat-sidebar-region", ChatSidebarRegion);
+if (!customElements.get("carapace-chat-sidebar-region")) {
+  customElements.define("carapace-chat-sidebar-region", ChatSidebarRegion);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-chat-sidebar-region": ChatSidebarRegion;
+    "carapace-chat-sidebar-region": ChatSidebarRegion;
   }
 }

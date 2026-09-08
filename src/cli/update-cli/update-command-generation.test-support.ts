@@ -37,7 +37,7 @@ export function registerGenerationRecoveryTests(
 ) {
   it("records a stopped service when activation throws before health verification", async () => {
     const { root, mocks } = fixture();
-    const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(root, ".openclaw") };
+    const env = { ...process.env, CARAPACE_STATE_DIR: path.join(root, ".carapace") };
     const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
     recordUpdateRunVerification(
       run.runId,
@@ -83,15 +83,15 @@ export function registerGenerationRecoveryTests(
     "restores the previous running generation after candidate stamp advancement (content changed=%s)",
     async (contentChanged) => {
       const { root, configPath, mocks } = fixture();
-      process.env.OPENCLAW_UPDATE_RUN_HANDOFF = "1";
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(root, ".openclaw") };
+      process.env.CARAPACE_UPDATE_RUN_HANDOFF = "1";
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(root, ".carapace") };
       const run = {
         runId: createUpdateRun({ trigger: "cli", before: { version: VERSION } }, { env }).runId,
         env,
       };
       const configSnapshot = await readConfigFileSnapshot({ skipPluginValidation: true });
       const schemas = await readUpdateStateSchemaVersions({
-        stateDir: env.OPENCLAW_STATE_DIR,
+        stateDir: env.CARAPACE_STATE_DIR,
         config: configSnapshot.config,
         env,
       });
@@ -242,7 +242,7 @@ export function registerGenerationRecoveryTests(
         expect(record.downtimeMs).toBeGreaterThanOrEqual(0);
         expect(record.confirmedAtMs).toBeGreaterThanOrEqual(before.stoppedAtMs!);
         expect(renderUpdateRunReport(record).headline).toBe(
-          `↩️ OpenClaw update rolled back to ${VERSION}: restart-unhealthy.`,
+          `↩️ Carapace update rolled back to ${VERSION}: restart-unhealthy.`,
         );
       }
     },

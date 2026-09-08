@@ -1,5 +1,5 @@
-import { assertSecretOwnerAvailable } from "openclaw/plugin-sdk/channel-secret-owner-runtime";
-import { getRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { assertSecretOwnerAvailable } from "carapace/plugin-sdk/channel-secret-owner-runtime";
+import { getRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { resolveSmsAccount } from "./accounts.js";
 import type { ResolvedSmsAccount } from "./types.js";
 

@@ -2,7 +2,7 @@ import { vi } from "vitest";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
 import type { ModelAliasIndex } from "../../agents/model-selection.js";
 import { createModelVisibilityPolicy } from "../../agents/model-visibility-policy.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import type { MsgContext } from "../templating.js";
 import { parseInlineSessionDirectives, type InlineDirectives } from "./directive-handling.parse.js";
@@ -14,7 +14,7 @@ export function createSessionEntry(overrides?: Partial<SessionEntry>): SessionEn
 
 export async function applyMixedDirectives(params: {
   body: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   ctx?: MsgContext;
   agentDir?: string;
   sessionEntry?: SessionEntry;
@@ -36,7 +36,7 @@ export async function applyMixedDirectives(params: {
   >[0]["modelState"]["resolveDefaultThinkingLevel"];
 }) {
   const cfg =
-    params.cfg ?? ({ commands: { text: true }, agents: { defaults: {} } } as OpenClawConfig);
+    params.cfg ?? ({ commands: { text: true }, agents: { defaults: {} } } as CarapaceConfig);
   const provider = params.provider ?? "anthropic";
   const model = params.model ?? "claude-opus-4-6";
   const channel = params.channel ?? "telegram";

@@ -10,7 +10,7 @@ import net from "node:net";
 import type { Duplex } from "node:stream";
 import { createLoopbackConnectOptions } from "../../infra/loopback-connect.js";
 
-const PORTAL_AUTH_NAME = "openclaw_portal";
+const PORTAL_AUTH_NAME = "carapace_portal";
 // Browser cookie jars are hostname-scoped, so the stable listener port in the
 // auth cookie name keeps concurrently open portals from replacing each other.
 function portalAuthCookieName(listenPort: number): string {
@@ -125,7 +125,7 @@ function rewriteTargetCookie(cookie: string, cookieNamespace: string): string | 
 
 function parsePortalUrl(req: IncomingMessage): URL | undefined {
   try {
-    return new URL(req.url ?? "/", "http://openclaw.invalid");
+    return new URL(req.url ?? "/", "http://carapace.invalid");
   } catch {
     return undefined;
   }
@@ -202,7 +202,7 @@ function htmlResponse(
 function respondPortalUnauthorized(req: IncomingMessage, res: ServerResponse): void {
   const html =
     "<!doctype html><meta charset=utf-8><title>Private portal</title>" +
-    "<p>This portal is private. Open it from the OpenClaw Control UI.</p>";
+    "<p>This portal is private. Open it from the Carapace Control UI.</p>";
   htmlResponse(res, 401, html, req.method === "HEAD");
 }
 

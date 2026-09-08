@@ -33,7 +33,7 @@ describe("dispatch-owned reply scaffolding provenance", () => {
 
   it("sanitizes reasoning snapshots without changing source payloads or presentation metadata", async () => {
     const internal =
-      "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nprivate metadata\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+      "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nprivate metadata\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>";
     const source: Array<Parameters<NonNullable<GetReplyOptions["onReasoningStream"]>>[0]> = [
       { text: internal },
       {

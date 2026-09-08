@@ -3,13 +3,13 @@ import {
   createMigrationManualItem,
   hasMigrationConfigPatchConflict,
   mergeMigrationConfigValue,
-} from "openclaw/plugin-sdk/migration";
-import type { MigrationItem, MigrationProviderContext } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/migration";
+import type { MigrationItem, MigrationProviderContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   asNonArrayRecord,
   isRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { parse as parseYaml } from "yaml";
 import { importsMcpSensitiveValues, mapMcpServer, mcpManualItems } from "./config-mcp.js";
 import { providerConfig } from "./config-provider-contract.js";
@@ -77,7 +77,7 @@ export function buildConfigItems(params: {
       target: "plugins.slots",
       path: ["plugins", "slots"],
       value: { memory: "memory-core" },
-      message: "Select the default OpenClaw memory plugin for imported file memory.",
+      message: "Select the default Carapace memory plugin for imported file memory.",
     });
   }
 
@@ -100,7 +100,7 @@ export function buildConfigItems(params: {
         id: "manual:memory-provider:honcho",
         source: "config.yaml:memory.provider",
         message:
-          "Hermes used Honcho memory. OpenClaw keeps built-in memory selected until the matching plugin is installed and reviewed.",
+          "Hermes used Honcho memory. Carapace keeps built-in memory selected until the matching plugin is installed and reviewed.",
         recommendation:
           "Install or review the Honcho memory plugin before selecting it for plugins.slots.memory.",
       }),
@@ -110,8 +110,8 @@ export function buildConfigItems(params: {
       createMigrationManualItem({
         id: `manual:memory-provider:${memoryProvider}`,
         source: "config.yaml:memory.provider",
-        message: `Hermes memory provider "${memoryProvider}" does not have a known OpenClaw mapping.`,
-        recommendation: "Install or configure an equivalent OpenClaw memory plugin manually.",
+        message: `Hermes memory provider "${memoryProvider}" does not have a known Carapace mapping.`,
+        recommendation: "Install or configure an equivalent Carapace memory plugin manually.",
       }),
     );
   }

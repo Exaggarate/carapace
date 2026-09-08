@@ -29,8 +29,8 @@ const action = {
   phase: "reserved",
   lifetime: {
     kind: "native",
-    unit: "openclaw-gateway.service",
-    scope: "openclaw-triage-test.scope",
+    unit: "carapace-gateway.service",
+    scope: "carapace-triage-test.scope",
     placement: { kind: "pending" },
   },
 } as const;
@@ -636,8 +636,8 @@ unix(
           restartDrainTimeoutMs: 300_000,
           parentPid: process.pid,
           execPath: process.execPath,
-          argv1: "/unused/openclaw.mjs",
-          env: { OPENCLAW_STATE_DIR: to },
+          argv1: "/unused/carapace.mjs",
+          env: { CARAPACE_STATE_DIR: to },
           handoffId: identity.handoffId,
           meta: {},
         });

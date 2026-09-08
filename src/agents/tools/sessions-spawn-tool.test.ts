@@ -1,7 +1,7 @@
 import path from "node:path";
 // sessions_spawn tool tests cover model-visible schema gating, ACP/subagent
 // dispatch, and result details for spawned child sessions.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   configureExecutionDecisionWorkSink,
@@ -438,7 +438,7 @@ describe("sessions_spawn tool", () => {
     "declares completion policy and forwards $name to hidden, ACP, and visible spawns",
     async ({ input, expected }) => {
       registerAcpBackendForTest();
-      await withTestDir({ prefix: "openclaw-spawn-completion-" }, async (dir) => {
+      await withTestDir({ prefix: "carapace-spawn-completion-" }, async (dir) => {
         const callGateway = vi.fn(async () => ({
           key: "agent:main:dashboard:child",
           runStarted: true,
@@ -612,7 +612,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("creates visible worktree sessions and registers completion announce", async () => {
-    await withTestDir({ prefix: "openclaw-visible-spawn-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-visible-spawn-" }, async (dir) => {
       const callGateway = vi.fn(async () => ({
         key: "agent:main:dashboard:child",
         runStarted: true,
@@ -792,7 +792,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("explains an out-of-workspace visible cwd denial without suggesting a CLI fallback", async () => {
-    await withTestDir({ prefix: "openclaw-visible-spawn-external-cwd-" }, async (workspace) => {
+    await withTestDir({ prefix: "carapace-visible-spawn-external-cwd-" }, async (workspace) => {
       const outside = path.dirname(workspace);
       const callGateway = vi.fn(async () => {
         throw new GatewayClientRequestError({
@@ -821,7 +821,7 @@ describe("sessions_spawn tool", () => {
 
       expect(result.details).toMatchObject({
         status: "forbidden",
-        error: `Visible session cwd "${outside}" is outside configured agent workspaces and requires operator.admin. Omit cwd to use the target agent workspace, or ask the operator to start the session from a registered project. Do not substitute the synchronous \`openclaw agent\` CLI for a persistent visible session.`,
+        error: `Visible session cwd "${outside}" is outside configured agent workspaces and requires operator.admin. Omit cwd to use the target agent workspace, or ask the operator to start the session from a registered project. Do not substitute the synchronous \`carapace agent\` CLI for a persistent visible session.`,
       });
       expect(callGateway).toHaveBeenCalledOnce();
     });
@@ -876,7 +876,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("preserves unrelated visible-session admin denials with an allowed cwd", async () => {
-    await withTestDir({ prefix: "openclaw-visible-spawn-allowed-cwd-" }, async (workspace) => {
+    await withTestDir({ prefix: "carapace-visible-spawn-allowed-cwd-" }, async (workspace) => {
       const callGateway = vi.fn(async () => {
         throw new GatewayClientRequestError({
           code: "FORBIDDEN",
@@ -906,7 +906,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("rejects a visible spawn before creation when the exact parent incarnation changed", async () => {
-    await withTestDir({ prefix: "openclaw-visible-spawn-parent-race-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-visible-spawn-parent-race-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const parentSessionKey = "agent:main:main";
       await upsertSessionEntryCore(
@@ -1136,7 +1136,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("rejects cwd escape for sandboxed visible sessions", async () => {
-    await withTestDir({ prefix: "openclaw-visible-sandbox-cwd-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-visible-sandbox-cwd-" }, async (dir) => {
       const callGateway = vi.fn();
       const tool = createSessionsSpawnTool({
         agentSessionKey: "agent:main:main",
@@ -1166,7 +1166,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("allows cwd within a sandboxed visible session workspace", async () => {
-    await withTestDir({ prefix: "openclaw-visible-sandbox-cwd-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-visible-sandbox-cwd-" }, async (dir) => {
       const workspace = path.join(dir, "workspace");
       const cwd = path.join(workspace, "packages", "app");
       const callGateway = vi.fn(async () => ({
@@ -1270,7 +1270,7 @@ describe("sessions_spawn tool", () => {
       agentSessionKey: "agent:main:main",
       config: {
         agents: { list: [{ id: "main", identity: { name: "Roboclaw" } }] },
-        gateway: { publicOrigin: "https://openclaw.example", controlUi: { basePath: "/control" } },
+        gateway: { publicOrigin: "https://carapace.example", controlUi: { basePath: "/control" } },
       },
       inheritedToolAllowlist: ["read", "sessions_spawn"],
       inheritedToolDenylist: ["exec"],
@@ -1288,7 +1288,7 @@ describe("sessions_spawn tool", () => {
       status: "accepted",
       childSessionKey: "agent:main:dashboard:restricted-child",
       runId: "run-visible-restricted",
-      sessionUrl: "https://openclaw.example/control/chat/main/dashboard/restricted-child",
+      sessionUrl: "https://carapace.example/control/chat/main/dashboard/restricted-child",
       owner: { type: "agent", id: "main", label: "Roboclaw" },
     });
     expect(hoisted.inProcessCreationMock).toHaveBeenCalledWith(
@@ -1341,7 +1341,7 @@ describe("sessions_spawn tool", () => {
   it.each(["inherit", "require"] as const)(
     "admits a required parent's visible child with sandbox=%s while agent sandboxing is off",
     async (sandbox) => {
-      await withTestDir({ prefix: "openclaw-visible-required-parent-" }, async (dir) => {
+      await withTestDir({ prefix: "carapace-visible-required-parent-" }, async (dir) => {
         const storePath = path.join(dir, "sessions.json");
         const parentSessionKey = "agent:main:main";
         await upsertSessionEntryCore(
@@ -1592,7 +1592,7 @@ describe("sessions_spawn tool", () => {
   );
 
   it("applies spawn depth limits to visible dashboard descendants", async () => {
-    await withTestDir({ prefix: "openclaw-visible-depth-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-visible-depth-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const childKey = "agent:main:dashboard:child";
       await upsertSessionEntryCore(
@@ -2165,7 +2165,7 @@ describe("sessions_spawn tool", () => {
     expect(hoisted.spawnAcpDirectMock).not.toHaveBeenCalled();
   });
 
-  it("accepts ACP spawns when inherited allows include OpenClaw command tools", async () => {
+  it("accepts ACP spawns when inherited allows include Carapace command tools", async () => {
     registerAcpBackendForTest();
     const tool = createSessionsSpawnTool({
       agentSessionKey: "agent:main:main",

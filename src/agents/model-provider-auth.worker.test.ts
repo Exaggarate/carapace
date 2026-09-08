@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadPluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { listAgentIds, resolveAgentWorkspaceDir } from "./agent-scope-config.js";
@@ -20,7 +20,7 @@ import { runProviderAuthWarmWorkerInput } from "./model-provider-auth.worker.js"
 
 const tempDirs: string[] = [];
 
-function syntheticAuthScopes(cfg: OpenClawConfig): ProviderAuthWarmWorkerInput["syntheticAuth"] {
+function syntheticAuthScopes(cfg: CarapaceConfig): ProviderAuthWarmWorkerInput["syntheticAuth"] {
   return listAgentIds(cfg).map((agentId) => {
     const workspaceDir = resolveAgentWorkspaceDir(cfg, agentId);
     const { normalizePluginId: _normalizePluginId, ...metadataSnapshot } =
@@ -36,7 +36,7 @@ vi.mock("./prepared-model-catalog.js", () => ({
   getPreparedModelCatalogOwnerSnapshot: () => undefined,
   loadProviderScopedThinkingCatalog: vi.fn(async () => []),
   loadPreparedModelCatalogOwnerSnapshot: vi.fn(
-    async (params: { agentDir: string; agentId?: string; config: OpenClawConfig }) => ({
+    async (params: { agentDir: string; agentId?: string; config: CarapaceConfig }) => ({
       agentDir: params.agentDir,
       agentId: params.agentId,
       config: params.config,
@@ -84,12 +84,12 @@ describe("provider auth warm worker", () => {
   it("preserves runtime-only auth profile snapshots in the worker warm input", async () => {
     // Runtime-only profiles are not persisted to disk, so the worker input must
     // carry them explicitly or warming loses provider availability.
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-provider-auth-worker-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-provider-auth-worker-"));
     tempDirs.push(root);
 
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
       },
       async () => {
         const agentDir = path.join(root, "agent");
@@ -104,7 +104,7 @@ describe("provider auth warm worker", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
         const result = await runProviderAuthWarmWorkerInput({
           cfg,
           syntheticAuth: syntheticAuthScopes(cfg),
@@ -134,13 +134,13 @@ describe("provider auth warm worker", () => {
   }, 30_000);
 
   it("respects cooled-down inline api keys in the worker warm input", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-provider-auth-worker-cooldown-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-provider-auth-worker-cooldown-"));
     tempDirs.push(root);
 
     await withEnvAsync(
       {
-        OPENCLAW_DISABLE_PERSISTED_PLUGIN_REGISTRY: "1",
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
+        CARAPACE_DISABLE_PERSISTED_PLUGIN_REGISTRY: "1",
+        CARAPACE_STATE_DIR: path.join(root, "state"),
       },
       async () => {
         const agentDir = path.join(root, "agent");
@@ -156,7 +156,7 @@ describe("provider auth warm worker", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const usageId = resolveInlineProviderApiKeyUsageId("cooled-down");
         const result = await runProviderAuthWarmWorkerInput({

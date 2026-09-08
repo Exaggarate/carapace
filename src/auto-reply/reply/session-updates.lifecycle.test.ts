@@ -7,7 +7,7 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { incrementCompactionCount } from "./session-updates.js";
 import { persistSessionUsageUpdate } from "./session-usage.js";
 
@@ -23,12 +23,12 @@ async function withAccountingFixture(
     remove: () => Promise<unknown>;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "compaction-accounting", scenario: "minimal" },
     async (state) => {
       const scope = {
         agentId: "main",
-        storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
         sessionKey: "agent:main:compaction-accounting",
       };
       const entry: InternalSessionEntry = {

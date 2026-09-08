@@ -5,9 +5,9 @@ import type {
   DmPolicy,
   GroupPolicy,
   MentionPatternsPolicyConfig,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { SecretInput } from "openclaw/plugin-sdk/secret-input";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/config-contracts";
+import type { SecretInput } from "carapace/plugin-sdk/secret-input";
 
 export type ReplyToMode = "off" | "first" | "all" | "batched";
 
@@ -95,8 +95,8 @@ export type MatrixStreamingConfig = {
   /** Chunking mode: "length" (default) splits by size; "newline" splits on every newline. */
   chunkMode?: "length" | "newline";
   /** Block streaming delivery controls (separate from the preview mode). Default: disabled. */
-  block?: import("openclaw/plugin-sdk/channel-outbound").ChannelStreamingBlockConfig;
-  progress?: import("openclaw/plugin-sdk/channel-outbound").ChannelStreamingProgressConfig;
+  block?: import("carapace/plugin-sdk/channel-outbound").ChannelStreamingBlockConfig;
+  progress?: import("carapace/plugin-sdk/channel-outbound").ChannelStreamingProgressConfig;
   preview?: {
     /** Show tool/progress activity in the live draft preview. Default: true. */
     toolProgress?: boolean;
@@ -223,7 +223,7 @@ export type MatrixConfig = {
    *   lines to the progress draft (default: quiet). `streaming.preview.toolProgress:
    *   false` keeps legacy answer preview edits but hides interim tool/progress lines.
    * Legacy scalar/boolean spellings and the flat `blockStreaming`/`chunkMode`
-   * keys migrate via `openclaw doctor --fix`.
+   * keys migrate via `carapace doctor --fix`.
    * Default: `mode: "off"`.
    */
   streaming?: MatrixStreamingConfig;
@@ -238,15 +238,15 @@ export type CoreConfig = {
       botLoopProtection?: ChannelBotLoopProtectionConfig;
     };
   };
-  commands?: OpenClawConfig["commands"];
+  commands?: CarapaceConfig["commands"];
   session?: {
     store?: string;
-    dmScope?: NonNullable<OpenClawConfig["session"]>["dmScope"];
+    dmScope?: NonNullable<CarapaceConfig["session"]>["dmScope"];
   };
   messages?: {
     ackReaction?: string;
     ackReactionScope?: "group-mentions" | "group-all" | "direct" | "all" | "none" | "off";
   };
-  secrets?: OpenClawConfig["secrets"];
+  secrets?: CarapaceConfig["secrets"];
   [key: string]: unknown;
 };

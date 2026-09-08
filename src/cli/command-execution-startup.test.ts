@@ -56,12 +56,12 @@ describe("command-execution-startup", () => {
         pluginRegistry: { scope: "all" },
       },
       version: "1.2.3",
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledTimes(1);
     expect(emitCliBannerMock).toHaveBeenCalledWith("1.2.3", {
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
     });
 
     await mod.applyCliExecutionStartupPresentation({
@@ -89,7 +89,7 @@ describe("command-execution-startup", () => {
         pluginRegistry: { scope: "channels" },
       },
       version: "1.2.3",
-      argv: ["node", "openclaw", "status", "--json"],
+      argv: ["node", "carapace", "status", "--json"],
     });
 
     expect(routeLogsToStderrMock).toHaveBeenCalledTimes(1);

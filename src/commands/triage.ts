@@ -2,8 +2,8 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { Result } from "@openclaw/normalization-core/result";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { Result } from "@carapace/normalization-core/result";
 import { z } from "zod";
 import { tryResolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
 import { resolveAgentEffectiveModelPrimary } from "../agents/agent-scope.js";
@@ -26,7 +26,7 @@ import {
   withInstallationTarget,
   type InstallationTarget,
 } from "../infra/installation-target-context.js";
-import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRoot } from "../infra/carapace-root.js";
 import { readRestartSentinelReadOnly } from "../infra/restart-sentinel.js";
 import { acceptTriageContinuation } from "../infra/triage-continuation.js";
 import type { UpdateRepairValidation } from "../infra/update-repair-protocol.js";
@@ -251,7 +251,7 @@ export async function triageCommand(
     updateFailure,
     failure: automatic?.failure,
   });
-  // Packaged OpenClaw/Bun hosts cannot interpret npm shim entrypoints. Reuse the
+  // Packaged Carapace/Bun hosts cannot interpret npm shim entrypoints. Reuse the
   // active Node runtime or require an installed node.exe before choosing a shim.
   const nodeExecutable = isNodeRuntime(process.execPath)
     ? process.execPath
@@ -310,7 +310,7 @@ export async function triageCommand(
     if (!isCurrent()) {
       return;
     }
-    const file = path.join(outputDir, `openclaw-triage-prompt-${now}-${process.pid}.md`);
+    const file = path.join(outputDir, `carapace-triage-prompt-${now}-${process.pid}.md`);
     await fs.mkdir(outputDir, { recursive: true, mode: 0o700 });
     await fs.writeFile(file, prompt, { encoding: "utf8", mode: 0o600 });
     promptArtifact = { ok: true, value: file };
@@ -336,7 +336,7 @@ export async function triageCommand(
   suggestedCommands.push(
     formatInstallationTargetCommand(
       [
-        "openclaw",
+        "carapace",
         "triage",
         "--run",
         ...(updateResultPath ? ["--update-result", updateResultPath] : []),
@@ -418,7 +418,7 @@ export async function triageCommand(
           [handoff.program.command, ...handoff.program.leadingArgv, ...automaticArgs],
           {
             input: prompt,
-            env: { ...targetEnv, OPENCLAW_SHELL: "exec" },
+            env: { ...targetEnv, CARAPACE_SHELL: "exec" },
             ...agentOptions,
             signal: automatic.signal,
             timeoutMs: 600_000,
@@ -504,7 +504,7 @@ export async function triageCommand(
   }
 
   const { runUpdateRepairLoop } = await import("../infra/update-repair-agent.js");
-  const installRoot = await resolveOpenClawPackageRoot({
+  const installRoot = await resolveCarapacePackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
   });
@@ -512,7 +512,7 @@ export async function triageCommand(
     return;
   }
   if (!installRoot) {
-    throw new Error("Cannot locate the OpenClaw installation; use a suggested handoff command.");
+    throw new Error("Cannot locate the Carapace installation; use a suggested handoff command.");
   }
   const failedResult =
     updateFailure && "result" in updateFailure ? updateFailure.result : undefined;
@@ -555,7 +555,7 @@ export async function triageCommand(
         const entrypoint = await resolveGatewayInstallEntrypoint(installRoot);
         signal.throwIfAborted();
         if (!entrypoint) {
-          throw new Error("The installed OpenClaw entrypoint is unavailable.");
+          throw new Error("The installed Carapace entrypoint is unavailable.");
         }
         // A fresh child reads the repaired installation and can be cancelled without
         // leaving Doctor's temporary process-global state active in this CLI.
@@ -619,11 +619,11 @@ export async function triageCommand(
   if (result.status === "unavailable") {
     if (result.reason === "exec-denied-by-policy") {
       throw new Error(
-        "The operator's policy denies unattended repair (exec-denied-by-policy). Use `openclaw triage` for an external handoff.",
+        "The operator's policy denies unattended repair (exec-denied-by-policy). Use `carapace triage` for an external handoff.",
       );
     }
     throw new Error(
-      `Embedded agent unavailable: ${result.reason}. Run \`openclaw onboard\` or use a suggested handoff command.`,
+      `Embedded agent unavailable: ${result.reason}. Run \`carapace onboard\` or use a suggested handoff command.`,
     );
   }
   for (const attempt of result.attempts) {

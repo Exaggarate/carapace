@@ -1,13 +1,13 @@
-# `@openclaw/gateway-client`
+# `@carapace/gateway-client`
 
-Reference WebSocket client for the OpenClaw Gateway protocol. It provides the
-connection state machine used by OpenClaw's own Node and browser clients:
+Reference WebSocket client for the Carapace Gateway protocol. It provides the
+connection state machine used by Carapace's own Node and browser clients:
 challenge-based authentication, typed protocol frames, request correlation,
 timeouts, reconnect backoff, device-token handling, and event delivery.
 
 The current wire protocol is version 4. General clients must advertise exactly v4 with
 `minProtocol: 4` and `maxProtocol: 4`. See the
-[Gateway protocol specification](https://docs.openclaw.ai/gateway/protocol) for
+[Gateway protocol specification](../../docs/gateway/protocol.md) for
 the complete handshake, authentication, role, scope, and method contracts.
 Exact node identities (`role: "node"` plus `mode: "node"`) and probe clients
 can use v3. The built-in node host starts with an exact v4 envelope, then retries
@@ -19,8 +19,8 @@ same bounded negotiation.
 
 ## Versioning
 
-Package versions follow the OpenClaw calendar release train: `YYYY.M.PATCH`,
-including the OpenClaw prerelease suffix when applicable. The package version is
+Package versions follow the Carapace calendar release train: `YYYY.M.PATCH`,
+including the Carapace prerelease suffix when applicable. The package version is
 separate from the Gateway's current wire protocol number reported in `hello-ok`.
 
 ## Install
@@ -28,12 +28,12 @@ separate from the Gateway's current wire protocol number reported in `hello-ok`.
 Use the verified stable release with exact pins:
 
 ```bash
-npm install --save-exact @openclaw/gateway-client@2026.8.1 @openclaw/gateway-protocol@2026.8.1
+npm install --save-exact @carapace/gateway-client@2026.8.1 @carapace/gateway-protocol@2026.8.1
 ```
 
-See the canonical [installation guide](https://docs.openclaw.ai/gateway/clients#install-the-packages)
+See the canonical [installation guide](../../docs/gateway/clients.md#install-the-packages)
 for package/wire-version rules and recovery from reserved `0.0.0` artifacts.
-Test it with the Gateway version you deploy; the root `openclaw` CLI has its own
+Test it with the Gateway version you deploy; the root `carapace` CLI has its own
 package versions and dist-tags.
 
 This release declares Node.js `>=22.19.0`. Node consumers use the `ws` transport
@@ -43,33 +43,33 @@ WebSocket through the browser-safe protocol client surface.
 For device-authenticated Node connections, supply `deviceIdentity` (or
 `hostDeps.loadOrCreateDeviceIdentity`) and the `hostDeps.signDevicePayload` and
 `hostDeps.publicKeyRawBase64UrlFromPem` callbacks. The host also owns device-token
-storage through `GatewayClientHostDeps`; the package does not load OpenClaw's
+storage through `GatewayClientHostDeps`; the package does not load Carapace's
 local identity or credentials automatically.
 
 ## Entry points
 
-- `@openclaw/gateway-client` exports the Node `GatewayClient`, device-auth
+- `@carapace/gateway-client` exports the Node `GatewayClient`, device-auth
   helpers, readiness helpers, and timeout utilities.
-- `@openclaw/gateway-client/browser` exports the browser-safe protocol client,
+- `@carapace/gateway-client/browser` exports the browser-safe protocol client,
   browser device-auth lifecycle, reconnect policy, and lightweight protocol
   constants. Its module graph does not import Node built-ins or `ws`.
-- `@openclaw/gateway-client/readiness` exports helpers that delay client startup
+- `@carapace/gateway-client/readiness` exports helpers that delay client startup
   until the event loop can process Gateway IO.
-- `@openclaw/gateway-client/timeouts` exports timeout constants and safe timer
+- `@carapace/gateway-client/timeouts` exports timeout constants and safe timer
   resolution helpers.
-- `@openclaw/gateway-client/websocket-data` converts every Node `ws` raw-data
+- `@carapace/gateway-client/websocket-data` converts every Node `ws` raw-data
   shape to UTF-8 text.
 
 ## Node quickstart
 
 ```ts
-import { GatewayClient } from "@openclaw/gateway-client";
-import { PROTOCOL_VERSION } from "@openclaw/gateway-protocol/version";
+import { GatewayClient } from "@carapace/gateway-client";
+import { PROTOCOL_VERSION } from "@carapace/gateway-protocol/version";
 
 const connected = Promise.withResolvers<void>();
 const client = new GatewayClient({
   url: "ws://127.0.0.1:18789",
-  token: process.env.OPENCLAW_GATEWAY_TOKEN,
+  token: process.env.CARAPACE_GATEWAY_TOKEN,
   minProtocol: PROTOCOL_VERSION, // v4
   maxProtocol: PROTOCOL_VERSION, // v4
   onHelloOk: () => connected.resolve(),
@@ -96,7 +96,7 @@ Gateway accepts a compatible connection, so requests should wait for that callba
 This loopback example uses the default `gateway-client` / `backend` identity.
 It is not a device-pairing example. UI clients should declare their actual `mode`
 and supply the device-auth host callbacks described above; see
-[device identity and pairing](https://docs.openclaw.ai/gateway/protocol#device-identity-and-pairing).
+[device identity and pairing](../../docs/gateway/protocol.md#device-identity-and-pairing).
 
 For remote connections, prefer `wss://`. The Node client also accepts plaintext
 `ws://` by default for loopback, private/link-local/CGNAT IP addresses, and
@@ -106,7 +106,7 @@ without transport security.
 
 ## Browser clients
 
-Import `@openclaw/gateway-client/browser` when the host owns the WebSocket
+Import `@carapace/gateway-client/browser` when the host owns the WebSocket
 adapter and device-key storage. The browser entry includes
 `GatewayProtocolClient` and `GatewayBrowserDeviceAuthLifecycle`; it deliberately
 omits the Node transport, TLS fingerprint handling, and private-network address
@@ -134,7 +134,7 @@ the next delay.
 
 The canonical defaults table and the server policy fields that can replace
 pre-handshake values are documented in the
-[Gateway protocol specification](https://docs.openclaw.ai/gateway/protocol#client-constants).
+[Gateway protocol specification](../../docs/gateway/protocol.md#client-constants).
 
 Use the `./timeouts` entry point when a host must align readiness or watchdog
 budgets with these defaults. Use the `./readiness` entry point when startup must
@@ -142,15 +142,15 @@ wait for an event-loop probe before opening the socket.
 
 ## Bundled internals
 
-The retry supervisor and the small `@openclaw/net-policy/ip` implementation are
+The retry supervisor and the small `@carapace/net-policy/ip` implementation are
 inlined into the published JavaScript and declarations. They are implementation
 details, not public exports or supported API surfaces. `ipaddr.js` remains an
 external dependency because the inlined IP helpers use its public runtime and
 types.
 
-`ws`, `@openclaw/gateway-protocol`, and `ipaddr.js` remain external in the
+`ws`, `@carapace/gateway-protocol`, and `ipaddr.js` remain external in the
 published distribution. Consumers should import protocol types and constants
-from `@openclaw/gateway-protocol`, not from bundled implementation paths.
+from `@carapace/gateway-protocol`, not from bundled implementation paths.
 
 ## Contract notes
 

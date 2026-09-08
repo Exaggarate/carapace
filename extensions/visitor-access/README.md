@@ -1,14 +1,14 @@
 # Visitor Access
 
-Visitor Access is an internal OpenClaw plugin for granting individual people
-access to <https://team.openclaw.ai>. It manages one dedicated Cloudflare Access
+Visitor Access is an internal Carapace plugin for granting individual people
+access to <https://github.com/Exaggarate/carapace>. It manages one dedicated Cloudflare Access
 allow policy containing email addresses. Grants expire after 14 days by default;
 maintainers can refresh or revoke them with agent tools.
 
 The existing GitHub organization policy remains unchanged. Access allow policies
 combine with OR semantics, so adding a visitor does not change maintainer access.
 This package is private, built from source for the team deployment, and excluded
-from the OpenClaw npm release.
+from the Carapace npm release.
 
 ## Configure the plugin
 
@@ -25,7 +25,7 @@ account. Enable the plugin in the source-built Gateway configuration:
           accountId: "<CLOUDFLARE_ACCOUNT_ID>",
           appId: "<ACCESS_APPLICATION_ID>",
           apiToken: "<RESOLVED_CLOUDFLARE_API_TOKEN>",
-          policyName: "Visitors (openclaw-managed)",
+          policyName: "Visitors (carapace-managed)",
           defaultTtlDays: 14,
           maxVisitors: 50,
         },
@@ -49,14 +49,14 @@ grant manager. Tool calls and expiry sweeps share that service's mutation queue.
 | `accountId`      | Yes      | —                             | 1–128 letters, digits, `_`, or `-`.     |
 | `appId`          | Yes      | —                             | 1–128 letters, digits, `_`, or `-`.     |
 | `apiToken`       | Yes      | —                             | Nonempty resolved token string.         |
-| `policyName`     | No       | `Visitors (openclaw-managed)` | 1–200 characters; exact policy name.    |
+| `policyName`     | No       | `Visitors (carapace-managed)` | 1–200 characters; exact policy name.    |
 | `defaultTtlDays` | No       | `14`                          | Integer from 0 through 3650, or `null`. |
 | `maxVisitors`    | No       | `50`                          | Integer from 1 through 500.             |
 
 Use a secret reference value through your host or deployment's supported secret
 resolution path, then pass the resolved string as `apiToken`. This plugin does
 not resolve SecretRef objects itself. Do not paste a real token into chat or
-commit it to source control. See [Secrets](https://docs.openclaw.ai/gateway/secrets)
+commit it to source control. See [Secrets](../../docs/gateway/secrets.md)
 for the host's supported credential surfaces.
 
 Setting `defaultTtlDays` to `0` or `null` does not silently create permanent
@@ -82,7 +82,7 @@ for the same email refreshes its expiry rather than creating a second grant.
 Permanent access requires `forever: true`. Invites beyond `maxVisitors` are
 refused; revoke an existing visitor or deliberately raise the configured cap.
 
-Visitors log in at <https://team.openclaw.ai> with their own GitHub account. The
+Visitors log in at <https://github.com/Exaggarate/carapace> with their own GitHub account. The
 GitHub identity provider authenticates accounts; the organization restriction
 lives in the maintainer Access policy. The visitor policy matches the verified
 email supplied by GitHub, so the invited email must belong to that account.

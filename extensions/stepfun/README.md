@@ -1,12 +1,12 @@
-# OpenClaw StepFun Provider
+# Carapace StepFun Provider
 
-Official OpenClaw provider plugin for StepFun.
+Official Carapace provider plugin for StepFun.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/stepfun-provider
-openclaw gateway restart
+carapace plugins install @carapace/stepfun-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/stepfun> for setup and configuration.
+See <../../docs/providers/stepfun.md> for setup and configuration.

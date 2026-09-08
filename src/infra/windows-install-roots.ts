@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { resolveDiagnosticProcessEnv } from "./process-env.js";
 
 const DEFAULT_WINDOWS_SYSTEM_ROOT = "C:\\Windows";

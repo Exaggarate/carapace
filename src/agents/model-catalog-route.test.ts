@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { resolveThinkingProfile } from "../auto-reply/thinking.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderModelRouteCandidate } from "../plugin-sdk/provider-model-types.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import * as activeThinkingPolicy from "../plugins/provider-thinking-active.js";
@@ -265,7 +265,7 @@ describe("projectModelCatalogEntryForRoute", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const overrides = resolveConfiguredModelCatalogOverrides({ cfg, entry: platformEntry });
 
     expect(
@@ -292,7 +292,7 @@ describe("projectModelCatalogEntryForRoute", () => {
     ["casemodel", false],
     ["casemodel@variant", true],
   ] as const)("keeps exact configured overrides authoritative for %s", (id, reasoning) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -339,7 +339,7 @@ describe("projectModelCatalogEntryForRoute", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const canonicalPolicy: ModelCatalogRoutePolicy = {
       ...routePolicy,
       resolveIdentity: (entry) => {
@@ -366,7 +366,7 @@ describe("projectModelCatalogEntryForRoute", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const literalEntry = { ...platformEntry, id: "openai/acme-model" };
 
     expect(

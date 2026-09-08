@@ -13,7 +13,7 @@ export const TUI_PTY_TASK_FIXTURE = {
       } | null = null;
 
       async function waitForTaskRelease() {
-        const releasePath = process.env.OPENCLAW_TUI_PTY_TASK_RELEASE_PATH;
+        const releasePath = process.env.CARAPACE_TUI_PTY_TASK_RELEASE_PATH;
         if (releasePath) {
           while (!existsSync(releasePath)) {
             await new Promise((resolve) => setTimeout(resolve, 5));

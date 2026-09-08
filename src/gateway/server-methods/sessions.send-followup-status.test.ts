@@ -2,7 +2,7 @@
  * Tests follow-up session send status transitions and broadcasts.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import { expectSubagentFollowupReactivation } from "./subagent-followup.test-helpers.js";

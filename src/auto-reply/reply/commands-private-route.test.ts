@@ -1,8 +1,8 @@
 // Tests private-route command persistence and timestamp bounds.
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { ExecApprovalRequest } from "../../infra/exec-approvals.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -44,7 +44,7 @@ function createOwnerDerivedApprovalChannelPlugin(params: {
   id: "telegram";
   ownerPrefixes: string[];
 }): ChannelPlugin {
-  const resolveOwnerTargets = (cfg: OpenClawConfig) =>
+  const resolveOwnerTargets = (cfg: CarapaceConfig) =>
     (cfg.commands?.ownerAllowFrom ?? [])
       .map((owner) => String(owner))
       .flatMap((owner) => {
@@ -95,7 +95,7 @@ function registerApprovalChannelPlugins(plugins: ChannelPlugin[]) {
   );
 }
 
-function buildCommandParams(cfg: OpenClawConfig): HandleCommandsParams {
+function buildCommandParams(cfg: CarapaceConfig): HandleCommandsParams {
   return {
     cfg,
     ctx: {
@@ -135,7 +135,7 @@ function buildApprovalRequest(): ExecApprovalRequest {
   return {
     id: "diagnostics-private-route",
     request: {
-      command: "openclaw gateway diagnostics export --json",
+      command: "carapace gateway diagnostics export --json",
       sessionKey: "agent:main:discord:channel:1487138064806449297",
       turnSourceChannel: "discord",
       turnSourceTo: "channel:1487138064806449297",
@@ -159,7 +159,7 @@ describe("buildPrivateCommandApprovalRequest", () => {
     const request = buildPrivateCommandApprovalRequest({
       commandParams: buildCommandParams({}),
       id: "diagnostics-private-route",
-      command: "openclaw gateway diagnostics export --json",
+      command: "carapace gateway diagnostics export --json",
       agentId: "main",
       createdAtMs,
     });
@@ -185,7 +185,7 @@ describe("resolvePrivateCommandRouteTargets", () => {
         commands: {
           ownerAllowFrom: ["telegram:849985193", "discord:493655423946194964"],
         },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       request: buildApprovalRequest(),
     });
 
@@ -228,7 +228,7 @@ describe("resolvePrivateCommandRouteTargets", () => {
             "whatsapp:+15555550100",
           ],
         },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       request: buildApprovalRequest(),
     });
 
@@ -255,7 +255,7 @@ describe("resolvePrivateCommandRouteTargets", () => {
         commands: {
           ownerAllowFrom: ["telegram:849985193"],
         },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       request: buildApprovalRequest(),
     });
 
@@ -291,7 +291,7 @@ describe("resolvePrivateCommandRouteTargets", () => {
             botToken: "test-token",
           },
         },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       request: buildApprovalRequest(),
     });
 

@@ -32,7 +32,7 @@ describe("session transcript provenance", () => {
           message: {
             role,
             content: "Internal narrative output.",
-            __openclaw: { runId: "dreaming-narrative-main-light-real" },
+            __carapace: { runId: "dreaming-narrative-main-light-real" },
           },
         },
         { type: "message", message: { role: "assistant", content: "Later dreaming output." } },
@@ -68,7 +68,7 @@ describe("session transcript provenance", () => {
         message: {
           role: "user",
           content: "Keep this genuine user conversation.",
-          __openclaw: { runId: "dreaming-narrative-main-light-spoofed" },
+          __carapace: { runId: "dreaming-narrative-main-light-spoofed" },
         },
       },
     ]);
@@ -87,7 +87,7 @@ describe("session transcript provenance", () => {
         message: {
           role: "user",
           content: "Owner preference.",
-          __openclaw: { senderIsOwner: true },
+          __carapace: { senderIsOwner: true },
         },
       },
       {
@@ -120,7 +120,7 @@ describe("session transcript provenance", () => {
         message: {
           role: "user",
           content: "Research this preference.",
-          __openclaw: { senderIsOwner: true },
+          __carapace: { senderIsOwner: true },
         },
       },
       {
@@ -129,7 +129,7 @@ describe("session transcript provenance", () => {
         message: {
           role: "toolResult",
           content: "Attacker-controlled page text.",
-          __openclaw: { resultContentSource: "network" },
+          __carapace: { resultContentSource: "network" },
         },
       },
       {
@@ -138,7 +138,7 @@ describe("session transcript provenance", () => {
         message: {
           role: "assistant",
           content: "Derived memory candidate.",
-          __openclaw: { turnTainted: true },
+          __carapace: { turnTainted: true },
         },
       },
     ]);
@@ -203,7 +203,7 @@ describe("session transcript provenance", () => {
         type: "message",
         message: {
           role: "user",
-          content: "[OpenClaw heartbeat poll]",
+          content: "[Carapace heartbeat poll]",
           provenance: { kind: "internal_system", sourceTool: "heartbeat" },
         },
       },
@@ -255,7 +255,7 @@ describe("session transcript provenance", () => {
     const filePath = await writeTranscript("normal.jsonl", [
       {
         type: "message",
-        message: { role: "user", content: "[OpenClaw heartbeat poll]" },
+        message: { role: "user", content: "[Carapace heartbeat poll]" },
       },
       {
         type: "message",
@@ -274,7 +274,7 @@ describe("session transcript provenance", () => {
         type: "message",
         message: {
           role: "user",
-          content: "[OpenClaw heartbeat poll]",
+          content: "[Carapace heartbeat poll]",
           provenance: { kind: "internal_system", sourceTool: "heartbeat" },
         },
       },
@@ -304,7 +304,7 @@ describe("session transcript provenance", () => {
         message: {
           role: "user",
           content: "Owner preference without a message timestamp.",
-          __openclaw: { senderIsOwner: true },
+          __carapace: { senderIsOwner: true },
         },
       },
     ]);

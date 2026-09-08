@@ -8,7 +8,7 @@ import { listChannelCatalogEntries } from "./channel-catalog-registry.js";
 import { resolvePluginConfigContractsById } from "./config-contracts.js";
 import { setGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import { writePersistedInstalledPluginIndexSync } from "./installed-plugin-index-store-write.js";
-import { listOpenClawPluginManifestMetadata } from "./manifest-metadata-scan.js";
+import { listCarapacePluginManifestMetadata } from "./manifest-metadata-scan.js";
 import { loadPluginManifest } from "./manifest.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 import {
@@ -37,7 +37,7 @@ vi.mock("../logging/subsystem.js", async () => {
 const tempRoots: string[] = [];
 
 function createTempRoot(): string {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-manifest-metadata-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-manifest-metadata-"));
   tempRoots.push(root);
   return root;
 }
@@ -50,15 +50,15 @@ function writeJson(filePath: string, value: unknown): void {
 function createGlobalPluginFixture(pluginName: string) {
   const root = createTempRoot();
   const home = path.join(root, "home");
-  const pluginDir = path.join(home, ".openclaw", "extensions", pluginName);
-  const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+  const pluginDir = path.join(home, ".carapace", "extensions", pluginName);
+  const manifestPath = path.join(pluginDir, "carapace.plugin.json");
   fs.mkdirSync(pluginDir, { recursive: true });
   return {
     pluginDir,
     manifestPath,
     env: {
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
     },
   };
 }
@@ -71,14 +71,14 @@ function warningMessagesForPath(manifestPath: string): string[] {
 
 function expectPluginAbsentAcrossTwoScans(pluginDir: string, env: NodeJS.ProcessEnv): void {
   for (const records of [
-    listOpenClawPluginManifestMetadata(env),
-    listOpenClawPluginManifestMetadata(env),
+    listCarapacePluginManifestMetadata(env),
+    listCarapacePluginManifestMetadata(env),
   ]) {
     expect(records.find((record) => record.pluginDir === pluginDir)).toBeUndefined();
   }
 }
 
-describe("listOpenClawPluginManifestMetadata", () => {
+describe("listCarapacePluginManifestMetadata", () => {
   beforeEach(() => {
     manifestScanWarn.mockClear();
   });
@@ -98,20 +98,20 @@ describe("listOpenClawPluginManifestMetadata", () => {
       const bundledRoot = path.join(root, "bundled");
       const pluginDir = path.join(bundledRoot, "startup-owner");
       const env = {
-        OPENCLAW_HOME: path.join(root, "home"),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+        CARAPACE_HOME: path.join(root, "home"),
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
       };
       const writePackage = (generation: string, pluginId = "startup-owner") => {
         const targetDir = path.join(bundledRoot, pluginId);
         writeJson(path.join(targetDir, "package.json"), {
           name: `@fixture/${pluginId}`,
           version: generation,
-          openclaw: {
+          carapace: {
             extensions: ["./index.cjs"],
             channel: { id: "startup-channel", label: generation },
           },
         });
-        writeJson(path.join(targetDir, "openclaw.plugin.json"), {
+        writeJson(path.join(targetDir, "carapace.plugin.json"), {
           id: pluginId,
           version: generation,
           configSchema: { type: "object" },
@@ -139,7 +139,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
       const readGeneration = (pluginId = "startup-owner") => {
         switch (reader) {
           case "manifest":
-            return listOpenClawPluginManifestMetadata(env).find(
+            return listCarapacePluginManifestMetadata(env).find(
               (entry) => entry.manifest.id === pluginId,
             )?.manifest.version;
           case "channel":
@@ -171,11 +171,11 @@ describe("listOpenClawPluginManifestMetadata", () => {
     const home = path.join(root, "home");
     const bundledRoot = path.join(root, "extensions");
     const pluginDir = path.join(bundledRoot, "lifecycle-catalog");
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     const env = {
       HOME: home,
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
     };
     const writeManifest = (generation: string) =>
       writeJson(manifestPath, { id: "lifecycle-catalog", generation });
@@ -186,7 +186,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
     const readdirSpy = vi.spyOn(fs, "readdirSync");
 
     expect(
-      listOpenClawPluginManifestMetadata(env).find(
+      listCarapacePluginManifestMetadata(env).find(
         (record) => record.manifest.id === "lifecycle-catalog",
       )?.manifest.generation,
     ).toBe("first");
@@ -196,7 +196,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
 
     writeManifest("second");
     expect(
-      listOpenClawPluginManifestMetadata(env).find(
+      listCarapacePluginManifestMetadata(env).find(
         (record) => record.manifest.id === "lifecycle-catalog",
       )?.manifest.generation,
     ).toBe("first");
@@ -205,7 +205,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
 
     clearPluginMetadataLifecycleCaches();
     expect(
-      listOpenClawPluginManifestMetadata(env).find(
+      listCarapacePluginManifestMetadata(env).find(
         (record) => record.manifest.id === "lifecycle-catalog",
       )?.manifest.generation,
     ).toBe("second");
@@ -219,11 +219,11 @@ describe("listOpenClawPluginManifestMetadata", () => {
     const bundledRoot = path.join(root, "extensions");
     const staleBundledRoot = path.join(root, "stale", "extensions");
 
-    writeJson(path.join(bundledRoot, "openai", "openclaw.plugin.json"), {
+    writeJson(path.join(bundledRoot, "openai", "carapace.plugin.json"), {
       id: "openai",
       providerEndpoints: [{ endpointClass: "openai-public", hosts: ["api.openai.com"] }],
     });
-    writeJson(path.join(staleBundledRoot, "openai", "openclaw.plugin.json"), {
+    writeJson(path.join(staleBundledRoot, "openai", "carapace.plugin.json"), {
       id: "openai",
       providers: ["openai"],
     });
@@ -239,7 +239,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
         plugins: [
           {
             pluginId: "openai",
-            manifestPath: path.join(staleBundledRoot, "openai", "openclaw.plugin.json"),
+            manifestPath: path.join(staleBundledRoot, "openai", "carapace.plugin.json"),
             manifestHash: "stale-openai",
             rootDir: path.join(staleBundledRoot, "openai"),
             origin: "bundled",
@@ -254,12 +254,12 @@ describe("listOpenClawPluginManifestMetadata", () => {
         ],
         diagnostics: [],
       },
-      { stateDir: path.join(home, ".openclaw") },
+      { stateDir: path.join(home, ".carapace") },
     );
 
-    const records = listOpenClawPluginManifestMetadata({
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+    const records = listCarapacePluginManifestMetadata({
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
     });
 
     const openai = records.find((record) => record.manifest.id === "openai");
@@ -274,14 +274,14 @@ describe("listOpenClawPluginManifestMetadata", () => {
     const home = path.join(root, "home");
     const partialBundledRoot = path.join(root, "dist", "extensions");
 
-    writeJson(path.join(partialBundledRoot, "qa-lab", "openclaw.plugin.json"), {
+    writeJson(path.join(partialBundledRoot, "qa-lab", "carapace.plugin.json"), {
       id: "qa-lab",
       providers: ["qa-lab"],
     });
 
-    const records = listOpenClawPluginManifestMetadata({
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: partialBundledRoot,
+    const records = listCarapacePluginManifestMetadata({
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: partialBundledRoot,
     });
 
     const openai = records.find((record) => record.manifest.id === "openai");
@@ -294,16 +294,16 @@ describe("listOpenClawPluginManifestMetadata", () => {
     });
   });
 
-  it("falls through a blank OpenClaw home when scanning global manifests", () => {
+  it("falls through a blank Carapace home when scanning global manifests", () => {
     const root = createTempRoot();
     const home = path.join(root, "home");
-    const pluginDir = path.join(home, ".openclaw", "extensions", "example");
-    writeJson(path.join(pluginDir, "openclaw.plugin.json"), { id: "example" });
+    const pluginDir = path.join(home, ".carapace", "extensions", "example");
+    writeJson(path.join(pluginDir, "carapace.plugin.json"), { id: "example" });
 
-    const records = listOpenClawPluginManifestMetadata({
-      OPENCLAW_HOME: "   ",
+    const records = listCarapacePluginManifestMetadata({
+      CARAPACE_HOME: "   ",
       HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
     });
 
     expect(records).toContainEqual({
@@ -316,7 +316,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
   it("preserves identity, capabilities, and config schema without loading plugin runtime", () => {
     const root = createTempRoot();
     const home = path.join(root, "home");
-    const pluginDir = path.join(home, ".openclaw", "extensions", "authoring-contract");
+    const pluginDir = path.join(home, ".carapace", "extensions", "authoring-contract");
     const manifest = {
       id: "authoring-contract",
       name: "Authoring contract",
@@ -333,11 +333,11 @@ describe("listOpenClawPluginManifestMetadata", () => {
         },
       },
     };
-    writeJson(path.join(pluginDir, "openclaw.plugin.json"), manifest);
+    writeJson(path.join(pluginDir, "carapace.plugin.json"), manifest);
 
-    const records = listOpenClawPluginManifestMetadata({
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
+    const records = listCarapacePluginManifestMetadata({
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
     });
 
     expect(records).toContainEqual({
@@ -360,7 +360,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
     },
   ])("fails fast on $name", ({ manifest, error }) => {
     const pluginDir = createTempRoot();
-    writeJson(path.join(pluginDir, "openclaw.plugin.json"), manifest);
+    writeJson(path.join(pluginDir, "carapace.plugin.json"), manifest);
 
     const result = loadPluginManifest(pluginDir, false);
 
@@ -371,11 +371,11 @@ describe("listOpenClawPluginManifestMetadata", () => {
     const root = createTempRoot();
     const home = path.join(root, "home");
 
-    const goodPluginDir = path.join(home, ".openclaw", "extensions", "good-plugin");
-    writeJson(path.join(goodPluginDir, "openclaw.plugin.json"), { id: "good-plugin" });
+    const goodPluginDir = path.join(home, ".carapace", "extensions", "good-plugin");
+    writeJson(path.join(goodPluginDir, "carapace.plugin.json"), { id: "good-plugin" });
 
-    const oversizedDir = path.join(home, ".openclaw", "extensions", "big-plugin");
-    const oversizedPath = path.join(oversizedDir, "openclaw.plugin.json");
+    const oversizedDir = path.join(home, ".carapace", "extensions", "big-plugin");
+    const oversizedPath = path.join(oversizedDir, "carapace.plugin.json");
     fs.mkdirSync(oversizedDir, { recursive: true });
     fs.writeFileSync(
       oversizedPath,
@@ -385,11 +385,11 @@ describe("listOpenClawPluginManifestMetadata", () => {
     expect(fs.statSync(oversizedPath).size).toBeGreaterThan(256 * 1024);
 
     const env = {
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
     };
-    const records = listOpenClawPluginManifestMetadata(env);
-    const cachedRecords = listOpenClawPluginManifestMetadata(env);
+    const records = listCarapacePluginManifestMetadata(env);
+    const cachedRecords = listCarapacePluginManifestMetadata(env);
 
     // "good-plugin" is present; "big-plugin" is skipped due to oversized manifest.
     expect(records.find((record) => record.manifest.id === "good-plugin")).toBeTruthy();
@@ -447,7 +447,7 @@ describe("listOpenClawPluginManifestMetadata", () => {
     fs.writeFileSync(manifestPath, contents, "utf8");
     expect(() => JSON.parse(contents)).toThrow();
 
-    const records = listOpenClawPluginManifestMetadata(env);
+    const records = listCarapacePluginManifestMetadata(env);
 
     expect(records).toContainEqual({
       pluginDir,
@@ -461,11 +461,11 @@ describe("listOpenClawPluginManifestMetadata", () => {
     const root = createTempRoot();
     const home = path.join(root, "home");
 
-    const exactDir = path.join(home, ".openclaw", "extensions", "exact-plugin");
+    const exactDir = path.join(home, ".carapace", "extensions", "exact-plugin");
     fs.mkdirSync(exactDir, { recursive: true });
 
     // Write a compact JSON manifest padded to exactly the byte limit.
-    const exactPath = path.join(exactDir, "openclaw.plugin.json");
+    const exactPath = path.join(exactDir, "carapace.plugin.json");
     const exactManifest = { id: "exact-plugin", pad: "" };
     const compactJson = JSON.stringify(exactManifest);
     const requiredPadding = 256 * 1024 - Buffer.byteLength(compactJson, "utf8");
@@ -473,9 +473,9 @@ describe("listOpenClawPluginManifestMetadata", () => {
     fs.writeFileSync(exactPath, JSON.stringify(exactManifest), "utf8");
     expect(Buffer.byteLength(fs.readFileSync(exactPath), "utf8")).toBe(256 * 1024);
 
-    const records = listOpenClawPluginManifestMetadata({
-      OPENCLAW_HOME: home,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
+    const records = listCarapacePluginManifestMetadata({
+      CARAPACE_HOME: home,
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "empty-bundled"),
     });
 
     expect(records.find((record) => record.manifest.id === "exact-plugin")).toBeTruthy();

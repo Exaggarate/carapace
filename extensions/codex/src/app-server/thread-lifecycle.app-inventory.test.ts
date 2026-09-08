@@ -1,6 +1,6 @@
 import path from "node:path";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CodexAppInventoryCache } from "./app-inventory-cache.js";
 import { codexAppInventoryResponse } from "./app-inventory.test-helpers.js";
@@ -74,7 +74,7 @@ describe("Codex app inventory across physical process restart", () => {
   const processes: Array<{ close: () => void }> = [];
 
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-cold-app-inventory-");
+    tempDir = tempDirs.make("carapace-cold-app-inventory-");
   });
   afterEach(() => {
     for (const process of processes.splice(0)) {
@@ -583,7 +583,7 @@ describe("Codex app inventory across physical process restart", () => {
         destructiveApprovalMode: "ask",
       });
       // A native client can add a higher-precedence link reviewer without changing
-      // the OpenClaw policy fingerprint or invalidating its cached app inventory.
+      // the Carapace policy fingerprint or invalidating its cached app inventory.
       f.nativeLinkPolicy.approvals_reviewer = "auto_review";
       if (lifecycle === "warm") {
         f.process.reloadUserConfig();

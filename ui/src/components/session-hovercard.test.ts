@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { ProgressCard } from "@openclaw/gateway-protocol";
+import type { ProgressCard } from "@carapace/gateway-protocol";
 import { render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ControlUiSessionPullRequestSnapshot } from "../../../src/gateway/control-ui-contract.js";
@@ -21,11 +21,11 @@ function row(overrides: Partial<SidebarRecentSession> = {}): SidebarRecentSessio
       identity: { type: "profile", id: "alice" },
       label: "Alice Baker",
     },
-    subtitle: "openclaw ⎇ feature/session-hovercard",
+    subtitle: "carapace ⎇ feature/session-hovercard",
     workContext: {
       kind: "project",
-      name: "openclaw",
-      path: "/work/openclaw",
+      name: "carapace",
+      path: "/work/carapace",
       branch: "feature/session-hovercard",
     },
     children: [],
@@ -102,7 +102,7 @@ describe("renderSessionHovercard", () => {
       [...container.querySelectorAll(".session-hovercard__context-text")].map((node) =>
         node.textContent?.trim(),
       ),
-    ).toEqual(["openclaw"]);
+    ).toEqual(["carapace"]);
     expect(
       [...container.querySelectorAll(".session-hovercard__section")].map((section) =>
         [...section.classList].find((name) => name.startsWith("session-hovercard__section--")),
@@ -148,7 +148,7 @@ describe("renderSessionHovercard", () => {
 
   it("renders the channel avatar with gateway auth instead of an initials span", () => {
     const container = document.createElement("div");
-    const channelAvatarUrl = "/__openclaw__/channel-avatar/agent%3Amain%3Awork";
+    const channelAvatarUrl = "/__carapace__/channel-avatar/agent%3Amain%3Awork";
     render(
       renderSessionHovercard({
         row: row({ channelAvatarUrl }),
@@ -166,27 +166,27 @@ describe("renderSessionHovercard", () => {
         authTokens: readonly string[];
         authReady: boolean;
       }
-    >("openclaw-channel-avatar.session-hovercard__creator-avatar");
+    >("carapace-channel-avatar.session-hovercard__creator-avatar");
     expect(avatar).not.toBeNull();
     expect(avatar?.routeUrl).toBe(channelAvatarUrl);
     expect(avatar?.authTokens).toEqual(["device-token", "saved-token"]);
     expect(avatar?.authReady).toBe(true);
-    expect(container.querySelector("openclaw-viewer-avatar")).toBeNull();
+    expect(container.querySelector("carapace-viewer-avatar")).toBeNull();
   });
 
   it("keeps initials visible inside the channel avatar while auth is unavailable", async () => {
     const container = document.body.appendChild(document.createElement("div"));
     render(
       renderSessionHovercard({
-        row: row({ channelAvatarUrl: "/__openclaw__/channel-avatar/pending" }),
+        row: row({ channelAvatarUrl: "/__carapace__/channel-avatar/pending" }),
         avatarAuth: { authTokens: [], authReady: false },
       }),
       container,
     );
 
-    await customElements.whenDefined("openclaw-channel-avatar");
+    await customElements.whenDefined("carapace-channel-avatar");
     const avatar = container.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-channel-avatar",
+      "carapace-channel-avatar",
     );
     await avatar?.updateComplete;
 
@@ -196,7 +196,7 @@ describe("renderSessionHovercard", () => {
       ).toBe("AB");
     });
     expect(avatar?.querySelector("img.channel-avatar")).toBeNull();
-    expect(container.querySelector("openclaw-viewer-avatar")).toBeNull();
+    expect(container.querySelector("carapace-viewer-avatar")).toBeNull();
   });
 
   it("renders one titled PR row with compact diff facts and an overflow count", () => {
@@ -207,11 +207,11 @@ describe("renderSessionHovercard", () => {
           pullRequests: [
             {
               number: 101,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "feature",
               title: "First",
-              url: "https://github.com/openclaw/openclaw/pull/101",
+              url: "https://github.com/Exaggarate/carapace/pull/101",
               state: "open",
               changedFiles: 2,
               additions: 7,
@@ -220,20 +220,20 @@ describe("renderSessionHovercard", () => {
             },
             {
               number: 102,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "feature",
               title: "Second",
-              url: "https://github.com/openclaw/openclaw/pull/102",
+              url: "https://github.com/Exaggarate/carapace/pull/102",
               state: "draft",
             },
             {
               number: 103,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "feature",
               title: "Third",
-              url: "https://github.com/openclaw/openclaw/pull/103",
+              url: "https://github.com/Exaggarate/carapace/pull/103",
               state: "merged",
             },
           ],
@@ -244,7 +244,7 @@ describe("renderSessionHovercard", () => {
 
     const links = [...container.querySelectorAll<HTMLAnchorElement>(".session-hovercard__pr-row")];
     expect(links).toHaveLength(1);
-    expect(links[0]?.href).toBe("https://github.com/openclaw/openclaw/pull/101");
+    expect(links[0]?.href).toBe("https://github.com/Exaggarate/carapace/pull/101");
     expect(links[0]?.target).toBe("_blank");
     expect(links[0]?.rel).toContain("noopener");
     expect(links[0]?.querySelector(".session-hovercard__pr-title")?.textContent).toBe("First");
@@ -303,16 +303,16 @@ describe("renderSessionHovercard", () => {
     const container = document.createElement("div");
     render(
       renderSessionHovercard({
-        row: row({ workSession: true, subtitle: "openclaw/openclaw · feature" }),
+        row: row({ workSession: true, subtitle: "carapace/carapace · feature" }),
         pullRequests: snapshot({
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             branch: "feature",
             changedFiles: 3,
             additions: 12,
             deletions: 4,
-            createUrl: "https://github.com/openclaw/openclaw/pull/new/feature",
+            createUrl: "https://github.com/Exaggarate/carapace/pull/new/feature",
           },
         }),
       }),
@@ -327,7 +327,7 @@ describe("renderSessionHovercard", () => {
       ".session-hovercard__branch-action",
     );
     expect(createLink?.textContent).toBe("Create PR");
-    expect(createLink?.href).toBe("https://github.com/openclaw/openclaw/pull/new/feature");
+    expect(createLink?.href).toBe("https://github.com/Exaggarate/carapace/pull/new/feature");
     expect(createLink?.title).toBe("Create a pull request for feature");
   });
 
@@ -337,8 +337,8 @@ describe("renderSessionHovercard", () => {
       renderSessionHovercard({
         pullRequests: snapshot({
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             branch: "local-only",
             changedFiles: 2,
             additions: 18,
@@ -625,11 +625,11 @@ describe("renderSessionHovercard", () => {
 
     expect(attributionSummary(container)).toBe("Alice Baker & 4 others");
     const facepile = container.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-viewer-facepile",
+      "carapace-viewer-facepile",
     );
     await facepile?.updateComplete;
     const participantLinks = [
-      ...container.querySelectorAll<HTMLAnchorElement>("openclaw-viewer-facepile a"),
+      ...container.querySelectorAll<HTMLAnchorElement>("carapace-viewer-facepile a"),
     ];
     expect(participantLinks.map((link) => link.getAttribute("href"))).toEqual([
       "/activity/mira",
@@ -640,7 +640,7 @@ describe("renderSessionHovercard", () => {
 
     const participantsTooltip = container.querySelector<
       HTMLElement & { updateComplete: Promise<boolean> }
-    >("openclaw-tooltip.session-hovercard__participants-tooltip");
+    >("carapace-tooltip.session-hovercard__participants-tooltip");
     await participantsTooltip?.updateComplete;
     expect(participantsTooltip?.hasAttribute("open-on-click")).toBe(true);
     const participantTrigger = participantsTooltip?.querySelector<HTMLButtonElement>(
@@ -720,7 +720,7 @@ describe("renderSessionHovercard", () => {
     );
 
     const facepile = container.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-viewer-facepile",
+      "carapace-viewer-facepile",
     );
     await facepile?.updateComplete;
     expect(facepile?.querySelectorAll(".viewer-avatar:not(.viewer-avatar--overflow)")).toHaveLength(

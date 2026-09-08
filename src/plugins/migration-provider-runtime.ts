@@ -1,5 +1,5 @@
 // Runtime bridge for plugin-provided migration hooks.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getLoadedRuntimePluginRegistry } from "./active-runtime-registry.js";
 import { withBundledPluginEnablementCompat } from "./bundled-compat.js";
 import { listBundledPluginMetadata } from "./bundled-plugin-metadata.js";
@@ -17,7 +17,7 @@ type MigrationProviderPluginResolution = {
 
 let standaloneMigrationRegistrySlot:
   | {
-      config: OpenClawConfig | undefined;
+      config: CarapaceConfig | undefined;
       pluginIdsKey: string;
       registry: PluginRegistry;
     }
@@ -56,7 +56,7 @@ function bindMigrationProviderToRegistry(
   };
 }
 
-function resolveMigrationProviderRegistry(params: { cfg?: OpenClawConfig; pluginIds: string[] }) {
+function resolveMigrationProviderRegistry(params: { cfg?: CarapaceConfig; pluginIds: string[] }) {
   const active = getLoadedRuntimePluginRegistry({ requiredPluginIds: params.pluginIds });
   if (active) {
     return active;
@@ -71,7 +71,7 @@ function resolveMigrationProviderRegistry(params: { cfg?: OpenClawConfig; plugin
 }
 
 function resolveMigrationProviderPluginResolution(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerId?: string;
 }): MigrationProviderPluginResolution {
   const resolution = resolveManifestContractRuntimePluginResolution({
@@ -119,7 +119,7 @@ function mergeMigrationProviders(
 
 export function ensureStandaloneMigrationProviderRegistryLoaded(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     providerId?: string;
   } = {},
 ): void {
@@ -147,7 +147,7 @@ export function ensureStandaloneMigrationProviderRegistryLoaded(
 
 export function resolvePluginMigrationProvider(params: {
   providerId: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): MigrationProviderPlugin | undefined {
   const activeRegistry = getLoadedRuntimePluginRegistry();
   const activeProvider = findMigrationProviderById(
@@ -176,7 +176,7 @@ export function resolvePluginMigrationProvider(params: {
 
 export function resolvePluginMigrationProviders(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
   } = {},
 ): MigrationProviderPlugin[] {
   const activeRegistry = getLoadedRuntimePluginRegistry();

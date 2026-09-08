@@ -1,6 +1,6 @@
 // Verifies hook dispatch follows configured policy and explicit agent registry scopes.
 import { afterAll, afterEach, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createHookRunner } from "../plugins/hooks.js";
 import {
   cleanupPluginLoaderFixturesForTest,
@@ -53,7 +53,7 @@ it.each([
       },
       load: { paths: [plugin.file] },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const workspaceDir = makePluginLoaderTempDir();
   const run = async (registry: PluginRegistry) => {
     const result = await createHookRunner(registry).runBeforePromptBuild(

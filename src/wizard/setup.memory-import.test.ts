@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   MigrationApplyResult,
   MigrationPlan,
@@ -23,9 +23,9 @@ vi.mock("../commands/migrate/memory-import.js", () => ({
 
 import { runSetupMemoryImportStep } from "./setup.memory-import.js";
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: {
-    defaults: { workspace: "/tmp/openclaw-memory-step" },
+    defaults: { workspace: "/tmp/carapace-memory-step" },
     list: [{ id: "main", default: true }],
   },
 };
@@ -57,7 +57,7 @@ function planFor(
       action: "copy" as const,
       status: "planned" as const,
       source: `/source/${providerId}/${id}.md`,
-      target: `/tmp/openclaw-memory-step/memory/imports/${providerId}/${id}.md`,
+      target: `/tmp/carapace-memory-step/memory/imports/${providerId}/${id}.md`,
     })),
     ...conflicts.map((id) => ({
       id,
@@ -65,13 +65,13 @@ function planFor(
       action: "copy" as const,
       status: "conflict" as const,
       source: `/source/${providerId}/${id}.md`,
-      target: `/tmp/openclaw-memory-step/memory/imports/${providerId}/${id}.md`,
+      target: `/tmp/carapace-memory-step/memory/imports/${providerId}/${id}.md`,
     })),
   ];
   return {
     providerId,
     source: `/source/${providerId}`,
-    target: "/tmp/openclaw-memory-step",
+    target: "/tmp/carapace-memory-step",
     items,
     summary: {
       total: items.length,
@@ -147,10 +147,10 @@ describe("runSetupMemoryImportStep", () => {
     expect(mocks.applyProviderMemoryImport).not.toHaveBeenCalled();
     expect(prompter.multiselect).not.toHaveBeenCalled();
     const notes = JSON.stringify((prompter.note as ReturnType<typeof vi.fn>).mock.calls);
-    // The skip hint must not suggest `openclaw migrate <id>`: that command runs
+    // The skip hint must not suggest `carapace migrate <id>`: that command runs
     // the full provider migration, not a memory-only retry.
     expect(notes).toContain("Memory import page");
-    expect(notes).not.toContain("openclaw migrate");
+    expect(notes).not.toContain("carapace migrate");
   });
 
   it("applies only the selected providers with exact planned item ids", async () => {

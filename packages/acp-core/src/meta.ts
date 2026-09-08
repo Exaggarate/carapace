@@ -1,5 +1,5 @@
-import { asFiniteNumber, asSafeIntegerInRange } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber, asSafeIntegerInRange } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 
 function readMetaValue<T>(
   meta: Record<string, unknown> | null | undefined,

@@ -1,5 +1,5 @@
 // Voice Call tests cover manager.closed loop plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createManagerHarness, FakeProvider, markCallAnswered } from "./manager.test-harness.js";
 

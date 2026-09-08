@@ -6,7 +6,7 @@ import {
 } from "../infra/update-run-ledger.js";
 import type { UpdateRunPhase, UpdateRunRecord } from "../infra/update-run-record.js";
 import { AsyncWorkScope } from "../shared/async-work-scope.js";
-import { reconcileOpenClawStateSchemaPublication } from "../state/openclaw-state-db.js";
+import { reconcileCarapaceStateSchemaPublication } from "../state/carapace-state-db.js";
 import { GATEWAY_EVENT_UPDATE_RUN_CHANGED } from "./events.js";
 import type { GatewayBroadcastFn } from "./server-broadcast-types.js";
 
@@ -39,7 +39,7 @@ export function startUpdateRunWatcher(params: {
       return;
     }
     try {
-      const blocker = reconcileOpenClawStateSchemaPublication();
+      const blocker = reconcileCarapaceStateSchemaPublication();
       if (blocker?.publishAfterMs != null) {
         // Deadline belongs to the ledger row, so process restarts never restart the grace.
         publicationTimer = setTimeout(

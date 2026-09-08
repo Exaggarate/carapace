@@ -162,7 +162,7 @@ suite.define(() => {
         await captureProof(page, "hovercard-identity-rest.png");
         const trigger = row.locator("a.sidebar-recent-session__link");
         const identity = card.locator("a.session-hovercard__attribution-name");
-        const participant = card.locator("openclaw-viewer-facepile a.person-activity-avatar-link");
+        const participant = card.locator("carapace-viewer-facepile a.person-activity-avatar-link");
         await expect.poll(() => identity.textContent()).toBe("Ada King");
         expect(await identity.getAttribute("href")).toBe(adaPath);
         await expect
@@ -199,7 +199,7 @@ suite.define(() => {
 
         await waitForControlUiRoute(page, { pathname: adaPath, routeId: "activity", search: "" });
         await expect.poll(() => card.count()).toBe(0);
-        const activityPage = page.locator("openclaw-activity-page");
+        const activityPage = page.locator("carapace-activity-page");
         await expect
           .poll(() => activityPage.locator(`[data-activity-identity="${adaId}"]`).count())
           .toBe(1);
@@ -408,7 +408,7 @@ suite.define(() => {
               content: [{ type: "text", text: "Historical attribution stays display-only." }],
               timestamp: now - 180_000,
               // The same raw ID in a historical row is not profile provenance.
-              __openclaw: {
+              __carapace: {
                 id: "legacy-ada-message",
                 senderId: "profile-ada",
                 senderName: "Historical Ada",
@@ -418,7 +418,7 @@ suite.define(() => {
               role: "user",
               content: [{ type: "text", text: "Handing this over." }],
               timestamp: now - 120_000,
-              __openclaw: {
+              __carapace: {
                 id: "ada-message",
                 senderId: "profile-ada",
                 senderIdentity: { type: "profile", id: "profile-ada" },
@@ -450,7 +450,7 @@ suite.define(() => {
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
 
         const ownerLink = page.locator(
-          ".chat-pane__header a.person-activity-avatar-link:has(openclaw-session-owner-chip)",
+          ".chat-pane__header a.person-activity-avatar-link:has(carapace-session-owner-chip)",
         );
         await ownerLink.waitFor({ state: "visible" });
         expect(await ownerLink.getAttribute("href")).toBe("/activity/profile-ada");
@@ -481,7 +481,7 @@ suite.define(() => {
         await expect
           .poll(() =>
             page
-              .locator("openclaw-activity-page")
+              .locator("carapace-activity-page")
               .locator('[data-activity-identity="profile-mira"]')
               .count(),
           )

@@ -1,5 +1,5 @@
 // Defines plugin auto-enable decision and candidate types.
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 /** Reasons a configured surface can cause a plugin to be auto-enabled. */
 export type PluginAutoEnableCandidate =
@@ -66,7 +66,7 @@ export type PluginAutoEnableCandidate =
     };
 
 export type PluginAutoEnableResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changes: string[];
   autoEnabledReasons: Record<string, string[]>;
 };

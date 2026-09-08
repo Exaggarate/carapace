@@ -19,11 +19,11 @@ function runFixture(
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_CONFIG_BATCH_PATH: path.join(root, "batch.json"),
-      OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-      OPENCLAW_GATEWAY_TOKEN: "test-token",
-      OPENCLAW_OPENWEBUI_MODEL: "openai/gpt-5.4-mini",
-      OPENCLAW_STATE_DIR: root,
+      CARAPACE_CONFIG_BATCH_PATH: path.join(root, "batch.json"),
+      CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+      CARAPACE_GATEWAY_TOKEN: "test-token",
+      CARAPACE_OPENWEBUI_MODEL: "openai/gpt-5.4-mini",
+      CARAPACE_STATE_DIR: root,
       ...env,
     },
   });
@@ -38,11 +38,11 @@ describe("scripts/e2e/lib/fixture.mjs config commands", () => {
     [
       "openwebui-config",
       ["test-key"],
-      { OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: "300s" },
-      "invalid OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: 300s",
+      { CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: "300s" },
+      "invalid CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: 300s",
     ],
   ])("rejects %s arguments %j and env %j", (command, args, env, message) => {
-    const root = tempRoots.make("openclaw-fixture-config-");
+    const root = tempRoots.make("carapace-fixture-config-");
     const result = runFixture(root, command, args, env);
 
     expect(result.status).not.toBe(0);
@@ -50,11 +50,11 @@ describe("scripts/e2e/lib/fixture.mjs config commands", () => {
   });
 
   it("writes strict positive browser CDP ports into generated config", () => {
-    const root = tempRoots.make("openclaw-fixture-config-");
+    const root = tempRoots.make("carapace-fixture-config-");
     const result = runFixture(root, "browser-cdp", [], { CDP_PORT: "19223", PORT: "19000" });
 
     expect(result.status).toBe(0);
-    const config = JSON.parse(readFileSync(path.join(root, "openclaw.json"), "utf8"));
+    const config = JSON.parse(readFileSync(path.join(root, "carapace.json"), "utf8"));
     expect(config.gateway.port).toBe(19000);
     expect(config.browser.noSandbox).toBe(true);
     expect(config.browser.extraArgs).toEqual([
@@ -65,9 +65,9 @@ describe("scripts/e2e/lib/fixture.mjs config commands", () => {
   });
 
   it("writes strict positive Open WebUI provider timeouts into generated config", () => {
-    const root = tempRoots.make("openclaw-fixture-config-");
+    const root = tempRoots.make("carapace-fixture-config-");
     const result = runFixture(root, "openwebui-config", ["test-key"], {
-      OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: "300",
+      CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: "300",
     });
 
     expect(result.status).toBe(0);
@@ -80,11 +80,11 @@ describe("scripts/e2e/lib/fixture.mjs config commands", () => {
   });
 
   it("writes OpenAI web-search minimal config for the package scenario", () => {
-    const root = tempRoots.make("openclaw-fixture-config-");
+    const root = tempRoots.make("carapace-fixture-config-");
     const result = runFixture(root, "openai-web-search-minimal-config");
 
     expect(result.status).toBe(0);
-    const config = JSON.parse(readFileSync(path.join(root, "openclaw.json"), "utf8"));
+    const config = JSON.parse(readFileSync(path.join(root, "carapace.json"), "utf8"));
     expect(config.agents.defaults.model.primary).toBe("openai/gpt-5");
     expect(config.models.providers.openai).toMatchObject({
       api: "openai-responses",

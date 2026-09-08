@@ -1,14 +1,14 @@
-# OpenClaw Voyage Provider
+# Carapace Voyage Provider
 
-Official OpenClaw memory embedding provider plugin for Voyage AI.
+Official Carapace memory embedding provider plugin for Voyage AI.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/voyage-provider
-openclaw gateway restart
+carapace plugins install @carapace/voyage-provider
+carapace gateway restart
 ```
 
 Set `VOYAGE_API_KEY`, then configure memory search with `provider: "voyage"`.
-See <https://docs.openclaw.ai/reference/memory-config> for setup and
+See <../../docs/reference/memory-config.md> for setup and
 configuration.

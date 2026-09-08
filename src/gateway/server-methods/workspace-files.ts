@@ -1,8 +1,8 @@
 // Shared session workspace presentation for Gateway-local and worker-owned files.
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { detectMime } from "@openclaw/media-core/mime";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { detectMime } from "@carapace/media-core/mime";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type {
   SessionFileBrowserEntry,
   SessionFileBrowserResult,

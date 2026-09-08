@@ -1,12 +1,12 @@
 import path from "node:path";
 import { setImmediate } from "node:timers";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
-  openOpenClawStateDatabase,
+  openCarapaceStateDatabase,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, expect, test } from "vitest";
 import {
   clearMemoryCoreWorkspaceNamespace,
@@ -28,7 +28,7 @@ const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
 
 function createFixture() {
   const root = tempDirs.make("memory-workspace-state-");
-  const env = { OPENCLAW_STATE_DIR: root };
+  const env = { CARAPACE_STATE_DIR: root };
   configureMemoryCoreDreamingState(<T>(options: OpenKeyedStoreOptions) =>
     createPluginStateKeyedStoreForTests<T>("memory-core", { ...options, env }),
   );
@@ -37,7 +37,7 @@ function createFixture() {
     scope,
     foreignWorkspace: { ...scope, workspaceDir: path.join(root, "foreign-workspace") },
     foreignNamespace: { ...scope, namespace: "workspace-other" },
-    database: openOpenClawStateDatabase({ env }),
+    database: openCarapaceStateDatabase({ env }),
   };
 }
 

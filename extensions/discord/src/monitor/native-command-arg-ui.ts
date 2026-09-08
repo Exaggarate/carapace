@@ -10,8 +10,8 @@ import {
   type CommandArgDefinition,
   type CommandArgValues,
   type CommandArgs,
-} from "openclaw/plugin-sdk/command-auth-native";
-import { chunkItems } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/command-auth-native";
+import { chunkItems } from "carapace/plugin-sdk/text-chunking";
 import { decodeCustomIdComponent, encodeCustomIdComponent } from "../custom-id-codec.js";
 import {
   Button,

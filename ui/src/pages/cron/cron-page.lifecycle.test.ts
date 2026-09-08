@@ -256,13 +256,13 @@ describe("CronPage lifecycle", () => {
   );
 
   it("registers idempotently when the module is evaluated again", async () => {
-    const registered = customElements.get("openclaw-cron-page");
+    const registered = customElements.get("carapace-cron-page");
     expect(registered).toBeDefined();
 
     const freshModulePath = "./cron-page.ts?custom-element-idempotence";
     await expect(import(/* @vite-ignore */ freshModulePath)).resolves.toBeDefined();
 
-    expect(customElements.get("openclaw-cron-page")).toBe(registered);
+    expect(customElements.get("carapace-cron-page")).toBe(registered);
   });
 
   it("replaces all mutable page state on each connection epoch", async () => {

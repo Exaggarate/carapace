@@ -1,7 +1,7 @@
 /**
  * Detects provider stop turns that contain no assistant-visible content.
  */
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
 
 type EmptyAssistantTurnLike = {
   content?: unknown;
@@ -20,7 +20,7 @@ type UsageFieldMap = {
 };
 
 // Upstream agent runtimes should normalize Anthropic zero-token empty `stop`
-// turns before OpenClaw sees them. Downstream: openclaw/openclaw#71880.
+// turns before Carapace sees them. Downstream: carapace/carapace#71880.
 function readFiniteTokenCount(value: unknown): number | undefined {
   return asFiniteNumber(value);
 }

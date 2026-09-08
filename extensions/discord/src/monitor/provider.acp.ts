@@ -1,7 +1,7 @@
 // Discord provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { asDateTimestampMs } from "carapace/plugin-sdk/number-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { raceWithTimeout } from "./timeouts.js";
 
 type DiscordProviderSessionRuntimeModule = typeof import("./provider-session.runtime.js");
@@ -64,7 +64,7 @@ function resolveRunningActivityAgeMs(params: {
 }
 
 export async function probeDiscordAcpBindingHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   storedState?: "idle" | "running" | "error";

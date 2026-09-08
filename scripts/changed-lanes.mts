@@ -9,7 +9,7 @@ import { isRecord } from "./lib/record-shared.mjs";
 
 const GIT_OUTPUT_MAX_BUFFER = 64 * 1024 * 1024;
 const IMPLAUSIBLE_NO_MERGE_BASE_DIFF_PATHS = 200;
-const RAW_SYNC_CHANGED_LANES_ENV = "OPENCLAW_CHANGED_LANES_RAW_SYNC";
+const RAW_SYNC_CHANGED_LANES_ENV = "CARAPACE_CHANGED_LANES_RAW_SYNC";
 
 // Source files knip's production scan reads. Any edit to one of these can orphan
 // an export -- including an import-only edit that drops a barrel re-export's last
@@ -22,7 +22,7 @@ export function hasDeadcodeScannedSource(changedPaths: string[]): boolean {
 }
 
 const PROTOCOL_EVENT_COVERAGE_INPUT_RE =
-  /^(?:src\/gateway\/(?:server-methods-list|events)\.ts|scripts\/(?:(?:check-protocol-event-coverage|changed-lanes|check-changed)\.m[jt]s|tsx\.mjs|lib\/(?:(?:tsx-cli-shim|record-shared)\.mjs|local-check-runtime\.mts)|protocol-event-coverage\.allowlist\.json)|apps\/(?:ios\/Sources|shared\/OpenClawKit\/Sources)\/.+\.swift|apps\/android\/app\/src\/main\/java\/ai\/openclaw\/app\/.+\.kt)$/u;
+  /^(?:src\/gateway\/(?:server-methods-list|events)\.ts|scripts\/(?:(?:check-protocol-event-coverage|changed-lanes|check-changed)\.m[jt]s|tsx\.mjs|lib\/(?:(?:tsx-cli-shim|record-shared)\.mjs|local-check-runtime\.mts)|protocol-event-coverage\.allowlist\.json)|apps\/(?:ios\/Sources|shared\/CarapaceKit\/Sources)\/.+\.swift|apps\/android\/app\/src\/main\/java\/ai\/carapace\/app\/.+\.kt)$/u;
 
 export function hasProtocolEventCoverageInput(changedPaths: string[]): boolean {
   // Match the guard's scan roots and excluded directories, including deleted inputs.
@@ -55,7 +55,7 @@ const LIVE_DOCKER_PACKAGE_SCRIPT_RE = /^test:docker:live-[\w:-]+$/u;
 const PUBLIC_EXTENSION_CONTRACT_RE =
   /^(?:src\/plugin-sdk\/|src\/plugins\/contracts\/|src\/channels\/plugins\/|scripts\/lib\/plugin-sdk-entrypoints\.json$|scripts\/(?:sync-plugin-sdk-exports|plugin-sdk-api-diff)\.mts$)/u;
 const BUNDLED_CHANNEL_CONFIG_METADATA_PATH_RE =
-  /^(?:src\/config\/(?:bundled-channel-config-metadata\.generated|zod-schema\.[^/]+)\.ts|src\/channels\/plugins\/config-schema\.ts|src\/plugin-sdk\/(?:bundled-channel-config-schema|channel-config-schema)\.ts|src\/plugins\/(?:bundled-dir|public-surface-loader|public-surface-runtime|sdk-alias)\.ts|scripts\/(?:generate-bundled-channel-config-metadata\.ts|load-channel-config-surface\.ts|lib\/(?:bundled-plugin-source-utils|format-generated-module|generated-output-utils)\.mts)|extensions\/[^/]+\/(?:openclaw\.plugin\.json|package\.json|(?:config|security-contract)-api\.[cm]?[jt]sx?|src\/config-(?:schema(?:-[^/]+)?|surface|ui-hints)\.[cm]?[jt]sx?))$/u;
+  /^(?:src\/config\/(?:bundled-channel-config-metadata\.generated|zod-schema\.[^/]+)\.ts|src\/channels\/plugins\/config-schema\.ts|src\/plugin-sdk\/(?:bundled-channel-config-schema|channel-config-schema)\.ts|src\/plugins\/(?:bundled-dir|public-surface-loader|public-surface-runtime|sdk-alias)\.ts|scripts\/(?:generate-bundled-channel-config-metadata\.ts|load-channel-config-surface\.ts|lib\/(?:bundled-plugin-source-utils|format-generated-module|generated-output-utils)\.mts)|extensions\/[^/]+\/(?:carapace\.plugin\.json|package\.json|(?:config|security-contract)-api\.[cm]?[jt]sx?|src\/config-(?:schema(?:-[^/]+)?|surface|ui-hints)\.[cm]?[jt]sx?))$/u;
 const CONFIG_DOC_INPUT_PATH_RE =
   /^(?:src\/config\/[^/]+\.ts|src\/channels\/ids\.ts|src\/plugin-sdk\/(?:channel-core|secret-input)\.ts|src\/plugins\/(?:manifest(?:-registry|-setup-normalizers)?|package-manifest|discovery|bundled-channel-config-metadata)\.ts|scripts\/(?:generate-config-doc-baseline\.ts|(?:check-changed|changed-lanes)\.m[jt]s|lib\/changed-path-facts\.mjs))$/u;
 const CONFIG_DOC_BASELINE_PATHS = new Set([
@@ -105,7 +105,7 @@ export const RELEASE_METADATA_PATHS = new Set([
   "apps/android/fastlane/metadata/android/en-US/release_notes.txt",
   "apps/android/version.json",
   "apps/ios/CHANGELOG.md",
-  "apps/macos/Sources/OpenClaw/Resources/Info.plist",
+  "apps/macos/Sources/Carapace/Resources/Info.plist",
   "apps/mobile/version.json",
   ...CONFIG_DOC_BASELINE_PATHS,
   "docs/install/updating.md",

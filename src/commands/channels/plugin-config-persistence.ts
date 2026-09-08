@@ -1,11 +1,11 @@
 import type { ConfigWriteOptions } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { commitConfigWithPendingPluginInstalls } from "../../plugins/install-record-commit.js";
 import { refreshPluginRegistryAfterConfigMutation } from "../../plugins/registry-refresh.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
 export async function persistChannelPluginConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginInstalled: boolean;
   baseHash?: string;
   writeOptions?: ConfigWriteOptions;

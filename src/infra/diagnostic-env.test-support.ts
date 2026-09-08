@@ -19,7 +19,7 @@ export function createDiagnosticFixtureRouting(routing: NodeJS.ProcessEnv): Node
 export const diagnosticCanaries = {
   DIAGNOSTIC_NEUTRAL_CANARY: "synthetic-neutral",
   OPENAI_API_KEY: "synthetic-provider",
-  OPENCLAW_GATEWAY_TOKEN: "synthetic-token",
+  CARAPACE_GATEWAY_TOKEN: "synthetic-token",
   NODE_OPTIONS: "--no-warnings",
   LC_DIAGNOSTIC_CANARY: "synthetic-locale",
   HTTPS_PROXY: "http://proxy.invalid",

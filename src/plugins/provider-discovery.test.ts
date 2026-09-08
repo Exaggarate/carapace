@@ -171,8 +171,8 @@ describe("runProviderCatalog", () => {
     await runProviderCatalog({
       provider,
       config: {},
-      agentDir: "/tmp/openclaw-agent",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-agent",
+      workspaceDir: "/tmp/carapace-workspace",
       env: {},
       resolveProviderApiKey: () => ({ apiKey: undefined }),
       resolveProviderAuth: () => ({ apiKey: undefined, mode: "none", source: "none" }),

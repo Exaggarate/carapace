@@ -3,7 +3,7 @@ import { telegramProofIdentitySchema } from "./telegram-request-proof.ts";
 
 type Identity = z.infer<typeof telegramProofIdentitySchema>;
 
-const producerEndpoint = "https://clawsweeper.openclaw.ai/internal/exact-review/proof/producer";
+const producerEndpoint = "https://github.com/Exaggarate/carapace";
 
 export async function redeemTelegramReviewProof(identity: Identity): Promise<number> {
   const source = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;

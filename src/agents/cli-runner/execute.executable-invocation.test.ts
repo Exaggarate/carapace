@@ -57,7 +57,7 @@ function runVerifiedFixture(command: string, args: string[]) {
 }
 
 it("runs a verified plugin CLI script through its resolved interpreter", async () => {
-  const root = tempDirs.make("openclaw-plugin-cli-invocation-");
+  const root = tempDirs.make("carapace-plugin-cli-invocation-");
   const entrypoint = path.join(root, "cli.js");
   await fs.writeFile(
     path.join(root, "package.json"),
@@ -82,7 +82,7 @@ it("runs a verified plugin CLI script through its resolved interpreter", async (
 it.skipIf(process.platform === "win32")(
   "preserves a verified native CLI's symlink invocation name in a plugin process",
   async () => {
-    const root = tempDirs.make("openclaw-plugin-cli-alias-");
+    const root = tempDirs.make("carapace-plugin-cli-alias-");
     const command = path.join(root, "cli-fixture");
     await fs.symlink(process.execPath, command);
 

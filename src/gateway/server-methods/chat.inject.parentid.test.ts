@@ -10,8 +10,8 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import { onSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { appendInjectedAssistantMessageToTranscript } from "./chat-transcript-inject.js";
 
 type SqliteTranscriptFixture = {
@@ -38,8 +38,8 @@ async function createSqliteTranscriptFixture(params: {
 }
 
 async function cleanupFixture(fixture: { dir: string }) {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   fs.rmSync(fixture.dir, { recursive: true, force: true });
 }
 
@@ -87,7 +87,7 @@ describe("gateway chat.inject transcript writes", () => {
     "retains %s on both display and model content",
     async (stopReason) => {
       const fixture = await createSqliteTranscriptFixture({
-        prefix: "openclaw-chat-inject-display-content-",
+        prefix: "carapace-chat-inject-display-content-",
         sessionId: "sess-display-content",
       });
       const modelContent = [
@@ -121,7 +121,7 @@ describe("gateway chat.inject transcript writes", () => {
         });
         expect(last.message).toMatchObject({
           content: modelContent,
-          openclawDisplayContent: [...modelContent, attachment],
+          carapaceDisplayContent: [...modelContent, attachment],
           stopReason,
         });
       } finally {
@@ -132,7 +132,7 @@ describe("gateway chat.inject transcript writes", () => {
 
   it("appends a agent session entry that includes parentId", async () => {
     const fixture = await createSqliteTranscriptFixture({
-      prefix: "openclaw-chat-inject-",
+      prefix: "carapace-chat-inject-",
       sessionId: "sess-1",
     });
 
@@ -153,7 +153,7 @@ describe("gateway chat.inject transcript writes", () => {
 
   it("preserves parent links after an oversized transcript row", async () => {
     const fixture = await createSqliteTranscriptFixture({
-      prefix: "openclaw-chat-inject-large-",
+      prefix: "carapace-chat-inject-large-",
       sessionId: "sess-1",
     });
 
@@ -188,7 +188,7 @@ describe("gateway chat.inject transcript writes", () => {
 
   it("emits a redacted injected message through its persisted transcript owner", async () => {
     const fixture = await createSqliteTranscriptFixture({
-      prefix: "openclaw-chat-inject-redact-",
+      prefix: "carapace-chat-inject-redact-",
       sessionId: "sess-redact",
     });
     const fakeApiKey = "sk-proj-FAKEKEYFORTESTINGONLY1234567890";

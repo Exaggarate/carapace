@@ -2,9 +2,9 @@
 import type {
   ProviderResolveTransportTurnStateContext,
   ProviderTransportTurnState,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-metadata";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-metadata";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { isOpenAIApiBaseUrl, isOpenAICodexBaseUrl } from "./base-url.js";
 
 const DEFAULT_OPENAI_WS_DEGRADE_COOLDOWN_MS = 60_000;
@@ -51,7 +51,7 @@ function resolveSessionHeaders(sessionIdValue?: string): Record<string, string> 
   }
   return {
     "x-client-request-id": sessionId,
-    "x-openclaw-session-id": sessionId,
+    "x-carapace-session-id": sessionId,
   };
 }
 
@@ -74,14 +74,14 @@ export function resolveOpenAITransportTurnState(
   return {
     headers: {
       ...sessionHeaders,
-      "x-openclaw-turn-id": turnId,
-      "x-openclaw-turn-attempt": attempt,
+      "x-carapace-turn-id": turnId,
+      "x-carapace-turn-attempt": attempt,
     },
     metadata: {
-      openclaw_session_id: sessionHeaders["x-openclaw-session-id"] ?? "",
-      openclaw_turn_id: turnId,
-      openclaw_turn_attempt: attempt,
-      openclaw_transport: ctx.transport,
+      carapace_session_id: sessionHeaders["x-carapace-session-id"] ?? "",
+      carapace_turn_id: turnId,
+      carapace_turn_attempt: attempt,
+      carapace_transport: ctx.transport,
     },
     ...(ctx.transport === "websocket"
       ? {

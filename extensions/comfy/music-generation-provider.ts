@@ -3,7 +3,7 @@ import type {
   GeneratedMusicAsset,
   MusicGenerationProvider,
   MusicGenerationSourceImage,
-} from "openclaw/plugin-sdk/music-generation";
+} from "carapace/plugin-sdk/music-generation";
 import {
   DEFAULT_COMFY_MODEL,
   isComfyCapabilityConfigured,

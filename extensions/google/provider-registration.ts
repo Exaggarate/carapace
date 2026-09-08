@@ -1,10 +1,10 @@
 import type {
-  OpenClawPluginApi,
+  CarapacePluginApi,
   ProviderReasoningOutputModeContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-entry";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/plugin-entry";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-entry";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 import { normalizeGoogleModelId } from "./model-id.js";
 import { GOOGLE_GEMINI_DEFAULT_MODEL, applyGoogleGeminiModelDefault } from "./onboard.js";
 import {
@@ -153,6 +153,6 @@ export function buildGoogleProvider(): ProviderPlugin {
   };
 }
 
-export function registerGoogleProvider(api: OpenClawPluginApi) {
+export function registerGoogleProvider(api: CarapacePluginApi) {
   api.registerProvider(buildGoogleProvider());
 }

@@ -8,9 +8,9 @@ import type { UserProfileGitHubIdentity } from "../../packages/gateway-protocol/
 import { executeSqliteQuerySync, executeSqliteQueryTakeFirstSync } from "../infra/kysely-sync.js";
 import { normalizeGitHubLogin } from "../utils/github-login.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 import { mutateUserPreference, selectUserPreferenceValues } from "./user-preferences.js";
 import { selectResolvedUserProfileById, userProfilesDb } from "./user-profiles-internal.js";
 import { ensureUserProfilesSchema, UserProfileOwnerError } from "./user-profiles-schema.js";
@@ -66,13 +66,13 @@ function selectStoredGitHubIdentities(
 
 export function resolveCachedGitHubIdentity(
   params: { accountId: number; email: string },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): { profileId: string; updatedAt: number } | undefined {
   const email = params.email.trim().toLowerCase();
   if (!email || !Number.isSafeInteger(params.accountId) || params.accountId <= 0) {
     return undefined;
   }
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   ensureUserProfilesSchema(options, database);
   const { db } = database;
   const alias = executeSqliteQueryTakeFirstSync(
@@ -135,12 +135,12 @@ export function selectUserProfileGitHubIdentities(
 /** Resolves bounded participants for verified identities that have not opted out of public credit. */
 export function resolveUserProfileGitHubAttribution(
   profileIds: readonly string[],
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Map<string, StoredGitHubIdentity | null> {
   if (profileIds.length === 0) {
     return new Map();
   }
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   ensureUserProfilesSchema(options, database);
   const { db } = database;
   const profiles = executeSqliteQuerySync(

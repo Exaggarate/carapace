@@ -1,7 +1,7 @@
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { readSessionStoreSummaryReadOnly } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 
 /** One collection owns each physical store's bounded snapshot, including its agent windows. */
 export function createStatusSessionStoreReader(
@@ -30,7 +30,7 @@ export function createStatusSessionStoreReader(
 
 /** Reads each physical store once, retaining retired agent namespaces in the aggregate. */
 export function readStatusSessionStores(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agents: ReadonlyArray<{ id: string; name?: string }>,
   recentLimit: number,
 ) {

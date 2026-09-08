@@ -18,8 +18,8 @@ async function loadWorkspaceTemplateResolvers() {
 describe("resolveWorkspaceTemplateSearchDirs", () => {
   it("resolves templates from package root when module url is dist-rooted", async () => {
     const { resolveWorkspaceTemplateSearchDirs } = await loadWorkspaceTemplateResolvers();
-    const root = tempDirs.make("openclaw-templates-");
-    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+    const root = tempDirs.make("carapace-templates-");
+    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
 
     const templatesDir = path.join(root, "docs", "reference", "templates");
     await fs.mkdir(templatesDir, { recursive: true });
@@ -36,8 +36,8 @@ describe("resolveWorkspaceTemplateSearchDirs", () => {
 
   it("falls back to checkout docs when package-root templates are missing", async () => {
     const { resolveWorkspaceTemplateSearchDirs } = await loadWorkspaceTemplateResolvers();
-    const root = tempDirs.make("openclaw-templates-");
-    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+    const root = tempDirs.make("carapace-templates-");
+    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
 
     const distDir = path.join(root, "dist");
     await fs.mkdir(distDir, { recursive: true });
@@ -49,8 +49,8 @@ describe("resolveWorkspaceTemplateSearchDirs", () => {
 
   it("returns only existing documentation template directories", async () => {
     const { resolveWorkspaceTemplateSearchDirs } = await loadWorkspaceTemplateResolvers();
-    const root = tempDirs.make("openclaw-templates-");
-    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+    const root = tempDirs.make("carapace-templates-");
+    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
 
     const docsTemplatesDir = path.join(root, "docs", "reference", "templates");
     await fs.mkdir(docsTemplatesDir, { recursive: true });

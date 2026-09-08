@@ -15,7 +15,7 @@ import { setMatrixRuntime } from "../../runtime.js";
 import { deliverMatrixReplies } from "./replies.js";
 import type { ReplyPayload } from "./runtime-api.js";
 
-const PRESENTATION_KEY = "com.openclaw.presentation";
+const PRESENTATION_KEY = "com.carapace.presentation";
 
 async function resolveMockMatrixSend(_to: string, message: string, opts?: Record<string, unknown>) {
   const result = {

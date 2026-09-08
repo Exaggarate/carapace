@@ -2,8 +2,8 @@
 // fires during either an active request or retry backoff.
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import * as runtimeEnv from "openclaw/plugin-sdk/runtime-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import * as runtimeEnv from "carapace/plugin-sdk/runtime-env";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { probeTelegram } from "./probe.js";
 
@@ -23,9 +23,9 @@ describe("probeTelegram startup retry loop honors abortSignal", () => {
       "http_proxy",
       "https_proxy",
       "all_proxy",
-      "OPENCLAW_PROXY_URL",
-      "OPENCLAW_DEBUG_PROXY_ENABLED",
-      "OPENCLAW_DEBUG_PROXY_URL",
+      "CARAPACE_PROXY_URL",
+      "CARAPACE_DEBUG_PROXY_ENABLED",
+      "CARAPACE_DEBUG_PROXY_URL",
     ]) {
       vi.stubEnv(name, "");
     }

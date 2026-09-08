@@ -39,7 +39,7 @@ type ApprovalResolvedEvent =
   | SystemAgentApprovalResolved;
 type ApprovalReplayMethod = Extract<
   GatewayNativeApprovalMethod,
-  "exec.approval.list" | "plugin.approval.list" | "openclaw.approval.list"
+  "exec.approval.list" | "plugin.approval.list" | "carapace.approval.list"
 >;
 
 type ApprovalReplayClient = {
@@ -87,7 +87,7 @@ function resolveApprovalReplayMethods(
     methods.push("plugin.approval.list");
   }
   if (eventKinds.has("system-agent")) {
-    methods.push("openclaw.approval.list");
+    methods.push("carapace.approval.list");
   }
   return methods;
 }
@@ -227,7 +227,7 @@ export function createExecApprovalChannelRuntime<
       );
       return;
     }
-    if (evt.event === "openclaw.approval.requested" && eventKinds.has("system-agent")) {
+    if (evt.event === "carapace.approval.requested" && eventKinds.has("system-agent")) {
       spawn(
         "error handling approval request",
         // SAFETY: The event name and handled kind select the canonical approval request union.
@@ -243,7 +243,7 @@ export function createExecApprovalChannelRuntime<
       spawn("error handling approval resolved", handleResolved(evt.payload as TResolved));
       return;
     }
-    if (evt.event === "openclaw.approval.resolved" && eventKinds.has("system-agent")) {
+    if (evt.event === "carapace.approval.resolved" && eventKinds.has("system-agent")) {
       // SAFETY: The event name and handled kind select the canonical approval resolution union.
       spawn("error handling approval resolved", handleResolved(evt.payload as TResolved));
     }

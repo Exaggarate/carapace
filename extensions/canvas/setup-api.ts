@@ -1,7 +1,7 @@
 /**
  * Canvas setup entrypoint that exposes config migrations.
  */
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { migrateCanvasHostConfig } from "./src/config-migration.js";
 
 export default definePluginEntry({

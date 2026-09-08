@@ -6,10 +6,10 @@ import {
   NODE_WORKER_WORKSPACE_EXEC_COMMAND,
 } from "../../infra/node-commands.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { NODE_WORKSPACE_DRAIN_COMMAND } from "../../worker/node-workspace-protocol.js";
 import { environmentsHandlers } from "../server-methods/environments.js";
 import { createNodeWorkerTunnelManager } from "./node-worker-tunnel.js";
@@ -30,17 +30,17 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("offline device placement abandonment", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let placements: WorkerSessionPlacementStore;
 
   beforeEach(() => {
-    root = tempDirs.make("openclaw-device-abandon-");
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = tempDirs.make("carapace-device-abandon-");
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placements = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 

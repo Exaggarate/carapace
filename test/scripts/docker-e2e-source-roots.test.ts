@@ -67,8 +67,8 @@ fs.appendFileSync(${JSON.stringify(log)}, JSON.stringify({ command: ${JSON.strin
 if (${JSON.stringify(command)} === 'git') {
   if (args.includes('rev-parse')) console.log('a'.repeat(40));
 } else if (args[0] === 'build' || args[0] === 'buildx') {
-  if (args.some((arg) => arg.includes('OPENCLAW_EXTENSIONS=missing-plugin'))) {
-    console.error('unknown OPENCLAW_EXTENSIONS plugin id: missing-plugin');
+  if (args.some((arg) => arg.includes('CARAPACE_EXTENSIONS=missing-plugin'))) {
+    console.error('unknown CARAPACE_EXTENSIONS plugin id: missing-plugin');
     process.exit(49);
   }
 } else if (
@@ -97,10 +97,10 @@ if (${JSON.stringify(command)} === 'git') {
             ...process.env,
             PATH: `${bin}${path.delimiter}${process.env.PATH}`,
             TMPDIR: root,
-            OPENCLAW_DOCKER_E2E_REPO_ROOT: target,
-            OPENCLAW_CURRENT_PACKAGE_TGZ: packageTgz,
-            OPENCLAW_SKIP_DOCKER_BUILD: reuse ? "1" : "0",
-            OPENCLAW_DOCKER_SOCKET: socketPath,
+            CARAPACE_DOCKER_E2E_REPO_ROOT: target,
+            CARAPACE_CURRENT_PACKAGE_TGZ: packageTgz,
+            CARAPACE_SKIP_DOCKER_BUILD: reuse ? "1" : "0",
+            CARAPACE_DOCKER_SOCKET: socketPath,
           },
         });
         expect(result.status).not.toBe(0);
@@ -151,12 +151,12 @@ if (${JSON.stringify(command)} === 'git') {
     mkdirSync(path.join(target, "scripts"), { recursive: true });
     copyFileSync("scripts/lib/docker-e2e-package.sh", path.join(lib, "docker-e2e-package.sh"));
     writeFileSync(
-      path.join(target, "scripts/package-openclaw-for-docker.mjs"),
+      path.join(target, "scripts/package-carapace-for-docker.mjs"),
       "process.exit(47);\n",
     );
     const marker = path.join(root, "packer-source");
     writeFileSync(
-      path.join(trusted, "scripts/package-openclaw-for-docker.mjs"),
+      path.join(trusted, "scripts/package-carapace-for-docker.mjs"),
       `
 import fs from 'node:fs'; import path from 'node:path';
 const value = (name) => process.argv[process.argv.indexOf(name) + 1];
@@ -189,8 +189,8 @@ docker_e2e_cleanup_package_tgz "$package"
           ROOT_DIR: target,
           TRUSTED: trusted,
           TMPDIR: root,
-          OPENCLAW_DOCKER_E2E_REPO_ROOT: target,
-          OPENCLAW_CURRENT_PACKAGE_TGZ: "",
+          CARAPACE_DOCKER_E2E_REPO_ROOT: target,
+          CARAPACE_CURRENT_PACKAGE_TGZ: "",
         },
       },
     );

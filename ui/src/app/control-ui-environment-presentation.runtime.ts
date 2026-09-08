@@ -25,10 +25,10 @@ export function applyControlUiPresentation(params: {
     root.style.removeProperty("--control-ui-environment-ink");
     document.querySelector(".control-ui-environment-stripe")?.remove();
     for (const icon of document.querySelectorAll<HTMLLinkElement>(
-      'link[rel="icon"][data-openclaw-original-favicon]',
+      'link[rel="icon"][data-carapace-original-favicon]',
     )) {
       const original: [string | null, string | null] = JSON.parse(
-        icon.dataset.openclawOriginalFavicon!,
+        icon.dataset.carapaceOriginalFavicon!,
       );
       for (const [attribute, value] of [
         ["href", original[0]],
@@ -40,7 +40,7 @@ export function applyControlUiPresentation(params: {
           icon.setAttribute(attribute, value);
         }
       }
-      delete icon.dataset.openclawOriginalFavicon;
+      delete icon.dataset.carapaceOriginalFavicon;
     }
     return;
   }
@@ -71,7 +71,7 @@ export function applyControlUiPresentation(params: {
   }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path fill="${color}" d="M60 10C30 10 15 35 15 55c0 20 15 40 30 45v10h10v-10h10v10h10v-10c15-5 30-25 30-45 0-20-15-45-45-45Z"/></svg>`;
   for (const icon of document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')) {
-    icon.dataset.openclawOriginalFavicon ??= JSON.stringify([
+    icon.dataset.carapaceOriginalFavicon ??= JSON.stringify([
       icon.getAttribute("href"),
       icon.getAttribute("type"),
     ]);

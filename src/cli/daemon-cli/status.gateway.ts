@@ -1,7 +1,7 @@
 // Gateway target projection and port diagnostics for daemon status.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { resolveGatewayPort } from "../../config/paths.js";
-import type { GatewayBindMode, OpenClawConfig } from "../../config/types.js";
+import type { GatewayBindMode, CarapaceConfig } from "../../config/types.js";
 import { projectGatewayUrlForDiagnostics } from "../../gateway/connection-details.js";
 import { resolveAdvertisedControlUiLinks } from "../../gateway/control-ui-links.js";
 import { trimToUndefined } from "../../gateway/credentials.js";
@@ -57,9 +57,9 @@ function appendProbeNote(
 }
 
 export function resolveGatewayStatusProbeConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   hasUrlOverride: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const { config, hasUrlOverride } = params;
   // Freeze the resolved target and Gateway credentials while preserving
   // endpoint-scoped transport policy for the existing client selectors.
@@ -85,8 +85,8 @@ export function resolveGatewayStatusProbeConfig(params: {
 }
 
 export async function resolveGatewayStatusSummary(params: {
-  daemonCfg: OpenClawConfig;
-  cliCfg: OpenClawConfig;
+  daemonCfg: CarapaceConfig;
+  cliCfg: CarapaceConfig;
   mergedDaemonEnv: Record<string, string | undefined>;
   commandProgramArguments?: string[];
   rpcUrlOverride?: string;

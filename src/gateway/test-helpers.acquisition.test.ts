@@ -12,7 +12,7 @@ import { WebSocketServer } from "../../packages/gateway-client/src/websocket.tes
 import { createVitestResourceOwner } from "../../scripts/lib/vitest-resource-ownership.mts";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { runVitestShutdownCommand } from "../../test/helpers/vitest-shutdown-command.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   buildMinimalGatewayHelloOkPayload,
   closeMinimalGatewayServer,
@@ -231,7 +231,7 @@ function mockPeerGateway(peer: AcquisitionPeer, close = peer.close) {
   } satisfies import("./server.js").GatewayServer;
   const start = vi.fn(async () => {
     // Mirror the real startup-owned selector for close-order assertions.
-    process.env.OPENCLAW_GATEWAY_PORT = String(peer.port);
+    process.env.CARAPACE_GATEWAY_PORT = String(peer.port);
     return server;
   });
   vi.doMock("./server.js", () => ({
@@ -257,10 +257,10 @@ export async function verifyCompositeAcquisition({
   failure,
   shutdown,
 }: CompositeAcquisitionCase): Promise<void> {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     {
       label: "composite-acquisition",
-      env: { OPENCLAW_GATEWAY_TOKEN: "synthetic-prior-token" },
+      env: { CARAPACE_GATEWAY_TOKEN: "synthetic-prior-token" },
     },
     async (state) => {
       const behavior =
@@ -296,7 +296,7 @@ export async function verifyCompositeAcquisition({
             await stopAndWait.call(this, options);
             clientStopSettled = true;
           });
-        const selector = helper === "raw" ? "OPENCLAW_GATEWAY_TOKEN" : "OPENCLAW_GATEWAY_PORT";
+        const selector = helper === "raw" ? "CARAPACE_GATEWAY_TOKEN" : "CARAPACE_GATEWAY_PORT";
         const ownedSelector = helper === "raw" ? "synthetic-owned-token" : String(peer.port);
         const previousSelector = process.env[selector];
         const wsHeaders = failure === "construction" ? { "invalid header": "value" } : undefined;
@@ -436,9 +436,9 @@ export default defineConfig({
         PATH: process.env.PATH,
         HOME: path.join(root, "home"),
         USERPROFILE: path.join(root, "home"),
-        OPENCLAW_HOME: path.join(root, "home"),
-        OPENCLAW_STATE_DIR: path.join(root, "home/.openclaw"),
-        OPENCLAW_CONFIG_PATH: path.join(root, "home/.openclaw/openclaw.json"),
+        CARAPACE_HOME: path.join(root, "home"),
+        CARAPACE_STATE_DIR: path.join(root, "home/.carapace"),
+        CARAPACE_CONFIG_PATH: path.join(root, "home/.carapace/carapace.json"),
         TMPDIR: path.join(root, "tmp"),
         TMP: path.join(root, "tmp"),
         TEMP: path.join(root, "tmp"),
@@ -487,7 +487,7 @@ describe("raw Gateway helper acquisition ownership", () => {
     },
     { helper: "device request", behavior: "no response", error: "timeout" },
   ] as const)("$helper owns cleanup after $behavior", async ({ helper, behavior, error }) => {
-    await withOpenClawTestState({ label: "raw-acquisition" }, async () => {
+    await withCarapaceTestState({ label: "raw-acquisition" }, async () => {
       await withAcquisitionPeer(behavior, async (peer) => {
         const { openTrackedWs } = await import("./device-authz.test-helpers.js");
         const { openAuthenticatedGatewayWs } = await import("./shared-auth.test-helpers.js");
@@ -552,7 +552,7 @@ describe("raw Gateway helper acquisition ownership", () => {
   });
 
   it("retains the native error until awaited webchat preparation finishes", async () => {
-    await withOpenClawTestState({ label: "webchat-preparation" }, async () => {
+    await withCarapaceTestState({ label: "webchat-preparation" }, async () => {
       await withAcquisitionPeer("reply", async (peer) => {
         const preparing = createDeferred();
         const release = createDeferred();
@@ -595,19 +595,19 @@ describe("raw Gateway helper acquisition ownership", () => {
   });
 
   it("restores the token environment when server startup rejects before acquisition", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         label: "server-start-rejection",
-        env: { OPENCLAW_GATEWAY_TOKEN: "synthetic-prior-token" },
+        env: { CARAPACE_GATEWAY_TOKEN: "synthetic-prior-token" },
       },
       async () => {
         await withAcquisitionPeer("reply", async (peer) => {
           const startupError = new Error("synthetic server startup failure");
           mockPeerGateway(peer).mockRejectedValue(startupError);
           const { startServerWithClient } = await import("./test-helpers.server.js");
-          const previousToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+          const previousToken = process.env.CARAPACE_GATEWAY_TOKEN;
           await expect(startServerWithClient("synthetic-owned-token")).rejects.toBe(startupError);
-          expect(process.env.OPENCLAW_GATEWAY_TOKEN).toBe(previousToken);
+          expect(process.env.CARAPACE_GATEWAY_TOKEN).toBe(previousToken);
           expect(peer.clients).toEqual([]);
         });
       },
@@ -641,10 +641,10 @@ describe("raw Gateway helper acquisition ownership", () => {
   it.each(["success", "rejection"] as const)(
     "owns returned-server selectors through close %s",
     async (shutdown) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           label: "returned-client-server",
-          env: { OPENCLAW_GATEWAY_PORT: "24680" },
+          env: { CARAPACE_GATEWAY_PORT: "24680" },
         },
         async (state) => {
           await withAcquisitionPeer("reply", async (peer) => {
@@ -658,8 +658,8 @@ describe("raw Gateway helper acquisition ownership", () => {
             });
             const { startGatewayWithClient } = await import("./test-helpers.e2e.js");
             const configPath = state.statePath("client-config.json");
-            const previousConfig = process.env.OPENCLAW_CONFIG_PATH;
-            const previousPort = process.env.OPENCLAW_GATEWAY_PORT;
+            const previousConfig = process.env.CARAPACE_CONFIG_PATH;
+            const previousPort = process.env.CARAPACE_GATEWAY_PORT;
             const started = await startGatewayWithClient({
               cfg: {},
               configPath,
@@ -669,14 +669,14 @@ describe("raw Gateway helper acquisition ownership", () => {
               await started.client.stopAndWait();
               if (shutdown === "rejection") {
                 await expect(started.server.close()).rejects.toBe(closeError);
-                expect(process.env.OPENCLAW_GATEWAY_PORT).toBe(String(peer.port));
-                expect(process.env.OPENCLAW_CONFIG_PATH).toBe(configPath);
+                expect(process.env.CARAPACE_GATEWAY_PORT).toBe(String(peer.port));
+                expect(process.env.CARAPACE_CONFIG_PATH).toBe(configPath);
                 expect(peer.isListening()).toBe(true);
                 rejectClose = false;
               }
               await started.server.close();
-              expect(process.env.OPENCLAW_CONFIG_PATH).toBe(previousConfig);
-              expect(process.env.OPENCLAW_GATEWAY_PORT).toBe(previousPort);
+              expect(process.env.CARAPACE_CONFIG_PATH).toBe(previousConfig);
+              expect(process.env.CARAPACE_GATEWAY_PORT).toBe(previousPort);
               expect(peer.isListening()).toBe(false);
             } finally {
               await started.client.stopAndWait();
@@ -690,7 +690,7 @@ describe("raw Gateway helper acquisition ownership", () => {
   );
 
   it("joins the one-shot device socket close before returning its response", async () => {
-    await withOpenClawTestState({ label: "device-acquisition-response" }, async () => {
+    await withCarapaceTestState({ label: "device-acquisition-response" }, async () => {
       await withAcquisitionPeer("reply", async (peer) => {
         const { connectDeviceAuthReq } = await import("./test-helpers.e2e.js");
         const response = await connectDeviceAuthReq({

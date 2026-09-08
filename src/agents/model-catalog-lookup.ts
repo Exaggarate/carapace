@@ -1,12 +1,12 @@
 /**
  * Looks up model catalog entries and input capability support.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { isModelThinkingFormat, type ModelCompatConfig } from "../config/types.models.js";
 import type { Model } from "../llm/types.js";
 import type { ModelCatalogEntry, ModelInputType } from "./model-catalog.types.js";
@@ -62,10 +62,10 @@ function prepareModelThinkingCapability(params: {
   if (!compat || !provider || !modelId || !agentRuntime) {
     return undefined;
   }
-  const routeSource = params.route ?? (agentRuntime === "openclaw" ? params.entry : undefined);
+  const routeSource = params.route ?? (agentRuntime === "carapace" ? params.entry : undefined);
   const api = normalizeOptionalString(routeSource?.api);
   const baseUrl = normalizeOptionalString(routeSource?.baseUrl);
-  if (agentRuntime === "openclaw" && (!api || !baseUrl)) {
+  if (agentRuntime === "carapace" && (!api || !baseUrl)) {
     return undefined;
   }
   return {
@@ -127,7 +127,7 @@ export function prepareModelRunCapabilities(
     modelHasVision: modelSupportsInput(entry, "image"),
     modelThinkingCapability: prepareModelThinkingCapability({
       entry: entry ?? configuredEntry,
-      route: agentRuntime === "openclaw" ? (configuredEntry ?? entry) : undefined,
+      route: agentRuntime === "carapace" ? (configuredEntry ?? entry) : undefined,
       agentRuntime,
     }),
   };

@@ -25,9 +25,9 @@ describe.runIf(process.platform !== "win32")("Tailscale parent loss", () => {
           stdio: ["ignore", "ignore", "pipe", "ipc"],
           env: {
             ...process.env,
-            OPENCLAW_TEST_TAILSCALE_BINARY: fixture,
-            OPENCLAW_TEST_ROUTE_MARKER: marker,
-            OPENCLAW_TEST_ROUTE_PORT: String(port),
+            CARAPACE_TEST_TAILSCALE_BINARY: fixture,
+            CARAPACE_TEST_ROUTE_MARKER: marker,
+            CARAPACE_TEST_ROUTE_PORT: String(port),
             VITEST: "true",
           },
         });

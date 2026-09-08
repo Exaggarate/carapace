@@ -1,4 +1,4 @@
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { ResolvedBrowserProfile } from "./browser/config.js";
 /**
  * Browser node-proxy response envelope shared by the node host and Gateway.
@@ -10,7 +10,7 @@ export const BROWSER_PROXY_ERROR_ENVELOPE = "browser-v1" as const;
 /** Additive request envelope for Gateway-owned files sent to a browser node. */
 export const BROWSER_PROXY_UPLOAD_ENVELOPE = "browser-upload-v1" as const;
 /** Private node-host operation; unknown older nodes reject it before closing anything. */
-export const BROWSER_PROXY_OWNED_TAB_CLOSE_PATH = "/__openclaw/session-tab/close-owned";
+export const BROWSER_PROXY_OWNED_TAB_CLOSE_PATH = "/__carapace/session-tab/close-owned";
 
 export const BROWSER_PROXY_MAX_FILE_BYTES = 10 * 1024 * 1024;
 // 16 MiB expands to about 21.4 MiB in base64, leaving JSON/result headroom
@@ -161,7 +161,7 @@ export function parseBrowserProxyRoute(value: unknown): BrowserProxyRoute | unde
     typeof route.profile !== "string" ||
     !route.profile ||
     route.profile.trim() !== route.profile ||
-    (route.driver !== "openclaw" &&
+    (route.driver !== "carapace" &&
       route.driver !== "existing-session" &&
       route.driver !== "extension")
   ) {

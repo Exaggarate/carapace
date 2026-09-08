@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { nothing, render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setAvatarGatewayOrigin } from "../../lib/identity-avatar-context.ts";
@@ -37,7 +37,7 @@ describe("forwarded avatar publication", () => {
         content: `${agentId} report`,
         timestamp: index + 1,
         senderSession: { agentId, sessionKey: `agent:${agentId}:source` },
-        __openclaw: { id: `report-${agentId}` },
+        __carapace: { id: `report-${agentId}` },
       }));
       const host = {
         ...makeChatHost({

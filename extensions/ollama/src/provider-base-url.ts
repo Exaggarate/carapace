@@ -2,7 +2,7 @@
 import type {
   ModelProviderConfig,
   ModelDefinitionConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import { OLLAMA_DEFAULT_BASE_URL } from "./defaults.js";
 
 export function resolveOllamaBaseUrlForRun(params: {

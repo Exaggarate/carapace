@@ -3,7 +3,7 @@ import type {
   AcpElicitationHandler,
   AcpElicitationResponse,
   AcpJsonRpcId,
-} from "@openclaw/acp-core/runtime/types";
+} from "@carapace/acp-core/runtime/types";
 import { runStructuredInput } from "../../agents/harness/structured-input-execution.js";
 import type { ReplyPayload } from "../types.js";
 import { parseAcpElicitationRequest } from "./acp-elicitation.js";

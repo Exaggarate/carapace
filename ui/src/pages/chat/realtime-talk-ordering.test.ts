@@ -349,7 +349,7 @@ describe("browser Talk provider item ordering", () => {
           {
             type: "function_call",
             call_id: "consult-1",
-            name: "openclaw_agent_consult",
+            name: "carapace_agent_consult",
             arguments: JSON.stringify({ question: "check status" }),
           },
         ],

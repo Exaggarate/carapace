@@ -5,8 +5,8 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { PresenceEntry } from "../../packages/gateway-protocol/src/schema/snapshot.js";
 import { resolveRuntimeServiceVersion } from "../version.js";
 import { resolveMachineModelIdentifier } from "./machine-model.js";

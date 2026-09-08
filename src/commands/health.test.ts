@@ -5,7 +5,7 @@ import { retainGatewayResponsePayload } from "../../packages/gateway-client/src/
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { ExitError } from "../runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   buildCredentialsRequiredHealthDiagnostic,
   buildRateLimitedHealthDiagnostic,
@@ -235,7 +235,7 @@ describe("healthCommand", () => {
     const output = stripAnsi(runtime.log.mock.calls.map((call) => String(call[0])).join("\n"));
     expect(output).toContain(`Session store (main): ${parsed.sessions.path}`);
     expect(output).toContain(
-      "Plugin calendar: failed - service scheduler: address already in use; run openclaw doctor",
+      "Plugin calendar: failed - service scheduler: address already in use; run carapace doctor",
     );
     expect(output).not.toContain("inactive plugin load failed");
   });
@@ -368,7 +368,7 @@ describe("healthCommand", () => {
   it.each(["remote", "empty", "missing"] as const)(
     "shows each explicit fleet owner's sessions with %s agent summaries",
     async (agentSummaries) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const storePath = state.statePath("shared.sqlite");
         const updatedAt = Date.now();
         for (const [agentId, key] of [
@@ -994,7 +994,7 @@ describe("formatHealthCheckFailure", () => {
         "gateway closed (1006 abnormal closure (no close frame)): no close reason",
         "Gateway target: ws://127.0.0.1:19001",
         "Source: local loopback",
-        "Config: /Users/steipete/.openclaw-dev/openclaw.json",
+        "Config: /Users/steipete/.carapace-dev/carapace.json",
         "Bind: loopback",
       ].join("\n"),
     );
@@ -1004,7 +1004,7 @@ describe("formatHealthCheckFailure", () => {
         "Health check failed: gateway closed (1006 abnormal closure (no close frame)): no close reason",
         "  Gateway target: ws://127.0.0.1:19001",
         "  Source: local loopback",
-        "  Config: /Users/steipete/.openclaw-dev/openclaw.json",
+        "  Config: /Users/steipete/.carapace-dev/carapace.json",
         "  Bind: loopback",
       ].join("\n"),
     );

@@ -7,7 +7,7 @@ import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 import type { ISyncResponse } from "matrix-js-sdk/lib/matrix.js";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SqliteBackedMatrixSyncStore } from "./src/matrix/client/file-sync-store.js";
 import { installMatrixTestRuntime } from "./src/test-runtime.js";
@@ -48,7 +48,7 @@ function matrixStateRowsSha256(databasePath: string): string {
 }
 
 function runMatrixDoctorFix(params: { rootDir: string; stateDir: string }) {
-  const configPath = path.join(params.stateDir, "openclaw.json");
+  const configPath = path.join(params.stateDir, "carapace.json");
   const loaderPath = path.join(params.rootDir, "doctor-test-loader.mjs");
   fs.writeFileSync(
     configPath,
@@ -58,7 +58,7 @@ function runMatrixDoctorFix(params: { rootDir: string; stateDir: string }) {
           mode: "remote",
           remote: { url: "ws://127.0.0.1:1", token: "fixture-token" },
         },
-        logging: { file: path.join(params.rootDir, "openclaw.log") },
+        logging: { file: path.join(params.rootDir, "carapace.log") },
         plugins: { allow: ["matrix"], entries: { matrix: { enabled: true } } },
       },
       null,
@@ -134,14 +134,14 @@ if (process.versions.bun) {
         USERPROFILE: params.rootDir,
         NODE_DISABLE_COMPILE_CACHE: "1",
         NODE_ENV: undefined,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-        OPENCLAW_HIDE_BANNER: "1",
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_STATE_DIR: params.stateDir,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_HIDE_BANNER: "1",
+        CARAPACE_HOME: undefined,
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_STATE_DIR: params.stateDir,
+        CARAPACE_TEST_FAST: "1",
         VITEST: undefined,
         VITEST_POOL_ID: undefined,
         VITEST_WORKER_ID: undefined,
@@ -165,7 +165,7 @@ describe("Matrix account state Doctor migration", () => {
   });
 
   it("repairs active account state without opening token-root archives", async () => {
-    const stateDir = tempDirs.make("openclaw-matrix-doctor-");
+    const stateDir = tempDirs.make("carapace-matrix-doctor-");
     const storageRootDir = path.join(
       stateDir,
       "matrix",
@@ -182,8 +182,8 @@ describe("Matrix account state Doctor migration", () => {
       "matrix.example.org__bot",
       "sync-cache-backup",
     );
-    const databasePath = path.join(storageRootDir, "state", "openclaw.sqlite");
-    const archivedDatabasePath = path.join(archivedStorageRootDir, "state", "openclaw.sqlite");
+    const databasePath = path.join(storageRootDir, "state", "carapace.sqlite");
+    const archivedDatabasePath = path.join(archivedStorageRootDir, "state", "carapace.sqlite");
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     fs.mkdirSync(path.dirname(archivedDatabasePath), { recursive: true });
     const compressedFixture = Buffer.from(
@@ -204,7 +204,7 @@ describe("Matrix account state Doctor migration", () => {
     await staleStore.setSyncData(matrixSyncResponse("cursor-after-repair"));
     await expect(staleStore.flush()).rejects.toMatchObject({
       cause: {
-        name: "OpenClawStateDatabaseSchemaMigrationRequiredError",
+        name: "CarapaceStateDatabaseSchemaMigrationRequiredError",
         message: expect.stringContaining("audit-events-v2"),
       },
     });

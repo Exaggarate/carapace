@@ -17,7 +17,7 @@ afterEach(() => {
 
 describe("memory artifact provenance", () => {
   it("uses the same workspace identity through symlink aliases", async () => {
-    await withStateDirEnv("openclaw-memory-artifact-", async ({ tempRoot }) => {
+    await withStateDirEnv("carapace-memory-artifact-", async ({ tempRoot }) => {
       const workspaceDir = path.join(tempRoot, "workspace");
       const workspaceAlias = path.join(tempRoot, "workspace-alias");
       const relativePath = "memory/2026-08-20.md";
@@ -47,7 +47,7 @@ describe("memory artifact provenance", () => {
   });
 
   it("keeps the least-trusted origin sticky across later writes", async () => {
-    await withStateDirEnv("openclaw-memory-artifact-", async ({ tempRoot }) => {
+    await withStateDirEnv("carapace-memory-artifact-", async ({ tempRoot }) => {
       const address = { workspaceDir: tempRoot, relativePath: "memory/2026-08-20.md" };
       await recordMemoryArtifactWriteProvenance({
         ...address,
@@ -75,7 +75,7 @@ describe("memory artifact provenance", () => {
   });
 
   it("does not let an older rollback erase a later reservation", async () => {
-    await withStateDirEnv("openclaw-memory-artifact-", async ({ tempRoot }) => {
+    await withStateDirEnv("carapace-memory-artifact-", async ({ tempRoot }) => {
       const address = { workspaceDir: tempRoot, relativePath: "MEMORY.md" };
       const rollback = await recordMemoryArtifactWriteProvenance({
         ...address,
@@ -102,7 +102,7 @@ describe("memory artifact provenance", () => {
   });
 
   it("clears only the record matching the deleted file content", async () => {
-    await withStateDirEnv("openclaw-memory-artifact-", async ({ tempRoot }) => {
+    await withStateDirEnv("carapace-memory-artifact-", async ({ tempRoot }) => {
       const address = { workspaceDir: tempRoot, relativePath: "USER.md" };
       await recordMemoryArtifactWriteProvenance({
         ...address,

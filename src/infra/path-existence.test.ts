@@ -5,7 +5,7 @@ import { expect, it } from "vitest";
 import { pathMayExistSync } from "./path-existence.js";
 
 it("distinguishes definite absence from paths that may still exist", () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-path-existence-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-path-existence-"));
   try {
     const present = path.join(root, "present");
     fs.writeFileSync(present, "");

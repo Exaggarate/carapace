@@ -49,7 +49,7 @@ async function main() {
     args: process.argv.slice(2).filter((arg) => arg !== "--"),
     options: {
       runs: { type: "string", default: "5" },
-      repo: { type: "string", default: "openclaw/openclaw" },
+      repo: { type: "string", default: "carapace/carapace" },
       "dry-run": { type: "boolean", default: false },
       out: {
         type: "string",
@@ -109,8 +109,8 @@ async function main() {
   // workflows validate the canonical target before any Gateway test executes;
   // workflow head_sha is tooling identity, not the measured source identity.
   for (const workflow of [
-    "openclaw-release-checks.yml",
-    "openclaw-live-and-e2e-checks-reusable.yml",
+    "carapace-release-checks.yml",
+    "carapace-live-and-e2e-checks-reusable.yml",
   ]) {
     let sampled = 0;
     for (let page = 1; sampled < count; page += 1) {

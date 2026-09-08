@@ -49,7 +49,7 @@ async function withRunningSession(run: () => Promise<void>): Promise<void> {
       sessionTarget: {
         agentId: "wolf",
         sessionKey: RUNNING_SESSION_KEY,
-        storePath: "/state/agents/wolf/openclaw-agent.sqlite",
+        storePath: "/state/agents/wolf/carapace-agent.sqlite",
         expectedLifecycleRevision: "rev-7",
         expectedWriterRunId: "run-running",
       },

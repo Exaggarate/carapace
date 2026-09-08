@@ -3,7 +3,7 @@ import {
   describeOpenAiCompatibleVideo,
   type MediaUnderstandingProvider,
   type VideoDescriptionRequest,
-} from "openclaw/plugin-sdk/media-understanding";
+} from "carapace/plugin-sdk/media-understanding";
 import { QWEN_STANDARD_GLOBAL_BASE_URL } from "./models.js";
 
 const DEFAULT_QWEN_MEDIA_MODEL = "qwen3.6-plus";

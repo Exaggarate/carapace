@@ -4,8 +4,8 @@
  * MCP server setup uses this to validate SSE/streamable HTTP server records,
  * sanitize headers, and redact sensitive URLs in diagnostics.
  */
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { toMcpStringRecord } from "./mcp-config-shared.js";
 
 /** Supported HTTP-based MCP transport flavors. */

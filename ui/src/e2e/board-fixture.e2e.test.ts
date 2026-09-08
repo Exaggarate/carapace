@@ -22,7 +22,7 @@ import {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeStandaloneMockServer =
   chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
@@ -163,7 +163,7 @@ async function requestPreviewGateway(
 ): Promise<unknown[]> {
   return page.evaluate((batch) => {
     const app = document.querySelector<HTMLElement & { runtime?: ApplicationRuntime }>(
-      "openclaw-app",
+      "carapace-app",
     );
     const client = app?.runtime?.context.gateway.snapshot.client;
     if (!client) {
@@ -194,8 +194,8 @@ describeStandaloneMockServer("standalone Control UI mock server", () => {
       await page.goto(new URL("/chat", fixtureServer.url).toString());
       await page.getByRole("textbox", { name: "Chat composer", exact: true }).waitFor();
       const replies = await requestPreviewGateway(page, [
-        { method: "openclaw.chat", params: { sessionId: "delayed", message: "hello" } },
-        { method: "openclaw.chat", params: { sessionId: "welcome" } },
+        { method: "carapace.chat", params: { sessionId: "delayed", message: "hello" } },
+        { method: "carapace.chat", params: { sessionId: "welcome" } },
       ]);
       expect(replies).toMatchObject([
         { sessionId: "delayed", reply: expect.stringContaining("demo turn 0") },
@@ -238,7 +238,7 @@ describeStandaloneMockServer("standalone Control UI mock server", () => {
       try {
         await page.goto(new URL("/chat", fixtureServer.url).toString());
         await page.getByRole("textbox", { name: "Chat composer", exact: true }).waitFor();
-        const sessionKey = `agent:openclaw-mock:subagent:mock-task-${task}`;
+        const sessionKey = `agent:carapace-mock:subagent:mock-task-${task}`;
         const [description] = (await requestPreviewGateway(page, [
           { method: "sessions.describe", params: { key: sessionKey } },
         ])) as Array<{ session: { sessionId: string } }>;
@@ -387,7 +387,7 @@ describeStandaloneMockServer("standalone Control UI mock server", () => {
         });
         const page = await context.newPage();
         await page.goto(`${origin}/chat`, { waitUntil: "networkidle" });
-        await page.getByText("OpenClaw work checkout", { exact: true }).click();
+        await page.getByText("Carapace work checkout", { exact: true }).click();
         await page.getByRole("button", { name: "Write a message to send." }).waitFor();
         await page.screenshot({ path: path.join(artifacts, "chat.png") });
         await page.goto(`${origin}/profile`, { waitUntil: "networkidle" });
@@ -396,7 +396,7 @@ describeStandaloneMockServer("standalone Control UI mock server", () => {
           .toBe("Riley");
         await page.screenshot({ path: path.join(artifacts, "profile.png") });
         await page.goto(`${origin}/focus/terminal`, { waitUntil: "networkidle" });
-        const terminal = page.locator("openclaw-terminal-panel");
+        const terminal = page.locator("carapace-terminal-panel");
         await terminal.locator(".tabstrip-tab.is-live").waitFor();
         await terminal.locator(".tp-host canvas").waitFor({ state: "visible" });
         await page.screenshot({ path: path.join(artifacts, "terminal.png") });
@@ -844,19 +844,19 @@ describeStandaloneMockServer("standalone Control UI mock server", () => {
     const page = await browser.newPage();
     try {
       await page.goto(new URL("/chat", fixtureServer.url).toString(), { waitUntil: "networkidle" });
-      await page.getByText("OpenClaw work checkout", { exact: true }).click();
+      await page.getByText("Carapace work checkout", { exact: true }).click();
 
       await page.getByRole("button", { name: "Write a message to send." }).waitFor();
       expect(await page.getByText("Server updated", { exact: true }).count()).toBe(0);
       const paneState = await page
-        .locator("openclaw-chat-pane.chat-pane-cache__pane--active")
+        .locator("carapace-chat-pane.chat-pane-cache__pane--active")
         .evaluate(async (pane) => {
           const chatPane = pane as HTMLElement & {
             hasUpdated?: boolean;
             updateComplete?: Promise<boolean>;
           };
           await chatPane.updateComplete;
-          const constructor = customElements.get("openclaw-chat-pane");
+          const constructor = customElements.get("carapace-chat-pane");
           return {
             connected: chatPane.isConnected,
             hasUpdated: chatPane.hasUpdated,
@@ -880,7 +880,7 @@ describeStandaloneMockServer("standalone Control UI mock server", () => {
     const page = await browser.newPage();
     try {
       await page.goto(new URL("/chat", fixtureServer.url).toString(), { waitUntil: "networkidle" });
-      await page.getByText("OpenClaw work checkout", { exact: true }).click();
+      await page.getByText("Carapace work checkout", { exact: true }).click();
       await page.getByRole("button", { name: "Write a message to send." }).waitFor();
 
       const prompt = "generic mock send probe";
@@ -932,8 +932,8 @@ describeStandaloneMockServer("standalone native plugin preview", () => {
         .poll(() =>
           page.evaluate(() => {
             const gateway = (
-              window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway }
-            ).openclawControlUiE2eGateway;
+              window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway }
+            ).carapaceControlUiE2eGateway;
             return gateway?.requests
               .filter((request) => request.method === "plugins.controlUi.report")
               .map((request) => request.params);

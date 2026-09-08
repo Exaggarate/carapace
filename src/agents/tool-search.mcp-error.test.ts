@@ -1,11 +1,11 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   createAssistantMessageEventStream,
   type AssistantMessage,
   type Message,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { runAgentLoop, type AgentEvent, type AgentMessage } from "../plugin-sdk/agent-core.js";
@@ -287,7 +287,7 @@ describe("Tool Search MCP failures", () => {
     const codeTool = createToolSearchControl(target, TOOL_SEARCH_CODE_MODE_TOOL_NAME, "code");
     const result = await codeTool.execute("code-mode-mcp-call", {
       code: `
-        const call = await openclaw.tools.call(${JSON.stringify(target.name)}, {});
+        const call = await carapace.tools.call(${JSON.stringify(target.name)}, {});
         return { recovered: call.result.details.status === "error" };
       `,
     });

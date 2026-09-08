@@ -5,7 +5,7 @@ import type { SessionToolOverrides } from "../config/sessions/types.js";
  * Embedded runs use this to merge bundled/plugin MCP server config and return
  * the launchable server map plus diagnostics for the caller.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   BundleMcpDataDirOwnership,
   BundleMcpDiagnostic,
@@ -23,7 +23,7 @@ type EmbeddedAgentMcpConfig = {
 /** Loads merged MCP server config for an embedded agent workspace. */
 export function loadEmbeddedAgentMcpConfig(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   toolOverrides?: Pick<SessionToolOverrides, "mcpServers">;
 }): EmbeddedAgentMcpConfig {

@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { AgentSelectionRequiredError } from "../agents/agent-scope-config.js";
 import { normalizeChatType } from "../channels/chat-type.js";
 import {
@@ -15,7 +15,7 @@ import {
 } from "../config/sessions/conversation-registry.js";
 import type { ConversationRouteContext } from "../config/sessions/conversation-route-context.js";
 import { resolveConversationRouteFingerprint } from "../config/sessions/conversation-route-fingerprint.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { PlatformMessageNotDispatchedError } from "../infra/outbound/deliver-types.js";
 import { getGlobalPluginRegistry } from "../plugins/hook-runner-global.js";
 import { normalizeAccountId } from "../routing/account-id.js";
@@ -47,7 +47,7 @@ function hasActivePluginClaimOwner(pluginId: string): boolean {
 }
 
 function resolvePluginRouteOwner(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   conversation: ConversationRouteCandidate,
 ): RouteOwnerResolution | undefined {
   const channelId = normalizeChannelId(conversation.channel);
@@ -94,7 +94,7 @@ function resolvePluginRouteOwner(
 }
 
 function resolveConfiguredRouteOwner(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   conversation: ConversationRouteCandidate,
   context?: ConversationRouteContext,
 ): ResolvedAgentRoute | undefined {
@@ -120,7 +120,7 @@ function resolveConfiguredRouteOwner(
 }
 
 function resolveGenericRouteOwner(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   conversation: ConversationRouteCandidate;
   route: ResolvedAgentRoute;
   context?: ConversationRouteContext;
@@ -172,7 +172,7 @@ function bindingPeerCouldMatchConversation(
 }
 
 function hasUnrecordedContextualBinding(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   conversation: ConversationRouteCandidate;
   resolvedAgentId: string;
 }): boolean {
@@ -204,7 +204,7 @@ function hasUnrecordedContextualBinding(params: {
 
 /** Replays current configured and plugin-owned routing for a persisted conversation address. */
 export function resolveConversationRouteEligibilityForAgent(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   conversation: ConversationRouteCandidate;
 }): ConversationRouteEligibility {
@@ -263,7 +263,7 @@ export function resolveConversationRouteEligibilityForAgent(params: {
 
 /** Enforces current route ownership at a Gateway request boundary. */
 export function assertConversationRouteEligibleForAgent(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   conversation: ConversationRouteCandidate & Pick<ConversationRecord, "conversationRef">;
 }): void {
@@ -284,7 +284,7 @@ export function assertConversationRouteEligibleForAgent(params: {
 type ResolveConversation = typeof resolveConversation;
 
 export function assertConversationDeliveryAttemptAuthorized(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   conversationRef: string;
   expectedRouteFingerprint: string;
@@ -327,7 +327,7 @@ export function assertConversationDeliveryAttemptAuthorized(params: {
 }
 
 export function assertQueuedConversationDeliveryAttemptAuthorized(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   operationId: string;
   storePath?: string;

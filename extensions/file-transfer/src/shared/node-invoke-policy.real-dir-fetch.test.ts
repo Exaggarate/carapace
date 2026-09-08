@@ -2,10 +2,10 @@ import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { extractArchive } from "openclaw/plugin-sdk/archive";
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { extractArchive } from "carapace/plugin-sdk/archive";
+import type { CarapacePluginNodeInvokePolicyContext } from "carapace/plugin-sdk/plugin-entry";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { handleDirFetch } from "../node-host/dir-fetch.js";
 import { createFileTransferNodeInvokePolicy } from "./node-invoke-policy.js";
@@ -27,13 +27,13 @@ async function createRealDirFetchContext(input: {
   const approvals = {
     request: vi.fn(async () => ({ id: "approval-1", decision: "deny" as const })),
   };
-  const invokeNode = vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>(
+  const invokeNode = vi.fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>(
     async ({ params } = {}) => ({
       ok: true,
       payload: await handleDirFetch((params ?? {}) as Parameters<typeof handleDirFetch>[0]),
     }),
   );
-  const ctx: OpenClawPluginNodeInvokePolicyContext = {
+  const ctx: CarapacePluginNodeInvokePolicyContext = {
     nodeId: "node-1",
     command: "dir.fetch",
     params: { path: input.requested, maxBytes: input.maxBytes },
@@ -95,7 +95,7 @@ async function extractFetchedArchive(payload: Record<string, unknown>, tempRoot:
 }
 
 function firstInvokeParams(
-  invokeNode: ReturnType<typeof vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>>,
+  invokeNode: ReturnType<typeof vi.fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>>,
 ) {
   const request = requireRecord(invokeNode.mock.calls[0]?.[0], "invoke request");
   return requireRecord(request.params, "invoke params");
@@ -208,7 +208,7 @@ describe.runIf(process.platform !== "win32")("file-transfer real dir.fetch polic
       await fs.writeFile(sourceFile, "synthetic file payload");
       execFileSync("/usr/bin/xattr", [
         "-w",
-        "user.openclaw-fixture",
+        "user.carapace-fixture",
         "synthetic metadata",
         sourceFile,
       ]);

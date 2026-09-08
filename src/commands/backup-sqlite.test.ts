@@ -4,16 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { createLocalSqliteSnapshotProvider } from "../snapshot/local-repository.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.paths.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../state/carapace-agent-schema.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   backupSqliteCreateCommand,
   backupSqliteListCommand,
@@ -30,12 +30,12 @@ vi.mock("../config/config.js", async (importOriginal) => {
   return { ...actual, getRuntimeConfig: configMocks.getRuntimeConfig };
 });
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 beforeEach(async () => {
   // Rejected requests can record outcomes too; every case must own its state.
-  state = await createOpenClawTestState({
-    prefix: "openclaw-backup-sqlite-",
+  state = await createCarapaceTestState({
+    prefix: "carapace-backup-sqlite-",
     layout: "state-only",
   });
   configMocks.getRuntimeConfig.mockReset().mockReturnValue({
@@ -54,8 +54,8 @@ function createGlobalDatabase(databasePath: string): void {
     database.exec(`
       PRAGMA journal_mode = WAL;
       PRAGMA wal_autocheckpoint = 0;
-      ${OPENCLAW_STATE_SCHEMA_SQL}
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION};
+      ${CARAPACE_STATE_SCHEMA_SQL}
+      PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION};
       CREATE TABLE durable_entries (
         id INTEGER PRIMARY KEY,
         value TEXT NOT NULL
@@ -75,7 +75,7 @@ function createGlobalDatabase(databasePath: string): void {
           ) VALUES ('primary', 'global', ?, NULL, NULL, 1, 1)
         `,
       )
-      .run(OPENCLAW_STATE_SCHEMA_VERSION);
+      .run(CARAPACE_STATE_SCHEMA_VERSION);
     database
       .prepare(
         `
@@ -103,8 +103,8 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
   const database = new sqlite.DatabaseSync(databasePath);
   try {
     database.exec(`
-      ${OPENCLAW_AGENT_SCHEMA_SQL}
-      PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION};
+      ${CARAPACE_AGENT_SCHEMA_SQL}
+      PRAGMA user_version = ${CARAPACE_AGENT_SCHEMA_VERSION};
       CREATE TABLE durable_entries (
         id INTEGER PRIMARY KEY,
         value TEXT NOT NULL
@@ -124,7 +124,7 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
           ) VALUES ('primary', 'agent', ?, ?, NULL, 1, 1)
         `,
       )
-      .run(OPENCLAW_AGENT_SCHEMA_VERSION, agentId);
+      .run(CARAPACE_AGENT_SCHEMA_VERSION, agentId);
     database.prepare("INSERT INTO durable_entries (value) VALUES (?)").run("agent-state");
   } finally {
     database.close();
@@ -136,8 +136,8 @@ describe("SQLite backup commands", () => {
     const tempDir = state.root;
     const repositoryPath = path.join(tempDir, "snapshots");
     const scratchPath = path.join(tempDir, "scratch");
-    const restorePath = path.join(tempDir, "restore", "openclaw.sqlite");
-    const databasePath = resolveOpenClawStateSqlitePath();
+    const restorePath = path.join(tempDir, "restore", "carapace.sqlite");
+    const databasePath = resolveCarapaceStateSqlitePath();
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     await fs.mkdir(scratchPath, { mode: 0o700 });
     await fs.chmod(scratchPath, 0o700);
@@ -151,8 +151,8 @@ describe("SQLite backup commands", () => {
     });
     expect(created.manifest.database).toMatchObject({
       role: "global",
-      basename: "openclaw.sqlite",
-      userVersion: OPENCLAW_STATE_SCHEMA_VERSION,
+      basename: "carapace.sqlite",
+      userVersion: CARAPACE_STATE_SCHEMA_VERSION,
     });
     expect(JSON.parse(runtime.logs.shift() ?? "{}")).toEqual(created);
 
@@ -210,7 +210,7 @@ describe("SQLite backup commands", () => {
     const snapshotPath = path.join(repositoryPath, "missing-snapshot");
     const restorePath = path.join(tempDir, "restored.sqlite");
     const runtime = createRuntimeCapture();
-    const missingRepositoryMessage = `SQLite snapshot repository does not exist: ${repositoryPath}. Check the snapshot path or create a snapshot with \`openclaw backup sqlite create\`.`;
+    const missingRepositoryMessage = `SQLite snapshot repository does not exist: ${repositoryPath}. Check the snapshot path or create a snapshot with \`carapace backup sqlite create\`.`;
 
     await expect(backupSqliteVerifyCommand(runtime, snapshotPath, {})).rejects.toThrow(
       missingRepositoryMessage,
@@ -220,7 +220,7 @@ describe("SQLite backup commands", () => {
     ).rejects.toThrow(missingRepositoryMessage);
 
     await fs.mkdir(repositoryPath, { mode: 0o700 });
-    const missingSnapshotMessage = `SQLite snapshot does not exist: ${snapshotPath}. Run \`openclaw backup sqlite list --repository ${repositoryPath}\` to inspect available snapshots.`;
+    const missingSnapshotMessage = `SQLite snapshot does not exist: ${snapshotPath}. Run \`carapace backup sqlite list --repository ${repositoryPath}\` to inspect available snapshots.`;
     await expect(backupSqliteVerifyCommand(runtime, snapshotPath, {})).rejects.toThrow(
       missingSnapshotMessage,
     );
@@ -244,8 +244,8 @@ describe("SQLite backup commands", () => {
         });
       }
       const databasePath = agentDir
-        ? path.join(agentDir, "openclaw-agent.sqlite")
-        : resolveOpenClawAgentSqlitePath({ agentId: "ops-team" });
+        ? path.join(agentDir, "carapace-agent.sqlite")
+        : resolveCarapaceAgentSqlitePath({ agentId: "ops-team" });
       await fs.mkdir(path.dirname(databasePath), { recursive: true });
       createAgentDatabase(databasePath, "ops-team");
       const runtime = createRuntimeCapture();
@@ -258,15 +258,15 @@ describe("SQLite backup commands", () => {
       expect(created.manifest.database).toEqual({
         role: "agent",
         agentId: "ops-team",
-        basename: "openclaw-agent.sqlite",
-        userVersion: OPENCLAW_AGENT_SCHEMA_VERSION,
+        basename: "carapace-agent.sqlite",
+        userVersion: CARAPACE_AGENT_SCHEMA_VERSION,
       });
       expect(runtime.logs).toEqual([expect.stringContaining("Database: agent:ops-team")]);
       expect(runtime.errors).toEqual([]);
     },
   );
 
-  it("requires exactly one named OpenClaw database source", async () => {
+  it("requires exactly one named Carapace database source", async () => {
     const runtime = createRuntimeCapture();
 
     await expect(
@@ -285,7 +285,7 @@ describe("SQLite backup commands", () => {
     [
       "unknown",
       "nope-agent",
-      'Unknown agent id "nope-agent". Run openclaw agents list to see configured agents.',
+      'Unknown agent id "nope-agent". Run carapace agents list to see configured agents.',
     ],
     ["empty", "", "--agent must not be blank"],
     ["whitespace-only", "   ", "--agent must not be blank"],
@@ -301,7 +301,7 @@ describe("SQLite backup commands", () => {
   it("does not claim completion when a corrupt database also rejects outcome recording", async () => {
     const tempDir = state.root;
     const repositoryPath = path.join(tempDir, "snapshots");
-    const databasePath = resolveOpenClawStateSqlitePath();
+    const databasePath = resolveCarapaceStateSqlitePath();
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     await fs.writeFile(databasePath, Buffer.alloc(32));
     const runtime = createRuntimeCapture();

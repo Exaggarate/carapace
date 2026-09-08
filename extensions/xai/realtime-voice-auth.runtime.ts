@@ -1,11 +1,11 @@
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export async function resolveXaiRealtimeApiKey(
   configApiKey: string | undefined,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId?: string,
 ): Promise<string> {
   const direct =
@@ -23,6 +23,6 @@ export async function resolveXaiRealtimeApiKey(
     return oauthKey;
   }
   throw new Error(
-    "xAI credentials missing for realtime voice. Sign in with `openclaw onboard --auth-choice xai-oauth`, run `openclaw onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
+    "xAI credentials missing for realtime voice. Sign in with `carapace onboard --auth-choice xai-oauth`, run `carapace onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
   );
 }

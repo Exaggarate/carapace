@@ -1,11 +1,11 @@
 // Resolves media paths from reply payloads into runtime attachment metadata.
 import path from "node:path";
-import { mediaKindFromMime } from "@openclaw/media-core/constants";
-import { basenameFromAnyPath } from "@openclaw/media-core/file-name";
-import { isPassThroughRemoteMediaSource } from "@openclaw/media-core/media-source-url";
-import { mimeTypeFromFilePath } from "@openclaw/media-core/mime";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
+import { mediaKindFromMime } from "@carapace/media-core/constants";
+import { basenameFromAnyPath } from "@carapace/media-core/file-name";
+import { isPassThroughRemoteMediaSource } from "@carapace/media-core/media-source-url";
+import { mimeTypeFromFilePath } from "@carapace/media-core/mime";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import { resolveSendableOutboundReplyParts } from "carapace/plugin-sdk/reply-payload";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { resolvePathFromInput, toRelativeWorkspacePath } from "../../agents/path-policy.js";
 import {
@@ -14,7 +14,7 @@ import {
   resolveSandboxedMediaSource,
 } from "../../agents/sandbox-paths.js";
 import { ensureSandboxWorkspaceForSession } from "../../agents/sandbox.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { sanitizeUntrustedFileName } from "../../infra/fs-safe-advanced.js";
 import { FsSafeError } from "../../infra/fs-safe.js";
@@ -111,7 +111,7 @@ function getPayloadMediaList(payload: ReplyPayload): string[] {
 }
 
 export function createReplyMediaPathNormalizer(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey?: string;
   agentId?: string;
   workspaceDir: string;
@@ -130,7 +130,7 @@ export function createReplyMediaPathNormalizer(params: {
   workspaceMediaAccess?: OutboundMediaAccess;
 }): (payload: ReplyPayload) => Promise<ReplyPayload> {
   // Prefer an explicit agentId so callers without a resolved sessionKey (e.g.
-  // `openclaw agent --deliver` with `--reply-channel/--reply-to`) still get
+  // `carapace agent --deliver` with `--reply-channel/--reply-to`) still get
   // the stricter agent-scoped file-read policy applied during staging.
   const agentId =
     params.agentId ??

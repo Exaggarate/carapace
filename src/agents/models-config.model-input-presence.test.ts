@@ -4,18 +4,18 @@ import {
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import type { ProviderPlugin } from "../plugins/types.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
-import { planOpenClawModelsJsonSource } from "./models-config.js";
-import { planOpenClawModelsJsonWithDeps } from "./models-config.plan.test-support.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
+import { planCarapaceModelsJsonSource } from "./models-config.js";
+import { planCarapaceModelsJsonWithDeps } from "./models-config.plan.test-support.js";
 import { createPreparedModelCatalogWorkerInput } from "./prepared-model-catalog-worker.js";
 
 afterEach(clearRuntimeConfigSnapshot);
 
 type ResolveImplicitProviders = NonNullable<
-  NonNullable<Parameters<typeof planOpenClawModelsJsonWithDeps>[1]>["resolveImplicitProviders"]
+  NonNullable<Parameters<typeof planCarapaceModelsJsonWithDeps>[1]>["resolveImplicitProviders"]
 >;
 
 function model(id: string, input: Array<"text" | "image"> = ["text"]) {
@@ -53,7 +53,7 @@ describe("models config input presence", () => {
       apiKey: "MODEL_INPUT_FIXTURE_KEY",
       models: [model("vision-model")],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: { providers: { "model-input-fixture": configuredProvider } },
     };
     const sourceConfigForSecrets = {
@@ -66,7 +66,7 @@ describe("models config input presence", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const resolveImplicitProviders = vi.fn<ResolveImplicitProviders>(async () => ({
       "model-input-fixture": {
         ...configuredProvider,
@@ -74,12 +74,12 @@ describe("models config input presence", () => {
       },
     }));
 
-    const plan = await planOpenClawModelsJsonWithDeps(
+    const plan = await planCarapaceModelsJsonWithDeps(
       {
         cfg: sourceModels.length ? sourceConfigForSecrets : cfg,
         discoveryAuthConfig: cfg,
         sourceConfigForSecrets,
-        agentDir: "/tmp/openclaw-model-input-presence",
+        agentDir: "/tmp/carapace-model-input-presence",
         // Model-ID policies are part of this prepared merge fixture, not ambient discovery.
         pluginMetadataSnapshot: createPluginMetadataSnapshotFixture(),
         env: { MODEL_INPUT_FIXTURE_KEY: "default" },
@@ -169,7 +169,7 @@ describe("models config input presence", () => {
         apiKey: "CATALOG_FIXTURE_KEY",
         models: [configuredModel],
       };
-      const cfg: OpenClawConfig = { models: { providers: { [providerId]: configuredProvider } } };
+      const cfg: CarapaceConfig = { models: { providers: { [providerId]: configuredProvider } } };
       const sourceConfigForSecrets = {
         models: {
           providers: {
@@ -193,7 +193,7 @@ describe("models config input presence", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       const discovered = {
         ...configuredProvider,
         models: [
@@ -222,8 +222,8 @@ describe("models config input presence", () => {
       if (independent || missingSource) {
         // Missing top-level runtime state makes this an independent supplied config.
         setRuntimeConfigSnapshot({ ...cfg, gateway: { mode: "local" } }, sourceConfigForSecrets);
-        await withOpenClawTestState({ label: "independent-model-cost" }, async (state) => {
-          const plan = await planOpenClawModelsJsonSource(cfg, state.agentDir(), {
+        await withCarapaceTestState({ label: "independent-model-cost" }, async (state) => {
+          const plan = await planCarapaceModelsJsonSource(cfg, state.agentDir(), {
             ...options,
             env: state.env,
           });
@@ -237,7 +237,7 @@ describe("models config input presence", () => {
       const cloned = structuredClone(
         createPreparedModelCatalogWorkerInput({
           agentFacts: {
-            input: { config: cfg, agentDir: "/tmp/openclaw-model-cost-presence" },
+            input: { config: cfg, agentDir: "/tmp/carapace-model-cost-presence" },
             env: {},
             authStore: options.authStore,
             credentials: {},
@@ -253,7 +253,7 @@ describe("models config input presence", () => {
       );
       // Workers retain the captured pair after losing the parent's process-local snapshot.
       clearRuntimeConfigSnapshot();
-      const plan = await planOpenClawModelsJsonWithDeps({
+      const plan = await planCarapaceModelsJsonWithDeps({
         ...options,
         cfg: cloned.sourceConfigForSecrets,
         discoveryAuthConfig: cloned.input.config,

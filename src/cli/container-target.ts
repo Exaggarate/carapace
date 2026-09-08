@@ -1,8 +1,8 @@
 // CLI container targeting: parse --container and re-exec the command inside Docker/Podman.
 import { spawnSync } from "node:child_process";
 import { isIP } from "node:net";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { consumeRootOptionToken, FLAG_TERMINATOR } from "../infra/cli-root-options.js";
 import { resolveCliArgvInvocation } from "./argv-invocation.js";
 import { scanCliRootOptions } from "./root-option-scan.js";
@@ -30,7 +30,7 @@ type ContainerRuntimeExec = {
   argsPrefix: string[];
 };
 
-const CONTAINER_ALLOW_LOOPBACK_PROXY_URL_ENV = "OPENCLAW_CONTAINER_ALLOW_LOOPBACK_PROXY_URL";
+const CONTAINER_ALLOW_LOOPBACK_PROXY_URL_ENV = "CARAPACE_CONTAINER_ALLOW_LOOPBACK_PROXY_URL";
 const CONTAINER_RUNTIME_PROBE_TIMEOUT_MS = 10_000;
 
 export function parseCliContainerArgs(argv: string[]): CliContainerParseResult {
@@ -64,7 +64,7 @@ export function resolveCliContainerTarget(
   if (!parsed.ok) {
     throw new Error(parsed.error);
   }
-  return parsed.container ?? normalizeOptionalString(env.OPENCLAW_CONTAINER) ?? null;
+  return parsed.container ?? normalizeOptionalString(env.CARAPACE_CONTAINER) ?? null;
 }
 
 function isContainerRunning(params: {
@@ -149,23 +149,23 @@ function buildContainerExecArgs(params: {
 }): string[] {
   // Preserve proxy env only after loopback validation; localhost would point inside the container.
   const envFlag = params.exec.runtime === "docker" ? "-e" : "--env";
-  const proxyUrl = normalizeOptionalString(params.env.OPENCLAW_PROXY_URL);
+  const proxyUrl = normalizeOptionalString(params.env.CARAPACE_PROXY_URL);
   if (proxyUrl) {
     assertContainerProxyUrlIsReachable(proxyUrl, params.env);
   }
-  const proxyEnvArgs = proxyUrl ? [envFlag, `OPENCLAW_PROXY_URL=${proxyUrl}`] : [];
+  const proxyEnvArgs = proxyUrl ? [envFlag, `CARAPACE_PROXY_URL=${proxyUrl}`] : [];
   const interactiveFlags = ["-i", ...(params.stdinIsTTY && params.stdoutIsTTY ? ["-t"] : [])];
   return [
     ...params.exec.argsPrefix,
     "exec",
     ...interactiveFlags,
     envFlag,
-    `OPENCLAW_CONTAINER_HINT=${params.containerName}`,
+    `CARAPACE_CONTAINER_HINT=${params.containerName}`,
     envFlag,
-    "OPENCLAW_CLI_CONTAINER_BYPASS=1",
+    "CARAPACE_CLI_CONTAINER_BYPASS=1",
     ...proxyEnvArgs,
     params.containerName,
-    "openclaw",
+    "carapace",
     ...params.argv,
   ];
 }
@@ -184,7 +184,7 @@ function assertContainerProxyUrlIsReachable(proxyUrl: string, env: NodeJS.Proces
     return;
   }
   throw new Error(
-    `OPENCLAW_PROXY_URL=${redactProxyUrlForMessage(proxyUrl)} is loopback; 127.0.0.1 inside a container points at the container, not the host. ` +
+    `CARAPACE_PROXY_URL=${redactProxyUrlForMessage(proxyUrl)} is loopback; 127.0.0.1 inside a container points at the container, not the host. ` +
       `Use a container-reachable proxy address, or set ${CONTAINER_ALLOW_LOOPBACK_PROXY_URL_ENV}=1 if this is intentional.`,
   );
 }
@@ -231,20 +231,20 @@ function buildContainerExecEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const next = { ...env };
   // Container-targeted CLI invocations should use the container's own profile
   // and gateway auth/runtime state rather than inheriting host overrides.
-  delete next.OPENCLAW_PROFILE;
-  delete next.OPENCLAW_GATEWAY_PORT;
-  delete next.OPENCLAW_GATEWAY_URL;
-  delete next.OPENCLAW_GATEWAY_TOKEN;
-  delete next.OPENCLAW_GATEWAY_PASSWORD;
+  delete next.CARAPACE_PROFILE;
+  delete next.CARAPACE_GATEWAY_PORT;
+  delete next.CARAPACE_GATEWAY_URL;
+  delete next.CARAPACE_GATEWAY_TOKEN;
+  delete next.CARAPACE_GATEWAY_PASSWORD;
   // The child CLI should render container-aware follow-up commands via
-  // OPENCLAW_CONTAINER_HINT, but it should not treat itself as still
+  // CARAPACE_CONTAINER_HINT, but it should not treat itself as still
   // container-targeted for validation/routing.
-  next.OPENCLAW_CONTAINER = "";
+  next.CARAPACE_CONTAINER = "";
   return next;
 }
 
 function isBlockedContainerCommand(argv: string[]): boolean {
-  if (resolveCliArgvInvocation(["node", "openclaw", ...argv]).primary === "update") {
+  if (resolveCliArgvInvocation(["node", "carapace", ...argv]).primary === "update") {
     return true;
   }
   for (let i = 0; i < argv.length; i += 1) {
@@ -278,7 +278,7 @@ export function maybeRunCliInContainer(
     stdoutIsTTY: deps?.stdoutIsTTY ?? process.stdout.isTTY,
   };
 
-  if (resolvedDeps.env.OPENCLAW_CLI_CONTAINER_BYPASS === "1") {
+  if (resolvedDeps.env.CARAPACE_CLI_CONTAINER_BYPASS === "1") {
     return { handled: false, argv };
   }
 
@@ -292,7 +292,7 @@ export function maybeRunCliInContainer(
   }
   if (isBlockedContainerCommand(parsed.argv.slice(2))) {
     throw new Error(
-      "openclaw update is not supported with --container; rebuild or restart the container image instead.",
+      "carapace update is not supported with --container; rebuild or restart the container image instead.",
     );
   }
 

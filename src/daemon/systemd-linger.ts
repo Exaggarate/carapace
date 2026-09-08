@@ -3,7 +3,7 @@ import os from "node:os";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { execFileUtf8 } from "./exec-file.js";
 
 function resolveLoginctlUser(env: Record<string, string | undefined>): string | null {

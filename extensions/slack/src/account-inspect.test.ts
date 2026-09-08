@@ -1,5 +1,5 @@
 // Slack tests cover account inspection and credential status reporting.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { isSlackPluginAccountConfigured } from "./account-configured.js";
 import { inspectSlackAccount } from "./account-inspect.js";
@@ -16,7 +16,7 @@ describe("inspectSlackAccount", () => {
   it.each(["http", "relay"] as const)(
     "ignores inactive app-token refs and environment tokens in %s mode",
     (mode) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           slack: {
             mode,
@@ -61,7 +61,7 @@ describe("inspectSlackAccount", () => {
   );
 
   it("keeps an active socket app-token ref unavailable and operational resolution strict", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           botToken: "test-bot-token",
@@ -92,7 +92,7 @@ describe("inspectSlackAccount", () => {
             appToken: "test-app-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",
@@ -119,7 +119,7 @@ describe("inspectSlackAccount", () => {
             userToken: "test-user-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",
@@ -144,7 +144,7 @@ describe("inspectSlackAccount", () => {
             appToken: "test-app-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",
@@ -170,12 +170,12 @@ describe("inspectSlackAccount", () => {
             botToken: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_TEST_MISSING_SLACK_BOT_TOKEN",
+              id: "CARAPACE_TEST_MISSING_SLACK_BOT_TOKEN",
             },
             appToken: "test-app-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       envBotToken: "xoxb-lower-precedence",
       envAppToken: "",
       envUserToken: "",
@@ -200,11 +200,11 @@ describe("inspectSlackAccount", () => {
             userToken: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_TEST_MISSING_OPTIONAL_SLACK_USER_TOKEN",
+              id: "CARAPACE_TEST_MISSING_OPTIONAL_SLACK_USER_TOKEN",
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",
@@ -227,11 +227,11 @@ describe("inspectSlackAccount", () => {
             botToken: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_TEST_MISSING_REQUIRED_SLACK_BOT_TOKEN",
+              id: "CARAPACE_TEST_MISSING_REQUIRED_SLACK_BOT_TOKEN",
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",

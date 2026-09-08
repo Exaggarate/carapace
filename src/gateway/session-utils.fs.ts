@@ -1,11 +1,11 @@
 // Filesystem session history readers.
 // Parses transcript JSONL files for messages, previews, counts, and usage metadata.
 import fs from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   resolveIntegerOption,
   resolveNonNegativeIntegerOption,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { materializeSessionArchiveForRead } from "../config/sessions/archive-compression.js";
 import type { TranscriptEvent } from "../config/sessions/session-accessor.js";
 import { streamSessionTranscriptLines } from "../config/sessions/transcript-stream.js";

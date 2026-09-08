@@ -1,8 +1,8 @@
 import { afterAll, afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   cleanupPluginLoaderFixturesForTest,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   resetPluginLoaderTestStateForTest,
 } from "../plugins/loader.test-fixtures.js";
 import { withEnv } from "../test-utils/env.js";
@@ -11,8 +11,8 @@ import { listRealtimeVoiceProviders } from "./provider-registry.js";
 import { resolveConfiguredRealtimeVoiceProvider } from "./provider-resolver.js";
 
 function withVoiceProviders(
-  run: (cfg: OpenClawConfig) => void,
-  policy: OpenClawConfig["plugins"] = {},
+  run: (cfg: CarapaceConfig) => void,
+  policy: CarapaceConfig["plugins"] = {},
 ) {
   const { cfg, env } = createVoiceProviderFixture(policy);
   return withEnv(env, () => run(cfg));
@@ -33,7 +33,7 @@ describe("realtime voice provider discovery", () => {
     "discovers $configKey config when the active provider is configured=$activeReady",
     ({ activeReady, configKey }) => {
       withVoiceProviders((cfg) => {
-        const registry = loadOpenClawPlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
+        const registry = loadCarapacePlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
         expect(registry.realtimeVoiceProviders.map((entry) => entry.provider.id)).toEqual([
           "active-voice",
         ]);
@@ -122,7 +122,7 @@ describe("realtime voice provider discovery", () => {
     { label: "not allowed", policy: { allow: ["active-voice"] } },
   ])("does not auto-select a $label configured owner", ({ policy }) => {
     withVoiceProviders((cfg) => {
-      loadOpenClawPlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
+      loadCarapacePlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
       const result = resolveConfiguredRealtimeVoiceProvider({
         cfg,
         providerConfigs: {
@@ -150,7 +150,7 @@ describe("realtime voice provider discovery", () => {
 
   it("keeps a caller-supplied provider list authoritative", () => {
     withVoiceProviders((cfg) => {
-      const registry = loadOpenClawPlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
+      const registry = loadCarapacePlugins({ config: cfg, onlyPluginIds: ["active-voice"] });
       const result = resolveConfiguredRealtimeVoiceProvider({
         cfg,
         providers: registry.realtimeVoiceProviders.map((entry) => entry.provider),

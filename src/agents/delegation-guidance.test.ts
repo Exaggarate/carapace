@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildDelegationGuidanceSection,
   resolveMainSessionDelegationMode,
@@ -76,7 +76,7 @@ describe("resolveMainSessionDelegationMode", () => {
   ] as const)("resolves $name", ({ config, agentId, sessionKey, expected }) => {
     expect(
       resolveMainSessionDelegationMode({
-        config: config as OpenClawConfig,
+        config: config as CarapaceConfig,
         agentId,
         sessionKey,
       }),

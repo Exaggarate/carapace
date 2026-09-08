@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import pMap from "p-map";
 import { prepareSystemAgentRunAdmission } from "../../agents/admitted-run-context.js";
 import {
@@ -56,7 +56,7 @@ import {
   resolveConfigSecretRef,
 } from "../../config/resolution-facts.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
@@ -69,7 +69,7 @@ import type {
 import type { GatewayLockIdentity, GatewayLockOptions } from "../../infra/gateway-lock.js";
 import { type SecretRefResolveCache, resolveSecretRefString } from "../../secrets/resolve.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
-import { disposeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { disposeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { redactStatusSecrets } from "../status-all/format.js";
 import { buildProbeCandidateMap, selectProbeModel } from "./list.probe.models.js";
 import { formatMs } from "./shared.js";
@@ -235,7 +235,7 @@ function formatMissingCredentialProbeError(reasonCode: AuthProbeReasonCode): str
   return `${legacyLine}\n↳ Auth reason [ineligible_profile]: profile is incompatible with provider config.`;
 }
 
-function resolveProbeSecretRef(profile: ProfileEntry, cfg: OpenClawConfig) {
+function resolveProbeSecretRef(profile: ProfileEntry, cfg: CarapaceConfig) {
   const defaults = cfg.secrets?.defaults;
   if (profile.type === "api_key") {
     return resolveSecretInputRef({ value: profile.key, refValue: profile.keyRef, defaults }).ref;
@@ -253,11 +253,11 @@ function formatUnresolvedRefProbeError(refLabel: string): string {
 }
 
 function withDirectCredential(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   provider: string,
   value: string,
   mode: string | undefined,
-): OpenClawConfig {
+): CarapaceConfig {
   const providers = cfg.models?.providers ?? {};
   const configuredEntry = resolveMergedModelProviderEntry(cfg, provider);
   const configKey = configuredEntry?.providerKey ?? provider;
@@ -266,7 +266,7 @@ function withDirectCredential(
     return withoutProfileFallback(cfg, provider);
   }
   const auth = mode === "oauth" || mode === "token" ? mode : "api-key";
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...cfg,
     models: {
       ...cfg.models,
@@ -291,8 +291,8 @@ function withDirectCredential(
   return next;
 }
 
-function withoutProfileFallback(cfg: OpenClawConfig, provider: string): OpenClawConfig {
-  const next: OpenClawConfig = {
+function withoutProfileFallback(cfg: CarapaceConfig, provider: string): CarapaceConfig {
+  const next: CarapaceConfig = {
     ...cfg,
     auth: {
       ...cfg.auth,
@@ -307,7 +307,7 @@ function withoutProfileFallback(cfg: OpenClawConfig, provider: string): OpenClaw
 }
 
 async function resolveConfiguredProbeCredential(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   input: unknown;
   path: string;
   cache: SecretRefResolveCache;
@@ -333,7 +333,7 @@ async function resolveConfiguredProbeCredential(params: {
 }
 
 async function maybeResolveUnresolvedRefIssue(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   profile?: ProfileEntry;
   cache: SecretRefResolveCache;
 }): Promise<{ reasonCode: "unresolved_ref"; error: string } | null> {
@@ -361,7 +361,7 @@ async function maybeResolveUnresolvedRefIssue(params: {
 
 /** Builds probe targets plus preflight failures for missing/invalid credentials. */
 export async function buildProbeTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -779,7 +779,7 @@ export async function buildProbeTargets(params: {
 }
 
 async function probeTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir: string;
   workspaceDir: string;
@@ -849,10 +849,10 @@ async function probeTarget(params: {
     if (target.boundValue || target.useRuntimeAuth) {
       // Canonicalize so the isolated agent DB registers and unregisters under
       // one path. os.tmpdir() is a symlink on macOS (/var -> /private/var), and
-      // disposeOpenClawAgentDatabaseByPath's exact-path guard would otherwise
+      // disposeCarapaceAgentDatabaseByPath's exact-path guard would otherwise
       // skip the registry row, leaking an agent_databases entry per probe.
       isolatedAgentDir = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-probe-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auth-probe-")),
       );
     }
     if (target.boundValue && !target.useRuntimeAuth && isolatedAgentDir) {
@@ -908,7 +908,7 @@ async function probeTarget(params: {
       reasoningLevel: "off",
       verboseLevel: "off",
       streamParams: { maxTokens },
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       disableTools: true,
       modelRun: true,
       cleanupBundleMcpOnRunEnd: true,
@@ -941,14 +941,14 @@ async function probeTarget(params: {
     await removeInternalSessionEffectsSession(sessionTarget);
     if (isolatedAgentDir) {
       clearRuntimeAuthProfileStoreSnapshot(isolatedAgentDir);
-      disposeOpenClawAgentDatabaseByPath(resolveAuthProfileDatabasePath(isolatedAgentDir));
+      disposeCarapaceAgentDatabaseByPath(resolveAuthProfileDatabasePath(isolatedAgentDir));
       await fs.rm(isolatedAgentDir, { recursive: true, force: true });
     }
   }
 }
 
 async function runTargetsWithConcurrency(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -1005,7 +1005,7 @@ async function runTargetsWithConcurrency(params: {
 }
 
 function formatActiveGatewayModelsProbeRefusal(identity: GatewayLockIdentity): string {
-  return `A Gateway is running for this state directory (pid ${identity.pid}, port ${identity.port}). Stop the Gateway first (${formatCliCommand("openclaw gateway stop")}), then rerun models status --probe.`;
+  return `A Gateway is running for this state directory (pid ${identity.pid}, port ${identity.port}). Stop the Gateway first (${formatCliCommand("carapace gateway stop")}), then rerun models status --probe.`;
 }
 
 type AuthProbeStateOwnership = {
@@ -1041,7 +1041,7 @@ export async function withAuthProbeStateOwnership<T>(
 
 /** Runs all auth probes with bounded concurrency and returns a summary. */
 export async function runAuthProbes(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;

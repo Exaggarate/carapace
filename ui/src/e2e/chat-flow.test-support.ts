@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Page } from "playwright";
 import { expect } from "vitest";
 import { SESSION_DRAG_MIME } from "../lib/sessions/drag.ts";
@@ -23,7 +23,7 @@ export {
   pauseVirtualClock,
 };
 
-export const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+export const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 export async function captureUiProof(
   owner: { readonly artifactDir: string },
@@ -51,7 +51,7 @@ export function createChatFlowE2eSuite(
     name: "Control UI mocked Gateway E2E",
     trackBrowserContexts: true,
     unavailableMessage: (executablePath) =>
-      `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH to a compatible browser, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+      `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH to a compatible browser, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
   });
 }
 
@@ -192,7 +192,7 @@ export async function captureSessionAccessibilityProof(
     return;
   }
   const sessionAccessibilityProofDir = path.join(owner.artifactDir, "session-accessibility");
-  const sidebar = page.locator("openclaw-app-sidebar");
+  const sidebar = page.locator("carapace-app-sidebar");
   await page.screenshot({
     fullPage: true,
     path: path.join(sessionAccessibilityProofDir, `${name}.png`),
@@ -262,7 +262,7 @@ export async function readOutboxPayloadAttachments(page: Page, key: string) {
       attachments: Array<{ blob: Blob; fileName?: string; mimeType: string }>;
     };
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("openclaw-control-ui");
+      const request = indexedDB.open("carapace-control-ui");
       request.addEventListener("success", () => resolve(request.result), { once: true });
       request.addEventListener(
         "error",

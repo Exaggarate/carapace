@@ -1,7 +1,7 @@
 import { Type, type Static } from "typebox";
 import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createAbortError } from "../../infra/abort-signal.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { resolveSubagentCompletionResultText } from "../subagents/completion/subagent-completion-result.js";
@@ -75,7 +75,7 @@ function ownsRun(
   entry: SubagentRunRecord,
   currentSessionKeys: ReadonlySet<string>,
   currentAgentId?: string,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): boolean {
   const owner = entry.swarmRequesterSessionKey?.trim();
   if (!owner) {
@@ -97,7 +97,7 @@ function ownsRun(
   });
 }
 
-function paramsOwner(config: OpenClawConfig | undefined, sessionKey: string): string | undefined {
+function paramsOwner(config: CarapaceConfig | undefined, sessionKey: string): string | undefined {
   if (!config) {
     return undefined;
   }
@@ -138,7 +138,7 @@ export async function waitForCollectorCompletion(params: {
   runId: string;
   currentSessionKeys: ReadonlySet<string>;
   currentAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   signal?: AbortSignal;
 }): Promise<CollectorCompletionResult> {
   const readCompletion = (): CollectorCompletionResult | undefined => {
@@ -202,7 +202,7 @@ function readWaitState(
   ids: readonly string[],
   currentSessionKeys: ReadonlySet<string>,
   currentAgentId?: string,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ) {
   const errors: WaitError[] = [];
   const completed: Array<{
@@ -248,7 +248,7 @@ async function waitForCollector(params: {
   ids: readonly string[];
   currentSessionKeys: ReadonlySet<string>;
   currentAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   timeoutMs: number;
   signal?: AbortSignal;
 }) {
@@ -300,7 +300,7 @@ export function createAgentsWaitTool(opts: {
   agentSessionKey?: string;
   runSessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): AnyAgentTool {
   const swarm = resolveSwarmConfig(opts.config, opts.agentId);
   return markCollectorReaderTool({

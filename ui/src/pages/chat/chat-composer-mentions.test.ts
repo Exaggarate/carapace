@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import type { UsersMentionableResult } from "@openclaw/gateway-protocol";
+import type { UsersMentionableResult } from "@carapace/gateway-protocol";
 import { render } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GatewayBrowserClient } from "../../api/gateway.ts";

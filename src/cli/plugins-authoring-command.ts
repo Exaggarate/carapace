@@ -1,8 +1,8 @@
 // Plugin authoring commands for init/build/validate manifest generation.
 import fs from "node:fs";
 import path from "node:path";
-import { jsonSchemaValuesEqual } from "@openclaw/normalization-core/json-schema";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { jsonSchemaValuesEqual } from "@carapace/normalization-core/json-schema";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { replaceFileAtomic } from "../infra/replace-file.js";
 import { formatCwdRelativePathOrAbsolute as formatOutputPath } from "../infra/safe-cwd.js";
 import { getToolPluginMetadata, type ToolPluginMetadata } from "../plugin-sdk/tool-plugin.js";
@@ -217,20 +217,20 @@ export function buildToolPluginPackageManifest(params: {
   packageManifest: JsonObject;
   entry: string;
 }): JsonObject {
-  const openclaw =
-    params.packageManifest.openclaw &&
-    typeof params.packageManifest.openclaw === "object" &&
-    !Array.isArray(params.packageManifest.openclaw)
-      ? { ...(params.packageManifest.openclaw as JsonObject) }
+  const carapace =
+    params.packageManifest.carapace &&
+    typeof params.packageManifest.carapace === "object" &&
+    !Array.isArray(params.packageManifest.carapace)
+      ? { ...(params.packageManifest.carapace as JsonObject) }
       : {};
-  const existingExtensions = Array.isArray(openclaw.extensions)
-    ? openclaw.extensions.filter((entry): entry is string => typeof entry === "string")
+  const existingExtensions = Array.isArray(carapace.extensions)
+    ? carapace.extensions.filter((entry): entry is string => typeof entry === "string")
     : [];
   const extensions = uniqueStrings([...existingExtensions, params.entry]);
   return {
     ...params.packageManifest,
-    openclaw: {
-      ...openclaw,
+    carapace: {
+      ...carapace,
       extensions,
     },
   };
@@ -249,15 +249,15 @@ export function validateToolPluginProject(params: {
     existingManifest: params.manifest,
   });
   if (!jsonSchemaValuesEqual(params.manifest, expectedManifest)) {
-    errors.push("openclaw.plugin.json generated metadata is stale. Run openclaw plugins build.");
+    errors.push("carapace.plugin.json generated metadata is stale. Run carapace plugins build.");
   }
   if (params.manifest.id !== params.metadata.id) {
     errors.push(
-      `openclaw.plugin.json id (${String(params.manifest.id)}) must match entry id (${params.metadata.id})`,
+      `carapace.plugin.json id (${String(params.manifest.id)}) must match entry id (${params.metadata.id})`,
     );
   }
   if (!params.manifest.configSchema || typeof params.manifest.configSchema !== "object") {
-    errors.push("openclaw.plugin.json must include object configSchema");
+    errors.push("carapace.plugin.json must include object configSchema");
   }
   const manifestContracts = params.manifest.contracts as { tools?: unknown } | undefined;
   const manifestTools = Array.isArray(manifestContracts?.tools)
@@ -267,11 +267,11 @@ export function validateToolPluginProject(params: {
   const missing = metadataTools.filter((tool) => !manifestTools.includes(tool));
   const extra = manifestTools.filter((tool) => !metadataTools.includes(tool));
   if (missing.length > 0) {
-    errors.push(`openclaw.plugin.json contracts.tools is missing: ${missing.join(", ")}`);
+    errors.push(`carapace.plugin.json contracts.tools is missing: ${missing.join(", ")}`);
   }
   if (extra.length > 0) {
     errors.push(
-      `openclaw.plugin.json contracts.tools has no matching defineToolPlugin tool: ${extra.join(
+      `carapace.plugin.json contracts.tools has no matching defineToolPlugin tool: ${extra.join(
         ", ",
       )}`,
     );
@@ -280,11 +280,11 @@ export function validateToolPluginProject(params: {
   if (extensionResolution.status !== "ok") {
     errors.push(
       extensionResolution.status === "missing" || extensionResolution.status === "empty"
-        ? "package.json must include openclaw.extensions"
+        ? "package.json must include carapace.extensions"
         : extensionResolution.error,
     );
   } else if (!extensionResolution.entries.includes(params.entry)) {
-    errors.push(`package.json openclaw.extensions must include ${params.entry}`);
+    errors.push(`package.json carapace.extensions must include ${params.entry}`);
   }
   return errors;
 }
@@ -322,7 +322,7 @@ export async function runPluginsBuildCommand(opts: PluginsBuildOptions): Promise
       !jsonSchemaValuesEqual(currentManifest, manifest) ||
       !jsonSchemaValuesEqual(currentPackage, nextPackageManifest)
     ) {
-      defaultRuntime.error("Generated plugin metadata is out of date. Run openclaw plugins build.");
+      defaultRuntime.error("Generated plugin metadata is out of date. Run carapace plugins build.");
       return defaultRuntime.exit(1);
     }
     defaultRuntime.log("Plugin metadata is up to date.");
@@ -366,7 +366,7 @@ export async function collectPluginsValidationResult(
   if (browserSource) {
     const declaration = await buildPluginControlUi({ rootDir, source: browserSource, check: true });
     if (!jsonSchemaValuesEqual(manifest.controlUi, declaration)) {
-      errors.push("Control UI manifest is stale. Run openclaw plugins build.");
+      errors.push("Control UI manifest is stale. Run carapace plugins build.");
     }
   }
   if (errors.length > 0) {
@@ -476,7 +476,7 @@ function createConfigSchema() {
 const createPluginPackageMetadata = (pluginApi: string) => ({
   extensions: ["./dist/index.js"],
   compat: { pluginApi },
-  build: { openclawVersion: VERSION },
+  build: { carapaceVersion: VERSION },
 });
 
 function buildScaffoldTsconfig(type: PluginScaffoldType): JsonObject {
@@ -511,36 +511,36 @@ export default defineConfig({
 
 function writeToolPluginScaffold(params: { rootDir: string; id: string; name: string }): void {
   const packageManifest = {
-    name: `openclaw-plugin-${params.id}`,
+    name: `carapace-plugin-${params.id}`,
     version: "0.1.0",
     type: "module",
     private: true,
     scripts: {
       build: "tsc -p tsconfig.json",
-      "plugin:build": "npm run build && openclaw plugins build --entry ./dist/index.js",
-      "plugin:validate": "npm run build && openclaw plugins validate --entry ./dist/index.js",
+      "plugin:build": "npm run build && carapace plugins build --entry ./dist/index.js",
+      "plugin:validate": "npm run build && carapace plugins validate --entry ./dist/index.js",
       test: "vitest run --config ./vitest.config.ts",
     },
-    files: ["dist", "openclaw.plugin.json", "README.md"],
+    files: ["dist", "carapace.plugin.json", "README.md"],
     peerDependencies: {
-      openclaw: TOOL_PLUGIN_API_RANGE,
+      carapace: TOOL_PLUGIN_API_RANGE,
     },
     dependencies: {
       typebox: "^1.1.38",
     },
     devDependencies: {
-      openclaw: "latest",
+      carapace: "latest",
       typescript: "^5.9.0",
       vitest: "^3.2.0",
     },
-    openclaw: createPluginPackageMetadata(TOOL_PLUGIN_API_RANGE),
+    carapace: createPluginPackageMetadata(TOOL_PLUGIN_API_RANGE),
   };
   const idLiteral = jsStringLiteral(params.id);
   const nameLiteral = jsStringLiteral(params.name);
-  const description = `Add ${params.name} tools to OpenClaw.`;
+  const description = `Add ${params.name} tools to Carapace.`;
   const descriptionLiteral = jsStringLiteral(description);
   const indexSource = `import { Type } from "typebox";
-import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 
 export default defineToolPlugin({
   id: ${idLiteral},
@@ -560,7 +560,7 @@ export default defineToolPlugin({
 `;
   const testSource = `import { describe, expect, it } from "vitest";
 import entry from "./index.js";
-import { getToolPluginMetadata } from "openclaw/plugin-sdk/tool-plugin";
+import { getToolPluginMetadata } from "carapace/plugin-sdk/tool-plugin";
 
 describe(${idLiteral}, () => {
   it("declares tool metadata", () => {
@@ -570,7 +570,7 @@ describe(${idLiteral}, () => {
 `;
   const readmeSource = `# ${params.name}
 
-Simple OpenClaw tool plugin.
+Simple Carapace tool plugin.
 
 ## Build
 
@@ -598,39 +598,39 @@ npm test
 }
 
 function writeProviderPluginScaffold(params: { rootDir: string; id: string; name: string }): void {
-  const packageName = `openclaw-plugin-${params.id}`;
+  const packageName = `carapace-plugin-${params.id}`;
   const envVar = `${upperSnakeFromId(params.id)}_API_KEY`;
   const optionKey = `${lowerCamelFromId(params.id)}ApiKey`;
   const flagName = `--${params.id}-api-key`;
   const defaultModelId = "example-chat";
   const defaultModelRef = `${params.id}/${defaultModelId}`;
-  const description = `Add ${params.name} models to OpenClaw.`;
+  const description = `Add ${params.name} models to Carapace.`;
   const packageManifest = {
     name: packageName,
     version: "0.1.0",
-    description: `OpenClaw provider plugin for ${params.name}.`,
+    description: `Carapace provider plugin for ${params.name}.`,
     type: "module",
     scripts: {
       build: "tsc -p tsconfig.json",
       test: "vitest run --config ./vitest.config.ts",
       validate: "npm run build && clawhub package validate . --out .clawhub-validation",
     },
-    files: ["dist", "openclaw.plugin.json", "README.md"],
+    files: ["dist", "carapace.plugin.json", "README.md"],
     peerDependencies: {
-      openclaw: `>=${VERSION}`,
+      carapace: `>=${VERSION}`,
     },
     peerDependenciesMeta: {
-      openclaw: {
+      carapace: {
         optional: true,
       },
     },
     devDependencies: {
       clawhub: "latest",
-      openclaw: "latest",
+      carapace: "latest",
       typescript: "^5.9.0",
       vitest: "^3.2.0",
     },
-    openclaw: {
+    carapace: {
       ...createPluginPackageMetadata(`>=${VERSION}`),
       install: {
         clawhubSpec: `clawhub:${packageName}`,
@@ -667,8 +667,8 @@ function writeProviderPluginScaffold(params: { rootDir: string; id: string; name
   const noteMessageLiteral = jsStringLiteral(
     `Replace https://api.example.com/v1 with your ${params.name} API base URL.`,
   );
-  const indexSource = `import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth";
+  const indexSource = `import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-auth";
 
 const PLUGIN_ID = ${idLiteral};
 const PROVIDER_ID = PLUGIN_ID;
@@ -741,7 +741,7 @@ export default definePluginEntry({
 });
 `;
   const testSource = `import { describe, expect, it } from "vitest";
-import type { OpenClawPluginApi, ProviderPlugin } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi, ProviderPlugin } from "carapace/plugin-sdk/plugin-entry";
 import entry from "./index.js";
 
 describe(${idLiteral}, () => {
@@ -751,9 +751,9 @@ describe(${idLiteral}, () => {
       registerProvider(provider: ProviderPlugin) {
         providers.push(provider);
       },
-    } as Partial<OpenClawPluginApi>;
+    } as Partial<CarapacePluginApi>;
 
-    entry.register(api as OpenClawPluginApi);
+    entry.register(api as CarapacePluginApi);
 
     expect(providers.map((provider) => provider.id)).toEqual([${idLiteral}]);
     expect(providers[0]?.label).toBe(${nameLiteral});
@@ -804,7 +804,7 @@ describe(${idLiteral}, () => {
 `;
   const readmeSource = `# ${params.name}
 
-OpenClaw provider plugin for ${params.name}.
+Carapace provider plugin for ${params.name}.
 
 ## Commands
 
@@ -863,7 +863,7 @@ jobs:
       actions: read
       contents: read
       id-token: write
-    uses: openclaw/clawhub/.github/workflows/package-publish.yml@${CLAWHUB_PACKAGE_PUBLISH_WORKFLOW_REF}
+    uses: carapace/clawhub/.github/workflows/package-publish.yml@${CLAWHUB_PACKAGE_PUBLISH_WORKFLOW_REF}
     with:
       dry_run: \${{ inputs.dry_run }}
 `;

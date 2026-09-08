@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { expect, type Mock } from "vitest";
 import { patchSessionEntryCore } from "../config/sessions/session-accessor.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
 import {
   SESSION_ID,
@@ -100,7 +100,7 @@ export async function createRepositoryPublicationFixture(
     });
     await fs.writeFile(path.join(publicationStagingRoot, "snapshot.json"), raw);
     const publicationDigest = "sha256:" + createHash("sha256").update(raw).digest("hex");
-    const ref = "refs/openclaw/worker-results/" + suffix;
+    const ref = "refs/carapace/worker-results/" + suffix;
     payloads.set(ref, { publicationStagingRoot, publicationDigest });
     workspace = store.acceptCheckpoint({
       workspaceId: workspace.workspaceId,
@@ -241,7 +241,7 @@ export async function createRepositoryPublicationFixture(
     if (endpoint.endsWith("/git/commits")) {
       expect(body.parents).toHaveLength(1);
       expect(body.parents[0] === baseCommit || commits.has(body.parents[0])).toBe(true);
-      expect(body.message).toContain("OpenClaw-Publication:");
+      expect(body.message).toContain("Carapace-Publication:");
       const sha = git(["commit-tree", body.tree, "-p", body.parents[0]], body.message);
       const commit = {
         sha,
@@ -301,7 +301,7 @@ export async function createRepositoryPublicationFixture(
     }
     throw new Error("Unexpected GitHub endpoint " + endpoint);
   });
-  const placements = createWorkerSessionPlacementStore({ database: openOpenClawStateDatabase() });
+  const placements = createWorkerSessionPlacementStore({ database: openCarapaceStateDatabase() });
   return {
     baseCommit,
     baseTree,

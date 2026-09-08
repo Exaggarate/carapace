@@ -1,6 +1,6 @@
-import { redactSensitiveText } from "openclaw/plugin-sdk/logging-core";
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { redactSensitiveText } from "carapace/plugin-sdk/logging-core";
+import type { SpawnResult } from "carapace/plugin-sdk/process-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 
 const MAX_COMMAND_DETAIL_CHARS = 512;
 

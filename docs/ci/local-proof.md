@@ -35,7 +35,7 @@ pnpm check:timed                              # same gate with per-stage timings
 pnpm build:strict-smoke
 pnpm check:architecture
 pnpm test:gateway:watch-regression
-OPENCLAW_TUI_PTY_INCLUDE_LOCAL=1 node scripts/run-vitest.mjs run --config test/vitest/vitest.tui-pty.config.ts
+CARAPACE_TUI_PTY_INCLUDE_LOCAL=1 node scripts/run-vitest.mjs run --config test/vitest/vitest.tui-pty.config.ts
 pnpm test                                     # vitest tests
 pnpm test:changed                             # cheap smart changed Vitest targets
 pnpm test:ui                                  # Control UI unit/browser suite
@@ -58,7 +58,7 @@ node scripts/ci-run-timings.mjs --trend-hours 72 --compare-hours 12 --detail-run
 pnpm test:perf:groups --full-suite --allow-failures --output .artifacts/test-perf/baseline-before.json
 pnpm test:perf:groups:compare .artifacts/test-perf/baseline-before.json .artifacts/test-perf/after-agent.json
 pnpm test:startup:memory
-pnpm test:extensions:memory -- --json .artifacts/openclaw-performance/source/mock-provider/extension-memory.json
+pnpm test:extensions:memory -- --json .artifacts/carapace-performance/source/mock-provider/extension-memory.json
 pnpm perf:kova:summary --report .artifacts/kova/reports/mock-provider/report.json --output .artifacts/kova/summary.md
 ```
 
@@ -75,13 +75,13 @@ Two shrink-only budgets guard the configuration surface. Both fail CI on growth
 until the budget file is consciously updated in the same PR, and both demand a
 ratchet-down when cleanup lowers the real count.
 
-- `config/env-var-count-budget.txt` caps the number of distinct `OPENCLAW_*`
+- `config/env-var-count-budget.txt` caps the number of distinct `CARAPACE_*`
   names in production source under `src/`, `packages/`, and `extensions/`
   (tests and QA Lab excluded). Checked by `node --import tsx scripts/check-env-var-count.mts`.
   Removing env vars: lower the number in the same PR. Adding one is a
   config-surface decision — justify it in the PR body.
 - `docs/.generated/config-baseline.counts.json` caps the per-kind
-  (core/channel/plugin) `openclaw.json` schema entry counts. Checked by
+  (core/channel/plugin) `carapace.json` schema entry counts. Checked by
   `pnpm config:docs:check`; regenerate with `pnpm config:docs:gen` after any
   schema change.
 
@@ -113,7 +113,7 @@ Local changed-lane logic lives in `scripts/changed-lanes.mjs` and is executed by
 
 Schema dependency selection reuses the local relative-import graph, including re-exports and deleted leaf paths still referenced by surviving source. Shared SDK channel UI-hint and secret-input schema owners, plus the workspace sensitive-URL hint owner, are explicit roots across alias boundaries. Edits to their SDK facades are also selected without traversing unrelated facade runtime dependencies. This is not universal alias or computed-import resolution.
 
-Local changed-test routing lives in `scripts/test-projects.test-support.mts` and is intentionally cheaper than `check:changed`: direct test edits run themselves, source edits prefer explicit mappings, then sibling tests and import-graph dependents. Shared group-room delivery config is one of the explicit mappings: changes to the group visible-reply config, source reply delivery mode, or the message-tool system prompt route through the core reply tests plus Discord and Slack delivery regressions so a shared default change fails before the first PR push. Use `OPENCLAW_TEST_CHANGED_BROAD=1 pnpm test:changed` only when the change is harness-wide enough that the cheap mapped set is not a trustworthy proxy.
+Local changed-test routing lives in `scripts/test-projects.test-support.mts` and is intentionally cheaper than `check:changed`: direct test edits run themselves, source edits prefer explicit mappings, then sibling tests and import-graph dependents. Shared group-room delivery config is one of the explicit mappings: changes to the group visible-reply config, source reply delivery mode, or the message-tool system prompt route through the core reply tests plus Discord and Slack delivery regressions so a shared default change fails before the first PR push. Use `CARAPACE_TEST_CHANGED_BROAD=1 pnpm test:changed` only when the change is harness-wide enough that the cheap mapped set is not a trustworthy proxy.
 
 ## Testbox validation
 
@@ -129,13 +129,13 @@ or sanitized direct AWS Crabbox instead.
 Blacksmith Testbox proof requires Crabbox 0.48.0 or newer. That release binds
 stop and reuse to exact local claims, fences cleanup against ownership changes,
 retains failed-cleanup state for recovery, and reconciles terminal state before
-dropping local ownership. Older binaries are rejected before OpenClaw acquires
+dropping local ownership. Older binaries are rejected before Carapace acquires
 or reuses Testbox capacity.
 The check workflow hydrates its pinned dispatch commit with a depth-1 checkout;
 the changed gate later reconstructs the exact merge base and synced final tree.
 Sanitized AWS runs set `CRABBOX_ENV_ALLOW=CI`, pass
 `--no-hydrate`, and use a fresh temporary remote `HOME`; this prevents the repo
-`OPENCLAW_*` allowlist and existing auth profiles from reaching untrusted code.
+`CARAPACE_*` allowlist and existing auth profiles from reaching untrusted code.
 They use a newly warmed lease dedicated to that untrusted source, never a
 trusted or previously hydrated lease. Launch an installed trusted Crabbox
 binary from a clean trusted `main` checkout and fetch only the remote PR with
@@ -156,7 +156,7 @@ Owned AWS/Hetzner capacity also remains the fallback for Blacksmith outages,
 quota issues, or explicit owned-capacity testing.
 
 For an explicitly authorized admin-only PR landing fallback, set
-`OPENCLAW_PR_GATES_REMOTE=crabbox-aws` before `scripts/pr prepare-gates`.
+`CARAPACE_PR_GATES_REMOTE=crabbox-aws` before `scripts/pr prepare-gates`.
 The mode does not replace the default hosted aggregate gate. After the exact
 prep head is pushed, the wrapper synchronously dispatches the protected-main
 publisher. That trusted workflow checksum-installs Crabbox v0.46, resolves its
@@ -176,7 +176,7 @@ GitHub App token with `Members(read)` (the repository-scoped workflow token is
 not treated as org authority), validates its newly created authenticated broker
 run under the same service token, ordered complete events, canonical command
 and bootstrap upload hash, and
-publishes the distinct `openclaw/crabbox-gate` only for the exact proven
+publishes the distinct `carapace/crabbox-gate` only for the exact proven
 base/head/plan binding. The publisher also proves that the PR base is the merge
 base of its immutable protected-main workflow SHA and adds that workflow SHA to
 the strict check summary. Before and after the remote run, it proves that a
@@ -190,7 +190,7 @@ run. Only after the publisher and exact-head check succeed does the local
 wrapper derive `.local/gates.env` provider/run/lease/URL recovery metadata from
 the trusted summary; those fields are not publication authority.
 
-The fallback never replaces or republishes `openclaw/ci-gate`. Native merge
+The fallback never replaces or republishes `carapace/ci-gate`. Native merge
 verification still rejects draft PRs and permits the server ruleset bypass only
 when the Crabbox check is
 completed successfully by GitHub Actions on the prepared SHA, its bound workflow
@@ -245,14 +245,14 @@ When using the sibling checkout, rebuild the ignored local binary before timing 
 
 ```bash
 version="$(git -C ../crabbox describe --tags --always --dirty | sed 's/^v//')" \
-  && go build -C ../crabbox -trimpath -ldflags "-s -w -X github.com/openclaw/crabbox/internal/cli.version=${version}" -o bin/crabbox ./cmd/crabbox
+  && go build -C ../crabbox -trimpath -ldflags "-s -w -X github.com/Exaggarate/carapace/crabbox/internal/cli.version=${version}" -o bin/crabbox ./cmd/crabbox
 ```
 
 The `blacksmith:` block in `.crabbox.yaml` already pins the org, workflow, job, and ref defaults, so the explicit flags below are optional. Explicit clean-machine changed-gate parity:
 
 ```bash
 pnpm crabbox:run -- --provider blacksmith-testbox \
-  --blacksmith-org openclaw \
+  --blacksmith-org carapace \
   --blacksmith-workflow .github/workflows/ci-check-testbox.yml \
   --blacksmith-job check \
   --blacksmith-ref main \

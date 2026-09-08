@@ -1,5 +1,5 @@
 import { type Relay, finalizeEvent, type Event } from "nostr-tools";
-import { createChannelReplayGuard } from "openclaw/plugin-sdk/persistent-dedupe";
+import { createChannelReplayGuard } from "carapace/plugin-sdk/persistent-dedupe";
 import {
   queryBuzzDirectoryProfiles,
   queryBuzzDirectoryRooms,
@@ -175,7 +175,7 @@ export async function sendBuzzTextOneShot(params: {
     try {
       const directory = new BuzzDirectoryState({
         publicKey,
-        fallbackProfileName: "OpenClaw",
+        fallbackProfileName: "Carapace",
         channelIds: [params.channelId],
       });
       directory.replaceMemberships(
@@ -288,7 +288,7 @@ export async function startBuzzBus(options: {
   });
   const directory = new BuzzDirectoryState({
     publicKey,
-    fallbackProfileName: options.profileName ?? "OpenClaw",
+    fallbackProfileName: options.profileName ?? "Carapace",
     channelIds: options.channelIds,
     profileLimit: subscriptionBudget.profileLimit,
   });

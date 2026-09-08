@@ -26,8 +26,8 @@ describe("managed GitHub profile startup cleanup", () => {
   beforeEach(() => oauthMocks.list.mockReset().mockReturnValue([]));
 
   it("removes only unreferenced generations inside exact system and agent roots", async () => {
-    const stateDir = await fs.realpath(tempDirs.make("openclaw-github-cleanup-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = await fs.realpath(tempDirs.make("carapace-github-cleanup-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const agentDir = path.join(stateDir, "mutable-agent-dir");
     const systemRoot = resolveManagedGitHubProfileRoot({
       agentId: "system",
@@ -84,8 +84,8 @@ describe("managed GitHub profile startup cleanup", () => {
   });
 
   it("removes the complete safe profile root for an agent no longer configured", async () => {
-    const stateDir = await fs.realpath(tempDirs.make("openclaw-github-cleanup-removed-agent-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = await fs.realpath(tempDirs.make("carapace-github-cleanup-removed-agent-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const removedRoot = resolveManagedGitHubProfileRoot({
       agentId: "removed-agent",
       scope: "agent",
@@ -106,8 +106,8 @@ describe("managed GitHub profile startup cleanup", () => {
   });
 
   it("preserves a durable recovery generation until its OAuth record retires", async () => {
-    const stateDir = await fs.realpath(tempDirs.make("openclaw-github-cleanup-recovery-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = await fs.realpath(tempDirs.make("carapace-github-cleanup-recovery-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const systemRoot = resolveManagedGitHubProfileRoot({
       agentId: "system",
       scope: "system",
@@ -150,8 +150,8 @@ describe("managed GitHub profile startup cleanup", () => {
   });
 
   it("refuses symlink generations without touching their targets", async () => {
-    const stateDir = await fs.realpath(tempDirs.make("openclaw-github-cleanup-link-"));
-    const outside = await fs.realpath(tempDirs.make("openclaw-github-cleanup-outside-"));
+    const stateDir = await fs.realpath(tempDirs.make("carapace-github-cleanup-link-"));
+    const outside = await fs.realpath(tempDirs.make("carapace-github-cleanup-outside-"));
     const systemRoot = path.join(stateDir, "credentials", "github", "system");
     const agentRegistry = path.join(stateDir, "credentials", "github", "agents");
     await fs.mkdir(systemRoot, { recursive: true });
@@ -165,7 +165,7 @@ describe("managed GitHub profile startup cleanup", () => {
 
     const result = await cleanupRetiredManagedGitHubProfiles({
       config: {},
-      env: { OPENCLAW_STATE_DIR: stateDir },
+      env: { CARAPACE_STATE_DIR: stateDir },
     });
 
     expect(result.removed).toBe(0);

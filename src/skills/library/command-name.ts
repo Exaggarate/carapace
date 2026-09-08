@@ -11,7 +11,7 @@ export function managedSkillCommandName(slug: string, skillId: string): string {
 export function assertUnambiguousManagedSkillNames(entries: readonly SkillEntry[]): void {
   const managed = new Set(
     entries
-      .filter((entry) => entry.skill.source === "openclaw-library")
+      .filter((entry) => entry.skill.source === "carapace-library")
       .map((entry) => entry.skill.name),
   );
   if (!managed.size) {

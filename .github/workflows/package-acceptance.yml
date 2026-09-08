@@ -27,7 +27,7 @@ on:
       package_spec:
         description: Published package spec when source=npm
         required: false
-        default: openclaw@beta
+        default: carapace@beta
         type: string
       package_url:
         description: HTTPS .tgz URL when source=url or source=trusted-url
@@ -115,9 +115,9 @@ on:
         default: ""
         type: string
       published_upgrade_survivor_baseline:
-        description: Published OpenClaw package baseline for the published-upgrade-survivor Docker lane
+        description: Published Carapace package baseline for the published-upgrade-survivor Docker lane
         required: false
-        default: openclaw@latest
+        default: carapace@latest
         type: string
       published_upgrade_survivor_baselines:
         description: Optional baseline list; use supported-lines for latest/previous/extended/floor, last-stable-4, all-since-2026.4.23, release-history, or exact versions
@@ -177,7 +177,7 @@ on:
       package_spec:
         description: Published package spec when source=npm
         required: false
-        default: openclaw@beta
+        default: carapace@beta
         type: string
       target_context_ref:
         type: string
@@ -267,9 +267,9 @@ on:
         default: ""
         type: string
       published_upgrade_survivor_baseline:
-        description: Published OpenClaw package baseline for the published-upgrade-survivor Docker lane
+        description: Published Carapace package baseline for the published-upgrade-survivor Docker lane
         required: false
-        default: openclaw@latest
+        default: carapace@latest
         type: string
       published_upgrade_survivor_baselines:
         description: Optional baseline list; use supported-lines for latest/previous/extended/floor, last-stable-4, all-since-2026.4.23, release-history, or exact versions
@@ -316,13 +316,13 @@ on:
         description: Source commit recorded in the canonical package
         value: ${{ jobs.resolve_package.outputs.package_source_sha }}
       package_sha256:
-        description: Canonical OpenClaw package SHA-256
+        description: Canonical Carapace package SHA-256
         value: ${{ jobs.resolve_package.outputs.package_sha256 }}
       package_version:
-        description: Canonical OpenClaw package version
+        description: Canonical Carapace package version
         value: ${{ jobs.resolve_package.outputs.package_version }}
     secrets:
-      OPENCLAW_TRUSTED_PACKAGE_TOKEN:
+      CARAPACE_TRUSTED_PACKAGE_TOKEN:
         required: false
       OPENAI_API_KEY:
         required: false
@@ -362,15 +362,15 @@ on:
         required: false
       OPENCODE_ZEN_API_KEY:
         required: false
-      OPENCLAW_LIVE_BROWSER_CDP_URL:
+      CARAPACE_LIVE_BROWSER_CDP_URL:
         required: false
-      OPENCLAW_LIVE_SETUP_TOKEN:
+      CARAPACE_LIVE_SETUP_TOKEN:
         required: false
-      OPENCLAW_LIVE_SETUP_TOKEN_MODEL:
+      CARAPACE_LIVE_SETUP_TOKEN_MODEL:
         required: false
-      OPENCLAW_LIVE_SETUP_TOKEN_PROFILE:
+      CARAPACE_LIVE_SETUP_TOKEN_PROFILE:
         required: false
-      OPENCLAW_LIVE_SETUP_TOKEN_VALUE:
+      CARAPACE_LIVE_SETUP_TOKEN_VALUE:
         required: false
       GEMINI_API_KEY:
         required: false
@@ -402,25 +402,25 @@ on:
         required: false
       CLAUDE_CODE_OAUTH_TOKEN:
         required: false
-      OPENCLAW_CODEX_AUTH_JSON:
+      CARAPACE_CODEX_AUTH_JSON:
         required: false
-      OPENCLAW_CODEX_CONFIG_TOML:
+      CARAPACE_CODEX_CONFIG_TOML:
         required: false
-      OPENCLAW_CLAUDE_JSON:
+      CARAPACE_CLAUDE_JSON:
         required: false
-      OPENCLAW_CLAUDE_CREDENTIALS_JSON:
+      CARAPACE_CLAUDE_CREDENTIALS_JSON:
         required: false
-      OPENCLAW_CLAUDE_SETTINGS_JSON:
+      CARAPACE_CLAUDE_SETTINGS_JSON:
         required: false
-      OPENCLAW_CLAUDE_SETTINGS_LOCAL_JSON:
+      CARAPACE_CLAUDE_SETTINGS_LOCAL_JSON:
         required: false
-      OPENCLAW_GEMINI_SETTINGS_JSON:
+      CARAPACE_GEMINI_SETTINGS_JSON:
         required: false
       FIREWORKS_API_KEY:
         required: false
-      OPENCLAW_QA_CONVEX_SITE_URL:
+      CARAPACE_QA_CONVEX_SITE_URL:
         required: false
-      OPENCLAW_QA_CONVEX_SECRET_CI:
+      CARAPACE_QA_CONVEX_SECRET_CI:
         required: false
 
 permissions:
@@ -648,7 +648,7 @@ jobs:
           PUBLISHED_ARTIFACT: ${{ fromJSON(inputs.candidate_artifact_json || '{}').packagePublished == true }}
           TELEGRAM_MODE: ${{ inputs.telegram_mode }}
           TRUSTED_SOURCE_ID: ${{ inputs.trusted_source_id }}
-          OPENCLAW_TRUSTED_PACKAGE_TOKEN: ${{ secrets.OPENCLAW_TRUSTED_PACKAGE_TOKEN }}
+          CARAPACE_TRUSTED_PACKAGE_TOKEN: ${{ secrets.CARAPACE_TRUSTED_PACKAGE_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -674,10 +674,10 @@ jobs:
                 ("$SOURCE" == "ref" || "$SOURCE" == "artifact") ]]; then
             set -- \
               --plugin-registry-output-dir .artifacts/package-acceptance-telegram-plugin-registry \
-              --required-plugin-packages-json '["@openclaw/codex"]'
+              --required-plugin-packages-json '["@carapace/codex"]'
           fi
 
-          node --import tsx scripts/resolve-openclaw-package-candidate.mts \
+          node --import tsx scripts/resolve-carapace-package-candidate.mts \
             --source "$SOURCE" \
             --package-ref "$PACKAGE_REF" \
             --package-spec "$PACKAGE_SPEC" \
@@ -686,18 +686,18 @@ jobs:
             --trusted-source-id "$TRUSTED_SOURCE_ID" \
             --artifact-dir "${artifact_dir:-.}" \
             --output-dir .artifacts/docker-e2e-package \
-            --output-name openclaw-current.tgz \
+            --output-name carapace-current.tgz \
             --metadata .artifacts/docker-e2e-package/package-candidate.json \
             --github-output "$GITHUB_OUTPUT" \
             "$@"
-          echo "package_file_name=openclaw-current.tgz" >> "$GITHUB_OUTPUT"
+          echo "package_file_name=carapace-current.tgz" >> "$GITHUB_OUTPUT"
           if [[ "$SOURCE" == "artifact" ]]; then
             jq -e \
               --arg digest "$PACKAGE_SHA256" \
               --arg source_sha "$PACKAGE_SOURCE_SHA" \
               --arg version "$PACKAGE_VERSION" \
               '
-                .name == "openclaw" and
+                .name == "carapace" and
                 .sha256 == $digest and
                 .packageSourceSha == $source_sha and
                 .version == $version
@@ -807,19 +807,19 @@ jobs:
           fallback_baseline="$FALLBACK_BASELINE"
           npm_versions_json=""
           npm_dist_tags_json=""
-          if [[ "$fallback_baseline" == "openclaw@latest" ||
+          if [[ "$fallback_baseline" == "carapace@latest" ||
                 "$REQUESTED_BASELINES" == *"supported-lines"* ||
                 "$REQUESTED_BASELINES" == *"release-history"* ||
                 "$REQUESTED_BASELINES" == *"all-since-"* ||
                 "$REQUESTED_BASELINES" == *"last-stable-"* ]]; then
-            npm_versions_json="$RUNNER_TEMP/openclaw-npm-versions.json"
-            npm view openclaw versions --json --silent --prefer-online > "$npm_versions_json"
+            npm_versions_json="$RUNNER_TEMP/carapace-npm-versions.json"
+            npm view carapace versions --json --silent --prefer-online > "$npm_versions_json"
           fi
           if [[ "$REQUESTED_BASELINES" == *"supported-lines"* ]]; then
-            npm_dist_tags_json="$RUNNER_TEMP/openclaw-npm-dist-tags.json"
-            npm view openclaw dist-tags --json --silent --prefer-online > "$npm_dist_tags_json"
+            npm_dist_tags_json="$RUNNER_TEMP/carapace-npm-dist-tags.json"
+            npm view carapace dist-tags --json --silent --prefer-online > "$npm_dist_tags_json"
           fi
-          if [[ "$fallback_baseline" == "openclaw@latest" ]]; then
+          if [[ "$fallback_baseline" == "carapace@latest" ]]; then
             fallback_baseline="$(node scripts/lib/release-upgrade-baseline.mjs \
               --candidate-version "$CANDIDATE_VERSION" \
               --candidate-published "$CANDIDATE_PUBLISHED" \
@@ -828,7 +828,7 @@ jobs:
           fi
           releases_json=""
           if [[ "$REQUESTED_BASELINES" == *"release-history"* || "$REQUESTED_BASELINES" == *"all-since-"* || "$REQUESTED_BASELINES" == *"last-stable-"* ]]; then
-            releases_json=".artifacts/package-candidate-input/openclaw-releases.json"
+            releases_json=".artifacts/package-candidate-input/carapace-releases.json"
             gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,publishedAt,isPrerelease > "$releases_json"
           fi
           args=(
@@ -859,7 +859,7 @@ jobs:
         with:
           name: ${{ env.PACKAGE_ARTIFACT_NAME }}
           path: |
-            .artifacts/docker-e2e-package/openclaw-current.tgz
+            .artifacts/docker-e2e-package/carapace-current.tgz
             .artifacts/docker-e2e-package/package-candidate.json
           retention-days: 14
           if-no-files-found: error
@@ -981,17 +981,17 @@ jobs:
       - name: Enforce public package integrity
         env:
           EXPECTED_PACKAGE_SHA256: ${{ needs.resolve_package.outputs.package_sha256 }}
-          OPENCLAW_PACKAGE_TARBALL_CHECK_TIMINGS: "0"
+          CARAPACE_PACKAGE_TARBALL_CHECK_TIMINGS: "0"
         shell: bash
         run: |
           set -euo pipefail
-          package=".artifacts/docker-e2e-package/openclaw-current.tgz"
+          package=".artifacts/docker-e2e-package/carapace-current.tgz"
           actual_sha256="$(sha256sum "$package" | awk '{print $1}')"
           [[ "$actual_sha256" == "$EXPECTED_PACKAGE_SHA256" ]] || {
             echo "Canonical package artifact SHA-256 differs from the resolver output." >&2
             exit 1
           }
-          node scripts/check-openclaw-package-tarball.mjs "$package"
+          node scripts/check-carapace-package-tarball.mjs "$package"
 
   npm_12_install_sh:
     name: npm 12 install.sh acceptance
@@ -1053,36 +1053,36 @@ jobs:
         env:
           EXPECTED_PACKAGE_SHA256: ${{ needs.resolve_package.outputs.package_sha256 }}
           EXPECTED_PACKAGE_VERSION: ${{ needs.resolve_package.outputs.package_version }}
-          OPENCLAW_DOCKER_E2E_SELECTED_SHA: ${{ needs.resolve_package.outputs.package_source_sha }}
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: ${{ needs.resolve_package.outputs.package_version }}
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: ${{ needs.resolve_package.outputs.prepublish_plugin_registry_json != '' && format('{0}/.artifacts/prepublish-plugin-registry', github.workspace) || '' }}
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: ${{ fromJSON(needs.resolve_package.outputs.prepublish_plugin_registry_json || '{}').prepublishPluginRegistryManifestSha256 || '' }}
+          CARAPACE_DOCKER_E2E_SELECTED_SHA: ${{ needs.resolve_package.outputs.package_source_sha }}
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: ${{ needs.resolve_package.outputs.package_version }}
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: ${{ needs.resolve_package.outputs.prepublish_plugin_registry_json != '' && format('{0}/.artifacts/prepublish-plugin-registry', github.workspace) || '' }}
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: ${{ fromJSON(needs.resolve_package.outputs.prepublish_plugin_registry_json || '{}').prepublishPluginRegistryManifestSha256 || '' }}
         shell: bash
         run: |
           set -euo pipefail
-          package="$PWD/.artifacts/docker-e2e-package/openclaw-current.tgz"
+          package="$PWD/.artifacts/docker-e2e-package/carapace-current.tgz"
           [[ "$(sha256sum "$package" | awk '{print $1}')" == "$EXPECTED_PACKAGE_SHA256" ]]
-          npm_tool="$RUNNER_TEMP/openclaw-npm12-tool"
-          install_home="$RUNNER_TEMP/openclaw-npm12-home"
-          install_prefix="$RUNNER_TEMP/openclaw-npm12-prefix"
+          npm_tool="$RUNNER_TEMP/carapace-npm12-tool"
+          install_home="$RUNNER_TEMP/carapace-npm12-home"
+          install_prefix="$RUNNER_TEMP/carapace-npm12-prefix"
           mkdir -p "$install_home" "$install_prefix"
           npm install -g --prefix "$npm_tool" npm@12.0.2
           export PATH="$npm_tool/bin:$install_prefix/bin:$PATH"
           [[ "$(npm --version)" == "12.0.2" ]]
           HOME="$install_home" \
-            NPM_CONFIG_CACHE="$RUNNER_TEMP/openclaw-npm12-cache" \
+            NPM_CONFIG_CACHE="$RUNNER_TEMP/carapace-npm12-cache" \
             NPM_CONFIG_PREFIX="$install_prefix" \
-            OPENCLAW_VERSION="$package" \
+            CARAPACE_VERSION="$package" \
             bash scripts/e2e/lib/prepublish-plugin-registry.sh \
               bash scripts/install.sh --install-method npm --no-prompt --no-onboard
           source scripts/docker/install-sh-common/version-parse.sh
-          installed_version="$(extract_openclaw_semver "$("$install_prefix/bin/openclaw" --version)")"
+          installed_version="$(extract_carapace_semver "$("$install_prefix/bin/carapace" --version)")"
           [[ "$installed_version" == "$EXPECTED_PACKAGE_VERSION" ]] || {
-            echo "Installed OpenClaw version $installed_version differs from expected $EXPECTED_PACKAGE_VERSION." >&2
+            echo "Installed Carapace version $installed_version differs from expected $EXPECTED_PACKAGE_VERSION." >&2
             exit 1
           }
-          pending="$install_prefix/lib/node_modules/openclaw/.openclaw-lifecycle-pending"
-          legacy_guard="$install_prefix/lib/node_modules/openclaw/dist/openclaw-install-guard"
+          pending="$install_prefix/lib/node_modules/carapace/.carapace-lifecycle-pending"
+          legacy_guard="$install_prefix/lib/node_modules/carapace/dist/carapace-install-guard"
           [[ ! -e "$pending" ]]
           [[ ! -e "$legacy_guard" ]]
 
@@ -1095,7 +1095,7 @@ jobs:
       contents: read
       packages: read
       pull-requests: read
-    uses: ./.github/workflows/openclaw-live-and-e2e-checks-reusable.yml
+    uses: ./.github/workflows/carapace-live-and-e2e-checks-reusable.yml
     with: &docker_acceptance_inputs
       advisory: ${{ inputs.advisory || false }}
       ref: ${{ needs.resolve_package.outputs.package_source_sha || inputs.workflow_ref }}
@@ -1154,11 +1154,11 @@ jobs:
       MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
       OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
       OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
-      OPENCLAW_LIVE_BROWSER_CDP_URL: ${{ secrets.OPENCLAW_LIVE_BROWSER_CDP_URL }}
-      OPENCLAW_LIVE_SETUP_TOKEN: ${{ secrets.OPENCLAW_LIVE_SETUP_TOKEN }}
-      OPENCLAW_LIVE_SETUP_TOKEN_MODEL: ${{ secrets.OPENCLAW_LIVE_SETUP_TOKEN_MODEL }}
-      OPENCLAW_LIVE_SETUP_TOKEN_PROFILE: ${{ secrets.OPENCLAW_LIVE_SETUP_TOKEN_PROFILE }}
-      OPENCLAW_LIVE_SETUP_TOKEN_VALUE: ${{ secrets.OPENCLAW_LIVE_SETUP_TOKEN_VALUE }}
+      CARAPACE_LIVE_BROWSER_CDP_URL: ${{ secrets.CARAPACE_LIVE_BROWSER_CDP_URL }}
+      CARAPACE_LIVE_SETUP_TOKEN: ${{ secrets.CARAPACE_LIVE_SETUP_TOKEN }}
+      CARAPACE_LIVE_SETUP_TOKEN_MODEL: ${{ secrets.CARAPACE_LIVE_SETUP_TOKEN_MODEL }}
+      CARAPACE_LIVE_SETUP_TOKEN_PROFILE: ${{ secrets.CARAPACE_LIVE_SETUP_TOKEN_PROFILE }}
+      CARAPACE_LIVE_SETUP_TOKEN_VALUE: ${{ secrets.CARAPACE_LIVE_SETUP_TOKEN_VALUE }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -1174,13 +1174,13 @@ jobs:
       BYTEPLUS_ACCESS_KEY_ID: ${{ secrets.BYTEPLUS_ACCESS_KEY_ID }}
       BYTEPLUS_SECRET_ACCESS_KEY: ${{ secrets.BYTEPLUS_SECRET_ACCESS_KEY }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-      OPENCLAW_CODEX_AUTH_JSON: ${{ secrets.OPENCLAW_CODEX_AUTH_JSON }}
-      OPENCLAW_CODEX_CONFIG_TOML: ${{ secrets.OPENCLAW_CODEX_CONFIG_TOML }}
-      OPENCLAW_CLAUDE_JSON: ${{ secrets.OPENCLAW_CLAUDE_JSON }}
-      OPENCLAW_CLAUDE_CREDENTIALS_JSON: ${{ secrets.OPENCLAW_CLAUDE_CREDENTIALS_JSON }}
-      OPENCLAW_CLAUDE_SETTINGS_JSON: ${{ secrets.OPENCLAW_CLAUDE_SETTINGS_JSON }}
-      OPENCLAW_CLAUDE_SETTINGS_LOCAL_JSON: ${{ secrets.OPENCLAW_CLAUDE_SETTINGS_LOCAL_JSON }}
-      OPENCLAW_GEMINI_SETTINGS_JSON: ${{ secrets.OPENCLAW_GEMINI_SETTINGS_JSON }}
+      CARAPACE_CODEX_AUTH_JSON: ${{ secrets.CARAPACE_CODEX_AUTH_JSON }}
+      CARAPACE_CODEX_CONFIG_TOML: ${{ secrets.CARAPACE_CODEX_CONFIG_TOML }}
+      CARAPACE_CLAUDE_JSON: ${{ secrets.CARAPACE_CLAUDE_JSON }}
+      CARAPACE_CLAUDE_CREDENTIALS_JSON: ${{ secrets.CARAPACE_CLAUDE_CREDENTIALS_JSON }}
+      CARAPACE_CLAUDE_SETTINGS_JSON: ${{ secrets.CARAPACE_CLAUDE_SETTINGS_JSON }}
+      CARAPACE_CLAUDE_SETTINGS_LOCAL_JSON: ${{ secrets.CARAPACE_CLAUDE_SETTINGS_LOCAL_JSON }}
+      CARAPACE_GEMINI_SETTINGS_JSON: ${{ secrets.CARAPACE_GEMINI_SETTINGS_JSON }}
       FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
 
   docker_acceptance_registry:
@@ -1192,7 +1192,7 @@ jobs:
       contents: read
       packages: read
       pull-requests: read
-    uses: ./.github/workflows/openclaw-live-and-e2e-checks-reusable.yml
+    uses: ./.github/workflows/carapace-live-and-e2e-checks-reusable.yml
     with: *docker_acceptance_inputs
     secrets: *docker_acceptance_secrets
 
@@ -1219,14 +1219,14 @@ jobs:
       prepublish_plugin_registry_artifact_run_id: ${{ fromJSON(needs.resolve_package.outputs.prepublish_plugin_registry_json || '{}').prepublishPluginRegistryArtifactRunId || '' }}
       prepublish_plugin_registry_artifact_run_attempt: ${{ fromJSON(needs.resolve_package.outputs.prepublish_plugin_registry_json || '{}').prepublishPluginRegistryArtifactRunAttempt || '' }}
       prepublish_plugin_registry_manifest_sha256: ${{ fromJSON(needs.resolve_package.outputs.prepublish_plugin_registry_json || '{}').prepublishPluginRegistryManifestSha256 || '' }}
-      package_label: openclaw@${{ needs.resolve_package.outputs.package_version }}
+      package_label: carapace@${{ needs.resolve_package.outputs.package_version }}
       harness_ref: ${{ inputs.workflow_ref }}
       provider_mode: ${{ needs.resolve_package.outputs.telegram_mode }}
       scenario: ${{ needs.resolve_package.outputs.telegram_scenarios }}
     secrets:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-      OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
+      CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+      CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
 
   summary:
     name: Verify package acceptance

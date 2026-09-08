@@ -23,7 +23,7 @@ vi.mock("./image-runtime.js", () => ({ describeImageWithModel: vi.fn() }));
 
 describe("local image preparation", () => {
   it("rejects oversized local images before provider preparation", async () => {
-    await withTestDir({ prefix: "openclaw-image-input-limit-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-image-input-limit-" }, async (base) => {
       const filePath = path.join(base, "oversized.png");
       await fs.writeFile(filePath, Buffer.alloc(DEFAULT_MAX_BYTES.image + 1));
       await expect(
@@ -35,7 +35,7 @@ describe("local image preparation", () => {
   });
 
   it.skipIf(process.platform === "win32")("keeps rejecting local image symlinks", async () => {
-    await withTestDir({ prefix: "openclaw-image-input-roots-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-image-input-roots-" }, async (base) => {
       const allowed = path.join(base, "allowed");
       const outside = path.join(base, "outside.png");
       const filePath = path.join(allowed, "linked.png");
@@ -47,7 +47,7 @@ describe("local image preparation", () => {
   });
 
   it("accepts an explicitly supplied local image and classifies its bytes", async () => {
-    await withTestDir({ prefix: "openclaw-image-input-local-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-image-input-local-" }, async (base) => {
       const buffer = Buffer.from(
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
         "base64",

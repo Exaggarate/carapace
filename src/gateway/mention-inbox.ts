@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { flattenMarkdownToPlainText } from "@openclaw/normalization-core/markdown-plain-text";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { flattenMarkdownToPlainText } from "@carapace/normalization-core/markdown-plain-text";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   ErrorCodes,
   MAX_HUMAN_MENTIONS,
@@ -12,11 +12,11 @@ import {
   type MentionInboxItem,
   type MentionsListResult,
 } from "../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isIncognitoSessionKey } from "../routing/session-key.js";
 import { onSessionIdentityMutation } from "../sessions/session-lifecycle-events.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import { onUserProfilesChanged, readUserProfileVersion } from "../state/user-profile-events.js";
 import { createHumanMentionPolicy, humanMentionDisplayLabel } from "./human-mention-policy.js";
 import {
@@ -65,7 +65,7 @@ type MentionNotification = {
 /** Durable sources own retention and replay; each Gateway keeps disposable projection indexes. */
 export function createMentionInbox(params: {
   gatewayInstanceId: string;
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
   getClients: () => Iterable<GatewayClient>;
   broadcastToConnIds: GatewayBroadcastToConnIdsFn;
   onMentionCreated?: (notification: MentionNotification) => void;
@@ -123,7 +123,7 @@ export function createMentionInbox(params: {
 
   function mutate<T>(operation: () => T): T {
     try {
-      return runOpenClawStateWriteTransaction(
+      return runCarapaceStateWriteTransaction(
         ({ db }) => {
           synchronize(db);
           expireItems();
@@ -272,7 +272,7 @@ export function createMentionInbox(params: {
 
   function currentTarget(
     item: StoredMention,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     targets?: Map<string, ReturnType<typeof resolveSessionSharingTarget>>,
   ) {
     const { source, message } = item;

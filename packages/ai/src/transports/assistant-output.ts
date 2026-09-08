@@ -1,4 +1,4 @@
-import type { Api, AssistantMessage, Model } from "@openclaw/llm-core";
+import type { Api, AssistantMessage, Model } from "@carapace/llm-core";
 import { createEmptyTransportUsage } from "./transport-stream-shared.js";
 
 export function createAssistantOutput(

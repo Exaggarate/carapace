@@ -1,5 +1,5 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type { CommandInteraction } from "../internal/discord.js";
 import { createDiscordVoiceCommand } from "./command.js";
 import { createDiscordRecordingFixture } from "./transcripts-recording.test-support.js";

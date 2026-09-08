@@ -120,8 +120,8 @@ function recordsEqual(actual, expected) {
 function isCloseoutEvidenceAsset(assetName, tag) {
   const releaseVersion = tag.slice(1);
   return (
-    assetName === `openclaw-${releaseVersion}-stable-main-closeout.json` ||
-    assetName === `openclaw-${releaseVersion}-stable-main-closeout.json.sha256`
+    assetName === `carapace-${releaseVersion}-stable-main-closeout.json` ||
+    assetName === `carapace-${releaseVersion}-stable-main-closeout.json.sha256`
   );
 }
 
@@ -174,7 +174,7 @@ export function verifyStableMainCloseout(params) {
 
   if (mainVersion && !isStableMainVersionAtLeast(mainVersion, version)) {
     errors.push(
-      `main package.json version is ${mainVersion}, expected shipped version ${version} or a later stable OpenClaw CalVer.`,
+      `main package.json version is ${mainVersion}, expected shipped version ${version} or a later stable Carapace CalVer.`,
     );
   }
   if (tagPackageVersion && tagPackageVersion !== version) {
@@ -211,17 +211,17 @@ export function verifyStableMainCloseout(params) {
 
   const macAssetVersion = version;
   const expectedMacAssets = [
-    `OpenClaw-${macAssetVersion}.zip`,
-    `OpenClaw-${macAssetVersion}.dmg`,
-    `OpenClaw-${macAssetVersion}.dSYM.zip`,
+    `Carapace-${macAssetVersion}.zip`,
+    `Carapace-${macAssetVersion}.dmg`,
+    `Carapace-${macAssetVersion}.dSYM.zip`,
   ];
   const platformAssets = {
     macos: expectedMacAssets,
-    android: ["OpenClaw-Android-SHA256SUMS.txt", "OpenClaw-Android.apk"],
+    android: ["Carapace-Android-SHA256SUMS.txt", "Carapace-Android.apk"],
     windows: [
-      "OpenClawCompanion-SHA256SUMS.txt",
-      "OpenClawCompanion-Setup-arm64.exe",
-      "OpenClawCompanion-Setup-x64.exe",
+      "CarapaceCompanion-SHA256SUMS.txt",
+      "CarapaceCompanion-Setup-arm64.exe",
+      "CarapaceCompanion-Setup-x64.exe",
     ],
   };
   const expectedAppAssets = new Set(Object.values(platformAssets).flat());

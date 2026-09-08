@@ -3,8 +3,8 @@
  *
  * Selects per-run workspace directories and redacts run identifiers for logs/prompts.
  */
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { logWarn } from "../logger.js";
 import {
   classifySessionKeyShape,
@@ -57,7 +57,7 @@ class RunWorkspaceAgentNotConfiguredError extends Error {
 function resolveRunAgentId(params: {
   sessionKey?: string;
   agentId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): {
   agentId: string;
   agentIdSource: AgentIdSource;
@@ -94,7 +94,7 @@ export function resolveRunWorkspaceDir(params: {
   workspaceDir: unknown;
   sessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): ResolveRunWorkspaceResult {
   const rawSessionKey = params.sessionKey?.trim() ?? "";

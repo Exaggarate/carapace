@@ -2,14 +2,14 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveTimestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { resolveTimestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import type { AgentMessage } from "../../agents/runtime/index.js";
 import { redactTranscriptMessage } from "../../agents/transcript-redact.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { redactSecrets } from "../../logging/redact.js";
 import { KeyedAsyncQueue } from "../../plugin-sdk/keyed-async-queue.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../shared/transcript-only-openclaw-assistant.js";
+import { isTranscriptOnlyCarapaceAssistantMessage } from "../../shared/transcript-only-carapace-assistant.js";
 import { createSessionTranscriptHeader } from "./transcript-header.js";
 import { serializeJsonlLines } from "./transcript-jsonl.js";
 import {
@@ -453,7 +453,7 @@ type AppendSessionTranscriptMessageParams<TMessage = unknown> = {
   idempotencyLookup?: "scan" | "caller-checked";
   /** Runs in the transcript append queue after idempotency replay checks and before append. */
   prepareMessageAfterIdempotencyCheck?: (message: TMessage) => TMessage | undefined;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   /** Internal owned-batch hook for publishing a newly created transcript header. */
   onHeaderCreated?: (serializedHeader: string) => void;
 };
@@ -490,7 +490,7 @@ export async function appendSessionTranscriptMessage<TMessage>(
 }
 
 type AppendSessionTranscriptEventParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   event: unknown;
   transcriptPath: string;
 };
@@ -573,7 +573,7 @@ async function appendSessionTranscriptMessageLocked<TMessage>(
     ...(shouldRawAppend ? {} : { parentId: leafInfo.leafId ?? null }),
     timestamp: resolveTimestampMsToIsoString(now),
     message: finalMessage,
-    ...(leafInfo.appendMode === "side" && isTranscriptOnlyOpenClawAssistantMessage(finalMessage)
+    ...(leafInfo.appendMode === "side" && isTranscriptOnlyCarapaceAssistantMessage(finalMessage)
       ? { appendMode: "side" as const }
       : {}),
   };

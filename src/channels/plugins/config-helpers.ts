@@ -3,7 +3,7 @@
  *
  * Updates account enabled state and detects configured secret-like values.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 
 type ChannelSection = {
@@ -13,10 +13,10 @@ type ChannelSection = {
 
 /** Replace one section; undefined removes it and prunes an empty channels object. */
 export function writeChannelSection(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channelKey: string,
   section: Record<string, unknown> | undefined,
-): OpenClawConfig {
+): CarapaceConfig {
   if (section !== undefined) {
     return { ...cfg, channels: { ...cfg.channels, [channelKey]: section } };
   }
@@ -32,10 +32,10 @@ export function writeChannelSection(
 }
 
 export function setTopLevelChannelEnabledInConfigSection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sectionKey: string;
   enabled: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return writeChannelSection(params.cfg, params.sectionKey, {
     ...params.cfg.channels?.[params.sectionKey],
     enabled: params.enabled,
@@ -43,10 +43,10 @@ export function setTopLevelChannelEnabledInConfigSection(params: {
 }
 
 export function clearTopLevelChannelConfigFields(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sectionKey: string;
   clearBaseFields: string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   const section = params.cfg.channels?.[params.sectionKey];
   if (!section) {
     return params.cfg;
@@ -69,12 +69,12 @@ function isConfiguredSecretValue(value: unknown): boolean {
  * Updates an account enabled flag in a channel config section.
  */
 export function setAccountEnabledInConfigSection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sectionKey: string;
   accountId: string;
   enabled: boolean;
   allowTopLevel?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const accountKey = params.accountId || DEFAULT_ACCOUNT_ID;
   const channels = params.cfg.channels as Record<string, unknown> | undefined;
   const base = channels?.[params.sectionKey] as ChannelSection | undefined;
@@ -99,11 +99,11 @@ export function setAccountEnabledInConfigSection(params: {
  * Deletes one account from a channel config section, pruning empty channel/accounts objects.
  */
 export function deleteAccountFromConfigSection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sectionKey: string;
   accountId: string;
   clearBaseFields?: string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   const accountKey = params.accountId || DEFAULT_ACCOUNT_ID;
   const channels = params.cfg.channels as Record<string, unknown> | undefined;
   const base = channels?.[params.sectionKey] as ChannelSection | undefined;
@@ -194,12 +194,12 @@ export function clearAccountEntryFields<TAccountEntry extends object>(params: {
 
 /** Clear plugin-selected account fields and prune only the config branches changed by cleanup. */
 export function clearAccountFieldsFromConfigSection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sectionKey: string;
   accountId: string;
   fields: string[];
   markClearedOnFieldPresence?: boolean;
-}): { nextConfig: OpenClawConfig; changed: boolean; cleared: boolean } {
+}): { nextConfig: CarapaceConfig; changed: boolean; cleared: boolean } {
   // SAFETY: Channel sections are config objects; the account helper checks nested entries.
   const section = params.cfg.channels?.[params.sectionKey] as
     | (ChannelSection & Record<string, unknown>)

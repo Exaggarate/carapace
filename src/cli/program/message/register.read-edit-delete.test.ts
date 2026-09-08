@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 function createReadProgram() {
-  const program = new Command().name("openclaw").exitOverride();
+  const program = new Command().name("carapace").exitOverride();
   program.configureOutput({ writeErr: () => {} });
   const message = program.command("message");
   const runMessageAction = vi.fn(async () => undefined);
@@ -72,19 +72,19 @@ describe("message read legacy option visibility", () => {
       name: "Bash",
       test: it.skipIf(process.platform === "win32"),
       complete: (program: Command) =>
-        runGeneratedBashCompletion(program, ["openclaw", "message", "read", "--"]),
+        runGeneratedBashCompletion(program, ["carapace", "message", "read", "--"]),
     },
     {
       name: "Fish",
       test: itWithFish,
       complete: (program: Command) =>
-        runGeneratedFishCompletion(program, "openclaw message read --"),
+        runGeneratedFishCompletion(program, "carapace message read --"),
     },
     {
       name: "PowerShell",
       test: itWithPowerShell,
       complete: (program: Command) =>
-        powerShellCompletion.complete(program, "openclaw message read --"),
+        powerShellCompletion.complete(program, "carapace message read --"),
     },
   ];
   for (const engine of engines) {

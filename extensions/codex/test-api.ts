@@ -6,8 +6,8 @@ import {
   isSubagentSessionKey,
   type AnyAgentTool,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   type CodexAppServerRuntimeOptions,
   resolveCodexAppServerRuntimeOptions,

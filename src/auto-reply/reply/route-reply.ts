@@ -7,7 +7,7 @@
  * across multiple providers.
  */
 
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { resolveEffectiveMessagesConfig } from "../../agents/identity.js";
 import { normalizeChatType } from "../../channels/chat-type.js";
@@ -15,7 +15,7 @@ import { createChannelReplyTransform } from "../../channels/message/reply-transf
 import { getBundledChannelPlugin } from "../../channels/plugins/bundled.js";
 import { getLoadedChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
 import { normalizeChatChannelId } from "../../channels/registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
   isOutboundDeliveryError,
@@ -108,7 +108,7 @@ type RouteReplyParams = {
   /** Reply policy fallback for delivery kinds that do not carry payload metadata. */
   replyDelivery?: ReplyDeliveryContext;
   /** Config for provider-specific settings. */
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   /** Optional abort signal for cooperative cancellation. */
   abortSignal?: AbortSignal;
   /** Mirror reply into session transcript (default: true when sessionKey is set). */

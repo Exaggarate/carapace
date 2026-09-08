@@ -11,7 +11,7 @@ import {
   getActiveGatewayRootWorkCount,
   resetGatewayWorkAdmission,
 } from "../process/gateway-work-admission.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import { stop } from "./service/ops-lifecycle.js";
 import { onTimer } from "./service/timer.test-support.js";
 import { loadCronStore, saveCronStore } from "./store.js";
@@ -344,7 +344,7 @@ describe("cron service cross-tick bounded admission", () => {
         // immediately before receipt reservation. Simulate a sibling winning
         // the durable owner race at that boundary.
         if (nowCalls === 3) {
-          foreignReceipt = runOpenClawStateWriteTransaction(({ db }) => {
+          foreignReceipt = runCarapaceStateWriteTransaction(({ db }) => {
             const receipt = claimCronRunReceiptInDatabase({
               database: db,
               prepared: preparedForeignReceipt,

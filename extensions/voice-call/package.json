@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/voice-call",
+  "name": "@carapace/voice-call",
   "version": "2026.9.2",
-  "description": "OpenClaw voice-call plugin for Twilio, Telnyx, and Plivo phone calls.",
+  "description": "Carapace voice-call plugin for Twilio, Telnyx, and Plivo phone calls.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -13,24 +13,24 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "setupEntry": "./setup-api.ts",
     "install": {
-      "npmSpec": "@openclaw/voice-call",
+      "npmSpec": "@carapace/voice-call",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -38,7 +38,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "publishToClawHub": true,

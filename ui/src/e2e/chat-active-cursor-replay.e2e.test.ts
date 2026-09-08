@@ -16,7 +16,7 @@ const suite = createChatFlowE2eSuite();
 
 suite.define(() => {
   it("restores active commentary when an evicted session revalidates from its cursor", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-active-cursor-replay", artifactRoot)
       : undefined;
@@ -152,7 +152,7 @@ suite.define(() => {
         .poll(async () => (await cursorRequests()).length)
         .toBeGreaterThan(cursorRequestsBeforeReturn);
       const activeRunState = () =>
-        page.locator('openclaw-chat-pane[aria-hidden="false"]').evaluate((element) => {
+        page.locator('carapace-chat-pane[aria-hidden="false"]').evaluate((element) => {
           const state = (
             element as HTMLElement & {
               state?: {
@@ -171,7 +171,7 @@ suite.define(() => {
         segmentTexts: expect.arrayContaining([commentary]),
       });
       await page
-        .locator('openclaw-chat-pane[aria-hidden="false"] .chat-thread p')
+        .locator('carapace-chat-pane[aria-hidden="false"] .chat-thread p')
         .getByText(commentary, { exact: true })
         .waitFor({ timeout: 10_000 });
       expect((await cursorRequests()).at(-1)).toMatchObject({
@@ -182,7 +182,7 @@ suite.define(() => {
         await writeFile(
           path.join(artifactDir, "cursor-active-commentary-return.png"),
           await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-            page.locator('openclaw-chat-pane[aria-hidden="false"] .chat-thread'),
+            page.locator('carapace-chat-pane[aria-hidden="false"] .chat-thread'),
           ]),
         );
       }

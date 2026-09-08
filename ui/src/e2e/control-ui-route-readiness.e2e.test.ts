@@ -23,7 +23,7 @@ suite.define(() => {
         sessionKey: initialSessionKey,
       });
       await page.goto(controlUiSessionUrl(mountUrl.href, initialSessionKey));
-      const visiblePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
+      const visiblePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
       await expect
         .poll(() => visiblePane.evaluate((pane) => (pane as ChatPaneElement).sessionKey))
         .toBe(initialSessionKey);

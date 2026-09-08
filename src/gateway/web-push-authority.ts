@@ -2,7 +2,7 @@ import {
   GATEWAY_CLIENT_IDS,
   GATEWAY_CLIENT_MODES,
 } from "../../packages/gateway-protocol/src/client-info.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { listPairedDevicesReadOnly } from "../infra/device-pairing-store-readonly.js";
 import { hasEffectivePairedDeviceRole, type PairedDevice } from "../infra/device-pairing.js";
 import { listBoundWebPushSubscriptions, type BoundWebPushSubscription } from "../infra/push-web.js";
@@ -22,7 +22,7 @@ export type CurrentWebPushTarget = {
 function resolveCurrentWebPushTarget(params: {
   subscription: BoundWebPushSubscription;
   device: PairedDevice | undefined;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requiredScopes: readonly string[];
   visibilityScopes?: readonly string[];
 }): CurrentWebPushTarget | null {
@@ -85,7 +85,7 @@ function resolveCurrentWebPushTarget(params: {
 
 /** Reads every mutable authority fact in the caller's network-I/O continuation. */
 export function listCurrentWebPushTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requiredScopes: readonly string[];
   visibilityScopes?: readonly string[];
   stateDir?: string;

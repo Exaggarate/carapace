@@ -1,8 +1,8 @@
 // Shared File Transfer node-invoke policy fixtures for split test files.
 import crypto from "node:crypto";
 import { gzipSync } from "node:zlib";
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import type { CarapacePluginNodeInvokePolicyContext } from "carapace/plugin-sdk/plugin-entry";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { expect, vi } from "vitest";
 
 export function tarEntries(
@@ -69,12 +69,12 @@ export function createCtx(overrides: {
   command?: string;
   params?: Record<string, unknown>;
   pluginConfig?: Record<string, unknown>;
-  approvals?: OpenClawPluginNodeInvokePolicyContext["approvals"];
+  approvals?: CarapacePluginNodeInvokePolicyContext["approvals"];
 }) {
-  const invokeNode = vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>(
+  const invokeNode = vi.fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>(
     async ({
       params,
-    }: Parameters<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>[0] = {}) => ({
+    }: Parameters<CarapacePluginNodeInvokePolicyContext["invokeNode"]>[0] = {}) => ({
       ok: true,
       payload: {
         ok: true,
@@ -170,7 +170,7 @@ export function expectResultFields(result: unknown, fields: Record<string, unkno
 }
 
 export function requireInvokeParams(
-  invokeNode: ReturnType<typeof vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>>,
+  invokeNode: ReturnType<typeof vi.fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>>,
   callIndex: number,
 ) {
   const call = (invokeNode.mock.calls as unknown[][])[callIndex]?.[0];

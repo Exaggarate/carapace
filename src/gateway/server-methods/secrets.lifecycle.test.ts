@@ -18,7 +18,7 @@ import {
   readSecretStoreValue,
   writeSecretStoreEntry,
 } from "../../secrets/store/secret-store.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createAgentRuntimeApprovalAuthorityValidator } from "../agent-runtime-identity-token.js";
 import { QuestionManager } from "../question-manager.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
@@ -60,7 +60,7 @@ describe("secret store mutation lifecycle", () => {
   it.each(["dispatch continuation", "mutation logging"] as const)(
     "does not delete when admitted authority closes during %s",
     async (closure) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const name = "SYNTHETIC_DELETE_KEY";
         const value = "test-secret-delete-must-survive";
         writeSecretStoreEntry({
@@ -124,7 +124,7 @@ describe("secret store mutation lifecycle", () => {
   );
 
   it("reports only committed safe facts when the operator replaces proposed hosts", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const authority = claimAgentRunDelegatedAuthority({
         instanceId: "tool-instance",
         runId: "tool-run",
@@ -207,7 +207,7 @@ describe("secret store mutation lifecycle", () => {
   it.each(["api_key", "token"] as const)(
     "refreshes an auth-profile-only %s ref on create, rotation, and delete",
     async (type) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const name = "AUTH_PROFILE_ONLY_KEY";
         const ref = { source: "store", provider: "default", id: name } as const;
         const profileId = "custom:store";
@@ -222,7 +222,7 @@ describe("secret store mutation lifecycle", () => {
         };
         const runtimeOptions = {
           config: {},
-          env: { OPENCLAW_STATE_DIR: state.stateDir },
+          env: { CARAPACE_STATE_DIR: state.stateDir },
           agentDirs: [state.agentDir()],
           includeConfigRefs: false,
           loadAuthStore: () => store,

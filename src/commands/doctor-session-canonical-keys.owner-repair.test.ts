@@ -7,17 +7,17 @@ import {
   loadTranscriptEvents,
 } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../state/openclaw-agent-db-additive-columns.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../state/carapace-agent-db-additive-columns.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { repairCanonicalSessionKeys } from "./doctor-session-canonical-keys.js";
 import { insertLegacySession } from "./doctor-session-canonical-keys.test-support.js";
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 function insertEmptyAlias(params: {
   agentId: string;
@@ -27,7 +27,7 @@ function insertEmptyAlias(params: {
   storePath: string;
   updatedAt: number;
 }) {
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: params.agentId,
     env: params.env,
     path: resolveSqliteTargetFromSessionStorePath(params.storePath, {
@@ -50,8 +50,8 @@ describe("doctor transcript owner repair", () => {
     { sourceAgentId: "main", requiredAlias: true, requiredCanonical: true },
     { sourceAgentId: "main", requiredAlias: false, requiredCanonical: false },
   ])("preserves required creation provenance during canonical repair: %o", async (fixture) => {
-    await withStateDirEnv("openclaw-doctor-canonical-creation-stamp-", async ({ stateDir }) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withStateDirEnv("carapace-doctor-canonical-creation-stamp-", async ({ stateDir }) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions.json");
       const destinationStore = resolveSessionStorePathCore(storeTemplate, { agentId: "main", env });
       const sourceStore = resolveSessionStorePathCore(storeTemplate, {
@@ -59,7 +59,7 @@ describe("doctor transcript owner repair", () => {
         env,
       });
       const canonicalKey = "agent:main:work";
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }, { id: "ops" }] },
         session: { mainKey: "work", store: storeTemplate },
       };
@@ -133,8 +133,8 @@ describe("doctor transcript owner repair", () => {
     },
   ])("$label from the selected canonical-repair winner", async (fixture) => {
     const { sourceAgentId, winnerOwned } = fixture;
-    await withStateDirEnv("openclaw-doctor-assigned-owner-", async ({ stateDir }) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withStateDirEnv("carapace-doctor-assigned-owner-", async ({ stateDir }) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions.json");
       const destinationStore = resolveSessionStorePathCore(storeTemplate, { agentId: "main", env });
       const sourceStore = resolveSessionStorePathCore(storeTemplate, {
@@ -151,7 +151,7 @@ describe("doctor transcript owner repair", () => {
           ],
         },
         session: { mainKey: "work", store: storeTemplate },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       if (sourceAgentId === "main") {
         insertLegacySession({
@@ -190,7 +190,7 @@ describe("doctor transcript owner repair", () => {
         : undefined;
 
       if ("malformed" in fixture) {
-        openOpenClawAgentDatabase({
+        openCarapaceAgentDatabase({
           agentId: sourceAgentId,
           env,
           path: resolveSqliteTargetFromSessionStorePath(sourceStore, {
@@ -203,7 +203,7 @@ describe("doctor transcript owner repair", () => {
       }
 
       if (sourceAgentId === "ops") {
-        const database = openOpenClawAgentDatabase({
+        const database = openCarapaceAgentDatabase({
           agentId: "main",
           env,
           path: resolveSqliteTargetFromSessionStorePath(destinationStore, {
@@ -232,14 +232,14 @@ describe("doctor transcript owner repair", () => {
   });
 
   it("restores a valid node after an empty alias steals its transcript window", async () => {
-    await withStateDirEnv("openclaw-doctor-transcript-owner-", async ({ stateDir }) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withStateDirEnv("carapace-doctor-transcript-owner-", async ({ stateDir }) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions.json");
       const storePath = resolveSessionStorePathCore(storeTemplate, { agentId: "main", env });
       const cfg = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storeTemplate },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const canonicalKey = "agent:main:main";
       const staleKey = "agent:main:telegram:default:direct:fixture-peer";
       const sessionId = "stolen-owner-session";
@@ -308,14 +308,14 @@ describe("doctor transcript owner repair", () => {
   });
 
   it("follows alias ownership transitively to the configured canonical key", async () => {
-    await withStateDirEnv("openclaw-doctor-transcript-owner-chain-", async ({ stateDir }) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withStateDirEnv("carapace-doctor-transcript-owner-chain-", async ({ stateDir }) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions.json");
       const storePath = resolveSessionStorePathCore(storeTemplate, { agentId: "main", env });
       const cfg = {
         agents: { list: [{ id: "main", default: true }] },
         session: { mainKey: "work", store: storeTemplate },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const staleKey = "agent:main:telegram:default:direct:fixture-peer";
       const intermediateKey = "agent:main:main";
       const canonicalKey = "agent:main:work";

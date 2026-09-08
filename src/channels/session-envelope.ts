@@ -2,11 +2,11 @@
 import { resolveEnvelopeFormatOptions } from "../auto-reply/envelope.js";
 import { resolveSessionStorePathCore } from "../config/sessions.js";
 import { readSessionUpdatedAtCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** Resolves envelope options and previous timestamp for one inbound channel session. */
 export function resolveInboundSessionEnvelopeContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
 }) {

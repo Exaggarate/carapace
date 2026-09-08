@@ -1,7 +1,7 @@
 import Foundation
 import Testing
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 @MainActor
 struct DesktopHubScreenTests {
@@ -30,13 +30,13 @@ struct DesktopHubScreenTests {
 
     @Test func `standalone desktop URL uses document mode without credentials`() throws {
         let config = try Self.makeConfig(
-            url: #require(URL(string: "wss://gateway.example.com:8443/openclaw/")),
+            url: #require(URL(string: "wss://gateway.example.com:8443/carapace/")),
             token: "secret-token",
             password: "secret-password")
 
         let url = DesktopHubScreen.desktopURL(config: config, source: nil, session: nil)
 
-        #expect(url?.absoluteString == "https://gateway.example.com:8443/openclaw/focus/desktop")
+        #expect(url?.absoluteString == "https://gateway.example.com:8443/carapace/focus/desktop")
         #expect(url?.absoluteString.contains("secret-token") == false)
         #expect(url?.absoluteString.contains("secret-password") == false)
     }
@@ -90,7 +90,7 @@ struct DesktopHubScreenTests {
         #expect(url?.absoluteString == "https://gateway.example.com/focus/desktop/source/gateway")
         #expect(url?.absoluteString.contains("secret-token") == false)
         #expect(url?.absoluteString.contains("secret-password") == false)
-        #expect(script?.contains("__OPENCLAW_NATIVE_CONTROL_AUTH__") == true)
+        #expect(script?.contains("__CARAPACE_NATIVE_CONTROL_AUTH__") == true)
         #expect(script?.contains("\"token\":\"secret-token\"") == true)
         #expect(script?.contains("\"password\":\"secret-password\"") == true)
     }

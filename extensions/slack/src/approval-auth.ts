@@ -2,7 +2,7 @@
 import {
   createChannelApprovalAuth,
   resolveApprovalApprovers,
-} from "openclaw/plugin-sdk/approval-auth-runtime";
+} from "carapace/plugin-sdk/approval-auth-runtime";
 import { resolveSlackAccount, resolveSlackAccountAllowFrom } from "./accounts.js";
 import { normalizeSlackApproverTarget } from "./exec-approvals.js";
 import {

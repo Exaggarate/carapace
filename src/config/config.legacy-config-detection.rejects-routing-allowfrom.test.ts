@@ -38,7 +38,7 @@ describe("legacy config detection", () => {
       agents: {
         entries: {
           work: {
-            workspace: "~/openclaw-work",
+            workspace: "~/carapace-work",
             tools: {
               elevated: {
                 enabled: false,

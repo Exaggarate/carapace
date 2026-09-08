@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { matchesDeclaredProviderOwner } from "./provider-owner-index.js";
 import type { PluginProviderRegistration, ProviderPlugin } from "./provider-plugin.types.js";
 import { matchesProviderRuntimePlugin } from "./provider-registry-shared.js";

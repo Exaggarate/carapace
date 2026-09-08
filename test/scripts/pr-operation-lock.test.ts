@@ -24,7 +24,7 @@ import {
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createVitestResourceOwner } from "../../scripts/lib/vitest-resource-ownership.mts";
 import { createFixtureLifetime } from "../helpers/fixture-lifetime.js";
@@ -59,7 +59,7 @@ const lockScript = join(repoRoot, "scripts/pr-lib/operation-lock.sh");
 const processGroupRunner = join(repoRoot, "scripts/pr-lib/process-group-runner.mjs");
 const managedChildUrl = pathToFileURL(join(repoRoot, "scripts/lib/managed-child-process.mts")).href;
 const worktreeScript = join(repoRoot, "scripts/pr-lib/worktree.sh");
-const lockRef = "refs/openclaw/pr-operation-locks/42";
+const lockRef = "refs/carapace/pr-operation-locks/42";
 const detachedChildren = new WeakSet<ChildProcess>();
 const goneProcessGroups = new Set<number>();
 let templateRepo = "";
@@ -68,7 +68,7 @@ let freshMainTemplate: ReturnType<typeof createFreshMainTemplate> | undefined;
 // Direct preload affects only the supervisor; operation fixtures keep real clocks.
 // The source assertions below pin the production safety durations being accelerated.
 function createProcessGroupTimingPreload() {
-  const dir = tempDirs.make("openclaw-pr-operation-lock-timing-");
+  const dir = tempDirs.make("carapace-pr-operation-lock-timing-");
   const preloadPath = join(dir, "preload.cjs");
   writeFileSync(
     preloadPath,
@@ -114,12 +114,12 @@ function createPrFixtureEnv(homeDir: string, path: string): NodeJS.ProcessEnv {
 }
 
 function createTemplateRepo() {
-  const dir = mkdtempSync(join(tmpdir(), "openclaw-pr-operation-lock-template-"));
+  const dir = mkdtempSync(join(tmpdir(), "carapace-pr-operation-lock-template-"));
   // This shared template must not inherit the operator's Git hooks or identity.
   const options = { cwd: dir, env: createPrFixtureEnv(dir, process.env.PATH ?? "") };
   execFileSync("git", ["init", "-q", "-b", "main"], options);
-  execFileSync("git", ["config", "user.name", "OpenClaw Test"], options);
-  execFileSync("git", ["config", "user.email", "test@openclaw.invalid"], options);
+  execFileSync("git", ["config", "user.name", "Carapace Test"], options);
+  execFileSync("git", ["config", "user.email", "test@carapace.invalid"], options);
   writeFileSync(join(dir, "base.txt"), "base\n");
   execFileSync("git", ["add", "base.txt"], options);
   execFileSync("git", ["commit", "-qm", "base"], options);
@@ -134,7 +134,7 @@ afterAll(() => {
   rmSync(templateRepo, { force: true, recursive: true });
 });
 
-function createRepo(nestedName?: string, tempRoot = tempDirs.make("openclaw-pr-operation-lock-")) {
+function createRepo(nestedName?: string, tempRoot = tempDirs.make("carapace-pr-operation-lock-")) {
   const dir = nestedName ? join(tempRoot, nestedName) : tempRoot;
   if (nestedName) {
     mkdirSync(dir);
@@ -193,7 +193,7 @@ function bashSource(repoDir: string, supervised = false) {
     "set -euo pipefail",
     ...(supervised
       ? []
-      : ["unset OPENCLAW_PR_LOCK_NOTIFY_FD", "unset OPENCLAW_PR_LOCK_SUPERVISOR_PID"]),
+      : ["unset CARAPACE_PR_LOCK_NOTIFY_FD", "unset CARAPACE_PR_LOCK_SUPERVISOR_PID"]),
     `source '${worktreeScript}'`,
     `source '${lockScript}'`,
     `source '${commonScript}'`,
@@ -251,7 +251,7 @@ function installPrCliFixture(repoDir: string, env?: NodeJS.ProcessEnv) {
 function createFreshMainTemplate() {
   // Freeze only the committed wrapper/tool prefix. Origins, FETCH_HEAD,
   // linked worktrees, and failure proxies are created in each private copy.
-  const repoDir = freshMainTemplateDirs.make("openclaw-pr-fresh-main-template-");
+  const repoDir = freshMainTemplateDirs.make("carapace-pr-fresh-main-template-");
   cpSync(templateRepo, repoDir, { recursive: true });
   const stateDir = join(repoDir, "fixture-state");
   const homeDir = join(stateDir, "home");
@@ -733,9 +733,9 @@ describe("scripts/pr process-group platform guard", () => {
         cwd: repoDir,
         env: {
           ...process.env,
-          OPENCLAW_PR_DEDICATED_PROCESS_GROUP: "1",
-          OPENCLAW_PR_LOCK_NOTIFY_FD: "3",
-          OPENCLAW_PR_LOCK_SUPERVISOR_PID: String(process.pid),
+          CARAPACE_PR_DEDICATED_PROCESS_GROUP: "1",
+          CARAPACE_PR_LOCK_NOTIFY_FD: "3",
+          CARAPACE_PR_LOCK_SUPERVISOR_PID: String(process.pid),
         },
         stdio: "ignore",
       });
@@ -763,7 +763,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
     execFileSync("git", ["commit", "-qam", "target fixture"], { cwd: repoDir });
     const target = refOid(repoDir, "HEAD");
     execFileSync("git", ["checkout", "--detach", head], { cwd: repoDir });
-    const binDir = tempDirs.make("openclaw-pr-query-failure-");
+    const binDir = tempDirs.make("carapace-pr-query-failure-");
     const realGit = execFileSync("which", ["git"], { encoding: "utf8" }).trim();
     const proxy = writeFixtureFile(binDir, "git", [
       "#!/usr/bin/env bash",
@@ -799,7 +799,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
     "$command requires fresh main before replacing PR artifacts ($failure, existing=$existing)",
     async ({ command, failure, existing }) => {
       const template = (freshMainTemplate ??= createFreshMainTemplate());
-      const repoDir = tempDirs.make("openclaw-pr-fresh-main-");
+      const repoDir = tempDirs.make("carapace-pr-fresh-main-");
       cpSync(template.repoDir, repoDir, { recursive: true });
       const { cachedMain, canonicalTree } = template;
       const stateDir = join(repoDir, "fixture-state");
@@ -824,7 +824,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
         }).trim();
       const remoteMain = newCommit("new main\n");
       const pullHead = newCommit("available PR\n");
-      const originDir = tempDirs.make("openclaw-pr-fetch-origin-");
+      const originDir = tempDirs.make("carapace-pr-fetch-origin-");
       git("clone", "--bare", "--no-local", pathToFileURL(repoDir).href, originDir);
       git("remote", "add", "origin", pathToFileURL(originDir).href);
       git("fetch", "origin", "main");
@@ -906,18 +906,18 @@ describePosix("scripts/pr per-PR operation lock", () => {
         "#!/usr/bin/env bash",
         "set -euo pipefail",
         'case "$*" in',
-        '  "auth token") printf "token:1\\n" >> "$OPENCLAW_TEST_GH_EVENTS"; exit 1 ;;',
+        '  "auth token") printf "token:1\\n" >> "$CARAPACE_TEST_GH_EVENTS"; exit 1 ;;',
         '  "api graphql -f query=query { viewer { login } } --include")',
-        '    if [ "$OPENCLAW_TEST_AUTH_FAILURE" = 1 ]; then',
-        '      printf "viewer:1\\n" >> "$OPENCLAW_TEST_GH_EVENTS"; exit 1',
+        '    if [ "$CARAPACE_TEST_AUTH_FAILURE" = 1 ]; then',
+        '      printf "viewer:1\\n" >> "$CARAPACE_TEST_GH_EVENTS"; exit 1',
         "    fi",
-        '    printf "viewer:0\\n" >> "$OPENCLAW_TEST_GH_EVENTS"',
+        '    printf "viewer:0\\n" >> "$CARAPACE_TEST_GH_EVENTS"',
         '    printf \'HTTP/2.0 200 OK\\n\\n{"data":{"viewer":{"login":"fixture-user"}}}\\n\' ;;',
         '  "pr view 42 --json headRefOid")',
-        '    cat "$OPENCLAW_TEST_PR_METADATA"; printf "head:0\\n" >> "$OPENCLAW_TEST_GH_EVENTS" ;;',
+        '    cat "$CARAPACE_TEST_PR_METADATA"; printf "head:0\\n" >> "$CARAPACE_TEST_GH_EVENTS" ;;',
         '  "pr view 42 --json number,title,state,isDraft,author,baseRefName,headRefName,headRefOid,headRepository,headRepositoryOwner,url,body,labels,assignees,changedFiles,additions,deletions,statusCheckRollup,files")',
-        '    cat "$OPENCLAW_TEST_PR_METADATA"; printf "metadata:0\\n" >> "$OPENCLAW_TEST_GH_EVENTS" ;;',
-        '  *) printf "unexpected:99\\n" >> "$OPENCLAW_TEST_GH_EVENTS"; echo "unexpected fixture gh request" >&2; exit 99 ;;',
+        '    cat "$CARAPACE_TEST_PR_METADATA"; printf "metadata:0\\n" >> "$CARAPACE_TEST_GH_EVENTS" ;;',
+        '  *) printf "unexpected:99\\n" >> "$CARAPACE_TEST_GH_EVENTS"; echo "unexpected fixture gh request" >&2; exit 99 ;;',
         "esac",
       ]);
       chmodSync(gh, 0o755);
@@ -932,29 +932,29 @@ describePosix("scripts/pr per-PR operation lock", () => {
         "#!/usr/bin/env bash",
         "set -euo pipefail",
         'original=("$@")',
-        'prefix=("$OPENCLAW_TEST_REAL_GIT")',
+        'prefix=("$CARAPACE_TEST_REAL_GIT")',
         'if [ "${1-}" = -C ]; then prefix+=("$1" "$2"); shift 2; fi',
         'case "${1-}" in --git-dir=*) prefix+=("$1"); shift ;; esac',
         'if [ "${1-}" = fetch ]; then',
         '  refspec=""; for arg in "$@"; do case "$arg" in -*) ;; *) refspec="$arg" ;; esac; done',
         '  target="$refspec"; case "$refspec" in refs/heads/main|+refs/heads/main:*) target=main ;; esac',
-        '  result=0; "$OPENCLAW_TEST_REAL_GIT" "${original[@]}" || result=$?',
-        '  printf "fetch:%s:%s\\n" "$target" "$result" >> "$OPENCLAW_TEST_EVENTS"',
+        '  result=0; "$CARAPACE_TEST_REAL_GIT" "${original[@]}" || result=$?',
+        '  printf "fetch:%s:%s\\n" "$target" "$result" >> "$CARAPACE_TEST_EVENTS"',
         '  if [ "$target" = main ] && [ "$result" -eq 0 ]; then',
         '    destination=FETCH_HEAD; case "$refspec" in *:*) destination="${refspec#*:}" ;; esac',
         '    fetched=$("${prefix[@]}" rev-parse "$destination")',
-        '    if [ "$destination" = FETCH_HEAD ]; then printf "checkpoint:%s\\n" "$fetched" >> "$OPENCLAW_TEST_EVENTS"; fi',
-        '    if [ "$OPENCLAW_TEST_FAILURE" = second ] && [ ! -e "$OPENCLAW_TEST_FIRST_MAIN" ]; then',
-        '      printf "%s\\n" "$fetched" > "$OPENCLAW_TEST_FIRST_MAIN"',
-        '      "$OPENCLAW_TEST_REAL_GIT" --git-dir="$OPENCLAW_TEST_ORIGIN" update-ref -d refs/heads/main',
+        '    if [ "$destination" = FETCH_HEAD ]; then printf "checkpoint:%s\\n" "$fetched" >> "$CARAPACE_TEST_EVENTS"; fi',
+        '    if [ "$CARAPACE_TEST_FAILURE" = second ] && [ ! -e "$CARAPACE_TEST_FIRST_MAIN" ]; then',
+        '      printf "%s\\n" "$fetched" > "$CARAPACE_TEST_FIRST_MAIN"',
+        '      "$CARAPACE_TEST_REAL_GIT" --git-dir="$CARAPACE_TEST_ORIGIN" update-ref -d refs/heads/main',
         "    fi",
         "  fi",
         '  exit "$result"',
         "fi",
         'case "${1-} ${2-}" in',
-        '  "worktree add"|"checkout "*|"restore "*) printf "mutation:%s\\n" "$1" >> "$OPENCLAW_TEST_EVENTS" ;;',
+        '  "worktree add"|"checkout "*|"restore "*) printf "mutation:%s\\n" "$1" >> "$CARAPACE_TEST_EVENTS" ;;',
         "esac",
-        'exec "$OPENCLAW_TEST_REAL_GIT" "${original[@]}"',
+        'exec "$CARAPACE_TEST_REAL_GIT" "${original[@]}"',
       ]);
       chmodSync(gitProxy, 0o755);
       if (failure === "first") {
@@ -962,15 +962,15 @@ describePosix("scripts/pr per-PR operation lock", () => {
       }
       const childEnv: NodeJS.ProcessEnv = {
         ...env,
-        OPENCLAW_GH_BIN: gh,
-        OPENCLAW_TEST_PR_METADATA: metadataPath,
-        OPENCLAW_TEST_GH_EVENTS: ghEventsPath,
-        OPENCLAW_TEST_REAL_GIT: realGit,
-        OPENCLAW_TEST_ORIGIN: originDir,
-        OPENCLAW_TEST_EVENTS: eventsPath,
-        OPENCLAW_TEST_FIRST_MAIN: firstMainPath,
-        OPENCLAW_TEST_FAILURE: failure,
-        OPENCLAW_TEST_AUTH_FAILURE: failure === "auth" ? "1" : "0",
+        CARAPACE_GH_BIN: gh,
+        CARAPACE_TEST_PR_METADATA: metadataPath,
+        CARAPACE_TEST_GH_EVENTS: ghEventsPath,
+        CARAPACE_TEST_REAL_GIT: realGit,
+        CARAPACE_TEST_ORIGIN: originDir,
+        CARAPACE_TEST_EVENTS: eventsPath,
+        CARAPACE_TEST_FIRST_MAIN: firstMainPath,
+        CARAPACE_TEST_FAILURE: failure,
+        CARAPACE_TEST_AUTH_FAILURE: failure === "auth" ? "1" : "0",
       };
       const controller = spawn(
         cli,
@@ -1371,11 +1371,11 @@ describePosix("scripts/pr per-PR operation lock", () => {
     installRequiredPrCommandStubs(binDir);
     const env: NodeJS.ProcessEnv = {
       ...process.env,
-      OPENCLAW_PR_DEDICATED_PROCESS_GROUP: "1",
+      CARAPACE_PR_DEDICATED_PROCESS_GROUP: "1",
       PATH: `${binDir}:${process.env.PATH ?? ""}`,
     };
-    delete env.OPENCLAW_PR_LOCK_NOTIFY_FD;
-    delete env.OPENCLAW_PR_LOCK_SUPERVISOR_PID;
+    delete env.CARAPACE_PR_LOCK_NOTIFY_FD;
+    delete env.CARAPACE_PR_LOCK_SUPERVISOR_PID;
     const result = spawnSync(cli, ["review-init", "42"], {
       cwd: repoDir,
       encoding: "utf8",
@@ -1733,7 +1733,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
         "acquire_pr_operation_lock 42",
         `printf '%s\\n' "$PR_OPERATION_LOCK_OWNER_OID" > '${ownerFile}'`,
         "begin_pr_operation_validation_phase",
-        ...(failure === "notification" ? ["OPENCLAW_PR_LOCK_NOTIFY_FD=invalid"] : []),
+        ...(failure === "notification" ? ["CARAPACE_PR_LOCK_NOTIFY_FD=invalid"] : []),
         "fetch_count=0",
         "gh_plain() {",
         `  printf 'auth\\n' >> '${traceFile}'`,
@@ -1807,7 +1807,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
       const lifecycle = join(repoDir, "lifecycle.log");
       const ownerFile = join(repoDir, "owner-oid");
       const releaseCwd = join(repoDir, "release-cwd");
-      const refLock = join(repoDir, ".git/refs/openclaw/pr-operation-locks/42.lock");
+      const refLock = join(repoDir, ".git/refs/carapace/pr-operation-locks/42.lock");
       const git = (...args: string[]) =>
         execFileSync("git", args, { cwd: repoDir, encoding: "utf8" }).trim();
       git("config", "commit.gpgSign", "false");
@@ -1825,7 +1825,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
       git("add", "--", ...wrapperSources);
       git("commit", "-qm", "test: native cleanup fixture");
       const preparedHead = git("rev-parse", "HEAD");
-      const origin = tempDirs.make("openclaw-pr-cleanup-origin-");
+      const origin = tempDirs.make("carapace-pr-cleanup-origin-");
       git("init", "--bare", "-q", origin);
       git("remote", "add", "origin", origin);
       git("push", "-q", "origin", `${preparedHead}:refs/heads/main`);
@@ -1858,23 +1858,23 @@ describePosix("scripts/pr per-PR operation lock", () => {
         'case "$*" in',
         '  "auth token") exit 1 ;;',
         '  "api graphql --hostname "*)',
-        '    state=OPEN; if grep -q "^merged$" "$OPENCLAW_TEST_LIFECYCLE"; then state=MERGED; fi',
+        '    state=OPEN; if grep -q "^merged$" "$CARAPACE_TEST_LIFECYCLE"; then state=MERGED; fi',
         `    jq -cn --arg state "$state" --arg head '${preparedHead}' '{data:{repository:{id:"fixture-repo",url:"https://github.com/fixture/repo",nameWithOwner:"fixture/repo",ref:{target:{oid:$head}},pullRequest:{id:"fixture-pr",number:42,url:"https://github.com/fixture/repo/pull/42",state:$state,headRefOid:$head,baseRefName:"main",isDraft:false,mergeCommit:(if $state=="MERGED" then {oid:$head} else null end),autoMergeRequest:null,isInMergeQueue:false,isMergeQueueEnabled:false,mergeable:"MERGEABLE",mergeStateStatus:"CLEAN"}}}}' ;;`,
         '  "api graphql -f query=query { viewer { login } } --include")',
         '    printf \'HTTP/2.0 200 OK\\n\\n{"data":{"viewer":{"login":"fixture-user"}}}\\n\' ;;',
         '  "api graphql "*) printf "fixture-user\\n" ;;',
         '  "pr merge 42 "*)',
-        '    git rev-parse refs/openclaw/pr-operation-locks/42 > "$OPENCLAW_TEST_OWNER"',
-        '    if [ "$OPENCLAW_TEST_FAILURE" = merge ]; then echo "fixture merge failed" >&2; exit 7; fi',
-        '    printf "merged\\n" >> "$OPENCLAW_TEST_LIFECYCLE" ;;',
+        '    git rev-parse refs/carapace/pr-operation-locks/42 > "$CARAPACE_TEST_OWNER"',
+        '    if [ "$CARAPACE_TEST_FAILURE" = merge ]; then echo "fixture merge failed" >&2; exit 7; fi',
+        '    printf "merged\\n" >> "$CARAPACE_TEST_LIFECYCLE" ;;',
         '  "pr view 42 --json state --jq .state") printf "MERGED\\n" ;;',
         '  "repo view --json id,nameWithOwner,url")',
-        '    printf "invocation\\t%s\\n" "$PWD" >> "$OPENCLAW_TEST_LIFECYCLE"',
+        '    printf "invocation\\t%s\\n" "$PWD" >> "$CARAPACE_TEST_LIFECYCLE"',
         `    printf '%s\\n' '{"id":"fixture-repo","url":"https://github.com/fixture/repo","nameWithOwner":"fixture/repo"}' ;;`,
         '  "repo view "*) printf "fixture/repo\\n" ;;',
         `  "api --hostname github.com --paginate --slurp repos/fixture/repo/issues/42/comments?per_page=100 -H Cache-Control: max-age=0") printf '%s\\n' ${JSON.stringify(reviewComments)} ;;`,
         '  "api --hostname github.com --method POST repos/fixture/repo/issues/42/comments "*)',
-        '    printf "comment\\n" >> "$OPENCLAW_TEST_LIFECYCLE"',
+        '    printf "comment\\n" >> "$CARAPACE_TEST_LIFECYCLE"',
         '    printf "https://example.invalid/comment\\n" ;;',
         `  "pr view 42 --repo "*) printf '%s\\n' '{"headRefName":""}' ;;`,
         '  *) echo "unexpected fixture gh call: $*" >&2; exit 99 ;;',
@@ -1888,17 +1888,17 @@ describePosix("scripts/pr per-PR operation lock", () => {
         "set -euo pipefail",
         'case "$*" in',
         '  "worktree remove "*)',
-        '    "$OPENCLAW_TEST_REAL_GIT" "$@"',
-        '    printf "removed\\n" >> "$OPENCLAW_TEST_LIFECYCLE"',
-        '    if [ "$OPENCLAW_TEST_FAILURE" = release ]; then : > "$OPENCLAW_TEST_REF_LOCK"; fi',
+        '    "$CARAPACE_TEST_REAL_GIT" "$@"',
+        '    printf "removed\\n" >> "$CARAPACE_TEST_LIFECYCLE"',
+        '    if [ "$CARAPACE_TEST_FAILURE" = release ]; then : > "$CARAPACE_TEST_REF_LOCK"; fi',
         "    exit 0 ;;",
-        '  *"update-ref --no-deref -d refs/openclaw/pr-operation-locks/42 "*)',
-        '    pwd -P > "$OPENCLAW_TEST_RELEASE_CWD"',
-        '    "$OPENCLAW_TEST_REAL_GIT" "$@"',
-        '    printf "released\\n" >> "$OPENCLAW_TEST_LIFECYCLE"',
+        '  *"update-ref --no-deref -d refs/carapace/pr-operation-locks/42 "*)',
+        '    pwd -P > "$CARAPACE_TEST_RELEASE_CWD"',
+        '    "$CARAPACE_TEST_REAL_GIT" "$@"',
+        '    printf "released\\n" >> "$CARAPACE_TEST_LIFECYCLE"',
         "    exit 0 ;;",
         "esac",
-        'exec "$OPENCLAW_TEST_REAL_GIT" "$@"',
+        'exec "$CARAPACE_TEST_REAL_GIT" "$@"',
       ]);
       chmodSync(gitShim, 0o755);
       const result = spawnSync(
@@ -1910,15 +1910,15 @@ describePosix("scripts/pr per-PR operation lock", () => {
           timeout: 15_000,
           env: {
             ...process.env,
-            OPENCLAW_GH_BIN: gh,
-            OPENCLAW_PR_AUTO_MERGE: "0",
-            OPENCLAW_PR_MERGE_METHOD: "merge",
-            OPENCLAW_TEST_FAILURE: failure,
-            OPENCLAW_TEST_LIFECYCLE: lifecycle,
-            OPENCLAW_TEST_OWNER: ownerFile,
-            OPENCLAW_TEST_REAL_GIT: realGit,
-            OPENCLAW_TEST_REF_LOCK: refLock,
-            OPENCLAW_TEST_RELEASE_CWD: releaseCwd,
+            CARAPACE_GH_BIN: gh,
+            CARAPACE_PR_AUTO_MERGE: "0",
+            CARAPACE_PR_MERGE_METHOD: "merge",
+            CARAPACE_TEST_FAILURE: failure,
+            CARAPACE_TEST_LIFECYCLE: lifecycle,
+            CARAPACE_TEST_OWNER: ownerFile,
+            CARAPACE_TEST_REAL_GIT: realGit,
+            CARAPACE_TEST_REF_LOCK: refLock,
+            CARAPACE_TEST_RELEASE_CWD: releaseCwd,
             PATH: `${binDir}${delimiter}${process.env.PATH ?? ""}`,
           },
         },
@@ -1961,7 +1961,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
   it("reports exact recovery when lock notification fails", () => {
     const repoDir = createRepo();
     const result = runLockShell(repoDir, [
-      "OPENCLAW_PR_LOCK_NOTIFY_FD=9",
+      "CARAPACE_PR_LOCK_NOTIFY_FD=9",
       "set +e",
       "acquire_pr_operation_lock 42",
       "lock_status=$?",
@@ -1978,7 +1978,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
   });
   it("rejects a notification for a lock owned by another process group", async () => {
     const repoDir = createRepo();
-    const foreignRef = "refs/openclaw/pr-operation-locks/43";
+    const foreignRef = "refs/carapace/pr-operation-locks/43";
     const foreignHeld = join(repoDir, "foreign-held");
     const foreignHolder = spawnHolder(repoDir, foreignHeld, 43);
     try {
@@ -1986,7 +1986,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
       const foreignOid = refOid(repoDir, foreignRef);
       const result = await runSupervisedOperation(repoDir, "forged-notification.sh", [
         "acquire_pr_operation_lock 42",
-        `printf '%s\\t%s\\n' '${foreignRef}' '${foreignOid}' >&"$OPENCLAW_PR_LOCK_NOTIFY_FD"`,
+        `printf '%s\\t%s\\n' '${foreignRef}' '${foreignOid}' >&"$CARAPACE_PR_LOCK_NOTIFY_FD"`,
       ]);
       expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(1);
       expect(refOid(repoDir, foreignRef)).toBe(foreignOid);
@@ -2021,7 +2021,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
     const repoDir = createRepo();
     const result = await runSupervisedOperation(repoDir, fixture, [
       "acquire_pr_operation_lock 42",
-      `${command} >&"$OPENCLAW_PR_LOCK_NOTIFY_FD"`,
+      `${command} >&"$CARAPACE_PR_LOCK_NOTIFY_FD"`,
     ]);
     const ownerOid = refOid(repoDir);
     expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(1);
@@ -2067,7 +2067,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
   it("joins Git read producers before releasing a successful operation lock", async () => {
     const repoDir = createRepo();
     const producerExited = join(repoDir, "worktree-producer-exited");
-    const binDir = tempDirs.make("openclaw-pr-joined-query-");
+    const binDir = tempDirs.make("carapace-pr-joined-query-");
     const queryExited = join(binDir, "query-exited");
     const realGit = execFileSync("which", ["git"], { encoding: "utf8" }).trim();
     const proxy = writeFixtureFile(binDir, "git", [
@@ -2737,7 +2737,7 @@ describePosix("scripts/pr per-PR operation lock", () => {
     try {
       expect(await waitFor(() => existsSync(held))).toBe(true);
       const result = runLockShell(repoDir, [
-        "gh() { if [ \"$1 $2\" = 'repo view' ]; then printf 'openclaw/openclaw\\n'; else printf 'MERGED\\n'; fi; }",
+        "gh() { if [ \"$1 $2\" = 'repo view' ]; then printf 'carapace/carapace\\n'; else printf 'MERGED\\n'; fi; }",
         "gc_pr_worktrees false",
       ]);
       expect(result.status).toBe(0);

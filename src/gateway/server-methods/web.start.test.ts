@@ -2,7 +2,7 @@
  * Tests web.start gateway method behavior and backend launch responses.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelRuntimeSnapshot } from "../server-channel-runtime.types.js";
 import type { GatewayRequestHandlerOptions } from "./types.js";
@@ -83,7 +83,7 @@ describe("webHandlers web.login.start", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.normalizeChannelId.mockImplementation((channelId: string) =>
-      channelId === "wechat" || channelId === "weixin" ? "openclaw-weixin" : channelId,
+      channelId === "wechat" || channelId === "weixin" ? "carapace-weixin" : channelId,
     );
     mocks.resolveMissingOfficialExternalChannelPluginRepairHints.mockReturnValue([]);
   });
@@ -95,11 +95,11 @@ describe("webHandlers web.login.start", () => {
         pluginId: "whatsapp",
         channelId: "whatsapp",
         label: "WhatsApp",
-        installSpec: "clawhub:@openclaw/whatsapp",
-        installCommand: "openclaw plugins install clawhub:@openclaw/whatsapp",
-        doctorFixCommand: "openclaw doctor --fix",
+        installSpec: "clawhub:@carapace/whatsapp",
+        installCommand: "carapace plugins install clawhub:@carapace/whatsapp",
+        doctorFixCommand: "carapace doctor --fix",
         repairHint:
-          "Install the official external plugin with: openclaw plugins install clawhub:@openclaw/whatsapp, or run: openclaw doctor --fix.",
+          "Install the official external plugin with: carapace plugins install clawhub:@carapace/whatsapp, or run: carapace doctor --fix.",
       },
     ]);
     const respond = vi.fn();
@@ -122,7 +122,7 @@ describe("webHandlers web.login.start", () => {
       expect.objectContaining({
         code: "INVALID_REQUEST",
         message:
-          "web login provider is not available. Install the official external plugin with: openclaw plugins install clawhub:@openclaw/whatsapp, or run: openclaw doctor --fix.",
+          "web login provider is not available. Install the official external plugin with: carapace plugins install clawhub:@carapace/whatsapp, or run: carapace doctor --fix.",
       }),
     );
     expect(mocks.resolveMissingOfficialExternalChannelPluginRepairHints).toHaveBeenCalledWith({
@@ -142,11 +142,11 @@ describe("webHandlers web.login.start", () => {
                   pluginId: "whatsapp",
                   channelId: "whatsapp",
                   label: "WhatsApp",
-                  installSpec: "clawhub:@openclaw/whatsapp",
-                  installCommand: "openclaw plugins install clawhub:@openclaw/whatsapp",
-                  doctorFixCommand: "openclaw doctor --fix",
+                  installSpec: "clawhub:@carapace/whatsapp",
+                  installCommand: "carapace plugins install clawhub:@carapace/whatsapp",
+                  doctorFixCommand: "carapace doctor --fix",
                   repairHint:
-                    "Install the official external plugin with: openclaw plugins install clawhub:@openclaw/whatsapp, or run: openclaw doctor --fix.",
+                    "Install the official external plugin with: carapace plugins install clawhub:@carapace/whatsapp, or run: carapace doctor --fix.",
                 },
               ]
             : channelId === "signal"
@@ -155,11 +155,11 @@ describe("webHandlers web.login.start", () => {
                     pluginId: "signal",
                     channelId: "signal",
                     label: "Signal",
-                    installSpec: "clawhub:@openclaw/signal",
-                    installCommand: "openclaw plugins install clawhub:@openclaw/signal",
-                    doctorFixCommand: "openclaw doctor --fix",
+                    installSpec: "clawhub:@carapace/signal",
+                    installCommand: "carapace plugins install clawhub:@carapace/signal",
+                    doctorFixCommand: "carapace doctor --fix",
                     repairHint:
-                      "Install the official external plugin with: openclaw plugins install clawhub:@openclaw/signal, or run: openclaw doctor --fix.",
+                      "Install the official external plugin with: carapace plugins install clawhub:@carapace/signal, or run: carapace doctor --fix.",
                   },
                 ]
               : [],
@@ -196,7 +196,7 @@ describe("webHandlers web.login.start", () => {
       expect.objectContaining({
         code: "INVALID_REQUEST",
         message:
-          "web login provider is not available. Configured official external channel plugins are missing for WhatsApp, Signal. Install them with: openclaw plugins install clawhub:@openclaw/whatsapp; openclaw plugins install clawhub:@openclaw/signal, or run: openclaw doctor --fix.",
+          "web login provider is not available. Configured official external channel plugins are missing for WhatsApp, Signal. Install them with: carapace plugins install clawhub:@carapace/whatsapp; carapace plugins install clawhub:@carapace/signal, or run: carapace doctor --fix.",
       }),
     );
   });
@@ -323,7 +323,7 @@ describe("webHandlers web.login.start", () => {
         gateway: { loginWithQrStart: whatsappLogin, loginWithQrWait: vi.fn() },
       },
       {
-        id: "openclaw-weixin",
+        id: "carapace-weixin",
         gatewayMethods: ["web.login.start", "web.login.wait"],
         gateway: { loginWithQrStart: weixinLogin, loginWithQrWait: vi.fn() },
       },
@@ -397,7 +397,7 @@ describe("webHandlers web.login.start", () => {
         gateway: { loginWithQrStart: whatsappLogin },
       },
       {
-        id: "openclaw-weixin",
+        id: "carapace-weixin",
         gatewayMethods: ["web.login.start"],
         gateway: { loginWithQrStart: weixinLogin },
       },
@@ -418,7 +418,7 @@ describe("webHandlers web.login.wait", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.normalizeChannelId.mockImplementation((channelId: string) =>
-      channelId === "wechat" || channelId === "weixin" ? "openclaw-weixin" : channelId,
+      channelId === "wechat" || channelId === "weixin" ? "carapace-weixin" : channelId,
     );
     mocks.resolveMissingOfficialExternalChannelPluginRepairHints.mockReturnValue([]);
   });
@@ -491,7 +491,7 @@ describe("webHandlers web.login.wait", () => {
         gateway: { loginWithQrStart: vi.fn(), loginWithQrWait: whatsappWait },
       },
       {
-        id: "openclaw-weixin",
+        id: "carapace-weixin",
         gatewayMethods: ["web.login.start", "web.login.wait"],
         gateway: { loginWithQrStart: vi.fn(), loginWithQrWait: weixinWait },
       },

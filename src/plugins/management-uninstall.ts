@@ -1,12 +1,12 @@
 // Plans and commits package-owned uninstall state for CLI and management callers.
-import { ok, err, type Result } from "@openclaw/normalization-core/result";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { ok, err, type Result } from "@carapace/normalization-core/result";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   assertConfigWriteAllowedInCurrentMode,
   readConfigFileSnapshotForWrite,
   replaceConfigFile,
 } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import { withClawPackageLifecycleLease } from "../state/claw-package-lifecycle-lease.js";
 import { shortenHomePath } from "../utils.js";
@@ -63,7 +63,7 @@ export type PreparedPluginUninstall = {
   name: string;
   channelIds: string[] | undefined;
   plan: Extract<ReturnType<typeof planPluginUninstall>, { ok: true }>;
-  planForConfig: (config: OpenClawConfig) => ReturnType<typeof planPluginUninstall>;
+  planForConfig: (config: CarapaceConfig) => ReturnType<typeof planPluginUninstall>;
 };
 
 type PluginUninstallOutcome = Pick<
@@ -183,7 +183,7 @@ export async function preparePluginUninstall(
     (id) => plugins.find((entry) => entry.id === id)?.source ?? [],
   );
   const extensionsDir = resolveDefaultPluginExtensionsDir(cli ? undefined : env);
-  const planForConfig = (source: OpenClawConfig) =>
+  const planForConfig = (source: CarapaceConfig) =>
     planPluginUninstall(
       recordPluginPackageUninstallPlan(
         {

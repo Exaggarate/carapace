@@ -13,7 +13,7 @@ import {
   restoreGitBackupRef,
   verifyGitBackupRef,
 } from "../snapshot/git-backup.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { shortenHomePath } from "../utils.js";
 import {
   recordBackupOutcomeBestEffort,
@@ -72,7 +72,7 @@ async function resolveCreateDatabases(runtime: RuntimeEnv, options: BackupGitCre
   }> = [];
   if (options.all || options.global) {
     databases.push({
-      path: await fs.realpath(resolveOpenClawStateSqlitePath()),
+      path: await fs.realpath(resolveCarapaceStateSqlitePath()),
       identity: { role: "global" },
     });
   }

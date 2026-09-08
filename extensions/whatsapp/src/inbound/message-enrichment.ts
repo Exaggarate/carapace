@@ -4,9 +4,9 @@ import {
   formatInboundMediaUnavailableText,
   formatLocationText,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { createSubsystemLogger, redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { createSubsystemLogger, redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { getStatusCode } from "../session-errors.js";
 import {
   describeReplyContext,

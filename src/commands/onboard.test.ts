@@ -2,7 +2,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as providerAuthChoices from "../plugins/provider-auth-choices.js";
 import type { ProviderAuthMethod, ProviderPlugin } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -14,8 +14,8 @@ import { createTestRuntime as makeRuntime } from "./test-runtime-config-helpers.
 type ConfigSnapshotStub = {
   exists: boolean;
   valid: boolean;
-  config: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  sourceConfig?: CarapaceConfig;
   readError?: { code: string | null };
 };
 
@@ -118,7 +118,7 @@ vi.mock("../wizard/setup.migration-snapshot.js", () => ({
 
 vi.mock("./onboard-helpers.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./onboard-helpers.js")>()),
-  DEFAULT_WORKSPACE: "~/.openclaw/workspace",
+  DEFAULT_WORKSPACE: "~/.carapace/workspace",
   handleReset: mocks.handleReset,
 }));
 
@@ -209,7 +209,7 @@ describe("setupWizardCommand", () => {
     );
   });
 
-  it.each(["!!!", "openclaw", "crestodian"])(
+  it.each(["!!!", "carapace", "crestodian"])(
     "rejects invalid or reserved first-agent name %s before setup",
     async (agentName) => {
       const runtime = makeRuntime();
@@ -237,7 +237,7 @@ describe("setupWizardCommand", () => {
     );
 
     expect(runtime.error).toHaveBeenCalledExactlyOnceWith(
-      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("openclaw onboard")} for the interactive setup.`,
+      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("carapace onboard")} for the interactive setup.`,
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(mocks.runInteractiveSetup).not.toHaveBeenCalled();
@@ -253,10 +253,10 @@ describe("setupWizardCommand", () => {
 
       expect(runtime.log).toHaveBeenCalledWith(
         [
-          "Windows detected - OpenClaw runs great on WSL2!",
+          "Windows detected - Carapace runs great on WSL2!",
           "Native Windows might be trickier.",
           "Quick setup: wsl --install (one command, one reboot)",
-          "Guide: https://docs.openclaw.ai/windows",
+          "Guide: https://github.com/Exaggarate/carapace",
         ].join("\n"),
       );
     } finally {
@@ -284,7 +284,7 @@ describe("setupWizardCommand", () => {
     await setupWizardCommand(options, runtime);
 
     const message =
-      "Onboarding needs an interactive TTY. Use `openclaw onboard --non-interactive --accept-risk ...` for automation.";
+      "Onboarding needs an interactive TTY. Use `carapace onboard --non-interactive --accept-risk ...` for automation.";
     expect(runtime.error).toHaveBeenCalledWith(message);
     expect(vi.mocked(runtime.log).mock.calls).toEqual(
       "json" in options
@@ -326,7 +326,7 @@ describe("setupWizardCommand", () => {
       config: {
         agents: {
           defaults: {
-            workspace: "/tmp/openclaw-custom-workspace",
+            workspace: "/tmp/carapace-custom-workspace",
           },
         },
       },
@@ -336,7 +336,7 @@ describe("setupWizardCommand", () => {
 
     expect(mocks.handleReset).toHaveBeenCalledWith(
       "config+creds+sessions",
-      path.resolve("/tmp/openclaw-custom-workspace"),
+      path.resolve("/tmp/carapace-custom-workspace"),
       runtime,
     );
   });
@@ -350,7 +350,7 @@ describe("setupWizardCommand", () => {
       sourceConfig: {
         agents: {
           defaults: {
-            workspace: "/tmp/openclaw-invalid-config-workspace",
+            workspace: "/tmp/carapace-invalid-config-workspace",
           },
         },
       },
@@ -360,12 +360,12 @@ describe("setupWizardCommand", () => {
 
     expect(mocks.handleReset).toHaveBeenCalledWith(
       "full",
-      path.resolve("/tmp/openclaw-invalid-config-workspace"),
+      path.resolve("/tmp/carapace-invalid-config-workspace"),
       runtime,
     );
     expect(mocks.handleReset).not.toHaveBeenCalledWith(
       "full",
-      path.resolve("~/.openclaw/workspace"),
+      path.resolve("~/.carapace/workspace"),
       runtime,
     );
   });
@@ -382,7 +382,7 @@ describe("setupWizardCommand", () => {
             workspace: 42,
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
     });
 
     await setupWizardCommand({ reset: true, resetScope: "full" }, runtime);
@@ -426,7 +426,7 @@ describe("setupWizardCommand", () => {
 
     expect(mocks.handleReset).toHaveBeenCalledWith(
       "full",
-      resolveUserPath("~/.openclaw/workspace"),
+      resolveUserPath("~/.carapace/workspace"),
       runtime,
     );
   });
@@ -451,7 +451,7 @@ describe("setupWizardCommand", () => {
     );
 
     expect(runtime.error).toHaveBeenCalledExactlyOnceWith(
-      `Invalid --reset-scope. Use "config", "config+creds+sessions", or "full". Run ${formatCliCommand("openclaw onboard --reset --reset-scope config")} for a config-only reset.`,
+      `Invalid --reset-scope. Use "config", "config+creds+sessions", or "full". Run ${formatCliCommand("carapace onboard --reset --reset-scope config")} for a config-only reset.`,
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(mocks.handleReset).not.toHaveBeenCalled();
@@ -465,7 +465,7 @@ describe("setupWizardCommand", () => {
     await setupWizardCommand({ resetScope: "full" }, runtime);
 
     expect(runtime.error).toHaveBeenCalledWith(
-      "--reset-scope requires --reset. Re-run with openclaw onboard --reset --reset-scope full.",
+      "--reset-scope requires --reset. Re-run with carapace onboard --reset --reset-scope full.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(mocks.handleReset).not.toHaveBeenCalled();
@@ -479,7 +479,7 @@ describe("setupWizardCommand", () => {
     { mode: "", json: false },
   ])("fails fast for invalid non-interactive --mode $mode before reset", async ({ mode, json }) => {
     const runtime = makeRuntime();
-    const message = `Invalid --mode "${mode}". Use "local" or "remote", or run ${formatCliCommand("openclaw onboard")} for interactive setup.`;
+    const message = `Invalid --mode "${mode}". Use "local" or "remote", or run ${formatCliCommand("carapace onboard")} for interactive setup.`;
 
     await setupWizardCommand(
       {
@@ -532,7 +532,7 @@ describe("setupWizardCommand", () => {
           `remote mode without a URL${json ? " in JSON output" : ""}`,
           { mode: "remote" as const, json },
           formatCliCommand(
-            "openclaw onboard --non-interactive --accept-risk --mode remote --remote-url ws://127.0.0.1:3000",
+            "carapace onboard --non-interactive --accept-risk --mode remote --remote-url ws://127.0.0.1:3000",
           ),
         ] as const,
     ),
@@ -629,9 +629,9 @@ describe("setupWizardCommand", () => {
   it.each(
     (
       [
-        ["gatewayPassword", "OPENCLAW_GATEWAY_PASSWORD"],
-        ["remoteToken", "OPENCLAW_GATEWAY_TOKEN"],
-        ["remotePassword", "OPENCLAW_GATEWAY_PASSWORD"],
+        ["gatewayPassword", "CARAPACE_GATEWAY_PASSWORD"],
+        ["remoteToken", "CARAPACE_GATEWAY_TOKEN"],
+        ["remotePassword", "CARAPACE_GATEWAY_PASSWORD"],
       ] as const
     ).flatMap(([optionName, envName]) =>
       ["", "different-credential"].map((envValue) => ({ optionName, envName, envValue })),
@@ -668,7 +668,7 @@ describe("setupWizardCommand", () => {
   );
 
   it("keeps interactive gateway reference selection independent of the default env var", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "");
+    vi.stubEnv("CARAPACE_GATEWAY_PASSWORD", "");
     const runtime = makeRuntime();
 
     await setupWizardCommand(
@@ -723,8 +723,8 @@ describe("setupWizardCommand", () => {
   });
 
   it("rejects conflicting gateway token inputs before reset", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
+    const previous = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "env-token";
     const runtime = makeRuntime();
 
     try {
@@ -732,15 +732,15 @@ describe("setupWizardCommand", () => {
         {
           reset: true,
           gatewayToken: "plaintext-token",
-          gatewayTokenRefEnv: "OPENCLAW_GATEWAY_TOKEN",
+          gatewayTokenRefEnv: "CARAPACE_GATEWAY_TOKEN",
         },
         runtime,
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previous;
+        process.env.CARAPACE_GATEWAY_TOKEN = previous;
       }
     }
 
@@ -789,7 +789,7 @@ describe("setupWizardCommand", () => {
     "preflights $agentId provider profiles against reset scope $scope",
     async ({ agentName, agentId, scope, reuseProfile }) => {
       const runtime = makeRuntime();
-      const workspaceDir = "/tmp/openclaw-reset-agent-workspace";
+      const workspaceDir = "/tmp/carapace-reset-agent-workspace";
       const agentDirSuffix = path.join("agents", agentId, "agent");
       const resolveApiKey = vi
         .spyOn(nonInteractiveApiKeys, "resolveNonInteractiveApiKey")
@@ -881,7 +881,7 @@ describe("setupWizardCommand", () => {
     await expectAuthPreflightError(
       { authChoice: "apiKey", tokenProvider: "anthropic", anthropicApiKey: "" },
       () =>
-        `Missing --anthropic-api-key (or ANTHROPIC_API_KEY in env). Export ANTHROPIC_API_KEY, pass --anthropic-api-key, or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+        `Missing --anthropic-api-key (or ANTHROPIC_API_KEY in env). Export ANTHROPIC_API_KEY, pass --anthropic-api-key, or run ${formatCliCommand("carapace onboard")} for interactive setup.`,
     );
   });
 

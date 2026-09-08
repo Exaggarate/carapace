@@ -55,7 +55,7 @@ function runBasePreparation(
     });
   const renderEnv = (env: Record<string, string> = {}) =>
     Object.fromEntries(Object.entries(env).map(([key, value]) => [key, interpolate(value)]));
-  const bin = path.join(createTempDir("openclaw-testbox-tools-"), "bin");
+  const bin = path.join(createTempDir("carapace-testbox-tools-"), "bin");
   fs.mkdirSync(bin);
   // System-wide Node links are unrelated to Git preparation and must stay fixture-local.
   fs.writeFileSync(
@@ -114,7 +114,7 @@ describe.each(workflows)("%s Testbox base preparation", (workflowName) => {
       eventName: "workflow_dispatch",
     },
   ])("pins the correct base in a $shape checkout", ({ branch, depth, passes, eventName }) => {
-    const source = createTempDir("openclaw-testbox-source-");
+    const source = createTempDir("carapace-testbox-source-");
     git(source, "init", "-q", "--initial-branch=main");
     git(source, "config", "user.name", "Test User");
     git(source, "config", "user.email", "test@example.com");
@@ -140,7 +140,7 @@ describe.each(workflows)("%s Testbox base preparation", (workflowName) => {
     git(source, "commit", "-qm", "main advanced");
     const mainBase = git(source, "rev-parse", "HEAD");
     git(source, "merge", "--no-ff", "feature", "-m", "synthetic merge");
-    const repo = createTempDir("openclaw-testbox-shallow-");
+    const repo = createTempDir("carapace-testbox-shallow-");
     git(
       source,
       "clone",
@@ -160,7 +160,7 @@ describe.each(workflows)("%s Testbox base preparation", (workflowName) => {
       cwd: repo,
       encoding: "utf8",
     });
-    const trace = path.join(createTempDir("openclaw-testbox-trace-"), "git.jsonl");
+    const trace = path.join(createTempDir("carapace-testbox-trace-"), "git.jsonl");
     const result = runBasePreparation(repo, workflowName, eventBase, trace, eventName);
     const fetches = fs
       .readFileSync(trace, "utf8")

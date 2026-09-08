@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { testing as cliBackendsTesting } from "../../agents/cli-backends.test-support.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { buildPreparedModelsProviderData } from "./commands-models.js";
@@ -81,7 +81,7 @@ afterEach(() => {
 describe("CLI model visibility policy", () => {
   it.each<{
     name: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     expected: string[];
     view?: "all";
   }>([
@@ -206,7 +206,7 @@ describe("CLI model visibility policy", () => {
       },
     ]);
     modelProviderAuthMocks.authenticatedProviders = new Set(["anthropic", "claude-cli"]);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...cfg,
       agents: {
         ...cfg.agents,

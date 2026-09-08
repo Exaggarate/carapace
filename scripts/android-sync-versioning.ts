@@ -1,4 +1,4 @@
-// Android Sync Versioning script supports OpenClaw repository automation.
+// Android Sync Versioning script supports Carapace repository automation.
 import { checkAndroidVersioning } from "./lib/android-version.ts";
 import { parseVersionSyncArgs } from "./lib/version-script-args.ts";
 

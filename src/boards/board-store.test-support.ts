@@ -5,22 +5,22 @@ import { onTestFinished } from "vitest";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.entry.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { SqliteBoardStore } from "./sqlite-board-store.js";
 
 export function createTestBoardStore(options: { stateDir?: string } = {}): SqliteBoardStore {
   const ownsStateDir = options.stateDir === undefined;
-  const stateDir = options.stateDir ?? mkdtempSync(path.join(tmpdir(), "openclaw-board-store-"));
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = options.stateDir ?? mkdtempSync(path.join(tmpdir(), "carapace-board-store-"));
+  const env = { CARAPACE_STATE_DIR: stateDir };
   const seededSessions = new Set<string>();
 
   if (ownsStateDir) {
     onTestFinished(() => {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     });
   }
@@ -36,7 +36,7 @@ export function createTestBoardStore(options: { stateDir?: string } = {}): Sqlit
           : `agent:${agentId}:${sessionKey}`;
       const identity = `${agentId}\0${canonicalSessionKey}`;
       if (!seededSessions.has(identity)) {
-        const database = openOpenClawAgentDatabase({ agentId, env });
+        const database = openCarapaceAgentDatabase({ agentId, env });
         replaceSessionEntrySync(
           { agentId, sessionKey: canonicalSessionKey, storePath: database.path },
           { sessionId: `board-test-${seededSessions.size}`, updatedAt: Date.now() },

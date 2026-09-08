@@ -17,11 +17,11 @@ import {
   makeAgentUserMessage,
 } from "../../agents/test-helpers/agent-message-fixtures.js";
 import { withServer } from "../../plugin-sdk/test-helpers/http-test-server.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { readSkillReviewOutcomes } from "./collection-review-state.js";
 import { assertExperienceReviewDecision } from "./experience-review-decision.test-support.js";
@@ -42,7 +42,7 @@ import {
 const modelId = "gpt-5.6-luna";
 const { positiveMessages, interruptedMessages } = createExperienceReviewMessages(modelId);
 const tempDirs = createTrackedTempDirs();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 const proposalBody = [
   "# Manifest Deployment",
   "",
@@ -70,7 +70,7 @@ type Request = {
 type Scenario = "proposed" | "nothing" | "interrupted" | "rejected" | "failed";
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ layout: "home", prefix: "workshop-owner-contract-" });
+  state = await createCarapaceTestState({ layout: "home", prefix: "workshop-owner-contract-" });
 });
 afterEach(async () => {
   await state.cleanup();
@@ -204,7 +204,7 @@ describe("Workshop draft-only review through the real provider and tool owners",
             config: candidate.config,
             source,
           });
-          const database = openOpenClawAgentDatabase({ agentId: "main" });
+          const database = openCarapaceAgentDatabase({ agentId: "main" });
           const readSourceTranscript = () =>
             database.db
               .prepare("SELECT event_json FROM transcript_events WHERE session_id = ? ORDER BY seq")
@@ -297,7 +297,7 @@ describe("Workshop draft-only review through the real provider and tool owners",
           const privateMarker = "synthetic-workshop-native-payload:";
           if (scenario === "nothing") {
             Object.assign(messages[0]!, {
-              __openclaw: { upstreamUserText: privateMarker + "x".repeat(2 * 1024 * 1024) },
+              __carapace: { upstreamUserText: privateMarker + "x".repeat(2 * 1024 * 1024) },
             });
           }
           const replay = sanitizeToolUseResultPairingForModel(messages, true);
@@ -311,7 +311,7 @@ describe("Workshop draft-only review through the real provider and tool owners",
           // Load the real provider plugin before entering the review lane, as the live proof does.
           loadAgentRuntimePluginRegistryHandle({ config: candidate.config, workspaceDir });
           const outcomesBefore = new Set(Object.keys(readSkillReviewOutcomes().experienceReviews));
-          const database = openOpenClawAgentDatabase({ agentId: "main" });
+          const database = openCarapaceAgentDatabase({ agentId: "main" });
           const foregroundFingerprint = () => {
             const hash = createHash("sha256");
             for (const row of database.db

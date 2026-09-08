@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { IDBFactory } from "fake-indexeddb";
 import { render } from "lit";
 /* @vitest-environment jsdom */
@@ -35,7 +35,7 @@ describe("stored chat snapshot hydration", () => {
   afterEach(resetTranscriptTestDom);
 
   function createMountedPane(targetSessionKey: string, sharedMessages: ChatMessageCache) {
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
     vi.spyOn(pane, "requestUpdate").mockImplementation(() => undefined);
     vi.spyOn(pane, "performUpdate").mockImplementation(() => undefined);
     pane.sessionKey = targetSessionKey;
@@ -125,7 +125,7 @@ describe("stored chat snapshot hydration", () => {
         });
         expect(cached?.messages).toEqual(first.state.chatMessages);
         expect(cached?.messages).toHaveLength(1);
-        expect(cached?.messages[0]).toMatchObject({ __openclaw: { senderId: "local-author" } });
+        expect(cached?.messages[0]).toMatchObject({ __carapace: { senderId: "local-author" } });
       } finally {
         first.disconnectedCallback();
       }
@@ -188,7 +188,7 @@ describe("stored chat snapshot hydration", () => {
         const custodyMessage = {
           role: "user",
           content: "Gateway accepted the initial image",
-          __openclaw: metadata,
+          __carapace: metadata,
         };
         applyChatPendingInputs(remounted.state, {
           total: 1,
@@ -203,11 +203,11 @@ describe("stored chat snapshot hydration", () => {
         ).toEqual([custodyMessage]);
         expectRenderedInput(custodyMessage.content, senderName ?? "You");
         expect(container.textContent).not.toContain("Keep the attributed initial image");
-        expect(custodyMessage["__openclaw"]).toBe(metadata);
+        expect(custodyMessage["__carapace"]).toBe(metadata);
         const canonicalMessage = {
           ...custodyMessage,
           content: "Gateway persisted the initial image",
-          __openclaw: {
+          __carapace: {
             ...metadata,
             id: "cached-input",
             seq: 1,
@@ -333,7 +333,7 @@ describe("stored chat snapshot hydration", () => {
     } as unknown as GatewayBrowserClient;
     const context = createInitializationContext();
     context.gateway.snapshot.client = client;
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
     vi.spyOn(pane, "requestUpdate").mockImplementation(() => undefined);
     vi.spyOn(pane, "performUpdate").mockImplementation(() => undefined);
     pane.sessionKey = targetSessionKey;

@@ -22,7 +22,7 @@ vi.mock("../config/config.js", () => ({
   get isNixMode() {
     return cleanupConfigState.isNixMode;
   },
-  resolveConfigPath: () => "/tmp/.openclaw/openclaw.json",
+  resolveConfigPath: () => "/tmp/.carapace/carapace.json",
 }));
 
 vi.mock("../daemon/service.js", () => ({
@@ -48,17 +48,17 @@ export function createCleanupCommandRuntime() {
 export function resetCleanupCommandMocks() {
   vi.clearAllMocks();
   const cleanupPlan = {
-    stateDir: "/tmp/.openclaw",
-    configPath: "/tmp/.openclaw/openclaw.json",
-    oauthDir: "/tmp/.openclaw/credentials",
+    stateDir: "/tmp/.carapace",
+    configPath: "/tmp/.carapace/carapace.json",
+    oauthDir: "/tmp/.carapace/credentials",
     configInsideState: true,
     oauthInsideState: true,
-    workspaceDirs: ["/tmp/.openclaw/workspace"],
+    workspaceDirs: ["/tmp/.carapace/workspace"],
   };
   resolveCleanupPlanForDryRun.mockResolvedValue(cleanupPlan);
   resolveCleanupPlanForRemoval.mockResolvedValue(cleanupPlan);
   removePath.mockResolvedValue({ ok: true });
-  listAgentSessionDirs.mockResolvedValue(["/tmp/.openclaw/agents/main/sessions"]);
+  listAgentSessionDirs.mockResolvedValue(["/tmp/.carapace/agents/main/sessions"]);
   removeStateAndLinkedPaths.mockResolvedValue(true);
   removeWorkspaceDirs.mockResolvedValue([]);
   gatewayService.isLoaded.mockReset().mockResolvedValue(true);

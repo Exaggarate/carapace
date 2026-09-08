@@ -17,7 +17,7 @@ export type {
   ResolvedCodexPluginPolicy,
   ResolvedCodexPluginsPolicy,
 } from "./config-contracts.js";
-export { resolveOpenClawExecPolicyForCodexAppServer } from "./config-exec-approvals.js";
+export { resolveCarapaceExecPolicyForCodexAppServer } from "./config-exec-approvals.js";
 export {
   isCodexPairedNodeRemoteExecPlacementSandbox,
   isCodexRemoteExecPlacementSandbox,

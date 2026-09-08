@@ -28,17 +28,17 @@ const mocks = vi.hoisted(() => {
     }) satisfies AnyAgentTool;
 
   return {
-    createOpenClawToolsOptions: vi.fn(),
+    createCarapaceToolsOptions: vi.fn(),
     stubTool,
     onToolExecute,
   };
 });
 
-vi.mock("./openclaw-tools.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./openclaw-tools.js")>();
+vi.mock("./carapace-tools.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./carapace-tools.js")>();
   return {
-    createOpenClawTools: (options: unknown) => {
-      mocks.createOpenClawToolsOptions(options);
+    createCarapaceTools: (options: unknown) => {
+      mocks.createCarapaceToolsOptions(options);
       return [AUTOMATIONS_TOOL_NAME, "gateway"].map(mocks.stubTool);
     },
     filterToolsByClientCaps: actual.filterToolsByClientCaps,
@@ -47,7 +47,7 @@ vi.mock("./openclaw-tools.js", async (importOriginal) => {
 
 import "./test-helpers/fast-bash-tools.js";
 import "./test-helpers/fast-coding-tools.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import { createAgentToolsSandboxContext } from "./test-helpers/agent-tools-sandbox-context.js";
 import { AUTOMATIONS_TOOL_NAME } from "./tools/automations-tool-name.js";
 import {
@@ -55,34 +55,34 @@ import {
   withGatewayToolCallerIdentity,
 } from "./tools/gateway-caller-context.js";
 
-function firstOpenClawToolsOptions(): { cronSelfRemoveOnlyJobId?: string } | undefined {
-  return mocks.createOpenClawToolsOptions.mock.calls[0]?.[0] as
+function firstCarapaceToolsOptions(): { cronSelfRemoveOnlyJobId?: string } | undefined {
+  return mocks.createCarapaceToolsOptions.mock.calls[0]?.[0] as
     | { cronSelfRemoveOnlyJobId?: string }
     | undefined;
 }
 
-describe("createOpenClawCodingTools cron scope", () => {
+describe("createCarapaceCodingTools cron scope", () => {
   beforeEach(() => {
-    mocks.createOpenClawToolsOptions.mockClear();
+    mocks.createCarapaceToolsOptions.mockClear();
   });
 
   it("scopes cron-triggered jobs to self-removal", () => {
-    const tools = createOpenClawCodingTools({
+    const tools = createCarapaceCodingTools({
       trigger: "cron",
       jobId: "job-current",
     });
 
     expect(tools.map((tool) => tool.name)).toContain(AUTOMATIONS_TOOL_NAME);
-    expect(firstOpenClawToolsOptions()?.cronSelfRemoveOnlyJobId).toBe("job-current");
+    expect(firstCarapaceToolsOptions()?.cronSelfRemoveOnlyJobId).toBe("job-current");
   });
 
   it("does not scope non-cron sessions", () => {
-    createOpenClawCodingTools({
+    createCarapaceCodingTools({
       trigger: "user",
       jobId: "job-current",
     });
 
-    expect(firstOpenClawToolsOptions()?.cronSelfRemoveOnlyJobId).toBeUndefined();
+    expect(firstCarapaceToolsOptions()?.cronSelfRemoveOnlyJobId).toBeUndefined();
   });
 
   it.each([false, true])(
@@ -108,7 +108,7 @@ describe("createOpenClawCodingTools cron scope", () => {
             approvalAuthority: authority,
           },
           () =>
-            createOpenClawCodingTools({
+            createCarapaceCodingTools({
               runId,
               senderIsOwner: false,
               wrapBeforeToolCallHook: false,
@@ -116,7 +116,7 @@ describe("createOpenClawCodingTools cron scope", () => {
                 includeBaseCodingTools: false,
                 includeShellTools: false,
                 includeChannelTools: false,
-                includeOpenClawTools: true,
+                includeCarapaceTools: true,
                 includePluginTools: false,
               },
             }),
@@ -147,7 +147,7 @@ vi.mock("./lazy-exec-tool.js", async (importOriginal) => {
   };
 });
 
-describe("createOpenClawCodingTools exec notification routing", () => {
+describe("createCarapaceCodingTools exec notification routing", () => {
   it("binds native tool approval requests to the constructed permission generation", async () => {
     const generation = new AbortController();
     let approvalScope: AbortSignal | undefined;
@@ -155,7 +155,7 @@ describe("createOpenClawCodingTools exec notification routing", () => {
       approvalScope = AbortSignal.any([...(getGatewayToolCallerIdentity()?.approvalSignals ?? [])]);
       return { content: [], details: {} };
     });
-    const tools = createOpenClawCodingTools({
+    const tools = createCarapaceCodingTools({
       agentId: "main",
       sessionKey: "agent:main:scope",
       abortSignal: generation.signal,
@@ -164,7 +164,7 @@ describe("createOpenClawCodingTools exec notification routing", () => {
         includeBaseCodingTools: false,
         includeShellTools: false,
         includeChannelTools: false,
-        includeOpenClawTools: true,
+        includeCarapaceTools: true,
         includePluginTools: false,
       },
     });
@@ -182,14 +182,14 @@ describe("createOpenClawCodingTools exec notification routing", () => {
     (policySessionKey) => {
       const liveSessionKey = "agent:main:channel:group:example:thread:25";
 
-      createOpenClawCodingTools({
+      createCarapaceCodingTools({
         sessionKey: policySessionKey ?? liveSessionKey,
         runSessionKey: liveSessionKey,
         toolConstructionPlan: {
           includeBaseCodingTools: false,
           includeShellTools: true,
           includeChannelTools: false,
-          includeOpenClawTools: false,
+          includeCarapaceTools: false,
           includePluginTools: false,
         },
       });
@@ -205,7 +205,7 @@ describe("createOpenClawCodingTools exec notification routing", () => {
   );
 
   it("preserves an explicit process scope override", () => {
-    createOpenClawCodingTools({
+    createCarapaceCodingTools({
       sessionKey: "agent:main:policy",
       runSessionKey: "agent:worker:live",
       exec: { scopeKey: "explicit-process-owner" },
@@ -217,25 +217,25 @@ describe("createOpenClawCodingTools exec notification routing", () => {
   });
 });
 
-describe("createOpenClawCodingTools sandbox filesystem ownership", () => {
+describe("createCarapaceCodingTools sandbox filesystem ownership", () => {
   const sandbox = createAgentToolsSandboxContext({ workspaceDir: "/managed/workspace" });
 
   it("keeps host-owned tools available when no sandbox filesystem family is requested", () => {
-    mocks.createOpenClawToolsOptions.mockClear();
+    mocks.createCarapaceToolsOptions.mockClear();
 
-    const tools = createOpenClawCodingTools({
+    const tools = createCarapaceCodingTools({
       sandbox,
       toolConstructionPlan: {
         includeBaseCodingTools: false,
         includeShellTools: false,
         includeChannelTools: false,
-        includeOpenClawTools: true,
+        includeCarapaceTools: true,
         includePluginTools: true,
       },
     });
 
     expect(tools.map((tool) => tool.name)).toContain(AUTOMATIONS_TOOL_NAME);
-    expect(mocks.createOpenClawToolsOptions).toHaveBeenCalledOnce();
+    expect(mocks.createCarapaceToolsOptions).toHaveBeenCalledOnce();
   });
 
   it.each([
@@ -243,12 +243,12 @@ describe("createOpenClawCodingTools sandbox filesystem ownership", () => {
     { includeBaseCodingTools: false, includeShellTools: true },
   ])("rejects sandbox filesystem families without their bridge: %o", (families) => {
     expect(() =>
-      createOpenClawCodingTools({
+      createCarapaceCodingTools({
         sandbox,
         toolConstructionPlan: {
           ...families,
           includeChannelTools: false,
-          includeOpenClawTools: false,
+          includeCarapaceTools: false,
           includePluginTools: false,
         },
       }),

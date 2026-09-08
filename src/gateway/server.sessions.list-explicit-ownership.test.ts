@@ -6,7 +6,7 @@ import {
   replaceSessionEntrySync,
 } from "../config/sessions/session-accessor.js";
 import { addSessionMember, removeSessionMember } from "../config/sessions/session-sharing-store.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import type { GatewayClient } from "./server-methods/types.js";
 import { sharingPolicyClient } from "./session-sharing.test-utils.js";
@@ -22,12 +22,12 @@ import {
 setupGatewaySessionsHandlerTestHarness();
 
 test("sessions.list preserves recorded sentinel owners for explicit multi-agent federation", async () => {
-  const rootStateDir = process.env.OPENCLAW_STATE_DIR;
+  const rootStateDir = process.env.CARAPACE_STATE_DIR;
   if (!rootStateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+    throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
   }
   const stateDir = path.join(rootStateDir, "explicit-ownership-list-regression");
-  await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
     const agentsDir = path.join(stateDir, "agents");
     const storeTemplate = path.join(agentsDir, "{agentId}", "sessions", "sessions.json");
     testState.sessionConfig = { store: storeTemplate };
@@ -127,12 +127,12 @@ test("sessions.list preserves recorded sentinel owners for explicit multi-agent 
 });
 
 test("sessions.list preserves separate registered targets under a fixed store owner", async () => {
-  const rootStateDir = process.env.OPENCLAW_STATE_DIR;
+  const rootStateDir = process.env.CARAPACE_STATE_DIR;
   if (!rootStateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+    throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
   }
   const stateDir = path.join(rootStateDir, "fixed-owner-registered-list");
-  await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
     const storePath = path.join(stateDir, "shared.json");
     for (const agentId of ["main", "ops"]) {
       replaceSessionEntrySync(
@@ -151,7 +151,7 @@ test("sessions.list preserves separate registered targets under a fixed store ow
       connect: {
         minProtocol: 1,
         maxProtocol: 1,
-        client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+        client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
         role: "operator",
         scopes: ["operator.admin"],
       },
@@ -193,20 +193,20 @@ test.for(
     if (alias && process.platform === "win32") {
       context.skip();
     }
-    const rootStateDir = process.env.OPENCLAW_STATE_DIR;
+    const rootStateDir = process.env.CARAPACE_STATE_DIR;
     if (!rootStateDir) {
-      throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+      throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
     }
     const stateDir = path.join(rootStateDir, `physical-sharing-${change}-${alias}`);
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const storePath = path.join(stateDir, "shared.sqlite");
       const physicalPath = alias
-        ? path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite")
+        ? path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite")
         : storePath;
       testState.sessionConfig = { store: storePath };
       testState.agentsConfig = { ownership: "explicit", list: [{ id: "main" }, { id: "ops" }] };
       testState.agentConfig = { sessionStore: { agentId: "ops" } };
-      openOpenClawAgentDatabase({ agentId: "main", path: physicalPath });
+      openCarapaceAgentDatabase({ agentId: "main", path: physicalPath });
       if (alias) {
         await fs.symlink(physicalPath, storePath);
       }
@@ -290,12 +290,12 @@ test.for(
 );
 
 test("sessions.list never substitutes a later same-owner sentinel after the selected row disappears", async () => {
-  const rootStateDir = process.env.OPENCLAW_STATE_DIR;
+  const rootStateDir = process.env.CARAPACE_STATE_DIR;
   if (!rootStateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+    throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
   }
   const stateDir = path.join(rootStateDir, "same-owner-sentinel");
-  await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
     const first = {
       agentId: "main",
       storePath: path.join(stateDir, "a-first.sqlite"),

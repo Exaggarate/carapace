@@ -15,19 +15,19 @@ import { listBundledPackageChannelMetadata } from "./bundled-package-channel-met
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 
 const tempDirs: string[] = [];
-const originalBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-const originalTrustBundledPluginsDir = process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+const originalBundledPluginsDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+const originalTrustBundledPluginsDir = process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
 
 afterEach(() => {
   if (originalBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
   }
   if (originalTrustBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrustBundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrustBundledPluginsDir;
   }
   cleanupTempDirs(tempDirs);
   clearPluginMetadataLifecycleCaches();
@@ -36,8 +36,8 @@ afterEach(() => {
 });
 
 function useBundledPluginsDir(extensionsRoot: string): void {
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = extensionsRoot;
-  process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+  process.env.CARAPACE_BUNDLED_PLUGINS_DIR = extensionsRoot;
+  process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
   vi.mocked(resolveBundledPluginsDir).mockReturnValue(extensionsRoot);
 }
 
@@ -46,8 +46,8 @@ describe("bundled package channel metadata", () => {
     const root = makeTempRepoRoot(tempDirs, "bpcm-");
     const extensionsRoot = path.join(root, "dist", "extensions");
     writeJsonFile(path.join(extensionsRoot, "matrix", "package.json"), {
-      name: "@openclaw/matrix",
-      openclaw: {
+      name: "@carapace/matrix",
+      carapace: {
         channel: {
           id: "matrix",
           label: "Matrix",
@@ -61,7 +61,7 @@ describe("bundled package channel metadata", () => {
         },
       },
     });
-    writeJsonFile(path.join(extensionsRoot, "matrix", "openclaw.plugin.json"), {
+    writeJsonFile(path.join(extensionsRoot, "matrix", "carapace.plugin.json"), {
       id: "matrix",
       configSchema: { type: "object" },
       channels: ["matrix"],
@@ -90,15 +90,15 @@ describe("bundled package channel metadata", () => {
     useBundledPluginsDir(extensionsRoot);
 
     writeJsonFile(packagePath, {
-      name: "@openclaw/matrix",
-      openclaw: {
+      name: "@carapace/matrix",
+      carapace: {
         channel: {
           id: "matrix",
           label: "Before",
         },
       },
     });
-    writeJsonFile(path.join(extensionsRoot, "matrix", "openclaw.plugin.json"), {
+    writeJsonFile(path.join(extensionsRoot, "matrix", "carapace.plugin.json"), {
       id: "matrix",
       configSchema: { type: "object" },
       channels: ["matrix"],
@@ -113,8 +113,8 @@ describe("bundled package channel metadata", () => {
     ).toBe("Before");
 
     writeJsonFile(packagePath, {
-      name: "@openclaw/matrix",
-      openclaw: {
+      name: "@carapace/matrix",
+      carapace: {
         channel: {
           id: "matrix",
           label: "After",
@@ -144,7 +144,7 @@ describe("bundled channel schema source", () => {
     const tracked =
       listGitTrackedFiles({
         repoRoot: pluginTestRepoRoot,
-        pathspecs: "extensions/*/openclaw.plugin.json",
+        pathspecs: "extensions/*/carapace.plugin.json",
       }) ?? [];
     expect(tracked.length).toBeGreaterThan(0);
     const generatedChannelIds = new Set(

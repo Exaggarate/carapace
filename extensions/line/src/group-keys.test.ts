@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Line tests cover group keys plugin behavior.
 import { describe, expect, it } from "vitest";
 import {
@@ -64,7 +64,7 @@ describe("resolveLineGroupConfigEntry", () => {
       "*": { requireMention: false },
       C1: { systemPrompt: "team bot" },
     };
-    const cfg = { channels: { line: { groups } } } as unknown as OpenClawConfig;
+    const cfg = { channels: { line: { groups } } } as unknown as CarapaceConfig;
 
     const entry = resolveLineGroupConfigEntry(groups, { groupId: "C1" });
     expect(entry?.requireMention !== false).toBe(
@@ -90,7 +90,7 @@ describe("account-scoped LINE groups", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveLineGroupsConfig(cfg, "work")).toEqual({
       "group:g1": { requireMention: false },
@@ -137,7 +137,7 @@ describe("line group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveLineGroupRequireMention({ cfg, groupId: "same" })).toBe(false);
     expect(resolveLineGroupRequireMention({ cfg, groupId: "room:same" })).toBe(false);
@@ -168,7 +168,7 @@ describe("line group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveLineGroupRequireMention({ cfg, groupId: "g123", accountId: "work" })).toBe(false);
   });

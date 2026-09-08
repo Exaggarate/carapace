@@ -78,8 +78,8 @@ suite.define(() => {
           await page.goto(controlUiSessionUrl(suite.server.baseUrl, workKey));
           await gateway.waitForRequest("chat.startup");
           await page.locator(".sidebar-footer-bar__home").click();
-          const panel = page.locator("openclaw-assistant-panel");
-          await panel.locator("openclaw-chat-pane").waitFor();
+          const panel = page.locator("carapace-assistant-panel");
+          await panel.locator("carapace-chat-pane").waitFor();
           await gateway.waitForRequest("chat.startup", { after: 1 });
           await page.screenshot({ path: path.join(artifactDir, "home-open.png") });
           const composer = panel.locator(".agent-chat__composer-combobox textarea");
@@ -104,7 +104,7 @@ suite.define(() => {
   );
 
   it("refreshes reconnected Home context after a roster-only title update", async () => {
-    const proofDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+    const proofDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
       ? suite.artifactDir
       : undefined;
     await suite.withPage(
@@ -139,7 +139,7 @@ suite.define(() => {
         });
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, work.key));
         await page.locator(".sidebar-footer-bar__home").click();
-        const panel = page.locator("openclaw-assistant-panel");
+        const panel = page.locator("carapace-assistant-panel");
         const details = panel.locator(".assistant-panel-context details");
         await details.locator("summary").click();
         const reference = details.locator("pre");

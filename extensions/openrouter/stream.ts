@@ -1,14 +1,14 @@
 // Openrouter plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { buildProviderStreamFamilyHooks } from "openclaw/plugin-sdk/provider-stream-family";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { buildProviderStreamFamilyHooks } from "carapace/plugin-sdk/provider-stream-family";
 import {
   composeProviderStreamWrappers,
   createPayloadPatchStreamWrapper,
   normalizeOpenAICompatibleReasoningReplay,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { asNonArrayRecord, readStringValue } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-stream-shared";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { asNonArrayRecord, readStringValue } from "carapace/plugin-sdk/string-coerce-runtime";
 import { isOpenRouterDeepSeekV4ModelId, normalizeOpenRouterModelFamilyId } from "./models.js";
 import {
   isOpenRouterProxyReasoningUnsupportedModel,
@@ -65,10 +65,10 @@ function mergeOpenRouterAuthHeaders(options: Parameters<StreamFn>[2]): Parameter
     headers.set("Authorization", `Bearer ${apiKey}`);
   }
   if (!headers.has("http-referer")) {
-    headers.set("HTTP-Referer", "https://openclaw.ai");
+    headers.set("HTTP-Referer", "https://github.com/Exaggarate/carapace");
   }
   if (!headers.has("x-openrouter-title")) {
-    headers.set("X-OpenRouter-Title", "OpenClaw");
+    headers.set("X-OpenRouter-Title", "Carapace");
   }
   return {
     ...options,

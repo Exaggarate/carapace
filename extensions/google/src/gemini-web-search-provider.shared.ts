@@ -2,7 +2,7 @@
 import {
   isRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeGoogleApiBaseUrl } from "./google-api-base-url.js";
 
 const DEFAULT_GEMINI_WEB_SEARCH_MODEL = "gemini-2.5-flash";

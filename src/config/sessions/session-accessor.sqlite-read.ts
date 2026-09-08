@@ -8,13 +8,13 @@ import {
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
 import { extractAssistantPhaseText } from "../../shared/chat-message-content.js";
-import { isTranscriptOnlyOpenClawAssistantModel } from "../../shared/transcript-only-openclaw-assistant.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { isTranscriptOnlyCarapaceAssistantModel } from "../../shared/transcript-only-carapace-assistant.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { resolveOpenClawAgentSqlitePath } from "../../state/openclaw-agent-db.paths.js";
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { resolveCarapaceAgentSqlitePath } from "../../state/carapace-agent-db.paths.js";
 import type {
   LatestTranscriptAssistantMessage,
   LatestTranscriptAssistantText,
@@ -46,7 +46,7 @@ export type SqliteTranscriptStorageRow = SqliteTranscriptSnapshotRow & {
   createdAt: number;
 };
 
-export function createTranscriptIdentityReader(database: OpenClawAgentDatabase, sessionId: string) {
+export function createTranscriptIdentityReader(database: CarapaceAgentDatabase, sessionId: string) {
   const read = prepareSqliteQuerySync<
     string,
     { event_id: string; parent_id: string | null; seq: number }
@@ -68,7 +68,7 @@ export function createTranscriptIdentityReader(database: OpenClawAgentDatabase, 
 }
 
 export function readTranscriptIdentityByEventId(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   eventId: string,
 ): { eventId: string; parentId: string | null; seq: number } | undefined {
@@ -93,7 +93,7 @@ export function loadTranscriptReadSnapshotSync(scope: SessionTranscriptReadScope
   version: SessionTranscriptContextVersion;
 } {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return runSqliteDeferredTransactionSync(
     database.db,
     () => {
@@ -118,7 +118,7 @@ export function inspectTranscriptEventsSync(scope: SessionTranscriptReadScope): 
   snapshot: SessionStateDeleteSnapshot;
 } {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return runSqliteDeferredTransactionSync(
     database.db,
     () => ({
@@ -135,7 +135,7 @@ export function inspectTranscriptEventsSync(scope: SessionTranscriptReadScope): 
 /** Loads only the first transcript row for header metadata hot paths. */
 export function loadTranscriptHeaderSync(scope: SessionTranscriptReadScope): unknown {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const db = getSessionKysely(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -159,7 +159,7 @@ export function loadTranscriptTailEventsSync(
     return [];
   }
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const db = getSessionKysely(database.db);
   return executeSqliteQuerySync(
     database.db,
@@ -181,7 +181,7 @@ export function loadTranscriptEventRowsAfterSeqSync(
   throughSeq?: number,
 ): SessionTranscriptEventRow[] {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const db = getSessionKysely(database.db);
   let query = db
     .selectFrom("transcript_events")
@@ -203,7 +203,7 @@ export function readTranscriptEventAtSeqSync(
   seq: number,
 ): SessionTranscriptEventRow | undefined {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const db = getSessionKysely(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -222,7 +222,7 @@ export function readTranscriptEventAtSeqSync(
 }
 
 export function loadTranscriptEventsFromDatabase(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   options: { beforeEventSeq?: number; projection?: "reset-boundary" } = {},
 ): TranscriptEvent[] {
@@ -246,7 +246,7 @@ export function loadTranscriptEventsFromDatabase(
 }
 
 export function readTranscriptSnapshot(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): { events: TranscriptEvent[]; rows: SqliteTranscriptSnapshotRow[] } {
   const rows = readTranscriptEventRows(database, sessionId);
@@ -258,7 +258,7 @@ export function readTranscriptSnapshot(
 
 /** Reads transcript rows without decoding payloads for snapshot comparison. */
 export function readTranscriptEventRows(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   sessionId: string,
   options: { afterSeq?: number } = {},
 ): SqliteTranscriptSnapshotRow[] {
@@ -280,7 +280,7 @@ export function readTranscriptEventRows(
 
 /** Reads exact transcript storage rows for guarded doctor rewrites. */
 export function readTranscriptStorageRows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): SqliteTranscriptStorageRow[] {
   const db = getSessionKysely(database.db);
@@ -307,7 +307,7 @@ function sqliteTranscriptJsonlByteSize() {
 
 /** Reads transcript freshness and byte size without materializing event rows. */
 function readTranscriptStatsFromDatabase(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   sessionId: string,
 ): SessionTranscriptStats {
   const db = getSessionKysely(database.db);
@@ -345,7 +345,7 @@ function readTranscriptStatsFromDatabase(
 /** Reads transcript freshness and byte size without materializing event rows. */
 export function readTranscriptStatsSync(scope: SessionTranscriptReadScope): SessionTranscriptStats {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return readTranscriptStatsFromDatabase(database, resolved.sessionId);
 }
 
@@ -364,14 +364,14 @@ export function readTranscriptStatsBatchReadOnlySync(
   for (const [index, scope] of scopes.entries()) {
     const resolved = resolveSqliteTranscriptReadScope(scope);
     const options = toDatabaseOptions(resolved);
-    const pathname = resolveOpenClawAgentSqlitePath(options);
+    const pathname = resolveCarapaceAgentSqlitePath(options);
     const key = `${options.agentId}\0${pathname}`;
     const group = groups.get(key) ?? { options, items: [] };
     group.items.push({ index, sessionId: resolved.sessionId });
     groups.set(key, group);
   }
   for (const group of groups.values()) {
-    const read = withOpenClawAgentDatabaseReadOnly((database) => {
+    const read = withCarapaceAgentDatabaseReadOnly((database) => {
       for (const item of group.items) {
         results[item.index] = readTranscriptStatsFromDatabase(database, item.sessionId);
       }
@@ -388,10 +388,10 @@ export function readTranscriptStatsBatchReadOnlySync(
 /** Reads the latest visible assistant text from SQLite transcript rows in reverse order. */
 export function loadLatestAssistantText(
   scope: SessionTranscriptReadScope,
-  options: { includeTranscriptOnlyOpenClawAssistant?: boolean } = {},
+  options: { includeTranscriptOnlyCarapaceAssistant?: boolean } = {},
 ): LatestTranscriptAssistantText | undefined {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return runSqliteDeferredTransactionSync(
     database.db,
     () => {
@@ -451,7 +451,7 @@ function parseLatestAssistantText(
 
 function parseLatestAssistantMessageEvent(
   raw: string,
-  options: { includeTranscriptOnlyOpenClawAssistant?: boolean } = {},
+  options: { includeTranscriptOnlyCarapaceAssistant?: boolean } = {},
 ): LatestTranscriptAssistantMessage | undefined {
   let parsed: {
     id?: unknown;
@@ -467,8 +467,8 @@ function parseLatestAssistantMessageEvent(
     return undefined;
   }
   if (
-    !options.includeTranscriptOnlyOpenClawAssistant &&
-    isTranscriptOnlyOpenClawAssistantModel(message.provider, message.model)
+    !options.includeTranscriptOnlyCarapaceAssistant &&
+    isTranscriptOnlyCarapaceAssistantModel(message.provider, message.model)
   ) {
     return undefined;
   }
@@ -483,7 +483,7 @@ export async function hasSessionTranscriptMessage(
   scope: SessionTranscriptReadScope,
 ): Promise<boolean> {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const db = getSessionKysely(database.db);
   // Classification can change during a concurrent rewrite. Both probes must see
   // the same snapshot or an always-present message can disappear between them.
@@ -540,12 +540,12 @@ export async function findTranscriptEvent(
   match: (event: TranscriptEvent) => boolean,
 ): Promise<{ event: TranscriptEvent } | undefined> {
   const resolved = resolveSqliteTranscriptReadScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return findTranscriptEventInDatabase(database, resolved.sessionId, match);
 }
 
 export function findTranscriptEventInDatabase(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   sessionId: string,
   match: (event: TranscriptEvent) => boolean,
 ): { event: TranscriptEvent } | undefined {

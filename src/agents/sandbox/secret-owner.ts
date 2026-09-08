@@ -1,5 +1,5 @@
 /** Guards SSH sandbox use against unresolved runtime SecretRefs. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { coerceSecretRef } from "../../config/types.secrets.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { secretRefKey } from "../../secrets/ref-contract.js";
@@ -15,7 +15,7 @@ const SSH_SECRET_KEYS = ["identityData", "certificateData", "knownHostsData"] as
 
 /** Rejects cold or unmaterialized SSH credentials before any host SSH fallback is possible. */
 export function assertSshSandboxSecretOwnerAvailable(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   scope: SandboxScope;
   agentId?: string;
 }): void {

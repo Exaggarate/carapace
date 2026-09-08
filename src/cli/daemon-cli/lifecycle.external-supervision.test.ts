@@ -131,8 +131,8 @@ describe("external gateway supervision lifecycle", () => {
   });
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_SUPERVISOR_MODE"]);
-    process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+    envSnapshot = captureEnv(["CARAPACE_SUPERVISOR_MODE"]);
+    process.env.CARAPACE_SUPERVISOR_MODE = "external";
 
     for (const mock of [
       service.readCommand,

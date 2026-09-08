@@ -1,6 +1,6 @@
-import { isContextOverflow } from "@openclaw/ai/internal/runtime";
-import { isProviderRefusalAssistantError } from "@openclaw/llm-core/diagnostics";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isContextOverflow } from "@carapace/ai/internal/runtime";
+import { isProviderRefusalAssistantError } from "@carapace/llm-core/diagnostics";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import type { AssistantMessage } from "../../../llm/types.js";
 import { MAX_OVERFLOW_COMPACTION_ATTEMPTS } from "../../agent-compaction-constants.js";

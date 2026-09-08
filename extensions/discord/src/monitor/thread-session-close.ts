@@ -1,12 +1,12 @@
 // Discord plugin module implements thread session close behavior.
-import { listAgentIds } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { listAgentIds } from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   deleteSessionEntry,
   listSessionEntries,
   resolveStorePath,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 /**
  * Closes every session entry in the store whose key contains {@link threadId}.
@@ -14,7 +14,7 @@ import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coe
  * that a later inbound message starts a fresh session in every reset mode.
  */
 export async function closeDiscordThreadSessions(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   threadId: string;
 }): Promise<number> {
   const { cfg, threadId } = params;

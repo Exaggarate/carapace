@@ -1,17 +1,17 @@
-import { buildExecApprovalPendingReplyPayload } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { buildExecApprovalPendingReplyPayload } from "carapace/plugin-sdk/approval-reply-runtime";
 // Signal tests cover core plugin behavior.
 import {
   createMessageReceiptFromOutboundResults,
   verifyChannelMessageAdapterCapabilityProofs,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { installChannelDmPolicyContractSuite } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-outbound";
+import { installChannelDmPolicyContractSuite } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createPluginSetupWizardStatus,
   createTestWizardPrompter,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { listSignalAccountIds } from "./accounts.js";
 import {
@@ -379,7 +379,7 @@ describe("probeSignal", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountOverrides: {},
     });
 
@@ -411,7 +411,7 @@ describe("signalPlugin pairing.notifyApproval", () => {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it.each([
     {
@@ -454,7 +454,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       input: "signal:ops",
       normalized: "ops",
       preferredKind: "group",
@@ -478,7 +478,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       to: "signal:me",
       accountId: "default",
     });
@@ -513,7 +513,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       to: "signal:me",
       text: "approval",
       deps: { signal: send },
@@ -546,7 +546,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       to: "signal:ops",
       text: "approval",
       deps: { signal: send },
@@ -570,7 +570,7 @@ describe("signal outbound", () => {
 
     await expect(
       signalPlugin.outbound?.sendFormattedText?.({
-        cfg: { channels: { signal: { replyToMode: "first" } } } as OpenClawConfig,
+        cfg: { channels: { signal: { replyToMode: "first" } } } as CarapaceConfig,
         to: "+15551234567",
         text: "a".repeat(5000),
         deps: { signal: send },
@@ -613,7 +613,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       to: "signal:ops",
       text: "approval",
       mediaUrl: "file:///tmp/signal-proof.png",
@@ -641,7 +641,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       to: "signal:home",
     });
 
@@ -664,7 +664,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       input: "signal:home",
       normalized: "home",
       preferredKind: "user",
@@ -684,7 +684,7 @@ describe("signal outbound", () => {
           defaultTo: "signal:home",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const defaultTo = signalPlugin.config.resolveDefaultTo?.({
       cfg,
@@ -716,7 +716,7 @@ describe("signal outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "main",
       target: "signal:ops",
       resolvedTarget: {
@@ -742,7 +742,7 @@ describe("signal outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       signalPlugin.directory?.listPeers?.({ cfg, query: "me", runtime: {} as never }),
@@ -777,7 +777,7 @@ describe("signal outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveReplyToMode({ cfg, accountId: "work", chatType: "group" })).toBe("all");
     expect(resolveReplyToMode({ cfg, accountId: "work", chatType: "direct" })).toBe("off");
@@ -800,7 +800,7 @@ describe("signal outbound", () => {
             replyToModeByChatType: { direct: "first" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "default",
       context: {
         Channel: "signal",
@@ -874,7 +874,7 @@ describe("signal outbound", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         accountId: "default",
         payload: {
           text: "Approval required.",
@@ -912,7 +912,7 @@ describe("signal outbound", () => {
           targets: [{ channel: "signal", to: "+15551230000" }],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const payload = buildExecApprovalPendingReplyPayload({
       approvalId: "exec-after-delivery",
       approvalSlug: "exec-aft",
@@ -988,7 +988,7 @@ describe("signal outbound", () => {
           targets: [{ channel: "signal", to: "+15551230000" }],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const payload = buildExecApprovalPendingReplyPayload({
       approvalId: "exec-rendered-approval",
       approvalSlug: "exec-ren",
@@ -1048,7 +1048,7 @@ describe("signal outbound", () => {
           targets: [{ channel: "signal", to: "+15551230000" }],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const payload = buildExecApprovalPendingReplyPayload({
       approvalId: "exec-mixed-presentation",
       approvalSlug: "exec-mixed-presentation",
@@ -1122,7 +1122,7 @@ describe("signal outbound", () => {
           targets: [{ channel: "signal", to: "+15551230000" }],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const payload: ReplyPayload = {
       text: ["Exec approval required", "ID: exec-1"].join("\n"),
       channelData: {
@@ -1239,7 +1239,7 @@ describe("signal outbound", () => {
     const send = vi.fn(async () => ({ messageId: "signal-text-1" }));
 
     await signalPlugin.message?.send?.text?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: "signal:+15555550123",
       text: "reply",
       replyToId: "1700000000001",
@@ -1277,7 +1277,7 @@ describe("signal outbound", () => {
       proofs: {
         text: async () => {
           const result = await signalPlugin.message?.send?.text?.({
-            cfg: {} as OpenClawConfig,
+            cfg: {} as CarapaceConfig,
             to: "signal:+15555550123",
             text: "hello",
             deps,
@@ -1293,7 +1293,7 @@ describe("signal outbound", () => {
         },
         media: async () => {
           const result = await signalPlugin.message?.send?.media?.({
-            cfg: {} as OpenClawConfig,
+            cfg: {} as CarapaceConfig,
             to: "signal:+15555550123",
             text: "image",
             mediaUrl: "https://example.com/image.png",
@@ -1321,7 +1321,7 @@ describe("signal outbound", () => {
             body: "original message",
           });
           await signalPlugin.message?.send?.text?.({
-            cfg: {} as OpenClawConfig,
+            cfg: {} as CarapaceConfig,
             to: "signal:+15555550123",
             text: "reply",
             replyToId: "1700000000001",

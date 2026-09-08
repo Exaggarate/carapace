@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createRuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it } from "vitest";
 import { linePlugin } from "../channel-plugin-api.js";
 
@@ -16,7 +16,7 @@ const accountUser = `U${"4".repeat(32)}`;
 const group = `C${"5".repeat(32)}`;
 const room = `R${"6".repeat(32)}`;
 const accountGroup = `C${"7".repeat(32)}`;
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   channels: {
     line: {
       allowFrom: [user, `line:user:${user}`, "*", "accessGroup:operators"],

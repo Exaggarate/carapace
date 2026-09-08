@@ -1,6 +1,6 @@
-import type { ChannelDoctorConfigMutation } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import type { ChannelDoctorConfigMutation } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { asObjectRecord } from "carapace/plugin-sdk/runtime-doctor-migrations";
 
 function stripTimeoutSeconds(value: unknown): { value: unknown; changed: boolean } {
   const record = asObjectRecord(value);
@@ -24,7 +24,7 @@ function stripTimeoutSeconds(value: unknown): { value: unknown; changed: boolean
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   const rawEntry = asObjectRecord(
     (cfg.channels as Record<string, unknown> | undefined)?.clickclack,
@@ -42,7 +42,7 @@ export function normalizeCompatibilityConfig({
       channels: {
         ...cfg.channels,
         clickclack: stripped.value,
-      } as OpenClawConfig["channels"],
+      } as CarapaceConfig["channels"],
     },
     changes: ["Removed retired ClickClack timeout tuning knobs."],
   };

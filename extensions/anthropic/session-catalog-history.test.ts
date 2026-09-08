@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import { importClaudeHistory } from "./session-catalog-history.js";
 import { parseTranscriptLine } from "./session-catalog-transcript.js";
 
 const appended: Array<Record<string, unknown>> = [];
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", () => ({
+vi.mock("carapace/plugin-sdk/session-transcript-runtime", () => ({
   withSessionTranscriptWriteLock: async (
     _params: unknown,
     run: (transcript: {
@@ -61,7 +61,7 @@ describe("importClaudeHistory", () => {
       sessionId: "session-1",
       sessionKey: "agent:main:catalog-adopt",
       agentId: "main",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
     });
 
     expect(JSON.stringify(appended)).not.toContain("private skill instructions");
@@ -97,7 +97,7 @@ describe("importClaudeHistory", () => {
         sessionId: "session-1",
         sessionKey: "agent:main:catalog-adopt",
         agentId: "main",
-        config: {} as OpenClawConfig,
+        config: {} as CarapaceConfig,
       });
     } finally {
       vi.useRealTimers();
@@ -125,16 +125,16 @@ describe("importClaudeHistory", () => {
       sessionId: "session-1",
       sessionKey: "agent:main:catalog-adopt",
       agentId: "main",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
     });
 
     const userRow = appended.find((message) => message.role === "user");
     // mirrorOrigin keeps imported native prompts out of ownRecentUserTexts; without
     // it a repeated external prompt like "continue" is swallowed as self-echo.
-    expect(userRow?.["__openclaw"]).toMatchObject({ mirrorOrigin: "claude-catalog-import" });
+    expect(userRow?.["__carapace"]).toMatchObject({ mirrorOrigin: "claude-catalog-import" });
     const assistantRow = appended.find((message) => message.role === "assistant");
     expect(assistantRow).toBeDefined();
-    expect(assistantRow?.["__openclaw"]).toBeUndefined();
+    expect(assistantRow?.["__carapace"]).toBeUndefined();
   });
 
   it("omits empty native reasoning records instead of rendering a placeholder", async () => {
@@ -149,7 +149,7 @@ describe("importClaudeHistory", () => {
       sessionId: "session-1",
       sessionKey: "agent:main:catalog-adopt",
       agentId: "main",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
     });
 
     expect(appended).toHaveLength(1);
@@ -166,7 +166,7 @@ describe("importClaudeHistory", () => {
       sessionId: "session-1",
       sessionKey: "agent:main:catalog-adopt",
       agentId: "main",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
     });
 
     expect(appended).toHaveLength(1);

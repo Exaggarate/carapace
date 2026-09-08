@@ -20,11 +20,11 @@ async function runChannelMutation(verb: string, account?: string) {
     args.push("--delete");
   }
   const program = new Command()
-    .name("openclaw")
+    .name("carapace")
     .enablePositionalOptions()
     .exitOverride()
     .configureOutput({ writeErr: () => undefined });
-  await registerChannelsCli(program, ["node", "openclaw", ...args]);
+  await registerChannelsCli(program, ["node", "carapace", ...args]);
   await program.parseAsync(args, { from: "user" });
 }
 

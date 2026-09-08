@@ -1,7 +1,7 @@
 /**
  * Shared Browser CLI resize runner used by resize and set viewport commands.
  */
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { ACT_MAX_VIEWPORT_DIMENSION } from "../browser/act-policy.js";
 import {
   callBrowserRequest,

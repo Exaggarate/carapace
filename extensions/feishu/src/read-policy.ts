@@ -1,16 +1,16 @@
 import {
   compileAllowlist,
   resolveAllowlistMatchByCandidates,
-} from "openclaw/plugin-sdk/allow-from";
-import { ToolAuthorizationError } from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/allow-from";
+import { ToolAuthorizationError } from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   resolveDefaultGroupPolicy,
   resolveOpenProviderRuntimeGroupPolicy,
-} from "openclaw/plugin-sdk/runtime-group-policy";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-group-policy";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeFeishuChatType } from "./chat-type.js";
 import {
   hasExplicitFeishuGroupConfig,
@@ -29,7 +29,7 @@ type FeishuActionReadContext = Pick<
   | "toolContext"
 >;
 
-type FeishuReadContext = FeishuActionReadContext | OpenClawPluginToolContext;
+type FeishuReadContext = FeishuActionReadContext | CarapacePluginToolContext;
 
 function isActionContext(ctx: FeishuReadContext): ctx is FeishuActionReadContext {
   return "toolContext" in ctx;
@@ -88,7 +88,7 @@ function isCurrentChat(params: {
   );
 }
 
-function resolveFeishuReadGroupPolicy(cfg: OpenClawConfig, account: ResolvedFeishuAccount) {
+function resolveFeishuReadGroupPolicy(cfg: CarapaceConfig, account: ResolvedFeishuAccount) {
   return resolveOpenProviderRuntimeGroupPolicy({
     providerConfigPresent: cfg.channels?.feishu !== undefined,
     groupPolicy: account.config.groupPolicy,
@@ -97,7 +97,7 @@ function resolveFeishuReadGroupPolicy(cfg: OpenClawConfig, account: ResolvedFeis
 }
 
 export function isFeishuGroupReadAllowed(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   account: ResolvedFeishuAccount,
   chatId: string,
   current: boolean,
@@ -131,7 +131,7 @@ export function isFeishuGroupReadAllowed(
 }
 
 export function isFeishuGroupReadEnabled(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   account: ResolvedFeishuAccount,
   chatId: string,
 ): boolean {
@@ -149,7 +149,7 @@ function isDmUniversallyAllowed(account: ResolvedFeishuAccount): boolean {
 }
 
 export function assertFeishuChatReadAllowed(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedFeishuAccount;
   chatId: string;
   chatType?: FeishuChatType;
@@ -165,7 +165,7 @@ export function assertFeishuChatReadAllowed(params: {
 type FeishuChatReadPreliminaryDecision = "allow" | "deny" | "needs-metadata";
 
 export function resolveFeishuChatReadPreliminaryAuthorization(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedFeishuAccount;
   chatId: string;
   chatType?: FeishuChatType;
@@ -212,7 +212,7 @@ export type FeishuChatMemberReadAuthorization =
     };
 
 export function authorizeFeishuChatMemberRead(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedFeishuAccount;
   chatId: string;
   chatType?: FeishuChatType;
@@ -260,7 +260,7 @@ export function authorizeFeishuChatMemberRead(params: {
 }
 
 export function canEnumerateAllFeishuGroups(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   account: ResolvedFeishuAccount,
 ): boolean {
   const policy = resolveFeishuReadGroupPolicy(cfg, account);

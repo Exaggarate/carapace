@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { createPluginMetadataSnapshot } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
 import * as discovery from "../plugins/discovery.js";
 import * as loader from "../plugins/loader.js";
@@ -14,13 +14,13 @@ import {
   restoreActivePluginRegistrySnapshot,
   setActivePluginRegistry,
 } from "../plugins/runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { readTranscriptLibraryStatus } from "./status.js";
 import { TranscriptsStore } from "./store.js";
 
 describe("transcript setup metadata boundary", () => {
   it("offers a cold manifest source before and after a provider-only scoped registration without discovering runtime in status", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const pluginId = "fixture-captions";
       const providerId = "fixture-caption-source";
       const rootDir = state.statePath("fixture-plugin");
@@ -38,13 +38,13 @@ describe("transcript setup metadata boundary", () => {
         name: "Fixture captions",
         autoStart: { accountId: "optional", meetingUrl: "required" },
       };
-      const manifestPath = await state.writeJson("fixture-plugin/openclaw.plugin.json", {
+      const manifestPath = await state.writeJson("fixture-plugin/carapace.plugin.json", {
         id: pluginId,
         configSchema: { type: "object", additionalProperties: false, properties: {} },
         contracts: { transcriptSourceProviders: [providerId] },
         transcriptSources: { [providerId]: descriptor },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         plugins: {
           allow: [pluginId],
           entries: { [pluginId]: { enabled: true } },
@@ -85,7 +85,7 @@ describe("transcript setup metadata boundary", () => {
       setActivePluginRegistry(active);
       const store = new TranscriptsStore(state.statePath("transcripts"));
       const readStatus = async () => {
-        const discover = vi.spyOn(discovery, "discoverOpenClawPlugins").mockImplementation(() => {
+        const discover = vi.spyOn(discovery, "discoverCarapacePlugins").mockImplementation(() => {
           throw new Error("status must not discover plugins");
         });
         const resolve = vi.spyOn(loader, "resolveRuntimePluginRegistry").mockImplementation(() => {

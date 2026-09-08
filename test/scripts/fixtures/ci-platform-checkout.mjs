@@ -84,7 +84,7 @@ function prepareDocsPublisher() {
     "lib/mintlify-accordion.mjs",
     "docs-mdx-repair.md",
   ]) {
-    const output = path.join(target, ".openclaw-sync", name);
+    const output = path.join(target, ".carapace-sync", name);
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.copyFileSync(
       path.join(source, name === "docs-mdx-repair.md" ? ".github/codex/prompts" : "scripts", name),
@@ -905,7 +905,7 @@ async function command() {
   } else if (
     operation === "diff" &&
     ((options.docsPublish &&
-      args.join(" ") === "--quiet -- docs .openclaw-sync package.json package-lock.json") ||
+      args.join(" ") === "--quiet -- docs .carapace-sync package.json package-lock.json") ||
       (options.docsAgent && args.join(" ") === "--quiet") ||
       options.maturity)
   ) {

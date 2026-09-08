@@ -18,7 +18,7 @@ type PendingPluginBindingRequestEntry = {
 const PENDING_PLUGIN_BINDING_REQUEST_TTL_MS = 30 * 60_000;
 const MAX_PENDING_PLUGIN_BINDING_REQUESTS = 512;
 const pendingRequests = resolveGlobalMap<string, PendingPluginBindingRequestEntry>(
-  Symbol.for("openclaw.pluginBindingPendingRequests"),
+  Symbol.for("carapace.pluginBindingPendingRequests"),
   (requests) => {
     for (const entry of requests.values()) {
       clearTimeout(entry.timeoutId);

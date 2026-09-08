@@ -1,7 +1,7 @@
 import "../../styles/approval.css";
 import "../../styles/chat/question-card.css";
 import { consume } from "@lit/context";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -23,7 +23,7 @@ import {
   type QuestionPrompt,
 } from "../../app/question-prompt.ts";
 import { t } from "../../i18n/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import {
   createGatewayQuestionPanelProps,
   renderChatQuestionSummary,
@@ -31,7 +31,7 @@ import {
 
 type QuestionPageRequestError = "connection" | "unavailable" | null;
 
-export class QuestionPage extends OpenClawLightDomElement {
+export class QuestionPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: false })
   context!: ApplicationContext<RouteId>;
 
@@ -188,7 +188,7 @@ export class QuestionPage extends OpenClawLightDomElement {
       onSubmit: (answers) => submitQuestionPrompt(this.questionState, prompt.id, answers),
       onSkip: () => cancelQuestionPrompt(this.questionState, prompt.id),
     });
-    return html`<openclaw-chat-question-panel .props=${props}></openclaw-chat-question-panel>`;
+    return html`<carapace-chat-question-panel .props=${props}></carapace-chat-question-panel>`;
   }
 
   private questionStatusLabel(prompt: QuestionPrompt): string {

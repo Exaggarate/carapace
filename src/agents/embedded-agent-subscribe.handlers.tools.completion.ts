@@ -1,5 +1,5 @@
-import { asOptionalObjectRecord, asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalObjectRecord, asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   HEARTBEAT_RESPONSE_TOOL_NAME,
   normalizeHeartbeatToolResponse,
@@ -425,7 +425,7 @@ export async function handleToolExecutionEnd(
       data: {
         phase: "update",
         title: "Plan updated",
-        source: "openclaw",
+        source: "carapace",
         ...planUpdate,
       },
     };

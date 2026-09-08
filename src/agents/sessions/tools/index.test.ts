@@ -46,7 +46,7 @@ function requireTool(tools: AgentTool[], name: string): AgentTool {
 
 describe("session tool factories", () => {
   it("preserves literal @ paths across session file operations and keeps shorthand", async () => {
-    const cwd = tempDirs.make("openclaw-tool-factories-at-paths-");
+    const cwd = tempDirs.make("carapace-tool-factories-at-paths-");
     const tools = createAllTools(cwd);
     await fs.writeFile(path.join(cwd, "@literal.txt"), "literal before\n");
     await fs.writeFile(path.join(cwd, "literal.txt"), "plain sibling\n");
@@ -89,8 +89,8 @@ describe("session tool factories", () => {
   });
 
   it("keeps injected file paths independent of colliding local @ files", async () => {
-    const cwd = tempDirs.make("openclaw-tool-factories-local-");
-    const remote = tempDirs.make("openclaw-tool-factories-remote-");
+    const cwd = tempDirs.make("carapace-tool-factories-local-");
+    const remote = tempDirs.make("carapace-tool-factories-remote-");
     await fs.writeFile(path.join(cwd, "@target.txt"), "local sentinel\n");
     await fs.writeFile(path.join(remote, "target.txt"), "remote before\n");
     const remotePath = (absolutePath: string) =>
@@ -162,7 +162,7 @@ describe("session tool factories", () => {
   });
 
   it.each(factories)("$name preserves injected read operations", async (factory) => {
-    const cwd = tempDirs.make("openclaw-tool-factories-read-");
+    const cwd = tempDirs.make("carapace-tool-factories-read-");
     const tools = factory.create(cwd, {
       read: {
         operations: {
@@ -182,7 +182,7 @@ describe("session tool factories", () => {
   it.each(factories.filter((factory) => factory.names.includes("bash")))(
     "$name preserves shell options and file operations",
     async (factory) => {
-      const cwd = tempDirs.make("openclaw-tool-factories-files-");
+      const cwd = tempDirs.make("carapace-tool-factories-files-");
       const tools = factory.create(cwd, {
         bash: {
           commandPrefix: "prepare",
@@ -219,7 +219,7 @@ describe("session tool factories", () => {
   it.each(factories.filter((factory) => factory.names.includes("find")))(
     "$name preserves injected discovery operations",
     async (factory) => {
-      const cwd = tempDirs.make("openclaw-tool-factories-discovery-");
+      const cwd = tempDirs.make("carapace-tool-factories-discovery-");
       const tools = factory.create(cwd, {
         find: { operations: { exists: () => true, glob: () => [path.join(cwd, "remote.ts")] } },
         ls: {

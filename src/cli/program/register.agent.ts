@@ -77,7 +77,7 @@ export function registerAgentsCommands(program: Command): void {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/agents", "docs.openclaw.ai/cli/agents")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/agents", "github.com/Exaggarate/carapace")}\n`,
     );
 
   agents
@@ -221,14 +221,14 @@ export function registerAgentsCommands(program: Command): void {
         `
 ${theme.heading("Examples:")}
 ${formatHelpExamples([
-  ['openclaw agents set-identity --agent main --name "OpenClaw" --emoji "🦞"', "Set name + emoji."],
-  ["openclaw agents set-identity --agent main --avatar avatars/openclaw.png", "Set avatar path."],
+  ['carapace agents set-identity --agent main --name "Carapace" --emoji "🦞"', "Set name + emoji."],
+  ["carapace agents set-identity --agent main --avatar avatars/carapace.png", "Set avatar path."],
   [
-    "openclaw agents set-identity --workspace ~/.openclaw/workspace --from-identity",
+    "carapace agents set-identity --workspace ~/.carapace/workspace --from-identity",
     "Load from IDENTITY.md.",
   ],
   [
-    "openclaw agents set-identity --identity-file ~/.openclaw/workspace/IDENTITY.md --agent main",
+    "carapace agents set-identity --identity-file ~/.carapace/workspace/IDENTITY.md --agent main",
     "Use a specific IDENTITY.md.",
   ],
 ])}

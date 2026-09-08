@@ -4,9 +4,9 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import {
   classifyExecutionOwnerBinding,
   type ExecutionOwnerBindingResult,
@@ -17,7 +17,7 @@ export const EXECUTION_OWNER_LIFECYCLE_BINDING_TABLE =
 type ExecutionOwnerLifecycleKind = "cron" | "task" | "flow";
 
 type ExecutionOwnerLifecycleDatabase = Pick<
-  OpenClawStateDatabase,
+  CarapaceStateDatabase,
   "execution_owner_lifecycle_bindings"
 >;
 
@@ -33,13 +33,13 @@ function ensureExecutionOwnerLifecycleBindingSchema(db: DatabaseSync): void {
   if (tableExists(db, EXECUTION_OWNER_LIFECYCLE_BINDING_TABLE)) {
     return;
   }
-  const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf(SCHEMA_START);
-  const end = start < 0 ? -1 : OPENCLAW_STATE_SCHEMA_SQL.indexOf(SCHEMA_END, start);
+  const start = CARAPACE_STATE_SCHEMA_SQL.indexOf(SCHEMA_START);
+  const end = start < 0 ? -1 : CARAPACE_STATE_SCHEMA_SQL.indexOf(SCHEMA_END, start);
   if (start < 0 || end < start) {
-    throw new Error("OpenClaw execution owner lifecycle binding schema marker is missing.");
+    throw new Error("Carapace execution owner lifecycle binding schema marker is missing.");
   }
   // sqlite-allow-raw -- Canonical feature-local additive DDL only; metadata rows use Kysely.
-  db.exec(OPENCLAW_STATE_SCHEMA_SQL.slice(start, end + SCHEMA_END.length));
+  db.exec(CARAPACE_STATE_SCHEMA_SQL.slice(start, end + SCHEMA_END.length));
 }
 
 function classifyRetainedBinding(

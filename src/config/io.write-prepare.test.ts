@@ -9,7 +9,7 @@ import { tryResolveLegacyCompatibilityAgentId } from "./legacy.default-agent-own
 import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
 import { createMergePatch } from "./merge-patch.js";
 import { setConfigResolutionFacts } from "./resolution-facts.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 vi.unmock("../agents/agent-scope-config.js");
 
@@ -24,7 +24,7 @@ type WriteCase = {
   options?: Partial<PersistInput>;
   expected?: unknown;
   error?: string;
-  verify?: (persisted: OpenClawConfig) => void;
+  verify?: (persisted: CarapaceConfig) => void;
 };
 
 const main = { default: true };
@@ -972,17 +972,17 @@ const writeCases: WriteCase[] = [
   },
   {
     name: "preserves root $schema during unrelated partial writes",
-    current: { $schema: "https://openclaw.ai/config.json", gateway: { mode: "local" } },
+    current: { $schema: "https://github.com/Exaggarate/carapace", gateway: { mode: "local" } },
     next: { gateway: { mode: "local", port: 18789 } },
     expected: {
-      $schema: "https://openclaw.ai/config.json",
+      $schema: "https://github.com/Exaggarate/carapace",
       gateway: { mode: "local", port: 18789 },
     },
   },
   {
     name: "rejects writes that would flatten a root include",
     current: {
-      $schema: "https://openclaw.ai/config-from-include.json",
+      $schema: "https://github.com/Exaggarate/carapace",
       gateway: { mode: "local" },
     },
     authored: { $include: "./extra.json5", gateway: { mode: "local" } },
@@ -991,13 +991,13 @@ const writeCases: WriteCase[] = [
   },
   ...[null, 123].map((value) => ({
     name: `preserves invalid $schema ${value} for write validation`,
-    current: { $schema: "https://openclaw.ai/config.json", gateway: { mode: "local" } },
+    current: { $schema: "https://github.com/Exaggarate/carapace", gateway: { mode: "local" } },
     next: { $schema: value, gateway: { mode: "local", port: 18789 } },
     expected: { $schema: value, gateway: { mode: "local", port: 18789 } },
   })),
 ];
 
-function resolveWriteCase(testCase: WriteCase): OpenClawConfig {
+function resolveWriteCase(testCase: WriteCase): CarapaceConfig {
   return resolvePersistCandidateForWrite({
     runtimeConfig: testCase.current,
     sourceConfig: testCase.source ?? testCase.current,
@@ -1005,7 +1005,7 @@ function resolveWriteCase(testCase: WriteCase): OpenClawConfig {
     ...(testCase.authored === undefined ? {} : { rootAuthoredConfig: testCase.authored }),
     ...(testCase.before === undefined ? {} : { sourceConfigBeforeMigrations: testCase.before }),
     ...testCase.options,
-  }) as OpenClawConfig;
+  }) as CarapaceConfig;
 }
 
 describe("config io write prepare", () => {
@@ -1172,7 +1172,7 @@ describe("config io write prepare", () => {
       agents: { entries: { ops: {}, research: { default: true } } },
       gateway: { port: 18789 },
     };
-    const migrated = migratePersistedImplicitMainRoster(authored).config as OpenClawConfig;
+    const migrated = migratePersistedImplicitMainRoster(authored).config as CarapaceConfig;
 
     const persisted = resolvePersistCandidateForWrite({
       runtimeConfig: migrated,
@@ -1183,10 +1183,10 @@ describe("config io write prepare", () => {
       preserveLegacyAgentRoster: true,
       explicitSetPaths: [["gateway", "port"]],
       explicitSetValueSource: { gateway: { port: 19001 } },
-    }) as OpenClawConfig;
+    }) as CarapaceConfig;
 
     expect(persisted.agents?.entries?.research?.default).toBe(true);
-    const reloaded = migratePersistedImplicitMainRoster(persisted).config as OpenClawConfig;
+    const reloaded = migratePersistedImplicitMainRoster(persisted).config as CarapaceConfig;
     expect(tryResolveLegacyCompatibilityAgentId(reloaded)).toBe("research");
   });
 
@@ -1239,7 +1239,7 @@ describe("config io write prepare", () => {
           nextConfig: roster(entries),
           unsetPaths,
           allowedAgentRosterRemovals: ["worker"],
-        }) as OpenClawConfig,
+        }) as CarapaceConfig,
         unsetPaths,
       ),
     ).toEqual(roster({ main }));
@@ -1255,7 +1255,7 @@ describe("config io write prepare", () => {
         nextConfig: roster({ main }),
         unsetPaths,
         allowedAgentRosterRemovals: ["main"],
-      }) as OpenClawConfig,
+      }) as CarapaceConfig,
       unsetPaths,
     );
     expect(persisted.agents).not.toHaveProperty("list");
@@ -1265,24 +1265,24 @@ describe("config io write prepare", () => {
   it("strips transient plugin install records from partial writes", () => {
     const install = {
       source: "npm",
-      spec: "@ollama/openclaw-web-search",
-      installPath: "/tmp/openclaw-web-search",
-      resolvedName: "@ollama/openclaw-web-search",
+      spec: "@ollama/carapace-web-search",
+      installPath: "/tmp/carapace-web-search",
+      resolvedName: "@ollama/carapace-web-search",
       resolvedVersion: "0.2.2",
     };
     const persisted = applyUnsetPathsForWrite(
       resolvePersistCandidateForWrite({
         runtimeConfig: { plugins: { entries: {} } },
-        sourceConfig: { plugins: { entries: {}, installs: { "openclaw-web-search": install } } },
+        sourceConfig: { plugins: { entries: {}, installs: { "carapace-web-search": install } } },
         nextConfig: {
           plugins: {
             entries: {},
             installs: {
-              "openclaw-web-search": { ...install, spec: "@ollama/openclaw-web-search@0.2.2" },
+              "carapace-web-search": { ...install, spec: "@ollama/carapace-web-search@0.2.2" },
             },
           },
         },
-      }) as OpenClawConfig,
+      }) as CarapaceConfig,
       [["plugins", "installs"]],
     );
     expect(persisted.plugins).not.toHaveProperty("installs");
@@ -1574,7 +1574,7 @@ describe("config io write prepare", () => {
   });
 
   it("applies explicit unsets without mutating caller config", () => {
-    const input: OpenClawConfig = {
+    const input: CarapaceConfig = {
       gateway: { mode: "local" },
       commands: { ownerDisplay: "hash" },
       tools: { alsoAllow: ["exec", "fetch", "read"] },
@@ -1599,7 +1599,7 @@ describe("config io write prepare", () => {
     ["constructor key", ["commands", "constructor"]],
     ["prototype constructor property", ["commands", "prototype"]],
   ] as const)("treats %s unset paths as immutable no-ops", (_name, unsetPath) => {
-    const input: OpenClawConfig = {
+    const input: CarapaceConfig = {
       gateway: { mode: "local" },
       commands: { ownerDisplay: "hash" },
       tools: { alsoAllow: ["exec", "fetch"] },
@@ -1615,8 +1615,8 @@ describe("config io write prepare", () => {
           'channels.telegram.dmPolicy = "open" requires channels.telegram.allowFrom to include "*"',
       },
     ]).message;
-    expect(message).toContain("openclaw config set channels.telegram.allowFrom '[\"*\"]'");
-    expect(message).toContain('openclaw config set channels.telegram.dmPolicy "pairing"');
+    expect(message).toContain("carapace config set channels.telegram.allowFrom '[\"*\"]'");
+    expect(message).toContain('carapace config set channels.telegram.dmPolicy "pairing"');
   });
 
   it("preserves env refs on unchanged paths while keeping changed paths resolved", () => {
@@ -1738,7 +1738,7 @@ describe("config io write prepare", () => {
   it.each([
     {
       name: "keeps the read-time env snapshot when writing the same config path",
-      expectedPath: "/tmp/openclaw.json",
+      expectedPath: "/tmp/carapace.json",
       retained: true,
     },
     {
@@ -1749,7 +1749,7 @@ describe("config io write prepare", () => {
   ])("$name", ({ expectedPath, retained }) => {
     const snapshot = { OPENAI_API_KEY: "sk-secret" };
     const actual = resolveWriteEnvSnapshotForPath({
-      actualConfigPath: "/tmp/openclaw.json",
+      actualConfigPath: "/tmp/carapace.json",
       expectedConfigPath: expectedPath,
       envSnapshotForRestore: snapshot,
     });

@@ -8,7 +8,7 @@ export type JsonObject = Record<string, unknown>;
 /** Compatibility metadata extracted from an external plugin package. */
 export type ExternalPluginCompatibility = {
   pluginApiRange?: string;
-  builtWithOpenClawVersion?: string;
+  builtWithCarapaceVersion?: string;
   pluginSdkVersion?: string;
   minGatewayVersion?: string;
 };
@@ -27,25 +27,25 @@ export type ExternalCodePluginValidationResult = {
 
 /** Required package.json field paths for external code plugin packages. */
 export const EXTERNAL_CODE_PLUGIN_REQUIRED_FIELD_PATHS = [
-  "openclaw.compat.pluginApi",
-  "openclaw.build.openclawVersion",
+  "carapace.compat.pluginApi",
+  "carapace.build.carapaceVersion",
 ] as const;
 
-/** Read OpenClaw package.json blocks without trusting caller input shape. */
-function readOpenClawBlock(packageJson: unknown) {
+/** Read Carapace package.json blocks without trusting caller input shape. */
+function readCarapaceBlock(packageJson: unknown) {
   const root = isRecord(packageJson) ? packageJson : undefined;
-  const openclaw = isRecord(root?.openclaw) ? root.openclaw : undefined;
-  const compat = isRecord(openclaw?.compat) ? openclaw.compat : undefined;
-  const build = isRecord(openclaw?.build) ? openclaw.build : undefined;
-  const install = isRecord(openclaw?.install) ? openclaw.install : undefined;
-  return { root, openclaw, compat, build, install };
+  const carapace = isRecord(root?.carapace) ? root.carapace : undefined;
+  const compat = isRecord(carapace?.compat) ? carapace.compat : undefined;
+  const build = isRecord(carapace?.build) ? carapace.build : undefined;
+  const install = isRecord(carapace?.install) ? carapace.install : undefined;
+  return { root, carapace, compat, build, install };
 }
 
 /** Normalize compatibility metadata from an external plugin package.json. */
 export function normalizeExternalPluginCompatibility(
   packageJson: unknown,
 ): ExternalPluginCompatibility | undefined {
-  const { root, compat, build, install } = readOpenClawBlock(packageJson);
+  const { root, compat, build, install } = readCarapaceBlock(packageJson);
   const version = normalizeOptionalString(root?.version);
   const minHostVersion = normalizeOptionalString(install?.minHostVersion);
   const compatibility: ExternalPluginCompatibility = {};
@@ -60,9 +60,9 @@ export function normalizeExternalPluginCompatibility(
     compatibility.minGatewayVersion = minGatewayVersion;
   }
 
-  const builtWithOpenClawVersion = normalizeOptionalString(build?.openclawVersion) ?? version;
-  if (builtWithOpenClawVersion) {
-    compatibility.builtWithOpenClawVersion = builtWithOpenClawVersion;
+  const builtWithCarapaceVersion = normalizeOptionalString(build?.carapaceVersion) ?? version;
+  if (builtWithCarapaceVersion) {
+    compatibility.builtWithCarapaceVersion = builtWithCarapaceVersion;
   }
 
   const pluginSdkVersion = normalizeOptionalString(build?.pluginSdkVersion);
@@ -75,13 +75,13 @@ export function normalizeExternalPluginCompatibility(
 
 /** List missing required field paths for an external code plugin package.json. */
 export function listMissingExternalCodePluginFieldPaths(packageJson: unknown): string[] {
-  const { compat, build } = readOpenClawBlock(packageJson);
+  const { compat, build } = readCarapaceBlock(packageJson);
   const missing: string[] = [];
   if (!normalizeOptionalString(compat?.pluginApi)) {
-    missing.push("openclaw.compat.pluginApi");
+    missing.push("carapace.compat.pluginApi");
   }
-  if (!normalizeOptionalString(build?.openclawVersion)) {
-    missing.push("openclaw.build.openclawVersion");
+  if (!normalizeOptionalString(build?.carapaceVersion)) {
+    missing.push("carapace.build.carapaceVersion");
   }
   return missing;
 }

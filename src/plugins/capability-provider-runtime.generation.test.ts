@@ -4,7 +4,7 @@ import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { resolveSharedMainAuthAgentDir } from "../agents/auth-profiles/shared-main-dir.js";
 import { loadAgentRuntimePluginRegistryHandle } from "../agents/runtime-plugins.js";
 import { createPluginMetadataSnapshot } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadGatewayPlugins } from "../gateway/server-plugins.js";
 import { prepareGatewayPluginBootstrap } from "../gateway/server-startup-plugins.js";
 import { withEnv, withEnvAsync } from "../test-utils/env.js";
@@ -18,7 +18,7 @@ import { setCurrentPluginMetadataSnapshot } from "./current-plugin-metadata.test
 import * as discovery from "./discovery.js";
 import { buildInstalledPluginIndexRecords } from "./installed-plugin-index-record-builder.js";
 import * as installRecords from "./installed-plugin-index-record-reader.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePlugins } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   EMPTY_PLUGIN_SCHEMA,
@@ -52,10 +52,10 @@ function withSpeechFixture(
   const fixture = createSpeechFixture(registration);
   return withEnv(
     {
-      OPENCLAW_STATE_DIR: path.join(fixture.root, "state"),
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(fixture.root, "extensions"),
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+      CARAPACE_STATE_DIR: path.join(fixture.root, "state"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(fixture.root, "extensions"),
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
     },
     () => run(fixture),
   );
@@ -82,7 +82,7 @@ export default { id: "${id}", register(api) {
     filename: "index.ts",
     body: body("source"),
   });
-  const manifestPath = path.join(plugin.dir, "openclaw.plugin.json");
+  const manifestPath = path.join(plugin.dir, "carapace.plugin.json");
   fs.writeFileSync(
     manifestPath,
     JSON.stringify({
@@ -97,7 +97,7 @@ export default { id: "${id}", register(api) {
   );
   fs.writeFileSync(
     path.join(plugin.dir, "package.json"),
-    JSON.stringify({ openclaw: { extensions: ["./index.ts"] } }),
+    JSON.stringify({ carapace: { extensions: ["./index.ts"] } }),
   );
   const builtDir = path.join(root, "dist", "extensions", id);
   mkdirSafe(builtDir);
@@ -105,7 +105,7 @@ export default { id: "${id}", register(api) {
   // Artifact selection follows the entry format declared by emitted package metadata.
   fs.writeFileSync(
     path.join(builtDir, "package.json"),
-    JSON.stringify({ openclaw: { extensions: ["./index.js"] } }),
+    JSON.stringify({ carapace: { extensions: ["./index.js"] } }),
   );
   const seed = writePlugin({
     id: "fixture-seed",
@@ -115,9 +115,9 @@ export default { id: "${id}", register(api) {
   });
   fs.writeFileSync(
     path.join(seed.dir, "package.json"),
-    JSON.stringify({ openclaw: { extensions: ["./index.cjs"] } }),
+    JSON.stringify({ carapace: { extensions: ["./index.cjs"] } }),
   );
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: { defaults: { workspace: workspaceDir } },
     plugins: { enabled: false },
   };
@@ -148,7 +148,7 @@ function declareCapabilityCatalog(
   keys: readonly (typeof voiceKeys)[number][] = voiceKeys,
 ) {
   const pluginDir = path.join(fixture.root, "extensions", id);
-  const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+  const manifestPath = path.join(pluginDir, "carapace.plugin.json");
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   manifest.capabilityCatalogEntry = "./capability-catalog.ts";
   fs.writeFileSync(manifestPath, JSON.stringify(manifest));
@@ -198,7 +198,7 @@ function loadGatewayGeneration(
   }).pluginRegistry;
 }
 
-const speechProviders = (cfg: OpenClawConfig) =>
+const speechProviders = (cfg: CarapaceConfig) =>
   resolvePluginCapabilityProviders({ key: "speechProviders", cfg });
 
 afterEach(() => {
@@ -349,12 +349,12 @@ describe("capability loading from a Gateway generation", () => {
         fixture.config.plugins = { enabled: true };
         fixture.config.tts = { provider: id, providers: { "fixture-secondary": {} } };
         const { pluginDir, runtimeImported } = declareCapabilityCatalog(fixture);
-        const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+        const manifestPath = path.join(pluginDir, "carapace.plugin.json");
         const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
         manifest.contracts.speechProviders.push("fixture-secondary");
         fs.writeFileSync(manifestPath, JSON.stringify(manifest));
         const unrelatedDir = path.join(fixture.root, "extensions", "fixture-seed");
-        const unrelatedManifestPath = path.join(unrelatedDir, "openclaw.plugin.json");
+        const unrelatedManifestPath = path.join(unrelatedDir, "carapace.plugin.json");
         const unrelatedManifest = JSON.parse(fs.readFileSync(unrelatedManifestPath, "utf8"));
         unrelatedManifest.contracts = { speechProviders: ["fixture-unrequested"] };
         unrelatedManifest.capabilityCatalogEntry = "./capability-catalog.cjs";
@@ -457,7 +457,7 @@ describe("capability loading from a Gateway generation", () => {
       const installed = {
         [id]: { source: "path" as const, installPath: installedDir, sourcePath: installedDir },
       };
-      const discovered = discovery.discoverOpenClawPlugins({ installRecords: installed });
+      const discovered = discovery.discoverCarapacePlugins({ installRecords: installed });
       const snapshot = createPluginMetadataSnapshot({
         config: fixture.config,
         workspaceDir: fixture.workspaceDir,
@@ -586,7 +586,7 @@ describe("capability loading from a Gateway generation", () => {
   it.each(["../outside.ts", "", 7])("rejects an invalid catalog entry declaration: %j", (entry) => {
     withSpeechFixture((fixture) => {
       const { pluginDir, runtimeImported } = declareCapabilityCatalog(fixture);
-      const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+      const manifestPath = path.join(pluginDir, "carapace.plugin.json");
       const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
       manifest.capabilityCatalogEntry = entry;
       fs.writeFileSync(manifestPath, JSON.stringify(manifest));
@@ -606,10 +606,10 @@ describe("capability loading from a Gateway generation", () => {
       fixture.config.plugins = { enabled: key !== "speechProviders" };
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: path.join(fixture.root, "state"),
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(fixture.root, "extensions"),
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_STATE_DIR: path.join(fixture.root, "state"),
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.join(fixture.root, "extensions"),
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
         },
         async () => {
           const snapshot = publishMetadata(fixture);
@@ -623,7 +623,7 @@ describe("capability loading from a Gateway generation", () => {
             config: fixture.config,
             workspaceDir: fixture.workspaceDir,
           });
-          const discover = vi.spyOn(discovery, "discoverOpenClawPlugins");
+          const discover = vi.spyOn(discovery, "discoverCarapacePlugins");
           const readManifests = vi.spyOn(manifests, "loadPluginManifestRegistryCore");
           withPluginRuntimeRegistryScope(bootstrap.pluginRegistry, () => {
             const providers = resolvePluginCapabilityProviders({ key, cfg: fixture.config });
@@ -644,7 +644,7 @@ describe("capability loading from a Gateway generation", () => {
     withSpeechFixture((fixture) => {
       publishMetadata(fixture);
       const registry = loadGatewayGeneration(fixture);
-      const discover = vi.spyOn(discovery, "discoverOpenClawPlugins");
+      const discover = vi.spyOn(discovery, "discoverCarapacePlugins");
       const readManifests = vi.spyOn(manifests, "loadPluginManifestRegistryCore");
       const readInstalls = vi.spyOn(installRecords, "loadInstalledPluginIndexInstallRecordsSync");
       withPluginRuntimeRegistryScope(registry, () => {
@@ -711,7 +711,7 @@ describe("capability loading from a Gateway generation", () => {
       declareCapabilityCatalog(fixture);
       publishMetadata(fixture);
       const registry = loadGatewayGeneration(fixture);
-      const other = loadOpenClawPlugins({
+      const other = loadCarapacePlugins({
         config: { ...fixture.config, plugins: { entries: { [id]: { enabled: true } } } },
         onlyPluginIds: [id],
       });
@@ -732,7 +732,7 @@ describe("capability loading from a Gateway generation", () => {
       const registry = loadGatewayGeneration(fixture);
       const context = getPluginRuntimeLoadContext(registry);
       expect(context).toBeDefined();
-      const discover = vi.spyOn(discovery, "discoverOpenClawPlugins");
+      const discover = vi.spyOn(discovery, "discoverCarapacePlugins");
       const readManifests = vi.spyOn(manifests, "loadPluginManifestRegistryCore");
       const readInstalls = vi.spyOn(installRecords, "loadInstalledPluginIndexInstallRecordsSync");
       const captured = loadBundledCapabilityRuntimeRegistry({

@@ -45,9 +45,9 @@ describe("resolveQaEvidenceEnvironment", () => {
     expect(environment.ref).toBe("fallbacksha");
   });
 
-  it("prefers OPENCLAW_QA_REF without invoking git", () => {
+  it("prefers CARAPACE_QA_REF without invoking git", () => {
     const environment = resolveQaEvidenceEnvironment({
-      env: { OPENCLAW_QA_REF: "qa-ref", GITHUB_SHA: "fallbacksha" },
+      env: { CARAPACE_QA_REF: "qa-ref", GITHUB_SHA: "fallbacksha" },
     });
 
     expect(environment.ref).toBe("qa-ref");

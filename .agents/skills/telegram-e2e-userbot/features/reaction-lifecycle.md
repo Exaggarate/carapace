@@ -1,6 +1,6 @@
 # Reaction lifecycle
 
-Reaction lifecycle proves that the OpenClaw bot acknowledges a group mention on
+Reaction lifecycle proves that the Carapace bot acknowledges a group mention on
 the user's own Telegram message and that the user observes the emoji state.
 
 ## Sub-features
@@ -12,7 +12,7 @@ the user's own Telegram message and that the user observes the emoji state.
 ## How to get to it (user POV)
 
 - In the QA group, mention the bot in a message.
-- Watch reactions on that sent message while OpenClaw handles the turn.
+- Watch reactions on that sent message while Carapace handles the turn.
 
 ## Driving it with the Telegram userbot runner
 
@@ -20,7 +20,7 @@ Preconditions:
 
 - Baseline doctor passes.
 - The configured QA group permits reactions from the SUT bot.
-- OpenClaw's repo `mock-openai` fixture supports `OPENCLAW_E2E_DRAFTPROOF`.
+- Carapace's repo `mock-openai` fixture supports `CARAPACE_E2E_DRAFTPROOF`.
 - Use the group path; Telegram only reports these events to the user for the user's own message.
 
 - **Drive an acknowledgement.** Run:
@@ -31,7 +31,7 @@ Preconditions:
   E2E_ROOT_CONFIG_PATCH='{"messages":{"ackReaction":"👀","ackReactionScope":"group-mentions","statusReactions":{"enabled":true}}}' \
   node "$TELEGRAM_E2E_SKILL_DIR/scripts/run-mock-sut-user-e2e.mjs" \
     --timeout-ms 25000 \
-    --text '@{sut} Run the OPENCLAW_E2E_DRAFTPROOF scenario.' \
+    --text '@{sut} Run the CARAPACE_E2E_DRAFTPROOF scenario.' \
     --record "$TELEGRAM_E2E_PROOF_DIR/reaction-lifecycle/events.ndjson" \
     --output "$TELEGRAM_E2E_PROOF_DIR/reaction-lifecycle/summary.json"
   ```
@@ -39,7 +39,7 @@ Preconditions:
   The timeline contains reaction rows for the sent message: initial `👀`, a
   tool/status variant, a terminal done variant, then restored `👀`. Telegram
   may substitute group-allowed variants. Require the SUT's
-  `OPENCLAW_E2E_DRAFTPROOF` final reply. Judge the lifecycle from the first
+  `CARAPACE_E2E_DRAFTPROOF` final reply. Judge the lifecycle from the first
   `👀`; TDLib can emit an empty baseline row before the ack arrives.
 
 - **Confirm ownership.** Match the reaction row's `messageId` to

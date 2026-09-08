@@ -1,10 +1,10 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import { unsetConfiguredMcpServer } from "../agents/mcp-config-mutation.js";
 import { withClawMcpLifecycleLease } from "../agents/mcp-lifecycle-lease.js";
 import { normalizeConfiguredMcpServers } from "../config/mcp-config-normalize.js";
 import { listConfiguredMcpServers } from "../config/mcp-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { ClawRemoveError } from "./lifecycle-delete-support.js";
 import type { RemovedMcpServer } from "./lifecycle-remove-contract.js";
 import type { ClawStatusRecord } from "./lifecycle-status.js";
@@ -16,8 +16,8 @@ import {
 } from "./mcp.js";
 import type { ClawReferencedCleanup } from "./package-remove.js";
 
-type RemoveMcpServerOptions = OpenClawStateDatabaseOptions & {
-  config?: OpenClawConfig;
+type RemoveMcpServerOptions = CarapaceStateDatabaseOptions & {
+  config?: CarapaceConfig;
   sourceMcpServers?: Record<string, Record<string, unknown>>;
   listMcpServers?: typeof listConfiguredMcpServers;
   referencedCleanup?: ClawReferencedCleanup;

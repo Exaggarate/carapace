@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Shared package helpers for Docker E2E scripts.
-# Builds or resolves one OpenClaw npm tarball and exposes mount/build-context
+# Builds or resolves one Carapace npm tarball and exposes mount/build-context
 # helpers so Docker lanes test the package artifact instead of repo sources.
 
 DOCKER_E2E_PACKAGE_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -112,7 +112,7 @@ docker_e2e_restore_package_dist_from_image() (
   fi
   if [ "$requires_ai_dist" = "1" ] && \
     ! docker_e2e_docker_cmd cp \
-      "${container_id}:/app/node_modules/@openclaw/ai/dist" \
+      "${container_id}:/app/node_modules/@carapace/ai/dist" \
       "$temp_dir/ai-dist"; then
     cleanup_restore_package_dist
     return 1
@@ -163,11 +163,11 @@ docker_e2e_restore_package_dist_from_image() (
 
 docker_e2e_prepare_package_tgz() {
   local label="$1"
-  local package_tgz="${2:-${OPENCLAW_CURRENT_PACKAGE_TGZ:-}}"
+  local package_tgz="${2:-${CARAPACE_CURRENT_PACKAGE_TGZ:-}}"
 
   if [ -n "$package_tgz" ]; then
     if [ ! -f "$package_tgz" ]; then
-      echo "OpenClaw package tarball does not exist: $package_tgz" >&2
+      echo "Carapace package tarball does not exist: $package_tgz" >&2
       return 1
     fi
     docker_e2e_abs_path "$package_tgz"
@@ -175,37 +175,37 @@ docker_e2e_prepare_package_tgz() {
   fi
 
   local pack_dir
-  pack_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-docker-e2e-pack.XXXXXX")"
+  pack_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-docker-e2e-pack.XXXXXX")"
   local pack_status=0
   # ROOT_DIR can be a frozen candidate; resolve tooling beside this helper.
   package_tgz="$(
-    node "$DOCKER_E2E_PACKAGE_LIB_DIR/../package-openclaw-for-docker.mjs" \
-      --source-dir "${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}" \
+    node "$DOCKER_E2E_PACKAGE_LIB_DIR/../package-carapace-for-docker.mjs" \
+      --source-dir "${CARAPACE_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}" \
       --allow-unreleased-changelog \
       --output-dir "$pack_dir" \
-      --output-name openclaw-current.tgz
+      --output-name carapace-current.tgz
   )" || pack_status="$?"
   if [ "$pack_status" -ne 0 ]; then
     rm -rf "$pack_dir"
     return "$pack_status"
   fi
   if [ -z "$package_tgz" ]; then
-    echo "missing packed OpenClaw tarball" >&2
+    echo "missing packed Carapace tarball" >&2
     rm -rf "$pack_dir"
     return 1
   fi
-  touch "$pack_dir/.openclaw-docker-e2e-generated-package"
+  touch "$pack_dir/.carapace-docker-e2e-generated-package"
   docker_e2e_abs_path "$package_tgz"
 }
 
 docker_e2e_prepare_package_context() {
   local package_tgz="$1"
   local context_dir
-  context_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-docker-e2e-package-context.XXXXXX")"
+  context_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-docker-e2e-package-context.XXXXXX")"
   # BuildKit named contexts must be directories, so expose the tarball as a
   # stable filename inside a tiny temporary context.
   local copy_status=0
-  cp "$package_tgz" "$context_dir/openclaw-current.tgz" || copy_status="$?"
+  cp "$package_tgz" "$context_dir/carapace-current.tgz" || copy_status="$?"
   if [ "$copy_status" -ne 0 ]; then
     rm -rf "$context_dir"
     return "$copy_status"
@@ -221,7 +221,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const [, , artifactScript, contextDir] = process.argv;
-const registryDir = process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR;
+const registryDir = process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR;
 const target = path.join(contextDir, "prepublish-plugin-registry");
 fs.mkdirSync(target);
 let identity = {};
@@ -231,9 +231,9 @@ if (registryDir) {
   const bytes = fs.readFileSync(path.join(registryDir, PREPUBLISH_PLUGIN_REGISTRY_MANIFEST));
   const manifest = JSON.parse(bytes);
   identity = {
-    sourceSha: process.env.OPENCLAW_DOCKER_E2E_SELECTED_SHA || manifest.sourceSha,
-    candidateVersion: process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION || manifest.candidateVersion,
-    manifestSha256: process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256 || createHash("sha256").update(bytes).digest("hex"),
+    sourceSha: process.env.CARAPACE_DOCKER_E2E_SELECTED_SHA || manifest.sourceSha,
+    candidateVersion: process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION || manifest.candidateVersion,
+    manifestSha256: process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256 || createHash("sha256").update(bytes).digest("hex"),
   };
   validatePrepublishPluginRegistryArtifact({
     artifactDir: registryDir,
@@ -255,31 +255,31 @@ NODE
 
 docker_e2e_package_mount_args() {
   local package_tgz="$1"
-  local target="${2:-/tmp/openclaw-current.tgz}"
-  DOCKER_E2E_PACKAGE_ARGS=(-v "$package_tgz:$target:ro" -e "OPENCLAW_CURRENT_PACKAGE_TGZ=$target")
-  if [ -n "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ]; then
+  local target="${2:-/tmp/carapace-current.tgz}"
+  DOCKER_E2E_PACKAGE_ARGS=(-v "$package_tgz:$target:ro" -e "CARAPACE_CURRENT_PACKAGE_TGZ=$target")
+  if [ -n "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ]; then
     source "$DOCKER_E2E_PACKAGE_LIB_DIR/../e2e/lib/prepublish-plugin-registry.sh"
-    openclaw_prepublish_plugin_registry_configure_docker_args "$OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR"
+    carapace_prepublish_plugin_registry_configure_docker_args "$CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR"
     DOCKER_E2E_PACKAGE_ARGS+=(
-      "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DOCKER_ARGS[@]}"
+      "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DOCKER_ARGS[@]}"
     )
   fi
-  if [ -n "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-}" ]; then
-    DOCKER_E2E_PACKAGE_ARGS+=(-e "OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=$OPENCLAW_E2E_NPM_INSTALL_TIMEOUT")
+  if [ -n "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-}" ]; then
+    DOCKER_E2E_PACKAGE_ARGS+=(-e "CARAPACE_E2E_NPM_INSTALL_TIMEOUT=$CARAPACE_E2E_NPM_INSTALL_TIMEOUT")
   fi
-  if [ -n "${OPENCLAW_E2E_COMMAND_TIMEOUT:-}" ]; then
-    DOCKER_E2E_PACKAGE_ARGS+=(-e "OPENCLAW_E2E_COMMAND_TIMEOUT=$OPENCLAW_E2E_COMMAND_TIMEOUT")
+  if [ -n "${CARAPACE_E2E_COMMAND_TIMEOUT:-}" ]; then
+    DOCKER_E2E_PACKAGE_ARGS+=(-e "CARAPACE_E2E_COMMAND_TIMEOUT=$CARAPACE_E2E_COMMAND_TIMEOUT")
   fi
 }
 
 docker_e2e_cleanup_package_tgz() {
   local package_tgz="${1:-}"
   [ -n "$package_tgz" ] || return 0
-  [ "$(basename "$package_tgz")" = "openclaw-current.tgz" ] || return 0
+  [ "$(basename "$package_tgz")" = "carapace-current.tgz" ] || return 0
 
   local pack_dir
   pack_dir="$(dirname "$package_tgz")"
-  if [ -f "$pack_dir/.openclaw-docker-e2e-generated-package" ]; then
+  if [ -f "$pack_dir/.carapace-docker-e2e-generated-package" ]; then
     rm -rf "$pack_dir"
   fi
 }
@@ -365,7 +365,7 @@ docker_e2e_run_with_harness() {
   local previous_int_trap
   local previous_term_trap
   local previous_hup_trap
-  cid_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-docker-e2e-container.XXXXXX")"
+  cid_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-docker-e2e-container.XXXXXX")"
   cidfile="$cid_dir/container.cid"
   previous_int_trap="$(trap -p INT || true)"
   previous_term_trap="$(trap -p TERM || true)"
@@ -404,7 +404,7 @@ docker_e2e_run_with_harness() {
       kill -TERM $descendant_pids 2>/dev/null || true
     fi
     kill -TERM "$docker_run_pid" 2>/dev/null || true
-    local grace_seconds="${OPENCLAW_DOCKER_E2E_CONTAINER_TERM_GRACE_SECONDS:-10}"
+    local grace_seconds="${CARAPACE_DOCKER_E2E_CONTAINER_TERM_GRACE_SECONDS:-10}"
     if ! [[ "$grace_seconds" =~ ^[0-9]+$ ]] || [ "$grace_seconds" -lt 1 ]; then
       grace_seconds="10"
     else
@@ -500,7 +500,7 @@ docker_e2e_run_logged_print_with_harness() {
   local label="$1"
   shift
   local heartbeat_seconds
-  heartbeat_seconds="$(docker_e2e_read_positive_int_env OPENCLAW_DOCKER_E2E_LOG_HEARTBEAT_SECONDS 30)" || return $?
+  heartbeat_seconds="$(docker_e2e_read_positive_int_env CARAPACE_DOCKER_E2E_LOG_HEARTBEAT_SECONDS 30)" || return $?
   run_logged_print_heartbeat \
     "$label" \
     "$heartbeat_seconds" \

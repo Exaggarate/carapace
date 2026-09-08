@@ -6,10 +6,10 @@ import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { readConfigFileSnapshotForWrite, registerConfigWriteListener } from "../config/config.js";
 import { createConfigIO } from "../config/io.js";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "../plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { createTranscriptsAutoStartService } from "../transcripts/auto-start.js";
 import type {
@@ -33,7 +33,7 @@ import { commitGatewayConfigWrite } from "./server-methods/config-write-flow.js"
 const tempDirs = createTempDirTracker();
 afterEach(() => {
   resetConfigRuntimeState();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -45,7 +45,7 @@ const source = {
   meetingUrl: "https://example.test/room?invite=one#one",
   providerOptions: { credential: "synthetic-one" },
 };
-const previous: OpenClawConfig = { transcripts: { enabled: true, autoStart: [source] } };
+const previous: CarapaceConfig = { transcripts: { enabled: true, autoStart: [source] } };
 it.each([
   ["title", { ...source, title: "After" }, false],
   ["removed title", { ...source, title: undefined }, false],
@@ -68,7 +68,7 @@ it.each([
 ] as const)(
   "classifies authoritative %s changes without weakening source identity",
   (_name, candidate, restart) => {
-    const next: OpenClawConfig = { transcripts: { enabled: true, autoStart: [candidate] } };
+    const next: CarapaceConfig = { transcripts: { enabled: true, autoStart: [candidate] } };
     expect(
       buildGatewayReloadPlan(
         diffGatewayReloadPaths(previous, next, listConfigReloadRefinementPrefixes()),
@@ -150,10 +150,10 @@ it.each([
   ["routing", { bindings: [{ agentId: "notes", match: { channel: "discord" } }] }],
   ["default account", { channels: { discord: { defaultAccount: "other" } } }],
   ["credential", { channels: { discord: { token: "synthetic-changed-credential" } } }],
-] satisfies Array<[string, Partial<OpenClawConfig>]>)(
+] satisfies Array<[string, Partial<CarapaceConfig>]>)(
   "does not classify a mixed title and %s edit as title-only",
   (_name, other) => {
-    const next: OpenClawConfig = {
+    const next: CarapaceConfig = {
       ...previous,
       ...other,
       transcripts: { enabled: true, autoStart: [{ ...source, title: "After" }] },
@@ -171,7 +171,7 @@ it.each([
 );
 
 it("allows normal writer bookkeeping beside titles but not other metadata", () => {
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...previous,
     meta: { lastTouchedVersion: "2026.8.1" },
     transcripts: { enabled: true, autoStart: [{ ...source, title: "After" }] },
@@ -185,7 +185,7 @@ it("allows normal writer bookkeeping beside titles but not other metadata", () =
       },
     ).restartGateway,
   ).toBe(false);
-  const migration: OpenClawConfig = {
+  const migration: CarapaceConfig = {
     ...next,
     meta: { ...next.meta, migrations: { modelPolicyAllowlist: true } },
   };
@@ -204,7 +204,7 @@ it.each([false, true])(
   "keeps an admitted capture through a real title config commit (pending=%s) and applies the future title",
   async (pending) => {
     const stateDir = await fs.realpath(tempDirs.make("transcripts-title-reload-"));
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const requests: TranscriptStartRequest[] = [];
     const startupGate = createDeferred();
     if (!pending) {
@@ -231,7 +231,7 @@ it.each([false, true])(
       provider,
       source: import.meta.url,
     });
-    const initial: OpenClawConfig = {
+    const initial: CarapaceConfig = {
       gateway: { mode: "local", reload: { mode: "hybrid" } },
       transcripts: {
         enabled: true,
@@ -247,10 +247,10 @@ it.each([false, true])(
     };
     const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() };
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     await withEnvAsync(
-      { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_CONFIG_PATH: configPath },
+      { CARAPACE_STATE_DIR: stateDir, CARAPACE_CONFIG_PATH: configPath },
       async () => {
         await withPluginRuntimeRegistryScope(registry, async () => {
           await fs.writeFile(configPath, "{}");
@@ -268,7 +268,7 @@ it.each([false, true])(
             agentId: "notes",
             logger,
           });
-          const restart = vi.fn(async (_plan: GatewayReloadPlan, next: OpenClawConfig) => {
+          const restart = vi.fn(async (_plan: GatewayReloadPlan, next: CarapaceConfig) => {
             current = next;
             await service.stop();
             service = createTranscriptsAutoStartService({
@@ -282,7 +282,7 @@ it.each([false, true])(
           const commit = vi.fn(
             async (
               plan: GatewayReloadPlan,
-              next: OpenClawConfig,
+              next: CarapaceConfig,
               ownership: GatewayConfigReloadTransactionOwnership,
             ) => {
               ownership.markRuntimeCommitted(next, plan);
@@ -294,7 +294,7 @@ it.each([false, true])(
           const hotReload = vi.fn(
             async (
               plan: GatewayReloadPlan,
-              next: OpenClawConfig,
+              next: CarapaceConfig,
               ownership: GatewayConfigReloadTransactionOwnership,
             ) => {
               await commit(plan, next, ownership);

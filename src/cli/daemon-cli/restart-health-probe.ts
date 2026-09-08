@@ -1,6 +1,6 @@
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -8,7 +8,7 @@ import {
 import { classifyGatewayConnectFailure } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import { sanitizeTerminalText } from "../../../packages/terminal-core/src/safe-text.js";
 import { createConfigIO } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { callGateway } from "../../gateway/call.js";
 import { isGatewayProtocolResponseError } from "../../gateway/client.js";
 import type { PluginHealthErrorSummary } from "../../gateway/health/types.js";
@@ -48,7 +48,7 @@ export type GatewayHttpReadiness = {
 /** Waits for the unauthenticated HTTP(S) readiness contracts reported by service start. */
 export async function waitForGatewayHttpReadiness(params: {
   attempts: number;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   deadlineAt: number;
   delayMs: number;
   port: number;
@@ -217,7 +217,7 @@ function readChannelProbeErrors(health: unknown): Array<{ id: string; error: str
 export async function confirmGatewayReachable(params: {
   port: number;
   auth?: GatewayRestartProbeAuth;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   configuredProbe?: ConfiguredGatewayLocalProbe;
   env?: NodeJS.ProcessEnv;
   allowDeviceIdentityRequired?: boolean;
@@ -292,7 +292,7 @@ export async function confirmGatewayReachable(params: {
 
 export type GatewayRestartProbeContext = {
   auth: GatewayRestartProbeAuth | undefined;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 };
 
 export async function resolveGatewayRestartProbeContext(
@@ -306,7 +306,7 @@ export async function resolveGatewayRestartProbeContext(
     suppressFutureVersionWarning: true,
   })
     .readBestEffortConfig()
-    .catch((): OpenClawConfig => ({}));
+    .catch((): CarapaceConfig => ({}));
   const resolved = await resolveGatewayProbeAuthSafeWithSecretInputs({
     cfg,
     mode: "local",
@@ -318,7 +318,7 @@ export async function resolveGatewayRestartProbeContext(
 export async function inspectGatewayPortHealth(params: {
   port: number;
   auth?: GatewayRestartProbeAuth;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   configuredProbe?: ConfiguredGatewayLocalProbe;
   expectedListenerPid?: number;
 }): Promise<GatewayPortHealthSnapshot> {

@@ -11,11 +11,11 @@ import {
   type PluginDoctorContractModule,
 } from "../../plugins/doctor-contract-module.js";
 import { getCachedPluginModuleLoader } from "../../plugins/plugin-module-loader-cache.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { readAcpSessionMeta, upsertAcpSessionMeta } from "./session-meta.js";
 
 it("inspects without creating state and conditionally updates only the proven current owner", async () => {
-  await withOpenClawTestState({ label: "acp-doctor-owner" }, async ({ env, stateDir }) => {
+  await withCarapaceTestState({ label: "acp-doctor-owner" }, async ({ env, stateDir }) => {
     const cfg = {
       agents: { ownership: "explicit" as const, entries: { main: {}, work: {} } },
       session: { scope: "global" as const },
@@ -24,7 +24,7 @@ it("inspects without creating state and conditionally updates only the proven cu
     const readOnly = createPluginDoctorStateMigrationContext(scope);
     expect(readOnly.updateAcpSessionIdentity).toBeUndefined();
     expect(await readOnly.inspectAcpSessionClaims!()).toEqual({ claims: [], incomplete: [] });
-    await expect(fs.access(path.join(stateDir, "state", "openclaw.sqlite"))).rejects.toThrow();
+    await expect(fs.access(path.join(stateDir, "state", "carapace.sqlite"))).rejects.toThrow();
     for (const agentId of ["main", "work", "free-harness"]) {
       await upsertAcpSessionMeta({
         cfg,
@@ -100,7 +100,7 @@ it("inspects without creating state and conditionally updates only the proven cu
 it.each(["global", "shared-project"])(
   "migrates %s with real Doctor inventory beside an unrelated free ACP session",
   async (sessionKey) => {
-    await withOpenClawTestState({ label: "acp-doctor-composition" }, async (state) => {
+    await withCarapaceTestState({ label: "acp-doctor-composition" }, async (state) => {
       const cfg = {
         agents: { ownership: "explicit" as const, entries: { main: {}, work: {} } },
         session: { scope: "global" as const },
@@ -201,7 +201,7 @@ it.each(["global", "shared-project"])(
       expect(result.warnings).toEqual([]);
       expect(result.changes.length).toBeGreaterThan(0);
       const migrated = readAcpSessionMeta({ cfg, agentId: "work", sessionKey });
-      expect(migrated?.identity?.acpxRecordId).toMatch(/^openclaw-owner-v1-/);
+      expect(migrated?.identity?.acpxRecordId).toMatch(/^carapace-owner-v1-/);
       expect(
         (await readOnly.inspectAcpSessionClaims!()).claims.find(
           (claim) => claim.agentId === "free-harness",
@@ -217,7 +217,7 @@ it.each(["global", "shared-project"])(
 it.each(["agent:retired:main", "agent:retired:acp:binding:configured", "global", "acp:bare"])(
   "rejects a retired configured or fixed-store claim %s",
   async (sessionKey) => {
-    await withOpenClawTestState({ label: "acp-doctor-retired" }, async ({ env, stateDir }) => {
+    await withCarapaceTestState({ label: "acp-doctor-retired" }, async ({ env, stateDir }) => {
       const cfg = {
         agents: {
           ownership: "explicit" as const,

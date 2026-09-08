@@ -1,7 +1,7 @@
 // Bind one auth selection policy to either the host runtime or the cold SDK entrypoint.
-import { resolveDefaultAgentDir } from "openclaw/plugin-sdk/agent-harness-registration";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { AuthProfileStore } from "openclaw/plugin-sdk/provider-auth";
+import { resolveDefaultAgentDir } from "carapace/plugin-sdk/agent-harness-registration";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import type { AuthProfileStore } from "carapace/plugin-sdk/provider-auth";
 
 type ProfileAuth = Pick<
   PluginRuntime["modelAuth"],

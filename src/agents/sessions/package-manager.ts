@@ -236,7 +236,7 @@ function collectFiles(
   return files;
 }
 
-type SkillDiscoveryMode = "openclaw" | "agents";
+type SkillDiscoveryMode = "carapace" | "agents";
 
 function collectSkillEntries(
   dir: string,
@@ -309,7 +309,7 @@ function collectSkillEntries(
 
       const relPath = normalizeNativePathSeparators(relative(root, fullPath));
       if (
-        mode === "openclaw" &&
+        mode === "carapace" &&
         dir === root &&
         isFile &&
         entry.name.endsWith(".md") &&
@@ -427,8 +427,8 @@ function collectTopLevelAutoResourceEntries(
 function readResourceManifestFile(packageJsonPath: string): ResourceManifest | null {
   try {
     const content = readFileSync(packageJsonPath, "utf-8");
-    const pkg = JSON.parse(content) as { openclaw?: ResourceManifest };
-    return pkg.openclaw ?? null;
+    const pkg = JSON.parse(content) as { carapace?: ResourceManifest };
+    return pkg.carapace ?? null;
   } catch {
     return null;
   }
@@ -534,7 +534,7 @@ function collectAutoExtensionEntries(dir: string): string[] {
  */
 function collectResourceFiles(dir: string, resourceType: ResourceType): string[] {
   if (resourceType === "skills") {
-    return collectSkillEntries(dir, "openclaw");
+    return collectSkillEntries(dir, "carapace");
   }
   if (resourceType === "extensions") {
     return collectAutoExtensionEntries(dir);
@@ -544,7 +544,7 @@ function collectResourceFiles(dir: string, resourceType: ResourceType): string[]
 
 const AUTO_RESOURCE_COLLECTORS = {
   extensions: collectAutoExtensionEntries,
-  skills: (dir: string) => collectAutoSkillEntries(dir, "openclaw"),
+  skills: (dir: string) => collectAutoSkillEntries(dir, "carapace"),
   prompts: (dir: string) => collectTopLevelAutoResourceEntries(dir, "prompts"),
   themes: (dir: string) => collectTopLevelAutoResourceEntries(dir, "themes"),
 } satisfies Record<ResourceType, (dir: string) => string[]>;

@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it } from "vitest";
 import { RequestClient } from "../internal/discord.js";
 import { createDiscordDraftPreviewController } from "./message-handler.draft-preview.js";

@@ -101,7 +101,7 @@ function resolveSettledTurnFinalizationContext(params: {
     return undefined;
   }
   return {
-    source: "openclaw-transcript",
+    source: "carapace-transcript",
     messages: Object.freeze([...params.messagesSnapshot]),
   };
 }

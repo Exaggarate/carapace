@@ -161,7 +161,7 @@ export async function prepareGitRuntimePromotion(
     for (const { sourceRoot, destinationRoot: destination } of roots) {
       // .artifacts may point at another volume. A sibling of each destination
       // guarantees rename-only activation, including nested workspace outputs.
-      const temporary = `${destination}.openclaw-update-${randomUUID()}.tmp`;
+      const temporary = `${destination}.carapace-update-${randomUUID()}.tmp`;
       const entry = { destination, temporary, previous: false };
       staged.push(entry);
       await fs.mkdir(temporary, { recursive: true });

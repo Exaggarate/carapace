@@ -4,13 +4,13 @@ import { createRequire } from "node:module";
 import { hostname } from "node:os";
 import { performance } from "node:perf_hooks";
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { getFileLockProcessStartTime, isPidDefinitelyDead } from "../shared/pid-alive.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { withOpenClawStateStartupMigrationCheckpointDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowed } from "../state/openclaw-state-ownership.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { withCarapaceStateStartupMigrationCheckpointDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowed } from "../state/carapace-state-ownership.js";
 import { VERSION } from "../version.js";
 import {
   executeSqliteQuerySync,
@@ -20,7 +20,7 @@ import {
 import { runSqliteImmediateTransactionSync } from "./sqlite-transaction.js";
 
 type StartupMigrationCheckpointDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "schema_meta" | "state_leases"
 >;
 
@@ -149,17 +149,17 @@ function withStartupMigrationCheckpointDatabase<T>(
   env: NodeJS.ProcessEnv,
   callback: (db: DatabaseSync) => T,
 ): T {
-  return withOpenClawStateStartupMigrationCheckpointDatabase(callback, { env });
+  return withCarapaceStateStartupMigrationCheckpointDatabase(callback, { env });
 }
 
 function writeStartupMigrationCheckpointDatabase<T>(
   env: NodeJS.ProcessEnv,
   callback: (db: DatabaseSync) => T,
 ): T {
-  const databasePath = resolveOpenClawStateSqlitePath(env);
+  const databasePath = resolveCarapaceStateSqlitePath(env);
   return withStartupMigrationCheckpointDatabase(env, (db) =>
     runSqliteImmediateTransactionSync(db, () => {
-      assertOpenClawStateWriteAllowed({ database: db, databasePath, env });
+      assertCarapaceStateWriteAllowed({ database: db, databasePath, env });
       return callback(db);
     }),
   );
@@ -183,7 +183,7 @@ function assertStartupMigrationLeaseOwnedInTransaction(params: {
   );
   if (!activeLease) {
     throw new Error(
-      "OpenClaw startup migration lease was lost before startup migrations completed; retry so migrations can run under a fresh lease.",
+      "Carapace startup migration lease was lost before startup migrations completed; retry so migrations can run under a fresh lease.",
     );
   }
 }
@@ -268,7 +268,7 @@ export function hasActiveStartupMigrationLease(
   const env = params.env ?? process.env;
   const nowMs = params.nowMs ?? Date.now();
   return (
-    withExistingOpenClawStateDatabaseReadOnly(
+    withExistingCarapaceStateDatabaseReadOnly(
       ({ db }) => {
         const stateDb = getNodeSqliteKysely<StartupMigrationCheckpointDatabase>(db);
         const lease = executeSqliteQueryTakeFirstSync(
@@ -365,7 +365,7 @@ export function acquireStartupMigrationLease(
     } else if (existing) {
       const ownerHint = existingOwner ? ` (held by pid ${existingOwner.pid})` : "";
       throw new StartupMigrationLeaseConflictError(
-        `OpenClaw startup migrations are already running for this state directory; retry after the other OpenClaw process finishes or after ${new Date(existing.expiresAt ?? expiresAt).toISOString()}.${ownerHint}`,
+        `Carapace startup migrations are already running for this state directory; retry after the other Carapace process finishes or after ${new Date(existing.expiresAt ?? expiresAt).toISOString()}.${ownerHint}`,
         existingOwner?.host === hostname(),
       );
     }
@@ -414,7 +414,7 @@ export function acquireStartupMigrationLease(
         );
         if (result.numAffectedRows !== 1n) {
           throw new Error(
-            "OpenClaw startup migration lease was lost before startup migrations completed; retry so migrations can run under a fresh lease.",
+            "Carapace startup migration lease was lost before startup migrations completed; retry so migrations can run under a fresh lease.",
           );
         }
       });

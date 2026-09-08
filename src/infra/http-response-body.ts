@@ -1,6 +1,6 @@
 // Response readers do not depend on inbound request lifecycle or logging policy.
-import { consumeResponseBytes, decodeTextPrefix } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { consumeResponseBytes, decodeTextPrefix } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   withResponseBodyIdleTimeout,
   withResponseBodyTimeout,

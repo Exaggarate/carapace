@@ -1,5 +1,5 @@
 // Discord plugin module implements threading.cache behavior.
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
 import type { DiscordThreadStarter } from "./threading.types.js";
 
 type DiscordThreadStarterCacheEntry = {

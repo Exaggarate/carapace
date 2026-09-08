@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { listAgentIds } from "../agents/agent-scope.js";
 import {
   isConfiguredSessionStoreAgentId,
@@ -14,14 +14,14 @@ import {
   type SessionEntryListScope,
 } from "../config/sessions/session-accessor.js";
 import { canonicalSessionKeyMigrationRequiredError } from "../config/sessions/session-canonical-key.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   DEFAULT_AGENT_ID,
   isIncognitoSessionKey,
   normalizeAgentId,
   parseAgentSessionKey,
 } from "../routing/session-key.js";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveIncognitoCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
 import {
   resolveSessionStoreIdentity,
   resolveStoredSessionKeyForAgentStore,
@@ -81,7 +81,7 @@ function findCanonicalStoreMatch(
 }
 
 function buildGatewaySessionStoreScanTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   canonicalKey: string;
   agentId: string;
@@ -109,7 +109,7 @@ type GatewaySessionStoreDiscovery = {
 };
 
 function resolveGatewaySessionStoreCandidates(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   cache?: GatewaySessionStoreDiscoveryCache,
 ): GatewaySessionStoreDiscovery {
@@ -137,7 +137,7 @@ function resolveGatewaySessionStoreCandidates(
 export type GatewaySessionStoreDiscoveryCache = Map<string, GatewaySessionStoreDiscovery>;
 
 type GatewaySessionStoreLookupParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   agentId?: string;
   clone?: boolean;
@@ -354,7 +354,7 @@ function prepareGatewaySessionStoreTarget(
     agentId: params.agentId,
   });
   if (isIncognitoSessionKey(canonicalKey)) {
-    const storePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId });
+    const storePath = resolveIncognitoCarapaceAgentSqlitePath({ agentId });
     const read: GatewaySessionStoreRead = {
       storePath,
       agentId,
@@ -418,7 +418,7 @@ export function resolveGatewaySessionStoreTargetWithStore(
 
 /** Resolve one synchronous set of logical metadata targets using exact grouped reads. */
 export function resolveGatewaySessionStoreTargetsReadOnly(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targets: readonly { key: string; agentId?: string }[];
 }): GatewaySessionStoreTargetWithStore[] {
   const targetDiscoveryCache: GatewaySessionStoreDiscoveryCache = new Map();
@@ -477,7 +477,7 @@ function includeDirectChildEntries(
 }
 
 export function resolveGatewaySessionStoreTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   agentId?: string;
   clone?: boolean;

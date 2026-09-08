@@ -1,5 +1,5 @@
 // Summarizes heartbeat config for CLI and UI display.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveHeartbeatIntervalMs } from "./heartbeat-config.js";
 import {
   buildHeartbeatSummary,
@@ -12,13 +12,13 @@ export { resolveHeartbeatIntervalMs };
 export type { HeartbeatSummary };
 
 /** Return whether heartbeat scheduling applies to an agent. */
-export function isHeartbeatEnabledForAgent(cfg: OpenClawConfig, agentId?: string): boolean {
+export function isHeartbeatEnabledForAgent(cfg: CarapaceConfig, agentId?: string): boolean {
   return isEnrolledHeartbeatAgent(cfg, agentId, enrolledHeartbeatAgentIds(cfg));
 }
 
 /** Resolve display-ready heartbeat settings for an agent. */
 export function resolveHeartbeatSummaryForAgent(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId?: string,
 ): HeartbeatSummary {
   return buildHeartbeatSummary(cfg, agentId, enrolledHeartbeatAgentIds(cfg));

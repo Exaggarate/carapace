@@ -2,7 +2,7 @@ import type {
   QaBusAttachment,
   QaBusMessage,
   QaBusSnapshotConversation,
-} from "openclaw/plugin-sdk/qa-channel-protocol";
+} from "carapace/plugin-sdk/qa-channel-protocol";
 import {
   conversationSelectionKey,
   findConversationBySelectionKey,

@@ -58,15 +58,15 @@ suite.define(() => {
               }
               return getUserMedia(request);
             };
-            Object.defineProperty(window, "openclawWebKitVoiceConstraints", { value: requests });
+            Object.defineProperty(window, "carapaceWebKitVoiceConstraints", { value: requests });
           },
           { denyDefault: decision === "denied" },
         );
         const requests = () =>
           page.evaluate(
             () =>
-              (window as Window & { openclawWebKitVoiceConstraints?: MediaStreamConstraints[] })
-                .openclawWebKitVoiceConstraints,
+              (window as Window & { carapaceWebKitVoiceConstraints?: MediaStreamConstraints[] })
+                .carapaceWebKitVoiceConstraints,
           );
         await page.setViewportSize({ width: 390, height: 844 });
         await page.goto(`${suite.server.baseUrl}settings/appearance`);

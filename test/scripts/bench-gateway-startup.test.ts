@@ -5,7 +5,7 @@ import { createServer, type RequestListener } from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { testing } from "../../scripts/bench-gateway-startup.ts";
 import { stopChild } from "../../scripts/lib/gateway-bench-child.ts";
@@ -15,7 +15,7 @@ import {
   waitForInitialProbe,
 } from "../../scripts/lib/gateway-bench-runtime.ts";
 import { isStartupTraceDuration } from "../../scripts/lib/gateway-startup-trace-ranking.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import { validateConfigObject } from "../../src/config/validation.js";
 import { isPidAlive } from "../../src/shared/pid-alive.js";
 import { waitForPidToExit } from "../../src/test-utils/process-tree.js";
@@ -59,7 +59,7 @@ describe("gateway startup benchmark script", () => {
 
   it("prints help without running benchmark cases", () => {
     expect(helpResult.status).toBe(0);
-    expect(helpResult.stdout).toContain("OpenClaw Gateway startup benchmark");
+    expect(helpResult.stdout).toContain("Carapace Gateway startup benchmark");
     expect(helpResult.stdout).toContain("--case <id>");
     expect(helpResult.stdout).toContain("--cpu-prof-dir <dir>");
     expect(helpResult.stdout).toContain("--heap-prof-dir <dir>");
@@ -73,7 +73,7 @@ describe("gateway startup benchmark script", () => {
     "reports fractional counts without time units through the benchmark CLI",
     async ({ signal }) => {
       const fixtures = createTempDirTracker();
-      const root = fixtures.make("openclaw-bench-count-report-");
+      const root = fixtures.make("carapace-bench-count-report-");
       const entry = path.join(root, "entry.mjs");
       const counter = path.join(root, "counter.json");
       const eventsPath = path.join(root, "events.jsonl");
@@ -103,7 +103,7 @@ const counter = ${JSON.stringify(counter)};
 const record = (phase, extra = {}) => appendFileSync(${JSON.stringify(eventsPath)}, JSON.stringify({ phase, pid: process.pid, ...extra }) + "\\n");
 const sample = (existsSync(counter) ? JSON.parse(readFileSync(counter, "utf8")) : 0) + 1;
 writeFileSync(counter, JSON.stringify(sample));
-record("started", { home: process.env.OPENCLAW_HOME });
+record("started", { home: process.env.CARAPACE_HOME });
 const port = Number(process.argv[process.argv.indexOf("--port") + 1]);
 const server = createServer((req, res) => {
   const status = req.method === "HEAD" && ["/healthz", "/readyz"].includes(req.url) ? 200 : 404;
@@ -295,14 +295,14 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("does not disable local-check policy in the child gateway environment", () => {
-    const env = testing.sanitizedEnv("/tmp/openclaw-bench", "/tmp/openclaw-bench/config.json", {
+    const env = testing.sanitizedEnv("/tmp/carapace-bench", "/tmp/carapace-bench/config.json", {
       config: {},
       id: "default",
       name: "gateway default",
     });
 
-    expect(env.OPENCLAW_LOCAL_CHECK).toBeUndefined();
-    expect(env.OPENCLAW_GATEWAY_STARTUP_TRACE).toBe("1");
+    expect(env.CARAPACE_LOCAL_CHECK).toBeUndefined();
+    expect(env.CARAPACE_GATEWAY_STARTUP_TRACE).toBe("1");
   });
 
   it("forces incident packaged-plugin cases to load built plugin entries", () => {
@@ -312,22 +312,22 @@ server.listen(port, "127.0.0.1", () => {
     }
 
     const env = testing.sanitizedEnv(
-      "/tmp/openclaw-bench",
-      "/tmp/openclaw-bench/config.json",
+      "/tmp/carapace-bench",
+      "/tmp/carapace-bench/config.json",
       benchCase,
     );
 
-    expect(env.OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK).toBe("1");
-    expect(env.OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS).toBeUndefined();
+    expect(env.CARAPACE_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK).toBe("1");
+    expect(env.CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS).toBeUndefined();
   });
 
   it("requires the full packaged plugin inventory even when a build filter is set", () => {
-    const filteredEnv = { ...process.env, OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "telegram" };
+    const filteredEnv = { ...process.env, CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "telegram" };
 
     expect(testing.listIncidentPackagedPluginArtifacts(filteredEnv)).toEqual(
       testing.listIncidentPackagedPluginArtifacts({
         ...process.env,
-        OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: undefined,
+        CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: undefined,
       }),
     );
   });
@@ -703,7 +703,7 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("writes 50-plugin fixtures as a parent load path with explicit startup activation", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-config-test-"));
     try {
       const configPath = testing.writeConfig(root, {
         config: {},
@@ -720,7 +720,7 @@ server.listen(port, "127.0.0.1", () => {
       expect(config.plugins?.allow).toEqual(["bench-plugin-01", "bench-plugin-02"]);
       const manifest = JSON.parse(
         fs.readFileSync(
-          path.join(root, "plugins", "bench-plugin-01", "openclaw.plugin.json"),
+          path.join(root, "plugins", "bench-plugin-01", "carapace.plugin.json"),
           "utf8",
         ),
       ) as { activation?: { onStartup?: boolean } };
@@ -731,7 +731,7 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("builds a bounded incident fixture before the startup timer begins", async () => {
-    const root = tempDirs.make("openclaw-incident-bench-test-");
+    const root = tempDirs.make("carapace-incident-bench-test-");
     await testing.writeIncidentFixture(root, {
       kind: "combined",
       auditRowCount: 2_000,
@@ -739,7 +739,7 @@ server.listen(port, "127.0.0.1", () => {
       workspaceFileCount: 6,
     });
     const { DatabaseSync } = await import("node:sqlite");
-    const statePath = path.join(root, "state", "state", "openclaw.sqlite");
+    const statePath = path.join(root, "state", "state", "carapace.sqlite");
     const state = new DatabaseSync(statePath, { readOnly: true });
     try {
       expect(state.prepare("SELECT count(*) AS count FROM audit_events").get()).toEqual({
@@ -763,7 +763,7 @@ server.listen(port, "127.0.0.1", () => {
           "agents",
           `incident-agent-${String(index).padStart(2, "0")}`,
           "agent",
-          "openclaw-agent.sqlite",
+          "carapace-agent.sqlite",
         ),
         { readOnly: true },
       );
@@ -806,7 +806,7 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("builds a deterministic prepared-runtime catalog stall case", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-config-test-"));
     try {
       const benchCase = testing.parseOptions(["--case", "preparedRuntimeCatalogStall"]).cases[0];
       if (!benchCase) {
@@ -820,7 +820,7 @@ server.listen(port, "127.0.0.1", () => {
       expect(pluginId).toBe("bench-plugin-01");
       const pluginDir = path.join(root, "plugins", pluginId ?? "missing");
       const manifest = JSON.parse(
-        fs.readFileSync(path.join(pluginDir, "openclaw.plugin.json"), "utf8"),
+        fs.readFileSync(path.join(pluginDir, "carapace.plugin.json"), "utf8"),
       ) as { providers?: string[] };
       const source = fs.readFileSync(path.join(pluginDir, "index.cjs"), "utf8");
 
@@ -833,13 +833,13 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("builds a valid large plugin-model startup case", () => {
-    const root = tempDirs.make("openclaw-large-plugin-model-bench-test-");
+    const root = tempDirs.make("carapace-large-plugin-model-bench-test-");
     const benchCase = testing.parseOptions(["--case", "largePluginModelConfig"]).cases[0];
     if (!benchCase) {
       throw new Error("expected large plugin-model benchmark case");
     }
     const configPath = testing.writeConfig(root, benchCase);
-    const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as OpenClawConfig;
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as CarapaceConfig;
     const entries = Object.values(config.agents?.entries ?? {});
     const modelRefs = collectConfiguredModelRefs(config, { includeChannelModelOverrides: false });
 
@@ -854,7 +854,7 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("builds prepared-runtime scale cases with shared and distinct workspaces", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-config-test-"));
     try {
       const benchCase = testing.parseOptions(["--case", "preparedRuntimeScaleMany"]).cases[0];
       if (!benchCase) {
@@ -872,7 +872,7 @@ server.listen(port, "127.0.0.1", () => {
       const pluginId = config.plugins?.allow?.[0];
       const manifest = JSON.parse(
         fs.readFileSync(
-          path.join(root, "plugins", pluginId ?? "missing", "openclaw.plugin.json"),
+          path.join(root, "plugins", pluginId ?? "missing", "carapace.plugin.json"),
           "utf8",
         ),
       ) as { modelCatalog?: unknown; providerCatalogEntry?: string; providers?: string[] };
@@ -891,7 +891,7 @@ server.listen(port, "127.0.0.1", () => {
   });
 
   it("keeps startup-lazy plugin fixtures opted out of startup activation", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-config-test-"));
     try {
       testing.writeConfig(root, {
         config: {},
@@ -902,7 +902,7 @@ server.listen(port, "127.0.0.1", () => {
       });
       const manifest = JSON.parse(
         fs.readFileSync(
-          path.join(root, "plugins", "bench-plugin-01", "openclaw.plugin.json"),
+          path.join(root, "plugins", "bench-plugin-01", "carapace.plugin.json"),
           "utf8",
         ),
       ) as { activation?: { onStartup?: boolean } };

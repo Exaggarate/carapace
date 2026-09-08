@@ -12,22 +12,22 @@ import { inheritLegacyDefaultAgentId } from "./legacy.default-agent-owner.js";
 import { normalizeExecSafeBinProfilesInConfig } from "./normalize-exec-safe-bin.js";
 import { normalizeConfigPaths } from "./normalize-paths.js";
 import { normalizeTalkConfig } from "./talk.js";
-import type { OpenClawConfig, ResolvedSourceConfig, RuntimeConfig } from "./types.js";
+import type { CarapaceConfig, ResolvedSourceConfig, RuntimeConfig } from "./types.js";
 
 // Snapshot and load must materialize identically: prepared-runtime exact-config
 // resolution compares the startup-published (snapshot) config against the reply-path
 // (load) config, and any divergence permanently fails that resolve for affected configs.
 
-export function asResolvedSourceConfig(config: OpenClawConfig): ResolvedSourceConfig {
+export function asResolvedSourceConfig(config: CarapaceConfig): ResolvedSourceConfig {
   return config as ResolvedSourceConfig;
 }
 
-export function asRuntimeConfig(config: OpenClawConfig): RuntimeConfig {
+export function asRuntimeConfig(config: CarapaceConfig): RuntimeConfig {
   return config as RuntimeConfig;
 }
 
 export function materializeRuntimeConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: {
     env?: NodeJS.ProcessEnv;
     homedir?: () => string;

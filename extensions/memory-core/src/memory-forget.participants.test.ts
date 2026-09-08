@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { deleteSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { openOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { deleteSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { openCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { listMemorySessionTombstones } from "./memory-entry-origins.js";
 import { forgetMemoryEntries } from "./memory-forget.js";
@@ -17,10 +17,10 @@ import {
 describe("memory forget participant selectors", () => {
   let stateDir: string;
   let workspaceDir: string;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
 
   beforeEach(async () => {
-    stateDir = tempDirs.make("openclaw-memory-forget-");
+    stateDir = tempDirs.make("carapace-memory-forget-");
     ({ workspaceDir, cfg } = await createMemoryForgetFixture(stateDir));
   });
 
@@ -39,7 +39,7 @@ describe("memory forget participant selectors", () => {
         entry: { sessionId, updatedAt: Date.now() },
       });
     }
-    const database = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const database = openCarapaceAgentDatabase({ agentId: "main" }).db;
     const insert = database.prepare(`INSERT INTO session_participants
       (session_key, identity_namespace, actor_id, contribution_count, first_prompted_at, last_prompted_at)
       VALUES (?, ?, ?, 1, 1, 1)`);
@@ -86,7 +86,7 @@ describe("memory forget participant selectors", () => {
 
   it("does not infer hook or participant facts for an archived-only session", async () => {
     await seedMemoryForgetSession("archived", "gmail");
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     db.prepare(
       `INSERT INTO session_participants
          (session_key, identity_namespace, actor_id, contribution_count, first_prompted_at, last_prompted_at)

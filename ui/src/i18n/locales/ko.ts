@@ -1,1 +1,1 @@
-export { default as ko } from "virtual:openclaw-control-ui-locale/ko";
+export { default as ko } from "virtual:carapace-control-ui-locale/ko";

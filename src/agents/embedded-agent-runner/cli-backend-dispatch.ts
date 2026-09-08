@@ -2,8 +2,8 @@
  * Opt-in CLI-backend dispatch for one-shot embedded runs.
  *
  * Embedded runs targeting a CLI runtime provider normally fall through to the
- * openclaw harness and call the provider API directly with that runtime's
- * credentials (`cli_runtime_passthrough_openclaw`). Anthropic routes direct
+ * carapace harness and call the provider API directly with that runtime's
+ * credentials (`cli_runtime_passthrough_carapace`). Anthropic routes direct
  * anthropic-messages calls on subscription OAuth tokens to metered "extra
  * usage" billing: without extra-usage balance the passthrough fails closed
  * with a billing error, and with it the run silently draws paid usage instead
@@ -11,12 +11,12 @@
  * tolerate CLI latency opt in via `cliBackendDispatch: "subscription-auth"`
  * to run through the CLI backend on plan limits instead.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { SessionTranscriptRuntimeTarget } from "../../config/sessions/session-accessor.js";
 import { onAgentEventForRun } from "../../infra/agent-events.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { resolvePreparedRunAdmission } from "../admitted-run-context.js";
-import { stripOpenClawMcpToolPrefix } from "../cli-runner/tool-policy.js";
+import { stripCarapaceMcpToolPrefix } from "../cli-runner/tool-policy.js";
 import { normalizeToolPolicyName } from "../tool-policy.js";
 import { isToolResultError } from "../tool-result-error.js";
 import { resolveEmbeddedCliBackendDispatchEligibility } from "./cli-backend-dispatch-eligibility.js";
@@ -116,7 +116,7 @@ async function runEmbeddedAgentViaCliBackend(
   // unreachable, matching disableMessageTool intent.
   const cliToolAvailability = {
     native: [] as [],
-    openClaw: dispatch.toolsAllow,
+    carapace: dispatch.toolsAllow,
   };
   const onAgentToolResult = params.onAgentToolResult;
   const { storePath, expectedLifecycleRevision, expectedWriterRunId } = params.sessionTarget;
@@ -163,7 +163,7 @@ async function runEmbeddedAgentViaCliBackend(
     if (!rawName) {
       return;
     }
-    const toolName = normalizeToolPolicyName(stripOpenClawMcpToolPrefix(rawName));
+    const toolName = normalizeToolPolicyName(stripCarapaceMcpToolPrefix(rawName));
     const toolCallId = typeof evt.data.toolCallId === "string" ? evt.data.toolCallId : undefined;
     if (phase === "start") {
       transcript?.noteToolEvent({

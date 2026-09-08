@@ -44,7 +44,7 @@ function createFixture() {
         scopes: ["operator.read", "operator.admin"],
         recoveryScope: "synthetic-setup-owner",
       },
-      features: { methods: ["openclaw.setup.detect", "openclaw.setup.verify"] },
+      features: { methods: ["carapace.setup.detect", "carapace.setup.verify"] },
     },
     canvasPluginSurfaceUrl: null,
     assistantAgentId: "main",
@@ -111,13 +111,13 @@ function createFixture() {
     runtimeConfig,
     setGatewayPhase,
     setAgent,
-    detectCalls: () => request.mock.calls.filter(([method]) => method === "openclaw.setup.detect"),
+    detectCalls: () => request.mock.calls.filter(([method]) => method === "carapace.setup.detect"),
   };
 }
 
 async function mountPage(context: ApplicationContext): Promise<TestModelSetupPage> {
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-model-setup-page") as TestModelSetupPage;
+  const page = document.createElement("carapace-model-setup-page") as TestModelSetupPage;
   page.routeData = { firstRun: false };
   provider.append(page);
   document.body.append(provider);
@@ -143,7 +143,7 @@ describe("ModelSetupPage detection ownership", () => {
     const { context, request, runtimeConfig } = createFixture();
     request.mockResolvedValue(detection);
     const provider = createApplicationContextProvider(context);
-    const page = document.createElement("openclaw-model-setup-page") as TestModelSetupPage;
+    const page = document.createElement("carapace-model-setup-page") as TestModelSetupPage;
     provider.append(page);
     document.body.append(provider);
     await page.updateComplete;
@@ -183,7 +183,7 @@ describe("ModelSetupPage detection ownership", () => {
   it("waits for the connected Gateway when the page mounts during reconnect", async () => {
     const { context, request, runtimeConfig, setGatewayPhase, detectCalls } = createFixture();
     request.mockImplementation(async (method) =>
-      method === "openclaw.setup.detect" ? detection : {},
+      method === "carapace.setup.detect" ? detection : {},
     );
     setGatewayPhase("reconnecting");
     const page = await mountPage(context);
@@ -210,7 +210,7 @@ describe("ModelSetupPage detection ownership", () => {
         return stale.promise;
       });
       request.mockImplementation(async (method) =>
-        method === "openclaw.setup.detect"
+        method === "carapace.setup.detect"
           ? { ...detection, configuredModel: "provider/current-model", setupComplete: true }
           : {},
       );
@@ -235,7 +235,7 @@ describe("ModelSetupPage detection ownership", () => {
       expect(signal?.aborted).toBe(true);
       expect(detectCalls()).toHaveLength(2);
       expect(detectCalls().at(-1)).toEqual([
-        "openclaw.setup.detect",
+        "carapace.setup.detect",
         { agentId: change === "agent" ? "research" : "main" },
         expect.objectContaining({ signal: expect.any(AbortSignal) }),
       ]);
@@ -253,7 +253,7 @@ describe("ModelSetupPage detection ownership", () => {
     let oldWizardSignal: AbortSignal | undefined;
     let nextCalls = 0;
     request.mockImplementation(async (method, _params, options) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -280,7 +280,7 @@ describe("ModelSetupPage detection ownership", () => {
       if (method === "config.get") {
         return { config: {}, sourceConfig: {}, raw: "{}", hash: "hash-1", valid: true, issues: [] };
       }
-      return method === "openclaw.setup.detect" ? detection : {};
+      return method === "carapace.setup.detect" ? detection : {};
     });
     const page = await mountPage(context);
     await vi.waitFor(() =>
@@ -288,14 +288,14 @@ describe("ModelSetupPage detection ownership", () => {
     );
     page.querySelector<HTMLButtonElement>('[data-auth-choice="provider-auth"] button')!.click();
     await vi.waitFor(() => expect(oldWizardSignal).toBeInstanceOf(AbortSignal));
-    const start = request.mock.calls.find(([method]) => method === "openclaw.setup.auth.start")!;
+    const start = request.mock.calls.find(([method]) => method === "carapace.setup.auth.start")!;
 
     setGatewayPhase("reconnecting");
     setGatewayPhase("connected");
     await vi.waitFor(() => expect(page.textContent).toContain("Enter the selected provider key"));
     expect(oldWizardSignal?.aborted).toBe(true);
     expect(
-      request.mock.calls.filter(([method]) => method === "openclaw.setup.auth.start"),
+      request.mock.calls.filter(([method]) => method === "carapace.setup.auth.start"),
     ).toHaveLength(1);
     expect(request.mock.calls.filter(([method]) => method === "wizard.cancel")).toHaveLength(0);
     expect(request.mock.calls.findLast(([method]) => method === "wizard.next")?.[1]).toEqual({
@@ -311,7 +311,7 @@ describe("ModelSetupPage detection ownership", () => {
       if (method === "config.get") {
         return { config: {}, sourceConfig: {}, raw: "{}", hash: "hash-1", valid: true, issues: [] };
       }
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { sessionId: "wizard-before-reconnect", done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -320,7 +320,7 @@ describe("ModelSetupPage detection ownership", () => {
           releaseWizard = resolve;
         });
       }
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return { ...detection, configuredModel: "provider/current-model", setupComplete: true };
       }
       return {};
@@ -339,7 +339,7 @@ describe("ModelSetupPage detection ownership", () => {
     releaseWizard?.({ done: true, status: "done" });
 
     await vi.waitFor(() => {
-      expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).toBeNull();
       expect(page.textContent).toContain(
         "Connection changed before the configuration update was refreshed.",
       );

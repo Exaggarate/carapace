@@ -26,10 +26,10 @@ function git(...args: string[]) {
 }
 
 beforeEach(() => {
-  root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-prebuilt-ui-")));
-  vi.stubEnv("OPENCLAW_FORCE_BUILD", undefined);
-  vi.stubEnv("OPENCLAW_FORCE_RUNTIME_POSTBUILD", undefined);
-  vi.stubEnv("OPENCLAW_DEV_SOURCE_ROOT", root);
+  root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-prebuilt-ui-")));
+  vi.stubEnv("CARAPACE_FORCE_BUILD", undefined);
+  vi.stubEnv("CARAPACE_FORCE_RUNTIME_POSTBUILD", undefined);
+  vi.stubEnv("CARAPACE_DEV_SOURCE_ROOT", root);
   write(".gitignore", "dist/\n");
   write("package.json", '{"name":"prebuilt-ui-fixture","private":true}\n');
   git("init", "--quiet");
@@ -109,8 +109,8 @@ it("rejects an artifact generation built at another HEAD", () => {
 });
 
 it.each([
-  ["OPENCLAW_FORCE_BUILD", "force_build"],
-  ["OPENCLAW_FORCE_RUNTIME_POSTBUILD", "force_runtime_postbuild"],
+  ["CARAPACE_FORCE_BUILD", "force_build"],
+  ["CARAPACE_FORCE_RUNTIME_POSTBUILD", "force_runtime_postbuild"],
 ])("honors the owner's %s rebuild decision", (key, reason) => {
   vi.stubEnv(key, "1");
   expect(() => assertPrebuiltUiE2eRuntime(root)).toThrow(reason);

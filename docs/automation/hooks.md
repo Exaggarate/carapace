@@ -11,9 +11,9 @@ doc-schema-version: 1
 # Hooks
 
 Internal hooks are small JavaScript or TypeScript handlers that run in the
-Gateway process when OpenClaw emits an event. Use them to save session context,
+Gateway process when Carapace emits an event. Use them to save session context,
 log reset commands, or perform short side effects during message and session
-lifecycle events. OpenClaw includes [bundled hooks](/automation/hooks#bundled-hooks)
+lifecycle events. Carapace includes [bundled hooks](/automation/hooks#bundled-hooks)
 for common tasks; you do not need to write a plugin to use them.
 
 ## Choose the right surface
@@ -42,33 +42,33 @@ you a concrete file to inspect. Run these commands on the **Gateway host**, with
 the same profile and config as that Gateway:
 
 ```bash
-openclaw hooks list
-openclaw hooks info command-logger
-openclaw hooks enable command-logger
+carapace hooks list
+carapace hooks info command-logger
+carapace hooks enable command-logger
 ```
 
 The default `hybrid` [reload mode](/gateway/configuration#reload-modes) applies
 hook config changes without a restart. With reload mode `off`, run
-`openclaw gateway restart`, or restart a foreground Gateway yourself. Add
+`carapace gateway restart`, or restart a foreground Gateway yourself. Add
 `--agent <id>` when your configuration has multiple agents and no implicit owner.
 
 In a conversation you can safely reset, send `/new` or `/reset` as an authorized
 user. Then inspect the log on the Gateway host:
 
 ```bash
-tail -n 5 ~/.openclaw/logs/commands.log
+tail -n 5 ~/.carapace/logs/commands.log
 ```
 
 Look for a new JSON line with `"action":"new"` or `"action":"reset"`, a recent
 `timestamp`, and that conversation's `sessionKey`. With a custom state directory,
 read `<stateDir>/logs/commands.log` instead. This proves that a handler ran;
-`openclaw hooks check` alone does not.
+`carapace hooks check` alone does not.
 
 The log contains session and sender identifiers. Disable the hook after trying
 it if you do not want to retain those records:
 
 ```bash
-openclaw hooks disable command-logger
+carapace hooks disable command-logger
 ```
 
 ### Eligible, enabled, and loaded
@@ -99,7 +99,7 @@ new selection. Reload does not replay `gateway:startup`.
 `hooks list`, `info`, and `check` request the selected Gateway's inventory. An
 implicit local Gateway can fall back to local discovery when unavailable or
 when it lacks the report method. A configured remote Gateway or explicit
-`OPENCLAW_GATEWAY_URL` does not fall back to your laptop's hooks on failure.
+`CARAPACE_GATEWAY_URL` does not fall back to your laptop's hooks on failure.
 
 `hooks enable` and `hooks disable` always inspect and modify **local config**.
 They do not update a remote Gateway over RPC. Run them on the Gateway host to
@@ -124,14 +124,14 @@ assume the default state directory and that `reset-greeting` does not already
 exist; choose another name rather than overwrite an existing hook.
 
 ```bash
-mkdir -p ~/.openclaw/hooks/reset-greeting
+mkdir -p ~/.carapace/hooks/reset-greeting
 
-cat > ~/.openclaw/hooks/reset-greeting/HOOK.md <<'HOOK'
+cat > ~/.carapace/hooks/reset-greeting/HOOK.md <<'HOOK'
 ---
 name: reset-greeting
 description: "Confirm that a reset hook ran"
 metadata:
-  { "openclaw": { "events": ["command:new", "command:reset"] } }
+  { "carapace": { "events": ["command:new", "command:reset"] } }
 ---
 
 # Reset greeting
@@ -139,7 +139,7 @@ metadata:
 Send a short confirmation after an authorized reset command.
 HOOK
 
-cat > ~/.openclaw/hooks/reset-greeting/handler.js <<'HANDLER'
+cat > ~/.carapace/hooks/reset-greeting/handler.js <<'HANDLER'
 export default function handler(event) {
   if (event.type !== "command" || !["new", "reset"].includes(event.action)) {
     return;
@@ -159,8 +159,8 @@ needed.
 Enable and load it:
 
 ```bash
-openclaw hooks info reset-greeting
-openclaw hooks enable reset-greeting
+carapace hooks info reset-greeting
+carapace hooks enable reset-greeting
 ```
 
 Send `/new` in a disposable conversation on a configured chat channel that can
@@ -168,7 +168,7 @@ route replies, such as a direct message to the bot. Expect **Reset hook ran.**
 in that conversation and `[reset-greeting] reset hook ran` in Gateway logs.
 `/reset` triggers the same example. Normal command authorization still applies.
 
-Use an ordinary OpenClaw conversation, not an ACP-bound thread; bound sessions
+Use an ordinary Carapace conversation, not an ACP-bound thread; bound sessions
 delegate reset handling to their owning runtime. Do not use Control UI/webchat
 or a `sessions.reset` RPC as the chat-reply check:
 those paths do not deliver this hook's `event.messages` to the UI. The log marker
@@ -178,7 +178,7 @@ can still show that a reset event ran. See
 Disable the example when finished:
 
 ```bash
-openclaw hooks disable reset-greeting
+carapace hooks disable reset-greeting
 ```
 
 Disabling leaves the files in place. To use a workspace directory instead, put
@@ -189,7 +189,7 @@ Gateway will load that workspace's hooks.
 ### Handler implementation
 
 A handler exports a function returning `void` or `Promise<void>`. The loader uses
-the default export unless `metadata.openclaw.export` names another export.
+the default export unless `metadata.carapace.export` names another export.
 Returned values do not block, cancel, or rewrite the operation.
 
 Every event has these fields:
@@ -235,7 +235,7 @@ name: my-hook
 description: "Short description of what this hook does"
 homepage: https://example.com/my-hook
 metadata:
-  { "openclaw": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+  { "carapace": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 
 # My Hook
@@ -245,7 +245,7 @@ Explain the side effects, configuration, and verification steps here.
 
 `name` defaults to the directory name; use a unique, stable name.
 `description` is shown in reports. The following fields belong under
-`metadata.openclaw`:
+`metadata.carapace`:
 
 | Field              | Contract                                                                                                                                                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -330,7 +330,7 @@ examples.
 
 <Warning>
 `hooks.internal.handlers` is retired and fails normal config validation. Before
-running `openclaw doctor --fix`, migrate each registered module into a managed or
+running `carapace doctor --fix`, migrate each registered module into a managed or
 workspace hook directory with `HOOK.md` and a handler. Doctor removes the old
 registrations; it does not create executable files. For a legacy-only config
 with `hooks.internal.enabled: true`, it also removes that flag to avoid broad
@@ -344,15 +344,15 @@ Directory discovery merges hooks by **name** using these rules:
 
 | Source            | Location and collision behavior                                                                                                                                         |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bundled           | Shipped with OpenClaw.                                                                                                                                                  |
+| Bundled           | Shipped with Carapace.                                                                                                                                                  |
 | Plugin            | Hook directories declared by active plugins; can replace bundled names.                                                                                                 |
-| Managed           | `<stateDir>/hooks/`, normally `~/.openclaw/hooks/`; can replace bundled and plugin names.                                                                               |
+| Managed           | `<stateDir>/hooks/`, normally `~/.carapace/hooks/`; can replace bundled and plugin names.                                                                               |
 | Extra directories | `hooks.internal.load.extraDirs`; same source policy as managed hooks. Later extra directories win over earlier ones; the managed directory wins over extra directories. |
 | Workspace         | `<workspace>/hooks/`; can add names but cannot replace bundled, plugin, or managed names. Explicit opt-in required.                                                     |
 
 Bundled, managed, workspace, and plugin hook locations are collection
 directories: discovery inspects their immediate children for hooks or packages
-whose `package.json` declares `openclaw.hooks`.
+whose `package.json` declares `carapace.hooks`.
 
 Each explicit `hooks.internal.load.extraDirs` path can instead be a pack root,
 a single-hook root, or a collection directory. A pack root loads only its
@@ -362,7 +362,7 @@ pack or collection. A recognized pack with no valid hooks stays empty rather
 than scanning unlisted children. A single-hook root loads its own `HOOK.md`
 and handler. Only an ordinary collection root gets the immediate-child scan.
 
-For example, to select `/opt/openclaw-hook-library/my-hook/HOOK.md` directly,
+For example, to select `/opt/carapace-hook-library/my-hook/HOOK.md` directly,
 add that hook's directory:
 
 ```json
@@ -370,7 +370,7 @@ add that hook's directory:
   "hooks": {
     "internal": {
       "load": {
-        "extraDirs": ["/opt/openclaw-hook-library/my-hook"]
+        "extraDirs": ["/opt/carapace-hook-library/my-hook"]
       }
     }
   }
@@ -378,7 +378,7 @@ add that hook's directory:
 ```
 
 To scan the library's immediate children instead, add
-`/opt/openclaw-hook-library`. Only add trusted directories: any extra path
+`/opt/carapace-hook-library`. Only add trusted directories: any extra path
 opens hook-name selection across discovery sources beyond named entries,
 even when that path selects a single hook or pack.
 Handler files must stay within their hook directory; package and plugin hook
@@ -391,11 +391,11 @@ existing hook code, then verify the handler's actual side effect.
 ### Hook packs
 
 A hook pack is a package whose `package.json` declares hook directories in
-`openclaw.hooks`. Install a reviewed package or local directory through the
+`carapace.hooks`. Install a reviewed package or local directory through the
 unified installer:
 
 ```bash
-openclaw plugins install <path-or-spec>
+carapace plugins install <path-or-spec>
 ```
 
 Installation and update flags, npm restrictions, linked-root behavior and trust, and
@@ -412,7 +412,7 @@ the deprecated `hooks install` / `hooks update` aliases are documented in
 | `compaction-notifier`   | `session:compact:before`, `session:compact:after`    | Add compaction status notices on supported delivery paths. |
 | `session-memory`        | `command:new`, `command:reset`, `session:auto-reset` | Save recent conversation excerpts to workspace memory.     |
 
-Enable one with `openclaw hooks enable <hook-name>` and verify its side effect.
+Enable one with `carapace hooks enable <hook-name>` and verify its side effect.
 Startup-only hooks such as `boot-md` wait for the next Gateway start.
 
 <a id="boot-md"></a>
@@ -471,7 +471,7 @@ filters. Inspect the actual injected result with `/context detail`; see
 [Context](/concepts/context).
 
 `TOOLS.md` is not a recognized runtime bootstrap basename.
-`openclaw doctor --fix` archives workspace-root `TOOLS.md` and merges customized
+`carapace doctor --fix` archives workspace-root `TOOLS.md` and merges customized
 content into the `## Tools` section of `AGENTS.md`. Other `TOOLS.md` files named
 by patterns are not migrated;
 point those patterns at `AGENTS.md` instead.
@@ -731,7 +731,7 @@ with an explicit shutdown lifecycle, not a request/event handler.
 
 ## CLI reference
 
-See [`openclaw hooks`](/cli/hooks) for every public report and toggle option,
+See [`carapace hooks`](/cli/hooks) for every public report and toggle option,
 JSON output fields, exit behavior, and install/update aliases.
 
 ## Troubleshooting
@@ -739,11 +739,11 @@ JSON output fields, exit behavior, and install/update aliases.
 ### Hook not discovered
 
 Check the report's `workspaceDir` and `managedHooksDir` with
-`openclaw hooks list --json`. Confirm you are inspecting the intended host,
+`carapace hooks list --json`. Confirm you are inspecting the intended host,
 profile, and agent. Each hook needs `HOOK.md` and one supported handler file;
 a metadata file alone is insufficient. Collection locations inspect immediate
 children. An explicit extra path or linked root can itself be a hook or pack.
-For a pack, verify that `openclaw.hooks` lists the intended hook directories
+For a pack, verify that `carapace.hooks` lists the intended hook directories
 directly: nested packs and collections are not followed, and rejected entries
 do not cause unlisted children to be scanned.
 
@@ -755,8 +755,8 @@ linked packs, verify the root layout described under
 ### Hook not eligible
 
 ```bash
-openclaw hooks info my-hook
-openclaw hooks list --verbose
+carapace hooks info my-hook
+carapace hooks list --verbose
 ```
 
 Check `blockedReason`, missing binaries on the Gateway's `PATH`, environment,
@@ -772,7 +772,7 @@ report does not override the master switch or name selection and does not mean
 another agent's workspace was loaded.
 
 ```bash
-openclaw logs --follow
+carapace logs --follow
 ```
 
 Look for import/export errors, boundary failures, unknown-event warnings, or

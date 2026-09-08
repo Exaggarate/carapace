@@ -1,13 +1,13 @@
-import type { ImageGenerationProvider } from "openclaw/plugin-sdk/image-generation";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { MediaUnderstandingProvider } from "openclaw/plugin-sdk/media-understanding";
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { ImageGenerationProvider } from "carapace/plugin-sdk/image-generation";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { MediaUnderstandingProvider } from "carapace/plugin-sdk/media-understanding";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
 import type {
   RealtimeTranscriptionProviderPlugin,
   RealtimeTranscriptionSession,
   RealtimeTranscriptionSessionCreateRequest,
-} from "openclaw/plugin-sdk/realtime-transcription";
-import { createRealtimeVoiceAudioQueue } from "openclaw/plugin-sdk/realtime-voice-audio-queue";
+} from "carapace/plugin-sdk/realtime-transcription";
+import { createRealtimeVoiceAudioQueue } from "carapace/plugin-sdk/realtime-voice-audio-queue";
 import {
   RealtimeVoiceSessionLifecycle,
   type RealtimeVoiceBridge,
@@ -15,13 +15,13 @@ import {
   type RealtimeVoiceProviderPlugin,
   type RealtimeVoiceSessionConnection,
   type RealtimeVoiceToolResultOptions,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
+} from "carapace/plugin-sdk/realtime-voice-provider";
 import type {
   SpeechProviderPlugin,
   SpeechSynthesisStreamRequest,
   SpeechTelephonySynthesisRequest,
-} from "openclaw/plugin-sdk/speech";
-import type { VideoGenerationProvider } from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/speech";
+import type { VideoGenerationProvider } from "carapace/plugin-sdk/video-generation";
 import {
   assertXaiRealtimeVoiceRequestSupported,
   createXaiImageGenerationProviderMetadata,

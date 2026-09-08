@@ -6,7 +6,7 @@ import type {
   SimpleStreamOptions,
   StreamFunction,
   StreamOptions,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 
 /** Runtime stream adapter signature stored in the API provider registry. */
 export type ApiStreamFunction = (

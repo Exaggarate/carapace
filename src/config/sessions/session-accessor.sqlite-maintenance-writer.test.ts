@@ -3,9 +3,9 @@ import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { recordInboundSession } from "../../channels/session.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
   applySessionEntryLifecycleMutation,
   cleanupSessionLifecycleArtifactsCore,
@@ -38,11 +38,11 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
   vi.restoreAllMocks();
   archiveMaterializationHook.beforeMaterialize = undefined;
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 function createPlannerStore(entryCount: number) {
-  const tempDir = tempDirs.make("openclaw-session-maintenance-planner-");
+  const tempDir = tempDirs.make("carapace-session-maintenance-planner-");
   const storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
   for (let index = 0; index < entryCount; index += 1) {
     replaceSessionEntrySync(
@@ -56,7 +56,7 @@ function createPlannerStore(entryCount: number) {
   if (!databasePath) {
     throw new Error("expected planner maintenance database path");
   }
-  const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+  const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
   database.db.exec("ANALYZE; PRAGMA analysis_limit = 37;");
   return { database, storePath };
 }
@@ -101,7 +101,7 @@ it.each([false, true])(
 );
 
 it("releases the store writer before maintenance archive sizing completes", async () => {
-  const tempDir = tempDirs.make("openclaw-session-maintenance-writer-");
+  const tempDir = tempDirs.make("carapace-session-maintenance-writer-");
   const storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
   const removedKey = "agent:main:subagent:maintenance-sizing-removed";
   const writerKey = "agent:main:maintenance-sizing-writer";
@@ -159,7 +159,7 @@ it("releases the store writer before maintenance archive sizing completes", asyn
 });
 
 it("does not hold channel recording behind automatic session maintenance", async () => {
-  const tempDir = tempDirs.make("openclaw-session-maintenance-ingress-");
+  const tempDir = tempDirs.make("carapace-session-maintenance-ingress-");
   const storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
   const staleSessionKey = "agent:main:subagent:maintenance-ingress-stale";
   replaceSessionEntrySync(

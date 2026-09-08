@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   drag: vi.fn(async () => ({})),
   endSession: vi.fn(async () => ({})),
   escalateSession: vi.fn(async () => ({
-    session: "openclaw-test",
+    session: "carapace-test",
     captureScope: "desktop",
     effectiveScope: "desktop",
     desktopUnlocked: true,
@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => ({
   getCursorPosition: vi.fn(async () => ({})),
   getDesktopState: vi.fn(async () => ({})),
   getSessionState: vi.fn(async () => ({
-    session: "openclaw-test",
+    session: "carapace-test",
     captureScope: "desktop",
     effectiveScope: "desktop",
     desktopUnlocked: true,
@@ -116,7 +116,7 @@ describe("CUA Driver direct session", () => {
     expect(mocks.createTrustedSession).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        publicSession: expect.stringMatching(/^openclaw-/),
+        publicSession: expect.stringMatching(/^carapace-/),
         mode: "unrestricted",
         ttlSeconds: authorization.maxSessionTtlSeconds,
         idleTtlSeconds: authorization.maxIdleTtlSeconds,

@@ -1,5 +1,5 @@
 // Receipt lookup and source-removal bookkeeping for legacy workspace migration.
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
 import {
   readLegacyMigrationReceipt,
   resolveLegacyMigrationSourceKey,

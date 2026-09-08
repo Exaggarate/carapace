@@ -156,7 +156,7 @@ async function finishFailedUpdate(
     previousVerified: options.previousVerified,
     installKindChanged: false,
     configSnapshot: options.configSnapshot ?? {
-      path: "/fixture/openclaw.json",
+      path: "/fixture/carapace.json",
       exists: false,
       raw: null,
       parsed: {},
@@ -248,7 +248,7 @@ describe("failed update recovery restart", () => {
       vi.spyOn(Date, "now").mockImplementation(() => now);
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: tempDirs.make("update-report-before-boot-"),
+        CARAPACE_STATE_DIR: tempDirs.make("update-report-before-boot-"),
       };
       const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
       mocks.restart.mockImplementationOnce(async () => {
@@ -330,7 +330,7 @@ describe("failed update recovery restart", () => {
     const original = new ScheduledTaskAutoStartRecoveryError(
       [new Error("service stop failed"), restoreError],
       "Native preparation and compensation failed",
-      { OPENCLAW_STATE_DIR: "/fixture/state" },
+      { CARAPACE_STATE_DIR: "/fixture/state" },
     );
     const detail = formatErrorMessage(original);
     const failure = await finishFailedUpdate(
@@ -340,7 +340,7 @@ describe("failed update recovery restart", () => {
         steps: [
           {
             name: "update",
-            command: "openclaw update",
+            command: "carapace update",
             cwd: "/repo",
             durationMs: 1,
             exitCode: 1,
@@ -404,7 +404,7 @@ describe("failed update recovery restart", () => {
   });
 
   it("does not restart when the mutation owner returned no recovery verdict", async () => {
-    vi.stubEnv("OPENCLAW_UPDATE_RUN_HANDOFF", "1");
+    vi.stubEnv("CARAPACE_UPDATE_RUN_HANDOFF", "1");
     const failure = await finishFailedUpdate(failedResult(undefined), {
       json: true,
       stopped: false,
@@ -432,7 +432,7 @@ describe("failed update recovery restart", () => {
   ])(
     "preserves the final restart verdict ($handoff, $restoreFails, $safe, $stopped)",
     async ({ handoff, restoreFails, safe, stopped, expected, mutationFailed }) => {
-      vi.stubEnv("OPENCLAW_UPDATE_RUN_HANDOFF", handoff ? "1" : undefined);
+      vi.stubEnv("CARAPACE_UPDATE_RUN_HANDOFF", handoff ? "1" : undefined);
       const restoreError = new Error("restore failed");
       if (restoreFails) {
         mocks.restoreWindowsAutoStart.mockRejectedValueOnce(restoreError);
@@ -484,7 +484,7 @@ describe("failed update recovery restart", () => {
     "does not restart again after post-activation convergence exits %s",
     async (childExitCode) => {
       mocks.restartCandidate.mockResolvedValueOnce("ok");
-      vi.stubEnv("OPENCLAW_UPDATE_RUN_HANDOFF", "1");
+      vi.stubEnv("CARAPACE_UPDATE_RUN_HANDOFF", "1");
       const detail = "Fresh Doctor could not persist the migrated config.";
       mocks.freshProcess.mockResolvedValueOnce({
         resumed: false,
@@ -513,8 +513,8 @@ describe("failed update recovery restart", () => {
     async (stopped) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: tempDirs.make("update-report-recovery-"),
-        OPENCLAW_PROFILE: "work",
+        CARAPACE_STATE_DIR: tempDirs.make("update-report-recovery-"),
+        CARAPACE_PROFILE: "work",
       };
       const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
       mocks.readRuntime.mockResolvedValue({ status: stopped ? "stopped" : "unknown" });
@@ -525,7 +525,7 @@ describe("failed update recovery restart", () => {
 
       const nextAction = getUpdateRun(run.runId, { env })?.origin.nextAction;
       expect(mocks.restart).not.toHaveBeenCalled();
-      expect(nextAction).toContain("Run `openclaw --profile work triage`");
+      expect(nextAction).toContain("Run `carapace --profile work triage`");
       expect(nextAction?.includes("Keep the gateway stopped")).toBe(stopped);
       expect(mocks.printResult.mock.lastCall?.[2]).toEqual({ nextAction });
     },
@@ -536,7 +536,7 @@ describe("failed update recovery restart", () => {
     async (pid) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: tempDirs.make("update-running-unverified-"),
+        CARAPACE_STATE_DIR: tempDirs.make("update-running-unverified-"),
       };
       const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
       recordUpdateRunVerification(
@@ -636,7 +636,7 @@ describe("failed package update recovery safety", () => {
       step: { stderrTail: expect.stringContaining("candidate activation denied") },
     });
     const backupRuntime = path.join(transaction.backupRoot, "dist", "index.js");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(base, "state") };
+    const env = { ...process.env, CARAPACE_STATE_DIR: path.join(base, "state") };
     const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
     expect(result.activePackageRoot).toBeNull();
     await expect(fs.readFile(backupRuntime, "utf8")).resolves.toBe("export {};\n");
@@ -682,11 +682,11 @@ describe("failed package update recovery safety", () => {
     "settles the first broken update after Doctor rewrites config (operator edit=%s)",
     async (operatorEdit) => {
       const stateDir = tempDirs.make("update-managed-rollback-");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
       };
       const config = {
         gateway: { mode: "local" },
@@ -730,7 +730,7 @@ describe("failed package update recovery safety", () => {
       }
       const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
       const schemaVersions = await readUpdateStateSchemaVersions({
-        stateDir: env.OPENCLAW_STATE_DIR,
+        stateDir: env.CARAPACE_STATE_DIR,
         config: {},
         env,
       });
@@ -790,7 +790,7 @@ describe("failed package update recovery safety", () => {
       if (operatorEdit) {
         expect(failure.result.reason).toBe("state-migrated-no-rollback");
         expect(recorded.status).toBe("failed");
-        expect(recorded.origin.nextAction).toContain("openclaw.json");
+        expect(recorded.origin.nextAction).toContain("carapace.json");
         expect(await fs.readFile(configPath, "utf8")).toBe(current);
         expect(rollback).not.toHaveBeenCalled();
         expect(mocks.restartCandidate).not.toHaveBeenCalled();
@@ -804,7 +804,7 @@ describe("failed package update recovery safety", () => {
       expect(complete).toHaveBeenCalledOnce();
       expect(cleanupStatus).toBe("rolled-back");
       expect(recorded.status).toBe("rolled-back");
-      expect(renderUpdateRunReport(recorded).headline).toContain("↩️ OpenClaw update rolled back");
+      expect(renderUpdateRunReport(recorded).headline).toContain("↩️ Carapace update rolled back");
       expect(await fs.readFile(configPath, "utf8")).toBe(original);
       if (process.platform !== "win32") {
         expect((await fs.stat(configPath)).mode & 0o777).toBe(0o600);
@@ -850,7 +850,7 @@ describe("failed package update recovery safety", () => {
       reason: "doctor-failed",
       steps: [
         { name: "global update", command: "npm", cwd: "/", durationMs: 1, exitCode: 0 },
-        { name: "openclaw doctor", command: "doctor", cwd: "/", durationMs: 1, exitCode: 1 },
+        { name: "carapace doctor", command: "doctor", cwd: "/", durationMs: 1, exitCode: 1 },
       ],
       recovery: {
         serviceRestartSafe: false,
@@ -875,16 +875,16 @@ describe("live repair ownership after activation", () => {
     "repairs a still-running restart failure using its own ledger (transient read=%s)",
     async (transientRead) => {
       const stateDir = tempDirs.make("update-live-repair-owner-");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await fs.writeFile(configPath, "{}\n", { mode: 0o600 });
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
       };
       const run = { runId: createUpdateRun({ trigger: "api" }, { env }).runId, env };
 
-      const serviceEnv = { ...env, OPENCLAW_STATE_DIR: tempDirs.make("update-repair-service-") };
+      const serviceEnv = { ...env, CARAPACE_STATE_DIR: tempDirs.make("update-repair-service-") };
       vi.spyOn(servicePlan, "resolveGatewayServiceManagementBlockMessageForUpdate").mockReturnValue(
         undefined,
       );

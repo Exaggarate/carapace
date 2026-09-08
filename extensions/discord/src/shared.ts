@@ -1,13 +1,13 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { formatAllowFromLowercase } from "openclaw/plugin-sdk/allow-from";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { formatAllowFromLowercase } from "carapace/plugin-sdk/allow-from";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import type { ChannelDoctorAdapter } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import type { ChannelDoctorAdapter } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import { inspectDiscordAccount } from "./account-inspect.js";
 import {
   isDiscordAccountEnabledForRuntime,
@@ -70,7 +70,7 @@ const discordDoctor: ChannelDoctorAdapter = {
 };
 
 function resolveDiscordConfigAccessorAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): DiscordConfigAccessorAccount {
   const accountId = normalizeAccountId(

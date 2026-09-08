@@ -1,5 +1,5 @@
 /** Collects Gateway auth secret surfaces for secrets runtime preparation. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createGatewayCredentialPlan } from "../gateway/credential-planner.js";
 import type { SecretDefaults } from "./runtime-shared.js";
 import { isRecord } from "./shared.js";
@@ -63,7 +63,7 @@ function createState(params: {
 
 /** Evaluates which gateway credential SecretRefs can affect the effective auth plan. */
 export function evaluateGatewayAuthSurfaceStates(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   defaults?: SecretDefaults;
 }): GatewayAuthSurfaceStateMap {

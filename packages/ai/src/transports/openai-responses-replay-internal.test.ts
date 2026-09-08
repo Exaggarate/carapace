@@ -1,5 +1,5 @@
 import { setImmediate } from "node:timers/promises";
-import type { Model } from "@openclaw/llm-core";
+import type { Model } from "@carapace/llm-core";
 import OpenAI from "openai";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";

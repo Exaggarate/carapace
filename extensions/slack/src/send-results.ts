@@ -1,4 +1,4 @@
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
 import type { SlackSendResult } from "./send.js";
 
 export function mergeSlackSendResults(results: readonly SlackSendResult[]): SlackSendResult {

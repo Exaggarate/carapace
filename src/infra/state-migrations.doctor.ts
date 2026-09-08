@@ -23,7 +23,7 @@ import {
   resolveAllAgentSessionStoreCandidateTargetsSync,
   resolveConfiguredAgentDatabaseTargets,
 } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   collectRelevantDoctorPluginIds,
   listPluginDoctorSessionStoreAgentIds,
@@ -42,14 +42,14 @@ import {
   LEGACY_IMPLICIT_AGENT_ID,
   normalizeAgentId,
 } from "../routing/session-key.js";
-import { inspectOpenClawRegisteredAgentDatabases } from "../state/openclaw-agent-db-registry.js";
+import { inspectCarapaceRegisteredAgentDatabases } from "../state/carapace-agent-db-registry.js";
 import {
-  detectOpenClawStateDatabaseSchemaMigrations,
-  repairOpenClawStateDatabaseSchema,
-  repairOpenClawStateDatabaseSchemaIfNeeded,
-  type OpenClawStateDatabaseSchemaMigration,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  detectCarapaceStateDatabaseSchemaMigrations,
+  repairCarapaceStateDatabaseSchema,
+  repairCarapaceStateDatabaseSchemaIfNeeded,
+  type CarapaceStateDatabaseSchemaMigration,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { resolveIdentityPathViaExistingAncestorSync } from "./boundary-path.js";
 import { isPathInside } from "./path-guards.js";
 import {
@@ -211,7 +211,7 @@ import {
   migrateLegacyWorkspaceState,
 } from "./state-migrations.workspace-setup.js";
 
-function describeStateSchemaMigration(migration: OpenClawStateDatabaseSchemaMigration): string {
+function describeStateSchemaMigration(migration: CarapaceStateDatabaseSchemaMigration): string {
   switch (migration.kind) {
     case "agent-databases-composite-primary-key":
       return "agent database registry primary key → agent_id,path";
@@ -238,7 +238,7 @@ function describeStateSchemaMigration(migration: OpenClawStateDatabaseSchemaMigr
     case "skill-workshop-directory-ownership-v16":
       return "Skill Workshop ownership → per-agent directory containment";
     case "operator-approvals-system-agent":
-      return "operator approvals → OpenClaw system changes";
+      return "operator approvals → Carapace system changes";
     case "session-watch-cursor-provenance-v4":
       return "session watch cursors → provenance column";
     case "strict-tables-v3":
@@ -252,12 +252,12 @@ const autoMigrateChecked = new Set<string>();
 const DEFERRED_LEGACY_OWNER_MESSAGE =
   "Deferred legacy agent/session migration: select an agent owner";
 
-function tryResolveDoctorStateMigrationAgentId(cfg: OpenClawConfig): string | undefined {
+function tryResolveDoctorStateMigrationAgentId(cfg: CarapaceConfig): string | undefined {
   const agentId = tryResolveAmbientOwnerAgentId(cfg);
   return agentId && listAgentIds(cfg).includes(agentId) ? agentId : undefined;
 }
 
-function tryResolveDoctorSessionMigrationAgentId(cfg: OpenClawConfig): string | undefined {
+function tryResolveDoctorSessionMigrationAgentId(cfg: CarapaceConfig): string | undefined {
   return (
     tryResolveDoctorStateMigrationAgentId(cfg) ??
     (!isPerAgentSessionStoreConfig(cfg.session?.store)
@@ -267,7 +267,7 @@ function tryResolveDoctorSessionMigrationAgentId(cfg: OpenClawConfig): string | 
 }
 
 function hasCustomAgentDirOverride(env: NodeJS.ProcessEnv): boolean {
-  return Boolean(env.OPENCLAW_AGENT_DIR?.trim() || env.PI_CODING_AGENT_DIR?.trim());
+  return Boolean(env.CARAPACE_AGENT_DIR?.trim() || env.PI_CODING_AGENT_DIR?.trim());
 }
 
 function resolveConcreteBindingAccountId(value: unknown): string | undefined {
@@ -285,8 +285,8 @@ async function detectManagedWorktreeStateMigration(params: {
   artifactPreservingReadOnly?: boolean;
 }): Promise<LegacyStateDetection["worktrees"]> {
   const rawRoot = path.join(params.stateDir, "worktrees");
-  const stateEnv = { ...params.env, OPENCLAW_STATE_DIR: params.stateDir };
-  const databaseExists = migrationFileExists(resolveOpenClawStateSqlitePath(stateEnv));
+  const stateEnv = { ...params.env, CARAPACE_STATE_DIR: params.stateDir };
+  const databaseExists = migrationFileExists(resolveCarapaceStateSqlitePath(stateEnv));
   const legacyIds =
     params.doctorOnlyStateMigrations === true && databaseExists
       ? listLegacyRegistryWorktreesForMigration(stateEnv, {
@@ -333,10 +333,10 @@ async function detectManagedWorktreeStateMigration(params: {
 }
 
 export async function detectLegacyStateMigrations(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   /** Legacy session file inspection belongs to Doctor, including its read-only preview. */
   mode?: "automatic" | "doctor";
-  pluginDoctorConfig?: OpenClawConfig;
+  pluginDoctorConfig?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   pluginSessionStoreAgentIds?: readonly string[];
@@ -459,8 +459,8 @@ export async function detectLegacyStateMigrations(params: {
   const pluginInstallIndexPath = resolveLegacyInstalledPluginIndexStorePath({ stateDir });
   const hasPluginInstallIndex = migrationFileExists(pluginInstallIndexPath);
   const debugProxyCaptureSidecar = detectLegacyDebugProxyCaptureSidecar(stateDir, env);
-  const stateSchemaMigrations = detectOpenClawStateDatabaseSchemaMigrations(
-    { env: { ...env, OPENCLAW_STATE_DIR: stateDir } },
+  const stateSchemaMigrations = detectCarapaceStateDatabaseSchemaMigrations(
+    { env: { ...env, CARAPACE_STATE_DIR: stateDir } },
     { artifactPreservingReadOnly: params.artifactPreservingReadOnly },
   );
   const worktrees = await detectManagedWorktreeStateMigration({
@@ -1096,10 +1096,10 @@ function createStateSchemaMigrationStep(params: {
   mode: LegacyStateMigrationMode;
   requiredness: PreparedLegacyStateMigrationStep["requiredness"];
 }): LegacyStateMigrationStep {
-  const stateEnv = { ...params.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const stateEnv = { ...params.env, CARAPACE_STATE_DIR: params.stateDir };
   const database: LegacyStateMigrationEndpoint = {
     kind: "sqlite",
-    path: resolveOpenClawStateSqlitePath(stateEnv),
+    path: resolveCarapaceStateSqlitePath(stateEnv),
   };
   return {
     id: "state-schema",
@@ -1110,8 +1110,8 @@ function createStateSchemaMigrationStep(params: {
     reversibility: "checkpoint-required",
     run: () =>
       params.mode === "doctor"
-        ? repairOpenClawStateDatabaseSchema({ env: stateEnv })
-        : repairOpenClawStateDatabaseSchemaIfNeeded({ env: stateEnv }),
+        ? repairCarapaceStateDatabaseSchema({ env: stateEnv })
+        : repairCarapaceStateDatabaseSchemaIfNeeded({ env: stateEnv }),
   };
 }
 
@@ -1127,9 +1127,9 @@ function createPluginInstallIndexStep(params: {
     target: [
       {
         kind: "sqlite",
-        path: resolveOpenClawStateSqlitePath({
+        path: resolveCarapaceStateSqlitePath({
           ...params.env,
-          OPENCLAW_STATE_DIR: params.stateDir,
+          CARAPACE_STATE_DIR: params.stateDir,
         }),
       },
     ],
@@ -1155,9 +1155,9 @@ function createAgentTargetDiscoveryStep(params: {
       ...createConfigMigrationSources(params.configPath, params.configIncludedPaths),
       {
         kind: "sqlite",
-        path: resolveOpenClawStateSqlitePath({
+        path: resolveCarapaceStateSqlitePath({
           ...params.env,
-          OPENCLAW_STATE_DIR: params.stateDir,
+          CARAPACE_STATE_DIR: params.stateDir,
         }),
       },
       { kind: "path", path: path.join(params.stateDir, "agents") },
@@ -1171,18 +1171,18 @@ function createAgentTargetDiscoveryStep(params: {
 }
 
 function createConfigMachineStateStep(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configPath: string;
   configIncludedPaths: readonly string[];
   stateDir: string;
   env: NodeJS.ProcessEnv;
 }): LegacyStateMigrationStep {
-  const stateEnv = { ...params.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const stateEnv = { ...params.env, CARAPACE_STATE_DIR: params.stateDir };
   return {
     id: "config-machine-state",
     phase: "shared",
     source: createConfigMigrationSources(params.configPath, params.configIncludedPaths),
-    target: [{ kind: "sqlite", path: resolveOpenClawStateSqlitePath(stateEnv) }],
+    target: [{ kind: "sqlite", path: resolveCarapaceStateSqlitePath(stateEnv) }],
     requiredness: "conditional",
     reversibility: "checkpoint-required",
     run: () => migrateLegacyConfigMachineState({ config: params.config, env: stateEnv }),
@@ -1296,7 +1296,7 @@ function createDeferredPluginSessionStoreRefusal(
 }
 
 function createDeferredPluginSessionStoreEndpoints(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   inventory: PluginDoctorStateMigrationInventory,
 ): LegacyStateMigrationEndpoint[] {
   const knownPluginIds = new Set(inventory.knownPluginIds);
@@ -1327,7 +1327,7 @@ function createPluginMigrationPreparationRefusal(params: {
 }
 
 function resolveConfiguredSessionStoreEndpoints(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): LegacyStateMigrationEndpoint[] {
   return uniqueMigrationEndpoints(
@@ -1386,7 +1386,7 @@ function createConfigMigrationSources(
 }
 
 function inspectOrphanSessionStoreEndpoints(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   pluginSessionStoreAgentIds: readonly string[];
   registeredDatabases?: readonly { agentId: string; path: string }[];
@@ -1422,7 +1422,7 @@ function inspectOrphanSessionStoreEndpoints(params: {
 
 function buildLegacyStateMigrationPreludeSteps(params: {
   mode: LegacyStateMigrationMode;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configPath: string;
   configIncludedPaths: readonly string[];
   stateDir: string;
@@ -1436,10 +1436,10 @@ function buildLegacyStateMigrationPreludeSteps(params: {
   readOnlyPlanning?: boolean;
   pluginPreparation?: LegacyStateMigrationStep;
 }): LegacyStateMigrationStep[] {
-  const stateEnv = { ...params.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const stateEnv = { ...params.env, CARAPACE_STATE_DIR: params.stateDir };
   const stateDatabase: LegacyStateMigrationEndpoint = {
     kind: "sqlite",
-    path: resolveOpenClawStateSqlitePath(stateEnv),
+    path: resolveCarapaceStateSqlitePath(stateEnv),
   };
   const configSources = createConfigMigrationSources(params.configPath, params.configIncludedPaths);
   const agentPersistence = uniqueMigrationEndpoints([
@@ -1554,8 +1554,8 @@ function buildLegacyStateMigrationPreludeSteps(params: {
 type LegacyStateMigrationExecutionPlan = {
   mode: LegacyStateMigrationMode;
   detected: LegacyStateDetection;
-  config: OpenClawConfig;
-  sessionConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  sessionConfig?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   now?: () => number;
   agentDatabaseEndpoints?: LegacyStateMigrationEndpoint[];
@@ -1576,7 +1576,7 @@ function buildLegacyStateMigrationSteps(
   const stateDir = detected.stateDir;
   const stateDatabase: LegacyStateMigrationEndpoint = {
     kind: "sqlite",
-    path: resolveOpenClawStateSqlitePath({ ...env, OPENCLAW_STATE_DIR: stateDir }),
+    path: resolveCarapaceStateSqlitePath({ ...env, CARAPACE_STATE_DIR: stateDir }),
   };
   const now = params.now ?? (() => Date.now());
   const isDoctor = params.mode === "doctor";
@@ -1867,7 +1867,7 @@ function buildLegacyStateMigrationSteps(
 
   const managedWorktreePrelude: LegacyStateMigrationStep[] = [
     sharedStep("managed-worktrees", () => {
-      const stateEnv = { ...env, OPENCLAW_STATE_DIR: stateDir };
+      const stateEnv = { ...env, CARAPACE_STATE_DIR: stateDir };
       const discardedWorktrees =
         isDoctor && detected.worktrees.hasLegacy
           ? discardLegacyRegistryWorktrees(stateEnv, detected.worktrees.legacyIds)
@@ -1999,7 +1999,7 @@ function buildLegacyStateMigrationSteps(
       ...finalStep("skill-workshop", () =>
         migrateLegacySkillWorkshopProposals({
           config: params.sessionConfig ?? params.config,
-          env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...env, CARAPACE_STATE_DIR: stateDir },
           retireMissingDrafts: isDoctor,
         }),
       ),
@@ -2012,7 +2012,7 @@ function buildLegacyStateMigrationSteps(
         : () =>
             migrateLegacyChannelPairingState({
               detected: detected.channelPairing,
-              env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+              env: { ...env, CARAPACE_STATE_DIR: stateDir },
             }),
       false,
       channelPairingRefusal,
@@ -2079,7 +2079,7 @@ function buildLegacyStateMigrationSteps(
       ...finalStep("acp-session-metadata", () =>
         migrateLegacyAcpSessionMetadata({
           cfg: params.sessionConfig ?? params.config,
-          env: isDoctor ? { ...env, OPENCLAW_STATE_DIR: stateDir } : env,
+          env: isDoctor ? { ...env, CARAPACE_STATE_DIR: stateDir } : env,
           now,
           pluginSessionStoreAgentIds,
           legacySessionSurfaces: params.legacySessionSurfaces,
@@ -2208,9 +2208,9 @@ export async function planLegacyStateMigrationsReadOnly(params: {
     env: params.env,
     snapshot: requestedSnapshot,
   });
-  const rawOAuthDir = (params.env ?? process.env).OPENCLAW_OAUTH_DIR?.trim();
+  const rawOAuthDir = (params.env ?? process.env).CARAPACE_OAUTH_DIR?.trim();
   const callerOAuthDir = rawOAuthDir
-    ? resolveOAuthDir({ ...callerEnv, OPENCLAW_OAUTH_DIR: rawOAuthDir }, requestedSnapshot.stateDir)
+    ? resolveOAuthDir({ ...callerEnv, CARAPACE_OAUTH_DIR: rawOAuthDir }, requestedSnapshot.stateDir)
     : undefined;
   const oauthDirOutsideSnapshot =
     callerOAuthDir !== undefined &&
@@ -2228,7 +2228,7 @@ export async function planLegacyStateMigrationsReadOnly(params: {
     snapshot: requestedSnapshot,
   });
   if (callerOAuthDir && !oauthDirOutsideSnapshot) {
-    env.OPENCLAW_OAUTH_DIR = callerOAuthDir;
+    env.CARAPACE_OAUTH_DIR = callerOAuthDir;
   }
   const configBefore = await readLegacyStateMigrationPlanConfig({
     configPath: requestedSnapshot.configPath,
@@ -2321,7 +2321,7 @@ export async function planLegacyStateMigrationsReadOnly(params: {
           [
             {
               kind: "sqlite",
-              path: path.join(resolveSharedMainAuthAgentDir(env), "openclaw-agent.sqlite"),
+              path: path.join(resolveSharedMainAuthAgentDir(env), "carapace-agent.sqlite"),
             },
           ],
           snapshot.stateDir,
@@ -2487,7 +2487,7 @@ export async function planLegacyStateMigrationsReadOnly(params: {
   let agentTargetRefusal: PreparedLegacyStateMigrationStep["refusal"];
   let agentTargetRefusalEndpoints: LegacyStateMigrationEndpoint[] = [];
   try {
-    registeredDatabases = inspectOpenClawRegisteredAgentDatabases({
+    registeredDatabases = inspectCarapaceRegisteredAgentDatabases({
       env,
       includeIncompatibleSchemaVersions: true,
     });
@@ -2892,7 +2892,7 @@ async function runLegacyStateMigrationSteps(
 
 export async function runLegacyStateMigrations(params: {
   detected: LegacyStateDetection;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   now?: () => number;
   recoverCorruptTargetStore?: boolean;
@@ -2907,7 +2907,7 @@ export async function runLegacyStateMigrations(params: {
 > {
   const detected = params.detected;
   const env = params.env ?? process.env;
-  const config = params.config ?? ({} as OpenClawConfig);
+  const config = params.config ?? ({} as CarapaceConfig);
   const legacySessionSurfaces = params.legacySessionSurfaces;
   const buildSteps = (pluginStateMigrationInventory?: PluginDoctorStateMigrationInventory) =>
     buildLegacyStateMigrationSteps({
@@ -2987,8 +2987,8 @@ export async function runLegacyStateMigrations(params: {
 
 /** Run canonical startup migrations and explicit Doctor-owned file repairs. */
 export async function autoMigrateLegacyState(params: {
-  cfg: OpenClawConfig;
-  pluginDoctorConfig?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  pluginDoctorConfig?: CarapaceConfig;
   /** Include inputs captured by the config snapshot that produced cfg. */
   configIncludedPaths?: readonly string[];
   env?: NodeJS.ProcessEnv;
@@ -3109,7 +3109,7 @@ async function executeLegacyStateMigrations(
   if (mode === "automatic") {
     autoMigrateChecked.add(`${path.resolve(stateDir)}\0${mode}`);
   }
-  const stateEnv = { ...env, OPENCLAW_STATE_DIR: stateDir };
+  const stateEnv = { ...env, CARAPACE_STATE_DIR: stateDir };
   const stateSchemaOptions = { env: stateEnv };
   const configPath = resolveConfigPath(env, stateDir, homedir);
   let agentDatabaseTargets: Array<{ agentId: string; path: string }> = [];
@@ -3337,7 +3337,7 @@ async function executeLegacyStateMigrations(
     hasLegacy: migrationFileExists(resolveLegacyInstalledPluginIndexStorePath({ stateDir })),
   });
   try {
-    if (detectOpenClawStateDatabaseSchemaMigrations(stateSchemaOptions).length > 0) {
+    if (detectCarapaceStateDatabaseSchemaMigrations(stateSchemaOptions).length > 0) {
       stateSchemaStep = createStateSchemaMigrationStep({
         stateDir,
         env,

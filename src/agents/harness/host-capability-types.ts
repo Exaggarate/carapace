@@ -26,7 +26,7 @@ type AgentHarnessPreparedEnvironment = Readonly<{
 }>;
 
 type AgentHarnessToolSurfaceOptions = Omit<
-  NonNullable<Parameters<(typeof import("../agent-tools.js"))["createOpenClawCodingTools"]>[0]>,
+  NonNullable<Parameters<(typeof import("../agent-tools.js"))["createCarapaceCodingTools"]>[0]>,
   "operationalRunInstance"
 >;
 

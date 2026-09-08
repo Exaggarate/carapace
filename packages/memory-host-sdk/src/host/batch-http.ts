@@ -1,5 +1,5 @@
-import { retryAsync } from "@openclaw/retry";
-import type { SsrFPolicy } from "./openclaw-runtime-network.js";
+import { retryAsync } from "@carapace/retry";
+import type { SsrFPolicy } from "./carapace-runtime-network.js";
 import { postJson } from "./post-json.js";
 
 // JSON POST helper for batch APIs with provider-style transient retry.

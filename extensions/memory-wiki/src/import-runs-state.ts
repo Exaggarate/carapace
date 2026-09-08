@@ -2,17 +2,17 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { resolveNonNegativeIntegerOption } from "openclaw/plugin-sdk/number-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { resolveNonNegativeIntegerOption } from "carapace/plugin-sdk/number-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   asNullableRecord,
   normalizeOptionalString,
   normalizeUniqueTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { walkMemoryWikiDirectory } from "./bounded-walk.js";
 
 const LEGACY_IMPORT_RUN_READ_CONCURRENCY = 16;
@@ -79,7 +79,7 @@ let configuredImportRunStore: MemoryWikiImportRunStateStore | undefined;
 const memoryImportRunsByVault = new Map<string, Map<string, ChatGptImportRunRecord>>();
 
 export function resolveMemoryWikiImportRunsDir(vaultRoot: string): string {
-  return path.join(vaultRoot, ".openclaw-wiki", "import-runs");
+  return path.join(vaultRoot, ".carapace-wiki", "import-runs");
 }
 
 function resolveVaultRootKey(vaultRoot: string): string {

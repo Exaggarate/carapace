@@ -1,10 +1,10 @@
 import path from "node:path";
-import { optionalFiniteNumberSchema } from "openclaw/plugin-sdk/channel-actions";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { asNonArrayRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { textResult } from "openclaw/plugin-sdk/tool-results";
+import { optionalFiniteNumberSchema } from "carapace/plugin-sdk/channel-actions";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import { asNonArrayRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { textResult } from "carapace/plugin-sdk/tool-results";
 import { Type } from "typebox";
-import type { AnyAgentTool, OpenClawConfig } from "../api.js";
+import type { AnyAgentTool, CarapaceConfig } from "../api.js";
 import { applyMemoryWikiMutation, normalizeMemoryWikiMutationInput } from "./apply.js";
 import {
   WIKI_SEARCH_BACKENDS,
@@ -106,7 +106,7 @@ const WikiApplySchema = Type.Object(
 
 async function syncImportedSourcesIfNeeded(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
   signal?: AbortSignal,
 ) {
   await syncMemoryWikiImportedSources({
@@ -120,13 +120,13 @@ type WikiToolMemoryContext = {
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
-  conversationRecall?: OpenClawPluginToolContext["conversationRecall"];
+  conversationRecall?: CarapacePluginToolContext["conversationRecall"];
   signal?: AbortSignal;
 };
 
 export function createWikiStatusTool(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
   memoryContext: WikiToolMemoryContext = {},
 ): AnyAgentTool {
   return {
@@ -148,7 +148,7 @@ export function createWikiStatusTool(
 
 export function createWikiSearchTool(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
   memoryContext: WikiToolMemoryContext = {},
 ): AnyAgentTool {
   return {
@@ -186,7 +186,7 @@ export function createWikiSearchTool(
 
 export function createWikiLintTool(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
   signal?: AbortSignal,
 ): AnyAgentTool {
   return {
@@ -226,7 +226,7 @@ export function createWikiLintTool(
 
 export function createWikiApplyTool(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
   signal?: AbortSignal,
 ): AnyAgentTool {
   return {
@@ -250,7 +250,7 @@ export function createWikiApplyTool(
 
 export function createWikiGetTool(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
   memoryContext: WikiToolMemoryContext = {},
 ): AnyAgentTool {
   return {

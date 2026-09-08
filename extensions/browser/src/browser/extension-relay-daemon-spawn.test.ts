@@ -2,7 +2,7 @@ import net from "node:net";
 import { describe, expect, it, vi } from "vitest";
 import { ensureExtensionRelayDaemonProcess } from "./extension-relay-daemon-spawn.js";
 
-const ENTRY = "/opt/openclaw/dist/extensions/browser/relay-daemon-entry.js";
+const ENTRY = "/opt/carapace/dist/extensions/browser/relay-daemon-entry.js";
 
 describe("ensureExtensionRelayDaemonProcess", () => {
   it("skips when no relay credential exists", async () => {

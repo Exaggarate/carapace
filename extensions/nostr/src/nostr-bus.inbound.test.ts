@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PluginRuntime } from "../runtime-api.js";
 import { startNostrBus } from "./nostr-bus.js";
@@ -146,7 +146,7 @@ function startTestNostrBus(options: Parameters<typeof startNostrBus>[0]) {
 
 describe("startNostrBus inbound guards", () => {
   beforeEach(async () => {
-    const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-nostr-ingress-"));
+    const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-nostr-ingress-"));
     stateDir = await fs.realpath(created);
     ingressQueue = createChannelIngressQueueForTests<Record<string, unknown>>({
       channelId: "nostr",
@@ -180,7 +180,7 @@ describe("startNostrBus inbound guards", () => {
 
   afterEach(async () => {
     mockState.handlers = [];
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
 

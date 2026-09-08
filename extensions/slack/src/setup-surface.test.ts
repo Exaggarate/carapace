@@ -1,14 +1,14 @@
-import { installChannelDmPolicyContractSuite } from "openclaw/plugin-sdk/channel-test-helpers";
+import { installChannelDmPolicyContractSuite } from "carapace/plugin-sdk/channel-test-helpers";
 // Slack tests cover setup surface plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createQueuedWizardPrompter,
   createSetupWizardAdapter,
   createTestWizardPrompter,
   runSetupWizardConfigure,
   runSetupWizardPrepare,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { WizardPrompter } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { WizardPrompter } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSlackSetupWizardBase, slackSetupContract } from "./setup-core.js";
 import { buildSlackSetupLines } from "./setup-shared.js";
@@ -43,7 +43,7 @@ const baseCfg = {
       appToken: "xapp-test",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function requireFirstStringArg(mock: ReturnType<typeof vi.fn>, label: string): string {
   const [call] = mock.mock.calls;
@@ -68,7 +68,7 @@ describe("slackSetupWizard.prepare", () => {
 
     await runSetupWizardPrepare({
       prepare: slackSetupWizard.prepare,
-      cfg: { channels: { slack: { mode: "http" } } } as OpenClawConfig,
+      cfg: { channels: { slack: { mode: "http" } } } as CarapaceConfig,
       prompter: createTestWizardPrompter({ plain, note }),
     });
 
@@ -85,7 +85,7 @@ describe("slackSetupWizard.prepare", () => {
 
     await runSetupWizardPrepare({
       prepare: slackSetupWizard.prepare,
-      cfg: { channels: { slack: {} } } as OpenClawConfig,
+      cfg: { channels: { slack: {} } } as CarapaceConfig,
       prompter: createTestWizardPrompter({
         plain,
         note,
@@ -97,12 +97,12 @@ describe("slackSetupWizard.prepare", () => {
     const manifest = requireFirstStringArg(plain, "Slack manifest plain text");
     expect(JSON.parse(manifest)).toEqual({
       display_information: {
-        name: "OpenClaw",
-        description: "OpenClaw connector for OpenClaw",
+        name: "Carapace",
+        description: "Carapace connector for Carapace",
       },
       features: {
         bot_user: {
-          display_name: "OpenClaw",
+          display_name: "Carapace",
           always_online: true,
         },
         app_home: {
@@ -111,7 +111,7 @@ describe("slackSetupWizard.prepare", () => {
           messages_tab_read_only_enabled: false,
         },
         agent_view: {
-          agent_description: "OpenClaw connects Slack Agent View conversations to OpenClaw agents.",
+          agent_description: "Carapace connects Slack Agent View conversations to Carapace agents.",
           suggested_prompts: [
             {
               title: "What can you do?",
@@ -129,8 +129,8 @@ describe("slackSetupWizard.prepare", () => {
         },
         slash_commands: [
           {
-            command: "/openclaw",
-            description: "Send a message to OpenClaw",
+            command: "/carapace",
+            description: "Send a message to Carapace",
             should_escape: false,
           },
         ],
@@ -210,7 +210,7 @@ describe("slackSetupWizard.prepare", () => {
 
     const result = await runSetupWizardConfigure({
       configure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -255,7 +255,7 @@ describe("slackSetupWizard.prepare", () => {
 
     const result = await runSetupWizardConfigure({
       configure,
-      cfg: { channels: { slack: { mode: "http" } } } as OpenClawConfig,
+      cfg: { channels: { slack: { mode: "http" } } } as CarapaceConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -293,7 +293,7 @@ describe("slackSetupWizard.prepare", () => {
 
     const result = await runSetupWizardConfigure({
       configure,
-      cfg: { channels: { slack: { mode: "http" } } } as OpenClawConfig,
+      cfg: { channels: { slack: { mode: "http" } } } as CarapaceConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -333,7 +333,7 @@ describe("slackSetupWizard.prepare", () => {
 
     const result = await runSetupWizardConfigure({
       configure,
-      cfg: { channels: { slack: { mode: "http" } } } as OpenClawConfig,
+      cfg: { channels: { slack: { mode: "http" } } } as CarapaceConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -385,7 +385,7 @@ describe("slackSetupWizard.prepare", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -398,10 +398,10 @@ describe("slackSetupWizard.prepare", () => {
   });
 
   it.each([
-    { name: "new setup", cfg: {} as OpenClawConfig },
+    { name: "new setup", cfg: {} as CarapaceConfig },
     {
       name: "switch from user identity",
-      cfg: { channels: { slack: { postAs: "user" } } } as OpenClawConfig,
+      cfg: { channels: { slack: { postAs: "user" } } } as CarapaceConfig,
     },
   ])("keeps bot identity implicit for $name", async ({ cfg }) => {
     vi.stubEnv("SLACK_BOT_TOKEN", "");
@@ -472,7 +472,7 @@ describe("slackSetupWizard.prepare", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -499,7 +499,7 @@ describe("slackSetupWizard.prepare", () => {
             appToken: "test-app-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       prompter: queued.prompter,
     });
 
@@ -567,7 +567,7 @@ describe("slackSetupWizard.status", () => {
   ])("treats a complete user-identity $name account as configured", async ({ slack }) => {
     expect(
       await slackSetupWizard.status.resolveConfigured({
-        cfg: { channels: { slack } } as OpenClawConfig,
+        cfg: { channels: { slack } } as CarapaceConfig,
       }),
     ).toBe(true);
   });
@@ -592,7 +592,7 @@ describe("slackSetupWizard.status", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(configured).toBe(false);

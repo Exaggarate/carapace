@@ -2,13 +2,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import {
   getSkillsSnapshotVersion,
@@ -45,13 +45,13 @@ const tempDirs = createTrackedTempDirs();
 const stateDirs = createTrackedTempDirs();
 let testEnv: NodeJS.ProcessEnv;
 let stateDir = "";
-const workshopConfig: OpenClawConfig = {};
+const workshopConfig: CarapaceConfig = {};
 
 function workshopSkillsDir(agentId = "main"): string {
   return resolveWorkshopSkillsDir(workshopConfig, agentId, testEnv);
 }
 
-function withWorkshopOwner<T extends { config?: OpenClawConfig; agentId?: string }>(input: T) {
+function withWorkshopOwner<T extends { config?: CarapaceConfig; agentId?: string }>(input: T) {
   return {
     ...input,
     config: input.config ?? workshopConfig,
@@ -59,9 +59,9 @@ function withWorkshopOwner<T extends { config?: OpenClawConfig; agentId?: string
   };
 }
 
-type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: OpenClawConfig };
+type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: CarapaceConfig };
 type OptionalWorkshopOwner<T> = Omit<T, "config" | "agentId"> & {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
 };
 
@@ -97,21 +97,21 @@ const reviseSkillProposal = (
 ) => reviseSkillProposalImpl(withWorkshopOwner(input));
 
 beforeAll(async () => {
-  stateDir = await stateDirs.make("openclaw-skill-workshop-state-");
+  stateDir = await stateDirs.make("carapace-skill-workshop-state-");
   testEnv = {
     ...process.env,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-    OPENCLAW_AGENT_DIR: undefined,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+    CARAPACE_AGENT_DIR: undefined,
   };
   await listSkillProposals({ env: testEnv });
 });
 
 beforeEach(async () => {
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
-  vi.stubEnv("OPENCLAW_AGENT_DIR", undefined);
-  const database = openOpenClawStateDatabase({ env: testEnv });
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
+  vi.stubEnv("CARAPACE_AGENT_DIR", undefined);
+  const database = openCarapaceStateDatabase({ env: testEnv });
   database.db.exec(`
     DELETE FROM skill_workshop_proposal_events;
     DELETE FROM skill_workshop_proposal_rollbacks;
@@ -127,13 +127,13 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath(testEnv));
+  closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath(testEnv));
   vi.unstubAllEnvs();
   await stateDirs.cleanup();
 });
 
 async function makeWorkspace(): Promise<string> {
-  return await tempDirs.make("openclaw-skill-workshop-");
+  return await tempDirs.make("carapace-skill-workshop-");
 }
 
 async function createOwnedSkill(params: {
@@ -380,7 +380,7 @@ describe("skill workshop proposals", () => {
       name: "Frontmatter Skill",
       description: "Preserve metadata",
       content:
-        "---\nuser-invocable: false\nmetadata:\n  openclaw:\n    requires:\n      env:\n        - API_TOKEN\n---\n\n# Frontmatter Skill\n",
+        "---\nuser-invocable: false\nmetadata:\n  carapace:\n    requires:\n      env:\n        - API_TOKEN\n---\n\n# Frontmatter Skill\n",
     });
 
     await expect(
@@ -391,7 +391,7 @@ describe("skill workshop proposals", () => {
       "utf8",
     );
     expect(createdSkill).toContain("user-invocable: false");
-    expect(createdSkill).toContain("metadata:\n  openclaw:");
+    expect(createdSkill).toContain("metadata:\n  carapace:");
     expect(createdSkill).not.toContain("status: proposal");
     expect(createdSkill).not.toContain("version: ");
     expect(createdSkill).not.toContain("date: ");
@@ -1032,7 +1032,7 @@ describe("skill workshop proposals", () => {
       "utf8",
     );
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const manifest = await listSkillProposals();
     expect(manifest.proposals).toEqual(
       expect.arrayContaining([
@@ -1067,7 +1067,7 @@ describe("skill workshop proposals", () => {
     await fs.mkdir(path.dirname(supportFile), { recursive: true });
     await fs.writeFile(supportFile, "Partial support.\n", "utf8");
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     let releaseLock: (() => void) | undefined;
     let markAcquired: (() => void) | undefined;
     const acquired = new Promise<void>((resolve) => {
@@ -1138,7 +1138,7 @@ describe("skill workshop proposals", () => {
       "utf8",
     );
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(listSkillProposals()).resolves.toMatchObject({
       proposals: [expect.objectContaining({ id: proposal.record.id, status: "pending" })],
     });
@@ -1163,7 +1163,7 @@ describe("skill workshop proposals", () => {
     await fs.mkdir(proposal.record.target.skillDir, { recursive: true });
     await fs.writeFile(proposal.record.target.skillFile, "# External change\n", "utf8");
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(listSkillProposals()).resolves.toMatchObject({
       proposals: [expect.objectContaining({ id: proposal.record.id, status: "pending" })],
     });
@@ -1213,7 +1213,7 @@ describe("skill workshop proposals", () => {
     await fs.writeFile(path.join(skillDir, "references", "proof.md"), "New support.\n", "utf8");
     await fs.writeFile(skillFile, stripProposalFrontmatterForSkill(proposal.content), "utf8");
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(listSkillProposals()).resolves.toMatchObject({
       proposals: expect.arrayContaining([
         expect.objectContaining({ id: proposal.record.id, status: "applied" }),
@@ -1259,7 +1259,7 @@ describe("skill workshop proposals", () => {
     });
     await fs.writeFile(skillFile, stripProposalFrontmatterForSkill(proposal.content), "utf8");
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(listSkillProposals()).resolves.toMatchObject({
       proposals: expect.arrayContaining([
         expect.objectContaining({ id: proposal.record.id, status: "pending" }),
@@ -1300,7 +1300,7 @@ describe("skill workshop proposals", () => {
       "utf8",
     );
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(
       inspectSkillProposal(proposal.record.id, { agentId: "other" }),
     ).resolves.toBeNull();
@@ -1379,7 +1379,7 @@ describe("skill workshop proposals", () => {
     await expect(fs.readFile(supportFile, "utf8")).resolves.toBe("Partial support.\n");
 
     await fs.writeFile(draftFile, proposal.content);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(inspectSkillProposal(proposal.record.id)).resolves.toMatchObject({
       record: { status: "pending" },
     });

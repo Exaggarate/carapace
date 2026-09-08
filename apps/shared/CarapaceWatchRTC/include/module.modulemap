@@ -1,0 +1,4 @@
+module CarapaceWatchRTC {
+    header "CarapaceWatchRTC.h"
+    export *
+}

@@ -1,6 +1,6 @@
-import { shouldAckReaction } from "openclaw/plugin-sdk/channel-feedback";
+import { shouldAckReaction } from "carapace/plugin-sdk/channel-feedback";
 // Matrix tests cover the handler's reply presentation wiring.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prepareMatrixReplyPayload } from "../../outbound.js";
 import { installMatrixMonitorTestRuntime } from "../../test-runtime.js";
@@ -164,7 +164,7 @@ describe("matrix monitor handler reply presentation", () => {
     expect(reply?.presentation).toBeUndefined();
     expect(
       ((reply?.channelData?.matrix as { extraContent?: Record<string, unknown> } | undefined)
-        ?.extraContent ?? {})["com.openclaw.presentation"],
+        ?.extraContent ?? {})["com.carapace.presentation"],
     ).toMatchObject({ type: "message.presentation", version: 1 });
   });
 
@@ -228,7 +228,7 @@ describe("matrix monitor handler reply presentation", () => {
         payload.text,
         expect.objectContaining({
           extraContent: {
-            "com.openclaw.presentation": expect.objectContaining({
+            "com.carapace.presentation": expect.objectContaining({
               type: "message.presentation",
               version: 1,
               blocks: presentation.blocks,

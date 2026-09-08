@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const mocks = vi.hoisted(() => ({
   matchesAgentLifecycleBinding: vi.fn(),
@@ -17,7 +17,7 @@ import { updateGitHubToolIdentityConfig } from "./github-tool-identity-config.js
 
 describe("GitHub identity config mutation", () => {
   it("revalidates the agent incarnation inside the config mutation and never recreates it", async () => {
-    const draft: OpenClawConfig = { agents: { entries: { main: {} } } };
+    const draft: CarapaceConfig = { agents: { entries: { main: {} } } };
     mocks.matchesAgentLifecycleBinding.mockReturnValue(false);
     mocks.mutateConfigFileWithRetry.mockImplementation(async ({ mutate }) => {
       mutate(draft);

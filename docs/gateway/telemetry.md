@@ -1,15 +1,15 @@
 ---
-summary: "What OpenClaw sends: a daily update check by default, optional anonymous feature statistics, and every privacy control"
+summary: "What Carapace sends: a daily update check by default, optional anonymous feature statistics, and every privacy control"
 title: "Usage telemetry and update checks"
 read_when:
-  - Checking what information OpenClaw sends and what it never collects
+  - Checking what information Carapace sends and what it never collects
   - Deciding whether to share anonymous feature statistics
   - Enabling or disabling anonymous feature statistics
   - Disabling all automatic update-check requests
 ---
 
 **Automatic update checks send a daily request by default.** It asks whether a
-newer version exists and includes the OpenClaw version, operating system, Node.js
+newer version exists and includes the Carapace version, operating system, Node.js
 version, CPU architecture, and request surface. Feature statistics are opt-in.
 This page describes update-check telemetry, not requests made by configured
 providers, channels, or other services.
@@ -22,9 +22,9 @@ of adding a second request.
 These reports help inform maintenance priorities. They do not measure individual
 plugin invocations, messages, model requests, or active users. Public aggregates
 are available at
-[telemetry.openclaw.ai](https://telemetry.openclaw.ai).
+[github.com/Exaggarate/carapace](https://github.com/Exaggarate/carapace).
 
-Declining is a completely normal choice and changes nothing about how OpenClaw
+Declining is a completely normal choice and changes nothing about how Carapace
 works for you.
 
 ## Inspect what is sent
@@ -32,7 +32,7 @@ works for you.
 Run this command before or after changing your preference:
 
 ```bash
-openclaw telemetry show
+carapace telemetry show
 ```
 
 Add `--json` to get the same state and payload as one machine-readable
@@ -52,17 +52,17 @@ in JSON).
 The default request is:
 
 ```http
-GET https://telemetry.openclaw.ai/api/latest-version
-User-Agent: openclaw/2026.8.2 (darwin; node/26.0.1; arm64; gateway)
+GET https://github.com/Exaggarate/carapace
+User-Agent: carapace/2026.8.2 (darwin; node/26.0.1; arm64; gateway)
 ```
 
-The `User-Agent` contains the OpenClaw version, operating system, Node.js
+The `User-Agent` contains the Carapace version, operating system, Node.js
 version, CPU architecture, and whether the request came from the Gateway or
 CLI. It has no request body, install identifier, machine identifier, or random
 tracking identifier.
 
 The service responds with the latest version and, optionally, a short
-operator-facing note. OpenClaw displays an available update and its note through
+operator-facing note. Carapace displays an available update and its note through
 the existing update notice. Unreachable services, timeouts, oversized or invalid responses,
 and other failed checks do not interrupt startup or normal operation.
 
@@ -71,17 +71,17 @@ database. Startup reuses the cached result for the next 24 hours, and a running
 Gateway checks again during normal maintenance with a small random delay. Failed
 checks do not count as successful daily checks.
 
-For testing or self-hosting, set `OPENCLAW_TELEMETRY_ENDPOINT` to your complete
+For testing or self-hosting, set `CARAPACE_TELEMETRY_ENDPOINT` to your complete
 replacement endpoint URL. The public server source is available at
-[openclaw/telemetry](https://github.com/openclaw/telemetry).
+[carapace/telemetry](https://github.com/Exaggarate/carapace/telemetry).
 
 ## Optional anonymous feature statistics
 
 Feature statistics are **off by default**. Interactive setup can offer a one-time
 opt-in with **No thanks** selected by default; guided Quick Start skips that
-prompt. OpenClaw records a prompt response so setup does not ask again.
+prompt. Carapace records a prompt response so setup does not ask again.
 Non-interactive and scripted installations do not opt in automatically, but
-operators can explicitly enable statistics with `openclaw telemetry on` or
+operators can explicitly enable statistics with `carapace telemetry on` or
 `telemetry.enabled: true`. The enabled setting, not the presence of a prompt
 response, controls whether feature statistics are included.
 
@@ -108,7 +108,7 @@ When you explicitly enable feature statistics, the same daily request becomes a
 | Field                       | Meaning                                                                                           |
 | --------------------------- | ------------------------------------------------------------------------------------------------- |
 | `schema`                    | Payload format version, currently `1`.                                                            |
-| `version`                   | Installed OpenClaw version.                                                                       |
+| `version`                   | Installed Carapace version.                                                                       |
 | `platform`                  | Operating system and CPU architecture.                                                            |
 | `node`                      | Running Node.js version.                                                                          |
 | `surface`                   | Request surface: `gateway` or `cli`; the CLI preview uses `gateway`.                              |
@@ -133,7 +133,7 @@ The session count depends on locally recorded creation events that remain in
 the bounded event store. Missing or unreadable state produces zero. It is not
 a count of active sessions, messages, or all sessions that existed that day.
 
-The sender and `openclaw telemetry show` use the same payload builder, but their
+The sender and `carapace telemetry show` use the same payload builder, but their
 plugin registry, configuration, and collection time can differ. The CLI preview
 is not a guarantee of the exact next Gateway payload.
 
@@ -146,7 +146,7 @@ history or retention measure.
 Neither the update-check `User-Agent` nor the feature-statistics body includes
 message content, prompts, model names, API keys, credentials, secret references,
 file paths, hostnames, account identifiers, user identifiers, or installation
-and machine identifiers. OpenClaw does not create a random UUID or other
+and machine identifiers. Carapace does not create a random UUID or other
 persistent client identifier for these requests.
 
 The service's Analytics Engine rows exclude those identifying fields and client
@@ -164,8 +164,8 @@ Anonymous feature statistics are separate from optional, operator-configured
 Enable or disable anonymous feature statistics at any time:
 
 ```bash
-openclaw telemetry on
-openclaw telemetry off
+carapace telemetry on
+carapace telemetry off
 ```
 
 You can also configure the same preference directly:
@@ -180,19 +180,19 @@ You can also configure the same preference directly:
 
 Set `DO_NOT_TRACK=1` or `DO_NOT_TRACK=true` to force feature statistics off,
 even when `telemetry.enabled` is `true`. `DO_NOT_TRACK` does not disable the
-daily update check: OpenClaw sends the update-only `GET` request without a
+daily update check: Carapace sends the update-only `GET` request without a
 feature-statistics body.
 
 ## Automated environments
 
-OpenClaw sends nothing when it detects an automated environment, meaning the
+Carapace sends nothing when it detects an automated environment, meaning the
 `CI` environment variable is set to a truthy value. Continuous integration jobs
 are not installations: they would outnumber real operators by orders of
 magnitude and make version and platform counts meaningless, and your pipeline
 should not report to us on every job.
 
 This applies to both tiers, so a CI job sends no update check and no feature
-statistics. Setting `OPENCLAW_TELEMETRY_ENDPOINT` overrides the suppression,
+statistics. Setting `CARAPACE_TELEMETRY_ENDPOINT` overrides the suppression,
 because a configured endpoint means the run is deliberately exercising this
 path.
 
@@ -210,7 +210,7 @@ To go fully dark, disable the existing startup update check:
 
 This stops both tiers and every automatic update request: no update request, no
 feature statistics, and no update notice, even when `update.auto.enabled` is
-`true`. Setting `OPENCLAW_NO_AUTO_UPDATE=1` also prevents automatic update
+`true`. Setting `CARAPACE_NO_AUTO_UPDATE=1` also prevents automatic update
 requests and applies. Explicit update commands remain available when you choose
 to run them.
 

@@ -1,5 +1,5 @@
 // Tests inbound dedupe state for repeated message ids.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../templating.js";
 import { claimInboundDedupe, resetInboundDedupe } from "./inbound-dedupe.js";

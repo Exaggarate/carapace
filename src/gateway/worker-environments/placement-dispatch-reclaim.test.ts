@@ -7,10 +7,10 @@ import { runCommandWithTimeout } from "../../process/exec.js";
 import { runExclusiveSessionLifecycleMutation } from "../../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { coordinateWorkerPlacementDispatch } from "./placement-dispatch-coordinator.js";
 import {
   BUNDLE_HASH,
@@ -27,17 +27,17 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("worker placement dispatch reclaim", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let placementStore: PlacementStore;
 
   beforeEach(async () => {
-    root = tempDirs.make("openclaw-dispatch-");
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = tempDirs.make("carapace-dispatch-");
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placementStore = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -562,7 +562,7 @@ describe("worker placement dispatch reclaim", () => {
       state: "reclaimed",
       workspaceResultConflict: {
         paths: ["src/local.ts"],
-        stagedResultRef: expect.stringMatching(/^refs\/openclaw\/worker-results\/reclaim-/u),
+        stagedResultRef: expect.stringMatching(/^refs\/carapace\/worker-results\/reclaim-/u),
         totalCount: 1,
       },
     });
@@ -572,7 +572,7 @@ describe("worker placement dispatch reclaim", () => {
       sessionKey: REQUEST.sessionKey,
       agentId: REQUEST.agentId,
       paths: ["src/local.ts"],
-      stagedResultRef: expect.stringMatching(/^refs\/openclaw\/worker-results\/reclaim-/u),
+      stagedResultRef: expect.stringMatching(/^refs\/carapace\/worker-results\/reclaim-/u),
       totalCount: 1,
     });
     expect(placementStore.listPendingWorkspaceResults()).toEqual([]);
@@ -582,7 +582,7 @@ describe("worker placement dispatch reclaim", () => {
   it("reclaims an unchanged worker without clearing a retained keep-local conflict", async () => {
     const priorConflict = {
       paths: ["notes.md"],
-      stagedResultRef: "refs/openclaw/worker-results/prior-conflict",
+      stagedResultRef: "refs/carapace/worker-results/prior-conflict",
     };
     const harness = createHarness(placementStore, {
       priorWorkspaceResultConflict: priorConflict,
@@ -668,7 +668,7 @@ describe("worker placement dispatch reclaim", () => {
     });
     placementStore.recordWorkspaceResultConflict(claim, {
       paths: ["conflicted.txt"],
-      stagedResultRef: `refs/openclaw/worker-results/${claim.claimId}`,
+      stagedResultRef: `refs/carapace/worker-results/${claim.claimId}`,
     });
     placementStore.releaseTurn(claim);
 
@@ -906,7 +906,7 @@ describe("worker placement dispatch reclaim", () => {
   it("releases a failed final-sync claim so reclaim with a retained conflict is retryable", async () => {
     const priorConflict = {
       paths: ["data.txt"],
-      stagedResultRef: "refs/openclaw/worker-results/prior-conflict",
+      stagedResultRef: "refs/carapace/worker-results/prior-conflict",
     };
     const harness = createHarness(placementStore, {
       priorWorkspaceResultConflict: priorConflict,
@@ -961,7 +961,7 @@ describe("worker placement dispatch reclaim", () => {
     async (verifyFailureCall) => {
       const priorConflict = {
         paths: ["data.txt"],
-        stagedResultRef: "refs/openclaw/worker-results/prior-conflict",
+        stagedResultRef: "refs/carapace/worker-results/prior-conflict",
       };
       const harness = createHarness(placementStore, {
         priorWorkspaceResultConflict: priorConflict,
@@ -992,7 +992,7 @@ describe("worker placement dispatch reclaim", () => {
   it("keeps a committed failed stop result fenced for recovery", async () => {
     const priorConflict = {
       paths: ["notes.md"],
-      stagedResultRef: "refs/openclaw/worker-results/prior-conflict",
+      stagedResultRef: "refs/carapace/worker-results/prior-conflict",
     };
     const harness = createHarness(placementStore, {
       priorWorkspaceResultConflict: priorConflict,

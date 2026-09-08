@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
-import { resolveSandboxContext } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { resolveSandboxContext } from "carapace/plugin-sdk/agent-harness-runtime";
 
 const execFileAsync = promisify(execFile);
 
@@ -17,26 +17,26 @@ function requireEnv(name) {
   return value;
 }
 
-const root = requireEnv("OPENCLAW_E2E_ROOT");
-const sandboxImage = requireEnv("OPENCLAW_E2E_SANDBOX_IMAGE");
-const browserImage = requireEnv("OPENCLAW_E2E_BROWSER_IMAGE");
-const sandboxPrefix = requireEnv("OPENCLAW_E2E_SANDBOX_PREFIX");
-const browserPrefix = requireEnv("OPENCLAW_E2E_BROWSER_PREFIX");
-const browserNetwork = requireEnv("OPENCLAW_E2E_BROWSER_NETWORK");
+const root = requireEnv("CARAPACE_E2E_ROOT");
+const sandboxImage = requireEnv("CARAPACE_E2E_SANDBOX_IMAGE");
+const browserImage = requireEnv("CARAPACE_E2E_BROWSER_IMAGE");
+const sandboxPrefix = requireEnv("CARAPACE_E2E_SANDBOX_PREFIX");
+const browserPrefix = requireEnv("CARAPACE_E2E_BROWSER_PREFIX");
+const browserNetwork = requireEnv("CARAPACE_E2E_BROWSER_NETWORK");
 const stateDir = path.join(root, "state");
 const workspaceDir = path.join(root, "workspace");
 const sandboxRoot = path.join(root, "sandboxes");
-const configPath = path.join(stateDir, "openclaw.json");
-const sessionKey = requireEnv("OPENCLAW_E2E_SESSION_KEY");
+const configPath = path.join(stateDir, "carapace.json");
+const sessionKey = requireEnv("CARAPACE_E2E_SESSION_KEY");
 const workspaceHash = createHash("sha256").update(workspaceDir).digest("hex").slice(0, 32);
 const scopeKey = `${sessionKey}:workspace:${workspaceHash}`;
 const browserToken = `sandbox-browser-sidecar-${process.pid}`;
-const marker = `OPENCLAW_SANDBOX_BROWSER_SIDECAR_${process.pid}`;
+const marker = `CARAPACE_SANDBOX_BROWSER_SIDECAR_${process.pid}`;
 const ownedContainerNames = new Set();
 
 process.env.HOME = path.join(root, "home");
-process.env.OPENCLAW_STATE_DIR = stateDir;
-process.env.OPENCLAW_CONFIG_PATH = configPath;
+process.env.CARAPACE_STATE_DIR = stateDir;
+process.env.CARAPACE_CONFIG_PATH = configPath;
 
 const config = {
   gateway: {
@@ -107,7 +107,7 @@ async function listTaskContainers() {
     "ps",
     "-a",
     "--filter",
-    `label=openclaw.sessionKey=${scopeKey}`,
+    `label=carapace.sessionKey=${scopeKey}`,
     "--format",
     "{{.Names}}",
   ]);
@@ -221,7 +221,7 @@ try {
   assert.equal(snapshot.format, "ai", "bridge returned the wrong snapshot format");
   assert.match(snapshot.snapshot, new RegExp(marker), "snapshot did not contain the HTML marker");
 
-  const { stdout: listStdout } = await run("openclaw", ["sandbox", "list", "--browser", "--json"]);
+  const { stdout: listStdout } = await run("carapace", ["sandbox", "list", "--browser", "--json"]);
   const listed = JSON.parse(listStdout);
   const browserEntry = listed.browsers?.find(
     (entry) => entry.containerName === first.browser.containerName,
@@ -230,7 +230,7 @@ try {
   assert.equal(browserEntry.sessionKey, scopeKey);
   assert.equal(browserEntry.running, true);
 
-  await run("openclaw", [
+  await run("carapace", [
     "sandbox",
     "recreate",
     "--browser",

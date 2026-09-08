@@ -5,16 +5,16 @@ import {
   filterAndSortSessionEntries,
   listSessionsFromStoreAsync,
 } from "../../gateway/session-utils-list.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { loadCombinedSessionStoreForGatewayCore } from "./combined-store-gateway.js";
 import { persistSessionTranscriptTurn, replaceSessionEntrySync } from "./session-accessor.js";
 import { setCanonicalSqliteSessionMainKey } from "./session-canonical-key.js";
 
 it.each(["global", "unknown"])("projects the recorded aggregate %s owner", async (sessionKey) => {
-  await withOpenClawTestState({ label: "combined-list-owner" }, async () => {
-    const cfg: OpenClawConfig = {
+  await withCarapaceTestState({ label: "combined-list-owner" }, async () => {
+    const cfg: CarapaceConfig = {
       session: { scope: "global" },
       agents: {
         entries: {
@@ -47,9 +47,9 @@ it.each(["global", "unknown"])("projects the recorded aggregate %s owner", async
 });
 
 it("projects shared rows under their logical owner while retaining the physical database owner", async () => {
-  await withOpenClawTestState({ label: "combined-store-owner" }, async (state) => {
+  await withCarapaceTestState({ label: "combined-store-owner" }, async (state) => {
     const storePath = state.statePath("shared.sqlite");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: { main: {}, ops: {}, worker: {} },
@@ -57,7 +57,7 @@ it("projects shared rows under their logical owner while retaining the physical 
       },
       session: { scope: "global", store: storePath },
     };
-    openOpenClawAgentDatabase({ agentId: "main", path: storePath });
+    openCarapaceAgentDatabase({ agentId: "main", path: storePath });
     for (const sessionKey of ["global", "unknown", "agent:worker:task"]) {
       replaceSessionEntrySync(
         { agentId: sessionKey.startsWith("agent:") ? "worker" : "ops", sessionKey, storePath },
@@ -132,9 +132,9 @@ it("projects shared rows under their logical owner while retaining the physical 
 });
 
 it("keeps fixed-store ownership out of separate registered and suffixed databases", async () => {
-  await withOpenClawTestState({ label: "combined-store-partitions" }, async (state) => {
+  await withCarapaceTestState({ label: "combined-store-partitions" }, async (state) => {
     const storePath = state.statePath("shared.json");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: { main: {}, ops: {} },
@@ -174,9 +174,9 @@ it.for([false, true])(
     if (alias && process.platform === "win32") {
       context.skip();
     }
-    await withOpenClawTestState({ label: "combined-store-retired-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "combined-store-retired-owner" }, async (state) => {
       const storePath = state.statePath("shared.sqlite");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: { ops: {}, worker: {} },
@@ -185,9 +185,9 @@ it.for([false, true])(
         session: { store: storePath },
       };
       const physicalPath = alias
-        ? path.join(state.agentDir("main"), "openclaw-agent.sqlite")
+        ? path.join(state.agentDir("main"), "carapace-agent.sqlite")
         : storePath;
-      openOpenClawAgentDatabase({ agentId: "main", path: physicalPath });
+      openCarapaceAgentDatabase({ agentId: "main", path: physicalPath });
       if (alias) {
         await fs.symlink(physicalPath, storePath);
       }
@@ -231,9 +231,9 @@ it.for([false, true])(
 it.for(["main", "unknown", "global"])(
   "resolves global lineage aliases without folding sentinels (mainKey=%s)",
   async (mainKey) => {
-    await withOpenClawTestState({ label: "combined-store-global-lineage" }, async (state) => {
+    await withCarapaceTestState({ label: "combined-store-global-lineage" }, async (state) => {
       const storePath = state.statePath("shared.sqlite");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: { main: {}, ops: {}, worker: {} },
@@ -241,7 +241,7 @@ it.for(["main", "unknown", "global"])(
         },
         session: { scope: "global", mainKey, store: storePath },
       };
-      const database = openOpenClawAgentDatabase({ agentId: "main", path: storePath });
+      const database = openCarapaceAgentDatabase({ agentId: "main", path: storePath });
       setCanonicalSqliteSessionMainKey(database, mainKey);
       for (const sessionKey of ["global", "unknown"]) {
         replaceSessionEntrySync(
@@ -286,8 +286,8 @@ it.for(["main", "unknown", "global"])(
 );
 
 it("filters retired stores by canonical lineage owners without selecting an implicit agent", async () => {
-  await withOpenClawTestState({ label: "combined-store-retired-lineage" }, async (state) => {
-    const cfg: OpenClawConfig = {
+  await withCarapaceTestState({ label: "combined-store-retired-lineage" }, async (state) => {
+    const cfg: CarapaceConfig = {
       agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
       session: { store: state.statePath("agents", "{agentId}", "sessions", "sessions.json") },
     };
@@ -325,10 +325,10 @@ it("filters retired stores by canonical lineage owners without selecting an impl
 it.skipIf(process.platform === "win32")(
   "keeps suffix owners when a legacy selector aliases the shared database",
   async () => {
-    await withOpenClawTestState({ label: "combined-store-selector-alias" }, async (state) => {
+    await withCarapaceTestState({ label: "combined-store-selector-alias" }, async (state) => {
       const storePath = state.statePath("shared.json");
       const sqlitePath = state.statePath("shared.sqlite");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: { main: {}, ops: {}, worker: {} },
@@ -336,7 +336,7 @@ it.skipIf(process.platform === "win32")(
         },
         session: { store: storePath },
       };
-      openOpenClawAgentDatabase({ agentId: "main", path: sqlitePath });
+      openCarapaceAgentDatabase({ agentId: "main", path: sqlitePath });
       await fs.symlink(sqlitePath, storePath);
       replaceSessionEntrySync(
         { agentId: "main", sessionKey: "global", storePath },

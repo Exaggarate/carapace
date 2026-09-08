@@ -4,7 +4,7 @@ import {
   updateUserModelAuthProfile,
 } from "../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { ensureAuthProfileStore } from "./auth-profiles/store-runtime.js";
 import { resolveModelAuthLabel } from "./model-auth-label.js";
 
@@ -12,7 +12,7 @@ describe("personal account auth labels", () => {
   it.each([false, true])(
     "describes the selected account without private metadata (external profiles: %s)",
     async (includeExternalProfiles) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "home", prefix: "auth-label-personal-" },
         async (state) => {
           const owner = ensureProfileForEmail("person@example.test");

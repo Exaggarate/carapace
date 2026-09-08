@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { AuthProfileFailureReason } from "../agents/auth-profiles/types.js";
 import * as configPaths from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writeRestartSentinel } from "../infra/restart-sentinel.js";
 import type { PluginHookGatewayContext, PluginHookHandlerMap } from "../plugins/hook-types.js";
 import { registerPluginHttpRoute } from "../plugins/http-registry.js";
@@ -15,7 +15,7 @@ import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
 import type { PluginServicesHandle } from "../plugins/services.js";
-import type { OpenClawPluginServiceContext } from "../plugins/types.js";
+import type { CarapacePluginServiceContext } from "../plugins/types.js";
 import {
   GatewayDrainingError,
   getActiveGatewayRootWorkCount,
@@ -25,12 +25,12 @@ import {
   tryBeginGatewaySuspendAdmission,
 } from "../process/gateway-work-admission.js";
 import { AsyncWorkScope, getAsyncWorkSignal } from "../shared/async-work-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { GatewayConnectionWork } from "./server-connection-work.js";
 import { createGatewayPluginRuntimeGeneration } from "./server-plugin-runtime-generation.js";
 import "./server-startup-outcomes.test-support.js";
@@ -302,7 +302,7 @@ const publishedConnectionDependentSidecars = new Set<SidecarHandle>();
 const publishedGatewayLifetimeSidecars = new Set<SidecarHandle>();
 const publishedPostReadySidecars = new Set<SidecarHandle>();
 const transferredSidecars = new Set<SidecarHandle>();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 function adoptSidecars(target: Set<SidecarHandle>, sidecars: ReadonlyArray<SidecarHandle>): void {
   for (const sidecar of sidecars) {
@@ -387,7 +387,7 @@ async function cleanupGatewayTestState(): Promise<void> {
   publishedPostReadySidecars.clear();
   transferredSidecars.clear();
   await cleanup(() => resetGatewayWorkAdmission());
-  await cleanup(() => closeOpenClawStateDatabaseForTest());
+  await cleanup(() => closeCarapaceStateDatabaseForTest());
   await cleanup(() => {
     vi.useRealTimers();
   });
@@ -486,10 +486,10 @@ function firstGatewayStartCall(
 describe("startGatewayPostAttachRuntime", () => {
   beforeEach(async () => {
     resetGatewayWorkAdmission();
-    closeOpenClawStateDatabaseForTest();
-    testState = await createOpenClawTestState({ label: "gateway-post-attach" });
-    vi.stubEnv("OPENCLAW_SKIP_CHANNELS", "0");
-    vi.stubEnv("OPENCLAW_SKIP_PROVIDERS", "0");
+    closeCarapaceStateDatabaseForTest();
+    testState = await createCarapaceTestState({ label: "gateway-post-attach" });
+    vi.stubEnv("CARAPACE_SKIP_CHANNELS", "0");
+    vi.stubEnv("CARAPACE_SKIP_PROVIDERS", "0");
     hoisted.startPluginServices.mockClear();
     hoisted.startGmailWatcherWithLogs.mockClear();
     hoisted.prepareInternalHooks.mockClear();
@@ -562,22 +562,22 @@ describe("startGatewayPostAttachRuntime", () => {
 
     const defaultEnv = {
       ...testState.env,
-      OPENCLAW_STATE_DIR: undefined,
-      OPENCLAW_CONFIG_PATH: undefined,
+      CARAPACE_STATE_DIR: undefined,
+      CARAPACE_CONFIG_PATH: undefined,
     };
     expect(configPaths.resolveStateDir(defaultEnv)).toBe(testState.stateDir);
     expect(configPaths.resolveConfigPath(defaultEnv)).toBe(testState.configPath);
 
     const explicitStateDir = testState.path("explicit-state");
-    const explicitEnv = { ...defaultEnv, OPENCLAW_STATE_DIR: explicitStateDir };
+    const explicitEnv = { ...defaultEnv, CARAPACE_STATE_DIR: explicitStateDir };
     expect(configPaths.resolveStateDir(explicitEnv)).toBe(explicitStateDir);
     expect(configPaths.resolveConfigPath(explicitEnv)).toBe(
-      path.join(explicitStateDir, "openclaw.json"),
+      path.join(explicitStateDir, "carapace.json"),
     );
     expect(
       configPaths.resolveConfigPath({
         ...explicitEnv,
-        OPENCLAW_CONFIG_PATH: testState.path("config", "custom.json"),
+        CARAPACE_CONFIG_PATH: testState.path("config", "custom.json"),
       }),
     ).toBe(testState.path("config", "custom.json"));
   });
@@ -604,12 +604,12 @@ describe("startGatewayPostAttachRuntime", () => {
         stopOrder.push("post-ready");
       }),
     };
-    const originalCleanupEnv = process.env.OPENCLAW_CLEANUP_TEST;
+    const originalCleanupEnv = process.env.CARAPACE_CLEANUP_TEST;
 
     adoptSidecars(publishedGatewayLifetimeSidecars, [firstLifetimeSidecar, secondLifetimeSidecar]);
     adoptSidecars(publishedPostReadySidecars, [postReadySidecar]);
     vi.useFakeTimers();
-    vi.stubEnv("OPENCLAW_CLEANUP_TEST", "dirty");
+    vi.stubEnv("CARAPACE_CLEANUP_TEST", "dirty");
     expect(tryBeginGatewayRootWorkAdmission()).not.toBeNull();
 
     await expect(cleanupGatewayTestState()).rejects.toBe(firstError);
@@ -620,7 +620,7 @@ describe("startGatewayPostAttachRuntime", () => {
     expect(transferredSidecars.size).toBe(0);
     expect(getActiveGatewayRootWorkCount()).toBe(0);
     expect(vi.isFakeTimers()).toBe(false);
-    expect(process.env.OPENCLAW_CLEANUP_TEST).toBe(originalCleanupEnv);
+    expect(process.env.CARAPACE_CLEANUP_TEST).toBe(originalCleanupEnv);
     expect(fs.existsSync(testState.root)).toBe(false);
   });
 
@@ -1455,9 +1455,9 @@ describe("startGatewayPostAttachRuntime", () => {
   });
 
   it("skips heavy restart sentinel refresh when no sentinel file exists", async () => {
-    const stateDir = fs.mkdtempSync(path.join(testState.root, "openclaw-no-sentinel-"));
+    const stateDir = fs.mkdtempSync(path.join(testState.root, "carapace-no-sentinel-"));
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         hoisted.refreshLatestUpdateRestartSentinel.mockClear();
 
         const result = await testing.refreshLatestUpdateRestartSentinelIfPresent();
@@ -1466,13 +1466,13 @@ describe("startGatewayPostAttachRuntime", () => {
         expect(hoisted.refreshLatestUpdateRestartSentinel).not.toHaveBeenCalled();
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("refreshes the restart sentinel when the sentinel row exists", async () => {
-    const stateDir = fs.mkdtempSync(path.join(testState.root, "openclaw-sentinel-"));
+    const stateDir = fs.mkdtempSync(path.join(testState.root, "carapace-sentinel-"));
     try {
       await writeRestartSentinel(
         {
@@ -1480,9 +1480,9 @@ describe("startGatewayPostAttachRuntime", () => {
           status: "ok",
           ts: 1,
         },
-        { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
       );
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const sentinel = { kind: "update", status: "ok", ts: 1 } as const;
         hoisted.refreshLatestUpdateRestartSentinel.mockClear();
         hoisted.refreshLatestUpdateRestartSentinel.mockResolvedValue(sentinel);
@@ -1493,13 +1493,13 @@ describe("startGatewayPostAttachRuntime", () => {
         expect(hoisted.refreshLatestUpdateRestartSentinel).toHaveBeenCalledOnce();
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("detects restart sentinel rows in explicit state directories", async () => {
-    const stateDir = fs.mkdtempSync(path.join(testState.root, "openclaw-sentinel-state-"));
+    const stateDir = fs.mkdtempSync(path.join(testState.root, "carapace-sentinel-state-"));
     try {
       await writeRestartSentinel(
         {
@@ -1507,22 +1507,22 @@ describe("startGatewayPostAttachRuntime", () => {
           status: "ok",
           ts: 1,
         },
-        { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
       );
 
       expect(
         await testing.hasRestartSentinelFast({
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_STATE_DIR: stateDir,
         } as NodeJS.ProcessEnv),
       ).toBe(true);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("avoids sync filesystem probes while checking restart sentinel presence", async () => {
-    const stateDir = fs.mkdtempSync(path.join(testState.root, "openclaw-async-sentinel-"));
+    const stateDir = fs.mkdtempSync(path.join(testState.root, "carapace-async-sentinel-"));
     try {
       await writeRestartSentinel(
         {
@@ -1530,7 +1530,7 @@ describe("startGatewayPostAttachRuntime", () => {
           status: "ok",
           ts: 1,
         },
-        { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
       );
       const actualExistsSync = fs.existsSync;
       const existsSync = vi.spyOn(fs, "existsSync").mockImplementation((candidate) => {
@@ -1542,7 +1542,7 @@ describe("startGatewayPostAttachRuntime", () => {
       try {
         await expect(
           testing.hasRestartSentinelFast({
-            OPENCLAW_STATE_DIR: stateDir,
+            CARAPACE_STATE_DIR: stateDir,
           } as NodeJS.ProcessEnv),
         ).resolves.toBe(true);
         expect(
@@ -1552,7 +1552,7 @@ describe("startGatewayPostAttachRuntime", () => {
         existsSync.mockRestore();
       }
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(stateDir, { recursive: true, force: true });
     }
   });
@@ -1757,11 +1757,11 @@ describe("startGatewayPostAttachRuntime", () => {
     const { logGatewayStartup } =
       await vi.importActual<typeof import("./server-startup-log.js")>("./server-startup-log.js");
     const log = { info: vi.fn(), warn: vi.fn() };
-    const startupConfig: OpenClawConfig = {
+    const startupConfig: CarapaceConfig = {
       agents: { defaults: { model: "fixture/stale", thinkingDefault: "off" } },
       channels: { "diagnostic-chat": { enabled: true } },
     };
-    const winningConfig: OpenClawConfig = {
+    const winningConfig: CarapaceConfig = {
       ...startupConfig,
       agents: { defaults: { model: "fixture/current", thinkingDefault: "high" } },
       plugins: { entries: { replacement: { enabled: true } } },
@@ -2308,8 +2308,8 @@ describe("startGatewayPostAttachRuntime", () => {
   it("starts channels when channel startup is enabled", async () => {
     await withEnvAsync(
       {
-        OPENCLAW_SKIP_CHANNELS: undefined,
-        OPENCLAW_SKIP_PROVIDERS: undefined,
+        CARAPACE_SKIP_CHANNELS: undefined,
+        CARAPACE_SKIP_PROVIDERS: undefined,
       },
       async () => {
         const startChannels = vi.fn(async () => {});
@@ -2378,7 +2378,7 @@ describe("startGatewayPostAttachRuntime", () => {
 
   it("starts and reports plugin services after channel startup completes", async () => {
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
         let releaseChannels: (() => void) | undefined;
         const events: string[] = [];
@@ -2441,7 +2441,7 @@ describe("startGatewayPostAttachRuntime", () => {
         ]);
         expect(onPluginServices).toHaveBeenCalledTimes(1);
         const owner: PluginServicesHandle = onPluginServices.mock.calls[0]?.[0];
-        const config: OpenClawConfig = { diagnostics: { otel: { enabled: true } } };
+        const config: CarapaceConfig = { diagnostics: { otel: { enabled: true } } };
         const selected = new Set(["exporter"]);
         await owner.reload(config, selected);
         expect(pluginServices.reload).toHaveBeenCalledExactlyOnceWith(config, selected);
@@ -2454,7 +2454,7 @@ describe("startGatewayPostAttachRuntime", () => {
 
   it("does not start plugin services after deferred close starts during channel startup", async () => {
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
         let closing = false;
         let releaseChannels: (() => void) | undefined;
@@ -2840,7 +2840,7 @@ describe("startGatewayPostAttachRuntime", () => {
       await vi.importActual<typeof import("../plugins/services.js")>("../plugins/services.js");
     const registry = createEmptyPluginRegistry();
     const broadcastPluginEvent = vi.fn();
-    let context: OpenClawPluginServiceContext | undefined;
+    let context: CarapacePluginServiceContext | undefined;
     const { promise: cleanupReleased, resolve: releaseCleanup } = createDeferred();
     registry.services.push({
       pluginId: "deferred-deadline",
@@ -2922,7 +2922,7 @@ describe("startGatewayPostAttachRuntime", () => {
 
   it("reports deferred plugin services after core startup returns", async () => {
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
         let releaseStartupLog: (() => void) | undefined;
         let releaseChannels: (() => void) | undefined;
@@ -2997,7 +2997,7 @@ describe("startGatewayPostAttachRuntime", () => {
     const onChannelsStarted = vi.fn();
 
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: "1", OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: "1", CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
         await startGatewaySidecars({
           cfg: {
@@ -3031,7 +3031,7 @@ describe("startGatewayPostAttachRuntime", () => {
       expect.objectContaining({ startupTrace: trace.startupTrace }),
     );
     expect(logChannels.info).toHaveBeenCalledWith(
-      "skipping channel start (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+      "skipping channel start (CARAPACE_SKIP_CHANNELS=1 or CARAPACE_SKIP_PROVIDERS=1)",
     );
     expect(onChannelsStarted).toHaveBeenCalledOnce();
   });
@@ -3041,7 +3041,7 @@ describe("startGatewayPostAttachRuntime", () => {
     const logChannels = { info: vi.fn(), error: vi.fn() };
 
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
         await startGatewaySidecars({
           cfg: { hooks: { internal: { enabled: false } } } as never,
@@ -3679,7 +3679,7 @@ describe("startGatewayPostAttachRuntime", () => {
           events.push("cleanup");
         }),
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         hooks: {
           enabled: true,
           internal: { enabled: false },
@@ -3924,7 +3924,7 @@ describe("startGatewayPostAttachRuntime", () => {
               hooks: { enabled: true, internal: { enabled: false }, gmail: { account: "me" } },
             } as never,
             pluginRegistry: createPostAttachParams().pluginRegistry,
-            defaultWorkspaceDir: "/tmp/openclaw-workspace",
+            defaultWorkspaceDir: "/tmp/carapace-workspace",
             deps: {} as never,
             startChannels: vi.fn(async () => {}),
             shouldCreatePostReadySidecars: () => !closing,

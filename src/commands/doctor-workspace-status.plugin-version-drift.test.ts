@@ -1,7 +1,7 @@
 // Focused QA evidence for official Codex plugin drift through doctor diagnostics.
 import { describe, expect, it, vi } from "vitest";
 import * as noteModule from "../../packages/terminal-core/src/note.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { detectPluginVersionDrift } from "../plugins/plugin-version-drift.js";
 import {
   collectWorkspaceStatusHealthFindings,
@@ -33,7 +33,7 @@ vi.mock("../tasks/runtime-internal.js", () => ({
   listTasksForFlowId: () => [],
 }));
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   plugins: {
     entries: {
       codex: { enabled: true },
@@ -47,8 +47,8 @@ function detectCodexDrift(installedVersion: string, gatewayVersion: string) {
     installRecords: {
       codex: {
         source: "npm",
-        spec: `@openclaw/codex@${installedVersion}`,
-        resolvedName: "@openclaw/codex",
+        spec: `@carapace/codex@${installedVersion}`,
+        resolvedName: "@carapace/codex",
         resolvedVersion: installedVersion,
       },
     },
@@ -57,7 +57,7 @@ function detectCodexDrift(installedVersion: string, gatewayVersion: string) {
   for (const entry of report.drifts) {
     entry.targetResolution = {
       status: "resolved",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       requestedTarget: gatewayVersion,
       version: gatewayVersion,
     };
@@ -86,7 +86,7 @@ describe("official Codex plugin version drift doctor evidence", () => {
     try {
       noteWorkspaceStatus(config, { pluginVersionReadiness: readiness });
       expect(noteSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Running Gateway: OpenClaw 2026.5.30"),
+        expect.stringContaining("Running Gateway: Carapace 2026.5.30"),
         "Plugin restart readiness",
       );
     } finally {
@@ -109,7 +109,7 @@ describe("official Codex plugin version drift doctor evidence", () => {
       expect.objectContaining({
         requirement: "plugin-version-gateway-restart",
         message: expect.stringContaining(`running Gateway is ${runningGatewayVersion}`),
-        fixHint: "openclaw gateway restart",
+        fixHint: "carapace gateway restart",
       }),
     ]);
 
@@ -117,7 +117,7 @@ describe("official Codex plugin version drift doctor evidence", () => {
     try {
       noteWorkspaceStatus(config, { pluginVersionReadiness: readiness });
       expect(noteSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Running Gateway: OpenClaw ${runningGatewayVersion}`),
+        expect.stringContaining(`Running Gateway: Carapace ${runningGatewayVersion}`),
         "Plugin restart readiness",
       );
     } finally {
@@ -138,11 +138,11 @@ describe("official Codex plugin version drift doctor evidence", () => {
             installedVersion,
             gatewayVersion,
             source: "npm",
-            packageName: "@openclaw/codex",
-            spec: `@openclaw/codex@${installedVersion}`,
+            packageName: "@carapace/codex",
+            spec: `@carapace/codex@${installedVersion}`,
             targetResolution: {
               status: "resolved",
-              packageName: "@openclaw/codex",
+              packageName: "@carapace/codex",
               requestedTarget: gatewayVersion,
               version: gatewayVersion,
             },
@@ -158,11 +158,11 @@ describe("official Codex plugin version drift doctor evidence", () => {
         {
           checkId: "core/doctor/workspace-status",
           severity: "warning",
-          message: `Plugin codex is ${installedVersion}, but a Gateway restart will load OpenClaw ${gatewayVersion}.`,
+          message: `Plugin codex is ${installedVersion}, but a Gateway restart will load Carapace ${gatewayVersion}.`,
           path: "plugins.entries.codex",
           target: "codex",
           requirement: "plugin-version-drift",
-          fixHint: "openclaw plugins update @openclaw/codex@2026.6.1 && openclaw gateway restart",
+          fixHint: "carapace plugins update @carapace/codex@2026.6.1 && carapace gateway restart",
         },
       ]);
 
@@ -176,13 +176,13 @@ describe("official Codex plugin version drift doctor evidence", () => {
         );
         expect(driftNotes).toHaveLength(1);
         expect(driftNotes[0]?.[0]).toContain(
-          `1 active official plugin not on post-restart OpenClaw ${gatewayVersion}`,
+          `1 active official plugin not on post-restart Carapace ${gatewayVersion}`,
         );
         expect(driftNotes[0]?.[0]).toContain(
           `codex: ${installedVersion} (npm) -> expected ${gatewayVersion}`,
         );
-        expect(driftNotes[0]?.[0]).toContain("openclaw plugins update @openclaw/codex@2026.6.1");
-        expect(driftNotes[0]?.[0]).toContain("openclaw gateway restart");
+        expect(driftNotes[0]?.[0]).toContain("carapace plugins update @carapace/codex@2026.6.1");
+        expect(driftNotes[0]?.[0]).toContain("carapace gateway restart");
       } finally {
         noteSpy.mockRestore();
       }

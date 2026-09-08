@@ -36,7 +36,7 @@ export function parseRegistryNpmSpec(spec: string) {
     { geminiKey: "", googleKey: "test-google-key", expectedType: "vertex-ai" },
     { geminiKey: "", googleKey: "", expectedType: "oauth-personal" },
   ])("selects $expectedType from the supplied Gemini credentials", (testCase) => {
-    const home = tempDirs.make("openclaw-live-stage-gemini-");
+    const home = tempDirs.make("carapace-live-stage-gemini-");
     const settingsPath = path.join(home, ".gemini", "settings.json");
     mkdirSync(path.dirname(settingsPath));
     writeFileSync(
@@ -49,7 +49,7 @@ export function parseRegistryNpmSpec(spec: string) {
 
     const result = spawnSync(
       "bash",
-      ["-c", 'source "$1"; openclaw_live_stage_gemini_auth', "bash", stageScriptPath],
+      ["-c", 'source "$1"; carapace_live_stage_gemini_auth', "bash", stageScriptPath],
       {
         encoding: "utf8",
         env: {
@@ -74,7 +74,7 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("installs missing CLI executables and refreshes pinned packages", () => {
-    const root = tempDirs.make("openclaw-live-stage-cli-");
+    const root = tempDirs.make("carapace-live-stage-cli-");
     const binDir = path.join(root, "bin");
     mkdirSync(binDir);
     const npmPath = path.join(binDir, "npm");
@@ -94,7 +94,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; source "$1"; openclaw_live_prepare_cli_backend "$CLI_PATH" @fixture/backend 10; "$CLI_PATH"; openclaw_live_prepare_cli_backend "$CLI_PATH" @fixture/backend 10; openclaw_live_prepare_cli_backend "$CLI_PATH" @fixture/backend@1.0.0 10',
+        'set -euo pipefail; source "$1"; carapace_live_prepare_cli_backend "$CLI_PATH" @fixture/backend 10; "$CLI_PATH"; carapace_live_prepare_cli_backend "$CLI_PATH" @fixture/backend 10; carapace_live_prepare_cli_backend "$CLI_PATH" @fixture/backend@1.0.0 10',
         "test",
         stageScriptPath,
       ],
@@ -117,12 +117,12 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("fails explicitly when a selected backend has no executable or install package", () => {
-    const root = tempDirs.make("openclaw-live-stage-cli-missing-");
+    const root = tempDirs.make("carapace-live-stage-cli-missing-");
     const result = spawnSync(
       "bash",
       [
         "-c",
-        'set -euo pipefail; source "$1"; openclaw_live_prepare_cli_backend "$2" "" 10',
+        'set -euo pipefail; source "$1"; carapace_live_prepare_cli_backend "$2" "" 10',
         "test",
         stageScriptPath,
         path.join(root, "missing-cli"),
@@ -140,7 +140,7 @@ export function parseRegistryNpmSpec(spec: string) {
     },
     { entrypoint: "scripts/test-live.mjs", expected: "scripts/test-live.mjs -- target" },
   ])("runs the staged $entrypoint live runner", ({ entrypoint, expected }) => {
-    const root = tempDirs.make("openclaw-live-stage-entrypoint-");
+    const root = tempDirs.make("carapace-live-stage-entrypoint-");
     const binDir = path.join(root, "bin");
     const callsPath = path.join(root, "calls");
     mkdirSync(path.join(root, path.dirname(entrypoint)), { recursive: true });
@@ -156,7 +156,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; cd "$1"; source "$2"; openclaw_live_run_staged_script scripts/test-live -- target',
+        'set -euo pipefail; cd "$1"; source "$2"; carapace_live_run_staged_script scripts/test-live -- target',
         "test",
         root,
         stageScriptPath,
@@ -172,12 +172,12 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("refuses to replace a missing staged live runner", () => {
-    const root = tempDirs.make("openclaw-live-stage-entrypoint-missing-");
+    const root = tempDirs.make("carapace-live-stage-entrypoint-missing-");
     const result = spawnSync(
       "bash",
       [
         "-c",
-        'set +e; cd "$1"; source "$2"; openclaw_live_run_staged_script scripts/test-live -- target',
+        'set +e; cd "$1"; source "$2"; carapace_live_run_staged_script scripts/test-live -- target',
         "test",
         root,
         stageScriptPath,
@@ -186,11 +186,11 @@ export function parseRegistryNpmSpec(spec: string) {
     );
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("staged OpenClaw script entrypoint not found");
+    expect(result.stderr).toContain("staged Carapace script entrypoint not found");
   });
 
   it("installs validated Docker packages from the staged metadata export", () => {
-    const root = tempDirs.make("openclaw-live-stage-packages-");
+    const root = tempDirs.make("carapace-live-stage-packages-");
     const binDir = path.join(root, "bin");
     const installLog = path.join(root, "installs.log");
     mkdirSync(path.join(root, "scripts"), { recursive: true });
@@ -216,7 +216,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; cd "$1"; source "$2"; openclaw_live_prepare_cli_backend_docker_packages "fixture-provider" "fixture-provider/model"',
+        'set -euo pipefail; cd "$1"; source "$2"; carapace_live_prepare_cli_backend_docker_packages "fixture-provider" "fixture-provider/model"',
         "test",
         root,
         stageScriptPath,
@@ -239,7 +239,7 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("allows historical package setup omission only through its derived capability", () => {
-    const root = tempDirs.make("openclaw-live-stage-packages-missing-");
+    const root = tempDirs.make("carapace-live-stage-packages-missing-");
     mkdirSync(path.join(root, "scripts"), { recursive: true });
     linkFixtureNodeModules(root);
     writeFixturePackageSpecParser(root);
@@ -249,14 +249,14 @@ export function parseRegistryNpmSpec(spec: string) {
     );
     const command = [
       "-c",
-      'set -euo pipefail; cd "$1"; source "$2"; openclaw_live_prepare_cli_backend_docker_packages "" ""',
+      'set -euo pipefail; cd "$1"; source "$2"; carapace_live_prepare_cli_backend_docker_packages "" ""',
       "test",
       root,
       stageScriptPath,
     ];
     const rawControl = spawnSync("bash", command, {
       encoding: "utf8",
-      env: { ...process.env, OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1" },
+      env: { ...process.env, CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1" },
     });
     expect(rawControl.status).not.toBe(0);
     expect(rawControl.stderr).toContain("does not export resolveCliBackendDockerPackages");
@@ -265,7 +265,7 @@ export function parseRegistryNpmSpec(spec: string) {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE: "legacy",
+        CARAPACE_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE: "legacy",
       },
     });
     expect(derivedCapability.status, derivedCapability.stderr).toBe(0);
@@ -284,7 +284,7 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("rejects malformed staged package metadata before npm runs", () => {
-    const root = tempDirs.make("openclaw-live-stage-packages-malformed-");
+    const root = tempDirs.make("carapace-live-stage-packages-malformed-");
     const binDir = path.join(root, "bin");
     const installLog = path.join(root, "installs.log");
     mkdirSync(path.join(root, "scripts"), { recursive: true });
@@ -305,7 +305,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; cd "$1"; source "$2"; openclaw_live_prepare_cli_backend_docker_packages "" ""',
+        'set -euo pipefail; cd "$1"; source "$2"; carapace_live_prepare_cli_backend_docker_packages "" ""',
         "test",
         root,
         stageScriptPath,
@@ -328,7 +328,7 @@ export function parseRegistryNpmSpec(spec: string) {
   it("defaults frozen-target omissions closed and rejects invalid identity", () => {
     const command = [
       "-c",
-      'set -euo pipefail; source "$1"; openclaw_frozen_target_omissions_authorized',
+      'set -euo pipefail; source "$1"; carapace_frozen_target_omissions_authorized',
       "test",
       stageScriptPath,
     ];
@@ -337,26 +337,26 @@ export function parseRegistryNpmSpec(spec: string) {
 
     expect(run({}).status).toBe(1);
     const sameSha = run({
-      OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-      OPENCLAW_SELECTED_SHA: "a".repeat(40),
-      OPENCLAW_TOOLING_SHA: "a".repeat(40),
+      CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+      CARAPACE_SELECTED_SHA: "a".repeat(40),
+      CARAPACE_TOOLING_SHA: "a".repeat(40),
     });
     expect(sameSha.status).toBe(2);
     expect(sameSha.stderr).toContain("require distinct selected and tooling SHAs");
 
     const malformed = run({
-      OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "yes",
-      OPENCLAW_SELECTED_SHA: "a".repeat(40),
-      OPENCLAW_TOOLING_SHA: "b".repeat(40),
+      CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "yes",
+      CARAPACE_SELECTED_SHA: "a".repeat(40),
+      CARAPACE_TOOLING_SHA: "b".repeat(40),
     });
     expect(malformed.status).toBe(2);
-    expect(malformed.stderr).toContain("invalid OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS");
+    expect(malformed.stderr).toContain("invalid CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS");
   });
 
   it("falls back without frozen context but fails malformed authorization", () => {
     const command = [
       "-c",
-      'set -euo pipefail; source "$1"; openclaw_resolve_frozen_target_file "$2" missing/path fallback',
+      'set -euo pipefail; source "$1"; carapace_resolve_frozen_target_file "$2" missing/path fallback',
       "test",
       stageScriptPath,
       repoRoot,
@@ -368,13 +368,13 @@ export function parseRegistryNpmSpec(spec: string) {
     expect(absent.status).toBe(0);
     expect(absent.stdout).toBe("fallback\n");
 
-    const malformed = run({ OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "yes" });
+    const malformed = run({ CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "yes" });
     expect(malformed.status).toBe(2);
-    expect(malformed.stderr).toContain("invalid OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS");
+    expect(malformed.stderr).toContain("invalid CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS");
   });
 
   it("keeps a matching frozen-source capability under pipefail", () => {
-    const root = tempDirs.make("openclaw-frozen-target-capability-");
+    const root = tempDirs.make("carapace-frozen-target-capability-");
     const sourcePath = path.join(root, "scripts/e2e/lib/plugins/assertions.mjs");
     mkdirSync(path.dirname(sourcePath), { recursive: true });
     writeFileSync(sourcePath, `function assertPluginTgzRemoved()\n${"x\n".repeat(100_000)}`);
@@ -392,7 +392,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; source "$1"; openclaw_frozen_target_source_contains "$2" scripts/e2e/lib/plugins/assertions.mjs "function assertPluginTgzRemoved()"',
+        'set -euo pipefail; source "$1"; carapace_frozen_target_source_contains "$2" scripts/e2e/lib/plugins/assertions.mjs "function assertPluginTgzRemoved()"',
         "test",
         stageScriptPath,
         root,
@@ -401,7 +401,7 @@ export function parseRegistryNpmSpec(spec: string) {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_SELECTED_SHA: selectedSha,
+          CARAPACE_SELECTED_SHA: selectedSha,
         },
       },
     );
@@ -410,7 +410,7 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("derives frozen harness capabilities only from an authorized selected source", () => {
-    const root = tempDirs.make("openclaw-frozen-target-core-dialects-");
+    const root = tempDirs.make("carapace-frozen-target-core-dialects-");
     mkdirSync(path.join(root, "src/agents"), { recursive: true });
     mkdirSync(path.join(root, "src/agents/embedded-agent-runner/run"), { recursive: true });
     mkdirSync(path.join(root, "src/commands"), { recursive: true });
@@ -442,7 +442,7 @@ export function parseRegistryNpmSpec(spec: string) {
     }).trim();
     const resolveCoreDialects = [
       "-c",
-      'set -euo pipefail; source "$1"; openclaw_resolve_frozen_core_harness_capabilities "$2"; openclaw_resolve_frozen_live_cli_backend_package_mode "$2"; printf "%s %s %s %s\\n" "$OPENCLAW_FROZEN_TARGET_SESSION_REPAIR_MODE" "$OPENCLAW_FROZEN_TARGET_MCP_CODE_MODE_CATALOG_MODE" "$OPENCLAW_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE" "$OPENCLAW_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE"',
+      'set -euo pipefail; source "$1"; carapace_resolve_frozen_core_harness_capabilities "$2"; carapace_resolve_frozen_live_cli_backend_package_mode "$2"; printf "%s %s %s %s\\n" "$CARAPACE_FROZEN_TARGET_SESSION_REPAIR_MODE" "$CARAPACE_FROZEN_TARGET_MCP_CODE_MODE_CATALOG_MODE" "$CARAPACE_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE" "$CARAPACE_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE"',
       "test",
       stageScriptPath,
       root,
@@ -452,7 +452,7 @@ export function parseRegistryNpmSpec(spec: string) {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "0",
+        CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "0",
       },
     });
 
@@ -463,9 +463,9 @@ export function parseRegistryNpmSpec(spec: string) {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-        OPENCLAW_SELECTED_SHA: selectedSha,
-        OPENCLAW_TOOLING_SHA: "b".repeat(40),
+        CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+        CARAPACE_SELECTED_SHA: selectedSha,
+        CARAPACE_TOOLING_SHA: "b".repeat(40),
       },
     });
 
@@ -492,7 +492,7 @@ export function parseRegistryNpmSpec(spec: string) {
       error: "unable to resolve frozen runtime-context input contract",
     },
   ])("classifies $name from the selected source", ({ source, expected, error }) => {
-    const root = tempDirs.make("openclaw-frozen-target-runtime-context-");
+    const root = tempDirs.make("carapace-frozen-target-runtime-context-");
     const sourcePath = path.join(
       root,
       "src/agents/embedded-agent-runner/run/runtime-context-prompt.ts",
@@ -513,7 +513,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; source "$1"; openclaw_resolve_frozen_core_harness_capabilities "$2"; printf "%s\\n" "$OPENCLAW_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE"',
+        'set -euo pipefail; source "$1"; carapace_resolve_frozen_core_harness_capabilities "$2"; printf "%s\\n" "$CARAPACE_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE"',
         "test",
         stageScriptPath,
         root,
@@ -522,9 +522,9 @@ export function parseRegistryNpmSpec(spec: string) {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_SELECTED_SHA: selectedSha,
-          OPENCLAW_TOOLING_SHA: "b".repeat(40),
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          CARAPACE_SELECTED_SHA: selectedSha,
+          CARAPACE_TOOLING_SHA: "b".repeat(40),
         },
       },
     );
@@ -542,7 +542,7 @@ export function parseRegistryNpmSpec(spec: string) {
     "src/agents/subagent-announce.live.test.ts",
     "src/agents/subagents/announce/subagent-announce.live.test.ts",
   ])("resolves the staged announce test by unique basename: %s", (relativePath) => {
-    const root = tempDirs.make("openclaw-live-stage-announce-");
+    const root = tempDirs.make("carapace-live-stage-announce-");
     mkdirSync(path.join(root, path.dirname(relativePath)), { recursive: true });
     writeFileSync(path.join(root, relativePath), "");
 
@@ -550,7 +550,7 @@ export function parseRegistryNpmSpec(spec: string) {
       "bash",
       [
         "-c",
-        'set -euo pipefail; source "$2"; relative="$(openclaw_live_resolve_unique_staged_file "$1/src/agents" subagent-announce.live.test.ts)"; printf "src/agents/%s\\n" "$relative"',
+        'set -euo pipefail; source "$2"; relative="$(carapace_live_resolve_unique_staged_file "$1/src/agents" subagent-announce.live.test.ts)"; printf "src/agents/%s\\n" "$relative"',
         "test",
         root,
         stageScriptPath,
@@ -563,10 +563,10 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("rejects missing or ambiguous staged announce tests", () => {
-    const root = tempDirs.make("openclaw-live-stage-announce-invalid-");
+    const root = tempDirs.make("carapace-live-stage-announce-invalid-");
     const command = [
       "-c",
-      'set -euo pipefail; source "$2"; openclaw_live_resolve_unique_staged_file "$1/src/agents" subagent-announce.live.test.ts',
+      'set -euo pipefail; source "$2"; carapace_live_resolve_unique_staged_file "$1/src/agents" subagent-announce.live.test.ts',
       "test",
       root,
       stageScriptPath,
@@ -596,7 +596,7 @@ export function parseRegistryNpmSpec(spec: string) {
   });
 
   it("adds private SDK source exports only to the disposable source stage", () => {
-    const root = tempDirs.make("openclaw-live-stage-sdk-");
+    const root = tempDirs.make("carapace-live-stage-sdk-");
     mkdirSync(path.join(root, "scripts", "lib"), { recursive: true });
     mkdirSync(path.join(root, "src", "plugin-sdk"), { recursive: true });
     writeFileSync(

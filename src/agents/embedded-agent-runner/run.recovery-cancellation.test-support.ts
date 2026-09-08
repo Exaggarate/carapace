@@ -68,7 +68,7 @@ describe("recovery cancellation through the public run owner", () => {
   });
 
   it("fences retired foreground budget observers across physical retries", async () => {
-    const workspaceDir = tempDirs.make("openclaw-request-budget-retry-");
+    const workspaceDir = tempDirs.make("carapace-request-budget-retry-");
     const sessionManager = SessionManager.inMemory(workspaceDir);
     const firstBudget = {
       contextWindow: 32_768,
@@ -125,7 +125,7 @@ describe("recovery cancellation through the public run owner", () => {
     ] as const)(
       "preserves caller rejection and committed=$committed facts after $kind cancellation",
       async ({ kind, committed }) => {
-        const workspaceDir = tempDirs.make("openclaw-recovery-cancel-");
+        const workspaceDir = tempDirs.make("carapace-recovery-cancel-");
         const sessionManager = SessionManager.inMemory(workspaceDir);
         const abort = new AbortController();
         const callerError = new Error("caller stopped recovery");
@@ -594,10 +594,10 @@ describe("recovery cancellation through the public run owner", () => {
   );
 
   it("compacts and accounts a fresh persistent run whose first append creates the session row", async () => {
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
     const { SessionManager: PersistentSessionManager } =
       await import("../sessions/session-manager.js");
-    const state = await createOpenClawTestState({ label: "fresh-persistent-recovery" });
+    const state = await createCarapaceTestState({ label: "fresh-persistent-recovery" });
     let manager: ReturnType<typeof PersistentSessionManager.open> | undefined;
     let firstKeptEntryId: string | undefined;
     const runParams = {

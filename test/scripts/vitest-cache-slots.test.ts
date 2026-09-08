@@ -5,11 +5,11 @@ import { createDeferred } from "../helpers/promise.js";
 
 const spec = {
   config: "test/vitest/vitest.tooling.config.ts",
-  env: { OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: "/cache/original" },
+  env: { CARAPACE_VITEST_FS_MODULE_CACHE_PATH: "/cache/original" },
   watchMode: false,
   cacheAssignment: { kind: "scheduler", root: "/cache" } satisfies VitestCacheAssignment,
 };
-const cachePath = (assigned: typeof spec) => assigned.env.OPENCLAW_VITEST_FS_MODULE_CACHE_PATH;
+const cachePath = (assigned: typeof spec) => assigned.env.CARAPACE_VITEST_FS_MODULE_CACHE_PATH;
 
 describe("Vitest cache slot ownership", () => {
   it("holds concurrent leases until joined and reuses a failed command's completed slot", async () => {

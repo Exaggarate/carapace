@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   isDiscordAccountEnabledForRuntime,
   listDiscordAccountIds,
@@ -22,12 +22,12 @@ export class DiscordActivitiesRuntime {
 
   constructor(
     readonly store: DiscordActivityStore,
-    private readonly startupConfig: OpenClawConfig,
-    private readonly getCurrentConfig?: () => OpenClawConfig | undefined,
+    private readonly startupConfig: CarapaceConfig,
+    private readonly getCurrentConfig?: () => CarapaceConfig | undefined,
     private readonly env: NodeJS.ProcessEnv = process.env,
   ) {}
 
-  currentConfig(): OpenClawConfig {
+  currentConfig(): CarapaceConfig {
     return selectDiscordActivitiesRuntimeConfig(this.getCurrentConfig?.() ?? this.startupConfig);
   }
 

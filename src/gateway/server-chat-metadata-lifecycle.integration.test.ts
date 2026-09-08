@@ -18,7 +18,7 @@ import {
   refreshPreparedModelRuntimeSnapshots,
   registerPreparedModelRuntimePublicationListener,
 } from "../agents/prepared-model-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import {
   captureActivePluginRegistrySnapshot,
@@ -27,9 +27,9 @@ import {
 } from "../plugins/runtime.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createGatewayChatMetadataLifecycle } from "./server-chat-metadata-lifecycle.js";
 import {
   buildModelsListResult,
@@ -46,7 +46,7 @@ import {
 import type { GatewayPostReadySidecarHandle } from "./server-startup-post-attach.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 const config = {
   agents: {
     defaults: {
@@ -56,7 +56,7 @@ const config = {
     },
     list: [{ id: "main", default: true }],
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 const model = {
   id: "gpt-5.4",
   name: "GPT-5.4",
@@ -72,7 +72,7 @@ let sidecars: GatewayPostReadySidecarHandle[] = [];
 
 beforeEach(async () => {
   vi.stubEnv("OPENAI_API_KEY", "");
-  state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+  state = await createCarapaceTestState({ label: "prepared-model-runtime" });
   await resetPreparedModelRuntimeHarness(state);
   mocks.configuredAgentIds = ["main"];
   mocks.authStorage.getAll.mockReturnValue({
@@ -115,7 +115,7 @@ function configureAuthFixture(
       : {}),
   });
   mocks.authStorage.getAll.mockReturnValue({
-    openai: { type: "api_key", key: "openclaw-secret-ref-configured" },
+    openai: { type: "api_key", key: "carapace-secret-ref-configured" },
   });
   mocks.preparedAuthStore = {
     version: 1,
@@ -132,7 +132,7 @@ function configureAuthFixture(
 
 function configureHarnessOwnedUnresolvedAuth() {
   mocks.authStorage.getAll.mockReturnValue({
-    openai: { type: "api_key", key: "openclaw-secret-ref-configured" },
+    openai: { type: "api_key", key: "carapace-secret-ref-configured" },
   });
   mocks.preparedAuthStore = {
     version: 1,
@@ -154,7 +154,7 @@ afterEach(async ({ task }) => {
   vi.unstubAllEnvs();
 });
 
-async function createLifecycle(getConfig: () => OpenClawConfig = () => config) {
+async function createLifecycle(getConfig: () => CarapaceConfig = () => config) {
   return await createGatewayChatMetadataLifecycle({
     getConfig,
     minimalTestGateway: false,
@@ -162,7 +162,7 @@ async function createLifecycle(getConfig: () => OpenClawConfig = () => config) {
   });
 }
 
-async function publishOwner(ownerConfig: OpenClawConfig = config): Promise<void> {
+async function publishOwner(ownerConfig: CarapaceConfig = config): Promise<void> {
   await refreshPreparedModelRuntimeSnapshots(ownerConfig, {
     gatewayLifecycle: true,
     catalogMode: "live",
@@ -173,7 +173,7 @@ async function publishOwner(ownerConfig: OpenClawConfig = config): Promise<void>
 async function expectAvailable(
   lifecycle: Awaited<ReturnType<typeof createGatewayChatMetadataLifecycle>>,
   expectedAvailable = true,
-  activeConfig: OpenClawConfig = config,
+  activeConfig: CarapaceConfig = config,
   activeContext: GatewayRequestContext = context,
 ): Promise<void> {
   const owner = getPreparedModelCatalogOwnerSnapshot({
@@ -231,7 +231,7 @@ describe("gateway chat metadata lifecycle composition", () => {
   it.each([false, true])(
     "publishes coherent native membership when readiness changes from %s during preparation",
     async (initialReady) => {
-      const nativeConfig: OpenClawConfig = {
+      const nativeConfig: CarapaceConfig = {
         agents: {
           defaults: {
             model: "openai/gpt-5.6-luna",
@@ -362,7 +362,7 @@ describe("gateway chat metadata lifecycle composition", () => {
     "revalidates native observations (wildcard=$wildcard, $invalidate) without rediscovery",
     async ({ wildcard, invalidate }) => {
       const modelRef = wildcard ? "openai/*" : "openai/codex-latest";
-      const nativeConfig: OpenClawConfig = {
+      const nativeConfig: CarapaceConfig = {
         agents: {
           defaults: {
             ...(wildcard ? {} : { model: "openai/codex-latest" }),
@@ -549,7 +549,7 @@ describe("gateway chat metadata lifecycle composition", () => {
           expect(retained.read()).toMatchObject({ models: expectedModels(true) });
           const entered = createDeferredCore();
           const release = createDeferredCore<{ agentDir: string; wrote: false }>();
-          mocks.ensureOpenClawModelsJson.mockImplementationOnce(async () => {
+          mocks.ensureCarapaceModelsJson.mockImplementationOnce(async () => {
             entered.resolve();
             return await release.promise;
           });
@@ -693,11 +693,11 @@ describe("gateway chat metadata lifecycle composition", () => {
     const publishedConfig = {
       ...config,
       ui: { prefs: { chatShowThinking: true } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const currentConfig = {
       ...config,
       ui: { prefs: { chatShowThinking: false } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     await publishOwner(publishedConfig);
     const lifecycle = await createLifecycle(() => currentConfig);
     const loadCatalogSnapshot: GatewayRequestContext["loadGatewayModelCatalogSnapshot"] = (
@@ -766,7 +766,7 @@ describe("gateway chat metadata lifecycle composition", () => {
       pluginHarnessOwnsAuthBootstrap: true,
     });
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
     expect(mocks.preparedAuthMaterializations).toEqual([
       expect.objectContaining({
         provider: "openai",
@@ -793,7 +793,7 @@ describe("gateway chat metadata lifecycle composition", () => {
     const orderedConfig = {
       ...config,
       auth: { order: { openai: ["openai:default"] } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const orderedContext = {
       ...context,
       getRuntimeConfig: () => orderedConfig,
@@ -873,7 +873,7 @@ describe("gateway chat metadata lifecycle composition", () => {
     try {
       await lifecycle.attachContext(context, ownedSidecars);
       await expectAvailable(lifecycle);
-      mocks.ensureOpenClawModelsJson.mockRejectedValueOnce(failure);
+      mocks.ensureCarapaceModelsJson.mockRejectedValueOnce(failure);
       expect(mocks.mutationListener).toBeTypeOf("function");
       mocks.mutationListener!({
         agentDir: state.agentDir("worker"),

@@ -128,8 +128,8 @@ export type BaseOpenAIStreamOptions = StreamOptions & {
   onFirstEventTimeout?: (reason: Error) => void;
   /** Internal owner notification after a server rejects a persisted compaction checkpoint. */
   onCompactionRejected?: (checkpoint: OpenAIResponsesCompactionRejection) => void;
-  openclawCodeModeToolSurface?: boolean;
-  openclawCodeModeAllowedHostedToolTypes?: Set<string>;
+  carapaceCodeModeToolSurface?: boolean;
+  carapaceCodeModeAllowedHostedToolTypes?: Set<string>;
   frequencyPenalty?: number;
   presencePenalty?: number;
   seed?: number;

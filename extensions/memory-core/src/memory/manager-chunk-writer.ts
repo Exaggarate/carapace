@@ -3,11 +3,11 @@ import type {
   MemoryChunk,
   MemoryEntryProvenance,
   MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   compileSqliteQueryBindings,
   getNodeSqliteKysely,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
 
 export type IndexedMemoryChunk = MemoryChunk & {
   importance: number | null;

@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { createServer, type Server } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import {
   GATEWAY_READY_OUTPUT_MAX_CHARS,
@@ -40,11 +40,11 @@ describe("check-memory-fd-repro", () => {
     expect(
       withEnv(
         {
-          OPENCLAW_MEMORY_FD_REPRO_FILES: "17",
-          OPENCLAW_MEMORY_FD_REPRO_MAX_WORKSPACE_REG_FDS: "0",
-          OPENCLAW_MEMORY_FD_REPRO_SAMPLE_DELAY_MS: "0",
-          OPENCLAW_MEMORY_FD_REPRO_SETTLE_DELAY_MS: String(MAX_TIMER_TIMEOUT_MS + 1),
-          OPENCLAW_MEMORY_FD_REPRO_TIMEOUT_MS: String(MAX_TIMER_TIMEOUT_MS + 1),
+          CARAPACE_MEMORY_FD_REPRO_FILES: "17",
+          CARAPACE_MEMORY_FD_REPRO_MAX_WORKSPACE_REG_FDS: "0",
+          CARAPACE_MEMORY_FD_REPRO_SAMPLE_DELAY_MS: "0",
+          CARAPACE_MEMORY_FD_REPRO_SETTLE_DELAY_MS: String(MAX_TIMER_TIMEOUT_MS + 1),
+          CARAPACE_MEMORY_FD_REPRO_TIMEOUT_MS: String(MAX_TIMER_TIMEOUT_MS + 1),
         },
         () => parseArgs([]),
       ),
@@ -57,22 +57,22 @@ describe("check-memory-fd-repro", () => {
     });
 
     expect(() =>
-      withEnv({ OPENCLAW_MEMORY_FD_REPRO_FILES: "17files" }, () => parseArgs([])),
-    ).toThrow("OPENCLAW_MEMORY_FD_REPRO_FILES must be a non-negative integer");
+      withEnv({ CARAPACE_MEMORY_FD_REPRO_FILES: "17files" }, () => parseArgs([])),
+    ).toThrow("CARAPACE_MEMORY_FD_REPRO_FILES must be a non-negative integer");
     expect(() =>
-      withEnv({ OPENCLAW_MEMORY_FD_REPRO_TIMEOUT_MS: "1e3" }, () => parseArgs([])),
-    ).toThrow("OPENCLAW_MEMORY_FD_REPRO_TIMEOUT_MS must be a non-negative integer");
+      withEnv({ CARAPACE_MEMORY_FD_REPRO_TIMEOUT_MS: "1e3" }, () => parseArgs([])),
+    ).toThrow("CARAPACE_MEMORY_FD_REPRO_TIMEOUT_MS must be a non-negative integer");
   });
 
   it("lets explicit CLI numeric flags override malformed inherited env defaults", () => {
     expect(
       withEnv(
         {
-          OPENCLAW_MEMORY_FD_REPRO_FILES: "17files",
-          OPENCLAW_MEMORY_FD_REPRO_MAX_WORKSPACE_REG_FDS: "4fds",
-          OPENCLAW_MEMORY_FD_REPRO_TIMEOUT_MS: "1e3",
-          OPENCLAW_MEMORY_FD_REPRO_SAMPLE_DELAY_MS: "soon",
-          OPENCLAW_MEMORY_FD_REPRO_SETTLE_DELAY_MS: "later",
+          CARAPACE_MEMORY_FD_REPRO_FILES: "17files",
+          CARAPACE_MEMORY_FD_REPRO_MAX_WORKSPACE_REG_FDS: "4fds",
+          CARAPACE_MEMORY_FD_REPRO_TIMEOUT_MS: "1e3",
+          CARAPACE_MEMORY_FD_REPRO_SAMPLE_DELAY_MS: "soon",
+          CARAPACE_MEMORY_FD_REPRO_SETTLE_DELAY_MS: "later",
         },
         () =>
           parseArgs([
@@ -120,7 +120,7 @@ describe("check-memory-fd-repro", () => {
     });
 
     expect(
-      withEnv({ OPENCLAW_MEMORY_FD_REPRO_FILES: "17" }, () => parseArgs(["--", "--unknown"])),
+      withEnv({ CARAPACE_MEMORY_FD_REPRO_FILES: "17" }, () => parseArgs(["--", "--unknown"])),
     ).toMatchObject({
       fileCount: 17,
     });
@@ -174,7 +174,7 @@ describe("check-memory-fd-repro", () => {
   });
 
   it("writes an offline FTS-only memory search config for repro indexing", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-fd-config-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-memory-fd-config-"));
     try {
       const homeDir = path.join(root, "home");
       const workspaceDir = path.join(root, "workspace");

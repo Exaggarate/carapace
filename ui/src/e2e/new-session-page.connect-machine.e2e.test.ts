@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS } from "@openclaw/gateway-client/browser";
+import { DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS } from "@carapace/gateway-client/browser";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
@@ -98,8 +98,8 @@ suite.define(() => {
 
       const firstRequest = await gateway.waitForRequest("device.pair.setupCode");
       expect(firstRequest.params).toEqual({ includeQr: false, joinUrl: true });
-      const dialog = page.locator('openclaw-modal-dialog[label="Connect a machine"]');
-      await dialog.getByText(`npx openclaw connect '${firstJoinUrl}'`, { exact: true }).waitFor();
+      const dialog = page.locator('carapace-modal-dialog[label="Connect a machine"]');
+      await dialog.getByText(`npx carapace connect '${firstJoinUrl}'`, { exact: true }).waitFor();
       const copy = dialog.locator("button.chat-copy-btn");
       expect(await copy.count()).toBe(1);
       expect(await copy.getAttribute("aria-label")).toBe("Copy command");
@@ -117,7 +117,7 @@ suite.define(() => {
         includeQr: false,
         joinUrl: true,
       });
-      await dialog.getByText(`npx openclaw connect ${secondJoinUrl}`, { exact: true }).waitFor();
+      await dialog.getByText(`npx carapace connect ${secondJoinUrl}`, { exact: true }).waitFor();
       await captureProof(page, "02-connect-dialog.png", {
         surface: dialog.locator("dialog"),
         content: [copy],
@@ -171,7 +171,7 @@ suite.define(() => {
       await page.locator("#new-session-where-trigger").click();
       await page.getByRole("button", { name: "Connect a machine…" }).click();
       await gateway.waitForRequest("device.pair.setupCode");
-      const dialog = page.locator('openclaw-modal-dialog[label="Connect a machine"]');
+      const dialog = page.locator('carapace-modal-dialog[label="Connect a machine"]');
       await dialog.getByText("Creating a secure connection link…", { exact: true }).waitFor();
       await captureProof(page, "03-connect-loading.png");
 
@@ -188,7 +188,7 @@ suite.define(() => {
       await captureProof(page, "04-connect-timeout.png");
       const retry = dialog.getByRole("button", { name: "Mint fresh code" });
       await retry.click();
-      await dialog.getByText(`npx openclaw connect ${joinUrl}`, { exact: true }).waitFor();
+      await dialog.getByText(`npx carapace connect ${joinUrl}`, { exact: true }).waitFor();
       expect(await gateway.getRequests("device.pair.setupCode")).toHaveLength(2);
     } finally {
       await context.close();
@@ -213,7 +213,7 @@ suite.define(() => {
       });
 
       const alert = page
-        .locator('openclaw-modal-dialog[label="Connect a machine"]')
+        .locator('carapace-modal-dialog[label="Connect a machine"]')
         .getByRole("alert");
       await alert.waitFor();
       expect(await alert.textContent()).toContain("Authorization: [redacted]");
@@ -235,7 +235,7 @@ suite.define(() => {
       await page.locator("#new-session-where-trigger").click();
       await page.getByRole("button", { name: "Connect a machine…" }).click();
       await gateway.waitForRequest("device.pair.setupCode");
-      const dialog = page.locator('openclaw-modal-dialog[label="Connect a machine"]');
+      const dialog = page.locator('carapace-modal-dialog[label="Connect a machine"]');
       await dialog.getByText("Creating a secure connection link…", { exact: true }).waitFor();
 
       await gateway.closeLatest(1012, "test reconnect");

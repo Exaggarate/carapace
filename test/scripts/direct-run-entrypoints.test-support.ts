@@ -52,7 +52,7 @@ export const instance = {};
   return `
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { parseBoolean } from "@openclaw/normalization-core/boolean-coercion";
+import { parseBoolean } from "@carapace/normalization-core/boolean-coercion";
 enum Transformed { Value = "transformed" }
 try {
 const require = createRequire(${JSON.stringify(pathToFileURL(pluginPath).href)});
@@ -86,7 +86,7 @@ export async function withShimFixture<T>(
   // Own a sibling so unverified writers survive its cleanup, outside repo module resolution.
   // Windows has no enclosing namespace and keeps the ordinary temporary root.
   const fixtureParent = process.platform === "win32" ? tmpdir() : path.dirname(tmpdir());
-  const fixtureRoot = realpathSync(mkdtempSync(path.join(fixtureParent, "openclaw-tsx-cli-shim-")));
+  const fixtureRoot = realpathSync(mkdtempSync(path.join(fixtureParent, "carapace-tsx-cli-shim-")));
   const checkoutRoot = path.join(fixtureRoot, "checkout");
   const wrapperPath = path.join(checkoutRoot, wrapper);
   const implementationPath = wrapperPath.replace(

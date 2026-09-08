@@ -1,5 +1,5 @@
 import type { BigIntStats } from "node:fs";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export type FileIdentity = {
   device: string;

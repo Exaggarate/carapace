@@ -72,7 +72,7 @@ if (process.argv[2] === "child") {
       id: 1,
       method: "initialize",
       params: {
-        clientInfo: { name: "openclaw_orphan_test", version: "1.0.0" },
+        clientInfo: { name: "carapace_orphan_test", version: "1.0.0" },
         capabilities: { experimentalApi: true },
       },
     });

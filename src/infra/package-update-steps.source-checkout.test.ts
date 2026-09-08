@@ -19,7 +19,7 @@ async function writeSourceCheckout(checkoutRoot: string): Promise<void> {
     await fs.mkdir(path.join(checkoutRoot, dir), { recursive: true });
   }
   for (const [file, contents] of Object.entries({
-    "package.json": JSON.stringify({ name: "openclaw", version: SOURCE_VERSION }),
+    "package.json": JSON.stringify({ name: "carapace", version: SOURCE_VERSION }),
     "pnpm-workspace.yaml": "packages: []\n",
     "dist/entry.js": "export {};\n",
     "dist/build-info.json": JSON.stringify({ commit: SOURCE_SHA }),
@@ -30,16 +30,16 @@ async function writeSourceCheckout(checkoutRoot: string): Promise<void> {
   })) {
     await fs.writeFile(path.join(checkoutRoot, file), contents);
   }
-  await fs.writeFile(path.join(checkoutRoot, "openclaw.mjs"), "#!/usr/bin/env node\n", {
+  await fs.writeFile(path.join(checkoutRoot, "carapace.mjs"), "#!/usr/bin/env node\n", {
     mode: 0o755,
   });
 }
 
 describe("runGlobalPackageUpdateSteps", () => {
   it("validates a temporary source checkout then exposes its published root", async () => {
-    await withTestDir({ prefix: "openclaw-source-publication-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-source-publication-" }, async (base) => {
       const globalRoot = path.join(base, "prefix", "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       const candidateRoot = path.join(base, "candidate");
       const publishedRoot = path.join(base, "checkout");
       await writePackageRoot(packageRoot, "1.0.0");
@@ -49,7 +49,7 @@ describe("runGlobalPackageUpdateSteps", () => {
       const result = await runGlobalPackageUpdateSteps({
         installTarget: createNpmTarget(globalRoot),
         installSpec: candidateRoot,
-        packageName: "openclaw",
+        packageName: "carapace",
         expectedGitCheckout: { root: candidateRoot, sha: SOURCE_SHA },
         activateGitRoot: publishedRoot,
         runCommand: createRootRunner(globalRoot),
@@ -63,12 +63,12 @@ describe("runGlobalPackageUpdateSteps", () => {
           await fs.mkdir(layout.binDir, { recursive: true });
           await fs.symlink(
             candidateRoot,
-            path.join(layout.globalRoot, "openclaw"),
+            path.join(layout.globalRoot, "carapace"),
             process.platform === "win32" ? "junction" : undefined,
           );
           await fs.symlink(
-            "../lib/node_modules/openclaw/openclaw.mjs",
-            path.join(layout.binDir, "openclaw"),
+            "../lib/node_modules/carapace/carapace.mjs",
+            path.join(layout.binDir, "carapace"),
           );
           return { name, command: argv.join(" "), cwd: stagePrefix, durationMs: 0, exitCode: 0 };
         },
@@ -101,7 +101,7 @@ describe("runGlobalPackageUpdateSteps", () => {
     const result = await runGlobalPackageUpdateSteps({
       installTarget: { manager: "pnpm", command: "pnpm", globalRoot: null, packageRoot: null },
       installSpec: "/prepared-checkout",
-      packageName: "openclaw",
+      packageName: "carapace",
       expectedGitCheckout: { root: "/prepared-checkout", sha: SOURCE_SHA },
       runCommand: async () => ({ code: 0, stdout: "", stderr: "" }),
       runStep: async ({ name, argv }) => ({
@@ -122,9 +122,9 @@ describe("runGlobalPackageUpdateSteps", () => {
   });
 
   it("preserves the old global package when source exposure refuses before activation", async () => {
-    await withTestDir({ prefix: "openclaw-git-exposure-recovery-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-git-exposure-recovery-" }, async (base) => {
       const globalRoot = path.join(base, "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await writePackageRoot(packageRoot, "1.0.0");
       await writeSourceCheckout(path.join(base, "prepared-checkout"));
       const runStep = vi.fn();
@@ -135,7 +135,7 @@ describe("runGlobalPackageUpdateSteps", () => {
         },
         installSpec: path.join(base, "prepared-checkout"),
         expectedGitCheckout: { root: path.join(base, "prepared-checkout"), sha: SOURCE_SHA },
-        packageName: "openclaw",
+        packageName: "carapace",
         packageRoot,
         runCommand: createRootRunner(globalRoot),
         runStep,
@@ -174,9 +174,9 @@ describe("runGlobalPackageUpdateSteps", () => {
         remove: "dist/control-ui/assets/startup.js",
         error: "ui=incomplete",
       },
-      { name: "missing launcher", remove: "openclaw.mjs", error: "missing" },
+      { name: "missing launcher", remove: "carapace.mjs", error: "missing" },
     ])("verifies $name before finalization", async ({ name: caseName, error, remove, stale }) => {
-      await withTestDir({ prefix: "openclaw-package-update-source-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-update-source-" }, async (base) => {
         const prefix = path.join(base, "prefix");
         const globalRoot =
           manager === "npm"
@@ -184,7 +184,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             : manager === "pnpm"
               ? path.join(prefix, "global", "5", "node_modules")
               : path.join(prefix, ".bun", "install", "global", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         const checkoutRoot = path.join(base, "checkout");
         const linkedRoot =
           caseName === "wrong checkout" ? path.join(base, "other-checkout") : checkoutRoot;
@@ -219,7 +219,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             caseName === "accidental source link"
               ? undefined
               : { root: checkoutRoot, sha: caseName === "missing built SHA" ? null : SOURCE_SHA },
-          packageName: "openclaw",
+          packageName: "carapace",
           packageRoot,
           installCwd: checkoutRoot,
           runCommand: createRootRunner(globalRoot),
@@ -233,11 +233,11 @@ describe("runGlobalPackageUpdateSteps", () => {
               }
               expect(path.dirname(stagePrefix)).toBe(globalRoot);
               const stageLayout = resolveNpmGlobalPrefixLayoutFromPrefix(stagePrefix);
-              targetRoot = path.join(stageLayout.globalRoot, "openclaw");
+              targetRoot = path.join(stageLayout.globalRoot, "carapace");
               await fs.mkdir(stageLayout.binDir, { recursive: true });
               await fs.symlink(
-                "../lib/node_modules/openclaw/openclaw.mjs",
-                path.join(stageLayout.binDir, "openclaw"),
+                "../lib/node_modules/carapace/carapace.mjs",
+                path.join(stageLayout.binDir, "carapace"),
               );
             } else {
               await fs.rm(packageRoot, { recursive: true });
@@ -286,12 +286,12 @@ describe("runGlobalPackageUpdateSteps", () => {
               "global install swap",
               "candidate doctor",
             ]);
-            await expect(fs.readlink(path.join(prefix, "bin", "openclaw"))).resolves.toBe(
-              "../lib/node_modules/openclaw/openclaw.mjs",
+            await expect(fs.readlink(path.join(prefix, "bin", "carapace"))).resolves.toBe(
+              "../lib/node_modules/carapace/carapace.mjs",
             );
             expect(
               (await fs.readdir(globalRoot)).filter((entry) =>
-                entry.startsWith(".openclaw.update-stage-"),
+                entry.startsWith(".carapace.update-stage-"),
               ),
             ).toEqual([]);
           }

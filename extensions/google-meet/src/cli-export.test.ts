@@ -43,7 +43,7 @@ describe("Google Meet export publication", () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-publication-"));
+    tempDir = fs.mkdtempSync(path.join(tmpdir(), "carapace-google-meet-export-publication-"));
   });
 
   afterEach(() => {

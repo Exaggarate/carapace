@@ -5,7 +5,7 @@
  */
 import { statSync } from "node:fs";
 import path from "node:path";
-import { resolveNonNegativeIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveNonNegativeIntegerOption } from "@carapace/normalization-core/number-coercion";
 import { Type } from "typebox";
 import { releaseChildProcessOutputAfterExit } from "../../../process/child-process.js";
 import { spawnCommand } from "../../../process/exec.js";

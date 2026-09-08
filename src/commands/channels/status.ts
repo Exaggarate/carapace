@@ -1,6 +1,6 @@
-// Implements `openclaw channels status` with gateway status and config-only fallback.
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+// Implements `carapace channels status` with gateway status and config-only fallback.
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   formatCliFailureLines,
   isExpectedCliError,

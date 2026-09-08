@@ -1,19 +1,19 @@
-// Fresh-process fixture: value imports stay outside OpenClaw until each scenario demands them.
+// Fresh-process fixture: value imports stay outside Carapace until each scenario demands them.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { createServer, type IncomingHttpHeaders } from "node:http";
 import { registerHooks } from "node:module";
 import path from "node:path";
 import type { FetchLike } from "@modelcontextprotocol/sdk/shared/transport.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AuthProfileStore, OAuthCredential } from "./auth-profiles/types.js";
 
 const PLUGIN_ID = "mcp-proof-owner";
 const PROVIDER_ID = "mcp-proof-provider";
 const EXTERNAL_PROFILE = `${PROVIDER_ID}:external`;
 const STORED_PROFILE = `${PROVIDER_ID}:stored`;
-const OBSERVER_KEY: unique symbol = Symbol.for("openclaw.mcpAuthIntegrationObserver");
-type HookContext = { config?: OpenClawConfig; agentDir?: string };
+const OBSERVER_KEY: unique symbol = Symbol.for("carapace.mcpAuthIntegrationObserver");
+type HookContext = { config?: CarapaceConfig; agentDir?: string };
 type ProviderEvent = { kind: string; owner: string };
 type FixtureGlobal = typeof globalThis & {
   [OBSERVER_KEY]?: (kind: string, owner: string, context?: HookContext) => void;
@@ -39,7 +39,7 @@ function writeProvider(root: string, owner: string, tokenUrl: string, enabled = 
   const credentialPath = path.join(root, `external-${owner}.txt`);
   fs.writeFileSync(credentialPath, "first");
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: PLUGIN_ID,
       providers: [PROVIDER_ID],
@@ -51,7 +51,7 @@ function writeProvider(root: string, owner: string, tokenUrl: string, enabled = 
   fs.writeFileSync(
     source,
     `const fs = require("node:fs");
-const observe = (kind, context) => globalThis[Symbol.for("openclaw.mcpAuthIntegrationObserver")](kind, ${JSON.stringify(owner)}, context);
+const observe = (kind, context) => globalThis[Symbol.for("carapace.mcpAuthIntegrationObserver")](kind, ${JSON.stringify(owner)}, context);
 observe("evaluated");
 module.exports = {
   id: ${JSON.stringify(PLUGIN_ID)},
@@ -101,7 +101,7 @@ module.exports = {
 };
 `,
   );
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     plugins: {
       allow: [PLUGIN_ID],
       load: { paths: [source] },
@@ -348,7 +348,7 @@ async function runExternalScenario(root: string): Promise<void> {
 
 async function runRefreshScenario(root: string): Promise<void> {
   authRuntimeEntered = true;
-  const { filterStringRecord } = await import("@openclaw/normalization-core/record-coerce");
+  const { filterStringRecord } = await import("@carapace/normalization-core/record-coerce");
   const { saveAuthProfileStore } = await import("./auth-profiles/store-runtime.js");
   const { loadPersistedAuthProfileStore } = await import("./auth-profiles/persisted.js");
   const { resolveMcpBearerBundleConfig, withMcpAuthProfileBearer } =
@@ -640,13 +640,13 @@ async function main(): Promise<void> {
       // A rejected cold import must not load auth owners merely to clean them up.
       if (authRuntimeEntered) {
         const { closeAuthProfileReadPool } = await import("./auth-profiles/sqlite.js");
-        const { closeOpenClawAgentDatabasesForTest } =
-          await import("../state/openclaw-agent-db.js");
-        const { closeOpenClawStateDatabaseForTest } = await import("../state/openclaw-state-db.js");
+        const { closeCarapaceAgentDatabasesForTest } =
+          await import("../state/carapace-agent-db.js");
+        const { closeCarapaceStateDatabaseForTest } = await import("../state/carapace-state-db.js");
         closeAuthProfileReadPool();
         // Agent closure releases leases through shared state; close that owner last.
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     } finally {
       delete globals[OBSERVER_KEY];

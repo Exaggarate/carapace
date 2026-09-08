@@ -3,10 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { WorkerSessionPlacementIdentity } from "./placement-record.js";
 import { MAX_RUNNING_WORKER_SESSION_TOOL_OPERATIONS } from "./placement-session-tool-operations.js";
 import {
@@ -25,17 +25,17 @@ const OWNER_EPOCH = 7;
 
 describe("worker session placement gate", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let store: WorkerSessionPlacementStore;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-gate-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worker-gate-"));
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     store = createWorkerSessionPlacementStore({ database });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -249,7 +249,7 @@ describe("worker session placement gate", () => {
       owner: { kind: "local", environmentId: ENVIRONMENT_ID, ownerEpoch: OWNER_EPOCH },
     });
     store.markWorkspaceResultPending(claim);
-    store.recordStagedWorkspaceResult(claim, "refs/openclaw/worker-results/local-staged");
+    store.recordStagedWorkspaceResult(claim, "refs/carapace/worker-results/local-staged");
 
     createWorkerSessionPlacementGate(store).prepareWorkspaceResultOwnerRevocation(
       { sessionId: claim.sessionId, environmentId: ENVIRONMENT_ID, ownerEpoch: OWNER_EPOCH },
@@ -260,7 +260,7 @@ describe("worker session placement gate", () => {
       {
         sessionId: claim.sessionId,
         recoveryRequestedAtMs: expect.any(Number),
-        stagedResultRef: "refs/openclaw/worker-results/local-staged",
+        stagedResultRef: "refs/carapace/worker-results/local-staged",
       },
     ]);
     expect(store.get(claim.sessionId)).toMatchObject({

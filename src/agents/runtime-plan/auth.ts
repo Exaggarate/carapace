@@ -3,7 +3,7 @@
  * and harness auth owners are resolved before session auth profiles can be
  * safely forwarded.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { normalizeOptionalAgentRuntimeId } from "../agent-runtime-id.js";
 import {
@@ -40,7 +40,7 @@ export function buildAgentRuntimeAuthPlan(params: {
   modelRoute?: AgentRuntimeAuthPlan["modelRoute"];
   deferredRouteSupport?: AgentRuntimeAuthPlan["deferredRouteSupport"];
   credentialSource?: AgentRuntimeAuthPlan["credentialSource"];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: Pick<PluginMetadataSnapshot, "plugins">;

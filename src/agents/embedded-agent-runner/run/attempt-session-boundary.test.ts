@@ -22,7 +22,7 @@ import {
 } from "../../../config/sessions/transcript-write-context.js";
 import { buildTimestampPrefix } from "../../../gateway/server-methods/agent-timestamp.js";
 import { MAIN_SESSION_RESTART_RECOVERY_SOURCE_TOOL } from "../../../sessions/input-provenance.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import { guardSessionManager } from "../../session-tool-result-guard-wrapper.js";
 import type { AgentSession } from "../../sessions/index.js";
@@ -72,7 +72,7 @@ async function withPersistedOrphanBoundary(
     target: NonNullable<ReturnType<SessionManager["getSessionTarget"]>>;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ label: "orphan-projection" }, async (state) => {
+  await withCarapaceTestState({ label: "orphan-projection" }, async (state) => {
     const target = {
       agentId: "main",
       sessionId: "orphan-projection",
@@ -422,7 +422,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
         role: "user",
         content: [{ type: "text", text: "exact probe" }],
         timestamp: 1,
-        __openclaw: { senderName: "Must not leak" },
+        __carapace: { senderName: "Must not leak" },
       } as AgentMessage,
     ]);
 
@@ -466,7 +466,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
         role: "user",
         content: [{ type: "text", text: "finalize exactly" }],
         timestamp: 1,
-        __openclaw: { senderName: "Must not leak" },
+        __carapace: { senderName: "Must not leak" },
       } as AgentMessage,
     ]);
 
@@ -523,7 +523,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
       role: "user",
       content: "The launch is Friday",
       timestamp: 1,
-      __openclaw: { senderId: "alice-id", senderName: "Alice" },
+      __carapace: { senderId: "alice-id", senderName: "Alice" },
     } as AgentMessage;
     const { activeSession } = createActiveSession();
     await prepareEmbeddedAttemptSessionBoundary({
@@ -563,7 +563,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
             role: "user",
             content: "The launch is Friday",
             timestamp: 1,
-            __openclaw: { senderId: "alice-id", senderName: "Alice" },
+            __carapace: { senderId: "alice-id", senderName: "Alice" },
           } as AgentMessage,
         },
         {
@@ -572,7 +572,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
             role: "user",
             content: "I can present it",
             timestamp: 2,
-            __openclaw: { senderId: "bob-id", senderName: "Bob" },
+            __carapace: { senderId: "bob-id", senderName: "Bob" },
           } as AgentMessage,
         },
       ],
@@ -610,7 +610,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
             role: "user",
             content: "same",
             timestamp: 1,
-            __openclaw: { senderName: "Bob" },
+            __carapace: { senderName: "Bob" },
           } as AgentMessage,
         },
         {
@@ -619,7 +619,7 @@ describe("prepareEmbeddedAttemptSessionBoundary", () => {
             role: "user",
             content: "same",
             timestamp: 1,
-            __openclaw: { senderName: "Alice" },
+            __carapace: { senderName: "Alice" },
           } as AgentMessage,
         },
       ],

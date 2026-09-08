@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { ArchiveExtractLimits } from "openclaw/plugin-sdk/archive";
+import type { ArchiveExtractLimits } from "carapace/plugin-sdk/archive";
 import { resolveLlamaCppDataDir } from "./defaults.js";
 
 export const LLAMA_SERVER_RELEASE = "b10809";

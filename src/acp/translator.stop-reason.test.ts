@@ -1,6 +1,6 @@
 /** Tests Gateway final/error states to ACP prompt stopReason mapping. */
 import type { PromptRequest } from "@agentclientprotocol/sdk";
-import { createInMemorySessionStore } from "@openclaw/acp-core/session";
+import { createInMemorySessionStore } from "@carapace/acp-core/session";
 import { describe, expect, it, vi } from "vitest";
 import type { GatewayClient } from "../gateway/client.js";
 import { createTestAcpEventLedger } from "./event-ledger.test-support.js";
@@ -173,7 +173,7 @@ describe("acp translator stop reason mapping", () => {
         sessionUpdate: "agent_message_chunk",
         content: {
           type: "text",
-          text: "[OpenClaw interruption] Tool validation failed: command contains unsupported flag",
+          text: "[Carapace interruption] Tool validation failed: command contains unsupported flag",
         },
       },
     });
@@ -283,7 +283,7 @@ describe("acp translator stop reason mapping", () => {
 
       await expect(promptPromise).rejects.toThrow("Gateway disconnected: 1006: connection lost");
       const expectedText =
-        "[OpenClaw interruption] The Gateway disconnected after accepting this message, so its final outcome is unknown. Check the session before retrying.";
+        "[Carapace interruption] The Gateway disconnected after accepting this message, so its final outcome is unknown. Check the session before retrying.";
       expect(sessionUpdate).toHaveBeenCalledWith({
         sessionId,
         update: {
@@ -361,7 +361,7 @@ describe("acp translator stop reason mapping", () => {
       await vi.advanceTimersByTimeAsync(1);
       await expect(promptPromise).rejects.toThrow("Gateway disconnected: 1006: connection lost");
       const expectedText =
-        "[OpenClaw interruption] The Gateway disconnected before OpenClaw could confirm whether this message was accepted, so its final outcome is unknown. Check the session before retrying.";
+        "[Carapace interruption] The Gateway disconnected before Carapace could confirm whether this message was accepted, so its final outcome is unknown. Check the session before retrying.";
       expect(sessionUpdate).toHaveBeenCalledWith({
         sessionId,
         update: {

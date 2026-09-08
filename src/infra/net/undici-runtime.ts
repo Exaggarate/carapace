@@ -1,4 +1,4 @@
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { matchesNoProxy } from "./proxy-env.js";
 import {
   buildHttp1AgentOptions,
@@ -39,7 +39,7 @@ export function loadUndiciGlobalDispatcherDeps(): UndiciGlobalDispatcherDeps {
   return loadUndiciModule(["getGlobalDispatcher", "setGlobalDispatcher"]);
 }
 
-/** Creates a direct undici Agent with OpenClaw's HTTP/1-only dispatcher policy. */
+/** Creates a direct undici Agent with Carapace's HTTP/1-only dispatcher policy. */
 export function createHttp1Agent(
   options?: UndiciAgentOptions,
   timeoutMs?: number,

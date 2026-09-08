@@ -34,7 +34,7 @@ describe("managed worktree protocol schemas", () => {
         key: "agent:main:dashboard:test",
         runStarted: false,
         runError: { code: "INVALID_REQUEST", message: "send blocked by session policy" },
-        worktree: { id: "id", path: "/worktree", branch: "openclaw/wt-test" },
+        worktree: { id: "id", path: "/worktree", branch: "carapace/wt-test" },
       }),
     ).toBe(true);
   });

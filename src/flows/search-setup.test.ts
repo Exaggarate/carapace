@@ -1,9 +1,9 @@
 // Search setup tests cover search provider setup and config changes.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as pluginEnable from "../plugins/enable.js";
 import { createNonExitingRuntime } from "../runtime.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -25,7 +25,7 @@ const mockGrokProvider = vi.hoisted(() => ({
   pluginId: "xai",
   label: "Grok",
   hint: "Search with xAI",
-  docsUrl: "https://docs.openclaw.ai/tools/web",
+  docsUrl: "https://github.com/Exaggarate/carapace",
   requiresCredential: true,
   credentialLabel: "xAI API key",
   placeholder: "xai-...",
@@ -116,7 +116,7 @@ const mockCodexProvider = vi.hoisted(() => ({
   pluginId: "codex",
   label: "Codex Hosted Search",
   hint: "Grounded answers through your Codex app-server account",
-  docsUrl: "https://docs.openclaw.ai/tools/web",
+  docsUrl: "https://github.com/Exaggarate/carapace",
   requiresCredential: false,
   credentialLabel: "Codex app-server account",
   placeholder: "",
@@ -148,7 +148,7 @@ const ensureOnboardingPluginInstalled = vi.hoisted(() =>
             [entry.pluginId]: {
               source: "npm",
               spec: entry.install.npmSpec,
-              installPath: `/tmp/openclaw-plugins/${entry.pluginId}`,
+              installPath: `/tmp/carapace-plugins/${entry.pluginId}`,
             },
           },
         },
@@ -199,7 +199,7 @@ describe("runSearchSetupFlow", () => {
   });
 
   it("keeps search config unchanged when plugin capability consent is declined", async () => {
-    const config: OpenClawConfig = { plugins: { entries: { xai: { enabled: false } } } };
+    const config: CarapaceConfig = { plugins: { entries: { xai: { enabled: false } } } };
     const reason = "Plugin requires capability consent.";
     const enable = vi
       .spyOn(pluginEnable, "enablePluginWithCapabilityConsent")
@@ -237,8 +237,8 @@ describe("runSearchSetupFlow", () => {
 
   it("names no-provider and user-skip outcomes as kept-current", async () => {
     webSearchProviderMocks.resolvePluginWebSearchProviders.mockReturnValue([]);
-    const original: OpenClawConfig = { gateway: { mode: "local" } };
-    const noProviderConfig: OpenClawConfig = {
+    const original: CarapaceConfig = { gateway: { mode: "local" } };
+    const noProviderConfig: CarapaceConfig = {
       ...original,
       plugins: { enabled: false },
     };
@@ -274,7 +274,7 @@ describe("runSearchSetupFlow", () => {
       select: select as never,
     });
 
-    await withEnvAsync({ OPENCLAW_LOCALE: "zh-CN" }, async () => {
+    await withEnvAsync({ CARAPACE_LOCALE: "zh-CN" }, async () => {
       await runSearchSetupFlow(
         { plugins: { allow: ["xai"] } },
         createNonExitingRuntime(),
@@ -289,7 +289,7 @@ describe("runSearchSetupFlow", () => {
         options: expect.arrayContaining([
           expect.objectContaining({
             label: "暂时跳过",
-            hint: "稍后可用 openclaw configure --section web 配置",
+            hint: "稍后可用 carapace configure --section web 配置",
           }),
         ]),
       }),
@@ -469,10 +469,10 @@ describe("runSearchSetupFlow", () => {
     expect(note).toHaveBeenNthCalledWith(
       3,
       [
-        "Secret references enabled — OpenClaw will store a reference instead of the API key.",
+        "Secret references enabled — Carapace will store a reference instead of the API key.",
         "Env var: XAI_API_KEY.",
         "Set XAI_API_KEY in the Gateway environment.",
-        "Docs: https://docs.openclaw.ai/tools/web",
+        "Docs: https://github.com/Exaggarate/carapace",
       ].join("\n"),
       "Web search",
     );
@@ -618,7 +618,7 @@ describe("runSearchSetupFlow", () => {
     expect(installRequest.entry?.pluginId).toBe("brave");
     expect(installRequest.entry?.label).toBe("Brave");
     expect(installRequest.entry?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(installRequest.entry?.install?.npmSpec).toBe("@openclaw/brave-plugin");
+    expect(installRequest.entry?.install?.npmSpec).toBe("@carapace/brave-plugin");
     expect(installRequest.autoConfirmSingleSource).toBe(true);
     expect(next.tools?.web?.search?.provider).toBe("brave");
     expect(next.tools?.web?.search?.enabled).toBe(true);
@@ -627,7 +627,7 @@ describe("runSearchSetupFlow", () => {
       | undefined;
     expect(braveConfig?.webSearch?.apiKey).toBe("brave-test-key");
     expect(next.plugins?.installs?.brave?.source).toBe("npm");
-    expect(next.plugins?.installs?.brave?.spec).toBe("@openclaw/brave-plugin");
+    expect(next.plugins?.installs?.brave?.spec).toBe("@carapace/brave-plugin");
   });
 
   it("forwards the persistent-effect guard to external provider installation", async () => {
@@ -653,7 +653,7 @@ describe("runSearchSetupFlow", () => {
       pluginId: "brave",
       status: "failed",
     });
-    const original: OpenClawConfig = { gateway: { mode: "local" } };
+    const original: CarapaceConfig = { gateway: { mode: "local" } };
     const select = vi.fn().mockResolvedValueOnce("brave");
     const text = vi.fn().mockResolvedValue("brave-test-key");
     const prompter = createWizardPrompter({
@@ -699,7 +699,7 @@ describe("runSearchSetupFlow", () => {
     expect(installRequest.entry?.pluginId).toBe("brave");
     expect(installRequest.entry?.label).toBe("Brave");
     expect(installRequest.entry?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(installRequest.entry?.install?.npmSpec).toBe("@openclaw/brave-plugin");
+    expect(installRequest.entry?.install?.npmSpec).toBe("@carapace/brave-plugin");
     expect(installRequest.autoConfirmSingleSource).toBe(true);
     expect(next.tools?.web?.search?.provider).toBe("brave");
     expect(next.tools?.web?.search?.enabled).toBe(false);
@@ -709,6 +709,6 @@ describe("runSearchSetupFlow", () => {
     expect(braveConfig?.webSearch?.apiKey).toBe("brave-disabled-key");
     expect(next.plugins?.entries?.brave?.enabled).toBeUndefined();
     expect(next.plugins?.installs?.brave?.source).toBe("npm");
-    expect(next.plugins?.installs?.brave?.spec).toBe("@openclaw/brave-plugin");
+    expect(next.plugins?.installs?.brave?.spec).toBe("@carapace/brave-plugin");
   });
 });

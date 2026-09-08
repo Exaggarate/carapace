@@ -2,14 +2,14 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveClaudeCliProjectDirForWorkspace } from "../agents/command/claude-cli-project-dir.js";
 import { noteClaudeCliHealth } from "./doctor-claude-cli.js";
 
 const resolveCliBackendConfigMock = vi.hoisted(() => vi.fn());
 const resolveModelAgentRuntimeMetadataMock = vi.hoisted(() =>
-  vi.fn((_params: { agentId: string }) => ({ id: "openclaw", source: "implicit" })),
+  vi.fn((_params: { agentId: string }) => ({ id: "carapace", source: "implicit" })),
 );
 
 vi.mock("../agents/cli-backends.js", () => ({
@@ -23,7 +23,7 @@ vi.mock("../agents/agent-runtime-metadata.js", () => ({
 async function withTempHome<T>(
   run: (params: { homeDir: string; workspaceDir: string }) => Promise<T> | T,
 ): Promise<T> {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-claude-cli-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-claude-cli-"));
   const homeDir = path.join(root, "home");
   const workspaceDir = path.join(root, "workspace");
   fs.mkdirSync(homeDir, { recursive: true });
@@ -56,7 +56,7 @@ describe("noteClaudeCliHealth", () => {
     resolveCliBackendConfigMock.mockReset();
     resolveModelAgentRuntimeMetadataMock
       .mockReset()
-      .mockReturnValue({ id: "openclaw", source: "implicit" });
+      .mockReturnValue({ id: "carapace", source: "implicit" });
     vi.restoreAllMocks();
   });
 
@@ -171,7 +171,7 @@ describe("noteClaudeCliHealth", () => {
   it("stays quiet for a healthy non-default Claude CLI runtime agent", async () => {
     await withTempHome(({ homeDir, workspaceDir }) => {
       resolveModelAgentRuntimeMetadataMock.mockImplementation(({ agentId }) => ({
-        id: agentId === "xiaoao" ? "claude-cli" : "openclaw",
+        id: agentId === "xiaoao" ? "claude-cli" : "carapace",
         source: agentId === "xiaoao" ? "model" : "implicit",
       }));
       const root = path.dirname(workspaceDir);
@@ -245,7 +245,7 @@ describe("noteClaudeCliHealth", () => {
       const body = noteBody(noteFn);
       expect(body).toContain("Claude auth: not logged in.");
       expect(body).toContain("claude auth login");
-      expect(body).not.toContain("openclaw models auth login");
+      expect(body).not.toContain("carapace models auth login");
     });
   });
 

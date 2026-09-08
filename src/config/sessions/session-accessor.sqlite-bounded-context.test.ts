@@ -3,8 +3,8 @@ import { expect, it, vi } from "vitest";
 import { CURRENT_SESSION_VERSION, SessionManager } from "../../agents/sessions/session-manager.js";
 import { makeAgentAssistantMessage } from "../../agents/test-helpers/agent-message-fixtures.js";
 import { clearNodeSqliteKyselyCacheForDatabase } from "../../infra/kysely-sync.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   appendTranscriptEvent,
   appendTranscriptMessage,
@@ -31,7 +31,7 @@ async function withBoundedContextScope(
     storePath: string;
   }) => Promise<void>,
 ): Promise<void> {
-  await withOpenClawTestState({ label: "bounded-transcript-context" }, async (state) => {
+  await withCarapaceTestState({ label: "bounded-transcript-context" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "bounded-context",
@@ -44,7 +44,7 @@ async function withBoundedContextScope(
 }
 
 function countAcquiredTranscriptPayloadBytes(
-  db: ReturnType<typeof openOpenClawAgentDatabase>["db"],
+  db: ReturnType<typeof openCarapaceAgentDatabase>["db"],
   marker: string,
   read: () => void,
 ): number {
@@ -118,7 +118,7 @@ it("reserves the transcript header inside the exact byte limit", async () => {
       messages: [{ eventId: "new", parentId: null, message: { role: "user", content: "new" } }],
       touchSessionEntry: false,
     });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId });
     const header = database.db
       .prepare(
         "SELECT event_json FROM transcript_events WHERE session_id = ? ORDER BY seq ASC LIMIT 1",
@@ -147,7 +147,7 @@ it("rejects an oversized header before acquiring its payload", async () => {
       id: scope.sessionId,
       cwd: marker + "x".repeat(4096),
     });
-    const { db } = openOpenClawAgentDatabase({ agentId: scope.agentId });
+    const { db } = openCarapaceAgentDatabase({ agentId: scope.agentId });
     const acquiredBytes = countAcquiredTranscriptPayloadBytes(db, marker, () => {
       expect(() =>
         readSessionTranscriptBoundedActiveContextCore(scope, { maxBytes: 1024, maxEvents: 10 }),
@@ -178,7 +178,7 @@ it.each(["compaction", "reset"] as const)(
         message: { role: "user", content: "latest", timestamp: 2 },
       });
       await waitForSessionTranscriptProjection(scope);
-      const { db } = openOpenClawAgentDatabase({ agentId: scope.agentId });
+      const { db } = openCarapaceAgentDatabase({ agentId: scope.agentId });
       const acquiredBytes = countAcquiredTranscriptPayloadBytes(db, marker, () => {
         const context = readSessionTranscriptBoundedActiveContextCore(scope, {
           maxBytes: 1024,
@@ -220,7 +220,7 @@ it("selects the session header by type when a mirror row precedes it", async () 
       preferredSessionId: scope.sessionId,
     });
     await waitForSessionTranscriptIndexReconcile({ agentId: scope.agentId });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId });
     database.db.exec("BEGIN; PRAGMA defer_foreign_keys = ON;");
     for (const [table, column] of [
       ["transcript_events", "seq"],
@@ -263,7 +263,7 @@ it("selects the session header by type when a mirror row precedes it", async () 
 });
 
 it("selects the session header when an exact migrated transcript has no identity rows", async () => {
-  await withOpenClawTestState({ label: "bounded-transcript-exact-import" }, async (state) => {
+  await withCarapaceTestState({ label: "bounded-transcript-exact-import" }, async (state) => {
     const scope = {
       agentId: "ops",
       env: state.env,
@@ -291,7 +291,7 @@ it("selects the session header when an exact migrated transcript has no identity
       },
     });
 
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     const identityCount = database.db
       .prepare("SELECT COUNT(*) AS count FROM transcript_event_identities WHERE session_id = ?")
       .get(scope.sessionId) as { count: number };
@@ -639,7 +639,7 @@ it("resolves reset history and raw-byte stats without acquiring unrelated reset 
       details: { payload: marker + "x".repeat(4096) },
     });
     await waitForSessionTranscriptProjection(scope);
-    const { db } = openOpenClawAgentDatabase({ agentId: scope.agentId });
+    const { db } = openCarapaceAgentDatabase({ agentId: scope.agentId });
     const acquiredBytes = countAcquiredTranscriptPayloadBytes(db, marker, () => {
       const history = readSessionTranscriptBoundedMessageTailPage(scope, {
         maxBytes: 1024,
@@ -666,7 +666,7 @@ it("counts retained raw bytes without hydrating private native payloads", async 
       role: "user",
       content: "kept",
       timestamp: 1,
-      __openclaw: { upstreamUserText: privateText },
+      __carapace: { upstreamUserText: privateText },
     } as Parameters<SessionManager["appendMessage"]>[0]);
     manager.appendResetBoundary("new", kept);
     await waitForSessionTranscriptProjection(scope);

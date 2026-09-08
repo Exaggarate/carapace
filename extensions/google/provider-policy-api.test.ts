@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { normalizeConfig, resolveThinkingProfile } from "./provider-policy-api.js";
 
 // Config and model policy must remain usable without initializing streaming transports.
-vi.mock("openclaw/plugin-sdk/provider-stream-shared", () => {
+vi.mock("carapace/plugin-sdk/provider-stream-shared", () => {
   throw new Error("Google provider policy must not load the streaming SDK");
 });
 
@@ -106,7 +106,7 @@ describe("google provider policy public artifact", () => {
       normalizeConfig({
         provider: "google-gemini-cli",
         providerConfig: {
-          baseUrl: "openclaw://google-gemini-cli",
+          baseUrl: "carapace://google-gemini-cli",
           models: [
             {
               id: "google/gemini-3-pro-preview",
@@ -121,7 +121,7 @@ describe("google provider policy public artifact", () => {
         },
       }),
     ).toEqual({
-      baseUrl: "openclaw://google-gemini-cli",
+      baseUrl: "carapace://google-gemini-cli",
       models: [
         {
           id: "google/gemini-3.1-pro-preview",

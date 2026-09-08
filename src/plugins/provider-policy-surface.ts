@@ -1,6 +1,6 @@
 /** Lightweight direct loader for bundled provider policy public artifacts. */
 import type { ModelProviderConfig } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   ProviderModelRouteResolution,
   ProviderNormalizeModelCatalogIdContext,
@@ -26,7 +26,7 @@ import {
 const PROVIDER_POLICY_ARTIFACT_CANDIDATES = ["provider-policy-api.js"] as const;
 
 type ProviderProjectConfiguredModelRowContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;
@@ -57,7 +57,7 @@ type EmbeddingProviderSetupInspection = {
 };
 
 export type InspectEmbeddingProviderSetup = (params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   agentId: string;
   provider: string;
@@ -69,7 +69,7 @@ export type ProviderPolicySurface = {
   normalizeConfig?: (ctx: ProviderNormalizeConfigContext) => ModelProviderConfig | null | undefined;
   applyConfigDefaults?: (
     ctx: ProviderApplyConfigDefaultsContext,
-  ) => OpenClawConfig | null | undefined;
+  ) => CarapaceConfig | null | undefined;
   resolveConfigApiKey?: (ctx: ProviderResolveConfigApiKeyContext) => string | null | undefined;
   resolveThinkingProfile?: (
     ctx: ProviderDefaultThinkingPolicyContext,

@@ -12,15 +12,15 @@ import type { RunPreparedReplyParams } from "../auto-reply/reply/get-reply-run.t
 import { bindPreparedReplyDispatchRuntime } from "../auto-reply/reply/prepared-reply-dispatch-context.js";
 import type { FollowupRun } from "../auto-reply/reply/queue.js";
 import { createPluginMetadataSnapshot } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { listRuntimePluginIdsFromRegistry } from "../plugins/active-runtime-registry.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { createPluginRecord } from "../plugins/status.test-helpers.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import * as agentScope from "./agent-scope.js";
 import {
   resolveAgentRuntimePluginLoadPlan,
@@ -47,11 +47,11 @@ vi.mock("../auto-reply/reply/get-reply-run-execute.js", () => ({
 }));
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared reply fallback ownership", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
     vi.clearAllMocks();
     const actual = await vi.importActual<typeof import("./agent-scope.js")>("./agent-scope.js");
@@ -85,7 +85,7 @@ describe("prepared reply fallback ownership", () => {
     async (scenario) => {
       const { scope, source, locked } = scenario;
       const failedHarness = "failedHarness" in scenario ? scenario.failedHarness : undefined;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           entries: {
             default:
@@ -132,7 +132,7 @@ describe("prepared reply fallback ownership", () => {
         hooks: [],
         rootDir: `/plugins/${id}`,
         source: `/plugins/${id}/index.js`,
-        manifestPath: `/plugins/${id}/openclaw.plugin.json`,
+        manifestPath: `/plugins/${id}/carapace.plugin.json`,
         activation: { onStartup: false, onProviders: [id] },
       }));
       const metadata = createPluginMetadataSnapshot({

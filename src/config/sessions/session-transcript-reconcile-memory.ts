@@ -2,10 +2,10 @@ import { sql } from "kysely";
 import { executeSqliteQueryTakeFirstSync } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
 import {
-  getOpenClawAgentDatabaseIfOpen,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  getCarapaceAgentDatabaseIfOpen,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 import type { PreparedSessionTranscriptProjectionMetadata } from "./session-transcript-projection-rebuild.js";
 
@@ -29,7 +29,7 @@ export type MemoryTranscriptProjectionFrame =
       final: boolean;
     };
 
-function readSnapshot(database: OpenClawAgentDatabase, sessionId: string) {
+function readSnapshot(database: CarapaceAgentDatabase, sessionId: string) {
   const db = getSessionKysely(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -65,15 +65,15 @@ function readSnapshot(database: OpenClawAgentDatabase, sessionId: string) {
 
 /** The parent alone owns memory state; a worker receives bytes, never its sentinel path. */
 export function createMemoryTranscriptProjectionSource(
-  database: OpenClawAgentDatabase,
-  options: OpenClawAgentDatabaseOptions,
+  database: CarapaceAgentDatabase,
+  options: CarapaceAgentDatabaseOptions,
 ) {
   let snapshot: MemoryTranscriptSnapshot | undefined;
   let afterSeq = -1;
   let offset = 0;
   let row: { seq: number; created_at: number; bytes: Uint8Array } | undefined;
   const assertCurrentOwner = () => {
-    if (!database.db.isOpen || getOpenClawAgentDatabaseIfOpen(options) !== database) {
+    if (!database.db.isOpen || getCarapaceAgentDatabaseIfOpen(options) !== database) {
       throw new Error("Incognito transcript database was disposed during reconciliation");
     }
   };

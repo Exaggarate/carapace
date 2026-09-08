@@ -1,7 +1,7 @@
 // Webhooks API module exposes the plugin public contract.
 export {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type CarapacePluginApi,
   type PluginLogger,
   type PluginRuntime,
-} from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/core";

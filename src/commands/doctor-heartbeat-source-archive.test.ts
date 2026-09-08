@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   collectHeartbeatScratchMigrationFindings,
   maybeMigrateHeartbeatFilesToScratch,
@@ -12,19 +12,19 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     cleanup();
   }),
 );
 
 async function fixture() {
-  const root = tempDirs.make("openclaw-heartbeat-archive-");
+  const root = tempDirs.make("carapace-heartbeat-archive-");
   const workspace = path.join(root, "workspace");
   await fs.mkdir(workspace);
   const sourcePath = path.join(workspace, "HEARTBEAT.md");
-  vi.stubEnv("OPENCLAW_STATE_DIR", root);
-  const cfg: OpenClawConfig = {
+  vi.stubEnv("CARAPACE_STATE_DIR", root);
+  const cfg: CarapaceConfig = {
     agents: {
       defaults: { workspace, heartbeat: { every: "30m" } },
       list: [{ id: "main", workspace }],

@@ -8,7 +8,7 @@ import {
   loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { buildAgentSessionPatch } from "../server-methods/agent-session-patch.js";
 import { prepareAgentSession } from "../server-methods/agent-session-prepare.js";
 
@@ -121,7 +121,7 @@ describe("agent session reuse at mutation", () => {
   });
 
   it("keeps a concurrent replacement after preparing a rotation from the stored row", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const cfg = { session: { reset: { mode: "idle" as const, idleMinutes: 1 } } };
       await state.writeConfig(cfg);
       const sessionKey = "agent:main:reuse-proof";

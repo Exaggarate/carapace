@@ -147,7 +147,7 @@ describe("MCP App transcript reconstruction", () => {
       mocks.loadSessionEntry.mockReturnValue({
         canonicalKey: sessionKey,
         entry: { sessionId: "session-1" },
-        storePath: "/tmp/openclaw-agent.sqlite",
+        storePath: "/tmp/carapace-agent.sqlite",
       });
       mocks.visitSessionMessagesAsync.mockImplementation(
         async (_scope: unknown, visit: (message: unknown) => void) => {

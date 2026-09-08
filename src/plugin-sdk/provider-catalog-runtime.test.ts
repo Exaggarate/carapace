@@ -1,4 +1,4 @@
-import { resolvePluginProviders } from "openclaw/plugin-sdk/provider-catalog-runtime";
+import { resolvePluginProviders } from "carapace/plugin-sdk/provider-catalog-runtime";
 import { afterEach, expect, it } from "vitest";
 import { resetPluginLoaderTestStateForTest } from "../plugins/loader.test-fixtures.js";
 

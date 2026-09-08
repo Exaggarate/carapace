@@ -55,7 +55,7 @@ describe("QA runtime-pair scenario catalog", () => {
     expect(readQaScenarioById("gateway-restart-inflight-run").runtimePairLane).toBeUndefined();
     expect(readQaScenarioById("gateway-restart-inflight-run").execution).toMatchObject({
       kind: "flow",
-      runtime: "openclaw",
+      runtime: "carapace",
       timeoutMs: 420_000,
     });
     expect(readQaScenarioExecutionConfig("gateway-restart-inflight-run")).toMatchObject({
@@ -84,7 +84,7 @@ describe("QA runtime-pair scenario catalog", () => {
     expect(longContextFlow).not.toContain("patchConfig");
   });
 
-  it("keeps the pinned gateway restart scenario owned by the OpenClaw runtime", () => {
+  it("keeps the pinned gateway restart scenario owned by the Carapace runtime", () => {
     const scenarioId = "gateway-restart-multi-live";
     const scenario = readQaScenarioById(scenarioId);
     const scenarios = readQaScenarioPack().scenarios;
@@ -94,7 +94,7 @@ describe("QA runtime-pair scenario catalog", () => {
     };
 
     expect(scenario.runtimePairLane).toBeUndefined();
-    expect(scenario.execution).toMatchObject({ kind: "flow", runtime: "openclaw" });
+    expect(scenario.execution).toMatchObject({ kind: "flow", runtime: "carapace" });
     expect(readQaScenarioExecutionConfig(scenarioId)).toMatchObject({
       requiredProviderMode: "live-frontier",
       requiredProvider: "openai",

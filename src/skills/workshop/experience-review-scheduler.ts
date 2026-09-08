@@ -2,7 +2,7 @@ import type { EmbeddedForegroundPromptContext } from "../../agents/embedded-agen
 import { runOutsidePreparedModelRuntimePluginGenerationScope } from "../../agents/prepared-model-runtime-generation-scope.js";
 import { getCanonicalSkillWorkspace } from "../../agents/skill-workshop-workspace-context.js";
 import type { TranscriptEntryAnchor } from "../../config/sessions/transcript-entry-anchor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import type { RunSkillUsage } from "../runtime/run-usage.js";
 import { resolveSkillWorkshopConfig } from "./config.js";
@@ -51,7 +51,7 @@ export type SkillExperienceReviewParams = {
   event: ExperienceReviewAgentEndEvent;
   ctx: ExperienceReviewAgentContext;
   usedSkills?: readonly RunSkillUsage[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   source?: TranscriptEntryAnchor;
 };
 
@@ -61,7 +61,7 @@ export type ExperienceReviewCandidate = {
     modelProviderId: string;
     modelId: string;
   };
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   source: TranscriptEntryAnchor;
   usedSkills?: readonly RunSkillUsage[];
   turnAborted?: boolean;

@@ -40,11 +40,11 @@ describe("resolveMissingOfficialExternalChannelPluginRepairHint", () => {
       pluginId: "feishu",
       channelId: "feishu",
       label: "Feishu",
-      installSpec: "@openclaw/feishu",
-      installCommand: "openclaw plugins install @openclaw/feishu",
-      doctorFixCommand: "openclaw doctor --fix",
+      installSpec: "@carapace/feishu",
+      installCommand: "carapace plugins install @carapace/feishu",
+      doctorFixCommand: "carapace doctor --fix",
       repairHint:
-        "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+        "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
     });
   });
 
@@ -105,8 +105,8 @@ describe("resolveMissingOfficialExternalChannelPluginRepairHint", () => {
       pluginId: "whatsapp",
       channelId: "whatsapp",
       label: "WhatsApp",
-      installSpec: "@openclaw/whatsapp",
-      installCommand: "openclaw plugins install @openclaw/whatsapp",
+      installSpec: "@carapace/whatsapp",
+      installCommand: "carapace plugins install @carapace/whatsapp",
     });
   });
 
@@ -153,8 +153,8 @@ describe("resolveExternalPluginRuntimeDependencyRepairHint", () => {
   it.each([
     {
       name: "names the official install command for the package that owns the id",
-      candidate: { pluginId: "discord", packageName: "@openclaw/discord" },
-      expected: "openclaw plugins install @openclaw/discord",
+      candidate: { pluginId: "discord", packageName: "@carapace/discord" },
+      expected: "carapace plugins install @carapace/discord",
     },
     {
       name: "withholds the official install command from a foreign package reusing the id",
@@ -175,7 +175,7 @@ describe("resolveExternalPluginRuntimeDependencyRepairHint", () => {
     expect(
       resolveExternalPluginRuntimeDependencyRepairHint({
         pluginId: "telegram",
-        packageName: "@openclaw/telegram",
+        packageName: "@carapace/telegram",
       }),
     ).toBeUndefined();
   });

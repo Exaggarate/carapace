@@ -1,8 +1,8 @@
 /** Builds API-key provider auth methods that write profiles and config updates. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import { createLazyRuntimeSurface } from "../shared/lazy-runtime.js";
 import { normalizeOptionalSecretInput } from "../utils/normalize-secret-input.js";
@@ -35,10 +35,10 @@ type ProviderApiKeyAuthMethodOptions = {
   metadata?: Record<string, string>;
   noteMessage?: string;
   noteTitle?: string;
-  applyConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  applyConfig?: (cfg: CarapaceConfig) => CarapaceConfig;
   resolveDefaultModel?: (params: {
     apiKey: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     signal?: AbortSignal;
   }) => Promise<string | undefined>;
 };
@@ -70,7 +70,7 @@ function resolveProfileIds(params: {
 
 async function resolveDefaultModel(
   params: ProviderApiKeyAuthMethodOptions,
-  context: { apiKey: string; config: OpenClawConfig; signal?: AbortSignal },
+  context: { apiKey: string; config: CarapaceConfig; signal?: AbortSignal },
 ): Promise<string | undefined> {
   if (!params.resolveDefaultModel) {
     return params.defaultModel;
@@ -91,7 +91,7 @@ async function applyApiKeyConfig(params: {
   profileIds: string[];
   defaultModel?: string;
   preserveExistingPrimary?: boolean;
-  applyConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  applyConfig?: (cfg: CarapaceConfig) => CarapaceConfig;
 }) {
   const { applyAuthProfileConfig, applyPrimaryModel } = await loadProviderApiKeyAuthRuntime();
   let next = params.ctx.config;

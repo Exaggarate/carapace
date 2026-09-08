@@ -12,9 +12,9 @@ const fixture = vi.hoisted(() => ({
   buildId: "2026.9.1-runtime-b",
   build: vi.fn(),
 }));
-vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot: async () => fixture.root,
-  resolveOpenClawPackageRootSync: () => fixture.root,
+vi.mock("../infra/carapace-root.js", () => ({
+  resolveCarapacePackageRoot: async () => fixture.root,
+  resolveCarapacePackageRootSync: () => fixture.root,
 }));
 vi.mock("../infra/control-ui-assets.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../infra/control-ui-assets.js")>()),
@@ -44,7 +44,7 @@ async function writeUi(root: string, buildId: string) {
   await writeRetentionBuild(root, buildId, { assetPath: "assets/startup.js" });
   await fs.writeFile(
     path.join(root, "index.html"),
-    `<html data-openclaw-control-ui-build-id="${buildId}-${"a".repeat(64)}"><script src="./assets/startup.js"></script></html>`,
+    `<html data-carapace-control-ui-build-id="${buildId}-${"a".repeat(64)}"><script src="./assets/startup.js"></script></html>`,
   );
 }
 
@@ -63,10 +63,10 @@ describe("source-selected Control UI identity preparation", () => {
   beforeEach(async () => {
     fixture.buildId = "2026.9.1-runtime-b";
     fixture.root = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-identity-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ui-identity-")),
     );
     fixture.selectedRoot = path.join(fixture.root, "dist", "control-ui");
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(fixture.root, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(fixture.root, "state"));
     await fs.mkdir(path.join(fixture.root, "ui"));
     await fs.mkdir(path.join(fixture.root, "scripts"));
     await fs.writeFile(path.join(fixture.root, "ui", "vite.config.ts"), "export {};");
@@ -142,7 +142,7 @@ describe("source-selected Control UI identity preparation", () => {
       if (kind === "macOS") {
         fixture.selectedRoot = path.join(
           fixture.root,
-          "OpenClaw.app",
+          "Carapace.app",
           "Contents",
           "Resources",
           "control-ui",
@@ -189,7 +189,7 @@ describe("source-selected Control UI identity preparation", () => {
       await writeUi(fixture.selectedRoot, fixture.buildId);
       fixture.selectedRoot = path.join(
         fixture.root,
-        "OpenClaw.app",
+        "Carapace.app",
         "Contents",
         "Resources",
         "control-ui",
@@ -204,7 +204,7 @@ describe("source-selected Control UI identity preparation", () => {
       await lifecycle.stop();
       expect(lifecycle.state).toEqual({ kind: "failed" });
       expect(warn).toHaveBeenCalledWith(expect.stringContaining(fixture.selectedRoot));
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("Reinstall OpenClaw"));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("Reinstall Carapace"));
       expect(fixture.build).not.toHaveBeenCalled();
     },
   );

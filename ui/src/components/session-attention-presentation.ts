@@ -38,7 +38,7 @@ export function renderSessionAttentionIcon(
     >${icon}</span
   >`;
   return showQuestionTooltip && questionLabel
-    ? html`<openclaw-tooltip .content=${questionLabel}>${content}</openclaw-tooltip>`
+    ? html`<carapace-tooltip .content=${questionLabel}>${content}</carapace-tooltip>`
     : content;
 }
 

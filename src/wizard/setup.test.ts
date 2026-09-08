@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 // Setup wizard tests cover end-to-end onboarding prompt flows.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter as buildWizardPrompter } from "../../test/helpers/wizard-prompter.js";
 import {
@@ -18,7 +18,7 @@ import { coerceConfig } from "../config/io.read-helpers.js";
 import { createConfigFileSnapshot } from "../config/io.snapshot-shared.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { materializeRuntimeConfig } from "../config/materialize.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginCompatibilityNotice } from "../plugins/status.js";
 import type { ProviderAuthResult } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -171,7 +171,7 @@ function providerPluginStub(
 const healthCommand = vi.hoisted(() => vi.fn(async () => {}));
 const ensureWorkspaceAndSessions = vi.hoisted(() => vi.fn(async () => {}));
 const ensureOnboardingConfig = vi.hoisted(() =>
-  vi.fn(async ({ config, baseConfig }: { config: OpenClawConfig; baseConfig: OpenClawConfig }) => ({
+  vi.fn(async ({ config, baseConfig }: { config: CarapaceConfig; baseConfig: CarapaceConfig }) => ({
     config,
     configBase: baseConfig,
     agentId: "main",
@@ -181,7 +181,7 @@ const ensureOnboardingConfig = vi.hoisted(() =>
 const replaceConfigFile = vi.hoisted(() =>
   vi.fn(
     async (params: {
-      nextConfig: OpenClawConfig;
+      nextConfig: CarapaceConfig;
       snapshot?: { hash?: string };
       baseHash?: string;
     }) => ({ nextConfig: params.nextConfig }),
@@ -189,7 +189,7 @@ const replaceConfigFile = vi.hoisted(() =>
 );
 const resolveGatewayPort = vi.hoisted(() =>
   vi.fn((_cfg?: unknown, env?: NodeJS.ProcessEnv) => {
-    const raw = env?.OPENCLAW_GATEWAY_PORT ?? process.env.OPENCLAW_GATEWAY_PORT;
+    const raw = env?.CARAPACE_GATEWAY_PORT ?? process.env.CARAPACE_GATEWAY_PORT;
     const port = raw ? Number.parseInt(raw, 10) : Number.NaN;
     return Number.isFinite(port) && port > 0 ? port : 18789;
   }),
@@ -219,7 +219,7 @@ function getWizardNoteCalls(note: WizardPrompter["note"]) {
   return (note as unknown as { mock: { calls: unknown[][] } }).mock.calls;
 }
 
-function modelConfigWithApiKey(apiKey: string): OpenClawConfig {
+function modelConfigWithApiKey(apiKey: string): CarapaceConfig {
   return {
     agents: {
       defaults: { model: { primary: "openai/gpt-5.5" } },
@@ -280,9 +280,9 @@ function prepareMockAuthProfilesIn(
   return persistCalls;
 }
 
-function persistedWizardConfigs(): OpenClawConfig[] {
+function persistedWizardConfigs(): CarapaceConfig[] {
   return (replaceConfigFile.mock.calls as unknown[][]).map(
-    ([params]) => (params as { nextConfig: OpenClawConfig }).nextConfig,
+    ([params]) => (params as { nextConfig: CarapaceConfig }).nextConfig,
   );
 }
 
@@ -425,14 +425,14 @@ vi.mock("../config/config.js", async (importActual) => {
       maxAttempts?: number;
       writeOptions?: Record<string, unknown>;
       transform: (
-        config: OpenClawConfig,
+        config: CarapaceConfig,
         context: {
           snapshot: Record<string, unknown>;
           previousHash: string | null;
           attempt: number;
         },
-      ) => Promise<{ nextConfig: OpenClawConfig }> | { nextConfig: OpenClawConfig };
-      commit: (params: Record<string, unknown>) => Promise<{ config: OpenClawConfig }>;
+      ) => Promise<{ nextConfig: CarapaceConfig }> | { nextConfig: CarapaceConfig };
+      commit: (params: Record<string, unknown>) => Promise<{ config: CarapaceConfig }>;
     }) => {
       const maxAttempts = params.maxAttempts ?? 5;
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -471,7 +471,7 @@ vi.mock("../commands/onboard-agent.js", async () => {
   };
 });
 vi.mock("../commands/onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
+  DEFAULT_WORKSPACE: "/tmp/carapace-workspace",
   applyWizardMetadata: (cfg: unknown) => cfg,
   summarizeExistingConfig: () => "summary",
   handleReset: async () => {},
@@ -580,7 +580,7 @@ describe("runSetupWizard", () => {
   let suiteCase = 0;
 
   beforeAll(async () => {
-    suiteRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-onboard-suite-"));
+    suiteRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-onboard-suite-"));
   });
 
   afterAll(async () => {
@@ -595,10 +595,10 @@ describe("runSetupWizard", () => {
     return dir;
   }
 
-  function configSnapshot(config: OpenClawConfig, exists = true): ConfigFileSnapshot {
+  function configSnapshot(config: CarapaceConfig, exists = true): ConfigFileSnapshot {
     const sourceConfig = coerceConfig(migratePersistedImplicitMainRoster(config).config);
     return createConfigFileSnapshot({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.carapace/carapace.json",
       exists,
       raw: exists ? JSON.stringify(config) : null,
       parsed: exists ? config : {},
@@ -629,7 +629,7 @@ describe("runSetupWizard", () => {
     setupSkills.mockReset();
     setupSkills.mockImplementation(async (cfg) => cfg);
     runSearchSetupFlow.mockReset();
-    runSearchSetupFlow.mockImplementation(async (config: OpenClawConfig) => ({
+    runSearchSetupFlow.mockImplementation(async (config: CarapaceConfig) => ({
       outcome: "completed",
       config,
     }));
@@ -648,7 +648,7 @@ describe("runSetupWizard", () => {
         tailscaleMode: "off",
       },
     }));
-    let authoredConfig: OpenClawConfig | undefined;
+    let authoredConfig: CarapaceConfig | undefined;
     readConfigFileSnapshot.mockReset();
     readConfigFileSnapshot.mockImplementation(async () =>
       configSnapshot(authoredConfig ?? {}, authoredConfig !== undefined),
@@ -699,10 +699,10 @@ describe("runSetupWizard", () => {
       agentId: "robby",
       bootstrapPending: true,
       createdAgent: true,
-      sessionMigrationWarnings: ["Run `openclaw doctor --fix` and retry setup."],
+      sessionMigrationWarnings: ["Run `carapace doctor --fix` and retry setup."],
     }));
 
-    await runWizard({ workspace: "/tmp/openclaw-workspace" }, createRuntime(), prompter);
+    await runWizard({ workspace: "/tmp/carapace-workspace" }, createRuntime(), prompter);
 
     expect(prompter.text).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -712,13 +712,13 @@ describe("runSetupWizard", () => {
     );
     expect(ensureOnboardingConfig).toHaveBeenCalledWith(
       expect.objectContaining({
-        workspace: "/tmp/openclaw-workspace",
+        workspace: "/tmp/carapace-workspace",
         preserveCandidateRoster: false,
         firstAgent: { name: "robby" },
       }),
     );
     expect(prompter.note).toHaveBeenCalledWith(
-      "Run `openclaw doctor --fix` and retry setup.",
+      "Run `carapace doctor --fix` and retry setup.",
       "Session history migration",
     );
   });
@@ -881,7 +881,7 @@ describe("runSetupWizard", () => {
     expect(plain).not.toHaveBeenCalled();
     expect(select).toHaveBeenCalledOnce();
     expect(select).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Help make OpenClaw better?", initialValue: false }),
+      expect.objectContaining({ message: "Help make Carapace better?", initialValue: false }),
     );
     expect(ensureAuthProfileStore).not.toHaveBeenCalled();
     expect(setupChannels).not.toHaveBeenCalled();
@@ -891,7 +891,7 @@ describe("runSetupWizard", () => {
   });
 
   it("preserves an unrelated config edit made during classic onboarding", async () => {
-    const initialConfig: OpenClawConfig = { ui: { seamColor: "blue" } };
+    const initialConfig: CarapaceConfig = { ui: { seamColor: "blue" } };
     let diskConfig = structuredClone(initialConfig);
     let diskHash = "hash-1";
     const snapshotFromDisk = () => ({
@@ -926,7 +926,7 @@ describe("runSetupWizard", () => {
   });
 
   it("re-reads and merges the latest config after a write conflict", async () => {
-    let diskConfig: OpenClawConfig = { ui: { seamColor: "blue" } };
+    let diskConfig: CarapaceConfig = { ui: { seamColor: "blue" } };
     let diskHash = "hash-1";
     let writeAttempts = 0;
     readConfigFileSnapshot.mockImplementation(async () => ({
@@ -983,7 +983,7 @@ describe("runSetupWizard", () => {
       const runtime = createRuntime();
 
       if (remoteKey === "password") {
-        vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "ambient-gateway-token");
+        vi.stubEnv("CARAPACE_GATEWAY_TOKEN", "ambient-gateway-token");
       }
       try {
         await runSetupWizard(
@@ -1065,7 +1065,7 @@ describe("runSetupWizard", () => {
   it.each([{ edgeAuth: { "X-Edge-Auth": "test-secret" } }, { tlsFingerprint: "ab".repeat(32) }])(
     "passes remote trust settings to the setup reachability probe: %j",
     async (trust) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         gateway: {
           mode: "remote",
           remote: {
@@ -1107,7 +1107,7 @@ describe("runSetupWizard", () => {
       }),
     );
     vi.stubEnv("REMOTE_SECRET_TOKEN", "resolved-remote-token");
-    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "env-password"); // pragma: allowlist secret
+    vi.stubEnv("CARAPACE_GATEWAY_PASSWORD", "env-password"); // pragma: allowlist secret
 
     try {
       await runSetupWizard(
@@ -1138,8 +1138,8 @@ describe("runSetupWizard", () => {
         },
       }),
     );
-    const previousToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "ambient-token"; // pragma: allowlist secret
+    const previousToken = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "ambient-token"; // pragma: allowlist secret
 
     try {
       await runSetupWizard(
@@ -1149,9 +1149,9 @@ describe("runSetupWizard", () => {
       );
     } finally {
       if (previousToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previousToken;
+        process.env.CARAPACE_GATEWAY_TOKEN = previousToken;
       }
     }
 
@@ -1177,7 +1177,7 @@ describe("runSetupWizard", () => {
         },
       }),
     );
-    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "ambient-password"); // pragma: allowlist secret
+    vi.stubEnv("CARAPACE_GATEWAY_PASSWORD", "ambient-password"); // pragma: allowlist secret
 
     try {
       await runSetupWizard(
@@ -1353,7 +1353,7 @@ describe("runSetupWizard", () => {
 
     expect(persistedWizardConfigs().at(-1)?.telemetry).toBeUndefined();
     expect(prompter.select).not.toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Help make OpenClaw better?" }),
+      expect.objectContaining({ message: "Help make Carapace better?" }),
     );
   });
 
@@ -1432,7 +1432,7 @@ describe("runSetupWizard", () => {
     {
       label: "freshness rejection",
       error: new SetupMigrationFreshnessError(
-        "Migration import during onboarding requires a fresh OpenClaw setup.\nExisting setup:\n- state agents/ exists",
+        "Migration import during onboarding requires a fresh Carapace setup.\nExisting setup:\n- state agents/ exists",
       ),
       detail: "state agents/ exists",
     },
@@ -1566,7 +1566,7 @@ describe("runSetupWizard", () => {
     "uses authored membership for same-command import and naming: $label, name=$requestedName",
     async ({ agents, authored, include, requestedName }) => {
       const workspaceDir = await fs.realpath(await makeCaseDir("import-naming-"));
-      const configPath = path.join(workspaceDir, "openclaw.json");
+      const configPath = path.join(workspaceDir, "carapace.json");
       if (include) {
         await fs.writeFile(path.join(workspaceDir, "roster.json"), JSON.stringify({ agents }));
       }
@@ -1722,7 +1722,7 @@ describe("runSetupWizard", () => {
   it("preserves imported fleet workspace ownership until the user confirms a move", async () => {
     const currentWorkspace = await makeCaseDir("imported-fleet-current-");
     const requestedWorkspace = await makeCaseDir("imported-fleet-requested-");
-    const importedConfig: OpenClawConfig = {
+    const importedConfig: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         defaults: { workspace: currentWorkspace, systemAgent: { agentId: "main" } },
@@ -1782,16 +1782,16 @@ describe("runSetupWizard", () => {
     );
     expect(prompter.select).toHaveBeenCalledOnce();
     expect(prompter.select).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Help make OpenClaw better?", initialValue: false }),
+      expect.objectContaining({ message: "Help make Carapace better?", initialValue: false }),
     );
   });
 
   it("preserves concurrent edits while migrating pending plugin install records", async () => {
-    let diskConfig: OpenClawConfig = {
+    let diskConfig: CarapaceConfig = {
       agents: { entries: { main: { default: true } } },
       plugins: {
         installs: {
-          demo: { source: "npm", spec: "@openclaw/demo-plugin" },
+          demo: { source: "npm", spec: "@carapace/demo-plugin" },
         },
       },
     };
@@ -2082,7 +2082,7 @@ describe("runSetupWizard", () => {
   });
 
   it("continues onboarding when search-provider installation fails", async () => {
-    const config: OpenClawConfig = { agents: { defaults: { workspace: "/tmp/workspace" } } };
+    const config: CarapaceConfig = { agents: { defaults: { workspace: "/tmp/workspace" } } };
     runSearchSetupFlow.mockResolvedValueOnce({
       outcome: "install-failed",
       config,
@@ -2137,9 +2137,9 @@ describe("runSetupWizard", () => {
     const configured = {
       ...beforeConfig,
       channels: { matrix: { accounts: { ops: { enabled: true } } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const hook = vi.fn();
-    const isConfiguredWrite = (value: OpenClawConfig) =>
+    const isConfiguredWrite = (value: CarapaceConfig) =>
       value.channels?.matrix?.accounts?.ops?.enabled === true;
     setupChannels.mockImplementationOnce(async (_cfg, _runtime, _prompter, options) => {
       const setupOptions = options as {
@@ -2237,7 +2237,7 @@ describe("runSetupWizard", () => {
         wizard: { modelSelection },
       });
     }
-    const existingConfig: OpenClawConfig = {
+    const existingConfig: CarapaceConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/sonnet-4.6" } },
         entries: { main: { default: true } },
@@ -2307,7 +2307,7 @@ describe("runSetupWizard", () => {
           description: "Provider credential",
         },
       ]);
-      const existingConfig: OpenClawConfig = {
+      const existingConfig: CarapaceConfig = {
         agents: {
           defaults: { model: { primary: "anthropic/sonnet-4.6" } },
           entries: { main: { default: true } },
@@ -2528,7 +2528,7 @@ describe("runSetupWizard", () => {
     const retryAgents = requireRecord(retryConfig.agents, "retry agents");
     expect(retryAgents.entries).toEqual({ main: {} });
     expect(requireRecord(retryAgents.defaults, "retry defaults").workspace).toBe(
-      "/tmp/openclaw-workspace",
+      "/tmp/carapace-workspace",
     );
   });
 
@@ -2637,8 +2637,8 @@ describe("runSetupWizard", () => {
   });
 
   it("resolves gateway.auth.password SecretRef for local setup probe", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_PASSWORD;
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "gateway-ref-password"; // pragma: allowlist secret
+    const previous = process.env.CARAPACE_GATEWAY_PASSWORD;
+    process.env.CARAPACE_GATEWAY_PASSWORD = "gateway-ref-password"; // pragma: allowlist secret
     probeGatewayReachable.mockClear();
     readConfigFileSnapshot.mockResolvedValueOnce(
       configSnapshot({
@@ -2648,7 +2648,7 @@ describe("runSetupWizard", () => {
             password: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_GATEWAY_PASSWORD",
+              id: "CARAPACE_GATEWAY_PASSWORD",
             },
           },
         },
@@ -2662,9 +2662,9 @@ describe("runSetupWizard", () => {
       await runWizard({ mode: "local" }, runtime, prompter);
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.CARAPACE_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = previous;
+        process.env.CARAPACE_GATEWAY_PASSWORD = previous;
       }
     }
 
@@ -2841,8 +2841,8 @@ describe("runSetupWizard", () => {
   });
 
   it("shows the resolved gateway port in quickstart for fresh envs", async () => {
-    const previousPort = process.env.OPENCLAW_GATEWAY_PORT;
-    process.env.OPENCLAW_GATEWAY_PORT = "18791";
+    const previousPort = process.env.CARAPACE_GATEWAY_PORT;
+    process.env.CARAPACE_GATEWAY_PORT = "18791";
     const note: WizardPrompter["note"] = vi.fn(async () => {});
     const prompter = buildWizardPrompter({ note });
     const runtime = createRuntime();
@@ -2851,9 +2851,9 @@ describe("runSetupWizard", () => {
       await runWizard({}, runtime, prompter);
     } finally {
       if (previousPort === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PORT;
+        delete process.env.CARAPACE_GATEWAY_PORT;
       } else {
-        process.env.OPENCLAW_GATEWAY_PORT = previousPort;
+        process.env.CARAPACE_GATEWAY_PORT = previousPort;
       }
     }
 
@@ -2868,10 +2868,10 @@ describe("runSetupWizard", () => {
   });
 
   it("localizes the quickstart summary", async () => {
-    const previousPort = process.env.OPENCLAW_GATEWAY_PORT;
-    const previousLocale = process.env.OPENCLAW_LOCALE;
-    process.env.OPENCLAW_GATEWAY_PORT = "18791";
-    process.env.OPENCLAW_LOCALE = "zh-CN";
+    const previousPort = process.env.CARAPACE_GATEWAY_PORT;
+    const previousLocale = process.env.CARAPACE_LOCALE;
+    process.env.CARAPACE_GATEWAY_PORT = "18791";
+    process.env.CARAPACE_LOCALE = "zh-CN";
     const note: WizardPrompter["note"] = vi.fn(async () => {});
     const prompter = buildWizardPrompter({ note });
     const runtime = createRuntime();
@@ -2880,14 +2880,14 @@ describe("runSetupWizard", () => {
       await runWizard({}, runtime, prompter);
     } finally {
       if (previousPort === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PORT;
+        delete process.env.CARAPACE_GATEWAY_PORT;
       } else {
-        process.env.OPENCLAW_GATEWAY_PORT = previousPort;
+        process.env.CARAPACE_GATEWAY_PORT = previousPort;
       }
       if (previousLocale === undefined) {
-        delete process.env.OPENCLAW_LOCALE;
+        delete process.env.CARAPACE_LOCALE;
       } else {
-        process.env.OPENCLAW_LOCALE = previousLocale;
+        process.env.CARAPACE_LOCALE = previousLocale;
       }
     }
 

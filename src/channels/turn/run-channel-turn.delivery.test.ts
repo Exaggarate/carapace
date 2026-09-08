@@ -9,7 +9,7 @@ import {
 } from "../../auto-reply/reply-payload.js";
 import type { DispatchReplyWithBufferedBlockDispatcher } from "../../auto-reply/reply/provider-dispatcher.types.js";
 import type { ReplyDispatchReceipt } from "../../auto-reply/reply/reply-dispatcher.types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetDiagnosticEventsForTest } from "../../infra/diagnostic-events.js";
 import { resetLogger, setLoggerOverride } from "../../logging/logger.js";
 import { createSuiteTempRootTracker } from "../../test-helpers/temp-dir.js";
@@ -110,8 +110,8 @@ vi.mock("../../infra/outbound/delivery-completion.js", async (importOriginal) =>
   return { ...actual, settlePendingFinalDelivery };
 });
 
-const cfg = {} as OpenClawConfig;
-const tempDirs = createSuiteTempRootTracker({ prefix: "openclaw-channel-turn-delivery-" });
+const cfg = {} as CarapaceConfig;
+const tempDirs = createSuiteTempRootTracker({ prefix: "carapace-channel-turn-delivery-" });
 let storePath: string;
 
 function dispatchTestAssembledTurn(

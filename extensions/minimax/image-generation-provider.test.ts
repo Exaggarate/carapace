@@ -1,7 +1,7 @@
 // Minimax tests cover image generation provider plugin behavior.
-import * as providerAuth from "openclaw/plugin-sdk/provider-auth-runtime";
-import * as providerHttp from "openclaw/plugin-sdk/provider-http";
-import { installPinnedHostnameTestHooks } from "openclaw/plugin-sdk/test-media-understanding";
+import * as providerAuth from "carapace/plugin-sdk/provider-auth-runtime";
+import * as providerHttp from "carapace/plugin-sdk/provider-http";
+import { installPinnedHostnameTestHooks } from "carapace/plugin-sdk/test-media-understanding";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildMinimaxImageGenerationProvider,

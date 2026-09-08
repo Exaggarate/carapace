@@ -26,7 +26,7 @@ permissions:
 concurrency:
   # cancel-in-progress starved the mirror: every main push cancelled the in-flight
   # sync and cancelled runs leave no successor, so under sustained merge velocity
-  # openclaw/docs never advanced. Queue instead — GitHub keeps only the newest
+  # carapace/docs never advanced. Queue instead — GitHub keeps only the newest
   # pending run per group, and skip_stale_source keeps completed runs idempotent.
   group: docs-sync-publish-${{ github.event_name == 'workflow_dispatch' && format('manual-{0}', github.run_id) || github.ref }}
   cancel-in-progress: false
@@ -35,41 +35,41 @@ jobs:
   sync-publish-repo:
     runs-on: ubuntu-latest
     env:
-      OPENCLAW_DOCS_SYNC_TOKEN: ${{ secrets.OPENCLAW_DOCS_SYNC_TOKEN }}
+      CARAPACE_DOCS_SYNC_TOKEN: ${{ secrets.CARAPACE_DOCS_SYNC_TOKEN }}
     steps:
       - name: Skip publish sync without token
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN == ''
-        run: echo "OPENCLAW_DOCS_SYNC_TOKEN is not configured; skipping docs publish repo sync."
+        if: env.CARAPACE_DOCS_SYNC_TOKEN == ''
+        run: echo "CARAPACE_DOCS_SYNC_TOKEN is not configured; skipping docs publish repo sync."
 
       - name: Checkout source repo
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Checkout ClawHub docs source
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/clawhub
+          repository: carapace/clawhub
           ref: main
           path: clawhub-source
           fetch-depth: 1
           persist-credentials: false
-          token: ${{ env.OPENCLAW_DOCS_SYNC_TOKEN || github.token }}
+          token: ${{ env.CARAPACE_DOCS_SYNC_TOKEN || github.token }}
 
       - name: Prepare Git owner
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Setup Node
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24.x"
 
       - name: Clone publish repo
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         run: |
           set -euo pipefail
           exec python3 -I -S "$CI_GIT_OWNER" --policy - <<'PYTHON'
@@ -87,7 +87,7 @@ jobs:
               subprocess.run(["rm", "-rf", publish], check=True)
               try:
                   run_git(workspace, "clone",
-                          f"https://x-access-token:{os.environ['OPENCLAW_DOCS_SYNC_TOKEN']}@github.com/openclaw/docs.git",
+                          f"https://x-access-token:{os.environ['CARAPACE_DOCS_SYNC_TOKEN']}@github.com/Exaggarate/carapace/docs.git",
                           publish, timeout=120)
                   raise SystemExit(0)
               except (GitFailure, FetchTimeout):
@@ -98,7 +98,7 @@ jobs:
           PYTHON
 
       - name: Sync docs into publish repo
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         run: |
           set -euo pipefail
           clawhub_sha="$(cd "$GITHUB_WORKSPACE/clawhub-source" && python3 -I -S "$CI_GIT_OWNER" --checkout-git 0 rev-parse HEAD)"
@@ -107,20 +107,20 @@ jobs:
             --source-repo "$GITHUB_REPOSITORY" \
             --source-sha "$GITHUB_SHA" \
             --clawhub-repo "$GITHUB_WORKSPACE/clawhub-source" \
-            --clawhub-source-repo "openclaw/clawhub" \
+            --clawhub-source-repo "carapace/clawhub" \
             --clawhub-source-sha "$clawhub_sha"
 
       - name: Install docs MDX checker dependency
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         working-directory: publish
         run: npm install --no-save --package-lock=false @mdx-js/mdx@3.1.1 tsx@4.23.12
 
       - name: Check publish docs MDX
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
-        run: node "$GITHUB_WORKSPACE/publish/.openclaw-sync/check-docs-mdx.mjs" "$GITHUB_WORKSPACE/publish/docs"
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
+        run: node "$GITHUB_WORKSPACE/publish/.carapace-sync/check-docs-mdx.mjs" "$GITHUB_WORKSPACE/publish/docs"
 
       - name: Commit publish repo sync
-        if: env.OPENCLAW_DOCS_SYNC_TOKEN != ''
+        if: env.CARAPACE_DOCS_SYNC_TOKEN != ''
         working-directory: publish
         run: |
           set -euo pipefail
@@ -157,7 +157,7 @@ jobs:
           def remote_source_sha():
               try:
                   with tempfile.TemporaryFile() as output:
-                      run_git(publish, "show", "refs/remotes/origin/main:.openclaw-sync/source.json",
+                      run_git(publish, "show", "refs/remotes/origin/main:.carapace-sync/source.json",
                               stdout=output, stderr=subprocess.DEVNULL)
                       output.seek(0)
                       data = json.loads(output.read().decode("utf-8", errors="replace"),
@@ -179,7 +179,7 @@ jobs:
               raise SystemExit(0)
 
           try:
-              run_git(publish, "diff", "--quiet", "--", "docs", ".openclaw-sync", "package.json", "package-lock.json")
+              run_git(publish, "diff", "--quiet", "--", "docs", ".carapace-sync", "package.json", "package-lock.json")
           except GitFailure:
               pass
           else:
@@ -193,9 +193,9 @@ jobs:
           else:
               skip_stale_source()
 
-          run_git(publish, "config", "user.name", "openclaw-docs-sync[bot]", reclaim_locks=True)
-          run_git(publish, "config", "user.email", "openclaw-docs-sync[bot]@users.noreply.github.com", reclaim_locks=True)
-          run_git(publish, "add", "docs", ".openclaw-sync", "package.json", "package-lock.json", reclaim_locks=True)
+          run_git(publish, "config", "user.name", "carapace-docs-sync[bot]", reclaim_locks=True)
+          run_git(publish, "config", "user.email", "carapace-docs-sync[bot]@users.noreply.github.com", reclaim_locks=True)
+          run_git(publish, "add", "docs", ".carapace-sync", "package.json", "package-lock.json", reclaim_locks=True)
           run_git(publish, "commit", "-m", f"chore(sync): mirror docs from {os.environ['GITHUB_REPOSITORY']}@{source_sha}", reclaim_locks=True)
           for attempt in range(1, 6):
               try:

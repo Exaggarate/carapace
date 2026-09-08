@@ -1,18 +1,18 @@
 // Voice Call plugin module implements runtime behavior.
-import { listAgentIds } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { isLoopbackHost } from "openclaw/plugin-sdk/gateway-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { listAgentIds } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/gateway-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import {
   assertRealtimeVoiceAgentConsultModelSelectionUnlocked,
   consultRealtimeVoiceAgent,
   REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME,
   resolveRealtimeVoiceAgentConsultToolsAllow,
   type RealtimeVoiceAgentConsultTranscriptEntry,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import type { OpenClawPluginApi } from "../api.js";
+} from "carapace/plugin-sdk/realtime-voice";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
+import type { CarapacePluginApi } from "../api.js";
 import type { VoiceCallConfig } from "./config.js";
 import {
   resolveVoiceCallEffectiveConfig,
@@ -62,7 +62,7 @@ type Logger = {
 };
 
 const REALTIME_VOICE_CONSULT_SYSTEM_PROMPT = [
-  "You are the configured OpenClaw agent receiving delegated requests from a live phone voice bridge.",
+  "You are the configured Carapace agent receiving delegated requests from a live phone voice bridge.",
   "Act on behalf of the caller using the normal available tools when the caller asks you to do work.",
   "Prioritize completing the user's request and returning a fast, speakable result over exhaustive investigation.",
   "For tool-backed status checks, prefer one or two bounded read-only queries before answering.",
@@ -86,7 +86,7 @@ const loadRealtimeHandler = createLazyRuntimeModule(() => import("./webhook/real
 
 function resolveVoiceCallConsultSessionKey(call: {
   config: VoiceCallConfig;
-  coreSession?: OpenClawConfig["session"];
+  coreSession?: CarapaceConfig["session"];
   sessionKey?: string;
   from?: string;
   to?: string;
@@ -227,7 +227,7 @@ async function resolveProvider(config: VoiceCallConfig): Promise<VoiceCallProvid
   }
 }
 
-function listRealtimeAgentIds(config: VoiceCallConfig, coreConfig: OpenClawConfig): string[] {
+function listRealtimeAgentIds(config: VoiceCallConfig, coreConfig: CarapaceConfig): string[] {
   const agentIds = new Set<string>([normalizeAgentId(config.agentId)]);
   for (const agentId of listAgentIds(coreConfig)) {
     agentIds.add(normalizeAgentId(agentId));
@@ -242,8 +242,8 @@ function listRealtimeAgentIds(config: VoiceCallConfig, coreConfig: OpenClawConfi
 
 async function createRealtimeInstructionsResolver(params: {
   config: VoiceCallConfig & { agentId: string };
-  coreConfig: OpenClawConfig;
-  agentRuntime: OpenClawPluginApi["runtime"]["agent"];
+  coreConfig: CarapaceConfig;
+  agentRuntime: CarapacePluginApi["runtime"]["agent"];
 }): Promise<(call: CallRecord) => string> {
   const genericConfig: VoiceCallConfig = {
     ...params.config,
@@ -283,9 +283,9 @@ async function createRealtimeInstructionsResolver(params: {
 
 export async function createVoiceCallRuntime(params: {
   config: VoiceCallConfig;
-  coreConfig: OpenClawConfig;
-  fullConfig?: OpenClawConfig;
-  agentRuntime: OpenClawPluginApi["runtime"]["agent"];
+  coreConfig: CarapaceConfig;
+  fullConfig?: CarapaceConfig;
+  agentRuntime: CarapacePluginApi["runtime"]["agent"];
   stateRuntime?: VoiceCallStateRuntime["state"];
   ttsRuntime?: TelephonyTtsRuntime;
   logger?: Logger;
@@ -306,7 +306,7 @@ export async function createVoiceCallRuntime(params: {
     debug: console.debug,
   };
 
-  const cfg = fullConfig ?? (coreConfig as OpenClawConfig);
+  const cfg = fullConfig ?? (coreConfig as CarapaceConfig);
   const unresolvedConfig = resolveVoiceCallConfig(rawConfig);
   const config = { ...unresolvedConfig, agentId: resolveVoiceCallAgentId(unresolvedConfig, cfg) };
 
@@ -336,7 +336,7 @@ export async function createVoiceCallRuntime(params: {
     manager,
     provider,
     coreConfig,
-    fullConfig ?? (coreConfig as OpenClawConfig),
+    fullConfig ?? (coreConfig as CarapaceConfig),
     agentRuntime,
     log,
   );

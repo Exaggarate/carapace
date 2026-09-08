@@ -36,7 +36,7 @@ describe("crypto digest helpers", () => {
   });
 
   it("streams file bytes through the same digest contract", async () => {
-    await withTestDir({ prefix: "openclaw-crypto-digest-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-crypto-digest-" }, async (dir) => {
       const filePath = path.join(dir, "hostile.bin");
       await fs.writeFile(filePath, HOSTILE_BYTES);
 
@@ -49,7 +49,7 @@ describe("crypto digest helpers", () => {
   });
 
   it("preserves stream failure context when hashing a file", async () => {
-    await withTestDir({ prefix: "openclaw-crypto-digest-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-crypto-digest-" }, async (dir) => {
       const filePath = path.join(dir, "missing.bin");
 
       await expect(sha256File(filePath)).rejects.toMatchObject({

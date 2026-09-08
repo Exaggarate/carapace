@@ -17,7 +17,7 @@ describeLive("provider response headers (live)", () => {
       fixture = await resolveLiveDirectModel({
         provider: "openai",
         api: "openai-responses",
-        envVar: "OPENCLAW_LIVE_OPENAI_CACHE_MODEL",
+        envVar: "CARAPACE_LIVE_OPENAI_CACHE_MODEL",
         preferredModelIds: ["gpt-5.6-luna", "gpt-5.5", "gpt-5.4-mini", "gpt-5.4"],
       });
     }, 120_000);
@@ -63,7 +63,7 @@ describeLive("provider response headers (live)", () => {
       fixture = await resolveLiveDirectModel({
         provider: "anthropic",
         api: "anthropic-messages",
-        envVar: "OPENCLAW_LIVE_ANTHROPIC_CACHE_MODEL",
+        envVar: "CARAPACE_LIVE_ANTHROPIC_CACHE_MODEL",
         preferredModelIds: ["claude-sonnet-5", "claude-haiku-4-5"],
       });
     }, 120_000);

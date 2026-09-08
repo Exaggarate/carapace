@@ -1,4 +1,4 @@
-import type { WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
+import type { WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
 import { createCrabboxXfceSessionEnvironment } from "./crabbox-worker-desktop-setup.js";
 
 const CLOUD_SETUP_CODE_ENV = "CRABBOX_WORKER_SETUP_CODE";
@@ -79,21 +79,21 @@ let phase;
 const setPhase = (next) => {
   if (phase === next) return;
   phase = next;
-  console.error("CRABBOX_PHASE:openclaw-bootstrap-" + next.toLowerCase().replaceAll(" ", "-"));
+  console.error("CRABBOX_PHASE:carapace-bootstrap-" + next.toLowerCase().replaceAll(" ", "-"));
 };
 setPhase("preparation");
 (async () => {
   let tokens;
   try { tokens = JSON.parse(credentials || "{}"); }
   catch { throw new Error("Cloud worker bootstrap credential format is invalid"); }
-  const stateDir = path.join(os.homedir(), ".openclaw", "cloud-workers", leaseId);
-  const runtimeRoot = path.join(os.homedir(), ".openclaw-worker", "node-runtimes");
+  const stateDir = path.join(os.homedir(), ".carapace", "cloud-workers", leaseId);
+  const runtimeRoot = path.join(os.homedir(), ".carapace-worker", "node-runtimes");
   const runtimeDir = path.join(runtimeRoot, bootstrap.sha256);
-  const cli = path.join(runtimeDir, "node_modules", "openclaw", "openclaw.mjs");
+  const cli = path.join(runtimeDir, "node_modules", "carapace", "carapace.mjs");
   const pidFile = path.join(stateDir, "node.pid");
   const setupFile = path.join(stateDir, "setup-code");
   const runtimeLink = path.join(stateDir, "runtime");
-  const nodeEnv = { ...process.env, ...(mode ? { OPENCLAW_STATE_DIR: stateDir } : {}) };
+  const nodeEnv = { ...process.env, ...(mode ? { CARAPACE_STATE_DIR: stateDir } : {}) };
   if (desktopEnvironment) {
     // Inspect XFCE only after stripping forwarded credentials from every child environment.
     const desktop = spawnSync("bash", ["-c", desktopEnvironment, "bash", process.execPath], { env: nodeEnv, encoding: "utf8", timeout: 60000 });
@@ -114,10 +114,10 @@ setPhase("preparation");
     if (alive) {
       const args = fs.readFileSync(path.join("/proc", pidText, "cmdline"), "utf8").split("\\0");
       const env = fs.readFileSync(path.join("/proc", pidText, "environ"), "utf8").split("\\0");
-      // OpenClaw changes process.title; the immutable install cwd survives that argv rewrite.
+      // Carapace changes process.title; the immutable install cwd survives that argv rewrite.
       const title = args[0];
-      const nodeInvocation = args[1] === cli || ["openclaw", "openclaw-connect", "openclaw-node"].includes(title);
-      if (!nodeInvocation || fs.realpathSync(path.join("/proc", pidText, "cwd")) !== runtimeDir || !env.includes("OPENCLAW_STATE_DIR=" + stateDir)) {
+      const nodeInvocation = args[1] === cli || ["carapace", "carapace-connect", "carapace-node"].includes(title);
+      if (!nodeInvocation || fs.realpathSync(path.join("/proc", pidText, "cwd")) !== runtimeDir || !env.includes("CARAPACE_STATE_DIR=" + stateDir)) {
         throw new Error("Cloud worker node is running a different bootstrap artifact or invocation; release and reprovision the worker");
       }
       setPhase("complete");
@@ -128,12 +128,12 @@ setPhase("preparation");
   const verifyRuntime = (root) => {
     setPhase("runtime verification");
     if (!fs.lstatSync(root).isDirectory() || fs.realpathSync(root) !== root) throw new Error("Cloud worker bootstrap runtime path is unsafe");
-    const packageRoot = path.join(root, "node_modules", "openclaw");
+    const packageRoot = path.join(root, "node_modules", "carapace");
     const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, "package.json"), "utf8"));
-    if (manifest.name !== "openclaw" || manifest.version !== bootstrap.openclawVersion) throw new Error("Cloud worker bootstrap package identity does not match the Gateway");
-    const probe = spawnSync(process.execPath, [path.join(packageRoot, "openclaw.mjs"), "--version"], { env: nodeEnv, encoding: "utf8", timeout: 60000 });
+    if (manifest.name !== "carapace" || manifest.version !== bootstrap.carapaceVersion) throw new Error("Cloud worker bootstrap package identity does not match the Gateway");
+    const probe = spawnSync(process.execPath, [path.join(packageRoot, "carapace.mjs"), "--version"], { env: nodeEnv, encoding: "utf8", timeout: 60000 });
     const version = probe.stdout?.trim();
-    const expected = "OpenClaw " + bootstrap.openclawVersion;
+    const expected = "Carapace " + bootstrap.carapaceVersion;
     if (probe.status !== 0 || (version !== expected && !version?.startsWith(expected + " "))) throw new Error("Cloud worker bootstrap CLI could not verify its Gateway version");
   };
   const verifyArchive = async (source, artifact, output) => {
@@ -190,7 +190,7 @@ setPhase("preparation");
     const relative = workerBundle.packageRelativePath;
     const parts = relative.split("/");
     if (parts.length !== 2 || !/^[a-z][a-z-]*$/.test(parts[0]) || parts[1] !== workerBundle.sha256 + ".tgz" || !/^[a-f0-9]{64}$/.test(workerBundle.sha256)) throw new Error("Cloud worker archive package path is invalid");
-    return path.join(root, "node_modules", "openclaw", ...parts);
+    return path.join(root, "node_modules", "carapace", ...parts);
   };
   const verifyWorkerArchive = async (root) => {
     setPhase("worker archive verification");
@@ -232,7 +232,7 @@ setPhase("preparation");
   } else {
   const stage = fs.mkdtempSync(path.join(runtimeRoot, "node-bootstrap-"));
   try {
-    const archive = path.join(stage, "openclaw.tgz");
+    const archive = path.join(stage, "carapace.tgz");
     if (!existingRuntime) await downloadArchive(bootstrap, tokens.nodeBootstrap, archive);
     let downloadedWorker;
     if (workerBundle) {

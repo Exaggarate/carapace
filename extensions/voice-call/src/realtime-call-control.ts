@@ -3,10 +3,10 @@ import {
   resolveRealtimeVoiceAgentConsultTools,
   type RealtimeVoiceAgentConsultToolPolicy,
   type RealtimeVoiceTool,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 
 /** Stable provider-facing tool name for ending the current phone call. */
-export const REALTIME_VOICE_END_CALL_TOOL_NAME = "openclaw_end_call";
+export const REALTIME_VOICE_END_CALL_TOOL_NAME = "carapace_end_call";
 
 /** Closure-bound end-call control exposed on every realtime phone call. */
 const REALTIME_VOICE_END_CALL_TOOL: RealtimeVoiceTool = {

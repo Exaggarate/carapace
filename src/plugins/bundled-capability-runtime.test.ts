@@ -57,7 +57,7 @@ function writeChannelCapabilityPlugin(id: string): TempPlugin {
     };`,
   });
   fs.writeFileSync(
-    path.join(plugin.dir, "openclaw.plugin.json"),
+    path.join(plugin.dir, "carapace.plugin.json"),
     JSON.stringify(
       {
         id,
@@ -89,7 +89,7 @@ describe("loadBundledCapabilityRuntimeRegistry", () => {
       path.join(target.dir, "package.json"),
       JSON.stringify({
         name: "@fixture/shadowed-capability",
-        openclaw: { extensions: ["./shadowed-capability.cjs"] },
+        carapace: { extensions: ["./shadowed-capability.cjs"] },
       }),
     );
     const shadow = writePlugin({
@@ -98,8 +98,8 @@ describe("loadBundledCapabilityRuntimeRegistry", () => {
     });
     const config = { plugins: { load: { paths: [shadow.dir] } } };
     const env = {
-      OPENCLAW_HOME: path.join(root, "home"),
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_HOME: path.join(root, "home"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
     };
     const snapshot = completePluginMetadataSnapshot({
       snapshot: loadPluginMetadataSnapshot({ config, env, preferPersisted: false }),
@@ -112,7 +112,7 @@ describe("loadBundledCapabilityRuntimeRegistry", () => {
       snapshot.bundledManifestRegistry?.plugins.find((plugin) => plugin.id === target.id)?.origin,
     ).toBe("bundled");
     setGatewayPluginMetadataSnapshot(snapshot, { config, env });
-    fs.writeFileSync(path.join(target.dir, "openclaw.plugin.json"), "{}");
+    fs.writeFileSync(path.join(target.dir, "carapace.plugin.json"), "{}");
 
     const registry = loadBundledCapabilityRuntimeRegistry({ pluginIds: [target.id], config, env });
     expect(registry.providers.map((entry) => entry.provider.id)).toEqual(["bundled-capability"]);

@@ -17,7 +17,7 @@ test(
   async () => {
     // Minimal Gateway mode intentionally omits worker ownership; this exercises production startup
     // with no configured cloud profiles, where the core device provider still owns placement.
-    process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
+    process.env.CARAPACE_TEST_MINIMAL_GATEWAY = "0";
     harness = await startGatewayServerHarness();
     const { ws } = await harness.openClient();
     const created = await rpcReq<{ key?: string; sessionId?: string }>(ws, "sessions.create", {

@@ -53,7 +53,7 @@ describe("retired runtime config migrations", () => {
       expect(findLegacyConfigIssues(raw)).toContainEqual({
         path: "messages.suppressToolErrors",
         message:
-          'messages.suppressToolErrors is retired; tool failure warnings now appear only when a run ends without a reply. Run "openclaw doctor --fix".',
+          'messages.suppressToolErrors is retired; tool failure warnings now appear only when a run ends without a reply. Run "carapace doctor --fix".',
       });
 
       expect(applyAll(raw).changes).toEqual([
@@ -93,7 +93,7 @@ describe("retired runtime config migrations", () => {
           enabled: true,
           handlers: [{ event: "command:new", module: "hooks/legacy.js" }],
           entries: { canonical: { enabled: true } },
-          load: { extraDirs: ["/opt/openclaw/hooks"] },
+          load: { extraDirs: ["/opt/carapace/hooks"] },
           sibling: "preserved",
         },
       },
@@ -103,7 +103,7 @@ describe("retired runtime config migrations", () => {
     expect(raw.hooks.internal).toEqual({
       enabled: true,
       entries: { canonical: { enabled: true } },
-      load: { extraDirs: ["/opt/openclaw/hooks"] },
+      load: { extraDirs: ["/opt/carapace/hooks"] },
       sibling: "preserved",
     });
     expect(changes).toEqual([
@@ -137,7 +137,7 @@ describe("retired runtime config migrations", () => {
 
   it.each([
     ["named entries", { enabled: true, entries: { canonical: { enabled: false } } }],
-    ["extra directories", { enabled: true, load: { extraDirs: ["/opt/openclaw/hooks"] } }],
+    ["extra directories", { enabled: true, load: { extraDirs: ["/opt/carapace/hooks"] } }],
     ["explicit disablement", { enabled: false }],
   ])("preserves canonical enabled state for %s", (_label, expected) => {
     const raw = { hooks: { internal: { ...structuredClone(expected), handlers: null } } };
@@ -210,7 +210,7 @@ describe("retired runtime config migrations", () => {
           candidate.path.join(".") === "agents.defaults.compaction.truncateAfterCompaction",
       );
       expect(retiredRule?.message).toBe(
-        'agents.defaults.compaction.truncateAfterCompaction is retired; byte-triggered compaction now opts in via maxActiveTranscriptBytes alone. Run "openclaw doctor --fix".',
+        'agents.defaults.compaction.truncateAfterCompaction is retired; byte-triggered compaction now opts in via maxActiveTranscriptBytes alone. Run "carapace doctor --fix".',
       );
     }
   });
@@ -809,7 +809,7 @@ describe("retired runtime config migrations", () => {
         controlUi: { allowInsecureAuth: true, dangerouslyDisableDeviceAuth: true },
       },
       proxy: { enabled: true, proxyUrl: "http://proxy.example" },
-      discovery: { wideArea: { enabled: true, domain: "openclaw.internal" } },
+      discovery: { wideArea: { enabled: true, domain: "carapace.internal" } },
     });
 
     expect(result.raw).toMatchObject({
@@ -854,7 +854,7 @@ describe("retired runtime config migrations", () => {
         },
       },
       proxy: { proxyUrl: "http://proxy.example" },
-      discovery: { wideArea: { domain: "openclaw.internal" } },
+      discovery: { wideArea: { domain: "carapace.internal" } },
     });
     expect(result.raw).toHaveProperty("messages.responsePrefix", "[bot]");
     expect(result.raw).not.toHaveProperty("web");

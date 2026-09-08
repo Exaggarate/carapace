@@ -3,10 +3,10 @@
  * hot paths share. Keep this internal: it prepares existing config/state, not a
  * new public access-profile config surface.
  */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import type { ChatType } from "../channels/chat-type.js";
 import { normalizeChatType } from "../channels/chat-type.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GroupToolPolicyConfig } from "../config/types.tools.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import type { RuntimePluginToolGrant } from "../plugins/runtime/tool-grant.js";
@@ -57,7 +57,7 @@ function resolveManifestToolProfileNames(
 }
 
 export type ConversationCapabilityProfileParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   /** Live conversation key when a sandbox/policy key is used for tool filtering. */
   runSessionKey?: string;

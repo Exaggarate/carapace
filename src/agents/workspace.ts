@@ -8,7 +8,7 @@ import syncFs from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { Minimatch } from "minimatch";
 import { extractFrontmatterBlock } from "../../packages/markdown-core/src/frontmatter.js";
 import type { ChatType } from "../channels/chat-type.js";
@@ -31,7 +31,7 @@ import { runCommandWithTimeout } from "../process/exec.js";
 import { isCronSessionKey, isSubagentSessionKey } from "../routing/session-key.js";
 import { deriveSessionChatTypeFromKey } from "../sessions/session-chat-type-shared.js";
 import { createLazyPromise, getOrCreatePromise } from "../shared/lazy-promise.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { resolveUserPath } from "../utils.js";
 import {
   MAX_WORKSPACE_BOOTSTRAP_FILE_BYTES,
@@ -304,9 +304,9 @@ export class WorkspaceVanishedError extends Error {
 
   constructor(params: { workspaceDir: string }) {
     super(
-      `OpenClaw workspace appears to have disappeared after a recent initialization: ${params.workspaceDir}. ` +
+      `Carapace workspace appears to have disappeared after a recent initialization: ${params.workspaceDir}. ` +
         `Refusing to reseed BOOTSTRAP.md over a recently attested workspace. ` +
-        "Restore the workspace or run a full OpenClaw reset if this reset was intentional.",
+        "Restore the workspace or run a full Carapace reset if this reset was intentional.",
     );
     this.name = "WorkspaceVanishedError";
     this.workspaceDir = params.workspaceDir;
@@ -334,7 +334,7 @@ export async function publishBootstrapFile(
   let cleanupError: unknown;
   const staging = await tempFile({
     rootDir: dir,
-    prefix: "openclaw-bootstrap",
+    prefix: "carapace-bootstrap",
     fileName: path.basename(filePath),
     onCleanupError: (error) => {
       cleanupError = error;
@@ -746,7 +746,7 @@ async function workspaceSetupStateHasSurvivalEvidence(params: {
 
 function readCanonicalWorkspaceStateSnapshot(
   dir: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): WorkspaceStateSnapshot {
   const snapshot = readWorkspaceStateSnapshot(dir, options);
   assertNoUnmigratedWorkspaceState({
@@ -757,7 +757,7 @@ function readCanonicalWorkspaceStateSnapshot(
 
 export async function isWorkspaceSetupCompleted(
   dir: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<boolean> {
   const state = readCanonicalWorkspaceStateSnapshot(dir, options).setup;
   return typeof state.setupCompletedAt === "string" && state.setupCompletedAt.trim().length > 0;
@@ -765,7 +765,7 @@ export async function isWorkspaceSetupCompleted(
 
 export async function resolveWorkspaceBootstrapStatus(
   dir: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<"pending" | "complete"> {
   const resolvedDir = resolveUserPath(dir);
   const state = readCanonicalWorkspaceStateSnapshot(resolvedDir, options).setup;
@@ -791,7 +791,7 @@ export async function seedWorkspaceBootstrap(params: {
   dir: string;
   content: Buffer;
   nowMs?: number;
-  stateOptions?: OpenClawStateDatabaseOptions;
+  stateOptions?: CarapaceStateDatabaseOptions;
 }): Promise<"seeded" | "already-seeded" | "consumed"> {
   if (params.content.byteLength > MAX_WORKSPACE_BOOTSTRAP_FILE_BYTES) {
     throw new WorkspaceBootstrapSeedConflictError(
@@ -1202,7 +1202,7 @@ export async function ensureAgentWorkspace(params?: {
       (await workspaceProfileLooksConfigured({
         dir,
         // A preexisting Git repository is user evidence. Git metadata left by
-        // an expired, wiped OpenClaw workspace is not completion evidence.
+        // an expired, wiped Carapace workspace is not completion evidence.
         includeGitEvidence: !reseedingExpiredWorkspaceState,
       }))
     ) {

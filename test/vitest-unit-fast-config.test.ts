@@ -89,7 +89,7 @@ describe("unit-fast vitest lane", () => {
       import path from "node:path";
       const selectedTests = [
         "src/agents/agent-tools.deferred-followup-guidance.test.ts",
-        "src/test-utils/openclaw-test-state.test.ts",
+        "src/test-utils/carapace-test-state.test.ts",
         "src/utils.test.ts",
         "src/media-generation/runtime-shared.test.ts",
       ];
@@ -152,11 +152,11 @@ describe("unit-fast vitest lane", () => {
       const scopedHookFileReads = hookFileReads;
       const scopedOutsideFileReads = outsideFileReads;
       unselectedFileReads = 0;
-      const directory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-fast-selection-"));
+      const directory = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-fast-selection-"));
       try {
         const includeFile = path.join(directory, "include.json");
         fs.writeFileSync(includeFile, JSON.stringify(selectedTests));
-        process.env.OPENCLAW_VITEST_INCLUDE_FILE = includeFile;
+        process.env.CARAPACE_VITEST_INCLUDE_FILE = includeFile;
         const selections = [];
         for (const name of ["unit-fast", "unit-fast-isolated", "unit-fast-fake-timers"]) {
           const { default: config } = await import("./test/vitest/vitest." + name + ".config.ts?io-probe=" + Date.now());
@@ -190,7 +190,7 @@ describe("unit-fast vitest lane", () => {
         ...process.env,
         FORCE_COLOR: "0",
         NO_COLOR: "1",
-        OPENCLAW_VITEST_INCLUDE_FILE: undefined,
+        CARAPACE_VITEST_INCLUDE_FILE: undefined,
       },
       evalFlag: "-e",
       imports: ["tsx"],
@@ -231,14 +231,14 @@ describe("unit-fast vitest lane", () => {
     expect(selection, configProbeResult.stdout).not.toBeNull();
     expect(JSON.parse(selection?.[1] ?? "null")).toEqual([
       ["src/agents/agent-tools.deferred-followup-guidance.test.ts"],
-      ["src/test-utils/openclaw-test-state.test.ts"],
+      ["src/test-utils/carapace-test-state.test.ts"],
       ["src/utils.test.ts"],
     ]);
     const unitSelection = configProbeResult.stdout.match(/UNIT_SELECTION_PROBE (.+)/u);
     expect(unitSelection, configProbeResult.stdout).not.toBeNull();
     const excluded = [
       "src/agents/agent-tools.deferred-followup-guidance.test.ts",
-      "src/test-utils/openclaw-test-state.test.ts",
+      "src/test-utils/carapace-test-state.test.ts",
       "src/utils.test.ts",
     ];
     const include = [...excluded, "src/media-generation/runtime-shared.test.ts"];
@@ -250,7 +250,7 @@ describe("unit-fast vitest lane", () => {
   });
 
   it("keeps untracked tests in their planned fast lane and execution include list", () => {
-    const cwd = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-untracked-")));
+    const cwd = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-untracked-")));
     const mockHelper = "src/hooks/mock-helper.test.ts";
     const pure = "src/hooks/pure.test.ts";
     const stateful = "src/hooks/stateful.test.ts";

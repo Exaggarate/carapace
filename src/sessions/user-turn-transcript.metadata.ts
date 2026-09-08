@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { AgentMessage } from "../../packages/agent-core/src/types.js";
 import type { MsgContext } from "../auto-reply/templating.js";
 import { readTranscriptSenderIdentity } from "../chat/sender-identity.js";
@@ -112,15 +112,15 @@ export function rewritePersistedSteerTargetRunId(
   if (!message || targetRunId === undefined) {
     return message;
   }
-  const metadata = { ...message["__openclaw"] };
+  const metadata = { ...message["__carapace"] };
   delete metadata.steerTargetRunId;
   if (targetRunId) {
     metadata.steerTargetRunId = targetRunId;
   }
   const nextMessage = { ...message };
-  delete nextMessage["__openclaw"];
+  delete nextMessage["__carapace"];
   if (Object.keys(metadata).length > 0) {
-    nextMessage["__openclaw"] = metadata;
+    nextMessage["__carapace"] = metadata;
   }
   return nextMessage;
 }
@@ -135,10 +135,10 @@ export function restorePreparedUserTurnOperationalMetaForRuntime<
   if (!params.preparedMessage || params.runtimeMessage.role !== "user") {
     return params.runtimeMessage;
   }
-  const preparedMeta = params.preparedMessage["__openclaw"];
+  const preparedMeta = params.preparedMessage["__carapace"];
   const senderIsOwner = preparedMeta?.senderIsOwner;
   const steerTargetRunId = normalizePersistedSteerTargetRunId(preparedMeta?.steerTargetRunId);
-  const nextMessage: TMessage & { display?: boolean; __openclaw?: Record<string, unknown> } = {
+  const nextMessage: TMessage & { display?: boolean; __carapace?: Record<string, unknown> } = {
     ...params.runtimeMessage,
   };
   const provenance = normalizeInputProvenance(Reflect.get(params.preparedMessage, "provenance"));
@@ -148,7 +148,7 @@ export function restorePreparedUserTurnOperationalMetaForRuntime<
   if (params.preparedMessage.display === false) {
     nextMessage.display = false;
   }
-  const runtimeMeta = { ...nextMessage["__openclaw"] };
+  const runtimeMeta = { ...nextMessage["__carapace"] };
   delete runtimeMeta.intent;
   if (preparedMeta?.intent) {
     runtimeMeta.intent = preparedMeta.intent;
@@ -168,9 +168,9 @@ export function restorePreparedUserTurnOperationalMetaForRuntime<
   ) {
     runtimeMeta.humanMentions = preparedMeta.humanMentions;
   }
-  delete nextMessage["__openclaw"];
+  delete nextMessage["__carapace"];
   if (Object.keys(runtimeMeta).length > 0) {
-    nextMessage["__openclaw"] = runtimeMeta;
+    nextMessage["__carapace"] = runtimeMeta;
   }
   return nextMessage;
 }
@@ -180,12 +180,12 @@ export function applyTranscriptSenderIdentityToWrite(
   message: AgentMessage,
   write: () => AgentMessage | null | undefined,
 ): AgentMessage | null | undefined {
-  const original = asOptionalRecord(Reflect.get(message, "__openclaw"));
+  const original = asOptionalRecord(Reflect.get(message, "__carapace"));
   const identity =
     message.role === "user" ? readTranscriptSenderIdentity(original?.senderIdentity) : undefined;
   const senderId = original?.senderId;
   const next = write();
-  const metadata = next && asOptionalRecord(Reflect.get(next, "__openclaw"));
+  const metadata = next && asOptionalRecord(Reflect.get(next, "__carapace"));
   if (!metadata || !Object.hasOwn(metadata, "senderIdentity")) {
     return next;
   }
@@ -199,7 +199,7 @@ export function applyTranscriptSenderIdentityToWrite(
   }
   const redacted = { ...metadata };
   delete redacted.senderIdentity;
-  return Object.assign({ ...next }, { __openclaw: redacted });
+  return Object.assign({ ...next }, { __carapace: redacted });
 }
 
 /** Applies before-message hooks while preserving user-turn transcript metadata. */
@@ -214,7 +214,7 @@ export function preparePersistedUserTurnMessageForTranscriptWrite(
   const idempotencyKey =
     typeof originalIdempotencyKey === "string" ? originalIdempotencyKey : undefined;
   const provenance = normalizeInputProvenance(Reflect.get(message, "provenance"));
-  const originalMeta = message["__openclaw"];
+  const originalMeta = message["__carapace"];
   const originalContent =
     originalMeta?.humanMentions === undefined ? undefined : structuredClone(message.content);
   const humanMentions =
@@ -262,7 +262,7 @@ export function preparePersistedUserTurnMessageForTranscriptWrite(
     ...(provenance ? { provenance } : {}),
   };
   const protectedMeta: Record<string, unknown> = {
-    ...nextUserMessage["__openclaw"],
+    ...nextUserMessage["__carapace"],
     ...(typeof senderIsOwner === "boolean" ? { senderIsOwner } : {}),
     ...(replyToId ? { replyToId } : {}),
     ...(replyToPreview ? { replyToPreview } : {}),
@@ -288,9 +288,9 @@ export function preparePersistedUserTurnMessageForTranscriptWrite(
     ...(display === false ? { display: false } : {}),
     ...(idempotencyKey ? { idempotencyKey } : {}),
   };
-  delete protectedMessage["__openclaw"];
+  delete protectedMessage["__carapace"];
   if (Object.keys(protectedMeta).length > 0) {
-    protectedMessage["__openclaw"] = protectedMeta;
+    protectedMessage["__carapace"] = protectedMeta;
   }
   return protectedMessage;
 }

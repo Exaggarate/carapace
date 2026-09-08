@@ -5,9 +5,9 @@ import { constants } from "node:sqlite";
 import { afterEach, describe, expect, it, vi, type MockInstance } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
 import { resolveSqliteDatabaseFilePaths } from "../infra/sqlite-files.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { claimOpenClawStateOwnership } from "../state/openclaw-state-ownership-operations.js";
-import { OpenClawStateOwnershipError } from "../state/openclaw-state-ownership.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { claimCarapaceStateOwnership } from "../state/carapace-state-ownership-operations.js";
+import { CarapaceStateOwnershipError } from "../state/carapace-state-ownership.js";
 import {
   acquireDebugProxyCaptureStore,
   closeDebugProxyCaptureStore,
@@ -21,19 +21,19 @@ const cleanupDirs: string[] = [];
 
 afterEach(() => {
   closeDebugProxyCaptureStore();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   cleanupTempDirs(cleanupDirs);
 });
 
 function makeStore() {
-  const root = makeTempDir(cleanupDirs, "openclaw-proxy-capture-");
-  return new DebugProxyCaptureStore({ env: { OPENCLAW_STATE_DIR: root } });
+  const root = makeTempDir(cleanupDirs, "carapace-proxy-capture-");
+  return new DebugProxyCaptureStore({ env: { CARAPACE_STATE_DIR: root } });
 }
 
 function makeStateEnv(prefix: string): NodeJS.ProcessEnv {
   const root = makeTempDir(cleanupDirs, prefix);
-  return { OPENCLAW_STATE_DIR: root };
+  return { CARAPACE_STATE_DIR: root };
 }
 
 function readMode(target: string): number {
@@ -44,13 +44,13 @@ describe("DebugProxyCaptureStore", () => {
   it.each(["shared", "path"] as const)(
     "summarizes %s capture labels without materializing every metadata row",
     (kind) => {
-      const env = makeStateEnv("openclaw-proxy-capture-coverage-");
+      const env = makeStateEnv("carapace-proxy-capture-coverage-");
       const store =
         kind === "shared"
           ? new DebugProxyCaptureStore({ env })
           : new DebugProxyCaptureStore(
-              path.join(env.OPENCLAW_STATE_DIR!, "capture.sqlite"),
-              path.join(env.OPENCLAW_STATE_DIR!, "blobs"),
+              path.join(env.CARAPACE_STATE_DIR!, "capture.sqlite"),
+              path.join(env.CARAPACE_STATE_DIR!, "blobs"),
             );
       const events = [
         { host: " localhost:7 ", metaJson: '{"provider":" alpha ","api":"chat","model":"one"}' },
@@ -74,7 +74,7 @@ describe("DebugProxyCaptureStore", () => {
           store.recordEvent({
             sessionId: index < events.length ? "coverage" : "other",
             ts: index,
-            sourceScope: "openclaw",
+            sourceScope: "carapace",
             sourceProcess: "test",
             protocol: "http",
             direction: "local",
@@ -141,7 +141,7 @@ describe("DebugProxyCaptureStore", () => {
   );
 
   it("keeps the cached store open until the last lease releases", () => {
-    const options = { env: makeStateEnv("openclaw-proxy-capture-lease-") };
+    const options = { env: makeStateEnv("carapace-proxy-capture-lease-") };
 
     const first = acquireDebugProxyCaptureStore(options);
     const second = acquireDebugProxyCaptureStore(options);
@@ -159,19 +159,19 @@ describe("DebugProxyCaptureStore", () => {
   });
 
   it("rebinds a cached shared store after the state database closes underneath it", () => {
-    const options = { env: makeStateEnv("openclaw-proxy-capture-rebind-") };
+    const options = { env: makeStateEnv("carapace-proxy-capture-rebind-") };
     const stale = getDebugProxyCaptureStore(options);
     stale.upsertSession({
       id: "exit-session",
       startedAt: 1,
       mode: "proxy-run",
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "cli",
     });
 
     // Exit-time hook closes the shared handle out from under the cached store;
     // finalizeDebugProxyCapture then re-fetches and must not get a dead handle.
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(stale.isClosed).toBe(true);
 
     const rebound = getDebugProxyCaptureStore(options);
@@ -180,29 +180,29 @@ describe("DebugProxyCaptureStore", () => {
   });
 
   it("fences a shared store that was opened before external ownership was claimed", () => {
-    const env = makeStateEnv("openclaw-proxy-capture-preclaim-");
+    const env = makeStateEnv("carapace-proxy-capture-preclaim-");
     const store = new DebugProxyCaptureStore({ env });
-    env.OPENCLAW_SUPERVISOR_MODE = "external";
-    claimOpenClawStateOwnership("gateway-supervisor", { env });
-    delete env.OPENCLAW_SUPERVISOR_MODE;
+    env.CARAPACE_SUPERVISOR_MODE = "external";
+    claimCarapaceStateOwnership("gateway-supervisor", { env });
+    delete env.CARAPACE_SUPERVISOR_MODE;
 
     expect(() =>
       store.upsertSession({
         id: "preclaim-session",
         startedAt: 1,
         mode: "proxy-run",
-        sourceScope: "openclaw",
+        sourceScope: "carapace",
         sourceProcess: "cli",
       }),
-    ).toThrow(OpenClawStateOwnershipError);
+    ).toThrow(CarapaceStateOwnershipError);
   });
 
   it("tracks and closes cached stores independently across paths", () => {
     const first = acquireDebugProxyCaptureStore({
-      env: makeStateEnv("openclaw-proxy-capture-first-"),
+      env: makeStateEnv("carapace-proxy-capture-first-"),
     });
     const second = acquireDebugProxyCaptureStore({
-      env: makeStateEnv("openclaw-proxy-capture-second-"),
+      env: makeStateEnv("carapace-proxy-capture-second-"),
     });
 
     first.release();
@@ -215,7 +215,7 @@ describe("DebugProxyCaptureStore", () => {
   });
 
   it("preserves the shipped path-based Plugin SDK overloads", () => {
-    const root = makeTempDir(cleanupDirs, "openclaw-proxy-capture-legacy-sdk-");
+    const root = makeTempDir(cleanupDirs, "carapace-proxy-capture-legacy-sdk-");
     const dbPath = path.join(root, "capture.sqlite");
     const blobDir = path.join(root, "blobs");
     const lease = acquireDebugProxyCaptureStore(dbPath, blobDir);
@@ -233,7 +233,7 @@ describe("DebugProxyCaptureStore", () => {
       id: "legacy-sdk-session",
       startedAt: 1,
       mode: "sdk",
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "plugin",
       dbPath,
       blobDir,
@@ -242,7 +242,7 @@ describe("DebugProxyCaptureStore", () => {
       id: "legacy-sdk-session",
       startedAt: 0,
       mode: "replacement",
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "updated-plugin",
       dbPath: "unused-database",
       blobDir: "unused-blobs",
@@ -260,7 +260,7 @@ describe("DebugProxyCaptureStore", () => {
     lease.store.recordEvent({
       sessionId: "legacy-sdk-session",
       ts: 2,
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "plugin",
       protocol: "https",
       direction: "outbound",
@@ -317,13 +317,13 @@ describe("DebugProxyCaptureStore", () => {
     ["shared", "deleteSessions", "capture_blobs"],
     ["shared", "purgeAll", "capture_blobs"],
   ] as const)("rolls back %s %s when %s deletion fails", (kind, operation, deniedTable) => {
-    const root = makeTempDir(cleanupDirs, "openclaw-proxy-capture-rollback-");
+    const root = makeTempDir(cleanupDirs, "carapace-proxy-capture-rollback-");
     const dbPath = path.join(root, "capture.sqlite");
     const blobDir = path.join(root, "blobs");
     const lease =
       kind === "path"
         ? acquireDebugProxyCaptureStore(dbPath, blobDir)
-        : acquireDebugProxyCaptureStore({ env: { OPENCLAW_STATE_DIR: root } });
+        : acquireDebugProxyCaptureStore({ env: { CARAPACE_STATE_DIR: root } });
     const sessionId = "rollback-session";
 
     try {
@@ -331,7 +331,7 @@ describe("DebugProxyCaptureStore", () => {
         id: sessionId,
         startedAt: 1,
         mode: "sdk",
-        sourceScope: "openclaw",
+        sourceScope: "carapace",
         sourceProcess: "plugin",
         dbPath,
         blobDir,
@@ -341,7 +341,7 @@ describe("DebugProxyCaptureStore", () => {
       lease.store.recordEvent({
         sessionId,
         ts: 2,
-        sourceScope: "openclaw",
+        sourceScope: "carapace",
         sourceProcess: "plugin",
         protocol: "https",
         direction: "outbound",
@@ -400,7 +400,7 @@ describe("DebugProxyCaptureStore", () => {
     });
 
     const store = new DebugProxyCaptureStore({
-      env: makeStateEnv("openclaw-proxy-capture-nfs-"),
+      env: makeStateEnv("carapace-proxy-capture-nfs-"),
     });
     try {
       expect(store.db.prepare("PRAGMA journal_mode").get()).toMatchObject({
@@ -414,18 +414,18 @@ describe("DebugProxyCaptureStore", () => {
   it.each(["shared", "path"] as const)(
     "retries a rejected %s event without retaining an implicit session",
     (kind) => {
-      const env = makeStateEnv("openclaw-proxy-capture-write-");
+      const env = makeStateEnv("carapace-proxy-capture-write-");
       const lease =
         kind === "shared"
           ? acquireDebugProxyCaptureStore({ env })
           : acquireDebugProxyCaptureStore(
-              path.join(env.OPENCLAW_STATE_DIR!, "capture.sqlite"),
-              path.join(env.OPENCLAW_STATE_DIR!, "blobs"),
+              path.join(env.CARAPACE_STATE_DIR!, "capture.sqlite"),
+              path.join(env.CARAPACE_STATE_DIR!, "blobs"),
             );
       const event = {
         sessionId: "rejected-event",
         ts: 7,
-        sourceScope: "openclaw",
+        sourceScope: "carapace",
         sourceProcess: "capture-test",
         protocol: "wss",
         direction: "inbound",
@@ -466,8 +466,8 @@ describe("DebugProxyCaptureStore", () => {
   it.runIf(process.platform !== "win32")(
     "stores capture blobs in the private shared state database",
     () => {
-      const env = makeStateEnv("openclaw-proxy-capture-permissions-");
-      const root = env.OPENCLAW_STATE_DIR!;
+      const env = makeStateEnv("carapace-proxy-capture-permissions-");
+      const root = env.CARAPACE_STATE_DIR!;
       const store = new DebugProxyCaptureStore({ env });
       const blob = store.persistPayload(Buffer.from("authorization: Bearer secret"));
       const row = store.db
@@ -480,7 +480,7 @@ describe("DebugProxyCaptureStore", () => {
         | { data: Uint8Array; encoding: string; sha256: string; sizeBytes: number }
         | undefined;
 
-      expect(store.dbPath).toBe(path.join(root, "state", "openclaw.sqlite"));
+      expect(store.dbPath).toBe(path.join(root, "state", "carapace.sqlite"));
       expect(fs.existsSync(path.join(root, "debug-proxy", "capture.sqlite"))).toBe(false);
       expect(fs.existsSync(path.join(root, "debug-proxy", "blobs"))).toBe(false);
       expect(row).toMatchObject({
@@ -512,8 +512,8 @@ describe("DebugProxyCaptureStore", () => {
       id: "session-1",
       startedAt: Date.now(),
       mode: "proxy-run",
-      sourceScope: "openclaw",
-      sourceProcess: "openclaw",
+      sourceScope: "carapace",
+      sourceProcess: "carapace",
     });
     const firstPayload = persistEventPayload(store, {
       data: '{"ok":true}',
@@ -533,8 +533,8 @@ describe("DebugProxyCaptureStore", () => {
     store.recordEvent({
       sessionId: "session-1",
       ts: 1,
-      sourceScope: "openclaw",
-      sourceProcess: "openclaw",
+      sourceScope: "carapace",
+      sourceProcess: "carapace",
       protocol: "https",
       direction: "outbound",
       kind: "request",
@@ -551,19 +551,19 @@ describe("DebugProxyCaptureStore", () => {
   it.each(["shared", "path"] as const)(
     "preserves %s diagnostic grouping, session scope, and native read retries",
     (kind) => {
-      const env = makeStateEnv("openclaw-proxy-capture-diagnostics-");
+      const env = makeStateEnv("carapace-proxy-capture-diagnostics-");
       const store =
         kind === "shared"
           ? new DebugProxyCaptureStore({ env })
           : new DebugProxyCaptureStore(
-              path.join(env.OPENCLAW_STATE_DIR!, "capture.sqlite"),
-              path.join(env.OPENCLAW_STATE_DIR!, "blobs"),
+              path.join(env.CARAPACE_STATE_DIR!, "capture.sqlite"),
+              path.join(env.CARAPACE_STATE_DIR!, "blobs"),
             );
       const record = (overrides: Partial<CaptureEventRecord>) =>
         store.recordEvent({
           sessionId: "captured",
           ts: 1,
-          sourceScope: "openclaw",
+          sourceScope: "carapace",
           sourceProcess: "test",
           protocol: "https",
           direction: "outbound",
@@ -580,7 +580,7 @@ describe("DebugProxyCaptureStore", () => {
             id,
             startedAt: index,
             mode: "test",
-            sourceScope: "openclaw",
+            sourceScope: "carapace",
             sourceProcess: "test",
           });
         }
@@ -685,7 +685,7 @@ describe("DebugProxyCaptureStore", () => {
     store.recordEvent({
       sessionId: "session-direct",
       ts: 20,
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "provider",
       protocol: "https",
       direction: "outbound",
@@ -704,7 +704,7 @@ describe("DebugProxyCaptureStore", () => {
     store.recordEvent({
       sessionId: "session-direct",
       ts: 1,
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "another-provider",
       protocol: "https",
       direction: "outbound",
@@ -722,8 +722,8 @@ describe("DebugProxyCaptureStore", () => {
       id: "session-direct",
       startedAt: 10,
       mode: "runtime",
-      sourceScope: "openclaw",
-      sourceProcess: "openclaw",
+      sourceScope: "carapace",
+      sourceProcess: "carapace",
       endedAt: 40,
       proxyUrl: "http://synthetic.invalid",
     });
@@ -731,7 +731,7 @@ describe("DebugProxyCaptureStore", () => {
       id: "session-direct",
       startedAt: 30,
       mode: "replacement",
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "updated-process",
     });
 
@@ -746,12 +746,12 @@ describe("DebugProxyCaptureStore", () => {
   });
 
   it.each(["shared", "path"] as const)("preserves %s blob custody and cleanup counts", (kind) => {
-    const env = makeStateEnv("openclaw-proxy-capture-cleanup-");
-    const blobDir = path.join(env.OPENCLAW_STATE_DIR!, "blobs");
+    const env = makeStateEnv("carapace-proxy-capture-cleanup-");
+    const blobDir = path.join(env.CARAPACE_STATE_DIR!, "blobs");
     const store =
       kind === "shared"
         ? new DebugProxyCaptureStore({ env })
-        : new DebugProxyCaptureStore(path.join(env.OPENCLAW_STATE_DIR!, "capture.sqlite"), blobDir);
+        : new DebugProxyCaptureStore(path.join(env.CARAPACE_STATE_DIR!, "capture.sqlite"), blobDir);
     try {
       const sharedPayload = persistEventPayload(store, {
         data: '{"shared":true}',
@@ -763,14 +763,14 @@ describe("DebugProxyCaptureStore", () => {
           id: sessionId,
           startedAt: Date.now(),
           mode: "proxy-run",
-          sourceScope: "openclaw",
-          sourceProcess: "openclaw",
+          sourceScope: "carapace",
+          sourceProcess: "carapace",
         });
         store.recordEvent({
           sessionId,
           ts: Date.now(),
-          sourceScope: "openclaw",
-          sourceProcess: "openclaw",
+          sourceScope: "carapace",
+          sourceProcess: "carapace",
           protocol: "https",
           direction: "outbound",
           kind: "request",

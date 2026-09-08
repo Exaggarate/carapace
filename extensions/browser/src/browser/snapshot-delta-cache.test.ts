@@ -15,7 +15,7 @@ function createContext(state: BrowserServerState = {} as BrowserServerState): Br
 }
 
 function cacheScope(documentIdentity: string) {
-  return { profile: "openclaw", targetId: "tab-1", documentIdentity, family };
+  return { profile: "carapace", targetId: "tab-1", documentIdentity, family };
 }
 
 describe("snapshot delta cache", () => {

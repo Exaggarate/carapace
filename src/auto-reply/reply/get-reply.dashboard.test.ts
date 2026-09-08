@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { runEmbeddedAgent } from "../../agents/embedded-agent.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { withFullRuntimeReplyConfig } from "./get-reply-fast-path.js";
 import { getReplyFromConfig } from "./get-reply.js";
 import { finalizeInboundContext } from "./inbound-context.js";
@@ -18,7 +18,7 @@ vi.mock("../../agents/embedded-agent.js", async (importOriginal) => ({
   })),
 }));
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 afterEach(async () => {
   await state?.cleanup();
   vi.clearAllMocks();
@@ -31,9 +31,9 @@ it.each([
 ] as const)(
   "preserves dashboard skill ownership for $source with authorized=$authorized",
   async ({ source, authorized }) => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "dashboard-reply",
-      env: { OPENCLAW_TEST_FAST: "0" },
+      env: { CARAPACE_TEST_FAST: "0" },
     });
     const skillDir = path.join(state.workspaceDir, "skills", "control-ui");
     await fs.mkdir(skillDir, { recursive: true });
@@ -47,7 +47,7 @@ it.each([
           workspace: state.workspaceDir,
           skipBootstrap: true,
           model: { primary: "mock-openai/gpt-5.6-luna" },
-          models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "openclaw" } } },
+          models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "carapace" } } },
         },
       },
       plugins: { enabled: false },

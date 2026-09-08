@@ -1,7 +1,7 @@
 // Curated Updates settings presentation. The existing update config remains
 // the source of authored policy; the Gateway schedule DTO owns runtime status.
-import { parseDateStringTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { parseDateStringTimestampMs } from "@carapace/normalization-core/number-coercion";
+import { asNullableRecord as asConfigRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing, type TemplateResult } from "lit";
 import type { UpdateRunRecord } from "../../../../src/infra/update-run-record.ts";
 import "../../components/update-run-view.ts";
@@ -115,10 +115,10 @@ function renderRecordedAttempt(props: UpdatesViewProps) {
   return renderSettingsSection({ title: t("updates.page.latestAttempt") }, [
     run
       ? html`<div class="settings-row settings-row--stacked">
-          <openclaw-update-run-view
+          <carapace-update-run-view
             .run=${run}
             .connected=${props.connected}
-          ></openclaw-update-run-view>
+          ></carapace-update-run-view>
         </div>`
       : nothing,
     ...(!failed
@@ -170,7 +170,7 @@ function renderRecordedAttempt(props: UpdatesViewProps) {
             stacked: true,
             control: html`<details class="updates-attempt-details">
               <summary>${t("updates.page.showCliFallback")}</summary>
-              <pre><code>openclaw triage</code></pre>
+              <pre><code>carapace triage</code></pre>
             </details>`,
           }),
         ]),
@@ -542,7 +542,7 @@ export function renderUpdates(props: UpdatesViewProps): TemplateResult {
           }),
         ]),
         html`<p class="settings-page__hint">
-          <a href="https://docs.openclaw.ai/install/update-troubleshooting" target="_blank"
+          <a href="https://github.com/Exaggarate/carapace" target="_blank"
             >${t("updates.page.troubleshoot")}</a
           >
         </p>`,

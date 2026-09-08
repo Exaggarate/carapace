@@ -78,7 +78,7 @@ const { inspectManagedPlugin, listManagedPlugins } = await import("./management-
 const installSnapshot = {
   config: {},
   baseHash: "base-hash",
-  writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+  writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
 };
 
 const trackedArtifactDirs: string[] = [];
@@ -139,7 +139,7 @@ function metadataSnapshot(enabled: boolean, installed = false) {
       origin: "bundled",
       rootDir: "/tmp/workboard",
       source: "/tmp/workboard/index.ts",
-      manifestPath: "/tmp/workboard/openclaw.plugin.json",
+      manifestPath: "/tmp/workboard/carapace.plugin.json",
     },
     installOwner,
   );
@@ -149,7 +149,7 @@ function metadataSnapshot(enabled: boolean, installed = false) {
         recordInstalledPluginIndexInstallOwner(
           {
             pluginId: "workboard",
-            packageName: "@openclaw/workboard",
+            packageName: "@carapace/workboard",
             origin: "bundled",
             rootDir: "/tmp/workboard",
             enabled,
@@ -192,7 +192,7 @@ describe("plugin management registry refresh", () => {
       snapshot: {
         valid: true,
         parsed: {},
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: {},
         hash: "base-hash",
       },
@@ -243,11 +243,11 @@ describe("plugin management registry refresh", () => {
         snapshot: {
           valid: true,
           parsed: {},
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           sourceConfig: { plugins: { entries: { workboard: { enabled: !enabled } } } },
           hash: "base-hash",
         },
-        writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+        writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
       });
       mocks.replaceConfig.mockResolvedValue({});
       mocks.metadata
@@ -275,7 +275,7 @@ describe("plugin management registry refresh", () => {
       snapshot: {
         valid: true,
         parsed: {},
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: {},
         hash: "base-hash",
       },
@@ -324,7 +324,7 @@ describe("plugin management registry refresh", () => {
       snapshot: {
         valid: true,
         parsed: config,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: config,
         hash: "base-hash",
       },
@@ -390,7 +390,7 @@ describe("plugin management registry refresh", () => {
         link: true,
       },
       snapshot: installSnapshot,
-      env: { OPENCLAW_STATE_DIR: stateDir },
+      env: { CARAPACE_STATE_DIR: stateDir },
     };
 
     await expect(installManagedPluginSource(params)).rejects.toMatchObject({

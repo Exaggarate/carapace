@@ -130,7 +130,7 @@ describe("Workboard dispatcher lifecycle races", () => {
   });
 
   it("retains a managed worktree when pre-start lossless cleanup declines", async () => {
-    const managedPath = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-retained-"));
+    const managedPath = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-retained-"));
     const store = new WorkboardStore(createMemoryStore());
     const card = await store.create({
       title: "Retain failed worker checkout",
@@ -148,7 +148,7 @@ describe("Workboard dispatcher lifecycle races", () => {
           create: vi.fn().mockResolvedValue({
             id: "managed-id",
             path: managedPath,
-            branch: `openclaw/wb-${card.id}`,
+            branch: `carapace/wb-${card.id}`,
           }),
           release: vi.fn(),
           removeIfLossless,

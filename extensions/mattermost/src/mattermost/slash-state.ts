@@ -17,7 +17,7 @@ import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   sendHttpRequestRejection,
-  type OpenClawPluginApi,
+  type CarapacePluginApi,
 } from "./runtime-api.js";
 import {
   normalizeSlashCommandTrigger,
@@ -72,7 +72,7 @@ type SlashCommandAccountState = {
  * the module-level variable and the HTTP handler never sees the tokens
  * populated by the monitor.
  */
-const ACCOUNT_STATES_KEY = Symbol.for("openclaw.mattermost.slash-account-states");
+const ACCOUNT_STATES_KEY = Symbol.for("carapace.mattermost.slash-account-states");
 
 function getSlashAccountStates(): Map<string, SlashCommandAccountState> {
   const globalStore = globalThis as Record<PropertyKey, unknown>;
@@ -187,7 +187,7 @@ export function activateSlashCommands(params: {
   registeredCommands: MattermostRegisteredCommand[];
   triggerMap?: Map<string, string>;
   api: {
-    cfg: import("./runtime-api.js").OpenClawConfig;
+    cfg: import("./runtime-api.js").CarapaceConfig;
     runtime: import("./runtime-api.js").RuntimeEnv;
   };
   log?: (msg: string) => void;
@@ -253,7 +253,7 @@ export function deactivateSlashCommands(accountId?: string) {
  * to registered team/trigger ownership so upstream validation can accept a
  * rotated Mattermost token.
  */
-export function registerSlashCommandRoute(api: OpenClawPluginApi) {
+export function registerSlashCommandRoute(api: CarapacePluginApi) {
   const mmConfig = api.config.channels?.mattermost as MattermostConfig | undefined;
 
   // Collect callback paths from both top-level and per-account config.

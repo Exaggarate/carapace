@@ -1,29 +1,29 @@
-import type { ImageGenerationProvider } from "openclaw/plugin-sdk/image-generation";
-import type { MediaUnderstandingProvider } from "openclaw/plugin-sdk/media-understanding";
+import type { ImageGenerationProvider } from "carapace/plugin-sdk/image-generation";
+import type { MediaUnderstandingProvider } from "carapace/plugin-sdk/media-understanding";
 import type {
   PluginCapabilityCatalogContext,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/plugin-entry";
 import type {
   RealtimeTranscriptionProviderConfig,
   RealtimeTranscriptionProviderPlugin,
-} from "openclaw/plugin-sdk/realtime-transcription";
+} from "carapace/plugin-sdk/realtime-transcription";
 import type {
   RealtimeVoiceAudioFormat,
   RealtimeVoiceBridgeCreateRequest,
   RealtimeVoiceProviderPlugin,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/realtime-voice";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import {
   isRecord,
   normalizeOptionalString,
   parseBooleanValue,
   parseFiniteNumber,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   VideoGenerationProvider,
   VideoGenerationProviderCapabilities,
-} from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/video-generation";
 import { XAI_DEFAULT_IMAGE_MODEL, XAI_IMAGE_MODELS } from "./model-definitions.js";
 import {
   XAI_REALTIME_DEFAULT_MODEL,
@@ -302,7 +302,7 @@ export function assertXaiRealtimeVoiceRequestSupported(
 
 function hasXaiRealtimeApiKeyInput(
   configApiKey: string | undefined,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId: string | undefined,
   {
     isProviderAuthProfileConfigured,

@@ -1,28 +1,28 @@
 // Line plugin module implements monitor behavior.
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
-import { hasFinalInboundReplyDispatch } from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { channelReadyPatch, channelStoppedPatch } from "openclaw/plugin-sdk/gateway-runtime";
-import { chunkMarkdownText } from "openclaw/plugin-sdk/reply-runtime";
+import { resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/channel-contract";
+import { hasFinalInboundReplyDispatch } from "carapace/plugin-sdk/channel-inbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { channelReadyPatch, channelStoppedPatch } from "carapace/plugin-sdk/gateway-runtime";
+import { chunkMarkdownText } from "carapace/plugin-sdk/reply-runtime";
 import {
   danger,
   logVerbose,
   waitForAbortSignal,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/runtime-env";
 import {
   canonicalizeWebhookRouteKey,
   normalizePluginHttpPath,
   normalizeWebhookPath,
   registerWebhookTargetWithPluginRoute,
   resolveSingleWebhookTarget,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 import {
   beginWebhookRequestPipelineOrReject,
   createWebhookInFlightLimiter,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-request-guards";
 import { resolveDefaultLineAccountId } from "./accounts.js";
 import { deliverLineAutoReply } from "./auto-reply-delivery.js";
 import { createLineBot } from "./bot.js";
@@ -52,9 +52,9 @@ interface MonitorLineProviderOptions {
   channelAccessToken: string;
   channelSecret: string;
   accountId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: RuntimeEnv;
-  buildContext?: typeof import("openclaw/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
+  buildContext?: typeof import("carapace/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
   abortSignal?: AbortSignal;
   webhookUrl?: string;
   webhookPath?: string;
@@ -94,7 +94,7 @@ async function registerLineWebhookTarget(
 const lineWebhookTargets = new Map<string, LineWebhookTarget[]>();
 
 function startLineLoadingKeepalive(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   userId: string;
   accountId?: string;
   intervalMs?: number;
@@ -421,7 +421,7 @@ export async function monitorLineProvider(
             logVerbose(`line: received ${body.events.length} webhook events`);
             // Only the admission owner can distinguish queued events from ignored standby deliveries.
             if ((await match.target.bot.handleWebhook(body)) === "durable") {
-              res.setHeader("x-openclaw-delivery-accepted", "durable");
+              res.setHeader("x-carapace-delivery-accepted", "durable");
             }
           }
           res.statusCode = 200;

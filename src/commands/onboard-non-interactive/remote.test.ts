@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 
 const commitNonInteractiveOnboardConfigMock = vi.hoisted(() =>
-  vi.fn(async (_params: { nextConfig: OpenClawConfig }) => undefined),
+  vi.fn(async (_params: { nextConfig: CarapaceConfig }) => undefined),
 );
 
 vi.mock("./config-write.js", () => ({
@@ -94,14 +94,14 @@ describe("runNonInteractiveRemoteSetup", () => {
       name: "token",
       option: "remoteToken" as const,
       field: "token" as const,
-      envName: "OPENCLAW_GATEWAY_TOKEN",
+      envName: "CARAPACE_GATEWAY_TOKEN",
       previousField: "password" as const,
     },
     {
       name: "password",
       option: "remotePassword" as const,
       field: "password" as const,
-      envName: "OPENCLAW_GATEWAY_PASSWORD",
+      envName: "CARAPACE_GATEWAY_PASSWORD",
       previousField: "token" as const,
     },
   ])(

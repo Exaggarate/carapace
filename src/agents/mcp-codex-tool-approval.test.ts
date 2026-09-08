@@ -12,7 +12,7 @@ describe("Codex MCP tool approval projection", () => {
     { kind: "option-shaped", serverName: "--help" },
   ])("keeps $kind server names out of executable approval hints", ({ serverName }) => {
     expect(formatMcpCodexApprovalRemedy(serverName)).toContain(
-      "openclaw mcp configure <server> --approval approve",
+      "carapace mcp configure <server> --approval approve",
     );
   });
 
@@ -22,7 +22,7 @@ describe("Codex MCP tool approval projection", () => {
     expect(requiresMcpCodexToolApproval({ mode: undefined })).toBe(true);
   });
 
-  it("preserves explicit modes and the loopback OpenClaw approval exception", () => {
+  it("preserves explicit modes and the loopback Carapace approval exception", () => {
     expect(
       resolveProjectedMcpCodexToolApprovalMode("example", {
         command: "example-mcp",
@@ -30,7 +30,7 @@ describe("Codex MCP tool approval projection", () => {
       }),
     ).toBe("prompt");
     expect(
-      resolveProjectedMcpCodexToolApprovalMode("openclaw", {
+      resolveProjectedMcpCodexToolApprovalMode("carapace", {
         url: "http://127.0.0.1:18789/mcp",
       }),
     ).toBe("approve");

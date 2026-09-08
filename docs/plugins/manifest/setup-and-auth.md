@@ -12,7 +12,7 @@ Manifest fields that setup, onboarding, and config UI surfaces read before plugi
 
 ## Native conversation discovery
 
-Plugins exposing conversations created outside OpenClaw declare
+Plugins exposing conversations created outside Carapace declare
 `setup.nativeSessionCatalog` with a `label`, optional `description`, and optional
 `nodeCommands` containing their catalog read/list/resume command names. The
 contract uses the plugin's existing `config.sessionCatalog.enabled` preference.
@@ -49,14 +49,14 @@ resource is missing.
 
 ## providerAuthChoices reference
 
-Each `providerAuthChoices` entry describes one onboarding or auth choice. OpenClaw reads this before provider runtime loads. Provider setup lists use these manifest choices, descriptor-derived setup choices, and install-catalog metadata without loading provider runtime.
+Each `providerAuthChoices` entry describes one onboarding or auth choice. Carapace reads this before provider runtime loads. Provider setup lists use these manifest choices, descriptor-derived setup choices, and install-catalog metadata without loading provider runtime.
 
 | Field                  | Required | Type                                                                  | What it means                                                                                                                       |
 | ---------------------- | -------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `provider`             | Yes      | `string`                                                              | Provider id this choice belongs to.                                                                                                 |
 | `method`               | Yes      | `string`                                                              | Auth method id to dispatch to.                                                                                                      |
 | `choiceId`             | Yes      | `string`                                                              | Stable auth-choice id used by onboarding and CLI flows.                                                                             |
-| `choiceLabel`          | No       | `string`                                                              | User-facing label. If omitted, OpenClaw falls back to `choiceId`.                                                                   |
+| `choiceLabel`          | No       | `string`                                                              | User-facing label. If omitted, Carapace falls back to `choiceId`.                                                                   |
 | `choiceHint`           | No       | `string`                                                              | Short helper text for the picker.                                                                                                   |
 | `icon`                 | No       | HTTPS URL                                                             | Artwork shown beside this choice in supported onboarding clients.                                                                   |
 | `website`              | No       | HTTPS URL                                                             | Product, sign-in, or installation page shown by supported onboarding clients.                                                       |
@@ -81,7 +81,7 @@ Each `providerAuthChoices` entry describes one onboarding or auth choice. OpenCl
 When `appGuidedDiscovery` is true, the matching provider auth method must expose
 `appGuidedSetup.detect` and `appGuidedSetup.prepare`. Detection must be
 read-only: no login, model pull, download, or config write. Preparation rechecks
-the exact selected model and returns a config proposal; OpenClaw live-tests that
+the exact selected model and returns a config proposal; Carapace live-tests that
 proposal in isolation and commits it only after success. A provider can also
 expose `appGuidedSetup.detectAvailability` to mark its setup choice as detected
 when the local service is reachable but no model qualifies for automatic setup.
@@ -145,15 +145,15 @@ Top-level `cliBackends` stays valid and continues to describe CLI inference back
 
 When present, `setup.providers` and `setup.cliBackends` are the preferred descriptor-first lookup surface for setup discovery. If the descriptor only narrows the candidate plugin and setup still needs richer setup-time runtime hooks, set `requiresRuntime: true` and keep `setup-api` in place as the fallback execution path.
 
-Without an explicit `openclaw.setupEntry`, OpenClaw resolves the conventional `setup-api` file at the package root or in package-local `dist/`. Standalone runtime builds include that public surface automatically.
+Without an explicit `carapace.setupEntry`, Carapace resolves the conventional `setup-api` file at the package root or in package-local `dist/`. Standalone runtime builds include that public surface automatically.
 
-OpenClaw includes `setup.providers[].envVars` in generic provider auth and env-var lookups. Put setup and status env metadata there.
+Carapace includes `setup.providers[].envVars` in generic provider auth and env-var lookups. Put setup and status env metadata there.
 
 Use `providerUsageAuthEnvVars` when a billing or organization-level credential must activate `resolveUsageAuth` without becoming an inference credential. These names join workspace dotenv blocking, ACP child-process stripping, sandbox secret filtering, and broad secret scrubbing. The provider runtime still reads and classifies the value inside `resolveUsageAuth`.
 
-OpenClaw can also derive simple setup choices from `setup.providers[].authMethods` when no setup entry is available, or when `setup.requiresRuntime: false` declares setup runtime unnecessary. Explicit `providerAuthChoices` entries stay preferred for custom labels, CLI flags, onboarding scope, and assistant metadata.
+Carapace can also derive simple setup choices from `setup.providers[].authMethods` when no setup entry is available, or when `setup.requiresRuntime: false` declares setup runtime unnecessary. Explicit `providerAuthChoices` entries stay preferred for custom labels, CLI flags, onboarding scope, and assistant metadata.
 
-Set `requiresRuntime: false` only when those descriptors are sufficient for the setup surface. OpenClaw treats explicit `false` as a descriptor-only contract and will not execute `setup-api` or `openclaw.setupEntry` for setup lookup. If a descriptor-only plugin still ships one of those setup runtime entries, OpenClaw reports an additive diagnostic and continues ignoring it. Omitted `requiresRuntime` keeps legacy fallback behavior so existing plugins that added descriptors without the flag do not break.
+Set `requiresRuntime: false` only when those descriptors are sufficient for the setup surface. Carapace treats explicit `false` as a descriptor-only contract and will not execute `setup-api` or `carapace.setupEntry` for setup lookup. If a descriptor-only plugin still ships one of those setup runtime entries, Carapace reports an additive diagnostic and continues ignoring it. Omitted `requiresRuntime` keeps legacy fallback behavior so existing plugins that added descriptors without the flag do not break.
 
 Because setup lookup can execute plugin-owned `setup-api` code, normalized `setup.providers[].id` and `setup.cliBackends[]` values must stay unique across discovered plugins. Ambiguous ownership fails closed instead of picking a winner from discovery order.
 

@@ -1,6 +1,6 @@
 // Amazon Bedrock tests cover discovery plugin behavior.
 import type { BedrockClient } from "@aws-sdk/client-bedrock";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   discoverBedrockModels,

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { safeParseJson } from "@openclaw/normalization-core/json-coercion";
+import { safeParseJson } from "@carapace/normalization-core/json-coercion";
 import {
   inspectPluginInstallRecordMap,
   type PluginInstallRecordMapState,

@@ -3,12 +3,12 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { sha256Hex } from "./crypto-digest.js";
 import {
@@ -46,22 +46,22 @@ vi.mock("../logging/subsystem.js", () => ({
   }),
 }));
 
-type ExecApprovalsDatabase = Pick<OpenClawStateKyselyDatabase, "exec_approvals_config">;
+type ExecApprovalsDatabase = Pick<CarapaceStateKyselyDatabase, "exec_approvals_config">;
 
 const tempDirs: string[] = [];
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 
 function createStateDir(): string {
   const stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "exec-approvals-db-")));
   tempDirs.push(stateDir);
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   return stateDir;
 }
 
 function row() {
   return executeSqliteQueryTakeFirstSync(
-    openOpenClawStateDatabase().db,
-    getNodeSqliteKysely<ExecApprovalsDatabase>(openOpenClawStateDatabase().db)
+    openCarapaceStateDatabase().db,
+    getNodeSqliteKysely<ExecApprovalsDatabase>(openCarapaceStateDatabase().db)
       .selectFrom("exec_approvals_config")
       .selectAll()
       .where("config_key", "=", "current"),
@@ -69,8 +69,8 @@ function row() {
 }
 
 function makeStateDatabaseUnavailable(): void {
-  closeOpenClawStateDatabaseForTest();
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  closeCarapaceStateDatabaseForTest();
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("missing test state dir");
   }
@@ -80,7 +80,7 @@ function makeStateDatabaseUnavailable(): void {
 const TEST_DELETION_OPERATION_ID = "test-deletion-operation";
 
 function seedAgentDeletionJournal(agentId: string, operationId = TEST_DELETION_OPERATION_ID): void {
-  openOpenClawStateDatabase()
+  openCarapaceStateDatabase()
     .db.prepare(
       `INSERT INTO agent_deletion_journal (
          agent_id, operation_id, agent_dir, workspace_dir, sessions_dir, created_at
@@ -96,7 +96,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   execApprovalsStoreTesting.reset();
   envSnapshot.restore();
   for (const directory of tempDirs.splice(0)) {
@@ -106,7 +106,7 @@ afterEach(() => {
 
 describe("exec approvals SQLite store", () => {
   it("does not create shared state for a read-only load", () => {
-    const statePath = resolveOpenClawStateSqlitePath();
+    const statePath = resolveCarapaceStateSqlitePath();
     expect(fs.existsSync(statePath)).toBe(false);
 
     expect(loadExecApprovalsReadOnly()).toMatchObject({
@@ -122,8 +122,8 @@ describe("exec approvals SQLite store", () => {
       defaults: { security: "allowlist" },
       agents: {},
     });
-    const statePath = resolveOpenClawStateSqlitePath();
-    closeOpenClawStateDatabaseForTest();
+    const statePath = resolveCarapaceStateSqlitePath();
+    closeCarapaceStateDatabaseForTest();
     const older = new DatabaseSync(statePath);
     older.exec(`
       PRAGMA user_version = 7;
@@ -162,7 +162,7 @@ describe("exec approvals SQLite store", () => {
     const written = await updateExecApprovals({
       update: () => ({
         version: 1,
-        socket: { path: "/tmp/openclaw-approvals.sock", token: "secret" },
+        socket: { path: "/tmp/carapace-approvals.sock", token: "secret" },
         defaults: {
           security: "allowlist",
           ask: "on-miss",
@@ -180,7 +180,7 @@ describe("exec approvals SQLite store", () => {
     expect(loadExecApprovals().defaults?.security).toBe("allowlist");
     expect(row()).toMatchObject({
       config_key: "current",
-      socket_path: "/tmp/openclaw-approvals.sock",
+      socket_path: "/tmp/carapace-approvals.sock",
       has_socket_token: 1,
       default_security: "allowlist",
       default_ask: "on-miss",
@@ -230,7 +230,7 @@ describe("exec approvals SQLite store", () => {
       raw: '{"version":1,"agents":{"__proto__":{"security":42}}}',
     },
   ])("fails closed and warns once for $name", ({ raw }) => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.prepare(
       "INSERT INTO exec_approvals_config (config_key, raw_json, socket_path, has_socket_token, default_security, default_ask, default_ask_fallback, auto_allow_skills, agent_count, allowlist_count, updated_at_ms) VALUES (?, ?, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 1)",
     ).run("current", raw);
@@ -413,15 +413,15 @@ describe("exec approvals SQLite store", () => {
 
   it("serializes two SQLite handles and rejects a stale cross-handle CAS", () => {
     saveExecApprovals({ version: 1, defaults: { security: "deny" }, agents: {} });
-    const databasePath = resolveOpenClawStateSqlitePath(process.env);
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = resolveCarapaceStateSqlitePath(process.env);
+    closeCarapaceStateDatabaseForTest();
     const first = new DatabaseSync(databasePath);
     const second = new DatabaseSync(databasePath);
     try {
       first.exec("PRAGMA busy_timeout = 5000");
       second.exec("PRAGMA busy_timeout = 5000");
       const stale = snapshotFromExecApprovalsRow({
-        path: "state/openclaw.sqlite#exec_approvals_config",
+        path: "state/carapace.sqlite#exec_approvals_config",
         row: readExecApprovalsConfigRow(first),
       });
       runSqliteImmediateTransactionSync(second, () => {
@@ -448,8 +448,8 @@ describe("exec approvals SQLite store", () => {
   ])(
     "blocks runtime reads while the retired %s exists, then rechecks after removal",
     (_, suffix) => {
-      closeOpenClawStateDatabaseForTest();
-      const stateDir = process.env.OPENCLAW_STATE_DIR;
+      closeCarapaceStateDatabaseForTest();
+      const stateDir = process.env.CARAPACE_STATE_DIR;
       if (!stateDir) {
         throw new Error("missing test state dir");
       }
@@ -465,7 +465,7 @@ describe("exec approvals SQLite store", () => {
       }
       expect(caught).toBeInstanceOf(ExecApprovalsMigrationRequiredError);
       expect(caught).toMatchObject({
-        message: `Legacy exec approvals exist at ${sourcePath}. Run \`openclaw doctor --fix\` with OPENCLAW_STATE_DIR set to ${stateDir} before using exec approvals.`,
+        message: `Legacy exec approvals exist at ${sourcePath}. Run \`carapace doctor --fix\` with CARAPACE_STATE_DIR set to ${stateDir} before using exec approvals.`,
       });
 
       fs.rmSync(legacyPath);
@@ -474,9 +474,9 @@ describe("exec approvals SQLite store", () => {
   );
 
   it("scopes the doctor command to the blocked state directory", () => {
-    // A bare `openclaw doctor --fix` repairs the default root, leaving a scoped
+    // A bare `carapace doctor --fix` repairs the default root, leaving a scoped
     // install blocked by the same file it was told to repair (#115008).
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
       throw new Error("missing test state dir");
     }
@@ -487,7 +487,7 @@ describe("exec approvals SQLite store", () => {
     // Prose, not `VAR=value cmd`: no Windows shell accepts that form, and a path
     // containing spaces would need shell-specific quoting to survive a paste.
     expect(error.message).toContain(
-      `Run \`openclaw doctor --fix\` with OPENCLAW_STATE_DIR set to ${stateDir}`,
+      `Run \`carapace doctor --fix\` with CARAPACE_STATE_DIR set to ${stateDir}`,
     );
   });
 
@@ -496,7 +496,7 @@ describe("exec approvals SQLite store", () => {
     [false, true, false],
     [false, false, true],
   ])("detects legacy state at every source-claim-source probe", (first, claim, second) => {
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
       throw new Error("missing test state dir");
     }

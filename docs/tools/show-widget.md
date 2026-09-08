@@ -10,13 +10,13 @@ read_when:
   - You need the show_widget input, security, or retention contract
 ---
 
-`show_widget` is a core tool that shows a self-contained HTML widget on the user's current surface. OpenClaw renders it inline in the Control UI and in iOS, Android, macOS, and Linux Quick Chat transcripts; the Linux dashboard uses the browser Control UI. In a Discord session with [Activities](/channels/discord-activities) enabled, the Discord plugin posts an **Open widget** button that launches it as an Activity.
+`show_widget` is a core tool that shows a self-contained HTML widget on the user's current surface. Carapace renders it inline in the Control UI and in iOS, Android, macOS, and Linux Quick Chat transcripts; the Linux dashboard uses the browser Control UI. In a Discord session with [Activities](/channels/discord-activities) enabled, the Discord plugin posts an **Open widget** button that launches it as an Activity.
 
 For a pinned data report, provide a structured `report` with `pin: true`. Reports render directly in the Control UI dashboard using its native typography and layout, without a document frame. Use HTML for arbitrary interactive content or an inline preview. See [Native dashboard reports](#native-dashboard-reports).
 
 ## How widgets work
 
-For HTML widgets, OpenClaw core validates `widget_code` and wraps it once in the canonical HTML document. For an inline client, core stores that document as a Canvas document and returns a preview handle. The Control UI reads the document over its authenticated Gateway connection and renders it through the dedicated-origin, double-iframe sandbox used by dashboard widgets and MCP Apps. The widget frame does not need its own login session. iOS, Android, macOS, and Linux Quick Chat use isolated web views. Full chat clients restore the widget after history reload; Quick Chat keeps the widget for its active reply.
+For HTML widgets, Carapace core validates `widget_code` and wraps it once in the canonical HTML document. For an inline client, core stores that document as a Canvas document and returns a preview handle. The Control UI reads the document over its authenticated Gateway connection and renders it through the dedicated-origin, double-iframe sandbox used by dashboard widgets and MCP Apps. The widget frame does not need its own login session. iOS, Android, macOS, and Linux Quick Chat use isolated web views. Full chat clients restore the widget after history reload; Quick Chat keeps the widget for its active reply.
 
 Channel plugins can register a contextual presenter behind the same core tool. In a configured Discord session, core hands the composed document to the Discord presenter, which stores it and posts the Activity button in the current channel. The model still makes one `show_widget` call; there is no transport-specific widget tool or content kind.
 
@@ -25,14 +25,14 @@ In Control UI sessions, a Canvas widget can also be pinned to the session dashbo
 For browser embedding, the wrapper document injects five small host bridges around the widget code:
 
 - A size reporter posts the rendered content height to the embedding chat, which clamps it and fits the iframe (48 to 8000 pixels).
-- A host bridge defines the legacy `sendPrompt(text)` helper plus the structured `openclaw.prompt`, `openclaw.state`, `openclaw.data`, and `openclaw.cron` APIs. Inline chat prompts retain their private message channel; dashboard APIs use a view-ticket-bound request channel. See [Interactive widgets](#interactive-widgets) and [Dashboard capabilities](#dashboard-capabilities).
+- A host bridge defines the legacy `sendPrompt(text)` helper plus the structured `carapace.prompt`, `carapace.state`, `carapace.data`, and `carapace.cron` APIs. Inline chat prompts retain their private message channel; dashboard APIs use a view-ticket-bound request channel. See [Interactive widgets](#interactive-widgets) and [Dashboard capabilities](#dashboard-capabilities).
 - A theme bridge listens for the Control UI's current design tokens and applies them as CSS variables, on load and again on every theme change.
 - A snapshot bridge renders the current widget document as a PNG when the embedding chat requests an export.
 - A chat-host bridge hides embedded scrollbar chrome when the widget runs inline while preserving scrolling behavior.
 
 Everything else stays inside the frame: the document runs in an opaque origin with a strict Content Security Policy, so widget scripts cannot reach the Control UI, the Gateway, or the network.
 
-OpenClaw exposes `show_widget` only when the originating Gateway client declares the `inline-widgets` capability or exactly one registered current-channel presenter synchronously matches trusted run context. The Control UI and supported native apps declare the inline capability automatically. Linux Quick Chat stays text-only for Gateway connections that require a custom TLS leaf pin because its platform WebView cannot bind that pin. Discord matches only when Activities are configured for the current account and a concrete channel is available. Other channel runs without an inline client or matching presenter do not receive the tool.
+Carapace exposes `show_widget` only when the originating Gateway client declares the `inline-widgets` capability or exactly one registered current-channel presenter synchronously matches trusted run context. The Control UI and supported native apps declare the inline capability automatically. Linux Quick Chat stays text-only for Gateway connections that require a custom TLS leaf pin because its platform WebView cannot bind that pin. Discord matches only when Activities are configured for the current account and a concrete channel is available. Other channel runs without an inline client or matching presenter do not receive the tool.
 
 An agent-turn automation bound to a persistent session and carrying a server-authored scheduled tool policy may explicitly allow `show_widget` without an inline client. That scheduled surface is pinned-only: every call requires `pin: true`, writes to the bound session dashboard, and cannot set `presentation.target`. Detached cron-run sessions, ordinary capless channel runs, and scheduled jobs without an explicit tool cap remain excluded. The originating-client capability remains mandatory for inline presentation.
 
@@ -75,7 +75,7 @@ Bare headings, paragraphs, links, buttons, inputs, selects, textareas, tables, a
 - `.row` for a wrapping horizontal layout
 - `button.primary` for the primary action
 
-The Control UI posts an `openclaw:widget-theme` message with the active theme values when a widget loads and whenever the theme changes. Widgets therefore track every theme family, including Claw, Knot, Dash, and custom themes, without reloading. Outside the Control UI, including native apps and direct opens, widgets use the baked light or dark palette selected by `prefers-color-scheme`.
+The Control UI posts an `carapace:widget-theme` message with the active theme values when a widget loads and whenever the theme changes. Widgets therefore track every theme family, including Claw, Knot, Dash, and custom themes, without reloading. Outside the Control UI, including native apps and direct opens, widgets use the baked light or dark palette selected by `prefers-color-scheme`.
 
 Author widgets with four rules:
 
@@ -172,9 +172,9 @@ Reuse the same `name` and `pin: true` with a new `report` object to replace a re
 
 ## Show on a device
 
-When a widget presenter plugin is active, `presentation.target` also offers `node_panel`. OpenClaw creates the same hosted widget document, selects a connected widget-panel-capable Mac, and opens its native panel at that document. The tool result names the selected Mac.
+When a widget presenter plugin is active, `presentation.target` also offers `node_panel`. Carapace creates the same hosted widget document, selects a connected widget-panel-capable Mac, and opens its native panel at that document. The tool result names the selected Mac.
 
-If no eligible Mac is connected or the node command fails, the widget still appears inline in chat and the result explains how to recover. Pair a Mac running OpenClaw or open the macOS app, then retry. Widgets shown in a native panel are render-only in this first version; widget actions remain disabled there.
+If no eligible Mac is connected or the node command fails, the widget still appears inline in chat and the result explains how to recover. Pair a Mac running Carapace or open the macOS app, then retry. Widgets shown in a native panel are render-only in this first version; widget actions remain disabled there.
 
 ## Interactive widgets
 
@@ -199,12 +199,12 @@ Accepted prompts appear in the transcript as regular user messages and start a n
 
 Pinned HTML and registered-source widgets expose one ticket-bound host API. An explicit [session permission mode](/gateway/permission-modes) determines how declared capabilities are approved: **Full access** grants them immediately; **Workspace** uses an AI reviewer and rejects anything it does not allow; **Guarded** shows an **Allow** / **Reject** card; **Read only** rejects them. Without an explicit session mode, the equivalent configured exec approval policy applies.
 
-- `openclaw.host.controlUiBaseUrl` exposes the Control UI origin plus its configured base path after the dashboard host initializes. It is `null` before initialization and outside the dashboard, so read it in the link's click handler rather than when the widget script first runs.
-- `openclaw.prompt.send(text)` requires transient user activation and posts a visible composer message. Declaring and receiving the `prompt` tool grant skips the extra per-click confirmation; validation, focus checks, and rate limits still apply.
-- `openclaw.state.emit(payload)` adds a session notice. Payloads are capped at 8 KiB, and identical client emissions within five seconds are coalesced.
-- `openclaw.data.read(bindingId, params?)` resolves only at the Gateway. Core bindings are `sessions.list`, `usage.status`, `usage.cost`, `cron.list`, `cron.status`, `agents.list`, `health`, and the repository-scoped `github.actions.runs` binding below.
-- `openclaw.action.run(actionId, params?)` invokes an operator-granted plugin dashboard action verb through its write-scoped Gateway method.
-- `openclaw.cron.trigger(jobId)` runs an existing job now only when the exact `cron.trigger:<jobId>` capability was granted.
+- `carapace.host.controlUiBaseUrl` exposes the Control UI origin plus its configured base path after the dashboard host initializes. It is `null` before initialization and outside the dashboard, so read it in the link's click handler rather than when the widget script first runs.
+- `carapace.prompt.send(text)` requires transient user activation and posts a visible composer message. Declaring and receiving the `prompt` tool grant skips the extra per-click confirmation; validation, focus checks, and rate limits still apply.
+- `carapace.state.emit(payload)` adds a session notice. Payloads are capped at 8 KiB, and identical client emissions within five seconds are coalesced.
+- `carapace.data.read(bindingId, params?)` resolves only at the Gateway. Core bindings are `sessions.list`, `usage.status`, `usage.cost`, `cron.list`, `cron.status`, `agents.list`, `health`, and the repository-scoped `github.actions.runs` binding below.
+- `carapace.action.run(actionId, params?)` invokes an operator-granted plugin dashboard action verb through its write-scoped Gateway method.
+- `carapace.cron.trigger(jobId)` runs an existing job now only when the exact `cron.trigger:<jobId>` capability was granted.
 
 User-clicked links to `http` or `https` destinations are forwarded to the Control UI host, which opens a new tab with `noopener` and `noreferrer`. Forwarding covers a primary click on a `target="_blank"` link and a middle-button click on any link, matching how links behave elsewhere in the Control UI; a widget's own `preventDefault` still cancels the click. The widget sandbox never grants popup permission, and script-initiated `window.open` does not work.
 
@@ -227,7 +227,7 @@ input, replacing `owner/repo` in both places:
   "name": "workflow-runs",
   "pin": true,
   "capabilities": { "tools": ["github.actions.runs:owner/repo"] },
-  "widget_code": "<pre id='runs'>Loading…</pre><script>openclaw.data.read('github.actions.runs',{repository:'owner/repo',perPage:20}).then(data=>{document.getElementById('runs').textContent=data.workflow_runs.map(run=>run.display_title+': '+(run.conclusion||run.status)).join('\\n')}).catch(error=>{document.getElementById('runs').textContent=String(error)});</script>"
+  "widget_code": "<pre id='runs'>Loading…</pre><script>carapace.data.read('github.actions.runs',{repository:'owner/repo',perPage:20}).then(data=>{document.getElementById('runs').textContent=data.workflow_runs.map(run=>run.display_title+': '+(run.conclusion||run.status)).join('\\n')}).catch(error=>{document.getElementById('runs').textContent=String(error)});</script>"
 }
 ```
 

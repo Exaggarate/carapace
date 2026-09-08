@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { publishSessionEntryCacheInvalidation } from "./session-accessor.sqlite-entry-cache.js";
 import { getSessionKysely, type ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
 import { parseSessionEntryJson } from "./session-accessor.sqlite-status.js";
@@ -26,7 +26,7 @@ export type SessionTranscriptContextVersion = {
 };
 
 export function readTranscriptContextVersionInTransaction(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   sessionId: string,
 ) {
   const db = getSessionKysely(database.db);
@@ -52,7 +52,7 @@ function createTranscriptGeneration(): string {
 
 /** Read the current raw transcript generation inside the caller's transaction. */
 export function readTranscriptGenerationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): string | undefined {
   const db = getSessionKysely(database.db);
@@ -67,7 +67,7 @@ export function readTranscriptGenerationInTransaction(
 
 /** Materialize a generation once; pure appends must preserve an existing token. */
 export function ensureTranscriptGenerationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): string {
   const db = getSessionKysely(database.db);
@@ -84,7 +84,7 @@ export function ensureTranscriptGenerationInTransaction(
 
 /** Rotate the watermark in the same transaction as destructive transcript replacement. */
 export function rotateTranscriptGenerationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): string {
   const db = getSessionKysely(database.db);
@@ -102,7 +102,7 @@ export function rotateTranscriptGenerationInTransaction(
 }
 
 export function ensureTranscriptSessionRoot(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   updatedAt: number,
   options: { allowStoredAlias?: boolean } = {},
@@ -228,7 +228,7 @@ export function ensureTranscriptSessionRoot(
   );
 }
 
-export function readNextTranscriptSeq(database: OpenClawAgentDatabase, sessionId: string): number {
+export function readNextTranscriptSeq(database: CarapaceAgentDatabase, sessionId: string): number {
   const db = getSessionKysely(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -248,7 +248,7 @@ function normalizeTranscriptMutationAtMs(value: number): number | undefined {
 }
 
 export function readTranscriptMutationStateInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): { observedAt: number | null; updatedAt: number | null } {
   const db = getSessionKysely(database.db);
@@ -266,7 +266,7 @@ export function readTranscriptMutationStateInTransaction(
 }
 
 export function advanceTranscriptMutationAtInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   value: number,
   options: { strictly?: boolean } = {},
@@ -293,7 +293,7 @@ export function advanceTranscriptMutationAtInTransaction(
 }
 
 export function touchTranscriptMutationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): void {
   const now = normalizeTranscriptMutationAtMs(Date.now());
@@ -303,7 +303,7 @@ export function touchTranscriptMutationInTransaction(
 }
 
 export function deleteTranscriptEventsInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): boolean {
   const db = getSessionKysely(database.db);

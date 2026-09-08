@@ -1,6 +1,6 @@
 // Memory Core owns process-local sync outcome reporting.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { redactSensitiveText } from "carapace/plugin-sdk/security-runtime";
 
 export class MemorySyncOutcomeLedger {
   private failureRevision = 0;

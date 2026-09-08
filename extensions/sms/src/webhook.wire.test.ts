@@ -1,6 +1,6 @@
 // Sms tests cover webhook responses as the sender receives them on the wire.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { postRawWebhook, withServer } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { postRawWebhook, withServer } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSmsWebhookHandler } from "./webhook.js";
 import {

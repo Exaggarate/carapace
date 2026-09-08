@@ -2,7 +2,7 @@
 import {
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -19,7 +19,7 @@ import {
   isConfiguredSessionStoreAgentId,
   resolveExistingAgentSessionStoreTargetsSync,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
 import { setGatewayDedupeEntry } from "../agent-turn/agent-job.js";
 import { resolveChatRunOwnerAgentId } from "../chat-run-owner.js";
@@ -84,7 +84,7 @@ export function resolveAbortSessionKey(params: {
 
 function resolveSessionKeyAgentId(
   sessionKey: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): string | undefined {
   const key = normalizeOptionalString(sessionKey);
   if (!key) {
@@ -99,13 +99,13 @@ function resolveSessionKeyAgentId(
 function sessionKeyBelongsToAgent(
   sessionKey: string | undefined,
   agentId: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): boolean {
   return resolveSessionKeyAgentId(sessionKey, cfg) === normalizeAgentId(agentId);
 }
 
 function resolveScopedAbortKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string | undefined;
   agentId: string | undefined;
 }): string | undefined {

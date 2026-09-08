@@ -49,7 +49,7 @@ suite.define(() => {
         await page.goto(`${suite.server.baseUrl}settings/updates`);
         await gateway.waitForRequest("config.get");
         await page.getByRole("button", { name: "Update now", exact: true }).click();
-        const dialog = page.locator("openclaw-modal-dialog");
+        const dialog = page.locator("carapace-modal-dialog");
         await dialog.getByRole("button", { name: "Update and restart", exact: true }).waitFor();
         expect(await gateway.getRequests("update.run")).toHaveLength(0);
         await page.screenshot({
@@ -62,9 +62,9 @@ suite.define(() => {
         expect((await gateway.waitForRequest("update.runs.get")).params).toEqual({
           runId: run.runId,
         });
-        const runView = dialog.locator("openclaw-update-run-view");
+        const runView = dialog.locator("carapace-update-run-view");
         await runView
-          .getByText("⬆️ OpenClaw update in progress: staging.", { exact: true })
+          .getByText("⬆️ Carapace update in progress: staging.", { exact: true })
           .waitFor();
         await runView.getByText("Downloading the update package.", { exact: false }).waitFor();
         expect(await runView.locator('[data-step="repairing"]').count()).toBe(0);
@@ -160,7 +160,7 @@ suite.define(() => {
           status: run.status,
           updatedAtMs: run.updatedAtMs,
         });
-        const headline = "✅ OpenClaw updated to 2.0.0 (from 1.0.0).";
+        const headline = "✅ Carapace updated to 2.0.0 (from 1.0.0).";
         await runView.getByText(headline, { exact: true }).first().waitFor();
         await runView.getByText("Gateway downtime: 1s.", { exact: false }).waitFor();
         expect(await runView.locator('[data-oracle][data-state="pass"]').count()).toBe(4);
@@ -173,7 +173,7 @@ suite.define(() => {
         await dialog.getByRole("button", { name: "Close", exact: true }).click();
         await dialog.waitFor({ state: "detached" });
         await page
-          .locator("openclaw-update-run-view")
+          .locator("carapace-update-run-view")
           .getByText(headline, { exact: true })
           .first()
           .waitFor();
@@ -195,7 +195,7 @@ suite.define(() => {
         await freshPage.goto(`${suite.server.baseUrl}settings/updates`);
         await freshGateway.waitForRequest("update.status");
         await freshPage
-          .locator("openclaw-update-run-view")
+          .locator("carapace-update-run-view")
           .getByText(headline, { exact: true })
           .first()
           .waitFor();

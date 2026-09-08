@@ -1,4 +1,4 @@
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { storeDeviceAuthToken } from "../lib/nodes/index.ts";
 import * as prewarm from "../pages/chat/session-snapshot-prewarm.ts";
@@ -7,7 +7,7 @@ import type { BootRecord } from "./boot-record.ts";
 import { bootstrapApplication } from "./bootstrap.ts";
 import { loadSettings, persistSessionToken, saveSettings } from "./settings.ts";
 
-const BOOT_RECORD_PREFIX = "openclaw.control.bootRecord.v1:";
+const BOOT_RECORD_PREFIX = "carapace.control.bootRecord.v1:";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -113,7 +113,7 @@ describe("warm startup credential binding", () => {
       saveSettings(settings);
       persistSessionToken(settings.gatewayUrl, token);
       localStorage.setItem(
-        "openclaw-device-identity-v1",
+        "carapace-device-identity-v1",
         JSON.stringify({
           version: 1,
           deviceId: "device-one",

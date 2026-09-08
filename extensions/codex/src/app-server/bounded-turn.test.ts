@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { runBoundedCodexAppServerTurn } from "./bounded-turn.js";
 import {
@@ -501,7 +501,7 @@ describe("runBoundedCodexAppServerTurn settled finalization isolation", () => {
     ).resolves.toEqual({
       action: "decline",
       content: null,
-      _meta: { message: "OpenClaw Codex hosted search does not support interactive input." },
+      _meta: { message: "Carapace Codex hosted search does not support interactive input." },
     });
 
     await fake.notify({

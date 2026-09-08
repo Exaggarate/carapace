@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { describe, expect, it, vi } from "vitest";
 import { registerQaLabCli } from "./cli.js";
@@ -11,7 +11,7 @@ import type { QaScorecardChannelDriver } from "./scorecard-taxonomy.js";
 import { selectQaFlowSuiteScenarios } from "./suite-planning.js";
 import { makeQaSuiteTestScenario } from "./suite-test-helpers.js";
 
-vi.mock("openclaw/plugin-sdk/qa-runner-runtime", () => ({
+vi.mock("carapace/plugin-sdk/qa-runner-runtime", () => ({
   listQaRunnerCliContributions: () => [],
 }));
 
@@ -29,11 +29,11 @@ function captureReportedArgv(command: string): string[] {
 function selectReportedCommands(scenarios: QaSeedScenarioWithSource[]) {
   const matches = scenarios.flatMap((scenario) => findQaScenarioMatches([scenario], scenario.id));
   const report = renderQaScenarioMatchesMarkdownReport({ query: "selected scenarios", matches });
-  const commands = [...report.matchAll(/`(pnpm openclaw qa suite[^`]+)`/gu)];
+  const commands = [...report.matchAll(/`(pnpm carapace qa suite[^`]+)`/gu)];
   expect(commands.length).toBeGreaterThan(0);
   return commands.map(([, command]) => {
     const argv = captureReportedArgv(command!);
-    expect(argv.slice(0, 4)).toEqual(["pnpm", "openclaw", "qa", "suite"]);
+    expect(argv.slice(0, 4)).toEqual(["pnpm", "carapace", "qa", "suite"]);
     const program = new Command();
     registerQaLabCli(program);
     const qa = expectDefined(
@@ -126,11 +126,11 @@ describe("QA coverage command selection", () => {
       query: scenario.id,
       matches: findQaScenarioMatches([scenario], scenario.id),
     });
-    const command = expectDefined(report.match(/`(pnpm openclaw qa suite[^`]+)`/u)?.[1], "command");
+    const command = expectDefined(report.match(/`(pnpm carapace qa suite[^`]+)`/u)?.[1], "command");
 
     expect(captureReportedArgv(command)).toEqual([
       "pnpm",
-      "openclaw",
+      "carapace",
       "qa",
       "suite",
       "--channel-driver",

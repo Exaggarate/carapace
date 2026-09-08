@@ -1,5 +1,5 @@
 import { ACCESS_MODE_ALL, ACCESS_MODE_SELECTED } from "./relay-core.js";
-import { addTabToOpenClawGroup } from "./relay-tab-groups.js";
+import { addTabToCarapaceGroup } from "./relay-tab-groups.js";
 import { TAB_SCOPED_COMMANDS } from "./tab-access-command-scope.js";
 import { createTabDocumentProvenance } from "./tab-document-provenance.js";
 import { effectiveTabUrl, isValidTabId, tabEligibility } from "./tab-eligibility.js";
@@ -34,7 +34,7 @@ export function createTabAccessPolicy({ chromeApi = chrome, isSelectedTab, getGr
   let initialized = null;
   let storageChain = Promise.resolve();
   const addTabToGroup = (tabId, created) =>
-    addTabToOpenClawGroup(tabId, { chromeApi, getGroupColor, created });
+    addTabToCarapaceGroup(tabId, { chromeApi, getGroupColor, created });
 
   const documents = createTabDocumentProvenance({
     access: {
@@ -610,15 +610,15 @@ export function createTabAccessPolicy({ chromeApi = chrome, isSelectedTab, getGr
       throw new Error(`tab ${tabId} access was revoked`);
     }
     if (state.reason === "paused") {
-      throw new Error(`tab ${tabId} is paused for OpenClaw`);
+      throw new Error(`tab ${tabId} is paused for Carapace`);
     }
     if (state.reason === "not-selected") {
-      throw new Error(`tab ${tabId} is not in the OpenClaw tab group`);
+      throw new Error(`tab ${tabId} is not in the Carapace tab group`);
     }
     if (state.reason === "incognito") {
-      throw new Error(`tab ${tabId} is incognito and unavailable to OpenClaw`);
+      throw new Error(`tab ${tabId} is incognito and unavailable to Carapace`);
     }
-    throw new Error(`tab ${tabId} is restricted or unavailable to OpenClaw`);
+    throw new Error(`tab ${tabId} is restricted or unavailable to Carapace`);
   }
 
   async function listAccessibleTabs({ allowDuringTransition = false } = {}) {
@@ -675,7 +675,7 @@ export function createTabAccessPolicy({ chromeApi = chrome, isSelectedTab, getGr
     if (!eligibilityForTab(tab, controlledBlank).eligible) {
       deniedTabIds.delete(tabId);
       invalidateTab(tabId);
-      throw new Error(`tab ${tabId} is restricted or unavailable to OpenClaw`);
+      throw new Error(`tab ${tabId} is restricted or unavailable to Carapace`);
     }
     await mutateStorage(persistDeniedIds);
   }

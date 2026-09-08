@@ -218,9 +218,9 @@ function renderLibraryEditor(library: SkillLibraryController) {
     >
       ${t(`skillLibrary.${action}`)}
     </button>`;
-  return html` <openclaw-modal-dialog
+  return html` <carapace-modal-dialog
     label=${draft.entry?.slug ?? t("skillLibrary.create")}
-    style="--openclaw-modal-width: 960px;"
+    style="--carapace-modal-width: 960px;"
     @modal-cancel=${(event: Event) => {
       // Native dismissal must not bypass the controller's busy and discard checks.
       event.preventDefault();
@@ -526,7 +526,7 @@ function renderLibraryEditor(library: SkillLibraryController) {
         }
       </div>
     </form>
-  </openclaw-modal-dialog>`;
+  </carapace-modal-dialog>`;
 }
 
 function renderLibraryImport(library: SkillLibraryController) {
@@ -534,7 +534,7 @@ function renderLibraryImport(library: SkillLibraryController) {
     return nothing;
   }
   const close = () => library.close();
-  return html`<openclaw-modal-dialog
+  return html`<carapace-modal-dialog
     label=${t("skillLibrary.import")}
     @modal-cancel=${(event: Event) => {
       event.preventDefault();
@@ -629,5 +629,5 @@ function renderLibraryImport(library: SkillLibraryController) {
         </button>
       </div>
     </form>
-  </openclaw-modal-dialog>`;
+  </carapace-modal-dialog>`;
 }

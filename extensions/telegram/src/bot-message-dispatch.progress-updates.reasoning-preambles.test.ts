@@ -340,7 +340,7 @@ describeTelegramDispatch("dispatchTelegramMessage progress-updates reasoning and
         await dispatcherOptions.deliver(
           {
             text: "Fast mode enabled",
-            channelData: { openclawProgressKind: "fast-mode-auto" },
+            channelData: { carapaceProgressKind: "fast-mode-auto" },
           },
           { kind: "tool" },
         );
@@ -370,7 +370,7 @@ describeTelegramDispatch("dispatchTelegramMessage progress-updates reasoning and
     dispatchReplyWithBufferedBlockDispatcher.mockImplementation(async ({ replyOptions }) => {
       rendered = await replyOptions?.onToolResult?.({
         text: "Fast mode enabled",
-        channelData: { openclawProgressKind: "fast-mode-auto" },
+        channelData: { carapaceProgressKind: "fast-mode-auto" },
       });
       return { queuedFinal: false };
     });
@@ -390,7 +390,7 @@ describeTelegramDispatch("dispatchTelegramMessage progress-updates reasoning and
     expect(deliverReplies).toHaveBeenCalledOnce();
     expectDeliveredReply(0, {
       text: "Fast mode enabled",
-      channelData: { openclawProgressKind: "fast-mode-auto" },
+      channelData: { carapaceProgressKind: "fast-mode-auto" },
     });
   });
 

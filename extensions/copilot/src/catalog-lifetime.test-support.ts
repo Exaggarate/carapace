@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type Socket } from "node:net";
 import { CopilotClient, RuntimeConnection } from "@github/copilot-sdk";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 
 type Request = { id: number; method: string; params: Record<string, unknown> };
 

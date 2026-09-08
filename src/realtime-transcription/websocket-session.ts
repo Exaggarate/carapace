@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { toErrorObject, toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject, toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import type WebSocket from "ws";
 import { RetrySupervisor } from "../../packages/retry/src/index.js";
 import { sleepWithAbort } from "../infra/backoff.js";

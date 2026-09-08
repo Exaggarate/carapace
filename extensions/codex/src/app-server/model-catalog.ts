@@ -1,5 +1,5 @@
-import type { AgentHarnessModelCatalogParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { ModelCatalogEntry } from "openclaw/plugin-sdk/agent-runtime";
+import type { AgentHarnessModelCatalogParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { ModelCatalogEntry } from "carapace/plugin-sdk/agent-runtime";
 import { readCodexPluginConfig } from "./config-parsing.js";
 import { resolveCodexAppServerRuntimeOptions } from "./config-runtime.js";
 import { buildCodexRuntimeModelParams } from "./model-runtime.js";
@@ -8,7 +8,7 @@ import { isJsonObject, type CodexGetAccountResponse } from "./protocol.js";
 import { withCodexAppServerJsonClient } from "./request.js";
 import { captureSharedCodexAppServerCatalogLifetime } from "./shared-client.js";
 
-// Manifest contract (openclaw.plugin.json discovery.timeoutMs default): live model
+// Manifest contract (carapace.plugin.json discovery.timeoutMs default): live model
 // discovery is bounded tightly so a wedged app-server degrades to the static catalog.
 const DEFAULT_MODEL_DISCOVERY_TIMEOUT_MS = 2500;
 type ModelInputType = NonNullable<ModelCatalogEntry["input"]>[number];

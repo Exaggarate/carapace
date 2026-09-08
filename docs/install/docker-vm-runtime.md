@@ -1,8 +1,8 @@
 ---
-summary: "Shared Docker VM runtime steps for long-lived OpenClaw Gateway hosts"
+summary: "Shared Docker VM runtime steps for long-lived Carapace Gateway hosts"
 doc-schema-version: 1
 read_when:
-  - You are deploying OpenClaw on a cloud VM with Docker
+  - You are deploying Carapace on a cloud VM with Docker
   - You need the shared setup, binary bake, persistence, and update flow
 title: "Docker VM runtime"
 ---
@@ -19,7 +19,7 @@ You need:
 - A Debian or Ubuntu VM with Docker Engine and Docker Compose v2
 - At least 6 GB RAM for a source image build; smaller hosts should use the
   official pre-built image below
-- The OpenClaw source checkout on the VM
+- The Carapace source checkout on the VM
 - Provider and model credentials for onboarding
 - An SSH-only or otherwise restricted provider firewall; do not expose the
   Gateway port directly to the public Internet
@@ -27,8 +27,8 @@ You need:
 From the VM:
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw
+git clone https://github.com/Exaggarate/carapace.git
+cd carapace
 docker --version
 docker compose version
 ```
@@ -38,20 +38,20 @@ docker compose version
 The maintained setup script defaults state to the current VM user's home:
 
 ```bash
-export OPENCLAW_CONFIG_DIR="$HOME/.openclaw"
-export OPENCLAW_WORKSPACE_DIR="$HOME/.openclaw/workspace"
-export OPENCLAW_AUTH_PROFILE_SECRET_DIR="$HOME/.openclaw-auth-profile-secrets"
+export CARAPACE_CONFIG_DIR="$HOME/.carapace"
+export CARAPACE_WORKSPACE_DIR="$HOME/.carapace/workspace"
+export CARAPACE_AUTH_PROFILE_SECRET_DIR="$HOME/.carapace-auth-profile-secrets"
 ```
 
 Override those paths before setup if your VM uses a dedicated data disk. Keep
 all three directories in backups. Current OAuth token material is stored as
-plaintext in SQLite under `OPENCLAW_CONFIG_DIR`, including access, refresh, and
+plaintext in SQLite under `CARAPACE_CONFIG_DIR`, including access, refresh, and
 ID-token values. Treat the config directory and its backups or copies as
 credentials.
 
 The auth-profile secret directory contains only the local key used to recover
 legacy encrypted OAuth sidecar credentials. It must persist for that recovery
-path and remain separate from `OPENCLAW_CONFIG_DIR`, but it does not encrypt
+path and remain separate from `CARAPACE_CONFIG_DIR`, but it does not encrypt
 current SQLite rows or protect a state-only backup or copy.
 
 ## Run the maintained Docker setup
@@ -60,16 +60,16 @@ current SQLite rows or protect a state-only backup or copy.
 ./scripts/docker/setup.sh
 ```
 
-The script creates the host directories, builds `openclaw:local`, runs
+The script creates the host directories, builds `carapace:local`, runs
 onboarding, generates a Gateway token, synchronizes `.env`, and starts the
 Gateway through the repository's `docker-compose.yml`. The Compose file pins
-container-side state to `/home/node/.openclaw` while using the host paths above
+container-side state to `/home/node/.carapace` while using the host paths above
 as bind-mount sources.
 
 To use an official prebuilt image instead of building from source:
 
 ```bash
-export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
+export CARAPACE_IMAGE="ghcr.io/carapace/carapace:latest"
 ./scripts/docker/setup.sh
 ```
 
@@ -77,7 +77,7 @@ For unattended setup, provider SecretRefs, extra mounts, sandbox setup, and all
 supported environment variables, use the full [Docker guide](/install/docker).
 
 <Warning>
-`OPENCLAW_GATEWAY_BIND=lan` is the normal container setting: `loopback` would
+`CARAPACE_GATEWAY_BIND=lan` is the normal container setting: `loopback` would
 limit the Gateway to the container's own network namespace. Keep the published
 host port private with the cloud firewall, then reach it through the SSH tunnel
 from the provider guide.
@@ -105,13 +105,13 @@ lockfile, including `packages/*` and selected plugin workspaces.
 For Debian packages, prefer the existing build argument:
 
 ```bash
-export OPENCLAW_IMAGE_APT_PACKAGES="socat"
+export CARAPACE_IMAGE_APT_PACKAGES="socat"
 ```
 
 For downloaded release binaries such as `gog`, `goplaces`, or `wacli`, add the
 download and install commands to the repo-root `Dockerfile` final runtime stage,
 after its package-install blocks and before `USER node`. Preserve the existing
-non-root uid 1000 setup, `tini` entrypoint, health check, and `openclaw` symlink.
+non-root uid 1000 setup, `tini` entrypoint, health check, and `carapace` symlink.
 
 <Note>
 The repository Dockerfile digest-pins its Node and Bun base images. Keep those
@@ -123,7 +123,7 @@ for reproducible builds, use versioned asset URLs and verify their checksums.
 Rebuild the customized image without repeating onboarding:
 
 ```bash
-OPENCLAW_SKIP_ONBOARDING=1 ./scripts/docker/setup.sh
+CARAPACE_SKIP_ONBOARDING=1 ./scripts/docker/setup.sh
 ```
 
 If the build fails with `Killed` or exit code 137 during dependency installation
@@ -132,18 +132,18 @@ or bundling, the VM is out of memory. Resize it before retrying.
 Verify baked binaries:
 
 ```bash
-docker compose exec openclaw-gateway which gog
-docker compose exec openclaw-gateway which goplaces
-docker compose exec openclaw-gateway which wacli
+docker compose exec carapace-gateway which gog
+docker compose exec carapace-gateway which goplaces
+docker compose exec carapace-gateway which wacli
 ```
 
 ## Verify and administer the Gateway
 
 ```bash
 docker compose ps
-docker compose logs --tail=100 openclaw-gateway
+docker compose logs --tail=100 carapace-gateway
 curl -fsS http://127.0.0.1:18789/healthz
-docker compose run --rm openclaw-cli dashboard --no-open
+docker compose run --rm carapace-cli dashboard --no-open
 ```
 
 `/healthz` returning a 200 response confirms that the Gateway process is
@@ -151,63 +151,63 @@ listening. The image `HEALTHCHECK` polls the same endpoint. If the Control UI
 requires device approval:
 
 ```bash
-docker compose run --rm openclaw-cli devices list
-docker compose run --rm openclaw-cli devices approve <requestId>
+docker compose run --rm carapace-cli devices list
+docker compose run --rm carapace-cli devices approve <requestId>
 ```
 
 ## What persists where
 
-OpenClaw runs in Docker, but the container filesystem is not the source of
+Carapace runs in Docker, but the container filesystem is not the source of
 truth. Long-lived state must survive restarts, rebuilds, and reboots.
 
 | Component            | Container location                  | Persistence mechanism       | Notes                                                                                      |
 | -------------------- | ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------ |
-| Gateway state/config | `/home/node/.openclaw/`             | `OPENCLAW_CONFIG_DIR` mount | Includes `openclaw.json`, shared state, and installed plugin package roots                 |
-| Agent workspace      | `/home/node/.openclaw/workspace/`   | Workspace mount             | Code and agent artifacts                                                                   |
-| Channel credentials  | `/home/node/.openclaw/credentials/` | Config mount                | Channel credential material                                                                |
-| Model auth profiles  | `/home/node/.openclaw/`             | Config mount                | Shared `state/openclaw.sqlite`; agent-local `agents/<agentId>/agent/openclaw-agent.sqlite` |
-| Auth-profile key     | `/home/node/.config/openclaw/`      | Secret-directory mount      | Legacy encrypted-sidecar recovery key; does not protect current SQLite rows                |
-| Skill state          | `/home/node/.openclaw/skills/`      | Config mount                | Skill-level state                                                                          |
+| Gateway state/config | `/home/node/.carapace/`             | `CARAPACE_CONFIG_DIR` mount | Includes `carapace.json`, shared state, and installed plugin package roots                 |
+| Agent workspace      | `/home/node/.carapace/workspace/`   | Workspace mount             | Code and agent artifacts                                                                   |
+| Channel credentials  | `/home/node/.carapace/credentials/` | Config mount                | Channel credential material                                                                |
+| Model auth profiles  | `/home/node/.carapace/`             | Config mount                | Shared `state/carapace.sqlite`; agent-local `agents/<agentId>/agent/carapace-agent.sqlite` |
+| Auth-profile key     | `/home/node/.config/carapace/`      | Secret-directory mount      | Legacy encrypted-sidecar recovery key; does not protect current SQLite rows                |
+| Skill state          | `/home/node/.carapace/skills/`      | Config mount                | Skill-level state                                                                          |
 | External binaries    | `/usr/local/bin/`                   | Docker image                | Must be baked at build time                                                                |
 | Node and OS packages | Container filesystem                | Docker image                | Rebuilt with the image; do not install at runtime                                          |
 | Docker container     | Ephemeral                           | Restartable                 | Safe to replace after mounted state is verified                                            |
 
-## Common pitfall: never file-bind `openclaw.json`
+## Common pitfall: never file-bind `carapace.json`
 
 Mount the gateway state **as a directory**, never as a single file. The repo
 `docker-compose.yml` already does this:
 
 ```yaml
 # Supported: whole state directory.
-- "${OPENCLAW_CONFIG_DIR:-${HOME:-/tmp}/.openclaw}:/home/node/.openclaw"
+- "${CARAPACE_CONFIG_DIR:-${HOME:-/tmp}/.carapace}:/home/node/.carapace"
 ```
 
 ```yaml
 # Unsupported: single-file bind. Do not use this.
-# - "./openclaw.json:/home/node/.openclaw/openclaw.json"
+# - "./carapace.json:/home/node/.carapace/carapace.json"
 ```
 
-A single-file bind remains attached to the mounted file. Normal OpenClaw
-configuration saves replace `openclaw.json`. If a host-side save replaces the
+A single-file bind remains attached to the mounted file. Normal Carapace
+configuration saves replace `carapace.json`. If a host-side save replaces the
 source of a single-file bind after the container starts, the container can keep
 reading the old file while the host path points to the new one. The host-side
 save can succeed without updating what the container sees. An edit that writes
 to the same file in place does not cause this divergence.
 
-Fix: keep the directory mount from Compose. Edit `openclaw.json` on the host
+Fix: keep the directory mount from Compose. Edit `carapace.json` on the host
 inside that directory.
 
-## Update OpenClaw
+## Update Carapace
 
 For a source-built image:
 
 ```bash
 git pull --ff-only
-OPENCLAW_SKIP_ONBOARDING=1 ./scripts/docker/setup.sh
-docker compose run --rm openclaw-cli doctor --json
+CARAPACE_SKIP_ONBOARDING=1 ./scripts/docker/setup.sh
+docker compose run --rm carapace-cli doctor --json
 ```
 
-For a pinned or prebuilt image, update `OPENCLAW_IMAGE` to the intended tag or
+For a pinned or prebuilt image, update `CARAPACE_IMAGE` to the intended tag or
 digest before rerunning the setup script. Routine image upgrades run startup-safe
 migrations against the mounted state; see [Upgrading container images](/install/docker#upgrading-container-images)
 for recovery when a migration cannot complete automatically.

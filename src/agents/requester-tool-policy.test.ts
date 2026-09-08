@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveRequesterToolPolicies } from "./requester-tool-policy.js";
 import { attachToolAllowlistIntersection } from "./tool-policy.js";
 import { resolveWebSearchToolPolicy } from "./web-search-tool-policy.js";
@@ -14,7 +14,7 @@ describe("resolveRequesterToolPolicies", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-requester-policy-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-requester-policy-"));
     storePath = path.join(tempDir, "sessions.json");
   });
 
@@ -30,7 +30,7 @@ describe("resolveRequesterToolPolicies", () => {
     } as SessionEntry);
   }
 
-  function config(overrides: OpenClawConfig = {}): OpenClawConfig {
+  function config(overrides: CarapaceConfig = {}): CarapaceConfig {
     return {
       ...overrides,
       session: { ...overrides.session, store: storePath },

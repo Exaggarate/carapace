@@ -1,12 +1,12 @@
 // Verifies plugin text transforms rewrite prompts and streamed assistant output.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   createAssistantMessageEventStream,
   type AssistantMessage,
   type Context,
   type Model,
   type ToolCall,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import {
   applyPluginTextReplacements,

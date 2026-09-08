@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { crc32 } from "node:zlib";
-import { runAgentLoop } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Message, Model } from "openclaw/plugin-sdk/llm";
+import { runAgentLoop } from "carapace/plugin-sdk/agent-core";
+import type { Context, Message, Model } from "carapace/plugin-sdk/llm";
 // Native provider conversation contracts: streamed reasoning and retained runtime context.
 import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";

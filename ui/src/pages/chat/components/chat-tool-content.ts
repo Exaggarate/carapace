@@ -1,5 +1,5 @@
-import { asNullableRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asNullableRecord, isRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { ref } from "lit/directives/ref.js";
 import { renderCopyButton } from "../../../components/copy-button.ts";
@@ -403,7 +403,7 @@ export function renderExpandedToolCardContent(
     });
   const sidebarAction = canOpenSidebar
     ? html`
-        <openclaw-tooltip content=${t("chat.toolCards.openDetails")}>
+        <carapace-tooltip content=${t("chat.toolCards.openDetails")}>
           <button
             class="chat-tool-card__action-btn"
             type="button"
@@ -412,7 +412,7 @@ export function renderExpandedToolCardContent(
           >
             <span class="chat-tool-card__action-icon">${icons.panelRightOpen}</span>
           </button>
-        </openclaw-tooltip>
+        </carapace-tooltip>
       `
     : nothing;
   const diffCopyAction =

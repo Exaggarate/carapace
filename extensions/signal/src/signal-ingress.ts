@@ -5,13 +5,13 @@ import {
   type ChannelIngressQueue,
   type ChannelIngressMonitorDeliveryResult,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import {
   asPositiveSafeInteger,
   isRecord,
   normalizeNullableString as normalizeRawString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SignalSseEvent } from "./client-adapter.js";
 import type { SignalReceivePayload } from "./monitor/event-handler.types.js";
 import { getOptionalSignalRuntime } from "./runtime.js";

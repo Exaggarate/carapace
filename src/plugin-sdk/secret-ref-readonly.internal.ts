@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { isBuiltInDefaultSecretProviderRef } from "../secrets/ref-contract.js";
 
 /** Checks env provider selection and allowlists without resolving a credential. */
 export function canResolveEnvSecretRefInReadOnlyPath(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   id: string;
 }): boolean {

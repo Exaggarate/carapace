@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/browser-plugin",
+  "name": "@carapace/browser-plugin",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw browser tool plugin",
+  "description": "Carapace browser tool plugin",
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
@@ -14,11 +14,11 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
+    "@carapace/plugin-sdk": "workspace:*",
     "@types/yargs-parser": "21.0.3",
     "undici": "8.10.2"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],

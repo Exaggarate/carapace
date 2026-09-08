@@ -1,4 +1,4 @@
-import { createOpenClawCodingTools } from "openclaw/plugin-sdk/agent-harness";
+import { createCarapaceCodingTools } from "carapace/plugin-sdk/agent-harness";
 import { describe, expect, it } from "vitest";
 import { createCodexDynamicToolBridge } from "./dynamic-tools.js";
 import { parseCodexNativeToolCatalog } from "./native-tool-catalog.js";
@@ -6,7 +6,7 @@ import { flattenCodexDynamicToolFunctions } from "./protocol.js";
 import { codexDynamicToolsFingerprint } from "./thread-fingerprints.js";
 
 function createCollectorTools(swarm?: false) {
-  return createOpenClawCodingTools({
+  return createCarapaceCodingTools({
     sessionKey: "agent:main:main",
     runId: "parent",
     config: {

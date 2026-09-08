@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { resolvePreparedExecEnvironment } from "./bash-tools.exec-request-preparation.js";
@@ -207,7 +207,7 @@ describe("exec GitHub identity", () => {
       try {
         const preparedRunEnvironment = prepareGitHubToolEnvironment({
           config,
-          env: { OPENCLAW_STATE_DIR: profileRoot },
+          env: { CARAPACE_STATE_DIR: profileRoot },
           sourceConfig: {
             gateway: {
               controlUi: {

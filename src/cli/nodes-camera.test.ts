@@ -75,7 +75,7 @@ let writeScreenSnapshotToFile: typeof import("./nodes-screen.js").writeScreenSna
 let publishOutputFileAtomically: PublishOutputFileAtomically;
 
 async function withCameraTempDir<T>(run: (dir: string) => Promise<T>): Promise<T> {
-  return await withTempDir("openclaw-test-", run);
+  return await withTempDir("carapace-test-", run);
 }
 
 async function expectPathMissing(targetPath: string): Promise<void> {
@@ -280,7 +280,7 @@ describe("nodes camera helpers", () => {
       tmpDir: "/tmp",
       id: "id1",
     });
-    expect(p).toBe(path.join("/tmp", "openclaw-camera-snap-front-id1.jpg"));
+    expect(p).toBe(path.join("/tmp", "carapace-camera-snap-front-id1.jpg"));
   });
 
   it("rejects media format path traversal", () => {
@@ -321,7 +321,7 @@ describe("nodes camera helpers", () => {
         tmpDir: dir,
         id: "clip1",
       });
-      expect(out).toBe(path.join(dir, "openclaw-camera-clip-front-clip1.mp4"));
+      expect(out).toBe(path.join(dir, "carapace-camera-clip-front-clip1.mp4"));
       await expect(readFileUtf8AndCleanup(out)).resolves.toBe("hi");
     });
   });
@@ -342,7 +342,7 @@ describe("nodes camera helpers", () => {
         id: "clip2",
         expectedHost,
       });
-      expect(out).toBe(path.join(dir, "openclaw-camera-clip-back-clip2.mp4"));
+      expect(out).toBe(path.join(dir, "carapace-camera-clip-back-clip2.mp4"));
       await expect(readFileUtf8AndCleanup(out)).resolves.toBe("url-clip");
     });
   });
@@ -758,7 +758,7 @@ describe("nodes screen helpers", () => {
       tmpDir: "/tmp",
       id: "id1",
     });
-    expect(p).toBe(path.join("/tmp", "openclaw-screen-record-id1.mp4"));
+    expect(p).toBe(path.join("/tmp", "carapace-screen-record-id1.mp4"));
   });
 
   it("parses screen.snapshot payload", () => {
@@ -799,10 +799,10 @@ describe("nodes screen helpers", () => {
 
   it("builds screen snapshot temp path from the reported format", () => {
     expect(screenSnapshotTempPath({ ext: "jpg", tmpDir: "/tmp", id: "id1" })).toBe(
-      path.join("/tmp", "openclaw-screen-snapshot-id1.jpg"),
+      path.join("/tmp", "carapace-screen-snapshot-id1.jpg"),
     );
     expect(screenSnapshotTempPath({ ext: "png", tmpDir: "/tmp", id: "id1" })).toBe(
-      path.join("/tmp", "openclaw-screen-snapshot-id1.png"),
+      path.join("/tmp", "carapace-screen-snapshot-id1.png"),
     );
   });
 });

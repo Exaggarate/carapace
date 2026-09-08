@@ -1,7 +1,7 @@
 /** SQLite-backed ACP session metadata storage keyed through session-store entries. */
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJsonRecord } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { safeParseJsonRecord } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { Insertable } from "kysely";
 import { getRuntimeConfig } from "../../config/config.js";
 import { patchSessionEntryWithKey } from "../../config/sessions/session-accessor.js";
@@ -12,13 +12,13 @@ import {
   type SessionAcpMeta,
   type SessionEntry,
 } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
 import {
-  type OpenClawStateDatabaseOptions,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  type CarapaceStateDatabaseOptions,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import {
   acpSessionRowMatchesEntry,
   type AcpSessionEntryBinding,
@@ -43,7 +43,7 @@ import {
 export { resolveSessionStorePathForAcp } from "./session-meta-store.js";
 
 export type AcpSessionStoreEntry = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   storePath: string;
   sessionKey: string;
@@ -103,7 +103,7 @@ function bindAcpSessionMeta(params: {
 export function readAcpSessionMeta(params: {
   sessionKey: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
 }): SessionAcpMeta | undefined {
@@ -121,7 +121,7 @@ export function readAcpSessionMeta(params: {
   if (!storeEntry.storePath) {
     return undefined;
   }
-  const row = withExistingOpenClawStateDatabaseReadOnly(
+  const row = withExistingCarapaceStateDatabaseReadOnly(
     ({ db }) =>
       resolveReadableAcpSessionRow({
         row: selectAcpSessionRowForStoreEntry(
@@ -144,7 +144,7 @@ export function readAcpSessionMeta(params: {
 export function readAcpSessionMetaForEntry(params: {
   sessionKey: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   entry: AcpSessionEntryBinding | undefined;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
@@ -153,7 +153,7 @@ export function readAcpSessionMetaForEntry(params: {
   if (!sessionKey) {
     return undefined;
   }
-  const row = withExistingOpenClawStateDatabaseReadOnly(
+  const row = withExistingCarapaceStateDatabaseReadOnly(
     ({ db }) =>
       resolveReadableAcpSessionRow({
         row: selectAcpSessionRowForStoreEntry(
@@ -181,7 +181,7 @@ export function readAcpSessionMetaBatch(params: {
   }>;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): Map<SessionEntry, SessionAcpMeta | undefined> {
   const result = new Map<SessionEntry, SessionAcpMeta | undefined>();
   const entriesByKey = new Map<
@@ -207,7 +207,7 @@ export function readAcpSessionMetaBatch(params: {
     return result;
   }
 
-  withExistingOpenClawStateDatabaseReadOnly(
+  withExistingCarapaceStateDatabaseReadOnly(
     ({ db: database }) => {
       // Chunked IN keeps each statement under SQLite's bind-variable cap, matching the
       // sharing-store membership precedent; one statement per 500 keys instead of per row.
@@ -251,9 +251,9 @@ export function readAcpSessionMetaBatch(params: {
   return result;
 }
 
-function selectAcpSessionRows(options: OpenClawStateDatabaseOptions = {}): AcpSessionRow[] {
+function selectAcpSessionRows(options: CarapaceStateDatabaseOptions = {}): AcpSessionRow[] {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(
+    withExistingCarapaceStateDatabaseReadOnly(
       ({ db }) =>
         executeSqliteQuerySync(
           db,
@@ -288,7 +288,7 @@ export function writeAcpSessionMetaForMigration(params: {
     meta: params.meta,
     updatedAt: params.now?.() ?? Date.now(),
   });
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       upsertAcpSessionMetaRow(database.db, row);
     },
@@ -310,7 +310,7 @@ export function repairAcpSessionMetaKeyForMigration(params: {
   }
 
   let repaired = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const currentRow = selectAcpSessionRow(database.db, sessionKey);
       if (currentRow && acpSessionRowMatchesEntry(currentRow, params.entry)) {
@@ -401,7 +401,7 @@ function upsertAcpSessionMetaRow(db: DatabaseSync, row: Insertable<AcpSessionsTa
 export function readAcpSessionEntry(params: {
   sessionKey: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   clone?: boolean;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
@@ -414,7 +414,7 @@ export function readAcpSessionEntry(params: {
   if (!storeEntry.storePath) {
     return null;
   }
-  const row = withExistingOpenClawStateDatabaseReadOnly(
+  const row = withExistingCarapaceStateDatabaseReadOnly(
     ({ db }) =>
       resolveReadableAcpSessionRow({
         row: selectAcpSessionRowForStoreEntry(
@@ -442,7 +442,7 @@ export function readAcpSessionEntry(params: {
 }
 
 export async function listAcpSessionEntries(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   clone?: boolean;
   databasePath?: string;
@@ -521,7 +521,7 @@ export async function upsertAcpSessionMeta(params: {
   assertCommitAllowed?: () => void;
   sessionKey: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
   now?: () => number;
@@ -554,7 +554,7 @@ export async function upsertAcpSessionMeta(params: {
   let nextMeta: SessionAcpMeta | null | undefined;
   let preparedEntry: SessionEntry | undefined;
   const updatedAt = params.now?.() ?? Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const currentRow = selectAcpSessionRowForStoreEntry(
         database.db,
@@ -597,7 +597,7 @@ export async function upsertAcpSessionMeta(params: {
           },
         )
       : null;
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       (database) => {
         params.assertCommitAllowed?.();
         const sessionKeysToDelete = new Set([databaseSessionKey]);
@@ -655,7 +655,7 @@ export async function upsertAcpSessionMeta(params: {
     storePath: storeEntry.storePath,
     sessionKeys: [storageSessionKey, persisted.sessionKey],
   });
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       // The entry patch and legacy cleanup await before this authoritative publication.
       params.assertCommitAllowed?.();

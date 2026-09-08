@@ -87,15 +87,15 @@ export function registerAuthModesSuite(): void {
     let prevToken: string | undefined;
 
     beforeAll(async () => {
-      prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-      process.env.OPENCLAW_GATEWAY_TOKEN = "secret";
+      prevToken = process.env.CARAPACE_GATEWAY_TOKEN;
+      process.env.CARAPACE_GATEWAY_TOKEN = "secret";
       testState.gatewayAuth = { mode: "token", token: "secret" };
       port = await getGatewayTestPort();
       server = await startTestGatewayServer(port, { openAiChatCompletionsEnabled: true });
     });
 
     beforeEach(() => {
-      process.env.OPENCLAW_GATEWAY_TOKEN = "secret";
+      process.env.CARAPACE_GATEWAY_TOKEN = "secret";
       testState.gatewayAuth = { mode: "token", token: "secret" };
     });
 
@@ -177,15 +177,15 @@ export function registerAuthModesSuite(): void {
     let prevToken: string | undefined;
 
     beforeAll(async () => {
-      prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+      prevToken = process.env.CARAPACE_GATEWAY_TOKEN;
+      delete process.env.CARAPACE_GATEWAY_TOKEN;
       testState.gatewayAuth = { mode: "none" };
       port = await getGatewayTestPort();
       server = await startTestGatewayServer(port);
     });
 
     beforeEach(() => {
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+      delete process.env.CARAPACE_GATEWAY_TOKEN;
       testState.gatewayAuth = { mode: "none" };
     });
 
@@ -206,12 +206,12 @@ export function registerAuthModesSuite(): void {
     test.each([
       {
         mode: "token" as const,
-        envKey: "OPENCLAW_GATEWAY_TOKEN" as const,
+        envKey: "CARAPACE_GATEWAY_TOKEN" as const,
         expected: "gateway auth token is blank",
       },
       {
         mode: "password" as const,
-        envKey: "OPENCLAW_GATEWAY_PASSWORD" as const,
+        envKey: "CARAPACE_GATEWAY_PASSWORD" as const,
         expected: "gateway auth password is blank",
       },
     ])("rejects $mode mode before startup when its credential is empty", async (testCase) => {
@@ -249,7 +249,7 @@ export function registerAuthModesSuite(): void {
           controlUiEnabled: false,
         }),
       ).rejects.toThrow(
-        "without auth (set gateway.auth.token/password, or set OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD",
+        "without auth (set gateway.auth.token/password, or set CARAPACE_GATEWAY_TOKEN/CARAPACE_GATEWAY_PASSWORD",
       );
     });
   });
@@ -321,7 +321,7 @@ export function registerAuthModesSuite(): void {
       expect(payload?.auth?.deviceToken).toBe(undefined);
       testTailscaleWhois.calls.length = 0;
 
-      const stateDir = process.env.OPENCLAW_STATE_DIR;
+      const stateDir = process.env.CARAPACE_STATE_DIR;
       if (!stateDir) {
         throw new Error("expected Tailscale Control UI media fixture");
       }
@@ -330,7 +330,7 @@ export function registerAuthModesSuite(): void {
       const mediaPath = path.join(mediaDir, "preview.png");
       await fs.writeFile(mediaPath, Buffer.from("not-a-real-png"));
       const mediaUrl = new URL(
-        "/__openclaw__/assistant-media",
+        "/__carapace__/assistant-media",
         `http://${tailscaleEndpoint.host}:${tailscaleEndpoint.port}`,
       );
       mediaUrl.searchParams.set("meta", "1");

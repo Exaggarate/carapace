@@ -101,7 +101,7 @@ import { executeMutableUpdate } from "./update-command-execution.js";
 const successfulUpdate: UpdateRunResult = {
   status: "ok",
   mode: "npm",
-  root: "/opt/openclaw",
+  root: "/opt/carapace",
   before: { version: "1.0.0" },
   after: { version: "1.0.1" },
   steps: [],
@@ -112,7 +112,7 @@ function executionParams(
   updateInstallKind: "git" | "package",
 ): Parameters<typeof executeMutableUpdate>[0] {
   return {
-    root: "/opt/openclaw",
+    root: "/opt/carapace",
     installKind: updateInstallKind,
     updateInstallKind,
     switchToGit: false,
@@ -125,7 +125,7 @@ function executionParams(
     tag: "1.0.1",
     opts: { json: true },
     shouldRestart: true,
-    packageInstallSpec: "openclaw@1.0.1",
+    packageInstallSpec: "carapace@1.0.1",
     packageTargetVersion: "1.0.1",
     managedServiceRootRedirect: null,
     invocationCwd: "/work",
@@ -138,13 +138,13 @@ function executionParams(
 function schemaContext(
   profile: string,
 ): Awaited<ReturnType<typeof captureTargetDatabaseSchemaContext>> {
-  const env = { OPENCLAW_PROFILE: profile };
+  const env = { CARAPACE_PROFILE: profile };
   return {
     env,
     readEnv: { ...env },
     config: {},
     configSnapshot: {
-      path: `/fixture/${profile}/openclaw.json`,
+      path: `/fixture/${profile}/carapace.json`,
       exists: true,
       raw: "{}",
       parsed: {},
@@ -170,10 +170,10 @@ function inspectOrStopService(phase: "inspect" | "prepare" = "prepare"): PreMana
     inspected: true,
     runtimeInspected: true,
     running,
-    serviceEnv: { OPENCLAW_PROFILE: "default" },
+    serviceEnv: { CARAPACE_PROFILE: "default" },
     serviceUpdateVerdict: {
       kind: "owned",
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       fingerprint: "service-fingerprint",
       refreshDefinition: false,
     },
@@ -214,10 +214,10 @@ describe("mutable update execution", () => {
   it.each(["available", "unavailable", "changed-owner"] as const)(
     "admits local artifacts from the staged version before rehearsal: %s",
     async (outcome) => {
-      await withTestDir({ prefix: "openclaw-staged-plugin-admission-" }, async (stage) => {
+      await withTestDir({ prefix: "carapace-staged-plugin-admission-" }, async (stage) => {
         await fs.writeFile(
           path.join(stage, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "1.0.7" }),
+          JSON.stringify({ name: "carapace", version: "1.0.7" }),
         );
         const events: string[] = [];
         mocks.pluginPreflight.mockImplementation(async ({ targetVersion }) => {
@@ -296,8 +296,8 @@ describe("mutable update execution", () => {
   });
 
   it.each([
-    "@openclaw/example@1.0.1: Package not found on npm",
-    "@openclaw/example@1.0.1: npm view failed: ECONNRESET",
+    "@carapace/example@1.0.1: Package not found on npm",
+    "@carapace/example@1.0.1: npm view failed: ECONNRESET",
   ])("keeps the serving package unchanged when plugin admission fails: %s", async (detail) => {
     mocks.pluginPreflight.mockRejectedValue(
       new UpdatePreMutationError("plugin-target-unavailable", detail),
@@ -369,12 +369,12 @@ describe("mutable update execution", () => {
       return serviceState;
     });
     mocks.prepareMutableUpdate.mockImplementation(async (env) => {
-      expect(env).toEqual({ OPENCLAW_PROFILE: "default" });
+      expect(env).toEqual({ CARAPACE_PROFILE: "default" });
       events.push("mutable-prepare");
     });
     const schemaGate = createDeferred();
     mocks.checkTargetSchemas.mockImplementation(async (_versions, contexts) => {
-      expect(contexts.map((context) => context.env.OPENCLAW_PROFILE)).toEqual([
+      expect(contexts.map((context) => context.env.CARAPACE_PROFILE)).toEqual([
         "invoker",
         "default",
       ]);
@@ -397,8 +397,8 @@ describe("mutable update execution", () => {
       expect(events.at(-1)).toBe("schema-after-inspection");
       expect(mocks.serviceStopped).toBe(false);
       expect(mocks.runPackageUpdate).not.toHaveBeenCalled();
-      params.packageInstallSpec = "openclaw@changed-during-schema-check";
-      serviceState.serviceEnv = { OPENCLAW_PROFILE: "revalidated" };
+      params.packageInstallSpec = "carapace@changed-during-schema-check";
+      serviceState.serviceEnv = { CARAPACE_PROFILE: "revalidated" };
     } finally {
       schemaGate.resolve();
       await pendingExecution;
@@ -411,8 +411,8 @@ describe("mutable update execution", () => {
     expect(mocks.runPackageUpdate).toHaveBeenCalledOnce();
     expect(mocks.runPackageUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        installSpec: "openclaw@1.0.1",
-        managedServiceEnv: { OPENCLAW_PROFILE: "revalidated" },
+        installSpec: "carapace@1.0.1",
+        managedServiceEnv: { CARAPACE_PROFILE: "revalidated" },
       }),
     );
   });

@@ -11,7 +11,7 @@ import {
 const workflowSha = "a".repeat(40);
 const landedSha = "b".repeat(40);
 const pullHeadSha = "c".repeat(40);
-const repository = "openclaw/openclaw";
+const repository = "carapace/carapace";
 
 type BrokerWorkflow = {
   concurrency: { "cancel-in-progress": boolean; group: string };
@@ -44,7 +44,7 @@ function brokerEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     GITHUB_RUN_ID: "12345",
     GITHUB_SHA: workflowSha,
     GITHUB_TRIGGERING_ACTOR: "maintainer",
-    GITHUB_WORKFLOW_REF: "openclaw/openclaw/.github/workflows/frv-proof-broker.yml@refs/heads/main",
+    GITHUB_WORKFLOW_REF: "carapace/carapace/.github/workflows/frv-proof-broker.yml@refs/heads/main",
     GITHUB_WORKFLOW_SHA: workflowSha,
     ...overrides,
   };
@@ -191,7 +191,7 @@ describe("FRV proof broker request validation", () => {
 
   it.each([
     ["repository", brokerEnv({ GITHUB_REPOSITORY: "attacker/fork" })],
-    ["workflow", brokerEnv({ GITHUB_WORKFLOW_REF: "openclaw/openclaw/other.yml@main" })],
+    ["workflow", brokerEnv({ GITHUB_WORKFLOW_REF: "carapace/carapace/other.yml@main" })],
     ["ref", brokerEnv({ GITHUB_REF: "refs/pull/128141/merge" })],
     ["workflow SHA", brokerEnv({ GITHUB_WORKFLOW_SHA: "c".repeat(40) })],
     ["actor", brokerEnv({ GITHUB_TRIGGERING_ACTOR: "different-user" })],

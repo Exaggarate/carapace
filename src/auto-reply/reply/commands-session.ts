@@ -4,12 +4,12 @@ import {
   resolveExpiresAtMsFromDurationMs,
   resolveNonNegativeIntegerOption,
   timestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { formatFastModeCurrentStatus, resolveFastModeState } from "../../agents/fast-mode.js";
 import {
   setChannelConversationBindingIdleTimeoutBySessionKey,
@@ -29,7 +29,7 @@ import {
   type RestartSentinelPayload,
   writeRestartSentinel,
 } from "../../infra/restart-sentinel.js";
-import { scheduleGatewaySigusr1Restart, triggerOpenClawRestart } from "../../infra/restart.js";
+import { scheduleGatewaySigusr1Restart, triggerCarapaceRestart } from "../../infra/restart.js";
 import { parseActivationCommand } from "../group-activation.js";
 import { parseSendPolicyCommand } from "../send-policy.js";
 import {
@@ -558,7 +558,7 @@ export const handleRestartCommand: CommandHandler = defineGatewayControlCommand(
           : undefined,
       });
       return sessionCommandReply(
-        "⚙️ Restarting OpenClaw in-process (SIGUSR1); back in a few seconds.",
+        "⚙️ Restarting Carapace in-process (SIGUSR1); back in a few seconds.",
       );
     }
     let sentinelWritten = false;
@@ -573,7 +573,7 @@ export const handleRestartCommand: CommandHandler = defineGatewayControlCommand(
         "⚠️ Restart failed: could not persist the post-restart acknowledgement.",
       );
     }
-    const restartMethod = triggerOpenClawRestart();
+    const restartMethod = triggerCarapaceRestart();
     if (!restartMethod.ok) {
       if (sentinelWritten) {
         await clearRestartSentinel();
@@ -582,7 +582,7 @@ export const handleRestartCommand: CommandHandler = defineGatewayControlCommand(
       return sessionCommandReply(`⚠️ Restart failed (${restartMethod.method}).${detail}`);
     }
     return sessionCommandReply(
-      `⚙️ Restarting OpenClaw via ${restartMethod.method}; give me a few seconds to come back online.`,
+      `⚙️ Restarting Carapace via ${restartMethod.method}; give me a few seconds to come back online.`,
     );
   },
 );

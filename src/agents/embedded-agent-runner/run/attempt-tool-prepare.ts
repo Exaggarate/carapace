@@ -14,7 +14,7 @@ import { extractModelCompat } from "../../../plugins/provider-model-compat.js";
 import { getPluginToolMeta } from "../../../plugins/tool-metadata.js";
 import { isSubagentSessionKey } from "../../../routing/session-key.js";
 import type { NestedToolActivity } from "../../../sessions/nested-tool-activity.js";
-import { createOpenClawCodingTools } from "../../agent-tools.js";
+import { createCarapaceCodingTools } from "../../agent-tools.js";
 import { createSkillInstructionDeliveryCache } from "../../agent-tools.read.js";
 import { getChannelAgentToolMeta } from "../../channel-tools.js";
 import { createCodeModePermissionChangeReason } from "../../code-mode-permission-change.js";
@@ -55,15 +55,15 @@ import { buildEmbeddedAttemptToolRunContext } from "./attempt-tool-run-context.j
 import { TOOL_SEARCH_CONTROL_ALLOWLIST_NAMES } from "./attempt-tool-search-run-plan.js";
 import type { EmbeddedRunAttemptParams } from "./types.js";
 
-type OpenClawCodingToolsOptions = NonNullable<Parameters<typeof createOpenClawCodingTools>[0]>;
-type SkillUsagePaths = OpenClawCodingToolsOptions["skillUsagePaths"];
+type CarapaceCodingToolsOptions = NonNullable<Parameters<typeof createCarapaceCodingTools>[0]>;
+type SkillUsagePaths = CarapaceCodingToolsOptions["skillUsagePaths"];
 
 export function prepareEmbeddedAttemptToolBase(params: {
   agentDir: string;
   attempt: EmbeddedRunAttemptParams;
   setup: EmbeddedAttemptSetup;
   markCoreToolStage: (name: string) => void;
-  onYield: NonNullable<OpenClawCodingToolsOptions["onYield"]>;
+  onYield: NonNullable<CarapaceCodingToolsOptions["onYield"]>;
   runAbortController: AbortController;
   runTrace: DiagnosticTraceContext;
   skillUsagePaths: SkillUsagePaths;
@@ -242,7 +242,7 @@ export function prepareEmbeddedAttemptToolBase(params: {
     const constructedToolsRaw = !shouldConstructTools
       ? []
       : (() => {
-          const allTools = createOpenClawCodingTools({
+          const allTools = createCarapaceCodingTools({
             agentId: params.setup.sessionAgentId,
             ...buildConversationContext(),
             exec: {
@@ -314,7 +314,7 @@ export function prepareEmbeddedAttemptToolBase(params: {
           const boundTools = attempt.hostCapabilities
             ? attempt.hostCapabilities.bindToolSurface(allTools)
             : allTools;
-          params.markCoreToolStage("attempt:create-openclaw-coding-tools");
+          params.markCoreToolStage("attempt:create-carapace-coding-tools");
           const filteredTools = applyEmbeddedAttemptToolsAllow(boundTools, effectiveToolsAllow, {
             toolMeta: (tool) => getPluginToolMeta(tool),
           });

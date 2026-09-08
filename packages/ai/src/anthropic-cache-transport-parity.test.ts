@@ -1,5 +1,5 @@
-import type { Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { Context, Model } from "@carapace/llm-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it, vi } from "vitest";
 import {
   anthropicModel,
@@ -127,7 +127,7 @@ describe("Anthropic cache checkpoint transport parity", () => {
   ])(
     "keeps implicit long TTL host gating identical for $name",
     async ({ baseUrl, envBaseUrl, long }) => {
-      vi.stubEnv("OPENCLAW_CACHE_RETENTION", "long");
+      vi.stubEnv("CARAPACE_CACHE_RETENTION", "long");
       vi.stubEnv("ANTHROPIC_BASE_URL", envBaseUrl);
       for (const implementation of ["provider", "transport"] as const) {
         const { payload } = await captureAnthropicRequest(implementation, { model: { baseUrl } });

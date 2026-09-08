@@ -63,7 +63,7 @@ afterEach(async () => {
     if (!factory) {
       return;
     }
-    const request = factory.deleteDatabase("openclaw-control-ui");
+    const request = factory.deleteDatabase("carapace-control-ui");
     await new Promise<void>((resolve, reject) => {
       request.onsuccess = () => resolve();
       request.addEventListener("error", () =>

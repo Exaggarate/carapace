@@ -18,7 +18,7 @@ const fixture = fileURLToPath(
   new URL("./update-finalization-output.test-support.ts", import.meta.url),
 );
 const doctorDiagnostics = [
-  "OpenClaw doctor",
+  "Carapace doctor",
   "Doctor panel diagnostic",
   "Doctor workspace diagnostic",
   "Doctor console diagnostic",
@@ -48,9 +48,9 @@ describe.each(["repair", "finalize"])("update %s process output", (command) => {
   it.each(command === "repair" ? scenarios : finalizeScenarios)(
     "%s preserves the output and exit contract without restarting",
     async (scenario) => {
-      const root = tempDirs.make("openclaw-update-json-");
+      const root = tempDirs.make("carapace-update-json-");
       const state = path.join(root, "state");
-      const config = path.join(root, "openclaw.json");
+      const config = path.join(root, "carapace.json");
       const workspace = path.join(root, "workspace");
       const server = net.createServer();
       await new Promise<void>((resolve, reject) => {
@@ -73,7 +73,7 @@ describe.each(["repair", "finalize"])("update %s process output", (command) => {
           gateway: { mode: "local", port: address.port, auth: { mode: "none" } },
           plugins: { enabled: false, allow: [] },
           agents: { defaults: { workspace } },
-          logging: { file: path.join(root, "openclaw.log") },
+          logging: { file: path.join(root, "carapace.log") },
         }),
       );
       const json = !scenario.startsWith("human");
@@ -95,7 +95,7 @@ describe.each(["repair", "finalize"])("update %s process output", (command) => {
         ...(json && scenario !== "inherited-json" ? ["--json"] : []),
       ];
       const readRun = () =>
-        listUpdateRuns({ limit: 1 }, { env: { HOME: root, OPENCLAW_STATE_DIR: state } })[0];
+        listUpdateRuns({ limit: 1 }, { env: { HOME: root, CARAPACE_STATE_DIR: state } })[0];
       let observedPhaseStart: ReturnType<typeof readRun> | undefined;
       const result = await runCliProcessChild({
         ...(scenario === "phase-hang"
@@ -126,11 +126,11 @@ describe.each(["repair", "finalize"])("update %s process output", (command) => {
           PATH: path.dirname(process.execPath),
           HOME: root,
           USERPROFILE: root,
-          OPENCLAW_HOME: root,
-          OPENCLAW_STATE_DIR: state,
-          OPENCLAW_CONFIG_PATH: config,
-          OPENCLAW_SERVICE_REPAIR_POLICY: "external",
-          OPENCLAW_GATEWAY_PORT: String(address.port),
+          CARAPACE_HOME: root,
+          CARAPACE_STATE_DIR: state,
+          CARAPACE_CONFIG_PATH: config,
+          CARAPACE_SERVICE_REPAIR_POLICY: "external",
+          CARAPACE_GATEWAY_PORT: String(address.port),
           XDG_CONFIG_HOME: path.join(root, "xdg-config"),
           XDG_DATA_HOME: path.join(root, "xdg-data"),
           XDG_CACHE_HOME: path.join(root, "xdg-cache"),
@@ -273,7 +273,7 @@ describe.each(["repair", "finalize"])("update %s process output", (command) => {
           expect(triageIndex, failure).toBeGreaterThan(result.stdout.indexOf(terminal));
           expect(promptIndex, failure).toBeGreaterThan(triageIndex);
           expect(guidanceIndex, failure).toBeGreaterThan(promptIndex);
-          expect(result.stdout.trimEnd().endsWith("openclaw triage --run"), failure).toBe(true);
+          expect(result.stdout.trimEnd().endsWith("carapace triage --run"), failure).toBe(true);
         } else {
           expect(result.stdout.trimEnd().endsWith(terminal), failure).toBe(true);
         }

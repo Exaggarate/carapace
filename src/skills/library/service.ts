@@ -13,10 +13,10 @@ import {
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { evaluateSkillInstallPolicy } from "../../plugins/install-security-scan.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import { hasMultipleSessionSharingIdentities } from "../../state/user-profile-list.js";
 import {
   assertProposalContainsNoLiteralSecrets,
@@ -51,14 +51,14 @@ import {
 /** Prepared once at human ingress; no library catalog or feature schema work. */
 export function resolveSkillLibraryPresentation(
   authority: SkillLibraryAuthority,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Pick<
   SkillsLibraryListResult,
   "profileId" | "multipleProfiles" | "defaultTarget" | "canManageWorkspace"
 > {
   authority.assertCurrent();
   const multipleProfiles = hasMultipleSessionSharingIdentities(options);
-  const actor = resolveSkillLibraryActor(openOpenClawStateDatabase(options).db, authority);
+  const actor = resolveSkillLibraryActor(openCarapaceStateDatabase(options).db, authority);
   return {
     profileId: actor.profileId ?? null,
     multipleProfiles,
@@ -75,7 +75,7 @@ export function resolveSkillLibraryPresentation(
 export function listSkillLibrary(
   authority: SkillLibraryAuthority,
   params: SkillsLibraryListParams = {},
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): SkillsLibraryListResult {
   authority.assertCurrent();
   const presentation = resolveSkillLibraryPresentation(authority, options);
@@ -148,7 +148,7 @@ export async function readSkillLibrary(
   authority: SkillLibraryAuthority,
   skillId: string,
   revision?: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
   selected?: { revision: string; assertSessionAccess: () => void },
 ): Promise<SkillsLibraryReadResult> {
   const authorize = (db: import("node:sqlite").DatabaseSync) => {
@@ -216,13 +216,13 @@ export async function readSkillLibrary(
 export async function saveSkillLibrary(
   authority: SkillLibraryAuthority,
   params: SkillsLibrarySaveParams,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
   uploadId?: string,
 ): Promise<SkillsLibraryReceipt> {
   if (!validateSkillsLibrarySaveParams(params)) {
     throw new SkillLibraryError("INVALID_BUNDLE", "Invalid skill save parameters.");
   }
-  requireSkillLibraryProfile(openOpenClawStateDatabase(options).db, authority);
+  requireSkillLibraryProfile(openCarapaceStateDatabase(options).db, authority);
   const previous = params.skillId
     ? readSkillLibraryStore(
         (db) => requireSkillLibraryEntry(db, params.skillId!, authority, true),
@@ -278,7 +278,7 @@ export async function saveSkillLibrary(
     authority.assertCurrent();
     await staged.publish();
     ensureSkillLibrarySchema(options);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         const actor = requireSkillLibraryProfile(db, authority);
         if (uploadId) {
@@ -370,7 +370,7 @@ export async function saveSkillLibrary(
 export function mutateSkillLibrary(
   authority: SkillLibraryAuthority,
   params: SkillsLibraryMutateParams,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): SkillsLibraryReceipt {
   const exists = readSkillLibraryStore(
     (db) => requireSkillLibraryEntry(db, params.skillId, authority, true),
@@ -379,7 +379,7 @@ export function mutateSkillLibrary(
   if (!exists) {
     throw new SkillLibraryError("NOT_FOUND", "Skill not found.");
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const actor = requireSkillLibraryProfile(db, authority);
       const current = requireSkillLibraryEntry(db, params.skillId, authority, true);

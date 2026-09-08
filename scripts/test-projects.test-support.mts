@@ -432,7 +432,7 @@ const TOOLING_DOCKER_VITEST_CONFIG = "test/vitest/vitest.tooling-docker.config.t
 const TOOLING_ISOLATED_VITEST_CONFIG = "test/vitest/vitest.tooling-isolated.config.ts";
 const TOOLING_VITEST_CONFIG = "test/vitest/vitest.tooling.config.ts";
 const PACKAGE_DOCKER_TEST_TARGET =
-  "test/e2e/qa-lab/runtime/package-openclaw-for-docker.e2e.test.ts";
+  "test/e2e/qa-lab/runtime/package-carapace-for-docker.e2e.test.ts";
 const TOOLING_DOCKER_TEST_TARGET = "test/scripts/docker-build-helper.test.ts";
 const BROAD_TOOLING_SCRIPT_TEST_PATTERNS = new Set([
   "test/scripts/**/*.test.ts",
@@ -450,8 +450,8 @@ export const UI_E2E_VITEST_CONFIG = "test/vitest/vitest.ui-e2e.config.ts";
 const UI_ISOLATED_VITEST_CONFIG = "test/vitest/vitest.ui-isolated.config.ts";
 const UTILS_VITEST_CONFIG = "test/vitest/vitest.utils.config.ts";
 const WIZARD_VITEST_CONFIG = "test/vitest/vitest.wizard.config.ts";
-const INCLUDE_FILE_ENV_KEY = "OPENCLAW_VITEST_INCLUDE_FILE";
-const FS_MODULE_CACHE_PATH_ENV_KEY = "OPENCLAW_VITEST_FS_MODULE_CACHE_PATH";
+const INCLUDE_FILE_ENV_KEY = "CARAPACE_VITEST_INCLUDE_FILE";
+const FS_MODULE_CACHE_PATH_ENV_KEY = "CARAPACE_VITEST_FS_MODULE_CACHE_PATH";
 const FAILED_SHARD_DIGEST_LIMIT = 12;
 const CHANGED_ARGS_PATTERN = /^--changed(?:=(.+))?$/u;
 const VITEST_CONFIG_BY_KIND: Record<string, string> = {
@@ -556,7 +556,7 @@ const VITEST_CONFIG_BY_KIND: Record<string, string> = {
 const BROAD_CHANGED_FALLBACK_PATTERNS = [
   /^package\.json$/u,
   /^pnpm-lock\.yaml$/u,
-  /^test\/setup(?:\.shared|\.extensions|-openclaw-runtime)?\.ts$/u,
+  /^test\/setup(?:\.shared|\.extensions|-carapace-runtime)?\.ts$/u,
   /^vitest(?:\..+)?\.(?:config\.ts|paths\.mjs)$/u,
   /^test\/vitest\/vitest\.(?:config|shared\.config|scoped-config|performance-config)\.ts$/u,
   /^test\/helpers\//u,
@@ -626,7 +626,7 @@ const RUNTIME_SIDECAR_PATH_CONSUMER_TEST_TARGETS = [
   ...RUNTIME_SIDECAR_BASELINE_OWNER_TEST_TARGETS,
   "src/infra/update-global.test.ts",
   "src/infra/update-runner.test.ts",
-  "test/openclaw-npm-postpublish-verify.test.ts",
+  "test/carapace-npm-postpublish-verify.test.ts",
 ];
 const GITHUB_YAML_PINNING_GUARD_TEST_TARGETS = ["test/scripts/ci-workflow-guards.test.ts"];
 const GROUP_VISIBLE_REPLY_TEST_TARGETS = [
@@ -727,7 +727,7 @@ const SOURCE_TEST_TARGETS = new Map([
   ],
   ["extensions/codex/package.json", CODEX_VERSION_CONTRACT_TEST_TARGETS],
   ["extensions/codex/src/app-server/version.ts", CODEX_VERSION_CONTRACT_TEST_TARGETS],
-  ["src/test-utils/openclaw-test-state.ts", ["src/test-utils/openclaw-test-state.test.ts"]],
+  ["src/test-utils/carapace-test-state.ts", ["src/test-utils/carapace-test-state.test.ts"]],
   [
     "src/channels/plugins/contracts/test-helpers/manifest.ts",
     [
@@ -893,10 +893,10 @@ const TOOLING_IMPORTABLE_FILE_EXTENSIONS = [
 const TOOLING_IMPORT_GRAPH_GREP_PATHS = TOOLING_IMPORT_GRAPH_ROOTS.flatMap((root) =>
   TOOLING_IMPORTABLE_FILE_EXTENSIONS.map((ext) => `:(glob)${root}/**/*${ext}`),
 );
-const BROAD_CHANGED_ENV_KEY = "OPENCLAW_TEST_CHANGED_BROAD";
-const VITEST_NO_OUTPUT_TIMEOUT_ENV_KEY = "OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS";
-const VITEST_NO_OUTPUT_HEARTBEAT_ENV_KEY = "OPENCLAW_VITEST_NO_OUTPUT_HEARTBEAT_MS";
-const VITEST_NO_OUTPUT_RETRY_ENV_KEY = "OPENCLAW_VITEST_NO_OUTPUT_RETRY";
+const BROAD_CHANGED_ENV_KEY = "CARAPACE_TEST_CHANGED_BROAD";
+const VITEST_NO_OUTPUT_TIMEOUT_ENV_KEY = "CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS";
+const VITEST_NO_OUTPUT_HEARTBEAT_ENV_KEY = "CARAPACE_VITEST_NO_OUTPUT_HEARTBEAT_MS";
+const VITEST_NO_OUTPUT_RETRY_ENV_KEY = "CARAPACE_VITEST_NO_OUTPUT_RETRY";
 /** Default no-output timeout applied to test-projects Vitest children. */
 export const DEFAULT_TEST_PROJECTS_VITEST_NO_OUTPUT_TIMEOUT_MS = String(900_000);
 /** Default heartbeat interval applied to test-projects Vitest children. */
@@ -915,7 +915,7 @@ export function formatNoChangedTestTargetLines(skippedBroadFallbackPaths: string
       skippedBroadFallbackPaths.length === 1 ? "" : "s"
     } require broad Vitest fallback:`,
     ...skippedBroadFallbackPaths.map((changedPath) => `[test]   ${changedPath}`),
-    "[test] run `OPENCLAW_TEST_CHANGED_BROAD=1 pnpm test:changed` for broad coverage.",
+    "[test] run `CARAPACE_TEST_CHANGED_BROAD=1 pnpm test:changed` for broad coverage.",
   ];
 }
 
@@ -2149,8 +2149,8 @@ const changedScopeTests = [
 const dockerCache = "src/docker-build-cache.test.ts";
 const dockerDigests = "src/docker-image-digests.test.ts";
 const openaiChatToolsE2e = "test/e2e/qa-lab/runtime/openai-compatible-chat-tools.e2e.test.ts";
-const npmPostpublish = "test/openclaw-npm-postpublish-verify.test.ts";
-const crossOsReleaseChecks = "openclaw-cross-os-release-checks";
+const npmPostpublish = "test/carapace-npm-postpublish-verify.test.ts";
+const crossOsReleaseChecks = "carapace-cross-os-release-checks";
 const runNode = "src/infra/run-node.test.ts";
 const pluginSdkEntryOwners = [
   "src/plugins/contracts/plugin-sdk-index.bundle.test.ts",
@@ -2173,7 +2173,7 @@ const EXACT_TOOLING_TARGETS = new Map<string, string[]>([
   [".github/workflows/docs-agent.yml", ["docs-agent-workflow"]],
   ["scripts/generate-ci-git-owner.mts", ["ci-git-owner"]],
   [
-    ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml",
+    ".github/workflows/carapace-live-and-e2e-checks-reusable.yml",
     [packageAcceptance, workflowGuards, "release-workflow-matrix-plan", installDocker],
   ],
   [
@@ -2210,7 +2210,7 @@ const EXACT_TOOLING_TARGETS = new Map<string, string[]>([
     [
       "test/release-version.test.ts",
       "test/npm-publish-plan.test.ts",
-      "test/openclaw-npm-release-check.test.ts",
+      "test/carapace-npm-release-check.test.ts",
       npmPostpublish,
       "test/plugin-npm-release.test.ts",
       "test/plugin-clawhub-release.test.ts",
@@ -2220,8 +2220,8 @@ const EXACT_TOOLING_TARGETS = new Map<string, string[]>([
       "docker-release-artifacts",
       "full-release-validation-at-sha",
       "ios-version",
-      "openclaw-npm-extended-stable-release",
-      "openclaw-npm-publish",
+      "carapace-npm-extended-stable-release",
+      "carapace-npm-publish",
       "npm-prepared-bundle",
       "release-preflight",
       "release-prepare",
@@ -2265,9 +2265,9 @@ const EXACT_TOOLING_TARGETS = new Map<string, string[]>([
   ["scripts/lib/managed-child-process.mts", ["managed-child-process", "lint-status"]],
   ["scripts/lib/dist-artifact-ownership.mts", ["dist-artifact-ownership", "lint-status"]],
   ["scripts/docker-e2e-rerun.mts", ["docker-e2e-helper-cli"]],
-  ["scripts/openclaw-postpack.mjs", [TOOLING_VITEST_CONFIG]],
-  ["scripts/package-manifest.mjs", ["test/openclaw-prepack.test.ts"]],
-  ["scripts/openclaw-npm-prepublish-verify.ts", ["test/openclaw-npm-prepublish-verify.test.ts"]],
+  ["scripts/carapace-postpack.mjs", [TOOLING_VITEST_CONFIG]],
+  ["scripts/package-manifest.mjs", ["test/carapace-prepack.test.ts"]],
+  ["scripts/carapace-npm-prepublish-verify.ts", ["test/carapace-npm-prepublish-verify.test.ts"]],
   ["scripts/lib/docker-e2e-scenarios.mts", [dockerE2e, pluginPrerelease]],
   ["scripts/lib/upgrade-survivor-policy.mjs", [dockerE2e]],
   ["scripts/e2e/kitchen-sink-rpc-walk.mts", ["kitchen-sink-rpc-walk", pluginPrerelease]],
@@ -2304,7 +2304,7 @@ const EXACT_TOOLING_TARGETS = new Map<string, string[]>([
       "upgrade-survivor-assertions",
       "upgrade-survivor-mobile-pairing",
       "upgrade-survivor-recovery-cleanup",
-      "openclaw-test-state",
+      "carapace-test-state",
     ],
   ],
   [
@@ -2420,7 +2420,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
       "full-release-validation-at-sha",
       "full-release-candidate-reuse",
       "find-reusable-release-validation",
-      "openclaw-npm-extended-stable-full-validation-workflow",
+      "carapace-npm-extended-stable-full-validation-workflow",
       "release-no-push-workflow",
       "release-ci-summary",
       packageAcceptance,
@@ -2433,7 +2433,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
     ["full-release-candidate-reuse", packageAcceptance, "check-workflows", workflowGuards],
   ],
   [
-    /^\.github\/workflows\/openclaw-release-checks\.yml$/u,
+    /^\.github\/workflows\/carapace-release-checks\.yml$/u,
     [packageAcceptance, crossOsReleaseChecks, pluginPrerelease, installDocker],
   ],
   [
@@ -2447,8 +2447,8 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   ],
   [/^\.github\/workflows\/install-smoke\.yml$/u, ["install-smoke-no-push-workflow", installDocker]],
   [
-    /^\.github\/workflows\/openclaw-performance\.yml$/u,
-    ["openclaw-performance-workflow", "openclaw-performance-git-lifecycle"],
+    /^\.github\/workflows\/carapace-performance\.yml$/u,
+    ["carapace-performance-workflow", "carapace-performance-git-lifecycle"],
   ],
   [/^\.github\/workflows\/linux-app-release\.yml$/u, ["release-workflow-git-lifecycle"]],
   [
@@ -2462,11 +2462,11 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   [/^\.github\/workflows\/plugin-prerelease\.yml$/u, [pluginPrerelease]],
   [/^\.github\/workflows\/tui-pty\.yml$/u, [packageAcceptance]],
   [
-    /^\.github\/workflows\/openclaw-cross-os-release-checks-reusable\.yml$/u,
-    [crossOsReleaseChecks, "openclaw-cross-os-release-workflow", packageAcceptance],
+    /^\.github\/workflows\/carapace-cross-os-release-checks-reusable\.yml$/u,
+    [crossOsReleaseChecks, "carapace-cross-os-release-workflow", packageAcceptance],
   ],
   [
-    /^\.github\/workflows\/openclaw-release-publish\.yml$/u,
+    /^\.github\/workflows\/carapace-release-publish\.yml$/u,
     [packageAcceptance, "docker-release-artifacts", "vercel-container-registry-publish"],
   ],
   [/^\.github\/workflows\/package-acceptance\.yml$/u, [packageAcceptance]],
@@ -2479,8 +2479,8 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
     [packageAcceptance, "plugin-clawhub-new-workflow"],
   ],
   [
-    /^\.github\/workflows\/openclaw-npm-release\.yml$/u,
-    [npmPostpublish, "openclaw-npm-extended-stable-workflow", packageAcceptance],
+    /^\.github\/workflows\/carapace-npm-release\.yml$/u,
+    [npmPostpublish, "carapace-npm-extended-stable-workflow", packageAcceptance],
   ],
   [
     new RegExp(
@@ -2508,7 +2508,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   ],
   [/^\.github\/workflows\/android-release\.yml$/u, [packageAcceptance, workflowGuards]],
   [
-    /^\.github\/(?:actions\/(?:ensure-base-commit|git-owner|publish-generated-pr|mantis-validate-trusted-ref)\/|workflows\/(?:workflow-sanity|qa-profile-evidence|maturity-scorecard|docs-agent|docs-sync-publish|openclaw-performance|linux-app-release|macos-release|npm-placeholder-bootstrap|plugin-clawhub-release|plugin-npm-release|mantis-(?:discord-(?:smoke|status-reactions|thread-attachment)|slack-desktop-smoke|web-ui-chat-proof))\.yml$)/u,
+    /^\.github\/(?:actions\/(?:ensure-base-commit|git-owner|publish-generated-pr|mantis-validate-trusted-ref)\/|workflows\/(?:workflow-sanity|qa-profile-evidence|maturity-scorecard|docs-agent|docs-sync-publish|carapace-performance|linux-app-release|macos-release|npm-placeholder-bootstrap|plugin-clawhub-release|plugin-npm-release|mantis-(?:discord-(?:smoke|status-reactions|thread-attachment)|slack-desktop-smoke|web-ui-chat-proof))\.yml$)/u,
     [
       "ci-git-owner",
       "ci-linux-git",
@@ -2538,14 +2538,14 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   ],
   [/^scripts\/e2e\/npm-telegram-live-docker\.sh$/u, ["npm-telegram-live"]],
   [
-    /^scripts\/package-openclaw-for-docker\.m[jt]s$/u,
-    ["test/e2e/qa-lab/runtime/package-openclaw-for-docker.e2e.test.ts"],
+    /^scripts\/package-carapace-for-docker\.m[jt]s$/u,
+    ["test/e2e/qa-lab/runtime/package-carapace-for-docker.e2e.test.ts"],
   ],
   [/^scripts\/run-node\.(?:mjs|mts)$/u, [runNode]],
   [/^scripts\/ios-write-swift-filelist\.m[jt]s$/u, ["ios-run"]],
   [/^scripts\/pr-lib\/merge(?:-outcome)?\.sh$/u, ["pr-merge", "pr-merge-outcome"]],
   [/^scripts\/plugin-clawhub-publish\.sh$/u, ["test/plugin-clawhub-release.test.ts"]],
-  [/^scripts\/openclaw-npm-postpublish-verify\.ts$/u, [npmPostpublish]],
+  [/^scripts\/carapace-npm-postpublish-verify\.ts$/u, [npmPostpublish]],
   [
     /^scripts\/install\.ps1$/u,
     ["install-ps1", "website-installer-sync-workflow", crossOsReleaseChecks, changedScope],
@@ -2560,8 +2560,8 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
     ["src/plugins/copy-bundled-plugin-metadata.test.ts", runNode],
   ],
   [
-    /^scripts\/github\/run-openclaw-cross-os-release-checks\.sh$/u,
-    ["openclaw-cross-os-release-workflow"],
+    /^scripts\/github\/run-carapace-cross-os-release-checks\.sh$/u,
+    ["carapace-cross-os-release-workflow"],
   ],
   [
     /^scripts\/(?:write-plugin-sdk-entry-dts\.ts|lib\/local-check-runtime\.mts)$/u,
@@ -2582,7 +2582,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
       [
         "^scripts\\/(?:auth-monitor|mobile-reauth|setup-auth-system|",
         "termux-(?:auth-widget|quick-auth|sync-widget))\\.sh$|",
-        "^scripts\\/systemd\\/openclaw-auth-monitor\\.(?:service|timer)$",
+        "^scripts\\/systemd\\/carapace-auth-monitor\\.(?:service|timer)$",
       ].join(""),
       "u",
     ),
@@ -2674,7 +2674,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   ],
   [
     /^scripts\/lib\/workspace-bootstrap-smoke\.mts$/u,
-    [releaseCheck, "test/openclaw-npm-release-check.test.ts"],
+    [releaseCheck, "test/carapace-npm-release-check.test.ts"],
   ],
   [/^scripts\/lib\/extension-test-plan\.(?:mjs|mts)$/u, ["test-extension"]],
   [
@@ -2690,9 +2690,9 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
       runNode,
       "src/infra/package-dist-inventory.test.ts",
       releaseCheck,
-      "test/openclaw-npm-release-check.test.ts",
+      "test/carapace-npm-release-check.test.ts",
       "check-gateway-watch-regression",
-      "check-openclaw-package-tarball",
+      "check-carapace-package-tarball",
       crossOsReleaseChecks,
     ],
   ],
@@ -2700,7 +2700,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
     /^scripts\/lib\/package-dist-imports\.mjs$/u,
     [
       "check-package-dist-imports",
-      "check-openclaw-package-tarball",
+      "check-carapace-package-tarball",
       "postinstall-bundled-plugins",
       releaseCheck,
     ],
@@ -2726,7 +2726,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
     /^scripts\/lib\/npm-publish-plan\.mjs$/u,
     [
       "test/npm-publish-plan.test.ts",
-      "test/openclaw-npm-release-check.test.ts",
+      "test/carapace-npm-release-check.test.ts",
       npmPostpublish,
       "test/plugin-npm-release.test.ts",
       "test/plugin-clawhub-release.test.ts",
@@ -2756,7 +2756,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   ],
   [/^scripts\/lib\/run-node\.(?:mjs|mts)$/u, [runNode]],
   [
-    /^\.agents\/skills\/openclaw-changelog-update\/scripts\/verify-release-notes\.mjs$/u,
+    /^\.agents\/skills\/carapace-changelog-update\/scripts\/verify-release-notes\.mjs$/u,
     ["release-notes-ledger", "verify-release-notes"],
   ],
   [
@@ -2872,7 +2872,7 @@ const SEMANTIC_TOOLING_TARGET_PATTERNS: Array<[RegExp, string[]]> = [
   ],
   [/^scripts\/e2e\/codex-media-path-docker\.sh$/u, ["codex-media-path-client"]],
   [/^scripts\/e2e\/live-plugin-tool-docker\.sh$/u, ["live-plugin-tool-assertions"]],
-  [/^scripts\/e2e\/onboard-docker\.sh$/u, [dockerBuild, "openclaw-test-state"]],
+  [/^scripts\/e2e\/onboard-docker\.sh$/u, [dockerBuild, "carapace-test-state"]],
   [
     new RegExp(
       [
@@ -3128,7 +3128,7 @@ function resolveDirectToolingReferenceTests(changedPath: string, cwd: string) {
 
 function resolveToolingTestTargets(changedPath: string, cwd = process.cwd()) {
   if (
-    /^test\/scripts\/(?:ci-(?:checkout|git-owner|linux-git|platform-checkout|windows-process-census)\.test(?:-support)?\.ts|generated-publisher\.test-support\.ts|openclaw-performance-(?:workflow\.test(?:-support)?|git-lifecycle\.test)\.ts|plugin-release-git-lifecycle\.test\.ts|release-workflow-git-lifecycle\.test\.ts|fixtures\/(?:ci-platform-checkout\.mjs|ci-checkout-auth\.py|ci-windows-process-census\.(?:mjs|py)))$/u.test(
+    /^test\/scripts\/(?:ci-(?:checkout|git-owner|linux-git|platform-checkout|windows-process-census)\.test(?:-support)?\.ts|generated-publisher\.test-support\.ts|carapace-performance-(?:workflow\.test(?:-support)?|git-lifecycle\.test)\.ts|plugin-release-git-lifecycle\.test\.ts|release-workflow-git-lifecycle\.test\.ts|fixtures\/(?:ci-platform-checkout\.mjs|ci-checkout-auth\.py|ci-windows-process-census\.(?:mjs|py)))$/u.test(
       changedPath,
     )
   ) {
@@ -3136,8 +3136,8 @@ function resolveToolingTestTargets(changedPath: string, cwd = process.cwd()) {
       "ci-git-owner",
       "ci-linux-git",
       "ci-platform-checkout",
-      "openclaw-performance-workflow",
-      "openclaw-performance-git-lifecycle",
+      "carapace-performance-workflow",
+      "carapace-performance-git-lifecycle",
       "plugin-release-git-lifecycle",
       "release-workflow-git-lifecycle",
       workflowGuards,
@@ -3178,9 +3178,9 @@ function resolveToolingTestTargets(changedPath: string, cwd = process.cwd()) {
     return null;
   }
   const crossOsReleaseTargets =
-    implementationPath === "scripts/openclaw-cross-os-release-checks.ts" ||
+    implementationPath === "scripts/carapace-cross-os-release-checks.ts" ||
     implementationPath.startsWith("scripts/lib/cross-os-release-checks/")
-      ? ["test/scripts/openclaw-cross-os-release-checks.test.ts"]
+      ? ["test/scripts/carapace-cross-os-release-checks.test.ts"]
       : null;
   const explicitTargets =
     (changedPath === "Dockerfile"
@@ -3308,7 +3308,7 @@ function resolvePreciseChangedTestTargets(
   const cwd = options.cwd ?? process.cwd();
   const mappedTargets =
     SOURCE_TEST_TARGETS.get(changedPath) ??
-    (/^extensions\/[^/]+\/openclaw\.plugin\.json$/u.test(changedPath)
+    (/^extensions\/[^/]+\/carapace\.plugin\.json$/u.test(changedPath)
       ? [changedPath, DOCS_CONFIG_EXAMPLES_TEST_TARGET]
       : null) ??
     resolveToolingTestTargets(changedPath, cwd) ??
@@ -4095,16 +4095,16 @@ export function buildFullSuiteVitestRunPlans(args: string[], cwd = process.cwd()
     ];
   }
   const parallelShardCount = parsePositiveInt(
-    process.env.OPENCLAW_TEST_PROJECTS_PARALLEL,
-    "OPENCLAW_TEST_PROJECTS_PARALLEL",
+    process.env.CARAPACE_TEST_PROJECTS_PARALLEL,
+    "CARAPACE_TEST_PROJECTS_PARALLEL",
   );
   const expandToProjectConfigs =
-    process.env.OPENCLAW_TEST_PROJECTS_LEAF_SHARDS === "1" ||
+    process.env.CARAPACE_TEST_PROJECTS_LEAF_SHARDS === "1" ||
     (parallelShardCount !== null && parallelShardCount > 1) ||
     shouldExpandLocalFullSuiteShardsByDefault(process.env);
   return fullSuiteVitestShards.flatMap((shard) => {
     if (
-      process.env.OPENCLAW_TEST_SKIP_FULL_EXTENSIONS_SHARD === "1" &&
+      process.env.CARAPACE_TEST_SKIP_FULL_EXTENSIONS_SHARD === "1" &&
       shard.config === FULL_EXTENSIONS_VITEST_CONFIG
     ) {
       return [];
@@ -4113,7 +4113,7 @@ export function buildFullSuiteVitestRunPlans(args: string[], cwd = process.cwd()
     // Bound project and worker lifetimes before either aggregate reaches V8's heap limit.
     const expandShard =
       expandToProjectConfigs ||
-      (process.env.OPENCLAW_TESTBOX_REMOTE_RUN === "1" &&
+      (process.env.CARAPACE_TESTBOX_REMOTE_RUN === "1" &&
         (shard.config === FULL_AGENTIC_VITEST_CONFIG ||
           shard.config === FULL_EXTENSIONS_VITEST_CONFIG));
     const configs = expandShard ? shard.projects : [shard.config];
@@ -4175,7 +4175,7 @@ function shouldUseLocalFullSuiteParallelByDefault(env = process.env) {
   if (hasConservativeVitestWorkerBudget(env)) {
     return false;
   }
-  return env.OPENCLAW_TEST_PROJECTS_SERIAL !== "1" && !isCiLikeEnv(env);
+  return env.CARAPACE_TEST_PROJECTS_SERIAL !== "1" && !isCiLikeEnv(env);
 }
 
 function shouldExpandLocalFullSuiteShardsByDefault(env = process.env) {
@@ -4199,10 +4199,10 @@ function parsePositiveInt(value: string | undefined, label: string) {
 
 function hasConservativeVitestWorkerBudget(env: NodeJS.ProcessEnv) {
   const workerBudget = parsePositiveInt(
-    env.OPENCLAW_VITEST_MAX_WORKERS ?? env.OPENCLAW_TEST_WORKERS,
-    env.OPENCLAW_VITEST_MAX_WORKERS === undefined
-      ? "OPENCLAW_TEST_WORKERS"
-      : "OPENCLAW_VITEST_MAX_WORKERS",
+    env.CARAPACE_VITEST_MAX_WORKERS ?? env.CARAPACE_TEST_WORKERS,
+    env.CARAPACE_VITEST_MAX_WORKERS === undefined
+      ? "CARAPACE_TEST_WORKERS"
+      : "CARAPACE_VITEST_MAX_WORKERS",
   );
   return workerBudget !== null && workerBudget <= 1;
 }
@@ -4257,13 +4257,13 @@ export function resolveParallelFullSuiteConcurrency(
   let env = envInput;
   env ??= process.env;
   const override = parsePositiveInt(
-    env.OPENCLAW_TEST_PROJECTS_PARALLEL,
-    "OPENCLAW_TEST_PROJECTS_PARALLEL",
+    env.CARAPACE_TEST_PROJECTS_PARALLEL,
+    "CARAPACE_TEST_PROJECTS_PARALLEL",
   );
   if (override !== null) {
     return Math.min(override, specCount);
   }
-  if (env.OPENCLAW_TEST_PROJECTS_SERIAL === "1") {
+  if (env.CARAPACE_TEST_PROJECTS_SERIAL === "1") {
     return 1;
   }
   if (isCiLikeEnv(env)) {
@@ -4273,7 +4273,7 @@ export function resolveParallelFullSuiteConcurrency(
     return 1;
   }
   if (
-    env.OPENCLAW_TEST_PROJECTS_LEAF_SHARDS !== "1" &&
+    env.CARAPACE_TEST_PROJECTS_LEAF_SHARDS !== "1" &&
     !shouldUseLocalFullSuiteParallelByDefault(env)
   ) {
     return 1;
@@ -4413,7 +4413,7 @@ export function createVitestRunSpecs(
   );
   return plans.map((plan, index) => {
     const includeFilePath = plan.includePatterns
-      ? path.join(os.tmpdir(), `openclaw-vitest-include-${randomUUID()}-${index}.json`)
+      ? path.join(os.tmpdir(), `carapace-vitest-include-${randomUUID()}-${index}.json`)
       : null;
     return {
       config: plan.config,

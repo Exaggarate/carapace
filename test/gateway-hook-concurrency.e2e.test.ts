@@ -1,12 +1,12 @@
 // E2E: hook dispatch uses the shared cron budget without starving older cron work.
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { writeOpenAiResponsesSse } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 import { createDeferred } from "./helpers/promise.js";
 
 const TEST_TIMEOUT_MS = 180_000;
@@ -39,7 +39,7 @@ type HeldModelServer = {
   url: string;
 };
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const modelServers: HeldModelServer[] = [];
 
 afterEach(async () => {
@@ -54,10 +54,10 @@ describe("Gateway hook concurrency", () => {
     async () => {
       const modelServer = await startHeldModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "gateway-hook-completion",
         config: createTestConfig(modelServer.url),
-        env: { OPENCLAW_SKIP_CRON: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+        env: { CARAPACE_SKIP_CRON: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       });
       instances.push(instance);
       await instance.startGateway();
@@ -98,10 +98,10 @@ describe("Gateway hook concurrency", () => {
     async () => {
       const modelServer = await startHeldModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "gateway-hook-concurrency",
         config: createTestConfig(modelServer.url),
-        env: { OPENCLAW_SKIP_CRON: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+        env: { CARAPACE_SKIP_CRON: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       });
       instances.push(instance);
       await instance.startGateway();
@@ -260,7 +260,7 @@ describe("Gateway hook concurrency", () => {
   );
 });
 
-function createTestConfig(baseUrl: string): OpenClawConfig {
+function createTestConfig(baseUrl: string): CarapaceConfig {
   return {
     plugins: { slots: { memory: "none" } },
     hooks: {
@@ -272,7 +272,7 @@ function createTestConfig(baseUrl: string): OpenClawConfig {
       defaults: {
         heartbeat: { every: "0m" },
         model: { primary: MODEL_REF },
-        models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+        models: { [MODEL_REF]: { agentRuntime: { id: "carapace" } } },
         skipBootstrap: true,
         skills: [],
       },
@@ -305,7 +305,7 @@ function createTestConfig(baseUrl: string): OpenClawConfig {
 }
 
 async function warmGatewayHook(
-  instance: OpenClawTestInstance,
+  instance: CarapaceTestInstance,
   modelServer: HeldModelServer,
 ): Promise<void> {
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -331,7 +331,7 @@ async function warmGatewayHook(
   throw new Error("Gateway hook warmup did not reach the model after three attempts");
 }
 
-async function postHook(instance: OpenClawTestInstance, index: number): Promise<HookResponse> {
+async function postHook(instance: CarapaceTestInstance, index: number): Promise<HookResponse> {
   const response = await fetch(`http://127.0.0.1:${instance.port}/hooks/agent`, {
     method: "POST",
     headers: {
@@ -353,7 +353,7 @@ async function postHook(instance: OpenClawTestInstance, index: number): Promise<
   };
 }
 
-async function postObservedHook(instance: OpenClawTestInstance, id: string): Promise<HookResponse> {
+async function postObservedHook(instance: CarapaceTestInstance, id: string): Promise<HookResponse> {
   const response = await fetch(`http://127.0.0.1:${instance.port}/hooks/agent`, {
     method: "POST",
     headers: {
@@ -480,7 +480,7 @@ async function drainRequest(request: IncomingMessage): Promise<string> {
 }
 
 async function waitForCronRun(
-  instance: OpenClawTestInstance,
+  instance: CarapaceTestInstance,
   jobId: string,
   runId: string,
 ): Promise<void> {

@@ -1,4 +1,4 @@
-import { truncateCodePoints } from "@openclaw/normalization-core/code-points";
+import { truncateCodePoints } from "@carapace/normalization-core/code-points";
 import {
   ErrorCodes,
   errorShape,

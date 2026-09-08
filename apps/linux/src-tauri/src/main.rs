@@ -19,7 +19,7 @@ mod remote_gateway;
 mod tray;
 mod updater;
 
-use cli::{CliError, OpenClawCli};
+use cli::{CliError, CarapaceCli};
 use gateway::{GatewayAction, GatewaySnapshot, ReadyGateway};
 use gateway_operation_queue::{GatewayOperation, GatewayOperationQueue};
 use installer::InstallChannel;
@@ -77,7 +77,7 @@ fn native_auth_initialization_script(
     if (location.origin !== {origin}) return;
     const base = {path};
     if (base !== "/" && location.pathname !== base && !location.pathname.startsWith(`${{base}}/`)) return;
-    Object.defineProperty(window, "__OPENCLAW_NATIVE_CONTROL_AUTH__", {{
+    Object.defineProperty(window, "__CARAPACE_NATIVE_CONTROL_AUTH__", {{
       value: {auth},
       configurable: true,
     }});
@@ -128,8 +128,8 @@ fn is_release_version(version: &str) -> bool {
     version != "0.1.0"
 }
 
-// The openclaw:// URL contract is deliberately tiny and handled entirely in
-// Rust: `openclaw://dashboard` opens/connects the dashboard; anything else
+// The carapace:// URL contract is deliberately tiny and handled entirely in
+// Rust: `carapace://dashboard` opens/connects the dashboard; anything else
 // just focuses the app. New routes are added to this enum — the renderer
 // (which is often navigated away to the remote dashboard) never sees URLs.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -139,7 +139,7 @@ enum DeepLinkRoute {
 }
 
 fn deep_link_route(url: &Url) -> DeepLinkRoute {
-    if url.scheme() == "openclaw" && url.host_str() == Some("dashboard") {
+    if url.scheme() == "carapace" && url.host_str() == Some("dashboard") {
         DeepLinkRoute::Dashboard
     } else {
         DeepLinkRoute::FocusOnly
@@ -162,9 +162,9 @@ mod deep_link_tests {
     use super::{deep_link_route, DeepLinkRoute, Url};
 
     #[test]
-    fn dashboard_route_matches_only_the_openclaw_dashboard_host() {
-        let dashboard = Url::parse("openclaw://dashboard/ignored?source=test").unwrap();
-        let other = Url::parse("openclaw://settings/dashboard").unwrap();
+    fn dashboard_route_matches_only_the_carapace_dashboard_host() {
+        let dashboard = Url::parse("carapace://dashboard/ignored?source=test").unwrap();
+        let other = Url::parse("carapace://settings/dashboard").unwrap();
         let other_scheme = Url::parse("https://dashboard/").unwrap();
 
         assert_eq!(deep_link_route(&dashboard), DeepLinkRoute::Dashboard);
@@ -191,7 +191,7 @@ mod native_browser_tests {
             ("file:///etc/passwd", false),
             ("javascript:alert(1)", false),
             ("data:text/html,fixture", false),
-            ("openclaw://dashboard", false),
+            ("carapace://dashboard", false),
         ] {
             assert_eq!(
                 external_browser_url_allowed(&Url::parse(candidate).expect("URL")),
@@ -210,15 +210,15 @@ mod native_browser_tests {
     fn native_password_handoff_is_origin_scoped_and_consumed_before_page_code() {
         let request = RemoteGatewayRequest {
             transport: "direct".to_string(),
-            url: Some("https://gateway.example.com/openclaw".to_string()),
+            url: Some("https://gateway.example.com/carapace".to_string()),
             ssh_target: None,
             token: None,
             password: Some("fixture-password".to_string()),
             remote_port: None,
             tls_fingerprint: None,
         };
-        let dashboard = Url::parse("https://gateway.example.com/openclaw").expect("dashboard");
-        let gateway = Url::parse("wss://gateway.example.com/openclaw").expect("Gateway");
+        let dashboard = Url::parse("https://gateway.example.com/carapace").expect("dashboard");
+        let gateway = Url::parse("wss://gateway.example.com/carapace").expect("Gateway");
         let initialization_script =
             native_auth_initialization_script(&dashboard, &gateway, &request).expect("auth script");
         assert!(!dashboard.as_str().contains("fixture-password"));
@@ -227,18 +227,18 @@ mod native_browser_tests {
         let runner = r#"
             const init = new Function('window', 'location', process.argv[1]);
             const cases = [
-              ['https://gateway.example.com', '/openclaw', true],
-              ['https://gateway.example.com', '/openclaw/settings/model-setup', true],
-              ['https://attacker.example.com', '/openclaw', false],
-              ['https://gateway.example.com', '/openclaw-other', false],
+              ['https://gateway.example.com', '/carapace', true],
+              ['https://gateway.example.com', '/carapace/settings/model-setup', true],
+              ['https://attacker.example.com', '/carapace', false],
+              ['https://gateway.example.com', '/carapace-other', false],
               ['https://gateway.example.com', '/other', false],
             ];
             for (const [origin, pathname, allowed] of cases) {
               const window = {};
               init(window, {origin, pathname});
-              const auth = window.__OPENCLAW_NATIVE_CONTROL_AUTH__;
+              const auth = window.__CARAPACE_NATIVE_CONTROL_AUTH__;
               if (Boolean(auth) !== allowed) throw new Error('origin/path policy failed');
-              if (allowed && (auth.gatewayUrl !== 'wss://gateway.example.com/openclaw' || auth.password !== 'fixture-password')) {
+              if (allowed && (auth.gatewayUrl !== 'wss://gateway.example.com/carapace' || auth.password !== 'fixture-password')) {
                 throw new Error('native password was not delivered');
               }
             }
@@ -246,7 +246,7 @@ mod native_browser_tests {
         let output = Command::new("node")
             .args(["-e", runner, &initialization_script])
             .output()
-            .expect("Node is required by the OpenClaw workspace");
+            .expect("Node is required by the Carapace workspace");
         assert!(
             output.status.success(),
             "native auth handoff failed: {}",
@@ -258,13 +258,13 @@ mod native_browser_tests {
     fn pinned_remote_gateway_never_receives_credentials_through_an_unpinned_webview() {
         let request: RemoteGatewayRequest = serde_json::from_value(serde_json::json!({
             "transport": "direct",
-            "url": "https://gateway.example.com/openclaw",
+            "url": "https://gateway.example.com/carapace",
             "token": "fixture-token",
             "tlsFingerprint": "ab".repeat(32),
         }))
         .expect("pinned remote request");
-        let dashboard = Url::parse("https://gateway.example.com/openclaw").expect("dashboard");
-        let gateway = Url::parse("wss://gateway.example.com/openclaw").expect("Gateway");
+        let dashboard = Url::parse("https://gateway.example.com/carapace").expect("dashboard");
+        let gateway = Url::parse("wss://gateway.example.com/carapace").expect("Gateway");
         let result = native_auth_initialization_script(&dashboard, &gateway, &request);
 
         assert!(
@@ -365,7 +365,7 @@ impl NavigationState {
 }
 
 struct DesktopInner {
-    cli: Mutex<Option<OpenClawCli>>,
+    cli: Mutex<Option<CarapaceCli>>,
     navigation: Mutex<NavigationState>,
     operation: Mutex<()>,
     pending_approvals: Mutex<pending_approvals::PendingApprovalState>,
@@ -472,8 +472,8 @@ impl DesktopState {
             .lock()
             .map_err(|_| "Installer lock is unavailable.".to_string())?;
         installer::install(app, channel)?;
-        let cli = OpenClawCli::discover().map_err(|error| {
-            format!("OpenClaw is installed, but the CLI could not be found: {error}")
+        let cli = CarapaceCli::discover().map_err(|error| {
+            format!("Carapace is installed, but the CLI could not be found: {error}")
         })?;
         *self.inner.cli.lock().expect("CLI mutex poisoned") = Some(cli.clone());
 
@@ -482,9 +482,9 @@ impl DesktopState {
         let repair_error = match cli.output(["doctor", "--fix", "--non-interactive"]) {
             Ok(output) if !output.status.success() => Some(
                 cli::output_tail(&output.stderr)
-                    .unwrap_or_else(|| format!("OpenClaw repair exited with {}", output.status)),
+                    .unwrap_or_else(|| format!("Carapace repair exited with {}", output.status)),
             ),
-            Err(error) => Some(format!("OpenClaw repair could not start: {error}")),
+            Err(error) => Some(format!("Carapace repair could not start: {error}")),
             _ => None,
         };
         if let Some(error) = repair_error {
@@ -501,17 +501,17 @@ impl DesktopState {
             .navigation
             .lock()
             .map_err(|_| {
-                "OpenClaw is installed, but preparing the Gateway dashboard failed: \
+                "Carapace is installed, but preparing the Gateway dashboard failed: \
                  Dashboard navigation lock is unavailable."
                     .to_string()
             })?
             .mark_onboarding_pending();
         let ready = gateway::ensure_ready(&cli).map_err(|error| {
-            format!("OpenClaw is installed, but connecting to the Gateway failed: {error}")
+            format!("Carapace is installed, but connecting to the Gateway failed: {error}")
         })?;
         self.finish_local_connection(app, cli, ready)
             .map_err(|error| {
-                format!("OpenClaw is installed, but opening the Gateway dashboard failed: {error}")
+                format!("Carapace is installed, but opening the Gateway dashboard failed: {error}")
             })
     }
 
@@ -545,7 +545,7 @@ impl DesktopState {
     fn finish_local_connection(
         &self,
         app: &AppHandle,
-        cli: OpenClawCli,
+        cli: CarapaceCli,
         ready: ReadyGateway,
     ) -> Result<GatewaySnapshot, String> {
         app.state::<gateway_ws::GatewayClient>()
@@ -725,18 +725,18 @@ impl DesktopState {
         self.inner.quitting.load(Ordering::SeqCst)
     }
 
-    pub(crate) fn resolve_cli(&self) -> Result<OpenClawCli, CliError> {
+    pub(crate) fn resolve_cli(&self) -> Result<CarapaceCli, CliError> {
         if let Some(cli) = self
             .inner
             .cli
             .lock()
             .expect("CLI mutex poisoned")
             .clone()
-            .filter(OpenClawCli::is_available)
+            .filter(CarapaceCli::is_available)
         {
             return Ok(cli);
         }
-        let cli = OpenClawCli::discover()?;
+        let cli = CarapaceCli::discover()?;
         *self.inner.cli.lock().expect("CLI mutex poisoned") = Some(cli.clone());
         Ok(cli)
     }
@@ -793,7 +793,7 @@ impl DesktopState {
         }
     }
 
-    fn poll_pending_approvals(&self, app: &AppHandle, cli: &OpenClawCli, generation: u64) {
+    fn poll_pending_approvals(&self, app: &AppHandle, cli: &CarapaceCli, generation: u64) {
         let pending = match pending_approvals::fetch(cli) {
             Ok(pending) => pending,
             Err(error) => {
@@ -824,7 +824,7 @@ impl DesktopState {
         }
         // Notifications are a doorbell only; approval stays in the dashboard or CLI.
         for request in diff.new {
-            notify::notify(app, "OpenClaw", &request.notification_body());
+            notify::notify(app, "Carapace", &request.notification_body());
         }
     }
 
@@ -902,7 +902,7 @@ impl DesktopState {
             .is_ok_and(|navigation| navigation.watchdog_is_current(generation))
     }
 
-    fn start_watchdog(&self, app: AppHandle, mut cli: OpenClawCli) {
+    fn start_watchdog(&self, app: AppHandle, mut cli: CarapaceCli) {
         let generation = {
             let Ok(mut navigation) = self.inner.navigation.lock() else {
                 return;
@@ -1041,7 +1041,7 @@ mod navigation_tests {
                 true,
             ),
             (
-                "http://127.0.0.1/openclaw/settings/model-setup/?tab=ai&firstRun=1#token=redacted",
+                "http://127.0.0.1/carapace/settings/model-setup/?tab=ai&firstRun=1#token=redacted",
                 true,
             ),
             ("http://127.0.0.1/settings/model-setup", false),
@@ -1053,7 +1053,7 @@ mod navigation_tests {
             ("http://127.0.0.1/settings/providers?firstRun=1", false),
             ("http://127.0.0.1/custodian?onboarding=1", true),
             (
-                "http://127.0.0.1/openclaw/custodian/?tab=chat&onboarding=YES",
+                "http://127.0.0.1/carapace/custodian/?tab=chat&onboarding=YES",
                 true,
             ),
             ("http://127.0.0.1/custodian", false),
@@ -1134,11 +1134,11 @@ mod navigation_tests {
 
         let url = navigation
             .prepare_dashboard_url(
-                "http://127.0.0.1:18789/openclaw/?foo=bar&firstRun=1#token=secret",
+                "http://127.0.0.1:18789/carapace/?foo=bar&firstRun=1#token=secret",
             )
             .expect("dashboard URL");
 
-        assert_eq!(url.path(), "/openclaw/settings/model-setup");
+        assert_eq!(url.path(), "/carapace/settings/model-setup");
         assert_eq!(url.query(), Some("foo=bar&firstRun=explicit"));
         assert_eq!(url.fragment(), Some("token=secret"));
     }
@@ -1415,7 +1415,7 @@ fn main() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("OpenClaw desktop app failed");
+        .expect("Carapace desktop app failed");
     app.run(|app, event| {
         #[cfg(target_os = "linux")]
         if matches!(event, tauri::RunEvent::Exit) {

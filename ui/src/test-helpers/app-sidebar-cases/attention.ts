@@ -151,7 +151,7 @@ describe("AppSidebar session attention", () => {
     expect(questionAttention?.getAttribute("tabindex")).toBe("0");
     expect(
       (
-        questionAttention?.closest("openclaw-tooltip") as
+        questionAttention?.closest("carapace-tooltip") as
           | (HTMLElement & {
               content?: string;
             })
@@ -317,7 +317,7 @@ describe("AppSidebar session attention", () => {
     );
     expect(homeAttention).not.toBeNull();
     expect(
-      (homeAttention?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+      (homeAttention?.closest("carapace-tooltip") as (HTMLElement & { content?: string }) | null)
         ?.content,
     ).toBe("Waiting for approval");
 
@@ -373,7 +373,7 @@ describe("AppSidebar session attention", () => {
 
   it("marks a collapsed section that contains agent-declared attention", async () => {
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "carapace:sidebar:sessions:collapsed-sections",
       JSON.stringify(["ungrouped"]),
     );
     const sessionsHarness = createSessionsHarness("main", [sessionKey]);
@@ -403,7 +403,7 @@ describe("AppSidebar session attention", () => {
   it("bubbles unloaded child attention to its parent and collapsed section", async () => {
     const parentKey = "agent:main:parent";
     for (const kind of ["question", "approval"] as const) {
-      localStorage.setItem("openclaw:sidebar:sessions:collapsed-sections", "[]");
+      localStorage.setItem("carapace:sidebar:sessions:collapsed-sections", "[]");
       const childKey = `agent:main:subagent:${kind}`;
       const gatewayHarness = createGatewayHarness({
         request: vi.fn().mockResolvedValue({ questions: [] }),

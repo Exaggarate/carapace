@@ -1,6 +1,6 @@
-import type { MemorySearchRuntimeDebug } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import type { MemorySearchRuntimeDebug } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 // Memory Core tests cover tools plugin behavior.
-import { clearMemoryPluginState } from "openclaw/plugin-sdk/memory-host-core";
+import { clearMemoryPluginState } from "carapace/plugin-sdk/memory-host-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MEMORY_GET_TOOL_CONTRACT, MEMORY_SEARCH_TOOL_CONTRACT } from "./memory-tool-contract.js";
 import {
@@ -22,7 +22,7 @@ import { applyProjectRanking } from "./memory/project-ranking.js";
 import { createMemorySearchTool, testing as memoryToolsTesting } from "./tools.js";
 import { buildMemorySearchUnavailableResult } from "./tools.shared.js";
 import {
-  asOpenClawConfig,
+  asCarapaceConfig,
   createMemorySearchToolOrThrow,
   expectUnavailableMemorySearchDetails,
 } from "./tools.test-helpers.js";
@@ -42,9 +42,9 @@ const sessionStore = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/session-transcript-hit", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-transcript-hit", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-hit")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-transcript-hit")>();
   return {
     ...actual,
     loadCombinedSessionStoreForGateway: vi.fn(() => ({
@@ -216,7 +216,7 @@ describe("memory_search unavailable payloads", () => {
   it("passes the host local-service hook to tool memory managers", async () => {
     const acquireLocalService = vi.fn(async () => undefined);
     const tool = createMemorySearchTool({
-      config: asOpenClawConfig({
+      config: asCarapaceConfig({
         agents: { list: [{ id: "main", default: true }] },
       }),
       acquireLocalService,
@@ -258,9 +258,9 @@ describe("memory_search unavailable payloads", () => {
     expectUnavailableMemorySearchDetails(result.details, {
       error,
       warning:
-        "Memory search is unavailable because this OpenClaw Node runtime does not provide SQLite support.",
+        "Memory search is unavailable because this Carapace Node runtime does not provide SQLite support.",
       action:
-        "Run OpenClaw with a Node runtime that includes node:sqlite, then retry memory_search.",
+        "Run Carapace with a Node runtime that includes node:sqlite, then retry memory_search.",
     });
   });
 
@@ -279,13 +279,13 @@ describe("memory_search unavailable payloads", () => {
 
   it("does not infer migration recovery from non-quota error text", async () => {
     setMemorySearchImpl(async () => {
-      throw new Error("embedding provider timeout; run openclaw doctor --fix");
+      throw new Error("embedding provider timeout; run carapace doctor --fix");
     });
 
     const tool = createMemorySearchToolOrThrow();
     const result = await tool.execute("generic", { query: "hello" });
     expectUnavailableMemorySearchDetails(result.details, {
-      error: "embedding provider timeout; run openclaw doctor --fix",
+      error: "embedding provider timeout; run carapace doctor --fix",
       warning: "Memory search is unavailable due to an embedding/provider error.",
       action: "Check embedding provider configuration and retry memory_search.",
     });
@@ -301,7 +301,7 @@ describe("memory_search unavailable payloads", () => {
     ).toMatchObject({
       warning: "Memory search did not finish within its time limit.",
       action:
-        "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: openclaw memory status --deep --agent recall, and rebuild with openclaw memory index --force --agent recall only if it reports the index dirty or incomplete",
+        "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: carapace memory status --deep --agent recall, and rebuild with carapace memory index --force --agent recall only if it reports the index dirty or incomplete",
     });
     expect(buildMemorySearchUnavailableResult("memory_search timed out after 15s")).toMatchObject({
       warning: "Memory search is unavailable due to an embedding/provider error.",
@@ -359,7 +359,7 @@ describe("memory_search unavailable payloads", () => {
         error: "memory_search timed out after 15s",
         warning: "Memory search did not finish within its time limit.",
         action:
-          "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: openclaw memory status --deep --agent main, and rebuild with openclaw memory index --force --agent main only if it reports the index dirty or incomplete",
+          "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: carapace memory status --deep --agent main, and rebuild with carapace memory index --force --agent main only if it reports the index dirty or incomplete",
       });
       // The deadline must abort the orphaned search, not just race past it.
       expect(searchSignal?.aborted).toBe(true);
@@ -368,7 +368,7 @@ describe("memory_search unavailable payloads", () => {
         error: "memory_search timed out after 15s",
         warning: "Memory search did not finish within its time limit.",
         action:
-          "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: openclaw memory status --deep --agent main, and rebuild with openclaw memory index --force --agent main only if it reports the index dirty or incomplete",
+          "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: carapace memory status --deep --agent main, and rebuild with carapace memory index --force --agent main only if it reports the index dirty or incomplete",
       });
       expect(searchCalls).toBe(1);
       setMemorySearchImpl(async () => {
@@ -412,7 +412,7 @@ describe("memory_search unavailable payloads", () => {
         error: "memory_search timed out after 15s",
         warning: "Memory search did not finish within its time limit.",
         action:
-          "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: openclaw memory status --deep --agent main, and rebuild with openclaw memory index --force --agent main only if it reports the index dirty or incomplete",
+          "Retry memory_search after a short wait: a memory-corpus timeout pauses retries for up to a minute. If memory-corpus timeouts persist, run: carapace memory status --deep --agent main, and rebuild with carapace memory index --force --agent main only if it reports the index dirty or incomplete",
       });
     } finally {
       vi.useRealTimers();
@@ -636,7 +636,7 @@ describe("memory_search unavailable payloads", () => {
       warning:
         "Memory index is stale: embedding request timed out. Search results may be incomplete.",
       action:
-        "Run: openclaw memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.",
+        "Run: carapace memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.",
     });
   });
 
@@ -709,7 +709,7 @@ describe("memory_search unavailable payloads", () => {
       error: reason,
       warning: `Tell the user: memory search is paused because the current memory configuration no longer matches the index (${reason}).`,
       action:
-        "Tell the user to run: openclaw memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.",
+        "Tell the user to run: carapace memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.",
     });
     expect(searchCalls).toBe(1);
     expect(getMemorySyncMockCalls()).toBe(0);
@@ -796,7 +796,7 @@ describe("memory_search corpus labels", () => {
 
   it("uses explicit plugin context agent over synthetic active-memory session keys", async () => {
     const tool = createMemorySearchToolOrThrow({
-      config: asOpenClawConfig({
+      config: asCarapaceConfig({
         agents: {
           list: [
             { id: "main", default: true, memory: { search: { enabled: false } } },
@@ -814,7 +814,7 @@ describe("memory_search corpus labels", () => {
   });
 
   it("re-resolves config when executing a previously created tool", async () => {
-    const startupConfig = asOpenClawConfig({
+    const startupConfig = asCarapaceConfig({
       agents: {
         defaults: {},
         list: [{ id: "main", default: true }],
@@ -826,7 +826,7 @@ describe("memory_search corpus labels", () => {
         },
       },
     });
-    const patchedConfig = asOpenClawConfig({
+    const patchedConfig = asCarapaceConfig({
       agents: {
         defaults: {},
         list: [{ id: "main", default: true }],

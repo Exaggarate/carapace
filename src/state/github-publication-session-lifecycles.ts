@@ -4,10 +4,10 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { ensureGitHubPublicationSessionLifecycleSchema } from "./openclaw-state-db-schema-additive.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB } from "./openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "./openclaw-state-db.js";
+import { ensureGitHubPublicationSessionLifecycleSchema } from "./carapace-state-db-schema-additive.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB } from "./carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "./carapace-state-db.js";
 
 const table = "github_publication_session_lifecycles";
 type PublicationIdentity = { publicationKind: "shared" | "personal"; requestId: string };
@@ -31,7 +31,7 @@ export function insertGitHubPublicationSessionLifecycle(
 
 /** A missing binding is unproven; a retained NULL records an originally absent revision. */
 export function readGitHubPublicationSessionLifecycle(input: PublicationIdentity) {
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   return tableExists(db, table)
     ? executeSqliteQueryTakeFirstSync(
         db,

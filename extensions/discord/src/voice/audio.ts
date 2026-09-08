@@ -8,11 +8,11 @@ import {
   type OpusDecoderHandle as LibopusDecoder,
   type OpusEncoderHandle as LibopusEncoder,
 } from "libopus-wasm";
-import { resolveFfmpegBin } from "openclaw/plugin-sdk/media-runtime";
-import { resamplePcm } from "openclaw/plugin-sdk/realtime-voice";
-import { logVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
-import { tempWorkspace, resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { resolveFfmpegBin } from "carapace/plugin-sdk/media-runtime";
+import { resamplePcm } from "carapace/plugin-sdk/realtime-voice";
+import { logVerbose, shouldLogVerbose } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
+import { tempWorkspace, resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 
 const SAMPLE_RATE = 48_000;
 const CHANNELS = 2;
@@ -319,7 +319,7 @@ export async function writeVoiceWavFile(
   pcm: Buffer,
 ): Promise<{ path: string; durationSeconds: number; cleanup: () => Promise<void> }> {
   const workspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
+    rootDir: resolvePreferredCarapaceTmpDir(),
     prefix: "discord-voice-",
   });
   try {

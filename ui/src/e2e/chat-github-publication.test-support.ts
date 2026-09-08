@@ -30,14 +30,14 @@ export const publicationMethods = [
 
 export async function showPublicationBranch(
   gateway: Awaited<ReturnType<typeof installMockGateway>>,
-  branch = "openclaw/personal-publication",
+  branch = "carapace/personal-publication",
 ) {
   const key = await waitForWatchedSessionKey(gateway);
   await gateway.emitGatewayEvent(CONTROL_UI_SESSION_PULL_REQUESTS_CHANGED_EVENT, {
     sessions: {
       [key]: {
         pullRequests: [],
-        branch: { owner: "openclaw", repo: "openclaw", branch, additions: 7, deletions: 2 },
+        branch: { owner: "carapace", repo: "carapace", branch, additions: 7, deletions: 2 },
         rateLimited: false,
         status: "ok",
       },

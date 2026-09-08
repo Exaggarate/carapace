@@ -1,7 +1,7 @@
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import { expect, it } from "vitest";
 import {
   appendAssistantMirrorMessageByIdentity,
@@ -382,7 +382,7 @@ describeTelegramDispatch("dispatchTelegramMessage progress-updates", () => {
       await replyOptions?.onAssistantMessageStart?.();
       await replyOptions?.onToolResult?.({
         text: "🧭 Agents",
-        channelData: { openclawToolProgressId: "dynamic-1" },
+        channelData: { carapaceToolProgressId: "dynamic-1" },
       });
       await replyOptions?.onToolStart?.({
         name: "agents_list",
@@ -422,7 +422,7 @@ describeTelegramDispatch("dispatchTelegramMessage progress-updates", () => {
       });
       await replyOptions?.onToolResult?.({
         text: "🛠️ Bash",
-        channelData: { openclawToolProgressId: "command-1" },
+        channelData: { carapaceToolProgressId: "command-1" },
       });
       return { queuedFinal: false };
     });

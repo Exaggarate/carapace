@@ -29,7 +29,7 @@ describe.each(["portable", "Linux shell"] as const)("leading-@ remote paths (%s)
   it.runIf(fixture === "portable" || process.platform === "linux")(
     "preserves literal files, shorthand, journal authority, patch targets, and stat failures",
     async () => {
-      const stateDir = await fs.realpath(tempDirs.make("openclaw-at-remote-"));
+      const stateDir = await fs.realpath(tempDirs.make("carapace-at-remote-"));
       const hostRoot = path.join(stateDir, "host");
       const remoteRoot = path.join(stateDir, "remote");
       const containerWorkdir = fixture === "portable" ? "/remote-workspace" : remoteRoot;
@@ -244,7 +244,7 @@ describe.each(["portable", "Linux shell"] as const)("leading-@ remote paths (%s)
       await expect(fs.readFile(path.join(remoteRoot, "replace-present.md"), "utf8")).resolves.toBe(
         "sibling",
       );
-      await withStateDirEnv("openclaw-remote-provenance-", async () => {
+      await withStateDirEnv("carapace-remote-provenance-", async () => {
         const relativePath = "memory/quarantine.md";
         const memoryPath = path.posix.join(containerWorkdir, relativePath);
         const memoryWriteProvenance = createMemoryWriteProvenanceObserver({

@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 // Zalouser plugin module implements zalo js behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
 import {
   asDateTimestampMs,
   asFiniteNumberInRange,
@@ -12,16 +12,16 @@ import {
   parseStrictNonNegativeInteger,
   resolveExpiresAtMsFromDurationMs,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-import { withTimeout } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
+import { withTimeout } from "carapace/plugin-sdk/security-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sleep, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { sleep, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { normalizeZaloReactionIcon } from "./reaction.js";
 import { createZalouserSendReceipt } from "./send-receipt.js";
 import {

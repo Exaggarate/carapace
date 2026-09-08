@@ -25,8 +25,8 @@ const groups: number[] = [];
 const artifactDirs: string[] = [];
 beforeEach(() => {
   rpcStop.mockReset().mockResolvedValue(undefined);
-  vi.stubEnv("OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
-  vi.stubEnv("OPENCLAW_LIVE_SETUP_TOKEN_VALUE", undefined);
+  vi.stubEnv("CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
+  vi.stubEnv("CARAPACE_LIVE_SETUP_TOKEN_VALUE", undefined);
 });
 afterEach(async () => {
   vi.restoreAllMocks();

@@ -170,7 +170,7 @@ function scenarioHasRuntimeToolCallEvidence(scenario: QaParityReportScenario): b
   return (
     scenario.status === "pass" &&
     isRuntimeParityResultPass(parity) &&
-    parity.cells.openclaw.toolCalls.length > 0 &&
+    parity.cells.carapace.toolCalls.length > 0 &&
     parity.cells.codex.toolCalls.length > 0
   );
 }
@@ -259,9 +259,9 @@ function isLiveProviderMode(providerMode: string | undefined) {
 
 function describeLiveUsageFailure(scenarioName: string, scenario: QaRuntimeParityScenarioReport) {
   const missing = [
-    scenario.openclawTokens > 0
+    scenario.carapaceTokens > 0
       ? undefined
-      : `${scenario.openclawStatus === "pass" ? "openclaw" : "openclaw failed"}=0`,
+      : `${scenario.carapaceStatus === "pass" ? "carapace" : "carapace failed"}=0`,
     scenario.codexTokens > 0
       ? undefined
       : `${scenario.codexStatus === "pass" ? "codex" : "codex failed"}=0`,
@@ -566,7 +566,7 @@ export function renderQaAgenticParityMarkdownReport(comparison: QaAgenticParityC
   // openai/gpt-5.6-luna vs anthropic/claude-opus-4-8, but the helper works for
   // any parity comparison a caller configures.
   const lines = [
-    `# OpenClaw Agentic Parity Report — ${comparison.candidateLabel} vs ${comparison.baselineLabel}`,
+    `# Carapace Agentic Parity Report — ${comparison.candidateLabel} vs ${comparison.baselineLabel}`,
     "",
     `- Compared at: ${comparison.comparedAt}`,
     `- Candidate: ${comparison.candidateLabel}`,
@@ -634,24 +634,24 @@ export function buildQaRuntimeParityReport(params: {
         runtimeParityUsage: resolveRuntimeParityUsagePolicy(undefined),
         drift: "missing",
         driftDetails: scenario.details,
-        openclawStatus: "missing",
+        carapaceStatus: "missing",
         codexStatus: "missing",
-        openclawTokens: 0,
+        carapaceTokens: 0,
         codexTokens: 0,
-        openclawUsage: null,
+        carapaceUsage: null,
         codexUsage: null,
-        openclawToolCalls: 0,
+        carapaceToolCalls: 0,
         codexToolCalls: 0,
-        openclawWallClockMs: null,
+        carapaceWallClockMs: null,
         codexWallClockMs: null,
         fasterRuntime: null,
         speedupPercent: null,
       } satisfies QaRuntimeParityScenarioReport;
     }
     driftCounts[parity.drift] += 1;
-    const openclawCell = parity.cells.openclaw;
+    const carapaceCell = parity.cells.carapace;
     const codexCell = parity.cells.codex;
-    const openclawStatus = runtimeParityCellStatus(openclawCell);
+    const carapaceStatus = runtimeParityCellStatus(carapaceCell);
     const codexStatus = runtimeParityCellStatus(codexCell);
     const parityStatus = isRuntimeParityResultPass(parity) ? "pass" : "fail";
     const runtimeParityUsage = resolveRuntimeParityUsagePolicy(parity.runtimeParityUsage);
@@ -661,35 +661,35 @@ export function buildQaRuntimeParityReport(params: {
       runtimeParityUsage,
       drift: parity.drift,
       driftDetails: parity.driftDetails,
-      openclawStatus,
+      carapaceStatus,
       codexStatus,
-      openclawTokens: openclawCell.usage.totalTokens,
+      carapaceTokens: carapaceCell.usage.totalTokens,
       codexTokens: codexCell.usage.totalTokens,
-      openclawUsage:
+      carapaceUsage:
         runtimeParityUsage.expectation === "not-applicable"
           ? null
-          : summarizeRuntimeParityCacheUsage(openclawCell.usage),
+          : summarizeRuntimeParityCacheUsage(carapaceCell.usage),
       codexUsage:
         runtimeParityUsage.expectation === "not-applicable"
           ? null
           : summarizeRuntimeParityCacheUsage(codexCell.usage),
-      ...(openclawCell.cacheDiagnostics === undefined
+      ...(carapaceCell.cacheDiagnostics === undefined
         ? {}
-        : { openclawCacheDiagnostics: openclawCell.cacheDiagnostics }),
+        : { carapaceCacheDiagnostics: carapaceCell.cacheDiagnostics }),
       ...(codexCell.cacheDiagnostics === undefined
         ? {}
         : { codexCacheDiagnostics: codexCell.cacheDiagnostics }),
-      openclawToolCalls: openclawCell.toolCalls.length,
+      carapaceToolCalls: carapaceCell.toolCalls.length,
       codexToolCalls: codexCell.toolCalls.length,
-      openclawWallClockMs: openclawCell.wallClockMs,
+      carapaceWallClockMs: carapaceCell.wallClockMs,
       codexWallClockMs: codexCell.wallClockMs,
-      ...(openclawCell.bootstrapWallClockMs === undefined
+      ...(carapaceCell.bootstrapWallClockMs === undefined
         ? {}
-        : { openclawBootstrapWallClockMs: openclawCell.bootstrapWallClockMs }),
+        : { carapaceBootstrapWallClockMs: carapaceCell.bootstrapWallClockMs }),
       ...(codexCell.bootstrapWallClockMs === undefined
         ? {}
         : { codexBootstrapWallClockMs: codexCell.bootstrapWallClockMs }),
-      ...compareRuntimeWallClockMs(openclawCell.wallClockMs, codexCell.wallClockMs),
+      ...compareRuntimeWallClockMs(carapaceCell.wallClockMs, codexCell.wallClockMs),
     } satisfies QaRuntimeParityScenarioReport;
     if (parityStatus === "fail") {
       failures.push(
@@ -725,7 +725,7 @@ export function buildQaRuntimeParityReport(params: {
     scenarios,
     timing: summarizeRuntimeParityTiming(scenarios),
     usage: {
-      openclaw: aggregateRuntimeParityCacheUsage(scenarios, "openclaw"),
+      carapace: aggregateRuntimeParityCacheUsage(scenarios, "carapace"),
       codex: aggregateRuntimeParityCacheUsage(scenarios, "codex"),
     },
     pass: failures.length === 0 && failedScenarios === 0,

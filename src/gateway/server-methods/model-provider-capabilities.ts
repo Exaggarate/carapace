@@ -1,5 +1,5 @@
 import { resolveProviderIdForAuth } from "../../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { resolveManifestProviderAuthChoices } from "../../plugins/provider-auth-choices.js";
 import {
@@ -9,7 +9,7 @@ import {
 import type { ModelProviderCapability } from "./models-auth-status.types.js";
 
 export function resolveModelProviderCapabilities(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot: PluginMetadataSnapshot;
   workspaceDir: string;

@@ -1,9 +1,9 @@
 // Duckduckgo helper module supports config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const DEFAULT_DDG_SAFE_SEARCH = "moderate";
 
@@ -17,7 +17,7 @@ type DdgPluginConfig = {
 };
 
 function resolveDdgWebSearchConfig(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): DdgPluginConfig["webSearch"] | undefined {
   const pluginConfig = config?.plugins?.entries?.duckduckgo?.config as DdgPluginConfig | undefined;
   const webSearch = pluginConfig?.webSearch;
@@ -27,11 +27,11 @@ function resolveDdgWebSearchConfig(
   return undefined;
 }
 
-export function resolveDdgRegion(config?: OpenClawConfig): string | undefined {
+export function resolveDdgRegion(config?: CarapaceConfig): string | undefined {
   return normalizeOptionalString(resolveDdgWebSearchConfig(config)?.region);
 }
 
-export function resolveDdgSafeSearch(config?: OpenClawConfig): DdgSafeSearch {
+export function resolveDdgSafeSearch(config?: CarapaceConfig): DdgSafeSearch {
   const safeSearch = resolveDdgWebSearchConfig(config)?.safeSearch;
   const normalized = normalizeLowercaseStringOrEmpty(safeSearch);
   if (normalized === "strict" || normalized === "off") {

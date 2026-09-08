@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { PLUGIN_CAPABILITY_CONSENT_REQUIRED } from "../../../../packages/gateway-protocol/src/capability-consent-error-details.js";
 import { stripAnsi } from "../../../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../../../packages/terminal-core/src/safe-text.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../../../infra/clawhub-spec.js";
 import { parseRegistryNpmSpec } from "../../../infra/npm-registry-spec.js";
@@ -76,7 +76,7 @@ function formatInstalledConfiguredPluginChange(params: {
 
 export async function installCandidate(params: {
   candidate: DownloadableInstallCandidate;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   records: Record<string, PluginInstallRecord>;
   env: NodeJS.ProcessEnv;
   updateChannel?: UpdateChannel;
@@ -156,7 +156,7 @@ async function installCandidatePackage(
           ? parseClawHubPluginSpec(candidate.clawhubSpec)?.name
           : undefined,
         coreVersion: resolveCompatibilityHostVersion(params.env),
-        versionBoundToCore: candidate.versionBoundToOpenClaw,
+        versionBoundToCore: candidate.versionBoundToCarapace,
       })
     : null;
   const npmSpecs = candidate.npmSpec
@@ -167,7 +167,7 @@ async function installCandidatePackage(
           ? parseRegistryNpmSpec(candidate.npmSpec)?.name
           : undefined,
         coreVersion: resolveCompatibilityHostVersion(params.env),
-        versionBoundToCore: candidate.versionBoundToOpenClaw,
+        versionBoundToCore: candidate.versionBoundToCarapace,
       })
     : null;
   const clawhubInstallSpec = clawhubSpecs?.installSpec ?? candidate.clawhubSpec;

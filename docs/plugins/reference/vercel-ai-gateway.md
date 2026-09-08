@@ -1,5 +1,5 @@
 ---
-summary: "Adds Vercel AI Gateway model provider support to OpenClaw."
+summary: "Adds Vercel AI Gateway model provider support to Carapace."
 read_when:
   - You are installing, configuring, or auditing the vercel-ai-gateway plugin
 title: "Vercel AI Gateway plugin reference"
@@ -7,15 +7,15 @@ title: "Vercel AI Gateway plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Adds Vercel AI Gateway model provider support to OpenClaw.
+Adds Vercel AI Gateway model provider support to Carapace.
 
 ## Distribution
 
-- Package: `@openclaw/vercel-ai-gateway-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/vercel-ai-gateway-provider`
+- Package: `@carapace/vercel-ai-gateway-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/vercel-ai-gateway-provider`
 
 ## Surface
 

@@ -1,5 +1,5 @@
-import { safeParseJson } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { safeParseJson } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   GATEWAY_CLIENT_CAPS,
   hasGatewayClientCap,

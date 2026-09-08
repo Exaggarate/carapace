@@ -1,5 +1,5 @@
 // Provider setup flow configures provider credentials, models, and defaults.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizePluginsConfig, resolveEffectiveEnableState } from "../plugins/config-state.js";
 import * as providerAuthChoices from "../plugins/provider-auth-choices.js";
 import * as providerInstallCatalog from "../plugins/provider-install-catalog.js";
@@ -12,7 +12,7 @@ type ProviderFlowScope = "text-inference" | "image-generation" | "music-generati
 const DEFAULT_PROVIDER_FLOW_SCOPE: ProviderFlowScope = "text-inference";
 
 type ProviderSetupFlowParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   scope?: ProviderFlowScope | "all";

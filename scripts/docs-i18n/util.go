@@ -13,8 +13,8 @@ import (
 const (
 	workflowVersion          = 17
 	promptVersion            = 32
-	envDocsI18nModel         = "OPENCLAW_DOCS_I18N_MODEL"
-	envDocsI18nFallbackModel = "OPENCLAW_DOCS_I18N_FALLBACK_MODEL"
+	envDocsI18nModel         = "CARAPACE_DOCS_I18N_MODEL"
+	envDocsI18nFallbackModel = "CARAPACE_DOCS_I18N_FALLBACK_MODEL"
 	defaultOpenAIModel       = "gpt-5.6"
 )
 
@@ -90,7 +90,7 @@ func isWhitespace(b byte) bool {
 
 func validateNoTranslationTranscriptArtifacts(source, translated string) error {
 	sourceLower := strings.ToLower(source)
-	for _, token := range []string{"<openclaw_docs_i18n_input>", "</openclaw_docs_i18n_input>"} {
+	for _, token := range []string{"<carapace_docs_i18n_input>", "</carapace_docs_i18n_input>"} {
 		if strings.Contains(strings.ToLower(translated), token) && !strings.Contains(sourceLower, token) {
 			return fmt.Errorf("agent transcript artifact leaked into translation: %q", token)
 		}

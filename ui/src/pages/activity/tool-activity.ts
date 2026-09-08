@@ -1,6 +1,6 @@
 // Control UI module implements activity model behavior.
-import { asNullableObjectRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeNullableString as toTrimmedString } from "@openclaw/normalization-core/string-coerce";
+import { asNullableObjectRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeNullableString as toTrimmedString } from "@carapace/normalization-core/string-coerce";
 import { redactToolPayloadText } from "../../lib/browser-redact.ts";
 import { formatUnknownText, truncateText } from "../../lib/format.ts";
 

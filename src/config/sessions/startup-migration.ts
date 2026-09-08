@@ -3,16 +3,16 @@ import path from "node:path";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { formatDoctorStateRepairFailure } from "../../infra/state-repair-message.js";
 import { readAgentDeletionJournal } from "../../state/agent-deletion-journal.js";
-import { listOpenClawRegisteredAgentDatabases } from "../../state/openclaw-agent-db-registry.js";
+import { listCarapaceRegisteredAgentDatabases } from "../../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  isOpenClawAgentDatabaseOpen,
-  withOpenClawAgentDatabaseAsync,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  isCarapaceAgentDatabaseOpen,
+  withCarapaceAgentDatabaseAsync,
+  resolveCarapaceAgentSqlitePath,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import { resolveStateDir } from "../paths.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { migrateLegacyMainSessionKeys } from "./legacy-main-session-migration.js";
 import { SessionStoreMigrationRequiredError } from "./migration-required.js";
 import { resolveSqliteReadScope, toDatabaseOptions } from "./session-accessor.sqlite-scope.js";
@@ -26,7 +26,7 @@ import { migrateManagedWorktreeCanonicalWorkspaces } from "./worktree-workspace-
 export type SessionStartupMigrationLogger = Record<"info" | "warn", (message: string) => void>;
 
 export function assertSessionStoreMigrationComplete(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   targets?: readonly { storePath: string }[];
   operation?: "doctor";
@@ -44,17 +44,17 @@ export function assertSessionStoreMigrationComplete(params: {
             `Legacy session store requires migration at ${legacyStore}`,
             "Repair the retained source using the migration report's named file and validation error, preserving the original history.",
           )
-        : `Legacy session store requires migration: ${legacyStore}. Run "${formatCliCommand("openclaw doctor --fix", env)}" against the same state/config before starting OpenClaw.`,
+        : `Legacy session store requires migration: ${legacyStore}. Run "${formatCliCommand("carapace doctor --fix", env)}" against the same state/config before starting Carapace.`,
     );
   }
 }
 
 /** Maintains existing stores, optionally handing each live database to its runtime owner. */
 export async function runSessionStartupMigration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   log: SessionStartupMigrationLogger;
-  handoffDatabase?: (database: OpenClawAgentDatabaseOptions) => Promise<void>;
+  handoffDatabase?: (database: CarapaceAgentDatabaseOptions) => Promise<void>;
   deps?: {
     migrateLegacyMainSessionKeys?: typeof migrateLegacyMainSessionKeys;
     migrateManagedWorktreeCanonicalWorkspaces?: typeof migrateManagedWorktreeCanonicalWorkspaces;
@@ -91,12 +91,12 @@ export async function runSessionStartupMigration(params: {
     params.deps?.migrateManagedWorktreeCanonicalWorkspaces ??
     migrateManagedWorktreeCanonicalWorkspaces;
   const registeredDatabases = new Set(
-    listOpenClawRegisteredAgentDatabases({ env }).map((entry) => `${entry.agentId}\0${entry.path}`),
+    listCarapaceRegisteredAgentDatabases({ env }).map((entry) => `${entry.agentId}\0${entry.path}`),
   );
   let migratedWorktreeSessions = 0;
   for (const target of targets) {
     const options = toDatabaseOptions(resolveSqliteReadScope({ ...target, env }));
-    const databasePath = resolveOpenClawAgentSqlitePath(options);
+    const databasePath = resolveCarapaceAgentSqlitePath(options);
     if (databases.has(databasePath) || !fs.existsSync(databasePath)) {
       continue;
     }
@@ -110,7 +110,7 @@ export async function runSessionStartupMigration(params: {
       );
       continue;
     }
-    const alreadyOpen = isOpenClawAgentDatabaseOpen(databasePath);
+    const alreadyOpen = isCarapaceAgentDatabaseOpen(databasePath);
     let handedOff = false;
     try {
       try {
@@ -119,7 +119,7 @@ export async function runSessionStartupMigration(params: {
           !registeredDatabases.has(`${options.agentId}\0${databasePath}`) ||
           !isCanonicalSqliteSessionMainKeyCurrent(options, mainKey)
         ) {
-          await withOpenClawAgentDatabaseAsync(options, (database) =>
+          await withCarapaceAgentDatabaseAsync(options, (database) =>
             setCanonicalSqliteSessionMainKey(database, mainKey),
           );
         }
@@ -144,8 +144,8 @@ export async function runSessionStartupMigration(params: {
         handedOff = true;
       }
     } finally {
-      if (!alreadyOpen && !handedOff && isOpenClawAgentDatabaseOpen(databasePath)) {
-        closeOpenClawAgentDatabaseByPath(databasePath);
+      if (!alreadyOpen && !handedOff && isCarapaceAgentDatabaseOpen(databasePath)) {
+        closeCarapaceAgentDatabaseByPath(databasePath);
       }
     }
   }

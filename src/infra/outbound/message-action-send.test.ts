@@ -1,12 +1,12 @@
 // Covers plugin-dispatched message actions, target resolution, dry-run behavior,
 // and plugin tool-result extraction.
 import fs from "node:fs/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import {
@@ -101,7 +101,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "gatewaychat",
@@ -170,7 +170,7 @@ describe("runMessageAction plugin dispatch", () => {
       });
 
       await runMessageAction({
-        cfg: { channels: { gatewaychat: { enabled: true } } } as OpenClawConfig,
+        cfg: { channels: { gatewaychat: { enabled: true } } } as CarapaceConfig,
         action: "send",
         params: {
           channel: "gatewaychat",
@@ -264,7 +264,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "gatewaydeliver",
@@ -312,7 +312,7 @@ describe("runMessageAction plugin dispatch", () => {
         messageId: "gw-send-tts",
       });
       mocks.maybeApplyTtsToPayload.mockResolvedValueOnce({
-        mediaUrl: "file:///tmp/openclaw-voice.ogg",
+        mediaUrl: "file:///tmp/carapace-voice.ogg",
         audioAsVoice: true,
         spokenText: "hello there",
       });
@@ -327,7 +327,7 @@ describe("runMessageAction plugin dispatch", () => {
           tts: {
             auto: "tagged",
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "gatewaychat",
@@ -350,8 +350,8 @@ describe("runMessageAction plugin dispatch", () => {
         readRecordField(gatewayParams, "params", "gateway message params"),
         {
           message: "",
-          media: "file:///tmp/openclaw-voice.ogg",
-          mediaUrl: "file:///tmp/openclaw-voice.ogg",
+          media: "file:///tmp/carapace-voice.ogg",
+          mediaUrl: "file:///tmp/carapace-voice.ogg",
           asVoice: true,
           audioAsVoice: true,
         },
@@ -379,7 +379,7 @@ describe("runMessageAction plugin dispatch", () => {
       });
       setTestPlugin(localPlugin, "localchat");
       mocks.maybeApplyTtsToPayload.mockResolvedValueOnce({
-        mediaUrl: "file:///tmp/openclaw-voice.ogg",
+        mediaUrl: "file:///tmp/carapace-voice.ogg",
         audioAsVoice: true,
         spokenText: "hello there",
       });
@@ -394,7 +394,7 @@ describe("runMessageAction plugin dispatch", () => {
           tts: {
             auto: "tagged",
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "localchat",
@@ -409,8 +409,8 @@ describe("runMessageAction plugin dispatch", () => {
         readRecordField(call, "params", "local plugin params"),
         {
           message: "",
-          media: "file:///tmp/openclaw-voice.ogg",
-          mediaUrl: "file:///tmp/openclaw-voice.ogg",
+          media: "file:///tmp/carapace-voice.ogg",
+          mediaUrl: "file:///tmp/carapace-voice.ogg",
           asVoice: true,
           audioAsVoice: true,
         },
@@ -420,7 +420,7 @@ describe("runMessageAction plugin dispatch", () => {
   });
   describe("presentation send routing", () => {
     const handleAction = vi.fn(
-      async ({ cfg, params }: { cfg: OpenClawConfig; params: Record<string, unknown> }) => {
+      async ({ cfg, params }: { cfg: CarapaceConfig; params: Record<string, unknown> }) => {
         const message = typeof params.message === "string" ? params.message : "";
         const responsePrefix = Object.values(cfg.channels ?? {}).find(
           (entry): entry is { responsePrefix?: string } =>
@@ -481,7 +481,7 @@ describe("runMessageAction plugin dispatch", () => {
             enabled: true,
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const presentation = {
         blocks: [{ type: "text", text: "Presentation-only payload" }],
@@ -528,7 +528,7 @@ describe("runMessageAction plugin dispatch", () => {
           },
         },
         messages: { responsePrefix: "[Nexus]" },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       mocks.callGatewayLeastPrivilege.mockResolvedValueOnce({
         ok: true,
         messageId: "card-location",
@@ -596,7 +596,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "cardchat",
@@ -680,7 +680,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "cardchat",
@@ -746,7 +746,7 @@ describe("runMessageAction plugin dispatch", () => {
       );
 
       await runMessageAction({
-        cfg: { channels: { cardchat: { enabled: true } } } as OpenClawConfig,
+        cfg: { channels: { cardchat: { enabled: true } } } as CarapaceConfig,
         action: "send",
         ...(actionOrigin ? { actionOrigin } : {}),
         params: {
@@ -780,7 +780,7 @@ describe("runMessageAction plugin dispatch", () => {
               responsePrefix: "[Nexus]",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "cardchat",

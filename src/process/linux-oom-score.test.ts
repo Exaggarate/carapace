@@ -93,12 +93,12 @@ describe("prepareOomScoreAdjustedSpawn", () => {
   });
 
   it.each(["0", "false", "FALSE", "no", "off"])(
-    "respects the OPENCLAW_CHILD_OOM_SCORE_ADJ=%s opt-out",
+    "respects the CARAPACE_CHILD_OOM_SCORE_ADJ=%s opt-out",
     (value) => {
       expect(
         prepareOomScoreAdjustedSpawn("/usr/bin/node", ["run.js"], {
           ...linux,
-          env: { OPENCLAW_CHILD_OOM_SCORE_ADJ: value },
+          env: { CARAPACE_CHILD_OOM_SCORE_ADJ: value },
         }),
       ).toMatchObject({ command: "/usr/bin/node", args: ["run.js"], wrapped: false });
     },
@@ -253,7 +253,7 @@ describe("prepareOomScoreAdjustedSpawnPreservingExecEnv", () => {
     {
       name: "OOM opt-out",
       command: "/usr/bin/node",
-      options: { ...linux, env: { OPENCLAW_CHILD_OOM_SCORE_ADJ: "0", ENV: "" } },
+      options: { ...linux, env: { CARAPACE_CHILD_OOM_SCORE_ADJ: "0", ENV: "" } },
     },
     {
       name: "missing shell",
@@ -284,7 +284,7 @@ describe("prepareOomScoreAdjustedSpawnPreservingExecEnv", () => {
   it.runIf(process.platform !== "win32")(
     "restores exact values only for the final executable",
     () => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oom-env-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-oom-env-"));
       const bashEnvPath = path.join(tempDir, "bash-env.sh");
       const startupMarkerPath = path.join(tempDir, "wrapper-startup-marker");
       fs.writeFileSync(bashEnvPath, `printf touched > "${startupMarkerPath}"\n`);
@@ -330,7 +330,7 @@ describe("prepareOomScoreAdjustedSpawnPreservingExecEnv", () => {
   it.runIf(bashAvailable)(
     "does not expose preserving carriers to Bash-as-sh xtrace startup",
     () => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oom-xtrace-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-oom-xtrace-"));
       const markerPath = path.join(tempDir, "ps4-marker");
       const secret = "review-secret-carried-value";
       try {
@@ -360,7 +360,7 @@ describe("prepareOomScoreAdjustedSpawnPreservingExecEnv", () => {
   );
 
   it.runIf(bashAvailable)("strips xtrace startup controls from Bash-as-sh", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oom-strip-xtrace-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-oom-strip-xtrace-"));
     const markerPath = path.join(tempDir, "ps4-marker");
     try {
       const prepared = prepareOomScoreAdjustedSpawn(process.execPath, ["-e", ""], {
@@ -388,7 +388,7 @@ describe("prepareOomScoreAdjustedSpawnPreservingExecEnv", () => {
         [prepareOomScoreAdjustedSpawnPreservingExecEnv, false],
         [prepareOomScoreAdjustedSpawn, true],
       ] as const) {
-        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oom-function-"));
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-oom-function-"));
         const markerPath = path.join(tempDir, "echo-marker");
         try {
           const prepared = prepare(process.execPath, ["-e", ""], {

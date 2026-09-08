@@ -28,7 +28,7 @@ import {
   GatewayPageController,
   type GatewayPageChange,
 } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { fetchPluginIconBlobUrl } from "./icon-loader.ts";
 import { confirmPluginUninstall } from "./plugin-lifecycle-confirmation.ts";
 import { PluginsConsentController } from "./plugins-consent-controller.ts";
@@ -69,7 +69,7 @@ function withPlugin(
   return { ...current, plugins };
 }
 
-class PluginsPage extends OpenClawLightDomElement {
+class PluginsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -544,7 +544,7 @@ class PluginsPage extends OpenClawLightDomElement {
     }
   }
 
-  private openClawHubSearch(query: string) {
+  private carapaceHubSearch(query: string) {
     this.query = query;
     this.changeTab("discover");
   }
@@ -680,7 +680,7 @@ class PluginsPage extends OpenClawLightDomElement {
         onSelect: (tab) => this.selectHubTab(tab),
       })}
       ${renderSettingsWorkspace(html`
-        <openclaw-plugin-manager></openclaw-plugin-manager>
+        <carapace-plugin-manager></carapace-plugin-manager>
         ${renderPlugins({
           connected: this.gateway.connected,
           loading: this.loading,
@@ -722,20 +722,20 @@ class PluginsPage extends OpenClawLightDomElement {
           onRetryConsentInspection: () => void this.consentController.inspect(),
           onDismissMessage: (rowKey) => this.setMessage(rowKey, null),
           onUninstall: (pluginId, rowKey) => void this.uninstall(pluginId, rowKey),
-          onSearchClawHub: (query) => this.openClawHubSearch(query),
+          onSearchClawHub: (query) => this.carapaceHubSearch(query),
         })}
       `)}
     `;
   }
 }
 
-if (!customElements.get("openclaw-plugins-page")) {
-  customElements.define("openclaw-plugins-page", PluginsPage);
+if (!customElements.get("carapace-plugins-page")) {
+  customElements.define("carapace-plugins-page", PluginsPage);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-plugins-page": PluginsPage;
+    "carapace-plugins-page": PluginsPage;
   }
 }
 

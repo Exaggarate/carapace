@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { listAgentIds } from "../agent-scope-config.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
@@ -16,28 +16,28 @@ import {
 
 const { runEmbeddedAgent } = await loadRunOverflowCompactionHarness();
 
-function projectSetupExecutionConfig(source: OpenClawConfig): OpenClawConfig {
+function projectSetupExecutionConfig(source: CarapaceConfig): CarapaceConfig {
   return {
     ...source,
     agents: {
       ...source.agents,
       entries: {
         ...(source.agents?.entries ?? { main: {} }),
-        openclaw: {},
+        carapace: {},
       },
     },
   };
 }
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("embedded setup inference inherited auth owner", () => {
   // Provider-pinned runs stay on the mocked plugin harness, so no host-route
   // warmup is needed here; see createOverflowRunParams for the route trap.
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.inherited-auth-owner" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.inherited-auth-owner" });
     useOpenAIPlatformAuthFixture();
   });
 
@@ -48,11 +48,11 @@ describe("embedded setup inference inherited auth owner", () => {
   it.each([
     { name: "a pre-roster config", source: {} },
     { name: "a sole-agent config", source: { agents: { entries: { main: {} } } } },
-  ] satisfies Array<{ name: string; source: OpenClawConfig }>)(
+  ] satisfies Array<{ name: string; source: CarapaceConfig }>)(
     "prepares the explicit main agent from $name",
     async ({ name, source }) => {
       const config = projectSetupExecutionConfig(source);
-      expect(listAgentIds(config)).toEqual(["main", "openclaw"]);
+      expect(listAgentIds(config)).toEqual(["main", "carapace"]);
 
       mockedBuildEmbeddedRunPayloads.mockReturnValue([{ text: "OK" }]);
       mockedRunEmbeddedAttempt.mockResolvedValueOnce(makeAttemptResult({ assistantTexts: ["OK"] }));

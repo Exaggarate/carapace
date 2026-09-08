@@ -1,16 +1,16 @@
 // Memory Core plugin module implements manager embedding ops behavior.
 import fs from "node:fs/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { extractCuratedEntryRecallMetadata } from "openclaw/plugin-sdk/memory-core-host-engine-curated";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { extractCuratedEntryRecallMetadata } from "carapace/plugin-sdk/memory-core-host-engine-curated";
 import {
   enforceEmbeddingMaxInputTokens,
   hasNonTextEmbeddingParts,
   isEmbeddingBatchUnavailableError,
   type EmbeddingInput,
   type MemoryEmbeddingProviderRuntime,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
+import { createSubsystemLogger } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   buildFileEntry,
   buildMultimodalChunkForIndexing,
@@ -27,11 +27,11 @@ import {
   type MemoryChunk,
   type MemoryEntryProvenance,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { MAX_TIMER_TIMEOUT_MS, resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { runSqliteImmediateTransaction } from "openclaw/plugin-sdk/sqlite-runtime";
-import { chunkItems } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { MAX_TIMER_TIMEOUT_MS, resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
+import { runSqliteImmediateTransaction } from "carapace/plugin-sdk/sqlite-runtime";
+import { chunkItems } from "carapace/plugin-sdk/text-chunking";
 import { hasMemorySessionTombstone } from "../memory-entry-origins.js";
 import { withMemoryWorkspaceLock } from "../memory-workspace-lock.js";
 import { readSessionResetRecallCutoffMetadata } from "../session-reset-recall-metadata.js";

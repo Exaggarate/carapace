@@ -1,9 +1,9 @@
 // Deepinfra plugin module adapts its text embedding runtime to the generic provider contract.
-import type { EmbeddingProviderAdapter } from "openclaw/plugin-sdk/embedding-providers";
+import type { EmbeddingProviderAdapter } from "carapace/plugin-sdk/embedding-providers";
 import {
   embeddingProviderOwnsDestination,
   sanitizeEmbeddingCacheHeaders,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   createDeepInfraEmbeddingProvider,
   DEFAULT_DEEPINFRA_EMBEDDING_MODEL,

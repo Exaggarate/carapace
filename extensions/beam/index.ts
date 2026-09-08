@@ -1,4 +1,4 @@
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { createBeamRequestHandler } from "./src/http.js";
 import { createBeamMirrorService } from "./src/mirror.js";
 import { createBeamSessionCatalog } from "./src/session-catalog.js";

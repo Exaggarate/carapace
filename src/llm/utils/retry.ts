@@ -1,5 +1,5 @@
-import { WEBSOCKET_NON_RETRYABLE_CLOSE_ERROR_CODE } from "@openclaw/ai/diagnostics";
-import { isProviderRefusalAssistantError } from "@openclaw/llm-core/diagnostics";
+import { WEBSOCKET_NON_RETRYABLE_CLOSE_ERROR_CODE } from "@carapace/ai/diagnostics";
+import { isProviderRefusalAssistantError } from "@carapace/llm-core/diagnostics";
 import { classifyFailoverSignal } from "../../agents/failover/classify.js";
 import {
   extractFailoverHttpStatus,

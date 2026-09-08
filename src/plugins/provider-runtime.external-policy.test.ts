@@ -6,7 +6,7 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 
 const fixtureState = vi.hoisted(() => ({ pluginRoot: "" }));
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const externalPluginRoot = tempDirs.make("openclaw-provider-retired-auth-external-");
+const externalPluginRoot = tempDirs.make("carapace-provider-retired-auth-external-");
 fs.writeFileSync(
   path.join(externalPluginRoot, "provider-policy-api.js"),
   'export const deprecatedProfileIds = ["fixture-provider:legacy"];\n',

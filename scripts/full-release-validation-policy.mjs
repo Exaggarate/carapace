@@ -60,7 +60,7 @@ const LEGACY_CHILD_SPECS = Object.freeze([
   },
   {
     dispatchName: "Dispatch release checks",
-    displayName: "OpenClaw Release Checks",
+    displayName: "Carapace Release Checks",
     key: "releaseChecks",
     parentJobName: "Run release/live/Docker/QA validation",
     rerunGroups: [
@@ -73,7 +73,7 @@ const LEGACY_CHILD_SPECS = Object.freeze([
       "qa-live",
     ],
     suffix: "-release-checks",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
 ]);
 const CHILD_SPECS = Object.freeze([
@@ -106,21 +106,21 @@ const CHILD_SPECS = Object.freeze([
   },
   {
     dispatchName: "Dispatch release checks independent phase",
-    displayName: "OpenClaw Release Checks",
+    displayName: "Carapace Release Checks",
     key: "releaseChecksIndependent",
     parentJobName: "Run release checks independent validation",
     rerunGroups: ["all", "install-smoke", "live-e2e", "qa-parity", "qa-live"],
     suffix: "-release-checks-independent",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   {
     dispatchName: "Dispatch release checks candidate phase",
-    displayName: "OpenClaw Release Checks",
+    displayName: "Carapace Release Checks",
     key: "releaseChecksCandidate",
     parentJobName: "Run release checks candidate validation",
     rerunGroups: ["all", "cross-os", "live-e2e", "package"],
     suffix: "-release-checks-candidate",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   {
     dispatchName: "Dispatch npm Telegram E2E",
@@ -132,13 +132,13 @@ const CHILD_SPECS = Object.freeze([
     workflow: "npm-telegram-beta-e2e.yml",
   },
   {
-    dispatchName: "Dispatch OpenClaw Performance",
-    displayName: "OpenClaw Performance",
+    dispatchName: "Dispatch Carapace Performance",
+    displayName: "Carapace Performance",
     key: "productPerformance",
     parentJobName: "Run product performance evidence",
     rerunGroups: ["all", "performance"],
     suffix: "",
-    workflow: "openclaw-performance.yml",
+    workflow: "carapace-performance.yml",
   },
 ]);
 const HISTORICAL_EXECUTION_PLAN_KEYS = Object.freeze(
@@ -391,10 +391,10 @@ export function normalizeReleaseTelegramWaiver({
   // the waived release exactly; a moving dist-tag does not establish version.
   if (
     [releasePackageSpec, packageAcceptancePackageSpec, npmTelegramPackageSpec].some(
-      (spec) => spec !== "" && spec !== `openclaw@${targetVersion}`,
+      (spec) => spec !== "" && spec !== `carapace@${targetVersion}`,
     )
   ) {
-    throw new Error(`Telegram waiver package overrides must be openclaw@${targetVersion}`);
+    throw new Error(`Telegram waiver package overrides must be carapace@${targetVersion}`);
   }
   return telegramWaiver;
 }
@@ -991,7 +991,7 @@ export function buildReleaseExecutionPlanArtifact({
     ...(waiver ? { telegramWaiver: waiver, targetVersion } : {}),
     ...(coveragePolicy !== undefined ? { coveragePolicy, targetVersion } : {}),
     version: 1,
-    kind: "openclaw.full-release-execution-plan",
+    kind: "carapace.full-release-execution-plan",
     parentRunId: String(expected.parentRunId),
     parentRunAttempt: positiveInteger(expected.parentRunAttempt),
     workflowRef: boundedString(expected.workflowRef, MAX_LABEL_LENGTH),
@@ -1087,7 +1087,7 @@ export function validateReleaseExecutionPlanArtifact(payload, expected = {}) {
   }
   if (
     payload.version !== 1 ||
-    payload.kind !== "openclaw.full-release-execution-plan" ||
+    payload.kind !== "carapace.full-release-execution-plan" ||
     !/^[1-9][0-9]*$/u.test(String(payload.parentRunId ?? "")) ||
     positiveInteger(payload.parentRunAttempt) === undefined ||
     !/^[a-f0-9]{40}$/u.test(String(payload.workflowSha ?? "")) ||
@@ -1454,8 +1454,8 @@ export function buildReleaseStateArtifact({
     version: 2,
     kind:
       mode === "decision"
-        ? "openclaw.full-release-decision"
-        : "openclaw.full-release-diagnostic-drain",
+        ? "carapace.full-release-decision"
+        : "carapace.full-release-diagnostic-drain",
     mode,
     parentRunId: expected.parentRunId,
     parentRunAttempt: expected.parentRunAttempt,
@@ -1626,8 +1626,8 @@ export function validateReleaseStateArtifact(payload, expected, expectedMode) {
   const mode = expectedMode ?? payload.mode;
   const expectedKind =
     mode === "decision"
-      ? "openclaw.full-release-decision"
-      : "openclaw.full-release-diagnostic-drain";
+      ? "carapace.full-release-decision"
+      : "carapace.full-release-diagnostic-drain";
   if (
     payload.version !== 2 ||
     payload.mode !== mode ||

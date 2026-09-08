@@ -9,7 +9,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { runNodeScript } from "../../test/helpers/run-node-script.js";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePluginNpmProjectDir } from "./install-paths.js";
 import { withPluginInstallRoots } from "./install-root-context.js";
 import {
@@ -61,7 +61,7 @@ afterEach(async () => {
 });
 
 async function makeInstallFixture(label: string) {
-  const rootDir = tempDirs.make(`openclaw-${label}-`);
+  const rootDir = tempDirs.make(`carapace-${label}-`);
   return { rootDir, npmRoot: path.join(rootDir, "managed-npm") };
 }
 
@@ -89,7 +89,7 @@ function useRegistry(registry: string): void {
 }
 
 async function installNpmPlugin(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   expectedIntegrity?: string;
   npmRoot: string;
   spec: string;
@@ -116,7 +116,7 @@ describe("installPluginFromNpmSpec e2e", () => {
         { packageName, version: "2.0.0" },
       ]);
       await useStaticRegistry([{ packageName, latest: "2.0.0", versions }]);
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(rootDir, "state") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(rootDir, "state") };
       const install = (version: string, deferCommit = false, cancelBeforePublish = false) =>
         withPluginLifecycleLease({ env }, async (lease) => {
           let callerActive = true;
@@ -183,7 +183,7 @@ describe("installPluginFromNpmSpec e2e", () => {
         () => undefined,
         (error: unknown) => error,
       );
-      expect.soft(rollbackError).toHaveProperty("code", "OPENCLAW_STATE_LEASE_LOST");
+      expect.soft(rollbackError).toHaveProperty("code", "CARAPACE_STATE_LEASE_LOST");
       const after = await Promise.all(protectedFiles.map((file) => fs.readFile(file)));
       expect(after).toEqual(before);
 
@@ -197,7 +197,7 @@ describe("installPluginFromNpmSpec e2e", () => {
     const packageName = uniquePackageName("relocated-plugin");
     await useStaticRegistry(await registryPackages(rootDir, [{ packageName }]));
     const bundledPath = path.join(rootDir, "old", "extensions", packageName);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: { [packageName]: { enabled: true } },
         load: { paths: [bundledPath] },
@@ -217,7 +217,7 @@ describe("installPluginFromNpmSpec e2e", () => {
         syncPluginsForUpdateChannel({
           config,
           channel: "stable",
-          env: { ...process.env, OPENCLAW_STATE_DIR: roots.stateDir },
+          env: { ...process.env, CARAPACE_STATE_DIR: roots.stateDir },
           externalizedBundledPluginBridges: [
             { bundledPluginId: packageName, npmSpec: packageName },
           ],
@@ -274,7 +274,7 @@ describe("installPluginFromNpmSpec e2e", () => {
         downloadBarrier,
       );
       const stateDir = path.join(rootDir, "state");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const reportPath = path.join(rootDir, "install-result.json");
       const npmConfigPath = path.join(rootDir, "empty.npmrc");
       const npmGlobalConfigPath = path.join(rootDir, "global.npmrc");
@@ -297,7 +297,7 @@ describe("installPluginFromNpmSpec e2e", () => {
         } from ${JSON.stringify(new URL("../infra/agent-run-registry.ts", import.meta.url).href)};
         const [packageName, registry, reportPath] = JSON.parse(process.argv[1]);
         await writeConfigFile({});
-        const configBefore = await fs.readFile(process.env.OPENCLAW_CONFIG_PATH, "utf8");
+        const configBefore = await fs.readFile(process.env.CARAPACE_CONFIG_PATH, "utf8");
         const observations = {};
         for (const stage of ["cancelled", "active"]) {
           const authority = claimAgentRunDelegatedAuthority(Object.freeze({
@@ -340,7 +340,7 @@ describe("installPluginFromNpmSpec e2e", () => {
           }
           cancellationAbort.abort();
           await cancellation;
-          const npmEntries = await fs.readdir(path.join(process.env.OPENCLAW_STATE_DIR, "npm"), {
+          const npmEntries = await fs.readdir(path.join(process.env.CARAPACE_STATE_DIR, "npm"), {
             recursive: true,
           }).catch((error) => {
             if (error.code === "ENOENT") return [];
@@ -348,11 +348,11 @@ describe("installPluginFromNpmSpec e2e", () => {
           });
           observations[stage] = {
             exitCode, authorityClosed, error: errors.join("\\n"),
-            configUnchanged: configBefore === await fs.readFile(process.env.OPENCLAW_CONFIG_PATH, "utf8"),
+            configUnchanged: configBefore === await fs.readFile(process.env.CARAPACE_CONFIG_PATH, "utf8"),
             pluginInstalls: await readPersistedInstalledPluginIndexInstallRecords() ?? {},
             hookInstalls: readHookInstalls(),
             npmPayloads: npmEntries.filter((entry) => entry.endsWith(path.join("node_modules", packageName))),
-            hookPayload: existsSync(path.join(process.env.OPENCLAW_STATE_DIR, "hooks", packageName)),
+            hookPayload: existsSync(path.join(process.env.CARAPACE_STATE_DIR, "hooks", packageName)),
           };
           releaseAgentRunDelegatedAuthority(authority);
         }
@@ -370,10 +370,10 @@ describe("installPluginFromNpmSpec e2e", () => {
           ],
           {
             ...process.env,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_HOME: rootDir,
-            OPENCLAW_AGENT_DIR: undefined,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_HOME: rootDir,
+            CARAPACE_AGENT_DIR: undefined,
             NPM_CONFIG_REGISTRY: registry,
             npm_config_registry: registry,
             NPM_CONFIG_CACHE: path.join(rootDir, "npm-cache"),
@@ -433,12 +433,12 @@ describe("installPluginFromNpmSpec e2e", () => {
   it("installs the newest compatible stable package when npm latest requires a newer plugin API", async () => {
     const { rootDir, npmRoot } = await makeInstallFixture("npm-plugin-compatible-version-e2e");
     const packageName = uniquePackageName("compatible-plugin");
-    const compatibleOpenClaw = {
+    const compatibleCarapace = {
       extensions: ["./dist/index.js"],
       install: { minHostVersion: ">=2026.4.25" },
       compat: { pluginApi: ">=2026.5.10-beta.1" },
     };
-    const incompatibleOpenClaw = {
+    const incompatibleCarapace = {
       extensions: ["./dist/index.js"],
       install: { minHostVersion: ">=2026.4.25" },
       compat: { pluginApi: ">=2026.5.27" },
@@ -447,17 +447,17 @@ describe("installPluginFromNpmSpec e2e", () => {
       {
         packageName,
         version: "2026.5.26",
-        openclaw: compatibleOpenClaw,
+        carapace: compatibleCarapace,
       },
       {
         packageName,
         version: "2026.5.27",
-        openclaw: incompatibleOpenClaw,
+        carapace: incompatibleCarapace,
       },
     ]);
     await useStaticRegistry([{ packageName, latest: "2026.5.27", versions }]);
-    const previousHostVersion = process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
-    process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION = "2026.5.10-beta.1";
+    const previousHostVersion = process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
+    process.env.CARAPACE_COMPATIBILITY_HOST_VERSION = "2026.5.10-beta.1";
     const warnings: string[] = [];
 
     try {
@@ -481,26 +481,26 @@ describe("installPluginFromNpmSpec e2e", () => {
       expect(installedPackageJson.version).toBe("2026.5.26");
     } finally {
       if (previousHostVersion === undefined) {
-        delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+        delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
       } else {
-        process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION = previousHostVersion;
+        process.env.CARAPACE_COMPATIBILITY_HOST_VERSION = previousHostVersion;
       }
     }
   });
 
-  it("scrubs root openclaw materialized by required npm peers", async () => {
+  it("scrubs root carapace materialized by required npm peers", async () => {
     const { rootDir, npmRoot } = await makeInstallFixture("npm-plugin-required-peer-e2e");
     const packageName = uniquePackageName("required-peer-plugin");
     const registry = await useStaticRegistry(
       await registryPackages(rootDir, [
         {
           packageName,
-          peerDependencies: { openclaw: ">=2026.0.0" },
+          peerDependencies: { carapace: ">=2026.0.0" },
           peerDependenciesMeta: {},
         },
         {
-          packageName: "openclaw",
-          pluginId: "registry-openclaw-copy",
+          packageName: "carapace",
+          pluginId: "registry-carapace-copy",
           version: "2026.0.0",
         },
       ]),
@@ -533,11 +533,11 @@ describe("installPluginFromNpmSpec e2e", () => {
     const rawLock = await readJson<{
       packages?: Record<string, unknown>;
     }>(path.join(rawNpmRoot, "package-lock.json"));
-    const rawOpenClawLockEntry = rawLock.packages?.["node_modules/openclaw"] as
+    const rawCarapaceLockEntry = rawLock.packages?.["node_modules/carapace"] as
       | { peer?: unknown; version?: unknown }
       | undefined;
-    expect(rawOpenClawLockEntry?.peer).toBe(true);
-    expect(rawOpenClawLockEntry?.version).toBe("2026.0.0");
+    expect(rawCarapaceLockEntry?.peer).toBe(true);
+    expect(rawCarapaceLockEntry?.version).toBe("2026.0.0");
 
     const result = await installNpmPlugin({
       spec: `${packageName}@1.0.0`,
@@ -551,13 +551,13 @@ describe("installPluginFromNpmSpec e2e", () => {
     const lock = await readJson<{
       packages?: Record<string, unknown>;
     }>(path.join(projectRoot, "package-lock.json"));
-    expect(lock.packages?.["node_modules/openclaw"]).toBeUndefined();
+    expect(lock.packages?.["node_modules/carapace"]).toBeUndefined();
     await expect(
-      fs.lstat(path.join(projectRoot, "node_modules", "openclaw")),
+      fs.lstat(path.join(projectRoot, "node_modules", "carapace")),
     ).rejects.toHaveProperty("code", "ENOENT");
     await expect(
       fs
-        .lstat(path.join(result.targetDir, "node_modules", "openclaw"))
+        .lstat(path.join(result.targetDir, "node_modules", "carapace"))
         .then((stat) => stat.isSymbolicLink()),
     ).resolves.toBe(true);
   });
@@ -641,10 +641,10 @@ describe("installPluginFromNpmSpec e2e", () => {
     ).resolves.toBeTruthy();
     const rootManifest = await readJson<{
       dependencies?: Record<string, string>;
-      openclaw?: { managedPeerDependencies?: string[] };
+      carapace?: { managedPeerDependencies?: string[] };
     }>(path.join(projectRoot, "package.json"));
     expect(["1.0.0", "^1.0.0"]).toContain(rootManifest.dependencies?.[runtimePeer]);
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).toContain(runtimePeer);
+    expect(rootManifest.carapace?.managedPeerDependencies ?? []).toContain(runtimePeer);
   });
 
   it("leaves legacy flat-root peer dependencies alone during isolated later installs", async () => {
@@ -686,11 +686,11 @@ describe("installPluginFromNpmSpec e2e", () => {
     ).rejects.toHaveProperty("code", "ENOENT");
     const rootManifest = await readJson<{
       dependencies?: Record<string, string>;
-      openclaw?: { managedPeerDependencies?: string[] };
+      carapace?: { managedPeerDependencies?: string[] };
     }>(path.join(npmRoot, "package.json"));
     expect(rootManifest.dependencies?.[laterPlugin]).toBeUndefined();
     expect(rootManifest.dependencies?.[runtimePeer]).toBeUndefined();
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain(runtimePeer);
+    expect(rootManifest.carapace?.managedPeerDependencies ?? []).not.toContain(runtimePeer);
   });
 
   it("ignores legacy flat-root package cycles during isolated installs", async () => {
@@ -760,11 +760,11 @@ describe("installPluginFromNpmSpec e2e", () => {
     try {
       const rootManifest = await readJson<{
         dependencies?: Record<string, string>;
-        openclaw?: { managedPeerDependencies?: string[] };
+        carapace?: { managedPeerDependencies?: string[] };
       }>(path.join(projectRoot, "package.json"));
       expect(rootManifest.dependencies?.[blockedPlugin]).toBeUndefined();
       expect(rootManifest.dependencies?.[runtimePeer]).toBeUndefined();
-      expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain(runtimePeer);
+      expect(rootManifest.carapace?.managedPeerDependencies ?? []).not.toContain(runtimePeer);
     } catch (error) {
       expect((error as NodeJS.ErrnoException).code).toBe("ENOENT");
     }
@@ -799,11 +799,11 @@ describe("installPluginFromNpmSpec e2e", () => {
     const projectRoot = pluginNpmProjectRoot(npmRoot, blockedPlugin);
     const rootManifest = await readJson<{
       dependencies?: Record<string, string>;
-      openclaw?: { managedPeerDependencies?: string[] };
+      carapace?: { managedPeerDependencies?: string[] };
     }>(path.join(projectRoot, "package.json"));
     expect(rootManifest.dependencies?.[blockedPlugin]).toBe("1.0.0");
     expect(rootManifest.dependencies?.[missingPeer]).toBeUndefined();
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain(missingPeer);
+    expect(rootManifest.carapace?.managedPeerDependencies ?? []).not.toContain(missingPeer);
     await expect(
       fs.lstat(path.join(projectRoot, "node_modules", blockedPlugin, "package.json")),
     ).resolves.toBeTruthy();
@@ -850,15 +850,15 @@ describe("installPluginFromNpmSpec e2e", () => {
     }
     const rootManifest = await readJson<{
       dependencies?: Record<string, string>;
-      openclaw?: { managedPeerDependencies?: string[] };
+      carapace?: { managedPeerDependencies?: string[] };
     }>(path.join(blockedProjectRoot, "package.json"));
     expect(rootManifest.dependencies?.[existingRootDependency]).toBe("1.0.0");
     expect(rootManifest.dependencies?.[blockedPlugin]).toBeUndefined();
     expect(rootManifest.dependencies?.[runtimePeer]).toBeUndefined();
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain(
+    expect(rootManifest.carapace?.managedPeerDependencies ?? []).not.toContain(
       existingRootDependency,
     );
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain(runtimePeer);
+    expect(rootManifest.carapace?.managedPeerDependencies ?? []).not.toContain(runtimePeer);
     await expect(
       fs.lstat(
         path.join(blockedProjectRoot, "node_modules", existingRootDependency, "package.json"),
@@ -880,17 +880,17 @@ describe("installPluginFromNpmSpec e2e", () => {
       await registryPackages(rootDir, [
         {
           packageName: codexName,
-          peerDependencies: { openclaw: ">=2026.5.5-beta.2" },
-          peerDependenciesMeta: { openclaw: { optional: true } },
+          peerDependencies: { carapace: ">=2026.5.5-beta.2" },
+          peerDependenciesMeta: { carapace: { optional: true } },
         },
         {
           packageName: opikName,
-          peerDependencies: { openclaw: ">=2026.3.2" },
+          peerDependencies: { carapace: ">=2026.3.2" },
           peerDependenciesMeta: {},
         },
         {
-          packageName: "openclaw",
-          pluginId: "registry-openclaw-copy",
+          packageName: "carapace",
+          pluginId: "registry-carapace-copy",
           version: "2026.5.4",
         },
       ]),
@@ -918,24 +918,24 @@ describe("installPluginFromNpmSpec e2e", () => {
       const lock = await readJson<{
         packages?: Record<string, unknown>;
       }>(path.join(projectRoot, "package-lock.json"));
-      expect(lock.packages?.["node_modules/openclaw"]).toBeUndefined();
+      expect(lock.packages?.["node_modules/carapace"]).toBeUndefined();
       await expect(
-        fs.lstat(path.join(projectRoot, "node_modules", "openclaw")),
+        fs.lstat(path.join(projectRoot, "node_modules", "carapace")),
       ).rejects.toHaveProperty("code", "ENOENT");
     }
     await expect(
       fs
-        .lstat(path.join(first.targetDir, "node_modules", "openclaw"))
+        .lstat(path.join(first.targetDir, "node_modules", "carapace"))
         .then((stat) => stat.isSymbolicLink()),
     ).resolves.toBe(true);
     await expect(
       fs
-        .lstat(path.join(second.targetDir, "node_modules", "openclaw"))
+        .lstat(path.join(second.targetDir, "node_modules", "carapace"))
         .then((stat) => stat.isSymbolicLink()),
     ).resolves.toBe(true);
   });
 
-  it("keeps an earlier isolated openclaw peer link after later plugin installs", async () => {
+  it("keeps an earlier isolated carapace peer link after later plugin installs", async () => {
     const { rootDir, npmRoot } = await makeInstallFixture("npm-plugin-peer-e2e");
     const peerPackageName = uniquePackageName("peer-plugin");
     const laterPackageName = uniquePackageName("later-plugin");
@@ -943,7 +943,7 @@ describe("installPluginFromNpmSpec e2e", () => {
       await registryPackages(rootDir, [
         {
           packageName: peerPackageName,
-          peerDependencies: { openclaw: ">=2026.0.0" },
+          peerDependencies: { carapace: ">=2026.0.0" },
         },
         { packageName: laterPackageName },
       ]),
@@ -956,7 +956,7 @@ describe("installPluginFromNpmSpec e2e", () => {
     if (!first.ok) {
       throw new Error(first.error);
     }
-    const peerLink = path.join(first.targetDir, "node_modules", "openclaw");
+    const peerLink = path.join(first.targetDir, "node_modules", "carapace");
     await expect(fs.lstat(peerLink).then((stat) => stat.isSymbolicLink())).resolves.toBe(true);
 
     const second = await installNpmPlugin({
@@ -972,11 +972,11 @@ describe("installPluginFromNpmSpec e2e", () => {
     const manifest = await readJson<{
       dependencies?: Record<string, string>;
     }>(path.join(peerProjectRoot, "package.json"));
-    expect(manifest.dependencies?.openclaw).toBeUndefined();
+    expect(manifest.dependencies?.carapace).toBeUndefined();
     const lock = await readJson<{
       packages?: Record<string, unknown>;
     }>(path.join(peerProjectRoot, "package-lock.json"));
-    expect(lock.packages?.["node_modules/openclaw"]).toBeUndefined();
+    expect(lock.packages?.["node_modules/carapace"]).toBeUndefined();
   });
 
   it("pins a mutable npm tag to the version resolved before install", async () => {

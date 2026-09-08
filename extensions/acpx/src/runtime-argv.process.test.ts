@@ -5,8 +5,8 @@ import { AcpxRuntime as BaseAcpxRuntime, type AcpRuntimeOptions } from "acpx/run
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { withOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { withCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, expect, it, vi } from "vitest";
 import { prepareAcpxCodexAuthConfig } from "./codex-auth-bridge.js";
 import { splitCommandParts } from "./command-line.js";
@@ -23,7 +23,7 @@ const sessionKey = "agent:main:acp:argv";
 const samples = ["", "space value", `owner's "choice"`, String.raw`C:\tools\adapter`];
 
 it("does not reinterpret a legacy command when a workspace file has the same name", async () => {
-  await withOpenClawTestState({ label: "acpx-command-source" }, async (state) => {
+  await withCarapaceTestState({ label: "acpx-command-source" }, async (state) => {
     await fs.writeFile(path.join(state.root, "node --version"), "workspace content");
     const config = resolveAcpxPluginConfig({
       rawConfig: { agents: { fixture: { command: "node --version", args: ["suffix"] } } },
@@ -59,7 +59,7 @@ it.each([
 ])(
   "preserves ACP argv through real processes and reconnect (leased=$wrapped, command=$form)",
   async ({ wrapped, form }) => {
-    await withOpenClawTestState({ label: "acpx-argv-process" }, async (state) => {
+    await withCarapaceTestState({ label: "acpx-argv-process" }, async (state) => {
       const peerDirectory = path.join(state.root, "peer");
       await fs.mkdir(peerDirectory);
       const executable = path.join(
@@ -106,7 +106,7 @@ it.each([
         store: openAcpxProcessLeaseStateStore((options) =>
           createPluginStateKeyedStoreForTests("acpx", {
             ...options,
-            env: { ...process.env, OPENCLAW_STATE_DIR: state.root },
+            env: { ...process.env, CARAPACE_STATE_DIR: state.root },
           }),
         ),
       });
@@ -119,9 +119,9 @@ it.each([
           timeoutMs: 5_000,
           ...(wrapped
             ? {
-                openclawWrapperRoot: path.join(state.root, "acpx"),
-                openclawGatewayInstanceId: "argv-test",
-                openclawProcessLeaseStore: leases,
+                carapaceWrapperRoot: path.join(state.root, "acpx"),
+                carapaceGatewayInstanceId: "argv-test",
+                carapaceProcessLeaseStore: leases,
               }
             : {}),
         });
@@ -179,7 +179,7 @@ it.each([
 it.skipIf(process.platform === "win32")(
   "reuses an unchanged persisted POSIX scalar ACP command",
   async () => {
-    await withOpenClawTestState({ label: "acpx-scalar-reuse" }, async (state) => {
+    await withCarapaceTestState({ label: "acpx-scalar-reuse" }, async (state) => {
       const peerDirectory = path.join(state.root, "peer");
       await fs.mkdir(peerDirectory);
       const argv = [process.execPath, script, peerDirectory];
@@ -222,7 +222,7 @@ it.skipIf(process.platform === "win32")(
 );
 
 it("keeps generated Codex and Claude wrapper commands as portable argv", async () => {
-  await withOpenClawTestState({ label: "acpx-wrapper-argv" }, async (state) => {
+  await withCarapaceTestState({ label: "acpx-wrapper-argv" }, async (state) => {
     const codexHome = path.join(state.root, "empty-codex-home");
     await fs.mkdir(codexHome);
     vi.stubEnv("CODEX_HOME", codexHome);

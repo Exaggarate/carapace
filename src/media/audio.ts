@@ -1,6 +1,6 @@
 // Audio media helpers normalize audio mime types, extensions, and load options.
-import { getFileExtension, normalizeMimeType } from "@openclaw/media-core/mime";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { getFileExtension, normalizeMimeType } from "@carapace/media-core/mime";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 
 /** File extensions accepted by channel voice-message upload paths. */
 const VOICE_MESSAGE_AUDIO_EXTENSIONS = new Set([".oga", ".ogg", ".opus", ".mp3", ".m4a"]);

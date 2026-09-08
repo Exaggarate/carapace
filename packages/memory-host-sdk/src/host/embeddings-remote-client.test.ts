@@ -163,8 +163,8 @@ describe("resolveRemoteEmbeddingBearerClient", () => {
     ).rejects.toThrow(/memory\.search\.remote\.apiKey|Authorization header/);
   });
 
-  it("adds OpenClaw attribution to native OpenAI embedding requests", async () => {
-    vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+  it("adds Carapace attribution to native OpenAI embedding requests", async () => {
+    vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
     const client = await resolveRemoteEmbeddingBearerClient({
       provider: "openai",
       defaultBaseUrl: "https://api.openai.com/v1",
@@ -184,9 +184,9 @@ describe("resolveRemoteEmbeddingBearerClient", () => {
     expect(client.headers).toEqual({
       Authorization: "Bearer sk-test",
       "Content-Type": "application/json",
-      originator: "openclaw",
+      originator: "carapace",
       version: "2026.3.22",
-      "User-Agent": "openclaw/2026.3.22",
+      "User-Agent": "carapace/2026.3.22",
     });
   });
 });

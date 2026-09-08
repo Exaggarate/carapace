@@ -2,7 +2,7 @@
 import type { BigIntStats } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { FsSafeError, resolveAbsolutePathForRead } from "openclaw/plugin-sdk/security-runtime";
+import { FsSafeError, resolveAbsolutePathForRead } from "carapace/plugin-sdk/security-runtime";
 import { fileIdentity, readPathBinding, type FileIdentity } from "../shared/path-binding.js";
 
 type InvalidPathResult = {

@@ -115,7 +115,7 @@ describe("chat pane session menu boundary", () => {
     );
 
     const menu = container.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-chat-header-session-menu",
+      "carapace-chat-header-session-menu",
     );
     expect(menu).not.toBeNull();
     await menu?.updateComplete;

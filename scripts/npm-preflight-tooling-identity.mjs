@@ -60,7 +60,7 @@ export function validateNpmPreflightProducer({
   workflowSha,
   runId,
   runAttempt,
-  workflowPath = ".github/workflows/openclaw-npm-release.yml",
+  workflowPath = ".github/workflows/carapace-npm-release.yml",
   fullReleaseManifest,
   fullReleaseRunId,
   fullReleaseRunAttempt,
@@ -82,10 +82,10 @@ export function validateNpmPreflightProducer({
     !/^[a-f0-9]{40}$/u.test(workflowSha ?? "") ||
     !/^[1-9][0-9]*$/u.test(String(runId ?? "")) ||
     !/^[1-9][0-9]*$/u.test(String(runAttempt ?? "")) ||
-    ![".github/workflows/openclaw-npm-release.yml", ...QUALIFIED_WORKFLOWS].includes(
+    ![".github/workflows/carapace-npm-release.yml", ...QUALIFIED_WORKFLOWS].includes(
       workflowPath,
     ) ||
-    (manifest.version === 2 && workflowPath !== ".github/workflows/openclaw-npm-release.yml")
+    (manifest.version === 2 && workflowPath !== ".github/workflows/carapace-npm-release.yml")
   ) {
     throw new Error("npm preflight expected producer identity is invalid.");
   }
@@ -97,7 +97,7 @@ export function validateNpmPreflightProducer({
     runAttempt: String(runAttempt),
     ...(manifest.version === 3
       ? {
-          producerWorkflowPath: ".github/workflows/openclaw-npm-preflight.yml",
+          producerWorkflowPath: ".github/workflows/carapace-npm-preflight.yml",
           jobId: manifest.producer.jobId,
           jobName: manifest.producer.jobName,
         }
@@ -108,7 +108,7 @@ export function validateNpmPreflightProducer({
     (!/^[1-9][0-9]*$/u.test(manifest.producer.jobId ?? "") ||
       typeof manifest.producer.jobName !== "string" ||
       !/(?:^| \/ )Qualify prepared npm package$/u.test(manifest.producer.jobName) ||
-      manifest.preparedBundle?.schema !== "openclaw.prepared-npm-bundle/v1" ||
+      manifest.preparedBundle?.schema !== "carapace.prepared-npm-bundle/v1" ||
       manifest.preparedBundle.source?.sha !== manifest.releaseSha ||
       manifest.preparedBundle.package?.sha256 !== manifest.tarballSha256 ||
       manifest.preparedBundle.producer?.repository !== repository ||
@@ -197,12 +197,12 @@ export function validateFullReleaseNpmPreflight({
     String(manifest.runAttempt) !== String(runAttempt) ||
     manifest.targetSha !== sourceSha ||
     manifest.workflowSha !== toolingSha ||
-    qualified?.schema !== "openclaw.qualified-npm-preflight/v1" ||
+    qualified?.schema !== "carapace.qualified-npm-preflight/v1" ||
     qualified.source?.sha !== sourceSha ||
     !/^[a-f0-9]{64}$/u.test(qualified.manifestSha256 ?? "") ||
     !/^[1-9][0-9]*$/u.test(qualified.artifact?.id ?? "") ||
     !/^[a-f0-9]{64}$/u.test(qualified.artifact?.digest ?? "") ||
-    !/^openclaw-npm-preflight-[A-Za-z0-9_.-]+$/u.test(qualified.artifact?.name ?? "") ||
+    !/^carapace-npm-preflight-[A-Za-z0-9_.-]+$/u.test(qualified.artifact?.name ?? "") ||
     !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u.test(producerRepository ?? "") ||
     producer?.repository !== producerRepository ||
     !/^[1-9][0-9]*$/u.test(producer?.runId ?? "") ||

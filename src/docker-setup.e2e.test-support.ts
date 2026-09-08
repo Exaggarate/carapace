@@ -4,7 +4,7 @@ import { createServer } from "node:net";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect } from "vitest";
-import { resolvePreferredOpenClawTmpDir } from "./infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./infra/tmp-carapace-dir.js";
 import { createSuiteTempRootTracker } from "./test-helpers/temp-dir.js";
 
 export const repoRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
@@ -17,8 +17,8 @@ export type DockerSetupSandbox = {
 };
 
 const sandboxRootTracker = createSuiteTempRootTracker({
-  prefix: "openclaw-docker-setup-",
-  parentDir: resolvePreferredOpenClawTmpDir(),
+  prefix: "carapace-docker-setup-",
+  parentDir: resolvePreferredCarapaceTmpDir(),
 });
 
 export async function setupDockerSetupSandboxRoot(): Promise<void> {
@@ -113,7 +113,7 @@ if [[ "\${1:-}" == "compose" ]]; then
   for ((i = 0; i + 4 < \${#args[@]}; i++)); do
     if [[ "\${args[$i]}" == "--entrypoint" &&
       "\${args[$((i + 1))]}" == "node" &&
-      "\${args[$((i + 2))]}" == "openclaw-gateway" &&
+      "\${args[$((i + 2))]}" == "carapace-gateway" &&
       "\${args[$((i + 3))]}" == "-e" ]]; then
       node -e "\${args[$((i + 4))]}" "\${args[@]:$((i + 5))}"
       exit $?
@@ -193,7 +193,7 @@ export async function createDockerSetupSandbox(): Promise<DockerSetupSandbox> {
   await writeFile(dockerfilePath, "FROM scratch\n");
   await writeFile(
     composePath,
-    "services:\n  openclaw-gateway:\n    image: noop\n  openclaw-cli:\n    image: noop\n",
+    "services:\n  carapace-gateway:\n    image: noop\n  carapace-cli:\n    image: noop\n",
   );
   await writeDockerStub(binDir, logPath);
 
@@ -202,11 +202,11 @@ export async function createDockerSetupSandbox(): Promise<DockerSetupSandbox> {
 
 export const prestartContainerEnvFlags = [
   "-e HOME=/home/node",
-  "-e OPENCLAW_HOME=/home/node",
-  "-e OPENCLAW_STATE_DIR=/home/node/.openclaw",
-  "-e OPENCLAW_CONFIG_PATH=/home/node/.openclaw/openclaw.json",
-  "-e OPENCLAW_CONFIG_DIR=/home/node/.openclaw",
-  "-e OPENCLAW_WORKSPACE_DIR=/home/node/.openclaw/workspace",
+  "-e CARAPACE_HOME=/home/node",
+  "-e CARAPACE_STATE_DIR=/home/node/.carapace",
+  "-e CARAPACE_CONFIG_PATH=/home/node/.carapace/carapace.json",
+  "-e CARAPACE_CONFIG_DIR=/home/node/.carapace",
+  "-e CARAPACE_WORKSPACE_DIR=/home/node/.carapace/workspace",
 ].join(" ");
 
 export const noFollowOwnershipRepair = (root: string) =>
@@ -252,7 +252,7 @@ export function collectMatchingLines(
 }
 
 export function isGatewayStartLine(line: string) {
-  return line.includes("compose") && line.includes(" up -d") && line.includes("openclaw-gateway");
+  return line.includes("compose") && line.includes(" up -d") && line.includes("carapace-gateway");
 }
 
 export function findGatewayStartLineIndex(lines: string[]) {

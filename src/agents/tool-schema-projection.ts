@@ -1,4 +1,4 @@
-import { projectRuntimeToolInputSchema } from "@openclaw/ai/internal/tool-schema";
+import { projectRuntimeToolInputSchema } from "@carapace/ai/internal/tool-schema";
 /**
  * Projects agent tool schemas into JSON-safe runtime shapes and diagnostics.
  * Provider/runtime dispatch uses this module to drop incompatible tools before
@@ -6,11 +6,11 @@ import { projectRuntimeToolInputSchema } from "@openclaw/ai/internal/tool-schema
  */
 import type { AnyAgentTool } from "./tools/common.js";
 
-export { projectRuntimeToolInputSchema } from "@openclaw/ai/internal/tool-schema";
+export { projectRuntimeToolInputSchema } from "@carapace/ai/internal/tool-schema";
 export type {
   RuntimeToolInputSchemaJson,
   RuntimeToolInputSchemaProjection,
-} from "@openclaw/ai/internal/tool-schema";
+} from "@carapace/ai/internal/tool-schema";
 
 /** Diagnostic for one incompatible runtime tool schema. */
 export type RuntimeToolSchemaDiagnostic = {

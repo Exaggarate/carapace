@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
 import { resolveFutureConfigActionBlock } from "../../config/future-version-guard.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import {
   createUpdateRun,
@@ -23,9 +23,9 @@ import {
 import { runExec } from "../../process/exec.js";
 import { defaultRuntime } from "../../runtime.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { VERSION } from "../../version.js";
 
 const mocks = vi.hoisted(() => ({
@@ -71,24 +71,24 @@ const pluginResult: PostCorePluginUpdateResult = {
   integrityDrifts: [],
 };
 type Lane = LeaseScenario["lane"];
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let entrypoint: string;
 
 beforeEach(async () => {
   vi.clearAllMocks();
-  state = await createOpenClawTestState({
+  state = await createCarapaceTestState({
     label: "update-lease",
     env: {
-      OPENCLAW_COMPATIBILITY_HOST_VERSION: undefined,
-      OPENCLAW_UPDATE_POST_CORE_RESULT_PATH: undefined,
-      OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH: undefined,
-      OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: undefined,
-      OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL: undefined,
-      OPENCLAW_UPDATE_POST_CORE_STARTED_AT_MS: undefined,
-      OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION: undefined,
-      OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR: undefined,
-      OPENCLAW_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART: undefined,
-      OPENCLAW_UPDATE_RUN_ID: undefined,
+      CARAPACE_COMPATIBILITY_HOST_VERSION: undefined,
+      CARAPACE_UPDATE_POST_CORE_RESULT_PATH: undefined,
+      CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH: undefined,
+      CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: undefined,
+      CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL: undefined,
+      CARAPACE_UPDATE_POST_CORE_STARTED_AT_MS: undefined,
+      CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION: undefined,
+      CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR: undefined,
+      CARAPACE_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART: undefined,
+      CARAPACE_UPDATE_RUN_ID: undefined,
     },
   });
   await state.writeConfig({ plugins: { enabled: false }, update: { channel: "stable" } });
@@ -259,8 +259,8 @@ describe("update orchestration lifecycle ownership", () => {
         hostVersion: lane === "repair" ? undefined : "1.0.0",
       });
       if (lane === "current-process") {
-        vi.stubEnv("OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION", "1");
-        vi.stubEnv("OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR", "1");
+        vi.stubEnv("CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION", "1");
+        vi.stubEnv("CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR", "1");
       }
       mocks.plugins.mockImplementationOnce(async () => {
         const result = await runExec(process.execPath, [entrypoint, "probe"], {
@@ -278,7 +278,7 @@ describe("update orchestration lifecycle ownership", () => {
         expect(listUpdateRuns({ active: true })).toEqual([]);
         expect(listUpdateRuns({ limit: 1 })[0]?.origin.driver?.pid).toBe(process.pid);
       }
-      expect(process.env.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION).toBe(
+      expect(process.env.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION).toBe(
         lane === "current-process" ? "1" : undefined,
       );
       expect(await events()).toEqual([
@@ -290,7 +290,7 @@ describe("update orchestration lifecycle ownership", () => {
         "readiness",
       ]);
       if (lane === "current-process") {
-        expect(process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBeUndefined();
+        expect(process.env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBeUndefined();
         expect(mocks.restart).toHaveBeenCalledWith(
           expect.objectContaining({ shouldRestart: false }),
         );
@@ -383,8 +383,8 @@ describe("update orchestration lifecycle ownership", () => {
       await writePersistedInstalledPluginIndexInstallRecords(old);
       expect(await loadInstalledPluginIndexInstallRecords()).toEqual(old);
       const recordsPath = await state.writeJson("forwarded.json", old);
-      vi.stubEnv("OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH", recordsPath);
-      vi.stubEnv("OPENCLAW_UPDATE_POST_CORE_STARTED_AT_MS", String(Date.now()));
+      vi.stubEnv("CARAPACE_UPDATE_POST_CORE_INSTALL_RECORDS_PATH", recordsPath);
+      vi.stubEnv("CARAPACE_UPDATE_POST_CORE_STARTED_AT_MS", String(Date.now()));
       const current: Record<string, PluginInstallRecord> = empty
         ? {}
         : { current: { source: "path" } };
@@ -527,7 +527,7 @@ describe("update orchestration lifecycle ownership", () => {
   it("resume reports a plugin exception after releasing its lease", async () => {
     await writeScenario("resume");
     const resultPath = state.path("failed-post-core.json");
-    vi.stubEnv("OPENCLAW_UPDATE_POST_CORE_RESULT_PATH", resultPath);
+    vi.stubEnv("CARAPACE_UPDATE_POST_CORE_RESULT_PATH", resultPath);
     mocks.plugins.mockRejectedValueOnce(new Error("plugin fixture failure"));
     await expect(invoke("resume")).rejects.toThrow("plugin fixture failure");
     const result = JSON.parse(await fs.readFile(resultPath, "utf8"));
@@ -549,7 +549,7 @@ describe("update orchestration lifecycle ownership", () => {
       postUpdate: { plugins: { reason: "post-plugin-doctor-execution-failed" } },
     });
     expect(mocks.restart).not.toHaveBeenCalled();
-    expect(process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBeUndefined();
+    expect(process.env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBeUndefined();
     expectDoctorDiagnostics();
     expect(await events()).toEqual(["post-attempt", "post-acquired", "validate", "readiness"]);
   });
@@ -646,7 +646,7 @@ describe("update orchestration lifecycle ownership", () => {
           },
         });
       }
-      const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+      const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
       expect(persisted.meta?.lastTouchedVersion).toBe(valid ? VERSION : futureVersion);
       expect(persisted.update?.channel).toBe("stable");
       const startupBlock = resolveFutureConfigActionBlock({

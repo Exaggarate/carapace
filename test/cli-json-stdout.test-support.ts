@@ -11,15 +11,15 @@ export function runBuiltCli(
     ...(options.inheritEnvironment === false ? { PATH: process.env.PATH } : process.env),
     HOME: tempHome,
     USERPROFILE: tempHome,
-    OPENCLAW_TEST_FAST: "1",
+    CARAPACE_TEST_FAST: "1",
   };
-  delete env.OPENCLAW_HOME;
-  delete env.OPENCLAW_STATE_DIR;
-  delete env.OPENCLAW_CONFIG_PATH;
+  delete env.CARAPACE_HOME;
+  delete env.CARAPACE_STATE_DIR;
+  delete env.CARAPACE_CONFIG_PATH;
   delete env.VITEST;
   Object.assign(env, envOverrides);
 
-  const entry = path.resolve(process.cwd(), "openclaw.mjs");
+  const entry = path.resolve(process.cwd(), "carapace.mjs");
   return spawnSync(process.execPath, [entry, ...args], {
     cwd: process.cwd(),
     env,

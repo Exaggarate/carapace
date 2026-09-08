@@ -1,6 +1,6 @@
 import type fs from "node:fs";
 import path from "node:path";
-import { err, ok } from "@openclaw/normalization-core/result";
+import { err, ok } from "@carapace/normalization-core/result";
 import { resolveCronJobsStorePathFromConfig } from "../cron/store.js";
 import { isVerbose } from "../global-state.js";
 import { isVitestRuntimeEnv } from "../infra/env.js";
@@ -80,12 +80,12 @@ import { applyMergePatch, createMergePatch } from "./merge-patch.js";
 import { assertConfigWriteAllowedInCurrentMode } from "./nix-mode-write-guard.js";
 import { resolveIncludeRoots } from "./paths.js";
 import { preflightRuntimeSnapshotWrite } from "./runtime-snapshot.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 import { validateConfigObjectRawWithPlugins } from "./validation.js";
 
 export async function writeConfigFileFromContext(
   context: ConfigIoContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: ConfigWriteOptions,
   readSnapshot: () => Promise<ReadConfigFileSnapshotInternalResult>,
 ): Promise<InternalConfigWriteResult> {
@@ -201,10 +201,10 @@ export async function writeConfigFileFromContext(
   const envForRestore = options.envSnapshotForRestore ?? deps.env;
   const resolveValidationCandidate = (candidate: unknown) => {
     // Validate removals now; apply them once to the final authored output after materialization.
-    const config = applyUnsetPathsForWrite(candidate as OpenClawConfig, unsetPaths);
+    const config = applyUnsetPathsForWrite(candidate as CarapaceConfig, unsetPaths);
     return containsConfigIncludeDirective(config)
       ? context.resolveRuntimePreflightSourceConfig(
-          restoreEnvVarRefs(config, snapshot.parsed, envForRestore) as OpenClawConfig,
+          restoreEnvVarRefs(config, snapshot.parsed, envForRestore) as CarapaceConfig,
         )
       : config;
   };
@@ -224,7 +224,7 @@ export async function writeConfigFileFromContext(
   // Validate authored structure before stamping can replace malformed parents.
   validateCandidate(validationCandidate);
   // SAFETY: the original resolved input was just validated; retain raw values, not parser defaults.
-  const validatedCandidate = validationCandidate as OpenClawConfig;
+  const validatedCandidate = validationCandidate as CarapaceConfig;
   const materialized = stampConfigVersion(
     snapshot.exists
       ? validatedCandidate
@@ -245,14 +245,14 @@ export async function writeConfigFileFromContext(
     homedir: deps.homedir,
   });
 
-  let cfgToWrite = persistCandidate as OpenClawConfig;
+  let cfgToWrite = persistCandidate as CarapaceConfig;
   try {
     if (deps.fs.existsSync(configPath)) {
       const currentRaw = await deps.fs.promises.readFile(configPath, "utf-8");
       const parsed = parseConfigJson5(currentRaw, deps.json5);
       if (parsed.ok) {
         const beforeIdentityRestore = cfgToWrite;
-        cfgToWrite = restoreEnvVarRefs(cfgToWrite, parsed.parsed, envForRestore) as OpenClawConfig;
+        cfgToWrite = restoreEnvVarRefs(cfgToWrite, parsed.parsed, envForRestore) as CarapaceConfig;
         collectChangedPaths(beforeIdentityRestore, cfgToWrite, "", identityRestoredPaths);
       }
     }
@@ -277,14 +277,14 @@ export async function writeConfigFileFromContext(
         envRefMap,
         changedPaths,
         identityRestoredPaths,
-      ) as OpenClawConfig)
+      ) as CarapaceConfig)
     : cfgToWrite;
   const tildeRestoredOutputConfig = restoreAuthoredTildePathsForWrite(
     outputConfigBase,
     snapshot.parsed,
     undefined,
     deps.homedir(),
-  ) as OpenClawConfig;
+  ) as CarapaceConfig;
   const outputConfig = applyUnsetPathsForWrite(tildeRestoredOutputConfig, unsetPaths);
   const stampedOutputConfig = stampConfigVersion(outputConfig, options.lastTouchedVersionOverride);
   rejectConfigNonFiniteNumbers(stampedOutputConfig);
@@ -324,12 +324,12 @@ export async function writeConfigFileFromContext(
     if (
       !snapshot.exists ||
       options.skipOutputLogs ||
-      (isVitestRuntimeEnv(deps.env) && !readTestLogFlag("OPENCLAW_TEST_CONFIG_WRITE_LOG"))
+      (isVitestRuntimeEnv(deps.env) && !readTestLogFlag("CARAPACE_TEST_CONFIG_WRITE_LOG"))
     ) {
       return;
     }
-    const testLog = readTestLogFlag("OPENCLAW_TEST_CONFIG_WRITE_LOG");
-    if (!isVerbose() && deps.env.OPENCLAW_CONFIG_OVERWRITE_LOG !== "1" && !testLog) {
+    const testLog = readTestLogFlag("CARAPACE_TEST_CONFIG_WRITE_LOG");
+    if (!isVerbose() && deps.env.CARAPACE_CONFIG_OVERWRITE_LOG !== "1" && !testLog) {
       return;
     }
     deps.logger.warn(
@@ -342,7 +342,7 @@ export async function writeConfigFileFromContext(
     );
   };
   const logConfigWriteAnomalies = () => {
-    const testLog = readTestLogFlag("OPENCLAW_TEST_CONFIG_WRITE_LOG");
+    const testLog = readTestLogFlag("CARAPACE_TEST_CONFIG_WRITE_LOG");
     if (
       suspiciousReasons.length === 0 ||
       options.skipOutputLogs ||
@@ -351,7 +351,7 @@ export async function writeConfigFileFromContext(
       return;
     }
     const showMissingMeta =
-      isVerbose() || deps.env.OPENCLAW_CONFIG_WRITE_ANOMALY_LOG === "1" || testLog;
+      isVerbose() || deps.env.CARAPACE_CONFIG_WRITE_ANOMALY_LOG === "1" || testLog;
     const visibleReasons = showMissingMeta
       ? suspiciousReasons
       : suspiciousReasons.filter((reason) => reason !== "missing-meta-before-write");
@@ -417,7 +417,7 @@ export async function writeConfigFileFromContext(
 
   const preCommitRuntimePreflight =
     options.preCommitRuntimePreflight ??
-    (async (sourceConfig: OpenClawConfig) => {
+    (async (sourceConfig: CarapaceConfig) => {
       await preflightRuntimeSnapshotWrite({
         nextSourceConfig: sourceConfig,
         refreshOptions: options.runtimeRefresh,

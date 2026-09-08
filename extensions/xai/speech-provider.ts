@@ -1,11 +1,11 @@
 // Xai provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
 import type {
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
   SpeechSynthesisTarget,
-} from "openclaw/plugin-sdk/speech";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/speech";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   createXaiSpeechProviderMetadata,
   readXaiSpeechOverrides,
@@ -29,7 +29,7 @@ async function resolveXaiSpeechSynthesisRequest(
   const config = readXaiSpeechProviderConfig(req.providerConfig);
   const overrides = readXaiSpeechOverrides(req.providerOverrides);
   const { resolveGeneratedMediaMaxBytes } =
-    await import("openclaw/plugin-sdk/media-generation-runtime");
+    await import("carapace/plugin-sdk/media-generation-runtime");
   return {
     text: req.text,
     apiKey: await resolveXaiAudioApiKey(config.apiKey, req.cfg),
@@ -92,7 +92,7 @@ export function buildXaiSpeechProvider(): SpeechProviderPlugin {
 // 3. xAI OAuth auth profile (cfg-scoped)
 async function resolveOptionalXaiAudioApiKey(
   configApiKey: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): Promise<string | undefined> {
   const direct = resolveDirectXaiAudioApiKey(configApiKey);
   if (direct) {
@@ -101,20 +101,20 @@ async function resolveOptionalXaiAudioApiKey(
   if (!cfg) {
     return undefined;
   }
-  const { resolveApiKeyForProvider } = await import("openclaw/plugin-sdk/provider-auth-runtime");
+  const { resolveApiKeyForProvider } = await import("carapace/plugin-sdk/provider-auth-runtime");
   const auth = await resolveApiKeyForProvider({ provider: "xai", cfg });
   return normalizeOptionalString(auth?.apiKey);
 }
 
 async function resolveXaiAudioApiKey(
   configApiKey: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<string> {
   const apiKey = await resolveOptionalXaiAudioApiKey(configApiKey, cfg);
   if (apiKey) {
     return apiKey;
   }
   throw new Error(
-    "xAI credentials missing for TTS. Sign in with `openclaw onboard --auth-choice xai-oauth`, or run `openclaw onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
+    "xAI credentials missing for TTS. Sign in with `carapace onboard --auth-choice xai-oauth`, or run `carapace onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
   );
 }

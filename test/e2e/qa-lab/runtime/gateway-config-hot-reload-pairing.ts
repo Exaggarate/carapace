@@ -53,7 +53,7 @@ async function portOpen(host: string, port: number): Promise<boolean> {
 
 export async function prepareGatewayPairingFixture(temporaryRoot: string) {
   assert.equal(
-    process.env.OPENCLAW_TESTBOX,
+    process.env.CARAPACE_TESTBOX,
     "1",
     "Real SSH pairing proof requires a disposable Testbox",
   );
@@ -102,7 +102,7 @@ export async function prepareGatewayPairingFixture(temporaryRoot: string) {
 const fs = require("node:fs/promises");
 const delay = require("node:timers/promises").setTimeout;
 (async () => {
-  if (process.env.SSH_ORIGINAL_COMMAND !== "sh -lc 'openclaw node identity --json'") throw new Error("unexpected fixture SSH command");
+  if (process.env.SSH_ORIGINAL_COMMAND !== "sh -lc 'carapace node identity --json'") throw new Error("unexpected fixture SSH command");
   const { deviceId, publicKey, started, release } = JSON.parse(await fs.readFile(process.argv[2], "utf8"));
   await fs.writeFile(started, "started");
   const deadline = Date.now() + 30000;
@@ -228,7 +228,7 @@ for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => child.kill(
   };
   try {
     const fixtureIdentity = loadOrCreateDeviceIdentity({
-      path: path.join(temporaryRoot, "state", "openclaw.sqlite"),
+      path: path.join(temporaryRoot, "state", "carapace.sqlite"),
       identityKey: "hot-reload-fixture",
     });
     await stage(fixtureIdentity, false);
@@ -245,7 +245,7 @@ for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => child.kill(
       "BatchMode=yes",
       "--",
       `${username}@${address}`,
-      "sh -lc 'openclaw node identity --json'",
+      "sh -lc 'carapace node identity --json'",
     ]);
     assert.equal(JSON.parse(fixtureProbe.stdout).deviceId, fixtureIdentity.deviceId);
   } catch (error) {
@@ -256,7 +256,7 @@ for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => child.kill(
     runtimeEnvPatch: {
       // The fixture owns this PATH: normal CLI bootstrap puts /usr/bin first and
       // would bypass the real-SSH adapter's isolated trust files and high port.
-      OPENCLAW_PATH_BOOTSTRAPPED: "1",
+      CARAPACE_PATH_BOOTSTRAPPED: "1",
       PATH: `${bin}${path.delimiter}${process.env.PATH ?? "/usr/bin:/bin"}`,
     },
     close,
@@ -271,7 +271,7 @@ for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => child.kill(
       const connections: HotReloadConnection[] = [];
       const identity = () =>
         loadOrCreateDeviceIdentity({
-          path: path.join(temporaryRoot, "state", "openclaw.sqlite"),
+          path: path.join(temporaryRoot, "state", "carapace.sqlite"),
           identityKey: `hot-reload-${randomUUID()}`,
         });
       const list = () => params.operator.request<PairingList>("device.pair.list", {});

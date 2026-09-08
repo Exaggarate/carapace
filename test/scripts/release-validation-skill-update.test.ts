@@ -10,27 +10,27 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const execFileAsync = promisify(execFile);
 const checkerSource = path.resolve(
-  process.env.OPENCLAW_TEST_RELEASE_VALIDATION_CHECKER ??
-    ".agents/skills/openclaw-release-validation/scripts/check-update.mjs",
+  process.env.CARAPACE_TEST_RELEASE_VALIDATION_CHECKER ??
+    ".agents/skills/carapace-release-validation/scripts/check-update.mjs",
 );
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function runChecker(
   scriptPath: string,
   workspace: string,
-  envOverrides: NodeJS.ProcessEnv = { OPENCLAW_STATE_DIR: workspace },
+  envOverrides: NodeJS.ProcessEnv = { CARAPACE_STATE_DIR: workspace },
 ) {
   const preloadPath = path.join(path.dirname(workspace), "mock-fetch.mjs");
   await writeFile(
     preloadPath,
     `globalThis.fetch = async (input) => {
       const url = new URL(input instanceof Request ? input.url : String(input));
-      if (url.searchParams.get("ownerHandle") !== "openclaw") {
+      if (url.searchParams.get("ownerHandle") !== "carapace") {
         throw new Error("missing owner-qualified ClawHub detail lookup");
       }
       return new Response(JSON.stringify({
         latestVersion: { version: "0.1.7" },
-        owner: { handle: "openclaw" },
+        owner: { handle: "carapace" },
       }), { status: 200, headers: { "content-type": "application/json" } });
     };\n`,
   );
@@ -77,7 +77,7 @@ test.each([".clawhub", ".clawdhub"])(
       version: 1,
       registry: "https://clawhub.ai",
       slug: "release-validation",
-      ownerHandle: "openclaw",
+      ownerHandle: "carapace",
       installedVersion: "0.1.6",
       installedAt: 1,
       skillFile,
@@ -89,7 +89,7 @@ test.each([".clawhub", ".clawdhub"])(
     const lockEntry = {
       version: "0.1.6",
       installedAt: 1,
-      ownerHandle: "openclaw",
+      ownerHandle: "carapace",
       skillFile,
       fileTreeSha256,
     };
@@ -108,26 +108,26 @@ test.each([".clawhub", ".clawdhub"])(
       localModifications: false,
       status: "update-available",
       update: {
-        command: ["openclaw", "skills", "update", "@openclaw/release-validation", "--global"],
+        command: ["carapace", "skills", "update", "@carapace/release-validation", "--global"],
       },
     });
 
     const stateLink = path.join(fixture, "state-link");
     await symlink(workspace, stateLink, process.platform === "win32" ? "junction" : "dir");
     const throughStateLink = await runChecker(scriptPath, workspace, {
-      OPENCLAW_STATE_DIR: stateLink,
+      CARAPACE_STATE_DIR: stateLink,
     });
     expect(throughStateLink.update?.command).toContain("--global");
 
     const throughConfigPath = await runChecker(scriptPath, workspace, {
-      OPENCLAW_STATE_DIR: "",
-      OPENCLAW_CONFIG_PATH: path.join(workspace, "custom-openclaw.json"),
+      CARAPACE_STATE_DIR: "",
+      CARAPACE_CONFIG_PATH: path.join(workspace, "custom-carapace.json"),
     });
     expect(throughConfigPath.update?.command).toContain("--global");
 
     const throughTildeState = await runChecker(scriptPath, workspace, {
-      OPENCLAW_HOME: fixture,
-      OPENCLAW_STATE_DIR: "~/workspace",
+      CARAPACE_HOME: fixture,
+      CARAPACE_STATE_DIR: "~/workspace",
     });
     expect(throughTildeState.update?.command).toContain("--global");
 
@@ -138,10 +138,10 @@ test.each([".clawhub", ".clawdhub"])(
       status: "update-available",
       update: {
         command: [
-          "openclaw",
+          "carapace",
           "skills",
           "update",
-          "@openclaw/release-validation",
+          "@carapace/release-validation",
           "--global",
           "--force",
         ],
@@ -153,7 +153,7 @@ test.each([".clawhub", ".clawdhub"])(
       JSON.stringify({
         ...origin,
         registry: " https://clawhub.ai/ ",
-        ownerHandle: " OpenClaw ",
+        ownerHandle: " Carapace ",
       }),
     );
     const normalized = await runChecker(scriptPath, workspace);

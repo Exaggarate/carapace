@@ -13,23 +13,23 @@ describe("hasAuthProfileStoreSourceForProvider", () => {
   });
 
   async function withAgentStore(profiles: Record<string, unknown>) {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-source-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auth-source-"));
     const stateDir = path.join(root, "state");
     const agentDir = path.join(root, "agent");
     await fs.mkdir(agentDir, { recursive: true });
     await fs.mkdir(stateDir, { recursive: true });
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     writePersistedAuthProfileStoreRaw({ version: 1, profiles }, agentDir);
     return { agentDir };
   }
 
   async function withLegacyAuthStore(profiles: Record<string, unknown>) {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-source-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auth-source-"));
     const stateDir = path.join(root, "state");
     const agentDir = path.join(root, "agent");
     await fs.mkdir(agentDir, { recursive: true });
     await fs.mkdir(stateDir, { recursive: true });
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     await fs.writeFile(path.join(agentDir, "auth.json"), JSON.stringify(profiles));
     return { agentDir };
   }
@@ -82,7 +82,7 @@ describe("hasAuthProfileStoreSourceForProvider", () => {
     // The unreadable store names its own remediation; a null return would make
     // callers report generic lock contention instead.
     await expect(updateAuthProfileStoreWithLock({ agentDir, updater })).rejects.toThrow(
-      "is unreadable; run openclaw doctor --fix",
+      "is unreadable; run carapace doctor --fix",
     );
     expect(updater).not.toHaveBeenCalled();
     expect(readPersistedAuthProfileStoreRaw(agentDir)).toEqual(unreadableStore);

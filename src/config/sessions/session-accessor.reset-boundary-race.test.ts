@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../../test/helpers/temp-dir.js";
 import * as sqliteQueries from "../../infra/kysely-sync.js";
-import * as agentDatabase from "../../state/openclaw-agent-db.js";
+import * as agentDatabase from "../../state/carapace-agent-db.js";
 import {
   applySessionEntryLifecycleMutation,
   loadSessionEntry,
@@ -20,18 +20,18 @@ import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target
 
 const transactionInjection = vi.hoisted(() => ({ run: null as (() => void) | null }));
 
-vi.mock("../../state/openclaw-agent-db.js", async (importOriginal) => {
+vi.mock("../../state/carapace-agent-db.js", async (importOriginal) => {
   const actual = await importOriginal<typeof agentDatabase>();
   return {
     ...actual,
-    runOpenClawAgentWriteTransaction: <T>(
-      run: Parameters<typeof actual.runOpenClawAgentWriteTransaction<T>>[0],
-      options: Parameters<typeof actual.runOpenClawAgentWriteTransaction<T>>[1],
+    runCarapaceAgentWriteTransaction: <T>(
+      run: Parameters<typeof actual.runCarapaceAgentWriteTransaction<T>>[0],
+      options: Parameters<typeof actual.runCarapaceAgentWriteTransaction<T>>[1],
     ) => {
       const inject = transactionInjection.run;
       transactionInjection.run = null;
       inject?.();
-      return actual.runOpenClawAgentWriteTransaction(run, options);
+      return actual.runCarapaceAgentWriteTransaction(run, options);
     },
   };
 });
@@ -42,13 +42,13 @@ describe("reset boundary concurrency", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = makeTempDir(tempDirs, "openclaw-reset-boundary-race-");
+    tempDir = makeTempDir(tempDirs, "carapace-reset-boundary-race-");
     storePath = path.join(tempDir, "sessions.json");
   });
 
   afterEach(() => {
     transactionInjection.run = null;
-    agentDatabase.closeOpenClawAgentDatabasesForTest();
+    agentDatabase.closeCarapaceAgentDatabasesForTest();
     cleanupTempDirs(tempDirs);
   });
 
@@ -173,7 +173,7 @@ describe("reset boundary concurrency", () => {
       ),
     ).toContain("concurrent");
 
-    agentDatabase.closeOpenClawAgentDatabasesForTest();
+    agentDatabase.closeCarapaceAgentDatabasesForTest();
     await waitForSessionTranscriptProjection(scope);
     expect(
       readRecentSessionTranscriptActiveEvents(scope, 10).map(
@@ -188,7 +188,7 @@ describe("reset boundary concurrency", () => {
       { sessionKey: "agent:main:reset-projection", storePath },
       { sessionId, updatedAt: 10 },
     );
-    const database = agentDatabase.openOpenClawAgentDatabase({
+    const database = agentDatabase.openCarapaceAgentDatabase({
       agentId: "main",
       path: resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
     });

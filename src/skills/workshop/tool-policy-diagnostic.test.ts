@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { detectSkillWorkshopToolPolicyDiagnostic } from "./tool-policy-diagnostic.js";
 
-function detect(config: OpenClawConfig, workshopEnabled = true) {
+function detect(config: CarapaceConfig, workshopEnabled = true) {
   const agents = config.agents;
   const hasRoster = Boolean(agents && ("entries" in agents || "list" in agents));
   return detectSkillWorkshopToolPolicyDiagnostic({

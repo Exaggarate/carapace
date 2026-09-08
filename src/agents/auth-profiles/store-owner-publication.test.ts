@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { prepareSecretsRuntimeFastPathSnapshot } from "../../secrets/runtime-fast-path.js";
 import { activateSecretsRuntimeSnapshotState } from "../../secrets/runtime-state.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { withEnv } from "../../test-utils/env.js";
 import {
   assertAuthProfileMigrationReady,
@@ -50,7 +50,7 @@ describe("auth publication owner receipts", () => {
       const { prepareSecretsRuntimeSnapshot } = await import("../../secrets/runtime.js");
       const first = await seedRoot("first");
       const second = await seedRoot("second");
-      const agentDir = tempDirs.make("openclaw-auth-owner-empty-activation-");
+      const agentDir = tempDirs.make("carapace-auth-owner-empty-activation-");
       await updateAuthProfileStoreWithLock({
         stateDir: first.stateDir,
         saveOptions,
@@ -157,8 +157,8 @@ describe("auth publication owner receipts", () => {
     "validates committed shared migration facts with unreadableLocal=$unreadableLocal populated=$populated",
     async ({ unreadableLocal, populated }) => {
       const root = await seedRoot("original");
-      const oauthDir = tempDirs.make("openclaw-auth-owner-late-oauth-");
-      const env = { ...root.env, OPENCLAW_OAUTH_DIR: oauthDir };
+      const oauthDir = tempDirs.make("carapace-auth-owner-late-oauth-");
+      const env = { ...root.env, CARAPACE_OAUTH_DIR: oauthDir };
       withEnv(env, () =>
         setRuntimeAuthProfileStoreSnapshot(
           loadAuthProfileStoreWithoutExternalProfiles(root.agentDir),
@@ -221,7 +221,7 @@ describe("auth publication owner receipts", () => {
           next,
           undefined,
           saveOptions,
-          openOpenClawStateDatabase({ env: first.env }),
+          openCarapaceStateDatabase({ env: first.env }),
         ),
       );
       expect(loadPersistedSharedAuthProfileStore(first.env)).toMatchObject(next);
@@ -269,7 +269,7 @@ describe("auth publication owner receipts", () => {
     "isolates $refusedOwner rollback refusal with newer=$newer stateOnly=$stateOnly",
     async ({ refusedOwner, newer, stateOnly }) => {
       const root = await seedRoot("original");
-      const healthyAgentDir = tempDirs.make("openclaw-auth-owner-healthy-sibling-");
+      const healthyAgentDir = tempDirs.make("carapace-auth-owner-healthy-sibling-");
       const healthyPath = resolveAuthProfileDatabasePath(healthyAgentDir);
       withEnv(root.env, () =>
         setRuntimeAuthProfileStoreSnapshot(
@@ -354,8 +354,8 @@ describe("auth publication owner receipts", () => {
 
   it("retains a prepared owner's relocated legacy OAuth discovery during local rebuild", async () => {
     const root = await seedRoot("original");
-    const oauthDir = tempDirs.make("openclaw-auth-owner-legacy-oauth-");
-    const env = { ...root.env, OPENCLAW_OAUTH_DIR: oauthDir };
+    const oauthDir = tempDirs.make("carapace-auth-owner-legacy-oauth-");
+    const env = { ...root.env, CARAPACE_OAUTH_DIR: oauthDir };
     withEnv(env, () => {
       saveAuthProfileStore({ version: 1, profiles: {} }, undefined, saveOptions);
       setRuntimeAuthProfileStoreSnapshot(
@@ -397,7 +397,7 @@ describe("auth publication owner receipts", () => {
             store("updated-first"),
             undefined,
             saveOptions,
-            openOpenClawStateDatabase({ env: first.env }),
+            openCarapaceStateDatabase({ env: first.env }),
           );
         }
       };
@@ -466,8 +466,8 @@ describe("auth publication owner receipts", () => {
 
   it("keeps the original shared owner after a bounded temporary-state exec save", async () => {
     const original = await seedRoot("original");
-    const temporary = tempDirs.make("openclaw-auth-owner-bounded-temp-");
-    withEnv({ ...original.env, OPENCLAW_STATE_DIR: temporary }, () => {
+    const temporary = tempDirs.make("carapace-auth-owner-bounded-temp-");
+    withEnv({ ...original.env, CARAPACE_STATE_DIR: temporary }, () => {
       withAuthProfileStoreAgentDir(original.agentDir, original.stateDir, () => {
         const current = ensureAuthProfileStoreWithoutExternalProfiles();
         saveAuthProfileStore(current, undefined, saveOptions);
@@ -494,8 +494,8 @@ describe("auth publication owner receipts", () => {
       profiles: [{ profileId: "shared-oauth", credential: oauth }],
     });
     expect(snapshotAt(original.agentPath)?.profiles["shared-oauth"]).toEqual(oauth);
-    const temporary = tempDirs.make("openclaw-auth-owner-bounded-oauth-");
-    withEnv({ ...original.env, OPENCLAW_STATE_DIR: temporary }, () => {
+    const temporary = tempDirs.make("carapace-auth-owner-bounded-oauth-");
+    withEnv({ ...original.env, CARAPACE_STATE_DIR: temporary }, () => {
       withAuthProfileStoreAgentDir(original.agentDir, original.stateDir, () => {
         const current = ensureAuthProfileStoreWithoutExternalProfiles();
         expect(current.profiles["shared-oauth"]).toBeUndefined();
@@ -579,13 +579,13 @@ describe("auth publication owner receipts", () => {
   it.each(["publish", "compensate"] as const)(
     "reconciles two legacy roots sharing one relocated database during %s",
     (operation) => {
-      const sharedDir = tempDirs.make("openclaw-auth-owner-aliased-legacy-");
+      const sharedDir = tempDirs.make("carapace-auth-owner-aliased-legacy-");
       const roots = ["first", "second"].map(() => ({
-        agentDir: tempDirs.make("openclaw-auth-owner-aliased-agent-"),
+        agentDir: tempDirs.make("carapace-auth-owner-aliased-agent-"),
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: tempDirs.make("openclaw-auth-owner-aliased-root-"),
-          OPENCLAW_AGENT_DIR: sharedDir,
+          CARAPACE_STATE_DIR: tempDirs.make("carapace-auth-owner-aliased-root-"),
+          CARAPACE_AGENT_DIR: sharedDir,
         },
       }));
       writePersistedAuthProfileStoreRaw(store("original"), sharedDir);
@@ -623,7 +623,7 @@ describe("auth publication owner receipts", () => {
 
   it("activates a valid prepared owner without reopening an unrelated public cold scope", async () => {
     const first = await seedRoot("first");
-    const coldAgentDir = tempDirs.make("openclaw-auth-owner-unrelated-cold-");
+    const coldAgentDir = tempDirs.make("carapace-auth-owner-unrelated-cold-");
     const assertOuterUnchanged = unreadableOuter("future");
     replaceRuntimeAuthProfileStoreSnapshots([{ agentDir: coldAgentDir, store: store("cold") }]);
     const prepared = prepareSecretsRuntimeFastPathSnapshot({

@@ -2,7 +2,7 @@
 summary: "Setting up ACP agents: acpx harness config, plugin setup, permissions"
 read_when:
   - Installing or configuring the acpx harness for Claude Code / Codex / Gemini CLI
-  - Enabling the plugin-tools or OpenClaw-tools MCP bridge
+  - Enabling the plugin-tools or Carapace-tools MCP bridge
   - Configuring ACP permission modes
 title: "ACP agents — setup"
 ---
@@ -16,7 +16,7 @@ app-server runtime config, use [Codex harness](/plugins/codex-harness). For
 OpenAI API keys or Codex OAuth model-provider config, use
 [OpenAI](/providers/openai).
 
-Codex has two OpenClaw routes:
+Codex has two Carapace routes:
 
 | Route                      | Config/command                                         | Setup page                              |
 | -------------------------- | ------------------------------------------------------ | --------------------------------------- |
@@ -44,7 +44,7 @@ Built-in acpx harness aliases (from the pinned `acpx` dependency):
 | `kiro`       | [Kiro CLI](https://kiro.dev)                                                                           |
 | `mux`        | [Mux](https://mux.coder.com)                                                                           |
 | `opencode`   | [OpenCode](https://opencode.ai)                                                                        |
-| `openclaw`   | OpenClaw ACP bridge (native `openclaw acp`)                                                            |
+| `carapace`   | Carapace ACP bridge (native `carapace acp`)                                                            |
 | `pi`         | [Pi Coding Agent](https://github.com/earendil-works/pi)                                                |
 | `qoder`      | [Qoder CLI](https://docs.qoder.com/cli/acp)                                                            |
 | `qwen`       | [Qwen Code](https://github.com/QwenLM/qwen-code)                                                       |
@@ -52,15 +52,15 @@ Built-in acpx harness aliases (from the pinned `acpx` dependency):
 
 `factory-droid` and `factorydroid` also resolve to the built-in `droid` adapter.
 
-When OpenClaw uses the acpx backend, prefer these values for `agentId` unless your acpx config defines custom agent aliases.
+When Carapace uses the acpx backend, prefer these values for `agentId` unless your acpx config defines custom agent aliases.
 If your local Cursor install still exposes ACP as `agent acp`, override the `cursor` agent command in your acpx config instead of changing the built-in default.
 
-Direct acpx CLI usage can also target arbitrary adapters via `--agent <command>`, but that raw escape hatch is an acpx CLI feature (not the normal OpenClaw `agentId` path).
+Direct acpx CLI usage can also target arbitrary adapters via `--agent <command>`, but that raw escape hatch is an acpx CLI feature (not the normal Carapace `agentId` path).
 
 Model control is adapter-capability dependent. Codex ACP model refs are
-normalized by OpenClaw before startup. Other harnesses need ACP `models` plus
+normalized by Carapace before startup. Other harnesses need ACP `models` plus
 `session/set_model` support; if a harness exposes neither that ACP capability
-nor its own startup model flag, OpenClaw/acpx cannot force a model selection.
+nor its own startup model flag, Carapace/acpx cannot force a model selection.
 
 ## Required config
 
@@ -85,7 +85,7 @@ Core ACP baseline:
       "kilocode",
       "kimi",
       "kiro",
-      "openclaw",
+      "carapace",
       "opencode",
       "qwen",
     ],
@@ -121,9 +121,9 @@ See [Configuration Reference](/gateway/configuration-reference).
 
 ## Repair existing bare-session histories
 
-ACPX isolates bare session names by OpenClaw owner. If a session reports
+ACPX isolates bare session names by Carapace owner. If a session reports
 `SESSION_OWNER_MIGRATION_REQUIRED`, stop the Gateway and run
-`openclaw doctor --fix`, then restart. Doctor uses the same service workspace
+`carapace doctor --fix`, then restart. Doctor uses the same service workspace
 as the Gateway; ACPX's default state directory is `<service workspace>/state`.
 
 The repair requires one current, unambiguous canonical owner claim with matching
@@ -141,12 +141,12 @@ finishing the metadata update and archiving the old persistent record.
 
 ## Plugin setup for acpx backend
 
-Packaged installs use the official `@openclaw/acpx` runtime plugin for ACP.
+Packaged installs use the official `@carapace/acpx` runtime plugin for ACP.
 Install and enable it before using ACP harness sessions:
 
 ```bash
-openclaw plugins install @openclaw/acpx
-openclaw config set plugins.entries.acpx.enabled true
+carapace plugins install @carapace/acpx
+carapace config set plugins.entries.acpx.enabled true
 ```
 
 Source checkouts can also use the local workspace plugin after `pnpm install`.
@@ -161,14 +161,14 @@ If you disabled `acpx`, denied it via `plugins.allow` / `plugins.deny`, or want
 to switch back to the packaged plugin, use the explicit package path:
 
 ```bash
-openclaw plugins install @openclaw/acpx
-openclaw config set plugins.entries.acpx.enabled true
+carapace plugins install @carapace/acpx
+carapace config set plugins.entries.acpx.enabled true
 ```
 
 Local workspace install during development:
 
 ```bash
-openclaw plugins install ./path/to/local/acpx-plugin
+carapace plugins install ./path/to/local/acpx-plugin
 ```
 
 Then verify backend health:
@@ -184,8 +184,8 @@ version to configure). By default it registers the embedded backend during
 Gateway startup and waits for one health probe before the gateway `ready`
 signal. That probe also supplies failure diagnostics and is bounded by
 `plugins.entries.acpx.config.timeoutSeconds`; an unhealthy result does not
-launch a second probe. Set `OPENCLAW_ACPX_RUNTIME_STARTUP_PROBE=0` or
-`OPENCLAW_SKIP_ACPX_RUNTIME_PROBE=1` only for scripts or environments that
+launch a second probe. Set `CARAPACE_ACPX_RUNTIME_STARTUP_PROBE=0` or
+`CARAPACE_SKIP_ACPX_RUNTIME_PROBE=1` only for scripts or environments that
 intentionally keep the startup probe disabled. Run `/acp doctor` for an explicit
 on-demand probe.
 
@@ -226,26 +226,26 @@ See [Plugins](/tools/plugin).
 
 `acpx` auto-downloads ACP adapters (for example the Claude and Codex ACP
 bridges) via `npx` on first use. You do not need to install adapter packages
-manually, and there is no separate postinstall step for OpenClaw itself. If an
+manually, and there is no separate postinstall step for Carapace itself. If an
 adapter download or spawn fails, `/acp doctor` reports the failure.
 
 ### Plugin tools MCP bridge
 
-By default, ACPX sessions do **not** expose OpenClaw plugin-registered tools to
+By default, ACPX sessions do **not** expose Carapace plugin-registered tools to
 the ACP harness.
 
 If you want ACP agents such as Codex or Claude Code to call installed
-OpenClaw plugin tools such as memory recall/store, enable the dedicated bridge:
+Carapace plugin tools such as memory recall/store, enable the dedicated bridge:
 
 ```bash
-openclaw config set plugins.entries.acpx.config.pluginToolsMcpBridge true
+carapace config set plugins.entries.acpx.config.pluginToolsMcpBridge true
 ```
 
 What this does:
 
-- Injects a built-in MCP server named `openclaw-plugin-tools` into ACPX session
+- Injects a built-in MCP server named `carapace-plugin-tools` into ACPX session
   bootstrap.
-- Exposes plugin tools already registered by installed and enabled OpenClaw
+- Exposes plugin tools already registered by installed and enabled Carapace
   plugins.
 - Passes the active ACP session identity to plugin tool factories, so
   agent-scoped tools stay in that agent's namespace.
@@ -256,27 +256,27 @@ Security and trust notes:
 - This expands the ACP harness tool surface.
 - ACP agents get access only to plugin tools already active in the gateway.
 - Treat this as the same trust boundary as letting those plugins execute in
-  OpenClaw itself.
+  Carapace itself.
 - Review installed plugins before enabling it.
 
 Custom `mcpServers` still work as before. The built-in plugin-tools bridge is an
 additional opt-in convenience, not a replacement for generic MCP server config.
 
-### OpenClaw tools MCP bridge
+### Carapace tools MCP bridge
 
-By default, ACPX sessions also do **not** expose built-in OpenClaw tools through
+By default, ACPX sessions also do **not** expose built-in Carapace tools through
 MCP. Enable the separate core-tools bridge when an ACP agent needs selected
 built-in tools such as `cron`:
 
 ```bash
-openclaw config set plugins.entries.acpx.config.openClawToolsMcpBridge true
+carapace config set plugins.entries.acpx.config.carapaceToolsMcpBridge true
 ```
 
 What this does:
 
-- Injects a built-in MCP server named `openclaw-tools` into ACPX session
+- Injects a built-in MCP server named `carapace-tools` into ACPX session
   bootstrap.
-- Exposes selected built-in OpenClaw tools. The initial server exposes `cron`.
+- Exposes selected built-in Carapace tools. The initial server exposes `cron`.
 - Keeps core-tool exposure explicit and default-off.
 
 ### Runtime operation timeout configuration
@@ -287,10 +287,10 @@ to complete ACP startup and initialization. Override it if your host needs a
 different operation limit:
 
 ```bash
-openclaw config set plugins.entries.acpx.config.timeoutSeconds 180
+carapace config set plugins.entries.acpx.config.timeoutSeconds 180
 ```
 
-Runtime turns use OpenClaw agent/run timeouts, including `/acp timeout`.
+Runtime turns use Carapace agent/run timeouts, including `/acp timeout`.
 `sessions_spawn` does not accept per-call timeout overrides; the operator path
 is `agents.defaults.subagents.runTimeoutSeconds`. Restart the gateway after
 changing `timeoutSeconds`.
@@ -303,7 +303,7 @@ the first allowed agent; otherwise it defaults to `codex`. If your deployment
 needs a different ACP agent for health checks, set the probe agent explicitly:
 
 ```bash
-openclaw config set plugins.entries.acpx.config.probeAgent claude
+carapace config set plugins.entries.acpx.config.probeAgent claude
 ```
 
 Restart the gateway after changing this value.
@@ -315,9 +315,9 @@ permission prompts. This does not disable ACP form or URL elicitation during a
 channel-delivered turn: those requests use transient Gateway questions instead.
 The acpx plugin provides two config keys that control harness permissions:
 
-These ACPX harness permissions are separate from OpenClaw exec approvals and separate from CLI-backend vendor bypass flags such as Claude CLI `--permission-mode bypassPermissions`. ACPX `approve-all` is the harness-level break-glass switch for ACP sessions.
+These ACPX harness permissions are separate from Carapace exec approvals and separate from CLI-backend vendor bypass flags such as Claude CLI `--permission-mode bypassPermissions`. ACPX `approve-all` is the harness-level break-glass switch for ACP sessions.
 
-For the broader comparison between OpenClaw `tools.exec.mode`, Codex Guardian
+For the broader comparison between Carapace `tools.exec.mode`, Codex Guardian
 approvals, and ACPX harness permissions, see
 [Permission modes](/tools/permission-modes).
 
@@ -345,14 +345,14 @@ Controls what happens when a permission prompt would be shown but no interactive
 Set via plugin config:
 
 ```bash
-openclaw config set plugins.entries.acpx.config.permissionMode approve-all
-openclaw config set plugins.entries.acpx.config.nonInteractivePermissions fail
+carapace config set plugins.entries.acpx.config.permissionMode approve-all
+carapace config set plugins.entries.acpx.config.nonInteractivePermissions fail
 ```
 
 Restart the gateway after changing these values.
 
 <Warning>
-OpenClaw defaults to `permissionMode=approve-reads` and `nonInteractivePermissions=fail`. In non-interactive ACP sessions, any write or exec that triggers a permission prompt can fail with `PermissionPromptUnavailableError: Permission prompt unavailable in non-interactive mode`.
+Carapace defaults to `permissionMode=approve-reads` and `nonInteractivePermissions=fail`. In non-interactive ACP sessions, any write or exec that triggers a permission prompt can fail with `PermissionPromptUnavailableError: Permission prompt unavailable in non-interactive mode`.
 
 If you need to restrict permissions, set `nonInteractivePermissions` to `deny` so sessions degrade gracefully instead of crashing.
 </Warning>

@@ -1,6 +1,6 @@
 /** Request-isolated registry views forked from lifecycle-owned model generations. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { Model } from "../llm/types.js";
 import type { PreparedAgentCredentialModes } from "./agent-auth-credential-modes.js";
 import { normalizeDiscoveredAgentModel } from "./agent-model-discovery.js";
@@ -36,7 +36,7 @@ function usesCredentialFreeRegistry(options: LoadPreparedAgentModelRegistryOptio
 function createRegistryView(params: {
   registry: ModelRegistry;
   agentDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   providerFilter?: string;
   normalizeModels?: boolean;
   workspaceDir?: string;
@@ -118,7 +118,7 @@ async function loadReadSnapshot(
 }
 
 function resolveInput(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: LoadPreparedAgentModelRegistryOptions = {},
 ): PreparedModelRuntimeInput {
   const agentId = options.agentId ?? resolveAmbientOwnerAgentId(config);
@@ -136,12 +136,12 @@ function resolveInput(
 
 /** Loads and forks one registry from the owning command lifecycle generation. */
 export async function loadPreparedAgentModelRegistry(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: LoadPreparedAgentModelRegistryOptions = {},
 ): Promise<{
   agentDir: string;
   authModes: PreparedAgentCredentialModes;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   registry: ModelRegistry;
 }> {
   const input = resolveInput(config, options);

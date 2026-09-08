@@ -8,7 +8,7 @@ import {
 import {
   formatMediaPlaceholderText,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import { jidToE164 } from "./text-runtime.js";
 
 // ── Inbound message metadata cache ──────────────────────────────────────

@@ -267,7 +267,7 @@ describe("hooks mapping", () => {
   });
 
   it("validates sessionMode returned by hook transforms", async () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-hook-session-mode-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-hook-session-mode-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     fs.writeFileSync(
@@ -419,7 +419,7 @@ describe("hooks mapping", () => {
   });
 
   it("runs transform module", async () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const modPath = path.join(transformsRoot, "transform.mjs");
@@ -458,7 +458,7 @@ describe("hooks mapping", () => {
 
   it("treats transform-provided session keys as templated by default", async () => {
     const result = await applyGmailTransformSessionKey({
-      tempPrefix: "openclaw-config-sessionkey-xform-",
+      tempPrefix: "carapace-config-sessionkey-xform-",
       payload: { subject: "external" },
       sessionKey: "hook:gmail:static",
       transformLines: [
@@ -478,7 +478,7 @@ describe("hooks mapping", () => {
 
   it("uses transform-provided static session key source metadata", async () => {
     const result = await applyGmailTransformSessionKey({
-      tempPrefix: "openclaw-config-sessionkey-static-",
+      tempPrefix: "carapace-config-sessionkey-static-",
       sessionKey: "hook:gmail:{{messages[0].subject}}",
       transformLines: [
         "export default () => ({",
@@ -495,7 +495,7 @@ describe("hooks mapping", () => {
 
   it("treats empty transform session keys as absent for source tracking", async () => {
     const result = await applyGmailTransformSessionKey({
-      tempPrefix: "openclaw-config-sessionkey-empty-",
+      tempPrefix: "carapace-config-sessionkey-empty-",
       sessionKey: "hook:gmail:{{messages[0].subject}}",
       transformLines: [
         "export default () => ({",
@@ -512,7 +512,7 @@ describe("hooks mapping", () => {
 
   it("defaults invalid transform session key source metadata to templated", async () => {
     const result = await applyGmailTransformSessionKey({
-      tempPrefix: "openclaw-config-sessionkey-invalid-",
+      tempPrefix: "carapace-config-sessionkey-invalid-",
       transformLines: [
         "export default () => ({",
         '  kind: "agent",',
@@ -530,7 +530,7 @@ describe("hooks mapping", () => {
   });
 
   it("rejects transform module traversal outside transformsDir", () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-traversal-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-traversal-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     expect(() =>
@@ -550,7 +550,7 @@ describe("hooks mapping", () => {
   });
 
   it("rejects absolute transform module path outside transformsDir", () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-abs-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-abs-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const outside = path.join(os.tmpdir(), "evil.mjs");
@@ -571,7 +571,7 @@ describe("hooks mapping", () => {
   });
 
   it("rejects transformsDir traversal outside the transforms root", () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-xformdir-trav-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-xformdir-trav-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     expect(() =>
@@ -592,7 +592,7 @@ describe("hooks mapping", () => {
   });
 
   it("rejects transformsDir absolute path outside the transforms root", () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-xformdir-abs-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-xformdir-abs-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     expect(() =>
@@ -613,7 +613,7 @@ describe("hooks mapping", () => {
   });
 
   it("accepts transformsDir subdirectory within the transforms root", async () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-xformdir-ok-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-xformdir-ok-");
     const result = await applyNullTransformFromTempConfig({ configDir, transformsDir: "subdir" });
     expectSkippedTransformResult(result);
   });
@@ -621,10 +621,10 @@ describe("hooks mapping", () => {
   it.runIf(process.platform !== "win32")(
     "rejects transform module symlink escape outside transformsDir",
     () => {
-      const configDir = makeTempDir(hooksTempDirs, "openclaw-config-symlink-module-");
+      const configDir = makeTempDir(hooksTempDirs, "carapace-config-symlink-module-");
       const transformsRoot = path.join(configDir, "hooks", "transforms");
       fs.mkdirSync(transformsRoot, { recursive: true });
-      const outsideDir = makeTempDir(hooksTempDirs, "openclaw-outside-module-");
+      const outsideDir = makeTempDir(hooksTempDirs, "carapace-outside-module-");
       const outsideModule = path.join(outsideDir, "evil.mjs");
       fs.writeFileSync(outsideModule, 'export default () => ({ kind: "wake", text: "owned" });');
       fs.symlinkSync(outsideModule, path.join(transformsRoot, "linked.mjs"));
@@ -648,10 +648,10 @@ describe("hooks mapping", () => {
   it.runIf(process.platform !== "win32")(
     "rejects transformsDir symlink escape outside transforms root",
     () => {
-      const configDir = makeTempDir(hooksTempDirs, "openclaw-config-symlink-dir-");
+      const configDir = makeTempDir(hooksTempDirs, "carapace-config-symlink-dir-");
       const transformsRoot = path.join(configDir, "hooks", "transforms");
       fs.mkdirSync(transformsRoot, { recursive: true });
-      const outsideDir = makeTempDir(hooksTempDirs, "openclaw-outside-dir-");
+      const outsideDir = makeTempDir(hooksTempDirs, "carapace-outside-dir-");
       fs.writeFileSync(path.join(outsideDir, "transform.mjs"), "export default () => null;");
       fs.symlinkSync(outsideDir, path.join(transformsRoot, "escape"), "dir");
       expect(() =>
@@ -673,7 +673,7 @@ describe("hooks mapping", () => {
   );
 
   it.runIf(process.platform !== "win32")("accepts in-root transform module symlink", async () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-symlink-ok-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-symlink-ok-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     const nestedDir = path.join(transformsRoot, "nested");
     fs.mkdirSync(nestedDir, { recursive: true });
@@ -704,7 +704,7 @@ describe("hooks mapping", () => {
   });
 
   it("treats null transform as a handled skip", async () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-config-skip-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-config-skip-");
     const result = await applyNullTransformFromTempConfig({ configDir });
     expectSkippedTransformResult(result);
   });
@@ -754,7 +754,7 @@ describe("hooks mapping", () => {
   });
 
   it("caches transform functions by module path and export name", async () => {
-    const configDir = makeTempDir(hooksTempDirs, "openclaw-hooks-export-");
+    const configDir = makeTempDir(hooksTempDirs, "carapace-hooks-export-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const modPath = path.join(transformsRoot, "multi-export.mjs");
@@ -820,15 +820,15 @@ describe("hooks mapping", () => {
   });
 
   it("uses one transform module instance per mapping reload", async () => {
-    const configDir = autoCleanupTempDirs.make("openclaw-hooks-generation-");
+    const configDir = autoCleanupTempDirs.make("carapace-hooks-generation-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const modPath = path.join(transformsRoot, "same-generation.mjs");
     fs.writeFileSync(
       modPath,
       [
-        "globalThis.__openclawHookTransformInstance = (globalThis.__openclawHookTransformInstance ?? 0) + 1;",
-        "const instance = globalThis.__openclawHookTransformInstance;",
+        "globalThis.__carapaceHookTransformInstance = (globalThis.__carapaceHookTransformInstance ?? 0) + 1;",
+        "const instance = globalThis.__carapaceHookTransformInstance;",
         'export function transformA() { return { kind: "wake", text: `A-${instance}` }; }',
         'export function transformB() { return { kind: "wake", text: `B-${instance}` }; }',
       ].join("\n"),
@@ -882,7 +882,7 @@ describe("hooks mapping", () => {
   });
 
   it("reloads a transform when the module file changes", async () => {
-    const configDir = autoCleanupTempDirs.make("openclaw-hooks-reload-");
+    const configDir = autoCleanupTempDirs.make("carapace-hooks-reload-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const modPath = path.join(transformsRoot, "reloadable.mjs");
@@ -930,7 +930,7 @@ describe("hooks mapping", () => {
   });
 
   it("does not invalidate the active transform cache while resolving a rejected reload", async () => {
-    const configDir = autoCleanupTempDirs.make("openclaw-hooks-rejected-reload-");
+    const configDir = autoCleanupTempDirs.make("carapace-hooks-rejected-reload-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const modPath = path.join(transformsRoot, "reloadable.mjs");
@@ -986,7 +986,7 @@ describe("hooks mapping", () => {
   });
 
   it("does not let an older in-flight transform import repopulate the reload cache", async () => {
-    const configDir = autoCleanupTempDirs.make("openclaw-hooks-overlap-");
+    const configDir = autoCleanupTempDirs.make("carapace-hooks-overlap-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const modPath = path.join(transformsRoot, "reloadable.mjs");

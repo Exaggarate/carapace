@@ -1,6 +1,6 @@
 // Builds memory flush prompts when conversation context exceeds model budget.
-import { resolveAnthropicServerCompactionPlan } from "@openclaw/ai/internal/anthropic";
-import { resolveOpenAIResponsesServerCompactionPlan } from "@openclaw/ai/internal/openai-responses-payload-policy";
+import { resolveAnthropicServerCompactionPlan } from "@carapace/ai/internal/anthropic";
+import { resolveOpenAIResponsesServerCompactionPlan } from "@carapace/ai/internal/openai-responses-payload-policy";
 import { resolveModelExtraParamSources } from "../../agents/model-extra-params.js";
 import { normalizeStaticProviderModelId } from "../../agents/model-ref-shared.js";
 import { normalizeProviderId } from "../../agents/model-selection.js";
@@ -10,9 +10,9 @@ import {
   resolveMergedModelProviderModels,
 } from "../../config/model-provider-config.js";
 import { resolveFreshSessionTotalTokens, type SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
-export function resolveMaxActiveTranscriptBytes(cfg?: OpenClawConfig): number | undefined {
+export function resolveMaxActiveTranscriptBytes(cfg?: CarapaceConfig): number | undefined {
   const parsed = parseNonNegativeByteSize(
     cfg?.agents?.defaults?.compaction?.maxActiveTranscriptBytes,
   );
@@ -38,7 +38,7 @@ export function resolveCompactionThreshold(params: {
 
 export function resolveResponsesServerCompactionThreshold(params: {
   contextWindowTokens: number;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider?: string;
   modelId?: string;
 }): number | undefined {

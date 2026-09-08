@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { writeSecretStoreEntry } from "../secrets/store/secret-store.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { attachInitialGatewayLifetimeSidecars } from "./server-lifetime-sidecars.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
@@ -29,13 +29,13 @@ vi.mock("./github-oauth-lifecycle.js", () => ({
 const roots: string[] = [];
 
 function createStateDir(): string {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sidecars-")));
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sidecars-")));
   roots.push(root);
   return root;
 }
 
 function countStoredRows(name: string): number {
-  const row = openOpenClawStateDatabase()
+  const row = openCarapaceStateDatabase()
     .db.prepare("SELECT COUNT(*) AS count FROM secret_store_entries WHERE name = ?")
     .get(name) as { count: number };
   return row.count;
@@ -54,7 +54,7 @@ function writeStoredSecret(name: string, value: string): void {
 
 afterEach(() => {
   vi.useRealTimers();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const root of roots.splice(0)) {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -171,7 +171,7 @@ describe("gateway lifetime sidecars", () => {
   ])(
     "owns startup and scheduled handoff expiry when minimalTestGateway=$minimalTestGateway",
     async ({ minimalTestGateway, expectedHandoffRows }) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: createStateDir() }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: createStateDir() }, async () => {
         vi.useFakeTimers();
         vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
         const startupHandoff = "github-setup-55555555555555555555555555555555";

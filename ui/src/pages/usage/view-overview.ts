@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 // Control UI view renders usage render overview screen content.
 import { html, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
@@ -143,11 +143,11 @@ function renderFilterChips(
           ({ labelKey, value, removeKey, onClear, title }) => html`
             <div class="filter-chip" title=${ifDefined(title)}>
               <span class="filter-chip-label">${t(labelKey)}: ${value}</span>
-              <openclaw-tooltip .content=${t("usage.filters.remove")}>
+              <carapace-tooltip .content=${t("usage.filters.remove")}>
                 <button class="filter-chip-remove" @click=${onClear} aria-label=${t(removeKey)}>
                   ×
                 </button>
-              </openclaw-tooltip>
+              </carapace-tooltip>
             </div>
           `,
         )}
@@ -351,7 +351,7 @@ function renderDailyChartCompact(
               const costLabel = formatAnalysisCost(d.totalCost);
               const segmentTotal = segments.reduce((sum, segment) => sum + segment.value, 0) || 1;
               return html`
-                <openclaw-tooltip
+                <carapace-tooltip
                   .content=${[dateLabel, tokensLabel, costLabel, ...breakdownLines].join("\n")}
                 >
                   <div
@@ -394,7 +394,7 @@ function renderDailyChartCompact(
                     }
                     <div class="${labelClass}">${shortLabel}</div>
                   </div>
-                </openclaw-tooltip>
+                </carapace-tooltip>
               `;
             })}
           </div>
@@ -542,7 +542,7 @@ function renderSummaryStat(params: {
     <div class=${classes}>
       <div class="usage-summary-title">
         ${params.title}
-        <openclaw-tooltip open-on-click>
+        <carapace-tooltip open-on-click>
           <button
             id=${hintId}
             type="button"
@@ -557,7 +557,7 @@ function renderSummaryStat(params: {
                click-to-open; the click handler still normalizes browsers that do
                not focus buttons on pointer activation. -->
           <span slot="content">${params.hint}</span>
-        </openclaw-tooltip>
+        </carapace-tooltip>
       </div>
       <div class=${valueClasses}>${params.value}</div>
       <div class="usage-summary-sub">${params.sub}</div>
@@ -1012,7 +1012,7 @@ function renderSessionsCard(
               )}
             </select>
           </label>
-          <openclaw-tooltip
+          <carapace-tooltip
             .content=${
               sessionSortDir === "desc"
                 ? t("usage.sessions.descending")
@@ -1030,7 +1030,7 @@ function renderSessionsCard(
             >
               ${sessionSortDir === "desc" ? "↓" : "↑"}
             </button>
-          </openclaw-tooltip>
+          </carapace-tooltip>
           ${
             selectedCount > 0
               ? html`

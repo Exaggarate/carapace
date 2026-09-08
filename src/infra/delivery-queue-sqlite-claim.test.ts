@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   claimDeliveryQueueEntryPlatformSend,
   createInitialDeliveryProducerClaim,
@@ -49,7 +49,7 @@ describe("delivery queue SQLite dispatch ownership", () => {
         expect(settle()).toBe(true);
       }
 
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(getDeliveryQueueEntryStatus(queueName, entry.id, stateDir)).toBe(
         rollback ? "pending" : "completed",
       );

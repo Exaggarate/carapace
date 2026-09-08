@@ -1,10 +1,10 @@
 // Telegram plugin module implements dm access behavior.
 import type { Bot } from "grammy";
 import type { Message } from "grammy/types";
-import { createChannelPairingChallengeIssuer } from "openclaw/plugin-sdk/channel-pairing";
-import type { DmPolicy } from "openclaw/plugin-sdk/config-contracts";
-import { upsertChannelPairingRequest } from "openclaw/plugin-sdk/conversation-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { createChannelPairingChallengeIssuer } from "carapace/plugin-sdk/channel-pairing";
+import type { DmPolicy } from "carapace/plugin-sdk/config-contracts";
+import { upsertChannelPairingRequest } from "carapace/plugin-sdk/conversation-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import type { NormalizedAllowFrom } from "./bot-access.js";
 import { renderTelegramHtmlText } from "./format.js";

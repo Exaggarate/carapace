@@ -2,8 +2,8 @@
 import { describe, expect, it } from "vitest";
 import {
   isGatewayArgv,
-  isOpenClawArgv,
-  isOpenClawCommandArgv,
+  isCarapaceArgv,
+  isCarapaceCommandArgv,
   parseProcCmdline,
 } from "./gateway-process-argv.js";
 
@@ -29,66 +29,66 @@ describe("isGatewayArgv", () => {
   });
 
   it("matches known entrypoints across slash and case variants", () => {
-    expect(isGatewayArgv(["NODE", "C:\\OpenClaw\\DIST\\ENTRY.JS", "gateway"])).toBe(true);
-    expect(isGatewayArgv(["bun", "/srv/openclaw/scripts/run-node.mjs", "gateway"])).toBe(true);
-    expect(isGatewayArgv(["node", "/srv/openclaw/openclaw.mjs", "gateway"])).toBe(true);
-    expect(isGatewayArgv(["tsx", "/srv/openclaw/src/entry.ts", "gateway"])).toBe(true);
-    expect(isGatewayArgv(["tsx", "/srv/openclaw/src/index.ts", "gateway"])).toBe(true);
+    expect(isGatewayArgv(["NODE", "C:\\Carapace\\DIST\\ENTRY.JS", "gateway"])).toBe(true);
+    expect(isGatewayArgv(["bun", "/srv/carapace/scripts/run-node.mjs", "gateway"])).toBe(true);
+    expect(isGatewayArgv(["node", "/srv/carapace/carapace.mjs", "gateway"])).toBe(true);
+    expect(isGatewayArgv(["tsx", "/srv/carapace/src/entry.ts", "gateway"])).toBe(true);
+    expect(isGatewayArgv(["tsx", "/srv/carapace/src/index.ts", "gateway"])).toBe(true);
   });
 
-  it("matches the openclaw executable but gates the gateway binary behind the opt-in flag", () => {
-    expect(isGatewayArgv(["C:\\bin\\openclaw.cmd", "gateway"])).toBe(true);
-    expect(isGatewayArgv(["/usr/local/bin/openclaw-gateway", "gateway"])).toBe(false);
-    expect(isGatewayArgv(["openclaw-gateway"])).toBe(false);
+  it("matches the carapace executable but gates the gateway binary behind the opt-in flag", () => {
+    expect(isGatewayArgv(["C:\\bin\\carapace.cmd", "gateway"])).toBe(true);
+    expect(isGatewayArgv(["/usr/local/bin/carapace-gateway", "gateway"])).toBe(false);
+    expect(isGatewayArgv(["carapace-gateway"])).toBe(false);
     expect(
-      isGatewayArgv(["/usr/local/bin/openclaw-gateway", "gateway"], {
+      isGatewayArgv(["/usr/local/bin/carapace-gateway", "gateway"], {
         allowGatewayBinary: true,
       }),
     ).toBe(true);
     expect(
-      isGatewayArgv(["C:\\bin\\openclaw-gateway.EXE", "gateway"], {
+      isGatewayArgv(["C:\\bin\\carapace-gateway.EXE", "gateway"], {
         allowGatewayBinary: true,
       }),
     ).toBe(true);
-    expect(isGatewayArgv(["openclaw-gateway"], { allowGatewayBinary: true })).toBe(true);
+    expect(isGatewayArgv(["carapace-gateway"], { allowGatewayBinary: true })).toBe(true);
   });
 
   it("rejects unknown gateway argv even when the token is present", () => {
-    expect(isGatewayArgv(["node", "/srv/openclaw/custom.js", "gateway"])).toBe(false);
+    expect(isGatewayArgv(["node", "/srv/carapace/custom.js", "gateway"])).toBe(false);
     expect(isGatewayArgv(["python", "gateway", "script.py"])).toBe(false);
   });
 });
 
-describe("isOpenClawCommandArgv", () => {
+describe("isCarapaceCommandArgv", () => {
   it("matches doctor across source, built, and installed entrypoints", () => {
-    expect(isOpenClawCommandArgv(["node", "/srv/openclaw/openclaw.mjs", "doctor"], "doctor")).toBe(
+    expect(isCarapaceCommandArgv(["node", "/srv/carapace/carapace.mjs", "doctor"], "doctor")).toBe(
       true,
     );
     expect(
-      isOpenClawCommandArgv(["NODE", "C:\\OpenClaw\\DIST\\ENTRY.JS", "DOCTOR"], "doctor"),
+      isCarapaceCommandArgv(["NODE", "C:\\Carapace\\DIST\\ENTRY.JS", "DOCTOR"], "doctor"),
     ).toBe(true);
-    expect(isOpenClawCommandArgv(["C:\\bin\\openclaw.cmd", "doctor", "--fix"], "doctor")).toBe(
+    expect(isCarapaceCommandArgv(["C:\\bin\\carapace.cmd", "doctor", "--fix"], "doctor")).toBe(
       true,
     );
   });
 
-  it("rejects other OpenClaw commands and unrelated doctor processes", () => {
-    expect(isOpenClawCommandArgv(["openclaw", "gateway"], "doctor")).toBe(false);
-    expect(isOpenClawCommandArgv(["python", "doctor", "worker.py"], "doctor")).toBe(false);
+  it("rejects other Carapace commands and unrelated doctor processes", () => {
+    expect(isCarapaceCommandArgv(["carapace", "gateway"], "doctor")).toBe(false);
+    expect(isCarapaceCommandArgv(["python", "doctor", "worker.py"], "doctor")).toBe(false);
   });
 });
 
-describe("isOpenClawArgv", () => {
+describe("isCarapaceArgv", () => {
   it.each([
-    ["agent exec", ["openclaw", "agent", "exec", "task"]],
-    ["local TUI", ["node", "/srv/openclaw/openclaw.mjs", "tui", "--local"]],
-    ["models probe", ["openclaw", "models", "status", "--probe"]],
-    ["bare local TUI", ["openclaw"]],
+    ["agent exec", ["carapace", "agent", "exec", "task"]],
+    ["local TUI", ["node", "/srv/carapace/carapace.mjs", "tui", "--local"]],
+    ["models probe", ["carapace", "models", "status", "--probe"]],
+    ["bare local TUI", ["carapace"]],
   ])("recognizes the %s embedded owner", (_label, argv) => {
-    expect(isOpenClawArgv(argv)).toBe(true);
+    expect(isCarapaceArgv(argv)).toBe(true);
   });
 
   it("rejects an unrelated process", () => {
-    expect(isOpenClawArgv(["python", "worker.py"])).toBe(false);
+    expect(isCarapaceArgv(["python", "worker.py"])).toBe(false);
   });
 });

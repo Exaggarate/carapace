@@ -1,6 +1,6 @@
 // Covers resolving the active agent id from session keys and explicit config.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { setRetainedLegacyDefaultAgentId } from "../config/legacy.default-agent-owner-state.js";
 import { AgentSelectionRequiredError } from "./agent-scope-config.js";
 import {
@@ -13,7 +13,7 @@ describe("resolveSessionAgentIdStrict", () => {
     "does not read unrelated roster entries for a prepared owner: %j",
     (owner) => {
       let unrelatedEntryReads = 0;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           entries: {
             main: {},
@@ -43,10 +43,10 @@ describe.each([
     agents: {
       entries: { main: {}, beta: {} },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it("treats an explicitly undefined agentId as omitted", () => {
-    const config = { agents: { entries: { main: {} } } } as OpenClawConfig;
+    const config = { agents: { entries: { main: {} } } } as CarapaceConfig;
     expect(resolveSessionAgentIds({ config, agentId: undefined })).toEqual(
       resolveSessionAgentIds({ config }),
     );
@@ -68,7 +68,7 @@ describe.each([
   });
 
   it("uses the retained migration owner only while it remains configured", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { ownership: "explicit", entries: { main: {}, beta: {} } },
     };
     setRetainedLegacyDefaultAgentId(config, "beta");
@@ -264,7 +264,7 @@ describe.each([
 });
 
 it.each(["raw", "retained"])("preserves a different %s default for paired callers", (source) => {
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: { entries: { main: { default: source === "raw" }, beta: {} } },
   };
   if (source === "retained") {

@@ -1,5 +1,5 @@
-import type { AgentMessage } from "@openclaw/agent-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AgentMessage } from "@carapace/agent-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 
 // Native replay retains the exact submitted prompt. Model-context consumers already
 // have its visible content; copying this storage-only payload duplicates the prompt.
@@ -27,7 +27,7 @@ export function projectModelContextMessages(messages: unknown[]): unknown[] {
   const output: unknown[] = [];
   for (const message of stripToolResultDetails(messages)) {
     const record = asOptionalRecord(message);
-    const metadata = asOptionalRecord(record?.["__openclaw"]);
+    const metadata = asOptionalRecord(record?.["__carapace"]);
     if (!metadata || !MODEL_CONTEXT_PRIVATE_METADATA_KEYS.some((key) => key in metadata)) {
       output.push(message);
       continue;
@@ -36,7 +36,7 @@ export function projectModelContextMessages(messages: unknown[]): unknown[] {
     for (const key of MODEL_CONTEXT_PRIVATE_METADATA_KEYS) {
       delete projected[key];
     }
-    output.push({ ...record, __openclaw: projected });
+    output.push({ ...record, __carapace: projected });
   }
   return output;
 }

@@ -87,14 +87,14 @@ function getCurrentLogFileBytesSync(file: string): number {
 
 function buildDroppedMarker(target: FileLogQueueEntry, count: number): FileLogQueueEntry {
   const date = new Date();
-  const message = `[openclaw] file log queue overflow; dropped ${count} oldest record${count === 1 ? "" : "s"}`;
+  const message = `[carapace] file log queue overflow; dropped ${count} oldest record${count === 1 ? "" : "s"}`;
   const record = {
     0: message,
     _meta: {
       date,
       hostname: target.hostname,
       logLevelName: "WARN",
-      name: "openclaw",
+      name: "carapace",
     },
     time: formatTimestamp(date, { style: "long" }),
     hostname: target.hostname,
@@ -128,7 +128,7 @@ function warnAboutRotationFailure(entry: FileLogQueueEntry, synchronous: boolean
     return;
   }
   warnedRotationFiles.set(entry.file, entry.maxFileBytes);
-  const message = `[openclaw] log file rotation failed; continuing writes file=${entry.file} maxFileBytes=${entry.maxFileBytes}`;
+  const message = `[carapace] log file rotation failed; continuing writes file=${entry.file} maxFileBytes=${entry.maxFileBytes}`;
   writeFileTransportWarning(message, synchronous);
 }
 
@@ -141,8 +141,8 @@ function warnAboutAppendFailure(entry: FileLogQueueEntry, synchronous: boolean):
     return;
   }
   const message = saturated
-    ? "[openclaw] log file append failure diagnostics saturated; suppressing new file targets"
-    : `[openclaw] log file append failed; records dropped; check that the path is a writable regular file; file=${entry.file}`;
+    ? "[carapace] log file append failure diagnostics saturated; suppressing new file targets"
+    : `[carapace] log file append failed; records dropped; check that the path is a writable regular file; file=${entry.file}`;
   if (!writeFileTransportWarning(message, synchronous)) {
     return;
   }

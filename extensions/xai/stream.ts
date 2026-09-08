@@ -1,14 +1,14 @@
 // Xai plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { streamSimple } from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   composeProviderStreamWrappers,
   createPayloadPatchStreamWrapper,
   createPlainTextToolCallCompatWrapper,
   createToolStreamWrapper,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { asOptionalRecord, filterStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-stream-shared";
+import { asOptionalRecord, filterStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import { XAI_BASE_URL } from "./model-definitions.js";
 import { resolveXaiOAuthAutoModelId } from "./model-id.js";
 import { isXaiGrokProxyBaseUrl } from "./provider-catalog.js";

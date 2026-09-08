@@ -14,7 +14,7 @@ function levelIds(params: {
 }
 
 describe("OpenAI thinking route provenance", () => {
-  it.each(["openclaw", "codex", "auto"])(
+  it.each(["carapace", "codex", "auto"])(
     "offers Astra's supported efforts on the %s runtime",
     (runtime) => {
       expect(
@@ -23,7 +23,7 @@ describe("OpenAI thinking route provenance", () => {
     },
   );
 
-  it.each(["openclaw", "codex", "auto"])(
+  it.each(["carapace", "codex", "auto"])(
     "retains Astra Ultra with scalar API metadata on the %s runtime",
     (runtime) => {
       expect(

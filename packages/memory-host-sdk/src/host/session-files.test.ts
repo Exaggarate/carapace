@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   clearConfigCache,
   clearRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { markInboundContextLabel } from "../../../../src/auto-reply/reply/inbound-context-marker.js";
 import { encodeSessionArchiveContent } from "../../../../src/config/sessions/archive-compression.js";
@@ -15,8 +15,8 @@ import {
   resetSessionEntryLifecycle,
   upsertSessionEntryCore,
 } from "../../../../src/config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../../src/state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../../src/state/carapace-state-db.js";
 import {
   buildSessionEntry,
   listSessionTranscriptCorpusEntriesForAgent,
@@ -42,10 +42,10 @@ beforeEach(() => {
   tmpDir = path.join(fixtureRoot, `case-${fixtureId++}`);
   fsSync.mkdirSync(tmpDir, { recursive: true });
   envSnapshot = {
-    OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
-    OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
+    CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
+    CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
   };
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", tmpDir);
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", tmpDir);
   clearRuntimeConfigSnapshot();
   clearConfigCache();
 });
@@ -53,8 +53,8 @@ beforeEach(() => {
 afterEach(() => {
   // Agent close releases leases through shared state; close agent handles first while the fixture
   // env is active, then close shared state before removing the Windows-owned directory.
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const [key, value] of Object.entries(envSnapshot ?? {})) {
     if (value === undefined) {
       Reflect.deleteProperty(process.env, key);
@@ -605,11 +605,11 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
     const sessionsDir = path.join(tmpDir, "custom-sessions");
     const sessionFile = path.join(sessionsDir, "custom-thread.jsonl");
     const storePath = path.join(sessionsDir, "sessions.json");
-    const configPath = path.join(tmpDir, "openclaw.json");
+    const configPath = path.join(tmpDir, "carapace.json");
     fsSync.mkdirSync(sessionsDir, { recursive: true });
     fsSync.writeFileSync(sessionFile, "");
     fsSync.writeFileSync(configPath, JSON.stringify({ session: { store: storePath } }));
-    Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", configPath);
+    Reflect.set(process.env, "CARAPACE_CONFIG_PATH", configPath);
     clearRuntimeConfigSnapshot();
     clearConfigCache();
     await upsertTestSessionEntries(storePath, {
@@ -632,7 +632,7 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
   it("keeps unowned archives from an agent-owned fixed session store", async () => {
     const sessionsDir = path.join(tmpDir, "agents", "main", "sessions");
     const archivePath = path.join(sessionsDir, "retained.jsonl.deleted.2026-02-16T22-27-33.000Z");
-    const configPath = path.join(tmpDir, "openclaw.json");
+    const configPath = path.join(tmpDir, "carapace.json");
     fsSync.mkdirSync(sessionsDir, { recursive: true });
     fsSync.writeFileSync(archivePath, "");
     fsSync.writeFileSync(path.join(sessionsDir, "sessions.json"), "{}");
@@ -640,7 +640,7 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
       configPath,
       JSON.stringify({ session: { store: path.join(sessionsDir, "sessions.json") } }),
     );
-    Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", configPath);
+    Reflect.set(process.env, "CARAPACE_CONFIG_PATH", configPath);
     clearRuntimeConfigSnapshot();
     clearConfigCache();
 
@@ -665,13 +665,13 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
       "absolute-thread.jsonl.deleted.2026-02-16T22-27-33.000Z",
     );
     const storePath = path.join(storeDir, "sessions.json");
-    const configPath = path.join(tmpDir, "openclaw.json");
+    const configPath = path.join(tmpDir, "carapace.json");
     fsSync.mkdirSync(storeDir, { recursive: true });
     fsSync.mkdirSync(sessionsDir, { recursive: true });
     fsSync.writeFileSync(sessionFile, "");
     fsSync.writeFileSync(archivePath, "");
     fsSync.writeFileSync(configPath, JSON.stringify({ session: { store: storePath } }));
-    Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", configPath);
+    Reflect.set(process.env, "CARAPACE_CONFIG_PATH", configPath);
     clearRuntimeConfigSnapshot();
     clearConfigCache();
     await upsertTestSessionEntries(storePath, {
@@ -711,7 +711,7 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
   it("keeps legacy main aliases in a renamed default agent store", async () => {
     const sessionsDir = path.join(tmpDir, "agents", "ops", "sessions");
     const sessionFile = path.join(sessionsDir, "legacy-main.jsonl");
-    const configPath = path.join(tmpDir, "openclaw.json");
+    const configPath = path.join(tmpDir, "carapace.json");
     fsSync.mkdirSync(sessionsDir, { recursive: true });
     fsSync.writeFileSync(sessionFile, "");
     fsSync.writeFileSync(
@@ -727,7 +727,7 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
       configPath,
       JSON.stringify({ agents: { entries: { ops: { default: true } } } }),
     );
-    Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", configPath);
+    Reflect.set(process.env, "CARAPACE_CONFIG_PATH", configPath);
     clearRuntimeConfigSnapshot();
     clearConfigCache();
 
@@ -736,7 +736,7 @@ describe("listSessionTranscriptCorpusEntriesForAgent", () => {
 });
 
 describe("memory session sync targets", () => {
-  it("parses deprecated canonical OpenClaw transcript paths into sync identity", () => {
+  it("parses deprecated canonical Carapace transcript paths into sync identity", () => {
     const sessionFile = path.join(tmpDir, "agents", "main", "sessions", "active.jsonl");
     fsSync.mkdirSync(path.dirname(sessionFile), { recursive: true });
 
@@ -766,7 +766,7 @@ describe("buildSessionEntry", () => {
     // Line 7: user message
     const jsonlLines = [
       JSON.stringify({ type: "custom", customType: "model-snapshot", data: {} }),
-      JSON.stringify({ type: "custom", customType: "openclaw.cache-ttl", data: {} }),
+      JSON.stringify({ type: "custom", customType: "carapace.cache-ttl", data: {} }),
       JSON.stringify({ type: "session-meta", agentId: "test" }),
       JSON.stringify({ type: "message", message: { role: "user", content: "Hello world" } }),
       JSON.stringify({ type: "custom", customType: "tool-result", data: {} }),

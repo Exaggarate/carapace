@@ -1,4 +1,4 @@
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { getRuntimeConfig } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { buildBrowserExtensionPairing } from "./extension-pairing.js";
 import { ensureExtensionRelayDaemonProcess } from "./extension-relay-daemon-spawn.js";
 

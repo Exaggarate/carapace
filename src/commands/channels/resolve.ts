@@ -1,9 +1,9 @@
-// Implements `openclaw channels resolve` for provider-specific user/group target resolution.
+// Implements `carapace channels resolve` for provider-specific user/group target resolution.
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveConfiguredAgentId } from "../../agents/agent-scope-config.js";
 import type {
   ChannelResolveKind,
@@ -121,7 +121,7 @@ export async function channelsResolveCommand(opts: ChannelsResolveOptions, runti
   const entries = normalizeStringEntries(opts.entries);
   if (entries.length === 0) {
     throw new Error(
-      `At least one entry is required. Example: ${formatCliCommand("openclaw channels resolve --channel discord <name-or-id>")}.`,
+      `At least one entry is required. Example: ${formatCliCommand("carapace channels resolve --channel discord <name-or-id>")}.`,
     );
   }
 
@@ -154,7 +154,7 @@ export async function channelsResolveCommand(opts: ChannelsResolveOptions, runti
     : null;
   if (explicitChannel && resolvedExplicit?.catalogEntry && !resolvedExplicit.plugin) {
     throw new Error(
-      `Channel plugin "${resolvedExplicit.catalogEntry.id}" is not installed. Run ${formatCliCommand(`openclaw channels add --channel ${resolvedExplicit.catalogEntry.id}`)} first.`,
+      `Channel plugin "${resolvedExplicit.catalogEntry.id}" is not installed. Run ${formatCliCommand(`carapace channels add --channel ${resolvedExplicit.catalogEntry.id}`)} first.`,
     );
   }
   const selection = explicitChannel

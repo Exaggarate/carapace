@@ -12,7 +12,7 @@ if ([...args].some((arg) => arg !== "--check" && arg !== "--write") || args.size
 const repoRoot = resolveRepoRoot(import.meta.url);
 const outputPath = path.join(
   repoRoot,
-  "apps/macos/Sources/OpenClaw/BrowserInspectScript.generated.swift",
+  "apps/macos/Sources/Carapace/BrowserInspectScript.generated.swift",
 );
 // Avoid both raw-string terminators and Swift interpolation in the page source.
 let delimiter = "#";

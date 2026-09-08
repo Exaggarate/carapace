@@ -1,7 +1,7 @@
 // Discord plugin module implements gateway logging behavior.
 import type { EventEmitter } from "node:events";
-import { logVerbose, warn } from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose, warn } from "carapace/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 
 type GatewayEmitter = Pick<EventEmitter, "on" | "removeListener">;
 

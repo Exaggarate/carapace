@@ -1,7 +1,7 @@
 import type {
   SessionsCatalogStartTerminalParams,
   SessionsCatalogStartTerminalResult,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 import {
   TERMINAL_PANEL_TOGGLE_EVENT,
   type TerminalPanelToggleDetail,

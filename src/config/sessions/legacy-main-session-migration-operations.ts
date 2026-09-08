@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import { isSameOpenClawAgentDatabasePath } from "../../state/openclaw-agent-db-registry.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import { isSameCarapaceAgentDatabasePath } from "../../state/carapace-agent-db-registry.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type {
   LegacyMainSessionMigrationMode,
   LegacyMainSessionMigrationOutcome,
@@ -61,7 +61,7 @@ export function claimsMatch(left: SessionClaim, right: SessionClaim): boolean {
 }
 
 export function readClaim(
-  database: Pick<OpenClawAgentDatabase, "agentId" | "db" | "path">,
+  database: Pick<CarapaceAgentDatabase, "agentId" | "db" | "path">,
   store: PhysicalStore,
   key: string,
   canonicalKey: string,
@@ -89,7 +89,7 @@ export function readClaim(
 }
 
 export function samePhysicalStore(left: PhysicalStore, right: PhysicalStore): boolean {
-  return isSameOpenClawAgentDatabasePath(left.path, right.path);
+  return isSameCarapaceAgentDatabasePath(left.path, right.path);
 }
 
 function freshestClaim(claims: readonly SessionClaim[]): SessionClaim {
@@ -109,11 +109,11 @@ export function warningForDivergence(
   claims: readonly SessionClaim[],
 ): string {
   const claimsText = claims.map((claim) => `${claim.store.path}#${claim.key}`).join(", ");
-  return `session: ${kind} for ${canonicalKey}; preserved claims ${claimsText}. Run openclaw doctor --fix to quarantine the losing claims.`;
+  return `session: ${kind} for ${canonicalKey}; preserved claims ${claimsText}. Run carapace doctor --fix to quarantine the losing claims.`;
 }
 
 function writeMigratedSessionClaim(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   entry: SessionEntry,
 ): void {
@@ -132,7 +132,7 @@ function mutateLegacySessionClaims<T>(
     operationLabel: string;
     beforePersistentApply?: () => void;
   },
-  commit: (database: OpenClawAgentDatabase) => T,
+  commit: (database: CarapaceAgentDatabase) => T,
 ): Promise<T> {
   const scope = {
     agentId: params.store.databaseAgentId,
@@ -229,7 +229,7 @@ async function copyClaimCrossStore(params: {
       }
     },
   });
-  const destination = withOpenClawAgentDatabaseReadOnly(
+  const destination = withCarapaceAgentDatabaseReadOnly(
     (database) => readClaim(database, params.destination, params.canonicalKey, params.canonicalKey),
     {
       agentId: params.destination.databaseAgentId,
@@ -351,7 +351,7 @@ export async function processIdenticalClaims(params: {
         detail: "source aliases changed during the in-place transaction",
       };
     }
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withCarapaceAgentDatabaseReadOnly(
       (database) =>
         readClaim(database, params.destination, params.canonicalKey, params.canonicalKey),
       {
@@ -371,7 +371,7 @@ export async function processIdenticalClaims(params: {
       env: params.env,
       source: sourceBefore,
     });
-    const sourceAfter = withOpenClawAgentDatabaseReadOnly(
+    const sourceAfter = withCarapaceAgentDatabaseReadOnly(
       (database) => readClaim(database, sourceBefore.store, sourceBefore.key, params.canonicalKey),
       {
         agentId: sourceBefore.store.databaseAgentId,
@@ -470,7 +470,7 @@ export async function repairDivergentClaims(params: {
       return { quarantinedKeys: [], resolved: false };
     }
   }
-  const canonicalResult = withOpenClawAgentDatabaseReadOnly(
+  const canonicalResult = withCarapaceAgentDatabaseReadOnly(
     (database) => readClaim(database, params.destination, params.canonicalKey, params.canonicalKey),
     {
       agentId: params.destination.databaseAgentId,

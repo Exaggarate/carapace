@@ -1,5 +1,5 @@
 // Slack tests cover config schema plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { SlackConfigSchema } from "../config-api.js";
 import { listSlackAccountIds, resolveSlackAccount } from "./accounts.js";
@@ -96,7 +96,7 @@ describe("slack config schema", () => {
             accounts: { work: account === undefined ? {} : { joinIntro: account } },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       expectSlackConfigValid(cfg.channels.slack);
       expect(resolveSlackAccount({ cfg, accountId: "work" }).config.joinIntro).toBe(expected);
@@ -141,7 +141,7 @@ describe("slack config schema", () => {
           accounts: { work: {} },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expectSlackConfigValid(cfg.channels.slack);
     expect(resolveSlackAccount({ cfg, accountId: "work" }).identity).toBe("user");
@@ -156,7 +156,7 @@ describe("slack config schema", () => {
           appToken: "test-app-token",
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const account = resolveSlackAccount({ cfg });
 

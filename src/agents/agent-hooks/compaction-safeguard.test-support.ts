@@ -33,7 +33,7 @@ type CompactionSafeguardTestApi = {
 
 function getTestApi(): CompactionSafeguardTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.compactionSafeguardTestApi")
+    Symbol.for("carapace.compactionSafeguardTestApi")
   ];
   if (!api) {
     throw new Error("compaction safeguard test API is unavailable");

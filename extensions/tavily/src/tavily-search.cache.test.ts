@@ -1,4 +1,4 @@
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTavilyWebSearchProvider } from "./tavily-search-provider.js";
 import { createTavilySearchTool } from "./tavily-search-tool.js";

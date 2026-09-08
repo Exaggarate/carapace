@@ -5,7 +5,7 @@ import { allocateCdpPort, getUsedPorts, isValidProfileName } from "./profiles.js
 const CDP_PORT_RANGE_START = 18800;
 const CDP_PORT_RANGE_END = 18899;
 describe("profile name validation", () => {
-  it.each(["openclaw", "work", "my-profile", "test123", "a", "a-b-c-1-2-3", "1test"])(
+  it.each(["carapace", "work", "my-profile", "test123", "a", "a-b-c-1-2-3", "1test"])(
     "accepts valid lowercase name: %s",
     (name) => {
       expect(isValidProfileName(name)).toBe(true);
@@ -96,7 +96,7 @@ describe("getUsedPorts", () => {
 
   it("extracts ports from profile configs", () => {
     const profiles = {
-      openclaw: { cdpPort: 18792 },
+      carapace: { cdpPort: 18792 },
       work: { cdpPort: 18793 },
       personal: { cdpPort: 18795 },
     };

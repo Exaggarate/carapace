@@ -1,13 +1,13 @@
-# Venice OpenClaw provider
+# Venice Carapace provider
 
-Official OpenClaw provider plugin for Venice.
+Official Carapace provider plugin for Venice.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/venice-provider
+carapace plugins install @carapace/venice-provider
 ```
 
 ## Docs
 
-See `docs/providers/venice.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/venice`.
+See `docs/providers/venice.md` in the Carapace repository, or the published docs at `../../docs/providers/venice.md`.

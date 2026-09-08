@@ -11,12 +11,12 @@ import type { ManagedHandoffLease } from "./update-managed-service-handoff-lease
 import { signalMockManagedUpdateHandoffReady } from "./update-managed-service-handoff.test-support.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
-const resolvePreferredOpenClawTmpDirMock = vi.hoisted(() => vi.fn());
+const resolvePreferredCarapaceTmpDirMock = vi.hoisted(() => vi.fn());
 const spawnSyncMock = vi.hoisted(() => vi.fn());
 const forceKillChildProcessTreeMock = vi.hoisted(() => vi.fn());
 const tempDirs = new Set<string>();
 const mockedHandoffLeaseCleanups = new Set<() => void>();
-const MOCK_INSTALL_ROOT = path.join(os.tmpdir(), `openclaw-handoff-command-${process.pid}`);
+const MOCK_INSTALL_ROOT = path.join(os.tmpdir(), `carapace-handoff-command-${process.pid}`);
 
 function createReadyChild(_command: string, args: string[]) {
   const child = Object.assign(new EventEmitter(), {
@@ -56,18 +56,18 @@ vi.mock("../daemon/systemd-scope.js", async (importOriginal) => ({
   findInstalledSystemdGatewayScope: vi.fn(async () => null),
 }));
 
-vi.mock("./tmp-openclaw-dir.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./tmp-openclaw-dir.js")>()),
-  resolvePreferredOpenClawTmpDir: resolvePreferredOpenClawTmpDirMock,
+vi.mock("./tmp-carapace-dir.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./tmp-carapace-dir.js")>()),
+  resolvePreferredCarapaceTmpDir: resolvePreferredCarapaceTmpDirMock,
 }));
 
 beforeEach(async () => {
   // Helpers in one fixture share a coordinator without touching the operator's database.
   const coordinatorDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-coordinator-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-coordinator-")),
   );
   tempDirs.add(coordinatorDir);
-  resolvePreferredOpenClawTmpDirMock.mockReturnValue(coordinatorDir);
+  resolvePreferredCarapaceTmpDirMock.mockReturnValue(coordinatorDir);
   forceKillChildProcessTreeMock.mockReset();
   spawnMock.mockReset();
   spawnSyncMock
@@ -115,7 +115,7 @@ async function startHandoffAndReadCommand(params: {
     ...(params.acceptCapabilities ? { acceptCapabilities: true } : {}),
     parentPid: process.pid,
     execPath: "/usr/local/bin/node",
-    argv1: "/opt/openclaw/openclaw.mjs",
+    argv1: "/opt/carapace/carapace.mjs",
     meta: {},
     ...(params.devTarget ? { devTarget: params.devTarget } : {}),
     ...(params.env ? { env: params.env } : {}),
@@ -153,7 +153,7 @@ async function startHandoffAndReadCommand(params: {
 
 describe("managed service update handoff command", () => {
   it("stages automatic triage in a stop-linked scope with the installed entry", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-triage-command-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-triage-command-"));
     tempDirs.add(root);
     await fs.writeFile(path.join(root, "systemd-run"), "#!/bin/sh\nexit 1\n", { mode: 0o700 });
     const { startManagedServiceUpdateHandoff } =
@@ -164,7 +164,7 @@ describe("managed service update handoff command", () => {
       supervisor: "systemd",
       env: {
         PATH: root,
-        OPENCLAW_STATE_DIR: root,
+        CARAPACE_STATE_DIR: root,
       },
       handoffId: "triage-fixture",
       meta: {},
@@ -182,7 +182,7 @@ describe("managed service update handoff command", () => {
     });
     const [, args] = spawnMock.mock.calls[0] as [string, string[]];
     tempDirs.add(path.dirname(args.at(-1)!));
-    expect(args).toContain("--property=PartOf=openclaw-gateway.service");
+    expect(args).toContain("--property=PartOf=carapace-gateway.service");
     const staged = JSON.parse(await fs.readFile(args.at(-1)!, "utf8"));
     expect(staged.commandArgv).toEqual([
       process.execPath,
@@ -302,7 +302,7 @@ describe("managed service update handoff command", () => {
 
     expect(result.commandArgv).toEqual([
       "/usr/local/bin/node",
-      "/opt/openclaw/openclaw.mjs",
+      "/opt/carapace/carapace.mjs",
       "update",
       "--yes",
       "--json",
@@ -321,7 +321,7 @@ describe("managed service update handoff command", () => {
 
     expect(result.commandArgv).toEqual([
       "/usr/local/bin/node",
-      "/opt/openclaw/openclaw.mjs",
+      "/opt/carapace/carapace.mjs",
       "update",
       "--yes",
       "--json",
@@ -345,7 +345,7 @@ describe("managed service update handoff command", () => {
       channel: "beta",
       env: {
         KEEP: "value",
-        OPENCLAW_UPDATE_DEV_TARGET_REF: "stale-ref",
+        CARAPACE_UPDATE_DEV_TARGET_REF: "stale-ref",
       },
       devTarget: {
         mode: "tracked",
@@ -355,7 +355,7 @@ describe("managed service update handoff command", () => {
     });
 
     expect(result.spawnEnv?.KEEP).toBe("value");
-    expect(result.spawnEnv?.OPENCLAW_UPDATE_RUN_ID).toBe(runId);
+    expect(result.spawnEnv?.CARAPACE_UPDATE_RUN_ID).toBe(runId);
     expect(parseDevUpdateTargetEnv(result.spawnEnv ?? {})).toEqual({
       status: "valid",
       target: {

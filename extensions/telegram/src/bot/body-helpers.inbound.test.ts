@@ -1,5 +1,5 @@
 import type { Message, MessageEntity } from "grammy/types";
-import { markdownToIR } from "openclaw/plugin-sdk/text-chunking";
+import { markdownToIR } from "carapace/plugin-sdk/text-chunking";
 import { describe, expect, it } from "vitest";
 import { getTelegramTextParts, joinTelegramTextParts } from "./body-helpers.js";
 import { renderTelegramTextEntities } from "./inbound-text-entities.js";

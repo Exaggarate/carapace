@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
-import { MEMORY_CHUNKING_VERSION } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+import { MEMORY_CHUNKING_VERSION } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { describe, expect, it } from "vitest";
 import { createManagerIndexFixture } from "./manager-index.test-support.js";
 import type { MemoryIndexMeta } from "./manager-reindex-state.js";
@@ -48,7 +48,7 @@ describe("memory search after a chunking upgrade", () => {
     }
     await manager.close();
     await closeAllMemorySearchManagers();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     if (oldChunkingVersion) {
       // Keep real indexed files unchanged, but reopen the publication as an older runtime's index.
       withDatabase(dbPath, (db) => {
@@ -86,7 +86,7 @@ describe("memory search after a chunking upgrade", () => {
     expect(manager.status().custom?.indexIdentity).toMatchObject({
       status: "mismatched",
       code: "chunking_version",
-      owner: "openclaw",
+      owner: "carapace",
     });
     expect(withDatabase(dbPath, readMeta).chunkingVersion).toBe(MEMORY_CHUNKING_VERSION - 1);
   });

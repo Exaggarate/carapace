@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { closeActiveMemorySearchManager } from "openclaw/plugin-sdk/memory-host-search";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { closeActiveMemorySearchManager } from "carapace/plugin-sdk/memory-host-search";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { readActiveMemoryConfig } from "./config.js";
 import {
   CACHE_SWEEP_INTERVAL_MS,
@@ -70,7 +70,7 @@ function resetCircuitBreaker(key: string): void {
 }
 
 function scheduleMemorySearchCleanupAfterTimeout(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   logPrefix: string,
   agentId: string,
 ): Promise<void> {

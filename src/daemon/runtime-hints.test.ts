@@ -9,16 +9,16 @@ describe("buildPlatformRuntimeLogHints", () => {
         platform: "darwin",
         env: {
           HOME: "/Users/test",
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-state",
-          OPENCLAW_LOG_PREFIX: "gateway",
+          CARAPACE_STATE_DIR: "/tmp/carapace-state",
+          CARAPACE_LOG_PREFIX: "gateway",
         },
-        systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        systemdServiceName: "carapace-gateway",
+        windowsTaskName: "Carapace Gateway",
       }),
     ).toEqual([
-      "Launchd stdout (if installed): /Users/test/Library/Logs/openclaw/gateway.log",
+      "Launchd stdout (if installed): /Users/test/Library/Logs/carapace/gateway.log",
       "Launchd stderr (if installed): suppressed",
-      "Restart attempts: /tmp/openclaw-state/logs/gateway-restart.log",
+      "Restart attempts: /tmp/carapace-state/logs/gateway-restart.log",
     ]);
   });
 
@@ -27,27 +27,27 @@ describe("buildPlatformRuntimeLogHints", () => {
       buildPlatformRuntimeLogHints({
         platform: "linux",
         env: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-state",
+          CARAPACE_STATE_DIR: "/tmp/carapace-state",
         },
-        systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        systemdServiceName: "carapace-gateway",
+        windowsTaskName: "Carapace Gateway",
       }),
     ).toEqual([
-      "Logs: journalctl --user -u openclaw-gateway.service -n 200 --no-pager",
-      "Restart attempts: /tmp/openclaw-state/logs/gateway-restart.log",
+      "Logs: journalctl --user -u carapace-gateway.service -n 200 --no-pager",
+      "Restart attempts: /tmp/carapace-state/logs/gateway-restart.log",
     ]);
     expect(
       buildPlatformRuntimeLogHints({
         platform: "win32",
         env: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-state",
+          CARAPACE_STATE_DIR: "/tmp/carapace-state",
         },
-        systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        systemdServiceName: "carapace-gateway",
+        windowsTaskName: "Carapace Gateway",
       }),
     ).toEqual([
-      'Logs: schtasks /Query /TN "OpenClaw Gateway" /V /FO LIST',
-      "Restart attempts: /tmp/openclaw-state/logs/gateway-restart.log",
+      'Logs: schtasks /Query /TN "Carapace Gateway" /V /FO LIST',
+      "Restart attempts: /tmp/carapace-state/logs/gateway-restart.log",
     ]);
   });
 });
@@ -57,30 +57,30 @@ describe("buildPlatformServiceStartHints", () => {
     expect(
       buildPlatformServiceStartHints({
         platform: "darwin",
-        installHint: "openclaw gateway install",
-        startCommand: "openclaw gateway",
-        launchAgentPlistPath: "~/Library/LaunchAgents/com.openclaw.gateway.plist",
-        systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        installHint: "carapace gateway install",
+        startCommand: "carapace gateway",
+        launchAgentPlistPath: "~/Library/LaunchAgents/com.carapace.gateway.plist",
+        systemdServiceName: "carapace-gateway",
+        windowsTaskName: "Carapace Gateway",
       }),
     ).toEqual([
-      "openclaw gateway install",
-      "openclaw gateway",
-      "launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.openclaw.gateway.plist",
+      "carapace gateway install",
+      "carapace gateway",
+      "launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.carapace.gateway.plist",
     ]);
     expect(
       buildPlatformServiceStartHints({
         platform: "linux",
-        installHint: "openclaw gateway install",
-        startCommand: "openclaw gateway",
-        launchAgentPlistPath: "~/Library/LaunchAgents/com.openclaw.gateway.plist",
-        systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        installHint: "carapace gateway install",
+        startCommand: "carapace gateway",
+        launchAgentPlistPath: "~/Library/LaunchAgents/com.carapace.gateway.plist",
+        systemdServiceName: "carapace-gateway",
+        windowsTaskName: "Carapace Gateway",
       }),
     ).toEqual([
-      "openclaw gateway install",
-      "openclaw gateway",
-      "systemctl --user start openclaw-gateway.service",
+      "carapace gateway install",
+      "carapace gateway",
+      "systemctl --user start carapace-gateway.service",
     ]);
   });
 });

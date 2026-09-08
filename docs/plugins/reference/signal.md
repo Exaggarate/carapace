@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Signal channel plugin."
+summary: "Carapace Signal channel plugin."
 read_when:
   - You are installing, configuring, or auditing the signal plugin
 title: "Signal plugin reference"
@@ -7,15 +7,15 @@ title: "Signal plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw Signal channel plugin.
+Carapace Signal channel plugin.
 
 ## Distribution
 
-- Package: `@openclaw/signal`
-- Install route: npm or ClawHub: `clawhub:@openclaw/signal`
+- Package: `@carapace/signal`
+- Install route: npm or ClawHub: `clawhub:@carapace/signal`
 
 ## Surface
 

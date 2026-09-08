@@ -1,6 +1,6 @@
 import { setImmediate as nextEventLoopTurn } from "node:timers/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { createAssistantMessageEventStream } from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { extractText } from "../../../ui/src/lib/chat/message-extract.ts";
 import * as admission from "../../agents/admitted-run-context.js";
@@ -27,10 +27,10 @@ import { readTranscriptEventRows } from "../../config/sessions/session-accessor.
 import { onInternalSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
 import {
   flushClientVoiceSessionWrites,
   registerClientVoiceConsultRun,
@@ -65,7 +65,7 @@ vi.mock("../../agents/admitted-run-context.js", async (importOriginal) => {
 });
 
 function rawTranscriptRows() {
-  return readTranscriptEventRows(openOpenClawAgentDatabase({ agentId: AGENT_ID }), SESSION_ID);
+  return readTranscriptEventRows(openCarapaceAgentDatabase({ agentId: AGENT_ID }), SESSION_ID);
 }
 
 function nativeTranscript(text: string) {
@@ -159,7 +159,7 @@ const activeControls = [
   {
     mode: "followup",
     text: "after that check tests",
-    acknowledgment: "Queued that follow-up for the active OpenClaw run.",
+    acknowledgment: "Queued that follow-up for the active Carapace run.",
   },
 ] as const;
 
@@ -181,7 +181,7 @@ describe("native Talk action ownership through public plugin registration", () =
         agentId: AGENT_ID,
         sessionId: SESSION_ID,
         sessionKey: SESSION_KEY,
-        storePath: resolveOpenClawAgentSqlitePath({ agentId: AGENT_ID }),
+        storePath: resolveCarapaceAgentSqlitePath({ agentId: AGENT_ID }),
       };
       const publications: Promise<void>[] = [];
       const published = vi.fn();
@@ -275,7 +275,7 @@ describe("native Talk action ownership through public plugin registration", () =
         );
         // A returned readback is a distinct voice record, not a deduplication signal.
         const readback = "Both labels are preserved.";
-        const dialogue = "OpenClaw is waiting on the model.";
+        const dialogue = "Carapace is waiting on the model.";
         for (const text of [readback, dialogue]) {
           socket.serverEvent({ type: "turn.done", turn: { role: "assistant", transcript: text } });
           await flushNativeTranscript(result);
@@ -307,7 +307,7 @@ describe("native Talk action ownership through public plugin registration", () =
         await fixture.invoke("talk.client.close", { voiceSessionId: result.voiceSessionId });
         const rawCompleted = rawTranscriptRows();
         expect(
-          closeOpenClawAgentDatabaseByPath(resolveOpenClawAgentSqlitePath({ agentId: AGENT_ID })),
+          closeCarapaceAgentDatabaseByPath(resolveCarapaceAgentSqlitePath({ agentId: AGENT_ID })),
         ).toBe(true);
         await connectNativeSession(fixture);
         const session = await nativeCallSession();
@@ -331,7 +331,7 @@ describe("native Talk action ownership through public plugin registration", () =
         agentId: AGENT_ID,
         sessionId: SESSION_ID,
         sessionKey: SESSION_KEY,
-        storePath: resolveOpenClawAgentSqlitePath({ agentId: AGENT_ID }),
+        storePath: resolveCarapaceAgentSqlitePath({ agentId: AGENT_ID }),
       };
       const manager = SessionManager.open(scope);
       const append = (
@@ -532,9 +532,9 @@ describe("native Talk action ownership through public plugin registration", () =
           await vi.waitFor(() =>
             expect(spokenMessages(socket.sent.slice(before))).toEqual([
               ...(queued
-                ? [expect.stringContaining("There is no active OpenClaw run to cancel.")]
+                ? [expect.stringContaining("There is no active Carapace run to cancel.")]
                 : []),
-              expect.stringContaining(`There is no active OpenClaw run to ${mode}.`),
+              expect.stringContaining(`There is no active Carapace run to ${mode}.`),
             ]),
           );
           expect(abortOwned).not.toHaveBeenCalled();
@@ -563,7 +563,7 @@ describe("native Talk action ownership through public plugin registration", () =
         socket.serverEvent(nativeDelegation("startup-control", "use the release branch instead"));
         await vi.waitFor(() =>
           expect(spokenMessages(socket.sent.slice(before))).toEqual([
-            expect.stringContaining("There is no active OpenClaw run to steer."),
+            expect.stringContaining("There is no active Carapace run to steer."),
           ]),
         );
         expect(signal?.aborted).toBe(false);
@@ -832,7 +832,7 @@ describe("native Talk action ownership through public plugin registration", () =
         socket.serverEvent(nativeTranscript("cancel"));
         socket.serverEvent(nativeDelegation("overflow-cancel", "cancel"));
         await flushNativeTranscript(result);
-        const statusReply = "OpenClaw is working on the current voice request.";
+        const statusReply = "Carapace is working on the current voice request.";
         await vi.waitFor(() =>
           expect(
             spokenMessages(socket.sent.slice(beforeBurst)).filter((message) =>
@@ -855,7 +855,7 @@ describe("native Talk action ownership through public plugin registration", () =
           expect(Buffer.byteLength(refusal, "utf8")).toBeLessThanOrEqual(500);
         }
         expect(socket.sent.slice(beforeBurst).join("\n")).not.toContain(
-          "Cancelled the active OpenClaw run.",
+          "Cancelled the active Carapace run.",
         );
         expect(queueMessage).not.toHaveBeenCalled();
         expect(abortOwned).not.toHaveBeenCalled();
@@ -871,7 +871,7 @@ describe("native Talk action ownership through public plugin registration", () =
         await vi.waitFor(() => expect(abortOwned).toHaveBeenCalledOnce());
         await vi.waitFor(() =>
           expect(spokenMessages(socket.sent.slice(beforeRecovery))).toEqual([
-            expect.stringContaining("Cancelled the active OpenClaw run."),
+            expect.stringContaining("Cancelled the active Carapace run."),
           ]),
         );
         await flushNativeTranscript(result);

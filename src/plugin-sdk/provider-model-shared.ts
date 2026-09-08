@@ -20,11 +20,11 @@ import type {
   ProviderSanitizeReplayHistoryContext,
 } from "./plugin-entry.js";
 
-export { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+export { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 export {
   normalizeAntigravityPreviewModelId,
   normalizeGooglePreviewModelId,
-} from "@openclaw/model-catalog-core/provider-model-id-normalize";
+} from "@carapace/model-catalog-core/provider-model-id-normalize";
 
 type SelfHostedOpenAICompatibleProviderOverrides = Partial<
   Omit<ProviderPlugin, "id" | "label" | "docsPath" | "envVars" | "auth" | "catalog" | "wizard">
@@ -152,13 +152,13 @@ export {
   supportsClaudeFastMode,
   supportsClaudeNativeMaxEffort,
   supportsClaudeNativeXhighEffort,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 export type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogKind,
   UnifiedModelCatalogSource,
-} from "@openclaw/model-catalog-core/model-catalog-types";
-export { isCloudModelRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+} from "@carapace/model-catalog-core/model-catalog-types";
+export { isCloudModelRef } from "@carapace/model-catalog-core/model-catalog-refs";
 export { parseModelRef } from "../agents/model-selection-normalize.js";
 export type {
   BedrockDiscoveryConfig,
@@ -222,7 +222,7 @@ export function modelCostsEqual(
 
 const LOCAL_MODEL_FAMILY_PREFERENCES = [
   // Gemma 4 leads: live bench of the system-agent contract (planner JSON +
-  // openclaw tool calls) scored gemma4:e4b well above qwen3.5:4b on approval
+  // carapace tool calls) scored gemma4:e4b well above qwen3.5:4b on approval
   // follow-through and structured-command accuracy at ~2.5x lower latency.
   /gemma[-_.]?4(?!\d)/,
   /qwen[-_.]?3[._]5(?!\d)/,

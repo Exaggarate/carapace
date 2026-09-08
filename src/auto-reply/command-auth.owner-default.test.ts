@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { resolveOwnerPromptNumbers } from "../agents/owner-display.js";
 import { buildAgentSystemPrompt } from "../agents/system-prompt.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { isResetAuthorizedForContext, resolveCommandAuthorization } from "./command-auth.js";
 import type { MsgContext } from "./templating.js";
 import { installDiscordRegistryHooks } from "./test-helpers/command-auth-registry-fixture.js";
@@ -38,7 +38,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
   it("does not treat direct-message senders as owners when no ownerAllowFrom is configured", () => {
     const cfg = {
       channels: { discord: {} },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "discord",
@@ -61,7 +61,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
   it("does not treat group-chat senders as owners when no ownerAllowFrom is configured", () => {
     const cfg = {
       channels: { discord: {} },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "discord",
@@ -84,7 +84,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
   it("keeps channel-validated native group commands authorized without owner status", () => {
     const cfg = {
       channels: { telegram: {} },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "telegram",
@@ -108,7 +108,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
   it("keeps channel allowlist senders authorized without owner status", () => {
     const cfg = {
       channels: { telegram: { allowFrom: ["200482621"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "telegram",
@@ -133,7 +133,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
     const cfg = {
       channels: { discord: {} },
       commands: { ownerAllowFrom: ["456"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "discord",
@@ -155,7 +155,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
     const cfg = {
       channels: { telegram: {} },
       commands: { ownerAllowFrom: ["456"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "telegram",
@@ -180,7 +180,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
     const cfg = {
       channels: { discord: {} },
       commands: { ownerAllowFrom: ["456"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "discord",
@@ -206,7 +206,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
     const cfg = {
       channels: { discord: {} },
       commands: { ownerAllowFrom: ownerIds.map((ownerId) => `discord:${ownerId}`) },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const context = {
       Provider: "discord",
       Surface: "discord",
@@ -231,7 +231,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
       senderIsOwner: auth.senderIsOwner,
     });
     const promptParams = {
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       ownerNumbers,
       runtimeInfo: { channel: "discord" },
     };
@@ -261,7 +261,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
     const cfg = {
       channels: { discord: {} },
       commands: { ownerAllowFrom: ["*"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "discord",
@@ -282,7 +282,7 @@ describe("senderIsOwner only reflects explicit owner authorization", () => {
   });
 
   it("senderIsOwner is true for internal operator.admin sessions", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     const ctx = {
       Provider: "webchat",

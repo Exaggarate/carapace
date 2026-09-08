@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { WebSocket } from "ws";
 import {
   QA_EVIDENCE_FILENAME,
@@ -58,10 +58,10 @@ function createFixturePlugin(repoRoot: string, outputRoot: string) {
 }
 
 function withVoiceCallConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginDir: string;
   servePort: number;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const config = params.config;
   return {
     ...config,
@@ -218,7 +218,7 @@ function countOccurrences(text: string, marker: string): number {
 }
 
 async function runVoiceCallProof(options: ProducerOptions): Promise<string> {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-voice-call-gateway-"));
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-voice-call-gateway-"));
   const fixture = createFixturePlugin(options.repoRoot, fixtureRoot);
   const mock = await startQaMockOpenAiServer();
   const servePort = await getFreePort();
@@ -235,8 +235,8 @@ async function runVoiceCallProof(options: ProducerOptions): Promise<string> {
       controlUiEnabled: false,
       enabledPluginIds: ["voice-call"],
       runtimeEnvPatch: {
-        OPENCLAW_QA_VOICE_BRIDGE_CALLS_PATH: fixture.bridgeCallsPath,
-        OPENCLAW_QA_VOICE_TOOL_RESULTS_PATH: fixture.toolResultsPath,
+        CARAPACE_QA_VOICE_BRIDGE_CALLS_PATH: fixture.bridgeCallsPath,
+        CARAPACE_QA_VOICE_TOOL_RESULTS_PATH: fixture.toolResultsPath,
       },
       mutateConfig: (config) =>
         withVoiceCallConfig({ config, pluginDir: fixture.pluginDir, servePort }),
@@ -400,7 +400,7 @@ async function runVoiceCallProof(options: ProducerOptions): Promise<string> {
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line) => JSON.parse(line) as { tools?: string[] });
-    if (!bridgeCalls.some((call) => call.tools?.includes("openclaw_agent_consult"))) {
+    if (!bridgeCalls.some((call) => call.tools?.includes("carapace_agent_consult"))) {
       throw new Error(
         `realtime bridge did not expose embedded consult: ${JSON.stringify(bridgeCalls)}`,
       );

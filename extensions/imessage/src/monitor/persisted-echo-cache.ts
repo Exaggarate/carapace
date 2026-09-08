@@ -1,6 +1,6 @@
-import type { MediaPlaceholderTextFact } from "openclaw/plugin-sdk/channel-inbound";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import type { MediaPlaceholderTextFact } from "carapace/plugin-sdk/channel-inbound";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { getIMessageRuntime } from "../runtime.js";
 import {
   IMESSAGE_SENT_ECHOES_TTL_MS,

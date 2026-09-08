@@ -1,5 +1,5 @@
-import { normalizeJsonSchemaForTypeBox } from "@openclaw/normalization-core/json-schema";
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeJsonSchemaForTypeBox } from "@carapace/normalization-core/json-schema";
+import { asOptionalObjectRecord } from "@carapace/normalization-core/record-coerce";
 // Compiles plugin manifest schemas for validation without runtime loading.
 import { Format } from "typebox/format";
 import { Compile, type Validator as TypeBoxValidator } from "typebox/schema";

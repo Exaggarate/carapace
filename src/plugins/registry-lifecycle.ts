@@ -19,7 +19,7 @@ export const pluginLoaderCacheState = new PluginLoaderCacheState<PluginRegistry>
 // Registry identities cross built/source module copies. Their activation and
 // revocation state must share that lifetime, or valid owners fail and revocations split.
 const { retiredRegistries, activatedRegistries, registryEpochs, recordEpochs, revokedRecordEpoch } =
-  resolveGlobalSingleton(Symbol.for("openclaw.pluginRegistryLifecycle"), () => ({
+  resolveGlobalSingleton(Symbol.for("carapace.pluginRegistryLifecycle"), () => ({
     retiredRegistries: new WeakSet<PluginRegistry>(),
     activatedRegistries: new WeakSet<PluginRegistry>(),
     registryEpochs: new WeakMap<PluginRegistry, PluginRegistryLifecycleState>(),

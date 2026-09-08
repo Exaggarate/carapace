@@ -1,8 +1,8 @@
 // Matrix plugin module implements credentials read behavior. Pure record
 // shapes/normalizers live in credentials-state.ts; this module owns the
 // heavy sync plugin-state store access.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-store-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { createPluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-store-runtime";
 import { getOptionalMatrixRuntime } from "../runtime.js";
 import {
   MATRIX_CREDENTIALS_MAX_ENTRIES,
@@ -18,9 +18,9 @@ export { resolveMatrixCredentialsDir, resolveMatrixCredentialsPath } from "../st
 export function openMatrixCredentialsStore(env: NodeJS.ProcessEnv = process.env) {
   const runtime = getOptionalMatrixRuntime();
   const resolvedEnv =
-    env.OPENCLAW_STATE_DIR?.trim() || !runtime
+    env.CARAPACE_STATE_DIR?.trim() || !runtime
       ? env
-      : { ...env, OPENCLAW_STATE_DIR: runtime.state.resolveStateDir(env) };
+      : { ...env, CARAPACE_STATE_DIR: runtime.state.resolveStateDir(env) };
   return createPluginStateSyncKeyedStore<MatrixCredentialStateRecord>("matrix", {
     namespace: MATRIX_CREDENTIALS_NAMESPACE,
     maxEntries: MATRIX_CREDENTIALS_MAX_ENTRIES,

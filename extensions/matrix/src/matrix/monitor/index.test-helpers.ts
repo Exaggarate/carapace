@@ -214,11 +214,11 @@ const hoisted = vi.hoisted(() => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-runtime-context", () => ({
+vi.mock("carapace/plugin-sdk/channel-runtime-context", () => ({
   registerChannelRuntimeContext: hoisted.registerChannelRuntimeContext,
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-group-policy", () => ({
+vi.mock("carapace/plugin-sdk/runtime-group-policy", () => ({
   GROUP_POLICY_BLOCKED_LABEL: { room: "room" },
   resolveAllowlistProviderRuntimeGroupPolicy: () => ({
     groupPolicy: "allowlist",
@@ -228,7 +228,7 @@ vi.mock("openclaw/plugin-sdk/runtime-group-policy", () => ({
   warnMissingProviderGroupPolicyFallbackOnce: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/thread-bindings-runtime", () => ({
+vi.mock("carapace/plugin-sdk/thread-bindings-runtime", () => ({
   resolveThreadBindingIdleTimeoutMsForChannel: () => 24 * 60 * 60 * 1000,
   resolveThreadBindingMaxAgeMsForChannel: () => 0,
 }));
@@ -301,7 +301,7 @@ vi.mock("../config-update.js", () => ({
 
 vi.mock("../device-health.js", () => ({
   summarizeMatrixDeviceHealth: vi.fn(() => ({
-    staleOpenClawDevices: [],
+    staleCarapaceDevices: [],
   })),
 }));
 

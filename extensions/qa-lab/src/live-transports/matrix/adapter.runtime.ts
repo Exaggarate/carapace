@@ -2,10 +2,10 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
-import { buildQaTarget } from "openclaw/plugin-sdk/qa-channel-protocol";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
+import { buildQaTarget } from "carapace/plugin-sdk/qa-channel-protocol";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
 import { readQaScenarioExecutionConfig } from "../../scenario-catalog.js";
 import { createMatrixQaScenarioEnvironment } from "./scenarios/scenario-environment.js";
 import { createMatrixQaClient, provisionMatrixQaRoom } from "./substrate/client.js";
@@ -35,7 +35,7 @@ const MATRIX_SHARED_FLOW_TOPOLOGY = {
       key: "main",
       kind: "group",
       members: ["driver", "observer", "sut"],
-      name: "OpenClaw Matrix QA",
+      name: "Carapace Matrix QA",
       requireMention: true,
     },
     {
@@ -210,7 +210,7 @@ export async function createMatrixQaTransportAdapter(
       driverLocalpart: `qa-driver-${suffix}`,
       observerLocalpart: `qa-observer-${suffix}`,
       registrationToken: harness.registrationToken,
-      roomName: `OpenClaw Matrix QA ${suffix}`,
+      roomName: `Carapace Matrix QA ${suffix}`,
       sutLocalpart: `qa-sut-${suffix}`,
       topology: resolveMatrixQaAdapterTopology(options.scenarioIds),
     });
@@ -361,8 +361,8 @@ export async function createMatrixQaTransportAdapter(
       });
       const actor = input.senderId === "observer" ? provisioning.observer : provisioning.driver;
       const actorClient = input.senderId === "observer" ? observerClient : driverClient;
-      const hasPortableMention = input.text.includes("@openclaw");
-      const body = input.text.replaceAll("@openclaw", provisioning.sut.userId);
+      const hasPortableMention = input.text.includes("@carapace");
+      const body = input.text.replaceAll("@carapace", provisioning.sut.userId);
       const mentionUserIds = hasPortableMention ? [provisioning.sut.userId] : undefined;
       const replyToEventId = input.replyToId ? nativeEventIds.get(input.replyToId) : undefined;
       const threadRootEventId = input.threadId ? nativeEventIds.get(input.threadId) : undefined;
@@ -413,7 +413,7 @@ export async function createMatrixQaTransportAdapter(
       busMessageIds.clear();
     },
     createGatewayConfig: () =>
-      buildMatrixQaConfig({} as OpenClawConfig, {
+      buildMatrixQaConfig({} as CarapaceConfig, {
         driverAccessToken: provisioning.driver.accessToken,
         driverUserId: provisioning.driver.userId,
         homeserver: harness.baseUrl,
@@ -426,13 +426,13 @@ export async function createMatrixQaTransportAdapter(
         topology: provisioning.topology,
       }),
     createRuntimeEnvPatch: () => ({
-      OPENCLAW_QA_MATRIX_DRIVER_USER_ID: provisioning.driver.userId,
-      OPENCLAW_QA_MATRIX_OBSERVER_USER_ID: provisioning.observer.userId,
-      OPENCLAW_QA_MATRIX_SUT_ACCOUNT_ID: accountId,
-      OPENCLAW_QA_MATRIX_MAIN_ROOM_ID:
+      CARAPACE_QA_MATRIX_DRIVER_USER_ID: provisioning.driver.userId,
+      CARAPACE_QA_MATRIX_OBSERVER_USER_ID: provisioning.observer.userId,
+      CARAPACE_QA_MATRIX_SUT_ACCOUNT_ID: accountId,
+      CARAPACE_QA_MATRIX_MAIN_ROOM_ID:
         provisioning.topology.rooms.find((room) => room.key === "main")?.roomId ??
         provisioning.roomId,
-      OPENCLAW_QA_MATRIX_SECONDARY_ROOM_ID:
+      CARAPACE_QA_MATRIX_SECONDARY_ROOM_ID:
         provisioning.topology.rooms.find((room) => room.key === "secondary")?.roomId ?? "",
     }),
     prepareFlow: scenarioEnvironment.prepareFlow,

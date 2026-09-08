@@ -1,10 +1,10 @@
-import { normalizeOptionalString, type FastMode } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString, type FastMode } from "@carapace/normalization-core/string-coerce";
 import type {
   SessionRow,
   SessionRunStatus,
 } from "../../../packages/gateway-protocol/src/schema/sessions-row.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { parseRawSessionConversationRef } from "../../sessions/session-key-utils.js";
 import type { FastModeSource } from "../../shared/fast-mode.js";
 /**
@@ -146,7 +146,7 @@ export function resolveSessionToolContext(opts?: {
   agentSessionKey?: string;
   requesterAgentIdOverride?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }) {
   const cfg = opts?.config ?? getRuntimeConfig();
   return {

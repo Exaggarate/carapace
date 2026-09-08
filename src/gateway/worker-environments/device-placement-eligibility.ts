@@ -1,5 +1,5 @@
 import type { DevicePlacementRequirement } from "../../agents/harness/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   resolveNodeCommandAllowlist,
   resolveRequiredNodeCommandAuthority,
@@ -17,7 +17,7 @@ export async function resolveDevicePlacementEligibility(params: {
   deviceId: string;
   runtimeId?: string;
   requirement: DevicePlacementRequirement | undefined;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   currentNode?: {
     nodeId: string;
     connId?: string;

@@ -2,7 +2,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { buildFeishuConversationId, parseFeishuConversationId } from "./conversation-id.js";
 import { normalizeFeishuTarget, stripFeishuProviderPrefix } from "./targets.js";
 import { getFeishuThreadBindingManager } from "./thread-bindings.js";

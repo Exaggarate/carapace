@@ -1,7 +1,7 @@
 // Builds the status summary used by human and JSON status output.
 // It aggregates sessions, tasks, heartbeat, channel summary, and model/runtime metadata.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { withAgentRosterFactsBatch } from "../agents/agent-scope-config.js";
 import { resolveAgentConfig } from "../agents/agent-scope.js";
 import { DEFAULT_CONTEXT_TOKENS, DEFAULT_MODEL, DEFAULT_PROVIDER } from "../agents/defaults.js";
@@ -22,7 +22,7 @@ import {
   resolveSessionTotalTokens,
   type SessionEntry,
 } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { listGatewayAgentsBasic } from "../gateway/agent-list.js";
 import { resolveHeartbeatSessionKey } from "../infra/heartbeat-runner-session.js";
 import { resolveHeartbeatSummariesForAgents } from "../infra/heartbeat-summary-projection.js";
@@ -159,7 +159,7 @@ function selectRecentSessionCandidates(
   return selected;
 }
 
-async function prepareSessionStatusDetails(cfg: OpenClawConfig, now: number) {
+async function prepareSessionStatusDetails(cfg: CarapaceConfig, now: number) {
   const {
     classifySessionKey,
     resolveConfiguredStatusModelRef,
@@ -387,8 +387,8 @@ export async function getStatusSummary(
   options: {
     includeSensitive?: boolean;
     includeChannelSummary?: boolean;
-    config?: OpenClawConfig;
-    sourceConfig?: OpenClawConfig;
+    config?: CarapaceConfig;
+    sourceConfig?: CarapaceConfig;
     hostDesktopStatus?: import("../gateway/desktop/host-source.js").HostDesktopStatus;
   } = {},
 ): Promise<StatusSummary> {
@@ -497,7 +497,7 @@ export async function getStatusSummary(
     ...(taskInspection.state === "migration-required"
       ? {
           warning:
-            "Task history is unavailable until Gateway startup or openclaw doctor --fix repairs the state database.",
+            "Task history is unavailable until Gateway startup or carapace doctor --fix repairs the state database.",
         }
       : {}),
   };

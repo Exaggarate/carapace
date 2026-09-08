@@ -1,11 +1,11 @@
 import { createModelVisibilityPolicy } from "../../agents/model-visibility-policy.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ThinkLevel } from "../thinking.shared.js";
 import type { createModelSelectionState } from "./model-selection.js";
 
 /** Supplies selected-model facts to tests outside the model-selection owner. */
 export function createModelSelectionStateFixture(params: {
-  agentCfg: NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]> | undefined;
+  agentCfg: NonNullable<NonNullable<CarapaceConfig["agents"]>["defaults"]> | undefined;
   provider: string;
   model: string;
 }): Awaited<ReturnType<typeof createModelSelectionState>> {

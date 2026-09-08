@@ -10,7 +10,7 @@ type RegistrationResources = {
 
 // Registrars and loaders can come from different source/built module copies.
 const inspections = resolveGlobalSingleton(
-  Symbol.for("openclaw.pluginRegistryInspectionResources"),
+  Symbol.for("carapace.pluginRegistryInspectionResources"),
   () => new WeakMap<PluginRegistry, PluginRegistryInspectionResources>(),
 );
 

@@ -1,14 +1,14 @@
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 /**
  * Subagent spawn-depth lookup helpers.
  *
  * Reads persisted session store state to recover spawn depth and parent lineage across restarts.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionStorePathCore } from "../../../config/sessions/paths.js";
 import { listSessionEntriesReadOnly } from "../../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
 import { getSubagentDepth, parseAgentSessionKey } from "../../../sessions/session-key-utils.js";
 import { resolveSessionAgentId } from "../../agent-scope.js";
@@ -44,7 +44,7 @@ export function readSubagentSessionStore(
 
 function buildKeyCandidates(
   rawKey: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   explicitAgentId?: string,
 ): string[] {
   if (!cfg) {
@@ -84,7 +84,7 @@ export function findSubagentSessionEntryById<T extends SessionDepthEntry>(
 
 function resolveEntryForSessionKey(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   store?: Record<string, SessionDepthEntry>;
   cache: Map<string, Record<string, SessionEntry>>;
   agentId?: string;
@@ -138,7 +138,7 @@ function resolveEntryForSessionKey(params: {
 export function getSubagentDepthFromSessionStore(
   sessionKey: string | undefined | null,
   opts?: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     store?: Record<string, SessionDepthEntry>;
     agentId?: string;
   },

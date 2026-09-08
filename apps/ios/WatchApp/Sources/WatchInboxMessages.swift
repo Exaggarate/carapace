@@ -1,13 +1,13 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
-// Canonical transport leaf models live in OpenClawKit. The local envelope types
+// Canonical transport leaf models live in CarapaceKit. The local envelope types
 // below retain the existing Watch inbox persistence shape without `type`.
-typealias WatchPayloadType = OpenClawWatchPayloadType
-typealias WatchRiskLevel = OpenClawWatchRisk
-typealias WatchExecApprovalDecision = OpenClawWatchExecApprovalDecision
-typealias WatchExecApprovalTransportOutcome = OpenClawWatchExecApprovalOutcome
-typealias WatchExecApprovalCloseReason = OpenClawWatchExecApprovalCloseReason
+typealias WatchPayloadType = CarapaceWatchPayloadType
+typealias WatchRiskLevel = CarapaceWatchRisk
+typealias WatchExecApprovalDecision = CarapaceWatchExecApprovalDecision
+typealias WatchExecApprovalTransportOutcome = CarapaceWatchExecApprovalOutcome
+typealias WatchExecApprovalCloseReason = CarapaceWatchExecApprovalCloseReason
 typealias WatchOpaqueUTF8Key = ExactOpaqueIdentifierKey
 typealias WatchApprovalID = ExecApprovalIdentifier
 typealias WatchGatewayID = GatewayStableIdentifier
@@ -17,7 +17,7 @@ struct WatchExecApprovalIdentityKey: Hashable, Sendable {
     var approvalID: WatchApprovalID.Key
 }
 
-typealias WatchExecApprovalItem = OpenClawWatchExecApprovalItem
+typealias WatchExecApprovalItem = CarapaceWatchExecApprovalItem
 
 struct WatchExecApprovalPromptMessage: Codable, Equatable {
     var approval: WatchExecApprovalItem
@@ -72,10 +72,10 @@ struct WatchExecApprovalSnapshotMessage: Codable, Equatable {
     }
 }
 
-typealias WatchExecApprovalSnapshotRequestMessage = OpenClawWatchExecApprovalSnapshotRequestMessage
-typealias WatchExecApprovalSnapshotRequestItem = OpenClawWatchExecApprovalSnapshotRequestItem
-typealias WatchExecApprovalResolveMessage = OpenClawWatchExecApprovalResolveMessage
-typealias WatchAppCommand = OpenClawWatchAppCommand
+typealias WatchExecApprovalSnapshotRequestMessage = CarapaceWatchExecApprovalSnapshotRequestMessage
+typealias WatchExecApprovalSnapshotRequestItem = CarapaceWatchExecApprovalSnapshotRequestItem
+typealias WatchExecApprovalResolveMessage = CarapaceWatchExecApprovalResolveMessage
+typealias WatchAppCommand = CarapaceWatchAppCommand
 
 enum WatchStatusLocalizationKey: String {
     case connected
@@ -481,31 +481,31 @@ extension WatchExecApprovalDecision {
 struct WatchChatSessionIdentity: Hashable {
     var gatewayID: WatchGatewayID.Key?
     var sessionKey: WatchOpaqueUTF8Key
-    var deliveryContext: OpenClawWatchChatDeliveryContext?
+    var deliveryContext: CarapaceWatchChatDeliveryContext?
 }
 
 struct WatchAppSnapshotMessage: Codable, Equatable {
-    var gatewayStatus: OpenClawWatchAppStatus
+    var gatewayStatus: CarapaceWatchAppStatus
     var gatewayConnected: Bool
     var agentName: String
     var agentAvatarURL: String?
     var agentAvatarText: String?
     var sessionKey: String
     var gatewayStableID: String?
-    var talkStatus: OpenClawWatchAppStatus
+    var talkStatus: CarapaceWatchAppStatus
     var talkEnabled: Bool
     var talkListening: Bool
     var talkSpeaking: Bool
     var pendingApprovalCount: Int
     var chatItems: [WatchChatItem]?
-    var chatStatus: OpenClawWatchAppStatus?
+    var chatStatus: CarapaceWatchAppStatus?
     var sentAtMs: Int64?
     var snapshotId: String?
-    var chatDeliveryContext: OpenClawWatchChatDeliveryContext?
+    var chatDeliveryContext: CarapaceWatchChatDeliveryContext?
 
-    var validatedChatDeliveryContext: OpenClawWatchChatDeliveryContext? {
+    var validatedChatDeliveryContext: CarapaceWatchChatDeliveryContext? {
         guard let context = self.chatDeliveryContext,
-              (try? OpenClawWatchChatDeliveryCodec.validateContext(context)) != nil,
+              (try? CarapaceWatchChatDeliveryCodec.validateContext(context)) != nil,
               self.gatewayStableID?.utf8.elementsEqual(context.gatewayStableID.utf8) == true,
               self.sessionKey.utf8.elementsEqual(context.sessionKey.utf8)
         else { return nil }
@@ -520,23 +520,23 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
     }
 
     init(
-        gatewayStatus: OpenClawWatchAppStatus,
+        gatewayStatus: CarapaceWatchAppStatus,
         gatewayConnected: Bool,
         agentName: String,
         agentAvatarURL: String?,
         agentAvatarText: String?,
         sessionKey: String,
         gatewayStableID: String?,
-        talkStatus: OpenClawWatchAppStatus,
+        talkStatus: CarapaceWatchAppStatus,
         talkEnabled: Bool,
         talkListening: Bool,
         talkSpeaking: Bool,
         pendingApprovalCount: Int,
         chatItems: [WatchChatItem]?,
-        chatStatus: OpenClawWatchAppStatus?,
+        chatStatus: CarapaceWatchAppStatus?,
         sentAtMs: Int64?,
         snapshotId: String?,
-        chatDeliveryContext: OpenClawWatchChatDeliveryContext? = nil)
+        chatDeliveryContext: CarapaceWatchChatDeliveryContext? = nil)
     {
         self.gatewayStatus = gatewayStatus
         self.gatewayConnected = gatewayConnected
@@ -586,7 +586,7 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
             gatewayStatus: Self.parseStatus(
                 payload["gatewayStatus"],
                 fallbackText: payload["gatewayStatusText"] as? String)
-                ?? OpenClawWatchAppStatus.decodeLegacyGateway(
+                ?? CarapaceWatchAppStatus.decodeLegacyGateway(
                     text: payload["gatewayStatusText"] as? String,
                     connected: gatewayConnected),
             gatewayConnected: gatewayConnected,
@@ -598,7 +598,7 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
             talkStatus: Self.parseStatus(
                 payload["talkStatus"],
                 fallbackText: payload["talkStatusText"] as? String)
-                ?? OpenClawWatchAppStatus.decodeLegacyTalk(
+                ?? CarapaceWatchAppStatus.decodeLegacyTalk(
                     text: payload["talkStatusText"] as? String,
                     enabled: talkEnabled,
                     listening: talkListening,
@@ -611,17 +611,17 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
             chatStatus: Self.parseStatus(
                 payload["chatStatus"],
                 fallbackText: payload["chatStatusText"] as? String)
-                ?? OpenClawWatchAppStatus.decodeLegacyChat(
+                ?? CarapaceWatchAppStatus.decodeLegacyChat(
                     code: payload["chatStatusCode"] as? String,
                     text: payload["chatStatusText"] as? String),
             sentAtMs: sentAtMs,
             snapshotId: snapshotId,
             chatDeliveryContext: (payload["chatDeliveryContext"] as? [String: Any])
-                .flatMap { try? OpenClawWatchChatDeliveryCodec.decodeContext($0) })
+                .flatMap { try? CarapaceWatchChatDeliveryCodec.decodeContext($0) })
     }
 
     static func localizedChatStatusText(
-        status: OpenClawWatchAppStatus?,
+        status: CarapaceWatchAppStatus?,
         chatCount: Int,
         hasAppSnapshot: Bool,
         localize: (WatchStatusLocalizationKey) -> String = { $0.localized }) -> String
@@ -678,13 +678,13 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
         self.sentAtMs = try container.decodeIfPresent(Int64.self, forKey: .sentAtMs)
         self.snapshotId = try container.decodeIfPresent(String.self, forKey: .snapshotId)
         self.chatDeliveryContext = try container.decodeIfPresent(
-            OpenClawWatchChatDeliveryContext.self, forKey: .chatDeliveryContext)
+            CarapaceWatchChatDeliveryContext.self, forKey: .chatDeliveryContext)
         let gatewayStatusText = try container.decodeIfPresent(String.self, forKey: .gatewayStatusText)
         let talkStatusText = try container.decodeIfPresent(String.self, forKey: .talkStatusText)
         let chatStatusCode = try container.decodeIfPresent(String.self, forKey: .chatStatusCode)
         let chatStatusText = try container.decodeIfPresent(String.self, forKey: .chatStatusText)
         if let gatewayStatus = try? container.decode(
-            OpenClawWatchAppStatus.self,
+            CarapaceWatchAppStatus.self,
             forKey: .gatewayStatus)
         {
             self.gatewayStatus = gatewayStatus
@@ -692,16 +692,16 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
                   let gatewayStatusText,
                   !gatewayStatusText.isEmpty
         {
-            self.gatewayStatus = OpenClawWatchAppStatus(
+            self.gatewayStatus = CarapaceWatchAppStatus(
                 code: .legacy,
                 verbatim: gatewayStatusText)
         } else {
-            self.gatewayStatus = OpenClawWatchAppStatus.decodeLegacyGateway(
+            self.gatewayStatus = CarapaceWatchAppStatus.decodeLegacyGateway(
                 text: gatewayStatusText,
                 connected: self.gatewayConnected)
         }
         if let talkStatus = try? container.decode(
-            OpenClawWatchAppStatus.self,
+            CarapaceWatchAppStatus.self,
             forKey: .talkStatus)
         {
             self.talkStatus = talkStatus
@@ -709,19 +709,19 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
                   let talkStatusText,
                   !talkStatusText.isEmpty
         {
-            self.talkStatus = OpenClawWatchAppStatus(
+            self.talkStatus = CarapaceWatchAppStatus(
                 code: .legacy,
                 verbatim: talkStatusText)
         } else {
-            self.talkStatus = OpenClawWatchAppStatus.decodeLegacyTalk(
+            self.talkStatus = CarapaceWatchAppStatus.decodeLegacyTalk(
                 text: talkStatusText,
                 enabled: self.talkEnabled,
                 listening: self.talkListening,
                 speaking: self.talkSpeaking)
         }
         self.chatStatus = (try? container.decode(
-            OpenClawWatchAppStatus.self,
-            forKey: .chatStatus)) ?? OpenClawWatchAppStatus.decodeLegacyChat(
+            CarapaceWatchAppStatus.self,
+            forKey: .chatStatus)) ?? CarapaceWatchAppStatus.decodeLegacyChat(
             code: chatStatusCode,
             text: chatStatusText)
     }
@@ -749,7 +749,7 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
 
     private static func parseStatus(
         _ value: Any?,
-        fallbackText: String? = nil) -> OpenClawWatchAppStatus?
+        fallbackText: String? = nil) -> CarapaceWatchAppStatus?
     {
         guard let payload = value as? [String: Any],
               let rawCode = payload["code"] as? String
@@ -757,12 +757,12 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
             return nil
         }
         let verbatim = payload["verbatim"] as? String
-        guard let code = OpenClawWatchAppStatusCode(rawValue: rawCode) else {
+        guard let code = CarapaceWatchAppStatusCode(rawValue: rawCode) else {
             let legacyText = verbatim?.isEmpty == false ? verbatim : fallbackText
             guard let legacyText, !legacyText.isEmpty else { return nil }
-            return OpenClawWatchAppStatus(code: .legacy, verbatim: legacyText)
+            return CarapaceWatchAppStatus(code: .legacy, verbatim: legacyText)
         }
-        return OpenClawWatchAppStatus(
+        return CarapaceWatchAppStatus(
             code: code,
             localizationKey: payload["localizationKey"] as? String,
             arguments: payload["arguments"] as? [String] ?? [],
@@ -799,11 +799,11 @@ struct WatchAppSnapshotMessage: Codable, Equatable {
     }
 }
 
-typealias WatchChatCompletionMessage = OpenClawWatchChatCompletionMessage
-typealias WatchChatItem = OpenClawWatchChatItem
-typealias WatchAppSnapshotRequestMessage = OpenClawWatchAppSnapshotRequestMessage
-typealias WatchAppCommandMessage = OpenClawWatchAppCommandMessage
-typealias WatchPromptAction = OpenClawWatchAction
+typealias WatchChatCompletionMessage = CarapaceWatchChatCompletionMessage
+typealias WatchChatItem = CarapaceWatchChatItem
+typealias WatchAppSnapshotRequestMessage = CarapaceWatchAppSnapshotRequestMessage
+typealias WatchAppCommandMessage = CarapaceWatchAppCommandMessage
+typealias WatchPromptAction = CarapaceWatchAction
 
 struct WatchNotifyMessage: Codable {
     var id: String?
@@ -818,7 +818,7 @@ struct WatchNotifyMessage: Codable {
     var expiresAtMs: Int64?
     var risk: String?
     var actions: [WatchPromptAction]
-    var chatDeliveryContext: OpenClawWatchChatDeliveryContext?
+    var chatDeliveryContext: CarapaceWatchChatDeliveryContext?
 }
 
 struct WatchExecApprovalRecord: Codable, Equatable, Identifiable {
@@ -917,7 +917,7 @@ struct WatchExecApprovalRecord: Codable, Equatable, Identifiable {
     }
 }
 
-extension OpenClawWatchAppStatus {
+extension CarapaceWatchAppStatus {
     func localizedText(
         localize: (WatchStatusLocalizationKey) -> String = { $0.localized },
         localizePresentation: (String, [String]) -> String = { key, arguments in

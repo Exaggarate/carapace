@@ -1,7 +1,7 @@
 // Runtime boundary for provider discovery through plugin entrypoints.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { sortUniqueStrings } from "../../packages/normalization-core/src/string-normalization.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { planEffectiveModelCatalogRows } from "../model-catalog/index.js";
 import { shouldRejectHardlinkedPluginFiles } from "./hardlink-policy.js";
 import { loadManifestMetadataSnapshot } from "./manifest-contract-eligibility.js";
@@ -139,7 +139,7 @@ function hasProviderAuthEnvCredential(
 
 function prepareManifestCatalogDiscovery(
   pluginRecords: readonly PluginManifestRecord[],
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   includeProviders: boolean,
 ): Pick<ProviderDiscoveryEntryResult, "providers" | "runtimeManifestCatalogPluginIds"> {
   const providers: ProviderPlugin[] = [];
@@ -193,7 +193,7 @@ function prepareManifestCatalogDiscovery(
 }
 
 function resolveProviderDiscoveryEntryPlugins(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   onlyPluginIds?: string[];

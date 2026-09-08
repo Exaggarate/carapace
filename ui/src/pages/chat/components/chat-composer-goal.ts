@@ -97,7 +97,7 @@ function renderChatGoalActionButton(options: {
   onClick: () => void;
 }): TemplateResult {
   return html`
-    <openclaw-tooltip content=${options.label}>
+    <carapace-tooltip content=${options.label}>
       <button
         class="agent-chat__goal-action ${options.className}"
         type="button"
@@ -107,7 +107,7 @@ function renderChatGoalActionButton(options: {
         ${options.icon}
         <span class="agent-chat__goal-action-label">${options.chipLabel}</span>
       </button>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 

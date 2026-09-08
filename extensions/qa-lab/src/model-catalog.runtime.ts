@@ -1,8 +1,8 @@
 // Qa Lab plugin module implements model catalog behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { runCommandWithTimeout } from "carapace/plugin-sdk/process-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { QA_CHILD_STDERR_TAIL_BYTES, QA_CHILD_STDOUT_MAX_BYTES } from "./child-output.js";
 import { splitQaModelRef } from "./model-selection.js";
 import { resolveQaNodeExecPath } from "./node-exec.js";
@@ -96,12 +96,12 @@ function createCatalogAbortError() {
 
 export async function loadQaRunnerModelOptions(params: { repoRoot: string; signal?: AbortSignal }) {
   const tempRoot = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-qa-model-catalog-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-qa-model-catalog-"),
   );
   const workspaceDir = path.join(tempRoot, "workspace");
   const stateDir = path.join(tempRoot, "state");
   const homeDir = path.join(tempRoot, "home");
-  const configPath = path.join(tempRoot, "openclaw.json");
+  const configPath = path.join(tempRoot, "carapace.json");
 
   try {
     await Promise.all([
@@ -134,11 +134,11 @@ export async function loadQaRunnerModelOptions(params: { repoRoot: string; signa
         cwd: params.repoRoot,
         env: {
           HOME: homeDir,
-          OPENCLAW_HOME: homeDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_OAUTH_DIR: path.join(stateDir, "credentials"),
-          OPENCLAW_CODEX_DISCOVERY_LIVE: "0",
+          CARAPACE_HOME: homeDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_OAUTH_DIR: path.join(stateDir, "credentials"),
+          CARAPACE_CODEX_DISCOVERY_LIVE: "0",
         },
         killProcessTree: true,
         maxOutputBytes: {

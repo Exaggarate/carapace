@@ -1,7 +1,7 @@
 import { mock } from "node:test";
 
 const count = 150_000;
-const storePath = "/mock/agents/main/agent/openclaw-agent.sqlite";
+const storePath = "/mock/agents/main/agent/carapace-agent.sqlite";
 const unexpected = () => {
   throw new Error("unexpected non-preview dependency");
 };

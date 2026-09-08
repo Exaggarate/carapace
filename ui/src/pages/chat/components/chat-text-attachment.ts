@@ -1,7 +1,7 @@
 import { html, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import { t } from "../../../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../../../lit/carapace-element.ts";
 import { renderCompactAttachmentCard } from "./chat-attachment-card.ts";
 import { readResponseBytesWithinLimit } from "./chat-response-bytes.ts";
 
@@ -25,7 +25,7 @@ export function isTextAttachment(mimeType: string, filename: string): boolean {
   );
 }
 
-class ChatTextAttachment extends OpenClawLightDomContentsElement {
+class ChatTextAttachment extends CarapaceLightDomContentsElement {
   @property() src = "";
   @property() sourceIdentity = "";
   @property() label = "";
@@ -131,12 +131,12 @@ ${this.text}</pre>`
   }
 }
 
-if (!customElements.get("openclaw-chat-text-attachment")) {
-  customElements.define("openclaw-chat-text-attachment", ChatTextAttachment);
+if (!customElements.get("carapace-chat-text-attachment")) {
+  customElements.define("carapace-chat-text-attachment", ChatTextAttachment);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-chat-text-attachment": ChatTextAttachment;
+    "carapace-chat-text-attachment": ChatTextAttachment;
   }
 }

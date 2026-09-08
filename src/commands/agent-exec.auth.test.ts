@@ -20,7 +20,7 @@ import {
 } from "../agents/auth-profiles/sqlite.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { agentExecCommand } from "./agent-exec.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -43,7 +43,7 @@ afterEach(() => {
 
 describe("agent exec stored auth", () => {
   it("skips external Codex CLI credentials under --auth-env-only", async () => {
-    const codexHome = tempDirs.make("openclaw-agent-exec-codex-home-");
+    const codexHome = tempDirs.make("carapace-agent-exec-codex-home-");
     await fs.writeFile(
       path.join(codexHome, "auth.json"),
       JSON.stringify({
@@ -115,7 +115,7 @@ describe("agent exec stored auth", () => {
   it.each([false, true])(
     "reads portable shared credentials across temporary state (local override: %s)",
     async (localOverride) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { scenario: "minimal", env: { OPENAI_API_KEY: undefined } },
         async (state) => {
           writeConfigMachineState("auth.sharedStore", { location: "state-db" });
@@ -170,7 +170,7 @@ describe("agent exec stored auth", () => {
           let resolvedKey: string | undefined;
           const result = await agentExecCommand("inspect", {}, runtime, {
             runAgent: async () => {
-              expect(process.env.OPENCLAW_STATE_DIR).not.toBe(state.stateDir);
+              expect(process.env.CARAPACE_STATE_DIR).not.toBe(state.stateDir);
               const store = ensureAuthProfileStore(undefined, {
                 externalCli: { mode: "none" },
                 syncExternalCli: false,
@@ -227,25 +227,25 @@ describe("agent exec stored auth", () => {
   );
 
   it("rejects an unreadable original shared store before entering temporary exec", async () => {
-    await withOpenClawTestState({ scenario: "minimal", layout: "split" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal", layout: "split" }, async (state) => {
       writeConfigMachineState("auth.sharedStore", { location: "state-db" });
       writePersistedAuthProfileStoreRaw({ version: 1, profiles: "invalid" });
       const { runtime } = createRuntime();
       const runAgent = vi.fn(async () => successResult());
       const result = await agentExecCommand("inspect", {}, runtime, { runAgent });
       expect(result.envelope.error?.message).toContain(
-        path.join(state.stateDir, "state", "openclaw.sqlite"),
+        path.join(state.stateDir, "state", "carapace.sqlite"),
       );
-      expect(result.envelope.error?.message).toContain("is unreadable; run openclaw doctor --fix");
+      expect(result.envelope.error?.message).toContain("is unreadable; run carapace doctor --fix");
       expect(runAgent).not.toHaveBeenCalled();
     });
   });
 
   it("reads stored credentials from the configured agent directory", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-exec-cfg-auth-");
+    const stateDir = tempDirs.make("carapace-agent-exec-cfg-auth-");
     const customAgentDir = path.join(stateDir, "custom-home");
     await fs.mkdir(customAgentDir, { recursive: true });
-    const seedPath = path.join(stateDir, "openclaw.json");
+    const seedPath = path.join(stateDir, "carapace.json");
     await fs.writeFile(
       seedPath,
       JSON.stringify({
@@ -277,10 +277,10 @@ describe("agent exec stored auth", () => {
   });
 
   it("blocks direct persisted credential reads under --auth-env-only", async () => {
-    const normalStateDir = tempDirs.make("openclaw-agent-exec-hidden-auth-");
+    const normalStateDir = tempDirs.make("carapace-agent-exec-hidden-auth-");
     const normalAgentDir = path.join(normalStateDir, "agents", "main", "agent");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = normalStateDir;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = normalStateDir;
     const { saveAuthProfileStore } = await import("../agents/auth-profiles.js");
     saveAuthProfileStore(
       {
@@ -310,9 +310,9 @@ describe("agent exec stored auth", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
 
@@ -321,10 +321,10 @@ describe("agent exec stored auth", () => {
   });
 
   it("uses the normal stored auth profile when auth-env-only is disabled", async () => {
-    const normalStateDir = tempDirs.make("openclaw-agent-exec-normal-state-");
+    const normalStateDir = tempDirs.make("carapace-agent-exec-normal-state-");
     const normalAgentDir = path.join(normalStateDir, "agents", "main", "agent");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = normalStateDir;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = normalStateDir;
     const { saveAuthProfileStore } = await import("../agents/auth-profiles.js");
     saveAuthProfileStore(
       {
@@ -340,7 +340,7 @@ describe("agent exec stored auth", () => {
     try {
       await agentExecCommand("inspect", { authEnvOnly: false }, runtime, {
         runAgent: vi.fn(async () => {
-          expect(process.env.OPENCLAW_STATE_DIR).not.toBe(normalStateDir);
+          expect(process.env.CARAPACE_STATE_DIR).not.toBe(normalStateDir);
           profileIds = Object.keys(
             ensureAuthProfileStore(undefined, {
               allowKeychainPrompt: false,
@@ -352,9 +352,9 @@ describe("agent exec stored auth", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
 

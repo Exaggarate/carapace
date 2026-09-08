@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 
 /** Fill undefined fields in place; newly assigned values retain their source references. */

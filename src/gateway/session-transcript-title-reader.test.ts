@@ -1,6 +1,6 @@
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import * as sessionAccessor from "../config/sessions/session-accessor.js";
@@ -11,10 +11,10 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   readSessionMessagesAsync,
@@ -45,15 +45,15 @@ let envSnapshot: ReturnType<typeof captureEnv>;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-  tempDir = tempDirs.make("openclaw-transcript-titles-");
+  envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+  tempDir = tempDirs.make("carapace-transcript-titles-");
   storePath = path.join(tempDir, "sessions.json");
-  setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+  setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   envSnapshot.restore();
 });
 
@@ -89,9 +89,9 @@ async function writeSqliteMessages(
 }
 
 function markProjectionNeedsRebuild(sessionId: string): void {
-  openOpenClawAgentDatabase({
+  openCarapaceAgentDatabase({
     agentId: "main",
-    path: path.join(tempDir, "openclaw-agent.sqlite"),
+    path: path.join(tempDir, "carapace-agent.sqlite"),
   })
     .db.prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
     .run(sessionId);
@@ -267,9 +267,9 @@ describe("session transcript title hydration", () => {
       if (projection === "stale") {
         markProjectionNeedsRebuild(scope.sessionId);
       } else {
-        openOpenClawAgentDatabase({
+        openCarapaceAgentDatabase({
           agentId: "main",
-          path: path.join(tempDir, "openclaw-agent.sqlite"),
+          path: path.join(tempDir, "carapace-agent.sqlite"),
         })
           .db.prepare(
             "UPDATE session_transcript_active_events SET context_eligible = NULL WHERE session_id = ?",
@@ -283,7 +283,7 @@ describe("session transcript title hydration", () => {
       } finally {
         await waitForSessionTranscriptIndexReconcile({
           agentId: "main",
-          path: path.join(tempDir, "openclaw-agent.sqlite"),
+          path: path.join(tempDir, "carapace-agent.sqlite"),
         });
       }
       expect(fields).toEqual({
@@ -303,7 +303,7 @@ describe("session transcript title hydration", () => {
         ]),
       );
     }
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(tempDir, "carapace-agent.sqlite");
     markProjectionNeedsRebuild("reader-title-rebuilding");
 
     expect(readSessionTitleFieldsFromTranscriptBatch(scopes)).toEqual([
@@ -603,9 +603,9 @@ describe("session transcript title hydration", () => {
       { role: "assistant", content: "generation reply" },
     ]);
     expect(readSessionTitleFieldsFromTranscript(scope).firstUserMessage).toBe("generation prompt");
-    openOpenClawAgentDatabase({
+    openCarapaceAgentDatabase({
       agentId: "main",
-      path: path.join(tempDir, "openclaw-agent.sqlite"),
+      path: path.join(tempDir, "carapace-agent.sqlite"),
     })
       .db.prepare("UPDATE transcript_rewrite_watermarks SET generation = ? WHERE session_id = ?")
       .run("f".repeat(32), sessionId);
@@ -647,7 +647,7 @@ describe("session transcript Markdown title previews", () => {
         {
           role: "assistant",
           content:
-            "# Done\n\nLanded [PR #124879](https://github.com/openclaw/openclaw/pull/124879) with **green** CI. Use foo_bar_baz from ~/.openclaw.",
+            "# Done\n\nLanded [PR #124879](https://github.com/Exaggarate/carapace/pull/124879) with **green** CI. Use foo_bar_baz from ~/.carapace.",
         },
       ]);
       const fields =
@@ -658,7 +658,7 @@ describe("session transcript Markdown title previews", () => {
       expect(fields).toEqual({
         firstUserMessage: "Keep **title Markdown** unchanged",
         lastMessagePreview:
-          "Done Landed PR #124879 with green CI. Use foo_bar_baz from ~/.openclaw.",
+          "Done Landed PR #124879 with green CI. Use foo_bar_baz from ~/.carapace.",
       });
     },
   );

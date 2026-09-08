@@ -20,7 +20,7 @@ import { focusChatSidePanel, restoreChatAsMain } from "./chat-side-panel.test-su
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const sessionKey = "agent:main:board-mcp-app";
 const rosterMatch = { includeGlobal: true };
@@ -95,7 +95,7 @@ async function waitForMountedApp(page: Page): Promise<void> {
 async function cycleBoardProviderConnection(page: Page): Promise<void> {
   await page.evaluate(() => {
     const surface = document.querySelector(".board-session-surface");
-    const pane = surface?.closest("openclaw-chat-pane");
+    const pane = surface?.closest("carapace-chat-pane");
     const lease = pane ? Reflect.get(pane, "boardProviderLease") : undefined;
     const scopedProvider = lease?.provider;
     const transport = scopedProvider ? Reflect.get(scopedProvider, "transport") : undefined;
@@ -111,20 +111,20 @@ async function cycleBoardProviderConnection(page: Page): Promise<void> {
 async function captureBoardIdentity(page: Page): Promise<void> {
   await page.evaluate(() => {
     const surface = document.querySelector<HTMLElement>(".board-session-surface");
-    const board = surface?.querySelector("openclaw-board-view");
-    const cell = board?.querySelector("openclaw-board-widget-cell");
+    const board = surface?.querySelector("carapace-board-view");
+    const cell = board?.querySelector("carapace-board-widget-cell");
     const appView = cell?.querySelector("mcp-app-view");
     const iframe = appView?.shadowRoot?.querySelector("iframe");
     if (!surface || !board || !cell || !appView || !iframe) {
       throw new Error("Board MCP App identity is incomplete");
     }
-    Reflect.set(window, "__openclawBoardIdentity", { surface, board, cell, appView, iframe });
+    Reflect.set(window, "__carapaceBoardIdentity", { surface, board, cell, appView, iframe });
   });
 }
 
 async function readBoardIdentity(page: Page) {
   return await page.evaluate(() => {
-    const stored = Reflect.get(window, "__openclawBoardIdentity") as {
+    const stored = Reflect.get(window, "__carapaceBoardIdentity") as {
       surface: HTMLElement;
       board: Element;
       cell: Element;
@@ -132,8 +132,8 @@ async function readBoardIdentity(page: Page) {
       iframe: Element;
     };
     const surface = document.querySelector<HTMLElement>(".board-session-surface");
-    const board = surface?.querySelector("openclaw-board-view");
-    const cell = board?.querySelector("openclaw-board-widget-cell");
+    const board = surface?.querySelector("carapace-board-view");
+    const cell = board?.querySelector("carapace-board-widget-cell");
     const appView = cell?.querySelector("mcp-app-view");
     const iframe = appView?.shadowRoot?.querySelector("iframe");
     return {
@@ -336,7 +336,7 @@ describeControlUiE2e("Control UI dashboard MCP Apps", () => {
   });
 
   it("retains one board runtime across split, expanded, and inactive panel states", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("board-panel-retention", artifactRoot)
       : undefined;

@@ -40,7 +40,7 @@ describe("chat pane warm reload", () => {
 
     const memory: ChatMessageCache = new Map();
     const store = new SessionSnapshotStore(memory);
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
     vi.spyOn(pane, "requestUpdate").mockImplementation(() => undefined);
     vi.spyOn(pane, "performUpdate").mockImplementation(() => undefined);
     pane.context = createInitializationContext();

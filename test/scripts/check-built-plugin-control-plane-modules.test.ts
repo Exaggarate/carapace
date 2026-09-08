@@ -13,17 +13,17 @@ import {
 const roots: string[] = [];
 
 function makeRoot(extension = ".js"): string {
-  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-control-plane-"));
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-control-plane-"));
   roots.push(rootDir);
   fs.writeFileSync(path.join(rootDir, "package.json"), '{"type":"module"}\n');
   if (extension === ".cjs") {
-    write(rootDir, "extensions/demo/openclaw.plugin.json", '{"id":"demo"}');
+    write(rootDir, "extensions/demo/carapace.plugin.json", '{"id":"demo"}');
     write(rootDir, "extensions/demo/index.ts", "export {};\n");
     write(
       rootDir,
       "extensions/demo/package.json",
       JSON.stringify({
-        openclaw: {
+        carapace: {
           extensions: ["./index.ts"],
           build: { bundledDist: false, runtimeFormat: "cjs" },
           release: { publishToNpm: true },

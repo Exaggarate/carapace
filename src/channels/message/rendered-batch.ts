@@ -3,7 +3,7 @@
  *
  * Summarizes reply payloads so delivery can pick adapter paths and recovery metadata.
  */
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import type { ReplyPayload } from "../../auto-reply/reply-payload.js";
 import type {
   RenderedMessageBatch,

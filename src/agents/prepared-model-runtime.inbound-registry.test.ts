@@ -15,9 +15,9 @@ import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { getPluginRuntimeGenerationRegistry } from "../plugins/runtime/generation-scope.js";
 import { getPluginRuntimeLoadContext } from "../plugins/runtime/load-context.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import type { DiscoverAuthStorageOptions } from "./agent-auth-discovery.js";
 import { withPreparedModelRuntimePluginGenerationScope } from "./prepared-model-runtime-generation-scope.js";
 import {
@@ -29,11 +29,11 @@ import {
 } from "./prepared-model-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared reply dispatch runtime", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
   });
 
@@ -91,7 +91,7 @@ describe("prepared reply dispatch runtime", () => {
       agentId: "default",
       agentDir: published.agentDir,
       workspaceDir: published.workspaceDir,
-      runtimePluginSelections: [{ provider: "selected", modelId: "model", runtime: "openclaw" }],
+      runtimePluginSelections: [{ provider: "selected", modelId: "model", runtime: "carapace" }],
     };
     const lease = await acquireAgentRunPreparedModelRuntime(input, {
       catalogMode: "static",
@@ -148,7 +148,7 @@ describe("prepared reply dispatch runtime", () => {
       hooks: [],
       rootDir: `/plugins/${id}`,
       source: `/plugins/${id}/index.js`,
-      manifestPath: `/plugins/${id}/openclaw.plugin.json`,
+      manifestPath: `/plugins/${id}/carapace.plugin.json`,
       activation: { onStartup: false, onAgentHarnesses: [id] },
     }));
     await refreshPreparedModelRuntimeSnapshots(config, {
@@ -518,7 +518,7 @@ describe("prepared reply dispatch runtime", () => {
     expect(testApi.getPreparedModelRuntimeOwnerCountForTest()).toBe(1);
     const finishAuthRefreshGate = createDeferred();
     let finishAuthRefresh: (() => void) | undefined;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, agentDir) => {
       finishAuthRefresh = () => finishAuthRefreshGate.resolve();
       await finishAuthRefreshGate.promise;
       return { agentDir: String(agentDir), wrote: false };

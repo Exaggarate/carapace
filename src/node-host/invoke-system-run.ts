@@ -1,7 +1,7 @@
 /** Policy and execution pipeline for approved node-host system.run requests. */
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   describeInterpreterInlineEval,
   type InterpreterInlineEvalHit,
@@ -161,7 +161,7 @@ const APPROVAL_SCRIPT_OPERAND_BINDING_DENIED_MESSAGE =
   "SYSTEM_RUN_DENIED: approval missing script operand binding";
 const APPROVAL_STATE_WRITE_FAILED_MESSAGE =
   "SYSTEM_RUN_DENIED: approval state could not be persisted";
-type ExecToolConfig = NonNullable<NonNullable<OpenClawConfig["tools"]>["exec"]>;
+type ExecToolConfig = NonNullable<NonNullable<CarapaceConfig["tools"]>["exec"]>;
 
 type EffectiveSystemRunExecPolicy = {
   agentExec: ExecToolConfig | undefined;
@@ -196,7 +196,7 @@ function normalizeDeniedReason(reason: string | null | undefined): SystemRunDeni
 
 /** Resolves the effective exec security/ask policy for one system.run request. */
 export async function resolveEffectiveSystemRunExecPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string | undefined;
   defaultSecurity: ExecSecurity;
   defaultAsk: ExecAsk;
@@ -221,7 +221,7 @@ export async function resolveEffectiveSystemRunExecPolicy(params: {
 
 async function resolveSystemRunAutoReviewer(params: {
   opts: HandleSystemRunInvokeOptions;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string | undefined;
   agentExec: ExecToolConfig | undefined;
   globalExec: ExecToolConfig | undefined;
@@ -265,12 +265,12 @@ type HandleSystemRunInvokeOptions = {
   sendInvokeResult: (result: SystemRunInvokeResult) => Promise<void>;
   sendExecFinishedEvent: (params: ExecFinishedEventParams) => Promise<void>;
   preferMacAppExecHost: boolean;
-  getRuntimeConfig?: () => OpenClawConfig;
+  getRuntimeConfig?: () => CarapaceConfig;
   autoReviewer?: ExecAutoReviewer;
   commitExecAuthorization?: typeof commitExecAuthorizationLocked;
 };
 
-async function loadSystemRunConfig(opts: HandleSystemRunInvokeOptions): Promise<OpenClawConfig> {
+async function loadSystemRunConfig(opts: HandleSystemRunInvokeOptions): Promise<CarapaceConfig> {
   if (opts.getRuntimeConfig) {
     return opts.getRuntimeConfig();
   }

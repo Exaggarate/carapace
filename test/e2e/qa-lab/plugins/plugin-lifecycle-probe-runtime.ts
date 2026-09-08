@@ -46,11 +46,11 @@ interface RegistryServer {
 }
 
 function stateDir(env: ProbeEnv = process.env) {
-  return env.OPENCLAW_STATE_DIR || path.join(env.HOME ?? os.homedir(), ".openclaw");
+  return env.CARAPACE_STATE_DIR || path.join(env.HOME ?? os.homedir(), ".carapace");
 }
 
 function configPath(env: ProbeEnv = process.env) {
-  return env.OPENCLAW_CONFIG_PATH || path.join(stateDir(env), "openclaw.json");
+  return env.CARAPACE_CONFIG_PATH || path.join(stateDir(env), "carapace.json");
 }
 
 function readJson(file: string) {
@@ -270,32 +270,32 @@ export function parseDurationMs(value: string | undefined, fallback: string) {
 
 function createMatrixStateEnv(resourceDir: string): MatrixEnv {
   const home = fs.mkdtempSync(path.join(resourceDir, "home."));
-  const stateDir = path.join(home, ".openclaw");
+  const stateDir = path.join(home, ".carapace");
   const workspaceDir = path.join(home, "workspace");
-  const configFile = path.join(stateDir, "openclaw.json");
+  const configFile = path.join(stateDir, "carapace.json");
   fs.mkdirSync(stateDir, { recursive: true });
   fs.mkdirSync(workspaceDir, { recursive: true });
   return {
     ...process.env,
     HOME: home,
     USERPROFILE: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configFile,
-    OPENCLAW_TEST_WORKSPACE_DIR: workspaceDir,
-    OPENCLAW_AUTH_PROFILE_SECRET_KEY: randomBytes(32).toString("hex"),
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configFile,
+    CARAPACE_TEST_WORKSPACE_DIR: workspaceDir,
+    CARAPACE_AUTH_PROFILE_SECRET_KEY: randomBytes(32).toString("hex"),
   };
 }
 
 function packageEntrypoint(prefix: string) {
-  const packageRoot = path.join(prefix, "lib", "node_modules", "openclaw");
+  const packageRoot = path.join(prefix, "lib", "node_modules", "carapace");
   for (const entry of ["dist/index.mjs", "dist/index.js"]) {
     const candidate = path.join(packageRoot, entry);
     if (fs.existsSync(candidate)) {
       return candidate;
     }
   }
-  throw new Error(`OpenClaw package entrypoint not found under ${packageRoot}/dist/`);
+  throw new Error(`Carapace package entrypoint not found under ${packageRoot}/dist/`);
 }
 
 async function runCommand(command: string, args: readonly string[], options: CommandOptions = {}) {
@@ -438,18 +438,18 @@ async function runCommand(command: string, args: readonly string[], options: Com
   }
 }
 
-async function installOpenClawPackage(prefix: string, env: MatrixEnv) {
-  const packageTgz = env.OPENCLAW_CURRENT_PACKAGE_TGZ;
-  assertProbe(packageTgz, "OPENCLAW_CURRENT_PACKAGE_TGZ is required");
-  const installLog = "/tmp/openclaw-plugin-lifecycle-install.log";
-  process.stdout.write("Installing mounted OpenClaw package...\n");
+async function installCarapacePackage(prefix: string, env: MatrixEnv) {
+  const packageTgz = env.CARAPACE_CURRENT_PACKAGE_TGZ;
+  assertProbe(packageTgz, "CARAPACE_CURRENT_PACKAGE_TGZ is required");
+  const installLog = "/tmp/carapace-plugin-lifecycle-install.log";
+  process.stdout.write("Installing mounted Carapace package...\n");
   await runCommand(
     "npm",
     ["install", "-g", "--prefix", prefix, packageTgz, "--no-fund", "--no-audit"],
     {
       env,
       outputFile: installLog,
-      timeoutMs: parseDurationMs(env.OPENCLAW_E2E_NPM_INSTALL_TIMEOUT, "600s"),
+      timeoutMs: parseDurationMs(env.CARAPACE_E2E_NPM_INSTALL_TIMEOUT, "600s"),
     },
   );
 }
@@ -592,14 +592,14 @@ async function runRuntimeInspect(params: {
 
 async function runPluginLifecycleMatrix() {
   const pluginId = "lifecycle-claw";
-  const packageName = "@openclaw/lifecycle-claw";
+  const packageName = "@carapace/lifecycle-claw";
   const packOwner = "lifecycle-pack";
-  const packPackageName = "@openclaw/lifecycle-pack";
+  const packPackageName = "@carapace/lifecycle-pack";
   const packOne = `${packOwner}/one`;
   const packTwo = `${packOwner}/two`;
   const packOld = `${packOwner}/old`;
   const packRenamed = `${packOwner}/renamed`;
-  const resourceDir = tempDirs.make("openclaw-plugin-lifecycle-matrix-");
+  const resourceDir = tempDirs.make("carapace-plugin-lifecycle-matrix-");
   const npmPrefix = "/tmp/npm-prefix";
   const env = createMatrixStateEnv(resourceDir);
   const tarballV1 = path.join(resourceDir, "lifecycle-claw-1.0.0.tgz");
@@ -626,7 +626,7 @@ async function runPluginLifecycleMatrix() {
   fs.rmSync(npmPrefix, { recursive: true, force: true });
 
   try {
-    await installOpenClawPackage(npmPrefix, env);
+    await installCarapacePackage(npmPrefix, env);
     const entry = packageEntrypoint(npmPrefix);
     const matrixEnv: MatrixEnv = {
       ...env,

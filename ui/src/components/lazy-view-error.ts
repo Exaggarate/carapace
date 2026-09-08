@@ -35,9 +35,9 @@ export function renderLazyElementModal(controller: {
     return nothing;
   }
   const close = () => controller.close();
-  return html`<openclaw-modal-dialog label=${state.element.label} @modal-cancel=${close}>
+  return html`<carapace-modal-dialog label=${state.element.label} @modal-cancel=${close}>
     ${renderLazyElementState(state, () => controller.retry(), close)}
-  </openclaw-modal-dialog>`;
+  </carapace-modal-dialog>`;
 }
 
 export function renderLazyViewError({

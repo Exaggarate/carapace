@@ -2,7 +2,7 @@
  * Tests session utility interactions with plugin runtime state.
  */
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveSessionStorePathCore, type SessionEntry } from "../config/sessions.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
@@ -49,7 +49,7 @@ describe("gateway session list plugin runtime normalization", () => {
       agents: {
         defaults: { model: { primary: "custom-provider/custom-legacy-model" } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const store = Object.fromEntries(
       Array.from({ length: 3 }, (_value, index) => [
         `session-${index}`,
@@ -92,7 +92,7 @@ describe("gateway session list plugin runtime normalization", () => {
       agents: {
         defaults: { model: { primary: "custom-provider/custom-legacy-model" } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const row = sessionUtils.buildGatewaySessionRow({
       cfg,
@@ -107,7 +107,7 @@ describe("gateway session list plugin runtime normalization", () => {
   });
 
   it("keeps lifecycle event rows lightweight without changing explicit detail rows", async () => {
-    await withStateDirEnv("openclaw-lifecycle-row-plugin-runtime-", async () => {
+    await withStateDirEnv("carapace-lifecycle-row-plugin-runtime-", async () => {
       normalizeProviderModelIdWithPluginMock.mockImplementation(
         ({ provider, context }: { provider?: string; context?: { modelId?: string } }) =>
           provider === "custom-provider" && context?.modelId === "custom-legacy-model"
@@ -118,7 +118,7 @@ describe("gateway session list plugin runtime normalization", () => {
         agents: {
           defaults: { model: { primary: "custom-provider/custom-legacy-model" } },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const configRuntime = await import("../config/config.js");
       configRuntime.resetConfigRuntimeState();
       configRuntime.setRuntimeConfigSnapshot(cfg, cfg);

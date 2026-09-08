@@ -1,5 +1,5 @@
-import { mergeAllowlist, summarizeMapping } from "openclaw/plugin-sdk/allow-from";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
+import { mergeAllowlist, summarizeMapping } from "carapace/plugin-sdk/allow-from";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/channel-contract";
 import {
   createChannelInboundEnvelopeBuilder,
   createChannelPartialDeliveryError,
@@ -7,44 +7,44 @@ import {
   isChannelPartialDeliveryError,
   logInboundDrop,
   resolveInboundMentionDecision,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   resolveStableChannelMessageIngress,
   type ChannelIngressContextBinding,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   createMessageReceiptFromOutboundResults,
   listMessageReceiptPlatformIds,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-import { resolveChannelGroupsConfigPath } from "openclaw/plugin-sdk/channel-policy";
-import type { MarkdownTableMode, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
+import { resolveChannelGroupsConfigPath } from "carapace/plugin-sdk/channel-policy";
+import type { MarkdownTableMode, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
 // Zalouser plugin module implements monitor behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
 import {
   DEFAULT_GROUP_HISTORY_LIMIT,
   type HistoryEntry,
   createChannelHistoryWindow,
-} from "openclaw/plugin-sdk/reply-history";
+} from "carapace/plugin-sdk/reply-history";
 import {
   deliverTextOrMediaReply,
   resolveSendableOutboundReplyParts,
   type OutboundReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+} from "carapace/plugin-sdk/reply-payload";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
 import {
   resolveDefaultGroupPolicy,
   resolveOpenProviderRuntimeGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
+} from "carapace/plugin-sdk/runtime-group-policy";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildZalouserGroupCandidates,
   findZalouserGroupEntry,
@@ -71,7 +71,7 @@ import {
 
 type ZalouserMonitorOptions = {
   account: ResolvedZalouserAccount;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: RuntimeEnv;
   abortSignal: AbortSignal;
   statusSink?: (patch: Omit<ChannelAccountSnapshot, "accountId">) => void;
@@ -225,7 +225,7 @@ async function sendZalouserDeliveryAcks(params: {
 async function processMessage(
   message: ZaloInboundMessage,
   account: ResolvedZalouserAccount,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   groupsConfigPath: string,
   core: ZalouserCoreRuntime,
   runtime: RuntimeEnv,
@@ -739,7 +739,7 @@ async function deliverZalouserReply(params: {
   isGroup: boolean;
   runtime: RuntimeEnv;
   core: ZalouserCoreRuntime;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   accountId?: string;
   tableMode?: MarkdownTableMode;
 }): Promise<{ visibleReplySent: boolean }> {

@@ -10,7 +10,7 @@ describe("package git fixture", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("installs the packed runtime without resolving checkout-only development dependencies", () => {
-    const root = tempDirs.make("openclaw-package-git-fixture-install-");
+    const root = tempDirs.make("carapace-package-git-fixture-install-");
     const runtimeDir = path.join(root, "runtime");
     mkdirSync(runtimeDir);
     writeFileSync(
@@ -61,18 +61,18 @@ describe("package git fixture", () => {
   });
 
   it("stages bundled ai runtime as a local file dependency", async () => {
-    const root = tempDirs.make("openclaw-package-git-fixture-");
+    const root = tempDirs.make("carapace-package-git-fixture-");
     writeFileSync(path.join(root, ".gitignore"), "dist/\n");
-    mkdirSync(path.join(root, "node_modules", "@openclaw", "ai"), { recursive: true });
+    mkdirSync(path.join(root, "node_modules", "@carapace", "ai"), { recursive: true });
     writeFileSync(
       path.join(root, "package.json"),
       `${JSON.stringify(
         {
-          dependencies: { "@openclaw/ai": "2026.6.11", chalk: "5.6.2" },
-          bundleDependencies: ["@openclaw/ai", "chalk"],
+          dependencies: { "@carapace/ai": "2026.6.11", chalk: "5.6.2" },
+          bundleDependencies: ["@carapace/ai", "chalk"],
           scripts: {
             build: "node build.mjs",
-            openclaw: "node scripts/run-node.mjs",
+            carapace: "node scripts/run-node.mjs",
             postinstall: "node scripts/postinstall-bundled-plugins.mjs",
           },
         },
@@ -81,14 +81,14 @@ describe("package git fixture", () => {
       )}\n`,
     );
     writeFileSync(
-      path.join(root, "node_modules", "@openclaw", "ai", "package.json"),
+      path.join(root, "node_modules", "@carapace", "ai", "package.json"),
       `${JSON.stringify({
-        name: "@openclaw/ai",
+        name: "@carapace/ai",
         version: "2026.6.11",
         type: "module",
         main: "./dist/index.mjs",
         exports: { ".": "./dist/index.mjs" },
-        devDependencies: { "@openclaw/normalization-core": "0.0.0-private" },
+        devDependencies: { "@carapace/normalization-core": "0.0.0-private" },
       })}\n`,
     );
 
@@ -103,17 +103,17 @@ describe("package git fixture", () => {
       expect.arrayContaining(["dist/", "node_modules", "**/node_modules/", "pnpm-lock.yaml"]),
     );
     const packageJson = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
-    expect(packageJson.dependencies["@openclaw/ai"]).toBe("file:.openclaw-fixture/packages/ai");
+    expect(packageJson.dependencies["@carapace/ai"]).toBe("file:.carapace-fixture/packages/ai");
     expect(packageJson.bundleDependencies).toEqual(["chalk"]);
     expect(packageJson.scripts).toEqual({
       build: "node build.mjs",
-      openclaw: "node openclaw.mjs",
+      carapace: "node carapace.mjs",
     });
     const relocatedAiPackage = JSON.parse(
-      readFileSync(path.join(root, ".openclaw-fixture", "packages", "ai", "package.json"), "utf8"),
+      readFileSync(path.join(root, ".carapace-fixture", "packages", "ai", "package.json"), "utf8"),
     );
     expect(relocatedAiPackage).toMatchObject({
-      name: "@openclaw/ai",
+      name: "@carapace/ai",
       version: "2026.6.11",
       type: "module",
       main: "./dist/index.mjs",
@@ -123,18 +123,18 @@ describe("package git fixture", () => {
 
     mkdirSync(path.join(root, "node_modules", "chalk"), { recursive: true });
     writeFileSync(path.join(root, "node_modules", "chalk", "package.json"), "{}\n");
-    mkdirSync(path.join(root, ".openclaw-fixture", "packages", "ai", "node_modules", "zod"), {
+    mkdirSync(path.join(root, ".carapace-fixture", "packages", "ai", "node_modules", "zod"), {
       recursive: true,
     });
     writeFileSync(
-      path.join(root, ".openclaw-fixture", "packages", "ai", "node_modules", "zod", "package.json"),
+      path.join(root, ".carapace-fixture", "packages", "ai", "node_modules", "zod", "package.json"),
       "{}\n",
     );
     writeFileSync(path.join(root, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n");
     for (const destination of ["dist", "node_modules"]) {
       const staging = path.join(
         root,
-        `${destination}.openclaw-update-00000000-0000-4000-8000-000000000000.tmp`,
+        `${destination}.carapace-update-00000000-0000-4000-8000-000000000000.tmp`,
       );
       mkdirSync(staging);
       writeFileSync(path.join(staging, "candidate"), "staged runtime");
@@ -148,12 +148,12 @@ describe("package git fixture", () => {
     expect(staged.status).toBe(0);
     expect(staged.stdout).not.toContain("node_modules");
     expect(staged.stdout).not.toContain("pnpm-lock.yaml");
-    expect(staged.stdout).not.toContain(".openclaw-update-");
+    expect(staged.stdout).not.toContain(".carapace-update-");
     expect(staged.stdout).toContain("operator-notes.tmp");
   });
 
   it("uses the packed entrypoint without a bundled ai runtime", () => {
-    const root = tempDirs.make("openclaw-package-git-fixture-no-ai-");
+    const root = tempDirs.make("carapace-package-git-fixture-no-ai-");
     writeFileSync(
       path.join(root, "package.json"),
       `${JSON.stringify(
@@ -161,7 +161,7 @@ describe("package git fixture", () => {
           dependencies: { chalk: "5.6.2" },
           scripts: {
             lint: "node lint.mjs",
-            openclaw: "node scripts/run-node.mjs",
+            carapace: "node scripts/run-node.mjs",
             postinstall: "node scripts/postinstall-bundled-plugins.mjs",
           },
         },
@@ -180,8 +180,8 @@ describe("package git fixture", () => {
     const packageJson = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
     expect(packageJson.scripts).toEqual({
       lint: "node lint.mjs",
-      openclaw: "node openclaw.mjs",
+      carapace: "node carapace.mjs",
     });
-    expect(packageJson.dependencies).not.toHaveProperty("@openclaw/ai");
+    expect(packageJson.dependencies).not.toHaveProperty("@carapace/ai");
   });
 });

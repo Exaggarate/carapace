@@ -1,8 +1,8 @@
 import type {
-  OpenClawPluginNodeInvokePolicyContext,
-  OpenClawPluginNodeInvokePolicyResult,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+  CarapacePluginNodeInvokePolicyContext,
+  CarapacePluginNodeInvokePolicyResult,
+} from "carapace/plugin-sdk/plugin-entry";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { appendFileTransferAudit, type FileTransferAuditOp } from "./audit.js";
 import { DIR_FETCH_MAX_ENTRIES } from "./dir-fetch-limits.js";
 import { type GrantedAuthorization, promptVerb } from "./node-invoke-policy-approval.js";
@@ -74,7 +74,7 @@ function* dirFetchPolicyPaths(entries: readonly string[]): Generator<string, voi
 }
 
 export async function validateDirFetchEntries(input: {
-  ctx: OpenClawPluginNodeInvokePolicyContext;
+  ctx: CarapacePluginNodeInvokePolicyContext;
   op: FileTransferAuditOp;
   authorization: GrantedAuthorization;
   requestedPath: string;
@@ -82,7 +82,7 @@ export async function validateDirFetchEntries(input: {
   entries: unknown;
   startedAt: number;
   phase: "preflight" | "archive";
-}): Promise<OpenClawPluginNodeInvokePolicyResult | null> {
+}): Promise<CarapacePluginNodeInvokePolicyResult | null> {
   const nodeDisplayName = input.ctx.node?.displayName;
   const missingCode =
     input.phase === "preflight" ? "PREFLIGHT_ENTRIES_MISSING" : "ARCHIVE_ENTRIES_MISSING";
@@ -229,7 +229,7 @@ export function policyDeniedResult(input: {
   code: string;
   message: string;
   details?: Record<string, unknown>;
-}): OpenClawPluginNodeInvokePolicyResult {
+}): CarapacePluginNodeInvokePolicyResult {
   return {
     ok: false,
     code: input.code,
@@ -247,18 +247,18 @@ type PreflightResult =
     }
   | {
       ok: false;
-      result: OpenClawPluginNodeInvokePolicyResult;
+      result: CarapacePluginNodeInvokePolicyResult;
       canonicalChanged?: false;
     }
   | {
       ok: false;
-      result: OpenClawPluginNodeInvokePolicyResult;
+      result: CarapacePluginNodeInvokePolicyResult;
       canonicalChanged: true;
       canonicalPath: string;
     };
 
 async function invokePreflight(input: {
-  ctx: OpenClawPluginNodeInvokePolicyContext;
+  ctx: CarapacePluginNodeInvokePolicyContext;
   op: FileTransferAuditOp;
   params: Record<string, unknown>;
   requestedPath: string;
@@ -350,14 +350,14 @@ async function invokePreflight(input: {
 }
 
 export async function validateCanonicalAuthorization(input: {
-  ctx: OpenClawPluginNodeInvokePolicyContext;
+  ctx: CarapacePluginNodeInvokePolicyContext;
   op: FileTransferAuditOp;
   kind: FilePolicyKind;
   authorization: GrantedAuthorization;
   requestedPath: string;
   canonicalPath: string;
   startedAt: number;
-}): Promise<OpenClawPluginNodeInvokePolicyResult | null> {
+}): Promise<CarapacePluginNodeInvokePolicyResult | null> {
   const nodeDisplayName = input.ctx.node?.displayName;
   if (
     input.authorization.source === "literal" &&
@@ -427,7 +427,7 @@ export async function validateCanonicalAuthorization(input: {
 }
 
 async function invokeAuthorizedPreflight(input: {
-  ctx: OpenClawPluginNodeInvokePolicyContext;
+  ctx: CarapacePluginNodeInvokePolicyContext;
   op: FileTransferAuditOp;
   kind: FilePolicyKind;
   authorization: GrantedAuthorization;
@@ -489,7 +489,7 @@ async function invokeAuthorizedPreflight(input: {
 }
 
 export async function runPathPreflight(input: {
-  ctx: OpenClawPluginNodeInvokePolicyContext;
+  ctx: CarapacePluginNodeInvokePolicyContext;
   op: FileTransferAuditOp;
   kind: FilePolicyKind;
   authorization: GrantedAuthorization;
@@ -498,7 +498,7 @@ export async function runPathPreflight(input: {
   startedAt: number;
 }): Promise<
   | { ok: true; canonicalPath: string; binding: PathBinding }
-  | { ok: false; result: OpenClawPluginNodeInvokePolicyResult }
+  | { ok: false; result: CarapacePluginNodeInvokePolicyResult }
 > {
   const preflight = await invokeAuthorizedPreflight(input);
   if (!preflight.ok) {
@@ -519,7 +519,7 @@ export async function runPathPreflight(input: {
 }
 
 export async function runDirFetchPreflight(input: {
-  ctx: OpenClawPluginNodeInvokePolicyContext;
+  ctx: CarapacePluginNodeInvokePolicyContext;
   op: FileTransferAuditOp;
   authorization: GrantedAuthorization;
   params: Record<string, unknown>;
@@ -527,7 +527,7 @@ export async function runDirFetchPreflight(input: {
   startedAt: number;
 }): Promise<
   | { ok: true; canonicalPath: string; binding: PathBinding }
-  | { ok: false; result: OpenClawPluginNodeInvokePolicyResult }
+  | { ok: false; result: CarapacePluginNodeInvokePolicyResult }
 > {
   const preflight = await invokeAuthorizedPreflight({ ...input, kind: "read" });
   if (!preflight.ok) {

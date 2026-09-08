@@ -107,7 +107,7 @@ describe("node worker transfer client", () => {
           fs.readFile(
             path.join(
               root,
-              ".openclaw-worker",
+              ".carapace-worker",
               "manifests",
               `${manifestRef.slice("sha256:".length)}.json`,
             ),

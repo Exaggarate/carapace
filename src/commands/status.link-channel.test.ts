@@ -1,6 +1,6 @@
 // Status link-channel tests cover channel link status summaries and redaction.
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 
 const pluginRegistry = vi.hoisted(() => ({ list: [] as unknown[] }));
 
@@ -36,7 +36,7 @@ describe("resolveLinkChannelContext", () => {
       },
     ];
 
-    const result = await resolveLinkChannelContext({} as OpenClawConfig);
+    const result = await resolveLinkChannelContext({} as CarapaceConfig);
     expect(result?.linked).toBe(true);
     expect(result?.authAgeMs).toBeNull();
     expect(result?.account).toBe(account);
@@ -73,6 +73,6 @@ describe("resolveLinkChannelContext", () => {
       },
     ];
 
-    await expect(resolveLinkChannelContext({} as OpenClawConfig)).rejects.toThrow("missing secret");
+    await expect(resolveLinkChannelContext({} as CarapaceConfig)).rejects.toThrow("missing secret");
   });
 });

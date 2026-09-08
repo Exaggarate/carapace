@@ -63,8 +63,8 @@ describe("custodian page", () => {
         ?.getAttribute("src"),
     ).toBe("/favicon.svg");
     // Onboarding strips the header identity; the thread avatar is the only mascot.
-    expect(page.querySelector(".custodian__mark openclaw-mascot")).toBeNull();
-    const card = page.querySelector("openclaw-option-card")!;
+    expect(page.querySelector(".custodian__mark carapace-mascot")).toBeNull();
+    const card = page.querySelector("carapace-option-card")!;
     await card.updateComplete;
     expect(page.querySelector(".option-card__choice--recommended")?.textContent).toContain(
       "Talk to my agent",
@@ -74,7 +74,7 @@ describe("custodian page", () => {
 
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
     await page.updateComplete;
-    expect(request.mock.calls[0]?.[0]).toBe("openclaw.chat");
+    expect(request.mock.calls[0]?.[0]).toBe("carapace.chat");
     expect(request.mock.calls[0]?.[1]).toMatchObject({ welcomeVariant: "onboarding" });
     // LLM-authored option cards remain chat messages; wizard controls use wizardAnswer below.
     expect(request.mock.calls[1]?.[1]).toMatchObject({
@@ -144,7 +144,7 @@ describe("custodian page", () => {
     await waitForFast(() =>
       expect(page.querySelectorAll('.custodian__wizard-step input[type="radio"]')).toHaveLength(5),
     );
-    expect(page.querySelector("openclaw-option-card")).toBeNull();
+    expect(page.querySelector("carapace-option-card")).toBeNull();
     expect(page.querySelector(".agent-chat__composer-shell")).toBeNull();
     page
       .querySelectorAll<HTMLInputElement>('.custodian__wizard-step input[type="radio"]')[4]!
@@ -267,7 +267,7 @@ describe("custodian page", () => {
         sensitive: true,
       },
     });
-    const { context } = createContext(request, ["openclaw.chat"], {
+    const { context } = createContext(request, ["carapace.chat"], {
       gatewayCapabilities: [],
     });
     const { page } = await mountPage(context);
@@ -288,7 +288,7 @@ describe("custodian page", () => {
       .fn()
       .mockRejectedValue(
         new Error(
-          "OpenClaw requires working inference: No agent model is configured. Run `openclaw onboard` first.",
+          "Carapace requires working inference: No agent model is configured. Run `carapace onboard` first.",
         ),
       );
     const { context } = createContext(request);
@@ -305,7 +305,7 @@ describe("custodian page", () => {
 
   it.each([
     { pathname: "/settings/channels", expectedPage: "channels" },
-    { pathname: "/not-an-openclaw-route", expectedPage: undefined },
+    { pathname: "/not-an-carapace-route", expectedPage: undefined },
   ])(
     "adds resolved page context only to user turns at $pathname",
     async ({ pathname, expectedPage }) => {
@@ -341,7 +341,7 @@ describe("custodian page", () => {
 
   it("renders advertised durable history before the live welcome with a divider", async () => {
     const request = vi.fn(async (method: string, _params?: unknown) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         return {
           turns: [
             { role: "user", text: "Earlier question", at: 1 },
@@ -349,7 +349,7 @@ describe("custodian page", () => {
           ],
         };
       }
-      if (method === "openclaw.chat") {
+      if (method === "carapace.chat") {
         return {
           sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
           reply: "Live welcome",
@@ -358,15 +358,15 @@ describe("custodian page", () => {
       }
       throw new Error(`unexpected request ${method}`);
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
     const { page } = await mountPage(context);
 
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
     await page.updateComplete;
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "carapace.chat.history",
+      "carapace.chat",
     ]);
     expect(request.mock.calls[0]?.[1]).toEqual({});
     const rows = Array.from(page.querySelectorAll(".chat-group, .chat-divider")).map((row) =>
@@ -383,7 +383,7 @@ describe("custodian page", () => {
   it("refreshes durable rows for a same-ownership client replacement", async () => {
     let historyCalls = 0;
     const request = vi.fn(async (method: string, _params?: unknown) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCalls += 1;
         return {
           turns:
@@ -395,7 +395,7 @@ describe("custodian page", () => {
                 ],
         };
       }
-      if (method === "openclaw.chat") {
+      if (method === "carapace.chat") {
         return {
           sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
           reply: "Live welcome",
@@ -405,8 +405,8 @@ describe("custodian page", () => {
       throw new Error(`unexpected request ${method}`);
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -416,9 +416,9 @@ describe("custodian page", () => {
     await waitForFast(() => expect(page.textContent).toContain("Completed while away"));
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     expect(page.textContent).toContain("Earlier state");
     expect(page.textContent).not.toContain("Live welcome");
@@ -464,7 +464,7 @@ describe("custodian page", () => {
         reply: "Recovered welcome.",
         action: "none",
       });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["carapace.chat", "carapace.chat.history"]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(page.querySelector('[role="alert"] button')).not.toBeNull());
 
@@ -472,9 +472,9 @@ describe("custodian page", () => {
     await waitForFast(() => expect(page.textContent).toContain("Recovered welcome."));
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
-      "openclaw.chat",
+      "carapace.chat.history",
+      "carapace.chat",
+      "carapace.chat",
     ]);
     expect(page.textContent).toContain("Loaded transcript row");
   });
@@ -526,7 +526,7 @@ describe("custodian page", () => {
       isOther: false,
     };
     const request = vi.fn(async (method: string) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         return { turns: [{ role: "assistant", text: "Earlier row", at: 1 }] };
       }
       return {
@@ -537,13 +537,13 @@ describe("custodian page", () => {
       };
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
     await page.updateComplete;
-    expect(page.querySelector("openclaw-option-card")).not.toBeNull();
+    expect(page.querySelector("carapace-option-card")).not.toBeNull();
 
     setGatewaySnapshot({ phase: "reconnecting" });
     await page.updateComplete;
@@ -553,10 +553,10 @@ describe("custodian page", () => {
     await page.updateComplete;
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "carapace.chat.history",
+      "carapace.chat",
     ]);
-    expect(page.querySelector("openclaw-option-card")).not.toBeNull();
+    expect(page.querySelector("carapace-option-card")).not.toBeNull();
     expect(page.textContent).toContain("Choose the next step.");
   });
 
@@ -573,8 +573,8 @@ describe("custodian page", () => {
       turns: [{ role: "assistant", text: "Hello after reconnect.", at: 1 }],
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -602,7 +602,7 @@ describe("custodian page", () => {
         }),
       );
     const replacementRequest = vi.fn((method: string, params: { sessionId?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         return Promise.resolve({
           turns: [
             { role: "user", text: "check this system", at: 1 },
@@ -618,8 +618,8 @@ describe("custodian page", () => {
       });
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -639,9 +639,9 @@ describe("custodian page", () => {
     // Full rejoin: history, welcome-only chat, then one barrier refresh behind
     // the rejoin in case the interrupted turn persisted rows meanwhile.
     expect(replacementRequest.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     expect(page.querySelector('[role="alert"]')).toBeNull();
   });
@@ -674,8 +674,8 @@ describe("custodian page", () => {
         action: "none",
       });
     const { context, setGatewaySnapshot, setGatewayToken } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -705,8 +705,8 @@ describe("custodian page", () => {
       message: "test-token-placeholder",
     });
     expect(replacementRequest.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "carapace.chat.history",
+      "carapace.chat",
     ]);
     expect(replacementRequest.mock.calls[1]?.[1]).toMatchObject({
       sessionId: expect.stringMatching(/^control-ui-onboarding-/),
@@ -783,7 +783,7 @@ describe("custodian page", () => {
     const question = {
       id: "access",
       header: "Access",
-      question: "How should OpenClaw work?",
+      question: "How should Carapace work?",
       options: [{ label: "Full access", recommended: true }, { label: "Ask first" }],
       isOther: false,
     };
@@ -811,7 +811,7 @@ describe("custodian page", () => {
     await page.updateComplete;
     expect(request.mock.calls[1]?.[1]).toMatchObject({ message: "cancel" });
     expect(page.querySelector(".chat-group.user")?.textContent).toContain("Skip for now");
-    await waitForFast(() => expect(page.querySelector("openclaw-option-card")).toBeNull());
+    await waitForFast(() => expect(page.querySelector("carapace-option-card")).toBeNull());
   });
 
   it("exits onboarding locally when the question declares an exit skip action", async () => {
@@ -895,7 +895,7 @@ describe("custodian page", () => {
     await page.updateComplete;
 
     expect(page.querySelector(".chat-group.assistant")).toBeNull();
-    expect(page.querySelector("openclaw-option-card")).not.toBeNull();
+    expect(page.querySelector("carapace-option-card")).not.toBeNull();
     expect(page.textContent).toContain("Which channel?");
     expect(page.textContent).not.toContain("NO_REPLY");
   });
@@ -904,7 +904,7 @@ describe("custodian page", () => {
     const question = {
       id: "access",
       header: "Access",
-      question: "How should OpenClaw work?",
+      question: "How should Carapace work?",
       options: [{ label: "Full access", recommended: true }, { label: "Ask first" }],
       isOther: false,
     };
@@ -948,7 +948,7 @@ describe("custodian page", () => {
   it("requests the normal caretaker greeting outside onboarding", async () => {
     const request = vi.fn().mockResolvedValue({
       sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
-      reply: "OpenClaw here. Everything is healthy.",
+      reply: "Carapace here. Everything is healthy.",
       action: "none",
     });
     const { context } = createContext(request);
@@ -975,7 +975,7 @@ describe("custodian page", () => {
       .fn()
       .mockResolvedValueOnce({
         sessionId: "control-ui-caretaker-00000000-0000-4000-8000-000000000001",
-        reply: "I'm OpenClaw. All systems nominal.",
+        reply: "I'm Carapace. All systems nominal.",
         action: "none",
         question: {
           id: "system-agent-quick-actions",

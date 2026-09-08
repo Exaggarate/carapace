@@ -5,11 +5,11 @@ import {
   formatConfigWriteDeniedMessage,
 } from "../../channels/plugins/config-writes.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 /** Resolves the denial message for config writes attempted from a channel. */
 export function resolveConfigWriteDeniedText(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string | null;
   originChannelId: ChannelId | null;
   originAccountId?: string;

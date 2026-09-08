@@ -70,7 +70,7 @@ describe("GitHub tool identity", () => {
   });
 
   it("gives a managed agent override complete precedence", async () => {
-    const stateDir = tempDirs.make("openclaw-github-state-");
+    const stateDir = tempDirs.make("carapace-github-state-");
     const config = {
       tools: {
         github: {
@@ -98,7 +98,7 @@ describe("GitHub tool identity", () => {
       managedLocalIdentity: false,
     });
 
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const expectedProfileDir = resolveManagedGitHubProfileDir({
       agentId: "main",
       scope: "agent",
@@ -280,8 +280,8 @@ describe("GitHub tool identity", () => {
   });
 
   it("keeps the selected scope distinct from the effective agent override", async () => {
-    const root = tempDirs.make("openclaw-github-scope-status-");
-    const env = { OPENCLAW_STATE_DIR: root };
+    const root = tempDirs.make("carapace-github-scope-status-");
+    const env = { CARAPACE_STATE_DIR: root };
     const systemProfileId = "ghp_12121212121212121212121212121212";
     const agentProfileId = "ghp_34343434343434343434343434343434";
     const systemProfileDir = resolveManagedGitHubProfileDir({
@@ -409,8 +409,8 @@ describe("GitHub tool identity", () => {
     },
     { failure: undefined, pendingRefresh: undefined, refreshExpiresAtMs: 1, expected: "expired" },
   ] as const)("reports OAuth refresh state $expected", async (testCase) => {
-    const root = tempDirs.make("openclaw-github-refresh-status-");
-    const env = { OPENCLAW_STATE_DIR: root };
+    const root = tempDirs.make("carapace-github-refresh-status-");
+    const env = { CARAPACE_STATE_DIR: root };
     const profileId = "ghp_56565656565656565656565656565656";
     const profileDir = resolveManagedGitHubProfileDir({
       agentId: "main",
@@ -482,7 +482,7 @@ describe("GitHub tool identity", () => {
   });
 
   it("probes native gh with ambient token precedence and reads Git author in the workspace", async () => {
-    const workspace = tempDirs.make("openclaw-github-workspace-");
+    const workspace = tempDirs.make("carapace-github-workspace-");
     await resolveGitHubToolIdentityStatus({
       config: { agents: { defaults: { workspace } } },
       agentId: "main",
@@ -541,10 +541,10 @@ describe("GitHub tool identity", () => {
   );
 
   it("removes ambient tokens from the actual managed publication child environment", async () => {
-    const root = tempDirs.make("openclaw-github-publication-env-");
+    const root = tempDirs.make("carapace-github-publication-env-");
     const profileId = "ghp_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
     const env = {
-      OPENCLAW_STATE_DIR: root,
+      CARAPACE_STATE_DIR: root,
       GH_TOKEN: "ambient-primary",
       GITHUB_TOKEN: "ambient-fallback",
       PREVIEW_SERVICE_TOKEN: "preview-only",
@@ -621,9 +621,9 @@ describe("GitHub tool identity", () => {
   });
 
   it("token rotation bypasses the verification cache", async () => {
-    const root = tempDirs.make("openclaw-github-token-rotation-");
+    const root = tempDirs.make("carapace-github-token-rotation-");
     const profileId = "ghp_dddddddddddddddddddddddddddddddd";
-    const env = { OPENCLAW_STATE_DIR: root };
+    const env = { CARAPACE_STATE_DIR: root };
     const config = { tools: { github: { profileId } } };
     const profileDir = resolveManagedGitHubProfileDir({
       agentId: "main",
@@ -661,9 +661,9 @@ describe("GitHub tool identity", () => {
   });
 
   it("a disconnected profile is unavailable without a probe", async () => {
-    const root = tempDirs.make("openclaw-github-disconnected-");
+    const root = tempDirs.make("carapace-github-disconnected-");
     const profileId = "ghp_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-    const env = { OPENCLAW_STATE_DIR: root };
+    const env = { CARAPACE_STATE_DIR: root };
     const config = { tools: { github: { profileId } } };
     const profileDir = resolveManagedGitHubProfileDir({
       agentId: "main",
@@ -788,9 +788,9 @@ describe("GitHub tool identity", () => {
       credentialState: "unverified",
     },
   ])("reports a managed $label honestly", async (testCase) => {
-    const root = tempDirs.make("openclaw-github-status-");
+    const root = tempDirs.make("carapace-github-status-");
     const profileId = "ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    const env = { OPENCLAW_STATE_DIR: root };
+    const env = { CARAPACE_STATE_DIR: root };
     const profileDir = resolveManagedGitHubProfileDir({
       agentId: "main",
       scope: "agent",
@@ -830,7 +830,7 @@ describe("GitHub tool identity", () => {
   });
 
   it("serializes a private verified CLI profile and returns only account metadata", async () => {
-    const root = tempDirs.make("openclaw-github-profile-");
+    const root = tempDirs.make("carapace-github-profile-");
     const profileDir = path.join(root, "profile");
     const result = await installManagedGitHubProfile({
       profileDir,
@@ -856,8 +856,8 @@ describe("GitHub tool identity", () => {
   });
 
   it("atomically refreshes the credential seen by an already-prepared stable profile", async () => {
-    const root = tempDirs.make("openclaw-github-stable-refresh-");
-    const env = { OPENCLAW_STATE_DIR: root };
+    const root = tempDirs.make("carapace-github-stable-refresh-");
+    const env = { CARAPACE_STATE_DIR: root };
     const profileId = "ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     const config = { tools: { github: { profileId, kind: "oauth" as const } } };
     const profileDir = resolveManagedGitHubProfileDir({
@@ -894,7 +894,7 @@ describe("GitHub tool identity", () => {
   });
 
   it("keeps the previous generation after the new version commits", async () => {
-    const root = tempDirs.make("openclaw-github-rotate-");
+    const root = tempDirs.make("carapace-github-rotate-");
     const previousProfileDir = path.join(root, "profile-old");
     const profileDir = path.join(root, "profile-new");
     await fs.mkdir(previousProfileDir, { mode: 0o700 });
@@ -927,7 +927,7 @@ describe("GitHub tool identity", () => {
   });
 
   it("deletes only the new profile when the guarded config write fails", async () => {
-    const root = tempDirs.make("openclaw-github-rollback-");
+    const root = tempDirs.make("carapace-github-rollback-");
     const previousProfileDir = path.join(root, "profile-old");
     const profileDir = path.join(root, "profile-new");
     await fs.mkdir(previousProfileDir, { mode: 0o700 });

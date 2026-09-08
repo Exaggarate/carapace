@@ -1,4 +1,4 @@
-import type { BrowserConfig, BrowserProfileConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BrowserConfig, BrowserProfileConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import {
   assertChromeMcpCdpTransportAllowed,

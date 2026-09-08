@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { isTransientSqliteBackupPath, isVolatileBackupPath } from "./backup-volatile-filter.js";
 
-const stateDir = "/opt/openclaw/state";
+const stateDir = "/opt/carapace/state";
 const plan = { stateDirs: [stateDir] };
 
 describe("isVolatileBackupPath", () => {
@@ -30,9 +30,9 @@ describe("isVolatileBackupPath", () => {
     [`${stateDir}/logs/config-audit.jsonl.migrated.raw.doctor-scrub-progress`, false],
     [`${stateDir}/delivery-queue/pending.tmp`, true],
     [`${stateDir}/session-delivery-queue/pending.tmp`, true],
-    [`${stateDir}/browser/openclaw/user-data/SingletonCookie`, true],
-    [`${stateDir}/browser/openclaw/user-data/SingletonLock`, true],
-    [`${stateDir}/browser/openclaw/user-data/SingletonSocket`, true],
+    [`${stateDir}/browser/carapace/user-data/SingletonCookie`, true],
+    [`${stateDir}/browser/carapace/user-data/SingletonLock`, true],
+    [`${stateDir}/browser/carapace/user-data/SingletonSocket`, true],
     [`${stateDir}/sandbox/skills-workspaces/workspace-main`, true],
     [`${stateDir}/sandbox/skills-workspaces/workspace-main/skills/demo`, true],
     [`${stateDir}/cache/control-ui-assets/generation/assets/app.js`, true],
@@ -44,9 +44,9 @@ describe("isVolatileBackupPath", () => {
     [`${stateDir}/cron/jobs.json`, false],
     // non-volatile: cron runs but wrong extension
     [`${stateDir}/cron/runs/2026-01-01/job.json`, false],
-    [`${stateDir}/browser/openclaw/user-data/Preferences`, false],
-    [`${stateDir}/browser/openclaw/user-data/nested/SingletonSocket`, false],
-    [`${stateDir}/browser/openclaw/SingletonSocket`, false],
+    [`${stateDir}/browser/carapace/user-data/Preferences`, false],
+    [`${stateDir}/browser/carapace/user-data/nested/SingletonSocket`, false],
+    [`${stateDir}/browser/carapace/SingletonSocket`, false],
     [`${stateDir}/sandbox/registry.json`, false],
     [`${stateDir}/sandbox/workspaces/workspace-main/README.md`, false],
     [`${stateDir}/cache/other-product/artifact.bin`, false],
@@ -76,8 +76,8 @@ describe("isVolatileBackupPath", () => {
   });
 
   it("does not match paths that escape the anchor via `..`", () => {
-    // `/opt/openclaw/state/sessions/../config.jsonl` resolves to
-    // `/opt/openclaw/state/config.jsonl`, which is NOT inside sessions/.
+    // `/opt/carapace/state/sessions/../config.jsonl` resolves to
+    // `/opt/carapace/state/config.jsonl`, which is NOT inside sessions/.
     expect(isVolatileBackupPath(`${stateDir}/sessions/../config.jsonl`, plan)).toBe(false);
     expect(isVolatileBackupPath(`${stateDir}/cron/runs/../jobs.log`, plan)).toBe(false);
     expect(isVolatileBackupPath(`${stateDir}/logs/../notes.jsonl`, plan)).toBe(false);
@@ -110,7 +110,7 @@ describe("isVolatileBackupPath", () => {
   });
 
   it("normalizes Windows-style separators before anchor checks", () => {
-    const winStateDir = "C:\\openclaw\\state";
+    const winStateDir = "C:\\carapace\\state";
     const winPlan = { stateDirs: [winStateDir] };
     expect(isVolatileBackupPath(`${winStateDir}\\sessions\\s-abc\\transcript.jsonl`, winPlan)).toBe(
       true,
@@ -120,7 +120,7 @@ describe("isVolatileBackupPath", () => {
     );
     expect(isVolatileBackupPath(`${winStateDir}\\cron\\runs\\2026\\job.jsonl`, winPlan)).toBe(true);
     expect(
-      isVolatileBackupPath(`${winStateDir}\\browser\\openclaw\\user-data\\SingletonLock`, winPlan),
+      isVolatileBackupPath(`${winStateDir}\\browser\\carapace\\user-data\\SingletonLock`, winPlan),
     ).toBe(true);
     expect(
       isVolatileBackupPath(`${winStateDir}\\sandbox\\skills-workspaces\\workspace-main`, winPlan),
@@ -131,7 +131,7 @@ describe("isVolatileBackupPath", () => {
 
   it("matches tar filter paths when node-tar omits the leading slash", () => {
     expect(
-      isVolatileBackupPath("opt/openclaw/state/agents/main/sessions/transcript.jsonl", plan),
+      isVolatileBackupPath("opt/carapace/state/agents/main/sessions/transcript.jsonl", plan),
     ).toBe(true);
   });
 
@@ -159,10 +159,10 @@ describe("isTransientSqliteBackupPath", () => {
   });
 
   it.each([
-    "tmp/openclaw-502/gateway.state.lock.sqlite",
-    "tmp/openclaw-502/gateway.12345678.lock.sqlite-wal",
-    "tmp/openclaw-502/device-identity.12345678.lock.sqlite-journal",
-    "tmp/openclaw-502/retained.sqlite",
+    "tmp/carapace-502/gateway.state.lock.sqlite",
+    "tmp/carapace-502/gateway.12345678.lock.sqlite-wal",
+    "tmp/carapace-502/device-identity.12345678.lock.sqlite-journal",
+    "tmp/carapace-502/retained.sqlite",
     "plugins/dedicated/durable.sqlite",
     "plugins/dedicated/cache.lock.sqlite",
     "plugins/dedicated/durable.locked.sqlite",

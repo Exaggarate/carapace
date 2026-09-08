@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -42,17 +42,17 @@ const {
     startSubscription: vi.fn().mockResolvedValue(undefined),
   },
   monitorFixture: {
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     url: "https://urbit.example.com",
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-runtime", () => ({
   resolveHumanDelayConfig: vi.fn(() => undefined),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>()),
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>()),
   createChannelInboundEnvelopeBuilder: vi.fn(() => vi.fn(() => "tlon-envelope")),
 }));
 

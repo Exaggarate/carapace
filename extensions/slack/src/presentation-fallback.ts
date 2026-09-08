@@ -7,7 +7,7 @@ import {
   type MessagePresentationBlock,
   type MessagePresentationChartBlock,
   type MessagePresentationTableBlock,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import { escapeSlackMrkdwn } from "./monitor/mrkdwn.js";
 
 const SLACK_UNCOPYABLE_COMMAND_WARNING = "not copyable: contains backtick";

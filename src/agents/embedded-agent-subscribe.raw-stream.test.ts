@@ -12,11 +12,11 @@ describe("appendRawStream", () => {
   };
 
   beforeAll(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-raw-stream-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-raw-stream-test-"));
   });
 
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_RAW_STREAM", "true");
+    vi.stubEnv("CARAPACE_RAW_STREAM", "true");
     process.on("unhandledRejection", onUnhandledRejection);
   });
 
@@ -40,7 +40,7 @@ describe("appendRawStream", () => {
   it("contains a real rejected append without leaking an unhandled rejection", async () => {
     const directoryTarget = path.join(tmpDir, "directory-target");
     fs.mkdirSync(directoryTarget);
-    vi.stubEnv("OPENCLAW_RAW_STREAM_PATH", directoryTarget);
+    vi.stubEnv("CARAPACE_RAW_STREAM_PATH", directoryTarget);
 
     expect(() => appendRawStream(() => ({ event: "test", ts: 1 }))).not.toThrow();
     await drainAsyncWrites();
@@ -50,7 +50,7 @@ describe("appendRawStream", () => {
 
   it("snapshots the factory result before appending exact JSONL", async () => {
     const rawStreamPath = path.join(tmpDir, "raw.jsonl");
-    vi.stubEnv("OPENCLAW_RAW_STREAM_PATH", rawStreamPath);
+    vi.stubEnv("CARAPACE_RAW_STREAM_PATH", rawStreamPath);
 
     const payload = { event: "test", ts: 1 };
     appendRawStream(() => payload);
@@ -64,8 +64,8 @@ describe("appendRawStream", () => {
 
   it("does nothing when raw streaming is disabled", async () => {
     const rawStreamPath = path.join(tmpDir, "disabled.jsonl");
-    vi.stubEnv("OPENCLAW_RAW_STREAM", "");
-    vi.stubEnv("OPENCLAW_RAW_STREAM_PATH", rawStreamPath);
+    vi.stubEnv("CARAPACE_RAW_STREAM", "");
+    vi.stubEnv("CARAPACE_RAW_STREAM_PATH", rawStreamPath);
 
     let evaluated = false;
     appendRawStream(() => {
@@ -84,7 +84,7 @@ describe("appendRawStream", () => {
     const rawStreamPath = path.join(tmpDir, "cyclic.jsonl");
     const payload: Record<string, unknown> = {};
     payload.self = payload;
-    vi.stubEnv("OPENCLAW_RAW_STREAM_PATH", rawStreamPath);
+    vi.stubEnv("CARAPACE_RAW_STREAM_PATH", rawStreamPath);
 
     expect(() => appendRawStream(() => payload)).not.toThrow();
     expect(() =>

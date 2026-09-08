@@ -1,11 +1,11 @@
 // Firecrawl plugin module implements firecrawl search tool behavior.
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-runtime";
 import {
   jsonResult,
   readPositiveIntegerParam,
   readStringArrayParam,
   readStringParam,
-} from "openclaw/plugin-sdk/provider-web-search";
+} from "carapace/plugin-sdk/provider-web-search";
 import { Type } from "typebox";
 import { runFirecrawlSearch } from "./firecrawl-client.js";
 
@@ -73,7 +73,7 @@ const FirecrawlSearchToolSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export function createFirecrawlSearchTool(api: OpenClawPluginApi) {
+export function createFirecrawlSearchTool(api: CarapacePluginApi) {
   return {
     name: "firecrawl_search",
     label: "Firecrawl Search",

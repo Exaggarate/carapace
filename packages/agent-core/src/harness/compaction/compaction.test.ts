@@ -308,7 +308,7 @@ describe("session-entry compaction budgeting", () => {
       kind: "custom",
       createMessage: (excludeFromContext: boolean): AgentMessage => ({
         role: "custom",
-        customType: "openclaw.operator-activity",
+        customType: "carapace.operator-activity",
         content: "x".repeat(80_004),
         display: excludeFromContext,
         excludeFromContext,
@@ -949,7 +949,7 @@ describe("split-turn compaction", () => {
   const operatorFocus = "Preserve API decisions.";
   const runtimeContext: AgentMessage = {
     role: "custom",
-    customType: "openclaw.runtime-context",
+    customType: "carapace.runtime-context",
     content: "PRIVATE_RUNTIME_CONTEXT",
     display: false,
     details: { runtimeContextCarrier: true },

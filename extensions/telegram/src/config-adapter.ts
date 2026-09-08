@@ -1,12 +1,12 @@
 // Telegram plugin module implements shared config adapter behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { formatAllowFromLowercase } from "openclaw/plugin-sdk/allow-from";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { formatAllowFromLowercase } from "carapace/plugin-sdk/allow-from";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import type { ChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
 import { inspectTelegramAccount } from "./account-inspect.js";
 import {
   listTelegramAccountIds,
@@ -23,7 +23,7 @@ type TelegramConfigAccessorAccount = {
 };
 
 export function resolveTelegramConfigAccessorAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): TelegramConfigAccessorAccount {
   const accountId = normalizeAccountId(

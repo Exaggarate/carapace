@@ -13,7 +13,7 @@ const tempDirs: string[] = [];
 
 function makePackage(): { root: string; entrypoint: string; implementation: string } {
   const root = fs.realpathSync.native(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-artifact-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cli-artifact-")),
   );
   tempDirs.push(root);
   const entrypoint = path.join(root, "bin", "cli.js");
@@ -73,7 +73,7 @@ describe("CLI executable implementation identity", () => {
       const artifactRoot = path.join(process.cwd(), ".artifacts");
       fs.mkdirSync(artifactRoot, { recursive: true });
       const root = fs.realpathSync.native(
-        makeTempDir(tempDirs, "openclaw-cli-path-case-", artifactRoot),
+        makeTempDir(tempDirs, "carapace-cli-path-case-", artifactRoot),
       );
       const binDir = path.join(root, "bin");
       const executable = path.join(binDir, "mixed-identity.exe");
@@ -139,7 +139,7 @@ describe("CLI executable implementation identity", () => {
         fs.copyFileSync(process.execPath, entrypoint);
       } else {
         const hookRoot = fs.realpathSync.native(
-          fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-unbound-hook-")),
+          fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cli-unbound-hook-")),
         );
         tempDirs.push(hookRoot);
         const hook = path.join(hookRoot, "unbound-hook.cjs");
@@ -206,7 +206,7 @@ describe("CLI executable implementation identity", () => {
     it("does not bind a missing PATH command to an executable in the current directory", async () => {
       const fixture = makePackage();
       const emptyPath = path.join(fixture.root, "empty-path");
-      const command = `openclaw-cli-missing-owner-${randomUUID()}.exe`;
+      const command = `carapace-cli-missing-owner-${randomUUID()}.exe`;
       const executable = path.join(process.cwd(), command);
       fs.mkdirSync(emptyPath);
       // Workers cannot chdir; this uniquely owned file exercises implicit cwd lookup.
@@ -310,7 +310,7 @@ describe("CLI executable implementation identity", () => {
   });
 
   it("requires a positive native executable name under a backend package policy", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-native-policy-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cli-native-policy-"));
     tempDirs.push(root);
     const executable = path.join(root, "claude");
     fs.copyFileSync(process.execPath, executable);

@@ -68,7 +68,7 @@ describe("same-origin browser bootstrap recovery", () => {
 
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(fetchMock).toHaveBeenCalledWith(
-      "/operator/.well-known/openclaw/browser-bootstrap",
+      "/operator/.well-known/carapace/browser-bootstrap",
       expect.objectContaining({
         method: "GET",
         credentials: "same-origin",

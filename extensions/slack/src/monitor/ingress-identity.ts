@@ -1,8 +1,8 @@
 import {
   defineStableChannelIngressIdentity,
   type ChannelIngressIdentifierKind,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { parseSlackTarget } from "../target-parsing.js";
 import { normalizeSlackSlug } from "./allow-list.js";
 

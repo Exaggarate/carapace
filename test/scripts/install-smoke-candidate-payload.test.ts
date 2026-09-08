@@ -11,9 +11,9 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const IDENTITY = {
-  harnessRepository: "openclaw/openclaw",
+  harnessRepository: "carapace/carapace",
   harnessSha: "1".repeat(40),
-  repository: "openclaw/openclaw",
+  repository: "carapace/carapace",
   runAttempt: "2",
   runId: "12345",
   targetSha: "2".repeat(40),
@@ -58,9 +58,9 @@ function createFixture(
 
   writeFileSync(
     path.join(packageContents, "package.json"),
-    `${JSON.stringify({ name: "openclaw", version: PACKAGE_VERSION })}\n`,
+    `${JSON.stringify({ name: "carapace", version: PACKAGE_VERSION })}\n`,
   );
-  writeFileSync(path.join(packageContents, "index.js"), "console.log('openclaw');\n");
+  writeFileSync(path.join(packageContents, "index.js"), "console.log('carapace');\n");
   const packagePath = path.join(packageDir, "candidate.tgz");
   createTarball(packagePath, packageRoot, ["package"]);
   if (options.symlinkPackage) {
@@ -115,7 +115,7 @@ describe("install smoke candidate payload", () => {
     expect(verified).toMatchObject({
       ...IDENTITY,
       packageVersion: PACKAGE_VERSION,
-      schema: "openclaw.install-smoke-candidate-payload/v1",
+      schema: "carapace.install-smoke-candidate-payload/v1",
       sourceArchiveSha256: sha256(fixture.archivePath),
     });
     expect(verified.files.map(({ name, role }) => ({ name, role }))).toEqual([
@@ -130,7 +130,7 @@ describe("install smoke candidate payload", () => {
       {
         entryCount: 2,
         filename: "candidate.tgz",
-        name: "openclaw",
+        name: "carapace",
         size: statSync(fixture.packagePath).size,
         unpackedSize:
           statSync(path.join(fixture.packageContents, "package.json")).size +

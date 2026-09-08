@@ -1,5 +1,5 @@
 // Stores voice wake trigger configuration.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineStateWithMetadata } from "../state/config-machine-state.js";
 
@@ -9,7 +9,7 @@ type VoiceWakeConfig = {
   updatedAtMs: number;
 };
 
-const DEFAULT_TRIGGERS = ["openclaw", "claude", "computer"];
+const DEFAULT_TRIGGERS = ["carapace", "claude", "computer"];
 const VOICEWAKE_TRIGGERS_STATE_KEY = "voicewake.triggers";
 
 function sanitizeTriggers(triggers: string[] | undefined | null): string[] {
@@ -20,7 +20,7 @@ function sanitizeTriggers(triggers: string[] | undefined | null): string[] {
 }
 
 function stateDatabaseOptions(stateDir?: string) {
-  return stateDir ? { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } } : {};
+  return stateDir ? { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } } : {};
 }
 
 /** Return the built-in voice wake trigger list. */

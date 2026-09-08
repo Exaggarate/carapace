@@ -152,7 +152,7 @@ suite.define(() => {
       const artifactDir = path.join(
         createControlUiE2eArtifactDir(
           "virtual-sizing",
-          process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR,
+          process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR,
         ),
         "after",
         `${reducedMotion}-${interruption}-${recoveryPosition}`,
@@ -174,7 +174,7 @@ suite.define(() => {
                   ? "Assistant preview awaiting full text."
                   : `Transcript message ${index}. ${"Keep this conversation scrollable. ".repeat(6)}`,
               timestamp: 1000 + index,
-              __openclaw: {
+              __carapace: {
                 id: `sizing-message-${index}`,
                 seq: index + 1,
                 ...(index % 2 === 1 ? { truncated: true, reason: "display-cap" } : {}),
@@ -591,7 +591,7 @@ suite.define(() => {
                   ]
                 : `Image fixture message ${index}.`,
             timestamp: index + 1,
-            __openclaw: { id: `image-message-${index}`, seq: index + 1 },
+            __carapace: { id: `image-message-${index}`, seq: index + 1 },
           })),
         });
         await page.goto(`${suite.server.baseUrl}chat`);
@@ -641,7 +641,7 @@ suite.define(() => {
   });
 
   it("keeps completed-work and tool disclosures anchored on every expand and collapse frame", async () => {
-    const artifactDirParent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-transcript-disclosure-anchor", artifactDirParent)
       : undefined;
@@ -834,7 +834,7 @@ suite.define(() => {
   });
 
   it("keeps raw tool details anchored at the end and middle of a long transcript", async () => {
-    const artifactDirParent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-transcript-disclosure-anchor", artifactDirParent)
       : undefined;
@@ -884,7 +884,7 @@ suite.define(() => {
                   view: {
                     backend: "canvas",
                     id: "disclosure-geometry-proof",
-                    url: "/__openclaw__/canvas/documents/disclosure-geometry-proof/index.html",
+                    url: "/__carapace__/canvas/documents/disclosure-geometry-proof/index.html",
                     title: "Disclosure geometry proof",
                     preferred_height: 160,
                   },

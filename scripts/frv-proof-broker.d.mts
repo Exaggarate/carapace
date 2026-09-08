@@ -3,7 +3,7 @@ export type BrokerContext = {
   correlation: string;
   landedSha: string;
   prNumber: number;
-  repository: "openclaw/openclaw";
+  repository: "carapace/carapace";
   runId: number;
   workflowSha: string;
 };
@@ -30,7 +30,7 @@ export type ProofReceipt = {
   landedSha: string;
   operation: "noop";
   prNumber: number;
-  repository: "openclaw/openclaw";
+  repository: "carapace/carapace";
   sourceRef: "refs/heads/main";
   workflowSha: string;
 };

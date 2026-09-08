@@ -1,8 +1,8 @@
 /**
  * Normalizes OpenAI Responses reasoning/tool-call history for safe replay.
  */
-import { replaceCompactionReplayOwnerContent } from "@openclaw/ai/transports";
-import { parseDateFirstTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { replaceCompactionReplayOwnerContent } from "@carapace/ai/transports";
+import { parseDateFirstTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { sha256HexPrefixCore } from "../../infra/crypto-digest.js";
 import type { AgentMessage } from "../runtime/index.js";
 import { rewriteToolResultIds } from "../tool-call-id.js";
@@ -165,7 +165,7 @@ function createOpenAIResponsesToolCallIdResolver(): (id: string) => string {
  * `function_call.id`, and matching `function_call_output.call_id` values
  * that exceed its 64-char `call_*` / `fc_*` shape. pi-ai skips its own
  * normalizer for same-model replay, then splits persisted `call_id|fc_id`
- * pairs directly into the provider payload, so OpenClaw must normalize here.
+ * pairs directly into the provider payload, so Carapace must normalize here.
  */
 export function normalizeOpenAIResponsesToolCallIds(messages: AgentMessage[]): AgentMessage[] {
   let changed = false;

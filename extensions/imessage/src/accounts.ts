@@ -1,17 +1,17 @@
 import { statSync } from "node:fs";
 import path from "node:path";
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
+import { createAccountListHelpers } from "carapace/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
 import {
   normalizeAccountId,
   resolveAccountEntry,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/account-resolution";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/account-resolution";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { IMessageAccountConfig } from "./account-types.js";
 import {
   expandIMessageUserPath,
@@ -41,7 +41,7 @@ export const listIMessageAccountIds = listAccountIds;
 export const resolveDefaultIMessageAccountId = resolveDefaultAccountId;
 
 function resolveIMessageAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
 ): IMessageAccountConfig | undefined {
   return resolveAccountEntry(cfg.channels?.imessage?.accounts, accountId);
@@ -84,7 +84,7 @@ function mergeIMessageStreamingConfig(
   };
 }
 
-function mergeIMessageAccountConfig(cfg: OpenClawConfig, accountId: string): IMessageAccountConfig {
+function mergeIMessageAccountConfig(cfg: CarapaceConfig, accountId: string): IMessageAccountConfig {
   const accountConfig = resolveIMessageAccountConfig(cfg, accountId);
   const merged = resolveMergedIMessageAccountConfig(cfg, accountId);
   const streaming = mergeIMessageStreamingConfig(
@@ -95,7 +95,7 @@ function mergeIMessageAccountConfig(cfg: OpenClawConfig, accountId: string): IMe
 }
 
 export function resolveIMessageAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): ResolvedIMessageAccount {
   const accountId = normalizeAccountId(
@@ -141,7 +141,7 @@ function normalizeIMessageDbPath(value: string | undefined | null): string {
 
 // Stable signature for the local Messages backend an iMessage account targets.
 // Two enabled accounts that share a signature watch the same source, which
-// caused duplicate inbound handling in openclaw/openclaw#65141.
+// caused duplicate inbound handling in carapace/carapace#65141.
 function resolveIMessageAccountSourceSignature(account: ResolvedIMessageAccount): string {
   const cliPath = normalizeIMessageCliPath(account.config.cliPath);
   const dbPath = normalizeIMessageDbPath(account.config.dbPath);
@@ -164,11 +164,11 @@ function resolveIMessageAccountSourceSignature(account: ResolvedIMessageAccount)
 }
 
 function resolveIMessageAccountSourceOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   signature: string;
 }): string | undefined {
   // Prefer an explicit named account over the implicit "default" so that
-  // bindings tied to the named account keep working (openclaw/openclaw#65141).
+  // bindings tied to the named account keep working (carapace/carapace#65141).
   let defaultOwner: string | undefined;
   for (const candidateAccountId of listIMessageAccountIds(params.cfg)) {
     const candidate = resolveIMessageAccount({
@@ -203,12 +203,12 @@ function resolveIMessageDatabaseFileIdentity(dbPath: string): string | undefined
  * Returns the owner account id when `account` is an enabled duplicate of
  * another enabled account that targets the same local Messages source. Used
  * by the iMessage gateway lifecycle to skip starting redundant `imsg rpc`
- * watchers (openclaw/openclaw#65141) without otherwise marking the duplicate
+ * watchers (carapace/carapace#65141) without otherwise marking the duplicate
  * disabled — outbound selection, status surfaces, and capability listings
  * keep treating both accounts normally.
  */
 export function resolveIMessageDuplicateSourceOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedIMessageAccount;
 }): string | undefined {
   if (!params.account.enabled || !params.account.configured) {
@@ -221,14 +221,14 @@ export function resolveIMessageDuplicateSourceOwner(params: {
   return owner && owner !== params.account.accountId ? owner : undefined;
 }
 
-export function listEnabledIMessageAccounts(cfg: OpenClawConfig): ResolvedIMessageAccount[] {
+export function listEnabledIMessageAccounts(cfg: CarapaceConfig): ResolvedIMessageAccount[] {
   return listIMessageAccountIds(cfg)
     .map((accountId) => resolveIMessageAccount({ cfg, accountId }))
     .filter((account) => account.enabled);
 }
 
 export function hasExclusiveIMessageLocalDatabase(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedIMessageAccount;
   cliPath: string;
   dbPath?: string;
@@ -278,7 +278,7 @@ export function hasExclusiveIMessageLocalDatabase(params: {
 }
 
 export function collectIMessageDuplicateAccountSourceWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): string[] {
   const groups = new Map<string, ResolvedIMessageAccount[]>();
   for (const accountId of listIMessageAccountIds(params.cfg)) {
@@ -311,7 +311,7 @@ export function collectIMessageDuplicateAccountSourceWarnings(params: {
     const dbPath = normalizeIMessageDbPath(owner.config.dbPath);
     const where = dbPath ? `cliPath=${cliPath}, dbPath=${dbPath}` : `cliPath=${cliPath}`;
     warnings.push(
-      `- channels.imessage: accounts "${owner.accountId}" and ${dupIds} watch the same local Messages source (${where}). OpenClaw runs one watcher (owner: "${owner.accountId}") and idles the duplicate; the other accounts stay enabled for outbound sends and status. Inbound messages arrive tagged with accountId="${owner.accountId}", so bindings pinned to ${dupIds} should be re-pointed at "${owner.accountId}" (or set "enabled": false on "${owner.accountId}" to flip ownership). Set "enabled": false on the unused duplicates to silence this warning.`,
+      `- channels.imessage: accounts "${owner.accountId}" and ${dupIds} watch the same local Messages source (${where}). Carapace runs one watcher (owner: "${owner.accountId}") and idles the duplicate; the other accounts stay enabled for outbound sends and status. Inbound messages arrive tagged with accountId="${owner.accountId}", so bindings pinned to ${dupIds} should be re-pointed at "${owner.accountId}" (or set "enabled": false on "${owner.accountId}" to flip ownership). Set "enabled": false on the unused duplicates to silence this warning.`,
     );
   }
   return warnings;

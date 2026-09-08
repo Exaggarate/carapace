@@ -1,7 +1,7 @@
 // Qa Lab plugin module implements mock auth behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { applyAuthProfileConfig } from "openclaw/plugin-sdk/provider-auth-api-key";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { applyAuthProfileConfig } from "carapace/plugin-sdk/provider-auth-api-key";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { writeQaAuthProfiles } from "./auth-store.js";
 
 /** Providers the mock harness stages placeholder credentials for by default. */
@@ -15,9 +15,9 @@ export function buildQaMockProfileId(provider: string): string {
 }
 
 export function applyQaMockAuthProfileConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providers?: readonly string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   let next = params.cfg;
   for (const provider of uniqueStrings(params.providers ?? QA_MOCK_AUTH_PROVIDERS)) {
     next = applyAuthProfileConfig(next, {
@@ -50,11 +50,11 @@ export function applyQaMockAuthProfileConfig(params: {
  * serializer; anything beyond that is ignored by the mock.
  */
 export async function stageQaMockAuthProfiles(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   stateDir: string;
   agentIds?: readonly string[];
   providers?: readonly string[];
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const agentIds = uniqueStrings(params.agentIds ?? QA_MOCK_AUTH_AGENT_IDS);
   const providers = uniqueStrings(params.providers ?? QA_MOCK_AUTH_PROVIDERS);
   for (const agentId of agentIds) {

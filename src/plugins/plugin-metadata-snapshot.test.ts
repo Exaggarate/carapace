@@ -8,7 +8,7 @@ import {
   resolveProviderEndpoint,
   resolveProviderRequestPolicy,
 } from "../agents/provider-attribution.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { clearBundledDiscoveryModeMemo } from "./bundled-discovery-state.js";
@@ -173,19 +173,19 @@ describe("plugin metadata snapshot", () => {
 
     const registry = loadPluginManifestRegistryCore({
       config: { plugins: { enabled: false } },
-      env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_STATE_DIR: "/unselected-state" },
+      env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", CARAPACE_STATE_DIR: "/unselected-state" },
     });
     expect(registry).toBe(snapshot.manifestRegistry);
   });
 
   it("refreshes snapshots for the selected environment's discovery policy", async () => {
     const roots: string[] = [];
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     try {
-      setTestEnvValue("OPENCLAW_STATE_DIR", makeTempDir(roots, "openclaw-metadata-process-"));
+      setTestEnvValue("CARAPACE_STATE_DIR", makeTempDir(roots, "carapace-metadata-process-"));
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: makeTempDir(roots, "openclaw-metadata-selected-"),
+        CARAPACE_STATE_DIR: makeTempDir(roots, "carapace-metadata-selected-"),
       };
       const config = {};
       writeConfigMachineState("plugins.bundledDiscovery", "compat", { env });
@@ -765,7 +765,7 @@ describe("plugin metadata snapshot", () => {
     );
     enumeratePolicies.mockClear();
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { defaults: { model: { primary: "demo/latest" } } },
       models: {
         providers: {
@@ -926,7 +926,7 @@ describe("plugin metadata snapshot", () => {
         endpointClass: "openai-public",
         usesKnownNativeOpenAIEndpoint: true,
         usesExplicitProxyLikeEndpoint: false,
-        attributionHeaders: { originator: "openclaw" },
+        attributionHeaders: { originator: "carapace" },
       });
     }
     expect(

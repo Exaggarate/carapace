@@ -1,12 +1,12 @@
-# OpenClaw Gradium Plugin
+# Carapace Gradium Plugin
 
-Official OpenClaw plugin for Gradium.
+Official Carapace plugin for Gradium.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/gradium-speech
-openclaw gateway restart
+carapace plugins install @carapace/gradium-speech
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/gradium> for setup and configuration.
+See <../../docs/providers/gradium.md> for setup and configuration.

@@ -1,16 +1,16 @@
 import { statSync } from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createLazyRuntimeModule,
   createLazyRuntimeSurface,
-} from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/lazy-runtime";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { SessionCatalogProvider } from "openclaw/plugin-sdk/session-catalog";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicy,
+} from "carapace/plugin-sdk/plugin-entry";
+import type { SessionCatalogProvider } from "carapace/plugin-sdk/session-catalog";
 import { CLAUDE_CLI_BACKEND_ID, CLAUDE_CLI_ROUTE_PROBE_MODEL_IDS } from "./cli-constants.js";
 import { resolveClaudeTerminalExecutable } from "./session-catalog-executable.js";
 import { resolveClaudeCatalogHomeDir } from "./session-catalog-home.js";
@@ -54,11 +54,11 @@ function claudeProjectsAvailable(env: NodeJS.ProcessEnv): boolean {
   }
 }
 
-function currentConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config ?? {}) as OpenClawConfig;
+function currentConfig(api: CarapacePluginApi): CarapaceConfig {
+  return (api.runtime.config?.current?.() ?? api.config ?? {}) as CarapaceConfig;
 }
 
-function registerClaudeSessionCatalog(api: OpenClawPluginApi): void {
+function registerClaudeSessionCatalog(api: CarapacePluginApi): void {
   const loadCatalogRuntime = createLazyRuntimeSurface(
     () => import("./session-catalog.js"),
     (module) => module.createClaudeSessionCatalogRuntime(api),
@@ -87,7 +87,7 @@ function registerClaudeSessionCatalog(api: OpenClawPluginApi): void {
   api.registerSessionCatalog(provider);
 }
 
-function createClaudeSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
+function createClaudeSessionNodeHostCommands(): CarapacePluginNodeHostCommand[] {
   return [
     {
       command: CLAUDE_SESSIONS_LIST_COMMAND,
@@ -127,7 +127,7 @@ function createClaudeSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] 
   ];
 }
 
-export function createClaudeSessionNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+export function createClaudeSessionNodeInvokePolicies(): CarapacePluginNodeInvokePolicy[] {
   return [
     {
       commands: [
@@ -158,7 +158,7 @@ export function createClaudeSessionNodeInvokePolicies(): OpenClawPluginNodeInvok
   ];
 }
 
-export function registerClaudeSessionDiscovery(api: OpenClawPluginApi): void {
+export function registerClaudeSessionDiscovery(api: CarapacePluginApi): void {
   if (!isClaudeSessionCatalogEnabled(api.pluginConfig)) {
     return;
   }

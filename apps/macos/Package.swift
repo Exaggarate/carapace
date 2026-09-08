@@ -1,18 +1,18 @@
 // swift-tools-version: 6.3
-// Package manifest for the OpenClaw macOS companion (menu bar app + IPC library).
+// Package manifest for the Carapace macOS companion (menu bar app + IPC library).
 
 import PackageDescription
 
 let package = Package(
-    name: "OpenClaw",
+    name: "Carapace",
     platforms: [
         .macOS(.v15),
     ],
     products: [
-        .library(name: "OpenClawIPC", targets: ["OpenClawIPC"]),
-        .library(name: "OpenClawDiscovery", targets: ["OpenClawDiscovery"]),
-        .executable(name: "OpenClaw", targets: ["OpenClaw"]),
-        .executable(name: "openclaw-mac", targets: ["OpenClawMacCLI"]),
+        .library(name: "CarapaceIPC", targets: ["CarapaceIPC"]),
+        .library(name: "CarapaceDiscovery", targets: ["CarapaceDiscovery"]),
+        .executable(name: "Carapace", targets: ["Carapace"]),
+        .executable(name: "carapace-mac", targets: ["CarapaceMacCLI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/sindresorhus/KeyboardShortcuts", exact: "3.0.1"),
@@ -20,49 +20,49 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log.git", from: "1.15.0"),
         .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.9.6"),
         .package(
-            url: "https://github.com/openclaw/Peekaboo.git",
+            url: "https://github.com/Exaggarate/carapace/Peekaboo.git",
             revision: "44eff916c3330739108cc1d73683338d4250503a"),
         .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.4.1"),
-        .package(path: "../shared/OpenClawKit"),
-        .package(path: "../shared/OpenClawMLXTTSProtocol"),
+        .package(path: "../shared/CarapaceKit"),
+        .package(path: "../shared/CarapaceMLXTTSProtocol"),
         .package(path: "../swabble"),
     ],
     targets: [
         .target(
-            name: "OpenClawCameraPTZNative",
-            path: "Sources/OpenClawCameraPTZNative",
+            name: "CarapaceCameraPTZNative",
+            path: "Sources/CarapaceCameraPTZNative",
             publicHeadersPath: "include",
             linkerSettings: [
                 .linkedFramework("CoreFoundation"),
                 .linkedFramework("IOKit"),
             ]),
         .target(
-            name: "OpenClawIPC",
+            name: "CarapaceIPC",
             dependencies: [],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .target(
-            name: "OpenClawDiscovery",
+            name: "CarapaceDiscovery",
             dependencies: [
-                .product(name: "OpenClawKit", package: "OpenClawKit"),
+                .product(name: "CarapaceKit", package: "CarapaceKit"),
                 .product(name: "Subprocess", package: "swift-subprocess"),
             ],
-            path: "Sources/OpenClawDiscovery",
+            path: "Sources/CarapaceDiscovery",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .executableTarget(
-            name: "OpenClaw",
+            name: "Carapace",
             dependencies: [
-                "OpenClawIPC",
-                "OpenClawDiscovery",
-                "OpenClawCameraPTZNative",
-                .product(name: "OpenClawNativeState", package: "OpenClawKit"),
-                .product(name: "OpenClawKit", package: "OpenClawKit"),
-                .product(name: "OpenClawChatUI", package: "OpenClawKit"),
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
-                .product(name: "OpenClawProtocol", package: "OpenClawKit"),
+                "CarapaceIPC",
+                "CarapaceDiscovery",
+                "CarapaceCameraPTZNative",
+                .product(name: "CarapaceNativeState", package: "CarapaceKit"),
+                .product(name: "CarapaceKit", package: "CarapaceKit"),
+                .product(name: "CarapaceChatUI", package: "CarapaceKit"),
+                .product(name: "CarapaceMLXTTSProtocol", package: "CarapaceMLXTTSProtocol"),
+                .product(name: "CarapaceProtocol", package: "CarapaceKit"),
                 .product(name: "SwabbleKit", package: "swabble"),
                 .product(name: "Subprocess", package: "swift-subprocess"),
                 .product(name: "Logging", package: "swift-log"),
@@ -77,7 +77,7 @@ let package = Package(
                 "Resources/Localizable.xcstrings",
             ],
             resources: [
-                .copy("Resources/OpenClaw.icns"),
+                .copy("Resources/Carapace.icns"),
                 .copy("Resources/NativeSessionCatalogs.json"),
                 .copy("Resources/AppIcons"),
                 .copy("Resources/DeviceModels"),
@@ -87,28 +87,28 @@ let package = Package(
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .executableTarget(
-            name: "OpenClawMacCLI",
+            name: "CarapaceMacCLI",
             dependencies: [
-                "OpenClawIPC",
-                "OpenClawDiscovery",
-                .product(name: "OpenClawKit", package: "OpenClawKit"),
-                .product(name: "OpenClawProtocol", package: "OpenClawKit"),
+                "CarapaceIPC",
+                "CarapaceDiscovery",
+                .product(name: "CarapaceKit", package: "CarapaceKit"),
+                .product(name: "CarapaceProtocol", package: "CarapaceKit"),
             ],
-            path: "Sources/OpenClawMacCLI",
+            path: "Sources/CarapaceMacCLI",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .testTarget(
-            name: "OpenClawIPCTests",
+            name: "CarapaceIPCTests",
             dependencies: [
-                "OpenClawIPC",
-                "OpenClaw",
-                "OpenClawMacCLI",
-                "OpenClawDiscovery",
-                .product(name: "OpenClawChatUI", package: "OpenClawKit"),
-                .product(name: "OpenClawKit", package: "OpenClawKit"),
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
-                .product(name: "OpenClawProtocol", package: "OpenClawKit"),
+                "CarapaceIPC",
+                "Carapace",
+                "CarapaceMacCLI",
+                "CarapaceDiscovery",
+                .product(name: "CarapaceChatUI", package: "CarapaceKit"),
+                .product(name: "CarapaceKit", package: "CarapaceKit"),
+                .product(name: "CarapaceMLXTTSProtocol", package: "CarapaceMLXTTSProtocol"),
+                .product(name: "CarapaceProtocol", package: "CarapaceKit"),
                 .product(name: "SwabbleKit", package: "swabble"),
             ],
             swiftSettings: [

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { AgentSelectionRequiredError } from "./agent-scope.js";
 import { resolveModelWorkspaceDir } from "./model-discovery-context.js";
 
-function multiAgentConfig(): OpenClawConfig {
+function multiAgentConfig(): CarapaceConfig {
   return {
     agents: {
       entries: {
@@ -11,7 +11,7 @@ function multiAgentConfig(): OpenClawConfig {
         beta: { workspace: "/workspaces/beta" },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("resolveModelWorkspaceDir", () => {

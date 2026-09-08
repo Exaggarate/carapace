@@ -4,7 +4,7 @@ import { resolveGlobalSingleton } from "../../shared/global-singleton.js";
 import type { PluginRegistry } from "../registry-types.js";
 
 const registryScope = resolveGlobalSingleton<AsyncLocalStorage<PluginRegistry>>(
-  Symbol.for("openclaw.pluginRuntimeGenerationRegistryScope"),
+  Symbol.for("carapace.pluginRuntimeGenerationRegistryScope"),
   () => new AsyncLocalStorage<PluginRegistry>(),
 );
 

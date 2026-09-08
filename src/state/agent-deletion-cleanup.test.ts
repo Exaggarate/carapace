@@ -14,24 +14,24 @@ import { replaceSessionEntrySync } from "../config/sessions/session-accessor.sql
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import * as integrityWorker from "../infra/sqlite-integrity-worker.js";
 import { beginAgentDeletionJournal, removeAgentDeletionJournal } from "./agent-deletion-journal.js";
-import { assertNoOpenClawAgentDatabaseLeases } from "./openclaw-agent-db-lease.js";
+import { assertNoCarapaceAgentDatabaseLeases } from "./carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawAgentDatabasesAsync,
-  getOpenClawAgentDatabaseIfOpen,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  withOpenClawAgentDatabaseAsync,
-} from "./openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "./openclaw-state-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceAgentDatabasesAsync,
+  getCarapaceAgentDatabaseIfOpen,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+  withCarapaceAgentDatabaseAsync,
+} from "./carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "./carapace-state-db.js";
 
 const roots: string[] = [];
 afterEach(async () => {
   vi.restoreAllMocks();
-  await closeOpenClawAgentDatabasesAsync();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  await closeCarapaceAgentDatabasesAsync();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const root of roots.splice(0)) {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -40,12 +40,12 @@ afterEach(async () => {
 function fixture() {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "agent-delete-cleanup-")));
   roots.push(root);
-  const options = { agentId: "worker", env: { OPENCLAW_STATE_DIR: root } };
-  const database = openOpenClawAgentDatabase(options);
+  const options = { agentId: "worker", env: { CARAPACE_STATE_DIR: root } };
+  const database = openCarapaceAgentDatabase(options);
   const scope = { ...options, sessionKey: "agent:worker:main" };
   const write = (sessionId: string) => replaceSessionEntrySync(scope, { sessionId, updatedAt: 1 });
   write("before");
-  closeOpenClawAgentDatabaseByPath(database.path);
+  closeCarapaceAgentDatabaseByPath(database.path);
   const entry = {
     agentId: options.agentId,
     agentDir: path.dirname(database.path),
@@ -90,7 +90,7 @@ describe("agent deletion database cleanup authority", () => {
         let rejected: Promise<unknown> | undefined;
         const running = deletion.runDatabaseCleanup(f.target, async () => {
           rejected = expect(
-            withOpenClawAgentDatabaseAsync(f.options, () => {
+            withCarapaceAgentDatabaseAsync(f.options, () => {
               operationCalled = true;
             }),
           ).rejects.toThrow(/no longer/);
@@ -131,7 +131,7 @@ describe("agent deletion database cleanup authority", () => {
       }
       expect(operationCalled).toBe(false);
       expect(() =>
-        assertNoOpenClawAgentDatabaseLeases("worker", { env: f.options.env }),
+        assertNoCarapaceAgentDatabaseLeases("worker", { env: f.options.env }),
       ).not.toThrow();
     },
   );
@@ -151,7 +151,7 @@ describe("agent deletion database cleanup authority", () => {
         },
       );
       const running = deletion.runDatabaseCleanup(f.target, () =>
-        withOpenClawAgentDatabaseAsync(f.options, async () => {
+        withCarapaceAgentDatabaseAsync(f.options, async () => {
           await releaseOwner.promise;
           f.write("owned");
         }),
@@ -160,7 +160,7 @@ describe("agent deletion database cleanup authority", () => {
         await checked.promise;
         let outsideCalled = false;
         const rejected = expect(
-          withOpenClawAgentDatabaseAsync(f.options, (database) => {
+          withCarapaceAgentDatabaseAsync(f.options, (database) => {
             outsideCalled = true;
             return database.db.isOpen;
           }),
@@ -180,13 +180,13 @@ describe("agent deletion database cleanup authority", () => {
   it("rechecks a settled cleanup scope before an async operation on a borrowed survivor", async () => {
     const f = fixture();
     const options = { ...f.options, agentId: "kept", path: path.join(f.root, "shared.sqlite") };
-    const kept = openOpenClawAgentDatabase(options);
+    const kept = openCarapaceAgentDatabase(options);
     let operationCalled = false;
     await f.withDeletion(async (deletion) => {
       let rejected: Promise<unknown> | undefined;
       await deletion.runDatabaseCleanup({ agentId: "kept", path: kept.path }, async () => {
         rejected = expect(
-          withOpenClawAgentDatabaseAsync(options, () => {
+          withCarapaceAgentDatabaseAsync(options, () => {
             operationCalled = true;
           }),
         ).rejects.toThrow("no longer active");
@@ -195,7 +195,7 @@ describe("agent deletion database cleanup authority", () => {
     });
     expect(operationCalled).toBe(false);
     expect(kept.db.isOpen).toBe(true);
-    expect(openOpenClawAgentDatabase(options)).toBe(kept);
+    expect(openCarapaceAgentDatabase(options)).toBe(kept);
   });
 
   it("retries a settled shared-store close before admitting a fresh deletion cleanup", async () => {
@@ -206,13 +206,13 @@ describe("agent deletion database cleanup authority", () => {
       agents: { entries: { worker: {}, kept: {} } },
       session: { store: storePath },
     };
-    openOpenClawAgentDatabase(sharedOptions);
+    openCarapaceAgentDatabase(sharedOptions);
     const workerScope = { ...f.options, storePath, sessionKey: "agent:worker:shared" };
     const keptScope = { ...workerScope, agentId: "kept", sessionKey: "agent:kept:shared" };
     replaceSessionEntrySync(workerScope, { sessionId: "remove", updatedAt: Date.now() });
     replaceSessionEntrySync(keptScope, { sessionId: "keep", updatedAt: Date.now() });
-    closeOpenClawAgentDatabaseByPath(storePath, "kept");
-    let retained: ReturnType<typeof openOpenClawAgentDatabase> | undefined;
+    closeCarapaceAgentDatabaseByPath(storePath, "kept");
+    let retained: ReturnType<typeof openCarapaceAgentDatabase> | undefined;
     let closeCalls = 0;
     const runAttempt = (deletion: AgentDeletionOperation, injectFailure: boolean) => {
       prepareAgentDeleteDatabases(cfg, "worker", f.entry.agentDir, { env: f.options.env });
@@ -221,7 +221,7 @@ describe("agent deletion database cleanup authority", () => {
         runDatabaseCleanup: (target, run) =>
           deletion.runDatabaseCleanup(target, async () => {
             if (injectFailure && target.path === storePath) {
-              retained = openOpenClawAgentDatabase(sharedOptions);
+              retained = openCarapaceAgentDatabase(sharedOptions);
               const close = retained.db.close.bind(retained.db);
               vi.spyOn(retained.db, "close").mockImplementation(() => {
                 closeCalls += 1;
@@ -239,13 +239,13 @@ describe("agent deletion database cleanup authority", () => {
     await expect(f.withDeletion((deletion) => runAttempt(deletion, true))).resolves.toBe(true);
     expect(closeCalls).toBe(1);
     expect(retained?.db.isOpen).toBe(true);
-    expect(() => openOpenClawAgentDatabase(sharedOptions)).toThrow("active deletion cleanup");
+    expect(() => openCarapaceAgentDatabase(sharedOptions)).toThrow("active deletion cleanup");
     await expect(f.withDeletion((deletion) => runAttempt(deletion, false))).resolves.toBe(false);
     expect(closeCalls).toBe(2);
     expect(retained?.db.isOpen).toBe(false);
     expect(loadSessionEntryReadOnly(workerScope)).toBeUndefined();
     expect(loadSessionEntryReadOnly(keptScope)?.sessionId).toBe("keep");
-    expect(openOpenClawAgentDatabase(sharedOptions).db.isOpen).toBe(true);
+    expect(openCarapaceAgentDatabase(sharedOptions).db.isOpen).toBe(true);
   });
 
   it("rejects cleanup settlement after awaited journal takeover", async () => {
@@ -254,7 +254,7 @@ describe("agent deletion database cleanup authority", () => {
       const opened = createDeferred();
       const release = createDeferred();
       const running = deletion.runDatabaseCleanup(f.target, async () => {
-        openOpenClawAgentDatabase(f.options);
+        openCarapaceAgentDatabase(f.options);
         opened.resolve();
         await release.promise;
       });
@@ -270,7 +270,7 @@ describe("agent deletion database cleanup authority", () => {
       }
       await rejected;
       expect(f.read()).toBe("before");
-      expect(getOpenClawAgentDatabaseIfOpen(f.options)).toBeUndefined();
+      expect(getCarapaceAgentDatabaseIfOpen(f.options)).toBeUndefined();
     });
   });
 
@@ -287,13 +287,13 @@ describe("agent deletion database cleanup authority", () => {
       const write = (sessionId: string) =>
         replaceSessionEntrySync(scope, { sessionId, updatedAt: 1 });
       if (warmSurvivor) {
-        openOpenClawAgentDatabase(options);
+        openCarapaceAgentDatabase(options);
         write("before");
       }
       await f.withDeletion(async (deletion) => {
         await expect(
           deletion.runDatabaseCleanup(options, async () => {
-            runOpenClawAgentWriteTransaction(() => {
+            runCarapaceAgentWriteTransaction(() => {
               write("stale");
               beginAgentDeletionJournal(
                 { ...f.entry, operationId: "replacement", deleteFiles: true },
@@ -315,7 +315,7 @@ describe("agent deletion database cleanup authority", () => {
       const late = createDeferred();
       let lateWrite: Promise<unknown> | undefined;
       const running = deletion.runDatabaseCleanup(f.target, async () => {
-        const database = openOpenClawAgentDatabase(f.options);
+        const database = openCarapaceAgentDatabase(f.options);
         lateWrite = (async () => {
           await late.promise;
           expect(() => f.write("late")).toThrow("no longer active");
@@ -327,8 +327,8 @@ describe("agent deletion database cleanup authority", () => {
       });
       try {
         await opened.promise;
-        expect(() => openOpenClawAgentDatabase(f.options)).toThrow("active deletion cleanup");
-        expect(() => getOpenClawAgentDatabaseIfOpen(f.options)).toThrow("active deletion cleanup");
+        expect(() => openCarapaceAgentDatabase(f.options)).toThrow("active deletion cleanup");
+        expect(() => getCarapaceAgentDatabaseIfOpen(f.options)).toThrow("active deletion cleanup");
         expect(() => f.write("ordinary")).toThrow("active deletion cleanup");
         const alias = path.join(f.root, "alias");
         fs.symlinkSync(
@@ -337,7 +337,7 @@ describe("agent deletion database cleanup authority", () => {
           process.platform === "win32" ? "junction" : "dir",
         );
         expect(() =>
-          openOpenClawAgentDatabase({
+          openCarapaceAgentDatabase({
             ...f.options,
             path: path.join(alias, path.basename(f.target.path)),
           }),
@@ -354,7 +354,7 @@ describe("agent deletion database cleanup authority", () => {
       }
       expect(f.read()).toBe("owned");
       expect(() =>
-        assertNoOpenClawAgentDatabaseLeases("worker", { env: f.options.env }),
+        assertNoCarapaceAgentDatabaseLeases("worker", { env: f.options.env }),
       ).not.toThrow();
     });
   });
@@ -366,9 +366,9 @@ describe("agent deletion database cleanup authority", () => {
       await f.withDeletion(async (deletion) => {
         const opened = createDeferred();
         const release = createDeferred();
-        let database: ReturnType<typeof openOpenClawAgentDatabase> | undefined;
+        let database: ReturnType<typeof openCarapaceAgentDatabase> | undefined;
         const running = deletion.runDatabaseCleanup(f.target, async () => {
-          database = openOpenClawAgentDatabase(f.options);
+          database = openCarapaceAgentDatabase(f.options);
           opened.resolve();
           await release.promise;
           expect(() => f.write("stale")).toThrow("no longer owns database cleanup");
@@ -400,15 +400,15 @@ describe("agent deletion database cleanup authority", () => {
     const other = fixture();
     await f.withDeletion(async (deletion) => {
       await deletion.runDatabaseCleanup(f.target, async () => {
-        const database = openOpenClawAgentDatabase(f.options);
+        const database = openCarapaceAgentDatabase(f.options);
         expect(() =>
-          openOpenClawAgentDatabase({ ...f.options, env: other.options.env, path: f.target.path }),
+          openCarapaceAgentDatabase({ ...f.options, env: other.options.env, path: f.target.path }),
         ).toThrow("another state database");
         expect(() =>
-          openOpenClawAgentDatabase({ ...f.options, agentId: "kept", path: f.target.path }),
+          openCarapaceAgentDatabase({ ...f.options, agentId: "kept", path: f.target.path }),
         ).toThrow("already open for agent worker");
         expect(() =>
-          openOpenClawAgentDatabase({ ...f.options, path: path.join(f.root, "unowned.sqlite") }),
+          openCarapaceAgentDatabase({ ...f.options, path: path.join(f.root, "unowned.sqlite") }),
         ).toThrow("unavailable while agent worker is deleted");
         expect(database.db.isOpen).toBe(true);
       });
@@ -422,11 +422,11 @@ describe("agent deletion database cleanup authority", () => {
     async (failRun) => {
       const f = fixture();
       await f.withDeletion(async (deletion) => {
-        let retained: ReturnType<typeof openOpenClawAgentDatabase> | undefined;
+        let retained: ReturnType<typeof openCarapaceAgentDatabase> | undefined;
         const closeError = new Error("held native close");
         const runError = new Error("cleanup operation failed");
         const running = deletion.runDatabaseCleanup(f.target, async () => {
-          retained = openOpenClawAgentDatabase(f.options);
+          retained = openCarapaceAgentDatabase(f.options);
           vi.spyOn(retained.db, "close").mockImplementationOnce(() => {
             throw closeError;
           });
@@ -440,15 +440,15 @@ describe("agent deletion database cleanup authority", () => {
           await expect(running).rejects.toBe(closeError);
         }
         expect(retained?.db.isOpen).toBe(true);
-        expect(() => openOpenClawAgentDatabase(f.options)).toThrow("active deletion cleanup");
-        expect(() => assertNoOpenClawAgentDatabaseLeases("worker", { env: f.options.env })).toThrow(
+        expect(() => openCarapaceAgentDatabase(f.options)).toThrow("active deletion cleanup");
+        expect(() => assertNoCarapaceAgentDatabaseLeases("worker", { env: f.options.env })).toThrow(
           "database is still open",
         );
-        expect(closeOpenClawAgentDatabaseByPath(f.target.path, "worker")).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(f.target.path, "worker")).toBe(true);
         await deletion.runDatabaseCleanup(f.target, async () => f.write("retried"));
         expect(f.read()).toBe("retried");
         expect(() =>
-          assertNoOpenClawAgentDatabaseLeases("worker", { env: f.options.env }),
+          assertNoCarapaceAgentDatabaseLeases("worker", { env: f.options.env }),
         ).not.toThrow();
       });
     },
@@ -477,13 +477,13 @@ describe("agent deletion database cleanup authority", () => {
       const f = fixture();
       const storePath = path.join(f.root, "shared.sqlite");
       const sharedOptions = { ...f.options, agentId: "kept", path: storePath };
-      const shared = openOpenClawAgentDatabase(sharedOptions);
+      const shared = openCarapaceAgentDatabase(sharedOptions);
       const workerScope = { ...f.options, storePath, sessionKey: "agent:worker:shared" };
       const keptScope = { ...workerScope, agentId: "kept", sessionKey: "agent:kept:shared" };
       replaceSessionEntrySync(workerScope, { sessionId: "remove", updatedAt: Date.now() });
       replaceSessionEntrySync(keptScope, { sessionId: "keep", updatedAt: Date.now() });
       if (cold) {
-        closeOpenClawAgentDatabaseByPath(storePath);
+        closeCarapaceAgentDatabaseByPath(storePath);
       }
       await f.withDeletion(async (deletion) => {
         await expect(
@@ -497,7 +497,7 @@ describe("agent deletion database cleanup authority", () => {
         expect(loadSessionEntryReadOnly(keptScope)?.sessionId).toBe("keep");
         expect(shared.db.isOpen).toBe(!cold);
         if (cold) {
-          expect(getOpenClawAgentDatabaseIfOpen(sharedOptions)).toBeUndefined();
+          expect(getCarapaceAgentDatabaseIfOpen(sharedOptions)).toBeUndefined();
         }
       });
     },

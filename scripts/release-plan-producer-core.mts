@@ -60,9 +60,9 @@ type ReleasePlanProducerRequest =
   | { operation: "produce" | "produce-lock"; params: ReleasePlanSource }
   | { operation: "verify-lock"; lockJson: string; params: ReleasePlanSource };
 
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const VALIDATION_WORKFLOW_PATH = ".github/workflows/full-release-validation.yml";
-const PUBLICATION_WORKFLOW_PATH = ".github/workflows/openclaw-release-publish.yml";
+const PUBLICATION_WORKFLOW_PATH = ".github/workflows/carapace-release-publish.yml";
 const NPM_CORE_PACKAGE_POLICY_PATH = "scripts/lib/npm-core-release-packages.json";
 const YAML_PACKAGE_VERSION = "2.9.0";
 const YAML_PACKAGE_INTEGRITY =
@@ -218,7 +218,7 @@ function withCandidateSnapshot<T>(
   candidateSha: string,
   callback: (snapshotRoot: string) => T,
 ): T {
-  const snapshotRoot = mkdtempSync(join(tmpdir(), "openclaw-release-candidate-"));
+  const snapshotRoot = mkdtempSync(join(tmpdir(), "carapace-release-candidate-"));
   try {
     // Select metadata inside Git before buffering or decoding paths: directory-name
     // decoding can silently omit non-UTF-8 inventory, while source trees can exceed stdout limits.
@@ -342,7 +342,7 @@ function collectCorePackagePolicy(document: unknown): CorePackagePolicy[] {
         !entry ||
         typeof entry !== "object" ||
         !/^packages\/[a-z0-9-]+$/u.test(entry.path) ||
-        !/^@openclaw\/[a-z0-9-]+$/u.test(entry.name) ||
+        !/^@carapace\/[a-z0-9-]+$/u.test(entry.name) ||
         (entry.dependency !== undefined && entry.dependency !== entry.name),
     ) ||
     new Set(document.map((entry) => entry.path)).size !== document.length ||
@@ -390,7 +390,7 @@ function collectPackageInventory(
     }
     packages.set(manifest.name, entry);
   };
-  addPackage({ name: "openclaw", version }, ["npm"], "package.json");
+  addPackage({ name: "carapace", version }, ["npm"], "package.json");
   const pluginCandidates = collectExtensionPackageJsonCandidates(snapshotRoot);
   for (const [target, plugins] of [
     ["clawhub", collectPublishablePluginPackagesFromCandidates(pluginCandidates, "clawhub")],
@@ -418,11 +418,11 @@ function collectPackageInventory(
     if (policy.dependency && typeof rootManifest.dependencies?.[policy.dependency] !== "string") {
       continue;
     }
-    if (!policy.dependency && manifest.openclaw?.release?.publishToNpm !== true) {
+    if (!policy.dependency && manifest.carapace?.release?.publishToNpm !== true) {
       continue;
     }
     if (manifest.version !== version) {
-      throw new Error(`${policy.path} version must match openclaw ${version}`);
+      throw new Error(`${policy.path} version must match carapace ${version}`);
     }
     if (manifest.name !== policy.name) {
       throw new Error(`${policy.path} must publish ${policy.name}`);

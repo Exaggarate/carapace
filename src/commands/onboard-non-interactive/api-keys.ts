@@ -12,7 +12,7 @@ import {
 import { isMalformedApiKeyInput } from "../../agents/auth-profiles/credential-state.js";
 import { resolveEnvApiKey } from "../../agents/model-auth.js";
 import { formatCliCommand } from "../../cli/command-format.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import { normalizeOptionalSecretInput } from "../../utils/normalize-secret-input.js";
 import { rejectOnboardingOption } from "../onboard-options.js";
@@ -31,7 +31,7 @@ function parseEnvVarNameFromSourceLabel(source: string | undefined): string | un
 
 async function resolveApiKeyFromProfiles(params: {
   provider: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
 }): Promise<string | null> {
   const store = ensureAuthProfileStore(params.agentDir);
@@ -63,7 +63,7 @@ async function resolveApiKeyFromProfiles(params: {
 /** Resolves an API key for non-interactive setup without prompting the user. */
 export async function resolveNonInteractiveApiKey(params: {
   provider: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   flagValue?: string;
   flagName: string;
   envVar: string;
@@ -101,7 +101,7 @@ export async function resolveNonInteractiveApiKey(params: {
       return envVarName ? { key, source, envVarName } : { key, source };
     }
     const envHint = source === "env" ? ` Check ${envVarName ?? params.envVar}.` : "";
-    return reject(`Paste the API key value, not an OpenClaw onboarding command.${envHint}`);
+    return reject(`Paste the API key value, not an Carapace onboarding command.${envHint}`);
   };
 
   const useSecretRefMode = params.secretInputMode === "ref"; // pragma: allowlist secret
@@ -166,6 +166,6 @@ export async function resolveNonInteractiveApiKey(params: {
   const profileHint =
     params.allowProfile === false ? "" : `, or existing ${params.provider} API-key profile`;
   return reject(
-    `Missing ${params.flagName} (or ${params.envVar} in env${profileHint}). Export ${params.envVar}, pass ${params.flagName}, or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+    `Missing ${params.flagName} (or ${params.envVar} in env${profileHint}). Export ${params.envVar}, pass ${params.flagName}, or run ${formatCliCommand("carapace onboard")} for interactive setup.`,
   );
 }

@@ -1,16 +1,16 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { OpenClawSchema } from "./zod-schema.js";
+import { CarapaceSchema } from "./zod-schema.js";
 
-describe("OpenClawSchema worktreeRoot", () => {
+describe("CarapaceSchema worktreeRoot", () => {
   it("keeps the default implicit and accepts an absolute or home-relative root", () => {
-    expect(OpenClawSchema.parse({}).worktreeRoot).toBeUndefined();
+    expect(CarapaceSchema.parse({}).worktreeRoot).toBeUndefined();
     const roots = [path.resolve("worktrees"), "~/worktrees", "~"];
     if (path.sep === "\\") {
       roots.push("~\\worktrees");
     }
     for (const worktreeRoot of roots) {
-      expect(OpenClawSchema.parse({ worktreeRoot }).worktreeRoot).toBe(worktreeRoot);
+      expect(CarapaceSchema.parse({ worktreeRoot }).worktreeRoot).toBe(worktreeRoot);
     }
   });
 
@@ -25,10 +25,10 @@ describe("OpenClawSchema worktreeRoot", () => {
     42,
     null,
   ])("rejects an empty, relative, or non-string root: %j", (worktreeRoot) => {
-    expect(OpenClawSchema.safeParse({ worktreeRoot }).success).toBe(false);
+    expect(CarapaceSchema.safeParse({ worktreeRoot }).success).toBe(false);
   });
 
   it("keeps the retired worktrees namespace invalid", () => {
-    expect(OpenClawSchema.safeParse({ worktrees: { root: "~/worktrees" } }).success).toBe(false);
+    expect(CarapaceSchema.safeParse({ worktrees: { root: "~/worktrees" } }).success).toBe(false);
   });
 });

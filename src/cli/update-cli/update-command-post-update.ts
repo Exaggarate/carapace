@@ -21,7 +21,7 @@ import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { loadInstalledPluginIndexInstallRecords } from "../../plugins/installed-plugin-index-records.js";
 import { defaultRuntime } from "../../runtime.js";
 import { classifyUpdateOutcome } from "../../shared/update-outcome.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
 import { formatCliCommand } from "../command-format.js";
 import { printResult } from "./progress.js";
 import { tryWriteCompletionCache, type UpdateCommandOptions } from "./shared.js";
@@ -77,8 +77,8 @@ export type FinishUpdateParams = UpdateRestartParams & {
   packageUpdateNodeRunner?: string;
   packageTransaction?: PackageUpdateTransaction;
   schemaVersions?: UpdateStateSchemaVersion[];
-  candidateSchemaVersions?: OpenClawSchemaVersions;
-  previousSchemaVersions?: OpenClawSchemaVersions;
+  candidateSchemaVersions?: CarapaceSchemaVersions;
+  previousSchemaVersions?: CarapaceSchemaVersions;
   previousVerified?: boolean;
   activationConfig?: import("./update-command-config-snapshot.js").UpdateConfigSnapshot;
   rollbackBlockedReason?: "state-migrated-no-rollback" | "rollback-state-unverified";
@@ -315,7 +315,7 @@ export async function finishUpdate(params: FinishUpdateParams): Promise<UpdateRu
         ...finalResult.steps,
         {
           name: "Windows task autostart recovery",
-          command: "openclaw update",
+          command: "carapace update",
           cwd: finalResult.root ?? params.root,
           durationMs: 0,
           exitCode: 1,
@@ -664,7 +664,7 @@ export async function finishUpdate(params: FinishUpdateParams): Promise<UpdateRu
       await tryWriteCompletionCache(postUpdateRoot, Boolean(params.opts.json));
     } catch (err) {
       if (!params.opts.json) {
-        const completionCacheRefreshCommand = formatCliCommand("openclaw completion --write-state");
+        const completionCacheRefreshCommand = formatCliCommand("carapace completion --write-state");
         defaultRuntime.log(
           theme.warn(
             `Completion cache update failed: ${formatErrorMessage(err)}. Update will continue; retry with: ${completionCacheRefreshCommand}`,
@@ -717,7 +717,7 @@ export async function finishUpdate(params: FinishUpdateParams): Promise<UpdateRu
         ...params.result.steps,
         {
           name: "post-update verification",
-          command: "openclaw update",
+          command: "carapace update",
           cwd: params.result.root ?? params.root,
           durationMs: Math.max(0, Date.now() - params.startedAt),
           exitCode: 1,

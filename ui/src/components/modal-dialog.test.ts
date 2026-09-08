@@ -9,7 +9,7 @@ import {
   installDialogPolyfill,
   nextFrame,
 } from "../test-helpers/modal-dialog.ts";
-import { OpenClawModalDialog } from "./modal-dialog.ts";
+import { CarapaceModalDialog } from "./modal-dialog.ts";
 
 vi.mock("../app/native-browser-host.ts", () => ({
   hasNativeBrowserBridge: () => true,
@@ -21,7 +21,7 @@ let restoreDialogPolyfill: () => void;
 async function renderModal() {
   render(
     html`
-      <openclaw-modal-dialog
+      <carapace-modal-dialog
         label="Confirm action"
         description="Review the operation before continuing."
       >
@@ -31,14 +31,14 @@ async function renderModal() {
           <button id="first-action">First</button>
           <button id="last-action">Last</button>
         </section>
-      </openclaw-modal-dialog>
+      </carapace-modal-dialog>
     `,
     container,
   );
   return await getRenderedModalDialog(container);
 }
 
-describe("openclaw-modal-dialog", () => {
+describe("carapace-modal-dialog", () => {
   beforeEach(() => {
     restoreDialogPolyfill = installDialogPolyfill();
     container = document.createElement("div");
@@ -62,18 +62,18 @@ describe("openclaw-modal-dialog", () => {
     expect(dialog.getAttribute("aria-label")).toBe("Confirm action");
     expect(dialog.getAttribute("aria-description")).toBe("Review the operation before continuing.");
     expect(dialog.getRootNode()).toBe(webAwesomeDialog.shadowRoot);
-    expect(document.openClawModalLayers?.has(modal)).toBe(true);
+    expect(document.carapaceModalLayers?.has(modal)).toBe(true);
 
     modal.hide();
     await modal.updateComplete;
-    expect(document.openClawModalLayers?.has(modal)).toBe(false);
+    expect(document.carapaceModalLayers?.has(modal)).toBe(false);
 
     modal.show();
     await modal.updateComplete;
-    expect(document.openClawModalLayers?.has(modal)).toBe(true);
+    expect(document.carapaceModalLayers?.has(modal)).toBe(true);
 
     modal.remove();
-    expect(document.openClawModalLayers?.has(modal)).toBe(false);
+    expect(document.carapaceModalLayers?.has(modal)).toBe(false);
   });
 
   it("occludes native tabs through nested dialogs, closing animations, and removal", async () => {
@@ -81,7 +81,7 @@ describe("openclaw-modal-dialog", () => {
     const unsubscribe = subscribeNativeOverlayOcclusion(changes);
     try {
       const { modal, webAwesomeDialog } = await renderModal();
-      const nested = document.createElement("openclaw-modal-dialog");
+      const nested = document.createElement("carapace-modal-dialog");
       modal.append(nested);
       await getRenderedModalDialog(modal);
       expect(changes.mock.calls).toEqual([[false], [true]]);
@@ -120,9 +120,9 @@ describe("openclaw-modal-dialog", () => {
 
   it("focuses slotted autofocus content", async () => {
     render(
-      html`<openclaw-modal-dialog label="Edit">
+      html`<carapace-modal-dialog label="Edit">
         <textarea id="autofocus-target" autofocus></textarea>
-      </openclaw-modal-dialog>`,
+      </carapace-modal-dialog>`,
       container,
     );
     await getRenderedModalDialog(container);
@@ -132,10 +132,10 @@ describe("openclaw-modal-dialog", () => {
 
   it("keeps focus on a field the user selected when the show animation settles", async () => {
     render(
-      html`<openclaw-modal-dialog label="Edit">
+      html`<carapace-modal-dialog label="Edit">
         <input id="autofocus-target" autofocus />
         <textarea id="notes-field"></textarea>
-      </openclaw-modal-dialog>`,
+      </carapace-modal-dialog>`,
       container,
     );
     const { webAwesomeDialog } = await getRenderedModalDialog(container);
@@ -159,7 +159,7 @@ describe("openclaw-modal-dialog", () => {
   it("hands an active toast back to the app layer when it closes", async () => {
     const shell = document.createElement("div");
     shell.className = "shell";
-    const appHost = document.createElement("openclaw-toast-host");
+    const appHost = document.createElement("carapace-toast-host");
     shell.append(appHost);
     document.body.append(shell);
     try {
@@ -181,7 +181,7 @@ describe("openclaw-modal-dialog", () => {
   });
 
   it("assigns overlay motion by interaction type", () => {
-    const styles = OpenClawModalDialog.styles.cssText;
+    const styles = CarapaceModalDialog.styles.cssText;
 
     expect(styles).toMatch(
       /:host\(\.palette\)\s+wa-dialog\s*\{[^}]*--show-duration:\s*0ms;[^}]*--hide-duration:\s*0ms;/u,
@@ -190,10 +190,10 @@ describe("openclaw-modal-dialog", () => {
       /:host\(\.drawer\)\s+wa-dialog\s*\{[^}]*--show-duration:\s*200ms;[^}]*--hide-duration:\s*0ms;/u,
     );
     expect(styles).toMatch(
-      /:host\(\.drawer\)\s+wa-dialog\[open\]::part\(dialog\)\s*\{[^}]*animation:\s*openclaw-drawer-in 200ms cubic-bezier\(0\.32, 0\.72, 0, 1\);/u,
+      /:host\(\.drawer\)\s+wa-dialog\[open\]::part\(dialog\)\s*\{[^}]*animation:\s*carapace-drawer-in 200ms cubic-bezier\(0\.32, 0\.72, 0, 1\);/u,
     );
     expect(styles).toMatch(
-      /@keyframes openclaw-drawer-in\s*\{\s*from\s*\{\s*transform:\s*translateX\(100%\);\s*\}\s*to\s*\{\s*transform:\s*translateX\(0\);/u,
+      /@keyframes carapace-drawer-in\s*\{\s*from\s*\{\s*transform:\s*translateX\(100%\);\s*\}\s*to\s*\{\s*transform:\s*translateX\(0\);/u,
     );
   });
   it("emits modal-cancel on Escape", async () => {

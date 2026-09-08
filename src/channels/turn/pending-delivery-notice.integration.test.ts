@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setReplyPayloadMetadata } from "../../auto-reply/reply-payload.js";
 import type { FinalizedMsgContext } from "../../auto-reply/templating.js";
 import { loadSessionEntry, replaceSessionEntry } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { failDurableDelivery } from "../../infra/outbound/delivery-completion.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { dispatchRoutedChannelTurn } from "./lifecycle.js";
 
 const dispatchReplyWithRoutedChannelDispatcherCore = vi.hoisted(() => vi.fn());
@@ -60,7 +60,7 @@ function createCtx(overrides: Partial<FinalizedMsgContext> = {}): FinalizedMsgCo
 describe("pending delivery notice end to end", () => {
   let tmpDir: string;
   let storePath: string;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
   const sessionKey = "agent:main:telegram:direct:chat-1";
   const context = { channel: "telegram", to: "chat-1", accountId: "default" };
   const completion = {
@@ -75,10 +75,10 @@ describe("pending delivery notice end to end", () => {
     vi.clearAllMocks();
     sendRecoveryNotice.mockResolvedValue({ suppressed: false });
     appendAssistantMessageToSessionTranscript.mockResolvedValue({ ok: true });
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-notice-e2e-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-notice-e2e-"));
     storePath = path.join(tmpDir, "sessions.json");
     completion.storePath = storePath;
-    cfg = { session: { store: storePath } } as OpenClawConfig;
+    cfg = { session: { store: storePath } } as CarapaceConfig;
     await replaceSessionEntry(
       { sessionKey, storePath },
       {
@@ -168,7 +168,7 @@ describe("pending delivery notice end to end", () => {
       );
 
       // Reopen the canonical store so normalization must preserve the terminal fact.
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       // A queue restart can repeat owner settlement after its first write committed.
       await failDurableDelivery({ kind: "pending-final", ...completion });
       await runTurn(async () => ({ visibleReplySent: true }), { bindCustody: false });

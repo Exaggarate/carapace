@@ -1,15 +1,15 @@
 /**
  * Gateway loop for polling ClickClack backlog events, opening the realtime
- * websocket, and dispatching user messages into OpenClaw.
+ * websocket, and dispatching user messages into Carapace.
  */
-import type { ChannelGatewayContext } from "openclaw/plugin-sdk/channel-contract";
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import type { buildChannelInboundEventContext } from "openclaw/plugin-sdk/channel-inbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { channelReadyPatch, channelStoppedPatch } from "openclaw/plugin-sdk/gateway-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { readStringField } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import type { ChannelGatewayContext } from "carapace/plugin-sdk/channel-contract";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import type { buildChannelInboundEventContext } from "carapace/plugin-sdk/channel-inbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { channelReadyPatch, channelStoppedPatch } from "carapace/plugin-sdk/gateway-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
+import { readStringField } from "carapace/plugin-sdk/string-coerce-runtime";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import type { RawData } from "ws";
 import { resolveClickClackInboundAccess } from "./access.js";
 import { resolveClickClackAccount } from "./accounts.js";

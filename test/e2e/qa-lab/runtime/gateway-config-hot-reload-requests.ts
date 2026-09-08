@@ -137,7 +137,7 @@ export async function proveHotReloadRequests({
       const body =
         endpoint === "chatCompletions"
           ? {
-              model: "openclaw/qa",
+              model: "carapace/qa",
               messages: [
                 {
                   role: "user",
@@ -146,7 +146,7 @@ export async function proveHotReloadRequests({
               ],
             }
           : {
-              model: "openclaw/qa",
+              model: "carapace/qa",
               input: [
                 {
                   type: "message",

@@ -1,7 +1,7 @@
 // Covers synchronous extra security audit aggregation.
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { setConfigResolutionFacts } from "../config/resolution-facts.js";
 import {
   collectAttackSurfaceSummaryFindings,
@@ -17,7 +17,7 @@ describe("collectSecretsInConfigFindings", () => {
   it("distinguishes an unresolved password from byte-identical literal text", () => {
     const config = {
       gateway: { auth: { password: "${GATEWAY_PASSWORD}" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     setConfigResolutionFacts(config, new Set(["gateway.auth.password"]));
     expect(collectSecretsInConfigFindings(config)).toHaveLength(0);
 
@@ -32,26 +32,26 @@ describe("collectAttackSurfaceSummaryFindings", () => {
       name: "distinguishes external webhooks from internal hooks when only internal hooks are enabled",
       cfg: {
         hooks: { internal: { enabled: true } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedDetail: ["hooks.webhooks: disabled", "hooks.internal: enabled"],
     },
     {
       name: "reports both hook systems as enabled when both are configured",
       cfg: {
         hooks: { enabled: true, internal: { enabled: true } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedDetail: ["hooks.webhooks: enabled", "hooks.internal: enabled"],
     },
     {
       name: "reports internal hooks as disabled until configured",
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       expectedDetail: ["hooks.webhooks: disabled", "hooks.internal: disabled"],
     },
     {
       name: "reports internal hooks as disabled when explicitly set to false",
       cfg: {
         hooks: { internal: { enabled: false } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedDetail: ["hooks.internal: disabled"],
     },
   ])("$name", ({ cfg, expectedDetail }) => {
@@ -71,19 +71,19 @@ describe("collectSmallModelRiskFindings", () => {
     agents: { defaults: { model: { primary: "ollama/mistral-8b" } } },
     browser: { enabled: false },
     tools: { web: { fetch: { enabled: false } } },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const browserDefaultCfg = {
     agents: { defaults: { model: { primary: "ollama/mistral-8b" } } },
     tools: { web: { fetch: { enabled: false } } },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const browserBlockedByPluginPolicyCfg = {
     ...browserDefaultCfg,
     plugins: { allow: ["openai"] },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const configuredBrowserBlockedByPluginPolicyCfg = {
     ...browserBlockedByPluginPolicyCfg,
     browser: { enabled: true },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 
   it.each([
     {

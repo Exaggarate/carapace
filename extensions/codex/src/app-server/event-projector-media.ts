@@ -1,11 +1,11 @@
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { generatedImageAssetFromBase64 } from "openclaw/plugin-sdk/image-generation";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
-import { readStringField as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { generatedImageAssetFromBase64 } from "carapace/plugin-sdk/image-generation";
+import { resolveGeneratedMediaMaxBytes } from "carapace/plugin-sdk/media-generation-runtime";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
+import { readStringField as readString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { readItemString } from "./event-projector-values.js";
 import type { CodexThreadItem, JsonObject } from "./protocol.js";
 import type { CodexRemoteWorkspaceFileReader } from "./remote-workspace-media.js";

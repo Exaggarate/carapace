@@ -7,7 +7,7 @@ type ModelsConfigTestApi = {
 
 function getTestApi(): ModelsConfigTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.modelsConfigTestApi")
+    Symbol.for("carapace.modelsConfigTestApi")
   ] as ModelsConfigTestApi;
 }
 

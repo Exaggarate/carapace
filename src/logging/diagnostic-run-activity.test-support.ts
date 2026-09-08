@@ -19,7 +19,7 @@ type DiagnosticRunActivityTestApi = {
 
 function getTestApi(): DiagnosticRunActivityTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.diagnosticRunActivityTestApi")
+    Symbol.for("carapace.diagnosticRunActivityTestApi")
   ] as DiagnosticRunActivityTestApi;
 }
 

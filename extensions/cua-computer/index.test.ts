@@ -2,17 +2,17 @@ import fs from "node:fs";
 import {
   validateJsonSchemaValue,
   type JsonSchemaObject,
-} from "openclaw/plugin-sdk/json-schema-runtime";
+} from "carapace/plugin-sdk/json-schema-runtime";
 import {
   normalizePluginsConfig,
   resolveEffectiveEnableState,
-} from "openclaw/plugin-sdk/plugin-config-runtime";
+} from "carapace/plugin-sdk/plugin-config-runtime";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi, type TestPluginApiInput } from "openclaw/plugin-sdk/plugin-test-api";
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicy,
+  CarapacePluginNodeInvokePolicyContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi, type TestPluginApiInput } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const artifactMocks = vi.hoisted(() => ({
@@ -39,7 +39,7 @@ function registerPlugin(overrides: TestPluginApiInput = {}) {
 
 function validateManifestConfig(value: unknown) {
   const manifest = JSON.parse(
-    fs.readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"),
+    fs.readFileSync(new URL("./carapace.plugin.json", import.meta.url), "utf8"),
   ) as { configSchema: JsonSchemaObject };
   return validateJsonSchemaValue({
     cacheKey: "cua-computer.manifest.config.test",
@@ -60,7 +60,7 @@ describe("cua-computer plugin registration", () => {
 
   it("enables Gateway policy by default while keeping explicit plugin disable authoritative", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"),
+      fs.readFileSync(new URL("./carapace.plugin.json", import.meta.url), "utf8"),
     ) as { enabledByDefault?: boolean; enabledByDefaultOnPlatforms?: string[] };
 
     expect(manifest.enabledByDefault).toBe(true);
@@ -78,7 +78,7 @@ describe("cua-computer plugin registration", () => {
   it.each(["linux", "win32"])("loads only remote policy by default on %s", (platform) => {
     Object.defineProperty(process, "platform", { configurable: true, value: platform });
     const registerNodeHostCommand = vi.fn();
-    const policies: OpenClawPluginNodeInvokePolicy[] = [];
+    const policies: CarapacePluginNodeInvokePolicy[] = [];
     registerPlugin({
       config: {},
       registerNodeHostCommand,
@@ -101,7 +101,7 @@ describe("cua-computer plugin registration", () => {
     },
   ])("preserves native provider activation on $platform", ({ platform, config }) => {
     Object.defineProperty(process, "platform", { configurable: true, value: platform });
-    const commands: OpenClawPluginNodeHostCommand[] = [];
+    const commands: CarapacePluginNodeHostCommand[] = [];
     registerPlugin({ config, registerNodeHostCommand: (command) => commands.push(command) });
     expect(commands.map((command) => command.command)).toEqual(["screen.snapshot", "computer.act"]);
     expect(artifactMocks.verify).toHaveBeenCalledOnce();
@@ -109,16 +109,16 @@ describe("cua-computer plugin registration", () => {
   });
 
   it("registers the screen and dangerous computer node-host commands", () => {
-    const commands: OpenClawPluginNodeHostCommand[] = [];
-    const policies: OpenClawPluginNodeInvokePolicy[] = [];
+    const commands: CarapacePluginNodeHostCommand[] = [];
+    const policies: CarapacePluginNodeInvokePolicy[] = [];
     const registerTool = vi.fn();
     const registerCli = vi.fn();
     const registerNodeCliFeature = vi.fn();
     const registerService = vi.fn();
     registerPlugin({
       pluginConfig: {},
-      registerNodeHostCommand: (command: OpenClawPluginNodeHostCommand) => commands.push(command),
-      registerNodeInvokePolicy: (policy: OpenClawPluginNodeInvokePolicy) => policies.push(policy),
+      registerNodeHostCommand: (command: CarapacePluginNodeHostCommand) => commands.push(command),
+      registerNodeInvokePolicy: (policy: CarapacePluginNodeInvokePolicy) => policies.push(policy),
       registerTool,
       registerCli,
       registerNodeCliFeature,
@@ -149,10 +149,10 @@ describe("cua-computer plugin registration", () => {
     expect(validateManifestConfig({ unexpected: true }).ok).toBe(false);
     expect(plugin.configSchema).not.toHaveProperty("uiHints");
 
-    const commands: OpenClawPluginNodeHostCommand[] = [];
+    const commands: CarapacePluginNodeHostCommand[] = [];
     registerPlugin({
       pluginConfig: config,
-      registerNodeHostCommand: (command: OpenClawPluginNodeHostCommand) => commands.push(command),
+      registerNodeHostCommand: (command: CarapacePluginNodeHostCommand) => commands.push(command),
       registerNodeInvokePolicy: () => {},
     });
 
@@ -168,8 +168,8 @@ describe("cua-computer plugin registration", () => {
       ok: false,
       code: "COMPUTER_DRIVER_PACKAGE_MISSING",
       diagnostic:
-        "COMPUTER_DRIVER_PACKAGE_MISSING: native package absent. Fix: reinstall OpenClaw.",
-      fixHint: "Reinstall OpenClaw.",
+        "COMPUTER_DRIVER_PACKAGE_MISSING: native package absent. Fix: reinstall Carapace.",
+      fixHint: "Reinstall Carapace.",
     });
 
     registerPlugin({
@@ -180,16 +180,16 @@ describe("cua-computer plugin registration", () => {
     });
 
     expect(error).toHaveBeenCalledWith(
-      "COMPUTER_DRIVER_PACKAGE_MISSING: native package absent. Fix: reinstall OpenClaw.",
+      "COMPUTER_DRIVER_PACKAGE_MISSING: native package absent. Fix: reinstall Carapace.",
     );
   });
 
   it("forwards an explicitly armed computer action and preserves node refusals", async () => {
-    const policies: OpenClawPluginNodeInvokePolicy[] = [];
+    const policies: CarapacePluginNodeInvokePolicy[] = [];
     registerPlugin({
       pluginConfig: {},
       registerNodeHostCommand: () => {},
-      registerNodeInvokePolicy: (policy: OpenClawPluginNodeInvokePolicy) => policies.push(policy),
+      registerNodeInvokePolicy: (policy: CarapacePluginNodeInvokePolicy) => policies.push(policy),
     });
     const refusal = {
       ok: false as const,
@@ -202,7 +202,7 @@ describe("cua-computer plugin registration", () => {
       policies[0]!.handle({
         invokeNode,
         risk: { level: "ordinary", family: "input" },
-      } as unknown as OpenClawPluginNodeInvokePolicyContext),
+      } as unknown as CarapacePluginNodeInvokePolicyContext),
     ).resolves.toEqual(refusal);
     expect(invokeNode).toHaveBeenCalledOnce();
   });

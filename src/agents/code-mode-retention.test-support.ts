@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { setImmediate } from "node:timers/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { Type } from "typebox";
 import { createDeferredCore } from "../shared/deferred.js";
 import { activeRuns, disposeAllCodeModeRuns } from "./code-mode-state.js";

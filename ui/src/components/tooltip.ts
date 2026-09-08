@@ -1,10 +1,10 @@
-// Control UI adapter for Web Awesome tooltips. OpenClaw keeps its terse
+// Control UI adapter for Web Awesome tooltips. Carapace keeps its terse
 // wrapper API and manual dismissal; Web Awesome owns positioning and rendering.
 import "@awesome.me/webawesome/dist/components/tooltip/tooltip.js";
 import type WaTooltip from "@awesome.me/webawesome/dist/components/tooltip/tooltip.js";
 import { css, html } from "lit";
 import { property, query } from "lit/decorators.js";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 import {
   isTooltipTextRedundant,
   isTooltipTriggerElement,
@@ -20,10 +20,10 @@ const RICH_CONTENT_CLOSE_DELAY = 100;
 let nextTooltipId = 0;
 
 function createTooltipId() {
-  return `openclaw-tooltip-${++nextTooltipId}`;
+  return `carapace-tooltip-${++nextTooltipId}`;
 }
 
-class TooltipProvider extends OpenClawLitElement {
+class TooltipProvider extends CarapaceLitElement {
   @property({ type: Number }) delay = HOVER_DELAY;
   @property({ type: Number }) skipDelay = SKIP_DELAY;
 
@@ -93,7 +93,7 @@ class TooltipProvider extends OpenClawLitElement {
   }
 }
 
-class Tooltip extends OpenClawLitElement {
+class Tooltip extends CarapaceLitElement {
   private static readonly activeByDocument = new WeakMap<Document, Tooltip>();
 
   static readonly consumeEscape = (event: KeyboardEvent, ownerDocument: Document): boolean => {
@@ -157,28 +157,28 @@ class Tooltip extends OpenClawLitElement {
     }
 
     wa-tooltip {
-      --max-width: var(--openclaw-tooltip-max-width, min(260px, calc(100vw - 16px)));
-      --wa-tooltip-arrow-size: var(--openclaw-tooltip-arrow-size, 0px);
+      --max-width: var(--carapace-tooltip-max-width, min(260px, calc(100vw - 16px)));
+      --wa-tooltip-arrow-size: var(--carapace-tooltip-arrow-size, 0px);
       --wa-tooltip-background-color: var(
-        --openclaw-tooltip-background-color,
+        --carapace-tooltip-background-color,
         color-mix(in srgb, var(--bg-elevated) 97%, var(--text) 3%)
       );
       --wa-tooltip-border-color: var(
-        --openclaw-tooltip-border-color,
+        --carapace-tooltip-border-color,
         var(--overlay-border, var(--border-strong))
       );
       --wa-tooltip-border-width: 1px;
       --wa-tooltip-border-style: solid;
       --wa-tooltip-content-color: var(--text);
-      --wa-tooltip-border-radius: var(--openclaw-tooltip-border-radius, var(--radius-md));
-      --show-duration: var(--openclaw-tooltip-popup-show-duration, var(--wa-transition-fast));
-      --hide-duration: var(--openclaw-tooltip-popup-hide-duration, var(--wa-transition-fast));
+      --wa-tooltip-border-radius: var(--carapace-tooltip-border-radius, var(--radius-md));
+      --show-duration: var(--carapace-tooltip-popup-show-duration, var(--wa-transition-fast));
+      --hide-duration: var(--carapace-tooltip-popup-hide-duration, var(--wa-transition-fast));
       font-family: var(--font-body);
     }
 
     wa-tooltip::part(body) {
-      padding: var(--openclaw-tooltip-padding, 5px 7px);
-      box-shadow: var(--openclaw-tooltip-shadow, var(--overlay-shadow, var(--shadow-md)));
+      padding: var(--carapace-tooltip-padding, 5px 7px);
+      box-shadow: var(--carapace-tooltip-shadow, var(--overlay-shadow, var(--shadow-md)));
       font-size: 11px;
       font-weight: 500;
       line-height: 1.25;
@@ -186,7 +186,7 @@ class Tooltip extends OpenClawLitElement {
     }
 
     :host(.sidebar-hover-tooltip) wa-tooltip[open]::part(base__popup) {
-      animation: var(--openclaw-tooltip-open-animation);
+      animation: var(--carapace-tooltip-open-animation);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -200,7 +200,7 @@ class Tooltip extends OpenClawLitElement {
       }
     }
 
-    @keyframes openclaw-tooltip-hover-card-in {
+    @keyframes carapace-tooltip-hover-card-in {
       from {
         opacity: 0;
         transform: scale(0.95);
@@ -269,7 +269,7 @@ class Tooltip extends OpenClawLitElement {
     this.tooltipProvider = null;
     let owner: Element | null = trigger;
     while (owner) {
-      const provider = owner.closest<TooltipProvider>("openclaw-tooltip-provider");
+      const provider = owner.closest<TooltipProvider>("carapace-tooltip-provider");
       if (provider) {
         this.tooltipProvider = provider;
         break;
@@ -674,7 +674,7 @@ class Tooltip extends OpenClawLitElement {
 export const consumeTooltipEscape = Tooltip.consumeEscape;
 
 export function focusWithoutTooltip(target: HTMLElement | null | undefined) {
-  const tooltip = target?.closest<Tooltip>("openclaw-tooltip");
+  const tooltip = target?.closest<Tooltip>("carapace-tooltip");
   if (tooltip && target) {
     tooltip.focusTriggerWithoutOpening(target);
   } else {
@@ -682,17 +682,17 @@ export function focusWithoutTooltip(target: HTMLElement | null | undefined) {
   }
 }
 
-if (!customElements.get("openclaw-tooltip-provider")) {
-  customElements.define("openclaw-tooltip-provider", TooltipProvider);
+if (!customElements.get("carapace-tooltip-provider")) {
+  customElements.define("carapace-tooltip-provider", TooltipProvider);
 }
 
-if (!customElements.get("openclaw-tooltip")) {
-  customElements.define("openclaw-tooltip", Tooltip);
+if (!customElements.get("carapace-tooltip")) {
+  customElements.define("carapace-tooltip", Tooltip);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-tooltip-provider": TooltipProvider;
-    "openclaw-tooltip": Tooltip;
+    "carapace-tooltip-provider": TooltipProvider;
+    "carapace-tooltip": Tooltip;
   }
 }

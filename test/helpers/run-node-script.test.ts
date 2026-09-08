@@ -10,7 +10,7 @@ import { useAutoCleanupTempDirTracker } from "./temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 it("captures inherited output written after the script exits", async () => {
-  const script = join(tempDirs.make("openclaw-node-script-output-"), "parent.mjs");
+  const script = join(tempDirs.make("carapace-node-script-output-"), "parent.mjs");
   writeFileSync(
     script,
     `import { spawn } from "node:child_process";
@@ -37,7 +37,7 @@ child.once("message", () => process.exit(17));
 it.for(["at limit", "stdout overflow", "stderr overflow"])(
   "preserves independent 2 MiB output failure boundaries: %s",
   async (mode) => {
-    const directory = tempDirs.make("openclaw-node-script-buffer-");
+    const directory = tempDirs.make("carapace-node-script-buffer-");
     const script = join(directory, "output.mjs");
     const pidFile = join(directory, "pid");
     const maxBuffer = 2 * 1024 * 1024;
@@ -81,7 +81,7 @@ it.skipIf(process.platform === "win32")(
       vi.stubEnv(key, ownerRoot);
     }
     const fixture = createFixtureLifetime();
-    const directory = fixture.createTempDir("openclaw-node-script-uncertain-");
+    const directory = fixture.createTempDir("carapace-node-script-uncertain-");
     const script = join(directory, "parent.mjs");
     const pidFile = join(directory, "leaf.pid");
     const release = join(directory, "release");

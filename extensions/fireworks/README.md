@@ -1,13 +1,13 @@
-# Fireworks OpenClaw provider
+# Fireworks Carapace provider
 
-Official OpenClaw provider plugin for Fireworks.
+Official Carapace provider plugin for Fireworks.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/fireworks-provider
+carapace plugins install @carapace/fireworks-provider
 ```
 
 ## Docs
 
-See `docs/providers/fireworks.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/fireworks`.
+See `docs/providers/fireworks.md` in the Carapace repository, or the published docs at `../../docs/providers/fireworks.md`.

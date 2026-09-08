@@ -3,13 +3,13 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveAgentConfig } from "../../agents/agent-scope.js";
 import { resolveMentionPatternPolicy } from "../../channels/mention-pattern-policy.js";
 import type { ChannelId } from "../../channels/plugins/channel-id.types.js";
 import { getLoadedChannelPluginById } from "../../channels/plugins/registry-loaded.js";
 import { normalizeAnyChannelId } from "../../channels/registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { compileConfigRegexes, type ConfigRegexRejectReason } from "../../security/config-regex.js";
 import { escapeRegExp } from "../../utils.js";
@@ -335,7 +335,7 @@ function compileMentionPatternsCached(params: {
 }
 
 function resolveMentionPatterns(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId?: string,
 ): ResolvedMentionPatterns {
   if (!cfg) {
@@ -356,7 +356,7 @@ function resolveMentionPatterns(
 
 /** Builds mention regexes from config, agent identity, and channel policy. */
 export function buildMentionRegexes(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId?: string,
   options?: BuildMentionRegexesOptions,
 ): RegExp[] {
@@ -436,7 +436,7 @@ export function stripStructuralPrefixes(text: string): string {
 export function stripMentions(
   text: string,
   ctx: MsgContext,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId?: string,
 ): string {
   let result = text;

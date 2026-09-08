@@ -7,13 +7,13 @@ import {
   resolveAdmittedRunActiveAssertion,
 } from "../agents/admitted-run-context.js";
 import { readConfigFileSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { rotateAgentEventLifecycleGeneration } from "../infra/agent-events.js";
 import { resetAgentRunRegistryForTest } from "../infra/agent-run-registry.js";
 import { loadExecApprovalsReadOnly } from "../infra/exec-approvals.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { executeSystemAgentOperation } from "./operations-execute.js";
 import type { SystemAgentOverview } from "./overview.js";
 import { createSystemAgentTestRuntime } from "./system-agent.runtime.test-support.js";
@@ -68,7 +68,7 @@ it.each([
   { phase: "first-agent", loss: "live" },
   { phase: "first-agent", loss: "direct" },
 ] as const)("setup $phase preparation with $loss authority", async ({ phase, loss }) => {
-  const state = await createOpenClawTestState({ label: "setup-lifetime" });
+  const state = await createCarapaceTestState({ label: "setup-lifetime" });
   const admission = prepareSystemAgentRunAdmission({}, "setup-run", "main", "setup-test");
   let replacement: ReturnType<typeof prepareSystemAgentRunAdmission> | undefined;
   const admitted = await admission.admit("embedded");
@@ -82,12 +82,12 @@ it.each([
   const { runtime, lines } = createSystemAgentTestRuntime();
   const workspace = state.workspaceDir;
   const model = "anthropic/claude-sonnet-4-6";
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: {
       defaults: {
         workspace,
         model,
-        models: { [model]: { agentRuntime: { id: "openclaw" } } },
+        models: { [model]: { agentRuntime: { id: "carapace" } } },
         ...(phase === "sessions" ? { skipBootstrap: true } : {}),
       },
       ...(phase === "first-agent" ? {} : { entries: { main: { workspace } } }),
@@ -212,15 +212,15 @@ it.each([
       if (phase !== "exec-approval") {
         expect.soft(await fs.stat(state.sessionsDir()).catch(() => null)).toBeNull();
       }
-      expect.soft(loadExecApprovalsReadOnly().agents?.openclaw).toBeUndefined();
-      expect.soft(lines).not.toContain("[openclaw] done: openclaw.setup");
+      expect.soft(loadExecApprovalsReadOnly().agents?.carapace).toBeUndefined();
+      expect.soft(lines).not.toContain("[carapace] done: carapace.setup");
     } else {
       expect(outcome).toMatchObject({ result: { applied: true, bootstrapPending: true } });
       expect(afterRaw).not.toBe(beforeRaw);
       expect(JSON.parse(afterRaw)).toHaveProperty("agents.entries.main");
       expect(await fs.readFile(path.join(workspace, "AGENTS.md"), "utf8")).not.toBe("");
       expect((await fs.stat(state.sessionsDir())).isDirectory()).toBe(true);
-      expect(loadExecApprovalsReadOnly().agents?.openclaw).toEqual({
+      expect(loadExecApprovalsReadOnly().agents?.carapace).toEqual({
         security: "full",
         ask: "off",
       });
@@ -230,8 +230,8 @@ it.each([
     await completion;
     admission.close();
     replacement?.close();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   }
 });

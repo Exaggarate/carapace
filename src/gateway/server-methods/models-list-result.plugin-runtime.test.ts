@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentHarnessV2 } from "../../agents/harness/types.js";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../../agents/model-catalog.types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
 import {
@@ -9,7 +9,7 @@ import {
   restoreActivePluginRegistrySnapshot,
   setActivePluginRegistry,
 } from "../../plugins/runtime.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { registerGatewayModelCatalogPrivateAccess } from "../server-model-catalog-auth.js";
 import {
   buildModelsListResult,
@@ -64,10 +64,10 @@ describe("models.list plugin metadata handoff", () => {
   });
 
   it("reuses one Gateway-owned metadata snapshot across startup projection and browse", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-plugin-runtime-",
+        prefix: "carapace-models-list-plugin-runtime-",
         agentEnv: "main",
       },
       async (state) => {
@@ -82,7 +82,7 @@ describe("models.list plugin metadata handoff", () => {
               },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         const snapshot: ModelCatalogSnapshot = {
           entries: [catalogEntry("modern"), catalogEntry("another")],
           routeVariants: [],
@@ -124,7 +124,7 @@ describe("models.list plugin metadata handoff", () => {
   it("keeps prepared owner facts when preloaded-only browse requires full discovery", async () => {
     const cfg = {
       agents: { defaults: { models: { "custom/*": {} } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const snapshot: ModelCatalogSnapshot = { entries: [], routeVariants: [] };
     const loadGatewayModelCatalogSnapshot = vi.fn();
     const context = {
@@ -155,7 +155,7 @@ describe("models.list plugin metadata handoff", () => {
   });
 
   it("discovers a harness catalog for an explicit configured picker read", async () => {
-    const cfg = { agents: { defaults: { model: "custom/modern" } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { model: "custom/modern" } } } as CarapaceConfig;
     const snapshot: ModelCatalogSnapshot = {
       entries: [catalogEntry("modern")],
       routeVariants: [],
@@ -203,10 +203,10 @@ describe("models.list plugin metadata handoff", () => {
     mocks.prepareHarnessCatalog.mockImplementationOnce(
       actualHarnessCatalog.prepareModelsListHarnessCatalog,
     );
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-prepared-registry-",
+        prefix: "carapace-models-list-prepared-registry-",
         agentEnv: "main",
       },
       async (state) => {
@@ -222,7 +222,7 @@ describe("models.list plugin metadata handoff", () => {
               modelPolicy: { allow: ["custom/native-model"] },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         const entry: ModelCatalogEntry = {
           id: "native-model",
           name: "Native Model",

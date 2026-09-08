@@ -177,7 +177,7 @@ describe("restart health", () => {
       inspectPortUsage.mockResolvedValue({
         port,
         status: "busy",
-        listeners: [{ pid: process.pid, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: process.pid, commandLine: "carapace-gateway" }],
         hints: [],
       });
 
@@ -192,7 +192,7 @@ describe("restart health", () => {
           probeContext: { config: { gateway: { auth: { mode: "none" } } }, auth: {} },
           env: {
             ...process.env,
-            OPENCLAW_STATE_DIR: `/tmp/openclaw-autoqa-161-${process.pid}-${port}`,
+            CARAPACE_STATE_DIR: `/tmp/carapace-autoqa-161-${process.pid}-${port}`,
           },
         });
 
@@ -262,7 +262,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
       hints: [],
     });
 
@@ -295,7 +295,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -316,7 +316,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
       hints: [],
     });
 
@@ -344,7 +344,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
       hints: [],
     });
 
@@ -394,7 +394,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -444,7 +444,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
       hints: [],
     });
 
@@ -480,7 +480,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
       hints: [],
     });
 

@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { readJson } from "./fixtures/common.mjs";
 import {
-  resolveOpenClawConfigPath as configPath,
-  resolveOpenClawStateDir as stateDir,
-} from "./openclaw-state-paths.mjs";
+  resolveCarapaceConfigPath as configPath,
+  resolveCarapaceStateDir as stateDir,
+} from "./carapace-state-paths.mjs";
 import { readPluginInstallRecords } from "./plugin-index-sqlite.mjs";
 
 export { configPath, readJson, stateDir };

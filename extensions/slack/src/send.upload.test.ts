@@ -2,10 +2,10 @@ import type { WebClient } from "@slack/web-api";
 import {
   formatErrorMessage,
   PlatformMessageNotDispatchedError,
-} from "openclaw/plugin-sdk/error-runtime";
-import type { LookupFn } from "openclaw/plugin-sdk/ssrf-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
-import type { WebMediaResult } from "openclaw/plugin-sdk/web-media";
+} from "carapace/plugin-sdk/error-runtime";
+import type { LookupFn } from "carapace/plugin-sdk/ssrf-runtime";
+import { withServer } from "carapace/plugin-sdk/test-env";
+import type { WebMediaResult } from "carapace/plugin-sdk/web-media";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "./blocks.test-helpers.js";
 import {
@@ -46,7 +46,7 @@ const buildTimeoutAbortSignal = vi.hoisted(() =>
 );
 const fetchWithSsrFGuard = vi.fn(
   async (
-    params: Parameters<typeof import("openclaw/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard>[0],
+    params: Parameters<typeof import("carapace/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard>[0],
   ) => {
     const signal = params.signal;
     if (!signal) {
@@ -63,9 +63,9 @@ const fetchWithSsrFGuard = vi.fn(
   },
 );
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-    "openclaw/plugin-sdk/ssrf-runtime",
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/ssrf-runtime")>(
+    "carapace/plugin-sdk/ssrf-runtime",
   );
   return {
     ...actual,
@@ -74,9 +74,9 @@ vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/extension-shared", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/extension-shared")>(
-    "openclaw/plugin-sdk/extension-shared",
+vi.mock("carapace/plugin-sdk/extension-shared", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/extension-shared")>(
+    "carapace/plugin-sdk/extension-shared",
   );
   return {
     ...actual,
@@ -85,9 +85,9 @@ vi.mock("openclaw/plugin-sdk/extension-shared", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/fetch-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/fetch-runtime")>(
-    "openclaw/plugin-sdk/fetch-runtime",
+vi.mock("carapace/plugin-sdk/fetch-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/fetch-runtime")>(
+    "carapace/plugin-sdk/fetch-runtime",
   );
   return {
     ...actual,
@@ -98,9 +98,9 @@ vi.mock("openclaw/plugin-sdk/fetch-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/outbound-media", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/outbound-media")>(
-    "openclaw/plugin-sdk/outbound-media",
+vi.mock("carapace/plugin-sdk/outbound-media", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/outbound-media")>(
+    "carapace/plugin-sdk/outbound-media",
   );
   const mockedLoadOutboundMediaFromUrl =
     loadOutboundMediaFromUrlMock as unknown as typeof actual.loadOutboundMediaFromUrl;
@@ -245,8 +245,8 @@ function mockUploadDestination(client: UploadTestClient, uploadUrl: string) {
 }
 
 async function useRealUploadGuard(networkFetch: typeof fetch, lookupAddress?: string) {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-    "openclaw/plugin-sdk/ssrf-runtime",
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/ssrf-runtime")>(
+    "carapace/plugin-sdk/ssrf-runtime",
   );
   const lookupFn = lookupAddress
     ? ((async () => [{ address: lookupAddress, family: 4 }]) as unknown as LookupFn)
@@ -636,8 +636,8 @@ describe("sendMessageSlack file upload with user IDs", () => {
   });
 
   it("preserves HTTP upload URLs on an alternate Slack API origin", async () => {
-    const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-      "openclaw/plugin-sdk/ssrf-runtime",
+    const actual = await vi.importActual<typeof import("carapace/plugin-sdk/ssrf-runtime")>(
+      "carapace/plugin-sdk/ssrf-runtime",
     );
     await withServer(
       (req, res) => {
@@ -840,7 +840,7 @@ describe("sendMessageSlack file upload with user IDs", () => {
         expect(error).toBeInstanceOf(PlatformMessageNotDispatchedError);
         expect(error).toMatchObject({
           name: "PlatformMessageNotDispatchedError",
-          code: "OPENCLAW_PLATFORM_MESSAGE_NOT_DISPATCHED",
+          code: "CARAPACE_PLATFORM_MESSAGE_NOT_DISPATCHED",
           cause: expect.objectContaining({ name: "TimeoutError" }),
         });
 

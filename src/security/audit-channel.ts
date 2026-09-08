@@ -1,7 +1,7 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 // Audits channel configuration for exposure, auth, and trust risks.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { AgentSelectionRequiredError } from "../agents/agent-scope-config.js";
 import {
   hasConfiguredUnavailableCredentialStatus,
@@ -15,7 +15,7 @@ import type { ChannelId } from "../channels/plugins/types.public.js";
 import { inspectReadOnlyChannelAccount } from "../channels/read-only-account-inspect.js";
 import { isDangerousNameMatchingEnabled } from "../config/dangerous-name-matching.js";
 import { canonicalizeMainSessionAlias } from "../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   listExactDirectMessageBindingPeerIds,
@@ -52,7 +52,7 @@ function dedupeFindings(findings: SecurityAuditFinding[]): SecurityAuditFinding[
 }
 
 function hasExplicitProviderAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   provider: string,
   accountId: string,
 ): boolean {
@@ -79,8 +79,8 @@ function formatChannelAccountNote(params: {
 
 /** Collect channel-specific security findings across active channel plugins/accounts. */
 export async function collectChannelSecurityFindingsCore(params: {
-  cfg: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfig?: CarapaceConfig;
   plugins: ChannelPlugin[];
   mode?: "audit" | "doctor";
 }): Promise<SecurityAuditFinding[]> {
@@ -125,7 +125,7 @@ export async function collectChannelSecurityFindingsCore(params: {
 
   const inspectChannelAccount = async (
     plugin: (typeof params.plugins)[number],
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     accountId: string,
   ) => {
     if (plugin.config.inspectAccount) {

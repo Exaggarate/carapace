@@ -626,7 +626,7 @@ describe("abortChatRunById", () => {
           kind: "canvas",
           surface: "assistant_message",
           render: "url",
-          url: "/__openclaw__/canvas/documents/finished/index.html",
+          url: "/__carapace__/canvas/documents/finished/index.html",
           viewId: "finished",
           sandbox: "scripts",
         },

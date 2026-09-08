@@ -92,7 +92,7 @@ describe("subagent composer", () => {
           role: "assistant",
           content: "The workspace review is complete.",
           timestamp: 1_000,
-          __openclaw: { id: "review-result", seq: 1 },
+          __carapace: { id: "review-result", seq: 1 },
         },
       ];
       const container = document.body.appendChild(document.createElement("div"));

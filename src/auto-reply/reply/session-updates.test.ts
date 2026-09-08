@@ -87,7 +87,7 @@ describe("ensureSkillSnapshot", () => {
   it.each(["agent:writer:main", "global"])(
     "keeps the prepared skill owner for %s",
     async (sessionKey) => {
-      vi.stubEnv("OPENCLAW_TEST_FAST", "0");
+      vi.stubEnv("CARAPACE_TEST_FAST", "0");
       const workspaceDir = `${TEST_WORKSPACE_DIR}/${sessionKey}`;
 
       await ensureSkillSnapshot({
@@ -118,7 +118,7 @@ describe("ensureSkillSnapshot", () => {
   );
 
   it("does not keep a deleted first-turn session entry when persisting skills", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "0");
+    vi.stubEnv("CARAPACE_TEST_FAST", "0");
     const sessionKey = "agent:main:main";
     const sessionEntry = {
       sessionId: "deleted-session",
@@ -158,7 +158,7 @@ describe("ensureSkillSnapshot", () => {
   });
 
   it("adopts a rebound first-turn session entry instead of overwriting it", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "0");
+    vi.stubEnv("CARAPACE_TEST_FAST", "0");
     const sessionKey = "agent:main:main";
     const sessionEntry = {
       sessionId: "old-session",
@@ -193,7 +193,7 @@ describe("ensureSkillSnapshot", () => {
   });
 
   it("persists first-turn skill snapshots as a guarded partial update", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "0");
+    vi.stubEnv("CARAPACE_TEST_FAST", "0");
     const sessionKey = "agent:main:main";
     const sessionEntry = {
       sessionId: "session-1",
@@ -236,7 +236,7 @@ describe("ensureSkillSnapshot", () => {
   });
 
   it("keeps a concurrent rename and unpin while persisting a skill snapshot", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "0");
+    vi.stubEnv("CARAPACE_TEST_FAST", "0");
     const sessionKey = "agent:main:reply";
     const staleEntry = {
       sessionId: "reply-session",

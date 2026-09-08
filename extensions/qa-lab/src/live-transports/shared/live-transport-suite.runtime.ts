@@ -22,7 +22,7 @@ export async function runLiveTransportQaSuiteCommand(params: {
 }) {
   const options = params.options;
   const credentialSource =
-    options.credentialSource?.trim() || process.env.OPENCLAW_QA_CREDENTIAL_SOURCE?.trim();
+    options.credentialSource?.trim() || process.env.CARAPACE_QA_CREDENTIAL_SOURCE?.trim();
   if (params.credentialMode === "env-only") {
     const laneLabel = params.laneLabel ?? params.channelId;
     if (credentialSource && credentialSource.toLowerCase() !== "env") {

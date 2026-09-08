@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -111,7 +111,7 @@ describe("cli json stdout contract", () => {
   ])("returns one canonical JSON document when skills $name fails", async (testCase) => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "missing-openclaw.json");
+        const configPath = path.join(tempHome, "missing-carapace.json");
         if ("remoteMissing" in testCase) {
           await fs.writeFile(configPath, JSON.stringify({ gateway: { mode: "remote" } }));
         }
@@ -128,13 +128,13 @@ describe("cli json stdout contract", () => {
         )}`;
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--import=${preload}`,
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_GATEWAY_PORT: "1",
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_GATEWAY_PORT: "1",
           ...("explicitGateway" in testCase
             ? {
-                OPENCLAW_GATEWAY_URL: "ws://127.0.0.1:9",
-                OPENCLAW_GATEWAY_TOKEN: "fixture-token",
+                CARAPACE_GATEWAY_URL: "ws://127.0.0.1:9",
+                CARAPACE_GATEWAY_TOKEN: "fixture-token",
               }
             : {}),
         });
@@ -158,7 +158,7 @@ describe("cli json stdout contract", () => {
         expect(result.stderr).toContain(message);
         expect(result.stderr.length).toBeLessThan(2_048);
       },
-      { prefix: "openclaw-skills-json-failure-e2e-" },
+      { prefix: "carapace-skills-json-failure-e2e-" },
     );
   });
 
@@ -173,9 +173,9 @@ describe("cli json stdout contract", () => {
         )}`;
         const result = runBuiltCli(tempHome, ["skills", "search", "fixture"], {
           NODE_OPTIONS: `--import=${preload}`,
-          OPENCLAW_DEBUG: testCase.debug,
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
+          CARAPACE_DEBUG: testCase.debug,
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
         });
 
         expect(result.status, result.stderr).toBe(1);
@@ -183,7 +183,7 @@ describe("cli json stdout contract", () => {
         expect(result.stderr).toContain("ClawHub /api/v1/search returned malformed JSON");
         expect(result.stderr.includes("Unexpected token")).toBe(testCase.includesCause);
       },
-      { prefix: "openclaw-skills-human-failure-e2e-" },
+      { prefix: "carapace-skills-human-failure-e2e-" },
     );
   });
 });

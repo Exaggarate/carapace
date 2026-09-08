@@ -5,7 +5,7 @@ import path from "node:path";
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { NodeHostConfig } from "../node-host/config.js";
 import { encodePairingSetupCode } from "../pairing/setup-code.js";
 import { registerConnectCli } from "./connect-cli.js";
@@ -39,8 +39,8 @@ vi.mock("../infra/net/fetch-guard.js", async (importOriginal) => {
 vi.mock("../runtime.js", () => ({ defaultRuntime: mocks.runtime }));
 
 const payload = {
-  url: "wss://192.168.1.20:8443/openclaw-gw",
-  urls: ["wss://192.168.1.20:8443/openclaw-gw", "wss://gateway.tailnet.example/tailnet-gw"],
+  url: "wss://192.168.1.20:8443/carapace-gw",
+  urls: ["wss://192.168.1.20:8443/carapace-gw", "wss://gateway.tailnet.example/tailnet-gw"],
   bootstrapToken: "bootstrap-token",
   tlsFingerprint: "ab".repeat(32),
 };
@@ -81,7 +81,7 @@ describe("connect cli", () => {
     { name: "oc-pair wrapper", target: () => `oc-pair://${setupCode()}`, fetched: false },
     {
       name: "HTTPS join URL",
-      target: () => `https://gateway.example/openclaw-gw/j/${"a".repeat(22)}`,
+      target: () => `https://gateway.example/carapace-gw/j/${"a".repeat(22)}`,
       fetched: true,
     },
   ])("maps a $name into the existing node foreground runtime", async ({ target, fetched }) => {
@@ -103,12 +103,12 @@ describe("connect cli", () => {
       gatewayPort: 8443,
       gatewayTls: true,
       gatewayTlsFingerprint: "ab".repeat(32),
-      gatewayContextPath: "/openclaw-gw",
+      gatewayContextPath: "/carapace-gw",
       gatewayCandidates: [
         {
           host: "192.168.1.20",
           port: 8443,
-          contextPath: "/openclaw-gw",
+          contextPath: "/carapace-gw",
           tls: true,
           tlsFingerprint: "ab".repeat(32),
         },
@@ -163,7 +163,7 @@ describe("connect cli", () => {
   );
 
   it("consumes an environment-managed target file before connecting", async () => {
-    const root = tempDirs.make("openclaw-connect-target-");
+    const root = tempDirs.make("carapace-connect-target-");
     const targetFile = path.join(root, "setup-code");
     await fs.writeFile(targetFile, setupCode(), { mode: 0o600 });
 
@@ -179,7 +179,7 @@ describe("connect cli", () => {
     "rejects a socket target without removing it",
     async () => {
       // Keep the Unix socket below Darwin's path limit even under a long test TMPDIR.
-      const root = tempDirs.make("openclaw-connect-target-socket-", "/tmp");
+      const root = tempDirs.make("carapace-connect-target-socket-", "/tmp");
       const targetFile = path.join(root, "setup-code.sock");
       const server = net.createServer();
       await new Promise<void>((resolve, reject) => {
@@ -216,7 +216,7 @@ describe("connect cli", () => {
       message: "max 65536 bytes",
     },
   ])("rejects an $name target file without removing it", async ({ contents, message }) => {
-    const root = tempDirs.make("openclaw-connect-target-invalid-");
+    const root = tempDirs.make("carapace-connect-target-invalid-");
     const targetFile = path.join(root, "setup-code");
     await fs.writeFile(targetFile, contents, { mode: 0o600 });
 
@@ -231,7 +231,7 @@ describe("connect cli", () => {
   it.skipIf(process.platform === "win32")(
     "consumes a symlinked target file and keeps the backing file intact",
     async () => {
-      const root = tempDirs.make("openclaw-connect-target-symlink-");
+      const root = tempDirs.make("carapace-connect-target-symlink-");
       const targetFile = path.join(root, "setup-code");
       const backingFile = path.join(root, "backing-setup-code");
       await fs.writeFile(backingFile, setupCode(), { mode: 0o600 });
@@ -299,9 +299,9 @@ describe("connect cli", () => {
       mutate: expect.any(Function),
     });
     const mutation = mocks.mutateConfigFileWithRetry.mock.calls[0]?.[0] as {
-      mutate: (draft: OpenClawConfig) => void;
+      mutate: (draft: CarapaceConfig) => void;
     };
-    const draft: OpenClawConfig = {
+    const draft: CarapaceConfig = {
       gateway: { port: 28443 },
       nodeHost: { skills: { enabled: false }, workerRuns: { enabled: false } },
     };

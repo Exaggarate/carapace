@@ -1,6 +1,6 @@
 // Control UI E2E tests cover approval queue behavior through the Gateway WebSocket.
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Page } from "playwright";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
@@ -14,7 +14,7 @@ const suite = createControlUiE2eSuite({
 // Browser contexts preserve test isolation; keep one process warm for this file.
 let page: Page | undefined;
 const activeSessionKey = "agent:main:main";
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -34,11 +34,11 @@ function approval(id: string, command: string, createdAtMs: number, sessionKey =
 const requireRecord = createRequireRecord("record", "expected-object-value");
 
 function approvalInboxButton(currentPage: Page) {
-  return currentPage.locator("openclaw-sidebar-attention .sidebar-issues-button");
+  return currentPage.locator("carapace-sidebar-attention .sidebar-issues-button");
 }
 
 function approvalInboxPanel(currentPage: Page) {
-  return currentPage.locator("openclaw-sidebar-attention #sidebar-issues-panel");
+  return currentPage.locator("carapace-sidebar-attention #sidebar-issues-panel");
 }
 
 suite.define(() => {
@@ -120,7 +120,7 @@ suite.define(() => {
     await currentPage
       .locator('.chat-inline-approval [data-approval-id="approval-inline"]')
       .waitFor();
-    expect(await currentPage.locator("openclaw-modal-dialog").count()).toBe(0);
+    expect(await currentPage.locator("carapace-modal-dialog").count()).toBe(0);
 
     await gateway.emitGatewayEvent(
       "exec.approval.requested",
@@ -128,7 +128,7 @@ suite.define(() => {
     );
 
     await approvalInboxButton(currentPage).waitFor();
-    expect(await currentPage.locator("openclaw-modal-dialog").count()).toBe(0);
+    expect(await currentPage.locator("carapace-modal-dialog").count()).toBe(0);
     expect(await currentPage.getByText("echo other", { exact: true }).count()).toBe(0);
     if (captureUiProof) {
       await currentPage.screenshot({ path: path.join(proofDir, "01-passive-attention.png") });

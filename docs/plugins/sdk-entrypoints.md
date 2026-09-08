@@ -13,7 +13,7 @@ each entry shape: `defineToolPlugin`, `definePluginEntry`,
 `defineChannelPluginEntry`, `defineSetupPluginEntry`.
 
 All plugin APIs are [experimental](/plugins/sdk-overview#api-stability),
-including these entry helpers. Pin and test the OpenClaw host versions your
+including these entry helpers. Pin and test the Carapace host versions your
 plugin supports.
 
 <Tip>
@@ -24,7 +24,7 @@ plugin supports.
 
 ## Tool policy vocabulary
 
-`openclaw/plugin-sdk/agent-harness-runtime` exposes core's synchronous policy
+`carapace/plugin-sdk/agent-harness-runtime` exposes core's synchronous policy
 primitives through `toolPolicy`:
 
 - `toolPolicy.expandToolGroups(list?)` normalizes tool aliases, drops blank entries, expands
@@ -43,7 +43,7 @@ decision across awaited work.
 
 ## Sandbox bind parsing
 
-`openclaw/plugin-sdk/agent-harness-runtime` exports
+`carapace/plugin-sdk/agent-harness-runtime` exports
 `splitSandboxBindSpec(spec, options?)`. It returns raw `{ host, container, options }`
 segments, or `null` when no host/container separator exists. Windows host drive
 prefixes are always preserved. Pass `{ allowWindowsContainerPath: true }` to
@@ -53,12 +53,12 @@ This helper splits text; it does not validate or authorize a mount.
 
 ## Package entries
 
-Installed plugins point `package.json` `openclaw` fields at both source and
+Installed plugins point `package.json` `carapace` fields at both source and
 built entries:
 
 ```json
 {
-  "openclaw": {
+  "carapace": {
     "extensions": ["./src/index.ts"],
     "runtimeExtensions": ["./dist/index.js"],
     "setupEntry": "./src/setup-entry.ts",
@@ -75,7 +75,7 @@ built entries:
   (entries pair positionally). `runtimeSetupEntry` requires `setupEntry`.
 - If a `runtimeExtensions`/`runtimeSetupEntry` artifact is declared but
   missing, installation fails and discovery reports a packaging error for that
-  entry; OpenClaw does not silently fall back to source.
+  entry; Carapace does not silently fall back to source.
 - Without an explicit runtime entry, package discovery through
   `plugins.load.paths` or global roots looks for matching JavaScript peers under
   `dist/` first, then beside the TypeScript source entry. For `src/` entries,
@@ -100,17 +100,17 @@ built entries:
 
 ## `defineToolPlugin`
 
-**Import:** `openclaw/plugin-sdk/tool-plugin`
+**Import:** `carapace/plugin-sdk/tool-plugin`
 
 For plugins that only add agent tools. Keeps the source small, infers config
 and tool-parameter types from TypeBox schemas, wraps plain return values in
-the OpenClaw tool-result format, and exposes static metadata that
-`openclaw plugins build` writes into the plugin manifest (`contracts.tools`,
+the Carapace tool-result format, and exposes static metadata that
+`carapace plugins build` writes into the plugin manifest (`contracts.tools`,
 `configSchema`).
 
 ```typescript
 import { Type } from "typebox";
-import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 
 export default defineToolPlugin({
   id: "stock-quotes",
@@ -148,23 +148,23 @@ export default defineToolPlugin({
 - `outputSchema` optionally describes that original `details` value for Code
   Mode and Tool Search. Catalog calls reject an invalid schema before execution
   and validate the final value before returning it.
-- For custom tool results, `openclaw/plugin-sdk/tool-results` exports
+- For custom tool results, `carapace/plugin-sdk/tool-results` exports
   `textResult` and `jsonResult`.
-- Tool names are static, so `openclaw plugins build` derives
+- Tool names are static, so `carapace plugins build` derives
   `contracts.tools` from the declared tools without hand-duplicated names.
 - Runtime loading stays strict: installed plugins still need
-  `openclaw.plugin.json` and `package.json` `openclaw.extensions`. OpenClaw
+  `carapace.plugin.json` and `package.json` `carapace.extensions`. Carapace
   never executes plugin code to infer missing manifest data.
 
 ## `definePluginEntry`
 
-**Import:** `openclaw/plugin-sdk/plugin-entry`
+**Import:** `carapace/plugin-sdk/plugin-entry`
 
 For provider plugins, advanced tool plugins, hook plugins, and anything that
 is **not** a messaging channel.
 
 ```typescript
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 
 export default definePluginEntry({
   id: "my-plugin",
@@ -183,15 +183,15 @@ export default definePluginEntry({
 | `name`                    | `string`                                                         | Yes      | -                   |
 | `description`             | `string`                                                         | Yes      | -                   |
 | `kind`                    | `string` (deprecated, see below)                                 | No       | -                   |
-| `configSchema`            | `OpenClawPluginConfigSchema \| () => OpenClawPluginConfigSchema` | No       | Empty object schema |
-| `reload`                  | `OpenClawPluginReloadRegistration`                               | No       | -                   |
-| `nodeHostCommands`        | `OpenClawPluginNodeHostCommand[]`                                | No       | -                   |
-| `securityAuditCollectors` | `OpenClawPluginSecurityAuditCollector[]`                         | No       | -                   |
-| `register`                | `(api: OpenClawPluginApi) => void`                               | Yes      | -                   |
+| `configSchema`            | `CarapacePluginConfigSchema \| () => CarapacePluginConfigSchema` | No       | Empty object schema |
+| `reload`                  | `CarapacePluginReloadRegistration`                               | No       | -                   |
+| `nodeHostCommands`        | `CarapacePluginNodeHostCommand[]`                                | No       | -                   |
+| `securityAuditCollectors` | `CarapacePluginSecurityAuditCollector[]`                         | No       | -                   |
+| `register`                | `(api: CarapacePluginApi) => void`                               | Yes      | -                   |
 
-- `id` must match your `openclaw.plugin.json` manifest.
+- `id` must match your `carapace.plugin.json` manifest.
 - External session catalogs use
-  `openclaw/plugin-sdk/session-catalog` and register a
+  `carapace/plugin-sdk/session-catalog` and register a
   `SessionCatalogProvider` with `api.registerSessionCatalog(...)`. Required
   provider fields are `id`, `label`, `list`, and `read`; optional hooks are
   `resolveCreateSession`, `continueSession`, `copyToGatewaySession`,
@@ -305,7 +305,7 @@ export default definePluginEntry({
   validation messages into `parseReadParams(...)` and `parseListParams(...)`.
 
   `resolveCreateSession({ agentId })` must return a config-derived model/runtime
-  target before OpenClaw advertises model-chat creation. Native terminal readiness
+  target before Carapace advertises model-chat creation. Native terminal readiness
   is independent of this target.
   Use
   [`api.runtime.agent.resolveSessionCatalogCreateTarget(...)`](/plugins/sdk-runtime#api-runtime-agent)
@@ -347,15 +347,15 @@ export default definePluginEntry({
   unchanged.
 
 - `kind` is deprecated: declare an exclusive slot (`"memory"` or
-  `"context-engine"`) in the `openclaw.plugin.json` manifest `kind` field
+  `"context-engine"`) in the `carapace.plugin.json` manifest `kind` field
   instead. Runtime-entry `kind` remains only as a compatibility fallback for
   older plugins.
-- `configSchema` can be a function for lazy evaluation. OpenClaw resolves and
+- `configSchema` can be a function for lazy evaluation. Carapace resolves and
   memoizes the schema on first access, so expensive schema builders only run
   once.
 - A `nodeHostCommands` descriptor can define `isAvailable({ config, env })`.
   Returning `false` omits that command and its capability from the headless
-  node's Gateway declaration. OpenClaw evaluates it against the node-local
+  node's Gateway declaration. Carapace evaluates it against the node-local
   startup config; command handlers should still validate availability when
   invoked.
 
@@ -390,7 +390,7 @@ supports them; a lower `minHostVersion` does not override that API requirement.
 
 ### Computer Use providers
 
-**Import:** `openclaw/plugin-sdk/computer-use`
+**Import:** `carapace/plugin-sdk/computer-use`
 
 Node-local Computer Use plugins register one provider through
 `registerComputerUseProvider(api, provider)`. The helper owns the
@@ -406,7 +406,7 @@ a fallback stack.
 
 ## `defineChannelPluginEntry`
 
-**Import:** `openclaw/plugin-sdk/channel-core`
+**Import:** `carapace/plugin-sdk/channel-core`
 
 Wraps `definePluginEntry` with channel-specific wiring: it automatically
 calls `api.registerChannel({ plugin })`, exposes an optional root-help CLI
@@ -414,7 +414,7 @@ metadata seam, and gates capability and full-runtime callbacks on registration
 mode.
 
 ```typescript
-import { defineChannelPluginEntry } from "openclaw/plugin-sdk/channel-core";
+import { defineChannelPluginEntry } from "carapace/plugin-sdk/channel-core";
 
 export default defineChannelPluginEntry({
   id: "my-channel",
@@ -440,11 +440,11 @@ export default defineChannelPluginEntry({
 | `name`                 | `string`                                                         | Yes      | -                   |
 | `description`          | `string`                                                         | Yes      | -                   |
 | `plugin`               | `ChannelPlugin`                                                  | Yes      | -                   |
-| `configSchema`         | `OpenClawPluginConfigSchema \| () => OpenClawPluginConfigSchema` | No       | Empty object schema |
+| `configSchema`         | `CarapacePluginConfigSchema \| () => CarapacePluginConfigSchema` | No       | Empty object schema |
 | `setRuntime`           | `(runtime: PluginRuntime) => void`                               | No       | -                   |
-| `registerCliMetadata`  | `(api: OpenClawPluginApi) => void`                               | No       | -                   |
-| `registerFull`         | `(api: OpenClawPluginApi) => void`                               | No       | -                   |
-| `registerCapabilities` | `(api: OpenClawPluginApi) => void`                               | No       | -                   |
+| `registerCliMetadata`  | `(api: CarapacePluginApi) => void`                               | No       | -                   |
+| `registerFull`         | `(api: CarapacePluginApi) => void`                               | No       | -                   |
+| `registerCapabilities` | `(api: CarapacePluginApi) => void`                               | No       | -                   |
 
 Callbacks run per registration mode (full table under
 [Registration mode](#registration-mode)):
@@ -458,7 +458,7 @@ Callbacks run per registration mode (full table under
   command metadata, and normal CLI registration stays compatible with full
   plugin loads.
 - `registerFull` runs only for `"full"` and `"tool-discovery"`. For
-  `"tool-discovery"` it runs _instead of_ channel registration: OpenClaw
+  `"tool-discovery"` it runs _instead of_ channel registration: Carapace
   skips `registerChannel`/`setRuntime` entirely and calls the full-runtime
   callback followed by the capability callback. Keep tool registration in
   `registerFull` and capability providers in `registerCapabilities`.
@@ -466,11 +466,11 @@ Callbacks run per registration mode (full table under
   `"tool-discovery"`. Register inert advertised providers here so read-only
   capability discovery can find them without starting sockets, clients,
   workers, or services.
-- Discovery registration is non-activating, not import-free: OpenClaw may
+- Discovery registration is non-activating, not import-free: Carapace may
   evaluate the trusted plugin entry and channel plugin module to build the
   snapshot. Keep top-level imports side-effect-free and put sockets,
   clients, workers, and services behind `"full"`-only paths.
-- Like `definePluginEntry`, `configSchema` can be a lazy factory; OpenClaw
+- Like `definePluginEntry`, `configSchema` can be a lazy factory; Carapace
   memoizes the resolved schema on first access.
 
 CLI registration:
@@ -478,7 +478,7 @@ CLI registration:
 - Use `api.registerCli(..., { descriptors: [...] })` for plugin-owned root
   CLI commands you want lazy-loaded without disappearing from the root CLI
   parse tree. Descriptor names must match letters, numbers, hyphen, and
-  underscore, starting with a letter or number; OpenClaw rejects other
+  underscore, starting with a letter or number; Carapace rejects other
   shapes and strips terminal control sequences from descriptions before
   rendering help. Cover every top-level command root the registrar exposes,
   and declare the same name, description, and subcommand marker in the
@@ -488,16 +488,16 @@ CLI registration:
   `machineOutput({ argv, stdoutIsTTY })` resolver for JSON, JSONL, or other
   machine-readable stdout modes that are not selected solely by `--json`.
   Parse command tokens with `getRootOptionAwareCommandPath` from
-  `openclaw/plugin-sdk/cli-argv`. Keep the descriptor in a lightweight
+  `carapace/plugin-sdk/cli-argv`. Keep the descriptor in a lightweight
   plugin-local module and reuse it from both `cli-metadata.ts` and full
   registration; do not import runtime barrels to construct metadata.
   Meeting runtime shells accept that descriptor through `cli.descriptor`.
   Nested descriptors do not expose `machineOutput`.
 - Use `api.registerNodeCliFeature(...)` for paired-node feature commands so
-  they land under `openclaw nodes` (equivalent to
+  they land under `carapace nodes` (equivalent to
   `registerCli(registrar, { parentPath: ["nodes"], ... })`).
 - For other nested plugin commands, add `parentPath` and register commands
-  on the `program` object passed to the registrar; OpenClaw resolves it to
+  on the `program` object passed to the registrar; Carapace resolves it to
   the parent command before calling the plugin.
 - For channel plugins, register CLI descriptors from `registerCliMetadata`
   and keep `registerFull` focused on runtime-only work.
@@ -508,18 +508,18 @@ CLI registration:
 
 ## `defineSetupPluginEntry`
 
-**Import:** `openclaw/plugin-sdk/channel-core`
+**Import:** `carapace/plugin-sdk/channel-core`
 
 For the lightweight `setup-entry.ts` file. Returns just `{ plugin }` with no
 runtime or CLI wiring.
 
 ```typescript
-import { defineSetupPluginEntry } from "openclaw/plugin-sdk/channel-core";
+import { defineSetupPluginEntry } from "carapace/plugin-sdk/channel-core";
 
 export default defineSetupPluginEntry(myChannelPlugin);
 ```
 
-OpenClaw loads this instead of the full entry when a channel is disabled or
+Carapace loads this instead of the full entry when a channel is disabled or
 unconfigured. See
 [Setup and Config](/plugins/sdk-setup#setup-entry) for when this matters.
 
@@ -527,13 +527,13 @@ Pair `defineSetupPluginEntry(...)` with the narrow setup helper families:
 
 | Import                                  | Use for                                                                                                                                                                            |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openclaw/plugin-sdk/setup-runtime`     | Runtime-safe setup helpers: `createSetupTranslator`, import-safe setup patch adapters, lookup-note output, `promptResolvedAllowFrom`, `splitSetupEntries`, delegated setup proxies |
-| `openclaw/plugin-sdk/channel-setup`     | Optional-install setup surfaces                                                                                                                                                    |
-| `openclaw/plugin-sdk/channel-dm-policy` | Account-aware DM policy descriptors for setup flows                                                                                                                                |
-| `openclaw/plugin-sdk/setup-tools`       | Setup/install CLI, archive, and docs helpers                                                                                                                                       |
-| `openclaw/plugin-sdk/archive`           | Bounded TAR/gzip member inspection, archive extraction, and single-entry reads                                                                                                     |
-| `openclaw/plugin-sdk/root-walk`         | Budgeted, root-bounded directory walking                                                                                                                                           |
-| `openclaw/plugin-sdk/secret-file`       | Pinned secret reads and first-writer-wins creation                                                                                                                                 |
+| `carapace/plugin-sdk/setup-runtime`     | Runtime-safe setup helpers: `createSetupTranslator`, import-safe setup patch adapters, lookup-note output, `promptResolvedAllowFrom`, `splitSetupEntries`, delegated setup proxies |
+| `carapace/plugin-sdk/channel-setup`     | Optional-install setup surfaces                                                                                                                                                    |
+| `carapace/plugin-sdk/channel-dm-policy` | Account-aware DM policy descriptors for setup flows                                                                                                                                |
+| `carapace/plugin-sdk/setup-tools`       | Setup/install CLI, archive, and docs helpers                                                                                                                                       |
+| `carapace/plugin-sdk/archive`           | Bounded TAR/gzip member inspection, archive extraction, and single-entry reads                                                                                                     |
+| `carapace/plugin-sdk/root-walk`         | Budgeted, root-bounded directory walking                                                                                                                                           |
+| `carapace/plugin-sdk/secret-file`       | Pinned secret reads and first-writer-wins creation                                                                                                                                 |
 
 `inspectTarArchive({ archivePath, timeoutMs, limits, entryFilter, onFiltered })`
 returns a bounded, frozen list of accepted `{ path, kind, size }` TAR/gzip members
@@ -551,12 +551,12 @@ full entry.
 
 Bundled workspace channels that split setup and runtime surfaces can use
 `defineBundledChannelSetupEntry(...)` from
-`openclaw/plugin-sdk/channel-entry-contract` instead. It lets the setup
+`carapace/plugin-sdk/channel-entry-contract` instead. It lets the setup
 entry keep setup-safe plugin/secrets exports while still exposing a runtime
 setter:
 
 ```typescript
-import { defineBundledChannelSetupEntry } from "openclaw/plugin-sdk/channel-entry-contract";
+import { defineBundledChannelSetupEntry } from "carapace/plugin-sdk/channel-entry-contract";
 
 export default defineBundledChannelSetupEntry({
   importMetaUrl: import.meta.url,
@@ -640,7 +640,7 @@ api.registerService({
 });
 ```
 
-OpenClaw namespaces this as `plugin.<plugin-id>.changed`. Event names are one
+Carapace namespaces this as `plugin.<plugin-id>.changed`. Event names are one
 lowercase segment, payloads must be bounded JSON, and the scope must be
 `operator.read`, `operator.write`, or `operator.admin`. The emitter exists only
 for the service lifetime and is revoked after stop or failed start. Prefer
@@ -648,7 +648,7 @@ version or invalidation payloads over full records so authorized clients reread
 canonical state through the plugin's scoped Gateway methods.
 
 Discovery mode builds a non-activating registry snapshot. It may still
-evaluate the plugin entry and the channel plugin object so OpenClaw can
+evaluate the plugin entry and the channel plugin object so Carapace can
 register channel capabilities and static CLI descriptors. Treat module
 evaluation in discovery as trusted but lightweight: no network clients,
 subprocesses, listeners, database connections, background workers,
@@ -662,7 +662,7 @@ provider/client SDK bootstraps still belong in `"full"`.
 
 ## Plugin shapes
 
-OpenClaw classifies loaded plugins by their registration behavior:
+Carapace classifies loaded plugins by their registration behavior:
 
 | Shape                 | Description                                        |
 | --------------------- | -------------------------------------------------- |
@@ -671,7 +671,7 @@ OpenClaw classifies loaded plugins by their registration behavior:
 | **hook-only**         | Only hooks, no capabilities                        |
 | **non-capability**    | Tools/commands/services but no capabilities        |
 
-Use `openclaw plugins inspect <id>` to see a plugin's shape.
+Use `carapace plugins inspect <id>` to see a plugin's shape.
 
 ## Related
 
@@ -683,16 +683,16 @@ Use `openclaw plugins inspect <id>` to see a plugin's shape.
 
 ## MCP subprocess runtime
 
-**Import:** `mcpStdioRuntime` from `openclaw/plugin-sdk/agent-harness-runtime` using dynamic `import()` when opening a connection. Its frozen object lazily loads one factory:
+**Import:** `mcpStdioRuntime` from `carapace/plugin-sdk/agent-harness-runtime` using dynamic `import()` when opening a connection. Its frozen object lazily loads one factory:
 
 ```ts
-const { mcpStdioRuntime } = await import("openclaw/plugin-sdk/agent-harness-runtime");
+const { mcpStdioRuntime } = await import("carapace/plugin-sdk/agent-harness-runtime");
 const { createMcpStdioClient } = await mcpStdioRuntime.load();
 ```
 
-Use `createMcpStdioClient(params)` for a caller-owned MCP proxy subprocess fronting a stateful driver. OpenClaw owns the subprocess and its descendants, newline framing and JSON-RPC validation, initialization, request admission, deadlines, and shutdown. The client starts connecting when the factory returns. Keep this runtime out of plugin registration and paths that do not open MCP connections.
+Use `createMcpStdioClient(params)` for a caller-owned MCP proxy subprocess fronting a stateful driver. Carapace owns the subprocess and its descendants, newline framing and JSON-RPC validation, initialization, request admission, deadlines, and shutdown. The client starts connecting when the factory returns. Keep this runtime out of plugin registration and paths that do not open MCP connections.
 
-Supply `command`, optional `args`, and an exact `env`; the child inherits no other environment variables. Set `clientInfo` (`name` and `version`), the required `protocolVersion`, `startupTimeoutMs`, `maxPendingRequests`, and `maxFrameBytes`. The server must return exactly the requested protocol version. OpenClaw retains a fixed 32 KiB stderr tail for unexpected-exit diagnostics. The decoder bounds pending bytes plus each incoming chunk before buffering, preserves fragmented UTF-8, skips empty lines, and requires safe integer response IDs.
+Supply `command`, optional `args`, and an exact `env`; the child inherits no other environment variables. Set `clientInfo` (`name` and `version`), the required `protocolVersion`, `startupTimeoutMs`, `maxPendingRequests`, and `maxFrameBytes`. The server must return exactly the requested protocol version. Carapace retains a fixed 32 KiB stderr tail for unexpected-exit diagnostics. The decoder bounds pending bytes plus each incoming chunk before buffering, preserves fragmented UTF-8, skips empty lines, and requires safe integer response IDs.
 
 The caller supplies `errors.unavailable(message, cause?)` and `errors.protocol(message, cause?)`, each returning an `Error`. The first classifies process, lifecycle, admission, deadline, and cancellation failures. The second classifies malformed frames, non-timeout JSON-RPC errors, and handshake contract violations. Plugin-specific tool-result normalization stays with the caller.
 

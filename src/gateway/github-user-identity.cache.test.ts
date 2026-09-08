@@ -5,14 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { setRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
 import { SecretSurfaceUnavailableError } from "../secrets/runtime-degraded-state.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { onUserProfilesChanged } from "../state/user-profile-events.js";
 import {
   getUserProfileListItem,
   setDisplayName,
   setUserProfileRole,
 } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createAuthenticatedGitHubIdentitySync } from "./github-user-identity.js";
 import { resolveAuthenticatedHttpUserProfile } from "./http-auth-user-profile.js";
 import { invalidateOperatorRolePolicy } from "./operator-role-policy.js";
@@ -69,12 +69,12 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("GitHub public identity metadata cache", () => {
   it("deduplicates concurrent metadata without caching Access verification or local profiles", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const gate = createDeferred();
       const metadata = vi.fn<typeof fetch>().mockImplementation(async () => {
         await gate.promise;
@@ -98,7 +98,7 @@ describe("GitHub public identity metadata cache", () => {
   });
 
   it("refreshes expired metadata conditionally and extends freshness on a 304", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
       const metadata = vi
         .fn<typeof fetch>()
@@ -129,7 +129,7 @@ describe("GitHub public identity metadata cache", () => {
   });
 
   it("separates account and credential keys and rejects unavailable configured credentials", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const access = { id: 101, email: "ada@example.test" };
       const metadata = vi
         .fn<typeof fetch>()
@@ -162,7 +162,7 @@ describe("GitHub public identity metadata cache", () => {
   });
 
   it("never reuses an anonymous ETag for an authenticated refresh", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
       setRuntimeConfigSnapshot({ gateway: { controlUi: { github: { token: "service-token" } } } });
       const metadata = vi
@@ -199,7 +199,7 @@ describe("GitHub public identity metadata cache", () => {
   ])(
     "invalidates expired metadata after a $name without using the durable outage binding",
     async ({ response }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
         const metadata = vi
           .fn<typeof fetch>()
@@ -219,7 +219,7 @@ describe("GitHub public identity metadata cache", () => {
   );
 
   it("rechecks live Access and local role revocation on HTTP metadata cache hits", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
       const access = { id: 101, email: "ada@example.test" };
       const metadata = vi
@@ -278,7 +278,7 @@ describe("GitHub public identity metadata cache", () => {
   });
 
   it("binds a new email on a metadata cache hit before reusing its durable profile", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const access = { id: 101, email: "ada@example.test" };
       const metadata = vi
         .fn<typeof fetch>()
@@ -308,7 +308,7 @@ describe("GitHub public identity metadata cache", () => {
   });
 
   it("uses only an exact durable binding during expired metadata quota cooldown", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
       const access = { id: 101, email: "ada@example.test" };
       const metadata = vi
@@ -329,7 +329,7 @@ describe("GitHub public identity metadata cache", () => {
   });
 
   it("reverifies mutable Tailscale logins when an account name is reassigned", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const transport = vi
         .spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse({ id: 101, login: "ada" }))

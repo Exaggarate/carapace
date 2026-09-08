@@ -1,7 +1,7 @@
 // Qa Channel plugin module implements channel actions behavior.
-import { jsonResult, readStringParam } from "openclaw/plugin-sdk/channel-actions";
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import { extractToolSend } from "openclaw/plugin-sdk/tool-send";
+import { jsonResult, readStringParam } from "carapace/plugin-sdk/channel-actions";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
+import { extractToolSend } from "carapace/plugin-sdk/tool-send";
 import { Type } from "typebox";
 import { resolveQaChannelAccount } from "./accounts.js";
 import {

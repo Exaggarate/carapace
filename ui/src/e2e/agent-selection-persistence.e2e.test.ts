@@ -21,7 +21,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -32,7 +32,7 @@ beforeEach(() => {
 const agentsList = {
   agents: [
     { id: "dummy", identity: { name: "Dummy" }, kind: "agent", name: "Dummy" },
-    { id: "openclaw", identity: { name: "OpenClaw" }, kind: "agent", name: "OpenClaw" },
+    { id: "carapace", identity: { name: "Carapace" }, kind: "agent", name: "Carapace" },
   ],
   defaultId: "dummy",
   mainKey: "main",
@@ -53,8 +53,8 @@ const scenario: ControlUiMockGatewayScenario = {
           response: { agentId: "dummy", avatar: "", emoji: "D", name: "Dummy" },
         },
         {
-          match: { agentId: "openclaw" },
-          response: { agentId: "openclaw", avatar: "", emoji: "O", name: "OpenClaw" },
+          match: { agentId: "carapace" },
+          response: { agentId: "carapace", avatar: "", emoji: "O", name: "Carapace" },
         },
       ],
     },
@@ -91,18 +91,18 @@ async function screenshot(page: Page, name: string) {
 
 async function selectedAgentName(page: Page): Promise<string> {
   const text =
-    (await page.locator("openclaw-app-sidebar .sidebar-agent-card__name").textContent()) ?? "";
+    (await page.locator("carapace-app-sidebar .sidebar-agent-card__name").textContent()) ?? "";
   return text.trim();
 }
 
-async function hasOpenClawStartup(gateway: MockGatewayControls): Promise<boolean> {
+async function hasCarapaceStartup(gateway: MockGatewayControls): Promise<boolean> {
   return (await gateway.getRequests("chat.startup")).some((request) => {
     const params = request.params as
       | { agentId?: unknown; limit?: unknown; sessionKey?: unknown }
       | undefined;
     return (
-      params?.agentId === "openclaw" &&
-      params.sessionKey === "agent:openclaw:main" &&
+      params?.agentId === "carapace" &&
+      params.sessionKey === "agent:carapace:main" &&
       params.limit === 80
     );
   });
@@ -135,7 +135,7 @@ async function openPage(
   const page = await context.newPage();
   const gateway = await installMockGateway(page, scenario);
   await page.goto(`${suite.server.baseUrl}chat`);
-  await page.locator("openclaw-app-sidebar").waitFor();
+  await page.locator("carapace-app-sidebar").waitFor();
   return { gateway, page };
 }
 
@@ -152,7 +152,7 @@ suite.define(() => {
     try {
       const first = await openPage(context);
       const firstPage = first.page;
-      const sidebar = firstPage.locator("openclaw-app-sidebar");
+      const sidebar = firstPage.locator("carapace-app-sidebar");
       await first.gateway.waitForRequest("chat.startup");
       await expect.poll(() => selectedAgentName(firstPage)).toBe("Dummy");
       await screenshot(firstPage, "01-default-agent.png");
@@ -160,14 +160,14 @@ suite.define(() => {
       await sidebar.getByRole("button", { name: /Switch agent/ }).click();
       await sidebar
         .locator("wa-dropdown.sidebar-agent-menu")
-        .getByRole("menuitemradio", { name: "OpenClaw" })
+        .getByRole("menuitemradio", { name: "Carapace" })
         .click();
-      await waitForControlUiRoute(firstPage, { pathname: "/chat/openclaw", routeId: "chat" });
-      await expect.poll(() => selectedAgentName(firstPage)).toBe("OpenClaw");
+      await waitForControlUiRoute(firstPage, { pathname: "/chat/carapace", routeId: "chat" });
+      await expect.poll(() => selectedAgentName(firstPage)).toBe("Carapace");
       await expect
-        .poll(() => firstPage.getByRole("heading", { name: "OpenClaw" }).isVisible())
+        .poll(() => firstPage.getByRole("heading", { name: "Carapace" }).isVisible())
         .toBe(true);
-      await screenshot(firstPage, "02-selected-openclaw.png");
+      await screenshot(firstPage, "02-selected-carapace.png");
 
       // The macOS host reopens the Gateway's canonical session key. Unlike the
       // browser-only route alias, `global` cannot encode which agent owns it.
@@ -178,14 +178,14 @@ suite.define(() => {
       const reopenedPage = reopened.page;
       await reopened.gateway.waitForRequest("chat.startup");
       await waitForControlUiRoute(reopenedPage, {
-        pathname: "/chat/openclaw",
+        pathname: "/chat/carapace",
         routeId: "chat",
       });
       await screenshot(reopenedPage, "03-reopened-agent.png");
-      await expect.poll(() => hasOpenClawStartup(reopened.gateway)).toBe(true);
-      await expect.poll(() => selectedAgentName(reopenedPage)).toBe("OpenClaw");
+      await expect.poll(() => hasCarapaceStartup(reopened.gateway)).toBe(true);
+      await expect.poll(() => selectedAgentName(reopenedPage)).toBe("Carapace");
       await expect
-        .poll(() => reopenedPage.getByRole("heading", { name: "OpenClaw" }).isVisible())
+        .poll(() => reopenedPage.getByRole("heading", { name: "Carapace" }).isVisible())
         .toBe(true);
       await screenshot(reopenedPage, "04-verified-reopened-agent.png");
     } finally {

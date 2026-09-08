@@ -1,5 +1,5 @@
 // Opencode Go provider module implements model/runtime integration.
-import type { MediaUnderstandingProvider } from "openclaw/plugin-sdk/media-understanding";
+import type { MediaUnderstandingProvider } from "carapace/plugin-sdk/media-understanding";
 
 export const opencodeGoMediaUnderstandingProvider: MediaUnderstandingProvider = {
   id: "opencode-go",

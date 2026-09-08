@@ -13,7 +13,7 @@ function runBash(command: string, env: NodeJS.ProcessEnv = {}): string {
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_TRUFFLEHOG_SOURCE_ONLY: "1",
+      CARAPACE_TRUFFLEHOG_SOURCE_ONLY: "1",
       ...env,
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -61,7 +61,7 @@ describe("scripts/install-trufflehog.sh", () => {
   });
 
   it("does not download TruffleHog again when the pinned version is installed", () => {
-    const root = tempDirs.make("openclaw-trufflehog-install-");
+    const root = tempDirs.make("carapace-trufflehog-install-");
     const binDir = join(root, "bin");
     const downloadMarker = join(root, "downloaded");
     mkdirSync(binDir);
@@ -82,7 +82,7 @@ describe("scripts/install-trufflehog.sh", () => {
     chmodSync(fakeUname, 0o755);
 
     runBash(`source ${SCRIPT}\ninstall_trufflehog`, {
-      OPENCLAW_TRUFFLEHOG_BIN_DIR: binDir,
+      CARAPACE_TRUFFLEHOG_BIN_DIR: binDir,
       PATH: `${binDir}:${process.env.PATH ?? ""}`,
     });
 
@@ -91,7 +91,7 @@ describe("scripts/install-trufflehog.sh", () => {
   });
 
   it("creates a missing user-writable install directory without sudo", () => {
-    const root = tempDirs.make("openclaw-trufflehog-user-bin-");
+    const root = tempDirs.make("carapace-trufflehog-user-bin-");
     const binDir = join(root, "nested", "bin");
     const fakeBin = join(root, "fake-bin");
     const sudoMarker = join(root, "sudo-used");
@@ -100,8 +100,8 @@ describe("scripts/install-trufflehog.sh", () => {
     writeFileSync(fakeSudo, `#!/bin/sh\nprintf used >${JSON.stringify(sudoMarker)}\nexit 99\n`);
     chmodSync(fakeSudo, 0o755);
 
-    runBash(`source ${SCRIPT}\nrun_as_root mkdir -p "$OPENCLAW_TRUFFLEHOG_BIN_DIR"`, {
-      OPENCLAW_TRUFFLEHOG_BIN_DIR: binDir,
+    runBash(`source ${SCRIPT}\nrun_as_root mkdir -p "$CARAPACE_TRUFFLEHOG_BIN_DIR"`, {
+      CARAPACE_TRUFFLEHOG_BIN_DIR: binDir,
       PATH: `${fakeBin}:${process.env.PATH ?? ""}`,
     });
 
@@ -110,7 +110,7 @@ describe("scripts/install-trufflehog.sh", () => {
   });
 
   it("does not change permissions on an existing writable install directory", () => {
-    const root = tempDirs.make("openclaw-trufflehog-existing-bin-");
+    const root = tempDirs.make("carapace-trufflehog-existing-bin-");
     const binDir = join(root, "bin");
     const fakeBin = join(root, "fake-bin");
     const installMarker = join(root, "install-used");
@@ -124,7 +124,7 @@ describe("scripts/install-trufflehog.sh", () => {
     chmodSync(fakeInstall, 0o755);
 
     runBash(`source ${SCRIPT}\nensure_trufflehog_bin_dir`, {
-      OPENCLAW_TRUFFLEHOG_BIN_DIR: binDir,
+      CARAPACE_TRUFFLEHOG_BIN_DIR: binDir,
       PATH: `${fakeBin}:${process.env.PATH ?? ""}`,
     });
 
@@ -132,7 +132,7 @@ describe("scripts/install-trufflehog.sh", () => {
   });
 
   it("passes bounded download options to curl and cleans up after curl times out", () => {
-    const root = tempDirs.make("openclaw-trufflehog-curl-");
+    const root = tempDirs.make("carapace-trufflehog-curl-");
     const binDir = join(root, "bin");
     const argsFile = join(root, "curl-args");
     mkdirSync(binDir);
@@ -147,7 +147,7 @@ describe("scripts/install-trufflehog.sh", () => {
         `uname() { if [ "$1" = "-s" ]; then printf "Linux\\n"; else printf "x86_64\\n"; fi; }\nsource ${SCRIPT}\ninstall_trufflehog`,
         {
           CURL_ARGS_FILE: argsFile,
-          OPENCLAW_TRUFFLEHOG_BIN_DIR: join(root, "install"),
+          CARAPACE_TRUFFLEHOG_BIN_DIR: join(root, "install"),
           PATH: `${binDir}:${process.env.PATH ?? ""}`,
         },
       ),

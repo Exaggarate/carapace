@@ -24,17 +24,17 @@ describe("runtime parity execution order", () => {
     {
       label: "the canonical default",
       runtimePair: undefined,
-      expectedExecutionOrder: ["openclaw", "codex"],
+      expectedExecutionOrder: ["carapace", "codex"],
     },
     {
       label: "an explicitly canonical pair",
-      runtimePair: ["openclaw", "codex"],
-      expectedExecutionOrder: ["openclaw", "codex"],
+      runtimePair: ["carapace", "codex"],
+      expectedExecutionOrder: ["carapace", "codex"],
     },
     {
       label: "a reversed pair",
-      runtimePair: ["codex", "openclaw"],
-      expectedExecutionOrder: ["codex", "openclaw"],
+      runtimePair: ["codex", "carapace"],
+      expectedExecutionOrder: ["codex", "carapace"],
     },
   ] satisfies Array<{
     label: string;
@@ -54,14 +54,14 @@ describe("runtime parity execution order", () => {
       });
 
       expect(runCell.mock.calls.map(([runtime]) => runtime)).toEqual(expectedExecutionOrder);
-      expect(Object.keys(result.cells)).toEqual(["openclaw", "codex"]);
-      expect(result.cells.openclaw).toMatchObject({ runtime: "openclaw", status: "pass" });
+      expect(Object.keys(result.cells)).toEqual(["carapace", "codex"]);
+      expect(result.cells.carapace).toMatchObject({ runtime: "carapace", status: "pass" });
       expect(result.cells.codex).toMatchObject({ runtime: "codex", status: "pass" });
       expect(result.drift).toBe("none");
     },
   );
 
-  it.each(["openclaw", "codex"] as const)(
+  it.each(["carapace", "codex"] as const)(
     "rejects duplicate %s runtimes before executing a parity cell",
     async (runtime) => {
       const runCell = vi.fn(async (selectedRuntime: RuntimeId) => ({
@@ -84,7 +84,7 @@ describe("runtime parity execution order", () => {
     const executionOrder: RuntimeId[] = [];
     const result = await runRuntimeParityScenario({
       scenarioId: "reversed-runtime-cell-failure",
-      runtimePair: ["codex", "openclaw"],
+      runtimePair: ["codex", "carapace"],
       runCell: async (runtime) => {
         executionOrder.push(runtime);
         return {
@@ -95,8 +95,8 @@ describe("runtime parity execution order", () => {
       },
     });
 
-    expect(executionOrder).toEqual(["codex", "openclaw"]);
-    expect(result.cells.openclaw.status).toBe("pass");
+    expect(executionOrder).toEqual(["codex", "carapace"]);
+    expect(result.cells.carapace.status).toBe("pass");
     expect(result.cells.codex).toMatchObject({
       runtime: "codex",
       status: "fail",

@@ -1,5 +1,5 @@
 // Telegram tests cover bot.helpers plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { resolveTelegramGroupAllowFromContext, resolveTelegramStreamMode } from "./bot/helpers.js";
 import { resolveTelegramDraftStreamingChunking } from "./draft-chunking.js";
@@ -29,7 +29,7 @@ describe("resolveTelegramStreamMode", () => {
 
 describe("resolveTelegramGroupAllowFromContext", () => {
   it("expands Telegram access groups before normalizing allowFrom entries", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       accessGroups: {
         maintainers: {
           type: "message.senders",

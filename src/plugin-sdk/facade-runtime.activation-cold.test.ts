@@ -15,12 +15,12 @@ it("awaits cold activation before loading a tiny allowed source facade", async (
   fs.mkdirSync(pluginRoot);
   fs.writeFileSync(path.join(pluginRoot, "package.json"), '{"type":"module"}\n');
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     '{"id":"async-cold-owner","enabledByDefault":true}\n',
   );
   fs.writeFileSync(path.join(pluginRoot, "api.ts"), 'export const marker: string = "cold";\n');
   resetFacadeRuntimeStateForTest();
-  vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", root);
+  vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", root);
   try {
     const pending = loadActivatedBundledPluginPublicSurfaceModule({
       dirName: "fixture",

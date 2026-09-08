@@ -55,7 +55,7 @@ async function runGatewayUpdateInternal(opts: UpdateRunnerOptions): Promise<Upda
       status: "error",
       mode: "unknown",
       root: gitRoot,
-      reason: "not-openclaw-root",
+      reason: "not-carapace-root",
       recovery: { serviceRestartSafe: false, reason: "runtime-verification-failed" },
       steps: [],
       durationMs: Date.now() - startedAt,
@@ -75,7 +75,7 @@ async function runGatewayUpdateInternal(opts: UpdateRunnerOptions): Promise<Upda
     return {
       status: "error",
       mode: "unknown",
-      reason: "not-openclaw-root",
+      reason: "not-carapace-root",
       recovery: { serviceRestartSafe: false, reason: "runtime-verification-failed" },
       steps: [],
       durationMs: Date.now() - startedAt,

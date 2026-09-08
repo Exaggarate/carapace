@@ -2,20 +2,20 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import {
   createEmptyPluginRegistry,
   createRuntimeEnv,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { vi, type Mock } from "vitest";
 import type { ResolvedZaloAccount } from "../types.js";
 
@@ -116,8 +116,8 @@ const importCachedWebhookModule = createLazyRuntimeModule(
 export async function resetLifecycleTestState() {
   // Agent close releases leases through shared state; closing shared state first
   // can reopen it during teardown and leave Windows handles under the state dir.
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   if (lifecycleStateDir) {
     await fs.rm(lifecycleStateDir, {
       recursive: true,
@@ -128,9 +128,9 @@ export async function resetLifecycleTestState() {
     lifecycleStateDir = undefined;
   }
   if (previousLifecycleStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousLifecycleStateDir;
+    process.env.CARAPACE_STATE_DIR = previousLifecycleStateDir;
     previousLifecycleStateDir = undefined;
   }
   vi.clearAllMocks();
@@ -141,12 +141,12 @@ export async function resetLifecycleTestState() {
 async function installLifecycleWebhookIngressState(): Promise<void> {
   const runtime = getZaloRuntimeMock() as PluginRuntime;
   const createdDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-zalo-lifecycle-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-zalo-lifecycle-"),
   );
   const stateDir = await fs.realpath(createdDir);
-  previousLifecycleStateDir = process.env.OPENCLAW_STATE_DIR;
+  previousLifecycleStateDir = process.env.CARAPACE_STATE_DIR;
   lifecycleStateDir = stateDir;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  process.env.CARAPACE_STATE_DIR = stateDir;
   runtime.state.openChannelIngressQueue = (<T>(options: { accountId?: string }) =>
     createChannelIngressQueueForTests<T>({
       channelId: "zalo",
@@ -189,7 +189,7 @@ export async function loadCachedLifecycleMonitorModule(cacheKey: string): Promis
 
 export async function startWebhookLifecycleMonitor(params: {
   account: ResolvedZaloAccount;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   token?: string;
   webhookUrl?: string;
   webhookSecret?: string;

@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   createChannelIngressQueue,
   listChannelIngressQueueAccountIdsReadOnly,
@@ -11,9 +11,9 @@ import {
 
 describe("read-only listing access", () => {
   it("lists without creating the shared state database", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ingress-readonly-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ingress-readonly-"));
     try {
-      const sqlitePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const sqlitePath = path.join(stateDir, "state", "carapace.sqlite");
       await expect(fs.access(sqlitePath)).rejects.toThrow();
 
       const reader = createChannelIngressQueue<{ text: string }>({
@@ -45,7 +45,7 @@ describe("read-only listing access", () => {
         stateDir,
       }).enqueue("evt-1", { text: "hello" });
       await fs.access(sqlitePath);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       const after = createChannelIngressQueue<{ text: string }>({
         channelId: "line",
@@ -58,7 +58,7 @@ describe("read-only listing access", () => {
         await listChannelIngressQueueAccountIdsReadOnly({ channelId: "line", stateDir }),
       ).toEqual(["default"]);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   });

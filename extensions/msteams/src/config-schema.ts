@@ -7,11 +7,11 @@ import {
   MSTeamsReplyStyleSchema,
   refineChannelDmPolicy,
   ToolPolicySchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
+} from "carapace/plugin-sdk/channel-config-schema";
 import {
   buildSecretInputSchema,
   registerSensitiveConfigSchema,
-} from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/secret-input";
 import { z } from "zod";
 import { msTeamsChannelConfigUiHints } from "./config-ui-hints.js";
 

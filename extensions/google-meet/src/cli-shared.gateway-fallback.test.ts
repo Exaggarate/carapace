@@ -1,4 +1,4 @@
-import type { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import type { callGatewayFromCli } from "carapace/plugin-sdk/gateway-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { callGoogleMeetGateway } from "./cli-shared.js";
 

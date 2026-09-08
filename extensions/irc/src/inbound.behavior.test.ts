@@ -1,6 +1,6 @@
 // Irc tests cover inbound.behavior plugin behavior.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedIrcAccount } from "./accounts.js";
 import { handleIrcInbound } from "./inbound.js";
@@ -59,7 +59,7 @@ function createAccount(overrides?: Partial<ResolvedIrcAccount>): ResolvedIrcAcco
     accountId: "default",
     enabled: true,
     server: "irc.example.com",
-    nick: "OpenClaw",
+    nick: "Carapace",
     config: {
       dmPolicy: "pairing",
       allowFrom: [],
@@ -122,7 +122,7 @@ describe("irc inbound behavior", () => {
     expect(sendReply).toHaveBeenCalledWith(
       "alice",
       [
-        "OpenClaw: access not configured.",
+        "Carapace: access not configured.",
         "",
         "Your IRC id: alice!ident@example.com",
         "Pairing code:",
@@ -132,7 +132,7 @@ describe("irc inbound behavior", () => {
         "",
         "Ask the bot owner to approve with:",
         "```",
-        "openclaw pairing approve irc CODE",
+        "carapace pairing approve irc CODE",
         "```",
       ].join("\n"),
       undefined,
@@ -335,8 +335,8 @@ describe("irc inbound behavior", () => {
   });
 
   it.each([
-    { label: "ordinary nick", nick: "OpenClaw", text: "OpenClaw: hello", mentioned: true },
-    { label: "ASCII case folding", nick: "OpenClaw", text: "openclaw: hello", mentioned: true },
+    { label: "ordinary nick", nick: "Carapace", text: "Carapace: hello", mentioned: true },
+    { label: "ASCII case folding", nick: "Carapace", text: "carapace: hello", mentioned: true },
     { label: "leading bracket", nick: "[Claw]", text: "[Claw]: hello", mentioned: true },
     { label: "trailing bracket", nick: "Claw]", text: "hello Claw],", mentioned: true },
     { label: "leading caret", nick: "^Claw", text: "^Claw, hello", mentioned: true },

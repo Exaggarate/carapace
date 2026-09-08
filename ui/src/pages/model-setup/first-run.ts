@@ -70,7 +70,7 @@ export async function startModelSetupFirstRunRedirectAfterLocation(params: {
     const defaults = readSessionDefaults(snapshot);
     const selectedAgentId = context.agentSelection.state.selectedId?.trim() || null;
     if (
-      canCallGatewayMethod(snapshot, "openclaw.setup.detect", "operator.admin") &&
+      canCallGatewayMethod(snapshot, "carapace.setup.detect", "operator.admin") &&
       (!selectedAgentId || selectedAgentId === defaults?.defaultAgentId?.trim()) &&
       isStillDefaultLanding()
     ) {
@@ -78,7 +78,7 @@ export async function startModelSetupFirstRunRedirectAfterLocation(params: {
         redirect();
       } else if (defaults?.modelConfigured) {
         try {
-          if (localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")) {
+          if (localStorage.getItem("carapace.modelSetup.pendingActivation.v1")) {
             const ownerRevision = context.gateway.connectionRevision;
             // Crypto stays lazy; only an existing receipt suspends startup.
             void import("./model-setup-page.ts")

@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { CodeModeWorkerResult } from "./code-mode-runtime.js";
 import {
   applyCodeModeCatalog,
@@ -21,7 +21,7 @@ import { jsonResult, type AnyAgentTool } from "./tools/common.js";
 
 // Both public entry points use the real QuickJS worker and normal tool executor.
 function harness(headless: boolean, limit: number, tool: AnyAgentTool) {
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     tools: { codeMode: { enabled: true, maxPendingToolCalls: limit } },
   };
   const ctx = {
@@ -224,7 +224,7 @@ it("preserves queued arguments, request IDs, and dependency order across partial
     {
       kind: "exec",
       config,
-      catalog: [{ name: "probe", callableName: "probe", source: "openclaw" }],
+      catalog: [{ name: "probe", callableName: "probe", source: "carapace" }],
       namespaces: [],
       source:
         'const calls = Array.from({ length: 20 }, (_, i) => { const input = { value: String(i) }; const call = probe(input); input.value = "mutated"; return call; });' +
@@ -280,7 +280,7 @@ it("preserves queued arguments, request IDs, and dependency order across partial
 });
 
 it("carries queued calls through a public exec/wait without replaying the prefix", async () => {
-  const config: OpenClawConfig = { tools: { codeMode: true } };
+  const config: CarapaceConfig = { tools: { codeMode: true } };
   const ctx = {
     config,
     runtimeConfig: config,

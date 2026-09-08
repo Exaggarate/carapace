@@ -22,18 +22,18 @@ const DISABLE_EXPERIMENTAL_WARNING = "--disable-warning=ExperimentalWarning";
 const CODEX_VERSION = "0.152.1";
 const tempDirs: string[] = [];
 const tmpFixtureFiles = [
-  "/tmp/openclaw-candidate-codex-package.json",
-  "/tmp/openclaw-codex-agent.err",
-  "/tmp/openclaw-codex-agent.json",
-  "/tmp/openclaw-codex-agent-after-uninstall.err",
-  "/tmp/openclaw-codex-agent-after-uninstall.json",
-  "/tmp/openclaw-codex-followthrough.err",
-  "/tmp/openclaw-codex-followthrough.json",
-  "/tmp/openclaw-codex-inspect.json",
-  "/tmp/openclaw-codex-plugin-inspect.json",
-  "/tmp/openclaw-codex-plugins-list.json",
-  "/tmp/openclaw-onboard.json",
-  "/tmp/openclaw-plugins-list.json",
+  "/tmp/carapace-candidate-codex-package.json",
+  "/tmp/carapace-codex-agent.err",
+  "/tmp/carapace-codex-agent.json",
+  "/tmp/carapace-codex-agent-after-uninstall.err",
+  "/tmp/carapace-codex-agent-after-uninstall.json",
+  "/tmp/carapace-codex-followthrough.err",
+  "/tmp/carapace-codex-followthrough.json",
+  "/tmp/carapace-codex-inspect.json",
+  "/tmp/carapace-codex-plugin-inspect.json",
+  "/tmp/carapace-codex-plugins-list.json",
+  "/tmp/carapace-onboard.json",
+  "/tmp/carapace-plugins-list.json",
 ];
 
 afterEach(() => {
@@ -56,7 +56,7 @@ function writeJson(filePath: string, value: unknown) {
 }
 
 function writeAuthProfileStoreSqlite(stateDir: string) {
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   mkdirSync(path.dirname(databasePath), { recursive: true });
   const db = new DatabaseSync(databasePath);
   try {
@@ -99,8 +99,8 @@ function runCodexOnDemandAssertions(root: string) {
       ...process.env,
       HOME: path.join(root, "home"),
       NODE_OPTIONS: nodeOptionsWithoutExperimentalWarnings(),
-      OPENCLAW_CONFIG_PATH: path.join(root, "state", "openclaw.json"),
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_CONFIG_PATH: path.join(root, "state", "carapace.json"),
+      CARAPACE_STATE_DIR: path.join(root, "state"),
     },
   });
 }
@@ -128,10 +128,10 @@ function runCodexNpmPluginLiveAssertions(params: {
         ...process.env,
         HOME: path.join(params.root, "home"),
         NODE_OPTIONS: nodeOptionsWithoutExperimentalWarnings(),
-        OPENCLAW_STATE_DIR: path.join(params.root, "state"),
-        OPENCLAW_CODEX_NPM_PLUGIN_BINDING_STORE_CONTRACT:
+        CARAPACE_STATE_DIR: path.join(params.root, "state"),
+        CARAPACE_CODEX_NPM_PLUGIN_BINDING_STORE_CONTRACT:
           params.bindingStoreContract ?? "plugin-kv",
-        OPENCLAW_CODEX_NPM_PLUGIN_SESSION_STORE_CONTRACT: params.sessionStoreContract ?? "sqlite",
+        CARAPACE_CODEX_NPM_PLUGIN_SESSION_STORE_CONTRACT: params.sessionStoreContract ?? "sqlite",
       },
     },
   );
@@ -167,10 +167,10 @@ function runCodexNpmPluginLiveFollowthroughAssertions(params: {
         ...process.env,
         HOME: path.join(params.root, "home"),
         NODE_OPTIONS: nodeOptionsWithoutExperimentalWarnings(),
-        OPENCLAW_STATE_DIR: path.join(params.root, "state"),
-        OPENCLAW_CODEX_NPM_PLUGIN_BINDING_STORE_CONTRACT:
+        CARAPACE_STATE_DIR: path.join(params.root, "state"),
+        CARAPACE_CODEX_NPM_PLUGIN_BINDING_STORE_CONTRACT:
           params.bindingStoreContract ?? "plugin-kv",
-        OPENCLAW_CODEX_NPM_PLUGIN_SESSION_STORE_CONTRACT: params.sessionStoreContract ?? "sqlite",
+        CARAPACE_CODEX_NPM_PLUGIN_SESSION_STORE_CONTRACT: params.sessionStoreContract ?? "sqlite",
         ...params.assertionEnv,
       },
     },
@@ -184,8 +184,8 @@ function runCodexNpmPluginLiveConfigure(root: string) {
       ...process.env,
       HOME: path.join(root, "home"),
       NODE_OPTIONS: nodeOptionsWithoutExperimentalWarnings(),
-      OPENCLAW_CONFIG_PATH: path.join(root, "state", "openclaw.json"),
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_CONFIG_PATH: path.join(root, "state", "carapace.json"),
+      CARAPACE_STATE_DIR: path.join(root, "state"),
     },
   });
 }
@@ -193,15 +193,15 @@ function runCodexNpmPluginLiveConfigure(root: string) {
 function runCodexNpmPluginLivePluginAssertions(root: string) {
   return spawnSync(
     process.execPath,
-    [CODEX_NPM_PLUGIN_LIVE_ASSERTIONS_SCRIPT, "assert-plugin", "npm:@openclaw/codex"],
+    [CODEX_NPM_PLUGIN_LIVE_ASSERTIONS_SCRIPT, "assert-plugin", "npm:@carapace/codex"],
     {
       encoding: "utf8",
       env: {
         ...process.env,
         HOME: path.join(root, "home"),
         NODE_OPTIONS: nodeOptionsWithoutExperimentalWarnings(),
-        OPENCLAW_CONFIG_PATH: path.join(root, "state", "openclaw.json"),
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
+        CARAPACE_CONFIG_PATH: path.join(root, "state", "carapace.json"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
       },
     },
   );
@@ -214,8 +214,8 @@ function runCodexNpmPluginLiveDependencyAssertions(root: string) {
       ...process.env,
       HOME: path.join(root, "home"),
       NODE_OPTIONS: nodeOptionsWithoutExperimentalWarnings(),
-      OPENCLAW_CONFIG_PATH: path.join(root, "state", "openclaw.json"),
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_CONFIG_PATH: path.join(root, "state", "carapace.json"),
+      CARAPACE_STATE_DIR: path.join(root, "state"),
     },
   });
 }
@@ -227,7 +227,7 @@ function writeCodexBindingStateSqlite(params: {
   storedSessionId?: string;
   threadId: string;
 }) {
-  const dbPath = path.join(params.stateDir, "state", "openclaw.sqlite");
+  const dbPath = path.join(params.stateDir, "state", "carapace.sqlite");
   mkdirSync(path.dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   try {
@@ -277,7 +277,7 @@ function writeSessionStoreSqlite(params: {
   sessionId: string;
   sessionKey: string;
 }) {
-  const dbPath = path.join(params.stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(params.stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   mkdirSync(path.dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   try {
@@ -335,7 +335,7 @@ function replaceSessionTranscriptMessages(params: {
   sessionId: string;
   messages: unknown[];
 }) {
-  const dbPath = path.join(params.stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(params.stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   const db = new DatabaseSync(dbPath);
   try {
     const now = Date.now();
@@ -379,10 +379,10 @@ function createCodexNpmPluginLiveFixture(root: string, storedSessionId?: string)
   const stateDir = path.join(root, "state");
   const sessionKey = "agent:main:codex-npm-plugin-live";
   const sessionId = "codex-npm-plugin-live";
-  const marker = "OPENCLAW-CODEX-NPM-PLUGIN-LIVE-OK";
+  const marker = "CARAPACE-CODEX-NPM-PLUGIN-LIVE-OK";
   const threadId = "thread-codex-npm-live";
   const modelRef = "openai/gpt-5.4";
-  writeJson("/tmp/openclaw-codex-agent.json", {
+  writeJson("/tmp/carapace-codex-agent.json", {
     payloads: [{ text: marker }],
     meta: { executionTrace: { winnerProvider: "openai" } },
   });
@@ -432,7 +432,7 @@ function createCodexNpmPluginLiveFollowthroughFixture(params: {
   const artifactPath = path.join(workspaceDir, "codex-progress-followthrough.txt");
   writeFileSync(artifactPath, params.artifactText ?? "hidden-1\nhidden-2\nhidden-3\n", "utf8");
   const replyTexts = params.replyTexts ?? [progressMarker, completeMarker];
-  writeJson("/tmp/openclaw-codex-followthrough.json", {
+  writeJson("/tmp/carapace-codex-followthrough.json", {
     payloads: replyTexts.map((text) => ({ text })),
     meta: { executionTrace: { winnerProvider: "openai" } },
   });
@@ -514,7 +514,7 @@ function convertCodexNpmPluginLiveFixtureToLegacy<
   bindingStoreContract: "legacy-sidecar" | "plugin-kv" = "legacy-sidecar",
 ) {
   const stateDir = path.join(fixture.root, "state");
-  rmSync(path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"));
+  rmSync(path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"));
   const sessionFile = path.join(stateDir, "agents", "main", "sessions", "session.jsonl");
   mkdirSync(path.dirname(sessionFile), { recursive: true });
   writeFileSync(
@@ -523,7 +523,7 @@ function convertCodexNpmPluginLiveFixtureToLegacy<
     "utf8",
   );
   if (bindingStoreContract === "legacy-sidecar") {
-    rmSync(path.join(stateDir, "state", "openclaw.sqlite"));
+    rmSync(path.join(stateDir, "state", "carapace.sqlite"));
     writeJson(`${sessionFile}.codex-app-server.json`, {
       schemaVersion: 2,
       threadId: "thread-codex-npm-live",
@@ -567,19 +567,19 @@ function currentCodexPlatformTarget() {
 }
 
 function createCodexInstallFixture(root: string) {
-  writeJson("/tmp/openclaw-candidate-codex-package.json", {
+  writeJson("/tmp/carapace-candidate-codex-package.json", {
     dependencies: { "@openai/codex": CODEX_VERSION },
   });
   const stateDir = path.join(root, "state");
   const npmRoot = path.join(stateDir, "npm");
-  const installPath = path.join(npmRoot, "projects", "codex", "node_modules", "@openclaw", "codex");
-  const projectRoot = npmProjectRootForInstalledPackage(installPath, "@openclaw/codex");
+  const installPath = path.join(npmRoot, "projects", "codex", "node_modules", "@carapace", "codex");
+  const projectRoot = npmProjectRootForInstalledPackage(installPath, "@carapace/codex");
   const target = currentCodexPlatformTarget();
   const pluginPackageJson = path.join(installPath, "package.json");
   writeJson(pluginPackageJson, {
-    name: "@openclaw/codex",
+    name: "@carapace/codex",
     dependencies: { "@openai/codex": CODEX_VERSION },
-    openclaw: { install: { requiredPlatformPackages: [target.alias] } },
+    carapace: { install: { requiredPlatformPackages: [target.alias] } },
   });
   const openAiCodexRoot = path.join(projectRoot, "node_modules", "@openai", "codex");
   const openAiCodexPackageJson = path.join(openAiCodexRoot, "package.json");
@@ -609,7 +609,7 @@ function createCodexInstallFixture(root: string) {
     os: [target.os],
     cpu: [target.cpu],
   });
-  writeJson(path.join(stateDir, "openclaw.json"), {
+  writeJson(path.join(stateDir, "carapace.json"), {
     agents: { defaults: { model: { primary: "openai/gpt-5.6-sol" } } },
     models: { providers: { openai: { agentRuntime: { id: "codex" } } } },
   });
@@ -619,21 +619,21 @@ function createCodexInstallFixture(root: string) {
         codex: {
           installPath,
           source: "npm",
-          spec: "npm:@openclaw/codex",
+          spec: "npm:@carapace/codex",
         },
       },
     },
     { stateDir },
   );
-  writeJson("/tmp/openclaw-onboard.json", {
+  writeJson("/tmp/carapace-onboard.json", {
     ok: true,
     mode: "local",
     authChoice: "openai-api-key",
   });
-  writeJson("/tmp/openclaw-codex-inspect.json", {
+  writeJson("/tmp/carapace-codex-inspect.json", {
     plugin: { id: "codex", status: "loaded", agentHarnessIds: ["codex"] },
   });
-  writeJson("/tmp/openclaw-plugins-list.json", {
+  writeJson("/tmp/carapace-plugins-list.json", {
     plugins: [{ id: "codex", enabled: true, status: "loaded" }],
   });
   writeAuthProfileStoreSqlite(stateDir);
@@ -650,7 +650,7 @@ describe("Codex install helpers", () => {
   const missingRegistration =
     'Agent harness runtime "codex" is unavailable because its plugin registration is missing from this prepared run. Enable or reinstall the plugin that provides this runtime, restart the Gateway, then retry.';
   const inactiveOwner =
-    'Agent harness runtime "codex" is unavailable. (reason=owner-plugin-not-activatable, ownerPluginId=codex). Run "openclaw doctor --fix". Owner plugin "codex" is not activatable (disabled in config). Repair the plugin or select a model that does not require this runtime, restart the Gateway, then retry.';
+    'Agent harness runtime "codex" is unavailable. (reason=owner-plugin-not-activatable, ownerPluginId=codex). Run "carapace doctor --fix". Owner plugin "codex" is not activatable (disabled in config). Repair the plugin or select a model that does not require this runtime, restart the Gateway, then retry.';
   it.each([
     ["missing registration", 1, missingRegistration, true],
     ["inactive owner", 1, inactiveOwner, true],
@@ -673,11 +673,11 @@ describe("Codex install helpers", () => {
   ] as const)(
     "validates the post-uninstall agent failure: %s",
     (_label, status, message, accepted) => {
-      writeJson("/tmp/openclaw-codex-agent-after-uninstall.json", {
+      writeJson("/tmp/carapace-codex-agent-after-uninstall.json", {
         ok: false,
         error: { type: "cli_error", message },
       });
-      writeFileSync("/tmp/openclaw-codex-agent-after-uninstall.err", message);
+      writeFileSync("/tmp/carapace-codex-agent-after-uninstall.err", message);
 
       const result = spawnSync(
         process.execPath,
@@ -690,13 +690,13 @@ describe("Codex install helpers", () => {
   );
 
   it("configures the canonical OpenAI model for the Codex runtime by default", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-configure-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-configure-");
 
     const result = runCodexNpmPluginLiveConfigure(root);
 
     expect(result.status, result.stderr).toBe(0);
     expect(result.stderr).toBe("");
-    const config = JSON.parse(readFileSync(path.join(root, "state", "openclaw.json"), "utf8")) as {
+    const config = JSON.parse(readFileSync(path.join(root, "state", "carapace.json"), "utf8")) as {
       agents: {
         defaults: {
           model: { primary: string; fallbacks: string[] };
@@ -716,7 +716,7 @@ describe("Codex install helpers", () => {
   });
 
   it("accepts the canonical harness-only Codex plugin registration", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-harness-registration-");
+    const root = makeTempDir(tempDirs, "carapace-codex-harness-registration-");
     createCodexInstallFixture(root);
     const installPath = path.join(
       root,
@@ -725,7 +725,7 @@ describe("Codex install helpers", () => {
       "projects",
       "codex",
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "codex",
     );
     writePluginInstallIndexForE2E(
@@ -734,19 +734,19 @@ describe("Codex install helpers", () => {
           codex: {
             installPath,
             source: "npm",
-            spec: "@openclaw/codex",
+            spec: "@carapace/codex",
             resolvedVersion: "2026.7.2",
-            resolvedSpec: "@openclaw/codex@2026.7.2",
+            resolvedSpec: "@carapace/codex@2026.7.2",
           },
         },
       },
       { stateDir: path.join(root, "state") },
     );
-    writeJson("/tmp/openclaw-codex-plugins-list.json", {
+    writeJson("/tmp/carapace-codex-plugins-list.json", {
       plugins: [{ id: "codex", enabled: true, status: "loaded" }],
       diagnostics: [],
     });
-    writeJson("/tmp/openclaw-codex-plugin-inspect.json", {
+    writeJson("/tmp/carapace-codex-plugin-inspect.json", {
       plugin: {
         id: "codex",
         status: "loaded",
@@ -764,7 +764,7 @@ describe("Codex install helpers", () => {
   });
 
   it("resolves package roots and package manifests inside managed npm installs", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-install-utils-");
+    const root = makeTempDir(tempDirs, "carapace-codex-install-utils-");
     const packageRoot = path.join(
       root,
       "state",
@@ -772,10 +772,10 @@ describe("Codex install helpers", () => {
       "projects",
       "codex",
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "codex",
     );
-    const projectRoot = npmProjectRootForInstalledPackage(packageRoot, "@openclaw/codex");
+    const projectRoot = npmProjectRootForInstalledPackage(packageRoot, "@carapace/codex");
     const dependencyPackage = path.join(
       projectRoot,
       "node_modules",
@@ -796,7 +796,7 @@ describe("Codex install helpers", () => {
   });
 
   it("accepts a complete on-demand Codex npm install fixture", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-");
     createCodexInstallFixture(root);
     const agentDatabasePath = path.join(
       root,
@@ -804,7 +804,7 @@ describe("Codex install helpers", () => {
       "agents",
       "main",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
     mkdirSync(path.dirname(agentDatabasePath), { recursive: true });
     const agentDatabase = new DatabaseSync(agentDatabasePath);
@@ -831,7 +831,7 @@ describe("Codex install helpers", () => {
   });
 
   it("records the same exact Codex release package evidence for the npm-live install", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-deps-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-deps-");
     createCodexInstallFixture(root);
 
     const result = runCodexNpmPluginLiveDependencyAssertions(root);
@@ -848,7 +848,7 @@ describe("Codex install helpers", () => {
     ["on-demand", runCodexOnDemandAssertions],
     ["npm-live", runCodexNpmPluginLiveDependencyAssertions],
   ] as const)("rejects %s plugin pins that differ from the candidate", (_lane, runAssertions) => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-candidate-pin-");
+    const root = makeTempDir(tempDirs, "carapace-codex-candidate-pin-");
     const fixture = createCodexInstallFixture(root);
     const pluginPackage = JSON.parse(readFileSync(fixture.pluginPackageJson, "utf8"));
     pluginPackage.dependencies["@openai/codex"] = "0.153.0";
@@ -858,14 +858,14 @@ describe("Codex install helpers", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
-      `@openclaw/codex must depend on @openai/codex ${CODEX_VERSION}; found 0.153.0`,
+      `@carapace/codex must depend on @openai/codex ${CODEX_VERSION}; found 0.153.0`,
     );
   });
 
   it.each([undefined, "^0.152.1", "latest"])("rejects a non-exact candidate pin %s", (pin) => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-candidate-invalid-pin-");
+    const root = makeTempDir(tempDirs, "carapace-codex-candidate-invalid-pin-");
     const fixture = createCodexInstallFixture(root);
-    writeJson("/tmp/openclaw-candidate-codex-package.json", {
+    writeJson("/tmp/carapace-candidate-codex-package.json", {
       dependencies: { "@openai/codex": pin },
     });
     const pluginPackage = JSON.parse(readFileSync(fixture.pluginPackageJson, "utf8"));
@@ -876,12 +876,12 @@ describe("Codex install helpers", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
-      `@openclaw/codex must depend on @openai/codex ${String(pin)}; found ${String(pin)}`,
+      `@carapace/codex must depend on @openai/codex ${String(pin)}; found ${String(pin)}`,
     );
   });
 
   it("rejects an installed @openai/codex package outside the exact release version", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-package-version-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-package-version-");
     const fixture = createCodexInstallFixture(root);
     writeJson(fixture.openAiCodexPackageJson, {
       name: "@openai/codex",
@@ -902,7 +902,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects a managed Codex CLI outside the exact release version", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-cli-version-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-cli-version-");
     const fixture = createCodexInstallFixture(root);
     writeFileSync(fixture.codexBin, '#!/usr/bin/env node\nconsole.log("codex-cli 0.148.0");\n', {
       mode: 0o755,
@@ -917,7 +917,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects a missing current-platform Codex alias", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-platform-missing-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-platform-missing-");
     const fixture = createCodexInstallFixture(root);
     rmSync(path.dirname(fixture.platformPackageJson), { force: true, recursive: true });
 
@@ -928,7 +928,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects the wrong current-platform Codex alias version", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-platform-version-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-platform-version-");
     const fixture = createCodexInstallFixture(root);
     writeJson(fixture.platformPackageJson, {
       name: "@openai/codex",
@@ -946,7 +946,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects current-platform Codex alias OS and CPU metadata drift", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-platform-manifest-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-platform-manifest-");
     const fixture = createCodexInstallFixture(root);
     writeJson(fixture.platformPackageJson, {
       name: "@openai/codex",
@@ -975,9 +975,9 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects on-demand fixtures without the canonical SQLite install record", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-no-index-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-no-index-");
     createCodexInstallFixture(root);
-    rmSync(path.join(root, "state", "state", "openclaw.sqlite"), { force: true });
+    rmSync(path.join(root, "state", "state", "carapace.sqlite"), { force: true });
 
     const result = runCodexOnDemandAssertions(root);
 
@@ -986,10 +986,10 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects duplicate onboarding terminal JSON documents", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-duplicate-terminal-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-duplicate-terminal-");
     createCodexInstallFixture(root);
     writeFileSync(
-      "/tmp/openclaw-onboard.json",
+      "/tmp/carapace-onboard.json",
       `${JSON.stringify({ ok: true })}\n${JSON.stringify({ ok: true })}\n`,
       "utf8",
     );
@@ -1001,7 +1001,7 @@ describe("Codex install helpers", () => {
   });
 
   it("accepts SQLite-backed session and Codex binding state in the npm live assertion", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-live-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-live-");
     const fixture = createCodexNpmPluginLiveFixture(root);
 
     const result = runCodexNpmPluginLiveAssertions(fixture);
@@ -1013,7 +1013,7 @@ describe("Codex install helpers", () => {
   it.each(["sqlite", "legacy-json"] as const)(
     "accepts progress, artifact work, and completion with the %s session contract",
     (sessionStoreContract) => {
-      const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-");
+      const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-");
       const fixture = createCodexNpmPluginLiveFollowthroughFixture({ root, sessionStoreContract });
 
       const result = runCodexNpmPluginLiveFollowthroughAssertions(fixture);
@@ -1024,7 +1024,7 @@ describe("Codex install helpers", () => {
   );
 
   it("accepts settled failed work before a later successful artifact write", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-recovered-work-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-recovered-work-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({ root, readFails: true });
 
     const result = runCodexNpmPluginLiveFollowthroughAssertions(fixture);
@@ -1040,14 +1040,14 @@ describe("Codex install helpers", () => {
           [
             sessionStoreContract,
             "event count",
-            "OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_WALK_ENTRIES",
+            "CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_WALK_ENTRIES",
             "2",
             "exceeded 2 events",
           ],
           [
             sessionStoreContract,
             "aggregate bytes",
-            "OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_SCAN_BYTES",
+            "CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_SCAN_BYTES",
             "128",
             "exceeded 128 bytes",
           ],
@@ -1056,7 +1056,7 @@ describe("Codex install helpers", () => {
   )(
     "rejects an oversized %s transcript by %s before assertions",
     (sessionStoreContract, _label, envName, limit, errorText) => {
-      const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-bounded-");
+      const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-bounded-");
       const fixture = createCodexNpmPluginLiveFollowthroughFixture({
         root,
         sessionStoreContract,
@@ -1073,10 +1073,10 @@ describe("Codex install helpers", () => {
   );
 
   it("rejects a Codex live turn that stops after its progress message", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-progress-only-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-progress-only-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
-      replyTexts: ["OPENCLAW-CODEX-NPM-PLUGIN-LIVE-OK-FOLLOWTHROUGH-PROGRESS"],
+      replyTexts: ["CARAPACE-CODEX-NPM-PLUGIN-LIVE-OK-FOLLOWTHROUGH-PROGRESS"],
     });
 
     const result = runCodexNpmPluginLiveFollowthroughAssertions(fixture);
@@ -1086,7 +1086,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects a Codex live turn whose follow-through artifact is incomplete", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-incomplete-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-incomplete-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       artifactText: "hidden-1\n",
@@ -1099,7 +1099,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects workspace work outside the progress and completion messages", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-work-order-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-work-order-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       workPlacement: "before-progress",
@@ -1116,7 +1116,7 @@ describe("Codex install helpers", () => {
   it.each(["sqlite", "legacy-json"] as const)(
     "rejects workspace work issued before progress delivery completes with the %s session contract",
     (sessionStoreContract) => {
-      const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-batched-work-");
+      const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-batched-work-");
       const fixture = createCodexNpmPluginLiveFollowthroughFixture({
         root,
         sessionStoreContract,
@@ -1133,7 +1133,7 @@ describe("Codex install helpers", () => {
   );
 
   it("rejects a malformed legacy follow-through transcript", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-legacy-malformed-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-legacy-malformed-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       sessionStoreContract: "legacy-json",
@@ -1144,11 +1144,11 @@ describe("Codex install helpers", () => {
     const result = runCodexNpmPluginLiveFollowthroughAssertions(fixture);
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OpenClaw legacy transcript event");
+    expect(result.stderr).toContain("invalid Carapace legacy transcript event");
   });
 
   it("rejects completion sent before the artifact write succeeds", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-pending-write-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-pending-write-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       workPlacement: "write-result-after-completion",
@@ -1161,7 +1161,7 @@ describe("Codex install helpers", () => {
   });
 
   it("accepts a terminal completion message without the optional final marker", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-legacy-completion-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-legacy-completion-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       messageFinals: [undefined, undefined],
@@ -1174,7 +1174,7 @@ describe("Codex install helpers", () => {
   });
 
   it("accepts explicit progress and completion final controls", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-explicit-finals-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-explicit-finals-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       messageFinals: [false, true],
@@ -1190,7 +1190,7 @@ describe("Codex install helpers", () => {
     ["terminal progress", [true, true]],
     ["nonfinal completion", [undefined, false]],
   ] as const)("rejects %s Codex message final controls", (_label, messageFinals) => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-followthrough-final-controls-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-followthrough-final-controls-");
     const fixture = createCodexNpmPluginLiveFollowthroughFixture({
       root,
       messageFinals: [...messageFinals],
@@ -1205,7 +1205,7 @@ describe("Codex install helpers", () => {
   });
 
   it("accepts the explicit frozen-target JSON session and sidecar binding contract", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-live-legacy-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-live-legacy-");
     const fixture = createLegacyCodexNpmPluginLiveFixture(root);
 
     const result = runCodexNpmPluginLiveAssertions(fixture);
@@ -1215,7 +1215,7 @@ describe("Codex install helpers", () => {
   });
 
   it("keeps current targets fail-closed when the SQLite session database is missing", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-live-no-sqlite-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-live-no-sqlite-");
     const fixture = createLegacyCodexNpmPluginLiveFixture(root);
 
     const result = runCodexNpmPluginLiveAssertions({
@@ -1228,7 +1228,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects a Codex binding owned by a stale physical session generation", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-npm-live-stale-");
+    const root = makeTempDir(tempDirs, "carapace-codex-npm-live-stale-");
     const fixture = createCodexNpmPluginLiveFixture(root, "previous-session");
 
     const result = runCodexNpmPluginLiveAssertions(fixture);
@@ -1240,7 +1240,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects on-demand fixtures missing the managed @openai/codex dependency", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-missing-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-missing-");
     createCodexInstallFixture(root);
     rmSync(path.join(root, "state", "npm", "projects", "codex", "node_modules", "@openai"), {
       force: true,
@@ -1254,7 +1254,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects on-demand fixtures missing the managed Codex executable", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-missing-bin-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-missing-bin-");
     createCodexInstallFixture(root);
     rmSync(
       path.join(
@@ -1278,7 +1278,7 @@ describe("Codex install helpers", () => {
   });
 
   it("rejects a present managed Codex wrapper when its native executable is unavailable", () => {
-    const root = makeTempDir(tempDirs, "openclaw-codex-on-demand-broken-native-");
+    const root = makeTempDir(tempDirs, "carapace-codex-on-demand-broken-native-");
     createCodexInstallFixture(root);
     const codexBin = path.join(
       root,

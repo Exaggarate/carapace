@@ -8,7 +8,7 @@ import {
 } from "../agents/prepared-model-runtime.js";
 import { resolveDefaultAgentWorkspaceDir } from "../agents/workspace-default.js";
 import { isRestartEnabled } from "../config/commands.flags.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resetDirectoryCache } from "../infra/outbound/target-resolver.js";
@@ -95,7 +95,7 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
 
   const applyHotReload = async (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     publication?: GatewayHotReloadPublication,
   ) => {
     assertIrreversibleReloadPlanHasRecoveryOwner(plan, restartRecoveryAvailable);
@@ -187,8 +187,8 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
     const laneConcurrency = resolveGatewayLaneConcurrency(nextConfig);
     // Use one candidate env snapshot before publication and through later channel starts.
     const shouldSkipChannelRestart =
-      isTruthyEnvValue(candidateEnv.OPENCLAW_SKIP_CHANNELS) ||
-      isTruthyEnvValue(candidateEnv.OPENCLAW_SKIP_PROVIDERS);
+      isTruthyEnvValue(candidateEnv.CARAPACE_SKIP_CHANNELS) ||
+      isTruthyEnvValue(candidateEnv.CARAPACE_SKIP_PROVIDERS);
     const channelReloadTargets = () =>
       new Set<ChannelKind>([...channelsToRestart, ...restartChannelAccounts.keys()]);
     const getChannelAutostartSuppression = () => params.getChannelAutostartSuppression?.() ?? null;
@@ -608,7 +608,7 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
               signal: restartAbortController.signal,
               onSkipped: () =>
                 params.logHooks.info(
-                  "skipping gmail watcher restart (OPENCLAW_SKIP_GMAIL_WATCHER=1)",
+                  "skipping gmail watcher restart (CARAPACE_SKIP_GMAIL_WATCHER=1)",
                 ),
             });
           }
@@ -630,7 +630,7 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
       channelsStoppedBeforePluginReload,
       shouldSkipChannelRestart,
       skipChannelRestartLogMessage:
-        "skipping channel reload (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+        "skipping channel reload (CARAPACE_SKIP_CHANNELS=1 or CARAPACE_SKIP_PROVIDERS=1)",
       isLifecycleReloadAborted,
       getChannelAutostartSuppression,
       channelReloadTargets,

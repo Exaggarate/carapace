@@ -40,7 +40,7 @@ describe("gateway startup trace", () => {
   });
 
   it("keeps pre-bootstrap and startup phases on one elapsed-time origin", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_STARTUP_TRACE", "1");
+    vi.stubEnv("CARAPACE_GATEWAY_STARTUP_TRACE", "1");
     const info = vi.fn();
     const trace = createGatewayStartupTrace(
       { info } as unknown as Parameters<typeof createGatewayStartupTrace>[0],
@@ -59,7 +59,7 @@ describe("gateway startup trace", () => {
   });
 
   it("closes the event-loop monitor once without allowing it to reopen", () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_STARTUP_TRACE", "1");
+    vi.stubEnv("CARAPACE_GATEWAY_STARTUP_TRACE", "1");
     const trace = createGatewayStartupTrace({ info: vi.fn() } as never);
 
     trace.close();
@@ -73,7 +73,7 @@ describe("gateway startup trace", () => {
   });
 
   it("keeps tracing after a measured error until startup reaches a terminal outcome", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_STARTUP_TRACE", "1");
+    vi.stubEnv("CARAPACE_GATEWAY_STARTUP_TRACE", "1");
     const trace = createGatewayStartupTrace({ info: vi.fn() } as never);
 
     await expect(

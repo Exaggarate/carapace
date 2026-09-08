@@ -1,11 +1,11 @@
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 
 const MCP_LIFECYCLE_LEASE_SCOPE = "core:claw-mcp-lifecycle";
 const MCP_LIFECYCLE_LEASE_MS = 5 * 60_000;
 const MCP_LIFECYCLE_WAIT_MS = 10 * 60_000;
 
-type McpLifecycleLeaseOptions = Pick<OpenClawStateDatabaseOptions, "env" | "path" | "database"> & {
+type McpLifecycleLeaseOptions = Pick<CarapaceStateDatabaseOptions, "env" | "path" | "database"> & {
   signal?: AbortSignal;
 };
 
@@ -15,7 +15,7 @@ export async function withMcpLifecycleLease<T>(
   options: McpLifecycleLeaseOptions,
   run: (assertOwned: () => void) => Promise<T>,
 ): Promise<T> {
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: MCP_LIFECYCLE_LEASE_SCOPE,
       key: name.trim(),

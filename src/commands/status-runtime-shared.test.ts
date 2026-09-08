@@ -259,7 +259,7 @@ describe("status-runtime-shared", () => {
     });
   });
 
-  it("does not add Codex synthetic usage for OpenAI routes pinned to OpenClaw runtime", async () => {
+  it("does not add Codex synthetic usage for OpenAI routes pinned to Carapace runtime", async () => {
     await resolveStatusUsageSummary({
       timeoutMs: 3456,
       config: {
@@ -267,7 +267,7 @@ describe("status-runtime-shared", () => {
           defaults: {
             model: { primary: "openai/gpt-5.5" },
             models: {
-              "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
             },
           },
         },

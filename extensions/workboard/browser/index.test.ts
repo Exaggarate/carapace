@@ -1,6 +1,6 @@
 import "./test/dom.setup.ts";
-import type { ControlUiAccessory } from "openclaw/plugin-sdk/control-ui";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { ControlUiAccessory } from "carapace/plugin-sdk/control-ui";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { expect, it, vi } from "vitest";
 import workboardPlugin from "./index.ts";
 import { createGatewaySession, createWorkboardCard } from "./lib/workboard/test/index-helpers.ts";

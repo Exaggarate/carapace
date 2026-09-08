@@ -11,7 +11,7 @@ export type CliHarnessCleanup = {
 // Entry modules must stay runtime-free. Only executable bootstraps grant this scope;
 // exported/programmatic CLI calls and Gateway boot retain their existing lifecycle.
 const scope = resolveGlobalSingleton<AsyncLocalStorage<"process" | CliHarnessCleanup | undefined>>(
-  Symbol.for("openclaw.cliRuntimeCleanup"),
+  Symbol.for("carapace.cliRuntimeCleanup"),
   () => new AsyncLocalStorage(),
 );
 

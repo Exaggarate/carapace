@@ -2,10 +2,10 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "../../plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createTranscriptsAutoStartService } from "../../transcripts/auto-start.js";
 import { activeSessions, createTranscriptSessionId } from "../../transcripts/capture.js";
 import type {
@@ -20,7 +20,7 @@ const tempDirs = createTempDirTracker();
 afterEach(() => {
   activeSessions.clear();
   vi.useRealTimers();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -69,11 +69,11 @@ function harness() {
     source: import.meta.url,
   });
   const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   const service = (
-    entries: NonNullable<NonNullable<OpenClawConfig["transcripts"]>["autoStart"]> = [entry],
-    config: OpenClawConfig = {},
+    entries: NonNullable<NonNullable<CarapaceConfig["transcripts"]>["autoStart"]> = [entry],
+    config: CarapaceConfig = {},
   ) =>
     createTranscriptsAutoStartService({
       stateDir,
@@ -132,7 +132,7 @@ describe("occupancy-driven transcript lifecycle", () => {
         await h.store.writeSession(session);
         await h.store.appendUtteranceForSession(session, { text: "Archived speech" });
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await withPluginRuntimeRegistryScope(h.registry, async () => {
         const service = h.service();
         try {
@@ -160,7 +160,7 @@ describe("occupancy-driven transcript lifecycle", () => {
 
   it("keeps admitted history with its original agent after the room is reassigned", async () => {
     const h = harness();
-    const configFor = (agentId: string): OpenClawConfig => ({
+    const configFor = (agentId: string): CarapaceConfig => ({
       agents: { list: [{ id: "agent-a", default: true }, { id: "agent-b" }] },
       bindings: [{ agentId, match: { channel: "room", peer: { kind: "channel", id: "voice" } } }],
     });
@@ -472,7 +472,7 @@ describe("occupancy-driven transcript lifecycle", () => {
           await first.stop();
         }
         await vi.advanceTimersByTimeAsync(gap);
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         const second = h.service([{ ...h.entry, title: "Future meeting" }]);
         try {
           second.start();

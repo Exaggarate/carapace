@@ -1,16 +1,16 @@
 import { randomUUID } from "node:crypto";
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { executeSqliteQueryTakeFirstSync } from "../../infra/kysely-sync.js";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import { assertModelSelectionUnlocked } from "../../sessions/model-overrides.js";
 import { extractAssistantPhaseText } from "../../shared/chat-message-content.js";
 import { isIncognitoSessionKey } from "../../shared/incognito-session-key.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type { TranscriptEvent } from "./session-accessor.sqlite-contract.js";
 import {
   collectSessionEntryLookupKeys,
@@ -98,7 +98,7 @@ function cloneSessionBranchSummaries(branches: readonly SessionBranchSummary[]) 
 }
 
 function readSessionBranchWatermark(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): Pick<SessionBranchCacheEntry, "generation" | "maxSeq"> {
   const db = getSessionKysely(database.db);
@@ -120,7 +120,7 @@ function readSessionBranchWatermark(
 }
 
 function loadSessionBranchSummaries(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): SessionBranchSummary[] {
   const cacheKey = sessionBranchCacheKey(database.path, sessionId);
@@ -156,7 +156,7 @@ export async function listSessionBranches(
     ...(params.storePath ? { storePath: params.storePath } : {}),
   });
   try {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const currentEntry = readSessionEntryRow(database, sourceKey)?.entry;
     if (!currentEntry?.sessionId) {
       return { status: "missing-session" };
@@ -229,7 +229,7 @@ async function mutateSqliteSessionAtMessage(
     ...(params.storePath ? { storePath: params.storePath } : {}),
   });
   const preparedEntry = readSessionEntryRow(
-    openOpenClawAgentDatabase(toDatabaseOptions(resolved)),
+    openCarapaceAgentDatabase(toDatabaseOptions(resolved)),
     sourceKey,
   )?.entry;
   const preparedExpectedState =
@@ -242,7 +242,7 @@ async function mutateSqliteSessionAtMessage(
       : undefined);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
     let previousIdentity = new Map<string, SessionEntry>();
-    const { databasePath, result, publish } = runOpenClawAgentWriteTransaction((database) => {
+    const { databasePath, result, publish } = runCarapaceAgentWriteTransaction((database) => {
       params.commitGuard?.();
       const identityKeys = uniqueStrings([
         ...collectSessionEntryLookupKeys(database, sourceKey),
@@ -285,7 +285,7 @@ async function mutateSqliteSessionAtMessage(
 }
 
 function mutateSqliteSessionAtMessageInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedSqliteScope,
   params: {
     canonicalSourceKey: string;
@@ -674,7 +674,7 @@ function extractEditorAttachments(
 function extractEditorMediaRefs(
   message: Record<string, unknown>,
 ): Array<{ path: string; contentType: string }> | undefined {
-  const media = asRecord(message["__openclaw"])?.media;
+  const media = asRecord(message["__carapace"])?.media;
   if (!Array.isArray(media)) {
     return undefined;
   }

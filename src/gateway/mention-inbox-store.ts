@@ -8,7 +8,7 @@ import {
 } from "../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../infra/sqlite-transaction.js";
 import type { ConfigMachineStateDatabase } from "../state/config-machine-state.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
 
 export const MENTION_RETENTION_MS = 7 * 24 * 60 * 60_000;
 export const MAX_MENTION_SOURCES = 10_000;
@@ -119,7 +119,7 @@ export function readMentionStoreSnapshot(
   if (activeDatabase) {
     return read(activeDatabase);
   }
-  const result = withExistingOpenClawStateDatabaseReadOnly(({ db }) => ({
+  const result = withExistingCarapaceStateDatabaseReadOnly(({ db }) => ({
     snapshot: runSqliteDeferredTransactionSync(db, () => read(db), {
       operationLabel: "mentions.read",
     }),

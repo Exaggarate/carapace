@@ -1,5 +1,5 @@
-// Raft plugin entrypoint registers its OpenClaw integration.
-import { defineBundledChannelEntry } from "openclaw/plugin-sdk/channel-entry-contract";
+// Raft plugin entrypoint registers its Carapace integration.
+import { defineBundledChannelEntry } from "carapace/plugin-sdk/channel-entry-contract";
 
 export default defineBundledChannelEntry({
   id: "raft",

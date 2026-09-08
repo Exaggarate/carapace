@@ -269,7 +269,7 @@ export function renderTranscriptSearch(
           requestUpdate();
         }}
       />
-      <openclaw-tooltip .content=${t("chat.thread.closeSearch")}>
+      <carapace-tooltip .content=${t("chat.thread.closeSearch")}>
         <button
           class="btn btn--ghost"
           aria-label=${t("chat.thread.closeSearch")}
@@ -277,7 +277,7 @@ export function renderTranscriptSearch(
         >
           ${icons.x}
         </button>
-      </openclaw-tooltip>
+      </carapace-tooltip>
     </div>
   `;
 }
@@ -377,7 +377,7 @@ function createMessageActionContextButton(params: {
   label.textContent = params.label;
   button.append(label);
   button.addEventListener("click", params.onClick);
-  const tooltip = document.createElement("openclaw-tooltip");
+  const tooltip = document.createElement("carapace-tooltip");
   tooltip.content = params.tooltip;
   tooltip.append(button);
   return { element: tooltip, button };

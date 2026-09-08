@@ -3,7 +3,7 @@ import {
   isPathInside,
   removePathWithinRoot,
   root as fsRoot,
-} from "openclaw/plugin-sdk/file-access-runtime";
+} from "carapace/plugin-sdk/file-access-runtime";
 import {
   createWritableRenameTargetResolver,
   type DirectoryEntry,
@@ -11,8 +11,8 @@ import {
   type SandboxFsBridge,
   type SandboxFsStat,
   type SandboxResolvedPath,
-} from "openclaw/plugin-sdk/sandbox";
-import { FsSafeError } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/sandbox";
+import { FsSafeError } from "carapace/plugin-sdk/security-runtime";
 import { normalizeMxcPathForComparison } from "./path-comparison.js";
 import {
   resolveMxcReadOnlySkillMounts,

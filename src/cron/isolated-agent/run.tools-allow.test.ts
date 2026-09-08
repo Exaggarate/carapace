@@ -21,7 +21,7 @@ import {
 } from "./run.test-harness.js";
 
 const MISSING_WEB_SEARCH_PROVIDER_DIAGNOSTIC_MESSAGE =
-  "web_search tool requested in toolsAllow but no web search provider is selected. Configure one with: openclaw configure --section web, or set tools.web.search.provider.";
+  "web_search tool requested in toolsAllow but no web search provider is selected. Configure one with: carapace configure --section web, or set tools.web.search.provider.";
 
 const RUN_TOOLS_ALLOW_TIMEOUT_MS = 300_000;
 
@@ -127,7 +127,7 @@ function requireEmbeddedAgentCall(): {
       }
     | undefined;
   if (!call) {
-    throw new Error("Expected embedded OpenClaw agent call for toolsAllow passthrough");
+    throw new Error("Expected embedded Carapace agent call for toolsAllow passthrough");
   }
   return call;
 }
@@ -136,8 +136,8 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
   let previousFastTestEnv: string | undefined;
 
   beforeEach(() => {
-    previousFastTestEnv = process.env.OPENCLAW_TEST_FAST;
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    previousFastTestEnv = process.env.CARAPACE_TEST_FAST;
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     resetRunCronIsolatedAgentTurnHarness();
     clearActiveRuntimeWebToolsMetadata();
     resolveDeliveryTargetMock.mockResolvedValue({
@@ -156,10 +156,10 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
     clearActiveRuntimeWebToolsMetadata();
     if (previousFastTestEnv == null) {
       vi.unstubAllEnvs();
-      delete process.env.OPENCLAW_TEST_FAST;
+      delete process.env.CARAPACE_TEST_FAST;
       return;
     }
-    vi.stubEnv("OPENCLAW_TEST_FAST", previousFastTestEnv);
+    vi.stubEnv("CARAPACE_TEST_FAST", previousFastTestEnv);
   });
 
   it(
@@ -265,7 +265,7 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
       (params.job as { payload: { message: string } }).payload.message = [
         "Command to run:",
         "- command: python3 scripts/check_mail.py",
-        "- workdir: /srv/openclaw",
+        "- workdir: /srv/carapace",
       ].join("\n");
 
       const result = await runCronIsolatedAgentTurn(params);
@@ -274,7 +274,7 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
         status: "error",
         admissionDisposition: "rejected",
         error: expect.stringContaining(
-          "openclaw automations edit tools-allow --tools exec,process",
+          "carapace automations edit tools-allow --tools exec,process",
         ),
         diagnostics: {
           summary: expect.stringContaining("No command was executed"),
@@ -315,7 +315,7 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
       (params.job as { payload: { message: string } }).payload.message = [
         "Command to run:",
         "- command: python3 scripts/check_mail.py",
-        "- workdir: /srv/openclaw",
+        "- workdir: /srv/carapace",
       ].join("\n");
 
       const result = await runCronIsolatedAgentTurn(params);
@@ -352,7 +352,7 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
       (params.job as { payload: { message: string } }).payload.message = [
         "Command to run:",
         "- command: python3 scripts/check_mail.py",
-        "- workdir: /srv/openclaw",
+        "- workdir: /srv/carapace",
       ].join("\n");
 
       const result = await runCronIsolatedAgentTurn(params);

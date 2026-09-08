@@ -1,13 +1,13 @@
 // Provider discovery contract helpers define reusable discovery tests for provider plugins.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { runProviderCatalog } from "../../plugins/provider-discovery.js";
 import {
   registerProviderPlugins as registerProviders,
   requireRegisteredProvider as requireProvider,
 } from "../../test-utils/plugin-registration.js";
-import type { AuthProfileStore, OpenClawConfig } from "../provider-auth.js";
+import type { AuthProfileStore, CarapaceConfig } from "../provider-auth.js";
 
 const resolveCopilotRuntimeAuthMock = vi.hoisted(() => vi.fn());
 const buildVllmProviderMock = vi.hoisted(() => vi.fn());
@@ -84,7 +84,7 @@ function runCatalog(
   state: DiscoveryState,
   params: {
     provider: ProviderHandle;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     env?: NodeJS.ProcessEnv;
     resolveProviderApiKey?: () => { apiKey: string | undefined; discoveryApiKey?: string };
     resolveProviderAuth?: (
@@ -138,13 +138,13 @@ function providerModelIds(provider: Record<string, unknown>): Array<unknown> {
 function installDiscoveryHooks(state: DiscoveryState, options: DiscoveryContractOptions) {
   beforeAll(async () => {
     vi.resetModules();
-    vi.doMock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => {
+    vi.doMock("carapace/plugin-sdk/provider-auth", async (importOriginal) => {
       const actual = await importOriginal<typeof import("../provider-auth.js")>();
       return {
         ...actual,
         DEFAULT_COPILOT_API_BASE_URL: "https://api.individual.githubcopilot.com",
         MINIMAX_OAUTH_MARKER: "minimax-oauth",
-        applyAuthProfileConfig: (config: OpenClawConfig) => config,
+        applyAuthProfileConfig: (config: CarapaceConfig) => config,
         buildApiKeyCredential: (
           provider: string,
           key: unknown,
@@ -178,9 +178,9 @@ function installDiscoveryHooks(state: DiscoveryState, options: DiscoveryContract
         validateApiKeyInput: () => undefined,
       };
     });
-    vi.doMock("openclaw/plugin-sdk/provider-setup", async () => {
+    vi.doMock("carapace/plugin-sdk/provider-setup", async () => {
       const actual = await vi.importActual<typeof import("../provider-setup.js")>(
-        "openclaw/plugin-sdk/provider-setup",
+        "carapace/plugin-sdk/provider-setup",
       );
       return {
         ...actual,
@@ -434,7 +434,7 @@ export function describeVllmProviderDiscoveryContract(params: {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as CarapaceConfig,
           env: {
             VLLM_API_KEY: "env-vllm-key",
           } as NodeJS.ProcessEnv,
@@ -490,7 +490,7 @@ export function describeVllmProviderDiscoveryContract(params: {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as CarapaceConfig,
           env: {
             VLLM_API_KEY: "env-vllm-key",
           } as NodeJS.ProcessEnv,
@@ -540,7 +540,7 @@ export function describeVllmProviderDiscoveryContract(params: {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           env: {
             VLLM_API_KEY: "env-vllm-key",
           } as NodeJS.ProcessEnv,
@@ -640,7 +640,7 @@ export function describeSglangProviderDiscoveryContract(params: {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           env: {
             SGLANG_API_KEY: "env-sglang-key",
           } as NodeJS.ProcessEnv,
@@ -691,7 +691,7 @@ export function describeSglangProviderDiscoveryContract(params: {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           env: {
             SGLANG_API_KEY: "env-sglang-key",
           } as NodeJS.ProcessEnv,

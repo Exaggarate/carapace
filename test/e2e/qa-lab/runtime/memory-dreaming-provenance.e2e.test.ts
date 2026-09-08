@@ -13,7 +13,7 @@ import {
   connectGatewayClient,
   disconnectGatewayClient,
 } from "../../../../src/gateway/test-helpers.e2e.js";
-import type { OpenClawConfig } from "../../../../src/plugin-sdk/config-contracts.js";
+import type { CarapaceConfig } from "../../../../src/plugin-sdk/config-contracts.js";
 import { MEMORY_DREAMING_SYSTEM_EVENT_TEXT } from "../../../../src/plugin-sdk/memory-core-host-status.js";
 import { readMemoryHostEventRecords } from "../../../../src/plugin-sdk/memory-host-events.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
@@ -80,7 +80,7 @@ async function sendAndWait(params: {
 }
 
 function configureMemoryProof(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deep: {
     enabled: boolean;
     limit: number;
@@ -88,7 +88,7 @@ function configureMemoryProof(
     minRecallCount?: number;
     minUniqueQueries?: number;
   } = { enabled: true, limit: 20, minScore: 1 },
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     ...cfg,
     agents: {
@@ -142,7 +142,7 @@ function configureMemoryProof(
   };
 }
 
-function configureExplicitOwnerProof(cfg: OpenClawConfig): OpenClawConfig {
+function configureExplicitOwnerProof(cfg: CarapaceConfig): CarapaceConfig {
   const configured = configureMemoryProof(cfg, {
     enabled: true,
     limit: 20,
@@ -250,7 +250,7 @@ describe("memory provenance through a real Gateway", () => {
       );
 
       await gateway.restartAfterStateMutation(async ({ configPath }) => {
-        const config = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+        const config = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
         await fs.writeFile(
           configPath,
           `${JSON.stringify(
@@ -260,7 +260,7 @@ describe("memory provenance through a real Gateway", () => {
                 ...config.plugins,
                 slots: { ...config.plugins?.slots, memory: "memory-core" },
               },
-            } satisfies OpenClawConfig,
+            } satisfies CarapaceConfig,
             null,
             2,
           )}\n`,

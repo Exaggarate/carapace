@@ -1,10 +1,10 @@
-import { prepareModelForSimpleCompletion } from "@openclaw/ai/transports";
+import { prepareModelForSimpleCompletion } from "@carapace/ai/transports";
 /**
  * Simple completion runtime preparation.
  *
  * Resolves agent model selection, auth, runtime policy, and missing-auth errors before simple completions run.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { bindModelLlmRuntime } from "../llm/model-runtime-binding.js";
 import type { Model } from "../llm/types.js";
@@ -99,7 +99,7 @@ type PreparedSimpleCompletionModelForAgent =
     });
 
 type SimpleCompletionSelectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir?: string;
   modelRef?: string;
@@ -182,7 +182,7 @@ export function resolveSimpleCompletionSelectionForAgent(
 }
 
 export async function prepareSimpleCompletionModel(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   agentId?: string;
   provider: string;
   modelId: string;
@@ -462,7 +462,7 @@ async function prepareSimpleCompletionModelCore(
 
 async function withPreparedSimpleCompletionRuntime<T>(
   params: {
-    cfg: OpenClawConfig | undefined;
+    cfg: CarapaceConfig | undefined;
     agentId?: string;
     agentDir?: string;
     modelResolver?: typeof resolveModelAsync;
@@ -519,7 +519,7 @@ async function withPreparedSimpleCompletionRuntime<T>(
 }
 
 export async function prepareSimpleCompletionModelForAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir?: string;
   modelRef?: string;

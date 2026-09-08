@@ -2,7 +2,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { describe, expect, it, vi } from "vitest";
 import { IMessageRpcClient } from "./client.js";
 import { sendMessageIMessage } from "./send.js";
@@ -364,7 +364,7 @@ describe("sendIMessageOutbound approval identity", () => {
 
 describe("iMessage account media limits", () => {
   it.each(["work", undefined])("enforces the resolved account cap for %s", async (accountId) => {
-    const state = await createOpenClawTestState({ prefix: "imessage-account-media-" });
+    const state = await createCarapaceTestState({ prefix: "imessage-account-media-" });
     const client = new IMessageRpcClient();
     const delivered: Buffer[] = [];
     const request = vi.spyOn(client, "request").mockImplementation(async (_method, params) => {
@@ -468,7 +468,7 @@ describe("imessagePlugin pairing.notifyApproval", () => {
       "send",
       expect.objectContaining({
         to: "+15551234567",
-        text: "✅ OpenClaw access approved. Send a message to start chatting.",
+        text: "✅ Carapace access approved. Send a message to start chatting.",
       }),
       expect.any(Object),
     );

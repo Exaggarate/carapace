@@ -8,12 +8,12 @@ import { pathToFileURL } from "node:url";
 import { resolveRepoRoot } from "./lib/repo-root.mjs";
 const repoRoot = resolveRepoRoot(import.meta.url);
 const tmpDir = process.env.TMPDIR || process.env.TEMP || process.env.TMP || os.tmpdir();
-const MAX_RSS_MARKER = "__OPENCLAW_MAX_RSS_KB__=";
+const MAX_RSS_MARKER = "__CARAPACE_MAX_RSS_KB__=";
 const DEFAULT_COMMAND_TIMEOUT_MS = 60_000;
 const STARTUP_MEMORY_SAMPLE_COUNT = 3;
 const STARTUP_MEMORY_RSS_TOLERANCE_MB = 1;
 const COMMAND_TIMEOUT_MS = readPositiveIntEnv(
-  "OPENCLAW_STARTUP_MEMORY_TIMEOUT_MS",
+  "CARAPACE_STARTUP_MEMORY_TIMEOUT_MS",
   DEFAULT_COMMAND_TIMEOUT_MS,
 );
 let tmpHome = null;
@@ -56,10 +56,10 @@ function readRequiredPathOption(argv, index, flag) {
 function parseArgs(argv) {
   const options = {
     jsonPath:
-      readNonEmptyEnv("OPENCLAW_STARTUP_MEMORY_JSON_PATH") ??
+      readNonEmptyEnv("CARAPACE_STARTUP_MEMORY_JSON_PATH") ??
       path.join(repoRoot, ".artifacts", "startup-memory", "startup-memory.json"),
     summaryPath:
-      readNonEmptyEnv("OPENCLAW_STARTUP_MEMORY_SUMMARY_PATH") ??
+      readNonEmptyEnv("CARAPACE_STARTUP_MEMORY_SUMMARY_PATH") ??
       path.join(repoRoot, ".artifacts", "startup-memory", "summary.md"),
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -109,33 +109,33 @@ const cases = [
   {
     id: "help",
     label: "--help",
-    args: ["openclaw.mjs", "--help"],
-    limitMb: readPositiveNumberEnv("OPENCLAW_STARTUP_MEMORY_HELP_MB", DEFAULT_LIMITS_MB.help),
+    args: ["carapace.mjs", "--help"],
+    limitMb: readPositiveNumberEnv("CARAPACE_STARTUP_MEMORY_HELP_MB", DEFAULT_LIMITS_MB.help),
   },
   {
     id: "pluginsList",
     label: "plugins list --json",
-    args: ["openclaw.mjs", "plugins", "list", "--json"],
+    args: ["carapace.mjs", "plugins", "list", "--json"],
     limitMb: readPositiveNumberEnv(
-      "OPENCLAW_STARTUP_MEMORY_PLUGINS_LIST_MB",
+      "CARAPACE_STARTUP_MEMORY_PLUGINS_LIST_MB",
       DEFAULT_LIMITS_MB.pluginsList,
     ),
   },
   {
     id: "statusJson",
     label: "status --json",
-    args: ["openclaw.mjs", "status", "--json"],
+    args: ["carapace.mjs", "status", "--json"],
     limitMb: readPositiveNumberEnv(
-      "OPENCLAW_STARTUP_MEMORY_STATUS_JSON_MB",
+      "CARAPACE_STARTUP_MEMORY_STATUS_JSON_MB",
       DEFAULT_LIMITS_MB.statusJson,
     ),
   },
   {
     id: "gatewayStatus",
     label: "gateway status",
-    args: ["openclaw.mjs", "gateway", "status"],
+    args: ["carapace.mjs", "gateway", "status"],
     limitMb: readPositiveNumberEnv(
-      "OPENCLAW_STARTUP_MEMORY_GATEWAY_STATUS_MB",
+      "CARAPACE_STARTUP_MEMORY_GATEWAY_STATUS_MB",
       DEFAULT_LIMITS_MB.gatewayStatus,
     ),
   },
@@ -151,7 +151,7 @@ function formatFixGuidance(testCase, details) {
     "2. If this is an RSS overage, compare the startup import graph against the last passing commit and look for newly eager imports, bootstrap side effects, or plugin loading on the command path.",
     "3. If this is a non-zero exit, inspect the first transitive import/config error in stderr and fix that root cause before re-checking memory.",
     "LLM prompt:",
-    `"OpenClaw startup-memory CI failed for '${testCase.label}'. Analyze this failure, identify the first runtime/import side effect that makes startup heavier or broken, and propose the smallest safe patch. Failure output:\n${details}"`,
+    `"Carapace startup-memory CI failed for '${testCase.label}'. Analyze this failure, identify the first runtime/import side effect that makes startup heavier or broken, and propose the smallest safe patch. Failure output:\n${details}"`,
   ];
   return `${guidance.join("\n")}\n`;
 }
@@ -222,7 +222,7 @@ function buildBenchEnv(homeDir = tmpHome) {
   }
   // Keep the benchmark on a single process so RSS reflects the actual command
   // path rather than the warning-suppression respawn wrapper.
-  env.OPENCLAW_NO_RESPAWN = "1";
+  env.CARAPACE_NO_RESPAWN = "1";
   return env;
 }
 function runCaseSample(testCase, sampleIndex, params = {}) {
@@ -333,7 +333,7 @@ function writeReport(options, results) {
     results: results.map(({ failureMessage: _failureMessage, ...result }) => result),
   };
   const lines = [
-    "# OpenClaw Startup Memory",
+    "# Carapace Startup Memory",
     "",
     `Generated: ${report.generatedAt}`,
     "",
@@ -367,14 +367,14 @@ function runStartupMemoryCheck(argv = process.argv.slice(2), params = {}) {
     return { skipped: true, results: [] };
   }
   const options = parseArgs(argv);
-  tmpHome = mkdtempSync(path.join(os.tmpdir(), "openclaw-startup-memory-"));
+  tmpHome = mkdtempSync(path.join(os.tmpdir(), "carapace-startup-memory-"));
   benchEntryPath = path.join(tmpHome, "bench-entry.mjs");
   // Run the real launcher in-process so peak RSS is self-reported at exit
   // without --import/--require flags: the entry declines its dist ESM resolve
   // fast path when preload hooks may be registered, so an injected hook would
   // measure a slower non-default resolution configuration instead of what a
-  // plain `node openclaw.mjs ...` invocation pays.
-  const launcherPath = path.join(repoRoot, "openclaw.mjs");
+  // plain `node carapace.mjs ...` invocation pays.
+  const launcherPath = path.join(repoRoot, "carapace.mjs");
   writeFileSync(
     benchEntryPath,
     [

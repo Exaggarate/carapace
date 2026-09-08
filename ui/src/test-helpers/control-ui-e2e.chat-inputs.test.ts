@@ -12,7 +12,7 @@ it.for([false, true])(
     gatewayPage.execute(
       createControlUiMockGatewayInitScript({
         historyMessages: [
-          { role: "assistant", content: "Ready", __openclaw: { id: "ready", seq: 4 } },
+          { role: "assistant", content: "Ready", __carapace: { id: "ready", seq: 4 } },
         ],
       }),
     );
@@ -41,7 +41,7 @@ it.for([false, true])(
         role: "user",
         content: params.message,
         idempotencyKey: "source-run:user",
-        __openclaw: expect.objectContaining({ id: "mock-user:source-run", seq: 5 }),
+        __carapace: expect.objectContaining({ id: "mock-user:source-run", seq: 5 }),
       }),
     ]);
     expect(history.inputReceipts).toEqual([
@@ -55,7 +55,7 @@ it.for([false, true])(
       );
       expect(event).toBeGreaterThan(frames.findIndex((frame) => frame.id === "send"));
       expect(
-        (history.messages as Array<{ __openclaw?: unknown }>)[1]?.["__openclaw"],
+        (history.messages as Array<{ __carapace?: unknown }>)[1]?.["__carapace"],
       ).toMatchObject({
         media: [
           {
@@ -86,8 +86,8 @@ it("does not invent consumption for held, explicitly resolved, or raw terminal i
 }) => {
   const { window, execute } = gatewayPage;
   execute(createControlUiMockGatewayInitScript({ deferredMethods: ["chat.send"] }));
-  const gateway = (window as typeof window & { openclawControlUiE2eGateway: ControlUiMockGateway })
-    .openclawControlUiE2eGateway;
+  const gateway = (window as typeof window & { carapaceControlUiE2eGateway: ControlUiMockGateway })
+    .carapaceControlUiE2eGateway;
   const { request, send } = gatewayPage.connect();
   await flushMockTimers();
   send("held", "chat.send", {
@@ -113,8 +113,8 @@ it("keeps an explicit display snapshot separate from durable input receipts", as
 }) => {
   const { window, execute } = gatewayPage;
   execute(createControlUiMockGatewayInitScript());
-  const gateway = (window as typeof window & { openclawControlUiE2eGateway: ControlUiMockGateway })
-    .openclawControlUiE2eGateway;
+  const gateway = (window as typeof window & { carapaceControlUiE2eGateway: ControlUiMockGateway })
+    .carapaceControlUiE2eGateway;
   const { request } = gatewayPage.connect();
   await flushMockTimers();
   await request("send", "chat.send", {

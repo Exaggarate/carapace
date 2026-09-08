@@ -3,7 +3,7 @@
  * Converts nested provider, transport, timeout, auth, and local coordination
  * failures into structured failover reasons and remediation metadata.
  */
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import { formatCliCommand } from "../cli/command-format.js";
 import { isAgentRunStaleLifecycleError } from "../infra/agent-lifecycle-error.js";
 import { copyErrorDiagnostic } from "../infra/error-diagnostics.js";
@@ -55,7 +55,7 @@ const RUNTIME_COORDINATION_ERROR_NAMES = new Set([
 // Failed owned cleanup stops replay even for frozen errors crossing bundled chunks.
 // Keep the fact weakly keyed to the original error, never inferred from display text.
 const modelFallbackStops = resolveGlobalSingleton(
-  Symbol.for("openclaw.modelFallbackStops"),
+  Symbol.for("carapace.modelFallbackStops"),
   () => new WeakSet<Error>(),
 );
 
@@ -578,7 +578,7 @@ export function buildFailoverRemediationHint(err: unknown): string | undefined {
     return undefined;
   }
   if (provider === "google-gemini-cli") {
-    return `Authenticate in Gemini CLI directly, or configure a supported Google API key with: ${formatCliCommand("openclaw configure")}`;
+    return `Authenticate in Gemini CLI directly, or configure a supported Google API key with: ${formatCliCommand("carapace configure")}`;
   }
   const command = buildProviderReauthCommand(provider);
   return command ? `Re-authenticate with: ${command}` : undefined;
@@ -598,7 +598,7 @@ export function buildProviderReauthCommand(
     return undefined;
   }
   return formatCliCommand(
-    `openclaw models auth login --provider ${quotePosixShellArg(trimmed)} --force`,
+    `carapace models auth login --provider ${quotePosixShellArg(trimmed)} --force`,
     env,
   );
 }

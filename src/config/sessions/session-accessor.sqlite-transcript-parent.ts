@@ -3,7 +3,7 @@ import {
   executeSqliteQueryTakeFirstSync,
   iterateSqliteQuerySync,
 } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type { TranscriptMessageAppendOptions } from "./session-accessor.sqlite-contract.js";
 import { readTranscriptIdentityByEventId } from "./session-accessor.sqlite-read.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
@@ -18,7 +18,7 @@ import {
 } from "./transcript-visible-events.js";
 
 export function resolveTranscriptMessageAppendParent<TMessage>(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   options: Pick<TranscriptMessageAppendOptions<TMessage>, "appendIntent" | "parentId">,
 ): string | null {
@@ -38,7 +38,7 @@ export function resolveTranscriptMessageAppendParent<TMessage>(
 
 /** Checks the durable tree directly when the materialized active-path projection is dirty. */
 export function isTranscriptEntryOnActivePathInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   entryId: string,
 ): boolean {
@@ -49,7 +49,7 @@ export function isTranscriptEntryOnActivePathInTransaction(
 }
 
 function transcriptEntryIsAncestor(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   leafId: string,
   candidateId: string | null,
@@ -83,7 +83,7 @@ function transcriptEntryIsAncestor(
 }
 
 function readActiveTranscriptAppendParentId(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): string | null {
   const db = getSessionKysely(database.db);
@@ -130,7 +130,7 @@ function readActiveTranscriptAppendParentId(
 }
 
 function readTranscriptNavigationEvents(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): unknown[] {
   const db = getSessionKysely(database.db);
@@ -148,7 +148,7 @@ function readTranscriptNavigationEvents(
 }
 
 function transcriptTreeReferenceExists(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   eventId: string | null,
 ): boolean {

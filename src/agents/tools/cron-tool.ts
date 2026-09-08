@@ -3,7 +3,7 @@
  *
  * Manages scheduled jobs, wake/run actions, delivery context, and reminder-style payload normalization.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { parseDurationMs } from "../../cli/parse-duration.js";
 import { getRuntimeConfig } from "../../config/config.js";
 import { resolveCronCreationDelivery } from "../../cron/delivery-context.js";
@@ -201,7 +201,7 @@ SCHEDULE:
 
 TARGET+PAYLOAD:
 - "current" (agentTurn default) = this conversation: the run stays detached, reads bounded chat context, then commits its final visible assistant result to this conversation's durable history. Self-wakeup/"continue later"/loop = at|every + agentTurn + current.
-- "isolated" = fresh detached session (shows in \`openclaw tasks\`); standalone background work.
+- "isolated" = fresh detached session (shows in \`carapace tasks\`); standalone background work.
 - "main" = heartbeat lane; payload {kind:"systemEvent",text} (systemEvent default target).
 - "session:<key>" = named session.
 - agentTurn {kind:"agentTurn",message,model?,thinking?,timeoutSeconds?}; timeoutSeconds 0=none.
@@ -410,7 +410,7 @@ export function createCronTool(opts?: CronToolOptions, deps?: CronToolDeps): Any
             // job properties to the top level alongside `action` instead of nesting
             // them inside `job`. When `params.job` is missing or empty, reconstruct
             // a synthetic job object from any recognised top-level job fields.
-            // See: https://github.com/openclaw/openclaw/issues/11310
+            // See: https://github.com/Exaggarate/carapace/issues/11310
             if (isMissingOrEmptyObject(params.job)) {
               const synthetic = recoverCronObjectFromFlatParams(params);
               // Only use the synthetic job if at least one meaningful field is present

@@ -6,8 +6,8 @@ import {
   resolveEffectiveCompactionReserveTokens,
   SILENT_REPLY_TOKEN,
   type MemoryFlushPlan,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import { resolveMemoryCoreNowMs } from "./time.js";
 
 const DEFAULT_MEMORY_FLUSH_SOFT_TOKENS = 4000;
@@ -97,7 +97,7 @@ function appendCurrentTimeLine(text: string, timeLine: string): string {
 
 export function buildMemoryFlushPlan(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     nowMs?: number;
     contextWindowTokens?: number;
   } = {},

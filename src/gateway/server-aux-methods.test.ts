@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { listCoreGatewayMethodNames } from "./methods/core-descriptors.js";
 import { createGatewayAuxHandlers } from "./server-aux-handlers.js";
 import { coreGatewayHandlers } from "./server-methods/core-handlers.js";
@@ -7,7 +7,7 @@ import type { GatewayRequestHandlers } from "./server-methods/types.js";
 
 describe("core and auxiliary method handler parity", () => {
   it("wires a dispatchable core or auxiliary handler for every core descriptor", async () => {
-    const fixture = await createOpenClawTestState({ label: "gateway-aux-methods" });
+    const fixture = await createCarapaceTestState({ label: "gateway-aux-methods" });
     const aux = createGatewayAuxHandlers({
       log: {},
       activateRuntimeSecrets: async () => {

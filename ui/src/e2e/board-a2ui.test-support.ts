@@ -64,7 +64,7 @@ export async function installA2uiFailureDiagnostics(page: Page) {
     window.addEventListener("message", (event) => {
       const kind = event.data?.type ?? event.data?.method;
       if (
-        kind === "openclaw:widget-bridge-ready" ||
+        kind === "carapace:widget-bridge-ready" ||
         kind === "ui/notifications/sandbox-proxy-ready" ||
         kind === "ui/notifications/sandbox-resource-loaded"
       ) {
@@ -72,7 +72,7 @@ export async function installA2uiFailureDiagnostics(page: Page) {
       }
       if (
         window !== window.top ||
-        kind !== "openclaw:widget-bridge-port-offer" ||
+        kind !== "carapace:widget-bridge-port-offer" ||
         observedPorts >= 8
       ) {
         return;
@@ -82,9 +82,9 @@ export async function installA2uiFailureDiagnostics(page: Page) {
       // Observe the host's incoming traffic without starting the port, adopting
       // its ticket, wrapping frozen APIs, or recording authority/payload bytes.
       event.ports[0]?.addEventListener("message", (message) => {
-        if (message.data?.type === "openclaw:widget-host-init-ack") {
+        if (message.data?.type === "carapace:widget-host-init-ack") {
           recordBridge("host-init-ack");
-        } else if (message.data?.type === "openclaw:widget-bridge-request") {
+        } else if (message.data?.type === "carapace:widget-bridge-request") {
           recordBridge(
             message.data.method === "state.emit" ? "request:state.emit" : "request:other",
           );
@@ -92,15 +92,15 @@ export async function installA2uiFailureDiagnostics(page: Page) {
       });
     });
     Reflect.set(window, "__a2uiFailureSnapshot", () => {
-      const host = document.querySelector("openclaw-a2ui-host");
+      const host = document.querySelector("carapace-a2ui-host");
       const rendererError = host ? Reflect.get(host, "error") : undefined;
-      const api = Reflect.get(window, "openclaw");
+      const api = Reflect.get(window, "carapace");
       const outer = document.querySelector(".board-widget__frame");
       return {
         input,
         bridge,
         readyState: document.readyState,
-        rendererDefined: Boolean(customElements.get("openclaw-a2ui-host")),
+        rendererDefined: Boolean(customElements.get("carapace-a2ui-host")),
         rendererConnected: host?.isConnected ?? false,
         rendererError: typeof rendererError === "string" ? rendererError.slice(0, 512) : undefined,
         rendererAlert: host?.shadowRoot

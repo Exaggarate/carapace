@@ -1,11 +1,11 @@
 // Ollama stream runtime implements native transport behavior.
 import { randomUUID } from "node:crypto";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { buildTimeoutAbortSignal } from "openclaw/plugin-sdk/extension-shared";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { buildTimeoutAbortSignal } from "carapace/plugin-sdk/extension-shared";
 import {
   parseJsonObjectPreservingUnsafeIntegers,
   parseJsonPreservingUnsafeIntegers,
-} from "openclaw/plugin-sdk/json-unsafe-integers";
+} from "carapace/plugin-sdk/json-unsafe-integers";
 import type {
   AssistantMessage,
   StopReason,
@@ -14,15 +14,15 @@ import type {
   ToolCall,
   Tool,
   Usage,
-} from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream, transformMessages } from "openclaw/plugin-sdk/llm";
-import type { ProviderRuntimeModel } from "openclaw/plugin-sdk/plugin-entry";
-import { isNonSecretApiKeyMarker } from "openclaw/plugin-sdk/provider-auth";
-import { readProviderResponseErrorText } from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/llm";
+import { createAssistantMessageEventStream, transformMessages } from "carapace/plugin-sdk/llm";
+import type { ProviderRuntimeModel } from "carapace/plugin-sdk/plugin-entry";
+import { isNonSecretApiKeyMarker } from "carapace/plugin-sdk/provider-auth";
+import { readProviderResponseErrorText } from "carapace/plugin-sdk/provider-http";
 import {
   createPlainTextToolCallCompatWrapper,
   notifyLlmRequestActivity,
-} from "openclaw/plugin-sdk/provider-stream-shared";
+} from "carapace/plugin-sdk/provider-stream-shared";
 import {
   describeUnsupportedToolResultMedia,
   extractToolResultText,
@@ -33,14 +33,14 @@ import {
   notifyProviderHttpResponse,
   parseTerminalToolCallArguments,
   sortPromptCacheToolsByName,
-} from "openclaw/plugin-sdk/provider-transport-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-transport-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   isRecord,
   normalizeOptionalString,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { estimateStringChars } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { estimateStringChars } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   isOllamaCloudOrigin,
   OLLAMA_CLOUD_PROVIDER_ID,
@@ -878,7 +878,7 @@ export function buildAssistantMessage(
   const promptTokens = resolveUsageCount(response.prompt_eval_count, usageFallback?.input);
   const outputTokens = resolveUsageCount(response.eval_count, usageFallback?.output);
   const reportedCacheRead = resolveOptionalUsageCount(response.prompt_eval_cached_count);
-  // Ollama includes cached tokens in prompt_eval_count; OpenClaw records input as uncached.
+  // Ollama includes cached tokens in prompt_eval_count; Carapace records input as uncached.
   const cacheRead =
     reportedCacheRead === undefined ? undefined : Math.min(reportedCacheRead, promptTokens);
 
@@ -1059,7 +1059,7 @@ function createRawOllamaStreamFn(
                 modelId: model.id,
               });
         const requestParams = {
-          // OpenClaw owns history compaction. Ask local servers to reject overflow
+          // Carapace owns history compaction. Ask local servers to reject overflow
           // instead of silently discarding messages or shifting the context window.
           ...(model.provider !== OLLAMA_CLOUD_PROVIDER_ID &&
           !isOllamaCloudModel(model.id) &&

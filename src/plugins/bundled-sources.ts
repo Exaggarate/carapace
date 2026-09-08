@@ -1,9 +1,9 @@
 // Resolves bundled plugin source metadata from package manifests.
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { getGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
-import { discoverOpenClawPlugins, type PluginDiscoveryResult } from "./discovery.js";
+import { discoverCarapacePlugins, type PluginDiscoveryResult } from "./discovery.js";
 import { loadPluginManifest } from "./manifest.js";
 
 export type BundledPluginSource = {
@@ -57,7 +57,7 @@ export function resolveBundledPluginSources(params: {
       }))
     : (
         params.discovery ??
-        discoverOpenClawPlugins({ workspaceDir: params.workspaceDir, env: params.env })
+        discoverCarapacePlugins({ workspaceDir: params.workspaceDir, env: params.env })
       ).candidates.flatMap((candidate) => {
         if (candidate.origin !== "bundled") {
           return [];
@@ -139,5 +139,5 @@ export function resolveBundledPluginInstallCommandHint(params: {
   if (!bundledSource?.localPath) {
     return null;
   }
-  return `openclaw plugins install ${bundledSource.localPath}`;
+  return `carapace plugins install ${bundledSource.localPath}`;
 }

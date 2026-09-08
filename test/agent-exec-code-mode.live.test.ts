@@ -17,14 +17,14 @@ const describeLive = isLiveTestEnabled() && openAiApiKey.length > 0 ? describe :
 
 describeLive("agent exec Code Mode with environment authentication", () => {
   it("starts without configuration and completes dependent filesystem calls", async () => {
-    const root = tempDirs.make("openclaw-agent-exec-code-mode-live-");
+    const root = tempDirs.make("carapace-agent-exec-code-mode-live-");
     const home = path.join(root, "home");
     const stateDir = path.join(root, "state");
     const workspace = path.join(root, "workspace");
     const tmpDir = path.join(root, "tmp");
     await Promise.all([home, stateDir, workspace, tmpDir].map((dir) => fs.mkdir(dir)));
     const repoRoot = path.resolve(import.meta.dirname, "..");
-    const installedRoot = path.join(root, "node_modules", "openclaw");
+    const installedRoot = path.join(root, "node_modules", "carapace");
     const sourceDist = path.join(repoRoot, "dist");
     const excludedPlugins = collectRootPackageExcludedExtensionDirs({ cwd: repoRoot });
     await fs.mkdir(installedRoot, { recursive: true });
@@ -62,7 +62,7 @@ describeLive("agent exec Code Mode with environment authentication", () => {
       TMPDIR: tmpDir,
       TMP: tmpDir,
       TEMP: tmpDir,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_STATE_DIR: stateDir,
       OPENAI_API_KEY: openAiApiKey,
     };
     let stdout: string;

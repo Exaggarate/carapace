@@ -10,15 +10,15 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { createOpenClawStateSchemaEnsurer } from "../state/openclaw-state-feature-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { createCarapaceStateSchemaEnsurer } from "../state/carapace-state-feature-schema.js";
 import { clearAuditIdentityKeyCacheForDatabase } from "./audit-identity.js";
 import { hasExecutionDecisionFactsForRun } from "./execution-decision-facts.js";
 import {
@@ -37,10 +37,10 @@ import {
 } from "./execution-identity-context-build.js";
 
 type ExecutionIdentityDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "audit_events" | "execution_identity_contexts"
 >;
-type ExecutionIdentityRow = Selectable<OpenClawStateKyselyDatabase["execution_identity_contexts"]>;
+type ExecutionIdentityRow = Selectable<CarapaceStateKyselyDatabase["execution_identity_contexts"]>;
 
 const EXECUTION_IDENTITY_CONTEXT_MAX_BYTES = 16 * 1024;
 const EXECUTION_IDENTITY_CONTEXT_RETENTION_MS = 30 * 24 * 60 * 60_000;
@@ -48,13 +48,13 @@ const EXECUTION_IDENTITY_CONTEXT_MAX_ROWS = 100_000;
 const EXECUTION_IDENTITY_CONTEXT_PRUNE_BATCH_ROWS = 1_024;
 const EXECUTION_IDENTITY_HMAC_REF_RE = /^hmac-sha256:v1:[a-f0-9]{32}:[a-f0-9]{64}$/u;
 
-const ensureExecutionIdentityContextSchema = createOpenClawStateSchemaEnsurer({
+const ensureExecutionIdentityContextSchema = createCarapaceStateSchemaEnsurer({
   table: "execution_identity_contexts",
   endMarker: "  ON execution_identity_contexts (run_id, created_at, execution_id);\n",
   operationLabel: "audit.execution-identity.schema.ensure",
 });
 
-type ExecutionIdentityStoreOptions = OpenClawStateDatabaseOptions & {
+type ExecutionIdentityStoreOptions = CarapaceStateDatabaseOptions & {
   now?: number;
   limits?: {
     maxRows: number;
@@ -62,7 +62,7 @@ type ExecutionIdentityStoreOptions = OpenClawStateDatabaseOptions & {
   };
 };
 
-type ExecutionIdentityReadOptions = OpenClawStateDatabaseOptions & {
+type ExecutionIdentityReadOptions = CarapaceStateDatabaseOptions & {
   now?: number;
 };
 
@@ -188,17 +188,17 @@ function pruneExecutionIdentityContextsAfterInsert(
 export function pruneExpiredExecutionIdentityContexts(
   params: {
     now?: number;
-    database?: OpenClawStateDatabaseOptions;
+    database?: CarapaceStateDatabaseOptions;
   } = {},
 ): number {
   const databaseOptions = params.database ?? {};
-  const database = openOpenClawStateDatabase(databaseOptions);
+  const database = openCarapaceStateDatabase(databaseOptions);
   // Maintenance must not create opt-in storage. First capture owns schema creation;
   // once the table exists, cleanup remains active even after collection is disabled.
   if (!tableExists(database.db, "execution_identity_contexts")) {
     return 0;
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const deleted = deleteExpiredExecutionIdentityContexts(
         db,
@@ -222,7 +222,7 @@ function persistExecutionIdentityAdmissionEnvelope(
   const envelope = parseExecutionIdentityAdmissionEnvelope(input);
   ensureExecutionIdentityContextSchema(options);
   const executionId = envelope.executionId;
-  const opened = openOpenClawStateDatabase(options);
+  const opened = openCarapaceStateDatabase(options);
   // HMAC lookup/key creation and canonical serialization finish before BEGIN.
   // The transaction only rereads the authoritative row and synchronously commits.
   const plannedContext = buildExecutionIdentityContext(opened.db, envelope, {
@@ -232,7 +232,7 @@ function persistExecutionIdentityAdmissionEnvelope(
   const plannedContextJson = JSON.stringify(plannedContext);
   let transactionDatabase: DatabaseSync | undefined;
   try {
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         transactionDatabase = db;
         const existing = readRowByExecutionId(db, executionId);
@@ -285,7 +285,7 @@ function verifyExecutionIdentityAdmissionRetry(
   token: ExecutionIdentityAdmissionToken,
   options: ExecutionIdentityReadOptions = {},
 ): ExecutionIdentityContextV1 {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   if (!tableExists(db, "execution_identity_contexts")) {
     throw new Error("execution identity recovery evidence unavailable");
   }
@@ -324,7 +324,7 @@ function readExecutionIdentityContextByExecutionId(
 ): ExecutionIdentityContextReadResult {
   const normalizedExecutionId = ensureBoundedExecutionIdentityRef(executionId, "execution id");
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "execution_identity_contexts")) {
         return { status: "missing" } as const;
       }
@@ -431,7 +431,7 @@ function inspectExactExecution(
       remediation: [
         {
           code: "inspect_state_integrity",
-          text: "Run openclaw doctor and inspect the shared state database before trusting this execution.",
+          text: "Run carapace doctor and inspect the shared state database before trusting this execution.",
         },
       ],
     });
@@ -504,7 +504,7 @@ function inspectRunSelector(
 ): InternalAuditRunInspectResult {
   const runId = ensureBoundedExecutionIdentityRef(params.runId, "run id");
   const now = options.now ?? Date.now();
-  const inspected = withExistingOpenClawStateDatabaseReadOnly<
+  const inspected = withExistingCarapaceStateDatabaseReadOnly<
     InternalAuditRunInspectResult | undefined
   >(({ db }) => {
     const firstMatches = tableExists(db, "execution_identity_contexts")
@@ -524,7 +524,7 @@ function inspectRunSelector(
           remediation: [
             {
               code: "inspect_state_integrity",
-              text: "Run openclaw doctor and inspect the shared state database before trusting this run.",
+              text: "Run carapace doctor and inspect the shared state database before trusting this run.",
             },
           ],
         });
@@ -556,7 +556,7 @@ function inspectRunSelector(
           remediation: [
             {
               code: "select_execution_id",
-              text: "Select one candidate with openclaw audit --execution <id> --explain.",
+              text: "Select one candidate with carapace audit --execution <id> --explain.",
             },
           ],
         },
@@ -613,7 +613,7 @@ function inspectRunSelector(
         remediation: [
           {
             code: "inspect_state_integrity",
-            text: "Run openclaw doctor and retry the run inspection.",
+            text: "Run carapace doctor and retry the run inspection.",
           },
         ],
       });

@@ -1,7 +1,7 @@
 // Load context tests cover agent and workspace context resolution for plugin runtimes.
 import { inspect } from "node:util";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginCache, withPluginCache } from "../plugin-cache.js";
 import type { PluginMetadataSnapshot } from "../plugin-metadata-snapshot.types.js";
 import { createEmptyPluginRegistry } from "../registry-empty.js";
@@ -10,7 +10,7 @@ const loadConfigMock = vi.fn<typeof import("../../config/config.js").loadConfig>
 const applyPluginAutoEnableMock =
   vi.fn<typeof import("../../config/plugin-auto-enable.js").applyPluginAutoEnable>();
 const resolvePluginControlPlaneWorkspaceMock = vi.fn(
-  (params: { config: OpenClawConfig; env?: NodeJS.ProcessEnv; workspaceDir?: string }) => ({
+  (params: { config: CarapaceConfig; env?: NodeJS.ProcessEnv; workspaceDir?: string }) => ({
     workspaceDir: params.workspaceDir ?? "/resolved-workspace",
     workspaceScope: "selected" as const,
   }),
@@ -129,7 +129,7 @@ describe("resolvePluginRuntimeLoadContext", () => {
         },
       },
     };
-    const env = { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv;
 
     applyPluginAutoEnableMock.mockReturnValue({
       config: resolvedConfig,
@@ -184,7 +184,7 @@ describe("resolvePluginRuntimeLoadContext", () => {
   it("keeps prepared metadata when auto-enable changes the activation policy", () => {
     const config = { plugins: {} };
     const activatedConfig = { plugins: { entries: { demo: { enabled: true } } } };
-    const env = { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv;
     applyPluginAutoEnableMock.mockReturnValue({
       config: activatedConfig,
       changes: [],
@@ -215,14 +215,14 @@ describe("resolvePluginRuntimeLoadContext", () => {
 
     const context = resolvePluginRuntimeLoadContext({
       config: { plugins: {} },
-      env: { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv,
+      env: { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv,
     });
 
     expect(context.metadataSnapshot).toBe(derivedSnapshot);
   });
 
   it("uses the source runtime snapshot for plugin activation source config", () => {
-    const env = { HOME: "/tmp/openclaw-home" };
+    const env = { HOME: "/tmp/carapace-home" };
     const runtimeConfig = { plugins: {} };
     const sourceConfig = {
       plugins: {
@@ -245,7 +245,7 @@ describe("resolvePluginRuntimeLoadContext", () => {
   });
 
   it("applies auto-enable against each operation's exact prepared metadata", () => {
-    const env = { HOME: "/tmp/openclaw-home" };
+    const env = { HOME: "/tmp/carapace-home" };
     const config = { plugins: {} };
     const firstRegistry = { diagnostics: [], plugins: [] };
     const secondRegistry = { diagnostics: [], plugins: [] };
@@ -290,7 +290,7 @@ describe("resolvePluginRuntimeLoadContext", () => {
 
     const context = resolvePluginRuntimeLoadContext({
       config: { plugins: {} },
-      env: { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv,
+      env: { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv,
     });
 
     expect(context.installRecords).toEqual({
@@ -306,7 +306,7 @@ describe("resolvePluginRuntimeLoadContext", () => {
     { scope: "explicit owner", pluginIds: ["demo"] },
   ])("projects $scope metadata from the prepared config-wide inventory", ({ pluginIds }) => {
     const config = { plugins: {} };
-    const env = { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv;
 
     const context = resolvePluginRuntimeLoadContext({ config, env, onlyPluginIds: pluginIds });
 
@@ -322,10 +322,10 @@ describe("resolvePluginRuntimeLoadContext", () => {
   it("keeps private load facts out of diagnostics while preserving registry copies", () => {
     const configSentinel = "synthetic-private-config-sentinel";
     const envSentinel = "synthetic-private-env-sentinel";
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { entries: { demo: { config: { sentinel: configSentinel } } } },
     };
-    const env = { HOME: "/tmp/openclaw-home", PRIVATE_CONTEXT_TEST: envSentinel };
+    const env = { HOME: "/tmp/carapace-home", PRIVATE_CONTEXT_TEST: envSentinel };
     const context = resolvePluginRuntimeLoadContext({ config, env });
     const registry = createEmptyPluginRegistry();
     setPluginRuntimeLoadContext(registry, context, "original-registration");
@@ -361,7 +361,7 @@ describe("resolvePluginRuntimeLoadContext", () => {
   it("builds plugin load options from the shared runtime context", () => {
     const context = resolvePluginRuntimeLoadContext({
       config: { plugins: {} },
-      env: { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv,
+      env: { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv,
       preferBuiltPluginArtifacts: true,
       workspaceDir: "/explicit-workspace",
     });

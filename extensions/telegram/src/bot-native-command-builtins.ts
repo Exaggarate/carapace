@@ -5,7 +5,7 @@ import {
   resolveAgentDir,
   resolveDefaultModelForAgent,
   resolveThinkingDefaultWithRuntimeCatalog,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import {
   buildCommandTextFromArgs,
   findCommandByNativeName,
@@ -17,15 +17,15 @@ import {
   resolveFastModeState,
   resolveStoredModelOverride,
   type CommandArgs,
-} from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import {
   getSessionEntry,
   resolveStorePath,
   type SessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import {
   dispatchTelegramBuiltinTurn,
@@ -62,7 +62,7 @@ function buildTelegramCommandMenuModelContext(params: {
 }
 
 function resolveTelegramCommandMenuModelContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
 }): TelegramCommandMenuModelContext {
@@ -128,7 +128,7 @@ function resolveTelegramCommandMenuModelContext(params: {
 }
 
 function resolveTelegramFastCommandModelContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
 }): { provider?: string; model?: string } {
@@ -159,7 +159,7 @@ function resolveTelegramFastCommandModelContext(params: {
 }
 
 function resolveTelegramFastCommandState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
 }) {
@@ -196,7 +196,7 @@ function resolveTelegramFastCommandState(params: {
 }
 
 async function resolveTelegramThinkMenuCurrentLevel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   provider?: string;
   model?: string;

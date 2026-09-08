@@ -3,8 +3,8 @@ import {
   type AssistantMessage,
   type Model,
   type Tool,
-} from "openclaw/plugin-sdk/llm";
-import { extractNonEmptyAssistantText, isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+} from "carapace/plugin-sdk/llm";
+import { extractNonEmptyAssistantText, isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import {
@@ -15,7 +15,7 @@ import {
 const OPENCODE_ZEN_MODELS_URL = "https://opencode.ai/zen/v1/models";
 const OPENCODE_API_KEY =
   process.env.OPENCODE_API_KEY?.trim() || process.env.OPENCODE_ZEN_API_KEY?.trim() || "";
-const LIVE_MODEL_ID = process.env.OPENCLAW_LIVE_OPENCODE_MODEL?.trim() || "mimo-v2.5-free";
+const LIVE_MODEL_ID = process.env.CARAPACE_LIVE_OPENCODE_MODEL?.trim() || "mimo-v2.5-free";
 const LIVE = isLiveTestEnabled(["OPENCODE_LIVE_TEST"]) && OPENCODE_API_KEY.length > 0;
 const describeLive = LIVE ? describe : describe.skip;
 

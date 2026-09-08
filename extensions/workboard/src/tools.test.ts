@@ -1,6 +1,6 @@
 // Workboard tests cover tools plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { isToolResultError } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { isToolResultError } from "carapace/plugin-sdk/agent-harness-runtime";
 import { Value } from "typebox/value";
 import { describe, expect, it } from "vitest";
 import type { PersistedWorkboardCard, WorkboardKeyedStore } from "./persistence-types.js";

@@ -6,10 +6,10 @@ import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "vitest";
 import { type RawData, WebSocketServer } from "ws";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runCliProcessChild } from "./cli-process-child.test-helpers.js";
 
 const INITIALIZE_FRAME = {
@@ -26,7 +26,7 @@ const INITIALIZE_FRAME = {
 };
 
 async function createPreparedAcpProcessState() {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     applyEnv: false,
     label: "acp-process",
     scenario: "minimal",
@@ -34,8 +34,8 @@ async function createPreparedAcpProcessState() {
   try {
     // These cases assert bridge stderr after normal startup. Prepare canonical
     // shared state so the one-time migration diagnostic is not part of that signal.
-    const database = openOpenClawStateDatabase({ env: state.env });
-    closeOpenClawStateDatabaseByPath(database.path);
+    const database = openCarapaceStateDatabase({ env: state.env });
+    closeCarapaceStateDatabaseByPath(database.path);
     return state;
   } catch (error) {
     await state.cleanup();
@@ -49,8 +49,8 @@ function createAcpProcessEnv(baseEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
     NODE_ENV: undefined,
     NODE_OPTIONS: "--use-openssl-ca",
     NODE_USE_SYSTEM_CA: "0",
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_NO_RESPAWN: "1",
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_NO_RESPAWN: "1",
     VITEST: undefined,
   };
 }
@@ -111,7 +111,7 @@ describe("ACP CLI process exit", () => {
     const state = await createPreparedAcpProcessState();
     try {
       const result = await runCliProcessChild({
-        nodeArgs: [path.resolve("openclaw.mjs"), "acp", "--require-existing"],
+        nodeArgs: [path.resolve("carapace.mjs"), "acp", "--require-existing"],
         env: createAcpProcessEnv(state.env),
         input: `${JSON.stringify(INITIALIZE_FRAME)}\n`,
       });
@@ -181,7 +181,7 @@ describe("ACP CLI process exit", () => {
       let response: Record<string, unknown> | undefined;
       const result = await runCliProcessChild({
         nodeArgs: [
-          path.resolve("openclaw.mjs"),
+          path.resolve("carapace.mjs"),
           "acp",
           "--require-existing",
           "--url",

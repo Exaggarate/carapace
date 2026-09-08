@@ -17,7 +17,7 @@ const httpBlockedPorts = new Set([
 ]);
 
 const hostPortPool = resolveGlobalSingleton<{ value?: PortPool }>(
-  Symbol.for("openclaw.testPortPool"),
+  Symbol.for("carapace.testPortPool"),
   () => ({}),
 );
 

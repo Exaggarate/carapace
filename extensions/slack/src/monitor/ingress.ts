@@ -5,15 +5,15 @@ import {
   createChannelIngressMonitor,
   type ChannelIngressQueue,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   collectErrorGraphCandidates,
   extractErrorCode,
   formatErrorMessage,
-} from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { PluginJsonValue } from "openclaw/plugin-sdk/plugin-entry";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { PluginJsonValue } from "carapace/plugin-sdk/plugin-entry";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { getSlackRuntime } from "../runtime.js";
 import { isNonRecoverableSlackAuthError } from "./reconnect-policy.js";
 
@@ -21,7 +21,7 @@ const SLACK_INGRESS_PAYLOAD_VERSION = 1;
 const SLACK_INGRESS_POLL_INTERVAL_MS = 1_000;
 const SLACK_BOLT_AUTHORIZATION_ERROR = "slack_bolt_authorization_error";
 
-const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "openclawIngressLifecycle";
+const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "carapaceIngressLifecycle";
 
 export type SlackIngressTurnLifecycle = Omit<
   ChannelIngressMonitorLifecycle,

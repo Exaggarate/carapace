@@ -1,5 +1,5 @@
 // Chat UI chips for pull requests detected on the session's working branch.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing } from "lit";
 import type {
   ControlUiSessionBranch,
@@ -15,7 +15,7 @@ import {
   renderGitHubPublicationDetails,
 } from "./chat-github-publication.ts";
 
-const DISMISSED_STORAGE_KEY = "openclaw.chat.dismissedPullRequests";
+const DISMISSED_STORAGE_KEY = "carapace.chat.dismissedPullRequests";
 // Bounds localStorage growth: dismissals for the oldest sessions fall off
 // once this many sessions have dismissed chips.
 const DISMISSED_SESSION_LIMIT = 20;
@@ -223,11 +223,11 @@ function renderDiffStats(
 
 function renderRateLimitWarning() {
   return html`
-    <openclaw-tooltip content=${t("chat.pullRequests.rateLimited")}>
+    <carapace-tooltip content=${t("chat.pullRequests.rateLimited")}>
       <span class="chat-pr__warning" role="img" aria-label=${t("chat.pullRequests.rateLimited")}>
         ${icons.alertTriangle}
       </span>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 

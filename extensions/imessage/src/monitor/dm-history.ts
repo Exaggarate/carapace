@@ -2,9 +2,9 @@
 import {
   formatInboundEnvelope,
   type resolveEnvelopeFormatOptions,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { parseDateStringTimestampMs } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { parseDateStringTimestampMs } from "carapace/plugin-sdk/number-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { IMessageRpcClient } from "../client.js";
 import { normalizeIMessageHandle } from "../targets.js";
 import { parseIMessageNotification } from "./parse-notification.js";

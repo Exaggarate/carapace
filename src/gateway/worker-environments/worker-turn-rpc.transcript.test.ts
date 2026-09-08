@@ -40,7 +40,7 @@ describe("worker transcript claim fences", () => {
         agentId: "main",
         sessionId: claim.sessionId,
         sessionKey: `agent:main:${claim.sessionId}`,
-        storePath: path.join(support.testState.root, "openclaw-agent.sqlite"),
+        storePath: path.join(support.testState.root, "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(target, {
         sessionId: claim.sessionId,

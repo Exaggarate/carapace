@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
 import {
   appendSessionTranscriptMessageByIdentity,
   readSessionTranscriptEvents,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import {
@@ -140,7 +140,7 @@ describe("Codex attachment continuity", () => {
       content: scenario.source === "path" ? [{ type: "text" as const, text: caption }] : caption,
       timestamp: cutoff + 1,
       idempotencyKey: "saved-attachment-input:user",
-      __openclaw: { media },
+      __carapace: { media },
     };
     await appendSessionTranscriptMessageByIdentity({
       ...target,
@@ -262,7 +262,7 @@ describe("Codex attachment continuity", () => {
           mode === "inline"
             ? [{ type: "text" as const, text: "Read this image." }, image]
             : "Read this image.",
-        __openclaw: {
+        __carapace: {
           media: [
             { url: `media://inbound/${saved.id}`, contentType: "image/png", fileName: "blue.png" },
           ],

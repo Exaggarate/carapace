@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayEventLoopHealth } from "../gateway/server/event-loop-health.js";
 
 const noteMock = vi.hoisted(() => vi.fn());
 const spawnSyncMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", async () => {
-  const { mockNodeChildProcessSpawnSync } = await import("openclaw/plugin-sdk/test-node-mocks");
+  const { mockNodeChildProcessSpawnSync } = await import("carapace/plugin-sdk/test-node-mocks");
   return mockNodeChildProcessSpawnSync(spawnSyncMock, () =>
     vi.importActual<typeof import("node:child_process")>("node:child_process"),
   );
@@ -17,7 +17,7 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({ note: noteMock }));
 const { collectWhatsappResponsivenessHealthFindings, noteWhatsappResponsivenessHealth } =
   await import("./doctor-whatsapp-responsiveness.js");
 
-const cfg: OpenClawConfig = { channels: { whatsapp: { enabled: true } } };
+const cfg: CarapaceConfig = { channels: { whatsapp: { enabled: true } } };
 const cpuPressure: GatewayEventLoopHealth = {
   degraded: true,
   degradedSinceMs: 0,
@@ -28,7 +28,7 @@ const cpuPressure: GatewayEventLoopHealth = {
   utilization: 0.04,
   cpuCoreRatio: 2,
 };
-const localTuis = () => [{ pid: 101, command: "openclaw-tui --profile another-profile" }];
+const localTuis = () => [{ pid: 101, command: "carapace-tui --profile another-profile" }];
 
 describe("doctor WhatsApp responsiveness", () => {
   beforeEach(() => {
@@ -39,14 +39,14 @@ describe("doctor WhatsApp responsiveness", () => {
     spawnSyncMock.mockReturnValue({
       status: 0,
       stdout: [
-        " 101 openclaw-tui",
-        " 102 /usr/bin/node /usr/lib/node_modules/openclaw/dist/index.js gateway --port 18789",
-        " 103 openclaw channels",
-        " 104 openclaw tui --local",
-        " 105 /usr/bin/openclaw chat",
-        " 106 helper --note 'openclaw tui'",
-        " 107 openclaw-helper openclaw terminal",
-        " 108 openclaw --flag tui",
+        " 101 carapace-tui",
+        " 102 /usr/bin/node /usr/lib/node_modules/carapace/dist/index.js gateway --port 18789",
+        " 103 carapace channels",
+        " 104 carapace tui --local",
+        " 105 /usr/bin/carapace chat",
+        " 106 helper --note 'carapace tui'",
+        " 107 carapace-helper carapace terminal",
+        " 108 carapace --flag tui",
       ].join("\n"),
     });
     const findings = collectWhatsappResponsivenessHealthFindings({
@@ -84,7 +84,7 @@ describe("doctor WhatsApp responsiveness", () => {
         message:
           "Gateway reports pressure, and local TUI clients were detected. This snapshot does not identify the source of the pressure.",
         fixHint:
-          "Inspect Gateway diagnostics with openclaw gateway diagnostics export before deciding whether to close clients.",
+          "Inspect Gateway diagnostics with carapace gateway diagnostics export before deciding whether to close clients.",
       }),
     ]);
     noteWhatsappResponsivenessHealth(params);

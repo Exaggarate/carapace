@@ -21,7 +21,7 @@ function runAgentsDeleteAssert(
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
         SHARED_WORKSPACE: path.join(root, "workspace"),
         ...env,
       },
@@ -34,14 +34,14 @@ function runOpenWebUiWorkspace(workspaceDir: string) {
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_WORKSPACE_DIR: workspaceDir,
+      CARAPACE_WORKSPACE_DIR: workspaceDir,
     },
   });
 }
 
 describe("workspace fixture assertions", () => {
   it("requires gateway deletion and retains the shared surviving agent", () => {
-    const root = tempDirs.make("openclaw-fixture-workspace-");
+    const root = tempDirs.make("carapace-fixture-workspace-");
     const workspace = path.join(root, "workspace");
     const outputPath = path.join(root, "agents-delete.json");
     const agentsPath = path.join(root, "agents.json");
@@ -57,10 +57,10 @@ describe("workspace fixture assertions", () => {
   });
 
   it("prepares Open WebUI without retired workspace setup state", () => {
-    const root = tempDirs.make("openclaw-fixture-workspace-");
+    const root = tempDirs.make("carapace-fixture-workspace-");
     const workspaceDir = path.join(root, "workspace");
-    const nestedStatePath = path.join(workspaceDir, ".openclaw", "workspace-state.json");
-    const rootStatePath = path.join(workspaceDir, "openclaw-workspace-state.json");
+    const nestedStatePath = path.join(workspaceDir, ".carapace", "workspace-state.json");
+    const rootStatePath = path.join(workspaceDir, "carapace-workspace-state.json");
     mkdirSync(path.dirname(nestedStatePath), { recursive: true });
     writeFileSync(nestedStatePath, "{}\n");
     writeFileSync(rootStatePath, "{}\n");
@@ -75,7 +75,7 @@ describe("workspace fixture assertions", () => {
   });
 
   it("rejects oversized agents delete output before parsing it", () => {
-    const root = tempDirs.make("openclaw-fixture-workspace-");
+    const root = tempDirs.make("carapace-fixture-workspace-");
     const outputPath = path.join(root, "agents-delete.json");
     const agentsPath = path.join(root, "agents.json");
     mkdirSync(root, { recursive: true });
@@ -86,7 +86,7 @@ describe("workspace fixture assertions", () => {
     );
 
     const result = runAgentsDeleteAssert(root, outputPath, agentsPath, {
-      OPENCLAW_FIXTURE_AGENTS_DELETE_OUTPUT_MAX_BYTES: "1024",
+      CARAPACE_FIXTURE_AGENTS_DELETE_OUTPUT_MAX_BYTES: "1024",
     });
 
     expect(result.status).not.toBe(0);
@@ -96,7 +96,7 @@ describe("workspace fixture assertions", () => {
   });
 
   it("bounds invalid agents delete JSON diagnostics", () => {
-    const root = tempDirs.make("openclaw-fixture-workspace-");
+    const root = tempDirs.make("carapace-fixture-workspace-");
     const outputPath = path.join(root, "agents-delete.json");
     const agentsPath = path.join(root, "agents.json");
     mkdirSync(root, { recursive: true });
@@ -107,7 +107,7 @@ describe("workspace fixture assertions", () => {
     );
 
     const result = runAgentsDeleteAssert(root, outputPath, agentsPath, {
-      OPENCLAW_FIXTURE_AGENTS_DELETE_OUTPUT_MAX_BYTES: "131072",
+      CARAPACE_FIXTURE_AGENTS_DELETE_OUTPUT_MAX_BYTES: "131072",
     });
 
     expect(result.status).not.toBe(0);
@@ -119,7 +119,7 @@ describe("workspace fixture assertions", () => {
   });
 
   it("rejects an agents delete result that explicitly reports local transport", () => {
-    const root = tempDirs.make("openclaw-fixture-workspace-");
+    const root = tempDirs.make("carapace-fixture-workspace-");
     const workspace = path.join(root, "workspace");
     const outputPath = path.join(root, "agents-delete.json");
     const agentsPath = path.join(root, "agents.json");
@@ -144,7 +144,7 @@ describe("workspace fixture assertions", () => {
   });
 
   it("rejects deletion output without the gateway transport marker", () => {
-    const root = tempDirs.make("openclaw-fixture-workspace-");
+    const root = tempDirs.make("carapace-fixture-workspace-");
     const workspace = path.join(root, "workspace");
     const outputPath = path.join(root, "agents-delete.json");
     const agentsPath = path.join(root, "agents.json");

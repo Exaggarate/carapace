@@ -3,10 +3,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { isTruthyEnvValue, isVitestRuntimeEnv } from "../infra/env.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { tryProcessCwd } from "../infra/safe-cwd.js";
 import { resolveUserPath } from "../utils.js";
@@ -18,8 +18,8 @@ import {
 } from "./plugin-cache-files.js";
 import { getPluginCache } from "./plugin-cache.js";
 
-const DISABLED_BUNDLED_PLUGINS_DIR = path.join(os.tmpdir(), "openclaw-empty-bundled-plugins");
-const TEST_TRUST_BUNDLED_PLUGINS_DIR_ENV = "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR";
+const DISABLED_BUNDLED_PLUGINS_DIR = path.join(os.tmpdir(), "carapace-empty-bundled-plugins");
+const TEST_TRUST_BUNDLED_PLUGINS_DIR_ENV = "CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR";
 
 /** Diagnostic emitted when source-checkout bundled plugins lack dependency installs. */
 type SourceCheckoutDependencyDiagnostic = {
@@ -29,7 +29,7 @@ type SourceCheckoutDependencyDiagnostic = {
 
 /** Returns true when env disables bundled plugin discovery. */
 export function areBundledPluginsDisabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  const raw = normalizeOptionalLowercaseString(env.OPENCLAW_DISABLE_BUNDLED_PLUGINS);
+  const raw = normalizeOptionalLowercaseString(env.CARAPACE_DISABLE_BUNDLED_PLUGINS);
   return raw === "1" || raw === "true";
 }
 
@@ -70,7 +70,7 @@ export function hasUsableBundledPluginTree(pluginsDir: string): boolean {
       const pluginDir = path.join(pluginsDir, entry.name);
       return (
         pluginCacheExistsSync(path.join(pluginDir, "package.json")) ||
-        pluginCacheExistsSync(path.join(pluginDir, "openclaw.plugin.json"))
+        pluginCacheExistsSync(path.join(pluginDir, "carapace.plugin.json"))
       );
     });
   } catch {
@@ -95,8 +95,8 @@ function trustedBundledPluginRootsForPackageRoot(packageRoot: string): string[] 
 }
 
 function resolvePackageRootsForBundledPlugins(): string[] {
-  const argvRoot = resolveOpenClawPackageRootSync({ argv1: process.argv[1] });
-  const moduleRoot = resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url });
+  const argvRoot = resolveCarapacePackageRootSync({ argv1: process.argv[1] });
+  const moduleRoot = resolveCarapacePackageRootSync({ moduleUrl: import.meta.url });
   return uniqueStrings([argvRoot, moduleRoot].filter((entry): entry is string => Boolean(entry)));
 }
 
@@ -120,7 +120,7 @@ export function resolveSourceCheckoutDependencyDiagnostic(
     return {
       source: packageRoot,
       message:
-        "OpenClaw source checkout detected without pnpm workspace dependencies; run `pnpm install` from the repo root so bundled plugins can load package-local dependencies.",
+        "Carapace source checkout detected without pnpm workspace dependencies; run `pnpm install` from the repo root so bundled plugins can load package-local dependencies.",
     };
   }
   return null;
@@ -132,7 +132,7 @@ function resolveTrustedExistingOverride(resolvedOverride: string): string | null
     return null;
   }
 
-  const modulePackageRoot = resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url });
+  const modulePackageRoot = resolveCarapacePackageRootSync({ moduleUrl: import.meta.url });
   if (
     !modulePackageRoot ||
     !isPluginInPackageBundledRoots({ rootDir: realOverride, packageRoot: modulePackageRoot })
@@ -186,7 +186,7 @@ function resolveBundledPluginsDirUncached(env: NodeJS.ProcessEnv): string | unde
     return resolveDisabledBundledPluginsDir();
   }
 
-  const override = env.OPENCLAW_BUNDLED_PLUGINS_DIR?.trim();
+  const override = env.CARAPACE_BUNDLED_PLUGINS_DIR?.trim();
   let rejectedExistingOverride: string | null = null;
   if (override) {
     const resolvedOverride = resolveUserPath(override, env);
@@ -203,7 +203,7 @@ function resolveBundledPluginsDirUncached(env: NodeJS.ProcessEnv): string | unde
   }
 
   try {
-    const argvRoot = resolveOpenClawPackageRootSync({ argv1: process.argv[1] });
+    const argvRoot = resolveCarapacePackageRootSync({ argv1: process.argv[1] });
     const rejectedOverrideUsesArgvRoot = Boolean(
       argvRoot &&
       rejectedExistingOverride &&
@@ -213,7 +213,7 @@ function resolveBundledPluginsDirUncached(env: NodeJS.ProcessEnv): string | unde
       }),
     );
     const safeArgvRoot = rejectedOverrideUsesArgvRoot ? null : argvRoot;
-    const moduleRoot = resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url });
+    const moduleRoot = resolveCarapacePackageRootSync({ moduleUrl: import.meta.url });
     const packageRoots = uniqueStrings(
       [safeArgvRoot, moduleRoot].filter((entry): entry is string => Boolean(entry)),
     );
@@ -265,7 +265,7 @@ function resolveBundledPluginsDirUncached(env: NodeJS.ProcessEnv): string | unde
 
 export function resolveBundledPluginsDir(env: NodeJS.ProcessEnv = process.env): string | undefined {
   const disabled = areBundledPluginsDisabled(env);
-  const override = disabled ? undefined : env.OPENCLAW_BUNDLED_PLUGINS_DIR?.trim();
+  const override = disabled ? undefined : env.CARAPACE_BUNDLED_PLUGINS_DIR?.trim();
   const key = JSON.stringify([
     import.meta.url,
     disabled,

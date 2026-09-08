@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { applyAllowAlwaysDecision } from "./exec-approvals-allow-always.js";
 import type { ExecApprovalsFile } from "./exec-approvals-core.js";
@@ -49,10 +49,10 @@ describe("generated exec approval migration", () => {
   });
 
   it("removes inactive generated grants without changing manual or cwd-bound rules", async () => {
-    await withTestDir({ prefix: "openclaw-exec-approval-migration-" }, async (home) => {
-      const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-      process.env.OPENCLAW_STATE_DIR = path.join(home, ".openclaw");
-      closeOpenClawStateDatabaseForTest();
+    await withTestDir({ prefix: "carapace-exec-approval-migration-" }, async (home) => {
+      const previousStateDir = process.env.CARAPACE_STATE_DIR;
+      process.env.CARAPACE_STATE_DIR = path.join(home, ".carapace");
+      closeCarapaceStateDatabaseForTest();
       execApprovalsStoreTesting.reset();
       try {
         const current = buildCwdBoundHashedArgPattern(["/usr/bin/git", "status"], "/workspace");
@@ -96,12 +96,12 @@ describe("generated exec approval migration", () => {
           expect.objectContaining({ pattern: "=node-command:marker", source: "allow-always" }),
         ]);
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         execApprovalsStoreTesting.reset();
         if (previousStateDir === undefined) {
-          delete process.env.OPENCLAW_STATE_DIR;
+          delete process.env.CARAPACE_STATE_DIR;
         } else {
-          process.env.OPENCLAW_STATE_DIR = previousStateDir;
+          process.env.CARAPACE_STATE_DIR = previousStateDir;
         }
       }
     });

@@ -3,10 +3,10 @@
  *
  * Builds agent tool schema contributions from loaded or bundled channel action hooks.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { Type, type TSchema } from "typebox";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
   getPreparedMessageToolCatalog,
@@ -40,7 +40,7 @@ export const listMessageActionDiscoveryChannels = (
  * Input used to discover channel message actions for agent tool schemas.
  */
 export type ChannelMessageActionDiscoveryInput = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   channel?: string | null;
   chatType?: ChatType | null;
   currentChannelProvider?: string | null;
@@ -56,7 +56,7 @@ export type ChannelMessageActionDiscoveryInput = {
 };
 
 type ChannelMessageActionDiscoveryParams = ChannelMessageActionDiscoveryInput & {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   preparedMessageToolCatalog?: PreparedMessageToolCatalog;
 };
 
@@ -83,7 +83,7 @@ export function createMessageActionDiscoveryContext(
     params.channel ?? params.currentChannelProvider,
   );
   return {
-    cfg: params.cfg ?? ({} as OpenClawConfig),
+    cfg: params.cfg ?? ({} as CarapaceConfig),
     ...(params.chatType ? { chatType: params.chatType } : {}),
     currentChannelId: params.currentChannelId,
     currentChannelProvider,
@@ -437,7 +437,7 @@ export function resolveChannelMessageToolMediaSourceParamKeys(
  * Returns whether any registered channel advertises a message capability.
  */
 export function channelSupportsMessageCapability(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   capability: ChannelMessageCapability,
   preparedMessageToolCatalog?: PreparedMessageToolCatalog,
 ): boolean {

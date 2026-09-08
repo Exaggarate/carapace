@@ -23,7 +23,7 @@ import {
 import { captureConfigOverrideApplier } from "../config/runtime-overrides.js";
 import { resolveSystemMainSessionTarget } from "../config/sessions.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isSecretRef } from "../config/types.secrets.js";
 import { getActiveCronJobCount } from "../cron/active-jobs.js";
 import {
@@ -32,7 +32,7 @@ import {
 } from "../infra/diagnostic-events.js";
 import { isVitestRuntimeEnv, logAcceptedEnvOption } from "../infra/env.js";
 import { formatErrorMessage } from "../infra/errors.js";
-import { prepareGatewayAgentCliShim } from "../infra/openclaw-cli-shim.js";
+import { prepareGatewayAgentCliShim } from "../infra/carapace-cli-shim.js";
 import { readGatewayRestartHandoffSync } from "../infra/restart-handoff.js";
 import { setGatewaySigusr1RestartPolicy, setPreRestartDeferralCheck } from "../infra/restart.js";
 import { withSystemEventOwner } from "../infra/system-event-ownership.js";
@@ -44,9 +44,9 @@ import { getGatewayPluginMetadataSnapshot } from "../plugins/current-plugin-meta
 import { getTotalQueueSize } from "../process/command-queue.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { createLazyPromise } from "../shared/lazy-runtime.js";
-import { withArtifactPreservingStateReads } from "../state/openclaw-state-db-readonly.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../state/openclaw-state-ownership.js";
+import { withArtifactPreservingStateReads } from "../state/carapace-state-db-readonly.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../state/carapace-state-ownership.js";
 import { ADMIN_SCOPE } from "./method-scopes.js";
 import { listCoreGatewayMethodNames } from "./methods/core-descriptors.js";
 import {
@@ -68,8 +68,8 @@ type WorkerEnvironmentStartupLoader = () => Promise<
 >;
 
 function publishGatewayPluginRuntimeConfigAtStartup(params: {
-  runtimeConfig: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
 }): void {
   setAppliedRuntimeConfigSnapshot(params.runtimeConfig, params.sourceConfig);
 }
@@ -85,7 +85,7 @@ export async function prepareGatewayServerBootstrap(input: {
   const { port, opts, log, logSecrets, loadWorkerEnvironmentStartupModule } = input;
   const { assertConfiguredWorkspaceStateReady } = await import("../agents/workspace-state-dirs.js");
   // Derive defaults and admit exactly the snapshot that bootstrap will consume.
-  process.env.OPENCLAW_GATEWAY_PORT = String(port);
+  process.env.CARAPACE_GATEWAY_PORT = String(port);
   const envBeforeStartupConfigLoad = { ...process.env };
   const formatRuntimeGatewayAuthTokenWarning = input.formatRuntimeGatewayAuthTokenWarning;
   const traceOriginAt = opts.processStartedAt ?? opts.startupStartedAt;
@@ -127,8 +127,8 @@ export async function prepareGatewayServerBootstrap(input: {
   });
   const inspectStateOwnership = async (signal?: AbortSignal) => {
     normalizeStateDirEnv(process.env);
-    await assertOpenClawStateWriteAllowedAtPath({
-      databasePath: resolveOpenClawStateSqlitePath(process.env),
+    await assertCarapaceStateWriteAllowedAtPath({
+      databasePath: resolveCarapaceStateSqlitePath(process.env),
       env: process.env,
       signal,
     });
@@ -138,26 +138,26 @@ export async function prepareGatewayServerBootstrap(input: {
   );
   const [
     {
-      OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
-      OpenClawDatabaseSchemaPreflightError,
-      preflightOpenClawDatabaseSchemas,
+      CARAPACE_DATABASE_SCHEMA_DOCS_URL,
+      CarapaceDatabaseSchemaPreflightError,
+      preflightCarapaceDatabaseSchemas,
     },
     agentDatabase,
     stateDatabase,
   ] = await startupTrace.measure("state.runtime-imports", () =>
     Promise.all([
-      import("../state/openclaw-database-preflight.js"),
-      import("../state/openclaw-agent-db.js"),
-      import("../state/openclaw-state-db-contract.js"),
+      import("../state/carapace-database-preflight.js"),
+      import("../state/carapace-agent-db.js"),
+      import("../state/carapace-state-db-contract.js"),
     ]),
   );
   const inspectDatabaseSchemas = (signal?: AbortSignal) =>
-    preflightOpenClawDatabaseSchemas({
+    preflightCarapaceDatabaseSchemas({
       signal,
       env: process.env,
       supportedVersions: {
-        state: stateDatabase.OPENCLAW_STATE_SCHEMA_VERSION,
-        agent: agentDatabase.OPENCLAW_AGENT_SCHEMA_VERSION,
+        state: stateDatabase.CARAPACE_STATE_SCHEMA_VERSION,
+        agent: agentDatabase.CARAPACE_AGENT_SCHEMA_VERSION,
       },
     });
   const databaseSchemas = await startupTrace.measure("state.schema-preflight", () =>
@@ -174,17 +174,17 @@ export async function prepareGatewayServerBootstrap(input: {
         foundVersion: database.foundVersion,
         supportedVersion: database.supportedVersion,
         writerAppVersion: database.writerAppVersion ?? "unknown",
-        docsUrl: OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
+        docsUrl: CARAPACE_DATABASE_SCHEMA_DOCS_URL,
       });
     }
-    throw new OpenClawDatabaseSchemaPreflightError(databaseSchemas.incompatible);
+    throw new CarapaceDatabaseSchemaPreflightError(databaseSchemas.incompatible);
   }
   for (const database of databaseSchemas.indeterminate) {
     log.warn("database schema preflight could not inspect database; continuing to real open", {
       kind: database.kind,
       path: database.path,
       reason: database.reason,
-      docsUrl: OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
+      docsUrl: CARAPACE_DATABASE_SCHEMA_DOCS_URL,
     });
   }
   const { bootstrapGatewayNetworkRuntime } = await startupTrace.measure(
@@ -194,15 +194,15 @@ export async function prepareGatewayServerBootstrap(input: {
   await startupTrace.measure("runtime.network-bootstrap", () => bootstrapGatewayNetworkRuntime());
 
   const minimalTestGateway =
-    isVitestRuntimeEnv() && process.env.OPENCLAW_TEST_MINIMAL_GATEWAY === "1";
+    isVitestRuntimeEnv() && process.env.CARAPACE_TEST_MINIMAL_GATEWAY === "1";
   const ambientEnvTriggers = opts.ambientEnvTriggers ?? "suppress";
 
   logAcceptedEnvOption({
-    key: "OPENCLAW_RAW_STREAM",
+    key: "CARAPACE_RAW_STREAM",
     description: "raw stream logging enabled",
   });
   logAcceptedEnvOption({
-    key: "OPENCLAW_RAW_STREAM_PATH",
+    key: "CARAPACE_RAW_STREAM_PATH",
     description: "raw stream log path override",
   });
   if (!minimalTestGateway) {
@@ -254,7 +254,7 @@ export async function prepareGatewayServerBootstrap(input: {
   const emitSecretsStateEvent = (
     code: "SECRETS_RELOADER_DEGRADED" | "SECRETS_RELOADER_RECOVERED",
     message: string,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ) => {
     const text = `[${code}] ${message}`;
     try {
@@ -378,7 +378,7 @@ export async function prepareGatewayServerBootstrap(input: {
   const seededControlUiAllowedOrigins = controlUiSeed.seededAllowedOrigins
     ? cfgAtStart.gateway?.controlUi?.allowedOrigins
     : undefined;
-  const applyFixedGatewayOverlays = (config: OpenClawConfig): OpenClawConfig => {
+  const applyFixedGatewayOverlays = (config: CarapaceConfig): CarapaceConfig => {
     let runtimeConfig = config;
     if (reloadAuthOverride || startupTailscaleOverride) {
       runtimeConfig = {
@@ -420,7 +420,7 @@ export async function prepareGatewayServerBootstrap(input: {
     ]);
     return runtimeConfig;
   };
-  const applyReloadableGatewayAuthRefs = (config: OpenClawConfig): OpenClawConfig => {
+  const applyReloadableGatewayAuthRefs = (config: CarapaceConfig): CarapaceConfig => {
     if (!startupAuthSecretRefOverride?.token && !startupAuthSecretRefOverride?.password) {
       return config;
     }
@@ -438,9 +438,9 @@ export async function prepareGatewayServerBootstrap(input: {
     return next;
   };
   const prepareReloadCandidate = (params: {
-    runtimeConfig: OpenClawConfig;
-    sourceConfig: OpenClawConfig;
-    previousSourceConfig?: OpenClawConfig;
+    runtimeConfig: CarapaceConfig;
+    sourceConfig: CarapaceConfig;
+    previousSourceConfig?: CarapaceConfig;
   }) => {
     const previousSourceConfig =
       params.previousSourceConfig ??
@@ -462,7 +462,7 @@ export async function prepareGatewayServerBootstrap(input: {
           ambientEnvTriggers,
         });
     const applyCandidateOverrides = captureConfigOverrideApplier();
-    const reapplyCompareOverlays = (config: OpenClawConfig): OpenClawConfig => {
+    const reapplyCompareOverlays = (config: CarapaceConfig): CarapaceConfig => {
       const applied = applyCandidateOverrides(
         mergeActivationSectionsIntoRuntimeConfig({
           runtimeConfig: config,
@@ -472,7 +472,7 @@ export async function prepareGatewayServerBootstrap(input: {
       copyConfigResolutionFacts(config, applied);
       return applied;
     };
-    const reapplyRuntimeOverlays = (config: OpenClawConfig): OpenClawConfig =>
+    const reapplyRuntimeOverlays = (config: CarapaceConfig): CarapaceConfig =>
       applyFixedGatewayOverlays(applyReloadableGatewayAuthRefs(reapplyCompareOverlays(config)));
     const runtimeConfig = reapplyRuntimeOverlays(params.runtimeConfig);
     // Both managed writes and watcher reloads must reject unmigrated workspaces

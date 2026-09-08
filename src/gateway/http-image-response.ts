@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import { normalizeMimeType } from "@openclaw/media-core/mime";
+import { normalizeMimeType } from "@carapace/media-core/mime";
 import { fileTypeFromBuffer } from "file-type";
 import { matchesHttpIfNoneMatch } from "./http-conditional.js";
 

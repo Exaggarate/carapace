@@ -1,11 +1,11 @@
-# OpenClaw Microsoft Teams
+# Carapace Microsoft Teams
 
-Official OpenClaw channel plugin for Microsoft Teams bot conversations.
+Official Carapace channel plugin for Microsoft Teams bot conversations.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/msteams
+carapace plugins install @carapace/msteams
 ```
 
-Configure the Teams bot credentials and trusted service URLs in OpenClaw, then connect the bot to the teams or chats where agents should operate.
+Configure the Teams bot credentials and trusted service URLs in Carapace, then connect the bot to the teams or chats where agents should operate.

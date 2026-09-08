@@ -3,7 +3,7 @@
  * Verifies provider hooks, normalization, de-duping, and prioritized refs.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { Model } from "../llm/types.js";
 
 const providerRuntimeMocks = vi.hoisted(() => ({
@@ -78,12 +78,12 @@ describe("appendPrioritizedDynamicLiveModels", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await appendPrioritizedDynamicLiveModels({
       models: [model("anthropic", "claude-sonnet-4-6")],
       config,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       modelRegistry: REGISTRY,
       resolveDynamicModel,
       prepareDynamicModel,
@@ -106,7 +106,7 @@ describe("appendPrioritizedDynamicLiveModels", () => {
       expect.objectContaining({
         provider: DYNAMIC_PROVIDER,
         context: expect.objectContaining({
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/carapace-agent",
           modelId: "glm-5",
           modelRegistry: REGISTRY,
           provider: DYNAMIC_PROVIDER,
@@ -119,7 +119,7 @@ describe("appendPrioritizedDynamicLiveModels", () => {
       expect.objectContaining({
         provider: DYNAMIC_PROVIDER,
         context: expect.objectContaining({
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/carapace-agent",
           modelId: "glm-5",
           modelRegistry: REGISTRY,
           provider: DYNAMIC_PROVIDER,
@@ -132,7 +132,7 @@ describe("appendPrioritizedDynamicLiveModels", () => {
         provider: DYNAMIC_PROVIDER,
         id: "glm-5",
       }),
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
     );
   });
 
@@ -142,7 +142,7 @@ describe("appendPrioritizedDynamicLiveModels", () => {
 
     const result = await appendPrioritizedDynamicLiveModels({
       models: [model(DYNAMIC_PROVIDER, "glm-5")],
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       modelRegistry: REGISTRY,
       resolveDynamicModel,
       prepareDynamicModel,
@@ -161,7 +161,7 @@ describe("appendPrioritizedDynamicLiveModels", () => {
 
     const result = await appendPrioritizedDynamicLiveModels({
       models: [],
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       modelRegistry: REGISTRY,
       refs: [{ provider: DYNAMIC_PROVIDER, id: "glm-5" }],
     });
@@ -171,7 +171,7 @@ describe("appendPrioritizedDynamicLiveModels", () => {
     expect(providerRuntimeMocks.runProviderDynamicModel).not.toHaveBeenCalled();
     expect(normalizeDiscoveredAgentModelMock).toHaveBeenCalledWith(
       preparedModel,
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       { config: undefined, workspaceDir: undefined },
     );
   });
@@ -193,12 +193,12 @@ describe("appendPrioritizedDynamicLiveModels", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const result = await appendPrioritizedDynamicLiveModels({
       models: [],
       config,
-      agentDir: "/tmp/openclaw-agent",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-agent",
+      workspaceDir: "/tmp/carapace-workspace",
       modelRegistry: REGISTRY,
       refs: [{ provider: DYNAMIC_PROVIDER, id: "glm-5" }],
     });
@@ -210,8 +210,8 @@ describe("appendPrioritizedDynamicLiveModels", () => {
     expect(providerRuntimeMocks.runProviderDynamicModel).toHaveBeenCalledTimes(1);
     expect(normalizeDiscoveredAgentModelMock).toHaveBeenCalledWith(
       expect.objectContaining({ provider: DYNAMIC_PROVIDER, id: "glm-5" }),
-      "/tmp/openclaw-agent",
-      { config, workspaceDir: "/tmp/openclaw-workspace" },
+      "/tmp/carapace-agent",
+      { config, workspaceDir: "/tmp/carapace-workspace" },
     );
   });
 });

@@ -5,23 +5,23 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import * as runtimeWorkerUrl from "../../infra/runtime-worker-url.js";
-import { assertNoOpenClawAgentDatabaseLeases } from "../../state/openclaw-agent-db-lease.js";
+import { assertNoCarapaceAgentDatabaseLeases } from "../../state/carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-  isOpenClawAgentDatabaseOpen,
-  openOpenClawAgentDatabase,
-  OPENCLAW_AGENT_DB_OPEN_HANDLE_CAP,
-  resolveOpenClawAgentSqlitePath,
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+  isCarapaceAgentDatabaseOpen,
+  openCarapaceAgentDatabase,
+  CARAPACE_AGENT_DB_OPEN_HANDLE_CAP,
+  resolveCarapaceAgentSqlitePath,
   withAgentDatabaseMaintenanceLease,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import * as sleepUtils from "../../utils/sleep.js";
 import { persistSessionTranscriptTurn } from "./session-accessor.js";
@@ -44,7 +44,7 @@ type TerminalType = Extract<
 
 function countAgentDatabaseLeases(pathname: string, env?: NodeJS.ProcessEnv): number {
   // SAFETY: SQLite COUNT(*) always returns one row with the numeric alias requested here.
-  const row = openOpenClawStateDatabase({ env })
+  const row = openCarapaceStateDatabase({ env })
     .db.prepare(
       `SELECT COUNT(*) AS count
        FROM agent_database_leases
@@ -55,7 +55,7 @@ function countAgentDatabaseLeases(pathname: string, env?: NodeJS.ProcessEnv): nu
 }
 
 function createCleanupFenceProbe() {
-  const stateDatabase = openOpenClawStateDatabase();
+  const stateDatabase = openCarapaceStateDatabase();
   let lockHeld = false;
   let resolvePlanStarted!: () => void;
   let resolveTerminal!: (type: TerminalType) => void;
@@ -97,13 +97,13 @@ function createCleanupFenceProbe() {
 }
 
 function openCachePressureAgents(): void {
-  for (let index = 0; index < OPENCLAW_AGENT_DB_OPEN_HANDLE_CAP; index += 1) {
-    openOpenClawAgentDatabase({ agentId: `pressure-${index}` });
+  for (let index = 0; index < CARAPACE_AGENT_DB_OPEN_HANDLE_CAP; index += 1) {
+    openCarapaceAgentDatabase({ agentId: `pressure-${index}` });
   }
 }
 
 function readProjectedTranscript(
-  database: ReturnType<typeof openOpenClawAgentDatabase>,
+  database: ReturnType<typeof openCarapaceAgentDatabase>,
   sessionId: string,
 ) {
   return database.db
@@ -149,7 +149,7 @@ function createPlanFinishFence(sessionId: string) {
 }
 
 async function waitForCurrentProjection(databasePath: string, sessionId: string): Promise<void> {
-  const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+  const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
   await vi.waitFor(
     () => {
       expect(
@@ -164,14 +164,14 @@ async function waitForCurrentProjection(databasePath: string, sessionId: string)
 
 describe("session transcript reconcile worker lifecycle", () => {
   it("drains later fixture owners without waiting for an unrelated state directory", async () => {
-    const root = tempDirs.make("openclaw-reconcile-scope-");
+    const root = tempDirs.make("carapace-reconcile-scope-");
     const stateDir = path.join(root, "state");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const first = { agentId: "main", env };
     const later = { agentId: "later", env };
     const unrelated = {
       agentId: "main",
-      env: { ...env, OPENCLAW_STATE_DIR: `${stateDir}-unrelated` },
+      env: { ...env, CARAPACE_STATE_DIR: `${stateDir}-unrelated` },
     };
     const realSetImmediate = globalThis.setImmediate;
     const immediateSpy = vi.spyOn(globalThis, "setImmediate");
@@ -179,7 +179,7 @@ describe("session transcript reconcile worker lifecycle", () => {
       new Promise<void>((resolve) => {
         realSetImmediate(resolve);
       });
-    const startDeferred = (options: OpenClawAgentDatabaseOptions) => {
+    const startDeferred = (options: CarapaceAgentDatabaseOptions) => {
       const release = createDeferred();
       immediateSpy.mockImplementationOnce((callback) => {
         void release.promise.then(() => callback());
@@ -211,7 +211,7 @@ describe("session transcript reconcile worker lifecycle", () => {
       await checkpoint();
       expect(settled).toBe(true);
       expect(isSessionTranscriptIndexReconcileRunning(unrelated)).toBe(true);
-      expect(isOpenClawAgentDatabaseOpen(resolveOpenClawAgentSqlitePath(unrelated))).toBe(false);
+      expect(isCarapaceAgentDatabaseOpen(resolveCarapaceAgentSqlitePath(unrelated))).toBe(false);
     } finally {
       immediateSpy.mockRestore();
       releaseFirst.resolve();
@@ -222,19 +222,19 @@ describe("session transcript reconcile worker lifecycle", () => {
         ...[first, later, unrelated].map(waitForSessionTranscriptIndexReconcile),
       ]);
       for (const options of [first, later, unrelated]) {
-        closeOpenClawAgentDatabaseByPath(resolveOpenClawAgentSqlitePath(options));
+        closeCarapaceAgentDatabaseByPath(resolveCarapaceAgentSqlitePath(options));
       }
       for (const options of [first, unrelated]) {
-        closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath(options.env));
+        closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath(options.env));
       }
     }
   });
 
   it("resolves one session before unrelated projection repair completes", async () => {
-    const stateDir = tempDirs.make("openclaw-active-transcript-");
+    const stateDir = tempDirs.make("carapace-active-transcript-");
     const scope = {
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       sessionId: "active-transcript-test",
       sessionKey: "agent:main:active-transcript-test",
     };
@@ -253,7 +253,7 @@ describe("session transcript reconcile worker lifecycle", () => {
         });
       }
       const databaseOptions = { agentId: scope.agentId, env: scope.env };
-      const database = openOpenClawAgentDatabase(databaseOptions);
+      const database = openCarapaceAgentDatabase(databaseOptions);
       const markDirty = database.db.prepare(
         "UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?",
       );
@@ -308,14 +308,14 @@ describe("session transcript reconcile worker lifecycle", () => {
         await Promise.all([targetReconciliation, allReconciliation]);
       }
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   }, 30_000);
 
   it("awaits pending-pass backoff while coalescing writes and keeping ready sessions available", async () => {
-    const stateDir = tempDirs.make("openclaw-reconcile-backoff-");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-reconcile-backoff-");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const databaseOptions = { agentId: "main", env };
     const scope = {
       ...databaseOptions,
@@ -340,7 +340,7 @@ describe("session transcript reconcile worker lifecycle", () => {
         });
       }
       await waitForSessionTranscriptIndexReconcile(databaseOptions);
-      const database = openOpenClawAgentDatabase(databaseOptions);
+      const database = openCarapaceAgentDatabase(databaseOptions);
       const baselineLeaseCount = countAgentDatabaseLeases(database.path, env);
       const markDirty = database.db.prepare(
         "UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?",
@@ -423,16 +423,16 @@ describe("session transcript reconcile worker lifecycle", () => {
       resume.resolve();
       await waitForSessionTranscriptIndexReconcile(databaseOptions);
       sleepSpy.mockRestore();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   }, 30_000);
 
   it.each([false, true])(
     "retains the active reconcile handle under cache pressure (explicit close: %s)",
     async (explicitClose) => {
-      const stateDir = tempDirs.make("openclaw-reconcile-retained-");
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      const stateDir = tempDirs.make("carapace-reconcile-retained-");
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const databaseOptions = { agentId: "main" };
         const scope = {
           ...databaseOptions,
@@ -450,7 +450,7 @@ describe("session transcript reconcile worker lifecycle", () => {
             touchSessionEntry: false,
           });
           await waitForSessionTranscriptIndexReconcile(databaseOptions);
-          const database = openOpenClawAgentDatabase(databaseOptions);
+          const database = openCarapaceAgentDatabase(databaseOptions);
           const expected = readProjectedTranscript(database, scope.sessionId);
           expect(expected).toHaveLength(1);
           database.db
@@ -477,10 +477,10 @@ describe("session transcript reconcile worker lifecycle", () => {
             openCachePressureAgents();
             expect(database.db.isOpen).toBe(true);
             if (explicitClose) {
-              expect(closeOpenClawAgentDatabaseByPath(database.path)).toBe(true);
+              expect(closeCarapaceAgentDatabaseByPath(database.path)).toBe(true);
               expect(database.db.isOpen).toBe(false);
               expect(countAgentDatabaseLeases(database.path)).toBe(1);
-              expect(() => assertNoOpenClawAgentDatabaseLeases("main")).toThrow(
+              expect(() => assertNoCarapaceAgentDatabaseLeases("main")).toThrow(
                 "still open in another process",
               );
               const maintain = vi.fn(async () => undefined);
@@ -497,7 +497,7 @@ describe("session transcript reconcile worker lifecycle", () => {
             status: "fulfilled",
             value: { reconciledSessions: 1 },
           });
-          const settled = openOpenClawAgentDatabase(databaseOptions);
+          const settled = openCarapaceAgentDatabase(databaseOptions);
           expect(settled === database).toBe(!explicitClose);
           expect(readProjectedTranscript(settled, scope.sessionId)).toEqual(expected);
           expect(countAgentDatabaseLeases(database.path)).toBe(1);
@@ -507,8 +507,8 @@ describe("session transcript reconcile worker lifecycle", () => {
           expect(settled.db.isOpen).toBe(false);
           expect(countAgentDatabaseLeases(database.path)).toBe(0);
         } finally {
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       });
     },
@@ -518,8 +518,8 @@ describe("session transcript reconcile worker lifecycle", () => {
   it.each(["clean", "worker-create", "worker-url", "preflight-begin", "preflight-commit"] as const)(
     "does not retain a handle after %s preflight/worker startup",
     async (mode) => {
-      const stateDir = tempDirs.make("openclaw-reconcile-startup-release-");
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      const stateDir = tempDirs.make("carapace-reconcile-startup-release-");
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const options = { agentId: "main" };
         const scope = {
           ...options,
@@ -534,7 +534,7 @@ describe("session transcript reconcile worker lifecycle", () => {
             touchSessionEntry: false,
           });
           await waitForSessionTranscriptIndexReconcile(options);
-          const database = openOpenClawAgentDatabase(options);
+          const database = openCarapaceAgentDatabase(options);
           if (mode !== "clean") {
             database.db
               .prepare(
@@ -578,8 +578,8 @@ describe("session transcript reconcile worker lifecycle", () => {
           expect(database.db.isOpen).toBe(false);
           expect(countAgentDatabaseLeases(database.path)).toBe(0);
         } finally {
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       });
     },
@@ -592,8 +592,8 @@ describe("session transcript reconcile worker lifecycle", () => {
   ])(
     "keeps the operation pending until lease release after $expectedTerminal",
     async ({ expectedTerminal, failAfterFirstPlan }) => {
-      const stateDir = tempDirs.make("openclaw-transcript-worker-cleanup-");
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      const stateDir = tempDirs.make("carapace-transcript-worker-cleanup-");
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const primarySessionId = "cleanup-primary";
         const primaryScope = {
           agentId: "main",
@@ -630,7 +630,7 @@ describe("session transcript reconcile worker lifecycle", () => {
           }
           await waitForSessionTranscriptIndexReconcile({ agentId: "main" });
 
-          const database = openOpenClawAgentDatabase({ agentId: "main" });
+          const database = openCarapaceAgentDatabase({ agentId: "main" });
           const databasePath = database.path;
           database.db
             .prepare(
@@ -693,8 +693,8 @@ describe("session transcript reconcile worker lifecycle", () => {
           expect(database.db.isOpen).toBe(false);
           expect(countAgentDatabaseLeases(databasePath)).toBe(0);
         } finally {
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       });
     },

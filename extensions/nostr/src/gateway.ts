@@ -2,20 +2,20 @@
 import {
   resolveStableChannelMessageIngress,
   type StableChannelIngressIdentityParams,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   bindIngressLifecycleToReplyOptions,
   runPassiveAccountLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
+import { attachChannelToResult } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
 import {
   chunkTextForOutbound,
   sanitizeAssistantVisibleText,
   stripMarkdown,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import type { PluginRuntime } from "../runtime-api.js";
 import type { ChannelOutboundAdapter, ChannelPlugin } from "./channel-api.js";
 import type { MetricEvent } from "./metrics.js";
@@ -111,7 +111,7 @@ export const startNostrGatewayAccount: NostrGatewayStart = async (ctx) => {
   const resolveInboundAccess = async (
     senderPubkey: string,
     rawBody: string,
-    contextBinding?: import("openclaw/plugin-sdk/channel-ingress-runtime").ChannelIngressContextBinding,
+    contextBinding?: import("carapace/plugin-sdk/channel-ingress-runtime").ChannelIngressContextBinding,
   ) =>
     await resolveStableChannelMessageIngress({
       channelId: "nostr",
@@ -334,7 +334,7 @@ export const nostrPairingTextAdapter = {
     message,
     accountId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     id: string;
     message: string;
     accountId?: string;

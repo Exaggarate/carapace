@@ -33,10 +33,10 @@ suite.define(() => {
       );
       await inlineCard.waitFor();
       await gateway.resolveDeferred("exec.approval.list");
-      await page.locator("openclaw-sidebar-attention .sidebar-issues-button").click();
+      await page.locator("carapace-sidebar-attention .sidebar-issues-button").click();
       await page
         .locator(
-          'openclaw-sidebar-attention #sidebar-issues-panel [data-approval-id="approval-before-refresh"]',
+          'carapace-sidebar-attention #sidebar-issues-panel [data-approval-id="approval-before-refresh"]',
         )
         .waitFor();
       expect(await inlineCard.count()).toBe(1);

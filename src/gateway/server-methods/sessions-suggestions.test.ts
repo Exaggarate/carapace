@@ -12,7 +12,7 @@ import {
   SESSION_SUGGESTION_DISPATCH_CLAIM_TTL_MS,
 } from "../../config/sessions/session-suggestion-store.js";
 import { buildPersistedUserTurnMessage } from "../../sessions/user-turn-transcript.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { resolveSessionSharingTarget } from "../session-sharing.js";
 import { getSessionSuggestionTestMocks } from "./sessions-suggestions.test-mocks.js";
 import {
@@ -31,7 +31,7 @@ registerSessionSuggestionTestLifecycle(mocks);
 
 describe("session suggestion handlers", () => {
   it("admits bare fixed-store keys only through their persisted owner", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = state.path("shared-sessions.sqlite");
       await upsertSessionEntryCore(
         { agentId: "ops", sessionKey: "global", storePath },
@@ -77,7 +77,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("attributes a bare-key suggestion send to the persisted owner", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = state.path("shared-sessions.sqlite");
       await upsertSessionEntryCore(
         { agentId: "ops", sessionKey: "global", storePath },
@@ -121,7 +121,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("rejects archived suggestion creation and non-dismiss resolutions", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const archivedKey = "agent:main:archived-suggestions";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: archivedKey },
@@ -180,7 +180,7 @@ describe("session suggestion handlers", () => {
   ] as const)(
     "dispatches %s through chat.send with suggested-by attribution",
     async (resolution, queueMode) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertDefaultSuggestionSession();
         const added = await call(
           "session.suggestions.add",
@@ -225,7 +225,7 @@ describe("session suggestion handlers", () => {
   );
 
   it("sends immediately through start-or-steer when the session is idle", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertDefaultSuggestionSession();
       const added = await call(
         "session.suggestions.add",
@@ -251,7 +251,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("allows only owners and admins to resolve suggestions", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertDefaultSuggestionSession();
       const added = await call(
         "session.suggestions.add",
@@ -297,7 +297,7 @@ describe("session suggestion handlers", () => {
   ] as const)(
     "finalizes and publishes %s without administrative transcript narration",
     async (resolution, state, dispatchesConversation) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertDefaultSuggestionSession();
         const added = await call(
           "session.suggestions.add",
@@ -368,7 +368,7 @@ describe("session suggestion handlers", () => {
               role: "user",
               content: "Ship the focused change",
               idempotencyKey: `session-suggestion:${id}`,
-              __openclaw: {
+              __carapace: {
                 senderId: "alice",
                 senderName: "Suggested by Alice",
                 senderIdentity: { type: "profile", id: "alice" },
@@ -385,7 +385,7 @@ describe("session suggestion handlers", () => {
   );
 
   it("keeps typing dormant for one identity and broadcasts for two live viewers", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       vi.useFakeTimers();
       vi.setSystemTime(1_000);
       await upsertDefaultSuggestionSession();
@@ -503,7 +503,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("returns structured errors for blank text and clientless dispatch", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertDefaultSuggestionSession();
       const blank = await call(
         "session.suggestions.add",
@@ -555,7 +555,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("keeps an uncertain dispatch claimed until retry reconciliation", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       let now = 1_000;
       vi.spyOn(Date, "now").mockImplementation(() => now);
       await upsertDefaultSuggestionSession();
@@ -607,7 +607,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("claims a pending suggestion before dispatching it", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertDefaultSuggestionSession();
       const added = await call(
         "session.suggestions.add",
@@ -640,7 +640,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("returns a structured error when the session is replaced after dispatch", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey },
         {
@@ -699,7 +699,7 @@ describe("session suggestion handlers", () => {
   it.each(["claim", "release", "finalize"] as const)(
     "maps a session replacement during %s to the structured terminal error",
     async (phase) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertSessionEntryCore(
           { agentId: "main", sessionKey },
           {
@@ -754,7 +754,7 @@ describe("session suggestion handlers", () => {
   );
 
   it("keeps an unexpected claim-release failure retryable", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey },
         {
@@ -794,7 +794,7 @@ describe("session suggestion handlers", () => {
   });
 
   it("releases a durable claim after a definite dispatch rejection", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertDefaultSuggestionSession();
       const added = await call(
         "session.suggestions.add",

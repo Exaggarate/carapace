@@ -1,6 +1,6 @@
 // Xai tests cover tool auth shared plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { NON_ENV_SECRETREF_MARKER } from "openclaw/plugin-sdk/provider-auth-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { NON_ENV_SECRETREF_MARKER } from "carapace/plugin-sdk/provider-auth-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   isXaiToolEnabled,
@@ -175,7 +175,7 @@ describe("xai tool auth helpers", () => {
         hasAuthForProvider: vi.fn(() => true),
         resolveApiKeyForProvider: vi.fn(async () => "profile-key"),
       };
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: CarapaceConfig = {
         secrets: {
           defaults: { env: "selected" },
           providers: declaration ? { selected: declaration } : undefined,

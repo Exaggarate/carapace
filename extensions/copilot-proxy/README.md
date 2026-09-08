@@ -1,4 +1,4 @@
-# Copilot Proxy (OpenClaw plugin)
+# Copilot Proxy (Carapace plugin)
 
 Provider plugin for the **Copilot Proxy** VS Code extension.
 
@@ -7,7 +7,7 @@ Provider plugin for the **Copilot Proxy** VS Code extension.
 This bundled plugin is enabled by default. If you previously disabled it, re-enable it:
 
 ```bash
-openclaw plugins enable copilot-proxy
+carapace plugins enable copilot-proxy
 ```
 
 Restart the Gateway after enabling.
@@ -15,7 +15,7 @@ Restart the Gateway after enabling.
 ## Authenticate
 
 ```bash
-openclaw models auth login --provider copilot-proxy --set-default
+carapace models auth login --provider copilot-proxy --set-default
 ```
 
 ## Notes

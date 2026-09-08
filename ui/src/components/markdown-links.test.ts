@@ -172,9 +172,9 @@ describe("toSanitizedMarkdownHtml links", () => {
     });
 
     it("links http:// URLs", () => {
-      const html = toSanitizedMarkdownHtml("Visit http://github.com/openclaw");
+      const html = toSanitizedMarkdownHtml("Visit http://github.com/carapace");
       expect(html).toBe(
-        '<p>Visit <a href="http://github.com/openclaw" class="markdown-bare-url markdown-github-link" title="http://github.com/openclaw" rel="noreferrer noopener" target="_blank">github.com/openclaw</a></p>\n',
+        '<p>Visit <a href="http://github.com/carapace" class="markdown-bare-url markdown-github-link" title="http://github.com/carapace" rel="noreferrer noopener" target="_blank">github.com/carapace</a></p>\n',
       );
     });
 
@@ -219,9 +219,9 @@ describe("toSanitizedMarkdownHtml links", () => {
     });
 
     it("does NOT rewrite explicit markdown links with CJK display text", () => {
-      const html = toSanitizedMarkdownHtml("[OpenClaw中文](https://docs.openclaw.ai)");
+      const html = toSanitizedMarkdownHtml("[Carapace中文](https://github.com/Exaggarate/carapace)");
       expect(html).toBe(
-        '<p><a href="https://docs.openclaw.ai" rel="noreferrer noopener" target="_blank">OpenClaw中文</a></p>\n',
+        '<p><a href="https://github.com/Exaggarate/carapace" rel="noreferrer noopener" target="_blank">Carapace中文</a></p>\n',
       );
     });
 
@@ -572,7 +572,7 @@ describe("toSanitizedMarkdownHtml links", () => {
     it("keeps the bundled GitHub mark and skips image-only links", () => {
       const fragment = htmlFragment(
         toSanitizedMarkdownHtml(
-          "[OpenClaw](https://github.com/openclaw/openclaw) [![badge](data:image/png;base64,iVBORw0KGgo=)](https://example.com)",
+          "[Carapace](https://github.com/Exaggarate/carapace) [![badge](data:image/png;base64,iVBORw0KGgo=)](https://example.com)",
           { linkFavicons: true },
         ),
       );
@@ -584,7 +584,7 @@ describe("toSanitizedMarkdownHtml links", () => {
   });
 
   describe("github item references", () => {
-    const githubRepo = { owner: "openclaw", repo: "openclaw" };
+    const githubRepo = { owner: "carapace", repo: "carapace" };
 
     it("leaves references plain without a repository", () => {
       const fragment = htmlFragment(toSanitizedMarkdownHtml("PR #141270 issue #123 #141270"));
@@ -607,7 +607,7 @@ describe("toSanitizedMarkdownHtml links", () => {
     ])("renders %s through the existing GitHub chip classifier", (input, prefix, number, kind) => {
       const fragment = htmlFragment(toSanitizedMarkdownHtml(input, { githubRepo }));
       const anchor = fragment.querySelector<HTMLAnchorElement>("a.markdown-github-item");
-      const href = `https://github.com/openclaw/openclaw/${kind === "pull" ? "pull" : "issues"}/${number}`;
+      const href = `https://github.com/Exaggarate/carapace/${kind === "pull" ? "pull" : "issues"}/${number}`;
       expect(anchor?.getAttribute("href")).toBe(href);
       expect(anchor?.classList.contains("markdown-github-link")).toBe(true);
       expect(anchor?.dataset.githubKind).toBe(kind);
@@ -855,11 +855,11 @@ describe("toSanitizedMarkdownHtml links", () => {
 
   describe("github link marks", () => {
     it.each([
-      ["bare pull request", "https://github.com/openclaw/openclaw/pull/3434", "#3434", "pull"],
-      ["bare issue", "https://github.com/openclaw/openclaw/issues/3435", "#3435", "issue"],
-      ["autolink", "<https://github.com/openclaw/openclaw/pull/3434>", "#3434", "pull"],
-      ["bare www item", "https://www.github.com/openclaw/openclaw/issues/3435", "#3435", "issue"],
-      ["repository", "https://github.com/openclaw/openclaw", "openclaw/openclaw", undefined],
+      ["bare pull request", "https://github.com/Exaggarate/carapace/pull/3434", "#3434", "pull"],
+      ["bare issue", "https://github.com/Exaggarate/carapace/issues/3435", "#3435", "issue"],
+      ["autolink", "<https://github.com/Exaggarate/carapace/pull/3434>", "#3434", "pull"],
+      ["bare www item", "https://www.github.com/Exaggarate/carapace/issues/3435", "#3435", "issue"],
+      ["repository", "https://github.com/Exaggarate/carapace", "carapace/carapace", undefined],
       [
         "repository file",
         "https://github.com/blader/humanizer/blob/main/SKILL.md",
@@ -868,79 +868,79 @@ describe("toSanitizedMarkdownHtml links", () => {
       ],
       [
         "other path",
-        "https://github.com/openclaw/openclaw/actions/runs/123",
+        "https://github.com/Exaggarate/carapace/actions/runs/123",
         "github.com/actions/runs/123",
         undefined,
       ],
       [
         "pull shorthand",
-        "[#3434](https://github.com/openclaw/openclaw/pull/3434)",
+        "[#3434](https://github.com/Exaggarate/carapace/pull/3434)",
         "#3434",
         "pull",
       ],
       [
         "issue shorthand",
-        "[#3434](https://github.com/openclaw/openclaw/issues/3434)",
+        "[#3434](https://github.com/Exaggarate/carapace/issues/3434)",
         "#3434",
         "issue",
       ],
       [
         "repository shorthand",
-        "[openclaw/openclaw#3434](https://github.com/openclaw/openclaw/pull/3434)",
-        "openclaw/openclaw#3434",
+        "[carapace/carapace#3434](https://github.com/Exaggarate/carapace/pull/3434)",
+        "carapace/carapace#3434",
         "pull",
       ],
       [
         "shorthand with authored tooltip",
-        '[#3434](https://github.com/openclaw/openclaw/pull/3434 "A pull request")',
+        '[#3434](https://github.com/Exaggarate/carapace/pull/3434 "A pull request")',
         "#3434",
         "pull",
       ],
       [
         "labelled link",
-        "[the fix](https://github.com/openclaw/openclaw/pull/3434)",
+        "[the fix](https://github.com/Exaggarate/carapace/pull/3434)",
         "the fix",
         undefined,
       ],
       [
         "www host",
-        "[the fix](https://www.github.com/openclaw/openclaw/pull/3434)",
+        "[the fix](https://www.github.com/Exaggarate/carapace/pull/3434)",
         "the fix",
         undefined,
       ],
       [
         "http scheme",
-        "[the fix](http://github.com/openclaw/openclaw/pull/3434)",
+        "[the fix](http://github.com/Exaggarate/carapace/pull/3434)",
         "the fix",
         undefined,
       ],
       [
         "list item",
-        "- [the fix](https://github.com/openclaw/openclaw/pull/3434)",
+        "- [the fix](https://github.com/Exaggarate/carapace/pull/3434)",
         "the fix",
         undefined,
       ],
       [
         "wrong number",
-        "[#3435](https://github.com/openclaw/openclaw/pull/3434)",
+        "[#3435](https://github.com/Exaggarate/carapace/pull/3434)",
         "#3435",
         undefined,
       ],
       [
         "wrong repository",
-        "[other/project#3434](https://github.com/openclaw/openclaw/pull/3434)",
+        "[other/project#3434](https://github.com/Exaggarate/carapace/pull/3434)",
         "other/project#3434",
         undefined,
       ],
       [
         "padded label",
-        "[ #3434 ](https://github.com/openclaw/openclaw/pull/3434)",
+        "[ #3434 ](https://github.com/Exaggarate/carapace/pull/3434)",
         " #3434 ",
         undefined,
       ],
       [
         "code-span label",
-        "[`#3434`](https://github.com/openclaw/openclaw/pull/3434)",
+        "[`#3434`](https://github.com/Exaggarate/carapace/pull/3434)",
         "#3434",
         undefined,
       ],
@@ -981,14 +981,14 @@ describe("toSanitizedMarkdownHtml links", () => {
     });
 
     it.each([
-      ["a files-tab path", "https://github.com/openclaw/openclaw/pull/3434/files"],
-      ["a commits path", "https://github.com/openclaw/openclaw/pull/3434/commits"],
+      ["a files-tab path", "https://github.com/Exaggarate/carapace/pull/3434/files"],
+      ["a commits path", "https://github.com/Exaggarate/carapace/pull/3434/commits"],
       [
         "an issue comment fragment",
-        "https://github.com/openclaw/openclaw/issues/3434#issuecomment-1",
+        "https://github.com/Exaggarate/carapace/issues/3434#issuecomment-1",
       ],
-      ["a review comment query", "https://github.com/openclaw/openclaw/pull/3434?tab=files"],
-      ["a diff anchor", "https://github.com/openclaw/openclaw/pull/3434/files#diff-abc123"],
+      ["a review comment query", "https://github.com/Exaggarate/carapace/pull/3434?tab=files"],
+      ["a diff anchor", "https://github.com/Exaggarate/carapace/pull/3434/files#diff-abc123"],
     ])("keeps the specific destination in the chip href and tooltip for %s", (_kind, input) => {
       const fragment = htmlFragment(toSanitizedMarkdownHtml(input));
       const link = fragment.querySelector<HTMLAnchorElement>("a");
@@ -1000,11 +1000,11 @@ describe("toSanitizedMarkdownHtml links", () => {
     });
 
     it.each([
-      ["non-github host", "[docs](https://example.com/openclaw)"],
-      ["lookalike host", "[docs](https://notgithub.com/openclaw)"],
-      ["github in query", "[docs](https://example.com/?to=https://github.com/openclaw)"],
-      ["subdomain host", "[pages](https://openclaw.github.io/openclaw)"],
-      ["image-only link", "[![build](data:image/png;base64,x)](https://github.com/openclaw)"],
+      ["non-github host", "[docs](https://example.com/carapace)"],
+      ["lookalike host", "[docs](https://notgithub.com/carapace)"],
+      ["github in query", "[docs](https://example.com/?to=https://github.com/carapace)"],
+      ["subdomain host", "[pages](https://carapace.github.io/carapace)"],
+      ["image-only link", "[![build](data:image/png;base64,x)](https://github.com/carapace)"],
       ["image-only item", "[![build](data:image/png;base64,x)](https://github.com/o/r/pull/3434)"],
       ["lookalike item", "https://github.com.example.com/o/r/pull/3434"],
       ["non-github shorthand", "[#3434](https://example.com/o/r/pull/3434)"],
@@ -1017,7 +1017,7 @@ describe("toSanitizedMarkdownHtml links", () => {
     it("leaves github urls inside fences untouched", () => {
       const fragment = htmlFragment(
         toSanitizedMarkdownHtml(
-          "```\nhttps://github.com/openclaw/openclaw\n```\n\n```\nhttps://github.com/o/r/pull/3434\n```",
+          "```\nhttps://github.com/Exaggarate/carapace\n```\n\n```\nhttps://github.com/o/r/pull/3434\n```",
         ),
       );
       expect(fragment.querySelector("a")).toBeNull();
@@ -1025,9 +1025,9 @@ describe("toSanitizedMarkdownHtml links", () => {
     });
 
     it.each([
-      ["pull request", "`https://github.com/openclaw/openclaw/pull/141131`", "#141131", "pull"],
+      ["pull request", "`https://github.com/Exaggarate/carapace/pull/141131`", "#141131", "pull"],
       ["issue", "` https://github.com/o/r/issues/3434 `", "#3434", "issue"],
-      ["repository", "`https://github.com/openclaw/openclaw`", "openclaw/openclaw", undefined],
+      ["repository", "`https://github.com/Exaggarate/carapace`", "carapace/carapace", undefined],
     ])("promotes a code span holding only a github %s url", (_kind, input, label, kind) => {
       const href = input.replaceAll("`", "").trim();
       const fragment = htmlFragment(toSanitizedMarkdownHtml(`See ${input} today`));
@@ -1060,10 +1060,10 @@ describe("toSanitizedMarkdownHtml links", () => {
 
     it("keeps the hover preview target intact on marked links", () => {
       const fragment = htmlFragment(
-        toSanitizedMarkdownHtml("[#3434](https://github.com/openclaw/openclaw/pull/3434)"),
+        toSanitizedMarkdownHtml("[#3434](https://github.com/Exaggarate/carapace/pull/3434)"),
       );
       const link = fragment.querySelector<HTMLAnchorElement>("a.markdown-github-link");
-      expect(link?.getAttribute("href")).toBe("https://github.com/openclaw/openclaw/pull/3434");
+      expect(link?.getAttribute("href")).toBe("https://github.com/Exaggarate/carapace/pull/3434");
       expect(link?.getAttribute("target")).toBe("_blank");
     });
   });

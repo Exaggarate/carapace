@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 /** Normalizes ClawHub SHA-256 metadata into Subresource Integrity format. */
 export function normalizeClawHubSha256Integrity(value: string): string | null {

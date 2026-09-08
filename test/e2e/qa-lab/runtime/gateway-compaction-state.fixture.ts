@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 import { setTimeout as pollDelay } from "node:timers/promises";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import type { QaBusState, QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import {
   COMPACTION_PROOF_MODEL_ID as MODEL_ID,
@@ -16,16 +16,16 @@ import {
 type StateRuntime = {
   sessions: {
     SessionManager: Pick<
-      typeof import("openclaw/plugin-sdk/agent-sessions").SessionManager,
+      typeof import("carapace/plugin-sdk/agent-sessions").SessionManager,
       "open"
     >;
   };
   store: Pick<
-    typeof import("openclaw/plugin-sdk/session-store-runtime"),
+    typeof import("carapace/plugin-sdk/session-store-runtime"),
     "resolveStorePath" | "upsertSessionEntry" | "loadTranscriptEventsSync"
   >;
   transcript: Pick<
-    typeof import("openclaw/plugin-sdk/session-transcript-runtime"),
+    typeof import("carapace/plugin-sdk/session-transcript-runtime"),
     "appendSessionTranscriptMessageByIdentity"
   >;
   claimAgentSessionWriter: typeof import("../../../../src/agents/embedded-agent-runner/run/session-bootstrap.js").claimAgentSessionWriter;

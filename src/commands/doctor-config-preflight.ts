@@ -14,7 +14,7 @@ import { formatConfigIssueLines } from "../config/issue-format.js";
 import { resolveStateDir } from "../config/paths.js";
 import { inspectShippedPluginInstallConfigRecords } from "../config/plugin-install-config-migration.js";
 import type { ConfigFileSnapshot } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import type {
   MigrationCheckpointIdentity,
@@ -29,9 +29,9 @@ import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveInstalledPluginIndexPolicyHash } from "../plugins/installed-plugin-index-policy.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
-import { withArtifactPreservingStateReads } from "../state/openclaw-state-db-readonly.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../state/openclaw-state-ownership.js";
+import { withArtifactPreservingStateReads } from "../state/carapace-state-db-readonly.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../state/carapace-state-ownership.js";
 import { noteIncludeConfinementWarning } from "./doctor-config-analysis.js";
 import { resolveMigrationCheckpointIdentity } from "./doctor-config-preflight-checkpoint.js";
 import { maybeMigrateLegacyConfig } from "./doctor-config-preflight-legacy-config.js";
@@ -50,7 +50,7 @@ import {
   prepareStartupMigrationPlugins,
 } from "./doctor-config-preflight-startup.js";
 import * as cronMigration from "./doctor-config-preflight.cron.js";
-import { maybeRepairPluginOpenClawHostLinks } from "./doctor-plugin-host-links.js";
+import { maybeRepairPluginCarapaceHostLinks } from "./doctor-plugin-host-links.js";
 import { throwStartupMigrationGuardRejected } from "./doctor-startup-migration-refusal.js";
 import { noteStaleUpdateRuns } from "./doctor-update-run.js";
 import type { CronCodexRuntimePolicyTarget } from "./doctor/cron/store-migration.js";
@@ -69,7 +69,7 @@ const configLog = createSubsystemLogger("config");
 
 export type DoctorConfigPreflightResult = {
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
   cronCodexRuntimePolicyTargets?: CronCodexRuntimePolicyTarget[];
   stateMigrationStepReceipts?: LegacyStateMigrationStepReceipt[];
@@ -81,7 +81,7 @@ export type DoctorConfigPreflightResult = {
 export function shouldSkipPluginValidationForDoctorConfigPreflight(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  return isTruthyEnvValue(env.OPENCLAW_UPDATE_IN_PROGRESS);
+  return isTruthyEnvValue(env.CARAPACE_UPDATE_IN_PROGRESS);
 }
 
 /**
@@ -120,8 +120,8 @@ export async function runDoctorConfigPreflight(
   // Startup publishes one aggregate report; ordinary Doctor calls keep their per-stage output.
   const migrationLog = gatewayStartupCheckpointRequired ? { info() {}, warn() {} } : undefined;
   if (stateMigrationsRequested) {
-    await assertOpenClawStateWriteAllowedAtPath({
-      databasePath: resolveOpenClawStateSqlitePath(process.env),
+    await assertCarapaceStateWriteAllowedAtPath({
+      databasePath: resolveCarapaceStateSqlitePath(process.env),
       env: process.env,
       recoverOrphanedSidecars: !gatewayStartupCheckpointRequired,
     });
@@ -213,7 +213,7 @@ export async function runDoctorConfigPreflight(
         startupMigrationHeartbeatError =
           error instanceof Error
             ? error
-            : new Error("OpenClaw startup migration lease heartbeat failed.");
+            : new Error("Carapace startup migration lease heartbeat failed.");
       }
     }, 60_000);
     startupMigrationHeartbeat.unref?.();
@@ -227,7 +227,7 @@ export async function runDoctorConfigPreflight(
       warnings: gatewayStartupCheckpointRequired ? [] : result.warnings,
     });
   };
-  const migratePluginDoctorState = async (config: OpenClawConfig) => {
+  const migratePluginDoctorState = async (config: CarapaceConfig) => {
     const { autoMigrateLegacyPluginDoctorState } =
       await import("../infra/state-migrations.plugin-doctor.js");
     noteStartupStateMigrationResult(
@@ -368,7 +368,7 @@ export async function runDoctorConfigPreflight(
           : null;
       let configRepaired = false;
       if (!activeConfigRepair && (await recoverConfigFromJsonRootSuffix(snapshot))) {
-        note("Removed non-JSON prefix from openclaw.json.", "Config");
+        note("Removed non-JSON prefix from carapace.json.", "Config");
         configRepaired = true;
       } else if (
         !activeConfigRepair &&
@@ -377,7 +377,7 @@ export async function runDoctorConfigPreflight(
         (await recoverConfigFromLastKnownGood({ snapshot, reason: "doctor-invalid-config" }))
       ) {
         note(
-          "Restored openclaw.json from last-known-good; original saved as .clobbered.*.",
+          "Restored carapace.json from last-known-good; original saved as .clobbered.*.",
           "Config",
         );
         configRepaired = true;
@@ -392,7 +392,7 @@ export async function runDoctorConfigPreflight(
         !parseConfigJson5(snapshot.raw).ok
       ) {
         throw new Error(
-          `Config at ${snapshot.path} is not parseable and cannot be repaired automatically. The file remains unchanged. Inspect the exact parse error with ${formatCliCommand("openclaw config validate")}, then hand-edit the file; or move it aside and run ${formatCliCommand("openclaw onboard")} to generate a fresh config.`,
+          `Config at ${snapshot.path} is not parseable and cannot be repaired automatically. The file remains unchanged. Inspect the exact parse error with ${formatCliCommand("carapace config validate")}, then hand-edit the file; or move it aside and run ${formatCliCommand("carapace onboard")} to generate a fresh config.`,
         );
       }
     }
@@ -521,7 +521,7 @@ export async function runDoctorConfigPreflight(
         }
         // Repair host links under the pinned lease before plugin migrations import packages.
         await measurePreflightStep("plugin-host-link-repair", () =>
-          maybeRepairPluginOpenClawHostLinks({
+          maybeRepairPluginCarapaceHostLinks({
             env: startupMigrationEnv,
             prompter: { shouldRepair: true },
           }),
@@ -662,7 +662,7 @@ export async function runDoctorConfigPreflight(
         ),
       );
       note(
-        `Migrated legacy config keys${activeConfigRepair ? " in the active openclaw.json" : " at startup"}:\n${automaticConfigRepair.changes.map((entry) => `- ${entry}`).join("\n")}`,
+        `Migrated legacy config keys${activeConfigRepair ? " in the active carapace.json" : " at startup"}:\n${automaticConfigRepair.changes.map((entry) => `- ${entry}`).join("\n")}`,
         "Doctor changes",
       );
       configSnapshotRead = await readConfigSnapshotForPreflight(false);
@@ -714,7 +714,7 @@ export async function runDoctorConfigPreflight(
           persistedIdentity.pluginDoctorConfigFingerprint
       ) {
         throw new Error(
-          'OpenClaw config identity changed while persisting the refreshed plugin registry; refusing to write the migration checkpoint. Run "openclaw doctor --fix" and retry.',
+          'Carapace config identity changed while persisting the refreshed plugin registry; refusing to write the migration checkpoint. Run "carapace doctor --fix" and retry.',
         );
       }
       // The durable reread supplies the accepted inventory. Replace both the

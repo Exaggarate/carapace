@@ -17,9 +17,9 @@ describe("state database coordinator", () => {
   ] as const)(
     "reacquires an existing %s coordinator without filesystem changes",
     async (_, acquire) => {
-      const root = tempDirs.make("openclaw-lifecycle-coordinator-noop-");
+      const root = tempDirs.make("carapace-lifecycle-coordinator-noop-");
       const params = {
-        databasePath: path.join(root, "state", "openclaw.sqlite"),
+        databasePath: path.join(root, "state", "carapace.sqlite"),
         runtimeDirectory: root,
       };
       const first = acquire(params);
@@ -44,8 +44,8 @@ describe("state database coordinator", () => {
   );
 
   it("reference-counts same-process owners", async () => {
-    const root = tempDirs.make("openclaw-state-database-coordinator-");
-    const databasePath = path.join(root, "selected-state", "state", "openclaw.sqlite");
+    const root = tempDirs.make("carapace-state-database-coordinator-");
+    const databasePath = path.join(root, "selected-state", "state", "carapace.sqlite");
     const runtimeDirectory = path.join(root, "runtime");
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     const first = acquireStateDatabaseCoordinator({
@@ -71,8 +71,8 @@ describe("state database coordinator", () => {
   });
 
   it("keeps Gateway presence independent from short state operations", async () => {
-    const root = tempDirs.make("openclaw-gateway-lifecycle-coordinator-");
-    const databasePath = path.join(root, "state", "openclaw.sqlite");
+    const root = tempDirs.make("carapace-gateway-lifecycle-coordinator-");
+    const databasePath = path.join(root, "state", "carapace.sqlite");
     const runtimeDirectory = path.join(root, "runtime");
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     const gateway = acquireGatewayLifecycleCoordinator({
@@ -91,8 +91,8 @@ describe("state database coordinator", () => {
   });
 
   it("allows the owning Gateway process to mutate its own schema", async () => {
-    const root = tempDirs.make("openclaw-gateway-schema-owner-");
-    const databasePath = path.join(root, "state", "openclaw.sqlite");
+    const root = tempDirs.make("carapace-gateway-schema-owner-");
+    const databasePath = path.join(root, "state", "carapace.sqlite");
     const runtimeDirectory = path.join(root, "runtime");
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     const gateway = acquireGatewayLifecycleCoordinator({

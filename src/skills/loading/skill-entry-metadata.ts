@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { isPathInside } from "../../infra/path-guards.js";
-import type { OpenClawSkillMetadata, ParsedSkillFrontmatter } from "../types.js";
+import type { CarapaceSkillMetadata, ParsedSkillFrontmatter } from "../types.js";
 import { resolveSkillManifestMetadata } from "./frontmatter.js";
 import { tryRealpath } from "./symlink-targets.js";
 
-const SKILL_SOURCE_ORIGIN_RELATIVE_PATH = path.join(".openclaw", "source-origin.json");
+const SKILL_SOURCE_ORIGIN_RELATIVE_PATH = path.join(".carapace", "source-origin.json");
 const MAX_SKILL_SOURCE_ORIGIN_BYTES = 16 * 1024;
 
 function readSourceInstallSkillKey(skillDir: string): string | undefined {
@@ -37,7 +37,7 @@ function readSourceInstallSkillKey(skillDir: string): string | undefined {
 export function resolveSkillEntryMetadata(params: {
   frontmatter: ParsedSkillFrontmatter;
   skillDir: string;
-}): OpenClawSkillMetadata | undefined {
+}): CarapaceSkillMetadata | undefined {
   const metadata = resolveSkillManifestMetadata(params.frontmatter);
   if (metadata?.skillKey) {
     return metadata;

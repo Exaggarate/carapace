@@ -19,9 +19,9 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const catalogGroupingStorageKey = "openclaw:sidebar:sessions:catalog-grouping";
-const collapsedSessionSectionsStorageKey = "openclaw:sidebar:sessions:collapsed-sections";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const catalogGroupingStorageKey = "carapace:sidebar:sessions:catalog-grouping";
+const collapsedSessionSectionsStorageKey = "carapace:sidebar:sessions:collapsed-sections";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -134,7 +134,7 @@ suite.define(() => {
               worktree: {
                 id: "startup-phases",
                 branch: "startup-phases",
-                repoRoot: "/workspace/openclaw",
+                repoRoot: "/workspace/carapace",
               },
             },
           ],
@@ -156,7 +156,7 @@ suite.define(() => {
                     {
                       threadId: "thread-startup",
                       name: "Trace startup labels to code paths",
-                      cwd: "/workspace/openclaw",
+                      cwd: "/workspace/carapace",
                       status: "idle",
                       archived: false,
                       canContinue: true,
@@ -180,7 +180,7 @@ suite.define(() => {
                     {
                       threadId: "thread-claude",
                       name: "Review the provider catalog UI",
-                      cwd: "/workspace/openclaw",
+                      cwd: "/workspace/carapace",
                       status: "idle",
                       archived: false,
                       canContinue: true,
@@ -376,7 +376,7 @@ suite.define(() => {
                     {
                       threadId: "thread-local",
                       name: "Local planning session",
-                      cwd: "/Users/dev/openclaw",
+                      cwd: "/Users/dev/carapace",
                       status: "idle",
                       archived: false,
                       canContinue: true,
@@ -391,7 +391,7 @@ suite.define(() => {
                     {
                       threadId: "thread-worktree",
                       name: "Worktree fix session",
-                      cwd: "/Users/dev/openclaw/.claude/worktrees/fix-1",
+                      cwd: "/Users/dev/carapace/.claude/worktrees/fix-1",
                       status: "idle",
                       archived: false,
                       canContinue: true,
@@ -461,11 +461,11 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: import("../app/bootstrap.ts").ApplicationRuntime;
             };
             const theme = app.runtime?.context.theme;
-            const palette = document.getElementById("openclaw-theme-palette-knot");
+            const palette = document.getElementById("carapace-theme-palette-knot");
             const root = document.documentElement.dataset;
             return {
               preferences: [theme?.settings.theme, theme?.mode, theme?.resolvedMode],
@@ -495,23 +495,23 @@ suite.define(() => {
           .locator(":scope > *")
           .evaluateAll((items) => items.map((item) => item.getAttribute("role"))),
       ).toEqual(["listitem", "listitem"]);
-      const openclawProject = section.locator(
-        '[data-session-catalog-project="project:/Users/dev/openclaw"]',
+      const carapaceProject = section.locator(
+        '[data-session-catalog-project="project:/Users/dev/carapace"]',
       );
-      const openclawProjectItem = openclawProject.locator("..");
-      const openclawProjectList = openclawProjectItem.locator(":scope > [role=list]");
-      expect(await openclawProjectItem.getAttribute("role")).toBe("listitem");
-      expect(await openclawProjectList.getAttribute("aria-label")).toBe("Local Codex: openclaw");
+      const carapaceProjectItem = carapaceProject.locator("..");
+      const carapaceProjectList = carapaceProjectItem.locator(":scope > [role=list]");
+      expect(await carapaceProjectItem.getAttribute("role")).toBe("listitem");
+      expect(await carapaceProjectList.getAttribute("aria-label")).toBe("Local Codex: carapace");
       expect(
-        await openclawProject.locator(".sidebar-session-catalog-project__label").textContent(),
-      ).toBe("openclaw");
+        await carapaceProject.locator(".sidebar-session-catalog-project__label").textContent(),
+      ).toBe("carapace");
       expect(
-        await openclawProject.locator(".sidebar-session-catalog-project__count").textContent(),
+        await carapaceProject.locator(".sidebar-session-catalog-project__count").textContent(),
       ).toBe("2");
       const projectRows = section.locator(".sidebar-recent-session--catalog-project-child");
       await expect.poll(() => projectRows.count()).toBe(3);
       expect(
-        await openclawProjectList
+        await carapaceProjectList
           .locator(":scope > *")
           .evaluateAll((items) => items.map((item) => item.getAttribute("role"))),
       ).toEqual(["listitem", "listitem"]);
@@ -560,7 +560,7 @@ suite.define(() => {
         });
       }
       const projectLabelTone = await readTextTone(
-        openclawProject.locator(".sidebar-session-catalog-project__label"),
+        carapaceProject.locator(".sidebar-session-catalog-project__label"),
       );
       expect(projectLabelTone.distanceToText).toBeLessThan(projectLabelTone.distanceToMuted);
       if (captureUiProofEnabled) {
@@ -646,24 +646,24 @@ suite.define(() => {
         await page.evaluate((key) => localStorage.getItem(key), catalogGroupingStorageKey),
       ).toBe("project");
 
-      await openclawProject.click();
-      await expect.poll(() => openclawProject.getAttribute("aria-expanded")).toBe("false");
+      await carapaceProject.click();
+      await expect.poll(() => carapaceProject.getAttribute("aria-expanded")).toBe("false");
       expect(await section.getByText("Local planning session", { exact: true }).count()).toBe(0);
       expect(await section.getByText("Worktree fix session", { exact: true }).count()).toBe(0);
       expect(await section.getByText("Other project session", { exact: true }).count()).toBe(1);
-      expect(await openclawProject.count()).toBe(1);
+      expect(await carapaceProject.count()).toBe(1);
       expect(
-        await openclawProject.locator(".sidebar-session-catalog-project__count").textContent(),
+        await carapaceProject.locator(".sidebar-session-catalog-project__count").textContent(),
       ).toBe("2");
       expect(
         await page.evaluate(
           (key) => JSON.parse(localStorage.getItem(key) ?? "[]"),
           collapsedSessionSectionsStorageKey,
         ),
-      ).toContain("catalog-project:codex:gateway:local:project:/Users/dev/openclaw");
+      ).toContain("catalog-project:codex:gateway:local:project:/Users/dev/carapace");
 
-      await openclawProject.click();
-      await expect.poll(() => openclawProject.getAttribute("aria-expanded")).toBe("true");
+      await carapaceProject.click();
+      await expect.poll(() => carapaceProject.getAttribute("aria-expanded")).toBe("true");
       expect(await section.getByText("Local planning session", { exact: true }).count()).toBe(1);
       expect(await section.getByText("Worktree fix session", { exact: true }).count()).toBe(1);
       expect(
@@ -671,7 +671,7 @@ suite.define(() => {
           (key) => JSON.parse(localStorage.getItem(key) ?? "[]"),
           collapsedSessionSectionsStorageKey,
         ),
-      ).not.toContain("catalog-project:codex:gateway:local:project:/Users/dev/openclaw");
+      ).not.toContain("catalog-project:codex:gateway:local:project:/Users/dev/carapace");
 
       if (captureUiProofEnabled) {
         await section.screenshot({
@@ -978,7 +978,7 @@ suite.define(() => {
     await expandCodingSection(page);
     await page.getByText("Release checklist", { exact: true }).click();
     const catalogPane = page
-      .locator("openclaw-chat-pane.chat-pane-cache__pane--visible")
+      .locator("carapace-chat-pane.chat-pane-cache__pane--visible")
       .filter({ hasText: "prepare release" });
     await catalogPane.getByText("prepare release", { exact: true }).waitFor();
     expect(

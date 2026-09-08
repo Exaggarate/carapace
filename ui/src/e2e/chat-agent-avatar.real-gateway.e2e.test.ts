@@ -4,21 +4,21 @@ import { expect, it } from "vitest";
 import { appendTranscriptMessage } from "../../../src/config/sessions/session-accessor.js";
 import { ensureGatewayOwnerProfile, setAvatar } from "../../../src/state/user-profiles.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { runQaGatewayFixture } from "../../../test/helpers/qa-gateway-cleanup.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { controlUiSessionUrl } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
-const captureEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-let instance: OpenClawTestInstance | undefined;
+const captureEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+let instance: CarapaceTestInstance | undefined;
 const suite = createControlUiE2eSuite({
   name: "Control UI agent avatar with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    const owner = await createOpenClawTestInstance({
+    const owner = await createCarapaceTestInstance({
       name: "control-ui-agent-avatar",
       config: { gateway: { controlUi: { enabled: true } } },
     });

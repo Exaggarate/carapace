@@ -18,7 +18,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not installed at ${executablePath}.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const artifactParent = path.resolve(process.cwd(), ".artifacts/control-ui-e2e/workboard-routing");
 const boards = [
   { id: "default", total: 0, active: 0, archived: 0, byStatus: {} },
@@ -39,7 +39,7 @@ function configSnapshot(enabled: boolean) {
   return {
     config,
     hash: `workboard-routing-${enabled}`,
-    path: "/tmp/openclaw-e2e/openclaw.json",
+    path: "/tmp/carapace-e2e/carapace.json",
     raw: JSON.stringify(config),
     resolved: config,
     sourceConfig: config,
@@ -129,7 +129,7 @@ suite.define(() => {
         );
       }
 
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       await sidebar
         .locator("wa-dropdown.sidebar-more-menu")
@@ -227,7 +227,7 @@ suite.define(() => {
         await page.goto(`${suite.server.baseUrl}workboard`);
         await gateway.waitForRequest("agents.list");
 
-        const agentScope = page.locator(".agent-scope-control openclaw-agent-select");
+        const agentScope = page.locator(".agent-scope-control carapace-agent-select");
         await agentScope.locator(".agent-select__trigger").click();
         await expect
           .poll(() =>
@@ -269,7 +269,7 @@ suite.define(() => {
         await expect
           .poll(() =>
             createForm
-              .locator(".workboard-agent-select openclaw-agent-select")
+              .locator(".workboard-agent-select carapace-agent-select")
               .evaluate((select) => (select as HTMLElement & { value: string }).value),
           )
           .toBe("writer");
@@ -305,7 +305,7 @@ suite.define(() => {
           },
         });
         await page.goto(`${suite.server.baseUrl}apps`);
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         await sidebar.locator(".sidebar-nav__head-action").click();
         await sidebar
           .locator("wa-dropdown.sidebar-more-menu")
@@ -359,7 +359,7 @@ suite.define(() => {
         },
       });
       await page.goto(`${suite.server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       const moreMenu = sidebar.locator("wa-dropdown.sidebar-more-menu");
       await moreMenu.waitFor();

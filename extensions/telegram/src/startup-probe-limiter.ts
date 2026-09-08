@@ -1,4 +1,4 @@
-import { createPermitPool } from "openclaw/plugin-sdk/concurrency-runtime";
+import { createPermitPool } from "carapace/plugin-sdk/concurrency-runtime";
 
 const TELEGRAM_STARTUP_PROBE_CONCURRENCY = 2;
 const startupProbePermits = createPermitPool(TELEGRAM_STARTUP_PROBE_CONCURRENCY);

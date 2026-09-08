@@ -2,7 +2,7 @@
  * Tests direct-message guard policy helpers exposed through the SDK.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveImplicitMessageActionTarget } from "../infra/outbound/message-action-normalization.js";
 import {
   createDirectDmPreCryptoGuardPolicy,
@@ -14,7 +14,7 @@ import { resolveStableChannelMessageIngress } from "./channel-ingress-runtime.js
 
 const baseCfg = {
   commands: { useAccessGroups: true },
-} as unknown as OpenClawConfig;
+} as unknown as CarapaceConfig;
 
 function createDirectDmRuntime() {
   const recordInboundSessionMock = vi.fn(async (_params: unknown) => {});
@@ -139,7 +139,7 @@ describe("channel-inbound direct-message helpers", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: "nostr",
       accountId: "default",
       dmPolicy: "allowlist",

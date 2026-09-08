@@ -6,7 +6,7 @@ import {
 } from "./native-session-catalog-config.js";
 import type { PluginRuntime } from "./runtime/types.js";
 import type { SessionCatalogProvider } from "./session-catalog.js";
-import type { OpenClawPluginNodeHostCommand } from "./types.node-host.js";
+import type { CarapacePluginNodeHostCommand } from "./types.node-host.js";
 
 function hasReadableNativeCatalogConfig(): boolean {
   try {
@@ -95,7 +95,7 @@ export function createNativeSessionCatalogGate(params: {
           : {}),
       };
     },
-    node(command: OpenClawPluginNodeHostCommand): OpenClawPluginNodeHostCommand {
+    node(command: CarapacePluginNodeHostCommand): CarapacePluginNodeHostCommand {
       const { prepare, watchAvailability } = command;
       return {
         ...command,

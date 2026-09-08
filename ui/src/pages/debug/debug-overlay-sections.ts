@@ -1,5 +1,5 @@
-import { formatByteSize } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { formatByteSize } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, nothing, type TemplateResult } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import type { SystemInfoResult } from "../../../../packages/gateway-protocol/src/index.js";
@@ -157,7 +157,7 @@ function renderStatus(
       : "";
   return html`
     <div class="debug-overlay__vitals">
-      <openclaw-debug-sparkline
+      <carapace-debug-sparkline
         class="debug-overlay__vital debug-overlay__vital--cpu"
         data-degraded=${cpuDegraded ? "" : nothing}
         .label=${t("debug.overlay.cpu")}
@@ -165,16 +165,16 @@ function renderStatus(
         .samples=${collectSamples(history, (sample) => sample.eventLoop?.cpuCoreRatio)}
         .format=${formatPercent}
         .floorMax=${1}
-      ></openclaw-debug-sparkline>
-      <openclaw-debug-sparkline
+      ></carapace-debug-sparkline>
+      <carapace-debug-sparkline
         class="debug-overlay__vital debug-overlay__vital--memory"
         .label=${t("debug.overlay.memory")}
         .sub=${heapSub}
         .samples=${collectSamples(history, (sample) => sample.processMemory?.rssBytes)}
         .format=${formatMegabytes}
         autorange
-      ></openclaw-debug-sparkline>
-      <openclaw-debug-sparkline
+      ></carapace-debug-sparkline>
+      <carapace-debug-sparkline
         class="debug-overlay__vital debug-overlay__vital--delay"
         data-degraded=${delayDegraded ? "" : nothing}
         .label=${t("debug.overlay.delayP99")}
@@ -182,7 +182,7 @@ function renderStatus(
         .samples=${collectSamples(history, (sample) => sample.eventLoop?.delayP99Ms)}
         .format=${formatDelayMs}
         .floorMax=${20}
-      ></openclaw-debug-sparkline>
+      ></carapace-debug-sparkline>
     </div>
     ${
       status.disks?.length
@@ -190,7 +190,7 @@ function renderStatus(
             ${repeat(
               status.disks ?? [],
               (disk) => disk.path,
-              (disk) => html`<openclaw-debug-sparkline
+              (disk) => html`<carapace-debug-sparkline
                 class="debug-overlay__vital debug-overlay__vital--disk"
                 title=${disk.path}
                 .label=${`${t("debug.overlay.disk")} ${disk.path}`}
@@ -202,7 +202,7 @@ function renderStatus(
                 )}
                 .format=${formatFreeBytes}
                 autorange
-              ></openclaw-debug-sparkline>`,
+              ></carapace-debug-sparkline>`,
             )}
           </div>`
         : nothing

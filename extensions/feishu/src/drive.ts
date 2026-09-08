@@ -1,9 +1,9 @@
 // Feishu plugin module implements drive behavior.
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import { isRecord, readStringValue as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawPluginApi } from "../runtime-api.js";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
+import { isRecord, readStringValue as readString } from "carapace/plugin-sdk/string-coerce-runtime";
+import type { CarapacePluginApi } from "../runtime-api.js";
 import { cleanupAmbientCommentTypingReaction } from "./comment-reaction.js";
 import { encodeQuery, extractReplyText, formatFeishuApiError } from "./comment-shared.js";
 import { parseFeishuCommentTarget, type CommentFileType } from "./comment-target.js";
@@ -721,7 +721,7 @@ export async function deliverCommentThreadText(
 
 // ============ Tool Registration ============
 
-export function registerFeishuDriveTools(api: OpenClawPluginApi) {
+export function registerFeishuDriveTools(api: CarapacePluginApi) {
   if (!api.config) {
     return;
   }

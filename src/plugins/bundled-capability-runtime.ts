@@ -2,8 +2,8 @@
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { withBundledPluginEnablementCompat } from "./bundled-compat.js";
 import { getGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
-import { discoverOpenClawPlugins, type PluginDiscoveryResult } from "./discovery.js";
-import { loadOpenClawPluginsWithInternalOverrides } from "./loader-runtime-load.js";
+import { discoverCarapacePlugins, type PluginDiscoveryResult } from "./discovery.js";
+import { loadCarapacePluginsWithInternalOverrides } from "./loader-runtime-load.js";
 import type { PluginLoadOptions } from "./loader.js";
 import { loadPluginManifestRegistryCore } from "./manifest-registry.js";
 import type { PluginRuntime } from "./runtime/types.js";
@@ -62,7 +62,7 @@ export function loadBundledCapabilityRuntimeRegistry(
   const discovery = preparedRegistry
     ? undefined
     : (params.discovery ??
-      discoverOpenClawPlugins({
+      discoverCarapacePlugins({
         env,
         workspaceDir: params.workspaceDir,
         installRecords: params.installRecords,
@@ -84,7 +84,7 @@ export function loadBundledCapabilityRuntimeRegistry(
     ),
     diagnostics: manifestRegistry.diagnostics,
   };
-  return loadOpenClawPluginsWithInternalOverrides(
+  return loadCarapacePluginsWithInternalOverrides(
     {
       ...loadOptions,
       config,

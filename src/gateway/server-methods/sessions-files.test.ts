@@ -552,7 +552,7 @@ describe("sessions.files RPC handlers", () => {
   });
 
   it("does not read absolute or parent-relative paths outside the configured workspace", async () => {
-    const outsidePath = path.join(os.tmpdir(), `openclaw-outside-${Date.now()}.txt`);
+    const outsidePath = path.join(os.tmpdir(), `carapace-outside-${Date.now()}.txt`);
     fs.writeFileSync(outsidePath, "outside\n", "utf8");
     hoisted.loadSessionEntry.mockReturnValue({
       canonicalKey: "agent:main:main",
@@ -585,7 +585,7 @@ describe("sessions.files RPC handlers", () => {
   });
 
   it("does not follow workspace symlinks for file previews", async () => {
-    const outsidePath = path.join(os.tmpdir(), `openclaw-linked-${Date.now()}.txt`);
+    const outsidePath = path.join(os.tmpdir(), `carapace-linked-${Date.now()}.txt`);
     fs.writeFileSync(outsidePath, "linked outside\n", "utf8");
     fs.symlinkSync(outsidePath, path.join(workspaceRoot, "linked.txt"));
 
@@ -607,7 +607,7 @@ describe("sessions.files RPC handlers", () => {
   });
 
   it("does not follow symlinked parent directories for file previews", async () => {
-    const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-linked-parent-"));
+    const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-linked-parent-"));
     writeWorkspaceFile(outsideDir, "secret.txt", "linked parent outside\n");
     fs.symlinkSync(outsideDir, path.join(workspaceRoot, "linked-dir"), "dir");
 
@@ -659,7 +659,7 @@ describe("sessions.files RPC handlers", () => {
 
   it("does not derive a workspace root from transcript cwd", async () => {
     const sessionsDir = path.join(workspaceRoot, "custom-sessions");
-    const transcriptCwd = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-transcript-cwd-"));
+    const transcriptCwd = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-transcript-cwd-"));
     writeWorkspaceFile(transcriptCwd, "secret.txt", "transcript cwd secret\n");
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.writeFileSync(
@@ -1080,8 +1080,8 @@ describe("sessions.files RPC handlers", () => {
 
   it("rejects escaped and symlinked write targets without touching outside files", async () => {
     const tempRoot = fs.realpathSync(os.tmpdir());
-    const outsidePath = path.join(tempRoot, `openclaw-session-write-outside-${Date.now()}.txt`);
-    const escapedName = `openclaw-session-write-escape-${Date.now()}.txt`;
+    const outsidePath = path.join(tempRoot, `carapace-session-write-outside-${Date.now()}.txt`);
+    const escapedName = `carapace-session-write-escape-${Date.now()}.txt`;
     const escapedPath = path.resolve(workspaceRoot, "..", escapedName);
     const outsideContent = "outside\n";
     fs.writeFileSync(outsidePath, outsideContent, "utf8");

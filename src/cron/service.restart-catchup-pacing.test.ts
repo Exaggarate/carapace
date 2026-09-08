@@ -8,7 +8,7 @@ const FIRST_RUN_AT = Date.parse("2026-09-06T12:00:00.000Z");
 const MINUTE = 60_000;
 const PACED_DELAY = 30 * MINUTE;
 const { logger, makeStorePath } = setupCronServiceSuite({
-  prefix: "openclaw-cron-paced-restart-",
+  prefix: "carapace-cron-paced-restart-",
   baseTimeIso: new Date(FIRST_RUN_AT - MINUTE).toISOString(),
 });
 

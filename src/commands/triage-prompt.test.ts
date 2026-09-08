@@ -6,7 +6,7 @@ describe("renderTriagePrompt", () => {
   const homeDir = "/home/triage-test";
   const redaction = {
     env: { HOME: homeDir },
-    stateDir: `${homeDir}/.openclaw`,
+    stateDir: `${homeDir}/.carapace`,
   };
 
   it("orders sanitized findings by severity and includes repair hints and bundle details", () => {
@@ -17,7 +17,7 @@ describe("renderTriagePrompt", () => {
         checkId: "core/error",
         severity: "error",
         message: "model routing failed",
-        fixHint: "Run `openclaw doctor --fix`.",
+        fixHint: "Run `carapace doctor --fix`.",
       },
     ];
 
@@ -29,8 +29,8 @@ describe("renderTriagePrompt", () => {
 
     expect(prompt.indexOf("[error]")).toBeLessThan(prompt.indexOf("[warning]"));
     expect(prompt.indexOf("[warning]")).toBeLessThan(prompt.indexOf("[info]"));
-    expect(prompt).toContain("Fix: Run `openclaw doctor --fix`.");
-    expect(prompt).toContain("Sanitized ZIP: $OPENCLAW_STATE_DIR/diagnostics.zip");
+    expect(prompt).toContain("Fix: Run `carapace doctor --fix`.");
+    expect(prompt).toContain("Sanitized ZIP: $CARAPACE_STATE_DIR/diagnostics.zip");
     expect(prompt).toContain(
       "The diagnostics archive excludes secrets, tokens, raw chat payloads, and raw logs",
     );
@@ -42,7 +42,7 @@ describe("renderTriagePrompt", () => {
         {
           checkId: `${homeDir}/checks/config`,
           severity: "error",
-          message: `Config: ${redaction.stateDir}/openclaw.json\nneeds repair`,
+          message: `Config: ${redaction.stateDir}/carapace.json\nneeds repair`,
           fixHint: `Inspect ${homeDir}/logs/gateway.log`,
         },
       ],
@@ -51,7 +51,7 @@ describe("renderTriagePrompt", () => {
     });
 
     expect(prompt).toContain(
-      "[error] ~/checks/config: Config: $OPENCLAW_STATE_DIR/openclaw.json needs repair",
+      "[error] ~/checks/config: Config: $CARAPACE_STATE_DIR/carapace.json needs repair",
     );
     expect(prompt).toContain("Fix: Inspect ~/logs/gateway.log");
     expect(prompt).toContain("Sanitized ZIP: ~/Downloads/diagnostics.zip");
@@ -80,7 +80,7 @@ describe("renderTriagePrompt", () => {
     const rendered = prompt.match(/^- \[warning\]/gmu)?.length ?? 0;
     expect(rendered).toBeGreaterThan(0);
     expect(prompt).toContain(
-      `${findings.length - rendered} more findings omitted; run \`openclaw doctor\` for the full list.`,
+      `${findings.length - rendered} more findings omitted; run \`carapace doctor\` for the full list.`,
     );
     expect(prompt).toContain("## Privacy");
     expect(prompt).not.toContain("\uFFFD");
@@ -114,15 +114,15 @@ describe("renderTriagePrompt", () => {
     const rendered = prompt.match(/^- \[warning\]/gmu)?.length ?? 0;
     expect(rendered).toBeGreaterThan(0);
     expect(prompt).toContain(
-      `${findings.length - rendered} more findings omitted; run \`openclaw doctor\` for the full list.`,
+      `${findings.length - rendered} more findings omitted; run \`carapace doctor\` for the full list.`,
     );
     expect(prompt).toContain("## Privacy");
     expect(prompt).not.toContain("\uFFFD");
     expect(prompt).toContain("...");
     expect(prompt).toContain("restart-unhealthy");
     expect(prompt).not.toContain("sk-test-triage-secret-1234567890");
-    expect(prompt).toContain("openclaw health --json");
-    expect(prompt).toContain("openclaw gateway status --deep");
+    expect(prompt).toContain("carapace health --json");
+    expect(prompt).toContain("carapace gateway status --deep");
     expect(prompt).toContain("2026.8.31");
     expect(prompt).toContain("original symptom");
   });
@@ -148,7 +148,7 @@ describe("renderTriagePrompt", () => {
         result: {
           status: "error",
           mode: "npm",
-          root: `${homeDir}/npm/openclaw`,
+          root: `${homeDir}/npm/carapace`,
           reason: "npm install failed",
           before: { version: "2026.8.1" },
           after: { version: "2026.9.1" },
@@ -267,7 +267,7 @@ describe("renderTriagePrompt", () => {
     }
     expect(prompt).toContain("## Diagnostics bundle");
     expect(prompt).toContain("## Privacy");
-    expect(prompt).toContain("local paths are relative to `~` or `$OPENCLAW_STATE_DIR`.");
+    expect(prompt).toContain("local paths are relative to `~` or `$CARAPACE_STATE_DIR`.");
     expect(prompt).not.toContain("Prompt truncated");
     expect(prompt).not.toContain("\uFFFD");
   });
@@ -280,9 +280,9 @@ describe("renderTriagePrompt", () => {
     {
       bundle: {
         kind: "unavailable" as const,
-        reason: `Gateway config: ${redaction.stateDir}/openclaw.json`,
+        reason: `Gateway config: ${redaction.stateDir}/carapace.json`,
       },
-      text: "Diagnostics export unavailable: Gateway config: $OPENCLAW_STATE_DIR/openclaw.json",
+      text: "Diagnostics export unavailable: Gateway config: $CARAPACE_STATE_DIR/carapace.json",
     },
     {
       bundle: { kind: "deferred" as const },

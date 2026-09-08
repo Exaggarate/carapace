@@ -5,13 +5,13 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { prepareRestartScript, runRestartScript } from "./restart-helper.js";
 
-const windowsKillPolicyStartMarker = "# OPENCLAW_RESTART_KILL_POLICY_BEGIN";
-const windowsKillPolicyEndMarker = "# OPENCLAW_RESTART_KILL_POLICY_END";
+const windowsKillPolicyStartMarker = "# CARAPACE_RESTART_KILL_POLICY_BEGIN";
+const windowsKillPolicyEndMarker = "# CARAPACE_RESTART_KILL_POLICY_END";
 
 function findPowerShell(): string | null {
   const executables = process.platform === "win32" ? ["powershell.exe", "pwsh.exe"] : ["pwsh"];
   const candidates = [
-    process.env.OPENCLAW_TEST_PWSH,
+    process.env.CARAPACE_TEST_PWSH,
     ...executables.flatMap((executable) =>
       (process.env.PATH ?? "")
         .split(path.delimiter)
@@ -88,7 +88,7 @@ itWithPowerShell(
   async () => {
     const scriptPath = await prepareWindowsScript([
       "node",
-      "C:\\openclaw\\dist\\entry.js",
+      "C:\\carapace\\dist\\entry.js",
       "gateway",
       "--port",
       "18789",
@@ -110,7 +110,7 @@ function Assert-DecisionLog {
 }
 
 $commandLines = @(
-  @{ Line = '"C:\Program Files\node.exe" "C:\openclaw\entry.js" gateway'; Expected = @('C:\Program Files\node.exe', 'C:\openclaw\entry.js', 'gateway') },
+  @{ Line = '"C:\Program Files\node.exe" "C:\carapace\entry.js" gateway'; Expected = @('C:\Program Files\node.exe', 'C:\carapace\entry.js', 'gateway') },
   @{ Line = 'node "" "a b" C:\plain\path'; Expected = @('node', '', 'a b', 'C:\plain\path') },
   @{ Line = 'node a\\\b d"e f"g h'; Expected = @('node', 'a\\\b', 'de fg', 'h') },
   @{ Line = 'node a\\\"b c d'; Expected = @('node', 'a\"b', 'c', 'd') },
@@ -122,7 +122,7 @@ $commandLines = @(
   @{ Line = ('node' + [char]9 + 'first' + [char]9 + 'second'); Expected = @('node', 'first', 'second') }
 )
 foreach ($case in $commandLines) {
-  $actual = @(Split-OpenClawWindowsCommandLine -CommandLine $case.Line)
+  $actual = @(Split-CarapaceWindowsCommandLine -CommandLine $case.Line)
   Assert-True ($actual.Count -eq $case.Expected.Count) "argument count mismatch: $($case.Line)"
   for ($index = 0; $index -lt $actual.Count; $index++) {
     Assert-True ([string]::Equals($actual[$index], $case.Expected[$index], [StringComparison]::Ordinal)) "argument mismatch: $($case.Line) at $index"
@@ -189,7 +189,7 @@ function Invoke-MockedKill {
     $script:ProcessOpenCalls += 1
     return $script:MockLease
   }
-  Invoke-OpenClawVerifiedListenerKill -ProcessId 4242 -Port 18789 -ExpectedArgv $ExpectedArgv -ProcessQuery $processQuery -ListenerQuery $listenerQuery -ProcessOpen $processOpen
+  Invoke-CarapaceVerifiedListenerKill -ProcessId 4242 -Port 18789 -ExpectedArgv $ExpectedArgv -ProcessQuery $processQuery -ListenerQuery $listenerQuery -ProcessOpen $processOpen
 }
 
 # Get-NetTCPConnection exposes object properties, including duplicate IPv4/IPv6 rows.
@@ -201,7 +201,7 @@ function Get-NetTCPConnection {
     [pscustomobject]@{ LocalPort = 443; OwningProcess = 5252 }
   )
 }
-$snapshot = Get-OpenClawListenerSnapshot -Port 18789
+$snapshot = Get-CarapaceListenerSnapshot -Port 18789
 Assert-True $snapshot.Known "Get-NetTCPConnection snapshot should be known"
 Assert-True (@($snapshot.Pids).Count -eq 1) "duplicate listener PIDs should collapse"
 Assert-True (@($snapshot.Pids)[0] -eq 4242) "wrong Get-NetTCPConnection PID"
@@ -216,18 +216,18 @@ function netstat.exe {
     "  TCP    127.0.0.1:18789    127.0.0.1:61234 HERGESTELLT     5252"
   )
 }
-$snapshot = Get-OpenClawListenerSnapshot -Port 18789
+$snapshot = Get-CarapaceListenerSnapshot -Port 18789
 Assert-True $snapshot.Known "netstat snapshot should be known"
 Assert-True (@($snapshot.Pids).Count -eq 1) "netstat IPv4/IPv6 PIDs should collapse"
 Assert-True (@($snapshot.Pids)[0] -eq 4242) "wrong netstat PID"
 
 function netstat.exe { $script:LASTEXITCODE = 1 }
-$snapshot = Get-OpenClawListenerSnapshot -Port 18789
+$snapshot = Get-CarapaceListenerSnapshot -Port 18789
 Assert-True (-not $snapshot.Known) "failed listener queries must remain unknown"
 
 $creation = "133987654321000000"
-$expected = @("node", "C:\openclaw\dist\entry.js", "gateway", "--port", "18789")
-$managed = New-ProcessFacts 4242 $creation @("node.exe", "C:\openclaw\dist\entry.js", "gateway", "--port", "18789")
+$expected = @("node", "C:\carapace\dist\entry.js", "gateway", "--port", "18789")
+$managed = New-ProcessFacts 4242 $creation @("node.exe", "C:\carapace\dist\entry.js", "gateway", "--port", "18789")
 $knownListener = [pscustomobject]@{ Known = $true; Pids = @(4242) }
 
 $script:RestartLogs.Clear()
@@ -268,12 +268,12 @@ Assert-True (-not $recycledLease.Terminated) "recycled PID target was killed"
 Assert-True $recycledLease.Disposed "recycled PID handle was not disposed"
 Assert-DecisionLog "process-replaced"
 
-Write-Output "OPENCLAW_RESTART_POLICY_OK"
+Write-Output "CARAPACE_RESTART_POLICY_OK"
 `,
       );
 
       expect(result.stderr).toBe("");
-      expect(result.stdout).toContain("OPENCLAW_RESTART_POLICY_OK");
+      expect(result.stdout).toContain("CARAPACE_RESTART_POLICY_OK");
     } finally {
       await fs.rm(path.dirname(scriptPath), { recursive: true, force: true });
     }
@@ -284,22 +284,22 @@ describe.runIf(process.platform === "win32")("Windows restart wrapper", () => {
   it.each([
     {
       name: "completed restart",
-      body: '& { [Console]::Out.WriteLine("OPENCLAW_RESTART_COMPLETE"); exit 0 }\n\n',
+      body: '& { [Console]::Out.WriteLine("CARAPACE_RESTART_COMPLETE"); exit 0 }\n\n',
       accepted: true,
     },
     {
       name: "failed restart with a completion marker",
-      body: '& { [Console]::Out.WriteLine("OPENCLAW_RESTART_COMPLETE"); exit 7 }\n\n',
+      body: '& { [Console]::Out.WriteLine("CARAPACE_RESTART_COMPLETE"); exit 7 }\n\n',
       accepted: false,
     },
     {
       name: "malformed input",
-      body: '& { [Console]::Out.WriteLine("OPENCLAW_RESTART_COMPLETE"); this is ( }\n\n',
+      body: '& { [Console]::Out.WriteLine("CARAPACE_RESTART_COMPLETE"); this is ( }\n\n',
       accepted: false,
     },
     {
       name: "incomplete input",
-      body: '& { [Console]::Out.WriteLine("OPENCLAW_RESTART_COMPLETE"); exit 0\n',
+      body: '& { [Console]::Out.WriteLine("CARAPACE_RESTART_COMPLETE"); exit 0\n',
       accepted: false,
     },
   ])("reports the native outcome for $name", async ({ body, accepted }) => {
@@ -307,7 +307,7 @@ describe.runIf(process.platform === "win32")("Windows restart wrapper", () => {
     try {
       await fs.writeFile(scriptPath.replace(/\.cmd$/u, ".ps1"), body);
       // A leftover outcome cannot authorize a new invocation that never ran.
-      await fs.writeFile(scriptPath.replace(/\.cmd$/u, ".out"), "OPENCLAW_RESTART_COMPLETE\r\n");
+      await fs.writeFile(scriptPath.replace(/\.cmd$/u, ".out"), "CARAPACE_RESTART_COMPLETE\r\n");
       await expect(runRestartScript(scriptPath, 10_000)).resolves.toBe(accepted);
       expect(existsSync(path.dirname(scriptPath))).toBe(false);
     } finally {

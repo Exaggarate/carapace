@@ -7,15 +7,15 @@ export default defineConfig({
   base: "./",
   resolve: {
     alias: {
-      "openclaw/plugin-sdk/error-runtime": path.resolve(
+      "carapace/plugin-sdk/error-runtime": path.resolve(
         import.meta.dirname,
         "../../../packages/normalization-core/src/browser-error-runtime.ts",
       ),
-      "openclaw/plugin-sdk/text-utility-runtime": path.resolve(
+      "carapace/plugin-sdk/text-utility-runtime": path.resolve(
         import.meta.dirname,
         "../../../packages/normalization-core/src/utf16-slice.ts",
       ),
-      "openclaw/plugin-sdk/time-runtime": path.resolve(
+      "carapace/plugin-sdk/time-runtime": path.resolve(
         import.meta.dirname,
         "../../../packages/plugin-sdk/src/time-runtime.ts",
       ),

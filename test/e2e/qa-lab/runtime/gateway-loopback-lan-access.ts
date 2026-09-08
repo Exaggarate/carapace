@@ -6,7 +6,7 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { WebSocket, type RawData } from "ws";
 import { PROTOCOL_VERSION } from "../../../../packages/gateway-protocol/src/index.js";
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../../../../src/config/config.js";
@@ -29,19 +29,19 @@ const PROBE_TIMEOUT_MS = 10_000;
 const ENV_KEYS = [
   "HOME",
   ...GATEWAY_STARTUP_MUTATED_ENV_KEYS,
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_PASSWORD",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_GATEWAY_PASSWORD",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
 ] as const;
 
 type ProducerOptions = {
@@ -341,10 +341,10 @@ export async function runGatewayLoopbackLanProof(): Promise<GatewayLoopbackLanPr
   }
 
   const env = captureEnv([...ENV_KEYS]);
-  // openclaw-temp-dir: standalone producer removes this state root in finally
-  const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-network-"));
-  const stateDir = path.join(tempHome, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
+  // carapace-temp-dir: standalone producer removes this state root in finally
+  const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gateway-network-"));
+  const stateDir = path.join(tempHome, ".carapace");
+  const configPath = path.join(stateDir, "carapace.json");
   const emptyPluginsDir = path.join(tempHome, "empty-bundled-plugins");
   const token = `gateway-network-${randomUUID()}`;
   let server: GatewayServer | undefined;
@@ -354,18 +354,18 @@ export async function runGatewayLoopbackLanProof(): Promise<GatewayLoopbackLanPr
       deleteTestEnvValue(key);
     }
     setTestEnvValue("HOME", tempHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-    setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
-    setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-    setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-    setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-    setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-    setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-    setTestEnvValue("OPENCLAW_SKIP_PROVIDERS", "1");
-    setTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR", emptyPluginsDir);
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    setTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY", "1");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+    setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
+    setTestEnvValue("CARAPACE_SKIP_CHANNELS", "1");
+    setTestEnvValue("CARAPACE_SKIP_GMAIL_WATCHER", "1");
+    setTestEnvValue("CARAPACE_SKIP_CRON", "1");
+    setTestEnvValue("CARAPACE_SKIP_CANVAS_HOST", "1");
+    setTestEnvValue("CARAPACE_SKIP_BROWSER_CONTROL_SERVER", "1");
+    setTestEnvValue("CARAPACE_SKIP_PROVIDERS", "1");
+    setTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR", emptyPluginsDir);
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    setTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY", "1");
     await fs.mkdir(emptyPluginsDir, { recursive: true });
     await fs.mkdir(stateDir, { recursive: true });
     await fs.writeFile(

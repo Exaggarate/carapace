@@ -1,5 +1,5 @@
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SystemPresence } from "../infra/system-presence.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import { authorizeOperatorScopesForRequiredScope, READ_SCOPE } from "./method-scopes.js";
@@ -14,7 +14,7 @@ import { resolveCanonicalSessionStoreMatchFromStoreKeys } from "./session-utils-
 
 /** One synchronous snapshot/fanout owns these reads; never reuse them across broadcasts. */
 export function createPresenceRecipientProjection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   presence: SystemPresence[];
 }): (client: GatewayClient | null) => SystemPresence[] {
   const targets = new Map<string, { canonicalKey: string; entry: SessionEntry } | undefined>();

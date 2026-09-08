@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import type { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import type { createQaGatewayChild, QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import {
   GATEWAY_CLIENT_CAPS,
@@ -85,8 +85,8 @@ export async function createPublishedWireWorkspace(root: string): Promise<Publis
   await fs.mkdir(source, { recursive: true });
   await execFileAsync("git", ["init", "--bare", bare]);
   await git(source, "init", "-b", "main");
-  await git(source, "config", "user.name", "OpenClaw QA");
-  await git(source, "config", "user.email", "openclaw-qa@example.invalid");
+  await git(source, "config", "user.name", "Carapace QA");
+  await git(source, "config", "user.email", "carapace-qa@example.invalid");
   await fs.mkdir(path.join(source, "nested"));
   await fs.writeFile(path.join(source, "launch-wire.txt"), "local-install launch wire\n");
   await fs.writeFile(path.join(source, "nested", "tracked.txt"), "nested tracked input\n");
@@ -146,7 +146,7 @@ export async function connectWireClient(params: {
   onEvent?: (event: WireGatewayEvent) => void;
   timeoutMs?: number;
 }): Promise<GatewayClient> {
-  const { GatewayClient } = await import("openclaw/plugin-sdk/gateway-runtime");
+  const { GatewayClient } = await import("carapace/plugin-sdk/gateway-runtime");
   return await new Promise<GatewayClient>((resolve, reject) => {
     let settled = false;
     const finish = (error?: Error) => {
@@ -327,7 +327,7 @@ export async function createPairedNodeWorkerHost(
     ...process.env,
     HOME: path.join(options.root, `${label}-home`),
     NODE_DISABLE_COMPILE_CACHE: undefined,
-    OPENCLAW_STATE_DIR: nodeStateDir,
+    CARAPACE_STATE_DIR: nodeStateDir,
     ...options.workerEnv,
   };
   await fs.mkdir(nodeEnv.HOME, { recursive: true });

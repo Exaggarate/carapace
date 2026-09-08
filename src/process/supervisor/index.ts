@@ -4,7 +4,7 @@ import { createProcessSupervisor } from "./supervisor.js";
 import type { ProcessSupervisor } from "./types.js";
 
 const holder = resolveGlobalSingleton(
-  Symbol.for("openclaw.processSupervisorHolder"),
+  Symbol.for("carapace.processSupervisorHolder"),
   (): { current: ReturnType<typeof createProcessSupervisor> | null } => ({ current: null }),
   async (value) => {
     const supervisor = value.current;

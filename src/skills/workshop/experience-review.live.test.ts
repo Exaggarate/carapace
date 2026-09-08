@@ -10,11 +10,11 @@ import {
 import { SessionManager } from "../../agents/sessions/index.js";
 import { onAgentRuntimeEvent } from "../../infra/agent-events.js";
 import type { Message } from "../../llm/types.js";
-import { closeOpenClawStateDatabaseByPath } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import {
   readSkillReviewOutcomes,
@@ -31,17 +31,17 @@ import {
 import { getSkillProposalRunProgress, listSkillProposals } from "./service.js";
 
 const LIVE =
-  isLiveTestEnabled(["OPENCLAW_LIVE_SKILL_EXPERIENCE_REVIEW"]) &&
+  isLiveTestEnabled(["CARAPACE_LIVE_SKILL_EXPERIENCE_REVIEW"]) &&
   Boolean(process.env.OPENAI_API_KEY?.trim());
 const describeLive = LIVE ? describe : describe.skip;
-const modelId = process.env.OPENCLAW_LIVE_SKILL_EXPERIENCE_MODEL ?? "gpt-5.6-luna";
+const modelId = process.env.CARAPACE_LIVE_SKILL_EXPERIENCE_MODEL ?? "gpt-5.6-luna";
 const {
   learnableMessages: positiveMessages,
   negativeMessages,
   interruptedMessages,
 } = createExperienceReviewMessages(modelId);
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let workspaceDir = "";
 const reviewDiagnostics = new Map<string, unknown>();
 const unsubscribeDiagnostics = LIVE
@@ -67,13 +67,13 @@ const unsubscribeDiagnostics = LIVE
 
 beforeAll(async () => {
   // Full home isolation: the embedded review resolves the shared-main auth
-  // store via HOME, and a real ~/.openclaw with pending doctor migration
+  // store via HOME, and a real ~/.carapace with pending doctor migration
   // must never leak into (or fail) this live run.
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "home",
-    prefix: "openclaw-live-skill-review-state-",
+    prefix: "carapace-live-skill-review-state-",
   });
-  workspaceDir = await tempDirs.make("openclaw-live-skill-review-workspace-");
+  workspaceDir = await tempDirs.make("carapace-live-skill-review-workspace-");
 });
 
 function logReviewOutcomes(
@@ -116,10 +116,10 @@ async function candidate(
 describe("skill experience review diagnostics", () => {
   it("logs persisted failure outcomes without raw provider error text", async () => {
     const liveOutcomesBefore = readSkillReviewOutcomes();
-    const diagnosticWorkspace = await tempDirs.make("openclaw-live-skill-review-diagnostic-");
+    const diagnosticWorkspace = await tempDirs.make("carapace-live-skill-review-diagnostic-");
     // Workspace keys share one database. Isolate synthetic failures so the
     // live afterAll output contains only outcomes from actual review runs.
-    const diagnosticStore = { path: path.join(diagnosticWorkspace, "openclaw.sqlite") };
+    const diagnosticStore = { path: path.join(diagnosticWorkspace, "carapace.sqlite") };
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
     try {
       recordSkillExperienceReviewOutcome(
@@ -146,7 +146,7 @@ describe("skill experience review diagnostics", () => {
       expect(readSkillReviewOutcomes()).toEqual(liveOutcomesBefore);
     } finally {
       log.mockRestore();
-      closeOpenClawStateDatabaseByPath(diagnosticStore.path);
+      closeCarapaceStateDatabaseByPath(diagnosticStore.path);
     }
   });
 });

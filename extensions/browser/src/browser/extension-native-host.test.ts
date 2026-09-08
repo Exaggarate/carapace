@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { useAutoCleanupTempDirTracker, withEnvAsync } from "openclaw/plugin-sdk/test-env";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { useAutoCleanupTempDirTracker, withEnvAsync } from "carapace/plugin-sdk/test-env";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { relayTestKey } from "../../chrome-extension/relay-key.test-support.js";
 import { parseBrowserNativeHostOrigins, runBrowserNativeHost } from "./extension-native-host.js";
@@ -165,20 +165,20 @@ describe("native bootstrap request schema", () => {
 });
 
 async function nativeFixture() {
-  const root = tempDirs.make("openclaw-native-host-");
+  const root = tempDirs.make("carapace-native-host-");
   const stateDir = path.join(root, "state");
   const managedDir = path.join(stateDir, "browser", "native-messaging");
   const manifestDir = path.join(root, "chrome", "NativeMessagingHosts");
   await fs.mkdir(managedDir, { recursive: true, mode: 0o700 });
   await fs.mkdir(manifestDir, { recursive: true, mode: 0o700 });
   const launcherPath = path.join(managedDir, "bootstrap.sh");
-  const manifestPath = path.join(manifestDir, "ai.openclaw.browser_bootstrap.json");
+  const manifestPath = path.join(manifestDir, "ai.carapace.browser_bootstrap.json");
   await fs.writeFile(launcherPath, "#!/bin/sh\n", { mode: 0o700 });
   await fs.writeFile(
     manifestPath,
     `${JSON.stringify({
-      name: "ai.openclaw.browser_bootstrap",
-      description: "OpenClaw browser extension bootstrap",
+      name: "ai.carapace.browser_bootstrap",
+      description: "Carapace browser extension bootstrap",
       path: launcherPath,
       type: "stdio",
       allowed_origins: [ORIGIN],
@@ -243,8 +243,8 @@ describe("native host origin and topology boundary", () => {
     await fs.writeFile(
       fixture.manifestPath,
       `${JSON.stringify({
-        name: "ai.openclaw.browser_bootstrap",
-        description: "OpenClaw browser extension bootstrap",
+        name: "ai.carapace.browser_bootstrap",
+        description: "Carapace browser extension bootstrap",
         path: fixture.launcherPath,
         type: "stdio",
         allowed_origins: expectedOrigins,
@@ -276,8 +276,8 @@ describe("native host origin and topology boundary", () => {
     await fs.writeFile(
       fixture.manifestPath,
       `${JSON.stringify({
-        name: "ai.openclaw.browser_bootstrap",
-        description: "OpenClaw browser extension bootstrap",
+        name: "ai.carapace.browser_bootstrap",
+        description: "Carapace browser extension bootstrap",
         path: fixture.launcherPath,
         type: "stdio",
         allowed_origins: [ORIGIN, OTHER_ORIGIN],
@@ -305,8 +305,8 @@ describe("native host origin and topology boundary", () => {
     await fs.writeFile(
       fixture.manifestPath,
       JSON.stringify({
-        name: "ai.openclaw.browser_bootstrap",
-        description: "OpenClaw browser extension bootstrap",
+        name: "ai.carapace.browser_bootstrap",
+        description: "Carapace browser extension bootstrap",
         path: fixture.launcherPath,
         type: "stdio",
         allowed_origins: ["chrome-extension://*/"],
@@ -383,7 +383,7 @@ describe("native host ensure_relay", () => {
         await ensureExtensionRelayDaemonProcess({
           port,
           cfg: { browser: { profiles: { remote: { cdpUrl: "https://browser.example:29443" } } } },
-          entryPath: "/opt/openclaw/dist/extensions/browser/relay-daemon-entry.js",
+          entryPath: "/opt/carapace/dist/extensions/browser/relay-daemon-entry.js",
           probe,
           spawnProcess,
         }),
@@ -405,7 +405,7 @@ describe("native host ensure_relay", () => {
         { mode: 0o600 },
       );
       await withEnvAsync(
-        { OPENCLAW_STATE_DIR: fixture.stateDir, OPENCLAW_GATEWAY_PORT: undefined },
+        { CARAPACE_STATE_DIR: fixture.stateDir, CARAPACE_GATEWAY_PORT: undefined },
         async () => {
           let daemon: ReturnType<typeof runExtensionRelayDaemon> | undefined;
           try {
@@ -427,7 +427,7 @@ describe("native host ensure_relay", () => {
                       },
                     },
                   },
-                  entryPath: "/opt/openclaw/dist/extensions/browser/relay-daemon-entry.js",
+                  entryPath: "/opt/carapace/dist/extensions/browser/relay-daemon-entry.js",
                   // Keep the real config, port probe, credential read and relay server;
                   // only replace process creation so the test owns daemon cleanup.
                   spawnProcess: (_command, args) => {

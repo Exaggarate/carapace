@@ -80,7 +80,7 @@ describe("full release metadata checkouts", () => {
   ])(
     "runs $job tooling from the complete scripts tree",
     ({ job, checkout, entrypoint, extraPath }) => {
-      const root = mkdtempSync(join(tmpdir(), "openclaw-release-sparse-"));
+      const root = mkdtempSync(join(tmpdir(), "carapace-release-sparse-"));
       try {
         const toolingCheckout = step(job, checkout).with as Record<string, unknown>;
         expect(toolingCheckout["sparse-checkout-cone-mode"]).toBe(false);
@@ -113,7 +113,7 @@ describe("full release metadata checkouts", () => {
   );
 
   it("keeps target metadata narrow and runs the macOS preflight from the tooling tree", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-release-sparse-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-release-sparse-"));
     try {
       const targetCheckouts = [
         ["resolve_target", "Checkout target package manifest"],

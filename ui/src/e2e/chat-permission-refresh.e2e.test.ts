@@ -36,7 +36,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, session.key));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const trigger = pane.locator('[data-chat-permission-select="true"]');
       await expect.poll(() => trigger.getAttribute("data-chat-select-value")).toBe("guarded");
       const listRequests = (await gateway.getRequests("sessions.list", rosterMatch)).length;
@@ -48,7 +48,7 @@ suite.define(() => {
       await gateway.waitForRequest("sessions.list", { after: listRequests, match: rosterMatch });
       // Swarm hydration can finish here; the parent must not appear in its own child query.
       await page.evaluate(async (key) => {
-        const app = document.querySelector("openclaw-app") as PermissionTestApp;
+        const app = document.querySelector("carapace-app") as PermissionTestApp;
         await app.runtime?.context.sessions.list({
           spawnedBy: key,
           includeGlobal: false,
@@ -100,7 +100,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, session.key));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const trigger = pane.locator('[data-chat-permission-select="true"]');
       await expect.poll(() => trigger.getAttribute("data-chat-select-value")).toBe("guarded");
       const listRequests = (await gateway.getRequests("sessions.list", rosterMatch)).length;
@@ -120,7 +120,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate((key) => {
-            const app = document.querySelector("openclaw-app") as PermissionTestApp;
+            const app = document.querySelector("carapace-app") as PermissionTestApp;
             return app.runtime?.context.sessions.state.result?.sessions.find(
               (row) => row.key === key,
             )?.permissionMode;

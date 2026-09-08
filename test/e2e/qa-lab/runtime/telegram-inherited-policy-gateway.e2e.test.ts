@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import { withServer, withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withServer, withTempDir } from "carapace/plugin-sdk/test-env";
 import { expect, test } from "vitest";
 import {
   type MockOpenAiRequestSnapshot,
@@ -102,7 +102,7 @@ test.each(["allowlist", "open"] as const)(
         });
       },
       async (apiRoot) =>
-        await withTempDir("openclaw-telegram-policy-", async (workspace) => {
+        await withTempDir("carapace-telegram-policy-", async (workspace) => {
           const mock = await startQaMockOpenAiServer();
           const gatewayOwner = createQaGatewayChild();
           let gateway: QaGatewayChild | undefined;
@@ -175,7 +175,7 @@ test.each(["allowlist", "open"] as const)(
               },
               controlUiEnabled: false,
               runtimeEnvPatch: {
-                OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+                CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
                 TELEGRAM_BOT_TOKEN: undefined,
               },
               mutateConfig: (cfg) => {

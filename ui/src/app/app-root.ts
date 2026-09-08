@@ -1,5 +1,5 @@
 import { ContextProvider } from "@lit/context";
-import { buildControlUiFocusPath, type ControlUiFocusTarget } from "@openclaw/session-url-contract";
+import { buildControlUiFocusPath, type ControlUiFocusTarget } from "@carapace/session-url-contract";
 import type { RouteLocation, RouteNotFound } from "@openclaw/uirouter";
 import { html, nothing } from "lit";
 import { state } from "lit/decorators.js";
@@ -14,7 +14,7 @@ import { t } from "../i18n/index.ts";
 import { formatUiError } from "../lib/format-error.ts";
 import { normalizeAgentId } from "../lib/sessions/session-key.ts";
 import { isTerminalAvailable } from "../lib/terminal-availability.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import type { ChatRouteData } from "../pages/chat/route-loader.ts";
 import { bootstrapApplication, type ApplicationRuntime } from "./bootstrap.ts";
@@ -50,7 +50,7 @@ function isRouteNotFound(result: ChatRouteData | RouteNotFound): result is Route
   return "type" in result && result.type === "notFound";
 }
 
-export class OpenClawApp extends OpenClawLightDomElement {
+export class CarapaceApp extends CarapaceLightDomElement {
   // Pinned while a connect submitted from the visible login gate is in
   // flight, so a failed manual attempt cannot flash the shell in between.
   @state() private loginGatePinned = false;
@@ -115,7 +115,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
     super.connectedCallback();
     const embedHost = nativeEmbedHost();
     this.ownerDocument.documentElement.classList.toggle(
-      "openclaw-native-embed",
+      "carapace-native-embed",
       embedHost !== null,
     );
     if (embedHost) {
@@ -153,7 +153,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
       .start()
       .then(() => this.resolveFocusDashboard())
       .catch((error: unknown) => {
-        console.error("[openclaw] application start failed", error);
+        console.error("[carapace] application start failed", error);
       });
   }
 
@@ -175,7 +175,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
 
   protected override firstUpdated(): void {
     if (this.runtime) {
-      globalThis.dispatchEvent(new Event("openclaw-control-ui-rendered"));
+      globalThis.dispatchEvent(new Event("carapace-control-ui-rendered"));
     }
   }
 
@@ -272,7 +272,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
     }
     const approvalId =
       runtime.documentMode?.kind === "approval" ? runtime.documentMode.approvalId : "";
-    return html`<openclaw-approval-page .approvalId=${approvalId ?? ""}></openclaw-approval-page>`;
+    return html`<carapace-approval-page .approvalId=${approvalId ?? ""}></carapace-approval-page>`;
   }
 
   private renderQuestionDocument(runtime: ApplicationRuntime) {
@@ -282,7 +282,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
     }
     const questionId =
       runtime.documentMode?.kind === "question" ? runtime.documentMode.questionId : "";
-    return html`<openclaw-question-page .questionId=${questionId ?? ""}></openclaw-question-page>`;
+    return html`<carapace-question-page .questionId=${questionId ?? ""}></carapace-question-page>`;
   }
 
   private replaceFocusDashboardLocation(location: RouteLocation, source: RouteLocation): void {
@@ -422,7 +422,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
       </main>`;
     }
     return html`
-      <openclaw-board-document
+      <carapace-board-document
         .gatewaySnapshot=${gatewaySnapshot}
         .sessionKey=${route.data.sessionKey}
         .preparedSession=${
@@ -433,7 +433,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
         .onDocumentClose=${
           isNativeWebChromeHost() ? null : () => this.closeDocument(this.context?.basePath ?? "")
         }
-      ></openclaw-board-document>
+      ></carapace-board-document>
       ${
         !gatewayConnected && gatewaySnapshot.lastError === null
           ? renderConnectingSplash(gatewayStartupStatus)
@@ -451,7 +451,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
     }
     const gatewayUrlConfirmation = this.pendingGatewayUrl
       ? html`
-          <openclaw-gateway-url-confirmation
+          <carapace-gateway-url-confirmation
             .props=${{
               pendingGatewayUrl: this.pendingGatewayUrl,
               currentGatewayUrl: runtime.context.gateway.connection.gatewayUrl,
@@ -465,12 +465,12 @@ export class OpenClawApp extends OpenClawLightDomElement {
                 this.pendingGatewayUrl = null;
               },
             }}
-          ></openclaw-gateway-url-confirmation>
+          ></carapace-gateway-url-confirmation>
         `
       : nothing;
-    return html`<openclaw-tooltip-provider>
+    return html`<carapace-tooltip-provider>
       ${this.renderDocument(context, runtime)} ${gatewayUrlConfirmation}
-    </openclaw-tooltip-provider>`;
+    </carapace-tooltip-provider>`;
   }
 
   private renderDocument(context: ApplicationContext<RouteId>, runtime: ApplicationRuntime) {
@@ -499,13 +499,13 @@ export class OpenClawApp extends OpenClawLightDomElement {
       const terminalAgentId = terminalOwner ? normalizeAgentId(terminalOwner) : null;
       // Embedded clients query this host immediately; keep it stable while the chunk loads.
       return html`
-        <openclaw-terminal-panel
+        <carapace-terminal-panel
           .client=${gatewayConnected ? gatewaySnapshot.client : null}
           .available=${terminalAvailable}
           .agentId=${terminalAgentId}
           .themeMode=${context.theme.resolvedMode}
           fullscreen
-        ></openclaw-terminal-panel>
+        ></carapace-terminal-panel>
         ${
           !gatewayConnected && gatewaySnapshot.lastError === null
             ? renderConnectingSplash(gatewayStartupStatus)
@@ -532,7 +532,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
       const source = focusTarget.selector?.kind === "source" ? focusTarget.selector.value : null;
       const session = focusTarget.selector?.kind === "session" ? focusTarget.selector.value : null;
       return html`
-        <openclaw-desktop-panel
+        <carapace-desktop-panel
           .client=${gatewayConnected ? gatewaySnapshot.client : null}
           .available=${desktopAvailable}
           .documentMode=${true}
@@ -540,7 +540,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
           .sessionKey=${session}
           .documentControl=${focusTarget.control}
           .onDocumentClose=${() => this.closeDocument(context.basePath)}
-        ></openclaw-desktop-panel>
+        ></carapace-desktop-panel>
         ${
           !gatewayConnected && gatewaySnapshot.lastError === null
             ? renderConnectingSplash(gatewayStartupStatus)
@@ -597,7 +597,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
     }
     if (showLoginGate) {
       return html`
-        <openclaw-login-gate
+        <carapace-login-gate
           .props=${{
             resourceBasePath: context.resourceBasePath,
             connected: gatewayConnected,
@@ -631,7 +631,7 @@ export class OpenClawApp extends OpenClawLightDomElement {
               });
             },
           }}
-        ></openclaw-login-gate>
+        ></carapace-login-gate>
       `;
     }
     if (runtime.documentMode?.kind === "approval") {
@@ -641,23 +641,23 @@ export class OpenClawApp extends OpenClawLightDomElement {
       return this.renderQuestionDocument(runtime);
     }
     return html`
-      <openclaw-github-link-hovercard-provider
+      <carapace-github-link-hovercard-provider
         .client=${gatewaySnapshot.client}
         .agentId=${
           context.agentSelection.state.selectedId ?? gatewaySnapshot.assistantAgentId ?? undefined
         }
       >
-        <openclaw-session-progress-hovercard-provider
+        <carapace-session-progress-hovercard-provider
           .client=${gatewaySnapshot.client}
           .context=${context}
           .gateway=${context.gateway}
         >
-          <openclaw-app-shell
+          <carapace-app-shell
             .runtime=${runtime}
             .onboarding=${this.onboarding}
-          ></openclaw-app-shell>
-        </openclaw-session-progress-hovercard-provider>
-      </openclaw-github-link-hovercard-provider>
+          ></carapace-app-shell>
+        </carapace-session-progress-hovercard-provider>
+      </carapace-github-link-hovercard-provider>
     `;
   }
 }

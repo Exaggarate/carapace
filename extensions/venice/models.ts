@@ -1,13 +1,13 @@
 import {
   buildManifestModelProviderConfig,
   readManifestProviderDefaultModelRef,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/provider-catalog-shared";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { parseVeniceModelPricing } from "./pricing-api.js";
 
 const VENICE_MANIFEST_CATALOG = manifest.modelCatalog.providers.venice;

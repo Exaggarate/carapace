@@ -1,5 +1,5 @@
 // Shared types for applying auth-choice selections during onboarding and agent setup.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderAuthResult } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
@@ -7,7 +7,7 @@ import type { AuthChoice, OnboardOptions } from "./onboard-types.js";
 
 export type ApplyAuthChoiceParams = {
   authChoice: AuthChoice;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
@@ -20,7 +20,7 @@ export type ApplyAuthChoiceParams = {
 };
 
 export type ApplyAuthChoiceResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentModelOverride?: string;
   retrySelection?: boolean;
 };

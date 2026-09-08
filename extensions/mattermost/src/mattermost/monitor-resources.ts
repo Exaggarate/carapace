@@ -8,16 +8,16 @@ import {
   type ChannelInboundMediaPayload,
   type InboundMediaFacts,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
-import type { MediaKind, SavedRemoteMedia } from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
+import type { MediaKind, SavedRemoteMedia } from "carapace/plugin-sdk/media-runtime";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { sanitizeUntrustedFileName } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { sanitizeUntrustedFileName } from "carapace/plugin-sdk/security-runtime";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   buildMattermostApiUrl,
   fetchMattermostChannel,

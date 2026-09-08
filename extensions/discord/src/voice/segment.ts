@@ -1,9 +1,9 @@
 import { Readable } from "node:stream";
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { unlinkIfExists } from "openclaw/plugin-sdk/media-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { unlinkIfExists } from "carapace/plugin-sdk/media-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { maybeControlDiscordVoiceAgentRun } from "./agent-control.js";
 import { createDiscordOpusPlaybackStream } from "./audio.js";
 import { type DiscordVoiceIngressContext, runDiscordVoiceAgentTurn } from "./ingress.js";
@@ -21,7 +21,7 @@ type DiscordVoiceResponseParams = {
   entry: VoiceSessionEntry;
   accountId: string;
   userId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   runtime: RuntimeEnv;
   admissionAllowFrom?: string[];

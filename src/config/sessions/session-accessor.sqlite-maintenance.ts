@@ -1,16 +1,16 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { sql } from "kysely";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { runWithSqliteBusyTimeout } from "../../infra/sqlite-busy-timeout.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
 import { getChildLogger } from "../../logging/logger.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { publishSessionStateArchives } from "./session-accessor.sqlite-archive-store.js";
 import {
   materializeSessionStateDeletePlans,
@@ -18,7 +18,7 @@ import {
 } from "./session-accessor.sqlite-archive.js";
 import type { SessionLifecycleArchivedTranscript } from "./session-accessor.sqlite-contract.js";
 import {
-  runSqliteSessionDeletionTransaction as runOpenClawAgentWriteTransaction,
+  runSqliteSessionDeletionTransaction as runCarapaceAgentWriteTransaction,
   withSqliteSessionDeletions,
 } from "./session-accessor.sqlite-deletion.js";
 import {
@@ -82,7 +82,7 @@ export async function refreshSqliteSessionPlannerStatisticsBestEffort(
   if (deletedEntries < SESSION_PLANNER_ANALYSIS_MIN_DELETED_ENTRIES || !isCurrent()) {
     return;
   }
-  const storePath = resolveOpenClawAgentSqlitePath(toDatabaseOptions(scope));
+  const storePath = resolveCarapaceAgentSqlitePath(toDatabaseOptions(scope));
   const active = plannerMaintenanceByStore.get(storePath);
   if (active) {
     await active;
@@ -92,7 +92,7 @@ export async function refreshSqliteSessionPlannerStatisticsBestEffort(
     if (!isCurrent()) {
       return;
     }
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(scope));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(scope));
     // Planner maintenance must not inherit the normal 5s writer wait: a competing
     // process skips this best-effort pass instead of blocking the Gateway event loop.
     runWithSqliteBusyTimeout(database.db, 0, () => {
@@ -292,7 +292,7 @@ async function readSessionTranscriptJsonlBytes(
     if (!isCurrent()) {
       return bytesBySessionId;
     }
-    const opened = withOpenClawAgentDatabaseReadOnly((database) => {
+    const opened = withCarapaceAgentDatabaseReadOnly((database) => {
       const db = getSessionKysely(database.db);
       return executeSqliteQuerySync(
         database.db,
@@ -320,7 +320,7 @@ async function readSessionTranscriptJsonlBytes(
 }
 
 export function applySessionEntryMaintenance(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   params: {
     activeSessionKey?: string;
     activeSessionKeys?: readonly string[];
@@ -585,7 +585,7 @@ export async function finalizeSessionEntryMaintenancePlansAfterWriterReleaseBest
               return [];
             }
             let committed: SessionLifecycleArchivedTranscript[] = [];
-            runOpenClawAgentWriteTransaction((database) => {
+            runCarapaceAgentWriteTransaction((database) => {
               const partition = partitionUnchangedPlannedLifecycleArtifactEntries(
                 database,
                 batch.entryRemovals,
@@ -599,7 +599,7 @@ export async function finalizeSessionEntryMaintenancePlansAfterWriterReleaseBest
                 new Set(committedEntryRemovals.map((removal) => removal.sessionKey)),
               );
               deletePlannedLifecycleArtifactEntries(database, committedEntryRemovals);
-              deferOpenClawAgentPostCommitPublication(
+              deferCarapaceAgentPostCommitPublication(
                 database,
                 prepareCommittedSessionEntryRemovals(scope.agentId, committedEntryRemovals),
               );

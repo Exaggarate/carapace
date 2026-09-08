@@ -17,12 +17,12 @@ import {
 } from "../../shared/chat-message-content.js";
 import {
   CRON_DIRECT_DELIVERY_CONTEXT_KIND,
-  OPENCLAW_DELIVERY_MIRROR_MODEL,
-  OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-  OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
-  isTranscriptOnlyOpenClawAssistantMessage,
-} from "../../shared/transcript-only-openclaw-assistant.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+  CARAPACE_DELIVERY_MIRROR_MODEL,
+  CARAPACE_TRANSCRIPT_ARTIFACT_API,
+  CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER,
+  isTranscriptOnlyCarapaceAssistantMessage,
+} from "../../shared/transcript-only-carapace-assistant.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import {
   parseSqliteSessionFileMarker,
   type SqliteSessionFileMarker,
@@ -163,7 +163,7 @@ export { resolveSessionTranscriptFile } from "./transcript-file-resolve.js";
 
 function parseAssistantTranscriptText(
   line: string,
-  options?: { excludeTranscriptOnlyOpenClawAssistant?: boolean },
+  options?: { excludeTranscriptOnlyCarapaceAssistant?: boolean },
 ): AssistantTranscriptText | undefined {
   const parsed = JSON.parse(line) as {
     id?: unknown;
@@ -176,8 +176,8 @@ function parseAssistantTranscriptText(
     return undefined;
   }
   if (
-    options?.excludeTranscriptOnlyOpenClawAssistant &&
-    isTranscriptOnlyOpenClawAssistantMessage(message)
+    options?.excludeTranscriptOnlyCarapaceAssistant &&
+    isTranscriptOnlyCarapaceAssistantMessage(message)
   ) {
     return undefined;
   }
@@ -213,8 +213,8 @@ function parseRecentConversationText(
         provenance?: unknown;
         provider?: unknown;
         model?: unknown;
-        openclawDeliveryMirror?: unknown;
-        __openclaw?: unknown;
+        carapaceDeliveryMirror?: unknown;
+        __carapace?: unknown;
       }
     | undefined;
   if (
@@ -224,7 +224,7 @@ function parseRecentConversationText(
   ) {
     return undefined;
   }
-  const deliveryMirror = message.openclawDeliveryMirror;
+  const deliveryMirror = message.carapaceDeliveryMirror;
   const includeCronDirectDeliveryContext =
     options.includeCronDirectDeliveryContext === true &&
     deliveryMirror !== null &&
@@ -234,7 +234,7 @@ function parseRecentConversationText(
     deliveryMirror.kind === CRON_DIRECT_DELIVERY_CONTEXT_KIND;
   if (
     message.role === "assistant" &&
-    isTranscriptOnlyOpenClawAssistantMessage(message) &&
+    isTranscriptOnlyCarapaceAssistantMessage(message) &&
     !includeCronDirectDeliveryContext
   ) {
     return undefined;
@@ -384,7 +384,7 @@ export async function readLatestAssistantTextFromSessionTranscript(
   for await (const line of streamSessionTranscriptLinesReverse(sessionFile)) {
     try {
       const assistantText = parseAssistantTranscriptText(line, {
-        excludeTranscriptOnlyOpenClawAssistant: true,
+        excludeTranscriptOnlyCarapaceAssistant: true,
       });
       if (assistantText) {
         return assistantText;
@@ -415,7 +415,7 @@ export async function appendAssistantMessageToSessionTranscript(params: {
   /** Optional override for store path (mostly for tests). */
   storePath?: string;
   updateMode?: SessionTranscriptUpdateMode;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   beforeMessageWrite?: AssistantBeforeMessageWrite;
   onMessageCommitted?: SessionTranscriptTurnPersistOptions["onMessageCommitted"];
 }): Promise<SessionTranscriptAppendResult> {
@@ -461,9 +461,9 @@ export async function appendAssistantMessageToSessionTranscript(params: {
       role: "assistant" as const,
       content,
       ...(displayContent ? { [ASSISTANT_DISPLAY_CONTENT_FIELD]: displayContent } : {}),
-      api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-      provider: OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
-      model: OPENCLAW_DELIVERY_MIRROR_MODEL,
+      api: CARAPACE_TRANSCRIPT_ARTIFACT_API,
+      provider: CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER,
+      model: CARAPACE_DELIVERY_MIRROR_MODEL,
       usage: {
         input: 0,
         output: 0,
@@ -480,7 +480,7 @@ export async function appendAssistantMessageToSessionTranscript(params: {
       },
       stopReason: "stop" as const,
       timestamp: Date.now(),
-      ...(params.deliveryMirror ? { openclawDeliveryMirror: params.deliveryMirror } : {}),
+      ...(params.deliveryMirror ? { carapaceDeliveryMirror: params.deliveryMirror } : {}),
     },
   });
 }
@@ -499,7 +499,7 @@ export async function appendExactAssistantMessageToSessionTranscript(params: {
   runId?: string;
   storePath?: string;
   updateMode?: SessionTranscriptUpdateMode;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   beforeMessageWrite?: AssistantBeforeMessageWrite;
   onMessageCommitted?: SessionTranscriptTurnPersistOptions["onMessageCommitted"];
 }): Promise<SessionTranscriptAppendResult> {
@@ -730,8 +730,8 @@ async function touchSqliteAssistantAppendSessionEntry(params: {
 
 function isRedundantDeliveryMirror(message: SessionTranscriptAssistantMessage): boolean {
   return (
-    message.provider === OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER &&
-    message.model === OPENCLAW_DELIVERY_MIRROR_MODEL
+    message.provider === CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER &&
+    message.model === CARAPACE_DELIVERY_MIRROR_MODEL
   );
 }
 
@@ -767,8 +767,8 @@ async function readLatestVisibleTranscriptMessage(scope: {
 }
 
 function isIdentifiedDeliveryMirror(message: SessionTranscriptAssistantMessage): boolean {
-  const marker = (message as { openclawDeliveryMirror?: InternalSessionTranscriptDeliveryMirror })
-    .openclawDeliveryMirror;
+  const marker = (message as { carapaceDeliveryMirror?: InternalSessionTranscriptDeliveryMirror })
+    .carapaceDeliveryMirror;
   return (
     isRedundantDeliveryMirror(message) &&
     (marker?.kind === "channel-final" ||
@@ -800,7 +800,7 @@ function extractAssistantMessageText(message: AgentMessage): string | null {
 async function findLatestEquivalentAssistantMessageId(
   target: SessionTranscriptTurnWriteContext,
   message: SessionTranscriptAssistantMessage,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): Promise<string | undefined> {
   const expectedText = extractAssistantMessageText(redactTranscriptMessage(message, config));
   if (!expectedText) {

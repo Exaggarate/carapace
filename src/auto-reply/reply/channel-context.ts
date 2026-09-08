@@ -2,8 +2,8 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getActivePluginChannelRegistry } from "../../plugins/runtime.js";
 
 type CommandSurfaceParams = {
@@ -19,7 +19,7 @@ type CommandSurfaceParams = {
 };
 
 type ChannelAccountParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: {
     OriginatingChannel?: string;
     Surface?: string;

@@ -1,5 +1,5 @@
-import { embeddedAgentLog, type AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { embeddedAgentLog, type AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CodexHistoryRejection } from "./history-rejection.js";
 import { captureCodexSettledTurnFinalizationContext } from "./settled-turn-context.js";
@@ -68,7 +68,7 @@ function settledHostPromptTurn() {
     content: "Send it.",
     timestamp: 1,
     idempotencyKey: "durable-user-turn",
-    __openclaw: { senderIsOwner: true, transport: { messageId: "transport-message" } },
+    __carapace: { senderIsOwner: true, transport: { messageId: "transport-message" } },
   } as AgentMessage;
   return {
     settledMessages,

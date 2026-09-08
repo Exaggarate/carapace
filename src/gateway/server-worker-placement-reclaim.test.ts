@@ -3,17 +3,17 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { setImmediate } from "node:timers/promises";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { loadTranscriptEvents, replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { clearAgentRunContext } from "../infra/agent-run-registry.js";
 import { runExclusiveSessionLifecycleMutation } from "../sessions/session-lifecycle-admission.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  openOpenClawStateDatabase,
-  closeOpenClawStateDatabaseForTest,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  closeCarapaceStateDatabaseForTest,
+} from "../state/carapace-state-db.js";
 import { pendingChatSendDedupeKey } from "./server-shared.js";
 import { cancelGatewayWorkerSessionWork } from "./server-worker-placement-cancel.js";
 import { createGatewayWorkerDispatchAdmission } from "./server-worker-placement-dispatch-admission.js";
@@ -38,8 +38,8 @@ vi.mock("../config/config.js", async (importOriginal) => ({
 }));
 const roots: string[] = [];
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   lookup.value = undefined;
   await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
 });
@@ -59,7 +59,7 @@ async function scenario(
 ) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "worker-stop-"));
   roots.push(root);
-  const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+  const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
   const placements = createWorkerSessionPlacementStore({ database, now: () => 1000 });
   const storePath = path.join(root, "sessions.sqlite");
   const worktreePath = path.join(root, "workspace");
@@ -584,7 +584,7 @@ it("Stop preserves RPC cancellation and buffered output while Move waits behind 
         content: [
           expect.objectContaining({ type: "text", text: "partial before queued Move Stop" }),
         ],
-        openclawAbort: { aborted: true, origin: "rpc", runId: "queued-move-partial-running" },
+        carapaceAbort: { aborted: true, origin: "rpc", runId: "queued-move-partial-running" },
       }),
     }),
   ]);
@@ -595,7 +595,7 @@ it.each(["missing", "local"] as const)(
   async (state) => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "worker-stop-local-"));
     roots.push(root);
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const storePath = path.join(root, "sessions.sqlite");
     const entry = { sessionId: REQUEST.sessionId, updatedAt: Date.now() };
@@ -728,7 +728,7 @@ it.each(["missing", "local"] as const)(
           content: [
             expect.objectContaining({ type: "text", text: "partial before queued dispatch Stop" }),
           ],
-          openclawAbort: { aborted: true, origin: "rpc", runId },
+          carapaceAbort: { aborted: true, origin: "rpc", runId },
         }),
       }),
     ]);

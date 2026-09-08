@@ -3,22 +3,22 @@ doc-schema-version: 1
 summary: "Automations: scheduled jobs, webhooks, and Gmail PubSub triggers for the Gateway scheduler"
 read_when:
   - Scheduling background jobs or wakeups
-  - Wiring external triggers (webhooks, Gmail) into OpenClaw
+  - Wiring external triggers (webhooks, Gmail) into Carapace
   - Deciding between heartbeat and automations for scheduled work
 title: "Automations"
 sidebarTitle: "Automations"
 ---
 
-Automations are OpenClaw's built-in scheduler. The scheduler persists jobs, wakes the agent at the right time, and can deliver output to a chat channel, a webhook, or nowhere.
+Automations are Carapace's built-in scheduler. The scheduler persists jobs, wakes the agent at the right time, and can deliver output to a chat channel, a webhook, or nowhere.
 
-Manage automations with the `openclaw automations` CLI; `openclaw cron` remains an alias for the same commands.
+Manage automations with the `carapace automations` CLI; `carapace cron` remains an alias for the same commands.
 
 ## Quick start
 
 <Steps>
   <Step title="Add a one-shot reminder">
     ```bash
-    openclaw automations create "2027-02-01T16:00:00Z" \
+    carapace automations create "2027-02-01T16:00:00Z" \
       --name "Reminder" \
       --session main \
       --system-event "Reminder: check the automations docs draft" \
@@ -28,14 +28,14 @@ Manage automations with the `openclaw automations` CLI; `openclaw cron` remains 
   </Step>
   <Step title="Check your jobs">
     ```bash
-    openclaw automations list
-    openclaw automations get <job-id>
-    openclaw automations show <job-id>
+    carapace automations list
+    carapace automations get <job-id>
+    carapace automations show <job-id>
     ```
   </Step>
   <Step title="See run history">
     ```bash
-    openclaw automations runs <job-id>
+    carapace automations runs <job-id>
     ```
   </Step>
 </Steps>

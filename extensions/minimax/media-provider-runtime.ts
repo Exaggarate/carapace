@@ -1,10 +1,10 @@
-import type { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import type { fetchWithTimeoutGuarded, postJsonRequest } from "openclaw/plugin-sdk/provider-http";
+import type { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import type { fetchWithTimeoutGuarded, postJsonRequest } from "carapace/plugin-sdk/provider-http";
 import {
   asOptionalRecord,
   normalizeOptionalString,
   readStringField,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const DEFAULT_MINIMAX_MEDIA_BASE_URL = "https://api.minimax.io";
 

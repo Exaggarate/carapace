@@ -1,13 +1,13 @@
 import { setTimeout as delay } from "node:timers/promises";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   WorkerProviderError,
   type WorkerLeaseStatus,
   type WorkerProfile,
   type WorkerProvider,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { runCommandWithTimeout } from "carapace/plugin-sdk/process-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { crabboxCommandError } from "./crabbox-worker-command-error.js";
 import {
   type CrabboxCommandRunner,
@@ -68,7 +68,7 @@ import {
   resolveCrabboxWarmImageCaptureTimeoutMs,
 } from "./crabbox-worker-warm-image.js";
 
-export { resolveOpenClawRoot } from "./crabbox-worker-profile.js";
+export { resolveCarapaceRoot } from "./crabbox-worker-profile.js";
 
 // Local pack creation, two seed commands, upload, and runtime installation precede capture.
 const CRABBOX_PROJECT_PREPARATION_TIMEOUT_MS =
@@ -82,7 +82,7 @@ type LeaseHeartbeatContext = LeaseCommandContext &
 
 type CrabboxWorkerProviderDependencies = {
   isExecutable?: (candidate: string) => boolean;
-  openclawRoot?: string;
+  carapaceRoot?: string;
   pathEnv?: string;
   platform?: NodeJS.Platform;
   runCommand?: CrabboxCommandRunner;
@@ -153,7 +153,7 @@ export function createCrabboxWorkerProvider(
   const warn = dependencies.warn ?? (() => {});
   const sleep =
     dependencies.sleep ?? ((milliseconds, signal) => delay(milliseconds, undefined, { signal }));
-  const openclawRoot = dependencies.openclawRoot ?? process.cwd();
+  const carapaceRoot = dependencies.carapaceRoot ?? process.cwd();
   const heartbeats = createCrabboxHeartbeatManager({
     run: (context, signal) =>
       runCrabboxCommand({
@@ -183,7 +183,7 @@ export function createCrabboxWorkerProvider(
     defaultBinary ??= resolveCrabboxBinary({
       explicit,
       isExecutable: dependencies.isExecutable,
-      openclawRoot,
+      carapaceRoot,
       pathEnv: dependencies.pathEnv ?? process.env.PATH,
       platform: dependencies.platform,
     });

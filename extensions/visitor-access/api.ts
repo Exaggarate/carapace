@@ -2,9 +2,9 @@ export {
   buildPluginConfigSchema,
   definePluginEntry,
   type AnyAgentTool,
-  type OpenClawPluginApi,
-  type OpenClawPluginToolContext,
+  type CarapacePluginApi,
+  type CarapacePluginToolContext,
   type PluginLogger,
-} from "openclaw/plugin-sdk/plugin-entry";
-export type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-export { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+} from "carapace/plugin-sdk/plugin-entry";
+export type { PluginStateKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
+export { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";

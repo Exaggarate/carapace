@@ -1,7 +1,7 @@
 // Covers MCP config normalization, validation, and serialization.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { listConfiguredMcpServers, mcpConfigInternal } from "./mcp-config.js";
 import { REDACTED_SENTINEL } from "./redact-snapshot.js";
@@ -15,7 +15,7 @@ function validationOk(raw: unknown) {
 const mockReadSourceConfigSnapshot = vi.hoisted(() => async () => {
   const fsValue = await import("node:fs/promises");
   const pathValue = await import("node:path");
-  const configPath = pathValue.join(process.env.OPENCLAW_STATE_DIR ?? "", "openclaw.json");
+  const configPath = pathValue.join(process.env.CARAPACE_STATE_DIR ?? "", "carapace.json");
   try {
     const raw = await fsValue.readFile(configPath, "utf-8");
     const parsed = JSON.parse(raw);
@@ -39,7 +39,7 @@ const mockReplaceConfigFile = vi.hoisted(
     async ({ sourceConfig }: { sourceConfig: unknown }) => {
       const fsLocal = await import("node:fs/promises");
       const pathLocal = await import("node:path");
-      const configPath = pathLocal.join(process.env.OPENCLAW_STATE_DIR ?? "", "openclaw.json");
+      const configPath = pathLocal.join(process.env.CARAPACE_STATE_DIR ?? "", "carapace.json");
       await fsLocal.writeFile(configPath, JSON.stringify(sourceConfig, null, 2), "utf-8");
       return { nextConfig: sourceConfig };
     },
@@ -68,18 +68,18 @@ async function withMcpConfigHome<T>(
 ) {
   return await withTempHome(
     async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
       return await fn({ configPath });
     },
     {
-      prefix: "openclaw-mcp-config-",
+      prefix: "carapace-mcp-config-",
       skipSessionCleanup: true,
       env: {
-        OPENCLAW_CONFIG_PATH: undefined,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_CONFIG_PATH: undefined,
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
       },
     },
   );

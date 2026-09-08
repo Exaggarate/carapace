@@ -9,9 +9,9 @@ require_artifact() {
 validate_pr_temp_storage() {
   local temp_dir="${TMPDIR:-/tmp}"
   local probe=""
-  if ! probe=$(mktemp "${temp_dir%/}/openclaw-pr.XXXXXX"); then
+  if ! probe=$(mktemp "${temp_dir%/}/carapace-pr.XXXXXX"); then
     :
-  elif ! printf 'openclaw-pr-temp-probe\n' >"$probe"; then
+  elif ! printf 'carapace-pr-temp-probe\n' >"$probe"; then
     rm -f "$probe" 2>/dev/null || true
   elif rm -f "$probe"; then
     return 0
@@ -60,7 +60,7 @@ changelog_required_for_changed_files() {
 }
 
 root_changelog_update_allowed_for_pr() {
-  case "${OPENCLAW_ALLOW_ROOT_CHANGELOG_PR:-}" in
+  case "${CARAPACE_ALLOW_ROOT_CHANGELOG_PR:-}" in
     1|true|TRUE|yes|YES|on|ON)
       printf 'override\n'
       return 0
@@ -190,7 +190,7 @@ read_pr_view_json() {
   local fields="$2"
   local max_attempts=3
   local temp_dir
-  temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/openclaw-pr-view.XXXXXX") || {
+  temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/carapace-pr-view.XXXXXX") || {
     echo "Unable to create temporary storage for GitHub PR metadata." >&2
     return 1
   }
@@ -267,7 +267,7 @@ pr_contributor_allows_human_trailers() {
   normalized=$(printf '%s' "$contrib" | tr '[:upper:]' '[:lower:]')
 
   case "$normalized" in
-    ""|"null"|"app/"*|"codex"|"openclaw"|"clawsweeper"|"openclaw-clawsweeper"|"clawsweeper[bot]"|"openclaw-clawsweeper[bot]"|"steipete")
+    ""|"null"|"app/"*|"codex"|"carapace"|"clawsweeper"|"carapace-clawsweeper"|"clawsweeper[bot]"|"carapace-clawsweeper[bot]"|"steipete")
       return 1
       ;;
   esac

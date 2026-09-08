@@ -1,12 +1,12 @@
 // Zalo tests cover actions plugin behavior.
 import http from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { zaloMessageActions } from "./actions.js";
 
 describe("zaloMessageActions.describeMessageTool", () => {
   it("honors the selected Zalo account during discovery", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         zalo: {
           enabled: true,
@@ -43,14 +43,14 @@ describe("zaloMessageActions.describeMessageTool", () => {
               botToken: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_TEST_MISSING_ZALO_TOKEN",
+                id: "CARAPACE_TEST_MISSING_ZALO_TOKEN",
               },
             },
             healthy: { botToken: "healthy-token" },
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(zaloMessageActions.describeMessageTool?.({ cfg })).toEqual({
       actions: ["send"],
       capabilities: [],

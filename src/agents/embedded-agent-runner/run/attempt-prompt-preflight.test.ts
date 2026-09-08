@@ -1,5 +1,5 @@
-import { captureOpenAIResponsesCompaction } from "@openclaw/ai/transports";
-import type { Model } from "@openclaw/llm-core";
+import { captureOpenAIResponsesCompaction } from "@carapace/ai/transports";
+import type { Model } from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import { testing } from "../../openai-transport-stream.test-support.js";
 import type { AgentMessage } from "../../runtime/index.js";
@@ -18,7 +18,7 @@ import {
 const attempt = {
   provider: "test-provider",
   modelId: "test-model",
-  sessionFile: "/tmp/openclaw-attempt-preflight-test.jsonl",
+  sessionFile: "/tmp/carapace-attempt-preflight-test.jsonl",
   sessionId: "session-1",
   sessionKey: "agent:test:main",
   model: {

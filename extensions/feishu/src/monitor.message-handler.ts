@@ -1,5 +1,5 @@
-import { createRuntimeConfigReader } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { isRecord, readStringValue as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createRuntimeConfigReader } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { isRecord, readStringValue as readString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { ClawdbotConfig, HistoryEntry, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import { claimUnprocessedFeishuMessage, type FeishuMessageProcessingClaim } from "./dedup.js";
 import { resolveFeishuMessageDedupeKey } from "./dedupe-key.js";

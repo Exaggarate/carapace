@@ -68,6 +68,6 @@ export function registerTabAccessEvents(options: {
   scheduleTabsSync(): void;
   detachDebugger(tabId: number): Promise<void>;
   pauseTab(tabId: number): void | Promise<void>;
-  removeTabFromOpenClawGroup(tabId: number): void | Promise<void>;
+  removeTabFromCarapaceGroup(tabId: number): void | Promise<void>;
   runAccessMutation(task: () => void | Promise<void>): Promise<void>;
 }): void;

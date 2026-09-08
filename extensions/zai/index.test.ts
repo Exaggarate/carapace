@@ -2,15 +2,15 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
-import { createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
+import { createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 function createGlm47Template() {
   return {
@@ -604,7 +604,7 @@ describe("zai provider plugin", () => {
   });
 
   it("uses deprecated pi agent auth.json for usage auth when modern sources are empty", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-zai-legacy-auth-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-zai-legacy-auth-"));
     try {
       const authDir = path.join(home, ".pi", "agent");
       await fs.mkdir(authDir, { recursive: true });

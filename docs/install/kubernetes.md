@@ -1,16 +1,16 @@
 ---
-summary: "Deploy OpenClaw Gateway to a Kubernetes cluster with Kustomize"
+summary: "Deploy Carapace Gateway to a Kubernetes cluster with Kustomize"
 read_when:
-  - You want to run OpenClaw on a Kubernetes cluster
-  - You want to test OpenClaw in a Kubernetes environment
+  - You want to run Carapace on a Kubernetes cluster
+  - You want to test Carapace in a Kubernetes environment
 title: "Kubernetes"
 ---
 
-A minimal starting point for running OpenClaw on Kubernetes, not a production-ready deployment. It covers the core resources and is meant to be adapted to your environment.
+A minimal starting point for running Carapace on Kubernetes, not a production-ready deployment. It covers the core resources and is meant to be adapted to your environment.
 
 ## Why not Helm
 
-OpenClaw is a single container with some config files. The interesting customization is in agent content (Markdown files, skills, config overrides), not infrastructure templating. Kustomize handles overlays without the overhead of a Helm chart. Layer a Helm chart on top of these manifests if your deployment grows more complex.
+Carapace is a single container with some config files. The interesting customization is in agent content (Markdown files, skills, config overrides), not infrastructure templating. Kustomize handles overlays without the overhead of a Helm chart. Layer a Helm chart on top of these manifests if your deployment grows more complex.
 
 ## What you need
 
@@ -25,14 +25,14 @@ OpenClaw is a single container with some config files. The interesting customiza
 export <PROVIDER>_API_KEY="..."
 ./scripts/k8s/deploy.sh
 
-kubectl port-forward svc/openclaw 18789:18789 -n openclaw
+kubectl port-forward svc/carapace 18789:18789 -n carapace
 open http://127.0.0.1:18789
 ```
 
 `deploy.sh` creates token auth by default. Retrieve the generated gateway token for the Control UI:
 
 ```bash
-kubectl get secret openclaw-secrets -n openclaw -o jsonpath='{.data.OPENCLAW_GATEWAY_TOKEN}' | base64 -d
+kubectl get secret carapace-secrets -n carapace -o jsonpath='{.data.CARAPACE_GATEWAY_TOKEN}' | base64 -d
 ```
 
 For local debugging, `./scripts/k8s/deploy.sh --show-token` prints the token after deploy.
@@ -75,19 +75,19 @@ Add `--show-token` to either command to print the token to stdout for local test
 ### 2) Access the gateway
 
 ```bash
-kubectl port-forward svc/openclaw 18789:18789 -n openclaw
+kubectl port-forward svc/carapace 18789:18789 -n carapace
 open http://127.0.0.1:18789
 ```
 
 ## What gets deployed
 
 ```text
-Namespace: openclaw (configurable via OPENCLAW_NAMESPACE)
-├── Deployment/openclaw        # Single pod, init container + gateway
-├── Service/openclaw           # ClusterIP on port 18789
+Namespace: carapace (configurable via CARAPACE_NAMESPACE)
+├── Deployment/carapace        # Single pod, init container + gateway
+├── Service/carapace           # ClusterIP on port 18789
 ├── PersistentVolumeClaim      # 10Gi for agent state and config
-├── ConfigMap/openclaw-config  # openclaw.json + AGENTS.md
-└── Secret/openclaw-secrets    # Gateway token + API keys
+├── ConfigMap/carapace-config  # carapace.json + AGENTS.md
+└── Secret/carapace-secrets    # Gateway token + API keys
 ```
 
 The Deployment probes `/readyz` for startup and traffic readiness with a five-minute startup budget, and `/healthz` for liveness. Every probe asserts the JSON probe contract rather than the status code alone, because the Control UI answers unknown paths with a catch-all `200`; a status-only check would pass forever against an image whose probe route does not exist yet.
@@ -106,16 +106,16 @@ Edit the `AGENTS.md` in `scripts/k8s/manifests/configmap.yaml` and redeploy:
 
 ### Gateway config
 
-Edit `openclaw.json` in `scripts/k8s/manifests/configmap.yaml`. See [Gateway configuration](/gateway/configuration) for the full reference.
+Edit `carapace.json` in `scripts/k8s/manifests/configmap.yaml`. See [Gateway configuration](/gateway/configuration) for the full reference.
 
-The init container seeds `openclaw.json` and workspace `AGENTS.md` only when each file is missing from the PVC. The persisted copy is the source of truth after first boot: changes made through OpenClaw (`onboard`, `channels add`, `doctor --fix`, Control UI) survive pod restarts, and updating the ConfigMap does not overwrite an existing PVC copy. To intentionally reseed a file from an updated ConfigMap, delete the persisted copy and restart:
+The init container seeds `carapace.json` and workspace `AGENTS.md` only when each file is missing from the PVC. The persisted copy is the source of truth after first boot: changes made through Carapace (`onboard`, `channels add`, `doctor --fix`, Control UI) survive pod restarts, and updating the ConfigMap does not overwrite an existing PVC copy. To intentionally reseed a file from an updated ConfigMap, delete the persisted copy and restart:
 
 ```bash
-kubectl exec -n openclaw deploy/openclaw -- rm /home/node/.openclaw/openclaw.json
-kubectl rollout restart -n openclaw deploy/openclaw
+kubectl exec -n carapace deploy/carapace -- rm /home/node/.carapace/carapace.json
+kubectl rollout restart -n carapace deploy/carapace
 ```
 
-Deployments created from the previous template applied ConfigMap edits on every pod start (and discarded any config changes made through OpenClaw). If you relied on that flow, use the reseed commands above after ConfigMap edits.
+Deployments created from the previous template applied ConfigMap edits on every pod start (and discarded any config changes made through Carapace). If you relied on that flow, use the reseed commands above after ConfigMap edits.
 
 ### Add providers
 
@@ -133,15 +133,15 @@ Existing provider keys stay in the Secret unless you overwrite them.
 Or patch the Secret directly:
 
 ```bash
-kubectl patch secret openclaw-secrets -n openclaw \
+kubectl patch secret carapace-secrets -n carapace \
   -p '{"stringData":{"<PROVIDER>_API_KEY":"..."}}'
-kubectl rollout restart deployment/openclaw -n openclaw
+kubectl rollout restart deployment/carapace -n carapace
 ```
 
 ### Custom namespace
 
 ```bash
-OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
+CARAPACE_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 ```
 
 ### Custom image
@@ -149,8 +149,8 @@ OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 Edit the `image` field in `scripts/k8s/manifests/deployment.yaml`:
 
 ```yaml
-# Bump this immutable versioned tag when upgrading OpenClaw.
-image: ghcr.io/openclaw/openclaw:2026.7.1-2-slim
+# Bump this immutable versioned tag when upgrading Carapace.
+image: ghcr.io/carapace/carapace:2026.7.1-2-slim
 ```
 
 ### Expose beyond port-forward
@@ -177,20 +177,20 @@ This applies all manifests and restarts the pod to pick up any config or secret 
 ./scripts/k8s/deploy.sh --delete
 ```
 
-For the default `openclaw` namespace, this deletes the namespace and everything in it, including the PVC.
+For the default `carapace` namespace, this deletes the namespace and everything in it, including the PVC.
 
-For a custom namespace, `--delete` removes only OpenClaw resources and preserves the namespace and unrelated workloads:
+For a custom namespace, `--delete` removes only Carapace resources and preserves the namespace and unrelated workloads:
 
 ```bash
-OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh --delete
+CARAPACE_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh --delete
 ```
 
-Use `--delete-resources` to request this scoped teardown explicitly in any namespace. Both scoped modes delete the OpenClaw Deployment, Service, PVC, ConfigMap, and generated Secret. Deleting the PVC removes OpenClaw's claim and access to its persisted data; whether the backing volume and data are deleted depends on the PersistentVolume or StorageClass reclaim policy (`Delete` or `Retain`).
+Use `--delete-resources` to request this scoped teardown explicitly in any namespace. Both scoped modes delete the Carapace Deployment, Service, PVC, ConfigMap, and generated Secret. Deleting the PVC removes Carapace's claim and access to its persisted data; whether the backing volume and data are deleted depends on the PersistentVolume or StorageClass reclaim policy (`Delete` or `Retain`).
 
 To delete a custom namespace and every workload in it, explicitly opt in:
 
 ```bash
-OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh --delete-namespace
+CARAPACE_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh --delete-namespace
 ```
 
 This also deletes unrelated workloads and the PVC.
@@ -212,7 +212,7 @@ scripts/k8s/
 ├── create-kind.sh              # Local Kind cluster (auto-detects docker/podman)
 └── manifests/
     ├── kustomization.yaml      # Kustomize base
-    ├── configmap.yaml          # openclaw.json + AGENTS.md
+    ├── configmap.yaml          # carapace.json + AGENTS.md
     ├── deployment.yaml         # Pod spec with security hardening
     ├── pvc.yaml                # 10Gi persistent storage
     └── service.yaml            # ClusterIP on 18789

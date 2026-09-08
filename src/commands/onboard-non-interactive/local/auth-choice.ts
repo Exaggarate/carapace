@@ -6,7 +6,7 @@
  */
 import type { ApiKeyCredential } from "../../../agents/auth-profiles/types.js";
 import { formatCliCommand } from "../../../cli/command-format.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { SecretInput } from "../../../config/types.secrets.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import { resolveManifestDeprecatedProviderAuthChoice } from "../../../plugins/provider-auth-choices.js";
@@ -33,15 +33,15 @@ type ResolvedNonInteractiveApiKey = NonNullable<
   Awaited<ReturnType<typeof resolveNonInteractiveApiKey>>
 >;
 
-/** Applies a local non-interactive auth choice to the pending OpenClaw config. */
+/** Applies a local non-interactive auth choice to the pending Carapace config. */
 export async function applyNonInteractiveAuthChoice(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   authChoice: AuthChoice;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   target: OnboardingAgentTarget;
-}): Promise<OpenClawConfig | null> {
+}): Promise<CarapaceConfig | null> {
   const { opts, runtime, baseConfig } = params;
   let authChoice = normalizeApiKeyTokenProviderAuthChoice({
     authChoice: params.authChoice,
@@ -56,7 +56,7 @@ export async function applyNonInteractiveAuthChoice(params: {
     rejectOnboardingOption(
       opts,
       runtime,
-      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("carapace onboard")} for interactive setup.`,
     );
     return null;
   }

@@ -1,6 +1,6 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ProviderAuthMethod } from "openclaw/plugin-sdk/plugin-entry";
-import type { OAuthCredential } from "openclaw/plugin-sdk/provider-auth";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { ProviderAuthMethod } from "carapace/plugin-sdk/plugin-entry";
+import type { OAuthCredential } from "carapace/plugin-sdk/provider-auth";
 
 const PROVIDER_ID = "xai";
 const XAI_OAUTH_METHOD_ID = "oauth";

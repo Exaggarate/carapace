@@ -3,13 +3,13 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   clearConfigCache,
   resetConfigRuntimeState,
   setRuntimeConfigSnapshot,
 } from "../config/config.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { clearSecretsRuntimeSnapshot } from "../secrets/runtime.js";
 
 function canonicalizeTempConfigForTest(cfg: unknown): unknown {
@@ -34,19 +34,19 @@ function canonicalizeTempConfigForTest(cfg: unknown): unknown {
   return next;
 }
 
-/** Writes a temp OpenClaw config, installs it as runtime state, then restores globals. */
+/** Writes a temp Carapace config, installs it as runtime state, then restores globals. */
 export async function withTempConfig(params: {
   cfg: unknown;
   run: () => Promise<void>;
   prefix?: string;
 }): Promise<void> {
-  const prevConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+  const prevConfigPath = process.env.CARAPACE_CONFIG_PATH;
 
-  const testConfig = canonicalizeTempConfigForTest(params.cfg) as OpenClawConfig;
-  const dir = await mkdtemp(path.join(os.tmpdir(), params.prefix ?? "openclaw-test-config-"));
-  const configPath = path.join(dir, "openclaw.json");
+  const testConfig = canonicalizeTempConfigForTest(params.cfg) as CarapaceConfig;
+  const dir = await mkdtemp(path.join(os.tmpdir(), params.prefix ?? "carapace-test-config-"));
+  const configPath = path.join(dir, "carapace.json");
 
-  process.env.OPENCLAW_CONFIG_PATH = configPath;
+  process.env.CARAPACE_CONFIG_PATH = configPath;
 
   try {
     await writeFile(configPath, JSON.stringify(testConfig, null, 2), "utf-8");
@@ -59,9 +59,9 @@ export async function withTempConfig(params: {
     await params.run();
   } finally {
     if (prevConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.CARAPACE_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = prevConfigPath;
+      process.env.CARAPACE_CONFIG_PATH = prevConfigPath;
     }
     clearConfigCache();
     resetConfigRuntimeState();

@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceKit
+import CarapaceProtocol
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 private final class RecordingGatewaySpeechSynthesizer: TalkGatewaySpeechSynthesizing {

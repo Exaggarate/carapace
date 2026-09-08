@@ -1,18 +1,18 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import {
   clearConfigCache,
   clearRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   normalizeSessionDeliveryState,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { openOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { openCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { writeBackfillDiaryEntries } from "./dreaming-dreams-file.js";
 import {
@@ -58,7 +58,7 @@ async function writeTranscript(filePath: string, messages: TranscriptMessage[]):
       role: message.role,
       content: message.content,
       timestamp: message.timestamp,
-      ...(message.owner ? { __openclaw: { senderIsOwner: true } } : {}),
+      ...(message.owner ? { __carapace: { senderIsOwner: true } } : {}),
     },
   }));
   await fs.writeFile(filePath, `${records.map((record) => JSON.stringify(record)).join("\n")}\n`);
@@ -90,7 +90,7 @@ async function seedCanonicalTranscript(
         role: message.role,
         content: message.content,
         timestamp: message.timestamp,
-        ...(message.owner ? { __openclaw: { senderIsOwner: true } } : {}),
+        ...(message.owner ? { __carapace: { senderIsOwner: true } } : {}),
       },
     });
   }
@@ -99,8 +99,8 @@ async function seedCanonicalTranscript(
 
 async function createIsolatedWorkspace(prefix: string): Promise<string> {
   const workspaceDir = await harness.createTempWorkspace(prefix);
-  vi.stubEnv("OPENCLAW_STATE_DIR", path.join(workspaceDir, "state"));
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(workspaceDir, "openclaw.json"));
+  vi.stubEnv("CARAPACE_STATE_DIR", path.join(workspaceDir, "state"));
+  vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(workspaceDir, "carapace.json"));
   clearRuntimeConfigSnapshot();
   clearConfigCache();
   return workspaceDir;
@@ -486,7 +486,7 @@ describe("runSessionBackfill", () => {
     expect(drained.batchCount).toBe(2);
     expect((await run()).candidateCount).toBe(0);
     const dreams = await fs.readFile(path.join(workspaceDir, "DREAMS.md"), "utf-8");
-    expect(dreams.match(/openclaw:dreaming:backfill-entry/g)).toHaveLength(2);
+    expect(dreams.match(/carapace:dreaming:backfill-entry/g)).toHaveLength(2);
   });
 
   it("applies the total cap after finding the oldest candidate across sources", async () => {
@@ -668,7 +668,7 @@ describe("runSessionBackfill", () => {
     expect(dreams).toContain("Existing backfill entry");
     expect(dreams).toContain("Owner prefers dark mode for all editors");
     expect(dreams).not.toContain("No grounded facts were extracted");
-    expect(dreams.match(/openclaw:dreaming:backfill-entry/g)).toHaveLength(2);
+    expect(dreams.match(/carapace:dreaming:backfill-entry/g)).toHaveLength(2);
   });
 
   it.each(["rem", "apply", "failed-apply"] as const)(
@@ -724,7 +724,7 @@ describe("runSessionBackfill", () => {
         expect(repeated.writtenDiaryEntries).toBe(0);
         expect(listMemoryEntryOrigins({ agentId: "main" })).toEqual(origins);
       }
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const preview = await forgetMemoryEntries({
         cfg,
         agentId: "main",
@@ -812,7 +812,7 @@ describe("runSessionBackfill", () => {
     ]);
     const diaryPath = path.join(workspaceDir, "DREAMS.md");
     await fs.writeFile(diaryPath, "Keep this operator note.\n");
-    openOpenClawAgentDatabase({ agentId: "main" }).db.exec(`
+    openCarapaceAgentDatabase({ agentId: "main" }).db.exec(`
       CREATE TRIGGER reject_diary_origin BEFORE INSERT ON memory_entry_origins
       BEGIN SELECT RAISE(ABORT, 'injected diary origin failure'); END;
     `);
@@ -866,7 +866,7 @@ describe("runSessionBackfill", () => {
     expect(await readShortTermRecallEntries({ workspaceDir })).toHaveLength(1);
 
     const dreamsPath = path.join(workspaceDir, "DREAMS.md");
-    expect(await fs.readFile(dreamsPath, "utf-8")).toContain("openclaw:dreaming:backfill-entry");
+    expect(await fs.readFile(dreamsPath, "utf-8")).toContain("carapace:dreaming:backfill-entry");
 
     const rollback = await runSessionBackfill({
       agentId: "main",
@@ -879,7 +879,7 @@ describe("runSessionBackfill", () => {
     });
     expect(await readShortTermRecallEntries({ workspaceDir })).toHaveLength(0);
     expect(await fs.readFile(dreamsPath, "utf-8")).not.toContain(
-      "openclaw:dreaming:backfill-entry",
+      "carapace:dreaming:backfill-entry",
     );
     const reapplied = await runSessionBackfill({
       agentId: "main",

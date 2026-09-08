@@ -10,7 +10,7 @@ vi.mock("matrix-js-sdk/lib/matrix.js", () => {
 vi.mock("fake-indexeddb", () => {
   throw new Error("IndexedDB runtime loaded without a legacy snapshot");
 });
-vi.mock("openclaw/plugin-sdk/doctor-repair-runtime", () => {
+vi.mock("carapace/plugin-sdk/doctor-repair-runtime", () => {
   throw new Error("Schema repair runtime loaded without an account database");
 });
 vi.mock("./src/matrix/client/storage.js", () => {
@@ -23,14 +23,14 @@ vi.mock("./src/account-selection.js", () => {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 it("completes absent legacy-state checks without loading client runtimes", async () => {
-  const stateDir = tempDirs.make("openclaw-matrix-doctor-import-");
+  const stateDir = tempDirs.make("carapace-matrix-doctor-import-");
   const { stateMigrations } = await import("./doctor-contract-api.js");
   const openPluginStateKeyedStore = vi.fn(() => {
     throw new Error("absent legacy sources must not open a state store");
   });
   const params = {
     config: {},
-    env: { HOME: stateDir, OPENCLAW_STATE_DIR: stateDir },
+    env: { HOME: stateDir, CARAPACE_STATE_DIR: stateDir },
     stateDir,
     oauthDir: path.join(stateDir, "oauth"),
     context: { openPluginStateKeyedStore },

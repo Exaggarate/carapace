@@ -1,4 +1,4 @@
-import type { CliBackendExecuteContext } from "openclaw/plugin-sdk/cli-backend";
+import type { CliBackendExecuteContext } from "carapace/plugin-sdk/cli-backend";
 
 const PROTOCOL_FLAGS = new Set([
   "-p",
@@ -76,15 +76,15 @@ export function prepareClaudeCliTransportArgs(context: CliBackendExecuteContext)
       tools = names;
     } else {
       // Native actions must pass the host hooks, even if argv requested automatic approval.
-      allowedTools.push(...names.filter((name) => name.startsWith("mcp__openclaw__")));
+      allowedTools.push(...names.filter((name) => name.startsWith("mcp__carapace__")));
     }
   }
   let approvedTools = [...new Set(allowedTools)];
   if (context.toolAvailability) {
     tools = [...context.toolAvailability.native];
-    approvedTools = context.toolAvailability.openClaw
-      .map((name) => `mcp__openclaw__${name}`)
-      .filter((name) => allowedTools.includes(name) || allowedTools.includes("mcp__openclaw__*"));
+    approvedTools = context.toolAvailability.carapace
+      .map((name) => `mcp__carapace__${name}`)
+      .filter((name) => allowedTools.includes(name) || allowedTools.includes("mcp__carapace__*"));
   }
   args.push(
     "--print",

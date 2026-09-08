@@ -1,5 +1,5 @@
 import { type Mock, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime } from "../api.js";
+import type { CarapaceConfig, PluginRuntime } from "../api.js";
 import { createLineSendReceipt } from "./send-receipt.js";
 
 type LineRuntimeMocks = {
@@ -40,7 +40,7 @@ export function createRuntime(): { runtime: PluginRuntime; mocks: LineRuntimeMoc
   const chunkMarkdownText = vi.fn((text: string) => [text]);
   const resolveTextChunkLimit = vi.fn(() => 123);
   const resolveLineAccount = vi.fn(
-    ({ cfg, accountId }: { cfg: OpenClawConfig; accountId?: string }) => {
+    ({ cfg, accountId }: { cfg: CarapaceConfig; accountId?: string }) => {
       const resolved = accountId ?? "default";
       const lineConfig = (cfg.channels?.line ?? {}) as {
         accounts?: Record<string, Record<string, unknown>>;

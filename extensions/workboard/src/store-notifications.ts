@@ -1,7 +1,7 @@
 import type {
   WorkboardNotification,
   WorkboardNotificationSubscription,
-} from "@openclaw/workboard-contract";
+} from "@carapace/workboard-contract";
 import type { PersistedWorkboardNotificationSubscription } from "./persistence-types.js";
 import {
   cardRunId,

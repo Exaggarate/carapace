@@ -13,7 +13,7 @@ type RunViewElement = HTMLElement & {
 };
 
 async function mount(record: UpdateRunRecord) {
-  const element = document.createElement("openclaw-update-run-view") as RunViewElement;
+  const element = document.createElement("carapace-update-run-view") as RunViewElement;
   element.run = record;
   document.body.append(element);
   await element.updateComplete;
@@ -140,7 +140,7 @@ describe("update run view", () => {
     });
     await element.updateComplete;
     const report = element.querySelector('[aria-label="Update report"]');
-    expect(report?.textContent).toContain("✅ OpenClaw updated to 2026.9.2 (from 2026.9.1).");
+    expect(report?.textContent).toContain("✅ Carapace updated to 2026.9.2 (from 2026.9.1).");
     expect(report?.textContent).toContain("service running; version verified; channels ready");
     expect(element.querySelectorAll('[data-state="pass"]')).toHaveLength(4);
     expect(element.querySelector('[data-step="repairing"]')).toBeNull();
@@ -162,7 +162,7 @@ describe("update run view", () => {
       }),
     );
     expect(element.querySelector('[aria-label="Update report"]')?.textContent).toContain(
-      "Run openclaw triage to diagnose and repair the failed update.",
+      "Run carapace triage to diagnose and repair the failed update.",
     );
     expect(element.querySelector(".update-run-view__details")?.textContent).toContain(
       '<img src=x onerror="alert(1)">',

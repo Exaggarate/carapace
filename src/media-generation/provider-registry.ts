@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as capabilityProviderRuntime from "../plugins/capability-provider-runtime.js";
 import {
   buildCapabilityProviderIndex,
@@ -23,7 +23,7 @@ export function createMediaProviderRegistry<TKey extends MediaProviderRegistryKe
 ) {
   const buildProviderIndex = (
     mode: "canonical" | "aliases",
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
     additionalProviderIds?: readonly string[],
   ) =>
     buildCapabilityProviderIndex(
@@ -37,10 +37,10 @@ export function createMediaProviderRegistry<TKey extends MediaProviderRegistryKe
     );
 
   return {
-    listProviders: (cfg?: OpenClawConfig, additionalProviderIds?: readonly string[]) => [
+    listProviders: (cfg?: CarapaceConfig, additionalProviderIds?: readonly string[]) => [
       ...buildProviderIndex("canonical", cfg, additionalProviderIds).values(),
     ],
-    getProvider: (providerId: string | undefined, cfg?: OpenClawConfig) => {
+    getProvider: (providerId: string | undefined, cfg?: CarapaceConfig) => {
       const normalized = normalizeCapabilityProviderId(providerId);
       if (!normalized) {
         return undefined;

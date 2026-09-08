@@ -8,7 +8,7 @@ describe("MCP channels Docker attachment contract", () => {
       source: { type: "base64", media_type: "image/png", data: "abc" },
     };
     const canonicalAttachment = {
-      type: "openclaw_media",
+      type: "carapace_media",
       media: {
         url: "media://inbound/seeded-image.png",
         contentType: "image/png",

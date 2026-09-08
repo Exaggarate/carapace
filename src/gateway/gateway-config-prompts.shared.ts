@@ -1,9 +1,9 @@
 // Gateway setup prompt shared constants.
 // Provides Tailscale copy and Control UI origin updates for CLI setup flows.
-import { isIpv6Address, parseCanonicalIpAddress } from "@openclaw/net-policy/ip";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { isIpv6Address, parseCanonicalIpAddress } from "@carapace/net-policy/ip";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getTailnetHostname } from "../infra/tailscale.js";
 
 export const TAILSCALE_EXPOSURE_OPTIONS = [
@@ -30,8 +30,8 @@ export const TAILSCALE_MISSING_BIN_NOTE_LINES = [
 
 export const TAILSCALE_DOCS_LINES = [
   "Docs:",
-  "https://docs.openclaw.ai/gateway/tailscale",
-  "https://docs.openclaw.ai/web",
+  "https://github.com/Exaggarate/carapace",
+  "https://github.com/Exaggarate/carapace",
 ] as const;
 
 function normalizeTailnetHostForUrl(rawHost: string): string | null {
@@ -68,10 +68,10 @@ function appendAllowedOrigin(existing: string[] | undefined, origin: string): st
 }
 
 export async function maybeAddTailnetOriginToControlUiAllowedOrigins(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   tailscaleMode: string;
   tailscaleBin?: string | null;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   if (params.tailscaleMode !== "serve" && params.tailscaleMode !== "funnel") {
     return params.config;
   }

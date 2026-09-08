@@ -1,5 +1,5 @@
 {
-  "schema": "openclaw.authorized-beta-focused-policy.v1",
+  "schema": "carapace.authorized-beta-focused-policy.v1",
   "mode": "authorized-beta-focused-v1",
   "releaseTag": "v2026.8.1-beta.3",
   "releaseVersion": "2026.8.1-beta.3",

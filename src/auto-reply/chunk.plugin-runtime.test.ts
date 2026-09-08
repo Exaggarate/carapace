@@ -1,4 +1,4 @@
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it } from "vitest";
 import { createPluginRecord } from "../plugins/loader-records.js";
 import { createPluginRegistry } from "../plugins/registry.js";

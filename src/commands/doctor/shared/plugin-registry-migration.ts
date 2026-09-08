@@ -7,7 +7,7 @@ import {
   copyPluginInstallRecordMap,
   setPluginInstallRecordMapEntry,
 } from "../../../config/plugin-install-record-map.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
 import { inspectPersistedInstalledPluginIndexInstallRecordsSync } from "../../../plugins/installed-plugin-index-record-state.js";
 import {
@@ -94,12 +94,12 @@ export class InvalidPluginInstallRecordStateError extends Error {}
 function invalidPersistedInstallRecordMessage(filePath: string): string {
   return [
     `Persisted plugin install records are invalid at ${filePath}.`,
-    "Stop the Gateway, back up this database, delete only the config_machine_state row with state_key='plugins.installedIndex' using SQLite tooling, then rerun `openclaw doctor --fix` to rebuild it.",
+    "Stop the Gateway, back up this database, delete only the config_machine_state row with state_key='plugins.installedIndex' using SQLite tooling, then rerun `carapace doctor --fix` to rebuild it.",
   ].join(" ");
 }
 
 const INVALID_CONFIG_INSTALL_RECORD_MESSAGE =
-  "plugins.installs contains invalid records. Back up openclaw.json, correct or remove the invalid retired plugins.installs record, then rerun `openclaw doctor --fix`.";
+  "plugins.installs contains invalid records. Back up carapace.json, correct or remove the invalid retired plugins.installs record, then rerun `carapace doctor --fix`.";
 
 export type ShippedPluginInstallConfigImport = {
   source: Pick<ConfigFileSnapshot, "path" | "hash" | "sourceConfig">;
@@ -219,7 +219,7 @@ export type PluginRegistryDoctorMigrationParams = LoadInstalledPluginIndexParams
   InstalledPluginIndexStoreOptions & {
     dryRun?: boolean;
     existsSync?: (path: string) => boolean;
-    readConfig?: () => Promise<OpenClawConfig> | OpenClawConfig;
+    readConfig?: () => Promise<CarapaceConfig> | CarapaceConfig;
   };
 
 /** Decide whether Doctor should migrate the plugin registry in this environment. */
@@ -265,7 +265,7 @@ export function preflightPluginRegistryDoctorMigration(
 
 async function readMigrationConfig(
   params: PluginRegistryDoctorMigrationParams,
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   if (params.config) {
     return params.config;
   }

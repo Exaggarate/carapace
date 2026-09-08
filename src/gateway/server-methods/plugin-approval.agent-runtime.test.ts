@@ -3,11 +3,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import type { PluginApprovalRequestPayload } from "../../infra/plugin-approvals.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import type { AgentRuntimeIdentity } from "../agent-runtime-identity-token.js";
 import { ExecApprovalManager } from "../exec-approval-manager.js";
 import { createTestApprovalManager } from "../exec-approval-manager.test-support.js";
@@ -17,15 +17,15 @@ import type { GatewayRequestHandlerOptions } from "./types.js";
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
     for (const dir of tempDirs.dirs) {
-      closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: dir }));
+      closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: dir }));
     }
     cleanup();
   }),
 );
 
-function databaseOptions(): OpenClawStateDatabaseOptions {
+function databaseOptions(): CarapaceStateDatabaseOptions {
   const stateDir = fs.realpathSync(tempDirs.make("plugin-approval-id-"));
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 }
 
 function executionIdentity() {
@@ -222,7 +222,7 @@ describe("plugin approval signed agent runtime", () => {
       turnSourceThreadId: "thread-1",
     });
     expect(
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare(
           "SELECT approval_id, source_context_id, source_execution_id FROM operator_approval_execution_identities WHERE approval_id = ?",
         )
@@ -266,7 +266,7 @@ describe("plugin approval signed agent runtime", () => {
       (vi.mocked(opts.context.broadcast).mock.calls[0]?.[1] as { id?: unknown } | undefined)?.id,
     );
     expect(
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare(
           "SELECT name FROM sqlite_schema WHERE type = 'table' AND name = 'operator_approval_execution_identities'",
         )

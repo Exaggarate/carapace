@@ -79,7 +79,7 @@ async function readJson(filePath: string): Promise<Record<string, unknown>> {
 async function createInstalledServiceCommand() {
   // An installed service has already observed its config; include that health store in snapshots.
   await readConfigFileSnapshot();
-  const programArguments = ["openclaw", "gateway", "run"];
+  const programArguments = ["carapace", "gateway", "run"];
   const environment = buildServiceEnvironment({
     env: process.env,
     port: 18789,
@@ -111,18 +111,18 @@ describe("runDaemonInstall integration", () => {
   beforeAll(async () => {
     envSnapshot = captureEnv([
       "HOME",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_GATEWAY_TOKEN",
-      "OPENCLAW_GATEWAY_PASSWORD",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_CONFIG_PATH",
+      "CARAPACE_GATEWAY_TOKEN",
+      "CARAPACE_GATEWAY_PASSWORD",
     ]);
-    accountHome = await makeTempWorkspace("openclaw-daemon-install-int-");
-    tempHome = path.join(accountHome, ".openclaw");
+    accountHome = await makeTempWorkspace("carapace-daemon-install-int-");
+    tempHome = path.join(accountHome, ".carapace");
     await fs.mkdir(tempHome);
-    configPath = path.join(tempHome, "openclaw.json");
+    configPath = path.join(tempHome, "carapace.json");
     process.env.HOME = accountHome;
-    process.env.OPENCLAW_STATE_DIR = tempHome;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = tempHome;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
   });
 
   afterAll(async () => {
@@ -140,8 +140,8 @@ describe("runDaemonInstall integration", () => {
     resetRuntimeCapture();
     clearRuntimeConfigSnapshot();
     // Keep these defined-but-empty so dotenv won't repopulate from local .env.
-    process.env.OPENCLAW_GATEWAY_TOKEN = "";
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "";
+    process.env.CARAPACE_GATEWAY_TOKEN = "";
+    process.env.CARAPACE_GATEWAY_PASSWORD = "";
     serviceMock.isLoaded.mockResolvedValue(false);
     serviceMock.readDefinitionMutationCapability.mockResolvedValue({ kind: "writable" });
     serviceMock.readCommand.mockReset();
@@ -175,13 +175,13 @@ describe("runDaemonInstall integration", () => {
     const before = await snapshotConfig();
     await withEnvAsync(
       {
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_PROFILE: undefined,
-        OPENCLAW_LAUNCHD_LABEL: undefined,
-        OPENCLAW_SYSTEMD_UNIT: undefined,
-        OPENCLAW_WINDOWS_TASK_NAME: undefined,
-        OPENCLAW_NIX_MODE: mode.startsWith("Nix") ? "1" : undefined,
-        OPENCLAW_SUPERVISOR_MODE: mode.includes("supervision") ? " ExTeRnAl " : undefined,
+        CARAPACE_HOME: undefined,
+        CARAPACE_PROFILE: undefined,
+        CARAPACE_LAUNCHD_LABEL: undefined,
+        CARAPACE_SYSTEMD_UNIT: undefined,
+        CARAPACE_WINDOWS_TASK_NAME: undefined,
+        CARAPACE_NIX_MODE: mode.startsWith("Nix") ? "1" : undefined,
+        CARAPACE_SUPERVISOR_MODE: mode.includes("supervision") ? " ExTeRnAl " : undefined,
         HOME: mode === "relocated home" ? path.join(accountHome, "relocated") : accountHome,
         SUDO_USER: mode === "sudo user manager" ? "service-fixture" : undefined,
       },
@@ -254,9 +254,9 @@ describe("runDaemonInstall integration", () => {
         code: 1,
         termination: "exit",
         stdout: "",
-        stderr: "Call failed: Unit openclaw-gateway.service not found.",
+        stderr: "Call failed: Unit carapace-gateway.service not found.",
       });
-      const env = { ...process.env, HOME: fixture, OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway" };
+      const env = { ...process.env, HOME: fixture, CARAPACE_SYSTEMD_UNIT: "carapace-gateway" };
       serviceMock.readCommand.mockImplementation((_env, options) =>
         readSystemdServiceExecStart(env, options),
       );
@@ -298,7 +298,7 @@ describe("runDaemonInstall integration", () => {
     "blocks a root-owned manager %s before config or token writes",
     async (kind) => {
       const fixture = await fs.realpath(await fs.mkdtemp(path.join(tempHome, "manager-owner-")));
-      const unitPath = path.join(fixture, ".config/systemd/user/openclaw-gateway.service");
+      const unitPath = path.join(fixture, ".config/systemd/user/carapace-gateway.service");
       const extra = path.join(fixture, "global-user", "operator.conf");
       // Reach the foreign-owner check even when the test process has a permissive umask.
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o700 });
@@ -332,7 +332,7 @@ describe("runDaemonInstall integration", () => {
               })
             : buildSystemdManagerPropertyOutput({ programArguments: ["/usr/bin/node", "gateway"] }),
       }));
-      const env = { ...process.env, HOME: fixture, OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway" };
+      const env = { ...process.env, HOME: fixture, CARAPACE_SYSTEMD_UNIT: "carapace-gateway" };
       serviceMock.readCommand.mockImplementationOnce((_env, options) =>
         readSystemdServiceExecStart(env, options),
       );
@@ -358,13 +358,13 @@ describe("runDaemonInstall integration", () => {
 
   it("checks the planned generated environment after a drop-in redirects effective state", async () => {
     const fixture = await fs.realpath(await fs.mkdtemp(path.join(tempHome, "planned-owner-")));
-    const plannedState = path.join(fixture, ".openclaw");
+    const plannedState = path.join(fixture, ".carapace");
     const effectiveState = path.join(fixture, "effective");
-    const unit = path.join(fixture, ".config/systemd/user/openclaw-gateway.service");
+    const unit = path.join(fixture, ".config/systemd/user/carapace-gateway.service");
     const dropIn = `${unit}.d/override.conf`;
     const plannedFile = path.join(plannedState, "gateway.systemd.env");
     const effectiveFile = path.join(effectiveState, "gateway.systemd.env");
-    const invocation = captureEnv(["HOME", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+    const invocation = captureEnv(["HOME", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]);
     await fs.mkdir(path.dirname(dropIn), { recursive: true, mode: 0o700 });
     await fs.mkdir(plannedState, { mode: 0o700 });
     await fs.mkdir(effectiveState, { mode: 0o700 });
@@ -372,12 +372,12 @@ describe("runDaemonInstall integration", () => {
     await fs.writeFile(effectiveFile, "OPERATOR_VALUE=effective\n", { mode: 0o600 });
     await fs.writeFile(
       unit,
-      `[Service]\nExecStart=/usr/bin/node gateway\nEnvironment=OPENCLAW_STATE_DIR=${plannedState}\nEnvironmentFile=${plannedFile}\n`,
+      `[Service]\nExecStart=/usr/bin/node gateway\nEnvironment=CARAPACE_STATE_DIR=${plannedState}\nEnvironmentFile=${plannedFile}\n`,
       { mode: 0o600 },
     );
     await fs.writeFile(
       dropIn,
-      `[Service]\nEnvironment=OPENCLAW_STATE_DIR=${effectiveState}\nEnvironmentFile=\nEnvironmentFile=${effectiveFile}\n`,
+      `[Service]\nEnvironment=CARAPACE_STATE_DIR=${effectiveState}\nEnvironmentFile=\nEnvironmentFile=${effectiveFile}\n`,
       { mode: 0o600 },
     );
     await fs.writeFile(
@@ -385,8 +385,8 @@ describe("runDaemonInstall integration", () => {
       JSON.stringify({ gateway: { auth: { mode: "token", token: "existing-token" } } }),
     );
     process.env.HOME = fixture;
-    process.env.OPENCLAW_STATE_DIR = plannedState;
-    process.env.OPENCLAW_CONFIG_PATH = path.join(plannedState, "openclaw.json");
+    process.env.CARAPACE_STATE_DIR = plannedState;
+    process.env.CARAPACE_CONFIG_PATH = path.join(plannedState, "carapace.json");
     clearConfigCache();
     const lstat = fs.lstat.bind(fs);
     const owner = vi.spyOn(fs, "lstat").mockImplementation(async (...args) => {
@@ -406,7 +406,7 @@ describe("runDaemonInstall integration", () => {
           ? buildSystemdUnitPropertyOutput({ fragmentPath: unit, dropInPaths: [dropIn] })
           : buildSystemdManagerPropertyOutput({
               programArguments: ["/usr/bin/node", "gateway"],
-              environment: [`OPENCLAW_STATE_DIR=${effectiveState}`],
+              environment: [`CARAPACE_STATE_DIR=${effectiveState}`],
               environmentFiles: [[effectiveFile, false]],
             }),
     }));
@@ -442,7 +442,7 @@ describe("runDaemonInstall integration", () => {
     }
   });
 
-  it("refuses service install when config was written by a newer OpenClaw", async () => {
+  it("refuses service install when config was written by a newer Carapace", async () => {
     await fs.writeFile(
       configPath,
       JSON.stringify(
@@ -579,8 +579,8 @@ describe("runDaemonInstall integration", () => {
     clearConfigCache();
     serviceMock.isLoaded.mockResolvedValue(true);
     serviceMock.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "run"],
-      environment: { OPENCLAW_GATEWAY_TOKEN: "outdated-token" },
+      programArguments: ["carapace", "gateway", "run"],
+      environment: { CARAPACE_GATEWAY_TOKEN: "outdated-token" },
     } as never);
     serviceMock.readDefinitionMutationCapability.mockResolvedValueOnce({
       kind: "sealed",
@@ -601,11 +601,11 @@ describe("runDaemonInstall integration", () => {
     clearConfigCache();
     serviceMock.isLoaded.mockResolvedValue(true);
     serviceMock.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "run"],
-      environment: { OPENCLAW_STATE_DIR: effectiveStateDir },
+      programArguments: ["carapace", "gateway", "run"],
+      environment: { CARAPACE_STATE_DIR: effectiveStateDir },
     } as never);
     serviceMock.readDefinitionMutationCapability.mockImplementationOnce(async (args) =>
-      args?.environment?.OPENCLAW_STATE_DIR === effectiveStateDir
+      args?.environment?.CARAPACE_STATE_DIR === effectiveStateDir
         ? { kind: "sealed", reason: "foreign-owner" }
         : { kind: "writable" },
     );
@@ -615,8 +615,8 @@ describe("runDaemonInstall integration", () => {
 
     expect(serviceMock.readDefinitionMutationCapability).toHaveBeenCalledWith(
       expect.objectContaining({
-        env: expect.objectContaining({ OPENCLAW_STATE_DIR: tempHome }),
-        environment: expect.objectContaining({ OPENCLAW_STATE_DIR: effectiveStateDir }),
+        env: expect.objectContaining({ CARAPACE_STATE_DIR: tempHome }),
+        environment: expect.objectContaining({ CARAPACE_STATE_DIR: effectiveStateDir }),
       }),
     );
     expect(await snapshotConfig()).toEqual(before);
@@ -631,16 +631,16 @@ describe("runDaemonInstall integration", () => {
     { name: "rejected definition inspection", kind: "rejected", force: false },
   ])("leaves absent config and state untouched for $name", async ({ kind, force }) => {
     const isolatedHome = await fs.mkdtemp(path.join(tempHome, "sealed-install-"));
-    const stateDir = path.join(isolatedHome, ".openclaw");
+    const stateDir = path.join(isolatedHome, ".carapace");
     await fs.mkdir(stateDir);
-    const missingConfigPath = path.join(stateDir, "openclaw.json");
+    const missingConfigPath = path.join(stateDir, "carapace.json");
     const originalHome = process.env.HOME;
     process.env.HOME = isolatedHome;
-    const originalStateDir = process.env.OPENCLAW_STATE_DIR;
-    const originalConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+    const originalStateDir = process.env.CARAPACE_STATE_DIR;
+    const originalConfigPath = process.env.CARAPACE_CONFIG_PATH;
     const secret = "direct-install-capability-secret-canary";
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = missingConfigPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = missingConfigPath;
     clearConfigCache();
     if (kind === "rejected") {
       serviceMock.readDefinitionMutationCapability.mockRejectedValueOnce(new Error(secret));
@@ -665,8 +665,8 @@ describe("runDaemonInstall integration", () => {
       expect(runtimeLogs.join("\n")).not.toContain(secret);
     } finally {
       process.env.HOME = originalHome;
-      process.env.OPENCLAW_STATE_DIR = originalStateDir;
-      process.env.OPENCLAW_CONFIG_PATH = originalConfigPath;
+      process.env.CARAPACE_STATE_DIR = originalStateDir;
+      process.env.CARAPACE_CONFIG_PATH = originalConfigPath;
       clearConfigCache();
       await fs.rm(isolatedHome, { recursive: true, force: true });
     }
@@ -699,7 +699,7 @@ describe("runDaemonInstall integration", () => {
     expect(persistedToken).toEqual(expect.stringMatching(/^[0-9a-f]{48}$/));
 
     const installEnv = serviceMock.install.mock.calls[0]?.[0]?.environment;
-    expect(installEnv?.OPENCLAW_GATEWAY_TOKEN).toBeUndefined();
+    expect(installEnv?.CARAPACE_GATEWAY_TOKEN).toBeUndefined();
   });
 
   it("logs a generated-token warning without callback indexes or warning arrays", async () => {
@@ -881,7 +881,7 @@ describe("mergeInstallInvocationEnv", () => {
       const env = mergeInstallInvocationEnv({
         env: { PATH: "/usr/bin" },
         existingServiceEnv: {
-          [caKey]: " /opt/openclaw/corporate-ca.pem ",
+          [caKey]: " /opt/carapace/corporate-ca.pem ",
           NODE_TLS_REJECT_UNAUTHORIZED: "0",
           HTTPS_PROXY: "https://attacker.invalid",
           NODE_OPTIONS: "--require /tmp/untrusted.js",
@@ -893,7 +893,7 @@ describe("mergeInstallInvocationEnv", () => {
       });
 
       expect(env).toMatchObject({
-        NODE_EXTRA_CA_CERTS: "/opt/openclaw/corporate-ca.pem",
+        NODE_EXTRA_CA_CERTS: "/opt/carapace/corporate-ca.pem",
         OPENAI_API_KEY: "existing-service-key",
         PATH: "/usr/bin",
       });
@@ -915,14 +915,14 @@ describe("mergeInstallInvocationEnv", () => {
     "lets the current shell override installed Node CA trust on $platform",
     ({ platform, shellKey }) => {
       const env = mergeInstallInvocationEnv({
-        env: { [shellKey]: "/opt/openclaw/current-shell-ca.pem" },
+        env: { [shellKey]: "/opt/carapace/current-shell-ca.pem" },
         existingServiceEnv: {
-          NODE_EXTRA_CA_CERTS: "/opt/openclaw/previous-service-ca.pem",
+          NODE_EXTRA_CA_CERTS: "/opt/carapace/previous-service-ca.pem",
         },
         platform,
       });
 
-      expect(env.NODE_EXTRA_CA_CERTS).toBe("/opt/openclaw/current-shell-ca.pem");
+      expect(env.NODE_EXTRA_CA_CERTS).toBe("/opt/carapace/current-shell-ca.pem");
     },
   );
 });

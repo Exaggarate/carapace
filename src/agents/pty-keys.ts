@@ -3,7 +3,7 @@
  * sequences. The encoder handles xterm modifiers and DECCKM application
  * cursor mode.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 const ESC = "\x1b";
 const CR = "\r";

@@ -207,7 +207,7 @@ describe("native hook relay approval wait handling", () => {
     expect(result.stdout).toContain(
       decision === null ? "MCP tool approval timed out" : "Denied by user",
     );
-    expect(result.stdout).toContain("openclaw mcp configure memory --approval approve");
+    expect(result.stdout).toContain("carapace mcp configure memory --approval approve");
   });
 
   it.each(["arguments", "cwd", "elapsed time", "shortened name", "tool", "server", "case"])(

@@ -9,13 +9,13 @@ import { createStorageMock } from "../../../ui/src/test-helpers/storage.ts";
 import { waitForFast } from "../../../ui/src/test-helpers/wait-for.ts";
 import { applyWizardMetadata } from "../../commands/onboard-helpers.js";
 import { createConfigFileSnapshot } from "../../config/io.snapshot-shared.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { initializeNativeSessionCatalogPreferences } from "../../plugins/native-session-catalog-config.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { systemAgentHandlers } from "./system-agent.js";
 
 const fixture = vi.hoisted(() => ({
-  config: {} as OpenClawConfig,
+  config: {} as CarapaceConfig,
   exists: false,
   additionalCatalog: false,
 }));
@@ -23,7 +23,7 @@ vi.mock("../../config/config.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../config/config.js")>()),
   readConfigFileSnapshotWithPluginMetadata: async () => ({
     snapshot: createConfigFileSnapshot({
-      path: "/tmp/synthetic-onboarding/openclaw.json",
+      path: "/tmp/synthetic-onboarding/carapace.json",
       exists: fixture.exists,
       valid: true,
       raw: null,
@@ -91,7 +91,7 @@ describe("selected-agent Gateway detection and Model Setup consent", () => {
   ] as const)(
     "uses server-owned first-install evidence for %s selected-agent setup",
     async (state) => {
-      const authored: OpenClawConfig = {
+      const authored: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { main: {}, research: {} } },
       };
       fixture.exists = state !== "unwritten";
@@ -112,7 +112,7 @@ describe("selected-agent Gateway detection and Model Setup consent", () => {
       const agentId = state === "unwritten" ? "main" : "research";
       Object.assign(context.agentSelection.state, { selectedId: agentId, scopeId: agentId });
       request.mockImplementation(async (method, params) => {
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           const handler = systemAgentHandlers[method]!;
           return await new Promise((resolve, reject) => {
             const response = handler({
@@ -123,7 +123,7 @@ describe("selected-agent Gateway detection and Model Setup consent", () => {
             void Promise.resolve(response).catch(reject);
           });
         }
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: true, status: "cancelled" };
         }
         throw new Error(`Unexpected setup RPC: ${method}`);
@@ -138,7 +138,7 @@ describe("selected-agent Gateway detection and Model Setup consent", () => {
       );
       expect(request.mock.calls).toEqual([
         [
-          "openclaw.setup.detect",
+          "carapace.setup.detect",
           { agentId },
           expect.objectContaining({
             timeoutMs: expect.any(Number),
@@ -158,12 +158,12 @@ describe("selected-agent Gateway detection and Model Setup consent", () => {
       }
       page.querySelector<HTMLButtonElement>('[data-auth-choice="custom-api-key"] button')!.click();
       await waitForFast(() =>
-        expect(request.mock.calls.some(([method]) => method === "openclaw.setup.auth.start")).toBe(
+        expect(request.mock.calls.some(([method]) => method === "carapace.setup.auth.start")).toBe(
           true,
         ),
       );
       const activation = request.mock.calls.find(
-        ([method]) => method === "openclaw.setup.auth.start",
+        ([method]) => method === "carapace.setup.auth.start",
       )![1];
       expect(activation).toMatchObject({ authChoice: "custom-api-key", agentId });
       if (required) {

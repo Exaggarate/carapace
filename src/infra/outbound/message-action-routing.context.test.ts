@@ -1,7 +1,7 @@
 // Covers message-action cross-context policy, markers, and presentation
 // decoration behavior.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { MessageActionDeniedError } from "./message-action-denial.js";
 import { runMessageAction } from "./message-action-runner.js";
 import {
@@ -117,7 +117,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       actionParams: {
         channel: "slackdm",
         target: "user:U123",
@@ -227,7 +227,7 @@ describe("runMessageAction context isolation", () => {
             token: "forum-test",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send" as const,
       actionParams: {
         message: "hi",
@@ -348,7 +348,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       actionParams: {
         channel: "workspace",
         target: "channel:C99999999",
@@ -369,7 +369,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       actionParams: {
         channel: "workspace",
         target: "channel:C99999999",
@@ -407,7 +407,7 @@ describe("runMessageAction context isolation", () => {
             },
           ],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "sandbox",
       actionParams: {
         channel: "workspace",

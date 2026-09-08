@@ -1,9 +1,9 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 /**
  * Enforces source-managed provider secret ownership rules.
  */
 import { resolveConfigSecretRef } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isRecord } from "../utils.js";
 import {
   resolveNonEnvSecretRefApiKeyMarker,
@@ -19,7 +19,7 @@ import type { ProviderConfig } from "./models-config.providers.secrets.js";
  * This keeps runtime snapshots from materializing secret refs as plain values after config
  * normalization rewrites provider entries.
  */
-type ModelsConfig = NonNullable<OpenClawConfig["models"]>;
+type ModelsConfig = NonNullable<CarapaceConfig["models"]>;
 
 type SourceProviderEntry = { providerKey: string; providerConfig: ProviderConfig };
 
@@ -44,7 +44,7 @@ export function normalizeSourceProviderLookup(
 
 function resolveSourceManagedApiKeyMarker(params: {
   sourceProvider: SourceProviderEntry;
-  sourceConfig: OpenClawConfig | undefined;
+  sourceConfig: CarapaceConfig | undefined;
 }): string | undefined {
   const sourceApiKeyRef = resolveConfigSecretRef({
     config: params.sourceConfig,
@@ -62,7 +62,7 @@ function resolveSourceManagedApiKeyMarker(params: {
 
 function resolveSourceManagedHeaderMarkers(params: {
   sourceProvider: SourceProviderEntry;
-  sourceConfig: OpenClawConfig | undefined;
+  sourceConfig: CarapaceConfig | undefined;
 }): Record<string, string> {
   const sourceHeaders = isRecord(params.sourceProvider.providerConfig.headers)
     ? params.sourceProvider.providerConfig.headers
@@ -92,7 +92,7 @@ function resolveSourceManagedHeaderMarkers(params: {
 /** Preserves source-managed apiKey/header markers from the original provider config. */
 export function enforceSourceManagedProviderSecrets(params: {
   providers: ModelsConfig["providers"];
-  sourceConfigForSecrets: OpenClawConfig | undefined;
+  sourceConfigForSecrets: CarapaceConfig | undefined;
   secretRefManagedProviders?: Set<string>;
 }): ModelsConfig["providers"] {
   const { providers } = params;

@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
-import { readMemoryHostEvents } from "openclaw/plugin-sdk/memory-host-events";
+} from "carapace/plugin-sdk/memory-host-core";
+import { readMemoryHostEvents } from "carapace/plugin-sdk/memory-host-events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMemoryCloseMockCalls,
@@ -28,7 +28,7 @@ import {
   testing as memoryToolsTesting,
 } from "./tools.js";
 import {
-  asOpenClawConfig,
+  asCarapaceConfig,
   createAutoCitationsMemorySearchTool,
   createDefaultMemoryToolConfig,
   createMemoryGetToolOrThrow,
@@ -95,7 +95,7 @@ describe("memory search citations", () => {
 
   // The first tool call pays Vitest's cold lazy-runtime transform cost on Node 24 CI.
   it("appends source information when citations are enabled", async () => {
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       memory: { citations: "on" },
       agents: { list: [{ id: "main", default: true }] },
     });
@@ -108,7 +108,7 @@ describe("memory search citations", () => {
   }, 180_000);
 
   it("leaves snippet untouched when citations are off", async () => {
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       memory: { citations: "off" },
       agents: { list: [{ id: "main", default: true }] },
     });
@@ -156,7 +156,7 @@ describe("memory tools", () => {
 
   it("uses default memory manager mode for shared memory_search", async () => {
     const tool = createMemorySearchToolOrThrow({
-      config: asOpenClawConfig({
+      config: asCarapaceConfig({
         agents: { list: [{ id: "main", default: true }] },
       }),
     });
@@ -174,7 +174,7 @@ describe("memory tools", () => {
 
   it("uses one-shot CLI memory manager mode for explicit local CLI memory_search", async () => {
     const tool = createMemorySearchToolOrThrow({
-      config: asOpenClawConfig({
+      config: asCarapaceConfig({
         agents: { list: [{ id: "main", default: true }] },
       }),
       oneShotCliRun: true,
@@ -239,7 +239,7 @@ describe("memory tools", () => {
   });
 
   it("revokes retained memory tools when live config disables memory", async () => {
-    const startupConfig = asOpenClawConfig({
+    const startupConfig = asCarapaceConfig({
       agents: { list: [{ id: "main", default: true }] },
     });
     let liveConfig = startupConfig;
@@ -250,7 +250,7 @@ describe("memory tools", () => {
       throw new Error("memory tools missing");
     }
 
-    liveConfig = asOpenClawConfig({
+    liveConfig = asCarapaceConfig({
       agents: {
         list: [{ id: "main", default: true, memory: { search: { enabled: false } } }],
       },
@@ -322,7 +322,7 @@ describe("memory tools", () => {
       ]);
 
       const tool = createMemorySearchToolOrThrow({
-        config: asOpenClawConfig({
+        config: asCarapaceConfig({
           agents: { list: [{ id: "main", default: true }] },
           plugins: {
             entries: {
@@ -422,7 +422,7 @@ describe("memory tools", () => {
         search,
         get: async () => null,
       });
-      const config = asOpenClawConfig({
+      const config = asCarapaceConfig({
         agents: { list: [{ id: "marketing-agent", default: true }] },
       });
       const tool = createMemorySearchTool({

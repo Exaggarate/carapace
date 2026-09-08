@@ -18,7 +18,7 @@ const helper = path.resolve("scripts/verify-mac-node-worker-fs.mjs");
 describe.skipIf(process.platform !== "darwin")("Mac worker bundled filesystem proof", () => {
   let compiled: string;
   beforeAll(async () => {
-    compiled = builds.make("openclaw-worker-fs-build-");
+    compiled = builds.make("carapace-worker-fs-build-");
     const selected = buildConfigs.find((config) => config.name === TSDOWN_UNIFIED_CONFIG_GROUP);
     expect(selected).toBeDefined();
     const bundles = await build({
@@ -42,9 +42,9 @@ describe.skipIf(process.platform !== "darwin")("Mac worker bundled filesystem pr
   });
 
   function fixture() {
-    const directory = fixtures.make("openclaw-worker-fs-proof-");
+    const directory = fixtures.make("carapace-worker-fs-proof-");
     const runtime = path.join(directory, "runtime");
-    const packageRoot = path.join(runtime, "lib/node_modules/openclaw");
+    const packageRoot = path.join(runtime, "lib/node_modules/carapace");
     fs.cpSync(compiled, packageRoot, { recursive: true });
     const home = path.join(directory, "home");
     fs.mkdirSync(home);

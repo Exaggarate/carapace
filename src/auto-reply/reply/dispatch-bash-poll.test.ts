@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from "vitest";
 import {
   addSession,
@@ -7,7 +7,7 @@ import {
   recordNotifyOnExitRemoval,
 } from "../../agents/bash-process-registry.js";
 import { createProcessSessionFixture } from "../../agents/bash-process-registry.test-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   drainSystemEventEntries,
   enqueueSystemEventEntry,
@@ -79,7 +79,7 @@ function fixture(alias = "!poll") {
       "completion receipt",
     ),
   );
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { entries: { main: {} } },
     commands: { bash: true, text: true },
   };

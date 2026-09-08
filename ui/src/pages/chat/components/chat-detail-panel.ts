@@ -1,4 +1,4 @@
-import { toErrorObject } from "@openclaw/normalization-core";
+import { toErrorObject } from "@carapace/normalization-core";
 import { property, state } from "lit/decorators.js";
 import {
   localEditorFilePath,
@@ -17,7 +17,7 @@ import type { EmbedSandboxMode } from "../../../lib/chat/tool-display.ts";
 import { copyToClipboard } from "../../../lib/clipboard.ts";
 import { type EditorId, openEditor } from "../../../lib/editor-links.ts";
 import { formatUiError } from "../../../lib/format-error.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../../lit/carapace-element.ts";
 import { releaseChatMediaResourceSubscriber } from "./chat-message-media.ts";
 import type { AttachmentSidebarRuntime, SidebarContent } from "./chat-sidebar-content-types.ts";
 import {
@@ -38,7 +38,7 @@ import type { FileEditorViewHandle } from "./file-editor-view.ts";
 type FileSidebarContent = Extract<SidebarContent, { kind: "file" }>;
 type ChatDetailPanelContent = Exclude<SidebarContent, { kind: "task" }>;
 
-class ChatDetailPanel extends OpenClawLightDomElement {
+class ChatDetailPanel extends CarapaceLightDomElement {
   @property({ attribute: false }) content: ChatDetailPanelContent | null = null;
   @property({ attribute: false }) execNode: string | null = null;
   @property({ attribute: false }) attachmentRuntime: AttachmentSidebarRuntime = {};
@@ -692,6 +692,6 @@ class ChatDetailPanel extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-detail-panel")) {
-  customElements.define("openclaw-chat-detail-panel", ChatDetailPanel);
+if (!customElements.get("carapace-chat-detail-panel")) {
+  customElements.define("carapace-chat-detail-panel", ChatDetailPanel);
 }

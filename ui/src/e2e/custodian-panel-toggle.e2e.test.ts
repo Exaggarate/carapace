@@ -1,4 +1,4 @@
-// Control UI tests cover the global Ask OpenClaw panel toggle and persisted session identity.
+// Control UI tests cover the global Ask Carapace panel toggle and persisted session identity.
 import path from "node:path";
 import { chromium, type Browser } from "playwright";
 import { beforeEach, afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -14,14 +14,14 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 let artifactDir: string;
 beforeEach(() => {
   artifactDir = createControlUiE2eArtifactDir("custodian-panel-toggle");
 });
 
-const CUSTODIAN_SESSION_STORAGE_KEY = "openclaw.custodian.session.v1";
+const CUSTODIAN_SESSION_STORAGE_KEY = "carapace.custodian.session.v1";
 const MOCK_SESSION_ID = "e2e-custodian-panel";
 const WORK_SESSION_KEY = "agent:main:work";
 
@@ -36,16 +36,16 @@ function custodianGatewayScenario() {
       "chat.startup",
       "chat.history",
       "chat.send",
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ],
     methodResponses: {
-      "openclaw.chat": {
+      "carapace.chat": {
         sessionId: MOCK_SESSION_ID,
         reply: "Machine is healthy. Ask me anything.",
         action: "none",
       },
-      "openclaw.chat.history": {
+      "carapace.chat.history": {
         turns: [
           { role: "user", text: "Fix my channel", at: 1_700_000_100_000 },
           { role: "assistant", text: "Channel repaired.", at: 1_700_000_101_000 },
@@ -55,7 +55,7 @@ function custodianGatewayScenario() {
   };
 }
 
-describeControlUiE2e("Control UI Ask OpenClaw panel toggle mocked Gateway E2E", () => {
+describeControlUiE2e("Control UI Ask Carapace panel toggle mocked Gateway E2E", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(`Playwright Chromium is unavailable at ${chromiumExecutablePath}`);
@@ -69,7 +69,7 @@ describeControlUiE2e("Control UI Ask OpenClaw panel toggle mocked Gateway E2E", 
     await server?.close();
   });
 
-  it("keeps Home available without an OpenClaw tab when openclaw.chat is not advertised", async () => {
+  it("keeps Home available without an Carapace tab when carapace.chat is not advertised", async () => {
     const context = await browser.newContext({
       colorScheme: "dark",
       locale: "en-US",
@@ -88,22 +88,22 @@ describeControlUiE2e("Control UI Ask OpenClaw panel toggle mocked Gateway E2E", 
       await page.locator(".sidebar-brand__search").waitFor();
       await page.locator(".sidebar-identity-card").waitFor();
       await page.locator(".sidebar-footer-bar__home").click();
-      const panel = page.locator("openclaw-assistant-panel");
+      const panel = page.locator("carapace-assistant-panel");
       await panel.getByRole("button", { name: "Home", exact: true }).waitFor();
-      expect(await panel.getByRole("button", { name: "Ask OpenClaw", exact: true }).count()).toBe(
+      expect(await panel.getByRole("button", { name: "Ask Carapace", exact: true }).count()).toBe(
         0,
       );
-      expect(await gateway.getRequests("openclaw.chat")).toHaveLength(0);
+      expect(await gateway.getRequests("carapace.chat")).toHaveLength(0);
       await page.screenshot({
         animations: "disabled",
-        path: path.join(artifactDir, "00-home-without-openclaw-tab.png"),
+        path: path.join(artifactDir, "00-home-without-carapace-tab.png"),
       });
     } finally {
       await context.close();
     }
   });
 
-  it("opens OpenClaw from Home and the palette and reuses the persisted session id", async () => {
+  it("opens Carapace from Home and the palette and reuses the persisted session id", async () => {
     const context = await browser.newContext({
       colorScheme: "dark",
       locale: "en-US",
@@ -119,18 +119,18 @@ describeControlUiE2e("Control UI Ask OpenClaw panel toggle mocked Gateway E2E", 
       expect(response?.status()).toBe(200);
 
       await page.locator(".sidebar-footer-bar__home").click();
-      const panel = page.locator("openclaw-assistant-panel");
-      const openClawTab = panel.getByRole("button", { name: "Ask OpenClaw", exact: true });
-      await openClawTab.waitFor();
+      const panel = page.locator("carapace-assistant-panel");
+      const carapaceTab = panel.getByRole("button", { name: "Ask Carapace", exact: true });
+      await carapaceTab.waitFor();
       await page.screenshot({
         animations: "disabled",
         path: path.join(artifactDir, "01-home-dock.png"),
       });
 
       // Opening the panel renders the durable machine-wide history from the Gateway.
-      await openClawTab.click();
+      await carapaceTab.click();
       await panel.getByText("Channel repaired.").waitFor();
-      const chatRequest = await gateway.waitForRequest("openclaw.chat");
+      const chatRequest = await gateway.waitForRequest("carapace.chat");
       const firstSessionId = (chatRequest.params as { sessionId?: string }).sessionId;
       expect(typeof firstSessionId).toBe("string");
       await page.screenshot({
@@ -143,8 +143,8 @@ describeControlUiE2e("Control UI Ask OpenClaw panel toggle mocked Gateway E2E", 
 
       // The command palette opens the same conversation directly.
       await page.locator(".sidebar-brand__search").click();
-      await page.getByPlaceholder("Search chats and commands…").fill("Ask OpenClaw");
-      const paletteItem = page.getByRole("option", { name: "Ask OpenClaw", exact: true });
+      await page.getByPlaceholder("Search chats and commands…").fill("Ask Carapace");
+      const paletteItem = page.getByRole("option", { name: "Ask Carapace", exact: true });
       await paletteItem.waitFor();
       await page.screenshot({
         animations: "disabled",
@@ -163,10 +163,10 @@ describeControlUiE2e("Control UI Ask OpenClaw panel toggle mocked Gateway E2E", 
       // Reload: the dock restores its open state on its own and rerenders the
       // durable history with the persisted session id — no clicks required.
       // The reload replaces the page context and restarts the request ring, so
-      // the plain wait matches only post-reload openclaw.chat traffic.
+      // the plain wait matches only post-reload carapace.chat traffic.
       await page.reload();
-      await page.locator("openclaw-assistant-panel").getByText("Channel repaired.").waitFor();
-      const reloadedRequest = await gateway.waitForRequest("openclaw.chat");
+      await page.locator("carapace-assistant-panel").getByText("Channel repaired.").waitFor();
+      const reloadedRequest = await gateway.waitForRequest("carapace.chat");
       expect((reloadedRequest.params as { sessionId?: string }).sessionId).toBe(MOCK_SESSION_ID);
       await page.screenshot({
         animations: "disabled",

@@ -1,6 +1,6 @@
 // Mattermost plugin module implements directory behavior.
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { inspectMattermostAccount, listMattermostAccountIds } from "./accounts.js";
 import {
   createMattermostClient,
@@ -10,10 +10,10 @@ import {
   type MattermostUser,
 } from "./client.js";
 import { resolveMattermostTrustedChatKind } from "./monitor-auth.js";
-import type { ChannelDirectoryEntry, OpenClawConfig, RuntimeEnv } from "./runtime-api.js";
+import type { ChannelDirectoryEntry, CarapaceConfig, RuntimeEnv } from "./runtime-api.js";
 
 type MattermostDirectoryParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   query?: string | null;
   limit?: number | null;
@@ -21,7 +21,7 @@ type MattermostDirectoryParams = {
 };
 
 function buildClient(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): MattermostClient | null {
   const account = inspectMattermostAccount({ cfg: params.cfg, accountId: params.accountId });

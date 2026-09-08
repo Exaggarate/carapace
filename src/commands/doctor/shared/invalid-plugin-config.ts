@@ -1,13 +1,13 @@
 // Doctor quarantine for plugin entries whose config fails plugin-aware validation.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { validateConfigObjectWithPlugins } from "../../../config/validation.js";
 import { findDoctorLegacyConfigIssues } from "./legacy-config-issues.js";
 
 const PLUGIN_CONFIG_ISSUE_RE = /^plugins\.entries\.([^.]+)\.config(?:\.|$)/;
 
-function scanInvalidPluginConfig(cfg: OpenClawConfig): Set<string> {
+function scanInvalidPluginConfig(cfg: CarapaceConfig): Set<string> {
   const hits = new Set<string>();
   const validation = validateConfigObjectWithPlugins(cfg);
   if (validation.ok) {
@@ -39,8 +39,8 @@ function scanInvalidPluginConfig(cfg: OpenClawConfig): Set<string> {
 }
 
 /** Disable plugin entries and clear config when plugin validation marks their config invalid. */
-export function maybeRepairInvalidPluginConfig(cfg: OpenClawConfig): {
-  config: OpenClawConfig;
+export function maybeRepairInvalidPluginConfig(cfg: CarapaceConfig): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   const hits = scanInvalidPluginConfig(cfg);

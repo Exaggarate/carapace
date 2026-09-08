@@ -1,6 +1,6 @@
-## OpenClaw Android App
+## Carapace Android App
 
-OpenClaw Android is the officially released Google Play app. It connects to an OpenClaw Gateway as a companion node for chat, voice, approvals, screen, and device-aware automation.
+Carapace Android is the officially released Google Play app. It connects to an Carapace Gateway as a companion node for chat, voice, approvals, screen, and device-aware automation.
 
 ### App features
 
@@ -10,7 +10,7 @@ OpenClaw Android is the officially released Google Play app. It connects to an O
 - Search from Overview or Settings to find settings by their displayed name or category, alongside quick actions and recent threads. Local destinations such as Appearance, Profile, and Licenses work without connecting a Gateway. Back from a settings detail returns to the screen that opened search; Desktop appears only when the connected Gateway supports it.
 - Choose a theme family, color mode, accent, and app language in **Settings → Appearance**. Theme and accent edits sync with a connected writable profile. Read-only or unknown-profile edits, including new edits after restarting offline, stay on the device; choose them again after connecting to sync. Already profile-bound edits wait for that profile to reconnect, without discarding or replacing newer device-local choices.
 - Configure foreground on-device Voice Wake and Gateway-synced wake words in **Settings → Voice**.
-- Use **Settings → OpenClaw** for guided Gateway setup and repair. New replies stay visible at the end of the conversation; scrolling back preserves your reading position until you return or tap **Jump to latest**.
+- Use **Settings → Carapace** for guided Gateway setup and repair. New replies stay visible at the end of the conversation; scrolling back preserves your reading position until you return or tap **Jump to latest**.
 - Enable camera, location, and other phone capabilities through onboarding or Settings. Biometric locking, Gateway/chat notifications, and authenticated background presence are supported.
 - View the phone's memory and disk meters on the Control UI Devices page. Connected Android nodes report host resource stats immediately and every 60 seconds; disk meters require an available storage sample and a Gateway that supports host stats.
 - Manage installed skills and Gateway-verified ClawHub releases, review Skill Workshop proposals, and inspect or edit automations with the required Gateway access.
@@ -128,8 +128,8 @@ shared runtime and build contract.
 Repository-backed debug Gradle invocations, including `pnpm android:run` and
 `pnpm android:screenshots`, stamp the full checkout commit and capture one UTC
 build timestamp shared by every debug variant in that invocation. Release
-tasks still require explicit `openclawBuildCommit` and
-`openclawBuildTimestamp` properties so signed artifacts remain reproducible.
+tasks still require explicit `carapaceBuildCommit` and
+`carapaceBuildTimestamp` properties so signed artifacts remain reproducible.
 
 Prepare and finalize Android release metadata through the shared mobile cutter:
 
@@ -158,8 +158,8 @@ pnpm android:screenshots
 ```
 
 The screenshot script captures both form factors with retained
-`OpenClaw_Screenshots_API36` (Pixel 2) and
-`OpenClaw_Wear_Screenshots_API34` (Wear OS Large Round) AVDs. It creates a
+`Carapace_Screenshots_API36` (Pixel 2) and
+`Carapace_Wear_Screenshots_API34` (Wear OS Large Round) AVDs. It creates a
 missing AVD, boots it headlessly, waits for Android to finish booting, disables
 animations, captures the screenshots, then shuts down the emulator it started.
 Install the API 36 Google APIs and API 34 Wear OS system images in the local
@@ -168,15 +168,15 @@ explicitly capture one form factor from another emulator.
 
 `pnpm android:release:archive` builds signed release artifacts into `apps/android/build/release-artifacts/` and writes `.sha256` checksum files:
 
-- Play build: `openclaw-<version>-play-release.aab`
-- Wear build: `openclaw-<version>-wear-release.aab`
-- Third-party build: `openclaw-<version>-third-party-release.apk`
+- Play build: `carapace-<version>-play-release.aab`
+- Wear build: `carapace-<version>-wear-release.aab`
+- Third-party build: `carapace-<version>-third-party-release.apk`
 
 `pnpm android:bundle:release` is an alias for the same Fastlane archive lane.
 
-Regular final and correction OpenClaw releases publish the signed third-party APK as `OpenClaw-Android.apk` with a checksum manifest and GitHub Actions provenance. `.github/workflows/android-release.yml` is the only automated GitHub Release upload path. When the tagged Android pin matches the stable release train, `OpenClaw Release Publish` qualifies Android independently and dispatches it after core npm succeeds. A mismatched pin records an explicit skip. Android does not hold npm or GitHub release finalization, so verified APK assets may attach after the release is public.
+Regular final and correction Carapace releases publish the signed third-party APK as `Carapace-Android.apk` with a checksum manifest and GitHub Actions provenance. `.github/workflows/android-release.yml` is the only automated GitHub Release upload path. When the tagged Android pin matches the stable release train, `Carapace Release Publish` qualifies Android independently and dispatches it after core npm succeeds. A mismatched pin records an explicit skip. Android does not hold npm or GitHub release finalization, so verified APK assets may attach after the release is public.
 
-The protected `android-release` environment supplies `MATCH_PASSWORD`; the repository's read-only GitHub App token checks out encrypted material from `openclaw/apps-signing`. The workflow builds the exact release tag, refuses to replace different existing bytes, and re-downloads the APK for checksum, certificate, and provenance verification.
+The protected `android-release` environment supplies `MATCH_PASSWORD`; the repository's read-only GitHub App token checks out encrypted material from `carapace/apps-signing`. The workflow builds the exact release tag, refuses to replace different existing bytes, and re-downloads the APK for checksum, certificate, and provenance verification.
 
 `pnpm android:release:archive` is for local archive validation only. It is not a
 fallback upload path after `pnpm android:release:upload` fails.
@@ -200,9 +200,9 @@ Prefer `pnpm android:release:archive`, which stamps and validates the full Git c
 cd apps/android
 commit="$(git -C ../.. rev-parse HEAD)"
 built_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-./gradlew -PopenclawBuildCommit="$commit" -PopenclawBuildTimestamp="$built_at" :app:bundlePlayRelease
-./gradlew -PopenclawBuildCommit="$commit" -PopenclawBuildTimestamp="$built_at" :wear:bundleRelease
-./gradlew -PopenclawBuildCommit="$commit" -PopenclawBuildTimestamp="$built_at" :app:bundleThirdPartyRelease
+./gradlew -PcarapaceBuildCommit="$commit" -PcarapaceBuildTimestamp="$built_at" :app:bundlePlayRelease
+./gradlew -PcarapaceBuildCommit="$commit" -PcarapaceBuildTimestamp="$built_at" :wear:bundleRelease
+./gradlew -PcarapaceBuildCommit="$commit" -PcarapaceBuildTimestamp="$built_at" :app:bundleThirdPartyRelease
 ```
 
 ## Kotlin Lint + Format
@@ -289,7 +289,7 @@ Use `adb reverse` so Android `localhost:18789` tunnels to your laptop `localhost
 Terminal A (gateway):
 
 ```bash
-pnpm openclaw gateway --port 18789 --verbose
+pnpm carapace gateway --port 18789 --verbose
 ```
 
 Terminal B (USB tunnel):
@@ -317,7 +317,7 @@ This app is native Kotlin + Jetpack Compose.
 1. Start the gateway (on your main machine):
 
 ```bash
-pnpm openclaw gateway --port 18789 --verbose
+pnpm carapace gateway --port 18789 --verbose
 ```
 
 2. In the Android app:
@@ -330,8 +330,8 @@ Gateway credentials and setup codes are masked and accept paste. The app request
 3. Approve pairing (on the gateway machine):
 
 ```bash
-openclaw devices list
-openclaw devices approve <requestId>
+carapace devices list
+carapace devices approve <requestId>
 ```
 
 More details: `docs/platforms/android.md`.
@@ -364,7 +364,7 @@ Why these matter:
 - The Play build removes these behind the `play` flavor.
 - Photo library access is also removed from the Play build. Use third-party builds for `photos.latest`.
 
-Current OpenClaw Android implication:
+Current Carapace Android implication:
 
 - APK / sideload build can keep SMS, Call Log, and recent-photo features.
 - Google Play build excludes SMS send/search, Call Log search, and recent-photo access unless the product is intentionally positioned and approved under the relevant policy exception.
@@ -400,16 +400,16 @@ This suite assumes setup is already done manually. It does **not** install/run/p
 Pre-req checklist:
 
 1. Gateway is running and reachable from the Android app.
-2. Android app is connected to that gateway and `openclaw nodes status` shows it as paired + connected.
+2. Android app is connected to that gateway and `carapace nodes status` shows it as paired + connected.
 3. App stays unlocked and in foreground for the whole run.
 4. Grant runtime permissions for capabilities you expect to pass (camera/mic/location/notification listener/location, etc.).
 5. No interactive system dialogs should be pending before test start.
 6. Local operator test client pairing is approved. If first run fails with `pairing required`, preview the latest pending request, approve the printed request ID, then rerun:
 
 ```bash
-openclaw devices list
-openclaw devices approve --latest   # preview only; copy the requestId from output
-openclaw devices approve <requestId>
+carapace devices list
+carapace devices approve --latest   # preview only; copy the requestId from output
+carapace devices approve <requestId>
 ```
 
 Run:
@@ -420,10 +420,10 @@ pnpm android:test:integration
 
 Optional overrides:
 
-- `OPENCLAW_ANDROID_GATEWAY_URL=ws://...` (default: from your local OpenClaw config)
-- `OPENCLAW_ANDROID_GATEWAY_TOKEN=...`
-- `OPENCLAW_ANDROID_GATEWAY_PASSWORD=...`
-- `OPENCLAW_ANDROID_NODE_ID=...` or `OPENCLAW_ANDROID_NODE_NAME=...`
+- `CARAPACE_ANDROID_GATEWAY_URL=ws://...` (default: from your local Carapace config)
+- `CARAPACE_ANDROID_GATEWAY_TOKEN=...`
+- `CARAPACE_ANDROID_GATEWAY_PASSWORD=...`
+- `CARAPACE_ANDROID_NODE_ID=...` or `CARAPACE_ANDROID_NODE_NAME=...`
 
 What it does:
 
@@ -437,7 +437,7 @@ What it does:
 Common failure quick-fixes:
 
 - `pairing required` before tests start:
-  - list pending requests (`openclaw devices list`), then approve with the exact ID (`openclaw devices approve <requestId>`) and rerun.
+  - list pending requests (`carapace devices list`), then approve with the exact ID (`carapace devices approve <requestId>`) and rerun.
 
 ## Contributions
 

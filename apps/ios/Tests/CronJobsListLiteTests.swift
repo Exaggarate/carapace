@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawProtocol
+import CarapaceProtocol
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct CronJobsListLiteTests {
     @Test @MainActor func `cron collector preserves snapshot order and normalized revision`() async throws {

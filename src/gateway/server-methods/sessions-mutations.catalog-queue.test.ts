@@ -5,7 +5,7 @@ import {
   rejectPendingPreparedModelRuntimeReplacement,
 } from "../../agents/prepared-model-runtime.js";
 import { resetPreparedModelRuntimeSnapshotsForTest } from "../../agents/prepared-model-runtime.test-support.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import {
   loadSessionEntry,
@@ -23,8 +23,8 @@ import {
 } from "../../infra/diagnostic-trace-context.js";
 import * as sessionLifecycle from "../../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { handleGatewayRequest } from "../server-methods.js";
 import { loadGatewayModelCatalog as loadActualGatewayModelCatalog } from "../server-model-catalog.js";
 import { sessionMutationHandlers } from "./sessions-mutations.js";
@@ -33,12 +33,12 @@ import type { GatewayRequestContext } from "./types.js";
 
 afterEach(async () => {
   await resetPreparedModelRuntimeSnapshotsForTest();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 function patchContext(
   loadGatewayModelCatalog: GatewayRequestContext["loadGatewayModelCatalog"],
-  cfg: OpenClawConfig = {},
+  cfg: CarapaceConfig = {},
 ) {
   return {
     getRuntimeConfig: () => cfg,
@@ -62,7 +62,7 @@ function patchRequest(context: GatewayRequestContext) {
 }
 
 test("catalog reload releases the agent writer while preserving same-session ordering", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const catalogKey = "agent:main:catalog-dependent";
     const metadataKey = "agent:main:independent-metadata";
     for (const sessionKey of [catalogKey, metadataKey]) {
@@ -174,7 +174,7 @@ test("catalog reload releases the agent writer while preserving same-session ord
 test.each(["identity", "label", "alias", "cleared-selection"] as const)(
   "catalog preparation revalidates fresh %s before using the prepared result",
   async (change) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const key = change === "alias" ? "agent:main:main" : "agent:main:catalog-revalidation";
       const storedKey = change === "alias" ? "agent:main:work" : key;
       const otherKey = "agent:main:new-label-owner";
@@ -301,7 +301,7 @@ test.each(["identity", "label", "alias", "cleared-selection"] as const)(
 );
 
 test("patchMany prepares singleton agent groups without blocking another session", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const targets = ["main", "secondary"].map((agentId) => ({
       key: `agent:${agentId}:catalog-batch`,
     }));
@@ -395,7 +395,7 @@ test("patchMany prepares singleton agent groups without blocking another session
 });
 
 test("a multi-target agent group retains ordered label claims around catalog loading", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const targets = ["first", "second"].map((name) => ({ key: `agent:main:ordered-${name}` }));
     for (const { key } of targets) {
       await upsertSessionEntryCore(
@@ -440,7 +440,7 @@ test("a multi-target agent group retains ordered label claims around catalog loa
 });
 
 test("dispatched authorization rejects an instance replaced during catalog preparation", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const sessionKey = "agent:main:commit-bound-authorization";
     // A write-scoped model reset revalidates retained thinking. Admin scope would
     // bypass the session-instance authorization this request must exercise.
@@ -537,7 +537,7 @@ test("dispatched authorization rejects an instance replaced during catalog prepa
 });
 
 test("patch timing covers preparation and lifecycle finalization before cleanup", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const key = "agent:main:phase-boundaries";
     await upsertSessionEntryCore(
       { agentId: "main", sessionKey: key },

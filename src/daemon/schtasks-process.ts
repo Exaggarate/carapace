@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { isGatewayArgv } from "../infra/gateway-process-argv.js";
 import { inspectPortUsage } from "../infra/ports-inspect.js";
 import type { PortListener } from "../infra/ports-types.js";
@@ -33,8 +33,8 @@ export function resolveScheduledTaskCommandPort(
 ): number | null {
   return (
     parseTcpPortFromArgs(command?.programArguments) ??
-    parseTcpPort(command?.environment?.OPENCLAW_GATEWAY_PORT) ??
-    parseTcpPort(env.OPENCLAW_GATEWAY_PORT)
+    parseTcpPort(command?.environment?.CARAPACE_GATEWAY_PORT) ??
+    parseTcpPort(env.CARAPACE_GATEWAY_PORT)
   );
 }
 
@@ -109,7 +109,7 @@ async function resolveScheduledTaskProcess(
   if (!snapshot) {
     return null;
   }
-  // Match full persisted argv so a same-port OpenClaw process cannot impersonate this task.
+  // Match full persisted argv so a same-port Carapace process cannot impersonate this task.
   const pid = findInstalledProcessPid(snapshot, port, installedArguments, matchesProcess);
   return pid ? { pid, port } : null;
 }
@@ -121,7 +121,7 @@ async function resolveScheduledTaskNodeHostProcess(
 }
 
 export function shouldManageGatewayListenerPort(env: GatewayServiceEnv): boolean {
-  return normalizeLowercaseStringOrEmpty(env.OPENCLAW_SERVICE_KIND) !== NODE_SERVICE_KIND;
+  return normalizeLowercaseStringOrEmpty(env.CARAPACE_SERVICE_KIND) !== NODE_SERVICE_KIND;
 }
 
 export async function resolveScheduledTaskGatewayContext(env: GatewayServiceEnv): Promise<{

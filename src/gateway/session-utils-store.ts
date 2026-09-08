@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   readAcpSessionMeta,
   readAcpSessionMetaForEntry,
@@ -32,7 +32,7 @@ import {
 import { isInternalSessionEffectsKey } from "../config/sessions/internal-session-key.js";
 import type { SessionEntryListScope } from "../config/sessions/session-accessor.js";
 import { canonicalSessionKeyMigrationRequiredError } from "../config/sessions/session-canonical-key.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveExecPolicyForMode } from "../infra/exec-approvals-core.js";
 import { loadExecApprovals } from "../infra/exec-approvals-store.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
@@ -58,7 +58,7 @@ import { projectWorkerPlacementAgentRuntime } from "./worker-environments/placem
  * exists (#65524).
  */
 export function resolveDeletedAgentIdFromSessionKey(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   sessionKey: string,
   entry?: SessionEntry | null,
   options?: { acpMetadataSessionKey?: string | null },
@@ -89,7 +89,7 @@ export function resolveDeletedAgentIdFromSessionKey(
 }
 
 function readAcpMetaForDeletedAgentCheck(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   entry?: Pick<SessionEntry, "acp" | "lifecycleRevision"> | null;
   acpMetadataSessionKey?: string | null;
@@ -241,7 +241,7 @@ export function resolveCanonicalSessionEntryFromStoreKeys(
 }
 
 export function resolveCanonicalGatewaySessionStoreKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   store: Record<string, SessionEntry>;
   agentId?: string;
@@ -304,7 +304,7 @@ function normalizeFallbackList(values: readonly string[]): string[] {
 }
 
 function resolveGatewayAgentModel(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   resolvedModel: ReturnType<typeof resolveDefaultModelForAgent>,
 ): NonNullable<GatewayAgentRow["model"]> {
@@ -337,7 +337,7 @@ function resolvedPermissionLabel(
 }
 
 export function listAgentsForGateway(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   modelCatalog?: ModelCatalogEntry[],
   options?: {
     modelCatalogByAgentId?: SessionListModelCatalog;

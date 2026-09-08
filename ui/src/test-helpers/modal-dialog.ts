@@ -1,6 +1,6 @@
 import type WaDialog from "@awesome.me/webawesome/dist/components/dialog/dialog.js";
 import { expect, vi } from "vitest";
-import type { OpenClawModalDialog } from "../components/modal-dialog.ts";
+import type { CarapaceModalDialog } from "../components/modal-dialog.ts";
 
 type DialogMethodName = "showModal" | "close";
 type DialogDescriptorSnapshot = Record<DialogMethodName, PropertyDescriptor | undefined>;
@@ -58,7 +58,7 @@ export function createModalDialogTestFixture(
   const requests: Promise<unknown>[] = [];
   const modals = new Set<HTMLElement>();
   const captureModals = () => {
-    for (const modal of document.body.querySelectorAll("openclaw-modal-dialog")) {
+    for (const modal of document.body.querySelectorAll("carapace-modal-dialog")) {
       modals.add(modal);
     }
   };
@@ -124,7 +124,7 @@ export function createModalDialogTestFixture(
 export function waitForConfirmDialogActions(): Promise<HTMLElement> {
   return waitForDialog(() => {
     const actions = document.body.querySelector<HTMLElement>(
-      "openclaw-modal-dialog .exec-approval-actions",
+      "carapace-modal-dialog .exec-approval-actions",
     );
     if (!actions) {
       throw new Error("Expected an open confirm dialog");
@@ -146,8 +146,8 @@ export function answerConfirmDialog(actions: HTMLElement, choice: "confirm" | "c
 /** Await a dialog whose owner loads it behind a lazy import, then read it. */
 export async function waitForRenderedModalDialog(container: HTMLElement) {
   await waitForDialog(() => {
-    if (!container.querySelector("openclaw-modal-dialog")) {
-      throw new Error("Expected openclaw-modal-dialog");
+    if (!container.querySelector("carapace-modal-dialog")) {
+      throw new Error("Expected carapace-modal-dialog");
     }
   });
   return getRenderedModalDialog(container);
@@ -156,7 +156,7 @@ export async function waitForRenderedModalDialog(container: HTMLElement) {
 export async function waitForInputDialog(): Promise<HTMLInputElement> {
   await vi.dynamicImportSettled();
   for (let attempt = 0; attempt < 50; attempt += 1) {
-    const input = document.body.querySelector("openclaw-modal-dialog input");
+    const input = document.body.querySelector("carapace-modal-dialog input");
     if (input instanceof HTMLInputElement) {
       return input;
     }
@@ -174,10 +174,10 @@ export async function submitInputDialog(value: string): Promise<void> {
 }
 
 export async function getRenderedModalDialog(container: HTMLElement) {
-  const modal = container.querySelector<OpenClawModalDialog>("openclaw-modal-dialog");
+  const modal = container.querySelector<CarapaceModalDialog>("carapace-modal-dialog");
   expect(modal).toBeInstanceOf(HTMLElement);
   if (!modal) {
-    throw new Error("Expected openclaw-modal-dialog");
+    throw new Error("Expected carapace-modal-dialog");
   }
   await modal.updateComplete;
   await nextFrame();

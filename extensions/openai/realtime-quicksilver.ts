@@ -1,4 +1,4 @@
-import type { RealtimeVoiceProviderCapabilities } from "openclaw/plugin-sdk/realtime-voice";
+import type { RealtimeVoiceProviderCapabilities } from "carapace/plugin-sdk/realtime-voice";
 // Realtime voice uses browser or Gateway-owned WebRTC when the host owns delegation,
 // and the Platform-key direct WebSocket transport elsewhere.
 

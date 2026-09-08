@@ -1,5 +1,5 @@
-// Lexical ranking for the OpenClaw Tool Search runtime.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+// Lexical ranking for the Carapace Tool Search runtime.
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 /** Collects property names and descriptions from a JSON-Schema-shaped value. */
 export function readParameterText(parameters: unknown, depth = 0): string {

@@ -70,7 +70,7 @@ describe("resolveRuntimeWorkerArgv", () => {
   it.each(["ts", "mts", "cts"])(
     "runs a .%s worker from outside the package directory",
     async (extension) => {
-      await withTempDir("openclaw-worker-cwd-", async (cwd) => {
+      await withTempDir("carapace-worker-cwd-", async (cwd) => {
         const entry = path.join(cwd, `worker fixture.${extension}`);
         await writeFile(entry, "enum Answer { value = 42 }; console.log(Answer.value);");
         const { stdout } = await promisify(execFile)(

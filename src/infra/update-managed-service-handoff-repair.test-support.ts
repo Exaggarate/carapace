@@ -8,7 +8,7 @@ import {
   writeOpenAiResponsesSse,
   writeOpenAiResponsesText,
 } from "../../test/helpers/openai-responses-sse.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withServer } from "../plugin-sdk/test-helpers/http-test-server.js";
 import { runtimeProcessEntrypoints } from "./runtime-process-entrypoints.js";
 import { resolveRuntimeWorkerArgv } from "./runtime-worker-url.js";
@@ -42,7 +42,7 @@ export async function releaseManagedRepairInference(
   repair.releaseInference();
 }
 
-export function managedRepairConfig(baseUrl: string): OpenClawConfig {
+export function managedRepairConfig(baseUrl: string): CarapaceConfig {
   const modelRef = "repair-test/repair-model";
   return {
     commands: { ownerAllowFrom: ["owner"] },
@@ -50,7 +50,7 @@ export function managedRepairConfig(baseUrl: string): OpenClawConfig {
     agents: {
       defaults: {
         model: { primary: modelRef },
-        models: { [modelRef]: { agentRuntime: { id: "openclaw" } } },
+        models: { [modelRef]: { agentRuntime: { id: "carapace" } } },
         systemAgent: { agentId: "operator" },
         skipBootstrap: true,
         skills: [],

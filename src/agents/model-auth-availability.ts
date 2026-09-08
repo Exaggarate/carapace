@@ -3,11 +3,11 @@ import {
   findNormalizedProviderValue,
   normalizeProviderId,
   normalizeProviderIdForAuth,
-} from "@openclaw/model-catalog-core/provider-id";
-import { hasNonEmptyString as hasSecret } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/model-catalog-core/provider-id";
+import { hasNonEmptyString as hasSecret } from "@carapace/normalization-core/string-coerce";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
 import { resolveMergedModelProviderConfig } from "../config/model-provider-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import type {
   ProviderModelRouteAuthRequirement,
@@ -217,7 +217,7 @@ function evaluateCliRuntimeModelAuthAvailability(
       : { availability: undefined, routeResolution: null };
 }
 type CreateModelAuthAvailabilityResolverParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   authStore: AuthProfileStore;
   agentDir?: string;

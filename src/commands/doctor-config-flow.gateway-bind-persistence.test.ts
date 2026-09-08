@@ -3,15 +3,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readConfigFileSnapshot, readConfigFileSnapshotForWrite } from "../config/config.js";
-import { withEnvOverride, withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withEnvOverride, withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { runInitialConfigWriteHealth } from "../flows/doctor-health-contribution-runners.config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 import { repairLegacyConfigForUpdateChannel } from "./doctor/legacy-config-repair.js";
 
 describe("Doctor gateway bind persistence", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it.each([
@@ -19,9 +19,9 @@ describe("Doctor gateway bind persistence", () => {
     ["0.0.0.0", "lan"],
   ] as const)("persists gateway bind %s as %s", async (legacyBind, canonicalBind) => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
         // This core writer regression needs the authoritative empty bundled-plugin inventory.
-        const configPath = await writeOpenClawConfig(home, {
+        const configPath = await writeCarapaceConfig(home, {
           gateway: { mode: "local", bind: legacyBind },
         });
         expect((await readConfigFileSnapshot()).sourceConfig.commands).toBeUndefined();
@@ -46,7 +46,7 @@ describe("Doctor gateway bind persistence", () => {
         const diagnostics = {
           otel: { enabled: true, endpoint: "http://collector.test:4317", protocol: "grpc" },
         };
-        const configPath = await writeOpenClawConfig(home, {
+        const configPath = await writeCarapaceConfig(home, {
           gateway: { mode: "local", ...(scenario === "invalid" ? { port: "invalid" } : {}) },
           diagnostics: scenario === "include" ? { $include: "diagnostics.json" } : diagnostics,
           plugins: { entries: { canvas: { enabled: true, config: { host: { enabled: false } } } } },

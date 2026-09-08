@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { expect, it } from "vitest";
 import { createControlUiE2eSuite } from "../../../ui/src/e2e/control-ui-e2e-suite.test-support.ts";
 import { controlUiSessionUrl } from "../../../ui/src/test-helpers/control-ui-e2e.ts";
@@ -21,7 +21,7 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 type AutomationAction = "list" | "get" | "update" | "run" | "remove";
 const actions = ["list", "get", "update", "run", "remove"] as const;
 const automationName = "Telegram-created reminder";
@@ -139,7 +139,7 @@ suite.define(() => {
           repoRoot,
           command: {
             executablePath: process.execPath,
-            argsPrefix: [path.join(repoRoot, "openclaw.mjs")],
+            argsPrefix: [path.join(repoRoot, "carapace.mjs")],
             cwd: repoRoot,
             usePackagedPlugins: true,
           },
@@ -147,7 +147,7 @@ suite.define(() => {
           providerBaseUrl: provider.baseUrl,
           primaryModel: "mock-openai/gpt-5.6-luna",
           alternateModel: "mock-openai/gpt-5.6-luna-alt",
-          forcedRuntime: "openclaw",
+          forcedRuntime: "carapace",
           transport,
           transportBaseUrl: "http://127.0.0.1",
           controlUiEnabled: false,
@@ -260,9 +260,9 @@ suite.define(() => {
               ({ gatewayUrl, token }) => {
                 (
                   window as Window & {
-                    __OPENCLAW_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string; token: string };
+                    __CARAPACE_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string; token: string };
                   }
-                )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token };
+                )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token };
               },
               { gatewayUrl: gateway.wsUrl, token: gateway.token },
             );

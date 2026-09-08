@@ -4,16 +4,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openExistingOpenClawStateDatabaseReadOnly,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openExistingCarapaceStateDatabaseReadOnly,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   readWorkspaceFileCache,
   retireWorkspaceFileCache,
@@ -30,12 +30,12 @@ import {
   WORKSPACE_LEGACY_STATE_MIGRATION_KIND,
 } from "./workspace-state-store.js";
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workspace-store-",
+    prefix: "carapace-workspace-store-",
   });
 });
 
@@ -43,7 +43,7 @@ afterEach(async () => {
   if (testState) {
     retireWorkspaceFileCache(testState.workspaceDir);
   }
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await testState?.cleanup();
   testState = undefined;
 });
@@ -61,7 +61,7 @@ function deleteState(targetDir: string): void {
 
 function insertPersistedAttestationHash(filename: string, sha256: string): void {
   const identity = resolveWorkspaceStateIdentity(workspaceDir());
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   db.prepare(
     `INSERT INTO workspace_setup_state (
       workspace_key, workspace_path, attested_at_ms, attestation_updated_at_ms
@@ -74,7 +74,7 @@ function insertPersistedAttestationHash(filename: string, sha256: string): void 
 
 describe("workspace state store", () => {
   it("does not create shared state for a read-only snapshot", () => {
-    const statePath = resolveOpenClawStateSqlitePath(testState!.env);
+    const statePath = resolveCarapaceStateSqlitePath(testState!.env);
     expect(fs.existsSync(statePath)).toBe(false);
 
     expect(
@@ -101,7 +101,7 @@ describe("workspace state store", () => {
       ]),
     });
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const snapshot = readWorkspaceStateSnapshot(dir);
     expect(snapshot.setupExists).toBe(true);
@@ -294,7 +294,7 @@ describe("workspace state store", () => {
     const alias = testState!.path("workspace-link");
     const env = {
       ...process.env,
-      OPENCLAW_STATE_DIR: testState!.path("custom-state"),
+      CARAPACE_STATE_DIR: testState!.path("custom-state"),
     };
     fs.symlinkSync(dir, alias, process.platform === "win32" ? "junction" : "dir");
     const identity = resolveWorkspaceStateIdentity(dir);
@@ -307,7 +307,7 @@ describe("workspace state store", () => {
 
     expect(readWorkspaceStateSnapshot(alias, { env }).identity).toStrictEqual(identity);
     expect(readWorkspaceStateSnapshot(alias, { env }).setupExists).toBe(true);
-    expect(resolveOpenClawStateSqlitePath(env)).not.toBe(resolveOpenClawStateSqlitePath());
+    expect(resolveCarapaceStateSqlitePath(env)).not.toBe(resolveCarapaceStateSqlitePath());
     expect(readWorkspaceStateSnapshot(alias).setupExists).toBe(false);
   });
 
@@ -316,14 +316,14 @@ describe("workspace state store", () => {
     const alias = testState!.path("workspace-link");
     const env = {
       ...process.env,
-      OPENCLAW_STATE_DIR: testState!.path("custom-state"),
+      CARAPACE_STATE_DIR: testState!.path("custom-state"),
     };
     mergeWorkspaceSetupState(dir, { bootstrapSeededAt: "2026-07-16T01:00:00.000Z" }, 1_000, {
       env,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.symlinkSync(dir, alias, process.platform === "win32" ? "junction" : "dir");
-    const database = await openExistingOpenClawStateDatabaseReadOnly({ env });
+    const database = await openExistingCarapaceStateDatabaseReadOnly({ env });
     if (!database) {
       throw new Error("expected read-only database");
     }
@@ -370,7 +370,7 @@ describe("workspace state store", () => {
 
     expect(readWorkspaceStateSnapshot(dir).setupExists).toBe(true);
     expect(readWorkspaceStateSnapshot(replacement).setupExists).toBe(false);
-    const staleAlias = openOpenClawStateDatabase()
+    const staleAlias = openCarapaceStateDatabase()
       .db.prepare("SELECT alias_key FROM workspace_path_aliases WHERE alias_path = ?")
       .get(alias);
     expect(staleAlias).toBeUndefined();
@@ -400,7 +400,7 @@ describe("workspace state store", () => {
 
     expect(readWorkspaceFileCache(filePath, "identity")).toBeUndefined();
     expect(readWorkspaceStateSnapshot(dir).setupExists).toBe(false);
-    const aliases = openOpenClawStateDatabase()
+    const aliases = openCarapaceStateDatabase()
       .db.prepare("SELECT alias_key FROM workspace_path_aliases")
       .all();
     expect(aliases).toEqual([]);
@@ -414,7 +414,7 @@ describe("workspace state store", () => {
     mergeWorkspaceSetupState(alias, { bootstrapSeededAt: "2026-07-16T01:00:00.000Z" }, 1_000);
     writeWorkspaceFileCache({ filePath, content: "cached", identity: "identity" });
     const deletion = prepareWorkspaceStateDeletion(alias);
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare("UPDATE workspace_path_aliases SET alias_path = ? WHERE alias_path = ?")
       .run(`${alias}-mismatch`, alias);
 
@@ -448,7 +448,7 @@ describe("workspace state store", () => {
       };
 
       expect(() =>
-        runOpenClawStateWriteTransaction(() => {
+        runCarapaceStateWriteTransaction(() => {
           remove();
           expect(readWorkspaceFileCache(filePath, "identity")).toBe("cached");
           throw new Error("rollback cleanup");
@@ -457,7 +457,7 @@ describe("workspace state store", () => {
       expect(readWorkspaceStateSnapshot(dir).setupExists).toBe(true);
       expect(readWorkspaceFileCache(filePath, "identity")).toBe("cached");
 
-      runOpenClawStateWriteTransaction(() => {
+      runCarapaceStateWriteTransaction(() => {
         remove();
         expect(readWorkspaceFileCache(filePath, "identity")).toBe("cached");
       });
@@ -515,7 +515,7 @@ describe("workspace state store", () => {
   it("deletes future-version state without parsing it", () => {
     const dir = workspaceDir();
     const identity = resolveWorkspaceStateIdentity(dir);
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.prepare(
       `INSERT INTO workspace_setup_state (
         workspace_key,
@@ -541,8 +541,8 @@ describe("workspace state store", () => {
     const dir = workspaceDir();
     const filePath = path.join(dir, "AGENTS.md");
     writeWorkspaceFileCache({ filePath, content: "cached", identity: "identity" });
-    const databasePath = resolveOpenClawStateSqlitePath();
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = resolveCarapaceStateSqlitePath();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(path.dirname(databasePath), { recursive: true, force: true });
 
     deleteState(dir);
@@ -555,7 +555,7 @@ describe("workspace state store", () => {
   it("deletes migration receipts owned by the workspace", () => {
     const dir = workspaceDir();
     const identity = resolveWorkspaceStateIdentity(dir);
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     mergeWorkspaceSetupState(dir, { bootstrapSeededAt: "2026-07-16T01:00:00.000Z" });
     const insertRun = db.prepare(
       "INSERT INTO migration_runs (id, started_at, finished_at, status, report_json) VALUES (?, 1, 1, 'completed', '{}')",
@@ -577,7 +577,7 @@ describe("workspace state store", () => {
     insertReceipt.run(
       "owned-receipt",
       WORKSPACE_LEGACY_STATE_MIGRATION_KIND,
-      path.join(dir, ".openclaw", "workspace-state.json"),
+      path.join(dir, ".carapace", "workspace-state.json"),
       "owned-run",
       JSON.stringify({ workspaceKey: identity.workspaceKey }),
     );

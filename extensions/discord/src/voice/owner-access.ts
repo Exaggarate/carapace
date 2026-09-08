@@ -1,4 +1,4 @@
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { resolveDiscordAccountAllowFrom } from "../accounts.js";
 import { resolveDiscordCommandOwnerAllowFrom } from "../command-owners.js";
 import type { Client } from "../internal/discord.js";
@@ -33,7 +33,7 @@ export async function resolveDiscordVoiceAccessTarget(params: {
 }
 
 export function resolveDiscordVoiceAccess(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   accountId: string;
 }): {

@@ -10,10 +10,10 @@ import {
   NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE,
 } from "../../infra/node-runner-inventory.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { NodeWorkerSupervisorNodeProof } from "../node-registry-private.js";
 import { resolveDevicePlacementEligibility } from "./device-placement-eligibility.js";
 import { bindDeviceWorkerAvailability } from "./device-provider.js";
@@ -41,7 +41,7 @@ vi.mock("../../config/config.js", async (importOriginal) => {
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const CODEX_COMMAND = "codex.exec-server.stdio.v1";
-const OPENCLAW_DEVICE_REQUIREMENT = { requiredNodeCommands: [], consumesWorkerSlot: true };
+const CARAPACE_DEVICE_REQUIREMENT = { requiredNodeCommands: [], consumesWorkerSlot: true };
 const CODEX_DEVICE_REQUIREMENT = {
   requiredNodeCommands: [CODEX_COMMAND],
   consumesWorkerSlot: false,
@@ -99,24 +99,24 @@ function prepareCloudNodeDispatch(
     profileId: ready.profileId,
     executionMode,
     devicePlacement:
-      executionMode === "remote-exec" ? CODEX_DEVICE_REQUIREMENT : OPENCLAW_DEVICE_REQUIREMENT,
+      executionMode === "remote-exec" ? CODEX_DEVICE_REQUIREMENT : CARAPACE_DEVICE_REQUIREMENT,
   };
 }
 
 describe("device worker placement dispatch", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let placementStore: PlacementStore;
 
   beforeEach(() => {
     runtimeNodeCommandPolicy.commands = { allow: [CODEX_COMMAND] };
-    root = tempDirs.make("openclaw-device-dispatch-");
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = tempDirs.make("carapace-device-dispatch-");
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placementStore = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("provisions, syncs, and activates a local-install device environment", async () => {
@@ -134,7 +134,7 @@ describe("device worker placement dispatch", () => {
       sshEndpoint: null,
       bootstrapReceipt: {
         bundleHash: "a".repeat(64),
-        openclawVersion: "2026.8.12",
+        carapaceVersion: "2026.8.12",
         protocolFeatures: [WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE],
         installKind: "bundle",
       },
@@ -145,7 +145,7 @@ describe("device worker placement dispatch", () => {
       ...REQUEST,
       profileId: "device:device-1",
       deviceId: "device-1",
-      devicePlacement: OPENCLAW_DEVICE_REQUIREMENT,
+      devicePlacement: CARAPACE_DEVICE_REQUIREMENT,
       inheritedProfile: {
         providerId: "device",
         profileSnapshot: { install: "bundle" as const, settings: { device: "device-1" } },
@@ -179,7 +179,7 @@ describe("device worker placement dispatch", () => {
     expect(harness.placements.current()).toMatchObject({ state: "active" });
   });
 
-  it("syncs paired-device remote-exec without launching an OpenClaw worker child", async () => {
+  it("syncs paired-device remote-exec without launching an Carapace worker child", async () => {
     const harness = createHarness(placementStore);
     bindDeviceWorkerAvailability(harness.environments, async () => ({
       available: true,
@@ -497,7 +497,7 @@ describe("device worker placement dispatch", () => {
       ...REQUEST,
       profileId: "device:offline-device",
       deviceId: "offline-device",
-      devicePlacement: OPENCLAW_DEVICE_REQUIREMENT,
+      devicePlacement: CARAPACE_DEVICE_REQUIREMENT,
       inheritedProfile: {
         providerId: "device",
         profileSnapshot: {
@@ -510,7 +510,7 @@ describe("device worker placement dispatch", () => {
     await expect(
       harness.service.dispatch(request, (placement) => states.push(placement.state)),
     ).rejects.toThrow(
-      "device worker node offline-device requires an update before it can host sessions; run openclaw update, then reconnect it (for a headless node, run openclaw node restart)",
+      "device worker node offline-device requires an update before it can host sessions; run carapace update, then reconnect it (for a headless node, run carapace node restart)",
     );
 
     expect(states).toEqual(["requested", "failed"]);
@@ -518,8 +518,8 @@ describe("device worker placement dispatch", () => {
     expect(createWorkerSessionPlacementStore({ database }).get(REQUEST.sessionId)).toMatchObject({
       state: "failed",
       environmentId: null,
-      recoveryError: expect.stringContaining("run openclaw update"),
-      terminalReason: expect.stringContaining("run openclaw node restart"),
+      recoveryError: expect.stringContaining("run carapace update"),
+      terminalReason: expect.stringContaining("run carapace node restart"),
       terminalAtMs: 1_000,
     });
   });
@@ -535,7 +535,7 @@ describe("device worker placement dispatch", () => {
       ...REQUEST,
       profileId: "device:device-1",
       deviceId: "device-1",
-      devicePlacement: OPENCLAW_DEVICE_REQUIREMENT,
+      devicePlacement: CARAPACE_DEVICE_REQUIREMENT,
       inheritedProfile: {
         providerId: "device",
         profileSnapshot: { install: "bundle" as const, settings: { device: "device-1" } },
@@ -565,7 +565,7 @@ describe("device worker placement dispatch", () => {
     {
       name: "rejects worker-turn when all slots are occupied",
       node: deviceProof(0),
-      requirement: OPENCLAW_DEVICE_REQUIREMENT,
+      requirement: CARAPACE_DEVICE_REQUIREMENT,
       config: {},
       expected: false,
       message: "at capacity",
@@ -596,7 +596,7 @@ describe("device worker placement dispatch", () => {
     {
       name: "rejects a replaced node connection",
       node: deviceProof(),
-      requirement: OPENCLAW_DEVICE_REQUIREMENT,
+      requirement: CARAPACE_DEVICE_REQUIREMENT,
       config: {},
       currentNode: { nodeId: "device-1", connId: "replaced-connection" },
       expected: false,

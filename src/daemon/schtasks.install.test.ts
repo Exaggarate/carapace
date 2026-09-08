@@ -83,10 +83,10 @@ describe("installScheduledTask", () => {
   async function withUserProfileDir(
     run: (tmpDir: string, env: Record<string, string>) => Promise<void>,
   ) {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-schtasks-install-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-schtasks-install-"));
     const env = {
       USERPROFILE: tmpDir,
-      OPENCLAW_PROFILE: "default",
+      CARAPACE_PROFILE: "default",
     };
     try {
       await run(tmpDir, env);
@@ -104,11 +104,11 @@ describe("installScheduledTask", () => {
     });
   }
 
-  function expectInitialTaskQuery(taskName = "OpenClaw Gateway"): void {
+  function expectInitialTaskQuery(taskName = "Carapace Gateway"): void {
     expect(schtasksCalls[0]).toEqual(["/Query", "/TN", taskName]);
   }
 
-  function expectTaskRunCall(index: number, taskName = "OpenClaw Gateway"): void {
+  function expectTaskRunCall(index: number, taskName = "Carapace Gateway"): void {
     expect(schtasksCalls[index]).toEqual(["/Run", "/TN", taskName]);
   }
 
@@ -144,7 +144,7 @@ describe("installScheduledTask", () => {
         env,
         stdout: new PassThrough(),
         programArguments: ["node", "gateway.js"],
-        environment: { OPENCLAW_SERVICE_KIND: "gateway" },
+        environment: { CARAPACE_SERVICE_KIND: "gateway" },
       });
 
       const script = decodeWindowsLauncherScript({ buffer: await fs.readFile(scriptPath) });
@@ -161,30 +161,30 @@ describe("installScheduledTask", () => {
       const gatewayScript = decodeWindowsLauncherScript({
         buffer: await fs.readFile(gateway.scriptPath),
       });
-      expect(gatewayScript).toContain("rem OpenClaw Gateway");
-      expect(gatewayScript).not.toContain("OPENCLAW_SERVICE_VERSION");
+      expect(gatewayScript).toContain("rem Carapace Gateway");
+      expect(gatewayScript).not.toContain("CARAPACE_SERVICE_VERSION");
       expect(xmlPayloadCaptures.at(-1)?.xml).toContain(
-        "<Description>OpenClaw Gateway</Description>",
+        "<Description>Carapace Gateway</Description>",
       );
 
       const node = await installScheduledTask({
         env: {
           ...env,
-          OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Node",
-          OPENCLAW_TASK_SCRIPT_NAME: "node.cmd",
+          CARAPACE_WINDOWS_TASK_NAME: "Carapace Node",
+          CARAPACE_TASK_SCRIPT_NAME: "node.cmd",
         },
         stdout: new PassThrough(),
         programArguments: ["node", "node-host.js"],
-        description: "OpenClaw Node Host",
+        description: "Carapace Node Host",
         environment: {},
       });
       const nodeScript = decodeWindowsLauncherScript({
         buffer: await fs.readFile(node.scriptPath),
       });
-      expect(nodeScript).toContain("rem OpenClaw Node Host");
-      expect(nodeScript).not.toContain("OPENCLAW_SERVICE_VERSION");
+      expect(nodeScript).toContain("rem Carapace Node Host");
+      expect(nodeScript).not.toContain("CARAPACE_SERVICE_VERSION");
       expect(xmlPayloadCaptures.at(-1)?.xml).toContain(
-        "<Description>OpenClaw Node Host</Description>",
+        "<Description>Carapace Node Host</Description>",
       );
     });
   });
@@ -210,7 +210,7 @@ describe("installScheduledTask", () => {
           OC_CARET: "a^b",
           OC_PERCENT: "%TEMP%",
           OC_BANG: "!token!",
-          OC_SOURCE_PATH: "C:\\OpenClaw source & ^ %USERPROFILE%!",
+          OC_SOURCE_PATH: "C:\\Carapace source & ^ %USERPROFILE%!",
           OC_QUOTE: 'he said "hi"',
           OC_EMPTY: "",
           NODE_OPTIONS: "",
@@ -226,7 +226,7 @@ describe("installScheduledTask", () => {
       expect(script).toContain('set "OC_CARET=a^^b"');
       expect(script).toContain('set "OC_PERCENT=%%TEMP%%"');
       expect(script).toContain('set "OC_BANG=^!token^!"');
-      expect(script).toContain('set "OC_SOURCE_PATH=C:\\OpenClaw source & ^^ %%USERPROFILE%%^!"');
+      expect(script).toContain('set "OC_SOURCE_PATH=C:\\Carapace source & ^^ %%USERPROFILE%%^!"');
       expect(script).toContain('set "OC_QUOTE=he said ^"hi^""');
       expect(script).not.toContain('set "OC_EMPTY=');
       expect(script).toContain('set "NODE_OPTIONS="');
@@ -250,7 +250,7 @@ describe("installScheduledTask", () => {
           OC_CARET: "a^b",
           OC_PERCENT: "%TEMP%",
           OC_BANG: "!token!",
-          OC_SOURCE_PATH: "C:\\OpenClaw source & ^ %USERPROFILE%!",
+          OC_SOURCE_PATH: "C:\\Carapace source & ^ %USERPROFILE%!",
           OC_QUOTE: 'he said "hi"',
           NODE_OPTIONS: "",
         },
@@ -266,17 +266,17 @@ describe("installScheduledTask", () => {
         sourcePath: scriptPath,
       });
 
-      expect(schtasksCalls[0]).toEqual(["/Query", "/TN", "OpenClaw Gateway"]);
+      expect(schtasksCalls[0]).toEqual(["/Query", "/TN", "Carapace Gateway"]);
       expect(schtasksCalls[1]?.[0]).toBe("/Change");
       // Battery-flag XML re-apply runs between /Change and /Run on upgrades.
       expect(schtasksCalls[2]?.slice(0, 5)).toEqual([
         "/Create",
         "/F",
         "/TN",
-        "OpenClaw Gateway",
+        "Carapace Gateway",
         "/XML",
       ]);
-      expect(schtasksCalls[3]).toEqual(["/Run", "/TN", "OpenClaw Gateway"]);
+      expect(schtasksCalls[3]).toEqual(["/Run", "/TN", "Carapace Gateway"]);
     });
   });
 
@@ -334,7 +334,7 @@ describe("installScheduledTask", () => {
         ...env,
         USERDOMAIN: "WORKSTATION",
         USERNAME: "alice",
-        OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER: marker,
+        CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER: marker,
       });
       const launcherPath = scriptPath.replace(/\.cmd$/i, ".vbs");
       const rawLauncher = await fs.readFile(launcherPath);
@@ -345,7 +345,7 @@ describe("installScheduledTask", () => {
         expect(schtasksCalls[1]).toEqual([
           "/Change",
           "/TN",
-          "OpenClaw Gateway",
+          "Carapace Gateway",
           "/TR",
           expect.stringContaining("gateway.vbs"),
         ]);
@@ -357,7 +357,7 @@ describe("installScheduledTask", () => {
         "/Create",
         "/F",
         "/TN",
-        "OpenClaw Gateway",
+        "Carapace Gateway",
         "/XML",
       ]);
       expect(schtasksCalls[xmlIndex]).not.toContain("/RU");
@@ -380,8 +380,8 @@ describe("installScheduledTask", () => {
 
       const { scriptPath } = await installDefaultGatewayTask({
         USERPROFILE: cjkProfileDir,
-        OPENCLAW_PROFILE: "default",
-        OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
+        CARAPACE_PROFILE: "default",
+        CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
       });
       const launcherPath = scriptPath.replace(/\.cmd$/i, ".vbs");
       const rawLauncher = await fs.readFile(launcherPath);
@@ -419,7 +419,7 @@ describe("installScheduledTask", () => {
         HOME: env.USERPROFILE,
         USERDOMAIN: "WORKSTATION",
         USERNAME: "alice",
-        OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Custom Gateway",
+        CARAPACE_WINDOWS_TASK_NAME: "Carapace Custom Gateway",
       };
       const gatewayEnv = buildServiceEnvironment({
         env: callerEnv,
@@ -427,9 +427,9 @@ describe("installScheduledTask", () => {
         platform: "win32",
       });
 
-      expect(callerEnv.OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER).toBeUndefined();
-      expect(gatewayEnv.OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER).toBe("1");
-      expect(gatewayEnv.OPENCLAW_WINDOWS_TASK_NAME).toBe("OpenClaw Gateway");
+      expect(callerEnv.CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER).toBeUndefined();
+      expect(gatewayEnv.CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER).toBe("1");
+      expect(gatewayEnv.CARAPACE_WINDOWS_TASK_NAME).toBe("Carapace Gateway");
 
       const { scriptPath } = await installScheduledTask({
         env: callerEnv,
@@ -449,7 +449,7 @@ describe("installScheduledTask", () => {
         "/Create",
         "/F",
         "/TN",
-        "OpenClaw Custom Gateway",
+        "Carapace Custom Gateway",
         "/XML",
       ]);
       expect(schtasksCalls[1]).not.toContain("/RU");
@@ -458,12 +458,12 @@ describe("installScheduledTask", () => {
       expect(captured?.xml).toContain("gateway.vbs</Command>");
       expect(captured?.xml).toContain("<UserId>WORKSTATION\\alice</UserId>");
       expect(captured?.xml).toContain("<LogonType>InteractiveToken</LogonType>");
-      expect(script).toContain('set "OPENCLAW_WINDOWS_TASK_NAME=OpenClaw Custom Gateway"');
+      expect(script).toContain('set "CARAPACE_WINDOWS_TASK_NAME=Carapace Custom Gateway"');
       expect(launcher).toContain("WScript.Shell");
       expect(launcher).toContain(
         `WScript.Quit CreateObject("WScript.Shell").Run("""${scriptPath}""", 0, True)`,
       );
-      expectTaskRunCall(2, "OpenClaw Custom Gateway");
+      expectTaskRunCall(2, "Carapace Custom Gateway");
     });
   });
 
@@ -546,7 +546,7 @@ describe("installScheduledTask", () => {
           "/Create",
           "/F",
           "/TN",
-          "OpenClaw Gateway",
+          "Carapace Gateway",
           "/XML",
         ]);
         expect(createCall).not.toContain("/RU");
@@ -617,13 +617,13 @@ describe("installScheduledTask", () => {
         programArguments: ["node", "gateway.js"],
         environment: {
           PATH: "C:\\Windows\\System32;C:\\Program Files\\Docker\\Docker\\resources\\bin",
-          OPENCLAW_GATEWAY_PORT: "18789",
+          CARAPACE_GATEWAY_PORT: "18789",
         },
       });
 
       const script = decodeWindowsLauncherScript({ buffer: await fs.readFile(scriptPath) });
       expect(script).not.toContain('set "PATH=');
-      expect(script).toContain('set "OPENCLAW_GATEWAY_PORT=18789"');
+      expect(script).toContain('set "CARAPACE_GATEWAY_PORT=18789"');
     });
   });
 
@@ -634,7 +634,7 @@ describe("installScheduledTask", () => {
         stdout: new PassThrough(),
         programArguments: ["node", "gateway.js"],
         environment: {
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "TAVILY_API_KEY",
+          CARAPACE_SERVICE_MANAGED_ENV_KEYS: "TAVILY_API_KEY",
           TAVILY_API_KEY: "old-inline-value",
         },
       });
@@ -643,11 +643,11 @@ describe("installScheduledTask", () => {
       expect(command).toStrictEqual({
         programArguments: ["node", "gateway.js"],
         environment: {
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "TAVILY_API_KEY",
+          CARAPACE_SERVICE_MANAGED_ENV_KEYS: "TAVILY_API_KEY",
           TAVILY_API_KEY: "old-inline-value",
         },
         environmentValueSources: {
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "inline",
+          CARAPACE_SERVICE_MANAGED_ENV_KEYS: "inline",
           TAVILY_API_KEY: "inline",
         },
         sourcePath: scriptPath,

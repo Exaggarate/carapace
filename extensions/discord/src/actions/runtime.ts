@@ -1,7 +1,7 @@
 // Discord plugin module implements runtime behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { readStringParam } from "openclaw/plugin-sdk/channel-actions";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import { readStringParam } from "carapace/plugin-sdk/channel-actions";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { createDiscordActionGate } from "../accounts.js";
 import { handleDiscordGuildAction } from "./runtime.guild.js";
 import { handleDiscordMessagingAction } from "./runtime.messaging.js";
@@ -57,7 +57,7 @@ const moderationActions = new Set(["timeout", "kick", "ban"]);
 
 export async function handleDiscordAction(
   params: Record<string, unknown>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options?: DiscordMessagingActionOptions,
 ): Promise<AgentToolResult<unknown>> {
   const action = readStringParam(params, "action", { required: true });

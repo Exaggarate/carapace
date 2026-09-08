@@ -3,11 +3,11 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { registerEmbeddingProvider } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveOpenClawAgentSqlitePath } from "openclaw/plugin-sdk/sqlite-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { registerEmbeddingProvider } from "carapace/plugin-sdk/plugin-test-runtime";
+import { resolveCarapaceAgentSqlitePath } from "carapace/plugin-sdk/sqlite-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "./test-runtime-mocks.js";
 import type { EmbeddingProvider } from "./embeddings.js";
@@ -57,11 +57,11 @@ describe("memory manager reindex recovery", () => {
         },
       }),
     });
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mem-reindex-recovery-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-mem-reindex-recovery-"));
     workspaceDir = path.join(fixtureRoot, "workspace");
     memoryDir = path.join(workspaceDir, "memory");
     await fs.mkdir(memoryDir, { recursive: true });
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(fixtureRoot, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(fixtureRoot, "state"));
   });
 
   afterEach(async () => {
@@ -75,7 +75,7 @@ describe("memory manager reindex recovery", () => {
     await closeAllMemorySearchManagers();
     // The agent close releases its leases through shared state and reopens it, so the
     // shared handle is released second; otherwise Windows fails the removal with EBUSY.
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     await fs.rm(fixtureRoot, { recursive: true, force: true });
   });
@@ -84,7 +84,7 @@ describe("memory manager reindex recovery", () => {
     provider?: string;
     sources?: Array<"memory" | "sessions">;
     cacheEnabled?: boolean;
-  }): OpenClawConfig {
+  }): CarapaceConfig {
     return isolateMemoryManagerTestConfig({
       memory: {
         search: {
@@ -105,7 +105,7 @@ describe("memory manager reindex recovery", () => {
     });
   }
 
-  async function openManager(cfg: OpenClawConfig): Promise<MemoryIndexManager> {
+  async function openManager(cfg: CarapaceConfig): Promise<MemoryIndexManager> {
     const { getMemorySearchManager } = await import("./index.js");
     const result = await getMemorySearchManager({ cfg, agentId: "main" });
     if (!result.manager) {
@@ -338,7 +338,7 @@ describe("memory manager reindex recovery", () => {
 
   it("rejects a full reindex while another process owns the build lock", async () => {
     const memoryManager = await openManager(createCfg({ provider: "none", sources: ["memory"] }));
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    const databasePath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
     const lock = await waitForMemoryReindexLock(databasePath);
 
     try {
@@ -360,7 +360,7 @@ describe("memory manager reindex recovery", () => {
     if (!provider) {
       throw new Error("expected the test embedding provider");
     }
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    const databasePath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
     const reset = () =>
       resetMemoryDatabase({ targetDb: harness.db, dbPath: databasePath, workspaceDir });
     let releaseEmbedding = () => {};
@@ -411,7 +411,7 @@ describe("memory manager reindex recovery", () => {
   });
 
   it("waits for the build lock without blocking the event loop", async () => {
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    const databasePath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     const lock = await waitForMemoryReindexLock(databasePath);
     let timerFired = false;
@@ -470,7 +470,7 @@ describe("memory manager reindex recovery", () => {
   });
 
   it("requires doctor for legacy schemas before exposing a manager", async () => {
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    const databasePath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     const db = new DatabaseSync(databasePath);
     db.exec("CREATE TABLE memory_index_chunks (id TEXT PRIMARY KEY)");
@@ -483,7 +483,7 @@ describe("memory manager reindex recovery", () => {
     });
 
     expect(result.manager).toBeNull();
-    expect(result.error).toContain("uses schema version 0; run openclaw doctor --fix");
+    expect(result.error).toContain("uses schema version 0; run carapace doctor --fix");
     const reopened = new DatabaseSync(databasePath);
     expect(reopened.prepare("PRAGMA user_version").get()).toEqual({ user_version: 0 });
     reopened.close();

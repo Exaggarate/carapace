@@ -54,7 +54,7 @@ it.each(["history-only", "startup-only", "final-only", "delta-then-final"] as co
     const firstPrompt = {
       role: "user",
       content: "Start working",
-      __openclaw: { id: "first-user", idempotencyKey: "run-first:user", seq: 1 },
+      __carapace: { id: "first-user", idempotencyKey: "run-first:user", seq: 1 },
     };
     let history: ChatHistoryResult = {
       sessionId: "recovered-session",
@@ -79,7 +79,7 @@ it.each(["history-only", "startup-only", "final-only", "delta-then-final"] as co
     const reply = {
       role: "assistant",
       content: "Recovery completed.",
-      __openclaw: { id: "retry-answer", idempotencyKey: "run-retry", seq: 3 },
+      __carapace: { id: "retry-answer", idempotencyKey: "run-retry", seq: 3 },
     };
     try {
       if (delivery === "delta-then-final") {
@@ -105,7 +105,7 @@ it.each(["history-only", "startup-only", "final-only", "delta-then-final"] as co
           {
             role: "user",
             content: "Try again",
-            __openclaw: { id: "retry-user", idempotencyKey: "run-retry:user", seq: 2 },
+            __carapace: { id: "retry-user", idempotencyKey: "run-retry:user", seq: 2 },
           },
           reply,
         ],

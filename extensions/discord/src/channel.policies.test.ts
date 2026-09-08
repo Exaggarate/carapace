@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { discordPlugin } from "./channel.js";
 
@@ -72,7 +72,7 @@ describe("discordPlugin security", () => {
           allowFrom: ["  discord:<@!123456789>  "],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveDmPolicy({
       cfg,
@@ -111,7 +111,7 @@ describe("discordPlugin groups", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       discordPlugin.groups?.resolveRequireMention?.({

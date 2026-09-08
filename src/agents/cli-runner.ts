@@ -471,7 +471,7 @@ async function runPreparedCliAgentOwned(
       lastAssistant,
       sourceReplyWasDelivered: sourceReplyMirror.delivered,
       usedHistoryPrompt:
-        cliSessionIdToUse === undefined && context.openClawHistoryPrompt !== undefined,
+        cliSessionIdToUse === undefined && context.carapaceHistoryPrompt !== undefined,
     };
   };
 

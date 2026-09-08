@@ -2,10 +2,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { expect, vi } from "vitest";
 import { createTwitchIngress } from "./twitch-ingress.js";
 import type { TwitchChatMessage } from "./types.js";
@@ -36,11 +36,11 @@ export async function withTwitchIngressTestQueue<T>(
   fn: (queue: TwitchIngressTestQueue) => Promise<T>,
 ): Promise<T> {
   const createdDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-twitch-ingress-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-twitch-ingress-"),
   );
   const stateDir = await fs.realpath(createdDir);
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  const previousStateDir = process.env.CARAPACE_STATE_DIR;
+  process.env.CARAPACE_STATE_DIR = stateDir;
   const queue = createChannelIngressQueueForTests<TwitchIngressTestPayload>({
     channelId: "twitch",
     accountId: "default",
@@ -50,11 +50,11 @@ export async function withTwitchIngressTestQueue<T>(
     return await fn(queue);
   } finally {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }

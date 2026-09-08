@@ -1,9 +1,9 @@
 // Discord plugin module implements native command auth behavior.
-import { resolveCommandAuthorizedFromAuthorizers } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-import { resolveOpenProviderRuntimeGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveCommandAuthorizedFromAuthorizers } from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
+import { resolveOpenProviderRuntimeGroupPolicy } from "carapace/plugin-sdk/runtime-group-policy";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDiscordAccountAllowFrom, resolveDiscordAccountDmPolicy } from "../accounts.js";
 import { resolveDiscordCommandOwnerAllowFrom } from "../command-owners.js";
 import type { AutocompleteInteraction, Guild } from "../internal/discord.js";
@@ -23,7 +23,7 @@ import { resolveDiscordNativeInteractionChannelContext } from "./native-interact
 import { resolveDiscordSenderIdentity } from "./sender-identity.js";
 
 function resolveDiscordNativeCommandAllowlistAccess(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   sender: { id: string; name?: string; tag?: string };
   chatType: "direct" | "group" | "thread" | "channel";
@@ -66,7 +66,7 @@ function resolveDiscordNativeCommandAllowlistAccess(params: {
 }
 
 export function resolveDiscordNativeCommandChannelAccessContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordConfig;
   accountId: string;
   sender: { id: string; name?: string; tag?: string };
@@ -116,7 +116,7 @@ export function resolveDiscordNativeCommandChannelAccessContext(params: {
 }
 
 export async function resolveDiscordGuildNativeCommandAuthorized(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   discordConfig: DiscordConfig;
   useAccessGroups: boolean;
@@ -207,7 +207,7 @@ export function resolveDiscordNativeGroupDmAccess(params: {
 export async function resolveDiscordNativeAutocompleteAuthorized(params: {
   isPolicyCurrent?: () => boolean;
   interaction: AutocompleteInteraction;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordConfig;
   accountId: string;
   skipCommandOwnerAllowFrom?: boolean;

@@ -9,12 +9,12 @@ import {
 } from "../app/lazy-custom-element.ts";
 import { renderLazyElementModal } from "../components/lazy-view-error.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import type { ControlUiPluginCapability } from "./control-ui-capability.ts";
 
 const PLUGIN_MANAGER_DIALOG = {
-  tagName: "openclaw-plugin-manager-dialog",
+  tagName: "carapace-plugin-manager-dialog",
   get label() {
     return t("pluginUi.customize");
   },
@@ -24,11 +24,11 @@ const PLUGIN_MANAGER_DIALOG = {
 export function renderControlUiPluginRecovery(plugins: ControlUiPluginCapability, routeId: string) {
   // A workspace replacement can remove the Plugins page, so its escape stays host-owned.
   return routeId !== "plugins" || plugins.selectedReplacement("workspace")
-    ? html`<openclaw-plugin-manager floating></openclaw-plugin-manager>`
+    ? html`<carapace-plugin-manager floating></carapace-plugin-manager>`
     : nothing;
 }
 
-class ControlUiPluginManager extends OpenClawLightDomContentsElement {
+class ControlUiPluginManager extends CarapaceLightDomContentsElement {
   @consume({ context: applicationContext, subscribe: true }) private context?: ApplicationContext;
   @property({ type: Boolean }) floating = false;
   @state() private open = false;
@@ -87,18 +87,18 @@ class ControlUiPluginManager extends OpenClawLightDomContentsElement {
     }
     ${
       isOptionalElementDefined(PLUGIN_MANAGER_DIALOG)
-        ? html`<openclaw-plugin-manager-dialog
+        ? html`<carapace-plugin-manager-dialog
             .runtime=${this.context?.plugins}
             .open=${showDialog}
             @modal-cancel=${() => {
               this.open = false;
             }}
-          ></openclaw-plugin-manager-dialog>`
+          ></carapace-plugin-manager-dialog>`
         : nothing
     }`;
   }
 }
 
-if (!customElements.get("openclaw-plugin-manager")) {
-  customElements.define("openclaw-plugin-manager", ControlUiPluginManager);
+if (!customElements.get("carapace-plugin-manager")) {
+  customElements.define("carapace-plugin-manager", ControlUiPluginManager);
 }

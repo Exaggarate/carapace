@@ -3,14 +3,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createColdPluginFixture,
   isColdPluginRuntimeLoaded,
 } from "../plugins/test-helpers/cold-plugin-fixtures.js";
 
 const testState = vi.hoisted(() => ({
-  config: {} as OpenClawConfig,
+  config: {} as CarapaceConfig,
   logs: [] as string[],
 }));
 
@@ -38,7 +38,7 @@ vi.mock("../runtime.js", () => ({
 
 import { tryRouteCli } from "./route.js";
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-models-status-route-"));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-models-status-route-"));
 
 afterAll(() => {
   fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -53,9 +53,9 @@ it("does not execute an unrelated provider plugin", async () => {
     pluginId: "unrelated-provider",
     providerId: "unrelated-provider",
   });
-  vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-  vi.stubEnv("OPENCLAW_HOME", path.join(tempRoot, "home"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", path.join(tempRoot, "state"));
+  vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+  vi.stubEnv("CARAPACE_HOME", path.join(tempRoot, "home"));
+  vi.stubEnv("CARAPACE_STATE_DIR", path.join(tempRoot, "state"));
   testState.config = {
     agents: {
       defaults: {
@@ -70,9 +70,9 @@ it("does not execute an unrelated provider plugin", async () => {
   };
 
   for (const argv of [
-    ["node", "openclaw", "models", "status", "--json"],
-    ["node", "openclaw", "models", "--json"],
-    ["node", "openclaw", "models", "--agent", "main", "--status-json"],
+    ["node", "carapace", "models", "status", "--json"],
+    ["node", "carapace", "models", "--json"],
+    ["node", "carapace", "models", "--agent", "main", "--status-json"],
   ]) {
     await expect(tryRouteCli(argv)).resolves.toBe(true);
     const payload = JSON.parse(testState.logs.at(-1) ?? "{}") as { defaultModel?: string };

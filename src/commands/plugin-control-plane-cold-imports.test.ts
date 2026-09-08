@@ -9,7 +9,7 @@ import {
   isColdPluginRuntimeLoaded,
 } from "../plugins/test-helpers/cold-plugin-fixtures.js";
 import { cleanupTrackedTempDirs, makeTrackedTempDir } from "../plugins/test-helpers/fs-fixtures.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { buildAuthChoiceGroups, formatAuthChoiceChoicesForCli } from "./auth-choice-options.js";
 import { listManifestInstalledChannelIds } from "./channel-setup/discovery.js";
 
@@ -21,7 +21,7 @@ vi.mock("../agents/sandbox/docker.js", () => ({
 }));
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-command-cold-imports", tempDirs);
+  return makeTrackedTempDir("carapace-command-cold-imports", tempDirs);
 }
 
 afterEach(() => {
@@ -34,9 +34,9 @@ describe("command control-plane plugin discovery", () => {
   it.each([true, false])(
     "audits setup-backed channel warnings in status with enabled=%s",
     async (enabled) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
-          env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_BUNDLED_PLUGINS_DIR: undefined },
+          env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", CARAPACE_BUNDLED_PLUGINS_DIR: undefined },
         },
         async (state) => {
           const finding = {

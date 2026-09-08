@@ -29,7 +29,7 @@ import type {
   CodexSandboxExecSessionNotifications,
   JsonRpcRequest,
   ManagedProcess,
-  OpenClawExecServer,
+  CarapaceExecServer,
 } from "./types.js";
 
 /** Connection-local execution state; closing it never enables session resumption. */
@@ -41,7 +41,7 @@ export class CodexSandboxExecSession {
   private cleanup?: Promise<void>;
 
   constructor(
-    private readonly execServer: OpenClawExecServer,
+    private readonly execServer: CarapaceExecServer,
     private readonly transport: CodexSandboxExecMessageTransport,
   ) {
     this.notifications = {
@@ -145,7 +145,7 @@ export class CodexSandboxExecSession {
       default:
         throw new JsonRpcProtocolError(
           JSON_RPC_METHOD_NOT_FOUND,
-          `Unsupported OpenClaw sandbox exec-server method: ${method}`,
+          `Unsupported Carapace sandbox exec-server method: ${method}`,
         );
     }
   }

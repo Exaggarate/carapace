@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayRecoveryRuntime } from "../../gateway/server-instance-runtime.types.js";
 import { waitForAbortSignal } from "../../infra/abort-signal.js";
 import {
@@ -69,7 +69,7 @@ async function runRecoveryRetries(params: {
 }
 
 export async function recoverRestartAbortedMainSessions(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   onExhaustedTarget?: (target: ExhaustedRestartRecoveryTarget) => void;
   stateDir?: string;
   handledSessionKeys?: Set<string>;
@@ -113,7 +113,7 @@ export async function recoverRestartAbortedMainSessions(params: {
 export async function retryRestartAbortedMainSessionRecovery(
   params: MainSessionRecoveryStoreTarget & {
     canonicalSessionKey?: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     expectedRecoveryRunId?: string;
     expectedRecoverySourceRunId?: string;
     expectedSessionId: string;
@@ -143,7 +143,7 @@ export async function retryRestartAbortedMainSessionRecovery(
 
 async function recoverExpectedRestartRecovery(
   params: MainSessionRecoveryStoreTarget & {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     expectedClaim?: ExpectedRestartRecoveryClaim;
     expectedTarget?: ExpectedRestartRecoveryTarget;
     lifecycleGeneration?: string;
@@ -201,7 +201,7 @@ async function recoverExpectedRestartRecovery(
 export function scheduleRestartAbortedMainSessionRecoveryAfterOwnerRelease(
   params: MainSessionRecoveryStoreTarget & {
     delayMs?: number;
-    getConfig: () => OpenClawConfig;
+    getConfig: () => CarapaceConfig;
     getGatewayRuntime: () => GatewayRecoveryRuntime | undefined;
     maxRetries?: number;
     expectedSessionId: string;
@@ -260,7 +260,7 @@ export function scheduleRestartAbortedMainSessionRecoveryAfterOwnerRelease(
 
 export function scheduleRestartAbortedMainSessionRecovery(params: {
   delayMs?: number;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   maxRetries?: number;
   shouldContinue?: () => boolean;
   stateDir?: string;

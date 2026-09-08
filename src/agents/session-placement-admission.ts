@@ -1,6 +1,6 @@
 import { registerReplyOperationSuccessorBarrier } from "../auto-reply/reply/reply-run-registry.js";
 import type { SessionTranscriptRuntimeTarget } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createAbortError } from "../infra/abort-signal.js";
 import {
   assertAgentRunLifecycleGenerationCurrent,
@@ -34,7 +34,7 @@ export type SessionPlacementTurnParams = RunEmbeddedAgentParams & { sessionFile:
 
 type SessionPlacementSandboxParams = {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionId: string;
   sessionKey?: string;
   workspaceDir: string;
@@ -66,7 +66,7 @@ type SessionPlacementAdmissionState = {
 // Runtime chunks share one provider. The identity guard keeps an older gateway
 // shutdown from clearing a newer lifecycle's admission gate.
 const state = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionPlacementAdmissionState"),
+  Symbol.for("carapace.sessionPlacementAdmissionState"),
   (): SessionPlacementAdmissionState => ({}),
 );
 export function installSessionPlacementAdmissionProvider(

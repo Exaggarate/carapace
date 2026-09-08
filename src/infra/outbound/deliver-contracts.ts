@@ -8,7 +8,7 @@ import type {
   ChannelOutboundTargetRef,
 } from "../../channels/plugins/types.adapters.js";
 import type { ReplyToMode } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { MessagePresentation, ReplyPayloadDeliveryPin } from "../../interactive/payload.js";
 import type { OutboundMediaAccess } from "../../media/load-options.js";
 import type { DeliveryQueueCompletionRetention } from "../delivery-queue-sqlite.js";
@@ -136,7 +136,7 @@ export type ChannelHandler = {
 };
 
 export type ChannelHandlerParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   /** Admitted run owner for agent-scoped channel runtime discovery. */
   agentId?: string;
   channel: string;
@@ -167,7 +167,7 @@ export type ChannelHandlerParams = {
 };
 
 export type DeliverOutboundPayloadsCoreParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   to: string;
   accountId?: string;

@@ -10,11 +10,11 @@ import {
   readManagedImageRecord,
 } from "../gateway/managed-image-record-store.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createTempHomeEnv, type TempHomeEnv } from "../test-utils/temp-home.js";
 import { markTrustedGeneratedHtmlPath } from "./web-media.js";
 
@@ -23,17 +23,17 @@ describe("cleanOldMedia managed-subtree retention", () => {
   let tempHome: TempHomeEnv;
 
   beforeAll(async () => {
-    tempHome = await createTempHomeEnv("openclaw-test-home-");
+    tempHome = await createTempHomeEnv("carapace-test-home-");
     store = await import("./store.js");
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await tempHome.restore();
   });
 
   it("cannot delete managed history media or lift the legacy migration barrier", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
+    const stateDir = path.join(tempHome.home, ".carapace");
     const mediaDir = await store.ensureMediaDir();
     const inbound = await store.saveMediaBuffer(Buffer.from("inbound"), "image/png");
     const historyOriginal = await store.saveMediaBuffer(
@@ -145,10 +145,10 @@ describe("cleanOldMedia managed-subtree retention", () => {
       size: staleManagedOutgoing.size,
     });
 
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     const marker = executeSqliteQueryTakeFirstSync(
       db,
-      getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "outbound_media_provenance">>(db)
+      getNodeSqliteKysely<Pick<CarapaceStateKyselyDatabase, "outbound_media_provenance">>(db)
         .selectFrom("outbound_media_provenance")
         .select("realpath")
         .where("realpath", "=", staleOutbound.path),

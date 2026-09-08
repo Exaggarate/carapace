@@ -1,7 +1,7 @@
 import { request as httpRequest } from "node:http";
 // Copilot BYOK proxy tests verify SDK-local transport is guarded outbound fetch.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import type { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCopilotByokProxy } from "./byok-proxy.js";
 import { resolveCopilotProvider } from "./provider-bridge.js";
@@ -10,8 +10,8 @@ const ssrfRuntimeMock = vi.hoisted(() => ({
   fetchWithSsrFGuard: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>()),
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>()),
   fetchWithSsrFGuard: ssrfRuntimeMock.fetchWithSsrFGuard,
 }));
 
@@ -19,7 +19,7 @@ function getProxyCredentialHeader(headers: Record<string, string>): [string, str
   return expectDefined(
     Object.entries(headers).find(
       ([name, value]) =>
-        /^x-openclaw-copilot-byok-[a-f0-9]{24}$/.test(name) && /^[a-f0-9]{24}$/.test(value),
+        /^x-carapace-copilot-byok-[a-f0-9]{24}$/.test(name) && /^[a-f0-9]{24}$/.test(value),
     ),
     "proxy credential header",
   );
@@ -98,8 +98,8 @@ describe("createCopilotByokProxy", () => {
 
   it.each([307, 308])("preserves binary request bytes across a %i redirect", async (status) => {
     const { fetchWithSsrFGuard } = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/ssrf-runtime")
-    >("openclaw/plugin-sdk/ssrf-runtime");
+      typeof import("carapace/plugin-sdk/ssrf-runtime")
+    >("carapace/plugin-sdk/ssrf-runtime");
     ssrfRuntimeMock.fetchWithSsrFGuard.mockImplementation(fetchWithSsrFGuard);
     const clientFetch = globalThis.fetch;
     const received: Buffer[] = [];
@@ -331,7 +331,7 @@ describe("createCopilotByokProxy", () => {
         id: "deployment-gpt",
         baseUrl: "https://example.openai.azure.com/openai/v1",
         headers: {
-          "X-OpenClaw-Copilot-Byok-Proxy-Token": "configured-value",
+          "X-Carapace-Copilot-Byok-Proxy-Token": "configured-value",
           "X-Trace": "test",
         },
       },
@@ -343,7 +343,7 @@ describe("createCopilotByokProxy", () => {
     const sdkHeaders = expectDefined(proxy?.provider.provider?.headers, "Azure SDK headers");
     const [proxyCredentialHeader] = getProxyCredentialHeader(sdkHeaders);
     expect(sdkHeaders).toMatchObject({
-      "X-OpenClaw-Copilot-Byok-Proxy-Token": "configured-value",
+      "X-Carapace-Copilot-Byok-Proxy-Token": "configured-value",
       "X-Trace": "test",
     });
 
@@ -367,7 +367,7 @@ describe("createCopilotByokProxy", () => {
             headers: expect.objectContaining({
               "accept-encoding": "identity",
               "api-key": "azure-key",
-              "x-openclaw-copilot-byok-proxy-token": "configured-value",
+              "x-carapace-copilot-byok-proxy-token": "configured-value",
               "x-trace": "test",
             }),
           }),

@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAIRealtimeTranscriptionProvider } from "./realtime-transcription-provider.js";
 
@@ -70,12 +70,12 @@ vi.mock("ws", () => ({
   default: FakeWebSocket,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth", () => ({
   isProviderAuthProfileConfigured: providerAuthMocks.isProviderAuthProfileConfigured,
   resolveProviderAuthProfileApiKey: providerAuthMocks.resolveProviderAuthProfileApiKey,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: ssrfMocks.fetchWithSsrFGuard,
 }));
 
@@ -188,7 +188,7 @@ describe("buildOpenAIRealtimeTranscriptionProvider", () => {
           openai: {
             language: "en",
             model: "gpt-4o-transcribe",
-            prompt: "expect OpenClaw product names",
+            prompt: "expect Carapace product names",
             silenceDurationMs: 900,
             vadThreshold: 0.45,
           },
@@ -199,7 +199,7 @@ describe("buildOpenAIRealtimeTranscriptionProvider", () => {
     expect(resolved).toEqual({
       language: "en",
       model: "gpt-4o-transcribe",
-      prompt: "expect OpenClaw product names",
+      prompt: "expect Carapace product names",
       silenceDurationMs: 900,
       vadThreshold: 0.45,
     });
@@ -404,7 +404,7 @@ describe("buildOpenAIRealtimeTranscriptionProvider", () => {
         apiKey: "sk-test", // pragma: allowlist secret
         language: "en",
         model: "gpt-4o-transcribe",
-        prompt: "expect OpenClaw product names",
+        prompt: "expect Carapace product names",
         silenceDurationMs: 900,
         vadThreshold: 0.45,
       },
@@ -429,7 +429,7 @@ describe("buildOpenAIRealtimeTranscriptionProvider", () => {
             transcription: {
               model: "gpt-4o-transcribe",
               language: "en",
-              prompt: "expect OpenClaw product names",
+              prompt: "expect Carapace product names",
             },
             turn_detection: {
               type: "server_vad",

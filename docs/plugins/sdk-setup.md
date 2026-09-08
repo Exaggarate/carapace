@@ -5,10 +5,10 @@ sidebarTitle: "Setup and config"
 read_when:
   - You are adding a setup wizard to a plugin
   - You need to understand setup-entry.ts vs index.ts
-  - You are defining plugin config schemas or package.json openclaw metadata
+  - You are defining plugin config schemas or package.json carapace metadata
 ---
 
-Reference for plugin packaging (`package.json` metadata), manifests (`openclaw.plugin.json`), setup entries, and config schemas.
+Reference for plugin packaging (`package.json` metadata), manifests (`carapace.plugin.json`), setup entries, and config schemas.
 
 <Tip>
 **Looking for a walkthrough?** The how-to guides cover packaging in context: [Channel plugins](/plugins/sdk-channel-plugins#step-1-package-and-manifest) and [Provider plugins](/plugins/sdk-provider-plugins#step-1-package-and-manifest).
@@ -16,16 +16,16 @@ Reference for plugin packaging (`package.json` metadata), manifests (`openclaw.p
 
 ## Package metadata
 
-Your `package.json` needs an `openclaw` field that tells the plugin system what your plugin provides:
+Your `package.json` needs an `carapace` field that tells the plugin system what your plugin provides:
 
 <Tabs>
   <Tab title="Channel plugin">
     ```json
     {
-      "name": "@myorg/openclaw-my-channel",
+      "name": "@myorg/carapace-my-channel",
       "version": "1.0.0",
       "type": "module",
-      "openclaw": {
+      "carapace": {
         "extensions": ["./index.ts"],
         "setupEntry": "./setup-entry.ts",
         "channel": {
@@ -38,25 +38,25 @@ Your `package.json` needs an `openclaw` field that tells the plugin system what 
     ```
   </Tab>
   <Tab title="Provider plugin / ClawHub baseline">
-    ```json openclaw-clawhub-package.json
+    ```json carapace-clawhub-package.json
     {
-      "name": "@myorg/openclaw-my-plugin",
+      "name": "@myorg/carapace-my-plugin",
       "version": "1.0.0",
       "type": "module",
       "dependencies": {
         "typebox": "1.3.18"
       },
       "peerDependencies": {
-        "openclaw": ">=2026.3.24-beta.2"
+        "carapace": ">=2026.3.24-beta.2"
       },
-      "openclaw": {
+      "carapace": {
         "extensions": ["./index.ts"],
         "compat": {
           "pluginApi": ">=2026.3.24-beta.2",
           "minGatewayVersion": "2026.3.24-beta.2"
         },
         "build": {
-          "openclawVersion": "2026.3.24-beta.2",
+          "carapaceVersion": "2026.3.24-beta.2",
           "pluginSdkVersion": "2026.3.24-beta.2"
         }
       }
@@ -69,13 +69,13 @@ Your `package.json` needs an `openclaw` field that tells the plugin system what 
 Publishing externally on ClawHub requires `compat` and `build`. Canonical publish snippets live in `docs/snippets/plugin-publish/`.
 </Note>
 
-### `openclaw` fields
+### `carapace` fields
 
 <ParamField path="extensions" type="string[]">
   Entry point files (relative to package root). Valid source entries for workspace and git checkout development.
 </ParamField>
 <ParamField path="runtimeExtensions" type="string[]">
-  Built JavaScript peers for `extensions`, preferred when OpenClaw loads an installed npm package. See [SDK entry points](/plugins/sdk-entrypoints) for the source/built resolution order.
+  Built JavaScript peers for `extensions`, preferred when Carapace loads an installed npm package. See [SDK entry points](/plugins/sdk-entrypoints) for the source/built resolution order.
 </ParamField>
 <ParamField path="setupEntry" type="string">
   Lightweight setup-only entry (optional).
@@ -100,19 +100,19 @@ Publishing externally on ClawHub requires `compat` and `build`. Canonical publis
 </ParamField>
 
 <Note>
-Provider ids (`providers: string[]`) are manifest metadata, not package metadata. Declare them in `openclaw.plugin.json`, not here — see [Plugin manifest](/plugins/manifest).
+Provider ids (`providers: string[]`) are manifest metadata, not package metadata. Declare them in `carapace.plugin.json`, not here — see [Plugin manifest](/plugins/manifest).
 </Note>
 
-### `openclaw.channel`
+### `carapace.channel`
 
-`openclaw.channel` is cheap package metadata for channel discovery and setup surfaces before runtime loads.
+`carapace.channel` is cheap package metadata for channel discovery and setup surfaces before runtime loads.
 
 ### Channel-owned setup fields
 
-Channel plugins should define setup fields once in runtime code with `defineChannelSetupContract(...)` and publish the matching serializable projection under `openclaw.channel.setup.fields`. The runtime definition infers the plugin-local input type, parses both guided and non-interactive values, and keeps channel-specific keys out of core types. Package metadata lets `openclaw channels add <channel-id> --help` and `openclaw channels add --channel <channel-id> --help` discover only the selected channel's options without loading the plugin.
+Channel plugins should define setup fields once in runtime code with `defineChannelSetupContract(...)` and publish the matching serializable projection under `carapace.channel.setup.fields`. The runtime definition infers the plugin-local input type, parses both guided and non-interactive values, and keeps channel-specific keys out of core types. Package metadata lets `carapace channels add <channel-id> --help` and `carapace channels add --channel <channel-id> --help` discover only the selected channel's options without loading the plugin.
 
 ```ts
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "carapace/plugin-sdk/channel-setup";
 
 export const setupContract = defineChannelSetupContract({
   fields: {
@@ -137,7 +137,7 @@ export const setupContract = defineChannelSetupContract({
 
 ```json
 {
-  "openclaw": {
+  "carapace": {
     "channel": {
       "id": "example",
       "setup": {
@@ -164,7 +164,7 @@ Supported field kinds are `string`, `boolean`, `integer`, `string-list`, and `ch
 
 For a boolean `useEnv` field, set `envVars` to the static environment variable names required by the plugin runtime. Non-interactive channel setup then rejects `--use-env` before writing config when any declared variable is empty. Set `envVarMode: "any"` when one variable from the list is sufficient, such as an inline credential or file-path alternative. Omitting `envVars` preserves the plugin's existing validation behavior.
 
-The released `setup`/`ChannelSetupInput` adapter stays available for existing external plugins. New plugins should expose `setupContract`; OpenClaw always prefers it when both are present.
+The released `setup`/`ChannelSetupInput` adapter stays available for existing external plugins. New plugins should expose `setupContract`; Carapace always prefers it when both are present.
 
 | Field                                  | Type       | What it means                                                                 |
 | -------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
@@ -193,7 +193,7 @@ Example:
 
 ```json
 {
-  "openclaw": {
+  "carapace": {
     "channel": {
       "id": "my-channel",
       "label": "My Channel",
@@ -225,9 +225,9 @@ Example:
 - `setup`: include the channel in interactive setup/configure pickers
 - `docs`: mark the channel as public-facing in docs/navigation surfaces
 
-### `openclaw.install`
+### `carapace.install`
 
-`openclaw.install` is package metadata, not manifest metadata.
+`carapace.install` is package metadata, not manifest metadata.
 
 | Field                        | Type                                | What it means                                                                     |
 | ---------------------------- | ----------------------------------- | --------------------------------------------------------------------------------- |
@@ -235,14 +235,14 @@ Example:
 | `npmSpec`                    | `string`                            | Canonical npm spec for install/update fallback flows.                             |
 | `localPath`                  | `string`                            | Local development or bundled install path.                                        |
 | `defaultChoice`              | `"clawhub"` \| `"npm"` \| `"local"` | Preferred install source when multiple sources are available.                     |
-| `minHostVersion`             | `string`                            | Minimum supported OpenClaw version, `>=x.y.z` or `>=x.y.z-prerelease`.            |
+| `minHostVersion`             | `string`                            | Minimum supported Carapace version, `>=x.y.z` or `>=x.y.z-prerelease`.            |
 | `expectedIntegrity`          | `string`                            | Expected npm dist integrity string, usually `sha512-...`, for pinned installs.    |
 | `allowInvalidConfigRecovery` | `boolean`                           | Lets bundled-plugin reinstall flows recover from specific stale-config failures.  |
 | `requiredPlatformPackages`   | `string[]`                          | Required platform-specific npm aliases verified during npm install.               |
 
 <AccordionGroup>
   <Accordion title="Onboarding behavior">
-    Interactive onboarding uses `openclaw.install` for install-on-demand surfaces: if your plugin exposes provider auth choices or channel setup/catalog metadata before runtime loads, onboarding can prompt for ClawHub, npm, or local install, install or enable the plugin, then continue the selected flow. ClawHub choices use `clawhubSpec` and are preferred when present; npm choices require trusted catalog metadata with a registry `npmSpec` (exact versions and `expectedIntegrity` are optional pins, enforced on install/update when set). Keep "what to show" in `openclaw.plugin.json` and "how to install it" in `package.json`.
+    Interactive onboarding uses `carapace.install` for install-on-demand surfaces: if your plugin exposes provider auth choices or channel setup/catalog metadata before runtime loads, onboarding can prompt for ClawHub, npm, or local install, install or enable the plugin, then continue the selected flow. ClawHub choices use `clawhubSpec` and are preferred when present; npm choices require trusted catalog metadata with a registry `npmSpec` (exact versions and `expectedIntegrity` are optional pins, enforced on install/update when set). Keep "what to show" in `carapace.plugin.json` and "how to install it" in `package.json`.
   </Accordion>
   <Accordion title="minHostVersion enforcement">
     If `minHostVersion` is set, install and non-bundled manifest-registry loading both enforce it. Older hosts skip external plugins; invalid version strings are rejected. Bundled source plugins are assumed to be co-versioned with the host checkout.
@@ -252,9 +252,9 @@ Example:
 
     ```json
     {
-      "openclaw": {
+      "carapace": {
         "install": {
-          "npmSpec": "@wecom/wecom-openclaw-plugin@1.2.3",
+          "npmSpec": "@wecom/wecom-carapace-plugin@1.2.3",
           "expectedIntegrity": "sha512-REPLACE_WITH_NPM_DIST_INTEGRITY",
           "defaultChoice": "npm"
         }
@@ -264,7 +264,7 @@ Example:
 
   </Accordion>
   <Accordion title="allowInvalidConfigRecovery scope">
-    `allowInvalidConfigRecovery` is not a general bypass for broken configs. It is narrow bundled-plugin recovery only, letting reinstall/setup repair known upgrade leftovers like a missing bundled plugin path or a stale `channels.<id>` entry for that same plugin. If config is broken for unrelated reasons, install still fails closed and tells the operator to run `openclaw doctor --fix`.
+    `allowInvalidConfigRecovery` is not a general bypass for broken configs. It is narrow bundled-plugin recovery only, letting reinstall/setup repair known upgrade leftovers like a missing bundled plugin path or a stale `channels.<id>` entry for that same plugin. If config is broken for unrelated reasons, install still fails closed and tells the operator to run `carapace doctor --fix`.
   </Accordion>
 </AccordionGroup>
 
@@ -274,13 +274,13 @@ If your setup/full entry registers gateway RPC methods, keep them on a plugin-sp
 
 ## Plugin manifest
 
-Every native plugin must ship an `openclaw.plugin.json` in the package root. OpenClaw uses this to validate config without executing plugin code.
+Every native plugin must ship an `carapace.plugin.json` in the package root. Carapace uses this to validate config without executing plugin code.
 
 ```json
 {
   "id": "my-plugin",
   "name": "My Plugin",
-  "description": "Adds My Plugin capabilities to OpenClaw",
+  "description": "Adds My Plugin capabilities to Carapace",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
@@ -337,11 +337,11 @@ clawhub package publish your-org/your-plugin
 
 ## Setup entry
 
-`setup-entry.ts` is a lightweight alternative to `index.ts` that OpenClaw loads when it only needs setup surfaces (onboarding, config repair, disabled channel inspection):
+`setup-entry.ts` is a lightweight alternative to `index.ts` that Carapace loads when it only needs setup surfaces (onboarding, config repair, disabled channel inspection):
 
 ```typescript
 // setup-entry.ts
-import { defineSetupPluginEntry } from "openclaw/plugin-sdk/channel-core";
+import { defineSetupPluginEntry } from "carapace/plugin-sdk/channel-core";
 import { myChannelPlugin } from "./src/channel.js";
 
 export default defineSetupPluginEntry(myChannelPlugin);
@@ -349,10 +349,10 @@ export default defineSetupPluginEntry(myChannelPlugin);
 
 This avoids loading heavy runtime code (crypto libraries, CLI registrations, background services) during setup flows.
 
-Bundled workspace channels that keep setup-safe exports in sidecar modules can use `defineBundledChannelSetupEntry(...)` from `openclaw/plugin-sdk/channel-entry-contract` instead of `defineSetupPluginEntry(...)`. That bundled contract also supports an optional `runtime` export so setup-time runtime wiring can stay lightweight and explicit.
+Bundled workspace channels that keep setup-safe exports in sidecar modules can use `defineBundledChannelSetupEntry(...)` from `carapace/plugin-sdk/channel-entry-contract` instead of `defineSetupPluginEntry(...)`. That bundled contract also supports an optional `runtime` export so setup-time runtime wiring can stay lightweight and explicit.
 
 <AccordionGroup>
-  <Accordion title="When OpenClaw uses setupEntry instead of the full entry">
+  <Accordion title="When Carapace uses setupEntry instead of the full entry">
     - The channel is disabled but needs setup/onboarding surfaces.
     - The channel is enabled but unconfigured.
 
@@ -384,7 +384,7 @@ For hot setup-only paths, prefer the narrow setup helper seams over the broader 
 
 Use the broader `plugin-sdk/setup` seam when you want the full shared setup toolbox, including config-patch helpers such as `moveSingleAccountChannelSectionToDefaultAccount(...)`.
 
-Use `createSetupTranslator(...)` for fixed setup wizard copy. It uses the first nonblank value from `OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES`, and `LANG`, in that order, then falls back to English. Set `OPENCLAW_LOCALE=en` for an explicit English override. Keep plugin-specific setup text in plugin-owned code and use shared catalog keys only for common setup labels, status text, and official bundled plugin setup copy.
+Use `createSetupTranslator(...)` for fixed setup wizard copy. It uses the first nonblank value from `CARAPACE_LOCALE`, `LC_ALL`, `LC_MESSAGES`, and `LANG`, in that order, then falls back to English. Set `CARAPACE_LOCALE=en` for an explicit English override. Keep plugin-specific setup text in plugin-owned code and use shared catalog keys only for common setup labels, status text, and official bundled plugin setup copy.
 
 The setup patch adapters stay hot-path safe on import. Their bundled single-account promotion contract-surface lookup is lazy, so importing `plugin-sdk/setup-runtime` does not eagerly load bundled contract-surface discovery before the adapter is actually used.
 
@@ -398,7 +398,7 @@ index signature. Each plugin must declare and narrow its own setup fields or
 validate them with a plugin-owned schema at the adapter boundary:
 
 ```typescript
-import type { ChannelSetupAdapter, ChannelSetupInput } from "openclaw/plugin-sdk/channel-setup";
+import type { ChannelSetupAdapter, ChannelSetupInput } from "carapace/plugin-sdk/channel-setup";
 
 type AcmeSetupInput = ChannelSetupInput & {
   workspaceId?: string;
@@ -444,9 +444,9 @@ Every channel plugin can extend or narrow that promotion through its setup adapt
 
 The presence of `singleAccountKeysToMove` marks the promotion contract complete. Declare the field even when it is an empty array to opt out of legacy key promotion; an empty array does not suppress common fields. Adapters that omit the field retain a reader-backed pre-declaration promotion tier for already-published plugins. The 2026-07-22 registry sweep removed 23 keys with no published dependents and retained six common keys plus the setup-only `rooms` key. Each retained key is deleted as soon as its published readers migrate to declarations; no version boundary is required.
 
-Declare `openclaw.setupFeatures.configPromotion: true` in the plugin package manifest when doctor must load these declarations from the lightweight setup entry. Doctor discovers that entry through the plugin manifest for both bundled and installed plugins, including disabled plugins. The setup-only plugin surface and the full channel plugin must expose the same declarations.
+Declare `carapace.setupFeatures.configPromotion: true` in the plugin package manifest when doctor must load these declarations from the lightweight setup entry. Doctor discovers that entry through the plugin manifest for both bundled and installed plugins, including disabled plugins. The setup-only plugin surface and the full channel plugin must expose the same declarations.
 
-For a plugin-owned root layout, also declare `openclaw.setupFeatures.configPromotion: "preserve-root"` in `package.json`. Doctor reads this static declaration for installed and bundled plugins, including disabled plugins, without executing their runtime. Omitting the declaration or using `false` does not opt out of promotion. The runtime declaration belongs on the adapter passed to `defineChannelSetupContract`, and covers shared CLI, declarative wizard, and policy-writer promotion. It does not change helpers that explicitly migrate a base name; use a selected-account writer when the root remains an implicit identity. Buzz is an example of this layout.
+For a plugin-owned root layout, also declare `carapace.setupFeatures.configPromotion: "preserve-root"` in `package.json`. Doctor reads this static declaration for installed and bundled plugins, including disabled plugins, without executing their runtime. Omitting the declaration or using `false` does not opt out of promotion. The runtime declaration belongs on the adapter passed to `defineChannelSetupContract`, and covers shared CLI, declarative wizard, and policy-writer promotion. It does not change helpers that explicitly migrate a base name; use a selected-account writer when the root remains an implicit identity. Buzz is an example of this layout.
 
 When calling `moveSingleAccountChannelSectionToDefaultAccount(...)` with an already resolved plugin, pass its setup adapter as `setupSurface`. Caller-supplied setup surfaces take precedence over loaded and bundled lookup, which keeps scoped or setup-only plugins independent of global registration.
 
@@ -493,7 +493,7 @@ Use `buildChannelConfigSchema` to convert a Zod schema into the `ChannelConfigSc
 
 ```typescript
 import { z } from "zod";
-import { buildChannelConfigSchema } from "openclaw/plugin-sdk/channel-config-schema";
+import { buildChannelConfigSchema } from "carapace/plugin-sdk/channel-config-schema";
 
 const accountSchema = z.object({
   token: z.string().optional(),
@@ -505,11 +505,11 @@ const accountSchema = z.object({
 const configSchema = buildChannelConfigSchema(accountSchema);
 ```
 
-If you already author the contract as JSON Schema or TypeBox, use the direct helper so OpenClaw can skip Zod-to-JSON-Schema conversion on metadata paths:
+If you already author the contract as JSON Schema or TypeBox, use the direct helper so Carapace can skip Zod-to-JSON-Schema conversion on metadata paths:
 
 ```typescript
 import { Type } from "typebox";
-import { buildJsonChannelConfigSchema } from "openclaw/plugin-sdk/channel-config-schema";
+import { buildJsonChannelConfigSchema } from "carapace/plugin-sdk/channel-config-schema";
 
 const configSchema = buildJsonChannelConfigSchema(
   Type.Object({
@@ -519,14 +519,14 @@ const configSchema = buildJsonChannelConfigSchema(
 );
 ```
 
-For third-party plugins, the cold-path contract is still the plugin manifest: mirror the generated JSON Schema into `openclaw.plugin.json#channelConfigs` so config schema, setup, and UI surfaces can inspect `channels.<id>` without loading runtime code.
+For third-party plugins, the cold-path contract is still the plugin manifest: mirror the generated JSON Schema into `carapace.plugin.json#channelConfigs` so config schema, setup, and UI surfaces can inspect `channels.<id>` without loading runtime code.
 
 ## Setup wizards
 
-Channel plugins can provide interactive setup wizards for `openclaw onboard`. The wizard is a `ChannelSetupWizard` object on the `ChannelPlugin`:
+Channel plugins can provide interactive setup wizards for `carapace onboard`. The wizard is a `ChannelSetupWizard` object on the `ChannelPlugin`:
 
 ```typescript
-import type { ChannelSetupWizard } from "openclaw/plugin-sdk/channel-setup";
+import type { ChannelSetupWizard } from "carapace/plugin-sdk/channel-setup";
 
 const setupWizard: ChannelSetupWizard = {
   channel: "my-channel",
@@ -560,21 +560,21 @@ const setupWizard: ChannelSetupWizard = {
 
 <AccordionGroup>
   <Accordion title="Shared allowFrom prompts">
-    For DM allowlist prompts that only need the standard `note -> prompt -> parse -> merge -> patch` flow, prefer the shared setup helpers from `openclaw/plugin-sdk/setup`: `createPromptParsedAllowFromForAccount(...)` and `createTopLevelChannelParsedAllowFromPrompt(...)`.
+    For DM allowlist prompts that only need the standard `note -> prompt -> parse -> merge -> patch` flow, prefer the shared setup helpers from `carapace/plugin-sdk/setup`: `createPromptParsedAllowFromForAccount(...)` and `createTopLevelChannelParsedAllowFromPrompt(...)`.
   </Accordion>
   <Accordion title="Standard channel setup status">
-    For channel setup status blocks that only vary by labels, scores, and optional extra lines, prefer `createStandardChannelSetupStatus(...)` from `openclaw/plugin-sdk/setup` instead of hand-rolling the same `status` object in each plugin.
+    For channel setup status blocks that only vary by labels, scores, and optional extra lines, prefer `createStandardChannelSetupStatus(...)` from `carapace/plugin-sdk/setup` instead of hand-rolling the same `status` object in each plugin.
   </Accordion>
   <Accordion title="Optional channel setup surface">
-    For optional setup surfaces that should only appear in certain contexts, use `createOptionalChannelSetupSurface` from `openclaw/plugin-sdk/channel-setup`:
+    For optional setup surfaces that should only appear in certain contexts, use `createOptionalChannelSetupSurface` from `carapace/plugin-sdk/channel-setup`:
 
     ```typescript
-    import { createOptionalChannelSetupSurface } from "openclaw/plugin-sdk/channel-setup";
+    import { createOptionalChannelSetupSurface } from "carapace/plugin-sdk/channel-setup";
 
     const setupSurface = createOptionalChannelSetupSurface({
       channel: "my-channel",
       label: "My Channel",
-      npmSpec: "@myorg/openclaw-my-channel",
+      npmSpec: "@myorg/carapace-my-channel",
       docsPath: "/channels/my-channel",
     });
     // Returns { setupAdapter, setupWizard }
@@ -603,15 +603,15 @@ const setupWizard: ChannelSetupWizard = {
 <Tabs>
   <Tab title="npm">
     ```bash
-    openclaw plugins install @myorg/openclaw-my-plugin
+    carapace plugins install @myorg/carapace-my-plugin
     ```
 
-    Bare package specs install from npm during the launch cutover, unless the name matches a bundled or official plugin id, in which case OpenClaw uses that local/official copy instead. Use `clawhub:`, `npm:`, `git:`, or `npm-pack:` for deterministic source selection — see [Manage plugins](/plugins/manage-plugins).
+    Bare package specs install from npm during the launch cutover, unless the name matches a bundled or official plugin id, in which case Carapace uses that local/official copy instead. Use `clawhub:`, `npm:`, `git:`, or `npm-pack:` for deterministic source selection — see [Manage plugins](/plugins/manage-plugins).
 
   </Tab>
   <Tab title="ClawHub only">
     ```bash
-    openclaw plugins install clawhub:@myorg/openclaw-my-plugin
+    carapace plugins install clawhub:@myorg/carapace-my-plugin
     ```
   </Tab>
   <Tab title="npm package spec">
@@ -619,7 +619,7 @@ const setupWizard: ChannelSetupWizard = {
     direct npm install path during migration:
 
     ```bash
-    openclaw plugins install npm:@myorg/openclaw-my-plugin
+    carapace plugins install npm:@myorg/carapace-my-plugin
     ```
 
   </Tab>
@@ -628,14 +628,14 @@ const setupWizard: ChannelSetupWizard = {
 **In-repo plugins:** place under the bundled plugin workspace tree; they are automatically discovered during build.
 
 <Info>
-For npm-sourced installs, `openclaw plugins install` installs the package into a per-plugin project under `~/.openclaw/npm/projects` with lifecycle scripts disabled (`--ignore-scripts`). Keep plugin dependency trees pure JS/TS and avoid packages that require `postinstall` builds.
+For npm-sourced installs, `carapace plugins install` installs the package into a per-plugin project under `~/.carapace/npm/projects` with lifecycle scripts disabled (`--ignore-scripts`). Keep plugin dependency trees pure JS/TS and avoid packages that require `postinstall` builds.
 </Info>
 
 <Note>
 Gateway startup does not install plugin dependencies. npm/git/ClawHub install flows own dependency convergence; local plugins must already have their dependencies installed.
 </Note>
 
-Bundled package metadata is explicit, not inferred from built JavaScript at gateway startup. Runtime dependencies belong in the plugin package that owns them; packaged OpenClaw startup never repairs or mirrors plugin dependencies.
+Bundled package metadata is explicit, not inferred from built JavaScript at gateway startup. Runtime dependencies belong in the plugin package that owns them; packaged Carapace startup never repairs or mirrors plugin dependencies.
 
 ## Related
 

@@ -15,16 +15,16 @@ import {
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import * as pluginHostState from "../../plugins/host-hook-state.js";
 import { recordAgentProvenance } from "../../state/agent-provenance.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawRegisteredAgentDatabases,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceRegisteredAgentDatabases,
+  resolveCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { testState } from "../test-helpers.js";
 import {
   getGatewayConfigModule,
@@ -46,18 +46,18 @@ const UNKNOWN_AGENT_ID = "ghost";
 const UNKNOWN_SESSION_KEY = `agent:${UNKNOWN_AGENT_ID}:zzz`;
 
 function requireStateDir(): string {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!stateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required");
+    throw new Error("CARAPACE_STATE_DIR is required");
   }
   return stateDir;
 }
 
 function expectAgentStoreAbsent(agentId: string): void {
-  const env = { OPENCLAW_STATE_DIR: requireStateDir() };
-  expect(fs.existsSync(path.join(env.OPENCLAW_STATE_DIR, "agents", agentId))).toBe(false);
-  expect(fs.existsSync(resolveOpenClawAgentSqlitePath({ agentId, env }))).toBe(false);
-  expect(listOpenClawRegisteredAgentDatabases({ env }).map((entry) => entry.agentId)).not.toContain(
+  const env = { CARAPACE_STATE_DIR: requireStateDir() };
+  expect(fs.existsSync(path.join(env.CARAPACE_STATE_DIR, "agents", agentId))).toBe(false);
+  expect(fs.existsSync(resolveCarapaceAgentSqlitePath({ agentId, env }))).toBe(false);
+  expect(listCarapaceRegisteredAgentDatabases({ env }).map((entry) => entry.agentId)).not.toContain(
     agentId,
   );
 }
@@ -116,7 +116,7 @@ async function setAgentsConfig(agentsConfig: Record<string, unknown> | undefined
 }
 
 test("agents.list includes system rows only when negotiated", async () => {
-  fs.mkdirSync(path.join(requireStateDir(), "agents", "openclaw"), { recursive: true });
+  fs.mkdirSync(path.join(requireStateDir(), "agents", "carapace"), { recursive: true });
   testState.agentConfig = { model: { primary: "local/shared-reasoner" } };
   const readPreparedGatewayModelCatalog = vi.fn(async () => ({
     entries: [
@@ -131,10 +131,10 @@ test("agents.list includes system rows only when negotiated", async () => {
 
   expect(await listAgentIdsViaRpc(false, { readPreparedGatewayModelCatalog })).toEqual(["main"]);
   const result = await listAgentsViaRpc(true, { readPreparedGatewayModelCatalog });
-  expect(result.agents.map((agent) => agent.id)).toEqual(["main", "openclaw"]);
+  expect(result.agents.map((agent) => agent.id)).toEqual(["main", "carapace"]);
   expect(
     result.agents
-      .find((agent) => agent.id === "openclaw")
+      .find((agent) => agent.id === "carapace")
       ?.thinkingLevels?.map((level) => level.id),
   ).toEqual(["off"]);
   expect(readPreparedGatewayModelCatalog.mock.calls).toEqual([
@@ -250,8 +250,8 @@ afterEach(() => {
   testState.agentConfig = undefined;
   testState.sessionStorePath = undefined;
   testState.sessionConfig = undefined;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function configureFixedSessionStore(label = "default"): Promise<string> {
@@ -524,8 +524,8 @@ test("sessions.describe reads a pre-existing store after its agent is removed fr
     { sessionId: "session-ghost", updatedAt: 42 },
   );
   await setAgentsConfig({ list: [{ id: "main", default: true }] });
-  const registeredBefore = listOpenClawRegisteredAgentDatabases({
-    env: { OPENCLAW_STATE_DIR: requireStateDir() },
+  const registeredBefore = listCarapaceRegisteredAgentDatabases({
+    env: { CARAPACE_STATE_DIR: requireStateDir() },
   });
 
   const described = await directSessionReq<{ session: { key: string; sessionId: string } | null }>(
@@ -539,8 +539,8 @@ test("sessions.describe reads a pre-existing store after its agent is removed fr
   });
   expect(await listAgentIdsViaRpc()).toEqual(["main"]);
   expect(
-    listOpenClawRegisteredAgentDatabases({
-      env: { OPENCLAW_STATE_DIR: requireStateDir() },
+    listCarapaceRegisteredAgentDatabases({
+      env: { CARAPACE_STATE_DIR: requireStateDir() },
     }),
   ).toEqual(registeredBefore);
 });
@@ -713,17 +713,17 @@ test("session reads do not provision missing stores for default or configured ag
     expect(result).toMatchObject({ ok: true, payload: { session: null } });
     expect(
       fs.existsSync(
-        resolveOpenClawAgentSqlitePath({
+        resolveCarapaceAgentSqlitePath({
           agentId,
-          env: { OPENCLAW_STATE_DIR: requireStateDir() },
+          env: { CARAPACE_STATE_DIR: requireStateDir() },
         }),
       ),
     ).toBe(false);
   }
 
   expect(
-    listOpenClawRegisteredAgentDatabases({
-      env: { OPENCLAW_STATE_DIR: requireStateDir() },
+    listCarapaceRegisteredAgentDatabases({
+      env: { CARAPACE_STATE_DIR: requireStateDir() },
     })
       .map((entry) => entry.agentId)
       .filter((agentId) => agentId === "main" || agentId === "work"),
@@ -731,8 +731,8 @@ test("session reads do not provision missing stores for default or configured ag
 });
 
 test("searches rich displayed fields before selecting a page across visible agent stores", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
-    const config: OpenClawConfig = {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
+    const config: CarapaceConfig = {
       agents: {
         list: [
           { id: "main", default: true },

@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { indexedDB as fakeIndexedDB } from "fake-indexeddb";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { withFileLock } from "openclaw/plugin-sdk/file-lock";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { withFileLock } from "carapace/plugin-sdk/file-lock";
 import {
   MATRIX_IDB_SNAPSHOT_FILENAME,
   readMatrixIdbSnapshotJson,
@@ -14,7 +14,7 @@ import { LogService } from "./logger.js";
 
 // Advisory lock options for IDB snapshot file access. Without locking, the
 // gateway's periodic 60-second persist cycle and CLI crypto commands (e.g.
-// `openclaw matrix verify bootstrap`) can corrupt each other's state.
+// `carapace matrix verify bootstrap`) can corrupt each other's state.
 // Use a longer stale window than the generic 30s default because snapshot
 // restore and large crypto-store dumps can legitimately hold the lock for
 // longer, and reclaiming a live lock would reintroduce concurrent corruption.
@@ -35,13 +35,13 @@ type IdbDatabaseSnapshot = {
 type IdbPersistenceDiagnostic = {
   code: "matrix-idb-snapshot-requires-doctor";
   message: string;
-  remediation: "openclaw doctor --fix";
+  remediation: "carapace doctor --fix";
 };
 
 const LEGACY_SNAPSHOT_DIAGNOSTIC: IdbPersistenceDiagnostic = {
   code: "matrix-idb-snapshot-requires-doctor",
   message: "Matrix IndexedDB snapshot exists outside canonical SQLite state",
-  remediation: "openclaw doctor --fix",
+  remediation: "carapace doctor --fix",
 };
 
 class MatrixIdbSnapshotMigrationRequiredError extends Error {
@@ -253,7 +253,7 @@ async function restoreIndexedDatabases(snapshot: IdbDatabaseSnapshot[]): Promise
 
 function resolveDefaultIdbSnapshotPath(): string {
   const stateDir =
-    process.env.OPENCLAW_STATE_DIR || path.join(process.env.HOME || "/tmp", ".openclaw");
+    process.env.CARAPACE_STATE_DIR || path.join(process.env.HOME || "/tmp", ".carapace");
   return path.join(stateDir, "matrix", "crypto-idb-snapshot.json");
 }
 

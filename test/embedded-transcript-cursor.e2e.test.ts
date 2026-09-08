@@ -2,19 +2,19 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage } from "node:http";
 import path from "node:path";
-import { readSessionTranscriptRawDelta } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { readSessionTranscriptRawDelta } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   listSessionEntriesCore,
   loadSessionEntry,
 } from "../src/config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import { writeOpenAiResponsesText } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const TEST_TIMEOUT_MS = 180_000;
 const MODEL_REF = "cursor-settlement/cursor-settlement";
@@ -26,7 +26,7 @@ type MockModelServer = {
   close: () => Promise<void>;
 };
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const modelServers: MockModelServer[] = [];
 
 afterEach(async () => {
@@ -41,12 +41,12 @@ describe("embedded transcript cursor settlement", () => {
     async () => {
       const modelServer = await startMockModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "embedded-transcript-cursor",
         config: createTestConfig(modelServer.baseUrl),
         env: {
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       instances.push(instance);
@@ -118,14 +118,14 @@ describe("embedded transcript cursor settlement", () => {
   );
 });
 
-function createTestConfig(baseUrl: string): OpenClawConfig {
+function createTestConfig(baseUrl: string): CarapaceConfig {
   return {
     plugins: { slots: { memory: "none" } },
     agents: {
       defaults: {
         heartbeat: { every: "0m" },
         model: { primary: MODEL_REF },
-        models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+        models: { [MODEL_REF]: { agentRuntime: { id: "carapace" } } },
         skipBootstrap: true,
         skills: [],
       },
@@ -159,7 +159,7 @@ function createTestConfig(baseUrl: string): OpenClawConfig {
 
 async function runAgentTurn(
   client: Awaited<ReturnType<typeof connectGatewayClient>>,
-  instance: OpenClawTestInstance,
+  instance: CarapaceTestInstance,
   message: string,
 ): Promise<{ runId?: string; status?: string }> {
   const requestedRunId = randomUUID();

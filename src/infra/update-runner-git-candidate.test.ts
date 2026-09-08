@@ -135,19 +135,19 @@ describe("Git candidate activation", () => {
 
   beforeEach(async () => {
     directory = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-candidate-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-candidate-")),
     );
     root = path.join(directory, "checkout");
     remote = path.join(directory, "remote");
     await fs.mkdir(remote);
     await git(remote, "init", "--initial-branch=main");
-    await git(remote, "config", "user.name", "OpenClaw Test");
-    await git(remote, "config", "user.email", "openclaw@example.com");
+    await git(remote, "config", "user.name", "Carapace Test");
+    await git(remote, "config", "user.email", "carapace@example.com");
     await fs.writeFile(
       path.join(remote, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "2026.9.1", packageManager: "pnpm@12.0.0" }),
+      JSON.stringify({ name: "carapace", version: "2026.9.1", packageManager: "pnpm@12.0.0" }),
     );
-    await fs.writeFile(path.join(remote, "openclaw.mjs"), "export {};\n");
+    await fs.writeFile(path.join(remote, "carapace.mjs"), "export {};\n");
     await fs.mkdir(path.join(remote, "packages", "runtime"), { recursive: true });
     await fs.writeFile(
       path.join(remote, "packages", "runtime", "index.js"),
@@ -161,8 +161,8 @@ describe("Git candidate activation", () => {
     await git(remote, "commit", "-m", "base");
     beforeSha = await git(remote, "rev-parse", "HEAD");
     await git(directory, "clone", "--quiet", remote, root);
-    await git(root, "config", "user.name", "OpenClaw Test");
-    await git(root, "config", "user.email", "openclaw@example.com");
+    await git(root, "config", "user.name", "Carapace Test");
+    await git(root, "config", "user.email", "carapace@example.com");
     virtualStoreLayout = "node_modules/.pnpm";
     await writeRuntime(root, beforeSha, path.join(directory, "shared-store"), virtualStoreLayout);
     events = [];
@@ -237,7 +237,7 @@ describe("Git candidate activation", () => {
     const entries = await fs.readdir(root, { recursive: true });
     expect(
       entries.filter((entry) =>
-        /\.openclaw-update-[0-9a-f]{8}-[0-9a-f-]{27}\.tmp(?:\/|$)/u.test(entry),
+        /\.carapace-update-[0-9a-f]{8}-[0-9a-f-]{27}\.tmp(?:\/|$)/u.test(entry),
       ),
     ).toEqual([]);
   }
@@ -269,7 +269,7 @@ describe("Git candidate activation", () => {
   });
 
   it("does not exempt stale staging paths during initial admission", async () => {
-    const stale = path.join(root, "dist.openclaw-update-00000000-0000-0000-0000-000000000000.tmp");
+    const stale = path.join(root, "dist.carapace-update-00000000-0000-0000-0000-000000000000.tmp");
     await fs.mkdir(stale);
     await fs.writeFile(path.join(stale, "candidate"), "operator-owned");
     const result = await update();
@@ -292,9 +292,9 @@ describe("Git candidate activation", () => {
         ...(inspection ? { inspectGitTarget: async () => undefined } : {}),
         validateCandidate: async () => {
           if (mutation === "untracked") {
-            await fs.mkdir(path.join(root, "dist.openclaw-update-operator.tmp"));
+            await fs.mkdir(path.join(root, "dist.carapace-update-operator.tmp"));
             await fs.writeFile(
-              path.join(root, "dist.openclaw-update-operator.tmp", "keep.txt"),
+              path.join(root, "dist.carapace-update-operator.tmp", "keep.txt"),
               "keep this change",
             );
           } else if (mutation === "tracked") {
@@ -313,7 +313,7 @@ describe("Git candidate activation", () => {
       if (mutation === "untracked") {
         expect(
           await fs.readFile(
-            path.join(root, "dist.openclaw-update-operator.tmp", "keep.txt"),
+            path.join(root, "dist.carapace-update-operator.tmp", "keep.txt"),
             "utf8",
           ),
         ).toBe("keep this change");
@@ -355,7 +355,7 @@ describe("Git candidate activation", () => {
       await fs.writeFile(
         path.join(remote, "package.json"),
         JSON.stringify({
-          name: "openclaw",
+          name: "carapace",
           version: "2026.9.1",
           packageManager: `pnpm@${version}`,
         }),
@@ -375,8 +375,8 @@ describe("Git candidate activation", () => {
       ]) {
         vi.stubEnv(key, operatorStore);
       }
-      vi.stubEnv("OPENCLAW_UPDATE_PREFLIGHT_LINT", "1");
-      const candidateCommands = ["install", "build", "ui:build", "openclaw", "lint"];
+      vi.stubEnv("CARAPACE_UPDATE_PREFLIGHT_LINT", "1");
+      const candidateCommands = ["install", "build", "ui:build", "carapace", "lint"];
       const command = runCommand;
       runCommand = async (argv, options) => {
         if (argv[0] !== "pnpm") {
@@ -518,7 +518,7 @@ describe("Git candidate activation", () => {
       if (localCommit) {
         expect(await fs.readFile(path.join(root, "local.txt"), "utf8")).toBe("operator change\n");
         const committer = await git(root, "log", "-1", "--format=%cn <%ce>");
-        expect.soft(committer === "OpenClaw Test <openclaw@example.com>").toBe(true);
+        expect.soft(committer === "Carapace Test <carapace@example.com>").toBe(true);
       }
       await expectRuntime(root, current);
       const manifest: { virtualStoreDir: string } = JSON.parse(
@@ -657,7 +657,7 @@ describe("Git candidate activation", () => {
     "refuses activation when validation repairs %s source outside the selected commit",
     async (repairState) => {
       await fs.writeFile(
-        path.join(remote, "openclaw.mjs"),
+        path.join(remote, "carapace.mjs"),
         "throw new Error('broken launcher');\n",
       );
       const target = await advanceRemote();
@@ -665,10 +665,10 @@ describe("Git candidate activation", () => {
       const result = await update({
         devTarget: { mode: "detached", ref: target },
         validateCandidate: async (candidateRoot) => {
-          const launcher = path.join(candidateRoot, "openclaw.mjs");
+          const launcher = path.join(candidateRoot, "carapace.mjs");
           await fs.writeFile(launcher, "export {};\n");
           if (repairState !== "working") {
-            await git(candidateRoot, "add", "openclaw.mjs");
+            await git(candidateRoot, "add", "carapace.mjs");
           }
           if (repairState === "committed") {
             await git(candidateRoot, "commit", "-m", "repair launcher");
@@ -684,7 +684,7 @@ describe("Git candidate activation", () => {
       expect(result).toMatchObject({ status: "error", reason: "preflight-no-good-commit" });
       expect(stopped).toBe(false);
       expect(await git(root, "rev-parse", "HEAD")).toBe(beforeSha);
-      expect(await fs.readFile(path.join(root, "openclaw.mjs"), "utf8")).toBe("export {};\n");
+      expect(await fs.readFile(path.join(root, "carapace.mjs"), "utf8")).toBe("export {};\n");
       expect(await fs.readdir(path.join(root, ".artifacts"))).toEqual([]);
     },
   );

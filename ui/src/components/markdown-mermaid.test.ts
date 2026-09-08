@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { MermaidTransientError, renderMermaidSvg } from "@openclaw/mermaid-renderer";
+import { MermaidTransientError, renderMermaidSvg } from "@carapace/mermaid-renderer";
 import { html, nothing, render } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,13 +9,13 @@ import { copyToClipboard } from "../lib/clipboard.ts";
 import { mountMermaidBlocks } from "./markdown-mermaid.ts";
 import { toSanitizedMarkdownHtml } from "./markdown.ts";
 
-vi.mock("@openclaw/mermaid-renderer", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@openclaw/mermaid-renderer")>()),
+vi.mock("@carapace/mermaid-renderer", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@carapace/mermaid-renderer")>()),
   renderMermaidSvg: vi.fn(),
 }));
 vi.mock("../lib/clipboard.ts", () => ({ copyToClipboard: vi.fn() }));
 
-type MermaidElement = HTMLElementTagNameMap["openclaw-mermaid"];
+type MermaidElement = HTMLElementTagNameMap["carapace-mermaid"];
 const svg = '<svg xmlns="http://www.w3.org/2000/svg"><text>Rendered diagram</text></svg>';
 const renderSvg = vi.mocked(renderMermaidSvg);
 const copySource = vi.mocked(copyToClipboard);
@@ -36,7 +36,7 @@ async function mount(...sources: string[]) {
   const markdown = sources.map((value) => `\`\`\`mermaid\n${value}\`\`\``).join("\n\n");
   render(html`${unsafeHTML(toSanitizedMarkdownHtml(markdown))}`, container);
   mountMermaidBlocks(container);
-  const elements = [...container.querySelectorAll("openclaw-mermaid")];
+  const elements = [...container.querySelectorAll("carapace-mermaid")];
   expect(elements).toHaveLength(sources.length);
   await Promise.all(elements.map((element) => element.updateComplete));
   return { container, elements };

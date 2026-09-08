@@ -13,7 +13,7 @@ describe.runIf(
   const dirs = useAutoCleanupTempDirTracker(afterEach);
   it("retains literal shell arguments across scope placement and exec", async () => {
     const output = path.join(dirs.make("hosted-stop-scope-"), "argv");
-    const unit = `openclaw-stop-test-${randomUUID()}.scope`;
+    const unit = `carapace-stop-test-${randomUUID()}.scope`;
     const args = ["$@", "$$", "$HOME", "two words", "'\"; echo bad"];
     const executor = await prepareHostedStopExecutor({
       command: [

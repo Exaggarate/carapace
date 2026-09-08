@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { gunzipSync } from "node:zlib";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { sha256Hex } from "./crypto-digest.js";
 import { openNodeSqliteDatabase } from "./node-sqlite.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "./sqlite-number.js";
@@ -117,7 +117,7 @@ export function detectLegacyDebugProxyCaptureSidecar(
   const paths = resolveLegacyDebugProxyCapturePaths(stateDir);
   if (
     path.resolve(paths.sourcePath) ===
-    path.resolve(resolveOpenClawStateSqlitePath({ ...env, OPENCLAW_STATE_DIR: stateDir }))
+    path.resolve(resolveCarapaceStateSqlitePath({ ...env, CARAPACE_STATE_DIR: stateDir }))
   ) {
     return { ...paths, hasLegacy: false };
   }
@@ -425,7 +425,7 @@ export function migrateLegacyDebugProxyCaptureSidecar(params: {
   }
 
   try {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         const selectBlob = db.prepare(
           `SELECT encoding, size_bytes AS sizeBytes, sha256, data
@@ -543,7 +543,7 @@ export function migrateLegacyDebugProxyCaptureSidecar(params: {
           }
         }
       },
-      { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } },
+      { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } },
     );
     changes.push(
       `Migrated ${legacy.sessions.length} debug proxy capture ${legacy.sessions.length === 1 ? "session" : "sessions"}, ${legacy.events.length} ${legacy.events.length === 1 ? "event" : "events"}, and ${legacy.blobs.length} ${legacy.blobs.length === 1 ? "blob" : "blobs"} → shared SQLite state`,

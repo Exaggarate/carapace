@@ -1,4 +1,4 @@
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 /**
  * Session listing command.
  *
@@ -8,7 +8,7 @@ import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { getTerminalTableWidth, renderTable } from "../../packages/terminal-core/src/table.js";
 import { colorize, isRich, theme } from "../../packages/terminal-core/src/theme.js";
@@ -29,7 +29,7 @@ import { resolveProjectedSessionContextTokens } from "../config/sessions/context
 import { listSessionEntriesReadOnly } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveStoredSessionKeyForAgentStore } from "../gateway/session-store-key.js";
 import { info } from "../globals.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
@@ -159,7 +159,7 @@ const colorByPct = (label: string, pct: number | null, rich: boolean) => {
   return theme.muted(label);
 };
 
-// Matches `openclaw status` semantics: show the recorded total whenever one
+// Matches `carapace status` semantics: show the recorded total whenever one
 // exists, and withhold only the percentage when freshness provenance is missing.
 const formatTokensCell = (
   total: number | undefined,
@@ -197,14 +197,14 @@ const formatKindCell = (kind: SessionRow["kind"], rich: boolean) => {
 };
 
 function resolveSessionRuntimeLabel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry;
   agentRuntime: ReturnType<typeof resolveModelAgentRuntimeMetadata>;
   modelProvider: string;
   classifyCliProvider: CliProviderClassifier;
 }): string {
   const id = normalizeOptionalLowercaseString(params.agentRuntime.id);
-  const resolvedHarness = id && id !== "openclaw" && id !== "auto" ? id : undefined;
+  const resolvedHarness = id && id !== "carapace" && id !== "auto" ? id : undefined;
   return resolveAgentRuntimeLabel({
     config: params.cfg,
     sessionEntry: params.entry,
@@ -249,7 +249,7 @@ function stripChannelRecipientPrefix(
 
 function resolveDisplayRuntimePolicySessionKey(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   entry: SessionEntry;
 }): string | undefined {

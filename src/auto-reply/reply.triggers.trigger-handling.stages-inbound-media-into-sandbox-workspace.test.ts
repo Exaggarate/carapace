@@ -56,7 +56,7 @@ async function setupSandboxWorkspace(home: string): Promise<{
   sandboxDir: string;
 }> {
   const cfg = createSandboxMediaStageConfig(home);
-  const workspaceDir = join(home, "openclaw");
+  const workspaceDir = join(home, "carapace");
   const sandboxDir = join(home, "sandboxes", "session");
   await fs.mkdir(sandboxDir, { recursive: true });
   sandboxMocks.ensureSandboxWorkspaceForSession.mockResolvedValue({
@@ -71,7 +71,7 @@ async function writeInboundMedia(
   fileName: string,
   payload: string | Buffer,
 ): Promise<string> {
-  const inboundDir = join(home, ".openclaw", "media", "inbound");
+  const inboundDir = join(home, ".carapace", "media", "inbound");
   await fs.mkdir(inboundDir, { recursive: true });
   const mediaPath = join(inboundDir, fileName);
   await fs.writeFile(mediaPath, payload);
@@ -80,10 +80,10 @@ async function writeInboundMedia(
 
 describe("stageSandboxMedia", () => {
   it("leaves no staged input directory when an owned source is missing", async () => {
-    await withSandboxMediaTempHome("openclaw-staging-missing-", async (home) => {
+    await withSandboxMediaTempHome("carapace-staging-missing-", async (home) => {
       sandboxMocks.ensureSandboxWorkspaceForSession.mockResolvedValue(null);
       const cfg = createSandboxMediaStageConfig(home);
-      const workspaceDir = join(home, "openclaw");
+      const workspaceDir = join(home, "carapace");
       await fs.mkdir(workspaceDir, { recursive: true });
       const projectFile = join(workspaceDir, "keep.txt");
       await fs.writeFile(projectFile, "existing project file");
@@ -109,7 +109,7 @@ describe("stageSandboxMedia", () => {
   });
 
   it("stages global-session media with the prepared agent owner", async () => {
-    await withSandboxMediaTempHome("openclaw-staging-global-", async (home) => {
+    await withSandboxMediaTempHome("carapace-staging-global-", async (home) => {
       const { ensureSandboxWorkspaceForSession } = await vi.importActual<
         typeof import("../agents/sandbox/context.js")
       >("../agents/sandbox/context.js");
@@ -136,7 +136,7 @@ describe("stageSandboxMedia", () => {
   });
 
   it("stages managed inbound media URIs into the sandbox workspace", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
       const fileName = "report.pdf";
       await writeInboundMedia(home, fileName, "pdf-bytes");
@@ -154,7 +154,7 @@ describe("stageSandboxMedia", () => {
       });
 
       const stagedPath = result.staged.get(0)!;
-      expect(stagedPath).toMatch(/^media\/inbound\/openclaw-staged-[0-9a-f-]+\/input-/);
+      expect(stagedPath).toMatch(/^media\/inbound\/carapace-staged-[0-9a-f-]+\/input-/);
       expect(result.staged.get(0)).toBe(stagedPath);
       expect(ctx.media?.[0]?.path).toBe(stagedPath);
       expect(sessionCtx.media?.[0]?.path).toBe(stagedPath);
@@ -168,7 +168,7 @@ describe("stageSandboxMedia", () => {
   });
 
   it("maps a staged upload handle to its exact private input path", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const { cfg, workspaceDir } = await setupSandboxWorkspace(home);
       const fileName = "file_upload.jpg";
       await writeInboundMedia(home, fileName, "jpeg-bytes");
@@ -194,9 +194,9 @@ describe("stageSandboxMedia", () => {
   });
 
   it("keeps host-staged inbound images available to native vision", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const cfg = createSandboxMediaStageConfig(home);
-      const workspaceDir = join(home, "openclaw");
+      const workspaceDir = join(home, "carapace");
       sandboxMocks.ensureSandboxWorkspaceForSession.mockResolvedValue(null);
       const fileName = "host-photo.png";
       await writeInboundMedia(home, fileName, "host-image-bytes");
@@ -219,7 +219,7 @@ describe("stageSandboxMedia", () => {
       const stagedPath = ctx.media?.[0]?.path ?? "";
       const stagedRelativePath = path.relative(workspaceDir, stagedPath).replaceAll(path.sep, "/");
       expect(stagedRelativePath).toMatch(
-        new RegExp(`^media/inbound/openclaw-staged-[0-9a-f-]+/input-${fileName}$`),
+        new RegExp(`^media/inbound/carapace-staged-[0-9a-f-]+/input-${fileName}$`),
       );
       expect(result.staged.get(0)).toBe(stagedPath);
       expect(sessionCtx.media?.[0]?.path).toBe(stagedPath);
@@ -273,7 +273,7 @@ describe("stageSandboxMedia", () => {
   });
 
   it("stages allowed media and blocks unsafe paths", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
 
       {
@@ -290,7 +290,7 @@ describe("stageSandboxMedia", () => {
 
         const stagedPath = ctx.media?.[0]?.path ?? "";
         expect(stagedPath).toMatch(
-          /^media\/inbound\/openclaw-staged-[0-9a-f-]+\/input-photo\.jpg$/,
+          /^media\/inbound\/carapace-staged-[0-9a-f-]+\/input-photo\.jpg$/,
         );
         expect(ctx.media?.[0]?.path).toBe(stagedPath);
         expect(sessionCtx.media?.[0]?.path).toBe(stagedPath);
@@ -354,9 +354,9 @@ describe("stageSandboxMedia", () => {
       rewrite: (value: string) => value.replace(/^file:\/\/\//u, "FILE:/"),
     },
   ])("stages $label local file URLs from the media root", async ({ rewrite }) => {
-    await withSandboxMediaTempHome("openclaw-staging-file-url-", async (home) => {
+    await withSandboxMediaTempHome("carapace-staging-file-url-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
-      const sourceDir = join(home, ".openclaw", "media", "cache");
+      const sourceDir = join(home, ".carapace", "media", "cache");
       const fileName = "café photo.png";
       const sourcePath = join(sourceDir, fileName);
       await fs.mkdir(sourceDir, { recursive: true });
@@ -373,7 +373,7 @@ describe("stageSandboxMedia", () => {
       });
 
       const stagedPath = result.staged.get(0)!;
-      expect(stagedPath).toMatch(/^media\/inbound\/openclaw-staged-[0-9a-f-]+\/input-/);
+      expect(stagedPath).toMatch(/^media\/inbound\/carapace-staged-[0-9a-f-]+\/input-/);
       expect(result.staged).toEqual(new Map([[0, stagedPath]]));
       expect(ctx.media?.[0]).toMatchObject({ path: stagedPath, workspaceDir: sandboxDir });
       expect(sessionCtx.media).toEqual(ctx.media);
@@ -389,7 +389,7 @@ describe("stageSandboxMedia", () => {
     "FILE:/C:/media%5Cphoto.png",
     "FILE:////server/share/photo.png",
   ])("rejects unsafe uppercase file URL before staging: %s", async (sourceUrl) => {
-    await withSandboxMediaTempHome("openclaw-staging-file-url-", async (home) => {
+    await withSandboxMediaTempHome("carapace-staging-file-url-", async (home) => {
       const { cfg, workspaceDir } = await setupSandboxWorkspace(home);
       const { ctx, sessionCtx } = createSandboxMediaContexts(sourceUrl);
 
@@ -412,7 +412,7 @@ describe("stageSandboxMedia", () => {
     { name: "failed slot before staged slot", allowedIndex: 1, blockedIndex: 0 },
     { name: "staged slot before failed slot", allowedIndex: 0, blockedIndex: 1 },
   ])("updates facts positionally: $name", async ({ allowedIndex, blockedIndex }) => {
-    await withSandboxMediaTempHome("openclaw-staging-slots-", async (home) => {
+    await withSandboxMediaTempHome("carapace-staging-slots-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
       const allowedPath = await writeInboundMedia(home, "allowed.jpg", "allowed");
       const blockedPath = join(home, "blocked.jpg");
@@ -445,7 +445,7 @@ describe("stageSandboxMedia", () => {
 
       const stagedPath = result.staged.get(allowedIndex)!;
       expect(stagedPath).toMatch(
-        /^media\/inbound\/openclaw-staged-[0-9a-f-]+\/input-allowed\.jpg$/,
+        /^media\/inbound\/carapace-staged-[0-9a-f-]+\/input-allowed\.jpg$/,
       );
       expect(result.staged).toEqual(new Map([[allowedIndex, stagedPath]]));
       expect(ctx.media[allowedIndex]).toMatchObject({ path: stagedPath, workspaceDir: sandboxDir });
@@ -484,7 +484,7 @@ describe("stageSandboxMedia", () => {
   ] as const)(
     "rewrites resolved local URL aliases: $name",
     async ({ source, url, rewritesUrl }) => {
-      await withSandboxMediaTempHome("openclaw-staging-url-alias-", async (home) => {
+      await withSandboxMediaTempHome("carapace-staging-url-alias-", async (home) => {
         const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
         const fileName = "alias.jpg";
         const mediaPath = await writeInboundMedia(home, fileName, "alias-bytes");
@@ -514,7 +514,7 @@ describe("stageSandboxMedia", () => {
         });
 
         const stagedPath = result.staged.get(0)!;
-        expect(stagedPath).toMatch(/^media\/inbound\/openclaw-staged-[0-9a-f-]+\/input-/);
+        expect(stagedPath).toMatch(/^media\/inbound\/carapace-staged-[0-9a-f-]+\/input-/);
         const expectedUrl = rewritesUrl ? stagedPath : mediaUrl;
         expect(result.staged).toEqual(new Map([[0, stagedPath]]));
         expect(ctx.media[0]).toMatchObject({
@@ -529,7 +529,7 @@ describe("stageSandboxMedia", () => {
   );
 
   it("blocks destination symlink escapes when staging into sandbox workspace", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
 
       const mediaPath = await writeInboundMedia(home, "payload.txt", "PAYLOAD");
@@ -569,7 +569,7 @@ describe("stageSandboxMedia", () => {
   });
 
   it("stages media above the generic media-store limit", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
 
       const mediaPath = await writeInboundMedia(
@@ -589,7 +589,7 @@ describe("stageSandboxMedia", () => {
 
       const stagedPath = result.staged.get(0)!;
       expect(stagedPath).toMatch(
-        /^media\/inbound\/openclaw-staged-[0-9a-f-]+\/input-larger-than-generic-limit\.bin$/,
+        /^media\/inbound\/carapace-staged-[0-9a-f-]+\/input-larger-than-generic-limit\.bin$/,
       );
       expect(ctx.media?.[0]?.path).toBe(stagedPath);
       expect(sessionCtx.media?.[0]?.path).toBe(stagedPath);
@@ -600,7 +600,7 @@ describe("stageSandboxMedia", () => {
   });
 
   it("warns and keeps original media paths above the sandbox staging limit", async () => {
-    await withSandboxMediaTempHome("openclaw-triggers-", async (home) => {
+    await withSandboxMediaTempHome("carapace-triggers-", async (home) => {
       const { cfg, workspaceDir, sandboxDir } = await setupSandboxWorkspace(home);
       const stagingMaxBytes = SANDBOX_MEDIA_MAX_BYTES;
       const mediaPath = await writeInboundMedia(home, "oversized.bin", "");

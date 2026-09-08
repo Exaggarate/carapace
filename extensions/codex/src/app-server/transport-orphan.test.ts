@@ -27,7 +27,7 @@ describe.skipIf(process.platform === "win32")("Codex stdio crash recovery", () =
     "reaps the dead $0 owner before a fresh spawn and preserves live owners",
     { timeout: 60_000 },
     async (mode, ctx) => {
-      const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-orphan-"));
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-orphan-"));
       const fakeBin = path.join(root, "bin");
       await fs.mkdir(fakeBin);
       await fs.writeFile(path.join(fakeBin, "ps"), "#!/bin/sh\nexit 1\n", { mode: 0o755 });
@@ -98,7 +98,7 @@ describe.skipIf(process.platform === "win32")("Codex stdio crash recovery", () =
             HOME: root,
             ...native?.env,
             PATH: searchPath,
-            OPENCLAW_STATE_DIR: stateDir,
+            CARAPACE_STATE_DIR: stateDir,
             NODE_ENV: "test",
           },
           stdio: ["ignore", "pipe", "pipe"],

@@ -1,23 +1,23 @@
-import { jsonResult } from "openclaw/plugin-sdk/channel-actions";
-import { formatErrorMessage as errorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { jsonResult } from "carapace/plugin-sdk/channel-actions";
+import { formatErrorMessage as errorMessage } from "carapace/plugin-sdk/error-runtime";
 // Ollama node inference exposes local models to agents through paired node hosts.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   readFiniteNumberParam,
   readPositiveIntegerParam,
   readStringParam,
-} from "openclaw/plugin-sdk/param-readers";
+} from "carapace/plugin-sdk/param-readers";
 import type {
   AnyAgentTool,
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { asFiniteNumber, asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
+import { asFiniteNumber, asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { OLLAMA_DEFAULT_BASE_URL } from "./defaults.js";
 import {
   DEFAULT_INFERENCE_TIMEOUT_MS,
@@ -77,7 +77,7 @@ type OllamaChatPayload = {
 };
 
 type NodeSummary = Awaited<
-  ReturnType<OpenClawPluginApi["runtime"]["nodes"]["list"]>
+  ReturnType<CarapacePluginApi["runtime"]["nodes"]["list"]>
 >["nodes"][number];
 
 function readNodeCommandParams(paramsJSON?: string | null): Record<string, unknown> {
@@ -307,7 +307,7 @@ async function runOllamaNodeChat(params: {
 
 export function createOllamaNodeHostCommands(options?: {
   baseUrl?: string;
-}): OpenClawPluginNodeHostCommand[] {
+}): CarapacePluginNodeHostCommand[] {
   const baseUrl = options?.baseUrl ?? OLLAMA_DEFAULT_BASE_URL;
   return [
     {
@@ -390,7 +390,7 @@ function parseInvokePayload(raw: unknown): Record<string, unknown> {
 }
 
 async function invokeNode(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   nodeId: string,
   command: string,
   params: Record<string, unknown>,
@@ -409,7 +409,7 @@ async function invokeNode(
   return parseInvokePayload(raw);
 }
 
-export function createOllamaNodeInferenceTool(api: OpenClawPluginApi): AnyAgentTool {
+export function createOllamaNodeInferenceTool(api: CarapacePluginApi): AnyAgentTool {
   return {
     ...ollamaNodeInferenceToolDefinition,
     execute: async (_toolCallId, args, signal) => {
@@ -457,7 +457,7 @@ export function createOllamaNodeInferenceTool(api: OpenClawPluginApi): AnyAgentT
         return jsonResult({
           nodes,
           ...(modelNodes.length === 0 && {
-            hint: "No connected node advertises Ollama inference. Start Ollama and `openclaw node run` on the target machine, then approve any request shown by `openclaw nodes pending`.",
+            hint: "No connected node advertises Ollama inference. Start Ollama and `carapace node run` on the target machine, then approve any request shown by `carapace nodes pending`.",
           }),
         });
       }

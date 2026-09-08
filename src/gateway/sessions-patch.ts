@@ -1,6 +1,6 @@
 // Session patch applier for gateway session metadata and model/runtime overrides.
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   type ErrorShape,
@@ -43,7 +43,7 @@ import {
 } from "../config/sessions/session-entry-provenance.js";
 import { isPinnableSessionEntry } from "../config/sessions/session-pin-policy.js";
 import { projectCanonicalSessionEntryShape } from "../config/sessions/store-entry-shape.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeExecTarget } from "../infra/exec-approvals.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import {
@@ -90,7 +90,7 @@ function invalid(message: string): { ok: false; error: ErrorShape } {
 }
 
 export function resolveSessionPatchModelSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   catalog: ModelCatalogEntry[];
   raw: string;
@@ -124,7 +124,7 @@ export function resolveSessionPatchModelSelection(params: {
 }
 
 type SessionPatchProjectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   creation?: { via: SessionCreatedVia; actor?: SessionEntry["createdActor"] };
   existingEntry?: SessionEntry;
   isLabelInUse: (label: string) => boolean;

@@ -3,7 +3,7 @@ import {
   createEmptyPluginRegistry,
   createPluginRecord,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { vi } from "vitest";
 import { createCodexAppServerAgentHarness } from "../../harness.js";
 import type {

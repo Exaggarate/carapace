@@ -65,7 +65,7 @@ async function createFreshOperatorDevice(scopes: string[], nonce: string) {
   const identity = loadOrCreateDeviceIdentity({
     path: path.join(
       os.tmpdir(),
-      `openclaw-talk-config-device-${process.pid}-${talkConfigDeviceSeq++}.sqlite`,
+      `carapace-talk-config-device-${process.pid}-${talkConfigDeviceSeq++}.sqlite`,
     ),
   });
   const signedAtMs = Date.now();
@@ -274,7 +274,7 @@ describe("gateway talk.config", () => {
       expectTalkConfig(res.payload?.config?.talk, {
         provider: GENERIC_TALK_PROVIDER_ID,
         voiceId: "voice-123",
-        apiKey: "__OPENCLAW_REDACTED__",
+        apiKey: "__CARAPACE_REDACTED__",
         speechLocale: "ru-RU",
         silenceTimeoutMs: 1500,
       });
@@ -322,7 +322,7 @@ describe("gateway talk.config", () => {
       expect(res.ok).toBe(true);
       expectTalkConfig(res.payload?.config?.talk, {
         provider: GENERIC_TALK_PROVIDER_ID,
-        providerApiKey: "__OPENCLAW_REDACTED__",
+        providerApiKey: "__CARAPACE_REDACTED__",
         resolvedApiKey: "secret-key-abc",
       });
     });
@@ -417,9 +417,9 @@ describe("gateway talk.config", () => {
             // sentinel so no credential material leaks to read-scope callers.
             const redactedApiKey = talk?.providers?.[GENERIC_TALK_PROVIDER_ID]?.apiKey;
             expect(redactedApiKey).toEqual({
-              id: "__OPENCLAW_REDACTED__",
-              provider: "__OPENCLAW_REDACTED__",
-              source: "__OPENCLAW_REDACTED__",
+              id: "__CARAPACE_REDACTED__",
+              provider: "__CARAPACE_REDACTED__",
+              source: "__CARAPACE_REDACTED__",
             });
             expect(talk?.resolved?.config?.apiKey).toEqual(redactedApiKey);
           });

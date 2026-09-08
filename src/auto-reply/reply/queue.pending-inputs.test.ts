@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   appendTranscriptMessage,
@@ -17,9 +17,9 @@ import {
   type UserTurnTranscriptRecorder,
 } from "../../sessions/user-turn-transcript.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { executeAgentTurn } from "./agent-runner-execution.js";
 import { executeFollowupTurn } from "./followup-turn-execution.js";
 import {
@@ -37,7 +37,7 @@ import { createTypingController } from "./typing.js";
 vi.mock("./agent-runner-execution.js", () => ({ executeAgentTurn: vi.fn() }));
 
 describe("followup queue durable input consumption", () => {
-  const fixture = useTempSessionsFixture("openclaw-queue-pending-");
+  const fixture = useTempSessionsFixture("carapace-queue-pending-");
   let caseSequence = 0;
   let sessionKey = "";
   const sessionId = "queue-pending-session";
@@ -55,7 +55,7 @@ describe("followup queue durable input consumption", () => {
     for (const recorder of recorders.splice(0)) {
       recorder.finishPendingInput?.("interrupted");
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   const createStagedRun = async (runId: string) => {
@@ -101,7 +101,7 @@ describe("followup queue durable input consumption", () => {
     const first = await createStagedRun("first");
     const second = await createStagedRun("second");
     await persistQueuedRun(first.run);
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope()))).db;
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope()))).db;
     database.exec(
       "CREATE TEMP TRIGGER fail_second_source BEFORE INSERT ON transcript_events WHEN instr(NEW.event_json, 'second:user') > 0 BEGIN SELECT RAISE(ABORT, 'injected second source failure'); END",
     );

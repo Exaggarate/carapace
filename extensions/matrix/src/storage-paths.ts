@@ -1,8 +1,8 @@
 // Matrix plugin module implements storage paths behavior.
 import crypto from "node:crypto";
 import path from "node:path";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const MATRIX_TOKEN_HASH_DIRECTORY_PATTERN = /^[a-f0-9]{16}$/u;
 const MATRIX_SERVER_USER_DIRECTORY_PATTERN = /^.+__.+$/u;

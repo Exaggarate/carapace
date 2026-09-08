@@ -201,7 +201,7 @@ describe("fixed-store session bootstrap", () => {
         agentId: "ops",
         sessionId: "ops-session",
         sessionKey: "global",
-        storePath: "/tmp/explicit-openclaw-agent.sqlite",
+        storePath: "/tmp/explicit-carapace-agent.sqlite",
       };
       const callerError = new Error("reset owner closed while waiting for commit");
       let closed = false;

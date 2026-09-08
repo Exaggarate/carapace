@@ -16,7 +16,7 @@ import {
   type RespawnChildRuntime,
 } from "./process/respawn-child-runner.js";
 
-const COMPILE_CACHE_DISABLED_RESPAWNED_ENV = "OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED";
+const COMPILE_CACHE_DISABLED_RESPAWNED_ENV = "CARAPACE_COMPILE_CACHE_DISABLED_RESPAWNED";
 
 export function resolveEntryInstallRoot(entryFile: string): string {
   const entryDir = path.dirname(entryFile);
@@ -39,7 +39,7 @@ function isNodeCompileCacheRequested(env: NodeJS.ProcessEnv | undefined): boolea
   return env?.NODE_COMPILE_CACHE !== undefined && !isNodeCompileCacheDisabled(env);
 }
 
-function shouldEnableOpenClawCompileCache(params: {
+function shouldEnableCarapaceCompileCache(params: {
   env?: NodeJS.ProcessEnv;
   installRoot: string;
 }): boolean {
@@ -71,7 +71,7 @@ function readPackageVersion(packageJsonPath: string): string {
   return "unknown";
 }
 
-function resolveOpenClawCompileCacheDirectory(params: {
+function resolveCarapaceCompileCacheDirectory(params: {
   env?: NodeJS.ProcessEnv;
   installRoot: string;
 }): string {
@@ -91,28 +91,28 @@ function resolveOpenClawCompileCacheDirectory(params: {
       : path.join(os.tmpdir(), "node-compile-cache");
   return path.join(
     baseDirectory,
-    "openclaw",
+    "carapace",
     version,
     sanitizeCompileCachePathSegment(installMarker),
   );
 }
 
-type OpenClawCompileCacheRespawnPlan = {
+type CarapaceCompileCacheRespawnPlan = {
   command: string;
   args: string[];
   env: NodeJS.ProcessEnv;
   detachForProcessTree: boolean;
 };
 
-type OpenClawCompileCacheRespawnRuntime = RespawnChildRuntime & {
+type CarapaceCompileCacheRespawnRuntime = RespawnChildRuntime & {
   writeError: (message: string) => void | Promise<void>;
 };
 
-function buildOpenClawCompileCacheRespawnPlan(params: {
+function buildCarapaceCompileCacheRespawnPlan(params: {
   currentFile: string;
   installRoot: string;
   compileCacheDir?: string;
-}): OpenClawCompileCacheRespawnPlan | undefined {
+}): CarapaceCompileCacheRespawnPlan | undefined {
   const env = process.env;
   const argv = process.argv;
   const platform = process.platform;
@@ -142,12 +142,12 @@ function buildOpenClawCompileCacheRespawnPlan(params: {
   };
 }
 
-export async function respawnWithoutOpenClawCompileCacheIfNeeded(params: {
+export async function respawnWithoutCarapaceCompileCacheIfNeeded(params: {
   currentFile: string;
   installRoot: string;
   prepareWriteError?: () => Promise<(message: string) => void | Promise<void>>;
 }): Promise<boolean> {
-  const plan = buildOpenClawCompileCacheRespawnPlan({
+  const plan = buildCarapaceCompileCacheRespawnPlan({
     currentFile: params.currentFile,
     installRoot: params.installRoot,
     compileCacheDir: getCompileCacheDir?.(),
@@ -156,7 +156,7 @@ export async function respawnWithoutOpenClawCompileCacheIfNeeded(params: {
     return false;
   }
   const writeError = await params.prepareWriteError?.();
-  runOpenClawCompileCacheRespawnPlan(
+  runCarapaceCompileCacheRespawnPlan(
     plan,
     writeError
       ? {
@@ -170,9 +170,9 @@ export async function respawnWithoutOpenClawCompileCacheIfNeeded(params: {
   return true;
 }
 
-function runOpenClawCompileCacheRespawnPlan(
-  plan: OpenClawCompileCacheRespawnPlan,
-  runtime: OpenClawCompileCacheRespawnRuntime = {
+function runCarapaceCompileCacheRespawnPlan(
+  plan: CarapaceCompileCacheRespawnPlan,
+  runtime: CarapaceCompileCacheRespawnRuntime = {
     spawn,
     attachChildProcessBridge,
     exit: process.exit.bind(process) as (code?: number) => never,
@@ -189,7 +189,7 @@ function runOpenClawCompileCacheRespawnPlan(
     runtime,
     onError: (error) => {
       return runtime.writeError(
-        `[openclaw] Failed to respawn CLI without compile cache: ${
+        `[carapace] Failed to respawn CLI without compile cache: ${
           error instanceof Error ? (error.stack ?? error.message) : String(error)
         }\n`,
       );
@@ -197,15 +197,15 @@ function runOpenClawCompileCacheRespawnPlan(
   });
 }
 
-export function enableOpenClawCompileCache(params: {
+export function enableCarapaceCompileCache(params: {
   env?: NodeJS.ProcessEnv;
   installRoot: string;
 }): void {
-  if (!shouldEnableOpenClawCompileCache(params)) {
+  if (!shouldEnableCarapaceCompileCache(params)) {
     return;
   }
   try {
-    enableCompileCache(resolveOpenClawCompileCacheDirectory(params));
+    enableCompileCache(resolveCarapaceCompileCacheDirectory(params));
   } catch {
     // Best-effort only; never block startup.
   }

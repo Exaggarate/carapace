@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { STALE_WORKER_BUILD_REASON, supportsWorkerExecutionContextLaunch } from "./admission.js";
 import { matchesWorkerPlacementTarget } from "./placement-reclaim-contract.js";

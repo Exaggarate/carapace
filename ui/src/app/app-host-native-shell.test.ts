@@ -32,7 +32,7 @@ type ShellSettingsEscapeState = ShellKeyboardState & {
 type TestWebKitWindow = Window & {
   webkit?: {
     messageHandlers: {
-      openclawNav: { postMessage: (message: unknown) => void };
+      carapaceNav: { postMessage: (message: unknown) => void };
     };
   };
 };
@@ -71,22 +71,22 @@ afterEach(() => {
   resetAppHostTestGlobals();
 });
 
-describe("OpenClaw native shell", () => {
+describe("Carapace native shell", () => {
   it("reports readiness only while the native command listener owner is connected", () => {
-    const shell = document.createElement("openclaw-app-shell") as HTMLElement & {
+    const shell = document.createElement("carapace-app-shell") as HTMLElement & {
       connectedCallback(): void;
       disconnectedCallback(): void;
       nativeHistoryState: { canGoBack: boolean; canGoForward: boolean };
     };
-    const nativeWindow = window as Window & { __OPENCLAW_NATIVE_COMMANDS_READY__?: boolean };
+    const nativeWindow = window as Window & { __CARAPACE_NATIVE_COMMANDS_READY__?: boolean };
     const states: boolean[] = [];
     const recordState = () =>
-      states.push(nativeWindow["__OPENCLAW_NATIVE_COMMANDS_READY__"] === true);
-    window.addEventListener("openclaw:native-commands-state", recordState);
+      states.push(nativeWindow["__CARAPACE_NATIVE_COMMANDS_READY__"] === true);
+    window.addEventListener("carapace:native-commands-state", recordState);
     try {
       shell.connectedCallback();
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-history-state", {
+        new CustomEvent("carapace:native-history-state", {
           detail: { canGoBack: true, canGoForward: false },
         }),
       );
@@ -96,7 +96,7 @@ describe("OpenClaw native shell", () => {
       shell.disconnectedCallback();
       shell.nativeHistoryState = { canGoBack: false, canGoForward: false };
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-history-state", {
+        new CustomEvent("carapace:native-history-state", {
           detail: { canGoBack: true, canGoForward: false },
         }),
       );
@@ -104,14 +104,14 @@ describe("OpenClaw native shell", () => {
       expect(states).toEqual([true, false]);
     } finally {
       shell.disconnectedCallback();
-      window.removeEventListener("openclaw:native-commands-state", recordState);
-      Reflect.deleteProperty(nativeWindow, "__OPENCLAW_NATIVE_COMMANDS_READY__");
+      window.removeEventListener("carapace:native-commands-state", recordState);
+      Reflect.deleteProperty(nativeWindow, "__CARAPACE_NATIVE_COMMANDS_READY__");
     }
   });
 
   it("opens Settings with Shift-Command-Comma", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellKeyboardState;
     shell.runtime = {
       context: {
         navigate,
@@ -133,7 +133,7 @@ describe("OpenClaw native shell", () => {
 
   it("opens Settings with Ctrl-Shift-Comma", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellKeyboardState;
     shell.runtime = {
       context: {
         navigate,
@@ -156,7 +156,7 @@ describe("OpenClaw native shell", () => {
   it("restores the complete prior workspace URL when Escape leaves Settings", () => {
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSettingsEscapeState;
     shell.runtime = {
       context: {
@@ -185,7 +185,7 @@ describe("OpenClaw native shell", () => {
   it("keeps the raw config editor unchanged when Escape is pressed", () => {
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSettingsEscapeState;
     shell.runtime = {
       context: {
@@ -221,7 +221,7 @@ describe("OpenClaw native shell", () => {
     const restoreDialogPolyfill = installDialogPolyfill();
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSettingsEscapeState;
     shell.runtime = {
       context: {
@@ -233,7 +233,7 @@ describe("OpenClaw native shell", () => {
     shell.navDrawerOpen = false;
     shell.routeState = { routeId: "appearance" };
     const container = document.body.appendChild(document.createElement("div"));
-    const modal = container.appendChild(document.createElement("openclaw-modal-dialog"));
+    const modal = container.appendChild(document.createElement("carapace-modal-dialog"));
     const cancel = modal.appendChild(document.createElement("button"));
 
     try {
@@ -258,7 +258,7 @@ describe("OpenClaw native shell", () => {
     const update = vi.fn((next: { navCollapsed: boolean }) => {
       snapshot.navCollapsed = next.navCollapsed;
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
     shell.runtime = {
       context: {
         navigation: { snapshot, update },
@@ -276,7 +276,7 @@ describe("OpenClaw native shell", () => {
     const navigate = vi.fn();
     const openPalette = vi.fn();
     const togglePalette = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
     Object.defineProperty(shell, "commandPalette", {
       configurable: true,
       value: { openPalette, togglePalette },
@@ -285,7 +285,7 @@ describe("OpenClaw native shell", () => {
       context: nativeSessionContext(navigate, "agent/a"),
     };
     shell.handleNativeOpenSearch();
-    const toggleEvent = new CustomEvent("openclaw:native-toggle-search", { cancelable: true });
+    const toggleEvent = new CustomEvent("carapace:native-toggle-search", { cancelable: true });
     shell.handleNativeToggleSearch(toggleEvent);
     shell.handleNativeNewSession();
 
@@ -300,7 +300,7 @@ describe("OpenClaw native shell", () => {
     const onOpenPalette = vi.fn();
     const onOpenNewSession = vi.fn();
     const controls = document.createElement(
-      "openclaw-macos-titlebar-controls",
+      "carapace-macos-titlebar-controls",
     ) as unknown as MacosTitlebarControlsState;
     controls.navCollapsed = false;
     controls.historyOnly = false;
@@ -324,7 +324,7 @@ describe("OpenClaw native shell", () => {
   it("disables the native titlebar new-session control with its access reason", async () => {
     const onOpenNewSession = vi.fn();
     const controls = document.createElement(
-      "openclaw-macos-titlebar-controls",
+      "carapace-macos-titlebar-controls",
     ) as unknown as MacosTitlebarControlsState;
     controls.navCollapsed = true;
     controls.newSessionDisabledReason = "Operator write access is required.";
@@ -343,7 +343,7 @@ describe("OpenClaw native shell", () => {
 
   it("retains a native new-session request until a context exists", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
 
     shell.handleNativeNewSession();
 
@@ -361,7 +361,7 @@ describe("OpenClaw native shell", () => {
       { methods: ["sessions.create"], scopes: ["operator.read"] },
     ]) {
       const navigate = vi.fn();
-      const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+      const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
       shell.runtime = {
         context: nativeSessionContext(navigate, "main", options),
       };
@@ -391,11 +391,11 @@ describe("OpenClaw native shell", () => {
     "preserves native destination $basePath$path and acknowledges it",
     ({ path, routeId, search, basePath }) => {
       const navigate = vi.fn();
-      const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+      const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
       shell.runtime = {
         context: { navigate, basePath } as unknown as ApplicationContext,
       };
-      const event = new CustomEvent("openclaw:native-navigate", {
+      const event = new CustomEvent("carapace:native-navigate", {
         cancelable: true,
         detail: { path, search },
       });
@@ -414,14 +414,14 @@ describe("OpenClaw native shell", () => {
     "ignores malformed native search %s and keeps the plain route",
     (search) => {
       const navigate = vi.fn();
-      const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+      const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
       shell.runtime = {
         context: {
           navigate,
           basePath: "",
         } as unknown as ApplicationContext,
       };
-      const event = new CustomEvent("openclaw:native-navigate", {
+      const event = new CustomEvent("carapace:native-navigate", {
         cancelable: true,
         detail: { path: "/custodian", search },
       });
@@ -437,13 +437,13 @@ describe("OpenClaw native shell", () => {
     "leaves invalid native Dashboard path %s unhandled",
     (path) => {
       const navigate = vi.fn();
-      const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+      const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
       shell.runtime = {
         context: {
           navigate,
         } as unknown as ApplicationContext,
       };
-      const event = new CustomEvent("openclaw:native-navigate", {
+      const event = new CustomEvent("carapace:native-navigate", {
         cancelable: true,
         detail: { path },
       });
@@ -457,7 +457,7 @@ describe("OpenClaw native shell", () => {
 
   it("does not start a native session during onboarding", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
     shell.runtime = {
       context: {
         navigate,
@@ -472,9 +472,9 @@ describe("OpenClaw native shell", () => {
   });
 
   it("updates native history state from the host event", () => {
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
     shell.handleNativeHistoryState(
-      new CustomEvent("openclaw:native-history-state", {
+      new CustomEvent("carapace:native-history-state", {
         detail: { canGoBack: true, canGoForward: false },
       }),
     );
@@ -485,10 +485,10 @@ describe("OpenClaw native shell", () => {
   it("deduplicates native nav state reports", () => {
     const postMessage = vi.fn();
     (window as TestWebKitWindow).webkit = {
-      messageHandlers: { openclawNav: { postMessage } },
+      messageHandlers: { carapaceNav: { postMessage } },
     };
     const snapshot = { navCollapsed: false, navWidth: 280 };
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellNavigationState;
     shell.runtime = {
       context: {
         navigation: { snapshot },
@@ -508,7 +508,7 @@ describe("OpenClaw native shell", () => {
 
   it("leaves plain Command-Comma to the browser", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellKeyboardState;
     shell.runtime = {
       context: {
         navigate,
@@ -528,7 +528,7 @@ describe("OpenClaw native shell", () => {
   });
 });
 
-describe("OpenClaw shell update affordance", () => {
+describe("Carapace shell update affordance", () => {
   it("renders floating attention while keeping update actions in navigation", async () => {
     const container = document.createElement("div");
     document.body.append(container);
@@ -554,9 +554,9 @@ describe("OpenClaw shell update affordance", () => {
     });
     render(renderFloatingUpdateCard({ ...shared, navigationSurfaceHidden: collapsed }), container);
     expect(
-      container.querySelector("openclaw-sidebar-attention.sidebar-attention--floating"),
+      container.querySelector("carapace-sidebar-attention.sidebar-attention--floating"),
     ).not.toBeNull();
-    expect(container.querySelector("openclaw-sidebar-update-card")).toBeNull();
+    expect(container.querySelector("carapace-sidebar-update-card")).toBeNull();
 
     render(
       renderFloatingUpdateCard({
@@ -569,7 +569,7 @@ describe("OpenClaw shell update affordance", () => {
     );
     const refreshCard = container.querySelector<
       HTMLElement & { onRefresh: () => void; refreshRequired: boolean }
-    >("openclaw-sidebar-update-card");
+    >("carapace-sidebar-update-card");
     expect(refreshCard?.refreshRequired).toBe(true);
     refreshCard?.onRefresh();
     expect(shared.onRefresh).toHaveBeenCalledOnce();
@@ -590,7 +590,7 @@ describe("OpenClaw shell update affordance", () => {
       }),
       container,
     );
-    expect(container.querySelector("openclaw-sidebar-update-card")).not.toBeNull();
+    expect(container.querySelector("carapace-sidebar-update-card")).not.toBeNull();
     container.remove();
   });
 
@@ -623,7 +623,7 @@ describe("OpenClaw shell update affordance", () => {
 
       render(renderFloatingUpdateCard(shared), container);
       expect(
-        container.querySelector("openclaw-sidebar-attention.sidebar-attention--floating"),
+        container.querySelector("carapace-sidebar-attention.sidebar-attention--floating"),
       ).toBeNull();
 
       render(
@@ -632,7 +632,7 @@ describe("OpenClaw shell update affordance", () => {
       );
       const refreshCard = container.querySelector<
         HTMLElement & { updateComplete: Promise<boolean> }
-      >("openclaw-sidebar-update-card");
+      >("carapace-sidebar-update-card");
       await refreshCard?.updateComplete;
       expect(refreshCard?.querySelector(".sidebar-update-card")).not.toBeNull();
     } finally {
@@ -663,10 +663,10 @@ describe("OpenClaw shell update affordance", () => {
     for (const navigationSurfaceHidden of [false, true]) {
       render(renderFloatingUpdateCard({ ...shared, navigationSurfaceHidden }), container);
       expect(
-        container.querySelector("openclaw-sidebar-attention.sidebar-attention--floating"),
+        container.querySelector("carapace-sidebar-attention.sidebar-attention--floating"),
       ).toBeNull();
       const cards = container.querySelectorAll<HTMLElement & { refreshRequired: boolean }>(
-        "openclaw-sidebar-update-card",
+        "carapace-sidebar-update-card",
       );
       expect(cards).toHaveLength(1);
       expect(cards[0]?.refreshRequired).toBe(true);
@@ -685,6 +685,6 @@ describe("OpenClaw shell update affordance", () => {
       }),
       container,
     );
-    expect(container.querySelector("openclaw-sidebar-update-card")).toBeNull();
+    expect(container.querySelector("carapace-sidebar-update-card")).toBeNull();
   });
 });

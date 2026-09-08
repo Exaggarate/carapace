@@ -33,7 +33,7 @@ Which protocol versions a client may negotiate, and the constants a reference cl
 ### Client constants
 
 The reference client implementation lives in `packages/gateway-client/src/`
-(OpenClaw wraps it via the thin `src/gateway/client.ts` facade). These
+(Carapace wraps it via the thin `src/gateway/client.ts` facade). These
 defaults are stable across protocol v4 and are the expected baseline for
 third-party clients.
 
@@ -44,7 +44,7 @@ third-party clients.
 | `MIN_NODE_PROTOCOL_VERSION`               | `3`                                                   | `packages/gateway-protocol/src/version.ts`                                                                                |
 | `MIN_PROBE_PROTOCOL_VERSION`              | `3`                                                   | `packages/gateway-protocol/src/version.ts`                                                                                |
 | Request timeout (per RPC)                 | `30_000` ms                                           | `packages/gateway-client/src/client.ts` (`requestTimeoutMs`)                                                              |
-| Preauth / connect-challenge timeout       | `15_000` ms                                           | `packages/gateway-client/src/timeouts.ts` (`OPENCLAW_HANDSHAKE_TIMEOUT_MS` env can raise the paired server/client budget) |
+| Preauth / connect-challenge timeout       | `15_000` ms                                           | `packages/gateway-client/src/timeouts.ts` (`CARAPACE_HANDSHAKE_TIMEOUT_MS` env can raise the paired server/client budget) |
 | Initial reconnect backoff                 | `1_000` ms                                            | `packages/gateway-client/src/client.ts` (`GATEWAY_RECONNECT_POLICY`)                                                      |
 | Max reconnect backoff                     | `30_000` ms                                           | `packages/gateway-client/src/client.ts` (`GATEWAY_RECONNECT_POLICY`)                                                      |
 | Fast-retry clamp after device-token close | `250` ms                                              | `packages/gateway-client/src/client.ts`                                                                                   |

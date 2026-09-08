@@ -1,15 +1,15 @@
 ---
 summary: "Configuration overview: common tasks, quick setup, and links to the full reference"
 read_when:
-  - Setting up OpenClaw for the first time
+  - Setting up Carapace for the first time
   - Looking for common configuration patterns
   - Navigating to specific config sections
 title: "Configuration"
 ---
 
-OpenClaw reads an optional <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> config from `~/.openclaw/openclaw.json`. If the file is missing, OpenClaw uses safe defaults.
+Carapace reads an optional <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> config from `~/.carapace/carapace.json`. If the file is missing, Carapace uses safe defaults.
 
-The active config path must be a regular file. OpenClaw-owned writes replace it atomically (rename onto the path), so a symlinked `openclaw.json` gets its target replaced rather than written through - avoid symlinked config layouts. If you keep config outside the default state directory, point `OPENCLAW_CONFIG_PATH` directly at the real file.
+The active config path must be a regular file. Carapace-owned writes replace it atomically (rename onto the path), so a symlinked `carapace.json` gets its target replaced rather than written through - avoid symlinked config layouts. If you keep config outside the default state directory, point `CARAPACE_CONFIG_PATH` directly at the real file.
 
 Common reasons to add a config:
 
@@ -27,15 +27,15 @@ docs before editing config. Use this page for task-oriented guidance and
 field map and defaults.
 
 <Tip>
-**New to configuration?** Start with `openclaw onboard` for interactive setup, or check out the [Configuration Examples](/gateway/configuration-examples) guide for complete copy-paste configs.
+**New to configuration?** Start with `carapace onboard` for interactive setup, or check out the [Configuration Examples](/gateway/configuration-examples) guide for complete copy-paste configs.
 </Tip>
 
 ## Minimal config
 
 ```json5
-// ~/.openclaw/openclaw.json
+// ~/.carapace/carapace.json
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  agents: { defaults: { workspace: "~/.carapace/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -45,15 +45,15 @@ field map and defaults.
 <Tabs>
   <Tab title="Interactive wizard">
     ```bash
-    openclaw onboard       # full onboarding flow
-    openclaw configure     # config wizard
+    carapace onboard       # full onboarding flow
+    carapace configure     # config wizard
     ```
   </Tab>
   <Tab title="CLI (one-liners)">
     ```bash
-    openclaw config get agents.defaults.workspace
-    openclaw config set agents.defaults.heartbeat.every "2h"
-    openclaw config unset plugins.entries.brave.config.webSearch.apiKey
+    carapace config get agents.defaults.workspace
+    carapace config set agents.defaults.heartbeat.every "2h"
+    carapace config unset plugins.entries.brave.config.webSearch.apiKey
     ```
   </Tab>
   <Tab title="Control UI">
@@ -71,17 +71,17 @@ field map and defaults.
     with **Hide advanced** on the divider to collapse them again.
   </Tab>
   <Tab title="Direct edit">
-    Edit `~/.openclaw/openclaw.json` directly. The Gateway watches the file and applies changes automatically (see [hot reload](#config-hot-reload)).
+    Edit `~/.carapace/carapace.json` directly. The Gateway watches the file and applies changes automatically (see [hot reload](#config-hot-reload)).
   </Tab>
 </Tabs>
 
 ## Strict validation
 
 <Warning>
-OpenClaw only accepts configurations that fully match the schema. Gateway startup first applies safe legacy-key migrations to eligible single-file configs. Unknown keys, malformed types, or invalid values that remain cause the Gateway to **refuse to start**. The only root-level exception is `$schema` (string), so editors can attach JSON Schema metadata.
+Carapace only accepts configurations that fully match the schema. Gateway startup first applies safe legacy-key migrations to eligible single-file configs. Unknown keys, malformed types, or invalid values that remain cause the Gateway to **refuse to start**. The only root-level exception is `$schema` (string), so editors can attach JSON Schema metadata.
 </Warning>
 
-`openclaw config schema` prints the canonical JSON Schema used by Control UI
+`carapace config schema` prints the canonical JSON Schema used by Control UI
 and validation. `config.schema.lookup` fetches a single path-scoped node plus
 child summaries for drill-down tooling. Field `title`/`description` docs metadata
 carries through nested objects, wildcard (`*`), array-item (`[]`), and `anyOf`/
@@ -94,21 +94,21 @@ settings. A leaf inherits the nearest ancestor tier when it has no direct hint;
 paths with no declared ancestor default to advanced. This affects presentation
 only, not validation, defaults, reload behavior, or whether the key can be set.
 
-Startup migration uses the same deterministic, prompt-free transforms as `openclaw doctor --fix` and writes only when the entire migrated config validates, including plugins. The previous config stays in the `.bak` ring. Configs using `$include`, Nix-managed configs, and configs written by a newer OpenClaw version are not automatically migrated. See [Legacy config key migrations](/gateway/doctor#detailed-behavior-and-rationale) for the conditions and fallback.
+Startup migration uses the same deterministic, prompt-free transforms as `carapace doctor --fix` and writes only when the entire migrated config validates, including plugins. The previous config stays in the `.bak` ring. Configs using `$include`, Nix-managed configs, and configs written by a newer Carapace version are not automatically migrated. See [Legacy config key migrations](/gateway/doctor#detailed-behavior-and-rationale) for the conditions and fallback.
 
 When validation still fails:
 
 - The Gateway does not boot
-- Only diagnostic commands work (`openclaw doctor`, `openclaw logs`, `openclaw health`, `openclaw status`)
-- Run `openclaw doctor` to see exact issues
-- Run `openclaw doctor --fix` (`--repair` is the same flag; `--yes` skips prompts) to apply repairs
+- Only diagnostic commands work (`carapace doctor`, `carapace logs`, `carapace health`, `carapace status`)
+- Run `carapace doctor` to see exact issues
+- Run `carapace doctor --fix` (`--repair` is the same flag; `--yes` skips prompts) to apply repairs
 
 The Gateway keeps a trusted last-known-good copy after each successful startup,
-but startup and hot reload do not restore it automatically - only `openclaw doctor --fix`
-does. If `openclaw.json` remains invalid after eligible startup migrations (including
+but startup and hot reload do not restore it automatically - only `carapace doctor --fix`
+does. If `carapace.json` remains invalid after eligible startup migrations (including
 plugin-local validation), Gateway startup fails. An invalid hot reload is skipped and
 the current runtime keeps the last accepted config. When a write is blocked as an
-accidental clobber, OpenClaw attempts to save the rejected payload as
+accidental clobber, Carapace attempts to save the rejected payload as
 `<path>.rejected.<timestamp>` for inspection. The warning reports whether that save
 succeeded; if it failed, the active config still stays unchanged.
 The Gateway blocks writes that look like accidental clobbers - dropping the effective
@@ -211,7 +211,7 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
           main: {
             default: true,
             groupChat: {
-              mentionPatterns: ["@openclaw", "openclaw"],
+              mentionPatterns: ["@carapace", "carapace"],
             },
           },
         },
@@ -332,7 +332,7 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
   </Accordion>
 
   <Accordion title="Enable relay-backed push for official iOS builds">
-    Relay-backed push for public App Store builds uses the hosted OpenClaw relay: `https://ios-push-relay.openclaw.ai`.
+    Relay-backed push for public App Store builds uses the hosted Carapace relay: `https://github.com/Exaggarate/carapace`.
 
     Custom relay deployments require a deliberately separate iOS build/deployment path whose relay URL matches the gateway relay URL. If you are using a custom relay build, set this in gateway config:
 
@@ -355,7 +355,7 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
     CLI equivalent:
 
     ```bash
-    openclaw config set gateway.push.apns.relay.baseUrl https://relay.example.com
+    carapace config set gateway.push.apns.relay.baseUrl https://relay.example.com
     ```
 
     What this does:
@@ -381,9 +381,9 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
 
     Compatibility note:
 
-    - `OPENCLAW_APNS_RELAY_BASE_URL` and `OPENCLAW_APNS_RELAY_TIMEOUT_MS` still work as temporary env overrides.
+    - `CARAPACE_APNS_RELAY_BASE_URL` and `CARAPACE_APNS_RELAY_TIMEOUT_MS` still work as temporary env overrides.
     - Custom gateway relay URLs must match the relay base URL baked into the iOS build; the public App Store release lane rejects custom iOS relay URL overrides.
-    - `OPENCLAW_APNS_RELAY_ALLOW_HTTP=true` remains a loopback-only development escape hatch; do not persist HTTP relay URLs in config.
+    - `CARAPACE_APNS_RELAY_ALLOW_HTTP=true` remains a loopback-only development escape hatch; do not persist HTTP relay URLs in config.
 
     See [iOS App](/platforms/ios#relay-backed-push-for-official-builds) for the end-to-end flow and [Authentication and trust flow](/platforms/ios#authentication-and-trust-flow) for the relay security model.
 
@@ -454,8 +454,8 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
 
     Security note:
     - Treat all hook/webhook payload content as untrusted input.
-    - Use a dedicated `hooks.token`; do not reuse active Gateway auth secrets (`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` or `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`).
-    - Hook auth is header-only (`Authorization: Bearer ...` or `x-openclaw-token`); query-string tokens are rejected.
+    - Use a dedicated `hooks.token`; do not reuse active Gateway auth secrets (`gateway.auth.token` / `CARAPACE_GATEWAY_TOKEN` or `gateway.auth.password` / `CARAPACE_GATEWAY_PASSWORD`).
+    - Hook auth is header-only (`Authorization: Bearer ...` or `x-carapace-token`); query-string tokens are rejected.
     - `hooks.path` cannot be `/`; keep webhook ingress on a dedicated subpath such as `/hooks`.
     - Keep unsafe-content bypass flags disabled (`hooks.gmail.allowUnsafeExternalContent`, `hooks.mappings[].allowUnsafeExternalContent`) unless doing tightly scoped debugging.
     - If you enable `hooks.allowRequestSessionKey`, also set `hooks.allowedSessionKeyPrefixes` to bound caller-selected session keys.
@@ -473,8 +473,8 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
     {
       agents: {
         entries: {
-          home: { default: true, workspace: "~/.openclaw/workspace-home" },
-          work: { workspace: "~/.openclaw/workspace-work" },
+          home: { default: true, workspace: "~/.carapace/workspace-home" },
+          work: { workspace: "~/.carapace/workspace-work" },
         },
       },
       bindings: [
@@ -492,7 +492,7 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
     Use `$include` to organize large configs:
 
     ```json5
-    // ~/.openclaw/openclaw.json
+    // ~/.carapace/carapace.json
     {
       gateway: { port: 18789 },
       agents: { $include: "./agents.json5" },
@@ -507,13 +507,13 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
     - **Sibling keys**: merged after includes (override included values)
     - **Relative paths**: resolved relative to the including file
     - **Path format**: include paths must not contain null bytes and must be strictly shorter than 4096 characters before and after resolution
-    - **OpenClaw-owned writes**: when every changed key is owned by one
-      single-file include at an object-key path, OpenClaw updates the deepest
-      owning include and leaves `openclaw.json` intact. This works for both
+    - **Carapace-owned writes**: when every changed key is owned by one
+      single-file include at an object-key path, Carapace updates the deepest
+      owning include and leaves `carapace.json` intact. This works for both
       top-level sections such as `plugins: { $include: "./plugins.json5" }` and
       nested object-map entries. Write-through only targets include files inside
       the top-level config directory; includes admitted through
-      `OPENCLAW_INCLUDE_ROOTS` stay read-only for OpenClaw-owned writes.
+      `CARAPACE_INCLUDE_ROOTS` stay read-only for Carapace-owned writes.
     - **Unsupported write-through**: root includes (every section of a config
       whose root object authors `$include`), actual array-entry includes,
       include arrays, sibling overrides, files shared by multiple logical paths,
@@ -524,7 +524,7 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
       array positions.
       Include targets and contents are rechecked around persistence; a concurrent
       edit to an intermediate include refuses the write or rolls back its unchanged leaf.
-    - **Doctor repairs**: `openclaw doctor --fix` writes through the same
+    - **Doctor repairs**: `carapace doctor --fix` writes through the same
       boundary. A run whose candidate mixes a root-owned repair with an
       include-owned repair is refused as a whole. That refused write leaves every
       file unchanged (earlier writes in the same run stay saved), and Doctor names
@@ -532,8 +532,8 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
       files when the root file authors that boundary's `$include` (an agent-roster
       boundary is named without its file).
     - **Confinement**: `$include` paths must resolve under the directory holding
-      `openclaw.json`. To share a tree across machines or users, set
-      `OPENCLAW_INCLUDE_ROOTS` to a path-list (`:` on POSIX, `;` on Windows) of
+      `carapace.json`. To share a tree across machines or users, set
+      `CARAPACE_INCLUDE_ROOTS` to a path-list (`:` on POSIX, `;` on Windows) of
       additional directories that includes may reference. Symlinks are resolved
       and re-checked, so a path that lexically lives in a config dir but whose
       real target escapes every allowed root is still rejected.
@@ -544,26 +544,26 @@ skipped when a candidate contains a redacted secret placeholder such as `***` or
 
 ## Config hot reload
 
-The Gateway watches `~/.openclaw/openclaw.json` and applies changes automatically - no manual restart needed for most settings.
+The Gateway watches `~/.carapace/carapace.json` and applies changes automatically - no manual restart needed for most settings.
 
 Direct file edits are treated as untrusted until they validate. The watcher waits
 for editor temp-write/rename churn to settle, reads the final file, and rejects
-invalid external edits without rewriting `openclaw.json`. OpenClaw-owned config
+invalid external edits without rewriting `carapace.json`. Carapace-owned config
 writes use the same schema gate before writing (see [Strict validation](#strict-validation)
 for the clobber/rollback rules that apply to every write).
 
 If you see `config reload skipped (invalid config)` or startup reports `Invalid
-config`, inspect the config, run `openclaw config validate`, then run `openclaw
+config`, inspect the config, run `carapace config validate`, then run `carapace
 doctor --fix` for repair. See [Gateway troubleshooting](/gateway/troubleshooting#gateway-rejected-invalid-config)
 for the checklist.
 
 A live change that selects a workspace with retired setup state is also rejected,
-with an `openclaw doctor --fix` hint. The Gateway keeps its last-good runtime.
+with an `carapace doctor --fix` hint. The Gateway keeps its last-good runtime.
 Gateway-managed writes, including `config.set`, reject the candidate before
 persistence; hand edits and writes from a separate CLI process can remain on disk
 even though the watcher refuses to activate them. Stop the Gateway and, if the
 write was rejected before persistence, save the intended workspace path while
-it is stopped. Then run [`openclaw doctor --fix`](/cli/doctor) and restart.
+it is stopped. Then run [`carapace doctor --fix`](/cli/doctor) and restart.
 Reload never migrates workspace state.
 
 ### Reload modes
@@ -581,7 +581,7 @@ Reload never migrates workspace state.
 }
 ```
 
-The earlier `hot` and `restart` modes are retired; [`openclaw doctor --fix`](/cli/doctor) maps both to `hybrid`. Reload debounce is no longer configurable and runs behind a built-in default.
+The earlier `hot` and `restart` modes are retired; [`carapace doctor --fix`](/cli/doctor) maps both to `hybrid`. Reload debounce is no longer configurable and runs behind a built-in default.
 
 ### What hot-applies vs what needs a restart
 
@@ -607,7 +607,7 @@ stopped accounts; use an explicit channel start to resume those accounts.
 Model runtime selection keeps your authored settings separate from catalog defaults.
 Hot reload and secrets reload preserve that distinction: catalog compatibility
 metadata does not become a custom request override that switches a native runtime
-back to OpenClaw.
+back to Carapace.
 
 | Category                  | Fields                                                                                                                                                                                                                                                             | Gateway restart needed?                |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
@@ -728,7 +728,7 @@ The Gateway accepts its configured secret whether the client sends it as a token
 Local onboarding generates a Gateway secret by default (`gateway.auth.mode: "token"`)
 without asking you to choose an auth mechanism. Existing password-mode configs
 are preserved. To choose your own password explicitly, use
-`openclaw onboard --gateway-password <value>` or `--gateway-auth password`.
+`carapace onboard --gateway-password <value>` or `--gateway-auth password`.
 Remote onboarding asks for one Gateway secret and stores it as `gateway.remote.token`.
 See [Onboard](/cli/onboard) for storage choices and connecting without a shared secret.
 
@@ -764,7 +764,7 @@ When replacement ingress reports ready, old paths it did not reclaim are removed
 
 ### Reload planning
 
-When you edit a source file that is referenced through `$include`, OpenClaw plans
+When you edit a source file that is referenced through `$include`, Carapace plans
 the reload from the source-authored layout, not the flattened in-memory view.
 That keeps hot-reload decisions (hot-apply vs restart) predictable even when a
 single top-level section lives in its own included file such as
@@ -802,8 +802,8 @@ include update step summaries and command output tails.
 Example partial patch:
 
 ```bash
-openclaw gateway call config.get --params '{}'  # capture payload.hash
-openclaw gateway call config.patch --params '{
+carapace gateway call config.get --params '{}'  # capture payload.hash
+carapace gateway call config.patch --params '{
   "raw": "{ channels: { telegram: { groups: { \"*\": { requireMention: false } } } } }",
   "baseHash": "<hash>"
 }'
@@ -832,7 +832,7 @@ supersession by different content, or failed application returns `UNAVAILABLE`
 with recovery guidance. `config.set` acknowledges persistence only.
 
 `channels.status` reports active-work deferrals in `statusIssues`, alongside
-channel policy diagnostics shown in the Control UI and `openclaw channels status`.
+channel policy diagnostics shown in the Control UI and `carapace channels status`.
 `channels.start` also returns a diagnostic when that channel's reload is deferred;
 manual stop/start continues to use the published runtime configuration. Wait for
 active work to finish and refresh status. These diagnostics describe deferred
@@ -862,10 +862,10 @@ not saved into sibling entries. Explicitly configured values remain authoritativ
 
 ## Environment variables
 
-OpenClaw reads env vars from the parent process plus:
+Carapace reads env vars from the parent process plus:
 
 - `.env` from the current working directory (if present)
-- `~/.openclaw/.env` (global fallback)
+- `~/.carapace/.env` (global fallback)
 
 Neither file overrides existing env vars. You can also set inline env vars in config:
 
@@ -881,7 +881,7 @@ Neither file overrides existing env vars. You can also set inline env vars in co
 ```
 
 <Accordion title="Shell env import (optional)">
-  If enabled and expected keys aren't set, OpenClaw runs your login shell and imports only the missing keys:
+  If enabled and expected keys aren't set, Carapace runs your login shell and imports only the missing keys:
 
 ```json5
 {
@@ -891,7 +891,7 @@ Neither file overrides existing env vars. You can also set inline env vars in co
 }
 ```
 
-Env var equivalent: `OPENCLAW_LOAD_SHELL_ENV=1`. Default `timeoutMs`: `15000`.
+Env var equivalent: `CARAPACE_LOAD_SHELL_ENV=1`. Default `timeoutMs`: `15000`.
 </Accordion>
 
 <Accordion title="Env var substitution in config values">
@@ -899,7 +899,7 @@ Env var equivalent: `OPENCLAW_LOAD_SHELL_ENV=1`. Default `timeoutMs`: `15000`.
 
 ```json5
 {
-  gateway: { auth: { token: "${OPENCLAW_GATEWAY_TOKEN}" } },
+  gateway: { auth: { token: "${CARAPACE_GATEWAY_TOKEN}" } },
   models: { providers: { custom: { apiKey: "${CUSTOM_API_KEY}" } } },
 }
 ```

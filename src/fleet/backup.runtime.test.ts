@@ -14,7 +14,7 @@ const NEXT_ATTEMPT = "22222222222222222222222222222222";
 let root: string;
 let record: FleetCellRecord;
 
-const tempRoot = createSuiteTempRootTracker({ prefix: "openclaw-fleet-backup-test-" });
+const tempRoot = createSuiteTempRootTracker({ prefix: "carapace-fleet-backup-test-" });
 
 function inspection(running = false): Extract<FleetContainerInspectResult, { kind: "ok" }> {
   return {
@@ -23,13 +23,13 @@ function inspection(running = false): Extract<FleetContainerInspectResult, { kin
     state: running ? "running" : "exited",
     running,
     labels: {
-      "openclaw.fleet.tenant": "acme",
-      "openclaw.fleet.owner": cellOwnerId(record.dataDir),
-      "openclaw.fleet.attempt": ATTEMPT,
-      "openclaw.fleet.env-keys": "",
-      "openclaw.fleet.disk-limit": "10g",
+      "carapace.fleet.tenant": "acme",
+      "carapace.fleet.owner": cellOwnerId(record.dataDir),
+      "carapace.fleet.attempt": ATTEMPT,
+      "carapace.fleet.env-keys": "",
+      "carapace.fleet.disk-limit": "10g",
     },
-    environment: { OPENCLAW_GATEWAY_TOKEN: "old-token" },
+    environment: { CARAPACE_GATEWAY_TOKEN: "old-token" },
     imageId: "sha256:image",
     memory: "2147483648",
     cpus: "2",
@@ -52,8 +52,8 @@ function containerMock(current: FleetContainerInspectResult = inspection()) {
     inspectNetwork: vi.fn(async () => ({
       kind: "ok" as const,
       labels: {
-        "openclaw.fleet.tenant": "acme",
-        "openclaw.fleet.owner": cellOwnerId(record.dataDir),
+        "carapace.fleet.tenant": "acme",
+        "carapace.fleet.owner": cellOwnerId(record.dataDir),
       },
       attachedContainers: [{ id: "cell", name: record.containerName }],
       internal: false,
@@ -81,7 +81,7 @@ async function createArchive(
     path.join(source, "manifest.json"),
     JSON.stringify({
       schemaVersion: 1,
-      kind: "openclaw-fleet-cell-backup",
+      kind: "carapace-fleet-cell-backup",
       tenant: params.tenant ?? "acme",
       createdAt: new Date(0).toISOString(),
       hostPort: 19100,
@@ -105,7 +105,7 @@ beforeEach(async () => {
     image: "image",
     runtime: "docker",
     hostPort: 19100,
-    containerName: "openclaw-cell-acme",
+    containerName: "carapace-cell-acme",
     dataDir: path.join(root, "fleet", "cells", "acme"),
   };
   await fs.mkdir(record.dataDir, { recursive: true, mode: 0o700 });
@@ -481,7 +481,7 @@ describe("fleet restore runtime", () => {
 
     containers.inspectNetwork.mockResolvedValue({
       kind: "ok",
-      labels: { "openclaw.fleet.tenant": "acme", "openclaw.fleet.owner": "foreign" },
+      labels: { "carapace.fleet.tenant": "acme", "carapace.fleet.owner": "foreign" },
       attachedContainers: [],
       internal: false,
     });
@@ -505,7 +505,7 @@ describe("fleet restore runtime", () => {
     await fs.mkdir(path.join(source, "data"), { recursive: true });
     await fs.writeFile(
       path.join(source, "manifest.json"),
-      JSON.stringify({ schemaVersion: 1, kind: "openclaw-fleet-cell-backup", tenant: "acme" }),
+      JSON.stringify({ schemaVersion: 1, kind: "carapace-fleet-cell-backup", tenant: "acme" }),
     );
     await mutate(source);
     const archive = path.join(root, `${path.basename(source)}.tgz`);
@@ -535,7 +535,7 @@ describe("fleet restore runtime", () => {
     await fs.mkdir(path.join(source, "auth"));
     await fs.writeFile(
       path.join(source, "manifest.json"),
-      JSON.stringify({ schemaVersion: 1, kind: "openclaw-fleet-cell-backup", tenant: "acme" }),
+      JSON.stringify({ schemaVersion: 1, kind: "carapace-fleet-cell-backup", tenant: "acme" }),
     );
     await fs.writeFile(path.join(source, deepRelativePath), "state");
     const archive = path.join(root, `${path.basename(source)}.tgz`);
@@ -558,7 +558,7 @@ describe("fleet restore runtime", () => {
     await fs.mkdir(path.join(source, "data"), { recursive: true });
     await fs.writeFile(
       path.join(source, "manifest.json"),
-      JSON.stringify({ schemaVersion: 1, kind: "openclaw-fleet-cell-backup", tenant: "acme" }),
+      JSON.stringify({ schemaVersion: 1, kind: "carapace-fleet-cell-backup", tenant: "acme" }),
     );
     await fs.writeFile(path.join(source, "data", "restored.txt"), "new-data");
     const archive = path.join(root, `${path.basename(source)}.tgz`);
@@ -579,7 +579,7 @@ describe("fleet restore runtime", () => {
     const drifted = inspection();
     // Losing the env-provenance label makes the replacement profile unbuildable;
     // restore must detect that before stopping or removing anything.
-    delete drifted.labels["openclaw.fleet.env-keys"];
+    delete drifted.labels["carapace.fleet.env-keys"];
     const containers = containerMock(drifted);
     await expect(restoreFleetCell(restoreParams(containers, archive))).rejects.toThrow(
       /Cannot restore cell/iu,
@@ -596,13 +596,13 @@ describe("fleet restore runtime", () => {
       name: "generated previous default",
       cache: "/home/node/.cache",
       keys: [],
-      expectedCache: "/home/node/.openclaw/cache",
+      expectedCache: "/home/node/.carapace/cache",
     },
     {
       name: "explicit matching default",
-      cache: "/home/node/.openclaw/cache",
+      cache: "/home/node/.carapace/cache",
       keys: ["XDG_CACHE_HOME"],
-      expectedCache: "/home/node/.openclaw/cache",
+      expectedCache: "/home/node/.carapace/cache",
     },
     {
       name: "explicit previous default",
@@ -613,7 +613,7 @@ describe("fleet restore runtime", () => {
   ])("restores state and token with $name", async ({ cache, keys, expectedCache }) => {
     const archive = await createArchive();
     const current = inspection();
-    current.labels["openclaw.fleet.env-keys"] = keys.join(",");
+    current.labels["carapace.fleet.env-keys"] = keys.join(",");
     current.environment.XDG_CACHE_HOME = cache;
     const containers = containerMock(current);
     const result = await restoreFleetCell(restoreParams(containers, archive));
@@ -624,16 +624,16 @@ describe("fleet restore runtime", () => {
       code: "ENOENT",
     });
     const config = JSON.parse(
-      await fs.readFile(path.join(record.dataDir, "openclaw.json"), "utf8"),
+      await fs.readFile(path.join(record.dataDir, "carapace.json"), "utf8"),
     ) as { gateway?: { controlUi?: { allowedOrigins?: string[] } } };
     expect(config.gateway?.controlUi?.allowedOrigins).toContain("http://127.0.0.1:19100");
-    expect(containers.run.mock.calls[0]?.[0].environment.OPENCLAW_GATEWAY_TOKEN).toBe("new-token");
+    expect(containers.run.mock.calls[0]?.[0].environment.CARAPACE_GATEWAY_TOKEN).toBe("new-token");
     expect(containers.run.mock.calls[0]?.[0].environment.XDG_CACHE_HOME).toBe(expectedCache);
     expect(containers.run.mock.calls[0]?.[0].userEnvironmentKeys).toEqual(keys);
     // The disk limit must survive restore via the fleet label even on Podman,
     // whose inspect schema has no HostConfig.StorageOpt.
     expect(containers.run.mock.calls[0]?.[0].diskSize).toBe("10g");
-    expect(containers.run.mock.calls[0]?.[0].environment.OPENCLAW_GATEWAY_TOKEN).not.toBe(
+    expect(containers.run.mock.calls[0]?.[0].environment.CARAPACE_GATEWAY_TOKEN).not.toBe(
       "old-token",
     );
     expect(containers.run).toHaveBeenCalledWith(expect.any(Object), false);
@@ -653,7 +653,7 @@ describe("fleet restore runtime", () => {
     await expect(
       restoreFleetCell({ ...restoreParams(containers, archive), force: true }),
     ).rejects.toThrow(/transient removal failure/iu);
-    expect(containers.start).toHaveBeenCalledWith("docker", "openclaw-cell-acme");
+    expect(containers.start).toHaveBeenCalledWith("docker", "carapace-cell-acme");
     await expect(fs.readFile(path.join(record.dataDir, "state.txt"), "utf8")).resolves.toBe(
       "state",
     );
@@ -670,7 +670,7 @@ describe("fleet restore runtime", () => {
     containers.run.mockImplementation(async () => {
       running.running = true;
       running.state = "running";
-      running.labels["openclaw.fleet.attempt"] = NEXT_ATTEMPT;
+      running.labels["carapace.fleet.attempt"] = NEXT_ATTEMPT;
     });
     let clock = 0;
     let message = "";

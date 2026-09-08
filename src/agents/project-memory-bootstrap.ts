@@ -4,7 +4,7 @@ import {
   splitCuratedMarkdownEntries,
   stripMemoryAnnotationCarriers,
 } from "../../packages/memory-host-sdk/src/engine-storage.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isAutomaticMemoryEntryEligible,
   type MemorySearchResult,
@@ -123,7 +123,7 @@ function buildProjectMemoryBootstrap(params: {
 }
 
 export async function prepareProjectMemoryBootstrap(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   activeProjectKeys: readonly string[];
 }): Promise<string[]> {

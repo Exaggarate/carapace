@@ -10,7 +10,7 @@ import type {
   PluginAutoEnableCandidate,
   PluginAutoEnableResult,
 } from "./plugin-auto-enable.types.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 type PluginAutoEnableCacheEntry = {
   discoveryFingerprint: string;
@@ -111,7 +111,7 @@ function isPluginAutoEnableCacheEntryFresh(params: {
 
 /** Applies already detected plugin auto-enable candidates to config. */
 export function materializePluginAutoEnableCandidates(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   candidates: readonly PluginAutoEnableCandidate[];
   env?: NodeJS.ProcessEnv;
   manifestRegistry?: PluginManifestRegistry;
@@ -141,7 +141,7 @@ export function materializePluginAutoEnableCandidates(params: {
 }
 
 export function applyPluginAutoEnable(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   manifestRegistry?: PluginManifestRegistry;
   discovery?: PluginDiscoveryResult;

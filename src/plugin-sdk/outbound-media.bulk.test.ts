@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   createHostedOutboundMediaStore,
   type HostedOutboundMediaChunkRecord,
@@ -7,7 +7,7 @@ import {
 } from "./outbound-media.js";
 import {
   createPluginStateKeyedStoreForTests,
-  openOpenClawStateDatabase,
+  openCarapaceStateDatabase,
   resetPluginStateStoreForTests,
 } from "./plugin-state-test-runtime.js";
 
@@ -17,7 +17,7 @@ describe("hosted media bulk read error order", () => {
   it.each([true, false])(
     "preserves early exits, cleanup, and reached errors (bulk: %s)",
     async (bulk) => {
-      await withOpenClawTestState({ label: "hosted-media-bulk-errors" }, async () => {
+      await withCarapaceTestState({ label: "hosted-media-bulk-errors" }, async () => {
         for (const early of ["missing", "invalid-index", "invalid-bytes", "valid"]) {
           const metadataStore = createPluginStateKeyedStoreForTests<HostedOutboundMediaMetaRecord>(
             "fixture-plugin",
@@ -45,7 +45,7 @@ describe("hosted media bulk read error order", () => {
             });
           }
           await chunkStore.register(key(1), { id, index: 1, dataBase64: "NTY3OA==" });
-          const { db } = openOpenClawStateDatabase();
+          const { db } = openCarapaceStateDatabase();
           db.prepare(
             "UPDATE plugin_state_entries SET value_json = ? WHERE namespace = ? AND entry_key = ?",
           ).run("invalid JSON", `chunks-${early}`, key(1));

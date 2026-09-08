@@ -42,7 +42,7 @@ function continuationState(): ResponsesContinuationState {
       model: "gpt-5.6-luna",
       store: true,
       max_output_tokens: undefined,
-      metadata: { stable: "yes", openclaw_turn_id: "turn-1", openclaw_turn_attempt: "1" },
+      metadata: { stable: "yes", carapace_turn_id: "turn-1", carapace_turn_attempt: "1" },
       input: [firstUser] as never,
     },
     lastResponseId: "resp_1",
@@ -62,7 +62,7 @@ function nextRequest(phase = "final_answer"): ResponsesContinuationRequest {
       },
       { type: "message", role: "user", content: [{ type: "input_text", text: "second" }] },
     ] as never,
-    metadata: { openclaw_turn_attempt: "2", openclaw_turn_id: "turn-2", stable: "yes" },
+    metadata: { carapace_turn_attempt: "2", carapace_turn_id: "turn-2", stable: "yes" },
     store: true,
     model: "gpt-5.6-luna",
   };
@@ -81,8 +81,8 @@ function claim(params: {
     headers: {
       Authorization: params.authorization ?? "Bearer tenant-a",
       traceparent: `trace-${params.turn ?? "1"}`,
-      "x-openclaw-turn-id": `turn-${params.turn ?? "1"}`,
-      "x-openclaw-turn-attempt": params.turn ?? "1",
+      "x-carapace-turn-id": `turn-${params.turn ?? "1"}`,
+      "x-carapace-turn-attempt": params.turn ?? "1",
       "x-stable-route": "route-a",
     },
     request: params.request ?? continuationState().lastRequest,
@@ -130,7 +130,7 @@ describe("OpenAI Responses continuation", () => {
       content: [
         {
           type: "input_text" as const,
-          text: `<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\n${text}\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>`,
+          text: `<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\n${text}\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>`,
         },
       ],
     });

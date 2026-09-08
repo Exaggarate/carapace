@@ -50,7 +50,7 @@ export async function finishAlreadyCurrentUpdate(params: {
       startedAtMs,
       endedAtMs: Date.now(),
       detail: missing.length
-        ? `${missing.length} plugin payload(s) need repair; run openclaw update repair.`
+        ? `${missing.length} plugin payload(s) need repair; run carapace update repair.`
         : "Installed plugin payloads are present.",
     },
     { env: run.env },
@@ -59,6 +59,6 @@ export async function finishAlreadyCurrentUpdate(params: {
   printResult(
     result,
     params.opts,
-    missing.length ? { nextAction: "Run openclaw update repair to repair plugin payloads." } : {},
+    missing.length ? { nextAction: "Run carapace update repair to repair plugin payloads." } : {},
   );
 }

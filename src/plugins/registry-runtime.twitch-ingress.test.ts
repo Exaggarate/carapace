@@ -6,9 +6,9 @@ import {
 } from "../channels/message-access/admission-evidence.js";
 import { importBundledChannelContractSourceArtifact } from "../channels/plugins/contracts/test-helpers/runtime-artifacts.js";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runChannelInboundEvent } from "../plugin-sdk/channel-inbound.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createRuntimeEnv } from "../test-utils/plugin-runtime-env.js";
 import { markPluginRegistryActive, markPluginRegistryRetired } from "./registry-lifecycle.js";
 import { createPluginRegistry } from "./registry.js";
@@ -98,7 +98,7 @@ async function withTwitchMonitor(
   }) => Promise<void>,
   collectionEnabled = true,
 ) {
-  return withOpenClawTestState({ label: "twitch-provenance" }, async (state) => {
+  return withCarapaceTestState({ label: "twitch-provenance" }, async (state) => {
     const accountConfig = {
       username: "testbot",
       accessToken: "synthetic-test-token",
@@ -106,7 +106,7 @@ async function withTwitchMonitor(
       channel: "testchannel",
       ...policy,
     };
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { twitch: { accounts: { [accountId]: accountConfig } } },
     };
     const account = twitchPlugin.config.resolveAccount(cfg, accountId);

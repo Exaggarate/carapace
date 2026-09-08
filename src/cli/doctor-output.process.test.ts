@@ -14,15 +14,15 @@ import {
 import { resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
 import { createUpdateRun } from "../infra/update-run-ledger.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawRegisteredAgentDatabases,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceRegisteredAgentDatabases,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { spawnNodeEvalSync } from "../test-utils/node-process.js";
 import { cliRecoveryEntrypoints } from "./cli-entrypoint.test-support.js";
 
@@ -61,7 +61,7 @@ function runDoctor(params: {
   env?: NodeJS.ProcessEnv;
 }) {
   // Only the immutable package is shared across cases; scenario state stays separate.
-  doctorRuntime ??= createDoctorRuntime(runtimeDirs.make("openclaw-doctor-runtime-"));
+  doctorRuntime ??= createDoctorRuntime(runtimeDirs.make("carapace-doctor-runtime-"));
   return doctorRuntime(
     {
       ...process.env,
@@ -69,14 +69,14 @@ function runDoctor(params: {
       USERPROFILE: params.root,
       NODE_DISABLE_COMPILE_CACHE: "1",
       NODE_ENV: undefined,
-      OPENCLAW_CONFIG_PATH: params.configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_HIDE_BANNER: "1",
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_NO_RESPAWN: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_STATE_DIR: path.join(params.root, "state"),
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: params.configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_HIDE_BANNER: "1",
+      CARAPACE_HOME: undefined,
+      CARAPACE_NO_RESPAWN: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_STATE_DIR: path.join(params.root, "state"),
+      CARAPACE_TEST_FAST: "1",
       VITEST: undefined,
       VITEST_POOL_ID: undefined,
       VITEST_WORKER_ID: undefined,
@@ -94,16 +94,16 @@ function runDoctor(params: {
 
 describe("Doctor report process output", () => {
   it("refuses an unfenced schema bump without publication metadata before CLI debug capture can write state", () => {
-    const root = tempDirs.make("openclaw-doctor-update-schema-");
-    const configPath = path.join(root, "openclaw.json");
-    const env = { OPENCLAW_STATE_DIR: path.join(root, "state"), OPENCLAW_CONFIG_PATH: configPath };
+    const root = tempDirs.make("carapace-doctor-update-schema-");
+    const configPath = path.join(root, "carapace.json");
+    const env = { CARAPACE_STATE_DIR: path.join(root, "state"), CARAPACE_CONFIG_PATH: configPath };
     fs.writeFileSync(configPath, "{}\n");
-    const shared = openOpenClawStateDatabase({ env }).path;
+    const shared = openCarapaceStateDatabase({ env }).path;
     createUpdateRun({ trigger: "cli", before: { version: "2026.9.2" } }, { env });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const legacy = new DatabaseSync(shared);
     legacy.exec(
-      `PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION - 1}; UPDATE schema_meta SET schema_version = ${OPENCLAW_STATE_SCHEMA_VERSION - 1}; DROP TABLE config_machine_state;`,
+      `PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION - 1}; UPDATE schema_meta SET schema_version = ${CARAPACE_STATE_SCHEMA_VERSION - 1}; DROP TABLE config_machine_state;`,
     );
     legacy.close();
     const databaseBefore = fs.readFileSync(shared);
@@ -115,9 +115,9 @@ describe("Doctor report process output", () => {
       configPath,
       repair: true,
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_DEBUG_PROXY_ENABLED: "1",
-        OPENCLAW_SERVICE_REPAIR_POLICY: "external",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_DEBUG_PROXY_ENABLED: "1",
+        CARAPACE_SERVICE_REPAIR_POLICY: "external",
       },
     });
     expect(result.error).toBeUndefined();
@@ -129,7 +129,7 @@ describe("Doctor report process output", () => {
     const after = new DatabaseSync(shared, { readOnly: true });
     try {
       expect(after.prepare("PRAGMA user_version").get()?.user_version).toBe(
-        OPENCLAW_STATE_SCHEMA_VERSION - 1,
+        CARAPACE_STATE_SCHEMA_VERSION - 1,
       );
     } finally {
       after.close();
@@ -137,16 +137,16 @@ describe("Doctor report process output", () => {
     expect(fs.readFileSync(configPath)).toEqual(configBefore);
     expect(result.status, `${result.stderr}\n${result.stdout}`).toBe(1);
     expect(`${result.stderr}\n${result.stdout}`).toContain(
-      "Doctor refused update-time schema repair driven by OpenClaw 2026.9.2",
+      "Doctor refused update-time schema repair driven by Carapace 2026.9.2",
     );
   });
 
   it("reports deferred Doctor-only state after config refusal, then converges", () => {
-    const root = tempDirs.make("openclaw-doctor-deferred-state-");
+    const root = tempDirs.make("carapace-doctor-deferred-state-");
     const stateDir = path.join(root, "state");
     const workspaceDir = path.join(root, "workspace");
-    const configPath = path.join(root, "openclaw.json");
-    const workspaceSource = path.join(workspaceDir, "openclaw-workspace-state.json");
+    const configPath = path.join(root, "carapace.json");
+    const workspaceSource = path.join(workspaceDir, "carapace-workspace-state.json");
     const tuiSource = path.join(stateDir, "tui", "last-session.json");
     const agentSource = path.join(stateDir, "agent", "auth.json");
     fs.mkdirSync(path.dirname(tuiSource), { recursive: true });
@@ -195,12 +195,12 @@ describe("Doctor report process output", () => {
       "Deferred legacy agent/session migration: select an agent owner",
     );
     expect(refusedOutput).toContain("No listed legacy source was removed.");
-    expect(refusedOutput).toContain('rerun "openclaw doctor --fix"');
+    expect(refusedOutput).toContain('rerun "carapace doctor --fix"');
     expect(fs.readFileSync(configPath)).toEqual(configBefore);
     expect(fs.readFileSync(workspaceSource)).toEqual(workspaceBefore);
     expect(fs.readFileSync(tuiSource)).toEqual(tuiBefore);
     expect(fs.readFileSync(agentSource)).toEqual(agentBefore);
-    expect(fs.readdirSync(workspaceDir)).toEqual(["openclaw-workspace-state.json"]);
+    expect(fs.readdirSync(workspaceDir)).toEqual(["carapace-workspace-state.json"]);
     expect(fs.readdirSync(path.dirname(tuiSource))).toEqual(["last-session.json"]);
 
     fs.writeFileSync(
@@ -243,9 +243,9 @@ describe("Doctor report process output", () => {
   }, 180_000);
 
   it("fails repair when session import leaves a startup-blocking legacy store", () => {
-    const root = tempDirs.make("openclaw-doctor-session-convergence-");
+    const root = tempDirs.make("carapace-doctor-session-convergence-");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
     const original = Buffer.from('{"agent:main:legacy":');
     fs.mkdirSync(path.dirname(storePath), { recursive: true });
@@ -259,7 +259,7 @@ describe("Doctor report process output", () => {
     expect(result.signal, output).toBeNull();
     expect(result.status, output).toBe(1);
     expect(output).toContain("Legacy session store requires migration");
-    expect(output).toContain("openclaw doctor --fix");
+    expect(output).toContain("carapace doctor --fix");
     expect(output).not.toContain("Doctor complete.");
     expect(fs.readFileSync(storePath)).toEqual(original);
     expect(JSON.parse(fs.readFileSync(configPath, "utf8"))).toMatchObject({
@@ -271,11 +271,11 @@ describe("Doctor report process output", () => {
   it("explains and preserves retained custom agent databases in preview and repair", () => {
     for (const repair of [false, true]) {
       const root = tempDirs.make(
-        `openclaw-doctor-retained-database-${repair ? "repair" : "preview"}-`,
+        `carapace-doctor-retained-database-${repair ? "repair" : "preview"}-`,
       );
       const stateDir = path.join(root, "state");
-      const configPath = path.join(root, "openclaw.json");
-      const env = { OPENCLAW_STATE_DIR: stateDir };
+      const configPath = path.join(root, "carapace.json");
+      const env = { CARAPACE_STATE_DIR: stateDir };
       fs.mkdirSync(stateDir, { recursive: true });
       fs.writeFileSync(
         configPath,
@@ -287,7 +287,7 @@ describe("Doctor report process output", () => {
           },
         })}\n`,
       );
-      openOpenClawAgentDatabase({ agentId: "main", env });
+      openCarapaceAgentDatabase({ agentId: "main", env });
       const retainedDatabase = {
         agentId: "retired",
         path: path.join(stateDir, "retired.sqlite"),
@@ -299,7 +299,7 @@ describe("Doctor report process output", () => {
       const sanitizedExternalPath = path.join(root, "externalforged", "retired.sqlite");
       const retainedDatabases = [retainedDatabase, externalDatabase];
       for (const databaseCase of retainedDatabases) {
-        const retained = openOpenClawAgentDatabase({
+        const retained = openCarapaceAgentDatabase({
           agentId: databaseCase.agentId,
           env,
           path: databaseCase.path,
@@ -316,8 +316,8 @@ describe("Doctor report process output", () => {
             1,
           );
       }
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
 
       const result = runDoctor({ root, configPath, repair });
       const output = `${result.stderr}\n${result.stdout}`;
@@ -353,14 +353,14 @@ describe("Doctor report process output", () => {
           database.close();
         }
       }
-      const registeredDatabases = listOpenClawRegisteredAgentDatabases({ env });
+      const registeredDatabases = listCarapaceRegisteredAgentDatabases({ env });
       expect(registeredDatabases).toContainEqual(expect.objectContaining(retainedDatabase));
       expect(registeredDatabases).not.toContainEqual(expect.objectContaining(externalDatabase));
     }
   }, 120_000);
 
   it("omits backup tips for Git-backed nested agent workspaces", () => {
-    const root = tempDirs.make("openclaw-doctor-workspace-git-");
+    const root = tempDirs.make("carapace-doctor-workspace-git-");
     const repoRoot = path.join(root, "repo");
     const nestedWorkspace = path.join(
       repoRoot,
@@ -368,7 +368,7 @@ describe("Doctor report process output", () => {
     );
     const linkedWorkspace = path.join(root, "linked-workspace");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     fs.mkdirSync(path.join(repoRoot, ".git"), { recursive: true });
     fs.mkdirSync(nestedWorkspace, { recursive: true });
     fs.mkdirSync(stateDir);
@@ -415,11 +415,11 @@ describe("Doctor report process output", () => {
           USERPROFILE: root,
           NODE_DISABLE_COMPILE_CACHE: "1",
           NODE_ENV: undefined,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_HIDE_BANNER: "1",
-          OPENCLAW_HOME: root,
-          OPENCLAW_NO_RESPAWN: "1",
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_HIDE_BANNER: "1",
+          CARAPACE_HOME: root,
+          CARAPACE_NO_RESPAWN: "1",
+          CARAPACE_STATE_DIR: stateDir,
           VITEST: undefined,
           VITEST_POOL_ID: undefined,
           VITEST_WORKER_ID: undefined,
@@ -443,7 +443,7 @@ describe("Doctor report process output", () => {
     { name: "lint JSON", args: ["--lint", "--json"], exitCode: 1 },
     { name: "post-upgrade JSON", args: ["--post-upgrade", "--json"], exitCode: 1 },
   ])("drains the whole pipe before exiting for $name", ({ args, exitCode }) => {
-    const root = tempDirs.make("openclaw-doctor-output-");
+    const root = tempDirs.make("carapace-doctor-output-");
     const payload = { ok: false, findings: [{ level: "error", message: "x".repeat(1024 * 1024) }] };
     const sourceUrl = (relative: string) => new URL(relative, import.meta.url).href;
     // Keep the parser, runtime, and exit lifecycle real. Synthetic report
@@ -471,10 +471,10 @@ describe("Doctor report process output", () => {
       });
       const { registerMaintenanceCommands } = await import(${JSON.stringify(sourceUrl("./program/register.maintenance.ts"))});
       const { runCliWithExitFinalization } = await import(${JSON.stringify(sourceUrl("./one-shot-exit.ts"))});
-      process.argv = [process.execPath, "openclaw", "doctor", ...${JSON.stringify(args)}];
+      process.argv = [process.execPath, "carapace", "doctor", ...${JSON.stringify(args)}];
       await runCliWithExitFinalization({
         run: async () => {
-          const program = new Command().name("openclaw");
+          const program = new Command().name("carapace");
           registerMaintenanceCommands(program);
           await program.parseAsync(process.argv);
         },
@@ -488,9 +488,9 @@ describe("Doctor report process output", () => {
         PATH: path.dirname(process.execPath),
         HOME: root,
         USERPROFILE: root,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
         NO_COLOR: "1",
       },
       maxBuffer: 2 * 1024 * 1024,

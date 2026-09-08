@@ -2,7 +2,7 @@ import UIKit
 
 /// Compose card UI for the share extension. This target cannot link the app
 /// design layer (`Sources/Design`), so the accent below mirrors
-/// `OpenClawBrand.activationPrimaryAction`; keep both in sync when rebranding.
+/// `CarapaceBrand.activationPrimaryAction`; keep both in sync when rebranding.
 final class ShareComposeView: UIView, UITextViewDelegate {
     private enum Metric {
         static let pagePadding: CGFloat = 16
@@ -92,12 +92,12 @@ final class ShareComposeView: UIView, UITextViewDelegate {
             self.statusContainer.isHidden = true
         case .sending:
             self.showFooter(
-                text: NSLocalizedString("Sending to OpenClaw gateway…", comment: "Share extension sending status"),
+                text: NSLocalizedString("Sending to Carapace gateway…", comment: "Share extension sending status"),
                 icon: nil,
                 spinning: true)
         case .sent:
             self.showFooter(
-                text: NSLocalizedString("Sent to OpenClaw.", comment: "Share extension success status"),
+                text: NSLocalizedString("Sent to Carapace.", comment: "Share extension success status"),
                 icon: (name: "checkmark.circle.fill", tint: .systemGreen),
                 spinning: false)
         case let .blocked(message), let .failed(message):
@@ -156,7 +156,7 @@ final class ShareComposeView: UIView, UITextViewDelegate {
     private func configureSubviews() {
         self.backgroundColor = .systemGroupedBackground
 
-        self.titleLabel.text = "OpenClaw"
+        self.titleLabel.text = "Carapace"
         self.titleLabel.font = .preferredFont(forTextStyle: .headline)
         self.titleLabel.adjustsFontForContentSizeCategory = true
         self.titleLabel.accessibilityTraits.insert(.header)
@@ -302,7 +302,7 @@ final class ShareComposeView: UIView, UITextViewDelegate {
         configuration.imagePadding = 8
         configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(textStyle: .subheadline)
         configuration.attributedTitle = self.attributedTitle(
-            NSLocalizedString("Send to OpenClaw", comment: "Share extension send action"),
+            NSLocalizedString("Send to Carapace", comment: "Share extension send action"),
             style: .headline)
         return configuration
     }

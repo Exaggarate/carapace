@@ -1,5 +1,5 @@
 /** Handles diagnostics commands and private owner routing for sensitive diagnostics output. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { createExecTool } from "../../agents/bash-tools.js";
 import type { SessionEntry } from "../../config/sessions.js";
@@ -19,7 +19,7 @@ import {
 import type { ReplyPayload } from "../types.js";
 import { formatCommandExecResult, formatCommandExecText } from "./command-exec-result.js";
 import { rejectNonOwnerCommand } from "./command-gates.js";
-import { buildCurrentOpenClawCliExecRequest } from "./commands-openclaw-cli.js";
+import { buildCurrentCarapaceCliExecRequest } from "./commands-carapace-cli.js";
 import {
   buildPrivateCommandApprovalRequest,
   deliverPrivateCommandReply,
@@ -31,8 +31,8 @@ import type { CommandHandler, HandleCommandsParams } from "./commands-types.js";
 
 const DIAGNOSTICS_COMMAND = "/diagnostics";
 const CODEX_DIAGNOSTICS_COMMAND = "/codex diagnostics";
-const DIAGNOSTICS_DOCS_URL = "https://docs.openclaw.ai/gateway/diagnostics";
-const GATEWAY_DIAGNOSTICS_EXPORT_JSON_LABEL = "openclaw gateway diagnostics export --json";
+const DIAGNOSTICS_DOCS_URL = "https://github.com/Exaggarate/carapace";
+const GATEWAY_DIAGNOSTICS_EXPORT_JSON_LABEL = "carapace gateway diagnostics export --json";
 const DIAGNOSTICS_EXEC_SCOPE_KEY = "chat:diagnostics";
 const DIAGNOSTICS_PRIVATE_ROUTE_UNAVAILABLE =
   "I couldn't find a private owner approval route for diagnostics. Run /diagnostics from an owner DM so the sensitive diagnostics details are not posted in this chat.";
@@ -226,7 +226,7 @@ async function resolvePrivateDiagnosticsTargetsForCommand(
 }
 
 function buildGatewayDiagnosticsExportJsonRequest() {
-  return buildCurrentOpenClawCliExecRequest(["gateway", "diagnostics", "export", "--json"]);
+  return buildCurrentCarapaceCliExecRequest(["gateway", "diagnostics", "export", "--json"]);
 }
 
 async function requestGatewayDiagnosticsExportApproval(
@@ -370,9 +370,9 @@ function hasCodexHarnessMetadata(params: HandleCommandsParams): boolean {
 
 function isCodexDiagnosticsUnavailableText(text: string | undefined): boolean {
   return (
-    text?.startsWith("No Codex thread is attached to this OpenClaw session yet.") === true ||
+    text?.startsWith("No Codex thread is attached to this Carapace session yet.") === true ||
     text?.startsWith(
-      "Cannot send Codex diagnostics because this command did not include an OpenClaw session file.",
+      "Cannot send Codex diagnostics because this command did not include an Carapace session file.",
     ) === true
   );
 }

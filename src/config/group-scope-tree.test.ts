@@ -1,6 +1,6 @@
 // Verifies canonical group scope precedence and sender policy resolution.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "./config.js";
+import type { CarapaceConfig } from "./config.js";
 import {
   resolveChannelGroupRequireMention,
   resolveChannelGroupToolsPolicy,
@@ -127,7 +127,7 @@ describe("resolveScopeRequireMention", () => {
       const tree: ScopeTree = { scopes: { room: node } };
       const cfg = {
         channels: { whatsapp: { groups: { room: node } } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       expect(
         resolveScopeRequireMention({
@@ -349,7 +349,7 @@ describe("flat group policy adapters", () => {
     const defaults = { requireMention: false, tools: { deny: ["exec"] } };
     const cfg = {
       channels: { signal: { groups: { room, "*": defaults } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     expect(resolveChannelGroupRequireMention({ cfg, channel: "signal", groupId: "room" })).toBe(
       false,
     );
@@ -369,7 +369,7 @@ describe("flat group policy adapters", () => {
   ])("preserves configured-group identity for $groupId", ({ groupId, expected }) => {
     const cfg = {
       channels: { signal: { groups: { "*": {}, Room: {} } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     expect(
       resolveChannelGroupRequireMention({
         cfg,
@@ -397,7 +397,7 @@ describe("flat group policy adapters", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     expect(
       resolveChannelGroupToolsPolicy({
         cfg,
@@ -427,7 +427,7 @@ describe("flat group policy adapters", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     expect(
       resolveChannelGroupToolsPolicy({
         cfg,

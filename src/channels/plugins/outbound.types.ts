@@ -5,7 +5,7 @@
  */
 import type { ReplyPayload } from "../../auto-reply/reply-payload.js";
 import type { ReplyToMode } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ChannelApprovalKind } from "../../infra/approval-types.js";
 import type { OutboundDeliveryResult } from "../../infra/outbound/deliver-types.js";
 import type { OutboundDeliveryFormattingOptions } from "../../infra/outbound/formatting.js";
@@ -20,7 +20,7 @@ import type {
 } from "./types.core.js";
 
 export type ChannelOutboundContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to: string;
   text: string;
   mediaUrl?: string;
@@ -163,13 +163,13 @@ type ChannelOutboundChunkContext = {
 
 type ChannelOutboundNormalizePayloadParams = {
   payload: ReplyPayload;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 };
 
 type ChannelOutboundNormalizePayloadBatchParams = {
   payloads: readonly { index: number; payload: ReplyPayload }[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 };
 
@@ -181,14 +181,14 @@ export type ChannelOutboundAdapter = {
   /** Lift remote Markdown image syntax in text into outbound media attachments. */
   extractMarkdownImages?: boolean;
   /** Preserve model-authored Markdown details blocks for a native channel renderer. */
-  preserveMarkdownDetails?: (params: { cfg: OpenClawConfig; accountId?: string | null }) => boolean;
+  preserveMarkdownDetails?: (params: { cfg: CarapaceConfig; accountId?: string | null }) => boolean;
   textChunkLimit?: number;
   /**
    * Reserve the exact provider id used by the next single-message send.
    * Presence opts the channel into conversations_turn reply correlation.
    */
   prepareConversationTurnMessageId?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     to: string;
     text: string;
     accountId?: string | null;
@@ -197,7 +197,7 @@ export type ChannelOutboundAdapter = {
   sanitizeText?: (params: {
     text: string;
     payload: ReplyPayload;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     accountId?: string;
   }) => string;
   pollMaxOptions?: number;
@@ -216,32 +216,32 @@ export type ChannelOutboundAdapter = {
   sendPayloadGroupsMedia?: boolean;
   shouldSkipPlainTextSanitization?: (params: { payload: ReplyPayload }) => boolean;
   resolveEffectiveTextChunkLimit?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
     fallbackLimit?: number;
     formatting?: OutboundDeliveryFormattingOptions;
   }) => number | undefined;
   shouldSuppressLocalPayloadPrompt?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
     payload: ReplyPayload;
     hint?: ChannelOutboundPayloadHint;
   }) => boolean;
   beforeDeliverPayload?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     target: ChannelOutboundTargetRef;
     payload: ReplyPayload;
     hint?: ChannelOutboundPayloadHint;
   }) => Promise<void> | void;
   afterDeliverPayload?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     target: ChannelOutboundTargetRef;
     payload: ReplyPayload;
     results: readonly OutboundDeliveryResult[];
   }) => Promise<void> | void;
   /** Adopt a provider-created thread for later payloads in the same durable batch. */
   adoptTargetFromDelivery?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     target: ChannelOutboundTargetRef;
     result: OutboundDeliveryResult;
   }) => { threadId: string | number } | null | undefined;
@@ -254,7 +254,7 @@ export type ChannelOutboundAdapter = {
    * rich tables on the markdown path) can turn off for HTML-mode sends.
    */
   resolvePresentationCapabilities?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
     formatting?: OutboundDeliveryFormattingOptions;
   }) => ChannelPresentationCapabilities;
@@ -268,7 +268,7 @@ export type ChannelOutboundAdapter = {
     ctx: ChannelOutboundPayloadContext;
   }) => Promise<ReplyPayload | null> | ReplyPayload | null;
   pinDeliveredMessage?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     target: ChannelOutboundTargetRef;
     messageId: string;
     pin: ReplyPayloadDeliveryPin;
@@ -292,7 +292,7 @@ export type ChannelOutboundAdapter = {
     targetThreadId?: string;
   }) => boolean;
   resolveTarget?: (params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     to?: string;
     allowFrom?: string[];
     accountId?: string | null;

@@ -14,7 +14,7 @@ export function registerSharedRuntimeReaderDoctorTests(): void {
 
     beforeEach(async () => {
       tempDir = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-shared-runtime-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-shared-runtime-")),
       );
     });
 
@@ -25,22 +25,22 @@ export function registerSharedRuntimeReaderDoctorTests(): void {
     it.each([
       { selector: "STATE_DIRECTORY", sameInstall: false },
       { selector: "STATE_DIRECTORY", sameInstall: true },
-      { selector: "OPENCLAW_PLUGIN_STAGE_DIR", sameInstall: false },
-      { selector: "OPENCLAW_PLUGIN_STAGE_DIR", sameInstall: true },
+      { selector: "CARAPACE_PLUGIN_STAGE_DIR", sameInstall: false },
+      { selector: "CARAPACE_PLUGIN_STAGE_DIR", sameInstall: true },
     ])(
       "preserves a live shared runtime reader through Doctor ($selector, same install: $sameInstall)",
       async ({ selector, sameInstall }) => {
-        const stateA = path.join(tempDir, ".openclaw");
-        const stateB = path.join(tempDir, ".openclaw-peer");
-        const packageRoot = path.join(tempDir, "prefix-a", "node_modules", "openclaw");
+        const stateA = path.join(tempDir, ".carapace");
+        const stateB = path.join(tempDir, ".carapace-peer");
+        const packageRoot = path.join(tempDir, "prefix-a", "node_modules", "carapace");
         const readerPackageRoot = sameInstall
           ? packageRoot
-          : path.join(tempDir, "prefix-b", "node_modules", "openclaw");
+          : path.join(tempDir, "prefix-b", "node_modules", "carapace");
         const sharedBase = path.join(
           tempDir,
           selector === "STATE_DIRECTORY"
             ? "shared/plugin-runtime-deps"
-            : ".openclaw-install-stage-shared",
+            : ".carapace-install-stage-shared",
         );
         // Stable v2026.4.29 buckets are keyed by version and install path, not by
         // profile/database. Doctor cannot authorize deletion for another consumer.
@@ -48,7 +48,7 @@ export function registerSharedRuntimeReaderDoctorTests(): void {
           .update(readerPackageRoot)
           .digest("hex")
           .slice(0, 12);
-        const bucket = path.join(sharedBase, `openclaw-2026.4.29-${packageHash}`);
+        const bucket = path.join(sharedBase, `carapace-2026.4.29-${packageHash}`);
         const dependency = path.join(bucket, "node_modules", "fixture-runtime-dependency");
         const mirror = path.join(bucket, "dist", "extensions", "fixture-reader");
         const alias = path.join(path.dirname(readerPackageRoot), "fixture-runtime-dependency");
@@ -64,7 +64,7 @@ export function registerSharedRuntimeReaderDoctorTests(): void {
         }
         for (const stateDir of [stateA, stateB]) {
           await fs.mkdir(path.join(stateDir, "state"), { recursive: true });
-          const database = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"));
+          const database = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"));
           database.exec(`
             PRAGMA user_version = 8;
             CREATE TABLE agent_databases (
@@ -78,7 +78,7 @@ export function registerSharedRuntimeReaderDoctorTests(): void {
         for (const installRoot of new Set([packageRoot, readerPackageRoot])) {
           await fs.writeFile(
             path.join(installRoot, "package.json"),
-            '{"name":"openclaw","version":"2026.4.29"}\n',
+            '{"name":"carapace","version":"2026.4.29"}\n',
           );
         }
         await fs.writeFile(path.join(dependency, "package.json"), '{"main":"index.cjs"}\n');
@@ -125,7 +125,7 @@ process.send({ kind: "ready", version: version(), dependency: fromInstall("fixtu
         const reader = fork(
           readerFile,
           [
-            path.join(stateB, "state", "openclaw.sqlite"),
+            path.join(stateB, "state", "carapace.sqlite"),
             readerPackageRoot,
             path.join(mirror, "index.cjs"),
           ],
@@ -135,8 +135,8 @@ process.send({ kind: "ready", version: version(), dependency: fromInstall("fixtu
             env: {
               HOME: tempDir,
               USERPROFILE: tempDir,
-              OPENCLAW_HOME: tempDir,
-              OPENCLAW_STATE_DIR: stateB,
+              CARAPACE_HOME: tempDir,
+              CARAPACE_STATE_DIR: stateB,
               [selector]: selector === "STATE_DIRECTORY" ? path.dirname(sharedBase) : sharedBase,
             },
             stdio: ["ignore", "ignore", "ignore", "ipc"],
@@ -159,16 +159,16 @@ process.send({ kind: "ready", version: version(), dependency: fromInstall("fixtu
           });
           await fs.writeFile(
             path.join(packageRoot, "package.json"),
-            '{"name":"openclaw","version":"2026.8.1"}\n',
+            '{"name":"carapace","version":"2026.8.1"}\n',
           );
           await runDoctorRepairSequence({
             state: { cfg: {}, candidate: {}, pendingChanges: false, fixHints: [] },
-            doctorFixCommand: "openclaw doctor --fix",
+            doctorFixCommand: "carapace doctor --fix",
             env: {
               HOME: tempDir,
               USERPROFILE: tempDir,
-              OPENCLAW_HOME: tempDir,
-              OPENCLAW_STATE_DIR: stateA,
+              CARAPACE_HOME: tempDir,
+              CARAPACE_STATE_DIR: stateA,
               [selector]: selector === "STATE_DIRECTORY" ? path.dirname(sharedBase) : sharedBase,
             },
           });

@@ -1,14 +1,14 @@
 ---
-summary: "Run OpenClaw on a Linux server or cloud VPS — provider picker, architecture, and tuning"
+summary: "Run Carapace on a Linux server or cloud VPS — provider picker, architecture, and tuning"
 read_when:
   - You want to run the Gateway on a Linux server or cloud VPS
   - You need a quick map of hosting guides
-  - You want generic Linux server tuning for OpenClaw
+  - You want generic Linux server tuning for Carapace
 title: "Linux server"
 sidebarTitle: "Linux Server"
 ---
 
-Run the OpenClaw Gateway on any Linux server or cloud VPS. This page helps you
+Run the Carapace Gateway on any Linux server or cloud VPS. This page helps you
 pick a provider, explains how cloud deployments work, and covers generic Linux
 tuning that applies everywhere.
 
@@ -48,7 +48,7 @@ Related pages: [Gateway remote access](/gateway/remote), [Platforms hub](/platfo
 
 ## Harden admin access first
 
-Before you install OpenClaw on a public VPS, decide how you want to administer
+Before you install Carapace on a public VPS, decide how you want to administer
 the box itself.
 
 - For Tailnet-only admin access: install Tailscale first, join the VPS to your
@@ -56,7 +56,7 @@ the box itself.
   then restrict public SSH.
 - Without Tailscale: apply the equivalent hardening for your SSH path before
   exposing more services.
-- This is separate from Gateway access. You can still keep OpenClaw bound to
+- This is separate from Gateway access. You can still keep Carapace bound to
   loopback and use an SSH tunnel or Tailscale Serve for the dashboard.
 
 Tailscale-specific Gateway options live in [Tailscale](/gateway/tailscale).
@@ -86,44 +86,44 @@ Docs: [Nodes](/nodes), [Nodes CLI](/cli/nodes).
 If CLI commands feel slow on low-power VMs (or ARM hosts), enable Node's module compile cache:
 
 ```bash
-grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF'
-export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
-mkdir -p /var/tmp/openclaw-compile-cache
-export OPENCLAW_NO_RESPAWN=1
+grep -q 'NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF'
+export NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache
+mkdir -p /var/tmp/carapace-compile-cache
+export CARAPACE_NO_RESPAWN=1
 EOF
 source ~/.bashrc
 ```
 
 - `NODE_COMPILE_CACHE` improves repeated command startup times; the first run warms the cache.
-- `OPENCLAW_NO_RESPAWN=1` keeps routine Gateway restarts in-process, which avoids extra process handoffs and keeps PID tracking simple on small hosts.
+- `CARAPACE_NO_RESPAWN=1` keeps routine Gateway restarts in-process, which avoids extra process handoffs and keeps PID tracking simple on small hosts.
 - For Raspberry Pi specifics, see [Raspberry Pi](/install/raspberry-pi).
 
 ### systemd tuning checklist (optional)
 
 For VM hosts using `systemd`, consider:
 
-- Service env for a stable startup path: `OPENCLAW_NO_RESPAWN=1` and
-  `NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache`
+- Service env for a stable startup path: `CARAPACE_NO_RESPAWN=1` and
+  `NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache`
 - A longer startup timeout for slow hosts: `TimeoutStartSec=90`.
 - The managed unit owns the generic restart policy: `Restart=always`, `RestartSec=5`.
 - SSD-backed disks for state/cache paths to reduce random-I/O cold-start penalties.
 
-The standard `openclaw onboard --install-daemon` path installs a systemd user
+The standard `carapace onboard --install-daemon` path installs a systemd user
 unit; customize only host-specific startup settings with:
 
 ```bash
-systemctl --user edit openclaw-gateway.service
+systemctl --user edit carapace-gateway.service
 ```
 
 ```ini
 [Service]
-Environment=OPENCLAW_NO_RESPAWN=1
-Environment=NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
+Environment=CARAPACE_NO_RESPAWN=1
+Environment=NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache
 TimeoutStartSec=90
 ```
 
 If you deliberately installed a system unit instead, edit it via
-`sudo systemctl edit openclaw-gateway.service`.
+`sudo systemctl edit carapace-gateway.service`.
 
 For the canonical managed unit body and its restart policy, see the [Gateway runbook](/gateway).
 

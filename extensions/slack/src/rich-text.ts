@@ -2,7 +2,7 @@ import {
   asOptionalRecord,
   normalizeOptionalString,
   readNonBlankString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { escapeSlackMrkdwn } from "./monitor/mrkdwn.js";
 
 const RICH_TEXT_CONTAINER_TYPES = new Set<unknown>([

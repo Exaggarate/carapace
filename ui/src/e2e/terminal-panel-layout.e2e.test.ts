@@ -16,7 +16,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`.`,
 });
 
-const screenshotDirParent = process.env.OPENCLAW_TERMINAL_LAYOUT_SCREENSHOT_DIR?.trim();
+const screenshotDirParent = process.env.CARAPACE_TERMINAL_LAYOUT_SCREENSHOT_DIR?.trim();
 let screenshotDir: string | undefined;
 beforeEach(() => {
   screenshotDir = screenshotDirParent
@@ -33,7 +33,7 @@ async function captureLayout(page: Page, theme: string, state: string): Promise<
     caret: "hide",
     path: path.join(screenshotDir, `${theme}-${state}-context.png`),
   });
-  await page.locator("openclaw-terminal-panel .tp-header").screenshot({
+  await page.locator("carapace-terminal-panel .tp-header").screenshot({
     animations: "disabled",
     caret: "hide",
     path: path.join(screenshotDir, `${theme}-${state}-crop.png`),
@@ -89,7 +89,7 @@ suite.define(() => {
               "terminal.open": {
                 agentId: "main",
                 confined: false,
-                cwd: "/workspace/openclaw",
+                cwd: "/workspace/carapace",
                 sessionId: `terminal-layout-${theme}`,
                 shell: "/bin/zsh",
               },
@@ -106,10 +106,10 @@ suite.define(() => {
           await gateway.emitGatewayEvent("terminal.data", {
             sessionId: `terminal-layout-${theme}`,
             seq: 0,
-            data: "OpenClaw release workspace\r\n$ pnpm test ui/src/components/terminal/terminal-panel.test.ts\r\n22 tests passed\r\n$ ",
+            data: "Carapace release workspace\r\n$ pnpm test ui/src/components/terminal/terminal-panel.test.ts\r\n22 tests passed\r\n$ ",
           });
 
-          const panel = page.locator("openclaw-terminal-panel");
+          const panel = page.locator("carapace-terminal-panel");
           const surface = panel.locator(".tp");
           const fill = panel.getByRole("button", { name: "Fill main content area" });
           const bottom = panel.getByRole("button", { name: "Dock to bottom" });

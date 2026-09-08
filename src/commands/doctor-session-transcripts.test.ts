@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openFileBackedSessionManagerForTest } from "../../test/helpers/session-manager-file-fixture.js";
 
@@ -120,7 +120,7 @@ describe("doctor session transcript repair", () => {
           await params.run({ assertCurrent() {} }),
       );
     root = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-transcripts-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-transcripts-")),
     );
   });
 
@@ -154,9 +154,9 @@ describe("doctor session transcript repair", () => {
           content: [
             "visible ask",
             "",
-            "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
             "secret",
-            "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
           ].join("\n"),
         },
       },
@@ -229,7 +229,7 @@ describe("doctor session transcript repair", () => {
                 message: {
                   role: "user",
                   content:
-                    "visible ask\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\ncontext\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+                    "visible ask\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\ncontext\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
                 },
               },
               {
@@ -325,7 +325,7 @@ describe("doctor session transcript repair", () => {
         message: {
           role: "user",
           content:
-            "visible ask\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nsecret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "visible ask\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nsecret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
         },
       },
       {
@@ -346,7 +346,7 @@ describe("doctor session transcript repair", () => {
     ];
     expect(title).toBe("Session transcripts");
     expect(message).toContain("legacy state");
-    expect(message).toContain('Run "openclaw doctor --fix"');
+    expect(message).toContain('Run "carapace doctor --fix"');
     expect(countNonEmptyLines(await fs.readFile(filePath, "utf-8"))).toBe(3);
   });
 
@@ -377,7 +377,7 @@ describe("doctor session transcript repair", () => {
       checkId: "core/doctor/session-transcripts",
       severity: "info",
       path: filePath,
-      fixHint: expect.stringContaining("openclaw doctor --fix"),
+      fixHint: expect.stringContaining("carapace doctor --fix"),
     });
     expect(sessionTranscriptIssueToRepairEffect(issue)).toEqual({
       kind: "file",
@@ -398,7 +398,7 @@ describe("doctor session transcript repair", () => {
         message: {
           role: "user",
           content:
-            "visible ask\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nsecret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "visible ask\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nsecret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
         },
       },
       {
@@ -435,7 +435,7 @@ describe("doctor session transcript repair", () => {
         message: {
           role: "user",
           content:
-            "visible ask\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nsecret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "visible ask\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nsecret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
         },
       },
       {
@@ -533,7 +533,7 @@ describe("doctor session transcript repair", () => {
         message: {
           role: "user",
           content:
-            "visible ask\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nsecret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "visible ask\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nsecret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
         },
       },
       {
@@ -591,7 +591,7 @@ describe("doctor session transcript repair", () => {
         message: {
           role: "user",
           content:
-            "visible ask\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nsecret\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "visible ask\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nsecret\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
         },
       },
       {

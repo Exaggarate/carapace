@@ -5,7 +5,7 @@
  */
 import type { ReplyPayload } from "../../auto-reply/reply-payload.js";
 import type { ReplyToMode } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { OutboundSendDeps } from "../../infra/outbound/send-deps.js";
 import type { OutboundMediaAccess } from "../../media/load-options.js";
 import type { PollInput } from "../../polls.js";
@@ -176,7 +176,7 @@ export type MessageSendContext<TPayload = unknown, TSendResult = unknown> = {
 };
 
 /** Common text-send context shared by text, media, payload, and poll adapter calls. */
-export type ChannelMessageSendTextContext<TConfig = OpenClawConfig> = {
+export type ChannelMessageSendTextContext<TConfig = CarapaceConfig> = {
   cfg: TConfig;
   to: string;
   text: string;
@@ -206,7 +206,7 @@ export type ChannelMessageSendTextContext<TConfig = OpenClawConfig> = {
 };
 
 /** Media send context with validated access hooks and media presentation hints. */
-export type ChannelMessageSendMediaContext<TConfig = OpenClawConfig> =
+export type ChannelMessageSendMediaContext<TConfig = CarapaceConfig> =
   ChannelMessageSendTextContext<TConfig> & {
     mediaUrl: string;
     mediaAccess?: OutboundMediaAccess;
@@ -218,7 +218,7 @@ export type ChannelMessageSendMediaContext<TConfig = OpenClawConfig> =
   };
 
 /** Rich reply payload send context used when adapters can consume structured payloads. */
-export type ChannelMessageSendPayloadContext<TConfig = OpenClawConfig> =
+export type ChannelMessageSendPayloadContext<TConfig = CarapaceConfig> =
   ChannelMessageSendTextContext<TConfig> & {
     payload: ReplyPayload;
     mediaUrl?: string;
@@ -231,7 +231,7 @@ export type ChannelMessageSendPayloadContext<TConfig = OpenClawConfig> =
   };
 
 /** Poll send context; thread ids stay string-like because poll APIs do not accept numeric ids. */
-export type ChannelMessageSendPollContext<TConfig = OpenClawConfig> = Omit<
+export type ChannelMessageSendPollContext<TConfig = CarapaceConfig> = Omit<
   ChannelMessageSendTextContext<TConfig>,
   "text" | "threadId"
 > & {
@@ -263,7 +263,7 @@ export const unknownSendReconciliationKinds = [
 type UnknownSendReconciliationKind = (typeof unknownSendReconciliationKinds)[number];
 
 /** Send-attempt context tagged with the adapter method core is about to call. */
-export type ChannelMessageSendAttemptContext<TConfig = OpenClawConfig> =
+export type ChannelMessageSendAttemptContext<TConfig = CarapaceConfig> =
   | (ChannelMessageSendTextContext<TConfig> & { kind: "text" })
   | (ChannelMessageSendMediaContext<TConfig> & { kind: "media" })
   | (ChannelMessageSendPayloadContext<TConfig> & { kind: "payload" })
@@ -271,7 +271,7 @@ export type ChannelMessageSendAttemptContext<TConfig = OpenClawConfig> =
 
 /** Lifecycle context emitted after an adapter send succeeds but before commit finishes. */
 type ChannelMessageSendSuccessContext<
-  TConfig = OpenClawConfig,
+  TConfig = CarapaceConfig,
   TSendResult extends ChannelMessageSendResult = ChannelMessageSendResult,
 > = ChannelMessageSendAttemptContext<TConfig> & {
   result: TSendResult;
@@ -279,7 +279,7 @@ type ChannelMessageSendSuccessContext<
 };
 
 /** Lifecycle context emitted after an adapter send throws or rejects. */
-type ChannelMessageSendFailureContext<TConfig = OpenClawConfig> =
+type ChannelMessageSendFailureContext<TConfig = CarapaceConfig> =
   ChannelMessageSendAttemptContext<TConfig> & {
     error: unknown;
     attemptToken?: unknown;
@@ -287,12 +287,12 @@ type ChannelMessageSendFailureContext<TConfig = OpenClawConfig> =
 
 /** Lifecycle context emitted when a successful send is being durably committed. */
 export type ChannelMessageSendCommitContext<
-  TConfig = OpenClawConfig,
+  TConfig = CarapaceConfig,
   TSendResult extends ChannelMessageSendResult = ChannelMessageSendResult,
 > = ChannelMessageSendSuccessContext<TConfig, TSendResult>;
 
 /** Durable queue context used to reconcile a send whose platform state is unknown. */
-export type ChannelMessageUnknownSendContext<TConfig = OpenClawConfig> = {
+export type ChannelMessageUnknownSendContext<TConfig = CarapaceConfig> = {
   cfg: TConfig;
   queueId: string;
   channel: string;
@@ -333,7 +333,7 @@ export type ChannelMessageDeferredDeliveryAdmissionResult =
   | { status: "permanent_rejection"; reason: string };
 
 /** Minimal context available at deferred-delivery admission boundaries. */
-export type ChannelMessageDeferredDeliveryAdmissionContext<TConfig = OpenClawConfig> = {
+export type ChannelMessageDeferredDeliveryAdmissionContext<TConfig = CarapaceConfig> = {
   cfg: TConfig;
   channel: string;
   to: string;
@@ -343,7 +343,7 @@ export type ChannelMessageDeferredDeliveryAdmissionContext<TConfig = OpenClawCon
 
 /** Optional hooks around adapter send attempts, platform success/failure, and commit. */
 type ChannelMessageSendLifecycleAdapter<
-  TConfig = OpenClawConfig,
+  TConfig = CarapaceConfig,
   TSendResult extends ChannelMessageSendResult = ChannelMessageSendResult,
 > = {
   beforeSendAttempt?: (ctx: ChannelMessageSendAttemptContext<TConfig>) => unknown;
@@ -358,7 +358,7 @@ type ChannelMessageSendLifecycleAdapter<
 
 /** Adapter methods a message channel can implement for outbound text/media/payload/poll sends. */
 type ChannelMessageSendAdapter<
-  TConfig = OpenClawConfig,
+  TConfig = CarapaceConfig,
   TSendResult extends ChannelMessageSendResult = ChannelMessageSendResult,
 > = {
   text?: (ctx: ChannelMessageSendTextContext<TConfig>) => Promise<TSendResult>;
@@ -460,7 +460,7 @@ export type ChannelMessageReceiveAdapterShape = {
 
 /** Full message adapter shape composed from send, durable-final, live, and receive facets. */
 export type ChannelMessageAdapterShape<
-  TConfig = OpenClawConfig,
+  TConfig = CarapaceConfig,
   TSendResult extends ChannelMessageSendResult = ChannelMessageSendResult,
 > = {
   id?: string;

@@ -1,6 +1,6 @@
-import type { ResolvedAgentRoute } from "openclaw/plugin-sdk/routing";
+import type { ResolvedAgentRoute } from "carapace/plugin-sdk/routing";
 // Policy plugin evidence types.
-import type { coerceSecretRef } from "openclaw/plugin-sdk/secret-input";
+import type { coerceSecretRef } from "carapace/plugin-sdk/secret-input";
 
 export type PolicyAttestation = {
   readonly checkedAt: string;

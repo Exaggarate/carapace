@@ -7,7 +7,7 @@ import { packToArchive } from "./test-helpers/archive-fixtures.js";
 import { createSyncSuiteTempRootTracker } from "./test-helpers/fs-fixtures.js";
 import { createBundleInstallFixtureFactory } from "./test-helpers/install-fixtures.js";
 
-const suiteTempRootTracker = createSyncSuiteTempRootTracker("openclaw-plugin-install-path");
+const suiteTempRootTracker = createSyncSuiteTempRootTracker("carapace-plugin-install-path");
 const setupBundleInstallFixture = createBundleInstallFixtureFactory(
   suiteTempRootTracker.makeTempDir,
 );
@@ -22,12 +22,12 @@ function setupNativePluginInstallFixture() {
     JSON.stringify({
       name: "symlink-plugin",
       version: "1.0.0",
-      openclaw: { extensions: ["./dist/index.js"] },
+      carapace: { extensions: ["./dist/index.js"] },
     }),
     "utf-8",
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "symlink-plugin",
       configSchema: { type: "object", properties: {} },
@@ -98,7 +98,7 @@ describe("installPluginFromPath", () => {
     }
     expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.UNSUPPORTED_PLAIN_FILE_PLUGIN);
     expect(result.error).toBe(
-      "Plain file plugin installs are not supported. Install a plugin directory or archive that contains openclaw.plugin.json, or list standalone plugin files in plugins.load.paths.",
+      "Plain file plugin installs are not supported. Install a plugin directory or archive that contains carapace.plugin.json, or list standalone plugin files in plugins.load.paths.",
     );
   });
 

@@ -1,14 +1,14 @@
-import type { AssistantMessage, Context, Model } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model } from "@carapace/llm-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupSessionResources } from "../session-resources.js";
 import { createOpenAIResponsesTransportStreamFn } from "./openai-responses-client.js";
 import { captureOpenAIResponses } from "./openai-responses-live-capture.test-support.js";
 
 // Capture the real native endpoint: a proxy base URL would disable continuation eligibility.
-const LIVE = process.env.OPENCLAW_LIVE_TEST === "1";
+const LIVE = process.env.CARAPACE_LIVE_TEST === "1";
 const OPENAI_KEY = process.env.OPENAI_API_KEY ?? "";
 const describeLive = LIVE && OPENAI_KEY ? describe : describe.skip;
-const LIVE_MODEL_ID = process.env.OPENCLAW_LIVE_RESPONSES_MODEL || "gpt-5.6-luna";
+const LIVE_MODEL_ID = process.env.CARAPACE_LIVE_RESPONSES_MODEL || "gpt-5.6-luna";
 const LIVE_TIMEOUT_MS = 120_000;
 
 function userMessage(text: string, timestamp: number) {

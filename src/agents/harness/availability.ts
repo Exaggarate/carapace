@@ -49,13 +49,13 @@ export function resolveAgentHarnessAvailabilityDecision(
       ? { ...configured, runtime: runtimeOverride, runtimeSource: "model" }
       : configured;
   const implicit = policy.runtime === "codex" && policy.runtimeSource === "implicit";
-  if (policy.runtime === "auto" || policy.runtime === "openclaw") {
+  if (policy.runtime === "auto" || policy.runtime === "carapace") {
     return { kind: "available", policy };
   }
   const registered = getRegisteredAgentHarness(policy.runtime);
   if (!registered) {
     return implicit && params.mode !== "projection"
-      ? { kind: "implicit-unavailable", policy: { ...policy, runtime: "openclaw" } }
+      ? { kind: "implicit-unavailable", policy: { ...policy, runtime: "carapace" } }
       : { kind: "available", policy };
   }
   // A pinned native transcript owns early selection. Final prepared routes must
@@ -76,10 +76,10 @@ export function resolveAgentHarnessAvailabilityDecision(
     }),
   );
   if (!support.supported && !policy.forcedByEnvironment) {
-    if (implicit || support.fallbackRuntime === "openclaw") {
+    if (implicit || support.fallbackRuntime === "carapace") {
       return {
         kind: implicit ? "implicit-unsupported" : "declared-fallback",
-        policy: { ...policy, runtime: "openclaw" },
+        policy: { ...policy, runtime: "carapace" },
         support,
       };
     }

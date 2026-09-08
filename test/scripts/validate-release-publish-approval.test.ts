@@ -43,7 +43,7 @@ function runApprovalScript(
       EXPECTED_WORKFLOW_SHA: env.EXPECTED_WORKFLOW_SHA ?? "",
       EXPECTED_RUN_ATTEMPT: env.EXPECTED_RUN_ATTEMPT ?? "",
       APPROVAL_PATH: env.APPROVAL_PATH ?? "",
-      GITHUB_REPOSITORY: env.GITHUB_REPOSITORY ?? "openclaw/openclaw",
+      GITHUB_REPOSITORY: env.GITHUB_REPOSITORY ?? "carapace/carapace",
       RELEASE_APPROVAL_KIND: env.RELEASE_APPROVAL_KIND ?? "android",
       RELEASE_PACKAGES: env.RELEASE_PACKAGES ?? "",
       RELEASE_TAG: env.RELEASE_TAG ?? "v2026.6.21",
@@ -103,7 +103,7 @@ function runAndroidApproval({
     release?: Record<string, unknown>;
   };
 } = {}) {
-  const tempRoot = tempRoots.make("openclaw-android-approval-");
+  const tempRoot = tempRoots.make("carapace-android-approval-");
   fs.mkdirSync(path.join(tempRoot, ".release-harness"));
   fs.symlinkSync(
     path.join(process.cwd(), "scripts"),
@@ -134,21 +134,21 @@ function runAndroidApproval({
     NATIVE_CI_RUN_ID: nativeCi ? "91" : "",
     NATIVE_CI_WORKFLOW_REF: nativeCi ? ANDROID_PROTECTED_REF : "",
     GITHUB_REF: "refs/tags/v2026.8.1",
-    GITHUB_REPOSITORY: "openclaw/openclaw",
+    GITHUB_REPOSITORY: "carapace/carapace",
     RUNNER_TEMP: tempRoot,
     GITHUB_OUTPUT: path.join(tempRoot, "output"),
   };
   const parent = {
     id: 123,
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
     event: "workflow_dispatch",
     head_branch: ref,
     head_sha: ANDROID_TOOLING_SHA,
     run_attempt: 2,
-    path: `.github/workflows/openclaw-release-publish.yml@${fullRef}`,
+    path: `.github/workflows/carapace-release-publish.yml@${fullRef}`,
     status: "in_progress",
     conclusion: null,
-    html_url: "https://github.com/openclaw/openclaw/actions/runs/123",
+    html_url: "https://github.com/Exaggarate/carapace/actions/runs/123",
     ...run,
   };
   const tooling =
@@ -176,7 +176,7 @@ function runAndroidApproval({
     display_title: `CI release-native-android-123-2-${"a".repeat(40)}`,
     head_branch: ANDROID_PROTECTED_REF,
     head_sha: ANDROID_TOOLING_SHA,
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
     actor: { login: "github-actions[bot]" },
     triggering_actor: { login: "github-actions[bot]" },
     status: "completed",
@@ -227,16 +227,16 @@ if (args[0] === "release" && args[1] === "upload") {
   }
   process.exit(0);
 }
-if (args[0] === "api" && args[1] === "repos/openclaw/openclaw/actions/runs/123") {
+if (args[0] === "api" && args[1] === "repos/carapace/carapace/actions/runs/123") {
   process.stdout.write(fs.readFileSync(${JSON.stringify(parentPath)}, "utf8"));
   process.exit(0);
 }
-if (args[0] === "api" && args[1] === "repos/openclaw/openclaw/actions/runs/91") {
+if (args[0] === "api" && args[1] === "repos/carapace/carapace/actions/runs/91") {
   process.stdout.write(fs.readFileSync(${JSON.stringify(nativeCiPath)}, "utf8"));
   process.exit(0);
 }
 const responses = ${JSON.stringify({
-      [`repos/openclaw/openclaw/${identityEndpoint}`]: tooling,
+      [`repos/carapace/carapace/${identityEndpoint}`]: tooling,
     })};
 if (args[0] !== "api" || !responses[args[1]]) process.exit(91);
 if (${JSON.stringify(Boolean(publication?.afterToolingRead))} && fs.existsSync(${JSON.stringify(path.join(tempRoot, "publishing"))})) {
@@ -268,7 +268,7 @@ if (JSON.stringify(args) === JSON.stringify(["rev-parse", "v2026.8.1^{commit}"])
     [
       "-c",
       workflowStep(
-        ".github/workflows/openclaw-release-publish.yml",
+        ".github/workflows/carapace-release-publish.yml",
         "Write Android release approval",
       ),
     ],
@@ -357,7 +357,7 @@ promote_android_release_asset
     fs.writeFileSync(path.join(tempRoot, "publishing"), "");
     fs.symlinkSync(path.join(process.cwd(), "scripts"), path.join(tempRoot, "scripts"), "dir");
     fs.mkdirSync(path.join(tempRoot, "dist"));
-    for (const name of ["OpenClaw-Android.apk", "OpenClaw-Android-SHA256SUMS.txt"]) {
+    for (const name of ["Carapace-Android.apk", "Carapace-Android-SHA256SUMS.txt"]) {
       fs.writeFileSync(path.join(tempRoot, "dist", name), "fixture");
     }
     result = spawnSync(
@@ -388,24 +388,24 @@ function approvalRun(overrides: Record<string, unknown> = {}) {
     conclusion: null,
     event: "workflow_dispatch",
     headBranch: "release/2026.6.21",
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     status: "in_progress",
-    url: "https://github.com/openclaw/openclaw/actions/runs/123",
-    workflowName: "OpenClaw Release Publish",
+    url: "https://github.com/Exaggarate/carapace/actions/runs/123",
+    workflowName: "Carapace Release Publish",
     ...overrides,
   };
 }
 
 function writeClawHubApproval(overrides: Record<string, unknown> = {}) {
-  const tempRoot = tempRoots.make("openclaw-clawhub-bootstrap-approval-");
+  const tempRoot = tempRoots.make("carapace-clawhub-bootstrap-approval-");
   const approvalPath = path.join(tempRoot, "approval.json");
   fs.writeFileSync(
     approvalPath,
     `${JSON.stringify({
       version: 2,
       kind: "clawhub-bootstrap",
-      repository: "openclaw/openclaw",
-      workflow: "OpenClaw Release Publish",
+      repository: "carapace/carapace",
+      workflow: "Carapace Release Publish",
       parentRunId: "123",
       parentRunAttempt: 2,
       workflowBranch: "main",
@@ -413,7 +413,7 @@ function writeClawHubApproval(overrides: Record<string, unknown> = {}) {
       bootstrapWorkflowSha: "b".repeat(40),
       releaseTag: "v2026.7.1-beta.3",
       targetSha: "a".repeat(40),
-      packages: ["@openclaw/meta-provider", "@openclaw/voice-call"],
+      packages: ["@carapace/meta-provider", "@carapace/voice-call"],
       ...overrides,
     })}\n`,
   );
@@ -426,7 +426,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
-      "Using release publish approval run 123: https://github.com/openclaw/openclaw/actions/runs/123",
+      "Using release publish approval run 123: https://github.com/Exaggarate/carapace/actions/runs/123",
     );
     expect(result.stderr).toBe("");
   });
@@ -448,7 +448,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
       approvalRun({
         headBranch: "release-publish/aaaaaaaaaaaa-111",
         headSha: workflowSha,
-        path: `.github/workflows/openclaw-release-publish.yml@${fullRef}`,
+        path: `.github/workflows/carapace-release-publish.yml@${fullRef}`,
         runAttempt: 7,
       }),
       {
@@ -479,7 +479,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
-      "Using successful completed release publish run 123: https://github.com/openclaw/openclaw/actions/runs/123",
+      "Using successful completed release publish run 123: https://github.com/Exaggarate/carapace/actions/runs/123",
     );
     expect(result.stderr).toBe("");
   });
@@ -507,9 +507,9 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
         "verify",
         expect.any(String),
         "--repo",
-        "openclaw/openclaw",
+        "carapace/carapace",
         "--signer-workflow",
-        "openclaw/openclaw/.github/workflows/openclaw-release-publish.yml",
+        "carapace/carapace/.github/workflows/carapace-release-publish.yml",
         "--source-ref",
         `${ref === ANDROID_PROTECTED_REF ? "refs/tags" : "refs/heads"}/${ref}`,
         "--source-digest",
@@ -622,8 +622,8 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
       });
       expect(result.status, result.stderr).toBe(0);
       expect(result.uploads).toEqual([
-        "dist/OpenClaw-Android.apk#OpenClaw-Android.apk",
-        "dist/OpenClaw-Android-SHA256SUMS.txt#OpenClaw-Android-SHA256SUMS.txt",
+        "dist/Carapace-Android.apk#Carapace-Android.apk",
+        "dist/Carapace-Android-SHA256SUMS.txt#Carapace-Android-SHA256SUMS.txt",
       ]);
       expect(result.waitedForAndroid).toBe(false);
     },
@@ -684,8 +684,8 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
     const result = runAndroidApproval({ recovery, publication: { afterAdmission: parent } });
     expect(result.status, result.stderr).toBe(0);
     expect(result.uploads).toEqual([
-      "dist/OpenClaw-Android.apk#OpenClaw-Android.apk",
-      "dist/OpenClaw-Android-SHA256SUMS.txt#OpenClaw-Android-SHA256SUMS.txt",
+      "dist/Carapace-Android.apk#Carapace-Android.apk",
+      "dist/Carapace-Android-SHA256SUMS.txt#Carapace-Android-SHA256SUMS.txt",
     ]);
   });
 
@@ -711,7 +711,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
     ["SHA", { head_sha: "e".repeat(40) }],
     ["ref", { head_branch: "main" }],
     ["workflow path", { path: ".github/workflows/android-release.yml" }],
-    ["full ref", { path: ".github/workflows/openclaw-release-publish.yml@refs/heads/main" }],
+    ["full ref", { path: ".github/workflows/carapace-release-publish.yml@refs/heads/main" }],
     ["event", { event: "push" }],
     ["failed parent", { status: "completed", conclusion: "failure" }],
     ["cancelled parent", { status: "completed", conclusion: "cancelled" }],
@@ -773,7 +773,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
         EXPECTED_WORKFLOW_BRANCH: "main",
         EXPECTED_RUN_ATTEMPT: "2",
         RELEASE_APPROVAL_KIND: "clawhub-bootstrap",
-        RELEASE_PACKAGES: "@openclaw/voice-call,@openclaw/meta-provider",
+        RELEASE_PACKAGES: "@carapace/voice-call,@carapace/meta-provider",
         RELEASE_TAG: "v2026.7.1-beta.3",
       },
     );
@@ -795,7 +795,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
         EXPECTED_WORKFLOW_BRANCH: "main",
         EXPECTED_RUN_ATTEMPT: "2",
         RELEASE_APPROVAL_KIND: "clawhub-bootstrap",
-        RELEASE_PACKAGES: "@openclaw/meta-provider,@openclaw/voice-call",
+        RELEASE_PACKAGES: "@carapace/meta-provider,@carapace/voice-call",
         RELEASE_TAG: "v2026.7.1-beta.3",
       },
     );
@@ -818,7 +818,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
         EXPECTED_WORKFLOW_BRANCH: "main",
         EXPECTED_RUN_ATTEMPT: "2",
         RELEASE_APPROVAL_KIND: "clawhub-bootstrap",
-        RELEASE_PACKAGES: "@openclaw/meta-provider,@openclaw/voice-call",
+        RELEASE_PACKAGES: "@carapace/meta-provider,@carapace/voice-call",
         RELEASE_TAG: "v2026.7.1-beta.3",
       },
     );
@@ -840,7 +840,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
         EXPECTED_WORKFLOW_BRANCH: "main",
         EXPECTED_RUN_ATTEMPT: "2",
         RELEASE_APPROVAL_KIND: "clawhub-bootstrap",
-        RELEASE_PACKAGES: "@openclaw/meta-provider,@openclaw/voice-call",
+        RELEASE_PACKAGES: "@carapace/meta-provider,@carapace/voice-call",
         RELEASE_TAG: "v2026.7.1-beta.3",
       },
     );
@@ -854,7 +854,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
   it.each([
     ["release tag", { releaseTag: "v2026.7.1-beta.2" }, {}],
     ["target SHA", { targetSha: "c".repeat(40) }, {}],
-    ["package set", { packages: ["@openclaw/meta-provider"] }, {}],
+    ["package set", { packages: ["@carapace/meta-provider"] }, {}],
     ["parent attempt", { parentRunAttempt: 1 }, {}],
     ["parent workflow SHA", { parentWorkflowSha: "c".repeat(40) }, {}],
     ["bootstrap workflow SHA", { bootstrapWorkflowSha: "c".repeat(40) }, {}],
@@ -873,7 +873,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
         EXPECTED_WORKFLOW_BRANCH: "main",
         EXPECTED_RUN_ATTEMPT: "2",
         RELEASE_APPROVAL_KIND: "clawhub-bootstrap",
-        RELEASE_PACKAGES: "@openclaw/meta-provider,@openclaw/voice-call",
+        RELEASE_PACKAGES: "@carapace/meta-provider,@carapace/voice-call",
         RELEASE_TAG: "v2026.7.1-beta.3",
         ...envOverrides,
       },
@@ -911,7 +911,7 @@ describe("scripts/validate-release-publish-approval.mjs", () => {
 
       expect(result.status).toBe(0);
       expect(result.stdout).toContain(
-        `Using completed release publish run 123 (${conclusion}) for direct recovery: https://github.com/openclaw/openclaw/actions/runs/123`,
+        `Using completed release publish run 123 (${conclusion}) for direct recovery: https://github.com/Exaggarate/carapace/actions/runs/123`,
       );
       expect(result.stderr).toBe("");
     }

@@ -1,5 +1,5 @@
 import { html, nothing, render } from "lit";
-import type { ControlUiAccessory } from "openclaw/plugin-sdk/control-ui";
+import type { ControlUiAccessory } from "carapace/plugin-sdk/control-ui";
 import { icons } from "./components/icons.ts";
 import { t } from "./i18n/index.ts";
 import { workboardCardBoardId } from "./lib/workboard/board-filter.ts";

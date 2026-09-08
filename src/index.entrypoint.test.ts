@@ -60,7 +60,7 @@ describe("legacy package executable entrypoint", () => {
   it("completes pending lifecycle before loading the CLI entry graph", async () => {
     const calls: string[] = [];
     vi.mocked(existsSync).mockImplementation((value) =>
-      String(value).endsWith(".openclaw-lifecycle-pending"),
+      String(value).endsWith(".carapace-lifecycle-pending"),
     );
     vi.mocked(completePendingPackageLifecycle).mockImplementation(async () => {
       calls.push("lifecycle");
@@ -79,7 +79,7 @@ describe("legacy package executable entrypoint", () => {
 
   it("does not load the CLI entry graph when lifecycle completion fails", async () => {
     vi.mocked(existsSync).mockImplementation((value) =>
-      String(value).endsWith(".openclaw-lifecycle-pending"),
+      String(value).endsWith(".carapace-lifecycle-pending"),
     );
     vi.mocked(completePendingPackageLifecycle).mockRejectedValue(new Error("postinstall failed"));
 

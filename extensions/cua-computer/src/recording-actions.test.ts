@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, onTestFinished } from "vitest";
 import { driver, execution } from "./commands.test-helpers.js";
 import {
@@ -59,7 +59,7 @@ describe("cua-computer recording actions", () => {
     expect(startedJson).not.toContain(nativeRecordingRoot);
     expect(startedJson).not.toContain("native-session");
     const started = JSON.parse(startedJson) as { details: { resourceHandle: string } };
-    expect(started.details.resourceHandle).toMatch(/^openclaw:computer-resource:v1:/u);
+    expect(started.details.resourceHandle).toMatch(/^carapace:computer-resource:v1:/u);
 
     const stateJson = await computer.act(JSON.stringify({ action: "get_recording_state" }));
     expect(stateJson).not.toContain("/native/");
@@ -95,7 +95,7 @@ describe("cua-computer recording actions", () => {
   });
 
   it("rejects malformed, absolute, traversal, and symlink-escaped replay resources", async () => {
-    const outside = await tempRoot("openclaw-cua-resource-outside-");
+    const outside = await tempRoot("carapace-cua-resource-outside-");
     const active = driver();
     let nativeRecordingRoot = "";
     active.callTool.mockImplementation(async (name, args) => {
@@ -113,8 +113,8 @@ describe("cua-computer recording actions", () => {
     for (const resourceHandle of [
       "../outside",
       outside,
-      "openclaw:computer-resource:v1:unknown",
-      "openclaw:computer-resource:v1:123e4567-e89b-42d3-a456-426614174000",
+      "carapace:computer-resource:v1:unknown",
+      "carapace:computer-resource:v1:123e4567-e89b-42d3-a456-426614174000",
     ]) {
       await expect(
         computer.act(JSON.stringify({ action: "replay_trajectory", resourceHandle })),

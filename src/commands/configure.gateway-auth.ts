@@ -2,7 +2,7 @@
 import { resolveMutableAgentEntry } from "../agents/agent-scope-config.js";
 import { resolveAgentEffectiveModelPrimary } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig, GatewayAuthConfig } from "../config/config.js";
+import type { CarapaceConfig, GatewayAuthConfig } from "../config/config.js";
 import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
 import { isInvalidGatewaySecret } from "../gateway/known-weak-gateway-secrets.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -36,7 +36,7 @@ type ProviderChoiceModelPrompt = {
 
 async function resolveProviderChoiceModelPrompt(params: {
   authChoice: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): Promise<ProviderChoiceModelPrompt | undefined> {
@@ -63,7 +63,7 @@ async function resolveProviderChoiceModelPrompt(params: {
   };
 }
 
-function hasConfiguredProviderModels(cfg: OpenClawConfig, provider: string | undefined): boolean {
+function hasConfiguredProviderModels(cfg: CarapaceConfig, provider: string | undefined): boolean {
   if (!provider) {
     return false;
   }
@@ -76,7 +76,7 @@ function hasConfiguredProviderModels(cfg: OpenClawConfig, provider: string | und
   );
 }
 
-function hasStaticManifestCatalogRows(cfg: OpenClawConfig, provider: string | undefined): boolean {
+function hasStaticManifestCatalogRows(cfg: CarapaceConfig, provider: string | undefined): boolean {
   if (!provider) {
     return false;
   }
@@ -88,13 +88,13 @@ function hasStaticManifestCatalogRows(cfg: OpenClawConfig, provider: string | un
   );
 }
 
-function listConfiguredModelProviders(cfg: OpenClawConfig): string[] {
+function listConfiguredModelProviders(cfg: CarapaceConfig): string[] {
   return Object.entries(cfg.models?.providers ?? {})
     .filter(([, provider]) => (provider.models?.length ?? 0) > 0)
     .map(([provider]) => provider);
 }
 
-function resolveSingleConfiguredProvider(cfg: OpenClawConfig): string | undefined {
+function resolveSingleConfiguredProvider(cfg: CarapaceConfig): string | undefined {
   const configuredProviders = listConfiguredModelProviders(cfg);
   return configuredProviders.length === 1 ? configuredProviders[0] : undefined;
 }
@@ -106,7 +106,7 @@ function resolveProviderFromModelRef(model: string | undefined): string | undefi
 }
 
 function resolveCanonicalOpenAISelectionForLegacyCodexPrimary(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   target: OnboardingAgentTarget,
   selectedModels: readonly string[],
 ): string | undefined {
@@ -127,8 +127,8 @@ function resolveCanonicalOpenAISelectionForLegacyCodexPrimary(
 }
 
 function resolveConfiguredProviderFromAuthChange(params: {
-  before: OpenClawConfig;
-  after: OpenClawConfig;
+  before: CarapaceConfig;
+  after: CarapaceConfig;
   preferredProvider?: string;
 }): string | undefined {
   if (hasConfiguredProviderModels(params.after, params.preferredProvider)) {
@@ -184,7 +184,7 @@ export function buildGatewayAuthConfig(params: {
   if (params.mode === "trusted-proxy") {
     if (!params.trustedProxy) {
       throw new Error(
-        `trustedProxy config is required when mode is trusted-proxy. Run ${formatCliCommand("openclaw configure --section gateway")} to configure Gateway auth interactively.`,
+        `trustedProxy config is required when mode is trusted-proxy. Run ${formatCliCommand("carapace configure --section gateway")} to configure Gateway auth interactively.`,
       );
     }
     return { ...base, mode: "trusted-proxy", trustedProxy: params.trustedProxy };
@@ -194,11 +194,11 @@ export function buildGatewayAuthConfig(params: {
 
 /** Prompt for model provider credentials and explicit default model policy settings. */
 export async function promptAuthConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
   target: OnboardingAgentTarget = resolveOnboardingAgentTarget(cfg),
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   let next = cfg;
   let authChoice = "skip";
   let preferredProvider: string | undefined;

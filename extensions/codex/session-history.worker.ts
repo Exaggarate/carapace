@@ -1,7 +1,7 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { SessionTranscriptContextVersion } from "openclaw/plugin-sdk/codex-session-transcript-runtime";
-import { serveWorkerTasks } from "openclaw/plugin-sdk/process-runtime";
-import type { TranscriptTurnAdmission } from "openclaw/plugin-sdk/session-transcript-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { SessionTranscriptContextVersion } from "carapace/plugin-sdk/codex-session-transcript-runtime";
+import { serveWorkerTasks } from "carapace/plugin-sdk/process-runtime";
+import type { TranscriptTurnAdmission } from "carapace/plugin-sdk/session-transcript-runtime";
 import type { CodexHistoryReadResult } from "./src/app-server/history-rejection.js";
 import type { JsonValue } from "./src/app-server/protocol.js";
 import {

@@ -1,6 +1,6 @@
 // Collects daemon status from service files, config snapshots, ports, probes, and plugin drift.
 import fs from "node:fs/promises";
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import JSON5 from "json5";
 import type { classifyGatewayConnectFailure } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import {
@@ -9,7 +9,7 @@ import {
   resolveStateDir,
 } from "../../config/paths.js";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   ConfigFileSnapshot,
   GatewayControlUiConfig,
 } from "../../config/types.js";
@@ -17,7 +17,7 @@ import { resolveSecretInputRef } from "../../config/types.secrets.js";
 import { readLastGatewayErrorLine } from "../../daemon/diagnostics.js";
 import { inspectGatewayHeapLimit, type GatewayHeapLimitReport } from "../../daemon/gateway-heap.js";
 import type { ExtraGatewayService, FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
-import type { StaleOpenClawUpdateLaunchdJob } from "../../daemon/launchd.js";
+import type { StaleCarapaceUpdateLaunchdJob } from "../../daemon/launchd.js";
 import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
 import { summarizeGatewayServiceLayout } from "../../daemon/service-layout.js";
 import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
@@ -77,8 +77,8 @@ type ConfigSummary = {
 
 type DaemonConfigContext = {
   mergedDaemonEnv: Record<string, string | undefined>;
-  cliCfg: OpenClawConfig;
-  daemonCfg: OpenClawConfig;
+  cliCfg: CarapaceConfig;
+  daemonCfg: CarapaceConfig;
   cliConfigSummary: ConfigSummary;
   daemonConfigSummary: ConfigSummary;
   configMismatch: boolean;
@@ -86,7 +86,7 @@ type DaemonConfigContext = {
 
 type StatusConfigRead = {
   summary: ConfigSummary;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   mode: "fast" | "full";
 };
 
@@ -137,7 +137,7 @@ async function readFastStatusConfig(configPath: string): Promise<StatusConfigRea
     };
   }
 
-  const cfg: OpenClawConfig = asNonArrayRecord(parsed);
+  const cfg: CarapaceConfig = asNonArrayRecord(parsed);
   // Includes and environment expansion require the full config owner.
   if (raw.includes("$include") || raw.includes("${") || Object.hasOwn(cfg, "env")) {
     return null;
@@ -217,7 +217,7 @@ export type DaemonStatus = {
     configAudit?: ServiceConfigAudit;
     gatewayHeap?: GatewayHeapLimitReport;
     restartHandoff?: GatewayRestartHandoff;
-    staleUpdateLaunchdJobs?: StaleOpenClawUpdateLaunchdJob[];
+    staleUpdateLaunchdJobs?: StaleCarapaceUpdateLaunchdJob[];
   };
   config?: {
     cli: ConfigSummary;
@@ -265,8 +265,8 @@ export type DaemonStatus = {
   /**
    * Plugin version drift report. Surfaces active official external plugins
    * whose installed version does not match the running gateway version, which
-   * can happen after `npm install -g openclaw@<v>` updates the gateway binary
-   * without a corresponding `openclaw plugins update`.
+   * can happen after `npm install -g carapace@<v>` updates the gateway binary
+   * without a corresponding `carapace plugins update`.
    */
   pluginVersionDrift?: PluginVersionDriftReport;
   /** Doctor-only comparison against the installed service package a restart will load. */
@@ -340,7 +340,7 @@ async function inspectEstablishedGatewayClients(params: {
 }
 
 function hasActiveGatewayExecProbeCredential(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   explicitAuth: { token?: string; password?: string };
   mode: "local" | "remote";
@@ -462,8 +462,8 @@ export async function gatherDaemonStatus(
   const staleUpdateLaunchdJobs =
     opts.deep && process.platform === "darwin"
       ? await loadLaunchdModule()
-          .then(({ findStaleOpenClawUpdateLaunchdJobs }) =>
-            findStaleOpenClawUpdateLaunchdJobs(serviceEnv),
+          .then(({ findStaleCarapaceUpdateLaunchdJobs }) =>
+            findStaleCarapaceUpdateLaunchdJobs(serviceEnv),
           )
           .catch(() => [])
       : [];
@@ -601,7 +601,7 @@ export async function gatherDaemonStatus(
               pluginVersionRestartReadiness = {
                 status: "unresolved",
                 reason:
-                  "Gateway service command is unavailable, so the post-restart OpenClaw version is unknown.",
+                  "Gateway service command is unavailable, so the post-restart Carapace version is unknown.",
                 ...(runningGatewayVersion ? { runningGatewayVersion } : {}),
               };
             } else {
@@ -610,7 +610,7 @@ export async function gatherDaemonStatus(
                 pluginVersionRestartReadiness = {
                   status: "unresolved",
                   reason:
-                    "Gateway service package version is unavailable, so the post-restart OpenClaw version is unknown.",
+                    "Gateway service package version is unavailable, so the post-restart Carapace version is unknown.",
                   ...(runningGatewayVersion ? { runningGatewayVersion } : {}),
                 };
               } else {
@@ -668,7 +668,7 @@ export async function gatherDaemonStatus(
       runtime: runtime?.inspectionFailure
         ? {
             ...runtime,
-            detail: `${runtime.detail}; retry with openclaw gateway status --deep`,
+            detail: `${runtime.detail}; retry with carapace gateway status --deep`,
           }
         : runtime,
       configAudit,

@@ -1,7 +1,7 @@
 // Browser tests cover browser tool.schema plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { projectRuntimeToolInputSchema } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { normalizeOpenAIToolSchemas } from "openclaw/plugin-sdk/provider-tools";
+import { expectDefined } from "@carapace/normalization-core";
+import { projectRuntimeToolInputSchema } from "carapace/plugin-sdk/agent-harness-runtime";
+import { normalizeOpenAIToolSchemas } from "carapace/plugin-sdk/provider-tools";
 import { Value } from "typebox/value";
 import { describe, expect, it } from "vitest";
 import { createBrowserToolSchema, resolveBrowserToolCapabilities } from "./browser-tool.schema.js";

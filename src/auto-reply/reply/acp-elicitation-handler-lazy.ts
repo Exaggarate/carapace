@@ -1,4 +1,4 @@
-import type { AcpElicitationHandler } from "@openclaw/acp-core/runtime/types";
+import type { AcpElicitationHandler } from "@carapace/acp-core/runtime/types";
 import type { AcpElicitationHandlerParams } from "./acp-elicitation-handler.js";
 
 /** Defers the structured-input stack while preserving one exact handler per turn. */

@@ -1,7 +1,7 @@
 // Covers final fallback behavior when model-backed summarization fails.
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { ExtensionContext } from "openclaw/plugin-sdk/agent-sessions";
-import type { UserMessage } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import type { ExtensionContext } from "carapace/plugin-sdk/agent-sessions";
+import type { UserMessage } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CompactionError } from "../../packages/agent-core/src/harness/types.js";
 import { isAbortError } from "../infra/abort-signal.js";
@@ -11,9 +11,9 @@ const agentSessionMocks = vi.hoisted(() => ({
   generateSummary: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-sessions", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/agent-sessions")>(
-    "openclaw/plugin-sdk/agent-sessions",
+vi.mock("carapace/plugin-sdk/agent-sessions", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/agent-sessions")>(
+    "carapace/plugin-sdk/agent-sessions",
   );
   return {
     ...actual,

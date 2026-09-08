@@ -1,10 +1,10 @@
-import { isFutureDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { isFutureDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import {
   AGENT_RUN_RESTART_ABORT_STOP_REASON,
   createAgentRunRestartAbortError,
 } from "../../agents/run-termination.js";
 import { resolveSessionWorkStartError } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
 import {
   beginSessionWorkAdmission,
@@ -28,7 +28,7 @@ import type { AgentTurnContext, AgentTurnIo } from "./types.js";
 
 export function createAgentAdmissionController(params: {
   assertAdmissionCurrent?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runId: string;
   lifecycleGeneration: string;
   agentDedupeKeys: string[];
@@ -43,7 +43,7 @@ export function createAgentAdmissionController(params: {
   getResolvedSessionId: () => string | undefined;
   getResolvedSessionAgentId: () => string | undefined;
   getAgentId: () => string | undefined;
-  getCfgForAgent: () => OpenClawConfig | undefined;
+  getCfgForAgent: () => CarapaceConfig | undefined;
   getSessionPersisted: () => boolean;
   getSupersededSessionId: () => string | undefined;
   setAdmittedSessionId: (sessionId: string) => void;

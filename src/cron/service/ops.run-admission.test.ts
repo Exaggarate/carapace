@@ -14,7 +14,7 @@ import {
   setCommandLaneConcurrency,
 } from "../../process/command-queue.js";
 import { CommandLane } from "../../process/lanes.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import * as cronStoreModule from "../store.js";
 import { loadCronStore, saveCronStore } from "../store.js";
 import { cronStoreKey } from "../store/key.js";
@@ -182,7 +182,7 @@ describe("cron service run admission", () => {
       runIsolatedAgentJob,
     });
     inspectActiveCronRunReceipt({ storePath: store.storePath, jobId: failingJob.id });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TEMP TRIGGER reject_scheduled_sibling_activation
       BEFORE UPDATE OF started_at_ms ON cron_run_receipts
@@ -279,7 +279,7 @@ describe("cron service run admission", () => {
     expect(state.store?.jobs.find((job) => job.id === waitingJob.id)?.state.lastRunStatus).toBe(
       undefined,
     );
-    const receipt = openOpenClawStateDatabase()
+    const receipt = openCarapaceStateDatabase()
       .db.prepare(
         "SELECT status FROM cron_run_receipts WHERE store_key = ? AND job_id = ? ORDER BY started_at_ms DESC LIMIT 1",
       )
@@ -348,7 +348,7 @@ describe("cron service run admission", () => {
       await expect(waitingRun).resolves.toEqual({ ok: true, ran: false, reason: "not-due" });
       expect(runIsolatedAgentJob).toHaveBeenCalledTimes(1);
       expect(state.queuedRunReservationsByJobId.has(waitingJob.id)).toBe(false);
-      const receipt = openOpenClawStateDatabase()
+      const receipt = openCarapaceStateDatabase()
         .db.prepare("SELECT status FROM cron_run_receipts WHERE receipt_id = ?")
         .get(staleReceipt.receiptId) as { status: string } | undefined;
       expect(receipt?.status).toBe("skipped");
@@ -647,7 +647,7 @@ describe("cron service run admission", () => {
         persistedStatusAtEvent = cronStoreModule
           .loadCronJobsStoreSync(store.storePath)
           .jobs.find((entry) => entry.id === job.id)?.state.lastRunStatus;
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare(
             "UPDATE cron_jobs SET name = ?, job_json = json_set(job_json, '$.name', ?), updated_at = updated_at + 1 WHERE store_key = ? AND job_id = ?",
           )

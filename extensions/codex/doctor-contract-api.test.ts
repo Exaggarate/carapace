@@ -5,13 +5,13 @@ import path from "node:path";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { getSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { getSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   legacyConfigRules,
@@ -65,7 +65,7 @@ async function removeCodexDoctorFixture(stateDir: string): Promise<void> {
   // the temporary state dir; both must be released before removal or Windows keeps the files
   // locked and the removal fails with EBUSY. Agent close first: it releases leases through
   // shared state, so the reverse order can reopen it.
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   await fs.rm(stateDir, { recursive: true, force: true });
 }
@@ -78,8 +78,8 @@ async function createBindingMigrationFixture(options: {
   storeRoot?: "agent" | "fixed";
   threadId: string;
 }) {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-doctor-"));
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-doctor-"));
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const sessionsDir =
     options.storeRoot === "fixed"
       ? path.join(stateDir, "fixed-sessions")
@@ -144,7 +144,7 @@ describe("codex doctor contract", () => {
   it("reports the retired dynamic tools profile config key", () => {
     expect(
       legacyConfigRules[0]?.match({
-        codexDynamicToolsProfile: "openclaw-compat",
+        codexDynamicToolsProfile: "carapace-compat",
         codexDynamicToolsLoading: "direct",
       }),
     ).toBe(true);
@@ -238,7 +238,7 @@ describe("codex doctor contract", () => {
         candidate.match(original.plugins.entries.codex.config.appServer),
       );
       expect(rule?.path).toEqual(["plugins", "entries", "codex", "config", "appServer"]);
-      expect(rule?.message).toContain("openclaw doctor --fix");
+      expect(rule?.message).toContain("carapace doctor --fix");
 
       const result = normalizeCompatibilityConfig({ cfg: original });
 
@@ -274,7 +274,7 @@ describe("codex doctor contract", () => {
           codex: {
             enabled: true,
             config: {
-              codexDynamicToolsProfile: "openclaw-compat",
+              codexDynamicToolsProfile: "carapace-compat",
               codexDynamicToolsLoading: "direct",
               codexDynamicToolsExclude: ["custom_tool"],
               appServer: { mode: "guardian" },
@@ -1293,7 +1293,7 @@ describe("codex doctor contract", () => {
       name: "unknown-owner",
       threadId: "thread-unknown-owner",
     });
-    const externalDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-store-"));
+    const externalDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-store-"));
     const externalStore = path.join(externalDir, "sessions.json");
     await fs.writeFile(externalStore, contents, "utf8");
     const params = {
@@ -1316,8 +1316,8 @@ describe("codex doctor contract", () => {
   });
 
   it("does not scan above stateDir or follow escaped external store locators", async () => {
-    const outerDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-doctor-outer-"));
-    const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-doctor-outside-"));
+    const outerDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-doctor-outer-"));
+    const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-doctor-outside-"));
     const stateDir = path.join(outerDir, "state");
     await fs.mkdir(stateDir, { recursive: true });
     const strayDir = path.join(outerDir, "unrelated");
@@ -1346,7 +1346,7 @@ describe("codex doctor contract", () => {
       }),
       "utf8",
     );
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const params = {
       // The store directory is exactly stateDir's parent. It stays indexed-only,
       // and its explicit locator cannot escape that directory.
@@ -1374,7 +1374,7 @@ describe("codex doctor contract", () => {
           codex: {
             enabled: true,
             config: {
-              codexDynamicToolsProfile: "openclaw-compat",
+              codexDynamicToolsProfile: "carapace-compat",
               codexPlugins: {
                 enabled: true,
                 allow_destructive_actions: "on-request",

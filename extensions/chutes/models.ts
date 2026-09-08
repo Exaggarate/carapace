@@ -1,20 +1,20 @@
 /**
  * Chutes model catalog, static model definitions, and dynamic model discovery.
  */
-import { withTrustedEnvProxyGuardedFetchMode } from "openclaw/plugin-sdk/fetch-runtime";
-import { buildLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import { withTrustedEnvProxyGuardedFetchMode } from "carapace/plugin-sdk/fetch-runtime";
+import { buildLiveModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asPositiveSafeInteger,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { normalizeChutesModelPricing } from "./pricing-api.js";
 
 const CHUTES_MANIFEST_CATALOG = manifest.modelCatalog.providers.chutes;

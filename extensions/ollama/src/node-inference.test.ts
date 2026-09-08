@@ -1,6 +1,6 @@
 // Ollama node inference tests cover local discovery, chat, and agent tool routing.
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { describe, expect, it, vi } from "vitest";
 import { createOllamaNodeInvokePolicy } from "./node-inference-registration.js";
 import { createOllamaNodeHostCommands, createOllamaNodeInferenceTool } from "./node-inference.js";

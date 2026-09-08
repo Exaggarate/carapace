@@ -2,13 +2,13 @@
 import {
   embeddedAgentLog,
   resolveDefaultAgentDir,
-} from "openclaw/plugin-sdk/agent-harness-registration";
+} from "carapace/plugin-sdk/agent-harness-registration";
 import {
   ensureAuthProfileStore,
   resolveAuthProfileOrder,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveProviderIdForAuth } from "openclaw/plugin-sdk/provider-auth-aliases";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveProviderIdForAuth } from "carapace/plugin-sdk/provider-auth-aliases";
 import { createCodexAuthProfileSelection } from "./auth-profile-selection.js";
 export { CODEX_APP_SERVER_AUTH_PROVIDER } from "./auth-profile-selection.js";
 

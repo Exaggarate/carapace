@@ -4,7 +4,7 @@
  * session retention, and process cleanup for reconnect/poll flows.
  */
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { EventSessionRoutingPolicy } from "../infra/event-session-routing.js";
 import type {
   ManagedRunStdin,
@@ -29,7 +29,7 @@ function clampTtl(value: number | undefined) {
   return Math.min(Math.max(value, MIN_JOB_TTL_MS), MAX_JOB_TTL_MS);
 }
 
-const defaultJobTtlMs = clampTtl(readEnvInt("OPENCLAW_BASH_JOB_TTL_MS", "PI_BASH_JOB_TTL_MS"));
+const defaultJobTtlMs = clampTtl(readEnvInt("CARAPACE_BASH_JOB_TTL_MS", "PI_BASH_JOB_TTL_MS"));
 
 /** Resolves the retention duration captured by one admitted exec process. */
 export function resolveProcessCleanupMs(value?: number): number {
@@ -490,7 +490,7 @@ function resetProcessRegistryForTests() {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.bashProcessRegistryTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.bashProcessRegistryTestApi")] =
     { resetProcessRegistryForTests };
 }
 

@@ -7,7 +7,7 @@ import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot
 import type { PluginOrigin } from "../plugins/plugin-origin.types.js";
 import { buildDeclaredProviderOwnerIndex } from "../plugins/provider-owner-index.js";
 import { cleanupTrackedTempDirs, makeTrackedTempDir } from "../plugins/test-helpers/fs-fixtures.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 const tempDirs: string[] = [];
 
@@ -18,15 +18,15 @@ export function resetPluginAutoEnableTestState(): void {
 }
 
 export function makeTempDir(): string {
-  return makeTrackedTempDir("openclaw-plugin-auto-enable", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-auto-enable", tempDirs);
 }
 
 export function makeIsolatedEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   const rootDir = makeTempDir();
   return {
-    OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(process.cwd(), "extensions"),
-    OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+    CARAPACE_STATE_DIR: path.join(rootDir, "state"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.join(process.cwd(), "extensions"),
+    CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
     VITEST: "true",
     ...overrides,
   };
@@ -73,14 +73,14 @@ export function makeRegistry(
       origin: plugin.origin ?? "config",
       rootDir: `/fake/${plugin.id}`,
       source: `/fake/${plugin.id}/index.js`,
-      manifestPath: `/fake/${plugin.id}/openclaw.plugin.json`,
+      manifestPath: `/fake/${plugin.id}/carapace.plugin.json`,
     })),
     diagnostics: [],
   };
 }
 
 export function createPluginMetadataSnapshot(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   manifestRegistry: PluginManifestRegistry;
   workspaceDir?: string;
 }): PluginMetadataSnapshot {

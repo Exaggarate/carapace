@@ -98,7 +98,7 @@ describe("registerSetupCommand", () => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: false,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       sourceConfig: {},
     });
   });
@@ -201,14 +201,14 @@ describe("registerSetupCommand", () => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       sourceConfig,
     });
     readLocalOnboardingStateMock.mockReturnValue({ status: "pending" });
 
     await runInteractiveBareSetup();
 
-    expect(readLocalOnboardingStateMock).toHaveBeenCalledWith("/tmp/openclaw.json", sourceConfig);
+    expect(readLocalOnboardingStateMock).toHaveBeenCalledWith("/tmp/carapace.json", sourceConfig);
     expect(setupWizardCommandMock).toHaveBeenCalledWith(lastWizardOptions(), runtime);
     expect(runSystemAgentMock).not.toHaveBeenCalled();
   });
@@ -219,9 +219,9 @@ describe("registerSetupCommand", () => {
       readConfigFileSnapshotMock.mockResolvedValue({
         exists: true,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: {
-          $schema: "https://openclaw.ai/config.json",
+          $schema: "https://github.com/Exaggarate/carapace",
           meta: { updatedBy: "fixture" },
           wizard: { securityAcknowledgedAt: "2026-08-02T00:00:00.000Z", accessMode },
         },
@@ -239,7 +239,7 @@ describe("registerSetupCommand", () => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       sourceConfig: {
         wizard: {
           securityAcknowledgedAt: "2026-08-02T00:00:00.000Z",
@@ -262,7 +262,7 @@ describe("registerSetupCommand", () => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       sourceConfig: { agents: { defaults: { model: "acme/verified" } } },
     });
     readLocalOnboardingStateMock.mockReturnValue(onboardingState);
@@ -284,7 +284,7 @@ describe("registerSetupCommand", () => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       sourceConfig,
     });
     readLocalOnboardingStateMock.mockImplementation((_configPath, config) =>
@@ -295,7 +295,7 @@ describe("registerSetupCommand", () => {
 
     await runInteractiveBareSetup();
 
-    expect(readLocalOnboardingStateMock).toHaveBeenCalledWith("/tmp/openclaw.json", sourceConfig);
+    expect(readLocalOnboardingStateMock).toHaveBeenCalledWith("/tmp/carapace.json", sourceConfig);
     expect(runSystemAgentMock).toHaveBeenCalledOnce();
     expect(setupWizardCommandMock).not.toHaveBeenCalled();
   });
@@ -306,7 +306,7 @@ describe("registerSetupCommand", () => {
   ])("does not let a stale local receipt reroute %s", async (_description, config) => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       ...config,
     });
     readLocalOnboardingStateMock.mockReturnValue({ status: "pending" });
@@ -322,7 +322,7 @@ describe("registerSetupCommand", () => {
     readConfigFileSnapshotMock.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       sourceConfig: { gateway: {} },
     });
 
@@ -346,11 +346,11 @@ describe("registerSetupCommand", () => {
   it.each(["direct", "lazy"])(
     "registers a hidden retired-name alias through %s registration",
     async (mode) => {
-      const program = new Command().name("openclaw");
+      const program = new Command().name("carapace");
       if (mode === "direct") {
         registerSetupCommand(program);
       } else {
-        registerCoreCliCommands(program, createProgramContext(), ["node", "openclaw", "--help"]);
+        registerCoreCliCommands(program, createProgramContext(), ["node", "carapace", "--help"]);
       }
 
       expect(program.helpInformation()).not.toContain("crestodian");

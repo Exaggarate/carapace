@@ -1,12 +1,12 @@
-# OpenClaw Baseten Provider
+# Carapace Baseten Provider
 
-Official OpenClaw provider plugin for Baseten Model APIs, including Thinking Machines Lab's Inkling.
+Official Carapace provider plugin for Baseten Model APIs, including Thinking Machines Lab's Inkling.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/baseten-provider
-openclaw gateway restart
+carapace plugins install @carapace/baseten-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/baseten> for setup and configuration.
+See <../../docs/providers/baseten.md> for setup and configuration.

@@ -5,8 +5,8 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { prepareSystemAgentRunAdmission } from "../../agents/admitted-run-context.js";
 import { resolveEffectiveCompactionReserveTokens } from "../../agents/agent-compaction-constants.js";
 import { resolveDefaultAgentId } from "../../agents/agent-scope-config.js";
@@ -53,7 +53,7 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { resolveSessionStorePathForScope } from "../../config/sessions/session-store-path.js";
 import { selectSessionTranscriptLeafControlledPath } from "../../config/sessions/transcript-tree.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { readSessionMessagesAsync } from "../../gateway/session-transcript-readers.js";
 import { logVerbose } from "../../globals.js";
 import { isAbortError } from "../../infra/abort-signal.js";
@@ -225,7 +225,7 @@ function resolveMemoryFlushModelFallbackOptions(
 }
 
 type FollowupRuntimeParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   followupRun: FollowupRun;
   sessionEntry?: Pick<
     SessionEntry,
@@ -277,7 +277,7 @@ function resolveFollowupAgentRuntimeId(params: FollowupRuntimeParams): string {
 
 function followupOwnsNativeCompaction(params: FollowupRuntimeParams, runtimeId: string): boolean {
   // Backends that persist resumable native transcripts must remain the sole
-  // compaction owner; OpenClaw maintenance would corrupt that runtime state.
+  // compaction owner; Carapace maintenance would corrupt that runtime state.
   return (
     resolveCliBackendConfig(runtimeId, params.cfg, {
       agentId: params.followupRun.run.agentId,
@@ -441,12 +441,12 @@ function readActiveTurnTaintFromTranscriptEvents(events: readonly unknown[]): {
     if (record.role === "user") {
       return { boundaryFound: true, tainted: false };
     }
-    const metadata = record["__openclaw"];
+    const metadata = record["__carapace"];
     if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
       continue;
     }
-    const openClaw = metadata as { resultContentSource?: unknown; turnTainted?: unknown };
-    if (openClaw.turnTainted === true || openClaw.resultContentSource === "network") {
+    const carapace = metadata as { resultContentSource?: unknown; turnTainted?: unknown };
+    if (carapace.turnTainted === true || carapace.resultContentSource === "network") {
       return { boundaryFound: false, tainted: true };
     }
   }
@@ -502,7 +502,7 @@ type SessionLogSnapshot = {
 };
 
 async function appendPostCompactionRefreshPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   followupRun: FollowupRun;
 }): Promise<void> {
   const refreshPrompt = await readPostCompactionContext(params.followupRun.run.workspaceDir, {
@@ -682,7 +682,7 @@ async function estimatePromptTokensFromSessionTranscript(params: {
 export async function runSessionCompactionIfNeeded(params: {
   pendingUserEntryId?: string;
   compactionRequestBudget?: CompactionRequestBudget;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   followupRun: FollowupRun;
   promptForEstimate?: string;
   defaultModel: string;
@@ -871,7 +871,7 @@ export async function runSessionCompactionIfNeeded(params: {
   const shouldCompactByTranscriptBytes =
     exceedsTranscriptByteThreshold && !transcriptByteCompactionLatched;
   if (isCodexRuntime && !shouldCompactByTranscriptBytes) {
-    // Codex owns native-thread token pressure; OpenClaw owns the host transcript byte fuse
+    // Codex owns native-thread token pressure; Carapace owns the host transcript byte fuse
     // that bounds fresh-thread bootstrap seeds.
     logVerbose(
       `preflightCompaction skipped: sessionKey=${params.sessionKey} runtime=codex ` +
@@ -1244,7 +1244,7 @@ type MemoryFlushRunParams = Parameters<typeof runMemoryFlushIfNeeded>[0];
 export async function runMemoryFlushIfNeeded(params: {
   /** Supplied only by required preflight, while this admitted input is unprocessed. */
   preflightAdmission?: UserTurnTranscriptAdmissionReceipt;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   followupRun: FollowupRun;
   promptForEstimate?: string;
   opts?: Pick<GetReplyOptions, "promptCacheKey">;

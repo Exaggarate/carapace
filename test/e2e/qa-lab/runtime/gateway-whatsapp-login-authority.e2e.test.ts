@@ -8,9 +8,9 @@ import {
   disconnectGatewayClient,
 } from "../../../../src/gateway/test-helpers.e2e.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 
 type ToolsInvokeResult = {
   ok: boolean;
@@ -20,7 +20,7 @@ type ToolsInvokeResult = {
   error?: { code?: string; message?: string };
 };
 
-let instance: OpenClawTestInstance | undefined;
+let instance: CarapaceTestInstance | undefined;
 
 afterEach(async () => {
   await instance?.cleanup();
@@ -32,10 +32,10 @@ describe("Gateway WhatsApp login authority", () => {
     "hides credential relinking from non-owners and preserves the owner wait flow",
     { timeout: 120_000 },
     async () => {
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "qa-whatsapp-login-authority",
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(process.cwd(), "dist", "extensions"),
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.join(process.cwd(), "dist", "extensions"),
         },
         config: {
           plugins: {

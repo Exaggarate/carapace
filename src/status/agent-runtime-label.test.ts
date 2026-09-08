@@ -1,4 +1,4 @@
-import type { SessionAcpMeta } from "@openclaw/acp-core/types";
+import type { SessionAcpMeta } from "@carapace/acp-core/types";
 import { describe, expect, it } from "vitest";
 import { resolveAgentRuntimeLabel } from "./agent-runtime-label.js";
 
@@ -22,7 +22,7 @@ describe("resolveAgentRuntimeLabel", () => {
       name: "ACP agent and backend outrank the resolved harness",
       args: {
         sessionEntry: { acp: acpMeta("gemini", "acpx"), agentHarnessId: "codex" },
-        resolvedHarness: "openclaw",
+        resolvedHarness: "carapace",
       },
       expected: "gemini (acp/acpx)",
     },
@@ -67,7 +67,7 @@ describe("resolveAgentRuntimeLabel", () => {
     {
       name: "a non-CLI provider resolves to the built-in runtime",
       args: { fallbackProvider: "anthropic", classifyCliProvider: () => false },
-      expected: "OpenClaw Default",
+      expected: "Carapace Default",
     },
   ])("$name", ({ args, expected }) => {
     expect(resolveAgentRuntimeLabel(args)).toBe(expected);
@@ -116,13 +116,13 @@ describe("resolveAgentRuntimeLabel", () => {
       name: "a plugin-owned locked harness remains previous runtime history",
       args: {
         sessionEntry: {
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           modelSelectionLocked: true,
           pluginOwnerId: "model-owner",
         },
         resolvedHarness: "codex",
       },
-      expected: "OpenAI Codex (previous runtime: OpenClaw Default)",
+      expected: "OpenAI Codex (previous runtime: Carapace Default)",
     },
     {
       name: "a retired codex-cli pin still reports a real transition",
@@ -149,7 +149,7 @@ describe("resolveAgentRuntimeLabel", () => {
         fallbackProvider: "anthropic",
         classifyCliProvider: () => false,
       },
-      expected: "OpenClaw Default (previous runtime: OpenAI Codex)",
+      expected: "Carapace Default (previous runtime: OpenAI Codex)",
     },
     {
       name: "an unmapped pin is reported by its sanitized id",

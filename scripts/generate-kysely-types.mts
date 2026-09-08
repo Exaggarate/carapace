@@ -7,14 +7,14 @@ import { DatabaseSync } from "node:sqlite";
 
 const SCHEMAS = [
   {
-    name: "openclaw-state",
-    schema: "src/state/openclaw-state-schema.sql",
-    outFile: "src/state/openclaw-state-db.generated.d.ts",
+    name: "carapace-state",
+    schema: "src/state/carapace-state-schema.sql",
+    outFile: "src/state/carapace-state-db.generated.d.ts",
   },
   {
-    name: "openclaw-agent",
-    schema: "src/state/openclaw-agent-schema.sql",
-    outFile: "src/state/openclaw-agent-db.generated.d.ts",
+    name: "carapace-agent",
+    schema: "src/state/carapace-agent-schema.sql",
+    outFile: "src/state/carapace-agent-db.generated.d.ts",
   },
 ];
 

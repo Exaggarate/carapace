@@ -1,9 +1,9 @@
 import { getEventListeners } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { patchSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { patchSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { describe, expect, it, vi } from "vitest";
 import * as appServerPolicy from "./app-server-policy.js";
 import { applyCodexAppServerAuthProfile } from "./auth-bridge.js";
@@ -218,9 +218,9 @@ describe("prepareCodexAttemptConnection", () => {
     const params = createParams(sessionFile, path.join(tempDir, "workspace-installation-target"));
     const createToolSurface = vi.fn(params.hostCapabilities.createToolSurface);
     const localProcessEnv = Object.freeze({
-      OPENCLAW_STATE_DIR: "/fixture/diagnosed",
-      OPENCLAW_CONFIG_PATH: "/fixture/custom.json",
-      OPENCLAW_WORKSPACE_DIR: "/fixture/default-workspace",
+      CARAPACE_STATE_DIR: "/fixture/diagnosed",
+      CARAPACE_CONFIG_PATH: "/fixture/custom.json",
+      CARAPACE_WORKSPACE_DIR: "/fixture/default-workspace",
     });
     params.hostCapabilities = Object.freeze({
       ...params.hostCapabilities,
@@ -284,7 +284,7 @@ describe("prepareCodexAttemptConnection", () => {
         placement === "ordinary-unix-server" ? "unix" : "websocket",
       );
       expect(connection.shellEnvironment).toBeUndefined();
-      expect(connection.appServer.start.env ?? {}).not.toHaveProperty("OPENCLAW_STATE_DIR");
+      expect(connection.appServer.start.env ?? {}).not.toHaveProperty("CARAPACE_STATE_DIR");
       expect(connection.disableLoginShell).toBe(false);
       return;
     }
@@ -696,7 +696,7 @@ describe("prepareCodexAttemptConnection", () => {
         },
       }),
     ).rejects.toThrow(
-      'plugins.entries.codex.config.appServer.approvalPolicy="untrusted" is retired; run "openclaw doctor --fix" to migrate it to "on-request".',
+      'plugins.entries.codex.config.appServer.approvalPolicy="untrusted" is retired; run "carapace doctor --fix" to migrate it to "on-request".',
     );
   });
 

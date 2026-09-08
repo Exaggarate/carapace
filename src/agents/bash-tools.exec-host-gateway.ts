@@ -3,8 +3,8 @@
  * Evaluates shell allowlists, auto-review, durable approvals, follow-up routing,
  * and approved command execution for gateway-backed exec calls.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import {
   buildCronExecOperationBinding,
   consumeCronStandingGrant,
@@ -291,8 +291,8 @@ function formatDiagnosticsExportSuccess(aggregated: string): string {
     if (typeof manifest.generatedAt === "string") {
       lines.push(`Generated at: ${manifest.generatedAt}`);
     }
-    if (typeof manifest.openclawVersion === "string") {
-      lines.push(`OpenClaw version: ${manifest.openclawVersion}`);
+    if (typeof manifest.carapaceVersion === "string") {
+      lines.push(`Carapace version: ${manifest.carapaceVersion}`);
     }
     const contents = formatDiagnosticsContents(manifest);
     if (contents.length > 0) {
@@ -535,7 +535,7 @@ export async function processGatewayAllowlist(
   const obsoleteGeneratedApprovalCount = countObsoleteGeneratedExecApprovals(approvals.file);
   if (hostSecurity === "allowlist" && !allowlistSatisfied && obsoleteGeneratedApprovalCount > 0) {
     params.warnings.push(
-      `${obsoleteGeneratedApprovalCount} older generated exec ${obsoleteGeneratedApprovalCount === 1 ? "approval is" : "approvals are"} inactive because they are not tied to a working directory. Run "openclaw doctor --fix", then rerun the workflow and choose "Always allow here".`,
+      `${obsoleteGeneratedApprovalCount} older generated exec ${obsoleteGeneratedApprovalCount === 1 ? "approval is" : "approvals are"} inactive because they are not tied to a working directory. Run "carapace doctor --fix", then rerun the workflow and choose "Always allow here".`,
     );
   }
   const durableApprovalSatisfied = hasDurableExecApproval({

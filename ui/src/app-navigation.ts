@@ -1,5 +1,5 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { isValidWorkboardBoardId } from "@openclaw/workboard-contract";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { isValidWorkboardBoardId } from "@carapace/workboard-contract";
 // Control UI app navigation defines sidebar and settings presentation metadata.
 import type { RouteId } from "./app-route-paths.ts";
 import type {
@@ -437,16 +437,16 @@ export function titleForRoute(routeId: NavigationRouteId): string {
 /** Window/tab title, markers leftmost because tabs truncate from the right.
  * A disconnected Gateway replaces the approval count (a stale queue is not
  * actionable) and carries the pending-outbox total; titles already ending in the brand
- * ("Ask OpenClaw") skip the suffix so it never reads "… OpenClaw — OpenClaw". */
+ * ("Ask Carapace") skip the suffix so it never reads "… Carapace — Carapace". */
 export function formatDocumentTitle(options: {
   context: string;
   attentionCount?: number;
   gatewayDisconnected?: boolean;
   queuedCount?: number;
 }): string {
-  const base = options.context.endsWith("OpenClaw")
+  const base = options.context.endsWith("Carapace")
     ? options.context
-    : `${options.context} — OpenClaw`;
+    : `${options.context} — Carapace`;
   if (options.gatewayDisconnected) {
     const queued =
       options.queuedCount && options.queuedCount > 0
@@ -468,7 +468,7 @@ export function settingsNavigationLabelForRoute(
     return t(deviceSettingsGroupLabelKey(snapshot));
   }
   if (routeId === "custodian") {
-    return t("nav.askOpenClaw");
+    return t("nav.askCarapace");
   }
   return titleForRoute(routeId);
 }

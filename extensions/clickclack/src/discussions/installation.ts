@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
 
 const INSTALLATION_NAMESPACE = "discussion-installation";
 const INSTALLATION_KEY = "current";

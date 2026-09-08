@@ -30,7 +30,7 @@ describe("google-meet CLI", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+    vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
     vi.resetModules();
   });
 
@@ -254,7 +254,7 @@ describe("google-meet CLI", () => {
 
   it("prints markdown artifact and attendance output", async () => {
     stubMeetArtifactsApi();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-artifacts-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "carapace-google-meet-artifacts-"));
     const outputPath = path.join(tempDir, "artifacts.md");
     const artifactsStdout = captureStdout();
 
@@ -317,7 +317,7 @@ describe("google-meet CLI", () => {
   it.skipIf(process.platform === "win32")(
     "preserves an existing output when the OS rejects a full write",
     () => {
-      const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-output-failure-"));
+      const tempDir = mkdtempSync(path.join(tmpdir(), "carapace-google-meet-output-failure-"));
       const outputPath = path.join(tempDir, "artifacts.md");
       const prior = "prior export\n";
       writeFileSync(outputPath, prior);
@@ -325,7 +325,7 @@ describe("google-meet CLI", () => {
 
       try {
         const source = path.join(process.cwd(), "extensions/google-meet/src/cli-shared.ts");
-        const script = `import { writeCliOutput } from ${JSON.stringify(source)}; await writeCliOutput({ output: process.env.OPENCLAW_TEST_OUTPUT }, "x".repeat(8192));`;
+        const script = `import { writeCliOutput } from ${JSON.stringify(source)}; await writeCliOutput({ output: process.env.CARAPACE_TEST_OUTPUT }, "x".repeat(8192));`;
         const result = spawnSync(
           "/bin/sh",
           [
@@ -341,7 +341,7 @@ describe("google-meet CLI", () => {
           ],
           {
             cwd: process.cwd(),
-            env: { ...process.env, OPENCLAW_TEST_OUTPUT: outputPath },
+            env: { ...process.env, CARAPACE_TEST_OUTPUT: outputPath },
             encoding: "utf8",
           },
         );
@@ -406,7 +406,7 @@ describe("google-meet CLI", () => {
   it("writes an export bundle", async () => {
     stubMeetArtifactsApi();
     const stdout = captureStdout();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "carapace-google-meet-export-"));
 
     try {
       await setupCli({}).parseAsync(
@@ -473,7 +473,7 @@ describe("google-meet CLI", () => {
   it("neutralizes spreadsheet formulas in exported attendance CSV files", async () => {
     stubMeetArtifactsApi({ participantDisplayName: "\uFF1D1+1" });
     const stdout = captureStdout();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-csv-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "carapace-google-meet-export-csv-"));
 
     try {
       await setupCli({}).parseAsync(
@@ -503,7 +503,7 @@ describe("google-meet CLI", () => {
   it("includes artifact warnings in export summaries and manifests", async () => {
     stubMeetArtifactsApi({ failSmartNoteDocumentBody: true });
     const stdout = captureStdout();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-warning-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "carapace-google-meet-export-warning-"));
 
     try {
       await setupCli({}).parseAsync(
@@ -542,7 +542,7 @@ describe("google-meet CLI", () => {
   it("prints a dry-run export manifest without writing files", async () => {
     stubMeetArtifactsApi();
     const stdout = captureStdout();
-    const parentDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-dry-run-"));
+    const parentDir = mkdtempSync(path.join(tmpdir(), "carapace-google-meet-export-dry-run-"));
     const outputDir = path.join(parentDir, "bundle");
 
     try {

@@ -54,7 +54,7 @@ function buildWebUiChatEvidenceManifest({ candidateRef, candidateSha, status, ca
     id: "web-ui-chat-proof",
     title: "Mantis Web UI Chat Proof",
     summary: passed
-      ? "Mantis ran the OpenClaw Control UI chat proof against the candidate ref, sent a message through the mocked Gateway, rendered the final reply in the browser, and captured browser artifacts for review."
+      ? "Mantis ran the Carapace Control UI chat proof against the candidate ref, sent a message through the mocked Gateway, rendered the final reply in the browser, and captured browser artifacts for review."
       : "Mantis could not complete the Control UI chat proof. Retained attempt artifacts and logs describe the failure.",
     scenario: "web-ui-chat-proof",
     comparison: {
@@ -126,7 +126,7 @@ function renderReport({ candidateRef, candidateSha, outputDir, status, artifacts
     "",
     "## Scenario",
     "",
-    "The scenario loads OpenClaw Control UI chat in a browser with the mocked Gateway harness, sends a chat message through the GUI, verifies the `chat.send` request, emits a final Gateway reply, and waits for the reply to render in the web chat thread.",
+    "The scenario loads Carapace Control UI chat in a browser with the mocked Gateway harness, sends a chat message through the GUI, verifies the `chat.send` request, emits a final Gateway reply, and waits for the reply to render in the web chat thread.",
     "",
     "## Artifacts",
     "",

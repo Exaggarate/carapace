@@ -3,7 +3,7 @@ import type { AddressInfo, Socket } from "node:net";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPidAlive } from "../shared/pid-alive.js";
 import { killPidIfAlive, waitForPidFile, waitForPidToExit } from "../test-utils/process-tree.js";
 import { withTempDir } from "../test-utils/temp-dir.js";
@@ -103,7 +103,7 @@ async function withServer(handler: RequestListener, run: (base: string) => Promi
   }
 }
 
-function config(args: string[], timeoutSeconds = 10): OpenClawConfig {
+function config(args: string[], timeoutSeconds = 10): CarapaceConfig {
   return {
     tools: {
       links: { models: [{ command: process.execPath, args, timeoutSeconds: 10 }], timeoutSeconds },
@@ -148,7 +148,7 @@ describe("runLinkUnderstanding transport cleanup", () => {
               models: [{ type: "cli", command: "summarize" }],
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         ctx: { Body: `see ${url}` } as MsgContext,
       });
 
@@ -258,7 +258,7 @@ it("fetches only bare URLs from messages that also contain titled markdown links
 });
 
 it("stops processor descendants after caller cancellation", async () => {
-  await withTempDir("openclaw-link-cancel-", async (dir) => {
+  await withTempDir("carapace-link-cancel-", async (dir) => {
     const pidPath = path.join(dir, "worker.pid");
     const workerSource = "setInterval(() => {}, 1000); process.send('ready')";
     const wrapperSource = [

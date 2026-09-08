@@ -1,12 +1,12 @@
 // Discord tests cover model picker preferences migrations plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { buildLegacyMigrationPreview } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import { buildLegacyMigrationPreview } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "../../doctor-contract-api.js";
 import { detectDiscordLegacyStateMigrations } from "./model-picker-preferences-migrations.js";
@@ -15,8 +15,8 @@ let stateWorkspace: TempWorkspace;
 
 beforeEach(async () => {
   stateWorkspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
-    prefix: "openclaw-discord-model-picker-migration-",
+    rootDir: resolvePreferredCarapaceTmpDir(),
+    prefix: "carapace-discord-model-picker-migration-",
   });
 });
 

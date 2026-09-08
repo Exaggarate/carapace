@@ -19,7 +19,7 @@ vi.mock("./session-transcript-title-reader.js", () => ({ readSessionTitleFieldsF
 
 import { testing as cliBackendsTesting } from "../agents/cli-backends.test-support.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import type { ChatAttachment } from "./chat-attachments.js";
 import {
@@ -30,7 +30,7 @@ import {
 
 const cfg = {
   agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
-} as OpenClawConfig;
+} as CarapaceConfig;
 const baseEntry: SessionEntry = {
   sessionId: "session-1",
   updatedAt: 1,
@@ -44,7 +44,7 @@ function titleParams(entry: SessionEntry | undefined = baseEntry) {
     entry,
     sessionId: "session-1",
     sessionKey: "agent:main:dashboard:chat-1",
-    storePath: "/tmp/openclaw/sessions.json",
+    storePath: "/tmp/carapace/sessions.json",
     userMessage: "Help me plan the release",
   };
 }
@@ -114,7 +114,7 @@ describe("maybeGenerateDashboardSessionTitle", () => {
       {
         agentId: "main",
         sessionKey: "agent:main:dashboard:chat-1",
-        storePath: "/tmp/openclaw/sessions.json",
+        storePath: "/tmp/carapace/sessions.json",
       },
       expect.any(Function),
       { requireWriteSuccess: true },
@@ -154,7 +154,7 @@ describe("maybeGenerateDashboardSessionTitle", () => {
     const entry = {
       ...baseEntry,
       agentHarnessId: "codex",
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "carapace",
       modelSelectionLocked: true,
     };
     mockSessionUpdate(entry);
@@ -190,7 +190,7 @@ describe("maybeGenerateDashboardSessionTitle", () => {
           utilityModel: "openai/gpt-5.6-luna",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     resolveUtilityModelRefForAgent.mockReturnValue("openai/gpt-5.6-luna");
 
     await expect(

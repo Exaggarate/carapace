@@ -3,9 +3,9 @@ import path from "node:path";
 import type {
   MemoryEntryProvenance,
   MemorySearchResult,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { formatMemoryDreamingDay } from "openclaw/plugin-sdk/memory-core-host-status";
-import { appendMemoryHostEvent } from "openclaw/plugin-sdk/memory-host-events";
+} from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import { formatMemoryDreamingDay } from "carapace/plugin-sdk/memory-core-host-status";
+import { appendMemoryHostEvent } from "carapace/plugin-sdk/memory-host-events";
 import pLimit from "p-limit";
 import { deriveConceptTags } from "./concept-vocabulary.js";
 import {

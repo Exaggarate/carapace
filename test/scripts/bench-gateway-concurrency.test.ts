@@ -165,7 +165,7 @@ describe("gateway concurrency benchmark script", () => {
   });
 
   it("does not report missing or incomplete timeline evidence as zero scans", async () => {
-    await withTempDir("openclaw-concurrency-timeline-", async (root) => {
+    await withTempDir("carapace-concurrency-timeline-", async (root) => {
       const file = `${root}/timeline.jsonl`;
       expect(() => testing.readDiagnosticsTimelineSpans(file)).toThrow();
       await writeFile(file, "");
@@ -176,10 +176,10 @@ describe("gateway concurrency benchmark script", () => {
   });
 
   it("counts load spans by emission time even when buffered setup spans arrive later", async () => {
-    await withTempDir("openclaw-concurrency-timeline-", async (root) => {
+    await withTempDir("carapace-concurrency-timeline-", async (root) => {
       const file = `${root}/timeline.jsonl`;
       const spans = [999, 1_000, 1_500, 2_000, 2_001].map((timestamp) => ({
-        schemaVersion: "openclaw.diagnostics.v1",
+        schemaVersion: "carapace.diagnostics.v1",
         type: "span.end",
         name: "plugins.metadata.scan",
         durationMs: 10,
@@ -582,7 +582,7 @@ describe("gateway concurrency benchmark script", () => {
     });
 
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain("OpenClaw Gateway concurrency benchmark");
+    expect(result.stdout).toContain("Carapace Gateway concurrency benchmark");
   });
 
   it("ends CLI failures with the required wrapper marker", () => {

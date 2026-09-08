@@ -1,7 +1,7 @@
 /** Verifies MCP connection resolver registration ownership is fail-closed. */
 import { describe, expect, it, vi } from "vitest";
 import { resolveRequesterScopedMcpConnections } from "../agents/mcp-connection-resolver.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginRegistry } from "./registry.js";
 import { withPluginRuntimeRegistryScope } from "./runtime/gateway-request-scope.js";
 import type { PluginRuntime } from "./runtime/types.js";
@@ -19,7 +19,7 @@ function createRegistryHarness(allowProcessHomeSessionCatalogs = true) {
     allowProcessHomeSessionCatalogs,
     activateGlobalSideEffects: false,
   });
-  const config = {} as OpenClawConfig;
+  const config = {} as CarapaceConfig;
   const apiFor = (id: string) => {
     const record = createPluginRecord({ id, source: `/plugins/${id}/index.ts` });
     pluginRegistry.registry.plugins.push(record);

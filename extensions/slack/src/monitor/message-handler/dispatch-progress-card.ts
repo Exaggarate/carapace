@@ -2,10 +2,10 @@ import {
   type createChannelProgressWorkCounter,
   formatChannelProgressDraftText,
   type ChannelProgressDraftCompositorSnapshot,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { resolveGatewayPublicOrigin } from "openclaw/plugin-sdk/config-contracts";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { buildControlUiSessionPath } from "openclaw/plugin-sdk/session-discussion";
+} from "carapace/plugin-sdk/channel-outbound";
+import { resolveGatewayPublicOrigin } from "carapace/plugin-sdk/config-contracts";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { buildControlUiSessionPath } from "carapace/plugin-sdk/session-discussion";
 import { createSlackDraftStream } from "../../draft-stream.js";
 import { formatSlackError } from "../../errors.js";
 import { normalizeSlackOutboundText } from "../../format.js";

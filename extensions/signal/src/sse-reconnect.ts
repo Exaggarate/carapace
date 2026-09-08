@@ -1,6 +1,6 @@
 // Signal plugin module implements sse reconnect behavior.
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
-import { channelBlockedPatch, channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/channel-contract";
+import { channelBlockedPatch, channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
 import {
   computeBackoff,
   logVerbose,
@@ -8,7 +8,7 @@ import {
   sleepWithAbort,
   type BackoffPolicy,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/runtime-env";
 import {
   type SignalSseEvent,
   type SignalTransportKind,

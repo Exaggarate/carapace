@@ -55,8 +55,8 @@ async function initializeRepository(root: string): Promise<{ baseCommit: string;
   const repo = path.join(root, "source");
   await fs.mkdir(repo, { recursive: true });
   await git(repo, "init", "-b", "main");
-  await git(repo, "config", "user.name", "OpenClaw Test");
-  await git(repo, "config", "user.email", "openclaw-test@example.invalid");
+  await git(repo, "config", "user.name", "Carapace Test");
+  await git(repo, "config", "user.email", "carapace-test@example.invalid");
   await fs.writeFile(path.join(repo, "README.md"), "base\n");
   await git(repo, "add", "README.md");
   await git(repo, "commit", "-m", "initialize session worktree fixture");
@@ -99,7 +99,7 @@ describe("managed worktrees session-owner product proof", () => {
     { timeout: 240_000 },
     async () => {
       const canonicalTmp = await fs.realpath(os.tmpdir());
-      const fixtureRoot = tempDirs.make("openclaw-managed-worktree-session-", canonicalTmp);
+      const fixtureRoot = tempDirs.make("carapace-managed-worktree-session-", canonicalTmp);
       const { baseCommit, repo } = await initializeRepository(fixtureRoot);
       gatewayOwner = createQaLiveLaneGateway();
       harness = await gatewayOwner.start({
@@ -119,7 +119,7 @@ describe("managed worktrees session-owner product proof", () => {
       const clean = await createSessionWorktree({ name: "qa-session-clean", repo });
       expect(clean.worktree).toMatchObject({
         id: expect.any(String),
-        branch: "openclaw/qa-session-clean",
+        branch: "carapace/qa-session-clean",
         path: expect.any(String),
       });
       expect(clean.entry.worktree).toMatchObject({
@@ -192,7 +192,7 @@ describe("managed worktrees session-owner product proof", () => {
       expect(cleanDeleted.deleted).toBe(true);
       expect(cleanDeleted).not.toHaveProperty("worktreePreserved");
       await expect(fs.access(clean.worktree.path)).rejects.toMatchObject({ code: "ENOENT" });
-      const cleanSnapshotRef = `refs/openclaw/snapshots/${clean.worktree.id}`;
+      const cleanSnapshotRef = `refs/carapace/snapshots/${clean.worktree.id}`;
       await expect(git(repo, "show-ref", "--verify", cleanSnapshotRef)).resolves.toContain(
         cleanSnapshotRef,
       );
@@ -213,7 +213,7 @@ describe("managed worktrees session-owner product proof", () => {
       expect(dirtyDeleted.deleted).toBe(true);
       expect(dirtyDeleted).not.toHaveProperty("worktreePreserved");
       await expect(fs.access(dirty.worktree.path)).rejects.toMatchObject({ code: "ENOENT" });
-      const dirtySnapshotRef = `refs/openclaw/snapshots/${dirty.worktree.id}`;
+      const dirtySnapshotRef = `refs/carapace/snapshots/${dirty.worktree.id}`;
       const dirtySnapshotCommit = await git(repo, "rev-parse", dirtySnapshotRef);
 
       const restored = (await harness.gateway.call("worktrees.restore", {

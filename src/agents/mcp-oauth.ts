@@ -1,11 +1,11 @@
 /** MCP OAuth credential provider, flow coordinator, and login helpers. */
 import { auth } from "@modelcontextprotocol/sdk/client/auth.js";
 import type { FetchLike } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
-  type OpenClawStateLeaseContext,
-  withOpenClawStateLease,
-} from "../state/openclaw-state-lease.js";
+  type CarapaceStateLeaseContext,
+  withCarapaceStateLease,
+} from "../state/carapace-state-lease.js";
 import {
   buildMcpHttpFetch,
   withoutMcpAuthorizationHeader,
@@ -61,10 +61,10 @@ function isMcpOAuthRedirectRegistrationError(error: unknown): boolean {
 
 async function withMcpOAuthLease<T>(
   storeKey: string,
-  run: (lease: OpenClawStateLeaseContext) => Promise<T>,
+  run: (lease: CarapaceStateLeaseContext) => Promise<T>,
   signal?: AbortSignal,
 ): Promise<T> {
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: "core:mcp-oauth",
       key: storeKey,
@@ -79,7 +79,7 @@ async function withMcpOAuthLease<T>(
 
 function mcpOAuthAdditionalAuthorizationError(serverName: string): Error {
   return new Error(
-    `MCP server "${serverName}" requires additional OAuth authorization. Run openclaw mcp login ${serverName}.`,
+    `MCP server "${serverName}" requires additional OAuth authorization. Run carapace mcp login ${serverName}.`,
   );
 }
 
@@ -199,7 +199,7 @@ export async function resolveMcpOAuthAccessToken(
           return undefined;
         }
         throw new Error(
-          `MCP server "${params.identity.serverName}" requires OAuth authorization. Run openclaw mcp login ${params.identity.serverName}.`,
+          `MCP server "${params.identity.serverName}" requires OAuth authorization. Run carapace mcp login ${params.identity.serverName}.`,
         );
       }
 
@@ -216,7 +216,7 @@ export async function resolveMcpOAuthAccessToken(
       }
       if (!tokens.refresh_token) {
         throw new Error(
-          `MCP server "${params.identity.serverName}" has expired OAuth credentials. Run openclaw mcp login ${params.identity.serverName}.`,
+          `MCP server "${params.identity.serverName}" has expired OAuth credentials. Run carapace mcp login ${params.identity.serverName}.`,
         );
       }
 
@@ -244,7 +244,7 @@ export async function resolveMcpOAuthAccessToken(
       const refreshedTokens = await provider.tokens();
       if (result !== "AUTHORIZED" || !refreshedTokens?.access_token) {
         throw new Error(
-          `MCP server "${params.identity.serverName}" could not refresh OAuth credentials. Run openclaw mcp login ${params.identity.serverName}.`,
+          `MCP server "${params.identity.serverName}" could not refresh OAuth credentials. Run carapace mcp login ${params.identity.serverName}.`,
         );
       }
       return refreshedTokens.access_token;
@@ -378,7 +378,7 @@ async function runMcpOAuthAuthorizationAttempt(
     scope?: string;
     suppressStoredTokens?: boolean;
   },
-  lease: OpenClawStateLeaseContext,
+  lease: CarapaceStateLeaseContext,
 ): Promise<"authorized" | "redirect"> {
   const provider = createMcpOAuthClientProvider({
     identity: params.identity,
@@ -485,7 +485,7 @@ async function completeMcpOAuthAuthorizationUnderLease(
   identity: McpOAuthIdentity,
   config: ResolvedHttpMcpTransportConfig,
   input: { code: string },
-  lease: OpenClawStateLeaseContext,
+  lease: CarapaceStateLeaseContext,
 ): Promise<"authorized"> {
   const storeKey = identity.storeKey;
   const store = readMcpOAuthStore(storeKey);

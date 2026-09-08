@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
 import { finalizePluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
@@ -35,7 +35,7 @@ function createMediaSnapshot(generation: string, nativePdf: boolean) {
 
 describe("media defaults generation ownership", () => {
   it.each([false, true])("follows nested metadata scopes with config=%s", (hasConfig) => {
-    const cfg: OpenClawConfig | undefined = hasConfig ? {} : undefined;
+    const cfg: CarapaceConfig | undefined = hasConfig ? {} : undefined;
     const options = { config: cfg, trustConfigIdentity: true };
     const first = createMediaSnapshot("first", true);
     const second = createMediaSnapshot("second", false);

@@ -14,14 +14,14 @@ import {
   hasInProcessGatewayToolContext,
 } from "../agents/tools/in-process-gateway.js";
 import type { CliDeps } from "../cli/deps.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { makeCronJob } from "../cron/delivery.test-helpers.js";
 import { loadCronStore, resolveCronJobsStorePath, saveCronStore } from "../cron/store.js";
 import {
   getPluginRuntimeGatewayRequestScope,
   withPluginRuntimeGatewayContextResolver,
 } from "../plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withLocalGatewayRequestScope } from "./local-request-context.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
 import {
@@ -50,7 +50,7 @@ describe("local gateway request context", () => {
       agents: {
         defaults: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     response = await withLocalGatewayRequestScope(
       {
@@ -182,7 +182,7 @@ describe("local gateway request context", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const loadOwner = vi
       .spyOn(preparedModelCatalog, "loadPublishedPreparedModelCatalogOwnerSnapshot")
       .mockResolvedValue(
@@ -235,7 +235,7 @@ describe("local gateway request context", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const model = {
       provider: "local-auth-provider",
       id: "local-auth-model",
@@ -326,7 +326,7 @@ describe("local gateway request context", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const candidate = {
       catalogOwner: { agentId: "main", workspaceDir: "/tmp/local-model-timeout-workspace" },
       agentId: "main",
@@ -360,8 +360,8 @@ describe("local gateway request context", () => {
   });
 
   it("commits agent deletion through the canonical cron store", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-local-cron-delete-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-local-cron-delete-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const cfg = {
       cron: { store: path.join(stateDir, "cron", "jobs.json") },
       agents: {
@@ -369,7 +369,7 @@ describe("local gateway request context", () => {
         defaults: { systemAgent: { agentId: "main" } },
         entries: { main: {}, worker: {} },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     try {
       const now = Date.now();
       const storePath = resolveCronJobsStorePath();
@@ -411,7 +411,7 @@ describe("local gateway request context", () => {
         "agentless-system-job",
       ]);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       vi.unstubAllEnvs();
       fs.rmSync(stateDir, { recursive: true, force: true });
     }

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveRealpathOrAbsolute } from "../infra/boundary-path.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { resetPluginSlotsToDefaults } from "./slots.js";
@@ -66,7 +66,7 @@ function loadPathMatchesInstallPath(loadPath: string, installPath: string): bool
 }
 
 export function hasMatchingPluginLoadPath(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   ownedPaths: readonly string[],
 ): boolean {
   return Boolean(
@@ -77,9 +77,9 @@ export function hasMatchingPluginLoadPath(
 }
 
 function removeMatchingLoadPaths(
-  load: NonNullable<OpenClawConfig["plugins"]>["load"],
+  load: NonNullable<CarapaceConfig["plugins"]>["load"],
   ownedPaths: readonly string[],
-): { load: NonNullable<OpenClawConfig["plugins"]>["load"] | undefined; changed: boolean } {
+): { load: NonNullable<CarapaceConfig["plugins"]>["load"] | undefined; changed: boolean } {
   const loadPaths = load?.paths;
   if (
     ownedPaths.length === 0 ||
@@ -101,10 +101,10 @@ function removeMatchingLoadPaths(
 }
 
 export function removePluginRuntimePolicyFromConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   pluginId: string,
   opts?: { channelIds?: string[]; loadPaths?: string[] },
-): { config: OpenClawConfig; actions: PluginConfigUninstallActions } {
+): { config: CarapaceConfig; actions: PluginConfigUninstallActions } {
   const actions = createEmptyConfigUninstallActions();
   const pluginsConfig = cfg.plugins ?? {};
 
@@ -175,16 +175,16 @@ export function removePluginRuntimePolicyFromConfig(
     config: {
       ...cfg,
       plugins: Object.keys(cleanedPlugins).length > 0 ? cleanedPlugins : undefined,
-      channels: channels as OpenClawConfig["channels"],
+      channels: channels as CarapaceConfig["channels"],
     },
     actions,
   };
 }
 
 export function removePluginInstallOwnerFromConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   installOwner: string,
-): { config: OpenClawConfig; actions: PluginConfigUninstallActions } {
+): { config: CarapaceConfig; actions: PluginConfigUninstallActions } {
   const actions = createEmptyConfigUninstallActions();
   const pluginsConfig = cfg.plugins ?? {};
   let installs = pluginsConfig.installs;

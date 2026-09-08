@@ -17,16 +17,16 @@ import {
   isSessionTranscriptLeafControl,
 } from "../config/sessions/transcript-tree.js";
 import { MIN_READABLE_SESSION_VERSION } from "../config/sessions/version.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { executeSqliteQueryTakeFirstSync } from "../infra/kysely-sync.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import {
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { resolveTargetSqliteOptions } from "./doctor-session-sqlite-readers.js";
 import { ReadOnlySqliteTranscriptReader } from "./doctor-session-sqlite-transcript-readers.js";
 
@@ -105,7 +105,7 @@ function snapshotsMatch(
 }
 
 function readHeaderRepairContext(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): HeaderRepairContext | undefined {
   const db = getSessionKysely(database.db);
@@ -163,7 +163,7 @@ function formatHeaderTimestamp(createdAt: number): string | undefined {
 
 function assertRepairPreservedEvents(params: {
   before: readonly SqliteTranscriptStorageRow[];
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   sessionId: string;
 }): void {
   const after = readTranscriptStorageRows(params.database, params.sessionId);
@@ -194,7 +194,7 @@ function formatCount(count: number, singular: string): string {
 
 /** Reports or repairs canonical SQLite transcripts whose first header was never persisted. */
 export async function noteSessionTranscriptHeaderHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   shouldRepair: boolean;
 }): Promise<HeaderRepairReport> {
@@ -205,7 +205,7 @@ export async function noteSessionTranscriptHeaderHealth(params: {
   const seenPaths = new Set<string>();
   for (const target of resolveAllAgentSessionStoreTargetsSync(params.cfg, { env })) {
     const databaseOptions = resolveTargetSqliteOptions(target, env);
-    const sqlitePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+    const sqlitePath = resolveCarapaceAgentSqlitePath(databaseOptions);
     if (seenPaths.has(sqlitePath) || !fs.existsSync(sqlitePath)) {
       continue;
     }
@@ -245,7 +245,7 @@ export async function noteSessionTranscriptHeaderHealth(params: {
         const logicalAgentId = parseAgentSessionKey(snapshot.sessionKey)?.agentId ?? target.agentId;
         const workspaceCwd = resolveAgentWorkspaceDir(params.cfg, logicalAgentId, env);
         try {
-          runOpenClawAgentWriteTransaction(
+          runCarapaceAgentWriteTransaction(
             (database) => {
               const currentRows = readTranscriptStorageRows(database, sessionId);
               if (!snapshotsMatch(snapshot.rows, currentRows)) {
@@ -324,7 +324,7 @@ export async function noteSessionTranscriptHeaderHealth(params: {
     note(
       [
         `- Found ${formatCount(found, "canonical session transcript")} without a header.`,
-        `- Run "openclaw doctor --fix" to repair ${found === 1 ? "it" : "them"} before resuming the session.`,
+        `- Run "carapace doctor --fix" to repair ${found === 1 ? "it" : "them"} before resuming the session.`,
       ].join("\n"),
       NOTE_TITLE,
     );

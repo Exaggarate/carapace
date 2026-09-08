@@ -5,9 +5,9 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import { addSessionMember } from "../../config/sessions/session-sharing-store.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import * as sessionTranscriptReaders from "../session-transcript-readers.js";
 import {
@@ -24,8 +24,8 @@ import {
 setupGatewaySessionsHandlerTestHarness();
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 test.each([
@@ -37,7 +37,7 @@ test.each([
   "keeps the selected unscoped $sessionKey row's owner (transcript=$transcript)",
   async ({ sessionKey, transcript }) => {
     const ownerId = ensureProfileForEmail("aggregate-owner@example.test").id;
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { scope: "global" },
       agents: {
         entries: {
@@ -138,7 +138,7 @@ test("a hidden-foreign role cannot discover sessions through search, batch previ
       storePath,
     });
   }
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     gateway: {
       roles: {
         default: "guest",
@@ -213,7 +213,7 @@ test.each(["research", "ops"] as const)(
         contents: ["global owner search needle"],
       });
     }
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { scope: "global" },
       agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
       gateway: {
@@ -277,7 +277,7 @@ test("sessions.describe and sessions.get hide foreign drafts at operator role bo
       ),
     ).toBe("inserted");
   }
-  const roleConfig = (others: "none" | "view" | "suggest" | "write"): OpenClawConfig => ({
+  const roleConfig = (others: "none" | "view" | "suggest" | "write"): CarapaceConfig => ({
     gateway: {
       roles: {
         default: "limited",

@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 // Web login methods delegate QR-login start/wait requests to the active channel
 // plugin that owns web login gateway methods.
 import {

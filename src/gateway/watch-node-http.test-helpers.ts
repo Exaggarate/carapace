@@ -11,7 +11,7 @@ import {
   GATEWAY_CLIENT_MODES,
 } from "../../packages/gateway-protocol/src/client-info.js";
 import { PROTOCOL_VERSION, type ConnectParams } from "../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   loadOrCreateDeviceIdentity,
   publicKeyRawBase64UrlFromPem,
@@ -30,7 +30,7 @@ export async function startWatchNodeHttpRuntime(
   options?: {
     rateLimiter?: AuthRateLimiter;
     abortConnectResponse?: boolean;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     now?: () => number;
     onConnectResponseStart?: () => void;
     onPollReady?: (response: ServerResponse) => void;

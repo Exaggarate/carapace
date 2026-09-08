@@ -5,8 +5,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   createQaBusState,
   createQaChannelTransport,
@@ -117,7 +117,7 @@ async function createFixturePlugin(root: string) {
   const realtimeCallsPath = path.join(root, "realtime-calls.jsonl");
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: FIXTURE_PLUGIN_ID,
@@ -142,7 +142,7 @@ module.exports = {
       autoSelectOrder: 1,
       isConfigured: () => true,
       async synthesize(request) {
-        fs.appendFileSync(process.env.OPENCLAW_QA_SPEECH_CALLS_PATH, JSON.stringify({ text: request.text, target: request.target }) + "\\n");
+        fs.appendFileSync(process.env.CARAPACE_QA_SPEECH_CALLS_PATH, JSON.stringify({ text: request.text, target: request.target }) + "\\n");
         return {
           audioBuffer: Buffer.from(${JSON.stringify(FIXTURE_WAV_BASE64)}, "base64"),
           fileExtension: ".wav",
@@ -156,7 +156,7 @@ module.exports = {
       label: "QA Realtime",
       isConfigured: () => true,
       async createBrowserSession(request) {
-        fs.appendFileSync(process.env.OPENCLAW_QA_REALTIME_CALLS_PATH, JSON.stringify({ tools: request.tools?.map((tool) => tool.name) ?? [] }) + "\\n");
+        fs.appendFileSync(process.env.CARAPACE_QA_REALTIME_CALLS_PATH, JSON.stringify({ tools: request.tools?.map((tool) => tool.name) ?? [] }) + "\\n");
         return {
           provider: ${JSON.stringify(FIXTURE_REALTIME_PROVIDER_ID)},
           transport: "provider-websocket",
@@ -183,7 +183,7 @@ module.exports = {
   return { pluginDir, realtimeCallsPath, speechCallsPath };
 }
 
-function withFixturePlugin(config: OpenClawConfig, pluginDir: string): OpenClawConfig {
+function withFixturePlugin(config: CarapaceConfig, pluginDir: string): CarapaceConfig {
   return {
     ...config,
     plugins: {
@@ -334,7 +334,7 @@ async function waitForWebchatAudio(params: {
 }
 
 async function runWebchatAutoTtsProof(options: ProducerOptions): Promise<string> {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-webchat-tts-"));
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-webchat-tts-"));
   const fixture = await createFixturePlugin(fixtureRoot);
   const mock = await startQaMockOpenAiServer();
   const gatewayOwner = createQaGatewayChild();
@@ -350,9 +350,9 @@ async function runWebchatAutoTtsProof(options: ProducerOptions): Promise<string>
       transportBaseUrl: "http://127.0.0.1",
       controlUiEnabled: true,
       runtimeEnvPatch: {
-        OPENCLAW_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
-        OPENCLAW_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
-        OPENCLAW_TTS_PREFS: path.join(fixtureRoot, "tts-prefs.json"),
+        CARAPACE_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
+        CARAPACE_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
+        CARAPACE_TTS_PREFS: path.join(fixtureRoot, "tts-prefs.json"),
       },
       mutateConfig: (config) => {
         const withPlugin = withFixturePlugin(config, fixture.pluginDir);
@@ -431,7 +431,7 @@ async function runWebchatAutoTtsProof(options: ProducerOptions): Promise<string>
 }
 
 async function runCodexInboundMessageAutoTtsProof(options: ProducerOptions): Promise<string> {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-inbound-tts-"));
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-inbound-tts-"));
   const state = createQaBusState();
   const transport = createQaChannelTransport(state);
   const gatewayOwner = createQaGatewayChild();
@@ -456,8 +456,8 @@ async function runCodexInboundMessageAutoTtsProof(options: ProducerOptions): Pro
         transportBaseUrl: bus.baseUrl,
         controlUiEnabled: false,
         runtimeEnvPatch: {
-          OPENCLAW_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
-          OPENCLAW_TTS_PREFS: path.join(fixtureRoot, "tts-prefs.json"),
+          CARAPACE_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
+          CARAPACE_TTS_PREFS: path.join(fixtureRoot, "tts-prefs.json"),
         },
         mutateConfig: (config) => {
           const withPlugin = withFixturePlugin(config, fixture.pluginDir);
@@ -669,7 +669,7 @@ async function waitForQueuedTalkSteer(client: GatewayClient, sessionKey: string)
 }
 
 async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<string> {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-active-talk-"));
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-active-talk-"));
   const fixture = await createFixturePlugin(fixtureRoot);
   const mock = await startQaMockOpenAiServer({ finalOnlyMarkerPauseMs: 60_000 });
   const gatewayOwner = createQaGatewayChild();
@@ -684,8 +684,8 @@ async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<str
       transportBaseUrl: "http://127.0.0.1",
       controlUiEnabled: true,
       runtimeEnvPatch: {
-        OPENCLAW_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
-        OPENCLAW_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
+        CARAPACE_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
+        CARAPACE_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
       },
       mutateConfig: (config) => {
         const withPlugin = withFixturePlugin(config, fixture.pluginDir);
@@ -723,8 +723,8 @@ async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<str
     const tools = providerCalls[0]?.tools;
     if (
       !Array.isArray(tools) ||
-      !tools.includes("openclaw_agent_consult") ||
-      !tools.includes("openclaw_agent_control")
+      !tools.includes("carapace_agent_consult") ||
+      !tools.includes("carapace_agent_control")
     ) {
       throw new Error(
         `Talk provider did not receive consult/control tools: ${JSON.stringify(tools)}`,
@@ -733,7 +733,7 @@ async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<str
     const consultRequest = client.request("talk.client.toolCall", {
       sessionKey,
       callId: `qa-talk-${randomUUID()}`,
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "final-only marker streaming qa check: inspect the active run" },
     });
     // A failed control step can end the scenario before this long-lived request

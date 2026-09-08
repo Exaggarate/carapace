@@ -81,7 +81,7 @@ describe("ircPlugin pairing.notifyApproval", () => {
     hoisted.sendPrivmsg.mockReset();
     hoisted.connectIrcClient.mockReset();
     hoisted.connectIrcClient.mockImplementation(async () => ({
-      nick: "openclaw",
+      nick: "carapace",
       isReady: () => true,
       sendRaw: vi.fn(),
       join: vi.fn(),

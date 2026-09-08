@@ -10,7 +10,7 @@
 // mints a new event id while the logical target id stays stable, and previews
 // are mentions-inert until a final either edits in place or gets redacted and
 // re-sent as a fresh mention-bearing event.
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with CARAPACE_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import { MatrixEvent, type IEvent } from "matrix-js-sdk/lib/matrix.js";
 import {
   deliveryTraceScenarios,
@@ -19,20 +19,20 @@ import {
   type DeliveryTraceInStep,
   type DeliveryTraceScenario,
   type WireRecorder,
-} from "openclaw/plugin-sdk/channel-contract-testing";
+} from "carapace/plugin-sdk/channel-contract-testing";
 import {
   implicitMentionKindWhen,
   resolveInboundMentionDecision,
-} from "openclaw/plugin-sdk/channel-mention-gating";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/channel-mention-gating";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   chunkMarkdownTextWithMode,
   resolveChunkMode,
   resolveTextChunkLimit,
-} from "openclaw/plugin-sdk/reply-chunking";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/reply-chunking";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { convertMarkdownTables } from "carapace/plugin-sdk/text-chunking";
 import { beforeAll, describe, it, vi } from "vitest";
 import {
   createMatrixHandlerTestHarness,
@@ -42,7 +42,7 @@ import type { MatrixClient } from "./matrix/sdk.js";
 import { installMatrixTestRuntime } from "./test-runtime.js";
 
 const ROOM_ID = "!room:example.org";
-const BOT_USER_ID = "@openclaw:example.org";
+const BOT_USER_ID = "@carapace:example.org";
 const INBOUND_EVENT_ID = "$inbound-1";
 
 beforeAll(() => {

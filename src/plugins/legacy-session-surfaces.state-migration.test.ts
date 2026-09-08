@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { autoMigrateLegacyState } from "../infra/state-migrations.doctor.js";
 import { resetAutoMigrateLegacyStateDirForTest } from "../infra/state-migrations.state-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { writePersistedInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
 import { prepareLegacySessionSurfaces } from "./legacy-session-surfaces.js";
 import { clearPluginRegistryLoadCache } from "./loader.js";
@@ -19,7 +19,7 @@ afterEach(() => {
   clearPluginRegistryLoadCache();
   clearPluginMetadataLifecycleCaches();
   resetAutoMigrateLegacyStateDirForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 
@@ -43,7 +43,7 @@ function writeSessionSurfacePlugin(params: {
       name: packageName,
       version: "1.0.0",
       type: "module",
-      openclaw: {
+      carapace: {
         extensions: ["./dist/index.js"],
         setupEntry: "./dist/setup-entry.js",
         setupFeatures: { legacySessionSurfaces: true },
@@ -53,7 +53,7 @@ function writeSessionSurfacePlugin(params: {
     "utf8",
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: params.pluginId,
       channels: [params.channelId],
@@ -94,7 +94,7 @@ export const legacySessionSurface = {
   );
   fs.writeFileSync(
     path.join(pluginDir, "dist", "setup-entry.js"),
-    `import { defineBundledChannelSetupEntry } from "openclaw/plugin-sdk/channel-entry-contract";
+    `import { defineBundledChannelSetupEntry } from "carapace/plugin-sdk/channel-entry-contract";
 export default defineBundledChannelSetupEntry({
   importMetaUrl: import.meta.url,
   features: { legacySessionSurfaces: true },
@@ -112,7 +112,7 @@ export default defineBundledChannelSetupEntry({
 
 describe("installed channel legacy session surfaces", () => {
   it("loads only the selected setup sidecar and canonicalizes its legacy group key", async () => {
-    const rootDir = makeTrackedTempDir("openclaw-session-surface", tempDirs);
+    const rootDir = makeTrackedTempDir("carapace-session-surface", tempDirs);
     const stateDir = path.join(rootDir, "state");
     const bundledDir = path.join(rootDir, "bundled-disabled");
     fs.mkdirSync(bundledDir, { recursive: true });
@@ -130,10 +130,10 @@ describe("installed channel legacy session surfaces", () => {
     });
     const env = {
       HOME: rootDir,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_VERSION: "2026.8.1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_VERSION: "2026.8.1",
       VITEST: "true",
     } as NodeJS.ProcessEnv;
     const config = {
@@ -148,7 +148,7 @@ describe("installed channel legacy session surfaces", () => {
           "blocked-session-owner": { enabled: false },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     writePersistedInstalledPluginIndexInstallRecordsSync(
       {
@@ -224,7 +224,7 @@ describe("installed channel legacy session surfaces", () => {
   });
 
   it("loads an explicitly enabled owner without a channel presence signal", async () => {
-    const rootDir = makeTrackedTempDir("openclaw-session-surface-enabled-only", tempDirs);
+    const rootDir = makeTrackedTempDir("carapace-session-surface-enabled-only", tempDirs);
     const stateDir = path.join(rootDir, "state");
     const bundledDir = path.join(rootDir, "bundled-disabled");
     fs.mkdirSync(bundledDir, { recursive: true });
@@ -236,10 +236,10 @@ describe("installed channel legacy session surfaces", () => {
     });
     const env = {
       HOME: rootDir,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_VERSION: "2026.8.1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_VERSION: "2026.8.1",
       VITEST: "true",
     } as NodeJS.ProcessEnv;
     const config = {
@@ -247,7 +247,7 @@ describe("installed channel legacy session surfaces", () => {
         allow: ["enabled-only-session-owner"],
         entries: { "enabled-only-session-owner": { enabled: true } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     writePersistedInstalledPluginIndexInstallRecordsSync(
       {
         "enabled-only-session-owner": {
@@ -288,7 +288,7 @@ describe("installed channel legacy session surfaces", () => {
   });
 
   it("defers reinterpretation when a selected owner's sidecar has no canonicalizer", async () => {
-    const rootDir = makeTrackedTempDir("openclaw-session-surface-failure", tempDirs);
+    const rootDir = makeTrackedTempDir("carapace-session-surface-failure", tempDirs);
     const stateDir = path.join(rootDir, "state");
     const bundledDir = path.join(rootDir, "bundled-disabled");
     fs.mkdirSync(bundledDir, { recursive: true });
@@ -310,10 +310,10 @@ export const legacySessionSurface = {
     );
     const env = {
       HOME: rootDir,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_VERSION: "2026.8.1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_VERSION: "2026.8.1",
       VITEST: "true",
     } as NodeJS.ProcessEnv;
     const config = {
@@ -322,7 +322,7 @@ export const legacySessionSurface = {
         allow: ["broken-session-owner"],
         entries: { "broken-session-owner": { enabled: true } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     writePersistedInstalledPluginIndexInstallRecordsSync(
       {
         "broken-session-owner": {

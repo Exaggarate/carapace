@@ -3,7 +3,7 @@ import type { ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined, readStringValue } from "@openclaw/normalization-core";
+import { expectDefined, readStringValue } from "@carapace/normalization-core";
 import {
   afterEach,
   beforeEach,
@@ -50,9 +50,9 @@ vi.mock("node:child_process", async (importOriginal) =>
 vi.mock("./process/child-process-bridge.js", () => ({ attachChildProcessBridge }));
 
 import {
-  enableOpenClawCompileCache,
+  enableCarapaceCompileCache,
   resolveEntryInstallRoot,
-  respawnWithoutOpenClawCompileCacheIfNeeded,
+  respawnWithoutCarapaceCompileCacheIfNeeded,
 } from "./entry.compile-cache.js";
 
 function enabledDirectory(callIndex = 0): string {
@@ -72,18 +72,18 @@ describe("entry compile cache", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    root = tempDirs.make("openclaw-compile-cache-");
+    root = tempDirs.make("carapace-compile-cache-");
     entryFile = path.join(root, "dist", "entry.js");
     argv = [process.execPath, entryFile, "status", "--json"];
     envSnapshot = captureEnv([
       "NODE_COMPILE_CACHE",
       "NODE_DISABLE_COMPILE_CACHE",
-      "OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED",
-      "OPENCLAW_PROFILE",
+      "CARAPACE_COMPILE_CACHE_DISABLED_RESPAWNED",
+      "CARAPACE_PROFILE",
     ]);
     setTestEnvValue("NODE_COMPILE_CACHE", path.join(root, ".node-cache"));
     deleteTestEnvValue("NODE_DISABLE_COMPILE_CACHE");
-    deleteTestEnvValue("OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED");
+    deleteTestEnvValue("CARAPACE_COMPILE_CACHE_DISABLED_RESPAWNED");
     enableCompileCache.mockReset();
     getCompileCacheDir.mockReset();
     attachChildProcessBridge.mockReset();
@@ -108,38 +108,38 @@ describe("entry compile cache", () => {
   }
 
   it("resolves install roots from source and dist entry paths", () => {
-    expect(resolveEntryInstallRoot("/repo/openclaw/src/entry.ts")).toBe("/repo/openclaw");
-    expect(resolveEntryInstallRoot("/repo/openclaw/dist/entry.js")).toBe("/repo/openclaw");
-    expect(resolveEntryInstallRoot("/pkg/openclaw/entry.js")).toBe("/pkg/openclaw");
+    expect(resolveEntryInstallRoot("/repo/carapace/src/entry.ts")).toBe("/repo/carapace");
+    expect(resolveEntryInstallRoot("/repo/carapace/dist/entry.js")).toBe("/repo/carapace");
+    expect(resolveEntryInstallRoot("/pkg/carapace/entry.js")).toBe("/pkg/carapace");
   });
 
   it("treats git and source entry markers as source checkouts", async () => {
-    await fs.writeFile(path.join(root, ".git"), "gitdir: .git/worktrees/openclaw\n", "utf8");
-    enableOpenClawCompileCache({ env: {}, installRoot: root });
+    await fs.writeFile(path.join(root, ".git"), "gitdir: .git/worktrees/carapace\n", "utf8");
+    enableCarapaceCompileCache({ env: {}, installRoot: root });
     expect(enableCompileCache).not.toHaveBeenCalled();
   });
 
   it("disables compile cache for source-checkout installs", async () => {
     await markSourceCheckout();
-    enableOpenClawCompileCache({ env: {}, installRoot: root });
+    enableCarapaceCompileCache({ env: {}, installRoot: root });
     expect(enableCompileCache).not.toHaveBeenCalled();
   });
 
   it("keeps compile cache enabled for packaged installs unless disabled by env", () => {
-    enableOpenClawCompileCache({ env: {}, installRoot: root });
+    enableCarapaceCompileCache({ env: {}, installRoot: root });
     expect(enableCompileCache).toHaveBeenCalledOnce();
-    enableOpenClawCompileCache({ env: { NODE_DISABLE_COMPILE_CACHE: "1" }, installRoot: root });
+    enableCarapaceCompileCache({ env: { NODE_DISABLE_COMPILE_CACHE: "1" }, installRoot: root });
     expect(enableCompileCache).toHaveBeenCalledOnce();
   });
 
   it("scopes packaged compile cache by package install metadata", async () => {
     await fs.writeFile(path.join(root, "package.json"), '{"version":"2026.4.29"}\n', "utf8");
-    enableOpenClawCompileCache({
+    enableCarapaceCompileCache({
       env: { NODE_COMPILE_CACHE: path.join(root, ".node-cache") },
       installRoot: root,
     });
     const directory = enabledDirectory();
-    expect(directory).toContain(path.join(".node-cache", "openclaw"));
+    expect(directory).toContain(path.join(".node-cache", "carapace"));
     expect(directory).toContain("2026.4.29");
     expect(path.basename(directory)).toMatch(/^\d+-\d+$/);
   });
@@ -148,7 +148,7 @@ describe("entry compile cache", () => {
     const packageJsonPath = path.join(root, "package.json");
     const env = { NODE_COMPILE_CACHE: path.join(root, ".node-cache") };
     await fs.writeFile(packageJsonPath, '{"version":"2026.4.29"}\n', "utf8");
-    enableOpenClawCompileCache({ env, installRoot: root });
+    enableCarapaceCompileCache({ env, installRoot: root });
     const originalDirectory = enabledDirectory();
     await fs.mkdir(originalDirectory, { recursive: true });
     const originalCacheEntry = path.join(originalDirectory, "keep.txt");
@@ -158,9 +158,9 @@ describe("entry compile cache", () => {
       '{"version":"2026.4.29","installation":"replacement"}\n',
       "utf8",
     );
-    enableOpenClawCompileCache({ env, installRoot: root });
+    enableCarapaceCompileCache({ env, installRoot: root });
     const replacementDirectory = enabledDirectory(1);
-    expect(replacementDirectory).toContain(path.join("openclaw", "2026.4.29"));
+    expect(replacementDirectory).toContain(path.join("carapace", "2026.4.29"));
     expect(replacementDirectory).not.toBe(originalDirectory);
     await expect(fs.readFile(originalCacheEntry, "utf8")).resolves.toBe(
       "previous cached installation\n",
@@ -170,13 +170,13 @@ describe("entry compile cache", () => {
   it("runs a one-shot no-cache respawn when source checkout inherits NODE_COMPILE_CACHE", async () => {
     await markSourceCheckout();
     await expect(
-      respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+      respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
     ).resolves.toBe(true);
     const [command, args, options] = expectDefined(spawn.mock.calls[0], "respawn call");
     expect(command).toBe(process.execPath);
     expect(args).toEqual(["--no-warnings", entryFile, "status", "--json"]);
     expect(options?.env?.NODE_DISABLE_COMPILE_CACHE).toBe("1");
-    expect(options?.env?.OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED).toBe("1");
+    expect(options?.env?.CARAPACE_COMPILE_CACHE_DISABLED_RESPAWNED).toBe("1");
     expect(options?.env?.NODE_COMPILE_CACHE).toBeUndefined();
     expect(options?.stdio).toBe("inherit");
     expect(options?.detached).toBe(
@@ -190,13 +190,13 @@ describe("entry compile cache", () => {
     argv = [process.execPath, entryFile, "hooks", "relay", "--relay-id", "relay-1"];
     await withMockedPlatform("linux", async () => {
       await expect(
-        respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+        respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
       ).resolves.toBe(false);
       expect(spawn).not.toHaveBeenCalled();
     });
     await withMockedPlatform("win32", async () => {
       await expect(
-        respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+        respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
       ).resolves.toBe(true);
       expect(spawn).toHaveBeenCalledOnce();
     });
@@ -210,7 +210,7 @@ describe("entry compile cache", () => {
       argv = [process.execPath, entryFile, "webhooks", "--profile", "fixture", "gmail", "run"];
       await withMockedPlatform(platform, async () => {
         await expect(
-          respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+          respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
         ).resolves.toBe(false);
         expect(spawn).not.toHaveBeenCalled();
       });
@@ -220,36 +220,36 @@ describe("entry compile cache", () => {
   it("keeps interactive no-cache respawns attached to the terminal", async () => {
     await markSourceCheckout();
     argv = [process.execPath, entryFile, "tui"];
-    await respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
+    await respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
     expect(expectDefined(spawn.mock.calls[0], "respawn call")[2]?.detached).toBe(false);
   });
 
   it("keeps bare-root no-cache respawns attached to the terminal", async () => {
     await markSourceCheckout();
     argv = [process.execPath, entryFile];
-    await respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
+    await respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
     expect(expectDefined(spawn.mock.calls[0], "respawn call")[2]?.detached).toBe(false);
   });
 
   it("does not respawn packaged installs when NODE_COMPILE_CACHE is configured", async () => {
     await expect(
-      respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+      respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
     ).resolves.toBe(false);
     expect(spawn).not.toHaveBeenCalled();
   });
 
   it("does not respawn source checkouts twice", async () => {
     await markSourceCheckout();
-    setTestEnvValue("OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED", "1");
+    setTestEnvValue("CARAPACE_COMPILE_CACHE_DISABLED_RESPAWNED", "1");
     await expect(
-      respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+      respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
     ).resolves.toBe(false);
     expect(spawn).not.toHaveBeenCalled();
   });
 
   it("runs compile-cache respawns with the child-process bridge", async () => {
     await markSourceCheckout();
-    await respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
+    await respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
     expect(attachChildProcessBridge).toHaveBeenCalledWith(child, {
       onSignal: expect.any(Function),
     });
@@ -260,7 +260,7 @@ describe("entry compile cache", () => {
 
   it("marks signal-terminated compile-cache respawn children as failed without forcing another exit", async () => {
     await markSourceCheckout();
-    await respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
+    await respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root });
     child.emit("exit", null, "SIGTERM");
     expect(exit).toHaveBeenCalledExactlyOnceWith(1);
   });
@@ -270,7 +270,7 @@ describe("entry compile cache", () => {
     argv = [process.execPath, entryFile, "tui"];
     vi.useFakeTimers();
     try {
-      await respawnWithoutOpenClawCompileCacheIfNeeded({
+      await respawnWithoutCarapaceCompileCacheIfNeeded({
         currentFile: entryFile,
         installRoot: root,
       });
@@ -294,7 +294,7 @@ describe("entry compile cache", () => {
     deleteTestEnvValue("NODE_COMPILE_CACHE");
     getCompileCacheDir.mockReturnValue(path.join(root, ".active-cache"));
     await expect(
-      respawnWithoutOpenClawCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
+      respawnWithoutCarapaceCompileCacheIfNeeded({ currentFile: entryFile, installRoot: root }),
     ).resolves.toBe(true);
     expect(spawn).toHaveBeenCalledOnce();
     expect(
@@ -304,11 +304,11 @@ describe("entry compile cache", () => {
 
   it("awaits diagnostic setup while preserving the child environment snapshot", async () => {
     await markSourceCheckout();
-    setTestEnvValue("OPENCLAW_PROFILE", "before-diagnostics");
+    setTestEnvValue("CARAPACE_PROFILE", "before-diagnostics");
     const writer = createDeferredCore<(message: string) => void>();
     const writeError = vi.fn();
     const prepareWriteError = vi.fn(() => writer.promise);
-    const pending = respawnWithoutOpenClawCompileCacheIfNeeded({
+    const pending = respawnWithoutCarapaceCompileCacheIfNeeded({
       currentFile: entryFile,
       installRoot: root,
       prepareWriteError,
@@ -316,13 +316,13 @@ describe("entry compile cache", () => {
     try {
       expect(prepareWriteError).toHaveBeenCalledOnce();
       expect(spawn).not.toHaveBeenCalled();
-      setTestEnvValue("OPENCLAW_PROFILE", "after-diagnostics");
+      setTestEnvValue("CARAPACE_PROFILE", "after-diagnostics");
     } finally {
       writer.resolve(writeError);
       await pending;
     }
     await expect(pending).resolves.toBe(true);
-    expect(expectDefined(spawn.mock.calls[0], "respawn call")[2]?.env?.OPENCLAW_PROFILE).toBe(
+    expect(expectDefined(spawn.mock.calls[0], "respawn call")[2]?.env?.CARAPACE_PROFILE).toBe(
       "before-diagnostics",
     );
     child.emit("error", new Error("spawn failed"));

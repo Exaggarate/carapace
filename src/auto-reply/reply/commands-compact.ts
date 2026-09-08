@@ -1,9 +1,9 @@
 // Implements compaction commands for session context and model state.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveAgentDir, resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { resolveContextTokensForModel } from "../../agents/context.js";
 import {
@@ -23,7 +23,7 @@ import { resolveCollapsedSessionAuthPinSource } from "../../config/sessions/auth
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import { resolveSessionStorePathForScope } from "../../config/sessions/session-store-path.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
 import { rejectUnauthorizedCommand } from "./command-gates.js";
 import type { CommandHandler, CommandHandlerResult } from "./commands-types.js";
@@ -38,7 +38,7 @@ function loadCompactRuntime(): Promise<typeof import("./commands-compact.runtime
 function extractCompactInstructions(params: {
   rawBody?: string;
   ctx: import("../templating.js").MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   isGroup: boolean;
 }): string | undefined {
@@ -90,7 +90,7 @@ function compactionUnavailable(reason: string, text: string): CommandHandlerResu
 }
 
 function resolveManualCompactContextTokenBudget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider?: string;
   model?: string;
   agentId: string;

@@ -1,5 +1,5 @@
 /** Reads prepared provider hooks without activating plugins during model-reference parsing. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { findProviderRuntimePluginInRegistry } from "../plugins/provider-registry-selection.js";
 import type { ProviderNormalizeModelIdContext } from "../plugins/provider-runtime.types.js";
 import { getPluginRegistryForContext } from "../plugins/runtime/gateway-request-scope.js";

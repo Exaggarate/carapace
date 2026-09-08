@@ -1,6 +1,6 @@
 // Gateway shared-auth generation enforcement.
 // Disconnects clients when config writes invalidate shared credentials.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayReloadSettings } from "./config-reload-settings.js";
 import {
   invalidateGatewayPolicyClient,
@@ -198,7 +198,7 @@ export function finalizeOwnedSharedGatewaySessionGeneration(
 /** Enforce shared auth generation behavior after a config write. */
 export function enforceSharedGatewaySessionGenerationForConfigWrite(params: {
   state: SharedGatewaySessionGenerationState;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   resolveRuntimeSnapshotGeneration: () => string | undefined;
   clients: Iterable<SharedGatewayAuthClient>;
 }): void {

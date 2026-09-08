@@ -23,7 +23,7 @@ import {
 } from "./new-session-page.test-support.ts";
 
 const suite = createNewSessionPageE2eSuite();
-const captureCliAgentsProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureCliAgentsProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 function requestHasParam(request: { params?: unknown }, key: string, value: unknown): boolean {
   return Boolean(
@@ -277,7 +277,7 @@ suite.define(() => {
         : {}),
     });
     const page = await context.newPage();
-    const worktreePath = "/home/peter/.openclaw/worktrees/terminal-e2e";
+    const worktreePath = "/home/peter/.carapace/worktrees/terminal-e2e";
     const config = { tools: { web: { search: { provider: "brave" } } } };
     const gateway = await installMockGateway(page, {
       cliAgentsEnabled: true,
@@ -327,7 +327,7 @@ suite.define(() => {
           repoFingerprint: "0123456789abcdef",
           repoRoot: WORKSPACE,
           path: worktreePath,
-          branch: "openclaw/terminal-task",
+          branch: "carapace/terminal-task",
           baseRef: "main",
           ownerKind: "manual",
           createdAt: 1,
@@ -400,7 +400,7 @@ suite.define(() => {
         methods.indexOf("sessions.catalog.startTerminal"),
       );
       await expect.poll(() => page.locator(".new-session-page__message").inputValue()).toBe("");
-      const panel = page.locator("openclaw-terminal-panel");
+      const panel = page.locator("carapace-terminal-panel");
       await panel.locator(".tabstrip-tab.is-live").waitFor();
       await panel.locator(".tp-host canvas").waitFor({ state: "visible" });
       await expect
@@ -539,7 +539,7 @@ suite.define(() => {
         expect(await gateway.getRequests("sessions.create")).toHaveLength(0);
         await gateway.resolveDeferred("sessions.catalog.startTerminal");
         await expect.poll(() => message.inputValue()).toBe("");
-        await page.locator("openclaw-terminal-panel .tabstrip-tab.is-live").waitFor();
+        await page.locator("carapace-terminal-panel .tabstrip-tab.is-live").waitFor();
         expect(await gateway.getRequests("sessions.title.prepare")).toHaveLength(1);
         expect(await gateway.getRequests("sessions.create")).toHaveLength(0);
       } finally {
@@ -833,7 +833,7 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}new`);
       await page.getByRole("heading", { name: "Main" }).waitFor();
       await gateway.waitForRequest("worktrees.branches");
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker
         .locator("wa-dropdown-item[data-agent-option]")

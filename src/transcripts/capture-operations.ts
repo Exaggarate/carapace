@@ -16,7 +16,7 @@ import { TranscriptsStore } from "./store.js";
 
 export function createTranscriptsStore(ctx: TranscriptsRuntimeContext): TranscriptsStore {
   return new TranscriptsStore(path.join(ctx.stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: ctx.stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: ctx.stateDir },
   });
 }
 

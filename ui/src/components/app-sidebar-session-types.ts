@@ -1,4 +1,4 @@
-import { gatewayOriginScope } from "@openclaw/gateway-client/browser";
+import { gatewayOriginScope } from "@carapace/gateway-client/browser";
 import type { SessionParticipant } from "../../../packages/gateway-protocol/src/schema/session-participant.js";
 import type { SessionPlacementDiskSpace } from "../../../packages/gateway-protocol/src/schema/session-placement.js";
 import type { SessionCatalogPullRequestSummary } from "../../../packages/gateway-protocol/src/schema/sessions-catalog.js";
@@ -261,21 +261,21 @@ export function sidebarSessionStateId(key: string): string {
   return `sidebar-session-state-${encodeURIComponent(key)}`;
 }
 
-const SIDEBAR_SESSION_GROUPING_STORAGE_KEY = "openclaw:sidebar:sessions:grouping";
-const SIDEBAR_SESSION_CATALOG_GROUPING_STORAGE_KEY = "openclaw:sidebar:sessions:catalog-grouping";
-const SIDEBAR_SESSION_SHOW_PREVIEW_STORAGE_KEY = "openclaw:sidebar:sessions:show-preview";
-const SIDEBAR_SESSION_SHOW_CRON_STORAGE_KEY = "openclaw:sidebar:sessions:show-cron";
-const SIDEBAR_SESSION_SHOW_SYSTEM_STORAGE_KEY = "openclaw:sidebar:sessions:show-system";
-const SIDEBAR_SESSION_HIDE_EMPTY_GROUPS_STORAGE_KEY = "openclaw:sidebar:sessions:hide-empty-groups";
-const SIDEBAR_SESSION_STATUS_FILTER_STORAGE_KEY = "openclaw:sidebar:sessions:status-filter";
-const SIDEBAR_SESSION_SORT_MODE_STORAGE_KEY = "openclaw:sidebar:sessions:sort-mode";
+const SIDEBAR_SESSION_GROUPING_STORAGE_KEY = "carapace:sidebar:sessions:grouping";
+const SIDEBAR_SESSION_CATALOG_GROUPING_STORAGE_KEY = "carapace:sidebar:sessions:catalog-grouping";
+const SIDEBAR_SESSION_SHOW_PREVIEW_STORAGE_KEY = "carapace:sidebar:sessions:show-preview";
+const SIDEBAR_SESSION_SHOW_CRON_STORAGE_KEY = "carapace:sidebar:sessions:show-cron";
+const SIDEBAR_SESSION_SHOW_SYSTEM_STORAGE_KEY = "carapace:sidebar:sessions:show-system";
+const SIDEBAR_SESSION_HIDE_EMPTY_GROUPS_STORAGE_KEY = "carapace:sidebar:sessions:hide-empty-groups";
+const SIDEBAR_SESSION_STATUS_FILTER_STORAGE_KEY = "carapace:sidebar:sessions:status-filter";
+const SIDEBAR_SESSION_SORT_MODE_STORAGE_KEY = "carapace:sidebar:sessions:sort-mode";
 const SIDEBAR_SESSION_COLLAPSED_SECTIONS_STORAGE_KEY =
-  "openclaw:sidebar:sessions:collapsed-sections";
-const SIDEBAR_HIDDEN_SESSION_CATALOGS_STORAGE_KEY = "openclaw:sidebar:sessions:hidden-catalogs";
+  "carapace:sidebar:sessions:collapsed-sections";
+const SIDEBAR_HIDDEN_SESSION_CATALOGS_STORAGE_KEY = "carapace:sidebar:sessions:hidden-catalogs";
 const SIDEBAR_SESSION_OWNER_FILTER_STORAGE_PREFIX =
-  "openclaw.control.sidebarSessionOwnerFilter.v1:";
+  "carapace.control.sidebarSessionOwnerFilter.v1:";
 export const SIDEBAR_HIDDEN_SESSION_CATALOGS_CHANGED_EVENT =
-  "openclaw:sidebar-hidden-catalogs-changed";
+  "carapace:sidebar-hidden-catalogs-changed";
 
 export function loadStoredSidebarSessionsGrouping(): SidebarSessionsGrouping {
   return normalizeSidebarSessionsGrouping(

@@ -1,7 +1,7 @@
 import { tableFromArrays } from "apache-arrow";
 import { Command } from "commander";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./api.js";
+import type { CarapacePluginApi } from "./api.js";
 import type { Embeddings } from "./embeddings.js";
 import type { MemoryDB } from "./lancedb-store.js";
 import { registerMemoryCli } from "./memory-cli.js";
@@ -31,7 +31,7 @@ function createHarness(params?: {
   const search = vi.fn(async () => []);
   const query = vi.fn(async () => params?.queryRows ?? []);
   registerMemoryCli(
-    { registerCli } as unknown as OpenClawPluginApi,
+    { registerCli } as unknown as CarapacePluginApi,
     { search, query } as unknown as MemoryDB,
     embeddings,
     (rawAgentId) => (typeof rawAgentId === "string" ? rawAgentId : "main"),
@@ -57,7 +57,7 @@ describe("memory-lancedb CLI embedding lifecycle", () => {
     const harness = createHarness();
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
     try {
-      await harness.program.parseAsync(["node", "openclaw", "ltm", "search", "hello"]);
+      await harness.program.parseAsync(["node", "carapace", "ltm", "search", "hello"]);
     } finally {
       log.mockRestore();
     }
@@ -73,7 +73,7 @@ describe("memory-lancedb CLI embedding lifecycle", () => {
     try {
       await harness.program.parseAsync([
         "node",
-        "openclaw",
+        "carapace",
         "ltm",
         "search",
         "private account memory",
@@ -99,7 +99,7 @@ describe("memory-lancedb CLI embedding lifecycle", () => {
     });
 
     await expect(
-      harness.program.parseAsync(["node", "openclaw", "ltm", "search", "hello"]),
+      harness.program.parseAsync(["node", "carapace", "ltm", "search", "hello"]),
     ).rejects.toThrow("embedding failed");
     expect(harness.close).toHaveBeenCalledTimes(1);
   });
@@ -110,7 +110,7 @@ describe("memory-lancedb CLI embedding lifecycle", () => {
     await expect(
       harness.program.parseAsync([
         "node",
-        "openclaw",
+        "carapace",
         "ltm",
         "search",
         "hello",
@@ -131,7 +131,7 @@ describe("memory-lancedb CLI embedding lifecycle", () => {
     });
 
     const rejection = await harness.program
-      .parseAsync(["node", "openclaw", "ltm", "search", "hello"])
+      .parseAsync(["node", "carapace", "ltm", "search", "hello"])
       .then(
         () => "resolved",
         (err: unknown) => err,
@@ -164,7 +164,7 @@ describe("memory-lancedb CLI query output", () => {
       try {
         await harness.program.parseAsync([
           "node",
-          "openclaw",
+          "carapace",
           "ltm",
           "query",
           "--cols",

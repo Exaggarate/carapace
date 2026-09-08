@@ -120,7 +120,7 @@ async function runStateStoreGuard(commandPath: string[]): Promise<void> {
   let outcome: import("../state-dir-gateway-check.js").CliGatewayStateDirOutcome;
   try {
     const { checkCliGatewayStateDir } = await import("../state-dir-gateway-check.js");
-    outcome = await checkCliGatewayStateDir({ command: `openclaw ${commandPath.join(" ")}` });
+    outcome = await checkCliGatewayStateDir({ command: `carapace ${commandPath.join(" ")}` });
   } catch (error) {
     const { formatErrorMessage } = await import("../../infra/errors.js");
     const { logDebug } = await import("../../logger.js");
@@ -170,7 +170,7 @@ export function registerPreActionHooks(program: Command, programVersion: string)
     setVerbose(verbose);
     const cliLogLevel = getCliLogLevel(actionCommand);
     if (cliLogLevel) {
-      process.env.OPENCLAW_LOG_LEVEL = cliLogLevel;
+      process.env.CARAPACE_LOG_LEVEL = cliLogLevel;
     }
     if (!verbose) {
       process.env.NODE_NO_WARNINGS ??= "1";
@@ -224,7 +224,7 @@ export function registerPreActionHooks(program: Command, programVersion: string)
       beforeStateMigrations = async (snapshot) => {
         if (snapshot) {
           const { isValidAgentId, normalizeAgentId } =
-            await import("@openclaw/normalization-core/agent-id");
+            await import("@carapace/normalization-core/agent-id");
           if (isValidAgentId(stateMigrationAgentId)) {
             const [{ listAgentIds }, { retainLegacyDefaultAgentId }] = await Promise.all([
               import("../../agents/agent-scope-config.js"),

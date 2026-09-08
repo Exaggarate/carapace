@@ -1,7 +1,7 @@
 // Synology Chat tests cover webhook handler plugin behavior.
 import { createServer } from "node:http";
-import { expectDefined } from "@openclaw/normalization-core";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { expectDefined } from "@carapace/normalization-core";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { makeFormBody, makeReq, makeRes, makeStalledReq } from "./test-http-utils.js";
 import type { ResolvedSynologyChatAccount } from "./types.js";
@@ -268,12 +268,12 @@ describe("createWebhookHandler", () => {
     const pending = handler(makeReq("POST", validBody), res);
     await vi.waitFor(() => expect(receive).toHaveBeenCalledTimes(1));
     expect(res.status).toBe(0);
-    expect(res.headers["x-openclaw-delivery-accepted"]).toBeUndefined();
+    expect(res.headers["x-carapace-delivery-accepted"]).toBeUndefined();
 
     resolveAdmission?.({ kind: "durable" });
     await pending;
     expect(res.status).toBe(204);
-    expect(res.headers["x-openclaw-delivery-accepted"]).toBe("durable");
+    expect(res.headers["x-carapace-delivery-accepted"]).toBe("durable");
   });
 
   it("returns 503 without acknowledging when durable admission fails", async () => {
@@ -288,7 +288,7 @@ describe("createWebhookHandler", () => {
     await handler(makeReq("POST", validBody), res);
 
     expect(res.status).toBe(503);
-    expect(res.headers["x-openclaw-delivery-accepted"]).toBeUndefined();
+    expect(res.headers["x-carapace-delivery-accepted"]).toBeUndefined();
     expect(res.body).toContain("Webhook admission failed");
   });
 

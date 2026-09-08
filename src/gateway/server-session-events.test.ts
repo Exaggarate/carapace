@@ -51,7 +51,7 @@ describe("createTranscriptUpdateBroadcastHandler", () => {
       message: {
         role: "assistant",
         content: "replacement",
-        __openclaw: { id: "same-id", transcriptPosition },
+        __carapace: { id: "same-id", transcriptPosition },
       },
     });
     const { broadcastToConnIds, handler } = createHandler(false);
@@ -73,7 +73,7 @@ describe("createTranscriptUpdateBroadcastHandler", () => {
         messageSeq: 7,
         message: expect.objectContaining({
           content: "replacement",
-          __openclaw: expect.objectContaining({ transcriptPosition }),
+          __carapace: expect.objectContaining({ transcriptPosition }),
         }),
       }),
       expect.any(Set),
@@ -486,7 +486,7 @@ describe("createTranscriptUpdateBroadcastHandler", () => {
     expect(payload).toMatchObject({
       session: {
         thinkingLevel: "ultra",
-        agentRuntime: { id: "openclaw" },
+        agentRuntime: { id: "carapace" },
       },
     });
     expect(payload).not.toHaveProperty("thinkingLevels");
@@ -637,7 +637,7 @@ describe("createTranscriptUpdateBroadcastHandler", () => {
       }),
     ).resolves.toMatchObject({
       message: {
-        __openclaw: {
+        __carapace: {
           id: "message-1",
           idempotencyKey: "client-turn-3",
           seq: 1,
@@ -651,7 +651,7 @@ describe("createTranscriptUpdateBroadcastHandler", () => {
       emitAssistantTranscriptUpdate(false, {
         role: "user",
         content: [{ type: "text", text: "Owner turn" }],
-        __openclaw: { senderIsOwner: true },
+        __carapace: { senderIsOwner: true },
       }),
     ).resolves.toMatchObject({
       senderIsOwner: true,

@@ -1,6 +1,6 @@
-import OpenClawChatUI
+import CarapaceChatUI
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct GatewayQuickSetupSheetMoodTests {

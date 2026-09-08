@@ -5,10 +5,10 @@ import path from "node:path";
 import {
   clampPositiveTimerTimeoutMs,
   resolvePositiveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { sleepWithAbort } from "@openclaw/retry";
+} from "@carapace/normalization-core/number-coercion";
+import { sleepWithAbort } from "@carapace/retry";
 import type { ModelProviderLocalServiceConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { toErrorObject } from "../infra/errors.js";
 import { mergeProcessEnv } from "../infra/process-env.js";
 import type { Model } from "../llm/types.js";
@@ -38,7 +38,7 @@ const PROBE_INTERVAL_MS = 250;
 const PROCESS_TREE_EXIT_POLL_MS = 25;
 const LOCAL_SERVICE_OUTPUT_TAIL_MAX_BYTES = 8 * 1024;
 
-const MODEL_PROVIDER_LOCAL_SERVICE_SYMBOL = Symbol.for("openclaw.modelProviderLocalService");
+const MODEL_PROVIDER_LOCAL_SERVICE_SYMBOL = Symbol.for("carapace.modelProviderLocalService");
 
 type ModelWithProviderLocalService = {
   [MODEL_PROVIDER_LOCAL_SERVICE_SYMBOL]?: ModelProviderLocalServiceConfig;
@@ -77,7 +77,7 @@ type LocalServiceDiagnostics = {
 
 /** Bind local-service acquisition to a host-owned config snapshot. */
 export function createConfiguredProviderLocalServiceAcquirer(
-  getConfig: () => OpenClawConfig,
+  getConfig: () => CarapaceConfig,
 ): AcquireConfiguredProviderLocalService {
   return async (target, signal) => {
     const resolved = resolveConfiguredProviderLocalServiceTarget(getConfig(), target);

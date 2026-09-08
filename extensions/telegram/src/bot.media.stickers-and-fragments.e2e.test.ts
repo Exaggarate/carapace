@@ -236,7 +236,7 @@ describe("telegram stickers", () => {
 describe("telegram local Bot API media", () => {
   it("reads a container-local file from its trusted host volume mount", async () => {
     const token = "123:test-token";
-    const tempRoot = await realpath(await mkdtemp(path.join(os.tmpdir(), "openclaw-tg-local-")));
+    const tempRoot = await realpath(await mkdtemp(path.join(os.tmpdir(), "carapace-tg-local-")));
     const relativePath = path.join(token, "documents", "file_12.zip");
     try {
       await mkdir(path.dirname(path.join(tempRoot, relativePath)), { recursive: true });
@@ -322,7 +322,7 @@ describe("telegram text fragments", () => {
       try {
         await handler({
           message: firstMessage,
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 
@@ -336,7 +336,7 @@ describe("telegram text fragments", () => {
             reply_to_message: { ...firstMessage, reply_to_message: undefined },
             quote: { text: quote, position: part1.indexOf(quote) },
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 
@@ -364,7 +364,7 @@ describe("telegram text fragments", () => {
     "processes leading Telegram bot commands immediately without static registration",
     async () => {
       const { handler, replySpy } = await createBotHandlerWithOptions({});
-      const command = "/deploy@openclaw_bot";
+      const command = "/deploy@carapace_bot";
       const { message } = buildNearLimitMessage({
         messageId: 20,
         prefix: `${command} `,
@@ -373,7 +373,7 @@ describe("telegram text fragments", () => {
 
       await handler({
         message,
-        me: { username: "openclaw_bot" },
+        me: { username: "carapace_bot" },
         getFile: async () => ({}),
       });
 
@@ -419,7 +419,7 @@ describe("telegram text fragments", () => {
             date: 1736380800,
             text: part1,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 
@@ -431,7 +431,7 @@ describe("telegram text fragments", () => {
             date: 1736380801,
             text: part2,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 
@@ -488,9 +488,9 @@ describe("telegram text fragments", () => {
             message_thread_id: 101,
             is_topic_message: true,
             date: 1736380800,
-            text: `@openclaw_bot topic-one ${"A".repeat(4050)}`,
+            text: `@carapace_bot topic-one ${"A".repeat(4050)}`,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 
@@ -502,9 +502,9 @@ describe("telegram text fragments", () => {
             message_thread_id: 202,
             is_topic_message: true,
             date: 1736380801,
-            text: `@openclaw_bot topic-two ${"B".repeat(4050)}`,
+            text: `@carapace_bot topic-two ${"B".repeat(4050)}`,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 

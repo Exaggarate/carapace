@@ -101,7 +101,7 @@ async function waitForGatewaySeededConversation(gateway: GatewayRpcClient) {
 async function main() {
   const gatewayUrl = process.env.GW_URL?.trim();
   const gatewayToken = process.env.GW_TOKEN?.trim();
-  const frozenTarget = process.env.OPENCLAW_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy";
+  const frozenTarget = process.env.CARAPACE_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy";
   assert(gatewayUrl, "missing GW_URL");
   assert(gatewayToken, "missing GW_TOKEN");
 
@@ -215,7 +215,7 @@ async function main() {
       "seeded attachment message",
       () =>
         messages.find((entry) => {
-          const raw = entry["__openclaw"];
+          const raw = entry["__carapace"];
           return (
             raw && typeof raw === "object" && (raw as { id?: unknown }).id === "msg-attachment"
           );

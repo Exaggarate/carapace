@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { BrowserConfig, BrowserProfileConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withEnv, withTempDir } from "openclaw/plugin-sdk/test-env";
+import type { BrowserConfig, BrowserProfileConfig } from "carapace/plugin-sdk/config-contracts";
+import { withEnv, withTempDir } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { resolveUserPath } from "../utils.js";
 import {
@@ -14,7 +14,7 @@ import {
 } from "./config.js";
 import { getBrowserProfileCapabilities } from "./profile-capabilities.js";
 
-const BROWSER_HEADLESS_ENV_KEY = "OPENCLAW_BROWSER_HEADLESS";
+const BROWSER_HEADLESS_ENV_KEY = "CARAPACE_BROWSER_HEADLESS";
 
 function resolveRequiredProfile(config: BrowserConfig, profileName: string) {
   const profile = resolveProfile(resolveBrowserConfig(config), profileName);
@@ -41,15 +41,15 @@ describe("browser config", () => {
     expect(resolved.cdpHost).toBe("127.0.0.1");
     expect(resolved.cdpProtocol).toBe("http");
     const profile = resolveProfile(resolved, resolved.defaultProfile);
-    expect(profile?.name).toBe("openclaw");
-    expect(profile?.driver).toBe("openclaw");
+    expect(profile?.name).toBe("carapace");
+    expect(profile?.driver).toBe("carapace");
     expect(profile?.cdpPort).toBe(18800);
     expect(profile?.cdpUrl).toBe("http://127.0.0.1:18800");
 
-    const openclaw = resolveProfile(resolved, "openclaw");
-    expect(openclaw?.driver).toBe("openclaw");
-    expect(openclaw?.cdpPort).toBe(18800);
-    expect(openclaw?.cdpUrl).toBe("http://127.0.0.1:18800");
+    const carapace = resolveProfile(resolved, "carapace");
+    expect(carapace?.driver).toBe("carapace");
+    expect(carapace?.cdpPort).toBe(18800);
+    expect(carapace?.cdpUrl).toBe("http://127.0.0.1:18800");
     const user = resolveProfile(resolved, "user");
     expect(user?.driver).toBe("existing-session");
     expect(user?.cdpPort).toBe(0);
@@ -157,12 +157,12 @@ describe("browser config", () => {
     { name: "malformed", content: "not-a-relay-key\n" },
     { name: "valid", content: `${"a1".repeat(32)}\n` },
   ])("normalizes config independently of a $name relay secret", async ({ content }) => {
-    await withTempDir("openclaw-config-relay-", async (dir) => {
+    await withTempDir("carapace-config-relay-", async (dir) => {
       const stateDir = fs.realpathSync(dir);
       const credentials = path.join(stateDir, "credentials");
       fs.mkdirSync(credentials, { mode: 0o700 });
       const secretPath = path.join(credentials, "browser-extension-relay.secret");
-      withEnv({ OPENCLAW_STATE_DIR: stateDir, OPENCLAW_OAUTH_DIR: credentials }, () => {
+      withEnv({ CARAPACE_STATE_DIR: stateDir, CARAPACE_OAUTH_DIR: credentials }, () => {
         const withoutSecret = resolveBrowserConfig(undefined);
         fs.writeFileSync(secretPath, content, { flag: "wx", mode: 0o600 });
         expect(resolveBrowserConfig(undefined)).toEqual(withoutSecret);
@@ -180,7 +180,7 @@ describe("browser config", () => {
     resolved.extensionRelayInternalTokens.chrome = "process-only-token";
     expect(resolveProfile(resolved, "chrome")?.cdpUrl).toBe(
       [
-        "http://openclaw-internal:",
+        "http://carapace-internal:",
         "process-only-token",
         `@127.0.0.1:${resolved.extensionRelayDefaultPort}`,
       ].join(""),
@@ -195,27 +195,27 @@ describe("browser config", () => {
     ).toBe(false);
   });
 
-  it("derives default ports from OPENCLAW_GATEWAY_PORT when unset", () => {
-    withEnv({ OPENCLAW_GATEWAY_PORT: "19001" }, () => {
+  it("derives default ports from CARAPACE_GATEWAY_PORT when unset", () => {
+    withEnv({ CARAPACE_GATEWAY_PORT: "19001" }, () => {
       const resolved = resolveBrowserConfig(undefined);
       expect(resolved.controlPort).toBe(19003);
       expect(resolveProfile(resolved, "chrome-relay")).toBe(null);
 
-      const openclaw = resolveProfile(resolved, "openclaw");
-      expect(openclaw?.cdpPort).toBe(19012);
-      expect(openclaw?.cdpUrl).toBe("http://127.0.0.1:19012");
+      const carapace = resolveProfile(resolved, "carapace");
+      expect(carapace?.cdpPort).toBe(19012);
+      expect(carapace?.cdpUrl).toBe("http://127.0.0.1:19012");
     });
   });
 
   it("derives default ports from gateway.port when env is unset", () => {
-    withEnv({ OPENCLAW_GATEWAY_PORT: undefined }, () => {
+    withEnv({ CARAPACE_GATEWAY_PORT: undefined }, () => {
       const resolved = resolveBrowserConfig(undefined, { gateway: { port: 19011 } });
       expect(resolved.controlPort).toBe(19013);
       expect(resolveProfile(resolved, "chrome-relay")).toBe(null);
 
-      const openclaw = resolveProfile(resolved, "openclaw");
-      expect(openclaw?.cdpPort).toBe(19022);
-      expect(openclaw?.cdpUrl).toBe("http://127.0.0.1:19022");
+      const carapace = resolveProfile(resolved, "carapace");
+      expect(carapace?.cdpPort).toBe(19022);
+      expect(carapace?.cdpUrl).toBe("http://127.0.0.1:19022");
     });
   });
 
@@ -270,7 +270,7 @@ describe("browser config", () => {
     const resolved = resolveBrowserConfig({
       cdpUrl: "http://example.com:9222",
     });
-    const profile = resolveProfile(resolved, "openclaw");
+    const profile = resolveProfile(resolved, "carapace");
     expect(profile?.cdpPort).toBe(9222);
     expect(profile?.cdpUrl).toBe("http://example.com:9222");
     expect(profile?.cdpIsLoopback).toBe(false);
@@ -363,7 +363,7 @@ describe("browser config", () => {
       {
         name: "falls back to headless for local managed Linux profiles without display",
         config: {},
-        profileName: "openclaw",
+        profileName: "carapace",
         expected: { headless: true, source: "linux-display-fallback" },
       },
       {
@@ -374,27 +374,27 @@ describe("browser config", () => {
       },
       {
         name: "lets explicit profile headless=false beat the Linux no-display fallback",
-        config: withProfile("openclaw", { cdpPort: 18800, headless: false }, { headless: true }),
-        profileName: "openclaw",
+        config: withProfile("carapace", { cdpPort: 18800, headless: false }, { headless: true }),
+        profileName: "carapace",
         expected: { headless: false, source: "profile" },
       },
       {
         name: "lets explicit global headless=false beat the Linux no-display fallback",
         config: { headless: false },
-        profileName: "openclaw",
+        profileName: "carapace",
         expected: { headless: false, source: "config" },
       },
       {
-        name: "lets OPENCLAW_BROWSER_HEADLESS override profile/global config",
-        config: withProfile("openclaw", { cdpPort: 18800, headless: false }),
-        profileName: "openclaw",
+        name: "lets CARAPACE_BROWSER_HEADLESS override profile/global config",
+        config: withProfile("carapace", { cdpPort: 18800, headless: false }),
+        profileName: "carapace",
         headlessEnv: "1",
         expected: { headless: true, source: "env" },
       },
       {
         name: "lets request-local headless override beat env and profile/global config",
-        config: withProfile("openclaw", { cdpPort: 18800, headless: false }, { headless: false }),
-        profileName: "openclaw",
+        config: withProfile("carapace", { cdpPort: 18800, headless: false }, { headless: false }),
+        profileName: "carapace",
         headlessEnv: "0",
         headlessOverride: true,
         expected: { headless: true, source: "request" },
@@ -413,7 +413,7 @@ describe("browser config", () => {
 
     it("returns an actionable error only when headed mode is explicitly selected", () => {
       const defaultResolved = resolveBrowserConfig({});
-      const defaultProfile = resolveProfile(defaultResolved, "openclaw")!;
+      const defaultProfile = resolveProfile(defaultResolved, "carapace")!;
       expect(
         getManagedBrowserMissingDisplayError(defaultResolved, defaultProfile, {
           platform: "linux",
@@ -423,17 +423,17 @@ describe("browser config", () => {
 
       const profileResolved = resolveBrowserConfig({
         profiles: {
-          openclaw: { cdpPort: 18800, color: "#FF4500", headless: false },
+          carapace: { cdpPort: 18800, color: "#FF4500", headless: false },
         },
       });
-      const profile = resolveProfile(profileResolved, "openclaw")!;
+      const profile = resolveProfile(profileResolved, "carapace")!;
       expect(
         getManagedBrowserMissingDisplayError(profileResolved, profile, {
           platform: "linux",
           env: noDisplayEnv,
         }),
       ).toMatchObject({
-        message: expect.stringContaining("browser.profiles.openclaw.headless=false"),
+        message: expect.stringContaining("browser.profiles.carapace.headless=false"),
         headlessSource: "profile",
       });
 
@@ -469,7 +469,7 @@ describe("browser config", () => {
     {
       name: "preserves wss:// cdpUrl with query params for the default profile",
       config: { cdpUrl: "wss://connect.browserbase.com?apiKey=test-key" },
-      profileName: "openclaw",
+      profileName: "carapace",
       expected: {
         cdpUrl: "wss://connect.browserbase.com/?apiKey=test-key",
         cdpHost: "connect.browserbase.com",
@@ -491,38 +491,38 @@ describe("browser config", () => {
     },
     {
       name: "URL with non-default port wins over cdpPort",
-      config: withProfile("openclaw", { cdpPort: 18800, cdpUrl: "http://127.0.0.1:9222" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpPort: 18800, cdpUrl: "http://127.0.0.1:9222" }),
+      profileName: "carapace",
       expected: { cdpPort: 9222, cdpUrl: "http://127.0.0.1:9222" },
     },
     {
       name: "URL with explicit default port :80 wins over cdpPort",
-      config: withProfile("openclaw", { cdpPort: 18800, cdpUrl: "http://127.0.0.1:80" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpPort: 18800, cdpUrl: "http://127.0.0.1:80" }),
+      profileName: "carapace",
       expected: { cdpPort: 80, cdpUrl: "http://127.0.0.1:80" },
     },
     {
       name: "URL without port defers to cdpPort",
-      config: withProfile("openclaw", { cdpPort: 18800, cdpUrl: "http://127.0.0.1" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpPort: 18800, cdpUrl: "http://127.0.0.1" }),
+      profileName: "carapace",
       expected: { cdpPort: 18800, cdpUrl: "http://127.0.0.1:18800" },
     },
     {
       name: "URL with non-default port, no cdpPort configured",
-      config: withProfile("openclaw", { cdpUrl: "http://127.0.0.1:9222" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpUrl: "http://127.0.0.1:9222" }),
+      profileName: "carapace",
       expected: { cdpPort: 9222, cdpUrl: "http://127.0.0.1:9222" },
     },
     {
       name: "URL without port and no cdpPort falls back to protocol default",
-      config: withProfile("openclaw", { cdpUrl: "https://remote-browser.example.com" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpUrl: "https://remote-browser.example.com" }),
+      profileName: "carapace",
       expected: { cdpPort: 443, cdpUrl: "https://remote-browser.example.com" },
     },
     {
       name: "no URL + cdpPort constructs URL from defaults",
-      config: withProfile("openclaw", { cdpPort: 9222 }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpPort: 9222 }),
+      profileName: "carapace",
       expected: { cdpPort: 9222, cdpUrl: "http://127.0.0.1:9222" },
     },
     {
@@ -542,14 +542,14 @@ describe("browser config", () => {
     },
     {
       name: "IPv6 URL without port defers to cdpPort",
-      config: withProfile("openclaw", { cdpPort: 18800, cdpUrl: "http://[::1]" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpPort: 18800, cdpUrl: "http://[::1]" }),
+      profileName: "carapace",
       expected: { cdpPort: 18800, cdpUrl: "http://[::1]:18800" },
     },
     {
       name: "IPv6 URL with explicit port wins over cdpPort",
-      config: withProfile("openclaw", { cdpPort: 18800, cdpUrl: "http://[::1]:9222" }),
-      profileName: "openclaw",
+      config: withProfile("carapace", { cdpPort: 18800, cdpUrl: "http://[::1]:9222" }),
+      profileName: "carapace",
       expected: { cdpPort: 9222, cdpUrl: "http://[::1]:9222" },
     },
     {
@@ -579,19 +579,19 @@ describe("browser config", () => {
             cdpPort: 18800,
             cdpUrl: "https://user:pass@remote-browser.example.com:443/json/version?token=abc#frag",
             color: "#0066CC",
-            driver: "openclaw",
+            driver: "carapace",
           },
           websocket: {
             cdpPort: 18800,
             cdpUrl: "wss://remote-browser.example.com:443/json/version?token=abc",
             color: "#0066CC",
-            driver: "openclaw",
+            driver: "carapace",
           },
           ipv6: {
             cdpPort: 18800,
             cdpUrl: "http://[::1]:80/json/version?token=abc",
             color: "#0066CC",
-            driver: "openclaw",
+            driver: "carapace",
           },
         },
       });
@@ -614,22 +614,22 @@ describe("browser config", () => {
     it("userinfo colons without a URL port defer to cdpPort", () => {
       const resolved = resolveBrowserConfig({
         profiles: {
-          openclaw: {
+          carapace: {
             cdpPort: 18800,
             cdpUrl: "http://user:pass@127.0.0.1/json/version",
             color: "#FF4500",
-            driver: "openclaw",
+            driver: "carapace",
           },
         },
       });
-      const profile = resolveProfile(resolved, "openclaw");
+      const profile = resolveProfile(resolved, "carapace");
       expect(profile?.cdpPort).toBe(18800);
       expect(profile?.cdpUrl).toBe("http://user:pass@127.0.0.1:18800/json/version");
     });
   });
 
-  it("rejects openclaw profiles without cdpPort or cdpUrl", () => {
-    const resolved = resolveBrowserConfig(withProfile("bad", { driver: "openclaw" }));
+  it("rejects carapace profiles without cdpPort or cdpUrl", () => {
+    const resolved = resolveBrowserConfig(withProfile("bad", { driver: "carapace" }));
     expect(() => resolveProfile(resolved, "bad")).toThrow("must define cdpPort or cdpUrl");
   });
 
@@ -858,7 +858,7 @@ describe("browser config", () => {
     const existingSession = resolveProfile(resolved, "chrome-live")!;
     expect(getBrowserProfileCapabilities(existingSession).usesChromeMcp).toBe(true);
 
-    const managed = resolveProfile(resolved, "openclaw")!;
+    const managed = resolveProfile(resolved, "carapace")!;
     expect(getBrowserProfileCapabilities(managed).usesChromeMcp).toBe(false);
 
     const work = resolveProfile(resolved, "work")!;

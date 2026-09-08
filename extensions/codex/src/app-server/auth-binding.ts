@@ -1,13 +1,13 @@
 import {
   fingerprintResolvedAuthProfileCredential,
   type AgentHarnessAuthBindingFingerprintParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   resolveApiKeyForProfile,
   type AuthProfileCredential,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { resolveOpenAICodexAuthIdentity } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/agent-runtime";
+import { resolveOpenAICodexAuthIdentity } from "carapace/plugin-sdk/provider-auth";
 
 type CodexAppServerPreparedAuthBinding = {
   authProfileStore: AuthProfileStore;

@@ -2,12 +2,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { recordChannelBotPairLoopAndCheckSuppression } from "openclaw/plugin-sdk/channel-inbound";
+import { recordChannelBotPairLoopAndCheckSuppression } from "carapace/plugin-sdk/channel-inbound";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { MediaFetchError } from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { MediaFetchError } from "carapace/plugin-sdk/media-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import {
@@ -45,8 +45,8 @@ const inboundMocks = vi.hoisted(() => ({
   toInboundMediaFactsWithMetadata: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   inboundMocks.toInboundMediaFactsWithMetadata.mockImplementation(
     actual.toInboundMediaFactsWithMetadata,
   );
@@ -569,7 +569,7 @@ describe("googlechat monitor inbound space classification", () => {
   });
 
   it("adopts an oversized attachment so the next message in its durable lane can run", async () => {
-    const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-googlechat-oversized-"));
+    const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-googlechat-oversized-"));
     const stateDir = await fs.realpath(created);
     const queue = createChannelIngressQueueForTests<{ version: 1; rawEvent: string }>({
       channelId: "googlechat",
@@ -635,7 +635,7 @@ describe("googlechat monitor inbound space classification", () => {
       expect(await queue.listClaims()).toEqual([]);
     } finally {
       await ingress.stop();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   });
@@ -728,7 +728,7 @@ describe("googlechat monitor inbound space classification", () => {
     expect(apiMocks.sendGoogleChatMessage).toHaveBeenCalledWith({
       account,
       space: "spaces/CLASSIFY",
-      text: "_OpenClaw is typing..._",
+      text: "_Carapace is typing..._",
       thread: expectedThread,
     });
   });
@@ -756,7 +756,7 @@ describe("googlechat monitor inbound space classification", () => {
       name: "the generic fallback when names are empty",
       accountName: " ",
       agent: { name: " ", identity: { name: " " } },
-      expectedText: "_OpenClaw is typing..._",
+      expectedText: "_Carapace is typing..._",
     },
   ])("uses $name in the typing message", async ({ accountName, agent, expectedText }) => {
     const { core } = createInboundClassificationHarness();
@@ -878,7 +878,7 @@ describe("googlechat monitor inbound space classification", () => {
     expect(apiMocks.sendGoogleChatMessage).toHaveBeenNthCalledWith(1, {
       account,
       space: "spaces/CLASSIFY",
-      text: "_OpenClaw is typing..._",
+      text: "_Carapace is typing..._",
       thread: requestedThread,
     });
     expect(apiMocks.updateGoogleChatMessage).toHaveBeenCalledWith({
@@ -1016,7 +1016,7 @@ describe("googlechat monitor direct messages", () => {
     expect(apiMocks.sendGoogleChatMessage).toHaveBeenCalledWith({
       account,
       space: "spaces/DM",
-      text: "_OpenClaw is typing..._",
+      text: "_Carapace is typing..._",
       thread: undefined,
     });
     expect(runTurn).toHaveBeenCalledOnce();

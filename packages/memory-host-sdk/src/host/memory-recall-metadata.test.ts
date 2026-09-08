@@ -70,7 +70,7 @@ describe("memory recall metadata", () => {
       insertProvenance.run("good", "owner");
       insertChunk.run("neutral", "MEMORY.md", 2, 2, "neutral", "neutral");
       expect(() => insertMetadata.run("good", 11, null, null)).toThrow();
-      insertMetadata.run("good", 9, "when flying", "github.com/openclaw/openclaw");
+      insertMetadata.run("good", 9, "when flying", "github.com/Exaggarate/carapace");
       const metadata = readMemoryRecallMetadata(db, ["neutral", "good", "good", "unknown"]);
       expect([...metadata.keys()].toSorted()).toEqual(["good", "neutral"]);
       expect(metadata.get("neutral")).toEqual({
@@ -83,7 +83,7 @@ describe("memory recall metadata", () => {
         id: "good",
         importance: 9,
         triggers: "when flying",
-        project_key: "github.com/openclaw/openclaw",
+        project_key: "github.com/Exaggarate/carapace",
         provenance: { originClass: "owner", sessionKind: "interactive", observedAt: 2 },
       });
       expect(readCuratedMemoryTriggerCandidates(db, 10)).toEqual([
@@ -96,7 +96,7 @@ describe("memory recall metadata", () => {
           text: "t",
           importance: 9,
           triggers: "when flying",
-          project_key: "github.com/openclaw/openclaw",
+          project_key: "github.com/Exaggarate/carapace",
           origin_class: "owner",
           session_kind: "interactive",
           observed_at: 2,
@@ -114,9 +114,9 @@ describe("memory recall metadata", () => {
           id,
           "daily",
         );
-        insertMetadata.run(id, null, null, "github.com/openclaw/openclaw");
+        insertMetadata.run(id, null, null, "github.com/Exaggarate/carapace");
       }
-      expect(readCuratedProjectMemoryCandidates(db, 1, ["github.com/openclaw/openclaw"])).toEqual([
+      expect(readCuratedProjectMemoryCandidates(db, 1, ["github.com/Exaggarate/carapace"])).toEqual([
         expect.objectContaining({ id: "good", importance: 9 }),
       ]);
 
@@ -124,7 +124,7 @@ describe("memory recall metadata", () => {
         const id = `bootstrap-low-${String(index).padStart(3, "0")}`;
         insertChunk.run(id, "MEMORY.md", index + 2, index + 2, id, "low");
         insertProvenance.run(id, "agent");
-        insertMetadata.run(id, 1, null, "github.com/openclaw/openclaw");
+        insertMetadata.run(id, 1, null, "github.com/Exaggarate/carapace");
       }
       insertChunk.run(
         "bootstrap-high",
@@ -135,15 +135,15 @@ describe("memory recall metadata", () => {
         "high-priority bootstrap fact",
       );
       insertProvenance.run("bootstrap-high", "agent");
-      insertMetadata.run("bootstrap-high", 10, null, "github.com/openclaw/openclaw");
-      expect(readCuratedProjectMemoryCandidates(db, 48, ["github.com/openclaw/openclaw"])).toEqual(
+      insertMetadata.run("bootstrap-high", 10, null, "github.com/Exaggarate/carapace");
+      expect(readCuratedProjectMemoryCandidates(db, 48, ["github.com/Exaggarate/carapace"])).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: "bootstrap-high", importance: 10 })]),
       );
 
       insertChunk.run("a-foreign", "MEMORY.md", 2, 2, "h2", "foreign");
       insertProvenance.run("a-foreign", "agent");
       insertMetadata.run("a-foreign", 9, "when flying", "github.com/example/other");
-      expect(readCuratedMemoryTriggerCandidates(db, 1, ["github.com/openclaw/openclaw"])).toEqual([
+      expect(readCuratedMemoryTriggerCandidates(db, 1, ["github.com/Exaggarate/carapace"])).toEqual([
         expect.objectContaining({ id: "good" }),
       ]);
       expect(readCuratedMemoryTriggerCandidates(db, 1, [])).toEqual([]);
@@ -162,12 +162,12 @@ describe("memory recall metadata", () => {
 
       insertChunk.run("untrusted", "MEMORY.md", 4, 4, "h4", "untrusted");
       insertProvenance.run("untrusted", "untrusted");
-      insertMetadata.run("untrusted", 10, "when flying", "github.com/openclaw/openclaw");
+      insertMetadata.run("untrusted", 10, "when flying", "github.com/Exaggarate/carapace");
       insertChunk.run("missing", "MEMORY.md", 5, 5, "h5", "missing");
-      insertMetadata.run("missing", 10, "when flying", "github.com/openclaw/openclaw");
+      insertMetadata.run("missing", 10, "when flying", "github.com/Exaggarate/carapace");
       const triggerIds = readCuratedMemoryTriggerCandidates(db, 10).map((entry) => entry.id);
       const projectIds = readCuratedProjectMemoryCandidates(db, 10, [
-        "github.com/openclaw/openclaw",
+        "github.com/Exaggarate/carapace",
       ]).map((entry) => entry.id);
       for (const id of ["untrusted", "missing"]) {
         expect(triggerIds).not.toContain(id);

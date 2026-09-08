@@ -12,10 +12,10 @@ export {
   withManager,
   withProgress,
   withProgressTotals,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-cli";
+} from "carapace/plugin-sdk/memory-core-host-runtime-cli";
 export {
   getRuntimeConfig,
   resolveDefaultAgentId,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
 export { getMemorySearchManager } from "./memory/index.js";

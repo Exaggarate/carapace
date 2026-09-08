@@ -31,7 +31,7 @@ describe("resolveApplicationStartupSettings", () => {
 
   it("clears a cached shared token when the native dashboard selects browser identity", () => {
     const gatewayUrl = "wss://gateway.example";
-    window["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token: null };
+    window["__CARAPACE_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token: null };
     const startup = resolveApplicationStartupSettings(
       makeUiSettings(gatewayUrl, { token: "shared-owner-token" }),
       { pathname: "/chat", search: "", hash: "" },
@@ -72,7 +72,7 @@ describe("resolveApplicationStartupSettings", () => {
   });
 
   it("re-scopes the selected token when native auth changes only the Gateway and password", () => {
-    window["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+    window["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
       gatewayUrl: "wss://gateway-b.example",
       password: "next-password",
     };
@@ -90,10 +90,10 @@ describe("resolveApplicationStartupSettings", () => {
 
   it("carries a bounded native client identity into gateway startup", () => {
     Object.assign(window, {
-      __OPENCLAW_NATIVE_CONTROL_AUTH__: {
+      __CARAPACE_NATIVE_CONTROL_AUTH__: {
         gatewayUrl: "wss://gateway.example",
         client: {
-          id: "openclaw-ios",
+          id: "carapace-ios",
           mode: "ui",
           platform: "iOS 27.0.0",
           deviceFamily: "iPhone",
@@ -110,7 +110,7 @@ describe("resolveApplicationStartupSettings", () => {
     });
 
     expect(startup.nativeClient).toEqual({
-      clientName: "openclaw-ios",
+      clientName: "carapace-ios",
       mode: "ui",
       platform: "iOS 27.0.0",
       deviceFamily: "iPhone",
@@ -147,28 +147,28 @@ describe("loadSettings default gateway URL derivation", () => {
       host: "gateway.example:8443",
       pathname: "/ignored/path",
     });
-    setControlUiBasePath(" /openclaw/ ");
+    setControlUiBasePath(" /carapace/ ");
 
-    expect(loadSettings().gatewayUrl).toBe(expectedGatewayUrl("/openclaw"));
+    expect(loadSettings().gatewayUrl).toBe(expectedGatewayUrl("/carapace"));
   });
 
   it("binds standalone documents to the page Gateway without persisting a selection", () => {
     setTestLocation({
       protocol: "https:",
       host: "gateway.example:8443",
-      pathname: "/openclaw/approve/exec%3A1",
+      pathname: "/carapace/approve/exec%3A1",
     });
-    setControlUiBasePath("/openclaw");
+    setControlUiBasePath("/carapace");
     const remote = makeUiSettings("wss://remote.example:8443", {
       sessionKey: "agent:remote:main",
       lastActiveSessionKey: "agent:remote:main",
     });
     const sessionCredential = ["page", "session", "credential"].join("-");
-    persistSessionToken(expectedGatewayUrl("/openclaw"), sessionCredential);
+    persistSessionToken(expectedGatewayUrl("/carapace"), sessionCredential);
     const before = [...Array(localStorage.length)].map((_, index) => localStorage.key(index));
 
     expect(resolvePageGatewaySettings(remote)).toMatchObject({
-      gatewayUrl: expectedGatewayUrl("/openclaw"),
+      gatewayUrl: expectedGatewayUrl("/carapace"),
       token: sessionCredential,
       sessionKey: "main",
       lastActiveSessionKey: "main",
@@ -182,10 +182,10 @@ describe("loadSettings default gateway URL derivation", () => {
     setTestLocation({
       protocol: "http:",
       host: "gateway.example:18789",
-      pathname: "/apps/openclaw/chat",
+      pathname: "/apps/carapace/chat",
     });
 
-    expect(loadSettings().gatewayUrl).toBe(expectedGatewayUrl("/apps/openclaw"));
+    expect(loadSettings().gatewayUrl).toBe(expectedGatewayUrl("/apps/carapace"));
   });
 
   it("skips node sessionStorage accessors that warn without a storage file", () => {
@@ -216,9 +216,9 @@ describe("loadSettings default gateway URL derivation", () => {
       host: "gateway.example:8443",
       pathname: "/",
     });
-    sessionStorage.setItem("openclaw.control.token.v1", "legacy-session-token");
-    const gatewayUrl = "wss://gateway.example:8443/openclaw";
-    const scopedKey = `openclaw.control.settings.v1:${gatewayUrl}`;
+    sessionStorage.setItem("carapace.control.token.v1", "legacy-session-token");
+    const gatewayUrl = "wss://gateway.example:8443/carapace";
+    const scopedKey = `carapace.control.settings.v1:${gatewayUrl}`;
     localStorage.setItem(
       scopedKey,
       JSON.stringify({
@@ -228,7 +228,7 @@ describe("loadSettings default gateway URL derivation", () => {
       }),
     );
     localStorage.setItem(
-      "openclaw.control.currentGateway.v1:wss://gateway.example:8443",
+      "carapace.control.currentGateway.v1:wss://gateway.example:8443",
       gatewayUrl,
     );
 
@@ -242,7 +242,7 @@ describe("loadSettings default gateway URL derivation", () => {
     >;
     expect(rewritten.token).toBeUndefined();
     expect(rewritten.sessionsByGateway).toEqual({
-      "wss://gateway.example:8443/openclaw": {
+      "wss://gateway.example:8443/carapace": {
         sessionKey: "agent",
         lastActiveSessionKey: "agent",
       },
@@ -347,7 +347,7 @@ describe("loadSettings default gateway URL derivation", () => {
     expect(settings.gatewayUrl).toBe(gwUrl);
     expect(settings.token).toBe("");
 
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(JSON.parse(localStorage.getItem(scopedKey) ?? "{}")).toEqual({
       gatewayUrl: gwUrl,
       theme: "claw",
@@ -390,7 +390,7 @@ describe("loadSettings default gateway URL derivation", () => {
       token: "",
       sessionKey: "agent:test_old:main",
       lastActiveSessionKey: "agent:test_old:main",
-      selectedAgentId: " OpenClaw ",
+      selectedAgentId: " Carapace ",
       theme: "claw",
       themeMode: "system",
       chatShowThinking: true,
@@ -404,11 +404,11 @@ describe("loadSettings default gateway URL derivation", () => {
     expect(settings.gatewayUrl).toBe(gwUrl);
     expect(settings.sessionKey).toBe("agent:test_old:main");
     expect(settings.lastActiveSessionKey).toBe("agent:test_old:main");
-    expect(settings.selectedAgentId).toBe("openclaw");
+    expect(settings.selectedAgentId).toBe("carapace");
     expect(loadGatewaySessionSelection(gwUrl)).toEqual({
       sessionKey: "agent:test_old:main",
       lastActiveSessionKey: "agent:test_old:main",
-      selectedAgentId: "openclaw",
+      selectedAgentId: "carapace",
     });
   });
 
@@ -420,7 +420,7 @@ describe("loadSettings default gateway URL derivation", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:wss://gateway.example:8443`;
+    const scopedKey = `carapace.control.settings.v1:wss://gateway.example:8443`;
 
     // Pre-seed sessionsByGateway with 11 stale gateway entries so the next
     // saveSettings call pushes the total to 12 and triggers the cap (10).
@@ -480,7 +480,7 @@ describe("loadSettings default gateway URL derivation", () => {
     setControlUiBasePath("/gateway-b");
 
     expect(loadSettings().gatewayUrl).toBe(expectedGatewayUrl("/gateway-b"));
-    expect(localStorage.getItem("openclaw.control.settings.v1")).toBeNull();
+    expect(localStorage.getItem("carapace.control.settings.v1")).toBeNull();
   });
 
   it("keeps custom gateway selections isolated per Control UI base path", () => {

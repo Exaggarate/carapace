@@ -1,6 +1,6 @@
 // Telegram plugin module implements action runtime behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import { readBooleanParam } from "carapace/plugin-sdk/boolean-param";
 import {
   jsonResult,
   readPositiveIntegerParam,
@@ -10,22 +10,22 @@ import {
   readStringParam,
   resolvePollMaxSelections,
   resolveReactionMessageId,
-} from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import { normalizeOutboundLocation } from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
+import { normalizeOutboundLocation } from "carapace/plugin-sdk/channel-inbound";
 import {
   buildOutboundSessionContext,
   sendDurableMessageBatch,
   type DurableMessageBatchSendResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizeMessagePresentation,
   renderMessagePresentationFallbackText,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import type { MessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
+import type { MessagePresentation } from "carapace/plugin-sdk/interactive-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import { resolveTelegramAccountOwnerAgentId } from "./account-owner.js";
 import {
   createTelegramActionGate,
@@ -162,7 +162,7 @@ function readTelegramThreadId(params: Record<string, unknown>) {
   );
 }
 
-function resolveActionTopicNameCacheScope(cfg: OpenClawConfig, accountId?: string | null): string {
+function resolveActionTopicNameCacheScope(cfg: CarapaceConfig, accountId?: string | null): string {
   const resolvedAccountId = accountId ?? resolveDefaultTelegramAccountId(cfg);
   const storePath = resolveStorePath(cfg.session?.store, {
     agentId: resolveTelegramAccountOwnerAgentId({ cfg, accountId: resolvedAccountId }),
@@ -393,7 +393,7 @@ function getLastDurableTelegramActionResult(
 
 async function describeTelegramAllowedReactionSample(params: {
   chatId: string | number;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   token: string;
   accountId?: string;
 }): Promise<string> {
@@ -426,7 +426,7 @@ async function describeTelegramAllowedReactionSample(params: {
 
 export async function handleTelegramAction(
   params: Record<string, unknown>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options?: {
     mediaAccess?: ChannelMessageActionContext["mediaAccess"];
     mediaLocalRoots?: readonly string[];

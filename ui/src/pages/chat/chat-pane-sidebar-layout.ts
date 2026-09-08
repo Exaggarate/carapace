@@ -42,18 +42,18 @@ type LazyElement = readonly [tagName: string, loadModule: () => Promise<unknown>
 
 const LAZY_SIDEBAR_ELEMENTS: Partial<Record<LazyElementKey, LazyElement>> = {
   region: [
-    "openclaw-chat-sidebar-region",
+    "carapace-chat-sidebar-region",
     () => import("./components/chat-sidebar-region.runtime.ts"),
   ],
   terminal: [
-    "openclaw-terminal-panel",
+    "carapace-terminal-panel",
     () => import("../../components/terminal/terminal-panel-registration.ts"),
   ],
-  browser: ["openclaw-browser-panel", () => import("../../components/browser/browser-panel.ts")],
-  desktop: ["openclaw-desktop-panel", () => import("../../components/desktop/desktop-panel.ts")],
-  companion: ["openclaw-chat-session-rail", () => import("./components/chat-session-rail.ts")],
+  browser: ["carapace-browser-panel", () => import("../../components/browser/browser-panel.ts")],
+  desktop: ["carapace-desktop-panel", () => import("../../components/desktop/desktop-panel.ts")],
+  companion: ["carapace-chat-session-rail", () => import("./components/chat-session-rail.ts")],
   discussion: [
-    "openclaw-session-discussion",
+    "carapace-session-discussion",
     () => import("./components/session-discussion-panel.ts"),
   ],
 };
@@ -190,7 +190,7 @@ export function renderSidebarRegion(params: {
         ? regionError === null
           ? (regionLoading ?? null)
           : null
-        : html`<openclaw-chat-sidebar-region
+        : html`<carapace-chat-sidebar-region
             .layout=${params.layout}
             .panelDefinitions=${panelDefinitions}
             .panelTemplates=${panelTemplates ?? params.panelTemplates}
@@ -199,7 +199,7 @@ export function renderSidebarRegion(params: {
             .callbacks=${params.callbacks}
             .narrow=${params.narrow}
             .availableWidth=${params.availableWidth}
-          ></openclaw-chat-sidebar-region>`
+          ></carapace-chat-sidebar-region>`
     }
     <div
       class="sidebar-region__primary"

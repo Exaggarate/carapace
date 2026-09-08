@@ -3,7 +3,7 @@ import { classifySessionMessageOrigin } from "../../../../packages/memory-host-s
 import type { MemoryOriginClass } from "../../../../packages/memory-host-sdk/src/host/types.js";
 import { sanitizeModelSpecialTokens } from "../../../security/external-content.js";
 import { hasInterSessionUserProvenance } from "../../../sessions/input-provenance.js";
-import { isOpenClawDeliveryMirrorAssistantMessage } from "../../../shared/transcript-only-openclaw-assistant.js";
+import { isCarapaceDeliveryMirrorAssistantMessage } from "../../../shared/transcript-only-carapace-assistant.js";
 
 const SESSION_MEMORY_TOOL_DIRECTIVE_PREFIX = String.raw`(?:(?:\|DSML\|)|(?:\uFF5CDSML\uFF5C))?`;
 const SESSION_MEMORY_TOOL_DIRECTIVE_KIND = String.raw`(?:tool_calls?|function_calls?|tool_use_error)`;
@@ -118,7 +118,7 @@ function renderSessionMemoryMessage(
   return {
     turnOrigin: nextTurnOrigin,
     message: {
-      isDeliveryMirror: isOpenClawDeliveryMirrorAssistantMessage(record.message),
+      isDeliveryMirror: isCarapaceDeliveryMirrorAssistantMessage(record.message),
       originClass,
       role,
       text: sanitized,

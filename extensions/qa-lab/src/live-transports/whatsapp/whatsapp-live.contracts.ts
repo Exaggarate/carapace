@@ -2,8 +2,8 @@
 import type {
   WhatsAppQaDriverObservedMessage,
   WhatsAppQaDriverSession,
-} from "@openclaw/whatsapp/api.js";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "@carapace/whatsapp/api.js";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 import type { QaGatewayChild } from "../../gateway-child.js";
 export { toQaError as toWhatsAppQaError } from "../../errors.js";
 

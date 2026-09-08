@@ -25,9 +25,9 @@ type JsonRecord = Record<string, unknown>;
 
 export type PluginPackageJson = JsonRecord & {
   dependencies?: JsonRecord;
-  openclaw?: {
+  carapace?: {
     assetScripts?: { build?: unknown };
-    build?: { bundledDist?: unknown; openclawVersion?: unknown; runtimeFormat?: unknown };
+    build?: { bundledDist?: unknown; carapaceVersion?: unknown; runtimeFormat?: unknown };
     compat?: { pluginApi?: unknown };
     release?: {
       bundleRuntimeDependencies?: unknown;
@@ -54,8 +54,8 @@ function readJsonFile(filePath: string) {
 /** Return whether a plugin package publishes through an artifact release workflow. */
 function isPublishablePluginPackage(packageJson: PluginPackageJson) {
   return (
-    packageJson.openclaw?.release?.publishToNpm === true ||
-    packageJson.openclaw?.release?.publishToClawHub === true
+    packageJson.carapace?.release?.publishToNpm === true ||
+    packageJson.carapace?.release?.publishToClawHub === true
   );
 }
 
@@ -92,7 +92,7 @@ function getStringRecord(value: unknown) {
 function createNeverBundleDependencyMatcher(packageJson: PluginPackageJson) {
   const externalDependencies = collectExternalDependencyNames(packageJson);
   return (id: string) => {
-    if (id === "openclaw" || id.startsWith("openclaw/")) {
+    if (id === "carapace" || id.startsWith("carapace/")) {
       return true;
     }
     for (const dependency of externalDependencies) {
@@ -105,7 +105,7 @@ function createNeverBundleDependencyMatcher(packageJson: PluginPackageJson) {
 }
 
 const HOST_PLUGIN_SDK_IMPORT_RE =
-  /(?:\bfrom\s+|\bimport\s*(?:\(\s*)?|\b(?:require|_+require\d*)\(\s*)["'](openclaw\/plugin-sdk\/[^"']+)["']/gu;
+  /(?:\bfrom\s+|\bimport\s*(?:\(\s*)?|\b(?:require|_+require\d*)\(\s*)["'](carapace\/plugin-sdk\/[^"']+)["']/gu;
 
 function listRuntimeJavaScriptFiles(rootDir: string): string[] {
   if (!fs.existsSync(rootDir)) {
@@ -145,7 +145,7 @@ export function listMissingPluginNpmRuntimeHostExports(plan: { repoRoot: string;
   const hostPackageJson = readJsonFile(path.join(plan.repoRoot, "package.json"));
   const hostExports = new Set(Object.keys(hostPackageJson.exports ?? {}));
   return [...hostImports]
-    .filter((specifier) => !hostExports.has(specifier.replace(/^openclaw/u, ".")))
+    .filter((specifier) => !hostExports.has(specifier.replace(/^carapace/u, ".")))
     .toSorted((left, right) => left.localeCompare(right));
 }
 
@@ -234,8 +234,8 @@ function resolvePluginNpmRuntimePackageFiles(plan: {
       : [],
   );
   merged.add("dist/**");
-  if (packageRelativePathExists(plan.packageDir, "openclaw.plugin.json")) {
-    merged.add("openclaw.plugin.json");
+  if (packageRelativePathExists(plan.packageDir, "carapace.plugin.json")) {
+    merged.add("carapace.plugin.json");
   }
   if (packageRelativePathExists(plan.packageDir, "README.md")) {
     merged.add("README.md");
@@ -249,7 +249,7 @@ function resolvePluginNpmRuntimePackageFiles(plan: {
   return [...merged];
 }
 
-function normalizeOpenClawPeerRange(value: unknown) {
+function normalizeCarapacePeerRange(value: unknown) {
   const normalized = normalizePackageEntry(value);
   if (!normalized) {
     return "";
@@ -259,47 +259,47 @@ function normalizeOpenClawPeerRange(value: unknown) {
     : `>=${normalized}`;
 }
 
-function resolveOpenClawPeerRange(
+function resolveCarapacePeerRange(
   packageJson: PluginPackageJson,
   rootPackageJson: PluginPackageJson | undefined,
 ) {
   return (
-    normalizeOpenClawPeerRange(packageJson.openclaw?.compat?.pluginApi) ||
-    normalizeOpenClawPeerRange(packageJson.peerDependencies?.openclaw) ||
-    normalizeOpenClawPeerRange(packageJson.openclaw?.build?.openclawVersion) ||
-    normalizeOpenClawPeerRange(rootPackageJson?.version) ||
-    normalizeOpenClawPeerRange(packageJson.version)
+    normalizeCarapacePeerRange(packageJson.carapace?.compat?.pluginApi) ||
+    normalizeCarapacePeerRange(packageJson.peerDependencies?.carapace) ||
+    normalizeCarapacePeerRange(packageJson.carapace?.build?.carapaceVersion) ||
+    normalizeCarapacePeerRange(rootPackageJson?.version) ||
+    normalizeCarapacePeerRange(packageJson.version)
   );
 }
 
-/** Resolve package peer dependency metadata for the OpenClaw plugin API. */
+/** Resolve package peer dependency metadata for the Carapace plugin API. */
 function resolvePluginNpmRuntimePackagePeerMetadata(plan: {
   packageJson: PluginPackageJson;
   rootPackageJson: PluginPackageJson | undefined;
   pluginDir: string;
 }) {
-  const openclawPeerRange = resolveOpenClawPeerRange(plan.packageJson, plan.rootPackageJson);
-  if (!openclawPeerRange) {
+  const carapacePeerRange = resolveCarapacePeerRange(plan.packageJson, plan.rootPackageJson);
+  if (!carapacePeerRange) {
     throw new Error(
-      `cannot infer openclaw peerDependency range for ${plan.pluginDir}; set openclaw.compat.pluginApi or package version`,
+      `cannot infer carapace peerDependency range for ${plan.pluginDir}; set carapace.compat.pluginApi or package version`,
     );
   }
   const existingPeerDependencies = getStringRecord(plan.packageJson.peerDependencies);
   const existingPeerDependenciesMeta = isRecord(plan.packageJson.peerDependenciesMeta)
     ? plan.packageJson.peerDependenciesMeta
     : {};
-  const existingOpenClawMeta = isRecord(existingPeerDependenciesMeta.openclaw)
-    ? existingPeerDependenciesMeta.openclaw
+  const existingCarapaceMeta = isRecord(existingPeerDependenciesMeta.carapace)
+    ? existingPeerDependenciesMeta.carapace
     : {};
   return {
     peerDependencies: {
       ...existingPeerDependencies,
-      openclaw: openclawPeerRange,
+      carapace: carapacePeerRange,
     },
     peerDependenciesMeta: {
       ...existingPeerDependenciesMeta,
-      openclaw: {
-        ...existingOpenClawMeta,
+      carapace: {
+        ...existingCarapaceMeta,
         optional: true,
       },
     },
@@ -321,12 +321,12 @@ export function resolvePluginNpmRuntimeBuildPlan(params: PluginNpmRuntimeBuildPa
     : undefined;
   // Compilation also serves private source-checkout plugins. Publication selection
   // belongs to listPublishablePluginPackageDirs, not the runtime graph builder.
-  if (!Array.isArray(packageJson.openclaw?.extensions)) {
+  if (!Array.isArray(packageJson.carapace?.extensions)) {
     return null;
   }
 
   const runtimeFormat = resolvePluginRuntimeFormat(packageJson);
-  const manifestPath = path.join(packageDir, "openclaw.plugin.json");
+  const manifestPath = path.join(packageDir, "carapace.plugin.json");
   const manifest = fs.existsSync(manifestPath) ? readJsonFile(manifestPath) : {};
   const packageEntries = collectPluginSourceEntries(packageJson, manifest).map(
     normalizePackageEntry,
@@ -349,7 +349,7 @@ export function resolvePluginNpmRuntimeBuildPlan(params: PluginNpmRuntimeBuildPa
       path.join(packageDir, sourceEntry.replace(/^\.\//u, "")),
     ]),
   );
-  const setupEntry = normalizePackageEntry(packageJson.openclaw?.setupEntry);
+  const setupEntry = normalizePackageEntry(packageJson.carapace?.setupEntry);
 
   const plan = {
     repoRoot,
@@ -361,8 +361,8 @@ export function resolvePluginNpmRuntimeBuildPlan(params: PluginNpmRuntimeBuildPa
     entry,
     outDir: path.join(packageDir, "dist"),
     runtimeFormat,
-    runtimeExtensions: (Array.isArray(packageJson.openclaw?.extensions)
-      ? packageJson.openclaw.extensions
+    runtimeExtensions: (Array.isArray(packageJson.carapace?.extensions)
+      ? packageJson.carapace.extensions
       : []
     )
       .map(normalizePackageEntry)
@@ -413,7 +413,7 @@ export async function buildPluginNpmRuntime(params: PluginNpmRuntimeBuildParams)
   const missingHostExports = listMissingPluginNpmRuntimeHostExports(plan);
   if (missingHostExports.length > 0) {
     throw new Error(
-      `${plan.pluginDir} runtime imports missing OpenClaw host exports: ${missingHostExports.join(", ")}`,
+      `${plan.pluginDir} runtime imports missing Carapace host exports: ${missingHostExports.join(", ")}`,
     );
   }
   rewriteCommonJsRuntimeSpecifiers(plan);
@@ -438,21 +438,21 @@ export async function buildPluginNpmRuntime(params: PluginNpmRuntimeBuildParams)
 async function preparePluginNativeImport(params: PluginNpmRuntimeBuildParams) {
   // Source setup is opt-in; publication and root builds must remain artifact-only.
   const { readRootJsonObjectSync } = await import("../../src/infra/json-files.js");
-  const { linkOpenClawPeerDependencies, resolveOpenClawHostDependency } =
+  const { linkCarapacePeerDependencies, resolveCarapaceHostDependency } =
     await import("../../src/plugins/plugin-peer-link.js");
   const { isSourceCheckoutRoot } = await import("../postinstall-bundled-plugins.mjs");
   const repoRoot = fs.realpathSync(params.repoRoot ?? ".");
   const hostManifest = readRootJsonObjectSync({
     rootDir: repoRoot,
     relativePath: "package.json",
-    boundaryLabel: "OpenClaw source checkout",
+    boundaryLabel: "Carapace source checkout",
   });
   if (
     !hostManifest.ok ||
-    hostManifest.value.name !== "openclaw" ||
+    hostManifest.value.name !== "carapace" ||
     !isSourceCheckoutRoot({ packageRoot: repoRoot })
   ) {
-    throw new Error("Native-import preparation must run from an OpenClaw source checkout root.");
+    throw new Error("Native-import preparation must run from an Carapace source checkout root.");
   }
   const packageDir = path.resolve(repoRoot, params.packageDir);
   if (
@@ -474,16 +474,16 @@ async function preparePluginNativeImport(params: PluginNpmRuntimeBuildParams) {
       `Could not safely read ${packageDir}/package.json; use a regular file containing a JSON object.`,
     );
   }
-  const dependency = resolveOpenClawHostDependency(manifest.value);
+  const dependency = resolveCarapaceHostDependency(manifest.value);
   if (!dependency) {
     throw new Error(
-      `${params.packageDir} does not declare openclaw in peerDependencies or dependencies; no host link to prepare.`,
+      `${params.packageDir} does not declare carapace in peerDependencies or dependencies; no host link to prepare.`,
     );
   }
   if (
     !fs.statSync(path.join(repoRoot, "dist/plugin-sdk"), { throwIfNoEntry: false })?.isDirectory()
   ) {
-    throw new Error("Host SDK output is missing; build OpenClaw before preparing native imports.");
+    throw new Error("Host SDK output is missing; build Carapace before preparing native imports.");
   }
   const runtimeFormat = resolvePluginRuntimeFormat(manifest.value);
   const outDir = path.join(packageDir, "dist");
@@ -501,15 +501,15 @@ async function preparePluginNativeImport(params: PluginNpmRuntimeBuildParams) {
       );
     }
   }
-  const result = await linkOpenClawPeerDependencies({
+  const result = await linkCarapacePeerDependencies({
     installedDir: packageDir,
     hostRoot: repoRoot,
-    peerDependencies: { openclaw: dependency.spec },
+    peerDependencies: { carapace: dependency.spec },
     logger: { warn: (message) => console.error(message) },
   });
   if (result.skipped > 0) {
     throw new Error(
-      `Could not prepare ${params.packageDir}: inspect node_modules/openclaw and the warning above; move conflicting paths aside and rerun --prepare-native-import.`,
+      `Could not prepare ${params.packageDir}: inspect node_modules/carapace and the warning above; move conflicting paths aside and rerun --prepare-native-import.`,
     );
   }
   console.error(

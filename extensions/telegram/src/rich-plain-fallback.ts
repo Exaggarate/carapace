@@ -1,7 +1,7 @@
 // withTelegramPlainFallback owns formatted-to-plain recovery for durable sends,
 // final replies, and draft previews. A second orchestrator reintroduces silent drift.
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
-import { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
+import { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 import type { TelegramRichBlocksDegradationReason } from "./rich-block-model.js";
 
 // Any RICH_MESSAGE_*_INVALID rejection (entities, media, depth) degrades to

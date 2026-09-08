@@ -1,6 +1,6 @@
 // Tests bash command status replies and active-process cancellation.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   enqueueSystemEventEntry,
   enqueueSystemEventWithReceipt,
@@ -41,7 +41,7 @@ const { handleBashChatCommand } = await import("./bash-command.js");
 function buildParams(commandBody: string) {
   const cfg = {
     commands: { bash: true },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   const ctx = {
     CommandBody: commandBody,
@@ -300,7 +300,7 @@ describe("handleBashChatCommand", () => {
         const result = await handleBashChatCommand(params);
 
         expect(result.text).toContain(`elevated is not available right now (runtime=${runtime})`);
-        expect(result.text).toContain(`openclaw sandbox explain --session ${sessionKey}`);
+        expect(result.text).toContain(`carapace sandbox explain --session ${sessionKey}`);
         expect(result.text).not.toContain("agent:main:telegram:slash-session");
         expect(createExecToolMock).not.toHaveBeenCalled();
       });

@@ -40,7 +40,7 @@ function exited(child) {
 test("config patches restart before releasing their scenario barrier", async (context) => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "telegram-config-patch-"));
   context.after(() => fs.rmSync(temp, { recursive: true, force: true }));
-  const configPath = path.join(temp, "openclaw.json");
+  const configPath = path.join(temp, "carapace.json");
   fs.writeFileSync(configPath, JSON.stringify({ channels: { telegram: { historyLimit: 5 } } }));
   const calls = [];
   const restarted = { pid: 2 };
@@ -84,8 +84,8 @@ test("runner rejects a live SUT identity that differs from the lease", () => {
 test("scenario commands receive the leased test harness without broker authority", () => {
   const commandEnv = createScenarioCommandEnvironment({
     gatewayEnv: {
-      OPENCLAW_CONFIG_PATH: "/tmp/openclaw.json",
-      OPENCLAW_STATE_DIR: "/tmp/state",
+      CARAPACE_CONFIG_PATH: "/tmp/carapace.json",
+      CARAPACE_STATE_DIR: "/tmp/state",
       TELEGRAM_BOT_TOKEN: "sut-token",
     },
     driverEnv: {
@@ -95,8 +95,8 @@ test("scenario commands receive the leased test harness without broker authority
     telegramApiRoot: "http://127.0.0.1:19881",
   });
   assert.deepEqual(commandEnv, {
-    OPENCLAW_CONFIG_PATH: "/tmp/openclaw.json",
-    OPENCLAW_STATE_DIR: "/tmp/state",
+    CARAPACE_CONFIG_PATH: "/tmp/carapace.json",
+    CARAPACE_STATE_DIR: "/tmp/state",
     TELEGRAM_BOT_TOKEN: "sut-token",
     TELEGRAM_E2E_SUT_BOT_TOKEN: "sut-token",
     TELEGRAM_USER_DRIVER_STATE_DIR: "/tmp/user-driver",
@@ -126,7 +126,7 @@ test("scenario command evidence retains no argv or process output", () => {
 
 test("successful probe cleanup removes private runner scratch without an output directory", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "telegram-runner-scratch-"));
-  fs.writeFileSync(path.join(root, "openclaw.json"), "private config");
+  fs.writeFileSync(path.join(root, "carapace.json"), "private config");
   removeRunnerScratch(root);
   assert.equal(fs.existsSync(root), false);
 });
@@ -250,10 +250,10 @@ test("lease loss during blocked readiness stops the gateway before polling", asy
   const gatewayEnv = createGatewayEnvironment({
     baseEnv: {
       PATH: "/safe/bin",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "broker-secret",
+      CARAPACE_QA_CONVEX_SECRET_CI: "broker-secret",
       TELEGRAM_E2E_STATE_DIR: "/private/lease",
     },
-    configPath: path.join(temp, "openclaw.json"),
+    configPath: path.join(temp, "carapace.json"),
     stateDir: path.join(temp, "state"),
     sutToken: "sut-token",
   });
@@ -289,7 +289,7 @@ test("lease loss during blocked readiness stops the gateway before polling", asy
   );
   await new Promise((resolve) => setTimeout(resolve, 250));
   assert.equal(gatewayEnv.PATH, "/safe/bin");
-  assert.equal(gatewayEnv.OPENCLAW_QA_CONVEX_SECRET_CI, undefined);
+  assert.equal(gatewayEnv.CARAPACE_QA_CONVEX_SECRET_CI, undefined);
   assert.equal(gatewayEnv.TELEGRAM_E2E_STATE_DIR, undefined);
   assert.equal(fs.existsSync(gatewayReady), true);
   assert.equal(fs.existsSync(pollMarker), false);
@@ -440,7 +440,7 @@ test("successful command parents keep descendants lease-owned until cleanup", as
 });
 
 test("failed executable launches settle before credential release", async () => {
-  const result = await runCommand("/missing/openclaw-telegram-executable", [], {
+  const result = await runCommand("/missing/carapace-telegram-executable", [], {
     cwd: process.cwd(),
     env: process.env,
     timeoutMs: 1_000,
@@ -459,7 +459,7 @@ test("failed executable launches settle before credential release", async () => 
 
 test("failed direct probe launches settle before credential release", async () => {
   const probe = ownChild(
-    spawn("/missing/openclaw-telegram-uv", [], {
+    spawn("/missing/carapace-telegram-uv", [], {
       detached: true,
       stdio: "ignore",
     }),
@@ -511,7 +511,7 @@ test("credential command timeout stops a nested wrapper before its side effect",
 test("credential-bearing child processes receive no parent control secrets", () => {
   const env = sanitizeChildEnvironment({
     PATH: "/safe/bin",
-    OPENCLAW_QA_CONVEX_SECRET_CI: "broker-secret",
+    CARAPACE_QA_CONVEX_SECRET_CI: "broker-secret",
     GITHUB_TOKEN: "github-secret",
     TELEGRAM_E2E_STATE_DIR: "/private/lease",
     TELEGRAM_USER_DRIVER_STATE_DIR: "/private/lease/user-driver",

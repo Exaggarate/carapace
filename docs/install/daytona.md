@@ -1,14 +1,14 @@
 ---
-summary: "Run OpenClaw in a Daytona cloud sandbox with SSH access and signed preview URLs"
+summary: "Run Carapace in a Daytona cloud sandbox with SSH access and signed preview URLs"
 read_when:
-  - Running OpenClaw in a Daytona sandbox
-  - You want a cloud sandbox for OpenClaw without managing a VPS
+  - Running Carapace in a Daytona sandbox
+  - You want a cloud sandbox for Carapace without managing a VPS
 title: "Daytona"
 ---
 
-Run a persistent OpenClaw Gateway in a [Daytona](https://www.daytona.io) cloud
+Run a persistent Carapace Gateway in a [Daytona](https://www.daytona.io) cloud
 sandbox: an isolated Linux environment with SSH access and built-in preview
-URLs, no VPS management required. OpenClaw comes pre-installed in the
+URLs, no VPS management required. Carapace comes pre-installed in the
 `daytona-medium` snapshot, so setup starts immediately after SSH.
 
 Keep the Gateway on loopback and reach the dashboard through Daytona's signed
@@ -53,7 +53,7 @@ daytona login --api-key=YOUR_API_KEY
 ## Create a sandbox
 
 ```bash
-daytona sandbox create --name openclaw --snapshot daytona-medium --auto-stop 0
+daytona sandbox create --name carapace --snapshot daytona-medium --auto-stop 0
 ```
 
 | Flag                        | Why                                                |
@@ -64,37 +64,37 @@ daytona sandbox create --name openclaw --snapshot daytona-medium --auto-stop 0
 ## Connect via SSH
 
 ```bash
-daytona ssh openclaw
+daytona ssh carapace
 ```
 
 ## Run onboarding
 
-Inside the sandbox, configure OpenClaw in one command:
+Inside the sandbox, configure Carapace in one command:
 
 ```bash
-openclaw onboard --non-interactive --accept-risk \
+carapace onboard --non-interactive --accept-risk \
   --anthropic-api-key YOUR_ANTHROPIC_KEY \
   --skip-daemon --skip-channels --skip-skills --skip-hooks --skip-health
 ```
 
 `--skip-daemon` matters: Daytona sandboxes do not run a service manager, so
 you start the Gateway manually below. Swap the key flag for your provider
-(`--openai-api-key`, `--openrouter-api-key`, and so on); `openclaw onboard
+(`--openai-api-key`, `--openrouter-api-key`, and so on); `carapace onboard
 --help` lists them all. Channels, skills, and hooks are skipped here and
 configured later.
 
-Running `openclaw onboard` without flags starts a conversational setup
+Running `carapace onboard` without flags starts a conversational setup
 assistant instead and requires an interactive terminal;
-`openclaw onboard --classic` runs the older step-by-step wizard.
+`carapace onboard --classic` runs the older step-by-step wizard.
 
 Onboarding configures a gateway auth token. Print it any time from the
 sandbox:
 
 ```bash
-node -p "require(process.env.HOME + '/.openclaw/openclaw.json').gateway.auth.token"
+node -p "require(process.env.HOME + '/.carapace/carapace.json').gateway.auth.token"
 ```
 
-`openclaw config get gateway.auth.token` returns `__OPENCLAW_REDACTED__`
+`carapace config get gateway.auth.token` returns `__CARAPACE_REDACTED__`
 rather than the value, because the CLI masks secrets in its output.
 
 ## Allow the preview URL origin
@@ -107,15 +107,15 @@ From your **local terminal** (not the sandbox SSH session), generate a signed
 preview URL for the Gateway port:
 
 ```bash
-daytona preview-url openclaw --port 18789
+daytona preview-url carapace --port 18789
 ```
 
 Copy the URL it prints. Back in the sandbox SSH session, allow that origin and
 trust the in-sandbox preview proxy, replacing the example URL with your own:
 
 ```bash
-openclaw config set gateway.controlUi.allowedOrigins '["PASTE_YOUR_PREVIEW_URL"]'
-openclaw config set gateway.trustedProxies '["127.0.0.1"]'
+carapace config set gateway.controlUi.allowedOrigins '["PASTE_YOUR_PREVIEW_URL"]'
+carapace config set gateway.trustedProxies '["127.0.0.1"]'
 ```
 
 Paste the URL exactly as printed: scheme and host only, with no trailing slash
@@ -127,14 +127,14 @@ trailing slash, so copy from the terminal instead.
 ## Start the Gateway
 
 ```bash
-nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
+nohup carapace gateway run > /tmp/gateway.log 2>&1 &
 ```
 
 The Gateway runs in the background and survives SSH disconnects. Verify it is
 up:
 
 ```bash
-openclaw gateway health
+carapace gateway health
 ```
 
 The command reports the Gateway status, so `OK` means you are good to
@@ -143,8 +143,8 @@ continue.
 To restart the Gateway later (after config changes or updates):
 
 ```bash
-pkill -f "openclaw gateway" || true
-nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
+pkill -f "carapace gateway" || true
+nohup carapace gateway run > /tmp/gateway.log 2>&1 &
 ```
 
 ## Open the dashboard
@@ -160,10 +160,10 @@ sandbox SSH session:
 
 ```bash
 # List pending requests and copy the request id
-openclaw devices list
+carapace devices list
 
 # Approve it
-openclaw devices approve REQUEST_ID
+carapace devices approve REQUEST_ID
 ```
 
 ## Security
@@ -187,23 +187,23 @@ Unknown senders require pairing approval by default; see
 ### Telegram
 
 Create a bot with [@BotFather](https://t.me/botfather) (`/newbot`), copy the
-token, then configure OpenClaw from the sandbox SSH session:
+token, then configure Carapace from the sandbox SSH session:
 
 ```bash
 export TELEGRAM_BOT_TOKEN="<bot-token>"
-openclaw channels add --channel telegram --use-env
+carapace channels add --channel telegram --use-env
 ```
 
-Also store `TELEGRAM_BOT_TOKEN=<bot-token>` in `~/.openclaw/.env` so the
+Also store `TELEGRAM_BOT_TOKEN=<bot-token>` in `~/.carapace/.env` so the
 background Gateway receives it after a restart. `--use-env` validates the token
-without copying it into `openclaw.json`.
+without copying it into `carapace.json`.
 
 Restart the Gateway (see above), send your bot a DM, then approve the pairing
 code it reports:
 
 ```bash
-openclaw pairing list telegram
-openclaw pairing approve telegram PAIRING_CODE
+carapace pairing list telegram
+carapace pairing approve telegram PAIRING_CODE
 ```
 
 Pairing codes expire after 1 hour. Full reference: [Telegram](/channels/telegram).
@@ -213,8 +213,8 @@ Pairing codes expire after 1 hour. Full reference: [Telegram](/channels/telegram
 WhatsApp ships as a separate plugin, so install and enable it first:
 
 ```bash
-openclaw plugins install clawhub:@openclaw/whatsapp
-openclaw plugins enable whatsapp
+carapace plugins install clawhub:@carapace/whatsapp
+carapace plugins enable whatsapp
 ```
 
 Installing does not enable a plugin, so the `enable` step is required;
@@ -225,12 +225,12 @@ plugin from ClawHub or npm instead.
 Then link the account by scanning a QR code from the sandbox SSH session:
 
 ```bash
-openclaw channels login --channel whatsapp
+carapace channels login --channel whatsapp
 ```
 
 On your phone: **Settings → Linked Devices → Link a Device**, then scan the QR
 code shown in the terminal. Restart the Gateway after linking, then message
-yourself on WhatsApp and OpenClaw replies in that chat.
+yourself on WhatsApp and Carapace replies in that chat.
 
 No pairing approval is needed: with no allowlist configured, the linked
 account's own number is allowed by default. Pairing applies to unknown
@@ -239,36 +239,36 @@ personal-number mode, and self-chat details: [WhatsApp](/channels/whatsapp).
 
 ## Updating
 
-The snapshot's global npm tree is owned by root, so plain `openclaw update`
+The snapshot's global npm tree is owned by root, so plain `carapace update`
 cannot write to it. Update from the sandbox SSH session with:
 
 The command below is for npm 12 or npm 11.16+. On npm 11.15 and earlier,
-omit `--allow-scripts=openclaw`.
+omit `--allow-scripts=carapace`.
 
 ```bash
-sudo env "PATH=$PATH" npm install --global openclaw@latest --allow-scripts=openclaw
-openclaw doctor
+sudo env "PATH=$PATH" npm install --global carapace@latest --allow-scripts=carapace
+carapace doctor
 ```
 
-`openclaw doctor` migrates any older config after the update. Restart the
+`carapace doctor` migrates any older config after the update. Restart the
 Gateway afterwards (see above).
 
 ## Stop and resume the sandbox
 
 ```bash
 # Stop
-daytona sandbox stop openclaw
+daytona sandbox stop carapace
 
 # Resume
-daytona sandbox start openclaw
+daytona sandbox start carapace
 ```
 
 Sandbox state persists across stop/start cycles, but the Gateway process does
 not auto-start. After a resume, reconnect and start it again:
 
 ```bash
-daytona ssh openclaw
-nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
+daytona ssh carapace
+nohup carapace gateway run > /tmp/gateway.log 2>&1 &
 ```
 
 ## Troubleshooting
@@ -276,7 +276,7 @@ nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
 ### Gateway not running after sandbox restart
 
 The Gateway process does not survive a sandbox restart. Reconnect with
-`daytona ssh openclaw` and start it again with the `nohup` command above.
+`daytona ssh carapace` and start it again with the `nohup` command above.
 
 ### Preview URL expired
 
@@ -284,7 +284,7 @@ Preview URLs are time-limited (default 3600 seconds). Regenerate from your
 local terminal, optionally with a longer expiry:
 
 ```bash
-daytona preview-url openclaw --port 18789 --expires 86400
+daytona preview-url carapace --port 18789 --expires 86400
 ```
 
 Each generated URL has a different host, so it is a new origin. After
@@ -294,14 +294,14 @@ restart the Gateway, or the Control UI is rejected with `origin not allowed`.
 ### Sandbox auto-stopped
 
 If the sandbox was created without `--auto-stop 0`, it stops automatically
-when idle. Resume it with `daytona sandbox start openclaw`.
+when idle. Resume it with `daytona sandbox start carapace`.
 
 ### Gateway port not reachable
 
 Confirm the Gateway is running and listening:
 
 ```bash
-openclaw gateway health
+carapace gateway health
 tail -20 /tmp/gateway.log
 ```
 
@@ -310,10 +310,10 @@ If you changed the Gateway port, pass the same port to `daytona preview-url`.
 ## Notes
 
 - For programmatic sandbox provisioning, see the
-  [Daytona OpenClaw SDK guide](https://www.daytona.io/docs/en/guides/openclaw/openclaw-sdk-sandbox/)
+  [Daytona Carapace SDK guide](https://www.daytona.io/docs/en/guides/carapace/carapace-sdk-sandbox/)
 
 ## Related
 
 - [Gateway remote access](/gateway/remote)
 - [Gateway security](/gateway/security)
-- [Updating OpenClaw](/install/updating)
+- [Updating Carapace](/install/updating)

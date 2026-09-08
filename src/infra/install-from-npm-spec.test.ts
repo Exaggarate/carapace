@@ -15,7 +15,7 @@ vi.mock("./install-source-utils.js", async () => {
     ...actual,
     withInstallWorkspace: vi.fn(
       async (_prefix: string, fn: (tmpDir: string) => Promise<unknown>) => {
-        return await fn("/tmp/openclaw-npm-pack-install-test");
+        return await fn("/tmp/carapace-npm-pack-install-test");
       },
     ),
     packNpmSpecToArchive: vi.fn(),
@@ -23,8 +23,8 @@ vi.mock("./install-source-utils.js", async () => {
 });
 
 describe("installFromValidatedNpmSpecArchive", () => {
-  const baseSpec = "@openclaw/test@1.0.0";
-  const baseArchivePath = "/tmp/openclaw-test.tgz";
+  const baseSpec = "@carapace/test@1.0.0";
+  const baseArchivePath = "/tmp/carapace-test.tgz";
 
   const mockPackedSuccess = (overrides?: {
     resolvedSpec?: string;
@@ -56,7 +56,7 @@ describe("installFromValidatedNpmSpecArchive", () => {
     >;
   }) =>
     await installFromValidatedNpmSpecArchive({
-      tempDirPrefix: "openclaw-test-",
+      tempDirPrefix: "carapace-test-",
       spec: overrides.spec ?? baseSpec,
       timeoutMs: 1000,
       expectedIntegrity: overrides.expectedIntegrity,
@@ -91,14 +91,14 @@ describe("installFromValidatedNpmSpecArchive", () => {
 
     expect(result).toEqual({ ok: false, error: "pack failed" });
     expect(installFromArchive).not.toHaveBeenCalled();
-    expect(withInstallWorkspace).toHaveBeenCalledWith("openclaw-test-", expect.any(Function));
+    expect(withInstallWorkspace).toHaveBeenCalledWith("carapace-test-", expect.any(Function));
   });
 
   it("rejects unsupported npm specs before packing", async () => {
     const installFromArchive = vi.fn(async () => ({ ok: true as const }));
 
     const result = await runInstall({
-      spec: "file:/tmp/openclaw.tgz",
+      spec: "file:/tmp/carapace.tgz",
       installFromArchive,
     });
 
@@ -112,7 +112,7 @@ describe("installFromValidatedNpmSpecArchive", () => {
   });
 
   it("returns resolution metadata and installer result on success", async () => {
-    mockPackedSuccess({ name: "@openclaw/test", version: "1.0.0" });
+    mockPackedSuccess({ name: "@carapace/test", version: "1.0.0" });
     const installFromArchive = vi.fn(async () => ({ ok: true as const, target: "done" }));
 
     const result = await runInstall({
@@ -164,7 +164,7 @@ describe("installFromValidatedNpmSpecArchive", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: "aborted: npm package integrity drift detected for @openclaw/test@1.0.0",
+      error: "aborted: npm package integrity drift detected for @carapace/test@1.0.0",
     });
     expect(installFromArchive).not.toHaveBeenCalled();
   });
@@ -182,10 +182,10 @@ describe("installFromValidatedNpmSpecArchive", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: "aborted: npm package integrity drift detected for @openclaw/test@1.0.0",
+      error: "aborted: npm package integrity drift detected for @carapace/test@1.0.0",
     });
     expect(warn).toHaveBeenCalledWith(
-      "Integrity drift detected for @openclaw/test@1.0.0: expected sha512-old, got sha512-new",
+      "Integrity drift detected for @carapace/test@1.0.0: expected sha512-old, got sha512-new",
     );
     expect(installFromArchive).not.toHaveBeenCalled();
   });
@@ -204,13 +204,13 @@ describe("installFromValidatedNpmSpecArchive", () => {
 
   it("rejects prerelease resolutions unless explicitly requested", async () => {
     mockPackedSuccess({
-      resolvedSpec: "@openclaw/test@latest",
+      resolvedSpec: "@carapace/test@latest",
       version: "1.1.0-beta.1",
     });
     const installFromArchive = vi.fn(async () => ({ ok: true as const }));
 
     const result = await runInstall({
-      spec: "@openclaw/test@latest",
+      spec: "@carapace/test@latest",
       installFromArchive,
     });
 
@@ -224,13 +224,13 @@ describe("installFromValidatedNpmSpecArchive", () => {
 
   it("allows prerelease resolutions when explicitly requested by tag", async () => {
     mockPackedSuccess({
-      resolvedSpec: "@openclaw/test@beta",
+      resolvedSpec: "@carapace/test@beta",
       version: "1.1.0-beta.1",
     });
     const installFromArchive = vi.fn(async () => ({ ok: true as const, pluginId: "beta-plugin" }));
 
     const result = await runInstall({
-      spec: "@openclaw/test@beta",
+      spec: "@carapace/test@beta",
       installFromArchive,
     });
 
@@ -241,9 +241,9 @@ describe("installFromValidatedNpmSpecArchive", () => {
   it("passes archive path and installer params to installFromArchive", async () => {
     vi.mocked(packNpmSpecToArchive).mockResolvedValue({
       ok: true,
-      archivePath: "/tmp/openclaw-plugin.tgz",
+      archivePath: "/tmp/carapace-plugin.tgz",
       metadata: {
-        resolvedSpec: "@openclaw/voice-call@1.0.0",
+        resolvedSpec: "@carapace/voice-call@1.0.0",
         integrity: "sha512-same",
       },
     });
@@ -253,8 +253,8 @@ describe("installFromValidatedNpmSpecArchive", () => {
     );
 
     const result = await installFromValidatedNpmSpecArchive({
-      tempDirPrefix: "openclaw-test-",
-      spec: "@openclaw/voice-call@1.0.0",
+      tempDirPrefix: "carapace-test-",
+      spec: "@carapace/voice-call@1.0.0",
       timeoutMs: 1000,
       installFromArchive,
       archiveInstallParams: { pluginId: "voice-call" },
@@ -265,7 +265,7 @@ describe("installFromValidatedNpmSpecArchive", () => {
       return;
     }
     expect(installFromArchive).toHaveBeenCalledWith({
-      archivePath: "/tmp/openclaw-plugin.tgz",
+      archivePath: "/tmp/carapace-plugin.tgz",
       pluginId: "voice-call",
     });
     expect(result).toMatchObject({ ok: true, pluginId: "voice-call" });
@@ -276,7 +276,7 @@ describe("archive workspace lifetime", () => {
   it.each(["success", "failure", "throw"] as const)(
     "cleans the archive workspace before exposing %s",
     async (outcome) => {
-      await withTestDir({ prefix: "openclaw-npm-archive-" }, async (rootDir) => {
+      await withTestDir({ prefix: "carapace-npm-archive-" }, async (rootDir) => {
         const actual = await vi.importActual<typeof import("./install-source-utils.js")>(
           "./install-source-utils.js",
         );
@@ -290,7 +290,7 @@ describe("archive workspace lifetime", () => {
           await fs.writeFile(archivePath, "owned archive");
           return { ok: true, archivePath, metadata: { version: "1.0.0" } };
         });
-        const transactionKey = Symbol.for("openclaw.packageDirInstallTransaction");
+        const transactionKey = Symbol.for("carapace.packageDirInstallTransaction");
         const transaction = { commit: vi.fn(), rollback: vi.fn() };
         const failure = {
           ok: false as const,

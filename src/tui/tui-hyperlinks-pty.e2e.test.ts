@@ -50,8 +50,8 @@ it.each([
         WARP_SESSION_ID: undefined,
         WARP_TERMINAL_SESSION_UUID: undefined,
         TERMINAL_EMULATOR: undefined,
-        OPENCLAW_TUI_PTY_COLS: String(cols),
-        OPENCLAW_TUI_PTY_ROWS: "30",
+        CARAPACE_TUI_PTY_COLS: String(cols),
+        CARAPACE_TUI_PTY_ROWS: "30",
       },
     });
     try {

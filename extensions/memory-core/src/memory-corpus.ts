@@ -1,9 +1,9 @@
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { extractErrorCode, formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { extractErrorCode, formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   listMemoryCorpusSupplements,
   type MemoryCorpusSearchResult,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import {
   createMemorySearchDeadlineError,
   DEFAULT_MEMORY_SEARCH_TIMEOUT_MS,

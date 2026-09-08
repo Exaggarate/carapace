@@ -4,7 +4,7 @@ import CoreLocation
 import CoreMotion
 import EventKit
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import ReplayKit
 import Speech
 import UIKit
@@ -93,7 +93,7 @@ extension GatewayConnectionController {
         if manualClientId?.isEmpty == false {
             return manualClientId!
         }
-        return "openclaw-ios"
+        return "carapace-ios"
     }
 
     private func resolvedDisplayName(defaults: UserDefaults) -> String {
@@ -111,36 +111,36 @@ extension GatewayConnectionController {
     }
 
     private func currentCaps() -> [String] {
-        var caps = [OpenClawCapability.screen.rawValue]
+        var caps = [CarapaceCapability.screen.rawValue]
 
         // Default-on: if the key doesn't exist yet, treat it as enabled.
         let cameraEnabled =
             UserDefaults.standard.object(forKey: "camera.enabled") == nil
                 ? true
                 : UserDefaults.standard.bool(forKey: "camera.enabled")
-        if cameraEnabled { caps.append(OpenClawCapability.camera.rawValue) }
+        if cameraEnabled { caps.append(CarapaceCapability.camera.rawValue) }
 
         let voiceWakeEnabled = UserDefaults.standard.bool(forKey: VoiceWakePreferences.enabledKey)
-        if voiceWakeEnabled { caps.append(OpenClawCapability.voiceWake.rawValue) }
+        if voiceWakeEnabled { caps.append(CarapaceCapability.voiceWake.rawValue) }
 
         let locationModeRaw = UserDefaults.standard.string(forKey: "location.enabledMode") ?? "off"
-        let locationMode = OpenClawLocationMode(rawValue: locationModeRaw) ?? .off
-        if locationMode != .off { caps.append(OpenClawCapability.location.rawValue) }
+        let locationMode = CarapaceLocationMode(rawValue: locationModeRaw) ?? .off
+        if locationMode != .off { caps.append(CarapaceCapability.location.rawValue) }
 
-        caps.append(OpenClawCapability.device.rawValue)
-        caps.append(OpenClawCapability.talk.rawValue)
+        caps.append(CarapaceCapability.device.rawValue)
+        caps.append(CarapaceCapability.talk.rawValue)
         if WatchMessagingService.isSupportedOnDevice() {
-            caps.append(OpenClawCapability.watch.rawValue)
+            caps.append(CarapaceCapability.watch.rawValue)
         }
-        caps.append(OpenClawCapability.photos.rawValue)
-        caps.append(OpenClawCapability.contacts.rawValue)
-        caps.append(OpenClawCapability.calendar.rawValue)
-        caps.append(OpenClawCapability.reminders.rawValue)
+        caps.append(CarapaceCapability.photos.rawValue)
+        caps.append(CarapaceCapability.contacts.rawValue)
+        caps.append(CarapaceCapability.calendar.rawValue)
+        caps.append(CarapaceCapability.reminders.rawValue)
         if Self.motionAvailable() {
-            caps.append(OpenClawCapability.motion.rawValue)
+            caps.append(CarapaceCapability.motion.rawValue)
         }
         if HealthAuthorization.isEnabled {
-            caps.append(OpenClawCapability.health.rawValue)
+            caps.append(CarapaceCapability.health.rawValue)
         }
 
         return caps
@@ -148,53 +148,53 @@ extension GatewayConnectionController {
 
     private func currentCommands() -> [String] {
         var commands: [String] = [
-            OpenClawScreenCommand.record.rawValue,
-            OpenClawSystemCommand.notify.rawValue,
-            OpenClawChatCommand.push.rawValue,
-            OpenClawTalkCommand.pttStart.rawValue,
-            OpenClawTalkCommand.pttStop.rawValue,
-            OpenClawTalkCommand.pttCancel.rawValue,
-            OpenClawTalkCommand.pttOnce.rawValue,
+            CarapaceScreenCommand.record.rawValue,
+            CarapaceSystemCommand.notify.rawValue,
+            CarapaceChatCommand.push.rawValue,
+            CarapaceTalkCommand.pttStart.rawValue,
+            CarapaceTalkCommand.pttStop.rawValue,
+            CarapaceTalkCommand.pttCancel.rawValue,
+            CarapaceTalkCommand.pttOnce.rawValue,
         ]
 
         let caps = Set(self.currentCaps())
-        if caps.contains(OpenClawCapability.camera.rawValue) {
-            commands.append(OpenClawCameraCommand.list.rawValue)
-            commands.append(OpenClawCameraCommand.snap.rawValue)
-            commands.append(OpenClawCameraCommand.clip.rawValue)
+        if caps.contains(CarapaceCapability.camera.rawValue) {
+            commands.append(CarapaceCameraCommand.list.rawValue)
+            commands.append(CarapaceCameraCommand.snap.rawValue)
+            commands.append(CarapaceCameraCommand.clip.rawValue)
         }
-        if caps.contains(OpenClawCapability.location.rawValue) {
-            commands.append(OpenClawLocationCommand.get.rawValue)
+        if caps.contains(CarapaceCapability.location.rawValue) {
+            commands.append(CarapaceLocationCommand.get.rawValue)
         }
-        if caps.contains(OpenClawCapability.device.rawValue) {
-            commands.append(OpenClawDeviceCommand.status.rawValue)
-            commands.append(OpenClawDeviceCommand.info.rawValue)
+        if caps.contains(CarapaceCapability.device.rawValue) {
+            commands.append(CarapaceDeviceCommand.status.rawValue)
+            commands.append(CarapaceDeviceCommand.info.rawValue)
         }
-        if caps.contains(OpenClawCapability.watch.rawValue) {
-            commands.append(OpenClawWatchCommand.status.rawValue)
-            commands.append(OpenClawWatchCommand.notify.rawValue)
+        if caps.contains(CarapaceCapability.watch.rawValue) {
+            commands.append(CarapaceWatchCommand.status.rawValue)
+            commands.append(CarapaceWatchCommand.notify.rawValue)
         }
-        if caps.contains(OpenClawCapability.photos.rawValue) {
-            commands.append(OpenClawPhotosCommand.latest.rawValue)
+        if caps.contains(CarapaceCapability.photos.rawValue) {
+            commands.append(CarapacePhotosCommand.latest.rawValue)
         }
-        if caps.contains(OpenClawCapability.contacts.rawValue) {
-            commands.append(OpenClawContactsCommand.search.rawValue)
-            commands.append(OpenClawContactsCommand.add.rawValue)
+        if caps.contains(CarapaceCapability.contacts.rawValue) {
+            commands.append(CarapaceContactsCommand.search.rawValue)
+            commands.append(CarapaceContactsCommand.add.rawValue)
         }
-        if caps.contains(OpenClawCapability.calendar.rawValue) {
-            commands.append(OpenClawCalendarCommand.events.rawValue)
-            commands.append(OpenClawCalendarCommand.add.rawValue)
+        if caps.contains(CarapaceCapability.calendar.rawValue) {
+            commands.append(CarapaceCalendarCommand.events.rawValue)
+            commands.append(CarapaceCalendarCommand.add.rawValue)
         }
-        if caps.contains(OpenClawCapability.reminders.rawValue) {
-            commands.append(OpenClawRemindersCommand.list.rawValue)
-            commands.append(OpenClawRemindersCommand.add.rawValue)
+        if caps.contains(CarapaceCapability.reminders.rawValue) {
+            commands.append(CarapaceRemindersCommand.list.rawValue)
+            commands.append(CarapaceRemindersCommand.add.rawValue)
         }
-        if caps.contains(OpenClawCapability.motion.rawValue) {
-            commands.append(OpenClawMotionCommand.activity.rawValue)
-            commands.append(OpenClawMotionCommand.pedometer.rawValue)
+        if caps.contains(CarapaceCapability.motion.rawValue) {
+            commands.append(CarapaceMotionCommand.activity.rawValue)
+            commands.append(CarapaceMotionCommand.pedometer.rawValue)
         }
-        if caps.contains(OpenClawCapability.health.rawValue) {
-            commands.append(OpenClawHealthCommand.summary.rawValue)
+        if caps.contains(CarapaceCapability.health.rawValue) {
+            commands.append(CarapaceHealthCommand.summary.rawValue)
         }
 
         return commands

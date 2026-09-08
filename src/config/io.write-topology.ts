@@ -13,7 +13,7 @@ import type {
   ReadConfigFileSnapshotWithPluginMetadataResult,
 } from "./io.types.js";
 import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 import { materializeLegacyAgentOwnershipForActiveChannelsResult } from "./validation.js";
 
 function cloneConfigPathParents(
@@ -45,7 +45,7 @@ function cloneConfigPathParents(
 // and persistence remain in the committing writer.
 export function prepareConfigWriteTopology(
   params: ReadConfigFileSnapshotWithPluginMetadataResult & {
-    nextConfig: OpenClawConfig;
+    nextConfig: CarapaceConfig;
     options: Pick<
       ConfigWriteOptions,
       "explicitSetPaths" | "explicitSetValueSource" | "persistCanonicalAgentRoster"

@@ -1,9 +1,9 @@
 // Doctor-only removal for the retired commitments JSON store.
 import path from "node:path";
 import { root, type Root } from "@openclaw/fs-safe";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { withExistingOpenClawStateDatabaseArtifactPreservingReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { withExistingCarapaceStateDatabaseArtifactPreservingReadOnly } from "../state/carapace-state-db-readonly.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import { withLegacyMigrationStateLock } from "./state-migrations.lock.js";
 import {
   markLegacyMigrationSourceRemoved,
@@ -49,7 +49,7 @@ export async function detectLegacyCommitments(params: {
     !legacyMigrationSourceOrClaimMayExist(sourcePath, DOCTOR_CLAIM_SUFFIX)
   ) {
     try {
-      const receipt = withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(
+      const receipt = withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(
         ({ db }) =>
           readLegacyMigrationReceiptFromDatabase(
             db,
@@ -112,7 +112,7 @@ function recordDiscardDecision(params: {
   const runId = `${sourceKey}:${params.snapshot.sha256.slice(0, 16)}`;
   const now = Date.now();
   let recreated = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       recreated = readLegacyMigrationReceiptFromDatabase(db, sourceKey)?.removedSource === true;
       const reportJson = JSON.stringify({
@@ -299,7 +299,7 @@ export async function migrateLegacyCommitments(params: {
     label: "retired commitments JSON",
     releaseLabel: "Commitments",
     errorLabel: "Failed retiring commitments JSON",
-    retryGuidance: "Stop the Gateway, then run `openclaw doctor --fix` again.",
+    retryGuidance: "Stop the Gateway, then run `carapace doctor --fix` again.",
     run: async (env) => {
       const stateRoot = await root(params.stateDir, {
         hardlinks: "reject",

@@ -1,6 +1,6 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createZeroUsageFixture } from "../test-helpers/usage-fixtures.js";
 
@@ -8,8 +8,8 @@ const { requestPreparedCompactionMock } = vi.hoisted(() => ({
   requestPreparedCompactionMock: vi.fn(),
 }));
 
-vi.mock("@openclaw/ai/transports", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@openclaw/ai/transports")>()),
+vi.mock("@carapace/ai/transports", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@carapace/ai/transports")>()),
   requestPreparedOpenAIResponsesCompaction: requestPreparedCompactionMock,
 }));
 

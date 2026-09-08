@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
-import type { WizardPrompter } from "openclaw/plugin-sdk/setup";
-import { requestBodyText, requestUrl } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
+import type { WizardPrompter } from "carapace/plugin-sdk/setup";
+import { requestBodyText, requestUrl } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildOllamaModelsConfig,
@@ -343,7 +343,7 @@ describe("Ollama onboarding model selection", () => {
           }),
         );
         const expectedDefault = `ollama/${useRemote ? remoteName : localName}`;
-        let config: OpenClawConfig;
+        let config: CarapaceConfig;
         if (mode === "interactive") {
           const result = await promptAndConfigureOllama({
             cfg: {},

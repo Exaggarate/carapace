@@ -1,13 +1,13 @@
-# SearXNG OpenClaw plugin
+# SearXNG Carapace plugin
 
-Official OpenClaw plugin for SearXNG.
+Official Carapace plugin for SearXNG.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/searxng-plugin
+carapace plugins install @carapace/searxng-plugin
 ```
 
 ## Docs
 
-See `docs/tools/searxng-search.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/tools/searxng-search`.
+See `docs/tools/searxng-search.md` in the Carapace repository, or the published docs at `../../docs/tools/searxng-search.md`.

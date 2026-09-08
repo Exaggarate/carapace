@@ -1,4 +1,4 @@
-import type { AssistantMessage, Context, Model, ToolResultMessage } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model, ToolResultMessage } from "@carapace/llm-core";
 import type { ResponseOutputItem } from "openai/resources/responses/responses.js";
 import { expect, it } from "vitest";
 import { transformProviderMessages } from "../provider-transcript-transform.js";

@@ -2,7 +2,7 @@
 // this element owns the shared agent selection, Overview status, and global
 // configuration controllers used by Settings.
 import { consume } from "@lit/context";
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asConfigRecord } from "@carapace/normalization-core/record-coerce";
 import { html, type PropertyValues, type TemplateResult } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { SystemInfoResult } from "../../../../packages/gateway-protocol/src/schema/system-info.ts";
@@ -22,7 +22,7 @@ import {
   runPluginConfigMutation,
   setPluginEnabled,
 } from "../../lib/plugins/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   resolveConfiguredDreaming,
@@ -58,7 +58,7 @@ import type { ConfigRouteData } from "./route-data.ts";
 /** Explicit-off sentinel; resolveSlotSelection maps it to an `off` selection. */
 const MEMORY_SLOT_OFF = "none";
 const MEMORY_SLOT_PATH = ["plugins", "slots", "memory"];
-const DREAMING_DOCS_URL = "https://docs.openclaw.ai/concepts/dreaming";
+const DREAMING_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type GatewayClient = NonNullable<ApplicationContext["gateway"]["snapshot"]["client"]>;
 
@@ -82,7 +82,7 @@ type MemoryPageProps = {
   buildEditor: (keys: readonly string[]) => TemplateResult;
 };
 
-class MemorySettingsPage extends OpenClawLightDomElement {
+class MemorySettingsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -675,16 +675,16 @@ class MemorySettingsPage extends OpenClawLightDomElement {
         onNavigate: (tab) => this.navigateTab(tab),
       }),
       memories: html`
-        <openclaw-memory-memories
+        <carapace-memory-memories
           .client=${this.context.gateway.snapshot.client}
           .connected=${this.context.gateway.snapshot.phase === "connected"}
           .methodAdvertised=${
             isGatewayMethodAdvertised(this.context.gateway.snapshot, "memory.search") === true
           }
           .agentId=${agentId}
-        ></openclaw-memory-memories>
+        ></carapace-memory-memories>
       `,
-      dreams: html` <openclaw-memory-dreaming .agentId=${agentId}></openclaw-memory-dreaming> `,
+      dreams: html` <carapace-memory-dreaming .agentId=${agentId}></carapace-memory-dreaming> `,
       editor:
         activeTab === "settings" ? this.buildEditor(memorySchemaKeysForTab("settings")) : html``,
       dreamingSettings: activeTab === "settings" ? this.renderDreamingControls() : html``,
@@ -692,19 +692,19 @@ class MemorySettingsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-memory-settings")) {
-  customElements.define("openclaw-memory-settings", MemorySettingsPage);
+if (!customElements.get("carapace-memory-settings")) {
+  customElements.define("carapace-memory-settings", MemorySettingsPage);
 }
 
 export function renderMemoryPage(props: MemoryPageProps) {
   return html`
-    <openclaw-memory-settings
+    <carapace-memory-settings
       .configObject=${props.configObject}
       .mutationDisabled=${props.mutationDisabled}
       .pluginsHref=${props.pluginsHref}
       .memoryImportHref=${props.memoryImportHref}
       .routeData=${props.routeData}
       .buildEditor=${props.buildEditor}
-    ></openclaw-memory-settings>
+    ></carapace-memory-settings>
   `;
 }

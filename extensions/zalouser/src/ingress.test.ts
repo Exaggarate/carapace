@@ -1,6 +1,6 @@
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/channel-ingress-test-runtime";
 // Zalouser tests cover durable socket admission, recovery, and replay semantics.
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelIngressQueue } from "carapace/plugin-sdk/channel-outbound";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createZalouserIngressMonitor, type ZalouserIngressLifecycle } from "./ingress.js";
 import {
@@ -15,7 +15,7 @@ function runtime() {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

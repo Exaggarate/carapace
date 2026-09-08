@@ -16,9 +16,9 @@ import {
 } from "./state.ts";
 
 export type ModelSetupWizardStartMethod =
-  | "openclaw.setup.auth.start"
-  | "openclaw.setup.prepare.start"
-  | "openclaw.setup.activate.start";
+  | "carapace.setup.auth.start"
+  | "carapace.setup.prepare.start"
+  | "carapace.setup.activate.start";
 
 export type ModelSetupWizardCompletion = {
   startMethod: ModelSetupWizardStartMethod;
@@ -121,8 +121,8 @@ export class ModelSetupWizardRunner {
     authChoice: string,
     startMethod: Exclude<
       ModelSetupWizardStartMethod,
-      "openclaw.setup.activate.start"
-    > = "openclaw.setup.auth.start",
+      "carapace.setup.activate.start"
+    > = "carapace.setup.auth.start",
     preferences: Pick<SystemAgentSetupActivateParams, "nativeSessionCatalogsEnabled"> = {},
   ): Promise<ModelSetupWizardCompletion | null> {
     return this.startSession(authChoice, startMethod, { authChoice, ...preferences });
@@ -134,7 +134,7 @@ export class ModelSetupWizardRunner {
   ): Promise<ModelSetupWizardCompletion | null> {
     return this.startSession(
       params.authChoice ?? params.kind,
-      "openclaw.setup.activate.start",
+      "carapace.setup.activate.start",
       params,
       targetId,
     );

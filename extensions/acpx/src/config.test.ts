@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { buildPluginConfigSchema } from "openclaw/plugin-sdk/plugin-entry";
+import { buildPluginConfigSchema } from "carapace/plugin-sdk/plugin-entry";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AcpxPluginConfigSchema } from "./config-schema.js";
 import { resolveAcpxPluginConfig, resolveAcpxPluginRoot } from "./config.js";
@@ -22,7 +22,7 @@ describe("embedded acpx plugin config", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("resolves workspace stateDir and cwd by default", () => {
-    const workspaceDir = path.resolve("/tmp/openclaw-acpx");
+    const workspaceDir = path.resolve("/tmp/carapace-acpx");
     const resolved = resolveAcpxPluginConfig({
       rawConfig: undefined,
       workspaceDir,
@@ -42,7 +42,7 @@ describe("embedded acpx plugin config", () => {
       rawConfig: {
         timeoutSeconds: 300,
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
     expect(resolved.timeoutSeconds).toBe(300);
@@ -56,7 +56,7 @@ describe("embedded acpx plugin config", () => {
           codex: { command: "codex custom-acp" },
         },
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
     expect(resolved.agents).toEqual({
@@ -79,7 +79,7 @@ describe("embedded acpx plugin config", () => {
           },
         },
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
     expect(resolved.agents).toEqual({
@@ -118,7 +118,7 @@ describe("embedded acpx plugin config", () => {
     vi.spyOn(process, "platform", "get").mockReturnValue(platform);
     const config = resolveAcpxPluginConfig({
       rawConfig: { agents: { fixture: { command, args: ["suffix"] } } },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
     expect(config.agents.fixture).toEqual([...expected, "suffix"]);
   });
@@ -133,7 +133,7 @@ describe("embedded acpx plugin config", () => {
           },
         },
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
     expect(resolved.agents).toEqual({
@@ -148,7 +148,7 @@ describe("embedded acpx plugin config", () => {
           simple: { command: "simple-acp" },
         },
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
     expect(resolved.agents).toEqual({
@@ -160,7 +160,7 @@ describe("embedded acpx plugin config", () => {
     expect(() =>
       resolveAcpxPluginConfig({
         rawConfig: { agents: { custom: { command: "node 'unfinished argument" } } },
-        workspaceDir: "/tmp/openclaw-acpx",
+        workspaceDir: "/tmp/carapace-acpx",
       }),
     ).toThrow("unterminated quote");
   });
@@ -170,7 +170,7 @@ describe("embedded acpx plugin config", () => {
       rawConfig: {
         probeAgent: "  OpenCode  ",
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
     expect(resolved.probeAgent).toBe("OpenCode");
@@ -182,7 +182,7 @@ describe("embedded acpx plugin config", () => {
         rawConfig: {
           probeAgent: "",
         },
-        workspaceDir: "/tmp/openclaw-acpx",
+        workspaceDir: "/tmp/carapace-acpx",
       }),
     ).toThrow(/probeAgent must be a non-empty string/);
   });
@@ -192,10 +192,10 @@ describe("embedded acpx plugin config", () => {
       rawConfig: {
         pluginToolsMcpBridge: true,
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
-    const server = resolved.mcpServers["openclaw-plugin-tools"];
+    const server = resolved.mcpServers["carapace-plugin-tools"];
     expect(server).toEqual({
       command: process.execPath,
       args: expectedMcpServerArgs({
@@ -205,20 +205,20 @@ describe("embedded acpx plugin config", () => {
     });
   });
 
-  it("injects the built-in OpenClaw tools MCP server only when explicitly enabled", () => {
+  it("injects the built-in Carapace tools MCP server only when explicitly enabled", () => {
     const resolved = resolveAcpxPluginConfig({
       rawConfig: {
-        openClawToolsMcpBridge: true,
+        carapaceToolsMcpBridge: true,
       },
-      workspaceDir: "/tmp/openclaw-acpx",
+      workspaceDir: "/tmp/carapace-acpx",
     });
 
-    const server = resolved.mcpServers["openclaw-tools"];
+    const server = resolved.mcpServers["carapace-tools"];
     expect(server).toEqual({
       command: process.execPath,
       args: expectedMcpServerArgs({
-        sourceEntry: "src/mcp/openclaw-tools-serve.ts",
-        distEntry: "dist/mcp/openclaw-tools-serve.js",
+        sourceEntry: "src/mcp/carapace-tools-serve.ts",
+        distEntry: "dist/mcp/carapace-tools-serve.js",
       }),
     });
   });
@@ -233,7 +233,7 @@ describe("embedded acpx plugin config", () => {
   it("keeps the runtime json schema in sync with the manifest config schema", () => {
     const pluginRoot = resolveAcpxPluginRoot();
     const manifest = JSON.parse(
-      fs.readFileSync(path.join(pluginRoot, "openclaw.plugin.json"), "utf8"),
+      fs.readFileSync(path.join(pluginRoot, "carapace.plugin.json"), "utf8"),
     ) as { configSchema?: unknown };
 
     expect(buildPluginConfigSchema(AcpxPluginConfigSchema).jsonSchema).toEqual(

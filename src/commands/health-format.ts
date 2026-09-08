@@ -1,5 +1,5 @@
 /** Shared CLI formatting for gateway health failures, channels, and delivery queues. */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { colorize, isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatChannelStatusState } from "../channels/plugins/status-state.js";
@@ -262,11 +262,11 @@ export const formatHealthChannelLines = (
   for (const plugin of failedPlugins.slice(0, 20)) {
     const id = sanitizeTerminalText(plugin.id).slice(0, 120);
     const error = sanitizeTerminalText(plugin.error).slice(0, 500);
-    lines.push(`Plugin ${id}: failed - ${error}; run openclaw doctor`);
+    lines.push(`Plugin ${id}: failed - ${error}; run carapace doctor`);
   }
   if (failedPlugins.length > 20) {
     lines.push(
-      `Plugins: failed - ${failedPlugins.length - 20} additional activated failures; run openclaw doctor`,
+      `Plugins: failed - ${failedPlugins.length - 20} additional activated failures; run carapace doctor`,
     );
   }
   return lines;

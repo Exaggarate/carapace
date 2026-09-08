@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
 import {
   patchLiveQaGatewayConfig,
   readLiveQaGatewayConfig,
@@ -24,7 +24,7 @@ type DiscordObservedMessage = Parameters<
 >[0]["observedMessages"][number];
 export type DiscordQaScenarioEnvironment = {
   configureScenario: (implementation: DiscordQaScenarioImplementation) => Promise<{
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     configureTranscriptVoiceAccess?: (authorized: boolean) => Promise<void>;
     run: DiscordQaScenarioRun;
     voiceChannel?: Awaited<
@@ -54,7 +54,7 @@ export function createDiscordQaScenarioEnvironment(params: {
           const run = implementation.buildRun(params.runtimeEnv.sutApplicationId);
           if (run.kind === "transcripts-voice-authorization" && !params.runtimeEnv.voiceChannelId) {
             throw new Error(
-              "Discord transcript authorization requires an explicit QA voiceChannelId in the leased credential or OPENCLAW_QA_DISCORD_VOICE_CHANNEL_ID. Reserve a dedicated empty QA voice channel before running; automatic room discovery is not allowed and the harness does not verify room occupancy.",
+              "Discord transcript authorization requires an explicit QA voiceChannelId in the leased credential or CARAPACE_QA_DISCORD_VOICE_CHANNEL_ID. Reserve a dedicated empty QA voice channel before running; automatic room discovery is not allowed and the harness does not verify room occupancy.",
             );
           }
           const voiceChannel =
@@ -68,7 +68,7 @@ export function createDiscordQaScenarioEnvironment(params: {
           const applyConfig = async (transcriptVoiceAuthorized?: boolean) => {
             const snapshot = await readLiveQaGatewayConfig(input.gateway);
             const cfg = discordQaScenarioSupport.testing.buildDiscordQaConfig(
-              snapshot.config as OpenClawConfig,
+              snapshot.config as CarapaceConfig,
               {
                 guildId: params.runtimeEnv.guildId,
                 channelId: params.runtimeEnv.channelId,

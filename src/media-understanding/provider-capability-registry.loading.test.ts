@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
@@ -53,7 +53,7 @@ module.exports = {
 describe("media capability inference owner loading", () => {
   beforeEach(() => {
     resetFixtureState();
-    root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-media-inference-"));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-media-inference-"));
   });
 
   afterEach(() => {
@@ -103,7 +103,7 @@ describe("media capability inference owner loading", () => {
     ({ active, providerId, configuredId, imageFallback, taggedPeers }) => {
       const selected = createMediaOwner("qa-selected-owner", providerId);
       const unrelated = createMediaOwner("qa-unrelated-owner", "qa-unrelated");
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           allow: [selected.pluginId, unrelated.pluginId],
           load: { paths: [selected.rootDir, unrelated.rootDir] },

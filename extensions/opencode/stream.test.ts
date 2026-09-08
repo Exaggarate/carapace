@@ -1,16 +1,16 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   createAssistantMessageEventStream,
   type AssistantMessage,
   type AssistantMessageEvent,
-} from "openclaw/plugin-sdk/llm";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/llm";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
 
 function toolCallMessage(
   name: string,
-  argumentsValue: Record<string, unknown> = { query: "OpenClaw" },
+  argumentsValue: Record<string, unknown> = { query: "Carapace" },
 ): AssistantMessage {
   return {
     role: "assistant",
@@ -35,8 +35,8 @@ describe("OpenCode stream adapter", () => {
   it("aliases the reserved web_search function across OpenCode Responses requests", async () => {
     const provider = await registerSingleProviderPlugin(plugin);
     let capturedPayload: Record<string, unknown> | undefined;
-    const existingAlias = "openclaw_web_search";
-    const wireAlias = "openclaw_web_search_2";
+    const existingAlias = "carapace_web_search";
+    const wireAlias = "carapace_web_search_2";
     let producerPartial: AssistantMessage | undefined;
     let producerTerminal: AssistantMessage | undefined;
     let releaseTerminal = () => {};
@@ -173,7 +173,7 @@ describe("OpenCode stream adapter", () => {
 
   it("does not restore an unaliased OpenCode Responses function name", async () => {
     const provider = await registerSingleProviderPlugin(plugin);
-    const existingAlias = "openclaw_web_search";
+    const existingAlias = "carapace_web_search";
     const source = createAssistantMessageEventStream();
     const payload = { tools: [{ type: "function", name: existingAlias }] };
     const baseStreamFn: StreamFn = (model, _context, options) => {

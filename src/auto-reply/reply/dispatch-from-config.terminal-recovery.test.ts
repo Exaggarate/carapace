@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { formatBillingErrorMessage } from "../../agents/failover/user-copy.js";
 import { readAgentRunTerminalOutcome } from "../../channels/turn/agent-run-terminal-outcome.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withReplyDispatcher } from "../dispatch-dispatcher.js";
 import { setReplyPayloadMetadata } from "../reply-payload.js";
 import type { ReplyPayload } from "../types.js";
@@ -39,7 +39,7 @@ function createVisibleDispatchParams(
       MessageThreadId: "501.000",
       BodyForAgent: "second telegram direct turn",
     }),
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     dispatcher: createDispatcher(),
     replyResolver,
   };

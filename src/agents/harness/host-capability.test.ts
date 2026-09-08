@@ -323,7 +323,7 @@ describe("agent harness host capability", () => {
   });
 
   it("closes prepared mutable-file approval revalidators with the admitted run", async () => {
-    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-host-binding-"));
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-host-binding-"));
     try {
       fs.writeFileSync(path.join(cwd, "script.sh"), "#!/bin/sh\necho approved\n");
       const { attempt } = await admittedAttempt("run-file-binding", { cwd });
@@ -360,9 +360,9 @@ describe("agent harness host capability", () => {
       localIdentityEnv: expect.objectContaining({ GH_CONFIG_DIR: expect.any(String) }),
       managedLocalIdentity: true,
       localProcessEnv: {
-        OPENCLAW_STATE_DIR: "/state",
-        OPENCLAW_CONFIG_PATH: "/config",
-        OPENCLAW_WORKSPACE_DIR: "/workspace",
+        CARAPACE_STATE_DIR: "/state",
+        CARAPACE_CONFIG_PATH: "/config",
+        CARAPACE_WORKSPACE_DIR: "/workspace",
       },
     });
     expect(Object.isFrozen(host.capabilities.preparedEnvironment?.().localProcessEnv)).toBe(true);

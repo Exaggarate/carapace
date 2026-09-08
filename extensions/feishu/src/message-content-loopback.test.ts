@@ -2,7 +2,7 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import * as Lark from "@larksuiteoapi/node-sdk";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import type { ClawdbotConfig } from "../runtime-api.js";
 import { resolveFeishuMediaList } from "./bot-content.js";
@@ -13,8 +13,8 @@ import { getMessageFeishu } from "./send.js";
 const { mockLogVerbose } = vi.hoisted(() => ({ mockLogVerbose: vi.fn() }));
 const requireRecord = createRequireRecord("record", "expected-label-capitalized");
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   return { ...actual, logVerbose: mockLogVerbose };
 });
 

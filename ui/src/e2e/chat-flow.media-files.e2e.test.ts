@@ -19,8 +19,8 @@ suite.define(() => {
   it("exposes an assistant document download with its Unicode filename and ticketed URL", async () => {
     const context = await suite.newBrowserContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
-    const source = "/tmp/openclaw/测试 report.pdf";
-    const mediaUrl = `/__openclaw__/assistant-media?source=${encodeURIComponent(source)}&mediaTicket=ticket-download`;
+    const source = "/tmp/carapace/测试 report.pdf";
+    const mediaUrl = `/__carapace__/assistant-media?source=${encodeURIComponent(source)}&mediaTicket=ticket-download`;
     await installMockGateway(page, {
       historyMessages: [
         {
@@ -168,7 +168,7 @@ suite.define(() => {
   it("moves a managed document batch from skeletons directly to final cards", async () => {
     const context = await suite.newBrowserContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
-    const proofDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+    const proofDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
       ? suite.artifactDir
       : undefined;
     const managedAttachmentSource = (artifactId: string) =>
@@ -339,13 +339,13 @@ suite.define(() => {
   ] as const)(
     "renders a $name image through the ticketed media route",
     async ({ source, workspaceDir, screenshotName }) => {
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+      const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
         ? suite.artifactDir
         : undefined;
       const context = await suite.newBrowserContext(createControlUiE2eContextOptions());
       const page = await context.newPage();
       const requestedMediaUrls: URL[] = [];
-      await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+      await page.route("**/__carapace__/assistant-media?**", async (route) => {
         const request = route.request();
         const url = new URL(request.url());
         requestedMediaUrls.push(url);
@@ -378,7 +378,7 @@ suite.define(() => {
             id: "user-inbound-media-ref",
             role: "user",
             content: [{ type: "text", text: "🖼️ Attached image" }],
-            __openclaw: {
+            __carapace: {
               media: [
                 {
                   path: source,
@@ -463,7 +463,7 @@ suite.define(() => {
       fetchedMedia.push({
         authorization: request.headers().authorization,
         pathname: url.pathname,
-        requesterSessionKey: request.headers()["x-openclaw-requester-session-key"],
+        requesterSessionKey: request.headers()["x-carapace-requester-session-key"],
       });
       await route.fulfill({
         body: managedImageBody,
@@ -638,7 +638,7 @@ suite.define(() => {
           "utf8",
         );
       }
-      if (process.env.OPENCLAW_BEHAVIOR_PROOF === "1") {
+      if (process.env.CARAPACE_BEHAVIOR_PROOF === "1") {
         process.stdout.write(
           `${JSON.stringify({ proof: "managed-image-cache", ...proofSummary })}\n`,
         );
@@ -682,7 +682,7 @@ suite.define(() => {
       // The copied class clears after 1500ms, so click and read it in one browser step.
       const copied = await copyButton.evaluate(async (element) => {
         const button = element as HTMLButtonElement;
-        const owner = element.closest("openclaw-chat-pane") as
+        const owner = element.closest("carapace-chat-pane") as
           | (HTMLElement & {
               updateComplete: Promise<unknown>;
             })

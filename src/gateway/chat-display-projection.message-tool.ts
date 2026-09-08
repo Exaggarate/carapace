@@ -1,9 +1,9 @@
-import { safeParseJsonRecord } from "@openclaw/normalization-core";
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { safeParseJsonRecord } from "@carapace/normalization-core";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { readAssistantDisplayContent } from "../shared/assistant-display-content.js";
-import { isOpenClawDeliveryMirrorAssistantMessage } from "../shared/transcript-only-openclaw-assistant.js";
+import { isCarapaceDeliveryMirrorAssistantMessage } from "../shared/transcript-only-carapace-assistant.js";
 import {
   extractAssistantTextForSilentCheck,
   hasAssistantDisplayableNonTextContent,
@@ -365,9 +365,9 @@ function readMessageToolSourceReplySink(
 function buildMessageToolVisibleReplyMirror(
   pending: PendingMessageToolVisibleReply,
 ): Record<string, unknown> {
-  const sourceMessageSeq = asPositiveSafeInteger(readRecord(pending.anchor["__openclaw"])?.seq);
+  const sourceMessageSeq = asPositiveSafeInteger(readRecord(pending.anchor["__carapace"])?.seq);
   const deliveryMirror = [pending.deliveryMirrorAnchor, pending.completionAnchor].find((message) =>
-    isOpenClawDeliveryMirrorAssistantMessage(message),
+    isCarapaceDeliveryMirrorAssistantMessage(message),
   );
   const displayContent = readAssistantDisplayContent(deliveryMirror);
   const content =
@@ -375,7 +375,7 @@ function buildMessageToolVisibleReplyMirror(
   const mirror: Record<string, unknown> = {
     role: "assistant",
     content,
-    openclawMessageToolMirror: {
+    carapaceMessageToolMirror: {
       toolName: "message",
       ...(pending.toolCallId ? { toolCallId: pending.toolCallId } : {}),
       ...(pending.sourceReplySink ? { sourceReplySink: pending.sourceReplySink } : {}),
@@ -387,9 +387,9 @@ function buildMessageToolVisibleReplyMirror(
       mirror[field] = pending.anchor[field];
     }
   }
-  const transcriptMeta = readRecord((pending.completionAnchor ?? pending.anchor)["__openclaw"]);
+  const transcriptMeta = readRecord((pending.completionAnchor ?? pending.anchor)["__carapace"]);
   if (transcriptMeta) {
-    mirror["__openclaw"] = { ...transcriptMeta };
+    mirror["__carapace"] = { ...transcriptMeta };
   }
   return mirror;
 }
@@ -398,17 +398,17 @@ function readMessageToolDeliveryMirrorText(message: Record<string, unknown>): st
   // Delivery mirrors can arrive between a successful message-tool result and
   // the final NO_REPLY. The pending mirror is the display row; the raw mirror
   // would duplicate that same send.
-  if (!isOpenClawDeliveryMirrorAssistantMessage(message)) {
+  if (!isCarapaceDeliveryMirrorAssistantMessage(message)) {
     return undefined;
   }
   return displayTextForDuplicateCheck(message);
 }
 
 function readMessageToolDeliveryMirrorCallId(message: Record<string, unknown>): string | undefined {
-  if (!isOpenClawDeliveryMirrorAssistantMessage(message)) {
+  if (!isCarapaceDeliveryMirrorAssistantMessage(message)) {
     return undefined;
   }
-  return normalizeOptionalString(readRecord(message.openclawDeliveryMirror)?.toolCallId);
+  return normalizeOptionalString(readRecord(message.carapaceDeliveryMirror)?.toolCallId);
 }
 
 export function mirrorMessageToolVisibleReplies(messages: unknown[]): unknown[] {

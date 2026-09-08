@@ -28,7 +28,7 @@ import {
   type SessionTranscriptUpdate,
 } from "../../sessions/transcript-events.js";
 import { readAssistantDisplayContent } from "../../shared/assistant-display-content.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { extractMessagingToolSourceReplyPayload } from "../embedded-agent-messaging-extraction.js";
 import { createEmbeddedAttemptTranscriptLifecycle } from "../embedded-agent-runner/run/attempt-transcript-lifecycle.js";
 import { buildEmbeddedRunPayloads } from "../embedded-agent-runner/run/payloads.js";
@@ -137,7 +137,7 @@ describe("WebChat message tool internal source reply", () => {
   });
 
   it("stages buffer media before acknowledging the current-source send", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "message-tool-source-buffer-" },
       async (state) => {
         await fs.mkdir(state.workspaceDir, { recursive: true });
@@ -170,7 +170,7 @@ describe("WebChat message tool internal source reply", () => {
   });
 
   it("uses policy-scoped bridge access for remote-only current-source media", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "message-tool-source-remote-media-" },
       async (state) => {
         await fs.mkdir(state.workspaceDir, { recursive: true });
@@ -233,7 +233,7 @@ describe("WebChat message tool internal source reply", () => {
   });
 
   it("rejects disallowed local media before acknowledging the current-source send", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "message-tool-source-path-" },
       async (state) => {
         await fs.mkdir(state.workspaceDir, { recursive: true });
@@ -254,8 +254,8 @@ describe("WebChat message tool internal source reply", () => {
   });
 
   it("publishes managed media with aligned metadata and the current run owner", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-internal-source-reply-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-internal-source-reply-" },
       async (state) => {
         const stateDir = state.stateDir;
         const workspaceDir = state.workspaceDir;
@@ -398,8 +398,8 @@ describe("WebChat message tool internal source reply", () => {
         const content = Array.isArray(assistant?.content)
           ? (assistant.content as Array<Record<string, unknown>>)
           : [];
-        const displayContent = Array.isArray(assistant?.openclawDisplayContent)
-          ? (assistant.openclawDisplayContent as Array<Record<string, unknown>>)
+        const displayContent = Array.isArray(assistant?.carapaceDisplayContent)
+          ? (assistant.carapaceDisplayContent as Array<Record<string, unknown>>)
           : [];
         const image = displayContent.find((block) => block.type === "image");
         const document = displayContent.find((block) => block.type === "attachment");
@@ -439,12 +439,12 @@ describe("WebChat message tool internal source reply", () => {
         const publishedMessage = published?.message as
           | {
               content?: Array<Record<string, unknown>>;
-              openclawDisplayContent?: Array<Record<string, unknown>>;
+              carapaceDisplayContent?: Array<Record<string, unknown>>;
             }
           | undefined;
         expect(publishedMessage?.content?.filter((block) => block.type === "image")).toEqual([]);
         expect(
-          publishedMessage?.openclawDisplayContent?.filter((block) => block.type === "image"),
+          publishedMessage?.carapaceDisplayContent?.filter((block) => block.type === "image"),
         ).toHaveLength(2);
         await expect(Promise.all(publishedDownloads)).resolves.toEqual([
           expect.objectContaining({ type: "image" }),
@@ -479,7 +479,7 @@ describe("WebChat message tool internal source reply", () => {
     "conflicting-writer",
     "lifecycle-drain-failure",
   ] as const)("cleans only uncommitted source-reply originals when append %s", async (outcome) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "source-reply-append-outcome-" },
       async (state) => {
         const sessionKey = "agent:main:webchat:dm:append-outcome";

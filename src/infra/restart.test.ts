@@ -14,7 +14,7 @@ const resolveLsofCommandSyncMock = vi.hoisted(() => vi.fn());
 const resolveGatewayPortMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", async () => {
-  const { mockNodeBuiltinModule } = await import("openclaw/plugin-sdk/test-node-mocks");
+  const { mockNodeBuiltinModule } = await import("carapace/plugin-sdk/test-node-mocks");
   return mockNodeBuiltinModule(
     () => vi.importActual<typeof import("node:child_process")>("node:child_process"),
     {
@@ -31,7 +31,7 @@ vi.mock("./ports-lsof.js", () => ({
 vi.mock("../config/paths.js", () => ({
   resolveGatewayPort: (...args: unknown[]) => resolveGatewayPortMock(...args),
   resolveStateDir: (env: NodeJS.ProcessEnv = process.env) =>
-    env.OPENCLAW_STATE_DIR ?? "/tmp/openclaw-state",
+    env.CARAPACE_STATE_DIR ?? "/tmp/carapace-state",
 }));
 
 const { cleanStaleGatewayProcessesSync, findGatewayPidsOnPortSync } =
@@ -40,7 +40,7 @@ const {
   normalizeGatewayRestartDelayMs,
   resetGatewayRestartStateForInProcessRestart,
   scheduleGatewaySigusr1Restart,
-  triggerOpenClawRestart,
+  triggerCarapaceRestart,
 } = await import("./restart.js");
 
 const envSnapshot = captureFullEnv();
@@ -73,7 +73,7 @@ function requireFirstSpawnSyncCall(): [unknown, unknown, unknown] {
 }
 
 describe.runIf(process.platform !== "win32")("findGatewayPidsOnPortSync", () => {
-  it("parses lsof output and filters non-openclaw/current processes", () => {
+  it("parses lsof output and filters non-carapace/current processes", () => {
     const gatewayPidA = process.pid + 1000;
     const gatewayPidB = process.pid + 2000;
     const foreignPid = process.pid + 3000;
@@ -82,13 +82,13 @@ describe.runIf(process.platform !== "win32")("findGatewayPidsOnPortSync", () => 
       status: 0,
       stdout: [
         `p${process.pid}`,
-        "copenclaw",
+        "ccarapace",
         `p${gatewayPidA}`,
-        "copenclaw-gateway",
+        "ccarapace-gateway",
         `p${foreignPid}`,
         "cnode",
         `p${gatewayPidB}`,
-        "cOpenClaw",
+        "cCarapace",
       ].join("\n"),
     });
 
@@ -130,7 +130,7 @@ describe.runIf(process.platform !== "win32")("cleanStaleGatewayProcessesSync", (
       .mockReturnValueOnce({
         error: undefined,
         status: 0,
-        stdout: [`p${stalePidA}`, "copenclaw", `p${stalePidB}`, "copenclaw-gateway"].join("\n"),
+        stdout: [`p${stalePidA}`, "ccarapace", `p${stalePidB}`, "ccarapace-gateway"].join("\n"),
       })
       .mockReturnValue({
         error: undefined,
@@ -155,7 +155,7 @@ describe.runIf(process.platform !== "win32")("cleanStaleGatewayProcessesSync", (
       .mockReturnValueOnce({
         error: undefined,
         status: 0,
-        stdout: [`p${stalePid}`, "copenclaw"].join("\n"),
+        stdout: [`p${stalePid}`, "ccarapace"].join("\n"),
       })
       .mockReturnValue({
         error: undefined,
@@ -196,11 +196,11 @@ describe.runIf(process.platform !== "win32")("cleanStaleGatewayProcessesSync", (
   });
 });
 
-describe("triggerOpenClawRestart", () => {
+describe("triggerCarapaceRestart", () => {
   it("does not kickstart after bootstrap registers an unloaded LaunchAgent", () => {
     setPlatform("darwin");
     withEnv(
-      { VITEST: undefined, NODE_ENV: undefined, HOME: "/Users/test", OPENCLAW_PROFILE: "default" },
+      { VITEST: undefined, NODE_ENV: undefined, HOME: "/Users/test", CARAPACE_PROFILE: "default" },
       () => {
         const uid = typeof process.getuid === "function" ? process.getuid() : 501;
         spawnSyncMock.mockImplementation((command: string, args: string[]) => {
@@ -216,14 +216,14 @@ describe("triggerOpenClawRestart", () => {
           return { error: undefined, status: 1, stdout: "" };
         });
 
-        const result = triggerOpenClawRestart();
+        const result = triggerCarapaceRestart();
 
         expect(result).toEqual({
           ok: true,
           method: "launchctl",
           tried: [
-            `launchctl kickstart -k gui/${uid}/ai.openclaw.gateway`,
-            `launchctl bootstrap gui/${uid} /Users/test/Library/LaunchAgents/ai.openclaw.gateway.plist`,
+            `launchctl kickstart -k gui/${uid}/ai.carapace.gateway`,
+            `launchctl bootstrap gui/${uid} /Users/test/Library/LaunchAgents/ai.carapace.gateway.plist`,
           ],
         });
       },
@@ -233,7 +233,7 @@ describe("triggerOpenClawRestart", () => {
   it("continues when launchctl bootstrap reports the service is already loaded", () => {
     setPlatform("darwin");
     withEnv(
-      { VITEST: undefined, NODE_ENV: undefined, HOME: "/Users/test", OPENCLAW_PROFILE: "default" },
+      { VITEST: undefined, NODE_ENV: undefined, HOME: "/Users/test", CARAPACE_PROFILE: "default" },
       () => {
         const uid = typeof process.getuid === "function" ? process.getuid() : 501;
         spawnSyncMock.mockImplementation((command: string, args: string[]) => {
@@ -252,15 +252,15 @@ describe("triggerOpenClawRestart", () => {
           return { error: undefined, status: 1, stdout: "" };
         });
 
-        const result = triggerOpenClawRestart();
+        const result = triggerCarapaceRestart();
 
         expect(result).toEqual({
           ok: true,
           method: "launchctl",
           tried: [
-            `launchctl kickstart -k gui/${uid}/ai.openclaw.gateway`,
-            `launchctl bootstrap gui/${uid} /Users/test/Library/LaunchAgents/ai.openclaw.gateway.plist`,
-            `launchctl kickstart gui/${uid}/ai.openclaw.gateway`,
+            `launchctl kickstart -k gui/${uid}/ai.carapace.gateway`,
+            `launchctl bootstrap gui/${uid} /Users/test/Library/LaunchAgents/ai.carapace.gateway.plist`,
+            `launchctl kickstart gui/${uid}/ai.carapace.gateway`,
           ],
         });
       },

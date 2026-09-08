@@ -1,5 +1,5 @@
 /** Shared plan construction for plugin-owned SecretRef setup commands. */
-import { isValidAgentId } from "@openclaw/normalization-core/agent-id";
+import { isValidAgentId } from "@carapace/normalization-core/agent-id";
 import type { PluginIntegrationSecretProviderConfig, SecretRef } from "../config/types.secrets.js";
 import { formatConcreteConfigPath, parseConcreteConfigPathTokens } from "../shared/dot-path.js";
 import type { SecretsApplyPlan, SecretsPlanTarget } from "./plan.js";
@@ -39,7 +39,7 @@ export function parsePluginSecretTargetSpecifier(
 ): { path: string; agentId?: string } {
   if (!value.startsWith("auth-profiles:")) {
     return {
-      path: value.startsWith("openclaw:") ? value.slice("openclaw:".length) : value,
+      path: value.startsWith("carapace:") ? value.slice("carapace:".length) : value,
     };
   }
   const remainder = value.slice("auth-profiles:".length);
@@ -93,7 +93,7 @@ function createPluginConfigSecretTarget(params: {
     throw new Error(`Invalid --target config path: ${params.path}`);
   }
   const resolved = resolveSecretPlanTargetByPathCore({
-    configFile: params.agentId ? "auth-profile-store" : "openclaw.json",
+    configFile: params.agentId ? "auth-profile-store" : "carapace.json",
     pathSegments,
     pathTokens: parsedPath,
   });
@@ -151,7 +151,7 @@ export function buildPluginSecretRefSetupPlan(params: {
   for (const target of targets) {
     const key = target.agentId
       ? `auth-profiles:${target.agentId}:${target.path}`
-      : `openclaw:${target.path}`;
+      : `carapace:${target.path}`;
     if (seen.has(key)) {
       throw new Error(
         `Duplicate secret target path in ${params.productName} setup: ${target.path}`,

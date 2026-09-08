@@ -5,8 +5,8 @@ import { promisify } from "node:util";
 import { expect, onTestFinished } from "vitest";
 import { getRegistryWorktree } from "../../agents/worktrees/registry.js";
 import { managedWorktrees } from "../../agents/worktrees/service.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { testState } from "../test-helpers.js";
 import {
   directSessionReq,
@@ -21,13 +21,13 @@ export async function initializeRemoteBackedGitWorkspace(root: string): Promise<
   const remote = path.join(root, "remote.git");
   await fs.mkdir(workspace, { recursive: true });
   await execFileAsync("git", ["-C", workspace, "init", "-b", "main"]);
-  await execFileAsync("git", ["-C", workspace, "config", "user.name", "OpenClaw Test"]);
+  await execFileAsync("git", ["-C", workspace, "config", "user.name", "Carapace Test"]);
   await execFileAsync("git", [
     "-C",
     workspace,
     "config",
     "user.email",
-    "openclaw-test@example.invalid",
+    "carapace-test@example.invalid",
   ]);
   await fs.writeFile(path.join(workspace, "README.md"), "base\n");
   await execFileAsync("git", ["-C", workspace, "add", "README.md"]);
@@ -42,12 +42,12 @@ export function setupGatewaySessionsWorktreeTestHarness() {
   const { createSessionStoreDir } = setupGatewaySessionsHandlerTestHarness();
 
   async function createArchiveWorktreeFixture() {
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-archive-worktree-",
+      prefix: "carapace-archive-worktree-",
     });
     const workspace = await initializeRemoteBackedGitWorkspace(state.root);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = { workspace };
     const { storePath } = await createSessionStoreDir();
     const created = await directSessionReq<{
@@ -69,7 +69,7 @@ export function setupGatewaySessionsWorktreeTestHarness() {
           allowSnapshotLoss: true,
         });
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       testState.agentConfig = undefined;
       await state.cleanup();
     });

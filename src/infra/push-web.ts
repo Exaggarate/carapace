@@ -1,7 +1,7 @@
 // Stores and verifies web push subscriptions and delivery payloads.
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { expectDefined, normalizeOptionalString } from "@openclaw/normalization-core";
+import { expectDefined, normalizeOptionalString } from "@carapace/normalization-core";
 import { resolveStateDir } from "../config/paths.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { pathMayExistSync } from "./path-existence.js";
@@ -74,7 +74,7 @@ function assertLegacyWebPushMigrationComplete(baseDir?: string): void {
   });
   if (pendingLegacyPath) {
     throw new Error(
-      `legacy Web Push state requires migration; run \`openclaw doctor --fix\` before using Web Push`,
+      `legacy Web Push state requires migration; run \`carapace doctor --fix\` before using Web Push`,
     );
   }
 }
@@ -119,16 +119,16 @@ export async function resolveVapidKeys(baseDir?: string): Promise<VapidKeyPair> 
 
 function resolveVapidSubjectFromEnv(): string {
   return (
-    normalizeOptionalString(process.env.OPENCLAW_VAPID_SUBJECT) ?? DEFAULT_WEB_PUSH_VAPID_SUBJECT
+    normalizeOptionalString(process.env.CARAPACE_VAPID_SUBJECT) ?? DEFAULT_WEB_PUSH_VAPID_SUBJECT
   );
 }
 
 function resolveVapidPublicKeyFromEnv(): string | undefined {
-  return normalizeOptionalString(process.env.OPENCLAW_VAPID_PUBLIC_KEY);
+  return normalizeOptionalString(process.env.CARAPACE_VAPID_PUBLIC_KEY);
 }
 
 function resolveVapidPrivateKeyFromEnv(): string | undefined {
-  return normalizeOptionalString(process.env.OPENCLAW_VAPID_PRIVATE_KEY);
+  return normalizeOptionalString(process.env.CARAPACE_VAPID_PRIVATE_KEY);
 }
 
 // --- Subscription CRUD ---

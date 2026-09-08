@@ -2,7 +2,7 @@ import {
   embeddedAgentLog,
   formatErrorMessage,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { CodexAppServerRpcError } from "./client.js";
 import { neutralizeCodexExplicitMentionSigils } from "./context-engine-projection.js";
 import { isJsonObject } from "./protocol.js";

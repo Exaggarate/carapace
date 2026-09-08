@@ -1,12 +1,12 @@
 // Msteams plugin module implements sdk behavior.
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { readSecretFile } from "openclaw/plugin-sdk/secret-file";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { readSecretFile } from "carapace/plugin-sdk/secret-file";
 import { normalizeBotFrameworkServiceUrl } from "./bot-framework-service-url.js";
 import type { MSTeamsCloudName } from "./cloud.js";
 import { resolveMSTeamsPrivateQaRuntime } from "./qa/private-runtime.js";
 import { MSTEAMS_REQUEST_TIMEOUT_MS } from "./request-timeout.js";
 import type { MSTeamsCredentials, MSTeamsFederatedCredentials } from "./token.js";
-import { buildOpenClawUserAgentFragment } from "./user-agent.js";
+import { buildCarapaceUserAgentFragment } from "./user-agent.js";
 
 type MSTeamsHttpServerAdapter =
   import("@microsoft/teams.apps/dist/http/adapter.js").IHttpServerAdapter;
@@ -83,7 +83,7 @@ type MSTeamsAppOn = {
     cb: (ctx: FileConsentCtx) => void | Promise<void>,
   ): MSTeamsApp;
   // SSO sign-in invokes. The monitor registers guarded replacement routes and
-  // delegates back into the SDK handlers after OpenClaw sender policy passes.
+  // delegates back into the SDK handlers after Carapace sender policy passes.
   (name: "signin.token-exchange", cb: (ctx: SigninTokenExchangeCtx) => unknown): MSTeamsApp;
   (name: "signin.verify-state", cb: (ctx: SigninVerifyStateCtx) => unknown): MSTeamsApp;
   // Feedback (thumbs up/down) on AI-generated messages — Teams delivers
@@ -265,7 +265,7 @@ async function createMSTeamsApp(
   const { App, cloudFromName } = await loadSdkModules();
   const privateQaRuntime = resolveMSTeamsPrivateQaRuntime();
   // Tag outbound SDK HTTP calls with a User-Agent fragment so the Teams
-  // backend can identify OpenClaw traffic for usage telemetry. Teams SDK
+  // backend can identify Carapace traffic for usage telemetry. Teams SDK
   // 2.0.11+ preserves both its own `teams.ts[apps]/<sdk-version>` identifier
   // and caller-provided User-Agent fragments when plain client headers are used.
   const cloud = options?.cloud ?? "Public";
@@ -275,7 +275,7 @@ async function createMSTeamsApp(
   const appOptions: Record<string, unknown> = {
     client: privateQaRuntime?.client ??
       options?.httpClient ?? {
-        headers: { "User-Agent": buildOpenClawUserAgentFragment() },
+        headers: { "User-Agent": buildCarapaceUserAgentFragment() },
         timeout: MSTEAMS_REQUEST_TIMEOUT_MS,
       },
     ...(privateQaRuntime

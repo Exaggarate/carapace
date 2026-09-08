@@ -7,16 +7,16 @@ import {
 } from "./prepared-model-runtime.test-harness.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadPreparedGatewayModelCatalogSnapshot } from "../gateway/server-model-catalog.js";
 import { refreshModelRuntimeAfterHotReload } from "../gateway/server-reload-model-runtime-scope.js";
 import { createPluginManifestRecordFixture } from "../plugins/plugin-metadata.test-support.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import type { ModelCatalogSnapshot } from "./model-catalog.types.js";
 import { buildConfiguredModelCatalog } from "./model-selection-shared.js";
 import { loadPreparedModelCatalogSnapshot } from "./prepared-model-catalog.js";
@@ -31,10 +31,10 @@ import {
 } from "./prepared-model-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 async function prepareCatalogOwner(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   catalogs: readonly ModelCatalogSnapshot[],
 ) {
   mocks.configuredAgentIds = ["pro"];
@@ -55,7 +55,7 @@ async function prepareCatalogOwner(
 
 describe("prepared model runtime scoped refresh", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
   });
 
@@ -68,7 +68,7 @@ describe("prepared model runtime scoped refresh", () => {
           "provider-a:default": { type: "api_key", provider: "provider-a", key: "fixture-key" },
         },
       };
-      const config: OpenClawConfig = { agents: { entries: { pro: {} } } };
+      const config: CarapaceConfig = { agents: { entries: { pro: {} } } };
       const learned = { provider: "provider-a", id: "learned", name: "Learned" };
       const caseDistinct = { provider: "provider-a", id: "Learned", name: "Case distinct" };
       const variant = { ...learned, baseUrl: "https://catalog.example.test/v1" };
@@ -154,7 +154,7 @@ describe("prepared model runtime scoped refresh", () => {
   it.each(["credential", "selected-profile", "synthetic-credential"] as const)(
     "does not retain an account inventory after its %s changes",
     async (change) => {
-      const config: OpenClawConfig = { agents: { entries: { pro: {} } } };
+      const config: CarapaceConfig = { agents: { entries: { pro: {} } } };
       const learned = { provider: "demo", id: "learned", name: "Learned" };
       const starter = { provider: "demo", id: "starter", name: "Starter" };
       const profiles = {
@@ -273,7 +273,7 @@ describe("prepared model runtime scoped refresh", () => {
             : []),
         ],
       };
-      const config: OpenClawConfig = { agents: { entries: { pro: {} } } };
+      const config: CarapaceConfig = { agents: { entries: { pro: {} } } };
       try {
         const owner = await prepareCatalogOwner(config, [previous, current]);
         await owner.loadFullModelCatalog!();
@@ -294,7 +294,7 @@ describe("prepared model runtime scoped refresh", () => {
     "carries completed discovery across hot reload without rediscovery (scope: %j)",
     async (agentIds) => {
       mocks.configuredAgentIds = ["pro"];
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: { entries: { pro: {} } },
         plugins: { entries: { fixture: { enabled: true } } },
       };
@@ -329,7 +329,7 @@ describe("prepared model runtime scoped refresh", () => {
       let currentConfig = config;
       for (const alias of ["First alias", "Second alias"]) {
         mocks.mutationListener?.({ affectsInheritedStores: true, profileSetChanged: false });
-        const nextConfig: OpenClawConfig = {
+        const nextConfig: CarapaceConfig = {
           meta: { lastTouchedVersion: alias },
           plugins: { entries: { fixture: { enabled: true, config: {} } } },
           agents: {
@@ -404,7 +404,7 @@ describe("prepared model runtime scoped refresh", () => {
         },
       ],
     };
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { entries: { pro: {} } },
       plugins: { allow: ["demo"], entries: { demo: { enabled: true } } },
       models: {
@@ -422,7 +422,7 @@ describe("prepared model runtime scoped refresh", () => {
     try {
       await refreshPreparedModelRuntimeSnapshots(config, options);
       await getPreparedModelRuntimeSnapshot({ ...input, config })!.loadFullModelCatalog!();
-      let nextConfig: OpenClawConfig =
+      let nextConfig: CarapaceConfig =
         change === "endpoint" || change === "configured-models"
           ? {
               ...config,
@@ -466,7 +466,7 @@ describe("prepared model runtime scoped refresh", () => {
   });
 
   it("does not reuse a post-startup account catalog under the startup credentials", async () => {
-    const config: OpenClawConfig = { agents: { entries: { pro: {} } } };
+    const config: CarapaceConfig = { agents: { entries: { pro: {} } } };
     const learned = { provider: "demo", id: "private-model", name: "Private model" };
     const catalog: ModelCatalogSnapshot = {
       entries: [learned],
@@ -508,7 +508,7 @@ describe("prepared model runtime scoped refresh", () => {
             free: {},
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const buildCounts: number[] = [];
       const options = {
         gatewayLifecycle: true,
@@ -549,7 +549,7 @@ describe("prepared model runtime scoped refresh", () => {
               pro: { tools: { exec: { security: "full", ask } } },
             },
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await refreshPreparedModelRuntimeSnapshots(nextConfig, {
           ...options,
           agentIds: new Set(["pro"]),
@@ -607,8 +607,8 @@ describe("prepared model runtime scoped refresh", () => {
     });
     mocks.runPreparedModelCatalogWorker.mockResolvedValueOnce(catalog);
     const input = { agentId: "pro", agentDir: state.agentDir("pro"), config: {} };
-    for (const [index, runtime] of ["openclaw", "fixture-runtime", "openclaw"].entries()) {
-      const config: OpenClawConfig = {
+    for (const [index, runtime] of ["carapace", "fixture-runtime", "carapace"].entries()) {
+      const config: CarapaceConfig = {
         agents: {
           defaults: {
             model: "custom/discovered-model",
@@ -710,7 +710,7 @@ describe("prepared model runtime scoped refresh", () => {
       },
     });
     mocks.loadAgentRuntimePluginRegistryHandle.mockReturnValue(registry);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       models: {
         providers: {
           demo: {
@@ -743,7 +743,7 @@ describe("prepared model runtime scoped refresh", () => {
     ]);
     const initial = await owner.loadFullModelCatalog!();
     expect(initial.entries).toContainEqual(expect.objectContaining(native));
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: CarapaceConfig = {
       ...config,
       agents: {
         entries: { pro: {} },
@@ -800,13 +800,13 @@ describe("prepared model runtime scoped refresh", () => {
       expect.objectContaining({ id: "native-new", nativeRuntime: "fixture-native" }),
     );
     expect(refreshed.entries.some((entry) => entry.id === "native-old")).toBe(false);
-    const retiredConfig: OpenClawConfig = {
+    const retiredConfig: CarapaceConfig = {
       ...nextConfig,
       agents: {
         ...nextConfig.agents,
         defaults: {
           ...nextConfig.agents?.defaults,
-          models: { "demo/*": { agentRuntime: { id: "openclaw" } } },
+          models: { "demo/*": { agentRuntime: { id: "carapace" } } },
         },
       },
     };
@@ -833,13 +833,13 @@ describe("prepared model runtime scoped refresh", () => {
         defaults: { model: "openai/gpt-5.6" },
         entries: { pro: {}, free: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const nextConfig = {
       agents: {
         defaults: { model: "openai/gpt-5.5" },
         entries: { pro: {}, free: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const buildCounts: number[] = [];
 
     await refreshPreparedModelRuntimeSnapshots(initialConfig, {
@@ -859,7 +859,7 @@ describe("prepared model runtime scoped refresh", () => {
     mocks.configuredAgentIds = ["free"];
     const initialConfig = {
       agents: { entries: { free: { model: "openai/gpt-5.5" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const nextConfig = {
       agents: {
         entries: {
@@ -867,7 +867,7 @@ describe("prepared model runtime scoped refresh", () => {
           pro: { model: "openai/gpt-5.6" },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const buildCounts: number[] = [];
 
     await refreshPreparedModelRuntimeSnapshots(initialConfig, {

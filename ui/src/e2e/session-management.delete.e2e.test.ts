@@ -44,7 +44,7 @@ suite.define(() => {
     try {
       await page.goto(`${suite.server.baseUrl}sessions`);
       await page.waitForFunction(() => {
-        const client = (document.querySelector("openclaw-app") as DraftDeletionTestApp).runtime
+        const client = (document.querySelector("carapace-app") as DraftDeletionTestApp).runtime
           ?.context.gateway.snapshot.client;
         return client?.recoveryScopeReady === true && Boolean(client.recoveryScope);
       });
@@ -56,7 +56,7 @@ suite.define(() => {
       );
       const owner = await page.evaluate(
         async ({ store, outbox, sessionKeys }) => {
-          const client = (document.querySelector("openclaw-app") as DraftDeletionTestApp).runtime
+          const client = (document.querySelector("carapace-app") as DraftDeletionTestApp).runtime
             ?.context.gateway.snapshot.client;
           if (!client?.recoveryScope) {
             throw new Error("Gateway recovery scope unavailable");
@@ -76,7 +76,7 @@ suite.define(() => {
             ]),
           );
           sessionStorage.setItem(
-            `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayOwner)}`,
+            `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayOwner)}`,
             JSON.stringify({ version: 4, gatewayOwner, sessions, recovery: {} }),
           );
           const recoveryScope = client.recoveryScope;
@@ -99,7 +99,7 @@ suite.define(() => {
       );
       const deleteFromRuntime = (sessionKeys: string[]) =>
         page.evaluate(async (targets) => {
-          const sessions = (document.querySelector("openclaw-app") as DraftDeletionTestApp).runtime
+          const sessions = (document.querySelector("carapace-app") as DraftDeletionTestApp).runtime
             ?.context.sessions;
           if (!sessions) {
             throw new Error("Session capability unavailable");
@@ -129,7 +129,7 @@ suite.define(() => {
       await gateway.waitForRequest("sessions.delete", { after: requestsBeforeReplacement });
       const inFlightRevision = await page.evaluate(
         async ({ store, key, scopeOwner }) => {
-          const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`;
+          const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`;
           const local = JSON.parse(sessionStorage.getItem(storageKey) ?? "{}") as {
             sessions: Record<string, unknown>;
           };
@@ -159,7 +159,7 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(
             async ({ store, key, scopeOwner }) => {
-              const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`;
+              const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`;
               const local = JSON.parse(sessionStorage.getItem(storageKey) ?? "{}") as {
                 sessions?: Record<string, { draft?: string; queue?: unknown[] }>;
               };
@@ -181,7 +181,7 @@ suite.define(() => {
 
       await page.evaluate(
         async ({ store, key, scopeOwner }) => {
-          const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`;
+          const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`;
           const local = JSON.parse(sessionStorage.getItem(storageKey) ?? "{}") as {
             sessions: Record<string, { draft?: string; draftRevision?: number }>;
           };
@@ -221,7 +221,7 @@ suite.define(() => {
             async ({ store, sessionKeys, scopeOwner }) => {
               const local = JSON.parse(
                 sessionStorage.getItem(
-                  `openclaw.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`,
+                  `carapace.control.chatComposer.v4:${encodeURIComponent(scopeOwner.gatewayOwner)}`,
                 ) ?? "{}",
               ) as { sessions?: Record<string, { draft?: string; queue?: unknown[] }> };
               return Object.fromEntries(
@@ -374,7 +374,7 @@ suite.define(() => {
       await row.hover();
       await row.getByRole("button", { name: "Open session menu" }).click();
       await page
-        .locator("openclaw-session-menu")
+        .locator("carapace-session-menu")
         .getByRole("menuitem", { name: "Delete…" })
         .click();
 
@@ -444,7 +444,7 @@ suite.define(() => {
           archived: [],
           worktreePreserved: {
             id: "wt-snapshot-failed",
-            branch: "openclaw/snapshot-failed",
+            branch: "carapace/snapshot-failed",
             path: "/worktrees/snapshot-failed",
             reason: "snapshot-failed",
           },
@@ -464,7 +464,7 @@ suite.define(() => {
       await row.hover();
       await row.getByRole("button", { name: "Open session menu" }).click();
       await page
-        .locator("openclaw-session-menu")
+        .locator("carapace-session-menu")
         .getByRole("menuitem", { name: "Delete…" })
         .click();
 
@@ -475,7 +475,7 @@ suite.define(() => {
       const worktreeModal = await waitForConfirmModal(page);
       await expect
         .poll(() => worktreeModal.textContent())
-        .toContain("OpenClaw could not create a safety snapshot");
+        .toContain("Carapace could not create a safety snapshot");
       await expect.poll(() => worktreeModal.textContent()).toContain("Remove?");
       await captureUiProof(
         suite,

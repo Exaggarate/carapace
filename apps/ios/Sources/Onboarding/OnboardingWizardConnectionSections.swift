@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 struct OnboardingModeSelectionSections: View {
@@ -42,7 +42,7 @@ struct OnboardingModeSelectionSections: View {
             }
         } header: {
             Text("Manual Connection")
-                .font(OpenClawType.footnoteSemiBold)
+                .font(CarapaceType.footnoteSemiBold)
                 .padding(.top, 12)
         }
         .disabled(self.isConnecting)
@@ -50,10 +50,10 @@ struct OnboardingModeSelectionSections: View {
         Section {
             Button(action: self.onContinue) {
                 Text("Continue")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
             .disabled(self.selectedMode == nil || self.isConnecting)
-            .buttonStyle(OpenClawPrimaryActionButtonStyle(height: 48))
+            .buttonStyle(CarapacePrimaryActionButtonStyle(height: 48))
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
@@ -79,12 +79,12 @@ struct OnboardingModeSelectionSections: View {
                 }
 
                 Text(title)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                     .foregroundStyle(.primary)
             }
             .frame(minHeight: 52)
         }
-        .tint(OpenClawBrand.activationPrimaryAction)
+        .tint(CarapaceBrand.activationPrimaryAction)
         .contentShape(Rectangle())
         .overlay {
             Button {
@@ -115,9 +115,9 @@ struct OnboardingConnectPhaseView: View {
                     .progressViewStyle(.circular)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Connecting…")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                     Text(verbatim: detail)
-                        .font(OpenClawType.footnote)
+                        .font(CarapaceType.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -136,16 +136,16 @@ struct OnboardingConnectPhaseView: View {
                 },
                 onShowDetails: self.onShowDetails)
         case let .failedStatus(message, allowsRetry):
-            OpenClawNoticeBanner(
+            CarapaceNoticeBanner(
                 icon: "exclamationmark.triangle.fill",
                 title: "Connection Failed",
                 message: .verbatim(message),
                 ownerLabel: "Needs attention",
-                tint: OpenClawBrand.danger,
-                primaryActionTitle: allowsRetry ? OpenClawTextValue.localized("Retry") : nil,
+                tint: CarapaceBrand.danger,
+                primaryActionTitle: allowsRetry ? CarapaceTextValue.localized("Retry") : nil,
                 onPrimaryAction: allowsRetry ? self.onRetry : nil)
         case .ready:
-            OpenClawStatusBadge(label: "Ready to Connect", tone: .muted)
+            CarapaceStatusBadge(label: "Ready to Connect", tone: .muted)
         }
     }
 }
@@ -171,41 +171,41 @@ struct OnboardingStagedGatewaySetupSection: View {
                         ProgressView()
                             .progressViewStyle(.circular)
                         Text("Connecting…")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                     }
                 } else {
                     Text("Connect")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             }
-            .font(OpenClawType.subheadSemiBold)
+            .font(CarapaceType.subheadSemiBold)
             .disabled(self.isBusy)
 
             Button(action: self.onUseManualSetup) {
                 Text("Use Manual Setup")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
-            .font(OpenClawType.subheadSemiBold)
+            .font(CarapaceType.subheadSemiBold)
             .disabled(self.isBusy)
         } header: {
             Text("Setup Link")
-                .font(OpenClawType.footnoteSemiBold)
+                .font(CarapaceType.footnoteSemiBold)
         } footer: {
             Text(self.link.tls
                 ? "Review this endpoint. Credentials are applied only after you tap Connect."
                 :
                 "Plaintext may expose credentials. Continue only if you trust this local network and host.")
-                .font(OpenClawType.footnote)
+                .font(CarapaceType.footnote)
         }
     }
 
     private func onboardingLabeledContent(_ title: LocalizedStringKey, value: String) -> some View {
         LabeledContent {
             Text(verbatim: value)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
         } label: {
             Text(title)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
         }
     }
 }
@@ -221,7 +221,7 @@ struct OnboardingDiscoveredGatewaysSection: View {
         Section {
             if self.gateways.isEmpty {
                 Text("No gateways found yet.")
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(self.gateways) { gateway in
@@ -231,10 +231,10 @@ struct OnboardingDiscoveredGatewaysSection: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(gateway.name)
-                                    .font(OpenClawType.body)
+                                    .font(CarapaceType.body)
                                 if let host = gateway.lanHost ?? gateway.tailnetDns {
                                     Text(host)
-                                        .font(OpenClawType.footnote)
+                                        .font(CarapaceType.footnote)
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -248,21 +248,21 @@ struct OnboardingDiscoveredGatewaysSection: View {
                                             .progressViewStyle(.circular)
                                     } else {
                                         Text(availability.actionTitle)
-                                            .font(OpenClawType.subheadSemiBold)
+                                            .font(CarapaceType.subheadSemiBold)
                                     }
                                 }
-                                .font(OpenClawType.subheadSemiBold)
+                                .font(CarapaceType.subheadSemiBold)
                                 .disabled(self.connectingGateway != nil)
                             } else {
                                 Text(availability.actionTitle)
-                                    .font(OpenClawType.subheadSemiBold)
-                                    .foregroundStyle(OpenClawBrand.warn)
+                                    .font(CarapaceType.subheadSemiBold)
+                                    .foregroundStyle(CarapaceBrand.warn)
                             }
                         }
 
                         if let guidanceText = availability.guidanceText {
                             Text(guidanceText)
-                                .font(OpenClawType.footnote)
+                                .font(CarapaceType.footnote)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -272,13 +272,13 @@ struct OnboardingDiscoveredGatewaysSection: View {
 
             Button(action: self.onRestartDiscovery) {
                 Text("Restart Discovery")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
-            .font(OpenClawType.subheadSemiBold)
+            .font(CarapaceType.subheadSemiBold)
             .disabled(self.connectingGateway != nil)
         } header: {
             Text("Discovered Gateways")
-                .font(OpenClawType.footnoteSemiBold)
+                .font(CarapaceType.footnoteSemiBold)
         }
     }
 }

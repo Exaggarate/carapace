@@ -1,6 +1,6 @@
 /** Tests live image-generation helper parsing and provider selection. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   parseCaseFilter,
   parseImageProviderFilter,
@@ -35,7 +35,7 @@ describe("image-generation live-test helpers", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveConfiguredLiveImageModels(cfg)).toEqual(
       new Map([

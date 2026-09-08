@@ -10,7 +10,7 @@ const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
 const writeJson = (file, value) => fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
 
 function withDatabase(stateDir, write, callback) {
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   assert(fs.existsSync(databasePath), "the published Gateway must create its own state database");
   const db = new DatabaseSync(databasePath, { readOnly: !write });
   try {

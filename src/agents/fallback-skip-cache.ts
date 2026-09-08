@@ -14,16 +14,16 @@
  * same `sessionId` shares the same skip set.
  */
 
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import { modelKey } from "./model-ref-shared.js";
 
 /**
  * Default time-to-live for a skip marker. Disabled by default so existing
  * fallback retry behavior stays unchanged unless an operator opts in with
- * OPENCLAW_FALLBACK_SKIP_TTL_MS.
+ * CARAPACE_FALLBACK_SKIP_TTL_MS.
  */
 const DEFAULT_FALLBACK_SKIP_TTL_MS = 0;
-const FALLBACK_SKIP_TTL_ENV = "OPENCLAW_FALLBACK_SKIP_TTL_MS";
+const FALLBACK_SKIP_TTL_ENV = "CARAPACE_FALLBACK_SKIP_TTL_MS";
 const FALLBACK_SKIP_TTL_MIN_MS = 1_000;
 const FALLBACK_SKIP_TTL_MAX_MS = 10 * 60_000;
 
@@ -68,20 +68,20 @@ const GLOBAL_PRUNE_INTERVAL_MS = 5_000;
 
 function getState(): SkipCacheState {
   const globalStore = globalThis as typeof globalThis & {
-    openclawFallbackSkipCache?: SkipBySession;
-    openclawFallbackSkipCacheState?: SkipCacheState;
+    carapaceFallbackSkipCache?: SkipBySession;
+    carapaceFallbackSkipCacheState?: SkipCacheState;
   };
-  if (!globalStore.openclawFallbackSkipCacheState) {
+  if (!globalStore.carapaceFallbackSkipCacheState) {
     // Reuse the existing buckets map if a prior version of this module already
     // populated the legacy global; otherwise start fresh.
-    const buckets = globalStore.openclawFallbackSkipCache ?? new Map();
-    globalStore.openclawFallbackSkipCacheState = {
+    const buckets = globalStore.carapaceFallbackSkipCache ?? new Map();
+    globalStore.carapaceFallbackSkipCacheState = {
       buckets,
       lastGlobalPruneAtMs: 0,
     };
-    globalStore.openclawFallbackSkipCache = buckets;
+    globalStore.carapaceFallbackSkipCache = buckets;
   }
-  return globalStore.openclawFallbackSkipCacheState;
+  return globalStore.carapaceFallbackSkipCacheState;
 }
 
 function getBuckets(): SkipBySession {

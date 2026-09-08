@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BoardProvider } from "../../../lib/board/provider.ts";
@@ -47,9 +47,9 @@ describe("chat transcript invalidation", () => {
     rerender();
     expect(chip()).toBeNull();
 
-    props.githubRepo = { owner: "openclaw", repo: "openclaw" };
+    props.githubRepo = { owner: "carapace", repo: "carapace" };
     rerender();
-    expect(chip()?.href).toBe("https://github.com/openclaw/openclaw/pull/141270");
+    expect(chip()?.href).toBe("https://github.com/Exaggarate/carapace/pull/141270");
     props.githubRepo = { owner: "other", repo: "checkout" };
     rerender();
     expect(chip()?.href).toBe("https://github.com/other/checkout/pull/141270");
@@ -65,7 +65,7 @@ describe("chat transcript invalidation", () => {
         role: index % 2 === 0 ? "user" : "assistant",
         content: `Historical message ${index}`,
         timestamp: index + 1,
-        __openclaw: { id: `message-${index}` },
+        __carapace: { id: `message-${index}` },
       }));
       const transcript = {
         expandedAssistantMessages: new Map(),
@@ -97,7 +97,7 @@ describe("chat transcript invalidation", () => {
             role: "user",
             content: "Inspect the workspace",
             timestamp: 1_000,
-            __openclaw: { id: "settled-user", idempotencyKey: `${completedRunId}:user` },
+            __carapace: { id: "settled-user", idempotencyKey: `${completedRunId}:user` },
           },
           {
             role: "toolResult",
@@ -114,13 +114,13 @@ describe("chat transcript invalidation", () => {
             stopReason: "stop",
             timestamp: 3_000,
             runId: completedRunId,
-            __openclaw: { id: "settled-final" },
+            __carapace: { id: "settled-final" },
           },
           {
             role: "user",
             content: "Continue with the next task",
             timestamp: 4_000,
-            __openclaw: { id: "active-user", idempotencyKey: `${activeRunId}:user` },
+            __carapace: { id: "active-user", idempotencyKey: `${activeRunId}:user` },
           },
         ]),
         showToolCalls: true,

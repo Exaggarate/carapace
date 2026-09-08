@@ -1,8 +1,8 @@
 // Feishu plugin module implements tool account behavior.
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import { normalizeOptionalAccountId } from "openclaw/plugin-sdk/account-resolution";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawPluginApi } from "../runtime-api.js";
+import { normalizeOptionalAccountId } from "carapace/plugin-sdk/account-resolution";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import type { CarapacePluginApi } from "../runtime-api.js";
 import {
   listEnabledFeishuAccounts,
   listFeishuAccountIds,
@@ -22,7 +22,7 @@ type FeishuToolRequirement = {
 };
 
 function resolveImplicitToolAccountId(params: {
-  api: Pick<OpenClawPluginApi, "config">;
+  api: Pick<CarapacePluginApi, "config">;
   executeParams?: AccountAwareParams;
   defaultAccountId?: string;
   requiredTool: FeishuToolRequirement;
@@ -99,7 +99,7 @@ function resolveImplicitToolAccountId(params: {
 }
 
 export function resolveFeishuToolAccount(params: {
-  api: Pick<OpenClawPluginApi, "config">;
+  api: Pick<CarapacePluginApi, "config">;
   executeParams?: AccountAwareParams;
   defaultAccountId?: string;
   requiredTool: FeishuToolRequirement;
@@ -120,7 +120,7 @@ export function resolveFeishuToolAccount(params: {
 }
 
 export function createFeishuToolClient(params: {
-  api: Pick<OpenClawPluginApi, "config">;
+  api: Pick<CarapacePluginApi, "config">;
   executeParams?: AccountAwareParams;
   defaultAccountId?: string;
   requiredTool: FeishuToolRequirement;
@@ -129,7 +129,7 @@ export function createFeishuToolClient(params: {
 }
 
 export function resolveAnyEnabledFeishuToolsConfig(
-  config: OpenClawPluginApi["config"],
+  config: CarapacePluginApi["config"],
 ): Required<FeishuToolsConfig> {
   const accounts = listEnabledFeishuAccounts(config);
   const merged: Required<FeishuToolsConfig> = {

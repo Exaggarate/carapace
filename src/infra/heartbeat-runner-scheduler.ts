@@ -1,7 +1,7 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { listAgentIds } from "../agents/agent-scope-config.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId, resolveAgentIdFromSessionKey } from "../routing/session-key.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
 import { formatErrorMessage } from "./errors.js";
@@ -42,12 +42,12 @@ type HeartbeatAgentState = {
 
 export type HeartbeatRunner = {
   stop: () => void;
-  updateConfig: (cfg: OpenClawConfig) => void;
+  updateConfig: (cfg: CarapaceConfig) => void;
 };
 
 export function startHeartbeatRunner(opts: {
-  cfg?: OpenClawConfig;
-  readCurrentConfig?: () => OpenClawConfig;
+  cfg?: CarapaceConfig;
+  readCurrentConfig?: () => CarapaceConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   runOnce?: typeof runHeartbeatOnce;
@@ -127,7 +127,7 @@ export function startHeartbeatRunner(opts: {
     agent.floodLoggedSinceLastRun = false;
   };
 
-  const updateConfig = (cfg: OpenClawConfig) => {
+  const updateConfig = (cfg: CarapaceConfig) => {
     if (state.stopped) {
       return;
     }

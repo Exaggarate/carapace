@@ -3,11 +3,11 @@
  * sessions. Keeps runtime tool filtering tied to canonical config, session
  * provenance, and inherited sub-agent capabilities.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   normalizeUniqueSingleOrTrimmedStringList,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import { getLoadedChannelPlugin } from "../channels/plugins/index.js";
 import { resolveSessionConversation } from "../channels/plugins/session-conversation.js";
 import {
@@ -15,7 +15,7 @@ import {
   resolveClawToolPolicyConsent,
 } from "../claws/tool-policy-runtime.js";
 import { resolveChannelGroupToolsPolicy } from "../config/group-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AgentToolsConfig } from "../config/types.tools.js";
 import { logWarn } from "../logger.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../routing/account-id.js";
@@ -53,7 +53,7 @@ const SUBAGENT_TOOL_DENY_ALWAYS = [
   // System admin - dangerous from subagent
   "gateway",
   "agents_list",
-  "openclaw",
+  "carapace",
   // Status/scheduling - main agent coordinates
   "session_status",
   "progress_card",
@@ -91,7 +91,7 @@ function mergeConfiguredSubagentAllow(
 
 /** Resolve sub-agent tool policy from stored session capabilities. */
 export function resolveSubagentToolPolicyForSession(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   sessionKey: string,
   opts?: {
     store?: SessionCapabilityStore;
@@ -118,7 +118,7 @@ export function resolveSubagentToolPolicyForSession(
 
 /** Resolve the tool policy inherited from a parent sub-agent session. */
 export function resolveInheritedToolPolicyForSession(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   sessionKey: string | undefined | null,
   opts?: {
     store?: SessionCapabilityStore;
@@ -143,7 +143,7 @@ export function resolveInheritedToolPolicyForSession(
 
 /** Resolve the shared profile, scope, extra, and sandbox policy layers. */
 export function resolveConfiguredToolPolicies(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentTools?: AgentToolsConfig;
   sandboxMode?: "off" | "non-main" | "all";
   agentId?: string | null;
@@ -311,7 +311,7 @@ export function sessionKeyNamesGroupConversation(sessionKey?: string | null): bo
   return (resolveGroupContextFromSessionKey(sessionKey).groupIds?.length ?? 0) > 0;
 }
 
-function resolveExplicitProfileAlsoAllow(tools?: OpenClawConfig["tools"]): string[] | undefined {
+function resolveExplicitProfileAlsoAllow(tools?: CarapaceConfig["tools"]): string[] | undefined {
   return Array.isArray(tools?.alsoAllow) ? tools.alsoAllow : undefined;
 }
 
@@ -321,7 +321,7 @@ function hasExplicitToolSection(section: unknown): boolean {
 
 /** Detect removed implicit grants for migration warnings only (#47487). */
 function detectImplicitProfileGrants(params: {
-  globalTools?: OpenClawConfig["tools"];
+  globalTools?: CarapaceConfig["tools"];
   agentTools?: AgentToolsConfig;
   includeGlobalSections: boolean;
 }): Array<{ section: string; grants: string[] }> {
@@ -343,7 +343,7 @@ function detectImplicitProfileGrants(params: {
 
 /** Resolve the layered global, provider, agent, and profile tool policies. */
 export function resolveEffectiveToolPolicy(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   agentId?: string;
   modelProvider?: string;
@@ -475,7 +475,7 @@ function denyAllToolPolicy(): SandboxToolPolicy {
 
 /** Resolve group-scoped tool policy after validating session provenance. */
 export function resolveGroupToolPolicy(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   spawnedBy?: string | null;
   messageProvider?: string;

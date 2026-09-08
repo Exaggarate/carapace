@@ -13,26 +13,26 @@ import {
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
 import {
-  closeOpenClawStateDatabase,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabase,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { persistClawInstallRecord } from "./provenance.js";
 import { makeProvenancePlan, stateEnv } from "./provenance.test-helpers.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   clearRuntimeConfigSnapshot();
   vi.unstubAllEnvs();
 });
 
 describe("Claw tool policy consent provenance", () => {
   it("does not create writable state for an ordinary named profile", () => {
-    const root = tempDirs.make("openclaw-non-claw-tool-consent-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(root, "state"));
+    const root = tempDirs.make("carapace-non-claw-tool-consent-");
+    vi.stubEnv("CARAPACE_STATE_DIR", join(root, "state"));
     const config = { agents: { list: [{ id: "worker", tools: { profile: "coding" as const } }] } };
     setRuntimeConfigSnapshot(config);
 
@@ -46,9 +46,9 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("does not infer Claw ownership before consent provenance is initialized", () => {
-    const root = tempDirs.make("openclaw-uninitialized-claw-tool-consent-");
+    const root = tempDirs.make("carapace-uninitialized-claw-tool-consent-");
     const stateDir = join(root, "state");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const config = {
       agents: {
         list: [{ id: "worker", tools: { profile: "full" as const, allow: ["read"] } }],
@@ -66,14 +66,14 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("fails an ordinary named profile closed when initial ownership is unreadable", () => {
-    const root = tempDirs.make("openclaw-unreadable-non-claw-tool-consent-");
+    const root = tempDirs.make("carapace-unreadable-non-claw-tool-consent-");
     const stateDir = join(root, "state");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const databasePath = resolveOpenClawStateSqlitePath(env);
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const databasePath = resolveCarapaceStateSqlitePath(env);
     mkdirSync(dirname(databasePath), { recursive: true });
     writeFileSync(databasePath, "not a sqlite database");
     const before = readFileSync(databasePath);
-    vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+    vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
 
     const config = {
       agents: {
@@ -92,28 +92,28 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("fails a known Claw closed without mutating unreadable consent provenance", async () => {
-    const root = tempDirs.make("openclaw-unreadable-claw-tool-consent-");
+    const root = tempDirs.make("carapace-unreadable-claw-tool-consent-");
     const stateDir = join(root, "state");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const databasePath = resolveOpenClawStateSqlitePath(env);
-    vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const databasePath = resolveCarapaceStateSqlitePath(env);
+    vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
     const { plan } = await makeProvenancePlan(
       root,
       { schemaVersion: 1, agent: { id: "worker" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "full", allow: ["read"] } },
         },
       },
     );
     persistClawInstallRecord(plan, { env });
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
     writeFileSync(databasePath, "not a sqlite database");
     const before = readFileSync(databasePath);
 
     const config = { agents: { list: [plan.agent.config] } };
-    expect(() => openOpenClawStateDatabase({ env })).toThrow();
+    expect(() => openCarapaceStateDatabase({ env })).toThrow();
     setRuntimeConfigSnapshot(config);
 
     expect(() =>
@@ -126,14 +126,14 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("fails closed after the prepared state database closes", async () => {
-    const root = tempDirs.make("openclaw-closed-claw-tool-consent-");
+    const root = tempDirs.make("carapace-closed-claw-tool-consent-");
     const env = stateEnv(root);
-    vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+    vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
     const { plan } = await makeProvenancePlan(
       root,
       { schemaVersion: 1, agent: { id: "worker" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "full", allow: ["read"] } },
         },
@@ -142,7 +142,7 @@ describe("Claw tool policy consent provenance", () => {
     persistClawInstallRecord(plan, { env });
     const config = { agents: { list: [plan.agent.config] } };
     setRuntimeConfigSnapshot(config);
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
 
     expect(() =>
       resolveConversationCapabilityProfile({
@@ -153,14 +153,14 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("fails closed when the active agent config does not match consent provenance", async () => {
-    const root = tempDirs.make("openclaw-modified-claw-tool-consent-");
+    const root = tempDirs.make("carapace-modified-claw-tool-consent-");
     const env = stateEnv(root);
-    vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+    vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
     const { plan } = await makeProvenancePlan(
       root,
       { schemaVersion: 1, agent: { id: "worker" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "full", allow: ["read"] } },
         },
@@ -188,14 +188,14 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("fails closed after a host upgrade leaves legacy profile provenance", async () => {
-    const root = tempDirs.make("openclaw-claw-tool-consent-");
+    const root = tempDirs.make("carapace-claw-tool-consent-");
     const env = stateEnv(root);
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(root, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", join(root, "state"));
     const { plan } = await makeProvenancePlan(
       root,
       { schemaVersion: 1, agent: { id: "worker" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "coding", allow: ["read"] } },
         },
@@ -222,12 +222,12 @@ describe("Claw tool policy consent provenance", () => {
     });
     expect(filtered.map((tool) => tool.name)).toEqual(["read"]);
 
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db /* sqlite-allow-raw: test-only downgrade simulates an install created by the previous host. */
       .prepare("UPDATE claw_installs SET schema_version = ? WHERE agent_id = ?")
-      .run("openclaw.clawInstallRecord.v1", "worker");
-    closeOpenClawStateDatabase();
-    openOpenClawStateDatabase({ env });
+      .run("carapace.clawInstallRecord.v1", "worker");
+    closeCarapaceStateDatabase();
+    openCarapaceStateDatabase({ env });
 
     const legacyConfig = {
       agents: {
@@ -249,26 +249,26 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("gives a legacy unbounded full profile an actionable repair path", async () => {
-    const root = tempDirs.make("openclaw-claw-full-tool-consent-");
+    const root = tempDirs.make("carapace-claw-full-tool-consent-");
     const env = stateEnv(root);
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(root, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", join(root, "state"));
     const { plan } = await makeProvenancePlan(
       root,
       { schemaVersion: 1, agent: { id: "worker" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "full", allow: ["read"] } },
         },
       },
     );
     persistClawInstallRecord(plan, { env });
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db /* sqlite-allow-raw: test-only downgrade simulates a legacy unbounded full profile. */
       .prepare("UPDATE claw_installs SET schema_version = ? WHERE agent_id = ?")
-      .run("openclaw.clawInstallRecord.v1", "worker");
-    closeOpenClawStateDatabase();
-    openOpenClawStateDatabase({ env });
+      .run("carapace.clawInstallRecord.v1", "worker");
+    closeCarapaceStateDatabase();
+    openCarapaceStateDatabase({ env });
 
     const config = {
       agents: {
@@ -288,23 +288,23 @@ describe("Claw tool policy consent provenance", () => {
         config,
       }),
     ).toThrow(
-      "Add an explicit tools.allow list to its package OpenClaw profile, then run `openclaw claws update worker`",
+      "Add an explicit tools.allow list to its package Carapace profile, then run `carapace claws update worker`",
     );
   });
 
   it("isolates an unsupported install record from other agents", async () => {
-    const root = tempDirs.make("openclaw-claw-tool-consent-isolation-");
+    const root = tempDirs.make("carapace-claw-tool-consent-isolation-");
     const env = stateEnv(root);
     const validRoot = join(root, "valid");
     const invalidRoot = join(root, "invalid");
     mkdirSync(validRoot);
     mkdirSync(invalidRoot);
-    vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+    vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
     const { plan: validPlan } = await makeProvenancePlan(
       validRoot,
       { schemaVersion: 1, agent: { id: "valid" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "full", allow: ["read"] } },
         },
@@ -314,7 +314,7 @@ describe("Claw tool policy consent provenance", () => {
       invalidRoot,
       { schemaVersion: 1, agent: { id: "invalid" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { profile: "full", allow: ["read"] } },
         },
@@ -322,12 +322,12 @@ describe("Claw tool policy consent provenance", () => {
     );
     persistClawInstallRecord(validPlan, { env });
     persistClawInstallRecord(invalidPlan, { env });
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db /* sqlite-allow-raw: test-only corruption verifies per-agent failure isolation. */
       .prepare("UPDATE claw_installs SET schema_version = ? WHERE agent_id = ?")
-      .run("openclaw.clawInstallRecord.unsupported", "invalid");
-    closeOpenClawStateDatabase();
-    openOpenClawStateDatabase({ env });
+      .run("carapace.clawInstallRecord.unsupported", "invalid");
+    closeCarapaceStateDatabase();
+    openCarapaceStateDatabase({ env });
 
     const config = { agents: { list: [validPlan.agent.config, invalidPlan.agent.config] } };
     setRuntimeConfigSnapshot(config);
@@ -347,14 +347,14 @@ describe("Claw tool policy consent provenance", () => {
   });
 
   it("does not intersect a standalone Claw allowlist with the host profile", async () => {
-    const root = tempDirs.make("openclaw-claw-standalone-tool-consent-");
+    const root = tempDirs.make("carapace-claw-standalone-tool-consent-");
     const env = stateEnv(root);
-    vi.stubEnv("OPENCLAW_STATE_DIR", join(root, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", join(root, "state"));
     const { plan } = await makeProvenancePlan(
       root,
       { schemaVersion: 1, agent: { id: "worker" } },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { allow: ["read"] } },
         },

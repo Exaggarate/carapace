@@ -4,15 +4,15 @@ import os from "node:os";
 import path from "node:path";
 import { resetDiagnosticEventsForTest } from "../infra/diagnostic-events.js";
 import { withEnv } from "../test-utils/env.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePlugins } from "./loader.js";
 import { pluginLoaderCacheState } from "./registry-lifecycle.js";
 import { resetPluginRuntimeStateForTest } from "./runtime.js";
 
-export { loadOpenClawPlugins };
+export { loadCarapacePlugins };
 
 export type TempPlugin = { dir: string; file: string; id: string };
-export type PluginLoadConfig = NonNullable<Parameters<typeof loadOpenClawPlugins>[0]>["config"];
-export type PluginRegistry = ReturnType<typeof loadOpenClawPlugins>;
+export type PluginLoadConfig = NonNullable<Parameters<typeof loadCarapacePlugins>[0]>["config"];
+export type PluginRegistry = ReturnType<typeof loadCarapacePlugins>;
 
 function chmodSafeDir(dir: string) {
   if (process.platform === "win32") {
@@ -32,10 +32,10 @@ export function mkdirSafe(dir: string) {
   chmodSafeDir(dir);
 }
 
-const fixtureRoot = mkdtempSafe(path.join(os.tmpdir(), "openclaw-plugin-"));
+const fixtureRoot = mkdtempSafe(path.join(os.tmpdir(), "carapace-plugin-"));
 let tempDirIndex = 0;
-const prevBundledDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-const prevDisableBundledPlugins = process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+const prevBundledDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+const prevDisableBundledPlugins = process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
 
 export const EMPTY_PLUGIN_SCHEMA = {
   type: "object",
@@ -95,7 +95,7 @@ export function writePluginMetadata(params: {
     );
   }
   fs.writeFileSync(
-    path.join(params.dir, "openclaw.plugin.json"),
+    path.join(params.dir, "carapace.plugin.json"),
     JSON.stringify(
       {
         id: params.id,
@@ -126,8 +126,8 @@ export function writePlugin(params: {
 }
 
 export function useNoBundledPlugins() {
-  process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
-  delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+  process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
+  delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
 }
 
 export function loadBundleFixture(params: {
@@ -139,10 +139,10 @@ export function loadBundleFixture(params: {
   useNoBundledPlugins();
   const workspaceDir = makePluginLoaderTempDir();
   const stateDir = makePluginLoaderTempDir();
-  const bundleRoot = path.join(workspaceDir, ".openclaw", "extensions", params.pluginId);
+  const bundleRoot = path.join(workspaceDir, ".carapace", "extensions", params.pluginId);
   params.build(bundleRoot);
-  return withEnv({ OPENCLAW_STATE_DIR: stateDir, ...params.env }, () =>
-    loadOpenClawPlugins({
+  return withEnv({ CARAPACE_STATE_DIR: stateDir, ...params.env }, () =>
+    loadCarapacePlugins({
       workspaceDir,
       onlyPluginIds: params.onlyPluginIds ?? [params.pluginId],
       config: {
@@ -164,14 +164,14 @@ export function resetPluginLoaderTestStateForTest() {
   resetPluginRuntimeStateForTest();
   resetDiagnosticEventsForTest();
   if (prevBundledDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = prevBundledDir;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = prevBundledDir;
   }
   if (prevDisableBundledPlugins === undefined) {
-    delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+    delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
   } else {
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = prevDisableBundledPlugins;
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = prevDisableBundledPlugins;
   }
 }
 
@@ -188,8 +188,8 @@ export function cleanupPluginLoaderFixturesForTest() {
     // ignore cleanup failures in tests
   }
   if (prevDisableBundledPlugins === undefined) {
-    delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+    delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
   } else {
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = prevDisableBundledPlugins;
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = prevDisableBundledPlugins;
   }
 }

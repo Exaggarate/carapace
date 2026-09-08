@@ -1,18 +1,18 @@
 // Whatsapp tests cover the durable outbound handoff across startup recovery.
 import type { AnyMessageContent, MiscMessageGenerationOptions, WAMessage } from "baileys";
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import { sendDurableMessageBatch } from "carapace/plugin-sdk/channel-outbound";
 import {
   createEmptyPluginRegistry,
   createOutboundTestPlugin,
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { drainPendingDeliveries } from "openclaw/plugin-sdk/delivery-queue-runtime";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { withStateDirEnv } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { drainPendingDeliveries } from "carapace/plugin-sdk/delivery-queue-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { withStateDirEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { whatsappChannelOutbound, whatsappMessageAdapter } from "./channel-outbound.js";
 import { createWebSendApi } from "./inbound/send-api.js";
@@ -25,16 +25,16 @@ const runtimeContextMocks = vi.hoisted(() => ({
   loadOutboundMediaFromUrl: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", async () => {
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-activity-runtime")
-  >("openclaw/plugin-sdk/channel-activity-runtime");
+    typeof import("carapace/plugin-sdk/channel-activity-runtime")
+  >("carapace/plugin-sdk/channel-activity-runtime");
   return { ...actual, recordChannelActivity: vi.fn() };
 });
 
-vi.mock("openclaw/plugin-sdk/outbound-media", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/outbound-media")>(
-    "openclaw/plugin-sdk/outbound-media",
+vi.mock("carapace/plugin-sdk/outbound-media", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/outbound-media")>(
+    "carapace/plugin-sdk/outbound-media",
   );
   return { ...actual, loadOutboundMediaFromUrl: runtimeContextMocks.loadOutboundMediaFromUrl };
 });
@@ -44,7 +44,7 @@ vi.mock("./connection-controller-runtime-context.js", () => ({
     runtimeContextMocks.controllers.get(accountId) ?? null,
 }));
 
-const cfg = { channels: { whatsapp: {} } } as OpenClawConfig;
+const cfg = { channels: { whatsapp: {} } } as CarapaceConfig;
 const accountId = "default";
 
 async function drainDefaultWhatsAppDeliveries(stateDir: string) {
@@ -102,7 +102,7 @@ describe("WhatsApp delivery recovery", () => {
     { mode: "all" as const, explicit: false },
     { mode: "first" as const, explicit: true },
   ])("preserves long styles and $mode quotes (explicit=$explicit)", async ({ mode, explicit }) => {
-    await withStateDirEnv("openclaw-whatsapp-styled-reply-", async () => {
+    await withStateDirEnv("carapace-whatsapp-styled-reply-", async () => {
       const sendMessage = vi.fn<ActiveWebListener["sendMessage"]>();
       sendMessage.mockImplementation(async () =>
         createAcceptedWhatsAppSendResult("text", `part-${sendMessage.mock.calls.length}`),
@@ -419,7 +419,7 @@ describe("WhatsApp delivery recovery", () => {
   it.each(["abort", "transport"] as const)(
     "retains accepted chunks after a later %s failure",
     async (failure) => {
-      await withStateDirEnv("openclaw-whatsapp-partial-reply-", async () => {
+      await withStateDirEnv("carapace-whatsapp-partial-reply-", async () => {
         const controller = new AbortController();
         const sendMessage = vi.fn<ActiveWebListener["sendMessage"]>(async () => {
           if (sendMessage.mock.calls.length > 1) {
@@ -454,7 +454,7 @@ describe("WhatsApp delivery recovery", () => {
   );
 
   it("keeps pre-connect recovery replayable, then sends exactly once after connect", async () => {
-    await withStateDirEnv("openclaw-whatsapp-delivery-recovery-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-whatsapp-delivery-recovery-", async ({ stateDir }) => {
       const initialResult = await sendDurableMessageBatch({
         cfg,
         channel: "whatsapp",

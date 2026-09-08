@@ -7,28 +7,28 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
 }
 
-val openClawAndroidVersionFile = rootProject.file("Config/Version.properties")
-val openClawMobileCutterInstruction =
+val carapaceAndroidVersionFile = rootProject.file("Config/Version.properties")
+val carapaceMobileCutterInstruction =
   "Run scripts/mobile-release-version.ts --prepare, capture the iOS release plan, then run --finalize."
-val openClawAndroidVersionProperties =
+val carapaceAndroidVersionProperties =
   Properties().apply {
-    if (!openClawAndroidVersionFile.isFile) {
-      error("Missing Android version properties. $openClawMobileCutterInstruction")
+    if (!carapaceAndroidVersionFile.isFile) {
+      error("Missing Android version properties. $carapaceMobileCutterInstruction")
     }
-    openClawAndroidVersionFile.inputStream().use(::load)
+    carapaceAndroidVersionFile.inputStream().use(::load)
   }
 
-fun requireOpenClawAndroidVersionProperty(name: String): String =
-  openClawAndroidVersionProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
-    ?: error("Missing $name in Config/Version.properties. $openClawMobileCutterInstruction")
+fun requireCarapaceAndroidVersionProperty(name: String): String =
+  carapaceAndroidVersionProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
+    ?: error("Missing $name in Config/Version.properties. $carapaceMobileCutterInstruction")
 
-val openClawAndroidPhoneVersionCode = requireOpenClawAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_CODE").toInt()
-val openClawAndroidBuildNumber = openClawAndroidPhoneVersionCode % 100
-check(openClawAndroidBuildNumber in 1..49) {
+val carapaceAndroidPhoneVersionCode = requireCarapaceAndroidVersionProperty("CARAPACE_ANDROID_VERSION_CODE").toInt()
+val carapaceAndroidBuildNumber = carapaceAndroidPhoneVersionCode % 100
+check(carapaceAndroidBuildNumber in 1..49) {
   "Android build number must be 01 through 49; Wear reserves 51 through 99."
 }
-val openClawAndroidWearVersionCode = openClawAndroidPhoneVersionCode + 50
-check(openClawAndroidWearVersionCode <= 2_100_000_000) { "Wear versionCode exceeds the Android platform maximum." }
+val carapaceAndroidWearVersionCode = carapaceAndroidPhoneVersionCode + 50
+check(carapaceAndroidWearVersionCode <= 2_100_000_000) { "Wear versionCode exceeds the Android platform maximum." }
 
 // Data Layer delivery requires the phone and watch packages to share one certificate.
 evaluationDependsOn(":app")
@@ -40,16 +40,16 @@ val phoneReleaseSigning =
     .findByName("release")
 
 android {
-  namespace = "ai.openclaw.wear"
+  namespace = "ai.carapace.wear"
   compileSdk = 37
 
   defaultConfig {
     // Data Layer traffic is scoped to matching package names and signatures.
-    applicationId = "ai.openclaw.app"
+    applicationId = "ai.carapace.app"
     minSdk = 31
     targetSdk = 36
-    versionCode = openClawAndroidWearVersionCode
-    versionName = requireOpenClawAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_NAME")
+    versionCode = carapaceAndroidWearVersionCode
+    versionName = requireCarapaceAndroidVersionProperty("CARAPACE_ANDROID_VERSION_NAME")
   }
 
   buildTypes {
@@ -90,7 +90,7 @@ android {
 
 androidComponents {
   onVariants(selector().withBuildType("release")) { variant ->
-    variant.lifecycleTasks.registerPreBuild(":app:validateOpenClawReleaseSigning")
+    variant.lifecycleTasks.registerPreBuild(":app:validateCarapaceReleaseSigning")
   }
 }
 

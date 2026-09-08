@@ -5,7 +5,7 @@ import { formatErrorMessage, formatUncaughtError } from "../infra/errors.js";
 import {
   UpdateSchemaRefusalError,
   type UpdateSchemaRefusalDatabase,
-} from "../state/openclaw-update-schema-refusal.js";
+} from "../state/carapace-update-schema-refusal.js";
 import { formatCliCommand } from "./command-format.js";
 
 type FormatCliFailureOptions = {
@@ -146,7 +146,7 @@ function shouldShowDebugDetails(
   argv: string[] | undefined = process.argv,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  return hasDebugArg(argv) || isTruthyEnvValue(env.OPENCLAW_DEBUG);
+  return hasDebugArg(argv) || isTruthyEnvValue(env.CARAPACE_DEBUG);
 }
 
 export function formatCliOperatorError(
@@ -162,7 +162,7 @@ export function formatCliOperatorError(
 function pushPrefixed(out: string[], value: string): void {
   for (const line of value.split("\n")) {
     if (line.trim().length > 0) {
-      out.push(`[openclaw] ${line}`);
+      out.push(`[carapace] ${line}`);
     }
   }
 }
@@ -177,23 +177,23 @@ export function formatCliFailureLines(options: FormatCliFailureOptions): string[
   const env = options.env ?? process.env;
   const showDebugDetails = shouldShowDebugDetails(options.argv, env);
   const lines = [
-    `[openclaw] ${options.title}`,
-    `[openclaw] Reason: ${formatCliOperatorError(options.error, {
+    `[carapace] ${options.title}`,
+    `[carapace] Reason: ${formatCliOperatorError(options.error, {
       argv: options.argv,
       env,
     })}`,
   ];
 
   if (showDebugDetails) {
-    lines.push("[openclaw] Stack:");
+    lines.push("[carapace] Stack:");
     pushPrefixed(lines, formatUncaughtError(options.error));
   } else {
-    lines.push("[openclaw] Debug: set OPENCLAW_DEBUG=1 to include the stack trace.");
+    lines.push("[carapace] Debug: set CARAPACE_DEBUG=1 to include the stack trace.");
   }
 
   if (options.includeDoctorHint !== false) {
-    lines.push(`[openclaw] Try: ${formatCliCommand("openclaw doctor", env)}`);
+    lines.push(`[carapace] Try: ${formatCliCommand("carapace doctor", env)}`);
   }
-  lines.push(`[openclaw] Help: ${formatCliCommand("openclaw --help", env)}`);
+  lines.push(`[carapace] Help: ${formatCliCommand("carapace --help", env)}`);
   return lines;
 }

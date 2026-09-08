@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { detectMime } from "@openclaw/media-core/mime";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { detectMime } from "@carapace/media-core/mime";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTtsTool } from "../agents/tools/tts-tool.js";
 import { handleTtsCommands } from "../auto-reply/reply/commands-tts.js";
@@ -10,15 +10,15 @@ import type { HandleCommandsParams } from "../auto-reply/reply/commands-types.js
 import { parseInlineSessionDirectives } from "../auto-reply/reply/directive-handling.parse.js";
 import { resolveChannelTtsVoiceDelivery } from "../channels/plugins/tts-capabilities.js";
 import type { ChannelTtsVoiceDeliveryCapabilities } from "../channels/plugins/types.core.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import type { SpeechProviderPlugin } from "../plugins/types.js";
 import { createChannelTestPluginBase, createTestRegistry } from "../test-utils/channel-plugins.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { listSpeechProviders } from "./provider-registry.js";
 import { maybeApplyTtsToPayload, textToSpeech } from "./tts.js";
 
@@ -59,8 +59,8 @@ const PROVIDER = "synthetic-tts-metadata";
 const CHANNEL = "imessage";
 const SPOKEN = "This synthetic audio should keep its channel delivery decision.";
 const requests: Array<{ target: string; text: string }> = [];
-let state: OpenClawTestState;
-let cfg: OpenClawConfig;
+let state: CarapaceTestState;
+let cfg: CarapaceConfig;
 
 function installFixture(voice: ChannelTtsVoiceDeliveryCapabilities, compatible = true): void {
   const provider: SpeechProviderPlugin = {
@@ -194,11 +194,11 @@ async function observeEntries(expectedVoice: boolean): Promise<void> {
 
 describe("TTS real synthesis owner to public output entries", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       layout: "home",
-      prefix: "openclaw-tts-entry-proof-",
+      prefix: "carapace-tts-entry-proof-",
     });
-    vi.stubEnv("OPENCLAW_TTS_PREFS", state.path("tts-prefs.json"));
+    vi.stubEnv("CARAPACE_TTS_PREFS", state.path("tts-prefs.json"));
     vi.stubGlobal(
       "fetch",
       vi.fn(() => {

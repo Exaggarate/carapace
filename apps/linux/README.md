@@ -1,6 +1,6 @@
-# OpenClaw for Linux
+# Carapace for Linux
 
-The Linux companion is a Tauri v2 desktop shell for local and remote OpenClaw Gateways. It discovers nearby Gateways over Bonjour, installs the CLI when local setup needs it, delegates local Gateway service management to `openclaw gateway`, opens the selected Gateway's Control UI, and stays available in the system tray.
+The Linux companion is a Tauri v2 desktop shell for local and remote Carapace Gateways. It discovers nearby Gateways over Bonjour, installs the CLI when local setup needs it, delegates local Gateway service management to `carapace gateway`, opens the selected Gateway's Control UI, and stays available in the system tray.
 
 Dashboard widgets load inside the app. Sign-in links and external links opened in a new window use your system browser.
 
@@ -62,13 +62,13 @@ cargo run
 cargo build
 ```
 
-The app uses `OPENCLAW_DESKTOP_CLI` when set. Otherwise it checks `~/.openclaw/bin/openclaw`, then `openclaw` on `PATH`.
+The app uses `CARAPACE_DESKTOP_CLI` when set. Otherwise it checks `~/.carapace/bin/carapace`, then `carapace` on `PATH`.
 
 Desktop notifications use each platform's system notification service. macOS 13+ uses Apple's User Notifications framework; Windows uses native system toasts and Linux uses the desktop notification service through `notify-rust`. On macOS, test notifications from a signed `.app` bundle: a direct `cargo run` stays unbundled, so the app disables notifications instead of initializing Apple's framework with no bundle identity.
 
 ## First-run setup
 
-The welcome screen explains what OpenClaw can do and asks where your assistant
+The welcome screen explains what Carapace can do and asks where your assistant
 should live:
 
 - **On this computer** installs the CLI and managed Node runtime when needed,
@@ -91,26 +91,26 @@ file-backed secret references; exec and shared-store references must be
 resolved on their owning Gateway host. SSH connections use your existing
 OpenSSH configuration and host-key verification; keep the remote Gateway bound
 to loopback when possible. See the
-[remote access guide](https://docs.openclaw.ai/gateway/remote) for Gateway
+[remote access guide](../../docs/gateway/remote.md) for Gateway
 authentication and network requirements.
 
 After connecting, Model Setup discovers AI access available to the selected
 Gateway and shows it as a choice. Discovery never imports or copies an account,
 and the companion never selects, tests, installs, or saves a provider until you
 click its action. The list includes supported installed providers and official
-provider plugins available from OpenClaw's managed plugin catalog. Installing a
+provider plugins available from Carapace's managed plugin catalog. Installing a
 provider plugin shows its capabilities for review and continues directly to
 that provider's authentication form. Successful verification may require a
 Gateway restart before the new model becomes available.
 
 The custom endpoint option supports OpenAI- and Anthropic-compatible services.
 For a local Gateway, it opens the canonical guided endpoint setup. For a remote
-Gateway, run `openclaw onboard --auth-choice custom-api-key` on the Gateway host as directed by the setup
+Gateway, run `carapace onboard --auth-choice custom-api-key` on the Gateway host as directed by the setup
 message; custom-provider secrets must be entered on their owning host. The
 desktop companion does not copy remote provider secrets to this computer.
 
 On a fresh install, setup also asks whether existing native Claude and Codex
-conversations should appear in OpenClaw. This is discovery only, not an import
+conversations should appear in Carapace. This is discovery only, not an import
 or copy. The option starts unchecked; declining disables both native session
 catalogs. Existing installations keep their current catalog behavior during an
 upgrade.
@@ -136,11 +136,11 @@ The companion checks the latest GitHub release shortly after launch and from **C
 
 ## Quick Chat widgets
 
-Quick Chat advertises the Gateway `inline-widgets` capability and renders hosted `show_widget` results in isolated child WebViews. The parent Quick Chat WebView is the only one granted Tauri commands; widget WebViews match no capability and therefore have no IPC access. Quick Chat accepts only assistant-message widget previews under the capability-scoped `/__openclaw__/canvas/documents/` route, blocks navigation away from the original document, uses nonpersistent WebViews, and keeps stable widget instances while switching among multiple previews. Connections that require a custom Gateway TLS leaf pin remain text-only because the platform WebView cannot bind that pin. Like the other native clients, Quick Chat does not expose the Control UI `sendPrompt` bridge.
+Quick Chat advertises the Gateway `inline-widgets` capability and renders hosted `show_widget` results in isolated child WebViews. The parent Quick Chat WebView is the only one granted Tauri commands; widget WebViews match no capability and therefore have no IPC access. Quick Chat accepts only assistant-message widget previews under the capability-scoped `/__carapace__/canvas/documents/` route, blocks navigation away from the original document, uses nonpersistent WebViews, and keeps stable widget instances while switching among multiple previews. Connections that require a custom Gateway TLS leaf pin remain text-only because the platform WebView cannot bind that pin. Like the other native clients, Quick Chat does not expose the Control UI `sendPrompt` bridge.
 
 ## Installer resource
 
-`tauri.conf.json` bundles the repository's canonical `scripts/install-cli.sh` directly as `install-cli.sh`. The app never keeps a forked copy. Stable, beta, and dev installs select `latest`, `beta`, and a managed Git `main` checkout respectively, always under `~/.openclaw`.
+`tauri.conf.json` bundles the repository's canonical `scripts/install-cli.sh` directly as `install-cli.sh`. The app never keeps a forked copy. Stable, beta, and dev installs select `latest`, `beta`, and a managed Git `main` checkout respectively, always under `~/.carapace`.
 
 ## Icons
 
@@ -201,7 +201,7 @@ they do not build bundles or run graphical first-run and AppImage runtime checks
 Manually dispatch `Linux App` on the branch to validate packaging before a
 release. It retains all pull-request checks, builds the `.deb` and AppImage,
 runs both native first-run cases and the packaged AppImage runtime smoke, and
-uploads the bundles as the `openclaw-linux-companion` workflow artifact. This
+uploads the bundles as the `carapace-linux-companion` workflow artifact. This
 validation does not publish a release.
 
 ## Releases

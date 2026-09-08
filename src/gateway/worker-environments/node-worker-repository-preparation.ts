@@ -170,7 +170,7 @@ export function createNodeWorkerRepositoryPreparation(exec: NodeWorkerRepository
       {
         try {
           const applied = await exec({
-            argv: ["openclaw-internal-workspace-seed"],
+            argv: ["carapace-internal-workspace-seed"],
             seed: { action: "apply", key: seedKey },
             timeoutMs: GIT_TIMEOUT_MS,
             transportRetry: "never",
@@ -227,7 +227,7 @@ export function createNodeWorkerRepositoryPreparation(exec: NodeWorkerRepository
       if (outcome.kind === "prepared") {
         try {
           const stored = await exec({
-            argv: ["openclaw-internal-workspace-seed"],
+            argv: ["carapace-internal-workspace-seed"],
             seed: { action: "store", key: seedKey, maxAgeMs: 6 * 60 * 60 * 1000 },
             timeoutMs: 180_000,
             transportRetry: "never",

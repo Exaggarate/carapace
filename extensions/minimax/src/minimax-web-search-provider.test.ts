@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { captureEnv } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { captureEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMiniMaxWebSearchProvider } from "./minimax-web-search-provider.js";
 
@@ -160,12 +160,12 @@ describe("minimax web search provider", () => {
   const codePlanEnv = { MINIMAX_CODE_PLAN_KEY: "cn-key" };
   const cnProvider = {
     models: { providers: { minimax: { baseUrl: "https://api.minimaxi.com/v1", models: [] } } },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const cnPortal = {
     models: {
       providers: { "minimax-portal": { baseUrl: "https://api.minimaxi.com/v1", models: [] } },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const cases = [
     {
       name: "configured global over CN provider",

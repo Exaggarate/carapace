@@ -30,7 +30,7 @@ export function resolveParallelsProviderAuth(input, env) {
   }
   const apiKeyEnv = input.apiKeyEnv || `${input.provider.toUpperCase()}_API_KEY`;
   const apiKeyValue = Object.hasOwn(env, apiKeyEnv) ? (env[apiKeyEnv] ?? "") : "";
-  const genericModel = env[`OPENCLAW_PARALLELS_${input.provider.toUpperCase()}_MODEL`];
+  const genericModel = env[`CARAPACE_PARALLELS_${input.provider.toUpperCase()}_MODEL`];
   const windowsOpenAi = input.platform === "windows" && input.provider === "openai";
   const auth = {
     apiKeyEnv,
@@ -39,7 +39,7 @@ export function resolveParallelsProviderAuth(input, env) {
     authKeyFlag: `${input.provider}-api-key`,
     modelId:
       input.modelId ||
-      (windowsOpenAi ? env.OPENCLAW_PARALLELS_WINDOWS_OPENAI_MODEL?.trim() : undefined) ||
+      (windowsOpenAi ? env.CARAPACE_PARALLELS_WINDOWS_OPENAI_MODEL?.trim() : undefined) ||
       (windowsOpenAi ? genericModel?.trim() && genericModel : genericModel) ||
       defaultModel,
     ...(input.provider === "minimax" ? {} : { tokenProvider: input.provider }),
@@ -103,6 +103,6 @@ export function runParallelsPrerequisiteEval(argv, env, io) {
     reason = error === INVALID_ARGUMENTS ? "invalid_arguments" : "internal_error";
   }
   const status = reason === null ? "ready" : "blocked";
-  io.write(`${JSON.stringify({ schema: "openclaw.parallels-prerequisite.v1", status, reason })}\n`);
+  io.write(`${JSON.stringify({ schema: "carapace.parallels-prerequisite.v1", status, reason })}\n`);
   return status === "ready" ? 0 : 1;
 }

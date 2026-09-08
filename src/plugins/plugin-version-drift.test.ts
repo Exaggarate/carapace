@@ -1,7 +1,7 @@
 /** Tests plugin version drift detection between package, manifest, and install records. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { fetchNpmPackageTargetStatus } from "../infra/update-check-package-target.js";
 import {
@@ -18,7 +18,7 @@ function npmRecord(
   version: string,
   overrides: Partial<PluginInstallRecord> = {},
 ): PluginInstallRecord {
-  const resolvedName = overrides.resolvedName ?? "@openclaw/whatsapp";
+  const resolvedName = overrides.resolvedName ?? "@carapace/whatsapp";
   return {
     source: "npm",
     spec: `${resolvedName}@latest`,
@@ -34,8 +34,8 @@ function clawhubRecord(
 ): PluginInstallRecord {
   return {
     source: "clawhub",
-    spec: "clawhub:@openclaw/whatsapp",
-    clawhubPackage: "@openclaw/whatsapp",
+    spec: "clawhub:@carapace/whatsapp",
+    clawhubPackage: "@carapace/whatsapp",
     resolvedVersion: version,
     ...overrides,
   };
@@ -58,7 +58,7 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.4"),
-        discord: npmRecord("2026.5.4", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.4", { resolvedName: "@carapace/discord" }),
       },
     });
 
@@ -71,10 +71,10 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.3", {
-          resolvedName: "@openclaw/whatsapp",
-          spec: "@openclaw/whatsapp@2026.5.3",
+          resolvedName: "@carapace/whatsapp",
+          spec: "@carapace/whatsapp@2026.5.3",
         }),
-        discord: npmRecord("2026.5.4", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.4", { resolvedName: "@carapace/discord" }),
       },
     });
 
@@ -84,8 +84,8 @@ describe("detectPluginVersionDrift", () => {
       installedVersion: "2026.5.3",
       gatewayVersion: "2026.5.4",
       source: "npm",
-      packageName: "@openclaw/whatsapp",
-      spec: "@openclaw/whatsapp@2026.5.3",
+      packageName: "@carapace/whatsapp",
+      spec: "@carapace/whatsapp@2026.5.3",
     });
   });
 
@@ -95,7 +95,7 @@ describe("detectPluginVersionDrift", () => {
       installRecords: {
         whatsapp: npmRecord("2026.5.4"),
         // ...and the inverse direction
-        discord: npmRecord("2026.5.4-1", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.4-1", { resolvedName: "@carapace/discord" }),
       },
     });
 
@@ -119,8 +119,8 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         discord: clawhubRecord("2026.5.3", {
-          spec: "clawhub:@openclaw/discord",
-          clawhubPackage: "@openclaw/discord",
+          spec: "clawhub:@carapace/discord",
+          clawhubPackage: "@carapace/discord",
           clawhubChannel: "official",
           clawhubUrl: "https://clawhub.ai",
         }),
@@ -162,9 +162,9 @@ describe("detectPluginVersionDrift", () => {
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
-        "openclaw-plugin-yuanbao": npmRecord("2.13.1", {
-          resolvedName: "openclaw-plugin-yuanbao",
-          spec: "openclaw-plugin-yuanbao@2.13.1",
+        "carapace-plugin-yuanbao": npmRecord("2.13.1", {
+          resolvedName: "carapace-plugin-yuanbao",
+          spec: "carapace-plugin-yuanbao@2.13.1",
         }),
       },
     });
@@ -176,9 +176,9 @@ describe("detectPluginVersionDrift", () => {
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.7",
       installRecords: {
-        "wecom-openclaw-plugin": npmRecord("2026.5.6", {
-          resolvedName: "@wecom/wecom-openclaw-plugin",
-          spec: "@wecom/wecom-openclaw-plugin@2026.5.6",
+        "wecom-carapace-plugin": npmRecord("2026.5.6", {
+          resolvedName: "@wecom/wecom-carapace-plugin",
+          spec: "@wecom/wecom-carapace-plugin@2026.5.6",
         }),
       },
     });
@@ -195,19 +195,19 @@ describe("detectPluginVersionDrift", () => {
         // bump alone.
         archive: {
           source: "archive",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@carapace/whatsapp",
           resolvedVersion: "2026.5.3",
-          spec: "@openclaw/whatsapp@archive",
+          spec: "@carapace/whatsapp@archive",
         },
         local: {
           source: "path",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@carapace/whatsapp",
           resolvedVersion: "2026.5.3",
           spec: "/tmp/local-plugin",
         },
         forked: {
           source: "git",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@carapace/whatsapp",
           resolvedVersion: "2026.5.3",
           spec: "git+ssh://example/forked",
         },
@@ -223,8 +223,8 @@ describe("detectPluginVersionDrift", () => {
       installRecords: {
         whatsapp: {
           source: "npm",
-          spec: "@openclaw/whatsapp@latest",
-          resolvedName: "@openclaw/whatsapp",
+          spec: "@carapace/whatsapp@latest",
+          resolvedName: "@carapace/whatsapp",
           version: "2026.5.3",
         },
       },
@@ -238,7 +238,7 @@ describe("detectPluginVersionDrift", () => {
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
-        whatsapp: { source: "npm", spec: "@openclaw/whatsapp@latest" },
+        whatsapp: { source: "npm", spec: "@carapace/whatsapp@latest" },
       },
     });
 
@@ -246,20 +246,20 @@ describe("detectPluginVersionDrift", () => {
   });
 
   it("skips plugins that are explicitly disabled in config", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           whatsapp: { enabled: false },
           discord: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.3"),
-        discord: npmRecord("2026.5.3", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.3", { resolvedName: "@carapace/discord" }),
       },
       config,
     });
@@ -268,11 +268,11 @@ describe("detectPluginVersionDrift", () => {
   });
 
   it("skips plugins disabled by the global plugin activation policy", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         enabled: false,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
@@ -295,7 +295,7 @@ describe("detectPluginVersionDrift", () => {
         plugins: {
           deny: ["whatsapp"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     const notAllowed = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
@@ -306,7 +306,7 @@ describe("detectPluginVersionDrift", () => {
         plugins: {
           allow: ["discord"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(denied.drifts).toEqual([]);
@@ -314,7 +314,7 @@ describe("detectPluginVersionDrift", () => {
   });
 
   it("includes plugins with no entry in config (default-enabled)", () => {
-    const config: OpenClawConfig = { plugins: { entries: {} } } as OpenClawConfig;
+    const config: CarapaceConfig = { plugins: { entries: {} } } as CarapaceConfig;
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
@@ -331,8 +331,8 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.3"),
-        discord: npmRecord("2026.5.3", { resolvedName: "@openclaw/discord" }),
-        matrix: npmRecord("2026.5.3", { resolvedName: "@openclaw/matrix" }),
+        discord: npmRecord("2026.5.3", { resolvedName: "@carapace/discord" }),
+        matrix: npmRecord("2026.5.3", { resolvedName: "@carapace/matrix" }),
       },
     });
 
@@ -345,12 +345,12 @@ describe("resolvePluginVersionDriftTargets", () => {
 
   function driftReport(
     gatewayVersion = "2026.7.1-2",
-    spec = "@openclaw/brave-plugin@2026.7.1-beta.2",
+    spec = "@carapace/brave-plugin@2026.7.1-beta.2",
   ) {
     return detectPluginVersionDrift({
       gatewayVersion,
       installRecords: {
-        brave: npmRecord("2026.7.1-beta.2", { resolvedName: "@openclaw/brave-plugin", spec }),
+        brave: npmRecord("2026.7.1-beta.2", { resolvedName: "@carapace/brave-plugin", spec }),
       },
     });
   }
@@ -363,14 +363,14 @@ describe("resolvePluginVersionDriftTargets", () => {
     });
     const report = await resolvePluginVersionDriftTargets(driftReport());
     expect(fetchNpmPackageTargetStatus).toHaveBeenCalledWith({
-      packageName: "@openclaw/brave-plugin",
+      packageName: "@carapace/brave-plugin",
       target: "2026.7.1",
     });
     expect(
       resolvePluginVersionDriftUpdateCommand(
         expectDefined(report.drifts[0], "detected plugin drift"),
       ),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.7.1");
+    ).toBe("carapace plugins update @carapace/brave-plugin@2026.7.1");
   });
 
   it.each([
@@ -392,7 +392,7 @@ describe("resolvePluginVersionDriftTargets", () => {
       const entry = expectDefined(report.drifts[0], "detected plugin drift");
       expect(entry.targetResolution).toMatchObject({
         status: "unresolved",
-        packageName: "@openclaw/brave-plugin",
+        packageName: "@carapace/brave-plugin",
         requestedTarget: "2026.7.1",
         error: expect.stringContaining(result.error ?? JSON.stringify(result.version)),
       });
@@ -408,13 +408,13 @@ describe("resolvePluginVersionDriftTargets", () => {
       ),
     ).toBeUndefined();
     const floating = await resolvePluginVersionDriftTargets(
-      driftReport("2026.7.1", "@openclaw/brave-plugin@latest"),
+      driftReport("2026.7.1", "@carapace/brave-plugin@latest"),
     );
     expect(
       resolvePluginVersionDriftUpdateCommand(
         expectDefined(floating.drifts[0], "floating plugin drift"),
       ),
-    ).toBe("openclaw plugins update brave");
+    ).toBe("carapace plugins update brave");
     expect(fetchNpmPackageTargetStatus).not.toHaveBeenCalled();
   });
 });
@@ -427,11 +427,11 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.7.0",
         gatewayVersion: "2026.7.1-2",
         source: "npm",
-        packageName: "@openclaw/brave-plugin",
-        spec: "@openclaw/brave-plugin@2026.7.0",
-        ...resolvedNpmTarget("@openclaw/brave-plugin", "2026.7.1"),
+        packageName: "@carapace/brave-plugin",
+        spec: "@carapace/brave-plugin@2026.7.0",
+        ...resolvedNpmTarget("@carapace/brave-plugin", "2026.7.1"),
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.7.1");
+    ).toBe("carapace plugins update @carapace/brave-plugin@2026.7.1");
   });
 
   it("uses an exact npm package target when the drifted install is pinned", () => {
@@ -441,11 +441,11 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        packageName: "@openclaw/brave-plugin",
-        spec: "@openclaw/brave-plugin@2026.6.9",
-        ...resolvedNpmTarget("@openclaw/brave-plugin", "2026.6.10-beta.1"),
+        packageName: "@carapace/brave-plugin",
+        spec: "@carapace/brave-plugin@2026.6.9",
+        ...resolvedNpmTarget("@carapace/brave-plugin", "2026.6.10-beta.1"),
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
+    ).toBe("carapace plugins update @carapace/brave-plugin@2026.6.10-beta.1");
   });
 
   it("parses the package name from exact npm specs when drift metadata is sparse", () => {
@@ -455,10 +455,10 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        spec: "@openclaw/brave-plugin@2026.6.9",
-        ...resolvedNpmTarget("@openclaw/brave-plugin", "2026.6.10-beta.1"),
+        spec: "@carapace/brave-plugin@2026.6.9",
+        ...resolvedNpmTarget("@carapace/brave-plugin", "2026.6.10-beta.1"),
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
+    ).toBe("carapace plugins update @carapace/brave-plugin@2026.6.10-beta.1");
   });
 
   it("prefers the parsed exact npm spec package over inconsistent drift metadata", () => {
@@ -468,25 +468,25 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        packageName: "@openclaw/other-plugin",
-        spec: "@openclaw/brave-plugin@2026.6.9",
-        ...resolvedNpmTarget("@openclaw/brave-plugin", "2026.6.10-beta.1"),
+        packageName: "@carapace/other-plugin",
+        spec: "@carapace/brave-plugin@2026.6.9",
+        ...resolvedNpmTarget("@carapace/brave-plugin", "2026.6.10-beta.1"),
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
+    ).toBe("carapace plugins update @carapace/brave-plugin@2026.6.10-beta.1");
   });
 
   it.each([
     {
       pluginId: "codex",
       source: "npm" as const,
-      packageName: "@openclaw/codex",
-      spec: "@openclaw/codex",
+      packageName: "@carapace/codex",
+      spec: "@carapace/codex",
     },
     {
       pluginId: "diagnostics-otel",
       source: "clawhub" as const,
-      packageName: "@openclaw/diagnostics-otel",
-      spec: "clawhub:@openclaw/diagnostics-otel",
+      packageName: "@carapace/diagnostics-otel",
+      spec: "clawhub:@carapace/diagnostics-otel",
     },
   ])("keeps the repairing plugin-id update for a floating $source install", (entry) => {
     expect(
@@ -498,7 +498,7 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         packageName: entry.packageName,
         spec: entry.spec,
       }),
-    ).toBe(`openclaw plugins update ${entry.pluginId}`);
+    ).toBe(`carapace plugins update ${entry.pluginId}`);
   });
 
   it("does not fabricate a command when an exact npm target was not resolved", () => {
@@ -508,8 +508,8 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "unknown",
         source: "npm",
-        packageName: "@openclaw/brave-plugin",
-        spec: "@openclaw/brave-plugin@2026.6.9",
+        packageName: "@carapace/brave-plugin",
+        spec: "@carapace/brave-plugin@2026.6.9",
       }),
     ).toBeUndefined();
   });

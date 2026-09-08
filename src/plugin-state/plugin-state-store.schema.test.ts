@@ -1,8 +1,8 @@
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   createPluginStateKeyedStore,
   resetPluginStateStoreForTests,
@@ -10,7 +10,7 @@ import {
 
 describe("plugin state schema compatibility", () => {
   it("cold-opens when an existing move table lacks its first-use column", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-state-placement-move-column", applyEnv: false },
       async (state) => {
         try {
@@ -22,7 +22,7 @@ describe("plugin state schema compatibility", () => {
           await first.register("first", { owner: "discord" });
           resetPluginStateStoreForTests();
 
-          const databasePath = resolveOpenClawStateSqlitePath(state.env);
+          const databasePath = resolveCarapaceStateSqlitePath(state.env);
           const previousDatabase = new DatabaseSync(databasePath);
           let versionBefore: unknown;
           let metadataBefore: unknown;
@@ -31,7 +31,7 @@ describe("plugin state schema compatibility", () => {
             metadataBefore = previousDatabase
               .prepare("SELECT * FROM schema_meta WHERE meta_key = 'primary'")
               .get();
-            expect(versionBefore).toEqual({ user_version: OPENCLAW_STATE_SCHEMA_VERSION });
+            expect(versionBefore).toEqual({ user_version: CARAPACE_STATE_SCHEMA_VERSION });
             expect(
               previousDatabase
                 .prepare(

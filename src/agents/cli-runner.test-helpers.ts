@@ -17,7 +17,7 @@ import {
 } from "../infra/diagnostic-events.js";
 import type { CliBackendPlugin } from "../plugins/cli-backend.types.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
-import { closeOpenClawAgentDatabaseByPath } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../state/carapace-agent-db.js";
 import {
   prepareSystemAgentRunAdmission,
   type PreparedAgentRunAdmission,
@@ -42,7 +42,7 @@ export type TestCliBackendParams = {
 };
 
 export function wrappedPluginSystemContext(text: string) {
-  return `---\n\nOpenClaw plugin-injected system context. This block is not workspace file content.\n\n${text}\n\n---`;
+  return `---\n\nCarapace plugin-injected system context. This block is not workspace file content.\n\n${text}\n\n---`;
 }
 
 export function captureModelCallDiagnostics(runId: string) {
@@ -73,13 +73,13 @@ export function expectModelCallTypes(
 export function createTestMcpLoopbackServerConfig(port: number) {
   return {
     mcpServers: {
-      openclaw: {
+      carapace: {
         type: "http",
         url: `http://127.0.0.1:${port}/mcp`,
         alwaysLoad: true,
         headers: {
-          Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
-          "x-openclaw-cli-capture-key": "${OPENCLAW_MCP_CLI_CAPTURE_KEY}",
+          Authorization: "Bearer ${CARAPACE_MCP_TOKEN}",
+          "x-carapace-cli-capture-key": "${CARAPACE_MCP_CLI_CAPTURE_KEY}",
         },
       },
     },
@@ -332,22 +332,22 @@ type PrepareCliRun = (params: RunCliAgentParams) => Promise<PreparedCliRunContex
 export function createCliRunnerPrepareFixture(prepareCliRun: PrepareCliRun) {
   const admissions: PreparedAgentRunAdmission[] = [];
   const tempDirs = new Set<string>();
-  const hadStateDir = Object.hasOwn(process.env, "OPENCLAW_STATE_DIR");
-  const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+  const hadStateDir = Object.hasOwn(process.env, "CARAPACE_STATE_DIR");
+  const originalStateDir = process.env.CARAPACE_STATE_DIR;
   let defaultSession:
     | { dir: string; sessionFile: string; sessionTarget: SessionTranscriptRuntimeTarget }
     | undefined;
   const databasePaths = new Set<string>();
 
   const createSession = () => {
-    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-prepare-")));
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cli-prepare-")));
     tempDirs.add(dir);
-    process.env.OPENCLAW_STATE_DIR = dir;
+    process.env.CARAPACE_STATE_DIR = dir;
     const sessionTarget = {
       agentId: "main",
       sessionId: "session-test",
       sessionKey: "agent:main:main",
-      storePath: path.join(dir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+      storePath: path.join(dir, "agents", "main", "agent", "carapace-agent.sqlite"),
     };
     databasePaths.add(sessionTarget.storePath);
     replaceSessionEntrySync(sessionTarget, { sessionId: sessionTarget.sessionId, updatedAt: 0 });
@@ -423,7 +423,7 @@ export function createCliRunnerPrepareFixture(prepareCliRun: PrepareCliRun) {
     cleanup() {
       admissions.splice(0).forEach((admission) => admission.close());
       for (const databasePath of databasePaths) {
-        closeOpenClawAgentDatabaseByPath(databasePath);
+        closeCarapaceAgentDatabaseByPath(databasePath);
       }
       databasePaths.clear();
       for (const dir of tempDirs) {
@@ -432,9 +432,9 @@ export function createCliRunnerPrepareFixture(prepareCliRun: PrepareCliRun) {
       tempDirs.clear();
       defaultSession = undefined;
       if (hadStateDir) {
-        process.env.OPENCLAW_STATE_DIR = originalStateDir;
+        process.env.CARAPACE_STATE_DIR = originalStateDir;
       } else {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       }
     },
   };

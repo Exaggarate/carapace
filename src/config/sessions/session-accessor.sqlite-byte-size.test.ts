@@ -1,8 +1,8 @@
 import { expect, it, vi } from "vitest";
 import { clearNodeSqliteKyselyCacheForDatabase } from "../../infra/kysely-sync.js";
 import { openNodeSqliteDatabase } from "../../infra/node-sqlite.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { persistSessionTranscriptTurn, readTranscriptStatsSync } from "./session-accessor.js";
 import { readSessionTranscriptBoundedActiveContextCore } from "./session-accessor.sqlite-active-context.js";
 import {
@@ -35,7 +35,7 @@ const readers: Array<
     "rebuild preflight",
     (scope) =>
       shouldRebuildSessionTranscriptIndexSynchronously(
-        openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env }).db,
+        openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env }).db,
         scope.sessionId,
       ),
   ],
@@ -79,7 +79,7 @@ const readers: Array<
 ];
 
 it.each(readers)("sizes %s without reading transcript overflow payloads", async (_name, read) => {
-  await withOpenClawTestState({ label: "transcript-byte-size" }, async (state) => {
+  await withCarapaceTestState({ label: "transcript-byte-size" }, async (state) => {
     const scope = {
       agentId: "main",
       env: state.env,
@@ -104,7 +104,7 @@ it.each(readers)("sizes %s without reading transcript overflow payloads", async 
       ],
       touchSessionEntry: false,
     });
-    const { db } = openOpenClawAgentDatabase({ agentId: scope.agentId, env: state.env });
+    const { db } = openCarapaceAgentDatabase({ agentId: scope.agentId, env: state.env });
     const table = db
       .prepare(
         "SELECT rootpage FROM sqlite_schema WHERE type = 'table' AND name = 'transcript_events'",
@@ -209,7 +209,7 @@ it.each(["incoming", "stored"])(
 it.each([false, true])(
   "keeps a contiguous usage tail with newest oversized=%s",
   async (oversized) => {
-    await withOpenClawTestState({ label: "usage-tail-budget" }, async (state) => {
+    await withCarapaceTestState({ label: "usage-tail-budget" }, async (state) => {
       const scope = {
         agentId: "main",
         env: state.env,

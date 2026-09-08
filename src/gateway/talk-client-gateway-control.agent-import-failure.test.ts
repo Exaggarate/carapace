@@ -1,5 +1,5 @@
 import { expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type ConsultParams = Parameters<
   typeof import("../talk/agent-consult-runtime.js").consultRealtimeVoiceAgent
@@ -31,7 +31,7 @@ import { createTalkClientAgentConsultRunner } from "./talk-client-agent-consult.
 it("does not create Talk admission when lazy core loading fails", async () => {
   mocks.consultRealtimeVoiceAgent.mockImplementationOnce(async (params: ConsultParams) => {
     await params.agentRuntime.runEmbeddedAgent({
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       prompt: "check",
       runId: "run-talk-import-failure",
       sessionId: "session-talk-import-failure",
@@ -41,7 +41,7 @@ it("does not create Talk admission when lazy core loading fails", async () => {
     return { text: "unexpected" };
   });
   const runner = createTalkClientAgentConsultRunner({
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     context: { chatAbortControllers: new Map(), logGateway: { warn: vi.fn() } } as never,
     sessionTarget: {
       agentId: "main",

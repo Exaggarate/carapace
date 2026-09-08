@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-registration";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-registration";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import { z } from "zod";
 
 export const CODEX_MANAGED_THREAD_NAMESPACE = "app-server-managed-threads";
@@ -44,14 +44,14 @@ export async function markStartedCodexManagedThread(
 
 function managedThreadStoreKey(sourceHomeId: string, threadId: string): string {
   return `sha256:${createHash("sha256")
-    .update("openclaw:codex-managed-thread:v1\0")
+    .update("carapace:codex-managed-thread:v1\0")
     .update(sourceHomeId)
     .update("\0")
     .update(threadId)
     .digest("hex")}`;
 }
 
-/** Durable ownership index for Codex threads created by OpenClaw. */
+/** Durable ownership index for Codex threads created by Carapace. */
 export function createCodexManagedThreadStore(
   state: Pick<
     PluginStateSyncKeyedStore<StoredCodexManagedThread>,

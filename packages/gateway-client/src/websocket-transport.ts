@@ -1,6 +1,6 @@
 import { TLSSocket } from "node:tls";
-import { isLoopbackIpAddress, type ParsedIpAddress } from "@openclaw/net-policy/ip";
-import { isWssUrl } from "@openclaw/net-policy/url-protocol";
+import { isLoopbackIpAddress, type ParsedIpAddress } from "@carapace/net-policy/ip";
+import { isWssUrl } from "@carapace/net-policy/url-protocol";
 import type { ClientOptions } from "ws";
 import {
   normalizeTlsFingerprint,
@@ -97,7 +97,7 @@ export function resolveGatewayWebSocketTransport(params: {
       "gateway tls fingerprint requires wss:// gateway url",
     );
   }
-  const allowPrivateWs = (params.env ?? process.env).OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1";
+  const allowPrivateWs = (params.env ?? process.env).CARAPACE_ALLOW_INSECURE_PRIVATE_WS === "1";
   if (!isSecureWebSocketUrl(params.url, { allowPrivateWs })) {
     let displayHost = params.url;
     try {
@@ -112,8 +112,8 @@ export function resolveGatewayWebSocketTransport(params: {
         "(ssh -N -L 18789:127.0.0.1:18789 user@gateway-host), or use Tailscale Serve/Funnel. " +
         (allowPrivateWs
           ? ""
-          : "Break-glass (trusted private networks only): set OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1. ") +
-        "Run `openclaw doctor --fix` for guidance.",
+          : "Break-glass (trusted private networks only): set CARAPACE_ALLOW_INSECURE_PRIVATE_WS=1. ") +
+        "Run `carapace doctor --fix` for guidance.",
     );
   }
 

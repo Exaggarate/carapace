@@ -17,7 +17,7 @@ import type {
   PersistedUserTurnMessage,
   UserTurnTranscriptRecorder,
 } from "../../../sessions/user-turn-transcript.types.js";
-import { OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE } from "../../internal-runtime-context.js";
+import { CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE } from "../../internal-runtime-context.js";
 import {
   AGENT_RUN_RESTART_ABORT_ERROR,
   AGENT_RUN_RESTART_ABORT_ERROR_CODE,
@@ -67,8 +67,8 @@ export function preparePersistedCurrentUserTurn(params: {
     const userId = sessionManager.resolveCurrentTurnEntryId((entry) => {
       if (entry.type === "custom_message") {
         return (
-          entry.customType === "openclaw:turn-aborted" ||
-          entry.customType === OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE
+          entry.customType === "carapace:turn-aborted" ||
+          entry.customType === CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE
         );
       }
       if (entry.type !== "message" || entry.message.role !== "assistant") {
@@ -78,7 +78,7 @@ export function preparePersistedCurrentUserTurn(params: {
       const errorCode: unknown = Reflect.get(aborted, "errorCode");
       return (
         aborted.stopReason === "aborted" &&
-        Reflect.get(aborted, "__openclaw")?.runId === runId &&
+        Reflect.get(aborted, "__carapace")?.runId === runId &&
         (errorCode !== undefined
           ? errorCode === AGENT_RUN_RESTART_ABORT_ERROR_CODE
           : aborted.errorMessage === AGENT_RUN_RESTART_ABORT_ERROR) &&

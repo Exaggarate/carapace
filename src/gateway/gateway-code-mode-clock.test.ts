@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_CAPS } from "../../packages/gateway-protocol/src/client-info.js";
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { setTestEnvValue } from "../test-utils/env.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
@@ -33,12 +33,12 @@ describe("Gateway Code Mode clock rollback", () => {
     { timeout: 120_000 },
     async () => {
       const { envSnapshot, tempHome, workspaceDir } = await setupGatewayTempHome({
-        prefix: "openclaw-gw-code-mode-clock-",
+        prefix: "carapace-gw-code-mode-clock-",
       });
       const deviceIdentity = loadOrCreateDeviceIdentity({
         path: path.join(
           tempHome,
-          ".openclaw",
+          ".carapace",
           "test-device-identities",
           GATEWAY_CLIENT_NAMES.TEST +
             "-" +
@@ -52,13 +52,13 @@ describe("Gateway Code Mode clock rollback", () => {
       const approvalPluginId = "code-mode-clock-proof";
       const approvalPluginPath = path.join(
         workspaceDir,
-        ".openclaw",
+        ".carapace",
         "extensions",
         approvalPluginId,
       );
       await fs.mkdir(approvalPluginPath, { recursive: true });
       await fs.writeFile(
-        path.join(approvalPluginPath, "openclaw.plugin.json"),
+        path.join(approvalPluginPath, "carapace.plugin.json"),
         `${JSON.stringify(
           {
             id: approvalPluginId,
@@ -237,7 +237,7 @@ describe("Gateway Code Mode clock rollback", () => {
       try {
         const configPath = await createGatewayConfigPath(tempHome);
         const mockProvider = buildMockOpenAiResponsesProvider(openaiBaseUrl);
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             defaults: {
               workspace: workspaceDir,
@@ -264,7 +264,7 @@ describe("Gateway Code Mode clock rollback", () => {
           gateway: { auth: { mode: "token", token } },
         };
         await fs.writeFile(configPath, JSON.stringify(cfg, null, 2) + "\n", "utf8");
-        setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+        setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
         clearRuntimeConfigSnapshot();
         clearConfigCache();
         const port = await getGatewayE2ePortBlock();

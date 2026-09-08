@@ -1,7 +1,7 @@
 // Googlechat tests cover monitor.reply delivery plugin behavior.
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { GoogleChatApiError } from "./api.js";
 import type { GoogleChatCoreRuntime, GoogleChatRuntimeEnv } from "./monitor-types.js";
@@ -26,7 +26,7 @@ const account = {
   config: {},
 } as ResolvedGoogleChatAccount;
 
-const config = {} as OpenClawConfig;
+const config = {} as CarapaceConfig;
 
 function createCore(params?: {
   chunks?: readonly string[];

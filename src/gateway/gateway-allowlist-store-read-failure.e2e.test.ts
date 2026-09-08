@@ -12,16 +12,16 @@ import { disconnectGatewayClient, startGatewayWithClient } from "./test-helpers.
 
 const ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR",
 ] as const;
 
 type ChatFinalPayload = {
@@ -44,9 +44,9 @@ describe("Gateway allowlist command", () => {
     let finalTimeout: ReturnType<typeof setTimeout> | undefined;
 
     try {
-      const home = tempDirs.make("openclaw-allowlist-gateway-");
-      const stateDir = path.join(home, ".openclaw");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const home = tempDirs.make("carapace-allowlist-gateway-");
+      const stateDir = path.join(home, ".carapace");
+      const configPath = path.join(stateDir, "carapace.json");
       const workspaceDir = path.join(home, "workspace");
       await Promise.all([
         fs.mkdir(stateDir, { recursive: true }),
@@ -54,16 +54,16 @@ describe("Gateway allowlist command", () => {
       ]);
       for (const [key, value] of Object.entries({
         HOME: home,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(process.cwd(), "extensions"),
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.join(process.cwd(), "extensions"),
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       })) {
         setTestEnvValue(key, value);
       }
@@ -139,7 +139,7 @@ describe("Gateway allowlist command", () => {
 
       expect(faultObserved).toBe(true);
       expect(extractFirstTextBlock(payload.message)).toContain(
-        "Paired allowFrom (store): unavailable (read failed). Retry this command; if it still fails, run openclaw doctor.",
+        "Paired allowFrom (store): unavailable (read failed). Retry this command; if it still fails, run carapace doctor.",
       );
     } finally {
       if (finalTimeout) {

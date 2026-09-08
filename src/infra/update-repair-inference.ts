@@ -12,7 +12,7 @@ import { findModelInCatalog } from "../agents/model-catalog-lookup.js";
 import { loadManifestModelCatalog } from "../agents/model-catalog.js";
 import { resolveModelCandidateChain } from "../agents/model-fallback-candidates.js";
 import { supportsModelTools } from "../agents/model-tool-support.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { verifySystemAgentInferenceWithFallback } from "../system-agent/inference-fallback.js";
@@ -32,7 +32,7 @@ export type UpdateRepairInferenceResult =
   | { ok: false; reason: string };
 
 export async function selectUpdateRepairInference(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: RuntimeEnv;
   signal: AbortSignal;
   timeoutMs: number;
@@ -125,13 +125,13 @@ export async function selectUpdateRepairInference(params: {
                       ...entry.models,
                       [modelKey]: {
                         ...entry.models?.[modelKey],
-                        agentRuntime: { id: "openclaw" },
+                        agentRuntime: { id: "carapace" },
                       },
                     },
                   })
                 : entry,
             );
-            const runConfig: OpenClawConfig = {
+            const runConfig: CarapaceConfig = {
               ...params.config,
               agents: {
                 ...params.config.agents,
@@ -156,7 +156,7 @@ export async function selectUpdateRepairInference(params: {
         accept,
         verify: async (route) => {
           signal.throwIfAborted();
-          tempDir ??= await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-repair-probe-"));
+          tempDir ??= await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-repair-probe-"));
           signal.throwIfAborted();
           const result = await runSetupInferenceTest({
             plan: {
@@ -165,7 +165,7 @@ export async function selectUpdateRepairInference(params: {
               routeAgentId: route.agentId,
               modelRef: route.modelLabel,
               // Repair tools belong to the local host, never an external coding CLI.
-              agentHarnessRuntimeOverride: "openclaw",
+              agentHarnessRuntimeOverride: "carapace",
             },
             tempDir,
             deps: { timeoutMs: Math.max(1, deadline - Date.now()) },

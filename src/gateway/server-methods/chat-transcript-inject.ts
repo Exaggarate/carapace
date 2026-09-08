@@ -4,7 +4,7 @@ import type { SessionManager } from "../../agents/sessions/session-manager.js";
 import { persistSessionTranscriptTurn } from "../../config/sessions/session-accessor.js";
 import type { SessionLifecycleRevisionExpectation } from "../../config/sessions/session-transcript-turn-lifecycle.types.js";
 import { applyAssistantDeliveryDirectives } from "../../config/sessions/transcript-assistant-delivery.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
   readSessionTranscriptRunId,
@@ -85,7 +85,7 @@ export async function appendInjectedAssistantMessageToTranscript(params: {
   abortMeta?: GatewayInjectedAbortMeta;
   ttsSupplement?: GatewayInjectedTtsSupplementMarker;
   now?: number;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Promise<GatewayInjectedTranscriptAppendResult> {
   const now = params.now ?? Date.now();
   const usage = {
@@ -110,7 +110,7 @@ export async function appendInjectedAssistantMessageToTranscript(params: {
   const displayMessage: {
     role: "assistant";
     content: Array<Record<string, unknown>>;
-    openclawDelivery?: unknown;
+    carapaceDelivery?: unknown;
   } = {
     role: "assistant",
     content: resolvedContent.map((block) => Object.assign({}, block)),
@@ -118,7 +118,7 @@ export async function appendInjectedAssistantMessageToTranscript(params: {
   const preparedDisplayMessage = applyAssistantDeliveryDirectives(displayMessage);
   const displayContent = preparedDisplayMessage.content;
   const canonicalContent = retainAssistantModelContent(displayContent);
-  const rawDeliveryFacts = preparedDisplayMessage.openclawDelivery;
+  const rawDeliveryFacts = preparedDisplayMessage.carapaceDelivery;
   const abortRunId = params.abortMeta?.runId;
   const messageBody: AppendMessageArg & Record<string, unknown> = applyAssistantDeliveryDirectives({
     role: "assistant",
@@ -126,18 +126,18 @@ export async function appendInjectedAssistantMessageToTranscript(params: {
     [ASSISTANT_DISPLAY_CONTENT_FIELD]: displayContent,
     timestamp: now,
     // Runtime projections retain their terminal state; host-authored partials
-    // keep their replayable default and carry cancellation in openclawAbort.
+    // keep their replayable default and carry cancellation in carapaceAbort.
     stopReason: params.stopReason ?? "stop",
     usage,
     // Make these explicit so downstream tooling never treats this as model output.
     api: "openai-responses",
-    provider: "openclaw",
+    provider: "carapace",
     model: "gateway-injected",
     ...(params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : {}),
-    ...(params.ttsSupplement ? { openclawTtsSupplement: params.ttsSupplement } : {}),
+    ...(params.ttsSupplement ? { carapaceTtsSupplement: params.ttsSupplement } : {}),
     ...(params.abortMeta
       ? {
-          openclawAbort: {
+          carapaceAbort: {
             aborted: true,
             origin: params.abortMeta.origin,
             runId: params.abortMeta.runId,
@@ -145,8 +145,8 @@ export async function appendInjectedAssistantMessageToTranscript(params: {
         }
       : {}),
   });
-  if (rawDeliveryFacts && messageBody.openclawDelivery === undefined) {
-    messageBody.openclawDelivery = rawDeliveryFacts;
+  if (rawDeliveryFacts && messageBody.carapaceDelivery === undefined) {
+    messageBody.carapaceDelivery = rawDeliveryFacts;
   }
 
   try {

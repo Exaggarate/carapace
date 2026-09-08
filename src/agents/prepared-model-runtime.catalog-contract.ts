@@ -1,4 +1,4 @@
-import type { ModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import type { ModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
 import type { ProviderCatalogOutcome } from "../plugins/provider-catalog.types.js";
 import type { AuthProfileStore } from "./auth-profiles/types.js";
 import type { InlineModelEntry } from "./embedded-agent-runner/model.inline-provider.js";

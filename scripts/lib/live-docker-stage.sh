@@ -4,16 +4,16 @@ live_docker_stage_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$live_docker_stage_dir/frozen-target-compat.sh"
 unset live_docker_stage_dir
 
-openclaw_live_stage_mounted_auth() {
-  if [ "${OPENCLAW_DOCKER_AUTH_PRESTAGED:-0}" = "1" ]; then
+carapace_live_stage_mounted_auth() {
+  if [ "${CARAPACE_DOCKER_AUTH_PRESTAGED:-0}" = "1" ]; then
     return 0
   fi
 
   local auth_path
   local auth_dirs=()
   local auth_files=()
-  IFS=',' read -r -a auth_dirs <<<"${OPENCLAW_DOCKER_AUTH_DIRS_RESOLVED:-}"
-  IFS=',' read -r -a auth_files <<<"${OPENCLAW_DOCKER_AUTH_FILES_RESOLVED:-}"
+  IFS=',' read -r -a auth_dirs <<<"${CARAPACE_DOCKER_AUTH_DIRS_RESOLVED:-}"
+  IFS=',' read -r -a auth_files <<<"${CARAPACE_DOCKER_AUTH_FILES_RESOLVED:-}"
   if ((${#auth_dirs[@]} > 0)); then
     for auth_path in "${auth_dirs[@]}"; do
       [ -n "$auth_path" ] || continue
@@ -36,7 +36,7 @@ openclaw_live_stage_mounted_auth() {
   fi
 }
 
-openclaw_live_stage_gemini_auth() {
+carapace_live_stage_gemini_auth() {
   local auth_type="gemini-api-key"
   if [ -z "${GEMINI_API_KEY:-}" ]; then
     [ -n "${GOOGLE_API_KEY:-}" ] || return 0
@@ -66,7 +66,7 @@ NODE
   echo "Using Gemini CLI auth type $auth_type"
 }
 
-openclaw_live_run_setup_command() {
+carapace_live_run_setup_command() {
   local timeout_seconds="${1:?setup timeout seconds required}"
   local label="${2:?setup label required}"
   shift 2
@@ -87,7 +87,7 @@ openclaw_live_run_setup_command() {
   fi
 }
 
-openclaw_live_prepare_cli_backend() {
+carapace_live_prepare_cli_backend() {
   local command_path="${1:?CLI command required}"
   local package="${2:-}"
   local timeout_seconds="${3:?setup timeout required}"
@@ -96,7 +96,7 @@ openclaw_live_prepare_cli_backend() {
     @*/*@* | [!@]*@*) pinned=1 ;;
   esac
   if [[ -n "$package" ]] && { [[ ! -x "$(command -v "$command_path" || true)" ]] || ((pinned)); }; then
-    openclaw_live_run_setup_command "$timeout_seconds" "live CLI backend setup" npm install -g "$package" || return $?
+    carapace_live_run_setup_command "$timeout_seconds" "live CLI backend setup" npm install -g "$package" || return $?
   fi
   if [[ ! -x "$(command -v "$command_path" || true)" ]]; then
     echo "ERROR: CLI backend executable was not provisioned: $command_path (package=${package:-none})." >&2
@@ -104,14 +104,14 @@ openclaw_live_prepare_cli_backend() {
   fi
 }
 
-openclaw_live_prepare_cli_backend_docker_packages() {
+carapace_live_prepare_cli_backend_docker_packages() {
   local requested_providers="${1:-}"
   local requested_models="${2:-}"
   local metadata_json
 
   metadata_json="$(
-    OPENCLAW_REQUESTED_PROVIDERS="$requested_providers" \
-      OPENCLAW_REQUESTED_MODELS="$requested_models" \
+    CARAPACE_REQUESTED_PROVIDERS="$requested_providers" \
+      CARAPACE_REQUESTED_MODELS="$requested_models" \
       node --import tsx --input-type=module <<'NODE'
 import { pathToFileURL } from "node:url";
 import path from "node:path";
@@ -134,8 +134,8 @@ if (!Object.prototype.hasOwnProperty.call(metadata, "resolveCliBackendDockerPack
   }
   const splitCsv = (value) => (value ?? "").split(",").map((part) => part.trim()).filter(Boolean);
   const packages = await metadata.resolveCliBackendDockerPackages(
-    splitCsv(process.env.OPENCLAW_REQUESTED_PROVIDERS),
-    splitCsv(process.env.OPENCLAW_REQUESTED_MODELS),
+    splitCsv(process.env.CARAPACE_REQUESTED_PROVIDERS),
+    splitCsv(process.env.CARAPACE_REQUESTED_MODELS),
   );
   if (!Array.isArray(packages)) {
     throw new Error("resolveCliBackendDockerPackages must return an array");
@@ -174,7 +174,7 @@ NODE
   )" || return $?
 
   if [[ "$capability" == "missing-export" ]]; then
-    if [[ "${OPENCLAW_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE:-current}" == "legacy" ]]; then
+    if [[ "${CARAPACE_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE:-current}" == "legacy" ]]; then
       echo "Staged target does not export resolveCliBackendDockerPackages; preserving historical no-package-setup behavior."
       return 0
     fi
@@ -192,12 +192,12 @@ NODE
   )" || return $?
   while IFS= read -r npm_package; do
     [[ -n "$npm_package" ]] || continue
-    openclaw_live_run_setup_command 180 "live CLI backend setup" npm install -g "$npm_package" ||
+    carapace_live_run_setup_command 180 "live CLI backend setup" npm install -g "$npm_package" ||
       return $?
   done <<<"$packages"
 }
 
-openclaw_live_resolve_unique_staged_file() {
+carapace_live_resolve_unique_staged_file() {
   local root_dir="${1:?staged root required}"
   local basename="${2:?staged file basename required}"
   if [[ ! -d "$root_dir" ]]; then
@@ -231,7 +231,7 @@ openclaw_live_resolve_unique_staged_file() {
   printf '%s\n' "${match#"$root_dir"/}"
 }
 
-openclaw_live_run_staged_script() {
+carapace_live_run_staged_script() {
   local stem="${1:?staged script stem required}"
   shift
 
@@ -245,16 +245,16 @@ openclaw_live_run_staged_script() {
     node "${stem}.mjs" "$@"
     return
   fi
-  echo "staged OpenClaw script entrypoint not found: ${stem}.{mts,mjs}" >&2
+  echo "staged Carapace script entrypoint not found: ${stem}.{mts,mjs}" >&2
   return 1
 }
 
-openclaw_live_stage_source_tree() {
+carapace_live_stage_source_tree() {
   local dest_dir="${1:?destination directory required}"
-  local stage_mode="${OPENCLAW_LIVE_DOCKER_SOURCE_STAGE_MODE:-copy}"
+  local stage_mode="${CARAPACE_LIVE_DOCKER_SOURCE_STAGE_MODE:-copy}"
 
   if [ "$stage_mode" = "symlink" ]; then
-    echo "OPENCLAW_LIVE_DOCKER_SOURCE_STAGE_MODE=symlink is disabled; using copy staging." >&2
+    echo "CARAPACE_LIVE_DOCKER_SOURCE_STAGE_MODE=symlink is disabled; using copy staging." >&2
   fi
 
   set +e
@@ -271,7 +271,7 @@ openclaw_live_stage_source_tree() {
     --exclude=.tmp \
     --exclude=.tmp-precommit-venv \
     --exclude=.worktrees \
-    --exclude=__openclaw_vitest__ \
+    --exclude=__carapace_vitest__ \
     --exclude=relay.sock \
     --exclude='*.sock' \
     --exclude='*/*.sock' \
@@ -287,11 +287,11 @@ openclaw_live_stage_source_tree() {
     return "$status"
   fi
 
-  local scripts_dir="${OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"
+  local scripts_dir="${CARAPACE_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"
   node "$scripts_dir/live-docker-stage-private-sdk-exports.mjs" "$dest_dir"
 }
 
-openclaw_live_link_runtime_tree() {
+carapace_live_link_runtime_tree() {
   local dest_dir="${1:?destination directory required}"
 
   if [ ! -e "$dest_dir/node_modules" ]; then
@@ -299,13 +299,13 @@ openclaw_live_link_runtime_tree() {
   fi
   ln -s /app/dist "$dest_dir/dist"
   if [ -d /app/dist-runtime/extensions ]; then
-    export OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist-runtime/extensions
+    export CARAPACE_BUNDLED_PLUGINS_DIR=/app/dist-runtime/extensions
   elif [ -d /app/dist/extensions ]; then
-    export OPENCLAW_BUNDLED_PLUGINS_DIR=/app/dist/extensions
+    export CARAPACE_BUNDLED_PLUGINS_DIR=/app/dist/extensions
   fi
 }
 
-openclaw_live_stage_node_modules() {
+carapace_live_stage_node_modules() {
   local dest_dir="${1:?destination directory required}"
   local target_dir="$dest_dir/node_modules"
 
@@ -325,9 +325,9 @@ openclaw_live_stage_node_modules() {
   mkdir -p "$target_dir/.vite-temp"
 }
 
-openclaw_live_scrub_staged_plugin_index() {
+carapace_live_scrub_staged_plugin_index() {
   local dest_dir="${1:?destination directory required}"
-  local db_path="$dest_dir/state/openclaw.sqlite"
+  local db_path="$dest_dir/state/carapace.sqlite"
 
   if [ ! -f "$db_path" ]; then
     return 0
@@ -355,9 +355,9 @@ try {
 NODE
 }
 
-openclaw_live_stage_state_dir() {
+carapace_live_stage_state_dir() {
   local dest_dir="${1:?destination directory required}"
-  local source_dir="${HOME}/.openclaw"
+  local source_dir="${HOME}/.carapace"
 
   mkdir -p "$dest_dir"
   if [ -d "$source_dir" ]; then
@@ -383,22 +383,22 @@ openclaw_live_stage_state_dir() {
       return "$status"
     fi
     chmod -R u+rwX "$dest_dir" || true
-    openclaw_live_scrub_staged_plugin_index "$dest_dir"
+    carapace_live_scrub_staged_plugin_index "$dest_dir"
     if [ -d "$source_dir/workspace" ] && [ ! -e "$dest_dir/workspace" ]; then
       ln -s "$source_dir/workspace" "$dest_dir/workspace"
     fi
   fi
 
-  export OPENCLAW_STATE_DIR="$dest_dir"
-  export OPENCLAW_CONFIG_PATH="$dest_dir/openclaw.json"
+  export CARAPACE_STATE_DIR="$dest_dir"
+  export CARAPACE_CONFIG_PATH="$dest_dir/carapace.json"
 }
 
-openclaw_live_prepare_staged_config() {
-  if [ ! -f "${OPENCLAW_CONFIG_PATH:-}" ]; then
+carapace_live_prepare_staged_config() {
+  if [ ! -f "${CARAPACE_CONFIG_PATH:-}" ]; then
     return 0
   fi
 
-  local scripts_dir="${OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"
+  local scripts_dir="${CARAPACE_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"
   (
     cd /app
     node --import tsx "$scripts_dir/live-docker-normalize-config.ts"

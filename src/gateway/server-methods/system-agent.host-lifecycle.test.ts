@@ -2,7 +2,7 @@
 import "./system-agent.mocks.test-support.js";
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createOperationalRunInstanceRef } from "../../agents/admitted-run-context.js";
@@ -46,7 +46,7 @@ const {
   seededSession,
 } = useSystemAgentGatewayTestFixture();
 
-describe("openclaw.chat hosted lifecycle", () => {
+describe("carapace.chat hosted lifecycle", () => {
   it.for([
     { action: "restart", fullPermission: false, loss: "none" },
     { action: "stop", fullPermission: false, loss: "none" },
@@ -64,10 +64,10 @@ describe("openclaw.chat hosted lifecycle", () => {
       const releasePreparation = createDeferred();
       const auditStarted = createDeferred();
       const releaseAudit = createDeferred();
-      const stateDir = systemAgentTempDirs.make("openclaw-delegated-gateway-lifecycle-");
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
-      fs.writeFileSync(path.join(stateDir, "openclaw.json"), JSON.stringify(verifiedConfig));
+      const stateDir = systemAgentTempDirs.make("carapace-delegated-gateway-lifecycle-");
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
+      fs.writeFileSync(path.join(stateDir, "carapace.json"), JSON.stringify(verifiedConfig));
       const nativeEffect = vi.fn<HostedGatewayStop["execute"]>(async (assertCurrent) => {
         assertCurrent();
         return { outcome: "accepted" };
@@ -181,7 +181,7 @@ describe("openclaw.chat hosted lifecycle", () => {
           req: {
             type: "req",
             id: "delegated-gateway-lifecycle",
-            method: "openclaw.chat",
+            method: "carapace.chat",
             params: {
               sessionId: "delegate-1",
               message: `${action} Gateway.`,
@@ -202,7 +202,7 @@ describe("openclaw.chat hosted lifecycle", () => {
           } as GatewayClient,
           isWebchatConnect: () => false,
           context,
-          extraHandlers: { "openclaw.chat": systemAgentHandlers["openclaw.chat"]! },
+          extraHandlers: { "carapace.chat": systemAgentHandlers["carapace.chat"]! },
         }),
       );
       let sameOwnerChat: Promise<RespondCall> | undefined;
@@ -218,7 +218,7 @@ describe("openclaw.chat hosted lifecycle", () => {
           });
           expect(manager.getSnapshot(proposalId)?.decision).toBeUndefined();
           expect(broadcast).toHaveBeenCalledWith(
-            "openclaw.approval.requested",
+            "carapace.approval.requested",
             expect.objectContaining({ id: proposalId }),
             { dropIfSlow: true },
           );
@@ -284,7 +284,7 @@ describe("openclaw.chat hosted lifecycle", () => {
         await pendingChat;
         const expectedReply =
           loss === "none"
-            ? `[openclaw] done: gateway.${action}`
+            ? `[carapace] done: gateway.${action}`
             : "system-agent approval authority is no longer active";
         expect(requestResponses.calls).toHaveLength(1);
         expect(rootsAtResponse).toEqual([expect.any(Number)]);

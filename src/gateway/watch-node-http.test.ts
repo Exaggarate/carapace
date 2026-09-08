@@ -82,7 +82,7 @@ describe("watch node HTTP transport", () => {
   it("uses Gateway time for skew-independent device proof", async () => {
     const now = vi.fn(() => 1_700_000_000_123);
     const { identity, issued, baseUrl, runtime } = await createWatchNodeFixture(
-      "openclaw-watch-node-challenge-time-",
+      "carapace-watch-node-challenge-time-",
       { now },
     );
 
@@ -99,7 +99,7 @@ describe("watch node HTTP transport", () => {
 
   it("rejects capabilities and identities outside the bounded watch surface", async () => {
     const { identity, issued, baseUrl, runtime } = await createWatchNodeFixture(
-      "openclaw-watch-node-surface-",
+      "carapace-watch-node-surface-",
     );
     const variants: Array<(nonce: string) => ConnectParams> = [
       (nonce) =>
@@ -152,7 +152,7 @@ describe("watch node HTTP transport", () => {
 
   it("accepts a supported notification permission set to false", async () => {
     const { identity, issued, baseUrl, runtime } = await createWatchNodeFixture(
-      "openclaw-watch-node-permissions-",
+      "carapace-watch-node-permissions-",
     );
     const response = await connectWatchNode({
       baseUrl,
@@ -168,7 +168,7 @@ describe("watch node HTTP transport", () => {
 
   it("does not let attacker challenges evict another client nonce", async () => {
     const { identity, issued, baseUrl, runtime } = await createWatchNodeFixture(
-      "openclaw-watch-node-challenge-eviction-",
+      "carapace-watch-node-challenge-eviction-",
       {
         config: { gateway: { trustedProxies: ["127.0.0.1"] } },
       },
@@ -210,7 +210,7 @@ describe("watch node HTTP transport", () => {
       disconnectedNodes,
       runtime,
       baseUrl,
-    } = await createWatchNodeFixture("openclaw-watch-node-disconnect-");
+    } = await createWatchNodeFixture("carapace-watch-node-disconnect-");
 
     const connectResponse = await connectWatchNode({
       baseUrl,
@@ -285,7 +285,7 @@ describe("watch node HTTP transport", () => {
         resolvePollReady = resolve;
       });
       const { identity, issued, nodeRegistry, disconnectedNodes, runtime, baseUrl } =
-        await createWatchNodeFixture("openclaw-watch-node-destroyed-poll-", {
+        await createWatchNodeFixture("carapace-watch-node-destroyed-poll-", {
           onPollReady: resolvePollReady,
         });
       const connectResponse = await connectWatchNode({
@@ -353,7 +353,7 @@ describe("watch node HTTP transport", () => {
 
   it("rejects an HTTP node session after an external reapproval changes its generation", async () => {
     const { baseDir, identity, issued, nodeRegistry, disconnectedNodes, runtime, baseUrl } =
-      await createWatchNodeFixture("openclaw-watch-node-reapproval-");
+      await createWatchNodeFixture("carapace-watch-node-reapproval-");
     const connectResponse = await connectWatchNode({
       baseUrl,
       identity,
@@ -388,7 +388,7 @@ describe("watch node HTTP transport", () => {
 
   it("does not deliver queued work after a verified HTTP session is retired", async () => {
     const { baseDir, identity, issued, nodeRegistry, runtime, baseUrl } =
-      await createWatchNodeFixture("openclaw-watch-node-poll-retirement-");
+      await createWatchNodeFixture("carapace-watch-node-poll-retirement-");
     try {
       const connected = await readJson(
         await connectWatchNode({ baseUrl, identity, bootstrapToken: issued.token }),
@@ -438,7 +438,7 @@ describe("watch node HTTP transport", () => {
 
   it("rejects an invoke result when pairing changes during body upload", async () => {
     const { baseDir, identity, issued, nodeRegistry, disconnectedNodes, runtime, baseUrl } =
-      await createWatchNodeFixture("openclaw-watch-node-result-generation-");
+      await createWatchNodeFixture("carapace-watch-node-result-generation-");
     const connectResponse = await connectWatchNode({
       baseUrl,
       identity,
@@ -502,7 +502,7 @@ describe("watch node HTTP transport", () => {
 
   it("rejects empty shadow credentials without consuming the challenge", async () => {
     const { baseDir, identity, issued, baseUrl, runtime } = await createWatchNodeFixture(
-      "openclaw-watch-node-auth-fields-",
+      "carapace-watch-node-auth-fields-",
     );
 
     const challenge = await readJson(await fetch(`${baseUrl}/challenge`));
@@ -541,7 +541,7 @@ describe("watch node HTTP transport", () => {
       pruneIntervalMs: 0,
     };
 
-    const abortedBaseDir = await tempDirs.make("openclaw-watch-node-aborted-connect-");
+    const abortedBaseDir = await tempDirs.make("carapace-watch-node-aborted-connect-");
     const abortedIdentity = loadOrCreateDeviceIdentity({
       path: path.join(abortedBaseDir, "watch-identity.sqlite"),
     });
@@ -603,7 +603,7 @@ describe("watch node HTTP transport", () => {
       abortedLimiter.dispose();
     }
 
-    const completedBaseDir = await tempDirs.make("openclaw-watch-node-completed-connect-");
+    const completedBaseDir = await tempDirs.make("carapace-watch-node-completed-connect-");
     const completedIdentity = loadOrCreateDeviceIdentity({
       path: path.join(completedBaseDir, "watch-identity.sqlite"),
     });
@@ -634,7 +634,7 @@ describe("watch node HTTP transport", () => {
   });
 
   it("restores an uncorrelated bootstrap token when the connect response aborts", async () => {
-    const baseDir = await tempDirs.make("openclaw-watch-node-generic-abort-");
+    const baseDir = await tempDirs.make("carapace-watch-node-generic-abort-");
     const identity = loadOrCreateDeviceIdentity({
       path: path.join(baseDir, "watch-identity.sqlite"),
     });
@@ -675,7 +675,7 @@ describe("watch node HTTP transport", () => {
     let fixtureBaseDir = "";
     let setupId = "";
     let completionAtHandoff: ReturnType<typeof loadDevicePairSetupCompletionRecord> = null;
-    const fixture = await createWatchNodeFixture("openclaw-watch-node-setup-order-", {
+    const fixture = await createWatchNodeFixture("carapace-watch-node-setup-order-", {
       onConnectResponseStart: () => {
         completionAtHandoff = loadDevicePairSetupCompletionRecord(
           setupId,
@@ -726,7 +726,7 @@ describe("watch node HTTP transport", () => {
     { name: "node-only Watch", existingProfile: NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE },
     { name: "broader operator", existingProfile: FULL_ACCESS_PAIRING_SETUP_BOOTSTRAP_PROFILE },
   ])("hands off only Talk access for a $name voice setup", async ({ existingProfile }) => {
-    const fixture = await createWatchNodeFixture("openclaw-watch-node-voice-", {
+    const fixture = await createWatchNodeFixture("carapace-watch-node-voice-", {
       bootstrapProfile: VOICE_NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE,
     });
     const { baseDir, identity, issued, baseUrl, runtime } = fixture;
@@ -811,7 +811,7 @@ describe("watch node HTTP transport", () => {
     { name: "full mobile", profile: FULL_ACCESS_PAIRING_SETUP_BOOTSTRAP_PROFILE },
   ])("does not accept a $name grant over Watch HTTP", async ({ profile }) => {
     const { baseDir, identity, issued, baseUrl, runtime } = await createWatchNodeFixture(
-      "openclaw-watch-node-profile-boundary-",
+      "carapace-watch-node-profile-boundary-",
       { bootstrapProfile: profile },
     );
     const response = await connectWatchNode({ baseUrl, identity, bootstrapToken: issued.token });
@@ -833,7 +833,7 @@ describe("watch node HTTP transport", () => {
       runtime,
       connectHandled,
       baseUrl,
-    } = await createWatchNodeFixture("openclaw-watch-node-http-", options);
+    } = await createWatchNodeFixture("carapace-watch-node-http-", options);
 
     const connectResponse = await connectWatchNode({
       baseUrl,

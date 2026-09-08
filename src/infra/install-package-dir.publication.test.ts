@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import {
   installPackageDir,
@@ -17,7 +17,7 @@ import {
 
 describe("installPackageDir publication failure", () => {
   const fixtureRootTracker = createSuiteTempRootTracker({
-    prefix: "openclaw-install-package-dir-publication-",
+    prefix: "carapace-install-package-dir-publication-",
   });
 
   afterEach(async () => {
@@ -304,7 +304,7 @@ describe("installPackageDir publication failure", () => {
         resumeCleanup.resolve();
         await lifecycle.catch(() => undefined);
         await pendingInstall?.catch(() => undefined);
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );

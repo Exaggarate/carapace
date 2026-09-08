@@ -1,10 +1,10 @@
 import Foundation
 import Observation
-import OpenClawKit
-import OpenClawNativeState
+import CarapaceKit
+import CarapaceNativeState
 import Testing
 import WatchConnectivity
-@testable import OpenClawWatchApp
+@testable import CarapaceWatchApp
 
 @MainActor
 struct WatchInboxStoreOperationTests {
@@ -468,7 +468,7 @@ struct WatchInboxStoreOperationTests {
             #expect(!store.isAwaitingVoiceReply)
             try await store.reloadChatDeliveryEntries()
             #expect(store.appCommandStatus == timeout)
-            let admitted = OpenClawWatchChatDeliveryReceipt(
+            let admitted = CarapaceWatchChatDeliveryReceipt(
                 context: context, commandId: commandId, state: .admitted(atMs: now))
             #expect(try await store.recordChatDeliveryReceipt(admitted) == nil)
             #expect(store.appCommandStatus == timeout)
@@ -476,7 +476,7 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             try await restored.reloadChatDeliveryEntries()
             #expect(restored.appCommandStatus == timeout)
             #expect(try await restored.recordChatDeliveryReceipt(admitted) == nil)
@@ -490,9 +490,9 @@ struct WatchInboxStoreOperationTests {
                 #expect(restored.appCommandStatus?.code == .queued)
                 return
             }
-            let outcome: OpenClawWatchChatDeliveryOutcome = supersedingEvent == "reply"
+            let outcome: CarapaceWatchChatDeliveryOutcome = supersedingEvent == "reply"
                 ? .reply(text: "Kept on Watch") : .failed(code: "gateway_run_failed", message: "The run failed.")
-            let receipt = OpenClawWatchChatDeliveryReceipt(
+            let receipt = CarapaceWatchChatDeliveryReceipt(
                 context: context,
                 commandId: commandId,
                 state: .terminal(.init(
@@ -507,7 +507,7 @@ struct WatchInboxStoreOperationTests {
             let reopened = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             try await reopened.reloadChatDeliveryEntries()
             #expect(reopened.savedChatDeliveryReceipt == receipt)
             #expect(reopened.appCommandStatus == restored.appCommandStatus)
@@ -560,7 +560,7 @@ struct WatchInboxStoreOperationTests {
             var snapshot = Self.snapshot(id: "selected-expiry-owner")
             snapshot.chatDeliveryContext = Self.deliveryContext()
             store.consume(appSnapshot: snapshot)
-            let command = OpenClawWatchChatDeliveryCommand(
+            let command = CarapaceWatchChatDeliveryCommand(
                 context: Self.deliveryContext(),
                 commandId: "expired",
                 submittedAtMs: 1000,
@@ -569,14 +569,14 @@ struct WatchInboxStoreOperationTests {
             var cutoff = command.expiresAtMs
             if newerFinalizedEntry {
                 let attempt = store.markAppCommandSending(.sendChat)
-                let completed = OpenClawWatchChatDeliveryCommand(
+                let completed = CarapaceWatchChatDeliveryCommand(
                     context: command.context,
                     commandId: attempt.uuidString,
                     submittedAtMs: 1001,
                     body: .chat(text: "A completed message"))
                 try await store.chatDeliveryJournal.enqueue(completed, nowMs: 1001)
                 #expect(store.markAppCommandResult(Self.result(.queued), command: .sendChat, attemptID: attempt))
-                let receipt = OpenClawWatchChatDeliveryReceipt(
+                let receipt = CarapaceWatchChatDeliveryReceipt(
                     context: completed.context,
                     commandId: completed.commandId,
                     state: .terminal(.init(
@@ -602,7 +602,7 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             #expect(restored.appCommandStatus == store.appCommandStatus)
             #expect(try await restored.chatDeliveryJournal.expiredEntries(nowMs: cutoff).isEmpty)
             #expect(try await restored.chatDeliveryJournal.entries(context: command.context, nowMs: 1000).isEmpty)
@@ -612,19 +612,19 @@ struct WatchInboxStoreOperationTests {
     @Test func `interactive receipt acknowledgment observes the committed SQLite admission`() async throws {
         try await Self.withJournalStore { store, _, url in
             let now = WatchVoiceTurnState.nowMs()
-            let command = OpenClawWatchChatDeliveryCommand(
+            let command = CarapaceWatchChatDeliveryCommand(
                 context: Self.deliveryContext(),
                 commandId: "ack-order",
                 submittedAtMs: now,
                 body: .chat(text: "Test admission"))
             try await store.chatDeliveryJournal.enqueue(command, nowMs: now)
-            let database = try OpenClawNativeStateSQLite(databaseURL: url, createIfMissing: false)
+            let database = try CarapaceNativeStateSQLite(databaseURL: url, createIfMissing: false)
             let receiver = WatchConnectivityReceiver(store: store, directNodeSetupHandler: { _, _ in })
-            let receipt = OpenClawWatchChatDeliveryReceipt(
+            let receipt = CarapaceWatchChatDeliveryReceipt(
                 context: command.context,
                 commandId: command.commandId,
                 state: .admitted(atMs: now))
-            let payload = try OpenClawWatchChatDeliveryCodec.encode(receipt)
+            let payload = try CarapaceWatchChatDeliveryCodec.encode(receipt)
             let committed: Bool = try await withCheckedThrowingContinuation { continuation in
                 receiver.session(WCSession.default, didReceiveMessage: payload) { reply in
                     do {
@@ -645,12 +645,12 @@ struct WatchInboxStoreOperationTests {
         try await Self.withJournalStore { store, _, url in
             let now = WatchVoiceTurnState.nowMs()
             let context = Self.deliveryContext()
-            let command = OpenClawWatchChatDeliveryCommand(
+            let command = CarapaceWatchChatDeliveryCommand(
                 context: context,
                 commandId: "replay-recovery",
                 submittedAtMs: now,
                 body: .chat(text: "Keep the saved reply"))
-            let receipt = OpenClawWatchChatDeliveryReceipt(
+            let receipt = CarapaceWatchChatDeliveryReceipt(
                 context: context,
                 commandId: command.commandId,
                 state: .terminal(.init(
@@ -659,10 +659,10 @@ struct WatchInboxStoreOperationTests {
                     runId: command.commandId,
                     completedAtMs: now)))
             let readyURL = url.appendingPathExtension("ready")
-            let readyJournal = OpenClawWatchChatDeliveryStore(databaseURL: readyURL)
+            let readyJournal = CarapaceWatchChatDeliveryStore(databaseURL: readyURL)
             try await readyJournal.enqueue(command, nowMs: now)
             _ = try await readyJournal.record(receipt, nowMs: now)
-            let readyDatabase = try OpenClawNativeStateSQLite(databaseURL: readyURL, createIfMissing: false)
+            let readyDatabase = try CarapaceNativeStateSQLite(databaseURL: readyURL, createIfMissing: false)
             try readyDatabase.execute("PRAGMA wal_checkpoint(TRUNCATE)")
             let committedDatabase = try Data(contentsOf: readyURL)
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
@@ -723,7 +723,7 @@ struct WatchInboxStoreOperationTests {
             snapshot.chatDeliveryContext = context
             store.consume(appSnapshot: snapshot)
             let commandId = try #require(await store.enqueueChat(text: "Keep the result", spokenReply: true))
-            let rejection = OpenClawWatchChatDeliveryReceipt(
+            let rejection = CarapaceWatchChatDeliveryReceipt(
                 context: context,
                 commandId: commandId,
                 state: .rejected(code: "routing_changed", message: "Refresh the delivery target on iPhone."))
@@ -734,10 +734,10 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             try await restored.reloadChatDeliveryEntries()
             #expect(restored.savedChatDeliveryReceipt == rejection)
-            let admitted = OpenClawWatchChatDeliveryReceipt(
+            let admitted = CarapaceWatchChatDeliveryReceipt(
                 context: context, commandId: commandId, state: .admitted(atMs: WatchVoiceTurnState.nowMs()))
             #expect(try await restored.recordChatDeliveryReceipt(admitted) == nil)
             restored.beginVoiceTurn(commandId: commandId)
@@ -753,13 +753,13 @@ struct WatchInboxStoreOperationTests {
             var snapshot = Self.snapshot(id: "selected-expiry-owner")
             snapshot.chatDeliveryContext = Self.deliveryContext()
             store.consume(appSnapshot: snapshot)
-            let command = OpenClawWatchChatDeliveryCommand(
+            let command = CarapaceWatchChatDeliveryCommand(
                 context: Self.deliveryContext(),
                 commandId: "typed-expiry",
                 submittedAtMs: 1000,
                 body: .chat(text: "A queued message"))
             try await store.chatDeliveryJournal.enqueue(command, nowMs: 1000)
-            let receipt = OpenClawWatchChatDeliveryReceipt(
+            let receipt = CarapaceWatchChatDeliveryReceipt(
                 context: command.context,
                 commandId: command.commandId,
                 state: .rejected(code: "expired", message: "This Watch message expired. Check Chat on iPhone."))
@@ -770,7 +770,7 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             #expect(restored.appCommandStatus == store.appCommandStatus)
         }
     }
@@ -794,13 +794,13 @@ struct WatchInboxStoreOperationTests {
                 let commandContext = scenario.hasPrefix("other") ? Self.deliveryContext(agent: "other") : context
                 // These IDs are canonically equal Strings but distinct opaque prompt identities.
                 let commandPromptID = scenario == "previousPrompt" ? "cafe\u{0301}" : currentPromptID
-                let body: OpenClawWatchChatDeliveryBody = isChat ? .chat(text: "Old saved chat") : .quickReply(
+                let body: CarapaceWatchChatDeliveryBody = isChat ? .chat(text: "Old saved chat") : .quickReply(
                     promptId: commandPromptID, actionId: action.id, actionLabel: "Saved action", note: nil)
                 let chatAttempt = store.markAppCommandSending(.sendChat)
                 let promptAttempt = try #require(store.markReplySending(
                     actionLabel: action.label,
                     commandId: "opaque-reply-command"))
-                let command = OpenClawWatchChatDeliveryCommand(
+                let command = CarapaceWatchChatDeliveryCommand(
                     context: commandContext,
                     commandId: affectsChat ? chatAttempt.uuidString :
                         "opaque-reply-command",
@@ -820,7 +820,7 @@ struct WatchInboxStoreOperationTests {
                 let message: String
                 if typedReceipt {
                     message = "The saved command expired on iPhone."
-                    let receipt = OpenClawWatchChatDeliveryReceipt(
+                    let receipt = CarapaceWatchChatDeliveryReceipt(
                         context: command.context,
                         commandId: command.commandId,
                         state: .rejected(code: "expired", message: message))
@@ -858,7 +858,7 @@ struct WatchInboxStoreOperationTests {
                 let restored = WatchInboxStore(
                     defaults: defaults,
                     requestNotificationAuthorization: false,
-                    chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                    chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
                 #expect(restored.appCommandStatus == store.appCommandStatus)
                 #expect(restored.replyStatus == store.replyStatus)
                 #expect(restored.promptId?.utf8.elementsEqual(currentPromptID.utf8) == true)
@@ -883,14 +883,14 @@ struct WatchInboxStoreOperationTests {
             let pending = try await store.chatDeliveryJournal.pendingCommands(nowMs: WatchVoiceTurnState.nowMs())
             let chat = try #require(pending.first { $0.commandId == chatID })
             let capturedReply = try #require(store.makeQuickReplyCommand(action: action))
-            let quickReply = OpenClawWatchChatDeliveryCommand(
+            let quickReply = CarapaceWatchChatDeliveryCommand(
                 context: capturedReply.context,
                 commandId: capturedReply.commandId,
                 submittedAtMs: chat.submittedAtMs + (quickReplyLater ? 1 : -1),
                 body: capturedReply.body)
             #expect(await store.enqueueQuickReply(quickReply))
             let now = max(chat.submittedAtMs, quickReply.submittedAtMs) + 1
-            let admitted = OpenClawWatchChatDeliveryReceipt(
+            let admitted = CarapaceWatchChatDeliveryReceipt(
                 context: context,
                 commandId: quickReply.commandId,
                 state: .admitted(atMs: now))
@@ -898,7 +898,7 @@ struct WatchInboxStoreOperationTests {
             #expect(store.appCommandStatus?.code == .queued)
             #expect(store.replyStatus?.code == .sent)
 
-            let chatRejection = OpenClawWatchChatDeliveryReceipt(
+            let chatRejection = CarapaceWatchChatDeliveryReceipt(
                 context: context,
                 commandId: chatID,
                 state: .rejected(code: "routing_changed", message: "Refresh the saved chat target on iPhone."))
@@ -907,7 +907,7 @@ struct WatchInboxStoreOperationTests {
             #expect(store.appCommandStatus?.detail == "Refresh the saved chat target on iPhone.")
             #expect(store.replyStatus?.code == .sent)
 
-            let forwarded = OpenClawWatchChatDeliveryReceipt(
+            let forwarded = CarapaceWatchChatDeliveryReceipt(
                 context: context,
                 commandId: quickReply.commandId,
                 state: .terminal(.init(
@@ -916,7 +916,7 @@ struct WatchInboxStoreOperationTests {
                     runId: "mixed-quick-reply-run",
                     completedAtMs: now)))
             let acknowledgment = try await store.recordChatDeliveryReceipt(forwarded, nowMs: now)
-            #expect(acknowledgment == OpenClawWatchChatDeliveryReceiptAck(
+            #expect(acknowledgment == CarapaceWatchChatDeliveryReceiptAck(
                 context: context,
                 commandId: quickReply.commandId,
                 receiptId: "mixed-quick-reply-result"))
@@ -928,7 +928,7 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             try await restored.reloadChatDeliveryEntries(nowMs: now)
             #expect(restored.appCommandStatus?.code == .failed)
             #expect(restored.savedChatDeliveryReceipt == chatRejection)
@@ -948,10 +948,10 @@ struct WatchInboxStoreOperationTests {
             store.consume(appSnapshot: snapshot)
             let now = WatchVoiceTurnState.nowMs()
             let oldDeadline = now + (expiredBeforeAdmission ? -1 : 60000)
-            let oldCommand = OpenClawWatchChatDeliveryCommand(
+            let oldCommand = CarapaceWatchChatDeliveryCommand(
                 context: context,
                 commandId: "older-saved-chat",
-                submittedAtMs: oldDeadline - OpenClawWatchChatDeliveryCodec.lifetimeMs,
+                submittedAtMs: oldDeadline - CarapaceWatchChatDeliveryCodec.lifetimeMs,
                 body: .chat(text: "Older saved chat"))
             try await store.chatDeliveryJournal.enqueue(oldCommand, nowMs: oldCommand.submittedAtMs)
 
@@ -978,7 +978,7 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             #expect(restored.appCommandStatus?.code == .queued)
             #expect(try await restored.chatDeliveryJournal.pendingCommands(nowMs: now) == [fresh])
         }
@@ -997,10 +997,10 @@ struct WatchInboxStoreOperationTests {
             store.consume(message: prompt, transport: "test")
             let now = WatchVoiceTurnState.nowMs()
             let oldDeadline = now + (expiredBeforeAdmission ? -1 : 60000)
-            let oldCommand = OpenClawWatchChatDeliveryCommand(
+            let oldCommand = CarapaceWatchChatDeliveryCommand(
                 context: context,
                 commandId: "older-saved-reply",
-                submittedAtMs: oldDeadline - OpenClawWatchChatDeliveryCodec.lifetimeMs,
+                submittedAtMs: oldDeadline - CarapaceWatchChatDeliveryCodec.lifetimeMs,
                 body: .quickReply(
                     promptId: "same-prompt", actionId: action.id, actionLabel: "Older action", note: nil))
             try await store.chatDeliveryJournal.enqueue(oldCommand, nowMs: oldCommand.submittedAtMs)
@@ -1018,7 +1018,7 @@ struct WatchInboxStoreOperationTests {
             let restored = WatchInboxStore(
                 defaults: defaults,
                 requestNotificationAuthorization: false,
-                chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+                chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
             #expect(restored.replyStatus == store.replyStatus)
             #expect(try await restored.chatDeliveryJournal.pendingCommands(nowMs: now) == [fresh])
         }
@@ -1031,7 +1031,7 @@ struct WatchInboxStoreOperationTests {
             snapshot.chatDeliveryContext = context
             store.consume(appSnapshot: snapshot)
             let oldID = try #require(await store.enqueueChat(text: "Saved older message"))
-            let receipt = OpenClawWatchChatDeliveryReceipt(
+            let receipt = CarapaceWatchChatDeliveryReceipt(
                 context: context, commandId: oldID,
                 state: .admitted(atMs: WatchVoiceTurnState.nowMs()))
             #expect(try await store.recordChatDeliveryReceipt(receipt) == nil)
@@ -1061,12 +1061,12 @@ struct WatchInboxStoreOperationTests {
         let store = WatchInboxStore(
             defaults: defaults,
             requestNotificationAuthorization: false,
-            chatDeliveryJournal: OpenClawWatchChatDeliveryStore(databaseURL: url))
+            chatDeliveryJournal: CarapaceWatchChatDeliveryStore(databaseURL: url))
         try await body(store, defaults, url)
     }
 
-    private static func deliveryContext(agent: String = "main") -> OpenClawWatchChatDeliveryContext {
-        OpenClawWatchChatDeliveryContext(
+    private static func deliveryContext(agent: String = "main") -> CarapaceWatchChatDeliveryContext {
+        CarapaceWatchChatDeliveryContext(
             gatewayStableID: "watch-test-gateway",
             routeGeneration: "generation",
             agentId: agent,

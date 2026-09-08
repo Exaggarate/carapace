@@ -409,7 +409,7 @@ describe("gateway agent handler", () => {
     },
     {
       state: "project preparation",
-      entry: { pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git" },
+      entry: { pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git" },
       reason: "workspace is not ready. Wait for setup to finish or retry in chat.",
     },
     {
@@ -653,7 +653,7 @@ describe("gateway agent handler", () => {
     expect(call.userTurnTranscriptRecorder?.message).toMatchObject({
       role: "user",
       content: "persist me",
-      __openclaw: { senderId: "alice@example.com" },
+      __carapace: { senderId: "alice@example.com" },
     });
   });
 
@@ -1234,7 +1234,7 @@ describe("gateway agent handler", () => {
   });
 
   it("durably admits managed media for inline image agent runs", async () => {
-    await withTestDir({ prefix: "openclaw-gateway-agent-inline-image-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-gateway-agent-inline-image-" }, async (root) => {
       useTestStateDir(root);
       mockMainSessionEntry({
         sessionId: "existing-session-id",
@@ -1282,7 +1282,7 @@ describe("gateway agent handler", () => {
       const call = await waitForAgentCommandCall<
         AgentCommandCall & {
           userTurnTranscriptRecorder?: {
-            message?: { __openclaw?: Record<string, unknown> };
+            message?: { __carapace?: Record<string, unknown> };
             hasPersisted: () => boolean;
           };
         }
@@ -1295,7 +1295,7 @@ describe("gateway agent handler", () => {
       ]);
       expect(call.userTurnTranscriptRecorder?.hasPersisted()).toBe(false);
       expect(mocks.persistSessionTranscriptTurn).not.toHaveBeenCalled();
-      expect(call.userTurnTranscriptRecorder?.message?.["__openclaw"]).toMatchObject({
+      expect(call.userTurnTranscriptRecorder?.message?.["__carapace"]).toMatchObject({
         media: [expect.objectContaining({ contentType: "image/png", kind: "image" })],
         mediaImageLayout: { slots: [{ kind: "inline", factIndex: 0 }] },
       });
@@ -1303,7 +1303,7 @@ describe("gateway agent handler", () => {
   });
 
   it("durably admits managed media for offloaded image agent runs", async () => {
-    await withTestDir({ prefix: "openclaw-gateway-agent-offloaded-image-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-gateway-agent-offloaded-image-" }, async (root) => {
       useTestStateDir(root);
       mockMainSessionEntry({
         sessionId: "existing-session-id",
@@ -1351,7 +1351,7 @@ describe("gateway agent handler", () => {
       const call = await waitForAgentCommandCall<
         AgentCommandCall & {
           userTurnTranscriptRecorder?: {
-            message?: { __openclaw?: Record<string, unknown> };
+            message?: { __carapace?: Record<string, unknown> };
             hasPersisted: () => boolean;
           };
         }
@@ -1361,7 +1361,7 @@ describe("gateway agent handler", () => {
       expect(call.message).toContain("[media attached: media://inbound/");
       expect(call.userTurnTranscriptRecorder?.hasPersisted()).toBe(false);
       expect(mocks.persistSessionTranscriptTurn).not.toHaveBeenCalled();
-      expect(call.userTurnTranscriptRecorder?.message?.["__openclaw"]).toMatchObject({
+      expect(call.userTurnTranscriptRecorder?.message?.["__carapace"]).toMatchObject({
         media: [expect.objectContaining({ contentType: "image/png", kind: "image" })],
         mediaImageLayout: { slots: [{ kind: "offloaded", factIndex: 0 }] },
       });
@@ -1453,7 +1453,7 @@ describe("gateway agent handler", () => {
     vi.setSystemTime(new Date("2026-05-07T12:00:00.000Z"));
     const staleEntry = {
       sessionId: "old-session-id",
-      sessionFile: "/tmp/openclaw/agents/main/sessions/old-session-id.jsonl",
+      sessionFile: "/tmp/carapace/agents/main/sessions/old-session-id.jsonl",
       updatedAt: 0,
       sessionStartedAt: 0,
     };
@@ -1486,7 +1486,7 @@ describe("gateway agent handler", () => {
     vi.setSystemTime(now);
     const missingTranscriptEntry = {
       sessionId: "failed-missing-session-id",
-      sessionFile: "/tmp/openclaw/missing/failed-missing-session-id.jsonl",
+      sessionFile: "/tmp/carapace/missing/failed-missing-session-id.jsonl",
       status: "failed",
       updatedAt: now,
       sessionStartedAt: now,
@@ -1529,7 +1529,7 @@ describe("gateway agent handler", () => {
         lastMutationAtMs: now - 1_000,
       });
 
-      await withTestDir({ prefix: "openclaw-gateway-terminal-main-newer-" }, async (root) => {
+      await withTestDir({ prefix: "carapace-gateway-terminal-main-newer-" }, async (root) => {
         const sessionsDir = `${root}/sessions`;
         const sessionFile = "terminal-main-session.jsonl";
         mocks.loadSessionEntry.mockReturnValue({
@@ -1590,7 +1590,7 @@ describe("gateway agent handler", () => {
     setDateOnlyFakeClockActive(true);
     vi.setSystemTime(now);
 
-    await withTestDir({ prefix: "openclaw-gateway-terminal-main-fresh-marker-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-gateway-terminal-main-fresh-marker-" }, async (root) => {
       const sessionsDir = `${root}/sessions`;
       await fs.mkdir(sessionsDir, { recursive: true });
       const sessionFile = "terminal-main-session.jsonl";
@@ -1657,7 +1657,7 @@ describe("gateway agent handler", () => {
     vi.setSystemTime(now);
 
     await withTestDir(
-      { prefix: "openclaw-gateway-terminal-main-explicit-resume-" },
+      { prefix: "carapace-gateway-terminal-main-explicit-resume-" },
       async (root) => {
         const sessionsDir = `${root}/sessions`;
         await fs.mkdir(sessionsDir, { recursive: true });
@@ -1729,7 +1729,7 @@ describe("gateway agent handler", () => {
       vi.setSystemTime(now);
 
       await withTestDir(
-        { prefix: `openclaw-gateway-terminal-main-${runKind}-reuse-` },
+        { prefix: `carapace-gateway-terminal-main-${runKind}-reuse-` },
         async (root) => {
           const sessionsDir = `${root}/sessions`;
           await fs.mkdir(sessionsDir, { recursive: true });

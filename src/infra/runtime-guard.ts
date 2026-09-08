@@ -1,10 +1,10 @@
-// Validates the current runtime against OpenClaw's Node engine floor.
+// Validates the current runtime against Carapace's Node engine floor.
 import process from "node:process";
 import { format } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   isNodeVersionAtLeast,
-  isSupportedOpenClawNodeVersion,
+  isSupportedCarapaceNodeVersion,
   parseNodeReleaseVersion,
 } from "../../node-version.mjs";
 import { formatConsoleDiagnosticBlock } from "../logging/json-console-line.js";
@@ -110,7 +110,7 @@ function detectCurrentRuntimeSqlite(): { available: boolean; version: string | n
   }
 }
 
-/** Returns whether a detected runtime meets OpenClaw's minimum runtime contract. */
+/** Returns whether a detected runtime meets Carapace's minimum runtime contract. */
 function runtimeSatisfies(details: RuntimeDetails): boolean {
   if (details.kind === "node") {
     return isSupportedNodeVersion(details.version);
@@ -126,17 +126,17 @@ function runtimeSatisfies(details: RuntimeDetails): boolean {
   return false;
 }
 
-/** Returns whether the current process runtime satisfies OpenClaw's engine contract. */
+/** Returns whether the current process runtime satisfies Carapace's engine contract. */
 export function isCurrentRuntimeSupported(): boolean {
   return runtimeSatisfies(detectRuntime());
 }
 
-/** Checks a Node version label against OpenClaw's supported Node version range. */
+/** Checks a Node version label against Carapace's supported Node version range. */
 export function isSupportedNodeVersion(version: string | null): boolean {
-  return isSupportedOpenClawNodeVersion(version);
+  return isSupportedCarapaceNodeVersion(version);
 }
 
-/** Checks a Bun version label against OpenClaw's minimum supported release. */
+/** Checks a Bun version label against Carapace's minimum supported release. */
 export function isSupportedBunVersion(version: string | null): boolean {
   return isAtLeast(parseSemver(version), MINIMUM_BUN_VERSION);
 }
@@ -208,12 +208,12 @@ export function assertSupportedRuntime(
   const execLabel = details.execPath ?? "unknown";
   const requirement =
     details.kind === "bun"
-      ? "openclaw requires Bun 1.4 or newer with WAL-reset-safe node:sqlite (SQLite 3.51.3+ or a patched 3.50.x/3.44.x release)."
-      : "openclaw requires Node >=24.16.0 <25, or >=26.1.0.";
+      ? "carapace requires Bun 1.4 or newer with WAL-reset-safe node:sqlite (SQLite 3.51.3+ or a patched 3.50.x/3.44.x release)."
+      : "carapace requires Node >=24.16.0 <25, or >=26.1.0.";
   const retryHint =
     details.kind === "bun"
-      ? "Upgrade Bun or run OpenClaw with a supported Node release."
-      : "Upgrade Node and re-run openclaw.";
+      ? "Upgrade Bun or run Carapace with a supported Node release."
+      : "Upgrade Node and re-run carapace.";
 
   runtime.error(
     [

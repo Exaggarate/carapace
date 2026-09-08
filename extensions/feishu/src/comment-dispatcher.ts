@@ -1,8 +1,8 @@
 // Feishu plugin module implements comment dispatcher behavior.
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
-import type { ChannelInboundTurnPlan } from "openclaw/plugin-sdk/channel-inbound";
-import { createReplyPrefixContext } from "openclaw/plugin-sdk/channel-outbound";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
+import { resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
+import type { ChannelInboundTurnPlan } from "carapace/plugin-sdk/channel-inbound";
+import { createReplyPrefixContext } from "carapace/plugin-sdk/channel-outbound";
+import { resolveSendableOutboundReplyParts } from "carapace/plugin-sdk/reply-payload";
 import type { ClawdbotConfig, ReplyPayload, RuntimeEnv } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";

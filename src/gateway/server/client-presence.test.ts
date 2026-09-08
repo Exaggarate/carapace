@@ -107,7 +107,7 @@ describe("live person presence timing", () => {
         minProtocol: 1,
         maxProtocol: 1,
         role: "operator",
-        client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+        client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       },
       authenticatedUserId: email,
       authenticatedUserProfile: {

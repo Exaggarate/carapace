@@ -2,24 +2,24 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   clearRuntimeAuthProfileStoreSnapshots,
   ensureAuthProfileStore,
   saveAuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { MAX_DATE_TIMESTAMP_MS, MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
+import { MAX_DATE_TIMESTAMP_MS, MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import type {
-  OpenClawConfig,
-  OpenClawPluginApi,
+  CarapaceConfig,
+  CarapacePluginApi,
   ProviderAuthResult,
   ProviderCatalogResult,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import type { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import type { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { runGitHubCopilotDeviceFlow } from "./login.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { CopilotRuntimeAuthError } from "./runtime-auth-error.js";
 
 const mocks = vi.hoisted(() => ({
@@ -36,9 +36,9 @@ function requireAuthMethod<T>(methods: readonly T[], index: number): T {
   return expectDefined(methods[index], `GitHub Copilot auth method ${index}`);
 }
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-    "openclaw/plugin-sdk/ssrf-runtime",
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/ssrf-runtime")>(
+    "carapace/plugin-sdk/ssrf-runtime",
   );
   return {
     ...actual,
@@ -56,12 +56,12 @@ vi.mock("./register.runtime.js", () => ({
 import plugin from "./index.js";
 
 const tempDirs: string[] = [];
-type RegisteredProvider = Parameters<OpenClawPluginApi["registerProvider"]>[0];
+type RegisteredProvider = Parameters<CarapacePluginApi["registerProvider"]>[0];
 type GithubCopilotTestProvider = RegisteredProvider & {
   auth: Array<{
     id: string;
     run: (ctx: unknown) => Promise<ProviderAuthResult | null>;
-    runNonInteractive: (ctx: unknown) => Promise<OpenClawConfig | null>;
+    runNonInteractive: (ctx: unknown) => Promise<CarapaceConfig | null>;
   }>;
   catalog: {
     run: (ctx: unknown) => Promise<ProviderCatalogResult>;
@@ -115,7 +115,7 @@ async function runDeviceAuthWithFakeTimers<T>(
 }
 
 async function createAgentDir() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-github-copilot-test-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-github-copilot-test-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -147,7 +147,7 @@ function writeExistingCopilotTokenProfile(agentDir: string) {
 }
 
 function registerProviderWithPluginConfig(pluginConfig: Record<string, unknown>) {
-  const registerProviderMock = vi.fn<OpenClawPluginApi["registerProvider"]>();
+  const registerProviderMock = vi.fn<CarapacePluginApi["registerProvider"]>();
   plugin.register(
     createTestPluginApi({
       id: "github-copilot",
@@ -532,7 +532,7 @@ describe("github-copilot plugin", () => {
   });
 
   it("registers embedding provider", () => {
-    const registerEmbeddingProviderMock = vi.fn<OpenClawPluginApi["registerEmbeddingProvider"]>();
+    const registerEmbeddingProviderMock = vi.fn<CarapacePluginApi["registerEmbeddingProvider"]>();
 
     plugin.register(
       createTestPluginApi({
@@ -724,7 +724,7 @@ describe("github-copilot plugin", () => {
                 apiKey: {
                   source: "env",
                   provider: "default",
-                  id: "OPENCLAW_MISSING_COPILOT_CATALOG_TOKEN",
+                  id: "CARAPACE_MISSING_COPILOT_CATALOG_TOKEN",
                 },
               },
             },
@@ -1249,7 +1249,7 @@ describe("github-copilot plugin", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const profileContext = {
         config,
         agentDir,
@@ -1374,7 +1374,7 @@ describe("github-copilot plugin", () => {
       });
       expect(result.profiles[0]?.secretStorage).toBeUndefined();
       expect(result.notes).toContain(
-        "Plaintext secret input mode was selected, so the GitHub Copilot token will remain inline in the auth profile and openclaw secrets audit --check will report it.",
+        "Plaintext secret input mode was selected, so the GitHub Copilot token will remain inline in the auth profile and carapace secrets audit --check will report it.",
       );
     } finally {
       vi.unstubAllGlobals();

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { loadNodeExecAvailability } from "../agents/node-exec-availability.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setPluginToolMeta } from "../plugins/tool-metadata.js";
 import {
   McpLoopbackToolCache,
@@ -35,7 +35,7 @@ function scopedToolFixture(names: string[]) {
 type ScopeParams = Parameters<typeof resolveMcpLoopbackScopedTools>[0];
 
 function scopeParams({
-  cfg = {} as OpenClawConfig,
+  cfg = {} as CarapaceConfig,
   grantToken,
   ...context
 }: Partial<ScopeParams["context"] & Pick<ScopeParams, "cfg" | "grantToken">> = {}): ScopeParams {
@@ -381,14 +381,14 @@ describe("McpLoopbackToolCache", () => {
           displayName: "shared-name",
           connected: true,
           commands: [],
-          clientId: eligibleIsCurrent ? "clawdbot-node" : "openclaw-node",
+          clientId: eligibleIsCurrent ? "clawdbot-node" : "carapace-node",
         },
         {
           nodeId: "worker",
           displayName: "shared-name",
           connected: true,
           commands: ["system.run"],
-          clientId: eligibleIsCurrent ? "openclaw-node" : "clawdbot-node",
+          clientId: eligibleIsCurrent ? "carapace-node" : "clawdbot-node",
         },
       ]);
       const scoped = await cache.resolve(params);
@@ -399,8 +399,8 @@ describe("McpLoopbackToolCache", () => {
   it("expires at the ttl boundary and partitions rows by config identity", async () => {
     vi.useFakeTimers();
     const cache = new McpLoopbackToolCache();
-    const cfgA = {} as OpenClawConfig;
-    const cfgB = {} as OpenClawConfig;
+    const cfgA = {} as CarapaceConfig;
+    const cfgB = {} as CarapaceConfig;
     const paramsA = scopeParams({ cfg: cfgA });
 
     await cache.resolve(paramsA);
@@ -418,7 +418,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("does not share cache rows across different grant allowlists", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     const unrestricted = await cache.resolve(scopeParams({ cfg }));
     const restricted = await cache.resolve(scopeParams({ cfg, toolsAllow: ["memory_search"] }));
@@ -436,7 +436,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("does not share cache rows across different runtime policy agents", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await cache.resolve(scopeParams({ cfg, runtimePolicyAgentId: "main" }));
     await cache.resolve(scopeParams({ cfg, runtimePolicyAgentId: "worker" }));
@@ -447,7 +447,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("does not share loopback tools across prepared vision capabilities", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await cache.resolve(scopeParams({ cfg, modelHasVision: true }));
     await cache.resolve(scopeParams({ cfg, modelHasVision: false }));
@@ -464,7 +464,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("does not share loopback message tools across prepared reply modes", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await cache.resolve(scopeParams({ cfg, replyToMode: "all" }));
     await cache.resolve(scopeParams({ cfg, replyToMode: "off" }));
@@ -496,7 +496,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("evicts only the revoked grant's cached tool closures", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await cache.resolve(scopeParams({ cfg, grantToken: "grant-a" }));
     await cache.resolve(scopeParams({ cfg, grantToken: "grant-b" }));
@@ -513,7 +513,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("preserves the global 256-entry cache cap across grants", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     for (let index = 0; index < 256; index += 1) {
       await cache.resolve(
@@ -532,7 +532,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("never reuses ordinary private-mode tools for a source-reply-only grant", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const params = scopeParams({
       cfg,
       messageProvider: "telegram",
@@ -553,7 +553,7 @@ describe("McpLoopbackToolCache", () => {
 
   it("does not share cache rows across delegation capabilities", async () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await cache.resolve(scopeParams({ cfg }));
     await cache.resolve(scopeParams({ cfg, delegationCapability: "report_only" }));

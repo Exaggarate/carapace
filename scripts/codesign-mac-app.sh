@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_BUNDLE="dist/OpenClaw.app"
+APP_BUNDLE="dist/Carapace.app"
 IDENTITY="${SIGN_IDENTITY:-}"
-SIGNING_VARIANT="${OPENCLAW_MAC_SIGNING_VARIANT:-standard}"
-ELEVATION_IDENTITY="Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)"
+SIGNING_VARIANT="${CARAPACE_MAC_SIGNING_VARIANT:-standard}"
+ELEVATION_IDENTITY="Developer ID Application: Carapace Foundation (FWJYW4S8P8)"
 ELEVATION_TEAM_ID="FWJYW4S8P8"
 TIMESTAMP_MODE="${CODESIGN_TIMESTAMP:-auto}"
 CODESIGN_TIMESTAMP_RETRY_ATTEMPTS="${CODESIGN_TIMESTAMP_RETRY_ATTEMPTS:-8}"
@@ -25,7 +25,7 @@ Usage: scripts/codesign-mac-app.sh [app-bundle]
 
 Env:
   SIGN_IDENTITY="Apple Development: Your Name (TEAMID)"
-  OPENCLAW_MAC_SIGNING_VARIANT=standard|elevation-host
+  CARAPACE_MAC_SIGNING_VARIANT=standard|elevation-host
   ALLOW_ADHOC_SIGNING=1
   CODESIGN_TIMESTAMP=auto|on|off
   CODESIGN_TIMESTAMP_RETRY_ATTEMPTS=8
@@ -39,7 +39,7 @@ fi
 case "$SIGNING_VARIANT" in
   standard|elevation-host) ;;
   *)
-    echo "ERROR: Unknown OPENCLAW_MAC_SIGNING_VARIANT value: $SIGNING_VARIANT (use standard|elevation-host)" >&2
+    echo "ERROR: Unknown CARAPACE_MAC_SIGNING_VARIANT value: $SIGNING_VARIANT (use standard|elevation-host)" >&2
     exit 1
     ;;
 esac
@@ -202,7 +202,7 @@ if [[ ! "$CODESIGN_TIMESTAMP_RETRY_DELAY_SECONDS" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
-ENT_TMP_DIR=$(mktemp -d -t openclaw-entitlements.XXXXXX)
+ENT_TMP_DIR=$(mktemp -d -t carapace-entitlements.XXXXXX)
 trap cleanup EXIT
 ENT_TMP_DIR="$(cd -P -- "$ENT_TMP_DIR" && pwd -P)"
 ENT_TMP_APP="$ENT_TMP_DIR/app.plist"
@@ -431,12 +431,12 @@ fi
 run_bundle_mutation xattr -cr "$APP_BUNDLE" 2>/dev/null || true
 
 # Sign bundled helper binaries before signing the app bundle.
-MAC_CONTROL_CLI="$APP_BUNDLE/Contents/MacOS/openclaw-mac"
+MAC_CONTROL_CLI="$APP_BUNDLE/Contents/MacOS/carapace-mac"
 if [ -f "$MAC_CONTROL_CLI" ]; then
   echo "Signing macOS control CLI"; sign_plain_item "$MAC_CONTROL_CLI"
 fi
 
-MLX_TTS_HELPER="$APP_BUNDLE/Contents/MacOS/openclaw-mlx-tts"
+MLX_TTS_HELPER="$APP_BUNDLE/Contents/MacOS/carapace-mlx-tts"
 if [ -f "$MLX_TTS_HELPER" ]; then
   echo "Signing MLX TTS helper"; sign_plain_item "$MLX_TTS_HELPER"
 fi

@@ -142,7 +142,7 @@ describe("native UI built-in delegation", () => {
     await vi.waitFor(() => expect(contexts).toHaveLength(1));
     const current = contexts[0];
     const view = host.querySelector<LitElement & { props: ControlUiSurfaceProps["composer"] }>(
-      "openclaw-plugin-view",
+      "carapace-plugin-view",
     );
     if (!current || !view) {
       throw new Error("Expected the composer replacement to mount");
@@ -200,7 +200,7 @@ describe("native UI built-in delegation", () => {
       const { host, request } = mountSurface(replacement);
       await vi.waitFor(() => expect(roots).toHaveLength(1));
       const current = contexts.at(-1);
-      const view = host.querySelector<LitElement & { presented: boolean }>("openclaw-plugin-view");
+      const view = host.querySelector<LitElement & { presented: boolean }>("carapace-plugin-view");
       if (!current || !view) {
         throw new Error("Expected the composer replacement to mount");
       }
@@ -274,11 +274,11 @@ describe("native UI built-in delegation", () => {
       },
     });
     await vi.waitFor(() => expect(host.textContent).toBe("Custom workspace"));
-    const retired = host.querySelector<LitElement>("openclaw-plugin-view")!;
+    const retired = host.querySelector<LitElement>("carapace-plugin-view")!;
     expect(link.isConnected).toBe(false);
 
     select();
-    await vi.waitFor(() => expect(host.querySelector("openclaw-plugin-view")).toBeNull());
+    await vi.waitFor(() => expect(host.querySelector("carapace-plugin-view")).toBeNull());
     await retired.updateComplete;
     expect(host.querySelector("nav")).toBe(host.navigation);
     expect(link.isConnected).toBe(true);
@@ -304,19 +304,19 @@ describe("native UI built-in delegation", () => {
     };
     const { host, reportError, listeners, select } = mountSurface();
     await host.updateComplete;
-    expect(host.querySelector("openclaw-plugin-view")).toBeNull();
+    expect(host.querySelector("carapace-plugin-view")).toBeNull();
     host.querySelector<HTMLButtonElement>(".builtin-action")!.click();
     expect(host.count).toBe(1);
 
     select(replacement);
     await vi.waitFor(() =>
-      expect(host.querySelector("openclaw-plugin-view button")).not.toBeNull(),
+      expect(host.querySelector("carapace-plugin-view button")).not.toBeNull(),
     );
     host.querySelector<HTMLButtonElement>(".builtin-action")!.click();
     expect(host.count).toBe(2);
 
     select();
-    await vi.waitFor(() => expect(host.querySelector("openclaw-plugin-view")).toBeNull());
+    await vi.waitFor(() => expect(host.querySelector("carapace-plugin-view")).toBeNull());
     host.querySelector<HTMLButtonElement>(".builtin-action")!.click();
     expect(host.count).toBe(3);
     expect(dispose).toHaveBeenCalledOnce();
@@ -370,7 +370,7 @@ describe("native UI built-in delegation", () => {
     host.remove();
     expect(signals[2]?.aborted).toBe(true);
     expect(listeners.size).toBe(0);
-    const view = host.querySelector<LitElement>("openclaw-plugin-view")!;
+    const view = host.querySelector<LitElement>("carapace-plugin-view")!;
     view.requestUpdate();
     await view.updateComplete;
     expect(roots).toHaveLength(3);

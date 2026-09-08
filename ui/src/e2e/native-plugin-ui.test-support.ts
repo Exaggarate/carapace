@@ -9,7 +9,7 @@ export function catalog(revision: string) {
         pluginId,
         name: "UI fixture",
         revision,
-        entryUrl: `/__openclaw__/plugins/control-ui/${pluginId}/${revision}/index.js`,
+        entryUrl: `/__carapace__/plugins/control-ui/${pluginId}/${revision}/index.js`,
         styles: [],
       },
     ],

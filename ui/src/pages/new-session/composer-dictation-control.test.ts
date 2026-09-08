@@ -133,7 +133,7 @@ describe("NewSessionDictationControl", () => {
     expect(microphone).not.toBeNull();
     expect(microphone?.classList.contains("chat-send-btn--hold-enabled")).toBe(false);
     expect(
-      (microphone?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+      (microphone?.closest("carapace-tooltip") as (HTMLElement & { content?: string }) | null)
         ?.content,
     ).toBe("Dictate");
     expect(captureSelection).toHaveBeenCalledOnce();

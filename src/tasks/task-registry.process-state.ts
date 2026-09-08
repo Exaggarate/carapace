@@ -1,5 +1,5 @@
 // Tracks task process state transitions used to reconcile running work.
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import type { TaskDeliveryState, TaskRecord } from "./task-registry.types.js";
 
 export type TaskRunOwner = {
@@ -41,7 +41,7 @@ type TaskRegistryProcessState = {
   listenerStop?: (() => void) | null;
 };
 
-const TASK_REGISTRY_PROCESS_STATE_KEY = Symbol.for("openclaw.taskRegistry.state");
+const TASK_REGISTRY_PROCESS_STATE_KEY = Symbol.for("carapace.taskRegistry.state");
 
 /** Returns the singleton in-process task registry state. */
 export function getTaskRegistryProcessState(): TaskRegistryProcessState {

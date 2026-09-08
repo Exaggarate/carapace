@@ -13,16 +13,16 @@ import {
 import { seedSkillLibrarySelection } from "../../skills/library/selection.js";
 import { saveSkillLibrary } from "../../skills/library/service.js";
 import type { SkillLibraryAuthority } from "../../skills/library/store.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import { skillsLibraryHandlers } from "./skills-library.js";
 import type { GatewayRequestHandlerOptions } from "./types.js";
 
 const temps = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     cleanup();
   }),
@@ -33,7 +33,7 @@ const content =
 describe("read-only session skill library projection", () => {
   it("exposes exact private pins to a shared-session reader without granting library access or changing selections", async () => {
     const root = temps.make("library-session-projection-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", root);
+    vi.stubEnv("CARAPACE_STATE_DIR", root);
     const alice = ensureProfileForEmail("alice@example.test");
     const bob = ensureProfileForEmail("bob@example.test");
     const cfg = { agents: { list: [{ id: "main", workspace: path.join(root, "workspace") }] } };

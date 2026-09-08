@@ -50,12 +50,12 @@ async function recordUpdateTraffic(page: Page): Promise<MockGatewayRequest[]> {
     // stale-chunk recovery and the explicit reload that tests non-replay.
     window.addEventListener("DOMContentLoaded", () => {
       const gatewayWindow = window as unknown as {
-        openclawControlUiE2eGateway: { requests: MockGatewayRequest[] };
+        carapaceControlUiE2eGateway: { requests: MockGatewayRequest[] };
         recordUpdateTraffic: (request: MockGatewayRequest) => Promise<void>;
       };
-      const requests = gatewayWindow.openclawControlUiE2eGateway.requests;
+      const requests = gatewayWindow.carapaceControlUiE2eGateway.requests;
       const record = (request: MockGatewayRequest) => {
-        if (request.method === "update.run" || request.method === "openclaw.chat") {
+        if (request.method === "update.run" || request.method === "carapace.chat") {
           void gatewayWindow.recordUpdateTraffic(request);
         }
       };
@@ -98,7 +98,7 @@ suite.define(() => {
           const config = { update: { channel: "stable", auto: { enabled: true } } };
           const gateway = await installMockGateway(page, {
             deferredMethods: ["update.run"],
-            featureMethods: [...defaultControlUiFeatureMethods, "openclaw.chat"],
+            featureMethods: [...defaultControlUiFeatureMethods, "carapace.chat"],
             updateAvailable: { channel: "stable", currentVersion: "1.0.0", latestVersion: "2.0.0" },
             methodResponses: {
               "config.get": {
@@ -110,7 +110,7 @@ suite.define(() => {
                 issues: [],
               },
               "update.status": { sentinel: null, schedule: SCHEDULE },
-              "openclaw.chat": {
+              "carapace.chat": {
                 sequence: [
                   {
                     sessionId: "update-triage-session",
@@ -130,7 +130,7 @@ suite.define(() => {
           const questions = () =>
             traffic.filter(
               ({ method, params }) =>
-                method === "openclaw.chat" &&
+                method === "carapace.chat" &&
                 params !== null &&
                 typeof params === "object" &&
                 "message" in params,
@@ -157,7 +157,7 @@ suite.define(() => {
           } else {
             await page.getByRole("button", { name: "Update now", exact: true }).click();
             await page
-              .locator("openclaw-modal-dialog")
+              .locator("carapace-modal-dialog")
               .getByRole("button", { name: "Update and restart", exact: true })
               .click();
             await gateway.waitForRequest("update.run");
@@ -187,12 +187,12 @@ suite.define(() => {
             await replacementDocument;
             await gateway.waitForRequest("update.status");
             const status = page.locator("#config-section-update .settings-status");
-            await status.getByText("openclaw triage", { exact: false }).waitFor();
+            await status.getByText("carapace triage", { exact: false }).waitFor();
             expect(await status.textContent()).toContain("ENOSPC");
             expect(questions()).toHaveLength(0);
             expect(await page.locator(".custodian__alert-card").count()).toBe(0);
           } else {
-            const panel = page.locator("openclaw-assistant-panel");
+            const panel = page.locator("carapace-assistant-panel");
             await panel
               .locator(".custodian__alert-card")
               .getByText("Diagnose failed update", { exact: true })
@@ -204,13 +204,13 @@ suite.define(() => {
               message: expect.stringContaining("Do not retry the update"),
             });
             if (source === "manual") {
-              const dialog = page.locator("openclaw-modal-dialog");
+              const dialog = page.locator("carapace-modal-dialog");
               await dialog.getByRole("button", { name: "Retry update", exact: true }).waitFor();
               expect(await dialog.textContent()).toContain("ENOSPC");
               await page.screenshot({ path: path.join(artifactDir, "2-retained-failure.png") });
               await dialog.getByRole("button", { name: "Close", exact: true }).click();
             }
-            expect(await page.locator("openclaw-modal-dialog").count()).toBe(0);
+            expect(await page.locator("carapace-modal-dialog").count()).toBe(0);
             await panel.getByText(DIAGNOSTIC_REPLY, { exact: true }).waitFor();
             expect(await panel.getByText(DIAGNOSTIC_REPLY, { exact: true }).count()).toBe(1);
           }
@@ -225,10 +225,10 @@ suite.define(() => {
             await page.reload();
             await gateway.waitForRequest("update.status");
             const status = page.locator("#config-section-update .settings-status");
-            await status.getByText("openclaw triage", { exact: false }).waitFor();
+            await status.getByText("carapace triage", { exact: false }).waitFor();
             expect(await status.textContent()).toContain("ENOSPC");
             expect(await page.locator(".custodian__alert-card").count()).toBe(0);
-            expect(await page.locator("openclaw-assistant-panel .assistant-panel").count()).toBe(0);
+            expect(await page.locator("carapace-assistant-panel .assistant-panel").count()).toBe(0);
             expect(questions()).toHaveLength(1);
             expect(updateRuns()).toHaveLength(source === "automatic" ? 0 : 1);
             await page.screenshot({
@@ -281,10 +281,10 @@ suite.define(() => {
           }, storageFailure);
           // The server retains the failure independently of denied browser storage.
           const gateway = await installMockGateway(page, {
-            featureMethods: [...defaultControlUiFeatureMethods, "openclaw.chat"],
+            featureMethods: [...defaultControlUiFeatureMethods, "carapace.chat"],
             methodResponses: {
               "update.status": { sentinel: FAILURE, schedule: SCHEDULE },
-              "openclaw.chat": {
+              "carapace.chat": {
                 sessionId: "storage-failure-session",
                 reply: "Ready to help.",
                 action: "none",
@@ -297,16 +297,16 @@ suite.define(() => {
               await page.reload();
             }
             await gateway.waitForRequest("update.status");
-            const panel = page.locator("openclaw-assistant-panel");
+            const panel = page.locator("carapace-assistant-panel");
             await panel.getByText("Ready to help.", { exact: true }).first().waitFor();
             const card = panel.locator(".custodian__alert-card");
-            await card.getByText("openclaw triage", { exact: false }).waitFor();
+            await card.getByText("carapace triage", { exact: false }).waitFor();
             expect(await card.textContent()).toContain("ENOSPC");
-            await expectRequestCountStable(gateway, "openclaw.chat", 1);
+            await expectRequestCountStable(gateway, "carapace.chat", 1);
             expect(
               traffic.filter(
                 ({ method, params }) =>
-                  method === "openclaw.chat" &&
+                  method === "carapace.chat" &&
                   params &&
                   typeof params === "object" &&
                   "message" in params,

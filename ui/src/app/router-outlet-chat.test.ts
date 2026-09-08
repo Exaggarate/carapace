@@ -59,7 +59,7 @@ function sessionData(sessionKey: string, face: "chat" | "dashboard"): ChatRouteD
 }
 
 function createOutlet(router: TestRouter): RouterOutletElement {
-  const outlet = document.createElement("openclaw-router-outlet") as RouterOutletElement;
+  const outlet = document.createElement("carapace-router-outlet") as RouterOutletElement;
   outlet.router = router;
   outlet.retryContext = {};
   document.body.append(outlet);
@@ -103,11 +103,11 @@ async function routeModule(
 }
 
 afterEach(() => {
-  Reflect.deleteProperty(window, "__OPENCLAW_CONTROL_UI_BASE_PATH__");
+  Reflect.deleteProperty(window, "__CARAPACE_CONTROL_UI_BASE_PATH__");
   document.body.replaceChildren();
 });
 
-describe("openclaw-router-outlet chat ownership", () => {
+describe("carapace-router-outlet chat ownership", () => {
   it("keeps the loaded session connected and inert across Home and Settings, then restores its draft", async () => {
     const sessionKey = "agent:main:dashboard:12345678-90ab-cdef-1234-567890abcdef";
     const teardown = vi.fn(async () => undefined);

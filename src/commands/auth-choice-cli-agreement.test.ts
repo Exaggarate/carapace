@@ -2,7 +2,7 @@
 // non-interactive dispatcher accepts, so the two lists cannot drift apart.
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 
 const PROVIDER_SETUP_CONTRIBUTIONS = [
   { providerId: "demo", option: { value: "demo-api-key", label: "Demo API key" } },
@@ -70,11 +70,11 @@ async function readAcceptedAuthChoices(rejectedChoice: string): Promise<string[]
     await import("./onboard-non-interactive/local/auth-choice.js");
   const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
   const result = await applyNonInteractiveAuthChoice({
-    nextConfig: {} as OpenClawConfig,
+    nextConfig: {} as CarapaceConfig,
     authChoice: rejectedChoice,
     opts: {},
     runtime: runtime as never,
-    baseConfig: {} as OpenClawConfig,
+    baseConfig: {} as CarapaceConfig,
     target: { agentId: "main", agentDir: "/tmp/agent", workspaceDir: "/tmp/workspace" },
   });
   expect(result).toBeNull();

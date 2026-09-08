@@ -3,13 +3,13 @@ import type { Selectable } from "kysely";
 import { tryResolveLegacyCompatibilityAgentId } from "../../config/legacy.default-agent-owner.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../../config/sessions/session-store-owner.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 
-export type AcpSessionsTable = OpenClawStateKyselyDatabase["acp_sessions"];
-type AcpSessionMetaDatabase = Pick<OpenClawStateKyselyDatabase, "acp_sessions">;
+export type AcpSessionsTable = CarapaceStateKyselyDatabase["acp_sessions"];
+type AcpSessionMetaDatabase = Pick<CarapaceStateKyselyDatabase, "acp_sessions">;
 export type AcpSessionRow = Selectable<AcpSessionsTable>;
 export type AcpSessionEntryBinding = Pick<SessionEntry, "lifecycleRevision"> &
   Partial<Pick<SessionEntry, "sessionId" | "sessionStartedAt">>;
@@ -90,7 +90,7 @@ export function parseAcpDatabaseSessionKeyCandidates(sessionKey: string): Array<
 }
 
 function resolveAcpLegacyUnscopedOwner(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   storeSessionKey: string,
 ): string | undefined {
   if (!cfg) {
@@ -107,7 +107,7 @@ function resolveAcpLegacyUnscopedOwner(
 export function legacyAcpDatabaseSessionKeys(
   storeSessionKey: string,
   agentId?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): string[] {
   const normalizedKey = storeSessionKey.trim();
   const keys: string[] = [];
@@ -143,7 +143,7 @@ export function selectAcpSessionRowForStoreEntry(
   db: DatabaseSync,
   storeSessionKey: string,
   agentId?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   entry?: AcpSessionEntryBinding,
 ): AcpSessionRow | undefined {
   const databaseKey = buildAcpDatabaseSessionKey(storeSessionKey, agentId);

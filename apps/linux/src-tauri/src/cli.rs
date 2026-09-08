@@ -8,9 +8,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 #[derive(Clone, Debug)]
-pub struct OpenClawCli {
+pub struct CarapaceCli {
     executable: PathBuf,
-    openclaw_home: PathBuf,
+    carapace_home: PathBuf,
     available: Arc<AtomicBool>,
 }
 
@@ -26,7 +26,7 @@ pub enum CliError {
 impl fmt::Display for CliError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Missing => write!(formatter, "OpenClaw CLI not found"),
+            Self::Missing => write!(formatter, "Carapace CLI not found"),
             Self::Environment(message)
             | Self::Spawn(message)
             | Self::CommandFailed(message)
@@ -37,33 +37,33 @@ impl fmt::Display for CliError {
 
 impl std::error::Error for CliError {}
 
-impl OpenClawCli {
+impl CarapaceCli {
     pub fn discover() -> Result<Self, CliError> {
-        let home = openclaw_home()?;
-        if let Some(override_path) = env::var_os("OPENCLAW_DESKTOP_CLI") {
+        let home = carapace_home()?;
+        if let Some(override_path) = env::var_os("CARAPACE_DESKTOP_CLI") {
             let cli = Self::new(PathBuf::from(override_path), home);
             cli.verify()?;
             return Ok(cli);
         }
 
-        let managed = home.join("bin/openclaw");
+        let managed = home.join("bin/carapace");
         if managed.is_file() {
             let cli = Self::new(managed, home);
             cli.verify()?;
             return Ok(cli);
         }
 
-        let cli = Self::new(PathBuf::from("openclaw"), home);
+        let cli = Self::new(PathBuf::from("carapace"), home);
         match cli.verify() {
             Ok(()) => Ok(cli),
             Err(_) => Err(CliError::Missing),
         }
     }
 
-    fn new(executable: PathBuf, openclaw_home: PathBuf) -> Self {
+    fn new(executable: PathBuf, carapace_home: PathBuf) -> Self {
         Self {
             executable,
-            openclaw_home,
+            carapace_home,
             available: Arc::new(AtomicBool::new(true)),
         }
     }
@@ -78,7 +78,7 @@ impl OpenClawCli {
             return Ok(());
         }
         Err(CliError::Spawn(format!(
-            "OpenClaw CLI exited with {}",
+            "Carapace CLI exited with {}",
             output.status
         )))
     }
@@ -104,10 +104,10 @@ impl OpenClawCli {
         command.stdout(Stdio::piped()).stderr(Stdio::piped());
         let child = command.spawn().map_err(|error| {
             self.available.store(false, Ordering::Release);
-            CliError::Spawn(format!("Failed to run OpenClaw CLI: {error}"))
+            CliError::Spawn(format!("Failed to run Carapace CLI: {error}"))
         })?;
         child.wait_with_output().map_err(|error| {
-            CliError::Spawn(format!("Failed to read OpenClaw CLI output: {error}"))
+            CliError::Spawn(format!("Failed to read Carapace CLI output: {error}"))
         })
     }
 
@@ -123,18 +123,18 @@ impl OpenClawCli {
         if !output.status.success() {
             let message = output_tail(&output.stderr)
                 .or_else(|| output_tail(&output.stdout))
-                .unwrap_or_else(|| format!("OpenClaw CLI exited with {}", output.status));
+                .unwrap_or_else(|| format!("Carapace CLI exited with {}", output.status));
             return Err(CliError::CommandFailed(message));
         }
         serde_json::from_slice(&output.stdout).map_err(|error| {
-            CliError::InvalidJson(format!("OpenClaw CLI returned invalid JSON: {error}"))
+            CliError::InvalidJson(format!("Carapace CLI returned invalid JSON: {error}"))
         })
     }
 
     fn command_path(&self) -> Result<OsString, CliError> {
         let mut paths = vec![
-            self.openclaw_home.join("bin"),
-            self.openclaw_home.join("tools/node/bin"),
+            self.carapace_home.join("bin"),
+            self.carapace_home.join("tools/node/bin"),
         ];
         if let Some(current) = env::var_os("PATH") {
             paths.extend(env::split_paths(&current));
@@ -157,7 +157,7 @@ pub(crate) fn output_tail(output: &[u8]) -> Option<String> {
     (!tail.is_empty()).then(|| tail.join("\n"))
 }
 
-pub fn openclaw_home() -> Result<PathBuf, CliError> {
+pub fn carapace_home() -> Result<PathBuf, CliError> {
     #[cfg(target_os = "windows")]
     let home = env::var_os("HOME")
         .filter(|value| !value.is_empty())
@@ -165,12 +165,12 @@ pub fn openclaw_home() -> Result<PathBuf, CliError> {
     #[cfg(not(target_os = "windows"))]
     let home = env::var_os("HOME").filter(|value| !value.is_empty());
     let home = home.ok_or_else(|| CliError::Environment("HOME is not set".to_string()))?;
-    Ok(PathBuf::from(home).join(".openclaw"))
+    Ok(PathBuf::from(home).join(".carapace"))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{output_tail, OpenClawCli};
+    use super::{output_tail, CarapaceCli};
     use std::path::PathBuf;
 
     #[test]
@@ -194,8 +194,8 @@ mod tests {
 
     #[test]
     fn missing_executable_invalidates_the_cached_cli() {
-        let cli = OpenClawCli::new(
-            PathBuf::from("openclaw-test-executable-that-does-not-exist"),
+        let cli = CarapaceCli::new(
+            PathBuf::from("carapace-test-executable-that-does-not-exist"),
             PathBuf::new(),
         );
 

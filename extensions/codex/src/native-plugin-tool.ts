@@ -1,8 +1,8 @@
 /** Owner-scoped, read-only discovery of plugins already known to Codex. */
-import type { AnyAgentTool } from "openclaw/plugin-sdk/core";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { asOptionalRecord as readRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { jsonResult } from "openclaw/plugin-sdk/tool-results";
+import type { AnyAgentTool } from "carapace/plugin-sdk/core";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import { asOptionalRecord as readRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { jsonResult } from "carapace/plugin-sdk/tool-results";
 import { Type } from "typebox";
 import { CODEX_CONTROL_METHODS } from "./app-server/capabilities.js";
 import { sessionBindingIdentity } from "./app-server/session-binding-record.js";
@@ -25,7 +25,7 @@ const CodexPluginsParamsSchema = Type.Object(
 
 type CodexPluginsToolOptions = {
   bindingStore: Pick<CodexAppServerBindingStore, "read">;
-  context: OpenClawPluginToolContext;
+  context: CarapacePluginToolContext;
   getPluginConfig: () => unknown;
   request?: typeof codexControlRequest;
 };

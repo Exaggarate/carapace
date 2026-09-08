@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import packageJson from "../package.json" with { type: "json" };
-import { laneResources, lanesNeedOpenClawPackage, laneWeight } from "./lib/docker-e2e-plan.mts";
+import { laneResources, lanesNeedCarapacePackage, laneWeight } from "./lib/docker-e2e-plan.mts";
 import {
   allReleasePathLanes,
   mainLanes,
@@ -112,7 +112,7 @@ function validateUniqueLanes(label: string, lanes: readonly (typeof mainLanes)[n
 function validateLane(label: string, lane: (typeof mainLanes)[number]) {
   const resources = laneResources(lane);
   const sourceCheckoutImageLane = sourceCheckoutImageLanes.has(lane.name);
-  const needsPackage = lanesNeedOpenClawPackage([lane]);
+  const needsPackage = lanesNeedCarapacePackage([lane]);
   const localImageBuild = sourceCheckoutImageLane || (needsPackage && !lane.e2eImageKind);
   if (!lane.name || typeof lane.name !== "string") {
     errors.push(`${label}: Docker E2E lane is missing a string name`);
@@ -138,7 +138,7 @@ function validateLane(label: string, lane: (typeof mainLanes)[number]) {
       `${label}: package Docker E2E lane '${lane.name}' must request package preparation`,
     );
   }
-  if (localImageBuild && !/\bOPENCLAW_SKIP_DOCKER_BUILD=0\b/u.test(lane.command)) {
+  if (localImageBuild && !/\bCARAPACE_SKIP_DOCKER_BUILD=0\b/u.test(lane.command)) {
     errors.push(
       `${label}: locally built Docker E2E lane '${lane.name}' must force a local image build`,
     );

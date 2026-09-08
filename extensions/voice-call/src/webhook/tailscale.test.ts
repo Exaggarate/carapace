@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { runCommandMock } = vi.hoisted(() => ({ runCommandMock: vi.fn() }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", () => ({
+vi.mock("carapace/plugin-sdk/process-runtime", () => ({
   runCommandWithTimeout: runCommandMock,
 }));
 

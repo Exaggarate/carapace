@@ -1,12 +1,12 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
 import { Api } from "grammy";
-import { buildHistoryContext } from "openclaw/plugin-sdk/reply-history";
+import { buildHistoryContext } from "carapace/plugin-sdk/reply-history";
 import {
   createReplyDispatcher,
   dispatchInboundMessage,
   type ReplyPayload,
-} from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/reply-runtime";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createTelegramDraftStream } from "./draft-stream.js";
 import { splitTelegramReasoningText } from "./reasoning-lane-coordinator.js";
@@ -150,8 +150,8 @@ describe("reply scaffolding through final preparation and Telegram HTTP", () => 
   it.each([false, true])(
     "cleans reasoning previews before Telegram HTTP (visible=%s)",
     async (visible) => {
-      const opening = "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>";
-      const internal = `${opening}\nprivate runtime metadata\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>`;
+      const opening = "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>";
+      const internal = `${opening}\nprivate runtime metadata\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>`;
       const snapshots = [opening.slice(0, 20), `${opening}\nprivate runtime metadata`, internal];
       if (visible) {
         snapshots.push(
@@ -176,7 +176,7 @@ describe("reply scaffolding through final preparation and Telegram HTTP", () => 
     const conversationContext = buildHistoryContext({
       historyText: "[Telegram] Alice: private history paragraph",
       currentMessage: [
-        "Conversation info: ⟦openclaw:ctx⟧",
+        "Conversation info: ⟦carapace:ctx⟧",
         "```json",
         '{"private":"sender metadata"}',
         "```",
@@ -260,10 +260,10 @@ describe("reply scaffolding through final preparation and Telegram HTTP", () => 
       "another message. This context is runtime-generated, not user-authored.",
       "Keep internal details private.",
       "",
-      "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
-      "Conversation info: (openclaw:ctx)",
+      "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
+      "Conversation info: (carapace:ctx)",
       '{"chat_id":"telegram:123","message_id":"925"}',
-      "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+      "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
       "",
       "Visible answer.",
     ].join("\n");
@@ -271,7 +271,7 @@ describe("reply scaffolding through final preparation and Telegram HTTP", () => 
     await prepareAndDispatch({ text: leaked });
 
     expect(delivered).toEqual(["Visible answer."]);
-    expect(delivered.join("\n")).not.toContain("<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>");
+    expect(delivered.join("\n")).not.toContain("<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>");
     expect(delivered.join("\n")).not.toContain("Keep internal details private.");
   });
 

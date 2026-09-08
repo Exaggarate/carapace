@@ -1,12 +1,12 @@
 import Foundation
 import GRDB
-import OpenClawProtocol
+import CarapaceProtocol
 import Testing
 import UIKit
 import UserNotifications
-@testable import OpenClaw
-@testable import OpenClawChatUI
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceChatUI
+@testable import CarapaceKit
 
 @MainActor
 private final class MockVoiceNoteAudioCapture: VoiceNoteAudioCapture {
@@ -36,15 +36,15 @@ private actor CancellingCameraService: CameraServicing {
     }
 
     func snap(
-        params _: OpenClawCameraSnapParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraSnapResult
+        params _: CarapaceCameraSnapParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraSnapResult
     {
         throw CancellationError()
     }
 
     func clip(
-        params _: OpenClawCameraClipParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraClipResult
+        params _: CarapaceCameraClipParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraClipResult
     {
         throw CancellationError()
     }
@@ -58,15 +58,15 @@ private actor RecordingCameraService: CameraServicing {
     }
 
     func snap(
-        params _: OpenClawCameraSnapParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraSnapResult
+        params _: CarapaceCameraSnapParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraSnapResult
     {
         (format: "jpg", base64: "", width: 1, height: 1)
     }
 
     func clip(
-        params _: OpenClawCameraClipParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraClipResult
+        params _: CarapaceCameraClipParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraClipResult
     {
         self.clipCalls += 1
         return (format: "mp4", base64: "", durationMs: 1, hasAudio: true)
@@ -102,11 +102,11 @@ private actor WatchApprovalReadbackProbe {
 }
 
 private actor MockHealthSummaryService: HealthSummaryServicing {
-    private(set) var periods: [OpenClawHealthSummaryPeriod] = []
+    private(set) var periods: [CarapaceHealthSummaryPeriod] = []
 
-    func summary(params: OpenClawHealthSummaryParams) async throws -> OpenClawHealthSummaryPayload {
+    func summary(params: CarapaceHealthSummaryParams) async throws -> CarapaceHealthSummaryPayload {
         self.periods.append(params.period)
-        return OpenClawHealthSummaryPayload(
+        return CarapaceHealthSummaryPayload(
             period: params.period,
             startISO: "2026-07-06T00:00:00Z",
             endISO: "2026-07-12T18:30:00Z",
@@ -131,15 +131,15 @@ private actor BlockingAudioCameraService: CameraServicing {
     }
 
     func snap(
-        params _: OpenClawCameraSnapParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraSnapResult
+        params _: CarapaceCameraSnapParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraSnapResult
     {
         (format: "jpg", base64: "", width: 1, height: 1)
     }
 
     func clip(
-        params _: OpenClawCameraClipParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraClipResult
+        params _: CarapaceCameraClipParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraClipResult
     {
         await self.barrier.suspendFirstPreparation()
         try Task.checkCancellation()
@@ -166,7 +166,7 @@ private actor BlockingAudioScreenRecorder: ScreenRecordingServicing {
         await self.barrier.suspendFirstPreparation()
         try Task.checkCancellation()
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("openclaw-screen-test-\(UUID().uuidString).mp4")
+            .appendingPathComponent("carapace-screen-test-\(UUID().uuidString).mp4")
         try Data().write(to: url)
         return url.path
     }
@@ -218,8 +218,8 @@ private actor OverlappingCameraService: CameraServicing {
     }
 
     func snap(
-        params _: OpenClawCameraSnapParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraSnapResult
+        params _: CarapaceCameraSnapParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraSnapResult
     {
         self.snapCount += 1
         if self.snapCount == 1 {
@@ -236,8 +236,8 @@ private actor OverlappingCameraService: CameraServicing {
     }
 
     func clip(
-        params _: OpenClawCameraClipParams,
-        defaultFacing _: OpenClawCameraFacing) async throws -> OpenClawCameraClipResult
+        params _: CarapaceCameraClipParams,
+        defaultFacing _: CarapaceCameraFacing) async throws -> CarapaceCameraClipResult
     {
         throw CancellationError()
     }
@@ -295,7 +295,7 @@ private func waitForTalkCondition(_ condition: @MainActor () -> Bool) async {
     Issue.record("Timed out waiting for Talk state")
 }
 
-private func talkRequest(id: String, command: OpenClawTalkCommand) -> BridgeInvokeRequest {
+private func talkRequest(id: String, command: CarapaceTalkCommand) -> BridgeInvokeRequest {
     BridgeInvokeRequest(id: id, command: command.rawValue)
 }
 
@@ -312,7 +312,7 @@ private func makeAgentDeepLinkURL(
     key: String? = nil) -> URL
 {
     var components = URLComponents()
-    components.scheme = "openclaw"
+    components.scheme = "carapace"
     components.host = "agent"
     var queryItems: [URLQueryItem] = [URLQueryItem(name: "message", value: message)]
     if deliver {
@@ -339,10 +339,10 @@ private func makeWatchChatRawMessage(
     idempotencyKey: String? = nil,
     stopReason: String? = nil) throws -> AnyCodable
 {
-    let message = OpenClawChatMessage(
+    let message = CarapaceChatMessage(
         role: role,
         content: [
-            OpenClawChatMessageContent(
+            CarapaceChatMessageContent(
                 type: type,
                 text: text,
                 mimeType: nil,
@@ -372,12 +372,12 @@ private func makeProjectedWatchChatRawMessage(
         "role": role,
         "content": [["type": "text", "text": text]],
         "timestamp": timestamp,
-        "__openclaw": metadata,
+        "__carapace": metadata,
     ]
     object["idempotencyKey"] = idempotencyKey
     object["stopReason"] = stopReason
     if isMessageToolMirror {
-        object["openclawMessageToolMirror"] = [
+        object["carapaceMessageToolMirror"] = [
             "toolName": "message",
             "sourceReplySink": "internal-ui",
             "sourceMessageSeq": 42,
@@ -621,7 +621,7 @@ private func makeWatchApprovalSnapshotRequest(
 
 private func makeWatchAppCommand(
     _ id: String,
-    _ command: OpenClawWatchAppCommand,
+    _ command: CarapaceWatchAppCommand,
     session: String? = "main",
     gateway: String? = nil,
     text: String? = nil,
@@ -683,24 +683,24 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         transport: "sendMessage")
     var sendError: Error?
     var sendNotificationHandler: (() async throws -> WatchNotificationSendResult)?
-    var sendChatDeliveryReceiptHandler: ((OpenClawWatchChatDeliveryReceipt) async throws
+    var sendChatDeliveryReceiptHandler: ((CarapaceWatchChatDeliveryReceipt) async throws
         -> WatchNotificationSendResult)?
-    var lastSent: (id: String, params: OpenClawWatchNotifyParams, gatewayStableID: String?)?
+    var lastSent: (id: String, params: CarapaceWatchNotifyParams, gatewayStableID: String?)?
     var lastDirectNodeSetupCode: String?
-    var lastSentExecApprovalPrompt: OpenClawWatchExecApprovalPromptMessage?
-    var sentExecApprovalPrompts: [OpenClawWatchExecApprovalPromptMessage] = []
-    var lastSentExecApprovalResolved: OpenClawWatchExecApprovalResolvedMessage?
-    var lastSentExecApprovalExpired: OpenClawWatchExecApprovalExpiredMessage?
-    var lastSentExecApprovalSnapshot: OpenClawWatchExecApprovalSnapshotMessage?
-    var sentExecApprovalSnapshots: [OpenClawWatchExecApprovalSnapshotMessage] = []
-    var lastSentAppSnapshot: OpenClawWatchAppSnapshotMessage?
-    var syncExecApprovalSnapshotHandler: ((OpenClawWatchExecApprovalSnapshotMessage) async throws
+    var lastSentExecApprovalPrompt: CarapaceWatchExecApprovalPromptMessage?
+    var sentExecApprovalPrompts: [CarapaceWatchExecApprovalPromptMessage] = []
+    var lastSentExecApprovalResolved: CarapaceWatchExecApprovalResolvedMessage?
+    var lastSentExecApprovalExpired: CarapaceWatchExecApprovalExpiredMessage?
+    var lastSentExecApprovalSnapshot: CarapaceWatchExecApprovalSnapshotMessage?
+    var sentExecApprovalSnapshots: [CarapaceWatchExecApprovalSnapshotMessage] = []
+    var lastSentAppSnapshot: CarapaceWatchAppSnapshotMessage?
+    var syncExecApprovalSnapshotHandler: ((CarapaceWatchExecApprovalSnapshotMessage) async throws
         -> WatchNotificationSendResult)?
-    var sentChatReceipts: [OpenClawWatchChatDeliveryReceipt] = []
-    var lastChatDeliveryContext: OpenClawWatchChatDeliveryContext?
+    var sentChatReceipts: [CarapaceWatchChatDeliveryReceipt] = []
+    var lastChatDeliveryContext: CarapaceWatchChatDeliveryContext?
     private var statusHandler: (@Sendable (WatchMessagingStatus) -> Void)?
-    private var chatDeliveryHandler: (@Sendable (OpenClawWatchChatDeliveryCommand) async throws -> Void)?
-    private var chatReceiptAckHandler: (@Sendable (OpenClawWatchChatDeliveryReceiptAck) async throws -> Void)?
+    private var chatDeliveryHandler: (@Sendable (CarapaceWatchChatDeliveryCommand) async throws -> Void)?
+    private var chatReceiptAckHandler: (@Sendable (CarapaceWatchChatDeliveryReceiptAck) async throws -> Void)?
     private var legacyChatRejectedHandler: (@Sendable () -> Void)?
     private var execApprovalResolveHandler: (@Sendable (WatchExecApprovalResolveEvent) -> Void)?
     private var execApprovalSnapshotRequestHandler: (@Sendable (WatchExecApprovalSnapshotRequestEvent) -> Void)?
@@ -721,13 +721,13 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func setChatDeliveryHandler(
-        _ handler: (@Sendable (OpenClawWatchChatDeliveryCommand) async throws -> Void)?)
+        _ handler: (@Sendable (CarapaceWatchChatDeliveryCommand) async throws -> Void)?)
     {
         self.chatDeliveryHandler = handler
     }
 
     func setChatDeliveryReceiptAckHandler(
-        _ handler: (@Sendable (OpenClawWatchChatDeliveryReceiptAck) async throws -> Void)?)
+        _ handler: (@Sendable (CarapaceWatchChatDeliveryReceiptAck) async throws -> Void)?)
     {
         self.chatReceiptAckHandler = handler
     }
@@ -756,9 +756,9 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
 
     func sendNotification(
         id: String,
-        params: OpenClawWatchNotifyParams,
+        params: CarapaceWatchNotifyParams,
         gatewayStableID: String?,
-        chatDeliveryContext: OpenClawWatchChatDeliveryContext?) async throws -> WatchNotificationSendResult
+        chatDeliveryContext: CarapaceWatchChatDeliveryContext?) async throws -> WatchNotificationSendResult
     {
         self.lastSent = (id: id, params: params, gatewayStableID: gatewayStableID)
         self.lastChatDeliveryContext = chatDeliveryContext
@@ -780,7 +780,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func sendExecApprovalPrompt(
-        _ message: OpenClawWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
     {
         self.lastSentExecApprovalPrompt = message
         self.sentExecApprovalPrompts.append(message)
@@ -791,7 +791,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func sendExecApprovalResolved(
-        _ message: OpenClawWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
     {
         self.lastSentExecApprovalResolved = message
         if let sendError {
@@ -801,7 +801,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func sendExecApprovalExpired(
-        _ message: OpenClawWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
     {
         self.lastSentExecApprovalExpired = message
         if let sendError {
@@ -811,7 +811,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func syncExecApprovalSnapshot(
-        _ message: OpenClawWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
     {
         self.lastSentExecApprovalSnapshot = message
         self.sentExecApprovalSnapshots.append(message)
@@ -825,7 +825,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func syncAppSnapshot(
-        _ message: OpenClawWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: CarapaceWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
     {
         self.lastSentAppSnapshot = message
         if let sendError {
@@ -835,7 +835,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     }
 
     func sendChatDeliveryReceipt(
-        _ receipt: OpenClawWatchChatDeliveryReceipt) async throws -> WatchNotificationSendResult
+        _ receipt: CarapaceWatchChatDeliveryReceipt) async throws -> WatchNotificationSendResult
     {
         self.sentChatReceipts.append(receipt)
         if let sendChatDeliveryReceiptHandler {
@@ -847,11 +847,11 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         return self.nextSendResult
     }
 
-    func emitChatDelivery(_ command: OpenClawWatchChatDeliveryCommand) async throws {
+    func emitChatDelivery(_ command: CarapaceWatchChatDeliveryCommand) async throws {
         try await self.chatDeliveryHandler?(command)
     }
 
-    func emitChatReceiptAck(_ acknowledgment: OpenClawWatchChatDeliveryReceiptAck) async throws {
+    func emitChatReceiptAck(_ acknowledgment: CarapaceWatchChatDeliveryReceiptAck) async throws {
         try await self.chatReceiptAckHandler?(acknowledgment)
     }
 
@@ -919,28 +919,28 @@ private final class WatchMessageSendGate {
 @MainActor
 final class WatchDeliveryFixture {
     let directory: URL
-    let databases: OpenClawClientDatabases
-    let journal: OpenClawWatchMessageJournal
-    let context: OpenClawWatchChatDeliveryContext
+    let databases: CarapaceClientDatabases
+    let journal: CarapaceWatchMessageJournal
+    let context: CarapaceWatchChatDeliveryContext
     let gateway = GatewayNodeSession()
     fileprivate let messaging = MockWatchMessagingService()
     let coordinator: WatchReplyCoordinator
 
-    init(legacy: OpenClawWatchMessageLegacyImport = .init(messages: [], recentMessageIDs: [])) async throws {
+    init(legacy: CarapaceWatchMessageLegacyImport = .init(messages: [], recentMessageIDs: [])) async throws {
         self.directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("watch-delivery-\(UUID().uuidString)", isDirectory: true)
-        self.databases = try OpenClawClientDatabases(directoryURL: self.directory)
+        self.databases = try CarapaceClientDatabases(directoryURL: self.directory)
         self.journal = self.databases.watchMessages
         try await self.journal.importLegacy(legacy, nowMs: WatchMessagingPayloadCodec.nowMs())
         try await self.journal.recoverInterruptedWork(nowMs: WatchMessagingPayloadCodec.nowMs())
         let gatewayID = "watch-journal-\(UUID().uuidString)"
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender", mainSessionKey: "main", defaultAgentID: "main"))
         let cache = self.databases.store(gatewayID: gatewayID)
         await cache.storeSessionRoutingIdentity(identity)
         await cache.retire()
         let route = try #require(try await self.journal.route(gatewayStableID: gatewayID))
-        self.context = try OpenClawWatchChatDeliveryContext(
+        self.context = try CarapaceWatchChatDeliveryContext(
             gatewayStableID: gatewayID,
             routeGeneration: #require(route.owner.routeGeneration),
             agentId: "researcher",
@@ -958,10 +958,10 @@ final class WatchDeliveryFixture {
 
     func command(
         id: String = UUID().uuidString,
-        body: OpenClawWatchChatDeliveryBody = .chat(text: "A synthetic Watch message"))
-        -> OpenClawWatchChatDeliveryCommand
+        body: CarapaceWatchChatDeliveryBody = .chat(text: "A synthetic Watch message"))
+        -> CarapaceWatchChatDeliveryCommand
     {
-        OpenClawWatchChatDeliveryCommand(
+        CarapaceWatchChatDeliveryCommand(
             context: self.context,
             commandId: id,
             submittedAtMs: WatchMessagingPayloadCodec.nowMs(),
@@ -978,7 +978,7 @@ final class WatchDeliveryFixture {
 
 @MainActor
 private func withWatchDeliveryFixture(
-    legacy: OpenClawWatchMessageLegacyImport = .init(messages: [], recentMessageIDs: []),
+    legacy: CarapaceWatchMessageLegacyImport = .init(messages: [], recentMessageIDs: []),
     _ body: (WatchDeliveryFixture) async throws -> Void) async throws
 {
     let fixture = try await WatchDeliveryFixture(legacy: legacy)
@@ -1171,11 +1171,11 @@ private final class BatteryMonitoringDevice: UIDevice {
 
 @MainActor
 private final class TimingOutDeviceStatusService: DeviceStatusServicing {
-    func status() async throws -> OpenClawDeviceStatusPayload {
+    func status() async throws -> CarapaceDeviceStatusPayload {
         throw URLError(.timedOut)
     }
 
-    func info() -> OpenClawDeviceInfoPayload {
+    func info() -> CarapaceDeviceInfoPayload {
         DeviceStatusService().info()
     }
 }
@@ -1196,7 +1196,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let appModel = NodeAppModel()
         appModel.isBackgrounded = true
         appModel.gatewayConnected = true
-        let delegate = OpenClawAppDelegate()
+        let delegate = CarapaceAppDelegate()
         delegate.appModel = appModel
 
         let result = await withCheckedContinuation { continuation in
@@ -1275,7 +1275,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let appModel = NodeAppModel(deviceStatusService: TimingOutDeviceStatusService())
         let request = BridgeInvokeRequest(
             id: "device-status-network-timeout",
-            command: OpenClawDeviceCommand.status.rawValue,
+            command: CarapaceDeviceCommand.status.rawValue,
             paramsJSON: "{}")
 
         let response = await appModel.handleInvoke(request)
@@ -1303,11 +1303,11 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let appModel = NodeAppModel(healthSummaryService: service)
         let request = BridgeInvokeRequest(
             id: "health-1",
-            command: OpenClawHealthCommand.summary.rawValue,
+            command: CarapaceHealthCommand.summary.rawValue,
             paramsJSON: #"{"period":"today"}"#)
 
         let response = await appModel.handleInvoke(request)
-        let payload = try decodeTalkPayload(OpenClawHealthSummaryPayload.self, from: response)
+        let payload = try decodeTalkPayload(CarapaceHealthSummaryPayload.self, from: response)
 
         #expect(response.ok)
         #expect(payload.period == .today)
@@ -1320,7 +1320,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let appModel = NodeAppModel(healthSummaryService: service)
         let request = BridgeInvokeRequest(
             id: "health-invalid",
-            command: OpenClawHealthCommand.summary.rawValue,
+            command: CarapaceHealthCommand.summary.rawValue,
             paramsJSON: #"{"period":"90d"}"#)
 
         let response = await appModel.handleInvoke(request)
@@ -1923,7 +1923,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             NotificationSnapshot(
                 identifier: "old-requested-approval",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "recovery-a",
                         "gatewayDeviceId": "device-a",
@@ -1932,7 +1932,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             NotificationSnapshot(
                 identifier: "new-requested-approval",
                 userInfo: [
-                    "openclaw": [
+                    "carapace": [
                         "kind": ExecApprovalNotificationBridge.requestedKind,
                         "approvalId": "recovery-b",
                         "gatewayDeviceId": "device-b",
@@ -2016,7 +2016,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             expiresAtMs: 4_000_000_000_000))
         appModel._test_presentExecApprovalPrompt(prompt)
 
-        let uncertainMessage = "Decision status is unknown. Actions remain locked until OpenClaw reconnects."
+        let uncertainMessage = "Decision status is unknown. Actions remain locked until Carapace reconnects."
         appModel._test_setPendingExecApprovalPromptUncertain(uncertainMessage)
 
         #expect(appModel._test_pendingExecApprovalState().resolving)
@@ -2365,7 +2365,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         // owner-frozen uncertain contract with a durable readback record.
         #expect(appModel._test_pendingExecApprovalState().resolving)
         #expect(appModel._test_pendingExecApprovalState().error ==
-            "Decision status is unknown. Actions remain locked until OpenClaw reconnects.")
+            "Decision status is unknown. Actions remain locked until Carapace reconnects.")
         #expect(appModel._test_pendingPersistedExecApprovalReadbacks().contains { readback in
             readback.approvalId == approvalID && readback.gatewayStableID == gatewayA.effectiveStableID
         })
@@ -2535,7 +2535,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         notificationCenter.delivered = [NotificationSnapshot(
             identifier: "offline-request-alert",
             userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": push.approvalId,
                     "gatewayDeviceId": "gateway-device-a",
@@ -2591,7 +2591,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         let request = BridgeInvokeRequest(
             id: "ptt-start",
-            command: OpenClawTalkCommand.pttStart.rawValue)
+            command: CarapaceTalkCommand.pttStart.rawValue)
         let response = await appModel.handleInvoke(request)
 
         #expect(response.ok == false)
@@ -2602,7 +2602,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `PTT start preserves an active voice note`() async {
         let capture = MockVoiceNoteAudioCapture()
-        let recorder = OpenClawVoiceNoteRecorder(capture: capture)
+        let recorder = CarapaceVoiceNoteRecorder(capture: capture)
         #expect(await recorder.start())
         let appModel = NodeAppModel(
             talkMode: TalkModeManager(allowSimulatorCapture: true),
@@ -2610,7 +2610,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         let request = BridgeInvokeRequest(
             id: "ptt-start-with-voice-note",
-            command: OpenClawTalkCommand.pttStart.rawValue)
+            command: CarapaceTalkCommand.pttStart.rawValue)
         let response = await appModel.handleInvoke(request)
 
         #expect(response.ok == false)
@@ -2645,7 +2645,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         let activeResponse = await active.value
         let queuedResponse = await queued.value
-        let activePayload = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: activeResponse)
+        let activePayload = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: activeResponse)
         #expect(activeResponse.ok)
         #expect(!queuedResponse.ok)
         #expect(talkMode._test_activePushToTalkCaptureId() == activePayload.captureId)
@@ -2702,7 +2702,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         #expect(await stale.value.ok == false)
         let freshResponse = await fresh.value
-        let freshPayload = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: freshResponse)
+        let freshPayload = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: freshResponse)
         #expect(freshResponse.ok)
         #expect(talkMode._test_activePushToTalkCaptureId() == freshPayload.captureId)
 
@@ -2778,8 +2778,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let barrier = TalkPreparationBarrier()
         let stableID = "talk-routing-restore-\(UUID().uuidString)"
         let databaseDirectoryURL = try #require(NodeAppModel.chatDatabaseDirectoryURL())
-        let databases = try OpenClawClientDatabases(directoryURL: databaseDirectoryURL)
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let databases = try CarapaceClientDatabases(directoryURL: databaseDirectoryURL)
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender",
             mainSessionKey: "restored-main",
             defaultAgentID: "main"))
@@ -2817,8 +2817,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let barrier = TalkPreparationBarrier()
         let stableID = "cancelled-routing-restore-\(UUID().uuidString)"
         let databaseDirectoryURL = try #require(NodeAppModel.chatDatabaseDirectoryURL())
-        let databases = try OpenClawClientDatabases(directoryURL: databaseDirectoryURL)
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let databases = try CarapaceClientDatabases(directoryURL: databaseDirectoryURL)
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender",
             mainSessionKey: "stale-main",
             defaultAgentID: "main"))
@@ -3050,7 +3050,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         let activeResponse = await appModel.handleInvoke(
             talkRequest(id: "node-route-active", command: .pttStart))
-        let active = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: activeResponse)
+        let active = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: activeResponse)
         #expect(talkMode._test_activePushToTalkCaptureId() == active.captureId)
 
         appModel.invalidateNodePushToTalkRoute()
@@ -3082,7 +3082,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         }
         let startResponse = await appModel.handleInvoke(
             talkRequest(id: "fresh-before-stale-cancel", command: .pttStart))
-        let active = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: startResponse)
+        let active = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: startResponse)
         let staleCancel = Task { @MainActor in
             await barrier.suspendFirstPreparation()
             return await appModel.handleInvoke(
@@ -3168,9 +3168,9 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         await waitForTalkCondition { talkMode._test_activePushToTalkCaptureId() != nil }
         let cancelledCaptureId = try #require(talkMode._test_activePushToTalkCaptureId())
         let cancelResponse = await appModel.handleInvoke(talkRequest(id: "cancel", command: .pttCancel))
-        let cancelPayload = try decodeTalkPayload(OpenClawTalkPTTStopPayload.self, from: cancelResponse)
+        let cancelPayload = try decodeTalkPayload(CarapaceTalkPTTStopPayload.self, from: cancelResponse)
         let cancelledOncePayload = try await decodeTalkPayload(
-            OpenClawTalkPTTStopPayload.self,
+            CarapaceTalkPTTStopPayload.self,
             from: cancelledOnce.value)
         #expect(cancelPayload.captureId == cancelledCaptureId)
         #expect(cancelPayload.status == "cancelled")
@@ -3182,8 +3182,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         await waitForTalkCondition { talkMode._test_activePushToTalkCaptureId() != nil }
         let stoppedCaptureId = try #require(talkMode._test_activePushToTalkCaptureId())
         let stopResponse = await appModel.handleInvoke(talkRequest(id: "stop", command: .pttStop))
-        let stopPayload = try decodeTalkPayload(OpenClawTalkPTTStopPayload.self, from: stopResponse)
-        let stoppedOncePayload = try await decodeTalkPayload(OpenClawTalkPTTStopPayload.self, from: stoppedOnce.value)
+        let stopPayload = try decodeTalkPayload(CarapaceTalkPTTStopPayload.self, from: stopResponse)
+        let stoppedOncePayload = try await decodeTalkPayload(CarapaceTalkPTTStopPayload.self, from: stoppedOnce.value)
         #expect(stopPayload.captureId == stoppedCaptureId)
         #expect(stopPayload.status == "empty")
         #expect(stoppedOncePayload == stopPayload)
@@ -3313,7 +3313,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 caps: [],
                 commands: [],
                 permissions: [:],
-                clientId: "openclaw-ios",
+                clientId: "carapace-ios",
                 clientMode: "node",
                 clientDisplayName: nil))
         appModel.activeGatewayConnectConfig = config
@@ -3419,10 +3419,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         #expect(!remoteStart.ok)
         #expect(remoteStart.error?.message.contains("PTT_BUSY") == true)
 
-        for command in [OpenClawTalkCommand.pttStop, .pttCancel] {
+        for command in [CarapaceTalkCommand.pttStop, .pttCancel] {
             let response = await appModel.handleInvoke(
                 talkRequest(id: "remote-\(command.rawValue)-during-dictation", command: command))
-            let payload = try decodeTalkPayload(OpenClawTalkPTTStopPayload.self, from: response)
+            let payload = try decodeTalkPayload(CarapaceTalkPTTStopPayload.self, from: response)
             #expect(payload.status == "idle")
             #expect(payload.captureId != captureId)
             #expect(talkMode._test_activePushToTalkCaptureId() == captureId)
@@ -3878,7 +3878,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         talkMode.suspendForBackground()
 
-        let payload = try await decodeTalkPayload(OpenClawTalkPTTStopPayload.self, from: once.value)
+        let payload = try await decodeTalkPayload(CarapaceTalkPTTStopPayload.self, from: once.value)
         #expect(payload.captureId == captureId)
         #expect(payload.status == "cancelled")
         #expect(talkMode._test_activePushToTalkCaptureId() == nil)
@@ -3894,7 +3894,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         defer { appModel.voiceWake.stop() }
 
         let startResponse = await appModel.handleInvoke(talkRequest(id: "background-start", command: .pttStart))
-        let start = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: startResponse)
+        let start = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: startResponse)
         #expect(appModel._test_pttVoiceWakeLeaseCaptureIds() == [start.captureId])
 
         appModel.setScenePhase(.background)
@@ -3929,7 +3929,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         }
 
         let response = await appModel.handleInvoke(talkRequest(id: "background-pref-start", command: .pttStart))
-        let start = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: response)
+        let start = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: response)
         #expect(talkMode._test_activePushToTalkCaptureId() == start.captureId)
 
         appModel.setScenePhase(.background)
@@ -4006,14 +4006,14 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         let startResponse = await appModel.handleInvoke(
             talkRequest(id: "background-finalizer-start", command: .pttStart))
-        let start = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: startResponse)
+        let start = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: startResponse)
         await talkMode._test_handlePushToTalkTranscript(
             "finish in background",
             isFinal: false,
             captureId: start.captureId)
         let stopResponse = await appModel.handleInvoke(
             talkRequest(id: "background-finalizer-stop", command: .pttStop))
-        #expect(try decodeTalkPayload(OpenClawTalkPTTStopPayload.self, from: stopResponse).status == "queued")
+        #expect(try decodeTalkPayload(CarapaceTalkPTTStopPayload.self, from: stopResponse).status == "queued")
         await barrier.waitUntilEntered()
 
         appModel.setScenePhase(.background)
@@ -4174,7 +4174,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
         let response = await appModel.handleInvoke(
             talkRequest(id: "disconnect-ptt-start", command: .pttStart))
-        let start = try decodeTalkPayload(OpenClawTalkPTTStartPayload.self, from: response)
+        let start = try decodeTalkPayload(CarapaceTalkPTTStartPayload.self, from: response)
         #expect(appModel._test_pttVoiceWakeLeaseCaptureIds() == [start.captureId])
 
         talkMode.updateGatewayConnected(false)
@@ -4296,7 +4296,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `voice note start cannot race an acquired PTT lease`() async {
         let capture = MockVoiceNoteAudioCapture()
-        let recorder = OpenClawVoiceNoteRecorder(capture: capture)
+        let recorder = CarapaceVoiceNoteRecorder(capture: capture)
         let appModel = NodeAppModel(
             talkMode: TalkModeManager(allowSimulatorCapture: true),
             voiceNoteRecorder: recorder)
@@ -4311,7 +4311,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `voice note cannot start after the app backgrounds`() async {
         let capture = MockVoiceNoteAudioCapture()
-        let recorder = OpenClawVoiceNoteRecorder(capture: capture)
+        let recorder = CarapaceVoiceNoteRecorder(capture: capture)
         let appModel = NodeAppModel(voiceNoteRecorder: recorder)
         defer { appModel.setScenePhase(.active) }
 
@@ -4325,7 +4325,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `voice note cannot start during PTT preparation`() async {
         let capture = MockVoiceNoteAudioCapture()
-        let recorder = OpenClawVoiceNoteRecorder(capture: capture)
+        let recorder = CarapaceVoiceNoteRecorder(capture: capture)
         let talkMode = TalkModeManager(allowSimulatorCapture: true)
         let appModel = NodeAppModel(talkMode: talkMode, voiceNoteRecorder: recorder)
         let barrier = TalkPreparationBarrier()
@@ -4357,10 +4357,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             talkMode: TalkModeManager(allowSimulatorCapture: true))
         appModel.acquirePttVoiceWakeLease(for: "camera-audio-ptt")
         defer { appModel.releasePttVoiceWakeLease(for: "camera-audio-ptt") }
-        let params = try JSONEncoder().encode(OpenClawCameraClipParams(includeAudio: true))
+        let params = try JSONEncoder().encode(CarapaceCameraClipParams(includeAudio: true))
         let request = try BridgeInvokeRequest(
             id: "camera-audio-during-ptt",
-            command: OpenClawCameraCommand.clip.rawValue,
+            command: CarapaceCameraCommand.clip.rawValue,
             paramsJSON: #require(String(data: params, encoding: .utf8)))
 
         let response = await appModel.handleInvoke(request)
@@ -4374,7 +4374,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let barrier = TalkPreparationBarrier()
         let talkMode = TalkModeManager(allowSimulatorCapture: true)
         let voiceNoteCapture = MockVoiceNoteAudioCapture()
-        let voiceNoteRecorder = OpenClawVoiceNoteRecorder(capture: voiceNoteCapture)
+        let voiceNoteRecorder = CarapaceVoiceNoteRecorder(capture: voiceNoteCapture)
         let appModel = NodeAppModel(
             camera: BlockingAudioCameraService(barrier: barrier),
             talkMode: talkMode,
@@ -4384,10 +4384,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             barrier.release()
             talkMode.stop()
         }
-        let params = try JSONEncoder().encode(OpenClawCameraClipParams(includeAudio: true))
+        let params = try JSONEncoder().encode(CarapaceCameraClipParams(includeAudio: true))
         let clipRequest = try BridgeInvokeRequest(
             id: "blocking-camera-audio",
-            command: OpenClawCameraCommand.clip.rawValue,
+            command: CarapaceCameraCommand.clip.rawValue,
             paramsJSON: #require(String(data: params, encoding: .utf8)))
         let clip = Task { @MainActor in await appModel.handleInvoke(clipRequest) }
         await barrier.waitUntilEntered()
@@ -4420,10 +4420,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             barrier.release()
             talkMode.stop()
         }
-        let params = try JSONEncoder().encode(OpenClawScreenRecordParams(includeAudio: true))
+        let params = try JSONEncoder().encode(CarapaceScreenRecordParams(includeAudio: true))
         let recordRequest = try BridgeInvokeRequest(
             id: "blocking-screen-audio",
-            command: OpenClawScreenCommand.record.rawValue,
+            command: CarapaceScreenCommand.record.rawValue,
             paramsJSON: #require(String(data: params, encoding: .utf8)))
         let recording = Task { @MainActor in await appModel.handleInvoke(recordRequest) }
         await barrier.waitUntilEntered()
@@ -4444,16 +4444,16 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             let recorder = BlockingAudioScreenRecorder(barrier: barrier)
             let appModel = NodeAppModel(screenRecorder: recorder)
             let firstParams = try JSONEncoder().encode(
-                OpenClawScreenRecordParams(includeAudio: firstIncludesAudio))
+                CarapaceScreenRecordParams(includeAudio: firstIncludesAudio))
             let secondParams = try JSONEncoder().encode(
-                OpenClawScreenRecordParams(includeAudio: secondIncludesAudio))
+                CarapaceScreenRecordParams(includeAudio: secondIncludesAudio))
             let firstRequest = try BridgeInvokeRequest(
                 id: "screen-first-\(firstIncludesAudio)",
-                command: OpenClawScreenCommand.record.rawValue,
+                command: CarapaceScreenCommand.record.rawValue,
                 paramsJSON: #require(String(data: firstParams, encoding: .utf8)))
             let secondRequest = try BridgeInvokeRequest(
                 id: "screen-second-\(secondIncludesAudio)",
-                command: OpenClawScreenCommand.record.rawValue,
+                command: CarapaceScreenCommand.record.rawValue,
                 paramsJSON: #require(String(data: secondParams, encoding: .utf8)))
 
             let first = Task { @MainActor in await appModel.handleInvoke(firstRequest) }
@@ -4482,10 +4482,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         }
         appModel.voiceWake.isEnabled = true
         appModel.voiceWake.statusText = "Listening"
-        let params = try JSONEncoder().encode(OpenClawCameraClipParams(includeAudio: true))
+        let params = try JSONEncoder().encode(CarapaceCameraClipParams(includeAudio: true))
         let request = try BridgeInvokeRequest(
             id: "background-camera-audio",
-            command: OpenClawCameraCommand.clip.rawValue,
+            command: CarapaceCameraCommand.clip.rawValue,
             paramsJSON: #require(String(data: params, encoding: .utf8)))
         let capture = Task { @MainActor in await appModel.handleInvoke(request) }
         await barrier.waitUntilEntered()
@@ -4506,10 +4506,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             barrier.release()
             appModel.setScenePhase(.active)
         }
-        let params = try JSONEncoder().encode(OpenClawScreenRecordParams(includeAudio: false))
+        let params = try JSONEncoder().encode(CarapaceScreenRecordParams(includeAudio: false))
         let request = try BridgeInvokeRequest(
             id: "background-screen-no-audio",
-            command: OpenClawScreenCommand.record.rawValue,
+            command: CarapaceScreenCommand.record.rawValue,
             paramsJSON: #require(String(data: params, encoding: .utf8)))
         let capture = Task { @MainActor in await appModel.handleInvoke(request) }
         await barrier.waitUntilEntered()
@@ -4534,10 +4534,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             barrier.release()
             appModel.setScenePhase(.active)
         }
-        let params = try JSONEncoder().encode(OpenClawScreenRecordParams(includeAudio: false))
+        let params = try JSONEncoder().encode(CarapaceScreenRecordParams(includeAudio: false))
         let request = try BridgeInvokeRequest(
             id: "late-cancelled-screen",
-            command: OpenClawScreenCommand.record.rawValue,
+            command: CarapaceScreenCommand.record.rawValue,
             paramsJSON: #require(String(data: params, encoding: .utf8)))
         let capture = Task { @MainActor in await appModel.handleInvoke(request) }
         await barrier.waitUntilEntered()
@@ -4656,7 +4656,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         defer { NodeAppModel._test_resetPersistedWatchExecApprovalBridgeState() }
         let (watchService, appModel) = makeWatchModel()
         let (snapshotEvents, snapshotEventContinuation) = AsyncStream.makeStream(
-            of: OpenClawWatchExecApprovalSnapshotMessage.self)
+            of: CarapaceWatchExecApprovalSnapshotMessage.self)
         defer { snapshotEventContinuation.finish() }
         watchService.syncExecApprovalSnapshotHandler = { message in
             snapshotEventContinuation.yield(message)
@@ -5573,7 +5573,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 id: "main",
                 name: "Main",
                 identity: [
-                    "avatarUrl": AnyCodable("https://example.com/openclaw.png"),
+                    "avatarUrl": AnyCodable("https://example.com/carapace.png"),
                     "emoji": AnyCodable("OC"),
                 ],
                 workspace: nil,
@@ -5593,7 +5593,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         })
 
         let snapshot = try #require(watchService.lastSentAppSnapshot)
-        #expect(snapshot.agentAvatarURL == "https://example.com/openclaw.png")
+        #expect(snapshot.agentAvatarURL == "https://example.com/carapace.png")
         #expect(snapshot.agentAvatarText == "OC")
     }
 
@@ -5663,7 +5663,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         appModel.connectedGatewayID = "gateway-current"
         appModel.setTalkEnabled(false)
 
-        for command in [OpenClawWatchAppCommand.openChat, .startTalk] {
+        for command in [CarapaceWatchAppCommand.openChat, .startTalk] {
             watchService.emitAppCommand(
                 makeWatchAppCommand(
                     "watch-stale-\(command.rawValue)",
@@ -5724,7 +5724,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                     timestamp: 2000 + Double(index)))
         }
 
-        let items = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
+        let items = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
 
         #expect(items.map(\.text) == ["Still worth reading"])
     }
@@ -5737,7 +5737,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 timestamp: Double(index + 1))
         }
 
-        let items = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
+        let items = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
 
         #expect(items.map(\.text) == (2..<7).map { "Readable message \($0)" })
     }
@@ -5757,7 +5757,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 isMessageToolMirror: true),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Send the update",
@@ -5778,8 +5778,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                     idempotencyKey: runID),
             ]
 
-            let items = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
-            let reply = OpenClawChatHistoryPresentation.replyText(
+            let items = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
+            let reply = CarapaceChatHistoryPresentation.replyText(
                 from: rawMessages,
                 runID: runID,
                 submittedText: "Question",
@@ -5804,7 +5804,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 idempotencyKey: "other-run"),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Question",
@@ -5833,7 +5833,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 stopReason: "stop"),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Question",
@@ -5858,7 +5858,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 stopReason: "stop"),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Watch question",
@@ -5883,7 +5883,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             makeWatchChatRawMessage(role: "assistant", text: "Queued reply", timestamp: 4000),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Watch question",
@@ -5916,7 +5916,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 timestamp: 4000),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Watch question",
@@ -5942,7 +5942,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             makeWatchChatRawMessage(role: "assistant", text: "Collected reply", timestamp: 4000),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Watch question",
@@ -5973,14 +5973,14 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             makeWatchChatRawMessage(role: "user", text: "Another question", timestamp: 5000),
             makeWatchChatRawMessage(role: "assistant", text: "Unrelated reply", timestamp: 6000),
         ]
-        var receipts: [OpenClawChatHistoryPayload.InputConsumption] = [
+        var receipts: [CarapaceChatHistoryPayload.InputConsumption] = [
             .init(runId: "other-source", consumedByEventId: "collected-user"),
         ]
         if let consumedEventID {
             receipts.append(.init(runId: "watch-run", consumedByEventId: consumedEventID))
         }
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Original Watch question",
@@ -5997,7 +5997,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             makeWatchChatRawMessage(role: "assistant", text: "Unrelated reply", timestamp: 5000),
         ]
 
-        let reply = OpenClawChatHistoryPresentation.replyText(
+        let reply = CarapaceChatHistoryPresentation.replyText(
             from: rawMessages,
             runID: "watch-run",
             submittedText: "Watch question",
@@ -6012,7 +6012,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             makeWatchChatRawMessage(role: "assistant", text: "Same", timestamp: 1000),
         ]
 
-        let items = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
+        let items = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
 
         #expect(items.count == 2)
         #expect(items[0].id != items[1].id)
@@ -6033,7 +6033,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 isMessageToolMirror: true),
         ]
 
-        let items = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
+        let items = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
 
         #expect(items.count == 2)
         #expect(items[0].id != items[1].id)
@@ -6049,13 +6049,13 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                     timestamp: Double(1000 + index)))
         }
 
-        let before = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
+        let before = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
         try rawMessages.append(
             makeWatchChatRawMessage(
                 role: "user",
                 text: "Next question",
                 timestamp: 2000))
-        let after = OpenClawChatHistoryPresentation.makeWatchItems(from: rawMessages)
+        let after = CarapaceChatHistoryPresentation.makeWatchItems(from: rawMessages)
 
         #expect(before.last?.id == after.dropLast().last?.id)
         #expect(after.last?.role == "user")
@@ -6265,7 +6265,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let firstID = UUID().uuidString
         let secondID = UUID().uuidString
         let (_, firstModel) = makeWatchModel(notificationCenter: MockBootstrapNotificationCenter())
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
             defaults.set(previousQueue, forKey: queueKey)
             defaults.set(previousMetadata, forKey: metadataKey)
@@ -6307,7 +6307,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let firstID = UUID().uuidString
         let laterID = UUID().uuidString
         let (_, model) = makeWatchModel(notificationCenter: MockBootstrapNotificationCenter())
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
             model.cancelChatOfflineDataRemoval(gatewayID: gatewayID)
             defaults.set(previousQueue, forKey: queueKey)
@@ -6343,7 +6343,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let gatewayID = "watch-legacy-concurrent-\(UUID().uuidString)"
         let commandID = UUID().uuidString
         let (_, model) = makeWatchModel(notificationCenter: MockBootstrapNotificationCenter())
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
             defaults.set(previousQueue, forKey: queueKey)
             defaults.set(previousMetadata, forKey: metadataKey)
@@ -6378,11 +6378,11 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             fixture.messaging.sendError = URLError(.networkConnectionLost)
             let command = fixture.command()
             let admitted = try await fixture.coordinator.admit(command)
-            let owner = OpenClawWatchMessageOwner(context: command.context)
+            let owner = CarapaceWatchMessageOwner(context: command.context)
             if scenario == "not-dispatched" {
                 let cache = fixture.databases.store(gatewayID: owner.gatewayStableID)
                 try await cache.storeSessionRoutingIdentity(#require(
-                    OpenClawChatSessionRoutingIdentity(contract: "global|main|other")))
+                    CarapaceChatSessionRoutingIdentity(contract: "global|main|other")))
                 await cache.retire()
                 // The canonical claim owner settles this routing change before any Gateway dispatch.
                 #expect(try await fixture.journal.claim(
@@ -6392,7 +6392,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                     command, nowMs: WatchMessagingPayloadCodec.nowMs()))
                 #expect(try await fixture.journal.recordAccepted(claim, runID: command.commandId) == .applied)
                 let accepted = try #require(try await fixture.journal.accepted(owner: owner).first)
-                let outcome: OpenClawWatchChatDeliveryOutcome = scenario == "reply"
+                let outcome: CarapaceWatchChatDeliveryOutcome = scenario == "reply"
                     ? .reply(text: "Committed reply")
                     : .failed(code: "gateway_run_failed", message: "The accepted Gateway run failed.")
                 #expect(try await fixture.journal.recordTerminal(
@@ -6418,7 +6418,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             #expect(replay.receipt == receipt)
             #expect(replay.admittedAtMs == admitted.admittedAtMs)
             #expect(replay.acceptedRunID == expectedRunID)
-            let acknowledgment = OpenClawWatchChatDeliveryReceiptAck(
+            let acknowledgment = CarapaceWatchChatDeliveryReceiptAck(
                 context: command.context, commandId: command.commandId, receiptId: terminal.receiptId)
             try await fixture.coordinator.acknowledge(acknowledgment)
             try await fixture.coordinator.acknowledge(acknowledgment)
@@ -6433,7 +6433,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
     {
         try await withWatchDeliveryFixture { fixture in
             let command = fixture.command()
-            let owner = OpenClawWatchMessageOwner(context: command.context)
+            let owner = CarapaceWatchMessageOwner(context: command.context)
             _ = try await fixture.journal.admit(command, nowMs: WatchMessagingPayloadCodec.nowMs())
             let claim = try #require(try await fixture.journal.claim(
                 command, nowMs: WatchMessagingPayloadCodec.nowMs()))
@@ -6618,7 +6618,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                     onConnected: {},
                     onDisconnected: { _ in },
                     onInvoke: { BridgeInvokeResponse(id: $0.id, ok: true) })
-                let body = OpenClawWatchChatDeliveryBody.quickReply(
+                let body = CarapaceWatchChatDeliveryBody.quickReply(
                     promptId: "issued-prompt", actionId: "done", actionLabel: nil, note: nil)
                 let first = fixture.command(id: "first-watch-send", body: body)
                 let second = fixture.command(id: "second-watch-send", body: body)
@@ -6702,7 +6702,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
     func `Watch route lease cannot send an expired command as its replacement`() async throws {
         try await withWatchDeliveryFixture { fixture in
             let leaseGate = WatchMessageSendGate()
-            let receipts = AsyncStream<OpenClawWatchChatDeliveryReceipt>
+            let receipts = AsyncStream<CarapaceWatchChatDeliveryReceipt>
                 .makeStream(bufferingPolicy: .bufferingNewest(8))
             let sendResult = fixture.messaging.nextSendResult
             fixture.messaging.sendChatDeliveryReceiptHandler = { receipt in
@@ -6769,12 +6769,12 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                     onDisconnected: { _ in },
                     onInvoke: { BridgeInvokeResponse(id: $0.id, ok: true) })
                 let now = WatchMessagingPayloadCodec.nowMs()
-                let original = OpenClawWatchChatDeliveryCommand(
+                let original = CarapaceWatchChatDeliveryCommand(
                     context: fixture.context,
                     commandId: "reused-watch-command",
-                    submittedAtMs: now - OpenClawWatchChatDeliveryCodec.lifetimeMs + 60000,
+                    submittedAtMs: now - CarapaceWatchChatDeliveryCodec.lifetimeMs + 60000,
                     body: .quickReply(promptId: "old-prompt", actionId: "old-action", actionLabel: nil, note: nil))
-                let replacement = OpenClawWatchChatDeliveryCommand(
+                let replacement = CarapaceWatchChatDeliveryCommand(
                     context: original.context,
                     commandId: original.commandId,
                     submittedAtMs: now,
@@ -6822,7 +6822,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         retiredDuringRemoval: Bool) async throws
     {
         try await withWatchDeliveryFixture { fixture in
-            let receipts = AsyncStream<OpenClawWatchChatDeliveryReceipt>
+            let receipts = AsyncStream<CarapaceWatchChatDeliveryReceipt>
                 .makeStream(bufferingPolicy: .bufferingNewest(8))
             let sendResult = fixture.messaging.nextSendResult
             fixture.messaging.sendChatDeliveryReceiptHandler = { receipt in
@@ -6834,7 +6834,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 receipts.continuation.finish()
             }
             let command = fixture.command()
-            let owner = OpenClawWatchMessageOwner(context: command.context)
+            let owner = CarapaceWatchMessageOwner(context: command.context)
             _ = try await fixture.journal.admit(command, nowMs: WatchMessagingPayloadCodec.nowMs())
             let claim = try #require(try await fixture.journal.claim(
                 command, nowMs: WatchMessagingPayloadCodec.nowMs()))
@@ -6868,7 +6868,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                                 "role": "assistant",
                                 "content": [["type": "text", "text": "Recovered after reconnect"]],
                                 "stopReason": "stop",
-                                "__openclaw": ["runId": command.commandId],
+                                "__carapace": ["runId": command.commandId],
                             ]]]
                         }
                     default:
@@ -6943,7 +6943,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         try await withWatchDeliveryFixture { fixture in
             let command = fixture.command(body: .quickReply(
                 promptId: "issued-prompt", actionId: "done", actionLabel: nil, note: nil))
-            let owner = OpenClawWatchMessageOwner(context: command.context)
+            let owner = CarapaceWatchMessageOwner(context: command.context)
             _ = try await fixture.journal.admit(command, nowMs: WatchMessagingPayloadCodec.nowMs())
             let claim = try #require(try await fixture.journal.claim(
                 command, nowMs: WatchMessagingPayloadCodec.nowMs()))
@@ -6953,7 +6953,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             #expect(accepted.receipt?.terminal == nil)
             await fixture.coordinator.stopAndWait()
             try fixture.databases.close()
-            let reopened = try OpenClawClientDatabases(directoryURL: fixture.directory)
+            let reopened = try CarapaceClientDatabases(directoryURL: fixture.directory)
             defer { try? reopened.close() }
             let journal = reopened.watchMessages
             let coordinator = WatchReplyCoordinator(
@@ -7008,24 +7008,24 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
     @Test @MainActor
     func `mirrored Watch action uses the cold canonical registry and commits phone custody`() async throws {
         let (_, model) = makeWatchModel(notificationCenter: MockBootstrapNotificationCenter())
-        let previous = OpenClawAppModelRegistry.appModel
-        OpenClawAppModelRegistry.appModel = model
+        let previous = CarapaceAppModelRegistry.appModel
+        CarapaceAppModelRegistry.appModel = model
         let gatewayID = "watch-cold-notification-\(UUID().uuidString)"
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
-            OpenClawAppModelRegistry.appModel = previous
+            CarapaceAppModelRegistry.appModel = previous
             try? databases.removeGatewayData(gatewayID: gatewayID)
             try? databases.close()
             model.disconnectGateway()
         }
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender", mainSessionKey: "main", defaultAgentID: "main"))
         let cache = databases.store(gatewayID: gatewayID)
         await cache.storeSessionRoutingIdentity(identity)
         await cache.retire()
         let journal = try await model.watchMessageJournal()
         let route = try #require(try await journal.route(gatewayStableID: gatewayID))
-        let context = try OpenClawWatchChatDeliveryContext(
+        let context = try CarapaceWatchChatDeliveryContext(
             gatewayStableID: gatewayID,
             routeGeneration: #require(route.owner.routeGeneration),
             agentId: "main",
@@ -7037,12 +7037,12 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             WatchPromptNotificationBridge.promptIDKey: "cold-prompt",
             WatchPromptNotificationBridge.gatewayStableIDKey: gatewayID,
             WatchPromptNotificationBridge.sessionKeyKey: "main",
-            WatchPromptNotificationBridge.chatDeliveryContextKey: OpenClawWatchChatDeliveryCodec.encode(context),
+            WatchPromptNotificationBridge.chatDeliveryContextKey: CarapaceWatchChatDeliveryCodec.encode(context),
             WatchPromptNotificationBridge.actionPrimaryIDKey: "done",
         ]
-        let action = try #require(OpenClawAppDelegate.parseWatchPromptAction(
+        let action = try #require(CarapaceAppDelegate.parseWatchPromptAction(
             actionIdentifier: WatchPromptNotificationBridge.actionPrimaryIdentifier, userInfo: userInfo))
-        let delegate = OpenClawAppDelegate()
+        let delegate = CarapaceAppDelegate()
         #expect(delegate.appModel == nil)
         await delegate.routeWatchPromptAction(action, notificationCenter: MockBootstrapNotificationCenter())
         let row = try #require(try await journal.entries(owner: route.owner).first)
@@ -7058,13 +7058,13 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let (messaging, model) = makeWatchModel(notificationCenter: MockBootstrapNotificationCenter())
         messaging.sendError = URLError(.networkConnectionLost)
         let gatewayID = "watch-receipt-recovery-\(UUID().uuidString)"
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
             try? databases.removeGatewayData(gatewayID: gatewayID)
             try? databases.close()
             model.disconnectGateway()
         }
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender", mainSessionKey: "main", defaultAgentID: "main"))
         let cache = databases.store(gatewayID: gatewayID)
         await cache.storeSessionRoutingIdentity(identity)
@@ -7072,14 +7072,14 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let journal = try await model.watchMessageJournal()
         try await journal.recoverInterruptedWork(nowMs: WatchMessagingPayloadCodec.nowMs())
         let route = try #require(try await journal.route(gatewayStableID: gatewayID))
-        let context = try OpenClawWatchChatDeliveryContext(
+        let context = try CarapaceWatchChatDeliveryContext(
             gatewayStableID: gatewayID,
             routeGeneration: #require(route.owner.routeGeneration),
             agentId: "main",
             sessionKey: "main",
             deliverySessionKey: "agent:main:main",
             sessionRoutingContract: identity.contract)
-        let command = OpenClawWatchChatDeliveryCommand(
+        let command = CarapaceWatchChatDeliveryCommand(
             context: context,
             commandId: UUID().uuidString,
             submittedAtMs: WatchMessagingPayloadCodec.nowMs(),
@@ -7128,20 +7128,20 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
     @MainActor func `watch admission sends only permanent noncustodial denials`(scenario: String) async throws {
         let (messaging, model) = makeWatchModel(notificationCenter: MockBootstrapNotificationCenter())
         let gatewayID = "watch-denial-\(UUID().uuidString)"
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
             try? databases.removeGatewayData(gatewayID: gatewayID)
             try? databases.close()
             model.disconnectGateway()
         }
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender", mainSessionKey: "main", defaultAgentID: "main"))
         let cache = databases.store(gatewayID: gatewayID)
         await cache.storeSessionRoutingIdentity(identity)
         await cache.retire()
         let journal = try await model.watchMessageJournal()
         let route = try #require(try await journal.route(gatewayStableID: gatewayID))
-        let context = try OpenClawWatchChatDeliveryContext(
+        let context = try CarapaceWatchChatDeliveryContext(
             gatewayStableID: gatewayID,
             routeGeneration: scenario == "stale_route" ? "retired-generation" : #require(route.owner.routeGeneration),
             agentId: "main",
@@ -7150,24 +7150,24 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             sessionRoutingContract: scenario == "routing_changed" ? "per-sender|old-main|main" : identity.contract)
         let nowMs = WatchMessagingPayloadCodec.nowMs()
         let submittedAt: Int64 = switch scenario {
-        case "expired", "phone": nowMs - OpenClawWatchChatDeliveryCodec.lifetimeMs - 1
-        case "clock_error": nowMs + OpenClawWatchChatDeliveryCodec.maxFutureSkewMs + 60000
+        case "expired", "phone": nowMs - CarapaceWatchChatDeliveryCodec.lifetimeMs - 1
+        case "clock_error": nowMs + CarapaceWatchChatDeliveryCodec.maxFutureSkewMs + 60000
         default: nowMs
         }
-        let command = OpenClawWatchChatDeliveryCommand(
+        let command = CarapaceWatchChatDeliveryCommand(
             context: context,
             commandId: UUID().uuidString,
             submittedAtMs: submittedAt,
             body: .chat(text: "Denial control"))
         if scenario == "identity_conflict" {
-            _ = try await journal.admit(OpenClawWatchChatDeliveryCommand(
+            _ = try await journal.admit(CarapaceWatchChatDeliveryCommand(
                 context: context,
                 commandId: command.commandId,
                 submittedAtMs: nowMs,
                 body: .chat(text: "Already owned immutable input")), nowMs: nowMs)
         } else if scenario == "capacity" {
-            for index in 0..<OpenClawWatchChatDeliveryCodec.maxPendingCommands {
-                _ = try await journal.admit(OpenClawWatchChatDeliveryCommand(
+            for index in 0..<CarapaceWatchChatDeliveryCodec.maxPendingCommands {
+                _ = try await journal.admit(CarapaceWatchChatDeliveryCommand(
                     context: context,
                     commandId: "\(command.commandId)-\(index)",
                     submittedAtMs: nowMs,
@@ -7176,18 +7176,18 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         }
         let rowsBefore = try await journal.entries(owner: route.owner)
         // Expired but well-formed envelopes must reach the application rejection owner.
-        let payload = try OpenClawWatchChatDeliveryCodec.encode(command)
+        let payload = try CarapaceWatchChatDeliveryCodec.encode(command)
         guard case let .chatDeliveryCommand(decoded)? = try WatchMessagingPayloadCodec.parseInboundPayload(
             payload, transport: "transferUserInfo")
         else {
             Issue.record("a structurally valid command did not reach admission")
             return
         }
-        var failure: OpenClawWatchChatDeliveryError?
+        var failure: CarapaceWatchChatDeliveryError?
         do {
             try await model.admitWatchChatDelivery(decoded, destination: scenario == "phone" ? .phone : .watch)
             Issue.record("rejected command was admitted")
-        } catch let error as OpenClawWatchChatDeliveryError {
+        } catch let error as CarapaceWatchChatDeliveryError {
             failure = error
         }
         let error = try #require(failure)
@@ -7210,15 +7210,15 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         notificationsEnabled: Bool) async
     {
         let restorePreference = overrideNotificationServingPreference(notificationsEnabled)
-        let previous = OpenClawAppModelRegistry.appModel
-        OpenClawAppModelRegistry.appModel = nil
+        let previous = CarapaceAppModelRegistry.appModel
+        CarapaceAppModelRegistry.appModel = nil
         defer { restorePreference()
-            OpenClawAppModelRegistry.appModel = previous
+            CarapaceAppModelRegistry.appModel = previous
         }
         let center = MockBootstrapNotificationCenter()
         let gate = NotificationAuthorizationGate()
         center.authorizationStatusHandler = { await gate.wait() }
-        let delegate = OpenClawAppDelegate()
+        let delegate = CarapaceAppDelegate()
         var completed = false
         let task = Task { @MainActor in
             await delegate.routeWatchPromptAction(.upgradeRequired, notificationCenter: center)
@@ -7256,7 +7256,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         notificationCenter.delivered = [NotificationSnapshot(
             identifier: "delivered-approval",
             userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-delivered-recovery",
                     "gatewayDeviceId": "gateway-device-a",
@@ -7482,7 +7482,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         notificationCenter.delivered = [NotificationSnapshot(
             identifier: "approval-event-notification",
             userInfo: [
-                "openclaw": [
+                "carapace": [
                     "kind": ExecApprovalNotificationBridge.requestedKind,
                     "approvalId": "approval-event-resolved",
                     "gatewayDeviceId": "gateway-device-a",
@@ -7803,7 +7803,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let appModel = NodeAppModel()
         appModel.setScenePhase(.background)
 
-        let req = BridgeInvokeRequest(id: "bg", command: OpenClawScreenCommand.record.rawValue)
+        let req = BridgeInvokeRequest(id: "bg", command: CarapaceScreenCommand.record.rawValue)
         let res = await appModel.handleInvoke(req)
         #expect(res.ok == false)
         #expect(res.error?.code == .backgroundUnavailable)
@@ -7815,7 +7815,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle invoke rejects camera when disabled`() async {
         let appModel = NodeAppModel()
-        let req = BridgeInvokeRequest(id: "cam", command: OpenClawCameraCommand.snap.rawValue)
+        let req = BridgeInvokeRequest(id: "cam", command: CarapaceCameraCommand.snap.rawValue)
 
         let defaults = UserDefaults.standard
         let key = "camera.enabled"
@@ -7848,7 +7848,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             }
         }
         let appModel = NodeAppModel(camera: CancellingCameraService())
-        let request = BridgeInvokeRequest(id: "cancelled-camera", command: OpenClawCameraCommand.snap.rawValue)
+        let request = BridgeInvokeRequest(id: "cancelled-camera", command: CarapaceCameraCommand.snap.rawValue)
 
         let response = await appModel.handleInvoke(request)
 
@@ -7879,14 +7879,14 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let appModel = NodeAppModel(camera: camera)
         let firstTask = Task {
             await appModel.handleInvoke(
-                BridgeInvokeRequest(id: "camera-first", command: OpenClawCameraCommand.snap.rawValue))
+                BridgeInvokeRequest(id: "camera-first", command: CarapaceCameraCommand.snap.rawValue))
         }
         for await _ in firstStarted.stream {
             break
         }
         let secondTask = Task {
             await appModel.handleInvoke(
-                BridgeInvokeRequest(id: "camera-second", command: OpenClawCameraCommand.snap.rawValue))
+                BridgeInvokeRequest(id: "camera-second", command: CarapaceCameraCommand.snap.rawValue))
         }
         for await _ in secondStarted.stream {
             break
@@ -7907,8 +7907,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let (center, appModel) = makeNotificationModel(status: .notDetermined)
         let req = try makeInvokeRequest(
             id: "notify-off",
-            command: OpenClawSystemCommand.notify.rawValue,
-            params: OpenClawSystemNotifyParams(title: "Approval", body: "Review request"))
+            command: CarapaceSystemCommand.notify.rawValue,
+            params: CarapaceSystemNotifyParams(title: "Approval", body: "Review request"))
 
         let res = await appModel.handleInvoke(req)
 
@@ -7924,8 +7924,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let (center, appModel) = makeNotificationModel(status: .authorized)
         let req = try makeInvokeRequest(
             id: "notify-on",
-            command: OpenClawSystemCommand.notify.rawValue,
-            params: OpenClawSystemNotifyParams(title: "Approval", body: "Review request"))
+            command: CarapaceSystemCommand.notify.rawValue,
+            params: CarapaceSystemNotifyParams(title: "Approval", body: "Review request"))
 
         let res = await appModel.handleInvoke(req)
 
@@ -7939,8 +7939,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let (center, appModel) = makeNotificationModel(status: .authorized)
         let req = try makeInvokeRequest(
             id: "notify-disabled",
-            command: OpenClawSystemCommand.notify.rawValue,
-            params: OpenClawSystemNotifyParams(title: "Approval", body: "Review request"))
+            command: CarapaceSystemCommand.notify.rawValue,
+            params: CarapaceSystemNotifyParams(title: "Approval", body: "Review request"))
 
         let res = await appModel.handleInvoke(req)
 
@@ -7975,8 +7975,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let (center, appModel) = makeNotificationModel(status: .notDetermined)
         let req = try makeInvokeRequest(
             id: "chat-push-off",
-            command: OpenClawChatCommand.push.rawValue,
-            params: OpenClawChatPushParams(text: "Build finished", speak: false))
+            command: CarapaceChatCommand.push.rawValue,
+            params: CarapaceChatPushParams(text: "Build finished", speak: false))
 
         let res = await appModel.handleInvoke(req)
 
@@ -7992,8 +7992,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let (center, appModel) = makeNotificationModel(status: .authorized)
         let req = try makeInvokeRequest(
             id: "chat-push-on",
-            command: OpenClawChatCommand.push.rawValue,
-            params: OpenClawChatPushParams(text: "Build finished", speak: false))
+            command: CarapaceChatCommand.push.rawValue,
+            params: CarapaceChatPushParams(text: "Build finished", speak: false))
 
         let res = await appModel.handleInvoke(req)
 
@@ -8007,8 +8007,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         center.authorizationStatusHandler = { await authorizationGate.wait() }
         let request = try makeInvokeRequest(
             id: "cancelled-chat-push",
-            command: OpenClawChatCommand.push.rawValue,
-            params: OpenClawChatPushParams(text: "Cancelled notification test", speak: true))
+            command: CarapaceChatCommand.push.rawValue,
+            params: CarapaceChatPushParams(text: "Cancelled notification test", speak: true))
         let invocation = Task { @MainActor in await appModel.handleInvoke(request) }
         let deadline = ContinuousClock().now.advanced(by: .seconds(2))
         while await !(authorizationGate.hasStarted()), ContinuousClock().now < deadline {
@@ -8029,13 +8029,13 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle invoke rejects invalid screen format`() async {
         let appModel = NodeAppModel()
-        let params = OpenClawScreenRecordParams(format: "gif")
+        let params = CarapaceScreenRecordParams(format: "gif")
         let data = try? JSONEncoder().encode(params)
         let json = data.flatMap { String(data: $0, encoding: .utf8) }
 
         let req = BridgeInvokeRequest(
             id: "screen",
-            command: OpenClawScreenCommand.record.rawValue,
+            command: CarapaceScreenCommand.record.rawValue,
             paramsJSON: json)
 
         let res = await appModel.handleInvoke(req)
@@ -8060,13 +8060,13 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             reachable: false,
             activationState: "inactive")
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let req = BridgeInvokeRequest(id: "watch-status", command: OpenClawWatchCommand.status.rawValue)
+        let req = BridgeInvokeRequest(id: "watch-status", command: CarapaceWatchCommand.status.rawValue)
 
         let res = await appModel.handleInvoke(req)
         #expect(res.ok == true)
 
         let payloadData = try #require(res.payloadJSON?.data(using: .utf8))
-        let payload = try JSONDecoder().decode(OpenClawWatchStatusPayload.self, from: payloadData)
+        let payload = try JSONDecoder().decode(CarapaceWatchStatusPayload.self, from: payloadData)
         #expect(payload.supported == true)
         #expect(payload.reachable == false)
         #expect(payload.activationState == "inactive")
@@ -8111,24 +8111,24 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             transport: "transferUserInfo")
         let appModel = NodeAppModel(watchMessagingService: watchService)
         appModel.connectedGatewayID = "gateway-watch-notify"
-        let params = OpenClawWatchNotifyParams(
-            title: "OpenClaw",
+        let params = CarapaceWatchNotifyParams(
+            title: "Carapace",
             body: "Meeting with Peter is at 4pm",
             priority: .timeSensitive)
         let req = try makeInvokeRequest(
             id: "watch-notify",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: CarapaceWatchCommand.notify.rawValue,
             params: params)
 
         let res = await appModel.handleInvoke(req, gatewayStableID: "gateway-a")
         #expect(res.ok == true)
-        #expect(watchService.lastSent?.params.title == "OpenClaw")
+        #expect(watchService.lastSent?.params.title == "Carapace")
         #expect(watchService.lastSent?.params.body == "Meeting with Peter is at 4pm")
         #expect(watchService.lastSent?.params.priority == .timeSensitive)
         #expect(watchService.lastSent?.gatewayStableID == "gateway-a")
 
         let payloadData = try #require(res.payloadJSON?.data(using: .utf8))
-        let payload = try JSONDecoder().decode(OpenClawWatchNotifyPayload.self, from: payloadData)
+        let payload = try JSONDecoder().decode(CarapaceWatchNotifyPayload.self, from: payloadData)
         #expect(payload.deliveredImmediately == false)
         #expect(payload.queuedForDelivery == true)
         #expect(payload.transport == "transferUserInfo")
@@ -8148,8 +8148,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         }
         let request = try makeInvokeRequest(
             id: "cancelled-watch-notify",
-            command: OpenClawWatchCommand.notify.rawValue,
-            params: OpenClawWatchNotifyParams(title: "OpenClaw", body: "Cancelled mirror test"))
+            command: CarapaceWatchCommand.notify.rawValue,
+            params: CarapaceWatchNotifyParams(title: "Carapace", body: "Cancelled mirror test"))
         let invocation = Task { @MainActor in await appModel.handleInvoke(request) }
         let deadline = ContinuousClock().now.advanced(by: .seconds(2))
         while await !(transportGate.hasStarted()), ContinuousClock().now < deadline {
@@ -8181,8 +8181,8 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             transport: "transferUserInfo")
         let request = try makeInvokeRequest(
             id: "accepted-watch-mirror",
-            command: OpenClawWatchCommand.notify.rawValue,
-            params: OpenClawWatchNotifyParams(title: "OpenClaw", body: "Accepted mirror test"))
+            command: CarapaceWatchCommand.notify.rawValue,
+            params: CarapaceWatchNotifyParams(title: "Carapace", body: "Accepted mirror test"))
         var response: BridgeInvokeResponse?
         let invocation = Task { @MainActor in
             response = await appModel.handleInvoke(request)
@@ -8205,7 +8205,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
     }
 
     @Test @MainActor func `watch notification encodes the exact immutable quick reply target`() throws {
-        let context = OpenClawWatchChatDeliveryContext(
+        let context = CarapaceWatchChatDeliveryContext(
             gatewayStableID: " gateway-e\u{301} ",
             routeGeneration: "issued-generation",
             agentId: "researcher",
@@ -8214,45 +8214,45 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             sessionRoutingContract: "global|main|main")
         let payload = WatchMessagingPayloadCodec.encodeNotificationPayload(
             id: "prompt-a",
-            params: OpenClawWatchNotifyParams(title: "Task", body: "Review?"),
+            params: CarapaceWatchNotifyParams(title: "Task", body: "Review?"),
             gatewayStableID: context.gatewayStableID,
             chatDeliveryContext: context)
         let encoded = try #require(payload["chatDeliveryContext"] as? [String: Any])
-        #expect(try OpenClawWatchChatDeliveryCodec.decodeContext(encoded) == context)
+        #expect(try CarapaceWatchChatDeliveryCodec.decodeContext(encoded) == context)
         #expect((payload["sessionKey"] as? String)?.utf8.elementsEqual(context.sessionKey.utf8) == true)
         #expect((payload["gatewayStableID"] as? String)?.utf8.elementsEqual(context.gatewayStableID.utf8) == true)
     }
 
     @Test @MainActor func `watch exec approval codec preserves gateway owner`() throws {
-        let approval = OpenClawWatchExecApprovalItem(
+        let approval = CarapaceWatchExecApprovalItem(
             id: "approval-a",
             gatewayStableID: "gateway-a",
             commandText: "echo safe",
             warningText: "Review shell expansion",
             allowedDecisions: [.allowOnce, .deny])
         let prompt = WatchMessagingPayloadCodec.encodeExecApprovalPromptPayload(
-            OpenClawWatchExecApprovalPromptMessage(approval: approval))
+            CarapaceWatchExecApprovalPromptMessage(approval: approval))
         let encodedApproval = try #require(prompt["approval"] as? [String: Any])
         #expect(encodedApproval["gatewayStableID"] as? String == "gateway-a")
         #expect(encodedApproval["warningText"] as? String == "Review shell expansion")
 
         let reply = try #require(WatchMessagingPayloadCodec.parseExecApprovalResolvePayload([
-            "type": OpenClawWatchPayloadType.execApprovalResolve.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalResolve.rawValue,
             "replyId": "reply-a",
             "approvalId": "approval-a",
             "gatewayStableID": "gateway-a",
-            "decision": OpenClawWatchExecApprovalDecision.allowOnce.rawValue,
+            "decision": CarapaceWatchExecApprovalDecision.allowOnce.rawValue,
         ], transport: "sendMessage"))
         #expect(reply.gatewayStableID == "gateway-a")
 
         let resolved = WatchMessagingPayloadCodec.encodeExecApprovalResolvedPayload(
-            OpenClawWatchExecApprovalResolvedMessage(
+            CarapaceWatchExecApprovalResolvedMessage(
                 approvalId: "approval-a",
                 gatewayStableID: "gateway-a",
                 outcome: .allowedAlways,
                 outcomeText: "This approval was already set to Always Allow."))
         let expired = WatchMessagingPayloadCodec.encodeExecApprovalExpiredPayload(
-            OpenClawWatchExecApprovalExpiredMessage(
+            CarapaceWatchExecApprovalExpiredMessage(
                 approvalId: "approval-a",
                 gatewayStableID: "gateway-a",
                 reason: .notFound))
@@ -8266,7 +8266,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let activeResolutionAttemptID = "\u{0085}resolution-attempt-a\u{0085}"
         let snapshotRequest = try #require(
             WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
                 "requestId": requestID,
                 "gatewayStableID": "gateway-a",
                 "heldApprovals": [
@@ -8286,7 +8286,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         #expect(snapshotRequest.heldApprovals[1].activeResolutionAttemptId == nil)
 
         let snapshot = WatchMessagingPayloadCodec.encodeExecApprovalSnapshotPayload(
-            OpenClawWatchExecApprovalSnapshotMessage(
+            CarapaceWatchExecApprovalSnapshotMessage(
                 approvals: [approval],
                 gatewayStableID: "gateway-a",
                 requestId: requestID,
@@ -8295,51 +8295,51 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         #expect(snapshot["requestGatewayStableID"] as? String == "gateway-a")
 
         let legacySnapshot = try JSONDecoder().decode(
-            OpenClawWatchExecApprovalSnapshotMessage.self,
+            CarapaceWatchExecApprovalSnapshotMessage.self,
             from: Data(#"{"type":"watch.execApproval.snapshot","approvals":[]}"#.utf8))
         #expect(legacySnapshot.requestId == nil)
         #expect(legacySnapshot.requestGatewayStableID == nil)
         #expect(throws: DecodingError.self) {
             _ = try JSONDecoder().decode(
-                OpenClawWatchExecApprovalSnapshotRequestMessage.self,
+                CarapaceWatchExecApprovalSnapshotRequestMessage.self,
                 from: Data(#"{"type":"watch.execApproval.snapshotRequest","requestId":"legacy"}"#.utf8))
         }
         // Shipped Watch binaries request snapshots with neither requestId nor heldApprovals.
         let shippedShapeRequest = try #require(
             WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
             ], transport: "sendMessage"))
         #expect(!shippedShapeRequest.requestId.isEmpty)
         #expect(shippedShapeRequest.heldApprovals.isEmpty)
         #expect(shippedShapeRequest.gatewayStableID == nil)
         let missingHeldApprovalsRequest = try #require(
             WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
                 "requestId": "missing-held-approvals",
             ], transport: "applicationContext"))
         #expect(missingHeldApprovalsRequest.requestId == "missing-held-approvals")
         #expect(missingHeldApprovalsRequest.heldApprovals.isEmpty)
         let missingRequestIdRequest = try #require(
             WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
                 "heldApprovals": [],
             ], transport: "applicationContext"))
         #expect(!missingRequestIdRequest.requestId.isEmpty)
         let emptyRequestIdRequest = try #require(
             WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
                 "requestId": "",
                 "heldApprovals": [],
             ], transport: "applicationContext"))
         #expect(!emptyRequestIdRequest.requestId.isEmpty)
         // A present heldApprovals key keeps strict rejection when malformed.
         #expect(WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-            "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
             "requestId": "malformed-held-approvals-shape",
             "heldApprovals": "not-an-array",
         ], transport: "applicationContext") == nil)
         #expect(WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-            "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
             "requestId": "malformed-held-approval",
             "heldApprovals": [
                 ["approvalId": "valid"],
@@ -8347,7 +8347,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             ],
         ], transport: "applicationContext") == nil)
         #expect(WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-            "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
             "requestId": "malformed-attempt",
             "heldApprovals": [[
                 "approvalId": "valid",
@@ -8361,7 +8361,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let gatewayID = "\u{0085}gateway-a\u{0085}"
         let replyID = "\u{0085}reply-e\u{0301}\u{0085}"
         let prompt = WatchMessagingPayloadCodec.encodeExecApprovalPromptPayload(
-            OpenClawWatchExecApprovalPromptMessage(approval: OpenClawWatchExecApprovalItem(
+            CarapaceWatchExecApprovalPromptMessage(approval: CarapaceWatchExecApprovalItem(
                 id: approvalID,
                 gatewayStableID: gatewayID,
                 commandText: "echo exact",
@@ -8370,11 +8370,11 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let encodedApprovalID = try #require(encodedApproval["id"] as? String)
         let encodedGatewayID = try #require(encodedApproval["gatewayStableID"] as? String)
         let reply = try #require(WatchMessagingPayloadCodec.parseExecApprovalResolvePayload([
-            "type": OpenClawWatchPayloadType.execApprovalResolve.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalResolve.rawValue,
             "replyId": replyID,
             "approvalId": encodedApprovalID,
             "gatewayStableID": encodedGatewayID,
-            "decision": OpenClawWatchExecApprovalDecision.allowOnce.rawValue,
+            "decision": CarapaceWatchExecApprovalDecision.allowOnce.rawValue,
         ], transport: "sendMessage"))
 
         #expect(Array(reply.replyId.utf8) == Array(replyID.utf8))
@@ -8386,7 +8386,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let payload = WatchMessagingPayloadCodec.encodeDirectNodeSetupPayload(
             setupCode: "opaque-bootstrap-code")
 
-        #expect(payload["type"] as? String == OpenClawWatchPayloadType.directNodeSetup.rawValue)
+        #expect(payload["type"] as? String == CarapaceWatchPayloadType.directNodeSetup.rawValue)
         #expect(payload["setupCode"] as? String == "opaque-bootstrap-code")
         #expect(payload["sentAtMs"] is Int64)
         #expect(payload["token"] == nil)
@@ -8398,25 +8398,25 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let encodedTimestamp = NSNumber(value: sentAtMs)
 
         let resolution = try #require(WatchMessagingPayloadCodec.parseExecApprovalResolvePayload([
-            "type": OpenClawWatchPayloadType.execApprovalResolve.rawValue,
+            "type": CarapaceWatchPayloadType.execApprovalResolve.rawValue,
             "approvalId": "approval-a",
-            "decision": OpenClawWatchExecApprovalDecision.allowOnce.rawValue,
+            "decision": CarapaceWatchExecApprovalDecision.allowOnce.rawValue,
             "sentAtMs": encodedTimestamp,
         ], transport: "sendMessage"))
         let approvalSnapshotRequest = try #require(
             WatchMessagingPayloadCodec.parseExecApprovalSnapshotRequestPayload([
-                "type": OpenClawWatchPayloadType.execApprovalSnapshotRequest.rawValue,
+                "type": CarapaceWatchPayloadType.execApprovalSnapshotRequest.rawValue,
                 "requestId": "timestamp-request",
                 "sentAtMs": encodedTimestamp,
                 "heldApprovals": [],
             ], transport: "sendMessage"))
         let appSnapshotRequest = try #require(WatchMessagingPayloadCodec.parseAppSnapshotRequestPayload([
-            "type": OpenClawWatchPayloadType.appSnapshotRequest.rawValue,
+            "type": CarapaceWatchPayloadType.appSnapshotRequest.rawValue,
             "sentAtMs": encodedTimestamp,
         ], transport: "sendMessage"))
         let appCommand = try #require(WatchMessagingPayloadCodec.parseAppCommandPayload([
-            "type": OpenClawWatchPayloadType.appCommand.rawValue,
-            "command": OpenClawWatchAppCommand.refresh.rawValue,
+            "type": CarapaceWatchPayloadType.appCommand.rawValue,
+            "command": CarapaceWatchAppCommand.refresh.rawValue,
             "sentAtMs": encodedTimestamp,
         ], transport: "sendMessage"))
 
@@ -8428,27 +8428,27 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `watch application context retains app and approval snapshots`() throws {
         let appPayload = WatchMessagingPayloadCodec.encodeAppSnapshotPayload(
-            OpenClawWatchAppSnapshotMessage(
-                gatewayStatus: OpenClawWatchAppStatus(code: .gatewayConnected),
+            CarapaceWatchAppSnapshotMessage(
+                gatewayStatus: CarapaceWatchAppStatus(code: .gatewayConnected),
                 gatewayStatusText: "Connected",
                 gatewayConnected: true,
                 agentName: "Main",
                 agentAvatarURL: "https://example.com/avatar.png",
                 sessionKey: "main",
                 gatewayStableID: "gateway-a",
-                talkStatus: OpenClawWatchAppStatus(code: .talkOff),
+                talkStatus: CarapaceWatchAppStatus(code: .talkOff),
                 talkStatusText: "Off",
                 talkEnabled: false,
                 talkListening: false,
                 talkSpeaking: false,
                 pendingApprovalCount: 1,
-                chatStatus: OpenClawWatchAppStatus(code: .chatConnectIPhone),
+                chatStatus: CarapaceWatchAppStatus(code: .chatConnectIPhone),
                 chatStatusText: "Connect iPhone chat to read messages",
                 snapshotId: "app-a"))
         let approvalPayload = WatchMessagingPayloadCodec.encodeExecApprovalSnapshotPayload(
-            OpenClawWatchExecApprovalSnapshotMessage(
+            CarapaceWatchExecApprovalSnapshotMessage(
                 approvals: [
-                    OpenClawWatchExecApprovalItem(
+                    CarapaceWatchExecApprovalItem(
                         id: "approval-a",
                         gatewayStableID: "gateway-a",
                         commandText: "echo safe",
@@ -8465,11 +8465,11 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             approvalPayload,
             merging: appContext)
 
-        #expect(combined["type"] as? String == OpenClawWatchPayloadType.execApprovalSnapshot.rawValue)
+        #expect(combined["type"] as? String == CarapaceWatchPayloadType.execApprovalSnapshot.rawValue)
         let nestedApp = try #require(
-            combined[OpenClawWatchPayloadType.appSnapshot.rawValue] as? [String: Any])
+            combined[CarapaceWatchPayloadType.appSnapshot.rawValue] as? [String: Any])
         let nestedApprovals = try #require(
-            combined[OpenClawWatchPayloadType.execApprovalSnapshot.rawValue] as? [String: Any])
+            combined[CarapaceWatchPayloadType.execApprovalSnapshot.rawValue] as? [String: Any])
         #expect(nestedApp["gatewayStableID"] as? String == "gateway-a")
         #expect(nestedApp["agentAvatarUrl"] as? String == "https://example.com/avatar.png")
         #expect(nestedApp["agentAvatarURL"] == nil)
@@ -8486,10 +8486,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle invoke watch notify rejects empty message`() async throws {
         let (watchService, appModel) = makeWatchModel()
-        let params = OpenClawWatchNotifyParams(title: "   ", body: "\n")
+        let params = CarapaceWatchNotifyParams(title: "   ", body: "\n")
         let req = try makeInvokeRequest(
             id: "watch-notify-empty",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: CarapaceWatchCommand.notify.rawValue,
             params: params)
 
         let res = await appModel.handleInvoke(req)
@@ -8500,14 +8500,14 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle invoke watch notify adds default actions for prompt`() async throws {
         let (watchService, appModel) = makeWatchModel()
-        let params = OpenClawWatchNotifyParams(
+        let params = CarapaceWatchNotifyParams(
             title: "Task",
             body: "Action needed",
             priority: .passive,
             promptId: "prompt-123")
         let req = try makeInvokeRequest(
             id: "watch-notify-default-actions",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: CarapaceWatchCommand.notify.rawValue,
             params: params)
 
         let res = await appModel.handleInvoke(req)
@@ -8540,25 +8540,25 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         model.connectedGatewayID = currentID
         model.selectedAgentId = "ui-other"
         model.gatewayDefaultAgentId = "main"
-        let databases = try OpenClawClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
+        let databases = try CarapaceClientDatabases(directoryURL: #require(NodeAppModel.chatDatabaseDirectoryURL()))
         defer {
             try? databases.removeGatewayData(gatewayID: currentID)
             try? databases.close()
             model.disconnectGateway()
         }
-        let identity = try #require(OpenClawChatSessionRoutingIdentity(
+        let identity = try #require(CarapaceChatSessionRoutingIdentity(
             scope: "per-sender", mainSessionKey: "main", defaultAgentID: "main"))
         let cache = databases.store(gatewayID: currentID)
         await cache.storeSessionRoutingIdentity(identity)
         await cache.retire()
-        let params = OpenClawWatchNotifyParams(
+        let params = CarapaceWatchNotifyParams(
             title: "Exact owner",
             body: "Informational notification",
             promptId: "prompt-\(suffix)",
             sessionKey: "agent:researcher:incident",
             gatewayStableID: currentID)
         let request = try makeInvokeRequest(
-            id: "notify-\(suffix)", command: OpenClawWatchCommand.notify.rawValue, params: params)
+            id: "notify-\(suffix)", command: CarapaceWatchCommand.notify.rawValue, params: params)
         let response = await model.handleInvoke(request, gatewayStableID: ingressID)
         #expect(response.ok)
         let sent = try #require(messaging.lastSent)
@@ -8577,14 +8577,14 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle invoke watch notify adds approval defaults`() async throws {
         let (watchService, appModel) = makeWatchModel()
-        let params = OpenClawWatchNotifyParams(
+        let params = CarapaceWatchNotifyParams(
             title: "Approval",
             body: "Allow command?",
             promptId: "prompt-approval",
             kind: "approval")
         let req = try makeInvokeRequest(
             id: "watch-notify-approval-defaults",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: CarapaceWatchCommand.notify.rawValue,
             params: params)
 
         let res = await appModel.handleInvoke(req)
@@ -8596,20 +8596,20 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle invoke watch notify derives priority from risk and caps actions`() async throws {
         let (watchService, appModel) = makeWatchModel()
-        let params = OpenClawWatchNotifyParams(
+        let params = CarapaceWatchNotifyParams(
             title: "Urgent",
             body: "Check now",
             risk: .high,
             actions: [
-                OpenClawWatchAction(id: "a1", label: "A1"),
-                OpenClawWatchAction(id: "a2", label: "A2"),
-                OpenClawWatchAction(id: "a3", label: "A3"),
-                OpenClawWatchAction(id: "a4", label: "A4"),
-                OpenClawWatchAction(id: "a5", label: "A5"),
+                CarapaceWatchAction(id: "a1", label: "A1"),
+                CarapaceWatchAction(id: "a2", label: "A2"),
+                CarapaceWatchAction(id: "a3", label: "A3"),
+                CarapaceWatchAction(id: "a4", label: "A4"),
+                CarapaceWatchAction(id: "a5", label: "A5"),
             ])
         let req = try makeInvokeRequest(
             id: "watch-notify-derive-priority",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: CarapaceWatchCommand.notify.rawValue,
             params: params)
 
         let res = await appModel.handleInvoke(req)
@@ -8627,10 +8627,10 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
             code: 1,
             userInfo: [NSLocalizedDescriptionKey: "WATCH_UNAVAILABLE: no paired Apple Watch"])
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(title: "OpenClaw", body: "Delivery check")
+        let params = CarapaceWatchNotifyParams(title: "Carapace", body: "Delivery check")
         let req = try makeInvokeRequest(
             id: "watch-notify-fail",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: CarapaceWatchCommand.notify.rawValue,
             params: params)
 
         let res = await appModel.handleInvoke(req)
@@ -8641,7 +8641,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
 
     @Test @MainActor func `handle deep link records failure when not connected`() async throws {
         let appModel = NodeAppModel()
-        let url = try #require(URL(string: "openclaw://agent?message=hello"))
+        let url = try #require(URL(string: "carapace://agent?message=hello"))
         await appModel.handleDeepLink(url: url)
         #expect(appModel.lastShareEventText.contains("gateway not connected"))
     }
@@ -8661,7 +8661,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
     @Test @MainActor func `handle deep link records oversized message rejection`() async throws {
         let appModel = NodeAppModel()
         let msg = String(repeating: "a", count: 20001)
-        let url = try #require(URL(string: "openclaw://agent?message=\(msg)"))
+        let url = try #require(URL(string: "carapace://agent?message=\(msg)"))
         await appModel.handleDeepLink(url: url)
         #expect(appModel.lastShareEventText.contains("message too large"))
     }
@@ -8740,13 +8740,13 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        let previousStateDir = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
-        setenv("OPENCLAW_STATE_DIR", tempDir.path, 1)
+        let previousStateDir = ProcessInfo.processInfo.environment["CARAPACE_STATE_DIR"]
+        setenv("CARAPACE_STATE_DIR", tempDir.path, 1)
         defer {
             if let previousStateDir {
-                setenv("OPENCLAW_STATE_DIR", previousStateDir, 1)
+                setenv("CARAPACE_STATE_DIR", previousStateDir, 1)
             } else {
-                unsetenv("OPENCLAW_STATE_DIR")
+                unsetenv("CARAPACE_STATE_DIR")
             }
             try? FileManager.default.removeItem(at: tempDir)
         }
@@ -8768,7 +8768,7 @@ private final class TimingOutDeviceStatusService: DeviceStatusServicing {
                 caps: [],
                 commands: [],
                 permissions: [:],
-                clientId: "openclaw-ios",
+                clientId: "carapace-ios",
                 clientMode: "node",
                 clientDisplayName: nil,
                 deviceAuthGatewayID: authenticationOwnerID))

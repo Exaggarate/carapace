@@ -2,8 +2,8 @@
 import crypto from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { webhook } from "@line/bot-sdk";
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { ChannelIngressQueue } from "carapace/plugin-sdk/channel-outbound";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLineNodeWebhookHandler } from "./webhook-node.js";
 import {
@@ -58,7 +58,7 @@ async function invokeSignedWebhook(params: {
 
 describe("LINE webhook spool", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("does not acknowledge when durable enqueue fails", async () => {

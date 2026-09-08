@@ -1,7 +1,7 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import { isTruthyEnvValue } from "openclaw/plugin-sdk/runtime-env";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
+import { streamSimple } from "carapace/plugin-sdk/llm";
+import { isTruthyEnvValue } from "carapace/plugin-sdk/runtime-env";
 import { describe, expect, it } from "vitest";
 import {
   buildAnthropicCompactionContextChunk,
@@ -11,7 +11,7 @@ import { wrapAnthropicProviderStream } from "./stream-wrappers.js";
 
 const settings = resolveAnthropicCompactionLiveSettings(
   process.env,
-  isTruthyEnvValue(process.env.OPENCLAW_LIVE_TEST),
+  isTruthyEnvValue(process.env.CARAPACE_LIVE_TEST),
 );
 const describeLive = settings.enabled ? describe : describe.skip;
 

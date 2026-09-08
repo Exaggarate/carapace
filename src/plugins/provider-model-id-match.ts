@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 /** True when an id matches a normalized exact value or value prefix. */
 export function matchesExactOrPrefix(id: string, values: readonly string[]): boolean {

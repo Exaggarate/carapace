@@ -8,7 +8,7 @@ title: "Cloudflare Tunnel and Access"
 ---
 
 Run the Gateway on loopback, publish it through a Cloudflare Tunnel, and let Cloudflare
-Access authenticate every request before it reaches OpenClaw. The Gateway keeps
+Access authenticate every request before it reaches Carapace. The Gateway keeps
 `gateway.bind: "loopback"`, so no port is exposed and no inbound firewall rule is
 needed; `cloudflared` dials out from the host.
 
@@ -58,7 +58,7 @@ users. Note the two headers Access adds to authenticated requests, because the G
 consumes them in the next step:
 
 - `cf-access-authenticated-user-email` — the authenticated identity.
-- `cf-access-jwt-assertion` — Access's signed assertion. OpenClaw checks only that this
+- `cf-access-jwt-assertion` — Access's signed assertion. Carapace checks only that this
   header is present and non-blank; it does not verify the JWT signature.
 
 ## Step 3: Trust those headers in the Gateway
@@ -103,23 +103,23 @@ application, then on the node host:
 ```bash
 export CF_ACCESS_CLIENT_ID="<client-id>"
 export CF_ACCESS_CLIENT_SECRET="<client-secret>"
-openclaw connect https://gateway.example/j/<code> --service
+carapace connect https://gateway.example/j/<code> --service
 ```
 
-`openclaw connect` persists these as env SecretRefs under
+`carapace connect` persists these as env SecretRefs under
 `gateway.cloudflareAccess.clientId` / `clientSecret`; see [Node CLI](/cli/node). The only
 cost is that the node needs those two values before the join command, so a join link is no
 longer paste-and-go on its own.
 
 **Alternative: exempt the self-authenticating routes.** Allow `/j/*` and
-`/__openclaw__/worker` without Access identity, keeping WebSocket upgrade enabled on the
+`/__carapace__/worker` without Access identity, keeping WebSocket upgrade enabled on the
 worker route. Both enforce their own short-lived credentials — a join code is single-use
 with a TTL, rate-limited per IP, and answers failures with an opaque 404; worker admission
 carries its own expiring credential. This keeps join links paste-and-go, at the cost of
 making those two routes publicly reachable. Prefer the service token unless you need that
 onboarding flow. See [Nodes](/nodes#gateway-deployments-that-cannot-host-nodes).
 
-If you do neither, `openclaw connect` fails against the tunnel even though the browser
+If you do neither, `carapace connect` fails against the tunnel even though the browser
 works, because the join request is redirected to the Access login page.
 
 ## Step 5: Connect each client
@@ -137,12 +137,12 @@ the WebSocket upgrade. Configure `gateway.remote.edgeAuth` as described in
 ## Verify
 
 ```bash
-openclaw tui
+carapace tui
 ```
 
 Expect the TUI to reach `wss://gateway.example` and show `connected`. A first
 connection may report `device pairing required`; approve it in the Control UI under
-Settings → Devices, or run `openclaw devices approve --latest` on the Gateway host
+Settings → Devices, or run `carapace devices approve --latest` on the Gateway host
 to preview the request, then rerun the approval command it prints.
 
 Reaching the Gateway's own pairing prompt is itself the proof that Access was
@@ -166,7 +166,7 @@ satisfied — an unauthenticated request never gets that far.
 | Symptom                                                             | Cause and fix                                                                                                                                     |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gateway rejected websocket upgrade (HTTP 302)` from the CLI or TUI | Access intercepted the upgrade. Configure `gateway.remote.edgeAuth`; see [Remote access](/gateway/remote#gateway-behind-an-identity-aware-proxy). |
-| Browser works, `openclaw connect` fails                             | Node routes are still behind Access. Apply one of the options in step 4.                                                                          |
+| Browser works, `carapace connect` fails                             | Node routes are still behind Access. Apply one of the options in step 4.                                                                          |
 | `Exec provider ... exited with code 1`                              | The exec secret provider runs with a scrubbed environment; `cloudflared` needs `passEnv: ["HOME"]` to read its cached token.                      |
 | `secrets.providers.*.command must not be a symlink`                 | Point `command` at the resolved binary, not a package-manager symlink.                                                                            |
 | Gateway starts but every request is anonymous                       | `allowLoopback` is unset, so headers from the local `cloudflared` are ignored.                                                                    |

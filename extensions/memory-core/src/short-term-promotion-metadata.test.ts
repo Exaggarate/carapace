@@ -67,10 +67,10 @@ describe("promotion recall metadata", () => {
       buildPromotionRecallAnnotations({
         conceptTags: ["memory"],
         score: 0.8,
-        projectKey: "github.com/openclaw/openclaw",
+        projectKey: "github.com/Exaggarate/carapace",
       }),
     ).toBe(
-      "<!-- trigger: memory --> <!-- importance: 8 --> <!-- project: github.com/openclaw/openclaw -->",
+      "<!-- trigger: memory --> <!-- importance: 8 --> <!-- project: github.com/Exaggarate/carapace -->",
     );
     expect(
       buildPromotionRecallAnnotations({

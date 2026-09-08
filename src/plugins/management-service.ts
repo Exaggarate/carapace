@@ -1,13 +1,13 @@
 // Reads plugin inventory and inspection metadata without loading install orchestration.
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type {
   PluginInspectSource,
   PluginsInspectResult,
 } from "../../packages/gateway-protocol/src/schema/plugins.js";
 import { resolveConfigWidePluginMetadataSnapshot } from "../config/io.plugin-metadata.js";
 import { resolveIsNixMode } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePendingPluginCapabilityReview } from "./capability-consent.js";
 import {
   buildPluginCapabilitySummary,
@@ -73,7 +73,7 @@ export type ManagedPluginInspection = PluginsInspectResult;
 
 function resolveManagedPluginDiagnostics(
   snapshot: PluginMetadataSnapshot,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): PluginDiagnostic[] {
   const dependencies = getManagedPluginCache().dependencyStatus;
   const isEnabled = createInstalledPluginEnabledPredicate(snapshot.index.plugins, config);
@@ -118,7 +118,7 @@ function resolvePluginIconSource(params: {
   }
   return undefined;
 }
-function resolveManagedPluginMetadataParams(config: OpenClawConfig, env: NodeJS.ProcessEnv) {
+function resolveManagedPluginMetadataParams(config: CarapaceConfig, env: NodeJS.ProcessEnv) {
   const workspace = resolvePluginControlPlaneWorkspace({ config, env });
   return {
     config,
@@ -127,7 +127,7 @@ function resolveManagedPluginMetadataParams(config: OpenClawConfig, env: NodeJS.
   };
 }
 
-function resolveManagedPluginMetadata(config: OpenClawConfig, env: NodeJS.ProcessEnv) {
+function resolveManagedPluginMetadata(config: CarapaceConfig, env: NodeJS.ProcessEnv) {
   const boot = getProcessGatewayPluginMetadataSnapshot();
   const candidate = getProcessPluginCache().desiredMetadata;
   return candidate && candidate.boot === boot
@@ -135,7 +135,7 @@ function resolveManagedPluginMetadata(config: OpenClawConfig, env: NodeJS.Proces
     : resolvePluginMetadataSnapshot(resolveManagedPluginMetadataParams(config, env));
 }
 
-export function loadFreshManagedPluginMetadata(config: OpenClawConfig, env: NodeJS.ProcessEnv) {
+export function loadFreshManagedPluginMetadata(config: CarapaceConfig, env: NodeJS.ProcessEnv) {
   // Gateway actions must cover every workspace shown in its management inventory.
   return getProcessGatewayPluginMetadataSnapshot()
     ? resolveConfigWidePluginMetadataSnapshot({ config, env, allowCurrent: false })
@@ -147,7 +147,7 @@ export function loadFreshManagedPluginMetadata(config: OpenClawConfig, env: Node
 
 /** Publish desired install state for management without replacing the Gateway's boot facts. */
 export function refreshManagedPluginMetadata(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): PluginMetadataSnapshot {
   const env = params.env ?? process.env;
@@ -165,7 +165,7 @@ export function refreshManagedPluginMetadata(params: {
 /** Resolve the current package-local icon without accepting caller-provided input. */
 export const resolveManagedPluginIconSource = withManagedPluginCache(
   async (params: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     pluginId: string;
     env?: NodeJS.ProcessEnv;
   }): Promise<ManagedPluginIconSource | undefined> => {
@@ -192,7 +192,7 @@ function normalizeManagedCatalogIconUrl(value: unknown): string | undefined {
 
 /** Resolve only URLs currently owned by a manifest or bundled presentation catalog. */
 export function resolveManagedSetupCatalogIconUrl(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   iconUrl: string;
   env?: NodeJS.ProcessEnv;
 }): string | undefined {
@@ -218,7 +218,7 @@ export function resolveManagedSetupCatalogIconUrl(params: {
 /** Build cold installed state merged with the hosted official catalog and bundled curation. */
 export const listManagedPlugins = withManagedPluginCache(
   async (params: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     env?: NodeJS.ProcessEnv;
     officialCatalog?: OfficialCatalogResult;
     metadata?: PluginMetadataSnapshot;
@@ -443,7 +443,7 @@ export const listManagedPlugins = withManagedPluginCache(
 /** Inspect one plugin's manifest, operator grants, and recorded install provenance. */
 export const inspectManagedPlugin = withManagedPluginCache(
   async (params: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     pluginId: string;
     env?: NodeJS.ProcessEnv;
   }): Promise<ManagedPluginInspection> => {

@@ -3,17 +3,17 @@ import fs from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type {
   PluginBlobEntry,
   PluginBlobEntryInfo,
   PluginBlobStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { createMockServerResponse } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { createMockServerResponse } from "carapace/plugin-sdk/test-env";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, OpenClawPluginApi, OpenClawPluginToolContext } from "../api.js";
+import type { CarapaceConfig, CarapacePluginApi, CarapacePluginToolContext } from "../api.js";
 import { registerDiffsPlugin } from "./plugin.js";
 import { createTempDiffRoot } from "./test-helpers.js";
 
@@ -60,7 +60,7 @@ describe("PlaywrightDiffScreenshotter", () => {
     }
     originalPlatform = platformDescriptor;
     ({ PlaywrightDiffScreenshotter } = await import("./browser.runtime.js"));
-    ({ rootDir, cleanup: cleanupRootDir } = await createTempDiffRoot("openclaw-diffs-browser-"));
+    ({ rootDir, cleanup: cleanupRootDir } = await createTempDiffRoot("carapace-diffs-browser-"));
     outputPath = path.join(rootDir, "preview.png");
     launchMock.mockReset();
   });
@@ -102,7 +102,7 @@ describe("PlaywrightDiffScreenshotter", () => {
       value: "win32",
     });
     vi.stubEnv("PATH", "");
-    vi.stubEnv("OPENCLAW_BROWSER_EXECUTABLE_PATH", "");
+    vi.stubEnv("CARAPACE_BROWSER_EXECUTABLE_PATH", "");
     vi.stubEnv("BROWSER_EXECUTABLE_PATH", "");
     vi.stubEnv("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH", "");
     vi.stubEnv("LOCALAPPDATA", params.localAppData);
@@ -234,11 +234,11 @@ describe("PlaywrightDiffScreenshotter", () => {
   it.each(["config", "runtimeConfig"] as const)(
     "uses explicit tool %s for viewer links and screenshot browser selection",
     async (configField) => {
-      const processConfig: OpenClawConfig = {
+      const processConfig: CarapaceConfig = {
         gateway: { publicOrigin: "https://process.example" },
         browser: { executablePath: path.join(rootDir, "unavailable-browser") },
       };
-      const explicitConfig: OpenClawConfig = {
+      const explicitConfig: CarapaceConfig = {
         gateway: { publicOrigin: "https://explicit.example" },
         browser: { executablePath: process.execPath },
       };
@@ -427,11 +427,11 @@ describe("PlaywrightDiffScreenshotter", () => {
 
 function createRegistrationHarness(params: {
   pluginConfig: Record<string, unknown>;
-  currentConfig: () => OpenClawConfig;
+  currentConfig: () => CarapaceConfig;
 }) {
   const registered: {
-    tool?: Parameters<OpenClawPluginApi["registerTool"]>[0];
-    httpHandler?: Parameters<OpenClawPluginApi["registerHttpRoute"]>[0]["handler"];
+    tool?: Parameters<CarapacePluginApi["registerTool"]>[0];
+    httpHandler?: Parameters<CarapacePluginApi["registerHttpRoute"]>[0]["handler"];
   } = {};
   const on = vi.fn();
   const blobStore = createMemoryBlobStore();
@@ -461,7 +461,7 @@ function createRegistrationHarness(params: {
   return {
     on,
     handleRequest,
-    render: async (context: OpenClawPluginToolContext) => {
+    render: async (context: CarapacePluginToolContext) => {
       const tool = expectDefined(
         typeof registration === "function" ? registration(context) : registration,
         "diffs tool for context",
@@ -482,7 +482,7 @@ function createRegistrationHarness(params: {
 
 describe("diffs plugin registration", () => {
   it("uses live runtime tool config through the registered tool factory", async () => {
-    let configFile: OpenClawConfig = {
+    let configFile: CarapaceConfig = {
       gateway: {
         port: 18789,
         bind: "loopback",
@@ -491,7 +491,7 @@ describe("diffs plugin registration", () => {
         entries: {
           diffs: {
             config: {
-              viewerBaseUrl: "https://startup.example.com/openclaw",
+              viewerBaseUrl: "https://startup.example.com/carapace",
               defaults: {
                 mode: "view",
                 theme: "light",
@@ -508,7 +508,7 @@ describe("diffs plugin registration", () => {
     };
     const { render, handleRequest } = createRegistrationHarness({
       pluginConfig: {
-        viewerBaseUrl: "https://startup.example.com/openclaw",
+        viewerBaseUrl: "https://startup.example.com/carapace",
         defaults: {
           mode: "view",
           theme: "light",
@@ -571,7 +571,7 @@ describe("diffs plugin registration", () => {
   });
 
   it("uses live runtime viewer-access config through the registered HTTP handler", async () => {
-    let configFile: OpenClawConfig = {
+    let configFile: CarapaceConfig = {
       gateway: {
         port: 18789,
         bind: "loopback",
@@ -685,7 +685,7 @@ describe("diffs plugin registration", () => {
   });
 
   it("fails closed for remote viewer access when the live diffs plugin entry is removed", async () => {
-    let configFile: OpenClawConfig = {
+    let configFile: CarapaceConfig = {
       gateway: {
         port: 18789,
         bind: "loopback",
@@ -841,12 +841,12 @@ function createMemoryBlobStore<TMetadata>(): PluginBlobStore<TMetadata> {
   };
 }
 
-function createConfig(): OpenClawConfig {
+function createConfig(): CarapaceConfig {
   return {
     browser: {
       executablePath: process.execPath,
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function localReq(input: {

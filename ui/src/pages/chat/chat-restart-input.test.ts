@@ -114,7 +114,7 @@ describe("accepted input restart handoff", () => {
             {
               role: "user",
               content: "A different source",
-              __openclaw: {
+              __carapace: {
                 id: "replacement-input",
                 seq: 1,
                 idempotencyKey: `${item.sendRunId}:user`,

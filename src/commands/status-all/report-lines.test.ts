@@ -25,7 +25,7 @@ describe("buildStatusAllReportLines", () => {
     const lines = await buildStatusAllReportLines({
       progress,
       configDiagnostics: {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         issues: [{ path: "gateway.port", message: "invalid" }],
       },
       overviewRows: [{ Item: "Gateway", Value: "ok" }],
@@ -101,11 +101,11 @@ describe("buildStatusAllReportLines", () => {
     expect(output).toContain("PRESENT");
     expect(output).toContain("ABSENT");
     expect(output).toContain("Config diagnostics:");
-    expect(output).toContain("Config file is invalid: /tmp/openclaw.json");
+    expect(output).toContain("Config file is invalid: /tmp/carapace.json");
     expect(output).toContain("gateway.port: invalid");
-    expect(output).toContain("Fix: openclaw doctor --fix");
+    expect(output).toContain("Fix: carapace doctor --fix");
     expect(output.indexOf("Config diagnostics:")).toBeLessThan(
-      output.indexOf("OpenClaw status --all"),
+      output.indexOf("Carapace status --all"),
     );
     expect(output).not.toContain(String.fromCharCode(0xd83d));
     expect(

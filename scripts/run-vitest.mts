@@ -943,7 +943,7 @@ export async function runVitest(
     // it must finish before the execution parser imports Vitest.
     vitestCliEntry = resolveVitestCliEntry({ baseDir: repoRoot });
   } catch (error) {
-    if (isErrorWithCode(error, "OPENCLAW_MISSING_VITEST")) {
+    if (isErrorWithCode(error, "CARAPACE_MISSING_VITEST")) {
       console.error(error.message);
       process.exitCode = 1;
       return;

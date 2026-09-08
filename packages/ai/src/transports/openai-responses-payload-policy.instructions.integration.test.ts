@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import type { AddressInfo, Server } from "node:net";
-import type { Context, Model } from "@openclaw/llm-core";
+import type { Context, Model } from "@carapace/llm-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupSessionResources } from "../session-resources.js";
 import { createOpenAIResponsesTransportStreamFn } from "./openai-responses-client.js";
@@ -8,7 +8,7 @@ import { createOpenAIResponsesTransportStreamFn } from "./openai-responses-clien
 // Matches the identically-named symbol in src/agents/provider-request-config.ts
 // via the global symbol registry, without a packages/ai -> src/agents import.
 const MODEL_PROVIDER_REQUEST_TRANSPORT_SYMBOL = Symbol.for(
-  "openclaw.modelProviderRequestTransport",
+  "carapace.modelProviderRequestTransport",
 );
 
 function attachModelProviderRequestTransport<TModel extends object>(

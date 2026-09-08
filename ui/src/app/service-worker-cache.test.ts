@@ -12,14 +12,14 @@ describe("Control UI service worker cache versioning", () => {
   it("announces only to legacy root/chat clients without reloading older settings tabs", async () => {
     const client = (url: string) => ({ url, postMessage: vi.fn(), navigate: vi.fn() });
     const included = [
-      client("https://control.example/openclaw/"),
-      client("https://control.example/openclaw/chat/main/session?mode=compact#latest"),
+      client("https://control.example/carapace/"),
+      client("https://control.example/carapace/chat/main/session?mode=compact#latest"),
     ];
     const excluded = [
-      client("https://control.example/openclaw/settings/appearance"),
-      client("https://control.example/openclaw/config?raw=1#editor"),
-      client("https://control.example/openclaw-other/chat"),
-      client("https://other.example/openclaw/chat/main/session"),
+      client("https://control.example/carapace/settings/appearance"),
+      client("https://control.example/carapace/config?raw=1#editor"),
+      client("https://control.example/carapace-other/chat"),
+      client("https://other.example/carapace/chat/main/session"),
     ];
     const listeners = new Map<string, (event: ActivateEventStub) => void>();
     const cacheDelete = vi.fn(async () => true);
@@ -32,10 +32,10 @@ describe("Control UI service worker cache versioning", () => {
       caches: {
         delete: cacheDelete,
         keys: async () => [
-          "openclaw-control-oldest",
-          "openclaw-control-older",
-          "openclaw-control-previous",
-          "openclaw-control-new-build",
+          "carapace-control-oldest",
+          "carapace-control-older",
+          "carapace-control-previous",
+          "carapace-control-new-build",
           "other-cache",
         ],
       },
@@ -43,8 +43,8 @@ describe("Control UI service worker cache versioning", () => {
         addEventListener: (type: string, listener: (event: ActivateEventStub) => void) =>
           listeners.set(type, listener),
         clients,
-        location: { href: "https://control.example/openclaw/sw.js?v=new-build" },
-        registration: { scope: "https://control.example/openclaw/" },
+        location: { href: "https://control.example/carapace/sw.js?v=new-build" },
+        registration: { scope: "https://control.example/carapace/" },
       },
     });
     new vm.Script(fs.readFileSync(serviceWorkerPath, "utf8")).runInContext(context);
@@ -56,7 +56,7 @@ describe("Control UI service worker cache versioning", () => {
     });
     await expect(activation).resolves.toBeUndefined();
     expect(clients.claim).toHaveBeenCalledBefore(clients.matchAll);
-    expect(cacheDelete).toHaveBeenCalledExactlyOnceWith("openclaw-control-oldest");
+    expect(cacheDelete).toHaveBeenCalledExactlyOnceWith("carapace-control-oldest");
     for (const page of included) {
       expect(page.postMessage).toHaveBeenCalledExactlyOnceWith(
         { type: "sw-updated", version: "new-build" },
@@ -76,7 +76,7 @@ describe("Control UI service worker cache versioning", () => {
     const source = fs
       .readFileSync(serviceWorkerPath, "utf8")
       .replace(
-        'const EMBEDDED_CACHE_VERSION = "__OPENCLAW_CONTROL_UI_BUILD_ID__";',
+        'const EMBEDDED_CACHE_VERSION = "__CARAPACE_CONTROL_UI_BUILD_ID__";',
         'const EMBEDDED_CACHE_VERSION = "new-build";',
       );
     new vm.Script(source).runInNewContext({
@@ -99,8 +99,8 @@ describe("Control UI service worker cache versioning", () => {
 
 describe("Control UI service worker notification scope", () => {
   const rootScope = "https://control.example/";
-  const nestedScope = "https://control.example/openclaw/";
-  const nestedScopeWithoutSlash = "https://control.example/openclaw";
+  const nestedScope = "https://control.example/carapace/";
+  const nestedScopeWithoutSlash = "https://control.example/carapace";
 
   function notificationScenario(
     name: string,
@@ -214,7 +214,7 @@ describe("Control UI service worker notification scope", () => {
       {
         target: "approve/exec%3A1#gatewayUrl=wss%3A%2F%2Fgateway.example",
         openedUrl:
-          "https://control.example/openclaw/approve/exec%3A1#gatewayUrl=wss%3A%2F%2Fgateway.example",
+          "https://control.example/carapace/approve/exec%3A1#gatewayUrl=wss%3A%2F%2Fgateway.example",
       },
     ),
     notificationScenario(
@@ -332,27 +332,27 @@ describe("Control UI service worker notification scope", () => {
     notificationScenario(
       "never focuses a cross-origin window with the same nested pathname",
       nestedScope,
-      ["https://outside.example/openclaw/"],
+      ["https://outside.example/carapace/"],
       { focusedClientIndex: -1, openedUrl: nestedScope },
     ),
     notificationScenario(
       "falls back to the registered scope for an explicit cross-origin target",
       nestedScope,
       [],
-      { target: "https://outside.example/openclaw/chat" },
+      { target: "https://outside.example/carapace/chat" },
     ),
     notificationScenario(
       "rejects a sibling-prefix target and never focuses its window",
       nestedScope,
-      ["https://control.example/openclaw-other/chat"],
-      { target: "/openclaw-other/chat", focusedClientIndex: -1, openedUrl: nestedScope },
+      ["https://control.example/carapace-other/chat"],
+      { target: "/carapace-other/chat", focusedClientIndex: -1, openedUrl: nestedScope },
     ),
     notificationScenario(
       "rejects a sibling-prefix target for a slashless nested scope",
       nestedScopeWithoutSlash,
-      ["https://control.example/openclaw-other/chat"],
+      ["https://control.example/carapace-other/chat"],
       {
-        target: "/openclaw-other/chat",
+        target: "/carapace-other/chat",
         focusedClientIndex: -1,
         openedUrl: nestedScopeWithoutSlash,
       },
@@ -367,12 +367,12 @@ describe("Control UI service worker notification scope", () => {
       "rejects a cross-origin target for a slashless nested scope",
       nestedScopeWithoutSlash,
       [],
-      { target: "https://outside.example/openclaw/chat" },
+      { target: "https://outside.example/carapace/chat" },
     ),
     notificationScenario(
       "never focuses a sibling-prefix window for the default nested target",
       nestedScope,
-      ["https://control.example/openclaw-other/"],
+      ["https://control.example/carapace-other/"],
       { focusedClientIndex: -1, openedUrl: nestedScope },
     ),
     notificationScenario(
@@ -394,7 +394,7 @@ describe("Control UI service worker notification scope", () => {
     async ({ scope, target, clientUrls, focusedClientIndex, navigatedUrl, openedUrl }) => {
       const worker = createNotificationServiceWorker(scope, clientUrls);
       const payload: ServiceWorkerPushPayload = {
-        title: "OpenClaw",
+        title: "Carapace",
         body: "Scoped notification",
       };
       if (target !== null) {
@@ -439,16 +439,16 @@ describe("Control UI service worker notification scope", () => {
 
   it("preserves a quiet shared tag for approval terminal replacements", async () => {
     const worker = createNotificationServiceWorker(nestedScope, []);
-    const tag = "openclaw-approval-exec:replacement";
+    const tag = "carapace-approval-exec:replacement";
 
     const requested = await worker.dispatchPush({
-      title: "OpenClaw approval requested",
-      body: "Open OpenClaw to review this request.",
+      title: "Carapace approval requested",
+      body: "Open Carapace to review this request.",
       tag,
       renotify: false,
     });
     const terminal = await worker.dispatchPush({
-      title: "OpenClaw approval updated",
+      title: "Carapace approval updated",
       body: "This approval is no longer pending.",
       tag,
       renotify: false,

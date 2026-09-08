@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "node:http";
 import type { Duplex } from "node:stream";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createWebSocketStream, WebSocket, WebSocketServer, type RawData } from "ws";
 import { registerSecretValueForRedaction } from "../../logging/secret-redaction-registry.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";

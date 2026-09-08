@@ -77,7 +77,7 @@ describe("follow-up delivery custody", () => {
     "leaves one sender after an admitted route fails with %s before dispatch",
     async (name) => {
       const tmpDir = fixtures.tmpDir();
-      process.env.OPENCLAW_STATE_DIR = tmpDir;
+      process.env.CARAPACE_STATE_DIR = tmpDir;
       const accepted: string[] = [];
       let startupClosed = true;
       setActivePluginRegistry(

@@ -27,7 +27,7 @@ import type {
   CaptureProtocol,
 } from "./types.js";
 
-const DEBUG_PROXY_FETCH_PATCH_KEY = Symbol.for("openclaw.debugProxy.fetchPatch");
+const DEBUG_PROXY_FETCH_PATCH_KEY = Symbol.for("carapace.debugProxy.fetchPatch");
 const REDACTED_CAPTURE_BINARY_PAYLOAD = Buffer.from("[REDACTED BINARY PAYLOAD]", "utf8");
 // Cap captured response bodies so debug proxy capture cannot be turned into an
 // out-of-memory vector. The patched global fetch tees every outbound response
@@ -321,7 +321,7 @@ function createHttpCaptureEventBase(params: {
   return {
     sessionId: params.settings.sessionId,
     ts: Date.now(),
-    sourceScope: "openclaw",
+    sourceScope: "carapace",
     sourceProcess: params.settings.sourceProcess,
     protocol: params.transport ?? protocolFromUrl(params.rawUrl),
     direction: params.direction,
@@ -396,7 +396,7 @@ function installDebugProxyGlobalFetchPatch(
         store.recordEvent({
           sessionId: settings.sessionId,
           ts: Date.now(),
-          sourceScope: "openclaw",
+          sourceScope: "carapace",
           sourceProcess: settings.sourceProcess,
           protocol: protocolFromUrl(captureUrl),
           direction: "local",
@@ -452,7 +452,7 @@ export function initializeDebugProxyCapture(
     id: settings.sessionId,
     startedAt: Date.now(),
     mode,
-    sourceScope: "openclaw",
+    sourceScope: "carapace",
     sourceProcess: settings.sourceProcess,
     proxyUrl: settings.proxyUrl,
   });
@@ -664,7 +664,7 @@ export function captureWsEvent(
   store.recordEvent({
     sessionId: settings.sessionId,
     ts: Date.now(),
-    sourceScope: "openclaw",
+    sourceScope: "carapace",
     sourceProcess: settings.sourceProcess,
     protocol: protocolFromUrl(captureUrl),
     direction: params.direction,

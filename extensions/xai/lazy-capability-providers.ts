@@ -1,4 +1,4 @@
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
+import { isProviderApiKeyConfigured } from "carapace/plugin-sdk/provider-auth";
 import { createLazyXaiVideoGenerationProvider as createLazyXaiVideoGenerationProviderCore } from "./lazy-capability-provider-factories.js";
 
 export {

@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { z } from "zod";
 import {
   SESSION_OBSERVER_HEALTH_VALUES,
@@ -19,7 +19,7 @@ import {
   patchSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AgentEventPayload } from "../infra/agent-events.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { redactToolPayloadText } from "../logging/redact.js";
@@ -229,7 +229,7 @@ export function createDormantSessionObserverRun(
 }
 
 export type SessionObserverDeps = {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   subscribers: SessionMessageSubscriberRegistry;
   sessionEventSubscribers?: SessionEventSubscriberRegistry;
   broadcastToConnIds: (

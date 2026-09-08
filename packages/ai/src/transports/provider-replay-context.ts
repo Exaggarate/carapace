@@ -1,4 +1,4 @@
-import type { Model, ProviderReplayState } from "@openclaw/llm-core";
+import type { Model, ProviderReplayState } from "@carapace/llm-core";
 import { shortHash } from "../utils/hash.js";
 
 type ProviderReplayContext = Readonly<

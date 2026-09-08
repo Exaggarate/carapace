@@ -1,8 +1,8 @@
 // Deepgram tests cover audio plugin behavior.
 import { spawnSync } from "node:child_process";
-import { runRealtimeSttLiveTest } from "openclaw/plugin-sdk/provider-test-contracts";
-import { createRealtimeTranscriptionWebSocketSession } from "openclaw/plugin-sdk/realtime-transcription-session";
-import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+import { runRealtimeSttLiveTest } from "carapace/plugin-sdk/provider-test-contracts";
+import { createRealtimeTranscriptionWebSocketSession } from "carapace/plugin-sdk/realtime-transcription-session";
+import { isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { describe, expect, it } from "vitest";
 import { transcribeDeepgramAudio } from "./audio.js";
 import { buildDeepgramRealtimeTranscriptionProvider } from "./realtime-transcription-provider-factory.js";

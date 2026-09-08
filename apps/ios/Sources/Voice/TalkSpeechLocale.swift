@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Speech
 
 enum TalkSpeechLocale {

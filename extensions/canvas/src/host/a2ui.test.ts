@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { handleA2uiHttpRequestWithRootResolver } from "./a2ui-route.js";
 import { A2UI_PATH } from "./a2ui-shared.js";
@@ -10,7 +10,7 @@ let fixtureRootReal = "";
 
 beforeAll(async () => {
   fixtureRoot = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-canvas-a2ui-route-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-canvas-a2ui-route-"),
   );
   const assetRoot = path.join(fixtureRoot, "canvas-host", "a2ui");
   await fs.mkdir(assetRoot, { recursive: true });

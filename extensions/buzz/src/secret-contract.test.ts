@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createResolverContext } from "openclaw/plugin-sdk/secret-ref-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createResolverContext } from "carapace/plugin-sdk/secret-ref-runtime";
 import { describe, expect, it } from "vitest";
 import { collectRuntimeConfigAssignments, secretTargetRegistryEntries } from "./secret-contract.js";
 
@@ -31,7 +31,7 @@ describe("Buzz secret contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const config = structuredClone(sourceConfig);
     const context = createResolverContext({ sourceConfig, env: {} });
     collectRuntimeConfigAssignments({ config, defaults: undefined, context });
@@ -63,8 +63,8 @@ describe("Buzz secret contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
-    const digest = (config: OpenClawConfig) => {
+    } as CarapaceConfig;
+    const digest = (config: CarapaceConfig) => {
       const context = createResolverContext({ sourceConfig: config, env: {} });
       collectRuntimeConfigAssignments({ config, defaults: undefined, context });
       return context.assignments.find((entry) => entry.ownerId === "buzz:ada")?.ownerContractDigest;
@@ -94,7 +94,7 @@ describe("Buzz secret contract", () => {
           authTag: { source: "exec", provider: "vault", id: "buzz-auth-tag" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const context = createResolverContext({ sourceConfig, env: {} });
 
     collectRuntimeConfigAssignments({

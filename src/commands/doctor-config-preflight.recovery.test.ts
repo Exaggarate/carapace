@@ -9,23 +9,23 @@ import { withEnvOverride } from "../config/test-helpers.js";
 import * as checkpoint from "../infra/startup-migration-checkpoint.js";
 import { ExitError } from "../runtime.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { runDoctorConfigPreflight } from "./doctor-config-preflight.js";
 import { withDoctorConfigPreflightHome } from "./doctor-config-preflight.test-support.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it.each(["backup", "active config"] as const)(
   "refuses changed %s under the lease before any repair",
   async (kind) => {
     await withDoctorConfigPreflightHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const stateDir = path.join(home, ".carapace");
+      const configPath = path.join(stateDir, "carapace.json");
       await fs.mkdir(stateDir, { recursive: true });
       const backup = { gateway: { mode: "local" }, plugins: { enabled: false } };
       const original =
@@ -35,15 +35,15 @@ it.each(["backup", "active config"] as const)(
           ? {
               ...backup,
               meta: { lastTouchedVersion: "9999.1.1" },
-              env: { vars: { OPENCLAW_SERVICE_MARKER: "openclaw" } },
+              env: { vars: { CARAPACE_SERVICE_MARKER: "carapace" } },
             }
           : {
               ...backup,
               agents: { defaults: { workspace: path.join(home, "changed-workspace") } },
             },
       );
-      openOpenClawStateDatabase({ path: path.join(stateDir, "state", "openclaw.sqlite") });
-      closeOpenClawStateDatabaseForTest();
+      openCarapaceStateDatabase({ path: path.join(stateDir, "state", "carapace.sqlite") });
+      closeCarapaceStateDatabaseForTest();
       const stateMigration = await import("../infra/state-migrations.state-dir.js");
       const migrateStateDir = vi.spyOn(stateMigration, "autoMigrateLegacyStateDir");
       await fs.writeFile(configPath, original);
@@ -58,7 +58,7 @@ it.each(["backup", "active config"] as const)(
         },
       };
       await withEnvOverride(
-        { OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS: undefined },
+        { CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS: undefined },
         async () => {
           expect(await prepareGatewayRunBootstrap({ opts: {}, runtime })).toBe(true);
           const acquire = checkpoint.acquireStartupMigrationLeaseWithWait;
@@ -93,8 +93,8 @@ it.each(["expired", "reassigned"] as const)(
   "does not restore a backup after the migration lease is %s during admission",
   async (loss) => {
     await withDoctorConfigPreflightHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const stateDir = path.join(home, ".carapace");
+      const configPath = path.join(stateDir, "carapace.json");
       await fs.mkdir(stateDir, { recursive: true });
       const original = '{"update":{"channel":"stable"}}\n';
       await fs.writeFile(configPath, original);
@@ -102,8 +102,8 @@ it.each(["expired", "reassigned"] as const)(
         `${configPath}.bak`,
         JSON.stringify({ gateway: { mode: "local" }, plugins: { enabled: false } }),
       );
-      openOpenClawStateDatabase({ path: path.join(stateDir, "state", "openclaw.sqlite") });
-      closeOpenClawStateDatabaseForTest();
+      openCarapaceStateDatabase({ path: path.join(stateDir, "state", "carapace.sqlite") });
+      closeCarapaceStateDatabaseForTest();
       let replacement: checkpoint.StartupMigrationLease | undefined;
       vi.spyOn(checkpoint, "acquireStartupMigrationLeaseWithWait").mockImplementationOnce(
         async (params) => {

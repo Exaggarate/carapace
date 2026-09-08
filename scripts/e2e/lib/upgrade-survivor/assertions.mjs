@@ -17,7 +17,7 @@ import { assertUpgradeVolumeMigrated, seedUpgradeVolume } from "./sqlite-volume.
 const command = process.argv[2];
 // Keep unrelated packaged assertion commands independent of agent-turn helpers.
 const legacyOperator =
-  process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO === "legacy-operator-state" ||
+  process.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIO === "legacy-operator-state" ||
   command?.includes("legacy-operator")
     ? await import("./legacy-operator-state.mjs")
     : undefined;
@@ -26,7 +26,7 @@ const SCENARIOS = new Set([
   "abandoned-update",
   "legacy-operator-state",
   "mobile-pairing-reconnect",
-  "acpx-openclaw-tools-bridge",
+  "acpx-carapace-tools-bridge",
   "feishu-channel",
   "bootstrap-persona",
   "channel-post-core-restore",
@@ -191,7 +191,7 @@ function seedLegacySessionMetadata(stateDir, perAgent) {
         resolvedSkills: [
           {
             name: "legacy-heavy-skill-cache",
-            filePath: "/tmp/openclaw-old-package/skills/legacy-heavy-skill-cache/SKILL.md",
+            filePath: "/tmp/carapace-old-package/skills/legacy-heavy-skill-cache/SKILL.md",
           },
         ],
       },
@@ -331,17 +331,17 @@ function seedLegacyCronScheduledAuthority(stateDir) {
 }
 
 function getScenario() {
-  const scenario = process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO || "base";
+  const scenario = process.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIO || "base";
   assert(SCENARIOS.has(scenario), `unknown upgrade survivor scenario: ${scenario}`);
   return scenario;
 }
 
 function getConfig() {
-  return readJson(requireEnv("OPENCLAW_CONFIG_PATH"));
+  return readJson(requireEnv("CARAPACE_CONFIG_PATH"));
 }
 
 function getCoverage() {
-  const file = process.env.OPENCLAW_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON;
+  const file = process.env.CARAPACE_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON;
   if (!file || !fs.existsSync(file)) {
     return null;
   }
@@ -364,8 +364,8 @@ function hasCoverage(coverage) {
 }
 
 function seedState() {
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
-  const workspace = requireEnv("OPENCLAW_TEST_WORKSPACE_DIR");
+  const stateDir = requireEnv("CARAPACE_STATE_DIR");
+  const workspace = requireEnv("CARAPACE_TEST_WORKSPACE_DIR");
   const scenario = getScenario();
   if (scenario === "legacy-operator-state") {
     // The scenario has already authored its state with the baseline's own CLI.
@@ -381,7 +381,7 @@ function seedState() {
       write(path.join(workspace, fileName), contents);
     }
   }
-  writeJson(path.join(workspace, ".openclaw", "workspace-state.json"), {
+  writeJson(path.join(workspace, ".carapace", "workspace-state.json"), {
     version: 1,
     setupCompletedAt: "2026-04-01T00:00:00.000Z",
   });
@@ -423,7 +423,7 @@ function seedState() {
 
   const runtimeRoot = path.join(stateDir, "plugin-runtime-deps");
   for (const plugin of ["discord", "telegram", "whatsapp"]) {
-    writeJson(path.join(runtimeRoot, plugin, ".openclaw-runtime-deps-stamp.json"), {
+    writeJson(path.join(runtimeRoot, plugin, ".carapace-runtime-deps-stamp.json"), {
       version: 0,
       plugin,
       stale: true,
@@ -432,7 +432,7 @@ function seedState() {
       path.join(
         runtimeRoot,
         plugin,
-        ".openclaw-runtime-deps-copy-stale",
+        ".carapace-runtime-deps-copy-stale",
         "node_modules",
         "stale-sentinel",
         "package.json",
@@ -441,13 +441,13 @@ function seedState() {
     );
   }
   if (scenario === "versioned-runtime-deps") {
-    const version = process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
+    const version = process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
     for (const plugin of ["discord", "feishu", "telegram", "whatsapp"]) {
       writeJson(
         path.join(
           runtimeRoot,
-          `openclaw-${version}-${plugin}`,
-          ".openclaw-runtime-deps-stamp.json",
+          `carapace-${version}-${plugin}`,
+          ".carapace-runtime-deps-stamp.json",
         ),
         {
           packageVersion: version,
@@ -458,7 +458,7 @@ function seedState() {
       write(
         path.join(
           runtimeRoot,
-          `openclaw-${version}-${plugin}`,
+          `carapace-${version}-${plugin}`,
           "node_modules",
           "stale-sentinel",
           "package.json",
@@ -485,7 +485,7 @@ function assertConfigSurvived() {
   const scenario = getScenario();
   if (scenario === "legacy-operator-state") {
     legacyOperator.assertLegacyOperatorConfig(
-      process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival",
+      process.env.CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival",
     );
     return;
   }
@@ -497,7 +497,7 @@ function assertConfigSurvived() {
 
   if (acceptsIntent(coverage, "update")) {
     const expectedChannel =
-      process.env.OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL ||
+      process.env.CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL ||
       (scenario === "prerelease-plugin-registry" ? "beta" : "stable");
     assert(
       expectedChannel === "stable" || expectedChannel === "beta",
@@ -548,13 +548,13 @@ function assertConfigSurvived() {
     }
   }
 
-  if (hasCoverage(coverage) && acceptsIntent(coverage, "acpx-openclaw-tools-bridge")) {
+  if (hasCoverage(coverage) && acceptsIntent(coverage, "acpx-carapace-tools-bridge")) {
     const pluginAllow = config.plugins?.allow ?? [];
     assert(pluginAllow.includes("acpx"), "ACPX plugin allow entry missing");
     assert(config.plugins?.entries?.acpx?.enabled === true, "ACPX plugin entry changed");
     assert(
-      config.plugins?.entries?.acpx?.config?.openClawToolsMcpBridge === true,
-      "ACPX OpenClaw tools bridge config changed",
+      config.plugins?.entries?.acpx?.config?.carapaceToolsMcpBridge === true,
+      "ACPX Carapace tools bridge config changed",
     );
   }
 
@@ -572,7 +572,7 @@ function assertConfigSurvived() {
   if (acceptsIntent(coverage, "discord-channel")) {
     const discord = config.channels?.discord;
     assert(discord?.enabled === true, "discord enabled flag changed");
-    const stage = process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
+    const stage = process.env.CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
     const discordAllowFrom =
       stage === "baseline" ? (discord.allowFrom ?? discord.dm?.allowFrom) : discord.allowFrom;
     const discordDmPolicy =
@@ -653,17 +653,17 @@ function assertConfigSurvived() {
 
   if (hasCoverage(coverage) && acceptsIntent(coverage, "logging")) {
     assert(
-      config.logging?.file === "~/openclaw-upgrade-survivor/gateway.jsonl",
+      config.logging?.file === "~/carapace-upgrade-survivor/gateway.jsonl",
       "logging.file tilde path changed",
     );
   }
 }
 
 function assertStateSurvived() {
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
-  const workspace = requireEnv("OPENCLAW_TEST_WORKSPACE_DIR");
+  const stateDir = requireEnv("CARAPACE_STATE_DIR");
+  const workspace = requireEnv("CARAPACE_TEST_WORKSPACE_DIR");
   const scenario = getScenario();
-  const stage = process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
+  const stage = process.env.CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
   if (scenario === "legacy-operator-state") {
     legacyOperator.assertLegacyOperatorConfig(stage);
     return;
@@ -696,7 +696,7 @@ function assertStateSurvived() {
     const sentinel = path.join(
       legacyRuntimeRoot,
       plugin,
-      ".openclaw-runtime-deps-copy-stale",
+      ".carapace-runtime-deps-copy-stale",
       "node_modules",
       "stale-sentinel",
       "package.json",
@@ -714,18 +714,18 @@ function assertStateSurvived() {
     }
   }
   if (scenario === "stale-source-plugin-shadow") {
-    const staleRoot = path.join(stateDir, "extensions", "opik-openclaw");
+    const staleRoot = path.join(stateDir, "extensions", "opik-carapace");
     assert(
       fs.existsSync(path.join(staleRoot, "src", "index.ts")),
       "source-only plugin shadow fixture missing",
     );
   }
   if (scenario === "versioned-runtime-deps") {
-    const version = process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
+    const version = process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
     for (const plugin of ["discord", "feishu", "telegram", "whatsapp"]) {
       const sentinel = path.join(
         legacyRuntimeRoot,
-        `openclaw-${version}-${plugin}`,
+        `carapace-${version}-${plugin}`,
         "node_modules",
         "stale-sentinel",
         "package.json",
@@ -770,7 +770,7 @@ function assertAuthProfileMigrationSurvived(stateDir, stage) {
       `auth archive changed for ${source}`,
     );
   }
-  const stateDatabase = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+  const stateDatabase = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
     readOnly: true,
   });
   try {
@@ -825,7 +825,7 @@ function assertAuthProfileMigrationSurvived(stateDir, stage) {
 
 function assertCronScheduledAuthorityMigrated(stateDir, stage) {
   const legacyStorePath = path.join(stateDir, "cron", "jobs.json");
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   if (stage === "baseline") {
     if (fs.existsSync(legacyStorePath)) {
       const jobs = readJson(legacyStorePath).jobs ?? [];
@@ -899,7 +899,7 @@ function assertMeetingTranscriptsMigrated(stateDir, stage) {
     "archived meeting transcript JSONL missing",
   );
 
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   const db = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const session = db
@@ -946,7 +946,7 @@ function assertMeetingTranscriptsMigrated(stateDir, stage) {
 function assertMeetingTranscriptExport(stateDir) {
   const legacySessionDir = path.join(stateDir, "transcripts", "2026-07-01", "design-review");
   const exportedDir = execFileSync(
-    "openclaw",
+    "carapace",
     ["transcripts", "path", "2026-07-01/design-review", "--dir"],
     { encoding: "utf8", env: process.env },
   ).trim();
@@ -969,14 +969,14 @@ function assertMeetingTranscriptExport(stateDir) {
 async function assertRestartServingTurn(file) {
   assert(file, "assert-restart-serving-turn requires an output path");
   const sessionKey = "agent:main:main";
-  const marker = `OPENCLAW_E2E_SURVIVOR_${randomUUID().replaceAll("-", "").toUpperCase()}`;
+  const marker = `CARAPACE_E2E_SURVIVOR_${randomUUID().replaceAll("-", "").toUpperCase()}`;
   const token = requireEnv("GATEWAY_AUTH_TOKEN_REF");
   const deadline = Date.now() + 120_000;
   const call = (method, params) => {
     const remainingMs = deadline - Date.now();
     assert(remainingMs > 0, "managed serving turn exceeded its two-minute budget");
     const result = spawnSync(
-      "openclaw",
+      "carapace",
       [
         "gateway",
         "call",
@@ -1084,7 +1084,7 @@ function assertSessionMetadataMigrated(stateDir, stage) {
     );
   }
   if (source !== "file") {
-    const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+    const dbPath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
     const db = new DatabaseSync(dbPath, { readOnly: true });
     try {
       const count = db.prepare(
@@ -1134,7 +1134,7 @@ function assertSessionMetadataMigrated(stateDir, stage) {
 }
 
 function readMigratedSessionStore(stateDir, targetStorePath) {
-  const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   if (fs.existsSync(dbPath)) {
     let db;
     try {
@@ -1202,7 +1202,7 @@ function readMigratedSessionStore(stateDir, targetStorePath) {
 }
 
 function readInstalledPluginIndex() {
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
+  const stateDir = requireEnv("CARAPACE_STATE_DIR");
   const index = readPluginInstallIndex({ stateDir });
   assert(index.installRecords, "installed plugin index missing");
   return index;
@@ -1211,11 +1211,11 @@ function readInstalledPluginIndex() {
 function assertBaselinePlugin([expectedVersion]) {
   const record = readInstalledPluginIndex().installRecords.discord;
   assert(record?.source === "npm", "baseline Discord plugin was not installed from npm");
-  assert(record.spec === "@openclaw/discord@latest", "baseline plugin selector became pinned");
+  assert(record.spec === "@carapace/discord@latest", "baseline plugin selector became pinned");
   const installed = readJson(path.join(resolveHomePath(record.installPath), "package.json"));
-  assert(installed.name === "@openclaw/discord", "baseline plugin package identity changed");
+  assert(installed.name === "@carapace/discord", "baseline plugin package identity changed");
   assert(installed.version === expectedVersion, "baseline plugin is not the baseline version");
-  console.log(`Baseline npm plugin: @openclaw/discord@${expectedVersion}, selector=latest.`);
+  console.log(`Baseline npm plugin: @carapace/discord@${expectedVersion}, selector=latest.`);
 }
 
 function assertExternalPluginInstall(records, pluginId, packageName) {
@@ -1249,7 +1249,7 @@ function assertExternalPluginInstall(records, pluginId, packageName) {
     `configured external ${pluginId} package name changed: ${packageJson.name}`,
   );
   if (installedFromNpm) {
-    const stateDir = requireEnv("OPENCLAW_STATE_DIR");
+    const stateDir = requireEnv("CARAPACE_STATE_DIR");
     assert(
       isPathInsideManagedNpmProjectPackageRoot({ stateDir, installPath, packageName }),
       `configured external ${pluginId} npm install path outside managed npm project root: ${installPath}`,
@@ -1264,7 +1264,7 @@ function assertExternalPluginInstall(records, pluginId, packageName) {
     record.clawhubPackage === packageName,
     `configured external ${pluginId} ClawHub package changed: ${record.clawhubPackage}`,
   );
-  const extensionsRoot = path.join(requireEnv("OPENCLAW_STATE_DIR"), "extensions");
+  const extensionsRoot = path.join(requireEnv("CARAPACE_STATE_DIR"), "extensions");
   assert(
     isPathInside(extensionsRoot, installPath),
     `configured external ${pluginId} ClawHub install path outside managed extensions root: ${installPath}`,
@@ -1359,12 +1359,12 @@ function assertNpmPluginInstall([
     expectedVersion,
     capabilityConsentSupported,
   );
-  const artifactDir = requireEnv("OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR");
+  const artifactDir = requireEnv("CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR");
   const { manifest } = validatePrepublishPluginRegistryArtifact({
     artifactDir,
-    expectedSourceSha: requireEnv("OPENCLAW_DOCKER_E2E_SELECTED_SHA"),
+    expectedSourceSha: requireEnv("CARAPACE_DOCKER_E2E_SELECTED_SHA"),
     expectedCandidateVersion: expectedVersion,
-    expectedManifestSha256: requireEnv("OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256"),
+    expectedManifestSha256: requireEnv("CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256"),
     requiredPackages: [packageName],
   });
   const artifact = manifest.packages.find((entry) => entry.name === packageName);
@@ -1381,9 +1381,9 @@ function assertCompanionPluginInstalls([expectedVersion, capabilityConsentSuppor
   );
   const records = readInstalledPluginIndex().installRecords ?? {};
   for (const [pluginId, packageName, source] of [
-    ["discord", "@openclaw/discord", "npm"],
-    ["whatsapp", "@openclaw/whatsapp", "clawhub"],
-    ["codex", "@openclaw/codex", "npm"],
+    ["discord", "@carapace/discord", "npm"],
+    ["whatsapp", "@carapace/whatsapp", "clawhub"],
+    ["codex", "@carapace/codex", "npm"],
   ]) {
     const packageJson = assertExternalPluginInstall(records, pluginId, packageName);
     const record = records[pluginId];
@@ -1421,7 +1421,7 @@ function assertPluginArtifactConsent(
   );
   if (capabilityConsentSupported === "1") {
     const inspection = JSON.parse(
-      execFileSync("openclaw", ["plugins", "inspect", pluginId, "--json"], {
+      execFileSync("carapace", ["plugins", "inspect", pluginId, "--json"], {
         encoding: "utf8",
         timeout: 120_000,
       }),
@@ -1474,7 +1474,7 @@ function assertRecoveredPluginInstalls(args) {
 
 function assertConfiguredPluginInstalls() {
   const coverage = getCoverage();
-  const stage = process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
+  const stage = process.env.CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
   if (!hasCoverage(coverage) || !acceptsIntent(coverage, "configured-plugin-installs")) {
     return;
   }
@@ -1485,11 +1485,11 @@ function assertConfiguredPluginInstalls() {
   const records = index.installRecords ?? {};
   assertOptionalConfiguredPluginIndex(records, index.plugins ?? [], {
     bundled: true,
-    packageName: "@openclaw/matrix",
+    packageName: "@carapace/matrix",
     pluginId: "matrix",
   });
   assertOptionalConfiguredPluginIndex(records, index.plugins ?? [], {
-    packageName: "@openclaw/brave-plugin",
+    packageName: "@carapace/brave-plugin",
     pluginId: "brave",
   });
   assert(!records.telegram, "internal telegram plugin should not be installed externally");
@@ -1582,7 +1582,7 @@ function assertRecoverableUpdateJson([file, expectedVersion, observationRoot, ba
       "",
     );
     const match =
-      /^Plugin "([^"]+)" requires capability consent(?:\. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry\.|; rerun with --accept-capabilities\.)$/.exec(
+      /^Plugin "([^"]+)" requires capability consent(?:\. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry\.|; rerun with --accept-capabilities\.)$/.exec(
         reason,
       );
     assertStrict.ok(match && reviewed.has(match[1]), "Unexpected plugin convergence failure.");
@@ -1683,11 +1683,11 @@ function assertUpdateRunSelfUpgrade([file]) {
   const qaAccounts = summary?.qaChannel?.status?.channelAccounts?.["qa-channel"];
   const targetServiceStarts = (summary?.supervisorHandoff?.systemctlInvocations ?? [])
     .map(normalizeSystemctlInvocation)
-    .filter((invocation) => invocation === "start openclaw-gateway.service");
+    .filter((invocation) => invocation === "start carapace-gateway.service");
 
   assert(summary?.status === "passed", "update.run self-upgrade summary did not pass");
   assert(sourceVersion === "2026.4.26", `unexpected source version: ${String(sourceVersion)}`);
-  assert(summary?.source?.spec === "openclaw@2026.4.26", "source package spec was not exact");
+  assert(summary?.source?.spec === "carapace@2026.4.26", "source package spec was not exact");
   assert(summary?.target?.tag === "latest", "target tag was not latest");
   assert(
     compareStableVersions(targetVersion, sourceVersion) > 0,
@@ -1890,17 +1890,17 @@ if (command === "list-scenarios") {
 } else if (command === "assert-exec-approvals") {
   if (getScenario() === "legacy-operator-state") {
     legacyOperator.assertLegacyOperatorApprovals(
-      process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival",
+      process.env.CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival",
     );
   } else if (!["watchos-direct-node", "mobile-pairing-reconnect"].includes(getScenario())) {
     assertExecApprovalPolicySurvived(
-      requireEnv("OPENCLAW_STATE_DIR"),
-      process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival",
+      requireEnv("CARAPACE_STATE_DIR"),
+      process.env.CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival",
     );
   }
 } else if (command === "seed-volume") {
   assert(getScenario() === "sqlite-volume", "seed-volume requires the sqlite-volume scenario");
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
+  const stateDir = requireEnv("CARAPACE_STATE_DIR");
   seedUpgradeVolume(stateDir);
 } else if (command === "assert-config") {
   assertConfigSurvived();
@@ -1914,7 +1914,7 @@ if (command === "list-scenarios") {
     getScenario() === "meeting-transcripts-sqlite",
     "transcript export requires the meeting scenario",
   );
-  assertMeetingTranscriptExport(requireEnv("OPENCLAW_STATE_DIR"));
+  assertMeetingTranscriptExport(requireEnv("CARAPACE_STATE_DIR"));
 } else if (command === "assert-npm-plugin-install") {
   assertNpmPluginInstall(process.argv.slice(3));
 } else if (command === "assert-companion-installs") {

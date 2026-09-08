@@ -67,11 +67,11 @@ suite.define(() => {
       try {
         await page.goto(new URL(controlUiSessionPath(sessionKeys[0]), suite.server.baseUrl).href);
         // A route URL can settle before its lazy pane mounts and becomes retainable.
-        await expect.poll(() => page.locator("openclaw-chat-pane").count()).toBe(1);
+        await expect.poll(() => page.locator("carapace-chat-pane").count()).toBe(1);
         for (const [index, key] of sessionKeys.slice(1).entries()) {
           await page.locator(`.sidebar-recent-session[data-session-key="${key}"] a`).click();
           await expect.poll(() => new URL(page.url()).pathname).toBe(controlUiSessionPath(key));
-          await expect.poll(() => page.locator("openclaw-chat-pane").count()).toBe(index + 2);
+          await expect.poll(() => page.locator("carapace-chat-pane").count()).toBe(index + 2);
         }
         const before = (await gateway.getRequests()).length;
         const connectBefore = (await gateway.getRequests("connect")).length;
@@ -122,7 +122,7 @@ suite.define(() => {
           message: { role: "assistant", content: [{ type: "text", text: "Done." }] },
         });
         await page.waitForFunction((sessionKey) => {
-          const pane = [...document.querySelectorAll("openclaw-chat-pane")].find(
+          const pane = [...document.querySelectorAll("carapace-chat-pane")].find(
             (element) =>
               (element as HTMLElement & { sessionKey?: string }).sessionKey === sessionKey,
           ) as (HTMLElement & { state?: { chatMessages?: unknown[] } }) | undefined;

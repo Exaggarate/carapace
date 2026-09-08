@@ -1,8 +1,8 @@
 // Xai tests cover realtime transcription provider plugin behavior.
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createRealtimeTranscriptionWebSocketSession } from "openclaw/plugin-sdk/realtime-transcription-session";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
+import { createRealtimeTranscriptionWebSocketSession } from "carapace/plugin-sdk/realtime-transcription-session";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
@@ -71,13 +71,13 @@ async function createRealtimeSttServer(params?: {
           const events = params?.transcriptionEvents ?? [
             {
               type: "transcript.partial",
-              text: "hello openclaw",
+              text: "hello carapace",
               is_final: false,
               speech_final: false,
             },
             {
               type: "transcript.partial",
-              text: "hello openclaw final",
+              text: "hello carapace final",
               is_final: true,
               speech_final: true,
             },
@@ -89,7 +89,7 @@ async function createRealtimeSttServer(params?: {
         }
         const event = JSON.parse(buffer.toString()) as { type?: string };
         if (event.type === "audio.done") {
-          ws.send(JSON.stringify({ type: "transcript.done", text: "hello openclaw final" }));
+          ws.send(JSON.stringify({ type: "transcript.done", text: "hello carapace final" }));
           done();
           resolveDone?.();
         }
@@ -156,7 +156,7 @@ describe("xai realtime transcription provider", () => {
   });
 
   it("streams raw binary audio and maps partial and final transcript events", async () => {
-    vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+    vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
     const binaryFrames: Buffer[] = [];
     const requestUrls: URL[] = [];
     const upgradeHeaders: Array<Record<string, string | string[] | undefined>> = [];
@@ -174,7 +174,7 @@ describe("xai realtime transcription provider", () => {
       resolveFinalTranscript = resolve;
     });
     const onTranscript = vi.fn((text: string) => {
-      if (text === "hello openclaw final") {
+      if (text === "hello carapace final") {
         resolveFinalTranscript?.();
       }
     });
@@ -210,7 +210,7 @@ describe("xai realtime transcription provider", () => {
     expect(Buffer.concat(binaryFrames).toString()).toContain("queued-before-ready");
     expect(Buffer.concat(binaryFrames).toString()).toContain("after-ready");
     expect(onSpeechStart).toHaveBeenCalled();
-    expect(onPartial).toHaveBeenCalledWith("hello openclaw");
+    expect(onPartial).toHaveBeenCalledWith("hello carapace");
     vi.unstubAllEnvs();
   });
 

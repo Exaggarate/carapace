@@ -4,7 +4,7 @@ import { getBundledChannelPlugin } from "../../channels/plugins/bundled.js";
 import type { ChannelDmAllowFromMode } from "../../channels/plugins/dm-access.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import { normalizeAnyChannelId } from "../../channels/registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginPackageChannelDoctorCapabilities } from "../../plugins/manifest.js";
 
 type DoctorGroupModel = "sender" | "route" | "hybrid";
@@ -88,7 +88,7 @@ function readResolvedAccountId(account: unknown): string | undefined {
 /** Resolve configured and runtime account ids through the channel plugin's own semantics. */
 export function resolveDoctorChannelAccountIds(
   channelName: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   configuredAccountIds: string[],
 ): DoctorChannelAccountIds | undefined {
   const channelId = normalizeAnyChannelId(channelName);

@@ -1,8 +1,8 @@
 // Server chat agent-event tests protect event fanout, heartbeat visibility,
 // session lifecycle persistence, and subscriber registry behavior.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { Value } from "typebox/value";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatEventSchema } from "../../packages/gateway-protocol/src/schema/logs-chat.js";
@@ -39,7 +39,7 @@ import {
   releaseAgentRunContext,
 } from "../infra/agent-run-registry.js";
 import { subscribePluginSessionsChanged } from "../plugins/gateway-events.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { GatewayClientRegistry } from "./server/client-registry.js";
 
 const persistGatewaySessionLifecycleEventMock = vi.fn();
@@ -308,7 +308,7 @@ describe("agent event handler", () => {
           text: JSON.stringify({
             kind: "canvas",
             presentation: { target, title, sandbox: "scripts" },
-            view: { id, url: `/__openclaw__/canvas/documents/${id}/index.html` },
+            view: { id, url: `/__carapace__/canvas/documents/${id}/index.html` },
           }),
         },
       ],
@@ -338,7 +338,7 @@ describe("agent event handler", () => {
           surface: "assistant_message",
           render: "url",
           title: id,
-          url: `/__openclaw__/canvas/documents/${id}/index.html`,
+          url: `/__carapace__/canvas/documents/${id}/index.html`,
           viewId: id,
           sandbox: "scripts",
         },
@@ -2338,11 +2338,11 @@ describe("agent event handler", () => {
       [
         "Visible before.",
         "",
-        "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
-        "OpenClaw runtime context (internal):",
+        "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
+        "Carapace runtime context (internal):",
         "[Internal task completion event]",
         "secret child result",
-        "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
         "",
         "Visible after.",
       ].join("\n"),
@@ -2354,7 +2354,7 @@ describe("agent event handler", () => {
       message?: { content?: Array<{ text?: string }> };
     };
     expect(payload.message?.content?.[0]?.text).toBe("Visible before.\n\nVisible after.");
-    expect(payload.message?.content?.[0]?.text).not.toContain("BEGIN_OPENCLAW_INTERNAL_CONTEXT");
+    expect(payload.message?.content?.[0]?.text).not.toContain("BEGIN_CARAPACE_INTERNAL_CONTEXT");
     expect(payload.message?.content?.[0]?.text).not.toContain("secret child result");
     expect(sessionChatCalls(nodeSendToSession)).toHaveLength(1);
     nowSpy?.mockRestore();
@@ -3434,7 +3434,7 @@ describe("agent event handler", () => {
         name: "tool_search_code",
         toolCallId: "tool-search-node-1",
         args: {
-          code: 'return await openclaw.tools.call("openclaw:core:exec", { command: "echo hi" });',
+          code: 'return await carapace.tools.call("carapace:core:exec", { command: "echo hi" });',
         },
       },
       { ts: 1_234 },
@@ -3450,7 +3450,7 @@ describe("agent event handler", () => {
       name: "exec",
       toolCallId: "tool-search-node-1",
       bridgeToolName: "tool_search_code",
-      bridgeTargetToolName: "openclaw:core:exec",
+      bridgeTargetToolName: "carapace:core:exec",
       bridgeVerb: "call",
       args: { command: "echo hi" },
     });
@@ -4945,7 +4945,7 @@ describe("agent event handler", () => {
       status: "running",
       modelProvider: "custom-provider",
       model: "custom-legacy-model",
-      agentRuntime: { id: "openclaw", source: "default" },
+      agentRuntime: { id: "carapace", source: "default" },
       thinkingLevel: "high",
       thinkingLevels: [{ id: "off", label: "off" }],
       thinkingOptions: ["off"],
@@ -5368,7 +5368,7 @@ describe("agent event handler", () => {
       status: "timeout",
     },
   ])("persists $name without waiting for retry grace", ({ terminal, status }) =>
-    withOpenClawTestState({ label: "terminal-projection" }, async (state) => {
+    withCarapaceTestState({ label: "terminal-projection" }, async (state) => {
       const sessionKey = "session-terminal-error";
       const storePath = state.statePath("agents", "main", "sessions", "sessions.json");
       const target = { storePath, sessionKey };

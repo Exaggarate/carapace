@@ -3,7 +3,7 @@ import path from "node:path";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { relayTestKey } from "../../../chrome-extension/relay-key.test-support.js";

@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClawKit
+@testable import CarapaceKit
 
 private let iOSSilenceTimeoutMs = 900
 

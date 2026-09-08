@@ -8,7 +8,7 @@ import {
   normalizeOptionalString,
   normalizeOptionalLowercaseString,
   normalizeStringifiedEntries,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { formatDocsLink } from "../../packages/terminal-core/src/links.js";
 import { colorize, isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import {
@@ -32,7 +32,7 @@ import {
   type SessionEntry,
 } from "../config/sessions.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildAgentMainSessionKey,
   normalizeAgentId,
@@ -50,10 +50,10 @@ type SandboxExplainOptions = {
   json: boolean;
 };
 
-const SANDBOX_DOCS_URL = "https://docs.openclaw.ai/sandbox";
+const SANDBOX_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 function normalizeExplainSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   session?: string;
 }): string {
@@ -79,7 +79,7 @@ function normalizeExplainSessionKey(params: {
 }
 
 function inferProviderFromSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
 }): string | undefined {
   const parsed = parseAgentSessionKey(params.sessionKey);
@@ -111,7 +111,7 @@ function inferProviderFromSessionKey(params: {
 }
 
 function resolveActiveChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry?: SessionEntry;
   sessionKey: string;
 }): string | undefined {
@@ -450,7 +450,7 @@ export async function sandboxExplainCommand(
     lines.push(`  - ${keyLocal}`);
   }
   lines.push("");
-  lines.push(`${key("Docs:")} ${formatDocsLink("/sandbox", "docs.openclaw.ai/sandbox")}`);
+  lines.push(`${key("Docs:")} ${formatDocsLink("/sandbox", "github.com/Exaggarate/carapace")}`);
 
   runtime.log(`${lines.join("\n")}\n`);
 }

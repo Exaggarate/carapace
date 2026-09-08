@@ -97,9 +97,9 @@ function globalLocalStorageIsUsable(): boolean {
     if (!existing) {
       return false;
     }
-    existing.setItem("__openclaw_probe__", "1");
-    const roundTrips = existing.getItem("__openclaw_probe__") === "1";
-    existing.removeItem("__openclaw_probe__");
+    existing.setItem("__carapace_probe__", "1");
+    const roundTrips = existing.getItem("__carapace_probe__") === "1";
+    existing.removeItem("__carapace_probe__");
     return roundTrips;
   } catch {
     return false;

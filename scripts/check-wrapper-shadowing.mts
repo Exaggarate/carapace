@@ -52,10 +52,10 @@ function resolveSourceModulePath(
   specifier: string,
   modulesByPath: ReadonlyMap<string, ModuleExports>,
 ) {
-  const pluginSdkPrefix = specifier.startsWith("openclaw/plugin-sdk/")
-    ? "openclaw/plugin-sdk/"
-    : specifier.startsWith("@openclaw/plugin-sdk/")
-      ? "@openclaw/plugin-sdk/"
+  const pluginSdkPrefix = specifier.startsWith("carapace/plugin-sdk/")
+    ? "carapace/plugin-sdk/"
+    : specifier.startsWith("@carapace/plugin-sdk/")
+      ? "@carapace/plugin-sdk/"
       : null;
   if (!pluginSdkPrefix) {
     return resolveExportModulePath(sourcePath, specifier, modulesByPath);

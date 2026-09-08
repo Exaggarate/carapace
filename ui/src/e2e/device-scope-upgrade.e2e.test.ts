@@ -17,7 +17,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) =>
     `Playwright Chromium is not installed or cannot start at ${executablePath}.`,
 });
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = artifactRoot
@@ -39,7 +39,7 @@ const SCOPE_UPGRADE_METHODS = [
   "device.scopes.waitUpgrade",
 ] as const;
 const MANUAL_UPGRADE_GUIDANCE =
-  "This browser has limited access. Manage it with openclaw devices on the Gateway or from Devices on an admin browser.";
+  "This browser has limited access. Manage it with carapace devices on the Gateway or from Devices on an admin browser.";
 
 function requireRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -50,7 +50,7 @@ function requireRecord(value: unknown): Record<string, unknown> {
 
 async function gatewayPhase(page: Page): Promise<string | undefined> {
   return page.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("carapace-app") as HTMLElement & {
       runtime?: { context: { gateway: { snapshot: { phase: string } } } };
     };
     return app.runtime?.context.gateway.snapshot.phase;
@@ -115,7 +115,7 @@ async function closeInbox(page: Page) {
 async function waitForPendingUpgradeItem(item: Locator) {
   await item
     .locator(".sidebar-issues-panel__body")
-    .getByText(/Approve this browser by running openclaw devices on the Gateway/u)
+    .getByText(/Approve this browser by running carapace devices on the Gateway/u)
     .waitFor();
   await item.getByRole("button", { name: "Retry", exact: true }).waitFor();
   await item.getByRole("button", { name: "Cancel", exact: true }).waitFor();
@@ -150,7 +150,7 @@ suite.define(() => {
     await expect.poll(() => desktopInbox.getAttribute("aria-label")).toBe("0 inbox items");
 
     await desktop.reload();
-    await desktop.locator("openclaw-app-shell").waitFor();
+    await desktop.locator("carapace-app-shell").waitFor();
     await expect.poll(() => desktopInbox.getAttribute("aria-label")).toBe("0 inbox items");
     const reloadedPanel = await openInbox(desktop);
     await reloadedPanel.getByRole("tab", { name: /System/u }).click();
@@ -226,7 +226,7 @@ suite.define(() => {
     await installMockGateway(clearedPage, { operatorScopes: FULL_SCOPES });
     await clearedPage.goto(`${suite.server.baseUrl}settings/appearance`);
     await waitForControlUiSettingsTakeover(clearedPage);
-    expect(await clearedPage.locator("openclaw-sidebar-attention").count()).toBe(0);
+    expect(await clearedPage.locator("carapace-sidebar-attention").count()).toBe(0);
     await clearedPage.close();
 
     const recurrencePage = await context.newPage();
@@ -274,7 +274,7 @@ suite.define(() => {
 
     await closeInbox(page);
     await page.getByRole("button", { name: "Expand sidebar" }).click();
-    const sidebar = page.locator("openclaw-app-sidebar");
+    const sidebar = page.locator("carapace-app-sidebar");
     const identityCard = sidebar.locator(".sidebar-identity-card");
     await identityCard.waitFor();
     await identityCard.click();
@@ -437,16 +437,16 @@ suite.define(() => {
     const context = await createContext();
     const page = await context.newPage();
     await installMockGateway(page, {
-      featureMethods: ["chat.metadata", "chat.startup", "openclaw.chat", ...SCOPE_UPGRADE_METHODS],
+      featureMethods: ["chat.metadata", "chat.startup", "carapace.chat", ...SCOPE_UPGRADE_METHODS],
       operatorScopes: LIMITED_SCOPES,
     });
     await page.goto(`${suite.server.baseUrl}custodian?onboarding=1`);
 
     expect(
-      await page.getByText("Update the Gateway to continue setup with OpenClaw.").count(),
+      await page.getByText("Update the Gateway to continue setup with Carapace.").count(),
     ).toBe(0);
     const onboardingInbox = page.locator(
-      ".custodian__header-actions > openclaw-sidebar-attention:not(.sidebar-attention--floating)",
+      ".custodian__header-actions > carapace-sidebar-attention:not(.sidebar-attention--floating)",
     );
     await onboardingInbox.locator(".sidebar-issues-button").waitFor();
     expect(await page.locator(".sidebar-attention--floating").count()).toBe(0);
@@ -515,7 +515,7 @@ suite.define(() => {
     const page = await context.newPage();
     const gateway = await installMockGateway(page, { operatorScopes: FULL_SCOPES });
     await page.goto(`${suite.server.baseUrl}chat`);
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("carapace-app-shell").waitFor();
 
     expect(await page.locator(".sidebar-issues-button__count").count()).toBe(0);
     expect(await page.locator('[data-attention-kind="scopeUpgrade"]').count()).toBe(0);

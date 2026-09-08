@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 // End-to-end auth-profile rotation coverage for embedded runner retries.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { wrapRunWithTestPreparedAdmission } from "./admitted-run-context.test-support.js";
 import {
   resolveInlineProviderApiKeyUsageId,
@@ -93,7 +93,7 @@ const installRunEmbeddedMocks = () => {
     }),
   }));
   vi.doMock("./models-config.js", () => ({
-    ensureOpenClawModelsJson: vi.fn(async () => ({ wrote: false })),
+    ensureCarapaceModelsJson: vi.fn(async () => ({ wrote: false })),
   }));
 };
 
@@ -161,7 +161,7 @@ afterEach(() => {
   resetLoggerFn();
 });
 
-const makeConfig = (opts?: { fallbacks?: string[]; apiKey?: string }): OpenClawConfig =>
+const makeConfig = (opts?: { fallbacks?: string[]; apiKey?: string }): CarapaceConfig =>
   ({
     agents: {
       defaults: {
@@ -191,9 +191,9 @@ const makeConfig = (opts?: { fallbacks?: string[]; apiKey?: string }): OpenClawC
         },
       },
     },
-  }) satisfies OpenClawConfig;
+  }) satisfies CarapaceConfig;
 
-const makeAgentOverrideOnlyFallbackConfig = (agentId: string): OpenClawConfig =>
+const makeAgentOverrideOnlyFallbackConfig = (agentId: string): CarapaceConfig =>
   ({
     agents: {
       defaults: {
@@ -230,11 +230,11 @@ const makeAgentOverrideOnlyFallbackConfig = (agentId: string): OpenClawConfig =>
         },
       },
     },
-  }) satisfies OpenClawConfig;
+  }) satisfies CarapaceConfig;
 
 const copilotModelId = "gpt-4o";
 
-const makeCopilotConfig = (): OpenClawConfig =>
+const makeCopilotConfig = (): CarapaceConfig =>
   ({
     agents: {
       list: [{ id: "test" }],
@@ -258,7 +258,7 @@ const makeCopilotConfig = (): OpenClawConfig =>
         },
       },
     },
-  }) satisfies OpenClawConfig;
+  }) satisfies CarapaceConfig;
 
 const writeAuthStore = async (
   agentDir: string,
@@ -412,7 +412,7 @@ async function runAutoPinnedOpenAiTurn(params: {
   sessionKey: string;
   runId: string;
   authProfileId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }) {
   await runEmbeddedAgentInline({
     sessionId: "session:test",
@@ -453,7 +453,7 @@ async function runAutoPinnedRotationCase(params: {
   runId: string;
   failureStage?: "assistant" | "prompt";
   exhaustTransientRetries?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }) {
   runEmbeddedAttemptMock.mockReset();
   return withAgentWorkspace(async ({ agentDir, workspaceDir }) => {
@@ -529,8 +529,8 @@ async function withTimedAgentWorkspace<T>(
 ) {
   vi.useFakeTimers();
   try {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-"));
     const now = Date.now();
     vi.setSystemTime(now);
 
@@ -548,8 +548,8 @@ async function withTimedAgentWorkspace<T>(
 async function withAgentWorkspace<T>(
   run: (ctx: { agentDir: string; workspaceDir: string }) => Promise<T>,
 ) {
-  const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
-  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
+  const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-"));
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-"));
   try {
     return await run({ agentDir, workspaceDir });
   } finally {
@@ -716,8 +716,8 @@ describe("runEmbeddedAgent auth profile rotation", () => {
   });
 
   it("refreshes copilot token after auth error and retries once", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-"));
     try {
       await writeCopilotAuthStore(agentDir);
       const now = Date.now();
@@ -781,8 +781,8 @@ describe("runEmbeddedAgent auth profile rotation", () => {
   });
 
   it("allows another auth refresh after a successful retry", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-"));
     try {
       await writeCopilotAuthStore(agentDir);
       const now = Date.now();
@@ -868,8 +868,8 @@ describe("runEmbeddedAgent auth profile rotation", () => {
   });
 
   it("does not reschedule copilot refresh after shutdown", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-workspace-"));
     vi.useFakeTimers();
     try {
       await writeCopilotAuthStore(agentDir);
@@ -946,7 +946,7 @@ describe("runEmbeddedAgent auth profile rotation", () => {
     setLoggerOverrideFn({
       level: "trace",
       consoleLevel: "silent",
-      file: path.join(os.tmpdir(), `openclaw-auth-rotation-${Date.now()}.log`),
+      file: path.join(os.tmpdir(), `carapace-auth-rotation-${Date.now()}.log`),
     });
 
     await runAutoPinnedRotationCase({

@@ -12,7 +12,7 @@ afterEach(async () => {
 });
 
 async function checkout(version: string) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-manager-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-manager-test-"));
   roots.push(root);
   await fs.writeFile(
     path.join(root, "package.json"),

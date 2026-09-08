@@ -36,12 +36,12 @@ function createRigRepository(): {
   fixture: string;
   proof: string;
 } {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-computer-use-rig-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-computer-use-rig-"));
   fixtureRoots.push(root);
   const scriptsDev = path.join(root, "scripts", "dev");
   const fakeBin = path.join(root, "fake-bin");
-  const app = path.join(root, "OpenClaw.app");
-  const appExecutable = path.join(app, "Contents", "MacOS", "OpenClaw");
+  const app = path.join(root, "Carapace.app");
+  const appExecutable = path.join(app, "Contents", "MacOS", "Carapace");
   mkdirSync(scriptsDev, { recursive: true });
   mkdirSync(fakeBin);
   mkdirSync(path.dirname(appExecutable), { recursive: true });
@@ -55,10 +55,10 @@ function createRigRepository(): {
   const captureInvocation = `#!${process.execPath}
 console.log(JSON.stringify({
   args: process.argv.slice(2),
-  config: process.env.OPENCLAW_CONFIG_PATH,
-  state: process.env.OPENCLAW_STATE_DIR,
-  profile: process.env.OPENCLAW_PROFILE,
-  ambient: ["OPENCLAW_GATEWAY_TOKEN", "OPENCLAW_GATEWAY_PASSWORD", "OPENCLAW_GATEWAY_URL", "OPENCLAW_GATEWAY_PORT"].filter(key => process.env[key] !== undefined),
+  config: process.env.CARAPACE_CONFIG_PATH,
+  state: process.env.CARAPACE_STATE_DIR,
+  profile: process.env.CARAPACE_PROFILE,
+  ambient: ["CARAPACE_GATEWAY_TOKEN", "CARAPACE_GATEWAY_PASSWORD", "CARAPACE_GATEWAY_URL", "CARAPACE_GATEWAY_PORT"].filter(key => process.env[key] !== undefined),
 }));
 `;
   writeFileSync(proof, captureInvocation);
@@ -72,8 +72,8 @@ console.log(JSON.stringify({
   writeExecutable(path.join(fakeBin, "xdpyinfo"), "#!/bin/sh\nexit 0\n");
 
   runGit(root, "init", "-q");
-  runGit(root, "config", "user.name", "OpenClaw Test");
-  runGit(root, "config", "user.email", "openclaw-test@example.com");
+  runGit(root, "config", "user.name", "Carapace Test");
+  runGit(root, "config", "user.email", "carapace-test@example.com");
   runGit(root, "add", "scripts");
   runGit(root, "commit", "-q", "-m", "fixture");
 
@@ -106,14 +106,14 @@ function runRig(params: { root: string; script: string; fakeBin: string; args: s
     encoding: "utf8",
     env: {
       HOME: path.join(params.root, "home"),
-      OPENCLAW_HOME: path.join(params.root, "home"),
+      CARAPACE_HOME: path.join(params.root, "home"),
       DISPLAY: ":99",
       XDG_SESSION_TYPE: "x11",
       PATH: `${params.fakeBin}:${process.env.PATH ?? ""}`,
-      OPENCLAW_GATEWAY_TOKEN: "synthetic-ambient-token",
-      OPENCLAW_GATEWAY_PASSWORD: "synthetic-ambient-password",
-      OPENCLAW_GATEWAY_URL: "ws://127.0.0.1:18789",
-      OPENCLAW_GATEWAY_PORT: "18789",
+      CARAPACE_GATEWAY_TOKEN: "synthetic-ambient-token",
+      CARAPACE_GATEWAY_PASSWORD: "synthetic-ambient-password",
+      CARAPACE_GATEWAY_URL: "ws://127.0.0.1:18789",
+      CARAPACE_GATEWAY_PORT: "18789",
     },
     timeout: 15_000,
   });
@@ -163,7 +163,7 @@ describe.each(["macos", "linux"] as const)("computer-use %s live rig auth", (pla
     expect(readdirSync(path.join(rig.scratch, "cli-state"))).toEqual([]);
     const configPaths = [gatewayPath, clientPath];
     if (platform === "macos") {
-      const appConfig = path.join(rig.root, "home", `.openclaw-${rig.profile}`, "openclaw.json");
+      const appConfig = path.join(rig.root, "home", `.carapace-${rig.profile}`, "carapace.json");
       expect(readFileSync(appConfig, "utf8") === readFileSync(clientPath, "utf8")).toBe(true);
       expect(gateway.gateway.nodes.pairing).toBeUndefined();
       configPaths.push(appConfig);
@@ -184,7 +184,7 @@ describe.each(["macos", "linux"] as const)("computer-use %s live rig auth", (pla
     const rig = await prepareRig();
     const gatewayState =
       platform === "macos"
-        ? path.join(rig.root, "home", `.openclaw-${rig.profile}`)
+        ? path.join(rig.root, "home", `.carapace-${rig.profile}`)
         : path.join(rig.scratch, "gateway-state");
     for (const [command, state, extra] of [
       ["gateway", gatewayState, []],

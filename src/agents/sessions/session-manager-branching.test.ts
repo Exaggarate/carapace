@@ -17,7 +17,7 @@ import {
   SessionTranscriptWriterClaimReboundError,
   withOwnedSessionTranscriptWrites,
 } from "../../config/sessions/transcript-write-context.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { SessionManager } from "./session-manager.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -27,7 +27,7 @@ describe("SessionManager branch replacement", () => {
   it.each(["memory", "sqlite"].flatMap((mode) => [3, 4].map((version) => ({ mode, version }))))(
     "preserves projection version $version, opaque parents, and labels in a $mode branch",
     async ({ mode, version }) => {
-      const dir = tempDirs.make("openclaw-session-manager-branch-");
+      const dir = tempDirs.make("carapace-session-manager-branch-");
       const scope = {
         agentId: "main",
         sessionId: "source-session",
@@ -107,7 +107,7 @@ describe("SessionManager branch replacement", () => {
   );
 
   it("creates SQLite-backed branch sessions without rewriting the source transcript", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-");
+    const dir = tempDirs.make("carapace-session-manager-");
     const storePath = path.join(dir, "sessions.json");
     const sessionId = "sqlite-branch-source";
     const sessionKey = "agent:main:dashboard:sqlite-branch-source";
@@ -198,7 +198,7 @@ describe("SessionManager branch replacement", () => {
   });
 
   it("does not publish a branch identity when transcript persistence fails", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-");
+    const dir = tempDirs.make("carapace-session-manager-");
     const scope = {
       agentId: "main",
       sessionId: "branch-write-failure",
@@ -210,7 +210,7 @@ describe("SessionManager branch replacement", () => {
     const beforeEntry = loadSessionEntry(scope);
     const beforeEvents = await loadTranscriptEvents(scope);
     const beforeEntries = manager.getEntries();
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: scope.agentId,
       path: resolveSessionTranscriptDatabasePath(scope),
     });
@@ -244,7 +244,7 @@ describe("SessionManager branch replacement", () => {
   it.each(["lifecycle", "writer", "metadata", "guarded-target", "successor-writer"])(
     "revalidates queued %s changes before branching",
     async (change) => {
-      const dir = tempDirs.make("openclaw-session-manager-");
+      const dir = tempDirs.make("carapace-session-manager-");
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "sqlite-branch-race-source";
       const sessionKey = "agent:main:dashboard:sqlite-branch-race-source";

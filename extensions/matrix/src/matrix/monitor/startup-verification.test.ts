@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setMatrixRuntime } from "../../runtime.js";
 import { ensureMatrixStartupVerification } from "./startup-verification.js";
@@ -27,7 +27,7 @@ async function readPersistedStartupState(rootDir: string) {
   }>("matrix", {
     namespace: "startup-verification",
     maxEntries: 1_000,
-    env: { ...process.env, OPENCLAW_STATE_DIR: rootDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: rootDir },
   });
   return await store.lookup("default");
 }

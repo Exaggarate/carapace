@@ -1,4 +1,4 @@
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginNodeInvokePolicyContext } from "carapace/plugin-sdk/plugin-entry";
 // File Transfer tests cover node invoke policy plugin behavior.
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { createFileTransferNodeInvokePolicy } from "./node-invoke-policy.js";
@@ -337,7 +337,7 @@ describe("file-transfer node invoke policy", () => {
     const policy = createFileTransferNodeInvokePolicy();
     const approvals = {
       request: vi.fn(async () => ({ id: "approval-1", decision })),
-    } as unknown as NonNullable<OpenClawPluginNodeInvokePolicyContext["approvals"]>;
+    } as unknown as NonNullable<CarapacePluginNodeInvokePolicyContext["approvals"]>;
     const { ctx, invokeNode } = createCtx({
       params: { path: "/tmp/new.txt" },
       pluginConfig: {

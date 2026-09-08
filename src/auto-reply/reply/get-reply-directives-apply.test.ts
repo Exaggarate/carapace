@@ -193,7 +193,7 @@ describe("applyInlineDirectiveOverrides", () => {
       expected,
     }) => {
       const directives = parseInlineSessionDirectives(
-        "hello /model openai/gpt-5.4 --runtime openclaw",
+        "hello /model openai/gpt-5.4 --runtime carapace",
       );
       const typing = createMockTypingController();
       const sessionEntry = {
@@ -220,7 +220,7 @@ describe("applyInlineDirectiveOverrides", () => {
 
       const result = await applyInlineDirectiveOverrides({
         ctx: buildTestCtx({
-          Body: "hello /model openai/gpt-5.4 --runtime openclaw",
+          Body: "hello /model openai/gpt-5.4 --runtime carapace",
           CommandAuthorized: true,
         }),
         cfg: {},
@@ -240,8 +240,8 @@ describe("applyInlineDirectiveOverrides", () => {
           ownerList: [],
           senderIsOwner: true,
           isAuthorizedSender: true,
-          rawBodyNormalized: "hello /model openai/gpt-5.4 --runtime openclaw",
-          commandBodyNormalized: "hello /model openai/gpt-5.4 --runtime openclaw",
+          rawBodyNormalized: "hello /model openai/gpt-5.4 --runtime carapace",
+          commandBodyNormalized: "hello /model openai/gpt-5.4 --runtime carapace",
         },
         directives,
         messageProviderKey: "webchat",

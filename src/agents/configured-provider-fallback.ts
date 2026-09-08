@@ -5,8 +5,8 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.js";
+} from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.js";
 
 type ProviderModelRef = {
   provider: string;
@@ -15,7 +15,7 @@ type ProviderModelRef = {
 
 /** Resolve the first configured provider/model that can replace a missing default. */
 export function resolveConfiguredProviderFallback(params: {
-  cfg: Pick<OpenClawConfig, "models">;
+  cfg: Pick<CarapaceConfig, "models">;
   defaultProvider: string;
   defaultModel: string | undefined;
 }): ProviderModelRef | null {

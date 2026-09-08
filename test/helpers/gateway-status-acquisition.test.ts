@@ -10,7 +10,7 @@ import {
   sendMinimalGatewayConnectChallenge,
   sendMinimalGatewayResponse,
 } from "../../src/gateway/minimal-gateway.test-helpers.js";
-import { createOpenClawTestInstance } from "./openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./carapace-test-instance.js";
 import { createDeferred } from "./promise.js";
 
 afterEach(() => {
@@ -25,7 +25,7 @@ async function withStatusPeer(
   mode: PeerMode,
   stopError: Error | undefined,
   body: (fixture: {
-    instance: Awaited<ReturnType<typeof createOpenClawTestInstance>>;
+    instance: Awaited<ReturnType<typeof createCarapaceTestInstance>>;
     clients: Array<{ stopJoined: boolean }>;
     firstStop: ReturnType<typeof createDeferred<void>>;
     secondClient: ReturnType<typeof createDeferred<void>>;
@@ -130,14 +130,14 @@ async function withStatusPeer(
       }
     });
   });
-  let instance: Awaited<ReturnType<typeof createOpenClawTestInstance>> | undefined;
+  let instance: Awaited<ReturnType<typeof createCarapaceTestInstance>> | undefined;
   try {
     await once(wss, "listening");
     const address = wss.address();
     if (!address || typeof address === "string") {
       throw new Error("status peer did not bind");
     }
-    instance = await createOpenClawTestInstance({ name: "status-acquisition", port: address.port });
+    instance = await createCarapaceTestInstance({ name: "status-acquisition", port: address.port });
     instance.state.applyEnv();
     await body({
       instance,

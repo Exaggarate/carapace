@@ -1,6 +1,6 @@
 // Covers heartbeat visibility resolution across defaults and accounts.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveHeartbeatVisibility } from "./heartbeat-visibility.js";
 
 describe("resolveHeartbeatVisibility", () => {
@@ -8,17 +8,17 @@ describe("resolveHeartbeatVisibility", () => {
     showOk?: boolean;
     showAlerts?: boolean;
     useIndicator?: boolean;
-  }): OpenClawConfig {
+  }): CarapaceConfig {
     return {
       channels: {
         defaults: {
           heartbeatVisibility,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
-  function createTelegramAccountHeartbeatConfig(): OpenClawConfig {
+  function createTelegramAccountHeartbeatConfig(): CarapaceConfig {
     return {
       channels: {
         telegram: {
@@ -34,11 +34,11 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   it("returns default values when no config is provided", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const result = resolveHeartbeatVisibility({ cfg, channel: "telegram" });
 
     expect(result).toEqual({
@@ -80,7 +80,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({ cfg, channel: "telegram" });
 
@@ -116,7 +116,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({
       cfg,
@@ -148,7 +148,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({
       cfg,
@@ -191,7 +191,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({ cfg, channel: "whatsapp" });
 
@@ -211,7 +211,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({ cfg, channel: "discord" });
 
@@ -233,7 +233,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({ cfg, channel: "slack" });
 
@@ -261,7 +261,7 @@ describe("resolveHeartbeatVisibility", () => {
   });
 
   it("webchat returns defaults when no channel defaults configured", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({ cfg, channel: "webchat" });
 
@@ -281,7 +281,7 @@ describe("resolveHeartbeatVisibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = resolveHeartbeatVisibility({
       cfg,

@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { UPDATE_RUN_PHASES } from "../../../packages/gateway-protocol/src/update-run-vocabulary.js";
 import type { UpdateRunRecord, UpdateRunStep } from "../../../src/infra/update-run-record.ts";
 import { renderUpdateRunReport } from "../../../src/infra/update-run-report.ts";

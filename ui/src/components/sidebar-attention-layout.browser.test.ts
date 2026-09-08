@@ -88,9 +88,9 @@ function panelParams(
 afterEach(() => {
   document.body.replaceChildren();
   document.documentElement.classList.remove(
-    "openclaw-native-nav",
-    "openclaw-native-macos",
-    "openclaw-native-web-chrome",
+    "carapace-native-nav",
+    "carapace-native-macos",
+    "carapace-native-web-chrome",
   );
 });
 
@@ -226,15 +226,15 @@ describe.runIf("__vitest_browser__" in globalThis)("Inbox panel layout", () => {
         ).join("")}
       </nav>
       <main class="content">
-        <openclaw-sidebar-attention class="sidebar-attention--floating">
+        <carapace-sidebar-attention class="sidebar-attention--floating">
           <button class="sidebar-issues-button"></button>
-        </openclaw-sidebar-attention>
+        </carapace-sidebar-attention>
       </main>
     `;
       document.body.append(shell);
 
       const attention = shell.querySelector<HTMLElement & { updateComplete: Promise<unknown> }>(
-        "openclaw-sidebar-attention",
+        "carapace-sidebar-attention",
       )!;
       const chrome = shell.querySelector<HTMLElement>(".shell-chrome-controls")!;
       const nativeChrome = shell.querySelector<HTMLElement>(".macos-titlebar-controls")!;
@@ -270,14 +270,14 @@ describe.runIf("__vitest_browser__" in globalThis)("Inbox panel layout", () => {
       inbox.setAttribute("aria-expanded", "false");
       expect(paint()).toEqual(resting);
 
-      document.documentElement.classList.add("openclaw-native-nav");
+      document.documentElement.classList.add("carapace-native-nav");
       expect(attention.getBoundingClientRect().left).toBeGreaterThanOrEqual(8);
 
-      document.documentElement.classList.add("openclaw-native-macos");
+      document.documentElement.classList.add("carapace-native-macos");
       expect(getComputedStyle(attention).top).toBe("52px");
 
       shell.append(nativeChrome);
-      document.documentElement.classList.add("openclaw-native-web-chrome");
+      document.documentElement.classList.add("carapace-native-web-chrome");
       expect(
         attention.getBoundingClientRect().left - nativeChrome.getBoundingClientRect().right,
       ).toBe(4);

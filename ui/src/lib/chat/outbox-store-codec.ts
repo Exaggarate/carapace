@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString as normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString as normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeQueueMode } from "../../../../src/auto-reply/reply/queue/normalize.js";
 import { t } from "../../i18n/index.ts";
 import { normalizeAgentId } from "../sessions/session-key.ts";

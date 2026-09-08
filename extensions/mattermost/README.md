@@ -1,13 +1,13 @@
-# Mattermost OpenClaw channel
+# Mattermost Carapace channel
 
-Official OpenClaw channel plugin for Mattermost.
+Official Carapace channel plugin for Mattermost.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/mattermost
+carapace plugins install @carapace/mattermost
 ```
 
 ## Docs
 
-See `docs/channels/mattermost.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/mattermost`.
+See `docs/channels/mattermost.md` in the Carapace repository, or the published docs at `../../docs/channels/mattermost.md`.

@@ -3,7 +3,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import {
@@ -193,11 +193,11 @@ describe("redactSystemAgentConfig", () => {
           },
         })),
       });
-      const preferred: OpenClawConfig = {
+      const preferred: CarapaceConfig = {
         plugins: { entries: { plus: { enabled: true } } },
         channels: { proofchat: { plus: "synthetic-plus", core: "synthetic-core" } },
       };
-      const fallback: OpenClawConfig = {
+      const fallback: CarapaceConfig = {
         plugins: { entries: { plus: { enabled: false }, core: { enabled: true } } },
         channels: { proofchat: { plus: "synthetic-plus", core: "synthetic-core" } },
       };

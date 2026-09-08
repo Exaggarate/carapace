@@ -14,16 +14,16 @@ import {
   acquireClawPackageLifecycleLease,
   withClawPackageLifecycleLease,
 } from "./claw-package-lifecycle-lease.js";
-import { closeOpenClawStateDatabaseForTest } from "./openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "./carapace-state-db.js";
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 const packageIntegrity = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 function plan(agentId: string, workspace: string): ClawAddPlan {
   return {
-    schemaVersion: "openclaw.clawAddPlan.v1",
+    schemaVersion: "carapace.clawAddPlan.v1",
     manifestSchemaVersion: 1,
     stability: "experimental",
     dryRun: true,
@@ -82,7 +82,7 @@ describe("Claw package independent adoption", () => {
   });
 
   it("marks every shared plugin reference independently owned", () => {
-    const env = { OPENCLAW_STATE_DIR: tempDirs.make("claw-adoption-") };
+    const env = { CARAPACE_STATE_DIR: tempDirs.make("claw-adoption-") };
     for (const agentId of ["first", "second"]) {
       const current = plan(agentId, `/tmp/${agentId}`);
       persistClawInstallRecord(current, { env });
@@ -129,7 +129,7 @@ describe("Claw package independent adoption", () => {
   });
 
   it("scopes skill adoption to the owning agent workspace", () => {
-    const env = { OPENCLAW_STATE_DIR: tempDirs.make("claw-adoption-") };
+    const env = { CARAPACE_STATE_DIR: tempDirs.make("claw-adoption-") };
     for (const agentId of ["first", "second"]) {
       const current = plan(agentId, `/tmp/${agentId}`);
       persistClawInstallRecord(current, { env });
@@ -172,7 +172,7 @@ describe("Claw package independent adoption", () => {
   });
 
   it("retains global plugins and releases their Claw references", async () => {
-    const env = { OPENCLAW_STATE_DIR: tempDirs.make("claw-adoption-race-") };
+    const env = { CARAPACE_STATE_DIR: tempDirs.make("claw-adoption-race-") };
     const current = plan("worker", "/tmp/worker");
     const install = persistClawInstallRecord(current, { env });
     const ref = persistClawPackageRef(
@@ -205,7 +205,7 @@ describe("Claw package independent adoption", () => {
   });
 
   it("serializes all skill mutations that share a workspace lockfile", () => {
-    const env = { OPENCLAW_STATE_DIR: tempDirs.make("claw-skill-lease-") };
+    const env = { CARAPACE_STATE_DIR: tempDirs.make("claw-skill-lease-") };
     const first = acquireClawPackageLifecycleLease(
       { kind: "skill", source: "clawhub", ref: "triage", workspace: "/tmp/worker" },
       { env, required: true },
@@ -215,7 +215,7 @@ describe("Claw package independent adoption", () => {
         { kind: "skill", source: "clawhub", ref: "summarize", workspace: "/tmp/worker" },
         { env, required: true },
       ),
-    ).toThrow("being changed by another OpenClaw lifecycle");
+    ).toThrow("being changed by another Carapace lifecycle");
     const otherWorkspace = acquireClawPackageLifecycleLease(
       { kind: "skill", source: "clawhub", ref: "triage", workspace: "/tmp/other" },
       { env, required: true },
@@ -226,7 +226,7 @@ describe("Claw package independent adoption", () => {
   });
 
   it("leases a direct operation before the first Claw package reference exists", () => {
-    const env = { OPENCLAW_STATE_DIR: tempDirs.make("claw-first-lease-") };
+    const env = { CARAPACE_STATE_DIR: tempDirs.make("claw-first-lease-") };
     const directLease = acquireClawPackageLifecycleLease(
       { kind: "plugin", source: "clawhub", ref: "@acme/audit" },
       { env },
@@ -237,18 +237,18 @@ describe("Claw package independent adoption", () => {
         { kind: "plugin", source: "clawhub", ref: "@acme/audit" },
         { env },
       ),
-    ).toThrow("being changed by another OpenClaw lifecycle");
+    ).toThrow("being changed by another Carapace lifecycle");
     expect(() =>
       acquireClawPackageLifecycleLease(
         { kind: "plugin", source: "clawhub", ref: "@acme/audit" },
         { env, required: true },
       ),
-    ).toThrow("being changed by another OpenClaw lifecycle");
+    ).toThrow("being changed by another Carapace lifecycle");
     directLease?.release();
   });
 
   it("releases a package lease when process exit bypasses async cleanup", async () => {
-    const env = { OPENCLAW_STATE_DIR: tempDirs.make("claw-exit-lease-") };
+    const env = { CARAPACE_STATE_DIR: tempDirs.make("claw-exit-lease-") };
     const artifact = { kind: "plugin", source: "clawhub", ref: "@acme/audit" } as const;
     const existingExitListeners = new Set(process.listeners("exit"));
 

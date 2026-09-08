@@ -116,8 +116,8 @@ describe("Control UI browser link routing", () => {
         configurable: true,
         value: {
           messageHandlers: {
-            openclawLink: { postMessage },
-            openclawBrowser: { postMessage: vi.fn() },
+            carapaceLink: { postMessage },
+            carapaceBrowser: { postMessage: vi.fn() },
           },
         },
       });

@@ -1,11 +1,11 @@
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import { PassThrough } from "node:stream";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/channel-entry-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createPluginRuntimeStore, type PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+import type { ChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/channel-entry-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createPluginRuntimeStore, type PluginRuntime } from "carapace/plugin-sdk/runtime-store";
 import { discordPlugin } from "../../channel-plugin-api.js";
 import { registerDiscordTranscriptSourceProvider } from "../../transcripts-source-api.js";
 import type { Client } from "../internal/discord.js";
@@ -30,7 +30,7 @@ export const lateText = "Synthetic late STT must not enter the stopped capture."
 
 /** Owns only external Discord/codec/STT edges; no routing, authorization or dispatch mocks. */
 export function createDiscordGatewayCaptureFixture(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   test: { expect: typeof import("vitest").expect; vi: typeof import("vitest").vi };
 }) {
   const { expect, vi } = params.test;
@@ -182,7 +182,7 @@ export function createDiscordGatewayCaptureFixture(params: {
     wavSpy.mockRestore();
     sdkSpy.mockRestore();
   }
-  const createManager = (cfg: OpenClawConfig) => {
+  const createManager = (cfg: CarapaceConfig) => {
     const createdManager = new DiscordVoiceManager({
       client,
       cfg,
@@ -273,7 +273,7 @@ export function createDiscordGatewayCaptureFixture(params: {
   }
 
   return {
-    register(api: OpenClawPluginApi) {
+    register(api: CarapacePluginApi) {
       // Same probe-type erasure used by defineBundledChannelEntry at registration.
       api.registerChannel({ plugin: discordPlugin as ChannelPlugin });
       registerDiscordTranscriptSourceProvider(api);
@@ -285,7 +285,7 @@ export function createDiscordGatewayCaptureFixture(params: {
       const media = installedRuntime.mediaUnderstanding;
       sttSpy = vi.spyOn(media, "transcribeAudioFile").mockImplementation(stt);
     },
-    async rotateManager(cfg: OpenClawConfig) {
+    async rotateManager(cfg: CarapaceConfig) {
       await closeCurrentManager();
       transport = createTransport();
       transports.push(transport);

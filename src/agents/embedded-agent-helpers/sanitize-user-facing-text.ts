@@ -29,7 +29,7 @@ import { EXEC_NO_OUTPUT_PLACEHOLDER } from "../bash-tools.exec-output.js";
 import {
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
   INTERNAL_RUNTIME_CONTEXT_END,
-  OPENCLAW_RUNTIME_CONTEXT_NOTICE,
+  CARAPACE_RUNTIME_CONTEXT_NOTICE,
   stripInternalRuntimeContext,
 } from "../internal-runtime-context.js";
 
@@ -241,7 +241,7 @@ export function userFacingTextFilters(
       activationTokens: [
         streaming ? "<" : INTERNAL_RUNTIME_CONTEXT_BEGIN,
         INTERNAL_RUNTIME_CONTEXT_END,
-        OPENCLAW_RUNTIME_CONTEXT_NOTICE,
+        CARAPACE_RUNTIME_CONTEXT_NOTICE,
       ],
     },
     { transform: stripInboundMetadata, activationTokens: INBOUND_METADATA_MARKERS },

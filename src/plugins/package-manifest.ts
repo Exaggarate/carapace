@@ -1,8 +1,8 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
 import type {
-  OpenClawPackageManifest,
+  CarapacePackageManifest,
   PackageExtensionResolution,
   PackageManifest,
 } from "./package-manifest.types.js";
@@ -18,7 +18,7 @@ export const DEFAULT_PLUGIN_ENTRY_CANDIDATES = [
 
 export function getPackageManifestMetadata(
   manifest: PackageManifest | undefined,
-): OpenClawPackageManifest | undefined {
+): CarapacePackageManifest | undefined {
   if (!manifest) {
     return undefined;
   }
@@ -27,14 +27,14 @@ export function getPackageManifestMetadata(
 
 /** Package authoring metadata names source; the runtime manifest names only built assets. */
 export function controlUiSource(packageManifest: Record<string, unknown>): string | undefined {
-  const source = isRecord(packageManifest.openclaw)
-    ? packageManifest.openclaw.controlUi
+  const source = isRecord(packageManifest.carapace)
+    ? packageManifest.carapace.controlUi
     : undefined;
   if (source === undefined) {
     return undefined;
   }
   if (typeof source !== "string" || !source.trim()) {
-    throw new Error("package.json openclaw.controlUi must name a browser source entrypoint.");
+    throw new Error("package.json carapace.controlUi must name a browser source entrypoint.");
   }
   return source;
 }
@@ -42,18 +42,18 @@ export function controlUiSource(packageManifest: Record<string, unknown>): strin
 export function resolvePackageExtensionEntries(
   manifest: PackageManifest | undefined,
 ): PackageExtensionResolution {
-  const rawOpenClaw = manifest?.[MANIFEST_KEY] as unknown;
-  if (rawOpenClaw === undefined || rawOpenClaw === null) {
+  const rawCarapace = manifest?.[MANIFEST_KEY] as unknown;
+  if (rawCarapace === undefined || rawCarapace === null) {
     return { status: "missing", entries: [] };
   }
-  if (!isRecord(rawOpenClaw)) {
+  if (!isRecord(rawCarapace)) {
     return {
       status: "invalid",
       entries: [],
-      error: "package.json openclaw must be an object",
+      error: "package.json carapace must be an object",
     };
   }
-  const raw = rawOpenClaw.extensions;
+  const raw = rawCarapace.extensions;
   if (raw === undefined || raw === null) {
     return { status: "missing", entries: [] };
   }
@@ -61,7 +61,7 @@ export function resolvePackageExtensionEntries(
     return {
       status: "invalid",
       entries: [],
-      error: "package.json openclaw.extensions must be an array",
+      error: "package.json carapace.extensions must be an array",
     };
   }
   const entries: string[] = [];
@@ -71,7 +71,7 @@ export function resolvePackageExtensionEntries(
       return {
         status: "invalid",
         entries: [],
-        error: `package.json openclaw.extensions[${index}] must be a non-empty string`,
+        error: `package.json carapace.extensions[${index}] must be a non-empty string`,
       };
     }
     entries.push(normalized);

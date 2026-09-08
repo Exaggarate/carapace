@@ -4,8 +4,8 @@ import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { createQaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import type { AuditRunInspectResult } from "../../../../packages/gateway-protocol/src/index.js";
@@ -80,7 +80,7 @@ describe("node worker launch wire", () => {
     "transfers and reconciles a gateway-push workspace through a device runner",
     { timeout: TEST_TIMEOUT_MS },
     async () => {
-      const root = tempDirs.make("openclaw-node-worker-launch-wire-");
+      const root = tempDirs.make("carapace-node-worker-launch-wire-");
       const provider = await startMidturnProvider();
       const published = await createPublishedWireWorkspace(root);
       const gatewayOwner = createQaGatewayChild();
@@ -374,7 +374,7 @@ describe("node worker launch wire", () => {
         ).resolves.toMatchObject({
           status: "error",
           error: expect.stringMatching(
-            /requires an update.*openclaw update.*reconnect.*openclaw node restart/su,
+            /requires an update.*carapace update.*reconnect.*carapace node restart/su,
           ),
         });
         await legacyWorkerNode.waitForInvokes();

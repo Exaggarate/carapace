@@ -8,7 +8,7 @@ import {
   type ConversationRegistryScope,
 } from "../config/sessions/conversation-registry.js";
 import { resolveConversationRouteFingerprint } from "../config/sessions/conversation-route-fingerprint.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveOutboundChannelPlugin } from "../infra/outbound/channel-resolution.js";
 import {
   ConversationDeliveryRejectedError,
@@ -134,7 +134,7 @@ function resultForCompletedOperation(params: {
 
 function prepareConversationMessageId(params: {
   plugin: ReturnType<typeof resolveOutboundChannelPlugin>;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   conversation: ConversationRecord;
   message: string;
 }): string {
@@ -167,13 +167,13 @@ function prepareConversationMessageId(params: {
 async function ensureConversationContextBinding(params: {
   deps: ConversationTurnDeps;
   scope: ConversationRegistryScope;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   sourceSessionKey?: string;
   conversation: ConversationRecord;
   plugin: ReturnType<typeof resolveOutboundChannelPlugin>;
   expectedRouteFingerprint: string;
-  readCurrentConfig: () => OpenClawConfig;
+  readCurrentConfig: () => CarapaceConfig;
 }): Promise<BoundConversationRecord> {
   if (hasConversationSessionBinding(params.conversation)) {
     return params.conversation;
@@ -224,8 +224,8 @@ async function ensureConversationContextBinding(params: {
 /** Owns correlation, delivery, and waiting inside the Gateway process that receives ingress. */
 export async function runGatewayConversationTurn(
   params: {
-    config: OpenClawConfig;
-    readCurrentConfig?: () => OpenClawConfig;
+    config: CarapaceConfig;
+    readCurrentConfig?: () => CarapaceConfig;
     agentId: string;
     senderIsOwner: boolean;
     sourceSessionKey?: string;

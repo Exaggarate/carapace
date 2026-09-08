@@ -1,4 +1,4 @@
-import type { CliBackendParsedJsonlEvent } from "openclaw/plugin-sdk/cli-backend";
+import type { CliBackendParsedJsonlEvent } from "carapace/plugin-sdk/cli-backend";
 import { describe, expect, it } from "vitest";
 
 function describeLegacyCliBackendEvent(event: CliBackendParsedJsonlEvent): string {

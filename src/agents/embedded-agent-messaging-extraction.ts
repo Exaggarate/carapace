@@ -1,15 +1,15 @@
 /** Extracts message delivery evidence from embedded-agent tool calls and results. */
-import { asNonNegativeFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNonNegativeFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { getChannelPlugin, normalizeChannelId } from "../channels/plugins/index.js";
 import type { ChannelMessageActionName } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isDeliveredCurrentSourceReply } from "../infra/outbound/source-reply-mirror.js";
 import { normalizeTargetForProvider } from "../infra/outbound/target-normalization.js";
 import {
@@ -158,7 +158,7 @@ function resolveMessagingToolThreadEvidence(params: {
   allowImplicitThread: boolean;
   threadSuppressed: boolean;
   options?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     currentChannelId?: string;
     currentMessagingTarget?: string;
     currentThreadId?: string;
@@ -227,7 +227,7 @@ export function extractMessagingToolSend(
   toolName: string,
   args: Record<string, unknown>,
   options?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     currentChannelId?: string;
     currentMessagingTarget?: string;
     currentThreadId?: string;
@@ -391,7 +391,7 @@ export function extractMessagingToolSendResult(
 
 export function isDeliveredMessagingToolSendToCurrentSource(params: {
   send: MessagingToolSend | undefined;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   currentProvider?: string;
   currentAccountId?: string;
   currentChannelId?: string;

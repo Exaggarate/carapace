@@ -33,7 +33,7 @@ describe("session entry replacement compare-and-swap", () => {
     readExactSessionEntryRowMock.mockImplementation(
       actualSessionEntryStore.readExactSessionEntryRow,
     );
-    storePath = `${makeTempDir(tempDirs, "replacement-cas")}/openclaw-agent.sqlite`;
+    storePath = `${makeTempDir(tempDirs, "replacement-cas")}/carapace-agent.sqlite`;
     scope = { sessionKey: "agent:main:replacement-row", storePath };
     await upsertSessionEntryCore(scope, {
       model: "base",

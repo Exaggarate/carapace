@@ -8,11 +8,11 @@ import type { BrowserServerState } from "./server-context.types.js";
 
 const mocks = vi.hoisted(() => ({
   closeChromeMcpSession: vi.fn(async () => false),
-  stopOpenClawChrome: vi.fn(async (_running: RunningChrome) => {}),
+  stopCarapaceChrome: vi.fn(async (_running: RunningChrome) => {}),
 }));
 
 vi.mock("./chrome.js", () => ({
-  stopOpenClawChrome: mocks.stopOpenClawChrome,
+  stopCarapaceChrome: mocks.stopCarapaceChrome,
 }));
 
 vi.mock("./chrome-mcp.runtime.js", () => ({
@@ -55,7 +55,7 @@ function fakeRunning(pid: number): RunningChrome {
 
 beforeEach(() => {
   mocks.closeChromeMcpSession.mockReset().mockResolvedValue(false);
-  mocks.stopOpenClawChrome.mockReset().mockResolvedValue(undefined);
+  mocks.stopCarapaceChrome.mockReset().mockResolvedValue(undefined);
 });
 
 describe("browser runtime shutdown profile races", () => {
@@ -126,7 +126,7 @@ describe("browser runtime shutdown profile races", () => {
     );
     await expect(stopping).resolves.toBeUndefined();
 
-    expect(mocks.stopOpenClawChrome.mock.calls.map(([running]) => running)).toEqual(children);
+    expect(mocks.stopCarapaceChrome.mock.calls.map(([running]) => running)).toEqual(children);
     expect(mocks.closeChromeMcpSession).not.toHaveBeenCalled();
     expect(clearState).toHaveBeenCalledTimes(1);
   });

@@ -1,5 +1,5 @@
 /** Detects legacy SecretRef env markers in config values. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isLegacySecretRefEnvMarker,
   parseLegacySecretRefEnvMarker,
@@ -21,7 +21,7 @@ type LegacySecretRefEnvMarkerCandidate = {
 
 function toCandidate(
   target: DiscoveredConfigSecretTarget,
-  defaults: NonNullable<OpenClawConfig["secrets"]>["defaults"] | undefined,
+  defaults: NonNullable<CarapaceConfig["secrets"]>["defaults"] | undefined,
 ): LegacySecretRefEnvMarkerCandidate | null {
   if (!isLegacySecretRefEnvMarker(target.value)) {
     return null;
@@ -38,7 +38,7 @@ function toCandidate(
  * Finds legacy env marker strings on registered secret targets without mutating config.
  */
 function collectLegacySecretRefEnvMarkerCandidates(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): LegacySecretRefEnvMarkerCandidate[] {
   const defaults = config.secrets?.defaults;
   return discoverConfigSecretTargets(config)
@@ -49,8 +49,8 @@ function collectLegacySecretRefEnvMarkerCandidates(
 /**
  * Converts parseable legacy env marker strings into structured env SecretRef objects.
  */
-export function migrateLegacySecretRefEnvMarkers(config: OpenClawConfig): {
-  config: OpenClawConfig;
+export function migrateLegacySecretRefEnvMarkers(config: CarapaceConfig): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   const candidates = collectLegacySecretRefEnvMarkerCandidates(config).filter(
@@ -60,7 +60,7 @@ export function migrateLegacySecretRefEnvMarkers(config: OpenClawConfig): {
     return { config, changes: [] };
   }
 
-  const next = structuredClone(config) as OpenClawConfig & Record<string, unknown>;
+  const next = structuredClone(config) as CarapaceConfig & Record<string, unknown>;
   const changes: string[] = [];
   for (const candidate of candidates) {
     const ref = candidate.ref;

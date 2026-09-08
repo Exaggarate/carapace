@@ -3,7 +3,7 @@ export async function resolveConfiguredWorkspaces(
   env: NodeJS.ProcessEnv,
 ): Promise<string[]> {
   const { resolveMemoryDreamingWorkspaces } =
-    await import("openclaw/plugin-sdk/memory-core-host-status");
+    await import("carapace/plugin-sdk/memory-core-host-status");
   return resolveMemoryDreamingWorkspaces(
     config as Parameters<typeof resolveMemoryDreamingWorkspaces>[0],
     { env },

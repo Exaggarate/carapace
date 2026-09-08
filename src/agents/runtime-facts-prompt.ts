@@ -1,7 +1,7 @@
 /** Compact current-turn snapshots; instructions belong in the stable system prompt. */
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadExecApprovals, resolveExecApprovalsFromFile } from "../infra/exec-approvals.js";
 import { listActiveProcessSessionReferences } from "./bash-process-references.js";
 import { resolveProcessToolScopeKey } from "./bash-process-scope.js";
@@ -19,7 +19,7 @@ type RuntimeFactsParams = {
   sessionKey?: string;
   sessionId?: string;
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 };
 
 /** Shared by embedded carriers and CLI current-turn context. */

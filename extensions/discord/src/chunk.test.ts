@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { countLines, hasBalancedFences } from "openclaw/plugin-sdk/test-fixtures";
+import { countLines, hasBalancedFences } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import { chunkDiscordTextWithMode } from "./chunk.js";
 

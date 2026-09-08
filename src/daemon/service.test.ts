@@ -115,11 +115,11 @@ describe("resolveGatewayService", () => {
     );
   });
 
-  it("guards mutating service adapters when config was written by a newer OpenClaw", async () => {
-    const tempHome = await makeTempWorkspace("openclaw-service-future-config-");
-    const stateDir = path.join(tempHome, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
-    const envSnapshot = captureEnv(["HOME", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+  it("guards mutating service adapters when config was written by a newer Carapace", async () => {
+    const tempHome = await makeTempWorkspace("carapace-service-future-config-");
+    const stateDir = path.join(tempHome, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
+    const envSnapshot = captureEnv(["HOME", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]);
     try {
       await fs.mkdir(stateDir, { recursive: true });
       await fs.writeFile(
@@ -135,8 +135,8 @@ describe("resolveGatewayService", () => {
         ),
       );
       process.env.HOME = tempHome;
-      process.env.OPENCLAW_STATE_DIR = stateDir;
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.CARAPACE_STATE_DIR = stateDir;
+      process.env.CARAPACE_CONFIG_PATH = configPath;
       clearConfigCache();
       clearRuntimeConfigSnapshot();
 
@@ -156,11 +156,11 @@ describe("resolveGatewayService", () => {
   it("guards every native service mutation when an external supervisor owns lifecycle", async () => {
     setPlatform("darwin");
     const service = resolveGatewayService();
-    const env = { OPENCLAW_SUPERVISOR_MODE: "external" };
+    const env = { CARAPACE_SUPERVISOR_MODE: "external" };
     const installArgs = {
       env,
       stdout: process.stdout,
-      programArguments: ["openclaw", "gateway", "run"],
+      programArguments: ["carapace", "gateway", "run"],
     };
     const mutations = [
       () => service.stage(installArgs),
@@ -194,19 +194,19 @@ describe("readGatewayServiceState", () => {
     async ({ updateInstallKind, shouldRestart, condition, portUsage, portSource }) => {
       const { maybeStopManagedServiceBeforeMutableUpdate } =
         await import("../cli/update-cli/update-command-service.js");
-      const home = await makeTempWorkspace("openclaw-managerless-preflight-");
+      const home = await makeTempWorkspace("carapace-managerless-preflight-");
       const keys = [
         "HOME",
         "PATH",
-        "OPENCLAW_HOME",
-        "OPENCLAW_STATE_DIR",
-        "OPENCLAW_CONFIG_PATH",
-        "OPENCLAW_PROFILE",
-        "OPENCLAW_GATEWAY_PORT",
-        "OPENCLAW_SUPERVISOR_MODE",
-        "OPENCLAW_SERVICE_MARKER",
-        "OPENCLAW_SERVICE_KIND",
-        "OPENCLAW_SYSTEMD_UNIT",
+        "CARAPACE_HOME",
+        "CARAPACE_STATE_DIR",
+        "CARAPACE_CONFIG_PATH",
+        "CARAPACE_PROFILE",
+        "CARAPACE_GATEWAY_PORT",
+        "CARAPACE_SUPERVISOR_MODE",
+        "CARAPACE_SERVICE_MARKER",
+        "CARAPACE_SERVICE_KIND",
+        "CARAPACE_SYSTEMD_UNIT",
         "DBUS_SESSION_BUS_ADDRESS",
         "DBUS_SYSTEM_BUS_ADDRESS",
         "XDG_RUNTIME_DIR",
@@ -227,13 +227,13 @@ describe("readGatewayServiceState", () => {
         process.env.PATH = home;
         const expectedPort = portSource === "config" ? 19902 : 19901;
         if (portSource === "config") {
-          await fs.mkdir(path.join(home, ".openclaw"), { recursive: true });
+          await fs.mkdir(path.join(home, ".carapace"), { recursive: true });
           await fs.writeFile(
-            path.join(home, ".openclaw/openclaw.json"),
+            path.join(home, ".carapace/carapace.json"),
             JSON.stringify({ gateway: { port: expectedPort } }),
           );
         } else {
-          process.env.OPENCLAW_GATEWAY_PORT = String(expectedPort);
+          process.env.CARAPACE_GATEWAY_PORT = String(expectedPort);
         }
         if (portUsage) {
           probePortUsage.mockResolvedValue(portUsage);
@@ -241,13 +241,13 @@ describe("readGatewayServiceState", () => {
         const node = condition.startsWith("node ");
         const unit = path.join(
           home,
-          `.config/systemd/user/openclaw-${node ? "node" : "gateway"}.service`,
+          `.config/systemd/user/carapace-${node ? "node" : "gateway"}.service`,
         );
         if (condition === "installed" || condition === "node installed") {
           await fs.mkdir(path.dirname(unit), { recursive: true });
           await fs.writeFile(
             unit,
-            `[Service]\nExecStart=/missing/openclaw ${node ? "node run" : "gateway"}\n`,
+            `[Service]\nExecStart=/missing/carapace ${node ? "node run" : "gateway"}\n`,
           );
         }
         if (node) {
@@ -277,7 +277,7 @@ describe("readGatewayServiceState", () => {
           if (
             (condition === "manager" && name === "/run/systemd") ||
             (condition === "global definition" &&
-              name === "/etc/systemd/user/openclaw-gateway.service")
+              name === "/etc/systemd/user/carapace-gateway.service")
           ) {
             return lstat(home, options);
           }
@@ -361,14 +361,14 @@ describe("readGatewayServiceState", () => {
         readDefinitionMutationCapability,
         isLoaded: vi.fn(async () => true),
         readCommand: vi.fn(async () => ({
-          programArguments: ["openclaw", "gateway", "run"],
-          environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+          programArguments: ["carapace", "gateway", "run"],
+          environment: { CARAPACE_GATEWAY_PORT: "18789" },
         })),
         readRuntime: vi.fn(async () => ({ status: "running" })),
       });
 
       const state = await readGatewayServiceState(service, {
-        env: { OPENCLAW_GATEWAY_PORT: "1" },
+        env: { CARAPACE_GATEWAY_PORT: "1" },
         requireEffective,
         timeoutMs: 100,
       });
@@ -376,12 +376,12 @@ describe("readGatewayServiceState", () => {
       expect(state.installed).toBe(true);
       expect(state.loadState).toEqual({ status: "loaded" });
       expect(state.running).toBe(true);
-      expect(state.env.OPENCLAW_GATEWAY_PORT).toBe("18789");
+      expect(state.env.CARAPACE_GATEWAY_PORT).toBe("18789");
       expect(hasInstalledDefinition).not.toHaveBeenCalled();
       if (requireEffective) {
         expect(readDefinitionMutationCapability).toHaveBeenCalledWith({
-          env: { OPENCLAW_GATEWAY_PORT: "1" },
-          environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+          env: { CARAPACE_GATEWAY_PORT: "1" },
+          environment: { CARAPACE_GATEWAY_PORT: "18789" },
           timeoutMs: 100,
         });
         expect(state.definitionMutationCapability).toEqual(
@@ -397,8 +397,8 @@ describe("readGatewayServiceState", () => {
   );
 
   it.each([
-    { name: "system-scoped OpenClaw service", definition: true, installed: true },
-    { name: "missing OpenClaw service definition", definition: false, installed: false },
+    { name: "system-scoped Carapace service", definition: true, installed: true },
+    { name: "missing Carapace service definition", definition: false, installed: false },
     { name: "failed service definition inspection", failure: true, installed: false },
   ])("preserves installed ownership for a $name without command details", async (scenario) => {
     const hasInstalledDefinition = vi.fn(async () => {
@@ -408,7 +408,7 @@ describe("readGatewayServiceState", () => {
       return scenario.definition ?? false;
     });
     const service = createService({ hasInstalledDefinition });
-    const env = { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service" };
+    const env = { CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service" };
 
     const state = await readGatewayServiceState(service, { env, timeoutMs: 100 });
 
@@ -423,23 +423,23 @@ describe("readGatewayServiceState", () => {
     const service = createService({
       isLoaded: vi.fn(async () => true),
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
         environment: {
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+          CARAPACE_GATEWAY_PORT: "18789",
+          CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
         },
       })),
       readRuntime,
     });
 
     const state = await readGatewayServiceState(service, {
-      env: { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-maintenance.service" },
+      env: { CARAPACE_SYSTEMD_UNIT: "carapace-gateway-maintenance.service" },
     });
 
-    expect(state.env.OPENCLAW_SYSTEMD_UNIT).toBe("openclaw-gateway-maintenance.service");
+    expect(state.env.CARAPACE_SYSTEMD_UNIT).toBe("carapace-gateway-maintenance.service");
     expect(readRuntime).toHaveBeenCalledWith(
       expect.objectContaining({
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-maintenance.service",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway-maintenance.service",
       }),
       { timeoutMs: undefined },
     );
@@ -523,8 +523,8 @@ describe("readGatewayServiceState", () => {
       isLoaded,
       readDefinitionMutationCapability,
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
-        environment: { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service" },
+        programArguments: ["carapace", "gateway", "run"],
+        environment: { CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service" },
       })),
       readRuntime,
     });
@@ -534,10 +534,10 @@ describe("readGatewayServiceState", () => {
         env: {},
         requireEffective: true,
         validateEnvBeforeStatusRead: (env) => {
-          throw new Error(`refused ${env.OPENCLAW_SYSTEMD_UNIT}`);
+          throw new Error(`refused ${env.CARAPACE_SYSTEMD_UNIT}`);
         },
       }),
-    ).rejects.toThrow("refused openclaw-gateway.service");
+    ).rejects.toThrow("refused carapace-gateway.service");
 
     expect(isLoaded).not.toHaveBeenCalled();
     expect(readRuntime).not.toHaveBeenCalled();
@@ -560,8 +560,8 @@ describe("startGatewayService", () => {
 
   it("starts stopped installed services and returns post-start state", async () => {
     const readCommand = vi.fn(async () => ({
-      programArguments: ["openclaw", "gateway", "run"],
-      environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+      programArguments: ["carapace", "gateway", "run"],
+      environment: { CARAPACE_GATEWAY_PORT: "18789" },
     }));
     const isLoaded = vi
       .fn<GatewayService["isLoaded"]>()
@@ -593,7 +593,7 @@ describe("startGatewayService", () => {
   it("rejects an unknown post-start service inspection", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })),
       isLoaded: vi
         .fn<GatewayService["isLoaded"]>()
@@ -614,7 +614,7 @@ describe("startGatewayService", () => {
   it("reports an explicit post-start process failure instead of claiming success", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi
@@ -632,7 +632,7 @@ describe("startGatewayService", () => {
   it("reports an explicit post-start failed manager state instead of claiming success", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi
@@ -649,7 +649,7 @@ describe("startGatewayService", () => {
   it("allows asynchronously starting services without terminal failure evidence", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -663,7 +663,7 @@ describe("startGatewayService", () => {
   it("does not mistake a previous exit code for a new asynchronous start failure", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped", lastExitStatus: 78 })),
@@ -677,7 +677,7 @@ describe("startGatewayService", () => {
   it("returns already-running without starting a loaded running service", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "running", pid: 4242 })),
@@ -698,8 +698,8 @@ describe("startGatewayService", () => {
   it("ignores legacy version metadata on an already-running service", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
-        environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+        programArguments: ["carapace", "gateway", "run"],
+        environment: { CARAPACE_SERVICE_VERSION: "2026.4.24" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "running", pid: 4242 })),
@@ -720,8 +720,8 @@ describe("startGatewayService", () => {
   it("starts a stopped service despite legacy version metadata", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
-        environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+        programArguments: ["carapace", "gateway", "run"],
+        environment: { CARAPACE_SERVICE_VERSION: "2026.4.24" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -739,8 +739,8 @@ describe("startGatewayService", () => {
   it("requests repair before start when the managed port differs from config", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "--port", "18789"],
-        environment: { OPENCLAW_GATEWAY_PORT: "19001" },
+        programArguments: ["carapace", "gateway", "--port", "18789"],
+        environment: { CARAPACE_GATEWAY_PORT: "19001" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -768,8 +768,8 @@ describe("startGatewayService", () => {
   it("uses the command-line port before a stale managed environment port", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "--port", "19001"],
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        programArguments: ["carapace", "gateway", "--port", "19001"],
+        environment: { CARAPACE_GATEWAY_PORT: "18789" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -789,9 +789,9 @@ describe("startGatewayService", () => {
   });
 
   describe("service program paths", () => {
-    const entrypoint = path.resolve("openclaw.mjs");
+    const entrypoint = path.resolve("carapace.mjs");
     const missing = path.resolve("missing-gateway-entrypoint.cjs");
-    const temporary = path.join(os.tmpdir(), "openclaw-service-layout", "index.js");
+    const temporary = path.join(os.tmpdir(), "carapace-service-layout", "index.js");
     const heapFlag = "--max-old-space-size=16384";
 
     describe.each([
@@ -916,7 +916,7 @@ describe("startGatewayService", () => {
     const readCommand = vi
       .fn<GatewayService["readCommand"]>()
       .mockResolvedValueOnce({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["carapace", "gateway", "run"],
       })
       .mockResolvedValueOnce(null);
     const service = createService({

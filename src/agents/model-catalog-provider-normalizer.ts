@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildModelCatalogProviderAliasTargets } from "../model-catalog/manifest-planner.js";
 import { isManifestPluginAvailableForControlPlane } from "../plugins/manifest-contract-eligibility.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
@@ -7,7 +7,7 @@ import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot
 /** Prepares provider aliases once for one captured catalog metadata generation. */
 export function createPreparedModelCatalogProviderNormalizer(
   metadataSnapshot: Pick<PluginMetadataSnapshot, "index" | "plugins">,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): (provider: string) => string {
   const aliases = new Map<string, string>();

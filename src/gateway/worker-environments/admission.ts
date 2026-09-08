@@ -110,8 +110,8 @@ export function admitWorkerConnection(params: {
     return { ok: false, reason: "bundle-mismatch" };
   }
   if (
-    admission.handshake.openclawVersion !== environment.bootstrapReceipt.openclawVersion ||
-    admission.handshake.openclawVersion !== params.expectedBuild.openclawVersion
+    admission.handshake.carapaceVersion !== environment.bootstrapReceipt.carapaceVersion ||
+    admission.handshake.carapaceVersion !== params.expectedBuild.carapaceVersion
   ) {
     return { ok: false, reason: "version-mismatch" };
   }

@@ -2,11 +2,11 @@
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { root, type Root } from "@openclaw/fs-safe";
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { err, ok } from "@openclaw/normalization-core/result";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { err, ok } from "@carapace/normalization-core/result";
 import { z } from "zod";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   normalizeExecApprovalsInternal,
   parsePersistedExecApprovals,
@@ -98,7 +98,7 @@ export function detectLegacyExecApprovals(params: {
   stateDir: string;
   doctorOnlyStateMigrations?: boolean;
 }): LegacyExecApprovalsDetection {
-  const env = { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: params.stateDir };
   const sourcePath = resolveExecApprovalsPath(env);
   const sourcePresent = legacyMigrationSourceOrClaimMayExist(sourcePath, DOCTOR_CLAIM_SUFFIX);
   return {
@@ -144,7 +144,7 @@ function decideAndRecordMigration(params: {
       : parsePersistedExecApprovals(normalizeLegacyNullableUsageMetadata(params.snapshot.raw));
   const legacyFile = legacy.ok ? legacy.value : null;
 
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const canonical = readExecApprovalsConfigRow(db);
       const canonicalFile = canonical ? tryParsePersistedExecApprovals(canonical.raw_json) : null;

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizePluginsConfig, resolveEffectivePluginActivationState } from "./config-state.js";
 import { isPluginEnabledByDefaultForPlatform } from "./default-enablement.js";
 import { loadPluginManifestRegistryCore } from "./manifest-registry.js";
@@ -11,7 +11,7 @@ type EnabledPluginRecord = Pick<
 >;
 
 /** Lists loaded plugin identities, or configured manifest identities before runtime activation. */
-export function listEnabledPluginRecords(config: OpenClawConfig): EnabledPluginRecord[] {
+export function listEnabledPluginRecords(config: CarapaceConfig): EnabledPluginRecord[] {
   const registry = getActivePluginRegistry();
   if (registry) {
     return registry.plugins.filter(

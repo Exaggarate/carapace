@@ -13,7 +13,7 @@ import {
   loadTranscriptEvents,
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildTimestampPrefix,
   timestampOptsFromConfig,
@@ -22,7 +22,7 @@ import { createAbortError } from "../../infra/abort-signal.js";
 import { clearMemoryPluginState, registerMemoryCapability } from "../../plugins/memory-state.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import { extractTextFromChatContent } from "../../shared/chat-content.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { runMemoryFlushIfNeeded } from "./agent-runner-memory.js";
 import { runReplyAgent } from "./agent-runner.js";
 import {
@@ -38,7 +38,7 @@ const text = (content: unknown) =>
 it.each(["completed", "interrupted"] as const)(
   "keeps %s optional memory inference out of the next human turn",
   async (outcome) => {
-    await withOpenClawTestState({ label: "private-memory-run" }, async (state) => {
+    await withCarapaceTestState({ label: "private-memory-run" }, async (state) => {
       const entered = createDeferred();
       const interrupted = new AbortController();
       const human = "Reply only FOREGROUND_READY. Preserve ünicode 🦞.\nThis is the human request.";
@@ -106,7 +106,7 @@ it.each(["completed", "interrupted"] as const)(
         sessionKey: "agent:main:main",
         storePath: path.join(state.sessionsDir(), "sessions.json"),
       };
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [{ id: "main", default: true, workspace: state.workspaceDir }],
           defaults: {

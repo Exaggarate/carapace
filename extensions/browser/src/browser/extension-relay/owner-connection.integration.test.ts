@@ -1,6 +1,6 @@
 import { once } from "node:events";
-import { clearRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { clearRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { afterEach, expect, it } from "vitest";
 import type { RawData, WebSocket } from "ws";
 import {

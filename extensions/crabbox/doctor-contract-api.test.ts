@@ -2,12 +2,12 @@ import path from "node:path";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import {
@@ -30,8 +30,8 @@ let env: NodeJS.ProcessEnv;
 
 beforeEach(() => {
   resetPluginStateStoreForTests();
-  stateDir = tempDirs.make("openclaw-crabbox-migration-");
-  env = { OPENCLAW_STATE_DIR: stateDir };
+  stateDir = tempDirs.make("carapace-crabbox-migration-");
+  env = { CARAPACE_STATE_DIR: stateDir };
 });
 
 afterEach(() => {
@@ -130,7 +130,7 @@ describe("Crabbox warm-profile Doctor migration", () => {
     });
     await store.register("cbx_legacy", { machineClass: "tiny" });
     const [lease] = listCrabboxLegacyWarmLeases(env);
-    const command = `openclaw crabbox warm-images --recover ${lease!.selector} --acknowledge-provider-cleanup`;
+    const command = `carapace crabbox warm-images --recover ${lease!.selector} --acknowledge-provider-cleanup`;
 
     expect((await migration.detectLegacyState(input()))?.preview.join("\n")).toContain(command);
     const result = await migration.migrateLegacyState(input());

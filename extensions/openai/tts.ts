@@ -122,11 +122,11 @@ export async function openaiTTS(params: {
     assertOkOrThrowProviderError,
     readProviderBinaryResponse,
     resolveProviderRequestHeaders,
-  } = await import("openclaw/plugin-sdk/provider-http");
+  } = await import("carapace/plugin-sdk/provider-http");
   const { captureHttpExchange, isDebugProxyGlobalFetchPatchInstalled } =
-    await import("openclaw/plugin-sdk/proxy-capture");
+    await import("carapace/plugin-sdk/proxy-capture");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
 
   const requestHeaders = resolveProviderRequestHeaders({
     provider: "openai",

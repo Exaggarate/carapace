@@ -5,7 +5,7 @@ import {
   replaceSessionEntry,
   replaceTranscriptEvents,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { readChatHistoryMessageId } from "../session-history-tail.js";
 import * as anchorReader from "../session-transcript-anchor-reader.js";
 import { readSessionMessagesAsync } from "../session-transcript-readers.js";
@@ -19,13 +19,13 @@ const failed = {
   content: [],
   stopReason: "error",
   errorMessage: "The selected model is unavailable.",
-  __openclaw: { runId: "recovered-run" },
+  __carapace: { runId: "recovered-run" },
 };
 const answer = {
   role: "assistant",
   content: [{ type: "text", text: "Recovered answer" }],
   stopReason: "stop",
-  __openclaw: { runId: "recovered-run" },
+  __carapace: { runId: "recovered-run" },
 };
 
 type PageOptions = Pick<Parameters<typeof readChatHistoryPage>[0], "offset" | "messageId"> & {
@@ -40,7 +40,7 @@ async function withTranscript(
     raw: () => ReturnType<typeof readSessionMessagesAsync>;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionKey: "agent:main:page-recovery",
@@ -119,7 +119,7 @@ describe("historical page recovery context", () => {
         expect(page.messages).toEqual([
           expect.objectContaining({
             stopReason: "error",
-            __openclaw: expect.objectContaining({ id: "failed" }),
+            __carapace: expect.objectContaining({ id: "failed" }),
           }),
         ]);
       },
@@ -138,7 +138,7 @@ describe("historical page recovery context", () => {
         vi.spyOn(anchorReader, "readSessionMessagesAroundIdWithStatsAsync").mockImplementationOnce(
           async (scope, options) => {
             await append("next-user", user);
-            await append("next-answer", { ...answer, __openclaw: { runId: "next-run" } });
+            await append("next-answer", { ...answer, __carapace: { runId: "next-run" } });
             return readAround(scope, options);
           },
         );

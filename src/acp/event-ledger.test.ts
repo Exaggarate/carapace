@@ -3,9 +3,9 @@ import { constants } from "node:sqlite";
 import { afterEach, describe, expect, it } from "vitest";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createSqliteAcpEventLedger } from "./event-ledger.js";
 import {
   createTestAcpEventLedger,
@@ -15,7 +15,7 @@ import {
 
 describe("ACP event ledger", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("records complete session updates in sequence", async () => {
@@ -147,7 +147,7 @@ describe("ACP event ledger", () => {
         cwd: "/new-work",
         complete: false,
       };
-      const { db } = openOpenClawStateDatabase({ path: databasePath });
+      const { db } = openCarapaceStateDatabase({ path: databasePath });
       // Payload access is unnecessary for append/metadata work and rejected
       // replay; making it fail exposes accidental full-history hydration.
       db.setAuthorizer((action, table, column) =>
@@ -181,7 +181,7 @@ describe("ACP event ledger", () => {
         db.setAuthorizer(null);
       }
 
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const second = createSqliteAcpEventLedger({ path: databasePath });
       const replay = await second.readReplay(session);
 
@@ -253,7 +253,7 @@ describe("ACP event ledger", () => {
           cwd: "/é/e\u0301/台\0😀",
           complete: true,
         };
-        const { db } = openOpenClawStateDatabase({ path: databasePath });
+        const { db } = openCarapaceStateDatabase({ path: databasePath });
         await ledger.startSession(session);
         const initial = expectAcpReplayUtf8Accounting(db);
         for (let count = 0; count < 10; count++) {

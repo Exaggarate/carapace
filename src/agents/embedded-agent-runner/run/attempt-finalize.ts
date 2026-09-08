@@ -3,7 +3,7 @@
  * It may assume stream execution and transcript writes are settled.
  */
 import { readActiveTranscriptEntryAnchor } from "../../../config/sessions/session-accessor.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
 import { freezeDiagnosticTraceContext } from "../../../infra/diagnostic-trace-context.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import { projectNestedToolActivityForHooks } from "../../../sessions/nested-tool-activity.js";
@@ -258,7 +258,7 @@ export async function completeEmbeddedAttemptAfterTurn(
         prePromptMessageCount: contextEngineAfterTurnCheckpoint ?? prePromptMessageCount,
         tokenBudget: attempt.contextTokenBudget,
         runtimeContext: afterTurnRuntimeContext,
-        contextEngineHostSupport: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        contextEngineHostSupport: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
         providerId: attempt.provider,
         requestedModelId: attempt.requestedModelId,
         modelId: attempt.modelId,

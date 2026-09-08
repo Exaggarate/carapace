@@ -97,7 +97,7 @@ export function scanNodeHostedSkills(
       ? loadSingleSkillDirectory({
           skillDir,
           rootRealPath,
-          source: "openclaw-node",
+          source: "carapace-node",
           maxBytes: NODE_SKILL_MAX_CONTENT_BYTES,
           onDiagnostic: (diagnostic) => {
             diagnosed = true;

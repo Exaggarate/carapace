@@ -1,7 +1,7 @@
 // Kilocode tests cover onboard plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveEnvApiKey } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { resolveAgentModelPrimaryValue } from "openclaw/plugin-sdk/provider-onboard";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveEnvApiKey } from "carapace/plugin-sdk/provider-auth-runtime";
+import { resolveAgentModelPrimaryValue } from "carapace/plugin-sdk/provider-onboard";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildKilocodeModelDefinition,
@@ -13,10 +13,10 @@ import {
 import { applyKilocodeConfig, KILOCODE_DEFAULT_MODEL_REF } from "./onboard.js";
 import { KILOCODE_BASE_URL } from "./provider-models.js";
 
-const emptyCfg: OpenClawConfig = {};
+const emptyCfg: CarapaceConfig = {};
 const KILOCODE_MODEL_IDS = ["kilo-auto/balanced"];
 
-function requireKilocodeProvider(cfg: OpenClawConfig) {
+function requireKilocodeProvider(cfg: CarapaceConfig) {
   const provider = cfg.models?.providers?.kilocode;
   if (!provider) {
     throw new Error("expected Kilocode provider config");
@@ -124,7 +124,7 @@ describe("Kilo Gateway provider config", () => {
     );
 
     it("preserves existing alias if already set", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             models: {
@@ -139,7 +139,7 @@ describe("Kilo Gateway provider config", () => {
     });
 
     it("does not change the default model selection", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             model: { primary: "openai/gpt-5" },

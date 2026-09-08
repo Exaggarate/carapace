@@ -10,7 +10,7 @@ export function projectModelContextEventSql(
   event: Expression<string>,
   omitCheckpoint: Expression<number>,
 ): RawBuilder<string> {
-  const paths = MODEL_CONTEXT_PRIVATE_METADATA_KEYS.map((key) => `$.message.__openclaw.${key}`);
+  const paths = MODEL_CONTEXT_PRIVATE_METADATA_KEYS.map((key) => `$.message.__carapace.${key}`);
   const projected = /* kysely-allow-raw: query-time JSON projection preserves durable transcript bytes. */ sql<string>`json_remove(${event}, ${sql.join(paths)})`;
   const modelEvent = /* kysely-allow-raw: tool result details are not model input; other details can be runtime context. */ sql<string>`CASE WHEN json_extract(${event}, '$.message.role') = 'toolResult'
     THEN json_remove(${projected}, '$.message.details') ELSE ${projected} END`;

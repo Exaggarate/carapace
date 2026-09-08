@@ -1,10 +1,10 @@
 /** Tests CLI compaction rotation and persisted transcript/session updates. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type { InternalSessionEntry, SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import {
   agentCommand,
@@ -168,7 +168,7 @@ describe("agentCommand compaction transcript rotation", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     state.runAgentAttemptMock.mockResolvedValueOnce(
       makeResult({
         sessionId: "custom-provider-session",
@@ -189,7 +189,7 @@ describe("agentCommand compaction transcript rotation", () => {
       providerOverride: "tui-pty-mock",
       modelOverride: "gpt-5.5",
       pluginsEnabled: false,
-      userTurnTranscriptRecorder: { message: { __openclaw: { senderIsOwner: true } } },
+      userTurnTranscriptRecorder: { message: { __carapace: { senderIsOwner: true } } },
     });
     expect(state.normalizeProviderModelIdWithRuntimeMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ provider: "tui-pty-mock" }),
@@ -218,7 +218,7 @@ describe("agentCommand compaction transcript rotation", () => {
       expect(state.runAgentAttemptMock.mock.calls[0]?.[0]).toMatchObject({
         opts: { senderIsOwner, inputProvenance },
         userTurnTranscriptRecorder: {
-          message: { provenance: inputProvenance, __openclaw: { senderIsOwner: owner } },
+          message: { provenance: inputProvenance, __carapace: { senderIsOwner: owner } },
         },
       });
     },
@@ -502,7 +502,7 @@ describe("agentCommand compaction transcript rotation", () => {
         sessionId,
         text: "answer",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
 

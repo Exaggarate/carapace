@@ -1,4 +1,4 @@
-name: openclaw-codeql-mcp-process-runtime-boundary-critical-quality
+name: carapace-codeql-mcp-process-runtime-boundary-critical-quality
 
 disable-default-queries: true
 

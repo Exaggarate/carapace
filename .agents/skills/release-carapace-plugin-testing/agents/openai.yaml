@@ -1,0 +1,4 @@
+interface:
+  display_name: "Carapace Plugin Pre-Release Testing"
+  short_description: "Plan plugin release validation"
+  default_prompt: "Use $release-carapace-plugin-testing to plan or run pre-release Carapace plugin validation across package, lifecycle, doctor, gateway, SDK, and live-ish proof."

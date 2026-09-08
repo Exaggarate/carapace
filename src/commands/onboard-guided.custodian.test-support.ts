@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSuiteLogPathTracker } from "../logging/log-test-helpers.js";
 import { resetLogger } from "../logging/logger.js";
 import { loggingState } from "../logging/state.js";
@@ -41,19 +41,19 @@ const readConfigFileSnapshot = vi.hoisted(() =>
   vi.fn(async () => ({
     exists: false,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     issues: [] as Array<{ path?: string; message: string }>,
     config: {},
   })),
 );
 const localOnboarding = vi.hoisted(() => {
   const states = new Map<string, LocalOnboardingState>();
-  const persisted = { config: undefined as OpenClawConfig | undefined };
+  const persisted = { config: undefined as CarapaceConfig | undefined };
   return {
     states,
     persisted,
     read: vi.fn((configPath: string) => states.get(configPath)),
-    readForConfig: vi.fn((configPath: string, config: OpenClawConfig) => {
+    readForConfig: vi.fn((configPath: string, config: CarapaceConfig) => {
       const state = states.get(configPath);
       return state?.securityAcknowledgedAt === config.wizard?.securityAcknowledgedAt
         ? state
@@ -108,12 +108,12 @@ const localOnboarding = vi.hoisted(() => {
 });
 const withConfigMutationExclusive = vi.hoisted(() =>
   vi.fn(
-    async (effect: (config: OpenClawConfig) => Promise<unknown>) =>
+    async (effect: (config: CarapaceConfig) => Promise<unknown>) =>
       await effect(localOnboarding.persisted.config ?? {}),
   ),
 );
 
-const logPathTracker = createSuiteLogPathTracker("openclaw-guided-onboard-log-");
+const logPathTracker = createSuiteLogPathTracker("carapace-guided-onboard-log-");
 
 vi.mock("../config/config.js", () => ({ readConfigFileSnapshot, withConfigMutationExclusive }));
 vi.mock("../state/local-onboarding-state.js", () => ({
@@ -123,7 +123,7 @@ vi.mock("../state/local-onboarding-state.js", () => ({
   completeLocalOnboarding: localOnboarding.complete,
 }));
 vi.mock("./onboard-agent.js", () => ({
-  ensureOnboardingAgent: async ({ config }: { config: OpenClawConfig }) => ({
+  ensureOnboardingAgent: async ({ config }: { config: CarapaceConfig }) => ({
     config: {
       ...config,
       agents: { ...config.agents, list: [{ id: "main", default: true }] },
@@ -135,7 +135,7 @@ vi.mock("./onboard-agent.js", () => ({
 }));
 
 vi.mock("./onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
+  DEFAULT_WORKSPACE: "/tmp/carapace-workspace",
   printWizardHeader: vi.fn(),
 }));
 
@@ -178,7 +178,7 @@ function detection(
     manualProviders: [],
     authOptions: [],
     recommendedInstalls: [],
-    workspace: "/tmp/openclaw-workspace",
+    workspace: "/tmp/carapace-workspace",
     setupComplete: false,
     ...overrides,
   };
@@ -186,7 +186,7 @@ function detection(
 
 function setupApplyResult() {
   return {
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
     configHashBefore: null,
     configHashAfter: null,
     bootstrapPending: false,
@@ -204,7 +204,7 @@ function pendingLocalSetup(params: {
   const pending: LocalOnboardingState = {
     version: 1,
     status: "pending",
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
     runId: params.runId,
     workspace: params.workspace,
     securityAcknowledgedAt: params.securityAcknowledgedAt ?? "2026-01-01T00:00:00.000Z",
@@ -241,7 +241,7 @@ function setupDeps(params: {
     listManualOptions: vi.fn(async () => ({
       manualProviders: [],
       authOptions: [],
-      workspace: "/tmp/openclaw-workspace",
+      workspace: "/tmp/carapace-workspace",
       setupComplete: false,
     })),
     detect: params.detect ?? vi.fn(async () => detection()),
@@ -258,7 +258,7 @@ function setupDeps(params: {
       }),
     persistRiskAcknowledgement:
       params.persistRiskAcknowledgement ??
-      vi.fn(async (config: OpenClawConfig) => {
+      vi.fn(async (config: CarapaceConfig) => {
         localOnboarding.persisted.config = config;
         return config.wizard?.securityAcknowledgedAt;
       }),
@@ -307,7 +307,7 @@ export function setupGuidedCustodianTestSuite() {
       return {
         exists: localOnboarding.persisted.config !== undefined,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         issues: [],
         config: localOnboarding.persisted.config ?? {},
       };

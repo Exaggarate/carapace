@@ -3,13 +3,13 @@ import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 import {
   createReplyDispatcher,
   type GetReplyOptions,
   type ReplyPayload,
-} from "openclaw/plugin-sdk/reply-runtime";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/reply-runtime";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { slackSetupPlugin } from "../../channel.setup.js";
 import { getSlackSessionRuns } from "../session-run-targets.js";
@@ -393,8 +393,8 @@ function createPreparedSlackMessage(params?: {
       botToken: "xoxb-test",
       app: { client: { chat: { postMessage: postMessageMock, update: chatUpdateMock } } },
       teamId: "T1",
-      botUserId: "U_OPENCLAW",
-      botId: "B_OPENCLAW",
+      botUserId: "U_CARAPACE",
+      botId: "B_CARAPACE",
       textLimit: 4000,
       typingReaction: params?.typingReaction ?? "",
       historyLimit: 0,
@@ -480,11 +480,11 @@ async function dispatchNativeProgressScenario(params: {
   );
 }
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-runtime", () => ({
   resolveHumanDelayConfig: () => undefined,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-feedback", () => ({
+vi.mock("carapace/plugin-sdk/channel-feedback", () => ({
   DEFAULT_TIMING: {
     doneHoldMs: 0,
     errorHoldMs: 0,
@@ -498,8 +498,8 @@ vi.mock("openclaw/plugin-sdk/channel-feedback", () => ({
   removeAckReactionAfterReply: () => {},
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-outbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-outbound")>();
+vi.mock("carapace/plugin-sdk/channel-outbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-outbound")>();
   return {
     ...actual,
     createChannelProgressDraftCompositor: (
@@ -832,14 +832,14 @@ vi.mock("openclaw/plugin-sdk/channel-outbound", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/reply-history", () => ({
+vi.mock("carapace/plugin-sdk/reply-history", () => ({
   clearHistoryEntriesIfEnabled: () => {},
   createChannelHistoryWindow: () => ({
     clear: () => {},
   }),
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-payload", () => ({
+vi.mock("carapace/plugin-sdk/reply-payload", () => ({
   resolveAskUserQuestionOptionIndices: () => undefined,
   isReplyPayloadNonTerminalToolErrorWarning: () => false,
   buildTtsSupplementMediaPayload: (payload: {
@@ -886,23 +886,23 @@ vi.mock("openclaw/plugin-sdk/reply-payload", () => ({
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("carapace/plugin-sdk/runtime-env", () => ({
   danger: (message: string) => message,
   logVerbose: logVerboseMock,
   shouldLogVerbose: () => false,
 }));
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/plugin-runtime")>();
+vi.mock("carapace/plugin-sdk/plugin-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/plugin-runtime")>();
   return { ...actual, getGlobalHookRunner: getGlobalHookRunnerMock };
 });
 
-vi.mock("openclaw/plugin-sdk/security-runtime", () => ({
+vi.mock("carapace/plugin-sdk/security-runtime", () => ({
   resolvePinnedMainDmOwnerFromAllowlist: () => mockedPinnedMainDmOwner,
 }));
 
-vi.mock("openclaw/plugin-sdk/string-coerce-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/string-coerce-runtime")>();
+vi.mock("carapace/plugin-sdk/string-coerce-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/string-coerce-runtime")>();
   const normalizeMockLowercaseString = (value?: string) => value?.toLowerCase();
   const readMockOptionalString = (value?: string) => value;
   return {
@@ -986,7 +986,7 @@ vi.mock("../allow-list.js", () => ({
 }));
 
 vi.mock("../config.runtime.js", () => ({
-  resolveStorePath: () => "/tmp/openclaw-store.json",
+  resolveStorePath: () => "/tmp/carapace-store.json",
   updateLastRoute: updateLastRouteMock,
 }));
 
@@ -1005,8 +1005,8 @@ vi.mock("../replies.js", async (importOriginal) => ({
   resolveSlackThreadTs: () => mockedReplyThreadTs,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   type DispatchParams = Parameters<typeof actual.dispatchChannelInboundTurn>[0];
   return {
     ...actual,
@@ -1634,7 +1634,7 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
     );
 
     expect(updateLastRouteMock).toHaveBeenCalledWith({
-      storePath: "/tmp/openclaw-store.json",
+      storePath: "/tmp/carapace-store.json",
       sessionKey: "agent:main:slack:direct:u1",
       deliveryContext: {
         channel: "slack",
@@ -1698,7 +1698,7 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
     );
 
     expect(updateLastRouteMock).toHaveBeenCalledWith({
-      storePath: "/tmp/openclaw-store.json",
+      storePath: "/tmp/carapace-store.json",
       sessionKey: "agent:main:main",
       deliveryContext: {
         channel: "slack",
@@ -1738,7 +1738,7 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
     );
 
     expect(updateLastRouteMock).toHaveBeenCalledWith({
-      storePath: "/tmp/openclaw-store.json",
+      storePath: "/tmp/carapace-store.json",
       sessionKey: "agent:main:main",
       deliveryContext: {
         channel: "slack",
@@ -2503,8 +2503,8 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
       createPreparedSlackMessage({
         cfg: {
           gateway: {
-            publicOrigin: "https://team.openclaw.ai",
-            controlUi: { basePath: "/openclaw" },
+            publicOrigin: "https://github.com/Exaggarate/carapace",
+            controlUi: { basePath: "/carapace" },
           },
         },
         accountConfig: { streaming: { progress: { toolProgress: true, label: "Shelling" } } },
@@ -2528,9 +2528,9 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
       "session card final edit",
     );
     expect(JSON.stringify(finalEdit.blocks)).toContain("✅ *Shelling*");
-    expect(JSON.stringify(finalEdit.blocks)).toContain("Open in OpenClaw");
+    expect(JSON.stringify(finalEdit.blocks)).toContain("Open in Carapace");
     expect(JSON.stringify(finalEdit.blocks)).toContain(
-      "https://team.openclaw.ai/openclaw/chat/agent-1/slack/C123",
+      "https://github.com/Exaggarate/carapace",
     );
     expect(deliverRepliesMock).toHaveBeenCalledTimes(1);
     expectDeliverReplyCall(0, FINAL_REPLY_TEXT);
@@ -2684,7 +2684,7 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
       "progress final edit",
     );
     expect(finalEdit.text).not.toBe(FINAL_REPLY_TEXT);
-    expect(JSON.stringify(finalEdit.blocks)).not.toContain("Open in OpenClaw");
+    expect(JSON.stringify(finalEdit.blocks)).not.toContain("Open in Carapace");
     expect(finalizeSlackPreviewEditMock).toHaveBeenCalledTimes(1);
     expect(draftStream.clear).not.toHaveBeenCalled();
   });
@@ -2916,7 +2916,7 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
           run: async () => {
             expectNativeProgressAppend(0, [
               taskUpdate(
-                expect.stringMatching(/^openclaw-attention-/u),
+                expect.stringMatching(/^carapace-attention-/u),
                 "Approval required: run checks; approval requested",
                 "pending",
               ),
@@ -2928,16 +2928,16 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
     });
     expect(
       collectNativeTaskUpdates().filter(
-        (task) => typeof task.id === "string" && task.id.startsWith("openclaw-attention-"),
+        (task) => typeof task.id === "string" && task.id.startsWith("carapace-attention-"),
       ),
     ).toEqual([
       taskUpdate(
-        expect.stringMatching(/^openclaw-attention-/u),
+        expect.stringMatching(/^carapace-attention-/u),
         "Approval required: run checks; approval requested",
         "pending",
       ),
       taskUpdate(
-        expect.stringMatching(/^openclaw-attention-/u),
+        expect.stringMatching(/^carapace-attention-/u),
         "Approval required: run checks; approval requested",
         "complete",
       ),
@@ -2956,12 +2956,12 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
 
     expect(
       collectNativeTaskUpdates().filter(
-        (task) => typeof task.id === "string" && task.id.startsWith("openclaw-attention-"),
+        (task) => typeof task.id === "string" && task.id.startsWith("carapace-attention-"),
       ),
     ).toEqual([
-      taskUpdate(expect.stringMatching(/^openclaw-attention-/u), "Bash — exit 1", "error"),
+      taskUpdate(expect.stringMatching(/^carapace-attention-/u), "Bash — exit 1", "error"),
       taskUpdate(
-        expect.stringMatching(/^openclaw-attention-/u),
+        expect.stringMatching(/^carapace-attention-/u),
         "Recovered: Bash — exit 1",
         "complete",
       ),
@@ -3387,7 +3387,7 @@ describe("dispatchPreparedSlackMessage preview fallback", () => {
 
     expectNativeProgressStart([
       planUpdate("Checking the workspace"),
-      taskUpdate("openclaw_summary", "Checking the workspace", "in_progress"),
+      taskUpdate("carapace_summary", "Checking the workspace", "in_progress"),
     ]);
     expect(deliverRepliesMock).not.toHaveBeenCalled();
     expectNativeStreamText(`\n${FINAL_REPLY_TEXT}`);

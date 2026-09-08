@@ -6,7 +6,7 @@ APP_DIR="$ROOT_DIR/apps/macos"
 
 usage() {
   printf 'Usage: %s\n' "$(basename "$0")"
-  printf 'Build, stop, and relaunch the local debug OpenClaw macOS app.\n'
+  printf 'Build, stop, and relaunch the local debug Carapace macOS app.\n'
 }
 
 for arg in "$@"; do
@@ -23,11 +23,11 @@ done
 cd "$APP_DIR"
 
 BUILD_PATH=".build-local"
-PRODUCT="OpenClaw"
+PRODUCT="Carapace"
 BIN="$BUILD_PATH/debug/$PRODUCT"
 BIN_ABS="$(pwd)/$BIN"
 APP_CWD="$(pwd -P)"
-LOG_PATH="${OPENCLAW_MAC_RUN_LOG:-$(mktemp "${TMPDIR:-/tmp}/openclaw-${PRODUCT}.XXXXXX.log")}"
+LOG_PATH="${CARAPACE_MAC_RUN_LOG:-$(mktemp "${TMPDIR:-/tmp}/carapace-${PRODUCT}.XXXXXX.log")}"
 
 process_cwd_matches() {
   local pid="$1"
@@ -66,7 +66,7 @@ stop_existing_local_app() {
 printf "\n▶️  Building $PRODUCT (debug, build path: $BUILD_PATH)\n"
 node "$ROOT_DIR/scripts/prepare-apple-mermaid.mjs"
 swift build -c debug --product "$PRODUCT" --build-path "$BUILD_PATH"
-swift build -c debug --product openclaw-mac --build-path "$BUILD_PATH"
+swift build -c debug --product carapace-mac --build-path "$BUILD_PATH"
 
 printf "\n⏹  Stopping existing $PRODUCT...\n"
 if ! stop_existing_local_app; then

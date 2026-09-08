@@ -1,5 +1,5 @@
 // Pairing CLI tests cover pairing command registration and pairing status output.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { theme } from "../../packages/terminal-core/src/theme.js";
@@ -85,7 +85,7 @@ describe("pairing cli", () => {
     readConfigFileSnapshotForWrite.mockClear();
     readConfigFileSnapshotForWrite.mockResolvedValue({
       snapshot: {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: true,
         raw: "{}",
         parsed: {},
@@ -264,7 +264,7 @@ describe("pairing cli", () => {
     expect(listChannelPairingRequests).toHaveBeenCalledWith("slack");
   });
 
-  it("redirects to openclaw devices when no pairing channels are configured", async () => {
+  it("redirects to carapace devices when no pairing channels are configured", async () => {
     listPairingChannels.mockReturnValueOnce([]);
 
     const error = await runPairing(["pairing", "list"]).then(
@@ -274,7 +274,7 @@ describe("pairing cli", () => {
 
     expect(error).toBeInstanceOf(Error);
     const message = (error as Error).message;
-    expect(message).toContain("openclaw devices");
+    expect(message).toContain("carapace devices");
     // Must not leak the empty enum that originally read like a bug.
     expect(message).not.toContain("expected one of: )");
     expect(message).not.toContain("()");
@@ -318,7 +318,7 @@ describe("pairing cli", () => {
   it("does not overwrite an existing command owner when approving pairing", async () => {
     readConfigFileSnapshotForWrite.mockResolvedValueOnce({
       snapshot: {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: true,
         raw: "{}",
         parsed: {},

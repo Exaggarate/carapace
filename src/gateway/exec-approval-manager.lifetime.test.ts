@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExecApprovalRequestPayload } from "../infra/exec-approvals.js";
 import {
@@ -9,7 +9,7 @@ import {
   tryBeginGatewayRootWorkAdmission,
 } from "../process/gateway-work-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
 import { ApprovalObserverClosedError } from "./exec-approval-lifecycle.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { createTestApprovalManager } from "./exec-approval-manager.test-support.js";
@@ -23,7 +23,7 @@ afterEach(async () => {
   await Promise.all(managers.splice(0).map((manager) => manager.drain()));
   vi.useRealTimers();
   for (const dir of tempDirs.splice(0)) {
-    closeOpenClawStateDatabaseByPath(path.join(dir, "state.sqlite"));
+    closeCarapaceStateDatabaseByPath(path.join(dir, "state.sqlite"));
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
@@ -37,7 +37,7 @@ function createManager(
 }
 
 function createPersistentManager() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-lifetime-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-lifetime-"));
   tempDirs.push(dir);
   const databaseOptions = { path: path.join(dir, "state.sqlite") };
   const onExpired = vi.fn();
@@ -143,7 +143,7 @@ describe("ExecApprovalManager lifetime", () => {
       }),
     ).toEqual(before);
 
-    closeOpenClawStateDatabaseByPath(originalDatabaseOptions.path);
+    closeCarapaceStateDatabaseByPath(originalDatabaseOptions.path);
     databaseOptions.path = path.join(dir, "must-not-open", "state.sqlite");
     expect(manager.resolveDetailed(record.id, "deny", { kind: "system", id: "late" })).toEqual({
       outcome: "not-found",

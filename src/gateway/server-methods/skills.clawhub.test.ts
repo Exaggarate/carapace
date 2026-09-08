@@ -66,7 +66,7 @@ type SkillsHandlerName = keyof typeof skillsHandlers;
 function emptySkillStatusReport() {
   return {
     workspaceDir: "/tmp/workspace",
-    managedSkillsDir: "/tmp/openclaw/skills",
+    managedSkillsDir: "/tmp/carapace/skills",
     skills: [],
   };
 }
@@ -77,7 +77,7 @@ async function callSkillsHandler(method: SkillsHandlerName, params: Record<strin
 
 function expectEmptySecurityVerdicts(response: unknown): void {
   expect(response).toEqual({
-    schema: "openclaw.skills.security-verdicts.v1",
+    schema: "carapace.skills.security-verdicts.v1",
     items: [],
   });
 }
@@ -142,7 +142,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("fetches one bulk ClawHub verdict batch for linked installed skills", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/carapace/skills",
       skills: [
         {
           name: "agentreceipt",
@@ -172,7 +172,7 @@ describe("skills gateway handlers (clawhub)", () => {
         requestedVersion: "1.2.3",
         version: "1.2.3",
         securityAuditUrl:
-          "https://clawhub.ai/openclaw/skills/agentreceipt/security-audit?version=1.2.3",
+          "https://clawhub.ai/carapace/skills/agentreceipt/security-audit?version=1.2.3",
         security: { status: "clean", passed: true },
         scannerPayload: { ignored: true },
       },
@@ -190,7 +190,7 @@ describe("skills gateway handlers (clawhub)", () => {
     expect(ok).toBe(true);
     expect(error).toBeUndefined();
     expect(response).toEqual({
-      schema: "openclaw.skills.security-verdicts.v1",
+      schema: "carapace.skills.security-verdicts.v1",
       items: [
         expect.objectContaining({
           registry: "https://clawhub.ai",
@@ -209,7 +209,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("keeps owner-qualified verdict targets distinct for shared slugs", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/carapace/skills",
       skills: [
         {
           name: "alice-weather",
@@ -280,7 +280,7 @@ describe("skills gateway handlers (clawhub)", () => {
     });
     expect(ok).toBe(true);
     expect(response).toEqual({
-      schema: "openclaw.skills.security-verdicts.v1",
+      schema: "carapace.skills.security-verdicts.v1",
       items: [
         expect.objectContaining({
           requestedSlug: "weather",
@@ -302,7 +302,7 @@ describe("skills gateway handlers (clawhub)", () => {
     resolveClawHubBaseUrlMock.mockReturnValue("https://registry.example/base/");
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/carapace/skills",
       skills: [
         {
           name: "agentreceipt",
@@ -312,7 +312,7 @@ describe("skills gateway handlers (clawhub)", () => {
             valid: true,
             registry: "https://registry.example/base",
             slug: "agentreceipt",
-            ownerHandle: "openclaw",
+            ownerHandle: "carapace",
             installedVersion: "1.2.3",
             installedAt: 123,
           },
@@ -325,11 +325,11 @@ describe("skills gateway handlers (clawhub)", () => {
         decision: "pass",
         reasons: [],
         requestedSlug: "agentreceipt",
-        requestedOwnerHandle: "openclaw",
+        requestedOwnerHandle: "carapace",
         requestedVersion: "1.2.3",
         slug: "agentreceipt",
         version: "1.2.3",
-        publisherHandle: "openclaw",
+        publisherHandle: "carapace",
         security: { status: "clean", passed: true },
       },
     ]);
@@ -343,7 +343,7 @@ describe("skills gateway handlers (clawhub)", () => {
       items: [
         {
           slug: "agentreceipt",
-          ownerHandle: "openclaw",
+          ownerHandle: "carapace",
           version: "1.2.3",
         },
       ],
@@ -354,7 +354,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("does not passively fetch verdicts from a non-configured registry", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/carapace/skills",
       skills: [
         {
           name: "agentreceipt",
@@ -377,7 +377,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("loads local Skill Card content for a known installed skill", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/carapace/skills",
       skills: [
         {
           name: "AgentReceipt",
@@ -403,7 +403,7 @@ describe("skills gateway handlers (clawhub)", () => {
       "/tmp/workspace/skills/agentreceipt",
     );
     expect(response).toEqual({
-      schema: "openclaw.skills.skill-card.v1",
+      schema: "carapace.skills.skill-card.v1",
       skillKey: "agentreceipt",
       path: "/tmp/workspace/skills/agentreceipt/skill-card.md",
       sizeBytes: 34,
@@ -707,7 +707,7 @@ describe("skills gateway handlers (clawhub)", () => {
         ok: false,
         error: "ClawHub blocked this release; update was not started.",
         code: "clawhub_download_blocked",
-        warning: "Latest skill version is marked malicious; OpenClaw will not download it.",
+        warning: "Latest skill version is marked malicious; Carapace will not download it.",
       },
     ]);
 
@@ -727,7 +727,7 @@ describe("skills gateway handlers (clawhub)", () => {
             ok: false,
             error: "ClawHub blocked this release; update was not started.",
             code: "clawhub_download_blocked",
-            warning: "Latest skill version is marked malicious; OpenClaw will not download it.",
+            warning: "Latest skill version is marked malicious; Carapace will not download it.",
           },
         ],
       },
@@ -741,10 +741,10 @@ describe("skills gateway handlers (clawhub)", () => {
             ok: false,
             error: "ClawHub blocked this release; update was not started.",
             code: "clawhub_download_blocked",
-            warning: "Latest skill version is marked malicious; OpenClaw will not download it.",
+            warning: "Latest skill version is marked malicious; Carapace will not download it.",
           },
         ],
-        warnings: ["Latest skill version is marked malicious; OpenClaw will not download it."],
+        warnings: ["Latest skill version is marked malicious; Carapace will not download it."],
       },
     });
   });

@@ -8,7 +8,7 @@ export const SET_RUNTIME_API_KEY_FIELD = ["setRuntime", "ApiKey"].join("");
 
 const imageRuntimeMocks = vi.hoisted(() => ({
   completeMock: vi.fn(),
-  ensureOpenClawModelsJsonMock: vi.fn(async () => {}),
+  ensureCarapaceModelsJsonMock: vi.fn(async () => {}),
   getApiKeyForModelMock: vi.fn(
     async (): Promise<{
       apiKey: string;
@@ -42,7 +42,7 @@ const imageRuntimeMocks = vi.hoisted(() => ({
 }));
 const {
   completeMock,
-  ensureOpenClawModelsJsonMock,
+  ensureCarapaceModelsJsonMock,
   getApiKeyForModelMock,
   resolveApiKeyForProviderCoreMock,
   requireApiKeyMock,
@@ -79,7 +79,7 @@ vi.mock("../agents/models-config.js", async () => ({
   ...(await vi.importActual<typeof import("../agents/models-config.js")>(
     "../agents/models-config.js",
   )),
-  ensureOpenClawModelsJson: ensureOpenClawModelsJsonMock,
+  ensureCarapaceModelsJson: ensureCarapaceModelsJsonMock,
 }));
 
 vi.mock("../agents/model-auth.js", () => ({
@@ -159,7 +159,7 @@ export function installImageRuntimeTestHooks({
   beforeEach(() => {
     // Provider endpoint policy comes from manifests. Pin source manifests so a
     // prior local build cannot make this source-checkout test read partial dist output.
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", path.join(process.cwd(), "extensions"));
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", path.join(process.cwd(), "extensions"));
     vi.stubGlobal("fetch", fetchMock);
     for (const mock of Object.values(imageRuntimeMocks)) {
       mock.mockReset();

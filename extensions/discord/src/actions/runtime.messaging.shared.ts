@@ -1,11 +1,11 @@
 import { ChannelType } from "discord-api-types/v10";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import type { ActionGate } from "openclaw/plugin-sdk/channel-actions";
-import { readStringParam, withNormalizedTimestamp } from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import type { DiscordActionConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
+import type { ActionGate } from "carapace/plugin-sdk/channel-actions";
+import { readStringParam, withNormalizedTimestamp } from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
+import type { DiscordActionConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Discord plugin module implements runtime.messaging.shared behavior.
-import { resolveOpenProviderRuntimeGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
+import { resolveOpenProviderRuntimeGroupPolicy } from "carapace/plugin-sdk/runtime-group-policy";
 import { mergeDiscordAccountConfig, resolveDefaultDiscordAccountId } from "../accounts.js";
 import { isDiscordThreadChannelType } from "../channel-type.js";
 import { createDiscordRuntimeAccountContext } from "../client.js";
@@ -41,7 +41,7 @@ export type DiscordMessagingActionContext = {
   action: string;
   params: Record<string, unknown>;
   isActionEnabled: ActionGate<DiscordActionConfig>;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   options?: DiscordMessagingActionOptions;
   accountId?: string;
   resolveChannelId: () => string;
@@ -53,7 +53,7 @@ export type DiscordMessagingActionContext = {
   }) => Promise<void>;
   filterGuildChannelList: <T>(params: { guildId: string; channels: T[] }) => Promise<T[]>;
   resolveReactionChannelId: () => Promise<string>;
-  withOpts: (extra?: Record<string, unknown>) => { cfg: OpenClawConfig; accountId?: string };
+  withOpts: (extra?: Record<string, unknown>) => { cfg: CarapaceConfig; accountId?: string };
   withReactionRuntimeOptions: <T extends Record<string, unknown> = Record<string, never>>(
     extra?: T,
   ) => DiscordReactOpts & T;
@@ -283,7 +283,7 @@ export function createDiscordMessagingActionContext(params: {
   action: string;
   input: Record<string, unknown>;
   isActionEnabled: ActionGate<DiscordActionConfig>;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   options?: DiscordMessagingActionOptions;
 }): DiscordMessagingActionContext {
   const accountId = readStringParam(params.input, "accountId");

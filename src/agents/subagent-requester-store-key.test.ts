@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveRequesterStoreKey } from "./subagents/announce/subagent-requester-store-key.js";
 
 describe("resolveRequesterStoreKey", () => {
@@ -10,8 +10,8 @@ describe("resolveRequesterStoreKey", () => {
         defaults: { sessionStore: { agentId: "ops" } },
         entries: { ops: {}, research: {} },
       },
-      session: { mainKey: "work", store: "/tmp/openclaw-shared-sessions.sqlite" },
-    } satisfies OpenClawConfig;
+      session: { mainKey: "work", store: "/tmp/carapace-shared-sessions.sqlite" },
+    } satisfies CarapaceConfig;
 
     expect(resolveRequesterStoreKey(cfg, "work")).toBe("agent:ops:work");
   });
@@ -22,7 +22,7 @@ describe("resolveRequesterStoreKey", () => {
         ownership: "explicit",
         entries: { ops: {}, research: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(resolveRequesterStoreKey(cfg, "incident-42", "research")).toBe(
       "agent:research:incident-42",

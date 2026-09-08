@@ -1,6 +1,6 @@
 // Telegram tests cover sendchataction 401 and transient backoff plugin behavior.
 import { Api } from "grammy";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { asTelegramClientFetch } from "./client-fetch.js";
 
@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 // Mock the runtime-exported backoff sleep that the handler actually imports.
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>()),
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>()),
   computeBackoff: vi.fn((_policy, attempt: number) => attempt * 1000),
   sleepWithAbort: mocks.sleepWithAbort,
 }));

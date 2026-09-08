@@ -6,20 +6,20 @@ import path from "node:path";
 import { App, type Receiver, type ReceiverEvent } from "@slack/bolt";
 import type { WebClientOptions } from "@slack/web-api";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
 import type {
   ChannelIngressMonitorLifecycle,
   ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginJsonValue } from "openclaw/plugin-sdk/plugin-entry";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginJsonValue } from "carapace/plugin-sdk/plugin-entry";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import {
   peekSystemEventEntries,
   resetSystemEventsForTest,
-} from "openclaw/plugin-sdk/system-event-runtime";
+} from "carapace/plugin-sdk/system-event-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSlackMonitorContext } from "./context.js";
 import { registerSlackMemberEvents } from "./events/members.js";
@@ -163,7 +163,7 @@ function attachBoltMemberIngress(params: {
     );
   }
   const ctx = createSlackMonitorContext({
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     accountId: "default",
     botToken: "xoxb-test",
     app,
@@ -192,7 +192,7 @@ function attachBoltMemberIngress(params: {
     replyToMode: "off",
     slashCommand: {
       enabled: false,
-      name: "openclaw",
+      name: "carapace",
       sessionPrefix: "slack:slash",
       ephemeral: true,
     },
@@ -230,7 +230,7 @@ async function withQueue(
   fn: (queue: ChannelIngressQueue<SlackIngressPayload>) => Promise<void>,
 ): Promise<void> {
   const rawRoot = await fs.mkdtemp(
-    path.join(os.tmpdir(), `openclaw-slack-ingress-${crypto.randomUUID()}-`),
+    path.join(os.tmpdir(), `carapace-slack-ingress-${crypto.randomUUID()}-`),
   );
   const stateDir = await fs.realpath(rawRoot);
   const queue = createChannelIngressQueueForTests<SlackIngressPayload>({
@@ -241,14 +241,14 @@ async function withQueue(
   try {
     await fn(queue);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
 describe("Slack durable ingress", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetSystemEventsForTest();
   });
 
@@ -882,7 +882,7 @@ describe("Slack durable ingress", () => {
 
 describe("Slack relay durable ingress", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   const relayMessage = {

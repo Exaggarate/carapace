@@ -64,7 +64,7 @@ const limits = {
 const posixIt = process.platform === "win32" ? it.skip : it;
 const { createTempDir } = createScriptTestHarness();
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const LIVE_E2E_WORKFLOW = ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml";
+const LIVE_E2E_WORKFLOW = ".github/workflows/carapace-live-and-e2e-checks-reusable.yml";
 type DockerCandidatePlan = Parameters<typeof validateDockerCandidateEnvironment>[1];
 
 function candidatePlan({
@@ -147,7 +147,7 @@ function writePackageTarball(
   root: string,
   name: string,
   version: string,
-  fileName = "openclaw.tgz",
+  fileName = "carapace.tgz",
 ) {
   const packageRoot = path.join(root, `package-${fileName}`);
   const packageDir = path.join(packageRoot, "package");
@@ -158,25 +158,25 @@ function writePackageTarball(
   return tarball;
 }
 
-function candidateFixture(packageName = "openclaw", packageVersion = "2026.8.1") {
-  const root = tempDirs.make("openclaw-docker-candidate-");
+function candidateFixture(packageName = "carapace", packageVersion = "2026.8.1") {
+  const root = tempDirs.make("carapace-docker-candidate-");
   const version = "2026.8.1";
   const packagePath = writePackageTarball(
-    tempDirs.make("openclaw-docker-package-"),
+    tempDirs.make("carapace-docker-package-"),
     packageName,
     packageVersion,
   );
   writeFileSync(
     path.join(root, "package.json"),
     JSON.stringify({
-      name: "openclaw",
+      name: "carapace",
       version,
       scripts: { "test:docker:gateway-network": "true" },
     }),
   );
   writeFakePackScript(root, packagePath);
   execFileSync("git", ["init", "-q"], { cwd: root });
-  execFileSync("git", ["add", "package.json", "scripts/package-openclaw-for-docker.mjs"], {
+  execFileSync("git", ["add", "package.json", "scripts/package-carapace-for-docker.mjs"], {
     cwd: root,
   });
   execFileSync(
@@ -194,16 +194,16 @@ function candidateFixture(packageName = "openclaw", packageVersion = "2026.8.1")
     version,
     packagePath,
     env: {
-      OPENCLAW_DOCKER_E2E_SELECTED_SHA: sourceSha,
-      OPENCLAW_CURRENT_PACKAGE_TGZ: packagePath,
-      OPENCLAW_CURRENT_PACKAGE_VERSION: version,
-      OPENCLAW_CURRENT_PACKAGE_SHA256: sha256(packagePath),
+      CARAPACE_DOCKER_E2E_SELECTED_SHA: sourceSha,
+      CARAPACE_CURRENT_PACKAGE_TGZ: packagePath,
+      CARAPACE_CURRENT_PACKAGE_VERSION: version,
+      CARAPACE_CURRENT_PACKAGE_SHA256: sha256(packagePath),
     },
   };
 }
 
 function writeFakePackScript(root: string, sourceTarball: string) {
-  const script = path.join(root, "scripts/package-openclaw-for-docker.mjs");
+  const script = path.join(root, "scripts/package-carapace-for-docker.mjs");
   mkdirSync(path.dirname(script), { recursive: true });
   writeFileSync(
     script,
@@ -225,11 +225,11 @@ function runCandidatePrep(fixture: ReturnType<typeof candidateFixture>) {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_ALL_LANES: "gateway-network",
-        OPENCLAW_DOCKER_ALL_LOG_DIR: path.join(fixture.root, "logs"),
-        OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-        OPENCLAW_DOCKER_E2E_REPO_ROOT: fixture.root,
-        OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR: fixture.root,
+        CARAPACE_DOCKER_ALL_LANES: "gateway-network",
+        CARAPACE_DOCKER_ALL_LOG_DIR: path.join(fixture.root, "logs"),
+        CARAPACE_DOCKER_ALL_TIMINGS: "0",
+        CARAPACE_DOCKER_E2E_REPO_ROOT: fixture.root,
+        CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR: fixture.root,
       },
     },
   );
@@ -238,7 +238,7 @@ function runCandidatePrep(fixture: ReturnType<typeof candidateFixture>) {
 
 function addRegistry(
   fixture: ReturnType<typeof candidateFixture>,
-  packageNames = ["@openclaw/discord", "@openclaw/feishu"],
+  packageNames = ["@carapace/discord", "@carapace/feishu"],
 ) {
   const registryDir = path.join(fixture.root, "registry");
   mkdirSync(registryDir);
@@ -253,7 +253,7 @@ function addRegistry(
     manifestPath,
     `${JSON.stringify(
       {
-        schema: "openclaw.prepublish-plugin-registry/v1",
+        schema: "carapace.prepublish-plugin-registry/v1",
         schemaVersion: 1,
         sourceSha: fixture.sourceSha,
         candidateVersion: fixture.version,
@@ -265,9 +265,9 @@ function addRegistry(
   );
   return {
     ...fixture.env,
-    OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registryDir,
-    OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: fixture.version,
-    OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: sha256(manifestPath),
+    CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registryDir,
+    CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: fixture.version,
+    CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: sha256(manifestPath),
   };
 }
 
@@ -384,11 +384,11 @@ describe("scripts/test-docker-all scheduler", () => {
     expect(result.stderr).toBe("");
     expect(result.stdout).toContain("--prepare-only=<manifest>");
     expect(result.stdout).toContain("--prepare-plugin-registry");
-    expect(result.stdout).toContain("OPENCLAW_DOCKER_ALL_* env vars");
+    expect(result.stdout).toContain("CARAPACE_DOCKER_ALL_* env vars");
   });
 
   it("passes the exact planner-selected survivor packages to registry preparation", () => {
-    const root = tempDirs.make("openclaw-standalone-survivor-registry-");
+    const root = tempDirs.make("carapace-standalone-survivor-registry-");
     const plan = resolveDockerE2ePlan({
       allowFrozenTargetScenarioOmissions: true,
       includeOpenWebUI: false,
@@ -400,7 +400,7 @@ describe("scripts/test-docker-all scheduler", () => {
       releaseChunk: "core",
       selectedLaneNames: ["published-upgrade-survivor"],
       timingStore: undefined,
-      upgradeSurvivorBaselines: "openclaw@2026.7.1-2",
+      upgradeSurvivorBaselines: "carapace@2026.7.1-2",
       upgradeSurvivorScenarios: "configured-plugin-installs",
     }).plan;
     createPrepublishPluginRegistryArtifact.mockReturnValue({
@@ -414,10 +414,10 @@ describe("scripts/test-docker-all scheduler", () => {
       outputDir: path.join(root, "prepublish-plugin-registry"),
       repoRoot: process.cwd(),
       requiredPackages: [
-        "@openclaw/codex",
-        "@openclaw/discord",
-        "@openclaw/matrix",
-        "@openclaw/whatsapp",
+        "@carapace/codex",
+        "@carapace/discord",
+        "@carapace/matrix",
+        "@carapace/whatsapp",
       ],
       sourceSha: "a".repeat(40),
     });
@@ -442,7 +442,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("writes a package-free prep-only manifest without Docker work", () => {
-    const root = tempDirs.make("openclaw-docker-package-free-");
+    const root = tempDirs.make("carapace-docker-package-free-");
     const manifestPath = path.join(root, "candidate.json");
     const result = spawnSync(
       process.execPath,
@@ -452,9 +452,9 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_LANES: "live-gateway",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: path.join(root, "logs"),
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_DOCKER_ALL_LANES: "live-gateway",
+          CARAPACE_DOCKER_ALL_LOG_DIR: path.join(root, "logs"),
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
         },
       },
     );
@@ -476,7 +476,7 @@ describe("scripts/test-docker-all scheduler", () => {
       sourceSha: fixture.sourceSha,
       candidate: {
         package: {
-          name: "openclaw",
+          name: "carapace",
           version: fixture.version,
           sha256: sha256(fixture.packagePath),
         },
@@ -489,7 +489,7 @@ describe("scripts/test-docker-all scheduler", () => {
     writeFileSync(
       path.join(fixture.root, "package.json"),
       JSON.stringify({
-        name: "openclaw",
+        name: "carapace",
         version: "dirty",
         scripts: { "test:docker:gateway-network": "true" },
       }),
@@ -508,8 +508,8 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it.each([
-    { name: "wrong-name", packageName: "not-openclaw", version: "2026.8.1" },
-    { name: "wrong-version", packageName: "openclaw", version: "0.0.0" },
+    { name: "wrong-name", packageName: "not-carapace", version: "2026.8.1" },
+    { name: "wrong-version", packageName: "carapace", version: "0.0.0" },
   ])("rejects a $name packed candidate", ({ packageName, version }) => {
     const fixture = candidateFixture(packageName, version);
     const result = runCandidatePrep(fixture).result;
@@ -524,14 +524,14 @@ describe("scripts/test-docker-all scheduler", () => {
     expect(() => validateDockerCandidateEnvironment(fixture.env, plan, fixture.root)).not.toThrow();
     expect(() =>
       validateDockerCandidateEnvironment(
-        { OPENCLAW_CURRENT_PACKAGE_TGZ: fixture.packagePath },
+        { CARAPACE_CURRENT_PACKAGE_TGZ: fixture.packagePath },
         plan,
         fixture.root,
       ),
     ).not.toThrow();
     for (const field of [
-      "OPENCLAW_CURRENT_PACKAGE_VERSION",
-      "OPENCLAW_CURRENT_PACKAGE_SHA256",
+      "CARAPACE_CURRENT_PACKAGE_VERSION",
+      "CARAPACE_CURRENT_PACKAGE_SHA256",
     ] as const) {
       const env: NodeJS.ProcessEnv = { ...fixture.env };
       delete env[field];
@@ -540,10 +540,10 @@ describe("scripts/test-docker-all scheduler", () => {
       );
     }
     for (const env of [
-      { ...fixture.env, OPENCLAW_CURRENT_PACKAGE_TGZ: "relative.tgz" },
-      { ...fixture.env, OPENCLAW_DOCKER_E2E_SELECTED_SHA: "a".repeat(40) },
-      { ...fixture.env, OPENCLAW_CURRENT_PACKAGE_SHA256: "b".repeat(64) },
-      { ...fixture.env, OPENCLAW_CURRENT_PACKAGE_VERSION: "0.0.0" },
+      { ...fixture.env, CARAPACE_CURRENT_PACKAGE_TGZ: "relative.tgz" },
+      { ...fixture.env, CARAPACE_DOCKER_E2E_SELECTED_SHA: "a".repeat(40) },
+      { ...fixture.env, CARAPACE_CURRENT_PACKAGE_SHA256: "b".repeat(64) },
+      { ...fixture.env, CARAPACE_CURRENT_PACKAGE_VERSION: "0.0.0" },
     ]) {
       expect(() => validateDockerCandidateEnvironment(env, plan, fixture.root)).toThrow();
     }
@@ -553,27 +553,27 @@ describe("scripts/test-docker-all scheduler", () => {
     const fixture = candidateFixture();
     const registryDir = path.join(fixture.root, "registry");
     const env: NodeJS.ProcessEnv = addRegistry(fixture);
-    delete env.OPENCLAW_CURRENT_PACKAGE_VERSION;
-    delete env.OPENCLAW_CURRENT_PACKAGE_SHA256;
-    env.OPENCLAW_CURRENT_PACKAGE_TGZ = path.relative(process.cwd(), fixture.packagePath);
-    env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR = path.relative(process.cwd(), registryDir);
+    delete env.CARAPACE_CURRENT_PACKAGE_VERSION;
+    delete env.CARAPACE_CURRENT_PACKAGE_SHA256;
+    env.CARAPACE_CURRENT_PACKAGE_TGZ = path.relative(process.cwd(), fixture.packagePath);
+    env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR = path.relative(process.cwd(), registryDir);
 
     expect(() =>
       validateDockerCandidateEnvironment(
         env,
-        candidatePlan({ requiredPackages: ["@openclaw/discord"] }),
+        candidatePlan({ requiredPackages: ["@carapace/discord"] }),
         fixture.root,
       ),
     ).not.toThrow();
-    expect(env.OPENCLAW_CURRENT_PACKAGE_TGZ).toBe(fixture.packagePath);
-    expect(env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR).toBe(registryDir);
+    expect(env.CARAPACE_CURRENT_PACKAGE_TGZ).toBe(fixture.packagePath);
+    expect(env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR).toBe(registryDir);
   });
 
   it("does not inspect package files for package-free plans", () => {
     const fixture = candidateFixture();
     expect(() =>
       validateDockerCandidateEnvironment(
-        { ...fixture.env, OPENCLAW_CURRENT_PACKAGE_TGZ: path.join(fixture.root, "missing.tgz") },
+        { ...fixture.env, CARAPACE_CURRENT_PACKAGE_TGZ: path.join(fixture.root, "missing.tgz") },
         candidatePlan({ needsPackage: false }),
         fixture.root,
       ),
@@ -586,7 +586,7 @@ describe("scripts/test-docker-all scheduler", () => {
     expect(() =>
       validateDockerCandidateEnvironment(
         env,
-        candidatePlan({ requiredPackages: ["@openclaw/discord"] }),
+        candidatePlan({ requiredPackages: ["@carapace/discord"] }),
         fixture.root,
       ),
     ).not.toThrow();
@@ -596,18 +596,18 @@ describe("scripts/test-docker-all scheduler", () => {
     expect(() =>
       validateDockerCandidateEnvironment(
         fixture.env,
-        candidatePlan({ requiredPackages: ["@openclaw/discord"] }),
+        candidatePlan({ requiredPackages: ["@carapace/discord"] }),
         fixture.root,
       ),
     ).toThrow("requires a prepublish plugin registry tuple");
     expect(() =>
       validateDockerCandidateEnvironment(
-        { ...fixture.env, OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: "/tmp/partial" },
+        { ...fixture.env, CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: "/tmp/partial" },
         candidatePlan(),
         fixture.root,
       ),
     ).toThrow("must be complete");
-    writeFileSync(path.join(env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR, "extra"), "extra");
+    writeFileSync(path.join(env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR, "extra"), "extra");
     expect(() => validateDockerCandidateEnvironment(env, candidatePlan(), fixture.root)).toThrow(
       "missing, extra, or non-file",
     );
@@ -618,13 +618,13 @@ describe("scripts/test-docker-all scheduler", () => {
     const env = addRegistry(fixture);
     const command = buildLaneRerunCommand("gateway-network", env);
     for (const key of [
-      "OPENCLAW_DOCKER_E2E_SELECTED_SHA",
-      "OPENCLAW_CURRENT_PACKAGE_TGZ",
-      "OPENCLAW_CURRENT_PACKAGE_VERSION",
-      "OPENCLAW_CURRENT_PACKAGE_SHA256",
-      "OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR",
-      "OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION",
-      "OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256",
+      "CARAPACE_DOCKER_E2E_SELECTED_SHA",
+      "CARAPACE_CURRENT_PACKAGE_TGZ",
+      "CARAPACE_CURRENT_PACKAGE_VERSION",
+      "CARAPACE_CURRENT_PACKAGE_SHA256",
+      "CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR",
+      "CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION",
+      "CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256",
     ] as const) {
       expect(command).toContain(`${key}='${env[key]}'`);
     }
@@ -633,7 +633,7 @@ describe("scripts/test-docker-all scheduler", () => {
   it("plans from an isolated release harness with source-checkout TypeScript support", () => {
     const artifactRoot = path.resolve(".artifacts");
     mkdirSync(artifactRoot, { recursive: true });
-    const root = tempDirs.make("openclaw-docker-plan-isolated-harness-", artifactRoot);
+    const root = tempDirs.make("carapace-docker-plan-isolated-harness-", artifactRoot);
     const scriptsDir = copyDockerSchedulerHarness(root);
 
     const result = spawnSync(
@@ -644,10 +644,10 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_PLAN_RELEASE_ALL: "1",
-          OPENCLAW_DOCKER_ALL_PROFILE: "release-path",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "base legacy-operator-state",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: process.cwd(),
+          CARAPACE_DOCKER_ALL_PLAN_RELEASE_ALL: "1",
+          CARAPACE_DOCKER_ALL_PROFILE: "release-path",
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "base legacy-operator-state",
+          CARAPACE_UPGRADE_SURVIVOR_TARGET_ROOT: process.cwd(),
         },
       },
     );
@@ -667,13 +667,13 @@ describe("scripts/test-docker-all scheduler", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_ALL_PARALLELISM: "1e3",
+        CARAPACE_DOCKER_ALL_PARALLELISM: "1e3",
       },
     });
 
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
-    expect(result.stderr).toContain("OPENCLAW_DOCKER_ALL_PARALLELISM must be a positive integer");
+    expect(result.stderr).toContain("CARAPACE_DOCKER_ALL_PARALLELISM must be a positive integer");
     expect(result.stderr).not.toContain("at ");
   });
 
@@ -683,11 +683,11 @@ describe("scripts/test-docker-all scheduler", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_ALL_BUILD: "0",
-        OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-        OPENCLAW_DOCKER_ALL_LANES: "cli-installer-distribution",
-        OPENCLAW_DOCKER_ALL_PREFLIGHT: "0",
-        OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+        CARAPACE_DOCKER_ALL_BUILD: "0",
+        CARAPACE_DOCKER_ALL_DRY_RUN: "1",
+        CARAPACE_DOCKER_ALL_LANES: "cli-installer-distribution",
+        CARAPACE_DOCKER_ALL_PREFLIGHT: "0",
+        CARAPACE_DOCKER_ALL_TIMINGS: "0",
       },
     });
 
@@ -703,9 +703,9 @@ describe("scripts/test-docker-all scheduler", () => {
     const localCommand = githubWorkflowRerunCommand(["install-e2e"], "a".repeat(40), {
       GITHUB_REF_NAME: "full-release-validation-temp-deleted",
       GITHUB_RUN_ID: "12345",
-      OPENCLAW_DOCKER_E2E_BARE_IMAGE: "openclaw-docker-e2e-bare:local",
-      OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE: "openclaw-docker-e2e-functional:local",
-      OPENCLAW_DOCKER_E2E_PACKAGE_ARTIFACT_NAME: "docker-e2e-package",
+      CARAPACE_DOCKER_E2E_BARE_IMAGE: "carapace-docker-e2e-bare:local",
+      CARAPACE_DOCKER_E2E_FUNCTIONAL_IMAGE: "carapace-docker-e2e-functional:local",
+      CARAPACE_DOCKER_E2E_PACKAGE_ARTIFACT_NAME: "docker-e2e-package",
     });
     expect(localCommand).not.toContain("--ref 'full-release-validation-temp-deleted'");
     expect(localCommand).not.toContain("package_artifact_run_id=");
@@ -716,20 +716,20 @@ describe("scripts/test-docker-all scheduler", () => {
     expectDeclaredDispatchInputs(localCommand);
 
     const registryCommand = githubWorkflowRerunCommand(["install-e2e"], "b".repeat(40), {
-      OPENCLAW_DOCKER_E2E_BARE_IMAGE: "ghcr.io/openclaw/openclaw-docker-e2e-bare:test",
-      OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE: "ghcr.io/openclaw/openclaw-docker-e2e-functional:test",
-      OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
-      OPENCLAW_DOCKER_E2E_WORKFLOW_REF: "main",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@2026.5.3",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS: "openclaw@2026.5.3 openclaw@2026.5.2",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "plugin-dependency-cleanup",
+      CARAPACE_DOCKER_E2E_BARE_IMAGE: "ghcr.io/carapace/carapace-docker-e2e-bare:test",
+      CARAPACE_DOCKER_E2E_FUNCTIONAL_IMAGE: "ghcr.io/carapace/carapace-docker-e2e-functional:test",
+      CARAPACE_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
+      CARAPACE_DOCKER_E2E_WORKFLOW_REF: "main",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@2026.5.3",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS: "carapace@2026.5.3 carapace@2026.5.2",
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "plugin-dependency-cleanup",
     });
     expect(registryCommand).toContain("--ref 'main'");
     expect(registryCommand).toContain(
-      "docker_e2e_bare_image='ghcr.io/openclaw/openclaw-docker-e2e-bare:test'",
+      "docker_e2e_bare_image='ghcr.io/carapace/carapace-docker-e2e-bare:test'",
     );
     expect(registryCommand).toContain(
-      "docker_e2e_functional_image='ghcr.io/openclaw/openclaw-docker-e2e-functional:test'",
+      "docker_e2e_functional_image='ghcr.io/carapace/carapace-docker-e2e-functional:test'",
     );
     expect(registryCommand).toContain("shared_image_policy=existing-only");
     expect(registryCommand).toContain("allow_unreleased_changelog=true");
@@ -737,7 +737,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("preserves ephemeral package intent in generated summary and failure reruns", async () => {
-    const logDir = createTempDir("openclaw-docker-all-rerun-intent-");
+    const logDir = createTempDir("carapace-docker-all-rerun-intent-");
     try {
       const selectedSha = "c".repeat(40);
       await writeRunSummary(
@@ -749,8 +749,8 @@ describe("scripts/test-docker-all scheduler", () => {
         },
         {
           ...process.env,
-          OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
-          OPENCLAW_DOCKER_E2E_SELECTED_SHA: selectedSha,
+          CARAPACE_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
+          CARAPACE_DOCKER_E2E_SELECTED_SHA: selectedSha,
         },
       );
 
@@ -782,25 +782,25 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("rejects loose numeric resource limit env vars before scheduling lanes", () => {
-    const logDir = mkdtempSync(`${tmpdir()}/openclaw-docker-all-`);
+    const logDir = mkdtempSync(`${tmpdir()}/carapace-docker-all-`);
     try {
       const result = spawnSync(process.execPath, ["scripts/test-docker-all.mjs"], {
         cwd: process.cwd(),
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_BUILD: "0",
-          OPENCLAW_DOCKER_ALL_DOCKER_LIMIT: "1e3",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_PREFLIGHT: "0",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_DOCKER_ALL_BUILD: "0",
+          CARAPACE_DOCKER_ALL_DOCKER_LIMIT: "1e3",
+          CARAPACE_DOCKER_ALL_DRY_RUN: "1",
+          CARAPACE_DOCKER_ALL_LOG_DIR: logDir,
+          CARAPACE_DOCKER_ALL_PREFLIGHT: "0",
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
         },
       });
 
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        "OPENCLAW_DOCKER_ALL_DOCKER_LIMIT must be a positive integer",
+        "CARAPACE_DOCKER_ALL_DOCKER_LIMIT must be a positive integer",
       );
       expect(result.stderr).not.toContain("at ");
     } finally {
@@ -809,20 +809,20 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("rejects release-path configs that schedule zero Docker lanes", () => {
-    const logDir = mkdtempSync(`${tmpdir()}/openclaw-docker-all-`);
+    const logDir = mkdtempSync(`${tmpdir()}/carapace-docker-all-`);
     try {
       const result = spawnSync(process.execPath, ["scripts/test-docker-all.mjs"], {
         cwd: process.cwd(),
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_CHUNK: "openwebui",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_INCLUDE_OPENWEBUI: "0",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_PREFLIGHT: "0",
-          OPENCLAW_DOCKER_ALL_PROFILE: "release-path",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_DOCKER_ALL_CHUNK: "openwebui",
+          CARAPACE_DOCKER_ALL_DRY_RUN: "1",
+          CARAPACE_DOCKER_ALL_INCLUDE_OPENWEBUI: "0",
+          CARAPACE_DOCKER_ALL_LOG_DIR: logDir,
+          CARAPACE_DOCKER_ALL_PREFLIGHT: "0",
+          CARAPACE_DOCKER_ALL_PROFILE: "release-path",
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
         },
       });
 
@@ -839,7 +839,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("rejects candidate-controlled survivor omissions without trusted opt-in", () => {
-    const root = tempDirs.make("openclaw-docker-all-untrusted-filter-");
+    const root = tempDirs.make("carapace-docker-all-untrusted-filter-");
     try {
       const assertionsFile = writeFrozenScenarioContract(root, ["unrelated"]);
       const executionMarker = path.join(root, "candidate-contract-executed");
@@ -856,11 +856,11 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "0",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "0",
+          CARAPACE_DOCKER_ALL_DRY_RUN: "1",
+          CARAPACE_DOCKER_ALL_LANES: "published-upgrade-survivor",
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -874,7 +874,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("fails with truthful artifacts when a frozen target cannot run selected survivor lanes", () => {
-    const root = tempDirs.make("openclaw-docker-all-filtered-");
+    const root = tempDirs.make("carapace-docker-all-filtered-");
     const logDir = path.join(root, "logs");
     try {
       writeFrozenScenarioContract(root, ["unrelated"]);
@@ -883,13 +883,13 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_DOCKER_ALL_BUILD: "0",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          CARAPACE_DOCKER_ALL_BUILD: "0",
+          CARAPACE_DOCKER_ALL_LANES: "published-upgrade-survivor",
+          CARAPACE_DOCKER_ALL_LOG_DIR: logDir,
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
+          CARAPACE_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -920,7 +920,7 @@ describe("scripts/test-docker-all scheduler", () => {
     { args: ["--plan-json"], dryRun: false, label: "JSON planning" },
     { args: [], dryRun: true, label: "dry runs" },
   ])("preserves $label when frozen survivor lanes are omitted", ({ args, dryRun }) => {
-    const root = tempDirs.make("openclaw-docker-all-filtered-plan-");
+    const root = tempDirs.make("carapace-docker-all-filtered-plan-");
     const logDir = path.join(root, "logs");
     try {
       writeFrozenScenarioContract(root, ["unrelated"]);
@@ -929,14 +929,14 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_DOCKER_ALL_BUILD: "0",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: dryRun ? "1" : "0",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          CARAPACE_DOCKER_ALL_BUILD: "0",
+          CARAPACE_DOCKER_ALL_DRY_RUN: dryRun ? "1" : "0",
+          CARAPACE_DOCKER_ALL_LANES: "published-upgrade-survivor",
+          CARAPACE_DOCKER_ALL_LOG_DIR: logDir,
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
+          CARAPACE_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -960,7 +960,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("reports omitted frozen-target lanes when another selected lane remains runnable", () => {
-    const root = tempDirs.make("openclaw-docker-all-mixed-filtered-");
+    const root = tempDirs.make("carapace-docker-all-mixed-filtered-");
     try {
       writeFrozenScenarioContract(root, ["unrelated"]);
       const result = spawnSync(process.execPath, ["scripts/test-docker-all.mjs"], {
@@ -968,12 +968,12 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor,plugin-binding-command-escape",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          CARAPACE_DOCKER_ALL_DRY_RUN: "1",
+          CARAPACE_DOCKER_ALL_LANES: "published-upgrade-survivor,plugin-binding-command-escape",
+          CARAPACE_DOCKER_ALL_TIMINGS: "0",
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
+          CARAPACE_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -987,7 +987,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   posixIt("writes Docker run artifacts when cleanup smoke fails", async () => {
-    const root = mkdtempSync(`${tmpdir()}/openclaw-docker-all-cleanup-`);
+    const root = mkdtempSync(`${tmpdir()}/carapace-docker-all-cleanup-`);
     const logDir = path.join(root, "logs");
     const fakePnpm = path.join(root, "pnpm");
     const phases: Array<Record<string, unknown>> = [];
@@ -1009,7 +1009,7 @@ process.exit(0);
     try {
       const baseEnv = {
         ...process.env,
-        OPENCLAW_DOCKER_E2E_IMAGE: "openclaw-test-image",
+        CARAPACE_DOCKER_E2E_IMAGE: "carapace-test-image",
         PATH: `${root}${path.delimiter}${process.env.PATH ?? ""}`,
       };
       const cleanupFailure = await runCleanupSmokePhase(baseEnv, logDir, phases);
@@ -1019,10 +1019,10 @@ process.exit(0);
       }
       await writeRunSummary(logDir, {
         failures: [cleanupFailure],
-        image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+        image: baseEnv.CARAPACE_DOCKER_E2E_IMAGE,
         images: {
-          bare: "openclaw-test-bare",
-          functional: "openclaw-test-image",
+          bare: "carapace-test-bare",
+          functional: "carapace-test-image",
         },
         lanes: [],
         phases,
@@ -1209,22 +1209,22 @@ process.exit(0);
   it("cleans stale stopped containers from all named Docker E2E lanes", () => {
     expect(
       dockerPreflightContainerNames(`
-openclaw-gateway-e2e-123 Exited (1) 2 minutes ago
-openclaw-config-reload-e2e-234 Created
-openclaw-plugin-binding-command-escape-e2e-345 Dead
-openclaw-kitchen-sink-rpc-e2e-456 Exited (137) 10 seconds ago
-openclaw-openwebui-gateway-567 Exited (1) 3 minutes ago
-openclaw-openwebui-678 Created
-openclaw-not-an-e2e-container Exited (1) 2 minutes ago
+carapace-gateway-e2e-123 Exited (1) 2 minutes ago
+carapace-config-reload-e2e-234 Created
+carapace-plugin-binding-command-escape-e2e-345 Dead
+carapace-kitchen-sink-rpc-e2e-456 Exited (137) 10 seconds ago
+carapace-openwebui-gateway-567 Exited (1) 3 minutes ago
+carapace-openwebui-678 Created
+carapace-not-an-e2e-container Exited (1) 2 minutes ago
 postgres Created
 `),
     ).toEqual([
-      "openclaw-gateway-e2e-123",
-      "openclaw-config-reload-e2e-234",
-      "openclaw-plugin-binding-command-escape-e2e-345",
-      "openclaw-kitchen-sink-rpc-e2e-456",
-      "openclaw-openwebui-gateway-567",
-      "openclaw-openwebui-678",
+      "carapace-gateway-e2e-123",
+      "carapace-config-reload-e2e-234",
+      "carapace-plugin-binding-command-escape-e2e-345",
+      "carapace-kitchen-sink-rpc-e2e-456",
+      "carapace-openwebui-gateway-567",
+      "carapace-openwebui-678",
     ]);
   });
 
@@ -1249,7 +1249,7 @@ postgres Created
   });
 
   it("reads bounded lane log tails instead of full noisy logs", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-docker-all-log-tail-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-docker-all-log-tail-"));
     try {
       const logPath = path.join(root, "lane.log");
       writeFileSync(
@@ -1322,7 +1322,7 @@ postgres Created
   });
 
   posixIt("kills timed-out shell command groups when the leader exits first", async () => {
-    const root = createTempDir("openclaw-docker-all-timeout-");
+    const root = createTempDir("carapace-docker-all-timeout-");
     const scriptPath = path.join(root, "leader-exits.mjs");
     const grandchildPidPath = path.join(root, "grandchild.pid");
     const readyPath = path.join(root, "ready");
@@ -1395,7 +1395,7 @@ setInterval(() => {}, 1000);
       grace: 500,
     },
   ])("$title", async ({ run, grace }) => {
-    const root = createTempDir("openclaw-docker-all-grace-");
+    const root = createTempDir("carapace-docker-all-grace-");
     const scriptPath = path.join(root, "leader-exits.mjs");
     const donePath = path.join(root, "done");
     const readyPath = path.join(root, "ready");
@@ -1437,7 +1437,7 @@ setInterval(() => {}, 1000);
   });
 
   posixIt("cleans active shell command groups before parent signal exit", async () => {
-    const root = createTempDir("openclaw-docker-all-parent-signal-");
+    const root = createTempDir("carapace-docker-all-parent-signal-");
     const leaderPath = path.join(root, "leader-exits.mjs");
     const runnerPath = path.join(root, "runner.mjs");
     const grandchildPidPath = path.join(root, "grandchild.pid");

@@ -4,12 +4,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import type { PluginBlobStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginBlobStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginBlobStoreForTests,
   resetPluginBlobStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolvePreferredOpenClawTmpDir } from "../api.js";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolvePreferredCarapaceTmpDir } from "../api.js";
 import { DiffArtifactStore } from "./store.js";
 import type { DiffArtifactBlobMetadata } from "./types.js";
 
@@ -49,7 +49,7 @@ export async function createTempDiffRoot(prefix: string): Promise<{
   rootDir: string;
   cleanup: () => Promise<void>;
 }> {
-  const rootDir = await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), prefix));
+  const rootDir = await fs.mkdtemp(path.join(resolvePreferredCarapaceTmpDir(), prefix));
   return {
     rootDir,
     cleanup: async () => {
@@ -72,7 +72,7 @@ export async function createDiffStoreHarness(prefix: string): Promise<{
   const rootDir = path.join(harnessRoot, "files");
   const env = {
     ...process.env,
-    OPENCLAW_STATE_DIR: path.join(harnessRoot, "state"),
+    CARAPACE_STATE_DIR: path.join(harnessRoot, "state"),
   };
   const openBlobStore = () =>
     createPluginBlobStoreForTests<DiffArtifactBlobMetadata>(

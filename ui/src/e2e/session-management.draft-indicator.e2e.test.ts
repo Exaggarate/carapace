@@ -44,7 +44,7 @@ suite.define(() => {
       const homeRow = page.locator(".nav-item--home");
       const secondRow = page.locator(`[data-session-key="${secondKey}"]`);
       const composer = page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] .agent-chat__composer-combobox > textarea',
+        'carapace-chat-pane[aria-hidden="false"] .agent-chat__composer-combobox > textarea',
       );
       await homeRow.waitFor({ state: "visible", timeout: 10_000 });
       await secondRow.waitFor({ state: "visible" });
@@ -74,7 +74,7 @@ suite.define(() => {
         routeId: "chat",
       });
       await draft.waitFor();
-      const presentedPanes = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const presentedPanes = page.locator('carapace-chat-pane[aria-hidden="false"]');
       await expect
         .poll(() =>
           presentedPanes.evaluateAll((panes) =>

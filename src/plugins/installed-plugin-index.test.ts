@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 // Covers installed plugin index read, write, and policy behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { recordPluginCandidateInstallOwner } from "./candidate-install-owner.js";
 import type { PluginCandidate } from "./discovery.js";
 import { resolveInstalledPluginIndexInstallOwner } from "./installed-plugin-index-install-owner.js";
@@ -20,7 +20,7 @@ import {
 } from "./installed-plugin-index.js";
 import { recordPluginInstall } from "./installs.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { CarapacePackageManifest } from "./manifest.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 import { cleanupTrackedTempDirs, makeTrackedTempDir } from "./test-helpers/fs-fixtures.js";
 
@@ -33,11 +33,11 @@ afterEach(() => {
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-installed-plugin-index", tempDirs);
+  return makeTrackedTempDir("carapace-installed-plugin-index", tempDirs);
 }
 
 function writePluginManifest(rootDir: string, manifest: Record<string, unknown>) {
-  fs.writeFileSync(path.join(rootDir, "openclaw.plugin.json"), JSON.stringify(manifest), "utf-8");
+  fs.writeFileSync(path.join(rootDir, "carapace.plugin.json"), JSON.stringify(manifest), "utf-8");
 }
 
 function writePackageJson(rootDir: string, packageJson: Record<string, unknown>) {
@@ -74,8 +74,8 @@ function writeManifestlessClaudeBundle(rootDir: string, entries: readonly string
 
 function hermeticEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
     ...overrides,
   };
@@ -88,7 +88,7 @@ function createPluginCandidate(params: {
   packageName?: string;
   packageVersion?: string;
   packageDir?: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   format?: PluginCandidate["format"];
   bundleFormat?: PluginCandidate["bundleFormat"];
   installOwner?: string;
@@ -345,7 +345,7 @@ describe("installed plugin index", () => {
   ])("$name", ({ id, idHint, installOwner }) => {
     const rootDir = makeTempDir();
     writeRuntimeEntry(rootDir);
-    const manifestPath = path.join(rootDir, "openclaw.plugin.json");
+    const manifestPath = path.join(rootDir, "carapace.plugin.json");
 
     const records = buildInstalledPluginIndexRecords({
       candidates: [createPluginCandidate({ rootDir, idHint, installOwner })],
@@ -592,7 +592,7 @@ describe("installed plugin index", () => {
         isInstalledPluginEnabled(index, "demo", {
           channels: { "demo-chat": { enabled: channelEnabled } },
           plugins: { entries: { demo: { enabled: true } } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
       ).toBe(expected);
     },
   );
@@ -812,8 +812,8 @@ describe("installed plugin index", () => {
 
     const index = loadInstalledPluginIndex({
       env: hermeticEnv({
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: stateDir,
       }),
     });
 
@@ -1063,7 +1063,7 @@ describe("installed plugin index", () => {
           },
         },
       },
-      env: hermeticEnv({ OPENCLAW_VERSION: "2026.4.25" }),
+      env: hermeticEnv({ CARAPACE_VERSION: "2026.4.25" }),
     });
 
     writePackageJson(fixture.rootDir, {
@@ -1090,7 +1090,7 @@ describe("installed plugin index", () => {
               resolvedVersion: "1.2.4",
             },
           },
-          env: hermeticEnv({ OPENCLAW_VERSION: "2026.4.26" }),
+          env: hermeticEnv({ CARAPACE_VERSION: "2026.4.26" }),
         }),
       ),
       compatRegistryVersion: "different-compat-registry",

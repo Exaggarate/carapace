@@ -36,7 +36,7 @@ describe("pending delivery notice", () => {
     sendRecoveryNotice.mockResolvedValue({ suppressed: false });
     findDeliveryIntentOwner.mockReturnValue(null);
     appendAssistantMessageToSessionTranscript.mockResolvedValue({ ok: true });
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pending-notice-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pending-notice-"));
     storePath = path.join(tmpDir, "sessions.json");
     await replaceSessionEntry(
       { sessionKey, storePath },

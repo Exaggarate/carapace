@@ -14,15 +14,15 @@ import uuid
 # Local Swift inputs consumed by macOS builds, including real shared-source paths.
 # Never follow source links or replay paths supplied by a cache.
 INPUT_TREES = (
-    "apps/macos/Sources", "apps/macos/Tests", "apps/shared/OpenClawKit/Sources",
-    "apps/shared/OpenClawMLXTTSProtocol/Sources",
+    "apps/macos/Sources", "apps/macos/Tests", "apps/shared/CarapaceKit/Sources",
+    "apps/shared/CarapaceMLXTTSProtocol/Sources",
     "apps/swabble/Sources", "apps/macos/.build/checkouts",
 )
 INPUT_FILES = (
     "apps/macos/Package.swift", "apps/macos/Package.resolved",
-    "apps/shared/OpenClawKit/Package.swift", "apps/swabble/Package.swift",
-    "apps/shared/OpenClawMLXTTSProtocol/Package.swift",
-    "apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayTLSStoreFixture.swift",
+    "apps/shared/CarapaceKit/Package.swift", "apps/swabble/Package.swift",
+    "apps/shared/CarapaceMLXTTSProtocol/Package.swift",
+    "apps/shared/CarapaceKit/Tests/CarapaceKitTests/GatewayTLSStoreFixture.swift",
 )
 CACHE_DIRECTORY = "apps/macos/.build"
 METADATA_NAME = "ci-input-metadata.json"

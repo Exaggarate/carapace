@@ -10,7 +10,7 @@ import { normalizeThinkLevel, type ThinkLevel } from "../../auto-reply/thinking.
 import { resolveAgentModelPrimaryValue } from "../../config/model-input.js";
 /** Resolves provider/model precedence for isolated cron runs. */
 import type { AgentConfig } from "../../config/types.agents.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { CronJob } from "../types.js";
 import { resolveCronAgentConfig } from "./run-config.js";
 import {
@@ -37,7 +37,7 @@ type CronSessionModelOverrides = {
 type CronModelSelectionSource = "default" | "subagent" | "agent" | "hook" | "payload" | "session";
 
 type ResolveCronModelSelectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   owner?: ResolvedPublishedModelCatalogOwner;
   agentConfigOverride?: Pick<AgentConfig, "model" | "subagents">;
   sessionEntry: CronSessionModelOverrides;
@@ -56,7 +56,7 @@ type ResolveCronModelSelectionResult =
       model: string;
       modelSource: CronModelSelectionSource;
       configuredProfileId?: string;
-      cfgWithAgentDefaults: OpenClawConfig;
+      cfgWithAgentDefaults: CarapaceConfig;
       owner: ResolvedPublishedModelCatalogOwner;
     }
   | {
@@ -64,7 +64,7 @@ type ResolveCronModelSelectionResult =
       error: string;
     };
 
-function formatAllowedModelRefs(params: { cfg: OpenClawConfig; agentId?: string }): string {
+function formatAllowedModelRefs(params: { cfg: CarapaceConfig; agentId?: string }): string {
   const configured = resolveConfiguredModelPolicyAllow(params).refs;
   if (configured && configured.length > 0) {
     return configured.toSorted().join(", ");
@@ -73,7 +73,7 @@ function formatAllowedModelRefs(params: { cfg: OpenClawConfig; agentId?: string 
 }
 
 function formatCronPayloadModelRejection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   modelOverride: string;
   error: string;
@@ -89,7 +89,7 @@ function formatCronPayloadModelRejection(params: {
 }
 
 export async function resolveCronModelSelectionOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   requiredAgentId?: string;
   agentDir?: string;
@@ -143,7 +143,7 @@ async function resolveCronThinkingCatalog(params: {
 }
 
 export async function resolveCronThinkingSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   owner: ResolvedPublishedModelCatalogOwner;
   provider: string;
   model: string;

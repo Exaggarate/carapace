@@ -6,25 +6,25 @@ import {
   waitForDiagnosticEventsDrained,
 } from "../infra/diagnostic-events.js";
 import { logWebhookReceived } from "../logging/diagnostic.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { createGatewayKernel } from "./server-kernel.js";
 
 it("owns diagnostic dispatch and heartbeat across initial disable, enable, disable, and close", async () => {
   const previouslyEnabled = areDiagnosticsEnabledForProcess();
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     label: "gateway-diagnostics-policy",
     env: {
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: "1",
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     },
   });
   let kernel: Awaited<ReturnType<typeof createGatewayKernel>> | undefined;

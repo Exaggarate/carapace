@@ -49,7 +49,7 @@ describe("OutputAccumulator", () => {
     async ({ chunks, maxBytes, expected, lastLineBytes, totalLines, partial }) => {
       const accumulator = new OutputAccumulator({
         maxBytes,
-        tempFilePrefix: "openclaw-output-test",
+        tempFilePrefix: "carapace-output-test",
       });
       const buffers = chunks.map((chunk) =>
         typeof chunk === "string" ? Buffer.from(chunk) : chunk,
@@ -102,7 +102,7 @@ describe("OutputAccumulator", () => {
     const accumulator = new OutputAccumulator({
       maxBytes: 8,
       maxLines: 10,
-      tempFilePrefix: "openclaw-output-test",
+      tempFilePrefix: "carapace-output-test",
     });
 
     accumulator.append(Buffer.from("secret output"));
@@ -120,7 +120,7 @@ describe("OutputAccumulator", () => {
   });
 
   it("reports an early native spill error when closed later and again", async () => {
-    const root = await realpath(await mkdtemp(join(tmpdir(), "openclaw-output-error-")));
+    const root = await realpath(await mkdtemp(join(tmpdir(), "carapace-output-error-")));
     const ownerUrl = new URL("./output-accumulator.ts", import.meta.url).href;
     try {
       const result = spawnNodeEvalSync(
@@ -149,7 +149,7 @@ describe("OutputAccumulator", () => {
          };
          syncBuiltinESMExports();
          try {
-           const output = new OutputAccumulator({ maxBytes: 8, tempFilePrefix: "openclaw-output-test" });
+           const output = new OutputAccumulator({ maxBytes: 8, tempFilePrefix: "carapace-output-test" });
            output.append(Buffer.from("output before finalization"), "stdout");
            const error = await failure;
            await setImmediate();
@@ -193,7 +193,7 @@ describe("OutputAccumulator", () => {
     const accumulator = new OutputAccumulator({
       maxBytes: 5,
       maxLines: 10,
-      tempFilePrefix: "openclaw-output-test",
+      tempFilePrefix: "carapace-output-test",
     });
 
     accumulator.append(Buffer.from("a🙂b"));
@@ -225,7 +225,7 @@ describe("OutputAccumulator", () => {
     const accumulator = new OutputAccumulator({
       maxBytes: 1,
       maxLines: 10,
-      tempFilePrefix: "openclaw-output-test",
+      tempFilePrefix: "carapace-output-test",
     });
 
     accumulator.append(Buffer.from([0xe6, 0x97]), "stdout"); // leading bytes of 日

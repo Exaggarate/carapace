@@ -1,10 +1,10 @@
 // Session action contract tests cover plugin session action metadata and execution contracts.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   createPluginRegistryFixture,
   registerTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "carapace/plugin-sdk/plugin-test-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ADMIN_SCOPE,
@@ -26,7 +26,7 @@ import { createEmptyPluginRegistry } from "../registry-empty.js";
 import { createPluginRegistry } from "../registry.js";
 import { setActivePluginRegistry } from "../runtime.js";
 import { createPluginRecord } from "../status.test-fixtures.js";
-import type { OpenClawPluginApi } from "../types.js";
+import type { CarapacePluginApi } from "../types.js";
 
 const MAIN_SESSION_KEY = "agent:main:main";
 
@@ -147,7 +147,7 @@ function requireObservedEvent(
 function registerActionFixture(params: {
   id: string;
   name?: string;
-  register: (api: OpenClawPluginApi) => void;
+  register: (api: CarapacePluginApi) => void;
 }) {
   const { config, registry } = createPluginRegistryFixture();
   registerTestPlugin({
@@ -744,8 +744,8 @@ describe("plugin session actions", () => {
     const observed: unknown[] = [];
     const unsubscribe = onAgentEvent((event) => observed.push(event));
     const { config, registry } = createPluginRegistryFixture();
-    let bundledApi: OpenClawPluginApi | undefined;
-    let workspaceApi: OpenClawPluginApi | undefined;
+    let bundledApi: CarapacePluginApi | undefined;
+    let workspaceApi: CarapacePluginApi | undefined;
     registerTestPlugin({
       registry,
       config,
@@ -873,7 +873,7 @@ describe("plugin session actions", () => {
     const observed: unknown[] = [];
     const unsubscribe = onAgentEvent((event) => observed.push(event));
     const { config, registry } = createPluginRegistryFixture();
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: CarapacePluginApi | undefined;
     registerTestPlugin({
       registry,
       config,
@@ -907,7 +907,7 @@ describe("plugin session actions", () => {
         },
         runtime: {} as never,
       });
-      let neverActiveApi: OpenClawPluginApi | undefined;
+      let neverActiveApi: CarapacePluginApi | undefined;
       registerTestPlugin({
         registry: neverActiveRegistry,
         config,
@@ -938,7 +938,7 @@ describe("plugin session actions", () => {
         runtime: {} as never,
         activateGlobalSideEffects: false,
       });
-      let inactiveApi: OpenClawPluginApi | undefined;
+      let inactiveApi: CarapacePluginApi | undefined;
       registerTestPlugin({
         registry: inactiveRegistry,
         config,
@@ -969,7 +969,7 @@ describe("plugin session actions", () => {
     const observed: unknown[] = [];
     const unsubscribe = onAgentEvent((event) => observed.push(event));
     const { config, registry } = createPluginRegistryFixture();
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: CarapacePluginApi | undefined;
     registerTestPlugin({
       registry,
       config,

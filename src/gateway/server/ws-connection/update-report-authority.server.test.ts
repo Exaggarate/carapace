@@ -12,7 +12,7 @@ import {
 import type { GithubIssueSubmitHooks, RunGithubCli } from "../../../infra/github-issue.js";
 import type { RestartSentinelPayload } from "../../../infra/restart-sentinel.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../state/carapace-state-db.js";
 import { createAgentRuntimeApprovalAuthorityValidator } from "../../agent-runtime-identity-token.js";
 import {
   createDispatchTestHarness,
@@ -53,12 +53,12 @@ const failure: RestartSentinelPayload = {
   stats: {
     handoffId: "authority-proof",
     mode: "npm",
-    target: "openclaw@next",
+    target: "carapace@next",
     reason: "doctor-failed",
     before: { version: "2026.8.1" },
     after: { version: "2026.8.2" },
     steps: [
-      { name: "doctor", command: "openclaw doctor --fix", durationMs: 10, log: { exitCode: 1 } },
+      { name: "doctor", command: "carapace doctor --fix", durationMs: 10, log: { exitCode: 1 } },
     ],
     durationMs: 20,
     recovery: { serviceRestartSafe: true, version: "2026.8.1" },
@@ -69,8 +69,8 @@ const originalWriteFile = fs.writeFile.bind(fs);
 let stateDir = "";
 
 function countReportReceipts(): number {
-  closeOpenClawStateDatabaseForTest();
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  closeCarapaceStateDatabaseForTest();
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   if (!existsSync(databasePath)) {
     return 0;
   }
@@ -199,8 +199,8 @@ describe("update report live authority boundary", () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
     vi.clearAllMocks();
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-report-authority-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-report-authority-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     mocks.getLatest.mockReturnValue(failure);
     mocks.refreshLatest.mockResolvedValue(failure);
     mocks.submitGithubIssue.mockImplementation(
@@ -210,14 +210,14 @@ describe("update report live authority boundary", () => {
         commitIssueCreate?.();
         return {
           status: "created",
-          url: "https://github.com/openclaw/openclaw/issues/999999",
+          url: "https://github.com/Exaggarate/carapace/issues/999999",
         };
       },
     );
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     await fs.rm(stateDir, { force: true, recursive: true });
   });
@@ -244,7 +244,7 @@ describe("update report live authority boundary", () => {
         ok: true,
         payload: {
           status: "created",
-          url: "https://github.com/openclaw/openclaw/issues/999999",
+          url: "https://github.com/Exaggarate/carapace/issues/999999",
         },
       });
     },
@@ -297,7 +297,7 @@ describe("update report live authority boundary", () => {
           started: true,
           status: 0,
           stdout: Buffer.from(
-            "HTTP/2.0 201 Created\nhttps://github.com/openclaw/openclaw/issues/999999\n",
+            "HTTP/2.0 201 Created\nhttps://github.com/Exaggarate/carapace/issues/999999\n",
           ),
         };
       });
@@ -349,7 +349,7 @@ describe("update report live authority boundary", () => {
             ok: true,
             payload: {
               status: "created",
-              url: "https://github.com/openclaw/openclaw/issues/999999",
+              url: "https://github.com/Exaggarate/carapace/issues/999999",
             },
           });
           expect(harness.close).not.toHaveBeenCalled();
@@ -478,7 +478,7 @@ describe("update report live authority boundary", () => {
           issueCreateCalls += 1;
           return {
             status: "created",
-            url: "https://github.com/openclaw/openclaw/issues/999999",
+            url: "https://github.com/Exaggarate/carapace/issues/999999",
           };
         },
       );

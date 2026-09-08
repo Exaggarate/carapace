@@ -4,14 +4,14 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { Deferred } from "../../shared/deferred.js";
 
 type PackedVersion = {
   archive: Buffer;
   dependencies?: Record<string, string>;
   integrity: string;
-  openclaw?: Record<string, unknown>;
+  carapace?: Record<string, unknown>;
   optionalDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
@@ -24,7 +24,7 @@ type PackPluginParams = {
   dependencies?: Record<string, string>;
   hookName?: string;
   indexJs?: string;
-  openclaw?: Record<string, unknown>;
+  carapace?: Record<string, unknown>;
   optionalDependencies?: Record<string, string>;
   packageName: string;
   peerDependencies?: Record<string, string>;
@@ -62,8 +62,8 @@ export async function packPlugins(
           name: params.packageName,
           version,
           type: "module",
-          openclaw:
-            params.openclaw ??
+          carapace:
+            params.carapace ??
             (params.hookName
               ? { hooks: [`./hooks/${params.hookName}`] }
               : { extensions: ["./dist/index.js"] }),
@@ -88,12 +88,12 @@ export async function packPlugins(
       await fs.mkdir(hookDir, { recursive: true });
       await fs.writeFile(
         path.join(hookDir, "HOOK.md"),
-        `---\nname: ${params.hookName}\ndescription: Install cancellation fixture\nmetadata: {"openclaw":{"events":["command:new"]}}\n---\n`,
+        `---\nname: ${params.hookName}\ndescription: Install cancellation fixture\nmetadata: {"carapace":{"events":["command:new"]}}\n---\n`,
       );
       await fs.writeFile(path.join(hookDir, "handler.js"), "export default async () => {};\n");
     } else {
       await fs.writeFile(
-        path.join(packageDir, "openclaw.plugin.json"),
+        path.join(packageDir, "carapace.plugin.json"),
         `${JSON.stringify(
           {
             id: params.pluginId ?? params.packageName,
@@ -135,7 +135,7 @@ export async function packPlugins(
       archive,
       ...(params.dependencies ? { dependencies: params.dependencies } : {}),
       integrity: `sha512-${crypto.createHash("sha512").update(archive).digest("base64")}`,
-      ...(params.openclaw ? { openclaw: params.openclaw } : {}),
+      ...(params.carapace ? { carapace: params.carapace } : {}),
       ...(params.optionalDependencies ? { optionalDependencies: params.optionalDependencies } : {}),
       ...(params.peerDependencies ? { peerDependencies: params.peerDependencies } : {}),
       ...(peerDependenciesMeta ? { peerDependenciesMeta } : {}),
@@ -204,7 +204,7 @@ export async function startStaticRegistry(
                 {
                   name: pkg.packageName,
                   version,
-                  ...(entry.openclaw ? { openclaw: entry.openclaw } : {}),
+                  ...(entry.carapace ? { carapace: entry.carapace } : {}),
                   ...(entry.dependencies ? { dependencies: entry.dependencies } : {}),
                   ...(entry.optionalDependencies
                     ? { optionalDependencies: entry.optionalDependencies }
@@ -301,7 +301,7 @@ export async function startMutableRegistry(
               {
                 name: params.packageName,
                 version,
-                ...(entry.openclaw ? { openclaw: entry.openclaw } : {}),
+                ...(entry.carapace ? { carapace: entry.carapace } : {}),
                 ...(entry.peerDependencies ? { peerDependencies: entry.peerDependencies } : {}),
                 ...(entry.peerDependenciesMeta
                   ? { peerDependenciesMeta: entry.peerDependenciesMeta }

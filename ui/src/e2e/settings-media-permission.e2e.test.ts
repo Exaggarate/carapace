@@ -122,7 +122,7 @@ async function events(page: Page) {
 async function settle(page: Page, enumerationId: number, rejectEnumeration = false) {
   return page.evaluate(
     ({ id, reject }) => {
-      const owner = document.querySelector("openclaw-config-page");
+      const owner = document.querySelector("carapace-config-page");
       const pageId = owner ? Reflect.get(owner, "pageId") : undefined;
       const surface = {
         route: location.pathname,
@@ -167,7 +167,7 @@ suite.define(() => {
         });
         const page = await context.newPage();
         const record: Record<string, unknown> = {
-          schema: "openclaw-settings-media-permission-proof-v1",
+          schema: "carapace-settings-media-permission-proof-v1",
           caseId,
           kind,
           transition,
@@ -182,7 +182,7 @@ suite.define(() => {
           await page.locator(".new-session-page__message").waitFor({ state: "visible" });
           await page.keyboard.press("Control+Shift+,");
           let { sidebar } = await waitForControlUiSettingsTakeover(page);
-          const configOwner = await page.locator("openclaw-config-page").elementHandle();
+          const configOwner = await page.locator("carapace-config-page").elementHandle();
           expect(configOwner).not.toBeNull();
           record.ownerConnectedAtGesture = await configOwner!.evaluate(
             (element) => element.isConnected,
@@ -224,7 +224,7 @@ suite.define(() => {
             // History moves before the route module and Lit view commit. Retire the
             // actual Appearance surface before releasing its pending enumeration.
             const pageTitle = page.locator(
-              "openclaw-config-page .content-header--settings .page-title",
+              "carapace-config-page .content-header--settings .page-title",
             );
             await pageTitle.waitFor({ state: "visible" });
             await expect.poll(() => pageTitle.textContent()).toBe("Advanced");
@@ -257,7 +257,7 @@ suite.define(() => {
           const settledContent = page.locator(
             transition === "disconnect"
               ? ".new-session-page__message"
-              : "openclaw-config-page .content-header--settings .page-title",
+              : "carapace-config-page .content-header--settings .page-title",
           );
           await captureSidebarUiProof(suite, page, "settled-surface.png", proofSurface, [
             settledContent,

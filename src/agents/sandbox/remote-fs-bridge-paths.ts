@@ -47,13 +47,13 @@ export function buildRemoteProtectedSkillRoots(params: {
   const roots = [
     path.posix.join(params.workspaceContainerRoot, "skills"),
     path.posix.join(params.workspaceContainerRoot, ".agents", "skills"),
-    path.posix.join(params.workspaceContainerRoot, ".openclaw", "sandbox-skills", "skills"),
+    path.posix.join(params.workspaceContainerRoot, ".carapace", "sandbox-skills", "skills"),
   ];
   if (params.includeAgentMount) {
     roots.push(
       path.posix.join(params.agentContainerRoot, "skills"),
       path.posix.join(params.agentContainerRoot, ".agents", "skills"),
-      path.posix.join(params.agentContainerRoot, ".openclaw", "sandbox-skills", "skills"),
+      path.posix.join(params.agentContainerRoot, ".carapace", "sandbox-skills", "skills"),
     );
   }
   return roots;

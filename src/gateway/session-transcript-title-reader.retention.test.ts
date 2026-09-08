@@ -7,17 +7,17 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { resolveRuntimeWorkerArgv, resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { cleanupSessionStateForTest } from "../test-utils/session-state-cleanup.js";
 import { sessionTitleRetentionEntrypoints } from "./session-title-retention.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let storePath: string;
 
 beforeAll(async () => {
-  state = await createOpenClawTestState({ label: "title-cache-retention", applyEnv: false });
+  state = await createCarapaceTestState({ label: "title-cache-retention", applyEnv: false });
   storePath = path.join(state.sessionsDir("main"), "sessions.json");
   const scope = { agentId: "main", env: state.env, storePath };
   for (let index = 0; index < 128; index++) {

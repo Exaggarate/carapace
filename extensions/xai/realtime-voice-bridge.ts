@@ -1,17 +1,17 @@
 import { randomUUID } from "node:crypto";
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
 import {
   captureWsEvent,
   createDebugProxyWebSocketAgent,
   resolveDebugProxySettings,
-} from "openclaw/plugin-sdk/proxy-capture";
+} from "carapace/plugin-sdk/proxy-capture";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceSessionConnection,
   RealtimeVoiceToolResultOptions,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { RealtimeVoiceSessionLifecycle } from "openclaw/plugin-sdk/realtime-voice-provider";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/realtime-voice";
+import { RealtimeVoiceSessionLifecycle } from "carapace/plugin-sdk/realtime-voice-provider";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import { resolveXaiRealtimeApiKey } from "./realtime-voice-auth.runtime.js";
 import {
   XAI_REALTIME_BASE_RECONNECT_DELAY_MS,

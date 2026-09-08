@@ -30,7 +30,7 @@ describe("session-store-runtime recovery boundary", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-sdk-session-recovery-");
+    tempDir = tempDirs.make("carapace-sdk-session-recovery-");
     storePath = path.join(tempDir, "sessions.json");
   });
 
@@ -64,7 +64,7 @@ describe("session-store-runtime recovery boundary", () => {
 
   it("keeps pending remote-project recovery private across public session mutations", async () => {
     const sessionKey = "agent:main:pending-project";
-    const pendingProjectGitUrl = "https://github.com/openclaw/openclaw.git";
+    const pendingProjectGitUrl = "https://github.com/Exaggarate/carapace.git";
     await replaceInternalSessionEntry(
       { sessionKey, storePath },
       { pendingProjectGitUrl, sessionId: "project-session", updatedAt: 10 },
@@ -123,7 +123,7 @@ describe("session-store-runtime recovery boundary", () => {
     await patchSessionEntry({
       fallbackEntry: {
         mainRestartRecovery,
-        pendingProjectGitUrl: "https://github.com/openclaw/injected.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace/injected.git",
         sessionId: "patch-created",
         updatedAt: 10,
       } as unknown as SessionEntry,
@@ -142,7 +142,7 @@ describe("session-store-runtime recovery boundary", () => {
     await upsertSessionEntry({
       entry: {
         mainRestartRecovery,
-        pendingProjectGitUrl: "https://github.com/openclaw/injected.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace/injected.git",
         sessionId: "upsert-created",
         updatedAt: 10,
       } as unknown as SessionEntry,

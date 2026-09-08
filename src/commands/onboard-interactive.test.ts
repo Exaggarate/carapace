@@ -4,7 +4,7 @@ import { PassThrough } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getRegisteredAgentHarness } from "../agents/harness/registry.js";
 import { createConfigFileSnapshot } from "../config/io.snapshot-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import {
   captureActivePluginRegistrySnapshot,
@@ -78,7 +78,7 @@ describe("runConversationalOnboarding", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    home = await createTempHomeEnv("openclaw-conversational-handoff-");
+    home = await createTempHomeEnv("carapace-conversational-handoff-");
     previousRegistry = captureActivePluginRegistrySnapshot();
     rootRegistry = createEmptyPluginRegistry();
     setActivePluginRegistry(rootRegistry);
@@ -96,15 +96,15 @@ describe("runConversationalOnboarding", () => {
     await home.restore();
   });
 
-  async function prepareConversation(runner: "codex" | "openclaw" | "cli" = "codex") {
-    let config: OpenClawConfig = {
+  async function prepareConversation(runner: "codex" | "carapace" | "cli" = "codex") {
+    let config: CarapaceConfig = {
       agents: {
         defaults: {
           workspace: path.join(home.home, "workspace"),
           model: runner === "cli" ? "claude-cli/sonnet-4.6" : "openai/gpt-5.6-sol",
           models: {
             "openai/gpt-5.6-sol": {
-              agentRuntime: { id: runner === "openclaw" ? "openclaw" : "codex" },
+              agentRuntime: { id: runner === "carapace" ? "carapace" : "codex" },
             },
             "fixture/model": { agentRuntime: { id: "fixture-runtime" } },
           },
@@ -123,7 +123,7 @@ describe("runConversationalOnboarding", () => {
     const { validateAgentHarnessRuntimeArtifact: _fixtureValidator, ...ownerDeps } = fixture.deps;
     mocks.readConfigFileSnapshot.mockImplementation(async () =>
       createConfigFileSnapshot({
-        path: path.join(home.home, "openclaw.json"),
+        path: path.join(home.home, "carapace.json"),
         exists: true,
         valid: true,
         raw: null,
@@ -299,7 +299,7 @@ describe("runConversationalOnboarding", () => {
     },
   );
 
-  it.each(["openclaw", "cli"] as const)(
+  it.each(["carapace", "cli"] as const)(
     "keeps the %s handoff free of plugin acquisition",
     async (runner) => {
       const { launchConversation } = await prepareConversation(runner);

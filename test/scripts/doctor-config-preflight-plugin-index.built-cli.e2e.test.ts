@@ -3,36 +3,36 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveDefaultAgentWorkspaceDir } from "../../src/agents/workspace-default.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import { hasActiveStartupMigrationLease } from "../../src/infra/startup-migration-checkpoint.js";
 import { writePersistedInstalledPluginIndexSync } from "../../src/plugins/installed-plugin-index-store-write.js";
 import { readPersistedInstalledPluginIndexSync } from "../../src/plugins/installed-plugin-index-store.js";
 import { clearPluginMetadataLifecycleCaches } from "../../src/plugins/plugin-metadata-lifecycle.js";
 import { loadPluginMetadataSnapshot } from "../../src/plugins/plugin-metadata-snapshot.js";
 import { writeManagedNpmPlugin } from "../../src/plugins/test-helpers/managed-npm-plugin.js";
-import { closeOpenClawStateDatabaseForTest } from "../../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../src/state/carapace-state-db.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../helpers/carapace-test-instance.js";
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 
 afterEach(async () => {
   await Promise.all(instances.splice(0).map((instance) => instance.cleanup()));
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("Doctor plugin index persistence built CLI proof", () => {
   it("starts after linking an empty legacy state dir to the canonical root", async () => {
-    const instance = await createOpenClawTestInstance({
+    const instance = await createCarapaceTestInstance({
       name: "doctor-empty-legacy-state-dir",
       env: {
-        OPENCLAW_CONFIG_PATH: undefined,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: undefined,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: undefined,
+        CARAPACE_HOME: undefined,
+        CARAPACE_STATE_DIR: undefined,
+        CARAPACE_TEST_FAST: "1",
       },
       startTimeoutMs: 90_000,
     });
@@ -50,37 +50,37 @@ describe("Doctor plugin index persistence built CLI proof", () => {
   }, 120_000);
 
   it("starts after replacing and verifying a stale persisted Doctor index", async () => {
-    const instance = await createOpenClawTestInstance({
+    const instance = await createCarapaceTestInstance({
       name: "doctor-plugin-index-persistence",
       env: {
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_TEST_FAST: "1",
       },
       startTimeoutMs: 90_000,
     });
     instances.push(instance);
     const workspaceDir = resolveDefaultAgentWorkspaceDir(instance.env);
 
-    const config = JSON.parse(fs.readFileSync(instance.configPath, "utf8")) as OpenClawConfig;
+    const config = JSON.parse(fs.readFileSync(instance.configPath, "utf8")) as CarapaceConfig;
     const pluginId = "legacy-doctor-index";
     const pluginDir = writeManagedNpmPlugin({
       stateDir: instance.stateDir,
-      packageName: "@openclaw/legacy-doctor-index",
+      packageName: "@carapace/legacy-doctor-index",
       pluginId,
       version: "1.0.0",
     });
     const packageJsonPath = path.join(pluginDir, "package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
-      openclaw: Record<string, unknown>;
+      carapace: Record<string, unknown>;
     };
     fs.writeFileSync(
       packageJsonPath,
       JSON.stringify({
         ...packageJson,
-        openclaw: {
-          ...packageJson.openclaw,
+        carapace: {
+          ...packageJson.carapace,
           build: {
             bundledDist: false,
-            openclawVersion: "2026.7.2",
+            carapaceVersion: "2026.7.2",
             pluginSdkVersion: "2026.7.2",
           },
         },
@@ -112,7 +112,7 @@ describe("Doctor plugin index persistence built CLI proof", () => {
     };
     writePersistedInstalledPluginIndexSync(legacyIndex, { env: instance.env });
     clearPluginMetadataLifecycleCaches();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(await instance.entrypoint()).toEqual([
       expect.stringMatching(/^dist\/index\.(?:js|mjs)$/u),
@@ -121,7 +121,7 @@ describe("Doctor plugin index persistence built CLI proof", () => {
     expect(hasActiveStartupMigrationLease({ env: instance.env }), instance.logs()).toBe(false);
 
     clearPluginMetadataLifecycleCaches();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const reread = loadPluginMetadataSnapshot({
       config,
       env: instance.env,

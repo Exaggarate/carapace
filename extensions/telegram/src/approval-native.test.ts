@@ -1,19 +1,19 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizeSessionDeliveryState,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import type { SessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/session-store-runtime";
+import type { SessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it } from "vitest";
 import { telegramApprovalCapability } from "./approval-native.js";
 
 function buildConfig(
-  overrides?: Partial<NonNullable<NonNullable<OpenClawConfig["channels"]>["telegram"]>>,
-): OpenClawConfig {
+  overrides?: Partial<NonNullable<NonNullable<CarapaceConfig["channels"]>["telegram"]>>,
+): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -26,20 +26,20 @@ function buildConfig(
         ...overrides,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 const tempDirs: string[] = [];
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 
 function createTempStorePath(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-approval-native-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-telegram-approval-native-"));
   tempDirs.push(dir);
   return path.join(dir, "sessions.json");
 }

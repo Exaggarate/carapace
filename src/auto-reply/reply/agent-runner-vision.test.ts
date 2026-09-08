@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAIResponsesParams } from "../../../packages/ai/src/transports/openai-responses-params-internal.js";
 import { createSolidPngBuffer } from "../../../test/helpers/image-fixtures.js";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { WorkerTunnelHandle } from "../../gateway/worker-environments/tunnel-contract.js";
 import { prepareWorkerTurnMedia } from "../../gateway/worker-environments/worker-turn-media.js";
 import type { Model } from "../../llm/types.js";
@@ -54,7 +54,7 @@ describe("ordinary reply model capability at cloud media admission", () => {
     async (testCase) => {
       const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "reply-vision-")));
       roots.push(root);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", workspace: root }] },
         ...(testCase.configured
           ? {

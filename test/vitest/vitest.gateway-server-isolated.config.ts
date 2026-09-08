@@ -16,7 +16,7 @@ export function createGatewayServerIsolatedVitestConfig(
   const sharedTest = sharedVitestConfig.test ?? {};
   const includeFromEnv = intersectIncludePatterns(
     gatewayServerIsolatedTestFiles,
-    loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env),
+    loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env),
   );
   const cliInclude = narrowIncludePatternsForCli(gatewayServerIsolatedTestFiles, options.argv);
 

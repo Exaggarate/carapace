@@ -11,7 +11,7 @@ import {
   DEFAULT_HEARTBEAT_EVERY,
   resolveHeartbeatPromptCore as resolveHeartbeatPromptText,
 } from "../auto-reply/heartbeat.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { tryResolveAmbientHeartbeatAgentId } from "./heartbeat-agent-resolution.js";
 import {
@@ -34,12 +34,12 @@ export type HeartbeatSummary = {
 
 const DEFAULT_HEARTBEAT_TARGET = "owner";
 
-export function enrolledHeartbeatAgentIds(cfg: OpenClawConfig): ReadonlySet<string> {
+export function enrolledHeartbeatAgentIds(cfg: CarapaceConfig): ReadonlySet<string> {
   return new Set(resolveHeartbeatAgents(cfg).map((agent) => agent.agentId));
 }
 
 export function isEnrolledHeartbeatAgent(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
   enrolled: ReadonlySet<string>,
 ): boolean {
@@ -48,7 +48,7 @@ export function isEnrolledHeartbeatAgent(
 }
 
 export function buildHeartbeatSummary(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string | undefined,
   enrolled: ReadonlySet<string>,
 ): HeartbeatSummary {
@@ -75,7 +75,7 @@ export function buildHeartbeatSummary(
  * the Gateway event loop for tens of seconds per refresh (#137570).
  */
 export function resolveHeartbeatSummariesForAgents(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentIds: readonly string[],
 ): HeartbeatSummary[] {
   return withAgentRosterFactsBatch(cfg, () => {

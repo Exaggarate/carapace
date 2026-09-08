@@ -1,8 +1,8 @@
 // Doctor workspace status tests cover workspace inspection and status output.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import * as noteModule from "../../packages/terminal-core/src/note.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginVersionDriftReport } from "../plugins/plugin-version-drift.js";
 import {
   createPluginLoadResult,
@@ -15,7 +15,7 @@ import {
 } from "./doctor-workspace-status.js";
 
 const mocks = vi.hoisted(() => ({
-  listAgentIds: vi.fn<(_cfg: OpenClawConfig) => string[]>(() => ["default"]),
+  listAgentIds: vi.fn<(_cfg: CarapaceConfig) => string[]>(() => ["default"]),
   resolveAgentWorkspaceDir: vi.fn(),
   resolveDefaultAgentId: vi.fn(),
   buildPluginRegistrySnapshotReport: vi.fn(),
@@ -25,7 +25,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../agents/agent-scope.js", () => ({
-  listAgentIds: (cfg: OpenClawConfig) => mocks.listAgentIds(cfg),
+  listAgentIds: (cfg: CarapaceConfig) => mocks.listAgentIds(cfg),
   resolveAgentWorkspaceDir: (...args: unknown[]) => mocks.resolveAgentWorkspaceDir(...args),
   tryResolveDefaultAgentId: (...args: unknown[]) => mocks.resolveDefaultAgentId(...args),
 }));
@@ -61,13 +61,13 @@ async function runNoteWorkspaceStatusForTest(
   loadResult: ReturnType<typeof createPluginLoadResult>,
   compatibilityWarnings: string[] = [],
   opts?: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     pluginVersionDrift?: PluginVersionDriftReport;
     flows?: unknown[];
     tasksByFlowId?: (flowId: string) => unknown[];
   },
 ) {
-  const cfg: OpenClawConfig = opts?.cfg ?? {};
+  const cfg: CarapaceConfig = opts?.cfg ?? {};
   mocks.resolveDefaultAgentId.mockReturnValue("default");
   mocks.listAgentIds.mockReturnValue(["default"]);
   mocks.resolveAgentWorkspaceDir.mockReturnValue("/workspace");
@@ -227,7 +227,7 @@ describe("noteWorkspaceStatus", () => {
         target: "codex",
         requirement: "plugin-version-drift",
         message: expect.stringContaining("2026.5.30-beta.1"),
-        fixHint: expect.stringContaining("openclaw plugins update codex"),
+        fixHint: expect.stringContaining("carapace plugins update codex"),
       }),
     ]);
   });
@@ -255,13 +255,13 @@ describe("noteWorkspaceStatus", () => {
                 installedVersion: "2026.7.1-beta.2",
                 gatewayVersion: "2026.7.1-2",
                 source: "npm",
-                packageName: "@openclaw/brave-plugin",
-                spec: "@openclaw/brave-plugin@2026.7.1-beta.2",
+                packageName: "@carapace/brave-plugin",
+                spec: "@carapace/brave-plugin@2026.7.1-beta.2",
                 targetResolution: {
                   status: "unresolved",
-                  packageName: "@openclaw/brave-plugin",
+                  packageName: "@carapace/brave-plugin",
                   requestedTarget: "2026.7.1",
-                  error: "npm registry did not resolve @openclaw/brave-plugin@2026.7.1: HTTP 404",
+                  error: "npm registry did not resolve @carapace/brave-plugin@2026.7.1: HTTP 404",
                 },
               },
             ],
@@ -277,8 +277,8 @@ describe("noteWorkspaceStatus", () => {
         fixHint: expect.stringContaining("No install command generated"),
       }),
     ]);
-    expect(findings[0]?.fixHint).not.toContain("openclaw plugins update");
-    expect(findings[0]?.fixHint).not.toContain("openclaw gateway restart");
+    expect(findings[0]?.fixHint).not.toContain("carapace plugins update");
+    expect(findings[0]?.fixHint).not.toContain("carapace gateway restart");
   });
 
   it("collects compatibility warnings, plugin diagnostics, and TaskFlow recovery findings", async () => {
@@ -343,7 +343,7 @@ describe("noteWorkspaceStatus", () => {
         target: "flow-123",
         requirement: "taskflow-recovery",
         message: expect.stringContaining("task-missing"),
-        fixHint: expect.stringContaining("openclaw tasks flow show flow-123"),
+        fixHint: expect.stringContaining("carapace tasks flow show flow-123"),
       }),
     ]);
   });
@@ -388,10 +388,10 @@ describe("noteWorkspaceStatus", () => {
       );
       expect(driftCalls).toHaveLength(1);
       const [body] = expectDefined(driftCalls[0], "(driftCalls)[0] test invariant");
-      expect(body).toContain("1 active official plugin not on post-restart OpenClaw 2026.6.1");
+      expect(body).toContain("1 active official plugin not on post-restart Carapace 2026.6.1");
       expect(body).toContain("codex: 2026.5.30-beta.1 (npm) -> expected 2026.6.1");
-      expect(body).toContain("openclaw plugins update codex");
-      expect(body).toContain("openclaw gateway restart");
+      expect(body).toContain("carapace plugins update codex");
+      expect(body).toContain("carapace gateway restart");
     } finally {
       noteSpy.mockRestore();
     }
@@ -426,11 +426,11 @@ describe("noteWorkspaceStatus", () => {
               installedVersion: "2026.6.9",
               gatewayVersion: "2026.6.10-beta.1",
               source: "npm",
-              packageName: "@openclaw/brave-plugin",
-              spec: "@openclaw/brave-plugin@2026.6.9",
+              packageName: "@carapace/brave-plugin",
+              spec: "@carapace/brave-plugin@2026.6.9",
               targetResolution: {
                 status: "resolved",
-                packageName: "@openclaw/brave-plugin",
+                packageName: "@carapace/brave-plugin",
                 requestedTarget: "2026.6.10-beta.1",
                 version: "2026.6.10-beta.1",
               },
@@ -445,9 +445,9 @@ describe("noteWorkspaceStatus", () => {
       );
       expect(driftCalls).toHaveLength(1);
       const [body] = expectDefined(driftCalls[0], "(driftCalls)[0] test invariant");
-      expect(body).toContain("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
-      expect(body).not.toContain("openclaw plugins update brave");
-      expect(body).toContain("openclaw gateway restart");
+      expect(body).toContain("carapace plugins update @carapace/brave-plugin@2026.6.10-beta.1");
+      expect(body).not.toContain("carapace plugins update brave");
+      expect(body).toContain("carapace gateway restart");
     } finally {
       noteSpy.mockRestore();
     }
@@ -566,7 +566,7 @@ describe("noteWorkspaceStatus", () => {
       expect(recoveryCalls).toHaveLength(1);
       const [body] = expectDefined(recoveryCalls[0], "(recoveryCalls)[0] test invariant");
       expect(body).toContain("flow-123");
-      expect(body).toContain("openclaw tasks flow show <flow-id>");
+      expect(body).toContain("carapace tasks flow show <flow-id>");
     } finally {
       noteSpy.mockRestore();
     }

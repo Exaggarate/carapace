@@ -52,7 +52,7 @@ const failure: RestartSentinelPayload = {
       {
         name: "build",
         command: "pnpm build --token secret",
-        cwd: "/Users/private/openclaw",
+        cwd: "/Users/private/carapace",
         durationMs: 10,
         log: { exitCode: 1, stderrTail: "raw log secret" },
       },
@@ -91,7 +91,7 @@ describe("update.report", () => {
       previewDigest: "a".repeat(64),
       savedReportPath: "/tmp/report.md",
       title: "Update failure",
-      url: "https://github.com/openclaw/openclaw/issues/new",
+      url: "https://github.com/Exaggarate/carapace/issues/new",
     });
     mocks.submit.mockImplementation(async (...args: unknown[]) => {
       const options = args[2] as {
@@ -111,7 +111,7 @@ describe("update.report", () => {
       return {
         savedReportPath: "/tmp/report.md",
         status: "created",
-        url: "https://github.com/openclaw/openclaw/issues/123",
+        url: "https://github.com/Exaggarate/carapace/issues/123",
       };
     });
   });
@@ -163,7 +163,7 @@ describe("update.report", () => {
           ...(failure.stats?.steps ?? []),
           {
             name: "post-install doctor",
-            command: "openclaw doctor",
+            command: "carapace doctor",
             durationMs: 5,
             advisory: true,
             log: { exitCode: 86 },
@@ -241,7 +241,7 @@ describe("update.report", () => {
         previewDigest: "a".repeat(64),
         savedReportPath: "/tmp/report.md",
         title: "Update failure",
-        url: "https://github.com/openclaw/openclaw/issues/new",
+        url: "https://github.com/Exaggarate/carapace/issues/new",
       };
     });
 

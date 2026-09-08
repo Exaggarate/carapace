@@ -1,7 +1,7 @@
 // Control UI tests cover browser credential submission and visible recovery.
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import { beforeEach, afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { ConnectErrorDetailCodes } from "../../../packages/gateway-protocol/src/connect-error-details.js";
@@ -20,7 +20,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 let artifactDir: string;
 beforeEach(() => {
@@ -86,7 +86,7 @@ async function rejectInitialConnect(
     details: { code },
     message,
   });
-  await page.locator("openclaw-login-gate").waitFor();
+  await page.locator("carapace-login-gate").waitFor();
 }
 
 describeControlUiE2e("Control UI Gateway secret E2E", () => {
@@ -134,8 +134,8 @@ describeControlUiE2e("Control UI Gateway secret E2E", () => {
       password: "token-accepted-by-mock",
     });
     await tokenFlow.gateway.resolveDeferred("connect");
-    await tokenFlow.page.locator("openclaw-app-shell").waitFor();
-    expect(await tokenFlow.page.locator("openclaw-login-gate").count()).toBe(0);
+    await tokenFlow.page.locator("carapace-app-shell").waitFor();
+    expect(await tokenFlow.page.locator("carapace-login-gate").count()).toBe(0);
     await writeFile(
       path.join(artifactDir, "01-token-connected.png"),
       await takeControlUiViewportScreenshot(tokenFlow.page, tokenFlow.page.locator(".shell"), [
@@ -182,7 +182,7 @@ describeControlUiE2e("Control UI Gateway secret E2E", () => {
       (await failure.locator(".login-gate__failure-raw").textContent())?.toLowerCase(),
     ).toContain("gateway password mismatch");
     expect(await failure.locator(".login-gate__failure-steps").isVisible()).toBe(true);
-    expect(await passwordFlow.page.locator("openclaw-app-shell").count()).toBe(0);
+    expect(await passwordFlow.page.locator("carapace-app-shell").count()).toBe(0);
     await writeFile(
       path.join(artifactDir, "02-password-rejected.png"),
       await takeControlUiViewportScreenshot(
@@ -203,8 +203,8 @@ describeControlUiE2e("Control UI Gateway secret E2E", () => {
       password: "password-accepted-by-mock",
     });
     await passwordFlow.gateway.resolveDeferred("connect");
-    await passwordFlow.page.locator("openclaw-app-shell").waitFor();
-    expect(await passwordFlow.page.locator("openclaw-login-gate").count()).toBe(0);
+    await passwordFlow.page.locator("carapace-app-shell").waitFor();
+    expect(await passwordFlow.page.locator("carapace-login-gate").count()).toBe(0);
     await writeFile(
       path.join(artifactDir, "03-password-recovered.png"),
       await takeControlUiViewportScreenshot(

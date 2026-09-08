@@ -5,8 +5,8 @@ import {
 } from "node:child_process";
 import { readFileSync } from "node:fs";
 import os from "node:os";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { DARWIN_SYSTEM_PROBE_TIMEOUT_MS } from "./os-summary.js";
 
 const models = new Map<NodeJS.Platform, string | undefined>();

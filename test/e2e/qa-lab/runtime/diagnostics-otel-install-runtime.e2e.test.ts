@@ -18,7 +18,7 @@ import { runQaGatewayFixture, stopQaGatewayFixture } from "../../../helpers/qa-g
 import { startLocalOtlpReceiver } from "./otel-test-support.js";
 
 const execFileAsync = promisify(execFile);
-const PACKAGE_NAME = "@openclaw/diagnostics-otel";
+const PACKAGE_NAME = "@carapace/diagnostics-otel";
 
 type MutableConfig = {
   diagnostics?: unknown;
@@ -157,7 +157,7 @@ async function packPlugin(repoRoot: string, scratch: string) {
       cwd: repoRoot,
       env: {
         ...process.env,
-        OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES: "1",
+        CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES: "1",
       },
       maxBuffer: 16 * 1024 * 1024,
       timeout: 120_000,
@@ -188,7 +188,7 @@ async function startRegistry(repoRoot: string, scratch: string, tarball: string,
       cwd: repoRoot,
       env: {
         ...process.env,
-        OPENCLAW_NPM_REGISTRY_UPSTREAM: "https://registry.npmjs.org",
+        CARAPACE_NPM_REGISTRY_UPSTREAM: "https://registry.npmjs.org",
       },
       stdio: ["ignore", "pipe", "pipe"],
     },
@@ -290,10 +290,10 @@ async function startInstallGateway(params: {
     }),
     runtimeEnvPatch: {
       NPM_CONFIG_REGISTRY: params.registryBaseUrl,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: `${params.envTraceEndpoint}/v1/traces`,
       ...(params.nodeOptions ? { NODE_OPTIONS: params.nodeOptions } : {}),
-      ...(params.nodeOptions ? { OPENCLAW_OTEL_PRELOADED: "1" } : {}),
+      ...(params.nodeOptions ? { CARAPACE_OTEL_PRELOADED: "1" } : {}),
     },
   });
 }
@@ -307,7 +307,7 @@ async function installAndConfigure(params: {
   const { gateway } = params;
   const spec = `npm:${PACKAGE_NAME}@${params.packageVersion}`;
   await gateway.runCli(["plugins", "install", spec, "--force", "--accept-capabilities"]);
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("qa gateway state directory was not configured");
   }
@@ -350,7 +350,7 @@ async function installAndConfigure(params: {
 describe("managed diagnostics-otel install runtime", () => {
   test("installs the exact package and exports with config precedence, sampling, and flush", async () => {
     const repoRoot = path.resolve(import.meta.dirname, "../../../..");
-    const scratch = await mkdtemp(path.join(tmpdir(), "openclaw-otel-install-"));
+    const scratch = await mkdtemp(path.join(tmpdir(), "carapace-otel-install-"));
     const configured = await startReceiver();
     const envOnly = await startReceiver();
     let registry: Awaited<ReturnType<typeof startRegistry>> | undefined;
@@ -397,7 +397,7 @@ describe("managed diagnostics-otel install runtime", () => {
           spanOffset += request.spanCount;
           if (
             request.path === "/v1/traces" &&
-            requestSpans.some((span) => span.name === "openclaw.run")
+            requestSpans.some((span) => span.name === "carapace.run")
           ) {
             return { request, spans: requestSpans };
           }
@@ -442,7 +442,7 @@ describe("managed diagnostics-otel install runtime", () => {
     expect(rootPackage.devDependencies?.["@opentelemetry/sdk-node"]).toBe("0.221.0");
     expect(sourcePluginPackage.dependencies?.["@opentelemetry/sdk-node"]).toBeUndefined();
     expect(sourcePluginPackage.devDependencies?.["@opentelemetry/sdk-node"]).toBeUndefined();
-    const scratch = await mkdtemp(path.join(tmpdir(), "openclaw-otel-preloaded-"));
+    const scratch = await mkdtemp(path.join(tmpdir(), "carapace-otel-preloaded-"));
     const receiver = await startReceiver();
     const ignoredConfig = await startReceiver();
     let registry: Awaited<ReturnType<typeof startRegistry>> | undefined;
@@ -478,7 +478,7 @@ describe("managed diagnostics-otel install runtime", () => {
           'import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";',
           `const sdk = new NodeSDK({ traceExporter: new OTLPTraceExporter({ url: ${JSON.stringify(`${receiver.baseUrl}/v1/traces`)} }) });`,
           "sdk.start();",
-          "globalThis.__openclawQaPreloadedOtelSdk = sdk;",
+          "globalThis.__carapaceQaPreloadedOtelSdk = sdk;",
         ].join("\n"),
       );
       gateway = await startInstallGateway({
@@ -494,7 +494,7 @@ describe("managed diagnostics-otel install runtime", () => {
         configTraceEndpoint: ignoredConfig.baseUrl,
         packageVersion: packed.version,
       });
-      const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+      const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
       if (!stateDir) {
         throw new Error("qa gateway state directory was not configured");
       }
@@ -516,7 +516,7 @@ describe("managed diagnostics-otel install runtime", () => {
       expect(gateway.logs()).toContain("diagnostics-otel: using preloaded OpenTelemetry SDK");
       await runTurn(gateway, "OTEL-PRELOADED-INSTALL-OK");
       const runSpan = await waitFor(
-        () => receiver.capturedSpans.find((span) => span.name === "openclaw.run"),
+        () => receiver.capturedSpans.find((span) => span.name === "carapace.run"),
         20_000,
       );
       expect(runSpan.traceId).toBeTruthy();

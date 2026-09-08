@@ -22,8 +22,8 @@ const portal: PortalSummary = {
   title: "App",
   port: 3000,
   listenPort: 43123,
-  tokenQuery: `openclaw_portal=${"a".repeat(64)}`,
-  url: `http://127.0.0.1:43123/?openclaw_portal=${"a".repeat(64)}`,
+  tokenQuery: `carapace_portal=${"a".repeat(64)}`,
+  url: `http://127.0.0.1:43123/?carapace_portal=${"a".repeat(64)}`,
   publicUrl: "http://127.0.0.1:43123/",
   createdAtMs: 1,
 };

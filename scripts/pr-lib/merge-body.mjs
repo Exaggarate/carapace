@@ -45,7 +45,7 @@ function trailers(body) {
       "--no-divider",
     ],
     {
-      input: `OpenClaw merge message\n\n${body}`,
+      input: `Carapace merge message\n\n${body}`,
       encoding: "utf8",
     },
   );

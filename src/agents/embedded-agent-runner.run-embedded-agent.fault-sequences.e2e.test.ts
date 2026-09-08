@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   classifyEmbeddedAgentRunResultForModelFallback,
   mergeEmbeddedAgentRunResultForModelFallbackExhaustion,
@@ -55,7 +55,7 @@ const { sleepWithAbortMock } = vi.hoisted(() => ({
 
 vi.mock("./models-config.js", async () => {
   const actual = await vi.importActual<typeof import("./models-config.js")>("./models-config.js");
-  return { ...actual, ensureOpenClawModelsJson: vi.fn(async () => ({ wrote: false })) };
+  return { ...actual, ensureCarapaceModelsJson: vi.fn(async () => ({ wrote: false })) };
 });
 
 type ProductionRunEmbeddedAgent = typeof import("./embedded-agent-runner/run.js").runEmbeddedAgent;
@@ -95,7 +95,7 @@ beforeEach(() => {
   sleepWithAbortMock.mockClear();
 });
 
-function makeProviderConfig(fallbacks: string[]): OpenClawConfig {
+function makeProviderConfig(fallbacks: string[]): CarapaceConfig {
   const provider = (modelIds: string[]) => ({
     api: "openai-responses" as const,
     apiKey: "test-key",
@@ -127,7 +127,7 @@ function makeProviderConfig(fallbacks: string[]): OpenClawConfig {
 async function withScenarioWorkspace<T>(
   run: (paths: { agentDir: string; workspaceDir: string }) => Promise<T>,
 ): Promise<T> {
-  const rawRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-fault-sequences-"));
+  const rawRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-fault-sequences-"));
   const root = await fs.realpath(rawRoot);
   const agentDir = path.join(root, "agents", "test", "agent");
   const workspaceDir = path.join(root, "workspace");
@@ -142,14 +142,14 @@ async function withScenarioWorkspace<T>(
     random.mockRestore();
     const { waitForSessionTranscriptIndexReconcile } =
       await import("../config/sessions/session-transcript-reconcile.js");
-    const { closeOpenClawAgentDatabaseByPath } = await import("../state/openclaw-agent-db.js");
+    const { closeCarapaceAgentDatabaseByPath } = await import("../state/carapace-agent-db.js");
     const { closeAuthProfileReadPool } = await import("./auth-profiles/sqlite.js");
-    const databasePath = path.join(agentDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(agentDir, "carapace-agent.sqlite");
     try {
       await waitForSessionTranscriptIndexReconcile({ agentId: "test", path: databasePath });
     } finally {
       closeAuthProfileReadPool({ kind: "database", databasePath });
-      closeOpenClawAgentDatabaseByPath(databasePath);
+      closeCarapaceAgentDatabaseByPath(databasePath);
       await fs.rm(root, { recursive: true, force: true });
     }
   }
@@ -258,7 +258,7 @@ function installFaultScript(faults: ProviderFault[], observations: AttemptObserv
 async function runScenario(params: {
   agentDir: string;
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runId: string;
 }): Promise<ScenarioOutcome> {
   const { replaceSessionEntry } = await import("../config/sessions/session-accessor.js");
@@ -266,7 +266,7 @@ async function runScenario(params: {
     agentId: "test",
     sessionId: `session:${params.runId}`,
     sessionKey: `agent:test:${params.runId}`,
-    storePath: path.join(params.agentDir, "openclaw-agent.sqlite"),
+    storePath: path.join(params.agentDir, "carapace-agent.sqlite"),
   };
   // Every fallback candidate belongs to the same outer admitted run.
   const preparedRunAdmission = createModelRoutingTestAdmission({

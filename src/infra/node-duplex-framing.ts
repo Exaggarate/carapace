@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createDeferredCore } from "../shared/deferred.js";
 
 const NODE_DUPLEX_FRAGMENT_BYTES = 8 * 1024;

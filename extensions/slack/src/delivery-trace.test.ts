@@ -10,7 +10,7 @@ import type { WebClient } from "@slack/web-api";
 // @slack/web-api ChatStreamer so the SDK's buffering contract is captured as-is:
 // previews may remain buffered below 256 chars, but finals flush before delivery
 // settles, including when native rejection requires ordinary-message fallback.
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with CARAPACE_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import { ChatStreamer } from "@slack/web-api/dist/chat-stream.js";
 import {
   expectDeliveryTraceMatchesGolden,
@@ -19,10 +19,10 @@ import {
   type DeliveryTraceStep,
   type TraceEvent,
   type TraceNormalizer,
-} from "openclaw/plugin-sdk/channel-contract-testing";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { ReplyDispatchKind, ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/channel-contract-testing";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { ReplyDispatchKind, ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { noteSlackDraftConversationMessage } from "./draft-message-boundaries.js";
 import type { PreparedSlackMessage } from "./monitor/message-handler/types.js";
@@ -103,8 +103,8 @@ const traceState = vi.hoisted((): SlackTraceState => ({
 // deliver/typing/replyOptions wiring (dedupe, thread plan, native stream ladder,
 // draft preview, preview finalize, deliverReplies chunking, sendMessageSlack)
 // stays the real production code.
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   type DispatchParams = Parameters<typeof actual.dispatchChannelInboundTurn>[0];
   return {
     ...actual,
@@ -155,7 +155,7 @@ vi.mock("./client.js", async (importOriginal) => {
 import { dispatchPreparedSlackMessage } from "./monitor/message-handler/dispatch.js";
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/channel-inbound");
+  vi.doUnmock("carapace/plugin-sdk/channel-inbound");
   vi.doUnmock("./client.js");
   vi.resetModules();
 });
@@ -233,7 +233,7 @@ const BLOCKS_FINAL_PRESENTATION = {
       type: "buttons",
       buttons: [
         { label: "Approve release", action: { type: "callback", value: "approve-release" } },
-        { label: "Release notes", url: "https://docs.openclaw.ai/release" },
+        { label: "Release notes", url: "https://github.com/Exaggarate/carapace" },
       ],
     },
   ],
@@ -503,12 +503,12 @@ function createPreparedTraceMessage(scenario: SlackTraceScenarioName): PreparedS
     ...(progressCard || nativeProgress
       ? {
           gateway: {
-            publicOrigin: "https://team.openclaw.ai",
-            controlUi: { basePath: "/openclaw" },
+            publicOrigin: "https://github.com/Exaggarate/carapace",
+            controlUi: { basePath: "/carapace" },
           },
         }
       : {}),
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const client = traceState.client;
   if (!client) {
     throw new Error("trace Slack client not initialized");
@@ -793,7 +793,7 @@ function buildSlackDeliveryProofVerdict(params: {
 }
 
 describe("slack delivery trace goldens", () => {
-  const headSha = process.env.OPENCLAW_DELIVERY_PROOF_SHA ?? "";
+  const headSha = process.env.CARAPACE_DELIVERY_PROOF_SHA ?? "";
   for (const scenarioName of Object.keys(slackTraceScenarios) as SlackTraceScenarioName[]) {
     it(`records ${scenarioName}`, async () => {
       const events = await runDeliveryTraceScenario({
@@ -812,7 +812,7 @@ describe("slack delivery trace goldens", () => {
         scenarioName === "preview-exec-failed-then-prose"
       ) {
         expect(wireTexts.some((text) => text.includes(EXEC_FAILED_PROSE))).toBe(true);
-        if (process.env.OPENCLAW_DELIVERY_PROOF === "1") {
+        if (process.env.CARAPACE_DELIVERY_PROOF === "1") {
           process.stdout.write(
             `${JSON.stringify(buildSlackDeliveryProofVerdict({ scenario: scenarioName, events, headSha }), null, 2)}\n`,
           );

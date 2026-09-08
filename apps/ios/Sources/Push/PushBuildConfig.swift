@@ -45,10 +45,10 @@ struct PushBuildConfig {
     let proofPolicy: PushProofPolicy
 
     static let current = PushBuildConfig()
-    static let openClawHostedRelayHost = "ios-push-relay.openclaw.ai"
-    static let openClawSandboxRelayHost = "ios-push-relay-sandbox.openclaw.ai"
+    static let carapaceHostedRelayHost = "github.com/Exaggarate/carapace"
+    static let carapaceSandboxRelayHost = "github.com/Exaggarate/carapace"
 
-    var usesOpenClawHostedRelay: Bool {
+    var usesCarapaceHostedRelay: Bool {
         guard self.transport == .relay, self.distribution == .official else { return false }
         guard let relayBaseURL = self.relayBaseURL,
               let components = URLComponents(url: relayBaseURL, resolvingAgainstBaseURL: false)
@@ -56,7 +56,7 @@ struct PushBuildConfig {
             return false
         }
         return components.scheme?.lowercased() == "https"
-            && [Self.openClawHostedRelayHost, Self.openClawSandboxRelayHost]
+            && [Self.carapaceHostedRelayHost, Self.carapaceSandboxRelayHost]
             .contains(components.host?.lowercased() ?? "")
             && components.user == nil
             && components.password == nil
@@ -73,11 +73,11 @@ struct PushBuildConfig {
     private init(readValue: (String) -> Any?) {
         self.mode = Self.readEnum(
             readValue: readValue,
-            key: "OpenClawPushMode",
+            key: "CarapacePushMode",
             fallback: .localSandbox)
         let relayBaseURLOverride = Self.readURL(
             readValue: readValue,
-            key: "OpenClawPushRelayBaseURL")
+            key: "CarapacePushRelayBaseURL")
         switch self.mode {
         case .localSandbox:
             self.transport = .direct
@@ -96,7 +96,7 @@ struct PushBuildConfig {
         case .appStore:
             self.transport = .relay
             self.distribution = .official
-            self.relayBaseURL = URL(string: "https://\(Self.openClawHostedRelayHost)")!
+            self.relayBaseURL = URL(string: "https://\(Self.carapaceHostedRelayHost)")!
             self.apnsEnvironment = .production
             self.relayProfile = .production
             self.proofPolicy = .appleStrict
@@ -104,7 +104,7 @@ struct PushBuildConfig {
             self.transport = .relay
             self.distribution = .official
             self.relayBaseURL = relayBaseURLOverride
-                ?? URL(string: "https://\(Self.openClawSandboxRelayHost)")!
+                ?? URL(string: "https://\(Self.carapaceSandboxRelayHost)")!
             self.apnsEnvironment = .sandbox
             self.relayProfile = .deviceSandbox
             self.proofPolicy = .appleDevelopment
@@ -112,7 +112,7 @@ struct PushBuildConfig {
             self.transport = .relay
             self.distribution = .official
             self.relayBaseURL = relayBaseURLOverride
-                ?? URL(string: "https://\(Self.openClawSandboxRelayHost)")!
+                ?? URL(string: "https://\(Self.carapaceSandboxRelayHost)")!
             self.apnsEnvironment = .sandbox
             self.relayProfile = .simulatorSandbox
             self.proofPolicy = .internalSimulator

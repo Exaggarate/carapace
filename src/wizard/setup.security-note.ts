@@ -35,9 +35,9 @@ export function getSecurityNoteMessage(): string {
     `- ${t("wizard.security.baselineStrongModel")}`,
     "",
     heading(t("wizard.security.runRegularly")),
-    formatCliCommand("openclaw security audit --deep"),
-    formatCliCommand("openclaw security audit --fix"),
+    formatCliCommand("carapace security audit --deep"),
+    formatCliCommand("carapace security audit --fix"),
     "",
-    `${t("wizard.security.learnMore")} https://docs.openclaw.ai/gateway/security`,
+    `${t("wizard.security.learnMore")} https://github.com/Exaggarate/carapace`,
   ].join("\n");
 }

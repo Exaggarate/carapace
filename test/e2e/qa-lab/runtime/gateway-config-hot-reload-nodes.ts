@@ -11,7 +11,7 @@ import {
 } from "../../../../packages/gateway-protocol/src/client-info.js";
 import type { NodePluginToolsUpdateParams } from "../../../../packages/gateway-protocol/src/schema/nodes.js";
 import type { EffectiveToolInventoryResult } from "../../../../src/agents/tools-effective-inventory.types.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { GatewayClient, GatewayClientRequestError } from "../../../../src/gateway/client.js";
 import { RfbPreauthBuffer } from "../../../../src/gateway/desktop/rfb-preauth.js";
 import { loadOrCreateDeviceIdentity } from "../../../../src/infra/device-identity.js";
@@ -129,14 +129,14 @@ export async function proveHotReloadNodePolicies({
 }) {
   assert(gateway.wsUrl, "Live Gateway must provide its WebSocket URL");
   const gatewayUrl = gateway.wsUrl;
-  const originalConfig = (await rpc<{ config: OpenClawConfig }>("config.get")).config;
+  const originalConfig = (await rpc<{ config: CarapaceConfig }>("config.get")).config;
   const original = originalConfig.gateway?.nodes;
   const originalToolAllow = originalConfig.agents?.entries?.qa?.tools?.alsoAllow ?? [];
   const originalAllow = original?.commands?.allow ?? [];
   const originalDeny = original?.commands?.deny ?? [];
   const baseAllow = [...new Set([...originalAllow, ECHO_COMMAND])];
   const identity = loadOrCreateDeviceIdentity({
-    path: path.join(temporaryRoot, "state/openclaw.sqlite"),
+    path: path.join(temporaryRoot, "state/carapace.sqlite"),
     identityKey: "runtime-policy-node",
   });
   let node: GatewayClient | undefined;
@@ -188,7 +188,7 @@ export async function proveHotReloadNodePolicies({
   const skillVisible = async () => {
     const report = await rpc<SkillStatusReport>("skills.status", { agentId: "qa" });
     return report.skills.some(
-      (skill) => skill.name === SKILL_NAME && skill.source === "openclaw-node",
+      (skill) => skill.name === SKILL_NAME && skill.source === "carapace-node",
     );
   };
 

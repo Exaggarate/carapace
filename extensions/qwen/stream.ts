@@ -1,15 +1,15 @@
 // Qwen plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { streamSimple } from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
 import {
   createPayloadPatchStreamWrapper,
   isOpenAICompatibleThinkingEnabled,
   normalizeOpenAICompatibleReasoningReplay,
   setQwenChatTemplateThinking,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { asOptionalRecord as asPayloadRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-stream-shared";
+import { asOptionalRecord as asPayloadRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isQwen38ModelId,
   isQwenTokenPlanDeepSeekV4ModelId,
@@ -371,7 +371,7 @@ export function createQwenThinkingWrapper(
         // tool-choice normalization; this pass only strips generic fields.
         patchTokenPlanKimiPayload(payloadObj, false);
       } else if (tokenPlanContract?.family === "glm") {
-        // GLM accepts OpenClaw's reasoning levels directly; only GLM 5.2 accepts max.
+        // GLM accepts Carapace's reasoning levels directly; only GLM 5.2 accepts max.
         patchTokenPlanGlmPayload(
           payloadObj,
           effectiveThinkingLevel,

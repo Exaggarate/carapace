@@ -12,7 +12,7 @@ const FORBIDDEN_PACKED_PATH_RULES = [
       `npm package must not include local runtime build output "${packedPath}".`,
   },
   {
-    prefix: "dist/OpenClaw.app/",
+    prefix: "dist/Carapace.app/",
     describe: (packedPath: string) =>
       `npm package must not include local application build output "${packedPath}".`,
   },

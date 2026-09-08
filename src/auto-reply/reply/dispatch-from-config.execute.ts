@@ -1,7 +1,7 @@
 import {
   hasOutboundReplyContent,
   isFastModeAutoProgressPayload,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/reply-payload";
 import { GENERIC_EXTERNAL_RUN_FAILURE_TEXT } from "../../agents/failover/user-copy.js";
 import { isAskUserPromptPending } from "../../agents/tools/ask-user-tool.js";
 import { settleProgressVisibilityCallbackResult } from "../../channels/progress-visibility.js";

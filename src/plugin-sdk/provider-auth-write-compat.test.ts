@@ -5,9 +5,9 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { resolveAuthProfileDatabasePath } from "../agents/auth-profiles/sqlite.js";
 import { saveAuthProfileStore } from "../agents/auth-profiles/store-runtime.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { upsertAuthProfileWithLock as upsertApiKeyProfileWithLock } from "./provider-auth-api-key.js";
 import {
   removeProviderAuthProfilesWithLock,
@@ -17,12 +17,12 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("provider auth write compatibility", () => {
   it("preserves nullable failures on both shipped Plugin SDK subpaths", async () => {
-    const root = tempDirs.make("openclaw-provider-auth-sdk-");
+    const root = tempDirs.make("carapace-provider-auth-sdk-");
     const agentDir = path.join(root, "agents", "work", "agent");
     fs.mkdirSync(agentDir, { recursive: true });
     saveAuthProfileStore(
@@ -34,7 +34,7 @@ describe("provider auth write compatibility", () => {
       },
       agentDir,
     );
-    openOpenClawAgentDatabase({
+    openCarapaceAgentDatabase({
       agentId: "work",
       path: resolveAuthProfileDatabasePath(agentDir),
     }).db.exec("ALTER TABLE auth_profile_store DROP COLUMN updated_at");

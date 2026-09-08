@@ -1,10 +1,10 @@
 // Discord plugin module implements ui colors behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 const DEFAULT_DISCORD_ACCENT_COLOR = "#5865F2";
 
 type ResolveDiscordAccentColorParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 };
 

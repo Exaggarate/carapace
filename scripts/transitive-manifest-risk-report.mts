@@ -5,7 +5,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { asRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord, isRecord } from "@carapace/normalization-core/record-coerce";
 import YAML from "yaml";
 import { readBoundedResponseText } from "./lib/bounded-response.mjs";
 import { classifyDependencySpec } from "./lib/dependency-spec-policy.mts";

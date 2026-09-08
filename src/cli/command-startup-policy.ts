@@ -40,7 +40,7 @@ export function resolveCliStartupPolicy(params: {
   const hideBanner = machineOutputMode || commandPolicy.hideBanner;
   return {
     suppressDoctorStdout,
-    hideBanner: hideBanner || isTruthyEnvValue(env.OPENCLAW_HIDE_BANNER),
+    hideBanner: hideBanner || isTruthyEnvValue(env.CARAPACE_HIDE_BANNER),
     skipConfigGuard:
       configGuard === "skip" || (configGuard === "when-suppressed" && suppressDoctorStdout),
     ...(configGuard === "validate" ? { validateConfigOnly: true } : {}),

@@ -60,10 +60,10 @@ describe("resolveCodexPluginAppCacheEndpoint", () => {
           headers: {},
         },
       },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       runtimeIdentity: {
         serverVersion: "0.20.0",
-        codexHome: "/tmp/openclaw-agent/codex-home",
+        codexHome: "/tmp/carapace-agent/codex-home",
       },
     };
 
@@ -91,7 +91,7 @@ describe("resolveCodexPluginAppCacheEndpoint", () => {
           headers: {},
         },
         connectionClass: "remote",
-        remoteWorkspaceRoot: "/home/oai/openclaw-workspaces",
+        remoteWorkspaceRoot: "/home/oai/carapace-workspaces",
       },
       runtimeIdentity: {
         serverVersion: "0.20.0",

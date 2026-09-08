@@ -1,6 +1,6 @@
 // Builds CLI runtime dispatch inputs for agent runner executions.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { runCliAgent } from "../../agents/cli-runner.js";
 import type { RunCliAgentParams } from "../../agents/cli-runner/types.js";
 import type { MediaImageLayout } from "../../agents/embedded-agent-runner/run/prompt-image-metadata.js";
@@ -460,7 +460,7 @@ async function runCliAgentWithLifecycleInternal(
     try {
       await params.onFastModeAutoProgress?.({
         text: summary,
-        channelData: { openclawProgressKind: FAST_MODE_AUTO_PROGRESS_KIND },
+        channelData: { carapaceProgressKind: FAST_MODE_AUTO_PROGRESS_KIND },
       });
     } catch {
       // Progress hints are best-effort; a channel failure must not fail the agent turn.

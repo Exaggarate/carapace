@@ -5,16 +5,16 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { runCommandWithRuntime } from "../cli/cli-utils.js";
 import { resolveConfiguredAgentDatabaseTargets } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runDoctorHealthFlow } from "../flows/doctor-health.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  repairOpenClawStateDatabaseSchema,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  repairCarapaceStateDatabaseSchema,
+} from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { beginDoctorMaintenance } from "./doctor-maintenance.js";
 
 const { mocks } = await import("../flows/doctor-health.test-support.js");
@@ -29,19 +29,19 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => vi.unstubAllEnvs());
 
 function createLegacyRegistryFixture() {
-  const root = tempDirs.make("openclaw-doctor-legacy-registry-");
+  const root = tempDirs.make("carapace-doctor-legacy-registry-");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(root, "openclaw.json");
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const configPath = path.join(root, "carapace.json");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   for (const [key, value] of Object.entries({
     HOME: root,
     USERPROFILE: root,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
   })) {
     vi.stubEnv(key, value);
   }
-  vi.stubEnv("OPENCLAW_HOME", undefined);
+  vi.stubEnv("CARAPACE_HOME", undefined);
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const { DatabaseSync } = requireNodeSqlite();
   const database = new DatabaseSync(databasePath);
@@ -54,7 +54,7 @@ function createLegacyRegistryFixture() {
     );
   `);
   database.close();
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: { ownership: "explicit", entries: { main: {} } },
   };
   const begin = () =>
@@ -90,10 +90,10 @@ it.each(["canonical", "custom-json", "shared-sqlite", "registered-shared-sqlite"
     const customDir = path.join(fixture.root, "custom");
     const agentPath =
       layout === "canonical"
-        ? path.join(fixture.stateDir, "agents", "main", "agent", "openclaw-agent.sqlite")
+        ? path.join(fixture.stateDir, "agents", "main", "agent", "carapace-agent.sqlite")
         : path.join(
             customDir,
-            layout === "custom-json" ? "openclaw-agent.sqlite" : "sessions.sqlite",
+            layout === "custom-json" ? "carapace-agent.sqlite" : "sessions.sqlite",
           );
     if (layout !== "canonical") {
       fixture.config.session = {
@@ -107,12 +107,12 @@ it.each(["canonical", "custom-json", "shared-sqlite", "registered-shared-sqlite"
       const registry = new DatabaseSync(fixture.databasePath);
       registry
         .prepare("INSERT INTO agent_databases VALUES (?, ?, ?, ?, ?)")
-        .run("ops", agentPath, OPENCLAW_AGENT_SCHEMA_VERSION, 1, null);
+        .run("ops", agentPath, CARAPACE_AGENT_SCHEMA_VERSION, 1, null);
       registry.close();
     }
     const agent = new DatabaseSync(agentPath);
     agent.exec(`
-      PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION + 1};
+      PRAGMA user_version = ${CARAPACE_AGENT_SCHEMA_VERSION + 1};
       CREATE TABLE schema_meta (meta_key TEXT PRIMARY KEY, agent_id TEXT);
       INSERT INTO schema_meta VALUES ('primary', 'main');
     `);
@@ -136,17 +136,17 @@ it.each(["canonical", "custom-json", "shared-sqlite", "registered-shared-sqlite"
 it.each(["missing-index", "wrong-index", "missing-table"] as const)(
   "lets the schema repair owner decide current shared-state %s",
   async (damage) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const initial = openOpenClawStateDatabase({ env: state.env });
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const initial = openCarapaceStateDatabase({ env: state.env });
       initial.db.exec(
         damage === "missing-table" ? "DROP TABLE task_runs" : "DROP INDEX idx_task_runs_status",
       );
       if (damage === "wrong-index") {
         initial.db.exec("CREATE INDEX idx_task_runs_status ON task_runs(task_id)");
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       mocks.runContributions.mockImplementation(async (ctx) => {
-        const result = repairOpenClawStateDatabaseSchema({ env: state.env });
+        const result = repairCarapaceStateDatabaseSchema({ env: state.env });
         ctx.runtime.log([...result.changes, ...result.warnings].join("\n"));
       });
       const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };

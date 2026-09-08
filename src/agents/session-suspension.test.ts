@@ -1,9 +1,9 @@
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 // Verifies quota suspension records recovery state without blocking shared work.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { QuotaSuspension } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { enqueueCommandInLane, getCommandLaneSnapshot } from "../process/command-queue.js";
 import { resetCommandQueueStateForTest } from "../process/command-queue.test-support.js";
 import { CommandLane } from "../process/lanes.js";
@@ -17,7 +17,7 @@ vi.mock("../config/sessions/session-accessor.js", () => sessionAccessorMocks);
 const sessionKeyResolverMocks = vi.hoisted(() => ({
   resolveStoredSessionKeyForSessionId: vi.fn(() => ({
     sessionKey: "session-key",
-    storePath: "/tmp/openclaw-session-suspension-test/sessions.json",
+    storePath: "/tmp/carapace-session-suspension-test/sessions.json",
   })),
 }));
 
@@ -26,7 +26,7 @@ vi.mock("./command/session.js", () => sessionKeyResolverMocks);
 async function recordSuspension(ttlMs = 100) {
   const { suspendSession } = await import("./session-suspension.js");
   await suspendSession({
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     sessionId: "session-1",
     reason: "quota_exhausted",
     failedProvider: "openai",
@@ -98,7 +98,7 @@ describe("session suspension", () => {
     );
 
     await suspendSession({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       agentId: "work",
       // Default layout: <state>/agents/<id>/agent — basename is always "agent".
       agentDir: "/state/agents/work/agent",
@@ -124,7 +124,7 @@ describe("session suspension", () => {
     registerResolvedAgentDir({ agentId: "research", agentDir: "/state/agents/research/agent" });
     try {
       await suspendSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         agentDir: "/state/agents/research/agent",
         sessionId: "session-2",
         reason: "quota_exhausted",

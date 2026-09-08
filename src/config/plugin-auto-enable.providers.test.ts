@@ -9,7 +9,7 @@ import {
   makeRegistry,
   resetPluginAutoEnableTestState,
 } from "./plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 const env = makeIsolatedEnv();
 
@@ -43,7 +43,7 @@ describe("applyPluginAutoEnable providers", () => {
     expect(result.config.plugins?.entries?.google?.enabled).toBe(true);
   });
 
-  const googleProviderCases: Array<{ name: string; config: OpenClawConfig }> = [
+  const googleProviderCases: Array<{ name: string; config: CarapaceConfig }> = [
     {
       name: "Google auth profile",
       config: {

@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSolidPngBuffer } from "../../../test/helpers/image-fixtures.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { resolveVideoGenerationModeCapabilities } from "../../video-generation/capabilities.js";
 import type {
@@ -28,7 +28,7 @@ function createPreparedRuntime(providers: VideoGenerationProvider[]): PreparedMo
   } as unknown as PreparedModelRuntimeSnapshot;
 }
 
-function createConfig(primary: string, fallbacks: string[]): OpenClawConfig {
+function createConfig(primary: string, fallbacks: string[]): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -58,7 +58,7 @@ describe("video generation invocation QA", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("selects image-to-video fallback, forwards declared options, and persists video bytes", async () => {
-    const root = tempDirs.make("openclaw-qa-video-invocation-");
+    const root = tempDirs.make("carapace-qa-video-invocation-");
     const referenceBytes = createSolidPngBuffer(2, 2, { r: 32, g: 112, b: 224 });
     const referencePath = path.join(root, "reference.png");
     await fs.writeFile(referencePath, referenceBytes);
@@ -118,7 +118,7 @@ describe("video generation invocation QA", () => {
     const config = createConfig("qa-limited-video/limited-v1", ["qa-capable-video/capable-v1"]);
     const providerOptions = { seed: 17, draft: true };
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(root, "state") }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: path.join(root, "state") }, async () => {
       const tool = requireVideoTool(
         createVideoGenerateTool({
           config,
@@ -193,7 +193,7 @@ describe("video generation invocation QA", () => {
   });
 
   it("preserves provider order through managed storage and URL fallback", async () => {
-    const root = tempDirs.make("openclaw-qa-video-output-order-");
+    const root = tempDirs.make("carapace-qa-video-output-order-");
     const savedVideo = createMp4Fixture();
     const oversizedVideo = Buffer.concat([savedVideo, Buffer.from([0x00])]);
     const provider: VideoGenerationProvider = {
@@ -226,7 +226,7 @@ describe("video generation invocation QA", () => {
     const config = createConfig("qa-ordered-video/ordered-v1", []);
     config.agents!.defaults!.mediaMaxMb = savedVideo.byteLength / (1024 * 1024);
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(root, "state") }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: path.join(root, "state") }, async () => {
       const tool = requireVideoTool(
         createVideoGenerateTool({
           config,
@@ -258,7 +258,7 @@ describe("video generation invocation QA", () => {
   });
 
   it("reports the fractional save cap when a generated video has no provider URL", async () => {
-    const root = tempDirs.make("openclaw-qa-video-fractional-cap-");
+    const root = tempDirs.make("carapace-qa-video-fractional-cap-");
     const maxBytes = createMp4Fixture().byteLength;
     const provider: VideoGenerationProvider = {
       id: "qa-capped-video",
@@ -278,7 +278,7 @@ describe("video generation invocation QA", () => {
     const config = createConfig("qa-capped-video/capped-v1", []);
     config.agents!.defaults!.mediaMaxMb = maxBytes / (1024 * 1024);
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(root, "state") }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: path.join(root, "state") }, async () => {
       const tool = requireVideoTool(
         createVideoGenerateTool({
           config,

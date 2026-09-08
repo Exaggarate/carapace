@@ -19,7 +19,7 @@ Oldest open: #6599 (2026-02-01, /models test-fallback feature). Seed snapshot be
 
 | # | Title | Pri | Impact | Rating | Status |
 |---|-------|-----|--------|--------|--------|
-| 141273 | openclaw update leaves stale run stuck at phase=requested after gateway restart | P0 | ux-release-blocker | platinum-hermit | queued |
+| 141273 | carapace update leaves stale run stuck at phase=requested after gateway restart | P0 | ux-release-blocker | platinum-hermit | queued |
 | 141254 | New Chat fails: archived "New chat" labels stay unique (Android sends const label) | P0 | session-state | diamond-lobster | queued |
 | 141245 | Plugin-update failure silently disables ALL plugins in config (defensive enabled:false write) | P0 | message-loss | diamond-lobster | queued |
 | 141252 | Regression: reply runs fail with "Reply operation has no active tool authority snapshot" (busy-session) | P1 | message-loss | diamond-lobster | queued |

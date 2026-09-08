@@ -1,9 +1,9 @@
 // Covers session-message sanitization for empty blocks, tool ids, and
 // thought-signature replay rules.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { AssistantMessage, ToolResultMessage, UserMessage } from "openclaw/plugin-sdk/llm";
+import { expectDefined } from "@carapace/normalization-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import type { AssistantMessage, ToolResultMessage, UserMessage } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import {
   sanitizeGoogleTurnOrdering,
@@ -405,7 +405,7 @@ describe("sanitizeSessionMessagesImages", () => {
 
   describe("thought_signature stripping", () => {
     it("strips msg_-prefixed thought_signature from assistant message content blocks", async () => {
-      // msg_ values are OpenClaw message ids, not provider signatures.
+      // msg_ values are Carapace message ids, not provider signatures.
       const input = castAgentMessages([
         {
           role: "assistant",

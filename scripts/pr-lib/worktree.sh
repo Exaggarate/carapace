@@ -10,8 +10,8 @@ repo_root() {
   # Anchor-exec handoff (see scripts/pr): the wrapper runs from materialized
   # temp-dir bytes with no git context of its own; the handoff env carries the
   # repository the run addresses.
-  if [ -n "${OPENCLAW_PR_ANCHOR_REPO_ROOT:-}" ]; then
-    (cd "$OPENCLAW_PR_ANCHOR_REPO_ROOT" && pwd)
+  if [ -n "${CARAPACE_PR_ANCHOR_REPO_ROOT:-}" ]; then
+    (cd "$CARAPACE_PR_ANCHOR_REPO_ROOT" && pwd)
     return
   fi
   base_dir="${script_parent_dir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"

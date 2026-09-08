@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ApplicationContext } from "../../app/context.ts";
 import {
@@ -6,7 +6,7 @@ import {
   defineTestTerminalPanelElement,
   terminalOpenResult,
 } from "../../components/terminal/terminal-panel.test-support.ts";
-import type { OpenClawTerminalPanel } from "../../components/terminal/terminal-panel.ts";
+import type { CarapaceTerminalPanel } from "../../components/terminal/terminal-panel.ts";
 import {
   createDraftFixture,
   registerTextPayload,
@@ -35,7 +35,7 @@ function mountNativeTerminal(context: ApplicationContext) {
     },
     forceReconnect: vi.fn(),
   });
-  const panel = document.createElement(nativeTerminalElement) as OpenClawTerminalPanel;
+  const panel = document.createElement(nativeTerminalElement) as CarapaceTerminalPanel;
   panel.client = client;
   panel.available = true;
   document.body.append(panel);
@@ -117,8 +117,8 @@ describe("DraftSubmissionFlow native terminal", () => {
       expect(terminal.panel.renderRoot.textContent).toContain(exitLabel);
       expect(terminal.panel.renderRoot.textContent).not.toContain("Could not attach");
       expect(request.mock.calls.some(([method]) => method === "terminal.attach")).toBe(false);
-      expect(sessionStorage.getItem("openclaw.terminal.sessions.v1")).toBe("[]");
-      expect(sessionStorage.getItem("openclaw.terminal.actions.v1")).toBeNull();
+      expect(sessionStorage.getItem("carapace.terminal.sessions.v1")).toBe("[]");
+      expect(sessionStorage.getItem("carapace.terminal.actions.v1")).toBeNull();
     },
   );
 

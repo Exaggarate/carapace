@@ -6,13 +6,13 @@ import {
 import { mergeProcessEnv, resolveEnvironmentValue } from "../../infra/process-env.js";
 
 const SERVICE_REFRESH_PATH_ENV_KEYS = [
-  "OPENCLAW_HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_WORKSPACE_DIR",
+  "CARAPACE_HOME",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_WORKSPACE_DIR",
 ] as const;
 const MANAGED_UPDATE_SELECTOR_ENV_KEYS = [
-  "OPENCLAW_HOME",
+  "CARAPACE_HOME",
   ...GATEWAY_SERVICE_SELECTOR_ENV_KEYS,
 ] as const;
 
@@ -68,9 +68,9 @@ export async function withUpdateInProgressEnv<T>(
   run: () => Promise<T>,
 ): Promise<T> {
   const env = resolveServiceRefreshEnv(process.env, invocationCwd);
-  env.OPENCLAW_UPDATE_IN_PROGRESS = "1";
+  env.CARAPACE_UPDATE_IN_PROGRESS = "1";
   const scopedKeys = Object.keys(env).filter(
-    (key) => key === "OPENCLAW_UPDATE_IN_PROGRESS" || env[key] !== process.env[key],
+    (key) => key === "CARAPACE_UPDATE_IN_PROGRESS" || env[key] !== process.env[key],
   );
   const previousValues = scopedKeys.map((key) => [key, process.env[key]] as const);
   // Package replacement can remove cwd. All phase owners must share the
@@ -93,8 +93,8 @@ export async function withUpdateInProgressEnv<T>(
 
 export function stripGatewayServiceMarkerEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const resolvedEnv = { ...env };
-  delete resolvedEnv.OPENCLAW_SERVICE_MARKER;
-  delete resolvedEnv.OPENCLAW_SERVICE_KIND;
+  delete resolvedEnv.CARAPACE_SERVICE_MARKER;
+  delete resolvedEnv.CARAPACE_SERVICE_KIND;
   delete resolvedEnv[GATEWAY_SERVICE_RUNTIME_PID_ENV];
   return resolvedEnv;
 }

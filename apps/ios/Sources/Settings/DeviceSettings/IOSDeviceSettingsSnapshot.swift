@@ -1,6 +1,6 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import UIKit
 import UserNotifications
 
@@ -26,7 +26,7 @@ final class IOSDeviceSettingsSnapshotProducer {
     {
         let authorization = self.appModel.locationAuthorizationSnapshot
         let locationMode = self.defaults.string(forKey: "location.enabledMode")
-            .flatMap(OpenClawLocationMode.init(rawValue:)) ?? .off
+            .flatMap(CarapaceLocationMode.init(rawValue:)) ?? .off
         return DeviceSettingsSnapshot(
             device: .init(
                 platform: .ios,

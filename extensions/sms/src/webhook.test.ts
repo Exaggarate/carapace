@@ -234,7 +234,7 @@ describe("createSmsWebhookHandler", () => {
     await handler(createRequest(body, signature), res);
 
     expect(res.statusCode).toBe(200);
-    expect(res.setHeaderMock).toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
     expect(enqueueSmsIngress).toHaveBeenCalledWith(parseTestTwilioForm(body));
   });
 
@@ -285,7 +285,7 @@ describe("createSmsWebhookHandler", () => {
     await handler(createRequest(payload.body, payload.signature), res);
 
     expect(res.statusCode).toBe(200);
-    expect(res.setHeaderMock).toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
     expect(delivery.record).toHaveBeenCalledWith({
       account: expect.objectContaining({ accountId: activeAccountId }),
       form: payload.form,
@@ -402,7 +402,7 @@ describe("createSmsWebhookHandler", () => {
       "sqlite unavailable",
     );
     expect(res.endMock).not.toHaveBeenCalled();
-    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
     expect(enqueueSmsIngress).not.toHaveBeenCalled();
   });
 
@@ -444,7 +444,7 @@ describe("createSmsWebhookHandler", () => {
     const pending = handler(createRequest(payload.body, payload.signature), res);
     await vi.waitFor(() => expect(delivery.record).toHaveBeenCalledOnce());
     expect(res.endMock).not.toHaveBeenCalled();
-    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
 
     if (!releaseCommit) {
       throw new Error("expected pending SMS delivery commit");
@@ -453,7 +453,7 @@ describe("createSmsWebhookHandler", () => {
     await pending;
 
     expect(res.statusCode).toBe(200);
-    expect(res.setHeaderMock).toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
     expect(res.endMock).toHaveBeenCalledOnce();
   });
 
@@ -477,7 +477,7 @@ describe("createSmsWebhookHandler", () => {
     expect(res.statusCode).toBe(200);
     expect(delivery.record).not.toHaveBeenCalled();
     expect(enqueueSmsIngress).not.toHaveBeenCalled();
-    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
   });
 
   it.each([
@@ -514,7 +514,7 @@ describe("createSmsWebhookHandler", () => {
     expect(res.statusCode).toBe(200);
     expect(delivery.record).not.toHaveBeenCalled();
     expect(enqueueSmsIngress).not.toHaveBeenCalled();
-    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
   });
 
   it("does not acknowledge when the durable enqueue fails", async () => {
@@ -532,7 +532,7 @@ describe("createSmsWebhookHandler", () => {
     );
 
     expect(res.endMock).not.toHaveBeenCalled();
-    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).not.toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
   });
 
   it("acknowledges only after the durable enqueue resolves", async () => {
@@ -561,7 +561,7 @@ describe("createSmsWebhookHandler", () => {
     await handling;
 
     expect(res.statusCode).toBe(200);
-    expect(res.setHeaderMock).toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
     expect(res.endMock).toHaveBeenCalledTimes(1);
   });
 
@@ -578,7 +578,7 @@ describe("createSmsWebhookHandler", () => {
     await handler(createRequest(body, signature), res);
 
     expect(res.statusCode).toBe(200);
-    expect(res.setHeaderMock).toHaveBeenCalledWith("x-openclaw-delivery-accepted", "durable");
+    expect(res.setHeaderMock).toHaveBeenCalledWith("x-carapace-delivery-accepted", "durable");
   });
 
   it("rejects a signed webhook without a stable MessageSid", async () => {

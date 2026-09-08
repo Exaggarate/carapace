@@ -25,7 +25,7 @@ import {
   composePackagePlugins,
   type DistributionPackageManifest,
 } from "../../infra/package-plugin-composition.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import {
   DEFAULT_WORKER_BUNDLE_ARCHIVE_LIMITS,
   readWorkerBundleArchiveManifest,
@@ -39,7 +39,7 @@ import {
 import { MAX_WORKER_BUNDLE_ARCHIVE_BYTES } from "../../shared/worker-bundle-limits.js";
 import { runTasksWithConcurrency } from "../../utils/run-with-concurrency.js";
 
-const BOOTSTRAP_LAUNCHER_FILES = ["openclaw.mjs", "node-version.mjs"];
+const BOOTSTRAP_LAUNCHER_FILES = ["carapace.mjs", "node-version.mjs"];
 const READ_CONCURRENCY = 16;
 const IGNORED_PLUGIN_DIRECTORIES = new Set(["node_modules", "src", "test", "tests"]);
 const METADATA_KEYS = [
@@ -56,14 +56,14 @@ type NodePackageManifest = DistributionPackageManifest & {
   devDependencies?: Record<string, string>;
   bundleDependencies?: string[];
   bundledDependencies?: string[];
-  openclaw?: { extensions?: string[]; runtimeExtensions?: string[] };
+  carapace?: { extensions?: string[]; runtimeExtensions?: string[] };
 };
 
 export type NodeBootstrapArtifact = Readonly<{
   tarballPath: string;
   tarballSha256: string;
   tarballBytes: number;
-  openclawVersion: string;
+  carapaceVersion: string;
   buildId: string;
   enabledPluginIds: readonly string[];
 }>;
@@ -162,12 +162,12 @@ async function resolvePlugins(options: ArtifactOptions, packageRoot: string) {
         }
       }
       const manifest = JSON.parse(
-        await fs.readFile(path.join(builtRoot, "openclaw.plugin.json"), "utf8"),
+        await fs.readFile(path.join(builtRoot, "carapace.plugin.json"), "utf8"),
       ) as { id?: unknown }; // SAFETY: the unknown id is checked against the trusted registry below.
       if (manifest.id !== id) {
         throw new Error(`Node bootstrap plugin identity does not match ${id}`);
       }
-      const entries = packageJson.openclaw?.runtimeExtensions ?? packageJson.openclaw?.extensions;
+      const entries = packageJson.carapace?.runtimeExtensions ?? packageJson.carapace?.extensions;
       if (!entries?.length) {
         throw new Error(`Node bootstrap plugin ${id} has no runtime entry`);
       }
@@ -186,8 +186,8 @@ async function prepareNodeBootstrapArtifact(
 ): Promise<NodeBootstrapArtifact> {
   const packageRoot = await fs.realpath(options.packageRoot);
   const sourcePackage = await readPackageManifest(packageRoot);
-  if (sourcePackage.name !== "openclaw") {
-    throw new Error("Node bootstrap requires the running OpenClaw package root");
+  if (sourcePackage.name !== "carapace") {
+    throw new Error("Node bootstrap requires the running Carapace package root");
   }
   const buildInfoPath = path.join(packageRoot, "dist", "build-info.json");
   const buildInfo = await fs.readFile(buildInfoPath, "utf8").catch((cause: unknown) => {
@@ -518,7 +518,7 @@ async function prepareNodeBootstrapArtifact(
     tarballPath,
     tarballSha256: hash.digest("hex"),
     tarballBytes,
-    openclawVersion: packageJson.version,
+    carapaceVersion: packageJson.version,
     buildId,
     enabledPluginIds: Object.freeze(plugins.map(({ id }) => id).toSorted()),
   });
@@ -540,7 +540,7 @@ export function createNodeBootstrapArtifactProvider(options: ArtifactOptions) {
       prepared ??= Promise.resolve().then(async () => {
         try {
           temporaryRoot = await fs.mkdtemp(
-            path.join(resolvePreferredOpenClawTmpDir(), "openclaw-node-runtime-"),
+            path.join(resolvePreferredCarapaceTmpDir(), "carapace-node-runtime-"),
           );
           if (closed) {
             throw new Error("Node bootstrap artifact provider is closed");

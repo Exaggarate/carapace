@@ -1,5 +1,5 @@
 /** Cleans up embedded attempt subscription resources. */
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import { isFastTestRuntimeEnv } from "../../../infra/test-runtime-env.js";
 import { recordAgentCleanupFailure, runAgentCleanupStep } from "../../run-cleanup-timeout.js";
 import { log } from "../logger.js";
@@ -7,7 +7,7 @@ import { log } from "../logger.js";
 // Invalid overrides retain the normal/test defaults; partial numeric parsing
 // must not silently widen cleanup waits.
 const EMBEDDED_ABORT_SETTLE_TIMEOUT_MS =
-  parseStrictPositiveInteger(process.env.OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS) ??
+  parseStrictPositiveInteger(process.env.CARAPACE_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS) ??
   (isFastTestRuntimeEnv() ? 250 : 2_000);
 
 type IdleAwareAgent = {

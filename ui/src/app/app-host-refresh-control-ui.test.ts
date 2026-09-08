@@ -15,7 +15,7 @@ import { resolveApplicationStartupSettings } from "./startup-settings.ts";
 import "./app-host.ts";
 
 vi.hoisted(() => {
-  vi.stubGlobal("OPENCLAW_CONTROL_UI_BUILD_INFO", {
+  vi.stubGlobal("CARAPACE_CONTROL_UI_BUILD_INFO", {
     version: "1.0.0",
     buildId: "serving-build",
     commit: null,
@@ -34,14 +34,14 @@ type RefreshShell = HTMLElement & {
 
 function createRefreshShell(gateway: ApplicationRuntime["context"]["gateway"]) {
   const snapshot = { controlUiRefreshRequired: true };
-  const shell = document.createElement("openclaw-app-shell") as RefreshShell;
+  const shell = document.createElement("carapace-app-shell") as RefreshShell;
   shell.runtime = {
     context: { overlays: { snapshot }, gateway },
   } as unknown as ApplicationRuntime;
   return { shell, snapshot };
 }
 
-describe("OpenClaw shell Control UI refresh", () => {
+describe("Carapace shell Control UI refresh", () => {
   let store: ReturnType<typeof createGatewayStoreTestStore>;
   let probe: ReturnType<typeof createDeferred<Response>>;
   let replace: ReturnType<typeof vi.fn<(url: string) => void>>;
@@ -131,7 +131,7 @@ describe("OpenClaw shell Control UI refresh", () => {
       store.gateway.stop();
       store = createGatewayStoreTestStore({
         clientOptions:
-          surface === "native" ? { clientName: "openclaw-ios", mode: "ui" } : undefined,
+          surface === "native" ? { clientName: "carapace-ios", mode: "ui" } : undefined,
       });
       const updates = createApplicationUpdateOverlays(store.gateway, vi.fn());
       const unsubscribe = store.gateway.subscribe(updates.synchronizeGateway);

@@ -5,7 +5,7 @@
  * calls at the unit level by verifying the hook runner functions exist
  * and validating the integration pattern.
  */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createHookRunnerWithRegistry } from "./hooks.test-fixtures.js";
 import type {
@@ -40,7 +40,7 @@ describe("gateway hook runner methods", () => {
   const gatewayCtx = {
     port: 18789,
     config: {} as never,
-    workspaceDir: "/tmp/openclaw-workspace",
+    workspaceDir: "/tmp/carapace-workspace",
     getCron: () => undefined,
   };
   const cronReconciledCtx: PluginHookCronReconciledContext = {

@@ -1,7 +1,7 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { HealthCheck } from "openclaw/plugin-sdk/health";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { HealthCheck } from "carapace/plugin-sdk/health";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   collectVectorProviderFindings,
   type ProviderFailure,

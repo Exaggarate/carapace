@@ -44,6 +44,6 @@ export const page = definePage({
     import("./agents-page.ts").then(() => ({
       header: true,
       render: (data: AgentsRouteData | undefined) =>
-        html`<openclaw-agents-page .routeData=${data}></openclaw-agents-page>`,
+        html`<carapace-agents-page .routeData=${data}></carapace-agents-page>`,
     })),
 });

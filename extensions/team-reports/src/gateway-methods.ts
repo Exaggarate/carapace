@@ -1,5 +1,5 @@
-import { ErrorCodes, errorShape } from "openclaw/plugin-sdk/gateway-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { ErrorCodes, errorShape } from "carapace/plugin-sdk/gateway-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import { z } from "zod";
 import { describePeriod, periodSchema } from "./periods.js";
 import type { TeamReportsScheduler } from "./scheduler.js";
@@ -18,7 +18,7 @@ const generateSchema = z.strictObject({
 });
 
 export function registerTeamReportsGatewayMethods(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   access: {
     scheduler: () => TeamReportsScheduler;
     store: () => TeamReportsStore;

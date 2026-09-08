@@ -125,7 +125,7 @@ describe("main session recovery terminal-only residue", () => {
   });
 
   it("retires terminal-only residue through the persisted startup scan", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-terminal-residue-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-terminal-residue-"));
     const storePath = path.join(tempDir, "sessions.json");
     try {
       await replaceSessionEntry({ sessionKey, storePath }, settledEntry());
@@ -149,7 +149,7 @@ describe("main session recovery terminal-only residue", () => {
   });
 
   it("retires terminal residue before orphan marking without touching a current owner", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-terminal-marking-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-terminal-marking-"));
     const storePath = path.join(tempDir, "sessions.json");
     const liveSessionKey = "agent:main:live";
     const startupCheckedStorePaths = new Set<string>();

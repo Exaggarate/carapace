@@ -2,7 +2,7 @@ import {
   resolveMemorySearchStaleness,
   stripMemoryAnnotationCarriers,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   asToolParamsRecord,
   jsonResult,
@@ -12,10 +12,10 @@ import {
   resolveMemoryDreamingPluginConfig,
   resolveRuntimeConfigCacheKey,
   type MemoryCorpusSearchResult,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { resolveMemoryDreamingConfig } from "openclaw/plugin-sdk/memory-core-host-status";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import { resolveMemoryDreamingConfig } from "carapace/plugin-sdk/memory-core-host-status";
 import {
   attemptMemoryCorpus,
   composeMemoryCorpusMetadata,
@@ -100,7 +100,7 @@ function readCorpusParam<T extends string>(
 
 function readMemorySearchToolCooldown(
   key: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): MemoryCorpusFailure | undefined {
   const entry = memorySearchToolCooldowns.get(key);
   if (!entry) {
@@ -120,7 +120,7 @@ function readMemorySearchToolCooldown(
 
 function recordMemorySearchToolCooldown(
   key: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   failure: MemoryCorpusFailure,
 ): void {
   memorySearchToolCooldowns.set(key, {

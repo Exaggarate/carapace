@@ -6,7 +6,7 @@ import * as doctorLegacy from "../commands/doctor/shared/legacy-config-issues.js
 import * as channelPresence from "../plugins/channel-presence-policy.js";
 import * as manifestRegistry from "../plugins/manifest-registry.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createConfigIoContext } from "./io.context.js";
 import {
   readConfigFileSnapshotFromContext,
@@ -24,17 +24,17 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
   vi.restoreAllMocks();
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function createContext(root: string) {
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   const env: NodeJS.ProcessEnv = {
     HOME: root,
     USERPROFILE: root,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: path.join(root, "state"),
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: path.join(root, "state"),
     VITEST: "true",
   };
   return createConfigIoContext({
@@ -49,7 +49,7 @@ describe("config snapshot plugin metadata", () => {
   it.each(["full", "core-only"] as const)(
     "keeps legacy roster channel discovery owned by %s validation",
     async (pluginValidation) => {
-      const root = tempDirs.make("openclaw-config-roster-metadata-");
+      const root = tempDirs.make("carapace-config-roster-metadata-");
       const context = createContext(root);
       context.options.pluginValidation = pluginValidation;
       fs.writeFileSync(
@@ -71,7 +71,7 @@ describe("config snapshot plugin metadata", () => {
   it.each(["full", "core-only"] as const)(
     "keeps invalid snapshot Doctor contracts owned by %s validation",
     async (pluginValidation) => {
-      const root = tempDirs.make("openclaw-config-invalid-metadata-");
+      const root = tempDirs.make("carapace-config-invalid-metadata-");
       const context = createContext(root);
       context.options.pluginValidation = pluginValidation;
       fs.writeFileSync(
@@ -98,7 +98,7 @@ describe("config snapshot plugin metadata", () => {
   );
 
   it("keeps best-effort core-only materialization independent of plugin metadata", async () => {
-    const root = tempDirs.make("openclaw-config-best-effort-metadata-");
+    const root = tempDirs.make("carapace-config-best-effort-metadata-");
     const context = createContext(root);
     context.options.pluginValidation = "core-only";
     fs.writeFileSync(
@@ -125,7 +125,7 @@ describe("config snapshot plugin metadata", () => {
     expect(discovery).not.toHaveBeenCalled();
   });
   it("records only genuinely missing substitutions as private facts", async () => {
-    const root = tempDirs.make("openclaw-config-snapshot-env-facts-");
+    const root = tempDirs.make("carapace-config-snapshot-env-facts-");
     const context = createContext(root);
     context.deps.env.GATEWAY_TOKEN = "${ENV_LITERAL_GATEWAY_TOKEN}";
     fs.writeFileSync(
@@ -170,7 +170,7 @@ describe("config snapshot plugin metadata", () => {
   });
 
   it("loads metadata for an explicit valid missing-config read without changing plain reads", async () => {
-    const root = tempDirs.make("openclaw-config-snapshot-metadata-");
+    const root = tempDirs.make("carapace-config-snapshot-metadata-");
     const context = createContext(root);
     const loader = vi.spyOn(context, "createValidationPluginMetadataSnapshotLoader");
 
@@ -194,7 +194,7 @@ describe("config snapshot plugin metadata", () => {
   });
 
   it("does not invent plugin metadata for invalid snapshots", async () => {
-    const root = tempDirs.make("openclaw-config-snapshot-invalid-");
+    const root = tempDirs.make("carapace-config-snapshot-invalid-");
     const context = createContext(root);
     fs.writeFileSync(context.configPath, "{ invalid", "utf8");
     const loader = vi.spyOn(context, "createValidationPluginMetadataSnapshotLoader");

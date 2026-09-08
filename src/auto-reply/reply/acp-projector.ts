@@ -1,15 +1,15 @@
-// Projects ACP runtime events into OpenClaw-visible session update records.
-import type { AcpRuntimeEvent, AcpSessionUpdateTag } from "@openclaw/acp-core/runtime/types";
+// Projects ACP runtime events into Carapace-visible session update records.
+import type { AcpRuntimeEvent, AcpSessionUpdateTag } from "@carapace/acp-core/runtime/types";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveAcpToolTerminalOutcome } from "../../acp/tool-status.js";
 import { EmbeddedBlockChunker } from "../../agents/embedded-agent-block-chunker.js";
 import { createVerifiedConversationContextStreamFilter } from "../../agents/embedded-agent-helpers/sanitize-user-facing-text.js";
 import { formatToolSummary, resolveToolDisplay } from "../../agents/tool-display.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { prefixSystemMessage } from "../../infra/system-message.js";
 import { truncateUtf16WithEllipsis as truncateText } from "../../shared/text-truncate.js";
 import type { ReplyPayload } from "../types.js";
@@ -166,7 +166,7 @@ type AcpReplyProjector = {
 };
 
 export function createAcpReplyProjector(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   shouldSendToolSummaries: boolean;
   shouldSendToolSummariesNow?: () => boolean;
   shouldSendFullToolDetails: boolean;

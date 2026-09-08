@@ -50,7 +50,7 @@ suite.define(() => {
     });
     try {
       await page.goto(`${suite.server.baseUrl}sessions`);
-      const roster = page.locator("openclaw-sessions-page");
+      const roster = page.locator("carapace-sessions-page");
       const search = roster.locator(".sessions-toolbar__search input");
       await search.pressSequentially("observatory", { delay: 40 });
       await roster.getByRole("button", { name: "Load more sessions", exact: true }).click();

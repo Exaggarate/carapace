@@ -1,6 +1,6 @@
 /** Tests configured ACP binding lifecycle behavior. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { AcpSessionResolution } from "./control-plane/manager.types.js";
 import {
   buildConfiguredAcpSessionKey,
@@ -28,7 +28,7 @@ const baseCfg = {
   agents: {
     list: [{ id: "codex" }, { id: "claude" }],
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 let ensureConfiguredAcpBindingSession: typeof import("./persistent-bindings.lifecycle.js").ensureConfiguredAcpBindingSession;
 
@@ -111,7 +111,7 @@ describe("ensureConfiguredAcpBindingSession", () => {
     const spec = createPersistentSpec();
     const sessionKey = mockReadySession({
       spec,
-      cwd: "/workspace/openclaw",
+      cwd: "/workspace/carapace",
       model: "manual/selected-model",
     });
 
@@ -134,7 +134,7 @@ describe("ensureConfiguredAcpBindingSession", () => {
     const spec = createPersistentSpec(runtimeOptions);
     const sessionKey = mockReadySession({
       spec,
-      cwd: "/workspace/openclaw",
+      cwd: "/workspace/carapace",
       model: "anthropic/claude-haiku-4-5",
       thinking: "high",
     });
@@ -156,7 +156,7 @@ describe("ensureConfiguredAcpBindingSession", () => {
 
   it("does not rewrite matching runtime options", async () => {
     const spec = createPersistentSpec({ model: "selected/model", thinking: "off" });
-    const sessionKey = mockReadySession({ spec, cwd: "/workspace/openclaw", ...spec });
+    const sessionKey = mockReadySession({ spec, cwd: "/workspace/carapace", ...spec });
 
     expect(await ensureConfiguredAcpBindingSession({ cfg: baseCfg, spec })).toEqual({
       ok: true,
@@ -171,7 +171,7 @@ describe("ensureConfiguredAcpBindingSession", () => {
     const spec = createPersistentSpec({ thinking: "off" });
     const sessionKey = mockReadySession({
       spec,
-      cwd: "/workspace/openclaw",
+      cwd: "/workspace/carapace",
       thinking: "high",
     });
     managerMocks.setSessionConfigOption.mockRejectedValue(new Error("Live off is unsupported"));
@@ -273,7 +273,7 @@ describe("ensureConfiguredAcpBindingSession", () => {
     const spec = createPersistentSpec({ thinking: "off" });
     const sessionKey = mockReadySession({
       spec,
-      cwd: "/workspace/openclaw",
+      cwd: "/workspace/carapace",
     });
 
     const ensured = await ensureConfiguredAcpBindingSession({
@@ -297,7 +297,7 @@ describe("ensureConfiguredAcpBindingSession", () => {
     const spec = createPersistentSpec();
     const sessionKey = mockReadySession({
       spec,
-      cwd: "/workspace/openclaw",
+      cwd: "/workspace/carapace",
       model: "manual/selected-model",
       thinking: "off",
     });

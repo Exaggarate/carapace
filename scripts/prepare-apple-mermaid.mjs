@@ -20,7 +20,7 @@ if (result.status !== 0) {
 
 const source = new URL("../apps/shared/mermaid/assets/mermaid/", import.meta.url);
 const resources = new URL(
-  "../apps/shared/OpenClawKit/Sources/OpenClawChatUI/Resources/",
+  "../apps/shared/CarapaceKit/Sources/CarapaceChatUI/Resources/",
   import.meta.url,
 );
 const destination = new URL("Mermaid/", resources);

@@ -3,13 +3,13 @@ import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import {
   ensurePortAvailable,
   extractErrorCode,
   formatErrorMessage,
-} from "openclaw/plugin-sdk/security-runtime";
-import { waitForTransportReady } from "openclaw/plugin-sdk/transport-ready-runtime";
+} from "carapace/plugin-sdk/security-runtime";
+import { waitForTransportReady } from "carapace/plugin-sdk/transport-ready-runtime";
 import { signalCheck } from "./client-adapter.js";
 
 type SignalDaemonOpts = {
@@ -63,7 +63,7 @@ export async function assertSignalDaemonEndpointAvailable(params: {
       extractErrorCode(error) === "EADDRINUSE" ||
       (error instanceof Error && error.name === "PortInUseError");
     if (!isPortCollision) {
-      // The operator-selected signal-cli may have stronger bind permissions than OpenClaw.
+      // The operator-selected signal-cli may have stronger bind permissions than Carapace.
       // Only a confirmed collision is authoritative from this parent-process probe.
       return;
     }

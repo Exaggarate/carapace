@@ -7,11 +7,11 @@ import {
   acquireStartupMigrationLease,
   STARTUP_MIGRATION_LEASE_TTL_MS,
 } from "../infra/startup-migration-checkpoint.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { recordPluginCandidateInstallOwner } from "./candidate-install-owner.js";
 import {
   getCurrentPluginMetadataSnapshot,
@@ -46,12 +46,12 @@ const tempDirs: string[] = [];
 
 afterEach(() => {
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-installed-plugin-index-store", tempDirs);
+  return makeTrackedTempDir("carapace-installed-plugin-index-store", tempDirs);
 }
 
 function createIndex(overrides: Partial<InstalledPluginIndex> = {}): InstalledPluginIndex {
@@ -66,7 +66,7 @@ function createIndex(overrides: Partial<InstalledPluginIndex> = {}): InstalledPl
     plugins: [
       {
         pluginId: "demo",
-        manifestPath: "/plugins/demo/openclaw.plugin.json",
+        manifestPath: "/plugins/demo/carapace.plugin.json",
         manifestHash: "manifest-hash",
         rootDir: "/plugins/demo",
         origin: "global",
@@ -97,7 +97,7 @@ function createCandidate(
     "utf8",
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id,
       name: id === "demo" ? "Demo" : "Next Demo",
@@ -213,7 +213,7 @@ function insertPersistedIndexRow(
     `"migrationVersion":${values.migrationVersion ?? 1},"policyHash":"policy-hash",` +
     `"generatedAtMs":123,"installRecords":${values.installRecordsJson ?? "{}"},` +
     `"plugins":${values.pluginsJson ?? "[]"},"diagnostics":${values.diagnosticsJson ?? "[]"}}}`;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       db.prepare(
         `
@@ -222,13 +222,13 @@ function insertPersistedIndexRow(
         `,
       ).run(valueJson);
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+    { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
   );
   return valueJson;
 }
 
 function readPersistedIndexRevision(stateDir: string): number | null {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const row = db
         .prepare(
@@ -245,7 +245,7 @@ function readPersistedIndexRevision(stateDir: string): number | null {
       const revision = (JSON.parse(row.value_json) as { revision?: unknown }).revision;
       return typeof revision === "number" ? revision : null;
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+    { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
   );
 }
 
@@ -256,7 +256,7 @@ describe("installed plugin index persistence", () => {
       const stateDir = makeTempDir();
       const pluginDir = path.join(stateDir, "demo");
       fs.mkdirSync(pluginDir);
-      const env = { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+      const env = { CARAPACE_STATE_DIR: stateDir, CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
       const config = {};
       const index = await refreshPersistedInstalledPluginIndex({
         reason: "manual",
@@ -292,7 +292,7 @@ describe("installed plugin index persistence", () => {
     const stateDir = makeTempDir();
 
     expect(resolveInstalledPluginIndexStorePath({ stateDir })).toBe(
-      path.join(stateDir, "state", "openclaw.sqlite"),
+      path.join(stateDir, "state", "carapace.sqlite"),
     );
   });
 
@@ -421,7 +421,7 @@ describe("installed plugin index persistence", () => {
 
   it("rejects a stale leased write without replacing the successor index", async () => {
     const stateDir = makeTempDir();
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const nowMs = Date.now();
     const staleLease = acquireStartupMigrationLease({ env, nowMs, owner: "stale" });
     const successorLease = acquireStartupMigrationLease({
@@ -465,8 +465,8 @@ describe("installed plugin index persistence", () => {
       },
     };
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-      OPENCLAW_VERSION: "2026.4.25",
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_VERSION: "2026.4.25",
       VITEST: "true",
     };
 
@@ -494,8 +494,8 @@ describe("installed plugin index persistence", () => {
     const candidate = createCandidate(pluginDir);
     const contractPath = path.join(pluginDir, "doctor-contract-api.ts");
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-      OPENCLAW_VERSION: "2026.4.25",
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_VERSION: "2026.4.25",
       VITEST: "true",
     };
     fs.writeFileSync(contractPath, "export const legacyConfigRules = [];\n", "utf8");
@@ -580,7 +580,7 @@ describe("installed plugin index persistence", () => {
     const stateDir = makeTempDir();
     const filePath = resolveInstalledPluginIndexStorePath({ stateDir });
     await writePersistedInstalledPluginIndex(createIndex(), { stateDir });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const sqlite = requireNodeSqlite();
     const mutate = new sqlite.DatabaseSync(filePath);
@@ -619,7 +619,7 @@ describe("installed plugin index persistence", () => {
       plugins: [
         {
           pluginId: "browser",
-          manifestPath: "/plugins/browser/openclaw.plugin.json",
+          manifestPath: "/plugins/browser/carapace.plugin.json",
           manifestHash: "browser-manifest-hash",
           rootDir: "/plugins/browser",
           origin: "bundled",
@@ -649,7 +649,7 @@ describe("installed plugin index persistence", () => {
       plugins: [
         {
           pluginId: "provider-owner",
-          manifestPath: "/plugins/provider-owner/openclaw.plugin.json",
+          manifestPath: "/plugins/provider-owner/carapace.plugin.json",
           manifestHash: "provider-owner-manifest-hash",
           rootDir: "/plugins/provider-owner",
           origin: "bundled",
@@ -700,8 +700,8 @@ describe("installed plugin index persistence", () => {
     const pluginDir = path.join(stateDir, "plugins", "demo");
     fs.mkdirSync(pluginDir, { recursive: true });
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-      OPENCLAW_VERSION: "2026.4.25",
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_VERSION: "2026.4.25",
       VITEST: "true",
     };
     const candidate = createCandidate(pluginDir, { configPaths: ["browser"] });
@@ -743,7 +743,7 @@ describe("installed plugin index persistence", () => {
     await expect(writePersistedInstalledPluginIndex(createIndex(), { stateDir })).rejects.toThrow(
       "Persisted plugin install records are invalid",
     );
-    const row = runOpenClawStateWriteTransaction(
+    const row = runCarapaceStateWriteTransaction(
       ({ db }) =>
         db
           .prepare(
@@ -752,7 +752,7 @@ describe("installed plugin index persistence", () => {
               WHERE state_key = 'plugins.installedIndex'`,
           )
           .get() as { value_json: string; updated_at_ms: number | bigint },
-      { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+      { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
     );
     expect(row).toEqual({ value_json: persistedValueJson, updated_at_ms: 123 });
   });
@@ -768,17 +768,17 @@ describe("installed plugin index persistence", () => {
   it("preserves newer shared-state schema errors while reading the index", async () => {
     const stateDir = makeTempDir();
     await writePersistedInstalledPluginIndex(createIndex(), { stateDir });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const databasePath = resolveInstalledPluginIndexStorePath({ stateDir });
     const { DatabaseSync } = requireNodeSqlite();
     const database = new DatabaseSync(databasePath);
-    database.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};`);
+    database.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};`);
     database.close();
 
     await expect(readPersistedInstalledPluginIndex({ stateDir })).rejects.toMatchObject({
       name: "SqliteSchemaVersionError",
       message: expect.stringContaining(
-        `uses newer schema version ${OPENCLAW_STATE_SCHEMA_VERSION + 1}`,
+        `uses newer schema version ${CARAPACE_STATE_SCHEMA_VERSION + 1}`,
       ),
     });
   });
@@ -810,8 +810,8 @@ describe("installed plugin index persistence", () => {
       stateDir,
       candidates: [candidate],
       env: {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_VERSION: "2026.4.25",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_VERSION: "2026.4.25",
         VITEST: "true",
       },
     });
@@ -834,8 +834,8 @@ describe("installed plugin index persistence", () => {
       orphaned: { source: "path", installPath: path.join(stateDir, "missing") },
     } satisfies InstalledPluginIndex["installRecords"];
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-      OPENCLAW_VERSION: "2026.4.25",
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_VERSION: "2026.4.25",
       VITEST: "true",
     };
     const initial = await refreshPersistedInstalledPluginIndex({
@@ -851,7 +851,7 @@ describe("installed plugin index persistence", () => {
       ),
     ).toEqual(["orphaned", "package"]);
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "demo",
         name: "Demo",
@@ -910,8 +910,8 @@ describe("installed plugin index persistence", () => {
     const candidate = createCandidate(pluginDir);
     const nextCandidate = createCandidate(nextPluginDir, { id: "next-demo" });
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-      OPENCLAW_VERSION: "2026.4.25",
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_VERSION: "2026.4.25",
       VITEST: "true",
     };
     await refreshPersistedInstalledPluginIndex({
@@ -952,8 +952,8 @@ describe("installed plugin index persistence", () => {
         demo: { source, installPath: pluginDir },
       } satisfies InstalledPluginIndex["installRecords"];
       const env = {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_VERSION: "2026.4.25",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_VERSION: "2026.4.25",
         VITEST: "true",
       };
       const initial = await refreshPersistedInstalledPluginIndex({
@@ -999,8 +999,8 @@ describe("installed plugin index persistence", () => {
       stateDir,
       candidates: [],
       env: {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_VERSION: "2026.4.25",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_VERSION: "2026.4.25",
         VITEST: "true",
       },
     });
@@ -1062,8 +1062,8 @@ describe("installed plugin index persistence", () => {
       stateDir,
       candidates: [],
       env: {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_VERSION: "2026.4.25",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_VERSION: "2026.4.25",
         VITEST: "true",
       },
     });

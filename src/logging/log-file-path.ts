@@ -1,14 +1,14 @@
 // Log file path helpers resolve log output paths for local runtime logs.
 import { createHash } from "node:crypto";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   DEFAULT_POSIX_TMP_ROOT,
-  resolvePreferredOpenClawTmpDir,
-} from "../infra/tmp-openclaw-dir.js";
+  resolvePreferredCarapaceTmpDir,
+} from "../infra/tmp-carapace-dir.js";
 import { canUseNodeFs, formatLocalDate, LOG_PREFIX, LOG_SUFFIX } from "./log-file-shared.js";
 
-const ROLLING_LOG_FILE_RE = /^(openclaw(?:-[a-z0-9-]+)?)-(\d{4}-\d{2}-\d{2})\.log$/u;
+const ROLLING_LOG_FILE_RE = /^(carapace(?:-[a-z0-9-]+)?)-(\d{4}-\d{2}-\d{2})\.log$/u;
 const MAX_LOG_PROFILE_SEGMENT_LENGTH = 220;
 
 function encodeLogProfileSegment(profile: string): string {
@@ -30,7 +30,7 @@ function encodeLogProfileSegment(profile: string): string {
 }
 
 function resolveLogProfileSegment(env: NodeJS.ProcessEnv): string | null {
-  const profile = env.OPENCLAW_PROFILE?.trim();
+  const profile = env.CARAPACE_PROFILE?.trim();
   if (!profile || profile.toLowerCase() === "default") {
     return null;
   }
@@ -50,7 +50,7 @@ export function resolveDefaultRollingLogFile(options?: {
   const date = options?.date ?? new Date();
   const env = options?.env ?? process.env;
   const logDir =
-    options?.logDir ?? (canUseNodeFs() ? resolvePreferredOpenClawTmpDir() : DEFAULT_POSIX_TMP_ROOT);
+    options?.logDir ?? (canUseNodeFs() ? resolvePreferredCarapaceTmpDir() : DEFAULT_POSIX_TMP_ROOT);
   const profileSegment = resolveLogProfileSegment(env);
   const profileSuffix = profileSegment ? `-${profileSegment}` : "";
   return path.join(logDir, `${LOG_PREFIX}${profileSuffix}-${formatLocalDate(date)}${LOG_SUFFIX}`);
@@ -58,13 +58,13 @@ export function resolveDefaultRollingLogFile(options?: {
 
 /** Resolves the configured log file or today's rolling default log path. */
 export function resolveConfiguredLogFilePath(
-  config?: OpenClawConfig | null,
+  config?: CarapaceConfig | null,
   options?: { date?: Date; env?: NodeJS.ProcessEnv; logDir?: string },
 ): string {
   return config?.logging?.file ?? resolveDefaultRollingLogFile(options);
 }
 
-/** Returns whether a path is one of OpenClaw's dated rolling log files. */
+/** Returns whether a path is one of Carapace's dated rolling log files. */
 export function isRollingLogFilePath(file: string): boolean {
   return ROLLING_LOG_FILE_RE.test(path.basename(file));
 }

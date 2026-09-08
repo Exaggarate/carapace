@@ -5,9 +5,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { withEnvOverride, withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withEnvOverride, withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { runWriteConfigHealth } from "../flows/doctor-health-contribution-runners.config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 
 const noteMock = vi.hoisted(() => vi.fn<(message: string, title?: string) => void>());
@@ -19,13 +19,13 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({
 describe("doctor --fix include write ownership", () => {
   afterEach(() => {
     noteMock.mockClear();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("writes a nested agent repair to its fragment and preserves both ancestor files", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
-        const configPath = await writeOpenClawConfig(home, {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        const configPath = await writeCarapaceConfig(home, {
           agents: { entries: { main: { $include: "./config/main-parent.json5" } } },
           gateway: { mode: "local" },
         });
@@ -56,8 +56,8 @@ describe("doctor --fix include write ownership", () => {
 
   it("records the refusal and leaves the root and the included file untouched", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
-        const configPath = await writeOpenClawConfig(home, {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        const configPath = await writeCarapaceConfig(home, {
           agents: { list: [{ id: "ops" }] },
           browser: { $include: "./browser.json" },
           gateway: { mode: "local" },

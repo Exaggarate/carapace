@@ -3,11 +3,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { assertSqliteSchemaContains } from "../infra/sqlite-schema-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_MAINTENANCE_SCHEMA_COMPATIBILITY } from "../state/openclaw-state-schema-compatibility.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { CARAPACE_STATE_MAINTENANCE_SCHEMA_COMPATIBILITY } from "../state/carapace-state-schema-compatibility.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import {
   NodeWorkerLaunchStore,
   type NodeWorkerContainerIdentity,
@@ -21,10 +21,10 @@ const DAY_MS = 24 * 60 * 60 * 1_000;
 const NOW_MS = 10 * DAY_MS;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 function fixture() {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("node-worker-turn-store-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("node-worker-turn-store-") };
   const launches = new NodeWorkerLaunchStore({ env });
   const turns = new NodeWorkerTurnStore({ env });
   const supervisor = requireNodeWorkerProcessIdentity(process.pid);
@@ -213,7 +213,7 @@ describe("node worker turn journal", () => {
           : { errorText: "physical worker stopped" }),
         nowMs: NOW_MS + 1,
       });
-      const database = openOpenClawStateDatabase({ env: f.env }).db;
+      const database = openCarapaceStateDatabase({ env: f.env }).db;
       expect(
         database
           .prepare("SELECT state, completed_at_ms FROM node_worker_turns WHERE turn_id = ?")
@@ -235,7 +235,7 @@ describe("node worker turn journal", () => {
       worker: null,
     });
     expect(
-      openOpenClawStateDatabase({ env: untracked.env })
+      openCarapaceStateDatabase({ env: untracked.env })
         .db.prepare("SELECT name FROM sqlite_schema WHERE name = 'node_worker_turns'")
         .get(),
     ).toBeUndefined();
@@ -253,7 +253,7 @@ describe("node worker turn journal", () => {
     f.start();
     f.turns.claim({ claim: f.first, ...f.owner, nowMs: NOW_MS });
     f.finish();
-    const database = openOpenClawStateDatabase({ env: f.env }).db;
+    const database = openCarapaceStateDatabase({ env: f.env }).db;
     const insert = database.prepare(`
       INSERT INTO node_worker_turns (turn_id, owner_launch_id, plan_hash, run_id, state,
         result_json, error_text, completed_at_ms, created_at_ms, updated_at_ms)
@@ -292,25 +292,25 @@ describe("node worker turn journal", () => {
     f.turns.claim({ claim: f.first, ...f.owner, nowMs: NOW_MS });
     const completed = f.finish();
     f.turns.claim({ claim: f.next, ...f.owner, nowMs: NOW_MS });
-    const opened = openOpenClawStateDatabase({ env: f.env });
+    const opened = openCarapaceStateDatabase({ env: f.env });
     const initialVersion = opened.db.prepare("PRAGMA user_version").get();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
-    const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf(
+    const start = CARAPACE_STATE_SCHEMA_SQL.indexOf(
       "CREATE TABLE IF NOT EXISTS node_worker_turns (",
     );
     const endMarker = "\n  WHERE state = 'running';";
-    const end = OPENCLAW_STATE_SCHEMA_SQL.indexOf(endMarker, start) + endMarker.length;
+    const end = CARAPACE_STATE_SCHEMA_SQL.indexOf(endMarker, start) + endMarker.length;
     const predecessorSchema =
-      OPENCLAW_STATE_SCHEMA_SQL.slice(0, start) + OPENCLAW_STATE_SCHEMA_SQL.slice(end);
+      CARAPACE_STATE_SCHEMA_SQL.slice(0, start) + CARAPACE_STATE_SCHEMA_SQL.slice(end);
     const predecessor = new DatabaseSync(opened.path);
     try {
       predecessor.exec("PRAGMA foreign_keys = ON");
       expect(() =>
         assertSqliteSchemaContains(predecessor, "predecessor shared state", predecessorSchema, {
-          ...OPENCLAW_STATE_MAINTENANCE_SCHEMA_COMPATIBILITY,
+          ...CARAPACE_STATE_MAINTENANCE_SCHEMA_COMPATIBILITY,
           allowedMissingTables:
-            OPENCLAW_STATE_MAINTENANCE_SCHEMA_COMPATIBILITY.allowedMissingTables?.filter(
+            CARAPACE_STATE_MAINTENANCE_SCHEMA_COMPATIBILITY.allowedMissingTables?.filter(
               (table) => table !== "node_worker_turns",
             ),
         }),
@@ -349,7 +349,7 @@ describe("node worker turn journal", () => {
       state: "interrupted",
       errorText: "predecessor cleanup",
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const pruningPredecessor = new DatabaseSync(opened.path);
     try {

@@ -5,8 +5,8 @@
 import {
   hasSensitiveUrlHintTag,
   SENSITIVE_URL_HINT_TAG,
-} from "@openclaw/net-policy/redact-sensitive-url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/net-policy/redact-sensitive-url";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import type { PluginOrigin } from "../plugins/plugin-origin.types.js";
 import { widenOfficialExternalChannelSecretSchema } from "./official-external-channel-secret-schema.js";

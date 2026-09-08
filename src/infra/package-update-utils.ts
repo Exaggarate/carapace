@@ -1,11 +1,11 @@
 // Inspects installed package metadata for update/install verification.
 import { readRootJsonObjectSync } from "@openclaw/fs-safe/json";
-import { compareOpenClawReleaseVersions } from "./npm-registry-spec.js";
+import { compareCarapaceReleaseVersions } from "./npm-registry-spec.js";
 import { compareValidSemver } from "./semver.js";
 
-/** Compare two package versions, preferring OpenClaw release ordering over plain semver. */
+/** Compare two package versions, preferring Carapace release ordering over plain semver. */
 export function comparePackageUpdateVersions(left: string, right: string): number {
-  const releaseCmp = compareOpenClawReleaseVersions(left, right);
+  const releaseCmp = compareCarapaceReleaseVersions(left, right);
   if (releaseCmp !== null) {
     return releaseCmp;
   }

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setActiveDegradedSecretOwners } from "../../secrets/runtime-degraded-state.js";
 import { createChannelTestPluginBase } from "../../test-utils/channel-plugins.js";
 import { validateExplicitMessageAccountSelection } from "./message-account-selection.js";
@@ -11,13 +11,13 @@ afterEach(() => {
 });
 
 describe("validateExplicitMessageAccountSelection", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
   const plugin = {
     id: "feishu",
     config: {
       listAccountIds: () => ["default"],
       defaultAccountId: () => "ops",
-      resolveAccount: (_cfg: OpenClawConfig, accountId?: string | null) => ({
+      resolveAccount: (_cfg: CarapaceConfig, accountId?: string | null) => ({
         accountId,
         enabled: true,
       }),
@@ -95,7 +95,7 @@ describe("resolveMessageBroadcastAccountPlan (registry-scoped channel plugins)",
       id: "scopex",
       config: {
         listAccountIds: () => ["ops"],
-        resolveAccount: (_cfg: OpenClawConfig, accountId?: string | null) => ({
+        resolveAccount: (_cfg: CarapaceConfig, accountId?: string | null) => ({
           accountId,
           enabled: true,
         }),
@@ -116,7 +116,7 @@ describe("resolveMessageBroadcastAccountPlan (registry-scoped channel plugins)",
       scopex: { enabled: true },
       "scopex-unavailable": { enabled: true },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 
   it("plans candidates from a channel plugin that is only registry-scoped", async () => {
     const { withPluginRuntimeRegistryScope } =

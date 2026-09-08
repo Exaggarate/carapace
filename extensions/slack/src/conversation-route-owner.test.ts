@@ -1,7 +1,7 @@
 import {
   registerSessionBindingAdapter,
   testing as sessionBindingTesting,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { inspectSlackConversationRouteOwner } from "./conversation-route-owner.js";
 import { registerSlackInstallationState } from "./installation-identity-state.js";

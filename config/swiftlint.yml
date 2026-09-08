@@ -19,10 +19,10 @@ excluded:
   - ../coverage
   - "*.playground"
   # Generated (protocol-gen-swift.ts)
-  - ../apps/macos/Sources/OpenClawProtocol/GatewayModels.swift
+  - ../apps/macos/Sources/CarapaceProtocol/GatewayModels.swift
   # Generated (generate-host-env-security-policy-swift.mts)
-  - ../apps/macos/Sources/OpenClaw/HostEnvSecurityPolicy.generated.swift
-  - ../apps/macos/Sources/OpenClaw/BrowserInspectScript.generated.swift
+  - ../apps/macos/Sources/Carapace/HostEnvSecurityPolicy.generated.swift
+  - ../apps/macos/Sources/Carapace/BrowserInspectScript.generated.swift
 
 analyzer_rules:
   - unused_declaration

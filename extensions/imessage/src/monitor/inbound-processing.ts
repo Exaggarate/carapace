@@ -15,27 +15,27 @@ import {
   toInboundMediaFactsWithMetadata,
   type ChannelInboundMediaInput,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   createChannelIngressResolver,
   defineStableChannelIngressIdentity,
   type ChannelIngressIdentityDescriptor,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   buildChannelGroupsScopeTree,
   resolveChannelGroupPolicy,
   resolveScopeRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
-import { hasControlCommand } from "openclaw/plugin-sdk/command-auth-native";
-import type { DmPolicy, GroupPolicy, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import type { ConfiguredBindingRouteResult } from "openclaw/plugin-sdk/conversation-runtime";
-import { createChannelHistoryWindow, type HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import type { FinalizedMsgContext } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeTerminalText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/channel-policy";
+import { hasControlCommand } from "carapace/plugin-sdk/command-auth-native";
+import type { DmPolicy, GroupPolicy, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveChannelContextVisibilityMode } from "carapace/plugin-sdk/context-visibility-runtime";
+import type { ConfiguredBindingRouteResult } from "carapace/plugin-sdk/conversation-runtime";
+import { createChannelHistoryWindow, type HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import type { FinalizedMsgContext } from "carapace/plugin-sdk/reply-runtime";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
+import { sanitizeTerminalText } from "carapace/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveIMessageDirectChatService } from "../chat-context.js";
 import { resolveIMessageConversationRoute } from "../conversation-route.js";
 import {
@@ -400,7 +400,7 @@ type IMessageInboundDecision =
   | IMessageInboundDispatchDecision;
 
 export async function resolveIMessageInboundDecision(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   message: IMessagePayload;
   opts?: Pick<MonitorIMessageOpts, "requireMention">;
@@ -896,7 +896,7 @@ export async function resolveIMessageInboundDecision(params: {
 }
 
 export async function buildIMessageInboundContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountService: IMessageService | undefined;
   decision: IMessageInboundDispatchDecision;
   message: IMessagePayload;

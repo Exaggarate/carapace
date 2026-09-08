@@ -1,4 +1,4 @@
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClawdbotConfig } from "../runtime-api.js";
 
@@ -25,8 +25,8 @@ vi.mock("./targets.js", () => ({
 vi.mock("./runtime.js", () => ({
   getFeishuRuntime: () => ({ media: { loadWebMedia: mocks.loadWebMedia } }),
 }));
-vi.mock("openclaw/plugin-sdk/media-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/media-runtime")>()),
+vi.mock("carapace/plugin-sdk/media-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/media-runtime")>()),
   runFfmpeg: mocks.runFfmpeg,
   runFfprobe: mocks.runFfprobe,
 }));
@@ -68,7 +68,7 @@ describe("Feishu upload contracts", () => {
     for (const id of ["./client.js", "./accounts.js", "./targets.js", "./runtime.js"]) {
       vi.doUnmock(id);
     }
-    vi.doUnmock("openclaw/plugin-sdk/media-runtime");
+    vi.doUnmock("carapace/plugin-sdk/media-runtime");
     vi.resetModules();
   });
 

@@ -1,9 +1,9 @@
 // Zai setup module handles plugin onboarding behavior.
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/provider-onboard";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildZaiCatalogModels,
   resolveZaiBaseUrl,
@@ -15,7 +15,7 @@ import {
 
 export const ZAI_DEFAULT_MODEL_REF = `zai/${ZAI_DEFAULT_MODEL_ID}`;
 
-function resolveZaiPresetBaseUrl(cfg: OpenClawConfig, endpoint?: string): string {
+function resolveZaiPresetBaseUrl(cfg: CarapaceConfig, endpoint?: string): string {
   const existingProvider = cfg.models?.providers?.zai;
   const existingBaseUrl = normalizeOptionalString(existingProvider?.baseUrl) ?? "";
   return endpoint ? resolveZaiBaseUrl(endpoint) : existingBaseUrl || resolveZaiBaseUrl();
@@ -39,10 +39,10 @@ export function resolveZaiModelId(params?: {
 }
 
 function applyZaiPreset(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: { endpoint?: string; modelId?: string },
   primaryModelRef?: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const baseUrl = resolveZaiPresetBaseUrl(cfg, params?.endpoint);
   const modelId = resolveZaiModelId({ ...params, baseUrl });
   const modelRef = `zai/${modelId}`;
@@ -57,16 +57,16 @@ function applyZaiPreset(
 }
 
 export function applyZaiProviderConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: { endpoint?: string; modelId?: string },
-): OpenClawConfig {
+): CarapaceConfig {
   return applyZaiPreset(cfg, params);
 }
 
 export function applyZaiConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: { endpoint?: string; modelId?: string },
-): OpenClawConfig {
+): CarapaceConfig {
   const baseUrl = resolveZaiPresetBaseUrl(cfg, params?.endpoint);
   const modelId = resolveZaiModelId({ ...params, baseUrl });
   const modelRef = modelId === ZAI_DEFAULT_MODEL_ID ? ZAI_DEFAULT_MODEL_REF : `zai/${modelId}`;

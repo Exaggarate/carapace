@@ -115,7 +115,7 @@ jobs:
 
       - name: Install Periphery
         run: |
-          periphery_dir="$RUNNER_TEMP/openclaw-periphery"
+          periphery_dir="$RUNNER_TEMP/carapace-periphery"
           ./scripts/install-periphery.sh "$periphery_dir"
           echo "$periphery_dir" >> "$GITHUB_PATH"
 

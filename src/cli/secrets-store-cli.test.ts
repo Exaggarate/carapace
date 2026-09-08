@@ -154,7 +154,7 @@ describe("secrets store CLI", () => {
   });
 
   it.each(["secret", "env"])("validates an empty %s value during set dry-run", async (kind) => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-store-empty-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-store-empty-"));
     const valueFile = path.join(root, "empty.txt");
     await fs.writeFile(valueFile, "");
     try {
@@ -188,7 +188,7 @@ describe("secrets store CLI", () => {
   it.each(["--dry-run", "--yes"])(
     "rejects an empty imported secret before any entry is written with %s",
     async (mode) => {
-      const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-store-invalid-import-"));
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-store-invalid-import-"));
       const dotenvPath = path.join(root, "values.env");
       await fs.writeFile(dotenvPath, "SERVICE_MODE=production\nSERVICE_API_KEY=\n");
       try {
@@ -313,7 +313,7 @@ describe("secrets store CLI", () => {
   });
 
   it("imports quoted and multiline dotenv values without exposing them", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-store-import-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-store-import-"));
     const dotenvPath = path.join(root, "values.env");
     await fs.writeFile(
       dotenvPath,

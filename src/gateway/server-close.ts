@@ -1,7 +1,7 @@
 // Gateway shutdown and restart close orchestration.
 // Coordinates hooks, drains, sockets, sidecars, plugins, and runtime cleanup.
 import type { Server as HttpServer } from "node:http";
-import { cleanupSessionResources } from "@openclaw/ai/internal/runtime";
+import { cleanupSessionResources } from "@carapace/ai/internal/runtime";
 import type { WebSocketServer } from "ws";
 import { getAcpSessionManager } from "../acp/control-plane/manager.js";
 import { disposeAcpSessionManagerInstance } from "../acp/control-plane/manager.lifecycle.js";

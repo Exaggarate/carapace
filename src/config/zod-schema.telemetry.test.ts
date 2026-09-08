@@ -1,23 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { computeBaseConfigSchemaResponse } from "./schema-base.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { CarapaceSchema } from "./zod-schema.js";
 
-describe("OpenClawSchema telemetry config", () => {
+describe("CarapaceSchema telemetry config", () => {
   it("keeps feature statistics absent by default and preserves explicit consent decisions", () => {
-    expect(OpenClawSchema.parse({}).telemetry).toBeUndefined();
+    expect(CarapaceSchema.parse({}).telemetry).toBeUndefined();
 
     for (const enabled of [false, true]) {
       const telemetry = { enabled, consentedAt: "2026-08-23T12:00:00.000Z" };
-      expect(OpenClawSchema.parse({ telemetry }).telemetry).toStrictEqual(telemetry);
+      expect(CarapaceSchema.parse({ telemetry }).telemetry).toStrictEqual(telemetry);
     }
   });
 
   it("rejects unknown telemetry fields and malformed consent timestamps", () => {
     expect(
-      OpenClawSchema.safeParse({ telemetry: { enabled: true, installId: "hidden" } }).success,
+      CarapaceSchema.safeParse({ telemetry: { enabled: true, installId: "hidden" } }).success,
     ).toBe(false);
     expect(
-      OpenClawSchema.safeParse({ telemetry: { consentedAt: "not-a-timestamp" } }).success,
+      CarapaceSchema.safeParse({ telemetry: { consentedAt: "not-a-timestamp" } }).success,
     ).toBe(false);
   });
 
@@ -32,7 +32,7 @@ describe("OpenClawSchema telemetry config", () => {
       help: expect.stringContaining("ISO timestamp"),
     });
 
-    expect(response.uiHints.telemetry?.docsUrl).toBe("https://docs.openclaw.ai/gateway/telemetry");
+    expect(response.uiHints.telemetry?.docsUrl).toBe("https://github.com/Exaggarate/carapace");
     expect(response.uiHints["telemetry.enabled"]?.advanced).toBe(true);
   });
 });

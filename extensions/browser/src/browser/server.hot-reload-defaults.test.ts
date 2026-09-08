@@ -17,12 +17,12 @@ describe("browser control server default profile reload", () => {
       ...state.cfgProfiles,
       work: { cdpUrl: "http://127.0.0.1:9222", color: "#0066CC" },
     };
-    setBrowserControlServerProfiles(profiles, "openclaw");
+    setBrowserControlServerProfiles(profiles, "carapace");
     const server = await startBrowserControlServerFromConfig();
     const fetch = getBrowserTestFetch();
     const base = getBrowserControlServerBaseUrl();
 
-    for (const defaultProfile of ["openclaw", "work", "openclaw"]) {
+    for (const defaultProfile of ["carapace", "work", "carapace"]) {
       setBrowserControlServerProfiles(profiles, defaultProfile);
       const response = await fetch(`${base}/`);
       expect(response.status).toBe(200);

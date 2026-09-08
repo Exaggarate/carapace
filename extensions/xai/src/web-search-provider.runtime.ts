@@ -1,11 +1,11 @@
 // Xai provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   coerceSecretRef,
   ensureAuthProfileStore,
   listUsableProviderAuthProfileIds,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   DEFAULT_CACHE_TTL_MINUTES,
   formatCliCommand,
@@ -21,7 +21,7 @@ import {
   resolveWebSearchProviderCredential,
   type WebSearchProviderSetupContext,
   writeCache,
-} from "openclaw/plugin-sdk/provider-web-search";
+} from "carapace/plugin-sdk/provider-web-search";
 import {
   buildXaiWebSearchPayload,
   requestXaiWebSearch,
@@ -65,7 +65,7 @@ export async function runXaiSearchProviderSetup(
     [
       "x_search lets your agent search X (formerly Twitter) posts via xAI.",
       "It reuses the same xAI credential you configured for Grok web search.",
-      `You can change this later with ${formatCliCommand("openclaw configure --section web")}.`,
+      `You can change this later with ${formatCliCommand("carapace configure --section web")}.`,
     ].join("\n"),
     "X search",
   );
@@ -207,7 +207,7 @@ async function resolveXaiProviderAuthCredential(params: {
   profileId?: string;
 }): Promise<XaiResolvedWebSearchAuth | undefined> {
   try {
-    const config = params.config as OpenClawConfig | undefined;
+    const config = params.config as CarapaceConfig | undefined;
     const resolved = await resolveApiKeyForProvider({
       provider: XAI_PROVIDER_ID,
       cfg: config,
@@ -239,7 +239,7 @@ async function resolveXaiProviderApiKeyProfileFallback(params: {
   config?: Record<string, unknown>;
   agentDir?: string;
 }): Promise<XaiResolvedWebSearchAuth | undefined> {
-  const config = params.config as OpenClawConfig | undefined;
+  const config = params.config as CarapaceConfig | undefined;
   const usableProfiles = listUsableProviderAuthProfileIds({
     agentDir: params.agentDir,
     cfg: config,
@@ -357,8 +357,8 @@ export async function executeXaiWebSearchProviderTool(
     return {
       error: "missing_xai_api_key",
       message:
-        "web_search (grok) needs xAI credentials. Run `openclaw onboard --auth-choice xai-oauth` to sign in with Grok, run `openclaw onboard --auth-choice xai-api-key`, set `XAI_API_KEY` in the Gateway environment, or configure `plugins.entries.xai.config.webSearch.apiKey`. If you do not want to configure search credentials, use web_fetch for a specific URL or the browser tool for interactive pages.",
-      docs: "https://docs.openclaw.ai/tools/web",
+        "web_search (grok) needs xAI credentials. Run `carapace onboard --auth-choice xai-oauth` to sign in with Grok, run `carapace onboard --auth-choice xai-api-key`, set `XAI_API_KEY` in the Gateway environment, or configure `plugins.entries.xai.config.webSearch.apiKey`. If you do not want to configure search credentials, use web_fetch for a specific URL or the browser tool for interactive pages.",
+      docs: "https://github.com/Exaggarate/carapace",
     };
   }
 

@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { detectMime } from "openclaw/plugin-sdk/media-mime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { detectMime } from "carapace/plugin-sdk/media-mime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import type { FileChooser, Locator, Page } from "playwright-core";
 import { getImageMetadata } from "../media/media-services.js";
 import { ACT_MAX_WAIT_TIME_MS, resolveActWaitTimeoutMs } from "./act-policy.js";

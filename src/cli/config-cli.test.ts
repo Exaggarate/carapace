@@ -3,10 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { Command } from "commander";
 // Config CLI tests cover config command registration, reads, writes, and output modes.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfigMutationConflictError } from "../config/mutation-conflict.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.js";
 import {
   createPluginManifestRecordFixture as createPluginManifestRecord,
   createPluginMetadataSnapshotFixture as createPluginMetadataSnapshot,
@@ -25,7 +25,7 @@ const { defaultRuntime, resetRuntimeCapture, mockRuntimeModule } = await vi.hois
 
 /**
  * Test for issue #6070:
- * `openclaw config set/unset` must update snapshot.resolved (user config after $include/${ENV},
+ * `carapace config set/unset` must update snapshot.resolved (user config after $include/${ENV},
  * but before runtime defaults), so runtime defaults don't leak into the written config.
  */
 
@@ -33,7 +33,7 @@ const mockReadConfigFileSnapshot =
   vi.fn<(options?: { observe?: boolean }) => Promise<ConfigFileSnapshot>>();
 const mockWriteConfigFile = vi.fn<
   (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     options?: {
       auditOrigin?: "cli";
       unsetPaths?: string[][];
@@ -61,7 +61,7 @@ const mockLoadChannelSecretContractApi = vi.hoisted(() =>
           return {
             id: pathPattern,
             targetType: pathPattern,
-            configFile: "openclaw.json" as const,
+            configFile: "carapace.json" as const,
             pathPattern,
             secretShape: "secret_input" as const,
             expectedResolvedValue: "string" as const,
@@ -75,7 +75,7 @@ const mockLoadChannelSecretContractApi = vi.hoisted(() =>
               {
                 id: "channels.discord.accounts[].token",
                 targetType: "channels.discord.accounts[].token",
-                configFile: "openclaw.json" as const,
+                configFile: "carapace.json" as const,
                 pathPattern: "channels.discord.accounts[].token",
                 refPathPattern: "channels.discord.accounts[].tokenRef",
                 secretShape: "sibling_ref" as const,
@@ -105,7 +105,7 @@ vi.mock("../config/config.js", () => ({
     writeOptions: {},
   }),
   writeConfigFile: (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     options?: {
       auditOrigin?: "cli";
       unsetPaths?: string[][];
@@ -113,7 +113,7 @@ vi.mock("../config/config.js", () => ({
     },
   ) => mockWriteConfigFile(cfg, options),
   replaceConfigFile: (params: {
-    sourceConfig: OpenClawConfig;
+    sourceConfig: CarapaceConfig;
     writeOptions?: {
       auditOrigin?: "cli";
       unsetPaths?: string[][];
@@ -239,11 +239,11 @@ vi.mock("../runtime.js", async () => {
 });
 
 function buildSnapshot(params: {
-  resolved: OpenClawConfig;
-  config: OpenClawConfig;
+  resolved: CarapaceConfig;
+  config: CarapaceConfig;
 }): ConfigFileSnapshot {
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     exists: true,
     raw: JSON.stringify(params.resolved),
     parsed: params.resolved,
@@ -258,12 +258,12 @@ function buildSnapshot(params: {
   };
 }
 
-function setSnapshot(resolved: OpenClawConfig, config: OpenClawConfig) {
+function setSnapshot(resolved: CarapaceConfig, config: CarapaceConfig) {
   mockReadConfigFileSnapshot.mockResolvedValue(buildSnapshot({ resolved, config }));
 }
 
-function setGatewaySnapshot(secrets?: OpenClawConfig["secrets"]): void {
-  const resolved: OpenClawConfig = {
+function setGatewaySnapshot(secrets?: CarapaceConfig["secrets"]): void {
+  const resolved: CarapaceConfig = {
     gateway: { port: 18789 },
     ...(secrets ? { secrets } : {}),
   };
@@ -272,7 +272,7 @@ function setGatewaySnapshot(secrets?: OpenClawConfig["secrets"]): void {
 
 function createValidExecutableFixture(): string {
   const root = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-valid-exec-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-valid-exec-")),
   );
   const fixturePath = path.join(root, "helper");
   fs.writeFileSync(fixturePath, "#!/bin/sh\nexit 1\n");
@@ -298,7 +298,7 @@ function writeSecurePluginEntrypoint(pathname: string, contents: string): void {
   fs.chmodSync(pathname, 0o644);
 }
 
-function withRuntimeDefaults(resolved: OpenClawConfig): OpenClawConfig {
+function withRuntimeDefaults(resolved: CarapaceConfig): CarapaceConfig {
   return {
     ...resolved,
     agents: {
@@ -373,7 +373,7 @@ function setExternalFeishuSchema() {
       diagnostics: [],
       plugins: [
         createPluginManifestRecord({
-          id: "openclaw-lark",
+          id: "carapace-lark",
           origin: "global",
           channels: ["feishu"],
           channelConfigs: {
@@ -404,16 +404,16 @@ function makeInvalidSnapshot(params: {
   path?: string;
   raw?: string;
   parsed?: unknown;
-  sourceConfig?: OpenClawConfig;
+  sourceConfig?: CarapaceConfig;
 }): ConfigFileSnapshot {
   const parsed = params.parsed ?? {};
   return {
-    path: params.path ?? "/tmp/custom-openclaw.json",
+    path: params.path ?? "/tmp/custom-carapace.json",
     exists: true,
     raw: params.raw ?? "{}",
     parsed,
-    sourceConfig: params.sourceConfig ?? (parsed as OpenClawConfig),
-    resolved: parsed as OpenClawConfig,
+    sourceConfig: params.sourceConfig ?? (parsed as CarapaceConfig),
+    resolved: parsed as CarapaceConfig,
     valid: false,
     runtimeConfig: {},
     config: {},
@@ -462,12 +462,12 @@ async function runValidateJsonAndGetPayload() {
   };
 }
 
-function firstWrittenConfig(): OpenClawConfig {
+function firstWrittenConfig(): CarapaceConfig {
   const written = firstMockArg(mockWriteConfigFile);
   if (!written) {
     throw new Error("expected written config");
   }
-  return written as OpenClawConfig;
+  return written as CarapaceConfig;
 }
 
 function firstWriteConfigOptions():
@@ -580,7 +580,7 @@ describe("config cli", () => {
 
   describe("config set - issue #6070", () => {
     it("preserves existing config keys when setting a new value", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: { main: {}, oracle: { workspace: "~/oracle-workspace" } },
         },
@@ -588,7 +588,7 @@ describe("config cli", () => {
         tools: { allow: ["group:fs"] },
         logging: { level: "debug" },
       };
-      const runtimeMerged: OpenClawConfig = {
+      const runtimeMerged: CarapaceConfig = {
         ...withRuntimeDefaults(resolved),
       };
       setSnapshot(resolved, runtimeMerged);
@@ -607,7 +607,7 @@ describe("config cli", () => {
     });
 
     it("marks set paths explicit so default-equal writes persist", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         channels: {
           telegram: {
             botToken: "tok-abc",
@@ -622,7 +622,7 @@ describe("config cli", () => {
             dmPolicy: "pairing",
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       setSnapshot(resolved, runtimeMerged);
 
       await runConfigSet("channels.telegram.dmPolicy", "pairing");
@@ -634,7 +634,7 @@ describe("config cli", () => {
     });
 
     it("marks object set paths explicit so nested default-equal writes persist", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         channels: {
           telegram: {
             botToken: "tok-abc",
@@ -649,7 +649,7 @@ describe("config cli", () => {
             dmPolicy: "pairing",
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       setSnapshot(resolved, runtimeMerged);
 
       await runConfigCommand([
@@ -665,7 +665,7 @@ describe("config cli", () => {
     });
 
     it("does not inject runtime defaults into the written config", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: { port: 18789 },
       };
       const runtimeMerged = {
@@ -679,7 +679,7 @@ describe("config cli", () => {
         } as never,
         messages: { ackReaction: "✅" } as never,
         sessions: { persistence: { enabled: true } } as never,
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, runtimeMerged);
 
       await runConfigSet("gateway.auth.mode", "token");
@@ -696,7 +696,7 @@ describe("config cli", () => {
     });
 
     it("writes agents.defaults.videoGenerationModel.primary without disturbing sibling defaults", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             model: "openai/gpt-5.4",
@@ -727,7 +727,7 @@ describe("config cli", () => {
     });
 
     it("normalizes retired Google Gemini model refs before writing config mutations", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             model: {
@@ -766,7 +766,7 @@ describe("config cli", () => {
     });
 
     it("rejects an unresolved primary model before writing config", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { defaults: { model: { primary: "openai/gpt-5.4-mini" } } },
       };
       setSnapshot(resolved, resolved);
@@ -774,7 +774,7 @@ describe("config cli", () => {
         refsChecked: 1,
         refsTotal: 1,
         errors: [
-          'Cannot set model reference "missing/nope" at agents.defaults.model.primary: Unknown model: missing/nope. Run openclaw models list to list available models.',
+          'Cannot set model reference "missing/nope" at agents.defaults.model.primary: Unknown model: missing/nope. Run carapace models list to list available models.',
         ],
       });
 
@@ -784,11 +784,11 @@ describe("config cli", () => {
 
       expect(mockWriteConfigFile).not.toHaveBeenCalled();
       expectErrorIncludes('Cannot set model reference "missing/nope"');
-      expectErrorIncludes("openclaw models list");
+      expectErrorIncludes("carapace models list");
     });
 
     it("preserves an authored env placeholder after model validation", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { defaults: { model: { primary: "openai/gpt-5.4-mini" } } },
       };
       setSnapshot(resolved, resolved);
@@ -816,7 +816,7 @@ describe("config cli", () => {
     });
 
     it("reports an unresolved primary model in dry-run JSON without writing config", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { defaults: { model: { primary: "openai/gpt-5.4-mini" } } },
       };
       setSnapshot(resolved, resolved);
@@ -824,7 +824,7 @@ describe("config cli", () => {
         refsChecked: 1,
         refsTotal: 1,
         errors: [
-          'Cannot set model reference "missing/nope" at agents.defaults.model.primary: Unknown model: missing/nope. Run openclaw models list to list available models.',
+          'Cannot set model reference "missing/nope" at agents.defaults.model.primary: Unknown model: missing/nope. Run carapace models list to list available models.',
         ],
       });
 
@@ -855,7 +855,7 @@ describe("config cli", () => {
     });
 
     it("reports model resolver setup failures as incomplete dry-run JSON", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { defaults: { model: { primary: "openai/gpt-5.4-mini" } } },
       };
       setSnapshot(resolved, resolved);
@@ -887,7 +887,7 @@ describe("config cli", () => {
     });
 
     it("normalizes explicit model-map paths before writing config mutations", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             models: {
@@ -916,7 +916,7 @@ describe("config cli", () => {
     });
 
     it("normalizes explicit per-agent model-map paths before writing config mutations", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: {
             ops: { models: { "google/gemini-3-pro-preview": {} } },
@@ -941,7 +941,7 @@ describe("config cli", () => {
     });
 
     it("normalizes per-agent model refs before writing config mutations", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: {
             tester: {
@@ -966,7 +966,7 @@ describe("config cli", () => {
     });
 
     it("normalizes provider catalog model refs before writing config mutations", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         models: {
           providers: {
             google: {
@@ -1014,7 +1014,7 @@ describe("config cli", () => {
           ],
         }),
       );
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         models: {
           providers: {
             myproxy: {
@@ -1048,16 +1048,16 @@ describe("config cli", () => {
         runConfigCommand([
           "config",
           "set",
-          'plugins.installs["openclaw-web-search"].spec',
-          '"@ollama/openclaw-web-search@0.2.2"',
+          'plugins.installs["carapace-web-search"].spec',
+          '"@ollama/carapace-web-search@0.2.2"',
           "--strict-json",
           "--dry-run",
         ]),
       ).rejects.toThrow(ExitError);
 
       expect(mockWriteConfigFile).not.toHaveBeenCalled();
-      expectErrorIncludes("openclaw plugins install <spec>");
-      expectErrorIncludes("openclaw plugins update <plugin-id>");
+      expectErrorIncludes("carapace plugins install <spec>");
+      expectErrorIncludes("carapace plugins update <plugin-id>");
     });
 
     it("rejects auto-managed meta.lastTouchedVersion config updates (#80849)", async () => {
@@ -1145,7 +1145,7 @@ describe("config cli", () => {
     });
 
     it("rejects protected model map replacement unless explicitly requested", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             models: {
@@ -1172,7 +1172,7 @@ describe("config cli", () => {
     });
 
     it("merges protected model map values with --merge", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             models: {
@@ -1227,7 +1227,7 @@ describe("config cli", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
         setSnapshot(resolved, resolved);
 
         await runConfigCommand(["config", "set", configPath, value, "--strict-json", "--merge"]);
@@ -1243,7 +1243,7 @@ describe("config cli", () => {
     );
 
     it("drops gateway.auth.password when switching mode to token", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           auth: {
             mode: "password",
@@ -1268,7 +1268,7 @@ describe("config cli", () => {
     });
 
     it("drops gateway.auth.token when switching mode to password", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           auth: {
             mode: "token",
@@ -1291,7 +1291,7 @@ describe("config cli", () => {
     });
 
     it("applies mode-based credential cleanup using the final batch result", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           auth: {
             mode: "password",
@@ -1319,7 +1319,7 @@ describe("config cli", () => {
     });
 
     it("conditionally writes when the authored path is absent or exactly matches JSON", async () => {
-      const absent: OpenClawConfig = { gateway: {} };
+      const absent: CarapaceConfig = { gateway: {} };
       setSnapshot(absent, { gateway: { port: 18789 } });
 
       await runConfigSet("gateway.port", "19001", "--strict-json", "--expect-current-absent");
@@ -1340,7 +1340,7 @@ describe("config cli", () => {
     });
 
     it("distinguishes an authored null from an absent path", async () => {
-      const resolved = { gateway: { port: null } } as unknown as OpenClawConfig;
+      const resolved = { gateway: { port: null } } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await expect(
@@ -1352,7 +1352,7 @@ describe("config cli", () => {
     });
 
     it("uses deep type-exact comparison for authored expectations", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: { port: 18789, bind: "loopback" },
       };
       setSnapshot(resolved, resolved);
@@ -1379,7 +1379,7 @@ describe("config cli", () => {
       const refId = "REDIRECTED_REF_ID";
       const resolved = {
         channels: { discord: { accounts: [{ token: existingValue }] } },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await expect(
@@ -1407,7 +1407,7 @@ describe("config cli", () => {
       const refId = "REDIRECTED_EXACT_REF_ID";
       const resolved = {
         channels: { discord: { accounts: [{ token: existingValue }] } },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await expect(
@@ -1429,7 +1429,7 @@ describe("config cli", () => {
 
     it("rejects an exact expectation when roster normalization redirects the write path", async () => {
       const existingValue = "existing-agent-name";
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: { name: existingValue } } },
       };
       setSnapshot(resolved, resolved);
@@ -1463,7 +1463,7 @@ describe("config cli", () => {
     });
 
     it("redacts sensitive values", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           auth: {
             token: "super-secret-token",
@@ -1474,11 +1474,11 @@ describe("config cli", () => {
 
       await runConfigCommand(["config", "get", "gateway.auth.token"]);
 
-      expect(mockWriteStdout).toHaveBeenCalledWith("__OPENCLAW_REDACTED__\n");
+      expect(mockWriteStdout).toHaveBeenCalledWith("__CARAPACE_REDACTED__\n");
     });
 
     it("redacts sensitive values in JSON output", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           auth: {
             token: "super-secret-token",
@@ -1489,15 +1489,15 @@ describe("config cli", () => {
 
       await runConfigCommand(["config", "get", "gateway.auth.token", "--json"]);
 
-      expect(parseLastLogPayload()).toBe("__OPENCLAW_REDACTED__");
+      expect(parseLastLogPayload()).toBe("__CARAPACE_REDACTED__");
       expect(mockWriteStdout).not.toHaveBeenCalledWith(
         expect.stringContaining("super-secret-token"),
       );
     });
 
     it("prints materialized subagent archive default", async () => {
-      const resolved: OpenClawConfig = {};
-      const config: OpenClawConfig = {
+      const resolved: CarapaceConfig = {};
+      const config: CarapaceConfig = {
         agents: {
           defaults: {
             maxConcurrent: 4,
@@ -1520,19 +1520,19 @@ describe("config cli", () => {
         name: "valid but unset schema path",
         path: "gateway.bind",
         message:
-          "Config path is valid but unset: gateway.bind. The runtime default applies until you set an authored value with openclaw config set gateway.bind <value>.",
+          "Config path is valid but unset: gateway.bind. The runtime default applies until you set an authored value with carapace config set gateway.bind <value>.",
       },
       {
         name: "valid but unset array path",
         path: "models.providers.example.models[0].id",
         message:
-          "Config path is valid but unset: models.providers.example.models[0].id. The runtime default applies until you set an authored value with openclaw config set 'models.providers.example.models[0].id' <value>.",
+          "Config path is valid but unset: models.providers.example.models[0].id. The runtime default applies until you set an authored value with carapace config set 'models.providers.example.models[0].id' <value>.",
       },
       {
         name: "unknown path",
         path: "nonexistent.path",
         message:
-          "Unknown config path: nonexistent.path. Run openclaw config schema to inspect valid paths.",
+          "Unknown config path: nonexistent.path. Run carapace config schema to inspect valid paths.",
       },
     ])("reports a $name to the operator", async (testCase) => {
       setGatewaySnapshot();
@@ -1551,13 +1551,13 @@ describe("config cli", () => {
         name: "valid but unset schema path",
         path: "gateway.bind",
         message:
-          "Config path is valid but unset: gateway.bind. The runtime default applies until you set an authored value with openclaw config set gateway.bind <value>.",
+          "Config path is valid but unset: gateway.bind. The runtime default applies until you set an authored value with carapace config set gateway.bind <value>.",
       },
       {
         name: "unknown path",
         path: "nonexistent.path",
         message:
-          "Unknown config path: nonexistent.path. Run openclaw config schema to inspect valid paths.",
+          "Unknown config path: nonexistent.path. Run carapace config schema to inspect valid paths.",
       },
     ])("outputs a JSON error for a $name", async (testCase) => {
       setGatewaySnapshot();
@@ -1629,7 +1629,7 @@ describe("config cli", () => {
         ok: false,
         error: {
           type: "cli_error",
-          message: expect.stringContaining("OpenClaw config is invalid"),
+          message: expect.stringContaining("Carapace config is invalid"),
         },
         issues: [{ path: "gateway.bind", message: "Invalid enum value" }],
       });
@@ -1657,7 +1657,7 @@ describe("config cli", () => {
 
     it("prints warnings while still reporting a valid config", async () => {
       setSnapshotOnce({
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: true,
         raw: "{}",
         parsed: {},
@@ -1730,7 +1730,7 @@ describe("config cli", () => {
       expectErrorIncludes("This is a plugin packaging issue, not a local config problem.");
       expectErrorIncludes("disable/uninstall the plugin");
       expect(mockError.mock.calls.map((call) => String(call[0])).join("\n")).not.toContain(
-        "openclaw doctor --fix",
+        "carapace doctor --fix",
       );
       expect(mockLog).not.toHaveBeenCalled();
     });
@@ -1757,7 +1757,7 @@ describe("config cli", () => {
         makeInvalidSnapshot({
           raw,
           parsed,
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           issues: [
             {
               path: "agents.list.3.tools.profile",
@@ -1772,7 +1772,7 @@ describe("config cli", () => {
       await expect(runConfigCommand(["config", "validate"])).rejects.toThrow(ExitError);
 
       expectErrorIncludes(
-        'openclaw.json:7 — agents.list[3].tools.profile: Invalid input (allowed: "minimal", "coding", "messaging", "full"), got: "none"',
+        'carapace.json:7 — agents.list[3].tools.profile: Invalid input (allowed: "minimal", "coding", "messaging", "full"), got: "none"',
       );
     });
 
@@ -1785,7 +1785,7 @@ describe("config cli", () => {
 
       const payload = await runValidateJsonAndGetPayload();
       expect(payload.valid).toBe(false);
-      expect(payload.path).toBe("/tmp/custom-openclaw.json");
+      expect(payload.path).toBe("/tmp/custom-carapace.json");
       expect(payload.issues).toEqual([{ path: "gateway.bind", message: "Invalid enum value" }]);
       expect(mockError).not.toHaveBeenCalled();
     });
@@ -1806,7 +1806,7 @@ describe("config cli", () => {
 
       const payload = await runValidateJsonAndGetPayload();
       expect(payload.valid).toBe(false);
-      expect(payload.path).toBe("/tmp/custom-openclaw.json");
+      expect(payload.path).toBe("/tmp/custom-carapace.json");
       expect(payload.issues).toEqual([
         {
           path: "update.channel",
@@ -1819,7 +1819,7 @@ describe("config cli", () => {
 
     it("prints file-not-found and exits 1 when config file is missing", async () => {
       setSnapshotOnce({
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: false,
         raw: null,
         parsed: {},
@@ -1841,7 +1841,7 @@ describe("config cli", () => {
     it.skipIf(process.platform === "win32")(
       "rejects exec SecretRef providers whose command path is a symlink",
       async () => {
-        const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-validate-link-"));
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-validate-link-"));
         const symlinkPath = path.join(root, "node-link");
         fs.symlinkSync(process.execPath, symlinkPath);
         try {
@@ -1890,7 +1890,7 @@ describe("config cli", () => {
     it.skipIf(process.platform === "win32")(
       "reports exec provider command-path errors in --json validate output",
       async () => {
-        const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-validate-json-link-"));
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-validate-json-link-"));
         const symlinkPath = path.join(root, "node-link");
         fs.symlinkSync(process.execPath, symlinkPath);
         try {
@@ -1908,10 +1908,10 @@ describe("config cli", () => {
             ok: false,
             error: {
               type: "cli_error",
-              message: expect.stringContaining("OpenClaw config is invalid"),
+              message: expect.stringContaining("Carapace config is invalid"),
             },
             valid: false,
-            path: "/tmp/openclaw.json",
+            path: "/tmp/carapace.json",
             issues: [
               {
                 path: "secrets.providers.execmain.command",
@@ -2009,7 +2009,7 @@ describe("config cli", () => {
 
   describe("config set parsing flags", () => {
     it("falls back to raw string when parsing fails and strict mode is off", async () => {
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const resolved: CarapaceConfig = { gateway: { port: 18789 } };
       setSnapshot(resolved, resolved);
 
       await runConfigSet("gateway.auth.mode", "{bad");
@@ -2047,7 +2047,7 @@ describe("config cli", () => {
     });
 
     it("accepts --strict-json with batch mode and applies batch payload", async () => {
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const resolved: CarapaceConfig = { gateway: { port: 18789 } };
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -2128,7 +2128,7 @@ describe("config cli", () => {
       async (mode) => {
         const resolved = {
           channels: { discord: { accounts: [{ token: "existing-token" }] } },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
         const ref = { source: "env", provider: "default", id: "DISCORD_ACCOUNT_TOKEN" };
         const configPath = "channels.discord.accounts[0].token";
         setSnapshot(resolved, resolved);
@@ -2173,7 +2173,7 @@ describe("config cli", () => {
     it("keeps a quoted numeric record key distinct from an array-indexed secret target", async () => {
       const resolved = {
         channels: { discord: { accounts: { "0": { token: "existing-token" } } } },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       const ref = { source: "env", provider: "default", id: "DISCORD_ACCOUNT_TOKEN" };
       setSnapshot(resolved, resolved);
 
@@ -2220,7 +2220,7 @@ describe("config cli", () => {
     ])("preserves generic config path identity for %s", async (configPath, value, expected) => {
       const resolved = {
         agents: { defaults: { models: { "fixture/model.v1": { params: {} } } } },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigSet(configPath, JSON.stringify(value), "--strict-json");
@@ -2233,13 +2233,13 @@ describe("config cli", () => {
 
     it("keeps numeric config set path segments as object keys for schema-backed Discord guild records", async () => {
       setConfigMutationShapeSchema();
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         channels: {
           discord: {
             enabled: true,
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -2264,13 +2264,13 @@ describe("config cli", () => {
 
     it("keeps numeric config set path segments as object keys for other schema-backed records", async () => {
       setConfigMutationShapeSchema();
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         channels: {
           telegram: {
             enabled: true,
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -2295,7 +2295,7 @@ describe("config cli", () => {
 
     it("canonicalizes schema-backed numeric agent list indexes before writing", async () => {
       setConfigMutationShapeSchema();
-      const resolved: OpenClawConfig = {};
+      const resolved: CarapaceConfig = {};
       setSnapshot(resolved, resolved);
 
       await runConfigSet("agents.list.0.id", '"tech"', "--strict-json");
@@ -2485,7 +2485,7 @@ describe("config cli", () => {
     ] as const)(
       "rejects unsafe exec provider paths on %s (dry run: %s)",
       async (mutation, dryRun) => {
-        const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-set-link-"));
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-set-link-"));
         const symlinkPath = path.join(root, "node-link");
         fs.symlinkSync(process.execPath, symlinkPath);
         try {
@@ -2558,7 +2558,7 @@ describe("config cli", () => {
     it.skipIf(process.platform === "win32")(
       "reports exec path preflight in --dry-run --json checks for ref-builder commands",
       async () => {
-        const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-set-dryrun-link-"));
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-set-dryrun-link-"));
         const symlinkPath = path.join(root, "node-link");
         fs.symlinkSync(process.execPath, symlinkPath);
         try {
@@ -2608,7 +2608,7 @@ describe("config cli", () => {
 
     it("dry-runs config patch channel fields against plugin-owned schemas", async () => {
       setExternalFeishuSchema();
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         channels: {
           feishu: {
             appId: "app-id",
@@ -2617,13 +2617,13 @@ describe("config cli", () => {
         },
       };
       setSnapshot(resolved, resolved);
-      const pathname = writeTempJson5File("openclaw-config-plugin-channel-schema", {
+      const pathname = writeTempJson5File("carapace-config-plugin-channel-schema", {
         channels: {
           feishu: {
             appId: "app-id",
             appSecret: "secret",
             replyMode: "thread",
-            footer: "OpenClaw",
+            footer: "Carapace",
           },
         },
       });
@@ -2796,7 +2796,7 @@ describe("config cli", () => {
     it("rejects --allow-exec without --dry-run", async () => {
       const nonexistentBatchPath = path.join(
         os.tmpdir(),
-        `openclaw-config-batch-nonexistent-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+        `carapace-config-batch-nonexistent-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
       );
       await expect(
         runConfigSet("--batch-file", nonexistentBatchPath, "--allow-exec"),
@@ -2808,7 +2808,7 @@ describe("config cli", () => {
     });
 
     it("fails dry-run when skipped exec refs use an unconfigured provider", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: { port: 18789 },
         secrets: {
           providers: {},
@@ -2836,7 +2836,7 @@ describe("config cli", () => {
     });
 
     it("fails dry-run when skipped exec refs use a provider with mismatched source", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: { port: 18789 },
         secrets: {
           providers: {
@@ -2868,7 +2868,7 @@ describe("config cli", () => {
     });
 
     it("writes inline SecretRef paths when target uses secret-input shape", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: { port: 18789, auth: { mode: "token" } },
       };
       setSnapshot(resolved, resolved);
@@ -2990,7 +2990,7 @@ describe("config cli", () => {
     });
 
     it("rejects empty batch files before reading or rewriting config", async () => {
-      const pathname = writeTempJson5File("openclaw-config-batch-empty", []);
+      const pathname = writeTempJson5File("carapace-config-batch-empty", []);
       try {
         await expect(runConfigSet("--batch-file", pathname)).rejects.toThrow(ExitError);
       } finally {
@@ -3004,12 +3004,12 @@ describe("config cli", () => {
     });
 
     it("supports batch-file mode", async () => {
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const resolved: CarapaceConfig = { gateway: { port: 18789 } };
       setSnapshot(resolved, resolved);
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-batch-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+        `carapace-config-batch-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
       );
       fs.writeFileSync(pathname, '[{"path":"gateway.auth.mode","value":"token"}]', "utf8");
       try {
@@ -3024,7 +3024,7 @@ describe("config cli", () => {
     });
 
     it("batch-file nested leaf updates preserve agents defaults and roster siblings", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             models: {
@@ -3044,7 +3044,7 @@ describe("config cli", () => {
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-memory-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+        `carapace-config-memory-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
       );
       fs.writeFileSync(
         pathname,
@@ -3077,7 +3077,7 @@ describe("config cli", () => {
     it("rejects malformed batch-file payloads", async () => {
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-batch-invalid-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+        `carapace-config-batch-invalid-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
       );
       fs.writeFileSync(pathname, '{"path":"gateway.auth.mode","value":"token"}', "utf8");
       try {
@@ -3103,12 +3103,12 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
+        `carapace-config-patch-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
       );
       fs.writeFileSync(
         pathname,
@@ -3176,10 +3176,10 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const pathname = writeTempJson5File("openclaw-config-patch-empty-object", {
+      const pathname = writeTempJson5File("carapace-config-patch-empty-object", {
         agents: {
           defaults: {
             models: {
@@ -3215,10 +3215,10 @@ describe("config cli", () => {
             ],
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const pathname = writeTempJson5File("openclaw-config-patch-array-delete", {
+      const pathname = writeTempJson5File("carapace-config-patch-array-delete", {
         gateway: { controlUi: { allowedOrigins: { "0": null } } },
       });
       try {
@@ -3246,10 +3246,10 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const pathname = writeTempJson5File("openclaw-config-patch-object-delete", {
+      const pathname = writeTempJson5File("carapace-config-patch-object-delete", {
         channels: { discord: { guilds: { "123": null } } },
       });
       try {
@@ -3276,7 +3276,7 @@ describe("config cli", () => {
     ] as const)(
       "allows %s to remove an unsafe exec provider while preserving another dormant provider (dry run: %s)",
       async (mutation, dryRun) => {
-        const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-provider-remove-"));
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-provider-remove-"));
         const symlinkPath = path.join(root, "node-link");
         fs.symlinkSync(process.execPath, symlinkPath);
         try {
@@ -3323,10 +3323,10 @@ describe("config cli", () => {
             mode: "socket",
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const pathname = writeTempJson5File("openclaw-config-patch-empty-merge", {
+      const pathname = writeTempJson5File("carapace-config-patch-empty-merge", {
         channels: {
           slack: {},
         },
@@ -3351,10 +3351,10 @@ describe("config cli", () => {
             enabled: true,
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const pathname = writeTempJson5File("openclaw-config-patch-numeric-object-key", {
+      const pathname = writeTempJson5File("carapace-config-patch-numeric-object-key", {
         channels: {
           discord: {
             guilds: {
@@ -3388,12 +3388,12 @@ describe("config cli", () => {
             default: { source: "env" },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-dry-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
+        `carapace-config-patch-dry-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
       );
       fs.writeFileSync(
         pathname,
@@ -3420,15 +3420,15 @@ describe("config cli", () => {
     });
 
     it("emits the resolved config path in config patch JSON", async () => {
-      const home = path.join(os.tmpdir(), "openclaw-home-token-config-patch");
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const home = path.join(os.tmpdir(), "carapace-home-token-config-patch");
+      const configPath = path.join(home, ".carapace", "carapace.json");
+      const resolved: CarapaceConfig = { gateway: { port: 18789 } };
       const snapshot = buildSnapshot({ resolved, config: resolved });
       snapshot.path = configPath;
       mockReadConfigFileSnapshot.mockResolvedValueOnce(snapshot);
-      vi.stubEnv("OPENCLAW_HOME", home);
+      vi.stubEnv("CARAPACE_HOME", home);
 
-      const patch = writeTempJson5File("openclaw-config-patch-resolved-path", {
+      const patch = writeTempJson5File("carapace-config-patch-resolved-path", {
         gateway: { port: 18790 },
       });
       try {
@@ -3441,7 +3441,7 @@ describe("config cli", () => {
       const payload = lastMockArg(defaultRuntime.writeJson) as { configPath: string };
       expect(payload.configPath).toBe(configPath);
       expect(path.isAbsolute(payload.configPath)).toBe(true);
-      expect(payload.configPath).not.toContain("$OPENCLAW_HOME");
+      expect(payload.configPath).not.toContain("$CARAPACE_HOME");
       expect(payload.configPath).not.toContain("~");
     });
 
@@ -3455,7 +3455,7 @@ describe("config cli", () => {
     });
 
     it("rejects a directory passed as --file", async () => {
-      const pathname = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-patch-directory-"));
+      const pathname = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-patch-directory-"));
       try {
         await expect(runConfigCommand(["config", "patch", "--file", pathname])).rejects.toThrow(
           ExitError,
@@ -3473,7 +3473,7 @@ describe("config cli", () => {
     it("rejects --file patches above the config mutation limit", async () => {
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-oversized-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
+        `carapace-config-patch-oversized-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
       );
       fs.writeFileSync(pathname, " ".repeat(8 * 1024 * 1024 + 1), "utf8");
       try {
@@ -3490,7 +3490,7 @@ describe("config cli", () => {
 
     it("dry-runs pluginIntegration provider patches against manifest integration metadata", async () => {
       const pluginId = "secret-provider-proof";
-      const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-plugin-provider-"));
+      const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-plugin-provider-"));
       try {
         writeSecurePluginEntrypoint(path.join(rootDir, "index.js"), "export default {};\n");
         writeSecurePluginEntrypoint(path.join(rootDir, "resolve.mjs"), "process.stdin.resume();\n");
@@ -3498,7 +3498,7 @@ describe("config cli", () => {
           secrets: {
             providers: {},
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
         mockLoadPluginMetadataSnapshot.mockReturnValue(
           createPluginMetadataSnapshot({
             diagnostics: [],
@@ -3509,7 +3509,7 @@ describe("config cli", () => {
                 origin: "bundled",
                 rootDir,
                 source: path.join(rootDir, "index.js"),
-                manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+                manifestPath: path.join(rootDir, "carapace.plugin.json"),
                 secretProviderIntegrations: {
                   vault: {
                     source: "exec",
@@ -3523,7 +3523,7 @@ describe("config cli", () => {
         );
 
         setSnapshot(resolved, resolved);
-        const validPatch = writeTempJson5File("openclaw-config-plugin-provider-valid", {
+        const validPatch = writeTempJson5File("carapace-config-plugin-provider-valid", {
           secrets: {
             providers: {
               team: {
@@ -3549,7 +3549,7 @@ describe("config cli", () => {
         expect(mockWriteConfigFile).not.toHaveBeenCalled();
 
         setSnapshot(resolved, resolved);
-        const invalidPatch = writeTempJson5File("openclaw-config-plugin-provider-invalid", {
+        const invalidPatch = writeTempJson5File("carapace-config-plugin-provider-invalid", {
           secrets: {
             providers: {
               team: {
@@ -3614,10 +3614,10 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const patch = writeTempJson5File("openclaw-config-plugin-disable", {
+      const patch = writeTempJson5File("carapace-config-plugin-disable", {
         plugins: {
           entries: {
             [pluginId]: { enabled: false },
@@ -3647,10 +3647,10 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
-      const patch = writeTempJson5File("openclaw-config-plugin-provider-ref", {
+      const patch = writeTempJson5File("carapace-config-plugin-provider-ref", {
         gateway: {
           auth: {
             token: { source: "exec", provider: "team", id: "gateway/token" },
@@ -3680,12 +3680,12 @@ describe("config cli", () => {
             default: { source: "env" },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-ref-schema-${Date.now()}-${Math.random()
+        `carapace-config-patch-ref-schema-${Date.now()}-${Math.random()
           .toString(16)
           .slice(2)}.json5`,
       );
@@ -3725,13 +3725,13 @@ describe("config cli", () => {
             enabled: false,
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
       mockResolveSecretRefValue.mockRejectedValue(new Error("missing env var"));
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-nested-ref-${Date.now()}-${Math.random()
+        `carapace-config-patch-nested-ref-${Date.now()}-${Math.random()
           .toString(16)
           .slice(2)}.json5`,
       );
@@ -3771,11 +3771,11 @@ describe("config cli", () => {
     });
 
     it("reports schema errors for deeply nested replacement values without an engine failure", async () => {
-      const resolved = {} as unknown as OpenClawConfig;
+      const resolved = {} as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-deep-replacement-${Date.now()}-${Math.random()
+        `carapace-config-patch-deep-replacement-${Date.now()}-${Math.random()
           .toString(16)
           .slice(2)}.json5`,
       );
@@ -3826,12 +3826,12 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-replace-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
+        `carapace-config-patch-replace-${Date.now()}-${Math.random().toString(16).slice(2)}.json5`,
       );
       fs.writeFileSync(
         pathname,
@@ -3882,7 +3882,7 @@ describe("config cli", () => {
     it("rejects unused config patch replace paths", async () => {
       const pathname = path.join(
         os.tmpdir(),
-        `openclaw-config-patch-unused-replace-${Date.now()}-${Math.random()
+        `carapace-config-patch-unused-replace-${Date.now()}-${Math.random()
           .toString(16)
           .slice(2)}.json5`,
       );
@@ -4082,7 +4082,7 @@ describe("config cli", () => {
         // untouched dormant exec provider may be repaired separately without
         // blocking an unrelated Discord-token dry run; `config validate` is
         // the strict all-provider surface (see #117128).
-        const badRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-untouched-"));
+        const badRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-untouched-"));
         const symlinkPath = path.join(badRoot, "bad-link");
         fs.symlinkSync(process.execPath, symlinkPath);
         try {
@@ -4189,11 +4189,11 @@ describe("config cli", () => {
           "config",
           "patch",
           "--file",
-          "/nonexistent/openclaw-config-json-patch.json5",
+          "/nonexistent/carapace-config-json-patch.json5",
           "--dry-run",
           "--json",
         ],
-        message: "--file not found: /nonexistent/openclaw-config-json-patch.json5",
+        message: "--file not found: /nonexistent/carapace-config-json-patch.json5",
       },
     ])("emits structured JSON and actionable stderr for $name", async ({ args, message }) => {
       await expect(runConfigCommand(args)).rejects.toThrow(ExitError);
@@ -4279,7 +4279,7 @@ describe("config cli", () => {
     });
 
     it("fails dry-run when provider updates make existing refs unresolvable", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           port: 18789,
           auth: {
@@ -4318,7 +4318,7 @@ describe("config cli", () => {
     });
 
     it("fails dry-run for nested provider edits that make existing refs unresolvable", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           port: 18789,
           auth: {
@@ -4448,7 +4448,7 @@ describe("config cli", () => {
       },
     ])("$name", async ({ args, error, list }) => {
       if (list) {
-        const resolved = { agents: { list } } as unknown as OpenClawConfig;
+        const resolved = { agents: { list } } as unknown as CarapaceConfig;
         setSnapshot(resolved, resolved);
       }
       await expect(runConfigCommand(args)).rejects.toThrow(ExitError);
@@ -4552,7 +4552,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -4577,7 +4577,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -4609,7 +4609,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand(["config", "unset", 'channels.discord.guilds["prod]guild"].channels']);
@@ -4627,7 +4627,7 @@ describe("config cli", () => {
     });
 
     it("rejects trailing escapes in config patch replacement paths", async () => {
-      const pathname = writeTempJson5File("openclaw-config-patch-dangling-escape", {
+      const pathname = writeTempJson5File("carapace-config-patch-dangling-escape", {
         gateway: { port: 23456 },
       });
       try {
@@ -4651,7 +4651,7 @@ describe("config cli", () => {
     });
 
     it("preserves valid bracket path forms", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: {}, other: { name: "Other" } } },
       };
       setSnapshot(resolved, resolved);
@@ -4673,7 +4673,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -4698,7 +4698,7 @@ describe("config cli", () => {
 
   describe("config unset - issue #6070", () => {
     it("preserves existing config keys when unsetting a value", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: {} } },
         gateway: { port: 18789 },
         tools: {
@@ -4707,7 +4707,7 @@ describe("config cli", () => {
         },
         logging: { level: "debug" },
       };
-      const runtimeMerged: OpenClawConfig = {
+      const runtimeMerged: CarapaceConfig = {
         ...withRuntimeDefaults(resolved),
       };
       setSnapshot(resolved, runtimeMerged);
@@ -4729,12 +4729,12 @@ describe("config cli", () => {
     });
 
     it("submits only the specified roster entry removal for writer validation", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: { "agent-a": {}, "agent-b": {}, "agent-c": {} },
         },
       };
-      const runtimeMerged: OpenClawConfig = {
+      const runtimeMerged: CarapaceConfig = {
         ...withRuntimeDefaults(resolved),
       };
       setSnapshot(resolved, runtimeMerged);
@@ -4749,7 +4749,7 @@ describe("config cli", () => {
     });
 
     it("preserves write-level unset handling for numeric object keys", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         channels: {
           discord: {
             guilds: {
@@ -4758,7 +4758,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand(["config", "unset", "channels.discord.guilds.123"]);
@@ -4777,7 +4777,7 @@ describe("config cli", () => {
     });
 
     it("dry-runs an unset without writing the config file", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: {} } },
         gateway: { port: 18789 },
         tools: {
@@ -4790,12 +4790,12 @@ describe("config cli", () => {
       await runConfigCommand(["config", "unset", "tools.alsoAllow", "--dry-run"]);
 
       expect(mockWriteConfigFile).not.toHaveBeenCalled();
-      expectLogIncludes("Dry run successful: 1 update(s) validated against /tmp/openclaw.json.");
+      expectLogIncludes("Dry run successful: 1 update(s) validated against /tmp/carapace.json.");
       expect(mockReadConfigFileSnapshot).toHaveBeenCalledTimes(1);
     });
 
     it("rejects an unset that makes a dependent model reference unresolved", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             model: {
@@ -4810,7 +4810,7 @@ describe("config cli", () => {
         refsChecked: 1,
         refsTotal: 1,
         errors: [
-          'Cannot set model reference "backup" at agents.defaults.model.fallbacks.0: Unknown model: openai/backup. Run openclaw models list to list available models.',
+          'Cannot set model reference "backup" at agents.defaults.model.fallbacks.0: Unknown model: openai/backup. Run carapace models list to list available models.',
         ],
       });
 
@@ -4831,7 +4831,7 @@ describe("config cli", () => {
     });
 
     it("reports an unset model failure through dry-run JSON", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             model: {
@@ -4846,7 +4846,7 @@ describe("config cli", () => {
         refsChecked: 1,
         refsTotal: 1,
         errors: [
-          'Cannot set model reference "backup" at agents.defaults.model.fallbacks.0: Unknown model: openai/backup. Run openclaw models list to list available models.',
+          'Cannot set model reference "backup" at agents.defaults.model.fallbacks.0: Unknown model: openai/backup. Run carapace models list to list available models.',
         ],
       });
 
@@ -4875,7 +4875,7 @@ describe("config cli", () => {
     });
 
     it("prints JSON for config unset dry-run", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: {} } },
         gateway: { port: 18789 },
         tools: {
@@ -4901,7 +4901,7 @@ describe("config cli", () => {
     });
 
     it("prints structured JSON when unset dry-run misses a path", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: { port: 18789 },
         tools: {
           profile: "coding",
@@ -4945,7 +4945,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const runtimeMerged = {
         agents: {
           defaults: {
@@ -4954,7 +4954,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const aliasPath = 'agents.defaults.models["openai/gpt-5.4"].alias';
       setSnapshot(resolved, runtimeMerged);
 
@@ -4968,7 +4968,7 @@ describe("config cli", () => {
 
       expectLogExcludes("No change");
       expectErrorIncludes(
-        `Config path not found in authored config: ${aliasPath}. It only exists after runtime defaults are applied, so there is nothing for config unset to remove. Use openclaw config set <path> <value> to override the inherited value.`,
+        `Config path not found in authored config: ${aliasPath}. It only exists after runtime defaults are applied, so there is nothing for config unset to remove. Use carapace config set <path> <value> to override the inherited value.`,
       );
       expect(mockWriteConfigFile).not.toHaveBeenCalled();
 
@@ -4994,7 +4994,7 @@ describe("config cli", () => {
     it("reports No change when removing a normalized duplicate leaves config unchanged", async () => {
       const retired = "google/gemini-3-pro-preview";
       const canonical = "google/gemini-3.1-pro-preview";
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           defaults: {
             models: {
@@ -5014,7 +5014,7 @@ describe("config cli", () => {
     });
 
     it("validates existing refs when unset dry-run removes all secret providers", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           port: 18789,
           auth: {
@@ -5049,7 +5049,7 @@ describe("config cli", () => {
     });
 
     it("validates existing refs when unset dry-run removes secret defaults", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         gateway: {
           port: 18789,
           auth: { mode: "token", token: "${WEB_SEARCH_API_KEY}" },
@@ -5063,7 +5063,7 @@ describe("config cli", () => {
             vaultenv: { source: "env" },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand(["config", "unset", "secrets.defaults", "--dry-run"]);
@@ -5076,7 +5076,7 @@ describe("config cli", () => {
         provider: "default",
         id: "WEB_SEARCH_API_KEY",
       });
-      expectLogIncludes("Dry run successful: 1 update(s) validated against /tmp/openclaw.json.");
+      expectLogIncludes("Dry run successful: 1 update(s) validated against /tmp/carapace.json.");
     });
 
     it("rejects config unset --json without --dry-run", async () => {
@@ -5112,7 +5112,7 @@ describe("config cli", () => {
 
     it("prints a no-restart hint for a same-value config patch", async () => {
       setGatewaySnapshot();
-      const pathname = writeTempJson5File("openclaw-config-patch-same-value", {
+      const pathname = writeTempJson5File("carapace-config-patch-same-value", {
         gateway: { port: 18789 },
       });
 
@@ -5129,7 +5129,7 @@ describe("config cli", () => {
     });
 
     it("prints a hot-reload hint for agents.list model changes", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: { main: {}, "mason-vale": { model: { primary: "ollama/qwen3-coder-next" } } },
         },
@@ -5150,7 +5150,7 @@ describe("config cli", () => {
     });
 
     it("does not treat legacy per-agent agentRuntime as restart-required", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: {
             "codex-legacy": {
@@ -5159,7 +5159,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, withRuntimeDefaults(resolved));
 
       await runConfigCommand([
@@ -5175,7 +5175,7 @@ describe("config cli", () => {
     });
 
     it("keeps the restart hint for hot-path edits when reload mode is off", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: { main: { model: { primary: "openai/gpt-5.4" } } },
         },
@@ -5199,7 +5199,7 @@ describe("config cli", () => {
     });
 
     it("normalizes legacy restart mode to hot apply semantics", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: { main: { model: { primary: "openai/gpt-5.4" } } },
         },
@@ -5223,7 +5223,7 @@ describe("config cli", () => {
     });
 
     it("prints a hot-reload hint when removing legacy per-agent agentRuntime", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: {
           entries: {
             "codex-legacy": {
@@ -5231,7 +5231,7 @@ describe("config cli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, withRuntimeDefaults(resolved));
 
       await runConfigCommand(["config", "unset", "agents.list[0].agentRuntime"]);
@@ -5242,13 +5242,13 @@ describe("config cli", () => {
     });
 
     it("prints a hot-reload hint for provider runtime policy changes", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         models: {
           providers: {
             openai: {},
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
@@ -5265,23 +5265,23 @@ describe("config cli", () => {
     });
 
     it("keeps the restart hint for broad plugins writes that change load paths", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         plugins: {
           load: {
-            paths: ["/tmp/openclaw-plugins-a"],
+            paths: ["/tmp/carapace-plugins-a"],
           },
           entries: {
             canvas: { enabled: true },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand([
         "config",
         "set",
         "plugins",
-        '{"load":{"paths":["/tmp/openclaw-plugins-b"]},"entries":{"canvas":{"enabled":true}}}',
+        '{"load":{"paths":["/tmp/carapace-plugins-b"]},"entries":{"canvas":{"enabled":true}}}',
         "--strict-json",
         "--replace",
       ]);
@@ -5291,16 +5291,16 @@ describe("config cli", () => {
     });
 
     it("keeps the restart hint for broad plugins unsets that remove load paths", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         plugins: {
           load: {
-            paths: ["/tmp/openclaw-plugins-a"],
+            paths: ["/tmp/carapace-plugins-a"],
           },
           entries: {
             canvas: { enabled: true },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       setSnapshot(resolved, resolved);
 
       await runConfigCommand(["config", "unset", "plugins"]);
@@ -5310,7 +5310,7 @@ describe("config cli", () => {
     });
 
     it("keeps the restart hint for restart-required config paths", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: {} } },
         gateway: { port: 18789 },
       };
@@ -5335,7 +5335,7 @@ describe("config cli", () => {
               [pluginId]: { enabled: true, config: { accounts: [{ enabled: true }] } },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
         setSnapshot(resolved, resolved);
 
         await runConfigSet(configPath, "false");
@@ -5348,7 +5348,7 @@ describe("config cli", () => {
     );
 
     it("keeps the restart hint for mixed hot and restart batch updates", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: CarapaceConfig = {
         agents: { entries: { main: { model: { primary: "openai/gpt-5.4" } } } },
         gateway: { port: 18789 },
       };
@@ -5368,19 +5368,19 @@ describe("config cli", () => {
 
   describe("config file", () => {
     it("resolves the active path without initializing state", async () => {
-      const home = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-file-"));
+      const home = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-file-"));
       const profile = "configfile-probe";
-      const stateDir = path.join(home, `.openclaw-${profile}`);
-      const configPath = path.join(stateDir, "openclaw.json");
-      vi.stubEnv("OPENCLAW_HOME", home);
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", "");
-      vi.stubEnv("OPENCLAW_PROFILE", "");
-      vi.stubEnv("OPENCLAW_STATE_DIR", "");
-      vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+      const stateDir = path.join(home, `.carapace-${profile}`);
+      const configPath = path.join(stateDir, "carapace.json");
+      vi.stubEnv("CARAPACE_HOME", home);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", "");
+      vi.stubEnv("CARAPACE_PROFILE", "");
+      vi.stubEnv("CARAPACE_STATE_DIR", "");
+      vi.stubEnv("CARAPACE_TEST_FAST", "1");
       applyCliProfileEnv({ profile });
       mockReadConfigFileSnapshot.mockImplementationOnce(async () => {
         fs.mkdirSync(path.join(stateDir, "state"), { recursive: true });
-        fs.writeFileSync(path.join(stateDir, "state", "openclaw.sqlite"), "initialized");
+        fs.writeFileSync(path.join(stateDir, "state", "carapace.sqlite"), "initialized");
         const snapshot = buildSnapshot({ resolved: {}, config: {} });
         snapshot.path = configPath;
         return snapshot;
@@ -5392,11 +5392,11 @@ describe("config cli", () => {
         expect(mockWriteStdout).toHaveBeenCalledWith(`${configPath}\n`);
         expect(output).toBe(`${configPath}\n`);
         expect(path.isAbsolute(output.trimEnd())).toBe(true);
-        expect(output).not.toContain("$OPENCLAW_HOME");
+        expect(output).not.toContain("$CARAPACE_HOME");
         expect(output).not.toContain("~");
         expect(mockReadConfigFileSnapshot).not.toHaveBeenCalled();
         expect(fs.existsSync(stateDir)).toBe(false);
-        expect(fs.existsSync(path.join(stateDir, "state", "openclaw.sqlite"))).toBe(false);
+        expect(fs.existsSync(path.join(stateDir, "state", "carapace.sqlite"))).toBe(false);
       } finally {
         vi.unstubAllEnvs();
         fs.rmSync(home, { recursive: true, force: true });
@@ -5404,8 +5404,8 @@ describe("config cli", () => {
     });
 
     it("emits the active path as a JSON object", async () => {
-      const configPath = path.join(os.tmpdir(), "openclaw-json-config", "openclaw.json");
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+      const configPath = path.join(os.tmpdir(), "carapace-json-config", "carapace.json");
+      vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
 
       try {
         await runConfigCommand(["config", "file", "--json"]);

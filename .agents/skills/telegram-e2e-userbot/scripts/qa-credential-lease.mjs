@@ -8,7 +8,7 @@ import { performance } from "node:perf_hooks";
 import { promisify } from "node:util";
 
 const ENDPOINT_PREFIX = "/qa-credentials/v1";
-const CHUNKED_PAYLOAD_MARKER = "__openclawQaCredentialPayloadChunksV1";
+const CHUNKED_PAYLOAD_MARKER = "__carapaceQaCredentialPayloadChunksV1";
 const CONVEX_BROKER_DEPLOYMENT = "reminiscent-ibex-847";
 const CONVEX_BROKER_SITE_URL = `https://${CONVEX_BROKER_DEPLOYMENT}.convex.site`;
 const DEFAULT_HTTP_TIMEOUT_MS = 15_000;
@@ -42,7 +42,7 @@ function parseBrokerConfig({ siteUrl, secret, allowInsecureHttp }) {
   try {
     parsed = new URL(siteUrl);
   } catch {
-    throw new Error("OPENCLAW_QA_CONVEX_SITE_URL must be a valid URL.");
+    throw new Error("CARAPACE_QA_CONVEX_SITE_URL must be a valid URL.");
   }
   const loopback =
     parsed.hostname === "localhost" ||
@@ -55,8 +55,8 @@ function parseBrokerConfig({ siteUrl, secret, allowInsecureHttp }) {
     !(parsed.protocol === "http:" && loopback && allowLoopbackHttp)
   ) {
     throw new Error(
-      "OPENCLAW_QA_CONVEX_SITE_URL must use https://. " +
-        "Loopback http:// requires OPENCLAW_QA_ALLOW_INSECURE_HTTP=1.",
+      "CARAPACE_QA_CONVEX_SITE_URL must use https://. " +
+        "Loopback http:// requires CARAPACE_QA_ALLOW_INSECURE_HTTP=1.",
     );
   }
   return { siteUrl: parsed.toString().replace(/\/+$/u, ""), secret };
@@ -73,18 +73,18 @@ async function defaultRunConvexCli(args, { cwd }) {
 }
 
 async function resolveBrokerConfig({ env, cwd, runConvexCliImpl, convexProjectDir }) {
-  const siteUrl = env.OPENCLAW_QA_CONVEX_SITE_URL?.trim();
-  const secret = env.OPENCLAW_QA_CONVEX_SECRET_CI?.trim();
+  const siteUrl = env.CARAPACE_QA_CONVEX_SITE_URL?.trim();
+  const secret = env.CARAPACE_QA_CONVEX_SECRET_CI?.trim();
   if (siteUrl || secret) {
     if (!siteUrl || !secret) {
       throw new Error(
-        "Set both OPENCLAW_QA_CONVEX_SITE_URL and OPENCLAW_QA_CONVEX_SECRET_CI, or leave both unset to use Convex CLI authentication.",
+        "Set both CARAPACE_QA_CONVEX_SITE_URL and CARAPACE_QA_CONVEX_SECRET_CI, or leave both unset to use Convex CLI authentication.",
       );
     }
     return parseBrokerConfig({
       siteUrl,
       secret,
-      allowInsecureHttp: env.OPENCLAW_QA_ALLOW_INSECURE_HTTP,
+      allowInsecureHttp: env.CARAPACE_QA_ALLOW_INSECURE_HTTP,
     });
   }
 
@@ -92,7 +92,7 @@ async function resolveBrokerConfig({ env, cwd, runConvexCliImpl, convexProjectDi
   try {
     const cliSecret = (
       await runConvexCliImpl(
-        ["env", "--deployment", CONVEX_BROKER_DEPLOYMENT, "get", "OPENCLAW_QA_CONVEX_SECRET_CI"],
+        ["env", "--deployment", CONVEX_BROKER_DEPLOYMENT, "get", "CARAPACE_QA_CONVEX_SECRET_CI"],
         { cwd: projectDir },
       )
     ).trim();
@@ -100,7 +100,7 @@ async function resolveBrokerConfig({ env, cwd, runConvexCliImpl, convexProjectDi
     return parseBrokerConfig({ siteUrl: CONVEX_BROKER_SITE_URL, secret: cliSecret });
   } catch (error) {
     throw new Error(
-      "Could not load the QA broker through the Convex CLI. Ask the user to install and authenticate the convex command, then request access to the OpenClaw broker project.",
+      "Could not load the QA broker through the Convex CLI. Ask the user to install and authenticate the convex command, then request access to the Carapace broker project.",
       { cause: error },
     );
   }

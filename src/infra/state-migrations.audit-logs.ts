@@ -355,7 +355,7 @@ async function migrateLegacyAuditLogSource(params: {
       warnings.push(...prepared.warnings);
       return result(false);
     }
-    const env = { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: params.stateDir };
     const maxEntries =
       params.source.kind === "config" ? CONFIG_AUDIT_MAX_ENTRIES : SYSTEM_AGENT_AUDIT_MAX_ENTRIES;
     const store = createSqliteAuditRecordStore<ConfigAuditRecord | SystemAgentAuditEntry>({
@@ -475,13 +475,13 @@ async function migrateLegacyAuditLogSource(params: {
       if (!scrubbedRecords.ok) {
         warnings.push(...scrubbedRecords.warnings);
         warnings.push(
-          `Retained uncheckpointed ${params.source.label} recovery archive; rerun openclaw doctor --fix`,
+          `Retained uncheckpointed ${params.source.label} recovery archive; rerun carapace doctor --fix`,
         );
         return result(false);
       }
       if (scrubbedRecords.records.length !== 0) {
         warnings.push(
-          `A legacy ${params.source.label} writer appended during recovery; rerun openclaw doctor --fix to import the retained rows`,
+          `A legacy ${params.source.label} writer appended during recovery; rerun carapace doctor --fix to import the retained rows`,
         );
         return result(false);
       }
@@ -542,13 +542,13 @@ async function migrateLegacyAuditLogSource(params: {
     if (!scrubbedRecords.ok) {
       warnings.push(...scrubbedRecords.warnings);
       warnings.push(
-        `Retained uncheckpointed ${params.source.label} recovery archive; rerun openclaw doctor --fix`,
+        `Retained uncheckpointed ${params.source.label} recovery archive; rerun carapace doctor --fix`,
       );
       return result(false);
     }
     if (scrubbedRecords.records.length !== 0) {
       warnings.push(
-        `A legacy ${params.source.label} writer appended during migration; rerun openclaw doctor --fix to import the retained rows`,
+        `A legacy ${params.source.label} writer appended during migration; rerun carapace doctor --fix to import the retained rows`,
       );
       return result(false);
     }
@@ -577,7 +577,7 @@ async function migrateLegacyAuditLogSource(params: {
     }
     if ((await root.exists(sourceRelativePath)) && !params.recreatedSourceScheduled) {
       warnings.push(
-        `An old writer recreated ${params.source.label} at ${params.source.logicalSourcePath}; rerun openclaw doctor --fix to import the retained rows`,
+        `An old writer recreated ${params.source.label} at ${params.source.logicalSourcePath}; rerun carapace doctor --fix to import the retained rows`,
       );
     }
     return result(checkpointed);
@@ -604,7 +604,7 @@ export async function migrateLegacyAuditLogs(params: {
   if (params.detected.sources.length === 0) {
     return { changes, warnings };
   }
-  const env = { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: params.stateDir };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
     // Exclusive state ownership excludes a predecessor Gateway and sibling doctor.

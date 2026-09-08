@@ -1,9 +1,9 @@
 // Model auth status tests cover profile health summaries, provider usage,
 // credential cleanup, secret refresh, and provider run abort side effects.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthHealthSummary } from "../../agents/auth-health.js";
 import {
@@ -12,7 +12,7 @@ import {
   type RuntimeAuthProfileStore,
 } from "../../agents/auth-profiles.js";
 import { NON_ENV_SECRETREF_MARKER } from "../../agents/model-auth-markers.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   resetConfigRuntimeState,
   setRuntimeConfigSnapshot,
@@ -752,7 +752,7 @@ describe("models.authStatus", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       mocks.getRuntimeConfig.mockReturnValue(config);
       setPreparedAuthStore({
         version: 1,
@@ -1340,14 +1340,14 @@ describe("models.authStatus", () => {
       models: sourceProvider.models,
       apiKey: "runtime-secret-value",
     };
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       models: {
         providers: {
           openai: sourceProvider,
         },
       },
     };
-    const runtimeConfig: OpenClawConfig = { models: { providers: { openai: runtimeProvider } } };
+    const runtimeConfig: CarapaceConfig = { models: { providers: { openai: runtimeProvider } } };
     setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
     mocks.getRuntimeConfig.mockReturnValue(runtimeConfig);
     mocks.buildAuthHealthSummary.mockReturnValue({

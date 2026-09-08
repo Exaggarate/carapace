@@ -9,8 +9,8 @@ import {
   startControlUiE2eServer,
 } from "../test-helpers/control-ui-e2e.ts";
 
-const useWebKit = process.env.OPENCLAW_CONTROL_UI_E2E_BROWSER === "webkit";
-const proofDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const useWebKit = process.env.CARAPACE_CONTROL_UI_E2E_BROWSER === "webkit";
+const proofDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 
 it("replaces a silent suspended socket when its tab returns to the foreground", async () => {
   const server = await startControlUiE2eServer(undefined, { source: true });

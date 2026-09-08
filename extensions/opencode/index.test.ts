@@ -3,14 +3,14 @@ import {
   registerProviderPlugin,
   registerSingleProviderPlugin,
   requireRegisteredProvider,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { NON_ENV_SECRETREF_MARKER } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { expectPassthroughReplayPolicy } from "openclaw/plugin-sdk/provider-test-contracts";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { NON_ENV_SECRETREF_MARKER } from "carapace/plugin-sdk/provider-auth-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { expectPassthroughReplayPolicy } from "carapace/plugin-sdk/provider-test-contracts";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import {
   buildOpencodeZenLiveProviderConfig,
   prepareOpencodeZenModel,

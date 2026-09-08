@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@carapace/workboard-contract";
 import { describe, expect, it, vi } from "vitest";
 import type {
   PersistedWorkboardAttachment,
@@ -14,8 +14,8 @@ import { createWorkboardSqliteStores } from "./sqlite-store.js";
 
 const sqliteStatements = vi.hoisted(() => ({ count: 0 }));
 
-vi.mock("openclaw/plugin-sdk/sqlite-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/sqlite-runtime")>();
+vi.mock("carapace/plugin-sdk/sqlite-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/sqlite-runtime")>();
   return {
     ...actual,
     openNodeSqliteDatabase: (...args: Parameters<typeof actual.openNodeSqliteDatabase>) => {
@@ -105,7 +105,7 @@ function fixtureCard(index: number): WorkboardCard {
 }
 
 function withStores<T>(run: (dbPath: string) => Promise<T>): Promise<T> {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-batch-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-batch-"));
   const dbPath = path.join(dir, "workboard.sqlite");
   return run(dbPath).finally(() => {
     fs.rmSync(dir, { recursive: true, force: true });

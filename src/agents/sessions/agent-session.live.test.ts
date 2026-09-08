@@ -2,7 +2,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { isLiveTestEnabled } from "../live-test-helpers.js";
@@ -71,7 +71,7 @@ async function resolveLiveModel(
   authStorage: AuthStorage,
 ): Promise<{ model: Model; modelRegistry: ModelRegistry }> {
   const requestedModelId =
-    process.env.OPENCLAW_LIVE_AGENT_SESSION_MODEL?.trim() || DEFAULT_MODEL_ID;
+    process.env.CARAPACE_LIVE_AGENT_SESSION_MODEL?.trim() || DEFAULT_MODEL_ID;
   // This suite owns AgentSession behavior, so keep its provider fixture independent from the
   // operator's config and refreshable catalog state. Catalog discovery has dedicated live lanes.
   await writeFile(
@@ -117,7 +117,7 @@ async function createLiveSession(
     handlers?: ExtensionHandlers;
   } = {},
 ) {
-  const root = await mkdtemp(join(tmpdir(), "openclaw-agent-session-live-"));
+  const root = await mkdtemp(join(tmpdir(), "carapace-agent-session-live-"));
   tempRoots.push(root);
   const cwd = join(root, "workspace");
   const agentDir = join(root, "agent");

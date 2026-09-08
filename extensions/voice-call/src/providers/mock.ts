@@ -1,6 +1,6 @@
 // Voice Call plugin module implements mock behavior.
 import crypto from "node:crypto";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   EndReason,
   GetCallStatusInput,

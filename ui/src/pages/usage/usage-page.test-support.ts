@@ -86,7 +86,7 @@ export async function createPage(
   renderView = false,
   context: ApplicationContext = contextWithClient(client),
 ): Promise<TestUsagePage> {
-  const page = document.createElement("openclaw-usage-page") as TestUsagePage;
+  const page = document.createElement("carapace-usage-page") as TestUsagePage;
   page.context = context;
   if (!renderView) {
     page.render = () => nothing;

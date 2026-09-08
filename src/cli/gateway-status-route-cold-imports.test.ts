@@ -90,8 +90,8 @@ vi.mock("../runtime.js", () => ({
 
 import { tryRouteCli } from "./route.js";
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-status-route-"));
-const configPath = path.join(tempRoot, "openclaw.json");
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-status-route-"));
+const configPath = path.join(tempRoot, "carapace.json");
 fs.writeFileSync(configPath, JSON.stringify({ gateway: { bind: "loopback" } }));
 
 afterAll(() => {
@@ -100,12 +100,12 @@ afterAll(() => {
 });
 
 it("keeps plain-config status off the full config runtime", async () => {
-  vi.stubEnv("OPENCLAW_HOME", tempRoot);
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempRoot);
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+  vi.stubEnv("CARAPACE_HOME", tempRoot);
+  vi.stubEnv("CARAPACE_STATE_DIR", tempRoot);
+  vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
 
   await expect(
-    tryRouteCli(["node", "openclaw", "gateway", "status", "--json", "--no-probe"]),
+    tryRouteCli(["node", "carapace", "gateway", "status", "--json", "--no-probe"]),
   ).resolves.toBe(true);
 
   expect(testState.output).toMatchObject({

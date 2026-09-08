@@ -5,7 +5,7 @@ import { createServer, type ViteDevServer } from "vite";
 import { expect, it } from "vitest";
 import type { GatewayServer } from "../../../src/gateway/server-public.ts";
 import { ensureProfileForEmail, setDisplayName } from "../../../src/state/user-profiles.ts";
-import { createOpenClawTestState } from "../../../src/test-utils/openclaw-test-state.ts";
+import { createCarapaceTestState } from "../../../src/test-utils/carapace-test-state.ts";
 import { getFreePort } from "../../../src/test-utils/ports.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
@@ -21,19 +21,19 @@ const authenticatedUser = "primary.user@example.test";
 suite.define(() => {
   it("shows the authenticated user instead of the default agent through a real Gateway", async () => {
     const port = await getFreePort();
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "control-ui-profile-real-gateway",
       layout: "home",
       env: {
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         VITEST: "1",
       },
     });
@@ -111,7 +111,7 @@ suite.define(() => {
       const gatewayUrl = new URL(proxyUrl);
       gatewayUrl.protocol = "ws:";
 
-      const proofDir = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1" ? suite.artifactDir : null;
+      const proofDir = process.env.CARAPACE_CAPTURE_UI_PROOF === "1" ? suite.artifactDir : null;
       await suite.withPage(
         {
           locale: "en-US",
@@ -126,7 +126,7 @@ suite.define(() => {
           url.hash = new URLSearchParams({ gatewayUrl: gatewayUrl.href }).toString();
           const response = await page.goto(url.href);
           expect(response?.status()).toBe(200);
-          const confirmation = page.locator("openclaw-gateway-url-confirmation");
+          const confirmation = page.locator("carapace-gateway-url-confirmation");
           await confirmation.waitFor();
           await confirmation
             .getByRole("button", { name: `Switch to ${gatewayUrl.host}`, exact: true })

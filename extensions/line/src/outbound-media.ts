@@ -1,6 +1,6 @@
 import type { messagingApi } from "@line/bot-sdk";
-import { getFileExtension, mimeTypeFromFilePath } from "openclaw/plugin-sdk/media-mime";
-import { resolvePinnedHostnameWithPolicy, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+import { getFileExtension, mimeTypeFromFilePath } from "carapace/plugin-sdk/media-mime";
+import { resolvePinnedHostnameWithPolicy, type SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 import { isHttpsUrl } from "./media-url.js";
 import type { LineOutboundMediaKind } from "./types.js";
 

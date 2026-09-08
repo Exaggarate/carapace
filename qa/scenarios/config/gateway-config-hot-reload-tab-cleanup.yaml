@@ -29,4 +29,4 @@ scenario:
     args: [--output-dir, "${outputDir}"]
     # 305s + up to 330s + 305s observations, plus Gateway/browser startup and cleanup.
     timeoutMs: 1200000
-    summary: Requires a disposable Linux Testbox with OPENCLAW_TESTBOX=1 and Playwright Chromium. Owns a real Gateway and external browser for three sequential production-cadence cleanup phases; allow up to 20 minutes. Provider and widget HTTP upstreams are synthetic.
+    summary: Requires a disposable Linux Testbox with CARAPACE_TESTBOX=1 and Playwright Chromium. Owns a real Gateway and external browser for three sequential production-cadence cleanup phases; allow up to 20 minutes. Provider and widget HTTP upstreams are synthetic.

@@ -1,21 +1,21 @@
 import { collectConfigRuntimeEnvVars } from "./env-vars.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 export const GATEWAY_CONFIG_SELECTION_ENV_KEYS: ReadonlySet<string> = new Set([
   "ANDROID_DATA",
   "HOME",
   "HOMEDRIVE",
   "HOMEPATH",
-  "OPENCLAW_AGENT_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_HOME",
-  "OPENCLAW_INCLUDE_ROOTS",
-  "OPENCLAW_NIX_MODE",
-  "OPENCLAW_OAUTH_DIR",
-  "OPENCLAW_PACKAGE_DIR",
-  "OPENCLAW_PROFILE",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_WORKSPACE_DIR",
+  "CARAPACE_AGENT_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_HOME",
+  "CARAPACE_INCLUDE_ROOTS",
+  "CARAPACE_NIX_MODE",
+  "CARAPACE_OAUTH_DIR",
+  "CARAPACE_PACKAGE_DIR",
+  "CARAPACE_PROFILE",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_WORKSPACE_DIR",
   "PI_CODING_AGENT_DIR",
   "PREFIX",
   "USERPROFILE",
@@ -23,10 +23,10 @@ export const GATEWAY_CONFIG_SELECTION_ENV_KEYS: ReadonlySet<string> = new Set([
 
 /** Rejects config.env changes that would retarget a running Gateway process. */
 export function assertGatewayConfigEnvSelectionUnchanged(
-  previousConfig: OpenClawConfig,
-  nextConfig: OpenClawConfig,
+  previousConfig: CarapaceConfig,
+  nextConfig: CarapaceConfig,
 ): void {
-  const normalize = (config: OpenClawConfig) =>
+  const normalize = (config: CarapaceConfig) =>
     new Map(
       Object.entries(collectConfigRuntimeEnvVars(config)).map(([key, value]) => [
         key.toUpperCase(),

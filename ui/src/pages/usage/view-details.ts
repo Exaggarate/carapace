@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 // Control UI view renders usage render details screen content.
 import { html, svg, nothing } from "lit";
 import {
@@ -326,7 +326,7 @@ function renderSessionDetailPanel(
               : nothing
           }
         </div>
-        <openclaw-tooltip .content=${t("usage.details.close")}>
+        <carapace-tooltip .content=${t("usage.details.close")}>
           <button
             class="btn btn--sm btn--ghost"
             @click=${onClose}
@@ -334,7 +334,7 @@ function renderSessionDetailPanel(
           >
             ×
           </button>
-        </openclaw-tooltip>
+        </carapace-tooltip>
       </div>
       ${
         session.scope === "family" && session.includedSessionIds?.length

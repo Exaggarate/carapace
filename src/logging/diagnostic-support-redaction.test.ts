@@ -41,13 +41,13 @@ function fakeRepeatedToken(chars: readonly string[], length = 40): string {
 }
 
 describe("diagnostic support redaction", () => {
-  const tempDir = path.join(os.tmpdir(), "openclaw-support-redaction-test");
+  const tempDir = path.join(os.tmpdir(), "carapace-support-redaction-test");
 
   it("redacts numeric private fields in support snapshots and config", () => {
     const redaction = {
       env: {
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
     };
@@ -63,7 +63,7 @@ describe("diagnostic support redaction", () => {
     const redaction = {
       env: {
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
     };
@@ -157,9 +157,9 @@ describe("diagnostic support redaction", () => {
       ["room !support-room:matrix.example.com", "room <redacted-matrix-room>"],
       ["event $F0Zlxky8bavuqH6MK75Av_c7UWFLp550WTQ1EA-F0KM", "event <redacted-matrix-event>"],
       ["event $UPPERCASEMATRIXEVENTID", "event <redacted-matrix-event>"],
-      ["event $OPENCLAW_STATE_DIR_PRIVATE", "event <redacted-matrix-event>"],
-      ["event $OPENCLAW_STATE_DIR1", "event <redacted-matrix-event>"],
-      ["event $PREFIX_OPENCLAW_STATE_DIR", "event <redacted-matrix-event>"],
+      ["event $CARAPACE_STATE_DIR_PRIVATE", "event <redacted-matrix-event>"],
+      ["event $CARAPACE_STATE_DIR1", "event <redacted-matrix-event>"],
+      ["event $PREFIX_CARAPACE_STATE_DIR", "event <redacted-matrix-event>"],
       ["notify @support_bot now", "notify <redacted-handle> now"],
       ["phone 15555551212", "phone <redacted-id>"],
       [
@@ -193,19 +193,19 @@ describe("diagnostic support redaction", () => {
 
   it("preserves canonical state path markers across repeated support handoffs", () => {
     const redaction = { env: {}, stateDir: tempDir };
-    const expected = "Config: $OPENCLAW_STATE_DIR/openclaw.json";
-    const sanitized = redactSupportString(`Config: ${tempDir}/openclaw.json`, redaction);
+    const expected = "Config: $CARAPACE_STATE_DIR/carapace.json";
+    const sanitized = redactSupportString(`Config: ${tempDir}/carapace.json`, redaction);
 
     expect(sanitized).toBe(expected);
     expect(redactSupportString(sanitized, redaction)).toBe(expected);
-    expect(redactSupportString("$OPENCLAW_STATE_DIR", redaction)).toBe("$OPENCLAW_STATE_DIR");
+    expect(redactSupportString("$CARAPACE_STATE_DIR", redaction)).toBe("$CARAPACE_STATE_DIR");
   });
 
   it("truncates support strings without splitting UTF-16 surrogate pairs", () => {
     const redaction = {
       env: {
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
     };
@@ -215,7 +215,7 @@ describe("diagnostic support redaction", () => {
       `abcd${truncationSuffix}`,
     );
 
-    const redactedPathPrefix = `$OPENCLAW_STATE_DIR${path.sep}`;
+    const redactedPathPrefix = `$CARAPACE_STATE_DIR${path.sep}`;
     expect(
       redactSupportString(path.join(tempDir, "abcd😀tail"), redaction, {
         maxLength: redactedPathPrefix.length + 5,
@@ -225,17 +225,17 @@ describe("diagnostic support redaction", () => {
 
   it("redacts Windows USERPROFILE paths when HOME is unset", () => {
     const userProfile = "C:\\Users\\support-user";
-    const stateDir = `${userProfile}\\AppData\\Roaming\\openclaw`;
+    const stateDir = `${userProfile}\\AppData\\Roaming\\carapace`;
     const redaction = {
       env: {
         USERPROFILE: userProfile,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_STATE_DIR: stateDir,
       },
       stateDir,
     };
 
     expect(redactSupportString(`${stateDir}\\logs\\gateway.log`, redaction)).toBe(
-      "$OPENCLAW_STATE_DIR\\logs\\gateway.log",
+      "$CARAPACE_STATE_DIR\\logs\\gateway.log",
     );
     expect(
       redactSupportString(`failed at ${userProfile}\\Documents\\snapshot-error.txt`, redaction),
@@ -253,14 +253,14 @@ describe("diagnostic support redaction", () => {
           command: {
             programArguments: [
               "node",
-              `${userProfile}\\openclaw\\dist\\index.js`,
+              `${userProfile}\\carapace\\dist\\index.js`,
               "--config",
-              `${stateDir}\\openclaw.json`,
+              `${stateDir}\\carapace.json`,
               `--aws-secret-access-key=${fakeAwsSecretAccessKey()}`,
               "--awsSecretAccessKey",
               fakeAwsSecretAccessKey(),
             ],
-            sourcePath: "c:\\users\\support-user\\AppData\\Local\\openclaw\\gateway-service.json",
+            sourcePath: "c:\\users\\support-user\\AppData\\Local\\carapace\\gateway-service.json",
           },
         },
       },
@@ -269,10 +269,10 @@ describe("diagnostic support redaction", () => {
     const serialized = JSON.stringify(status);
     expect(serialized).not.toContain("support-user");
     expect(serialized).not.toContain(fakeAwsSecretAccessKey());
-    expect(serialized).toContain("~\\\\openclaw\\\\dist\\\\index.js");
-    expect(serialized).toContain("$OPENCLAW_STATE_DIR\\\\openclaw.json");
+    expect(serialized).toContain("~\\\\carapace\\\\dist\\\\index.js");
+    expect(serialized).toContain("$CARAPACE_STATE_DIR\\\\carapace.json");
     expect(serialized).toContain("--aws-secret-access-key=<redacted>");
     expect(serialized).toContain("--awsSecretAccessKey");
-    expect(serialized).toContain("~\\\\AppData\\\\Local\\\\openclaw\\\\gateway-service.json");
+    expect(serialized).toContain("~\\\\AppData\\\\Local\\\\carapace\\\\gateway-service.json");
   });
 });

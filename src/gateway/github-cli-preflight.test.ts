@@ -11,7 +11,7 @@ afterEach(() => {
 
 describe("GitHub CLI preflight", () => {
   it("recognizes an installation immediately after a missing-CLI retry", async () => {
-    await withTestDir({ prefix: "openclaw-github-cli-" }, async (binDir) => {
+    await withTestDir({ prefix: "carapace-github-cli-" }, async (binDir) => {
       const executableName = process.platform === "win32" ? "gh.cmd" : "gh";
       const executablePath = path.join(binDir, executableName);
       const env = {

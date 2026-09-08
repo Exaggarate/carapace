@@ -1,4 +1,4 @@
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { generateSecureHex } from "../infra/secure-random.js";
 import { getPluginToolMeta, type PluginToolMcpMeta } from "../plugins/tool-metadata.js";
 import { finalizeAgentToolAvailability } from "./agent-tool-availability.js";
@@ -47,10 +47,10 @@ function catalogEntriesFingerprint(entries: readonly ToolSearchCatalogEntry[]): 
         entry.label ?? "",
         entry.description,
         entry.directVisible === true,
-        entry.source === "openclaw"
+        entry.source === "carapace"
           ? stableStringify(entry.parameters)
           : untrustedSchemaFingerprint(entry.parameters),
-        entry.source === "openclaw"
+        entry.source === "carapace"
           ? stableStringify(entry.outputSchema)
           : untrustedSchemaFingerprint(entry.outputSchema),
       ]),
@@ -119,9 +119,9 @@ function classifyTool(tool: CatalogTool): {
     return { source: "mcp", sourceName: pluginId };
   }
   if (pluginId) {
-    return { source: "openclaw", sourceName: pluginId };
+    return { source: "carapace", sourceName: pluginId };
   }
-  return { source: "openclaw", sourceName: "core" };
+  return { source: "carapace", sourceName: "core" };
 }
 
 function makeCatalogId(tool: CatalogTool, source: CatalogSource, sourceName?: string): string {
@@ -142,14 +142,14 @@ export function prepareToolSearchCatalogExecutionTool(
 ): CatalogTool {
   const prepareInput =
     options.prepareInput &&
-    entry.source === "openclaw" &&
+    entry.source === "carapace" &&
     "prepareBeforeToolCallParams" in entry.tool &&
     typeof entry.tool.prepareBeforeToolCallParams === "function";
-  const validateInput = options.validateInput && entry.source === "openclaw";
+  const validateInput = options.validateInput && entry.source === "carapace";
   if (!prepareInput && !validateInput) {
     return entry.tool;
   }
-  // SAFETY: both gates above restrict wrapper execution to OpenClaw-owned catalog tools.
+  // SAFETY: both gates above restrict wrapper execution to Carapace-owned catalog tools.
   const tool = entry.tool as AnyAgentTool;
   const wrapperOptions = options.prepareInput ? { protectNetworkErrors: false } : undefined;
   if (!isToolWrappedWithBeforeToolCallHook(tool)) {
@@ -180,7 +180,7 @@ function toCatalogEntry(
     label: tool.label,
     description: tool.description ?? "",
     parameters: tool.parameters,
-    ...(source === "openclaw" && (tool as AnyAgentTool).outputSchema
+    ...(source === "carapace" && (tool as AnyAgentTool).outputSchema
       ? { outputSchema: (tool as AnyAgentTool).outputSchema }
       : {}),
     tool: catalogTool,
@@ -194,7 +194,7 @@ function shouldCatalogTool(tool: AnyAgentTool): boolean {
 /**
  * Core file/shell primitives and caller-required names (e.g. message when it is
  * the only reply path) stay visible while remaining searchable. Both must
- * resolve to trusted OpenClaw tools: an MCP lookalike must never become a
+ * resolve to trusted Carapace tools: an MCP lookalike must never become a
  * direct delivery or core-coding tool.
  */
 export function isDirectVisibleCatalogTool(
@@ -203,7 +203,7 @@ export function isDirectVisibleCatalogTool(
 ): boolean {
   const classified = classifyTool(tool);
   return (
-    classified.source === "openclaw" &&
+    classified.source === "carapace" &&
     (directToolNames.has(tool.name) ||
       (isCoreCodingSurfaceToolName(tool.name) && classified.sourceName === "core"))
   );
@@ -371,7 +371,7 @@ export function resolveCatalog(ctx: ToolSearchToolContext): ToolSearchCatalogSes
 }
 
 function getTelemetry(catalog: ToolSearchCatalogSession): ToolSearchCatalogTelemetry {
-  const sources: Record<CatalogSource, number> = { openclaw: 0, mcp: 0, client: 0 };
+  const sources: Record<CatalogSource, number> = { carapace: 0, mcp: 0, client: 0 };
   for (const entry of catalog.entries) {
     sources[entry.source] += 1;
   }
@@ -411,7 +411,7 @@ export function visibleCatalogEntries(
 
 export function compactToolSearchCatalogEntry(entry: ToolSearchCatalogEntry) {
   const output =
-    entry.source === "openclaw" ? compactToolOutputHint(entry.outputSchema) : undefined;
+    entry.source === "carapace" ? compactToolOutputHint(entry.outputSchema) : undefined;
   // Node provenance is namespace-only metadata; generic Tool Search keeps its
   // existing MCP result shape outside Code Mode.
   const mcp = entry.mcp
@@ -430,7 +430,7 @@ export function compactToolSearchCatalogEntry(entry: ToolSearchCatalogEntry) {
     name: entry.name,
     label: entry.label,
     description: entry.description,
-    input: entry.source === "openclaw" ? compactToolInputHint(entry.parameters) : "unknown",
+    input: entry.source === "carapace" ? compactToolInputHint(entry.parameters) : "unknown",
     ...(output ? { output } : {}),
   };
 }

@@ -1,10 +1,10 @@
 import { createRequire } from "node:module";
-import { readPluginPackageVersion } from "openclaw/plugin-sdk/extension-shared";
-import { redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
+import { readPluginPackageVersion } from "carapace/plugin-sdk/extension-shared";
+import { redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   mergeScopedSearchConfig,
   readConfiguredSecretString,
@@ -12,9 +12,9 @@ import {
   resolveProviderWebSearchPluginConfig,
   type SearchConfigRecord,
   withTrustedWebSearchEndpoint,
-} from "openclaw/plugin-sdk/provider-web-search";
-import { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-web-search";
+import { redactSensitiveText } from "carapace/plugin-sdk/security-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   executeParallelSearchRequest,
   type ParallelSearchResponse,
@@ -32,7 +32,7 @@ const PARALLEL_SEARCH_RESPONSE_LIMIT_BYTES = 16 * 1024 * 1024;
 
 const require = createRequire(import.meta.url);
 const PLUGIN_VERSION = readPluginPackageVersion({ require });
-const USER_AGENT = `openclaw-parallel/${PLUGIN_VERSION} (${process.platform})`;
+const USER_AGENT = `carapace-parallel/${PLUGIN_VERSION} (${process.platform})`;
 
 type ParallelConfig = {
   apiKey?: string;
@@ -59,7 +59,7 @@ function invalidBaseUrlPayload(value: string) {
   return {
     error: "invalid_base_url",
     message: `plugins.entries.parallel.config.webSearch.baseUrl must be a valid http(s) URL. Got: ${value}`,
-    docs: "https://docs.openclaw.ai/tools/parallel-search",
+    docs: "https://github.com/Exaggarate/carapace",
   };
 }
 
@@ -96,7 +96,7 @@ function missingParallelKeyPayload() {
     error: "missing_parallel_api_key",
     message:
       "web_search (parallel) needs a Parallel API key. Set PARALLEL_API_KEY in the Gateway environment, or configure plugins.entries.parallel.config.webSearch.apiKey.",
-    docs: "https://docs.openclaw.ai/tools/parallel-search",
+    docs: "https://github.com/Exaggarate/carapace",
   };
 }
 

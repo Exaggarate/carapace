@@ -2,13 +2,13 @@
 import {
   resolveNonNegativeIntegerOption,
   resolveOptionalIntegerOption,
-} from "@openclaw/normalization-core/number-coercion";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/normalization-core/number-coercion";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { toErrorObject } from "../infra/errors.js";
 
 /** Resolve effective inbound debounce milliseconds from explicit, channel, and global config. */
 export function resolveInboundDebounceMs(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   overrideMs?: number;
 }): number {

@@ -10,7 +10,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("show_widget current-channel presentation", () => {
   it("presents once without materializing an inline view", async () => {
-    const stateDir = tempDirs.make("openclaw-widget-presenter-");
+    const stateDir = tempDirs.make("carapace-widget-presenter-");
     const present = vi.fn(async () => ({
       ok: true as const,
       value: {

@@ -2,7 +2,7 @@ import type { PreparedAgentCredentialModes } from "../../agents/agent-auth-crede
 import { loadAuthProfileStoreWithoutExternalProfiles } from "../../agents/auth-profiles.js";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.types.js";
 import type { createOpenAIModelRoutesResolver } from "../../agents/openai-model-routes.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import type { PluginRegistry } from "../../plugins/registry-types.js";
@@ -18,7 +18,7 @@ import type { GatewayRequestContext } from "./types.js";
 
 export const WITHOUT_OPENAI_ENV_AUTH = {
   CODEX_API_KEY: undefined,
-  CODEX_HOME: "/__openclaw_models_list_test__/codex",
+  CODEX_HOME: "/__carapace_models_list_test__/codex",
   OPENAI_API_KEY: undefined,
   OPENAI_BASE_URL: undefined,
   OPENAI_OAUTH_TOKEN: undefined,
@@ -57,7 +57,7 @@ type ListModelsParams = {
   publishedCatalog?: ModelCatalogEntry[];
   refresh?: boolean;
   staticEntries?: ModelCatalogEntry[];
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   discoveryModes?: Record<string, "refreshable" | "runtime" | "static">;
   catalogComplete?: boolean;
   preparedAuthModes?: PreparedAgentCredentialModes;
@@ -69,7 +69,7 @@ type ListModelsParams = {
 
 export function createModelsListTestContext(params: ListModelsParams) {
   const agentId = params.agentId ?? "main";
-  const config = params.cfg ?? ({} as OpenClawConfig);
+  const config = params.cfg ?? ({} as CarapaceConfig);
   const createCatalogSnapshot = (entries: ModelCatalogEntry[]) =>
     ({
       agentId,
@@ -122,7 +122,7 @@ export function createModelsListTestContext(params: ListModelsParams) {
 export async function listModels(params: ListModelsParams) {
   const context = createModelsListTestContext(params);
   const agentId = params.agentId ?? "main";
-  const config = params.cfg ?? ({} as OpenClawConfig);
+  const config = params.cfg ?? ({} as CarapaceConfig);
   return await buildModelsListResult({
     context,
     agentId,

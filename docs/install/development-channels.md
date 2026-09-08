@@ -8,7 +8,7 @@ title: "Release channels"
 sidebarTitle: "Release Channels"
 ---
 
-OpenClaw ships four update channels:
+Carapace ships four update channels:
 
 - **stable**: npm dist-tag `latest`. Recommended for most users.
 - **extended-stable**: npm dist-tag `extended-stable`. A net-new, trailing
@@ -29,10 +29,10 @@ directly to `latest`. Dist-tags are the source of truth for npm installs.
 ## Switching channels
 
 ```bash
-openclaw update --channel stable
-openclaw update --channel extended-stable
-openclaw update --channel beta
-openclaw update --channel dev
+carapace update --channel stable
+carapace update --channel extended-stable
+carapace update --channel beta
+carapace update --channel dev
 ```
 
 `--channel` drives the update and persists the choice to `update.channel` in
@@ -42,14 +42,14 @@ previous channel. The selected channel drives both install paths:
 | Channel           | npm/package installs                                                                                                                                                                   | git installs                                                                                       |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `stable`          | dist-tag `latest`                                                                                                                                                                      | switches to the npm package at `latest`                                                            |
-| `extended-stable` | resolves the public npm `extended-stable` selector, verifies the exact selected package, and installs that exact version. Fails closed with no fallback to `latest`, `beta`, or `dev`. | unsupported: OpenClaw leaves the checkout unchanged and asks you to use a package installation     |
+| `extended-stable` | resolves the public npm `extended-stable` selector, verifies the exact selected package, and installs that exact version. Fails closed with no fallback to `latest`, `beta`, or `dev`. | unsupported: Carapace leaves the checkout unchanged and asks you to use a package installation     |
 | `beta`            | dist-tag `beta`, falling back to `latest` when `beta` is missing or older                                                                                                              | switches to the npm package at `beta`, falling back to `latest` when beta is missing or older      |
 | `dev`             | switches to a Git checkout, builds it, and reinstalls the global CLI                                                                                                                   | fetches, rebases the checkout on the upstream `main` branch, builds, and reinstalls the global CLI |
 
 An explicit `--channel stable` or `--channel beta` switches a Git installation
-to a package installation. A bare `openclaw update` in a Git checkout with a
+to a package installation. A bare `carapace update` in a Git checkout with a
 previously stored stable or beta channel instead selects the corresponding Git tag.
-For these Git tag updates, OpenClaw refreshes branches without adding force to
+For these Git tag updates, Carapace refreshes branches without adding force to
 their configured refspecs, then force-refreshes tags only from the release remote.
 The retained `branch.main.remote` setting takes precedence, followed by `origin`
 or the only configured remote. With multiple remotes and neither choice, set
@@ -65,13 +65,13 @@ For managed Gateways, successful switches refresh the service to the verified
 installation before checking readiness. A refused switch or verified rollback
 recovers the previous service; unverified recovery leaves it stopped for inspection.
 
-For `dev` git installs, the default checkout is `~/openclaw` (or
-`$OPENCLAW_HOME/openclaw` when `OPENCLAW_HOME` is set); override with
-`OPENCLAW_GIT_DIR`.
+For `dev` git installs, the default checkout is `~/carapace` (or
+`$CARAPACE_HOME/carapace` when `CARAPACE_HOME` is set); override with
+`CARAPACE_GIT_DIR`.
 Automatic update campaigns pin the upstream commit they announce, so the
 displayed list previews up to five commits from the exact target installed even
 if `main` advances during the countdown. A manual
-`openclaw update --channel dev` still targets the current upstream `main`.
+`carapace update --channel dev` still targets the current upstream `main`.
 
 <Tip>
 To keep stable and dev in parallel, use two separate checkouts and point each gateway at its own.
@@ -84,34 +84,34 @@ single update **without** changing the persisted channel:
 
 ```bash
 # Install a specific version
-openclaw update --tag 2026.4.1-beta.1
+carapace update --tag 2026.4.1-beta.1
 
 # Install from the beta dist-tag (one-off, does not persist)
-openclaw update --tag beta
+carapace update --tag beta
 
 # Switch to the moving GitHub main checkout (persistent)
-openclaw update --channel dev
+carapace update --channel dev
 
 # Install a specific npm package spec
-openclaw update --tag openclaw@2026.4.1-beta.1
+carapace update --tag carapace@2026.4.1-beta.1
 
 ```
 
 Notes:
 
 - `--tag` applies to **package (npm) installs only**; git installs ignore it.
-- The tag is not persisted; the next `openclaw update` uses the configured
+- The tag is not persisted; the next `carapace update` uses the configured
   channel.
 - A package install with stored `update.channel: "dev"` still honors a one-off
   `--tag` without switching to Git. An explicit `--channel dev` takes precedence
   over `--tag` and selects the Git checkout flow.
 - The `--tag main` shorthand is rejected for package installs because the
   workspace checkout is not a self-contained package artifact. Use
-  `openclaw update --channel dev` (package installs switch to a git checkout)
+  `carapace update --channel dev` (package installs switch to a git checkout)
   or reinstall with the installer's git method:
-  `curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git --version main`.
+  `curl -fsSL https://github.com/Exaggarate/carapace | bash -s -- --install-method git --version main`.
 - Downgrade protection: if the target version is older than the current
-  version, OpenClaw prompts for confirmation (skip with `--yes`).
+  version, Carapace prompts for confirmation (skip with `--yes`).
 - Extended-stable always uses its verified exact package target. It is not a
   one-off alias for `--tag extended-stable`, and `--tag` cannot be combined
   with an effective extended-stable channel.
@@ -121,13 +121,13 @@ Notes:
 
 ## Dry run
 
-Preview what `openclaw update` would do without making changes:
+Preview what `carapace update` would do without making changes:
 
 ```bash
-openclaw update --dry-run
-openclaw update --channel beta --dry-run
-openclaw update --tag 2026.4.1-beta.1 --dry-run
-openclaw update --dry-run --json
+carapace update --dry-run
+carapace update --channel beta --dry-run
+carapace update --tag 2026.4.1-beta.1 --dry-run
+carapace update --dry-run --json
 ```
 
 The dry run reports the effective channel, target version, planned actions,
@@ -135,7 +135,7 @@ and whether a downgrade confirmation would be required.
 
 ## Plugins and channels
 
-Switching channels with `openclaw update` also syncs plugin sources:
+Switching channels with `carapace update` also syncs plugin sources:
 
 - `dev` switches installed plugins that have a bundled counterpart back to
   their bundled (git checkout) source.
@@ -148,22 +148,22 @@ Switching channels with `openclaw update` also syncs plugin sources:
   uses plugin `YYYY.M.P`).
 - npm-installed plugins are updated after the core update completes.
 - `beta` uses the same newest-of-`beta`/`latest` rule for managed npm plugins,
-  including official plugins such as `@openclaw/codex`. Exact version and range
+  including official plugins such as `@carapace/codex`. Exact version and range
   pins retain their selector. Startup repair keeps an already-current plugin
   instead of reinstalling it and requiring another restart.
 
 ## Checking current status
 
 ```bash
-openclaw update status
+carapace update status
 ```
 
 Shows the active channel (with the source that decided it: config, git tag,
 git branch, installed version, or default), install kind (git or package),
 current version, and update availability.
 It also shows the last recorded update run, including a failed fetch. Plain
-`openclaw status` uses cached Git refs; use `openclaw update status` or
-`openclaw status --deep` to request a fresh availability check.
+`carapace status` uses cached Git refs; use `carapace update status` or
+`carapace status --deep` to request a fresh availability check.
 
 ## Tagging best practices
 

@@ -3,7 +3,7 @@
  * It may assume attempt configuration and tool inputs are ready.
  */
 import type { SessionTranscriptRuntimeTarget } from "../../../config/sessions/session-accessor.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
 import {
   attachRuntimePromptMediaFacts,
   readPersistedMediaFacts,
@@ -135,7 +135,7 @@ export async function prepareEmbeddedAttemptAgentSession(input: {
     extensionFactories,
   });
   await resourceLoader.reload();
-  // reload() rehydrates disk settings. Reapply OpenClaw's context budget and
+  // reload() rehydrates disk settings. Reapply Carapace's context budget and
   // auto-compaction guards before the session can submit a prompt (#75799).
   applyAgentCompactionSettingsFromConfig({
     settingsManager,
@@ -653,7 +653,7 @@ export async function prepareEmbeddedAttemptSessionManager(input: {
         activeAgentId: input.sessionAgentId,
         contextEnginePluginId: input.resolveActiveContextEnginePluginId(),
       }),
-      contextEngineHostSupport: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+      contextEngineHostSupport: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
       providerId: attempt.provider,
       requestedModelId: attempt.requestedModelId,
       modelId: attempt.modelId,

@@ -30,7 +30,7 @@ dependency, and Testbox workflow fingerprint under `.crabbox/testbox-leases/`.
 Source-only edits keep reusing the warmed box. A changed merge base, lockfile,
 package-manager input, wrapper, or Testbox workflow fails closed and requires a
 fresh lease. Every run still syncs the current checkout.
-`OPENCLAW_TESTBOX_ALLOW_STALE=1` is only for intentional diagnostics, not
+`CARAPACE_TESTBOX_ALLOW_STALE=1` is only for intentional diagnostics, not
 release proof.
 
 The Testbox workflow registers a separate disposable checkout for native sync.
@@ -44,7 +44,7 @@ or changes the selected rsync binary.
 
 Workspace preparation changes require a fresh lease. A missing or overlapping
 execution-workspace binding stops the payload; stop that lease and warm a new one.
-Use the OpenClaw wrapper for proof: direct native Blacksmith commands target the
+Use the Carapace wrapper for proof: direct native Blacksmith commands target the
 transport checkout, which deliberately has no hydrated runtime.
 
 Testbox requests with `--artifact-glob` or `--require-artifact` also require the
@@ -107,13 +107,13 @@ report public networking with no Tailscale state before uploading any script.
 
 ## Crabbox repository setup
 
-The shared [Crabbox skill](https://github.com/openclaw/agent-skills/tree/main/skills/crabbox)
+The shared [Crabbox skill](https://github.com/Exaggarate/carapace/agent-skills/tree/main/skills/crabbox)
 owns portable lease, trust, sync, and cleanup procedures. This section owns the
-OpenClaw wrapper and workflow inputs. Routine task-needed Crabbox/Testbox use
+Carapace wrapper and workflow inputs. Routine task-needed Crabbox/Testbox use
 and task-owned worktrees do not require another confirmation; preserve unrelated
 work and existing credential, production, budget, and publication boundaries.
 
-Run trusted OpenClaw remote proof through the wrapper from the repository root:
+Run trusted Carapace remote proof through the wrapper from the repository root:
 
 ```bash
 node scripts/crabbox-wrapper.mjs run --help
@@ -138,10 +138,10 @@ The wrapper checks an executable sibling `../crabbox/bin/crabbox`, then `PATH`,
 then the sibling of the Git common checkout. Verify the selected binary and
 its source rather than trusting a directory name. If it needs repair or is
 missing, use a clean task-owned checkout of
-[Crabbox](https://github.com/openclaw/crabbox), build `./cmd/crabbox` into a
+[Crabbox](https://github.com/Exaggarate/carapace/crabbox), build `./cmd/crabbox` into a
 task-owned binary directory, and leave other checkouts and the operator's
 installed binary untouched. The existing
-`OPENCLAW_CRABBOX_WRAPPER_IGNORE_REPO_BINARY=1` setting skips the first sibling
+`CARAPACE_CRABBOX_WRAPPER_IGNORE_REPO_BINARY=1` setting skips the first sibling
 candidate; a task binary on `PATH` then takes precedence over the common-checkout
 candidate. A dirty or occupied sibling is not a reason to stop and ask.
 
@@ -150,8 +150,8 @@ For a selected trusted Testbox lane:
 ```bash
 node scripts/crabbox-wrapper.mjs run --timing-json -- \
   CI=1 NODE_OPTIONS=--max-old-space-size=4096 \
-  OPENCLAW_TEST_PROJECTS_PARALLEL=6 OPENCLAW_VITEST_MAX_WORKERS=1 \
-  OPENCLAW_TESTBOX=1 OPENCLAW_TESTBOX_REMOTE_RUN=1 \
+  CARAPACE_TEST_PROJECTS_PARALLEL=6 CARAPACE_VITEST_MAX_WORKERS=1 \
+  CARAPACE_TESTBOX=1 CARAPACE_TESTBOX_REMOTE_RUN=1 \
   pnpm test <path-or-filter>
 ```
 
@@ -213,13 +213,13 @@ For an explicitly selected local-container lane, the existing example image is
 `node:24-bookworm` and the install command is
 `corepack pnpm install --frozen-lockfile --store-dir .pnpm-store`, followed by
 the chosen test. Keep `--no-hydrate` and a repository-local dependency store
-when host caches cannot cross filesystems. The OpenClaw broker login endpoint
-is `https://crabbox.openclaw.ai`; normal brokered validation does not require
+when host caches cannot cross filesystems. The Carapace broker login endpoint
+is `https://github.com/Exaggarate/carapace`; normal brokered validation does not require
 asking for AWS keys.
 
 Live Gateway, channel, and agent-turn proof uses an isolated
-`OPENCLAW_STATE_DIR`, a free port, and the real user path. Test-only plugin
-artifacts may use `OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES=1`; that does not make
+`CARAPACE_STATE_DIR`, a free port, and the real user path. Test-only plugin
+artifacts may use `CARAPACE_ALLOW_PLUGIN_INSTALL_OVERRIDES=1`; that does not make
 them official installs. Before sharing WebVNC, inspect a screenshot of the
 working app. Keep proof media out of the product repository and compare source
 hashes before and after generator runs. If a final timing result is written but
@@ -281,14 +281,14 @@ The test toolchain pins stable Vitest `5.0.0`, including its browser and coverag
 packages. Use `describe(name, { concurrent: false }, callback)` for ordered
 suites. Await asynchronous assertions, keep `vi.mock`/`vi.hoisted` at module
 scope, and perform actions whose mock calls you assert inside the test.
-OpenClaw sets `clearMocks: false`, so setup and `beforeAll` calls are preserved.
+Carapace sets `clearMocks: false`, so setup and `beforeAll` calls are preserved.
 Clear or reset each assertion's owned mock actions explicitly as needed.
 Name patterns spanning suites use `suite > test`; native JSON retains its
 space-joined `fullName`, so evidence readers match `ancestorTitles` plus `title`.
 
 Filesystem transform caching uses `test.fsModuleCache` and
-`test.fsModuleCachePath`; the existing `OPENCLAW_VITEST_FS_MODULE_CACHE` and
-`OPENCLAW_VITEST_FS_MODULE_CACHE_PATH` controls retain their ownership and
+`test.fsModuleCachePath`; the existing `CARAPACE_VITEST_FS_MODULE_CACHE` and
+`CARAPACE_VITEST_FS_MODULE_CACHE_PATH` controls retain their ownership and
 disable behavior. Cache-key plugins use `defineCacheKeyGenerator`.
 Inline projects inherit root configuration in Vitest 5, including concatenated
 setup and include arrays. The four UI E2E resource projects declare
@@ -393,7 +393,7 @@ Every preparation compiles current source; checkout `dist/` is neither an input
 nor a fallback. Build errors, missing artifacts, and changes to recorded build
 inputs fail the run. Compilation includes the native subprocess fixtures before
 they impose resource limits. Third-party dependencies remain external except for
-the always-bundled OpenClaw packages. fs-safe remains external so its native loader
+the always-bundled Carapace packages. fs-safe remains external so its native loader
 resolves the optional platform package from fs-safe's own dependency scope, including
 nested pnpm installs. Compiled workers use that same installed package; they do not
 copy native binaries. The default stays off, and the existing `off`/`auto`/`require`
@@ -417,8 +417,8 @@ trailer.
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm test`                                       | Explicit file/directory targets route through scoped Vitest lanes. Untargeted runs are full-suite proof: fixed shard groups expand to leaf configs for local parallel execution, with the expected shard fanout printed before starting. The extension group always expands to per-extension shard configs instead of one giant root-project process. |
 | `pnpm test:changed`                               | Cheap smart changed-test run: precise targets from direct test edits, sibling `*.test.ts` files, explicit source mappings, and the local import graph. Broad/config/package changes are skipped unless they map to precise tests.                                                                                                                     |
-| `OPENCLAW_TEST_CHANGED_BROAD=1 pnpm test:changed` | Explicit broad changed-test run; use when a test harness/config/package edit should fall back to Vitest's broader changed-test behavior.                                                                                                                                                                                                              |
-| `pnpm test:force`                                 | Frees the configured OpenClaw gateway port (default `18789`), then runs the full suite with an isolated gateway port so server tests do not collide with a running instance.                                                                                                                                                                          |
+| `CARAPACE_TEST_CHANGED_BROAD=1 pnpm test:changed` | Explicit broad changed-test run; use when a test harness/config/package edit should fall back to Vitest's broader changed-test behavior.                                                                                                                                                                                                              |
+| `pnpm test:force`                                 | Frees the configured Carapace gateway port (default `18789`), then runs the full suite with an isolated gateway port so server tests do not collide with a running instance.                                                                                                                                                                          |
 | `pnpm test:coverage`                              | Emits an informational V8 coverage report for the default unit lane (`vitest.unit.config.ts`); no coverage thresholds are enforced.                                                                                                                                                                                                                   |
 | `pnpm test:coverage:changed`                      | Unit coverage only for files changed since `origin/main`.                                                                                                                                                                                                                                                                                             |
 | `pnpm changed:lanes`                              | Shows the architectural lanes triggered by the diff against `origin/main`.                                                                                                                                                                                                                                                                            |
@@ -555,11 +555,11 @@ Live-aware setup still loads the original profile and stages live state when
 requested. A bounded invocation artifact carries the original home to that setup;
 it does not grant live access, and hermetic setup never consults it. Known
 hermetic selections ignore ambient live and real-home flags. Known wholly
-live-aware selections retain explicit `OPENCLAW_LIVE_USE_REAL_HOME` behavior.
+live-aware selections retain explicit `CARAPACE_LIVE_USE_REAL_HOME` behavior.
 An explicitly real-home live invocation is refused before config loading if its
 selection mixes home policies or cannot be classified, including custom configs
 and ambiguous project selectors. Run hermetic tests without `LIVE`,
-`OPENCLAW_LIVE_TEST`, `OPENCLAW_LIVE_GATEWAY`, and `OPENCLAW_LIVE_USE_REAL_HOME`
+`CARAPACE_LIVE_TEST`, `CARAPACE_LIVE_GATEWAY`, and `CARAPACE_LIVE_USE_REAL_HOME`
 using `node scripts/run-vitest.mjs <test-path>`, then run the intended live
 selection separately using `node scripts/test-live.mts -- <live-test-path>`.
 The launcher does not split runs or change watch, filter, or report semantics.
@@ -591,12 +591,12 @@ This is home isolation, not a filesystem sandbox: explicit absolute paths,
 `os.userInfo()` account lookup, children with stripped or replaced home variables,
 and intentionally real-home live execution remain outside its protection.
 
-- `src/test-utils/openclaw-test-state.ts`: use from Vitest when a test needs an isolated `HOME`, `OPENCLAW_STATE_DIR`, `OPENCLAW_CONFIG_PATH`, config fixture, workspace, agent dir, or auth-profile store.
-- `pnpm test:env-mutations:report`: non-blocking report of tests/harnesses that mutate `HOME`, `OPENCLAW_STATE_DIR`, `OPENCLAW_CONFIG_PATH`, `OPENCLAW_WORKSPACE_DIR`, or related env keys directly. Use it to find migration candidates for the shared test-state helper.
-- `test/helpers/openclaw-test-instance.ts`: process-level E2E tests needing a running Gateway, CLI env, log capture, and cleanup in one place.
-- Docker/Bash E2E lanes that source `scripts/lib/docker-e2e-image.sh` can pass `docker_e2e_test_state_shell_b64 <label> <scenario>` into the container and decode it with `scripts/lib/openclaw-e2e-instance.sh`; multi-home scripts can pass `docker_e2e_test_state_function_b64` and call `openclaw_test_state_create <label> <scenario>` in each flow. `node --import tsx scripts/lib/openclaw-test-state.mts -- create --label <name> --scenario <name> --env-file <path> --json` writes a sourceable host env file (the `--` before `create` keeps newer Node runtimes from treating `--env-file` as a Node flag). Lanes that launch a Gateway can source `scripts/lib/openclaw-e2e-instance.sh` for entrypoint resolution, mock OpenAI startup, foreground/background launch, readiness probes, state env export, log dumps, and process cleanup.
+- `src/test-utils/carapace-test-state.ts`: use from Vitest when a test needs an isolated `HOME`, `CARAPACE_STATE_DIR`, `CARAPACE_CONFIG_PATH`, config fixture, workspace, agent dir, or auth-profile store.
+- `pnpm test:env-mutations:report`: non-blocking report of tests/harnesses that mutate `HOME`, `CARAPACE_STATE_DIR`, `CARAPACE_CONFIG_PATH`, `CARAPACE_WORKSPACE_DIR`, or related env keys directly. Use it to find migration candidates for the shared test-state helper.
+- `test/helpers/carapace-test-instance.ts`: process-level E2E tests needing a running Gateway, CLI env, log capture, and cleanup in one place.
+- Docker/Bash E2E lanes that source `scripts/lib/docker-e2e-image.sh` can pass `docker_e2e_test_state_shell_b64 <label> <scenario>` into the container and decode it with `scripts/lib/carapace-e2e-instance.sh`; multi-home scripts can pass `docker_e2e_test_state_function_b64` and call `carapace_test_state_create <label> <scenario>` in each flow. `node --import tsx scripts/lib/carapace-test-state.mts -- create --label <name> --scenario <name> --env-file <path> --json` writes a sourceable host env file (the `--` before `create` keeps newer Node runtimes from treating `--env-file` as a Node flag). Lanes that launch a Gateway can source `scripts/lib/carapace-e2e-instance.sh` for entrypoint resolution, mock OpenAI startup, foreground/background launch, readiness probes, state env export, log dumps, and process cleanup.
 
-`createOpenClawTestState` selects and owns temporary paths and process environment
+`createCarapaceTestState` selects and owns temporary paths and process environment
 selectors. It is not filesystem sandboxing and does not stop external producers.
 Await its asynchronous `restoreEnv()`; stop and join required producers before
 restoring selectors or removing state. Runtime reproductions of state-selection
@@ -605,18 +605,18 @@ to operator stores, not merely temporary `HOME` or state-directory overrides.
 
 ## Control UI, TUI, and extension lanes
 
-- **Control UI E2E:** `pnpm test:ui:e2e` runs the Vitest + Playwright lane, usually against a mocked Gateway WebSocket. Four resource groups retain two execution phases: `ui-e2e-bundled` and `ui-e2e-standalone` run first with at most two workers total; `ui-e2e-serial` and `ui-e2e-serial-standalone` then share one worker. The two bundle consumers lazily share one temporary UI bundle/preview until the invocation closes. Standalone projects own their fixture, source, or custom-build servers; selecting only standalone suites avoids the shared bundle build. Every selected project receives Chromium metadata, and new E2E files default to parallel bundled ownership. The root config retains the full discovery inventory: `ui/src/**/*.e2e.test.ts` plus the QA Lab media-transcript and OpenClaw-delegation real-Gateway suites. Shared mocks/controls live in `ui/src/test-helpers/control-ui-e2e.ts`. Some suites start isolated real Gateways; `OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY=1` excludes them. `pnpm test:e2e` includes this lane, with no additional CI jobs for resource groups. Use Testbox/Crabbox only when clean Linux/browser parity is part of the proof. In a linked worktree, `node scripts/run-vitest.mjs run --config test/vitest/vitest.ui-e2e.config.ts --configLoader runner ui/src/e2e/chat-flow.messaging.e2e.test.ts` avoids pnpm dependency reconciliation for a targeted local run.
+- **Control UI E2E:** `pnpm test:ui:e2e` runs the Vitest + Playwright lane, usually against a mocked Gateway WebSocket. Four resource groups retain two execution phases: `ui-e2e-bundled` and `ui-e2e-standalone` run first with at most two workers total; `ui-e2e-serial` and `ui-e2e-serial-standalone` then share one worker. The two bundle consumers lazily share one temporary UI bundle/preview until the invocation closes. Standalone projects own their fixture, source, or custom-build servers; selecting only standalone suites avoids the shared bundle build. Every selected project receives Chromium metadata, and new E2E files default to parallel bundled ownership. The root config retains the full discovery inventory: `ui/src/**/*.e2e.test.ts` plus the QA Lab media-transcript and Carapace-delegation real-Gateway suites. Shared mocks/controls live in `ui/src/test-helpers/control-ui-e2e.ts`. Some suites start isolated real Gateways; `CARAPACE_UI_E2E_SKIP_REAL_GATEWAY=1` excludes them. `pnpm test:e2e` includes this lane, with no additional CI jobs for resource groups. Use Testbox/Crabbox only when clean Linux/browser parity is part of the proof. In a linked worktree, `node scripts/run-vitest.mjs run --config test/vitest/vitest.ui-e2e.config.ts --configLoader runner ui/src/e2e/chat-flow.messaging.e2e.test.ts` avoids pnpm dependency reconciliation for a targeted local run.
 - **Control UI real-Gateway approval proof:** Check default and explicit Full Access delegation against an isolated Gateway with a mock provider. Build the runtime before running the targeted proof:
 
   ```bash
   pnpm build qaRuntime
   node scripts/run-vitest.mjs run --config test/vitest/vitest.ui-e2e.config.ts \
-    --configLoader runner extensions/qa-lab/src/control-ui-openclaw-delegation.real-gateway.e2e.test.ts
+    --configLoader runner extensions/qa-lab/src/control-ui-carapace-delegation.real-gateway.e2e.test.ts
   ```
 
-- **TUI PTY tests:** `node scripts/run-vitest.mjs run --config test/vitest/vitest.tui-pty.config.ts` runs the fast fake-backend PTY lane. `OPENCLAW_TUI_PTY_INCLUDE_LOCAL=1` or `pnpm tui:pty:test:watch --mode local` runs the slower `tui --local` smoke, which mocks only the external model endpoint. CI also sets `OPENCLAW_TUI_PTY_USE_BUILT_CLI=1` after building `dist/`; use that flag only when exact-head built artifacts already exist. Assert stable visible text or fixture calls, not raw ANSI snapshots.
+- **TUI PTY tests:** `node scripts/run-vitest.mjs run --config test/vitest/vitest.tui-pty.config.ts` runs the fast fake-backend PTY lane. `CARAPACE_TUI_PTY_INCLUDE_LOCAL=1` or `pnpm tui:pty:test:watch --mode local` runs the slower `tui --local` smoke, which mocks only the external model endpoint. CI also sets `CARAPACE_TUI_PTY_USE_BUILT_CLI=1` after building `dist/`; use that flag only when exact-head built artifacts already exist. Assert stable visible text or fixture calls, not raw ANSI snapshots.
 - `pnpm test:extensions` and `pnpm test extensions` run all extension/plugin shards. Heavy channel plugins, the browser plugin, and OpenAI run as dedicated shards; other plugin groups stay batched. `pnpm test extensions/<id>` runs one bundled plugin lane.
-- **Browser native host:** `node scripts/run-vitest.mjs extensions/browser/src/browser/extension-install.native-host.e2e.test.ts` runs the real native messaging launcher on macOS or Linux against built dist with synthetic installation state; it does not launch Chrome or a Gateway. Windows skips this POSIX process proof because [native bootstrap uses manual pairing there](/tools/chrome-extension#requirements). The E2E owner prepares artifacts before workers. With an already-built candidate, prefix the command with `OPENCLAW_E2E_USE_PREBUILT_DIST=1` to reuse it; missing artifacts fail the test. This case belongs to `pnpm test:e2e`, not the browser source shard or untargeted `pnpm test` unit suite. Linux CI runs it explicitly in `build-artifacts` and validates a JSON report proving the exact named test passed. The workflow skips only frozen historical checkouts missing this test file; that skip is unavailable proof, not a pass or coverage.
+- **Browser native host:** `node scripts/run-vitest.mjs extensions/browser/src/browser/extension-install.native-host.e2e.test.ts` runs the real native messaging launcher on macOS or Linux against built dist with synthetic installation state; it does not launch Chrome or a Gateway. Windows skips this POSIX process proof because [native bootstrap uses manual pairing there](/tools/chrome-extension#requirements). The E2E owner prepares artifacts before workers. With an already-built candidate, prefix the command with `CARAPACE_E2E_USE_PREBUILT_DIST=1` to reuse it; missing artifacts fail the test. This case belongs to `pnpm test:e2e`, not the browser source shard or untargeted `pnpm test` unit suite. Linux CI runs it explicitly in `build-artifacts` and validates a JSON report proving the exact named test passed. The workflow skips only frozen historical checkouts missing this test file; that skip is unavailable proof, not a pass or coverage.
 - Source files with sibling tests map to that sibling before falling back to wider directory globs. Helper edits under `src/channels/plugins/contracts/test-helpers`, `src/plugin-sdk/test-helpers`, and `src/plugins/contracts` use a local import graph to run importing tests instead of broad-running every shard when the dependency path is precise.
 - Contract directory targets fan out to their contract lanes: `pnpm test src/channels/plugins/contracts` runs the four channel contract configs and `pnpm test src/plugins/contracts` runs the plugin contracts config, since the generic `channels`/`plugins` projects exclude `contracts/**`.
 - `auto-reply` splits into three dedicated configs (`core`, `top-level`, `reply`) so the reply harness does not dominate the lighter top-level status/token/helper tests.
@@ -634,7 +634,7 @@ finalization before another case starts. Acquire and close browser contexts thro
 `suite.newBrowserContext` and `suite.closeBrowserContext` so late acquisitions and
 pending closes remain owned.
 
-Retain test state immediately after `createOpenClawTestState` resolves, including
+Retain test state immediately after `createCarapaceTestState` resolves, including
 when later config writes, imports, or startup fail. Hold original startup promises,
 not just their timeout wrappers. Close required producers before releasing state.
 For producers shared across cases, as in the MCP and auth suites, use the suite's
@@ -653,7 +653,7 @@ including cooperating background refreshes registered at their producer with
 `trackAsyncWork`. Connection-dependent worker sidecars must stop successfully
 before supervisor transports or other dependencies close; failure retains those
 dependencies and rejects shutdown. Register the actual operation, not just its
-response or timeout wrapper; cache eviction does not end its lifetime. `withOpenClawTestState` likewise
+response or timeout wrapper; cache eviction does not end its lifetime. `withCarapaceTestState` likewise
 joins registered callback descendants before releasing state. MCP requests observe
 both caller cancellation and their closing work owner, so shutdown cancels pending
 requests before joining handlers and disposing transports. These scopes do not
@@ -679,13 +679,13 @@ capture is enabled, sharing that directory across the module's scenarios. The No
 `createControlUiE2eArtifactDir(scope, parentDir?)` helper in
 `ui/src/test-helpers/control-ui-e2e-artifacts.ts` prints the actual allocated path.
 An explicit parent wins; otherwise it uses the trimmed existing
-`OPENCLAW_UI_E2E_ARTIFACT_DIR`, then the repository's `.artifacts/control-ui-e2e`
+`CARAPACE_UI_E2E_ARTIFACT_DIR`, then the repository's `.artifacts/control-ui-e2e`
 parent. Existing feature-specific directory controls and script output arguments
 select parents, with unique children beneath them. Explicit screenshot filename
 controls preserve the basename and print the relocated path.
 
-Keep capture gates independent from allocation: `OPENCLAW_CAPTURE_UI_PROOF`,
-`OPENCLAW_UI_E2E_RECORD`, and output-presence gates retain their existing meanings.
+Keep capture gates independent from allocation: `CARAPACE_CAPTURE_UI_PROOF`,
+`CARAPACE_UI_E2E_RECORD`, and output-presence gates retain their existing meanings.
 For per-attempt captures, allocate during scenario execution or `beforeEach`.
 Pass the same owner to shared capture helpers so screenshots, reports, and video
 stay together. Distinguish stage names within an attempt. Close the browser context
@@ -698,7 +698,7 @@ raw video have their own cleanup. New captures cannot recover overwritten eviden
 do not describe a replay as recovery of lost files.
 
 Timeout diagnostics allocate fresh children beneath the existing
-`OPENCLAW_UI_E2E_DIAGNOSTIC_DIR` or default timeout directory, keeping each PNG and
+`CARAPACE_UI_E2E_DIAGNOSTIC_DIR` or default timeout directory, keeping each PNG and
 JSON report together. Their `ci.shardIndex` and `ci.vitestShardCount` fields record
 `VITEST_SHARD_INDEX` and `VITEST_SHARD_COUNT`, respectively, as supplied by normal
 CI. Missing values remain `null`; manual and separate release E2E invocations do
@@ -756,16 +756,16 @@ corrupted video is not continuous-flow proof.
 
 - Gateway tests are included in the untargeted `pnpm test` full suite; run them alone with `pnpm test:gateway`.
 - `pnpm test:e2e`: repo E2E aggregate = `pnpm test:e2e:gateway && pnpm test:e2e:agent-plugin-gateway && pnpm test:ui:e2e`.
-- `pnpm test:e2e:gateway`: gateway end-to-end smoke tests (multi-instance WS/HTTP/node pairing). Defaults to `threads` + `isolate: false` with one worker in `vitest.e2e.config.ts`; opt into parallelism with `OPENCLAW_E2E_WORKERS=<n>` (capped at 16), and enable verbose logs with `OPENCLAW_E2E_VERBOSE=1`.
+- `pnpm test:e2e:gateway`: gateway end-to-end smoke tests (multi-instance WS/HTTP/node pairing). Defaults to `threads` + `isolate: false` with one worker in `vitest.e2e.config.ts`; opt into parallelism with `CARAPACE_E2E_WORKERS=<n>` (capped at 16), and enable verbose logs with `CARAPACE_E2E_VERBOSE=1`.
   Broad runs prepare the shared runtime once, then use four sequential Vitest shards in fresh processes to bound worker memory. The worker limit applies within each process; ordinary test failures are retained while remaining shards finish. Explicit filters, watch mode, caller-supplied shards, coverage, and report-output options keep one direct invocation.
-- `pnpm test:live`: provider live tests (Claude/Minimax/DeepSeek/z.ai/etc, gated by `*.live.test.ts`). Requires API keys and `LIVE=1` (or `OPENCLAW_LIVE_TEST=1`) to unskip; verbose output with `OPENCLAW_LIVE_TEST_QUIET=0`.
+- `pnpm test:live`: provider live tests (Claude/Minimax/DeepSeek/z.ai/etc, gated by `*.live.test.ts`). Requires API keys and `LIVE=1` (or `CARAPACE_LIVE_TEST=1`) to unskip; verbose output with `CARAPACE_LIVE_TEST_QUIET=0`.
 
 ## Full Docker suite (`pnpm test:docker:all`)
 
-Builds the shared live-test image, packs OpenClaw once as an npm tarball, builds/reuses a bare Node/Git runner image plus a functional image that installs that tarball into `/app`, then runs Docker smoke lanes through a weighted scheduler. `scripts/package-openclaw-for-docker.mjs` is the stable local/CI package packer entrypoint and validates the tarball plus `dist/postinstall-inventory.json` before Docker consumes it.
+Builds the shared live-test image, packs Carapace once as an npm tarball, builds/reuses a bare Node/Git runner image plus a functional image that installs that tarball into `/app`, then runs Docker smoke lanes through a weighted scheduler. `scripts/package-carapace-for-docker.mjs` is the stable local/CI package packer entrypoint and validates the tarball plus `dist/postinstall-inventory.json` before Docker consumes it.
 
-- Bare image (`OPENCLAW_DOCKER_E2E_BARE_IMAGE`): installer/update/plugin-dependency lanes; mounts the prebuilt tarball instead of copied repo sources.
-- Functional image (`OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE`): normal built-app functionality lanes.
+- Bare image (`CARAPACE_DOCKER_E2E_BARE_IMAGE`): installer/update/plugin-dependency lanes; mounts the prebuilt tarball instead of copied repo sources.
+- Functional image (`CARAPACE_DOCKER_E2E_FUNCTIONAL_IMAGE`): normal built-app functionality lanes.
 - Lane definitions: `scripts/lib/docker-e2e-scenarios.mts`. Planner: `scripts/lib/docker-e2e-plan.mts`. Executor: `scripts/test-docker-all.mjs`.
 - `node scripts/test-docker-all.mjs --plan-json` emits the scheduler-owned CI plan (lanes, image kinds, package/live-image needs, state scenarios, credential checks) without building or running Docker.
 
@@ -773,38 +773,38 @@ Scheduling knobs (env vars, defaults in parentheses):
 
 | Env var                                                                                                         | Default             | Purpose                                                                                                                                                                                                                                                                                    |
 | --------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `OPENCLAW_DOCKER_ALL_PARALLELISM`                                                                               | 10                  | Process slots.                                                                                                                                                                                                                                                                             |
-| `OPENCLAW_DOCKER_ALL_TAIL_PARALLELISM`                                                                          | 10                  | Provider-sensitive tail pool.                                                                                                                                                                                                                                                              |
-| `OPENCLAW_DOCKER_ALL_LIVE_LIMIT`                                                                                | 9                   | Heavy live-provider lane cap.                                                                                                                                                                                                                                                              |
-| `OPENCLAW_DOCKER_ALL_NPM_LIMIT`                                                                                 | 5                   | npm-resource lane cap.                                                                                                                                                                                                                                                                     |
-| `OPENCLAW_DOCKER_ALL_SERVICE_LIMIT`                                                                             | 7                   | Service-resource lane cap.                                                                                                                                                                                                                                                                 |
-| `OPENCLAW_DOCKER_ALL_LIVE_CLAUDE_LIMIT` / `_CODEX_LIMIT` / `_GEMINI_LIMIT` / `_DROID_LIMIT` / `_OPENCODE_LIMIT` | 4                   | Per-provider heavy-lane caps.                                                                                                                                                                                                                                                              |
-| `OPENCLAW_DOCKER_ALL_LIVE_OPENAI_LIMIT` / `_TELEGRAM_LIMIT`                                                     | 1                   | Narrower per-provider caps.                                                                                                                                                                                                                                                                |
-| `OPENCLAW_DOCKER_ALL_WEIGHT_LIMIT` / `OPENCLAW_DOCKER_ALL_DOCKER_LIMIT`                                         | -                   | Override for larger hosts.                                                                                                                                                                                                                                                                 |
-| `OPENCLAW_DOCKER_ALL_START_STAGGER_MS`                                                                          | 2000                | Delay between lane starts, avoids local Docker daemon create storms.                                                                                                                                                                                                                       |
-| `OPENCLAW_DOCKER_ALL_LANE_TIMEOUT_MS`                                                                           | 7,200,000 (120 min) | Per-lane fallback timeout; selected live/tail lanes use tighter caps.                                                                                                                                                                                                                      |
-| `OPENCLAW_DOCKER_ALL_LIVE_RETRIES`                                                                              | 1                   | Retries for transient live-provider failures.                                                                                                                                                                                                                                              |
-| `OPENCLAW_DOCKER_ALL_DRY_RUN`                                                                                   | off                 | Print the lane manifest without running Docker.                                                                                                                                                                                                                                            |
-| `OPENCLAW_DOCKER_ALL_STATUS_INTERVAL_MS`                                                                        | 30000               | Active-lane status print interval.                                                                                                                                                                                                                                                         |
-| `OPENCLAW_DOCKER_ALL_TIMINGS`                                                                                   | on                  | Reuse `.artifacts/docker-tests/lane-timings.json` for longest-first ordering; set to `0` to disable.                                                                                                                                                                                       |
-| `OPENCLAW_DOCKER_ALL_LIVE_MODE`                                                                                 | -                   | `skip` for deterministic/local lanes only, `only` for live-provider lanes only. Aliases: `pnpm test:docker:local:all`, `pnpm test:docker:live:all`. Live-only mode merges main and tail live lanes into one longest-first pool so provider buckets pack Claude/Codex/Gemini work together. |
-| `OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS`                                                               | 180                 | CLI backend Docker setup timeout.                                                                                                                                                                                                                                                          |
+| `CARAPACE_DOCKER_ALL_PARALLELISM`                                                                               | 10                  | Process slots.                                                                                                                                                                                                                                                                             |
+| `CARAPACE_DOCKER_ALL_TAIL_PARALLELISM`                                                                          | 10                  | Provider-sensitive tail pool.                                                                                                                                                                                                                                                              |
+| `CARAPACE_DOCKER_ALL_LIVE_LIMIT`                                                                                | 9                   | Heavy live-provider lane cap.                                                                                                                                                                                                                                                              |
+| `CARAPACE_DOCKER_ALL_NPM_LIMIT`                                                                                 | 5                   | npm-resource lane cap.                                                                                                                                                                                                                                                                     |
+| `CARAPACE_DOCKER_ALL_SERVICE_LIMIT`                                                                             | 7                   | Service-resource lane cap.                                                                                                                                                                                                                                                                 |
+| `CARAPACE_DOCKER_ALL_LIVE_CLAUDE_LIMIT` / `_CODEX_LIMIT` / `_GEMINI_LIMIT` / `_DROID_LIMIT` / `_OPENCODE_LIMIT` | 4                   | Per-provider heavy-lane caps.                                                                                                                                                                                                                                                              |
+| `CARAPACE_DOCKER_ALL_LIVE_OPENAI_LIMIT` / `_TELEGRAM_LIMIT`                                                     | 1                   | Narrower per-provider caps.                                                                                                                                                                                                                                                                |
+| `CARAPACE_DOCKER_ALL_WEIGHT_LIMIT` / `CARAPACE_DOCKER_ALL_DOCKER_LIMIT`                                         | -                   | Override for larger hosts.                                                                                                                                                                                                                                                                 |
+| `CARAPACE_DOCKER_ALL_START_STAGGER_MS`                                                                          | 2000                | Delay between lane starts, avoids local Docker daemon create storms.                                                                                                                                                                                                                       |
+| `CARAPACE_DOCKER_ALL_LANE_TIMEOUT_MS`                                                                           | 7,200,000 (120 min) | Per-lane fallback timeout; selected live/tail lanes use tighter caps.                                                                                                                                                                                                                      |
+| `CARAPACE_DOCKER_ALL_LIVE_RETRIES`                                                                              | 1                   | Retries for transient live-provider failures.                                                                                                                                                                                                                                              |
+| `CARAPACE_DOCKER_ALL_DRY_RUN`                                                                                   | off                 | Print the lane manifest without running Docker.                                                                                                                                                                                                                                            |
+| `CARAPACE_DOCKER_ALL_STATUS_INTERVAL_MS`                                                                        | 30000               | Active-lane status print interval.                                                                                                                                                                                                                                                         |
+| `CARAPACE_DOCKER_ALL_TIMINGS`                                                                                   | on                  | Reuse `.artifacts/docker-tests/lane-timings.json` for longest-first ordering; set to `0` to disable.                                                                                                                                                                                       |
+| `CARAPACE_DOCKER_ALL_LIVE_MODE`                                                                                 | -                   | `skip` for deterministic/local lanes only, `only` for live-provider lanes only. Aliases: `pnpm test:docker:local:all`, `pnpm test:docker:live:all`. Live-only mode merges main and tail live lanes into one longest-first pool so provider buckets pack Claude/Codex/Gemini work together. |
+| `CARAPACE_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS`                                                               | 180                 | CLI backend Docker setup timeout.                                                                                                                                                                                                                                                          |
 
-Env var pattern for resource caps is `OPENCLAW_DOCKER_ALL_<RESOURCE>_LIMIT` (resource name uppercased, non-alphanumerics collapsed to `_`).
+Env var pattern for resource caps is `CARAPACE_DOCKER_ALL_<RESOURCE>_LIMIT` (resource name uppercased, non-alphanumerics collapsed to `_`).
 
-Other behavior: the runner preflights Docker by default, cleans stale OpenClaw E2E containers, shares provider CLI tool caches between compatible lanes, and stops scheduling new pooled lanes after the first failure unless `OPENCLAW_DOCKER_ALL_FAIL_FAST=0` is set. If one lane exceeds the effective weight/resource cap on a low-parallelism host, it can still start from an empty pool and run alone until it releases capacity. Per-lane logs, `summary.json`, `failures.json`, and phase timings write under `.artifacts/docker-tests/<run-id>/`; use `pnpm test:docker:timings <summary.json>` to inspect slow lanes and `pnpm test:docker:rerun <run-id|summary.json|failures.json>` to print cheap targeted rerun commands.
+Other behavior: the runner preflights Docker by default, cleans stale Carapace E2E containers, shares provider CLI tool caches between compatible lanes, and stops scheduling new pooled lanes after the first failure unless `CARAPACE_DOCKER_ALL_FAIL_FAST=0` is set. If one lane exceeds the effective weight/resource cap on a low-parallelism host, it can still start from an empty pool and run alone until it releases capacity. Per-lane logs, `summary.json`, `failures.json`, and phase timings write under `.artifacts/docker-tests/<run-id>/`; use `pnpm test:docker:timings <summary.json>` to inspect slow lanes and `pnpm test:docker:rerun <run-id|summary.json|failures.json>` to print cheap targeted rerun commands.
 
 ### Notable Docker lanes
 
 | Command                                                                                      | Verifies                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm test:docker:browser-cdp-snapshot`                                                      | Chromium-backed source E2E container with raw CDP + isolated Gateway; `browser doctor --deep` CDP role snapshots include link URLs, cursor-promoted clickables, iframe refs, and frame metadata.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `pnpm test:docker:skill-install`                                                             | Installs the packed tarball in a bare Docker runner with `skills.install.allowUploadedArchives: false`, resolves a current skill slug from live ClawHub search, installs via `openclaw skills install`, and verifies `SKILL.md`, `.clawhub/origin.json`, `.clawhub/lock.json`, and `skills info --json`.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `pnpm test:docker:skill-install`                                                             | Installs the packed tarball in a bare Docker runner with `skills.install.allowUploadedArchives: false`, resolves a current skill slug from live ClawHub search, installs via `carapace skills install`, and verifies `SKILL.md`, `.clawhub/origin.json`, `.clawhub/lock.json`, and `skills info --json`.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `pnpm test:docker:live-cli-backend:claude`, `:claude:resume`, `:claude:cache`, `:claude:mcp` | Focused CLI backend live probes; `:claude:cache` settles the no-tool prompt shape, then requires at least 90% prompt-cache reuse on the following dirty-workspace resume and on the steady resume after a thinking-level change. Gemini has matching `:resume` and `:mcp` aliases.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `pnpm test:docker:openwebui`                                                                 | Dockerized OpenClaw + Open WebUI: sign in, check `/api/models`, run a real proxied chat through `/api/chat/completions`. Requires a usable live model key and pulls an external image; not expected to be CI-stable like the unit/e2e suites.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `pnpm test:docker:mcp-channels`                                                              | Seeded Gateway container plus a client container spawning `openclaw mcp serve`: routed conversation discovery, transcript reads, attachment metadata, live event queue behavior, outbound send routing, and Claude-style channel + permission notifications over the real stdio bridge (assertion reads raw stdio MCP frames directly).                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `pnpm test:docker:openwebui`                                                                 | Dockerized Carapace + Open WebUI: sign in, check `/api/models`, run a real proxied chat through `/api/chat/completions`. Requires a usable live model key and pulls an external image; not expected to be CI-stable like the unit/e2e suites.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `pnpm test:docker:mcp-channels`                                                              | Seeded Gateway container plus a client container spawning `carapace mcp serve`: routed conversation discovery, transcript reads, attachment metadata, live event queue behavior, outbound send routing, and Claude-style channel + permission notifications over the real stdio bridge (assertion reads raw stdio MCP frames directly).                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `pnpm test:docker:upgrade-survivor`                                                          | Installs the packed tarball over a dirty old-user fixture, runs package update plus non-interactive doctor without live provider/channel keys, starts a loopback Gateway, checks agents/channel config/plugin allowlists/workspace/session state/stale legacy plugin dependency state/startup/RPC status survive.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `pnpm test:docker:published-upgrade-survivor`                                                | Installs `openclaw@latest` by default, seeds realistic existing-user files, configures via a baked `openclaw config set` recipe, updates to the packed tarball, runs non-interactive doctor, writes `.artifacts/upgrade-survivor/summary.json`, checks `/healthz`, `/readyz`, RPC status. Override with `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC`, expand a matrix with `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS`, or add scenario fixtures with `OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS=reported-issues` (includes `configured-plugin-installs` and `stale-source-plugin-shadow`). Package Acceptance exposes these as `published_upgrade_survivor_baseline(s)` / `_scenarios` and resolves meta tokens like `last-stable-4` or `all-since-2026.4.23`. |
+| `pnpm test:docker:published-upgrade-survivor`                                                | Installs `carapace@latest` by default, seeds realistic existing-user files, configures via a baked `carapace config set` recipe, updates to the packed tarball, runs non-interactive doctor, writes `.artifacts/upgrade-survivor/summary.json`, checks `/healthz`, `/readyz`, RPC status. Override with `CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC`, expand a matrix with `CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS`, or add scenario fixtures with `CARAPACE_UPGRADE_SURVIVOR_SCENARIOS=reported-issues` (includes `configured-plugin-installs` and `stale-source-plugin-shadow`). Package Acceptance exposes these as `published_upgrade_survivor_baseline(s)` / `_scenarios` and resolves meta tokens like `last-stable-4` or `all-since-2026.4.23`. |
 | `pnpm test:docker:update-migration`                                                          | Published-upgrade survivor harness in the `plugin-deps-cleanup` scenario, starting at the latest stable release by default. The `Update Migration` workflow pins that baseline before fanout; pass `baselines=all-since-2026.4.23` for an explicit historical cleanup replay.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `pnpm test:docker:plugins`                                                                   | Install/update smoke for local path, `file:`, npm registry packages with hoisted dependencies, git moving refs, ClawHub fixtures, marketplace updates, and Claude-bundle enable/inspect.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -813,7 +813,7 @@ Other behavior: the runner preflights Docker by default, cleans stale OpenClaw E
 | Command                                      | Verifies                                                                                                                                                                                                                                                           |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pnpm test:e2e:openshell`                    | Real OpenShell gateway, isolated control-plane workspace, custom image, remote and mirrored filesystems, eight-way mixed exec/file stress, exact host/remote inventories, failure recovery, SSH cleanup, protected host metadata, and deny/allow network policies. |
-| `pnpm test:docker:package-install`           | Packed OpenClaw npm artifact installation into a clean global prefix, then CLI version and help startup from the installed package.                                                                                                                                |
+| `pnpm test:docker:package-install`           | Packed Carapace npm artifact installation into a clean global prefix, then CLI version and help startup from the installed package.                                                                                                                                |
 | `pnpm test:docker:openai-web-search-minimal` | Mocked TLS endpoint with a private test CA, isolated Gateway startup, and web-search request handling through the configured certificate trust path.                                                                                                               |
 | `pnpm test:docker:browser-cdp-snapshot`      | Chromium startup, raw CDP connectivity, isolated Gateway browser commands, doctor output, and accessibility snapshot roles.                                                                                                                                        |
 | `pnpm test:docker:kitchen-sink-rpc`          | Installed plugin commands and catalog tools, read-only Gateway RPC traversal, authentication boundaries, channel lifecycle, and resource ceilings.                                                                                                                 |
@@ -832,8 +832,8 @@ For local PR land/gate checks, run:
 
 If `pnpm test` flakes on a loaded host, rerun once before treating it as a regression, then isolate with `pnpm test <path/to/test>`. For memory-constrained hosts:
 
-- `OPENCLAW_VITEST_MAX_WORKERS=1 pnpm test`
-- `OPENCLAW_VITEST_FS_MODULE_CACHE_PATH=/tmp/openclaw-vitest-cache pnpm test:changed`
+- `CARAPACE_VITEST_MAX_WORKERS=1 pnpm test`
+- `CARAPACE_VITEST_FS_MODULE_CACHE_PATH=/tmp/carapace-vitest-cache pnpm test:changed`
 
 ## JSON reports across native processes
 
@@ -889,9 +889,9 @@ adding `--reporter=json` alone does not override a reporter tuple's own `outputF
 
 - `pnpm test:perf:imports`: enables Vitest import-duration + import-breakdown reporting, while still using scoped lane routing for explicit file/directory targets. `pnpm test:perf:imports:changed` scopes the same profiling to files changed since `origin/main`.
 - `pnpm test:perf:changed:bench -- --ref <git-ref>` benchmarks the routed changed-mode path against the native root-project run for the same committed git diff; `pnpm test:perf:changed:bench -- --worktree` benchmarks the current worktree change set without committing first.
-- `pnpm test:perf:profile:main` writes a CPU profile for the Vitest main thread; `pnpm test:perf:profile:runner` writes CPU + heap profiles for each unit worker. Both print their output directory (a temporary directory by default). Use `-- --output-dir <dir>` or `OPENCLAW_VITEST_PROFILE_DIR` to retain profiles at a chosen location.
+- `pnpm test:perf:profile:main` writes a CPU profile for the Vitest main thread; `pnpm test:perf:profile:runner` writes CPU + heap profiles for each unit worker. Both print their output directory (a temporary directory by default). Use `-- --output-dir <dir>` or `CARAPACE_VITEST_PROFILE_DIR` to retain profiles at a chosen location.
 - `pnpm test:perf:groups --full-suite --allow-failures --output .artifacts/test-perf/baseline-before.json`: runs every full-suite Vitest leaf config serially and writes grouped duration data plus per-config JSON/log artifacts. Full-suite reports isolate files by default so retained module graphs and GC pauses from earlier files are not charged to later assertions; pass `-- --no-isolate` only when intentionally profiling shared-worker accumulation. `pnpm test:perf:groups:compare .artifacts/test-perf/baseline-before.json .artifacts/test-perf/after-agent.json` compares grouped reports after a performance-focused change.
-- Full, extension, and include-pattern shard runs update local timing data in `.artifacts/vitest-shard-timings.json`; later whole-config runs use those timings to balance slow and fast shards. Include-pattern CI shards append the shard name to the timing key, which keeps filtered shard timings visible without replacing whole-config timing data. Set `OPENCLAW_TEST_PROJECTS_TIMINGS=0` to ignore the local timing artifact.
+- Full, extension, and include-pattern shard runs update local timing data in `.artifacts/vitest-shard-timings.json`; later whole-config runs use those timings to balance slow and fast shards. Include-pattern CI shards append the shard name to the timing key, which keeps filtered shard timings visible without replacing whole-config timing data. Set `CARAPACE_TEST_PROJECTS_TIMINGS=0` to ignore the local timing artifact.
 - `pnpm ci:timings:refit`: regenerate committed `config/ci-test-timings.json` from the last five successful main CI runs; add `--dry-run` to preview the changed-entry table. This file owns per-file UI E2E and per-profile compact-group weights, unlike the gitignored `.artifacts/vitest-shard-timings.json` whole-config timing cache. Independent CI shards use only the committed weights, never that cache. See [CI timing refits](/ci/capacity#measured-shard-weights) for the daily refresh and sampling rules.
 
 Runner profiling preserves the selected `forks` or `threads` pool, isolation, environment, and custom runners extending Vitest's `TestRunner`. Capture starts in a Node preload before Vitest worker imports, spans all files assigned to that worker, and finishes both profile files in awaited worker cleanup before teardown is acknowledged. It does not depend on exit-time profile flushing. Root global setup configures every selected project without replacing its reporters or setup. Main capture spans Vitest/Vite startup through run completion and close. Process termination before cleanup, bootstrap failures before runner construction, and teardown timeouts can still prevent output. Browser/VM pools, custom runners without `onCleanupWorkerContext`, and additional native `--cpu-prof`/`--heap-prof` flags are rejected for runner profiling.
@@ -904,7 +904,7 @@ pnpm test:perf:profile:runner -- --output-dir .artifacts/profiles -- --config te
 
 `pnpm test:extensions:memory` profiles built plugin index entries from `dist/extensions` (including nested `dist` output) and package-local `extensions/<id>/dist` output; TypeScript source entries are excluded. Root artifacts take precedence when both builds exist. Selecting an already-built plugin with `--extension <id>` reuses its output without requiring unrelated plugin builds; build the plugin package first if its output is not supplied by `pnpm build`.
 
-Native imports also need the plugin's declared dependencies and a resolvable `openclaw` host package. The profiler does not install or link dependencies: missing dependencies remain import failures in the JSON report and cause a nonzero exit.
+Native imports also need the plugin's declared dependencies and a resolvable `carapace` host package. The profiler does not install or link dependencies: missing dependencies remain import failures in the JSON report and cause a nonzero exit.
 
 ## Benchmarks
 
@@ -928,7 +928,7 @@ pnpm test:startup:bench:update
 pnpm test:startup:bench:check
 pnpm tsx scripts/bench-cli-startup.ts --runs 12
 pnpm tsx scripts/bench-cli-startup.ts --preset real --case status --case gatewayStatus --runs 3
-pnpm tsx scripts/bench-cli-startup.ts --entry openclaw.mjs --entry-secondary dist/entry.js --preset all
+pnpm tsx scripts/bench-cli-startup.ts --entry carapace.mjs --entry-secondary dist/entry.js --preset all
 ```
 
 Presets:
@@ -960,7 +960,7 @@ Case ids: `default`, `skipChannels` (channel startup skipped), `oneInternalHook`
 
 The incident cases are opt-in because each sample builds an isolated, non-sensitive load fixture: current global and agent databases, 100,000 retained audit rows with freelist fragmentation, eight agent workspaces containing 80,000 files (about 800 MB), and the packaged plugin inventory. Run the combined case only on a clean machine with enough free disk space; the fixture directory is removed after each sample. `incidentCombined` fails when `/healthz` p95 reaches 30 seconds or `/readyz` p95 reaches 60 seconds.
 
-Output includes first process output, `/healthz`, `/readyz`, HTTP listen log time, Gateway ready log time, CPU time, CPU core ratio, max RSS, heap, startup trace metrics, event-loop delay, and plugin lookup-table detail metrics. The script sets `OPENCLAW_GATEWAY_STARTUP_TRACE=1` in the child Gateway environment.
+Output includes first process output, `/healthz`, `/readyz`, HTTP listen log time, Gateway ready log time, CPU time, CPU core ratio, max RSS, heap, startup trace metrics, event-loop delay, and plugin lookup-table detail metrics. The script sets `CARAPACE_GATEWAY_STARTUP_TRACE=1` in the child Gateway environment.
 
 `/healthz` is liveness (HTTP server can answer). `/readyz` is usable readiness (startup plugin sidecars, channels, and ready-critical post-attach work have settled). Startup hooks dispatch asynchronously and are not part of the readiness guarantee. Ready log time is the Gateway's internal timestamp, useful for process-side attribution but not a substitute for the external `/readyz` probe.
 
@@ -979,7 +979,7 @@ pnpm test:restart:gateway -- --case default --runs 3 --restarts 3 --warmup 1
 
 Case ids: `skipChannels`, `skipChannelsAcpxProbe` (ACPX startup probe on), `skipChannelsNoAcpxProbe` (probe off), `default`, `fiftyPlugins`.
 
-Output includes next `/healthz`, next `/readyz`, downtime, restart ready timing, CPU, RSS, startup trace metrics for the replacement process, and restart trace metrics for signal handling, active-work drain, close phases, next start, ready timing, and memory snapshots. The script sets `OPENCLAW_GATEWAY_STARTUP_TRACE=1` and `OPENCLAW_GATEWAY_RESTART_TRACE=1`.
+Output includes next `/healthz`, next `/readyz`, downtime, restart ready timing, CPU, RSS, startup trace metrics for the replacement process, and restart trace metrics for signal handling, active-work drain, close phases, next start, ready timing, and memory snapshots. The script sets `CARAPACE_GATEWAY_STARTUP_TRACE=1` and `CARAPACE_GATEWAY_RESTART_TRACE=1`.
 
 Use this benchmark when a change touches restart signaling, close handlers, startup-after-restart, sidecar shutdown, service handoff, or readiness after restart. Start with `skipChannels` to isolate Gateway mechanics from channel startup; use `default` or plugin-heavy cases only after the narrow case explains the restart path. Trace metrics are attribution hints, not verdicts — judge a restart change from multiple samples, the matching owner span, `/healthz`/`/readyz` behavior, and the user-visible restart contract.
 
@@ -993,7 +993,7 @@ Optional; only needed for containerized onboarding smoke tests. Full cold-start 
 scripts/e2e/onboard-docker.sh
 ```
 
-Drives the interactive wizard via a pseudo-tty, verifies config/workspace/session state, then starts the gateway and runs `openclaw health`.
+Drives the interactive wizard via a pseudo-tty, verifies config/workspace/session state, then starts the gateway and runs `carapace health`.
 
 ## QR import smoke (Docker)
 

@@ -1,5 +1,5 @@
-// Diagnostics Prometheus plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Diagnostics Prometheus plugin entrypoint registers its Carapace integration.
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { createDiagnosticsPrometheusExporter } from "./src/service.js";
 
 const exporter = createDiagnosticsPrometheusExporter();
@@ -7,7 +7,7 @@ const exporter = createDiagnosticsPrometheusExporter();
 export default definePluginEntry({
   id: "diagnostics-prometheus",
   name: "Diagnostics Prometheus",
-  description: "Expose OpenClaw diagnostics metrics in Prometheus text format",
+  description: "Expose Carapace diagnostics metrics in Prometheus text format",
   register(api) {
     api.registerService(exporter.service);
     api.registerHttpRoute({

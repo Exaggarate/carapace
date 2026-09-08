@@ -3,12 +3,12 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawStateDatabaseByPath } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { syncSessionRepositoryWorkspace } from "./repository-workspace-startup.js";
 import { readSessionRepositoryCheckpoint } from "./session-repository-checkpoints.js";
 import type {
@@ -31,13 +31,13 @@ const session = {
 };
 const gitAuthor = { name: "Repository Test", email: "repository@example.invalid" };
 const token = "synthetic-repository-startup-token";
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 let databasePath: string | undefined;
 
 afterEach(async () => {
   vi.restoreAllMocks();
   if (databasePath) {
-    closeOpenClawStateDatabaseByPath(databasePath);
+    closeCarapaceStateDatabaseByPath(databasePath);
   }
   await state?.cleanup();
   state = undefined;
@@ -45,7 +45,7 @@ afterEach(async () => {
 });
 
 async function fixture(runSetupScript = false) {
-  state = await createOpenClawTestState({
+  state = await createCarapaceTestState({
     label: "repository-startup",
     layout: "state-only",
     env: { GIT_CONFIG_GLOBAL: os.devNull, GIT_CONFIG_NOSYSTEM: "1" },
@@ -229,10 +229,10 @@ it("accepts the initial SQLite and bare Git checkpoint before sync can finish or
       runSetupScript: true,
     },
   });
-  closeOpenClawStateDatabaseByPath(f.store.path);
+  closeCarapaceStateDatabaseByPath(f.store.path);
   const accepted = f.store.get(f.repository.workspaceId);
   expect(accepted).toMatchObject({ manifestHash: result.manifestRef });
-  expect(accepted?.checkpointRef).toMatch(/^refs\/openclaw\/worker-results\//u);
+  expect(accepted?.checkpointRef).toMatch(/^refs\/carapace\/worker-results\//u);
   const snapshot = await readSessionRepositoryCheckpoint({ workspaceId: f.repository.workspaceId });
   expect(snapshot.changedEntries.map((entry) => entry.path)).toEqual(["setup.txt"]);
   expect((await snapshot.readEntry(snapshot.changedEntries[0]!)).toString()).toBe(
@@ -327,7 +327,7 @@ it.each(["quiescence", "verification", "publication"] as const)(
       await requireWorkspaceResultGit(f.store.artifactPath(f.repository.workspaceId), [
         "for-each-ref",
         "--format=%(refname)",
-        "refs/openclaw/",
+        "refs/carapace/",
       ]),
     ).toBe("");
     expect(f.resume).toHaveBeenCalledOnce();

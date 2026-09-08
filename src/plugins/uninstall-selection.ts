@@ -1,6 +1,6 @@
 // Plugin uninstall id resolver for registry ids, display names, npm specs, and ClawHub specs.
-import { err as resultError, ok, type Result } from "@openclaw/normalization-core/result";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { err as resultError, ok, type Result } from "@carapace/normalization-core/result";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import type { PluginRecord } from "./registry.js";
 
@@ -9,7 +9,7 @@ export function resolvePluginUninstallId<
   TPlugin extends Pick<PluginRecord, "id" | "name">,
 >(params: {
   rawId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   plugins: TPlugin[];
 }): Result<{ pluginId: string; plugin?: TPlugin }, string> {
   const rawId = params.rawId.trim();

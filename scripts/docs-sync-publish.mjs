@@ -16,9 +16,9 @@ const SOURCE_DOCS_DIR = path.join(ROOT, "docs");
 const SOURCE_CONFIG_PATH = path.join(SOURCE_DOCS_DIR, "docs.json");
 const SLUGIFY_PACKAGE = "@sindresorhus/slugify";
 const INTERNAL_DOCS_DIRS = ["internal"];
-const DEFAULT_CLAWHUB_SOURCE_REPO = "openclaw/clawhub";
+const DEFAULT_CLAWHUB_SOURCE_REPO = "carapace/clawhub";
 const CLAWHUB_DOCS_TARGET_DIR = "clawhub";
-const CLAWHUB_REPO_ENV = "OPENCLAW_DOCS_SYNC_CLAWHUB_REPO";
+const CLAWHUB_REPO_ENV = "CARAPACE_DOCS_SYNC_CLAWHUB_REPO";
 const DEFAULT_CLAWHUB_REPO_CANDIDATES = [
   path.resolve(ROOT, "..", "clawhub-docs-clawhub"),
   path.resolve(ROOT, "..", "clawhub"),
@@ -28,43 +28,43 @@ const SYNC_SUPPORT_FILES = [
   // source sync runs before parser dependencies are installed.
   {
     source: new URL("./lib/docs-markdown.mjs", import.meta.url),
-    target: path.join(".openclaw-sync", "lib", "docs-markdown.mjs"),
+    target: path.join(".carapace-sync", "lib", "docs-markdown.mjs"),
   },
   {
     source: new URL("./lib/docs-redirects.mjs", import.meta.url),
-    target: path.join(".openclaw-sync", "lib", "docs-redirects.mjs"),
+    target: path.join(".carapace-sync", "lib", "docs-redirects.mjs"),
   },
   {
     source: path.join(ROOT, "scripts", "check-docs-mdx.mjs"),
-    target: path.join(".openclaw-sync", "check-docs-mdx.mjs"),
+    target: path.join(".carapace-sync", "check-docs-mdx.mjs"),
   },
   {
     source: path.join(ROOT, "scripts", "check-docs-mdx.mts"),
-    target: path.join(".openclaw-sync", "check-docs-mdx.mts"),
+    target: path.join(".carapace-sync", "check-docs-mdx.mts"),
   },
   {
     source: path.join(ROOT, "scripts", "lib", "arg-utils.runtime.mjs"),
-    target: path.join(".openclaw-sync", "lib", "arg-utils.runtime.mjs"),
+    target: path.join(".carapace-sync", "lib", "arg-utils.runtime.mjs"),
   },
   {
     source: path.join(ROOT, "scripts", "lib", "tsx-cli-shim.mjs"),
-    target: path.join(".openclaw-sync", "lib", "tsx-cli-shim.mjs"),
+    target: path.join(".carapace-sync", "lib", "tsx-cli-shim.mjs"),
   },
   {
     source: path.join(ROOT, "scripts", "lib", "local-check-runtime.mts"),
-    target: path.join(".openclaw-sync", "lib", "local-check-runtime.mts"),
+    target: path.join(".carapace-sync", "lib", "local-check-runtime.mts"),
   },
   {
     source: path.join(ROOT, "scripts", "tsx.mjs"),
-    target: path.join(".openclaw-sync", "tsx.mjs"),
+    target: path.join(".carapace-sync", "tsx.mjs"),
   },
   {
     source: path.join(ROOT, "scripts", "lib", "mintlify-accordion.mjs"),
-    target: path.join(".openclaw-sync", "lib", "mintlify-accordion.mjs"),
+    target: path.join(".carapace-sync", "lib", "mintlify-accordion.mjs"),
   },
   {
     source: path.join(ROOT, ".github", "codex", "prompts", "docs-mdx-repair.md"),
-    target: path.join(".openclaw-sync", "docs-mdx-repair.md"),
+    target: path.join(".carapace-sync", "docs-mdx-repair.md"),
   },
 ];
 const GENERATED_LOCALES = [
@@ -225,8 +225,8 @@ export function parseArgs(argv) {
     sourceSha: "",
     clawhubRepo: process.env[CLAWHUB_REPO_ENV] || "",
     clawhubSourceRepo:
-      process.env.OPENCLAW_DOCS_SYNC_CLAWHUB_SOURCE_REPO || DEFAULT_CLAWHUB_SOURCE_REPO,
-    clawhubSourceSha: process.env.OPENCLAW_DOCS_SYNC_CLAWHUB_SOURCE_SHA || "",
+      process.env.CARAPACE_DOCS_SYNC_CLAWHUB_SOURCE_REPO || DEFAULT_CLAWHUB_SOURCE_REPO,
+    clawhubSourceSha: process.env.CARAPACE_DOCS_SYNC_CLAWHUB_SOURCE_SHA || "",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -844,7 +844,7 @@ function writeSyncMetadata(targetRoot, args, sources) {
     repository: args.sourceRepo || "",
     sha: args.sourceSha || "",
     sources: {
-      openclaw: {
+      carapace: {
         repository: args.sourceRepo || "",
         sha: args.sourceSha || "",
       },
@@ -856,7 +856,7 @@ function writeSyncMetadata(targetRoot, args, sources) {
     },
     syncedAt: new Date().toISOString(),
   };
-  writeJson(path.join(targetRoot, ".openclaw-sync", "source.json"), metadata);
+  writeJson(path.join(targetRoot, ".carapace-sync", "source.json"), metadata);
 }
 
 function sourceSlugifyVersion() {

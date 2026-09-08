@@ -217,7 +217,7 @@ export async function runServiceStart(params: {
   expectedPort?: number;
 }) {
   const json = Boolean(params.opts?.json);
-  const serviceCommand = formatCliCommand(`openclaw ${params.serviceNoun.toLowerCase()}`);
+  const serviceCommand = formatCliCommand(`carapace ${params.serviceNoun.toLowerCase()}`);
   const { stdout, warnings, emit, fail } = createDaemonActionContext({ action: "start", json });
   const warn = json ? (message: string) => warnings.push(message) : undefined;
   const emitStarted = async (result: {
@@ -603,7 +603,7 @@ export async function runServiceRestart(params: {
             `${params.serviceNoun} service needs repair before restart: ${issues
               .map((issue) => issue.message)
               .join("; ")}`,
-            [formatCliCommand("openclaw gateway install --force")],
+            [formatCliCommand("carapace gateway install --force")],
           );
           return false;
         }
@@ -628,7 +628,7 @@ export async function runServiceRestart(params: {
     // Check for token drift before restart (service token vs config token)
     try {
       const command = await params.service.readCommand(process.env);
-      const serviceToken = command?.environment?.OPENCLAW_GATEWAY_TOKEN;
+      const serviceToken = command?.environment?.CARAPACE_GATEWAY_TOKEN;
       const cfg = await readBestEffortConfig();
       const driftEnv = {
         ...process.env,
@@ -639,7 +639,7 @@ export async function runServiceRestart(params: {
       if (driftIssue) {
         const recovery =
           resolveDaemonInstallBlockMessage("gateway") ??
-          `Run \`${formatCliCommand("openclaw gateway install --force")}\` to refresh the service token source.`;
+          `Run \`${formatCliCommand("carapace gateway install --force")}\` to refresh the service token source.`;
         const warning = `${driftIssue.message} ${recovery}`;
         warnings.push(warning);
         if (!json) {

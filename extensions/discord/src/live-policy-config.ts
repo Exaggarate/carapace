@@ -1,4 +1,4 @@
-import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
 
 /** Account policy consumed at inbound admission, without replacing the transport. */
 export function selectDiscordLivePolicyConfig(config: DiscordAccountConfig) {

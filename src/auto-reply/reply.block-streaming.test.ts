@@ -1,14 +1,14 @@
 /** Tests block streaming behavior for auto-reply output delivery. */
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveUnsuffixedSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import { isPathInside } from "../infra/path-guards.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { withFastReplyConfig } from "./reply/get-reply-fast-path.test-support.js";
 import { loadGetReplyModuleForTest } from "./reply/get-reply.test-loader.js";
 import { createModelSelectionStateFixture } from "./reply/model-selection.test-support.js";
@@ -101,7 +101,7 @@ function createTelegramMessage(messageSid: string): MsgContext {
   };
 }
 
-function createReplyConfig(state: OpenClawTestState, streamMode?: "block"): OpenClawConfig {
+function createReplyConfig(state: CarapaceTestState, streamMode?: "block"): CarapaceConfig {
   return withFastReplyConfig({
     agents: {
       defaults: {
@@ -116,7 +116,7 @@ function createReplyConfig(state: OpenClawTestState, streamMode?: "block"): Open
       },
     },
     session: { store: path.join(state.sessionsDir("main"), "sessions.json") },
-  } satisfies OpenClawConfig);
+  } satisfies CarapaceConfig);
 }
 
 describe("block streaming", () => {
@@ -129,8 +129,8 @@ describe("block streaming", () => {
   });
 
   it("handles ordering, timeout fallback, and telegram streamMode block", async () => {
-    await withOpenClawTestState(
-      { label: "reply-block-streaming", env: { OPENCLAW_TEST_FAST: "1" } },
+    await withCarapaceTestState(
+      { label: "reply-block-streaming", env: { CARAPACE_TEST_FAST: "1" } },
       async (state) => {
         const cfg = createReplyConfig(state);
         const streamModeCfg = createReplyConfig(state, "block");

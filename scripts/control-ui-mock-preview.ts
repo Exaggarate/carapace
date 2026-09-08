@@ -7,17 +7,17 @@ import type { ControlUiMockGateway } from "../ui/src/test-helpers/control-ui-e2e
 // Serialized into the preview page; runtime dependencies must stay inside this function.
 function installControlUiPreview(): void {
   const previewWindow = window as Window & {
-    __OPENCLAW_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string };
-    openclawControlUiE2eGateway?: ControlUiMockGateway;
+    __CARAPACE_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string };
+    carapaceControlUiE2eGateway?: ControlUiMockGateway;
   };
   // The WebSocket mock does not intercept HTTP. Select this origin before
   // application startup can send synthetic resources to the operator Gateway.
   const gatewayUrl = new URL(window.location.origin);
   gatewayUrl.protocol = gatewayUrl.protocol === "https:" ? "wss:" : "ws:";
-  gatewayUrl.pathname = "/__openclaw_mock_gateway__";
-  previewWindow["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = { gatewayUrl: gatewayUrl.toString() };
+  gatewayUrl.pathname = "/__carapace_mock_gateway__";
+  previewWindow["__CARAPACE_NATIVE_CONTROL_AUTH__"] = { gatewayUrl: gatewayUrl.toString() };
 
-  const gateway = previewWindow.openclawControlUiE2eGateway;
+  const gateway = previewWindow.carapaceControlUiE2eGateway;
   if (!gateway) {
     throw new Error("Preview Gateway must be installed before its request handlers");
   }
@@ -79,7 +79,7 @@ function installControlUiPreview(): void {
     ],
     isOther: true,
   } satisfies SystemAgentChatQuestion;
-  gateway.setRequestHandler("openclaw.chat", ({ params, respond }) => {
+  gateway.setRequestHandler("carapace.chat", ({ params, respond }) => {
     const input = params && typeof params === "object" ? (params as Record<string, unknown>) : {};
     const sessionId =
       typeof input.sessionId === "string" && input.sessionId.trim()
@@ -104,7 +104,7 @@ function installControlUiPreview(): void {
       : {
           sessionId,
           reply:
-            "Hi — I’m OpenClaw, your system caretaker.\n\nAsk me about setup, channels, or recent changes.",
+            "Hi — I’m Carapace, your system caretaker.\n\nAsk me about setup, channels, or recent changes.",
           action: "none",
         };
     window.setTimeout(() => respond(response), message === undefined ? 0 : 600);

@@ -32,7 +32,7 @@ describe("update report diagnostic command boundary", () => {
     "build",
     "global-install-failed",
     "origin/main@abcdef",
-    "openclaw@2026.9.1",
+    "carapace@2026.9.1",
     "linux/arm64",
     "🦞".repeat(5),
   ])("preserves scalar structured fact %s", async (value) => {
@@ -138,7 +138,7 @@ describe("update report diagnostic command boundary", () => {
           reason: "doctor-failed",
           steps: [
             {
-              name: "openclaw doctor",
+              name: "carapace doctor",
               command: "not copied",
               cwd: "/private",
               durationMs: 1,
@@ -151,6 +151,6 @@ describe("update report diagnostic command boundary", () => {
       context,
     );
     expect(report.body).toContain("- Failed phase: doctor-failed\n");
-    expect(report.body).not.toContain("openclaw doctor");
+    expect(report.body).not.toContain("carapace doctor");
   });
 });

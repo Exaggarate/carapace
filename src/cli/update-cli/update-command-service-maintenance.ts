@@ -1,6 +1,6 @@
 // Managed service identity, shutdown, and recovery shared by update and Doctor.
 import { Writable } from "node:stream";
-import { stableStringify } from "@openclaw/normalization-core/stable-stringify";
+import { stableStringify } from "@carapace/normalization-core/stable-stringify";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { isGatewayServiceEnv, resolveGatewayProfileSuffix } from "../../daemon/constants.js";
 import { resolveLaunchAgentLabel } from "../../daemon/launchd-label.js";
@@ -44,9 +44,9 @@ import {
 export { UpdateCommandAbort } from "./update-command-windows-task.js";
 
 const GATEWAY_SERVICE_INSPECTION_UNAVAILABLE_MESSAGE =
-  "Gateway service management skipped: inspection is unavailable. Run `openclaw gateway status --deep` and restart the gateway manually when service access is restored.";
+  "Gateway service management skipped: inspection is unavailable. Run `carapace gateway status --deep` and restart the gateway manually when service access is restored.";
 const GATEWAY_SERVICE_INSPECTION_BLOCK_MESSAGE =
-  "Gateway service inspection is unavailable. Refusing to mutate code because managed service ownership cannot be verified. Run `openclaw gateway status --deep` and retry when service access is restored.";
+  "Gateway service inspection is unavailable. Refusing to mutate code because managed service ownership cannot be verified. Run `carapace gateway status --deep` and retry when service access is restored.";
 const JSON_MODE_SERVICE_STDOUT = new Writable({
   write(_chunk, _encoding, callback) {
     callback();
@@ -154,8 +154,8 @@ function matchesStoppedService(
     state.command &&
     verdict &&
     "fingerprint" in verdict &&
-    resolveGatewayProfileSuffix(before.serviceEnv.OPENCLAW_PROFILE) ===
-      resolveGatewayProfileSuffix(state.env.OPENCLAW_PROFILE) &&
+    resolveGatewayProfileSuffix(before.serviceEnv.CARAPACE_PROFILE) ===
+      resolveGatewayProfileSuffix(state.env.CARAPACE_PROFILE) &&
     resolveName(before.serviceEnv) === resolveName(state.env) &&
     (refreshDefinition ||
       ("fingerprint" in inspection && inspection.fingerprint === verdict.fingerprint)),
@@ -397,7 +397,7 @@ export async function maybeStopManagedServiceBeforeMutableUpdate(params: {
       ...inspected,
       serviceMutationAllowed: false,
       serviceMutationSkipMessage:
-        "Gateway service management skipped: the service belongs to a different OpenClaw installation and was left untouched.",
+        "Gateway service management skipped: the service belongs to a different Carapace installation and was left untouched.",
     };
   }
   if (serviceUpdateVerdict.kind === "absent") {
@@ -459,7 +459,7 @@ export async function maybeStopManagedServiceBeforeMutableUpdate(params: {
     serviceState.loadState.status === "loaded" &&
     (process.platform === "darwin"
       ? (await service.isEnabled?.({ env: serviceState.env, timeoutMs: params.timeoutMs })) === true
-      : process.env.OPENCLAW_UPDATE_RUN_HANDOFF === "1");
+      : process.env.CARAPACE_UPDATE_RUN_HANDOFF === "1");
   if (!params.shouldRestart || (!serviceState.running && !supervisorMayRespawn)) {
     if (!params.shouldRestart && !params.jsonMode && serviceState.running) {
       const warning = `--no-restart is set while the managed gateway service is running; the ${params.updateInstallKind} update will not stop or restart that process.`;

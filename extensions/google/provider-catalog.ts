@@ -1,18 +1,18 @@
 import {
   buildLiveModelProviderConfig,
   type LiveModelCatalogFetchGuard,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   asOptionalRecord,
   asPositiveSafeInteger,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { isGoogleTextGenerationModelId, resolveGoogleStaticModelId } from "./provider-models.js";
 
 const GOOGLE_VERTEX_BASE_URL = "https://{location}-aiplatform.googleapis.com";

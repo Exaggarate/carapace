@@ -21,7 +21,7 @@ export function observeMcpAppHttpResponses(gatewayPort: number) {
     if (
       request.socket.localPort === gatewayPort &&
       request.method === "POST" &&
-      request.url === "/__openclaw__/mcp-app/view"
+      request.url === "/__carapace__/mcp-app/view"
     ) {
       responses.push(response);
     }
@@ -432,7 +432,7 @@ import {
 } from ${JSON.stringify(appModuleUrl)};
 const write = (id, value) => { document.getElementById(id).textContent = value; };
 try { void window.top.document; write("isolation", "failed"); } catch { write("isolation", "isolated"); }
-const app = new App({ name: "OpenClaw conformance fixture", version: "1.0.0" });
+const app = new App({ name: "Carapace conformance fixture", version: "1.0.0" });
 const applyHostContext = () => {
   const context = app.getHostContext();
   if (context?.theme) applyDocumentTheme(context.theme);

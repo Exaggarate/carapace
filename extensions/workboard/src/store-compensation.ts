@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
-import type { WorkboardCard } from "@openclaw/workboard-contract";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { WorkboardCard } from "@carapace/workboard-contract";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const ABSENT = Symbol("workboard-compensation-absent");
 

@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeUniqueTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeUniqueTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import {
   ErrorCodes,
   errorShape,
@@ -7,7 +7,7 @@ import {
   validateNodePendingAckParams,
   type ConnectParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   captureNodePairingGeneration,
   isNodePairingGenerationCurrent,
@@ -29,7 +29,7 @@ function resolveAllowedPendingNodeActions(params: {
   nodeId: string;
   pairingGeneration: string;
   client: { connect?: ConnectParams | null } | null;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): PendingNodeAction[] {
   const pending = listPendingNodeActions({
     nodeId: params.nodeId,

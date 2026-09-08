@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-node_bin="$HOME/.local/share/openclaw-orb/node/current/bin"
+node_bin="$HOME/.local/share/carapace-orb/node/current/bin"
 
 cd "$repo_root"
 
@@ -18,8 +18,8 @@ if [[ ! -x "$node_bin/pnpm" ]]; then
 fi
 
 node --input-type=module -e '
-  import { isSupportedOpenClawNodeVersion } from "./node-version.mjs";
-  if (!isSupportedOpenClawNodeVersion(process.version)) process.exit(1);
+  import { isSupportedCarapaceNodeVersion } from "./node-version.mjs";
+  if (!isSupportedCarapaceNodeVersion(process.version)) process.exit(1);
 '
 
 package_manager="$(node -p 'require("./package.json").packageManager')"

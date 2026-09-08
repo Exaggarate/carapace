@@ -164,7 +164,7 @@ describe("ChannelsPage lifecycle", () => {
             {
               id: "slack",
               name: "Slack",
-              description: "OpenClaw Slack channel plugin.",
+              description: "Carapace Slack channel plugin.",
               origin: "bundled",
               installed: true,
               enabled: false,
@@ -197,14 +197,14 @@ describe("ChannelsPage lifecycle", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:slack-plugin-icon");
-    const page = document.createElement("openclaw-channels-page") as ChannelsPageTestElement;
+    const page = document.createElement("carapace-channels-page") as ChannelsPageTestElement;
     page.context = source.context;
     document.body.append(page);
 
     await vi.waitFor(() => {
       expect(page.querySelector(".settings-row__title")?.textContent).toBe("Slack");
       expect(page.querySelector(".settings-row__desc")?.textContent).toBe(
-        "OpenClaw Slack channel plugin.",
+        "Carapace Slack channel plugin.",
       );
       expect(page.querySelector(".channels-item img")?.getAttribute("src")).toBe(
         "blob:slack-plugin-icon",
@@ -216,8 +216,8 @@ describe("ChannelsPage lifecycle", () => {
         .map(([input]) =>
           typeof input === "string" ? input : input instanceof URL ? input.href : input.url,
         )
-        .filter((url) => url.includes("/__openclaw__/plugin-icon/")),
-    ).toEqual(["/__openclaw__/plugin-icon/slack"]);
+        .filter((url) => url.includes("/__carapace__/plugin-icon/")),
+    ).toEqual(["/__carapace__/plugin-icon/slack"]);
     source.runtimeConfig.dispose();
     source.channels.dispose();
   });
@@ -240,7 +240,7 @@ describe("ChannelsPage lifecycle", () => {
             {
               id: "mattermost",
               name: "Mattermost",
-              description: "OpenClaw Mattermost channel plugin.",
+              description: "Carapace Mattermost channel plugin.",
               origin: "bundled",
               installed: true,
               enabled: true,
@@ -273,7 +273,7 @@ describe("ChannelsPage lifecycle", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mattermost-plugin-icon");
-    const page = document.createElement("openclaw-channels-page") as ChannelsPageTestElement;
+    const page = document.createElement("carapace-channels-page") as ChannelsPageTestElement;
     page.context = source.context;
     document.body.append(page);
 
@@ -300,7 +300,7 @@ describe("ChannelsPage lifecycle", () => {
     const gateway = createGateway();
     const first = createContext(gateway);
     const second = createContext(gateway);
-    const page = document.createElement("openclaw-channels-page") as ChannelsPageTestElement;
+    const page = document.createElement("carapace-channels-page") as ChannelsPageTestElement;
     page.context = first.context;
     document.body.append(page);
 
@@ -333,7 +333,7 @@ describe("ChannelsPage lifecycle", () => {
       limits: { pendingPerAccount: 3, ttlMs: 3_600_000 },
     };
     const refreshPairing = vi.spyOn(source.channels, "refreshPairing").mockResolvedValue();
-    const page = document.createElement("openclaw-channels-page") as PairingTestPage;
+    const page = document.createElement("carapace-channels-page") as PairingTestPage;
     page.context = source.context;
     document.body.append(page);
     await page.updateComplete;
@@ -422,7 +422,7 @@ describe("ChannelsPage lifecycle", () => {
       }
       return await baseRequest?.(method, params);
     });
-    const page = document.createElement("openclaw-channels-page") as ChannelsPageTestElement;
+    const page = document.createElement("carapace-channels-page") as ChannelsPageTestElement;
     page.context = source.context;
     document.body.append(page);
     await page.updateComplete;
@@ -461,7 +461,7 @@ describe("ChannelsPage lifecycle", () => {
     const response = createDeferred<Response>();
     const fetchMock = vi.fn(() => response.promise);
     vi.stubGlobal("fetch", fetchMock);
-    const page = document.createElement("openclaw-channels-page") as NostrTestPage;
+    const page = document.createElement("carapace-channels-page") as NostrTestPage;
     page.context = first.context;
     document.body.append(page);
     await page.updateComplete;
@@ -498,7 +498,7 @@ describe("ChannelsPage lifecycle", () => {
     const response = createDeferred<Response>();
     const fetchMock = vi.fn(() => response.promise);
     vi.stubGlobal("fetch", fetchMock);
-    const page = document.createElement("openclaw-channels-page") as NostrTestPage;
+    const page = document.createElement("carapace-channels-page") as NostrTestPage;
     page.context = source.context;
     document.body.append(page);
     await page.updateComplete;
@@ -530,7 +530,7 @@ describe("ChannelsPage lifecycle", () => {
     const response = createDeferred<Response>();
     const fetchMock = vi.fn(() => response.promise);
     vi.stubGlobal("fetch", fetchMock);
-    const page = document.createElement("openclaw-channels-page") as NostrTestPage;
+    const page = document.createElement("carapace-channels-page") as NostrTestPage;
     page.context = source.context;
     document.body.append(page);
     await page.updateComplete;
@@ -559,7 +559,7 @@ describe("ChannelsPage lifecycle", () => {
     const gateway = createGateway();
     const source = createContext(gateway);
     const fetchMock = stubHangingFetch();
-    const page = document.createElement("openclaw-channels-page") as NostrTestPage;
+    const page = document.createElement("carapace-channels-page") as NostrTestPage;
     page.context = source.context;
     document.body.append(page);
     await page.updateComplete;
@@ -583,7 +583,7 @@ describe("ChannelsPage lifecycle", () => {
     const gateway = createGateway();
     const source = createContext(gateway);
     const fetchMock = stubHangingFetch();
-    const page = document.createElement("openclaw-channels-page") as NostrTestPage;
+    const page = document.createElement("carapace-channels-page") as NostrTestPage;
     page.context = source.context;
     document.body.append(page);
     await page.updateComplete;

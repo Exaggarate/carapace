@@ -1,8 +1,8 @@
 // QA Lab plugin module implements suite launch behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { runPluginCommandWithTimeout } from "openclaw/plugin-sdk/run-command";
+import { formatErrorMessage, toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { runPluginCommandWithTimeout } from "carapace/plugin-sdk/run-command";
 import { isRepoRootRelativeRef, toRepoRelativePath } from "./cli-paths.js";
 import { QaSuiteArtifactError, QaSuiteInfraError } from "./errors.js";
 import {
@@ -301,8 +301,8 @@ async function resolveQaFlowChannelGroups(
   // Crabline only for Crabline-owned runs so unrelated transports stay isolated.
   const {
     isCrablineServerChannel,
-    OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
-    resolveOpenClawCrablineChannelDriverSelection,
+    CARAPACE_CRABLINE_DEFAULT_CHANNEL,
+    resolveCarapaceCrablineChannelDriverSelection,
   } = await import("@openclaw/crabline");
   if (runParams.expandScenarioChannels) {
     const groups = groupQaScenariosByExecutionCell(
@@ -311,7 +311,7 @@ async function resolveQaFlowChannelGroups(
         scenarios,
         channelDriver: "crabline",
         channel: runParams.channelDriverSelection?.channel,
-        defaultChannel: OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+        defaultChannel: CARAPACE_CRABLINE_DEFAULT_CHANNEL,
         supportsChannel: isCrablineServerChannel,
         expandChannels: true,
       }),
@@ -320,13 +320,13 @@ async function resolveQaFlowChannelGroups(
       channel,
       channelId: undefined,
       channelDriverSelection: channel
-        ? resolveOpenClawCrablineChannelDriverSelection({ channel })
+        ? resolveCarapaceCrablineChannelDriverSelection({ channel })
         : undefined,
       scenarios: groupedScenarios,
     }));
   }
   const channels = resolveQaSuiteScenarioChannels({
-    defaultChannel: OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+    defaultChannel: CARAPACE_CRABLINE_DEFAULT_CHANNEL,
     explicitChannel: runParams.channelDriverSelection?.channel,
     scenarios: [...scenarios],
   });
@@ -338,7 +338,7 @@ async function resolveQaFlowChannelGroups(
         channelId: undefined,
         channelDriverSelection:
           runParams.channelDriverSelection ??
-          resolveOpenClawCrablineChannelDriverSelection({ channel: singleChannel }),
+          resolveCarapaceCrablineChannelDriverSelection({ channel: singleChannel }),
         scenarios: [...scenarios],
       },
     ];
@@ -348,10 +348,10 @@ async function resolveQaFlowChannelGroups(
   return channels.map((channel) => ({
     channel,
     channelId: undefined,
-    channelDriverSelection: resolveOpenClawCrablineChannelDriverSelection({ channel }),
+    channelDriverSelection: resolveCarapaceCrablineChannelDriverSelection({ channel }),
     scenarios: scenarios.filter(
       (scenario) =>
-        (normalizeQaSuiteScenarioChannel(scenario) ?? OPENCLAW_CRABLINE_DEFAULT_CHANNEL) ===
+        (normalizeQaSuiteScenarioChannel(scenario) ?? CARAPACE_CRABLINE_DEFAULT_CHANNEL) ===
         channel,
     ),
   }));
@@ -437,7 +437,7 @@ async function runQaTestFileSuiteFromRuntime(params: {
         ? {
             // The owning QA process already loaded the prepared runtime. Native
             // child setup must not clean or rebuild those files under live gateways.
-            env: { OPENCLAW_E2E_USE_PREBUILT_DIST: "1" },
+            env: { CARAPACE_E2E_USE_PREBUILT_DIST: "1" },
           }
         : {}),
     ...(runParams?.failFast ? { failFast: true } : {}),
@@ -679,7 +679,7 @@ function renderUnifiedQaSuiteReport(params: {
   startedAt: Date;
 }) {
   return renderQaMarkdownReport({
-    title: "OpenClaw QA Scenario Suite",
+    title: "Carapace QA Scenario Suite",
     startedAt: params.startedAt,
     finishedAt: params.finishedAt,
     checks: [],

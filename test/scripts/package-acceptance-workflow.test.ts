@@ -32,12 +32,12 @@ import {
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const PACKAGE_ACCEPTANCE_WORKFLOW = ".github/workflows/package-acceptance.yml";
-const LIVE_E2E_WORKFLOW = ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml";
+const LIVE_E2E_WORKFLOW = ".github/workflows/carapace-live-and-e2e-checks-reusable.yml";
 const INSTALL_SMOKE_REUSABLE_WORKFLOW = ".github/workflows/install-smoke-reusable.yml";
 const CROSS_OS_RELEASE_CHECKS_REUSABLE_WORKFLOW =
-  ".github/workflows/openclaw-cross-os-release-checks-reusable.yml";
+  ".github/workflows/carapace-cross-os-release-checks-reusable.yml";
 const LIVE_MEDIA_RUNNER_DOCKERFILE = ".github/images/live-media-runner/Dockerfile";
-const LIVE_MEDIA_RUNNER_IMAGE = "ghcr.io/openclaw/openclaw-live-media-runner:ubuntu-24.04";
+const LIVE_MEDIA_RUNNER_IMAGE = "ghcr.io/carapace/carapace-live-media-runner:ubuntu-24.04";
 const LIVE_MEDIA_RUNNER_IMAGE_WORKFLOW = ".github/workflows/live-media-runner-image.yml";
 const NPM_TELEGRAM_WORKFLOW = ".github/workflows/npm-telegram-beta-e2e.yml";
 const MANTIS_DISCORD_SMOKE_WORKFLOW = ".github/workflows/mantis-discord-smoke.yml";
@@ -50,23 +50,23 @@ const MANTIS_WEB_UI_CHAT_PROOF_WORKFLOW = ".github/workflows/mantis-web-ui-chat-
 const PACKAGE_JSON = "package.json";
 const SETUP_PNPM_STORE_CACHE_ACTION = ".github/actions/setup-pnpm-store-cache/action.yml";
 const SETUP_RELEASE_HARNESS_ACTION = ".github/actions/setup-release-harness/action.yml";
-const RELEASE_CHECKS_WORKFLOW = ".github/workflows/openclaw-release-checks.yml";
-const RELEASE_TELEGRAM_QA_WORKFLOW = ".github/workflows/openclaw-release-telegram-qa.yml";
-const RELEASE_PUBLISH_WORKFLOW = ".github/workflows/openclaw-release-publish.yml";
+const RELEASE_CHECKS_WORKFLOW = ".github/workflows/carapace-release-checks.yml";
+const RELEASE_TELEGRAM_QA_WORKFLOW = ".github/workflows/carapace-release-telegram-qa.yml";
+const RELEASE_PUBLISH_WORKFLOW = ".github/workflows/carapace-release-publish.yml";
 const PLUGIN_PRERELEASE_WORKFLOW = ".github/workflows/plugin-prerelease.yml";
-const OPENCLAW_NPM_RELEASE_WORKFLOW = ".github/workflows/openclaw-npm-release.yml";
-const OPENCLAW_NPM_PREFLIGHT_WORKFLOW = ".github/workflows/openclaw-npm-preflight.yml";
+const CARAPACE_NPM_RELEASE_WORKFLOW = ".github/workflows/carapace-npm-release.yml";
+const CARAPACE_NPM_PREFLIGHT_WORKFLOW = ".github/workflows/carapace-npm-preflight.yml";
 const PLUGIN_CLAWHUB_RELEASE_WORKFLOW = ".github/workflows/plugin-clawhub-release.yml";
 const PLUGIN_NPM_RELEASE_WORKFLOW = ".github/workflows/plugin-npm-release.yml";
 const ANDROID_RELEASE_WORKFLOW = ".github/workflows/android-release.yml";
-const STABLE_MAIN_CLOSEOUT_WORKFLOW = ".github/workflows/openclaw-stable-main-closeout.yml";
+const STABLE_MAIN_CLOSEOUT_WORKFLOW = ".github/workflows/carapace-stable-main-closeout.yml";
 const WINDOWS_NODE_RELEASE_WORKFLOW = ".github/workflows/windows-node-release.yml";
 const FULL_RELEASE_VALIDATION_WORKFLOW = ".github/workflows/full-release-validation.yml";
 const FULL_RELEASE_CANDIDATE_WORKFLOW = ".github/workflows/full-release-candidate.yml";
 const FULL_RELEASE_ARTIFACTS_WORKFLOW = ".github/workflows/full-release-artifacts.yml";
 const ACTIONS_CACHE_V6 = "actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9";
 const CI_WORKFLOW = ".github/workflows/ci.yml";
-const PERFORMANCE_WORKFLOW = ".github/workflows/openclaw-performance.yml";
+const PERFORMANCE_WORKFLOW = ".github/workflows/carapace-performance.yml";
 const FULL_RELEASE_CHILD_DISPATCHES = [
   {
     jobName: "normal_ci",
@@ -96,17 +96,17 @@ const FULL_RELEASE_CHILD_DISPATCHES = [
     jobName: "release_checks_independent",
     kind: "release-checks",
     nonceSuffix: "-release-checks-independent",
-    runName: "OpenClaw Release Checks",
+    runName: "Carapace Release Checks",
     stepName: "Dispatch release checks independent phase",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   {
     jobName: "release_checks_candidate",
     kind: "release-checks",
     nonceSuffix: "-release-checks-candidate",
-    runName: "OpenClaw Release Checks",
+    runName: "Carapace Release Checks",
     stepName: "Dispatch release checks candidate phase",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   {
     jobName: "npm_telegram",
@@ -120,9 +120,9 @@ const FULL_RELEASE_CHILD_DISPATCHES = [
     jobName: "performance",
     kind: "performance",
     nonceSuffix: "",
-    runName: "OpenClaw Performance",
-    stepName: "Dispatch OpenClaw Performance",
-    workflow: "openclaw-performance.yml",
+    runName: "Carapace Performance",
+    stepName: "Dispatch Carapace Performance",
+    workflow: "carapace-performance.yml",
   },
   {
     jobName: "prepare_npm_package",
@@ -158,12 +158,12 @@ const CI_BUILD_ARTIFACTS_TESTBOX_WORKFLOW = ".github/workflows/ci-build-artifact
 const WINDOWS_BLACKSMITH_TESTBOX_WORKFLOW = ".github/workflows/windows-blacksmith-testbox.yml";
 const CRABBOX_HYDRATE_WORKFLOW = ".github/workflows/crabbox-hydrate.yml";
 const CRABBOX_CONFIG = ".crabbox.yaml";
-const SCHEDULED_LIVE_CHECKS_WORKFLOW = ".github/workflows/openclaw-scheduled-live-checks.yml";
+const SCHEDULED_LIVE_CHECKS_WORKFLOW = ".github/workflows/carapace-scheduled-live-checks.yml";
 const CI_HYDRATE_LIVE_AUTH_SCRIPT = "scripts/ci-hydrate-live-auth.sh";
 const RELEASE_CHECK_ARTIFACT_RESOLVER = "scripts/github/resolve-release-check-artifacts.sh";
 const RELEASE_FILTER_VALIDATOR = "scripts/github/validate-release-suite-filters.sh";
 const VERIFY_PROVIDER_SECRETS_SCRIPT =
-  ".agents/skills/release-openclaw-ci/scripts/verify-provider-secrets.mjs";
+  ".agents/skills/release-carapace-ci/scripts/verify-provider-secrets.mjs";
 const UPGRADE_SURVIVOR_RUN_SCRIPT = "scripts/e2e/lib/upgrade-survivor/run.sh";
 const SETUP_NODE_V6 = "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020";
 const DOWNLOAD_ARTIFACT_V8 = "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c";
@@ -318,7 +318,7 @@ wait_for_run() {
   local result=0
   case "$1" in
     plugin-npm-release.yml) result="\${MOCK_PLUGIN_NPM_RESULT:-0}" ;;
-    openclaw-npm-release.yml)
+    carapace-npm-release.yml)
       if [[ -n "\${4:-}" ]]; then result="\${MOCK_CORE_START_RESULT:-0}";
       else result="\${MOCK_CORE_RESULT:-0}"; fi ;;
     plugin-clawhub-release.yml) result="\${MOCK_CLAWHUB_RESULT:-0}" ;;
@@ -336,7 +336,7 @@ gh() {
 promote_android_release_asset() { record android; }
 promote_windows_release_assets() { record windows; }
 verify_published_release() {
-  record "verify:$clawhub_failed:bootstrap=$plugin_clawhub_bootstrap_completed:workflow=$openclaw_npm_expected_workflow_ref"
+  record "verify:$clawhub_failed:bootstrap=$plugin_clawhub_bootstrap_completed:workflow=$carapace_npm_expected_workflow_ref"
 }
 ${mockEvidence ? "upload_dependency_evidence_release_asset() { record dependency-evidence; }" : ""}
 upload_release_evidence_assets() { record release-evidence; }
@@ -368,7 +368,7 @@ ${functions}
           RUNNER_TEMP: root,
           GITHUB_OUTPUT: outputPath,
           GITHUB_STEP_SUMMARY: join(root, "summary"),
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           GITHUB_RUN_ID: "44",
           GITHUB_RUN_ATTEMPT: "2",
           GITHUB_REF: "refs/heads/main",
@@ -385,16 +385,16 @@ ${functions}
           FULL_RELEASE_VALIDATION_RUN_ID: "66",
           FULL_RELEASE_VALIDATION_RUN_ATTEMPT: "3",
           PLUGIN_SDK_API_ACKNOWLEDGEMENT: "",
-          PUBLISH_OPENCLAW_NPM: "true",
+          PUBLISH_CARAPACE_NPM: "true",
           WAIT_FOR_CLAWHUB: "true",
           CHILD_PLUGIN_NPM_RUN_ID: "101",
           CHILD_PLUGIN_CLAWHUB_RUN_ID: "202",
           CHILD_PLUGIN_CLAWHUB_BOOTSTRAP_RUN_ID: "303",
           CHILD_BOOTSTRAP_WORKFLOW_SHA: "d".repeat(40),
-          CHILD_OPENCLAW_NPM_ALREADY_PUBLISHED: "false",
-          CHILD_OPENCLAW_NPM_EXPECTED_WORKFLOW_REF: "refs/heads/main",
-          CHILD_OPENCLAW_NPM_EXPECTED_WORKFLOW_SHA: "d".repeat(40),
-          CHILD_OPENCLAW_NPM_RUN_ID: outputs().openclaw_npm_run_id ?? "",
+          CHILD_CARAPACE_NPM_ALREADY_PUBLISHED: "false",
+          CHILD_CARAPACE_NPM_EXPECTED_WORKFLOW_REF: "refs/heads/main",
+          CHILD_CARAPACE_NPM_EXPECTED_WORKFLOW_SHA: "d".repeat(40),
+          CHILD_CARAPACE_NPM_RUN_ID: outputs().carapace_npm_run_id ?? "",
           CORE_START_OUTCOME: "success",
           CLAWHUB_AUTHORIZATION_OUTCOME: "success",
           CLAWHUB_RECEIPT_OUTCOME: "success",
@@ -498,7 +498,7 @@ function runFullReleaseInputValidation(
     env: {
       PATH: process.env.PATH,
       GITHUB_OUTPUT: resolve(workdir, "output"),
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       RELEASE_PROFILE: releaseProfile,
       SKIP_PACKAGE_TELEGRAM_E2E: skipTelegram,
       TELEGRAM_WAIVER: options.telegramWaiver ?? "",
@@ -592,7 +592,7 @@ printf '%s\\n' "$value"
     : `refs/heads/${normalizedContextRef}`;
   const remoteSha = params.remoteSha ?? targetSha;
   const commitEndpoint = (ref: string) =>
-    `repos/openclaw/openclaw/commits/${encodeURIComponent(ref)}`;
+    `repos/carapace/carapace/commits/${encodeURIComponent(ref)}`;
   const outputPath = resolve(workdir, "output");
   const result = spawnSync("bash", ["-c", step.run ?? ""], {
     cwd: workdir,
@@ -602,14 +602,14 @@ printf '%s\\n' "$value"
       FAKE_API_ERROR: params.apiError ?? "",
       FAKE_BASE_ENDPOINT: commitEndpoint(`refs/tags/v${params.version}`),
       FAKE_CONTEXT_ENDPOINT: commitEndpoint(remoteRef),
-      FAKE_COMPARISON_ENDPOINT: `repos/openclaw/openclaw/compare/${targetSha}...${remoteSha}`,
+      FAKE_COMPARISON_ENDPOINT: `repos/carapace/carapace/compare/${targetSha}...${remoteSha}`,
       FAKE_COMPARISON_STATUS: params.comparisonStatus ?? "ahead",
       FAKE_REMOTE_REF: remoteRef,
       FAKE_REMOTE_SHA: remoteSha,
       FAKE_BASE_SHA: params.baseTagSha ?? params.remoteSha ?? targetSha,
       FAKE_PACKAGE_VERSION: params.version,
       GH_TOKEN: step.env?.GH_TOKEN === "${{ github.token }}" ? "test-token" : "",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_OUTPUT: outputPath,
       PATH: `${fakeBin}:${process.env.PATH}`,
       RELEASE_PROFILE: params.releaseProfile ?? "beta",
@@ -694,7 +694,7 @@ function releaseCandidateArtifactJson(selectedSha = "a".repeat(40), packagePubli
     packageArtifactDigest: "b".repeat(64),
     packageArtifactRunId: "123",
     packageArtifactRunAttempt: "1",
-    packageFileName: "openclaw-current.tgz",
+    packageFileName: "carapace-current.tgz",
     packageSourceSha: selectedSha,
     packageSha256: "c".repeat(64),
     packageVersion: "2026.8.1",
@@ -780,10 +780,10 @@ function runFullReleaseCandidateRequest(packagePublished: boolean) {
       RELEASE_SOAK: "false",
       RUNNER_TEMP: workdir,
       SHARED_IMAGE_POLICY: "no-push-artifact",
-      TARGET_REPOSITORY: "openclaw/openclaw",
+      TARGET_REPOSITORY: "carapace/carapace",
       TARGET_SHA: "a".repeat(40),
       TOOLING_SHA: "b".repeat(40),
-      UPGRADE_SURVIVOR_BASELINE: "openclaw@latest",
+      UPGRADE_SURVIVOR_BASELINE: "carapace@latest",
       UPGRADE_SURVIVOR_BASELINES: "",
       UPGRADE_SURVIVOR_SCENARIOS: "",
     },
@@ -807,8 +807,8 @@ function createReleaseChecksContextFixture() {
   const git = (...args: string[]) =>
     execFileSync("git", args, { cwd: repo, encoding: "utf8" }).trim();
   git("init", "-q", "--initial-branch=release/2026.8.1");
-  git("config", "user.name", "OpenClaw Test");
-  git("config", "user.email", "openclaw-test@example.com");
+  git("config", "user.name", "Carapace Test");
+  git("config", "user.email", "carapace-test@example.com");
   writeFileSync(resolve(repo, "package.json"), '{"version":1}\n', "utf8");
   git("add", "package.json");
   git("commit", "-qm", "candidate");
@@ -935,7 +935,7 @@ fs.appendFileSync(env.MOCK_GH_CALLS, JSON.stringify({
 }) + "\\n");
 const jobs = JSON.parse(env.MOCK_GH_JOBS);
 const conclusion = env.MOCK_GH_CONCLUSION;
-const url = "https://github.com/openclaw/openclaw/actions/runs/101";
+const url = "https://github.com/Exaggarate/carapace/actions/runs/101";
 function nextRunObservation() {
   const statuses = JSON.parse(env.MOCK_GH_STATUSES);
   const titles = JSON.parse(env.MOCK_GH_RUN_TITLES);
@@ -1035,10 +1035,10 @@ exit 0
   const defaultJobs = [
     {
       conclusion: "success",
-      html_url: "https://github.com/openclaw/openclaw/actions/runs/101/job/201",
+      html_url: "https://github.com/Exaggarate/carapace/actions/runs/101/job/201",
       name: "Verify release checks",
       status: "completed",
-      url: "https://github.com/openclaw/openclaw/actions/runs/101/job/201",
+      url: "https://github.com/Exaggarate/carapace/actions/runs/101/job/201",
     },
   ];
   const stepValues: Record<string, string> = {
@@ -1058,10 +1058,10 @@ exit 0
     MODE: "both",
     NPM_DIST_TAG: "beta",
     PACKAGE_ACCEPTANCE_PACKAGE_SPEC: "",
-    PACKAGE_SPEC: "openclaw@beta",
+    PACKAGE_SPEC: "carapace@beta",
     PARENT_WORKFLOW_SHA: parentSha,
     PREFLIGHT_PHASE: "all",
-    PREPARED_NPM_BUNDLE_JSON: '{"schema":"openclaw.prepared-npm-bundle/v1"}',
+    PREPARED_NPM_BUNDLE_JSON: '{"schema":"carapace.prepared-npm-bundle/v1"}',
     PHASE: child.jobName.endsWith("_candidate") ? "candidate" : "independent",
     PLUGIN_PRERELEASE_NODE_EXCLUDE_PATTERNS_JSON: "[]",
     PROVIDER: "openai",
@@ -1097,7 +1097,7 @@ exit 0
         readWorkflow(FULL_RELEASE_VALIDATION_WORKFLOW).env
           ?.GH_TRANSIENT_SERVER_OR_NETWORK_PATTERN ?? "HTTP 5[0-9][0-9]",
       GITHUB_OUTPUT: resolve(workdir, "github-output"),
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_RUN_ATTEMPT: "2",
       GITHUB_RUN_ID: "77",
       GITHUB_STEP_SUMMARY: resolve(workdir, "github-summary"),
@@ -1280,7 +1280,7 @@ function runPackageAcceptanceResolveScript(params: {
   mkdirSync(binDir, { recursive: true });
   mkdirSync(artifactDir, { recursive: true });
   const nodePath = resolve(binDir, "node");
-  const artifactPath = resolve(artifactDir, "openclaw-current.tgz");
+  const artifactPath = resolve(artifactDir, "carapace-current.tgz");
   const artifactBody = "package acceptance artifact";
   writeFileSync(artifactPath, artifactBody);
   writeFileSync(
@@ -1289,7 +1289,7 @@ function runPackageAcceptanceResolveScript(params: {
 printf "%s\\n" "$@" > "$CAPTURE_PATH"
 if [ "$SOURCE" = "artifact" ]; then
   mkdir -p .artifacts/docker-e2e-package
-  printf '{"name":"openclaw","sha256":"%s","packageSourceSha":"%s","version":"%s"}\\n' \
+  printf '{"name":"carapace","sha256":"%s","packageSourceSha":"%s","version":"%s"}\\n' \
     "$PACKAGE_SHA256" "$PACKAGE_SOURCE_SHA" "$PACKAGE_VERSION" \
     > .artifacts/docker-e2e-package/package-candidate.json
 fi
@@ -1302,13 +1302,13 @@ fi
     env: {
       CAPTURE_PATH: capturePath,
       GITHUB_OUTPUT: outputPath,
-      OPENCLAW_TRUSTED_PACKAGE_TOKEN: "",
-      PACKAGE_FILE_NAME: "openclaw-current.tgz",
+      CARAPACE_TRUSTED_PACKAGE_TOKEN: "",
+      PACKAGE_FILE_NAME: "carapace-current.tgz",
       PACKAGE_REF: "HEAD",
       PACKAGE_SHA256: createHash("sha256").update(artifactBody).digest("hex"),
       PACKAGE_SOURCE_SHA: "a".repeat(40),
-      PACKAGE_SPEC: "openclaw@beta",
-      PACKAGE_URL: "https://example.invalid/openclaw.tgz",
+      PACKAGE_SPEC: "carapace@beta",
+      PACKAGE_URL: "https://example.invalid/carapace.tgz",
       PACKAGE_VERSION: "2026.8.26",
       PATH: `${binDir}:${process.env.PATH}`,
       PREPUBLISH_PLUGIN_REGISTRY_JSON: params.prepublishPluginRegistryJson ?? "",
@@ -1351,9 +1351,9 @@ function runPackageAcceptanceBaselineStep(params: {
     resolve(binDir, "npm"),
     `#!/bin/sh
 printf '%s\n' "$*" >> "$NPM_LOG"
-if [ "$1 $2 $3" = "view openclaw versions" ]; then
+if [ "$1 $2 $3" = "view carapace versions" ]; then
   printf '%s\n' '["2026.6.34","2026.6.35","2026.7.1","2026.7.1-2","2026.8.1","2026.9.1"]'
-elif [ "$1 $2" = "view openclaw@latest" ]; then
+elif [ "$1 $2" = "view carapace@latest" ]; then
   printf '%s\n' '2026.9.1'
 else
   exit 64
@@ -1370,10 +1370,10 @@ fi
         params.source === "npm" ||
           JSON.parse(params.candidateArtifactJson ?? "{}").packagePublished === true,
       ),
-      FALLBACK_BASELINE: params.fallbackBaseline ?? "openclaw@latest",
+      FALLBACK_BASELINE: params.fallbackBaseline ?? "carapace@latest",
       GH_TOKEN: "",
       GITHUB_OUTPUT: outputPath,
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       NPM_LOG: npmLog,
       PATH: `${binDir}:${process.env.PATH}`,
       REQUESTED_BASELINES: "",
@@ -1432,7 +1432,7 @@ if (tool === "gh") {
     env: {
       PATH: `${bin}:${process.env.PATH}`,
       GITHUB_OUTPUT: output,
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       CANDIDATE_PUBLISHED: String(params.published ?? false),
       CANDIDATE_SOURCE_SHA: "a".repeat(40),
       CANDIDATE_VERSION: params.candidateVersion ?? "2026.9.3",
@@ -1478,8 +1478,8 @@ function runNpmTelegramInputValidation(overrides: Record<string, string>) {
   return spawnSync("bash", ["-c", script], {
     encoding: "utf8",
     env: {
-      OPENCLAW_QA_CONVEX_SECRET_CI: "test-secret",
-      OPENCLAW_QA_CONVEX_SITE_URL: "https://example.invalid",
+      CARAPACE_QA_CONVEX_SECRET_CI: "test-secret",
+      CARAPACE_QA_CONVEX_SITE_URL: "https://example.invalid",
       PACKAGE_ARTIFACT_DIGEST: "",
       PACKAGE_ARTIFACT_ID: "",
       PACKAGE_ARTIFACT_NAME: "",
@@ -1488,7 +1488,7 @@ function runNpmTelegramInputValidation(overrides: Record<string, string>) {
       PACKAGE_FILE_NAME: "",
       PACKAGE_SHA256: "",
       PACKAGE_SOURCE_SHA: "",
-      PACKAGE_SPEC: "openclaw@beta",
+      PACKAGE_SPEC: "carapace@beta",
       PACKAGE_VERSION: "",
       PATH: process.env.PATH,
       PREPUBLISH_PLUGIN_REGISTRY_ARTIFACT_DIGEST: "",
@@ -1539,7 +1539,7 @@ esac
       ARTIFACT_NAME: artifactName,
       ARTIFACT_RUN_ATTEMPT: attempt,
       ARTIFACT_RUN_ID: params.producerRunId,
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_RUN_ID: params.currentRunId,
       MOCK_ARTIFACT_JSON: JSON.stringify({
         created_at: "2026-07-15T08:49:20Z",
@@ -1577,14 +1577,14 @@ function runReleasePublishInputValidation(overrides: Record<string, string>) {
     env: {
       FULL_RELEASE_VALIDATION_RUN_ATTEMPT: "1",
       FULL_RELEASE_VALIDATION_RUN_ID: "222",
-      OPENCLAW_NPM_RESUME_RUN_ID: "",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      CARAPACE_NPM_RESUME_RUN_ID: "",
+      GITHUB_REPOSITORY: "carapace/carapace",
       PATH: `${binDir}:${process.env.PATH}`,
       PLUGINS: "",
       PLUGIN_PUBLISH_SCOPE: "all-publishable",
       PREFLIGHT_RUN_ID: "111",
       PUBLISH_DOCKER_ONLY: "false",
-      PUBLISH_OPENCLAW_NPM: "true",
+      PUBLISH_CARAPACE_NPM: "true",
       RELEASE_NPM_DIST_TAG: "beta",
       RELEASE_PROFILE: "beta",
       RELEASE_TAG: "v2026.7.1-beta.3",
@@ -1617,13 +1617,13 @@ function runReleasePublishChildWorkflowRef(overrides: Record<string, string> = {
   );
 }
 
-function runOpenClawNpmTrustedRefGuard(overrides: Record<string, string>) {
-  const job = workflowJob(OPENCLAW_NPM_RELEASE_WORKFLOW, "validate_publish_request");
+function runCarapaceNpmTrustedRefGuard(overrides: Record<string, string>) {
+  const job = workflowJob(CARAPACE_NPM_RELEASE_WORKFLOW, "validate_publish_request");
   const script = workflowStep(job, "Require trusted workflow ref for publish").run;
   if (!script) {
-    throw new Error("Expected OpenClaw npm trusted ref guard");
+    throw new Error("Expected Carapace npm trusted ref guard");
   }
-  const binDir = tempDirs.make("openclaw-npm-trusted-ref-");
+  const binDir = tempDirs.make("carapace-npm-trusted-ref-");
   const ghPath = `${binDir}/gh`;
   const gitPath = `${binDir}/git`;
   const timeoutPath = `${binDir}/timeout`;
@@ -1642,7 +1642,7 @@ function runOpenClawNpmTrustedRefGuard(overrides: Record<string, string>) {
   return spawnSync("bash", ["-c", script], {
     encoding: "utf8",
     env: {
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       MOCK_REMOTE_TAG_SHA: "a".repeat(40),
       MOCK_WORKFLOW_ANCESTOR: "true",
       PATH: `${binDir}:${process.env.PATH}`,
@@ -1703,7 +1703,7 @@ esac
     cwd: workdir,
     encoding: "utf8",
     env: {
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       MOCK_COMPARE_STATUS: "identical",
       MOCK_TAG_FULL_REF: "",
       MOCK_TAG_MISSING: "false",
@@ -1740,7 +1740,7 @@ function writePreflightConsumerTooling(toolingDir: string) {
   for (const source of [
     "npm-preflight-tooling-identity.mjs",
     "npm-prepared-bundle.mjs",
-    "openclaw-npm-extended-stable-release.mjs",
+    "carapace-npm-extended-stable-release.mjs",
     "release-tooling-identity.mjs",
     "lib/actions-artifact-archive.mjs",
     "lib/npm-core-release-packages.json",
@@ -1823,14 +1823,14 @@ async function qualifiedPreflightConsumerFixture(
     : FULL_RELEASE_VALIDATION_WORKFLOW;
   const fullRef = `refs/${params.preflightHeadBranch.startsWith("release-publish/") ? "tags" : "heads"}/${params.preflightHeadBranch}`;
   const producer = {
-    repository: "openclaw/openclaw",
-    workflowRef: `openclaw/openclaw/${workflowPath}@${fullRef}`,
+    repository: "carapace/carapace",
+    workflowRef: `carapace/carapace/${workflowPath}@${fullRef}`,
     workflowSha: params.preflightHeadSha,
     runId,
     runAttempt: "1",
     jobId: "999",
     jobName: "Prepare release npm artifacts / Qualify prepared npm package",
-    producerWorkflowPath: OPENCLAW_NPM_PREFLIGHT_WORKFLOW,
+    producerWorkflowPath: CARAPACE_NPM_PREFLIGHT_WORKFLOW,
   };
   const manifest = Buffer.from(
     JSON.stringify({ version: 3, releaseSha: "d".repeat(40), producer }),
@@ -1844,7 +1844,7 @@ async function qualifiedPreflightConsumerFixture(
   });
   const artifact = {
     id: "555",
-    name: "openclaw-npm-preflight-v2026.8.1-beta.3",
+    name: "carapace-npm-preflight-v2026.8.1-beta.3",
     digest: createHash("sha256").update(archive).digest("hex"),
     runId,
     runAttempt: "1",
@@ -1858,7 +1858,7 @@ async function qualifiedPreflightConsumerFixture(
     workflowSha: params.preflightHeadSha,
     publicationArtifacts: {
       npmPreflight: {
-        schema: "openclaw.qualified-npm-preflight/v1",
+        schema: "carapace.qualified-npm-preflight/v1",
         source: { sha: "d".repeat(40) },
         producer,
         artifact,
@@ -1889,8 +1889,8 @@ async function qualifiedPreflightConsumerFixture(
     preload,
     `import { readFileSync } from 'node:fs';
 globalThis.fetch = async (url) => {
-  if (url === 'https://api.github.com/repos/openclaw/openclaw/actions/artifacts/555') return Response.json(JSON.parse(process.env.MOCK_QUALIFIED_ARTIFACT));
-  if (url === 'https://api.github.com/repos/openclaw/openclaw/actions/artifacts/555/zip') return new Response(new Uint8Array(readFileSync(process.env.MOCK_QUALIFIED_ARCHIVE)));
+  if (url === 'https://api.github.com/repos/carapace/carapace/actions/artifacts/555') return Response.json(JSON.parse(process.env.MOCK_QUALIFIED_ARTIFACT));
+  if (url === 'https://api.github.com/repos/carapace/carapace/actions/artifacts/555/zip') return new Response(new Uint8Array(readFileSync(process.env.MOCK_QUALIFIED_ARCHIVE)));
   throw new Error('Unexpected fixture network request: ' + url);
 };\n`,
   );
@@ -1908,8 +1908,8 @@ globalThis.fetch = async (url) => {
       event: "workflow_dispatch",
       status: "completed",
       conclusion: "success",
-      repository: { full_name: "openclaw/openclaw" },
-      head_repository: { full_name: "openclaw/openclaw" },
+      repository: { full_name: "carapace/carapace" },
+      head_repository: { full_name: "carapace/carapace" },
     }),
     MOCK_QUALIFIED_JOBS: JSON.stringify({
       total_count: 1,
@@ -1930,7 +1930,7 @@ globalThis.fetch = async (url) => {
 
 async function runReleasePublishPreflightConsumerGuard(params: ProtectedPreflightConsumerParams) {
   const job = workflowJob(RELEASE_PUBLISH_WORKFLOW, "resolve_release_target");
-  const script = workflowStep(job, "Download OpenClaw npm preflight manifest").run;
+  const script = workflowStep(job, "Download Carapace npm preflight manifest").run;
   if (!script) {
     throw new Error("Expected release publish preflight consumer guard");
   }
@@ -1966,7 +1966,7 @@ exit 64
       EXPECTED_SHA: "d".repeat(40),
       GITHUB_OUTPUT: resolve(workdir, "github-output"),
       GITHUB_REF: params.currentRef,
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_WORKSPACE: workdir,
       FULL_RELEASE_VALIDATION_RUN_ID:
         params.fullReleaseRunId ?? (params.fullReleasePreflight ? "111" : "222"),
@@ -1980,7 +1980,7 @@ exit 64
         head_sha: params.preflightHeadSha,
         path: params.fullReleasePreflight
           ? ".github/workflows/full-release-validation.yml"
-          : ".github/workflows/openclaw-npm-release.yml",
+          : ".github/workflows/carapace-npm-release.yml",
         run_attempt: 1,
       }),
       PATH: `${binDir}:${dirname(process.execPath)}:${process.env.PATH}`,
@@ -1994,13 +1994,13 @@ exit 64
   return { ...result, outputPath: resolve(workdir, "github-output") };
 }
 
-async function runOpenClawNpmPreflightConsumerGuard(params: ProtectedPreflightConsumerParams) {
-  const job = workflowJob(OPENCLAW_NPM_RELEASE_WORKFLOW, "publish_openclaw_npm");
+async function runCarapaceNpmPreflightConsumerGuard(params: ProtectedPreflightConsumerParams) {
+  const job = workflowJob(CARAPACE_NPM_RELEASE_WORKFLOW, "publish_carapace_npm");
   const script = workflowStep(job, "Verify preflight run metadata").run;
   if (!script) {
-    throw new Error("Expected OpenClaw npm preflight consumer guard");
+    throw new Error("Expected Carapace npm preflight consumer guard");
   }
-  const workdir = tempDirs.make("openclaw-npm-preflight-consumer-");
+  const workdir = tempDirs.make("carapace-npm-preflight-consumer-");
   const binDir = resolve(workdir, "bin");
   mkdirSync(binDir);
   const qualificationEnv = await qualifiedPreflightConsumerFixture(workdir, params);
@@ -2054,7 +2054,7 @@ exit 64
       FULL_RELEASE_VALIDATION_RUN_ATTEMPT:
         params.fullReleaseRunAttempt ?? (params.independentProducer ? "3" : "1"),
       GITHUB_OUTPUT: resolve(workdir, "github-output"),
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       MOCK_PREFLIGHT_RUN: JSON.stringify({
         databaseId: 111,
         attempt: 1,
@@ -2063,16 +2063,16 @@ exit 64
         event: "workflow_dispatch",
         headBranch: params.preflightHeadBranch,
         headSha: params.preflightHeadSha,
-        url: "https://github.com/openclaw/openclaw/actions/runs/111",
+        url: "https://github.com/Exaggarate/carapace/actions/runs/111",
         workflowName: params.fullReleasePreflight
           ? "Full Release Validation"
-          : "OpenClaw NPM Release",
+          : "Carapace NPM Release",
       }),
       MOCK_PREFLIGHT_METADATA: JSON.stringify({
         run_attempt: 1,
         path: params.fullReleasePreflight
           ? ".github/workflows/full-release-validation.yml"
-          : ".github/workflows/openclaw-npm-release.yml",
+          : ".github/workflows/carapace-npm-release.yml",
       }),
       MOCK_TOOLING_ANCESTOR: String(params.toolingAncestor !== false),
       MOCK_RELEASE_SHA: "d".repeat(40),
@@ -2148,7 +2148,7 @@ function runReleaseCheckArtifactResolve(params: {
     resolve(REPO_ROOT, RELEASE_CHECK_ARTIFACT_RESOLVER),
     "resolve",
     "--repository",
-    "openclaw/openclaw",
+    "carapace/carapace",
     "--run-id",
     runId,
     "--consumer-attempt",
@@ -2261,7 +2261,7 @@ function runReleaseChecksSummary(params: {
   }
   const runId = "123456";
   const targetSha = "a".repeat(40);
-  const workdir = tempDirs.make("openclaw-release-check-status-");
+  const workdir = tempDirs.make("carapace-release-check-status-");
   const selectionDir = resolve(workdir, ".artifacts/release-check-selection");
   mkdirSync(selectionDir, { recursive: true });
   writeFileSync(
@@ -2312,13 +2312,13 @@ describe("package acceptance workflow", () => {
     const workflow = readWorkflow(RELEASE_PUBLISH_WORKFLOW);
     const input = workflow.on?.workflow_dispatch?.inputs?.plugin_sdk_api_acknowledgement;
     const resolveJob = workflowJob(RELEASE_PUBLISH_WORKFLOW, "resolve_release_target");
-    const downloadPreflight = workflowStep(resolveJob, "Download OpenClaw npm preflight manifest");
-    const validateEvidence = workflowStep(resolveJob, "Validate OpenClaw npm preflight manifest");
+    const downloadPreflight = workflowStep(resolveJob, "Download Carapace npm preflight manifest");
+    const validateEvidence = workflowStep(resolveJob, "Validate Carapace npm preflight manifest");
     const publishJob = workflowJob(RELEASE_PUBLISH_WORKFLOW, "publish");
     const dispatch = releasePublishOrchestration(publishJob);
 
     expect(readFileSync(RELEASE_PUBLISH_WORKFLOW, "utf8")).toContain(
-      "group: openclaw-release-publish-${{ inputs.npm_dist_tag }}",
+      "group: carapace-release-publish-${{ inputs.npm_dist_tag }}",
     );
 
     expect(input).toEqual({
@@ -2339,7 +2339,7 @@ describe("package acceptance workflow", () => {
     );
     expect(validateEvidence.run).toContain('node "$PLUGIN_SDK_API_VALIDATOR"');
     expect(validateEvidence.run).toContain('--acknowledge "$PLUGIN_SDK_API_ACKNOWLEDGEMENT"');
-    expect(validateEvidence.run).toContain('npm view "openclaw@${RELEASE_NPM_DIST_TAG}" version');
+    expect(validateEvidence.run).toContain('npm view "carapace@${RELEASE_NPM_DIST_TAG}" version');
     expect(validateEvidence.run).toContain('--current-selector-ref "$current_selector_ref"');
     expect(validateEvidence.run).toContain('--current-selector-sha "$current_selector_sha"');
     expect(validateEvidence.run).toContain("Immutable Plugin SDK API evidence artifact is missing");
@@ -2349,7 +2349,7 @@ describe("package acceptance workflow", () => {
       'expected_extended_stable_branch="extended-stable/${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.33"',
     );
     expect(downloadPreflight.run).toContain(
-      'preflight_path" != ".github/workflows/openclaw-npm-release.yml"',
+      'preflight_path" != ".github/workflows/carapace-npm-release.yml"',
     );
     expect(validateEvidence.run).toContain(
       'git merge-base --is-ancestor "$PREFLIGHT_WORKFLOW_SHA" "$WORKFLOW_SHA"',
@@ -2368,10 +2368,10 @@ describe("package acceptance workflow", () => {
     const selected = runReleasePublishInputValidation({
       FULL_RELEASE_VALIDATION_RUN_ATTEMPT: "",
       FULL_RELEASE_VALIDATION_RUN_ID: "",
-      PLUGINS: "@openclaw/meta",
+      PLUGINS: "@carapace/meta",
       PLUGIN_PUBLISH_SCOPE: "selected",
       PREFLIGHT_RUN_ID: "",
-      PUBLISH_OPENCLAW_NPM: "false",
+      PUBLISH_CARAPACE_NPM: "false",
     });
     expect(selected.status, selected.stderr).toBe(0);
 
@@ -2381,7 +2381,7 @@ describe("package acceptance workflow", () => {
       PLUGINS: "   ",
       PLUGIN_PUBLISH_SCOPE: "selected",
       PREFLIGHT_RUN_ID: "",
-      PUBLISH_OPENCLAW_NPM: "false",
+      PUBLISH_CARAPACE_NPM: "false",
     });
     expect(emptySelected.status).toBe(1);
     expect(emptySelected.stderr).toContain("plugin_publish_scope=selected requires plugins");
@@ -2390,7 +2390,7 @@ describe("package acceptance workflow", () => {
       FULL_RELEASE_VALIDATION_RUN_ATTEMPT: "",
       FULL_RELEASE_VALIDATION_RUN_ID: "",
       PREFLIGHT_RUN_ID: "",
-      PUBLISH_OPENCLAW_NPM: "false",
+      PUBLISH_CARAPACE_NPM: "false",
     });
     expect(broadWithoutEvidence.status).toBe(1);
     expect(broadWithoutEvidence.stderr).toContain("require preflight_run_id");
@@ -2398,39 +2398,39 @@ describe("package acceptance workflow", () => {
     const partialEvidence = runReleasePublishInputValidation({
       FULL_RELEASE_VALIDATION_RUN_ATTEMPT: "",
       FULL_RELEASE_VALIDATION_RUN_ID: "",
-      PLUGINS: "@openclaw/meta",
+      PLUGINS: "@carapace/meta",
       PLUGIN_PUBLISH_SCOPE: "selected",
-      PUBLISH_OPENCLAW_NPM: "false",
+      PUBLISH_CARAPACE_NPM: "false",
     });
     expect(partialEvidence.status).toBe(1);
     expect(partialEvidence.stderr).toContain("require full_release_validation_run_id");
 
-    expect(runReleasePublishInputValidation({ PUBLISH_OPENCLAW_NPM: "false" }).status).toBe(0);
+    expect(runReleasePublishInputValidation({ PUBLISH_CARAPACE_NPM: "false" }).status).toBe(0);
 
     const invalidResumeRun = runReleasePublishInputValidation({
-      OPENCLAW_NPM_RESUME_RUN_ID: "not-a-run-id",
+      CARAPACE_NPM_RESUME_RUN_ID: "not-a-run-id",
     });
     expect(invalidResumeRun.status).toBe(1);
     expect(invalidResumeRun.stderr).toContain(
-      "openclaw_npm_resume_run_id must be a positive GitHub Actions run id",
+      "carapace_npm_resume_run_id must be a positive GitHub Actions run id",
     );
   });
 
   it.each([
     { scope: "all-publishable", core: "true", plugins: "" },
     { scope: "all-publishable", core: "false", plugins: "" },
-    { scope: "selected", core: "false", plugins: "@openclaw/meta" },
+    { scope: "selected", core: "false", plugins: "@carapace/meta" },
   ])("rejects main before publishing children (scope=$scope, core=$core)", (mode) => {
     const result = runReleasePublishInputValidation({
       WORKFLOW_REF: "refs/heads/main",
       PLUGIN_PUBLISH_SCOPE: mode.scope,
-      PUBLISH_OPENCLAW_NPM: mode.core,
+      PUBLISH_CARAPACE_NPM: mode.core,
       PLUGINS: mode.plugins,
     });
     expect(result.status, result.stderr).toBe(1);
     expect(result.stderr).toContain("git tag release-publish/");
     expect(result.stderr).toContain("git push origin refs/tags/");
-    expect(result.stderr).toContain("gh workflow run openclaw-release-publish.yml --ref");
+    expect(result.stderr).toContain("gh workflow run carapace-release-publish.yml --ref");
   });
 
   it("retains the matching Tideclaw alpha parent route", () => {
@@ -2452,7 +2452,7 @@ describe("package acceptance workflow", () => {
       const result = runReleasePublishInputValidation({
         WORKFLOW_REF: "refs/heads/main",
         PUBLISH_DOCKER_ONLY: "true",
-        PUBLISH_OPENCLAW_NPM: "false",
+        PUBLISH_CARAPACE_NPM: "false",
         RELEASE_NPM_DIST_TAG: release.distTag,
         RELEASE_TAG: release.tag,
       });
@@ -2471,14 +2471,14 @@ describe("package acceptance workflow", () => {
     ]) {
       const result = runReleasePublishInputValidation({
         PUBLISH_DOCKER_ONLY: "true",
-        PUBLISH_OPENCLAW_NPM: "false",
+        PUBLISH_CARAPACE_NPM: "false",
         RELEASE_NPM_DIST_TAG: "latest",
         RELEASE_TAG: tag,
       });
       expect(result.status, tag).toBe(1);
     }
     const rejectedInputs: Record<string, string>[] = [
-      { PUBLISH_OPENCLAW_NPM: "true" },
+      { PUBLISH_CARAPACE_NPM: "true" },
       { PREFLIGHT_RUN_ID: "" },
       { FULL_RELEASE_VALIDATION_RUN_ID: "", FULL_RELEASE_VALIDATION_RUN_ATTEMPT: "" },
       { RELEASE_NPM_DIST_TAG: "alpha", RELEASE_TAG: "v2026.8.1-alpha.1" },
@@ -2487,7 +2487,7 @@ describe("package acceptance workflow", () => {
       expect(
         runReleasePublishInputValidation({
           PUBLISH_DOCKER_ONLY: "true",
-          PUBLISH_OPENCLAW_NPM: "false",
+          PUBLISH_CARAPACE_NPM: "false",
           RELEASE_NPM_DIST_TAG: "latest",
           RELEASE_TAG: "v2026.8.1",
           ...overrides,
@@ -2506,8 +2506,8 @@ describe("package acceptance workflow", () => {
     );
     expect(input?.description).toContain("beta, stable, or extended-stable");
     expect(verifyStep.env?.RELEASE_NPM_DIST_TAG).toBe("${{ inputs.npm_dist_tag }}");
-    expect(verifyStep.run).toContain('npm view "openclaw@${RELEASE_NPM_DIST_TAG}" version');
-    expect(verifyStep.run).not.toContain("npm view openclaw@extended-stable version");
+    expect(verifyStep.run).toContain('npm view "carapace@${RELEASE_NPM_DIST_TAG}" version');
+    expect(verifyStep.run).not.toContain("npm view carapace@extended-stable version");
   });
 
   it("accepts only exact protected SHA-pinned release publish tags", () => {
@@ -2517,7 +2517,7 @@ describe("package acceptance workflow", () => {
     writeFileSync(ghPath, `#!/bin/sh\nprintf '%s\\n' "\${MOCK_REMOTE_TAG_SHA}"\n`);
     chmodSync(ghPath, 0o755);
     const pinnedEnv = {
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       PATH: `${binDir}:${process.env.PATH}`,
       WORKFLOW_REF: `refs/tags/release-publish/${workflowSha.slice(0, 12)}-123`,
       WORKFLOW_SHA: workflowSha,
@@ -2603,7 +2603,7 @@ describe("package acceptance workflow", () => {
       const dispatchPath = join(root, "dispatch.json");
       const workflowRef = "release-publish/aaaaaaaaaaaa-123";
       const workflowSha = "a".repeat(40);
-      const runUrl = "https://github.com/openclaw/openclaw/actions/runs/91";
+      const runUrl = "https://github.com/Exaggarate/carapace/actions/runs/91";
       writeFileSync(
         join(root, "gh"),
         `#!${process.execPath}
@@ -2615,12 +2615,12 @@ if (args[0] === 'run' && args[1] === 'list') {
     args[args.indexOf('--branch') + 1] === ${JSON.stringify(otherRef ? "release-publish/bbbbbbbbbbbb-456" : workflowRef)};
   console.log(JSON.stringify(matches ? [{ databaseId: 91, status: ${JSON.stringify(state)}, url: ${JSON.stringify(runUrl)} }] : []));
 } else if (args[0] === 'run' && args[1] === 'view') {
-  console.log(JSON.stringify({ headSha: ${JSON.stringify(workflowSha)}, url: 'https://github.com/openclaw/openclaw/actions/runs/92' }));
+  console.log(JSON.stringify({ headSha: ${JSON.stringify(workflowSha)}, url: 'https://github.com/Exaggarate/carapace/actions/runs/92' }));
 } else if (args[0] === 'api' && args.some(arg => arg.includes('/commits/'))) {
   console.log(${JSON.stringify(workflowSha)});
 } else if (args[0] === 'api' && args.some(arg => arg.endsWith('/dispatches'))) {
   writeFileSync(${JSON.stringify(dispatchPath)}, readFileSync(0, 'utf8'));
-  console.log(JSON.stringify({ workflow_run_id: 92, html_url: 'https://github.com/openclaw/openclaw/actions/runs/92' }));
+  console.log(JSON.stringify({ workflow_run_id: 92, html_url: 'https://github.com/Exaggarate/carapace/actions/runs/92' }));
 } else throw new Error('Unexpected GitHub operation: ' + JSON.stringify(args));
 `,
         { mode: 0o755 },
@@ -2639,7 +2639,7 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
             PATH: `${root}:${process.env.PATH}`,
             HELPER_SCRIPT: resolve("scripts/lib/release-publish-children.sh"),
             GITHUB_REF: `refs/tags/${workflowRef}`,
-            GITHUB_REPOSITORY: "openclaw/openclaw",
+            GITHUB_REPOSITORY: "carapace/carapace",
             GITHUB_STEP_SUMMARY: join(root, "summary"),
             WORKFLOW_REF: workflowRef,
             PARENT_WORKFLOW_SHA: workflowSha,
@@ -2668,30 +2668,30 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
     const workflowSha = "a".repeat(40);
     const protectedRef = `refs/tags/release-publish/${workflowSha.slice(0, 12)}-123`;
 
-    const valid = runOpenClawNpmTrustedRefGuard({
+    const valid = runCarapaceNpmTrustedRefGuard({
       WORKFLOW_REF: protectedRef,
       WORKFLOW_SHA: workflowSha,
       MOCK_REMOTE_TAG_SHA: workflowSha,
     });
     expect(valid.status, valid.stderr).toBe(0);
 
-    const mismatchedName = runOpenClawNpmTrustedRefGuard({
+    const mismatchedName = runCarapaceNpmTrustedRefGuard({
       WORKFLOW_REF: `refs/tags/release-publish/${"b".repeat(12)}-123`,
       WORKFLOW_SHA: workflowSha,
     });
     expect(mismatchedName.status).toBe(1);
     expect(mismatchedName.stderr).toContain(
-      "SHA-pinned release-publish tag does not match the OpenClaw npm workflow SHA",
+      "SHA-pinned release-publish tag does not match the Carapace npm workflow SHA",
     );
 
-    const moved = runOpenClawNpmTrustedRefGuard({
+    const moved = runCarapaceNpmTrustedRefGuard({
       MOCK_REMOTE_TAG_SHA: "c".repeat(40),
       WORKFLOW_REF: protectedRef,
       WORKFLOW_SHA: workflowSha,
     });
     expect(moved.status).toBe(1);
     expect(moved.stderr).toContain(
-      "SHA-pinned release-publish tag does not resolve to the OpenClaw npm workflow SHA",
+      "SHA-pinned release-publish tag does not resolve to the Carapace npm workflow SHA",
     );
   });
 
@@ -2719,14 +2719,14 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
       );
     }
     const plugin = {
-      packageName: "@openclaw/example",
+      packageName: "@carapace/example",
       packageDir: "extensions/example",
       version: "2026.9.1",
       channel: "stable",
       publishTag: "latest",
     };
     const warning =
-      '@openclaw/example@2026.9.1: example-runtime pinned "1.2.3", npm latest is "1.2.4".';
+      '@carapace/example@2026.9.1: example-runtime pinned "1.2.3", npm latest is "1.2.4".';
     const planPath = join(root, "plan.json");
     writeFileSync(
       planPath,
@@ -2869,7 +2869,7 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
 
   it.each([
     ["aggregate", runReleasePublishPreflightConsumerGuard],
-    ["core npm", runOpenClawNpmPreflightConsumerGuard],
+    ["core npm", runCarapaceNpmPreflightConsumerGuard],
   ] as const)(
     "binds %s historical preflight consumption to independent producer provenance",
     async (_name, run) => {
@@ -2905,14 +2905,14 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
     const workflowSha = "a".repeat(40);
     const workflowTag = `release-publish/${workflowSha.slice(0, 12)}-123`;
     const protectedRef = `refs/tags/${workflowTag}`;
-    const predecessor = runOpenClawNpmTrustedRefGuard({
+    const predecessor = runCarapaceNpmTrustedRefGuard({
       MOCK_REMOTE_TAG_SHA: workflowSha,
       WORKFLOW_REF: protectedRef,
       WORKFLOW_SHA: workflowSha,
     });
     expect(predecessor.status, predecessor.stderr).toBe(0);
 
-    const consumer = await runOpenClawNpmPreflightConsumerGuard({
+    const consumer = await runCarapaceNpmPreflightConsumerGuard({
       currentRef: protectedRef,
       currentWorkflowSha: workflowSha,
       liveTagSha: "b".repeat(40),
@@ -2927,9 +2927,9 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
 
   it.each([
     ["aggregate", runReleasePublishPreflightConsumerGuard, false],
-    ["core npm", runOpenClawNpmPreflightConsumerGuard, false],
+    ["core npm", runCarapaceNpmPreflightConsumerGuard, false],
     ["aggregate with independent producer", runReleasePublishPreflightConsumerGuard, true],
-    ["core npm with independent producer", runOpenClawNpmPreflightConsumerGuard, true],
+    ["core npm with independent producer", runCarapaceNpmPreflightConsumerGuard, true],
   ] as const)(
     "admits only the exact selected FRV producer in %s publication",
     async (_name, run, independentProducer) => {
@@ -2967,13 +2967,13 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
         preflightHeadBranch: `release-ci/${"a".repeat(12)}-111`,
         preflightHeadSha: "a".repeat(40),
       };
-      const accepted = await runOpenClawNpmPreflightConsumerGuard(params);
+      const accepted = await runCarapaceNpmPreflightConsumerGuard(params);
       expect(accepted.status, accepted.stderr).toBe(0);
       for (const preflightHeadBranch of [
         params.preflightHeadBranch,
         params.expectedExtendedStableBranch,
       ]) {
-        const rejected = await runOpenClawNpmPreflightConsumerGuard({
+        const rejected = await runCarapaceNpmPreflightConsumerGuard({
           ...params,
           preflightHeadBranch,
           toolingAncestor: false,
@@ -3043,7 +3043,7 @@ dispatch_workflow_at_ref "$WORKFLOW_REF" "$PARENT_WORKFLOW_SHA" plugin-clawhub-r
         EXPECTED_PRODUCER_RUN_ID: producerRunId,
         RELEASE_TAG: `v${mode.version}`,
         TARGET_SHA: "d".repeat(40),
-        OPENCLAW_NPM_RESUME_RUN_ID: "777",
+        CARAPACE_NPM_RESUME_RUN_ID: "777",
         NPM_TELEGRAM_RUN_ID: "",
       },
       {
@@ -3068,13 +3068,13 @@ gh() {
     record notes
   else return 99; fi
 }
-npm() { printf '%s\\n' 'https://example.invalid/openclaw.tgz'; }
+npm() { printf '%s\\n' 'https://example.invalid/carapace.tgz'; }
 curl() {
   while [[ "$1" != "-o" ]]; do shift; done
   cp "$RUNNER_TEMP/registry.tgz" "$2"
 }
 node() {
-  if [[ "\${3:-}" == "$GITHUB_WORKSPACE/.release-harness/scripts/openclaw-npm-resume-run.mts" ]]; then
+  if [[ "\${3:-}" == "$GITHUB_WORKSPACE/.release-harness/scripts/carapace-npm-resume-run.mts" ]]; then
     printf '%s\\n' '{"url":"https://example.invalid/runs/777","workflowRef":"refs/tags/release-publish-verified","workflowSha":"${"a".repeat(40)}"}'
   else command node "$@"; fi
 }
@@ -3101,14 +3101,14 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
     writeFileSync(
       join(fixture.root, "release-postpublish-evidence.json"),
       JSON.stringify({
-        openclawNpmTarball: "https://example.invalid/openclaw.tgz",
-        openclawNpmIntegrity: "sha512-fixture",
+        carapaceNpmTarball: "https://example.invalid/carapace.tgz",
+        carapaceNpmIntegrity: "sha512-fixture",
         ...(mode.fullReleasePreflight ? { telegramWaiver: `${mode.version}-owner-approved` } : {}),
       }),
     );
     const resume = fixture.run(
       {
-        run: 'set -euo pipefail; source "$GITHUB_WORKSPACE/.release-harness/scripts/lib/release-publish-children.sh"; resolve_openclaw_npm_publish_state; [[ "$openclaw_npm_already_published" == true ]]',
+        run: 'set -euo pipefail; source "$GITHUB_WORKSPACE/.release-harness/scripts/lib/release-publish-children.sh"; resolve_carapace_npm_publish_state; [[ "$carapace_npm_already_published" == true ]]',
       },
       stepEnv(workflowStep(publish, "Dispatch publish workflows")),
     );
@@ -3135,7 +3135,7 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
 
     const proof = fixture.run(
       {
-        run: 'set -euo pipefail; source "$GITHUB_WORKSPACE/.release-harness/scripts/lib/release-publish-children.sh"; plugin_npm_run_id=101; openclaw_npm_run_id=404; windows_node_run_id=""; android_release_note=""; append_release_proof_to_github_release',
+        run: 'set -euo pipefail; source "$GITHUB_WORKSPACE/.release-harness/scripts/lib/release-publish-children.sh"; plugin_npm_run_id=101; carapace_npm_run_id=404; windows_node_run_id=""; android_release_note=""; append_release_proof_to_github_release',
       },
       {
         ...stepEnv(workflowStep(publish, "Complete publish workflows")),
@@ -3152,10 +3152,10 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
     expect
       .soft(proofText)
       .toContain(
-        `- npm preflight: https://github.com/openclaw/openclaw/actions/runs/${producerRunId}`,
+        `- npm preflight: https://github.com/Exaggarate/carapace/actions/runs/${producerRunId}`,
       );
     expect(proofText).toContain(
-      `- full release validation: https://github.com/openclaw/openclaw/actions/runs/${fullReleaseRunId}`,
+      `- full release validation: https://github.com/Exaggarate/carapace/actions/runs/${fullReleaseRunId}`,
     );
   });
 
@@ -3192,7 +3192,7 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
 
   it("revalidates protected tooling immediately before every core and plugin npm publish", () => {
     const corePublish = workflowStep(
-      workflowJob(OPENCLAW_NPM_RELEASE_WORKFLOW, "publish_openclaw_npm"),
+      workflowJob(CARAPACE_NPM_RELEASE_WORKFLOW, "publish_carapace_npm"),
       "Publish",
     );
     expect(corePublish.env).toMatchObject({
@@ -3220,26 +3220,26 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
       '--release-publish-parent-state-policy "$RELEASE_PUBLISH_PARENT_STATE_POLICY"',
     );
     expect(corePublish.run).toMatch(
-      /verify_release_tooling_identity\s+bash scripts\/openclaw-npm-publish\.sh --publish "\.\/\$\{tarball_path\}"/u,
+      /verify_release_tooling_identity\s+bash scripts\/carapace-npm-publish\.sh --publish "\.\/\$\{tarball_path\}"/u,
     );
     expect(corePublish.run).toMatch(
-      /verify_release_tooling_identity\s+bash scripts\/openclaw-npm-publish\.sh --publish "\$\{publish_target\}"/u,
+      /verify_release_tooling_identity\s+bash scripts\/carapace-npm-publish\.sh --publish "\$\{publish_target\}"/u,
     );
 
     const pluginPublishJob = workflowJob(PLUGIN_NPM_RELEASE_WORKFLOW, "publish_plugins_npm");
     const oidcPublish = workflowStep(pluginPublishJob, "Publish with trusted publisher");
     expect(oidcPublish.env).toMatchObject({
       GH_TOKEN: "${{ github.token }}",
-      OPENCLAW_RELEASE_PUBLISH_RUN_ATTEMPT: "${{ inputs.release_publish_run_attempt }}",
-      OPENCLAW_RELEASE_PUBLISH_RUN_ID: "${{ inputs.release_publish_run_id }}",
-      OPENCLAW_RELEASE_PUBLISH_REF: "${{ inputs.release_publish_branch }}",
-      OPENCLAW_RELEASE_PUBLISH_FULL_REF: "${{ inputs.release_publish_full_ref }}",
-      OPENCLAW_RELEASE_PUBLISH_PARENT_STATE_POLICY:
+      CARAPACE_RELEASE_PUBLISH_RUN_ATTEMPT: "${{ inputs.release_publish_run_attempt }}",
+      CARAPACE_RELEASE_PUBLISH_RUN_ID: "${{ inputs.release_publish_run_id }}",
+      CARAPACE_RELEASE_PUBLISH_REF: "${{ inputs.release_publish_branch }}",
+      CARAPACE_RELEASE_PUBLISH_FULL_REF: "${{ inputs.release_publish_full_ref }}",
+      CARAPACE_RELEASE_PUBLISH_PARENT_STATE_POLICY:
         "${{ inputs.release_publish_run_id != '' && (github.actor == 'github-actions[bot]' && 'active-or-failure' || 'manual-recovery') || '' }}",
-      OPENCLAW_RELEASE_TOOLING_FULL_REF: "${{ github.ref }}",
-      OPENCLAW_RELEASE_TOOLING_REF: "${{ github.ref_name }}",
-      OPENCLAW_RELEASE_TOOLING_REPOSITORY: "${{ github.repository }}",
-      OPENCLAW_RELEASE_TOOLING_SHA: "${{ github.workflow_sha }}",
+      CARAPACE_RELEASE_TOOLING_FULL_REF: "${{ github.ref }}",
+      CARAPACE_RELEASE_TOOLING_REF: "${{ github.ref_name }}",
+      CARAPACE_RELEASE_TOOLING_REPOSITORY: "${{ github.repository }}",
+      CARAPACE_RELEASE_TOOLING_SHA: "${{ github.workflow_sha }}",
     });
 
     expect(oidcPublish.env).toMatchObject({
@@ -3248,7 +3248,7 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
     });
     expect(oidcPublish.run).toContain("node scripts/release-tooling-identity.mjs verify");
     expect(oidcPublish.run).toContain(
-      '--release-publish-parent-state-policy "$OPENCLAW_RELEASE_PUBLISH_PARENT_STATE_POLICY"',
+      '--release-publish-parent-state-policy "$CARAPACE_RELEASE_PUBLISH_PARENT_STATE_POLICY"',
     );
     expect(oidcPublish.run).not.toContain("plugin-npm-publish.sh");
 
@@ -3289,12 +3289,12 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
     expect(oidcReadback.if).toBe("steps.publication_evidence.outputs.publish_route == 'npm-oidc'");
 
     const pluginWrapper = readFileSync("scripts/plugin-npm-publish.sh", "utf8");
-    expect(pluginWrapper).toContain('--release-publish-ref "${OPENCLAW_RELEASE_PUBLISH_REF:-}"');
+    expect(pluginWrapper).toContain('--release-publish-ref "${CARAPACE_RELEASE_PUBLISH_REF:-}"');
     expect(pluginWrapper).toContain(
-      '--release-publish-full-ref "${OPENCLAW_RELEASE_PUBLISH_FULL_REF:-}"',
+      '--release-publish-full-ref "${CARAPACE_RELEASE_PUBLISH_FULL_REF:-}"',
     );
     expect(pluginWrapper).toContain(
-      '--release-publish-parent-state-policy "${OPENCLAW_RELEASE_PUBLISH_PARENT_STATE_POLICY:-}"',
+      '--release-publish-parent-state-policy "${CARAPACE_RELEASE_PUBLISH_PARENT_STATE_POLICY:-}"',
     );
     const distTagIndex = pluginWrapper.indexOf(
       'npm dist-tag add "${package_name}@${package_version}"',
@@ -3315,8 +3315,8 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
         "Validate full release validation manifest",
       ],
       [
-        OPENCLAW_NPM_RELEASE_WORKFLOW,
-        "publish_openclaw_npm",
+        CARAPACE_NPM_RELEASE_WORKFLOW,
+        "publish_carapace_npm",
         "Verify full release validation evidence",
       ],
     ] as const) {
@@ -3356,7 +3356,7 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
     }
     const events = fixture.events();
     const dispatchIndex = events.findIndex((event) =>
-      event.startsWith("dispatch:openclaw-npm-release.yml"),
+      event.startsWith("dispatch:carapace-npm-release.yml"),
     );
     const receiptIndex = events.indexOf("authorize-clawhub");
     expect(dispatchIndex).toBeGreaterThanOrEqual(0);
@@ -3366,7 +3366,7 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
     expect(events).not.toContain("windows");
     expect(events).not.toContain("android");
     expect(dispatchIndex).toBeGreaterThan(draftIndex);
-    const gateIndex = events.indexOf("wait:openclaw-npm-release.yml:publish_openclaw_npm:true");
+    const gateIndex = events.indexOf("wait:carapace-npm-release.yml:publish_carapace_npm:true");
     expect(gateIndex).toBeGreaterThan(dispatchIndex);
     expect(gateIndex).toBeLessThan(receiptIndex);
     expect(events).toContain("approval-environment:npm-release");
@@ -3415,13 +3415,13 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
       const completed = fixture.run(workflowStep(job, "Complete publish workflows"), env);
       expect(completed.status, completed.stderr).toBe(1);
       const events = fixture.events();
-      expect(events).toContain("wait:openclaw-npm-release.yml:terminal:false");
+      expect(events).toContain("wait:carapace-npm-release.yml:terminal:false");
       const approval = String(approvesClawHub);
       expect(events).toContain(`wait:plugin-clawhub-release.yml:terminal:${approval}`);
       expect(events).toContain(`wait:plugin-clawhub-new.yml:terminal:${approval}`);
       const verification = `verify:1:bootstrap=${bootstrapCompleted}:workflow=refs/heads/main`;
       expect(events.indexOf(verification)).toBeGreaterThan(
-        events.lastIndexOf("finished:openclaw-npm-release.yml:0"),
+        events.lastIndexOf("finished:carapace-npm-release.yml:0"),
       );
       expect(events).toContain("release-evidence");
       expect(events).not.toContain("windows");
@@ -3447,7 +3447,7 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
       } else {
         expect(fixture.outputs()).toMatchObject({
           plugin_npm_completed: "true",
-          openclaw_npm_run_id: "404",
+          carapace_npm_run_id: "404",
         });
         const completed = fixture.run(workflowStep(job, "Complete publish workflows"), {
           CORE_START_OUTCOME: "failure",
@@ -3455,8 +3455,8 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
           CLAWHUB_RECEIPT_OUTCOME: "skipped",
         });
         expect(completed.status, completed.stderr).toBe(1);
-        expect(fixture.events()).toContain("cancel:run cancel --repo openclaw/openclaw 404");
-        expect(fixture.events()).toContain("wait:openclaw-npm-release.yml:terminal:false");
+        expect(fixture.events()).toContain("cancel:run cancel --repo carapace/carapace 404");
+        expect(fixture.events()).toContain("wait:carapace-npm-release.yml:terminal:false");
         expect(fixture.events().some((event) => event.startsWith("verify:"))).toBe(false);
       }
     },
@@ -3465,8 +3465,8 @@ render_github_release_notes() { cp "$2" "$1"; printf '%s\\n' '{"verificationIncl
   it.each([false, true])("preserves detached ClawHub and npm resume=%s", (resume) => {
     const fixture = createReleasePublishFixture({
       WAIT_FOR_CLAWHUB: "false",
-      CHILD_OPENCLAW_NPM_ALREADY_PUBLISHED: String(resume),
-      CHILD_OPENCLAW_NPM_EXPECTED_WORKFLOW_REF: "refs/tags/release-publish/aaaaaaaaaaaa-42",
+      CHILD_CARAPACE_NPM_ALREADY_PUBLISHED: String(resume),
+      CHILD_CARAPACE_NPM_EXPECTED_WORKFLOW_REF: "refs/tags/release-publish/aaaaaaaaaaaa-42",
     });
     const job = workflowJob(RELEASE_PUBLISH_WORKFLOW, "publish");
     for (const stepName of ["Start core npm publication", "Complete publish workflows"]) {
@@ -3530,7 +3530,7 @@ print_failed_run_summary 404
         encoding: "utf8",
         env: {
           PATH: process.env.PATH,
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           JOBS_FILE: jobsPath,
           LOG_REQUESTS: callsPath,
         },
@@ -3578,11 +3578,11 @@ gh() {
     elif [[ "$*" == *"--json jobs"* ]]; then
       local jobs
       if [[ "$MODE" == "duplicate" ]]; then
-        jobs='[{"name":"publish_openclaw_npm","status":"in_progress"},{"name":"publish_openclaw_npm","status":"in_progress"}]'
+        jobs='[{"name":"publish_carapace_npm","status":"in_progress"},{"name":"publish_carapace_npm","status":"in_progress"}]'
       elif [[ "$MODE" == "manual" || ( -f "$APPROVED" && "$MODE" != "approved-queued" ) ]]; then
-        jobs='[{"name":"publish_openclaw_npm","status":"in_progress"}]'
+        jobs='[{"name":"publish_carapace_npm","status":"in_progress"}]'
       else
-        jobs='[{"name":"publish_openclaw_npm","status":"queued"}]'
+        jobs='[{"name":"publish_carapace_npm","status":"queued"}]'
       fi
       printf '{"jobs":%s}\\n' "$jobs" | jq -c "\${!#}"
     else
@@ -3606,7 +3606,7 @@ print_failed_run_summary() { :; }
 ${shellFunctionSource(source, "verify_child_run_sha")}
 ${shellFunctionSource(source, "approve_pending_deployments")}
 ${shellFunctionSource(source, "wait_for_run")}
-wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPROVE_ENVIRONMENTS" "$APPROVED_ENVIRONMENT"
+wait_for_run carapace-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPROVE_ENVIRONMENTS" "$APPROVED_ENVIRONMENT"
 `,
       ],
       {
@@ -3616,11 +3616,11 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
           PATH: process.env.PATH,
           MODE: mode,
           EXPECTED_SHA: "a".repeat(40),
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           GITHUB_STEP_SUMMARY: join(root, "summary"),
           APPROVED: join(root, "approved"),
           CALLS: calls,
-          STARTED_JOB: mode === "passive" ? "" : "publish_openclaw_npm",
+          STARTED_JOB: mode === "passive" ? "" : "publish_carapace_npm",
           APPROVE_ENVIRONMENTS: String(mode !== "passive"),
           APPROVED_ENVIRONMENT: mode === "passive" ? "" : "npm-release",
         },
@@ -3647,7 +3647,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
         env: {
           PATH: `${root}:${process.env.PATH}`,
           RELEASE_TAG: "v2026.9.1",
-          PUBLISH_OPENCLAW_NPM: "true",
+          PUBLISH_CARAPACE_NPM: "true",
           PUBLISH_DOCKER_ONLY: "false",
           GITHUB_OUTPUT: join(root, "output"),
           GITHUB_STEP_SUMMARY: join(root, "summary"),
@@ -3684,7 +3684,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
       env: {
         PATH: `${root}:${process.env.PATH}`,
         RELEASE_TAG: tag,
-        PUBLISH_OPENCLAW_NPM: "true",
+        PUBLISH_CARAPACE_NPM: "true",
         PUBLISH_DOCKER_ONLY: "false",
         GITHUB_OUTPUT: join(root, "output"),
         GITHUB_STEP_SUMMARY: summaryPath,
@@ -3704,7 +3704,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
         outputs[name] = stepOutputs[field] ?? "";
       }
     }
-    const inputs = { tag, publish_openclaw_npm: true, publish_docker_only: false };
+    const inputs = { tag, publish_carapace_npm: true, publish_docker_only: false };
     const needs = {
       resolve_release_target: { result: "success", outputs },
       publish: { result: "success" },
@@ -3726,7 +3726,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
     outputs.coverage_policy = "npm-stable-v1";
     needs.qualify_android_native.outputs.qualified = "";
     expect(admitted("publish_android")).toBe(false);
-    inputs.publish_openclaw_npm = false;
+    inputs.publish_carapace_npm = false;
     expect(admitted("qualify_android_native")).toBe(false);
     expect(admitted("publish_android")).toBe(false);
     expect(outputs.android_pin_version).toBe(pin);
@@ -3748,7 +3748,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
       {
         RELEASE_TAG: tag,
         ANDROID_RELEASE_NOTE: outputs.android_release_note ?? "",
-        CHILD_OPENCLAW_NPM_ALREADY_PUBLISHED: "true",
+        CHILD_CARAPACE_NPM_ALREADY_PUBLISHED: "true",
       },
       { functions: 'append_release_proof_to_github_release() { record "$android_release_note"; }' },
     );
@@ -3763,10 +3763,10 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
     const publishOrchestration = releasePublishOrchestration(publishJob);
 
     for (const stepName of [
-      "Download OpenClaw npm preflight manifest",
+      "Download Carapace npm preflight manifest",
       "Resolve full release validation run",
       "Download full release validation manifest",
-      "Validate OpenClaw npm preflight manifest",
+      "Validate Carapace npm preflight manifest",
       "Validate full release validation manifest",
     ]) {
       expect(workflowStep(resolveJob, stepName).if).toContain(
@@ -3787,7 +3787,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
     ]) {
       const androidJob = workflowJob(RELEASE_PUBLISH_WORKFLOW, "publish_android");
       expect(workflowStep(androidJob, stepName)).toBeDefined();
-      expect(androidJob.if).toContain("inputs.publish_openclaw_npm");
+      expect(androidJob.if).toContain("inputs.publish_carapace_npm");
     }
     const nativeJob = workflowJob(RELEASE_PUBLISH_WORKFLOW, "qualify_android_native");
     const androidJob = workflowJob(RELEASE_PUBLISH_WORKFLOW, "publish_android");
@@ -3823,7 +3823,7 @@ wait_for_run openclaw-npm-release.yml 404 "$EXPECTED_SHA" "$STARTED_JOB" "$APPRO
       'approve_pending_deployments "${workflow}" "${run_id}" "${expected_sha}"',
       'dispatch_workflow_at_ref "${RELEASE_TAG}" "${TARGET_SHA}" android-release.yml',
       'wait_for_run plugin-npm-release.yml "${plugin_npm_run_id}" "${PARENT_WORKFLOW_SHA}"',
-      'wait_for_run_background openclaw-npm-release.yml "${openclaw_npm_run_id}" "${PARENT_WORKFLOW_SHA}"',
+      'wait_for_run_background carapace-npm-release.yml "${carapace_npm_run_id}" "${PARENT_WORKFLOW_SHA}"',
       '-f release_publish_branch="${PARENT_WORKFLOW_BRANCH}"',
       '-f release_publish_full_ref="${PARENT_WORKFLOW_FULL_REF}"',
       "plugin-clawhub-release.yml: detached; approval and publish not awaited",
@@ -3864,7 +3864,7 @@ printf 'native_failed=%s\\n' "$native_failed"
             PATH: process.env.PATH,
             RUNNER_TEMP: root,
             GITHUB_STEP_SUMMARY: summaryPath,
-            GITHUB_REPOSITORY: "openclaw/openclaw",
+            GITHUB_REPOSITORY: "carapace/carapace",
             GITHUB_RUN_ID: "123",
             GITHUB_RUN_ATTEMPT: "2",
             RELEASE_TAG: "v2026.8.1",
@@ -3883,13 +3883,13 @@ printf 'native_failed=%s\\n' "$native_failed"
       const summary = readFileSync(summaryPath, "utf8");
       if (assetsVerified) {
         expect(summary).toContain("previously published assets verified");
-        expect(summary).toContain("releases/download/v2026.8.1/OpenClaw-Android.apk");
+        expect(summary).toContain("releases/download/v2026.8.1/Carapace-Android.apk");
         expect(summary).not.toContain("actions/runs/456");
       } else if (dispatchFailure) {
         expect(summary).not.toContain("actions/runs/456");
       } else {
         expect(summary).toContain("completion not awaited");
-        expect(summary).toContain("https://github.com/openclaw/openclaw/actions/runs/456");
+        expect(summary).toContain("https://github.com/Exaggarate/carapace/actions/runs/456");
       }
     },
   );
@@ -3925,7 +3925,7 @@ printf 'native_failed=%s\\n' "$native_failed"
       head_branch: mode === "other-ref" ? "main" : workflowRef,
       head_sha: mode === "other-tooling" ? "c".repeat(40) : workflowSha,
       repository: {
-        full_name: mode === "other-repository" ? "example/other" : "openclaw/openclaw",
+        full_name: mode === "other-repository" ? "example/other" : "carapace/carapace",
       },
       actor: { login: "github-actions[bot]" },
       triggering_actor: { login: "github-actions[bot]" },
@@ -3944,10 +3944,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const args = process.argv.slice(2);
 if (args[0] === 'api' && args.some(arg => arg.endsWith('/workflows/ci.yml/dispatches'))) {
   writeFileSync(${JSON.stringify(dispatchPath)}, readFileSync(0, 'utf8'));
-  console.log(JSON.stringify({ workflow_run_id: 91, html_url: 'https://github.com/openclaw/openclaw/actions/runs/91' }));
+  console.log(JSON.stringify({ workflow_run_id: 91, html_url: 'https://github.com/Exaggarate/carapace/actions/runs/91' }));
 } else if (args[0] === 'api' && args.some(arg => arg.endsWith('/workflows/android-release.yml/dispatches'))) {
   writeFileSync(${JSON.stringify(androidDispatchPath)}, readFileSync(0, 'utf8'));
-  console.log(JSON.stringify({ workflow_run_id: 92, html_url: 'https://github.com/openclaw/openclaw/actions/runs/92' }));
+  console.log(JSON.stringify({ workflow_run_id: 92, html_url: 'https://github.com/Exaggarate/carapace/actions/runs/92' }));
 } else if (args[0] === 'api' && args.some(arg => arg.includes('/commits/'))) {
   const endpoint = args.find(arg => arg.includes('/commits/'));
   if (endpoint.endsWith('/v2026.8.1')) {
@@ -3968,7 +3968,7 @@ if (args[0] === 'api' && args.some(arg => arg.endsWith('/workflows/ci.yml/dispat
     headSha: args.includes('92') ? ${JSON.stringify(targetSha)} : run.head_sha,
     status: run.status, conclusion: run.conclusion,
     createdAt: '2026-08-30T10:00:00Z', updatedAt: '2026-08-30T10:01:00Z',
-    url: 'https://github.com/openclaw/openclaw/actions/runs/91',
+    url: 'https://github.com/Exaggarate/carapace/actions/runs/91',
   }));
 } else throw new Error('Unexpected GitHub operation: ' + JSON.stringify(args));
 `,
@@ -4021,7 +4021,7 @@ NODE
           RUNNER_TEMP: root,
           GITHUB_OUTPUT: outputPath,
           GITHUB_STEP_SUMMARY: join(root, "summary"),
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           GITHUB_RUN_ID: "123",
           GITHUB_RUN_ATTEMPT: "2",
           GITHUB_REF: `refs/tags/${workflowRef}`,
@@ -4069,8 +4069,8 @@ NODE
     if (approved) {
       expect(JSON.parse(readFileSync(approvalPath, "utf8"))).toEqual({
         version: 3,
-        repository: "openclaw/openclaw",
-        workflow: "OpenClaw Release Publish",
+        repository: "carapace/carapace",
+        workflow: "Carapace Release Publish",
         parentRunId: "123",
         parentRunAttempt: 2,
         workflowBranch: "main",
@@ -4099,9 +4099,9 @@ NODE
     git("remote", "add", "origin", root);
     git(
       "-c",
-      "user.name=OpenClaw Test",
+      "user.name=Carapace Test",
       "-c",
-      "user.email=openclaw-test@example.com",
+      "user.email=carapace-test@example.com",
       "commit",
       "--allow-empty",
       "-qm",
@@ -4113,9 +4113,9 @@ NODE
     git("add", "scripts/android-native-ci.mjs");
     git(
       "-c",
-      "user.name=OpenClaw Test",
+      "user.name=Carapace Test",
       "-c",
-      "user.email=openclaw-test@example.com",
+      "user.email=carapace-test@example.com",
       "commit",
       "-qm",
       "native-bound consumer",
@@ -4262,7 +4262,7 @@ NODE
       expect(script).toBeDefined();
       const root = tempDirs.make("stable-closeout-recovery-");
       const runPath = join(root, "run.json");
-      const jobs = npm ? [{ name: "Publish plugins, then OpenClaw", conclusion: "success" }] : [];
+      const jobs = npm ? [{ name: "Publish plugins, then Carapace", conclusion: "success" }] : [];
       if (docker === "current" || docker === "both") {
         jobs.push({ name: "Publish Docker images / Publish prepared Docker images", conclusion });
       }
@@ -4275,7 +4275,7 @@ NODE
       writeFileSync(
         runPath,
         JSON.stringify({
-          workflowName: "OpenClaw Release Publish",
+          workflowName: "Carapace Release Publish",
           event: "workflow_dispatch",
           status: "completed",
           conclusion: "failure",
@@ -4414,7 +4414,7 @@ NODE
     );
     expect(workflow).toContain('--allow-stale-rollback-drill "$REPAIR_PARTIAL_CLOSEOUT"');
     expect(workflow).toContain(
-      'awk -v asset="openclaw-${release_version}-stable-main-closeout.json"',
+      'awk -v asset="carapace-${release_version}-stable-main-closeout.json"',
     );
     expect(workflow).toContain("attach_or_verify \\");
     expect(attachStep.run).toContain('cp -- "$source_path" "$existing_dir/$asset_name"');
@@ -4427,7 +4427,7 @@ NODE
     );
     expect(workflow).toContain("(.[0].runAttempt == null) or");
     expect(workflow).toContain(
-      'release_manifest_asset="openclaw-${evidence_version}-release-manifest.json"',
+      'release_manifest_asset="carapace-${evidence_version}-release-manifest.json"',
     );
     expect(workflow).toContain('sha256sum --strict --status -c "$release_manifest_checksum_asset"');
     expect(workflow).toContain(
@@ -4443,7 +4443,7 @@ NODE
       'String(run.run_attempt ?? "") !== process.env.FULL_RELEASE_VALIDATION_RUN_ATTEMPT',
     );
     expect(evidenceStep.run).toContain(
-      'manifest_asset="openclaw-${evidence_version}-release-manifest.json"',
+      'manifest_asset="carapace-${evidence_version}-release-manifest.json"',
     );
     expect(evidenceStep.run).toContain('gh_with_retry release download "$EVIDENCE_TAG"');
     expect(evidenceStep.run).toContain(".runId == $run_id");
@@ -4605,16 +4605,16 @@ test "$package_manager" = "pnpm@12.1.0"
     chmodSync(pnpmPath, 0o755);
 
     const sdkStep = workflowStep(
-      workflowJob(OPENCLAW_NPM_PREFLIGHT_WORKFLOW, "check_sdk_npm"),
+      workflowJob(CARAPACE_NPM_PREFLIGHT_WORKFLOW, "check_sdk_npm"),
       "Verify Plugin SDK API changes",
     );
     const sdkCommandBlock = (sdkStep.run ?? "").match(
-      /\(\n\s+cd "\$tooling_dir"\n\s+pnpm install --frozen-lockfile --ignore-scripts --filter openclaw\n\s+pnpm run plugin-sdk:api:diff -- "\$\{diff_args\[@\]\}"\n\s*\)/u,
+      /\(\n\s+cd "\$tooling_dir"\n\s+pnpm install --frozen-lockfile --ignore-scripts --filter carapace\n\s+pnpm run plugin-sdk:api:diff -- "\$\{diff_args\[@\]\}"\n\s*\)/u,
     )?.[0];
     expect(sdkCommandBlock).toBeDefined();
     const installSteps = ["check_dependencies_npm", "check_contents_npm"].map((jobName) =>
       workflowStep(
-        workflowJob(OPENCLAW_NPM_PREFLIGHT_WORKFLOW, jobName),
+        workflowJob(CARAPACE_NPM_PREFLIGHT_WORKFLOW, jobName),
         "Install trusted qualification dependencies",
       ),
     );
@@ -4669,7 +4669,7 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(hydratePnpm.run).toContain('mkdir -p "$preferred_pnpm_store" 2>/dev/null');
     expect(hydratePnpm.run).toContain('[ -w "$preferred_pnpm_store" ]');
     expect(hydratePnpm.run).toContain(
-      'pnpm_cache_root="${XDG_CACHE_HOME:-$HOME/.cache}/openclaw/pnpm"',
+      'pnpm_cache_root="${XDG_CACHE_HOME:-$HOME/.cache}/carapace/pnpm"',
     );
     expect(hydratePnpm.run).toContain('pnpm_install_root="$pnpm_cache_root/install"');
     expect(hydratePnpm.run).toContain('export PNPM_CONFIG_STORE_DIR="$pnpm_cache_root/store"');
@@ -4757,16 +4757,16 @@ test "$package_manager" = "pnpm@12.1.0"
       "Docker is unavailable; standard hydration will continue without Docker",
     );
     expect(ensureDocker.run).toContain(
-      'echo "OPENCLAW_CRABBOX_DOCKER_AVAILABLE=0" >> "$GITHUB_ENV"',
+      'echo "CARAPACE_CRABBOX_DOCKER_AVAILABLE=0" >> "$GITHUB_ENV"',
     );
     expect(ensureDocker.run).toContain(
-      'echo "OPENCLAW_CRABBOX_DOCKER_AVAILABLE=1" >> "$GITHUB_ENV"',
+      'echo "CARAPACE_CRABBOX_DOCKER_AVAILABLE=1" >> "$GITHUB_ENV"',
     );
     expect(workflowStep(hydrate, "Ensure SSH is available").if).toBeUndefined();
     expect(workflowStep(hydrate, "Hydrate provider env helper").if).toBeUndefined();
     const markCrabboxReady = workflowStep(hydrate, "Mark Crabbox ready").run;
     expect(markCrabboxReady).toContain("COREPACK_HOME");
-    expect(markCrabboxReady).toContain("OPENCLAW_CRABBOX_DOCKER_AVAILABLE");
+    expect(markCrabboxReady).toContain("CARAPACE_CRABBOX_DOCKER_AVAILABLE");
     expect(markCrabboxReady).toContain("CRABBOX_PNPM_MODULES_DIR");
     expect(markCrabboxReady).toContain("PNPM_CONFIG_PACKAGE_IMPORT_METHOD");
     expect(markCrabboxReady).not.toContain("PNPM_CONFIG_MODULES_DIR");
@@ -4793,7 +4793,7 @@ test "$package_manager" = "pnpm@12.1.0"
       "$Value | Out-File -FilePath $Path -Encoding utf8 -Append",
     );
     expect(hydrateWindowsPnpm.run).toContain('"--filter",');
-    expect(hydrateWindowsPnpm.run).toContain('"openclaw",');
+    expect(hydrateWindowsPnpm.run).toContain('"carapace",');
     expect(hydrateWindowsPnpm.run).toContain(
       "New-Item -ItemType Junction -Path $workspaceNodeModules -Target $env:PNPM_CONFIG_MODULES_DIR",
     );
@@ -4835,8 +4835,8 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(markWindowsCrabboxReady).not.toContain('"PNPM_CONFIG_MODULES_DIR"');
     expect(markWindowsCrabboxReady).not.toContain('"PNPM_CONFIG_VIRTUAL_STORE_DIR"');
     expect(markWindowsCrabboxReady).toContain('"PATH"');
-    expect(workflowText).toContain("OPENCLAW_CRABBOX_HYDRATE_DOWNLOAD_TIMEOUT_SECONDS:-300");
-    expect(workflowText).toContain("OPENCLAW_CRABBOX_HYDRATE_DOWNLOAD_RETRIES:-3");
+    expect(workflowText).toContain("CARAPACE_CRABBOX_HYDRATE_DOWNLOAD_TIMEOUT_SECONDS:-300");
+    expect(workflowText).toContain("CARAPACE_CRABBOX_HYDRATE_DOWNLOAD_RETRIES:-3");
     expect(workflowText).toContain("--retry-all-errors");
     expect(workflowText).not.toContain("curl -fsSL https://get.docker.com | sudo sh");
 
@@ -4853,7 +4853,7 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(hydrateGithubCrabboxShell).toContain('readlink -f "$target"');
     expect(hydrateGithubCrabboxShell).toContain("link_node_tool corepack");
     const markHydrateGithubReady = workflowStep(hydrateGithub, "Mark Crabbox ready").run;
-    expect(markHydrateGithubReady).toContain("OPENCLAW_CRABBOX_DOCKER_AVAILABLE");
+    expect(markHydrateGithubReady).toContain("CARAPACE_CRABBOX_DOCKER_AVAILABLE");
     expect(markHydrateGithubReady).toContain("PNPM_CONFIG_PACKAGE_IMPORT_METHOD");
     expect(workflowStep(hydrateGithub, "Hydrate provider env helper").env?.FACTORY_API_KEY).toBe(
       "${{ secrets.FACTORY_API_KEY }}",
@@ -4922,14 +4922,14 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(workflow).toContain("trusted_source_id:");
     expect(workflow).toContain("TRUSTED_SOURCE_ID: ${{ inputs.trusted_source_id }}");
     expect(workflow).toContain('--trusted-source-id "$TRUSTED_SOURCE_ID"');
-    expect(workflow).toContain("scripts/resolve-openclaw-package-candidate.mts");
+    expect(workflow).toContain("scripts/resolve-carapace-package-candidate.mts");
     expect(workflow).toContain('--package-ref "$PACKAGE_REF"');
     expect(workflow).toContain("artifact-ids: ${{ inputs.artifact_id }}");
     expect(workflow).toContain("actions/artifacts/${ARTIFACT_ID}");
     expect(workflow).toContain("name: ${{ env.PACKAGE_ARTIFACT_NAME }}");
     expect(workflow).toContain("pull-requests: read");
     expect(workflow).toContain(
-      "uses: ./.github/workflows/openclaw-live-and-e2e-checks-reusable.yml",
+      "uses: ./.github/workflows/carapace-live-and-e2e-checks-reusable.yml",
     );
     expect(workflow).toContain(
       "ref: ${{ needs.resolve_package.outputs.package_source_sha || inputs.workflow_ref }}",
@@ -4939,7 +4939,7 @@ test "$package_manager" = "pnpm@12.1.0"
     );
     expect(workflow).toContain("package_integrity:");
     expect(workflow).toContain("name: Package integrity");
-    expect(workflow).toContain('node scripts/check-openclaw-package-tarball.mjs "$package"');
+    expect(workflow).toContain('node scripts/check-carapace-package-tarball.mjs "$package"');
     expect(workflow).toContain('[[ "$actual_sha256" == "$EXPECTED_PACKAGE_SHA256" ]]');
     expect(workflow).toContain("needs: [resolve_package, package_integrity]");
     expect(workflow).toContain("package_integrity=${PACKAGE_INTEGRITY_RESULT}");
@@ -4950,8 +4950,8 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(npm12Step.run).toContain("npm@12.0.2");
     expect(npm12Step.run).toContain("bash scripts/install.sh");
     expect(npm12Step.run).toContain("scripts/docker/install-sh-common/version-parse.sh");
-    expect(npm12Step.run).toContain("extract_openclaw_semver");
-    expect(npm12Step.run).toContain(".openclaw-lifecycle-pending");
+    expect(npm12Step.run).toContain("extract_carapace_semver");
+    expect(npm12Step.run).toContain(".carapace-lifecycle-pending");
     expect(JSON.stringify(npm12Job)).not.toContain("secrets.");
   });
 
@@ -4981,11 +4981,11 @@ test "$package_manager" = "pnpm@12.1.0"
       path: ".artifacts/prepublish-plugin-registry",
     });
     expect(install.env).toMatchObject({
-      OPENCLAW_DOCKER_E2E_SELECTED_SHA: "${{ needs.resolve_package.outputs.package_source_sha }}",
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:
+      CARAPACE_DOCKER_E2E_SELECTED_SHA: "${{ needs.resolve_package.outputs.package_source_sha }}",
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:
         "${{ needs.resolve_package.outputs.package_version }}",
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: `\${{ ${tuple} != '' && format('{0}/.artifacts/prepublish-plugin-registry', github.workspace) || '' }}`,
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: field("ManifestSha256"),
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: `\${{ ${tuple} != '' && format('{0}/.artifacts/prepublish-plugin-registry', github.workspace) || '' }}`,
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: field("ManifestSha256"),
     });
     expect(install.run).toMatch(
       /bash scripts\/e2e\/lib\/prepublish-plugin-registry\.sh\s*\\\s*bash scripts\/install\.sh/u,
@@ -5002,7 +5002,7 @@ test "$package_manager" = "pnpm@12.1.0"
       workflow.indexOf("  package_integrity:"),
     );
 
-    expect(resolveJob).toContain("scripts/resolve-openclaw-package-candidate.mts");
+    expect(resolveJob).toContain("scripts/resolve-carapace-package-candidate.mts");
     expect(resolveJob).not.toContain("pnpm install");
   });
 
@@ -5101,7 +5101,7 @@ test "$package_manager" = "pnpm@12.1.0"
     );
     expect(packageTelegram.with).not.toHaveProperty("allow_older_binary_destructive_actions");
     expect(workflow).toContain(
-      "package_label: openclaw@${{ needs.resolve_package.outputs.package_version }}",
+      "package_label: carapace@${{ needs.resolve_package.outputs.package_version }}",
     );
     expect(npmTelegramWorkflow).toContain("package_artifact_run_id:");
     expect(npmTelegramWorkflow).toContain("Download package-under-test artifact from release run");
@@ -5142,7 +5142,7 @@ test "$package_manager" = "pnpm@12.1.0"
       "Artifact-backed Telegram E2E requires the complete prerelease plugin registry tuple.",
     );
     expect(npmTelegramWorkflow).toContain(
-      "Prerelease plugin registry inputs require an artifact-backed OpenClaw package.",
+      "Prerelease plugin registry inputs require an artifact-backed Carapace package.",
     );
     expect(npmTelegramWorkflow).toContain(
       'expected_registry_suffix="-${PREPUBLISH_PLUGIN_REGISTRY_ARTIFACT_RUN_ID}-${PREPUBLISH_PLUGIN_REGISTRY_ARTIFACT_RUN_ATTEMPT}"',
@@ -5156,11 +5156,11 @@ test "$package_manager" = "pnpm@12.1.0"
     );
     expect(npmTelegramWorkflow).toContain('verify-upload "Prerelease plugin registry"');
     expect(npmTelegramWorkflow).toContain("Download prerelease plugin registry artifact");
-    expect(npmTelegramWorkflow).toContain("--required-packages-json '[\"@openclaw/codex\"]'");
+    expect(npmTelegramWorkflow).toContain("--required-packages-json '[\"@carapace/codex\"]'");
     expect(packageTelegram.secrets).toEqual({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      CARAPACE_QA_CONVEX_SECRET_CI: "${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}",
+      CARAPACE_QA_CONVEX_SITE_URL: "${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}",
     });
     expect(dockerAcceptance.with?.ref).toBe(
       "${{ needs.resolve_package.outputs.package_source_sha || inputs.workflow_ref }}",
@@ -5195,7 +5195,7 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(workflow).not.toContain("id-token: write");
     expect(buildPrivateQa.env).toMatchObject({
       NODE_OPTIONS: "--max-old-space-size=8192",
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
+      CARAPACE_BUILD_PRIVATE_QA: "1",
     });
     expectTextToIncludeAll(buildPrivateQa.run, [
       "pnpm build qaRuntime",
@@ -5275,7 +5275,7 @@ test "$package_manager" = "pnpm@12.1.0"
       expect(generated.result.status, generated.result.stderr).toBe(0);
       expect(generated.args).toContain("--plugin-registry-output-dir\n");
       expect(generated.args).toContain(".artifacts/package-acceptance-telegram-plugin-registry\n");
-      expect(generated.args).toContain('--required-plugin-packages-json\n["@openclaw/codex"]\n');
+      expect(generated.args).toContain('--required-plugin-packages-json\n["@carapace/codex"]\n');
     }
 
     for (const source of ["npm", "url", "trusted-url"] as const) {
@@ -5320,22 +5320,22 @@ test "$package_manager" = "pnpm@12.1.0"
       });
 
       expect(result.result.status, result.result.stderr).toBe(0);
-      expect(result.output).toContain(`baseline=openclaw@${expected}\n`);
+      expect(result.output).toContain(`baseline=carapace@${expected}\n`);
       expect(result.npmCalls).toHaveLength(1);
-      expect(result.npmCalls[0]).toContain("view openclaw versions");
-      expect(result.npmCalls[0]).not.toContain("openclaw@latest");
+      expect(result.npmCalls[0]).toContain("view carapace versions");
+      expect(result.npmCalls[0]).not.toContain("carapace@latest");
     },
   );
 
   it("reuses a propagated artifact baseline without resolving npm metadata again", () => {
     const result = runPackageAcceptanceBaselineStep({
       candidateVersion: "2026.8.1",
-      fallbackBaseline: "openclaw@2026.7.1-2",
+      fallbackBaseline: "carapace@2026.7.1-2",
       source: "artifact",
     });
 
     expect(result.result.status, result.result.stderr).toBe(0);
-    expect(result.output).toContain("baseline=openclaw@2026.7.1-2\n");
+    expect(result.output).toContain("baseline=carapace@2026.7.1-2\n");
     expect(result.npmCalls).toEqual([]);
   });
 
@@ -5420,7 +5420,7 @@ test "$package_manager" = "pnpm@12.1.0"
     const releaseChecksWorkflow = readFileSync(RELEASE_CHECKS_WORKFLOW, "utf8");
     const performanceJob = workflowStep(
       workflowJob(FULL_RELEASE_VALIDATION_WORKFLOW, "performance"),
-      "Dispatch OpenClaw Performance",
+      "Dispatch Carapace Performance",
     ).run;
 
     expect(workflow).toContain("TARGET_SHA: ${{ needs.resolve_target.outputs.sha }}");
@@ -5435,7 +5435,7 @@ test "$package_manager" = "pnpm@12.1.0"
     expect(workflow).toContain("codex_plugin_spec:");
     expect(workflow).toContain('args+=(-f codex_plugin_spec="$CODEX_PLUGIN_SPEC")');
     expect(releaseChecksWorkflow).toContain(
-      'codex_plugin_spec="npm:@openclaw/codex@${BASH_REMATCH[1]}"',
+      'codex_plugin_spec="npm:@carapace/codex@${BASH_REMATCH[1]}"',
     );
     expect(releaseChecksWorkflow.match(/run: pnpm build qaRuntime/gu)).toHaveLength(6);
     expect(releaseChecksWorkflow).not.toContain(
@@ -5477,7 +5477,7 @@ test "$package_manager" = "pnpm@12.1.0"
       "source: ${{ needs.resolve_target.outputs.package_acceptance_package_spec != '' && 'npm' || 'artifact' }}",
     );
     expect(releaseChecksWorkflow).toContain(
-      "package_spec: ${{ needs.resolve_target.outputs.package_acceptance_package_spec || 'openclaw@beta' }}",
+      "package_spec: ${{ needs.resolve_target.outputs.package_acceptance_package_spec || 'carapace@beta' }}",
     );
   });
 
@@ -5485,7 +5485,7 @@ test "$package_manager" = "pnpm@12.1.0"
     const workflow = readFileSync(FULL_RELEASE_VALIDATION_WORKFLOW, "utf8");
     const performanceStep = workflowStep(
       workflowJob(FULL_RELEASE_VALIDATION_WORKFLOW, "performance"),
-      "Dispatch OpenClaw Performance",
+      "Dispatch Carapace Performance",
     );
     const summaryStep = workflowStep(
       workflowJob(FULL_RELEASE_VALIDATION_WORKFLOW, "summary"),
@@ -5512,7 +5512,7 @@ test "$package_manager" = "pnpm@12.1.0"
       "Validate full release validation manifest",
     );
     const npmValidationStep = workflowStep(
-      workflowJob(".github/workflows/openclaw-npm-release.yml", "publish_openclaw_npm"),
+      workflowJob(".github/workflows/carapace-npm-release.yml", "publish_carapace_npm"),
       "Verify full release validation target",
     );
 
@@ -5564,7 +5564,7 @@ test "$package_manager" = "pnpm@12.1.0"
     "adopts and validates the exact $jobName run without waiting for terminal status",
     (child) => {
       const { calls, result } = runFullReleaseChildDispatch(child, {
-        MOCK_GH_DISPATCH_OUTPUT: "https://github.com/openclaw/openclaw/actions/runs/101",
+        MOCK_GH_DISPATCH_OUTPUT: "https://github.com/Exaggarate/carapace/actions/runs/101",
         MOCK_GH_STATUSES: '["in_progress"]',
       });
 
@@ -5586,7 +5586,7 @@ test "$package_manager" = "pnpm@12.1.0"
     );
 
     const { calls, result } = runFullReleaseChildDispatch(child, {
-      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/openclaw/openclaw/actions/runs/101",
+      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/Exaggarate/carapace/actions/runs/101",
       MOCK_GH_RUN_TITLES: JSON.stringify(titles),
     });
 
@@ -5600,7 +5600,7 @@ test "$package_manager" = "pnpm@12.1.0"
   it("bounds title convergence without reposting the dispatch", () => {
     const child = fullReleaseChild("artifact-docker");
     const { calls, result } = runFullReleaseChildDispatch(child, {
-      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/openclaw/openclaw/actions/runs/101",
+      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/Exaggarate/carapace/actions/runs/101",
       MOCK_GH_RUN_TITLES: JSON.stringify([child.runName]),
     });
 
@@ -5614,7 +5614,7 @@ test "$package_manager" = "pnpm@12.1.0"
 
   it("refuses an immutable child mismatch immediately without reposting", () => {
     const { calls, result } = runFullReleaseChildDispatch(FULL_RELEASE_CHILD_DISPATCHES[0], {
-      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/openclaw/openclaw/actions/runs/101",
+      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/Exaggarate/carapace/actions/runs/101",
       MOCK_GH_RUN_EVENT: "push",
     });
 
@@ -5685,7 +5685,7 @@ test "$package_manager" = "pnpm@12.1.0"
 
     const mismatched = runFullReleaseChildDispatch(FULL_RELEASE_CHILD_DISPATCHES[0], {
       MOCK_GH_CHILD_SHA: "c".repeat(40),
-      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/openclaw/openclaw/actions/runs/101",
+      MOCK_GH_DISPATCH_OUTPUT: "https://github.com/Exaggarate/carapace/actions/runs/101",
     });
     expect(mismatched.result.status).toBe(1);
     expect(mismatched.result.stderr).toContain("expected parent workflow SHA");
@@ -5950,22 +5950,22 @@ describe("package artifact reuse", () => {
     );
     expect(workflow).toContain("docker_e2e_bare_image:");
     expect(workflow).toContain("docker_e2e_functional_image:");
-    expect(workflow).toContain("OPENCLAW_DOCKER_E2E_SELECTED_SHA:");
+    expect(workflow).toContain("CARAPACE_DOCKER_E2E_SELECTED_SHA:");
     expect(workflow).toContain(
-      "OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: ${{ inputs.published_upgrade_survivor_baseline }}",
+      "CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: ${{ inputs.published_upgrade_survivor_baseline }}",
     );
     expect(workflow).toContain(
-      "OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS: ${{ matrix.group.published_upgrade_survivor_baselines || inputs.published_upgrade_survivor_baselines }}",
+      "CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS: ${{ matrix.group.published_upgrade_survivor_baselines || inputs.published_upgrade_survivor_baselines }}",
     );
     expect(workflow).toContain(
-      "OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: ${{ inputs.published_upgrade_survivor_scenarios }}",
+      "CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: ${{ inputs.published_upgrade_survivor_scenarios }}",
     );
-    expect(workflow).toContain("OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: ${{ github.workspace }}");
+    expect(workflow).toContain("CARAPACE_UPGRADE_SURVIVOR_TARGET_ROOT: ${{ github.workspace }}");
     expect(workflow).toContain(
-      "OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: ${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}",
+      "CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: ${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}",
     );
-    expect(workflow).toContain("Download current-run OpenClaw Docker E2E package");
-    expect(workflow).toContain("Download previous-run OpenClaw Docker E2E package");
+    expect(workflow).toContain("Download current-run Carapace Docker E2E package");
+    expect(workflow).toContain("Download previous-run Carapace Docker E2E package");
     expect(workflow).toContain(
       "needs.validate_selected_ref.outputs.package_artifact_present == 'true'",
     );
@@ -5983,7 +5983,7 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}");
     expect(workflow).not.toContain("uses: ./.github/actions/docker-e2e-plan");
     expect(workflow).toContain("Checkout trusted release harness");
-    expect(workflow).toContain("OPENCLAW_DOCKER_E2E_REPO_ROOT:");
+    expect(workflow).toContain("CARAPACE_DOCKER_E2E_REPO_ROOT:");
     expect(workflow).toContain("node .release-harness/scripts/test-docker-all.mjs --plan-json");
     expect(workflow).toContain("node .release-harness/scripts/docker-e2e.mjs github-outputs");
     expect(parsedWorkflow.on?.workflow_call?.inputs).toHaveProperty(
@@ -5992,7 +5992,7 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("Pack prerelease plugin registry artifact");
     expect(workflow).toContain("Validate prerelease plugin registry artifact");
     expect(workflow).toContain("Download targeted prerelease plugin registry artifact");
-    expect(workflow).toContain("OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR");
+    expect(workflow).toContain("CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR");
     expect(workflow).toContain("prepublishPluginRegistryManifestSha256");
     expect(
       workflowStep(
@@ -6023,8 +6023,8 @@ describe("package artifact reuse", () => {
     for (const jobId of ["validate_docker_e2e", "validate_docker_lanes"]) {
       const job = workflowJob(LIVE_E2E_WORKFLOW, jobId);
       expect(job.env).toMatchObject({
-        OPENCLAW_SELECTED_SHA: "${{ needs.validate_selected_ref.outputs.selected_sha }}",
-        OPENCLAW_TOOLING_SHA: "${{ needs.validate_selected_ref.outputs.workflow_sha }}",
+        CARAPACE_SELECTED_SHA: "${{ needs.validate_selected_ref.outputs.selected_sha }}",
+        CARAPACE_TOOLING_SHA: "${{ needs.validate_selected_ref.outputs.workflow_sha }}",
       });
       const registrySteps = (job.steps ?? []).filter((step) =>
         /^(Validate|Download) .*prerelease plugin registry/u.test(step.name ?? ""),
@@ -6039,7 +6039,7 @@ describe("package artifact reuse", () => {
         "${{ steps.plan.outputs.required_prepublish_plugin_packages }}",
       );
       const runStep = (job.steps ?? []).find((step) =>
-        step.run?.includes("export OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR="),
+        step.run?.includes("export CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR="),
       );
       expect(runStep).toBeDefined();
       expect(`${runStep?.run}\n${JSON.stringify(runStep?.env)}`).toContain(
@@ -6127,10 +6127,10 @@ describe("package artifact reuse", () => {
       INCLUDE_OPENWEBUI: "${{ inputs.include_openwebui }}",
       INCLUDE_RELEASE_PATH_SUITES: "${{ inputs.include_release_path_suites }}",
       LANES: "${{ inputs.docker_lanes }}",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "${{ inputs.published_upgrade_survivor_baseline }}",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS:
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "${{ inputs.published_upgrade_survivor_baseline }}",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS:
         "${{ inputs.published_upgrade_survivor_baselines }}",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "${{ inputs.published_upgrade_survivor_scenarios }}",
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "${{ inputs.published_upgrade_survivor_scenarios }}",
       PREPARE_ONLY: "${{ inputs.prepare_only }}",
       RELEASE_TEST_PROFILE: "${{ inputs.release_test_profile }}",
     });
@@ -6147,8 +6147,8 @@ describe("package artifact reuse", () => {
       "Build targeted Docker lane groups",
     );
     expect(groupPlanner.env).toMatchObject({
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "${{ inputs.published_upgrade_survivor_baseline }}",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SCOPE:
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "${{ inputs.published_upgrade_survivor_baseline }}",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SCOPE:
         "${{ inputs.published_upgrade_survivor_baseline_scope || 'all-scenarios' }}",
     });
     expect(workflowJob(LIVE_E2E_WORKFLOW, "validate_docker_lanes").strategy?.["max-parallel"]).toBe(
@@ -6161,7 +6161,7 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("targeted_docker_lane_group_size:");
     expect(workflow).toContain("scripts/plan-targeted-docker-lane-groups.mjs");
     expect(workflow).toContain(
-      "OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS: ${{ inputs.published_upgrade_survivor_baselines }}",
+      "CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS: ${{ inputs.published_upgrade_survivor_baselines }}",
     );
     expect(workflow).toContain("Docker E2E targeted lanes (${{ matrix.group.label }})");
     expect(workflow).toContain("LANES: ${{ matrix.group.docker_lanes }}");
@@ -6169,30 +6169,30 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("DOCKER_E2E_LANES: ${{ matrix.group.docker_lanes }}");
     expect(workflow).toContain("name: docker-e2e-${{ steps.plan.outputs.artifact_suffix }}");
     expect(scheduler).toContain(
-      "published_upgrade_survivor_baseline=${shellQuote(env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC)}",
+      "published_upgrade_survivor_baseline=${shellQuote(env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC)}",
     );
     expect(scheduler).toContain(
-      "published_upgrade_survivor_baselines=${shellQuote(env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS)}",
+      "published_upgrade_survivor_baselines=${shellQuote(env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS)}",
     );
     expect(scheduler).toContain(
-      '["OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC", baseEnv.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC]',
+      '["CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC", baseEnv.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC]',
     );
-    expect(scheduler).toContain('["OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS",');
-    expect(scheduler).toContain('["OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS",');
-    expect(packageJson).toContain("OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1");
+    expect(scheduler).toContain('["CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS",');
+    expect(scheduler).toContain('["CARAPACE_UPGRADE_SURVIVOR_SCENARIOS",');
+    expect(packageJson).toContain("CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1");
     expect(packageJson).toContain("test:docker:update-restart-auth");
-    expect(packageJson).toContain("OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth");
+    expect(packageJson).toContain("CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth");
     expect(publishedUpgradeSurvivor).toContain("validate_baseline_package_spec");
-    expect(publishedUpgradeSurvivor).toContain("OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE");
+    expect(publishedUpgradeSurvivor).toContain("CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE");
     expect(publishedUpgradeSurvivor).toContain("write_update_restart_service_env");
     expect(publishedUpgradeSurvivor).toContain("GATEWAY_AUTH_TOKEN_REF=%s");
-    expect(publishedUpgradeSurvivor).toContain("OPENCLAW_CLAWHUB_URL=%s");
+    expect(publishedUpgradeSurvivor).toContain("CARAPACE_CLAWHUB_URL=%s");
     expect(publishedUpgradeSurvivor).toContain("assert-no-requests");
     expect(publishedUpgradeSurvivor).toContain(
-      "env -u OPENCLAW_GATEWAY_TOKEN -u OPENCLAW_GATEWAY_PASSWORD openclaw",
+      "env -u CARAPACE_GATEWAY_TOKEN -u CARAPACE_GATEWAY_PASSWORD carapace",
     );
     expect(publishedUpgradeSurvivor).toContain("phase prepare-update-restart-probe");
-    expect(publishedUpgradeSurvivor).toContain("openclaw@(alpha|beta|latest|");
+    expect(publishedUpgradeSurvivor).toContain("carapace@(alpha|beta|latest|");
     expect(publishedUpgradeSurvivor).toContain("configure_watchos_tls_fixture");
     expect(publishedUpgradeSurvivor).toContain('"publicUrl":"wss://localhost:18789"');
     expect(publishedUpgradeSurvivor).toContain('export NODE_EXTRA_CA_CERTS="$WATCH_TLS_CA_CERT"');
@@ -6216,7 +6216,7 @@ describe("package artifact reuse", () => {
     expect(publishedUpgradeSurvivor.indexOf("phase seed-source-only-plugin-shadow")).toBeLessThan(
       publishedUpgradeSurvivor.indexOf("phase assert-baseline"),
     );
-    expect(publishedUpgradeSurvivor).toContain('"id": "opik-openclaw"');
+    expect(publishedUpgradeSurvivor).toContain('"id": "opik-carapace"');
     expect(publishedUpgradeSurvivor).toContain('"configSchema": {');
     expect(
       publishedUpgradeSurvivor.indexOf('validate_baseline_package_spec "$baseline_spec"'),
@@ -6244,7 +6244,7 @@ describe("package artifact reuse", () => {
       'if bash .release-harness/scripts/ci-docker-pull-retry.sh "$CACHE_IMAGE_REF"; then',
     );
     expect(workflow).toContain("Bare image cache pull failed; continuing with a cold build.");
-    expect(workflow).toContain('--build-context "openclaw_package=$package_context"');
+    expect(workflow).toContain('--build-context "carapace_package=$package_context"');
     expect(workflow).toContain('cache=(--cache-from "$BARE_IMAGE_REF")');
     expect(workflow).not.toContain('docker push "$CACHE_IMAGE_REF"');
     expect(workflow).toContain("uses: useblacksmith/setup-docker-builder@");
@@ -6427,7 +6427,7 @@ describe("package artifact reuse", () => {
     expect(workflowJob(FULL_RELEASE_ARTIFACTS_WORKFLOW, "candidate").uses).toBe(
       "./.github/workflows/full-release-candidate.yml",
     );
-    expect(prepare.uses).toBe("./.github/workflows/openclaw-live-and-e2e-checks-reusable.yml");
+    expect(prepare.uses).toBe("./.github/workflows/carapace-live-and-e2e-checks-reusable.yml");
     expect(prepare.with).toMatchObject({
       enable_prepublish_plugin_registry: true,
       emit_candidate_evidence: true,
@@ -6492,7 +6492,7 @@ describe("package artifact reuse", () => {
       "retention-days": 7,
     });
     expect(workflowRevision.env).toMatchObject({
-      EXPECTED_WORKFLOW_PATH: ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml",
+      EXPECTED_WORKFLOW_PATH: ".github/workflows/carapace-live-and-e2e-checks-reusable.yml",
       JOB_CONTEXT: "${{ toJSON(job) }}",
       RUN_ATTEMPT: "${{ github.run_attempt }}",
       RUN_ID: "${{ github.run_id }}",
@@ -6587,7 +6587,7 @@ describe("package artifact reuse", () => {
     expect(binderCheckouts.map(({ uses, with: inputs }) => ({ inputs, uses }))).toEqual([
       {
         inputs: {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           ref: "main",
           "fetch-depth": 1,
           path: ".release-harness",
@@ -6600,7 +6600,7 @@ describe("package artifact reuse", () => {
       producerSteps.indexOf(producerCheckouts[0]!),
     );
     expect(workflowRevision.env).toEqual({
-      EXPECTED_WORKFLOW_PATH: ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml",
+      EXPECTED_WORKFLOW_PATH: ".github/workflows/carapace-live-and-e2e-checks-reusable.yml",
       EXPECTED_WORKFLOW_REPOSITORY: "${{ github.repository }}",
       GH_TOKEN: "${{ github.token }}",
       HARNESS_PATH: ".release-harness",
@@ -6608,7 +6608,7 @@ describe("package artifact reuse", () => {
       RUN_ATTEMPT: "${{ github.run_attempt }}",
       RUN_ID: "${{ github.run_id }}",
     });
-    expect(workflowRevision.run).toContain('repository !== "openclaw/openclaw"');
+    expect(workflowRevision.run).toContain('repository !== "carapace/carapace"');
     expect(workflowRevision.run).toContain("job.workflow_repository !== repository");
     expect(workflowRevision.run).toContain("job.workflow_sha");
     expect(workflowRevision.run).toContain('"fetch"');
@@ -6799,7 +6799,7 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain('extensionId.startsWith("memory-")');
     expect(workflow).toContain('"blacksmith-16vcpu-ubuntu-2404"');
     expect(workflow).toContain("vitest_max_workers:");
-    expect(workflow).toContain("OPENCLAW_VITEST_MAX_WORKERS: ${{ matrix.vitest_max_workers }}");
+    expect(workflow).toContain("CARAPACE_VITEST_MAX_WORKERS: ${{ matrix.vitest_max_workers }}");
     expect(readFileSync("scripts/lib/extension-test-plan.mts", "utf8")).toContain(
       '"test/vitest/vitest.extension-memory.config.ts": 1',
     );
@@ -6891,14 +6891,14 @@ describe("package artifact reuse", () => {
       ),
     ).toMatchObject({
       command:
-        "OPENCLAW_LIVE_OPENAI_COMPACTION=1 OPENCLAW_LIVE_OPENAI_COMPACTION_FULL=0 node .release-harness/scripts/test-live-shard.mjs native-live-src-agents",
+        "CARAPACE_LIVE_OPENAI_COMPACTION=1 CARAPACE_LIVE_OPENAI_COMPACTION_FULL=0 node .release-harness/scripts/test-live-shard.mjs native-live-src-agents",
       profiles: "stable full",
     });
     expect(workflow).toContain("suite_id: native-live-src-agents-zai-coding");
     expect(workflow).toContain(
       "command: ZAI_CODING_LIVE_TEST=1 node .release-harness/scripts/test-live-shard.mjs native-live-src-agents-zai-coding",
     );
-    expect(workflow).toContain("OPENCLAW_LIVE_COMMAND: ${{ matrix.command }}");
+    expect(workflow).toContain("CARAPACE_LIVE_COMMAND: ${{ matrix.command }}");
     expect(workflow).toContain("live_suite_filter:");
     expect(workflow).toContain("validate_live_suite_filter:");
     expect(workflow).toContain("LIVE_SUITE_FILTER: ${{ inputs.live_suite_filter }}");
@@ -6916,20 +6916,20 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("suite_id: live-gateway-advisory-docker-xai-zai");
     expect(workflow).toContain("suite_id: live-subagent-announce-docker");
     expect(workflow).toContain("suite_group: live-gateway-advisory-docker");
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_PROVIDERS=deepseek,fireworks");
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_PROVIDERS=opencode-go,openrouter");
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_PROVIDERS=xai,zai");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_PROVIDERS=deepseek,fireworks");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_PROVIDERS=opencode-go,openrouter");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_PROVIDERS=xai,zai");
     expect(workflow).toContain("inputs.live_suite_filter == matrix.suite_group");
-    expect(workflow).toContain("OPENCLAW_LIVE_CLI_BACKEND_MODEL=claude-cli/claude-sonnet-4-6");
-    expect(workflow).toContain("OPENCLAW_LIVE_CLI_BACKEND_AUTH=api-key");
+    expect(workflow).toContain("CARAPACE_LIVE_CLI_BACKEND_MODEL=claude-cli/claude-sonnet-4-6");
+    expect(workflow).toContain("CARAPACE_LIVE_CLI_BACKEND_AUTH=api-key");
     expect(workflow).toContain("suite_id: live-cli-cache-docker");
-    expect(workflow).toContain("OPENCLAW_LIVE_CLI_BACKEND_CACHE_PROBE=1");
-    expect(workflow).not.toContain("OPENCLAW_LIVE_CLI_BACKEND_USE_CI_SAFE_CODEX_CONFIG=1");
+    expect(workflow).toContain("CARAPACE_LIVE_CLI_BACKEND_CACHE_PROBE=1");
+    expect(workflow).not.toContain("CARAPACE_LIVE_CLI_BACKEND_USE_CI_SAFE_CODEX_CONFIG=1");
     expect(workflow).not.toContain('service_tier=\\"fast\\"');
-    expect(workflow).not.toContain("OPENCLAW_LIVE_CLI_BACKEND_ARGS=");
-    expect(workflow).not.toContain("OPENCLAW_LIVE_CLI_BACKEND_RESUME_ARGS=");
+    expect(workflow).not.toContain("CARAPACE_LIVE_CLI_BACKEND_ARGS=");
+    expect(workflow).not.toContain("CARAPACE_LIVE_CLI_BACKEND_RESUME_ARGS=");
     expect(workflow).not.toContain(
-      'OPENCLAW_LIVE_CLI_BACKEND_ARGS=["exec","--json","--color","never","--sandbox","danger-full-access","--skip-git-repo-check"]',
+      'CARAPACE_LIVE_CLI_BACKEND_ARGS=["exec","--json","--color","never","--sandbox","danger-full-access","--skip-git-repo-check"]',
     );
     expect(workflow).toContain("bash .release-harness/scripts/ci-live-command-retry.sh");
     expect(workflow).toContain("use_github_hosted_runners:");
@@ -6943,7 +6943,7 @@ describe("package artifact reuse", () => {
     }
     for (const jobName of ["build", "test"]) {
       expect(
-        workflowJob(".github/workflows/openclaw-repo-e2e-reusable.yml", jobName)["runs-on"],
+        workflowJob(".github/workflows/carapace-repo-e2e-reusable.yml", jobName)["runs-on"],
       ).toBe(
         "${{ inputs.use_github_hosted_runners && 'ubuntu-24.04' || 'blacksmith-32vcpu-ubuntu-2404' }}",
       );
@@ -6951,21 +6951,21 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("suite_id: native-live-src-gateway-core");
     expect(workflow).toContain("suite_id: native-live-src-gateway-backends");
     expect(workflow).toContain(
-      "command: OPENCLAW_LIVE_CODEX_HARNESS=1 OPENCLAW_LIVE_CODEX_HARNESS_AUTH=api-key node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-core",
+      "command: CARAPACE_LIVE_CODEX_HARNESS=1 CARAPACE_LIVE_CODEX_HARNESS_AUTH=api-key node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-core",
     );
     expect(workflow).toContain(
-      "command: OPENCLAW_LIVE_CODEX_HARNESS=1 OPENCLAW_LIVE_CODEX_HARNESS_AUTH=api-key node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-backends",
+      "command: CARAPACE_LIVE_CODEX_HARNESS=1 CARAPACE_LIVE_CODEX_HARNESS_AUTH=api-key node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-backends",
     );
     expect(workflow).toContain("suite_id: native-live-src-infra");
     expect(workflow).toContain(
-      "command: OPENCLAW_LIVE_APNS_REACHABILITY=1 node .release-harness/scripts/test-live-shard.mjs native-live-src-infra",
+      "command: CARAPACE_LIVE_APNS_REACHABILITY=1 node .release-harness/scripts/test-live-shard.mjs native-live-src-infra",
     );
     expect(workflow).toContain("suite_id: native-live-src-gateway-profiles-anthropic-smoke");
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_SETUP_TIMEOUT_MS=300000");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_SETUP_TIMEOUT_MS=300000");
     expect(workflow).toContain("suite_id: native-live-src-gateway-profiles-anthropic-opus");
     expect(workflow).toContain("suite_id: native-live-src-gateway-profiles-anthropic-sonnet-haiku");
     expect(workflow).toContain("suite_group: native-live-src-gateway-profiles-anthropic");
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_MODELS=anthropic/claude-opus-5");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_MODELS=anthropic/claude-opus-5");
     expect(workflow).toContain("anthropic/claude-sonnet-4-6,anthropic/claude-haiku-4-5");
     expect(workflow).toMatch(
       /suite_id: native-live-src-gateway-profiles-fireworks[\s\S]*?advisory: true/u,
@@ -6974,13 +6974,13 @@ describe("package artifact reuse", () => {
       /suite_id: native-live-src-gateway-profiles-openai[\s\S]*?timeout_minutes: 60[\s\S]*?profiles: beta minimum stable full/u,
     );
     expect(workflow).toContain(
-      "command: OPENCLAW_LIVE_GATEWAY_SETUP_TIMEOUT_MS=300000 OPENCLAW_LIVE_GATEWAY_THINKING=off OPENCLAW_LIVE_GATEWAY_PROVIDERS=openai OPENCLAW_LIVE_GATEWAY_MODELS=openai/gpt-5.6-luna OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS=180000 OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000",
+      "command: CARAPACE_LIVE_GATEWAY_SETUP_TIMEOUT_MS=300000 CARAPACE_LIVE_GATEWAY_THINKING=off CARAPACE_LIVE_GATEWAY_PROVIDERS=openai CARAPACE_LIVE_GATEWAY_MODELS=openai/gpt-5.6-luna CARAPACE_LIVE_GATEWAY_STEP_TIMEOUT_MS=180000 CARAPACE_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000",
     );
     expect(workflow).toContain(
-      "OPENCLAW_LIVE_GATEWAY_MODELS=google/gemini-3.1-pro-preview node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-profiles",
+      "CARAPACE_LIVE_GATEWAY_MODELS=google/gemini-3.1-pro-preview node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-profiles",
     );
     expect(workflow).toContain(
-      "OPENCLAW_LIVE_GATEWAY_MODELS=minimax/MiniMax-M3,minimax-portal/MiniMax-M3 OPENCLAW_LIVE_GATEWAY_MAX_MODELS=2",
+      "CARAPACE_LIVE_GATEWAY_MODELS=minimax/MiniMax-M3,minimax-portal/MiniMax-M3 CARAPACE_LIVE_GATEWAY_MAX_MODELS=2",
     );
     expect(workflow).toMatch(
       /suite_id: native-live-src-gateway-profiles-fireworks[\s\S]*?timeout_minutes: 30[\s\S]*?advisory: true/u,
@@ -6992,33 +6992,33 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("suite_id: native-live-src-gateway-profiles-zai");
     expect(workflow).not.toContain("Z.AI API Platform validation is temporarily disabled");
     expect(workflow).not.toContain(
-      "OPENCLAW_LIVE_GATEWAY_PROVIDERS=deepseek,opencode-go,openrouter,xai,zai",
+      "CARAPACE_LIVE_GATEWAY_PROVIDERS=deepseek,opencode-go,openrouter,xai,zai",
     );
     expect(workflow).toContain("suite_id: live-gateway-anthropic-docker");
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_MAX_MODELS=2");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_MAX_MODELS=2");
     expect(workflow).toContain(
-      "OPENCLAW_LIVE_GATEWAY_THINKING=off OPENCLAW_LIVE_GATEWAY_PROVIDERS=openai OPENCLAW_LIVE_GATEWAY_MODELS=openai/gpt-5.6-luna OPENCLAW_LIVE_GATEWAY_MAX_MODELS=1 OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS=90000 OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000",
+      "CARAPACE_LIVE_GATEWAY_THINKING=off CARAPACE_LIVE_GATEWAY_PROVIDERS=openai CARAPACE_LIVE_GATEWAY_MODELS=openai/gpt-5.6-luna CARAPACE_LIVE_GATEWAY_MAX_MODELS=1 CARAPACE_LIVE_GATEWAY_STEP_TIMEOUT_MS=90000 CARAPACE_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000",
     );
     expect(workflow).toContain(
-      "OPENCLAW_LIVE_GATEWAY_MODELS=anthropic/claude-sonnet-4-6,anthropic/claude-haiku-4-5 OPENCLAW_LIVE_GATEWAY_MAX_MODELS=2",
+      "CARAPACE_LIVE_GATEWAY_MODELS=anthropic/claude-sonnet-4-6,anthropic/claude-haiku-4-5 CARAPACE_LIVE_GATEWAY_MAX_MODELS=2",
     );
-    expect(workflow).toContain("OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000");
+    expect(workflow).toContain("CARAPACE_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000");
     expect(workflow).toContain("timeout --foreground --kill-after=30s 35m");
     expect(workflow).toMatch(/suite_id: live-gateway-docker[\s\S]*?timeout_minutes: 40/u);
     expect(workflow).toContain("suite_id: native-live-extensions-a-k");
     expect(workflow).toContain("suite_id: native-live-extensions-l-n");
     expect(workflow).toContain("suite_id: native-live-extensions-moonshot");
     expect(workflow).toMatch(/suite_id: native-live-extensions-moonshot[\s\S]*?advisory: true/u);
-    expect(workflow).toContain("OPENCLAW_LIVE_SUITE_ADVISORY: ${{ matrix.advisory }}");
+    expect(workflow).toContain("CARAPACE_LIVE_SUITE_ADVISORY: ${{ matrix.advisory }}");
     expect(workflow).toContain("Advisory live suite failed with exit code");
     expect(workflow).toMatch(
-      /validate_live_media_provider_suites:[\s\S]*?OPENCLAW_LIVE_SUITE_ADVISORY: \$\{\{ matrix\.advisory \}\}[\s\S]*?shell: bash[\s\S]*?Advisory live suite failed with exit code/u,
+      /validate_live_media_provider_suites:[\s\S]*?CARAPACE_LIVE_SUITE_ADVISORY: \$\{\{ matrix\.advisory \}\}[\s\S]*?shell: bash[\s\S]*?Advisory live suite failed with exit code/u,
     );
     expect(workflow).toMatch(
       /suite_id: live-gateway-advisory-docker-deepseek-fireworks[\s\S]*?advisory: true/u,
     );
     expect(workflow).toMatch(
-      /validate_live_media_provider_suites:[\s\S]*?OPENCLAW_LIVE_SUITE_ADVISORY: \$\{\{ matrix\.advisory \}\}/u,
+      /validate_live_media_provider_suites:[\s\S]*?CARAPACE_LIVE_SUITE_ADVISORY: \$\{\{ matrix\.advisory \}\}/u,
     );
     expect(workflow).toMatch(
       /suite_id: native-live-extensions-media-video-d[\s\S]*?timeout_minutes: 30[\s\S]*?advisory: true/u,
@@ -7051,8 +7051,8 @@ describe("package artifact reuse", () => {
     expect(workflow).toContain("suite_id: native-live-extensions-media-music-minimax");
     expect(workflow).toContain("suite_id: native-live-extensions-media-video");
     expect(workflow).toContain("suite_group: native-live-extensions-media-video");
-    expect(workflow).toContain("OPENCLAW_LIVE_VIDEO_GENERATION_PROVIDERS=google,minimax");
-    expect(workflow).toContain("OPENCLAW_LIVE_VIDEO_GENERATION_PROVIDERS=openai,openrouter,xai");
+    expect(workflow).toContain("CARAPACE_LIVE_VIDEO_GENERATION_PROVIDERS=google,minimax");
+    expect(workflow).toContain("CARAPACE_LIVE_VIDEO_GENERATION_PROVIDERS=openai,openrouter,xai");
     expect(workflow).toContain(
       "inputs.live_suite_filter == 'native-live-src-gateway-profiles-anthropic'",
     );
@@ -7061,12 +7061,12 @@ describe("package artifact reuse", () => {
     );
     expect(workflow).toContain("inputs.live_suite_filter == 'native-live-extensions-media-video'");
     expect(workflow).not.toContain("needs_ffmpeg: true");
-    expect(retryHelper).toContain("OPENCLAW_LIVE_COMMAND_ATTEMPTS:-2");
+    expect(retryHelper).toContain("CARAPACE_LIVE_COMMAND_ATTEMPTS:-2");
     expect(retryHelper).toContain("ECONNRESET");
     expect(retryHelper).toContain("fetch failed");
     expect(retryHelper).toContain("gateway request timeout");
     expect(retryHelper).toContain("model idle timeout");
-    expect(retryHelper).toContain("OPENCLAW_LIVE_COMMAND_RATE_LIMIT_RETRY_DELAY_SECONDS:-60");
+    expect(retryHelper).toContain("CARAPACE_LIVE_COMMAND_RATE_LIMIT_RETRY_DELAY_SECONDS:-60");
     expect(retryHelper).toContain("Rate limit reached");
     expect(retryHelper).toContain("tokens per min");
     expect(
@@ -7089,11 +7089,11 @@ describe("package artifact reuse", () => {
     expect(deepSeek).toMatchObject({
       advisory: true,
       command:
-        "OPENCLAW_LIVE_GATEWAY_PROVIDERS=deepseek OPENCLAW_LIVE_GATEWAY_MODELS=deepseek/deepseek-v4-flash,deepseek/deepseek-v4-pro node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-profiles",
+        "CARAPACE_LIVE_GATEWAY_PROVIDERS=deepseek CARAPACE_LIVE_GATEWAY_MODELS=deepseek/deepseek-v4-flash,deepseek/deepseek-v4-pro node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-profiles",
       profiles: "full",
     });
     expect(openCodeGo.command).toContain(
-      "OPENCLAW_LIVE_GATEWAY_MODELS=opencode-go/deepseek-v4-flash,opencode-go/deepseek-v4-pro",
+      "CARAPACE_LIVE_GATEWAY_MODELS=opencode-go/deepseek-v4-flash,opencode-go/deepseek-v4-pro",
     );
   });
 
@@ -7107,7 +7107,7 @@ describe("package artifact reuse", () => {
     expect(mimo).toMatchObject({
       advisory: true,
       command:
-        "OPENCLAW_LIVE_GATEWAY_PROVIDERS=opencode-go OPENCLAW_LIVE_GATEWAY_MODELS=opencode-go/mimo-v2.5,opencode-go/mimo-v2.5-pro node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-profiles",
+        "CARAPACE_LIVE_GATEWAY_PROVIDERS=opencode-go CARAPACE_LIVE_GATEWAY_MODELS=opencode-go/mimo-v2.5,opencode-go/mimo-v2.5-pro node .release-harness/scripts/test-live-shard.mjs native-live-src-gateway-profiles",
       profiles: "full",
       suite_group: "native-live-src-gateway-profiles-opencode-go",
     });
@@ -7123,9 +7123,9 @@ describe("package artifact reuse", () => {
     );
 
     expect(openaiDefault).toMatchObject({ profiles: "stable full" });
-    expect(openaiDefault.command).toContain("OPENCLAW_LIVE_GATEWAY_OPENAI_API_DEFAULT=1");
-    expect(openaiDefault.command).toContain("OPENCLAW_LIVE_GATEWAY_PROVIDERS=openai");
-    expect(openaiDefault.command).not.toContain("OPENCLAW_LIVE_GATEWAY_MODELS=");
+    expect(openaiDefault.command).toContain("CARAPACE_LIVE_GATEWAY_OPENAI_API_DEFAULT=1");
+    expect(openaiDefault.command).toContain("CARAPACE_LIVE_GATEWAY_PROVIDERS=openai");
+    expect(openaiDefault.command).not.toContain("CARAPACE_LIVE_GATEWAY_MODELS=");
   });
 
   it("runs Docker live harnesses from trusted helper scripts", () => {
@@ -7146,22 +7146,22 @@ describe("package artifact reuse", () => {
     const stage = readFileSync("scripts/lib/live-docker-stage.sh", "utf8");
 
     expect(workflow).toContain(
-      'run: OPENCLAW_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 35m bash .release-harness/scripts/test-live-models-docker.sh',
+      'run: CARAPACE_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 35m bash .release-harness/scripts/test-live-models-docker.sh',
     );
     expect(workflow).toContain(
-      "command: OPENCLAW_LIVE_GATEWAY_THINKING=off OPENCLAW_LIVE_GATEWAY_PROVIDERS=openai OPENCLAW_LIVE_GATEWAY_MODELS=openai/gpt-5.6-luna OPENCLAW_LIVE_GATEWAY_MAX_MODELS=1",
+      "command: CARAPACE_LIVE_GATEWAY_THINKING=off CARAPACE_LIVE_GATEWAY_PROVIDERS=openai CARAPACE_LIVE_GATEWAY_MODELS=openai/gpt-5.6-luna CARAPACE_LIVE_GATEWAY_MAX_MODELS=1",
     );
     expect(workflow).toContain(
-      "command: OPENCLAW_LIVE_GATEWAY_PROVIDERS=minimax,minimax-portal OPENCLAW_LIVE_GATEWAY_MODELS=minimax/MiniMax-M3,minimax-portal/MiniMax-M3 OPENCLAW_LIVE_GATEWAY_MAX_MODELS=2",
+      "command: CARAPACE_LIVE_GATEWAY_PROVIDERS=minimax,minimax-portal CARAPACE_LIVE_GATEWAY_MODELS=minimax/MiniMax-M3,minimax-portal/MiniMax-M3 CARAPACE_LIVE_GATEWAY_MAX_MODELS=2",
     );
     expect(workflow).toContain(
-      'command: OPENCLAW_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 45m bash .release-harness/scripts/test-live-cli-backend-docker.sh',
+      'command: CARAPACE_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 45m bash .release-harness/scripts/test-live-cli-backend-docker.sh',
     );
     expect(workflow).toContain(
-      'command: OPENCLAW_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 45m bash .release-harness/scripts/test-live-acp-bind-docker.sh',
+      'command: CARAPACE_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 45m bash .release-harness/scripts/test-live-acp-bind-docker.sh',
     );
     expect(workflow).toContain(
-      'command: OPENCLAW_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 35m bash .release-harness/scripts/test-live-codex-harness-docker.sh',
+      'command: CARAPACE_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 35m bash .release-harness/scripts/test-live-codex-harness-docker.sh',
     );
     const codexCompatibility = workflowStep(
       providerSuites,
@@ -7170,10 +7170,10 @@ describe("package artifact reuse", () => {
     expect(codexCompatibility).toMatchObject({
       id: "codex_compat",
       env: {
-        OPENCLAW_FROZEN_CODEX_SUITE_ID: "${{ matrix.suite_id }}",
-        OPENCLAW_FROZEN_TARGET_ROOT: "${{ github.workspace }}",
-        OPENCLAW_SELECTED_SHA: "${{ needs.validate_selected_ref.outputs.selected_sha }}",
-        OPENCLAW_WORKFLOW_SHA: "${{ needs.validate_selected_ref.outputs.workflow_sha }}",
+        CARAPACE_FROZEN_CODEX_SUITE_ID: "${{ matrix.suite_id }}",
+        CARAPACE_FROZEN_TARGET_ROOT: "${{ github.workspace }}",
+        CARAPACE_SELECTED_SHA: "${{ needs.validate_selected_ref.outputs.selected_sha }}",
+        CARAPACE_WORKFLOW_SHA: "${{ needs.validate_selected_ref.outputs.workflow_sha }}",
       },
       run: "node .release-harness/scripts/resolve-frozen-codex-live-suite.mjs",
     });
@@ -7200,7 +7200,7 @@ describe("package artifact reuse", () => {
       ["luna", "max"],
     ]) {
       expect(workflow).toContain(
-        `OPENCLAW_LIVE_CODEX_HARNESS_TARGETS=openai/gpt-5.6-${model}=${thinking}`,
+        `CARAPACE_LIVE_CODEX_HARNESS_TARGETS=openai/gpt-5.6-${model}=${thinking}`,
       );
     }
     expect(workflow.match(/live-codex-harness\*-docker\)/gu)).toHaveLength(2);
@@ -7217,15 +7217,15 @@ describe("package artifact reuse", () => {
     expect(codexLiveTest).toContain("command: `/model ${modelKey} --runtime codex`");
     expect(codexLiveTest).toContain("thinkingLevel: CODEX_HARNESS_THINKING");
     expect(workflow).toContain(
-      'command: OPENCLAW_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 20m bash .release-harness/scripts/test-live-subagent-announce-docker.sh',
+      'command: CARAPACE_LIVE_DOCKER_REPO_ROOT="$GITHUB_WORKSPACE" timeout --foreground --kill-after=30s 20m bash .release-harness/scripts/test-live-subagent-announce-docker.sh',
     );
     expect(scenarios).toContain("function liveDockerScriptCommand");
     expect(scenarios).toContain("const LIVE_DOCKER_DEFAULT_HARNESS_DIR");
     expect(scenarios).toContain("fileURLToPath(import.meta.url)");
     expect(scenarios).toContain('? ".release-harness"');
-    expect(scenarios).toContain("process.env.OPENCLAW_DOCKER_E2E_REPO_ROOT");
+    expect(scenarios).toContain("process.env.CARAPACE_DOCKER_E2E_REPO_ROOT");
     expect(scenarios).toContain(
-      'harness="\\${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-${LIVE_DOCKER_DEFAULT_HARNESS_DIR}}"',
+      'harness="\\${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-${LIVE_DOCKER_DEFAULT_HARNESS_DIR}}"',
     );
     expect(scenarios).not.toContain("harness=.release-harness");
     expect(scenarios).toMatch(/liveDockerScriptCommand\(\s*"test-live-models-docker\.sh"/u);
@@ -7240,54 +7240,54 @@ describe("package artifact reuse", () => {
       /liveDockerScriptCommand\(\s*"test-live-subagent-announce-docker\.sh"/u,
     );
     expect(liveDockerAuth).toContain("codex-cli | openai)");
-    expect(liveDockerAuth).toContain("openclaw_live_init_docker_run_args()");
-    expect(liveDockerAuth).toContain("openclaw_live_stage_profile_into_home()");
-    expect(liveDockerAuth).toContain("openclaw_live_chown_bind_dirs_for_container_user()");
-    expect(liveDockerAuth).toContain("openclaw_live_uses_managed_bind_dirs()");
-    expect(liveDockerAuth).toContain('openclaw_live_truthy "${OPENCLAW_TESTBOX:-}"');
-    expect(liveDockerAuth).toContain('[[ -n "${OPENCLAW_DOCKER_CACHE_HOME_DIR:-}" ]]');
+    expect(liveDockerAuth).toContain("carapace_live_init_docker_run_args()");
+    expect(liveDockerAuth).toContain("carapace_live_stage_profile_into_home()");
+    expect(liveDockerAuth).toContain("carapace_live_chown_bind_dirs_for_container_user()");
+    expect(liveDockerAuth).toContain("carapace_live_uses_managed_bind_dirs()");
+    expect(liveDockerAuth).toContain('carapace_live_truthy "${CARAPACE_TESTBOX:-}"');
+    expect(liveDockerAuth).toContain('[[ -n "${CARAPACE_DOCKER_CACHE_HOME_DIR:-}" ]]');
     expect(liveDockerAuth).toContain(
-      'timeout_value="${2:-${OPENCLAW_LIVE_DOCKER_RUN_TIMEOUT:-2700s}}"',
+      'timeout_value="${2:-${CARAPACE_LIVE_DOCKER_RUN_TIMEOUT:-2700s}}"',
     );
     expect(harness).toContain('source "$TRUSTED_HARNESS_DIR/scripts/lib/live-docker-auth.sh"');
     expect(harness).not.toContain('source "$ROOT_DIR/scripts/lib/live-docker-auth.sh"');
     expect(harness).toContain(
-      'OPENCLAW_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"',
+      'CARAPACE_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"',
     );
     expect(harness).toContain(
-      '-e OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR="${DOCKER_TRUSTED_HARNESS_CONTAINER_DIR}/scripts"',
+      '-e CARAPACE_LIVE_DOCKER_SCRIPTS_DIR="${DOCKER_TRUSTED_HARNESS_CONTAINER_DIR}/scripts"',
     );
     expect(harness).toContain('node --import tsx "$trusted_scripts_dir/prepare-codex-ci-auth.ts"');
     expect(harness).toContain('source "$trusted_scripts_dir/lib/live-docker-stage.sh"');
     for (const script of [harness, ...sharedLiveScripts]) {
       expect(script).toContain('source "$TRUSTED_HARNESS_DIR/scripts/lib/live-docker-auth.sh"');
       expect(script).not.toContain('source "$ROOT_DIR/scripts/lib/live-docker-auth.sh"');
-      expect(script).toContain("openclaw_live_init_docker_run_args DOCKER_RUN_ARGS");
+      expect(script).toContain("carapace_live_init_docker_run_args DOCKER_RUN_ARGS");
       expect(script).toContain("DOCKER_RUN_ARGS+=(--rm -t \\");
       expect(script).not.toContain("DOCKER_RUN_ARGS=(docker run --rm -t \\");
     }
-    expect(liveDockerAuth).toContain("openclaw_live_prepare_bind_dir_for_container_user");
+    expect(liveDockerAuth).toContain("carapace_live_prepare_bind_dir_for_container_user");
     for (const script of sharedLiveScripts) {
-      expect(script).toContain("openclaw_live_uses_managed_bind_dirs");
+      expect(script).toContain("carapace_live_uses_managed_bind_dirs");
       expect(script).toContain(
-        'OPENCLAW_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"',
+        'CARAPACE_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"',
       );
       expect(script).toContain('source "$trusted_scripts_dir/lib/live-docker-stage.sh"');
       expect(script).toContain(
-        '-e OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR="${DOCKER_TRUSTED_HARNESS_CONTAINER_DIR}/scripts"',
+        '-e CARAPACE_LIVE_DOCKER_SCRIPTS_DIR="${DOCKER_TRUSTED_HARNESS_CONTAINER_DIR}/scripts"',
       );
       expect(script).toContain(
-        "openclaw_live_append_array DOCKER_RUN_ARGS DOCKER_TRUSTED_HARNESS_MOUNT",
+        "carapace_live_append_array DOCKER_RUN_ARGS DOCKER_TRUSTED_HARNESS_MOUNT",
       );
     }
     for (const [file, helper] of [
-      ["scripts/test-live-cli-backend-docker.sh", "openclaw_live_prepare_cli_backend"],
-      ["scripts/test-live-acp-bind-docker.sh", "openclaw_live_run_setup_command"],
-      ["scripts/test-live-codex-harness-docker.sh", "openclaw_live_run_setup_command"],
+      ["scripts/test-live-cli-backend-docker.sh", "carapace_live_prepare_cli_backend"],
+      ["scripts/test-live-acp-bind-docker.sh", "carapace_live_run_setup_command"],
+      ["scripts/test-live-codex-harness-docker.sh", "carapace_live_run_setup_command"],
     ] as const) {
       const script = readFileSync(file, "utf8");
       expect(script).toContain(helper);
-      expect(script).not.toContain('timeout --kill-after=30s "${OPENCLAW_LIVE_');
+      expect(script).not.toContain('timeout --kill-after=30s "${CARAPACE_LIVE_');
     }
     expect(stage).toContain("elif command -v gtimeout >/dev/null 2>&1; then");
     expect(stage).toContain('if "$timeout_bin" --kill-after=1s 1s true');
@@ -7296,42 +7296,42 @@ describe("package artifact reuse", () => {
       'echo "timeout command not found; cannot bound ${label} after ${timeout_seconds}s"',
     );
     expect(readFileSync("scripts/test-live-models-docker.sh", "utf8")).toContain(
-      "OPENCLAW_LIVE_MODELS_DOCKER_RUN_TIMEOUT:-2100s",
+      "CARAPACE_LIVE_MODELS_DOCKER_RUN_TIMEOUT:-2100s",
     );
     expect(readFileSync("scripts/test-live-gateway-models-docker.sh", "utf8")).toContain(
-      "OPENCLAW_LIVE_GATEWAY_DOCKER_RUN_TIMEOUT:-2100s",
+      "CARAPACE_LIVE_GATEWAY_DOCKER_RUN_TIMEOUT:-2100s",
     );
     expect(readFileSync("scripts/test-live-cli-backend-docker.sh", "utf8")).toContain(
-      "OPENCLAW_LIVE_CLI_BACKEND_DOCKER_RUN_TIMEOUT:-2700s",
+      "CARAPACE_LIVE_CLI_BACKEND_DOCKER_RUN_TIMEOUT:-2700s",
     );
     expect(readFileSync("scripts/test-live-cli-backend-docker.sh", "utf8")).toContain(
-      'CLI_SETUP_TIMEOUT_SECONDS="$(openclaw_live_read_positive_int_env OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS 180)"',
+      'CLI_SETUP_TIMEOUT_SECONDS="$(carapace_live_read_positive_int_env CARAPACE_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS 180)"',
     );
     expect(readFileSync("scripts/test-live-cli-backend-docker.sh", "utf8")).toContain(
-      '"$docker_package" "$OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS"',
+      '"$docker_package" "$CARAPACE_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS"',
     );
     expect(stage).toContain('"live CLI backend setup"');
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
-      "OPENCLAW_LIVE_ACP_BIND_DOCKER_RUN_TIMEOUT:-2700s",
+      "CARAPACE_LIVE_ACP_BIND_DOCKER_RUN_TIMEOUT:-2700s",
     );
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
-      'ACP_SETUP_TIMEOUT_SECONDS="$(openclaw_live_read_positive_int_env OPENCLAW_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS 180)"',
+      'ACP_SETUP_TIMEOUT_SECONDS="$(carapace_live_read_positive_int_env CARAPACE_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS 180)"',
     );
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
-      '"${OPENCLAW_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS:?missing live ACP bind setup timeout seconds}"',
+      '"${CARAPACE_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS:?missing live ACP bind setup timeout seconds}"',
     );
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
-      '-e OPENCLAW_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS="$ACP_SETUP_TIMEOUT_SECONDS"',
+      '-e CARAPACE_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS="$ACP_SETUP_TIMEOUT_SECONDS"',
     );
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
-      '-e OPENCLAW_LIVE_ACP_BIND_REQUIRE_CRON="${OPENCLAW_LIVE_ACP_BIND_REQUIRE_CRON:-}"',
+      '-e CARAPACE_LIVE_ACP_BIND_REQUIRE_CRON="${CARAPACE_LIVE_ACP_BIND_REQUIRE_CRON:-}"',
     );
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
       '"live ACP bind setup"',
     );
     const acpBindScript = readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8");
     expect(acpBindScript).toContain(
-      "OPENCLAW_LIVE_ACP_BIND_CLAUDE_AUTH must be one of: auto, api-key, subscription.",
+      "CARAPACE_LIVE_ACP_BIND_CLAUDE_AUTH must be one of: auto, api-key, subscription.",
     );
     expect(acpBindScript).toContain(
       'if [[ "$ACP_AGENT" == "claude" && "$CLAUDE_AUTH_MODE" == "subscription" ]]; then',
@@ -7341,43 +7341,43 @@ describe("package artifact reuse", () => {
     );
     expect(acpBindScript).toContain('-e CLAUDE_CODE_OAUTH_TOKEN="${CLAUDE_CODE_OAUTH_TOKEN:-}"');
     expect(acpBindScript).not.toContain("    -e ANTHROPIC_API_KEY \\\n");
-    expect(workflow.match(/OPENCLAW_LIVE_ACP_BIND_CLAUDE_AUTH=subscription/g)).toHaveLength(2);
-    expect(workflow.match(/OPENCLAW_LIVE_ACP_BIND_CLAUDE_AUTH=api-key/g)).toHaveLength(2);
+    expect(workflow.match(/CARAPACE_LIVE_ACP_BIND_CLAUDE_AUTH=subscription/g)).toHaveLength(2);
+    expect(workflow.match(/CARAPACE_LIVE_ACP_BIND_CLAUDE_AUTH=api-key/g)).toHaveLength(2);
     expect(readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8")).toContain(
       "run_setup_command bash -lc 'curl -fsSL https://app.factory.ai/cli | sh'",
     );
     expect(readFileSync("scripts/test-live-codex-harness-docker.sh", "utf8")).toContain(
-      "OPENCLAW_LIVE_CODEX_HARNESS_DOCKER_RUN_TIMEOUT:-$((2100 * CODEX_HARNESS_TARGET_COUNT))s",
+      "CARAPACE_LIVE_CODEX_HARNESS_DOCKER_RUN_TIMEOUT:-$((2100 * CODEX_HARNESS_TARGET_COUNT))s",
     );
     expect(readFileSync("scripts/test-live-codex-harness-docker.sh", "utf8")).toContain(
-      'CODEX_HARNESS_SETUP_TIMEOUT_SECONDS="$(openclaw_live_read_positive_int_env OPENCLAW_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS 180)"',
+      'CODEX_HARNESS_SETUP_TIMEOUT_SECONDS="$(carapace_live_read_positive_int_env CARAPACE_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS 180)"',
     );
     expect(readFileSync("scripts/test-live-codex-harness-docker.sh", "utf8")).toContain(
-      '"${OPENCLAW_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS:?missing live Codex harness setup timeout seconds}"',
+      '"${CARAPACE_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS:?missing live Codex harness setup timeout seconds}"',
     );
     expect(readFileSync("scripts/test-live-codex-harness-docker.sh", "utf8")).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS="$CODEX_HARNESS_SETUP_TIMEOUT_SECONDS"',
+      '-e CARAPACE_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS="$CODEX_HARNESS_SETUP_TIMEOUT_SECONDS"',
     );
     expect(readFileSync("scripts/test-live-codex-harness-docker.sh", "utf8")).toContain(
       '"live Codex harness setup"',
     );
     expect(readFileSync("scripts/test-live-codex-harness-docker.sh", "utf8")).toContain(
-      'run_setup_command npm install -g "$OPENCLAW_LIVE_CODEX_CLI_PACKAGE_SPEC"',
+      'run_setup_command npm install -g "$CARAPACE_LIVE_CODEX_CLI_PACKAGE_SPEC"',
     );
     expect(readFileSync("scripts/test-live-subagent-announce-docker.sh", "utf8")).toContain(
-      "OPENCLAW_LIVE_SUBAGENT_DOCKER_RUN_TIMEOUT:-1200s",
+      "CARAPACE_LIVE_SUBAGENT_DOCKER_RUN_TIMEOUT:-1200s",
     );
-    expect(build).toContain('ROOT_DIR="${OPENCLAW_LIVE_DOCKER_REPO_ROOT:-$SCRIPT_ROOT_DIR}"');
+    expect(build).toContain('ROOT_DIR="${CARAPACE_LIVE_DOCKER_REPO_ROOT:-$SCRIPT_ROOT_DIR}"');
     expect(build).toContain('source "$SCRIPT_ROOT_DIR/scripts/lib/docker-build.sh"');
     expect(build).toContain('source "$SCRIPT_ROOT_DIR/scripts/lib/docker-e2e-container.sh"');
     expect(build).toContain(
-      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_LIVE_DOCKER_PULL_TIMEOUT:-600s}}"',
+      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${CARAPACE_LIVE_DOCKER_PULL_TIMEOUT:-600s}}"',
     );
-    expect(build).toContain('LIVE_IMAGE_PULL_ATTEMPTS="${OPENCLAW_LIVE_DOCKER_PULL_ATTEMPTS:-3}"');
+    expect(build).toContain('LIVE_IMAGE_PULL_ATTEMPTS="${CARAPACE_LIVE_DOCKER_PULL_ATTEMPTS:-3}"');
     expect(build).toContain('docker_e2e_docker_cmd pull "$LIVE_IMAGE_NAME"');
     expect(build).not.toContain('docker pull "$LIVE_IMAGE_NAME"');
     expect(stage).toContain(
-      'local scripts_dir="${OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"',
+      'local scripts_dir="${CARAPACE_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"',
     );
     expect(stage).toContain('node --import tsx "$scripts_dir/live-docker-normalize-config.ts"');
   });
@@ -7385,9 +7385,9 @@ describe("package artifact reuse", () => {
   it("fails Droid ACP Docker live proof when Factory auth is missing", () => {
     const script = readFileSync("scripts/test-live-acp-bind-docker.sh", "utf8");
 
-    expect(script).toContain("openclaw_live_acp_bind_load_factory_api_key_from_profile");
+    expect(script).toContain("carapace_live_acp_bind_load_factory_api_key_from_profile");
     expect(script).not.toContain('source "$PROFILE_FILE"');
-    expect(script.indexOf("openclaw_live_acp_bind_load_factory_api_key_from_profile")).toBeLessThan(
+    expect(script.indexOf("carapace_live_acp_bind_load_factory_api_key_from_profile")).toBeLessThan(
       script.indexOf('if [[ "$ACP_AGENT" == "droid" && -z "${FACTORY_API_KEY:-}" ]]; then'),
     );
     expect(script).toContain(
@@ -7429,11 +7429,11 @@ describe("package artifact reuse", () => {
       "MINIMAX_API_KEY",
       "OPENCODE_API_KEY",
       "OPENCODE_ZEN_API_KEY",
-      "OPENCLAW_LIVE_BROWSER_CDP_URL",
-      "OPENCLAW_LIVE_SETUP_TOKEN",
-      "OPENCLAW_LIVE_SETUP_TOKEN_MODEL",
-      "OPENCLAW_LIVE_SETUP_TOKEN_PROFILE",
-      "OPENCLAW_LIVE_SETUP_TOKEN_VALUE",
+      "CARAPACE_LIVE_BROWSER_CDP_URL",
+      "CARAPACE_LIVE_SETUP_TOKEN",
+      "CARAPACE_LIVE_SETUP_TOKEN_MODEL",
+      "CARAPACE_LIVE_SETUP_TOKEN_PROFILE",
+      "CARAPACE_LIVE_SETUP_TOKEN_VALUE",
       "GEMINI_API_KEY",
       "GOOGLE_API_KEY",
       "OPENROUTER_API_KEY",
@@ -7449,13 +7449,13 @@ describe("package artifact reuse", () => {
       "BYTEPLUS_ACCESS_KEY_ID",
       "BYTEPLUS_SECRET_ACCESS_KEY",
       "CLAUDE_CODE_OAUTH_TOKEN",
-      "OPENCLAW_CODEX_AUTH_JSON",
-      "OPENCLAW_CODEX_CONFIG_TOML",
-      "OPENCLAW_CLAUDE_JSON",
-      "OPENCLAW_CLAUDE_CREDENTIALS_JSON",
-      "OPENCLAW_CLAUDE_SETTINGS_JSON",
-      "OPENCLAW_CLAUDE_SETTINGS_LOCAL_JSON",
-      "OPENCLAW_GEMINI_SETTINGS_JSON",
+      "CARAPACE_CODEX_AUTH_JSON",
+      "CARAPACE_CODEX_CONFIG_TOML",
+      "CARAPACE_CLAUDE_JSON",
+      "CARAPACE_CLAUDE_CREDENTIALS_JSON",
+      "CARAPACE_CLAUDE_SETTINGS_JSON",
+      "CARAPACE_CLAUDE_SETTINGS_LOCAL_JSON",
+      "CARAPACE_GEMINI_SETTINGS_JSON",
       "FIREWORKS_API_KEY",
     ];
     const githubBackedTestboxProviderSteps = [
@@ -7558,16 +7558,16 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       'if [[ "$credentials" == *",openai,"* ]]; then',
       "require_any OpenAI OPENAI_API_KEY",
       'if [[ "$credentials" == *",codex,"* ]]; then',
-      "require_any Codex OPENCLAW_CODEX_AUTH_JSON",
+      "require_any Codex CARAPACE_CODEX_AUTH_JSON",
       'if [[ "$credentials" == *",gemini,"* ]]; then',
-      "require_any Gemini GEMINI_API_KEY GOOGLE_API_KEY OPENCLAW_GEMINI_SETTINGS_JSON",
+      "require_any Gemini GEMINI_API_KEY GOOGLE_API_KEY CARAPACE_GEMINI_SETTINGS_JSON",
       'if [[ "$credentials" == *",opencode,"* ]]; then',
       "require_any OpenCode OPENCODE_API_KEY OPENCODE_ZEN_API_KEY",
     ]);
-    expect(reusableWorkflow.match(/OPENCLAW_LIVE_CLI_BACKEND_AUTH=subscription/g)).toHaveLength(2);
+    expect(reusableWorkflow.match(/CARAPACE_LIVE_CLI_BACKEND_AUTH=subscription/g)).toHaveLength(2);
     expect(
       reusableWorkflow.match(
-        /if \[\[ -n "\$\{OPENCLAW_CLAUDE_CREDENTIALS_JSON:-\}" \|\| -n "\$\{CLAUDE_CODE_OAUTH_TOKEN:-\}" \]\]; then/g,
+        /if \[\[ -n "\$\{CARAPACE_CLAUDE_CREDENTIALS_JSON:-\}" \|\| -n "\$\{CLAUDE_CODE_OAUTH_TOKEN:-\}" \]\]; then/g,
       ),
     ).toHaveLength(4);
   });
@@ -7592,7 +7592,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     const runWindowsTestboxStep = workflowStep(windowsTestboxJob, "Run Testbox");
     const windowsTestboxActionMarker = workflowStep(windowsTestboxJob, "Testbox action marker");
 
-    expect(workflow).not.toContain('PNPM_CONFIG_STORE_DIR: "/tmp/openclaw-pnpm-store"');
+    expect(workflow).not.toContain('PNPM_CONFIG_STORE_DIR: "/tmp/carapace-pnpm-store"');
     expect(workflow).not.toContain("PNPM_CONFIG_MODULES_DIR");
     expect(workflow).not.toContain("PNPM_CONFIG_VIRTUAL_STORE_DIR");
     expect(setupNodeWith).not.toHaveProperty("dependency-cache");
@@ -7640,7 +7640,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(workflow).toContain("Download package-under-test artifact");
     expect(workflow).toContain("harness_ref:");
     expect(workflow).toContain("ref: ${{ inputs.harness_ref || github.sha }}");
-    expect(workflow).toContain("OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ");
+    expect(workflow).toContain("CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ");
     expect(workflow).toContain("provider_mode:");
     expect(workflow).toContain("provider_mode must be mock-openai or live-frontier");
     expect(workflow).toContain("run_package_telegram_e2e:");
@@ -7661,7 +7661,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       workflowStep(
         workflowJob(NPM_TELEGRAM_WORKFLOW, "run_package_telegram_e2e"),
         "Run package Telegram E2E",
-      ).env?.OPENCLAW_NPM_TELEGRAM_RTT_CHECKS,
+      ).env?.CARAPACE_NPM_TELEGRAM_RTT_CHECKS,
     ).toBe("${{ inputs.rtt_scenario }}");
   });
 
@@ -7685,7 +7685,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       workflowStep(
         workflowJob(NPM_TELEGRAM_WORKFLOW, "run_package_telegram_e2e"),
         "Run package Telegram E2E",
-      ).env?.OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS,
+      ).env?.CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS,
     ).toBe("${{ inputs.allow_older_binary_destructive_actions && '1' || '' }}");
   });
 
@@ -7963,7 +7963,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       });
 
       expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain("must be a canonical OpenClaw release branch or tag");
+      expect(result.stderr).toContain("must be a canonical Carapace release branch or tag");
       expect(result.output).not.toContain("ci_release_scope=");
     },
   );
@@ -8087,7 +8087,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     });
     expect(workflow.concurrency).toEqual({
       group:
-        "openclaw-release-checks-${{ inputs.expected_sha || inputs.ref }}-${{ github.sha }}-${{ inputs.rerun_group }}-${{ inputs.phase }}-${{ inputs.release_profile == 'minimum' && 'beta' || inputs.release_profile }}-${{ inputs.run_release_soak || inputs.release_profile == 'stable' || inputs.release_profile == 'full' }}",
+        "carapace-release-checks-${{ inputs.expected_sha || inputs.ref }}-${{ github.sha }}-${{ inputs.rerun_group }}-${{ inputs.phase }}-${{ inputs.release_profile == 'minimum' && 'beta' || inputs.release_profile }}-${{ inputs.run_release_soak || inputs.release_profile == 'stable' || inputs.release_profile == 'full' }}",
       "cancel-in-progress": "${{ startsWith(github.ref, 'refs/heads/tideclaw/alpha/') }}",
     });
   });
@@ -8168,7 +8168,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       "false",
       "",
       {
-        packageAcceptancePackageSpec: "openclaw@beta",
+        packageAcceptancePackageSpec: "carapace@beta",
         phase: "candidate",
       },
     );
@@ -8180,7 +8180,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       "",
       {
         phase: "candidate",
-        releasePackageSpec: "openclaw@beta",
+        releasePackageSpec: "carapace@beta",
       },
     );
     const conflictingPublishedRelease = runReleaseChecksInputValidation(
@@ -8192,7 +8192,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       {
         candidateArtifactJson: releaseCandidateArtifactJson(),
         phase: "candidate",
-        releasePackageSpec: "openclaw@beta",
+        releasePackageSpec: "carapace@beta",
       },
     );
     const missingProvenance = runReleaseChecksInputValidation("beta", "false", "all", "false", "", {
@@ -8240,7 +8240,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       "",
       {
         candidateArtifactJson: releaseCandidateArtifactJson(),
-        packageAcceptancePackageSpec: "openclaw@next",
+        packageAcceptancePackageSpec: "carapace@next",
         phase: "candidate",
       },
     );
@@ -8248,7 +8248,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(result.status, result.stderr).toBe(0);
     const output = readFileSync(outputPath, "utf8");
     expect(output).toContain("package_mode=artifact\n");
-    expect(output).toContain("package_acceptance_package_spec=openclaw@next\n");
+    expect(output).toContain("package_acceptance_package_spec=carapace@next\n");
     expect(output).toContain("cross_os_scheduled=true\n");
     expect(output).toContain("docker_required=true\n");
     expect(output).toContain("package_acceptance_scheduled=true\n");
@@ -8367,7 +8367,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       rerunGroup: "package",
       skipTelegram: "false",
       overrides: {},
-      expected: "Package Telegram E2E: OpenClaw Release Checks Package Acceptance",
+      expected: "Package Telegram E2E: Carapace Release Checks Package Acceptance",
     },
     {
       label: "focused Telegram without a package",
@@ -8381,8 +8381,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       label: `published package from ${input}`,
       rerunGroup: "npm-telegram",
       skipTelegram: "false",
-      overrides: { [input]: "openclaw@2026.8.1-beta.3" },
-      expected: "Published-package Telegram E2E: `openclaw@2026.8.1-beta.3`",
+      overrides: { [input]: "carapace@2026.8.1-beta.3" },
+      expected: "Published-package Telegram E2E: `carapace@2026.8.1-beta.3`",
     })),
   ])(
     "summarizes Telegram package outcome for $label",
@@ -8411,7 +8411,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
           tool: "gh",
           args: [
             "api",
-            `repos/openclaw/openclaw/contents/scripts/e2e/lib/upgrade-survivor?ref=${"a".repeat(40)}`,
+            `repos/carapace/carapace/contents/scripts/e2e/lib/upgrade-survivor?ref=${"a".repeat(40)}`,
             "--jq",
             "[.[].name]",
           ],
@@ -8433,7 +8433,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       candidateVersion: "2026.9.3-beta.1",
       published: true,
     },
-    { name: "npm package override", override: "openclaw@2026.6.35" },
+    { name: "npm package override", override: "carapace@2026.6.35" },
     { name: "source before the new scenario", supportsScenario: false },
     {
       name: "frozen source with the new scenario",
@@ -8460,7 +8460,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(output.baselines).toBe("");
     expect(output.scenarios?.split(" ")).toEqual([
       "base",
-      "acpx-openclaw-tools-bridge",
+      "acpx-carapace-tools-bridge",
       "feishu-channel",
       "bootstrap-persona",
       "channel-post-core-restore",
@@ -8487,7 +8487,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
         soak
           ? [
               "base",
-              "acpx-openclaw-tools-bridge",
+              "acpx-carapace-tools-bridge",
               "feishu-channel",
               "bootstrap-persona",
               "channel-post-core-restore",
@@ -8563,7 +8563,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       target_context_ref:
         "${{ needs.resolve_target.outputs.package_acceptance_package_spec == '' && inputs.target_context_ref || '' }}",
       published_upgrade_survivor_baseline:
-        "${{ needs.resolve_target.outputs.package_acceptance_package_spec == '' && format('openclaw@{0}', needs.prepare_release_package.outputs.upgrade_baseline) || 'openclaw@latest' }}",
+        "${{ needs.resolve_target.outputs.package_acceptance_package_spec == '' && format('carapace@{0}', needs.prepare_release_package.outputs.upgrade_baseline) || 'carapace@latest' }}",
     });
     expect(packageAcceptanceJob.with?.candidate_artifact_json).toBe(
       "${{ needs.resolve_target.outputs.package_acceptance_package_spec == '' && needs.prepare_release_package.outputs.candidate_artifact_json || '' }}",
@@ -8608,7 +8608,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       "source: ${{ needs.resolve_target.outputs.package_acceptance_package_spec != '' && 'npm' || 'artifact' }}",
     );
     expect(workflow).toContain(
-      "package_spec: ${{ needs.resolve_target.outputs.package_acceptance_package_spec || 'openclaw@beta' }}",
+      "package_spec: ${{ needs.resolve_target.outputs.package_acceptance_package_spec || 'carapace@beta' }}",
     );
     expect(workflow).toContain(".artifacts/docker-e2e-package/package-candidate.json");
     expect(workflow).toContain(
@@ -8656,10 +8656,10 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(workflow).toContain("ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}");
     expect(workflow).toContain("ANTHROPIC_API_TOKEN: ${{ secrets.ANTHROPIC_API_TOKEN }}");
     expect(workflow).toContain(
-      "OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      "CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}",
     );
     expect(workflow).toContain(
-      "OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
+      "CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}",
     );
     expect(workflow).toContain("rerun_group:");
     expect(workflow).toContain("live_suite_filter:");
@@ -8697,7 +8697,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     );
     expect(filterValidator).toContain("cross_os_suite_filter requires rerun_group=all or cross-os");
     expect(workflow).toContain("live_suite_filter explicitly requested disabled QA live lane(s)");
-    expect(workflow).toContain("OPENCLAW_RELEASE_QA_*_LIVE_CI_ENABLED");
+    expect(workflow).toContain("CARAPACE_RELEASE_QA_*_LIVE_CI_ENABLED");
     expect(workflow).not.toContain(
       "QA release-check lanes are advisory and do not block release validation.",
     );
@@ -8733,8 +8733,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(releaseJob.uses).toBe("./.github/workflows/qa-live-transports-convex.yml");
     expect(releaseJob.secrets).toEqual({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      CARAPACE_QA_CONVEX_SECRET_CI: "${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}",
+      CARAPACE_QA_CONVEX_SITE_URL: "${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}",
     });
     expect(releaseJob.permissions).toEqual({ contents: "read", "pull-requests": "read" });
     expect(releaseJob.if).toBe(
@@ -8766,8 +8766,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     }
     expect(releaseWorkflow).not.toContain("qa_live_matrix_release_checks");
     expect(releaseWorkflow).not.toContain("Run QA Lab live Matrix lane");
-    expect(releaseWorkflow).not.toContain("pnpm openclaw qa matrix");
-    expect(qaWorkflow).toContain("pnpm openclaw qa matrix");
+    expect(releaseWorkflow).not.toContain("pnpm carapace qa matrix");
+    expect(qaWorkflow).toContain("pnpm carapace qa matrix");
     expect(qaWorkflow).toContain('if [[ "$FAIL_FAST" == "true" ]]');
     expect(qaWorkflow).toContain('trusted_reason="repository-branch"');
     expect(qaWorkflow).toContain('"${selected_revision}" != "${EXPECTED_SHA}"');
@@ -8798,8 +8798,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(workflowStep(matrixJob, "Run Matrix live lane").env).toEqual({
       FAIL_FAST: "${{ inputs.fail_fast }}",
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_LIVE_OPENAI_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1",
+      CARAPACE_LIVE_OPENAI_KEY: "${{ secrets.OPENAI_API_KEY }}",
+      CARAPACE_QA_REDACT_PUBLIC_METADATA: "1",
     });
     expect(releaseTelegramWorkflow).toContain(
       'echo "Telegram live lane failed on attempt ${attempt}; retrying once..." >&2',
@@ -8812,8 +8812,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(releaseJob.uses).toBe("./.github/workflows/qa-live-transports-convex.yml");
     expect(releaseJob.secrets).toEqual({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      CARAPACE_QA_CONVEX_SECRET_CI: "${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}",
+      CARAPACE_QA_CONVEX_SITE_URL: "${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}",
     });
     expect(releaseJob.permissions).toEqual({ contents: "read", "pull-requests": "read" });
     expect(releaseJob.if).toBe(
@@ -8901,16 +8901,16 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     for (const channel of ["DISCORD", "WHATSAPP", "SLACK"]) {
       const lower = channel.toLowerCase();
       expect(releaseWorkflow).toContain(
-        `RELEASE_QA_${channel}_LIVE_CI_ENABLED: \${{ vars.OPENCLAW_RELEASE_QA_${channel}_LIVE_CI_ENABLED || 'false' }}`,
+        `RELEASE_QA_${channel}_LIVE_CI_ENABLED: \${{ vars.CARAPACE_RELEASE_QA_${channel}_LIVE_CI_ENABLED || 'false' }}`,
       );
       expect(releaseWorkflow).toContain(`qa_live_${lower}_enabled="$qa_live_${lower}_ci_enabled"`);
       expect(releaseWorkflow).toContain(
         `needs.resolve_target.outputs.qa_live_${lower}_enabled == 'true'`,
       );
       expect(releaseWorkflow).not.toContain(
-        `vars.OPENCLAW_RELEASE_QA_${channel}_LIVE_CI_ENABLED == 'true'`,
+        `vars.CARAPACE_RELEASE_QA_${channel}_LIVE_CI_ENABLED == 'true'`,
       );
-      expect(qaWorkflow).not.toContain(`OPENCLAW_QA_${channel}_LIVE_CI_ENABLED`);
+      expect(qaWorkflow).not.toContain(`CARAPACE_QA_${channel}_LIVE_CI_ENABLED`);
     }
   });
 
@@ -9016,7 +9016,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       });
       expect(result.status, contextRef).toBe(1);
       expect(result.stderr).toContain(
-        "target_context_ref must be a canonical OpenClaw release branch or tag.",
+        "target_context_ref must be a canonical Carapace release branch or tag.",
       );
     }
 
@@ -9115,7 +9115,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(runStep.run).toContain("--scenario gateway-restart-multi-live");
     expect(runStep.run).toContain("--model openai/gpt-5.4");
     expect(runStep.run).toContain("--alt-model openai/gpt-5.4");
-    expect(runStep.run).toContain("--runtime-pair openclaw,codex");
+    expect(runStep.run).toContain("--runtime-pair carapace,codex");
     expect(runStep.run).toContain(
       "steps.run_lane.outputs.output_dir }}/gateway-restart-gpt-5.4-runtime-pair",
     );
@@ -9186,9 +9186,9 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(runtimePairValidation).toContain(
       'node --import tsx trusted-suite-validator/scripts/validate-qa-runtime-pair-summary.mts "${validator_args[@]}"',
     );
-    const coreRestartRun = workflowStep(laneJob, "Run OpenClaw core restart proof").run;
+    const coreRestartRun = workflowStep(laneJob, "Run Carapace core restart proof").run;
     expect(coreRestartRun).toContain("--scenario gateway-restart-inflight-run");
-    expect(coreRestartRun).toContain('--output-dir ".artifacts/qa-e2e/openclaw-core-restart"');
+    expect(coreRestartRun).toContain('--output-dir ".artifacts/qa-e2e/carapace-core-restart"');
     const trustedValidatorCheckout = workflowStep(
       laneJob,
       "Checkout trusted validator after candidate suite",
@@ -9328,7 +9328,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       expect(job.steps?.filter(({ name }) => name === "Prepare Git owner")).toEqual([
         {
           name: "Prepare Git owner",
-          uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+          uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
         },
       ]);
       const prepare =
@@ -9374,12 +9374,12 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
         slack
           ? [
               `${owner} --git 0 init "$install_dir/src"`,
-              `${owner} --checkout-git 0 remote add origin https://github.com/openclaw/crabbox.git`,
+              `${owner} --checkout-git 0 remote add origin https://github.com/Exaggarate/carapace/crabbox.git`,
               `${owner} --checkout-git 120 fetch --depth 1 origin "$CRABBOX_REF"`,
               `${owner} --checkout-git 0 checkout --detach FETCH_HEAD`,
             ]
           : [
-              `${owner} --git 120 clone --depth 1 https://github.com/openclaw/crabbox.git "$install_dir/src"`,
+              `${owner} --git 120 clone --depth 1 https://github.com/Exaggarate/carapace/crabbox.git "$install_dir/src"`,
             ],
       );
       clones += gitCalls.filter((line) => line.includes("--git 120 clone")).length;
@@ -9457,7 +9457,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(job.if).toBe(
       "inputs.include_openwebui && inputs.docker_lanes == '' && (inputs.release_test_profile == 'stable' || inputs.release_test_profile == 'full')",
     );
-    expect(job.env?.OPENCLAW_DOCKER_ALL_RELEASE_PROFILE).toBe("${{ inputs.release_test_profile }}");
+    expect(job.env?.CARAPACE_DOCKER_ALL_RELEASE_PROFILE).toBe("${{ inputs.release_test_profile }}");
     expect(setupNode.with).toMatchObject({
       "cache-mode": "off",
       "install-bun": "false",
@@ -9710,7 +9710,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       'target_version="$(jq -er',
       "is not reachable from release context branch",
       "does not match release tag",
-      "target_context_ref must be a canonical OpenClaw release branch or tag.",
+      "target_context_ref must be a canonical Carapace release branch or tag.",
     ]);
     expect(npmTelegramJob.name).toBe("Run package Telegram E2E");
     expect(npmTelegramJob.needs).toEqual(["resolve_target", "evidence_reuse"]);
@@ -9855,7 +9855,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expectTextToIncludeAll(validateStep.run, [
       'if [[ -z "${PACKAGE_ARTIFACT_NAME// }" ]]; then',
       "Artifact-backed Telegram E2E requires all artifact identity fields or none.",
-      "package_spec must be openclaw@alpha",
+      "package_spec must be carapace@alpha",
       "Artifact-backed Telegram E2E requires the complete immutable artifact and package identity tuple.",
     ]);
     expect(identityStep.env).toMatchObject({
@@ -9895,13 +9895,13 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       "Array.isArray(manifest.corePackageTarballs)",
       "manifest.corePackageTarballs === undefined",
       "package artifact tarball set does not match preflight manifest",
-      "package candidate manifest does not match the OpenClaw tarball",
+      "package candidate manifest does not match the Carapace tarball",
       "Package Telegram artifact SHA-256 differs from package_sha256.",
       "package candidate digest mismatch",
       "Package Telegram artifact tarball differs from package_file_name.",
       "Package Telegram artifact source SHA/version differs from the declared identity.",
-      'export OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR="${package_dir}"',
-      'export OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ="${package_tgz}"',
+      'export CARAPACE_NPM_TELEGRAM_PACKAGE_DIR="${package_dir}"',
+      'export CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ="${package_tgz}"',
     ]);
   });
 
@@ -9981,7 +9981,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       PACKAGE_ARTIFACT_NAME: "package-under-test",
       PACKAGE_ARTIFACT_RUN_ATTEMPT: "2",
       PACKAGE_ARTIFACT_RUN_ID: "456",
-      PACKAGE_FILE_NAME: "openclaw-2026.8.1.tgz",
+      PACKAGE_FILE_NAME: "carapace-2026.8.1.tgz",
       PACKAGE_SHA256: "b".repeat(64),
       PACKAGE_SOURCE_SHA: "c".repeat(40),
       PACKAGE_VERSION: "2026.8.1",
@@ -10033,7 +10033,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
-      "Prerelease plugin registry inputs require an artifact-backed OpenClaw package.",
+      "Prerelease plugin registry inputs require an artifact-backed Carapace package.",
     );
   });
 
@@ -10048,7 +10048,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       const job = workflowJob(workflowPath, jobName);
       expect(job.concurrency).toBeUndefined();
       const step = workflowStep(job, stepName);
-      expect(step.env?.OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS).toBe(acquireTimeoutMs);
+      expect(step.env?.CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS).toBe(acquireTimeoutMs);
     }
   });
 
@@ -10075,8 +10075,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     }
 
     expectTextToIncludeAll(liveE2eWorkflow, [
-      "OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS=180000",
-      "OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000",
+      "CARAPACE_LIVE_GATEWAY_STEP_TIMEOUT_MS=180000",
+      "CARAPACE_LIVE_GATEWAY_MODEL_TIMEOUT_MS=600000",
     ]);
   });
 
@@ -10436,7 +10436,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
 
     const telegramCaller = workflowJob(RELEASE_CHECKS_WORKFLOW, "qa_live_telegram_release_checks");
     const telegramDispatch = workflowStep(telegramCaller, "Dispatch and await trusted Telegram QA");
-    expect(telegramDispatch.run).toContain('workflow="openclaw-release-telegram-qa.yml"');
+    expect(telegramDispatch.run).toContain('workflow="carapace-release-telegram-qa.yml"');
     expect(telegramDispatch.run).toContain('--repo "$GITHUB_REPOSITORY"');
     expect(telegramDispatch.env).toMatchObject({
       PARENT_WORKFLOW_REF: "${{ github.ref_name }}",
@@ -10748,7 +10748,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       releaseResolveJob,
       "Download full release validation manifest",
     );
-    const npmPublishJob = workflowJob(OPENCLAW_NPM_RELEASE_WORKFLOW, "publish_openclaw_npm");
+    const npmPublishJob = workflowJob(CARAPACE_NPM_RELEASE_WORKFLOW, "publish_carapace_npm");
     const npmRun = workflowStep(npmPublishJob, "Verify full release validation evidence");
     const npmManifest = workflowStep(npmPublishJob, "Download full release validation manifest");
 
@@ -10792,7 +10792,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     const validateManifest = workflowStep(resolveJob, "Validate full release validation manifest");
     const publishDownload = workflowStep(publishJob, "Download full release validation manifest");
     const publishOrchestration = releasePublishOrchestration(publishJob);
-    const npmPublishJob = workflowJob(OPENCLAW_NPM_RELEASE_WORKFLOW, "publish_openclaw_npm");
+    const npmPublishJob = workflowJob(CARAPACE_NPM_RELEASE_WORKFLOW, "publish_carapace_npm");
     const npmCheckout = workflowStep(npmPublishJob, "Checkout");
     const npmFullRun = workflowStep(npmPublishJob, "Verify full release validation evidence");
     const npmDownload = workflowStep(npmPublishJob, "Download full release validation manifest");
@@ -10840,7 +10840,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     );
     expect(npmTarget.env?.FULL_RELEASE_VALIDATION_RUN_ID).toBeUndefined();
     expect(npmTarget.run).not.toContain(
-      "node scripts/openclaw-npm-extended-stable-release.mjs verify-manifest",
+      "node scripts/carapace-npm-extended-stable-release.mjs verify-manifest",
     );
     expect(npmCheckout.with?.["fetch-depth"]).toBe(
       "${{ inputs.release_evidence_mode == 'authorized-beta-focused-v1' && 0 || (inputs.preflight_run_id != '' && 1 || 0) }}",
@@ -10859,7 +10859,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     expect(publishSteps.some((step) => step.name === "Write Android release approval")).toBe(false);
     expect(workflowJob(RELEASE_PUBLISH_WORKFLOW, "publish_android").needs).toContain("publish");
     expect(dispatchIndex).toBeGreaterThan(notesIndex);
-    expect(publishSteps[notesIndex]?.if).toBe("${{ inputs.publish_openclaw_npm }}");
+    expect(publishSteps[notesIndex]?.if).toBe("${{ inputs.publish_carapace_npm }}");
 
     const publishRun = publishOrchestration.run ?? "";
     const createReleaseIndex = publishRun.lastIndexOf("create_or_update_github_release");
@@ -10942,7 +10942,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
     },
   ])("validates frozen npm release ancestry for $name", (scenario) => {
     const metadata = workflowStep(
-      workflowJob(OPENCLAW_NPM_PREFLIGHT_WORKFLOW, "check_dependencies_npm"),
+      workflowJob(CARAPACE_NPM_PREFLIGHT_WORKFLOW, "check_dependencies_npm"),
       "Validate release metadata",
     );
     const root = tempDirs.make("npm-preflight-release-ancestry-");
@@ -10954,9 +10954,9 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
         "git",
         [
           "-c",
-          "user.name=OpenClaw Test",
+          "user.name=Carapace Test",
           "-c",
-          "user.email=openclaw-test@example.com",
+          "user.email=carapace-test@example.com",
           "-c",
           "commit.gpgsign=false",
           "-c",
@@ -11009,7 +11009,7 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
         [
           'timeout() { shift 3; "$@"; }',
           "pnpm() {",
-          '  [[ "$*" == release:openclaw:npm:check ]]',
+          '  [[ "$*" == release:carapace:npm:check ]]',
           '  printf "%s\\n" "$RELEASE_TAG" "$RELEASE_MAIN_REF" > "$PACKAGE_CHECK_FACTS"',
           '  git merge-base --is-ancestor "$RELEASE_SHA" "$RELEASE_MAIN_REF"',
           "}",
@@ -11027,8 +11027,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
           RELEASE_TAG: "",
           PREFLIGHT_ONLY: "true",
           WORKFLOW_REF_NAME: "main",
-          OPENCLAW_NPM_PUBLISH_TAG: "beta",
-          OPENCLAW_NPM_RELEASE_SKIP_PACK_CHECK: "1",
+          CARAPACE_NPM_PUBLISH_TAG: "beta",
+          CARAPACE_NPM_RELEASE_SKIP_PACK_CHECK: "1",
         },
       },
     );
@@ -11101,8 +11101,8 @@ printf '%s\\n' "$DEEPSEEK_API_KEY" "$DEEPINFRA_API_KEY"`,
       const workflowSha = "d".repeat(40);
       const workflowRef = `release-publish/${workflowSha.slice(0, 12)}-123`;
       const digests = JSON.stringify({
-        "OpenClawCompanion-Setup-x64.exe": `sha256:${"a".repeat(64)}`,
-        "OpenClawCompanion-Setup-arm64.exe": `sha256:${"b".repeat(64)}`,
+        "CarapaceCompanion-Setup-x64.exe": `sha256:${"a".repeat(64)}`,
+        "CarapaceCompanion-Setup-arm64.exe": `sha256:${"b".repeat(64)}`,
       });
       writeFileSync(summaryPath, "");
       const result = spawnSync(
@@ -11129,7 +11129,7 @@ promote_windows_release_assets
             PATH: process.env.PATH,
             DISPATCH_ARGS: dispatchPath,
             GITHUB_STEP_SUMMARY: summaryPath,
-            GITHUB_REPOSITORY: "openclaw/openclaw",
+            GITHUB_REPOSITORY: "carapace/carapace",
             RELEASE_TAG: "v2026.9.1",
             CHILD_WORKFLOW_REF: workflowRef,
             PARENT_WORKFLOW_SHA: workflowSha,
@@ -11165,7 +11165,7 @@ promote_windows_release_assets
     expect(windowsWorkflow).not.toContain("default: latest");
     expect(windowsWorkflow).toContain("expected_installer_digests:");
     expect(windowsWorkflow).toContain("expected_installer_digests must contain exactly");
-    expect(windowsWorkflow).toContain("must be an explicit openclaw-windows-node release tag");
+    expect(windowsWorkflow).toContain("must be an explicit carapace-windows-node release tag");
     expect(windowsWorkflow).toContain("$installerPatterns = @(");
     expect(windowsWorkflow).toContain("Every matched installer is signature-checked");
     expect(windowsWorkflow).toContain("Get-ChildItem -LiteralPath dist -File");
@@ -11173,7 +11173,7 @@ promote_windows_release_assets
       "Downloaded Windows source asset does not match pinned digest",
     );
     expect(windowsWorkflow).toContain(
-      "--repo openclaw/openclaw-windows-node --json tagName,isDraft,isPrerelease,assets,url",
+      "--repo carapace/carapace-windows-node --json tagName,isDraft,isPrerelease,assets,url",
     );
     expect(windowsWorkflow).toContain(
       "Windows source release must contain exactly one required asset",
@@ -11182,13 +11182,13 @@ promote_windows_release_assets
       "Windows source release asset digest does not match the pinned digest",
     );
     expect(windowsWorkflow).toContain(
-      "CN=OpenClaw Foundation, O=OpenClaw Foundation, L=Mill Valley, S=California, C=US",
+      "CN=Carapace Foundation, O=Carapace Foundation, L=Mill Valley, S=California, C=US",
     );
     expect(windowsWorkflow).toContain("has unexpected signer subject");
-    expect(windowsWorkflow).toContain("OpenClawCompanion-SHA256SUMS.txt");
+    expect(windowsWorkflow).toContain("CarapaceCompanion-SHA256SUMS.txt");
     expect(windowsWorkflow).toContain("Verify promoted release asset contract");
     expect(windowsWorkflow).toContain(
-      "Promoted OpenClawCompanion asset names do not exactly match the current contract",
+      "Promoted CarapaceCompanion asset names do not exactly match the current contract",
     );
     expect(windowsWorkflow).toContain(
       "$targetRelease = gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --json assets",
@@ -11242,7 +11242,7 @@ promote_windows_release_assets
       "android-release-approval-${{ inputs.release_publish_run_id }}",
     );
     expect(androidWorkflow).toContain(
-      '--signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/openclaw-release-publish.yml"',
+      '--signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/carapace-release-publish.yml"',
     );
     expect(androidWorkflow).toContain('--source-ref "${EXPECTED_WORKFLOW_FULL_REF}"');
     expect(androidWorkflow).toContain('--source-digest "${EXPECTED_WORKFLOW_SHA}"');
@@ -11250,8 +11250,8 @@ promote_windows_release_assets
       "Attested Android release approval does not match this run request.",
     );
     expect(androidWorkflow).toContain('--artifact", "third-party');
-    expect(androidWorkflow).toContain("OpenClaw-Android.apk");
-    expect(androidWorkflow).toContain("OpenClaw-Android-SHA256SUMS.txt");
+    expect(androidWorkflow).toContain("Carapace-Android.apk");
+    expect(androidWorkflow).toContain("Carapace-Android-SHA256SUMS.txt");
     expect(androidWorkflow).toContain("actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6");
     expect(androidWorkflow).toContain("--signer-workflow");
     expect(androidWorkflow).toContain('--source-ref "refs/tags/${RELEASE_TAG}"');
@@ -11268,7 +11268,7 @@ promote_windows_release_assets
     expect(androidWorkflow).toContain('--source-digest "${FALLBACK_ANDROID_BASE_SHA}"');
     expect(androidWorkflow).toContain("steps.release_source.outputs.fallback_base_tag == ''");
     expect(androidWorkflow).toContain(
-      "OPENCLAW_BUILD_TIMESTAMP: ${{ steps.release_approval.outputs.build_timestamp }}",
+      "CARAPACE_BUILD_TIMESTAMP: ${{ steps.release_approval.outputs.build_timestamp }}",
     );
     expect(androidWorkflow).toContain("GIT_COMMIT: ${{ inputs.release_target_sha }}");
     expect(approvalScript).toContain("tagName,isPrerelease,createdAt");
@@ -11283,7 +11283,7 @@ promote_windows_release_assets
 
     expect(releaseWorkflow).toContain("promote_android_release_asset()");
     expect(releaseWorkflow).toContain("is_android_release()");
-    expect(androidWorkflow).toContain("requires a final or correction OpenClaw release tag");
+    expect(androidWorkflow).toContain("requires a final or correction Carapace release tag");
     expect(androidWorkflow).toContain("previous_version_code");
     expect(androidWorkflow).toContain("must exceed ${previous_tag} versionCode");
     expect(androidWorkflow).toContain("standalone channel bootstrap");
@@ -11297,9 +11297,9 @@ promote_windows_release_assets
 
     expect(releaseWorkflow).toContain("finalize_github_release:");
 
-    expect(androidDocs).toContain("github.com/openclaw/openclaw/releases");
-    expect(androidDocs).not.toContain("releases/latest/download/OpenClaw-Android.apk");
-    expect(androidDocs).toContain("gh attestation verify OpenClaw-Android.apk");
+    expect(androidDocs).toContain("github.com/Exaggarate/carapace/releases");
+    expect(androidDocs).not.toContain("releases/latest/download/Carapace-Android.apk");
+    expect(androidDocs).toContain("gh attestation verify Carapace-Android.apk");
     expect(androidDocs).toContain('--source-ref "refs/tags/${release_tag}"');
     expect(releaseDocs).toContain("signed standalone Android APK");
   });
@@ -11324,7 +11324,7 @@ promote_windows_release_assets
       "if ($stableRelease -and $sourceRelease.isPrerelease)",
     );
     const rejectUnexpectedTargetAssetsIndex = windowsWorkflow.indexOf(
-      "Target OpenClaw release contains unexpected OpenClawCompanion assets before upload",
+      "Target Carapace release contains unexpected CarapaceCompanion assets before upload",
     );
     const uploadAssetsIndex = windowsWorkflow.indexOf("gh release upload $env:RELEASE_TAG");
 
@@ -11350,9 +11350,9 @@ promote_windows_release_assets
         "${{ inputs.release_publish_branch || github.ref_name }}",
       ],
       [
-        OPENCLAW_NPM_RELEASE_WORKFLOW,
+        CARAPACE_NPM_RELEASE_WORKFLOW,
         "validate_publish_request",
-        "publish_openclaw_npm",
+        "publish_carapace_npm",
         "${{ inputs.release_publish_branch || github.ref_name }}",
       ],
       [
@@ -11377,7 +11377,7 @@ promote_windows_release_assets
       ]);
     }
 
-    for (const workflowPath of [PLUGIN_NPM_RELEASE_WORKFLOW, OPENCLAW_NPM_RELEASE_WORKFLOW]) {
+    for (const workflowPath of [PLUGIN_NPM_RELEASE_WORKFLOW, CARAPACE_NPM_RELEASE_WORKFLOW]) {
       const authorization = workflowStep(
         workflowJob(
           workflowPath,
@@ -11401,7 +11401,7 @@ promote_windows_release_assets
 
     for (const [workflowPath, publishJobName, environment] of [
       [PLUGIN_NPM_RELEASE_WORKFLOW, "publish_plugins_npm", "npm-release"],
-      [OPENCLAW_NPM_RELEASE_WORKFLOW, "publish_openclaw_npm", "npm-release"],
+      [CARAPACE_NPM_RELEASE_WORKFLOW, "publish_carapace_npm", "npm-release"],
       [
         ".github/workflows/plugin-clawhub-new.yml",
         "publish_bootstrap_plugins",
@@ -11550,7 +11550,7 @@ promote_windows_release_assets
       "approve_plugins_clawhub_release",
     ]);
     expect(clawHubPublish.uses).toBe(
-      "openclaw/clawhub/.github/workflows/package-publish.yml@d5a3688fb21a283460f362e57028601801961c85",
+      "carapace/clawhub/.github/workflows/package-publish.yml@d5a3688fb21a283460f362e57028601801961c85",
     );
     expect(clawHubPublish.permissions).toMatchObject({
       actions: "read",
@@ -11623,11 +11623,11 @@ promote_windows_release_assets
     );
 
     expect(postpublishEvidence.if).toContain("always()");
-    expect(postpublishEvidence.if).toContain("inputs.publish_openclaw_npm");
+    expect(postpublishEvidence.if).toContain("inputs.publish_carapace_npm");
     expect(postpublishEvidence.with).toMatchObject({
       "if-no-files-found": "error",
-      name: "openclaw-release-postpublish-evidence-${{ inputs.tag }}",
-      path: "${{ runner.temp }}/openclaw-release-postpublish-evidence",
+      name: "carapace-release-postpublish-evidence-${{ inputs.tag }}",
+      path: "${{ runner.temp }}/carapace-release-postpublish-evidence",
     });
     expect(postpublishEvidence.uses).toBe(UPLOAD_ARTIFACT_V7);
 
@@ -11656,7 +11656,7 @@ promote_windows_release_assets
       releasePublishOrchestration(workflowJob(RELEASE_PUBLISH_WORKFLOW, "publish")).run ?? "";
     const resolvePublishState = shellFunctionSource(
       publishRun,
-      "resolve_openclaw_npm_publish_state",
+      "resolve_carapace_npm_publish_state",
     );
     const registryDownload = resolvePublishState.match(
       /curl -fsSL[\s\S]*?"\$\{published_tarball_url\}"/u,
@@ -11684,7 +11684,7 @@ promote_windows_release_assets
         "-c",
         `
 set -uo pipefail
-GITHUB_REPOSITORY=openclaw/openclaw
+GITHUB_REPOSITORY=carapace/carapace
 gh() {
   if [[ "$1" == "run" && "$2" == "view" ]]; then
     printf '%s\\n' '{"headSha":"${expectedSha}","url":"https://example.invalid/run/123"}'
@@ -11716,7 +11716,7 @@ approve_pending_deployments plugin-clawhub-new.yml 123 "${expectedSha}" || statu
         "-c",
         `
 set -uo pipefail
-GITHUB_REPOSITORY=openclaw/openclaw
+GITHUB_REPOSITORY=carapace/carapace
 GITHUB_STEP_SUMMARY=/dev/null
 gh() {
   if [[ "$1" == "run" && "$2" == "view" ]]; then
@@ -11747,7 +11747,7 @@ approve_child_publish_environment plugin-clawhub-new.yml 123 "${expectedSha}" ||
         "-c",
         `
 set -uo pipefail
-GITHUB_REPOSITORY=openclaw/openclaw
+GITHUB_REPOSITORY=carapace/carapace
 gh() {
   if [[ "$1" == "run" && "$2" == "view" ]]; then
     printf '%s\\n' '{"headSha":"${"b".repeat(40)}","url":"https://example.invalid/run/123"}'
@@ -11783,9 +11783,9 @@ wait_for_run plugin-clawhub-new.yml 123 "${expectedSha}" || status=$?
       CROSS_OS_RELEASE_CHECKS_REUSABLE_WORKFLOW,
       LIVE_E2E_WORKFLOW,
       NPM_TELEGRAM_WORKFLOW,
-      ".github/workflows/openclaw-release-publish.yml",
+      ".github/workflows/carapace-release-publish.yml",
       ".github/workflows/android-release.yml",
-      ".github/workflows/openclaw-npm-release.yml",
+      ".github/workflows/carapace-npm-release.yml",
       ".github/workflows/macos-release.yml",
       ".github/workflows/plugin-clawhub-release.yml",
       PACKAGE_ACCEPTANCE_WORKFLOW,
@@ -12164,7 +12164,7 @@ wait_for_run plugin-clawhub-new.yml 123 "${expectedSha}" || status=$?
     expect(performancePublishPath.reduce((total, timeout) => total + timeout, 0)).toBe(280);
     const performanceParent = workflowJob(FULL_RELEASE_VALIDATION_WORKFLOW, "performance");
     expect(performanceParent["timeout-minutes"]).toBe(15);
-    expect(workflowStep(performanceParent, "Dispatch OpenClaw Performance").run).toContain(
+    expect(workflowStep(performanceParent, "Dispatch Carapace Performance").run).toContain(
       "-f publish_reports=false",
     );
     for (const [pathName, path] of [
@@ -12256,8 +12256,8 @@ wait_for_run plugin-clawhub-new.yml 123 "${expectedSha}" || status=$?
   });
 
   it("pins every documented raw Full Release Validation caller to one exact SHA", () => {
-    const nightly = readFileSync(".agents/skills/release-openclaw-nightly/SKILL.md", "utf8");
-    const releaseCi = readFileSync(".agents/skills/release-openclaw-ci/SKILL.md", "utf8");
+    const nightly = readFileSync(".agents/skills/release-carapace-nightly/SKILL.md", "utf8");
+    const releaseCi = readFileSync(".agents/skills/release-carapace-ci/SKILL.md", "utf8");
     // The CI page is an index over docs/ci/*. Read the whole set so this
     // assertion follows the content instead of a single file path.
     const ciDocs = [
@@ -12298,7 +12298,7 @@ wait_for_run plugin-clawhub-new.yml 123 "${expectedSha}" || status=$?
       packageArtifactDigest: "b".repeat(64),
       packageArtifactRunId: "456",
       packageArtifactRunAttempt: "1",
-      packageFileName: "openclaw-current.tgz",
+      packageFileName: "carapace-current.tgz",
       packageSourceSha: selectedSha,
       packageSha256: "c".repeat(64),
       packageVersion: "2026.7.2",
@@ -12341,7 +12341,7 @@ esac
     const validationEnv = {
       ...process.env,
       GH_TOKEN: "test-token",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       PATH: `${binDir}:${process.env.PATH ?? ""}`,
       SELECTED_SHA: selectedSha,
     };
@@ -12452,7 +12452,7 @@ esac
       [PLUGIN_NPM_RELEASE_WORKFLOW, "preview_plugins_npm", "Checkout"],
       [PLUGIN_CLAWHUB_RELEASE_WORKFLOW, "preview_plugins_clawhub", "Checkout"],
       [
-        ".github/workflows/openclaw-cross-os-release-checks-reusable.yml",
+        ".github/workflows/carapace-cross-os-release-checks-reusable.yml",
         "prepare",
         "Checkout public source ref",
       ],
@@ -12469,12 +12469,12 @@ esac
     }
 
     const scopedHistoryCheckouts: Array<[string, string, string]> = [
-      [OPENCLAW_NPM_RELEASE_WORKFLOW, "validate_publish_request", "Checkout"],
+      [CARAPACE_NPM_RELEASE_WORKFLOW, "validate_publish_request", "Checkout"],
       [RELEASE_PUBLISH_WORKFLOW, "resolve_release_target", "Checkout release tag"],
-      [OPENCLAW_NPM_PREFLIGHT_WORKFLOW, "check_openclaw_npm", "Checkout"],
-      [OPENCLAW_NPM_PREFLIGHT_WORKFLOW, "prepare_openclaw_npm", "Checkout"],
-      [OPENCLAW_NPM_PREFLIGHT_WORKFLOW, "verify_openclaw_npm", "Checkout"],
-      [OPENCLAW_NPM_PREFLIGHT_WORKFLOW, "check_sdk_npm", "Checkout trusted Plugin SDK API tooling"],
+      [CARAPACE_NPM_PREFLIGHT_WORKFLOW, "check_carapace_npm", "Checkout"],
+      [CARAPACE_NPM_PREFLIGHT_WORKFLOW, "prepare_carapace_npm", "Checkout"],
+      [CARAPACE_NPM_PREFLIGHT_WORKFLOW, "verify_carapace_npm", "Checkout"],
+      [CARAPACE_NPM_PREFLIGHT_WORKFLOW, "check_sdk_npm", "Checkout trusted Plugin SDK API tooling"],
     ];
     for (const [workflowPath, jobName, stepName] of scopedHistoryCheckouts) {
       expect(
@@ -12531,13 +12531,13 @@ esac
 
     expect(stepNames).not.toContain("Ensure matching GitHub release exists");
     expect(macosRelease.jobs?.validate_macos_release_request).toBeDefined();
-    expect(buildControlUi?.env?.OPENCLAW_CONTROL_UI_RELEASE_BUILD).toBe("1");
+    expect(buildControlUi?.env?.CARAPACE_CONTROL_UI_RELEASE_BUILD).toBe("1");
   });
 
   it("classifies fast pretag Control UI output as a release artifact", () => {
     const script = readFileSync("scripts/release-fast-pretag-check.sh", "utf8");
 
-    expect(script).toContain("OPENCLAW_CONTROL_UI_RELEASE_BUILD=1 pnpm ui:build");
+    expect(script).toContain("CARAPACE_CONTROL_UI_RELEASE_BUILD=1 pnpm ui:build");
   });
 
   it("keeps every tracked repository skill visible to Git-aware syncs", () => {

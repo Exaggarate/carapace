@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
-import type { ProgressCard } from "@openclaw/gateway-protocol";
-import { expectDefined } from "@openclaw/normalization-core";
+import type { ProgressCard } from "@carapace/gateway-protocol";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import type { GatewayBrowserClient, GatewayEventFrame } from "../../api/gateway.ts";

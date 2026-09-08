@@ -413,7 +413,7 @@ describe("sessions lifecycle commands", () => {
         archived: [],
         worktreePreserved: {
           id: "wt-1",
-          branch: "openclaw/active",
+          branch: "carapace/active",
           path: "/worktree",
           reason: "cleanup-failed",
         },
@@ -543,7 +543,7 @@ describe("sessions lifecycle commands", () => {
             key: "agent:main:missing",
             ok: false,
             status: "not_found",
-            error: expect.stringContaining("openclaw sessions list --json"),
+            error: expect.stringContaining("carapace sessions list --json"),
           },
           {
             key: "agent:main:last",

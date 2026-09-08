@@ -2,8 +2,8 @@
  * Resolves public avatar sources for configured agent identities.
  */
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
   hasAvatarUriScheme,
@@ -33,7 +33,7 @@ type AgentAvatarPublicSourceInput = {
 const PUBLIC_AVATAR_SOURCE_MAX_CHARS = 256;
 const PUBLIC_DATA_AVATAR_HEADER_MAX_CHARS = 64;
 
-function resolveAvatarSource(cfg: OpenClawConfig, agentId: string): string | null {
+function resolveAvatarSource(cfg: CarapaceConfig, agentId: string): string | null {
   const normalizedAgentId = normalizeAgentId(agentId);
   const fromConfig =
     normalizeOptionalString(resolveAgentIdentity(cfg, normalizedAgentId)?.avatar) ?? null;
@@ -88,7 +88,7 @@ export function resolvePublicAgentAvatarSource(
 }
 
 /** Resolve the effective avatar for an agent, including config and IDENTITY.md. */
-export function resolveAgentAvatar(cfg: OpenClawConfig, agentId: string): AgentAvatarResolution {
+export function resolveAgentAvatar(cfg: CarapaceConfig, agentId: string): AgentAvatarResolution {
   const source = resolveAvatarSource(cfg, agentId);
   if (!source) {
     return { kind: "none", reason: "missing" };

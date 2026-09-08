@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw QA synthetic channel plugin."
+summary: "Carapace QA synthetic channel plugin."
 read_when:
   - You are installing, configuring, or auditing the qa-channel plugin
 title: "QA Channel plugin reference"
@@ -7,14 +7,14 @@ title: "QA Channel plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw QA synthetic channel plugin.
+Carapace QA synthetic channel plugin.
 
 ## Distribution
 
-- Package: `@openclaw/qa-channel`
+- Package: `@carapace/qa-channel`
 - Install route: source checkout only
 
 ## Surface

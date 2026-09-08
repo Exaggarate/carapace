@@ -9,7 +9,7 @@ import { renderLazyViewError } from "../components/lazy-view-error.ts";
 import { renderLoadingState } from "../components/loading-state.ts";
 import { McpAppUnmountGate } from "../components/mcp-app-unmount.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import {
   RouterOutletController,
   selectRenderedRouteMatch,
@@ -51,7 +51,7 @@ function measureRoutedRender<T>(routeId: string, render: () => T): T {
   const result = render();
   const durationMs = Math.round((globalThis.performance?.now() ?? startedAt) - startedAt);
   if (durationMs >= 16) {
-    console.debug("[openclaw] routed render", { routeId, durationMs });
+    console.debug("[carapace] routed render", { routeId, durationMs });
   }
   return result;
 }
@@ -218,7 +218,7 @@ class LitRouterOutletController<
 }
 
 /** Presentation can retire immediately while its connected subtree finishes MCP teardown. */
-class OpenClawRoutePresentation extends OpenClawLightDomElement {
+class CarapaceRoutePresentation extends CarapaceLightDomElement {
   @property({ attribute: false }) ownerKey = "";
   @property({ attribute: false }) renderPage: (presented: boolean) => unknown = () => nothing;
   private presentedValue = false;
@@ -241,12 +241,12 @@ class OpenClawRoutePresentation extends OpenClawLightDomElement {
   }
 }
 
-class OpenClawRouterOutlet<
+class CarapaceRouterOutlet<
   TRouteId extends string = string,
   TLoadContext = unknown,
   TModule = unknown,
   TData = unknown,
-> extends OpenClawLightDomElement {
+> extends CarapaceLightDomElement {
   @property({ attribute: false }) router?: Router<TRouteId, TLoadContext, TModule, TData>;
   @property({ attribute: false }) retryContext?: TLoadContext;
   @property({ attribute: false }) onNotFound?: () => boolean | void;
@@ -259,7 +259,7 @@ class OpenClawRouterOutlet<
   @property({ attribute: false }) retentionScope?: object;
   private readonly retainedUnmountGate = new McpAppUnmountGate(this);
   private readonly transientUnmountGate = new McpAppUnmountGate(this);
-  private readonly retainedPresentation = createRef<OpenClawRoutePresentation>();
+  private readonly retainedPresentation = createRef<CarapaceRoutePresentation>();
   private retainedMatch?: RouteMatch<TRouteId, TModule, TData>;
   private retainedOwnerKey?: string;
   private retainedPresented = false;
@@ -382,7 +382,7 @@ class OpenClawRouterOutlet<
           retained
             ? keyed(
                 retainedKey,
-                html`<openclaw-route-presentation
+                html`<carapace-route-presentation
                   ${ref(this.retainedPresentation)}
                   .ownerKey=${retainedKey}
                   .presented=${presentRetained}
@@ -391,7 +391,7 @@ class OpenClawRouterOutlet<
                       retryContext: this.retryContext,
                       presented,
                     })}
-                ></openclaw-route-presentation>`,
+                ></carapace-route-presentation>`,
               )
             : nothing,
         () => (this.retainedPresentation.value ? [this.retainedPresentation.value] : []),
@@ -423,10 +423,10 @@ class OpenClawRouterOutlet<
   }
 }
 
-if (!customElements.get("openclaw-route-presentation")) {
-  customElements.define("openclaw-route-presentation", OpenClawRoutePresentation);
+if (!customElements.get("carapace-route-presentation")) {
+  customElements.define("carapace-route-presentation", CarapaceRoutePresentation);
 }
 
-if (!customElements.get("openclaw-router-outlet")) {
-  customElements.define("openclaw-router-outlet", OpenClawRouterOutlet);
+if (!customElements.get("carapace-router-outlet")) {
+  customElements.define("carapace-router-outlet", CarapaceRouterOutlet);
 }

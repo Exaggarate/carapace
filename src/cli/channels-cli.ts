@@ -165,18 +165,18 @@ export async function registerChannelsCli(
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw channels list", "List configured channels."],
-          ["openclaw channels list --all", "Show configured, bundled, and installable channels."],
-          ["openclaw channels add", "Open guided channel setup."],
-          ["openclaw channels status --probe", "Run channel status checks and probes."],
+          ["carapace channels list", "List configured channels."],
+          ["carapace channels list --all", "Show configured, bundled, and installable channels."],
+          ["carapace channels add", "Open guided channel setup."],
+          ["carapace channels status --probe", "Run channel status checks and probes."],
           [
-            "openclaw channels add --channel telegram --token <token>",
+            "carapace channels add --channel telegram --token <token>",
             "Add or update a channel account non-interactively.",
           ],
-          ["openclaw channels login --channel whatsapp", "Link a WhatsApp Web account."],
+          ["carapace channels login --channel whatsapp", "Link a WhatsApp Web account."],
         ])}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/channels",
-          "docs.openclaw.ai/cli/channels",
+          "github.com/Exaggarate/carapace",
         )}\n`,
     );
 
@@ -320,12 +320,12 @@ export async function registerChannelsCli(
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw channels add", "Open guided setup for available chat channels."],
+          ["carapace channels add", "Open guided setup for available chat channels."],
           [
-            "openclaw channels add --channel telegram --token <token>",
+            "carapace channels add --channel telegram --token <token>",
             "Add or update Telegram non-interactively.",
           ],
-          ["openclaw channels list --all", "Find channel ids before using --channel."],
+          ["carapace channels list --all", "Find channel ids before using --channel."],
         ])}\n`,
     )
     .option("--channel <name>", `Channel (${channelNames})`)

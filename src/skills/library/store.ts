@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import type { SelectQueryBuilder } from "kysely";
 import type { SkillLibraryEntry } from "../../../packages/gateway-protocol/src/schema/skill-library.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { authorizeOperatorScopesForRequiredScope } from "../../gateway/method-scopes.js";
 import { resolveOperatorRolePolicyForAssignment } from "../../gateway/operator-role-policy.js";
 import {
@@ -10,15 +10,15 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
-import type { DB as StateDatabase } from "../../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
+import type { DB as StateDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../../state/openclaw-state-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../../state/carapace-state-schema.js";
 import {
   selectResolvedUserProfile,
   selectResolvedUserProfileById,
@@ -32,7 +32,7 @@ export type SkillLibraryAuthority = {
   profileId?: string;
   namespace?: "personal";
   scopes: readonly string[];
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   /** Must revalidate the admitted run/placement and request owner, synchronously at commit. */
   assertCurrent: () => void;
 };
@@ -48,21 +48,21 @@ export type SkillLibraryDatabase = Pick<
 export const skillLibraryDb = (db: DatabaseSync) => getNodeSqliteKysely<SkillLibraryDatabase>(db);
 const ensured = new WeakSet<DatabaseSync>();
 
-export function ensureSkillLibrarySchema(options: OpenClawStateDatabaseOptions): void {
-  const { db } = openOpenClawStateDatabase(options);
+export function ensureSkillLibrarySchema(options: CarapaceStateDatabaseOptions): void {
+  const { db } = openCarapaceStateDatabase(options);
   if (ensured.has(db)) {
     return;
   }
-  const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf(
+  const start = CARAPACE_STATE_SCHEMA_SQL.indexOf(
     "CREATE TABLE IF NOT EXISTS skill_library_entries (",
   );
-  const end = OPENCLAW_STATE_SCHEMA_SQL.indexOf("-- End profile-owned skill library.", start);
+  const end = CARAPACE_STATE_SCHEMA_SQL.indexOf("-- End profile-owned skill library.", start);
   if (start < 0 || end < start) {
     throw new Error("Canonical skill library schema missing.");
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: transactionDb }) => {
-      transactionDb.exec(OPENCLAW_STATE_SCHEMA_SQL.slice(start, end)); // sqlite-allow-raw -- canonical first-use additive DDL.
+      transactionDb.exec(CARAPACE_STATE_SCHEMA_SQL.slice(start, end)); // sqlite-allow-raw -- canonical first-use additive DDL.
     },
     options,
     { operationLabel: "skills.library.schema" },
@@ -72,14 +72,14 @@ export function ensureSkillLibrarySchema(options: OpenClawStateDatabaseOptions):
 
 export function readSkillLibraryStore<T>(
   read: (db: DatabaseSync) => T,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): T | undefined {
   if (options.database) {
     return tableExists(options.database.db, "skill_library_entries")
       ? read(options.database.db)
       : undefined;
   }
-  return withExistingOpenClawStateDatabaseReadOnly(
+  return withExistingCarapaceStateDatabaseReadOnly(
     ({ db }) => (tableExists(db, "skill_library_entries") ? read(db) : undefined),
     options,
   );

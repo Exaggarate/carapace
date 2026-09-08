@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { CURRENT_SESSION_VERSION } from "openclaw/plugin-sdk/agent-sessions";
+import { CURRENT_SESSION_VERSION } from "carapace/plugin-sdk/agent-sessions";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import {
@@ -24,10 +24,10 @@ afterEach(async () => {
 describe("session-compaction-checkpoints", () => {
   test("preserves the full checkpoint row when its admitted owner closes during snapshot sizing", async () => {
     const dir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-owner-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-checkpoint-owner-")),
     );
     tempDirs.push(dir);
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "carapace-agent.sqlite");
     const sessionId = "checkpoint-owned-session";
     const sessionKey = MAIN_SESSION_KEY;
     const runId = `checkpoint-${path.basename(dir)}`;
@@ -124,7 +124,7 @@ describe("session-compaction-checkpoints", () => {
 
   test("persists global checkpoints only in the explicit agent's custom-store partition", async () => {
     const dir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-global-owner-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-checkpoint-global-owner-")),
     );
     tempDirs.push(dir);
     const storePath = path.join(dir, "shared-sessions.json");

@@ -12,7 +12,7 @@ import { preparedModelRuntimeConfigsMatch } from "../../agents/prepared-model-ru
 import { resolveAgentModelPrimaryValue } from "../../config/model-input.js";
 import { resolveSessionWorkStartError } from "../../config/sessions/lifecycle.js";
 import type { AgentDefaultsConfig } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveCreatorSandbox } from "../../gateway/operator-role-policy.js";
 import type { SourceDeliveryPlan } from "../../infra/outbound/source-delivery-plan.js";
 import { isCronSessionKey, parseAgentSessionKey } from "../../routing/session-key.js";
@@ -96,7 +96,7 @@ import { loadCronSessionEntryLatest, resolveCronSession } from "./session.js";
 
 export type PreparedCronRunContext = {
   input: RunCronAgentTurnParams;
-  cfgWithAgentDefaults: OpenClawConfig;
+  cfgWithAgentDefaults: CarapaceConfig;
   agentId: string;
   agentCfg: AgentDefaultsConfig;
   agentDir: string;

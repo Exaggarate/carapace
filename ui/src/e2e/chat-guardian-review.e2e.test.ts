@@ -11,7 +11,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI Guardian strict review mocked Gateway E2E",
   trackBrowserContexts: true,
 });
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureProof) {

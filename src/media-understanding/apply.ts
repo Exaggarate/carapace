@@ -1,6 +1,6 @@
 // Applies media-understanding outputs to inbound message context, including
 // attachment normalization, provider execution, file text extraction, and echoing.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import pMap from "p-map";
 import type { ActiveMediaModel } from "../../packages/media-understanding-common/src/active-model.js";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../packages/media-understanding-common/src/format.js";
 import { finalizeInboundContext } from "../auto-reply/reply/inbound-context.js";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { runMediaCapability } from "./apply-capability.js";
 import { resolveAttachmentKind } from "./attachments.js";
 import { DEFAULT_ECHO_TRANSCRIPT_FORMAT, sendTranscriptEcho } from "./echo-transcript.js";
@@ -136,7 +136,7 @@ function renderMediaAttachmentMarkers(params: {
 
 export async function applyMediaUnderstanding(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -217,7 +217,7 @@ export async function applyMediaUnderstanding(params: {
             kind: "audio.transcription",
             attachmentIndex: attachment.attachmentIndex,
             text: EMPTY_VOICE_NOTE_PLACEHOLDER,
-            provider: "openclaw",
+            provider: "carapace",
             model: "synthetic-empty-audio",
           });
         }

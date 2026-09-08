@@ -6,8 +6,8 @@
  * routing from drifting apart. Kept separate from the dispatch module so
  * the plugin runtime surface does not eagerly load the run machinery.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveRuntimeCliBackends } from "../../plugins/cli-backends.runtime.js";
 import {
   ensureAuthProfileStore,
@@ -22,7 +22,7 @@ type EmbeddedCliBackendDispatchEligibilityParams = {
   agentId?: string;
   /** Explicitly pinned auth profile for the run; decisive when it resolves. */
   authProfileId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
 };
@@ -78,7 +78,7 @@ export function resolveEmbeddedCliBackendDispatchEligibility(
 function resolveAuthModeSafe(
   params: {
     authProfileId?: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentDir?: string;
     workspaceDir?: string;
   },

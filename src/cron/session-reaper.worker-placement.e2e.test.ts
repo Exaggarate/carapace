@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { resolveDefaultSessionStorePath } from "../config/sessions/paths.js";
 import { loadExactSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { callGateway } from "../gateway/call.runtime.js";
 import {
   createGatewayConfigPath,
@@ -16,8 +16,8 @@ import {
 import { startGatewayServer } from "../gateway/server.js";
 import type { SessionsListResult } from "../gateway/session-utils.types.js";
 import { getGatewayE2ePortBlock } from "../gateway/test-helpers.e2e.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import type { CronRunLogEntry } from "./run-log-types.js";
 import type { CronJob } from "./types.js";
@@ -71,9 +71,9 @@ describe("scheduled cron session retirement through the Gateway", () => {
 
   beforeAll(async () => {
     resetGatewayTestState();
-    setup = await setupGatewayTempHome({ prefix: "openclaw-scheduled-cron-retirement-" });
-    deleteTestEnvValue("OPENCLAW_SKIP_CRON");
-    deleteTestEnvValue("OPENCLAW_SKIP_PROVIDERS");
+    setup = await setupGatewayTempHome({ prefix: "carapace-scheduled-cron-retirement-" });
+    deleteTestEnvValue("CARAPACE_SKIP_CRON");
+    deleteTestEnvValue("CARAPACE_SKIP_PROVIDERS");
     control = path.join(setup.tempHome, "control");
     const plugin = path.join(setup.tempHome, "cron-fixture-plugin");
     await fs.mkdir(control);
@@ -83,14 +83,14 @@ describe("scheduled cron session retirement through the Gateway", () => {
     await fs.writeFile(
       path.join(plugin, "package.json"),
       JSON.stringify({
-        name: "openclaw-cron-retirement-fixture",
+        name: "carapace-cron-retirement-fixture",
         version: "1.0.0",
         type: "module",
-        openclaw: { extensions: ["./index.mjs"] },
+        carapace: { extensions: ["./index.mjs"] },
       }),
     );
     await fs.writeFile(
-      path.join(plugin, "openclaw.plugin.json"),
+      path.join(plugin, "carapace.plugin.json"),
       JSON.stringify({
         id: "cron-fixture-cli",
         name: "Cron retirement fixture",
@@ -117,7 +117,7 @@ describe("scheduled cron session retirement through the Gateway", () => {
     const port = await getGatewayE2ePortBlock();
     const token = "synthetic-cron-retirement-token";
     const configPath = await createGatewayConfigPath(setup.tempHome);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: {
         mode: "local",
         port,
@@ -142,10 +142,10 @@ describe("scheduled cron session retirement through the Gateway", () => {
       cron: { enabled: true },
     };
     await fs.writeFile(configPath, JSON.stringify(config));
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-    setTestEnvValue("OPENCLAW_GATEWAY_PORT", String(port));
-    setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
-    stateDatabasePath = path.join(setup.tempHome, ".openclaw", "state", "openclaw.sqlite");
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+    setTestEnvValue("CARAPACE_GATEWAY_PORT", String(port));
+    setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
+    stateDatabasePath = path.join(setup.tempHome, ".carapace", "state", "carapace.sqlite");
     sessionStorePath = resolveDefaultSessionStorePath("main");
     server = await startGatewayServer(port, { controlUiEnabled: false });
   }, 120_000);
@@ -159,8 +159,8 @@ describe("scheduled cron session retirement through the Gateway", () => {
       }
       await server?.close({ reason: "scheduled cron retirement tests complete" });
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       resetGatewayTestState();
       if (setup) {
         try {

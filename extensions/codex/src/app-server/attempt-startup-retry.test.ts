@@ -8,7 +8,7 @@ import {
   embeddedAgentLog,
   type CodexBundleMcpThreadConfig,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { startCodexAttemptThread } from "./attempt-startup.js";
 import { CodexAppServerClient, isCodexAppServerConnectionClosedError } from "./client.js";
@@ -54,7 +54,7 @@ async function createStartupFailureFixture(
     | "registration-race"
     | "refusal",
 ) {
-  const root = path.join(os.tmpdir(), `openclaw-codex-startup-retry-${randomUUID()}`);
+  const root = path.join(os.tmpdir(), `carapace-codex-startup-retry-${randomUUID()}`);
   tempRoots.add(root);
   const fixturePath = path.join(root, "startup-failure.mjs");
   const spawnCountPath = path.join(root, "spawn-count");
@@ -98,7 +98,7 @@ async function createStartupFailureFixture(
       "      return;",
       "    }",
       '    const result = message.method === "initialize"',
-      '      ? { userAgent: `openclaw/${mode === "unsupported" ? "0.1.0" : "0.149.0"} (macOS; test)` }',
+      '      ? { userAgent: `carapace/${mode === "unsupported" ? "0.1.0" : "0.149.0"} (macOS; test)` }',
       '      : message.method === "config/read"',
       "        ? { config: {}, origins: {}, layers: [] }",
       '        : message.method === "configRequirements/read"',
@@ -192,7 +192,7 @@ describe("Codex app-server startup retry", () => {
   beforeEach(async () => {
     const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "codex-startup-state-"));
     tempRoots.add(stateDir);
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     vi.stubEnv("CODEX_API_KEY", "");
     vi.stubEnv("OPENAI_API_KEY", "");
     await clearSharedCodexAppServerClientAndWait();
@@ -356,7 +356,7 @@ describe("Codex app-server startup retry", () => {
       for (const failure of ["snapshot", "command", "commit"] as const) {
         const fixture = await createStartupFailureFixture("refusal");
         const { createPluginStateSyncKeyedStore } =
-          await import("openclaw/plugin-sdk/plugin-state-store-runtime");
+          await import("carapace/plugin-sdk/plugin-state-store-runtime");
         const store = createPluginStateSyncKeyedStore("codex", {
           namespace: "app-server-processes",
           maxEntries: 512,

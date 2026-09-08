@@ -1,13 +1,13 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
 import { connectUserModelAccount } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { AuthStorage, ModelRegistry } from "../sessions/index.js";
 import { resolveTieredModel } from "./model-resolution.js";
 import { guardModelFixtureAuth } from "./model.fixture.test-support.js";
@@ -18,10 +18,10 @@ import {
 } from "./model.generation-scope.test-support.js";
 import { resolveModelAsync } from "./model.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let auth: ReturnType<typeof guardModelFixtureAuth>;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "model-generation" });
+  state = await createCarapaceTestState({ label: "model-generation" });
   auth = guardModelFixtureAuth(state.root);
 });
 afterEach(async () => {
@@ -197,7 +197,7 @@ describe("model runtime generation scope", () => {
   });
 
   it("keeps alias, suppression, static metadata, and runtime hooks on the prepared generation", async () => {
-    const config = {} satisfies OpenClawConfig;
+    const config = {} satisfies CarapaceConfig;
     const generationA = createModelGenerationFixture({
       agentDir: state.agentDir(),
       workspaceDir: state.workspaceDir,
@@ -253,7 +253,7 @@ describe("model runtime generation scope", () => {
     const result = await resolveGeneration(generation);
 
     expect(result.model).toBeUndefined();
-    expect(result.error).toContain("openclaw doctor --fix");
+    expect(result.error).toContain("carapace doctor --fix");
     expect(result.error).toContain("current-model");
   });
 
@@ -284,12 +284,12 @@ describe("model runtime generation scope", () => {
     });
 
     expect(resolution.model).toBeUndefined();
-    expect(resolution.error).toContain("openclaw doctor --fix");
+    expect(resolution.error).toContain("carapace doctor --fix");
     expect(resolution.error).toContain("current-model");
   });
 
   it("keeps concurrent prepared generations isolated across awaited runtime hooks", async () => {
-    const config = {} satisfies OpenClawConfig;
+    const config = {} satisfies CarapaceConfig;
     let arrivals = 0;
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
@@ -340,7 +340,7 @@ describe("model runtime generation scope", () => {
   });
 
   it("keeps metadata-only prepared generations from borrowing current runtime hooks", async () => {
-    const config = {} satisfies OpenClawConfig;
+    const config = {} satisfies CarapaceConfig;
     const generationA = createModelGenerationFixture({
       agentDir: state.agentDir(),
       workspaceDir: state.workspaceDir,

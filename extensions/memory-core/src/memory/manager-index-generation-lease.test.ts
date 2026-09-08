@@ -105,7 +105,7 @@ async function stopChild(child: ChildProcessWithoutNullStreams): Promise<void> {
 let fixtureRoot = "";
 
 beforeEach(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-generation-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-generation-"));
 });
 
 afterEach(async () => {

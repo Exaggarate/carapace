@@ -2,7 +2,7 @@ import type { SessionToolOverrides } from "../config/sessions/types.js";
 /**
  * Shared types for projecting bundle MCP config into Codex app-server threads.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { BundleMcpDiagnostic } from "../plugins/bundle-mcp.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 
@@ -29,7 +29,7 @@ export type LoadCodexBundleMcpThreadConfigParams = {
   agentId?: string;
   /** Read-only initialization cannot provision data directories or requester transports. */
   preparationOnly?: true;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   toolsEnabled?: boolean;
   disableTools?: boolean;
   toolsAllow?: string[];

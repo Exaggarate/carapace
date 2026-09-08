@@ -1,5 +1,5 @@
 // Openai tests cover realtime voice provider plugin behavior.
-import type { RealtimeVoiceBridgeEvent } from "openclaw/plugin-sdk/realtime-voice";
+import type { RealtimeVoiceBridgeEvent } from "carapace/plugin-sdk/realtime-voice";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAIRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 
@@ -21,11 +21,11 @@ vi.mock("ws", () => ({
   default: mocks.FakeWebSocket,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: mocks.fetchWithSsrFGuardMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth", () => ({
   isProviderAuthProfileConfigured: mocks.isProviderAuthProfileConfiguredMock,
   resolveProviderAuthProfileApiKey: mocks.resolveProviderAuthProfileApiKeyMock,
 }));

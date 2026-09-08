@@ -1,5 +1,5 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { classifyGatewayStorageFailure } from "../../infra/sqlite-error-diagnostics.js";
 import type { AssistantMessage } from "../../llm/types.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -70,7 +70,7 @@ const TOOL_CALL_INPUT_MISSING_RE =
 const TOOL_CALL_INPUT_PATH_RE =
   /messages\.\d+\.content\.\d+\.tool_(?:use|call)\.(?:input|arguments)/i;
 type AssistantErrorTextOptions = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   sessionKey?: string;
   agentId?: string;
   provider?: string;

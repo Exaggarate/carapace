@@ -3,7 +3,7 @@ import { once } from "node:events";
 import fs from "node:fs";
 import path from "node:path";
 import type { Command } from "commander";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { sleep } from "../api.js";
 import { parseCliInteger, writeCliJson } from "./cli-command-io.js";
 import { getCallHistoryFromStore, MAX_CALL_RECORD_EVENTS } from "./manager/store.js";

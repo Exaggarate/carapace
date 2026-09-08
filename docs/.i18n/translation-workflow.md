@@ -13,9 +13,9 @@ Internal note for the docs publish pipeline. This file is under `docs/.i18n`, wh
 
 ## Event flow
 
-1. `openclaw/openclaw/.github/workflows/docs-sync-publish.yml` mirrors the OpenClaw docs tree into `openclaw/docs`, then replaces `docs/clawhub/` with the current `openclaw/clawhub/docs` input. The sync script also rewrites the publish `docs/docs.json`. The generated locale picker blocks exist there even though the source repo no longer commits them.
+1. `carapace/carapace/.github/workflows/docs-sync-publish.yml` mirrors the Carapace docs tree into `carapace/docs`, then replaces `docs/clawhub/` with the current `carapace/clawhub/docs` input. The sync script also rewrites the publish `docs/docs.json`. The generated locale picker blocks exist there even though the source repo no longer commits them.
 2. GitHub Pages deploys English/source changes immediately from the sync commit.
-3. `Translate All` (`openclaw/docs/.github/workflows/translate-all.yml`) is triggered by the sync commit, release dispatch, manual dispatch, or weekly schedule.
+3. `Translate All` (`carapace/docs/.github/workflows/translate-all.yml`) is triggered by the sync commit, release dispatch, manual dispatch, or weekly schedule.
 4. The coordinator waits a cooldown window before starting translation.
 5. After the cooldown, the coordinator reads the current `origin/main` source metadata.
 6. If a newer docs sync arrived during cooldown, the coordinator uses the newer source state.
@@ -29,9 +29,9 @@ Internal note for the docs publish pipeline. This file is under `docs/.i18n`, wh
 
 The coordinator waits 1 hour after a docs sync or release dispatch, then re-reads `origin/main`.
 
-The default cooldown is controlled by the publish repo variable `OPENCLAW_DOCS_TRANSLATION_COOLDOWN_SECONDS`, which defaults to `3600`. Repository dispatch callers may override it with `client_payload.cooldown_seconds`, and manual runs may set `cooldown_seconds`.
+The default cooldown is controlled by the publish repo variable `CARAPACE_DOCS_TRANSLATION_COOLDOWN_SECONDS`, which defaults to `3600`. Repository dispatch callers may override it with `client_payload.cooldown_seconds`, and manual runs may set `cooldown_seconds`.
 
-If `.openclaw-sync/source.json` changed during the wait, it waits again from the newer state. If `main` keeps moving, the wait is capped by `OPENCLAW_DOCS_TRANSLATION_MAX_WAIT_SECONDS`, which defaults to the cooldown value. The newest observed state is translated after the cap.
+If `.carapace-sync/source.json` changed during the wait, it waits again from the newer state. If `main` keeps moving, the wait is capped by `CARAPACE_DOCS_TRANSLATION_MAX_WAIT_SECONDS`, which defaults to the cooldown value. The newest observed state is translated after the cap.
 
 Manual and weekly runs do not wait by default.
 
@@ -67,7 +67,7 @@ payload/docs/<locale>/**
 payload/docs/.i18n/<locale>.tm.jsonl
 ```
 
-`metadata.json` includes the locale, locale slug, source SHA, pending count, changed count, and any failure reason. The finalizer rejects artifacts whose `source_sha` does not match the current `.openclaw-sync/source.json`.
+`metadata.json` includes the locale, locale slug, source SHA, pending count, changed count, and any failure reason. The finalizer rejects artifacts whose `source_sha` does not match the current `.carapace-sync/source.json`.
 
 The source repo release workflow dispatches one `translate-all-release` event. The coordinator still accepts old per-locale release events for compatibility, but those are only a fallback.
 

@@ -79,12 +79,12 @@ export function resolveSpawnCommand(
  * Reads the signal-forwarding force-kill grace period.
  */
 export function resolveForceKillDelayMs(env: NodeJS.ProcessEnv = process.env) {
-  const raw = env.OPENCLAW_RUN_WITH_ENV_FORCE_KILL_MS;
+  const raw = env.CARAPACE_RUN_WITH_ENV_FORCE_KILL_MS;
   const text = raw?.trim();
   if (!text) {
     return 5_000;
   }
-  const parsed = parsePositiveInt(text, "OPENCLAW_RUN_WITH_ENV_FORCE_KILL_MS");
+  const parsed = parsePositiveInt(text, "CARAPACE_RUN_WITH_ENV_FORCE_KILL_MS");
   return Math.min(parsed, MAX_TIMER_TIMEOUT_MS);
 }
 

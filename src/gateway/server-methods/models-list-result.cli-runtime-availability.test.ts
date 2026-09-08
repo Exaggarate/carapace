@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { testing as cliBackendsTesting } from "../../agents/cli-backends.test-support.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   clearUserProfileAuthLink,
   connectUserModelAccount,
 } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { loadDeferredCatalog } from "../server-model-catalog-auth.js";
 import {
   buildModelsListResult,
@@ -31,14 +31,14 @@ const config = {
       },
     ],
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 async function listClaudeCliModel(
   params: {
     authenticated?: boolean;
     providerApiKey?: boolean;
     pluginDisabled?: boolean;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
   } = {},
 ) {
   return await listModels({
@@ -194,7 +194,7 @@ describe("models.list CLI runtime availability", () => {
   ])(
     "uses personal $selection auth instead of native login (expired=$expired, sharedOrder=$sharedOrder, oauth=$oauth)",
     async ({ selection, expired, sharedOrder, oauth }) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", prefix: "personal-cli-model-catalog-" },
         async (state) => {
           const owner = ensureProfileForEmail("alice@example.test");
@@ -219,7 +219,7 @@ describe("models.list CLI runtime availability", () => {
           if (selection === "draft") {
             clearUserProfileAuthLink({ profileId: owner.id, provider: "anthropic" });
           }
-          const cfg: OpenClawConfig = sharedOrder
+          const cfg: CarapaceConfig = sharedOrder
             ? { ...config, auth: { order: { anthropic: ["anthropic:shared"] } } }
             : config;
           if (sharedOrder) {
@@ -308,14 +308,14 @@ describe("models.list CLI runtime availability", () => {
       available: false,
     },
   ])("uses the selected execution owner for $scenario", async (scenario) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "cli-pin-identity-" },
       async (state) => {
         const provider = scenario.provider ?? "claude-cli";
         const pinProvider = scenario.pinProvider ?? "claude-cli";
         const sharedProvider = scenario.sharedProvider ?? "claude-cli";
         const modelId = "claude-haiku-4-5";
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             defaults: { model: { primary: `${provider}/${modelId}` } },
             list: [{ id: "main", default: true }],

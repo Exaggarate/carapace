@@ -53,7 +53,7 @@ describe("requestCliNativeToolApproval", () => {
     "auto-allows and records an allowlisted native command: %s",
     async (input) => {
       const dir = makeExecApprovalsTempDir();
-      vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+      vi.stubEnv("CARAPACE_STATE_DIR", dir);
       const binary = makeExecutable(dir, "gog");
       saveExecApprovals({ version: 1, agents: { main: { allowlist: [{ pattern: binary }] } } });
       const command = input === "absolute" ? `${binary} calendar list` : input;
@@ -89,7 +89,7 @@ describe("requestCliNativeToolApproval", () => {
     "keeps the binding guard and explains allowlist misses for %s",
     async (command, reason, prompts) => {
       const dir = makeExecApprovalsTempDir();
-      vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+      vi.stubEnv("CARAPACE_STATE_DIR", dir);
       const binary = makeExecutable(dir, "gog");
       saveExecApprovals({ version: 1, agents: { main: { allowlist: [{ pattern: binary }] } } });
       mockCallGatewayTool.mockResolvedValueOnce({ id: "native-miss", decision: "deny" });
@@ -121,7 +121,7 @@ describe("requestCliNativeToolApproval", () => {
 
   it("still prompts for an allowlisted Bash command when ask is always", async () => {
     const dir = makeExecApprovalsTempDir();
-    vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+    vi.stubEnv("CARAPACE_STATE_DIR", dir);
     const binary = makeExecutable(dir, "gog");
     saveExecApprovals({ version: 1, agents: { main: { allowlist: [{ pattern: binary }] } } });
     mockCallGatewayTool.mockResolvedValueOnce({ id: "always", decision: "allow-once" });
@@ -144,7 +144,7 @@ describe("requestCliNativeToolApproval", () => {
   it("binds manual approval to the native PATH when exec prepends differ", async () => {
     const dir = makeExecApprovalsTempDir();
     const nativeDir = makeExecApprovalsTempDir();
-    vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+    vi.stubEnv("CARAPACE_STATE_DIR", dir);
     makeExecutable(dir, "gog");
     const nativeBinary = makeExecutable(nativeDir, "gog");
     saveExecApprovals({ version: 1, agents: { main: { allowlist: [] } } });
@@ -168,7 +168,7 @@ describe("requestCliNativeToolApproval", () => {
 
   it("rechecks current grants before recording an auto-allow", async () => {
     const dir = makeExecApprovalsTempDir();
-    vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+    vi.stubEnv("CARAPACE_STATE_DIR", dir);
     const binary = makeExecutable(dir, "gog");
     saveExecApprovals({ version: 1, agents: { main: { allowlist: [{ pattern: binary }] } } });
     const outcome = await requestCliNativeToolApproval({
@@ -379,7 +379,7 @@ describe("requestCliNativeToolApproval", () => {
   });
 
   it("checks Bash script drift before rejecting an unexpected allow-always", async () => {
-    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-always-drift-"));
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cli-always-drift-"));
     const script = path.join(cwd, "script.sh");
     try {
       fs.writeFileSync(script, "#!/bin/sh\necho approved\n");

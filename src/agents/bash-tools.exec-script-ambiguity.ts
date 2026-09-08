@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { splitShellArgs } from "../utils/shell-argv.js";
 import {
   extractInterpreterScriptPathsFromSegment,

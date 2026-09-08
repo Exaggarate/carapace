@@ -2,7 +2,7 @@
  * Browser CLI navigation and viewport commands.
  */
 import type { Command } from "commander";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   parseBrowserViewportDimension,
   runBrowserResizeWithOutput,

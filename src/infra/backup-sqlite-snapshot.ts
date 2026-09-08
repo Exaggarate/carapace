@@ -6,13 +6,13 @@ import type { BackupResourceInventory } from "../commands/backup-resource-invent
 import { isPathWithin } from "../commands/cleanup-utils.js";
 import { resolveGatewayLockDir } from "../config/paths.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import { assertOpenClawAgentDatabaseOwner } from "../state/openclaw-agent-db-maintenance.js";
-import { assertOpenClawStateDatabaseOwner } from "../state/openclaw-state-db-maintenance.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { assertCarapaceAgentDatabaseOwner } from "../state/carapace-agent-db-maintenance.js";
+import { assertCarapaceStateDatabaseOwner } from "../state/carapace-state-db-maintenance.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  sanitizeOpenClawGlobalStateSnapshot,
-  sanitizeOpenClawStateLeaseRows,
-} from "../state/openclaw-state-snapshot-sanitizer.js";
+  sanitizeCarapaceGlobalStateSnapshot,
+  sanitizeCarapaceStateLeaseRows,
+} from "../state/carapace-state-snapshot-sanitizer.js";
 import { isTransientSqliteBackupPath } from "./backup-volatile-filter.js";
 import { hasErrnoCode } from "./errno.js";
 import { collectErrorGraphCandidates, formatErrorMessage } from "./errors.js";
@@ -54,7 +54,7 @@ function resolveBackupAgentDatabaseOwner(
   inventory: BackupResourceInventory,
 ): string | undefined {
   const resolvedSourcePath = path.resolve(sourcePath);
-  if (path.basename(resolvedSourcePath) !== "openclaw-agent.sqlite") {
+  if (path.basename(resolvedSourcePath) !== "carapace-agent.sqlite") {
     return undefined;
   }
 
@@ -254,9 +254,9 @@ export async function createBackupSqliteSnapshotPlan(params: {
   legacyAuditDatabaseWitness?: string;
 }): Promise<{ snapshots: SqliteBackupAsset[]; discoveredSourcePaths: Set<string> }> {
   const globalStateSqlitePath = path.resolve(
-    resolveOpenClawStateSqlitePath({
+    resolveCarapaceStateSqlitePath({
       ...process.env,
-      OPENCLAW_STATE_DIR: params.inventory.stateDir,
+      CARAPACE_STATE_DIR: params.inventory.stateDir,
     }),
   );
   // Discovery finishes before snapshot creation so staged files cannot become
@@ -326,7 +326,7 @@ export async function createBackupSqliteSnapshotPlan(params: {
     }
     const canonicalSource = matchingCanonicalSources[0];
     const sourceDatabasePath = canonicalSource?.sourcePath ?? archiveSourcePath;
-    const sourcePath = path.join(params.tempDir, `openclaw-state-db-${snapshots.length}.sqlite`);
+    const sourcePath = path.join(params.tempDir, `carapace-state-db-${snapshots.length}.sqlite`);
     try {
       await createVerifiedSqliteSnapshot({
         sourcePath: sourceDatabasePath,
@@ -334,10 +334,10 @@ export async function createBackupSqliteSnapshotPlan(params: {
         requireNonEmptySource: Boolean(canonicalSource),
         validate:
           canonicalSource?.role === "global"
-            ? (database, pathname) => assertOpenClawStateDatabaseOwner(database, { pathname })
+            ? (database, pathname) => assertCarapaceStateDatabaseOwner(database, { pathname })
             : canonicalSource?.role === "agent"
               ? (database, pathname) =>
-                  assertOpenClawAgentDatabaseOwner(database, {
+                  assertCarapaceAgentDatabaseOwner(database, {
                     agentId: canonicalSource.agentId,
                     pathname,
                   })
@@ -353,11 +353,11 @@ export async function createBackupSqliteSnapshotPlan(params: {
                     "Legacy audit database rows changed during SQLite backup",
                   );
                 }
-                sanitizeOpenClawGlobalStateSnapshot(database);
+                sanitizeCarapaceGlobalStateSnapshot(database);
                 rewriteLegacyAuditBackupCheckpoints(database, params.legacyAuditSnapshots);
               }
             : canonicalSource?.role === "agent"
-              ? sanitizeOpenClawStateLeaseRows
+              ? sanitizeCarapaceStateLeaseRows
               : undefined,
       });
     } catch (error) {

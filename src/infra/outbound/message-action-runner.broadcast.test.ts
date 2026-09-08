@@ -14,7 +14,7 @@ import { runMessageAction } from "./message-action-runner.js";
 describe("broadcast send outcomes through native actions", () => {
   let tempHome: TempHomeEnv;
   beforeAll(async () => {
-    tempHome = await createTempHomeEnv("openclaw-broadcast-outcomes-");
+    tempHome = await createTempHomeEnv("carapace-broadcast-outcomes-");
   });
   afterEach(() => {
     resetPluginRuntimeStateForTest();

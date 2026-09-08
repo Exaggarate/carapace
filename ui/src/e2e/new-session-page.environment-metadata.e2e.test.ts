@@ -15,8 +15,8 @@ const suite = createNewSessionPageE2eSuite();
 const updateIssue = {
   code: "update-required",
   action: "update-and-reconnect",
-  updateCommand: "openclaw update",
-  headlessReconnectCommand: "openclaw node restart",
+  updateCommand: "carapace update",
+  headlessReconnectCommand: "carapace node restart",
 };
 
 suite.define(() => {
@@ -32,7 +32,7 @@ suite.define(() => {
           name: "Claude Sonnet 4.6",
           provider: "anthropic",
           agentRuntime: {
-            id: "openclaw",
+            id: "carapace",
             cloudPlacementSupported: true,
             devicePlacementSupported: true,
             devicePlacement: { requiredNodeCommands: [], consumesWorkerSlot: true },

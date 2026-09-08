@@ -29,8 +29,8 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 import { flushPendingSessionsChangedEvents } from "./server-methods/session-change-event.js";
 import { worktreesHandlers } from "./server-methods/worktrees.js";
 import { isSessionPermissionChangePending } from "./session-permission-change.js";
@@ -83,7 +83,7 @@ test.each([
     const release = createDeferredCore();
     const operationEntered = createDeferredCore();
     // The same capacity lease serializes real worktree create, remove, and restore operations.
-    const allocation = withOpenClawStateLease(
+    const allocation = withCarapaceStateLease(
       {
         scope: "core:managed-worktrees:create",
         key: "capacity",
@@ -505,7 +505,7 @@ test.each([
     await expect(fs.access(worktree.path)).rejects.toThrow();
     expect(getRegistryWorktree(process.env, worktree.id)).toMatchObject({
       removedAt: expect.any(Number),
-      snapshotRef: expect.stringMatching(/^refs\/openclaw\/snapshots\//),
+      snapshotRef: expect.stringMatching(/^refs\/carapace\/snapshots\//),
     });
     expect(
       (await execFileAsync("git", ["-C", workspace, "worktree", "list", "--porcelain"])).stdout,
@@ -564,7 +564,7 @@ test.each(["sessions.patch", "sessions.patchMany"] as const)(
     const databasePath = resolveSqliteTargetFromSessionStorePath(storePath, {
       agentId: "main",
     }).path;
-    const { db } = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const { db } = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     // Fail the real write after async projection, when premature cleanup has already run.
     db.exec(`
       CREATE TEMP TRIGGER reject_archive_metadata
@@ -752,7 +752,7 @@ test.each(["dashboard", "age", "count"] as const)(
     await expect(fs.access(worktree.path)).rejects.toThrow();
     expect(getRegistryWorktree(process.env, worktree.id)).toMatchObject({
       removedAt: expect.any(Number),
-      snapshotRef: expect.stringMatching(/^refs\/openclaw\/snapshots\//),
+      snapshotRef: expect.stringMatching(/^refs\/carapace\/snapshots\//),
     });
     await expect(loadSeededTranscriptEvents(fixture.transcriptScope)).resolves.toEqual(transcript);
     expect(

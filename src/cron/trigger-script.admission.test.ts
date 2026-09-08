@@ -11,7 +11,7 @@ import { resolveToolSearchConfig } from "../agents/tool-search.js";
 import { jsonResult, type AnyAgentTool } from "../agents/tools/common.js";
 import { getGatewayToolCallerIdentity } from "../agents/tools/gateway-caller-context.js";
 import { createExecutionStartedOwnerBinding } from "../audit/execution-owner-binding.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayRequestContext } from "../gateway/server-methods/types.js";
 import { createCronScriptRuntimeFixture as createCronScriptRuntime } from "./trigger-script.test-helpers.js";
 
@@ -30,7 +30,7 @@ function toolRuntime(ctx: HeadlessParams["ctx"]) {
   });
 }
 
-function prepareRuntime(config: OpenClawConfig, tool: AnyAgentTool) {
+function prepareRuntime(config: CarapaceConfig, tool: AnyAgentTool) {
   return vi.fn(async () => ({
     tools: [tool],
     context: { config, agentId: "main", sessionKey: "agent:main:cron:probe" },
@@ -51,7 +51,7 @@ describe("cron script admission", () => {
   it.each(["trigger", "payload"] as const)(
     "gives each warm %s invocation fresh authority and releases it after completion",
     async (mode) => {
-      const config: OpenClawConfig = {};
+      const config: CarapaceConfig = {};
       const admitted: AdmittedRunContext[] = [];
       const retained: HeadlessParams["ctx"][] = [];
       const started = vi.fn();
@@ -113,7 +113,7 @@ describe("cron script admission", () => {
     async (revocation) => {
       const entered = createDeferred();
       const release = createDeferred();
-      const config: OpenClawConfig = {};
+      const config: CarapaceConfig = {};
       let admitted: AdmittedRunContext | undefined;
       const controller = new AbortController();
       let gateway = {} as GatewayRequestContext;
@@ -165,7 +165,7 @@ describe("cron script admission", () => {
   );
 
   it("keeps concurrent invocations independent while sharing prepared tools", async () => {
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const entered = [createDeferred(), createDeferred()];
     const release = [createDeferred(), createDeferred()];
     const admitted: AdmittedRunContext[] = [];
@@ -217,7 +217,7 @@ describe("cron script admission", () => {
   });
 
   it("binds execution ownership to the payload admission after its condition closes", async () => {
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const admitted: AdmittedRunContext[] = [];
     const bind = vi.fn((context: AdmittedRunContext) => {
       expect(getAdmittedRunDelegatedAuthority(context)).toBeDefined();

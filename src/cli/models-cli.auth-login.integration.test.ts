@@ -9,7 +9,7 @@ import { testing as authStoreTesting } from "../agents/auth-profiles/store.test-
 import type { ProviderPlugin } from "../plugins/types.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { runRegisteredCli } from "../test-utils/command-runner.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { registerModelsCli } from "./models-cli.js";
 import { defaultRuntime } from "./models-cli.runtime.js";
 
@@ -96,7 +96,7 @@ describe("models auth login owner integration", () => {
   });
 
   it("promotes a relocated shared login through the shipped CLI command", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "models-auth-login-owner", scenario: "minimal" },
       async (state) => {
         await state.writeConfig({
@@ -128,7 +128,7 @@ describe("models auth login owner integration", () => {
   });
 
   it("reports partial success when the local order owner is busy", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "models-auth-login-order-busy", scenario: "minimal" },
       async (state) => {
         await state.writeConfig({

@@ -1,6 +1,6 @@
 import { realpath } from "node:fs/promises";
 import { join } from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
@@ -13,19 +13,19 @@ import {
 } from "./compact.hooks.harness.js";
 
 const { compactEmbeddedAgentSession } = await loadCompactHooksHarness();
-const [{ upsertSessionEntryCore }, { closeOpenClawAgentDatabasesForTest }] = await Promise.all([
+const [{ upsertSessionEntryCore }, { closeCarapaceAgentDatabasesForTest }] = await Promise.all([
   import("../../config/sessions/session-accessor.js"),
-  import("../../state/openclaw-agent-db.js"),
+  import("../../state/carapace-agent-db.js"),
 ]);
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     cleanup();
   }),
 );
 
 it("uses the admitted config and agent storage throughout queued compaction", async () => {
-  const workspaceDir = await realpath(tempDirs.make("openclaw-compaction-generation-"));
+  const workspaceDir = await realpath(tempDirs.make("carapace-compaction-generation-"));
   resetCompactHooksHarnessMocks(workspaceDir);
   const sessionTarget = {
     agentId: "main",

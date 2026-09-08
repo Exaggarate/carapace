@@ -30,7 +30,7 @@ import { handleChatDraftChange } from "./input-history.ts";
 import { scheduleChatScroll } from "./scroll.ts";
 import { buildInitialChatSubmission } from "./user-message-content.ts";
 
-const SKIP_REWIND_CONFIRM_PREFERENCE = "openclaw:skip-rewind-confirm";
+const SKIP_REWIND_CONFIRM_PREFERENCE = "carapace:skip-rewind-confirm";
 const confirmationOwners = new Set<HTMLElement>();
 
 describe("chat pane composer prefill attention", () => {
@@ -82,7 +82,7 @@ describe("chat pane composer prefill attention", () => {
 
 describe("chat pane first-turn attachment lifecycle", () => {
   it("claims the connected client's first message before attaching the pane", () => {
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
     const targetSessionKey = "agent:main:created-session";
     const client = {
       addEventListener: vi.fn(() => vi.fn()),
@@ -753,11 +753,11 @@ describe("chat pane connection lifecycle", () => {
       readonly conversationPresented: boolean;
     };
     lifecycle.render = () => null;
-    const shell = document.createElement("openclaw-app-shell");
+    const shell = document.createElement("carapace-app-shell");
     const presentations: Array<{ paneCount: number; conversationPresented: boolean }> = [];
-    shell.addEventListener("openclaw-chat-pane-lifecycle-changed", () => {
+    shell.addEventListener("carapace-chat-pane-lifecycle-changed", () => {
       presentations.push({
-        paneCount: shell.querySelectorAll("openclaw-chat-pane").length,
+        paneCount: shell.querySelectorAll("carapace-chat-pane").length,
         conversationPresented: lifecycle.conversationPresented,
       });
     });

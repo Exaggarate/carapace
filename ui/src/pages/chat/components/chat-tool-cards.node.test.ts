@@ -53,8 +53,8 @@ describe("tool-card extraction", () => {
         {
           role: "assistant",
           toolCallId: "live-origin",
-          __openclawToolStreamLive: true,
-          __openclawToolStreamResultReceived: true,
+          __carapaceToolStreamLive: true,
+          __carapaceToolStreamResultReceived: true,
           content: [
             { type: "toolcall", name, arguments: {} },
             { type: "toolresult", name, text: "ordinary output", details: browserDetails },
@@ -185,8 +185,8 @@ describe("tool-card extraction", () => {
             details,
             ...(shape === "live"
               ? {
-                  __openclawToolStreamLive: true,
-                  __openclawToolStreamResultReceived: true,
+                  __carapaceToolStreamLive: true,
+                  __carapaceToolStreamResultReceived: true,
                 }
               : {}),
             content: [
@@ -629,7 +629,7 @@ describe("tool-card extraction", () => {
         view: {
           backend: "canvas",
           id: "cv_inline",
-          url: "/__openclaw__/canvas/documents/cv_inline/index.html",
+          url: "/__carapace__/canvas/documents/cv_inline/index.html",
         },
         presentation: {
           target: "assistant_message",
@@ -645,7 +645,7 @@ describe("tool-card extraction", () => {
       surface: "assistant_message",
       render: "url",
       viewId: "cv_inline",
-      url: "/__openclaw__/canvas/documents/cv_inline/index.html",
+      url: "/__carapace__/canvas/documents/cv_inline/index.html",
       title: "Inline demo",
       preferredHeight: 420,
       sandbox: "scripts",
@@ -657,7 +657,7 @@ describe("tool-card extraction", () => {
       role: "tool",
       toolName: "browser.open",
       content: [{ type: "text", text: "Opened page" }],
-      __openclaw: { id: "msg-tool-history-1", seq: 7 },
+      __carapace: { id: "msg-tool-history-1", seq: 7 },
     });
 
     expect(card?.messageId).toBe("msg-tool-history-1");
@@ -698,7 +698,7 @@ describe("tool-card extraction", () => {
           kind: "canvas",
           view: {
             id: "cv_node_panel",
-            url: "/__openclaw__/canvas/documents/cv_node_panel/index.html",
+            url: "/__carapace__/canvas/documents/cv_node_panel/index.html",
           },
           presentation: {
             target: "node_panel",
@@ -714,7 +714,7 @@ describe("tool-card extraction", () => {
           view: {
             backend: "canvas",
             id: "cv_tool_card",
-            url: "/__openclaw__/canvas/documents/cv_tool_card/index.html",
+            url: "/__carapace__/canvas/documents/cv_tool_card/index.html",
           },
           presentation: {
             target: "tool_card",
@@ -772,16 +772,16 @@ describe("tool-card canvas URLs", () => {
   it("accepts hosted canvas paths and scopes them through the canvas capability host", async () => {
     const { resolveCanvasIframeUrl } = await loadResolver();
 
-    expect(resolveCanvasIframeUrl("/__openclaw__/canvas/documents/cv_demo/index.html")).toBe(
-      "/__openclaw__/canvas/documents/cv_demo/index.html",
+    expect(resolveCanvasIframeUrl("/__carapace__/canvas/documents/cv_demo/index.html")).toBe(
+      "/__carapace__/canvas/documents/cv_demo/index.html",
     );
     expect(
       resolveCanvasIframeUrl(
-        "/__openclaw__/canvas/documents/cv_demo/index.html",
-        "http://127.0.0.1:19003/__openclaw__/cap/cap_123",
+        "/__carapace__/canvas/documents/cv_demo/index.html",
+        "http://127.0.0.1:19003/__carapace__/cap/cap_123",
       ),
     ).toBe(
-      "http://127.0.0.1:19003/__openclaw__/cap/cap_123/__openclaw__/canvas/documents/cv_demo/index.html",
+      "http://127.0.0.1:19003/__carapace__/cap/cap_123/__carapace__/canvas/documents/cv_demo/index.html",
     );
   });
 
@@ -831,8 +831,8 @@ describe("isRunningToolCard", () => {
     const running = extractToolCards({
       role: "assistant",
       toolCallId: "call-live",
-      __openclawToolStreamLive: true,
-      __openclawToolStreamResultReceived: false,
+      __carapaceToolStreamLive: true,
+      __carapaceToolStreamResultReceived: false,
       content: [{ type: "toolcall", name: "bash", arguments: { command: "sleep 5" } }],
     });
     expect(running).toHaveLength(1);
@@ -841,8 +841,8 @@ describe("isRunningToolCard", () => {
     const finished = extractToolCards({
       role: "assistant",
       toolCallId: "call-live",
-      __openclawToolStreamLive: true,
-      __openclawToolStreamResultReceived: true,
+      __carapaceToolStreamLive: true,
+      __carapaceToolStreamResultReceived: true,
       content: [{ type: "toolcall", name: "bash", arguments: { command: "sleep 5" } }],
     });
     expect(finished[0]).toMatchObject({ live: true, completed: true });
@@ -857,8 +857,8 @@ describe("isRunningToolCard", () => {
       const partial = extractToolCards({
         role: "assistant",
         toolCallId: "call-live",
-        __openclawToolStreamLive: true,
-        __openclawToolStreamResultReceived: false,
+        __carapaceToolStreamLive: true,
+        __carapaceToolStreamResultReceived: false,
         content: [
           { type: "toolcall", name: "bash", arguments: { command: "sleep 5" } },
           { type: "toolresult", name: "bash", text },
@@ -874,8 +874,8 @@ describe("isRunningToolCard", () => {
       const done = extractToolCards({
         role: "assistant",
         toolCallId: "call-live",
-        __openclawToolStreamLive: true,
-        __openclawToolStreamResultReceived: true,
+        __carapaceToolStreamLive: true,
+        __carapaceToolStreamResultReceived: true,
         content: [
           { type: "toolcall", name: "bash", arguments: { command: "sleep 5" } },
           { type: "toolresult", name: "bash", text: "ok" },

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { promisify } from "node:util";
-import { ensureOpenClawAgentDatabaseSchema } from "../state/openclaw-agent-db.js";
+import { ensureCarapaceAgentDatabaseSchema } from "../state/carapace-agent-db.js";
 
 const execFileAsync = promisify(execFile);
 // The fixture owns its package assets; resolving linked source back to the checkout
@@ -149,13 +149,13 @@ export function seedV17AdditiveRepairDatabase(
   stateDir: string,
   options: { participantDependency?: boolean } = {},
 ): string {
-  const databasePath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const databasePath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const database = new DatabaseSync(databasePath);
   try {
-    ensureOpenClawAgentDatabaseSchema(database, {
+    ensureCarapaceAgentDatabaseSchema(database, {
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       path: databasePath,
       register: false,
     });

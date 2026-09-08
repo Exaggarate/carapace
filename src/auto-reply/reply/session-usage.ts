@@ -1,6 +1,6 @@
 /** Persists usage, cost, and model metadata after reply runs. */
-import { asNonNegativeFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asNonNegativeFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { clearCliSession } from "../../agents/cli-session.js";
 import type { ModelRef } from "../../agents/model-ref-shared.js";
 import {
@@ -18,7 +18,7 @@ import {
 } from "../../config/sessions.js";
 import { patchSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { estimateAggregateUsageCost } from "../../utils/usage-format.js";
 
@@ -53,7 +53,7 @@ function resolveNonNegativeTokenCount(value: number | undefined): number | undef
 }
 
 function estimateSessionRunCostUsd(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   usage?: NormalizedUsage;
   providerUsed?: string;
@@ -84,7 +84,7 @@ export async function persistSessionUsageUpdate(params: {
     "sessionId" | "lifecycleRevision" | "activeWriterRunId"
   >;
   authorize?: () => boolean;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
   usage?: NormalizedUsage;
   /**

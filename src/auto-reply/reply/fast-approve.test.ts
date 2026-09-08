@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildTestCtx } from "./test-ctx.js";
 
 const { handleApproveCommandFromContextMock } = vi.hoisted(() => ({
@@ -37,7 +37,7 @@ describe("tryFastApproveFromMessage", () => {
     await expect(
       tryFastApproveFromMessage({
         ctx,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         agentId: "main",
         sessionKey: "agent:main:imessage:direct:peer",
       }),
@@ -65,7 +65,7 @@ describe("tryFastApproveFromMessage", () => {
       ChatType: "direct",
     });
 
-    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as OpenClawConfig })).resolves.toEqual({
+    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as CarapaceConfig })).resolves.toEqual({
       handled: true,
     });
     expect(handleApproveCommandFromContextMock).toHaveBeenCalledWith(
@@ -83,7 +83,7 @@ describe("tryFastApproveFromMessage", () => {
       CommandInterpretationSuppressed: true,
       CommandAuthorized: true,
     });
-    const cfg = { commands: { allowFrom: { "*": ["*"] } } } satisfies OpenClawConfig;
+    const cfg = { commands: { allowFrom: { "*": ["*"] } } } satisfies CarapaceConfig;
 
     await expect(tryFastApproveFromMessage({ ctx, cfg })).resolves.toEqual({ handled: false });
     expect(handleApproveCommandFromContextMock).not.toHaveBeenCalled();
@@ -104,7 +104,7 @@ describe("tryFastApproveFromMessage", () => {
       ChatType: "direct",
     });
 
-    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as OpenClawConfig })).resolves.toEqual({
+    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as CarapaceConfig })).resolves.toEqual({
       handled: true,
       reply: { text: "Approval submitted." },
     });
@@ -128,7 +128,7 @@ describe("tryFastApproveFromMessage", () => {
       ChatType: "direct",
     });
 
-    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as OpenClawConfig })).resolves.toEqual({
+    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as CarapaceConfig })).resolves.toEqual({
       handled: false,
     });
     expect(handleApproveCommandFromContextMock).not.toHaveBeenCalled();
@@ -139,7 +139,7 @@ describe("tryFastApproveFromMessage", () => {
       Body: "hello",
       Provider: "imessage",
     });
-    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as OpenClawConfig })).resolves.toEqual({
+    await expect(tryFastApproveFromMessage({ ctx, cfg: {} as CarapaceConfig })).resolves.toEqual({
       handled: false,
     });
     expect(handleApproveCommandFromContextMock).not.toHaveBeenCalled();

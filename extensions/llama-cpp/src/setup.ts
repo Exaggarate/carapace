@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { listAgentIds, resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { listAgentIds, resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
 import type {
   ProviderAppGuidedSetupContext,
   ProviderAuthContext,
   ProviderAuthResult,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import { buildLlamaCppAuthProfileRemovalPatch } from "./auth-config.js";
 import {
   DEFAULT_LLAMA_CPP_EMBEDDING_MODEL,
@@ -316,7 +316,7 @@ async function resolveSetupPlan(
       !embeddingModelIsDefault
         ? "This estimate includes the default embedding model; your configured embedding model may need more memory and disk space."
         : undefined,
-      "OpenClaw will check a real tool call before making this your default model.",
+      "Carapace will check a real tool call before making this your default model.",
     ]
       .filter(Boolean)
       .join("\n");
@@ -467,7 +467,7 @@ export async function runLlamaCppSetup(ctx: ProviderAuthContext): Promise<Provid
     progress.stop("llama.cpp setup failed");
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Managed llama.cpp setup failed. Run openclaw doctor, fix the reported runtime or model issue, then retry. ${detail}`,
+      `Managed llama.cpp setup failed. Run carapace doctor, fix the reported runtime or model issue, then retry. ${detail}`,
       { cause: error },
     );
   }

@@ -1,6 +1,6 @@
-import type { SessionRow } from "@openclaw/gateway-protocol";
+import type { SessionRow } from "@carapace/gateway-protocol";
 
-export type { AgentsListResult } from "@openclaw/gateway-protocol";
+export type { AgentsListResult } from "@carapace/gateway-protocol";
 export type GatewaySessionRow = SessionRow & {
   hasActiveRun?: boolean;
   abortedLastRun?: boolean;

@@ -30,10 +30,10 @@ import {
   subtractShippedPullRequests,
   validateReleaseProvenanceOverrides,
   withoutExcludedContributionRecords,
-} from "../../.agents/skills/openclaw-changelog-update/scripts/verify-release-notes.mjs";
+} from "../../.agents/skills/carapace-changelog-update/scripts/verify-release-notes.mjs";
 
 const verifier = resolve(
-  ".agents/skills/openclaw-changelog-update/scripts/verify-release-notes.mjs",
+  ".agents/skills/carapace-changelog-update/scripts/verify-release-notes.mjs",
 );
 
 function git(cwd: string, args: string[]): string {
@@ -42,10 +42,10 @@ function git(cwd: string, args: string[]): string {
     encoding: "utf8",
     env: {
       ...process.env,
-      GIT_AUTHOR_NAME: "OpenClaw Test",
-      GIT_AUTHOR_EMAIL: "test@openclaw.invalid",
-      GIT_COMMITTER_NAME: "OpenClaw Test",
-      GIT_COMMITTER_EMAIL: "test@openclaw.invalid",
+      GIT_AUTHOR_NAME: "Carapace Test",
+      GIT_AUTHOR_EMAIL: "test@carapace.invalid",
+      GIT_COMMITTER_NAME: "Carapace Test",
+      GIT_COMMITTER_EMAIL: "test@carapace.invalid",
     },
   }).trim();
 }
@@ -208,11 +208,11 @@ describe("release-note verification", () => {
   });
 
   it("stores default GitHub snapshots in the shared Git common directory", () => {
-    const commonDir = resolve("/tmp/openclaw-shared-git");
+    const commonDir = resolve("/tmp/carapace-shared-git");
     expect(defaultGithubSnapshotPath("a".repeat(40), "b".repeat(40), commonDir)).toBe(
       join(
         commonDir,
-        "openclaw-release-cache",
+        "carapace-release-cache",
         `verify-release-notes-${"a".repeat(40)}-${"b".repeat(40)}.json`,
       ),
     );
@@ -518,7 +518,7 @@ describe("release-note verification", () => {
   });
 
   it("reuses exact-range GitHub GraphQL snapshots without caching REST reads", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-snapshot-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-snapshot-"));
     try {
       const filePath = join(cwd, "snapshot.json");
       let fetches = 0;
@@ -539,10 +539,10 @@ describe("release-note verification", () => {
         },
       });
       expect(
-        githubApiWithSnapshot(["repos/openclaw/openclaw/releases/tags/v1"], fetchApi, first),
+        githubApiWithSnapshot(["repos/carapace/carapace/releases/tags/v1"], fetchApi, first),
       ).toEqual({
         data: {
-          request: ["repos/openclaw/openclaw/releases/tags/v1"],
+          request: ["repos/carapace/carapace/releases/tags/v1"],
           fetches: 2,
         },
       });
@@ -568,7 +568,7 @@ describe("release-note verification", () => {
   });
 
   it("checkpoints successful GraphQL responses during long verification runs", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-snapshot-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-snapshot-"));
     try {
       const filePath = join(cwd, "snapshot.json");
       const state = createGithubSnapshotState({
@@ -595,7 +595,7 @@ describe("release-note verification", () => {
   });
 
   it("does not cache transient GraphQL errors", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-snapshot-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-snapshot-"));
     try {
       const filePath = join(cwd, "snapshot.json");
       const state = createGithubSnapshotState({
@@ -628,7 +628,7 @@ describe("release-note verification", () => {
   });
 
   it("rejects a snapshot bound to a different release target", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-snapshot-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-snapshot-"));
     try {
       const filePath = join(cwd, "snapshot.json");
       const state = createGithubSnapshotState({
@@ -893,13 +893,13 @@ describe("release-note verification", () => {
     },
     {
       name: "qualified references beside CSS values",
-      source: "OpenClaw/OpenClaw#123 --bg #262624; openclaw/openclaw#456 and Other/Repo#123456.",
+      source: "Carapace/Carapace#123 --bg #262624; carapace/carapace#456 and Other/Repo#123456.",
       expected: [123, 456],
     },
     {
       name: "ordinary Markdown and code references",
       source:
-        "**PR #123**; `#456`; [#789](https://github.com/openclaw/openclaw/issues/789)\n```text\n#123456\n```\n`--bg: #262624` (#1234)",
+        "**PR #123**; `#456`; [#789](https://github.com/Exaggarate/carapace/issues/789)\n```text\n#123456\n```\n`--bg: #262624` (#1234)",
       expected: [123, 456, 789, 123456, 1234],
     },
     {
@@ -961,7 +961,7 @@ describe("release-note verification", () => {
   it.each([0, 1, 2])(
     "accounts for merged side ancestry with %i reversals without duplicating shipped PRs",
     (reversals) => {
-      const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-ancestry-"));
+      const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-ancestry-"));
       try {
         git(cwd, ["init", "-q", "-b", "main"]);
         const changelog = [
@@ -1111,7 +1111,7 @@ console.log(JSON.stringify({ data }));
     { mode: "missing-data", attempts: 1, error: "did not include data" },
     { mode: "schema", attempts: 1, error: "Field unknownField does not exist" },
   ])("handles GraphQL transport failure at the CLI boundary: $mode", (scenario) => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-transport-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-transport-"));
     try {
       git(cwd, ["init", "-q", "-b", "main"]);
       const changelog = [
@@ -1216,7 +1216,7 @@ console.log(JSON.stringify({ data }));
   });
 
   it("records a canonical target SHA when --target is symbolic", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-"));
     try {
       git(cwd, ["init", "-q"]);
       writeFileSync(
@@ -1273,7 +1273,7 @@ console.log(JSON.stringify({ data }));
   });
 
   it("accepts a release-only base that shares history with canonical main", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-"));
     try {
       git(cwd, ["init", "-q"]);
       writeFileSync(
@@ -1336,7 +1336,7 @@ console.log(JSON.stringify({ data }));
   });
 
   it("leaves CHANGELOG.md untouched when the rendered ledger fails validation", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-"));
     try {
       git(cwd, ["init", "-q"]);
       const changelog = [
@@ -1395,7 +1395,7 @@ console.log(JSON.stringify({ data }));
   });
 
   it("rejects a release base that is not an ancestor of the target", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "openclaw-release-notes-"));
+    const cwd = mkdtempSync(join(tmpdir(), "carapace-release-notes-"));
     try {
       git(cwd, ["init", "-q"]);
       writeFileSync(

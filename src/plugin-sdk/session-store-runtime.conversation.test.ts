@@ -5,11 +5,11 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetSessionEntryLifecycle } from "../config/sessions/session-accessor.js";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.sqlite-entry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  getOpenClawAgentDatabaseIfOpen,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  getCarapaceAgentDatabaseIfOpen,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   deleteSessionEntry,
   getConversationSession,
@@ -24,18 +24,18 @@ describe("current conversation session binding", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-conversation-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-conversation-"));
     storePath = path.join(tempDir, "sessions.sqlite");
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
   it("does not create a database or hold a writer when the conversation store is missing", () => {
-    const scope = { agentId: "missing-owner", env: { OPENCLAW_STATE_DIR: tempDir } };
+    const scope = { agentId: "missing-owner", env: { CARAPACE_STATE_DIR: tempDir } };
 
     expect(
       getConversationSession({
@@ -47,12 +47,12 @@ describe("current conversation session binding", () => {
         threadId: "thread-1",
       }),
     ).toBeUndefined();
-    expect(getOpenClawAgentDatabaseIfOpen(scope)).toBeUndefined();
+    expect(getCarapaceAgentDatabaseIfOpen(scope)).toBeUndefined();
     expect(fs.readdirSync(tempDir)).toEqual([]);
   });
 
   it("reads conversation changes inside their owning transaction and respects rollback", async () => {
-    const databaseOptions = { agentId: "main", env: { OPENCLAW_STATE_DIR: tempDir } };
+    const databaseOptions = { agentId: "main", env: { CARAPACE_STATE_DIR: tempDir } };
     const scope = { ...databaseOptions, sessionKey: "agent:main:reef:group:room" };
     const replacementScope = { ...scope, sessionKey: `${scope.sessionKey}:thread:first` };
     const address = {
@@ -72,7 +72,7 @@ describe("current conversation session binding", () => {
     });
     const rollback = new Error("Roll back the conversation reassignment");
     expect(() =>
-      runOpenClawAgentWriteTransaction(() => {
+      runCarapaceAgentWriteTransaction(() => {
         replaceSessionEntrySync(replacementScope, {
           sessionId: "replacement",
           updatedAt: 200,

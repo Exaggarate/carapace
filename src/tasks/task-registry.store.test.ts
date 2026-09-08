@@ -17,18 +17,18 @@ import { readSqliteNumberPragma } from "../infra/sqlite-pragma.test-support.js";
 import { resetLogger, setLoggerOverride } from "../logging/logger.js";
 import { loggingState } from "../logging/state.js";
 import { createWarnLogCapture } from "../logging/test-helpers/warn-log-capture.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-  withOpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+  withCarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createInMemoryTaskRegistryStore } from "../test-utils/task-registry-store.js";
 import {
   collectCronHistoryOverflowTaskIds,
@@ -121,7 +121,7 @@ function createManagedTaskFlow(
   return flow;
 }
 type TaskRegistryTestDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "task_delivery_state" | "task_runs"
 >;
 
@@ -177,10 +177,10 @@ function createUnsafeTaskOwnerIndex(database: DatabaseSync): void {
 
 describe("task-registry store runtime", () => {
   it("does not create shared state for a read-only task snapshot", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-readonly-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-readonly-" },
       async () => {
-        const statePath = resolveOpenClawStateSqlitePath();
+        const statePath = resolveCarapaceStateSqlitePath();
         expect(() => statSync(statePath)).toThrow();
 
         const snapshot = loadTaskRegistryStateFromSqliteReadOnly();
@@ -192,12 +192,12 @@ describe("task-registry store runtime", () => {
   });
 
   it("reports an additive schema migration without querying newer task columns", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-old-schema-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-old-schema-" },
       async () => {
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         database.db.exec("ALTER TABLE task_runs DROP COLUMN tool_use_count");
-        closeOpenClawStateDatabase();
+        closeCarapaceStateDatabase();
 
         expect(loadTaskRegistryStateFromSqliteReadOnlyResult()).toEqual({
           state: "migration-required",
@@ -209,12 +209,12 @@ describe("task-registry store runtime", () => {
       },
     );
   });
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
 
   beforeAll(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-task-store-suite-",
+      prefix: "carapace-task-store-suite-",
     });
   });
 
@@ -268,7 +268,7 @@ describe("task-registry store runtime", () => {
   });
 
   it("logs restore parser failures and keeps the failure sticky", async () => {
-    const warnLogs = createWarnLogCapture("openclaw-task-registry-restore-test");
+    const warnLogs = createWarnLogCapture("carapace-task-registry-restore-test");
     const invalidValue = "not-requested";
     const loadSnapshot = vi.fn(() => {
       throw new Error(`Invalid persisted task delivery status: ${JSON.stringify(invalidValue)}`);
@@ -677,8 +677,8 @@ describe("task-registry store runtime", () => {
   it.each(["verbose", "", "state-change", "DONE_ONLY"])(
     "rejects an invalid notification policy before it can poison a SQLite restart (%s)",
     async (invalidPolicy) => {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-task-invalid-notify-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-task-invalid-notify-" },
         async () => {
           resetTaskRegistryForTests({ persist: false });
           const created = createTaskRecord({
@@ -692,7 +692,7 @@ describe("task-registry store runtime", () => {
             deliveryStatus: "pending",
             notifyPolicy: "done_only",
           });
-          const database = openOpenClawStateDatabase();
+          const database = openCarapaceStateDatabase();
           const db = getNodeSqliteKysely<TaskRegistryTestDatabase>(database.db);
 
           let mutationError: string | null = null;
@@ -754,8 +754,8 @@ describe("task-registry store runtime", () => {
   it.each(["done_only", "state_changes", "silent"] as const)(
     "persists valid notification policy %s across a fresh SQLite restart",
     async (notifyPolicy) => {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-task-valid-notify-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-task-valid-notify-" },
         async () => {
           resetTaskRegistryForTests({ persist: false });
           const created = createTaskRecord({
@@ -781,8 +781,8 @@ describe("task-registry store runtime", () => {
   );
 
   it("rejects corrupt persisted task rows during sqlite restore", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-corrupt-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-corrupt-" },
       async () => {
         resetTaskRegistryForTests({ persist: false });
         const created = createTaskRecord({
@@ -797,7 +797,7 @@ describe("task-registry store runtime", () => {
           notifyPolicy: "silent",
         });
 
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         const db = getNodeSqliteKysely<TaskRegistryTestDatabase>(database.db);
         executeSqliteQuerySync(
           database.db,
@@ -810,8 +810,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("drops invalid requester origins during sqlite restore", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-invalid-origin-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-invalid-origin-" },
       async () => {
         resetTaskRegistryForTests({ persist: false });
         const created = createTaskRecord({
@@ -829,7 +829,7 @@ describe("task-registry store runtime", () => {
           },
         });
 
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         const db = getNodeSqliteKysely<TaskRegistryTestDatabase>(database.db);
         executeSqliteQuerySync(
           database.db,
@@ -846,8 +846,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("round-trips runtime-owned task detail through sqlite", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-detail-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-detail-" },
       async () => {
         const task: TaskRecord = {
           ...createStoredTask(),
@@ -869,8 +869,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("preserves explicit null task detail through sqlite", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-null-detail-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-null-detail-" },
       async () => {
         const task: TaskRecord = {
           ...createStoredTask(),
@@ -885,8 +885,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("loads task and delivery rows from one sqlite read snapshot", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-read-snapshot-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-read-snapshot-" },
       async () => {
         resetTaskRegistryForTests({ persist: false });
         const created = createTaskRecord({
@@ -903,7 +903,7 @@ describe("task-registry store runtime", () => {
             to: "C1234567890",
           },
         });
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         database.db
           .prepare("UPDATE task_delivery_state SET last_notified_event_at = ? WHERE task_id = ?")
           .run(100, created.taskId);
@@ -941,8 +941,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("bypasses stale owner indexes for complete fresh results", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-owner-index-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-owner-index-" },
       async () => {
         resetTaskRegistryForTests({ persist: false });
         const ownerKey = "agent:main:main";
@@ -972,7 +972,7 @@ describe("task-registry store runtime", () => {
           target.taskId,
         );
 
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         createUnsafeTaskOwnerIndex(database.db);
         expect(database.db.prepare("PRAGMA quick_check").get()).toEqual({ quick_check: "ok" });
         expect(database.db.prepare("PRAGMA integrity_check('task_runs')").all()).toEqual(
@@ -1122,8 +1122,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("persists executor and requester agent ids in sqlite task rows", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-agent-id-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-agent-id-" },
       async () => {
         const created = createTaskRecord({
           runtime: "subagent",
@@ -1138,7 +1138,7 @@ describe("task-registry store runtime", () => {
           deliveryStatus: "pending",
         });
 
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         const db = getNodeSqliteKysely<TaskRegistryTestDatabase>(database.db);
         const row = executeSqliteQueryTakeFirstSync(
           database.db,
@@ -1166,8 +1166,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("persists tool activity across sqlite restore", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-tool-activity-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-tool-activity-" },
       async () => {
         const created = createTaskRecord({
           runtime: "subagent",
@@ -1196,8 +1196,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("normalizes a legacy terminal row with no persisted end time", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-legacy-terminal-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-legacy-terminal-" },
       async () => {
         const created = createTaskRecord({
           runtime: "cli",
@@ -1209,7 +1209,7 @@ describe("task-registry store runtime", () => {
           deliveryStatus: "pending",
         });
         const terminalAt = created.createdAt + 1_000;
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         const db = getNodeSqliteKysely<TaskRegistryTestDatabase>(database.db);
         executeSqliteQuerySync(
           database.db,
@@ -1230,8 +1230,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("persists requester origin atomically when creating sqlite tasks", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-create-origin-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-create-origin-" },
       async () => {
         const created = createTaskRecord({
           runtime: "acp",
@@ -1338,8 +1338,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("keeps nonpersistent resets storage-free and normal resets metadata-free", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async () => {
-      const databasePath = resolveOpenClawStateSqlitePath(process.env);
+    await withCarapaceTestState({ layout: "state-only" }, async () => {
+      const databasePath = resolveCarapaceStateSqlitePath(process.env);
       expect(existsSync(databasePath)).toBe(false);
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
@@ -1348,13 +1348,13 @@ describe("task-registry store runtime", () => {
       resetTaskRegistryForTests();
       resetTaskFlowRegistryForTests();
       expect(
-        tableExists(openOpenClawStateDatabase().db, "execution_owner_lifecycle_bindings"),
+        tableExists(openCarapaceStateDatabase().db, "execution_owner_lifecycle_bindings"),
       ).toBe(false);
     });
   });
 
   it("clears only the reset family's rows and orphan bindings", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async () => {
+    await withCarapaceTestState({ layout: "state-only" }, async () => {
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
       const task = createStoredTask();
@@ -1364,7 +1364,7 @@ describe("task-registry store runtime", () => {
         controllerId: "tests/reset-flow",
         goal: "Retained flow",
       });
-      const { db } = openOpenClawStateDatabase();
+      const { db } = openCarapaceStateDatabase();
       for (const [ownerKind, ownerId] of [
         ["task", task.taskId],
         ["task", "orphan-task"],
@@ -1387,7 +1387,7 @@ describe("task-registry store runtime", () => {
           .set({ detail_json: "{" }),
       );
       const readBindings = () =>
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare(
             "SELECT owner_kind, owner_id FROM execution_owner_lifecycle_bindings ORDER BY owner_kind, owner_id",
           )
@@ -1407,7 +1407,7 @@ describe("task-registry store runtime", () => {
       ]);
       upsertTaskWithDeliveryStateToSqlite({ task });
       bindExecutionOwnerLifecycleMetadata({
-        db: openOpenClawStateDatabase().db,
+        db: openCarapaceStateDatabase().db,
         ownerKind: "task",
         ownerId: task.taskId,
         binding: { contextId: "reset-context", executionId: "reset-execution" },
@@ -1426,8 +1426,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("removes omitted delivery state without changing other task rows", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-delivery-prune-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-delivery-prune-" },
       async () => {
         const taskA = createStoredTask();
         const taskB: TaskRecord = {
@@ -1462,8 +1462,8 @@ describe("task-registry store runtime", () => {
   });
 
   it("binds only live task owners and retains their metadata after terminalization", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-binding-owner-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-binding-owner-" },
       async () => {
         const active = { ...createStoredTask(), taskId: "task-binding-active" };
         const retained = { ...createStoredTask(), taskId: "task-binding-retained" };
@@ -1490,12 +1490,12 @@ describe("task-registry store runtime", () => {
         };
 
         expect(
-          tableExists(openOpenClawStateDatabase().db, "execution_owner_lifecycle_bindings"),
+          tableExists(openCarapaceStateDatabase().db, "execution_owner_lifecycle_bindings"),
         ).toBe(false);
         expect(bindTaskRunExecution({ admitted, taskId: terminal.taskId })).toBe("missing");
         expect(bindTaskRunExecution({ admitted, taskId: stale.taskId })).toBe("missing");
         expect(
-          tableExists(openOpenClawStateDatabase().db, "execution_owner_lifecycle_bindings"),
+          tableExists(openCarapaceStateDatabase().db, "execution_owner_lifecycle_bindings"),
         ).toBe(false);
         expect(bindTaskRunExecution({ admitted, taskId: active.taskId })).toBe("bound");
         expect(bindTaskRunExecution({ admitted, taskId: retained.taskId })).toBe("bound");
@@ -1504,7 +1504,7 @@ describe("task-registry store runtime", () => {
         upsertTaskWithDeliveryStateToSqlite({ task: finished });
         expect(bindTaskRunExecution({ admitted, taskId: finished.taskId })).toBe("missing");
         expect(
-          openOpenClawStateDatabase()
+          openCarapaceStateDatabase()
             .db.prepare(
               `SELECT owner_id
                FROM execution_owner_lifecycle_bindings
@@ -1519,7 +1519,7 @@ describe("task-registry store runtime", () => {
           [retained.taskId, terminal.taskId, stale.taskId].toSorted(),
         );
         expect(
-          openOpenClawStateDatabase()
+          openCarapaceStateDatabase()
             .db.prepare(
               "SELECT owner_id FROM execution_owner_lifecycle_bindings WHERE owner_kind = 'task'",
             )
@@ -1530,13 +1530,13 @@ describe("task-registry store runtime", () => {
   });
 
   it("reopens after the shared state database is closed", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-" },
       async () => {
         const task = createStoredTask();
         upsertTaskWithDeliveryStateToSqlite({ task });
 
-        closeOpenClawStateDatabase();
+        closeCarapaceStateDatabase();
 
         const restored = loadTaskRegistryStateFromSqlite();
         expect(restored.tasks.get(task.taskId)).toEqual(task);
@@ -1548,8 +1548,8 @@ describe("task-registry store runtime", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-task-store-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-task-store-" },
       async () => {
         createTaskRecord({
           runtime: "cron",
@@ -1563,9 +1563,9 @@ describe("task-registry store runtime", () => {
           notifyPolicy: "silent",
         });
 
-        const databasePath = resolveOpenClawStateSqlitePath(process.env);
+        const databasePath = resolveCarapaceStateSqlitePath(process.env);
         const registryDir = path.dirname(databasePath);
-        expect(databasePath.endsWith(path.join("state", "openclaw.sqlite"))).toBe(true);
+        expect(databasePath.endsWith(path.join("state", "carapace.sqlite"))).toBe(true);
         expect(statSync(registryDir).mode & 0o777).toBe(0o700);
         expect(statSync(databasePath).mode & 0o777).toBe(0o600);
       },
@@ -1789,8 +1789,8 @@ describe("task-registry store runtime", () => {
   it.each(["create", "update", "delete"] as const)(
     "keeps SQLite and published task state atomic when %s persistence fails",
     async (operation) => {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: `openclaw-task-atomic-${operation}-` },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: `carapace-task-atomic-${operation}-` },
         async () => {
           resetTaskRegistryForTests({ persist: false });
           const params = {
@@ -1837,7 +1837,7 @@ describe("task-registry store runtime", () => {
                 })
               : deleteTaskRecordById(existing.taskId);
           };
-          const { db } = openOpenClawStateDatabase();
+          const { db } = openCarapaceStateDatabase();
           const failingStatement =
             operation === "delete" ? "DELETE ON task_runs" : "INSERT ON task_delivery_state";
           // Fail the second statement: a missing transaction would leave the first row change behind.

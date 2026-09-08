@@ -1,16 +1,16 @@
 // Final doctor config-write decision after preview/repair mode has collected mutations.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 /** Decide whether doctor should write the repaired candidate config or only print hints. */
 export async function finalizeDoctorConfigFlow(params: {
-  cfg: OpenClawConfig;
-  candidate: OpenClawConfig;
+  cfg: CarapaceConfig;
+  candidate: CarapaceConfig;
   pendingChanges: boolean;
   shouldRepair: boolean;
   fixHints: string[];
   confirm: (p: { message: string; initialValue: boolean }) => Promise<boolean>;
   note: (message: string, title?: string) => void;
-}): Promise<{ cfg: OpenClawConfig; shouldWriteConfig: boolean }> {
+}): Promise<{ cfg: CarapaceConfig; shouldWriteConfig: boolean }> {
   if (!params.shouldRepair && params.pendingChanges) {
     const shouldApply = await params.confirm({
       message: "Apply recommended config repairs now?",

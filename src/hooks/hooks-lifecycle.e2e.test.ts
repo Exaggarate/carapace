@@ -6,7 +6,7 @@ import JSON5 from "json5";
 import * as tar from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { installHooksFromPath } from "./install.js";
 import {
   clearInternalHooks,
@@ -27,7 +27,7 @@ afterEach(() => {
 
 async function runHooksCli(args: string[], env: NodeJS.ProcessEnv) {
   try {
-    const result = await execFileAsync(process.execPath, ["openclaw.mjs", "hooks", ...args], {
+    const result = await execFileAsync(process.execPath, ["carapace.mjs", "hooks", ...args], {
       cwd: process.cwd(),
       env,
       encoding: "utf8",
@@ -44,12 +44,12 @@ async function runHooksCli(args: string[], env: NodeJS.ProcessEnv) {
   }
 }
 
-async function readConfig(configPath: string): Promise<OpenClawConfig> {
-  return JSON5.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+async function readConfig(configPath: string): Promise<CarapaceConfig> {
+  return JSON5.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
 }
 
 async function createHookPackFixture() {
-  const rootDir = tempDirs.make("openclaw-hooks-lifecycle-e2e-");
+  const rootDir = tempDirs.make("carapace-hooks-lifecycle-e2e-");
   const homeDir = path.join(rootDir, "home");
   const stateDir = path.join(rootDir, "state");
   const workspaceDir = path.join(rootDir, "workspace");
@@ -59,7 +59,7 @@ async function createHookPackFixture() {
   const packageDir = path.join(packageRoot, "package");
   const hookDir = path.join(packageDir, "hooks", hookName);
   const archivePath = path.join(rootDir, "qa-lifecycle-hooks.tgz");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
 
   await Promise.all([
     fs.mkdir(homeDir, { recursive: true }),
@@ -69,7 +69,7 @@ async function createHookPackFixture() {
     fs.mkdir(hookDir, { recursive: true }),
   ]);
 
-  const initialConfig: OpenClawConfig = {
+  const initialConfig: CarapaceConfig = {
     agents: { defaults: { workspace: workspaceDir } },
     hooks: { internal: { enabled: true } },
   };
@@ -78,9 +78,9 @@ async function createHookPackFixture() {
     path.join(packageDir, "package.json"),
     `${JSON.stringify(
       {
-        name: "@openclaw/qa-lifecycle-hooks",
+        name: "@carapace/qa-lifecycle-hooks",
         version: "1.0.0",
-        openclaw: { hooks: [`./hooks/${hookName}`] },
+        carapace: { hooks: [`./hooks/${hookName}`] },
       },
       null,
       2,
@@ -93,7 +93,7 @@ async function createHookPackFixture() {
       "---",
       `name: ${hookName}`,
       "description: Records a Gateway startup lifecycle event",
-      'metadata: {"openclaw":{"events":["gateway:startup"]}}',
+      'metadata: {"carapace":{"events":["gateway:startup"]}}',
       "---",
       "",
       "# QA lifecycle recorder",
@@ -112,11 +112,11 @@ async function createHookPackFixture() {
     ...process.env,
     HOME: homeDir,
     USERPROFILE: homeDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_HOME: homeDir,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_TEST_FAST: "1",
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_HOME: homeDir,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_TEST_FAST: "1",
     VITEST: "",
   };
 
@@ -162,7 +162,7 @@ describe("internal hook lifecycle", () => {
       expect.objectContaining({
         hook: expect.objectContaining({
           name: hookName,
-          source: "openclaw-managed",
+          source: "carapace-managed",
         }),
         metadata: expect.objectContaining({
           events: ["gateway:startup"],

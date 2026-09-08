@@ -13,25 +13,25 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   parseFfprobeCodecAndSampleRate,
   runFfmpeg,
   runFfprobe,
   MEDIA_FFMPEG_MAX_AUDIO_DURATION_SECS,
   unlinkIfExists,
-} from "openclaw/plugin-sdk/media-runtime";
-import { parseStrictFiniteNumber } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/media-runtime";
+import { parseStrictFiniteNumber } from "carapace/plugin-sdk/number-runtime";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { writeExternalFileWithinRoot } from "openclaw/plugin-sdk/security-runtime";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { writeExternalFileWithinRoot } from "carapace/plugin-sdk/security-runtime";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { DiscordError, RateLimitError, type RequestClient } from "./internal/discord.js";
 import { readDiscordMessage, readRetryAfter } from "./internal/rest-errors.js";
 import { DISCORD_ATTACHMENT_TOTAL_TIMEOUT_MS } from "./monitor/timeouts.js";
@@ -122,7 +122,7 @@ async function generateWaveform(filePath: string): Promise<string> {
  * Generate waveform by extracting raw PCM data and sampling amplitudes
  */
 async function generateWaveformFromPcm(filePath: string): Promise<string> {
-  const tempDir = resolvePreferredOpenClawTmpDir();
+  const tempDir = resolvePreferredCarapaceTmpDir();
   const tempPcm = path.join(tempDir, `waveform-${crypto.randomUUID()}.raw`);
 
   try {
@@ -237,7 +237,7 @@ export async function ensureOggOpus(filePath: string): Promise<{ path: string; c
   // Convert to OGG/Opus
   // Always resample to 48kHz to ensure Discord voice messages play at correct speed
   // (Discord expects 48kHz; lower sample rates like 24kHz from some TTS providers cause 0.5x playback)
-  const tempDir = resolvePreferredOpenClawTmpDir();
+  const tempDir = resolvePreferredCarapaceTmpDir();
   const outputPath = path.join(tempDir, `voice-${crypto.randomUUID()}.ogg`);
 
   await runFfmpegToOutput({

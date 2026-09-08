@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import {
-  parsePackageOpenClawSchemaVersions,
-  type OpenClawSchemaVersions,
-} from "../state/openclaw-schema-versions.js";
+  parsePackageCarapaceSchemaVersions,
+  type CarapaceSchemaVersions,
+} from "../state/carapace-schema-versions.js";
 import { isBetaTag, isStableTag, type UpdateChannel } from "./update-channels.js";
 import { compareSemverStrings } from "./update-check.js";
 import { runGitCandidatePreflight } from "./update-runner-git-preflight.js";
@@ -28,7 +28,7 @@ export async function withGitTargetInspectionRoot<T>(
   params: { root: string; runCommand: CommandRunner; timeoutMs: number },
   inspect: (root: string, runCommand: CommandRunner) => Promise<T>,
 ): Promise<T> {
-  const temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-admission-"));
+  const temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-admission-"));
   const inspectionRoot = path.join(temporaryRoot, "repository.git");
   const command = async (root: string, args: string[], allowMissing = false) => {
     const result = await params.runCommand(["git", "-C", root, ...args], {
@@ -110,7 +110,7 @@ export async function withGitTargetInspectionRoot<T>(
 }
 
 type GitTargetSchemaMetadata =
-  | { status: "ok"; schemaVersions?: OpenClawSchemaVersions }
+  | { status: "ok"; schemaVersions?: CarapaceSchemaVersions }
   | { status: "unreadable"; reason: string };
 
 export async function readGitTargetSchemaVersions(params: {
@@ -135,7 +135,7 @@ export async function readGitTargetSchemaVersions(params: {
     };
   }
   try {
-    const schemaVersions = parsePackageOpenClawSchemaVersions(JSON.parse(result.stdout) as unknown);
+    const schemaVersions = parsePackageCarapaceSchemaVersions(JSON.parse(result.stdout) as unknown);
     return { status: "ok", ...(schemaVersions ? { schemaVersions } : {}) };
   } catch (error) {
     return { status: "unreadable", reason: `target package.json unparseable: ${String(error)}` };

@@ -5,13 +5,13 @@ import type {
   MediaUnderstandingProvider,
   VideoDescriptionRequest,
   VideoDescriptionResult,
-} from "openclaw/plugin-sdk/media-understanding";
+} from "carapace/plugin-sdk/media-understanding";
 import {
   assertOkOrThrowProviderError,
   postJsonRequest,
   readProviderJsonResponse,
   type ProviderRequestTransportOverrides,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   DEFAULT_GOOGLE_API_BASE_URL,
   normalizeGoogleModelId,

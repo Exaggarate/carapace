@@ -32,7 +32,7 @@ export function createVitestCacheSlots(concurrency: number, platform = process.p
       cacheAssignment: { ...spec.cacheAssignment, leased: true },
       env: {
         ...spec.env,
-        OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: path.join(
+        CARAPACE_VITEST_FS_MODULE_CACHE_PATH: path.join(
           spec.cacheAssignment.root,
           "slots",
           String(slot),

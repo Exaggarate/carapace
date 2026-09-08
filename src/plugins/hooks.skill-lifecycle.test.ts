@@ -9,7 +9,7 @@ import { createHookRunner } from "./hooks.js";
 import { createMockPluginRegistry } from "./hooks.test-helpers.js";
 
 const ctx: PluginHookSkillContext = {
-  workspaceDir: "/tmp/openclaw-workspace",
+  workspaceDir: "/tmp/carapace-workspace",
   agentId: "main",
 };
 
@@ -25,7 +25,7 @@ const evaluationEvent: PluginHookSkillProposalEvaluateEvent = {
     name: "Demo Skill",
     skillKey: "demo-skill",
     description: "Demonstrates proposal evaluation.",
-    source: "openclaw-workspace",
+    source: "carapace-workspace",
   },
   candidate: {
     skillMd: {

@@ -1,10 +1,10 @@
 import { createRequire, isBuiltin } from "node:module";
 import { join } from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { BuildOptions, BuildResult, PluginBuild } from "esbuild";
 
-const moduleLocationImport = "openclaw-plugin-bundle:module-location";
-const runtimeFilesImport = "openclaw-plugin-bundle:runtime-files";
+const moduleLocationImport = "carapace-plugin-bundle:module-location";
+const runtimeFilesImport = "carapace-plugin-bundle:runtime-files";
 const loadDiagnostics = {
   "unsupported-dynamic-import": "error",
   "unsupported-require-call": "error",
@@ -25,7 +25,7 @@ type PluginBundleOptions = Omit<
 > & { platform: "node" | "browser"; absWorkingDir: string };
 
 function isPluginBundleHostImport(specifier: string): boolean {
-  return isBuiltin(specifier) || specifier === "openclaw" || specifier.startsWith("openclaw/");
+  return isBuiltin(specifier) || specifier === "carapace" || specifier.startsWith("carapace/");
 }
 
 export async function buildPluginBundle(options: PluginBundleOptions) {
@@ -43,7 +43,7 @@ export async function buildPluginBundle(options: PluginBundleOptions) {
   const backend = options.platform === "node";
   const recovery = backend
     ? "Use literal import or require paths and embed runtime resources, or use the regular package-install flow."
-    : "Use literal browser imports, or provide prebuilt browser assets without package.json openclaw.controlUi.";
+    : "Use literal browser imports, or provide prebuilt browser assets without package.json carapace.controlUi.";
   const bindings = backend
     ? 'metadata as "import.meta", directory as __dirname, filename as __filename, resolve as "require.resolve"'
     : 'resolve as "require.resolve"';
@@ -65,7 +65,7 @@ export async function buildPluginBundle(options: PluginBundleOptions) {
         {
           name: "plugin-bundle",
           setup(build: PluginBuild) {
-            build.onResolve({ filter: /^openclaw-plugin-bundle:module-location$/ }, () => ({
+            build.onResolve({ filter: /^carapace-plugin-bundle:module-location$/ }, () => ({
               path: "module-location",
               namespace: "plugin-bundle",
               sideEffects: false,
@@ -83,7 +83,7 @@ export async function buildPluginBundle(options: PluginBundleOptions) {
               ].join("\n"),
               loader: "js",
             }));
-            build.onResolve({ filter: /^openclaw-plugin-bundle:runtime-files$/ }, () => ({
+            build.onResolve({ filter: /^carapace-plugin-bundle:runtime-files$/ }, () => ({
               path: runtimeFilesImport,
               external: true,
               sideEffects: false,

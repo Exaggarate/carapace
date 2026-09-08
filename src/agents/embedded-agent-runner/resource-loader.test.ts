@@ -11,9 +11,9 @@ describe("createEmbeddedAgentResourceLoader", () => {
   it.each(["workspace", "agent"])(
     "keeps inline extensions without discovering %s instructions or prompts",
     async (location) => {
-      const cwd = tempDirs.make("openclaw-embedded-resources-");
+      const cwd = tempDirs.make("carapace-embedded-resources-");
       const agentDir = join(cwd, "agent");
-      const resourceDir = location === "workspace" ? join(cwd, ".openclaw") : agentDir;
+      const resourceDir = location === "workspace" ? join(cwd, ".carapace") : agentDir;
       await mkdir(resourceDir, { recursive: true });
       await writeFile(join(cwd, "AGENTS.md"), "ambient context");
       await writeFile(join(resourceDir, "SYSTEM.md"), "ambient system prompt");

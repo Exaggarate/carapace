@@ -2,8 +2,8 @@
 import type {
   AudioTranscriptionRequest,
   AudioTranscriptionResult,
-} from "openclaw/plugin-sdk/media-understanding";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/media-understanding";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const DEFAULT_DEEPGRAM_AUDIO_BASE_URL = "https://api.deepgram.com/v1";
 export const DEFAULT_DEEPGRAM_AUDIO_MODEL = "nova-3";
@@ -47,7 +47,7 @@ export async function transcribeDeepgramAudio(
     readProviderJsonObjectResponse,
     resolveProviderHttpRequestConfig,
     requireTranscriptionText,
-  } = await import("openclaw/plugin-sdk/provider-http");
+  } = await import("carapace/plugin-sdk/provider-http");
   const fetchFn = params.fetchFn ?? fetch;
   const model = resolveModel(params.model);
   const { baseUrl, allowPrivateNetwork, headers, dispatcherPolicy } =

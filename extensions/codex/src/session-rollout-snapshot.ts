@@ -1,8 +1,8 @@
 import { lstat } from "node:fs/promises";
 import path from "node:path";
 import { constants, createZstdDecompress } from "node:zlib";
-import { root } from "openclaw/plugin-sdk/file-access-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { root } from "carapace/plugin-sdk/file-access-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const CHUNK_BYTES = 64 * 1024;
 const META_BYTES = 1024 * 1024;

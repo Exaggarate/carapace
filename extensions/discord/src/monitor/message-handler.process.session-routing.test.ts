@@ -45,13 +45,13 @@ describe("processDiscordMessage session routing", () => {
       preflightAudioTranscript: "/status",
       preparedMedia: [
         {
-          path: "/tmp/openclaw-discord-test/voice.ogg",
+          path: "/tmp/carapace-discord-test/voice.ogg",
           contentType: "audio/ogg",
         },
       ],
       cfg: {
         messages: { groupChat: { visibleReplies: "message_tool" } },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
     });
 
@@ -119,7 +119,7 @@ describe("processDiscordMessage session routing", () => {
       messageText: "look",
       preparedMedia: [
         {
-          path: "/tmp/openclaw-discord-test/photo.png",
+          path: "/tmp/carapace-discord-test/photo.png",
           contentType: "image/png",
         },
       ],
@@ -132,7 +132,7 @@ describe("processDiscordMessage session routing", () => {
     expectRecordFields(requireRecord(getLastDispatchCtx(), "dispatch context"), {
       media: [
         expect.objectContaining({
-          path: "/tmp/openclaw-discord-test/photo.png",
+          path: "/tmp/carapace-discord-test/photo.png",
           contentType: "image/png",
         }),
       ],
@@ -147,7 +147,7 @@ describe("processDiscordMessage session routing", () => {
       cfg: {
         channels: { discord: { contextVisibility: "allowlist" } },
         messages: { ackReaction: "👀" },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       author: {
         id: "U1",
@@ -213,7 +213,7 @@ describe("processDiscordMessage session routing", () => {
       cfg: {
         channels: { discord: { contextVisibility: "all" } },
         messages: { ackReaction: "👀" },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       discordRestFetch: fetchImpl,
       message: {
@@ -272,7 +272,7 @@ describe("processDiscordMessage session routing", () => {
       cfg: {
         channels: { discord: { contextVisibility: "all" } },
         messages: { ackReaction: "👀" },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       discordRestFetch: fetchImpl,
       message: {
@@ -356,7 +356,7 @@ describe("processDiscordMessage session routing", () => {
       cfg: {
         messages: { ackReaction: "👀" },
         session: {
-          store: "/tmp/openclaw-discord-process-test-sessions.json",
+          store: "/tmp/carapace-discord-process-test-sessions.json",
           dmScope: "main",
         },
       },
@@ -423,7 +423,7 @@ describe("processDiscordMessage session routing", () => {
         messages: {
           groupChat: { visibleReplies: "message_tool" },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       route: BASE_CHANNEL_ROUTE,
     });
@@ -452,7 +452,7 @@ describe("processDiscordMessage session routing", () => {
             timing: { debounceMs: 0 },
           },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       route: BASE_CHANNEL_ROUTE,
     });
@@ -487,7 +487,7 @@ describe("processDiscordMessage session routing", () => {
             timing: { debounceMs: 0 },
           },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       route: BASE_CHANNEL_ROUTE,
     });

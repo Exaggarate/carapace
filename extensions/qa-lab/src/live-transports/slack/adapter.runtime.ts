@@ -1,13 +1,13 @@
 // Qa Lab plugin module implements Slack live transport adapter behavior.
 import { randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
 import {
   createDebugProxyCaptureReader,
   type DebugProxyCaptureReader,
-} from "openclaw/plugin-sdk/proxy-capture";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+} from "carapace/plugin-sdk/proxy-capture";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
 import {
   acquireQaCredentialLease,
   startQaCredentialLeaseHeartbeat,
@@ -275,7 +275,7 @@ export async function createSlackQaTransportAdapter(
     async sendInbound(input) {
       heartbeat.throwIfFailed();
       logicalConversationId = input.conversation.id;
-      const text = input.text.replaceAll("@openclaw", `<@${sutIdentity.userId}>`);
+      const text = input.text.replaceAll("@carapace", `<@${sutIdentity.userId}>`);
       const nativeThreadTs = input.threadId ? nativeMessageIds.get(input.threadId) : undefined;
       const sent = await sendSlackChannelMessage({
         channelId: runtimeEnv.channelId,
@@ -303,7 +303,7 @@ export async function createSlackQaTransportAdapter(
       activeThreadRoots.clear();
     },
     createGatewayConfig: () =>
-      buildSlackQaConfig({} as OpenClawConfig, {
+      buildSlackQaConfig({} as CarapaceConfig, {
         channelId: runtimeEnv.channelId,
         driverBotUserId: driverIdentity.userId,
         sutAccountId: accountId,
@@ -311,8 +311,8 @@ export async function createSlackQaTransportAdapter(
         sutBotToken: runtimeEnv.sutBotToken,
       }),
     createRuntimeEnvPatch: () => ({
-      OPENCLAW_DEBUG_PROXY_ENABLED: "1",
-      OPENCLAW_DEBUG_PROXY_SESSION_ID: captureSessionId,
+      CARAPACE_DEBUG_PROXY_ENABLED: "1",
+      CARAPACE_DEBUG_PROXY_SESSION_ID: captureSessionId,
     }),
     prepareFlow: async (input) => {
       captureReader ??= createDebugProxyCaptureReader({

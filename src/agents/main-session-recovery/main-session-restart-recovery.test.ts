@@ -11,7 +11,7 @@ import { resolveReplyRunDeliveryContext } from "../../auto-reply/reply/agent-run
 import { markInboundContextLabel } from "../../auto-reply/reply/inbound-context-marker.js";
 import type { ChannelOutboundAdapter } from "../../channels/plugins/types.public.js";
 import type { CliDeps } from "../../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import * as configSessions from "../../config/sessions.js";
 import type { InternalSessionEntry as SessionEntry } from "../../config/sessions.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
@@ -68,10 +68,10 @@ import {
   removeAgentDeletionJournal,
 } from "../../state/agent-deletion-journal.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { buildCurrentRunRestartRecoveryClaim } from "../agent-command-restart-recovery.js";
@@ -128,7 +128,7 @@ const discordDeliveryContext = {
 } as const;
 const executionIdentityEnabledConfig = {
   logging: { audit: { executionIdentity: true } },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 vi.mock("../../gateway/call.js", () => ({
   callGateway: vi.fn(async () => ({ runId: "run-resumed" })),
@@ -215,7 +215,7 @@ beforeEach(async () => {
   vi.mocked(callGateway).mockImplementation(async () => ({ runId: "run-resumed" }));
   resetAgentEventsForTest();
   resetGatewayWorkAdmission();
-  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-main-restart-recovery-"));
+  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-main-restart-recovery-"));
 });
 
 afterEach(async () => {
@@ -708,7 +708,7 @@ describe("main-session-restart-recovery", () => {
 
     const cfg = {
       agents: { list: [{ id: "main", default: true }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const storeTargets = await discoverRestartRecoveryStoreTargets({
       cfg,
       stateDir: tmpDir,
@@ -726,13 +726,13 @@ describe("main-session-restart-recovery", () => {
   });
 
   it("marks an admitted custom-store turn after a deleted agent leaves its directory behind", async () => {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
       const staleSessionsDir = await makeSessionsDir("retired-probe");
       await writeMainSession({
         sessionsDir: staleSessionsDir,
         sessionKey: "agent:retired-probe:main",
       });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const deletion = beginAgentDeletionJournal({
         agentId: "retired-probe",
         operationId: randomUUID(),
@@ -771,8 +771,8 @@ describe("main-session-restart-recovery", () => {
       } finally {
         admission?.release();
         removeAgentDeletionJournal(deletion.agentId, deletion.operationId);
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     });
   });
@@ -780,7 +780,7 @@ describe("main-session-restart-recovery", () => {
   it.each(["flat", "shared"] as const)(
     "marks an admitted removed owner without duplicate scans in a %s store",
     async (layout) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
         const storePath = path.join(
           tmpDir,
           "retired-active",
@@ -837,7 +837,7 @@ describe("main-session-restart-recovery", () => {
     const cfg = {
       agents: { list: [{ id: "main", default: true }] },
       session: { store: storePath },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       discoverRestartRecoveryStoreTargets({ cfg, stateDir: tmpDir, statuses: ["running"] }),
@@ -878,7 +878,7 @@ describe("main-session-restart-recovery", () => {
   it.each(["flat", "shared"] as const)(
     "preserves the yielded global requester owner in a %s store",
     async (layout) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
         const storePath = path.join(
           tmpDir,
           "yielded",
@@ -891,7 +891,7 @@ describe("main-session-restart-recovery", () => {
             ...(layout === "shared" ? { defaults: { sessionStore: { agentId: "ops" } } } : {}),
           },
           session: { scope: "global", store: storePath },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await replaceSessionEntry(
           { agentId: "main", sessionKey: "agent:main:unrelated", storePath },
           mainSessionEntry({ sessionId: "unrelated", status: "done", abortedLastRun: false }),
@@ -952,7 +952,7 @@ describe("main-session-restart-recovery", () => {
   it.each(["flat", "templated", "shared-global", "shared-scoped"] as const)(
     "preserves startup recovery ownership for an actual ops row: %s",
     async (layout) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
         const shared = layout.startsWith("shared-");
         const sessionKey = layout === "shared-scoped" ? "agent:ops:main" : "global";
         const configuredStore =
@@ -971,7 +971,7 @@ describe("main-session-restart-recovery", () => {
             store: configuredStore,
             ...(sessionKey === "global" ? { scope: "global" } : {}),
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         const storePath = configSessions.resolveSessionStorePathCore(configuredStore, {
           agentId: "ops",
         });
@@ -1002,7 +1002,7 @@ describe("main-session-restart-recovery", () => {
           }),
         );
         if (shared) {
-          expect(openOpenClawAgentDatabase({ agentId: "main", path: storePath }).agentId).toBe(
+          expect(openCarapaceAgentDatabase({ agentId: "main", path: storePath }).agentId).toBe(
             "main",
           );
         }
@@ -1039,12 +1039,12 @@ describe("main-session-restart-recovery", () => {
   )(
     "keeps two flat-store owners distinct during $phase (scoped=$scoped)",
     async ({ scoped, phase }) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
         const storePath = path.join(tmpDir, "two-owners", "sessions.json");
         const cfg = {
           agents: { ownership: "explicit", entries: { main: {}, ops: {} } },
           session: { store: storePath, ...(scoped ? {} : { scope: "global" }) },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         const keys = {
           main: scoped ? "agent:main:main" : "global",
           ops: scoped ? "agent:ops:main" : "global",
@@ -1132,7 +1132,7 @@ describe("main-session-restart-recovery", () => {
         entries: { ops: {}, research: {} },
       },
       session: { scope: "global", store: storePath },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const agentId = configSessions.resolveSessionStoreCompatibilityAgentId(cfg);
     await replaceSessionEntry(
@@ -1457,7 +1457,7 @@ describe("main-session-restart-recovery", () => {
         role: "assistant",
         content: [{ type: "text", text: "Checking the remaining background task." }],
         stopReason: "stop",
-        openclawStreamFallback: {
+        carapaceStreamFallback: {
           replacementText: "Checking the remaining background task.",
           source: "segment",
           itemId: "progress-after-recovery-mark",
@@ -1467,7 +1467,7 @@ describe("main-session-restart-recovery", () => {
         role: "assistant",
         content: [{ type: "text", text: "The restart handoff is in progress." }],
         stopReason: "stop",
-        openclawStreamFallback: {
+        carapaceStreamFallback: {
           replacementText: "The restart handoff is in progress.",
           source: "segment",
           itemId: "progress-after-recovery-mark-2",
@@ -1493,7 +1493,7 @@ describe("main-session-restart-recovery", () => {
         .filter(
           (message) =>
             message?.role === "assistant" &&
-            (message as { openclawStreamFallback?: { source?: unknown } }).openclawStreamFallback
+            (message as { carapaceStreamFallback?: { source?: unknown } }).carapaceStreamFallback
               ?.source === "segment",
         ),
     ).toHaveLength(2);
@@ -1536,7 +1536,7 @@ describe("main-session-restart-recovery", () => {
         },
         makeAssistantTextMessage("The Gateway is restarting; retry after it comes back."),
       ]);
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
         await persistGatewaySessionLifecycleEvent({
           sessionKey,
           agentId: "main",
@@ -1781,8 +1781,8 @@ describe("main-session-restart-recovery", () => {
       resetGlobalHookRunner();
       initializeGlobalHookRunner(registry);
       setActivePluginRegistry(registry);
-      const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-      process.env.OPENCLAW_STATE_DIR = tmpDir;
+      const previousStateDir = process.env.CARAPACE_STATE_DIR;
+      process.env.CARAPACE_STATE_DIR = tmpDir;
 
       await writeMainSession({
         sessionsDir,
@@ -1800,7 +1800,7 @@ describe("main-session-restart-recovery", () => {
           meta: { durationMs: 1 },
         };
         await deliverAgentCommandResult({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           deps: {} as CliDeps,
           runtime: { log: vi.fn(), error: vi.fn() } as never,
           opts: {
@@ -1858,13 +1858,13 @@ describe("main-session-restart-recovery", () => {
           text: "hooked: final answer",
         });
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         resetGlobalHookRunner();
         setActivePluginRegistry(createEmptyPluginRegistry());
         if (previousStateDir === undefined) {
-          delete process.env.OPENCLAW_STATE_DIR;
+          delete process.env.CARAPACE_STATE_DIR;
         } else {
-          process.env.OPENCLAW_STATE_DIR = previousStateDir;
+          process.env.CARAPACE_STATE_DIR = previousStateDir;
         }
       }
     },
@@ -1938,8 +1938,8 @@ describe("main-session-restart-recovery", () => {
         },
       ]),
     );
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
 
     vi.mocked(callGateway).mockImplementationOnce(async ({ params }) => {
       const request = params as Record<string, unknown>;
@@ -1963,7 +1963,7 @@ describe("main-session-restart-recovery", () => {
         meta: { durationMs: 1 },
       };
       await deliverAgentCommandResult({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         deps: {} as CliDeps,
         runtime: { log: vi.fn(), error: vi.fn() } as never,
         opts: {
@@ -2020,13 +2020,13 @@ describe("main-session-restart-recovery", () => {
         restartRecoveryDeliverySourceRunId: "telegram-follow-up-source",
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       resetGlobalHookRunner();
       setActivePluginRegistry(createEmptyPluginRegistry());
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
   });
@@ -2071,7 +2071,7 @@ describe("main-session-restart-recovery", () => {
     ["upgrade config without the new setting", {}],
     ["explicit collection disable", { logging: { audit: { executionIdentity: false } } }],
     ["disabled audit ledger", { logging: { audit: { enabled: false, executionIdentity: true } } }],
-  ] satisfies Array<[string, OpenClawConfig | undefined]>)(
+  ] satisfies Array<[string, CarapaceConfig | undefined]>)(
     "stores no recovery identity with %s",
     async (_label, cfg) => {
       const sessionsDir = await makeSessionsDir();
@@ -2852,7 +2852,7 @@ describe("main-session-restart-recovery", () => {
       expect(callGateway).not.toHaveBeenCalled();
       expect(sendRecoveryNotice).not.toHaveBeenCalled();
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 
@@ -2885,7 +2885,7 @@ describe("main-session-restart-recovery", () => {
       expect(sendRecoveryNotice).not.toHaveBeenCalled();
       expect(loadSessionEntry({ sessionKey: "agent:main:main", storePath })?.status).toBe("done");
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 
@@ -3077,7 +3077,7 @@ describe("main-session-restart-recovery", () => {
           ).toMatchObject({ intentId: `intent-owner-${ownerStatus}`, state: "owed" });
         }
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );
@@ -3414,7 +3414,7 @@ describe("main-session-restart-recovery", () => {
     const databasePaths = await Promise.all(
       agentIds.map(async (agentId) => {
         await makeSessionsDir(agentId);
-        return path.join(tmpDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+        return path.join(tmpDir, "agents", agentId, "agent", "carapace-agent.sqlite");
       }),
     );
 
@@ -3428,15 +3428,15 @@ describe("main-session-restart-recovery", () => {
 
   it("does not enter the writer lane for agent databases without running sessions", async () => {
     const agentIds = Array.from({ length: 12 }, (_, index) => `agent-${index + 1}`);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: tmpDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: tmpDir };
     for (const agentId of agentIds) {
-      openOpenClawAgentDatabase({
+      openCarapaceAgentDatabase({
         agentId,
         env,
-        path: path.join(tmpDir, "agents", agentId, "agent", "openclaw-agent.sqlite"),
+        path: path.join(tmpDir, "agents", agentId, "agent", "carapace-agent.sqlite"),
       });
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const applySessionEntryReplacements = vi.spyOn(
       sessionAccessor,
       "applySessionEntryReplacements",
@@ -3454,7 +3454,7 @@ describe("main-session-restart-recovery", () => {
 
   it("keeps corrupt existing agent databases on the startup recovery error path", async () => {
     await makeSessionsDir();
-    const databasePath = path.join(tmpDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+    const databasePath = path.join(tmpDir, "agents", "main", "agent", "carapace-agent.sqlite");
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     await fs.writeFile(databasePath, "not a sqlite database");
 
@@ -3679,7 +3679,7 @@ describe("main-session-restart-recovery", () => {
     const lateStorePath = path.join(lateSessionsDir, "sessions.json");
     const cfg = {
       agents: { list: [{ id: "main", default: true }, { id: "late" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const discoverySpy = vi.spyOn(configSessions, "resolveAllAgentSessionStoreTargetsSync");
     const originalApply = sessionAccessor.applySessionEntryReplacements;
     let restoredLateStore = false;
@@ -3878,7 +3878,7 @@ describe("main-session-restart-recovery", () => {
     ]);
     let currentConfig = {
       agents: { list: [{ id: "main", default: true }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const recovery = scheduleRestartAbortedMainSessionRecovery({
       delayMs: 0,
@@ -3889,7 +3889,7 @@ describe("main-session-restart-recovery", () => {
     await Promise.resolve();
     currentConfig = {
       agents: { list: [{ id: "main", default: true }, { id: "work" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     releaseStartup.resolve();
 
     await waitForFast(() => expect(callGateway).toHaveBeenCalledOnce());
@@ -4094,7 +4094,7 @@ describe("main-session-restart-recovery", () => {
       sessionsDir,
       pendingFinalDelivery: makePendingFinalDelivery(),
     });
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const discoverySpy = vi.spyOn(configSessions, "resolveAllAgentSessionStoreTargetsSync");
     const firstDispatch = createDeferred();
     const secondDispatch = createDeferred();
@@ -4552,7 +4552,7 @@ describe("main-session-restart-recovery", () => {
   });
 
   it("observes final exhaustion in distinct stores for the same logical session", async () => {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: tmpDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: tmpDir }, async () => {
       const sessionKey = "agent:ops:main";
       const targets: Parameters<typeof loadSessionEntry>[0][] = [];
       for (const [index, directory] of ["ops", " ops "].entries()) {
@@ -5216,7 +5216,7 @@ describe("main-session-restart-recovery", () => {
         role: "assistant",
         content: [{ type: "text", text: "delivered answer" }],
         stopReason: "stop",
-        openclawDeliveryMirror: {
+        carapaceDeliveryMirror: {
           kind: "message-tool-source-reply",
           final: true,
           sourceTurnId: "discord-message-1",
@@ -5549,7 +5549,7 @@ describe("main-session-restart-recovery", () => {
         role: "assistant",
         content: [{ type: "text", text: "not this turn's terminal answer" }],
         stopReason: "stop",
-        openclawDeliveryMirror: {
+        carapaceDeliveryMirror: {
           kind: "message-tool-source-reply",
           final,
           sourceTurnId,
@@ -5579,7 +5579,7 @@ describe("main-session-restart-recovery", () => {
         content: [{ type: "text", text: "" }],
         stopReason: "error",
         errorMessage: "This operation was aborted",
-        errorCode: "OPENCLAW_FIRST_EVENT_TIMEOUT",
+        errorCode: "CARAPACE_FIRST_EVENT_TIMEOUT",
       },
     ],
   ])(
@@ -5882,7 +5882,7 @@ describe("main-session-restart-recovery", () => {
         {
           role: "user",
           content:
-            "[System] Your previous turn was interrupted by a gateway restart while OpenClaw was waiting on tool/model work. Continue from the existing transcript and finish the interrupted response.",
+            "[System] Your previous turn was interrupted by a gateway restart while Carapace was waiting on tool/model work. Continue from the existing transcript and finish the interrupted response.",
         },
         createAssistantToolCallMessage([
           {
@@ -5978,7 +5978,7 @@ describe("main-session-restart-recovery", () => {
           role: "user",
           provenance: { kind: "internal_system", sourceTool: "main_session_restart_recovery" },
           content:
-            "[System] Your previous turn was interrupted by a gateway restart while OpenClaw was waiting on tool/model work. Continue from the existing transcript and finish the interrupted response.",
+            "[System] Your previous turn was interrupted by a gateway restart while Carapace was waiting on tool/model work. Continue from the existing transcript and finish the interrupted response.",
         },
         { role: "assistant", content: [{ type: "text", text: "Finished that recovery." }] },
         { role: "user", content: "a later request" },
@@ -6256,7 +6256,7 @@ describe("main-session-restart-recovery", () => {
         role: "assistant",
         content: [],
         stopReason: "aborted",
-        errorCode: "OPENCLAW_RESTART_ABORT",
+        errorCode: "CARAPACE_RESTART_ABORT",
         errorMessage: "agent run aborted for restart",
       },
     ]);

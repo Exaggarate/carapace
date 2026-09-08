@@ -10,7 +10,7 @@ import { registerLoginEnglish } from "../i18n/locales/en-login.ts";
 import { buildExternalLinkRel, EXTERNAL_LINK_TARGET } from "../lib/external-link.ts";
 import { formatGatewayHost } from "../lib/gateway-host.ts";
 import { classifyGatewaySecret } from "../lib/gateway-secret-shape.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { renderConnectCommand } from "./connect-command.ts";
 import { icons } from "./icons.ts";
 import {
@@ -125,7 +125,7 @@ function renderSecretToggle(
 ) {
   const [show, hide, toggle] = labels;
   return html`
-    <openclaw-tooltip .content=${revealed ? hide : show}>
+    <carapace-tooltip .content=${revealed ? hide : show}>
       <button
         type="button"
         class="settings-secret__toggle"
@@ -135,7 +135,7 @@ function renderSecretToggle(
       >
         ${revealed ? icons.eye : icons.eyeOff}
       </button>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 
@@ -308,17 +308,17 @@ function renderFormBody(params: { props: LoginGateProps; feedback: LoginFailureF
                 <summary class="login-gate__help-title">${t("connection.help.title")}</summary>
                 <ol class="login-gate__steps">
                   <li>
-                    ${t("connection.help.step1")}${renderConnectCommand("openclaw gateway run")}
+                    ${t("connection.help.step1")}${renderConnectCommand("carapace gateway run")}
                   </li>
                   <li>
-                    ${t("connection.help.step2")} ${renderConnectCommand("openclaw dashboard")}
+                    ${t("connection.help.step2")} ${renderConnectCommand("carapace dashboard")}
                   </li>
                   <li>${t("connection.help.step3")}</li>
                 </ol>
                 <div class="login-gate__docs">
                   <a
                     class="session-link"
-                    href="https://docs.openclaw.ai/web/dashboard"
+                    href="https://github.com/Exaggarate/carapace"
                     target=${EXTERNAL_LINK_TARGET}
                     rel=${buildExternalLinkRel()}
                     >${t("connection.help.docsLink")}</a
@@ -342,11 +342,11 @@ function renderLoginGate(props: LoginGateProps) {
 
   return html`
     <div class="login-gate">
-      <openclaw-toast-host></openclaw-toast-host>
+      <carapace-toast-host></carapace-toast-host>
       <div class="login-gate__card" data-mode=${feedback?.placement ?? "form"}>
         <header class="login-gate__brand">
           <img class="login-gate__logo" src=${faviconSrc} alt="" />
-          <span class="login-gate__brand-name">OpenClaw</span>
+          <span class="login-gate__brand-name">Carapace</span>
         </header>
         ${body}
       </div>
@@ -354,7 +354,7 @@ function renderLoginGate(props: LoginGateProps) {
   `;
 }
 
-class LoginGate extends OpenClawLightDomContentsElement {
+class LoginGate extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) props?: LoginGateProps;
 
   override render() {
@@ -362,6 +362,6 @@ class LoginGate extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-login-gate")) {
-  customElements.define("openclaw-login-gate", LoginGate);
+if (!customElements.get("carapace-login-gate")) {
+  customElements.define("carapace-login-gate", LoginGate);
 }

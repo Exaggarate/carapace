@@ -1,5 +1,5 @@
 import { setImmediate } from "node:timers/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { inspectLocalChromeHeadlessMode, isChromeCdpReady } from "./chrome.js";
 import { createProfileAvailability } from "./server-context.availability.js";
@@ -10,7 +10,7 @@ import type { ProfileRuntimeState } from "./server-context.types.js";
 vi.mock("./chrome.js", () => ({
   inspectLocalChromeHeadlessMode: vi.fn(),
   isChromeCdpReady: vi.fn(),
-  stopOpenClawChrome: vi.fn(),
+  stopCarapaceChrome: vi.fn(),
 }));
 
 afterEach(() => vi.resetAllMocks());

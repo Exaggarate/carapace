@@ -1,6 +1,6 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
 // Zalo plugin module implements runtime behavior.
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
 
 const { setRuntime: setZaloRuntime, getRuntime: getZaloRuntime } =
   createPluginRuntimeStore<PluginRuntime>({

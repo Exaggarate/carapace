@@ -6,7 +6,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installProcessWarningFilter, shouldIgnoreWarning } from "./warning-filter.js";
 
-const warningFilterKey = Symbol.for("openclaw.warning-filter");
+const warningFilterKey = Symbol.for("carapace.warning-filter");
 const baseEmitWarning = process.emitWarning.bind(process);
 
 function resetWarningFilterInstallState(): void {
@@ -81,16 +81,16 @@ describe("warning filter", () => {
   });
 
   it("routes only Node's warning printer at WARN across repeated capture setup", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-warning-filter-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-warning-filter-"));
     const logFile = path.join(tempDir, "warning.log");
-    const marker = "OPENCLAW_WARNING_LEVEL_PROBE";
-    const applicationMarker = "OPENCLAW_FORGED_WARNING_PREFIX_ERROR";
+    const marker = "CARAPACE_WARNING_LEVEL_PROBE";
+    const applicationMarker = "CARAPACE_FORGED_WARNING_PREFIX_ERROR";
     const source = `
       process.on("warning", () => console.error("(" + process.release.name + ":" + process.pid + ") ${applicationMarker}"));
       const { installProcessWarningFilter } = await import("./src/infra/warning-filter.ts");
       const { enableConsoleCapture } = await import("./src/logging/console.ts");
       const { flushLogger, setLoggerOverride } = await import("./src/logging/logger.ts");
-      setLoggerOverride({ level: "trace", file: process.env.OPENCLAW_WARNING_LOG, consoleLevel: "silent" });
+      setLoggerOverride({ level: "trace", file: process.env.CARAPACE_WARNING_LOG, consoleLevel: "silent" });
       installProcessWarningFilter();
       enableConsoleCapture();
       enableConsoleCapture();
@@ -100,7 +100,7 @@ describe("warning filter", () => {
     `;
 
     try {
-      const childEnv: NodeJS.ProcessEnv = { ...process.env, OPENCLAW_WARNING_LOG: logFile };
+      const childEnv: NodeJS.ProcessEnv = { ...process.env, CARAPACE_WARNING_LOG: logFile };
       delete childEnv.NODE_OPTIONS;
       delete childEnv.NODE_REDIRECT_WARNINGS;
       delete childEnv.NODE_NO_WARNINGS;
@@ -175,19 +175,19 @@ describe("warning filter", () => {
         ),
       ).toBeUndefined();
 
-      emitWarning("Visible warning", { type: "Warning", code: "OPENCLAW_TEST_WARNING" });
+      emitWarning("Visible warning", { type: "Warning", code: "CARAPACE_TEST_WARNING" });
       emitWarning(
         Object.assign(new Error("The punycode module is deprecated."), {
           name: "DeprecationWarning",
           code: "DEP0040",
         }),
-        { type: "Warning", code: "OPENCLAW_VISIBLE_OVERRIDE" },
+        { type: "Warning", code: "CARAPACE_VISIBLE_OVERRIDE" },
       );
       await flushWarnings();
       expect(
-        seenWarnings.find((warning) => warning.code === "OPENCLAW_TEST_WARNING"),
+        seenWarnings.find((warning) => warning.code === "CARAPACE_TEST_WARNING"),
       ).toStrictEqual({
-        code: "OPENCLAW_TEST_WARNING",
+        code: "CARAPACE_TEST_WARNING",
         name: "Warning",
         message: "Visible warning",
       });

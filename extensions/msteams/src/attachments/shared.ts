@@ -1,20 +1,20 @@
 // Msteams plugin module implements shared behavior.
 import { Buffer } from "node:buffer";
 import { lookup } from "node:dns/promises";
-import { responseWithRelease } from "openclaw/plugin-sdk/fetch-runtime";
+import { responseWithRelease } from "carapace/plugin-sdk/fetch-runtime";
 import {
   buildHostnameAllowlistPolicyFromSuffixAllowlist,
   isHttpsUrlAllowedByHostnameSuffixAllowlist,
   isPrivateIpAddress,
   normalizeHostnameSuffixAllowlist,
   type SsrFPolicy,
-} from "openclaw/plugin-sdk/ssrf-policy";
-import { fetchWithSsrFGuard, type LookupFn } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-policy";
+import { fetchWithSsrFGuard, type LookupFn } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { MSTEAMS_REQUEST_TIMEOUT_MS } from "../request-timeout.js";
 import type { MSTeamsAttachmentLike, MSTeamsInboundMedia } from "./types.js";
 

@@ -1,5 +1,5 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import { wrapLlamaServerStream } from "./stream.js";
 
@@ -41,7 +41,7 @@ describe("llama-server stream payload", () => {
     });
   });
 
-  it("does not force thinking on when OpenClaw selected another level", async () => {
+  it("does not force thinking on when Carapace selected another level", async () => {
     const payloadHook = capturePayloadHook("high");
     const payload = { model: "model" };
 
@@ -62,7 +62,7 @@ describe("llama-server stream payload", () => {
           model: "model",
           response_format: {
             type: "json_schema",
-            json_schema: { name: "openclaw_response", schema },
+            json_schema: { name: "carapace_response", schema },
           },
         },
         {},

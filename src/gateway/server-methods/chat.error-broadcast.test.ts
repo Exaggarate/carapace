@@ -1,10 +1,10 @@
 // Chat error broadcast tests ensure chat.send failures still respond and emit
 // error-state broadcasts for connected UI clients.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createChatRunState } from "../server-chat-state.js";
 import { recordClientPresenceActivity } from "../server/client-presence.js";
 import type { GatewayWsClient } from "../server/ws-types.js";
@@ -146,7 +146,7 @@ describe("chat.send error broadcast", () => {
   it.each([false, true])(
     "records new admission activity only if the socket remains live (closed=%s)",
     async (closedDuringAdmission) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const ctx = createMockContext();
         const client: GatewayWsClient = {
           connId: "activity-send",
@@ -158,7 +158,7 @@ describe("chat.send error broadcast", () => {
             maxProtocol: 1,
             role: "operator",
             scopes: ["operator.admin"],
-            client: { id: "openclaw-tui", version: "test", platform: "test", mode: "cli" },
+            client: { id: "carapace-tui", version: "test", platform: "test", mode: "cli" },
           },
           authenticatedUserId: "send@activity.test",
           personPresence: { onlineSince: Date.now() - 1_000 },

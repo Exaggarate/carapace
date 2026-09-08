@@ -4,20 +4,20 @@ import {
   type AssistantMessage,
   type Context,
   type Model,
-} from "openclaw/plugin-sdk/llm";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/llm";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
 import {
   createSingleUserPromptMessage,
   extractNonEmptyAssistantText,
   isLiveTestEnabled,
-} from "openclaw/plugin-sdk/test-live";
+} from "carapace/plugin-sdk/test-live";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { buildDeepSeekProvider } from "./provider-catalog.js";
 import { createDeepSeekV4ThinkingWrapper } from "./stream.js";
 
 const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY ?? "";
-const DEEPSEEK_LIVE_MODEL = process.env.OPENCLAW_LIVE_DEEPSEEK_MODEL?.trim() || "deepseek-v4-flash";
+const DEEPSEEK_LIVE_MODEL = process.env.CARAPACE_LIVE_DEEPSEEK_MODEL?.trim() || "deepseek-v4-flash";
 const LIVE = isLiveTestEnabled(["DEEPSEEK_LIVE_TEST"]);
 
 const describeLive = LIVE && DEEPSEEK_KEY ? describe : describe.skip;

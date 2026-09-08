@@ -1,4 +1,4 @@
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
 import { LLAMA_SERVER_DEFAULT_ORIGIN } from "./defaults.js";
 
 type LlamaServerEndpoint = {

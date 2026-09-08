@@ -182,7 +182,7 @@ export function createScopedVitestConfig(
     environment?: string;
     exclude?: string[];
     argv?: string[];
-    includeOpenClawRuntimeSetup?: boolean;
+    includeCarapaceRuntimeSetup?: boolean;
     isolate?: boolean;
     name?: string;
     fileParallelism?: boolean;
@@ -203,7 +203,7 @@ export function createScopedVitestConfig(
   const scopedDir = options?.dir;
   const resolvedScopedDir = scopedDir ? path.join(repoRoot, scopedDir) : undefined;
   const env = options?.env;
-  const externalIncludePatterns = loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+  const externalIncludePatterns = loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env);
   const includeFromEnv = options?.intersectIncludeFile
     ? intersectIncludePatterns(include, externalIncludePatterns)
     : externalIncludePatterns;
@@ -229,7 +229,7 @@ export function createScopedVitestConfig(
     ...new Set([
       ...(baseTest.setupFiles ?? []),
       ...(options?.setupFiles ?? []),
-      ...(options?.includeOpenClawRuntimeSetup === false ? [] : ["test/setup-openclaw-runtime.ts"]),
+      ...(options?.includeCarapaceRuntimeSetup === false ? [] : ["test/setup-carapace-runtime.ts"]),
     ]),
   ].map(resolveRepoRootPath);
   const useNonIsolatedRunner = options?.useNonIsolatedRunner ?? !isolate;

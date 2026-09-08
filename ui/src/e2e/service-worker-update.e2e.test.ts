@@ -19,7 +19,7 @@ import {
   type ControlUiE2eServer,
 } from "../test-helpers/control-ui-e2e.ts";
 
-const useWebKit = process.env.OPENCLAW_CONTROL_UI_E2E_BROWSER === "webkit";
+const useWebKit = process.env.CARAPACE_CONTROL_UI_E2E_BROWSER === "webkit";
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 let artifactDir: string;
 beforeEach(() => {
@@ -27,7 +27,7 @@ beforeEach(() => {
     artifactDir = createControlUiE2eArtifactDir("service-worker-update");
   }
 });
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 const buildA = "service-worker-build-a";
 const buildB = "service-worker-build-b";
@@ -232,7 +232,7 @@ describe("Control UI service-worker production update E2E", () => {
     });
     try {
       expect((await page.goto(`${server.baseUrl}chat/research`))?.status()).toBe(200);
-      await page.waitForFunction(() => Boolean(customElements.get("openclaw-app")), undefined, {
+      await page.waitForFunction(() => Boolean(customElements.get("carapace-app")), undefined, {
         timeout: controlUiE2eWaitTimeoutMs,
       });
     } catch (error) {
@@ -253,7 +253,7 @@ describe("Control UI service-worker production update E2E", () => {
     if (!useWebKit && !canRunPlaywrightChromium(chromiumExecutablePath)) {
       throw new Error(`Playwright Chromium is unavailable at ${chromiumExecutablePath}`);
     }
-    outDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-service-worker-update-"));
+    outDir = await mkdtemp(path.join(os.tmpdir(), "carapace-service-worker-update-"));
     server = await startProductionControlUiE2eServer(
       outDir,
       buildA,
@@ -367,7 +367,7 @@ describe("Control UI service-worker production update E2E", () => {
         });
         await expect
           .poll(() => page.evaluate(() => caches.keys()))
-          .toContain("openclaw-control-" + buildB);
+          .toContain("carapace-control-" + buildB);
         await page.waitForFunction(async () => {
           const registration = await navigator.serviceWorker.getRegistration();
           return registration?.active?.state === "activated" && !registration.installing;
@@ -467,10 +467,10 @@ describe("Control UI service-worker production update E2E", () => {
         .poll(
           async () =>
             page.evaluate(() => {
-              const panel = document.querySelector("openclaw-terminal-panel") as
+              const panel = document.querySelector("carapace-terminal-panel") as
                 | (HTMLElement & { available: boolean })
                 | null;
-              const shell = document.querySelector("openclaw-app-shell") as HTMLElement & {
+              const shell = document.querySelector("carapace-app-shell") as HTMLElement & {
                 runtime?: {
                   context?: {
                     config: { current: { terminalEnabled: boolean } };
@@ -502,7 +502,7 @@ describe("Control UI service-worker production update E2E", () => {
       });
       await expect
         .poll(() => page.evaluate(() => caches.keys()))
-        .toContain(`openclaw-control-${buildA}`);
+        .toContain(`carapace-control-${buildA}`);
 
       const nextOutDir = `${outDir}-next`;
       const previousOutDir = `${outDir}-previous`;
@@ -515,13 +515,13 @@ describe("Control UI service-worker production update E2E", () => {
 
       await page.evaluate(() => {
         localStorage.setItem(
-          "openclaw.terminal.panel.v1",
+          "carapace.terminal.panel.v1",
           JSON.stringify({ open: true, dock: "bottom", height: 320, width: 520 }),
         );
       });
       await gateway.setOnline(false);
       await page.waitForFunction(() => {
-        const panel = document.querySelector("openclaw-terminal-panel") as
+        const panel = document.querySelector("carapace-terminal-panel") as
           | (HTMLElement & { available: boolean })
           | null;
         return panel?.available === false;
@@ -543,14 +543,14 @@ describe("Control UI service-worker production update E2E", () => {
         return registration?.installing?.state === "installing";
       });
       await page.waitForFunction(() => {
-        const panel = document.querySelector("openclaw-terminal-panel") as
+        const panel = document.querySelector("carapace-terminal-panel") as
           | (HTMLElement & { available: boolean; terminalPanelOpen: boolean })
           | null;
         return panel?.available === true && panel.terminalPanelOpen;
       });
       await page.evaluate(() => {
         window.dispatchEvent(
-          new CustomEvent("openclaw:terminal-toggle", {
+          new CustomEvent("carapace:terminal-toggle", {
             detail: {
               open: true,
               catalog: {
@@ -563,7 +563,7 @@ describe("Control UI service-worker production update E2E", () => {
         );
       });
       await expect
-        .poll(() => page.evaluate(() => sessionStorage.getItem("openclaw.terminal.actions.v1")))
+        .poll(() => page.evaluate(() => sessionStorage.getItem("carapace.terminal.actions.v1")))
         .toContain("thread-during-worker-refresh");
       await page.waitForTimeout(300);
       const catalogOpensBeforeWorkerActivation = await getCatalogOpens();
@@ -579,7 +579,7 @@ describe("Control UI service-worker production update E2E", () => {
         .poll(async () => (await gateway.getRequests("connect")).at(-1)?.params)
         .toMatchObject({ client: { buildId: buildB } });
 
-      const terminal = page.locator("openclaw-terminal-panel[embedded]");
+      const terminal = page.locator("carapace-terminal-panel[embedded]");
       await terminal.waitFor({ state: "attached" });
       await expect
         .poll(() =>
@@ -601,7 +601,7 @@ describe("Control UI service-worker production update E2E", () => {
       // Observe the request and finish its intent before counting exactly once.
       await expect.poll(getCatalogOpens).toHaveLength(1);
       await expect
-        .poll(() => page.evaluate(() => sessionStorage.getItem("openclaw.terminal.actions.v1")))
+        .poll(() => page.evaluate(() => sessionStorage.getItem("carapace.terminal.actions.v1")))
         .toBeNull();
       const catalogOpens = await getCatalogOpens();
       expect(catalogOpens).toHaveLength(1);
@@ -619,7 +619,7 @@ describe("Control UI service-worker production update E2E", () => {
 
       await expect
         .poll(() => page.evaluate(() => caches.keys()))
-        .toContain(`openclaw-control-${buildB}`);
+        .toContain(`carapace-control-${buildB}`);
       const refreshedAsset = await fetchControlledAsset(page, assetB.path);
       expect(refreshedAsset).toMatchObject({
         controllerState: "activated",
@@ -634,7 +634,7 @@ describe("Control UI service-worker production update E2E", () => {
               const shell = await cache.match(new URL("./", window.location.origin));
               return shell ? (await shell.text()).includes(assetPath) : false;
             },
-            { assetPath: assetB.path, cacheName: `openclaw-control-${buildB}` },
+            { assetPath: assetB.path, cacheName: `carapace-control-${buildB}` },
           ),
         )
         .toBe(true);

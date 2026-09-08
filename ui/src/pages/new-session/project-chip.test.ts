@@ -3,9 +3,9 @@ import { projectCloneInput, resolveProjectChip } from "./project-chip.ts";
 
 const projects = [
   {
-    id: "openclaw",
-    displayName: "OpenClaw",
-    repoRoot: "/workspace/openclaw",
+    id: "carapace",
+    displayName: "Carapace",
+    repoRoot: "/workspace/carapace",
     source: "registered" as const,
   },
   {
@@ -58,7 +58,7 @@ describe("What chip state", () => {
       selectedRemoteProject: null,
       projects,
       recents: [
-        { kind: "project", projectId: "openclaw", displayName: "OpenClaw" },
+        { kind: "project", projectId: "carapace", displayName: "Carapace" },
         folderRecent,
         repositoryRecent,
       ],
@@ -69,11 +69,11 @@ describe("What chip state", () => {
   });
 
   it.each([
-    ["https://github.com/openclaw/openclaw.git", true],
-    ["git@github.com:openclaw/openclaw.git", true],
-    ["file:///tmp/openclaw.git", false],
+    ["https://github.com/Exaggarate/carapace.git", true],
+    ["git@github.com:Exaggarate/carapace.git", true],
+    ["file:///tmp/carapace.git", false],
     ["--upload-pack=touch-pwned", false],
-    ["https://github.com/openclaw/openclaw.git --config=evil", false],
+    ["https://github.com/Exaggarate/carapace.git --config=evil", false],
   ])("recognizes safe clone input %s", (value, expected) => {
     expect(projectCloneInput(value) !== null).toBe(expected);
   });

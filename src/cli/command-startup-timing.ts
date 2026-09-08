@@ -1,16 +1,16 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type DiagnosticsTimelineModule = typeof import("../infra/diagnostics-timeline.js");
 
 type CliCommandStartupTimingOptions = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 };
 
 let diagnosticsTimelineModulePromise: Promise<DiagnosticsTimelineModule> | undefined;
 
 function hasDiagnosticsTimelinePath(env: NodeJS.ProcessEnv): boolean {
-  return Boolean(env.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH?.trim());
+  return Boolean(env.CARAPACE_DIAGNOSTICS_TIMELINE_PATH?.trim());
 }
 
 function loadDiagnosticsTimelineModule(): Promise<DiagnosticsTimelineModule> {

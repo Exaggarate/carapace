@@ -5,7 +5,7 @@ import {
   type MemoryEmbeddingProviderCreateOptions,
   type MemoryEmbeddingProviderCreateResult,
   type RemoteEmbeddingClient,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   DEEPINFRA_BASE_URL,
   DEEPINFRA_EMBED_FALLBACK_MODELS,

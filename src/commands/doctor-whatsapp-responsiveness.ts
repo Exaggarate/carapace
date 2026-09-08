@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { HealthFinding } from "../flows/health-checks.js";
 import type { StatusSummary } from "../status/types.js";
 
@@ -27,10 +27,10 @@ function normalizeExecutableName(value: string | undefined): string {
 function isLocalTuiCommand(command: string): boolean {
   const argv = tokenizeCommandLine(command);
   const executable = normalizeExecutableName(argv[0]);
-  if (executable === "openclaw-tui") {
+  if (executable === "carapace-tui") {
     return true;
   }
-  return executable === "openclaw" && LOCAL_TUI_SUBCOMMANDS.has(argv[1] ?? "");
+  return executable === "carapace" && LOCAL_TUI_SUBCOMMANDS.has(argv[1] ?? "");
 }
 
 function parsePsPidLine(line: string): LocalTuiProcess | null {
@@ -49,7 +49,7 @@ function parsePsPidLine(line: string): LocalTuiProcess | null {
   return { pid, command };
 }
 
-/** Lists local OpenClaw TUI processes without inferring their Gateway or activity. */
+/** Lists local Carapace TUI processes without inferring their Gateway or activity. */
 function listLocalTuiProcesses(): LocalTuiProcess[] {
   if (process.platform === "win32") {
     return [];
@@ -75,7 +75,7 @@ function listLocalTuiProcesses(): LocalTuiProcess[] {
   return processes;
 }
 
-function hasWhatsappEnabled(cfg: OpenClawConfig): boolean {
+function hasWhatsappEnabled(cfg: CarapaceConfig): boolean {
   const whatsapp = cfg.channels?.whatsapp;
   if (!whatsapp || whatsapp.enabled === false) {
     return false;
@@ -93,7 +93,7 @@ function formatPidList(processes: LocalTuiProcess[]): string {
 
 /** Collects read-only structured findings for WhatsApp responsiveness pressure. */
 export function collectWhatsappResponsivenessHealthFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   status?: Pick<StatusSummary, "eventLoop"> | null;
   listLocalTuiProcesses?: () => LocalTuiProcess[];
 }): readonly HealthFinding[] {
@@ -122,7 +122,7 @@ export function collectWhatsappResponsivenessHealthFindings(params: {
       target: pids,
       requirement: "local-tui-event-loop-pressure",
       fixHint: `Inspect Gateway diagnostics with ${formatCliCommand(
-        "openclaw gateway diagnostics export",
+        "carapace gateway diagnostics export",
       )} before deciding whether to close clients.`,
     },
   ];

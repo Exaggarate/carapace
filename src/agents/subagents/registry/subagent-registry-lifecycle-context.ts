@@ -1,5 +1,5 @@
 import type { cleanupBrowserSessionsForLifecycleEnd } from "../../../browser-lifecycle-cleanup.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { callGateway as defaultCallGateway } from "../../../gateway/call.js";
 // This type-only leaf exists solely to keep lifecycle sibling modules from importing the controller.
 // Keeping the controller out of their dependency graph satisfies the architecture cycle gate.
@@ -19,7 +19,7 @@ export type SubagentLifecycleOptions = {
   runs: Map<string, SubagentRunRecord>;
   resumedRuns: Set<string>;
   subagentAnnounceTimeoutMs: number;
-  getRuntimeConfig(): OpenClawConfig;
+  getRuntimeConfig(): CarapaceConfig;
   persist(...runIds: string[]): void;
   persistOrThrow(...runIds: string[]): void;
   clearPendingLifecycleError(runId: string): void;

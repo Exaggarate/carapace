@@ -1,5 +1,5 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import { hasRunWorkspaceSkillUsage } from "../../skills/runtime/run-usage.js";
 import { stripProposalFrontmatterForSkill } from "../../skills/workshop/frontmatter.js";
@@ -84,7 +84,7 @@ function prepareSkillPatch(params: {
 
 export async function executePrepareSkillPatch(params: {
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   env?: NodeJS.ProcessEnv;
   toolParams: Record<string, unknown>;

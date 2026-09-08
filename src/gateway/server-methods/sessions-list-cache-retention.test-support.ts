@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { setImmediate } from "node:timers/promises";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { bumpSessionAutomationVersion } from "../session-automation-index.js";
 import type { SessionsListResult } from "../session-utils.types.js";
@@ -27,7 +27,7 @@ function result(key: string, hasActiveRun = false): SessionsListResult {
 
 async function retainedAfterRotation(rotation: "fence" | "config" | "catalog" | "expiry") {
   const context = {} as GatewayRequestContext;
-  let config: OpenClawConfig = {};
+  let config: CarapaceConfig = {};
   const retired: WeakRef<SessionsListResult>[] = [];
   const control = new WeakRef(result("uncached"));
   const modelCatalog = new Map([["main", { entries: [] }]]);

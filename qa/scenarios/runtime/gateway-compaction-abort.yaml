@@ -23,8 +23,8 @@ scenario:
     - The committed-cancellation case releases the hook in finally, observes hook settlement and the next same-session provider request, then joins only the owned Gateway before its final SQLite and delivery assertions; no second compaction or late original reply is allowed.
     - The held internal after hook covers the enclosing ContextEngine cancellation race, not the earlier SDK session_compact extension-hook timing.
   regressionRefs:
-    - https://github.com/openclaw/openclaw/issues/127523
-    - https://github.com/openclaw/openclaw/issues/127551
+    - https://github.com/Exaggarate/carapace/issues/127523
+    - https://github.com/Exaggarate/carapace/issues/127551
   docsRefs:
     - docs/concepts/compaction.md
     - docs/automation/hooks.md
@@ -46,7 +46,7 @@ scenario:
     kind: script
     path: test/e2e/qa-lab/runtime/gateway-compaction-abort.ts
     timeoutMs: 660000
-    summary: Run on Blacksmith Testbox after OPENCLAW_BUILD_PRIVATE_QA=1 pnpm build. The producer launches an environment-isolated child before importing OpenClaw and uses a built dist Gateway with owned state and ports. Pending cancellation, real writer replacement, independent summary failure, success, and cancellation during a loaded internal after hook record SQLite snapshots, held-hook accounting, provider checkpoints, QA Channel delivery, owned-process settlement, and a standard evidence verdict.
+    summary: Run on Blacksmith Testbox after CARAPACE_BUILD_PRIVATE_QA=1 pnpm build. The producer launches an environment-isolated child before importing Carapace and uses a built dist Gateway with owned state and ports. Pending cancellation, real writer replacement, independent summary failure, success, and cancellation during a loaded internal after hook record SQLite snapshots, held-hook accounting, provider checkpoints, QA Channel delivery, owned-process settlement, and a standard evidence verdict.
     config:
       requiredProviderMode: mock-openai
     args:

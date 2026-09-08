@@ -117,7 +117,7 @@ function populatedColdOpenScenario(): ControlUiMockGatewayScenario {
                 {
                   targetId: "target-1",
                   tabId: "tab-1",
-                  title: "OpenClaw",
+                  title: "Carapace",
                   url: "https://example.test/",
                 },
               ],
@@ -166,7 +166,7 @@ function populatedColdOpenScenario(): ControlUiMockGatewayScenario {
               "--- a/README.md",
               "+++ b/README.md",
               "@@ -1 +1,2 @@",
-              " OpenClaw",
+              " Carapace",
               "+Cold-open invariant",
               "",
             ].join("\n"),
@@ -227,7 +227,7 @@ function populatedColdOpenScenario(): ControlUiMockGatewayScenario {
 }
 
 async function openColdSidebar(page: Page, scenario = coldOpenScenario()) {
-  await page.route("**/__openclaw__/assistant-media?*", (route) =>
+  await page.route("**/__carapace__/assistant-media?*", (route) =>
     route.fulfill({ body: ONE_PIXEL_PNG, contentType: "image/png" }),
   );
   const gateway = await installMockGateway(page, scenario);
@@ -306,7 +306,7 @@ async function seedRetainedDesktopSlot(page: Page) {
         }),
       );
       localStorage.setItem(
-        "openclaw.desktopPanel",
+        "carapace.desktopPanel",
         JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
       );
     },
@@ -356,10 +356,10 @@ async function readColdOpenOutcome(page: Page): Promise<ColdOpenOutcome> {
   const activePanel = page.locator(".side-panel__panel:not([hidden])");
   await activePanel.waitFor();
   await activePanel.locator(":scope > *").first().waitFor();
-  if ((await activePanel.locator("openclaw-panel-loading-skeleton").count()) > 0) {
+  if ((await activePanel.locator("carapace-panel-loading-skeleton").count()) > 0) {
     return { outcome: "loading", emptyStateOffersAction: false };
   }
-  const emptyState = activePanel.locator("openclaw-panel-empty-state").first();
+  const emptyState = activePanel.locator("carapace-panel-empty-state").first();
   const genericEmptyState = (await emptyState.count()) > 0;
   return {
     outcome: genericEmptyState ? "generic-empty" : "content",
@@ -448,7 +448,7 @@ suite.define(() => {
     const context = await suite.newBrowserContext({ serviceWorkers: "block" });
     try {
       const page = await context.newPage();
-      await page.route("**/__openclaw__/assistant-media?*", (route) =>
+      await page.route("**/__carapace__/assistant-media?*", (route) =>
         route.fulfill({ body: ONE_PIXEL_PNG, contentType: "image/png" }),
       );
       const gateway = await installMockGateway(page, {
@@ -468,8 +468,8 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}chat`);
       await waitForControlUiGatewayReady(page);
       await openChatSidePanelType(page, "Browser");
-      const browser = page.locator("openclaw-browser-panel");
-      await browser.locator("openclaw-panel-empty-state").waitFor();
+      const browser = page.locator("carapace-browser-panel");
+      await browser.locator("carapace-panel-empty-state").waitFor();
 
       const initialRequests = await gateway.getRequests("browser.request");
       expect(initialRequests.map((request) => request.params)).toEqual([
@@ -556,7 +556,7 @@ suite.define(() => {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, RETAINED_DESKTOP_SESSION_KEY));
       await waitForControlUiGatewayReady(page);
 
-      const desktop = page.locator("openclaw-desktop-panel");
+      const desktop = page.locator("carapace-desktop-panel");
       await desktop.waitFor({ state: "attached" });
       await page.evaluate(
         () =>
@@ -594,7 +594,7 @@ suite.define(() => {
       await waitForControlUiGatewayReady(page);
       await openChatSidePanelType(page, "Desktop");
 
-      const desktop = page.locator("openclaw-desktop-panel");
+      const desktop = page.locator("carapace-desktop-panel");
       await desktop.getByText("worker-desktop-1", { exact: true }).waitFor();
       await installDesktopClientFake(desktop);
       await gateway.deferNext("desktop.observe");

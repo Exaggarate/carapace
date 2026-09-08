@@ -1,5 +1,5 @@
-import type { ControlUiHost, ControlUiWidget } from "openclaw/plugin-sdk/control-ui";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { ControlUiHost, ControlUiWidget } from "carapace/plugin-sdk/control-ui";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, expect, it, vi } from "vitest";
 import { createWorkboardCard } from "../lib/workboard/test/index-helpers.ts";
 import type { WorkboardCard } from "../lib/workboard/types.ts";

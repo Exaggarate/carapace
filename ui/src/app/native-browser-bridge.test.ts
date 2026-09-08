@@ -18,7 +18,7 @@ const tab = {
   openedBy: "web",
 };
 function install(postMessage = vi.fn().mockResolvedValue({ ok: true })) {
-  vi.stubGlobal("webkit", { messageHandlers: { openclawBrowser: { postMessage } } });
+  vi.stubGlobal("webkit", { messageHandlers: { carapaceBrowser: { postMessage } } });
   return postMessage;
 }
 afterEach(() => vi.unstubAllGlobals());
@@ -31,7 +31,7 @@ describe("native browser bridge wire contract", () => {
     expect(await postNativeBrowserMessage({ type: "close", tabId: "mac-1" })).toBeNull();
     const unsubscribe = subscribeNativeBrowserState(listener);
     window.dispatchEvent(
-      new CustomEvent("openclaw:native-browser-state", { detail: { revision: 1, tabs: [tab] } }),
+      new CustomEvent("carapace:native-browser-state", { detail: { revision: 1, tabs: [tab] } }),
     );
     unsubscribe();
     expect(listener).not.toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe("native browser bridge wire contract", () => {
         );
       },
     };
-    vi.stubGlobal("webkit", { messageHandlers: { openclawBrowser: bridge } });
+    vi.stubGlobal("webkit", { messageHandlers: { carapaceBrowser: bridge } });
     for (const message of [
       { type: "open", tabId: "mac-1", url: "about:blank", activate: false },
       { type: "present", scope: "scope", tabId: null, rect: null, visible: false },
@@ -127,12 +127,12 @@ describe("native browser bridge wire contract", () => {
 
   it("validates initial state and ignores malformed, duplicate, stale, and unsubscribed pushes", () => {
     install();
-    vi.stubGlobal("__OPENCLAW_NATIVE_BROWSER__", { revision: 2, tabs: [tab] });
+    vi.stubGlobal("__CARAPACE_NATIVE_BROWSER__", { revision: 2, tabs: [tab] });
     expect(readNativeBrowserState()).toEqual({ revision: 2, tabs: [tab] });
     const listener = vi.fn();
     const unsubscribe = subscribeNativeBrowserState(listener);
     const push = (detail: unknown) =>
-      window.dispatchEvent(new CustomEvent("openclaw:native-browser-state", { detail }));
+      window.dispatchEvent(new CustomEvent("carapace:native-browser-state", { detail }));
     for (const state of [
       { revision: 1, tabs: [tab] },
       { revision: 2, tabs: [] },
@@ -150,7 +150,7 @@ describe("native browser bridge wire contract", () => {
     unsubscribe();
     push({ revision: 4, tabs: [] });
     expect(listener).toHaveBeenCalledOnce();
-    vi.stubGlobal("__OPENCLAW_NATIVE_BROWSER__", { revision: 5, tabs: [tab, tab] });
+    vi.stubGlobal("__CARAPACE_NATIVE_BROWSER__", { revision: 5, tabs: [tab, tab] });
     expect(readNativeBrowserState()).toBeNull();
   });
 });

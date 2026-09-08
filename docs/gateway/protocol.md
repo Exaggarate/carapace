@@ -9,7 +9,7 @@ doc-schema-version: 1
 ---
 
 The Gateway WS protocol is the single control plane and node transport for
-OpenClaw. Operator and node clients (CLI, web UI, macOS app, iOS/Android nodes,
+Carapace. Operator and node clients (CLI, web UI, macOS app, iOS/Android nodes,
 headless nodes) connect over WebSocket and declare a **role** and **scope** at
 handshake time.
 
@@ -84,6 +84,6 @@ Every section heading from the previous single-page version keeps its anchor her
 
 ## Related
 
-- [Building a Gateway client](https://docs.openclaw.ai/gateway/clients)
-- [Embedding OpenClaw](https://docs.openclaw.ai/gateway/embedding)
+- [Building a Gateway client](clients.md)
+- [Embedding Carapace](embedding.md)
 - [Gateway runbook](/gateway)

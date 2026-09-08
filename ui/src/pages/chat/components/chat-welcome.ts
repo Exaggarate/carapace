@@ -2,7 +2,7 @@
 import { html, nothing } from "lit";
 import type { GatewaySessionRow, SessionsListResult } from "../../../api/types.ts";
 import { identityAvatarImage } from "../../../components/identity-avatar-view.ts";
-import "../../../components/openclaw-mascot.ts";
+import "../../../components/carapace-mascot.ts";
 import { t } from "../../../i18n/index.ts";
 import { resolveAssistantTextAvatar, resolveChatAvatarRenderUrl } from "../../../lib/avatar.ts";
 import { formatRelativeTimestamp } from "../../../lib/format.ts";
@@ -103,7 +103,7 @@ function selectWelcomeRecentSessions(
 function renderWelcomeClawd() {
   return html`
     <div class="agent-chat__welcome-clawd" aria-hidden="true">
-      <openclaw-mascot mood="idle" .size=${112}></openclaw-mascot>
+      <carapace-mascot mood="idle" .size=${112}></carapace-mascot>
     </div>
   `;
 }
@@ -203,7 +203,7 @@ export function renderWelcomeState(props: ChatWelcomeProps) {
   const mascotFor = (event: DragEvent): WelcomeMascot | null => {
     const target = event.currentTarget;
     return target instanceof HTMLElement
-      ? target.querySelector<WelcomeMascot>(".agent-chat__welcome-clawd openclaw-mascot")
+      ? target.querySelector<WelcomeMascot>(".agent-chat__welcome-clawd carapace-mascot")
       : null;
   };
 

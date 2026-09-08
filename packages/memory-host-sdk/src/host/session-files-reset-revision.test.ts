@@ -4,7 +4,7 @@ import path from "node:path";
 import {
   clearConfigCache,
   clearRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   persistSessionTranscriptTurn,
@@ -12,8 +12,8 @@ import {
   resetSessionEntryLifecycle,
   upsertSessionEntryCore,
 } from "../../../../src/config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../../src/state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../../src/state/carapace-state-db.js";
 import {
   buildSessionEntry,
   matchesSessionEntryPrefixHash,
@@ -33,25 +33,25 @@ let previousConfigPath: string | undefined;
 
 beforeEach(() => {
   tmpDir = fsSync.mkdtempSync(path.join(os.tmpdir(), "session-reset-revision-test-"));
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", tmpDir);
+  previousStateDir = process.env.CARAPACE_STATE_DIR;
+  previousConfigPath = process.env.CARAPACE_CONFIG_PATH;
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", tmpDir);
   clearRuntimeConfigSnapshot();
   clearConfigCache();
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   if (previousStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", previousStateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", previousStateDir);
   }
   if (previousConfigPath === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_CONFIG_PATH");
+    Reflect.deleteProperty(process.env, "CARAPACE_CONFIG_PATH");
   } else {
-    Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", previousConfigPath);
+    Reflect.set(process.env, "CARAPACE_CONFIG_PATH", previousConfigPath);
   }
   clearRuntimeConfigSnapshot();
   clearConfigCache();
@@ -70,8 +70,8 @@ describe("SQLite session snapshots and reset content revision", () => {
       };
       const observedAt = Date.parse("2026-07-01T10:00:00.000Z");
       const messages = [
-        { role: "user", content: "Owner preference.", __openclaw: { senderIsOwner: true } },
-        { role: "assistant", content: "Derived answer.", __openclaw: { turnTainted: true } },
+        { role: "user", content: "Owner preference.", __carapace: { senderIsOwner: true } },
+        { role: "assistant", content: "Derived answer.", __carapace: { turnTainted: true } },
         {
           role: "user",
           content: "Internal poll.",
@@ -98,7 +98,7 @@ describe("SQLite session snapshots and reset content revision", () => {
         {
           role: "user",
           content: [{ type: "image", source: "photo.jpg" }],
-          __openclaw: { senderIsOwner: true },
+          __carapace: { senderIsOwner: true },
         },
         { role: "assistant", content: [{ type: "text", text: "Photo answer." }] },
       ];
@@ -160,7 +160,7 @@ describe("SQLite session snapshots and reset content revision", () => {
         .map((message) => [message, observedAt]);
       expect(sqliteObserver.mock.calls).toEqual(observations);
       expect(archiveObserver.mock.calls).toEqual(observations);
-      const cutoff = Symbol.for("openclaw.memory.sessionResetRecallCutoff");
+      const cutoff = Symbol.for("carapace.memory.sessionResetRecallCutoff");
       expect(Object.getOwnPropertyDescriptor(sqlite, cutoff)).toEqual(
         Object.getOwnPropertyDescriptor(archive, cutoff),
       );
@@ -210,7 +210,7 @@ describe("SQLite session snapshots and reset content revision", () => {
 
     expect(during).toEqual(before);
     expect(observed).toEqual([first.message, kept.message]);
-    const cutoff = Symbol.for("openclaw.memory.sessionResetRecallCutoff");
+    const cutoff = Symbol.for("carapace.memory.sessionResetRecallCutoff");
     expect(Object.getOwnPropertyDescriptor(during, cutoff)).toMatchObject({
       configurable: false,
       enumerable: false,
@@ -276,7 +276,7 @@ describe("SQLite session snapshots and reset content revision", () => {
     const after = requireSessionEntry(await buildSessionEntry(sessionKey, buildOptions));
     expect(after.content).toBe(afterAppend.content);
     expect(after.lineMap).toEqual(afterAppend.lineMap);
-    const cutoffSymbol = Symbol.for("openclaw.memory.sessionResetRecallCutoff");
+    const cutoffSymbol = Symbol.for("carapace.memory.sessionResetRecallCutoff");
     expect(Object.getOwnPropertyDescriptor(after, cutoffSymbol)).toMatchObject({
       enumerable: false,
       value: { state: "valid", cutoffLine: expect.any(Number) },

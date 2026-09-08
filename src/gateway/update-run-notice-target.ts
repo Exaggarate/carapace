@@ -1,6 +1,6 @@
 import { parseSessionThreadInfo } from "../config/sessions/thread-info.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SessionDeliveryRoute } from "../infra/session-delivery-queue-storage.js";
 import {
   type DeliveryContext,
@@ -21,7 +21,7 @@ type NoticeTarget =
 
 /** Resolve the origin once; internal sessions intentionally have no external delivery context. */
 export function resolveUpdateRunNoticeTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey?: string;
   explicitDeliveryContext?: DeliveryContext;
   threadId?: string;

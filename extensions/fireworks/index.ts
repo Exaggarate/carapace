@@ -1,14 +1,14 @@
-import type { ProviderResolveDynamicModelContext } from "openclaw/plugin-sdk/plugin-entry";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+import type { ProviderResolveDynamicModelContext } from "carapace/plugin-sdk/plugin-entry";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import {
   buildProviderReplayFamilyHooks,
   cloneFirstTemplateModel,
   DEFAULT_CONTEXT_TOKENS,
   normalizeModelCompat,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import { isFireworksKimiModelId } from "./model-id.js";
 import { applyFireworksConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import {
   FIREWORKS_BASE_URL,
   FIREWORKS_DEFAULT_CONTEXT_WINDOW,

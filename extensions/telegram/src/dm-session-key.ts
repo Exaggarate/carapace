@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   buildAgentSessionKey,
   normalizeAccountId,
   type ResolvedAgentRoute,
-} from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/routing";
 
 export function resolveTelegramDirectPeerId(params: {
   chatId: number | string;
@@ -16,7 +16,7 @@ export function resolveTelegramDirectPeerId(params: {
 export function resolveTelegramNamedAccountBaseSessionKey(
   defaultAccountId: string,
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     route: Pick<ResolvedAgentRoute, "agentId" | "accountId" | "matchedBy" | "sessionKey">;
     chatId: number | string;
     isGroup: boolean;
@@ -49,7 +49,7 @@ export function resolveTelegramNamedAccountBaseSessionKey(
 export function resolveTelegramSecurityDmRoute(
   defaultAccountId: string,
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId: string;
     route: ResolvedAgentRoute;
     principalId?: string;

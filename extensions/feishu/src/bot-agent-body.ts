@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { FeishuPermissionError } from "./bot-sender-name.js";
 import type { FeishuMessageContext } from "./types.js";
 

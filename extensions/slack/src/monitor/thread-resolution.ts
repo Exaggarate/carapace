@@ -6,20 +6,20 @@ import {
   WebAPIRateLimitedError,
   WebAPIRequestError,
 } from "@slack/web-api";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
 import {
   collectErrorGraphCandidates,
   extractErrorCode,
   readErrorName,
-} from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/error-runtime";
 import {
   asDateTimestampMs,
   parseFiniteNumber,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { classifyTransientNetworkErrorCode } from "openclaw/plugin-sdk/retry-runtime";
-import { logVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString as normalizeThreadTs } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { classifyTransientNetworkErrorCode } from "carapace/plugin-sdk/retry-runtime";
+import { logVerbose, shouldLogVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString as normalizeThreadTs } from "carapace/plugin-sdk/string-coerce-runtime";
 import { formatSlackError } from "../errors.js";
 import type { SlackMessageEvent } from "../types.js";
 import type { SlackIngressTurnLifecycle } from "./ingress.js";

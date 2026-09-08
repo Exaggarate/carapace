@@ -169,7 +169,7 @@ async function writeFixture(pluginRoot: string): Promise<void> {
         $schema: PLUGIN_SCHEMA,
         name: "weather-helper",
         extensions: {
-          "ai.openclaw": { activation: { onStartup: true } },
+          "ai.carapace": { activation: { onStartup: true } },
           "com.example.other": { ignored: true },
         },
       },
@@ -325,11 +325,11 @@ async function main(): Promise<void> {
   const devRunnerPath = path.join(repoRoot, "scripts", "run-node.mjs");
   const entryPath = path.join(repoRoot, "dist", "index.js");
   const rootDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-plugin-gateway-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-plugin-gateway-")),
   );
-  const keep = process.env.OPENCLAW_AGENT_PLUGIN_GATEWAY_E2E_KEEP === "1";
+  const keep = process.env.CARAPACE_AGENT_PLUGIN_GATEWAY_E2E_KEEP === "1";
   const stateDir = path.join(rootDir, "state");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   const fixtureDir = path.join(rootDir, "weather-helper");
   const workspaceDir = path.join(rootDir, "workspace");
   const mockPort = await freePort();
@@ -340,11 +340,11 @@ async function main(): Promise<void> {
   const childEnv: NodeJS.ProcessEnv = {
     ...process.env,
     OPENAI_API_KEY: "agent-plugin-gateway-e2e",
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_NO_RESPAWN: "1",
-    OPENCLAW_SKIP_CHANNELS: "1",
-    OPENCLAW_SKIP_STARTUP_MODEL_PREWARM: "1",
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_NO_RESPAWN: "1",
+    CARAPACE_SKIP_CHANNELS: "1",
+    CARAPACE_SKIP_STARTUP_MODEL_PREWARM: "1",
+    CARAPACE_STATE_DIR: stateDir,
   };
   let mock: CapturedChild | undefined;
   let gateway: CapturedChild | undefined;
@@ -392,12 +392,12 @@ async function main(): Promise<void> {
       headers: {
         authorization: `Bearer ${GATEWAY_TOKEN}`,
         "content-type": "application/json",
-        "x-openclaw-agent": "main",
-        "x-openclaw-scopes": "operator.write",
-        "x-openclaw-session-key": "agent:main:openresponses:agent-plugin-gateway-e2e",
+        "x-carapace-agent": "main",
+        "x-carapace-scopes": "operator.write",
+        "x-carapace-session-key": "agent:main:openresponses:agent-plugin-gateway-e2e",
       },
       body: JSON.stringify({
-        model: "openclaw/main",
+        model: "carapace/main",
         input: "agent plugin bundle qa check",
         max_output_tokens: 256,
         stream: false,

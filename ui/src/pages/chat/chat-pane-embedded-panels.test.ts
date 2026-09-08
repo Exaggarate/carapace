@@ -82,9 +82,9 @@ async function renderPanelFixture(
     }),
     mount,
   );
-  await mount.querySelector("openclaw-chat-sidebar-region")?.updateComplete;
-  await mount.querySelector<LitElement>("openclaw-chat-detail-panel")?.updateComplete;
-  await mount.querySelector("openclaw-panel-loading-skeleton")?.updateComplete;
+  await mount.querySelector("carapace-chat-sidebar-region")?.updateComplete;
+  await mount.querySelector<LitElement>("carapace-chat-detail-panel")?.updateComplete;
+  await mount.querySelector("carapace-panel-loading-skeleton")?.updateComplete;
 }
 
 function createReviewFixture() {
@@ -371,24 +371,24 @@ describe("chat pane embedded panels", () => {
       const definitions = sidebarPanelDefinitions({
         state,
         renderDetail: (content) =>
-          html`<openclaw-chat-detail-panel
+          html`<carapace-chat-detail-panel
             .content=${content}
             embedded
-          ></openclaw-chat-detail-panel>`,
+          ></carapace-chat-detail-panel>`,
         workspace: html`<div>Files</div>`,
       } as Parameters<typeof sidebarPanelDefinitions>[0]);
       await renderPanelFixture(mount, layout, definitions);
     };
     const review = openSlot({ columns: [] }, "detail");
     await renderPanels(setSidebarOpen(review, false));
-    expect(mount.querySelector("openclaw-session-diff")).toBeNull();
+    expect(mount.querySelector("carapace-session-diff")).toBeNull();
     expect(request).not.toHaveBeenCalled();
 
     await renderPanels(review);
     await vi.waitFor(() =>
       expect(mount.querySelector(".session-diff__file-toggle")).not.toBeNull(),
     );
-    const diff = mount.querySelector("openclaw-session-diff");
+    const diff = mount.querySelector("carapace-session-diff");
     const toggle = mount.querySelector<HTMLButtonElement>(".session-diff__file-toggle")!;
     toggle.click();
     await vi.waitFor(() => expect(toggle.getAttribute("aria-expanded")).toBe("false"));
@@ -403,14 +403,14 @@ describe("chat pane embedded panels", () => {
       review,
     ]) {
       await renderPanels(layout);
-      expect(mount.querySelector("openclaw-session-diff")).toBe(diff);
+      expect(mount.querySelector("carapace-session-diff")).toBe(diff);
       expect(diff?.closest("[data-panel-slot]")?.hasAttribute("hidden")).toBe(
         !isSidebarSlotVisible(layout, "detail"),
       );
       expect(toggle.getAttribute("aria-expanded")).toBe("false");
     }
     await renderPanels(closeSlot(review, "detail"));
-    expect(mount.querySelector("openclaw-session-diff")).toBeNull();
+    expect(mount.querySelector("carapace-session-diff")).toBeNull();
     expect(request).toHaveBeenCalledExactlyOnceWith("sessions.diff", {
       sessionKey: state.sessionKey,
       agentId: "main",
@@ -449,7 +449,7 @@ describe("chat pane embedded panels", () => {
     for (const definition of definitions) {
       const mount = document.body.appendChild(document.createElement("div"));
       render(definition.loading, mount);
-      const skeleton = mount.querySelector("openclaw-panel-loading-skeleton");
+      const skeleton = mount.querySelector("carapace-panel-loading-skeleton");
       await skeleton?.updateComplete;
       expect(skeleton?.getAttribute("data-panel-skeleton")).toBe(
         expected[definition.slot as keyof typeof expected],

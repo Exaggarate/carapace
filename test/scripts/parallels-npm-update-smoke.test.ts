@@ -2,7 +2,7 @@
 import { spawnSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   posixAgentWorkspaceScript,
@@ -91,8 +91,8 @@ function extractWindowsBackgroundControlMarkers(decoded: string): {
     return match[0];
   };
   return {
-    done: marker("__OPENCLAW_BACKGROUND_DONE__", false),
-    exitPrefix: marker("__OPENCLAW_BACKGROUND_EXIT__", true),
+    done: marker("__CARAPACE_BACKGROUND_DONE__", false),
+    exitPrefix: marker("__CARAPACE_BACKGROUND_EXIT__", true),
   };
 }
 
@@ -107,9 +107,9 @@ function runPrerequisiteCli(args: string[], env: NodeJS.ProcessEnv = {}) {
     env: {
       ...childEnv,
       ...env,
-      OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_KILL_GRACE_MS: "invalid",
-      OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: "invalid",
-      OPENCLAW_PARALLELS_NPM_UPDATE_TIMEOUT_S: "invalid",
+      CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_KILL_GRACE_MS: "invalid",
+      CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: "invalid",
+      CARAPACE_PARALLELS_NPM_UPDATE_TIMEOUT_S: "invalid",
     },
     timeout: 10_000,
   });
@@ -118,7 +118,7 @@ function runPrerequisiteCli(args: string[], env: NodeJS.ProcessEnv = {}) {
 function runFrozenPrerequisiteHelper(env: NodeJS.ProcessEnv = {}) {
   const source = readFileSync("scripts/e2e/parallels/provider-auth-prerequisite.mjs", "utf8");
   const dataUrl = `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
-  const emptyCwd = tempDirs.make("openclaw-parallels-prerequisite-cwd-");
+  const emptyCwd = tempDirs.make("carapace-parallels-prerequisite-cwd-");
   const childEnv = { ...process.env };
   delete childEnv.OPENAI_API_KEY;
   const program = `
@@ -160,7 +160,7 @@ describe("parallels npm update smoke", () => {
     });
     expect(defaultResult.status).toBe(0);
     expect(defaultResult.stdout).toBe(
-      '{"schema":"openclaw.parallels-prerequisite.v1","status":"ready","reason":null}\n',
+      '{"schema":"carapace.parallels-prerequisite.v1","status":"ready","reason":null}\n',
     );
     expect(defaultResult.stderr).toBe("");
     expect(defaultResult.stdout).not.toContain(defaultSecret);
@@ -191,7 +191,7 @@ describe("parallels npm update smoke", () => {
   });
 
   it("blocks missing credentials before smoke-only validation or side effects", () => {
-    const root = tempDirs.make("openclaw-parallels-prerequisite-");
+    const root = tempDirs.make("carapace-parallels-prerequisite-");
     const binDir = path.join(root, "bin");
     const marker = path.join(root, "side-effect");
     mkdirSync(binDir);
@@ -221,7 +221,7 @@ describe("parallels npm update smoke", () => {
 
     expect(result.status).toBe(1);
     expect(result.stdout).toBe(
-      '{"schema":"openclaw.parallels-prerequisite.v1","status":"blocked","reason":"credential_missing"}\n',
+      '{"schema":"carapace.parallels-prerequisite.v1","status":"blocked","reason":"credential_missing"}\n',
     );
     expect(result.stderr).toBe("");
     expect(result.stdout).not.toContain("CUSTOM_MISSING_KEY");
@@ -235,7 +235,7 @@ describe("parallels npm update smoke", () => {
     });
     expect(ready.status).toBe(0);
     expect(ready.stdout).toBe(
-      '{"schema":"openclaw.parallels-prerequisite.v1","status":"ready","reason":null}\n',
+      '{"schema":"carapace.parallels-prerequisite.v1","status":"ready","reason":null}\n',
     );
     expect(ready.stderr).toBe("");
     expect(ready.stdout).not.toContain("sentinel-frozen-helper-secret");
@@ -243,7 +243,7 @@ describe("parallels npm update smoke", () => {
     const blocked = runFrozenPrerequisiteHelper();
     expect(blocked.status).toBe(1);
     expect(blocked.stdout).toBe(
-      '{"schema":"openclaw.parallels-prerequisite.v1","status":"blocked","reason":"credential_missing"}\n',
+      '{"schema":"carapace.parallels-prerequisite.v1","status":"blocked","reason":"credential_missing"}\n',
     );
     expect(blocked.stderr).toBe("");
   });
@@ -252,27 +252,27 @@ describe("parallels npm update smoke", () => {
     expect(
       parseArgs([
         "--target-tarball",
-        "/tmp/openclaw-candidate.tgz",
+        "/tmp/carapace-candidate.tgz",
         "--dependency-tarball",
-        "/tmp/openclaw-ai-candidate.tgz",
+        "/tmp/carapace-ai-candidate.tgz",
         "--registry-package-tarball",
-        "/tmp/openclaw-codex-candidate.tgz",
+        "/tmp/carapace-codex-candidate.tgz",
       ]),
     ).toMatchObject({
-      dependencyTarballs: ["/tmp/openclaw-ai-candidate.tgz"],
-      registryPackageTarballs: ["/tmp/openclaw-codex-candidate.tgz"],
-      targetTarball: "/tmp/openclaw-candidate.tgz",
+      dependencyTarballs: ["/tmp/carapace-ai-candidate.tgz"],
+      registryPackageTarballs: ["/tmp/carapace-codex-candidate.tgz"],
+      targetTarball: "/tmp/carapace-candidate.tgz",
       updateTarget: "",
       freshTargetSpec: undefined,
     });
     expect(() =>
-      parseArgs(["--target-tarball", "/tmp/openclaw-candidate.tgz", "--update-target", "beta"]),
+      parseArgs(["--target-tarball", "/tmp/carapace-candidate.tgz", "--update-target", "beta"]),
     ).toThrow("--target-tarball cannot be combined");
-    expect(() => parseArgs(["--dependency-tarball", "/tmp/openclaw-ai-candidate.tgz"])).toThrow(
+    expect(() => parseArgs(["--dependency-tarball", "/tmp/carapace-ai-candidate.tgz"])).toThrow(
       "--dependency-tarball requires --target-tarball",
     );
     expect(() =>
-      parseArgs(["--registry-package-tarball", "/tmp/openclaw-codex-candidate.tgz"]),
+      parseArgs(["--registry-package-tarball", "/tmp/carapace-codex-candidate.tgz"]),
     ).toThrow("--registry-package-tarball requires --target-tarball");
   });
 
@@ -297,7 +297,7 @@ describe("parallels npm update smoke", () => {
   it.runIf(process.platform !== "win32")(
     "uses the selected Windows VM for same-guest update transport",
     async () => {
-      const root = tempDirs.make("openclaw-parallels-windows-selection-");
+      const root = tempDirs.make("carapace-parallels-windows-selection-");
       const logPath = path.join(root, "prlctl.log");
       const prlctlPath = path.join(root, "prlctl");
       writeFileSync(
@@ -338,7 +338,7 @@ describe("parallels npm update smoke", () => {
     class FailingNpmUpdateSmoke extends NpmUpdateSmoke {
       protected override async makeRunTempDir(prefix: string): Promise<string> {
         void prefix;
-        return tempDirs.make("openclaw-parallels-npm-update-");
+        return tempDirs.make("carapace-parallels-npm-update-");
       }
 
       protected override async runSteps(): Promise<void> {
@@ -353,7 +353,7 @@ describe("parallels npm update smoke", () => {
         dependencyTarballs: [],
         registryPackageTarballs: [],
         json: false,
-        packageSpec: "openclaw@latest",
+        packageSpec: "carapace@latest",
         platforms: new Set<Platform>(["linux"]),
         provider: "openai",
         updateTarget: "local-main",
@@ -366,7 +366,7 @@ describe("parallels npm update smoke", () => {
   });
 
   it("removes uploaded guest update scripts when chmod fails", () => {
-    const root = tempDirs.make("openclaw-parallels-npm-update-");
+    const root = tempDirs.make("carapace-parallels-npm-update-");
     const logPath = path.join(root, "prlctl.log");
     const prlctlPath = path.join(root, "prlctl");
     writeFileSync(
@@ -376,15 +376,15 @@ set -euo pipefail
 log_path=${JSON.stringify(logPath)}
 printf '%s\\n' "$*" >>"$log_path"
 args=" $* "
-if [[ "$args" == *" /usr/bin/tee /tmp/openclaw-parallels-npm-update-linux-"* ]]; then
+if [[ "$args" == *" /usr/bin/tee /tmp/carapace-parallels-npm-update-linux-"* ]]; then
   cat >/dev/null
   exit 0
 fi
-if [[ "$args" == *" /bin/chmod 755 /tmp/openclaw-parallels-npm-update-linux-"* ]]; then
+if [[ "$args" == *" /bin/chmod 755 /tmp/carapace-parallels-npm-update-linux-"* ]]; then
   echo "chmod denied" >&2
   exit 7
 fi
-if [[ "$args" == *" /bin/rm -f /tmp/openclaw-parallels-npm-update-linux-"* ]]; then
+if [[ "$args" == *" /bin/rm -f /tmp/carapace-parallels-npm-update-linux-"* ]]; then
   printf 'cleanup\\n' >>"$log_path"
   exit 0
 fi
@@ -404,7 +404,7 @@ exit 1
           dependencyTarballs: [],
           registryPackageTarballs: [],
           json: false,
-          packageSpec: "openclaw@latest",
+          packageSpec: "carapace@latest",
           platforms: new Set<Platform>(["linux"]),
           provider: "openai",
           updateTarget: "local-main",
@@ -420,22 +420,22 @@ exit 1
             smoke,
             "Linux VM",
             "echo update",
-            "openclaw-parallels-npm-update-linux",
+            "carapace-parallels-npm-update-linux",
           ),
         ).toThrow("failed to chmod guest script");
       },
     );
 
     const log = readFileSync(logPath, "utf8");
-    expect(log).toContain("/bin/chmod 755 /tmp/openclaw-parallels-npm-update-linux-");
-    expect(log).toContain("/bin/rm -f /tmp/openclaw-parallels-npm-update-linux-");
+    expect(log).toContain("/bin/chmod 755 /tmp/carapace-parallels-npm-update-linux-");
+    expect(log).toContain("/bin/rm -f /tmp/carapace-parallels-npm-update-linux-");
     expect(log.match(/^cleanup$/gm)).toHaveLength(1);
   });
 
   it.each([0, 7])(
     "uses one macOS guest identity through upload, streamed exit %i, and cleanup",
     async (exitCode) => {
-      const root = tempDirs.make("openclaw-parallels-npm-update-");
+      const root = tempDirs.make("carapace-parallels-npm-update-");
       const logPath = path.join(root, "prlctl.log");
       const runArgsPath = path.join(root, "run-args");
       const uploadedScriptPath = path.join(root, "uploaded-script");
@@ -451,23 +451,23 @@ if [[ "$args" == *" --current-user whoami "* ]]; then
   printf 'desktop-user\\n'
   exit 0
 fi
-if [[ "$args" == *" /usr/bin/tee /tmp/openclaw-parallels-npm-update-macos-"* ]]; then
+if [[ "$args" == *" /usr/bin/tee /tmp/carapace-parallels-npm-update-macos-"* ]]; then
   cat >${JSON.stringify(uploadedScriptPath)}
   exit 0
 fi
-if [[ "$args" == *" /bin/chmod 700 /tmp/openclaw-parallels-npm-update-macos-"* ]]; then
+if [[ "$args" == *" /bin/chmod 700 /tmp/carapace-parallels-npm-update-macos-"* ]]; then
   exit 0
 fi
-if [[ "$args" == *" /usr/sbin/chown desktop-user /tmp/openclaw-parallels-npm-update-macos-"* ]]; then
+if [[ "$args" == *" /usr/sbin/chown desktop-user /tmp/carapace-parallels-npm-update-macos-"* ]]; then
   exit 0
 fi
-if [[ "$args" == *" /bin/bash /tmp/openclaw-parallels-npm-update-macos-"* ]]; then
+if [[ "$args" == *" /bin/bash /tmp/carapace-parallels-npm-update-macos-"* ]]; then
   printf '%s\\0' "$@" >${JSON.stringify(runArgsPath)}
   printf 'update-output\\n'
   printf 'update-diagnostic\\n' >&2
   exit ${exitCode}
 fi
-if [[ "$args" == *" /bin/rm -f /tmp/openclaw-parallels-npm-update-macos-"* ]]; then
+if [[ "$args" == *" /bin/rm -f /tmp/carapace-parallels-npm-update-macos-"* ]]; then
   exit 0
 fi
 exit 1
@@ -487,7 +487,7 @@ exit 1
             dependencyTarballs: [],
             registryPackageTarballs: [],
             json: false,
-            packageSpec: "openclaw@latest",
+            packageSpec: "carapace@latest",
             platforms: new Set<Platform>(["macos"]),
             provider: "openai",
             updateTarget: "local-main",
@@ -515,19 +515,19 @@ exit 1
         "/usr/bin/env",
         expect.stringMatching(/^PATH=/),
         "/bin/bash",
-        expect.stringMatching(/^\/tmp\/openclaw-parallels-npm-update-macos-/),
+        expect.stringMatching(/^\/tmp\/carapace-parallels-npm-update-macos-/),
       ]);
       expect(readFileSync(uploadedScriptPath, "utf8")).toBe("echo update");
       expect(output.join("")).toContain("update-output\n");
       expect(output.join("")).toContain("update-diagnostic\n");
       const log = readFileSync(logPath, "utf8");
       expect(log).toContain("--current-user whoami");
-      expect(log).toContain("/usr/bin/tee /tmp/openclaw-parallels-npm-update-macos-");
-      expect(log).toContain("/bin/chmod 700 /tmp/openclaw-parallels-npm-update-macos-");
+      expect(log).toContain("/usr/bin/tee /tmp/carapace-parallels-npm-update-macos-");
+      expect(log).toContain("/bin/chmod 700 /tmp/carapace-parallels-npm-update-macos-");
       expect(log).toContain("/usr/sbin/chown desktop-user");
-      expect(log.match(/\/bin\/bash \/tmp\/openclaw-parallels-npm-update-macos-/g)).toHaveLength(1);
+      expect(log.match(/\/bin\/bash \/tmp\/carapace-parallels-npm-update-macos-/g)).toHaveLength(1);
       expect(log.trim().split("\n").at(-1)).toMatch(
-        /^exec macOS Tahoe \/bin\/rm -f \/tmp\/openclaw-parallels-npm-update-macos-/,
+        /^exec macOS Tahoe \/bin\/rm -f \/tmp\/carapace-parallels-npm-update-macos-/,
       );
     },
   );
@@ -536,9 +536,9 @@ exit 1
     const script = readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain("--beta-validation [target]");
-    expect(script).toContain("resolveOpenClawRegistryVersion");
+    expect(script).toContain("resolveCarapaceRegistryVersion");
     expect(script).toContain("this.options.updateTarget = version");
-    expect(script).toContain("this.options.freshTargetSpec = `openclaw@${version}`");
+    expect(script).toContain("this.options.freshTargetSpec = `carapace@${version}`");
     expect(script).toContain("runFreshTargetInstalls");
     expect(script).toContain("freshTargetStatus");
   });
@@ -549,11 +549,11 @@ exit 1
   ] as const)(
     "keeps the %s candidate registry available through gateway shutdown and the local turn",
     (platform, buildScript) => {
-      const root = tempDirs.make("openclaw-parallels-update-registry-");
+      const root = tempDirs.make("carapace-parallels-update-registry-");
       const logPath = path.join(root, "registry.log");
       const lifecycleLog = path.join(root, "lifecycle.log");
       const gatewayOwner = path.join(root, "gateway-owner");
-      const gatewayTitle = platform === "macos" ? "openclaw-gateway        " : "openclaw-gateway";
+      const gatewayTitle = platform === "macos" ? "carapace-gateway        " : "carapace-gateway";
       const registry = "http://192.0.2.2:48123";
       const script = buildScript({
         auth: TEST_AUTH,
@@ -561,7 +561,7 @@ exit 1
         npmRegistry: registry,
         updateTarget: "2026.7.1-beta.3",
       }).replaceAll(
-        `/tmp/openclaw-parallels-${platform}-gateway.log`,
+        `/tmp/carapace-parallels-${platform}-gateway.log`,
         path.join(root, "gateway.log"),
       );
       const result = hostCommandRun(
@@ -570,7 +570,7 @@ exit 1
           "-c",
           `
 export HOME='${root}'
-unset OPENCLAW_WORKSPACE_DIR
+unset CARAPACE_WORKSPACE_DIR
 node() { cat >/dev/null; }
 python3() { cat >/dev/null; }
 function /usr/bin/env() { cat >/dev/null; }
@@ -591,7 +591,7 @@ pgrep() { return 1; }
 lsof() { :; }
 sleep() { :; }
 setsid() { :; }
-openclaw() {
+carapace() {
   case "$1 \${2-}" in
     "gateway stop")
       if [[ " $* " == *" --help "* ]]; then echo '--force'; return 0; fi
@@ -608,7 +608,7 @@ openclaw() {
   esac
   printf '%s|%s|%s\\n' "$1" "\${NPM_CONFIG_REGISTRY-}" "\${npm_config_registry-}" >>'${logPath}'
   case "$1" in
-    --version) echo 'OpenClaw 2026.7.1-beta.3' ;;
+    --version) echo 'Carapace 2026.7.1-beta.3' ;;
   esac
 }
 ${script}`,
@@ -640,7 +640,7 @@ ${script}`,
 
     for (const script of [macosUpdateScript(input), linuxUpdateScript(input)]) {
       expect(script).toContain(
-        "OpenClaw plugin migration inputs changed during startup convergence;",
+        "Carapace plugin migration inputs changed during startup convergence;",
       );
       expect(script).toContain("gateway_launch_log_offset=");
       expect(script).toContain("gateway_pid=$!");
@@ -662,7 +662,7 @@ ${script}`,
     });
 
     expect(script).toContain(
-      "OpenClaw plugin migration inputs changed during startup convergence;",
+      "Carapace plugin migration inputs changed during startup convergence;",
     );
     expect(script).toContain("$script:gatewayProcess.HasExited");
     expect(script).toContain("$script:gatewayProcess.WaitForExit()");
@@ -671,7 +671,7 @@ ${script}`,
     expect(script).toContain("Select-String -Path $script:gatewayLogPath -SimpleMatch");
     expect(script).toContain("$script:gatewayRestartCount = 1");
     expect(script).not.toContain("$attempt -eq 4");
-    expect(script).not.toContain("Invoke-OpenClaw gateway restart");
+    expect(script).not.toContain("Invoke-Carapace gateway restart");
   });
 
   it("keeps POSIX provider secrets out of executable command lines", () => {
@@ -723,13 +723,13 @@ ${script}`,
       parseRegistryPackageMetadata(
         JSON.stringify({
           version: "2026.5.20-beta.1",
-          "dist.tarball": "https://registry.example/openclaw-keyed.tgz",
+          "dist.tarball": "https://registry.example/carapace-keyed.tgz",
           gitHead: "abcdef0123456789",
         }),
       ),
     ).toEqual({
       version: "2026.5.20-beta.1",
-      tarball: "https://registry.example/openclaw-keyed.tgz",
+      tarball: "https://registry.example/carapace-keyed.tgz",
       gitHead: "abcdef0123456789",
     });
 
@@ -737,12 +737,12 @@ ${script}`,
       parseRegistryPackageMetadata(
         JSON.stringify({
           version: "2026.5.20-beta.1",
-          dist: { tarball: "https://registry.example/openclaw-nested.tgz" },
+          dist: { tarball: "https://registry.example/carapace-nested.tgz" },
         }),
       ),
     ).toEqual({
       version: "2026.5.20-beta.1",
-      tarball: "https://registry.example/openclaw-nested.tgz",
+      tarball: "https://registry.example/carapace-nested.tgz",
       gitHead: "",
     });
   });
@@ -752,8 +752,8 @@ ${script}`,
 
     expect(script).toContain("assertPublishedTargetMatchesHarnessCheckout");
     expect(script).toContain("readHarnessCheckoutVersion");
-    expect(script).toContain("openClawVersionFamily");
-    expect(script).toContain("OPENCLAW_PARALLELS_ALLOW_HARNESS_TARGET_MISMATCH");
+    expect(script).toContain("carapaceVersionFamily");
+    expect(script).toContain("CARAPACE_PARALLELS_ALLOW_HARNESS_TARGET_MISMATCH");
     expect(script).toContain("checkout the matching release branch");
   });
 
@@ -803,11 +803,11 @@ ${script}`,
     ].join("\n");
 
     expect(scripts).toContain("print_log_tail()");
-    expect(scripts).toContain("OPENCLAW_PARALLELS_NPM_UPDATE_LOG_TAIL_BYTES");
+    expect(scripts).toContain("CARAPACE_PARALLELS_NPM_UPDATE_LOG_TAIL_BYTES");
     expect(scripts).toContain('print_log_tail "$output_file"');
     expect(scripts).toContain('print_log_tail "$gateway_log" >&2');
     expect(scripts).not.toContain('cat "$output_file"');
-    expect(scripts).not.toContain("cat /tmp/openclaw-parallels-");
+    expect(scripts).not.toContain("cat /tmp/carapace-parallels-");
   });
 
   it("passes platform model timeouts to POSIX update agent turns", () => {
@@ -818,9 +818,9 @@ ${script}`,
     };
     withEnv(
       {
-        OPENCLAW_PARALLELS_LINUX_MODEL_TIMEOUT_S: undefined,
-        OPENCLAW_PARALLELS_MACOS_MODEL_TIMEOUT_S: undefined,
-        OPENCLAW_PARALLELS_MODEL_TIMEOUT_S: undefined,
+        CARAPACE_PARALLELS_LINUX_MODEL_TIMEOUT_S: undefined,
+        CARAPACE_PARALLELS_MACOS_MODEL_TIMEOUT_S: undefined,
+        CARAPACE_PARALLELS_MODEL_TIMEOUT_S: undefined,
       },
       () => {
         expect(macosUpdateScript(input)).toContain("--timeout 1800 --json");
@@ -829,8 +829,8 @@ ${script}`,
     );
     withEnv(
       {
-        OPENCLAW_PARALLELS_LINUX_MODEL_TIMEOUT_S: "321",
-        OPENCLAW_PARALLELS_MACOS_MODEL_TIMEOUT_S: "654",
+        CARAPACE_PARALLELS_LINUX_MODEL_TIMEOUT_S: "321",
+        CARAPACE_PARALLELS_MACOS_MODEL_TIMEOUT_S: "654",
       },
       () => {
         expect(macosUpdateScript(input)).toContain("--timeout 654 --json");
@@ -840,7 +840,7 @@ ${script}`,
   });
 
   it("streams fresh lane logs instead of retaining them in memory", async () => {
-    const root = tempDirs.make("openclaw-parallels-npm-update-");
+    const root = tempDirs.make("carapace-parallels-npm-update-");
     const logPath = path.join(root, "fresh.log");
     const output: string[] = [];
 
@@ -862,18 +862,18 @@ ${script}`,
   });
 
   it("sets platform-aware fresh lane timeouts", () => {
-    withEnv({ OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: undefined }, () => {
+    withEnv({ CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: undefined }, () => {
       expect(freshLaneTimeoutMs("macos")).toBe(75 * 60 * 1000);
       expect(freshLaneTimeoutMs("linux")).toBe(75 * 60 * 1000);
       expect(freshLaneTimeoutMs("windows")).toBe(90 * 60 * 1000);
     });
 
-    withEnv({ OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: "3" }, () => {
+    withEnv({ CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: "3" }, () => {
       expect(freshLaneTimeoutMs("macos")).toBe(3000);
     });
 
     withEnv(
-      { OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: String(Number.MAX_SAFE_INTEGER) },
+      { CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S: String(Number.MAX_SAFE_INTEGER) },
       () => {
         expect(freshLaneTimeoutMs("linux")).toBe(MAX_TIMER_TIMEOUT_MS);
       },
@@ -881,7 +881,7 @@ ${script}`,
   });
 
   it("clamps oversized fresh lane command timeouts before scheduling", async () => {
-    const root = tempDirs.make("openclaw-parallels-npm-update-");
+    const root = tempDirs.make("carapace-parallels-npm-update-");
     const logPath = path.join(root, "fresh.log");
 
     const code = await spawnLoggedCommand(
@@ -897,7 +897,7 @@ ${script}`,
   });
 
   it.runIf(process.platform !== "win32")("times out fresh lane process groups", async () => {
-    const root = tempDirs.make("openclaw-parallels-npm-update-");
+    const root = tempDirs.make("carapace-parallels-npm-update-");
     const logPath = path.join(root, "fresh.log");
     const scriptPath = path.join(root, "hung-fresh-lane.mjs");
     const descendantPidPath = path.join(root, "descendant.pid");
@@ -937,7 +937,7 @@ ${script}`,
   it.runIf(process.platform !== "win32")(
     "lets fresh lane descendants exit during timeout kill grace",
     async () => {
-      const root = tempDirs.make("openclaw-parallels-npm-update-");
+      const root = tempDirs.make("carapace-parallels-npm-update-");
       const logPath = path.join(root, "fresh.log");
       const scriptPath = path.join(root, "graceful-fresh-lane.mjs");
       const readyPath = path.join(root, "ready");
@@ -986,7 +986,7 @@ ${script}`,
           dependencyTarballs: [],
           registryPackageTarballs: [],
           json: false,
-          packageSpec: "openclaw@latest",
+          packageSpec: "carapace@latest",
           platforms: new Set<Platform>(["linux"]),
           provider: "openai",
           updateTarget: "local-main",
@@ -1004,7 +1004,7 @@ ${script}`,
     ) => Promise<number>;
 
     await expect(
-      runStreamingToJobLog.call(smoke, "openclaw-definitely-missing-command", [], 60 * 60 * 1000, {
+      runStreamingToJobLog.call(smoke, "carapace-definitely-missing-command", [], 60 * 60 * 1000, {
         append: () => undefined,
         logPath: "",
         signal: new AbortController().signal,
@@ -1016,7 +1016,7 @@ ${script}`,
   it.runIf(process.platform !== "win32")(
     "lets update stream descendants exit during timeout kill grace",
     async () => {
-      const root = tempDirs.make("openclaw-parallels-npm-update-");
+      const root = tempDirs.make("carapace-parallels-npm-update-");
       const scriptPath = path.join(root, "stream-update-grace.mjs");
       const readyPath = path.join(root, "stream-ready");
       const donePath = path.join(root, "stream-done");
@@ -1028,7 +1028,7 @@ ${script}`,
             dependencyTarballs: [],
             registryPackageTarballs: [],
             json: false,
-            packageSpec: "openclaw@latest",
+            packageSpec: "carapace@latest",
             platforms: new Set<Platform>(["linux"]),
             provider: "openai",
             updateTarget: "local-main",
@@ -1084,8 +1084,8 @@ ${script}`,
 
     expect(script).toContain("runWindowsBackgroundPowerShell");
     expect(transports).toContain("runWindowsBackgroundPowerShell");
-    expect(transports).toContain("__OPENCLAW_BACKGROUND_EXIT__");
-    expect(transports).toContain("__OPENCLAW_BACKGROUND_DONE__");
+    expect(transports).toContain("__CARAPACE_BACKGROUND_EXIT__");
+    expect(transports).toContain("__CARAPACE_BACKGROUND_DONE__");
     expect(transports).toContain("${options.label} timed out");
   });
 
@@ -1121,14 +1121,14 @@ ${script}`,
     const commands = decodedCommands.join("\n---\n");
     const payloads = inputs.join("\n---\n");
     expect(commands).toContain("$pidPath");
-    expect(commands).toContain("function Write-OpenClawUtf8File");
+    expect(commands).toContain("function Write-CarapaceUtf8File");
     expect(commands).toContain("[System.Text.UTF8Encoding]::new($false)");
-    expect(payloads).toContain("Write-OpenClawUtf8File $exitPath '0'");
-    expect(payloads).toContain("Write-OpenClawUtf8File $donePath 'done'");
-    expect(payloads).toContain("Write-OpenClawUtf8File $pidPath ([string]$PID)");
+    expect(payloads).toContain("Write-CarapaceUtf8File $exitPath '0'");
+    expect(payloads).toContain("Write-CarapaceUtf8File $donePath 'done'");
+    expect(payloads).toContain("Write-CarapaceUtf8File $pidPath ([string]$PID)");
     expect(commands).toContain('cmd.exe /d /s /c start "" /b powershell.exe');
     expect(commands).toContain("icacls.exe $runDir /inheritance:r");
-    expect(commands).toContain("Stop-OpenClawBackgroundProcessTree ([int]$backgroundPid)");
+    expect(commands).toContain("Stop-CarapaceBackgroundProcessTree ([int]$backgroundPid)");
     expect(commands).toContain(
       'Get-CimInstance Win32_Process -Filter "ParentProcessId=$ProcessId"',
     );
@@ -1210,7 +1210,7 @@ ${script}`,
       }
       if (args.includes("cmd.exe")) {
         const command = args.at(-1) ?? "";
-        if (command.includes("__OPENCLAW_BACKGROUND_DONE__")) {
+        if (command.includes("__CARAPACE_BACKGROUND_DONE__")) {
           logProbes++;
           const markers = extractWindowsBackgroundControlMarkers(command);
           return {
@@ -1272,7 +1272,7 @@ ${script}`,
     ).rejects.toThrow("windows background marker smuggle timed out");
 
     expect(decodedCommands.join("\n")).toContain(
-      "Stop-OpenClawBackgroundProcessTree ([int]$backgroundPid)",
+      "Stop-CarapaceBackgroundProcessTree ([int]$backgroundPid)",
     );
   });
 
@@ -1320,7 +1320,7 @@ ${script}`,
 
     expect(pollCount).toBe(1);
     expect(output.join("")).toContain("first chunk");
-    expect(decodedCommands.join("\n")).not.toContain("Stop-OpenClawBackgroundProcessTree");
+    expect(decodedCommands.join("\n")).not.toContain("Stop-CarapaceBackgroundProcessTree");
     expect(decodedCommands.join("\n")).toContain(
       "Remove-Item -Path $scriptPath, $logPath, $donePath, $exitPath, $pidPath",
     );
@@ -1335,7 +1335,7 @@ ${script}`,
   });
 
   it("selects macOS desktop users with homes on spaced mounted volumes", () => {
-    const root = tempDirs.make("openclaw-parallels-npm-update-");
+    const root = tempDirs.make("carapace-parallels-npm-update-");
     const prlctlPath = path.join(root, "prlctl");
     writeFileSync(
       prlctlPath,
@@ -1367,7 +1367,7 @@ exit 7
           dependencyTarballs: [],
           registryPackageTarballs: [],
           json: false,
-          packageSpec: "openclaw@latest",
+          packageSpec: "carapace@latest",
           platforms: new Set<Platform>(["macos"]),
           provider: "openai",
           updateTarget: "local-main",
@@ -1383,7 +1383,7 @@ exit 7
   });
 
   it("keeps spaces in macOS sudo fallback desktop homes", () => {
-    const root = tempDirs.make("openclaw-parallels-npm-update-");
+    const root = tempDirs.make("carapace-parallels-npm-update-");
     const prlctlPath = path.join(root, "prlctl");
     writeFileSync(
       prlctlPath,
@@ -1410,7 +1410,7 @@ exit 7
           dependencyTarballs: [],
           registryPackageTarballs: [],
           json: false,
-          packageSpec: "openclaw@latest",
+          packageSpec: "carapace@latest",
           platforms: new Set<Platform>(["macos"]),
           provider: "openai",
           updateTarget: "local-main",
@@ -1454,11 +1454,11 @@ exit 7
     expect(windowsScript).toContain(
       "Remove-Item $nodeScriptPath -Force -ErrorAction SilentlyContinue",
     );
-    expect(windowsScript).toContain("Remove-FuturePluginEntries\nStop-OpenClawGatewayProcesses");
-    expect(script).toContain("scrub_future_plugin_entries\nstop_openclaw_gateway_processes");
-    expect(macosScript).toContain('OPENCLAW_BIN="$(resolve_required_command openclaw)"');
+    expect(windowsScript).toContain("Remove-FuturePluginEntries\nStop-CarapaceGatewayProcesses");
+    expect(script).toContain("scrub_future_plugin_entries\nstop_carapace_gateway_processes");
+    expect(macosScript).toContain('CARAPACE_BIN="$(resolve_required_command carapace)"');
     expect(macosScript).toContain("/usr/local/bin:/usr/local/sbin");
-    expect(macosScript).not.toContain("/opt/homebrew/bin/openclaw");
+    expect(macosScript).not.toContain("/opt/homebrew/bin/carapace");
   });
 
   it("preserves bundled plugin inventory during updates while isolating POSIX gateway stops", () => {
@@ -1476,16 +1476,16 @@ exit 7
 
     expect(updateLines).not.toContain(undefined);
     for (const updateLine of updateLines) {
-      expect(updateLine).not.toContain("OPENCLAW_DISABLE_BUNDLED_PLUGINS");
+      expect(updateLine).not.toContain("CARAPACE_DISABLE_BUNDLED_PLUGINS");
     }
     expect(windowsScript).toContain(
-      "Invoke-WithScopedEnv @{ OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS = '1'",
+      "Invoke-WithScopedEnv @{ CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS = '1'",
     );
     expect(macosScript).toContain(
-      'OPENCLAW_DISABLE_BUNDLED_PLUGINS=1 "$OPENCLAW_BIN" gateway stop',
+      'CARAPACE_DISABLE_BUNDLED_PLUGINS=1 "$CARAPACE_BIN" gateway stop',
     );
     expect(linuxScript).toContain(
-      "OPENCLAW_DISABLE_BUNDLED_PLUGINS=1 OPENCLAW_ALLOW_ROOT=1 openclaw gateway stop",
+      "CARAPACE_DISABLE_BUNDLED_PLUGINS=1 CARAPACE_ALLOW_ROOT=1 carapace gateway stop",
     );
   });
 
@@ -1496,13 +1496,13 @@ exit 7
       updateTarget: "2026.5.3-beta.2",
     });
 
-    const updateIndex = script.indexOf("Invoke-OpenClaw update --tag");
+    const updateIndex = script.indexOf("Invoke-Carapace update --tag");
     const scopedIndex = script.indexOf(
-      "Invoke-WithScopedEnv @{ OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS",
+      "Invoke-WithScopedEnv @{ CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS",
     );
-    const versionIndex = script.indexOf("Invoke-OpenClaw --version", scopedIndex);
-    const startIndex = script.indexOf("\nStart-OpenClawGateway\n", updateIndex);
-    const agentIndex = script.indexOf("Invoke-OpenClaw agent --local");
+    const versionIndex = script.indexOf("Invoke-Carapace --version", scopedIndex);
+    const startIndex = script.indexOf("\nStart-CarapaceGateway\n", updateIndex);
+    const agentIndex = script.indexOf("Invoke-Carapace agent --local");
 
     expect(updateIndex).toBeGreaterThanOrEqual(0);
     expect(scopedIndex).toBeGreaterThanOrEqual(0);
@@ -1510,7 +1510,7 @@ exit 7
     expect(versionIndex).toBeGreaterThan(updateIndex);
     expect(startIndex).toBeGreaterThan(updateIndex);
     expect(agentIndex).toBeGreaterThan(updateIndex);
-    expect(script).not.toContain("OPENCLAW_DISABLE_BUNDLED_PLUGINS");
+    expect(script).not.toContain("CARAPACE_DISABLE_BUNDLED_PLUGINS");
   });
 
   it("generates a .NET-safe Windows stale import regex in the update-failure guard", () => {
@@ -1531,13 +1531,13 @@ exit 7
     }
     expect(staleImportLine).toContain("$updateText -match 'ERR_MODULE_NOT_FOUND'");
     expect(staleImportLine).toContain(`$updateText -match '${staleImportPattern}'`);
-    expect(staleImportPattern).not.toContain("node_modules\\openclaw\\dist\\");
+    expect(staleImportPattern).not.toContain("node_modules\\carapace\\dist\\");
     expect(staleImportPattern.match(/\\\\/g)).toHaveLength(4);
     const generatedRegex = new RegExp(staleImportPattern);
     for (const extension of ["js", "mjs"]) {
-      const representativeUpdateFailure = String.raw`Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\runner\AppData\Roaming\npm\node_modules\openclaw\dist\main-a1_B2.${extension}' imported from C:\Users\runner\AppData\Roaming\npm\node_modules\openclaw\dist\cli.js`;
+      const representativeUpdateFailure = String.raw`Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\runner\AppData\Roaming\npm\node_modules\carapace\dist\main-a1_B2.${extension}' imported from C:\Users\runner\AppData\Roaming\npm\node_modules\carapace\dist\cli.js`;
       expect(generatedRegex.test(representativeUpdateFailure)).toBe(true);
-      expect(generatedRegex.test(String.raw`node_modules\openclaw\dist\main.${extension}`)).toBe(
+      expect(generatedRegex.test(String.raw`node_modules\carapace\dist\main.${extension}`)).toBe(
         false,
       );
     }

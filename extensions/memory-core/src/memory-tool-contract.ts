@@ -1,21 +1,21 @@
-import { resolveSessionAgentIdStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { resolveSessionAgentIdStrict } from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   resolveMemorySearchIndexConfig,
   type MemoryPromptSectionBuilder,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
 import type { TSchema } from "typebox";
 import type { MemoryCoreAcquireLocalService } from "./memory/embedding-local-service.js";
 
 export type MemoryToolOptions = {
-  config?: OpenClawConfig;
-  getConfig?: () => OpenClawConfig | undefined;
+  config?: CarapaceConfig;
+  getConfig?: () => CarapaceConfig | undefined;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
   oneShotCliRun?: boolean;
-  conversationRecall?: OpenClawPluginToolContext["conversationRecall"];
+  conversationRecall?: CarapacePluginToolContext["conversationRecall"];
   activeProjectKeys?: readonly string[];
   acquireLocalService?: MemoryCoreAcquireLocalService;
 };

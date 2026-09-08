@@ -10,7 +10,7 @@ import { copyToolTerminalPresentation } from "./tool-terminal-presentation.js";
 
 export type AgentToolActionDescriptor = Readonly<{
   family: "data" | "tool";
-  operation: "filesystem" | "memory" | "openclaw" | "process";
+  operation: "filesystem" | "memory" | "carapace" | "process";
 }>;
 
 const actionDescriptors = new WeakMap<AnyAgentTool, AgentToolActionDescriptor>();
@@ -57,7 +57,7 @@ export function bindAssembledAgentToolActionDescriptor(tool: AnyAgentTool): void
   const memory = kind === "memory" || (Array.isArray(kind) && kind.includes("memory"));
   actionDescriptors.set(
     tool,
-    memory ? { family: "data", operation: "memory" } : { family: "tool", operation: "openclaw" },
+    memory ? { family: "data", operation: "memory" } : { family: "tool", operation: "carapace" },
   );
 }
 

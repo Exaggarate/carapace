@@ -1,7 +1,7 @@
 // Resolves filesystem paths for installed plugin index storage.
 import path from "node:path";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   hasActivePluginInstallRoots,
   resolveActivePluginInstallRoots,
@@ -20,10 +20,10 @@ export type InstalledPluginIndexStoreOptions = {
 function resolveStoreEnv(options: InstalledPluginIndexStoreOptions): NodeJS.ProcessEnv {
   const env = options.env ?? process.env;
   if (options.stateDir) {
-    return { ...env, OPENCLAW_STATE_DIR: options.stateDir };
+    return { ...env, CARAPACE_STATE_DIR: options.stateDir };
   }
   if (hasActivePluginInstallRoots()) {
-    return { ...env, OPENCLAW_STATE_DIR: resolveActivePluginInstallRoots(env).stateDir };
+    return { ...env, CARAPACE_STATE_DIR: resolveActivePluginInstallRoots(env).stateDir };
   }
   return env;
 }
@@ -35,13 +35,13 @@ export function resolveInstalledPluginIndexStorePath(
   if (options.filePath) {
     return options.filePath;
   }
-  return resolveOpenClawStateSqlitePath(resolveStoreEnv(options));
+  return resolveCarapaceStateSqlitePath(resolveStoreEnv(options));
 }
 
 /** Resolves state database options for the installed plugin index store. */
 export function resolveInstalledPluginIndexStateDatabaseOptions(
   options: InstalledPluginIndexStoreOptions = {},
-): OpenClawStateDatabaseOptions {
+): CarapaceStateDatabaseOptions {
   if (options.filePath) {
     return {
       ...(options.env ? { env: options.env } : {}),

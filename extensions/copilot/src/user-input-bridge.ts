@@ -4,7 +4,7 @@ import {
   runAgentHarnessGatewayQuestion,
   type AgentHarnessUserInputQuestion,
   type EmbeddedRunAttemptParamsV2,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 
 type CopilotUserInputHandler = NonNullable<SessionConfig["onUserInputRequest"]>;
 type CopilotUserInputRequest = Parameters<CopilotUserInputHandler>[0];

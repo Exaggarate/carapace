@@ -3,22 +3,22 @@
  * and direct messages.
  */
 import { createHash } from "node:crypto";
-import { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
+import { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
 import {
   createMessageReceiptFromOutboundResults,
   type ChannelMessageUnknownSendContext,
   type ChannelMessageUnknownSendReconciliationResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
 import {
   loadOutboundMediaFromUrl,
   type OutboundMediaLoadOptions,
-} from "openclaw/plugin-sdk/outbound-media";
+} from "carapace/plugin-sdk/outbound-media";
 import {
   FormatCapabilityProfile,
   renderMarkdownWithMarkers,
   sanitizeAssistantVisibleText,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import { resolveClickClackAccount } from "./accounts.js";
 import { createClickClackClient, type ClickClackClient } from "./http-client.js";
 import { resolveChannelId, resolveWorkspaceId } from "./resolve.js";
@@ -105,8 +105,8 @@ function mediaDeliveryNonces(params: { deliveryQueueId?: string; deliveryPartInd
     return {};
   }
   return {
-    message: `openclaw-media:${digest}`,
-    upload: `openclaw-upload:${digest}`,
+    message: `carapace-media:${digest}`,
+    upload: `carapace-upload:${digest}`,
   };
 }
 
@@ -115,7 +115,7 @@ function textDeliveryNonce(params: {
   deliveryPartIndex?: number;
 }): string | undefined {
   const digest = durableDeliveryDigest(params);
-  return digest ? `openclaw-text:${digest}` : undefined;
+  return digest ? `carapace-text:${digest}` : undefined;
 }
 
 function createDispatchOnce(onPlatformSendDispatch?: () => Promise<void>): () => Promise<void> {

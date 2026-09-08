@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { Value } from "typebox/value";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createOpenClawReadTool } from "./agent-tools.read.js";
+import { createCarapaceReadTool } from "./agent-tools.read.js";
 import type { AnyAgentTool } from "./agent-tools.types.js";
 import { createApplyPatchTool } from "./apply-patch.js";
 import { applyCodeModeCatalog } from "./code-mode.js";
@@ -42,7 +42,7 @@ describe("filesystem tool output contracts", () => {
   let tmpDir = "";
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-filesystem-contract-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-filesystem-contract-"));
   });
 
   afterEach(async () => {
@@ -214,7 +214,7 @@ describe("filesystem tool output contracts", () => {
     await fs.writeFile(path.join(tmpDir, "pixel.png"), Buffer.from(ONE_PIXEL_PNG_BASE64, "base64"));
     await fs.writeFile(path.join(tmpDir, "long.txt"), "x".repeat(DEFAULT_MAX_BYTES + 1), "utf8");
 
-    const tool = createOpenClawReadTool(
+    const tool = createCarapaceReadTool(
       createReadTool(tmpDir, { autoResizeImages: false }) as unknown as AnyAgentTool,
     );
     const text = await tool.execute("read-text", { path: "notes.txt", limit: 10 });
@@ -270,7 +270,7 @@ describe("filesystem tool output contracts", () => {
         "\n".repeat(leadingBlankLines) + JSON.stringify(records, null, indent) + "\n";
       await fs.writeFile(path.join(tmpDir, "records.json"), original);
       const base = createReadTool(tmpDir, { maxBytes: 16 * 1024 }) as unknown as AnyAgentTool;
-      const tool = wrapped ? createOpenClawReadTool(base) : base;
+      const tool = wrapped ? createCarapaceReadTool(base) : base;
       const first = await tool.execute("first-page", { path: "records.json" });
       expectContract(tool, first.details);
       expect(JSON.stringify(first.content)).toContain("to continue.");
@@ -309,7 +309,7 @@ describe("filesystem tool output contracts", () => {
 
   it("bounds structured blank pages independently of their short display summary", async () => {
     await fs.writeFile(path.join(tmpDir, "blank.txt"), "\n".repeat(10_000));
-    const tool = createOpenClawReadTool(createReadTool(tmpDir) as unknown as AnyAgentTool, {
+    const tool = createCarapaceReadTool(createReadTool(tmpDir) as unknown as AnyAgentTool, {
       modelContextWindowTokens: 1_024,
     });
     const result = await tool.execute("blank-budget", { path: "blank.txt" });
@@ -329,7 +329,7 @@ describe("filesystem tool output contracts", () => {
   it("retains source continuation when only its notice exceeds the rebound budget", async () => {
     await fs.writeFile(path.join(tmpDir, "continued.txt"), "x".repeat(2_000));
     const base = createReadTool(tmpDir, { maxBytes: 200 }) as unknown as AnyAgentTool;
-    const tool = createOpenClawReadTool(base, { modelContextWindowTokens: 100 });
+    const tool = createCarapaceReadTool(base, { modelContextWindowTokens: 100 });
     const result = await tool.execute("continued-rebound", { path: "continued.txt" });
     expectContract(tool, result.details);
     expect(result.details).toMatchObject({
@@ -342,7 +342,7 @@ describe("filesystem tool output contracts", () => {
     "honors normalized explicit limit %s without automatic paging",
     async (limit) => {
       await fs.writeFile(path.join(tmpDir, "limited.txt"), "alpha\nbeta\ngamma");
-      const tool = createOpenClawReadTool(createReadTool(tmpDir) as unknown as AnyAgentTool);
+      const tool = createCarapaceReadTool(createReadTool(tmpDir) as unknown as AnyAgentTool);
       const result = await tool.execute("normalized-limit", { path: "limited.txt", limit });
       expectContract(tool, result.details);
       expect(result.details).toMatchObject({

@@ -1,4 +1,4 @@
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 
 export type TelegramTestContext = Record<string, unknown>;
 export type TelegramTestMiddleware = (
@@ -10,10 +10,10 @@ type MiddlewareUseSpy = {
   mock: { calls: unknown[][] };
 };
 
-type ChannelInboundModule = typeof import("openclaw/plugin-sdk/channel-inbound");
+type ChannelInboundModule = typeof import("carapace/plugin-sdk/channel-inbound");
 type ChannelInboundRunParams = Parameters<ChannelInboundModule["runChannelInboundEvent"]>[0];
 type BufferedReplyDispatcher =
-  typeof import("openclaw/plugin-sdk/reply-dispatch-runtime").dispatchReplyWithBufferedBlockDispatcher;
+  typeof import("carapace/plugin-sdk/reply-dispatch-runtime").dispatchReplyWithBufferedBlockDispatcher;
 
 export function makeTelegramKeyedStoreTestMock<Value>(
   overrides: Partial<PluginStateKeyedStore<Value>> = {},
@@ -49,7 +49,7 @@ export async function runTelegramChannelInboundEventWithHarness(
           return resolved;
         }
         const plan =
-          resolved as unknown as import("openclaw/plugin-sdk/channel-inbound").ChannelInboundTurnPlan<"provider_message_sending">;
+          resolved as unknown as import("carapace/plugin-sdk/channel-inbound").ChannelInboundTurnPlan<"provider_message_sending">;
         return {
           ...plan,
           runDispatch: async () =>
@@ -107,7 +107,7 @@ export function createTelegramCallbackContext(params: {
         ? {}
         : { update: { update_id: params.updateId, callback_query: callbackQuery } }),
     callbackQuery,
-    me: { username: "openclaw_bot" },
+    me: { username: "carapace_bot" },
     getFile: async () => ({ download: async () => new Uint8Array() }),
   };
 }

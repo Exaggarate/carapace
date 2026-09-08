@@ -1,4 +1,4 @@
-import type { ModelRegistry } from "openclaw/plugin-sdk/agent-sessions";
+import type { ModelRegistry } from "carapace/plugin-sdk/agent-sessions";
 import { describe, expect, it, vi } from "vitest";
 import {
   cloneFirstTemplateModel,

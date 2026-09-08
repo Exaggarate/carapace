@@ -1,7 +1,7 @@
 // Qa Lab plugin module implements manual lane behavior.
 import { randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { toQaError } from "./errors.js";
 import { createQaGatewayChild } from "./gateway-child.js";
 import { startQaLabServer } from "./lab-server.js";

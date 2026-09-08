@@ -129,7 +129,7 @@ describe("plugin command runtime", () => {
       config: { logging: { redactPatterns: ["private-detail"] } },
     });
     expect(reply.text).toContain("missing payload");
-    expect(reply.text).toContain("openclaw doctor");
+    expect(reply.text).toContain("carapace doctor");
     expect(reply.text).not.toMatch(/fixture-secret-value|private-detail|at loader/);
     expect(reply.text!.length).toBeLessThan(400);
   });

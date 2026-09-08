@@ -3,13 +3,13 @@
  *
  * Prompts account ids, credentials, allowlists, and account-scoped setup config updates.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   normalizeStringEntries,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import type { DmPolicy, GroupPolicy } from "../../config/types.base.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SecretInput } from "../../config/types.secrets.js";
 import { resolveSecretInputModeForEnvSelection } from "../../plugins/provider-auth-mode.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
@@ -171,7 +171,7 @@ export function createStandardChannelSetupStatus(params: {
   includeStatusLine?: boolean;
   resolveConfigured: ChannelSetupWizardStatus["resolveConfigured"];
   resolveExtraStatusLines?: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string;
     configured: boolean;
   }) => string[] | Promise<string[]>;
@@ -214,12 +214,12 @@ export function resolveSetupAccountId(params: {
 }
 
 export async function resolveAccountIdForConfigure(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: WizardPrompter;
   label: string;
   accountOverride?: string;
   shouldPromptAccountIds: boolean;
-  listAccountIds: (cfg: OpenClawConfig) => string[];
+  listAccountIds: (cfg: CarapaceConfig) => string[];
   defaultAccountId: string;
 }): Promise<string> {
   const override = params.accountOverride?.trim();
@@ -238,12 +238,12 @@ export async function resolveAccountIdForConfigure(params: {
 }
 
 export function setAccountAllowFromForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId: string;
   allowFrom: string[];
   setupSurface?: ChannelSetupAdapter;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const { cfg, channel, accountId, allowFrom } = params;
   return patchConfigForScopedAccount({
     cfg,
@@ -256,12 +256,12 @@ export function setAccountAllowFromForChannel(params: {
 }
 
 export function patchTopLevelChannelConfigSection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   enabled?: boolean;
   clearFields?: string[];
   patch: Record<string, unknown>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const channelConfig = {
     ...(params.cfg.channels?.[params.channel] as Record<string, unknown> | undefined),
   };
@@ -276,11 +276,11 @@ export function patchTopLevelChannelConfigSection(params: {
 }
 
 function setTopLevelChannelAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   allowFrom: string[];
   enabled?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return patchTopLevelChannelConfigSection({
     cfg: params.cfg,
     channel: params.channel,
@@ -290,11 +290,11 @@ function setTopLevelChannelAllowFrom(params: {
 }
 
 export function setTopLevelChannelDmPolicyWithAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   dmPolicy: DmPolicy;
-  getAllowFrom?: (cfg: OpenClawConfig) => Array<string | number> | undefined;
-}): OpenClawConfig {
+  getAllowFrom?: (cfg: CarapaceConfig) => Array<string | number> | undefined;
+}): CarapaceConfig {
   const channelConfig =
     (params.cfg.channels?.[params.channel] as Record<string, unknown> | undefined) ?? {};
   const existingAllowFrom =
@@ -314,11 +314,11 @@ export function setTopLevelChannelDmPolicyWithAllowFrom(params: {
 }
 
 function setTopLevelChannelGroupPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   groupPolicy: GroupPolicy;
   enabled?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return patchTopLevelChannelConfigSection({
     cfg: params.cfg,
     channel: params.channel,
@@ -332,9 +332,9 @@ export function createTopLevelChannelDmPolicy(params: {
   channel: string;
   policyKey: string;
   allowFromKey: string;
-  getCurrent: (cfg: OpenClawConfig) => DmPolicy;
+  getCurrent: (cfg: CarapaceConfig) => DmPolicy;
   promptAllowFrom?: ChannelSetupDmPolicy["promptAllowFrom"];
-  getAllowFrom?: (cfg: OpenClawConfig) => Array<string | number> | undefined;
+  getAllowFrom?: (cfg: CarapaceConfig) => Array<string | number> | undefined;
 }): ChannelSetupDmPolicy {
   const setPolicy = createTopLevelChannelDmPolicySetter({
     channel: params.channel,
@@ -353,8 +353,8 @@ export function createTopLevelChannelDmPolicy(params: {
 
 export function createTopLevelChannelDmPolicySetter(params: {
   channel: string;
-  getAllowFrom?: (cfg: OpenClawConfig) => Array<string | number> | undefined;
-}): (cfg: OpenClawConfig, dmPolicy: DmPolicy) => OpenClawConfig {
+  getAllowFrom?: (cfg: CarapaceConfig) => Array<string | number> | undefined;
+}): (cfg: CarapaceConfig, dmPolicy: DmPolicy) => CarapaceConfig {
   return (cfg, dmPolicy) =>
     setTopLevelChannelDmPolicyWithAllowFrom({
       cfg,
@@ -367,7 +367,7 @@ export function createTopLevelChannelDmPolicySetter(params: {
 export function createTopLevelChannelAllowFromSetter(params: {
   channel: string;
   enabled?: boolean;
-}): (cfg: OpenClawConfig, allowFrom: string[]) => OpenClawConfig {
+}): (cfg: CarapaceConfig, allowFrom: string[]) => CarapaceConfig {
   return (cfg, allowFrom) =>
     setTopLevelChannelAllowFrom({
       cfg,
@@ -380,7 +380,7 @@ export function createTopLevelChannelAllowFromSetter(params: {
 export function createTopLevelChannelGroupPolicySetter(params: {
   channel: string;
   enabled?: boolean;
-}): (cfg: OpenClawConfig, groupPolicy: "open" | "allowlist" | "disabled") => OpenClawConfig {
+}): (cfg: CarapaceConfig, groupPolicy: "open" | "allowlist" | "disabled") => CarapaceConfig {
   return (cfg, groupPolicy) =>
     setTopLevelChannelGroupPolicy({
       cfg,
@@ -391,11 +391,11 @@ export function createTopLevelChannelGroupPolicySetter(params: {
 }
 
 function setAccountGroupPolicyForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId: string;
   groupPolicy: GroupPolicy;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return patchChannelConfigForAccount({
     cfg: params.cfg,
     channel: params.channel,
@@ -405,11 +405,11 @@ function setAccountGroupPolicyForChannel(params: {
 }
 
 function setAccountDmAllowFromForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId: string;
   allowFrom: string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   return patchChannelConfigForAccount({
     cfg: params.cfg,
     channel: params.channel,
@@ -488,10 +488,10 @@ export function createAccountScopedGroupAccessSection<TResolved>(params: {
   >;
   fallbackResolved: (entries: string[]) => TResolved;
   applyAllowlist: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId: string;
     resolved: TResolved;
-  }) => OpenClawConfig;
+  }) => CarapaceConfig;
 }): NonNullable<ChannelSetupWizard["groupAccess"]> {
   return {
     label: params.label,
@@ -540,21 +540,21 @@ export function createAccountScopedGroupAccessSection<TResolved>(params: {
 type AccountScopedChannel = string;
 
 export function setSetupChannelEnabled(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channel: string,
   enabled: boolean,
-): OpenClawConfig {
+): CarapaceConfig {
   return setTopLevelChannelEnabledInConfigSection({ cfg, sectionKey: channel, enabled });
 }
 
 function patchConfigForScopedAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: AccountScopedChannel;
   accountId: string;
   patch: Record<string, unknown>;
   ensureEnabled: boolean;
   setupSurface?: ChannelSetupAdapter;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const { cfg, channel, accountId, patch, ensureEnabled, setupSurface } = params;
   const channelConfig = cfg.channels?.[channel] as
     | { accounts?: Record<string, unknown> }
@@ -581,12 +581,12 @@ function patchConfigForScopedAccount(params: {
 }
 
 export function patchChannelConfigForAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: AccountScopedChannel;
   accountId: string;
   patch: Record<string, unknown>;
   setupSurface?: ChannelSetupAdapter;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return patchConfigForScopedAccount({
     ...params,
     ensureEnabled: true,
@@ -623,7 +623,7 @@ async function promptSingleChannelToken(params: {
     (
       await params.prompter.text({
         message: params.inputPrompt,
-        // Credential input: masked in terminal prompts, and the OpenClaw
+        // Credential input: masked in terminal prompts, and the Carapace
         // chat bridge relies on this flag to refuse plain-text secret entry.
         sensitive: true,
         validate: (value) => (value?.trim() ? undefined : "Required"),
@@ -660,7 +660,7 @@ type SingleChannelSecretInputPromptResult =
   | { action: "set"; value: SecretInput; resolvedValue: string };
 
 export async function runSingleChannelSecretStep(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: Pick<WizardPrompter, "confirm" | "text" | "select" | "note">;
   providerHint: string;
   credentialLabel: string;
@@ -674,14 +674,14 @@ export async function runSingleChannelSecretStep(params: {
   inputPrompt: string;
   preferredEnvVar?: string;
   onMissingConfigured?: () => Promise<void>;
-  applyUseEnv?: (cfg: OpenClawConfig) => OpenClawConfig | Promise<OpenClawConfig>;
+  applyUseEnv?: (cfg: CarapaceConfig) => CarapaceConfig | Promise<CarapaceConfig>;
   applySet?: (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     value: SecretInput,
     resolvedValue: string,
-  ) => OpenClawConfig | Promise<OpenClawConfig>;
+  ) => CarapaceConfig | Promise<CarapaceConfig>;
 }): Promise<{
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   action: SingleChannelSecretInputPromptResult["action"];
   resolvedValue?: string;
 }> {
@@ -736,7 +736,7 @@ export async function runSingleChannelSecretStep(params: {
 }
 
 export async function promptSingleChannelSecretInput(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: Pick<WizardPrompter, "confirm" | "text" | "select" | "note">;
   providerHint: string;
   credentialLabel: string;
@@ -755,7 +755,7 @@ export async function promptSingleChannelSecretInput(params: {
     copy: {
       modeMessage: `How do you want to provide this ${params.credentialLabel}?`,
       plaintextLabel: `Enter ${params.credentialLabel}`,
-      plaintextHint: "Stores the credential directly in OpenClaw config",
+      plaintextHint: "Stores the credential directly in Carapace config",
       refLabel: "Use external secret provider",
       refHint: "Stores a reference to env or configured external secret providers",
     },
@@ -798,9 +798,9 @@ export async function promptSingleChannelSecretInput(params: {
     preferredEnvVar: params.preferredEnvVar,
     copy: {
       sourceMessage: `Where is this ${params.credentialLabel} stored?`,
-      envVarPlaceholder: params.preferredEnvVar ?? "OPENCLAW_SECRET",
+      envVarPlaceholder: params.preferredEnvVar ?? "CARAPACE_SECRET",
       envVarFormatError:
-        'Use an env var name like "OPENCLAW_SECRET" (uppercase letters, numbers, underscores).',
+        'Use an env var name like "CARAPACE_SECRET" (uppercase letters, numbers, underscores).',
       noProvidersMessage:
         "No file/exec secret providers are configured yet. Add one under secrets.providers, or select Environment variable.",
     },
@@ -814,7 +814,7 @@ export async function promptSingleChannelSecretInput(params: {
 
 type ParsedAllowFromResult = { entries: string[]; error?: string };
 
-export async function promptParsedAllowFromForAccount<TConfig extends OpenClawConfig>(params: {
+export async function promptParsedAllowFromForAccount<TConfig extends CarapaceConfig>(params: {
   cfg: TConfig;
   accountId?: string;
   defaultAccountId: string;
@@ -868,7 +868,7 @@ export async function promptParsedAllowFromForAccount<TConfig extends OpenClawCo
   });
 }
 
-export function createPromptParsedAllowFromForAccount<TConfig extends OpenClawConfig>(params: {
+export function createPromptParsedAllowFromForAccount<TConfig extends CarapaceConfig>(params: {
   defaultAccountId: string | ((cfg: TConfig) => string);
   noteTitle?: string;
   noteLines?: string[];
@@ -905,14 +905,14 @@ export function createPromptParsedAllowFromForAccount<TConfig extends OpenClawCo
 
 export function createTopLevelChannelParsedAllowFromPrompt(params: {
   channel: string;
-  defaultAccountId: string | ((cfg: OpenClawConfig) => string);
+  defaultAccountId: string | ((cfg: CarapaceConfig) => string);
   enabled?: boolean;
   noteTitle?: string;
   noteLines?: string[];
   message: string;
   placeholder: string;
   parseEntries: (raw: string) => ParsedAllowFromResult;
-  getExistingAllowFrom?: (cfg: OpenClawConfig) => Array<string | number>;
+  getExistingAllowFrom?: (cfg: CarapaceConfig) => Array<string | number>;
   mergeEntries?: (params: { existing: Array<string | number>; parsed: string[] }) => string[];
 }): NonNullable<ChannelSetupDmPolicy["promptAllowFrom"]> {
   const setAllowFrom = createTopLevelChannelAllowFromSetter({
@@ -925,13 +925,13 @@ export function createTopLevelChannelParsedAllowFromPrompt(params: {
     message: params.message,
     placeholder: params.placeholder,
     parseEntries: params.parseEntries,
-    getExistingAllowFrom: ({ cfg }: { cfg: OpenClawConfig }) =>
+    getExistingAllowFrom: ({ cfg }: { cfg: CarapaceConfig }) =>
       params.getExistingAllowFrom?.(cfg) ??
       (cfg.channels?.[params.channel] as { allowFrom?: Array<string | number> } | undefined)
         ?.allowFrom ??
       [],
     ...(params.mergeEntries ? { mergeEntries: params.mergeEntries } : {}),
-    applyAllowFrom: ({ cfg, allowFrom }: { cfg: OpenClawConfig; allowFrom: string[] }) =>
+    applyAllowFrom: ({ cfg, allowFrom }: { cfg: CarapaceConfig; allowFrom: string[] }) =>
       setAllowFrom(cfg, allowFrom),
   };
 

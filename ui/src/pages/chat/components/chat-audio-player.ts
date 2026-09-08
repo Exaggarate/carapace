@@ -4,7 +4,7 @@ import { ref } from "lit/directives/ref.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { icons } from "../../../components/icons.ts";
 import { t } from "../../../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../../../lit/carapace-element.ts";
 import {
   openAttachmentCardFromClick,
   renderAttachmentCardHeader,
@@ -47,7 +47,7 @@ function formatChatMediaTime(seconds: number): string {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
-class ChatAudioPlayer extends OpenClawLightDomContentsElement {
+class ChatAudioPlayer extends CarapaceLightDomContentsElement {
   @property() src = "";
   @property() sourceIdentity = "";
   @property() label = "";
@@ -645,12 +645,12 @@ class ChatAudioPlayer extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-audio-player")) {
-  customElements.define("openclaw-chat-audio-player", ChatAudioPlayer);
+if (!customElements.get("carapace-chat-audio-player")) {
+  customElements.define("carapace-chat-audio-player", ChatAudioPlayer);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-chat-audio-player": ChatAudioPlayer;
+    "carapace-chat-audio-player": ChatAudioPlayer;
   }
 }

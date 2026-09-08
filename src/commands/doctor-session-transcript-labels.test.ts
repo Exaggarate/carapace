@@ -13,19 +13,19 @@ import {
 import { appendTranscriptEventsInTransaction } from "../config/sessions/session-accessor.sqlite-transcript-store.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import * as agentDatabase from "../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import * as agentDatabase from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 
 const note = vi.hoisted(() => vi.fn());
 
@@ -37,7 +37,7 @@ import { noteSessionTranscriptLabelHealth } from "./doctor-session-transcript-la
 const AGENT_ID = "main";
 const SESSION_ID = "legacy-label-session";
 const SESSION_KEY = "agent:main:legacy-label-session";
-const CFG: OpenClawConfig = { agents: { list: [{ id: AGENT_ID }] } };
+const CFG: CarapaceConfig = { agents: { list: [{ id: AGENT_ID }] } };
 const SESSION_TIMESTAMP = "2026-04-25T00:00:00Z";
 
 type MessageFixture = {
@@ -61,11 +61,11 @@ function createMessageEvent(fixture: MessageFixture): TranscriptEvent {
 }
 
 function appendTranscriptFixture(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
   events: readonly TranscriptEvent[],
   scope: { sessionId?: string; sessionKey?: string } = {},
-): OpenClawAgentDatabase {
-  agentDatabase.runOpenClawAgentWriteTransaction((database) => {
+): CarapaceAgentDatabase {
+  agentDatabase.runCarapaceAgentWriteTransaction((database) => {
     expect(
       appendTranscriptEventsInTransaction(
         database,
@@ -78,14 +78,14 @@ function appendTranscriptFixture(
       ),
     ).toBe(events.length);
   }, databaseOptions);
-  return openOpenClawAgentDatabase(databaseOptions);
+  return openCarapaceAgentDatabase(databaseOptions);
 }
 
 function seedMessageTranscript(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
   messages: readonly MessageFixture[],
   scope: { sessionId?: string; sessionKey?: string } = {},
-): OpenClawAgentDatabase {
+): CarapaceAgentDatabase {
   const sessionId = scope.sessionId ?? SESSION_ID;
   return appendTranscriptFixture(
     databaseOptions,
@@ -113,9 +113,9 @@ function findMessageContent(events: readonly unknown[], eventId: string): unknow
 }
 
 async function runTranscriptLabelHealth(
-  state: OpenClawTestState,
+  state: CarapaceTestState,
   shouldRepair: boolean,
-  cfg: OpenClawConfig = CFG,
+  cfg: CarapaceConfig = CFG,
 ): Promise<void> {
   await noteSessionTranscriptLabelHealth({ cfg, env: state.env, shouldRepair });
 }
@@ -181,8 +181,8 @@ function createLegacyLabelEvents(): {
 }
 
 function seedLegacyLabelTranscript(
-  databaseOptions: OpenClawAgentDatabaseOptions,
-): OpenClawAgentDatabase {
+  databaseOptions: CarapaceAgentDatabaseOptions,
+): CarapaceAgentDatabase {
   const { events } = createLegacyLabelEvents();
   return appendTranscriptFixture(databaseOptions, events);
 }
@@ -202,14 +202,14 @@ function findEventJson(
 }
 
 describe("doctor SQLite session transcript label migration", () => {
-  let state: OpenClawTestState;
-  let transcriptDatabaseOptions: OpenClawAgentDatabaseOptions;
+  let state: CarapaceTestState;
+  let transcriptDatabaseOptions: CarapaceAgentDatabaseOptions;
 
   beforeEach(async () => {
     note.mockClear();
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-doctor-transcript-labels-",
+      prefix: "carapace-doctor-transcript-labels-",
     });
     transcriptDatabaseOptions = { agentId: AGENT_ID, env: state.env };
   });
@@ -217,8 +217,8 @@ describe("doctor SQLite session transcript label migration", () => {
   afterEach(async () => {
     vi.restoreAllMocks();
     await waitForSessionTranscriptIndexReconcile(transcriptDatabaseOptions);
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
   });
 
@@ -240,7 +240,7 @@ describe("doctor SQLite session transcript label migration", () => {
 
     expect(readTranscriptSnapshot(database, SESSION_ID).rows).toEqual(before.rows);
     expect(note).toHaveBeenCalledWith(
-      '- Found 1 session with legacy inbound-context labels.\n- Run "openclaw doctor --fix" to rewrite them.',
+      '- Found 1 session with legacy inbound-context labels.\n- Run "carapace doctor --fix" to rewrite them.',
       "Session transcript labels",
     );
 
@@ -301,8 +301,8 @@ describe("doctor SQLite session transcript label migration", () => {
     const databaseOptions = { agentId: AGENT_ID, env: state.env };
     const database = seedLegacyLabelTranscript(databaseOptions);
     const before = readTranscriptEventRows(database, SESSION_ID);
-    const transaction = agentDatabase.runOpenClawAgentWriteTransaction;
-    vi.spyOn(agentDatabase, "runOpenClawAgentWriteTransaction").mockImplementationOnce(
+    const transaction = agentDatabase.runCarapaceAgentWriteTransaction;
+    vi.spyOn(agentDatabase, "runCarapaceAgentWriteTransaction").mockImplementationOnce(
       (write, options, transactionOptions) => {
         transaction((db) => {
           db.db
@@ -333,8 +333,8 @@ describe("doctor SQLite session transcript label migration", () => {
       sessionKey: `agent:main:${laterSessionId}`,
     });
     const legacyContent = "Conversation info (untrusted metadata):\n```json\n{}\n```";
-    const transaction = agentDatabase.runOpenClawAgentWriteTransaction;
-    vi.spyOn(agentDatabase, "runOpenClawAgentWriteTransaction").mockImplementationOnce(
+    const transaction = agentDatabase.runCarapaceAgentWriteTransaction;
+    vi.spyOn(agentDatabase, "runCarapaceAgentWriteTransaction").mockImplementationOnce(
       (write, options, transactionOptions) => {
         transaction((db) => {
           db.db
@@ -417,7 +417,7 @@ describe("doctor SQLite session transcript label migration", () => {
       const customSqlitePath = resolveSqliteTargetFromSessionStorePath(customStorePath, {
         agentId: AGENT_ID,
       }).path;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { entries: { [shared ? "beta" : AGENT_ID]: {} } },
         session: { store: customStorePath },
       };
@@ -434,7 +434,7 @@ describe("doctor SQLite session transcript label migration", () => {
       await runTranscriptLabelHealth(state, false, cfg);
 
       expect(note).toHaveBeenCalledWith(
-        '- Found 1 session with legacy inbound-context labels.\n- Run "openclaw doctor --fix" to rewrite them.',
+        '- Found 1 session with legacy inbound-context labels.\n- Run "carapace doctor --fix" to rewrite them.',
         "Session transcript labels",
       );
 
@@ -465,7 +465,7 @@ describe("doctor SQLite session transcript label migration", () => {
       "",
       // Fenced but NON-enumerated heading: the ```json fence does not prove provenance, so an
       // arbitrary user heading must NOT be marked (marking it would let the marker-only strippers
-      // hide the user's own JSON). Only the fixed OpenClaw labels in rule 1 are migrated.
+      // hide the user's own JSON). Only the fixed Carapace labels in rule 1 are migrated.
       "Here is my own data:",
       "Notes (untrusted metadata):",
       "```json",
@@ -525,7 +525,7 @@ describe("doctor SQLite session transcript label migration", () => {
       ]);
       if (escaped) {
         const rows = readTranscriptEventRows(database, SESSION_ID).slice(1);
-        agentDatabase.runOpenClawAgentWriteTransaction((db) => {
+        agentDatabase.runCarapaceAgentWriteTransaction((db) => {
           for (const row of rows) {
             db.db
               .prepare(
@@ -589,7 +589,7 @@ describe("doctor SQLite session transcript label migration", () => {
     // Pin an explicitly OLD activity timestamp so we can prove the maintenance rewrite preserves
     // recency instead of jumping the session to repair-time.
     const OLD_UPDATED_AT = 1_000_000;
-    agentDatabase.runOpenClawAgentWriteTransaction((db) => {
+    agentDatabase.runCarapaceAgentWriteTransaction((db) => {
       db.db
         .prepare(
           "UPDATE session_windows SET transcript_updated_at = ?, transcript_observed_at = ? WHERE session_id = ?",
@@ -636,7 +636,7 @@ describe("doctor SQLite session transcript label migration", () => {
     // Force the message row to a distinctly OLD created_at, well before repair-time Date.now(). The
     // append-time FTS timestamp still holds the (recent) append value until the repair rebuilds it.
     const OLD_CREATED_AT = 1_000_000;
-    agentDatabase.runOpenClawAgentWriteTransaction((db) => {
+    agentDatabase.runCarapaceAgentWriteTransaction((db) => {
       db.db
         .prepare("UPDATE transcript_events SET created_at = ? WHERE session_id = ?")
         .run(OLD_CREATED_AT, SESSION_ID);
@@ -810,7 +810,7 @@ describe("doctor SQLite session transcript label migration", () => {
 
       // Corrupt the sibling row's event_json in place. transcript_events has no type/id columns,
       // so match on the encoded event body.
-      agentDatabase.runOpenClawAgentWriteTransaction((writeDatabase) => {
+      agentDatabase.runCarapaceAgentWriteTransaction((writeDatabase) => {
         const changed = writeDatabase.db
           .prepare(
             "UPDATE transcript_events SET event_json = ? WHERE session_id = ? AND event_json LIKE ?",

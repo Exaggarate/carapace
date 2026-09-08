@@ -59,7 +59,7 @@ function readPackage(root: string): { exports: Record<string, unknown>; files: s
 }
 
 function createFixture(inventory?: { entries: string[]; privateEntries: string[] }) {
-  const root = tempDirs.make("openclaw-sdk-registration-");
+  const root = tempDirs.make("carapace-sdk-registration-");
   for (const file of [
     "scripts/sync-plugin-sdk-exports.mts",
     "scripts/lib/plugin-sdk-entries.mts",
@@ -90,8 +90,8 @@ function createFixture(inventory?: { entries: string[]; privateEntries: string[]
         compilerOptions: {
           strict: true,
           paths: {
-            "openclaw/plugin-sdk/*": [`${prefix}dist/plugin-sdk/*.d.ts`],
-            "openclaw/plugin-sdk/custom": [
+            "carapace/plugin-sdk/*": [`${prefix}dist/plugin-sdk/*.d.ts`],
+            "carapace/plugin-sdk/custom": [
               `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/custom.d.ts`,
               "./override.d.ts",
             ],
@@ -167,7 +167,7 @@ describe("plugin SDK registration CLI", () => {
   it.each(declarationConfigs)("checks $file independently without writing", ({ file }) => {
     const root = createFixture();
     const config = readConfig(root, file);
-    delete config.compilerOptions.paths["openclaw/plugin-sdk/browser-cdp"];
+    delete config.compilerOptions.paths["carapace/plugin-sdk/browser-cdp"];
     writeJson(root, file, config);
     const before = readOutputs(root);
 
@@ -187,12 +187,12 @@ describe("plugin SDK registration CLI", () => {
     const root = createFixture();
     const original = readOutputs(root);
     const shared = readConfig(root, declarationConfigs[0].file);
-    delete shared.compilerOptions.paths["openclaw/plugin-sdk/browser-cdp"];
+    delete shared.compilerOptions.paths["carapace/plugin-sdk/browser-cdp"];
     writeJson(root, declarationConfigs[0].file, shared);
     const xai = readConfig(root, declarationConfigs[1].file);
-    xai.compilerOptions.paths["openclaw/plugin-sdk/browser-cdp"] = ["./wrong.d.ts"];
+    xai.compilerOptions.paths["carapace/plugin-sdk/browser-cdp"] = ["./wrong.d.ts"];
     for (const entry of ["channel-secret-owner-runtime", "channel-secret-tts-runtime"]) {
-      xai.compilerOptions.paths[`openclaw/plugin-sdk/${entry}`] = ["./wrong.d.ts"];
+      xai.compilerOptions.paths[`carapace/plugin-sdk/${entry}`] = ["./wrong.d.ts"];
     }
     writeJson(root, declarationConfigs[1].file, xai);
 
@@ -207,7 +207,7 @@ describe("plugin SDK registration CLI", () => {
     );
     expect(sharedKeys).toEqual([
       ...Object.keys(shared.compilerOptions.paths),
-      "openclaw/plugin-sdk/browser-cdp",
+      "carapace/plugin-sdk/browser-cdp",
     ]);
     const synced = readOutputs(root);
     expect(runSync(root, "--check").status).toBe(0);
@@ -278,18 +278,18 @@ describe("plugin SDK registration CLI", () => {
     });
     for (const { file, prefix } of declarationConfigs) {
       expect(readConfig(root, file).compilerOptions.paths).toEqual({
-        "openclaw/plugin-sdk/*": [`${prefix}dist/plugin-sdk/*.d.ts`],
-        "openclaw/plugin-sdk/custom": [
+        "carapace/plugin-sdk/*": [`${prefix}dist/plugin-sdk/*.d.ts`],
+        "carapace/plugin-sdk/custom": [
           `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/custom.d.ts`,
           "./override.d.ts",
         ],
         ...Object.fromEntries(
           literalEntries.map((entry) => [
-            `openclaw/plugin-sdk/${entry}`,
+            `carapace/plugin-sdk/${entry}`,
             [`${prefix}packages/plugin-sdk/dist/src/plugin-sdk/${entry}.d.ts`],
           ]),
         ),
-        "openclaw/plugin-sdk/test-fixtures": [
+        "carapace/plugin-sdk/test-fixtures": [
           `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/test-fixtures.d.ts`,
         ],
       });
@@ -336,15 +336,15 @@ describe("plugin SDK registration CLI", () => {
       expect(readPackage(root).files).toEqual(retained);
       for (const { file, prefix } of declarationConfigs) {
         expect(readConfig(root, file).compilerOptions.paths).toEqual({
-          "openclaw/plugin-sdk/*": [`${prefix}dist/plugin-sdk/*.d.ts`],
-          "openclaw/plugin-sdk/custom": [
+          "carapace/plugin-sdk/*": [`${prefix}dist/plugin-sdk/*.d.ts`],
+          "carapace/plugin-sdk/custom": [
             `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/custom.d.ts`,
             "./override.d.ts",
           ],
-          "openclaw/plugin-sdk/private-entry": [
+          "carapace/plugin-sdk/private-entry": [
             `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/private-entry.d.ts`,
           ],
-          "openclaw/plugin-sdk/test-fixtures": [
+          "carapace/plugin-sdk/test-fixtures": [
             `${prefix}packages/plugin-sdk/dist/src/plugin-sdk/test-fixtures.d.ts`,
           ],
         });
@@ -371,7 +371,7 @@ describe("plugin SDK registration CLI", () => {
       for (const { file, prefix } of declarationConfigs) {
         for (const entry of formerEntries) {
           expect(
-            readConfig(root, file).compilerOptions.paths[`openclaw/plugin-sdk/${entry}`],
+            readConfig(root, file).compilerOptions.paths[`carapace/plugin-sdk/${entry}`],
           ).toEqual([`${prefix}packages/plugin-sdk/dist/src/plugin-sdk/${entry}.d.ts`]);
         }
       }

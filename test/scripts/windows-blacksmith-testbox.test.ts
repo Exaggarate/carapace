@@ -27,7 +27,7 @@ function runMonitor(options: {
   discoveryExit?: number;
   netstatExit?: number;
 }) {
-  const dir = createTempDir("openclaw-windows-idle-");
+  const dir = createTempDir("carapace-windows-idle-");
   fs.writeFileSync(path.join(dir, "connections"), options.rows ?? "");
   const markerSeed = path.join(dir, "marker-seed");
   fs.writeFileSync(markerSeed, "");

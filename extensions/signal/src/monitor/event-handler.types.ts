@@ -1,15 +1,15 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import type { StatusReactionTiming } from "openclaw/plugin-sdk/channel-feedback";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import type { StatusReactionTiming } from "carapace/plugin-sdk/channel-feedback";
 // Signal type declarations define plugin contracts.
 import type {
   DmPolicy,
   GroupPolicy,
-  OpenClawConfig,
+  CarapaceConfig,
   SignalReactionNotificationMode,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/config-contracts";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import type { SignalSender } from "../identity.js";
 
 export type SignalEnvelope = {
@@ -97,7 +97,7 @@ export type SignalEventHandlerDeps = {
   statusReactionTiming?: Required<StatusReactionTiming>;
   abortSignal?: AbortSignal;
   runTrackedTask?: (task: () => Promise<void>) => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   baseUrl: string;
   account?: string;
   accountUuid?: string;
@@ -125,7 +125,7 @@ export type SignalEventHandlerDeps = {
     maxBytes: number;
   }) => Promise<{ path: string; contentType?: string } | null>;
   deliverReplies: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     replies: ReplyPayload[];
     target: string;
     baseUrl: string;

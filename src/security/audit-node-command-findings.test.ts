@@ -1,6 +1,6 @@
 // Verifies node command security audit findings.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   collectNodeDangerousAllowCommandFindings,
   collectNodeDenyCommandPatternFindings,
@@ -45,7 +45,7 @@ describe("security audit node command findings", () => {
               commands: { deny: ["system.*", "system.runx"] },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         detailIncludes: ["system.*", "system.runx", "did you mean", "system.run"],
       },
       {
@@ -56,7 +56,7 @@ describe("security audit node command findings", () => {
               commands: { deny: ["system.run.prep"] },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         detailIncludes: ["system.run.prep", "did you mean", "system.run.prepare"],
       },
       {
@@ -67,7 +67,7 @@ describe("security audit node command findings", () => {
               commands: { deny: ["zzzzzzzzzzzzzz"] },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         detailIncludes: ["zzzzzzzzzzzzzz"],
         detailExcludes: ["did you mean"],
       },
@@ -81,7 +81,7 @@ describe("security audit node command findings", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         detailIncludes: ["camera.snapp", "system.*", "did you mean", "camera.snap"],
         detailExcludes: ["screen.record"],
       },
@@ -113,7 +113,7 @@ describe("security audit node command findings", () => {
           },
         },
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
     expect(findings).toStrictEqual([]);
   });
@@ -121,7 +121,7 @@ describe("security audit node command findings", () => {
   it("evaluates dangerous gateway.nodes.commands.allow findings", () => {
     const cases: Array<{
       name: string;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       expectedSeverity?: "warn" | "critical";
       expectedAbsent?: boolean;
     }> = [
@@ -134,7 +134,7 @@ describe("security audit node command findings", () => {
               commands: { allow: ["camera.snap", "screen.record", "health.summary"] },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         expectedSeverity: "warn" as const,
       },
       {
@@ -146,7 +146,7 @@ describe("security audit node command findings", () => {
               commands: { allow: ["camera.snap", "screen.record", "health.summary"] },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         expectedSeverity: "critical" as const,
       },
       {
@@ -160,7 +160,7 @@ describe("security audit node command findings", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         expectedAbsent: true,
       },
     ];

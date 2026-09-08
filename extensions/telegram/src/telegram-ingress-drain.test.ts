@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { GrammyError } from "grammy";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { createChannelIngressQueueForTests } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import {
   createTelegramSpooledReplayDeferredParticipant,
@@ -20,7 +20,7 @@ import {
 import { telegramSpooledUpdateLaneKey } from "./telegram-ingress-spool.test-support.js";
 
 async function withTempState<T>(fn: (stateDir: string) => Promise<T>): Promise<T> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-telegram-ingress-drain-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-telegram-ingress-drain-"));
   try {
     return await fn(stateDir);
   } finally {
@@ -35,7 +35,7 @@ const cfg = {
       dmPolicy: "allowlist",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function updatePayload(updateId: number): TelegramSpooledUpdatePayload {
   return {

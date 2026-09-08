@@ -47,7 +47,7 @@ describe("Anthropic server context management parity", () => {
 
   it("keeps clearing enabled after simple dispatch selects the Anthropic transport alias", async () => {
     const { payload, headers } = await captureAnthropicRequest("transport", {
-      transportApi: "openclaw-anthropic-messages-transport",
+      transportApi: "carapace-anthropic-messages-transport",
       cacheTtlPruning: {},
     });
     expect(payload.context_management).toEqual({

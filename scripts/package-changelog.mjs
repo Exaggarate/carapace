@@ -27,7 +27,7 @@ export function resolvePackageChangelogVersions(packageVersion, options = {}) {
   const match = RELEASE_VERSION_PATTERN.exec(packageVersion);
   if (!match) {
     throw new Error(
-      `Unsupported OpenClaw package version for changelog packaging: ${packageVersion}`,
+      `Unsupported Carapace package version for changelog packaging: ${packageVersion}`,
     );
   }
   if (PRERELEASE_VERSION_PATTERN.test(packageVersion)) {
@@ -97,7 +97,7 @@ export function extractCurrentPackageChangelog(content, packageVersion, options 
     // Keep every editorial note; only the audited record moves behind its immutable source link.
     const compacted = compactReleaseNotes(
       releaseSection,
-      "openclaw/openclaw",
+      "carapace/carapace",
       `v${packageVersion}`,
     );
     if (compacted) {

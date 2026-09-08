@@ -1,6 +1,6 @@
 ---
 name: telegram-e2e-userbot
-description: "Prove user-visible OpenClaw Telegram behavior on Telegram's Test Server with Convex-leased team credentials; drive real-user turns and record messages, edits, deletions, reactions, typing, or rich content."
+description: "Prove user-visible Carapace Telegram behavior on Telegram's Test Server with Convex-leased team credentials; drive real-user turns and record messages, edits, deletions, reactions, typing, or rich content."
 metadata:
   short-description: Telegram E2E via real-user driver
   argument-hint: "<message-or-command?>"
@@ -8,7 +8,7 @@ metadata:
 
 # Telegram E2E (Userbot)
 
-Prove OpenClaw behavior against Telegram's Test Server as a dedicated QA user.
+Prove Carapace behavior against Telegram's Test Server as a dedicated QA user.
 The user driver sees edits, deletions, reactions, and typing that a second bot
 cannot observe.
 
@@ -28,7 +28,7 @@ TDLib session or any Telegram Test Bot API method.
 
 ## 1. Prepare
 
-Run from the OpenClaw checkout and ref under test. Point to the repository skill:
+Run from the Carapace checkout and ref under test. Point to the repository skill:
 
 ```bash
 TELEGRAM_E2E_SKILL_DIR="${TELEGRAM_E2E_SKILL_DIR:-$PWD/.agents/skills/telegram-e2e-userbot}"
@@ -53,7 +53,7 @@ export TELEGRAM_GATEWAY_PORT TELEGRAM_MOCK_PORT
 ```
 
 Team and ClawSweeper runs use Convex. A maintainer with Convex CLI access to the
-OpenClaw broker project needs no local broker settings. The lease helper uses
+Carapace broker project needs no local broker settings. The lease helper uses
 `qa/convex-credential-broker` in the checkout, reads the production site and
 CI role through the authenticated CLI, and keeps them in process memory. Run
 the same doctor and runner commands below; no credential export is required.
@@ -64,8 +64,8 @@ authenticate the Convex CLI. Runtime setup must never install or log in.
 CI or another non-interactive worker can instead provide the broker pair:
 
 ```bash
-: "${OPENCLAW_QA_CONVEX_SITE_URL:?missing Convex QA site}"
-: "${OPENCLAW_QA_CONVEX_SECRET_CI:?missing Convex QA CI credential}"
+: "${CARAPACE_QA_CONVEX_SITE_URL:?missing Convex QA site}"
+: "${CARAPACE_QA_CONVEX_SECRET_CI:?missing Convex QA CI credential}"
 ```
 
 Done when the checkout contains `scripts/e2e/mock-openai-server.mjs`, the skill
@@ -80,7 +80,7 @@ the behavior under test. Prefer a DM for isolation. Use the shared group only
 when group policy, mentions, commands, topics, or reactions are part of the
 claim.
 
-Exercise the exact behavior changed by the diff. The generic `OPENCLAW_E2E_OK`
+Exercise the exact behavior changed by the diff. The generic `CARAPACE_E2E_OK`
 turn proves only the default message path. Formatting, commands, media, edits,
 deletions, reactions, topics, and timing each need actions and recorded events
 that expose the specific claim.
@@ -126,7 +126,7 @@ Create a durable proof directory outside runner scratch state:
 TELEGRAM_E2E_PROOF_DIR="$(mktemp -d /tmp/telegram-e2e-proof.XXXXXX)"
 node "$TELEGRAM_E2E_SKILL_DIR/scripts/run-mock-sut-user-e2e.mjs" \
   --gateway-port "$TELEGRAM_GATEWAY_PORT" --mock-port "$TELEGRAM_MOCK_PORT" \
-  --dm --text 'Please answer with OPENCLAW_E2E_OK only.' \
+  --dm --text 'Please answer with CARAPACE_E2E_OK only.' \
   --record "$TELEGRAM_E2E_PROOF_DIR/events.ndjson" \
   --output "$TELEGRAM_E2E_PROOF_DIR/summary.json"
 ```

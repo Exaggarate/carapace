@@ -1,17 +1,17 @@
 // Imessage tests cover monitor.plugin payload plugin behavior.
 import path from "node:path";
-import * as channelInbound from "openclaw/plugin-sdk/channel-inbound";
+import * as channelInbound from "carapace/plugin-sdk/channel-inbound";
 import {
   addTestHook,
   createEmptyPluginRegistry,
   createTestInboundDebounceFlush,
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import { recordInboundSession } from "openclaw/plugin-sdk/conversation-runtime";
-import type { dispatchReplyWithBufferedBlockDispatcher } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import type { waitForTransportReady } from "openclaw/plugin-sdk/transport-ready-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import { recordInboundSession } from "carapace/plugin-sdk/conversation-runtime";
+import type { dispatchReplyWithBufferedBlockDispatcher } from "carapace/plugin-sdk/reply-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+import type { waitForTransportReady } from "carapace/plugin-sdk/transport-ready-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { createIMessageRpcClient } from "./client.js";
 import { monitorIMessageProvider } from "./monitor.js";
@@ -26,12 +26,12 @@ const createIMessageRpcClientMock = vi.hoisted(() => vi.fn<typeof createIMessage
 const shouldDebounceTextInboundMock = vi.hoisted(() => vi.fn(() => false));
 const directDeliveryProof = vi.hoisted(() => ({ flush: false }));
 
-vi.mock("openclaw/plugin-sdk/transport-ready-runtime", () => ({
+vi.mock("carapace/plugin-sdk/transport-ready-runtime", () => ({
   waitForTransportReady: waitForTransportReadyMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   return {
     ...actual,
     createChannelInboundDebouncer: vi.fn(
@@ -96,7 +96,7 @@ describe("iMessage plugin payload attachments", () => {
               attachments: [
                 {
                   original_path:
-                    "/Users/openclaw/Library/Messages/Attachments/AA/BB/link.pluginPayloadAttachment",
+                    "/Users/carapace/Library/Messages/Attachments/AA/BB/link.pluginPayloadAttachment",
                   mime_type: null,
                   missing: false,
                   transfer_name: "link.pluginPayloadAttachment",
@@ -271,7 +271,7 @@ describe("iMessage plugin payload attachments", () => {
 
       const { DatabaseSync } = await import("node:sqlite");
       const database = new DatabaseSync(
-        path.join(getIMessageRuntime().state.resolveStateDir(), "state", "openclaw.sqlite"),
+        path.join(getIMessageRuntime().state.resolveStateDir(), "state", "carapace.sqlite"),
         { readOnly: true },
       );
       try {

@@ -3,14 +3,14 @@ import crypto from "node:crypto";
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
   type PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-paths";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-paths";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeStoredConversationId } from "./src/conversation-store-helpers.js";
 import {
   buildMSTeamsConversationStateKey,
@@ -127,7 +127,7 @@ function resolveLegacySanitizedSessionKey(
   return matches.length === 1 && match ? match : null;
 }
 
-function listAgentIds(config: OpenClawConfig): string[] {
+function listAgentIds(config: CarapaceConfig): string[] {
   const ids = new Set<string>(["main"]);
   if (isRecord(config.agents?.entries)) {
     for (const agentId of Object.keys(config.agents.entries)) {

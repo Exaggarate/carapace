@@ -13,15 +13,15 @@ const mediaTranscriptRealGatewayTest =
   "extensions/qa-lab/src/control-ui-media-transcript.real-gateway.e2e.test.ts";
 const sessionHostCommandStateRealGatewayTest =
   "extensions/qa-lab/src/session-host-command-state.real-gateway.e2e.test.ts";
-const openClawDelegationRealGatewayTest =
-  "extensions/qa-lab/src/control-ui-openclaw-delegation.real-gateway.e2e.test.ts";
+const carapaceDelegationRealGatewayTest =
+  "extensions/qa-lab/src/control-ui-carapace-delegation.real-gateway.e2e.test.ts";
 const automationManagementRealGatewayTest =
   "extensions/qa-lab/src/control-ui-automation-management.real-gateway.e2e.test.ts";
 const uiE2eIncludePatterns = [
   ...controlUiE2eTestGlobs,
   mediaTranscriptRealGatewayTest,
   sessionHostCommandStateRealGatewayTest,
-  openClawDelegationRealGatewayTest,
+  carapaceDelegationRealGatewayTest,
   automationManagementRealGatewayTest,
 ];
 export const uiE2eRealGatewayTestFiles = [
@@ -41,7 +41,7 @@ export const uiE2eRealGatewayTestFiles = [
   "ui/src/e2e/session-progress-hovercard.real-gateway.e2e.test.ts",
   "ui/src/e2e/usage-sessions-owner-attribution.e2e.test.ts",
   mediaTranscriptRealGatewayTest,
-  openClawDelegationRealGatewayTest,
+  carapaceDelegationRealGatewayTest,
   automationManagementRealGatewayTest,
 ];
 
@@ -106,12 +106,12 @@ export function createUiE2eVitestConfig(
   const baseTest = sharedVitestConfig.test ?? {};
   const baseSequence = (baseTest as { sequence?: object }).sequence;
   const realGatewayExclude =
-    env.OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY === "1" ? uiE2eRealGatewayTestFiles : [];
+    env.CARAPACE_UI_E2E_SKIP_REAL_GATEWAY === "1" ? uiE2eRealGatewayTestFiles : [];
   const exclude = [
     ...(baseTest.exclude ?? []).filter((pattern) => pattern !== "**/*.e2e.test.ts"),
     ...realGatewayExclude,
   ];
-  const includeFromEnv = loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+  const includeFromEnv = loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env);
   const include =
     includeFromEnv ??
     narrowIncludePatternsForCli(uiE2eIncludePatterns, argv) ??

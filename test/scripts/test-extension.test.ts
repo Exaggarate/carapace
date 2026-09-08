@@ -13,7 +13,7 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { bundledPluginFile, bundledPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledPluginFile, bundledPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { parseCLI } from "vitest/node";
 import {
@@ -214,7 +214,7 @@ describe("scripts/test-extension.mts", () => {
   });
 
   it("includes newly authored Matrix tests in bounded process targets", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-test-plan-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-test-plan-"));
     const relativeRoot = path.relative(process.cwd(), root);
     const testFile = path.join(root, "newly-authored.test.ts");
     writeFileSync(testFile, "export {};\n");
@@ -233,7 +233,7 @@ describe("scripts/test-extension.mts", () => {
   });
 
   posixIt("preserves newline and leading-space tokens in the tracked Git inventory", () => {
-    const root = tempDirs.make("openclaw-extension-git-paths-");
+    const root = tempDirs.make("carapace-extension-git-paths-");
     const trackedPaths = [" extensions/example.test.ts", "extensions/example\npath.test.ts"];
     expect(spawnSync("git", ["init", "-q", "--initial-branch=main"], { cwd: root }).status).toBe(0);
     for (const trackedPath of trackedPaths) {
@@ -370,7 +370,7 @@ describe("scripts/test-extension.mts", () => {
 
   it("can fail safe to all extensions when the base revision is unavailable", () => {
     const extensionIds = listChangedExtensionIds({
-      base: "refs/heads/openclaw-test-missing-base",
+      base: "refs/heads/carapace-test-missing-base",
       unavailableBaseBehavior: "all",
     });
 
@@ -637,7 +637,7 @@ describe("scripts/test-extension.mts", () => {
       });
     });
     const runPromise = runExtensionBatchPlan(createConcurrentExtensionBatchPlan(), {
-      env: { OPENCLAW_EXTENSION_BATCH_PARALLEL: "2" },
+      env: { CARAPACE_EXTENSION_BATCH_PARALLEL: "2" },
       runGroup: runGroup as NonNullable<
         NonNullable<Parameters<typeof runExtensionBatchPlan>[1]>["runGroup"]
       >,
@@ -662,8 +662,8 @@ describe("scripts/test-extension.mts", () => {
       args: ["--reporter=dot"],
       config: "heavy",
       env: {
-        OPENCLAW_EXTENSION_BATCH_PARALLEL: "2",
-        OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: path.join(
+        CARAPACE_EXTENSION_BATCH_PARALLEL: "2",
+        CARAPACE_VITEST_FS_MODULE_CACHE_PATH: path.join(
           process.cwd(),
           ".cache",
           "vitest",
@@ -690,7 +690,7 @@ describe("scripts/test-extension.mts", () => {
       });
     });
     const runPromise = runExtensionBatchPlan(createConcurrentExtensionBatchPlan(), {
-      env: { OPENCLAW_EXTENSION_BATCH_PARALLEL: "2" },
+      env: { CARAPACE_EXTENSION_BATCH_PARALLEL: "2" },
       runGroup: runGroup as NonNullable<
         NonNullable<Parameters<typeof runExtensionBatchPlan>[1]>["runGroup"]
       >,
@@ -710,16 +710,16 @@ describe("scripts/test-extension.mts", () => {
   });
 
   it("keeps extension batch parallelism bounded by group count", () => {
-    expect(resolveExtensionBatchParallelism(3, { OPENCLAW_EXTENSION_BATCH_PARALLEL: "2" })).toBe(2);
-    expect(resolveExtensionBatchParallelism(1, { OPENCLAW_EXTENSION_BATCH_PARALLEL: "4" })).toBe(1);
+    expect(resolveExtensionBatchParallelism(3, { CARAPACE_EXTENSION_BATCH_PARALLEL: "2" })).toBe(2);
+    expect(resolveExtensionBatchParallelism(1, { CARAPACE_EXTENSION_BATCH_PARALLEL: "4" })).toBe(1);
     expect(resolveExtensionBatchParallelism(3, {})).toBe(1);
   });
 
   it("rejects malformed extension batch parallelism", () => {
     for (const value of ["nope", "2x", "0"]) {
       expect(() =>
-        resolveExtensionBatchParallelism(3, { OPENCLAW_EXTENSION_BATCH_PARALLEL: value }),
-      ).toThrow("OPENCLAW_EXTENSION_BATCH_PARALLEL must be a positive integer");
+        resolveExtensionBatchParallelism(3, { CARAPACE_EXTENSION_BATCH_PARALLEL: value }),
+      ).toThrow("CARAPACE_EXTENSION_BATCH_PARALLEL must be a positive integer");
     }
   });
 
@@ -746,7 +746,7 @@ describe("scripts/test-extension.mts", () => {
     "runs installed Vitest without pnpm (Maglev: $enableMaglev, owner-authorized real home: $realHomeReplay)",
     ({ enableMaglev, realHomeReplay }) => {
       const root = realpathSync(
-        mkdtempSync(path.join(tmpdir(), "openclaw-test-extension-native-")),
+        mkdtempSync(path.join(tmpdir(), "carapace-test-extension-native-")),
       );
       const home = path.join(root, "home");
       const report = path.join(root, "report.json");
@@ -791,7 +791,7 @@ export default {root:${JSON.stringify(root)},cacheDir:${JSON.stringify(path.join
       } satisfies VitestBatchRunParams;
       writeFileSync(
         entry,
-        `import {runVitestBatch} from ${JSON.stringify(path.join(process.cwd(), "scripts/lib/vitest-batch-runner.mts"))};process.exitCode=await runVitestBatch({...${JSON.stringify(params)},env:{...process.env,OPENCLAW_VITEST_ENABLE_MAGLEV:${JSON.stringify(enableMaglev ? "1" : "")}}});`,
+        `import {runVitestBatch} from ${JSON.stringify(path.join(process.cwd(), "scripts/lib/vitest-batch-runner.mts"))};process.exitCode=await runVitestBatch({...${JSON.stringify(params)},env:{...process.env,CARAPACE_VITEST_ENABLE_MAGLEV:${JSON.stringify(enableMaglev ? "1" : "")}}});`,
       );
       try {
         const result = spawnSync(
@@ -804,8 +804,8 @@ export default {root:${JSON.stringify(root)},cacheDir:${JSON.stringify(path.join
               PATH: "",
               HOME: home,
               USERPROFILE: home,
-              OPENCLAW_LIVE_TEST: realHomeReplay ? "1" : "0",
-              OPENCLAW_LIVE_USE_REAL_HOME: realHomeReplay ? "1" : "0",
+              CARAPACE_LIVE_TEST: realHomeReplay ? "1" : "0",
+              CARAPACE_LIVE_USE_REAL_HOME: realHomeReplay ? "1" : "0",
               TMPDIR: root,
               TMP: root,
               TEMP: root,
@@ -919,7 +919,7 @@ export default {root:${JSON.stringify(root)},cacheDir:${JSON.stringify(path.join
   posixIt(
     "preserves wrapper termination when native Vitest exits cleanly after SIGTERM",
     async () => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-test-extension-signal-"));
+      const root = mkdtempSync(path.join(tmpdir(), "carapace-test-extension-signal-"));
       const config = path.join(root, "vitest.config.mjs");
       const entry = path.join(root, "batch.mts");
       const childPidPath = path.join(root, "child.pid");

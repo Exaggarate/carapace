@@ -31,7 +31,7 @@ function createContext(request: ReturnType<typeof vi.fn>) {
       type: "hello-ok",
       protocol: 1,
       auth: { role: "operator", scopes: ["operator.admin"] },
-      features: { methods: ["openclaw.chat"] },
+      features: { methods: ["carapace.chat"] },
     },
     assistantAgentId: "main",
     sessionKey: "main",
@@ -85,7 +85,7 @@ function createContext(request: ReturnType<typeof vi.fn>) {
 
 async function mountPage(context: ApplicationContext): Promise<TestCustodianPage> {
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-custodian-page") as TestCustodianPage;
+  const page = document.createElement("carapace-custodian-page") as TestCustodianPage;
   page.store = new CustodianSessionStore();
   page.onboarding = false;
   page.newAgentIntent = true;
@@ -171,6 +171,6 @@ describe("custodian new-agent flow", () => {
     expect(refreshList).not.toHaveBeenCalled();
     expect(setAgent).not.toHaveBeenCalled();
     expect(setSessionKey).not.toHaveBeenCalled();
-    expect(request.mock.calls.map(([method]) => method)).toEqual(["openclaw.chat"]);
+    expect(request.mock.calls.map(([method]) => method)).toEqual(["carapace.chat"]);
   });
 });

@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { expect, it } from "vitest";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
@@ -14,14 +14,14 @@ const models = (id: string) => [
   { id: "anchor", name: "Anchor" },
   { id, name: id },
 ];
-let instance: OpenClawTestInstance;
+let instance: CarapaceTestInstance;
 const suite = createControlUiE2eSuite({
   name: "Command Palette catalog publication with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    instance = await createOpenClawTestInstance({
+    instance = await createCarapaceTestInstance({
       name: "palette-catalog-publication",
-      env: { OPENCLAW_TEST_MINIMAL_GATEWAY: undefined, VITEST: undefined },
+      env: { CARAPACE_TEST_MINIMAL_GATEWAY: undefined, VITEST: undefined },
       config: {
         gateway: { controlUi: { enabled: true } },
         cron: { enabled: false },
@@ -164,7 +164,7 @@ suite.define(() => {
           await page.screenshot({ path: path.join(suite.artifactDir, "recovered.png") });
           await page.goBack();
           rejectCatalogReplies = true;
-          const sidebar = page.locator("openclaw-app-sidebar");
+          const sidebar = page.locator("carapace-app-sidebar");
           await sidebar.getByRole("button", { name: /Switch agent/ }).click();
           await sidebar
             .getByRole("menuitemradio", { name: "Reviewer fixture", exact: true })

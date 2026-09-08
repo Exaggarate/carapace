@@ -15,7 +15,7 @@ import { listSelectableAgents } from "../../lib/agents/display.ts";
 import { formatUiError } from "../../lib/format-error.ts";
 import { isGatewayMethodAdvertised } from "../../lib/gateway-methods.ts";
 import { generateUUID } from "../../lib/uuid.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   renderMemoryImport,
@@ -25,7 +25,7 @@ import {
 } from "./view.ts";
 
 const SESSION_BACKFILL_BATCH_DAYS = 14;
-const MEMORY_IMPORT_DOCS_URL = "https://docs.openclaw.ai/install/migrating";
+const MEMORY_IMPORT_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type PendingMemoryImport = {
   providerId: string;
@@ -41,7 +41,7 @@ function toErrorMessage(error: unknown): string {
   return formatUiError(error, "request failed");
 }
 
-export class MemoryImportPage extends OpenClawLightDomElement {
+export class MemoryImportPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -588,6 +588,6 @@ export class MemoryImportPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-memory-import-page")) {
-  customElements.define("openclaw-memory-import-page", MemoryImportPage);
+if (!customElements.get("carapace-memory-import-page")) {
+  customElements.define("carapace-memory-import-page", MemoryImportPage);
 }

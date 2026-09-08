@@ -1,6 +1,6 @@
 // Telegram tests cover channel actions.contract plugin behavior.
-import { installChannelActionsContractSuite } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { installChannelActionsContractSuite } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { telegramPlugin } from "../api.js";
 
@@ -16,7 +16,7 @@ describe("telegram actions contract", () => {
               botToken: "test-token-placeholder",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         expectedActions: [
           "send",
           "poll",
@@ -83,7 +83,7 @@ describe("telegram actions contract", () => {
               richMessages,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       });
 
       expect(hints?.text_markup).toBe(expectedMarkup);
@@ -111,7 +111,7 @@ describe("telegram actions contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const capabilitiesFor = (accountId: string) =>
       telegramPlugin.agentPrompt?.messageToolCapabilities?.({ cfg, accountId });
 
@@ -129,7 +129,7 @@ describe("telegram actions contract", () => {
             capabilities: [],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(capabilities).toContain("inlineButtons");
@@ -139,7 +139,7 @@ describe("telegram actions contract", () => {
     const discovery = telegramPlugin.actions?.describeMessageTool?.({
       cfg: {
         channels: { telegram: { botToken: "test-token-placeholder" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     const schema = discovery?.schema;
     const contributions = Array.isArray(schema) ? schema : schema ? [schema] : [];
@@ -160,7 +160,7 @@ describe("telegram actions contract", () => {
             capabilities: ["vision"],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(capabilities).not.toContain("inlineButtons");
@@ -180,7 +180,7 @@ describe("telegram actions contract", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "ops",
     });
 
@@ -198,7 +198,7 @@ describe("telegram actions contract", () => {
               richMessages: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       }),
     ).not.toThrow();
   });
@@ -221,7 +221,7 @@ describe("telegram actions contract", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(hints?.text_markup).toBe("markdown_telegram_rich");
@@ -261,7 +261,7 @@ describe("telegram actions contract", () => {
         ctx: {
           channel: "telegram",
           action: "send",
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           params: { quoteText: "  original message\n  " },
         },
         to: "123456",
@@ -286,7 +286,7 @@ describe("telegram actions contract", () => {
         ctx: {
           channel: "telegram",
           action: "send",
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           params: { quoteText: "original message" },
         },
         to: "123456",
@@ -298,7 +298,7 @@ describe("telegram actions contract", () => {
         ctx: {
           channel: "telegram",
           action: "send",
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           params: { quote_text: " \nsnake case quote  " },
         },
         to: "123456",
@@ -320,7 +320,7 @@ describe("telegram actions contract", () => {
         ctx: {
           channel: "telegram",
           action: "send",
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           params: { asVideoNote: true },
         },
         to: "123456",
@@ -332,7 +332,7 @@ describe("telegram actions contract", () => {
         ctx: {
           channel: "telegram",
           action: "send",
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           params: { location },
         },
         to: "123456",
@@ -349,7 +349,7 @@ describe("telegram actions contract", () => {
         ctx: {
           channel: "telegram",
           action: "send",
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           params: { buttons: '[[{"text":"Yes","callback_data":"yes"}]]' },
         },
         to: "123456",

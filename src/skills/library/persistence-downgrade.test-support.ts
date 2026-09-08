@@ -25,15 +25,15 @@ type BaselineProvenance = {
 };
 
 const requiredBaselineSources = [
-  "src/state/openclaw-state-db.ts",
-  "src/state/openclaw-state-db-contract.ts",
-  "src/state/openclaw-state-db-fast-path.ts",
-  "src/state/openclaw-state-db-maintenance.ts",
-  "src/state/openclaw-state-schema-compatibility.ts",
-  "src/state/openclaw-state-schema.sql",
-  "src/state/openclaw-agent-db.ts",
-  "src/state/openclaw-agent-db-contract.ts",
-  "src/state/openclaw-agent-schema.sql",
+  "src/state/carapace-state-db.ts",
+  "src/state/carapace-state-db-contract.ts",
+  "src/state/carapace-state-db-fast-path.ts",
+  "src/state/carapace-state-db-maintenance.ts",
+  "src/state/carapace-state-schema-compatibility.ts",
+  "src/state/carapace-state-schema.sql",
+  "src/state/carapace-agent-db.ts",
+  "src/state/carapace-agent-db-contract.ts",
+  "src/state/carapace-agent-schema.sql",
   "src/state/user-preferences.ts",
   "src/infra/sqlite-schema-contract.ts",
   "src/infra/sqlite-schema-sql.ts",
@@ -112,7 +112,7 @@ async function main() {
     const afterOld = readPersistenceDisk(root);
     assert.equal(afterOld.label, "Edited by baseline reader");
     assert.deepEqual(afterOld, { ...before, label: afterOld.label });
-    const state = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"), { readOnly: true });
+    const state = new DatabaseSync(path.join(root, "state", "carapace.sqlite"), { readOnly: true });
     try {
       assert.equal(
         state

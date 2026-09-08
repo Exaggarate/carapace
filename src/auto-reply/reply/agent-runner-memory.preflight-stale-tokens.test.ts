@@ -61,7 +61,7 @@ describe("runSessionCompactionIfNeeded stale totalTokens gating", () => {
   let rootDir = "";
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-preflight-stale-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-preflight-stale-"));
     registerMemoryFlushPlanResolverForTest(() => ({
       softThresholdTokens: 4_000,
       forceFlushTranscriptBytes: 1_000_000_000,

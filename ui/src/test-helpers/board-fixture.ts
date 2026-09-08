@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { state } from "lit/decorators.js";
 import type { BoardOp, BoardSnapshot } from "../lib/board/types.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 // The fixture page renders outside the app shell, so it must load the app
 // stylesheet itself (Web Awesome theme included) or dropdown menus render
 // theme-less: dark item text on the fixture's dark panels.
@@ -121,7 +121,7 @@ function contentControlsDocument(): string {
   </style><main><h2>Deploy controls</h2><p>Agent-authored content with no document inset.</p>
   <div class="actions"><button type="button">Preview</button><button type="button">Deploy</button></div>
   <input aria-label="Release note" placeholder="Release note"></main><script>
-    const report=()=>parent.postMessage({type:"openclaw:widget-size",height:document.body.scrollHeight},"*");
+    const report=()=>parent.postMessage({type:"carapace:widget-size",height:document.body.scrollHeight},"*");
     addEventListener("load",report);addEventListener("resize",report);new ResizeObserver(report).observe(document.documentElement);
   </script>`;
 }
@@ -250,7 +250,7 @@ export function applyBoardFixtureOps(
   return { ...next, revision: next.revision + 1 };
 }
 
-class BoardFixture extends OpenClawLightDomElement {
+class BoardFixture extends CarapaceLightDomElement {
   @state() private snapshot = structuredClone(initialSnapshot);
   @state() private activeTabId = "overview";
 
@@ -278,7 +278,7 @@ class BoardFixture extends OpenClawLightDomElement {
           </div>
           <div class="board-fixture-status"><i></i> fixture online</div>
         </header>
-        <openclaw-board-view
+        <carapace-board-view
           .snapshot=${this.snapshot}
           .activeTabId=${this.activeTabId}
           .widgetFrameUrl=${frameUrl}
@@ -289,14 +289,14 @@ class BoardFixture extends OpenClawLightDomElement {
               this.activeTabId = tabId;
             },
           }}
-        ></openclaw-board-view>
+        ></carapace-board-view>
       </main>
     `;
   }
 }
 
-if (!customElements.get("openclaw-board-fixture")) {
-  customElements.define("openclaw-board-fixture", BoardFixture);
+if (!customElements.get("carapace-board-fixture")) {
+  customElements.define("carapace-board-fixture", BoardFixture);
 }
 
-document.querySelector("#app")?.append(document.createElement("openclaw-board-fixture"));
+document.querySelector("#app")?.append(document.createElement("carapace-board-fixture"));

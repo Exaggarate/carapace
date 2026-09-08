@@ -76,7 +76,7 @@ describe.skipIf(process.platform !== "darwin")(
     // after this failed flight; keep the failure probe ahead of the concurrent cases.
     it("rejects all borrowers of a failed native preparation", ({ mac }) =>
       mac.lifetime.run(async () => {
-        const root = mac.createTempDir("openclaw-native-preparation-failure-");
+        const root = mac.createTempDir("carapace-native-preparation-failure-");
         const tool = vi.spyOn(mac, "run").mockResolvedValueOnce({
           status: 1,
           signal: null,
@@ -262,7 +262,7 @@ describe.skipIf(process.platform !== "darwin")(
     );
 
     it.concurrent.for([
-      ["Contents/MacOS/OpenClaw", false],
+      ["Contents/MacOS/Carapace", false],
       [`${workerRoot}/arm64/${addon}`, true],
     ] as const)(
       "rejects generic raw-fat64 signatures at %s",
@@ -545,8 +545,8 @@ describe.skipIf(process.platform !== "darwin")(
         }
         const preserved = [
           ...targets,
-          "Contents/MacOS/OpenClaw",
-          "Contents/MacOS/openclaw-mlx-tts",
+          "Contents/MacOS/Carapace",
+          "Contents/MacOS/carapace-mlx-tts",
           ...[0o644, 0o700, 0o750].map((mode) => `Contents/Frameworks/thin-${mode}.dylib`),
           ...["arm64", "x86_64"].flatMap((arch) =>
             [
@@ -706,7 +706,7 @@ describe.skipIf(process.platform !== "darwin")(
         await write(node, harness.binaries.arm64, 0o755);
         await runMacFixtureTool(
           "/usr/bin/plutil",
-          ["-remove", "OpenClawWorkerBuildID", harness.at("Contents/Info.plist")],
+          ["-remove", "CarapaceWorkerBuildID", harness.at("Contents/Info.plist")],
           harness.home,
           mac,
         );
@@ -740,7 +740,7 @@ describe.skipIf(process.platform !== "darwin")(
       workerRoot,
       `${workerRoot}/arm64`,
       `${workerRoot}/arm64/bin`,
-      `${workerRoot}/arm64/lib/node_modules/openclaw`,
+      `${workerRoot}/arm64/lib/node_modules/carapace`,
       `${workerRoot}/arm64/bin/node`,
       `${workerRoot}/arm64/${workerDist}/entry.js`,
       `${workerRoot}/arm64/${workerDist}/build-info.json`,
@@ -799,8 +799,8 @@ describe.skipIf(process.platform !== "darwin")(
     );
 
     it.concurrent.for([
-      "Contents/MacOS/OpenClaw",
-      "Contents/MacOS/openclaw-mlx-tts",
+      "Contents/MacOS/Carapace",
+      "Contents/MacOS/carapace-mlx-tts",
       "Contents/Frameworks/shared [fixture].dylib",
     ])("rejects thin shared code at %s", async (relative, { mac }) =>
       mac.lifetime.run(async () => {
@@ -862,7 +862,7 @@ describe.skipIf(process.platform !== "darwin")(
         "mlx",
         1,
         "MLX helper must be signed without app entitlements:",
-        "/Contents/MacOS/openclaw-mlx-tts",
+        "/Contents/MacOS/carapace-mlx-tts",
       ],
       [
         "cdhash-arm64",
@@ -972,7 +972,7 @@ describe.skipIf(process.platform !== "darwin")(
     );
 
     it.concurrent.for([
-      ["sourceCommit", "OpenClaw source"],
+      ["sourceCommit", "Carapace source"],
       ["peekabooCommit", "Peekaboo source"],
       ["version", "version"],
       ["build", "build"],

@@ -1,7 +1,7 @@
 // Tests info-style command responses, including effective tool inventory.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { EffectiveToolInventoryResult } from "../../agents/tools-effective-inventory.types.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -79,7 +79,7 @@ function firstMockArg(mock: { mock: { calls: unknown[][] } }, label: string): un
 
 function buildInfoParams(
   commandBodyNormalized: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   ctxOverrides?: Partial<MsgContext>,
 ): HandleCommandsParams {
   return {
@@ -146,7 +146,7 @@ describe("info command handlers", () => {
   ])("blocks %s from exporting a session", async (_label, isAuthorizedSender, senderIsOwner) => {
     const params = buildInfoParams("/export-session", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.command.isAuthorizedSender = isAuthorizedSender;
     params.command.senderIsOwner = senderIsOwner;
 
@@ -164,7 +164,7 @@ describe("info command handlers", () => {
   it("allows the owner to export a session", async () => {
     const params = buildInfoParams("/export-session", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const result = await handleExportSessionCommand(params, true);
 
@@ -178,7 +178,7 @@ describe("info command handlers", () => {
   it("ignores trajectory export requests from unauthorized senders", async () => {
     const params = buildInfoParams("/export-trajectory", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.command.isAuthorizedSender = false;
 
     const result = await handleExportTrajectoryCommand(params, true);
@@ -190,7 +190,7 @@ describe("info command handlers", () => {
   it("blocks authorized non-owners from exporting trajectory bundles", async () => {
     const params = buildInfoParams("/export-trajectory", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.command.senderIsOwner = false;
 
     const result = await handleExportTrajectoryCommand(params, true);
@@ -209,7 +209,7 @@ describe("info command handlers", () => {
         {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         {
           SenderId: "12345",
           SenderUsername: "TestUser",
@@ -228,7 +228,7 @@ describe("info command handlers", () => {
   it("returns usage for bare /skill without continuing to the agent", async () => {
     const params = buildInfoParams("/skill", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.skillCommands = [
       {
         name: "demo_skill",
@@ -247,7 +247,7 @@ describe("info command handlers", () => {
   it("returns an unknown skill reply for unmatched /skill targets", async () => {
     const params = buildInfoParams("/skill missing input", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const result = await handleSkillCommandUsage(params, true);
 
@@ -259,7 +259,7 @@ describe("info command handlers", () => {
   it("lets valid /skill invocations continue to the skill command path", async () => {
     const params = buildInfoParams("/skill demo_skill input", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.skillCommands = [
       {
         name: "demo_skill",
@@ -276,7 +276,7 @@ describe("info command handlers", () => {
   it("loads skills asynchronously before deciding named /skill invocations", async () => {
     const params = buildInfoParams("/skill demo_skill input", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.loadSkillCommands = vi.fn(async () => [
       {
         name: "demo_skill",
@@ -295,7 +295,7 @@ describe("info command handlers", () => {
   it("loads skills when named /skill receives an empty precomputed command list", async () => {
     const params = buildInfoParams("/skill demo_skill input", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.skillCommands = [];
     params.loadSkillCommands = vi.fn(async () => [
       {
@@ -315,7 +315,7 @@ describe("info command handlers", () => {
   it("keeps an empty precomputed /skill command list authoritative without a loader", async () => {
     const params = buildInfoParams("/skill demo_skill input", {
       commands: { text: true },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.skillCommands = [];
 
     const result = await handleSkillCommandUsage(params, true);
@@ -331,7 +331,7 @@ describe("info command handlers", () => {
       {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         SenderId: "123@lid",
         SenderUsername: "TestUser",
@@ -352,7 +352,7 @@ describe("info command handlers", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const cases = [
       { commandBody: "/context", expectedText: ["/context list", "Inline shortcut"] },
       { commandBody: "/context list", expectedText: ["Injected workspace files:", "AGENTS.md"] },
@@ -377,7 +377,7 @@ describe("info command handlers", () => {
       {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         ParentSessionKey: undefined,
       },
@@ -403,7 +403,7 @@ describe("info command handlers", () => {
     const params = buildInfoParams("/status", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.storePath = "/tmp/target-session-store.json";
 
     const statusResult = await handleStatusCommand(params, true);
@@ -420,7 +420,7 @@ describe("info command handlers", () => {
     const params = buildInfoParams("/status", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.sessionEntry = {
       sessionId: "wrapper-session",
       updatedAt: Date.now(),
@@ -450,7 +450,7 @@ describe("info command handlers", () => {
     const params = buildInfoParams("/status", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.resolvedFastMode = true;
 
     const statusResult = await handleStatusCommand(params, true);
@@ -467,7 +467,7 @@ describe("info command handlers", () => {
     const params = buildInfoParams("/status plugins", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     const statusResult = await handleStatusCommand(params, true);
 
@@ -488,7 +488,7 @@ describe("info command handlers", () => {
     const params = buildInfoParams("/commands", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.agentId = "target";
     params.sessionKey = "agent:target:whatsapp:direct:12345";
 
@@ -618,7 +618,7 @@ function buildConfig() {
   return {
     commands: { text: true },
     channels: { whatsapp: { allowFrom: ["*"] } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function resolveToolsArg(resolveToolsMock: { mock: { calls: unknown[][] } }, index = 0) {
@@ -873,7 +873,7 @@ describe("handleToolsCommand", () => {
       {
         commands: { text: true },
         channels: { telegram: { defaultAccount: "work" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       undefined,
       { workspaceDir: "/tmp" },
     );

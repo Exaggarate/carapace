@@ -8,10 +8,10 @@ const plan = createReleaseWorkflowMatrixPlan({ releaseProfile: "full", includeLi
 const providers = [
   "deepseek", // Gateway fixture provider outside the direct-model roster.
   ...plan.liveModels.matrix.include.map((entry) => entry.providers),
-  process.env.OPENCLAW_LIVE_PROVIDERS ?? "",
-  process.env.OPENCLAW_LIVE_GATEWAY_PROVIDERS ?? "",
-  process.env.OPENCLAW_LIVE_MODELS ?? "",
-  process.env.OPENCLAW_LIVE_GATEWAY_MODELS ?? "",
+  process.env.CARAPACE_LIVE_PROVIDERS ?? "",
+  process.env.CARAPACE_LIVE_GATEWAY_PROVIDERS ?? "",
+  process.env.CARAPACE_LIVE_MODELS ?? "",
+  process.env.CARAPACE_LIVE_GATEWAY_MODELS ?? "",
 ].flatMap((value) => value.split(/[\s,]+/u).map((ref) => ref.split("/")[0]));
 
 // Gateway/CLI fixtures also require these plugin artifacts.

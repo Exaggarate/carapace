@@ -37,7 +37,7 @@ const RECOVERABLE_UPDATE = {
   steps: [
     { name: "global update", exitCode: 0 },
     { name: "global install swap", exitCode: 0 },
-    { name: "openclaw doctor", exitCode: 0 },
+    { name: "carapace doctor", exitCode: 0 },
   ],
   postUpdate: {
     plugins: {
@@ -47,9 +47,9 @@ const RECOVERABLE_UPDATE = {
       warnings: [
         {
           reason:
-            'Plugin "discord" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.',
+            'Plugin "discord" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.',
           message:
-            'Plugin "discord" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.',
+            'Plugin "discord" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.',
         },
         {
           reason: "Config remained invalid after updated plugin migrations.",
@@ -69,7 +69,7 @@ function runJsonAssertion(command: string, value: unknown, ...args: string[]) {
 }
 
 function runJsonTextAssertion(command: string, contents: string, ...args: string[]) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-json-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-json-"));
   const file = join(root, "result.json");
   writeFileSync(file, contents);
   const result = spawnSync(
@@ -113,7 +113,7 @@ describe("upgrade recovery result assertions", () => {
       after: { version: "2026.8.1" },
       steps: [
         { name: "global update", exitCode: 0 },
-        { name: "openclaw doctor", exitCode: 0 },
+        { name: "carapace doctor", exitCode: 0 },
       ],
     };
     const plugins = {
@@ -139,7 +139,7 @@ describe("upgrade recovery result assertions", () => {
     ).toBe(0);
     // April 23 prints only the core report; the candidate's complete child result
     // must remain tied to this invocation before it can authorize fixture recovery.
-    const root = realpathSync(mkdtempSync(join(tmpdir(), "openclaw-upgrade-capture-")));
+    const root = realpathSync(mkdtempSync(join(tmpdir(), "carapace-upgrade-capture-")));
     const observationRoot = join(root, "observation");
     const resultFile = join(root, "update.json");
     mkdirSync(join(observationRoot, "diagnostics"), { recursive: true });
@@ -256,7 +256,7 @@ describe("upgrade recovery result assertions", () => {
         .status,
     ).toBe(0);
     const consentError =
-      'Plugin "discord" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.';
+      'Plugin "discord" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.';
     const consentOutcome = {
       pluginId: "discord",
       status: "error",
@@ -336,7 +336,7 @@ function writeMigratedSessionState(stateDir: string): undefined {
   mkdirSync(agentSessionsDir, { recursive: true });
   mkdirSync(agentDbDir, { recursive: true });
 
-  const db = new DatabaseSync(join(agentDbDir, "openclaw-agent.sqlite"));
+  const db = new DatabaseSync(join(agentDbDir, "carapace-agent.sqlite"));
   try {
     db.exec(`
       CREATE TABLE session_nodes (
@@ -447,7 +447,7 @@ function writeLegacyCacheSessionState(
   stateDir: string,
   options: { empty?: boolean; includePrompt?: boolean; replaceNodes?: boolean } = {},
 ) {
-  const dbPath = join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   const db = new DatabaseSync(dbPath);
   try {
     if (options.replaceNodes) {
@@ -475,7 +475,7 @@ function writeLegacyCacheSessionState(
 }
 
 function writeLegacySessionEntriesState(stateDir: string): void {
-  const dbPath = join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   const db = new DatabaseSync(dbPath);
   try {
     db.exec(`
@@ -505,12 +505,12 @@ function writeLegacySessionEntriesState(stateDir: string): void {
 
 function writeSharedRuntimeCaches(stateDir: string, versioned = false): void {
   const roots = ["discord", "telegram", "whatsapp"].map((plugin) =>
-    join(plugin, ".openclaw-runtime-deps-copy-stale"),
+    join(plugin, ".carapace-runtime-deps-copy-stale"),
   );
   if (versioned) {
     roots.push(
       ...["discord", "feishu", "telegram", "whatsapp"].map(
-        (plugin) => `openclaw-2026.4.24-${plugin}`,
+        (plugin) => `carapace-2026.4.24-${plugin}`,
       ),
     );
   }
@@ -525,7 +525,7 @@ function runSessionStateAssertion(
   setup: (stateDir: string) => NodeJS.ProcessEnv | undefined,
   options: { scenario?: string; commands?: string[] } = {},
 ): void {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-session-state-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-session-state-"));
   try {
     const stateDir = join(root, "state");
     const workspace = join(root, "workspace");
@@ -542,10 +542,10 @@ function runSessionStateAssertion(
         env: {
           ...process.env,
           ...fixtureEnv,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: options.scenario ?? "base",
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION: "2026.4.24",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_WORKSPACE_DIR: workspace,
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIO: options.scenario ?? "base",
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION: "2026.4.24",
         },
         stdio: "pipe",
       });
@@ -556,7 +556,7 @@ function runSessionStateAssertion(
 }
 
 function assertConfiguredPluginState(params: { installPath?: string } = {}): void {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-"));
   try {
     const stateDir = join(root, "state");
     const workspace = join(root, "workspace");
@@ -572,15 +572,15 @@ function assertConfiguredPluginState(params: { installPath?: string } = {}): voi
     writeMigratedSessionState(stateDir);
     writeSharedRuntimeCaches(stateDir);
     writeJson(join(matrixInstallDir, "package.json"), {
-      name: "@openclaw/matrix",
+      name: "@carapace/matrix",
     });
     writeJson(join(stateDir, "plugins", "installs.json"), {
       installRecords: {
         matrix: {
           source: "clawhub",
-          spec: "clawhub:@openclaw/matrix",
+          spec: "clawhub:@carapace/matrix",
           installPath: matrixInstallDir,
-          clawhubPackage: "@openclaw/matrix",
+          clawhubPackage: "@carapace/matrix",
           clawhubChannel: "official",
           artifactKind: "npm-pack",
         },
@@ -596,10 +596,10 @@ function assertConfiguredPluginState(params: { installPath?: string } = {}): voi
     execFileSync(process.execPath, [ASSERTIONS_PATH, "assert-state"], {
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-        OPENCLAW_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON: coveragePath,
-        OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "configured-plugin-installs",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_TEST_WORKSPACE_DIR: workspace,
+        CARAPACE_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON: coveragePath,
+        CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "configured-plugin-installs",
       },
       stdio: "pipe",
     });
@@ -615,9 +615,9 @@ function assertConfig(params: {
   stage?: "baseline" | "survival";
   updateChannel?: string;
 }): void {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-config-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-config-"));
   try {
-    const configPath = join(root, "openclaw.json");
+    const configPath = join(root, "carapace.json");
     const coveragePath = join(root, "coverage.json");
     writeJson(configPath, params.config);
     writeJson(coveragePath, {
@@ -628,11 +628,11 @@ function assertConfig(params: {
     execFileSync(process.execPath, [ASSERTIONS_PATH, "assert-config"], {
       env: {
         ...process.env,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON: coveragePath,
-        OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: params.scenario,
-        OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: params.stage ?? "survival",
-        OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL: params.updateChannel ?? "",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON: coveragePath,
+        CARAPACE_UPGRADE_SURVIVOR_SCENARIO: params.scenario,
+        CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: params.stage ?? "survival",
+        CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL: params.updateChannel ?? "",
       },
       stdio: "pipe",
     });
@@ -670,7 +670,7 @@ function assertCompanionPluginRecords(
     isolateAssertionRuntime?: boolean;
   } = {},
 ): void {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-companions-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-companions-"));
   try {
     const stateDir = join(root, "state");
     const version = "2026.8.1";
@@ -680,7 +680,7 @@ function assertCompanionPluginRecords(
       "projects",
       "discord",
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "discord",
     );
     const codexInstallPath = join(
@@ -689,14 +689,14 @@ function assertCompanionPluginRecords(
       "projects",
       "codex",
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "codex",
     );
     const whatsappInstallPath = join(stateDir, "extensions", "whatsapp");
     for (const [installPath, packageName] of [
-      [discordInstallPath, "@openclaw/discord"],
-      [whatsappInstallPath, "@openclaw/whatsapp"],
-      [codexInstallPath, "@openclaw/codex"],
+      [discordInstallPath, "@carapace/discord"],
+      [whatsappInstallPath, "@carapace/whatsapp"],
+      [codexInstallPath, "@carapace/codex"],
     ] as const) {
       mkdirSync(installPath, { recursive: true });
       writeJson(join(installPath, "package.json"), { name: packageName, version });
@@ -712,8 +712,8 @@ function assertCompanionPluginRecords(
     const records: Record<string, PluginInstallRecord> = {
       discord: {
         source: "npm",
-        spec: `@openclaw/discord@${version}`,
-        resolvedName: "@openclaw/discord",
+        spec: `@carapace/discord@${version}`,
+        resolvedName: "@carapace/discord",
         resolvedVersion: version,
         integrity: npmIntegrity,
         installPath: discordInstallPath,
@@ -727,9 +727,9 @@ function assertCompanionPluginRecords(
       },
       whatsapp: {
         source: "clawhub",
-        spec: `clawhub:@openclaw/whatsapp@${version}`,
+        spec: `clawhub:@carapace/whatsapp@${version}`,
         version,
-        clawhubPackage: "@openclaw/whatsapp",
+        clawhubPackage: "@carapace/whatsapp",
         clawhubChannel: "official",
         clawhubUrl: "http://127.0.0.1:18765",
         artifactKind: "npm-pack",
@@ -739,8 +739,8 @@ function assertCompanionPluginRecords(
       },
       codex: {
         source: "npm",
-        spec: `@openclaw/codex@${version}`,
-        resolvedName: "@openclaw/codex",
+        spec: `@carapace/codex@${version}`,
+        resolvedName: "@carapace/codex",
         resolvedVersion: version,
         integrity: npmIntegrity,
         installPath: codexInstallPath,
@@ -768,8 +768,8 @@ function assertCompanionPluginRecords(
           plugins: {
             ...RECOVERABLE_UPDATE.postUpdate.plugins,
             warnings: recoveryPluginIds.map((pluginId) => ({
-              reason: `Plugin "${pluginId}" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.`,
-              message: `Plugin "${pluginId}" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.`,
+              reason: `Plugin "${pluginId}" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.`,
+              message: `Plugin "${pluginId}" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.`,
             })),
           },
         },
@@ -801,7 +801,7 @@ function assertCompanionPluginRecords(
         env: {
           ...process.env,
           ...fixtureEnv,
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_STATE_DIR: stateDir,
           PATH: options.isolateAssertionRuntime ? "" : fixtureEnv.PATH,
         },
         stdio: "pipe",
@@ -818,7 +818,7 @@ function createUpdateRunSelfUpgradeSummary() {
   const note = "QA-UPDATE-RUN-PACKAGE-SELF-UPGRADE";
   return {
     status: "passed",
-    source: { spec: `openclaw@${sourceVersion}`, version: sourceVersion },
+    source: { spec: `carapace@${sourceVersion}`, version: sourceVersion },
     target: { tag: "latest", resolvedVersion: targetVersion },
     installedVersion: targetVersion,
     expectedRestartNote: note,
@@ -863,7 +863,7 @@ function createUpdateRunSelfUpgradeSummary() {
     },
     supervisorHandoff: {
       servicePid: 4242,
-      systemctlInvocations: ["--user start openclaw-gateway.service"],
+      systemctlInvocations: ["--user start carapace-gateway.service"],
       monitorEvents: [
         "source Gateway exited through supervised update handoff",
         "starting installed service without provider suppression",
@@ -891,7 +891,7 @@ function createUpdateRunSelfUpgradeSummary() {
 }
 
 function assertUpdateRunSelfUpgrade(summary: ReturnType<typeof createUpdateRunSelfUpgradeSummary>) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-update-run-self-upgrade-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-update-run-self-upgrade-"));
   try {
     const summaryPath = join(root, "summary.json");
     writeJson(summaryPath, summary);
@@ -946,7 +946,7 @@ describe("upgrade survivor assertions", () => {
   ])(
     "classifies baseline shared state for $name",
     ({ sdkPath, declaresTypes, runtime, failure }) => {
-      const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-baseline-sdk-"));
+      const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-baseline-sdk-"));
       try {
         const packageRoot = join(root, "package");
         const stateDir = join(root, "state");
@@ -954,7 +954,7 @@ describe("upgrade survivor assertions", () => {
         mkdirSync(packageRoot);
         mkdirSync(stateDir);
         writeJson(join(packageRoot, "package.json"), {
-          name: "openclaw",
+          name: "carapace",
           version,
           type: "module",
           exports: {
@@ -983,8 +983,8 @@ describe("upgrade survivor assertions", () => {
             encoding: "utf8",
             env: {
               ...process.env,
-              OPENCLAW_STATE_DIR: stateDir,
-              OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION: version,
+              CARAPACE_STATE_DIR: stateDir,
+              CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION: version,
             },
           },
         );
@@ -1051,7 +1051,7 @@ describe("upgrade survivor assertions", () => {
             store.profiles["anthropic:default"].access = "changed-access";
           }
           mkdirSync(join(stateDir, "state"), { recursive: true });
-          const db = new DatabaseSync(join(stateDir, "state", "openclaw.sqlite"));
+          const db = new DatabaseSync(join(stateDir, "state", "carapace.sqlite"));
           try {
             db.exec(`
               CREATE TABLE config_machine_state (state_key PRIMARY KEY, value_json);
@@ -1100,7 +1100,7 @@ describe("upgrade survivor assertions", () => {
             );
             writeFileSync(join(archive, "summary.md"), "Shipped transcript summary\n");
             mkdirSync(join(stateDir, "state"), { recursive: true });
-            const db = new DatabaseSync(join(stateDir, "state", "openclaw.sqlite"));
+            const db = new DatabaseSync(join(stateDir, "state", "carapace.sqlite"));
             try {
               db.exec(`
               CREATE TABLE meeting_transcript_sessions (session_id, started_at, next_utterance_seq);
@@ -1117,13 +1117,13 @@ describe("upgrade survivor assertions", () => {
             const binDir = join(stateDir, "bin");
             mkdirSync(binDir);
             writeFileSync(
-              join(binDir, "openclaw"),
+              join(binDir, "carapace"),
               `#!/usr/bin/env node
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 assert.deepEqual(process.argv.slice(2), ["transcripts", "path", "2026-07-01/design-review", "--dir"]);
-const root = process.env.OPENCLAW_STATE_DIR;
+const root = process.env.CARAPACE_STATE_DIR;
 const sessionDir = path.join(root, "transcripts", "2026-07-01", "design-review");
 fs.cpSync(path.join(root, "transcripts.migrated-fixture", "2026-07-01", "design-review"), sessionDir, { recursive: true });
 process.stdout.write(sessionDir + "\\n");
@@ -1150,7 +1150,7 @@ process.stdout.write(sessionDir + "\\n");
 
     expect(scenarios).toContain("base");
     expect(scenarios).toContain("mobile-pairing-reconnect");
-    expect(scenarios).toContain("acpx-openclaw-tools-bridge");
+    expect(scenarios).toContain("acpx-carapace-tools-bridge");
     expect(scenarios).toContain("prerelease-plugin-registry");
     expect(scenarios).toContain("sqlite-volume");
     expect(new Set(scenarios).size).toBe(scenarios.length);
@@ -1193,7 +1193,7 @@ process.stdout.write(sessionDir + "\\n");
   });
 
   it("allows token rotation and requires each reconnect to use the newest stored token", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-mobile-pairing-evidence-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-mobile-pairing-evidence-"));
     const phases = ["baseline", "candidate-first", "candidate-restart", "final"];
     const hashes = ["a", "b", "c", "d", "e"].map((value) => value.repeat(64));
     const files = phases.map((phase, index) => {
@@ -1270,7 +1270,7 @@ process.stdout.write(sessionDir + "\\n");
   it.each(["base", "sqlite-volume"])(
     "seeds recent ordered session timestamps for %s",
     (scenario) => {
-      const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-seed-"));
+      const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-seed-"));
       try {
         const stateDir = join(root, "state");
         const workspace = join(root, "workspace");
@@ -1281,9 +1281,9 @@ process.stdout.write(sessionDir + "\\n");
         execFileSync(process.execPath, [ASSERTIONS_PATH, "seed"], {
           env: {
             ...process.env,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-            OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: scenario,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_TEST_WORKSPACE_DIR: workspace,
+            CARAPACE_UPGRADE_SURVIVOR_SCENARIO: scenario,
           },
           stdio: "pipe",
         });
@@ -1356,7 +1356,7 @@ process.stdout.write(sessionDir + "\\n");
   it.each(["watchos-direct-node", "mobile-pairing-reconnect"])(
     "keeps the %s seed free of unrelated migration specimens",
     (scenario) => {
-      const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-companion-seed-"));
+      const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-companion-seed-"));
       try {
         const stateDir = join(root, "state");
         const workspace = join(root, "workspace");
@@ -1364,15 +1364,15 @@ process.stdout.write(sessionDir + "\\n");
         mkdirSync(workspace, { recursive: true });
         const env = {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: scenario,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_WORKSPACE_DIR: workspace,
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIO: scenario,
         };
 
         execFileSync(process.execPath, [ASSERTIONS_PATH, "seed"], { env, stdio: "pipe" });
 
         expect(existsSync(join(workspace, "IDENTITY.md"))).toBe(true);
-        expect(existsSync(join(workspace, ".openclaw", "workspace-state.json"))).toBe(true);
+        expect(existsSync(join(workspace, ".carapace", "workspace-state.json"))).toBe(true);
         for (const relative of [
           "sessions/sessions.json",
           "agents/main/sessions/legacy-session.json",
@@ -1384,7 +1384,7 @@ process.stdout.write(sessionDir + "\\n");
         for (const stage of ["baseline", "survival"]) {
           const stageEnv = {
             ...env,
-            OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: stage,
+            CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: stage,
           };
           execFileSync(process.execPath, [ASSERTIONS_PATH, "assert-state"], {
             env: stageEnv,
@@ -1402,16 +1402,16 @@ process.stdout.write(sessionDir + "\\n");
   );
 
   it("requires every seeded legacy cron specimen before update", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-cron-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-cron-"));
     try {
       const stateDir = join(root, "state");
       const workspace = join(root, "workspace");
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-        OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "cron-scheduled-authority",
-        OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: "baseline",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_TEST_WORKSPACE_DIR: workspace,
+        CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "cron-scheduled-authority",
+        CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: "baseline",
       };
       const run = (command: string) =>
         spawnSync(process.execPath, [ASSERTIONS_PATH, command], { env, encoding: "utf8" });
@@ -1431,8 +1431,8 @@ process.stdout.write(sessionDir + "\\n");
     }
   });
 
-  it("accepts the ACPX OpenClaw tools bridge scenario during seed", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-acpx-"));
+  it("accepts the ACPX Carapace tools bridge scenario during seed", () => {
+    const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-acpx-"));
     try {
       const stateDir = join(root, "state");
       const workspace = join(root, "workspace");
@@ -1442,9 +1442,9 @@ process.stdout.write(sessionDir + "\\n");
       execFileSync(process.execPath, [ASSERTIONS_PATH, "seed"], {
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "acpx-openclaw-tools-bridge",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_WORKSPACE_DIR: workspace,
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "acpx-carapace-tools-bridge",
         },
         stdio: "pipe",
       });
@@ -1453,10 +1453,10 @@ process.stdout.write(sessionDir + "\\n");
     }
   });
 
-  it("asserts the ACPX OpenClaw tools bridge config survived", () => {
+  it("asserts the ACPX Carapace tools bridge config survived", () => {
     expect(() =>
       assertConfig({
-        acceptedIntents: ["acpx-openclaw-tools-bridge"],
+        acceptedIntents: ["acpx-carapace-tools-bridge"],
         config: {
           plugins: {
             allow: ["acpx"],
@@ -1464,13 +1464,13 @@ process.stdout.write(sessionDir + "\\n");
               acpx: {
                 enabled: true,
                 config: {
-                  openClawToolsMcpBridge: true,
+                  carapaceToolsMcpBridge: true,
                 },
               },
             },
           },
         },
-        scenario: "acpx-openclaw-tools-bridge",
+        scenario: "acpx-carapace-tools-bridge",
       }),
     ).not.toThrow();
   });
@@ -1535,7 +1535,7 @@ process.stdout.write(sessionDir + "\\n");
     expect(() => assertCompanionPluginRecords()).not.toThrow();
     expect(() =>
       assertCompanionPluginRecords((records) => {
-        records.discord!.resolvedSpec = "@openclaw/discord@2026.8.1";
+        records.discord!.resolvedSpec = "@carapace/discord@2026.8.1";
       }),
     ).not.toThrow();
   });
@@ -1608,10 +1608,10 @@ process.stdout.write(sessionDir + "\\n");
   });
 
   it.each([
-    ["spec", "@openclaw/discord@file:payload"],
-    ["resolvedSpec", "@openclaw/discord@file:payload"],
-    ["spec", "@openclaw/discord@npm:@example/discord"],
-    ["resolvedSpec", "@openclaw/discord@git+https://example.invalid/discord.git"],
+    ["spec", "@carapace/discord@file:payload"],
+    ["resolvedSpec", "@carapace/discord@file:payload"],
+    ["spec", "@carapace/discord@npm:@example/discord"],
+    ["resolvedSpec", "@carapace/discord@git+https://example.invalid/discord.git"],
   ] as const)("rejects an official-looking non-registry %s", (field, value) => {
     expect(() =>
       assertCompanionPluginRecords((records) => {
@@ -1682,25 +1682,25 @@ process.stdout.write(sessionDir + "\\n");
         (records, paths) => {
           records.matrix = {
             ...records.whatsapp!,
-            clawhubPackage: "@openclaw/matrix",
-            spec: "clawhub:@openclaw/matrix@2026.8.1",
+            clawhubPackage: "@carapace/matrix",
+            spec: "clawhub:@carapace/matrix@2026.8.1",
           };
           writeJson(join(paths.whatsapp, "package.json"), {
-            name: "@openclaw/matrix",
+            name: "@carapace/matrix",
             version: "2026.8.1",
           });
           delete records.whatsapp;
           const bravePath = join(paths.codex, "..", "brave-plugin");
           mkdirSync(bravePath, { recursive: true });
           writeJson(join(bravePath, "package.json"), {
-            name: "@openclaw/brave-plugin",
+            name: "@carapace/brave-plugin",
             version: "2026.8.1",
           });
           records.brave = {
             ...records.codex!,
             installPath: bravePath,
-            resolvedName: "@openclaw/brave-plugin",
-            spec: "@openclaw/brave-plugin@2026.8.1",
+            resolvedName: "@carapace/brave-plugin",
+            spec: "@carapace/brave-plugin@2026.8.1",
           };
         },
         true,
@@ -1752,7 +1752,7 @@ process.stdout.write(sessionDir + "\\n");
     (_sourceLabel, pluginId) => {
       expect(() =>
         assertCompanionPluginRecords((_records, installPaths) => {
-          const packageName = pluginId === "discord" ? "@openclaw/discord" : "@openclaw/whatsapp";
+          const packageName = pluginId === "discord" ? "@carapace/discord" : "@carapace/whatsapp";
           writeJson(join(installPaths[pluginId], "package.json"), {
             name: packageName,
             version: "2026.8.0",
@@ -1777,8 +1777,8 @@ process.stdout.write(sessionDir + "\\n");
               writeMigratedSessionState(stateDir);
               const root =
                 scenario === "base"
-                  ? join("discord", ".openclaw-runtime-deps-copy-stale")
-                  : "openclaw-2026.4.24-feishu";
+                  ? join("discord", ".carapace-runtime-deps-copy-stale")
+                  : "carapace-2026.4.24-feishu";
               const sentinel = join(
                 stateDir,
                 "plugin-runtime-deps",
@@ -1815,7 +1815,7 @@ process.stdout.write(sessionDir + "\\n");
       runSessionStateAssertion((stateDir) => {
         writeMigratedSessionState(stateDir);
         const db = new DatabaseSync(
-          join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+          join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
         );
         try {
           db.exec("DELETE FROM session_nodes;");
@@ -1863,7 +1863,7 @@ process.stdout.write(sessionDir + "\\n");
       runSessionStateAssertion((stateDir) => {
         const agentDbDir = join(stateDir, "agents", "main", "agent");
         mkdirSync(agentDbDir, { recursive: true });
-        const db = new DatabaseSync(join(agentDbDir, "openclaw-agent.sqlite"));
+        const db = new DatabaseSync(join(agentDbDir, "carapace-agent.sqlite"));
         try {
           db.exec("CREATE TABLE unrelated_state (key TEXT PRIMARY KEY);");
         } finally {
@@ -1885,12 +1885,12 @@ process.stdout.write(sessionDir + "\\n");
     "user-only",
     "wrong-reply",
   ])("requires a completed persisted managed serving reply (%s)", (outcome) => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-survivor-serving-turn-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-survivor-serving-turn-"));
     try {
       const bin = join(root, "bin");
       mkdirSync(bin);
       writeFileSync(
-        join(bin, "openclaw"),
+        join(bin, "carapace"),
         `#!${process.execPath}
 const fs = require("node:fs");
 const method = process.argv[4];
@@ -1902,7 +1902,7 @@ if (outcome === "cli-failed") {
 }
 let result;
 if (method === "chat.send") {
-  fs.writeFileSync(process.env.PROBE_MARKER_FILE, params.message.match(/OPENCLAW_E2E_SURVIVOR_[A-F0-9]+/)[0]);
+  fs.writeFileSync(process.env.PROBE_MARKER_FILE, params.message.match(/CARAPACE_E2E_SURVIVOR_[A-F0-9]+/)[0]);
   result = { status: outcome === "not-started" ? "error" : "started", runId: "serving-run" };
 } else if (method === "agent.wait") {
   const pending = ["queued", "wait-timeout"].includes(outcome) && !fs.existsSync(process.env.PROBE_MARKER_FILE + ".waited");
@@ -1984,7 +1984,7 @@ process.stdout.write(JSON.stringify(result));
         runSessionStateAssertion((stateDir) => {
           writeMigratedSessionState(stateDir);
           const db = new DatabaseSync(
-            join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+            join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
           );
           try {
             db.prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?").run(
@@ -2014,7 +2014,7 @@ process.stdout.write(JSON.stringify(result));
           } finally {
             db.close();
           }
-          return { OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: stage };
+          return { CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: stage };
         });
       if (error) {
         expect(check).toThrow(error);
@@ -2029,7 +2029,7 @@ process.stdout.write(JSON.stringify(result));
       runSessionStateAssertion((stateDir) => {
         writeMigratedSessionState(stateDir);
         const db = new DatabaseSync(
-          join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+          join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
         );
         try {
           db.prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?").run(
@@ -2046,7 +2046,7 @@ process.stdout.write(JSON.stringify(result));
   });
 
   it("rejects ClawHub npm-pack installs outside the managed extensions root", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-survivor-outside-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-survivor-outside-"));
     try {
       expect(() =>
         assertConfiguredPluginState({ installPath: join(root, "outside-matrix") }),
@@ -2106,7 +2106,7 @@ process.stdout.write(JSON.stringify(result));
   it("rejects duplicate target service starts during the supervised handoff", () => {
     const summary = createUpdateRunSelfUpgradeSummary();
     summary.supervisorHandoff.systemctlInvocations.push(
-      "--user --quiet start openclaw-gateway.service",
+      "--user --quiet start carapace-gateway.service",
     );
 
     expect(() => assertUpdateRunSelfUpgrade(summary)).toThrow(/target exactly once/);

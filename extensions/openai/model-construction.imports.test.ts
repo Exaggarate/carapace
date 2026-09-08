@@ -1,4 +1,4 @@
-import { findSourceImportBackedges } from "openclaw/plugin-sdk/test-fixtures";
+import { findSourceImportBackedges } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 
 describe("OpenAI model construction imports", () => {

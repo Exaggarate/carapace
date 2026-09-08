@@ -16,7 +16,7 @@ import type { ModelAccounts } from "./model-accounts.ts";
 import { createConnectedContext } from "./profile-page.test-support.ts";
 import { ProfilePage } from "./profile-page.ts";
 
-const PROFILE_PAGE_TEST_TAG = "test-openclaw-profile-page";
+const PROFILE_PAGE_TEST_TAG = "test-carapace-profile-page";
 const modelAccountProfile: UserProfile = {
   id: "profile-1",
   displayName: "Ada",
@@ -203,7 +203,7 @@ it.each([
     ).toHaveLength(emailRows);
     const docsLink = page.querySelector<HTMLAnchorElement>(".page-subtitle a");
     expect(docsLink?.textContent?.trim()).toBe("Learn more");
-    expect(docsLink?.href).toBe("https://docs.openclaw.ai/concepts/user-model");
+    expect(docsLink?.href).toBe("https://github.com/Exaggarate/carapace");
     expect(page.querySelector(".profile-stats")).toBeNull();
     expect(page.querySelector(".profile-heatmap")).toBeNull();
     const usageRow = page.querySelector<HTMLButtonElement>(".settings-row--nav");
@@ -453,7 +453,7 @@ it("offers identity connection setup without profile RPCs or secret inputs for u
   expect(identity?.textContent).toContain("This connection has no personal profile");
   expect(identity?.textContent).toContain("Cloudflare Access, Tailscale Serve, or a trusted proxy");
   expect(
-    page.querySelector('a[href="https://docs.openclaw.ai/concepts/user-model"]'),
+    page.querySelector('a[href="https://github.com/Exaggarate/carapace"]'),
   ).not.toBeNull();
   expect(page.querySelector(".identity-name-control")).toBeNull();
   expect(page.querySelector('input[type="file"]')).toBeNull();
@@ -844,7 +844,7 @@ it("bootstraps and refreshes the connected user's profile through users.self", a
   displayNameInput.value = "Unsaved draft";
   displayNameInput.dispatchEvent(new Event("input", { bubbles: true }));
   await page.updateComplete;
-  const accountContext = page.querySelector("openclaw-model-accounts");
+  const accountContext = page.querySelector("carapace-model-accounts");
   expect(accountContext?.textContent).toContain("Augusta Ada");
   expect(accountContext?.textContent).not.toContain("Unsaved draft");
   stubProfileAvatarProcessing();
@@ -861,7 +861,7 @@ it("bootstraps and refreshes the connected user's profile through users.self", a
   );
   expect(
     (
-      page.querySelector("openclaw-viewer-avatar") as
+      page.querySelector("carapace-viewer-avatar") as
         | (HTMLElement & { user?: AuthenticatedUser })
         | null
     )?.user?.avatarUrl,
@@ -889,7 +889,7 @@ it("bootstraps and refreshes the connected user's profile through users.self", a
   await waitForFast(() =>
     expect(
       (
-        page.querySelector("openclaw-viewer-avatar") as
+        page.querySelector("carapace-viewer-avatar") as
           | (HTMLElement & { user?: AuthenticatedUser })
           | null
       )?.user?.avatarUrl,
@@ -984,7 +984,7 @@ it("keeps model-account actions usable when identity refresh overlaps ChatGPT co
   const redirect = page.querySelector<HTMLInputElement>("#profile-account-auth-answer")!;
   redirect.value = "http://localhost:1455/auth/callback?code=abc&state=s";
   redirect.dispatchEvent(new Event("input", { bubbles: true }));
-  await page.querySelector<ModelAccounts>("openclaw-model-accounts")!.updateComplete;
+  await page.querySelector<ModelAccounts>("carapace-model-accounts")!.updateComplete;
   page.querySelector<HTMLButtonElement>('.wizard-step__form button[type="submit"]')!.click();
 
   await waitForFast(() =>
@@ -1057,7 +1057,7 @@ it("uses the canonical self profile after a merge while presence still carries i
     ),
   );
   await waitForFast(() =>
-    expect(page.querySelector("openclaw-model-accounts")?.textContent).toContain(
+    expect(page.querySelector("carapace-model-accounts")?.textContent).toContain(
       "Canonical person",
     ),
   );

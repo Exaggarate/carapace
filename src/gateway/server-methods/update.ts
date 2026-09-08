@@ -1,7 +1,7 @@
 // Update gateway methods run self-update flows, report status, write restart
 // sentinels, and hand off managed-service restarts when needed.
 import { randomUUID } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { validateUpdateRunParams } from "../../../packages/gateway-protocol/src/index.js";
 import { isConfiguredCommandOwner } from "../../auto-reply/command-auth.js";
 import { formatCommandOwnerHint } from "../../commands/doctor-command-owner.js";
@@ -172,7 +172,7 @@ export const updateHandlers: GatewayRequestHandlers = {
     let ownsUpdateOutcome = false;
     let adoptedCampaignId: string | undefined;
     const ownerRequiredMessage = () =>
-      `Only the OpenClaw owner can start an update from chat. ${formatCommandOwnerHint({ cfg: context.getRuntimeConfig(), channel: params.requester?.channel, id: params.requester?.senderId })}`;
+      `Only the Carapace owner can start an update from chat. ${formatCommandOwnerHint({ cfg: context.getRuntimeConfig(), channel: params.requester?.channel, id: params.requester?.senderId })}`;
     const refuseNonOwner = () => {
       const requester = params.requester;
       // Only external chat identities are revocable here; internal or channel-less
@@ -321,7 +321,7 @@ export const updateHandlers: GatewayRequestHandlers = {
         return true;
       };
       const supervisor = detectRespawnSupervisor(process.env, process.platform, {
-        includeLinuxOpenClawGatewayServiceMarker: true,
+        includeLinuxCarapaceGatewayServiceMarker: true,
       });
       const requiresManagedServiceHandoff =
         installSurface.kind === "global" || (installSurface.kind === "git" && supervisor !== null);
@@ -336,7 +336,7 @@ export const updateHandlers: GatewayRequestHandlers = {
       if (targetFailureReason) {
         result = refusedUpdate("error", targetFailureReason);
       } else if (installSurface.kind === "missing") {
-        result = refusedUpdate("error", "not-openclaw-root");
+        result = refusedUpdate("error", "not-carapace-root");
       } else if (isGatewayExternallySupervised()) {
         const beforeVersion = await readPackageVersion(installSurface.root);
         result = refusedUpdate(
@@ -622,7 +622,7 @@ export const updateHandlers: GatewayRequestHandlers = {
       } catch {
         if (result.status === "ok" && handoff?.status !== "started") {
           noticeFailureMessage =
-            "The update was installed, but its restart notice could not be saved. Run openclaw update status after the gateway restarts.";
+            "The update was installed, but its restart notice could not be saved. Run carapace update status after the gateway restarts.";
           recordUpdateRunPhase(runId, "restarting", {
             origin: { nextAction: noticeFailureMessage },
           });

@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { ErrorCodes, errorShape } from "../../packages/gateway-protocol/src/index.js";
 import { persistSubagentSessionTiming } from "../agents/subagents/registry/subagent-registry-helpers.js";
@@ -21,8 +21,8 @@ import {
   SESSION_WORK_ADMISSION_DRAIN_TIMEOUT_MS,
 } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { waitForChatAbortControllerRemoval } from "./chat-abort-lifecycle-internal.js";
 import type { ChatAbortControllerEntry } from "./chat-abort.js";
@@ -58,7 +58,7 @@ const adminRequest = {
     },
   },
 };
-let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
 let repository: string;
 let storePath: string;
 let parent: SessionEntry;
@@ -71,10 +71,10 @@ type CreatedWorktreeSession = {
 
 async function createRepository(name: string): Promise<string> {
   const root = path.join(state.root, name);
-  await fs.mkdir(path.join(root, ".openclaw"), { recursive: true });
+  await fs.mkdir(path.join(root, ".carapace"), { recursive: true });
   await fs.writeFile(path.join(root, "README.md"), `${name}\n`);
   await fs.writeFile(
-    path.join(root, ".openclaw", "worktree-setup.sh"),
+    path.join(root, ".carapace", "worktree-setup.sh"),
     "#!/bin/sh\ntouch setup-marker.txt\n",
     { mode: 0o755 },
   );
@@ -127,11 +127,11 @@ async function createChild(params: Record<string, unknown> = {}, admin = false) 
 }
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ layout: "state-only", prefix: "openclaw-spawn-repo-" });
+  state = await createCarapaceTestState({ layout: "state-only", prefix: "carapace-spawn-repo-" });
   const defaultWorkspace = path.join(state.root, "non-git-workspace");
   await fs.mkdir(defaultWorkspace);
   repository = await createRepository("selected-project");
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace: defaultWorkspace };
   ({ storePath } = await createSessionStoreDir());
   const created = await directSessionReq<CreatedWorktreeSession>(
@@ -145,7 +145,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = undefined;
   testState.agentsConfig = undefined;
   await state?.cleanup();
@@ -164,7 +164,7 @@ test("trusted same-agent worktree spawns inherit the parent's selected project",
 
 test("keyed worktree creation reuses its recorded base after reopening the registry", async () => {
   const params = { ...parentCreateParams, cwd: repository };
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   const reused = await directSessionReq<CreatedWorktreeSession>(
     "sessions.create",
     params,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { baseUrlTextInput, defineTokenCredential } from "./setup-credential.js";
 
 type DemoAccount = {
@@ -7,16 +7,16 @@ type DemoAccount = {
   token?: string;
 };
 
-function resolveDemoAccount(cfg: OpenClawConfig): DemoAccount {
+function resolveDemoAccount(cfg: CarapaceConfig): DemoAccount {
   const config = (cfg.channels?.demo ?? {}) as DemoAccount["config"];
   return { config, token: typeof config.token === "string" ? config.token : undefined };
 }
 
 function patchDemoConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   patch: Record<string, unknown>;
   clearFields?: string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   const current = { ...((params.cfg.channels?.demo ?? {}) as Record<string, unknown>) };
   for (const field of params.clearFields ?? []) {
     delete current[field];
@@ -24,7 +24,7 @@ function patchDemoConfig(params: {
   return {
     ...params.cfg,
     channels: { ...params.cfg.channels, demo: { ...current, ...params.patch } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("defineTokenCredential", () => {
@@ -48,7 +48,7 @@ describe("defineTokenCredential", () => {
   it("inspects configured fields and resolved/env values", () => {
     expect(
       definition.inspect({
-        cfg: { channels: { demo: { tokenFile: "/tmp/token" } } } as OpenClawConfig,
+        cfg: { channels: { demo: { tokenFile: "/tmp/token" } } } as CarapaceConfig,
         accountId: "default",
       }),
     ).toEqual({
@@ -62,7 +62,7 @@ describe("defineTokenCredential", () => {
   it("clears sibling fields for env and set writes", async () => {
     const cfg = {
       channels: { demo: { token: "old", tokenFile: "/tmp/token", baseUrl: "https://demo" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const envConfig = await definition.applyUseEnv?.({ cfg, accountId: "default" });
     expect(envConfig?.channels?.demo).toEqual({ baseUrl: "https://demo" });
 
@@ -90,7 +90,7 @@ describe("baseUrlTextInput", () => {
       normalize: (value) => value.trim().replace(/\/$/, ""),
       patchAccount: ({ cfg, patch }) => patchDemoConfig({ cfg, patch }),
     });
-    const cfg = { channels: { demo: { baseUrl: "https://old" } } } as OpenClawConfig;
+    const cfg = { channels: { demo: { baseUrl: "https://old" } } } as CarapaceConfig;
     expect(await input.currentValue?.({ cfg, accountId: "default", credentialValues: {} })).toBe(
       "https://old",
     );

@@ -16,7 +16,7 @@ const bundleTestDeps = await vi.hoisted(async () => {
   const loadBundleRegistry = (params: { workspaceDir?: string }) => {
     const rootDir = pathModule.join(
       params.workspaceDir ?? "",
-      ".openclaw",
+      ".carapace",
       "extensions",
       "claude-bundle",
     );
@@ -44,7 +44,7 @@ const bundleTestDeps = await vi.hoisted(async () => {
   }) => {
     const pluginRoot = pathModule.join(
       params.workspaceDir,
-      ".openclaw",
+      ".carapace",
       "extensions",
       "claude-bundle",
     );
@@ -130,7 +130,7 @@ async function createWorkspaceBundle(params: {
   pluginId?: string;
 }): Promise<string> {
   const pluginId = params.pluginId ?? "claude-bundle";
-  const pluginRoot = path.join(params.workspaceDir, ".openclaw", "extensions", pluginId);
+  const pluginRoot = path.join(params.workspaceDir, ".carapace", "extensions", pluginId);
   await fs.mkdir(path.join(pluginRoot, ".claude-plugin"), { recursive: true });
   await fs.writeFile(
     path.join(pluginRoot, ".claude-plugin", "plugin.json"),
@@ -144,7 +144,7 @@ async function createWorkspaceBundle(params: {
 
 describe("loadEnabledBundleAgentSettingsSnapshot", () => {
   it("reuses a compatible plugin metadata snapshot without loading a fresh one", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-workspace-");
     const pluginRoot = await createWorkspaceBundle({ workspaceDir });
     const resolvedPluginRoot = await fs.realpath(pluginRoot);
     await fs.writeFile(
@@ -190,7 +190,7 @@ describe("loadEnabledBundleAgentSettingsSnapshot", () => {
   });
 
   it("treats a supplied lifecycle snapshot as authoritative across workspaces", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-workspace-");
     const pluginRoot = await createWorkspaceBundle({ workspaceDir });
     await fs.writeFile(
       path.join(pluginRoot, "settings.json"),
@@ -237,7 +237,7 @@ describe("loadEnabledBundleAgentSettingsSnapshot", () => {
   });
 
   it("loads sanitized settings and MCP defaults from enabled bundle plugins", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-workspace-");
     const pluginRoot = await createWorkspaceBundle({ workspaceDir });
     const resolvedPluginRoot = await fs.realpath(pluginRoot);
     await fs.mkdir(path.join(pluginRoot, "servers"), { recursive: true });
@@ -326,7 +326,7 @@ describe("loadEnabledBundleAgentSettingsSnapshot", () => {
   });
 
   it("ignores disabled bundle plugins", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-workspace-");
     const pluginRoot = await createWorkspaceBundle({ workspaceDir });
     await fs.writeFile(
       path.join(pluginRoot, "settings.json"),

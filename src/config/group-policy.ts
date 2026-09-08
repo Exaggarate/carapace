@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { ChannelId } from "../channels/plugins/channel-id.types.js";
 import { resolveAccountEntry } from "../routing/account-lookup.js";
 import { normalizeAccountId } from "../routing/session-key.js";
@@ -15,7 +15,7 @@ import {
   type ScopeTree,
 } from "./group-scope-tree.js";
 import type { GroupToolPolicySender } from "./tools-by-sender.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 import type { GroupToolPolicyConfig } from "./types.tools.js";
 
 export { resolveChannelGroups } from "./channel-groups.js";
@@ -57,7 +57,7 @@ function resolveChannelGroupConfig(
 
 /** Locate the authored map selected by the channel owner without changing its inheritance rules. */
 export function resolveChannelGroupsConfigPath(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: GroupPolicyChannel;
   accountId?: string | null;
   groups: Readonly<Record<string, unknown>> | undefined;
@@ -89,7 +89,7 @@ export function resolveChannelGroupsConfigPath(params: {
 type ChannelGroupPolicyMode = "open" | "allowlist" | "disabled";
 
 function resolveChannelGroupPolicyMode(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channel: GroupPolicyChannel,
   accountId?: string | null,
 ): ChannelGroupPolicyMode | undefined {
@@ -111,7 +111,7 @@ function resolveChannelGroupPolicyMode(
 }
 
 export function resolveChannelGroupPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: GroupPolicyChannel;
   groupId?: string | null;
   accountId?: string | null;
@@ -167,7 +167,7 @@ function buildSelectedGroupScope(
 }
 
 export function resolveChannelGroupRequireMention(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: GroupPolicyChannel;
   groupId?: string | null;
   accountId?: string | null;
@@ -187,7 +187,7 @@ export function resolveChannelGroupRequireMention(params: {
 
 export function resolveChannelGroupToolsPolicy(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     channel: GroupPolicyChannel;
     groupId?: string | null;
     groupIdCandidates?: Array<string | null | undefined>;

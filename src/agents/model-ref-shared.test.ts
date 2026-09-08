@@ -255,7 +255,7 @@ describe("provider model normalization bridge", () => {
   });
 
   it("invokes the retained normalizer from the packaged runtime layout", async () => {
-    await withTempDir("openclaw-model-normalizer-", async (root) => {
+    await withTempDir("carapace-model-normalizer-", async (root) => {
       const dist = path.join(root, "dist");
       await fs.mkdir(dist, { recursive: true });
       await fs.writeFile(path.join(root, "package.json"), '{"type":"module"}');
@@ -286,7 +286,7 @@ describe("provider model normalization bridge", () => {
   });
 
   it("applies source manifest normalization once without an executable hook", async () => {
-    await withTempDir("openclaw-model-normalizer-source-", async (root) => {
+    await withTempDir("carapace-model-normalizer-source-", async (root) => {
       // Native source execution protects the same contract before runtime preparation.
       const script = `
         const { pathToFileURL } = await import("node:url");
@@ -322,10 +322,10 @@ describe("provider model normalization bridge", () => {
         {
           env: {
             ...process.env,
-            OPENCLAW_HOME: root,
-            OPENCLAW_STATE_DIR: path.join(root, "state"),
-            OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_HOME: root,
+            CARAPACE_STATE_DIR: path.join(root, "state"),
+            CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
           },
         },
       );

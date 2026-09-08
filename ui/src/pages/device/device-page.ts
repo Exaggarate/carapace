@@ -24,7 +24,7 @@ import {
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { t } from "../../i18n/index.ts";
 import { registerSettingsEnglish } from "../../i18n/locales/en-settings.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import "./device.css";
 
@@ -64,7 +64,7 @@ function settleCookieSyncEdit(
   }
 }
 
-class DevicePage extends OpenClawLightDomElement {
+class DevicePage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -197,12 +197,12 @@ class DevicePage extends OpenClawLightDomElement {
                   ${t(this.extensionSetupRunning ? "configPage.deviceSettings.chromeExtensionPreparing" : "configPage.deviceSettings.chromeExtensionSetup")}
                 </button>
                 <a
-                  href="https://chromewebstore.google.com/detail/openclaw/kcdjddhmeafeomebliikmbpblkmkfoig"
+                  href="https://chromewebstore.google.com/detail/carapace/kcdjddhmeafeomebliikmbpblkmkfoig"
                   target="_blank"
                   rel="noopener noreferrer"
                   >${t("appsPage.ctaChromeWebStore")}</a
                 >
-                ${renderLearnMoreLink("https://docs.openclaw.ai/tools/chrome-extension")}
+                ${renderLearnMoreLink("https://github.com/Exaggarate/carapace")}
               </div>
               <p role="status">
                 ${
@@ -545,13 +545,13 @@ class DevicePage extends OpenClawLightDomElement {
       ${renderSettingsPageHeader({
         title: t(deviceSettingsGroupLabelKey(snapshot)),
         subtitle: html`${t(snapshot?.device.platform === "ios" ? "configPage.deviceSettings.introIos" : "configPage.deviceSettings.intro")}
-        ${renderLearnMoreLink(snapshot?.device.platform === "ios" ? "https://docs.openclaw.ai/platforms/ios" : "https://docs.openclaw.ai/platforms/macos")}`,
+        ${renderLearnMoreLink(snapshot?.device.platform === "ios" ? "https://github.com/Exaggarate/carapace" : "https://github.com/Exaggarate/carapace")}`,
       })}
       ${renderSettingsWorkspace(renderSettingsPage(body))}
     `;
   }
 }
 
-if (!customElements.get("openclaw-device-page")) {
-  customElements.define("openclaw-device-page", DevicePage);
+if (!customElements.get("carapace-device-page")) {
+  customElements.define("carapace-device-page", DevicePage);
 }

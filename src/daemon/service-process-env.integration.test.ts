@@ -36,7 +36,7 @@ describe.skipIf(process.platform === "win32")("native control environment bounda
   it.each([false, true])(
     "keeps systemctl and busctl routing with machine fallback %s",
     async (fallback) => {
-      await withTempDir("openclaw-manager-route-", async (temp) => {
+      await withTempDir("carapace-manager-route-", async (temp) => {
         const home = await fs.realpath(temp);
         const bus = fallback ? undefined : `unix:path=${home}/bus`;
         const source = {
@@ -103,7 +103,7 @@ for (const execute of [execSystemctlUser, execBusctlUser]) {
   );
 
   it("keeps loginctl account and sudo routing while closing both child environments", async () => {
-    await withTempDir("openclaw-linger-env-", async (temp) => {
+    await withTempDir("carapace-linger-env-", async (temp) => {
       const home = await fs.realpath(temp);
       const callsPath = path.join(home, "calls.jsonl");
       for (const command of ["loginctl", "sudo"]) {
@@ -147,9 +147,9 @@ assert.equal(process.getuid, realGetuid);
   });
 
   it("preserves effective service facts without leaking them to native children", async () => {
-    await withTempDir("openclaw-service-env-", async (temp) => {
+    await withTempDir("carapace-service-env-", async (temp) => {
       const home = await fs.realpath(temp);
-      const unit = "openclaw-boundary.service";
+      const unit = "carapace-boundary.service";
       const unitPath = path.join(home, ".config/systemd/user", unit);
       const envFile = path.join(home, "service.env");
       const callsPath = path.join(home, "calls.jsonl");
@@ -163,30 +163,30 @@ assert.equal(process.getuid, realGetuid);
         DBUS_SYSTEM_BUS_ADDRESS: `unix:path=${home}/system-bus`,
         SYSTEMD_BUS_TIMEOUT: "2s",
         PSMODULEANALYSISCACHEPATH: path.join(home, "synthetic-module-cache"),
-        OPENCLAW_SYSTEMD_UNIT: unit,
-        OPENCLAW_STATE_DIR: path.join(home, "state"),
+        CARAPACE_SYSTEMD_UNIT: unit,
+        CARAPACE_STATE_DIR: path.join(home, "state"),
         BOUNDARY_PARENT_ONLY: "synthetic-parent",
       };
       const inline = [
         "BOUNDARY_INLINE=synthetic-inline",
         "BOUNDARY_SHARED=inline-before-file",
-        "OPENCLAW_SYSTEMD_UNIT=stale-definition.service",
-        "OPENCLAW_PROFILE=default",
+        "CARAPACE_SYSTEMD_UNIT=stale-definition.service",
+        "CARAPACE_PROFILE=default",
       ];
       const definition = [
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
+        "ExecStart=/usr/bin/carapace gateway run",
         ...inline.map((entry) => `Environment=${entry}`),
         `EnvironmentFile=${envFile}`,
         "",
       ].join("\n");
       const fileContents = "BOUNDARY_FILE=synthetic-file\nBOUNDARY_SHARED=file-wins\n";
       await fs.mkdir(path.dirname(unitPath), { recursive: true });
-      await fs.mkdir(env.OPENCLAW_STATE_DIR);
+      await fs.mkdir(env.CARAPACE_STATE_DIR);
       await fs.writeFile(unitPath, definition);
       await fs.writeFile(envFile, fileContents);
       const serviceProperties = buildSystemdManagerPropertyOutput({
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
         environment: inline,
         environmentFiles: [[envFile, false]],
       });
@@ -196,9 +196,9 @@ const args = process.argv.slice(2);
 fs.appendFileSync(${JSON.stringify(callsPath)}, JSON.stringify({
   command: path.basename(process.argv[1]), args,
   canaries: ["BOUNDARY_PARENT_ONLY", "BOUNDARY_INLINE", "BOUNDARY_FILE", "BOUNDARY_SHARED"].map(name => Object.hasOwn(process.env, name)),
-  selectors: ["OPENCLAW_SYSTEMD_UNIT", "OPENCLAW_PROFILE", "OPENCLAW_STATE_DIR"].some(name => Object.hasOwn(process.env, name)),
-  native: ${JSON.stringify(Object.entries(env).filter(([name]) => !name.startsWith("OPENCLAW_") && !name.startsWith("BOUNDARY_")))}.every(([name, value]) => process.env[name] === value),
-  marker: process.env.OPENCLAW_CLI === "1",
+  selectors: ["CARAPACE_SYSTEMD_UNIT", "CARAPACE_PROFILE", "CARAPACE_STATE_DIR"].some(name => Object.hasOwn(process.env, name)),
+  native: ${JSON.stringify(Object.entries(env).filter(([name]) => !name.startsWith("CARAPACE_") && !name.startsWith("BOUNDARY_")))}.every(([name, value]) => process.env[name] === value),
+  marker: process.env.CARAPACE_CLI === "1",
 }) + "\\n");`;
       for (const command of ["systemctl", "busctl"]) {
         await fs.writeFile(
@@ -225,15 +225,15 @@ import { execSystemctlUser } from ${JSON.stringify(new URL("./systemd-exec.ts", 
 const command = await readSystemdServiceExecStart(process.env, { requireEffective: true });
 assert.deepEqual(command.environment, {
   BOUNDARY_INLINE: "synthetic-inline", BOUNDARY_SHARED: "file-wins", BOUNDARY_FILE: "synthetic-file",
-  OPENCLAW_SYSTEMD_UNIT: "stale-definition.service", OPENCLAW_PROFILE: "default",
+  CARAPACE_SYSTEMD_UNIT: "stale-definition.service", CARAPACE_PROFILE: "default",
 });
 assert.deepEqual(command.environmentValueSources, {
   BOUNDARY_INLINE: "inline", BOUNDARY_SHARED: "inline-and-file", BOUNDARY_FILE: "file",
-  OPENCLAW_SYSTEMD_UNIT: "inline", OPENCLAW_PROFILE: "inline",
+  CARAPACE_SYSTEMD_UNIT: "inline", CARAPACE_PROFILE: "inline",
 });
 assert.deepEqual(command.definitionPaths, [${JSON.stringify(unitPath)}]);
 const effectiveEnv = mergeGatewayServiceEnv(process.env, command);
-assert.equal(effectiveEnv.OPENCLAW_SYSTEMD_UNIT, ${JSON.stringify(unit)});
+assert.equal(effectiveEnv.CARAPACE_SYSTEMD_UNIT, ${JSON.stringify(unit)});
 assert.equal(effectiveEnv.BOUNDARY_PARENT_ONLY, "synthetic-parent");
 assert.equal(effectiveEnv.BOUNDARY_FILE, "synthetic-file");
 const result = await execSystemctlUser(effectiveEnv, ["status"], 5000);
@@ -292,7 +292,7 @@ describe("service manager routing environment", () => {
         DBUS_APPLICATION: "synthetic",
         XDG_APPLICATION: "synthetic",
         NODE_OPTIONS: "--inspect",
-        OPENCLAW_PROFILE: "private",
+        CARAPACE_PROFILE: "private",
         BOUNDARY_PARENT_ONLY: "synthetic",
       });
       expect(resolveServiceManagerEnv(source)).toEqual({

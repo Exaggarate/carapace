@@ -14,7 +14,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 let artifactDir: string;
 beforeEach(() => {
@@ -76,23 +76,23 @@ describeControlUiE2e("native link routing", () => {
       const messages: unknown[] = [];
       const browserMessages: NativeBrowserMessage[] = [];
       const host = window as Window & {
-        openclawNativeLinkMessages?: unknown[];
-        openclawNativeBrowserMessages?: NativeBrowserMessage[];
+        carapaceNativeLinkMessages?: unknown[];
+        carapaceNativeBrowserMessages?: NativeBrowserMessage[];
         webkit?: {
           messageHandlers?: {
-            openclawLink?: { postMessage: (message: unknown) => void };
-            openclawBrowser?: {
+            carapaceLink?: { postMessage: (message: unknown) => void };
+            carapaceBrowser?: {
               postMessage: (message: NativeBrowserMessage) => Promise<NativeBrowserReply>;
             };
           };
         };
       };
-      host.openclawNativeLinkMessages = messages;
-      host.openclawNativeBrowserMessages = browserMessages;
+      host.carapaceNativeLinkMessages = messages;
+      host.carapaceNativeBrowserMessages = browserMessages;
       host.webkit = {
         messageHandlers: {
-          openclawLink: { postMessage: (message: unknown) => messages.push(message) },
-          openclawBrowser: {
+          carapaceLink: { postMessage: (message: unknown) => messages.push(message) },
+          carapaceBrowser: {
             postMessage: async (message) => {
               browserMessages.push(message);
               return message.type === "open" ? { ok: true, tabId: message.tabId } : { ok: true };
@@ -127,8 +127,8 @@ describeControlUiE2e("native link routing", () => {
       .poll(() =>
         page.evaluate(
           () =>
-            (window as Window & { openclawNativeBrowserMessages?: NativeBrowserMessage[] })
-              .openclawNativeBrowserMessages,
+            (window as Window & { carapaceNativeBrowserMessages?: NativeBrowserMessage[] })
+              .carapaceNativeBrowserMessages,
         ),
       )
       .toContainEqual(
@@ -142,8 +142,8 @@ describeControlUiE2e("native link routing", () => {
       .poll(() =>
         page.evaluate(
           () =>
-            (window as Window & { openclawNativeLinkMessages?: unknown[] })
-              .openclawNativeLinkMessages,
+            (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+              .carapaceNativeLinkMessages,
         ),
       )
       .toEqual([]);
@@ -166,8 +166,8 @@ describeControlUiE2e("native link routing", () => {
       .poll(() =>
         page.evaluate(
           () =>
-            (window as Window & { openclawNativeLinkMessages?: unknown[] })
-              .openclawNativeLinkMessages,
+            (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+              .carapaceNativeLinkMessages,
         ),
       )
       .toContainEqual({
@@ -177,7 +177,7 @@ describeControlUiE2e("native link routing", () => {
       });
     const messageCount = await page.evaluate(
       () =>
-        (window as Window & { openclawNativeLinkMessages?: unknown[] }).openclawNativeLinkMessages
+        (window as Window & { carapaceNativeLinkMessages?: unknown[] }).carapaceNativeLinkMessages
           ?.length ?? 0,
     );
     await emailLink.evaluate((anchor) => (anchor as HTMLAnchorElement).click());
@@ -185,8 +185,8 @@ describeControlUiE2e("native link routing", () => {
       .poll(() =>
         page.evaluate(
           () =>
-            (window as Window & { openclawNativeLinkMessages?: unknown[] })
-              .openclawNativeLinkMessages?.length ?? 0,
+            (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+              .carapaceNativeLinkMessages?.length ?? 0,
         ),
       )
       .toBe(messageCount);
@@ -204,11 +204,11 @@ describeControlUiE2e("native link routing", () => {
 
     await link.click({ button: "right" });
     const menu = page.getByRole("menu", { name: "Link actions" });
-    const menuHost = page.locator("openclaw-native-link-menu");
+    const menuHost = page.locator("carapace-native-link-menu");
     await expect.poll(() => menu.isVisible()).toBe(true);
     await expect.poll(() => replyMenu.count()).toBe(0);
     await expect
-      .poll(() => page.locator("openclaw-native-link-menu .session-menu__text").allTextContents())
+      .poll(() => page.locator("carapace-native-link-menu .session-menu__text").allTextContents())
       .toEqual(["Open in Browser Panel", "Open in Default Browser", "Copy Link"]);
     await page.screenshot({
       path: path.join(artifactDir, "01-native-link-menu-page.jpg"),
@@ -220,8 +220,8 @@ describeControlUiE2e("native link routing", () => {
       .poll(() =>
         page.evaluate(
           () =>
-            (window as Window & { openclawNativeLinkMessages?: unknown[] })
-              .openclawNativeLinkMessages,
+            (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+              .carapaceNativeLinkMessages,
         ),
       )
       .toEqual([
@@ -237,12 +237,12 @@ describeControlUiE2e("native link routing", () => {
 
     await page.evaluate(() => {
       const host = window as Window & {
-        openclawModifiedLinkClick?: { defaultPrevented: boolean; metaKey: boolean };
+        carapaceModifiedLinkClick?: { defaultPrevented: boolean; metaKey: boolean };
       };
       document.addEventListener(
         "click",
         (event) => {
-          host.openclawModifiedLinkClick = {
+          host.carapaceModifiedLinkClick = {
             defaultPrevented: event.defaultPrevented,
             metaKey: event.metaKey,
           };
@@ -256,22 +256,22 @@ describeControlUiE2e("native link routing", () => {
         () =>
           (
             window as Window & {
-              openclawModifiedLinkClick?: { defaultPrevented: boolean; metaKey: boolean };
+              carapaceModifiedLinkClick?: { defaultPrevented: boolean; metaKey: boolean };
             }
-          ).openclawModifiedLinkClick,
+          ).carapaceModifiedLinkClick,
       ),
     ).toEqual({ defaultPrevented: false, metaKey: true });
     expect(
       await page.evaluate(
         () =>
-          (window as Window & { openclawNativeLinkMessages?: unknown[] })
-            .openclawNativeLinkMessages,
+          (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+            .carapaceNativeLinkMessages,
       ),
     ).toHaveLength(2);
 
     await page.evaluate(async () => {
-      await customElements.whenDefined("openclaw-modal-dialog");
-      const dialog = document.createElement("openclaw-modal-dialog");
+      await customElements.whenDefined("carapace-modal-dialog");
+      const dialog = document.createElement("carapace-modal-dialog");
       dialog.id = "native-link-routing-modal";
       dialog.setAttribute("label", "Link routing test");
       const anchor = document.createElement("a");
@@ -303,8 +303,8 @@ describeControlUiE2e("native link routing", () => {
       .poll(() =>
         page.evaluate(
           () =>
-            (window as Window & { openclawNativeBrowserMessages?: NativeBrowserMessage[] })
-              .openclawNativeBrowserMessages,
+            (window as Window & { carapaceNativeBrowserMessages?: NativeBrowserMessage[] })
+              .carapaceNativeBrowserMessages,
         ),
       )
       .toContainEqual(
@@ -317,8 +317,8 @@ describeControlUiE2e("native link routing", () => {
     expect(
       await page.evaluate(
         () =>
-          (window as Window & { openclawNativeLinkMessages?: unknown[] })
-            .openclawNativeLinkMessages,
+          (window as Window & { carapaceNativeLinkMessages?: unknown[] })
+            .carapaceNativeLinkMessages,
       ),
     ).toHaveLength(2);
     await page.evaluate(() => {
@@ -329,7 +329,7 @@ describeControlUiE2e("native link routing", () => {
       .getByRole("paragraph")
       .getByRole("link", { name: "Usage" })
       .click({ button: "right" });
-    expect(await page.locator("openclaw-native-link-menu").count()).toBe(0);
+    expect(await page.locator("carapace-native-link-menu").count()).toBe(0);
     const messageMenu = page.getByRole("menu", { name: "Message actions" });
     await expect.poll(() => messageMenu.isVisible()).toBe(false);
     await page.evaluate(() => new Promise(requestAnimationFrame));
@@ -338,7 +338,7 @@ describeControlUiE2e("native link routing", () => {
     await page.locator('a.markdown-file-link[data-file-path="README.md"]').click({
       button: "right",
     });
-    expect(await page.locator("openclaw-native-link-menu").count()).toBe(0);
+    expect(await page.locator("carapace-native-link-menu").count()).toBe(0);
   });
 
   it("keeps ordinary browser navigation when the native bridge is absent", async () => {
@@ -360,7 +360,7 @@ describeControlUiE2e("native link routing", () => {
     const link = page.getByRole("link", { name: "report" });
 
     await link.click({ button: "right" });
-    expect(await page.locator("openclaw-native-link-menu").count()).toBe(0);
+    expect(await page.locator("carapace-native-link-menu").count()).toBe(0);
     const popupPromise = page.waitForEvent("popup");
     await link.click();
     const popup = await popupPromise;

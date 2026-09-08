@@ -6,7 +6,7 @@ const { runQaProfileCommand, runQaSuiteCommand } = vi.hoisted(() => ({
   runQaSuiteCommand: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/qa-runner-runtime", () => ({
+vi.mock("carapace/plugin-sdk/qa-runner-runtime", () => ({
   listQaRunnerCliContributions: () => [],
 }));
 
@@ -134,7 +134,7 @@ describe.each(["suite", "profile"] as const)("%s scenario selection", (lane) => 
 
   const suiteArgs = [
     "node",
-    "openclaw",
+    "carapace",
     "qa",
     ...(lane === "suite" ? ["suite"] : ["run", "--qa-profile", "selection-profile"]),
     "--provider-mode",

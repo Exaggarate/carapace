@@ -2,18 +2,18 @@
 import {
   resolveStableChannelMessageIngress,
   type ChannelIngressContextBinding,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   resolveChannelGroupPolicy,
   resolveChannelGroupRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-policy";
 import type {
   ChannelGroupPolicy,
   DmPolicy,
   GroupPolicy,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import { resolveDefaultGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/config-contracts";
+import { resolveDefaultGroupPolicy } from "carapace/plugin-sdk/runtime-group-policy";
 import { resolveWhatsAppAccount, type ResolvedWhatsAppAccount } from "./accounts.js";
 import { getSelfIdentity, getSenderIdentity } from "./identity.js";
 import { requireWhatsAppInboundAdmission } from "./inbound/admission.js";
@@ -47,7 +47,7 @@ function normalizeWhatsAppIngressPhone(value: string): string | null {
 function buildResolvedWhatsAppGroupConfig(params: {
   groupPolicy: GroupPolicy;
   groups: ResolvedWhatsAppAccount["groups"];
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     channels: {
       whatsapp: {
@@ -55,11 +55,11 @@ function buildResolvedWhatsAppGroupConfig(params: {
         groups: params.groups,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 export function resolveWhatsAppInboundPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   selfE164?: string | null;
 }): ResolvedWhatsAppInboundPolicy {
@@ -118,7 +118,7 @@ export function resolveWhatsAppInboundPolicy(params: {
 }
 
 export async function resolveWhatsAppIngressAccess(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   policy: ResolvedWhatsAppInboundPolicy;
   isGroup: boolean;
   conversationId: string;
@@ -164,7 +164,7 @@ export async function resolveWhatsAppIngressAccess(params: {
 }
 
 export async function resolveWhatsAppCommandAuthorized(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   msg: AdmittedWebInboundMessage;
   policy?: ResolvedWhatsAppInboundPolicy;
   authDir?: string;

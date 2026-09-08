@@ -1,6 +1,6 @@
 // Video live test helpers resolve live provider test settings from environment.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.js";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   parseLiveCsvFilter,
   parseProviderModelMap,
@@ -59,7 +59,7 @@ export function parseVideoProviderFilter(raw?: string): Set<string> | null {
   return parseLiveCsvFilter(raw);
 }
 
-export function resolveConfiguredLiveVideoModels(cfg: OpenClawConfig): Map<string, string> {
+export function resolveConfiguredLiveVideoModels(cfg: CarapaceConfig): Map<string, string> {
   return resolveConfiguredLiveProviderModels(cfg.agents?.defaults?.mediaModels?.video);
 }
 

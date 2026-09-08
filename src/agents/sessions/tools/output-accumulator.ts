@@ -75,7 +75,7 @@ export class OutputAccumulator {
     // UTF-8 trimming can drop three bytes; truncateTail also ignores a final newline.
     // Keep enough extra bytes that an incomplete leading line cannot fit the display.
     this.maxRollingBytes = Math.max(this.maxBytes * 2, this.maxBytes + 5);
-    this.tempFilePrefix = options.tempFilePrefix ?? "openclaw-output";
+    this.tempFilePrefix = options.tempFilePrefix ?? "carapace-output";
     this.createTextTransform = options.createTextTransform;
   }
 

@@ -1,11 +1,11 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { UPDATE_RUN_PHASES } from "../../packages/gateway-protocol/src/update-run-vocabulary.js";
 import { resolveStateDir } from "../config/paths.js";
 import { redactSensitiveText } from "../logging/redact.js";
 import { escapeRegExp } from "../shared/regexp.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db-contract.js";
-import type { UpdateRuns } from "../state/openclaw-state-db.generated.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db-contract.js";
+import type { UpdateRuns } from "../state/carapace-state-db.generated.js";
 import { resolveRequiredHomeDir } from "./home-dir.js";
 import type { UpdateRunRecord } from "./update-run-record.js";
 import { UpdateRunRecordSchema } from "./update-run-schema.js";
@@ -33,7 +33,7 @@ const JSON_FIELDS = [
   "verification",
   "repair",
 ] as const;
-export type UpdateRunLedgerOptions = OpenClawStateDatabaseOptions & {
+export type UpdateRunLedgerOptions = CarapaceStateDatabaseOptions & {
   redactPaths?: readonly string[];
 };
 
@@ -116,8 +116,8 @@ export function encodeRun(input: UpdateRunRecord, options: UpdateRunLedgerOption
     [resolveRequiredHomeDir(env), "~"],
     [env.HOME, "~"],
     [env.USERPROFILE, "~"],
-    [resolveStateDir(env), "$OPENCLAW_STATE_DIR"],
-    [env.OPENCLAW_CONFIG_PATH, "[path]"],
+    [resolveStateDir(env), "$CARAPACE_STATE_DIR"],
+    [env.CARAPACE_CONFIG_PATH, "[path]"],
     ...(options.redactPaths ?? []).map((root): [string, string] => [root, "[path]"]),
   ];
   const redactPaths: [RegExp, string][] = roots.flatMap(([root, replacement]) => {

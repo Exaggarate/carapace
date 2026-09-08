@@ -1,11 +1,11 @@
 // Hook workspace helpers resolve hook roots and workspace-local hook files.
 import fs from "node:fs";
 import path from "node:path";
-import { safeParseJson } from "@openclaw/normalization-core";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { safeParseJson } from "@carapace/normalization-core";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { parseFrontmatterBlockResult } from "../../packages/markdown-core/src/frontmatter.js";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { openRootFileSync, readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isPathInsideWithRealpath } from "../security/scan-paths.js";
@@ -41,7 +41,7 @@ type HookDiscoveryRoot = {
 export type HookSourceFact = HookPolicyEntry & { rootId: string; filePath: string };
 type HookCandidate = HookSourceFact & { entry?: DiscoveredHookEntry };
 type HookDiscoveryOptions = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   managedHooksDir?: string;
   bundledHooksDir?: string;
 };
@@ -222,20 +222,20 @@ function resolveHookDiscoveryRoots(
   return [
     ...normalizeTrimmedStringList(opts?.config?.hooks?.internal?.load?.extraDirs).map((dir) => ({
       dir: resolveUserPath(dir),
-      source: "openclaw-managed" as const,
+      source: "carapace-managed" as const,
       includeRoot: true,
     })),
-    ...(bundledHooksDir ? [{ dir: bundledHooksDir, source: "openclaw-bundled" as const }] : []),
+    ...(bundledHooksDir ? [{ dir: bundledHooksDir, source: "carapace-bundled" as const }] : []),
     ...resolvePluginHookDirs({ workspaceDir, config: opts?.config }).map(
       ({ dir, pluginId, rootDir }) => ({
         dir,
         pluginId,
         rootDir,
-        source: "openclaw-plugin" as const,
+        source: "carapace-plugin" as const,
       }),
     ),
-    { dir: opts?.managedHooksDir ?? path.join(CONFIG_DIR, "hooks"), source: "openclaw-managed" },
-    { dir: path.join(workspaceDir, "hooks"), source: "openclaw-workspace" },
+    { dir: opts?.managedHooksDir ?? path.join(CONFIG_DIR, "hooks"), source: "carapace-managed" },
+    { dir: path.join(workspaceDir, "hooks"), source: "carapace-workspace" },
   ];
 }
 

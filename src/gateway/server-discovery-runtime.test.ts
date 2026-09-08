@@ -13,13 +13,13 @@ type ResolveWideAreaDiscoveryDomain =
 const mocks = vi.hoisted(() => ({
   pickPrimaryTailnetIPv4: vi.fn(() => "100.64.0.10"),
   pickPrimaryTailnetIPv6: vi.fn(() => undefined as string | undefined),
-  resolveWideAreaDiscoveryDomain: vi.fn<ResolveWideAreaDiscoveryDomain>(() => "openclaw.internal."),
+  resolveWideAreaDiscoveryDomain: vi.fn<ResolveWideAreaDiscoveryDomain>(() => "carapace.internal."),
   writeWideAreaGatewayZone: vi.fn<WriteWideAreaGatewayZone>(async () => ({
     changed: true,
-    zonePath: "/tmp/openclaw.internal.db",
+    zonePath: "/tmp/carapace.internal.db",
   })),
-  formatBonjourInstanceName: vi.fn((name: string) => `${name} (OpenClaw)`),
-  resolveBonjourCliPath: vi.fn(() => "/usr/local/bin/openclaw"),
+  formatBonjourInstanceName: vi.fn((name: string) => `${name} (Carapace)`),
+  resolveBonjourCliPath: vi.fn(() => "/usr/local/bin/carapace"),
   resolveTailnetDnsHint: vi.fn(async () => "gateway.tailnet.example.ts.net"),
 }));
 
@@ -91,7 +91,7 @@ function useDevelopmentDiscoveryEnv() {
 
 async function expectSshPortOmitted(rawPort: string) {
   useDevelopmentDiscoveryEnv();
-  process.env.OPENCLAW_SSH_PORT = rawPort;
+  process.env.CARAPACE_SSH_PORT = rawPort;
 
   const service = makeDiscoveryService({ id: "bonjour" });
 
@@ -109,7 +109,7 @@ async function expectSshPortOmitted(rawPort: string) {
 function startStuckDiscovery(timeoutMs: string) {
   vi.useFakeTimers();
   useDevelopmentDiscoveryEnv();
-  process.env.OPENCLAW_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = timeoutMs;
+  process.env.CARAPACE_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = timeoutMs;
 
   const service = makeDiscoveryService({
     id: "stuck-discovery",
@@ -140,7 +140,7 @@ describe("startGatewayDiscovery", () => {
   it("starts registered local discovery services with gateway advertisement context", async () => {
     process.env.NODE_ENV = "development";
     delete process.env.VITEST;
-    process.env.OPENCLAW_SSH_PORT = "2222";
+    process.env.CARAPACE_SSH_PORT = "2222";
 
     const stopped: string[] = [];
     const bonjour = makeDiscoveryService({
@@ -176,7 +176,7 @@ describe("startGatewayDiscovery", () => {
       gatewayDirectReachable: true,
       sshPort: 2222,
       tailnetDns: "gateway.tailnet.example.ts.net",
-      cliPath: "/usr/local/bin/openclaw",
+      cliPath: "/usr/local/bin/carapace",
       minimal: false,
     });
     expect(peer.service.advertise).toHaveBeenCalledTimes(1);
@@ -229,7 +229,7 @@ describe("startGatewayDiscovery", () => {
 
   it("waits for delayed discovery when the configured timeout exceeds Node's timer range", async () => {
     useDevelopmentDiscoveryEnv();
-    process.env.OPENCLAW_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = "2147483648";
+    process.env.CARAPACE_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = "2147483648";
 
     const stop = vi.fn();
     const service = makeDiscoveryService({
@@ -273,10 +273,10 @@ describe("startGatewayDiscovery", () => {
     await result.stop();
   });
 
-  it("skips local discovery services for truthy OPENCLAW_DISABLE_BONJOUR values", async () => {
+  it("skips local discovery services for truthy CARAPACE_DISABLE_BONJOUR values", async () => {
     process.env.NODE_ENV = "development";
     delete process.env.VITEST;
-    process.env.OPENCLAW_DISABLE_BONJOUR = "yes";
+    process.env.CARAPACE_DISABLE_BONJOUR = "yes";
 
     const service = makeDiscoveryService({ id: "bonjour" });
     const result = await startDiscovery({
@@ -297,7 +297,7 @@ describe("startGatewayDiscovery", () => {
     const logs = makeLogs();
 
     const result = await startDiscovery({
-      discovery: { mdns: { mode: "off" }, wideArea: { domain: "openclaw.internal." } },
+      discovery: { mdns: { mode: "off" }, wideArea: { domain: "carapace.internal." } },
       gatewayTls: { enabled: false },
       gatewayDirectReachable: true,
       tailscaleMode: "serve",
@@ -308,14 +308,14 @@ describe("startGatewayDiscovery", () => {
     expect(service.service.advertise).not.toHaveBeenCalled();
     expect(mocks.resolveTailnetDnsHint).toHaveBeenCalledWith({ enabled: true });
     const zoneParams = latestZoneParams();
-    expect(zoneParams.domain).toBe("openclaw.internal.");
+    expect(zoneParams.domain).toBe("carapace.internal.");
     expect(zoneParams.gatewayPort).toBe(18789);
     expect(zoneParams.gatewayDirectReachable).toBe(true);
-    expect(zoneParams.displayName).toBe("Lab Mac (OpenClaw)");
+    expect(zoneParams.displayName).toBe("Lab Mac (Carapace)");
     expect(zoneParams.tailnetIPv4).toBe("100.64.0.10");
     expect(zoneParams.tailnetDns).toBe("gateway.tailnet.example.ts.net");
     expect(logs.info.mock.calls).toEqual([
-      ["wide-area DNS-SD updated (openclaw.internal. → /tmp/openclaw.internal.db)"],
+      ["wide-area DNS-SD updated (carapace.internal. → /tmp/carapace.internal.db)"],
     ]);
     await result.stop();
   });
@@ -361,7 +361,7 @@ describe("startGatewayDiscovery", () => {
     const logs = makeLogs();
 
     await startDiscovery({
-      discovery: { mdns: { mode: "minimal" }, wideArea: { domain: "openclaw.internal." } },
+      discovery: { mdns: { mode: "minimal" }, wideArea: { domain: "carapace.internal." } },
       gatewayTls: { enabled: false },
       tailscaleMode: "serve",
       gatewayDiscoveryServices: [],
@@ -375,11 +375,11 @@ describe("startGatewayDiscovery", () => {
 
   it("replaces advertisements and wide-area metadata across live mode changes", async () => {
     useDevelopmentDiscoveryEnv();
-    process.env.OPENCLAW_SSH_PORT = "2222";
+    process.env.CARAPACE_SSH_PORT = "2222";
     const stop = vi.fn();
     const service = makeDiscoveryService({ id: "bonjour", stop });
     const discovery = await startDiscovery({
-      discovery: { mdns: { mode: "off" }, wideArea: { domain: "openclaw.internal." } },
+      discovery: { mdns: { mode: "off" }, wideArea: { domain: "carapace.internal." } },
       gatewayTls: { enabled: true, fingerprintSha256: "fingerprint" },
       gatewayDirectReachable: true,
       tailscaleMode: "serve",
@@ -390,12 +390,12 @@ describe("startGatewayDiscovery", () => {
       await discovery.update({ mdnsMode: mode });
       const full = mode === "full";
       expect(latestZoneParams()).toMatchObject({
-        domain: "openclaw.internal.",
+        domain: "carapace.internal.",
         gatewayPort: 18789,
         gatewayTlsEnabled: true,
         gatewayTlsFingerprintSha256: "fingerprint",
         gatewayDirectReachable: true,
-        cliPath: full ? "/usr/local/bin/openclaw" : undefined,
+        cliPath: full ? "/usr/local/bin/carapace" : undefined,
         sshPort: full ? 2222 : undefined,
       });
     }
@@ -444,7 +444,7 @@ describe("startGatewayDiscovery", () => {
     async (action) => {
       useDevelopmentDiscoveryEnv();
       vi.useFakeTimers();
-      process.env.OPENCLAW_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = "10";
+      process.env.CARAPACE_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = "10";
       const advertised = createDeferredCore<{ stop: () => void }>();
       const stop = vi.fn();
       const discoveryPromise = startDiscovery({
@@ -480,7 +480,7 @@ describe("startGatewayDiscovery", () => {
     async ({ action, olderGeneration, boundary }) => {
       useDevelopmentDiscoveryEnv();
       vi.useFakeTimers();
-      process.env.OPENCLAW_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = "10";
+      process.env.CARAPACE_GATEWAY_DISCOVERY_ADVERTISE_TIMEOUT_MS = "10";
       const lateAdvertisement = createDeferredCore<{ stop: () => Promise<void> }>();
       const activeStopping = createDeferredCore();
       const activeStopped = createDeferredCore();
@@ -497,7 +497,7 @@ describe("startGatewayDiscovery", () => {
         ...(boundary === "advertise" ? { advertise: pause } : { stop: pause }),
       });
       const discoveryPromise = startDiscovery({
-        ...(action === "off" ? { discovery: { wideArea: { domain: "openclaw.internal." } } } : {}),
+        ...(action === "off" ? { discovery: { wideArea: { domain: "carapace.internal." } } } : {}),
         gatewayDiscoveryServices: [
           makeDiscoveryService({ id: "late", advertise: () => lateAdvertisement.promise }),
           ...(boundary === "stop" && !olderGeneration ? [active] : []),
@@ -558,7 +558,7 @@ describe("startGatewayDiscovery", () => {
     useDevelopmentDiscoveryEnv();
     const service = makeDiscoveryService({ id: "bonjour" });
     const discovery = await startDiscovery({
-      discovery: { mdns: { mode: "off" }, wideArea: { domain: "openclaw.internal." } },
+      discovery: { mdns: { mode: "off" }, wideArea: { domain: "carapace.internal." } },
       tailscaleMode: "serve",
       gatewayDiscoveryServices: [service],
     });

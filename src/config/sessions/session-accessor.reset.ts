@@ -5,7 +5,7 @@ import {
   parseAgentSessionKey,
 } from "../../routing/session-key.js";
 import { createLazyRuntimeModule } from "../../shared/lazy-runtime.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import type { ConversationRouteContext } from "./conversation-route-context.js";
 import {
   cloneSessionEntries,
@@ -108,7 +108,7 @@ function loadReplySessionInitializationEntries(
   params: ReplySessionInitializationSelection,
 ): Record<string, SessionEntry> {
   assertSessionInitializationAgentScope(params.agentId, params.sessionKey);
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) =>
       runSqliteDeferredTransactionSync(database.db, () => {
         assertCanonicalSqliteSessionKeysCurrent(database);

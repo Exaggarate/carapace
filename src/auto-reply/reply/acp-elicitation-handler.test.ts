@@ -1,4 +1,4 @@
-import type { AcpElicitationRequest } from "@openclaw/acp-core/runtime/types";
+import type { AcpElicitationRequest } from "@carapace/acp-core/runtime/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { claimPendingAgentQuestionAnswer } from "../../agents/harness/gateway-question.js";
 

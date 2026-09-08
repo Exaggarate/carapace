@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { cleanupSessionLifecycleArtifacts } from "openclaw/plugin-sdk/session-store-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { cleanupSessionLifecycleArtifacts } from "carapace/plugin-sdk/session-store-runtime";
 
 const DREAMING_SESSION_KEY_PREFIX = "dreaming-narrative-";
 export const DREAMING_ORPHAN_MIN_AGE_MS = 300_000;
@@ -7,7 +7,7 @@ const DREAMING_TRANSCRIPT_RUN_MARKER = '"runId":"dreaming-narrative-';
 
 export async function scrubDreamingNarrativeArtifacts(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   logger: { info: (message: string) => void };
   nowMs?: number;
 }): Promise<void> {

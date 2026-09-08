@@ -23,9 +23,9 @@ EOF
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ANDROID_DIR="${ROOT_DIR}/apps/android"
-DEFAULT_SCREENSHOT_AVD="OpenClaw_Screenshots_API36"
+DEFAULT_SCREENSHOT_AVD="Carapace_Screenshots_API36"
 DEFAULT_SCREENSHOT_DEVICE_PROFILE="pixel_2"
-DEFAULT_WEAR_SCREENSHOT_AVD="OpenClaw_Wear_Screenshots_API34"
+DEFAULT_WEAR_SCREENSHOT_AVD="Carapace_Wear_Screenshots_API34"
 DEFAULT_WEAR_SCREENSHOT_DEVICE_PROFILE="wearos_large_round"
 case "$(uname -m)" in
   arm64|aarch64) DEFAULT_SCREENSHOT_ABI="arm64-v8a" ;;
@@ -46,8 +46,8 @@ DRY_RUN=0
 SCENES=(home chat settings gateway voice-wake)
 OUTPUT_TYPE="phoneScreenshots"
 GRADLE_ASSEMBLE_TASK=":app:assemblePlayDebug"
-APP_PACKAGE="ai.openclaw.app.debug"
-ACTIVITY_COMPONENT="$APP_PACKAGE/ai.openclaw.app.MainActivity"
+APP_PACKAGE="ai.carapace.app.debug"
+ACTIVITY_COMPONENT="$APP_PACKAGE/ai.carapace.app.MainActivity"
 EMULATOR_PID=""
 EMULATOR_LOG=""
 STARTED_EMULATOR=0
@@ -148,7 +148,7 @@ case "$FORM_FACTOR" in
     SCENES=(chat voice controls)
     OUTPUT_TYPE="wearScreenshots"
     GRADLE_ASSEMBLE_TASK=":wear:assembleDebug"
-    ACTIVITY_COMPONENT="$APP_PACKAGE/ai.openclaw.wear.MainActivity"
+    ACTIVITY_COMPONENT="$APP_PACKAGE/ai.carapace.wear.MainActivity"
     ARTIFACT_DIR="${ARTIFACT_ROOT}/wear"
     ;;
   *)
@@ -496,7 +496,7 @@ boot_emulator() {
 
   ensure_screenshot_avd "$avd"
   emulator="$(emulator_bin)"
-  EMULATOR_LOG="$(mktemp "${TMPDIR:-/tmp}/openclaw-android-screenshot-emulator.XXXXXX.log")"
+  EMULATOR_LOG="$(mktemp "${TMPDIR:-/tmp}/carapace-android-screenshot-emulator.XXXXXX.log")"
   echo "No connected Android device found. Booting AVD '${avd}'." >&2
   emulator_args=(-avd "$avd" -no-window -no-audio -no-boot-anim)
   if [[ -n "${ANDROID_SCREENSHOT_EMULATOR_ARGS:-}" ]]; then
@@ -580,11 +580,11 @@ scene_ready_text() {
     # The screenshot fixture seeds chat history and restores at the live edge,
     # so wait for the latest reply instead of empty-chat copy.
     chat) printf '%s\n' "The Android release is close." ;;
-    settings) printf '%s\n' "OpenClaw mobile" ;;
+    settings) printf '%s\n' "Carapace mobile" ;;
     voice-wake) printf '%s\n' "Wake listener" ;;
     # Connected fixtures can push Add Gateway below the composed viewport, so
     # wait for the gateway detail's always-visible subtitle instead.
-    gateway) printf '%s\n' "Connection between this phone and OpenClaw." ;;
+    gateway) printf '%s\n' "Connection between this phone and Carapace." ;;
     *)
       echo "Unknown Android screenshot scene: $1" >&2
       return 1
@@ -736,18 +736,18 @@ fi
 "$ADB_BIN" -s "$ADB_SERIAL" logcat -c >/dev/null 2>&1 || true
 
 for scene in "${SCENES[@]}"; do
-  output_path="${OUTPUT_DIR}/openclaw-${scene}.jpg"
-  raw_path="${OUTPUT_DIR}/openclaw-${scene}.raw.png"
-  artifact_path="${ARTIFACT_DIR}/screenshots/openclaw-${scene}.jpg"
-  ui_dump_path="${ARTIFACT_DIR}/ui-dumps/openclaw-${scene}.xml"
-  activity_start_path="${ARTIFACT_DIR}/activity-start/openclaw-${scene}.txt"
+  output_path="${OUTPUT_DIR}/carapace-${scene}.jpg"
+  raw_path="${OUTPUT_DIR}/carapace-${scene}.raw.png"
+  artifact_path="${ARTIFACT_DIR}/screenshots/carapace-${scene}.jpg"
+  ui_dump_path="${ARTIFACT_DIR}/ui-dumps/carapace-${scene}.xml"
+  activity_start_path="${ARTIFACT_DIR}/activity-start/carapace-${scene}.txt"
   "$ADB_BIN" -s "$ADB_SERIAL" shell am force-stop "$APP_PACKAGE" >/dev/null
   "$ADB_BIN" -s "$ADB_SERIAL" shell input keyevent 224 >/dev/null 2>&1 || true
   "$ADB_BIN" -s "$ADB_SERIAL" shell wm dismiss-keyguard >/dev/null 2>&1 || true
   "$ADB_BIN" -s "$ADB_SERIAL" shell am start -W \
     -n "$ACTIVITY_COMPONENT" \
-    --ez openclaw.screenshotMode true \
-    --es openclaw.screenshotScene "$scene" >"$activity_start_path"
+    --ez carapace.screenshotMode true \
+    --es carapace.screenshotScene "$scene" >"$activity_start_path"
   wait_for_scene_ready "$ADB_BIN" "$ADB_SERIAL" "$scene" "$ui_dump_path"
   sleep "${ANDROID_SCREENSHOT_SETTLE_SECONDS:-0.5}"
   "$ADB_BIN" -s "$ADB_SERIAL" exec-out screencap -p >"$raw_path"

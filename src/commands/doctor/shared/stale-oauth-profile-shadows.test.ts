@@ -11,7 +11,7 @@ import { clearRuntimeAuthProfileStoreSnapshots } from "../../../agents/auth-prof
 import { writePersistedAuthProfileStoreRaw } from "../../../agents/auth-profiles/sqlite.js";
 import { saveAuthProfileStore } from "../../../agents/auth-profiles/store-runtime.js";
 import type { AuthProfileStore, OAuthCredential } from "../../../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { captureEnv } from "../../../test-utils/env.js";
 import { resolveLegacyAuthProfilesPath as resolveAuthStorePath } from "../../doctor-auth-legacy-paths.js";
 import {
@@ -62,16 +62,16 @@ async function writeRawAuthStore(agentDir: string, store: unknown): Promise<void
 }
 
 describe("stale OAuth profile shadow doctor repair", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_AGENT_DIR", "OPENCLAW_STATE_DIR", "OPENCLAW_HOME"]);
+  const envSnapshot = captureEnv(["CARAPACE_AGENT_DIR", "CARAPACE_STATE_DIR", "CARAPACE_HOME"]);
   let tempRoot = "";
   let stateDir = "";
 
   beforeEach(async () => {
     clearRuntimeAuthProfileStoreSnapshots();
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-stale-oauth-shadow-"));
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-stale-oauth-shadow-"));
     stateDir = path.join(tempRoot, "state");
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    process.env.OPENCLAW_HOME = stateDir;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    process.env.CARAPACE_HOME = stateDir;
   });
 
   afterEach(async () => {
@@ -109,17 +109,17 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const hits = await scanStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       now,
     });
     const warnings = collectStaleOAuthProfileShadowWarnings({
       hits,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     });
 
     expect(hits).toHaveLength(1);
     expect(warnings[0]).toContain("stale OAuth auth profile anthropic:default");
-    expect(warnings[0]).toContain("openclaw doctor --fix");
+    expect(warnings[0]).toContain("carapace doctor --fix");
     expect(loadPersistedAuthProfileStore(childAgentDir)?.profiles[profileId]).toBeDefined();
   });
 
@@ -152,7 +152,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const hits = await scanStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       now,
     });
 
@@ -173,8 +173,8 @@ describe("stale OAuth profile shadow doctor repair", () => {
     const injectedStateDir = path.join(tempRoot, "injected-state");
     const injectedEnv = {
       ...process.env,
-      OPENCLAW_STATE_DIR: injectedStateDir,
-      OPENCLAW_HOME: injectedStateDir,
+      CARAPACE_STATE_DIR: injectedStateDir,
+      CARAPACE_HOME: injectedStateDir,
     };
     saveAuthProfileStore(
       storeWith(
@@ -213,7 +213,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const hits = await scanStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       env: injectedEnv,
       now,
     });
@@ -226,15 +226,15 @@ describe("stale OAuth profile shadow doctor repair", () => {
     ]);
   });
 
-  it("repairs shadows against the OPENCLAW_AGENT_DIR shared-main store", async () => {
+  it("repairs shadows against the CARAPACE_AGENT_DIR shared-main store", async () => {
     const profileId = "anthropic:default";
     const now = Date.now();
     const relocatedMainAgentDir = path.join(tempRoot, "relocated-main-agent");
     const childAgentDir = path.join(stateDir, "agents", "telegram", "agent");
     const env = {
       ...process.env,
-      OPENCLAW_AGENT_DIR: relocatedMainAgentDir,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_AGENT_DIR: relocatedMainAgentDir,
+      CARAPACE_STATE_DIR: stateDir,
     };
     await writeRawAuthStore(
       relocatedMainAgentDir,
@@ -262,7 +262,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const result = await repairStaleOAuthProfileShadows({
-      cfg: { agents: { entries: { telegram: { default: true } } } } satisfies OpenClawConfig,
+      cfg: { agents: { entries: { telegram: { default: true } } } } satisfies CarapaceConfig,
       env,
       now,
     });
@@ -285,7 +285,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
           accountId: "acct-shared",
           expires: now - 60_000,
           oauthRef: {
-            source: "openclaw-credentials",
+            source: "carapace-credentials",
             provider: "openai-codex",
             id: "0123456789abcdef0123456789abcdef",
           },
@@ -306,11 +306,11 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const hits = await scanStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       now,
     });
     const repair = await repairStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       now,
     });
 
@@ -362,7 +362,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const result = await repairStaleOAuthProfileShadows({
-      cfg: { agents: { list: [{ id: "telegram" }] } } satisfies OpenClawConfig,
+      cfg: { agents: { list: [{ id: "telegram" }] } } satisfies CarapaceConfig,
       now,
     });
 
@@ -403,7 +403,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const result = await repairStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       now,
     });
 
@@ -436,7 +436,7 @@ describe("stale OAuth profile shadow doctor repair", () => {
     );
 
     const result = await repairStaleOAuthProfileShadows({
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       now,
     });
 

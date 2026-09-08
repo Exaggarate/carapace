@@ -3,8 +3,8 @@
  *
  * Custom OpenAI-compatible base URLs intentionally bypass Codex-runtime defaults.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderRouteOverridePresence } from "../plugin-sdk/provider-model-types.js";
 import {
   isDefaultAgentRuntimeId,
@@ -44,11 +44,11 @@ export function resolveOpenAIImplicitAgentRuntime(
     modelId?: string;
     api?: string | null;
     baseUrl?: unknown;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     env?: Readonly<Record<string, string | undefined>>;
     requestTransportOverrides?: ProviderRouteOverridePresence;
   } & AgentRuntimePolicyScope,
-): "codex" | "openclaw" | null {
+): "codex" | "carapace" | null {
   if (!isOpenAIProvider(params.provider)) {
     return null;
   }
@@ -75,12 +75,12 @@ export function resolveOpenAIImplicitAgentRuntime(
   });
   if (!resolution) {
     // Endpoint and adapter ownership stays in the provider artifact. Without
-    // that policy, keep credentials and traffic on the core OpenClaw runtime.
-    return "openclaw";
+    // that policy, keep credentials and traffic on the core Carapace runtime.
+    return "carapace";
   }
   return resolution.kind !== "incompatible" && resolution.defaultRuntimeId === "codex"
     ? "codex"
-    : "openclaw";
+    : "carapace";
 }
 
 /** Parses the provider portion from a provider/model ref. */
@@ -98,7 +98,7 @@ export function parseModelRefProvider(value: unknown): string | undefined {
 /** Returns true when selected model config should ensure the Codex plugin exists. */
 export function modelSelectionShouldEnsureCodexPlugin(params: {
   model?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
 }): boolean {
   const provider = parseModelRefProvider(params.model);
@@ -144,7 +144,7 @@ export function listOpenAIAuthProfileProvidersForAgentRuntime(params: {
   provider: string;
   harnessRuntime?: string;
   agentHarnessId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): string[] {
   if (!isOpenAIProvider(params.provider)) {
     return [params.provider];
@@ -159,7 +159,7 @@ export function resolveOpenAIRuntimeProvider(params: {
   agentHarnessId?: string;
   authProfileProvider?: string;
   authProfileId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }): string {
   return isOpenAIProvider(params.provider) ? OPENAI_PROVIDER_ID : params.provider;
@@ -172,7 +172,7 @@ export function resolveSelectedOpenAIRuntimeProvider(params: {
   agentHarnessId?: string;
   authProfileProvider?: string;
   authProfileId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }): string {
   return isOpenAIProvider(params.provider) ? OPENAI_PROVIDER_ID : params.provider;
@@ -182,7 +182,7 @@ export function resolveSelectedOpenAIRuntimeProvider(params: {
 export function resolveContextConfigProviderForRuntime(params: {
   provider: string;
   runtimeId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): string {
   return isOpenAIProvider(params.provider) ? OPENAI_PROVIDER_ID : params.provider;
 }

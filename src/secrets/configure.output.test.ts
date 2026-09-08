@@ -4,16 +4,16 @@ import { noteCommittedSharedAuthStoreOwnership } from "../agents/auth-profiles/p
 import { readPersistedSharedAuthProfileStoreRaw } from "../agents/auth-profiles/sqlite.js";
 import { runSecretsCommand } from "../cli/secrets-cli-output.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runSecretsConfigureInteractive } from "./configure.js";
 
 it.each([true, false])(
   "keeps configure JSON output parseable without changing shared credentials (store present: %s)",
   async (storePresent) => {
-    await withOpenClawTestState({ layout: "home" }, async (state) => {
+    await withCarapaceTestState({ layout: "home" }, async (state) => {
       await state.writeConfig({});
       const sharedStore = {
         version: 1,
@@ -38,13 +38,13 @@ it.each([true, false])(
       };
       noteCommittedSharedAuthStoreOwnership({ location: "state-db" }, state.env);
       if (storePresent) {
-        const { db } = openOpenClawStateDatabase({ env: state.env });
+        const { db } = openCarapaceStateDatabase({ env: state.env });
         try {
           db.prepare(
             "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES (?, ?, 1)",
           ).run("authProfiles.store", JSON.stringify(sharedStore));
         } finally {
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       }
       const configBefore = await fs.readFile(state.configPath, "utf8");

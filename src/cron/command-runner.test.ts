@@ -132,7 +132,7 @@ describe("runCronCommandJob", () => {
   });
 
   it.skipIf(process.platform === "win32")("kills shell process groups on timeout", async () =>
-    withTempDir("openclaw-cron-command-", async (tempDir) => {
+    withTempDir("carapace-cron-command-", async (tempDir) => {
       const childPidPath = path.join(tempDir, "child.pid");
       const shellCommand = [
         "sleep 60 &",
@@ -256,7 +256,7 @@ describe("runCronCommandJob", () => {
     const result = await runCronCommandJob({
       job: makeCommandJob({
         kind: "command",
-        argv: ["openclaw-command-that-does-not-exist"],
+        argv: ["carapace-command-that-does-not-exist"],
         timeoutSeconds: 5,
       }),
     });

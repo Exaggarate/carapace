@@ -13,7 +13,7 @@ import {
   cleanupPluginLoaderFixturesForTest,
   clearPluginLoaderCache,
   EMPTY_PLUGIN_SCHEMA,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   makePluginLoaderTempDir,
   writePlugin,
 } from "./loader.test-fixtures.js";
@@ -132,7 +132,7 @@ describe("getLoadedRuntimePluginRegistry", () => {
     const deferredRegistry = createEmptyPluginRegistry();
     deferredRegistry.plugins.push({
       id: "deferred",
-      format: "openclaw",
+      format: "carapace",
       imported: false,
       status: "loaded",
     } as never);
@@ -236,8 +236,8 @@ describe("getLoadedRuntimePluginRegistry", () => {
         {
           id: "demo",
           origin: "workspace",
-          rootDir: "/tmp/session-workspace/.openclaw/extensions/demo",
-          source: "/tmp/session-workspace/.openclaw/extensions/demo/index.js",
+          rootDir: "/tmp/session-workspace/.carapace/extensions/demo",
+          source: "/tmp/session-workspace/.carapace/extensions/demo/index.js",
         } as never,
       ])("demo"),
     ).toBeUndefined();
@@ -286,8 +286,8 @@ it.each(["setup", "full"] as const)(
         ],
       }).manifestRegistry,
     });
-    const old = loadOpenClawPlugins(options("old"));
-    const next = loadOpenClawPlugins(options("new"));
+    const old = loadCarapacePlugins(options("old"));
+    const next = loadCarapacePlugins(options("new"));
     expect(old.plugins[0]?.status).toBe("loaded");
     setActivePluginRegistry(old, "old");
     const reused = getLoadedRuntimePluginRegistry({ loadOptions: options("new") });
@@ -336,11 +336,11 @@ it.each([
       writeFileSync(
         path.join(rootDir, "package.json"),
         JSON.stringify({
-          openclaw: { extensions: [`./index.${format}`], setupEntry: `./setup.${format}` },
+          carapace: { extensions: [`./index.${format}`], setupEntry: `./setup.${format}` },
         }),
       );
       writeFileSync(
-        path.join(rootDir, "openclaw.plugin.json"),
+        path.join(rootDir, "carapace.plugin.json"),
         JSON.stringify({ id: "bundled-setup", channels: ["bundled-setup"], configSchema: schema }),
       );
       return {
@@ -371,7 +371,7 @@ it.each([
     const expectedLabel = (index: number) =>
       preferBuiltPluginArtifacts || index !== 0 ? "built" : "source";
     for (const [loadedIndex, loadedOptions] of options.entries()) {
-      const loaded = loadOpenClawPlugins(loadedOptions);
+      const loaded = loadCarapacePlugins(loadedOptions);
       expect(loaded.channels[0]?.plugin.meta.label).toBe(expectedLabel(loadedIndex));
       setActivePluginRegistry(loaded, "canonical-view");
       for (const [requestedIndex, requestedOptions] of options.entries()) {
@@ -418,13 +418,13 @@ it("does not reuse a different explicitly selected bundled entry", () => {
       ],
     }).manifestRegistry,
   });
-  const old = loadOpenClawPlugins(options(runtime.file));
+  const old = loadCarapacePlugins(options(runtime.file));
   expect(old.providers[0]?.provider.label).toBe("Old");
   setActivePluginRegistry(old, "old-entry");
   expect(
     getLoadedRuntimePluginRegistry({ loadOptions: options(selectedSource) }) === undefined,
   ).toBe(true);
-  expect(loadOpenClawPlugins(options(selectedSource)).providers[0]?.provider.label).toBe(
+  expect(loadCarapacePlugins(options(selectedSource)).providers[0]?.provider.label).toBe(
     "Selected",
   );
 });
@@ -471,7 +471,7 @@ it("compares the executed artifact after the loader's final staging pass", () =>
       ],
     }).manifestRegistry,
   };
-  const loaded = loadOpenClawPlugins(options);
+  const loaded = loadCarapacePlugins(options);
   expect(loaded.providers[0]?.provider.label).toBe("stage-3");
   setActivePluginRegistry(loaded, "executed-stage");
   expect(getLoadedRuntimePluginRegistry({ loadOptions: options }) === loaded).toBe(true);

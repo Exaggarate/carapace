@@ -6,7 +6,7 @@ import {
   createQaGatewayChild,
   type QaGatewayChild,
 } from "../../../../extensions/qa-lab/api.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { createQaScriptEvidenceWriter } from "./script-evidence.js";
 
@@ -39,7 +39,7 @@ function sleep(ms: number) {
   });
 }
 
-export function withSiblingAccount(config: OpenClawConfig, baseUrl?: string): OpenClawConfig {
+export function withSiblingAccount(config: CarapaceConfig, baseUrl?: string): CarapaceConfig {
   const channel = config.channels?.[CHANNEL_ID] as Record<string, unknown> | undefined;
   return {
     ...config,
@@ -50,8 +50,8 @@ export function withSiblingAccount(config: OpenClawConfig, baseUrl?: string): Op
         ...(baseUrl && {
           enabled: true,
           baseUrl,
-          botUserId: "openclaw",
-          botDisplayName: "OpenClaw QA",
+          botUserId: "carapace",
+          botDisplayName: "Carapace QA",
           allowFrom: ["*"],
           pollTimeoutMs: 250,
         }),

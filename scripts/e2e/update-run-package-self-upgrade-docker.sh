@@ -9,25 +9,25 @@ source "$ROOT_DIR/scripts/lib/upgrade-survivor-diagnostics.sh"
 HARNESS_ROOT_DIR="$ROOT_DIR"
 LANE_ARTIFACT_SUFFIX=update-run-package-self-upgrade
 
-ALLOW_ENV="OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF"
+ALLOW_ENV="CARAPACE_QA_ALLOW_UPDATE_RUN_SELF"
 SOURCE_VERSION="2026.4.26"
 SOURCE_TAG="v$SOURCE_VERSION"
 SOURCE_COMMIT="be8c24633aaa7ef0425ae1178f096ee8dd6226c0"
 
-if [ "${OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF:-0}" != "1" ]; then
+if [ "${CARAPACE_QA_ALLOW_UPDATE_RUN_SELF:-0}" != "1" ]; then
   echo "blocked destructive package self-upgrade; set $ALLOW_ENV=1 to run" >&2
   exit 2
 fi
 
 IMAGE_NAME="$(
   docker_e2e_resolve_image \
-    "openclaw-update-run-package-self-upgrade-e2e" \
-    OPENCLAW_UPDATE_RUN_SELF_UPGRADE_E2E_IMAGE
+    "carapace-update-run-package-self-upgrade-e2e" \
+    CARAPACE_UPDATE_RUN_SELF_UPGRADE_E2E_IMAGE
 )"
-SKIP_BUILD="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_E2E_SKIP_BUILD:-0}"
-DOCKER_RUN_TIMEOUT="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_DOCKER_RUN_TIMEOUT:-1800s}"
-ARTIFACT_DIR="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/update-run-package-self-upgrade}"
-QA_CHANNEL_FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-update-run-qa-channel.XXXXXX")"
+SKIP_BUILD="${CARAPACE_UPDATE_RUN_SELF_UPGRADE_E2E_SKIP_BUILD:-0}"
+DOCKER_RUN_TIMEOUT="${CARAPACE_UPDATE_RUN_SELF_UPGRADE_DOCKER_RUN_TIMEOUT:-1800s}"
+ARTIFACT_DIR="${CARAPACE_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/update-run-package-self-upgrade}"
+QA_CHANNEL_FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/carapace-update-run-qa-channel.XXXXXX")"
 HISTORICAL_DIST_ARCHIVE="$QA_CHANNEL_FIXTURE_ROOT/historical-dist.tar"
 
 run_completed=0
@@ -64,7 +64,7 @@ prepare_qa_channel_fixture() {
       --filter=blob:none \
       --single-branch \
       --branch "$SOURCE_TAG" \
-      https://github.com/openclaw/openclaw.git \
+      https://github.com/Exaggarate/carapace.git \
       "$clone_root"
     source_repo="$clone_root"
     source_ref="HEAD"
@@ -88,8 +88,8 @@ prepare_qa_channel_fixture() {
           tag: process.env.SOURCE_TAG,
           tagObject: process.env.TAG_OBJECT,
           commit: process.env.SOURCE_COMMIT,
-          buildCommand: "OPENCLAW_BUILD_PRIVATE_QA=1 corepack pnpm build:docker",
-          runtimeInstall: `npm install --prefix <isolated-root> --omit=dev openclaw@${process.env.SOURCE_TAG.slice(1)}`,
+          buildCommand: "CARAPACE_BUILD_PRIVATE_QA=1 corepack pnpm build:docker",
+          runtimeInstall: `npm install --prefix <isolated-root> --omit=dev carapace@${process.env.SOURCE_TAG.slice(1)}`,
           privateDistOverlay: true,
         }, null, 2)}\n`,
       );
@@ -111,11 +111,11 @@ prepare_qa_channel_fixture() {
   (
     cd "$checkout_root"
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm install --frozen-lockfile
-    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 OPENCLAW_BUILD_PRIVATE_QA=1 corepack pnpm build:docker
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 CARAPACE_BUILD_PRIVATE_QA=1 corepack pnpm build:docker
   ) >>"$ARTIFACT_DIR/historical-qa-channel-build.log" 2>&1
 
   local compiled_plugin="$checkout_root/dist/extensions/qa-channel"
-  for required_file in package.json openclaw.plugin.json index.js setup-entry.js; do
+  for required_file in package.json carapace.plugin.json index.js setup-entry.js; do
     if [ ! -f "$compiled_plugin/$required_file" ]; then
       echo "shipped build omitted QA channel artifact $required_file" >&2
       return 1
@@ -140,32 +140,32 @@ docker_e2e_build_or_reuse \
 echo "Running Gateway update.run package self-upgrade Docker E2E..."
 docker_e2e_run_with_harness \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF=1 \
-  -e OPENCLAW_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR=/tmp/openclaw-update-run-artifacts \
-  -e OPENCLAW_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION="$SOURCE_VERSION" \
-  -v "$ARTIFACT_DIR:/tmp/openclaw-update-run-artifacts" \
-  -v "$HISTORICAL_DIST_ARCHIVE:/tmp/openclaw-update-run-historical-dist.tar:ro" \
+  -e CARAPACE_QA_ALLOW_UPDATE_RUN_SELF=1 \
+  -e CARAPACE_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR=/tmp/carapace-update-run-artifacts \
+  -e CARAPACE_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION="$SOURCE_VERSION" \
+  -v "$ARTIFACT_DIR:/tmp/carapace-update-run-artifacts" \
+  -v "$HISTORICAL_DIST_ARCHIVE:/tmp/carapace-update-run-historical-dist.tar:ro" \
   "$IMAGE_NAME" \
   timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" \
   bash -lc 'set -euo pipefail
-historical_install_root=/tmp/openclaw-update-run-historical-install
-historical_package_root="$historical_install_root/node_modules/openclaw"
-qa_plugin_link=/tmp/openclaw-update-run-build/dist/extensions/qa-channel
+historical_install_root=/tmp/carapace-update-run-historical-install
+historical_package_root="$historical_install_root/node_modules/carapace"
+qa_plugin_link=/tmp/carapace-update-run-build/dist/extensions/qa-channel
 npm install \
   --prefix "$historical_install_root" \
   --omit=dev \
   --no-fund \
   --no-audit \
-  "openclaw@$OPENCLAW_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION" \
-  2>&1 | tee /tmp/openclaw-update-run-artifacts/historical-package-install.log
+  "carapace@$CARAPACE_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION" \
+  2>&1 | tee /tmp/carapace-update-run-artifacts/historical-package-install.log
 tar --no-same-owner \
-  -xf /tmp/openclaw-update-run-historical-dist.tar \
+  -xf /tmp/carapace-update-run-historical-dist.tar \
   -C "$historical_package_root"
 mkdir -p "$(dirname "$qa_plugin_link")"
 ln -s "$historical_package_root/dist/extensions/qa-channel" "$qa_plugin_link"
 HISTORICAL_PACKAGE_ROOT="$historical_package_root" \
   HISTORICAL_PLUGIN_ENTRY="$historical_package_root/dist/extensions/qa-channel/index.js" \
-  HISTORICAL_PREFLIGHT_OUT=/tmp/openclaw-update-run-artifacts/historical-package-preflight.json \
+  HISTORICAL_PREFLIGHT_OUT=/tmp/carapace-update-run-artifacts/historical-package-preflight.json \
   node --input-type=module <<NODE
 import fs from "node:fs";
 import path from "node:path";
@@ -178,7 +178,7 @@ const packageVersion = JSON.parse(
 const pluginVersion = JSON.parse(
   fs.readFileSync(path.join(path.dirname(pluginEntry), "package.json"), "utf8"),
 ).version;
-if (packageVersion !== process.env.OPENCLAW_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION) {
+if (packageVersion !== process.env.CARAPACE_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION) {
   throw new Error("isolated historical package version mismatch: " + packageVersion);
 }
 await import(pathToFileURL(pluginEntry).href);

@@ -1,13 +1,13 @@
 // Loads plugin doctor contracts from manifest-owned metadata.
 import path from "node:path";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { shouldIncludeChannelSetupFeatureForConfig } from "../channels/plugins/bundled-setup-policy.js";
 import { GENERATED_BUNDLED_CHANNEL_CONFIG_METADATA } from "../config/bundled-channel-config-metadata.generated.js";
 import { discoverConfigWidePluginManifestRegistry } from "../config/io.plugin-metadata.js";
 import type { LegacyConfigRule } from "../config/legacy.shared.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { BundledChannelSetupEntryContract } from "../plugin-sdk/channel-entry-contract.js";
@@ -183,7 +183,7 @@ function loadPluginDoctorContractEntry(
 }
 
 function resolvePluginDoctorManifestRecords(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -229,7 +229,7 @@ function filterPluginDoctorRecordsByScope(
 
 function resolvePluginDoctorContracts(params: {
   surface: PluginDoctorContractSurface;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -289,7 +289,7 @@ function loadPluginDoctorContractEntries(params: {
   return entries;
 }
 export function listPluginDoctorLegacyConfigRules(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -301,7 +301,7 @@ export function listPluginDoctorLegacyConfigRules(params?: {
 }
 
 export function listPluginDoctorSessionRouteStateOwners(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -323,7 +323,7 @@ export function listPluginDoctorSessionRouteStateOwners(params?: {
 
 /** Resolve plugin-owned agent IDs whose core session stores need migration. */
 export function listPluginDoctorSessionStoreAgentIds(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -390,7 +390,7 @@ function loadLegacyChannelStateMigrationDetector(
 export class PluginDoctorStateMigrationDeclarationError extends Error {}
 
 export function listPluginDoctorStateMigrationEntries(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -469,7 +469,7 @@ function loadPluginDoctorStateMigrationEntries(
 }
 
 function resolvePluginDoctorStateMigrationRecords(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];
@@ -487,7 +487,7 @@ function resolvePluginDoctorStateMigrationRecords(params: {
 
 function filterPluginDoctorStateMigrationRecords(
   candidates: readonly PluginManifestRegistryRecord[],
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): PluginManifestRegistryRecord[] {
   const records: PluginManifestRegistryRecord[] = [];
   const normalizedConfig = normalizePluginsConfig(config?.plugins);
@@ -537,7 +537,7 @@ export type PluginDoctorStateMigrationInventory = {
  * candidate staging must bind them before their descriptors can authorize execution.
  */
 function listPluginDoctorStateMigrationInventory(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   candidateRoot?: string;
 }): PluginDoctorStateMigrationInventory {
@@ -554,7 +554,7 @@ function listPluginDoctorStateMigrationInventory(params?: {
   const bundled = params?.candidateRoot
     ? candidateBundledRoot && !areBundledPluginsDisabled(params.env)
       ? loadBundledPluginManifestRegistry({
-          env: { ...params.env, OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1" },
+          env: { ...params.env, CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1" },
           bundledRoot: candidateBundledRoot,
         }).plugins
       : []
@@ -580,7 +580,7 @@ function listPluginDoctorStateMigrationInventory(params?: {
 
 /** Resolve the bundled action inventory plus every configured owner that is not identity-bound. */
 export function resolvePluginDoctorStateMigrationInventory(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   candidateRoot?: string;
   artifactPreservingReadOnly?: boolean;
@@ -636,7 +636,7 @@ export function resolvePluginDoctorStateMigrationInventory(params: {
 
 /** Freeze the live registry's selected migration actions before state mutation. */
 export function resolveLivePluginDoctorStateMigrationInventory(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): PluginDoctorStateMigrationInventory {
   const bundledInventory = listPluginDoctorStateMigrationInventory(params);
@@ -690,15 +690,15 @@ export function resolveLivePluginDoctorStateMigrationInventory(params: {
 }
 
 export function applyPluginDoctorCompatibilityMigrations(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
     pluginIds?: readonly string[];
   },
 ): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changes: string[];
 } {
   let nextCfg = cfg;

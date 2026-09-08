@@ -4,7 +4,7 @@ import type { PluginLoadOptions } from "../loader.js";
 
 const loadConfigMock = vi.fn();
 const applyPluginAutoEnableMock = vi.fn();
-const loadOpenClawPluginsMock = vi.fn();
+const loadCarapacePluginsMock = vi.fn();
 
 let loadPluginMetadataRegistrySnapshot: typeof import("./metadata-registry-loader.js").loadPluginMetadataRegistrySnapshot;
 
@@ -18,9 +18,9 @@ vi.mock("../../config/plugin-auto-enable.js", () => ({
 }));
 
 vi.mock("../loader.js", () => ({
-  loadOpenClawPlugins: (...args: unknown[]) => loadOpenClawPluginsMock(...args),
+  loadCarapacePlugins: (...args: unknown[]) => loadCarapacePluginsMock(...args),
   loadPluginRegistryHandle: (options: Record<string, unknown> = {}) =>
-    loadOpenClawPluginsMock({ ...options, activate: false }),
+    loadCarapacePluginsMock({ ...options, activate: false }),
 }));
 
 vi.mock("../../agents/agent-scope.js", () => ({
@@ -39,11 +39,11 @@ vi.mock("../control-plane-workspace.js", () => ({
   }),
 }));
 
-function getOnlyLoadOpenClawPluginsOptions(): PluginLoadOptions {
-  expect(loadOpenClawPluginsMock).toHaveBeenCalledTimes(1);
-  const options = loadOpenClawPluginsMock.mock.calls[0]?.[0];
+function getOnlyLoadCarapacePluginsOptions(): PluginLoadOptions {
+  expect(loadCarapacePluginsMock).toHaveBeenCalledTimes(1);
+  const options = loadCarapacePluginsMock.mock.calls[0]?.[0];
   if (!options || typeof options !== "object") {
-    throw new Error("expected loadOpenClawPlugins to receive plugin load options");
+    throw new Error("expected loadCarapacePlugins to receive plugin load options");
   }
   return options as PluginLoadOptions;
 }
@@ -56,32 +56,32 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
   beforeEach(() => {
     loadConfigMock.mockReset();
     applyPluginAutoEnableMock.mockReset();
-    loadOpenClawPluginsMock.mockReset();
+    loadCarapacePluginsMock.mockReset();
     loadConfigMock.mockReturnValue({ plugins: {} });
     applyPluginAutoEnableMock.mockImplementation((params: { config: unknown }) => ({
       config: params.config,
       changes: [],
       autoEnabledReasons: {},
     }));
-    loadOpenClawPluginsMock.mockReturnValue({ plugins: [], diagnostics: [] });
+    loadCarapacePluginsMock.mockReturnValue({ plugins: [], diagnostics: [] });
   });
 
   it("defaults to a non-activating validate snapshot", () => {
     loadPluginMetadataRegistrySnapshot({
       config: { plugins: {} },
       activationSourceConfig: { plugins: { allow: ["demo"] } },
-      env: { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv,
+      env: { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv,
       workspaceDir: "/workspace",
       onlyPluginIds: ["demo"],
     });
 
-    const loadOptions = getOnlyLoadOpenClawPluginsOptions();
+    const loadOptions = getOnlyLoadCarapacePluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: { allow: ["demo"] } },
       autoEnabledReasons: {},
       workspaceDir: "/workspace",
-      env: { HOME: "/tmp/openclaw-home" },
+      env: { HOME: "/tmp/carapace-home" },
       throwOnLoadError: true,
       cache: false,
       activate: false,
@@ -98,7 +98,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
       loadModules: false,
     });
 
-    const loadOptions = getOnlyLoadOpenClawPluginsOptions();
+    const loadOptions = getOnlyLoadCarapacePluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: {} },
@@ -127,7 +127,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
       workspaceDir: "/workspace",
     });
 
-    const { env, ...loadOptions } = getOnlyLoadOpenClawPluginsOptions();
+    const { env, ...loadOptions } = getOnlyLoadCarapacePluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: {} },
@@ -174,7 +174,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
     });
 
     expect(applyPluginAutoEnableMock).not.toHaveBeenCalled();
-    expect(getOnlyLoadOpenClawPluginsOptions()).toEqual({
+    expect(getOnlyLoadCarapacePluginsOptions()).toEqual({
       config: { plugins: { allow: ["compat-provider"] } },
       activationSourceConfig: { plugins: { allow: ["raw-plugin"] } },
       autoEnabledReasons: {},
@@ -197,7 +197,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
       onlyPluginIds: [],
     });
 
-    const loadOptions = getOnlyLoadOpenClawPluginsOptions();
+    const loadOptions = getOnlyLoadCarapacePluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: {} },

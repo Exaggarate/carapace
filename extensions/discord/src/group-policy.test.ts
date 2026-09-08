@@ -1,13 +1,13 @@
 // Discord tests pin guild/channel ScopeTree policy precedence.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
 import { describe, expect, it } from "vitest";
 import {
   resolveDiscordGroupRequireMention,
   resolveDiscordGroupToolPolicy,
 } from "./group-policy.js";
 
-function createCfg(discord: Record<string, unknown>): OpenClawConfig {
-  return { channels: { discord } } as OpenClawConfig;
+function createCfg(discord: Record<string, unknown>): CarapaceConfig {
+  return { channels: { discord } } as CarapaceConfig;
 }
 
 describe("discord group policy", () => {

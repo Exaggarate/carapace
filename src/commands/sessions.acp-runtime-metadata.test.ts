@@ -10,23 +10,23 @@ import {
   registerAgentHarness,
 } from "../agents/harness/registry.js";
 import { restoreRegisteredAgentHarnesses } from "../agents/harness/registry.test-support.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 
 const ACP_SESSION_KEY = "agent:copilot:acp:86b7b5af-3773-4a56-b244-069d6c5d3db9";
 const NON_ACP_SESSION_KEY = "agent:main:main";
 
-function buildConfigWithoutAgentRuntimePolicy(): OpenClawConfig {
+function buildConfigWithoutAgentRuntimePolicy(): CarapaceConfig {
   return {
     agents: {
       list: [{ id: "copilot" }, { id: "main", default: true }],
       defaults: {},
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function computeSessionAgentRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   fallbackAgentId: string;
   acpRuntime?: boolean;
@@ -52,7 +52,7 @@ describe("session ACP runtime metadata", () => {
     (source) => {
       const supports = vi.fn((_context: unknown) => ({
         supported: false as const,
-        fallbackRuntime: "openclaw" as const,
+        fallbackRuntime: "carapace" as const,
       }));
       registerAgentHarness({
         id: "codex",
@@ -62,7 +62,7 @@ describe("session ACP runtime metadata", () => {
           throw new Error("projection must not execute");
         },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         models: {
           providers: {
             openai: {
@@ -103,7 +103,7 @@ describe("session ACP runtime metadata", () => {
           ...(source === "session-key" ? { agentRuntimeOverride: "codex" } : {}),
         },
       };
-      expect(resolveCurrentSessionAgentRuntimeMetadata(params)).toEqual({ id: "openclaw", source });
+      expect(resolveCurrentSessionAgentRuntimeMetadata(params)).toEqual({ id: "carapace", source });
       expect(
         resolveCurrentSessionAgentRuntimeMetadata({
           ...params,
@@ -158,24 +158,24 @@ describe("session ACP runtime metadata", () => {
     expect(agentRuntime.source).not.toBe("session-key");
   });
 
-  it("preserves locked Codex ownership ahead of stale OpenClaw session metadata", () => {
+  it("preserves locked Codex ownership ahead of stale Carapace session metadata", () => {
     const agentRuntime = resolveModelAgentRuntimeMetadata({
       cfg: {
         agents: {
           defaults: {
             models: {
-              "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "main",
       provider: "openai",
       model: "gpt-5.5",
       sessionKey: NON_ACP_SESSION_KEY,
       sessionEntry: {
         agentHarnessId: "codex",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         modelSelectionLocked: true,
       },
     });
@@ -195,13 +195,13 @@ describe("session ACP runtime metadata", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         agentId: "main",
         provider: "openai",
         model: "gpt-5.6-sol",
         sessionKey: NON_ACP_SESSION_KEY,
         sessionEntry: {
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
         },
       });
 
@@ -217,7 +217,7 @@ describe("session ACP runtime metadata", () => {
       model: "gpt-5.6-sol",
       sessionKey: NON_ACP_SESSION_KEY,
       sessionEntry: {
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         agentRuntimeOverride: "codex",
       },
     });

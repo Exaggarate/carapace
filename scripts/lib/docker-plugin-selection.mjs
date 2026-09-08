@@ -6,7 +6,7 @@ import { collectRootPackageExcludedExtensionDirs } from "./root-package-bundled-
 const PLUGIN_ID_RE = /^[a-z0-9][a-z0-9-]*$/u;
 
 function readManifest(pluginDir) {
-  const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+  const manifestPath = path.join(pluginDir, "carapace.plugin.json");
   if (!fs.existsSync(manifestPath)) {
     return null;
   }
@@ -54,17 +54,17 @@ export function resolveDockerPluginSelection(params) {
 
   for (const selectedId of selectedIds) {
     if (!PLUGIN_ID_RE.test(selectedId)) {
-      throw new Error(`invalid OPENCLAW_EXTENSIONS plugin id: ${selectedId}`);
+      throw new Error(`invalid CARAPACE_EXTENSIONS plugin id: ${selectedId}`);
     }
     const matches = plugins.filter(
       (plugin) => plugin.dirName === selectedId || plugin.manifestId === selectedId,
     );
     if (matches.length === 0) {
-      throw new Error(`unknown OPENCLAW_EXTENSIONS plugin id: ${selectedId}`);
+      throw new Error(`unknown CARAPACE_EXTENSIONS plugin id: ${selectedId}`);
     }
     if (matches.length > 1) {
       throw new Error(
-        `ambiguous OPENCLAW_EXTENSIONS plugin id: ${selectedId} (${matches
+        `ambiguous CARAPACE_EXTENSIONS plugin id: ${selectedId} (${matches
           .map((plugin) => plugin.dirName)
           .join(", ")})`,
       );
@@ -117,7 +117,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
               return [];
             }
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-            return packageJson.openclaw?.install?.requiredPlatformPackages ?? [];
+            return packageJson.carapace?.install?.requiredPlatformPackages ?? [];
           }),
         ),
       ].toSorted((left, right) => left.localeCompare(right));

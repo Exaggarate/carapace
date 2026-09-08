@@ -1,7 +1,7 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import type { GithubCounts } from "./types.js";
 
-export type Complete = OpenClawPluginApi["runtime"]["llm"]["complete"];
+export type Complete = CarapacePluginApi["runtime"]["llm"]["complete"];
 
 export function githubCounts(total = 0): GithubCounts {
   return {

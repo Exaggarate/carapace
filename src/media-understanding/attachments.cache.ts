@@ -6,11 +6,11 @@ import path from "node:path";
 import {
   classifyAttachmentBytes,
   type AttachmentClassification,
-} from "@openclaw/media-core/attachment-classify";
+} from "@carapace/media-core/attachment-classify";
 import {
   isInboundPathAllowed,
   mergeInboundPathRoots,
-} from "@openclaw/media-core/inbound-path-policy";
+} from "@carapace/media-core/inbound-path-policy";
 import { MediaUnderstandingSkipError } from "../../packages/media-understanding-common/src/errors.js";
 import { resolveStateDir } from "../config/paths.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
@@ -417,7 +417,7 @@ export class MediaAttachmentCache {
     const bufferResult = await this.getBuffer(params);
     const extension = path.extname(bufferResult.fileName || "") || "";
     const tmpPath = buildRandomTempFilePath({
-      prefix: "openclaw-media",
+      prefix: "carapace-media",
       extension,
     });
     // Keep failed staging owned when model fallback retries the same attachment.

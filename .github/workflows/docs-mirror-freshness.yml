@@ -1,7 +1,7 @@
 name: Docs Mirror Freshness
 
 # Freshness alarm for the docs publish pipeline: docs-sync-publish.yml mirrors
-# docs into openclaw/docs, but a broken sync leaves the mirror silently stale.
+# docs into carapace/docs, but a broken sync leaves the mirror silently stale.
 # This check fails (notifying the workflow actor) when the mirror trails a
 # docs-touching main commit by more than the grace window, after dispatching
 # one recovery sync.

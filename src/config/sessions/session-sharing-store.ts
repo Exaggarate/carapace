@@ -3,18 +3,18 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import type { SessionAccessScope } from "./session-accessor.sqlite-contract.js";
 import { readSessionEntryInstanceId } from "./session-accessor.sqlite-entry-identity.js";
 import { resolveSqliteScope, toDatabaseOptions } from "./session-accessor.sqlite-scope.js";
 
-type SessionMemberDatabase = Pick<OpenClawAgentKyselyDatabase, "session_members">;
+type SessionMemberDatabase = Pick<CarapaceAgentKyselyDatabase, "session_members">;
 
 type SessionMember = {
   identityId: string;
@@ -24,20 +24,20 @@ type SessionMember = {
 
 const SESSION_MEMBERSHIP_QUERY_CHUNK_SIZE = 400;
 
-function resolveDatabaseOptions(scope: SessionAccessScope): OpenClawAgentDatabaseOptions {
+function resolveDatabaseOptions(scope: SessionAccessScope): CarapaceAgentDatabaseOptions {
   return toDatabaseOptions(resolveSqliteScope(scope));
 }
 
-function getSessionMemberKysely(database: Pick<OpenClawAgentDatabase, "db">) {
+function getSessionMemberKysely(database: Pick<CarapaceAgentDatabase, "db">) {
   return getNodeSqliteKysely<SessionMemberDatabase>(database.db);
 }
 
 function readSessionMembers<T>(
   scope: SessionAccessScope,
   fallback: T,
-  operation: (database: Pick<OpenClawAgentDatabase, "db">) => T,
+  operation: (database: Pick<CarapaceAgentDatabase, "db">) => T,
 ): T {
-  const result = withOpenClawAgentDatabaseReadOnly(operation, resolveDatabaseOptions(scope), {
+  const result = withCarapaceAgentDatabaseReadOnly(operation, resolveDatabaseOptions(scope), {
     throwOnMissingTable: true,
   });
   return result.found ? result.value : fallback;
@@ -124,7 +124,7 @@ export function isSessionMember(scope: SessionAccessScope, identityId: string): 
 // can replace the row under the same key in between; the optional expected id
 // adds a caller snapshot check after the canonical node/entry check.
 function assertAuthorizedSessionInstance(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   expectedSessionId: string | undefined,
 ): void {
@@ -148,7 +148,7 @@ export function addSessionMember(
   }
   const options = resolveDatabaseOptions(scope);
   const addedAt = params.addedAt ?? Date.now();
-  const inserted = runOpenClawAgentWriteTransaction((database) => {
+  const inserted = runCarapaceAgentWriteTransaction((database) => {
     assertAuthorizedSessionInstance(
       database,
       resolveSqliteScope(scope).sessionKey,
@@ -183,7 +183,7 @@ export function removeSessionMember(
     return null;
   }
   const options = resolveDatabaseOptions(scope);
-  return runOpenClawAgentWriteTransaction((database) => {
+  return runCarapaceAgentWriteTransaction((database) => {
     assertAuthorizedSessionInstance(
       database,
       resolveSqliteScope(scope).sessionKey,

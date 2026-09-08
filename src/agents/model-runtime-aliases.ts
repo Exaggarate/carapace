@@ -1,10 +1,10 @@
 /**
  * Resolves CLI runtime aliases to provider/model auth labels and execution ids.
  */
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { parseModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentDir } from "./agent-scope-config.js";
 import { resolveExplicitAuthOrderSelection } from "./auth-profiles/order.js";
 import { getPreparedRuntimeAuthProfileStoreSnapshotCore } from "./auth-profiles/runtime-snapshots.js";
@@ -31,7 +31,7 @@ export function isRetiredModelPickerProvider(provider: string): boolean {
 
 /** Creates a provider visibility predicate for model picker rendering. */
 export function createModelPickerVisibleProviderPredicate(
-  params: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
+  params: { config?: CarapaceConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
 ): (provider: string) => boolean {
   const cliRuntimeProviders = new Set(
     listCliRuntimeProviderIds({
@@ -49,7 +49,7 @@ export function createModelPickerVisibleProviderPredicate(
 /** True for CLI runtime provider ids such as `claude-cli` and `google-gemini-cli`. */
 export function isCliRuntimeProvider(
   provider: string,
-  params: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
+  params: { config?: CarapaceConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
 ): boolean {
   const normalized = normalizeProviderId(provider);
   return listCliRuntimeProviderIds({
@@ -70,7 +70,7 @@ export function isCliRuntimeAlias(runtime: string | undefined): boolean {
 export function isCliRuntimeAliasForProvider(params: {
   runtime: string | undefined;
   provider: string | undefined;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): boolean {
   return isCliRuntimeModelBackendForProvider({
     provider: params.provider,
@@ -80,7 +80,7 @@ export function isCliRuntimeAliasForProvider(params: {
 }
 
 type RuntimeAliasComparisonOptions = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   includeSetupRegistry?: boolean;
 };
@@ -161,7 +161,7 @@ export function shouldPreferActiveRuntimeAliasAuthLabel(params: {
 }
 
 function resolveConfiguredRuntime(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   agentId?: string;
   modelId?: string;
@@ -179,7 +179,7 @@ function resolveConfiguredRuntime(params: {
 }
 
 type RuntimeAuthAliasParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   metadataSnapshot?: ProviderAuthAliasLookupParams["metadataSnapshot"];
 };
 
@@ -304,7 +304,7 @@ export function resolveCliRuntimeExecutionProvider(
 ): string | undefined {
   const provider = normalizeProviderId(params.provider);
   const { runtime, matchedProvider } = resolveConfiguredRuntime({ ...params, provider });
-  if (runtime === "openclaw") {
+  if (runtime === "carapace") {
     return undefined;
   }
   if (!runtime || runtime === "auto") {

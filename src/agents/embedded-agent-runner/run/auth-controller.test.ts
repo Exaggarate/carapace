@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { isSecretValueRegisteredForRedaction } from "../../../logging/secret-redaction-registry.js";
@@ -395,7 +395,7 @@ describe("createEmbeddedRunAuthController", () => {
   ])(
     "records a failed OAuth refresh for the $label and prefers the healthy profile next",
     async ({ profileCandidates, expectedOrder, advanceAfterInitialization }) => {
-      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-controller-"));
+      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auth-controller-"));
       try {
         const authStore: AuthProfileStore = {
           version: 1,
@@ -526,7 +526,7 @@ describe("createEmbeddedRunAuthController", () => {
   });
 
   it("registers exchanged credentials when sentinels are disabled", async () => {
-    vi.stubEnv("OPENCLAW_SECRET_SENTINELS", "off");
+    vi.stubEnv("CARAPACE_SECRET_SENTINELS", "off");
     const harness = createMutableAuthControllerHarness();
     const setRuntimeApiKey = vi.fn<(provider: string, apiKey: string) => void>();
     const source = mintSecretSentinel("kill-switch-source-secret", {

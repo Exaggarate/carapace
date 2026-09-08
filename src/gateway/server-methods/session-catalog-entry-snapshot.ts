@@ -11,7 +11,7 @@ import {
   type SessionEntrySummary,
 } from "../../config/sessions/session-accessor.js";
 import { sessionCreatorProfileId } from "../../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SessionCatalogEntrySnapshot } from "../../plugins/session-catalog.js";
 import { normalizeAgentId, resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import { projectSessionActor } from "../session-identity-projection.js";
@@ -36,7 +36,7 @@ type SessionCatalogRequestEntrySnapshot = {
 };
 
 export function createSessionCatalogRequestEntrySnapshot(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   fallbackAgentId: string;
 }): SessionCatalogRequestEntrySnapshot {
   const entriesByAgentId = new Map<string, readonly SessionEntrySummary[]>();

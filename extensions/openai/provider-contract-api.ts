@@ -1,10 +1,10 @@
 // Openai API module exposes the plugin public contract.
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
-import { decodeOpenAICodexJwtPayload } from "openclaw/plugin-sdk/provider-oauth-runtime";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
+import { decodeOpenAICodexJwtPayload } from "carapace/plugin-sdk/provider-oauth-runtime";
 import {
   asNonArrayRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const noopAuth = async () => ({ profiles: [] });
 const OPENAI_API_KEY_LABEL = "OpenAI API Key";

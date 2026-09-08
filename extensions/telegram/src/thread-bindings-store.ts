@@ -5,9 +5,9 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const TELEGRAM_THREAD_BINDINGS_NAMESPACE = "telegram.thread-bindings";
 export const TELEGRAM_THREAD_BINDINGS_MAX_ENTRIES = 5_000;

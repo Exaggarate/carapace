@@ -22,7 +22,7 @@ import "../../components/app-sidebar.ts";
 await import("../../components/viewer-facepile.ts");
 
 describe("AppSidebar update card wiring", () => {
-  it("keeps OpenClaw out of the workspace sidebar", async () => {
+  it("keeps Carapace out of the workspace sidebar", async () => {
     const gateway = createGateway({} as GatewayBrowserClient);
     const { sidebar } = await mountSidebar(gateway, createSessions("main", ["agent:main:main"]));
 
@@ -546,7 +546,7 @@ describe("AppSidebar agent chip", () => {
     promoted?.querySelector<HTMLButtonElement>("[data-session-menu]")?.click();
     await sidebar.updateComplete;
     const menu = sidebar.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-session-menu",
+      "carapace-session-menu",
     );
     expect(menu).not.toBeNull();
     await menu?.updateComplete;

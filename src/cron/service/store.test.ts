@@ -1,11 +1,11 @@
 // Cron service store tests cover persisted service state loading and writes.
 import fs from "node:fs/promises";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { setupCronServiceSuite } from "../service.test-harness.js";
 import * as cronStoreModule from "../store.js";
 import { loadCronStore, saveCronStore } from "../store.js";
@@ -159,7 +159,7 @@ describe("cron service store seam coverage", () => {
         surviving,
       ],
     });
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.prepare(
       "UPDATE cron_jobs SET job_json = json_set(job_json, '$.schedule.kind', ?) WHERE job_id = ?",
     ).run("unsupported", malformed.id);
@@ -219,7 +219,7 @@ describe("cron service store seam coverage", () => {
       version: 1,
       jobs: [malformedJob, malformedState, surviving],
     });
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     const stateRow = db
       .prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?")
       .get(malformedState.id) as { job_json: string };
@@ -283,7 +283,7 @@ describe("cron service store seam coverage", () => {
         surviving,
       ],
     });
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     // Number bindings become SQLite FLOATs; JSON formatting can round max + 1
     // back into the valid Date domain. Inject exact numeric JSON instead.
     const invalidTimestampJson = JSON.stringify(MAX_DATE_TIMESTAMP_MS + 1);
@@ -343,7 +343,7 @@ describe("cron service store seam coverage", () => {
     const invalidState = createReloadCronJob({ id: "invalid-runtime-state" });
     const surviving = createReloadCronJob({ id: "valid-runtime-state" });
     await saveCronStore(storePath, { version: 1, jobs: [invalidState, surviving] });
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare(
         "UPDATE cron_jobs SET state_json = json_set(state_json, '$.lastRunAtMs', json(?)) WHERE job_id = ?",
       )
@@ -681,7 +681,7 @@ describe("cron service store seam coverage", () => {
       agentId: "alpha",
       startedAtMs: STORE_TEST_NOW,
     });
-    const receipt = runOpenClawStateWriteTransaction(({ db }) =>
+    const receipt = runCarapaceStateWriteTransaction(({ db }) =>
       claimCronRunReceiptInDatabase({
         database: db,
         prepared,

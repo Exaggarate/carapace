@@ -568,7 +568,7 @@ describe("worker spawn startup composition", () => {
         await import("../server-worker-environment-startup.js");
       const factory = vi.spyOn(environmentServiceModule, "createWorkerEnvironmentService");
       try {
-        await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => {
+        await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => {
           const startup = await loadGatewayWorkerEnvironmentStartupState();
           const registry = createEmptyPluginRegistry();
           const runtime = await createGatewayWorkerEnvironmentRuntime({

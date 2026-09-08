@@ -4,7 +4,7 @@ import {
   normalizeAgentRunTimeoutPhase,
   normalizeProviderStarted,
   type AgentRunTimeoutPhase,
-} from "@openclaw/normalization-core/agent-run-terminal-outcome";
+} from "@carapace/normalization-core/agent-run-terminal-outcome";
 import {
   type FailoverError,
   findErrorProperty,
@@ -24,7 +24,7 @@ export {
   AGENT_RUN_RESTART_ABORT_STOP_REASON,
   AGENT_RUN_SUPERSEDED_STOP_REASON,
   isAbortedAgentStopReason,
-} from "@openclaw/normalization-core/agent-run-terminal-outcome";
+} from "@carapace/normalization-core/agent-run-terminal-outcome";
 /** Error text used for agent runs aborted by a gateway restart. */
 export const AGENT_RUN_RESTART_ABORT_ERROR = "agent run aborted for restart" as const;
 export const AGENT_RUN_SUPERSEDED_ERROR = "agent run superseded by a newer session writer" as const;
@@ -34,9 +34,9 @@ export const AGENT_RUN_SUPERSEDED_ERROR = "agent run superseded by a newer sessi
  * `errorCode`, so restart recovery can recognize its own abort without matching
  * free-form provider error text.
  */
-export const AGENT_RUN_RESTART_ABORT_ERROR_CODE = "OPENCLAW_RESTART_ABORT";
+export const AGENT_RUN_RESTART_ABORT_ERROR_CODE = "CARAPACE_RESTART_ABORT";
 const AGENT_RUN_SUPERSEDED_ABORT_ERROR_CODE = "AGENT_RUN_SUPERSEDED_ABORT";
-const AGENT_RUN_DIRECT_ABORT_ERROR_CODE = "OPENCLAW_DIRECT_ABORT";
+const AGENT_RUN_DIRECT_ABORT_ERROR_CODE = "CARAPACE_DIRECT_ABORT";
 
 export function createAgentRunDirectAbortError(): Error {
   const error = new Error(AGENT_RUN_ABORTED_ERROR) as Error & { code: string };

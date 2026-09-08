@@ -1,10 +1,10 @@
 /** Canonical binding codec and synchronous generation-aware reads; no lifecycle or auth loading. */
 import { createHash } from "node:crypto";
-import { AgentHarnessPreflightError } from "openclaw/plugin-sdk/agent-harness-registration";
-import type { EmbeddedRunAttemptParamsV2 } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { AgentHarnessPreflightError } from "carapace/plugin-sdk/agent-harness-registration";
+import type { EmbeddedRunAttemptParamsV2 } from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import { z } from "zod";
 import { CODEX_PLUGIN_MARKETPLACE_NAME_PATTERN } from "./config-contracts.js";
 import { normalizeCodexServiceTier } from "./config-utils.js";
@@ -15,12 +15,12 @@ export type CodexAppServerBindingIdentity =
   | { kind: "session"; agentId: string; sessionId: string; sessionKey?: string }
   | { kind: "conversation"; bindingId: string };
 
-/** Resolves the same agent scope OpenClaw uses for transcript/session ownership. */
+/** Resolves the same agent scope Carapace uses for transcript/session ownership. */
 export function sessionBindingIdentity(params: {
   sessionId: string;
   sessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Extract<CodexAppServerBindingIdentity, { kind: "session" }> {
   const { sessionAgentId } = resolveSessionAgentIdsStrict(params);
   const sessionKey = params.sessionKey?.trim();
@@ -125,18 +125,18 @@ const threadBindingSchema = z
     cwd: z.string(),
     rolloutPath: optionalNonBlankStringSchema,
     // Private runtime ownership. Only the supervision catalog creates this
-    // marker; public OpenClaw session metadata must never authorize user-home access.
+    // marker; public Carapace session metadata must never authorize user-home access.
     connectionScope: z.literal("supervision").optional(),
     supervisionSourceThreadId: z.string().trim().min(1).optional(),
     authProfileId: optionalStringSchema,
-    // Freeze OpenClaw-carried AGENTS.md at thread creation; bootstrap refreshes
+    // Freeze Carapace-carried AGENTS.md at thread creation; bootstrap refreshes
     // must not mutate the inherited policy of a resumed native session.
     agentWorkspaceDeveloperInstructions: optionalNonBlankStringSchema,
     model: optionalStringSchema,
     // Codex App Server owns selection for supervised and adopted threads. Keep
-    // this marker across resumes so OpenClaw never substitutes a default or fallback.
+    // this marker across resumes so Carapace never substitutes a default or fallback.
     preserveNativeModel: z.literal(true).optional().catch(undefined),
-    // Continue creates the OpenClaw Chat before native execution. This closed
+    // Continue creates the Carapace Chat before native execution. This closed
     // snapshot state is materialized only inside the fully configured harness.
     pendingSupervisionBranch: pendingSupervisionBranchSchema.optional(),
     // Manual attachment records intent; only the harness can attest its native

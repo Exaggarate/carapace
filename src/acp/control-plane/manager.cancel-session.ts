@@ -1,5 +1,5 @@
 /** Cancellation path for active ACP turns and idle runtime handles. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   AcpRuntimeError,
   toAcpRuntimeError,
@@ -16,7 +16,7 @@ import { acpSessionActorKey, requireReadySessionMeta } from "./manager.utils.js"
 
 /** Cancels either the active ACP turn or the idle runtime handle for a session. */
 export async function runManagerCancelSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   reason?: string;

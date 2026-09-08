@@ -3,18 +3,18 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { loadSecretFileSync as loadSecretFileSyncFromCore } from "openclaw/plugin-sdk/core";
+import { loadSecretFileSync as loadSecretFileSyncFromCore } from "carapace/plugin-sdk/core";
 import {
   fileExists,
   readFileWithinRoot,
   removePathWithinRoot,
   writeFileWithinRoot,
-} from "openclaw/plugin-sdk/file-access-runtime";
+} from "carapace/plugin-sdk/file-access-runtime";
 import {
   loadSecretFileSync,
   type SecretFileReadResult,
-} from "openclaw/plugin-sdk/secret-file-runtime";
-import { fileExists as fileExistsFromSecurity } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/secret-file-runtime";
+import { fileExists as fileExistsFromSecurity } from "carapace/plugin-sdk/security-runtime";
 import { describe, expect, it } from "vitest";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 
@@ -23,7 +23,7 @@ describe("plugin SDK fs-safe compatibility exports", () => {
     { subpath: "file-access-runtime", exists: fileExists },
     { subpath: "security-runtime", exists: fileExistsFromSecurity },
   ])("keeps $subpath file checks limited to regular files", async ({ exists }) => {
-    await withTestDir({ prefix: "openclaw-sdk-file-exists-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-sdk-file-exists-" }, async (root) => {
       const filePath = path.join(root, "file.txt");
       const symlinkPath = path.join(root, "linked.txt");
       fs.writeFileSync(filePath, "content");
@@ -41,7 +41,7 @@ describe("plugin SDK fs-safe compatibility exports", () => {
   });
 
   it("keeps deprecated secret-file result helpers on public SDK subpaths", async () => {
-    await withTestDir({ prefix: "openclaw-sdk-secret-compat-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-sdk-secret-compat-" }, async (root) => {
       const secretPath = path.join(root, "token.txt");
       fs.writeFileSync(secretPath, "secret\n", { mode: 0o600 });
 
@@ -63,7 +63,7 @@ describe("plugin SDK fs-safe compatibility exports", () => {
   });
 
   it("keeps root-bounded file-access helpers on file-access-runtime", async () => {
-    await withTestDir({ prefix: "openclaw-sdk-file-access-compat-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-sdk-file-access-compat-" }, async (root) => {
       await writeFileWithinRoot({
         rootDir: root,
         relativePath: "nested/file.txt",

@@ -1,5 +1,5 @@
 ---
-summary: "Where OpenClaw loads environment variables and the precedence order"
+summary: "Where Carapace loads environment variables and the precedence order"
 read_when:
   - You need to know which env vars are loaded, and in what order
   - You are debugging missing API keys in the Gateway
@@ -7,45 +7,45 @@ read_when:
 title: "Environment variables"
 ---
 
-OpenClaw pulls environment variables from multiple sources. The normal rule is **never override existing values**. For an OpenClaw-installed systemd service, the global `.env` may replace only service values that OpenClaw recorded as managed; operator-owned service values still take precedence.
-Workspace `.env` files are a lower-trust source: OpenClaw ignores provider credentials and protected runtime controls from workspace `.env` before applying precedence.
+Carapace pulls environment variables from multiple sources. The normal rule is **never override existing values**. For an Carapace-installed systemd service, the global `.env` may replace only service values that Carapace recorded as managed; operator-owned service values still take precedence.
+Workspace `.env` files are a lower-trust source: Carapace ignores provider credentials and protected runtime controls from workspace `.env` before applying precedence.
 
 ## Precedence (highest to lowest)
 
 1. **Process environment** (what the Gateway process already has from the parent shell/daemon).
 2. **`.env` in the current working directory** (dotenv default; does not override; provider credentials and protected runtime controls are ignored).
-3. **Global `.env`** at `~/.openclaw/.env` (aka `$OPENCLAW_STATE_DIR/.env`; recommended for provider API keys; does not override except for recorded OpenClaw-managed systemd service values).
-4. **Config `env` block** in `~/.openclaw/openclaw.json` (applied only if missing).
-5. **Optional login-shell import** (`env.shellEnv.enabled` or `OPENCLAW_LOAD_SHELL_ENV=1`), applied only for missing expected keys.
+3. **Global `.env`** at `~/.carapace/.env` (aka `$CARAPACE_STATE_DIR/.env`; recommended for provider API keys; does not override except for recorded Carapace-managed systemd service values).
+4. **Config `env` block** in `~/.carapace/carapace.json` (applied only if missing).
+5. **Optional login-shell import** (`env.shellEnv.enabled` or `CARAPACE_LOAD_SHELL_ENV=1`), applied only for missing expected keys.
 
-On fresh Ubuntu installs that use the default state dir, OpenClaw also treats `~/.config/openclaw/gateway.env` as a compatibility fallback after the global `.env`. If both files exist and disagree, OpenClaw keeps `~/.openclaw/.env` and prints a warning.
+On fresh Ubuntu installs that use the default state dir, Carapace also treats `~/.config/carapace/gateway.env` as a compatibility fallback after the global `.env`. If both files exist and disagree, Carapace keeps `~/.carapace/.env` and prints a warning.
 
 If the config file is missing entirely, step 4 is skipped; shell import still runs if enabled.
 
 ## Supported operator-facing variables
 
-The variables below are the supported environment contract for operators. Undocumented `OPENCLAW_*` variables are internal implementation details and may disappear without notice.
+The variables below are the supported environment contract for operators. Undocumented `CARAPACE_*` variables are internal implementation details and may disappear without notice.
 
 ### Paths and instances
 
 | Variable                 | Purpose                                                           |
 | ------------------------ | ----------------------------------------------------------------- |
-| `OPENCLAW_HOME`          | Override the home directory used for OpenClaw path defaults.      |
-| `OPENCLAW_STATE_DIR`     | Override the mutable state directory.                             |
-| `OPENCLAW_CONFIG_PATH`   | Override the active config file path.                             |
-| `OPENCLAW_WORKSPACE_DIR` | Override the default agent workspace.                             |
-| `OPENCLAW_PROFILE`       | Select a named profile and its isolated defaults.                 |
-| `OPENCLAW_GIT_DIR`       | Override the source checkout used by development-channel updates. |
-| `OPENCLAW_INCLUDE_ROOTS` | Allow `$include` to resolve from additional roots.                |
+| `CARAPACE_HOME`          | Override the home directory used for Carapace path defaults.      |
+| `CARAPACE_STATE_DIR`     | Override the mutable state directory.                             |
+| `CARAPACE_CONFIG_PATH`   | Override the active config file path.                             |
+| `CARAPACE_WORKSPACE_DIR` | Override the default agent workspace.                             |
+| `CARAPACE_PROFILE`       | Select a named profile and its isolated defaults.                 |
+| `CARAPACE_GIT_DIR`       | Override the source checkout used by development-channel updates. |
+| `CARAPACE_INCLUDE_ROOTS` | Allow `$include` to resolve from additional roots.                |
 
 ### Gateway and authentication
 
 | Variable                    | Purpose                                                         |
 | --------------------------- | --------------------------------------------------------------- |
-| `OPENCLAW_GATEWAY_URL`      | Override the remote Gateway URL used by clients.                |
-| `OPENCLAW_GATEWAY_PORT`     | Override the local Gateway port.                                |
-| `OPENCLAW_GATEWAY_TOKEN`    | Supply token authentication for Gateway servers and clients.    |
-| `OPENCLAW_GATEWAY_PASSWORD` | Supply password authentication for Gateway servers and clients. |
+| `CARAPACE_GATEWAY_URL`      | Override the remote Gateway URL used by clients.                |
+| `CARAPACE_GATEWAY_PORT`     | Override the local Gateway port.                                |
+| `CARAPACE_GATEWAY_TOKEN`    | Supply token authentication for Gateway servers and clients.    |
+| `CARAPACE_GATEWAY_PASSWORD` | Supply password authentication for Gateway servers and clients. |
 
 ### Provider credentials
 
@@ -53,49 +53,49 @@ Core and bundled provider plugins recognize the following credential and provide
 
 `AI_GATEWAY_API_KEY`, `ANTHROPIC_ADMIN_API_KEY`, `ANTHROPIC_ADMIN_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_OAUTH_TOKEN`, `ARCEEAI_API_KEY`, `AZURE_OPENAI_API_KEY`, `AZURE_SPEECH_API_KEY`, `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`, `BASETEN_API_KEY`, `BRAVE_API_KEY`, `BYTEPLUS_API_KEY`, `BYTEPLUS_SEED_SPEECH_API_KEY`, `CEREBRAS_API_KEY`, `CHUTES_API_KEY`, `CHUTES_OAUTH_TOKEN`, `CLAWROUTER_API_KEY`, `CLOUDFLARE_AI_GATEWAY_API_KEY`, `CODEX_API_KEY`, `COHERE_API_KEY`, `COMFY_API_KEY`, `COMFY_CLOUD_API_KEY`, `COPILOT_GITHUB_TOKEN`, `DASHSCOPE_API_KEY`, `DEEPGRAM_API_KEY`, `DEEPINFRA_API_KEY`, `DEEPSEEK_API_KEY`, `ELEVENLABS_API_KEY`, `EXA_API_KEY`, `FAL_API_KEY`, `FAL_KEY`, `FEATHERLESS_API_KEY`, `FIRECRAWL_API_KEY`, `FIREWORKS_API_KEY`, `GCLOUD_PROJECT`, `GEMINI_API_KEY`, `GH_TOKEN`, `GITHUB_TOKEN`, `GMI_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_APPLICATION_CREDENTIALS`, `GOOGLE_CLOUD_API_KEY`, `GOOGLE_CLOUD_LOCATION`, `GOOGLE_CLOUD_PROJECT`, `GRADIUM_API_KEY`, `GROQ_API_KEY`, `HF_TOKEN`, `HUGGINGFACE_HUB_TOKEN`, `INWORLD_API_KEY`, `KILOCODE_API_KEY`, `KIMICODE_API_KEY`, `KIMI_API_KEY`, `LITELLM_API_KEY`, `LM_API_TOKEN`, `LONGCAT_API_KEY`, `MINIMAX_API_KEY`, `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY`, `MINIMAX_OAUTH_TOKEN`, `MISTRAL_API_KEY`, `MODELSTUDIO_API_KEY`, `MODEL_API_KEY`, `MOONSHOT_API_KEY`, `NOVITA_API_KEY`, `NVIDIA_API_KEY`, `OLLAMA_API_KEY`, `OPENAI_ADMIN_KEY`, `OPENAI_API_KEY`, `OPENCODE_API_KEY`, `OPENCODE_ZEN_API_KEY`, `OPENROUTER_API_KEY`, `PARALLEL_API_KEY`, `PERPLEXITY_API_KEY`, `PIXVERSE_API_KEY`, `QIANFAN_API_KEY`, `QWEN_API_KEY`, `QWEN_TOKEN_PLAN_API_KEY`, `RUNWAYML_API_SECRET`, `RUNWAY_API_KEY`, `SENSEAUDIO_API_KEY`, `SGLANG_API_KEY`, `SPEECH_KEY`, `SPEECH_REGION`, `STEPFUN_API_KEY`, `SYNTHETIC_API_KEY`, `TAVILY_API_KEY`, `TOGETHER_API_KEY`, `TOKENHUB_API_KEY`, `TOKENPLAN_API_KEY`, `VENICE_API_KEY`, `VLLM_API_KEY`, `VOLCANO_ENGINE_API_KEY`, `VOLCENGINE_TTS_API_KEY`, `VOLCENGINE_TTS_APPID`, `VOLCENGINE_TTS_TOKEN`, `VOYAGE_API_KEY`, `VYDRA_API_KEY`, `XAI_API_KEY`, `XIAOMI_API_KEY`, `XIAOMI_TOKEN_PLAN_API_KEY`, `XI_API_KEY`, `ZAI_API_KEY`, and `Z_AI_API_KEY`.
 
-Installed third-party plugins may declare additional credential variables in their plugin manifests; those variables are contracts of the plugin that declares them, not core OpenClaw variables.
+Installed third-party plugins may declare additional credential variables in their plugin manifests; those variables are contracts of the plugin that declares them, not core Carapace variables.
 
 ### Logging and diagnostics
 
 | Variable                             | Purpose                                                       |
 | ------------------------------------ | ------------------------------------------------------------- |
-| `OPENCLAW_LOG_LEVEL`                 | Override file and console log levels.                         |
-| `OPENCLAW_DEBUG_MODEL_TRANSPORT`     | Enable model transport timing diagnostics.                    |
-| `OPENCLAW_DEBUG_MODEL_PAYLOAD`       | Select redacted model payload diagnostics.                    |
-| `OPENCLAW_DEBUG_SSE`                 | Select SSE timing or event-peek diagnostics.                  |
-| `OPENCLAW_DEBUG_CODE_MODE`           | Enable code-mode surface diagnostics.                         |
-| `OPENCLAW_DIAGNOSTICS`               | Enable named diagnostic flags, or disable all flags with `0`. |
-| `OPENCLAW_DIAGNOSTICS_TIMELINE_PATH` | Select the JSONL path for timeline diagnostics.               |
-| `OPENCLAW_DIAGNOSTICS_EVENT_LOOP`    | Add event-loop samples to timeline diagnostics.               |
+| `CARAPACE_LOG_LEVEL`                 | Override file and console log levels.                         |
+| `CARAPACE_DEBUG_MODEL_TRANSPORT`     | Enable model transport timing diagnostics.                    |
+| `CARAPACE_DEBUG_MODEL_PAYLOAD`       | Select redacted model payload diagnostics.                    |
+| `CARAPACE_DEBUG_SSE`                 | Select SSE timing or event-peek diagnostics.                  |
+| `CARAPACE_DEBUG_CODE_MODE`           | Enable code-mode surface diagnostics.                         |
+| `CARAPACE_DIAGNOSTICS`               | Enable named diagnostic flags, or disable all flags with `0`. |
+| `CARAPACE_DIAGNOSTICS_TIMELINE_PATH` | Select the JSONL path for timeline diagnostics.               |
+| `CARAPACE_DIAGNOSTICS_EVENT_LOOP`    | Add event-loop samples to timeline diagnostics.               |
 
 ### Feature and runtime toggles
 
 | Variable                             | Purpose                                                                      |
 | ------------------------------------ | ---------------------------------------------------------------------------- |
-| `OPENCLAW_LOAD_SHELL_ENV`            | Import missing expected variables from the login shell.                      |
-| `OPENCLAW_SHELL_ENV_TIMEOUT_MS`      | Set the login-shell import timeout.                                          |
-| `OPENCLAW_EXEC_SHELL_SNAPSHOT`       | Disable exec shell snapshots with `0`.                                       |
-| `OPENCLAW_OFFLINE`                   | Prevent downloads of pinned agent helper binaries.                           |
-| `OPENCLAW_BROWSER_HEADLESS`          | Force managed browser launches headed (`0`) or headless (`1`).               |
-| `OPENCLAW_DISABLE_BONJOUR`           | Force Bonjour advertising on (`0`) or off (`1`).                             |
-| `OPENCLAW_NO_AUTO_UPDATE`            | Disable automatic update applies.                                            |
-| `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS` | Allow trusted private-DNS `ws://` connections as a break-glass override.     |
-| `OPENCLAW_ALLOW_MULTI_GATEWAY`       | Allow multiple Gateway processes while preserving per-state ownership locks. |
-| `OPENCLAW_SKIP_CHANNELS`             | Start the Gateway without channel transports for troubleshooting.            |
-| `OPENCLAW_THEME`                     | Force the TUI palette to `light` or `dark`.                                  |
+| `CARAPACE_LOAD_SHELL_ENV`            | Import missing expected variables from the login shell.                      |
+| `CARAPACE_SHELL_ENV_TIMEOUT_MS`      | Set the login-shell import timeout.                                          |
+| `CARAPACE_EXEC_SHELL_SNAPSHOT`       | Disable exec shell snapshots with `0`.                                       |
+| `CARAPACE_OFFLINE`                   | Prevent downloads of pinned agent helper binaries.                           |
+| `CARAPACE_BROWSER_HEADLESS`          | Force managed browser launches headed (`0`) or headless (`1`).               |
+| `CARAPACE_DISABLE_BONJOUR`           | Force Bonjour advertising on (`0`) or off (`1`).                             |
+| `CARAPACE_NO_AUTO_UPDATE`            | Disable automatic update applies.                                            |
+| `CARAPACE_ALLOW_INSECURE_PRIVATE_WS` | Allow trusted private-DNS `ws://` connections as a break-glass override.     |
+| `CARAPACE_ALLOW_MULTI_GATEWAY`       | Allow multiple Gateway processes while preserving per-state ownership locks. |
+| `CARAPACE_SKIP_CHANNELS`             | Start the Gateway without channel transports for troubleshooting.            |
+| `CARAPACE_THEME`                     | Force the TUI palette to `light` or `dark`.                                  |
 
 ## Provider credentials and workspace `.env`
 
-Do not keep provider API keys only in a workspace `.env`. OpenClaw blocks a large set of provider credential and endpoint-redirect keys from workspace `.env` files, including every known provider auth env var (for example `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `PERPLEXITY_API_KEY`, `BRAVE_API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `FIRECRAWL_API_KEY`), plus any key ending in `_API_HOST`, `_BASE_URL`, `_ENDPOINT`, or `_HOMESERVER`, and the entire `OPENCLAW_*`, `CLAWHUB_*`, `ANTHROPIC_API_KEY_*`, and `OPENAI_API_KEY_*` namespaces.
+Do not keep provider API keys only in a workspace `.env`. Carapace blocks a large set of provider credential and endpoint-redirect keys from workspace `.env` files, including every known provider auth env var (for example `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `PERPLEXITY_API_KEY`, `BRAVE_API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `FIRECRAWL_API_KEY`), plus any key ending in `_API_HOST`, `_BASE_URL`, `_ENDPOINT`, or `_HOMESERVER`, and the entire `CARAPACE_*`, `CLAWHUB_*`, `ANTHROPIC_API_KEY_*`, and `OPENAI_API_KEY_*` namespaces.
 
 Use one of these trusted sources for provider credentials instead:
 
 - The Gateway process environment, such as a shell, launchd/systemd unit, container secret, or CI secret.
-- The global runtime dotenv file at `~/.openclaw/.env` or `$OPENCLAW_STATE_DIR/.env`.
-- The config `env` block in `~/.openclaw/openclaw.json`.
-- Optional login-shell import when `env.shellEnv.enabled` or `OPENCLAW_LOAD_SHELL_ENV=1` is enabled.
+- The global runtime dotenv file at `~/.carapace/.env` or `$CARAPACE_STATE_DIR/.env`.
+- The config `env` block in `~/.carapace/carapace.json`.
+- Optional login-shell import when `env.shellEnv.enabled` or `CARAPACE_LOAD_SHELL_ENV=1` is enabled.
 
-If you previously stored provider keys or endpoint routing values only in a workspace `.env`, move them to one of the trusted sources above. Workspace `.env` can still provide ordinary project variables that are not credentials, endpoint redirects, host overrides, or `OPENCLAW_*` runtime controls.
+If you previously stored provider keys or endpoint routing values only in a workspace `.env`, move them to one of the trusted sources above. Workspace `.env` can still provide ordinary project variables that are not credentials, endpoint redirects, host overrides, or `CARAPACE_*` runtime controls.
 
 See [Workspace `.env` files](/gateway/security#workspace-env-files) for the security rationale.
 
@@ -127,7 +127,7 @@ supports it:
     providers: {
       xai_key_file: {
         source: "file",
-        path: "~/.openclaw/secrets/xai-api-key.txt",
+        path: "~/.carapace/secrets/xai-api-key.txt",
         mode: "singleValue",
       },
     },
@@ -163,16 +163,16 @@ supported fields.
 
 Env var equivalents:
 
-- `OPENCLAW_LOAD_SHELL_ENV=1`
-- `OPENCLAW_SHELL_ENV_TIMEOUT_MS=15000` (default `15000`)
+- `CARAPACE_LOAD_SHELL_ENV=1`
+- `CARAPACE_SHELL_ENV_TIMEOUT_MS=15000` (default `15000`)
 
 For Bash, the import uses an interactive login shell (`bash -lic`) so `PS1` is initialized
 before login startup files run. Bash reads `/etc/profile` and the first available user login
 profile (`~/.bash_profile`, `~/.bash_login`, or `~/.profile`); many login profiles also source
 `~/.bashrc`. Keep those files quiet and bounded because their output, long-running work, or
-failures can affect OpenClaw startup. Other shells use noninteractive login startup (`-l -c`).
+failures can affect Carapace startup. Other shells use noninteractive login startup (`-l -c`).
 The probe runs in its own session, detached from your terminal, so startup files get no job
-control and cannot take over the terminal that runs OpenClaw.
+control and cannot take over the terminal that runs Carapace.
 This interactive Bash mode is limited to explicit shell env imports; automatic executable PATH
 discovery during ordinary Gateway commands remains noninteractive.
 
@@ -181,7 +181,7 @@ Successful probes are cached. If a probe fails, the next shell environment or PA
 ## Exec shell snapshots
 
 On non-Windows Gateway hosts, bash and zsh `exec` commands use a startup snapshot by default.
-Set `OPENCLAW_EXEC_SHELL_SNAPSHOT=0` in the Gateway process environment to disable this path.
+Set `CARAPACE_EXEC_SHELL_SNAPSHOT=0` in the Gateway process environment to disable this path.
 Values `false`, `no`, and `off` also disable it. Per-call `exec.env` values cannot toggle
 snapshots or redirect the snapshot cache.
 
@@ -194,21 +194,21 @@ application tokens, proxies, runtime injection variables, or arbitrary applicati
 This boundary leaves the parent environment and normal agent, Gateway, and updater payload
 environments unchanged.
 
-OpenClaw also injects context markers into spawned child processes:
+Carapace also injects context markers into spawned child processes:
 
-- `OPENCLAW_SHELL=exec`: set for commands run through the `exec` tool.
-- `OPENCLAW_SHELL=acp-client`: set for `openclaw acp client` when it spawns the ACP bridge process.
-- `OPENCLAW_SHELL=tui-local`: set for local TUI `!` shell commands.
-- `OPENCLAW_CLI=1`: set for child processes spawned by the CLI entry point.
+- `CARAPACE_SHELL=exec`: set for commands run through the `exec` tool.
+- `CARAPACE_SHELL=acp-client`: set for `carapace acp client` when it spawns the ACP bridge process.
+- `CARAPACE_SHELL=tui-local`: set for local TUI `!` shell commands.
+- `CARAPACE_CLI=1`: set for child processes spawned by the CLI entry point.
 
 These are runtime markers (not required user config). They can be used in shell/profile logic
 to apply context-specific rules.
 
 ## UI env vars
 
-- `OPENCLAW_THEME=light`: force the light TUI palette when your terminal has a light background.
-- `OPENCLAW_THEME=dark`: force the dark TUI palette.
-- `COLORFGBG`: if your terminal exports it, OpenClaw uses the background color hint to auto-pick the TUI palette.
+- `CARAPACE_THEME=light`: force the light TUI palette when your terminal has a light background.
+- `CARAPACE_THEME=dark`: force the dark TUI palette.
+- `COLORFGBG`: if your terminal exports it, Carapace uses the background color hint to auto-pick the TUI palette.
 
 ## Env var substitution in config
 
@@ -230,15 +230,15 @@ A missing or empty variable remains visible as `${VAR_NAME}` and emits a warning
 
 See [Configuration: Env var substitution](/gateway/config-secrets-env#env-var-substitution) for full details.
 
-This applies to string values in `openclaw.json` and in any file it pulls in through `$include`, because substitution runs over the config tree after includes resolve. OpenClaw's dotenv loader does not expand environment variable values. For example, `OPENCLAW_WORKSPACE_DIR=${XDG_CONFIG_HOME}/workspace` in a runtime `.env` file remains literal when OpenClaw loads it.
+This applies to string values in `carapace.json` and in any file it pulls in through `$include`, because substitution runs over the config tree after includes resolve. Carapace's dotenv loader does not expand environment variable values. For example, `CARAPACE_WORKSPACE_DIR=${XDG_CONFIG_HOME}/workspace` in a runtime `.env` file remains literal when Carapace loads it.
 
-Since OpenClaw does not expand these values, give path variables fully-resolved absolute paths. `OPENCLAW_WORKSPACE_DIR` does not expand a leading `~` either, because it goes straight to `path.resolve`. `OPENCLAW_STATE_DIR` and `OPENCLAW_CONFIG_PATH` do expand `~`. A workspace-local `.env` file drops the entire `OPENCLAW_*` namespace, since it is untrusted input, so set these variables in the trusted global `.env` at `$OPENCLAW_STATE_DIR/.env`, or `~/.openclaw/.env` by default.
+Since Carapace does not expand these values, give path variables fully-resolved absolute paths. `CARAPACE_WORKSPACE_DIR` does not expand a leading `~` either, because it goes straight to `path.resolve`. `CARAPACE_STATE_DIR` and `CARAPACE_CONFIG_PATH` do expand `~`. A workspace-local `.env` file drops the entire `CARAPACE_*` namespace, since it is untrusted input, so set these variables in the trusted global `.env` at `$CARAPACE_STATE_DIR/.env`, or `~/.carapace/.env` by default.
 
-Docker Compose follows its own [interpolation rules](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/). In the bundled `docker-compose.yml`, `OPENCLAW_WORKSPACE_DIR` from the project `.env` selects the host directory for the workspace bind mount. The container-side `OPENCLAW_WORKSPACE_DIR` stays pinned to `/home/node/.openclaw/workspace`.
+Docker Compose follows its own [interpolation rules](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/). In the bundled `docker-compose.yml`, `CARAPACE_WORKSPACE_DIR` from the project `.env` selects the host directory for the workspace bind mount. The container-side `CARAPACE_WORKSPACE_DIR` stays pinned to `/home/node/.carapace/workspace`.
 
 ## Secret refs vs `${ENV}` strings
 
-OpenClaw supports two env-driven patterns:
+Carapace supports two env-driven patterns:
 
 - `${VAR}` string substitution in config values.
 - SecretRef objects (`{ source: "env", provider: "default", id: "VAR" }`) for fields that support secrets references.
@@ -251,15 +251,15 @@ shorthand values.
 
 | Variable                 | Purpose                                                                                                                                                                                                                                 |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENCLAW_HOME`          | Override the home directory used for internal OpenClaw path defaults (`~/.openclaw/`, agent dirs, sessions, credentials, installer onboarding, and the default dev checkout). Useful when running OpenClaw as a dedicated service user. |
-| `OPENCLAW_STATE_DIR`     | Override the state directory (default `~/.openclaw`).                                                                                                                                                                                   |
-| `OPENCLAW_CONFIG_PATH`   | Override the config file path (default `~/.openclaw/openclaw.json`).                                                                                                                                                                    |
-| `OPENCLAW_INCLUDE_ROOTS` | Path-list of directories where `$include` directives may resolve files outside the config directory (default: none - `$include` is confined to the config dir). Tilde-expanded.                                                         |
+| `CARAPACE_HOME`          | Override the home directory used for internal Carapace path defaults (`~/.carapace/`, agent dirs, sessions, credentials, installer onboarding, and the default dev checkout). Useful when running Carapace as a dedicated service user. |
+| `CARAPACE_STATE_DIR`     | Override the state directory (default `~/.carapace`).                                                                                                                                                                                   |
+| `CARAPACE_CONFIG_PATH`   | Override the config file path (default `~/.carapace/carapace.json`).                                                                                                                                                                    |
+| `CARAPACE_INCLUDE_ROOTS` | Path-list of directories where `$include` directives may resolve files outside the config directory (default: none - `$include` is confined to the config dir). Tilde-expanded.                                                         |
 
 ## Agent helper tool downloads
 
-Set `OPENCLAW_OFFLINE=1` to prevent OpenClaw from downloading its pinned `fd`
-and `ripgrep` helper binaries. Existing helpers under the OpenClaw tools
+Set `CARAPACE_OFFLINE=1` to prevent Carapace from downloading its pinned `fd`
+and `ripgrep` helper binaries. Existing helpers under the Carapace tools
 directory and working system binaries remain eligible; a missing helper stays
 unavailable instead of triggering a network request.
 
@@ -267,33 +267,33 @@ unavailable instead of triggering a network request.
 
 | Variable                         | Purpose                                                                                                                                                                                      |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENCLAW_LOG_LEVEL`             | Override log level for both file and console (e.g. `debug`, `trace`). Takes precedence over `logging.level` and `logging.consoleLevel` in config. Invalid values are ignored with a warning. |
-| `OPENCLAW_DEBUG_MODEL_TRANSPORT` | Emit targeted model request/response timing diagnostics at `info` level without enabling global debug logs.                                                                                  |
-| `OPENCLAW_DEBUG_MODEL_PAYLOAD`   | Model payload diagnostics: `summary`, `tools`, or `full-redacted`. `full-redacted` is capped and redacted but may include prompt/message text.                                               |
-| `OPENCLAW_DEBUG_SSE`             | Streaming diagnostics: `events` for first/done timing, `peek` to include the first five redacted SSE events.                                                                                 |
-| `OPENCLAW_DEBUG_CODE_MODE`       | Code-mode model-surface diagnostics, including provider-tool hiding and compact control/direct enforcement.                                                                                  |
+| `CARAPACE_LOG_LEVEL`             | Override log level for both file and console (e.g. `debug`, `trace`). Takes precedence over `logging.level` and `logging.consoleLevel` in config. Invalid values are ignored with a warning. |
+| `CARAPACE_DEBUG_MODEL_TRANSPORT` | Emit targeted model request/response timing diagnostics at `info` level without enabling global debug logs.                                                                                  |
+| `CARAPACE_DEBUG_MODEL_PAYLOAD`   | Model payload diagnostics: `summary`, `tools`, or `full-redacted`. `full-redacted` is capped and redacted but may include prompt/message text.                                               |
+| `CARAPACE_DEBUG_SSE`             | Streaming diagnostics: `events` for first/done timing, `peek` to include the first five redacted SSE events.                                                                                 |
+| `CARAPACE_DEBUG_CODE_MODE`       | Code-mode model-surface diagnostics, including provider-tool hiding and compact control/direct enforcement.                                                                                  |
 
-### `OPENCLAW_HOME`
+### `CARAPACE_HOME`
 
-When set, `OPENCLAW_HOME` replaces the system home directory (`$HOME` / `os.homedir()`) for internal OpenClaw path defaults. This includes the default state directory, config path, agent directories, credentials, installer onboarding workspace, and the default dev checkout used by `openclaw update --channel dev`.
+When set, `CARAPACE_HOME` replaces the system home directory (`$HOME` / `os.homedir()`) for internal Carapace path defaults. This includes the default state directory, config path, agent directories, credentials, installer onboarding workspace, and the default dev checkout used by `carapace update --channel dev`.
 
-`OPENCLAW_HOME` does not grant ownership of the OS account's native Gateway service. Gateway service-management commands treat a relocated home as isolated state; use the OS account home and a named profile when a separate native service identity is required.
+`CARAPACE_HOME` does not grant ownership of the OS account's native Gateway service. Gateway service-management commands treat a relocated home as isolated state; use the OS account home and a named profile when a separate native service identity is required.
 
-**Precedence:** `OPENCLAW_HOME` > `$HOME` > `USERPROFILE` > Termux `PREFIX` home fallback on Android > `os.homedir()`
+**Precedence:** `CARAPACE_HOME` > `$HOME` > `USERPROFILE` > Termux `PREFIX` home fallback on Android > `os.homedir()`
 
 **Example** (macOS LaunchDaemon):
 
 ```xml
 <key>EnvironmentVariables</key>
 <dict>
-  <key>OPENCLAW_HOME</key>
+  <key>CARAPACE_HOME</key>
   <string>/Users/user</string>
 </dict>
 ```
 
-`OPENCLAW_HOME` can also be set to a tilde path (e.g. `~/svc`), which gets expanded using the same OS home fallback chain before use.
+`CARAPACE_HOME` can also be set to a tilde path (e.g. `~/svc`), which gets expanded using the same OS home fallback chain before use.
 
-Explicit path variables such as `OPENCLAW_STATE_DIR`, `OPENCLAW_CONFIG_PATH`, and `OPENCLAW_GIT_DIR` still take precedence. OS-account tasks such as shell startup file detection, package-manager setup, and host `~` expansion may still use the real system home.
+Explicit path variables such as `CARAPACE_STATE_DIR`, `CARAPACE_CONFIG_PATH`, and `CARAPACE_GIT_DIR` still take precedence. OS-account tasks such as shell startup file detection, package-manager setup, and host `~` expansion may still use the real system home.
 
 ## nvm users: web_fetch TLS failures
 
@@ -301,34 +301,34 @@ If Node.js was installed via **nvm** (not the system package manager), the built
 nvm's bundled CA store, which may be missing modern root CAs (ISRG Root X1/X2 for Let's Encrypt,
 DigiCert Global Root G2, etc.). This causes `web_fetch` to fail with `"fetch failed"` on most HTTPS sites.
 
-On Linux, OpenClaw automatically detects nvm and applies the fix in the actual startup environment:
+On Linux, Carapace automatically detects nvm and applies the fix in the actual startup environment:
 
-- `openclaw gateway install` writes `NODE_EXTRA_CA_CERTS` into the systemd service environment
-- the `openclaw` CLI entrypoint re-execs itself with `NODE_EXTRA_CA_CERTS` set before Node startup
+- `carapace gateway install` writes `NODE_EXTRA_CA_CERTS` into the systemd service environment
+- the `carapace` CLI entrypoint re-execs itself with `NODE_EXTRA_CA_CERTS` set before Node startup
 
 **Manual fix (for older versions or direct `node ...` launches):**
 
-Export the variable before starting OpenClaw:
+Export the variable before starting Carapace:
 
 ```bash
 export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
-openclaw gateway run
+carapace gateway run
 ```
 
-Do not rely on writing only to `~/.openclaw/.env` for this variable; Node reads
+Do not rely on writing only to `~/.carapace/.env` for this variable; Node reads
 `NODE_EXTRA_CA_CERTS` at process startup.
 
 ## Legacy environment variables
 
-OpenClaw only reads `OPENCLAW_*` environment variables. The legacy
+Carapace only reads `CARAPACE_*` environment variables. The legacy
 `CLAWDBOT_*` and `MOLTBOT_*` prefixes from earlier releases are silently
 ignored.
 
-If any are still set on the Gateway process at startup, OpenClaw emits a
-single Node deprecation warning (`OPENCLAW_LEGACY_ENV_VARS`) listing the
+If any are still set on the Gateway process at startup, Carapace emits a
+single Node deprecation warning (`CARAPACE_LEGACY_ENV_VARS`) listing the
 detected prefixes and the total count. Rename each value by replacing the
-legacy prefix with `OPENCLAW_` (for example `CLAWDBOT_GATEWAY_TOKEN` to
-`OPENCLAW_GATEWAY_TOKEN`); the old names take no effect.
+legacy prefix with `CARAPACE_` (for example `CLAWDBOT_GATEWAY_TOKEN` to
+`CARAPACE_GATEWAY_TOKEN`); the old names take no effect.
 
 ## Related
 

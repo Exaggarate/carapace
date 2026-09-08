@@ -28,7 +28,7 @@ describe("sameAbsolutePath", () => {
 describe("isKnownWorkspacePath", () => {
   it("accepts a canonical child after the Gateway approves a symlinked workspace root", async () => {
     const tempRoot = await fs.realpath(os.tmpdir());
-    const container = tempDirs.make("openclaw-ui-workspace-alias-", tempRoot);
+    const container = tempDirs.make("carapace-ui-workspace-alias-", tempRoot);
     const canonicalWorkspace = path.join(container, "canonical-workspace");
     const workspaceAlias = path.join(container, "workspace-alias");
     await fs.mkdir(path.join(canonicalWorkspace, "packages", "app"), { recursive: true });

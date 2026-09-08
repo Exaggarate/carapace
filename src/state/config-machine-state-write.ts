@@ -9,9 +9,9 @@ import {
   type ConfigMachineStateDatabase,
 } from "./config-machine-state.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 
 function serializeStateValue(value: unknown): string {
   const serialized = JSON.stringify(value);
@@ -24,12 +24,12 @@ function serializeStateValue(value: unknown): string {
 export function writeConfigMachineState(
   key: string,
   value: unknown,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
   const stateKey = normalizeConfigMachineStateKey(key);
   const valueJson = serializeStateValue(value);
   const now = Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<ConfigMachineStateDatabase>(database.db);
       executeSqliteQuerySync(
@@ -51,22 +51,22 @@ export function writeConfigMachineState(
 export function updateConfigMachineState<T>(
   key: string,
   update: (current: T | undefined) => T,
-  options?: OpenClawStateDatabaseOptions,
+  options?: CarapaceStateDatabaseOptions,
 ): T;
 /** Returning undefined removes the key within the same compare-and-update transaction. */
 export function updateConfigMachineState<T>(
   key: string,
   update: (current: T | undefined) => T | undefined,
-  options?: OpenClawStateDatabaseOptions,
+  options?: CarapaceStateDatabaseOptions,
 ): T | undefined;
 export function updateConfigMachineState<T>(
   key: string,
   update: (current: T | undefined) => T | undefined,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): T | undefined {
   const stateKey = normalizeConfigMachineStateKey(key);
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<ConfigMachineStateDatabase>(database.db);
       const row = executeSqliteQueryTakeFirstSync(
@@ -107,10 +107,10 @@ export function updateConfigMachineState<T>(
 /** Delete one machine-state value, reporting whether a stored value existed. */
 export function deleteConfigMachineState(
   key: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   const stateKey = normalizeConfigMachineStateKey(key);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<ConfigMachineStateDatabase>(database.db);
       const result = executeSqliteQuerySync(
@@ -127,7 +127,7 @@ export function deleteConfigMachineState(
 /** Import retired config values without replacing newer canonical database state. */
 export function importConfigMachineState(
   entries: ReadonlyArray<readonly [key: string, value: unknown]>,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): { imported: string[]; kept: string[] } {
   if (entries.length === 0) {
     return { imported: [], kept: [] };
@@ -137,7 +137,7 @@ export function importConfigMachineState(
     valueJson: serializeStateValue(value),
   }));
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<ConfigMachineStateDatabase>(database.db);
       const imported: string[] = [];

@@ -2,7 +2,7 @@
 import type {
   GeneratedImageAsset,
   ImageGenerationProvider,
-} from "openclaw/plugin-sdk/image-generation";
+} from "carapace/plugin-sdk/image-generation";
 import {
   DEFAULT_COMFY_MODEL,
   isComfyCapabilityConfigured,

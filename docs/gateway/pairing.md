@@ -73,7 +73,7 @@ In the Control UI Devices page, open the pairing dialog, choose **Node host**,
 and copy the generated command to the device:
 
 ```bash
-openclaw node run --pair "oc-pair://<setup-code>"
+carapace node run --pair "oc-pair://<setup-code>"
 ```
 
 The setup link carries the Gateway endpoint, a short-lived single-use bootstrap
@@ -92,12 +92,12 @@ folder sync. Those operations still use pending approval or
 ## CLI workflow (headless friendly)
 
 ```bash
-openclaw nodes pending
-openclaw nodes approve <requestId>
-openclaw nodes reject <requestId>
-openclaw nodes status
-openclaw nodes remove --node <id|name|ip>
-openclaw nodes rename --node <id|name|ip> --name "Living Room iPad"
+carapace nodes pending
+carapace nodes approve <requestId>
+carapace nodes reject <requestId>
+carapace nodes status
+carapace nodes remove --node <id|name|ip>
+carapace nodes rename --node <id|name|ip> --name "Living Room iPad"
 ```
 
 `nodes status` shows paired/connected nodes and their capabilities.
@@ -231,7 +231,7 @@ do not create approval churn.
 First-time `role: node` device pairing from a private/CGNAT address is
 auto-approved when the gateway can **prove machine ownership over SSH**: it
 connects back to the pairing host (`BatchMode`, `StrictHostKeyChecking=yes`),
-runs `openclaw node identity --json` there, and approves only when the remote
+runs `carapace node identity --json` there, and approves only when the remote
 device id and public key match the pending request exactly. The key match is
 what makes this safe: reachability alone never approves, so NAT co-tenants,
 other users on a shared host, and LAN spoofing all fall through to the normal
@@ -242,7 +242,7 @@ Enabled by default. Requirements for it to fire:
 - The gateway process user (or `sshVerify.user`) can SSH to the node host
   non-interactively (keys/agent; Tailscale SSH works too), and the host key is
   already trusted.
-- `openclaw` resolves on the remote `PATH` for non-interactive `sh -lc`.
+- `carapace` resolves on the remote `PATH` for non-interactive `sh -lc`.
 - The connecting IP is a direct (non-proxied, non-loopback) private, ULA,
   link-local, or CGNAT address, or matches `sshVerify.cidrs` when set.
 - Same eligibility floor as trusted-CIDR approval: fresh scopeless node
@@ -284,7 +284,7 @@ Harden or disable:
 
 ## Manual approval (macOS app)
 
-The macOS app shows node and device requests in one OpenClaw approval panel.
+The macOS app shows node and device requests in one Carapace approval panel.
 Each request keeps the name, platform, source address, and all requested access
 visible. System-command execution and device admin access are highlighted.
 Node requests that Gateway classifies as requiring administrator approval also
@@ -368,7 +368,7 @@ Boundaries:
   eligible, as trigger and as target. Trusted-CIDR and SSH-verified pairings
   cross hosts where display metadata is not a machine identity, so they are
   never removed automatically — use the Control UI cleanup or
-  `openclaw nodes remove` for those.
+  `carapace nodes remove` for those.
 - Owner-approved and QR/setup-code (bootstrap) pairings are never removed
   automatically. Records approved before provenance existed stay protected,
   even after a later silent re-approval of the same device id.
@@ -382,7 +382,7 @@ Boundaries:
 ## Metadata-upgrade auto-approval
 
 When an already-paired device reconnects with only non-sensitive metadata
-changes (for example display name or client platform hints), OpenClaw treats
+changes (for example display name or client platform hints), Carapace treats
 that as a `metadata-upgrade`. Silent auto-approval is narrow: it applies only
 to trusted non-browser local reconnects that already proved possession of
 local or shared credentials, including same-host native app reconnects after
@@ -413,20 +413,20 @@ operator auth.
 ## Storage (local, private)
 
 Pairing state lives on the paired device records in the shared SQLite state
-database under the Gateway state directory (default `~/.openclaw`):
+database under the Gateway state directory (default `~/.carapace`):
 
-- `~/.openclaw/state/openclaw.sqlite` (paired devices with device auth,
+- `~/.carapace/state/carapace.sqlite` (paired devices with device auth,
   approved node surfaces, pending surface requests, pending device pairing
   requests, and bootstrap tokens)
 
-If you override `OPENCLAW_STATE_DIR`, the database moves with it. Gateways
+If you override `CARAPACE_STATE_DIR`, the database moves with it. Gateways
 upgraded from releases with JSON stores import them at startup and leave
 `devices/*.json.migrated` and `nodes/*.json.migrated` archives behind.
 
 Security notes:
 
 - Device tokens are secrets; treat the state database as sensitive.
-- Rotating a device token uses `openclaw devices rotate` /
+- Rotating a device token uses `carapace devices rotate` /
   `device.token.rotate`.
 
 ## Transport behavior

@@ -1,15 +1,15 @@
 // Discord tests cover native command.commands allowfrom plugin behavior.
 import { ChannelType } from "discord-api-types/v10";
-import type { dispatchChannelInboundTurn } from "openclaw/plugin-sdk/channel-inbound";
-import type { NativeCommandSpec } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig, DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { matchPluginCommand } from "openclaw/plugin-sdk/plugin-runtime";
-import * as dispatcherModule from "openclaw/plugin-sdk/reply-dispatch-runtime";
+import type { dispatchChannelInboundTurn } from "carapace/plugin-sdk/channel-inbound";
+import type { NativeCommandSpec } from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig, DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { matchPluginCommand } from "carapace/plugin-sdk/plugin-runtime";
+import * as dispatcherModule from "carapace/plugin-sdk/reply-dispatch-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { defineThrowingDiscordChannelGetter } from "../test-support/partial-channel.js";
 import { createDiscordNativeCommand } from "./native-command.js";
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", { spy: true });
+vi.mock("carapace/plugin-sdk/plugin-runtime", { spy: true });
 import { nativeCommandRuntime } from "./native-command.runtime.js";
 import {
   createMockCommandInteraction,
@@ -30,7 +30,7 @@ function createInteraction(params?: { userId?: string }): MockCommandInteraction
   });
 }
 
-function createConfig(): OpenClawConfig {
+function createConfig(): CarapaceConfig {
   return {
     commands: {
       allowFrom: {
@@ -52,11 +52,11 @@ function createConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function createCommand(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   discordConfig?: DiscordAccountConfig,
   commandSpec: NativeCommandSpec = {
     name: "ping",
@@ -124,7 +124,7 @@ function firstDispatchReplyCall(): Parameters<
 
 async function runGuildSlashCommand(params?: {
   userId?: string;
-  mutateConfig?: (cfg: OpenClawConfig) => void;
+  mutateConfig?: (cfg: CarapaceConfig) => void;
   runtimeDiscordConfig?: DiscordAccountConfig;
   commandSpec?: NativeCommandSpec;
   optionValues?: Record<string, string>;

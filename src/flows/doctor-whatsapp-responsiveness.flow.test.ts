@@ -21,7 +21,7 @@ vi.mock("../commands/doctor-gateway-health.js", () => ({
   probeGatewayMemoryStatus: mocks.probeGatewayMemoryStatus,
 }));
 vi.mock("node:child_process", async () => {
-  const { mockNodeChildProcessSpawnSync } = await import("openclaw/plugin-sdk/test-node-mocks");
+  const { mockNodeChildProcessSpawnSync } = await import("carapace/plugin-sdk/test-node-mocks");
   return mockNodeChildProcessSpawnSync(mocks.ps, () =>
     vi.importActual<typeof import("node:child_process")>("node:child_process"),
   );
@@ -51,7 +51,7 @@ describe("Doctor responsiveness contribution flow", () => {
     const fakePid = process.pid + 1_000_000;
     mocks.ps.mockReturnValue({
       status: 0,
-      stdout: `${fakePid} openclaw-tui --profile unrelated\n`,
+      stdout: `${fakePid} carapace-tui --profile unrelated\n`,
     });
     mocks.checkGatewayHealth.mockResolvedValue({ healthOk: true, authenticated: false, status });
     const ctx = createDoctorHealthFlowContext({
@@ -96,7 +96,7 @@ describe("Doctor responsiveness contribution flow", () => {
           [
             "Gateway reports pressure, and local TUI clients were detected. This snapshot does not identify the source of the pressure.\n" +
               `Local TUI pids: ${fakePid}\n` +
-              "Inspect Gateway diagnostics with openclaw gateway diagnostics export before deciding whether to close clients.",
+              "Inspect Gateway diagnostics with carapace gateway diagnostics export before deciding whether to close clients.",
             "WhatsApp responsiveness",
           ],
         ]);

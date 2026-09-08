@@ -4,11 +4,11 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import WebSocket from "ws";
 import { createQaGatewayChild, type QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import { PROTOCOL_VERSION, type HelloOk } from "../../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { GatewayClient, type GatewayClientOptions } from "../../../../src/gateway/client.js";
 import { buildDeviceAuthPayloadV3 } from "../../../../src/gateway/device-auth.js";
 import {
@@ -24,7 +24,7 @@ const RETAINED_ORIGIN = "https://retained.example.test";
 const SCOPES = ["operator.admin", "operator.read", "operator.write", "operator.pairing"];
 type Connection = { client: GatewayClient; hello: HelloOk; closes: number };
 type ConfigAck = { sentinel: { payload: { stats: { requiresRestart: boolean } } } };
-type ConfigSnapshot = { hash: string; config: OpenClawConfig };
+type ConfigSnapshot = { hash: string; config: CarapaceConfig };
 type Evidence = { prefix: string; observation: string; bootId: string; pid: number };
 
 export async function proveHotReloadSecurity({
@@ -63,8 +63,8 @@ export async function proveHotReloadSecurity({
         transportBaseUrl: "http://127.0.0.1:1",
         controlUiEnabled: true,
         runtimeEnvPatch: {
-          OPENCLAW_GATEWAY_TOKEN: undefined,
-          OPENCLAW_GATEWAY_PASSWORD: undefined,
+          CARAPACE_GATEWAY_TOKEN: undefined,
+          CARAPACE_GATEWAY_PASSWORD: undefined,
         },
         mutateConfig: (cfg) => ({
           ...cfg,
@@ -164,7 +164,7 @@ export async function proveHotReloadSecurity({
       const enrolled = await connect({
         token: active.token,
         deviceIdentity: controllerIdentity,
-        clientName: "openclaw-tui",
+        clientName: "carapace-tui",
         mode: "ui",
       });
       const controllerToken = enrolled.hello.auth?.deviceToken;
@@ -174,7 +174,7 @@ export async function proveHotReloadSecurity({
         connect({
           deviceToken: controllerToken,
           deviceIdentity: controllerIdentity,
-          clientName: "openclaw-tui",
+          clientName: "carapace-tui",
           mode: "ui",
         });
       let controller = await connectController();
@@ -233,7 +233,7 @@ export async function proveHotReloadSecurity({
           ...credential,
           origin,
           deviceIdentity: identity(name),
-          clientName: "openclaw-control-ui",
+          clientName: "carapace-control-ui",
           mode: "webchat",
         });
       await group("gateway.controlUi.allowedOrigins", async () => {
@@ -317,7 +317,7 @@ export async function proveHotReloadSecurity({
                   assert(nonce);
                   const payload = buildDeviceAuthPayloadV3({
                     deviceId: fallbackIdentity.deviceId,
-                    clientId: "openclaw-control-ui",
+                    clientId: "carapace-control-ui",
                     clientMode: "webchat",
                     role: "operator",
                     scopes: SCOPES,
@@ -335,7 +335,7 @@ export async function proveHotReloadSecurity({
                         minProtocol: PROTOCOL_VERSION,
                         maxProtocol: PROTOCOL_VERSION,
                         client: {
-                          id: "openclaw-control-ui",
+                          id: "carapace-control-ui",
                           mode: "webchat",
                           version: "1.0.0",
                           platform: process.platform,
@@ -452,7 +452,7 @@ export async function proveHotReloadSecurity({
         await browserShared.client.stopAndWait();
         const cached = await browser(ORIGIN, browserName, { deviceToken: cachedToken });
         const nextCredential = randomUUID();
-        const authored = JSON.parse(await fs.readFile(active.configPath, "utf8")) as OpenClawConfig;
+        const authored = JSON.parse(await fs.readFile(active.configPath, "utf8")) as CarapaceConfig;
         assert(authored.gateway?.auth);
         authored.gateway.auth[mode] = nextCredential;
         const change =

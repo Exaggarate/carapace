@@ -1,11 +1,11 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 // Plans deterministic Gateway startup plugin activation from prepared registry metadata.
 import { collectConfiguredAgentHarnessRuntimes } from "../agents/harness-runtimes.js";
 import {
   listExplicitlyDisabledChannelIdsForConfig,
   type AmbientEnvTriggerPolicy,
 } from "../channels/config-presence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { listGatewayActivatedChannelIds } from "./channel-presence-policy.js";
 import { canStartConfiguredChannelPlugin } from "./channel-startup-policy.js";
 import {
@@ -51,8 +51,8 @@ export function resolveChannelPluginIdsFromRegistry(params: {
 }
 
 export function resolveGatewayStartupPluginPlanFromRegistry(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   index: PluginRegistrySnapshot;
   manifestRegistry: PluginManifestRegistry;

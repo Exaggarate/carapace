@@ -47,8 +47,8 @@ export function recoveryVolumeSpec(env = process.env) {
     return value;
   };
   return {
-    sessions: positive("OPENCLAW_UPGRADE_SURVIVOR_VOLUME_SESSIONS", 2),
-    eventsPerSession: positive("OPENCLAW_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION", 8),
+    sessions: positive("CARAPACE_UPGRADE_SURVIVOR_VOLUME_SESSIONS", 2),
+    eventsPerSession: positive("CARAPACE_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION", 8),
   };
 }
 
@@ -107,7 +107,7 @@ export function seedRecoveryFixture(stateDir, spec) {
   const retired = recoveryEvent(branch.sessionId, 1);
   retired.id = "retired-branch";
   retired.message.content[0].text +=
-    "\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nretired context\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+    "\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nretired context\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>";
   const user = recoveryEvent(branch.sessionId, 1);
   const reply = recoveryEvent(branch.sessionId, 2);
   reply.message.provider = "openai-codex";
@@ -317,7 +317,7 @@ export function recoveryTreeSnapshot(roots) {
 export function recoveryWalIndexPaths(stateDir, moves) {
   return [
     ...new Set([
-      path.join(stateDir, "state", "openclaw.sqlite-shm"),
+      path.join(stateDir, "state", "carapace.sqlite-shm"),
       ...moves.map((move) => `${move.sqlitePath}-shm`),
     ]),
   ];
@@ -351,7 +351,7 @@ export function assertRecoverySnapshot(
 
 export function recoveryHistoryMessages(history) {
   assert(Array.isArray(history.messages), "chat.history omitted messages");
-  return history.messages.map(({ __openclaw: identity, role, content }) => {
+  return history.messages.map(({ __carapace: identity, role, content }) => {
     assert(typeof identity?.id === "string", "chat.history omitted message identity");
     return { id: identity.id, role, content };
   });

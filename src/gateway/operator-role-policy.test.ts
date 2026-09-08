@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   authorizeGatewaySessionCreation,
   invalidateOperatorRolePolicy,
@@ -21,7 +21,7 @@ const guestRole = {
   scopes: ["operator.read", "operator.write"],
 } as const;
 
-function roleConfig(defaultRole = true): OpenClawConfig {
+function roleConfig(defaultRole = true): CarapaceConfig {
   return {
     gateway: {
       roles: {
@@ -49,7 +49,7 @@ function identifiedClient(profileId: string): GatewayClient {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -66,7 +66,7 @@ function identifiedClient(profileId: string): GatewayClient {
   };
 }
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 describe("operator role policy", () => {
   it("preserves legacy access only when operator roles are not configured", () => {
@@ -84,7 +84,7 @@ describe("operator role policy", () => {
   });
 
   it("resolves explicit and default assignments from the durable profile", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForEmail("role-default@example.com");
       const cfg = roleConfig();
 
@@ -100,7 +100,7 @@ describe("operator role policy", () => {
   });
 
   it("keeps human-derived sandbox restrictions separate from profile provenance", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForEmail("role-sandbox-creator@example.com");
       const cfg = roleConfig();
       const guest = cfg.gateway?.roles?.definitions.guest;
@@ -155,7 +155,7 @@ describe("operator role policy", () => {
   });
 
   it("falls back from stale assignments to the configured default or denies access", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForEmail("role-stale@example.com");
       setUserProfileRole(profile.id, "retired");
 
@@ -169,7 +169,7 @@ describe("operator role policy", () => {
   });
 
   it("retains the prepared assignment until the owner explicitly invalidates it", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForEmail("role-cache@example.com");
       const cfg = roleConfig();
 
@@ -186,7 +186,7 @@ describe("operator role policy", () => {
   });
 
   it("authorizes only configured agents and rejects unidentified operators", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForEmail("role-agents@example.com");
       const cfg = roleConfig();
 

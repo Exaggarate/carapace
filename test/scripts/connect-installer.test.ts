@@ -8,7 +8,7 @@ const SCRIPT_PATH = "scripts/connect.sh";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function createFixture() {
-  const root = tempDirs.make("openclaw-connect-installer-");
+  const root = tempDirs.make("carapace-connect-installer-");
   const installer = join(root, "install-cli.sh");
   const installArgs = join(root, "install-args");
   const helpArgs = join(root, "help-args");
@@ -31,12 +31,12 @@ while [[ $# -gt 0 ]]; do
 done
 [[ -n "$prefix" ]]
 mkdir -p "$prefix/bin"
-cat >"$prefix/bin/openclaw" <<'OPENCLAW'
+cat >"$prefix/bin/carapace" <<'CARAPACE'
 #!/usr/bin/env bash
 set -euo pipefail
 if [[ "$#" -eq 2 && "$1" == "connect" && "$2" == "--help" ]]; then
   printf '%s\n' "$@" >"$FAKE_HELP_ARGS"
-  target_files=("\${TMPDIR:-/tmp}"/openclaw-connect.*/join-target)
+  target_files=("\${TMPDIR:-/tmp}"/carapace-connect.*/join-target)
   if [[ -e "\${target_files[0]}" ]]; then
     : >"$FAKE_TARGET_CREATED_BEFORE_HELP"
   fi
@@ -64,8 +64,8 @@ else
 fi
 cat "$target_file" >"$FAKE_TARGET_CONTENT"
 exit "\${FAKE_CLI_EXIT:-0}"
-OPENCLAW
-chmod 0755 "$prefix/bin/openclaw"
+CARAPACE
+chmod 0755 "$prefix/bin/carapace"
 `,
   );
   chmodSync(installer, 0o755);
@@ -92,7 +92,7 @@ function runWrapper(
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_INSTALL_CLI_URL: fixture.installer,
+      CARAPACE_INSTALL_CLI_URL: fixture.installer,
       FAKE_INSTALL_ARGS: fixture.installArgs,
       FAKE_HELP_ARGS: fixture.helpArgs,
       FAKE_CONNECT_ARGS: fixture.connectArgs,
@@ -192,12 +192,12 @@ describe("scripts/connect.sh", () => {
     expect(`${result.stdout}\n${result.stderr}`).not.toContain(target);
   });
 
-  it("respects OPENCLAW_PREFIX when --prefix is omitted", () => {
+  it("respects CARAPACE_PREFIX when --prefix is omitted", () => {
     const fixture = createFixture();
     const prefix = join(fixture.root, "env-prefix");
 
     const result = runWrapper(fixture, ["--version", "2026.8.1", "setup-code"], {
-      OPENCLAW_PREFIX: prefix,
+      CARAPACE_PREFIX: prefix,
     });
 
     expect(result.status, result.stderr).toBe(0);
@@ -217,7 +217,7 @@ describe("scripts/connect.sh", () => {
     const privateTargetPath = readFileSync(fixture.targetPath, "utf8").trim();
     expect(result.status).toBe(23);
     expect(result.stderr).toContain(
-      "OpenClaw could not connect or install the session-host service.",
+      "Carapace could not connect or install the session-host service.",
     );
     expect(existsSync(privateTargetPath)).toBe(false);
     expect(existsSync(dirname(privateTargetPath))).toBe(false);
@@ -241,15 +241,15 @@ describe("scripts/connect.sh", () => {
     },
     {
       name: "tilde prefix",
-      args: ["--version", "2026.8.1", "--prefix", "~/.openclaw", "setup-code"],
-      message: "Cannot expand prefix '~/.openclaw'",
+      args: ["--version", "2026.8.1", "--prefix", "~/.carapace", "setup-code"],
+      message: "Cannot expand prefix '~/.carapace'",
     },
   ])("fails cleanly without HOME for the $name", ({ args, message }) => {
     const fixture = createFixture();
 
     const result = runWrapper(fixture, args, {
       HOME: undefined,
-      OPENCLAW_PREFIX: undefined,
+      CARAPACE_PREFIX: undefined,
     });
 
     expect(result.status).toBe(1);

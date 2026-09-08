@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
 import { loadBundledPluginFacade } from "../../../../src/test-utils/bundled-plugin-public-surface.js";
 import { connectGatewayStatusClient } from "../../../helpers/gateway-e2e-harness.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 import { runCodexAuthDoctorMigrationProof } from "./codex-auth-product-proof.test-support.js";
 
 const PRIMARY_MODEL = "openai/gpt-5.4";
@@ -20,10 +20,10 @@ type AppServerMessage = {
   method?: string;
   params?: { threadId?: string; model?: string; status?: { type?: string } };
 };
-let instance: OpenClawTestInstance | undefined;
+let instance: CarapaceTestInstance | undefined;
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   await instance?.cleanup();
   instance = undefined;
 });
@@ -92,12 +92,12 @@ describe("Gateway Codex failure recovery product proof", () => {
       const fixture = fileURLToPath(
         new URL("./codex-refusal-app-server.fixture.mjs", import.meta.url),
       );
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "qa-codex-refusal-product-proof",
         env: {
-          OPENCLAW_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
-          OPENCLAW_QA_CODEX_FAILURE_KIND: scenario.failureKind,
-          OPENCLAW_SKIP_PROVIDERS: undefined,
+          CARAPACE_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
+          CARAPACE_QA_CODEX_FAILURE_KIND: scenario.failureKind,
+          CARAPACE_SKIP_PROVIDERS: undefined,
         },
         config: {
           plugins: {
@@ -133,7 +133,7 @@ describe("Gateway Codex failure recovery product proof", () => {
         },
       });
       const requestLog = instance.state.path("codex-refusal-app-server.jsonl");
-      instance.env.OPENCLAW_QA_CODEX_REFUSAL_APP_SERVER_LOG = requestLog;
+      instance.env.CARAPACE_QA_CODEX_REFUSAL_APP_SERVER_LOG = requestLog;
       await runCodexAuthDoctorMigrationProof(instance, {
         accountId: "qa-codex-refusal",
         oauthAccess: "synthetic-codex-refusal-oauth",

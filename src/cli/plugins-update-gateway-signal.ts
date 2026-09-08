@@ -3,14 +3,14 @@ import {
   GATEWAY_CLIENT_NAMES,
 } from "../../packages/gateway-protocol/src/client-info.js";
 import { resolveGatewayPort } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { callGateway, type CallGatewayOptions } from "../gateway/call.js";
 
 type PluginMetadataGatewayCall = (opts: CallGatewayOptions) => Promise<unknown>;
 
 /** Notifies the local Gateway that persisted plugin metadata changed without config writes. */
 export async function notifyGatewayPluginMetadataChanged(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   deps: { callGateway?: PluginMetadataGatewayCall } = {},
 ): Promise<boolean> {
   try {

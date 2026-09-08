@@ -3,14 +3,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
-import { discoverOpenClawPlugins } from "./discovery.js";
+import { discoverCarapacePlugins } from "./discovery.js";
 import { loadPluginManifestRegistryCore } from "./manifest-registry.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 import { cleanupTrackedTempDirs, makeTrackedTempDir } from "./test-helpers/fs-fixtures.js";
 
 const checkout = fs.realpathSync(fileURLToPath(new URL("../../", import.meta.url)));
 const tempDirs: string[] = [];
-beforeEach(() => vi.stubEnv("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "0"));
+beforeEach(() => vi.stubEnv("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "0"));
 afterEach(() => {
   vi.unstubAllEnvs();
   cleanupTrackedTempDirs(tempDirs);
@@ -20,17 +20,17 @@ describe("running checkout discovery", () => {
   it.each(["default", "source"])(
     "selects the checkout %s tree over a tracked local copy without trusting unrelated plugins",
     (tree) => {
-      const stateDir = fs.realpathSync(makeTrackedTempDir("openclaw-checkout-shadow", tempDirs));
+      const stateDir = fs.realpathSync(makeTrackedTempDir("carapace-checkout-shadow", tempDirs));
       const installRecords = Object.fromEntries(
         ["codex", "diffs", "unrelated"].map((id) => {
           const pluginDir = path.join(stateDir, "extensions", id);
           fs.mkdirSync(pluginDir, { recursive: true });
           fs.writeFileSync(
             path.join(pluginDir, "package.json"),
-            JSON.stringify({ name: `@openclaw/${id}`, openclaw: { extensions: ["./index.js"] } }),
+            JSON.stringify({ name: `@carapace/${id}`, carapace: { extensions: ["./index.js"] } }),
           );
           fs.writeFileSync(
-            path.join(pluginDir, "openclaw.plugin.json"),
+            path.join(pluginDir, "carapace.plugin.json"),
             JSON.stringify({ id, configSchema: { type: "object" } }),
           );
           fs.writeFileSync(path.join(pluginDir, "index.js"), "export default {};\n");
@@ -38,14 +38,14 @@ describe("running checkout discovery", () => {
         }),
       );
       const env = {
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_DEV_SOURCE_ROOT: checkout,
-        OPENCLAW_BUNDLED_PLUGINS_DIR:
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_DEV_SOURCE_ROOT: checkout,
+        CARAPACE_BUNDLED_PLUGINS_DIR:
           tree === "source" ? path.join(checkout, "extensions") : undefined,
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "0",
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "0",
       };
       withPluginCache(createPluginCache(), () => {
-        const discovery = discoverOpenClawPlugins({ env, installRecords });
+        const discovery = discoverCarapacePlugins({ env, installRecords });
         const registry = loadPluginManifestRegistryCore({
           env,
           candidates: discovery.candidates,
@@ -96,7 +96,7 @@ describe("running checkout discovery", () => {
   it.each(["direct file", "symlink file", "direct directory", "symlink directory"])(
     "retains host provenance for a %s configured alias of a bundled entry",
     (alias) => {
-      const stateDir = fs.realpathSync(makeTrackedTempDir("openclaw-checkout", tempDirs));
+      const stateDir = fs.realpathSync(makeTrackedTempDir("carapace-checkout", tempDirs));
       const sourceRoot = path.join(checkout, "extensions");
       const pluginRoot = path.join(sourceRoot, "codex");
       let selectedRoot = pluginRoot;
@@ -105,13 +105,13 @@ describe("running checkout discovery", () => {
         fs.symlinkSync(pluginRoot, selectedRoot, process.platform === "win32" ? "junction" : "dir");
       }
       const env = {
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: sourceRoot,
-        OPENCLAW_DEV_SOURCE_ROOT: checkout,
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "0",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_BUNDLED_PLUGINS_DIR: sourceRoot,
+        CARAPACE_DEV_SOURCE_ROOT: checkout,
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "0",
       };
       withPluginCache(createPluginCache(), () => {
-        const discovery = discoverOpenClawPlugins({
+        const discovery = discoverCarapacePlugins({
           env,
           extraPaths: [
             alias.endsWith("directory") ? selectedRoot : path.join(selectedRoot, "index.ts"),
@@ -150,16 +150,16 @@ describe("host provenance across bundled build states", () => {
       aliasShapes.map((alias) => ({ label, built, alias })),
     ),
   )("keeps a $alias alias bundled in a $label bundled tree", ({ built, alias }) => {
-    const stateDir = fs.realpathSync(makeTrackedTempDir("openclaw-host-provenance", tempDirs));
-    const bundledDir = fs.realpathSync(makeTrackedTempDir("openclaw-bundled-tree", tempDirs));
+    const stateDir = fs.realpathSync(makeTrackedTempDir("carapace-host-provenance", tempDirs));
+    const bundledDir = fs.realpathSync(makeTrackedTempDir("carapace-bundled-tree", tempDirs));
     const pluginRoot = path.join(bundledDir, "hosted");
     fs.mkdirSync(pluginRoot, { recursive: true });
     fs.writeFileSync(
       path.join(pluginRoot, "package.json"),
-      JSON.stringify({ name: "@openclaw/hosted", openclaw: { extensions: ["./index.ts"] } }),
+      JSON.stringify({ name: "@carapace/hosted", carapace: { extensions: ["./index.ts"] } }),
     );
     fs.writeFileSync(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "carapace.plugin.json"),
       JSON.stringify({ id: "hosted", configSchema: { type: "object" } }),
     );
     fs.writeFileSync(path.join(pluginRoot, "index.ts"), "export default {};\n");
@@ -173,12 +173,12 @@ describe("host provenance across bundled build states", () => {
       fs.symlinkSync(pluginRoot, aliasRoot, process.platform === "win32" ? "junction" : "dir");
     }
     const env = {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
     };
     withPluginCache(createPluginCache(), () => {
-      const discovery = discoverOpenClawPlugins({
+      const discovery = discoverCarapacePlugins({
         env,
         extraPaths: [alias.endsWith("directory") ? aliasRoot : path.join(aliasRoot, "index.ts")],
         installRecords: {},

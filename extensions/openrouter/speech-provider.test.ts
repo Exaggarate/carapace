@@ -1,5 +1,5 @@
 // Openrouter tests cover speech provider plugin behavior.
-import { requireFirstPostJsonRecordRequest } from "openclaw/plugin-sdk/test-fixtures";
+import { requireFirstPostJsonRecordRequest } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildOpenRouterSpeechProvider } from "./speech-provider.js";
 
@@ -15,8 +15,8 @@ const { assertOkOrThrowHttpErrorMock, postJsonRequestMock, resolveProviderHttpRe
     })),
   }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-http")>()),
+vi.mock("carapace/plugin-sdk/provider-http", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-http")>()),
   assertOkOrThrowHttpError: assertOkOrThrowHttpErrorMock,
   postJsonRequest: postJsonRequestMock,
   resolveProviderHttpRequestConfig: resolveProviderHttpRequestConfigMock,
@@ -121,8 +121,8 @@ describe("openrouter speech provider", () => {
       defaultHeaders: {
         Authorization: "Bearer sk-openrouter",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://openclaw.ai",
-        "X-OpenRouter-Title": "OpenClaw",
+        "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+        "X-OpenRouter-Title": "Carapace",
       },
       provider: "openrouter",
       capability: "audio",
@@ -137,8 +137,8 @@ describe("openrouter speech provider", () => {
     expect(Object.fromEntries(headers.entries())).toEqual({
       authorization: "Bearer sk-openrouter",
       "content-type": "application/json",
-      "http-referer": "https://openclaw.ai",
-      "x-openrouter-title": "OpenClaw",
+      "http-referer": "https://github.com/Exaggarate/carapace",
+      "x-openrouter-title": "Carapace",
     });
     expect(request).toEqual({
       url: "https://openrouter.ai/api/v1/audio/speech",

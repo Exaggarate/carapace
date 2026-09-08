@@ -7,7 +7,7 @@ import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import { pruneMapToMaxSize } from "./map-size.js";
 
 export const { kyselyByDatabase, queryErrorHandlerByDatabase } = resolveGlobalSingleton(
-  Symbol.for("openclaw.sqliteKyselyCacheState"),
+  Symbol.for("carapace.sqliteKyselyCacheState"),
   () => ({
     kyselyByDatabase: new WeakMap<DatabaseSync, unknown>(),
     queryErrorHandlerByDatabase: new WeakMap<DatabaseSync, (error: unknown) => void>(),
@@ -15,10 +15,10 @@ export const { kyselyByDatabase, queryErrorHandlerByDatabase } = resolveGlobalSi
 );
 // Cached statements retain their database. Per-instance lifecycle wrappers clear
 // both caches before close, including callers from transformed SDK module graphs.
-const statementCacheSymbol = Symbol.for("openclaw.kyselySyncStatementCache");
-const statementInvalidationSymbol = Symbol.for("openclaw.kyselySyncStatementInvalidation");
-const statementCacheEnabledSymbol = Symbol.for("openclaw.kyselySyncStatementCacheEnabled");
-const authorizerActiveSymbol = Symbol.for("openclaw.kyselySyncAuthorizerActive");
+const statementCacheSymbol = Symbol.for("carapace.kyselySyncStatementCache");
+const statementInvalidationSymbol = Symbol.for("carapace.kyselySyncStatementInvalidation");
+const statementCacheEnabledSymbol = Symbol.for("carapace.kyselySyncStatementCacheEnabled");
+const authorizerActiveSymbol = Symbol.for("carapace.kyselySyncAuthorizerActive");
 // Bound SQL plus variable-size bindings to about 2 MiB per enabled database.
 // Process-wide retention scales with open handles; repeated variable SQL can enter.
 const statementCacheCapacity = 32;

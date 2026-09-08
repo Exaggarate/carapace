@@ -7,7 +7,7 @@ import {
 } from "../../../test/helpers/cron/service-regression-fixtures.js";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { DEFAULT_CRON_MAX_CONCURRENT_RUNS } from "../../config/cron-limits.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { saveCronStore } from "../store.js";
 import { cronStoreKey } from "../store/key.js";
 import { inspectActiveCronRunReceipt } from "../store/run-receipt-store.js";
@@ -136,7 +136,7 @@ describe("cron service run admission capacity edges", () => {
     expect(
       state.store?.jobs.find((job) => job.id === scheduledJob.id)?.state.runningAtMs,
     ).toBeUndefined();
-    const receipt = openOpenClawStateDatabase()
+    const receipt = openCarapaceStateDatabase()
       .db.prepare(
         "SELECT status FROM cron_run_receipts WHERE store_key = ? AND job_id = ? ORDER BY started_at_ms DESC LIMIT 1",
       )

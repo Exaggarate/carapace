@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 
 defineDiscordVoiceTests(
@@ -158,7 +158,7 @@ defineDiscordVoiceTests(
       try {
         beginSpeakerTurn(entry).close();
         const owner = lastRealtimeBridge();
-        await emitFinalRealtimeUserTranscript(owner.bridgeParams, "OpenClaw");
+        await emitFinalRealtimeUserTranscript(owner.bridgeParams, "Carapace");
         beginSpeakerTurn(entry, { senderIsOwner: false }).close();
         const guest = lastRealtimeBridge();
         await emitFinalRealtimeUserTranscript(guest.bridgeParams, "A separate conversation.");
@@ -215,7 +215,7 @@ defineDiscordVoiceTests(
           {
             itemId: "old-item",
             callId: "old-call",
-            name: "openclaw_agent_consult",
+            name: "carapace_agent_consult",
             args: { question: "Stale guest tool call." },
           },
           retired.session,
@@ -244,7 +244,7 @@ defineDiscordVoiceTests(
           {
             itemId: "old-item",
             callId: "old-call",
-            name: "openclaw_agent_consult",
+            name: "carapace_agent_consult",
             args: { question: "Original question." },
           },
           original.session,

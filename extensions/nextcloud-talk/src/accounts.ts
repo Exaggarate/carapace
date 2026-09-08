@@ -4,12 +4,12 @@ import {
   hasConfiguredAccountValue,
   normalizeAccountId,
   resolveAccountWithDefaultFallback,
-} from "openclaw/plugin-sdk/account-core";
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { isTruthyEnvValue } from "openclaw/plugin-sdk/runtime-env";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
-import { resolveSecretInputString } from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/account-core";
+import { createAccountListHelpers } from "carapace/plugin-sdk/account-helpers";
+import { isTruthyEnvValue } from "carapace/plugin-sdk/runtime-env";
+import { tryReadSecretFileSync } from "carapace/plugin-sdk/secret-file-runtime";
+import { resolveSecretInputString } from "carapace/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   resolveNextcloudTalkApiCredentialsResult,
   type NextcloudTalkCredentialUnavailableDiagnostic,
@@ -17,7 +17,7 @@ import {
 import type { CoreConfig, NextcloudTalkAccountConfig } from "./types.js";
 
 const debugAccounts = (...args: unknown[]) => {
-  if (isTruthyEnvValue(process.env.OPENCLAW_DEBUG_NEXTCLOUD_TALK_ACCOUNTS)) {
+  if (isTruthyEnvValue(process.env.CARAPACE_DEBUG_NEXTCLOUD_TALK_ACCOUNTS)) {
     console.warn("[nextcloud-talk:accounts]", ...args);
   }
 };

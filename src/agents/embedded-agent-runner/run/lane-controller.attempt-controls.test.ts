@@ -1,4 +1,4 @@
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import {

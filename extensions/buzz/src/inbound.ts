@@ -3,11 +3,11 @@ import {
   buildChannelInboundEventContext,
   logInboundDrop,
   resolveChannelInboundRouteEnvelope,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveStableChannelMessageIngress } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/logging-core";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveStableChannelMessageIngress } from "carapace/plugin-sdk/channel-ingress-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createSubsystemLogger } from "carapace/plugin-sdk/logging-core";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
 import type { BuzzBus } from "./buzz-bus.js";
 import type { BuzzConfigInput } from "./config-schema.js";
 import {
@@ -24,7 +24,7 @@ const log = createSubsystemLogger("buzz/inbound");
 
 export async function handleBuzzInbound(params: {
   account: ResolvedBuzzAccount;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   bus: BuzzBus;
   message: BuzzInboundMessage;
   signal: AbortSignal;

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-// Release Beta Verifier script supports OpenClaw repository automation.
+// Release Beta Verifier script supports Carapace repository automation.
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -35,7 +35,7 @@ type ReleaseVerifyBetaArgs = {
   rerunFailedClawHub: boolean;
   workflowRuns: {
     fullReleaseValidation?: string;
-    openclawNpm?: string;
+    carapaceNpm?: string;
     pluginNpm?: string;
     pluginClawHub?: string;
     pluginClawHubBootstrap?: string;
@@ -78,7 +78,7 @@ type WorkflowRunSummary = {
   };
 };
 
-const DEFAULT_REPO = "openclaw/openclaw";
+const DEFAULT_REPO = "carapace/carapace";
 const DEFAULT_CLAWHUB_REGISTRY = "https://clawhub.ai";
 const CLAWHUB_BOOTSTRAP_WORKFLOW_PATH = ".github/workflows/plugin-clawhub-new.yml";
 const CLAWHUB_BOOTSTRAP_READBACK_FILE = "clawhub-bootstrap-readback.json";
@@ -244,7 +244,7 @@ export function parseReleaseVerifyBetaArgs(argv: string[]): ReleaseVerifyBetaArg
   const version = values.shift();
   if (!version || version.startsWith("-")) {
     throw new Error(
-      "Usage: pnpm release:verify-beta -- <version> [--release-sha SHA] [--workflow-ref REF] [--clawhub-workflow-ref REF] [--full-release-validation-run ID] [--openclaw-npm-run ID] [--plugin-npm-run ID] [--plugin-clawhub-run ID] [--plugin-clawhub-bootstrap-run ID --clawhub-bootstrap-plugins NAMES] [--npm-telegram-run ID] [--skip-github-release] [--skip-clawhub]",
+      "Usage: pnpm release:verify-beta -- <version> [--release-sha SHA] [--workflow-ref REF] [--clawhub-workflow-ref REF] [--full-release-validation-run ID] [--carapace-npm-run ID] [--plugin-npm-run ID] [--plugin-clawhub-run ID] [--plugin-clawhub-bootstrap-run ID --clawhub-bootstrap-plugins NAMES] [--npm-telegram-run ID] [--skip-github-release] [--skip-clawhub]",
     );
   }
 
@@ -325,8 +325,8 @@ export function parseReleaseVerifyBetaArgs(argv: string[]): ReleaseVerifyBetaArg
       case "--full-release-validation-run":
         parsed.workflowRuns.fullReleaseValidation = next();
         break;
-      case "--openclaw-npm-run":
-        parsed.workflowRuns.openclawNpm = next();
+      case "--carapace-npm-run":
+        parsed.workflowRuns.carapaceNpm = next();
         break;
       case "--plugin-npm-run":
         parsed.workflowRuns.pluginNpm = next();
@@ -375,12 +375,12 @@ export function parseReleaseVerifyBetaArgs(argv: string[]): ReleaseVerifyBetaArg
   return parsed;
 }
 
-export function resolveOpenClawNpmPostpublishVerifier(rootDir: string, override?: string): string {
+export function resolveCarapaceNpmPostpublishVerifier(rootDir: string, override?: string): string {
   if (override === undefined) {
-    return resolve(rootDir, "scripts/openclaw-npm-postpublish-verify.ts");
+    return resolve(rootDir, "scripts/carapace-npm-postpublish-verify.ts");
   }
   const verifier = resolve(override);
-  if (verifier !== resolve(TRUSTED_TOOLING_ROOT, "scripts/openclaw-npm-postpublish-verify.ts")) {
+  if (verifier !== resolve(TRUSTED_TOOLING_ROOT, "scripts/carapace-npm-postpublish-verify.ts")) {
     throw new Error("--postpublish-verifier must select the trusted tooling verifier.");
   }
   return verifier;
@@ -1326,18 +1326,18 @@ export async function verifyBetaRelease(
     lines.push(`GitHub release OK: ${releaseUrl}`);
   }
 
-  const openclawNpm = await verifyNpmPackage("openclaw", args.version, args.distTag);
-  lines.push(`openclaw npm OK: ${args.version} (${args.distTag})`);
+  const carapaceNpm = await verifyNpmPackage("carapace", args.version, args.distTag);
+  lines.push(`carapace npm OK: ${args.version} (${args.distTag})`);
 
   if (!args.skipPostpublish) {
-    const postpublishVerifier = resolveOpenClawNpmPostpublishVerifier(
+    const postpublishVerifier = resolveCarapaceNpmPostpublishVerifier(
       rootDir,
       args.postpublishVerifier,
     );
     execFileSync("node", ["--import", "tsx", postpublishVerifier, args.version], {
       stdio: "inherit",
     });
-    lines.push("openclaw postpublish verifier OK");
+    lines.push("carapace postpublish verifier OK");
   }
 
   const npmPlugins = collectPublishablePluginPackages(rootDir, {
@@ -1429,13 +1429,13 @@ export async function verifyBetaRelease(
       }),
     );
   }
-  if (args.workflowRuns.openclawNpm !== undefined) {
+  if (args.workflowRuns.carapaceNpm !== undefined) {
     workflowRuns.push(
       verifyWorkflowRun({
-        id: args.workflowRuns.openclawNpm,
-        label: "OpenClaw NPM Release",
+        id: args.workflowRuns.carapaceNpm,
+        label: "Carapace NPM Release",
         repo: args.repo,
-        expectedWorkflowName: "OpenClaw NPM Release",
+        expectedWorkflowName: "Carapace NPM Release",
         expectedHeadBranch: args.workflowRef,
         rerunFailed: false,
       }),
@@ -1478,8 +1478,8 @@ export async function verifyBetaRelease(
           releaseTag: args.tag,
           npmDistTag: args.distTag,
           pluginSelection: args.pluginSelection,
-          openclawNpmIntegrity: openclawNpm.integrity,
-          openclawNpmTarball: openclawNpm.tarball,
+          carapaceNpmIntegrity: carapaceNpm.integrity,
+          carapaceNpmTarball: carapaceNpm.tarball,
           npmRegistrySignaturesVerified: args.skipPostpublish ? null : true,
           npmProvenanceAttestationMatched: args.skipPostpublish ? null : true,
           githubReleaseUrl: releaseUrl ?? null,

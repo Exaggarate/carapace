@@ -47,9 +47,9 @@ async function listBackupArchiveEntries(archivePath: string): Promise<string[]> 
 }
 
 async function createHelpProcessFixture(config?: Record<string, unknown>) {
-  const root = tempDirs.make("openclaw-help-exit-");
+  const root = tempDirs.make("carapace-help-exit-");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   const tlsImportGuardPath = path.join(root, "forbid-tls-import.mjs");
   const keepAlivePath = path.join(root, "keep-alive.mjs");
   const failRunMainImportPath = path.join(root, "fail-run-main-import.mjs");
@@ -148,9 +148,9 @@ async function runCliProcess(params: {
       NODE_ENV: undefined,
       NODE_OPTIONS: undefined,
       NODE_USE_SYSTEM_CA: "1",
-      OPENCLAW_CONFIG_PATH: params.pristineHome ? undefined : fixture.configPath,
-      OPENCLAW_NO_RESPAWN: params.allowRespawn ? undefined : "1",
-      OPENCLAW_STATE_DIR: params.pristineHome ? undefined : fixture.stateDir,
+      CARAPACE_CONFIG_PATH: params.pristineHome ? undefined : fixture.configPath,
+      CARAPACE_NO_RESPAWN: params.allowRespawn ? undefined : "1",
+      CARAPACE_STATE_DIR: params.pristineHome ? undefined : fixture.stateDir,
       VITEST: undefined,
       ...params.env,
     },
@@ -200,7 +200,7 @@ describe("CLI help process exit", () => {
     });
 
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: openclaw [options] [command]");
+    expect(result.stdout).toContain("Usage: carapace [options] [command]");
     expect(() => parseJsonLines(result.stdout)).toThrow();
   });
 
@@ -210,13 +210,13 @@ describe("CLI help process exit", () => {
     const result = await runCliProcess({ args: ["backup", "--help"], keepAlive: true });
 
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: openclaw backup [options] [command]");
+    expect(result.stdout).toContain("Usage: carapace backup [options] [command]");
   });
   it("flushes explicitly requested entry traces on precomputed help", async () => {
     const result = await runCliProcess({
       args: ["gateway", "--help"],
       config: { logging: { consoleStyle: "json", level: "silent" } },
-      env: { OPENCLAW_GATEWAY_STARTUP_TRACE: "1" },
+      env: { CARAPACE_GATEWAY_STARTUP_TRACE: "1" },
     });
 
     expect(parseJsonLines(result.stderr)).toEqual(
@@ -235,7 +235,7 @@ describe("CLI help process exit", () => {
       let stdout = "";
       let stderr = "";
       const program = new Command()
-        .name("openclaw")
+        .name("carapace")
         .exitOverride()
         .configureOutput({
           writeOut: (value) => {
@@ -245,7 +245,7 @@ describe("CLI help process exit", () => {
             stderr += value;
           },
         });
-      const argv = ["node", "openclaw", group, "--help"];
+      const argv = ["node", "carapace", group, "--help"];
       const registered =
         registry === "core"
           ? await registerCoreCliByName(program, createProgramContext(), group)
@@ -258,19 +258,19 @@ describe("CLI help process exit", () => {
       expect(parseResult).toBeInstanceOf(CommanderError);
       expect(parseResult).toMatchObject({ code: "commander.helpDisplayed", exitCode: 0 });
       expect(stderr).toBe("");
-      expect(stdout).toContain(`Usage: openclaw ${usageCommand} [options] [command]`);
+      expect(stdout).toContain(`Usage: carapace ${usageCommand} [options] [command]`);
     },
   );
 
   it.concurrent.each([
-    { args: ["acp", "--help"], usage: "Usage: openclaw acp [options] [command]" },
-    { args: ["acp", "client", "--help"], usage: "Usage: openclaw acp client [options]" },
+    { args: ["acp", "--help"], usage: "Usage: carapace acp [options] [command]" },
+    { args: ["acp", "client", "--help"], usage: "Usage: carapace acp client [options]" },
   ])("renders in-process ACP help for $args", async ({ args, usage }) => {
     let stdout = "";
     let stderr = "";
     let actionStarted = false;
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .exitOverride()
       .configureOutput({
         writeOut: (value) => {
@@ -283,7 +283,7 @@ describe("CLI help process exit", () => {
     program.hook("preAction", () => {
       actionStarted = true;
     });
-    const argv = ["node", "openclaw", ...args];
+    const argv = ["node", "carapace", ...args];
 
     const registered = await registerSubCliByName(program, "acp", argv);
     const parseResult = await program
@@ -317,7 +317,7 @@ describe("rejected CLI process state isolation", () => {
     });
 
     expect(result.stderr).toContain("--gateway-port must be an integer between 1 and 65535.");
-    await expect(fs.access(path.join(result.root, `.openclaw-${profile}`))).rejects.toMatchObject({
+    await expect(fs.access(path.join(result.root, `.carapace-${profile}`))).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
@@ -334,20 +334,20 @@ describe("models list JSON failure process output", () => {
       {
         provider: "autoqa-no-such-provider",
         message:
-          'Unknown provider filter "autoqa-no-such-provider" for this installation. Run openclaw plugins list --json to see installed providers, or configure it under models.providers.',
+          'Unknown provider filter "autoqa-no-such-provider" for this installation. Run carapace plugins list --json to see installed providers, or configure it under models.providers.',
       },
     ].flatMap(({ provider, message }) => [
       {
         name: `routed ${provider}`,
         provider,
         message,
-        env: { OPENCLAW_DISABLE_ROUTE_FIRST: undefined },
+        env: { CARAPACE_DISABLE_ROUTE_FIRST: undefined },
       },
       {
         name: `Commander ${provider}`,
         provider,
         message,
-        env: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" },
+        env: { CARAPACE_DISABLE_ROUTE_FIRST: "1" },
       },
     ]),
   )("renders $name as one clean canonical JSON document", async ({ provider, message, env }) => {
@@ -370,9 +370,9 @@ describe("models list JSON failure process output", () => {
 
 describe("message broadcast process exit", () => {
   it("drains a large piped JSON payload before exiting nonzero on a structured target failure", async () => {
-    const root = tempDirs.make("openclaw-message-broadcast-exit-");
+    const root = tempDirs.make("carapace-message-broadcast-exit-");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const entryPath = path.join(root, "run-message-broadcast.mjs");
     const largePayload = "x".repeat(8_388_608);
     await fs.writeFile(
@@ -427,10 +427,10 @@ await runCliWithExitFinalization({
         HOME: root,
         NODE_ENV: undefined,
         NODE_OPTIONS: undefined,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_STATE_DIR: stateDir,
         VITEST: undefined,
       },
       timeout: CLI_PROCESS_DEADLOCK_GUARD_MS,
@@ -447,10 +447,10 @@ describe("backup create process", () => {
   it.runIf(process.platform !== "win32")(
     "creates a verified backup through an absolute configured config link",
     async () => {
-      const root = tempDirs.make("openclaw-backup-cli-config-link-");
+      const root = tempDirs.make("carapace-backup-cli-config-link-");
       const stateDir = path.join(root, "state");
-      const configPath = path.join(stateDir, "openclaw.json");
-      const managedConfigPath = path.join(root, "nix-store", "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
+      const managedConfigPath = path.join(root, "nix-store", "carapace.json");
       const outputDir = path.join(root, "output");
       await Promise.all([
         fs.mkdir(stateDir, { recursive: true }),
@@ -480,12 +480,12 @@ describe("backup create process", () => {
           NODE_DISABLE_COMPILE_CACHE: "1",
           NODE_ENV: undefined,
           NODE_OPTIONS: undefined,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_HOME: root,
-          OPENCLAW_NO_RESPAWN: "1",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_HOME: root,
+          CARAPACE_NO_RESPAWN: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_STATE_DIR: stateDir,
           VITEST: undefined,
         },
       });
@@ -510,19 +510,19 @@ describe("backup create process", () => {
         throw new Error("backup CLI did not return an archive path");
       }
       const entries = await listBackupArchiveEntries(output.archivePath);
-      expect(entries.some((entry) => entry.endsWith("/state/openclaw.json"))).toBe(true);
+      expect(entries.some((entry) => entry.endsWith("/state/carapace.json"))).toBe(true);
     },
   );
 
   it.runIf(process.platform !== "win32")(
     "excludes a configured workspace before archive link validation",
     async () => {
-      const root = tempDirs.make("openclaw-backup-cli-workspace-exclusion-");
+      const root = tempDirs.make("carapace-backup-cli-workspace-exclusion-");
       const stateDir = path.join(root, "state");
       const workspaceDir = path.join(stateDir, "workspace");
       const externalTarget = path.join(root, "external-build");
       const outputDir = path.join(root, "output");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await Promise.all([
         fs.mkdir(workspaceDir, { recursive: true }),
         fs.mkdir(externalTarget, { recursive: true }),
@@ -556,12 +556,12 @@ describe("backup create process", () => {
           NODE_DISABLE_COMPILE_CACHE: "1",
           NODE_ENV: undefined,
           NODE_OPTIONS: undefined,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_HOME: root,
-          OPENCLAW_NO_RESPAWN: "1",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_HOME: root,
+          CARAPACE_NO_RESPAWN: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_STATE_DIR: stateDir,
           VITEST: undefined,
         },
       });
@@ -608,12 +608,12 @@ describe("JSON console style process output", () => {
         args: ["--container"],
         config: {
           logging: {
-            consoleStyle: "${OPENCLAW_TEST_CONSOLE_STYLE}",
+            consoleStyle: "${CARAPACE_TEST_CONSOLE_STYLE}",
             level: "silent",
           },
         },
-        env: { OPENCLAW_TEST_CONSOLE_STYLE: undefined },
-        stateEnv: () => ({ OPENCLAW_TEST_CONSOLE_STYLE: "json" }),
+        env: { CARAPACE_TEST_CONSOLE_STYLE: undefined },
+        stateEnv: () => ({ CARAPACE_TEST_CONSOLE_STYLE: "json" }),
         timeoutMs: SLOW_DOTENV_CHILD_PROCESS_TIMEOUT_MS,
         expectedExitCode: 2,
       });
@@ -635,16 +635,16 @@ describe("JSON console style process output", () => {
         args: ["gateway", "status"],
         config: {
           logging: {
-            consoleStyle: "${OPENCLAW_TEST_CONSOLE_STYLE}",
+            consoleStyle: "${CARAPACE_TEST_CONSOLE_STYLE}",
             level: "silent",
           },
         },
         env: {
-          OPENCLAW_GATEWAY_STARTUP_TRACE: "1",
-          OPENCLAW_TEST_CONSOLE_STYLE: undefined,
+          CARAPACE_GATEWAY_STARTUP_TRACE: "1",
+          CARAPACE_TEST_CONSOLE_STYLE: undefined,
         },
         failRunMainImport: true,
-        stateEnv: () => ({ OPENCLAW_TEST_CONSOLE_STYLE: "json" }),
+        stateEnv: () => ({ CARAPACE_TEST_CONSOLE_STYLE: "json" }),
         timeoutMs: SLOW_DOTENV_CHILD_PROCESS_TIMEOUT_MS,
         expectedExitCode: 1,
       });
@@ -673,7 +673,7 @@ describe("JSON console style process output", () => {
       expectedExitCode: 1,
       allowRespawn: true,
       config: loggingConfig,
-      env: { OPENCLAW_GATEWAY_STARTUP_TRACE: "1" },
+      env: { CARAPACE_GATEWAY_STARTUP_TRACE: "1" },
     });
 
     const bootstrapRecords = parseJsonLines(result.stderr).filter(

@@ -72,7 +72,7 @@ describe("renderChatAvatar", () => {
     expect(textAvatar?.getAttribute("role")).toBe("img");
     expect(textAvatar?.classList.contains("chat-avatar--logo")).toBe(false);
 
-    const localAvatar = renderAvatar(["assistant", { avatar: "/avatar/main", name: "OpenClaw" }]);
+    const localAvatar = renderAvatar(["assistant", { avatar: "/avatar/main", name: "Carapace" }]);
     expect(localAvatar?.getAttribute("src")).toBe("/avatar/main");
     expect(localAvatar?.classList.contains("chat-avatar--logo")).toBe(false);
   });

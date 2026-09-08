@@ -6,7 +6,7 @@ import { installMockGateway } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
 const suite = createControlUiE2eSuite({ name: "Attachment failure announcements" });
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureProof) {
@@ -32,7 +32,7 @@ suite.define(() => {
             role: "assistant",
             content: content("previous.pdf"),
             timestamp: 1,
-            __openclaw: { id: "existing-reply", seq: 1 },
+            __carapace: { id: "existing-reply", seq: 1 },
           };
           const gateway = await installMockGateway(page, { historyMessages: [existing] });
           await page.goto(`${suite.server.baseUrl}chat`);
@@ -68,7 +68,7 @@ suite.define(() => {
             content: content("missing.pdf"),
             timestamp: Date.now(),
             ...(runId ? { runId, phase: "final_answer" } : {}),
-            __openclaw: { id: "appended-reply", seq: 3 },
+            __carapace: { id: "appended-reply", seq: 3 },
           };
           await gateway.setHistoryMessages([existing, reply]);
           if (runId) {

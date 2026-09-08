@@ -1,4 +1,4 @@
-import * as ssrfRuntime from "openclaw/plugin-sdk/ssrf-runtime";
+import * as ssrfRuntime from "carapace/plugin-sdk/ssrf-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { sendA2aChannelText } from "./outbound.js";
 import type { A2aCoreConfig, A2aPeerConfig } from "./types.js";

@@ -3,7 +3,7 @@ import {
   asOptionalObjectRecord,
   asOptionalRecord,
   isRecord,
-} from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/normalization-core/record-coerce";
 import { findChatChannelMeta } from "../channels/chat-meta.js";
 import { normalizeChatChannelId } from "../channels/ids.js";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
@@ -16,7 +16,7 @@ import type {
   PluginAutoEnableResult,
 } from "./plugin-auto-enable.types.js";
 import { ensurePluginAllowlisted } from "./plugins-allowlist.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 export function resolvePluginAutoEnableCandidateReason(
   candidate: PluginAutoEnableCandidate,
@@ -52,7 +52,7 @@ export function resolvePluginAutoEnableCandidateReason(
   throw new Error("Unsupported plugin auto-enable candidate");
 }
 
-function isPluginExplicitlyDisabled(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginExplicitlyDisabled(cfg: CarapaceConfig, pluginId: string): boolean {
   const builtInChannelId = normalizeChatChannelId(pluginId);
   if (builtInChannelId) {
     const channels = cfg.channels;
@@ -63,12 +63,12 @@ function isPluginExplicitlyDisabled(cfg: OpenClawConfig, pluginId: string): bool
   return cfg.plugins?.entries?.[pluginId]?.enabled === false;
 }
 
-function isPluginDenied(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginDenied(cfg: CarapaceConfig, pluginId: string): boolean {
   const deny = cfg.plugins?.deny;
   return Array.isArray(deny) && deny.includes(pluginId);
 }
 
-function isPluginExplicitlySelected(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginExplicitlySelected(cfg: CarapaceConfig, pluginId: string): boolean {
   const allow = cfg.plugins?.allow;
   if (Array.isArray(allow) && allow.includes(pluginId)) {
     return true;
@@ -77,11 +77,11 @@ function isPluginExplicitlySelected(cfg: OpenClawConfig, pluginId: string): bool
 }
 
 function disableImplicitPreferredOverPlugin(params: {
-  config: OpenClawConfig;
-  originalConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  originalConfig: CarapaceConfig;
   pluginId: string;
   manifestRegistry: PluginManifestRegistry;
-}): OpenClawConfig {
+}): CarapaceConfig {
   if (isPluginExplicitlySelected(params.originalConfig, params.pluginId)) {
     return params.config;
   }
@@ -109,7 +109,7 @@ function disableImplicitPreferredOverPlugin(params: {
   };
 }
 
-function isBuiltInChannelAlreadyEnabled(cfg: OpenClawConfig, channelId: string): boolean {
+function isBuiltInChannelAlreadyEnabled(cfg: CarapaceConfig, channelId: string): boolean {
   const channels = cfg.channels;
   return asOptionalRecord(channels?.[channelId])?.enabled === true;
 }
@@ -150,10 +150,10 @@ function resolveAutoEnableChannelId(params: {
 }
 
 function registerPluginEntry(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   entry: PluginAutoEnableCandidate,
   manifestRegistry: PluginManifestRegistry,
-): OpenClawConfig {
+): CarapaceConfig {
   const builtInChannelId = resolveAutoEnableChannelId({ entry, manifestRegistry });
   if (builtInChannelId) {
     const channels = cfg.channels;
@@ -210,10 +210,10 @@ function isKnownPluginId(pluginId: string, manifestRegistry: PluginManifestRegis
 }
 
 function materializeConfiguredPluginEntryAllowlist(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changes: string[];
   manifestRegistry: PluginManifestRegistry;
-}): OpenClawConfig {
+}): CarapaceConfig {
   let next = params.config;
   const allow = next.plugins?.allow;
   const entries = asOptionalObjectRecord(next.plugins?.entries);
@@ -269,7 +269,7 @@ function formatAutoEnableChange(
 }
 
 export function materializePluginAutoEnableCandidatesInternal(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   candidates: readonly PluginAutoEnableCandidate[];
   env: NodeJS.ProcessEnv;
   manifestRegistry: PluginManifestRegistry;

@@ -5,7 +5,7 @@ import {
   resolveSetupWizardGroupAllowlist,
   runSetupWizardFinalize,
   runSetupWizardPrepare,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it } from "vitest";
 import {
   createAllowlistSetupWizardProxy,

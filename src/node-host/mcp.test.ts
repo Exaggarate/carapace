@@ -1,10 +1,10 @@
 /** Tests node-host MCP startup, descriptors, calls, and failure isolation. */
 
 import { ErrorCode, type CallToolResult, type Tool } from "@modelcontextprotocol/sdk/types.js";
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
-import { OpenClawSchema } from "../config/zod-schema.js";
+import { CarapaceSchema } from "../config/zod-schema.js";
 import { useFrozenTime, useRealTime } from "../test-utils/frozen-time.js";
 import { startNodeHostMcpManager } from "./mcp.js";
 
@@ -175,7 +175,7 @@ describe("node host MCP manager", () => {
   });
 
   it("parses nodeHost.mcp config, isolates failures, filters tools, and shuts down", async () => {
-    const parsed = OpenClawSchema.parse({
+    const parsed = CarapaceSchema.parse({
       nodeHost: {
         mcp: {
           servers: {

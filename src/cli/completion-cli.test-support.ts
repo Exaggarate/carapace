@@ -10,12 +10,12 @@ import { quoteCliArg } from "./quote-cli-arg.js";
 
 export function createCompletionProgram(): Command {
   const program = new Command();
-  program.name("openclaw");
+  program.name("carapace");
   program.description("CLI root");
   program.option("-v, --verbose", "Verbose output");
   program.option(
     "--status-json",
-    "Output JSON (alias for `models status --json`) in $OPENCLAW_STATE_DIR",
+    "Output JSON (alias for `models status --json`) in $CARAPACE_STATE_DIR",
   );
 
   const gateway = program.command("gateway").description("Gateway commands");
@@ -43,7 +43,7 @@ export function createDocumentedCompletionProgram(): Command {
 
 export function createAliasedCompletionProgram(): Command {
   const program = new Command();
-  program.name("openclaw");
+  program.name("carapace");
   program.option("--profile <name>", "Profile");
   const infer = program.command("infer").alias("capability").description("Run inference");
   infer.command("embed").description("Embed text").option("--model <id>", "Model id");
@@ -80,7 +80,7 @@ COMP_WORDS=(${words.map(quoteCliArg).join(" ")})
 COMP_CWORD=${input.cword ?? words.length - 1}
 COMP_LINE=${quoteCliArg(input.line ?? words.join(" "))}
 COMP_POINT=${input.point ?? "${#COMP_LINE}"}
-_openclaw_completion openclaw ${quoteCliArg(input.word ?? words.at(-1) ?? "")}
+_carapace_completion carapace ${quoteCliArg(input.word ?? words.at(-1) ?? "")}
 printf '%s\\n' "\${COMPREPLY[@]}"
 `,
     ],
@@ -134,7 +134,7 @@ export function runGeneratedFishCompletion(program: Command, commandLine: string
 function findPowerShell(): string | null {
   const executable = process.platform === "win32" ? "pwsh.exe" : "pwsh";
   const candidates = [
-    process.env.OPENCLAW_TEST_PWSH,
+    process.env.CARAPACE_TEST_PWSH,
     ...(process.env.PATH ?? "")
       .split(path.delimiter)
       .filter(Boolean)
@@ -175,7 +175,7 @@ while (($encodedRequest = [Console]::In.ReadLine()) -ne $null) {
     $request = $requestJson | ConvertFrom-Json
     $completionScript = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String([string]$request.script))
     $commandLine = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String([string]$request.commandLine))
-    Register-ArgumentCompleter -Native -CommandName openclaw -ScriptBlock $null
+    Register-ArgumentCompleter -Native -CommandName carapace -ScriptBlock $null
     Invoke-Expression $completionScript | Out-Null
     $completions = @(
       [System.Management.Automation.CommandCompletion]::CompleteInput(
@@ -193,7 +193,7 @@ while (($encodedRequest = [Console]::In.ReadLine()) -ne $null) {
     }
     $response = @{ version = 1; id = $responseId; ok = $false; error = ($_ | Out-String).Trim() }
   } finally {
-    Register-ArgumentCompleter -Native -CommandName openclaw -ScriptBlock $null
+    Register-ArgumentCompleter -Native -CommandName carapace -ScriptBlock $null
   }
   $responseJson = $response | ConvertTo-Json -Compress -Depth 5
   $encodedResponse = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($responseJson))
@@ -243,7 +243,7 @@ export class PowerShellCompletionRunner {
   private closing = false;
   private exitPromise: Promise<{ code: number | null; signal: NodeJS.Signals | null }> | undefined;
   private failure: Error | undefined;
-  private readonly framePrefix = `OPENCLAW_PWSH_V1:${randomBytes(8).toString("hex")}:`;
+  private readonly framePrefix = `CARAPACE_PWSH_V1:${randomBytes(8).toString("hex")}:`;
   private pending = new Map<string, PendingPowerShellCompletion>();
   private queue: Promise<void> = Promise.resolve();
   private readyPromise: Promise<void> | undefined;

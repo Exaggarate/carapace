@@ -12,7 +12,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = artifactRoot
@@ -174,7 +174,7 @@ suite.define(() => {
         const previousRequests = (await gateway.getRequests("sessions.usage")).length;
         await gateway.setMethodResponse("sessions.usage", usageResponse());
         await page
-          .locator("openclaw-usage-page")
+          .locator("carapace-usage-page")
           .getByRole("button", { name: "Refresh", exact: true })
           .click();
         await expect

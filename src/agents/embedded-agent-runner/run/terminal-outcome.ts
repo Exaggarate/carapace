@@ -1,4 +1,4 @@
-import { isProviderRefusalAssistantError } from "@openclaw/llm-core/diagnostics";
+import { isProviderRefusalAssistantError } from "@carapace/llm-core/diagnostics";
 import {
   buildAgentRunTerminalOutcomeFromAttempt,
   classifyAgentRunTerminalOutcome,

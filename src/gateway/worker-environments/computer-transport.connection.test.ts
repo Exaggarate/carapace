@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
 import {
@@ -187,7 +187,7 @@ describe("worker computer connection lifetime", () => {
             rpcSetVersion: identity.rpcSetVersion,
             handshake: {
               bundleHash: "a".repeat(64),
-              openclawVersion: "2026.8.1",
+              carapaceVersion: "2026.8.1",
               protocolFeatures: identity.protocolFeatures,
             },
           },

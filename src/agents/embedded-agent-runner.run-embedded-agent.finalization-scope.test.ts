@@ -38,7 +38,7 @@ beforeAll(async () => {
   // Keep the real harness boundary, including its temporary tool-authority scope.
   vi.doUnmock("./harness/selection.js");
   vi.doMock("./models-config.js", () => ({
-    ensureOpenClawModelsJson: vi.fn(async () => ({ wrote: false })),
+    ensureCarapaceModelsJson: vi.fn(async () => ({ wrote: false })),
   }));
   vi.doMock("./embedded-agent-runner/model.js", () => ({
     resolveModelAsync: async (provider: string, modelId: string) =>
@@ -77,7 +77,7 @@ describe("nested settled-turn finalization ownership", () => {
         agentId: "test",
         sessionId: "child-session",
         sessionKey: "agent:test:child",
-        storePath: path.join(agentDir, "openclaw-agent.sqlite"),
+        storePath: path.join(agentDir, "carapace-agent.sqlite"),
       };
       const parentTarget = {
         ...target,
@@ -171,7 +171,7 @@ describe("nested settled-turn finalization ownership", () => {
             toolMetas: [{ toolName: "write", toolCallId: "write-once", replaySafe: false }],
             itemLifecycle: { startedCount: 1, completedCount: 1, activeCount: 0 },
             codeModeEngaged: true,
-            settledTurnFinalizationContext: { source: "openclaw-transcript", messages },
+            settledTurnFinalizationContext: { source: "carapace-transcript", messages },
           });
         } finally {
           clearActiveEmbeddedRun(params.sessionId, handle, params.sessionKey);
@@ -220,7 +220,7 @@ describe("nested settled-turn finalization ownership", () => {
                     prompt: "Write once and summarize.",
                     provider: "openai",
                     model: "mock-1",
-                    agentHarnessRuntimeOverride: "openclaw",
+                    agentHarnessRuntimeOverride: "carapace",
                     runId: "child-run",
                     timeoutMs: 10_000,
                     enqueue: async (task) => await task(),
@@ -259,13 +259,13 @@ describe("nested settled-turn finalization ownership", () => {
         childAdmission.close();
         const { waitForSessionTranscriptIndexReconcile } =
           await import("../config/sessions/session-transcript-reconcile.js");
-        const { closeOpenClawAgentDatabaseByPath } = await import("../state/openclaw-agent-db.js");
+        const { closeCarapaceAgentDatabaseByPath } = await import("../state/carapace-agent-db.js");
         const { closeAuthProfileReadPool } = await import("./auth-profiles/sqlite.js");
         try {
           await waitForSessionTranscriptIndexReconcile({ agentId: "test", path: target.storePath });
         } finally {
           closeAuthProfileReadPool({ kind: "database", databasePath: target.storePath });
-          closeOpenClawAgentDatabaseByPath(target.storePath);
+          closeCarapaceAgentDatabaseByPath(target.storePath);
           await fs.rm(root, { recursive: true, force: true });
         }
       }

@@ -1,6 +1,6 @@
 // Builds structured context reports for context command responses.
-import { estimateTokensFromChars } from "@openclaw/normalization-core/cjk-chars";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { estimateTokensFromChars } from "@carapace/normalization-core/cjk-chars";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionAgentIds } from "../../agents/agent-scope.js";
 import {
   analyzeBootstrapBudget,

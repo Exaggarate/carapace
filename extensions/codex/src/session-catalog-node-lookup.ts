@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   CODEX_APP_SERVER_THREADS_LIST_COMMAND,
   CODEX_SESSION_CATALOG_MAX_PAGE_LIMIT,

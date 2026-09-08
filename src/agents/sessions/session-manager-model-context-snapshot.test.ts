@@ -3,7 +3,7 @@ import { expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { waitForSessionTranscriptProjection } from "../../config/sessions/session-transcript-reconcile.js";
 import { WorkerTaskPool } from "../../infra/worker-task-pool.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAgentAssistantMessage } from "../test-helpers/agent-message-fixtures.js";
 import { SessionManager } from "./session-manager.js";
 
@@ -14,14 +14,14 @@ it.each(
 )(
   "reads the completed-turn snapshot across later $mutation (incognito=$incognito)",
   async ({ incognito, mutation }) => {
-    await withOpenClawTestState({ label: "completed-model-context" }, async (state) => {
+    await withCarapaceTestState({ label: "completed-model-context" }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "completed-context",
         sessionKey: incognito
           ? "agent:main:dashboard:incognito-completed-context"
           : "agent:main:completed-context",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope);
@@ -32,7 +32,7 @@ it.each(
           makeAgentAssistantMessage({
             content: [{ type: "text", text: "completed answer" }],
           }),
-          { __openclaw: { upstreamUserText: "synthetic-private-native-payload" } },
+          { __carapace: { upstreamUserText: "synthetic-private-native-payload" } },
         ),
       );
       if (!terminal.anchor) {

@@ -1,15 +1,15 @@
 // Real-reader setup reruns retain the selected fleet owner across mutation and reopen.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { upsertAuthProfile } from "../../agents/auth-profiles/profiles.js";
 import { loadAuthProfileStoreWithoutExternalProfiles } from "../../agents/auth-profiles/store-runtime.js";
 import { readConfigFileSnapshot, resetConfigRuntimeState } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RuntimeEnv } from "../../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   applyOnboardingPrimaryModel,
   type OnboardingAgentTarget,
@@ -34,8 +34,8 @@ import { runNonInteractiveSetup } from "../onboard-non-interactive.js";
 
 afterEach(() => {
   vi.resetAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
 });
 
@@ -51,8 +51,8 @@ describe("local setup fleet owner persistence", () => {
     mocks.ensureOnboardingAgent.mockImplementation(ensureOnboardingAgent);
     await withTempHome(async (rawHome) => {
       const home = await fs.realpath(rawHome);
-      const stateDir = path.join(home, ".openclaw");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const stateDir = path.join(home, ".carapace");
+      const configPath = path.join(stateDir, "carapace.json");
       const includePath = path.join(stateDir, "roster.json");
       const workspace = path.join(home, "existing-workspace");
       const siblingWorkspace = path.join(home, "alpha-workspace");
@@ -102,7 +102,7 @@ describe("local setup fleet owner persistence", () => {
           nextConfig,
           target,
         }: {
-          nextConfig: OpenClawConfig;
+          nextConfig: CarapaceConfig;
           target: OnboardingAgentTarget;
         }) => {
           expect(target).toEqual({ agentId: "beta", agentDir, workspaceDir: workspace });
@@ -145,8 +145,8 @@ describe("local setup fleet owner persistence", () => {
           runtime,
           expect.objectContaining({ agentId: "beta", skipBootstrap: true }),
         );
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
         resetConfigRuntimeState();
         const reopened = await readConfigFileSnapshot();
         expect(reopened.valid, JSON.stringify(reopened.issues)).toBe(true);

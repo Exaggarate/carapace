@@ -154,7 +154,7 @@ describe("runGatewayLoop direct-stop active work", () => {
   const posixIt = process.platform === "win32" ? it.skip : it;
 
   posixIt("joins forced child cleanup before deleting its fixture directory", async () => {
-    const fixtureDir = tempDirs.make("openclaw-direct-stop-failure-");
+    const fixtureDir = tempDirs.make("carapace-direct-stop-failure-");
     const child = spawn(
       process.execPath,
       ["-e", 'process.stdout.write("ready"); setInterval(() => {}, 1_000)'],
@@ -181,7 +181,7 @@ describe("runGatewayLoop direct-stop active work", () => {
   posixIt.each([false, true])(
     "reports and drains a rootless adopted channel run after OS SIGTERM (trace=%s)",
     async (traceEnabled) => {
-      const fixtureDir = tempDirs.make("openclaw-direct-stop-active-work-");
+      const fixtureDir = tempDirs.make("carapace-direct-stop-active-work-");
       const stateDir = path.join(fixtureDir, "state");
       const homeDir = path.join(fixtureDir, "home");
       const tracePath = path.join(fixtureDir, "trace.log");
@@ -198,9 +198,9 @@ describe("runGatewayLoop direct-stop active work", () => {
             NODE_ENV: undefined,
             NODE_DISABLE_COMPILE_CACHE: "1",
             NODE_OPTIONS: undefined,
-            OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_GATEWAY_RESTART_TRACE: traceEnabled ? "1" : undefined,
+            CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_GATEWAY_RESTART_TRACE: traceEnabled ? "1" : undefined,
             VITEST: undefined,
           },
           stdio: ["ignore", "pipe", "pipe"],

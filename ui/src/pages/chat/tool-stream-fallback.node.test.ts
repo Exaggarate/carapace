@@ -390,8 +390,8 @@ describe("app-tool-stream fallback lifecycle handling", () => {
       const persisted = {
         role: "assistant",
         content: "Completed progress",
-        __openclaw: { id: "persisted-commentary", seq: 3, ...(runId ? { runId } : {}) },
-        openclawStreamFallback: { itemId: "shared-item", source: "segment" },
+        __carapace: { id: "persisted-commentary", seq: 3, ...(runId ? { runId } : {}) },
+        carapaceStreamFallback: { itemId: "shared-item", source: "segment" },
       };
       prunePersistedAssistantStreamSegments(state, persisted);
       expect(state.chatStreamSegments).toEqual(

@@ -140,7 +140,7 @@ export function createGatewayHarness(client: GatewayBrowserClient) {
     phase: "connected",
     offlineStable: false,
     canvasPluginSurfaceUrl: null,
-    hello: gatewayHelloForMethods([...SESSION_MUTATION_TEST_METHODS, "openclaw.chat"]),
+    hello: gatewayHelloForMethods([...SESSION_MUTATION_TEST_METHODS, "carapace.chat"]),
     assistantAgentId: "main",
     sessionKey: "agent:main:main",
     lastError: null,
@@ -582,7 +582,7 @@ export async function mountSidebar(
   const context = createContext(gateway, sessions, agentsList, approvalQueue, agentIdentity);
   const provider = createApplicationContextProvider(context);
   const sidebar = document.createElement(
-    "openclaw-app-sidebar",
+    "carapace-app-sidebar",
   ) as unknown as SidebarLifecycleState;
   sidebar.variant = variant;
   provider.append(sidebar);
@@ -680,14 +680,14 @@ export function setupSidebarTest() {
     });
     // Coding defaults to compact; most cases assert expanded contents, so start
     // expanded. Collapse tests override this value.
-    localStorage.setItem("openclaw:sidebar:sessions:collapsed-sections", JSON.stringify([]));
+    localStorage.setItem("carapace:sidebar:sessions:collapsed-sections", JSON.stringify([]));
   });
 
   afterEach(async () => {
     vi.useRealTimers();
     await vi.dynamicImportSettled();
     // Removing a prompt's DOM does not settle its promise or release its reentrancy guard.
-    for (const modal of document.body.querySelectorAll("openclaw-modal-dialog")) {
+    for (const modal of document.body.querySelectorAll("carapace-modal-dialog")) {
       modal.dispatchEvent(new CustomEvent("modal-cancel", { cancelable: true }));
     }
     await vi.dynamicImportSettled();

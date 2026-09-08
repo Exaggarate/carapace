@@ -28,7 +28,7 @@ const TERMINAL_ENVIRONMENT_STATES = new Set(["destroyed", "failed", "orphaned"])
 
 export type NodeWorkerBundleRetention = {
   currentBuild: () => Promise<
-    Readonly<Pick<WorkerAdmissionHandshake, "bundleHash" | "openclawVersion">>
+    Readonly<Pick<WorkerAdmissionHandshake, "bundleHash" | "carapaceVersion">>
   >;
   isEnvironmentOwnedNode: (nodeId: string) => boolean;
 };
@@ -291,7 +291,7 @@ export function createNodeWorkspaceRetainCoordinator(
             bundleHash: currentStatusTarget.bundleHash,
             status:
               bundleStatus.status === "installed"
-                ? { status: "installed", version: currentStatusTarget.openclawVersion }
+                ? { status: "installed", version: currentStatusTarget.carapaceVersion }
                 : { status: "missing" },
           });
         } else if (input.bundleStatusHash) {

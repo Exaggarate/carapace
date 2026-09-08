@@ -47,7 +47,7 @@ const roots: string[] = [];
 async function makeWorkspace(files: Record<string, Buffer>): Promise<string> {
   // Canonicalize first: macOS tmp is a /var -> /private/var symlink and the
   // resolver returns realpaths, so a raw mkdtemp root would not compare equal.
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ws-icon-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ws-icon-")));
   roots.push(root);
   for (const [relative, body] of Object.entries(files)) {
     const absolute = path.join(root, relative);
@@ -215,7 +215,7 @@ describe("handleWorkspaceIconHttpRequest", () => {
   });
 
   const iconRoute = (sessionKey: string) =>
-    `http://127.0.0.1:${port}/__openclaw__/workspace-icon/${encodeURIComponent(sessionKey)}`;
+    `http://127.0.0.1:${port}/__carapace__/workspace-icon/${encodeURIComponent(sessionKey)}`;
 
   it.each([
     { label: "ICO", file: "public/favicon.ico", body: ICO_BYTES, contentType: "image/x-icon" },
@@ -394,7 +394,7 @@ describe("handleWorkspaceIconHttpRequest", () => {
     expect((await fetch(iconRoute("agent:main:filler-0"))).status).toBe(503);
   });
 
-  const malformed = ["/__openclaw__/workspace-icon/", "/__openclaw__/workspace-icon/a/b"];
+  const malformed = ["/__carapace__/workspace-icon/", "/__carapace__/workspace-icon/a/b"];
 
   it.each(malformed)("claims %s as a 404 instead of falling through", async (pathname) => {
     const response = await fetch(`http://127.0.0.1:${port}${pathname}`);
@@ -403,7 +403,7 @@ describe("handleWorkspaceIconHttpRequest", () => {
   });
 
   it("leaves unrelated paths to later stages", async () => {
-    const response = await fetch(`http://127.0.0.1:${port}/__openclaw__/plugin-icon/x`);
+    const response = await fetch(`http://127.0.0.1:${port}/__carapace__/plugin-icon/x`);
     expect(response.status).toBe(418);
   });
 

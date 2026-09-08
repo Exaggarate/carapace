@@ -2,13 +2,13 @@ import {
   embeddedAgentLog,
   formatErrorMessage,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   appendSessionTranscriptMessageByIdentity,
   publishSessionTranscriptUpdateByIdentity,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
 
-const CONTEXT_COMPACTION_CUSTOM_TYPE = "openclaw.context-compaction";
+const CONTEXT_COMPACTION_CUSTOM_TYPE = "carapace.context-compaction";
 
 export async function persistCodexContextCompactionActivity(params: {
   sessionTarget?: EmbeddedRunAttemptParams["sessionTarget"];
@@ -39,7 +39,7 @@ export async function persistCodexContextCompactionActivity(params: {
       itemId: params.itemId,
       ...(params.runId ? { runId: params.runId } : {}),
     },
-    __openclaw: { itemId: params.itemId, ...(params.runId ? { runId: params.runId } : {}) },
+    __carapace: { itemId: params.itemId, ...(params.runId ? { runId: params.runId } : {}) },
     timestamp: params.timestamp,
     idempotencyKey: activityId,
   };

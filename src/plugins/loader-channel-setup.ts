@@ -1,11 +1,11 @@
 // Builds channel setup metadata from plugin light surfaces.
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import { isChannelConfigured } from "../config/channel-configured.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ChannelPluginLoadIntent } from "./loader-types.js";
 import { unwrapDefaultModuleExport } from "./module-export.js";
 import type { PluginRuntime } from "./runtime/types.js";
-import type { OpenClawPluginApi } from "./types.js";
+import type { CarapacePluginApi } from "./types.js";
 
 function mergeChannelPluginSection<T>(
   baseValue: T | undefined,
@@ -128,7 +128,7 @@ export function loadBundledRuntimeChannelPlugin(params: {
 export function resolveSetupChannelRegistration(moduleExport: unknown): {
   plugin?: ChannelPlugin;
   setChannelRuntime?: (runtime: PluginRuntime) => void;
-  registerSetupRuntime?: (api: OpenClawPluginApi) => void;
+  registerSetupRuntime?: (api: CarapacePluginApi) => void;
   usesBundledSetupContract?: boolean;
   loadError?: unknown;
 } {
@@ -174,7 +174,7 @@ export function resolveSetupChannelRegistration(moduleExport: unknown): {
           ...(typeof setupEntryRecord.registerSetupRuntime === "function"
             ? {
                 registerSetupRuntime: setupEntryRecord.registerSetupRuntime as (
-                  api: OpenClawPluginApi,
+                  api: CarapacePluginApi,
                 ) => void,
               }
             : {}),
@@ -204,7 +204,7 @@ export function resolveSetupChannelRegistration(moduleExport: unknown): {
 export function shouldLoadChannelPluginInSetupRuntime(params: {
   manifestChannels: string[];
   setupSource?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   channelPluginLoadIntent: ChannelPluginLoadIntent;
 }): boolean {

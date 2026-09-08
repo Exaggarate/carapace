@@ -52,7 +52,7 @@ const failure = {
 it.each(["maintenance.autoDetach", "gc.autoDetach"])(
   "overrides %s only for an explicitly owned Git command",
   async (key) => {
-    await withTestDir({ prefix: "openclaw-git-exec-maintenance-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-git-exec-maintenance-" }, async (root) => {
       await requireGitCommand(root, ["init"]);
       await requireGitCommand(root, ["config", key, "true"]);
       const owned = await executeGitCommand(root, ["config", "--get", key], {
@@ -217,7 +217,7 @@ describe("required Git output", () => {
     input: string | Buffer,
     run: (root: string, args: string[]) => Promise<void>,
   ) {
-    await withTestDir({ prefix: "openclaw-git-output-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-git-output-" }, async (root) => {
       await requireGitCommand(root, ["init"]);
       const oid = await requireGitCommand(root, ["hash-object", "-w", "--stdin"], { input });
       await run(root, ["cat-file", "blob", oid]);

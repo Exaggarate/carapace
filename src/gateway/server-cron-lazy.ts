@@ -1,7 +1,7 @@
 // Gateway cron lazy loader.
 // Defers scheduler startup until cron is touched by runtime or API handlers.
 import type { CliDeps } from "../cli/deps.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveCronJobsStorePathFromConfig } from "../cron/store.js";
 import { createLazyPromiseLoader } from "../shared/lazy-runtime.js";
 import type { GatewayCronServiceContract } from "./server-cron-contract.js";
@@ -9,7 +9,7 @@ import type { GatewayCronExitWatcherHandoff, GatewayCronState } from "./server-c
 import type { GatewayRequestContext } from "./server-methods/types.js";
 
 type LazyGatewayCronParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deps: CliDeps;
   broadcast: (event: string, payload: unknown, opts?: { dropIfSlow?: boolean }) => void;
   env?: NodeJS.ProcessEnv;
@@ -35,7 +35,7 @@ type LoadedGatewayCronState = {
 export function createLazyGatewayCronState(params: LazyGatewayCronParams): GatewayCronState {
   const env = params.env ?? process.env;
   const storePath = resolveCronJobsStorePathFromConfig(params.cfg, env);
-  const cronEnabled = env.OPENCLAW_SKIP_CRON !== "1" && params.cfg.cron?.enabled !== false;
+  const cronEnabled = env.CARAPACE_SKIP_CRON !== "1" && params.cfg.cron?.enabled !== false;
   let loaded: LoadedGatewayCronState | null = null;
   let stopped = false;
   let exitWatcherHandoff: GatewayCronExitWatcherHandoff | undefined;

@@ -2,22 +2,22 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { toErrorObject as toLintErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { toErrorObject as toLintErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
-import { parseSqliteSessionFileMarker } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { parseAgentSessionKey } from "carapace/plugin-sdk/routing";
+import { parseSqliteSessionFileMarker } from "carapace/plugin-sdk/session-store-runtime";
 import {
   appendSessionTranscriptMessageByIdentity,
   type SessionTranscriptTargetParams,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import {
   afterAll,
   afterEach,
@@ -83,14 +83,14 @@ const hoisted = vi.hoisted(() => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/memory-host-search", () => ({
+vi.mock("carapace/plugin-sdk/memory-host-search", () => ({
   closeActiveMemorySearchManager: hoisted.closeActiveMemorySearchManager,
   getActiveMemorySearchManager: hoisted.getActiveMemorySearchManager,
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-host-core", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/memory-host-core")>(
-    "openclaw/plugin-sdk/memory-host-core",
+vi.mock("carapace/plugin-sdk/memory-host-core", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/memory-host-core")>(
+    "carapace/plugin-sdk/memory-host-core",
   );
   return {
     ...actual,
@@ -104,9 +104,9 @@ vi.mock("openclaw/plugin-sdk/memory-host-core", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("carapace/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/session-store-runtime")>(
+    "carapace/plugin-sdk/session-store-runtime",
   );
   return {
     ...actual,
@@ -116,10 +116,10 @@ vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", async () => {
+vi.mock("carapace/plugin-sdk/session-transcript-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/session-transcript-runtime")
-  >("openclaw/plugin-sdk/session-transcript-runtime");
+    typeof import("carapace/plugin-sdk/session-transcript-runtime")
+  >("carapace/plugin-sdk/session-transcript-runtime");
   return {
     ...actual,
     readSessionTranscriptRawDelta: async (
@@ -370,7 +370,7 @@ describe("active-memory plugin", () => {
         openKeyedStore: (options: OpenKeyedStoreOptions) =>
           createPluginStateKeyedStoreForTests("active-memory", {
             ...options,
-            env: { ...process.env, OPENCLAW_STATE_DIR: pluginStateDir },
+            env: { ...process.env, CARAPACE_STATE_DIR: pluginStateDir },
           }),
       },
       config: {
@@ -618,14 +618,14 @@ describe("active-memory plugin", () => {
   };
   const registerPluginConfig = (overrides: Record<string, unknown>) => {
     api.pluginConfig = { agents: ["main"], mode: "always", ...overrides };
-    plugin.register(api as unknown as OpenClawPluginApi);
+    plugin.register(api as unknown as CarapacePluginApi);
   };
   const seedSession = (sessionKey: string, sessionId: string, updatedAt = 0) => {
     hoisted.sessionStore[sessionKey] = { sessionId, updatedAt };
   };
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-active-memory-test-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-active-memory-test-"));
     pluginStateDir = path.join(fixtureRoot, "plugin-state");
     stateDir = path.join(fixtureRoot, "state");
   });
@@ -633,14 +633,14 @@ describe("active-memory plugin", () => {
   beforeEach(async () => {
     vi.resetAllMocks();
     api.pluginConfig = { agents: ["main"] };
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
     await fs.mkdir(stateDir, { recursive: true });
     // Keep the SQLite file/schema warm, but clear the plugin's only real namespace.
     await createPluginStateKeyedStoreForTests("active-memory", {
       namespace: "session-toggles",
       maxEntries: 10_000,
-      env: { ...process.env, OPENCLAW_STATE_DIR: pluginStateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: pluginStateDir },
     }).clear();
     configFile = {
       session: { dmScope: "per-peer" },
@@ -741,7 +741,7 @@ describe("active-memory plugin", () => {
     );
     testing.resetActiveRecallCacheForTests();
     testing.setTimeoutPartialDataGraceMsForTests(5);
-    plugin.register(api as unknown as OpenClawPluginApi);
+    plugin.register(api as unknown as CarapacePluginApi);
   });
 
   afterEach(() => {
@@ -751,7 +751,7 @@ describe("active-memory plugin", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     await fs.rm(fixtureRoot, { recursive: true, force: true });
     fixtureRoot = "";
@@ -3287,11 +3287,11 @@ describe("active-memory plugin", () => {
     testing.setTimeoutPartialDataGraceMsForTests(50);
     registerPluginConfig({ timeoutMs: 100, maxSummaryChars: 80, logging: true });
     const sessionRuntime = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/session-store-runtime")
-    >("openclaw/plugin-sdk/session-store-runtime");
+      typeof import("carapace/plugin-sdk/session-store-runtime")
+    >("carapace/plugin-sdk/session-store-runtime");
     const transcriptRuntime = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/session-transcript-runtime")
-    >("openclaw/plugin-sdk/session-transcript-runtime");
+      typeof import("carapace/plugin-sdk/session-transcript-runtime")
+    >("carapace/plugin-sdk/session-transcript-runtime");
     hoisted.patchSessionEntry.mockImplementationOnce(sessionRuntime.patchSessionEntry);
     hoisted.cleanupSessionLifecycleArtifacts.mockImplementationOnce(
       sessionRuntime.cleanupSessionLifecycleArtifacts,
@@ -4688,7 +4688,7 @@ describe("active-memory plugin", () => {
           resolveLookup = resolve;
         }),
     });
-    plugin.register(api as unknown as OpenClawPluginApi);
+    plugin.register(api as unknown as CarapacePluginApi);
 
     const resultPromise = runPromptBuild(
       { prompt: "what food do i usually order? stalled toggle lookup" },
@@ -4725,7 +4725,7 @@ describe("active-memory plugin", () => {
           setTimeout(() => resolve(undefined), 1_490);
         }),
     });
-    plugin.register(api as unknown as OpenClawPluginApi);
+    plugin.register(api as unknown as CarapacePluginApi);
     runEmbeddedAgent.mockImplementationOnce(() => new Promise<never>(() => {}));
 
     const resultPromise = runPromptBuild(
@@ -4852,7 +4852,7 @@ describe("active-memory plugin", () => {
       const staleReadStarted = createDeferred<void>();
       const releaseStaleRead = createDeferred<void>();
       if (stalePoll) {
-        const transcriptRuntime = await import("openclaw/plugin-sdk/session-transcript-runtime");
+        const transcriptRuntime = await import("carapace/plugin-sdk/session-transcript-runtime");
         const readDelta = transcriptRuntime.readSessionTranscriptRawDelta;
         let heldRead = false;
         vi.spyOn(transcriptRuntime, "readSessionTranscriptRawDelta").mockImplementation(

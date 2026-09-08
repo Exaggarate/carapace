@@ -34,7 +34,7 @@ describe("runEmbeddedAttempt abort races", () => {
       const held = createDeferred();
       const started = createDeferred();
       const cleanupScope = createAgentCleanupScope();
-      hoisted.createOpenClawCodingToolsMock.mockImplementation((options: unknown) => {
+      hoisted.createCarapaceCodingToolsMock.mockImplementation((options: unknown) => {
         (
           options as { registerRunCleanup: (cleanup: () => Promise<void>) => void }
         ).registerRunCleanup(async () => {

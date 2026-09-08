@@ -1,5 +1,5 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { selectPreferredLocalModelId } from "openclaw/plugin-sdk/provider-model-shared";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { selectPreferredLocalModelId } from "carapace/plugin-sdk/provider-model-shared";
 import { normalizeOllamaCloudModelId, OLLAMA_CLOUD_DEFAULT_MODELS } from "./defaults.js";
 import {
   buildDefaultOllamaCloudModelDefinition,

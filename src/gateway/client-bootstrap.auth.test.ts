@@ -6,12 +6,12 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createConfigIoContext } from "../config/io.context.js";
 import { readConfigFileSnapshotFromContext } from "../config/io.snapshot.js";
 import type { GatewayRemoteConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayClientBootstrap } from "./client-bootstrap.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-function remoteGatewayConfig(remote?: GatewayRemoteConfig): OpenClawConfig {
+function remoteGatewayConfig(remote?: GatewayRemoteConfig): CarapaceConfig {
   return {
     gateway: {
       mode: "remote",
@@ -24,7 +24,7 @@ function remoteGatewayConfig(remote?: GatewayRemoteConfig): OpenClawConfig {
 }
 
 async function expectInteractiveAuth(
-  params: { config: OpenClawConfig; env?: NodeJS.ProcessEnv },
+  params: { config: CarapaceConfig; env?: NodeJS.ProcessEnv },
   expectedAuth: { token?: string; password?: string },
 ): Promise<void> {
   const result = await resolveGatewayClientBootstrap({
@@ -38,14 +38,14 @@ async function expectInteractiveAuth(
 
 describe("resolveGatewayClientBootstrap interactive auth policy", () => {
   it("preserves an escaped literal credential from config load through client bootstrap", async () => {
-    const root = tempDirs.make("openclaw-client-bootstrap-env-facts-");
-    const configPath = path.join(root, "openclaw.json");
+    const root = tempDirs.make("carapace-client-bootstrap-env-facts-");
+    const configPath = path.join(root, "carapace.json");
     const env: NodeJS.ProcessEnv = {
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
       VITEST: "true",
     };
     fs.writeFileSync(
@@ -69,14 +69,14 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
   });
 
   it("preserves a substituted template-looking literal through interactive client auth", async () => {
-    const root = tempDirs.make("openclaw-client-bootstrap-resolved-literal-");
-    const configPath = path.join(root, "openclaw.json");
+    const root = tempDirs.make("carapace-client-bootstrap-resolved-literal-");
+    const configPath = path.join(root, "carapace.json");
     const env: NodeJS.ProcessEnv = {
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
       SOURCE: "${OTHER}",
       VITEST: "true",
     };
@@ -100,7 +100,7 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
     expect(result.auth).toEqual({ token: "${OTHER}", password: undefined });
   });
 
-  it("keeps configured local password ahead of OPENCLAW_GATEWAY_PASSWORD", async () => {
+  it("keeps configured local password ahead of CARAPACE_GATEWAY_PASSWORD", async () => {
     await expectInteractiveAuth(
       {
         config: {
@@ -109,7 +109,7 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
             auth: { mode: "password", password: "local-config-auth-value" }, // pragma: allowlist secret
           },
         },
-        env: { OPENCLAW_GATEWAY_PASSWORD: "shell-password-value" }, // pragma: allowlist secret
+        env: { CARAPACE_GATEWAY_PASSWORD: "shell-password-value" }, // pragma: allowlist secret
       },
       {
         token: undefined,
@@ -118,11 +118,11 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
     );
   });
 
-  it("falls back to OPENCLAW_GATEWAY_PASSWORD without configured local password", async () => {
+  it("falls back to CARAPACE_GATEWAY_PASSWORD without configured local password", async () => {
     await expectInteractiveAuth(
       {
         config: { gateway: { mode: "local", auth: { mode: "password" } } },
-        env: { OPENCLAW_GATEWAY_PASSWORD: "shell-password-value" }, // pragma: allowlist secret
+        env: { CARAPACE_GATEWAY_PASSWORD: "shell-password-value" }, // pragma: allowlist secret
       },
       {
         token: undefined,
@@ -131,21 +131,21 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
     );
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN as remote interactive fallback", async () => {
+  it("uses CARAPACE_GATEWAY_TOKEN as remote interactive fallback", async () => {
     await expectInteractiveAuth(
       {
         config: remoteGatewayConfig(),
-        env: { OPENCLAW_GATEWAY_TOKEN: "shell-token-value" },
+        env: { CARAPACE_GATEWAY_TOKEN: "shell-token-value" },
       },
       { token: "shell-token-value", password: undefined },
     );
   });
 
-  it("keeps configured remote token ahead of OPENCLAW_GATEWAY_TOKEN", async () => {
+  it("keeps configured remote token ahead of CARAPACE_GATEWAY_TOKEN", async () => {
     await expectInteractiveAuth(
       {
         config: remoteGatewayConfig({ token: "remote-config-auth-value" }),
-        env: { OPENCLAW_GATEWAY_TOKEN: "shell-token-value" },
+        env: { CARAPACE_GATEWAY_TOKEN: "shell-token-value" },
       },
       { token: "remote-config-auth-value", password: undefined },
     );
@@ -156,7 +156,7 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
       config: remoteGatewayConfig({
         token: { source: "env", provider: "default", id: "ABSENT_BOOTSTRAP_REMOTE_TOKEN" },
       }),
-      env: { OPENCLAW_GATEWAY_TOKEN: "shell-token-value" },
+      env: { CARAPACE_GATEWAY_TOKEN: "shell-token-value" },
       authPolicy: "interactive",
     });
 
@@ -171,7 +171,7 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
           gateway: { mode: "local", auth: { token: "configured-auth-value" } },
         },
         gatewayUrl: "wss://override.example/rpc",
-        env: { OPENCLAW_GATEWAY_TOKEN: "shell-token-value" },
+        env: { CARAPACE_GATEWAY_TOKEN: "shell-token-value" },
         authPolicy: "interactive",
         overrideAuthErrorHint: "Fix: pass explicit auth.",
       }),
@@ -184,8 +184,8 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
         gateway: { mode: "local", auth: { token: "configured-auth-value" } },
       },
       env: {
-        OPENCLAW_GATEWAY_URL: "wss://override.example/rpc",
-        OPENCLAW_GATEWAY_TOKEN: "shell-token-value",
+        CARAPACE_GATEWAY_URL: "wss://override.example/rpc",
+        CARAPACE_GATEWAY_TOKEN: "shell-token-value",
       },
       authPolicy: "interactive",
       overrideAuthErrorHint: "Fix: pass explicit auth.",
@@ -201,7 +201,7 @@ describe("resolveGatewayClientBootstrap interactive auth policy", () => {
       },
       gatewayUrl: "wss://override.example/rpc",
       explicitAuth: { token: "caller-auth-value" },
-      env: { OPENCLAW_GATEWAY_TOKEN: "shell-token-value" },
+      env: { CARAPACE_GATEWAY_TOKEN: "shell-token-value" },
       authPolicy: "interactive",
       overrideAuthErrorHint: "Fix: pass explicit auth.",
     });

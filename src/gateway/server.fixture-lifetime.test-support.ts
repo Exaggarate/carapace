@@ -76,9 +76,9 @@ export default defineConfig({
           PATH: process.env.PATH,
           HOME: path.join(root, "home"),
           USERPROFILE: path.join(root, "home"),
-          OPENCLAW_HOME: path.join(root, "home"),
-          OPENCLAW_STATE_DIR: path.join(root, "home/.openclaw"),
-          OPENCLAW_CONFIG_PATH: path.join(root, "home/.openclaw/openclaw.json"),
+          CARAPACE_HOME: path.join(root, "home"),
+          CARAPACE_STATE_DIR: path.join(root, "home/.carapace"),
+          CARAPACE_CONFIG_PATH: path.join(root, "home/.carapace/carapace.json"),
           TMPDIR: path.join(root, "tmp"),
           TMP: path.join(root, "tmp"),
           TEMP: path.join(root, "tmp"),
@@ -208,7 +208,7 @@ test("observes startup cleanup ownership through fixture teardown", async () => 
     await own(runHooks(fixture.setup));
     await own(runHooks(fixture.reset));
     const home = process.env.HOME;
-    const state = process.env.OPENCLAW_STATE_DIR;
+    const state = process.env.CARAPACE_STATE_DIR;
     if (!home || !state) throw new Error("expected isolated Gateway fixture selectors");
     const markers = { home: path.join(home, "owned.txt"), state: path.join(state, "owned.txt") };
     for (const file of Object.values(markers)) fs.writeFileSync(file, "owned");
@@ -289,10 +289,10 @@ test("observes startup cleanup ownership through fixture teardown", async () => 
     const nativeStartupMatches = scenario.missingTls
       ? startupError?.message === tlsError && tlsError?.includes("cert/key missing")
       : listenResults[0]?.status === "rejected" && startupError === listenResults[0].reason;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "synthetic-retained-startup-token";
+    process.env.CARAPACE_GATEWAY_TOKEN = "synthetic-retained-startup-token";
     const selectors = new Map([
-      "HOME", "USERPROFILE", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_AGENT_DIR", "OPENCLAW_GATEWAY_TOKEN",
+      "HOME", "USERPROFILE", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH",
+      "CARAPACE_AGENT_DIR", "CARAPACE_GATEWAY_TOKEN",
     ].map(key => [key, process.env[key]]));
     const readState = () => ({
       ...Object.fromEntries(Object.entries(markers).map(([name, file]) => {

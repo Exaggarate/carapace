@@ -12,7 +12,7 @@ import {
   OutboundDeliveryError,
   PlatformMessageNotDispatchedError,
 } from "../../infra/outbound/deliver-types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { getReplyPayloadMetadata, setReplyPayloadMetadata } from "../reply-payload.js";
 import type { ReplyPayload } from "../types.js";
 import {
@@ -23,7 +23,7 @@ import {
 } from "./reply-dispatcher.js";
 
 async function makePendingFinalFixture() {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-dispatcher-pending-final-"));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-dispatcher-pending-final-"));
   const storePath = path.join(tmpDir, "sessions.json");
   const sessionKey = "agent:main:telegram:direct:123";
   await replaceSessionEntry(
@@ -99,7 +99,7 @@ describe("beforeDeliver in reply dispatcher", () => {
         dispatcher.sendFinalReply(fixture.payload);
         dispatcher.markComplete();
         const receipt = await dispatcher.waitForIdle();
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         expect(
           (loadSessionEntry(fixture) as InternalSessionEntry)?.pendingFinalDelivery?.deliveries,
         ).toEqual([{ id: "delivery-1", state }]);
@@ -111,7 +111,7 @@ describe("beforeDeliver in reply dispatcher", () => {
         await replay.waitForIdle();
         expect(deliver).toHaveBeenCalledOnce();
       } finally {
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         await fs.rm(fixture.tmpDir, { recursive: true, force: true });
       }
     },

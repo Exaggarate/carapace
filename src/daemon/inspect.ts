@@ -1,7 +1,7 @@
-/** Inspects installed platform services for extra OpenClaw or legacy gateway jobs. */
+/** Inspects installed platform services for extra Carapace or legacy gateway jobs. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_SERVICE_KIND,
   GATEWAY_SERVICE_MARKER,
@@ -22,7 +22,7 @@ export type ExtraGatewayService = {
   label: string;
   detail: string;
   scope: "user" | "system";
-  marker?: "openclaw" | "clawdbot";
+  marker?: "carapace" | "clawdbot";
   legacy?: boolean;
 };
 
@@ -30,7 +30,7 @@ export type FindExtraGatewayServicesOptions = {
   deep?: boolean;
 };
 
-const EXTRA_MARKERS = ["openclaw", "clawdbot"] as const;
+const EXTRA_MARKERS = ["carapace", "clawdbot"] as const;
 
 function quotePosixCleanupArgument(value: string): string {
   return /^[A-Za-z0-9_@%+=:,./-]+$/.test(value) ? value : `'${value.replaceAll("'", "'\\''")}'`;
@@ -131,8 +131,8 @@ export function detectMarkerLineWithGateway(contents: string): Marker | null {
 
 function hasGatewayServiceMarker(content: string): boolean {
   const lower = normalizeLowercaseStringOrEmpty(content);
-  const markerKeys = ["openclaw_service_marker"];
-  const kindKeys = ["openclaw_service_kind"];
+  const markerKeys = ["carapace_service_marker"];
+  const kindKeys = ["carapace_service_kind"];
   const markerValues = [normalizeLowercaseStringOrEmpty(GATEWAY_SERVICE_MARKER)];
   const hasMarkerKey = markerKeys.some((key) => lower.includes(key));
   const hasKindKey = kindKeys.some((key) => lower.includes(key));
@@ -195,38 +195,38 @@ function detectLaunchdGatewayExecutionMarker(contents: string): Marker | null {
   return null;
 }
 
-function isOpenClawGatewayLaunchdService(label: string, contents: string): boolean {
+function isCarapaceGatewayLaunchdService(label: string, contents: string): boolean {
   if (hasGatewayServiceMarker(contents)) {
     return true;
   }
-  if (detectLaunchdGatewayExecutionMarker(contents) !== "openclaw") {
+  if (detectLaunchdGatewayExecutionMarker(contents) !== "carapace") {
     return false;
   }
-  return label.startsWith("ai.openclaw.");
+  return label.startsWith("ai.carapace.");
 }
 
-function isOpenClawGatewaySystemdService(name: string, contents: string): boolean {
+function isCarapaceGatewaySystemdService(name: string, contents: string): boolean {
   if (hasGatewayServiceMarker(contents)) {
     return true;
   }
-  if (!name.startsWith("openclaw-gateway")) {
+  if (!name.startsWith("carapace-gateway")) {
     return false;
   }
   return normalizeLowercaseStringOrEmpty(contents).includes("gateway");
 }
 
-function isOpenClawGatewayTaskName(name: string): boolean {
+function isCarapaceGatewayTaskName(name: string): boolean {
   const normalized = normalizeLowercaseStringOrEmpty(name);
   if (!normalized) {
     return false;
   }
   // Windows schtasks /Query returns task names prefixed with \ (e.g.
-  // \OpenClaw Gateway for root-folder tasks). Strip the leading
+  // \Carapace Gateway for root-folder tasks). Strip the leading
   // backslash so the configured name matches correctly and the live
   // gateway task is not misidentified as an extra gateway service.
   const stripped = normalized.replace(/^\\+/, "");
   const defaultName = normalizeLowercaseStringOrEmpty(resolveGatewayWindowsTaskName());
-  return stripped === defaultName || /^openclaw gateway \(.+\)$/.test(stripped);
+  return stripped === defaultName || /^carapace gateway \(.+\)$/.test(stripped);
 }
 
 function isIgnoredLaunchdLabel(label: string): boolean {
@@ -293,18 +293,18 @@ async function collectServiceFiles(params: {
 async function scanLaunchdDir(params: {
   dir: string;
   scope: "user" | "system";
-  includeManagedOpenClaw?: boolean;
+  includeManagedCarapace?: boolean;
   managedLabel?: string;
 }): Promise<ExtraGatewayService[]> {
   const results: ExtraGatewayService[] = [];
   const candidates = await collectServiceFiles({
     dir: params.dir,
     extension: ".plist",
-    isIgnoredName: params.includeManagedOpenClaw ? () => false : isIgnoredLaunchdLabel,
+    isIgnoredName: params.includeManagedCarapace ? () => false : isIgnoredLaunchdLabel,
   });
 
   for (const { name: labelFromName, fullPath, contents } of candidates) {
-    const nativeLabel = params.includeManagedOpenClaw
+    const nativeLabel = params.includeManagedCarapace
       ? await readLaunchDaemonPlistLabel(fullPath)
       : null;
     const label =
@@ -316,8 +316,8 @@ async function scanLaunchdDir(params: {
     const marker =
       label === params.managedLabel ||
       hasGatewayServiceMarker(contents) ||
-      executionMarker === "openclaw"
-        ? "openclaw"
+      executionMarker === "carapace"
+        ? "carapace"
         : executionMarker === "clawdbot" || legacyLabel
           ? "clawdbot"
           : null;
@@ -326,13 +326,13 @@ async function scanLaunchdDir(params: {
     }
     // Managed current services are expected; this scan reports extra jobs that
     // can compete for ports or survive old installs.
-    if (!params.includeManagedOpenClaw && isIgnoredLaunchdLabel(label)) {
+    if (!params.includeManagedCarapace && isIgnoredLaunchdLabel(label)) {
       continue;
     }
     if (
-      !params.includeManagedOpenClaw &&
-      marker === "openclaw" &&
-      isOpenClawGatewayLaunchdService(label, contents)
+      !params.includeManagedCarapace &&
+      marker === "carapace" &&
+      isCarapaceGatewayLaunchdService(label, contents)
     ) {
       continue;
     }
@@ -342,7 +342,7 @@ async function scanLaunchdDir(params: {
       detail: `plist: ${fullPath}`,
       scope: params.scope,
       marker,
-      legacy: marker !== "openclaw" || isLegacyLabel(label),
+      legacy: marker !== "carapace" || isLegacyLabel(label),
     });
   }
 
@@ -352,26 +352,26 @@ async function scanLaunchdDir(params: {
 async function scanSystemdDir(params: {
   dir: string;
   scope: "user" | "system";
-  includeManagedOpenClaw?: boolean;
+  includeManagedCarapace?: boolean;
 }): Promise<ExtraGatewayService[]> {
   const results: ExtraGatewayService[] = [];
   const candidates = await collectServiceFiles({
     dir: params.dir,
     extension: ".service",
-    isIgnoredName: params.includeManagedOpenClaw ? () => false : isIgnoredSystemdName,
+    isIgnoredName: params.includeManagedCarapace ? () => false : isIgnoredSystemdName,
   });
 
   for (const { entry, name, fullPath, contents } of candidates) {
     const marker = hasGatewayServiceMarker(contents)
-      ? "openclaw"
+      ? "carapace"
       : detectMarkerLineWithGateway(contents);
     if (!marker) {
       continue;
     }
     if (
-      !params.includeManagedOpenClaw &&
-      marker === "openclaw" &&
-      isOpenClawGatewaySystemdService(name, contents)
+      !params.includeManagedCarapace &&
+      marker === "carapace" &&
+      isCarapaceGatewaySystemdService(name, contents)
     ) {
       continue;
     }
@@ -381,7 +381,7 @@ async function scanSystemdDir(params: {
       detail: `unit: ${fullPath}`,
       scope: params.scope,
       marker,
-      legacy: marker !== "openclaw",
+      legacy: marker !== "carapace",
     });
   }
 
@@ -400,7 +400,7 @@ export async function findSystemGatewayServices(): Promise<ExtraGatewayService[]
         ...(await scanSystemdDir({
           dir,
           scope: "system",
-          includeManagedOpenClaw: true,
+          includeManagedCarapace: true,
         })),
       );
     }
@@ -494,7 +494,7 @@ export async function findExtraGatewayServices(
         for (const svc of await scanLaunchdDir({
           dir: path.join(path.sep, "Library", "LaunchDaemons"),
           scope: "system",
-          includeManagedOpenClaw: true,
+          includeManagedCarapace: true,
           managedLabel: resolveLaunchAgentLabel(env),
         })) {
           push(svc);
@@ -570,7 +570,7 @@ export async function findExtraGatewayServices(
       if (!name) {
         continue;
       }
-      if (isOpenClawGatewayTaskName(name)) {
+      if (isCarapaceGatewayTaskName(name)) {
         continue;
       }
       const lowerName = normalizeLowercaseStringOrEmpty(name);
@@ -591,7 +591,7 @@ export async function findExtraGatewayServices(
         detail: task.taskToRun ? `task: ${name}, run: ${task.taskToRun}` : name,
         scope: "system",
         marker,
-        legacy: marker !== "openclaw",
+        legacy: marker !== "carapace",
       });
     }
     return results;

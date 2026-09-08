@@ -2,13 +2,13 @@ import path from "node:path";
 import type {
   AgentHarnessAttemptParamsV2,
   AnyAgentTool,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createContractToolTerminalObserver } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
-import { AuthStorage, ModelRegistry } from "openclaw/plugin-sdk/agent-sessions";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createAdmittedHostCapabilityTestFixture } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createContractToolTerminalObserver } from "carapace/plugin-sdk/agent-runtime-test-contracts";
+import { AuthStorage, ModelRegistry } from "carapace/plugin-sdk/agent-sessions";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createAdmittedHostCapabilityTestFixture } from "carapace/plugin-sdk/plugin-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { expect, it, vi } from "vitest";
 import { createCopilotAgentHarness } from "../harness.js";
 import { createCopilotFaultPeer } from "./catalog-lifetime.test-support.js";
@@ -17,7 +17,7 @@ import { createCopilotToolBridge } from "./tool-bridge.js";
 import * as toolBridgeModule from "./tool-bridge.js";
 
 it("cancels a resumed Code Mode cell during real SDK session.error cleanup before host closure", async () => {
-  const state = await createOpenClawTestState({ label: "copilot-catalog-lifetime" });
+  const state = await createCarapaceTestState({ label: "copilot-catalog-lifetime" });
   const peer = await createCopilotFaultPeer();
   const pool = createCopilotClientPool({ sdkFactory: () => peer.client });
   const harness = createCopilotAgentHarness({ pool });
@@ -29,7 +29,7 @@ it("cancels a resumed Code Mode cell during real SDK session.error cleanup befor
   let nestedSignal: AbortSignal | undefined;
   type ToolOptions = NonNullable<
     Parameters<
-      NonNullable<Parameters<typeof createCopilotToolBridge>[0]["createOpenClawCodingTools"]>
+      NonNullable<Parameters<typeof createCopilotToolBridge>[0]["createCarapaceCodingTools"]>
     >[0]
   >;
   let catalog: ToolOptions["toolSearchCatalogRef"];
@@ -107,7 +107,7 @@ it("cancels a resumed Code Mode cell during real SDK session.error cleanup befor
     .mockImplementation(async (input) => {
       const bridge = await realCreateToolBridge({
         ...input,
-        createOpenClawCodingTools: (options) => {
+        createCarapaceCodingTools: (options) => {
           catalog = options?.toolSearchCatalogRef;
           contextSignal = options?.abortSignal;
           return [fixtureTool];

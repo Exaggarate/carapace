@@ -1,5 +1,5 @@
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { GatewayUpdateAvailableEventPayload } from "../../../src/gateway/events.js";
 import type { UpdateRunRecord } from "../../../src/infra/update-run-record.js";
 import { isReportableUpdateRun } from "../../../src/shared/update-outcome.js";

@@ -16,7 +16,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI continue in terminal mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed at ${executablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed at ${executablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 const basePath = new URL("/nested/$&;=()+,![]{}'`/%25PATH%25", "http://localhost").pathname;
@@ -100,7 +100,7 @@ suite.define(() => {
         await page.goto(
           controlUiSessionUrl(new URL(`${basePath}/`, suite.server.baseUrl).href, sessionKey),
         );
-        const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+        const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
         await expect
           .poll(() => activePane.evaluate((pane) => (pane as ChatPaneElement).sessionKey))
           .toBe(sessionKey);
@@ -128,12 +128,12 @@ suite.define(() => {
         await page.screenshot({ path: path.join(artifactDir, "01-menu.png"), fullPage: true });
         await action.click();
 
-        const dialog = page.locator("openclaw-modal-dialog.continue-in-terminal-dialog");
+        const dialog = page.locator("carapace-modal-dialog.continue-in-terminal-dialog");
         await dialog.waitFor({ state: "visible" });
         await action.waitFor({ state: "hidden" });
         const command = (await dialog.locator("code").textContent()) ?? "";
-        expect(command).toMatch(/^openclaw resume --handoff [A-Za-z0-9_-]+$/u);
-        const encoded = command.slice("openclaw resume --handoff ".length);
+        expect(command).toMatch(/^carapace resume --handoff [A-Za-z0-9_-]+$/u);
+        const encoded = command.slice("carapace resume --handoff ".length);
         expect(decodeResumeHandoff(encoded)).toEqual({
           version: 1,
           sessionKey,
@@ -191,7 +191,7 @@ suite.define(() => {
         await page.goto(
           controlUiSessionUrl(new URL(`${basePath}/`, suite.server.baseUrl).href, sessionKey),
         );
-        const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+        const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
         // Mock history also renders in the retained boot pane. Wait for this session's pane
         // before Playwright resolves a control that can stay mounted beneath its replacement.
         await expect

@@ -11,44 +11,44 @@ export type {
   ChannelOutboundAdapter,
   ChannelPlugin,
   HistoryEntry,
-  OpenClawConfig,
-  OpenClawPluginApi,
+  CarapaceConfig,
+  CarapacePluginApi,
   OutboundIdentity,
   PluginRuntime,
   ReplyPayload,
-} from "openclaw/plugin-sdk/core";
-export type { OpenClawConfig as ClawdbotConfig } from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/core";
+export type { CarapaceConfig as ClawdbotConfig } from "carapace/plugin-sdk/core";
 export type RuntimeEnv = {
   log: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   exit: (code: number) => void;
 };
-export type { GroupToolPolicyConfig } from "openclaw/plugin-sdk/config-contracts";
+export type { GroupToolPolicyConfig } from "carapace/plugin-sdk/config-contracts";
 export {
   DEFAULT_ACCOUNT_ID,
   buildChannelConfigSchema,
   createActionGate,
   createDedupeCache,
-} from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/core";
 export {
   PAIRING_APPROVED_MESSAGE,
   buildProbeChannelStatusSummary,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/channel-status";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-export { createReplyPrefixContext } from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-status";
+export { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
+export { createReplyPrefixContext } from "carapace/plugin-sdk/channel-outbound";
 export {
   evaluateSupplementalContextVisibility,
   filterSupplementalContextItems,
   resolveChannelContextVisibilityMode,
-} from "openclaw/plugin-sdk/context-visibility-runtime";
-export { getSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-export { readJsonFileWithFallback } from "openclaw/plugin-sdk/json-store";
-export { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-export { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/context-visibility-runtime";
+export { getSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+export { readJsonFileWithFallback } from "carapace/plugin-sdk/json-store";
+export { normalizeAgentId } from "carapace/plugin-sdk/routing";
+export { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 export {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 export { setFeishuRuntime } from "./src/runtime.js";

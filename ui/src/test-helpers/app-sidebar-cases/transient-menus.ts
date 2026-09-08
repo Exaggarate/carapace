@@ -20,7 +20,7 @@ describe("AppSidebar transient menus", () => {
 
     const menu = sidebar.querySelector(".sidebar-session-sort-menu");
     expect(menu).not.toBeNull();
-    expect(menu?.closest("openclaw-menu-surface")).toBeNull();
+    expect(menu?.closest("carapace-menu-surface")).toBeNull();
   });
 
   it("ignores a stale sort-menu hide after opening its replacement", async () => {
@@ -71,7 +71,7 @@ describe("AppSidebar transient menus", () => {
       'wa-dropdown-item[value="command:agent-settings"]',
     );
     expect(firstMenu).not.toBeNull();
-    expect(firstMenu?.closest("openclaw-menu-surface")).toBeNull();
+    expect(firstMenu?.closest("carapace-menu-surface")).toBeNull();
     expect(settingsItem).not.toBeNull();
     firstMenu?.dispatchEvent(
       new CustomEvent("wa-select", {
@@ -108,7 +108,7 @@ describe("AppSidebar transient menus", () => {
     await sidebar.updateComplete;
     const firstMenu = sidebar.querySelector<HTMLElement>(".sidebar-more-menu");
     expect(firstMenu).not.toBeNull();
-    expect(firstMenu?.closest("openclaw-menu-surface")).toBeNull();
+    expect(firstMenu?.closest("carapace-menu-surface")).toBeNull();
     trigger.click();
     await sidebar.updateComplete;
     trigger.click();
@@ -135,7 +135,7 @@ describe("AppSidebar transient menus", () => {
     await sidebar.updateComplete;
     const firstMenu = sidebar.querySelector<HTMLElement>(".sidebar-customize-menu");
     expect(firstMenu).not.toBeNull();
-    expect(firstMenu?.closest("openclaw-menu-surface")).toBeNull();
+    expect(firstMenu?.closest("carapace-menu-surface")).toBeNull();
     firstMenu?.dispatchEvent(
       new CustomEvent("wa-select", {
         bubbles: true,

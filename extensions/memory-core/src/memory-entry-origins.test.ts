@@ -2,13 +2,13 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "carapace/plugin-sdk/sqlite-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readMemoryPreimages, storeMemoryPreimage } from "./dreaming-consolidation-artifacts.js";
 import {
@@ -33,19 +33,19 @@ describe("memory entry origins", () => {
 
   beforeEach(async () => {
     stateDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-origin-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-origin-")),
     );
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     await configureMemoryCoreDreamingStateForTests();
-    await fs.mkdir(path.dirname(resolveOpenClawAgentSqlitePath({ agentId: "main" })), {
+    await fs.mkdir(path.dirname(resolveCarapaceAgentSqlitePath({ agentId: "main" })), {
       recursive: true,
     });
   });
 
   afterEach(async () => {
     resetMemoryCoreDreamingStateForTests();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
@@ -62,7 +62,7 @@ describe("memory entry origins", () => {
   }
 
   it("lazily restores the additive origins table without changing the agent schema version", () => {
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     const version = db.prepare("PRAGMA user_version").get();
     db.exec("DROP TABLE IF EXISTS memory_entry_origins");
 
@@ -78,7 +78,7 @@ describe("memory entry origins", () => {
   });
 
   it("lazily persists forgotten sessions without recreating tombstones on reads or repeat writes", () => {
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     const version = db.prepare("PRAGMA user_version").get();
     const revisionBefore = db.prepare("SELECT revision FROM memory_index_state WHERE id = 1").get();
     db.exec("DROP TABLE IF EXISTS memory_session_tombstones");
@@ -131,8 +131,8 @@ describe("memory entry origins", () => {
       origins: [origin("prior", "session-1"), origin("candidate", "session-2")],
     });
     const priorEntry = "- The deployment target is staging.";
-    const previousMemory = `# Memory\n<!-- openclaw-memory-promotion:prior -->\n${priorEntry}\n`;
-    const currentMemory = `# Memory\n<!-- openclaw-memory-promotion:candidate -->\n- The deployment target is staging. Source: memory/a.md#L1-L1\n`;
+    const previousMemory = `# Memory\n<!-- carapace-memory-promotion:prior -->\n${priorEntry}\n`;
+    const currentMemory = `# Memory\n<!-- carapace-memory-promotion:candidate -->\n- The deployment target is staging. Source: memory/a.md#L1-L1\n`;
 
     reserveMemoryEntryOrigins({
       agentIds: ["main"],
@@ -165,8 +165,8 @@ describe("memory entry origins", () => {
       origins: [origin("stale", "session-1"), origin("surviving", "session-3")],
     });
     const priorEntry = "- The deployment target is staging.";
-    const previousMemory = `<!-- openclaw-memory-lineage:target -->\n<!-- openclaw-memory-promotion:stale -->\n${priorEntry}\n<!-- openclaw-memory-promotion:surviving -->\n- Keep this independent memory.\n`;
-    const currentMemory = `<!-- openclaw-memory-promotion:surviving -->\n- Keep this independent memory.\n<!-- openclaw-memory-lineage:target -->\n<!-- openclaw-memory-promotion:replacement -->\n- The deployment target is production.\n`;
+    const previousMemory = `<!-- carapace-memory-lineage:target -->\n<!-- carapace-memory-promotion:stale -->\n${priorEntry}\n<!-- carapace-memory-promotion:surviving -->\n- Keep this independent memory.\n`;
+    const currentMemory = `<!-- carapace-memory-promotion:surviving -->\n- Keep this independent memory.\n<!-- carapace-memory-lineage:target -->\n<!-- carapace-memory-promotion:replacement -->\n- The deployment target is production.\n`;
 
     reserveMemoryEntryOrigins({
       agentIds: ["main"],
@@ -235,7 +235,7 @@ describe("memory entry origins", () => {
           origin(key, key),
         ),
       });
-      const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+      const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
       db.prepare(
         "INSERT INTO memory_index_chunks (id, path, source, start_line, end_line, hash, model, text, embedding, updated_at) VALUES (?, ?, 'memory', 1, 2, ?, 'fts-only', ?, '[]', 1000)",
       ).run(

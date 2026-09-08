@@ -1,11 +1,11 @@
 import { afterEach, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 
 const retirementRules = vi.hoisted(() =>
   [
@@ -74,24 +74,24 @@ vi.mock("../agents/openai-model-routes.js", async (importOriginal) => {
           baseUrl: "https://api.openai.com/v1",
           authRequirement: "api-key",
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         },
         {
           api: "openai-chatgpt-responses",
           baseUrl: "https://chatgpt.com/backend-api/codex",
           authRequirement: "subscription",
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["carapace", "codex"] },
         },
       ],
     }),
   };
 });
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const state of states.splice(0)) {
     await state.cleanup();
   }
@@ -100,7 +100,7 @@ afterEach(async () => {
 });
 
 export async function createRetiredModelFixture(auth: "oauth" | "api-key" = "oauth") {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     prefix: "doctor-retired-model-",
   });
@@ -120,7 +120,7 @@ export async function createRetiredModelFixture(auth: "oauth" | "api-key" = "oau
       platform: { provider: "openai", type: "api_key", key: "synthetic-key" },
     },
   });
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { entries: { main: {} }, defaults: { model: "openai/current-model" } },
     auth: { order: { openai: [auth === "oauth" ? "chatgpt" : "platform"] } },
     models: { providers: { openai: { baseUrl: "https://api.openai.com/v1", models: [] } } },

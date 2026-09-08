@@ -1,5 +1,5 @@
 // Control UI controller manages skill workshop gateway state.
-import { readSkillProposalRevisionChangedError } from "@openclaw/gateway-protocol";
+import { readSkillProposalRevisionChangedError } from "@carapace/gateway-protocol";
 import { stripFrontmatterBlock } from "../../../../packages/markdown-core/src/frontmatter.js";
 import type { AgentSelectionCapability } from "../../app/agent-selection.ts";
 import type { ApplicationGateway } from "../../app/context.ts";
@@ -217,7 +217,7 @@ async function readSkillWorkshopInstalledSkill(
           );
           // Same-named workspace proposals are not versions of this agent's installed skill.
           return record.status === "applied" &&
-            record.target.source === "openclaw-workshop" &&
+            record.target.source === "carapace-workshop" &&
             record.target.skillKey === result.skillKey &&
             (record.kind === "create" ? record.target.skillKey : record.target.skillName) ===
               result.name

@@ -20,7 +20,7 @@ function routeData(agentId: string, catalogId = ""): NewSessionRouteData {
 }
 
 async function mount(data: NewSessionRouteData): Promise<NewSessionElement> {
-  const page = document.createElement("openclaw-new-session-page") as NewSessionElement;
+  const page = document.createElement("carapace-new-session-page") as NewSessionElement;
   page.data = data;
   document.body.append(page);
   await settle(page);
@@ -48,7 +48,7 @@ function message(page: NewSessionElement): string {
 }
 
 afterEach(() => {
-  document.querySelectorAll("openclaw-new-session-page").forEach((element) => element.remove());
+  document.querySelectorAll("carapace-new-session-page").forEach((element) => element.remove());
   sessionStorage.clear();
   window.history.replaceState({}, "", "/");
 });

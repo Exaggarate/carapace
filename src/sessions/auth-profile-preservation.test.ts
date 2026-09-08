@@ -3,10 +3,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { saveAuthProfileStore } from "../agents/auth-profiles/store-runtime.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   applyModelOverrideWithAuthProfileCompatibility,
   shouldPreserveSessionAuthProfileOverride,
@@ -24,7 +24,7 @@ const workspaceAliasPlugin = {
   origin: "workspace",
   rootDir: "/plugins/fixture-provider",
   source: "test",
-  manifestPath: "/plugins/fixture-provider/openclaw.plugin.json",
+  manifestPath: "/plugins/fixture-provider/carapace.plugin.json",
   providerAuthAliases: { "fixture-provider-plan": "fixture-provider" },
 } satisfies PluginManifestRecord;
 
@@ -42,12 +42,12 @@ describe("shouldPreserveSessionAuthProfileOverride", () => {
   it("uses config trust when resolving workspace provider aliases", () => {
     const allowedConfig = {
       plugins: { entries: { "fixture-provider": { enabled: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       shouldPreserveSessionAuthProfileOverride({
         cfg: allowedConfig,
-        agentDir: "/tmp/openclaw-auth-profile-preservation-allowed",
+        agentDir: "/tmp/carapace-auth-profile-preservation-allowed",
         entry,
         currentProvider: "fixture-provider",
         provider: "fixture-provider-plan",
@@ -57,7 +57,7 @@ describe("shouldPreserveSessionAuthProfileOverride", () => {
     expect(
       shouldPreserveSessionAuthProfileOverride({
         cfg: {},
-        agentDir: "/tmp/openclaw-auth-profile-preservation-denied",
+        agentDir: "/tmp/carapace-auth-profile-preservation-denied",
         entry,
         currentProvider: "fixture-provider",
         provider: "fixture-provider-plan",
@@ -67,7 +67,7 @@ describe("shouldPreserveSessionAuthProfileOverride", () => {
   });
 
   it("uses the recorded provider for an arbitrary stored profile id", () => {
-    const agentDir = tempDirs.make("openclaw-auth-profile-preservation-");
+    const agentDir = tempDirs.make("carapace-auth-profile-preservation-");
     saveAuthProfileStore(
       {
         version: 1,
@@ -104,7 +104,7 @@ describe("shouldPreserveSessionAuthProfileOverride", () => {
         cfg: {
           auth: { profiles: { "team:prod": { provider: "openai", mode: "api_key" } } },
         },
-        agentDir: tempDirs.make("openclaw-auth-profile-config-"),
+        agentDir: tempDirs.make("carapace-auth-profile-config-"),
         entry: { ...entry, authProfileOverride: "team:prod" },
         currentProvider: "openai",
         provider: "openai",
@@ -115,7 +115,7 @@ describe("shouldPreserveSessionAuthProfileOverride", () => {
   it.each(["openai", "anthropic"])(
     "retains a missing personal pin only when the selected provider %s is compatible",
     async (provider) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const personalId = `personal:${randomUUID()}:${randomUUID()}`;
         const sessionEntry: SessionEntry = {
           ...entry,
@@ -173,7 +173,7 @@ describe("shouldPreserveSessionAuthProfileOverride", () => {
       cfg: {
         auth: { profiles: { "team:prod": { provider: "openai", mode: "api_key" } } },
       },
-      agentDir: tempDirs.make("openclaw-auth-profile-default-"),
+      agentDir: tempDirs.make("carapace-auth-profile-default-"),
       entry: sessionEntry,
       currentProvider: "openai",
       selection: { provider, model, isDefault: true },

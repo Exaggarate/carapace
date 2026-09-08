@@ -12,7 +12,7 @@ describe("retained package backup retirement", () => {
   it.each([false, true])(
     "does not copy or remove the old package after a denied backup rename (caller verified=%s)",
     async (activationVerified) => {
-      await withTestDir({ prefix: "openclaw-retained-backup-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-retained-backup-" }, async (base) => {
         const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
         const rename = fs.rename.bind(fs);
         const renameSpy = vi.spyOn(fs, "rename").mockImplementation(async (...args) => {
@@ -54,7 +54,7 @@ describe("retained package backup retirement", () => {
   it.each(["unverified activation", "verified activation", "verified rollback"] as const)(
     "retires backups only after a proven outcome: %s",
     async (outcome) => {
-      await withTestDir({ prefix: "openclaw-retained-outcome-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-retained-outcome-" }, async (base) => {
         const { result, transaction, packageRoot } = await createRetainedPackageSwap(base);
         expect(result.status).toBe("committed");
         if (outcome === "verified rollback") {

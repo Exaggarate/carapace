@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds OpenClaw packages and plugin SDK artifacts with cache-aware orchestration.
+// Builds Carapace packages and plugin SDK artifacts with cache-aware orchestration.
 
 import type { SpawnSyncOptions } from "node:child_process";
 import { performance } from "node:perf_hooks";
@@ -51,7 +51,7 @@ type BuildAllStepParams = {
   npmExecPath?: string;
   comSpec?: string;
 };
-const RUN_NODE_SKIP_DTS_BUILD_ENV = "OPENCLAW_RUN_NODE_SKIP_DTS_BUILD";
+const RUN_NODE_SKIP_DTS_BUILD_ENV = "CARAPACE_RUN_NODE_SKIP_DTS_BUILD";
 const TSDOWN_AI_OUTPUT_ROOT = tsdownPackageOutputRoot("ai");
 const TSDOWN_MAIN_PACKAGE_OUTPUT_ROOTS = TSDOWN_PACKAGE_OUTPUT_ROOTS.filter(
   (root) => root !== TSDOWN_AI_OUTPUT_ROOT,
@@ -89,7 +89,7 @@ export const BUILD_ALL_STEPS: BuildAllStep[] = [
       outputs: declarationCacheOutputs([TSDOWN_AI_OUTPUT_ROOT]),
       restore: "always",
       runOnHit: {
-        env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" },
+        env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" },
       },
     },
   },
@@ -107,7 +107,7 @@ export const BUILD_ALL_STEPS: BuildAllStep[] = [
       outputs: declarationCacheOutputs(TSDOWN_MAIN_PACKAGE_OUTPUT_ROOTS),
       restore: "always",
       runOnHit: {
-        env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" },
+        env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" },
       },
     },
   },
@@ -120,11 +120,11 @@ export const BUILD_ALL_STEPS: BuildAllStep[] = [
       "--filter",
       TSDOWN_UNIFIED_CONFIG_GROUP,
     ),
-    env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" },
+    env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1" },
   },
   {
     ...tsxStep("write-unified-entry-dts", "scripts/write-unified-entry-dts.ts"),
-    env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "0" },
+    env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "0" },
   },
   tsxStep("external-plugins:local-dist", "scripts/build-external-plugin-local-dist.mts"),
   tsxStep("check-cli-bootstrap-imports", "scripts/check-cli-bootstrap-imports.mts"),
@@ -138,7 +138,7 @@ export const BUILD_ALL_STEPS: BuildAllStep[] = [
   tsxStep("runtime-postbuild-stamp", "scripts/runtime-postbuild-stamp.mts"),
   {
     ...tsxStep("write-plugin-sdk-entry-dts", "scripts/write-plugin-sdk-entry-dts.ts"),
-    env: { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "0" },
+    env: { CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "0" },
   },
   tsxStep("check-plugin-sdk-exports", "scripts/check-plugin-sdk-exports.mts"),
   {
@@ -146,7 +146,7 @@ export const BUILD_ALL_STEPS: BuildAllStep[] = [
     kind: "pnpm",
     pnpmArgs: ["ui:build"],
     // No build-all cache: ui/vite.config.ts derives the Control UI build ID
-    // from package.json, git HEAD, and OPENCLAW_CONTROL_UI_BUILD_ID env, so a
+    // from package.json, git HEAD, and CARAPACE_CONTROL_UI_BUILD_ID env, so a
     // file-input signature cannot exactly invalidate generated assets and a
     // warm hit could restore stale service-worker/app cache metadata.
     cache: undefined,
@@ -236,18 +236,18 @@ const FULL_RUNTIME_ONLY_STEPS = [
 export const BUILD_ALL_PROFILE_STEP_ENV: Record<string, Record<string, NodeJS.ProcessEnv>> = {
   full: {
     tsdown: {
-      OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1",
+      CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1",
     },
     "tsdown-unified": {
-      OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1",
+      CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1",
     },
   },
   package: {
     tsdown: {
-      OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1",
+      CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1",
     },
     "tsdown-unified": {
-      OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1",
+      CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1",
     },
   },
   ciArtifacts: {
@@ -256,35 +256,35 @@ export const BUILD_ALL_PROFILE_STEP_ENV: Record<string, Record<string, NodeJS.Pr
       // CI's dist consumers are runtime JS only; the plugin-sdk gate below
       // stages the two canonical SDK declaration groups instead. Release/package builds
       // (full profile, docker packaging) keep canonical dts.
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1",
-      OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1",
+      CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1",
     },
   },
   gatewayWatch: {
     tsdown: {
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1",
     },
     "runtime-postbuild": {
-      OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0",
+      CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0",
     },
   },
   qaRuntime: {
     tsdown: {
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1",
     },
   },
   sourcePerformance: {
     tsdown: {
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1",
     },
   },
   cliStartup: {
     tsdown: {
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1",
-      OPENCLAW_PRESERVE_CLI_STARTUP_METADATA: "1",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1",
+      CARAPACE_PRESERVE_CLI_STARTUP_METADATA: "1",
     },
     "runtime-postbuild": {
-      OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0",
+      CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0",
     },
   },
 };
@@ -293,7 +293,7 @@ function buildAllUsage() {
   return [
     "Usage: node --import tsx scripts/build-all.mts [profile]",
     "",
-    "Builds OpenClaw artifacts for the selected profile.",
+    "Builds Carapace artifacts for the selected profile.",
     "",
     "Profiles:",
     ...Object.keys(BUILD_ALL_PROFILES).map((profile) => `  ${profile}`),
@@ -383,7 +383,7 @@ export function resolveBuildAllEnvironment(
   });
   // Older installed updaters already send this marker to candidate builds.
   // Updates need runtime artifacts; explicit declaration/package builds still win.
-  if (buildEnv.OPENCLAW_UPDATE_IN_PROGRESS === "1") {
+  if (buildEnv.CARAPACE_UPDATE_IN_PROGRESS === "1") {
     buildEnv[RUN_NODE_SKIP_DTS_BUILD_ENV] ??= "1";
   }
   return buildEnv;
@@ -433,7 +433,7 @@ export function resolveBuildAllStep(step: BuildAllStep, params: BuildAllStepPara
   const nodeArgs =
     step.kind !== "pnpm"
       ? step.args
-      : env.OPENCLAW_BUILD_ALL_NO_PNPM === "1"
+      : env.CARAPACE_BUILD_ALL_NO_PNPM === "1"
         ? PNPM_STEP_NODE_FALLBACKS.get(step.label)
         : undefined;
   if (nodeArgs) {
@@ -530,7 +530,7 @@ export async function runBuildAllSteps(
     params.memoryLimit,
   );
   const steps = params.steps ?? resolveBuildAllSteps(profile, buildEnv);
-  const cacheEnabled = params.cacheEnabled ?? buildEnv.OPENCLAW_BUILD_CACHE !== "0";
+  const cacheEnabled = params.cacheEnabled ?? buildEnv.CARAPACE_BUILD_CACHE !== "0";
   const logger = params.logger ?? console;
   const now = params.now ?? performance.now.bind(performance);
   const resolveCacheState = params.resolveCacheState ?? resolveBuildStepCacheState;

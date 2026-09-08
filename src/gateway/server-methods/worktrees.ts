@@ -85,7 +85,7 @@ export function createWorktreesHandlers(service: WorktreeService): GatewayReques
           name: params.name,
           baseRef: params.baseRef,
           ownerKind: "manual",
-          // Repository hooks and .openclaw/worktree-setup.sh execute repo code.
+          // Repository hooks and .carapace/worktree-setup.sh execute repo code.
           runSetupScript: scopes.includes(ADMIN_SCOPE),
         }),
         undefined,

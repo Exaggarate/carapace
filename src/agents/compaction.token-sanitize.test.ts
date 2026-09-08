@@ -1,5 +1,5 @@
 // Verifies compaction token planning strips private/non-model fields first.
-import { serializeConversation, type AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import { serializeConversation, type AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { describe, expect, it } from "vitest";
 import {
   buildOversizedFallbackPlan,
@@ -25,7 +25,7 @@ describe("compaction token accounting sanitization", () => {
       } as AgentMessage,
       {
         role: "custom",
-        customType: "openclaw.runtime-context",
+        customType: "carapace.runtime-context",
         content: "internal",
         timestamp: 2,
       } as AgentMessage,

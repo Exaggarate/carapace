@@ -1,6 +1,6 @@
 import AVFAudio
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 private func makeRealtimeAudioTapBlock(
     inputSampleRate: Double,

@@ -122,7 +122,7 @@ function buildSystemAgentViewBase<TPhase extends ApprovalPhase>(
     approvalId: request.id,
     approvalKind: "system-agent",
     phase,
-    title: phase === "pending" ? "OpenClaw change requires approval" : "OpenClaw change",
+    title: phase === "pending" ? "Carapace change requires approval" : "Carapace change",
     description: request.request.description,
     metadata: request.request.agentId ? [{ label: "Agent", value: request.request.agentId }] : [],
     agentId: request.request.agentId ?? null,

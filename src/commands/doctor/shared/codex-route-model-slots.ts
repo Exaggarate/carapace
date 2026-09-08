@@ -1,9 +1,9 @@
 import {
   listModelRefsFromConfigValue,
   visitModelSelectorRefs,
-} from "@openclaw/model-catalog-core/configured-model-refs";
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/model-catalog-core/configured-model-refs";
+import { asOptionalRecord as asMutableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@carapace/normalization-core/string-coerce";
 import {
   isBlockedLegacyCodexModelRef,
   normalizeRuntimeString,

@@ -1,6 +1,6 @@
 // QA Lab Slack capture preserves transient message writes from the shared debug capture store.
 import { setTimeout as sleep } from "node:timers/promises";
-import type { DebugProxyCaptureReader } from "openclaw/plugin-sdk/proxy-capture";
+import type { DebugProxyCaptureReader } from "carapace/plugin-sdk/proxy-capture";
 import type { SlackObservedMessage } from "./slack-live.contracts.js";
 import { collectSlackBlockText } from "./slack-live.observations.js";
 

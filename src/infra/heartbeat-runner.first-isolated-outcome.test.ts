@@ -1,14 +1,14 @@
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { createHeartbeatToolResponsePayload } from "../auto-reply/heartbeat-tool-response.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import {
   listSessionEntriesReadOnly,
   loadExactSessionEntryReadOnly,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 import { claimHeartbeatOutcomeForRun } from "./heartbeat-outcome-store.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
@@ -22,7 +22,7 @@ import {
 
 installHeartbeatRunnerTestRuntime();
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetSystemEventsForTest();
 });
 
@@ -148,7 +148,7 @@ it.each(
         const scope = { agentId, storePath, sessionKey };
         const readEntry = (key: string) =>
           loadExactSessionEntryReadOnly({ ...scope, sessionKey: key })?.entry;
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             entries: { main: {}, ...(agentId === "ops" ? { ops: {} } : {}) },
             defaults: {
@@ -265,14 +265,14 @@ it.each(
         if (agentId === "ops") {
           const physicalPath =
             storeLayout === "flat"
-              ? path.join(tmpDir, "openclaw-agent.ops.sqlite")
+              ? path.join(tmpDir, "carapace-agent.ops.sqlite")
               : path.join(
                   tmpDir,
                   ...(storeLayout === "default" ? ["state"] : []),
                   "agents",
                   "ops",
                   "agent",
-                  "openclaw-agent.sqlite",
+                  "carapace-agent.sqlite",
                 );
           for (const key of [sessionKey, runKey]) {
             expect(

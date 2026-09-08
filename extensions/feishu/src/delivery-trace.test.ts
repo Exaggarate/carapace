@@ -4,7 +4,7 @@
 // delivery, and replyOptions callbacks); OUT
 // events are recorded at the mocked Lark SDK client and the mocked CardKit
 // HTTP fetch, so streaming-card entity calls are captured at the wire seam.
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with CARAPACE_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import {
   deliveryTraceScenarios,
   expectDeliveryTraceMatchesGolden,
@@ -12,8 +12,8 @@ import {
   type DeliveryTraceInStep,
   type DeliveryTraceScenarioName,
   type WireRecorder,
-} from "openclaw/plugin-sdk/channel-contract-testing";
-import { withFetchPreconnect } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-contract-testing";
+import { withFetchPreconnect } from "carapace/plugin-sdk/test-env";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { FeishuConfigSchema } from "./config-schema.js";
 import type { ResolvedFeishuAccount } from "./types.js";
@@ -85,9 +85,9 @@ vi.mock("./client.js", async (importOriginal) => {
 // channel.text uses the real chunking/table helpers because overflow
 // pagination behavior is part of the recorded lifecycle.
 vi.mock("./runtime.js", async () => {
-  const replyChunking = await import("openclaw/plugin-sdk/reply-chunking");
-  const textChunking = await import("openclaw/plugin-sdk/text-chunking");
-  const markdownTables = await import("openclaw/plugin-sdk/markdown-table-runtime");
+  const replyChunking = await import("carapace/plugin-sdk/reply-chunking");
+  const textChunking = await import("carapace/plugin-sdk/text-chunking");
+  const markdownTables = await import("carapace/plugin-sdk/markdown-table-runtime");
   const runtime = {
     media: {
       loadWebMedia: async () => {

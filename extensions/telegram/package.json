@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/telegram",
+  "name": "@carapace/telegram",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw Telegram channel plugin",
+  "description": "Carapace Telegram channel plugin",
   "type": "module",
   "dependencies": {
     "@grammyjs/runner": "2.0.3",
@@ -13,9 +13,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -45,7 +45,7 @@
       "selectionDocsPrefix": "",
       "selectionDocsOmitLabel": true,
       "selectionExtras": [
-        "https://openclaw.ai"
+        "https://github.com/Exaggarate/carapace"
       ],
       "markdownCapable": true,
       "setup": {

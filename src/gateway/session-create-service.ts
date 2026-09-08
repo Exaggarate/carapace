@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import {
   type FastMode,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   ErrorCodes,
   type ErrorShape,
@@ -59,7 +59,7 @@ import {
   type SessionCreatedVia,
 } from "../config/sessions/session-entry-provenance.js";
 import { inheritSessionSelection } from "../config/sessions/session-entry-selection.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createInternalHookEvent,
   hasInternalHookListeners,
@@ -129,7 +129,7 @@ const loadSessionAuthRuntime = createLazyRuntimeModule(
 
 async function existingSessionSelectionWouldChange(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   catalogModel?: string;
   defaultModel: string;
   defaultProvider: string;
@@ -280,7 +280,7 @@ type CreateGatewaySessionResult =
   | Extract<GatewaySessionCommitResult, { ok: false }>;
 
 export async function createGatewaySession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key?: string;
   agentId?: string;
   label?: string;

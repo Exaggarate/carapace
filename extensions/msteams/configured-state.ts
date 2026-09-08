@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { hasConfiguredSecretInput, normalizeSecretInputString } from "./src/secret-input.js";
 
 /** Mirror Teams auth-mode requirements without loading the Azure SDK or full channel. */
 export function hasConfiguredMSTeamsChannelState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): boolean {
   const config = params.cfg.channels?.msteams;

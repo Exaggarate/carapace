@@ -15,7 +15,7 @@ import {
   linkEmail,
   resolveUserProfileId,
 } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createChatRunState } from "./server-chat-state.js";
 import type { GatewayServerLiveState } from "./server-live-state.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
@@ -501,7 +501,7 @@ describe("createGatewayRequestContext", () => {
   });
 
   it("canonicalizes a connected profile after its durable identity is merged", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const source = ensureProfileForEmail("merge-source@example.test");
       const target = ensureProfileForEmail("merge-target@example.test");
       const unrelatedProfile = ensureProfileForEmail("merge-unrelated@example.test");

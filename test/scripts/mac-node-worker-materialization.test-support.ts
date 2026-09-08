@@ -62,7 +62,7 @@ function snapshot(root: string) {
 }
 
 async function materializationFixture(mac: MacScriptFixture, complete = false) {
-  const root = realpathSync(mac.createTempDir("openclaw-worker-native-copy-"));
+  const root = realpathSync(mac.createTempDir("carapace-worker-native-copy-"));
   const source = path.join(root, "canonical");
   const parent = path.join(root, "stage");
   const destination = path.join(parent, "derived");
@@ -136,7 +136,7 @@ async function materializationFixture(mac: MacScriptFixture, complete = false) {
 }
 
 async function stagingFixture(mac: MacScriptFixture) {
-  const root = realpathSync(mac.createTempDir("openclaw-worker-materialization-"));
+  const root = realpathSync(mac.createTempDir("carapace-worker-materialization-"));
   const binaries = await compiledMacNativeFixtures(root, mac);
   const scripts = path.join(root, "scripts");
   const destination = path.join(root, "published");
@@ -162,7 +162,7 @@ module.exports = (phase, product) => {
   const home = fs.realpathSync(process.env.HOME);
   assert(fs.statSync(home).isDirectory(), 'child HOME must already exist');
   assert(!fs.existsSync(path.join(home, 'operator-sentinel')), 'ambient HOME leaked');
-  assert.equal(process.env.OPENCLAW_STATE_DIR, undefined, 'ambient state leaked');
+  assert.equal(process.env.CARAPACE_STATE_DIR, undefined, 'ambient state leaked');
   const temporary = fs.realpathSync(os.tmpdir());
   const component = path.relative(${JSON.stringify(tmp)}, temporary).split(path.sep)[0];
   const privateRoot = component && component !== '..' ? path.join(${JSON.stringify(tmp)}, component) : null;
@@ -181,7 +181,7 @@ if (require.main === module) module.exports(process.argv[2], process.argv[3]);
 `,
   );
   await write(
-    path.join(scripts, "package-openclaw-for-docker.mjs"),
+    path.join(scripts, "package-carapace-for-docker.mjs"),
     `
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -248,7 +248,7 @@ install_node() {
   cp -R ${quote(path.join(root, "canonical"))}/"$selected" "$(node_dir)"
   ${quote(process.execPath)} ${quote(path.join(scripts, "record-scratch.cjs"))} install "$PREFIX"
 }
-install_openclaw() { [[ "$(cat "$OPENCLAW_VERSION")" == "inert package mock" ]]; }
+install_carapace() { [[ "$(cat "$CARAPACE_VERSION")" == "inert package mock" ]]; }
 `,
   );
   return {
@@ -275,9 +275,9 @@ install_openclaw() { [[ "$(cat "$OPENCLAW_VERSION")" == "inert package mock" ]];
           env: {
             HOME: root,
             TMPDIR: tempRoot,
-            OPENCLAW_STATE_DIR: path.join(root, "operator-state"),
+            CARAPACE_STATE_DIR: path.join(root, "operator-state"),
             PATH: `${path.dirname(process.execPath)}:${systemPath}`,
-            OPENCLAW_MAC_SIGNING_VARIANT: variant,
+            CARAPACE_MAC_SIGNING_VARIANT: variant,
           },
         },
       );

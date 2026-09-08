@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { CodeModeHeadlessResult } from "../agents/code-mode.js";
-import { resolveOpenClawPluginToolsForOptions } from "../agents/openclaw-plugin-tools.js";
+import { resolveCarapacePluginToolsForOptions } from "../agents/carapace-plugin-tools.js";
 import {
   createPreparedInboundRegistryLoader,
   loadPreparedInboundPluginRegistry,
@@ -11,7 +11,7 @@ import { prepareOwnedPluginLoadContext } from "../agents/prepared-model-runtime.
 import { ToolSearchRuntime } from "../agents/tool-search-runtime.js";
 import { resolveToolSearchConfig } from "../agents/tool-search.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata.test-support.js";
 import {
   cleanupPluginLoaderFixturesForTest,
@@ -26,21 +26,21 @@ import {
   withPluginRuntimeRegistryScope,
 } from "../plugins/runtime/gateway-request-scope.js";
 import { getPluginRuntimeLoadContext } from "../plugins/runtime/load-context.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createCronScriptRuntimeFixture as createCronScriptRuntime } from "./trigger-script.test-helpers.js";
 
 type HeadlessParams = Parameters<
   NonNullable<Parameters<typeof createCronScriptRuntime>[0]["runHeadless"]>
 >[0];
 
-let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
-let config: OpenClawConfig;
+let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
+let config: CarapaceConfig;
 let registrations: string;
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({
-    prefix: "openclaw-cron-preparation-",
-    env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" },
+  state = await createCarapaceTestState({
+    prefix: "carapace-cron-preparation-",
+    env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" },
   });
   registrations = state.path("registrations.jsonl");
   const dir = state.path("plugin");
@@ -71,10 +71,10 @@ beforeEach(async () => {
   }
   fs.writeFileSync(
     path.join(dir, "package.json"),
-    JSON.stringify({ name: "cold-probe", openclaw: { extensions: ["./index.ts"] } }),
+    JSON.stringify({ name: "cold-probe", carapace: { extensions: ["./index.ts"] } }),
   );
   fs.writeFileSync(
-    path.join(dir, "openclaw.plugin.json"),
+    path.join(dir, "carapace.plugin.json"),
     JSON.stringify({
       id: "cold-probe",
       configSchema: { type: "object", properties: {} },
@@ -215,7 +215,7 @@ describe("cron preparation plugin ownership", () => {
         setActivePluginRegistry(registry);
       }
       const tools = withPluginRuntimeRegistryScope(owner === "scoped" ? registry : undefined, () =>
-        resolveOpenClawPluginToolsForOptions({
+        resolveCarapacePluginToolsForOptions({
           options: {
             config,
             workspaceDir: state.workspaceDir,

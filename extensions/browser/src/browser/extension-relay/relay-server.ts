@@ -2,15 +2,15 @@
 import crypto from "node:crypto";
 import http, { type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { isLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   rawDataToString,
   readRequestBodyWithLimit,
   resolveRequestClientIp,
   WEBHOOK_BODY_READ_DEFAULTS,
-} from "openclaw/plugin-sdk/webhook-ingress";
-import { rejectWebSocketUpgrade } from "openclaw/plugin-sdk/websocket-runtime";
+} from "carapace/plugin-sdk/webhook-ingress";
+import { rejectWebSocketUpgrade } from "carapace/plugin-sdk/websocket-runtime";
 import { WebSocketServer, type WebSocket } from "ws";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { randomRelayId } from "./auth-v2-crypto.js";
@@ -44,7 +44,7 @@ import {
 export { authenticateExtensionWebSocket } from "./auth-v2-websocket.js";
 
 const log = createSubsystemLogger("browser").child("extension-relay");
-const INTERNAL_CDP_USERNAME = "openclaw-internal";
+const INTERNAL_CDP_USERNAME = "carapace-internal";
 const MAX_AUTH_BODY_BYTES = 8 * 1024;
 
 export const EXTENSION_RELAY_MAX_PAYLOAD_BYTES = 64 * 1024 * 1024;
@@ -74,7 +74,7 @@ export type ExtensionRelayHandle = {
   port: number;
   token: string;
   allowLegacyAuth: boolean;
-  /** Process-only Basic credential for OpenClaw's own CDP client. Never persisted or printed. */
+  /** Process-only Basic credential for Carapace's own CDP client. Never persisted or printed. */
   internalToken: string;
   bridge: ExtensionRelayBridge;
   close: () => Promise<void>;
@@ -400,7 +400,7 @@ export async function startExtensionRelayServer(params: {
         if (existingState.flow === "cdp" && req.method === "GET" && req.url === "/json/version") {
           if (!bridge.extensionConnected) {
             clearSocketState(socket);
-            rejectHttp(res, 503, "OpenClaw Chrome extension is not connected");
+            rejectHttp(res, 503, "Carapace Chrome extension is not connected");
             return;
           }
           res.once("finish", () => {
@@ -448,7 +448,7 @@ export async function startExtensionRelayServer(params: {
         if (!bridge.extensionConnected) {
           writeJson(res, 503, {
             error:
-              "OpenClaw Chrome extension is not connected. Install the extension and pair it with `openclaw browser extension pair`.",
+              "Carapace Chrome extension is not connected. Install the extension and pair it with `carapace browser extension pair`.",
           });
           return;
         }

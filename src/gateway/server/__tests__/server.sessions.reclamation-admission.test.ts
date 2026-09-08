@@ -9,13 +9,13 @@ import {
 import { resolveSqliteTargetFromSessionStorePath } from "../../../config/sessions/session-sqlite-target.js";
 import { beginSessionWorkAdmission } from "../../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../../state/carapace-state-db.js";
 import { rpcReq, writeSessionStore } from "../../test-helpers.js";
 import {
   loadSeededTranscriptEvents,
@@ -114,8 +114,8 @@ afterEach(() => {
   reclamation.gate = undefined;
   reclamation.exits = [];
   reclamation.exitCodes = [];
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function holdReclamationValidation() {
@@ -248,8 +248,8 @@ test("sessions.delete rejects revoked authority before repairing the same databa
     agentId: "main",
     path: resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
   };
-  const database = openOpenClawAgentDatabase(databaseOptions);
-  const stateDatabase = openOpenClawStateDatabase();
+  const database = openCarapaceAgentDatabase(databaseOptions);
+  const stateDatabase = openCarapaceStateDatabase();
   const readLeases = () =>
     stateDatabase.db
       .prepare("SELECT lease_id FROM agent_database_leases WHERE path = ? ORDER BY lease_id")
@@ -284,7 +284,7 @@ test("sessions.delete rejects revoked authority before repairing the same databa
     await validation.entered(
       withTestTimeout(deletion, 10_000, "reclamation Worker did not enter native validation"),
     );
-    expect(openOpenClawAgentDatabase(databaseOptions)).toBe(database);
+    expect(openCarapaceAgentDatabase(databaseOptions)).toBe(database);
     expect(database.db.isOpen).toBe(true);
     expect(readLeases()).toHaveLength(originalLeases.length + 1);
     const callsBeforeRevocation = guardCalls;
@@ -293,7 +293,7 @@ test("sessions.delete rejects revoked authority before repairing the same databa
 
     await expect(deletion).rejects.toThrow("caller authority revoked during Worker validation");
     expect(guardCalls).toBeGreaterThan(callsBeforeRevocation);
-    expect(openOpenClawAgentDatabase(databaseOptions)).toBe(database);
+    expect(openCarapaceAgentDatabase(databaseOptions)).toBe(database);
     expect(loadSessionEntry(transcriptScope)).toEqual(originalEntry);
     await expect(loadSeededTranscriptEvents(transcriptScope)).resolves.toEqual(originalTranscript);
     expect(Atomics.load(validation.gate, 2)).toBeGreaterThan(0);

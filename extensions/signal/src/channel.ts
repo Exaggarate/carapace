@@ -1,38 +1,38 @@
-import { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
+import { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
 // Signal plugin module implements channel behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { buildDmGroupAccountAllowlistAdapter } from "openclaw/plugin-sdk/allowlist-config-edit";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-contract";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import { buildDmGroupAccountAllowlistAdapter } from "carapace/plugin-sdk/allowlist-config-edit";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-contract";
 import {
   createChatChannelPlugin,
   type ChannelPlugin,
   type PluginRuntime,
-} from "openclaw/plugin-sdk/channel-core";
+} from "carapace/plugin-sdk/channel-core";
 import {
   createAccountStatusSink,
   createReplyToFanout,
   defineChannelMessageAdapter,
   resolveOutboundSendDep,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
-import { PAIRING_APPROVED_MESSAGE } from "openclaw/plugin-sdk/channel-status";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import { chunkText, resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
-import { buildOutboundBaseSessionKey, type RoutePeer } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "carapace/plugin-sdk/channel-pairing";
+import { attachChannelToResult } from "carapace/plugin-sdk/channel-send-result";
+import { PAIRING_APPROVED_MESSAGE } from "carapace/plugin-sdk/channel-status";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { questionGatewayRuntime } from "carapace/plugin-sdk/question-gateway-runtime";
+import { chunkText, resolveTextChunkLimit } from "carapace/plugin-sdk/reply-chunking";
+import { buildOutboundBaseSessionKey, type RoutePeer } from "carapace/plugin-sdk/routing";
 import {
   buildBaseChannelStatusSummary,
   collectStatusIssuesFromLastError,
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import {
   resolveSignalAccount,
   resolveSignalReplyToMode,

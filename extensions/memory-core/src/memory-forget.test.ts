@@ -2,13 +2,13 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { zstdCompressSync } from "node:zlib";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { loadSqliteVecExtension } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { deleteSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { openOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { openOpenClawStateDatabase } from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { loadSqliteVecExtension } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { deleteSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { openCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
+import { openCarapaceStateDatabase } from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DREAMING_MEMORY_BACKUP_NAMESPACE,
@@ -34,10 +34,10 @@ import { readShortTermRecallEntries } from "./short-term-promotion.js";
 describe("memory forget", () => {
   let stateDir: string;
   let workspaceDir: string;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
 
   beforeEach(async () => {
-    stateDir = tempDirs.make("openclaw-memory-forget-");
+    stateDir = tempDirs.make("carapace-memory-forget-");
     ({ workspaceDir, cfg } = await createMemoryForgetFixture(stateDir));
   });
 
@@ -68,7 +68,7 @@ describe("memory forget", () => {
     });
     await fs.writeFile(
       path.join(workspaceDir, "MEMORY.md"),
-      "# Long-Term Memory\n<!-- openclaw-memory-promotion:archived-entry -->\n- Archived secret.\n",
+      "# Long-Term Memory\n<!-- carapace-memory-promotion:archived-entry -->\n- Archived secret.\n",
     );
     await fs.writeFile(path.join(workspaceDir, "USER.md"), "# User\nKeep curated profile.\n");
     const corpusDir = path.join(workspaceDir, "memory", ".dreams", "session-corpus");
@@ -97,7 +97,7 @@ describe("memory forget", () => {
         archiveTranscript: true,
       }),
     ).resolves.toBe(true);
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     expect(
       db.prepare("SELECT session_id FROM session_windows WHERE session_id = ?").get("archived"),
     ).toBeUndefined();
@@ -159,7 +159,7 @@ describe("memory forget", () => {
     const originalContent =
       "# Long-Term Memory\n" +
       "Curated operator fact that must survive.\n" +
-      "<!-- openclaw-memory-promotion:archived-entry -->\n" +
+      "<!-- carapace-memory-promotion:archived-entry -->\n" +
       "- Archived secret.\n";
     await fs.writeFile(memoryPath, originalContent);
     await deleteSessionEntry({
@@ -229,7 +229,7 @@ describe("memory forget", () => {
         workspaceDir,
         entries: [backup],
       });
-      const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+      const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
       db.prepare(
         `INSERT INTO memory_index_chunks
         (id, path, source, start_line, end_line, hash, model, text, embedding, updated_at)
@@ -356,7 +356,7 @@ describe("memory forget", () => {
         role: "user",
         content: privateFact,
         timestamp: nowMs,
-        __openclaw: { senderIsOwner: true },
+        __carapace: { senderIsOwner: true },
       },
     });
     const applied = await runSessionBackfill({
@@ -386,7 +386,7 @@ describe("memory forget", () => {
       const corpusPath = path.join(corpusDir, "2026-08-26.txt");
       const content = `[main/sessions/main/${survivorId}#L1] User: Preserve this unrelated fact.\n`;
       await fs.writeFile(corpusPath, content);
-      const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+      const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
       db.prepare(
         `INSERT INTO memory_index_chunks
         (id, path, source, start_line, end_line, hash, model, text, embedding, updated_at)
@@ -456,12 +456,12 @@ describe("memory forget", () => {
       const memoryContent = [
         "# Long-Term Memory",
         "Curated operator fact.",
-        "<!-- openclaw-memory-lineage:old-lineage -->",
-        "<!-- openclaw-memory-promotion:mixed-entry -->",
+        "<!-- carapace-memory-lineage:old-lineage -->",
+        "<!-- carapace-memory-promotion:mixed-entry -->",
         "- Erase the mixed secret.",
-        "<!-- openclaw-memory-promotion:clean-entry -->",
+        "<!-- carapace-memory-promotion:clean-entry -->",
         "- Keep the clean fact.",
-        "<!-- openclaw-memory-promotion:legacy-entry -->",
+        "<!-- carapace-memory-promotion:legacy-entry -->",
         "- Preserve an untargetable legacy fact.",
         "",
       ].join("\n");
@@ -539,7 +539,7 @@ describe("memory forget", () => {
         ],
       });
 
-      const agentDatabase = openOpenClawAgentDatabase({ agentId: "main" });
+      const agentDatabase = openCarapaceAgentDatabase({ agentId: "main" });
       const db = agentDatabase.db;
       const loaded = await loadSqliteVecExtension({ db });
       expect(loaded.ok).toBe(true);
@@ -716,7 +716,7 @@ describe("memory forget", () => {
                 : "BEFORE DELETE ON memory_entry_origins WHEN OLD.entry_key = 'mixed-entry'";
           // Attach the fault to the actual purge connection after schema validation,
           // so an unexpected persistent trigger cannot fail database admission first.
-          const faultDb = failure === "backup" ? openOpenClawStateDatabase().db : agentDatabase.db;
+          const faultDb = failure === "backup" ? openCarapaceStateDatabase().db : agentDatabase.db;
           faultDb.exec(
             `CREATE TEMP TRIGGER abort_forget ${trigger} BEGIN SELECT RAISE(ABORT, '${failureMessage}'); END`,
           );
@@ -832,11 +832,11 @@ describe("memory forget", () => {
 
   it("keeps missing provenance untargetable without creating its table during dry-run", async () => {
     await seedMemoryForgetSession("target");
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     db.exec("DROP TABLE IF EXISTS memory_entry_origins");
     db.exec("DROP TABLE IF EXISTS memory_session_tombstones");
     const memoryContent =
-      "# Long-Term Memory\n<!-- openclaw-memory-promotion:legacy-entry -->\n- Keep old memory.\n";
+      "# Long-Term Memory\n<!-- carapace-memory-promotion:legacy-entry -->\n- Keep old memory.\n";
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), memoryContent);
     const revision = (
       db.prepare("SELECT revision FROM memory_index_state WHERE id = 1").get() as {

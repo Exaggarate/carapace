@@ -10,9 +10,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   acquireAgentRunPreparedModelRuntime,
   acquireReadOnlyPreparedModelRuntime,
@@ -28,11 +28,11 @@ import {
 } from "./prepared-model-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared model runtime snapshots", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
   });
 
@@ -44,7 +44,7 @@ describe("prepared model runtime snapshots", () => {
     await expect(prepareModelRuntimeSnapshot(input)).rejects.toThrow(
       "prepared model runtime owner was not published",
     );
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 
   it("publishes invalidation before the replacement generation", async () => {
@@ -171,7 +171,7 @@ describe("prepared model runtime snapshots", () => {
         workspaceDir: "/tmp/gateway-launch-workspace",
       }),
     ).resolves.toMatchObject({ config: configured });
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
   });
 
   it("retires a standalone run owner when its final lease releases", async () => {
@@ -206,7 +206,7 @@ describe("prepared model runtime snapshots", () => {
     );
 
     expect(mocks.prepareStaticCatalog).toHaveBeenCalledOnce();
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
     lease.release();
   });
 
@@ -228,7 +228,7 @@ describe("prepared model runtime snapshots", () => {
     });
     reusedLease.release();
     expect(mocks.prepareStaticCatalog).toHaveBeenCalledOnce();
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
 
     const secondInput = {
       ...firstInput,
@@ -244,7 +244,7 @@ describe("prepared model runtime snapshots", () => {
     );
     await expect(prepareModelRuntimeSnapshot(secondInput)).resolves.toBe(secondLease.snapshot);
     expect(mocks.prepareStaticCatalog).toHaveBeenCalledTimes(2);
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 
   it("retains an exact dynamic workspace owner after gateway run admission", async () => {
@@ -281,7 +281,7 @@ describe("prepared model runtime snapshots", () => {
     });
     expect(retainedLease.snapshot).toBe(firstLease.snapshot);
     retainedLease.release();
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
     expect(mocks.prepareStaticCatalog).toHaveBeenCalledOnce();
   });
 
@@ -316,7 +316,7 @@ describe("prepared model runtime snapshots", () => {
       const [first, second] = await Promise.all([firstPending, secondPending]);
 
       expect(second.snapshot).toBe(first.snapshot);
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
       expect(mocks.prepareStaticCatalog).toHaveBeenCalledOnce();
       first.release();
       second.release();
@@ -353,7 +353,7 @@ describe("prepared model runtime snapshots", () => {
     const config = {};
     await refreshPreparedModelRuntimeSnapshots(config, { gatewayLifecycle: true });
     const input = {
-      agentId: "openclaw",
+      agentId: "carapace",
       config,
       agentDir: state.agentDir("default"),
       inheritedAuthDir: state.agentDir("default"),
@@ -369,7 +369,7 @@ describe("prepared model runtime snapshots", () => {
     const config = {};
     await refreshPreparedModelRuntimeSnapshots(config, { gatewayLifecycle: true });
     const input = {
-      agentId: "openclaw",
+      agentId: "carapace",
       config,
       agentDir: state.agentDir("default"),
       inheritedAuthDir: state.agentDir("default"),
@@ -427,12 +427,12 @@ describe("prepared model runtime snapshots", () => {
   });
 
   it("rebases a reserved run identity through its configured agent directory", async () => {
-    mocks.configuredAgentIds = ["default", "openclaw"];
+    mocks.configuredAgentIds = ["default", "carapace"];
     const config = {};
     await refreshPreparedModelRuntimeSnapshots(config, { gatewayLifecycle: true });
 
     const lease = await acquireAgentRunPreparedModelRuntime({
-      agentId: "openclaw",
+      agentId: "carapace",
       config,
       agentDir: state.agentDir("default"),
       inheritedAuthDir: state.agentDir("default"),
@@ -440,7 +440,7 @@ describe("prepared model runtime snapshots", () => {
     });
 
     expect(lease.snapshot).toMatchObject({
-      agentId: "openclaw",
+      agentId: "carapace",
       agentDir: state.agentDir("default"),
       workspaceDir: "/tmp/setup-probe-workspace",
       config,
@@ -497,7 +497,7 @@ describe("prepared model runtime snapshots", () => {
     await refreshPreparedModelRuntimeSnapshots(initialConfig, { gatewayLifecycle: true });
     const finishReplacementGate = createDeferred();
     let finishReplacement!: () => void;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       finishReplacement = () => finishReplacementGate.resolve();
       await finishReplacementGate.promise;
       return { agentDir: String(targetDir), wrote: false };
@@ -517,17 +517,17 @@ describe("prepared model runtime snapshots", () => {
         workspaceDir: "/tmp/dynamic-replacement-workspace",
       });
       await Promise.resolve();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(1);
 
       refresh = refreshPreparedModelRuntimeSnapshots(latestConfig);
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       finishReplacement();
       await refresh;
       const lease = await leasePending;
 
       expect(lease.snapshot.config).toBe(latestConfig);
       expect(lease.snapshot.workspaceDir).toBe("/tmp/dynamic-replacement-workspace");
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
       expect(mocks.prepareStaticCatalog).toHaveBeenCalledOnce();
       lease.release();
     } finally {
@@ -581,7 +581,7 @@ describe("prepared model runtime snapshots", () => {
     expect(lease.snapshot.config).toBe(latestConfig);
     expect(lease.snapshot.agentDir).toBe(state.agentDir("default"));
     expect(lease.snapshot.workspaceDir).toBe("/tmp/unused-workspace");
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
     lease.release();
   });
 
@@ -610,7 +610,7 @@ describe("prepared model runtime snapshots", () => {
         inheritedAuthDir: state.agentDir("default"),
       }),
     ).resolves.toBe(lease.snapshot);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
   });
 
   it("releases a one-read dynamic metadata generation", async () => {
@@ -650,7 +650,7 @@ describe("prepared model runtime snapshots", () => {
 
     expect(refreshed.config).toBe(secondConfig);
     expect(fromStaleRequest).toBe(refreshed);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
   });
 
   it("does not serve the old snapshot after lifecycle refresh fails", async () => {
@@ -666,7 +666,7 @@ describe("prepared model runtime snapshots", () => {
     };
     await publishPreparedModelRuntimeSnapshot(input, { provenance: "configured" });
     const refreshError = new Error("catalog refresh failed");
-    mocks.ensureOpenClawModelsJson.mockRejectedValueOnce(refreshError);
+    mocks.ensureCarapaceModelsJson.mockRejectedValueOnce(refreshError);
 
     await expect(refreshPreparedModelRuntimeSnapshots(secondConfig)).rejects.toBe(refreshError);
     await expect(prepareModelRuntimeSnapshot({ ...input, config: secondConfig })).rejects.toBe(
@@ -680,7 +680,7 @@ describe("prepared model runtime snapshots", () => {
     await refreshPreparedModelRuntimeSnapshots(firstConfig);
     mocks.configuredAgentIds = ["default"];
     const refreshError = new Error("remaining owner refresh failed");
-    mocks.ensureOpenClawModelsJson.mockRejectedValueOnce(refreshError);
+    mocks.ensureCarapaceModelsJson.mockRejectedValueOnce(refreshError);
 
     await expect(refreshPreparedModelRuntimeSnapshots({})).rejects.toBe(refreshError);
     mocks.mutationListener?.({
@@ -695,7 +695,7 @@ describe("prepared model runtime snapshots", () => {
         workspaceDir: "/tmp/workspace-removed",
       }),
     ).rejects.toThrow("owner was not published");
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3);
   });
 
   it("commits no configured owner when one sibling refresh fails", async () => {
@@ -703,7 +703,7 @@ describe("prepared model runtime snapshots", () => {
     const firstConfig = {};
     await refreshPreparedModelRuntimeSnapshots(firstConfig);
     const refreshError = new Error("secondary refresh failed");
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockResolvedValueOnce({ agentDir: state.agentDir("default"), wrote: false })
       .mockRejectedValueOnce(refreshError);
 
@@ -732,7 +732,7 @@ describe("prepared model runtime snapshots", () => {
     const refreshError = new Error("queued auth refresh failed");
     const finishConfigRefreshGate = createDeferred();
     let finishConfigRefresh!: () => void;
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async (_config, targetDir) => {
         finishConfigRefresh = () => finishConfigRefreshGate.resolve();
         await finishConfigRefreshGate.promise;
@@ -745,7 +745,7 @@ describe("prepared model runtime snapshots", () => {
     let refresh: ReturnType<typeof refreshPreparedModelRuntimeSnapshots> | undefined;
     try {
       refresh = refreshPreparedModelRuntimeSnapshots({});
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(4));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(4));
       mocks.mutationListener?.({ affectsInheritedStores: true });
       finishConfigRefresh();
 
@@ -776,14 +776,14 @@ describe("prepared model runtime snapshots", () => {
       mocks.mutationListener?.({ affectsInheritedStores: true });
       return { entries: [] };
     });
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockResolvedValueOnce({ agentDir: state.agentDir("default"), wrote: false })
       .mockRejectedValueOnce(new Error("unexpected auth replay"));
 
     await expect(
       refreshPreparedModelRuntimeSnapshots({}, { gatewayLifecycle: true, catalogMode: "static" }),
     ).resolves.toBeUndefined();
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
     expect(mocks.loadAgentRuntimePluginRegistryHandle).toHaveBeenCalledTimes(2);
     expect(mocks.discoverAuthStorage).toHaveBeenCalledOnce();
     expect(mocks.discoverModels).toHaveBeenCalledOnce();
@@ -798,7 +798,7 @@ describe("prepared model runtime snapshots", () => {
     });
     const finishAuthRefreshGate = createDeferred();
     let finishAuthRefresh: (() => void) | undefined;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       finishAuthRefresh = () => finishAuthRefreshGate.resolve();
       await finishAuthRefreshGate.promise;
       return { agentDir: String(targetDir), wrote: false };
@@ -867,7 +867,7 @@ describe("prepared model runtime snapshots", () => {
     mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
     await expect(prepareModelRuntimeSnapshot({ config, agentDir })).resolves.not.toBe(first);
 
-    await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
     const refreshed = await prepareModelRuntimeSnapshot({ config, agentDir });
     expect(refreshed).not.toBe(first);
     expect(mocks.discoverAuthStorage).toHaveBeenCalledTimes(2);
@@ -878,18 +878,18 @@ describe("prepared model runtime snapshots", () => {
     const agentDir = state.agentDir("auth-superseded");
     await publishPreparedModelRuntimeSnapshot({ config, agentDir });
     const finishFirstRefreshGate = createDeferred();
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       await finishFirstRefreshGate.promise;
       return { agentDir: String(targetDir), wrote: false };
     });
 
     try {
       mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
       finishFirstRefreshGate.resolve();
 
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3));
       await expect(prepareModelRuntimeSnapshot({ config, agentDir })).resolves.toMatchObject({
         agentDir,
       });
@@ -911,7 +911,7 @@ describe("prepared model runtime snapshots", () => {
     });
     const finishFirstRefreshGate = createDeferred();
     const finishSecondRefreshGate = createDeferred();
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async (_config, targetDir) => {
         await finishFirstRefreshGate.promise;
         return { agentDir: String(targetDir), wrote: false };
@@ -924,12 +924,12 @@ describe("prepared model runtime snapshots", () => {
     let dispatch: ReturnType<typeof loadPublishedGatewayReplyDispatchRuntime> | undefined;
     try {
       mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       dispatch = loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" });
       void dispatch.catch(() => undefined);
       mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
       finishFirstRefreshGate.resolve();
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3));
       await expect(
         Promise.race([dispatch.then(() => "settled"), Promise.resolve("pending")]),
       ).resolves.toBe("pending");
@@ -962,7 +962,7 @@ describe("prepared model runtime snapshots", () => {
     const finishSupersededRefreshGate = createDeferred();
     const siblingGate = createDeferred<{ agentDir: string; wrote: false }>();
     let failSiblingRefresh: (() => void) | undefined;
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async (_config, targetDir) => {
         await finishSupersededRefreshGate.promise;
         return { agentDir: String(targetDir), wrote: false };
@@ -974,7 +974,7 @@ describe("prepared model runtime snapshots", () => {
 
     try {
       mocks.mutationListener?.({ affectsInheritedStores: true });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(4));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(4));
       mocks.mutationListener?.({ agentDir: supersededDir, affectsInheritedStores: false });
       finishSupersededRefreshGate.resolve();
       failSiblingRefresh?.();
@@ -1003,7 +1003,7 @@ describe("prepared model runtime snapshots", () => {
 
     mocks.mutationListener?.({ agentDir: inheritedAuthDir, affectsInheritedStores: false });
 
-    await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
     await prepareModelRuntimeSnapshot({ config, agentDir, inheritedAuthDir });
     expect(mocks.discoverAuthStorage).toHaveBeenLastCalledWith(
       agentDir,
@@ -1021,7 +1021,7 @@ describe("prepared model runtime snapshots", () => {
       affectsInheritedStores: false,
     });
 
-    await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
     await prepareModelRuntimeSnapshot({ config, agentDir });
     expect(mocks.discoverAuthStorage).toHaveBeenLastCalledWith(
       agentDir,
@@ -1042,7 +1042,7 @@ describe("prepared model runtime snapshots", () => {
     );
     await prepareModelRuntimeSnapshot({ config, agentDir: firstAgentDir });
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(70);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(70);
     expect(mocks.discoverAuthStorage).toHaveBeenCalledTimes(70);
     expect(mocks.discoverModels).toHaveBeenCalledTimes(70);
   });
@@ -1075,7 +1075,7 @@ describe("prepared model runtime snapshots", () => {
     });
 
     expect(snapshot.workspaceDir).toBe("/tmp/explicit-workspace");
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenLastCalledWith(
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenLastCalledWith(
       expect.any(Object),
       agentDir,
       expect.objectContaining({ workspaceDir: "/tmp/explicit-workspace" }),

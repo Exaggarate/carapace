@@ -300,7 +300,7 @@ describe("renderChatComposer controls", () => {
     expect(banner?.textContent).toContain("This session is archived.");
     expect(container.querySelector(".agent-chat__input")).toBeNull();
     expect(container.querySelector("textarea")).toBeNull();
-    expect(container.querySelector("openclaw-chat-question-panel")).toBeNull();
+    expect(container.querySelector("carapace-chat-question-panel")).toBeNull();
     expect(container.querySelector(".agent-chat__typing-indicator--outside")).toBeNull();
     banner?.querySelector<HTMLButtonElement>("button")?.click();
     expect(onAction).toHaveBeenCalledOnce();
@@ -506,7 +506,7 @@ describe("renderChatComposer controls", () => {
       ).toHaveLength(2),
     );
     const voiceTooltip = container.querySelector<HTMLElement & { content?: string }>(
-      ".chat-talk-control > openclaw-tooltip",
+      ".chat-talk-control > carapace-tooltip",
     );
     expect(container.querySelector(".chat-talk-control__capability-alert")).toBeNull();
     expect(voiceTooltip?.content).toBe(t("chat.composer.voiceGestureHint"));
@@ -811,7 +811,7 @@ describe("renderChatComposer controls", () => {
     );
 
     const capturedButton = container.querySelector<HTMLButtonElement>(
-      ".chat-talk-control > openclaw-tooltip > button",
+      ".chat-talk-control > carapace-tooltip > button",
     );
     expect(capturedButton).not.toBeNull();
     const captures = new Set<number>();
@@ -832,7 +832,7 @@ describe("renderChatComposer controls", () => {
     await vi.advanceTimersByTimeAsync(500);
 
     const rerenderedButton = container.querySelector<HTMLButtonElement>(
-      ".chat-talk-control > openclaw-tooltip > button",
+      ".chat-talk-control > carapace-tooltip > button",
     );
     expect(request).toHaveBeenCalledWith("talk.session.create", expect.anything());
     expect(rerenderedButton).toBe(capturedButton);
@@ -958,7 +958,7 @@ describe("renderChatComposer status", () => {
 
     composerProps.gatewayQuestionPrompts = [prompt];
     draw();
-    let panel = container.querySelector("openclaw-chat-question-panel") as HTMLElement & {
+    let panel = container.querySelector("carapace-chat-question-panel") as HTMLElement & {
       updateComplete: Promise<unknown>;
       props: { onCollapsedChange: (collapsed: boolean) => void };
     };
@@ -978,7 +978,7 @@ describe("renderChatComposer status", () => {
     expect(textarea.value).toBe("Host updated this draft while the question was open");
     expect(document.activeElement).toBe(textarea);
 
-    panel = container.querySelector("openclaw-chat-question-panel") as typeof panel;
+    panel = container.querySelector("carapace-chat-question-panel") as typeof panel;
     panel.props.onCollapsedChange(false);
     draw();
     await panel.updateComplete;
@@ -991,7 +991,7 @@ describe("renderChatComposer status", () => {
     textarea = container.querySelector<HTMLTextAreaElement>("textarea")!;
     expect(textarea.value).toBe("Host updated this draft while the question was open");
     expect(document.activeElement).toBe(textarea);
-    expect(container.querySelector("openclaw-chat-question-panel")).toBeNull();
+    expect(container.querySelector("carapace-chat-question-panel")).toBeNull();
 
     container.remove();
   });
@@ -1009,7 +1009,7 @@ describe("renderChatComposer status", () => {
     });
 
     render(renderChatComposer(composerProps), container);
-    let panel = container.querySelector("openclaw-chat-question-panel") as HTMLElement & {
+    let panel = container.querySelector("carapace-chat-question-panel") as HTMLElement & {
       props: {
         model: { questions: Array<{ question: string }>; requestPosition?: unknown };
         onNextRequest?: () => void;
@@ -1021,7 +1021,7 @@ describe("renderChatComposer status", () => {
     panel.props.onNextRequest?.();
     expect(onRequestUpdate).toHaveBeenCalledOnce();
     render(renderChatComposer(composerProps), container);
-    panel = container.querySelector("openclaw-chat-question-panel") as typeof panel;
+    panel = container.querySelector("carapace-chat-question-panel") as typeof panel;
     expect(panel.props.model.questions[0]?.question).toBe("Second prompt");
     expect(panel.props.model.requestPosition).toEqual({ current: 2, total: 2 });
   });
@@ -1037,7 +1037,7 @@ describe("renderChatComposer status", () => {
       gatewayQuestionPrompts: [unscopedPrompt, otherSessionPrompt],
     });
 
-    expect(view.container.querySelector("openclaw-chat-question-panel")).toBeNull();
+    expect(view.container.querySelector("carapace-chat-question-panel")).toBeNull();
   });
   it("floats a fresh interrupted status above the composer", () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(1_000);

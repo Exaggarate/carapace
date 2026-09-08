@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { applyCliProfileEnv } from "../cli/profile.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   getInstallationTarget,
   installationTargetEnv,
@@ -14,7 +14,7 @@ describe("installation target ownership", () => {
   it.each(["default", "custom", "relative", "profile", "legacy"])(
     "captures the canonical %s installation before selectors change",
     async (selector) => {
-      await withOpenClawTestState({ layout: "home" }, async (state) => {
+      await withCarapaceTestState({ layout: "home" }, async (state) => {
         const env: NodeJS.ProcessEnv = { HOME: state.home };
         let stateDir = state.stateDir;
         let configPath = state.configPath;
@@ -23,18 +23,18 @@ describe("installation target ownership", () => {
           stateDir = state.path("custom state");
           configPath = state.path("separate config", "custom.json");
           defaultWorkspaceDir = state.path("custom workspace");
-          env.OPENCLAW_STATE_DIR =
+          env.CARAPACE_STATE_DIR =
             selector === "relative" ? path.relative(process.cwd(), stateDir) : stateDir;
-          env.OPENCLAW_CONFIG_PATH =
+          env.CARAPACE_CONFIG_PATH =
             selector === "relative" ? path.relative(process.cwd(), configPath) : configPath;
-          env.OPENCLAW_WORKSPACE_DIR =
+          env.CARAPACE_WORKSPACE_DIR =
             selector === "relative"
               ? path.relative(process.cwd(), defaultWorkspaceDir)
               : defaultWorkspaceDir;
         } else if (selector === "profile") {
           applyCliProfileEnv({ profile: "diagnostic", env });
-          stateDir = path.join(state.home, ".openclaw-diagnostic");
-          configPath = path.join(stateDir, "openclaw.json");
+          stateDir = path.join(state.home, ".carapace-diagnostic");
+          configPath = path.join(stateDir, "carapace.json");
           defaultWorkspaceDir = path.join(stateDir, "workspace");
         } else if (selector === "legacy") {
           await fs.rm(stateDir, { recursive: true });
@@ -44,15 +44,15 @@ describe("installation target ownership", () => {
           await fs.writeFile(configPath, "{}");
         }
         const target = resolveInstallationTarget(env);
-        env.OPENCLAW_STATE_DIR = state.path("scratch");
-        delete env.OPENCLAW_CONFIG_PATH;
-        env.OPENCLAW_WORKSPACE_DIR = state.path("execution cwd");
+        env.CARAPACE_STATE_DIR = state.path("scratch");
+        delete env.CARAPACE_CONFIG_PATH;
+        env.CARAPACE_WORKSPACE_DIR = state.path("execution cwd");
         expect(target).toEqual({ stateDir, configPath, defaultWorkspaceDir });
         expect(Object.isFrozen(target)).toBe(true);
         expect(installationTargetEnv(target)).toEqual({
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_WORKSPACE_DIR: defaultWorkspaceDir,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_WORKSPACE_DIR: defaultWorkspaceDir,
         });
       });
     },

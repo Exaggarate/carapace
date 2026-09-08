@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   createPluginStateSyncKeyedStore,
   importPluginStateEntriesForDoctor,
@@ -15,7 +15,7 @@ import {
   setMaxPluginStateEntriesPerPluginForTests,
 } from "./plugin-state-store.test-helpers.js";
 
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 const pluginId = "import-test";
 const options = { namespace: "legacy", maxEntries: 2_000 };
 const entries = Array.from({ length: 1_001 }, (_, index) => ({
@@ -25,7 +25,7 @@ const entries = Array.from({ length: 1_001 }, (_, index) => ({
 }));
 
 beforeAll(async () => {
-  testState = await createOpenClawTestState({ label: "plugin-state-import" });
+  testState = await createCarapaceTestState({ label: "plugin-state-import" });
 });
 beforeEach(() => {
   testState.applyEnv();
@@ -43,7 +43,7 @@ afterAll(async () => {
 describe("doctor plugin state import", () => {
   it("bounds commit work while retaining source ages and remaining TTLs", () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(10_000);
-    const exec = vi.spyOn(openOpenClawStateDatabase().db, "exec");
+    const exec = vi.spyOn(openCarapaceStateDatabase().db, "exec");
     importPluginStateEntriesForDoctor(
       pluginId,
       options,
@@ -60,7 +60,7 @@ describe("doctor plugin state import", () => {
 
   it("commits the successful prefix of a failed batch and converges on rerun", () => {
     const bounded = { ...options, maxEntries: 600 };
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.exec(`CREATE TEMP TRIGGER fail_import BEFORE DELETE ON plugin_state_entries
       WHEN OLD.entry_key = 'row-150' BEGIN SELECT RAISE(ABORT, 'injected import failure'); END`);
     const store = createPluginStateSyncKeyedStore(pluginId, bounded);
@@ -80,7 +80,7 @@ describe("doctor plugin state import", () => {
   });
 
   it("preserves a transaction-abort failure and reopens without committing its batch prefix", () => {
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.exec(`CREATE TEMP TRIGGER abort_import BEFORE INSERT ON plugin_state_entries
       WHEN NEW.entry_key = 'row-750' BEGIN SELECT RAISE(ROLLBACK, 'import transaction aborted'); END`);
     let failure: unknown;
@@ -94,7 +94,7 @@ describe("doctor plugin state import", () => {
       cause: { message: "import transaction aborted" },
     });
     expect(db.isOpen).toBe(false);
-    const reopened = openOpenClawStateDatabase().db;
+    const reopened = openCarapaceStateDatabase().db;
     expect(reopened === db).toBe(false);
     const store = createPluginStateSyncKeyedStore(pluginId, options);
     // The first bounded batch committed; the entire second batch was aborted.
@@ -110,7 +110,7 @@ describe("doctor plugin state import", () => {
     seedPluginStateEntriesForTests([
       { pluginId, namespace: "durable", key: "sibling", value: true, expiresAt: 10_001 },
     ]);
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.function("advance_import_clock", () => {
       clock = backward ? 10_000 : 10_001;
       return 0;

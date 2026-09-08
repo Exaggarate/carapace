@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GitHubCliUnavailableError } from "../github-cli-preflight.js";
 import { toolsGitHubHandlers } from "./tools-github.js";

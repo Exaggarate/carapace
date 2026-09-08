@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import {
   appendTranscriptMessageSync,
@@ -52,7 +52,7 @@ type TtsCommandResult = Awaited<ReturnType<typeof handleTtsCommands>>;
 
 function buildTtsParams(
   commandBodyNormalized: string,
-  cfg: OpenClawConfig = {},
+  cfg: CarapaceConfig = {},
   agentId?: string,
   overrides: Partial<Parameters<typeof handleTtsCommands>[0]> = {},
 ): Parameters<typeof handleTtsCommands>[0] {
@@ -254,7 +254,7 @@ describe("handleTtsCommands status fallback reporting", () => {
     const result = await handleTtsCommands(
       buildTtsParams("/tts", {
         tts: { prefsPath: "/tmp/tts.json" },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       true,
     );
     const reply = expectReply(result);
@@ -280,7 +280,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   it("resolves status config for the active agent", async () => {
     const cfg = {
       agents: { list: [{ id: "reader", tts: { provider: "elevenlabs" } }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await handleTtsCommands(buildTtsParams("/tts status", cfg, "reader"), true);
 
@@ -301,7 +301,7 @@ describe("handleTtsCommands status fallback reporting", () => {
     });
     const cfg = {
       agents: { list: [{ id: "reader", tts: { provider: PRIMARY_TTS_PROVIDER } }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await handleTtsCommands(
       buildTtsParams("/tts audio hello", cfg, "reader", {
@@ -314,7 +314,7 @@ describe("handleTtsCommands status fallback reporting", () => {
     const speechCall = lastMockCall(ttsMocks.textToSpeech, "textToSpeech")[0] as {
       accountId?: string;
       agentId?: string;
-      cfg?: OpenClawConfig;
+      cfg?: CarapaceConfig;
       text?: string;
     };
     expect(speechCall.text).toBe("hello");
@@ -349,7 +349,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   ])(
     "reads the latest assistant reply via $command with voice delivery $audioAsVoice",
     async ({ command, audioAsVoice }) => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tts-latest-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-tts-latest-"));
       const storePath = path.join(tempDir, "sessions.json");
       const sessionKey = "agent:other:tts-latest";
       const sessionEntry: SessionEntry = { sessionId: "s1", updatedAt: 1 };
@@ -424,7 +424,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   );
 
   it("reads the latest assistant reply from the incognito transcript store", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tts-incognito-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-tts-incognito-"));
     const durableStorePath = path.join(tempDir, "sessions.json");
     const sessionKey = "agent:main:dashboard:incognito-tts-latest";
     const sessionEntry: SessionEntry = { sessionId: "incognito-session", updatedAt: 1 };
@@ -468,7 +468,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   });
 
   it("does not resend /tts latest for the same assistant reply", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tts-latest-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-tts-latest-"));
     const storePath = path.join(tempDir, "sessions.json");
     const sessionEntry: SessionEntry = { sessionId: "s1", updatedAt: 1 };
     const sessionStore = { "session-key": sessionEntry };

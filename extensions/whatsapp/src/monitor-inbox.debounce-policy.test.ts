@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { expect, it, vi } from "vitest";
 import {
   buildNotifyMessageUpsert,
@@ -12,7 +12,7 @@ import {
 installWebMonitorInboxUnitTestHooks();
 
 it("updates WhatsApp timing and drains batches enabled after socket attachment", async () => {
-  let cfg: OpenClawConfig = {
+  let cfg: CarapaceConfig = {
     channels: { whatsapp: { allowFrom: ["*"] } },
     messages: { inbound: { debounceMs: 0 } },
   };

@@ -3,10 +3,10 @@ import os from "node:os";
 import path from "node:path";
 // Auto-audio runner tests cover provider fallback selection and local binary
 // discovery for audio transcription.
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { describe, expect, it, vi } from "vitest";
 import { ProviderAuthError } from "../agents/model-auth-runtime-shared.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { MediaUnderstandingConfig } from "../config/types.tools.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { runCapability } from "./runner.js";
@@ -44,7 +44,7 @@ function createOpenAiAudioProvider(
   });
 }
 
-function createOpenAiAudioCfg(extra?: Partial<OpenClawConfig>): OpenClawConfig {
+function createOpenAiAudioCfg(extra?: Partial<CarapaceConfig>): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -55,7 +55,7 @@ function createOpenAiAudioCfg(extra?: Partial<OpenClawConfig>): OpenClawConfig {
       },
     },
     ...extra,
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 async function createWhisperExecutable(dir: string) {
@@ -81,10 +81,10 @@ async function createWhisperExecutable(dir: string) {
 
 async function runAutoAudioCase(params: {
   transcribeAudio: (req: AudioTranscriptionRequest) => Promise<{ text: string; model: string }>;
-  cfgExtra?: Partial<OpenClawConfig>;
+  cfgExtra?: Partial<CarapaceConfig>;
 }) {
   let runResult: Awaited<ReturnType<typeof runCapability>> | undefined;
-  await withAudioFixture("openclaw-auto-audio", async ({ ctx, media, cache }) => {
+  await withAudioFixture("carapace-auto-audio", async ({ ctx, media, cache }) => {
     const providerRegistry = createOpenAiAudioProvider(params.transcribeAudio);
     const cfg = createOpenAiAudioCfg(params.cfgExtra);
     runResult = await runCapability({
@@ -104,7 +104,7 @@ async function runAutoAudioCase(params: {
 
 describe("runCapability auto audio entries", () => {
   it("resolves audio credentials after loading each attachment", async () => {
-    await withAudioFixture("openclaw-audio-late-auth", async ({ ctx, media, cache }) => {
+    await withAudioFixture("carapace-audio-late-auth", async ({ ctx, media, cache }) => {
       let currentCredential = "before-download";
       const getBuffer = cache.getBuffer.bind(cache);
       vi.spyOn(cache, "getBuffer").mockImplementation(async (params) => {
@@ -145,7 +145,7 @@ describe("runCapability auto audio entries", () => {
       return { ok: true as const, value: { text: "subscription transcript" } };
     });
     try {
-      await withAudioFixture("openclaw-auto-prepared-audio", async ({ ctx, media, cache }) => {
+      await withAudioFixture("carapace-auto-prepared-audio", async ({ ctx, media, cache }) => {
         const result = await runCapability({
           capability: "audio",
           cfg: {},
@@ -193,7 +193,7 @@ describe("runCapability auto audio entries", () => {
       hasAuth.mockClear();
       const rejected = new Error("Audio transcription failed (HTTP 403)");
       const transcribeAudio = vi.fn(async () => ({ text: "authored fallback transcript" }));
-      await withAudioFixture("openclaw-audio-upload-fallback", async ({ ctx, media, cache }) => {
+      await withAudioFixture("carapace-audio-upload-fallback", async ({ ctx, media, cache }) => {
         const result = await runCapability({
           capability: "audio",
           cfg: {
@@ -249,7 +249,7 @@ describe("runCapability auto audio entries", () => {
   it.each(["provider", "local"] as const)(
     "continues to the next %s when automatic subscription preparation rejects the request",
     async (fallback) => {
-      const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auto-prepare-fallback-"));
+      const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auto-prepare-fallback-"));
       const rejected = new Error(
         "This subscription route cannot use the configured endpoint or prompt.",
       );
@@ -264,7 +264,7 @@ describe("runCapability auto audio entries", () => {
       try {
         await createWhisperExecutable(binDir);
         clearMediaUnderstandingBinaryCacheForTests();
-        await withAudioFixture("openclaw-auto-prepare-fallback", async ({ ctx, media, cache }) => {
+        await withAudioFixture("carapace-auto-prepare-fallback", async ({ ctx, media, cache }) => {
           await withEnvAsync(
             { PATH: binDir, SHERPA_ONNX_MODEL_DIR: undefined, WHISPER_CPP_MODEL: undefined },
             async () => {
@@ -321,7 +321,7 @@ describe("runCapability auto audio entries", () => {
   );
 
   it("keeps missing provider credentials unavailable without recording a failed attempt", async () => {
-    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auto-prepare-no-auth-"));
+    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auto-prepare-no-auth-"));
     const transcribeAudioWithContext = vi.fn(async () => ({
       ok: false as const,
       error: new ProviderAuthError("missing-provider-auth", "openai", "No configured credentials"),
@@ -331,7 +331,7 @@ describe("runCapability auto audio entries", () => {
       await withEnvAsync(
         { PATH: binDir, SHERPA_ONNX_MODEL_DIR: undefined, WHISPER_CPP_MODEL: undefined },
         async () => {
-          await withAudioFixture("openclaw-auto-prepare-no-auth", async ({ ctx, media, cache }) => {
+          await withAudioFixture("carapace-auto-prepare-no-auth", async ({ ctx, media, cache }) => {
             const result = await runCapability({
               capability: "audio",
               cfg: {},
@@ -376,7 +376,7 @@ describe("runCapability auto audio entries", () => {
     }));
 
     try {
-      await withAudioFixture("openclaw-auto-audio-oauth-skip", async ({ ctx, media, cache }) => {
+      await withAudioFixture("carapace-auto-audio-oauth-skip", async ({ ctx, media, cache }) => {
         const openAiTranscribe = vi.fn(async (req: AudioTranscriptionRequest) => ({
           text: "openai",
           model: req.model ?? "unknown",
@@ -399,7 +399,7 @@ describe("runCapability auto audio entries", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as CarapaceConfig,
           ctx,
           attachments: cache,
           media,
@@ -454,7 +454,7 @@ describe("runCapability auto audio entries", () => {
     const resolveApiKeyForProviderCore = vi.mocked(modelAuth.resolveApiKeyForProviderCore);
     resolveApiKeyForProviderCore.mockClear();
 
-    await withAudioFixture("openclaw-auto-audio-workspace-auth", async ({ ctx, media, cache }) => {
+    await withAudioFixture("carapace-auto-audio-workspace-auth", async ({ ctx, media, cache }) => {
       const result = await runCapability({
         capability: "audio",
         cfg: {
@@ -465,7 +465,7 @@ describe("runCapability auto audio entries", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx,
         attachments: cache,
         media,
@@ -473,8 +473,8 @@ describe("runCapability auto audio entries", () => {
           text: `workspace ${req.apiKey}`,
           model: req.model ?? "unknown",
         })),
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        workspaceDir: "/tmp/carapace-workspace",
       });
 
       expect(result.decision.outcome).toBe("success");
@@ -484,8 +484,8 @@ describe("runCapability auto audio entries", () => {
     expect(resolveApiKeyForProviderCore).toHaveBeenCalledWith(
       expect.objectContaining({
         provider: "openai",
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        workspaceDir: "/tmp/carapace-workspace",
       }),
     );
   });
@@ -494,7 +494,7 @@ describe("runCapability auto audio entries", () => {
     let runResult: Awaited<ReturnType<typeof runCapability>> | undefined;
     let seenModel: string | undefined;
 
-    await withAudioFixture("openclaw-auto-audio-codex", async ({ ctx, media, cache }) => {
+    await withAudioFixture("carapace-auto-audio-codex", async ({ ctx, media, cache }) => {
       const providerRegistry = createProviderRegistry({
         openai: {
           id: "openai",
@@ -515,7 +515,7 @@ describe("runCapability auto audio entries", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
 
       runResult = await runCapability({
         capability: "audio",
@@ -545,7 +545,7 @@ describe("runCapability auto audio entries", () => {
     let runResult: Awaited<ReturnType<typeof runCapability>> | undefined;
     let seenModel: string | undefined;
 
-    await withAudioFixture("openclaw-auto-audio-xai", async ({ ctx, media, cache }) => {
+    await withAudioFixture("carapace-auto-audio-xai", async ({ ctx, media, cache }) => {
       const providerRegistry = createProviderRegistry({
         xai: {
           id: "xai",
@@ -565,7 +565,7 @@ describe("runCapability auto audio entries", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
 
       runResult = await runCapability({
         capability: "audio",
@@ -591,12 +591,12 @@ describe("runCapability auto audio entries", () => {
   });
 
   it("prefers provider keys over auto-detected local whisper", async () => {
-    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auto-audio-bin-"));
+    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auto-audio-bin-"));
     try {
       await createWhisperExecutable(binDir);
       clearMediaUnderstandingBinaryCacheForTests();
       let seenModel: string | undefined;
-      await withAudioFixture("openclaw-auto-audio-priority", async ({ ctx, media, cache }) => {
+      await withAudioFixture("carapace-auto-audio-priority", async ({ ctx, media, cache }) => {
         const result = await withEnvAsync(
           { PATH: binDir, SHERPA_ONNX_MODEL_DIR: undefined, WHISPER_CPP_MODEL: undefined },
           async () =>
@@ -702,7 +702,7 @@ describe("runCapability auto audio entries", () => {
             },
           },
         },
-      } as Partial<OpenClawConfig>,
+      } as Partial<CarapaceConfig>,
     });
 
     expect(expectDefined(result.outputs[0], "media output 0").text).toBe("ok");
@@ -729,7 +729,7 @@ describe("runCapability auto audio entries", () => {
             },
           },
         },
-      } as Partial<OpenClawConfig>,
+      } as Partial<CarapaceConfig>,
     });
 
     expect(expectDefined(result.outputs[0], "media output 0").text).toBe("ok");
@@ -751,7 +751,7 @@ describe("runCapability auto audio entries", () => {
               audio,
             },
           },
-        } as Partial<OpenClawConfig>,
+        } as Partial<CarapaceConfig>,
       });
     };
 
@@ -770,7 +770,7 @@ describe("runCapability auto audio entries", () => {
     }
     await runCase({
       enabled: true,
-      prompt: "OpenClaw, Whisper, and Groq.",
+      prompt: "Carapace, Whisper, and Groq.",
       models: [{ provider: "openai", model: "whisper-1" }],
     });
 
@@ -781,7 +781,7 @@ describe("runCapability auto audio entries", () => {
       "Transcribe the audio.",
       "Transcribe the audio.",
       "Transcribe the audio.",
-      "OpenClaw, Whisper, and Groq.",
+      "Carapace, Whisper, and Groq.",
     ]);
   });
 
@@ -811,7 +811,7 @@ describe("runCapability auto audio entries", () => {
   );
 
   it("uses mistral when only mistral key is configured", async () => {
-    const isolatedAgentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-audio-agent-"));
+    const isolatedAgentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-audio-agent-"));
     let runResult: Awaited<ReturnType<typeof runCapability>> | undefined;
     try {
       await withEnvAsync(
@@ -822,10 +822,10 @@ describe("runCapability auto audio entries", () => {
           GEMINI_API_KEY: undefined,
           GOOGLE_API_KEY: undefined,
           MISTRAL_API_KEY: "mistral-test-key", // pragma: allowlist secret
-          OPENCLAW_AGENT_DIR: isolatedAgentDir,
+          CARAPACE_AGENT_DIR: isolatedAgentDir,
         },
         async () => {
-          await withAudioFixture("openclaw-auto-audio-mistral", async ({ ctx, media, cache }) => {
+          await withAudioFixture("carapace-auto-audio-mistral", async ({ ctx, media, cache }) => {
             const providerRegistry = createProviderRegistry({
               openai: {
                 id: "openai",
@@ -860,7 +860,7 @@ describe("runCapability auto audio entries", () => {
                   },
                 },
               },
-            } as unknown as OpenClawConfig;
+            } as unknown as CarapaceConfig;
 
             runResult = await runCapability({
               capability: "audio",

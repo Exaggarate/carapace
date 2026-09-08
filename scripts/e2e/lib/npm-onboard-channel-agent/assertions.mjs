@@ -20,11 +20,11 @@ import { readTextFileBounded, readTextFileTail } from "../text-file-utils.mjs";
 const command = process.argv[2];
 const ERROR_DETAIL_TAIL_BYTES = 16 * 1024;
 const JSON_ARTIFACT_MAX_BYTES = readPositiveIntEnv(
-  "OPENCLAW_NPM_ONBOARD_JSON_ARTIFACT_MAX_BYTES",
+  "CARAPACE_NPM_ONBOARD_JSON_ARTIFACT_MAX_BYTES",
   1024 * 1024,
 );
 const STATUS_TEXT_MAX_BYTES = readPositiveIntEnv(
-  "OPENCLAW_NPM_ONBOARD_STATUS_TEXT_MAX_BYTES",
+  "CARAPACE_NPM_ONBOARD_STATUS_TEXT_MAX_BYTES",
   1024 * 1024,
 );
 const ansiEscapePattern = new RegExp(String.raw`\u001b\[[0-?]*[ -/]*[@-~]`, "g");
@@ -42,7 +42,7 @@ function stripAnsi(text) {
 }
 
 const statusSectionTitles = new Set([
-  "openclaw status",
+  "carapace status",
   "overview",
   "plugin compatibility",
   "model selection",
@@ -82,11 +82,11 @@ function extractStatusSection(text, title) {
 
 function assertOnboardState() {
   const home = process.argv[3];
-  const stateDir = path.join(home, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const stateDir = path.join(home, ".carapace");
+  const configPath = path.join(stateDir, "carapace.json");
 
   if (!fs.existsSync(configPath)) {
-    throw new Error("onboard did not write openclaw.json");
+    throw new Error("onboard did not write carapace.json");
   }
   assertNoLegacyPrimaryAuthRows(stateDir);
   const authStoreText = readCanonicalAuthProfileStoreText(stateDir);
@@ -96,13 +96,13 @@ function assertOnboardState() {
   assertOpenAiEnvAuthProfileStore(authStoreText, {
     envRefMessage: "auth profile did not persist OPENAI_API_KEY env ref",
     rawKeyMessage: "auth profile persisted the raw OpenAI test key",
-    rawKeyNeedle: "sk-openclaw-npm-onboard-e2e",
+    rawKeyNeedle: "sk-carapace-npm-onboard-e2e",
   });
 }
 
 function configureMockModel() {
   const mockPort = parseMockOpenAiPort(process.argv[3]);
-  const configPath = path.join(process.env.HOME, ".openclaw", "openclaw.json");
+  const configPath = path.join(process.env.HOME, ".carapace", "carapace.json");
   const cfg = readJson(configPath);
   applyMockOpenAiModelConfig(cfg, { mockPort });
   fs.writeFileSync(configPath, `${JSON.stringify(cfg, null, 2)}\n`);
@@ -112,7 +112,7 @@ function assertMockModelConfig() {
   const mockPort = parseMockOpenAiPort(process.argv[3]);
   const expectedModelRef = "openai/gpt-5.6-luna";
   const expectedBaseUrl = `http://127.0.0.1:${mockPort}/v1`;
-  const configPath = path.join(process.env.HOME, ".openclaw", "openclaw.json");
+  const configPath = path.join(process.env.HOME, ".carapace", "carapace.json");
   const cfg = readJson(configPath);
   const provider = cfg.models?.providers?.openai;
   const defaultModel = cfg.agents?.defaults?.model?.primary;
@@ -128,7 +128,7 @@ function assertMockModelConfig() {
   if (provider?.api !== "openai-responses") {
     throw new Error(`mock OpenAI api was not preserved; got ${provider?.api}`);
   }
-  if (provider?.agentRuntime?.id !== "openclaw") {
+  if (provider?.agentRuntime?.id !== "carapace") {
     throw new Error(`mock OpenAI runtime was not preserved; got ${provider?.agentRuntime?.id}`);
   }
   if (defaultModel !== expectedModelRef) {
@@ -136,7 +136,7 @@ function assertMockModelConfig() {
       `mock default model was not preserved; expected ${expectedModelRef}, got ${defaultModel}`,
     );
   }
-  if (defaultRuntime !== "openclaw") {
+  if (defaultRuntime !== "carapace") {
     throw new Error(`mock default runtime was not preserved; got ${defaultRuntime}`);
   }
   if (agentModel !== expectedModelRef) {
@@ -144,7 +144,7 @@ function assertMockModelConfig() {
       `mock agent model was not preserved; expected ${expectedModelRef}, got ${agentModel}`,
     );
   }
-  if (agentRuntime !== "openclaw") {
+  if (agentRuntime !== "carapace") {
     throw new Error(`mock agent runtime was not preserved; got ${agentRuntime}`);
   }
 }
@@ -152,7 +152,7 @@ function assertMockModelConfig() {
 function assertChannelConfig() {
   const channel = process.argv[3];
   const expectedTokens = process.argv.slice(4);
-  const configPath = path.join(process.env.HOME, ".openclaw", "openclaw.json");
+  const configPath = path.join(process.env.HOME, ".carapace", "carapace.json");
   const cfg = readJson(configPath);
   const entry = cfg.channels?.[channel];
   if (!entry || entry.enabled === false) {
@@ -234,7 +234,7 @@ function assertStatusSurfaces() {
 function assertAgentTurn() {
   const marker = process.argv[3];
   const logPath = process.argv[4];
-  assertAgentReplyContainsMarker(marker, "/tmp/openclaw-agent.combined");
+  assertAgentReplyContainsMarker(marker, "/tmp/carapace-agent.combined");
   assertOpenAiRequestLogUsed(logPath);
 }
 

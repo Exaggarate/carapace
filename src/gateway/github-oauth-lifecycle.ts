@@ -39,7 +39,7 @@ import {
   resolveGitHubToolIdentityStatus,
   resolveManagedGitHubProfileDir,
 } from "../agents/github-tool-identity.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GitHubToolIdentityConfig } from "../config/types.tools.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
@@ -84,8 +84,8 @@ export async function requestCurrentPersonalGitHubRefresh(owner: string): Promis
 }
 
 export function createGitHubOAuthLifecycle(params: {
-  getConfig: () => OpenClawConfig;
-  getPersistedConfig?: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
+  getPersistedConfig?: () => CarapaceConfig;
   warn: (message: string) => void;
 }) {
   const personal = createPersonalGitHubOAuthLifecycle();
@@ -424,7 +424,7 @@ export function createGitHubOAuthLifecycle(params: {
         if (committingRequests.has(record.pendingInitial.requestId)) {
           continue;
         }
-        let persistedConfig: OpenClawConfig;
+        let persistedConfig: CarapaceConfig;
         try {
           const persisted = params.getPersistedConfig?.();
           if (!persisted) {

@@ -111,15 +111,15 @@ describe("normalizeRegisteredChannelPlugin", () => {
     const { diagnostics, pushDiagnostic } = collectDiagnostics();
 
     const normalized = normalizeRegisteredChannelPlugin({
-      pluginId: "openclaw-weixin",
-      source: "/tmp/openclaw-weixin/index.ts",
+      pluginId: "carapace-weixin",
+      source: "/tmp/carapace-weixin/index.ts",
       plugin: createChannelPlugin({
-        id: "openclaw-weixin",
+        id: "carapace-weixin",
         meta: {
-          id: "openclaw-weixin",
-          label: "openclaw-weixin",
-          selectionLabel: "openclaw-weixin (long-poll)",
-          docsPath: "/channels/openclaw-weixin",
+          id: "carapace-weixin",
+          label: "carapace-weixin",
+          selectionLabel: "carapace-weixin (long-poll)",
+          docsPath: "/channels/carapace-weixin",
           blurb: "Weixin channel",
         },
       }),

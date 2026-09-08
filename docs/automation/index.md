@@ -2,13 +2,13 @@
 doc-schema-version: 1
 summary: "Overview of automation mechanisms: tasks, automations, hooks, standing orders, and Task Flow"
 read_when:
-  - Deciding how to automate work with OpenClaw
+  - Deciding how to automate work with Carapace
   - Choosing between heartbeat, automations, hooks, and standing orders
   - Looking for the right automation entry point
 title: "Automation"
 ---
 
-OpenClaw runs work in the background through tasks, scheduled jobs, event hooks,
+Carapace runs work in the background through tasks, scheduled jobs, event hooks,
 and standing instructions. Use this page to pick the right mechanism.
 
 ## Quick decision guide
@@ -41,7 +41,7 @@ flowchart TD
 | Monitor calendar for upcoming events      | Automations                                | Explicit recurring schedule and delivery policy        |
 | Surface ambient main-session updates      | Heartbeat                                  | System-owned monitor automation and quiet alerts       |
 | Inspect status of a subagent or ACP run   | Background Tasks                           | Tasks ledger tracks all detached work                  |
-| Audit what ran and when                   | Background Tasks                           | `openclaw tasks list` and `openclaw tasks audit`       |
+| Audit what ran and when                   | Background Tasks                           | `carapace tasks list` and `carapace tasks audit`       |
 | Multi-step research then summarize        | Task Flow                                  | Durable orchestration with revision tracking           |
 | Run a script on session reset             | Hooks                                      | Internal `HOOK.md` scripts react to lifecycle events   |
 | Trigger an agent from an external service | [Webhooks](/automation/cron-jobs#webhooks) | Authenticated HTTP ingress, not an internal event hook |
@@ -66,7 +66,7 @@ when periodic main-session awareness is useful.
 
 ### Automations
 
-Automations are OpenClaw's built-in scheduler for all recurring and one-shot
+Automations are Carapace's built-in scheduler for all recurring and one-shot
 work, including heartbeat monitors. The scheduler persists jobs, wakes the agent
 at the right time, and can deliver output to a chat channel or webhook endpoint.
 It supports one-shot reminders, recurring intervals and cron expressions, and
@@ -76,13 +76,13 @@ See [Automations](/automation/cron-jobs).
 
 ### Tasks
 
-The background task ledger tracks all detached work: ACP runs, subagent spawns, isolated automation runs, and CLI operations. Tasks are records, not schedulers. Use `openclaw tasks list` and `openclaw tasks audit` to inspect them.
+The background task ledger tracks all detached work: ACP runs, subagent spawns, isolated automation runs, and CLI operations. Tasks are records, not schedulers. Use `carapace tasks list` and `carapace tasks audit` to inspect them.
 
 See [Background Tasks](/automation/tasks).
 
 ### Task Flow
 
-Task Flow is the flow orchestration substrate above background tasks. It manages durable multi-step flows with managed and mirrored sync modes, revision tracking, and `openclaw tasks flow list|show|cancel` for inspection.
+Task Flow is the flow orchestration substrate above background tasks. It manages durable multi-step flows with managed and mirrored sync modes, revision tracking, and `carapace tasks flow list|show|cancel` for inspection.
 
 See [Task Flow](/automation/taskflow).
 
@@ -97,7 +97,7 @@ See [Standing Orders](/automation/standing-orders).
 Internal hooks are event-driven scripts triggered by agent lifecycle events
 (`/new`, `/reset`, `/stop`), session compaction, gateway startup, and message
 flow. They are discovered from hook directories and managed with
-`openclaw hooks`. For in-process tool-call interception, use
+`carapace hooks`. For in-process tool-call interception, use
 [Plugin hooks](/plugins/hooks).
 
 See [Hooks](/automation/hooks).
@@ -125,9 +125,9 @@ See [Heartbeat](/gateway/heartbeat).
 
 ## Retired inferred commitments
 
-The inferred commitments experiment has been removed: OpenClaw no longer
+The inferred commitments experiment has been removed: Carapace no longer
 extracts follow-ups from conversations or delivers them through heartbeat.
-The `openclaw commitments` maintenance CLI is also gone. The database migration
+The `carapace commitments` maintenance CLI is also gone. The database migration
 discards the old commitment rows and removes their table and indexes.
 
 For reminders or scheduled work, create an explicit

@@ -37,7 +37,7 @@ function group(
 
 function userBoundary(sendId = "send-1"): MessageGroup {
   return group("user", `user:${sendId}`, undefined, {
-    __openclaw: { id: `user:${sendId}`, idempotencyKey: `${sendId}:user` },
+    __carapace: { id: `user:${sendId}`, idempotencyKey: `${sendId}:user` },
   });
 }
 
@@ -122,7 +122,7 @@ describe("coalesceAgentRunFrames", () => {
     const persistedBoundary = group("assistant", "persisted-after-heartbeat", runId, {
       api: "cli",
       idempotencyKey: `cli-assistant:${runId}`,
-      __openclaw: {
+      __carapace: {
         id: "persisted-after-heartbeat",
         turnBoundary: true,
       },
@@ -228,7 +228,7 @@ describe("coalesceAgentRunFrames", () => {
 
   it("starts a new frame at an authoritative projected turn boundary", () => {
     const projected = group("assistant", "steer-output", "run-1", {
-      __openclaw: { id: "steer-entry", turnBoundary: true },
+      __carapace: { id: "steer-entry", turnBoundary: true },
     });
     const items = coalesceAgentRunFrames([
       userBoundary(),
@@ -345,7 +345,7 @@ describe("coalesceAgentRunFrames", () => {
       parts: [
         group("assistant", "commentary-stop", "run-1", {
           stopReason: "stop",
-          openclawStreamFallback: {
+          carapaceStreamFallback: {
             replacementText: "I will inspect it.",
             source: "segment",
             itemId: "commentary-1",
@@ -360,7 +360,7 @@ describe("coalesceAgentRunFrames", () => {
       parts: [
         group("assistant", "reasoning", "run-1", {
           stopReason: "stop",
-          __openclaw: { mirrorOrigin: "codex-app-server", runId: "run-1" },
+          __carapace: { mirrorOrigin: "codex-app-server", runId: "run-1" },
         }),
         group("tool", "reasoning-tool", "run-1"),
       ],
@@ -454,7 +454,7 @@ describe("coalesceAgentRunFrames", () => {
   });
 
   it.each([
-    { name: "placement abort", terminal: { stopReason: "stop", openclawAbort: { aborted: true } } },
+    { name: "placement abort", terminal: { stopReason: "stop", carapaceAbort: { aborted: true } } },
     { name: "timeout", terminal: { stopReason: "timeout" } },
   ])("marks an interrupted partial failed for $name", ({ terminal }) => {
     const frame = requireFrame(

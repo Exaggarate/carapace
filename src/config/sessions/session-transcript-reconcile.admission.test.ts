@@ -6,14 +6,14 @@ import { afterEach, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import * as sqlite from "../../infra/node-sqlite.js";
 import * as integrity from "../../infra/sqlite-integrity-worker.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesAsync,
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesAsync,
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { persistSessionTranscriptTurn } from "./session-accessor.js";
 import {
   reconcileSessionTranscriptIndexes,
@@ -32,9 +32,9 @@ afterEach(async () => {
   for (const root of roots) {
     await waitForSessionTranscriptIndexReconcilesInStateDir(root);
   }
-  await closeOpenClawAgentDatabasesAsync();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  await closeCarapaceAgentDatabasesAsync();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   for (const root of roots.splice(0)) {
     fs.rmSync(root, { recursive: true, force: true });
@@ -44,17 +44,17 @@ afterEach(async () => {
 async function fixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "reconcile-admission-"));
   roots.push(root);
-  vi.stubEnv("OPENCLAW_STATE_DIR", root);
-  const options = { agentId: "main", env: { ...process.env, OPENCLAW_STATE_DIR: root } };
+  vi.stubEnv("CARAPACE_STATE_DIR", root);
+  const options = { agentId: "main", env: { ...process.env, CARAPACE_STATE_DIR: root } };
   const scope = { ...options, sessionId: "cold", sessionKey: "agent:main:cold" };
   await persistSessionTranscriptTurn(scope, {
     messages: [{ eventId: "seed", message: { role: "user", content: "cold admission fixture" } }],
     touchSessionEntry: false,
   });
   await waitForSessionTranscriptIndexReconcile(options);
-  const database = openOpenClawAgentDatabase(options);
+  const database = openCarapaceAgentDatabase(options);
   database.db.prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1").run();
-  closeOpenClawAgentDatabaseByPath(database.path);
+  closeCarapaceAgentDatabaseByPath(database.path);
   return {
     root,
     options: { ...options, path: database.path },
@@ -96,7 +96,7 @@ it("waits for a cold projection without superseding its native integrity admissi
   await waitForSessionTranscriptIndexReconcile(options);
   expect(parentChecks).toBe(0);
   expect(
-    withOpenClawAgentDatabaseReadOnly(
+    withCarapaceAgentDatabaseReadOnly(
       ({ db }) => db.prepare("SELECT needs_rebuild FROM session_transcript_index_state").get(),
       options,
     ),
@@ -125,14 +125,14 @@ it.each(["direct", "deferred"] as const)(
     if (mode === "deferred") {
       startSessionTranscriptIndexReconcile(params);
     }
-    options.env.OPENCLAW_STATE_DIR = nextRoot;
+    options.env.CARAPACE_STATE_DIR = nextRoot;
     if (task) {
       await expect(task).resolves.toEqual({ reconciledSessions: 1 });
     } else {
       await waitForSessionTranscriptIndexReconcile(original);
     }
     expect(inputs).toContainEqual(
-      expect.objectContaining({ mode: "disk", stateDir: original.env.OPENCLAW_STATE_DIR }),
+      expect.objectContaining({ mode: "disk", stateDir: original.env.CARAPACE_STATE_DIR }),
     );
     expect(fs.readdirSync(nextRoot)).toEqual([]);
   },

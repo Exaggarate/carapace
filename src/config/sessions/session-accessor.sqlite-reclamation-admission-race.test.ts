@@ -5,7 +5,7 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import * as nodeSqlite from "../../infra/node-sqlite.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import { onSessionIdentityMutation } from "../../sessions/session-lifecycle-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import {
   deleteSessionEntryLifecycle,
   loadSessionEntry,
@@ -65,7 +65,7 @@ describe("SQLite reclamation admission races", () => {
   let storePath: string;
 
   beforeEach(() => {
-    const tempDir = tempDirs.make("openclaw-session-reclamation-admission-race-");
+    const tempDir = tempDirs.make("carapace-session-reclamation-admission-race-");
     storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
   });
 
@@ -75,7 +75,7 @@ describe("SQLite reclamation admission races", () => {
     archiveMaterializationHook.beforeCommitRequest = undefined;
     archiveMaterializationHook.afterCommitRequest = undefined;
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it.runIf(process.platform !== "win32")(
@@ -92,7 +92,7 @@ describe("SQLite reclamation admission races", () => {
         { sessionId, updatedAt: 1 },
       );
       // Close/checkpoint before copying so both files start with the same durable row and revision.
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       fs.copyFileSync(originalPath, replacementPath);
       fs.symlinkSync(originalPath, alias);
       expect(loadSessionEntry({ sessionKey, storePath: alias })).toMatchObject({ sessionId });

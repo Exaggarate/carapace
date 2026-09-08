@@ -12,7 +12,7 @@ import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts"
 import { installNativeEmbed, installNativeWebChrome } from "./native-nav.test-support.ts";
 
 type DeviceSettingsTestWindow = Window & {
-  __OPENCLAW_NATIVE_DEVICE_SETTINGS__?: NativeDeviceSettingsSnapshot;
+  __CARAPACE_NATIVE_DEVICE_SETTINGS__?: NativeDeviceSettingsSnapshot;
   nativeDeviceSettingsMessages?: unknown[];
   nativeDeviceSettingsReplies?: Array<(snapshot: NativeDeviceSettingsSnapshot) => void>;
 };
@@ -26,7 +26,7 @@ async function installDeviceSettingsBridge(page: Page, snapshot: NativeDeviceSet
     const replies: Array<(snapshot: NativeDeviceSettingsSnapshot) => void> = [];
     const nativeWindow = window as DeviceSettingsTestWindow;
     Object.assign(nativeWindow, {
-      __OPENCLAW_NATIVE_DEVICE_SETTINGS__: initial,
+      __CARAPACE_NATIVE_DEVICE_SETTINGS__: initial,
       nativeDeviceSettingsMessages: messages,
       nativeDeviceSettingsReplies: replies,
     });
@@ -34,7 +34,7 @@ async function installDeviceSettingsBridge(page: Page, snapshot: NativeDeviceSet
       configurable: true,
       value: {
         messageHandlers: {
-          openclawDeviceSettings: {
+          carapaceDeviceSettings: {
             postMessage(message: unknown) {
               messages.push(message);
               if (
@@ -47,7 +47,7 @@ async function installDeviceSettingsBridge(page: Page, snapshot: NativeDeviceSet
                   replies.push(resolve);
                 });
               }
-              return Promise.resolve(nativeWindow["__OPENCLAW_NATIVE_DEVICE_SETTINGS__"]);
+              return Promise.resolve(nativeWindow["__CARAPACE_NATIVE_DEVICE_SETTINGS__"]);
             },
           },
         },
@@ -63,7 +63,7 @@ async function replyToDeviceSetting(page: Page, snapshot: NativeDeviceSettingsSn
     if (!reply) {
       throw new Error("No native settings request is waiting for a reply");
     }
-    nativeWindow["__OPENCLAW_NATIVE_DEVICE_SETTINGS__"] = next;
+    nativeWindow["__CARAPACE_NATIVE_DEVICE_SETTINGS__"] = next;
     reply(next);
   }, snapshot);
 }
@@ -97,7 +97,7 @@ suite.define(() => {
             .locator(".native-embed-header")
             .getByRole("heading", { name: "This iPhone", exact: true })
             .waitFor();
-          const devicePage = page.locator("openclaw-device-page");
+          const devicePage = page.locator("carapace-device-page");
           const appearance = devicePage.getByRole("combobox", { name: "Appearance", exact: true });
           await expect.poll(() => appearance.inputValue()).toBe("system");
           expect(await devicePage.locator(".settings-row__title").allTextContents()).toEqual([
@@ -115,7 +115,7 @@ suite.define(() => {
             await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
           ).toBe(true);
           const capture = async (stage: string) => {
-            if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+            if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
               await page.screenshot({
                 animations: "disabled",
                 fullPage: false,
@@ -141,7 +141,7 @@ suite.define(() => {
           await capture("03-ios-appearance-saved");
           await page.locator(".native-embed-header__back").click();
           await list.locator('a[href="/settings/device/permissions"]').click();
-          const permissionsPage = page.locator("openclaw-device-permissions-page");
+          const permissionsPage = page.locator("carapace-device-permissions-page");
           const precise = permissionsPage.locator(".settings-row").filter({
             has: page.locator(".settings-row__title").filter({ hasText: /^Precise location$/ }),
           });
@@ -178,7 +178,7 @@ suite.define(() => {
           .filter({ hasText: /^\s*This Mac\s*$/ })
           .waitFor();
         await sidebar.locator('a[href="/settings/device"]').waitFor();
-        const devicePage = page.locator("openclaw-device-page");
+        const devicePage = page.locator("carapace-device-page");
         const dockIcon = devicePage.getByRole("switch", { name: "Show Dock icon", exact: true });
         await expect.poll(() => dockIcon.isChecked()).toBe(true);
         expect(await dockIcon.isDisabled()).toBe(false);
@@ -221,7 +221,7 @@ suite.define(() => {
 
         await sidebar.locator('a[href="/settings/device/permissions"]').click();
         await expect.poll(() => new URL(page.url()).pathname).toBe("/settings/device/permissions");
-        const permissionsPage = page.locator("openclaw-device-permissions-page");
+        const permissionsPage = page.locator("carapace-device-permissions-page");
         const notifications = permissionsPage.locator(".settings-row").filter({
           has: page.locator(".settings-row__title").filter({ hasText: /^Notifications$/ }),
         });
@@ -247,11 +247,11 @@ suite.define(() => {
         const gateway = await installMockGateway(page, {
           featureMethods: ["voicewake.get", "voicewake.set"],
           deferredMethods: ["voicewake.set"],
-          methodResponses: { "voicewake.get": { triggers: ["openclaw"] } },
+          methodResponses: { "voicewake.get": { triggers: ["carapace"] } },
         });
         for (const route of ["device", "device/permissions"]) {
           expect((await page.goto(`${suite.server.baseUrl}settings/${route}`))?.status()).toBe(200);
-          await page.getByText(/only available inside the OpenClaw app/).waitFor();
+          await page.getByText(/only available inside the Carapace app/).waitFor();
           await page.locator('.settings-sidebar__item[href="/settings/devices"]').waitFor();
           expect(
             await page
@@ -269,7 +269,7 @@ suite.define(() => {
         }
         await page.goto(`${suite.server.baseUrl}settings/talk`);
         const triggers = page.getByRole("textbox", { name: "Trigger words", exact: true });
-        await expect.poll(() => triggers.inputValue()).toBe("openclaw");
+        await expect.poll(() => triggers.inputValue()).toBe("carapace");
         await triggers.fill("first phrase");
         await gateway.waitForRequest("voicewake.set");
         expect(await triggers.isEnabled()).toBe(true);
@@ -311,14 +311,14 @@ suite.define(() => {
         await installDeviceSettingsBridge(page, snapshot);
         await installMockGateway(page, { operatorScopes: ["operator.read"] });
         await page.goto(`${suite.server.baseUrl}settings/device`);
-        const devicePage = page.locator("openclaw-device-page");
+        const devicePage = page.locator("carapace-device-page");
         const sidebar = page.locator(".settings-sidebar");
         const profile = devicePage.getByRole("textbox", { name: "Target profile", exact: true });
         const messages = () =>
           page.evaluate(() => (window as DeviceSettingsTestWindow).nativeDeviceSettingsMessages);
         const revisit = async () => {
           await sidebar.locator('a[href="/settings/device/permissions"]').click();
-          await page.locator("openclaw-device-permissions-page").waitFor();
+          await page.locator("carapace-device-permissions-page").waitFor();
           await sidebar.locator('a[href="/settings/device"]').click();
           await profile.waitFor();
         };
@@ -392,9 +392,9 @@ suite.define(() => {
         // An external update must be visible once the latest request has settled.
         snapshot.browser.cookieSync.targetProfile = "external-profile";
         await page.evaluate((next: NativeDeviceSettingsSnapshot) => {
-          (window as DeviceSettingsTestWindow)["__OPENCLAW_NATIVE_DEVICE_SETTINGS__"] = next;
+          (window as DeviceSettingsTestWindow)["__CARAPACE_NATIVE_DEVICE_SETTINGS__"] = next;
           window.dispatchEvent(
-            new CustomEvent("openclaw:native-device-settings-changed", { detail: next }),
+            new CustomEvent("carapace:native-device-settings-changed", { detail: next }),
           );
         }, snapshot);
         await expect.poll(() => profile.inputValue()).toBe("external-profile");

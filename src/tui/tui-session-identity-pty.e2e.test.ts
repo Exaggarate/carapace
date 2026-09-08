@@ -77,8 +77,8 @@ afterEach(async () => {
 it("submits provider-specific thinking labels with one Enter", async () => {
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_TUI_PTY_THINKING_LABEL: "on",
-      OPENCLAW_TUI_PTY_SAFE_THINKING_LABEL: "always on",
+      CARAPACE_TUI_PTY_THINKING_LABEL: "on",
+      CARAPACE_TUI_PTY_SAFE_THINKING_LABEL: "always on",
     },
   });
 
@@ -166,13 +166,13 @@ it("keeps the active stream when the current session is selected again", async (
 }, 65_000);
 
 it("hides a stale approval when startup restores the remembered session", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-identity-");
+  const stateDir = tempDirs.make("carapace-tui-identity-");
   await seedRememberedSession(stateDir);
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_INITIAL_APPROVAL_SESSION_KEY: "agent:main:main",
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_INITIAL_APPROVAL_SESSION_KEY: "agent:main:main",
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
     },
   });
 
@@ -201,15 +201,15 @@ it("hides a stale approval when startup restores the remembered session", async 
 }, 65_000);
 
 it("restores a remembered global session while keeping pre-ready input editable", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-startup-session-");
+  const stateDir = tempDirs.make("carapace-tui-startup-session-");
   const marker = "startup remembered session proof";
   await seedRememberedSession(stateDir, "global");
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_PICKER_SESSION_KEY: "global",
-      OPENCLAW_TUI_PTY_RESTORE_DELAY_MS: "400",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_PICKER_SESSION_KEY: "global",
+      CARAPACE_TUI_PTY_RESTORE_DELAY_MS: "400",
     },
   });
 
@@ -253,14 +253,14 @@ it("restores a remembered global session while keeping pre-ready input editable"
 }, 65_000);
 
 it("keeps input editable while remembered startup history is loading", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-startup-history-");
+  const stateDir = tempDirs.make("carapace-tui-startup-history-");
   const marker = "startup remembered history proof";
   await seedRememberedSession(stateDir);
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_STARTUP_DELAY_MS: "400",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_STARTUP_DELAY_MS: "400",
     },
   });
 
@@ -298,15 +298,15 @@ it("keeps input editable while remembered startup history is loading", async () 
 }, 65_000);
 
 it("keeps reconnect input editable until restored history is stable", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-reconnect-session-");
+  const stateDir = tempDirs.make("carapace-tui-reconnect-session-");
   const marker = "reconnect remembered session proof";
   await seedRememberedSession(stateDir);
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
-      OPENCLAW_TUI_PTY_RECONNECT_HISTORY_DELAY_MS: "400",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
+      CARAPACE_TUI_PTY_RECONNECT_HISTORY_DELAY_MS: "400",
     },
   });
 
@@ -345,15 +345,15 @@ it("keeps reconnect input editable until restored history is stable", async () =
 }, 65_000);
 
 it("keeps an explicit launch session authoritative over remembered state", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-explicit-session-");
+  const stateDir = tempDirs.make("carapace-tui-explicit-session-");
   const explicitSession = "agent:main:explicit-target";
   const marker = "explicit startup session proof";
   await seedRememberedSession(stateDir);
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_SESSION: explicitSession,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_SESSION: explicitSession,
     },
   });
 
@@ -377,14 +377,14 @@ it("keeps an explicit launch session authoritative over remembered state", async
 }, 65_000);
 
 it("falls back to the default session when remembered lookup fails", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-restore-failure-");
+  const stateDir = tempDirs.make("carapace-tui-restore-failure-");
   const marker = "restore failure fallback proof";
   await seedRememberedSession(stateDir);
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_RESTORE_FAILURES: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_RESTORE_FAILURES: "1",
     },
   });
 
@@ -404,15 +404,15 @@ it("falls back to the default session when remembered lookup fails", async () =>
 }, 65_000);
 
 it("abandons a stale restore generation without sending or duplicating input", async () => {
-  const stateDir = tempDirs.make("openclaw-tui-restore-generation-");
+  const stateDir = tempDirs.make("carapace-tui-restore-generation-");
   const marker = "restore generation proof";
   await seedRememberedSession(stateDir);
   const fixture = await startTuiFixture({
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_RECONNECT_DURING_RESTORE: "1",
-      OPENCLAW_TUI_PTY_RESTORE_DELAY_MS: "400",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_RECONNECT_DURING_RESTORE: "1",
+      CARAPACE_TUI_PTY_RESTORE_DELAY_MS: "400",
     },
   });
 

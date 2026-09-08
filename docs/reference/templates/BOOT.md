@@ -12,7 +12,7 @@ Add short, explicit startup instructions here. The bundled `boot-md` hook runs t
 The hook ships disabled. Enable it first:
 
 ```bash
-openclaw hooks enable boot-md
+carapace hooks enable boot-md
 ```
 
 This hook turns off normal final-response delivery. If a checklist item sends a message, use the message tool. Name a channel and a target in each call. Then reply with the silent token `NO_REPLY`, in any letter case.

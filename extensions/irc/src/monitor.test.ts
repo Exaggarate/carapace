@@ -4,11 +4,11 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withTimeout } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withTimeout } from "carapace/plugin-sdk/security-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createIrcIngressMonitor } from "./irc-ingress.js";
 import { onIrcTestLine, startIrcTestServer } from "./irc-server.test-support.js";
@@ -48,7 +48,7 @@ async function withIngressQueue<T>(
   fn: (queue: IrcIngressQueue, stateDir: string) => Promise<T>,
   accountId = "default",
 ): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-irc-monitor-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-irc-monitor-"));
   const stateDir = await fs.realpath(created);
   const queue = createChannelIngressQueueForTests<IrcIngressPayload>({
     channelId: "irc",
@@ -60,7 +60,7 @@ async function withIngressQueue<T>(
     return await fn(queue, stateDir);
   } finally {
     queue.complete = complete;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -237,7 +237,7 @@ describe("IRC configured-unavailable credential connection boundaries", () => {
           host: "127.0.0.1",
           port: 6667,
           tls: false,
-          nick: "openclaw",
+          nick: "carapace",
           nickserv: {
             password: { source: "env", provider: "default", id: "IRC_UNAVAILABLE_EXPLICIT_SECRET" },
           },
@@ -371,8 +371,8 @@ describe("irc monitor reconnect", () => {
             tls: false,
             nick: "bot",
             username: "bot",
-            realname: "OpenClaw",
-            channels: ["#openclaw"],
+            realname: "Carapace",
+            channels: ["#carapace"],
           },
         },
       } as CoreConfig;
@@ -383,7 +383,7 @@ describe("irc monitor reconnect", () => {
         server.disconnectFirst();
         await withTimeout(reconnected, 3000, "IRC recovery after a failed reconnect attempt");
         expect(
-          server.lines.filter((line) => line === "USER bot 0 * :OpenClaw").length,
+          server.lines.filter((line) => line === "USER bot 0 * :Carapace").length,
         ).toBeGreaterThanOrEqual(3);
         expect(server.connectionCount).toBeGreaterThanOrEqual(3);
         expect(
@@ -434,7 +434,7 @@ describe("irc monitor reconnect", () => {
                 tls: false,
                 nick: "receipt-bot",
                 username: "bot",
-                realname: "OpenClaw",
+                realname: "Carapace",
                 dmPolicy: "pairing",
               },
             },
@@ -480,19 +480,19 @@ describe("irc monitor inbound target", () => {
   it.each([
     {
       label: "channel",
-      serverTarget: "#openclaw",
-      expected: { isGroup: true, target: "#openclaw", rawTarget: "#openclaw" },
+      serverTarget: "#carapace",
+      expected: { isGroup: true, target: "#carapace", rawTarget: "#carapace" },
     },
     {
       label: "DM",
-      serverTarget: "openclaw-bot",
-      expected: { isGroup: false, target: "alice", rawTarget: "openclaw-bot" },
+      serverTarget: "carapace-bot",
+      expected: { isGroup: false, target: "alice", rawTarget: "carapace-bot" },
     },
     {
       label: "channel with a colonless body",
-      serverTarget: "#openclaw",
+      serverTarget: "#carapace",
       colonlessBody: true,
-      expected: { isGroup: true, target: "#openclaw", rawTarget: "#openclaw" },
+      expected: { isGroup: true, target: "#carapace", rawTarget: "#carapace" },
     },
   ])(
     "maps $label targets through the monitor boundary",
@@ -513,7 +513,7 @@ describe("irc monitor inbound target", () => {
                   tls: false,
                   nick: "bot",
                   username: "bot",
-                  realname: "OpenClaw",
+                  realname: "Carapace",
                 },
               },
             } as CoreConfig,
@@ -554,9 +554,9 @@ describe("irc monitor inbound target", () => {
           receivedAt,
           connectionEpoch: "previous-connection",
           connectedNick: "receipt-bot",
-          rawLine: ":receipt-bot!ident@example.org PRIVMSG #openclaw :echo",
+          rawLine: ":receipt-bot!ident@example.org PRIVMSG #carapace :echo",
         },
-        { receivedAt, laneKey: "channel:#openclaw" },
+        { receivedAt, laneKey: "channel:#carapace" },
       );
       const server = await startInboundIrcServer("reconnected-bot");
       const onMessage = vi.fn();
@@ -572,7 +572,7 @@ describe("irc monitor inbound target", () => {
                 tls: false,
                 nick: "reconnected-bot",
                 username: "bot",
-                realname: "OpenClaw",
+                realname: "Carapace",
               },
             },
           } as CoreConfig,
@@ -623,7 +623,7 @@ describe("irc monitor inbound target", () => {
                 tls: false,
                 nick: "receipt-bot",
                 username: "bot",
-                realname: "OpenClaw",
+                realname: "Carapace",
               },
             },
           } as CoreConfig,
@@ -661,14 +661,14 @@ describe("irc monitor inbound target", () => {
                 tls: false,
                 nick: "bot",
                 username: "bot",
-                realname: "OpenClaw",
+                realname: "Carapace",
               },
             },
           } as CoreConfig,
           ingressQueue,
           onMessage,
         });
-        server.sendInbound("#openclaw", false, "bot");
+        server.sendInbound("#carapace", false, "bot");
         const completedId = await withTimeout(completed, 3000, "receipt-time self echo completion");
         expect(enqueueSpy).toHaveBeenCalledOnce();
         await enqueueSpy.mock.results[0]?.value;

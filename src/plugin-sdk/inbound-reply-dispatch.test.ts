@@ -9,7 +9,7 @@ import type {
   ChannelTurnResult,
   PreparedChannelTurn,
 } from "../channels/turn/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   dispatchChannelInboundReply,
   dispatchChannelInboundTurn,
@@ -116,11 +116,11 @@ describe("inbound reply dispatch compatibility", () => {
     } as FinalizedMsgContext;
 
     await dispatchInboundReplyWithBase({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       channel: "test",
       accountId: "default",
       route: { agentId: "main", sessionKey: "agent:main:test:peer" },
-      storePath: path.join(tempDirs.make("openclaw-inbound-reply-dispatch-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-inbound-reply-dispatch-"), "sessions.json"),
       ctxPayload,
       core: {
         channel: {

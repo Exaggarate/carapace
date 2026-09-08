@@ -26,7 +26,7 @@ import {
   type RuntimeConfigWriteApplicationClaim,
   type RuntimeConfigWriteApplicationStatus,
 } from "../config/runtime-write-application.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import {
   clearLoadInstalledPluginIndexInstallRecordsCache,
@@ -87,8 +87,8 @@ type GatewayConfigReloader = {
 type PluginInstallRecords = Record<string, PluginInstallRecord>;
 
 type InProcessConfigCandidate = {
-  config: OpenClawConfig;
-  compareConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  compareConfig: CarapaceConfig;
   persistedHash: string;
   afterWrite?: ConfigWriteNotification["afterWrite"];
   preparedCandidate?: ConfigWriteNotification["preparedCandidate"];
@@ -99,24 +99,24 @@ type InProcessConfigCandidate = {
 
 export type GatewayConfigReloadTransactionOwnership = {
   isCurrent: () => boolean;
-  markRuntimeCommitted: (runtimeConfig: OpenClawConfig, plan: GatewayReloadPlan) => void;
+  markRuntimeCommitted: (runtimeConfig: CarapaceConfig, plan: GatewayReloadPlan) => void;
   commitRuntimeEnv: () => void;
   publishRuntimeEnv: () => void;
   rollbackRuntimeEnv: () => void;
-  reapplyRuntimeOverlays: (config: OpenClawConfig) => OpenClawConfig;
+  reapplyRuntimeOverlays: (config: CarapaceConfig) => CarapaceConfig;
   runtimeEnv?: NonNullable<ConfigWriteNotification["preparedCandidate"]>["runtimeEnv"];
   runtimeRefresh?: RuntimeConfigSnapshotRefreshOptions;
 };
 
 type PreparedGatewayConfigCandidate = {
-  runtimeConfig: OpenClawConfig;
-  compareConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
+  compareConfig: CarapaceConfig;
   runtimeEnv?: NonNullable<ConfigWriteNotification["preparedCandidate"]>["runtimeEnv"];
-  reapplyRuntimeOverlays?: (config: OpenClawConfig) => OpenClawConfig;
-  reapplyCompareOverlays?: (config: OpenClawConfig) => OpenClawConfig;
+  reapplyRuntimeOverlays?: (config: CarapaceConfig) => CarapaceConfig;
+  reapplyCompareOverlays?: (config: CarapaceConfig) => CarapaceConfig;
 };
 
-function asPluginInstallConfig(records: PluginInstallRecords): OpenClawConfig {
+function asPluginInstallConfig(records: PluginInstallRecords): CarapaceConfig {
   return {
     plugins: {
       installs: records,
@@ -125,8 +125,8 @@ function asPluginInstallConfig(records: PluginInstallRecords): OpenClawConfig {
 }
 
 export function startGatewayConfigReloader(opts: {
-  initialConfig: OpenClawConfig;
-  initialCompareConfig?: OpenClawConfig;
+  initialConfig: CarapaceConfig;
+  initialCompareConfig?: CarapaceConfig;
   initialSnapshotRawHash: string | null;
   initialAuthoredConfig: unknown;
   initialIncludedPaths?: readonly string[];
@@ -137,28 +137,28 @@ export function startGatewayConfigReloader(opts: {
   /** Per-instance test hook for synchronizing filesystem edits with watcher startup. */
   onWatcherReady?: () => void;
   prepareConfigCandidate?: (params: {
-    runtimeConfig: OpenClawConfig;
-    sourceConfig: OpenClawConfig;
-    previousSourceConfig: OpenClawConfig;
+    runtimeConfig: CarapaceConfig;
+    sourceConfig: CarapaceConfig;
+    previousSourceConfig: CarapaceConfig;
   }) => PreparedGatewayConfigCandidate;
   initialInternalWriteHash?: string | null;
-  readSnapshot: (activeSourceConfig: OpenClawConfig) => Promise<ConfigFileSnapshot>;
+  readSnapshot: (activeSourceConfig: CarapaceConfig) => Promise<ConfigFileSnapshot>;
   /** Pauses restart emission synchronously when a matching disk candidate is observed. */
   onConfigCandidateObserved?: () => void;
-  onConfigChange?: (plan: GatewayReloadPlan, nextConfig: OpenClawConfig) => void | Promise<void>;
+  onConfigChange?: (plan: GatewayReloadPlan, nextConfig: CarapaceConfig) => void | Promise<void>;
   /** Publishes runtime state after a hot or no-op config transaction. */
-  onConfigApplied?: (plan: GatewayReloadPlan, nextConfig: OpenClawConfig) => void | Promise<void>;
+  onConfigApplied?: (plan: GatewayReloadPlan, nextConfig: CarapaceConfig) => void | Promise<void>;
   /** Runs synchronously when a config transaction publishes its runtime state. */
-  onRuntimeConfigCommitted?: (plan: GatewayReloadPlan, nextConfig: OpenClawConfig) => void;
+  onRuntimeConfigCommitted?: (plan: GatewayReloadPlan, nextConfig: CarapaceConfig) => void;
   /** Publishes the resolved source-config revision accepted by the active runtime. */
   onConfigRevisionApplied?: (hash: string) => void;
   /** Reads the same restart owner that fences publication of the applied revision. */
   hasOutstandingGatewayRestart?: () => boolean;
   /** Retires rejected lifecycle work after any newer config transaction is accepted. */
   onConfigAccepted?: (
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     ownership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
     acceptance: {
       runtimeApplied: boolean;
       publishSource?: () => Promise<() => Promise<void>>;
@@ -166,9 +166,9 @@ export function startGatewayConfigReloader(opts: {
   ) => void | (() => Promise<void>) | Promise<void | (() => Promise<void>)>;
   /** Publishes a newer source snapshot when effective runtime bytes are unchanged. */
   onEffectiveConfigUnchanged?: (
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     ownership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
   ) => Promise<{
     rollback: () => Promise<void>;
     /** Runs only when this exact source publication can no longer roll back. */
@@ -187,21 +187,21 @@ export function startGatewayConfigReloader(opts: {
   }) => void;
   onNoopConfigCommit: (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     ownership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
   ) => Promise<void | GatewayHotReloadApplicationStatus>;
   onHotReload: (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     ownership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
   ) => Promise<GatewayHotReloadApplicationStatus>;
   onRestart: (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     ownership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
   ) => void | Promise<void>;
   /** Keeps one accepted config transaction inside the Gateway work fence. */
   runTransaction?: <T>(run: () => Promise<T>) => Promise<T>;
@@ -233,9 +233,9 @@ export function startGatewayConfigReloader(opts: {
   );
   let currentRuntimeEnvSourceConfig = initialSourceConfig;
   let currentReapplyRuntimeOverlays =
-    initialCandidate?.reapplyRuntimeOverlays ?? ((config: OpenClawConfig) => config);
+    initialCandidate?.reapplyRuntimeOverlays ?? ((config: CarapaceConfig) => config);
   let currentRuntimeRefresh: RuntimeConfigSnapshotRefreshOptions | undefined;
-  const resolveSettings = (config: OpenClawConfig) => {
+  const resolveSettings = (config: CarapaceConfig) => {
     const resolved = resolveGatewayReloadSettings(config);
     return opts.testDebounceMs === undefined
       ? resolved
@@ -267,11 +267,11 @@ export function startGatewayConfigReloader(opts: {
   let startupInternalWriteHash = opts.initialInternalWriteHash ?? null;
   let lastAppliedWriteHash: string | null = null;
   let lastSourceOnlyWriteHash: string | null = null;
-  let lastSourceOnlyReapplyRuntimeOverlays: ((config: OpenClawConfig) => OpenClawConfig) | null =
+  let lastSourceOnlyReapplyRuntimeOverlays: ((config: CarapaceConfig) => CarapaceConfig) | null =
     null;
   let lastSourceOnlyRuntimeRefresh: RuntimeConfigSnapshotRefreshOptions | undefined;
-  let lastSourceOnlyRuntimeConfig: OpenClawConfig | null = null;
-  let lastSourceOnlySourceConfig: OpenClawConfig | null = null;
+  let lastSourceOnlyRuntimeConfig: CarapaceConfig | null = null;
+  let lastSourceOnlySourceConfig: CarapaceConfig | null = null;
 
   const appendExternalAudit = (
     record: Omit<ConfigExternalChangeAuditRecord, "ts" | "source" | "event" | "configPath">,
@@ -390,9 +390,9 @@ export function startGatewayConfigReloader(opts: {
   };
   const prepareRestart = async (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     ownership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
   ) => {
     try {
       // Every accepted restart candidate validates inside its config
@@ -428,8 +428,8 @@ export function startGatewayConfigReloader(opts: {
   };
 
   const applySnapshot = async (
-    candidateRuntimeConfig: OpenClawConfig,
-    nextSourceConfig: OpenClawConfig,
+    candidateRuntimeConfig: CarapaceConfig,
+    nextSourceConfig: CarapaceConfig,
     afterWrite?: ConfigWriteNotification["afterWrite"],
     transactionEpoch = configWriteEpoch,
     persistedHash?: string,
@@ -456,7 +456,7 @@ export function startGatewayConfigReloader(opts: {
     const nextCompareConfig = preparedCandidate?.compareConfig ?? nextSourceConfig;
     const nextConfigRevisionHash = hashRuntimeConfigValue(nextSourceConfig);
     let nextPluginInstallRecords = currentPluginInstallRecords;
-    let committedRuntimeConfig: OpenClawConfig | null = null;
+    let committedRuntimeConfig: CarapaceConfig | null = null;
     let publishedRuntimeEnv: ConfigRuntimeEnvPublication | undefined;
     let runtimeEnvCommitted = false;
     const nextSettings = resolveSettings(nextConfig);

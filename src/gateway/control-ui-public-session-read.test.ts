@@ -5,9 +5,9 @@ import {
   replaceTranscriptEvents,
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   isPublicSessionShareActive,
   readPublicSessionShare,
@@ -16,10 +16,10 @@ import * as transcriptReaders from "./session-transcript-readers.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
-const cfg: OpenClawConfig = { agents: { entries: { main: {} } } };
+const cfg: CarapaceConfig = { agents: { entries: { main: {} } } };
 const locator = {
   agentId: "main",
   sessionKey: "agent:main:public-history",
@@ -47,7 +47,7 @@ async function seed(messages: string[], target = locator) {
 
 describe("anonymous published session reader", () => {
   it("pages exact published history using source positions rather than rendered counts", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed(Array.from({ length: 205 }, (_, index) => `Message ${index}`));
       const latest = await readPublicSessionShare(cfg, locator);
       expect(latest).toMatchObject({
@@ -68,7 +68,7 @@ describe("anonymous published session reader", () => {
   });
 
   it("enforces the byte bound and advances past oversized source rows without losing older messages", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed(["Oldest", "x".repeat(1024 * 1024 + 1), "Newest"]);
       const latest = await readPublicSessionShare(cfg, locator);
       expect(latest?.messages).toMatchObject([{ content: "Newest" }]);
@@ -82,7 +82,7 @@ describe("anonymous published session reader", () => {
   });
 
   it("rejects private, unknown-agent, mismatched-instance and mismatched-grant requests", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed(["Published"]);
       expect(isPublicSessionShareActive(cfg, locator)).toBe(true);
       for (const target of [
@@ -105,7 +105,7 @@ describe("anonymous published session reader", () => {
   it.each(["revoke", "reset"] as const)(
     "rechecks %s after awaited history before releasing content",
     async (action) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await seed(["Must not escape after closure"]);
         const read = transcriptReaders.readSessionMessagesPageWithStatsAsync;
         vi.spyOn(transcriptReaders, "readSessionMessagesPageWithStatsAsync").mockImplementationOnce(
@@ -124,7 +124,7 @@ describe("anonymous published session reader", () => {
   );
 
   it("reads the exact global node in its configured store without resolving aliases", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const global = { ...locator, sessionKey: "global" };
       await seed(["Global publication"], global);
       expect((await readPublicSessionShare(cfg, global))?.messages).toMatchObject([

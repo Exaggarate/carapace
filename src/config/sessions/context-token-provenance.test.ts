@@ -36,7 +36,7 @@ describe("resolveTrustedSessionContextTokens", () => {
       patch: { contextTokensSource: "runtime-configured" as const },
     },
     { name: "missing harness", patch: { agentHarnessId: undefined } },
-    { name: "different harness", patch: { agentHarnessId: "openclaw" } },
+    { name: "different harness", patch: { agentHarnessId: "carapace" } },
     { name: "different provider", patch: { modelProvider: "openrouter" } },
     { name: "different model", patch: { model: "gpt-5.5" } },
   ])("rejects $name", ({ patch }) => {
@@ -119,7 +119,7 @@ describe("resolveProjectedSessionContextTokens", () => {
   it("falls back to current resolution when producer provenance differs", () => {
     expect(
       resolveProjectedSessionContextTokens({
-        entry: { ...matchingRuntimeEntry, agentHarnessId: "openclaw" },
+        entry: { ...matchingRuntimeEntry, agentHarnessId: "carapace" },
         ...currentSelection,
         resolvedContextTokens: 1_000_000,
       }),
@@ -159,7 +159,7 @@ describe("resolveProjectedSessionContextTokens", () => {
   it.each([
     { name: "provider", patch: { modelProvider: "openrouter" } },
     { name: "model", patch: { model: "gpt-5.5" } },
-    { name: "harness", patch: { agentHarnessId: "openclaw" } },
+    { name: "harness", patch: { agentHarnessId: "carapace" } },
   ])("rejects a persisted resolution owned by a different $name", ({ patch }) => {
     expect(
       resolveProjectedSessionContextTokens({
@@ -239,14 +239,14 @@ describe("resolveProjectedSessionContextBudgetStatus", () => {
       ...entry,
       modelProvider: "ollama",
       model: "qwen3:8b",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       contextTokens: 200_000,
       contextTokensSource: "runtime" as const,
     };
     const contextTokens = resolveProjectedSessionContextTokens({
       entry: runtimeEntry,
       ...selection,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       resolvedContextTokens: 262_144,
     });
     expect(contextTokens).toBe(200_000);

@@ -1,6 +1,6 @@
 import { once } from "node:events";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
 import { relayOwnerReply, relayOwnerRetired } from "./owner-protocol.js";

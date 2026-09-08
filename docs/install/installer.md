@@ -1,27 +1,27 @@
 ---
 summary: "How the installer scripts work (install.sh, install-cli.sh, install.ps1), flags, and automation"
 read_when:
-  - You want to understand `openclaw.ai/install.sh`
+  - You want to understand `github.com/Exaggarate/carapace/install.sh`
   - You want to automate installs (CI / headless)
   - You want to install from a GitHub checkout
 title: "Installer internals"
 ---
 
-OpenClaw ships three installer scripts, served from `openclaw.ai`.
+Carapace ships three installer scripts, served from `github.com/Exaggarate/carapace`.
 
 | Script                             | Platform             | What it does                                                                                   |
 | ---------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------- |
-| [`install.sh`](#installsh)         | macOS / Linux / WSL  | Installs Node if needed, installs OpenClaw via npm (default) or git, can run onboarding.       |
-| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + OpenClaw into a local prefix (`~/.openclaw`) via npm or git. No root required. |
-| [`install.ps1`](#installps1)       | Windows (PowerShell) | Installs Node if needed, installs OpenClaw via npm (default) or git, can run onboarding.       |
+| [`install.sh`](#installsh)         | macOS / Linux / WSL  | Installs Node if needed, installs Carapace via npm (default) or git, can run onboarding.       |
+| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + Carapace into a local prefix (`~/.carapace`) via npm or git. No root required. |
+| [`install.ps1`](#installps1)       | Windows (PowerShell) | Installs Node if needed, installs Carapace via npm (default) or git, can run onboarding.       |
 
 All three support Node **24.16+ or 26.1+** with a WAL-reset-safe linked SQLite library. When Node is missing, `install.sh` provisions Node 26 through Homebrew on macOS and the supported Node 24 LTS line through NodeSource on Linux. When a supported RPM-owned Node links unsafe SQLite, `install.sh` preserves the distro package and provisions a user-space Node runtime through `install-cli.sh`. The rootless `install-cli.sh` downloads Node 24.19.0; Linux ARMv7 is unsupported. On Windows, winget/Chocolatey/Scoop install the supported Node LTS line, and the portable fallback downloads Node 26.
 
-Before changing packages, every installer probes the exact npm executable it will use. npm 11.15 and earlier installs normally; npm 11.16 and later, including npm 12, receives `--allow-scripts` for only the npm-resolved OpenClaw candidate identity. An unreadable npm version stops before package mutation. A remaining `.openclaw-lifecycle-pending` marker or legacy `dist/openclaw-install-guard` makes the install fail instead of reporting a lifecycle-skipped package as successful.
+Before changing packages, every installer probes the exact npm executable it will use. npm 11.15 and earlier installs normally; npm 11.16 and later, including npm 12, receives `--allow-scripts` for only the npm-resolved Carapace candidate identity. An unreadable npm version stops before package mutation. A remaining `.carapace-lifecycle-pending` marker or legacy `dist/carapace-install-guard` makes the install fail instead of reporting a lifecycle-skipped package as successful.
 
 On npm 12, local `.tgz` and `.tar.gz` installs and updates need a comma-free archive filename and parent path. npm uses commas to separate lifecycle approvals, so move the archive to a comma-free path before retrying. Relative tarball arguments are still supported; the installer resolves their full path for approval.
 
-Install-method switches verify the replacement before retiring the current owner. Source wrappers use a same-directory atomic replacement; when an npm shim shares that path, the installer moves only an identity-matched source wrapper aside and restores it if npm installation, lifecycle checks, or candidate verification fails. On upgrades, `install.sh` and `install.ps1` run `openclaw doctor --fix`; repair or final verification failure exits nonzero, and the success banner appears only after those steps complete.
+Install-method switches verify the replacement before retiring the current owner. Source wrappers use a same-directory atomic replacement; when an npm shim shares that path, the installer moves only an identity-matched source wrapper aside and restores it if npm installation, lifecycle checks, or candidate verification fails. On upgrades, `install.sh` and `install.ps1` run `carapace doctor --fix`; repair or final verification failure exits nonzero, and the success banner appears only after those steps complete.
 
 ## Source build toolchain
 
@@ -49,38 +49,38 @@ checkout-pinned toolchain rather than reusing an older ambient launcher.
 <Tabs>
   <Tab title="install.sh">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
     ```
 
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --help
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --help
     ```
 
   </Tab>
   <Tab title="install-cli.sh">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
     ```
 
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --help
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --help
     ```
 
   </Tab>
   <Tab title="install.ps1">
     ```powershell
-    iwr -useb https://openclaw.ai/install.ps1 | iex
+    iwr -useb https://github.com/Exaggarate/carapace | iex
     ```
 
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -Tag beta -NoOnboard -DryRun
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -Tag beta -NoOnboard -DryRun
     ```
 
   </Tab>
 </Tabs>
 
 <Note>
-If install succeeds but `openclaw` is not found in a new terminal, see [Node.js troubleshooting](/install/node#troubleshooting).
+If install succeeds but `carapace` is not found in a new terminal, see [Node.js troubleshooting](/install/node#troubleshooting).
 </Note>
 
 ---
@@ -100,19 +100,19 @@ Recommended for most interactive installs on macOS/Linux/WSL.
     Supports macOS and Linux (including WSL).
   </Step>
   <Step title="Ensure a supported Node.js runtime">
-    Checks the Node version and linked SQLite library, then installs Node if needed (Node 26 through Homebrew `node` on macOS; Node 24 LTS through NodeSource setup scripts on Linux apt/dnf/yum). On RPM-based Linux, a supported distro Node that links unsafe SQLite remains installed while OpenClaw receives a user-space Node runtime. On macOS, Homebrew is installed only when the installer needs it for Node or Git. Node 24.16+ and Node 26.1+ are supported; Node 22, 23, and 25 are unsupported.
+    Checks the Node version and linked SQLite library, then installs Node if needed (Node 26 through Homebrew `node` on macOS; Node 24 LTS through NodeSource setup scripts on Linux apt/dnf/yum). On RPM-based Linux, a supported distro Node that links unsafe SQLite remains installed while Carapace receives a user-space Node runtime. On macOS, Homebrew is installed only when the installer needs it for Node or Git. Node 24.16+ and Node 26.1+ are supported; Node 22, 23, and 25 are unsupported.
     On Alpine/musl Linux, the installer uses apk packages instead of NodeSource and verifies the actual linked SQLite version. Current stable Alpine package streams can provide a new-enough Node with vulnerable system SQLite; when that happens, use an official `node:26-alpine` container or a glibc-based host instead.
   </Step>
   <Step title="Ensure Git">
     Installs Git if missing using the detected package manager, including Homebrew on macOS and apk on Alpine.
   </Step>
-  <Step title="Install OpenClaw">
+  <Step title="Install Carapace">
     - `npm` method (default): global npm install
-    - `git` method: clone/update repo, install deps with pnpm, build, then install wrapper at `~/.local/bin/openclaw`
+    - `git` method: clone/update repo, install deps with pnpm, build, then install wrapper at `~/.local/bin/carapace`
 
   </Step>
   <Step title="Post-install tasks">
-    - Resolves the just-installed `openclaw` binary for follow-up commands
+    - Resolves the just-installed `carapace` binary for follow-up commands
     - npm-prefix and daemon-status probes use a default five-second timeout; completed probes return without waiting for that deadline.
     - For an unconfigured install, starts onboarding before doctor or gateway probes. With `--no-onboard` or no TTY, it prints the command to finish setup later.
     - For a configured install, refreshes and restarts a loaded gateway service best-effort and runs repair Doctor. Upgrade repair failures are fatal; plugin update failures remain warnings.
@@ -123,7 +123,7 @@ Recommended for most interactive installs on macOS/Linux/WSL.
 
 ### Source checkout detection
 
-If run inside an OpenClaw checkout (`package.json` + `pnpm-workspace.yaml`), the script offers:
+If run inside an Carapace checkout (`package.json` + `pnpm-workspace.yaml`), the script offers:
 
 - use checkout (`git`), or
 - use global install (`npm`)
@@ -145,32 +145,32 @@ object is unavailable or cannot resolve to a commit.
 <Tabs>
   <Tab title="Default">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
     ```
   </Tab>
   <Tab title="Skip onboarding">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --no-onboard
     ```
   </Tab>
   <Tab title="Git install">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method git
     ```
   </Tab>
   <Tab title="GitHub main checkout">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --version main
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method git --version main
     ```
   </Tab>
   <Tab title="Dry run">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --dry-run
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --dry-run
     ```
   </Tab>
   <Tab title="Verify after install">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard --verify
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --no-onboard --verify
     ```
   </Tab>
 </Tabs>
@@ -185,7 +185,7 @@ object is unavailable or cannot resolve to a commit.
 | `--git \| --github`                     | Shortcut for git method                                                 |
 | `--version <version\|dist-tag\|spec>`   | npm version, dist-tag, or package spec (default: `latest`)              |
 | `--beta`                                | Use beta dist-tag if available, else fall back to `latest`              |
-| `--git-dir \| --dir <path>`             | Checkout directory (default: `~/openclaw`)                              |
+| `--git-dir \| --dir <path>`             | Checkout directory (default: `~/carapace`)                              |
 | `--no-git-update`                       | Skip `git pull` for existing checkout                                   |
 | `--no-prompt`                           | Disable prompts                                                         |
 | `--no-onboard`                          | Skip onboarding                                                         |
@@ -201,18 +201,18 @@ object is unavailable or cannot resolve to a commit.
 
 | Variable                                          | Description                                                        |
 | ------------------------------------------------- | ------------------------------------------------------------------ |
-| `OPENCLAW_INSTALL_METHOD=git\|npm`                | Install method                                                     |
-| `OPENCLAW_VERSION=latest\|next\|<semver>\|<spec>` | npm version, dist-tag, or package spec                             |
-| `OPENCLAW_BETA=0\|1`                              | Use beta if available                                              |
-| `OPENCLAW_HOME=<path>`                            | Base directory for OpenClaw state and default git/onboarding paths |
-| `OPENCLAW_GIT_DIR=<path>`                         | Checkout directory                                                 |
-| `OPENCLAW_GIT_UPDATE=0\|1`                        | Toggle git updates                                                 |
-| `OPENCLAW_NO_PROMPT=1`                            | Disable prompts                                                    |
-| `OPENCLAW_VERIFY_INSTALL=1`                       | Run the post-install smoke verify                                  |
-| `OPENCLAW_NO_ONBOARD=1`                           | Skip onboarding                                                    |
-| `OPENCLAW_DRY_RUN=1`                              | Dry run mode                                                       |
-| `OPENCLAW_VERBOSE=1`                              | Debug mode                                                         |
-| `OPENCLAW_NPM_LOGLEVEL=error\|warn\|notice`       | npm log level (default: `error`, hides npm deprecation noise)      |
+| `CARAPACE_INSTALL_METHOD=git\|npm`                | Install method                                                     |
+| `CARAPACE_VERSION=latest\|next\|<semver>\|<spec>` | npm version, dist-tag, or package spec                             |
+| `CARAPACE_BETA=0\|1`                              | Use beta if available                                              |
+| `CARAPACE_HOME=<path>`                            | Base directory for Carapace state and default git/onboarding paths |
+| `CARAPACE_GIT_DIR=<path>`                         | Checkout directory                                                 |
+| `CARAPACE_GIT_UPDATE=0\|1`                        | Toggle git updates                                                 |
+| `CARAPACE_NO_PROMPT=1`                            | Disable prompts                                                    |
+| `CARAPACE_VERIFY_INSTALL=1`                       | Run the post-install smoke verify                                  |
+| `CARAPACE_NO_ONBOARD=1`                           | Skip onboarding                                                    |
+| `CARAPACE_DRY_RUN=1`                              | Dry run mode                                                       |
+| `CARAPACE_VERBOSE=1`                              | Debug mode                                                         |
+| `CARAPACE_NPM_LOGLEVEL=error\|warn\|notice`       | npm log level (default: `error`, hides npm deprecation noise)      |
 
   </Accordion>
 </AccordionGroup>
@@ -225,7 +225,7 @@ object is unavailable or cannot resolve to a commit.
 
 <Info>
 Designed for environments where you want everything under a local prefix
-(default `~/.openclaw`) and no system Node dependency. Supports npm installs
+(default `~/.carapace`) and no system Node dependency. Supports npm installs
 by default, plus git-checkout installs under the same prefix flow.
 </Info>
 
@@ -240,18 +240,18 @@ by default, plus git-checkout installs under the same prefix flow.
   <Step title="Ensure Git">
     If Git is missing, attempts install via apt/dnf/yum/apk on Linux or Homebrew on macOS.
   </Step>
-  <Step title="Install OpenClaw under prefix">
-    - `npm` method (default): installs under the prefix with npm, then writes wrapper to `<prefix>/bin/openclaw`
-    - `git` method: clones/updates a checkout (default `~/openclaw`) and still writes the wrapper to `<prefix>/bin/openclaw`
+  <Step title="Install Carapace under prefix">
+    - `npm` method (default): installs under the prefix with npm, then writes wrapper to `<prefix>/bin/carapace`
+    - `git` method: clones/updates a checkout (default `~/carapace`) and still writes the wrapper to `<prefix>/bin/carapace`
 
   </Step>
   <Step title="Verify the installed CLI">
-    Runs `<prefix>/bin/openclaw --version` and stops with an error unless the
+    Runs `<prefix>/bin/carapace --version` and stops with an error unless the
     installed wrapper exits successfully with a nonempty version.
   </Step>
   <Step title="Refresh loaded gateway service">
     If a gateway service is already loaded from that same prefix, the script runs
-    `openclaw gateway install --force`, which activates the replacement service,
+    `carapace gateway install --force`, which activates the replacement service,
     and then probes gateway health best-effort.
   </Step>
 </Steps>
@@ -261,27 +261,27 @@ by default, plus git-checkout installs under the same prefix flow.
 <Tabs>
   <Tab title="Default">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
     ```
   </Tab>
   <Tab title="Custom prefix + version">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --prefix /opt/openclaw --version latest
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --prefix /opt/carapace --version latest
     ```
   </Tab>
   <Tab title="Git install">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --install-method git --git-dir ~/openclaw
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method git --git-dir ~/carapace
     ```
   </Tab>
   <Tab title="Automation JSON output">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --json --prefix /opt/openclaw
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --json --prefix /opt/carapace
     ```
   </Tab>
   <Tab title="Run onboarding">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --onboard
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --onboard
     ```
   </Tab>
 </Tabs>
@@ -291,17 +291,17 @@ by default, plus git-checkout installs under the same prefix flow.
 
 | Flag                                    | Description                                                                     |
 | --------------------------------------- | ------------------------------------------------------------------------------- |
-| `--prefix <path>`                       | Install prefix (default: `~/.openclaw`)                                         |
+| `--prefix <path>`                       | Install prefix (default: `~/.carapace`)                                         |
 | `--install-method \| --method npm\|git` | Choose install method (default: `npm`)                                          |
 | `--npm`                                 | Shortcut for npm method                                                         |
 | `--git \| --github`                     | Shortcut for git method                                                         |
-| `--git-dir \| --dir <path>`             | Git checkout directory (default: `~/openclaw`)                                  |
+| `--git-dir \| --dir <path>`             | Git checkout directory (default: `~/carapace`)                                  |
 | `--no-git-update`                       | Skip `git pull` for an existing git checkout                                    |
-| `--version <ver>`                       | OpenClaw version or dist-tag (default: `latest`)                                |
+| `--version <ver>`                       | Carapace version or dist-tag (default: `latest`)                                |
 | `--compatible-with <ver>`               | Refuse a CLI that cannot modify config written by `<ver>`                       |
 | `--node-version <ver>`                  | Node version (default: `24.19.0`)                                               |
 | `--json`                                | Emit NDJSON events                                                              |
-| `--onboard`                             | Run `openclaw onboard` after install                                            |
+| `--onboard`                             | Run `carapace onboard` after install                                            |
 | `--no-onboard`                          | Skip onboarding (default)                                                       |
 | `--set-npm-prefix`                      | On Linux, force npm prefix to `~/.npm-global` if current prefix is not writable |
 | `--help \| -h`                          | Show usage                                                                      |
@@ -312,21 +312,21 @@ by default, plus git-checkout installs under the same prefix flow.
 
 | Variable                                    | Description                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------ |
-| `OPENCLAW_PREFIX=<path>`                    | Install prefix                                                     |
-| `OPENCLAW_INSTALL_METHOD=git\|npm`          | Install method                                                     |
-| `OPENCLAW_VERSION=<ver>`                    | OpenClaw version or dist-tag                                       |
-| `OPENCLAW_NODE_VERSION=<ver>`               | Node version                                                       |
-| `OPENCLAW_HOME=<path>`                      | Base directory for OpenClaw state and default git/onboarding paths |
-| `OPENCLAW_GIT_DIR=<path>`                   | Git checkout directory for git installs                            |
-| `OPENCLAW_GIT_UPDATE=0\|1`                  | Toggle git updates for existing checkouts                          |
-| `OPENCLAW_NO_ONBOARD=1`                     | Skip onboarding                                                    |
-| `OPENCLAW_NPM_LOGLEVEL=error\|warn\|notice` | npm log level (default: `error`)                                   |
+| `CARAPACE_PREFIX=<path>`                    | Install prefix                                                     |
+| `CARAPACE_INSTALL_METHOD=git\|npm`          | Install method                                                     |
+| `CARAPACE_VERSION=<ver>`                    | Carapace version or dist-tag                                       |
+| `CARAPACE_NODE_VERSION=<ver>`               | Node version                                                       |
+| `CARAPACE_HOME=<path>`                      | Base directory for Carapace state and default git/onboarding paths |
+| `CARAPACE_GIT_DIR=<path>`                   | Git checkout directory for git installs                            |
+| `CARAPACE_GIT_UPDATE=0\|1`                  | Toggle git updates for existing checkouts                          |
+| `CARAPACE_NO_ONBOARD=1`                     | Skip onboarding                                                    |
+| `CARAPACE_NPM_LOGLEVEL=error\|warn\|notice` | npm log level (default: `error`)                                   |
 
   </Accordion>
 </AccordionGroup>
 
 <Note>
-`openclaw@main` and other GitHub source specs are not valid `--version` targets for npm installs. Use `--install-method git --version main` instead.
+`carapace@main` and other GitHub source specs are not valid `--version` targets for npm installs. Use `--install-method git --version main` instead.
 </Note>
 
 ---
@@ -342,17 +342,17 @@ by default, plus git-checkout installs under the same prefix flow.
     Requires PowerShell 5+.
   </Step>
   <Step title="Ensure a supported Node.js runtime">
-    If missing, attempts install via winget, then Chocolatey, then Scoop. If no package manager is available, the script downloads the official Node.js 26 Windows zip into `%LOCALAPPDATA%\OpenClaw\deps\portable-node` and adds it to the current process and user PATH. Node 24.16+ and Node 26.1+ are supported; Node 22, 23, and 25 are unsupported.
+    If missing, attempts install via winget, then Chocolatey, then Scoop. If no package manager is available, the script downloads the official Node.js 26 Windows zip into `%LOCALAPPDATA%\Carapace\deps\portable-node` and adds it to the current process and user PATH. Node 24.16+ and Node 26.1+ are supported; Node 22, 23, and 25 are unsupported.
   </Step>
-  <Step title="Install OpenClaw">
+  <Step title="Install Carapace">
     - `npm` method (default): global npm install using the selected `-Tag`, launched from a writable installer temp directory so shells opened in protected folders such as `C:\` still work
-    - `git` method: clone/update repo, install/build with pnpm, and install wrapper at `%USERPROFILE%\.local\bin\openclaw.cmd`. If Git is missing, the script bootstraps user-local MinGit under `%LOCALAPPDATA%\OpenClaw\deps\portable-git` and adds it to the current process and user PATH.
+    - `git` method: clone/update repo, install/build with pnpm, and install wrapper at `%USERPROFILE%\.local\bin\carapace.cmd`. If Git is missing, the script bootstraps user-local MinGit under `%LOCALAPPDATA%\Carapace\deps\portable-git` and adds it to the current process and user PATH.
 
   </Step>
   <Step title="Post-install tasks">
     - Adds needed bin directory to user PATH when possible
-    - Refreshes a loaded gateway service best-effort (`openclaw gateway install --force`, then restart)
-    - Runs `openclaw doctor --fix --non-interactive` on upgrades and git installs; failure prevents an upgrade-success result
+    - Refreshes a loaded gateway service best-effort (`carapace gateway install --force`, then restart)
+    - Runs `carapace doctor --fix --non-interactive` on upgrades and git installs; failure prevents an upgrade-success result
 
   </Step>
   <Step title="Handle failures">
@@ -365,27 +365,27 @@ by default, plus git-checkout installs under the same prefix flow.
 <Tabs>
   <Tab title="Default">
     ```powershell
-    iwr -useb https://openclaw.ai/install.ps1 | iex
+    iwr -useb https://github.com/Exaggarate/carapace | iex
     ```
   </Tab>
   <Tab title="Git install">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -InstallMethod git
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -InstallMethod git
     ```
   </Tab>
   <Tab title="GitHub main checkout">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -InstallMethod git -Tag main
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -InstallMethod git -Tag main
     ```
   </Tab>
   <Tab title="Custom git directory">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -InstallMethod git -GitDir "C:\openclaw"
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -InstallMethod git -GitDir "C:\carapace"
     ```
   </Tab>
   <Tab title="Dry run">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -DryRun
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -DryRun
     ```
   </Tab>
 </Tabs>
@@ -397,7 +397,7 @@ by default, plus git-checkout installs under the same prefix flow.
 | --------------------------- | ---------------------------------------------------------- |
 | `-InstallMethod npm\|git`   | Install method (default: `npm`)                            |
 | `-Tag <tag\|version\|spec>` | npm dist-tag, version, or package spec (default: `latest`) |
-| `-GitDir <path>`            | Checkout directory (default: `%USERPROFILE%\openclaw`)     |
+| `-GitDir <path>`            | Checkout directory (default: `%USERPROFILE%\carapace`)     |
 | `-NoOnboard`                | Skip onboarding                                            |
 | `-NoGitUpdate`              | Skip `git pull`                                            |
 | `-DryRun`                   | Print actions only                                         |
@@ -409,11 +409,11 @@ by default, plus git-checkout installs under the same prefix flow.
 
 | Variable                           | Description        |
 | ---------------------------------- | ------------------ |
-| `OPENCLAW_INSTALL_METHOD=git\|npm` | Install method     |
-| `OPENCLAW_GIT_DIR=<path>`          | Checkout directory |
-| `OPENCLAW_NO_ONBOARD=1`            | Skip onboarding    |
-| `OPENCLAW_GIT_UPDATE=0`            | Disable git pull   |
-| `OPENCLAW_DRY_RUN=1`               | Dry run mode       |
+| `CARAPACE_INSTALL_METHOD=git\|npm` | Install method     |
+| `CARAPACE_GIT_DIR=<path>`          | Checkout directory |
+| `CARAPACE_NO_ONBOARD=1`            | Skip onboarding    |
+| `CARAPACE_GIT_UPDATE=0`            | Disable git pull   |
+| `CARAPACE_DRY_RUN=1`               | Dry run mode       |
 
   </Accordion>
 </AccordionGroup>
@@ -435,23 +435,23 @@ Use non-interactive flags/env vars for predictable runs.
 <Tabs>
   <Tab title="install.sh (non-interactive npm)">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --no-prompt --no-onboard
     ```
   </Tab>
   <Tab title="install.sh (non-interactive git)">
     ```bash
-    OPENCLAW_INSTALL_METHOD=git OPENCLAW_NO_PROMPT=1 \
-      curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    CARAPACE_INSTALL_METHOD=git CARAPACE_NO_PROMPT=1 \
+      curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
     ```
   </Tab>
   <Tab title="install-cli.sh (JSON)">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --json --prefix /opt/openclaw
+    curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --json --prefix /opt/carapace
     ```
   </Tab>
   <Tab title="install.ps1 (skip onboarding)">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -NoOnboard
     ```
   </Tab>
 </Tabs>
@@ -473,7 +473,7 @@ Use non-interactive flags/env vars for predictable runs.
     Rerun the installer so it can bootstrap user-local MinGit, or install Git for Windows and reopen PowerShell.
   </Accordion>
 
-  <Accordion title='Windows: "openclaw is not recognized"'>
+  <Accordion title='Windows: "carapace is not recognized"'>
     Run `npm config get prefix` and add that directory to your user PATH (no `\bin` suffix needed on Windows), then reopen PowerShell.
   </Accordion>
 
@@ -482,13 +482,13 @@ Use non-interactive flags/env vars for predictable runs.
 
     ```powershell
     Set-PSDebug -Trace 1
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+    & ([scriptblock]::Create((iwr -useb https://github.com/Exaggarate/carapace))) -NoOnboard
     Set-PSDebug -Trace 0
     ```
 
   </Accordion>
 
-  <Accordion title="openclaw not found after install">
+  <Accordion title="carapace not found after install">
     Usually a PATH issue. See [Node.js troubleshooting](/install/node#troubleshooting).
   </Accordion>
 </AccordionGroup>

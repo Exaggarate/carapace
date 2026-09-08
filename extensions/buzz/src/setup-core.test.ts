@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buzzSetupContract } from "./setup-core.js";
 
@@ -17,7 +17,7 @@ describe("buzzSetupContract", () => {
     ({ name, expected }) => {
       const cfg = {
         channels: { buzz: { name: "Existing bot", groupPolicy: "allowlist" } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const before = structuredClone(cfg);
       const result = buzzSetupContract.applyAccountConfig({
         cfg,
@@ -47,7 +47,7 @@ describe("buzzSetupContract", () => {
       privateKey,
       authTag: '["auth","owner","kind=9","signature"]',
     };
-    const cfg = { channels: { buzz } } as OpenClawConfig;
+    const cfg = { channels: { buzz } } as CarapaceConfig;
     const input = {
       relayUrl: "wss://new.example.com",
       privateKey: "22".repeat(32),
@@ -81,7 +81,7 @@ describe("buzzSetupContract", () => {
       relayUrl: "wss://original.example.com",
       authTag: '["auth","owner","kind=9","signature"]',
     };
-    const cfg = { channels: { buzz } } as OpenClawConfig;
+    const cfg = { channels: { buzz } } as CarapaceConfig;
     const input = { relayUrl: "wss://new.example.com", useEnv: true };
     const requestedAccountId = "ada";
     const resolvedAccountId =
@@ -111,7 +111,7 @@ describe("buzzSetupContract", () => {
         privateKey: "33".repeat(32),
       };
       const accounts = scope === "explicit-default" ? { ada, default: explicitDefault } : { ada };
-      const cfg = { channels: { buzz: { ...root, accounts } } } as OpenClawConfig;
+      const cfg = { channels: { buzz: { ...root, accounts } } } as CarapaceConfig;
       const before = structuredClone(cfg);
       const accountId = scope === "named" ? "ada" : "default";
       const renamed = buzzSetupContract.applyAccountName!({ cfg, accountId, name: " Renamed " });
@@ -158,7 +158,7 @@ describe("buzzSetupContract", () => {
           privateKey: "11".repeat(32),
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = buzzSetupContract.applyAccountConfig({
       cfg,
@@ -182,7 +182,7 @@ describe("buzzSetupContract", () => {
           authTag: '["auth","owner","kind=9","signature"]',
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = buzzSetupContract.applyAccountConfig({
       cfg,
@@ -204,7 +204,7 @@ describe("buzzSetupContract", () => {
           authTag: '["auth","owner","kind=9","signature"]',
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = buzzSetupContract.applyAccountConfig({
       cfg,

@@ -1,19 +1,19 @@
 // Openai provider module implements model/runtime integration.
-import { bufferToBlobPart } from "openclaw/plugin-sdk/blob-runtime";
-import { extensionForMime, type MediaKind } from "openclaw/plugin-sdk/media-mime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { bufferToBlobPart } from "carapace/plugin-sdk/blob-runtime";
+import { extensionForMime, type MediaKind } from "carapace/plugin-sdk/media-mime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import type {
   createProviderOperationDeadline,
   pollProviderOperationJson,
   postMultipartRequest,
   ProviderOperationTimeoutMs,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   GeneratedVideoAsset,
   VideoGenerationProvider,
   VideoGenerationRequest,
-} from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/video-generation";
 import { resolveConfiguredOpenAIBaseUrl } from "./shared.js";
 
 const DEFAULT_OPENAI_VIDEO_BASE_URL = "https://api.openai.com/v1";
@@ -174,7 +174,7 @@ async function fetchOpenAIVideoDownload(
     executeProviderOperationWithRetry,
     fetchProviderDownloadResponse,
     fetchWithTimeoutGuarded,
-  } = await import("openclaw/plugin-sdk/provider-http");
+  } = await import("carapace/plugin-sdk/provider-http");
   const timeoutMs = createProviderOperationTimeoutResolver({
     deadline: params.deadline,
     defaultTimeoutMs: params.deadline.timeoutMs ?? DEFAULT_TIMEOUT_MS,
@@ -231,7 +231,7 @@ async function downloadOpenAIVideo(
   } & OpenAIVideoRequestPolicy,
 ): Promise<GeneratedVideoAsset> {
   const { downloadGeneratedVideoAsset } =
-    await import("openclaw/plugin-sdk/media-generation-runtime");
+    await import("carapace/plugin-sdk/media-generation-runtime");
   const url = new URL(`${params.baseUrl}/videos/${params.videoId}/content`);
   url.searchParams.set("variant", "video");
   return await downloadGeneratedVideoAsset({
@@ -265,7 +265,7 @@ async function downloadOpenAIVideo(
 export function buildOpenAIVideoGenerationProvider({
   isProviderApiKeyConfigured,
 }: Pick<
-  OpenClawPluginApi["runtime"]["modelAuth"],
+  CarapacePluginApi["runtime"]["modelAuth"],
   "isProviderApiKeyConfigured"
 >): VideoGenerationProvider {
   return {
@@ -304,7 +304,7 @@ export function buildOpenAIVideoGenerationProvider({
     },
     async generateVideo(req) {
       const { resolveApiKeyForProvider } =
-        await import("openclaw/plugin-sdk/provider-auth-runtime");
+        await import("carapace/plugin-sdk/provider-auth-runtime");
       const auth = await resolveApiKeyForProvider({
         provider: "openai",
         cfg: req.cfg,
@@ -330,8 +330,8 @@ export function buildOpenAIVideoGenerationProvider({
         },
         { resolveGeneratedMediaMaxBytes },
       ] = await Promise.all([
-        import("openclaw/plugin-sdk/provider-http"),
-        import("openclaw/plugin-sdk/media-generation-runtime"),
+        import("carapace/plugin-sdk/provider-http"),
+        import("carapace/plugin-sdk/media-generation-runtime"),
       ]);
       const fetchFn = fetch;
       const deadline = createProviderOperationDeadline({

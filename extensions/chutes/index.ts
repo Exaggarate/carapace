@@ -1,19 +1,19 @@
 /**
  * Chutes provider plugin entrypoint with OAuth and API-key auth methods.
  */
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import {
   resolveOAuthApiKeyMarker,
   type ProviderAuthContext,
   type ProviderAuthResult,
   buildOauthProviderAuthResult,
-} from "openclaw/plugin-sdk/provider-auth";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth-api-key";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-auth-api-key";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   normalizeOptionalString,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { loginChutes, refreshChutesOAuthCredential } from "./oauth.js";
 import {
   CHUTES_DEFAULT_MODEL_REF,

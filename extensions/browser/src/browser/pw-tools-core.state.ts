@@ -1,7 +1,7 @@
 /**
  * Browser context and emulation state helpers for Playwright-backed tools.
  */
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CDPSession, Page } from "playwright-core";
 import { getPlaywrightCore } from "./playwright-core.runtime.js";
 import { bindPlaywrightCdpSend } from "./pw-cdp-send.js";

@@ -39,8 +39,8 @@ const dotenvState = vi.hoisted(() => {
   return {
     state,
     loadDotEnv: vi.fn(() => {
-      state.profileAtDotenvLoad = process.env.OPENCLAW_PROFILE;
-      state.containerAtDotenvLoad = process.env.OPENCLAW_CONTAINER;
+      state.profileAtDotenvLoad = process.env.CARAPACE_PROFILE;
+      state.containerAtDotenvLoad = process.env.CARAPACE_CONTAINER;
     }),
   };
 });
@@ -77,7 +77,7 @@ vi.mock("../infra/runtime-guard.js", () => ({
 }));
 
 vi.mock("../infra/path-env.js", () => ({
-  ensureOpenClawCliOnPath: startup.ensurePath,
+  ensureCarapaceCliOnPath: startup.ensurePath,
 }));
 
 vi.mock("./route.js", () => ({
@@ -101,26 +101,26 @@ import { runCli } from "./run-main.js";
 
 describe("runCli environment and passive startup", () => {
   const envSnapshot = captureEnv([
-    "OPENCLAW_PROFILE",
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_CONTAINER",
-    "OPENCLAW_GATEWAY_PORT",
-    "OPENCLAW_GATEWAY_URL",
-    "OPENCLAW_GATEWAY_TOKEN",
-    "OPENCLAW_GATEWAY_PASSWORD",
+    "CARAPACE_PROFILE",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_CONFIG_PATH",
+    "CARAPACE_CONTAINER",
+    "CARAPACE_GATEWAY_PORT",
+    "CARAPACE_GATEWAY_URL",
+    "CARAPACE_GATEWAY_TOKEN",
+    "CARAPACE_GATEWAY_PASSWORD",
   ]);
 
   beforeEach(() => {
     vi.clearAllMocks();
-    deleteTestEnvValue("OPENCLAW_PROFILE");
-    deleteTestEnvValue("OPENCLAW_STATE_DIR");
-    deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
-    deleteTestEnvValue("OPENCLAW_CONTAINER");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_PORT");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_URL");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_PASSWORD");
+    deleteTestEnvValue("CARAPACE_PROFILE");
+    deleteTestEnvValue("CARAPACE_STATE_DIR");
+    deleteTestEnvValue("CARAPACE_CONFIG_PATH");
+    deleteTestEnvValue("CARAPACE_CONTAINER");
+    deleteTestEnvValue("CARAPACE_GATEWAY_PORT");
+    deleteTestEnvValue("CARAPACE_GATEWAY_URL");
+    deleteTestEnvValue("CARAPACE_GATEWAY_TOKEN");
+    deleteTestEnvValue("CARAPACE_GATEWAY_PASSWORD");
     dotenvState.state.profileAtDotenvLoad = undefined;
     dotenvState.state.containerAtDotenvLoad = undefined;
     dotenvState.loadDotEnv.mockClear();
@@ -148,7 +148,7 @@ describe("runCli environment and passive startup", () => {
     ["cleanup", "--channel", "beta"],
     ["cleanup", "--version"],
   ])("keeps cleanup passive before dispatch: %j", async (...args) => {
-    const argv = ["node", "openclaw", "update", ...args];
+    const argv = ["node", "carapace", "update", ...args];
     await runCli(argv);
 
     expect(startup.route).toHaveBeenCalledWith(argv);
@@ -163,7 +163,7 @@ describe("runCli environment and passive startup", () => {
   it.each(["--channel", "--tag", "--timeout"])(
     "retains update startup when cleanup is the value of %s",
     async (flag) => {
-      await runCli(["node", "openclaw", "update", flag, "cleanup"]);
+      await runCli(["node", "carapace", "update", flag, "cleanup"]);
       expect(startup.readConfig).toHaveBeenCalledOnce();
       expect(startup.startProxy).toHaveBeenCalledWith({ selected: "synthetic" });
       expect(startup.ensurePath).toHaveBeenCalledOnce();
@@ -173,88 +173,88 @@ describe("runCli environment and passive startup", () => {
 
   it("applies --profile before dotenv loading", async () => {
     fileState.hasCliDotEnv = true;
-    await runCli(["node", "openclaw", "--profile", "rawdog", "status"]);
+    await runCli(["node", "carapace", "--profile", "rawdog", "status"]);
 
     expect(dotenvState.loadDotEnv).toHaveBeenCalledOnce();
     expect(dotenvState.state.profileAtDotenvLoad).toBe("rawdog");
-    expect(process.env.OPENCLAW_PROFILE).toBe("rawdog");
+    expect(process.env.CARAPACE_PROFILE).toBe("rawdog");
   });
 
   it("rejects --container combined with --profile", async () => {
     await expect(
-      runCli(["node", "openclaw", "--container", "demo", "--profile", "rawdog", "status"]),
+      runCli(["node", "carapace", "--container", "demo", "--profile", "rawdog", "status"]),
     ).rejects.toThrow("--container cannot be combined with --profile/--dev");
 
     expect(dotenvState.loadDotEnv).not.toHaveBeenCalled();
-    expect(process.env.OPENCLAW_PROFILE).toBe("rawdog");
+    expect(process.env.CARAPACE_PROFILE).toBe("rawdog");
   });
 
   it("rejects --container combined with interleaved --profile", async () => {
     await expect(
-      runCli(["node", "openclaw", "status", "--container", "demo", "--profile", "rawdog"]),
+      runCli(["node", "carapace", "status", "--container", "demo", "--profile", "rawdog"]),
     ).rejects.toThrow("--container cannot be combined with --profile/--dev");
   });
 
   it("rejects --container combined with interleaved --dev", async () => {
     await expect(
-      runCli(["node", "openclaw", "status", "--container", "demo", "--dev"]),
+      runCli(["node", "carapace", "status", "--container", "demo", "--dev"]),
     ).rejects.toThrow("--container cannot be combined with --profile/--dev");
   });
 
   it("does not let dotenv change container target resolution", async () => {
     fileState.hasCliDotEnv = true;
     dotenvState.loadDotEnv.mockImplementationOnce(() => {
-      process.env.OPENCLAW_CONTAINER = "demo";
-      dotenvState.state.profileAtDotenvLoad = process.env.OPENCLAW_PROFILE;
-      dotenvState.state.containerAtDotenvLoad = process.env.OPENCLAW_CONTAINER;
+      process.env.CARAPACE_CONTAINER = "demo";
+      dotenvState.state.profileAtDotenvLoad = process.env.CARAPACE_PROFILE;
+      dotenvState.state.containerAtDotenvLoad = process.env.CARAPACE_CONTAINER;
     });
 
-    await runCli(["node", "openclaw", "status"]);
+    await runCli(["node", "carapace", "status"]);
 
     expect(dotenvState.loadDotEnv).toHaveBeenCalledOnce();
-    expect(process.env.OPENCLAW_CONTAINER).toBe("demo");
+    expect(process.env.CARAPACE_CONTAINER).toBe("demo");
     expect(dotenvState.state.containerAtDotenvLoad).toBe("demo");
-    expect(maybeRunCliInContainerMock).toHaveBeenCalledWith(["node", "openclaw", "status"]);
+    expect(maybeRunCliInContainerMock).toHaveBeenCalledWith(["node", "carapace", "status"]);
     expect(maybeRunCliInContainerMock).toHaveReturnedWith({
       handled: false,
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
     });
   });
 
-  it("allows container mode when OPENCLAW_PROFILE is already set in env", async () => {
-    setTestEnvValue("OPENCLAW_PROFILE", "work");
+  it("allows container mode when CARAPACE_PROFILE is already set in env", async () => {
+    setTestEnvValue("CARAPACE_PROFILE", "work");
 
     await expect(
-      runCli(["node", "openclaw", "--container", "demo", "status"]),
+      runCli(["node", "carapace", "--container", "demo", "status"]),
     ).resolves.toBeUndefined();
   });
 
   it.each([
-    ["OPENCLAW_GATEWAY_PORT", "19001"],
-    ["OPENCLAW_GATEWAY_URL", "ws://127.0.0.1:18789"],
-    ["OPENCLAW_GATEWAY_TOKEN", "demo-token"],
-    ["OPENCLAW_GATEWAY_PASSWORD", "demo-password"],
+    ["CARAPACE_GATEWAY_PORT", "19001"],
+    ["CARAPACE_GATEWAY_URL", "ws://127.0.0.1:18789"],
+    ["CARAPACE_GATEWAY_TOKEN", "demo-token"],
+    ["CARAPACE_GATEWAY_PASSWORD", "demo-password"],
   ])("allows container mode when %s is set in env", async (key, value) => {
     setTestEnvValue(key, value);
 
     await expect(
-      runCli(["node", "openclaw", "--container", "demo", "status"]),
+      runCli(["node", "carapace", "--container", "demo", "status"]),
     ).resolves.toBeUndefined();
   });
 
-  it("allows container mode when only OPENCLAW_STATE_DIR is set in env", async () => {
-    setTestEnvValue("OPENCLAW_STATE_DIR", "/tmp/openclaw-host-state");
+  it("allows container mode when only CARAPACE_STATE_DIR is set in env", async () => {
+    setTestEnvValue("CARAPACE_STATE_DIR", "/tmp/carapace-host-state");
 
     await expect(
-      runCli(["node", "openclaw", "--container", "demo", "status"]),
+      runCli(["node", "carapace", "--container", "demo", "status"]),
     ).resolves.toBeUndefined();
   });
 
-  it("allows container mode when only OPENCLAW_CONFIG_PATH is set in env", async () => {
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", "/tmp/openclaw-host-state/openclaw.json");
+  it("allows container mode when only CARAPACE_CONFIG_PATH is set in env", async () => {
+    setTestEnvValue("CARAPACE_CONFIG_PATH", "/tmp/carapace-host-state/carapace.json");
 
     await expect(
-      runCli(["node", "openclaw", "--container", "demo", "status"]),
+      runCli(["node", "carapace", "--container", "demo", "status"]),
     ).resolves.toBeUndefined();
   });
 });

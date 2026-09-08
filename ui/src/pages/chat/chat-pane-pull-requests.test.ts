@@ -31,11 +31,11 @@ function pullRequest(
 ): ControlUiSessionPullRequest {
   return {
     number,
-    owner: "openclaw",
-    repo: "openclaw",
+    owner: "carapace",
+    repo: "carapace",
     branch: "feature/demo",
     title: `Pull request ${number}`,
-    url: `https://github.com/openclaw/openclaw/pull/${number}`,
+    url: `https://github.com/Exaggarate/carapace/pull/${number}`,
     state,
   };
 }
@@ -214,7 +214,7 @@ describe("chat pane pushed pull request state", () => {
         setPullRequestSummary,
       } as unknown as SessionCapability);
       const key = "agent:main:current";
-      const repository = { owner: "openclaw", repo: "openclaw" };
+      const repository = { owner: "carapace", repo: "carapace" };
       pane.refreshSessionPullRequests();
       await Promise.resolve();
       emitSnapshot(emitGatewayEvent, key, {
@@ -246,14 +246,14 @@ describe("chat pane pushed pull request state", () => {
     pane.refreshSessionPullRequests();
     await Promise.resolve();
     emitSnapshot(emitGatewayEvent, state.sessionKey, {
-      repository: { owner: "openclaw", repo: "openclaw" },
+      repository: { owner: "carapace", repo: "carapace" },
       pullRequests: [],
       rateLimited: false,
       status: "ready",
     });
     pane.refreshSessionPullRequests();
     pane.render();
-    expect(pane.chatProps?.githubRepo).toEqual({ owner: "openclaw", repo: "openclaw" });
+    expect(pane.chatProps?.githubRepo).toEqual({ owner: "carapace", repo: "carapace" });
 
     state.sessionKey = "agent:main:another-checkout";
     pane.refreshSessionPullRequests();
@@ -470,7 +470,7 @@ describe("chat pane pushed pull request state", () => {
   it("clears the pane snapshot when the Gateway source disconnects", () => {
     const { pane } = createPullRequestPane({} as SessionCapability);
     pane.sessionPullRequests = [pullRequest(111532, "open")];
-    pane.githubRepo = { owner: "openclaw", repo: "openclaw" };
+    pane.githubRepo = { owner: "carapace", repo: "carapace" };
 
     pane.applyGatewaySnapshot({
       ...pane.context.gateway.snapshot,
@@ -492,10 +492,10 @@ describe("chat pane pushed pull request state", () => {
     await Promise.resolve();
     emitSnapshot(emitGatewayEvent, "agent:main:current", {
       branch: {
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch: "feature/demo",
-        createUrl: "https://github.com/openclaw/openclaw/pull/new/feature/demo",
+        createUrl: "https://github.com/Exaggarate/carapace/pull/new/feature/demo",
       },
       pullRequests: [pullRequest(111532, "open")],
       rateLimited: false,
@@ -504,7 +504,7 @@ describe("chat pane pushed pull request state", () => {
     pane.refreshSessionPullRequests();
     await Promise.resolve();
     expect(pane.sessionPullRequests).toHaveLength(1);
-    expect(pane.githubRepo).toEqual({ owner: "openclaw", repo: "openclaw" });
+    expect(pane.githubRepo).toEqual({ owner: "carapace", repo: "carapace" });
 
     emitGatewayEvent("sessions.changed", {
       sessionKey: "agent:main:current",
@@ -687,7 +687,7 @@ describe("PR refresh wire ownership", () => {
       const message = (text: string) => ({
         role: "assistant",
         content: [
-          { type: "text", text: `${text} https://github.com/openclaw/openclaw/pull/111532` },
+          { type: "text", text: `${text} https://github.com/Exaggarate/carapace/pull/111532` },
         ],
       });
       if (history) {
@@ -710,7 +710,7 @@ describe("PR refresh wire ownership", () => {
             state: "delta",
             runId: "wire-pr-run",
             sessionKey: key,
-            deltaText: "Opened https://github.com/openclaw/openclaw/pull/111532 ",
+            deltaText: "Opened https://github.com/Exaggarate/carapace/pull/111532 ",
           },
         });
         await nextFrame();

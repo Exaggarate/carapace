@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { realpath } from "node:fs/promises";
 import { resolve, sep } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import type { Selectable } from "kysely";
 import { root as fsSafeRoot, FsSafeError, type Root } from "../infra/fs-safe.js";
 import {
@@ -13,19 +13,19 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { clawContainedRelativePath } from "./path-containment.js";
 import { parseClawMarkdown } from "./reader.js";
 import type { ClawAddPlan, ClawAddPlanAction, ClawDiagnostic } from "./types.js";
 
 export const CLAW_WORKSPACE_FILE_RECORD_SCHEMA_VERSION =
-  "openclaw.clawWorkspaceFileRecord.v1" as const;
+  "carapace.clawWorkspaceFileRecord.v1" as const;
 
 const MAX_CLAW_WORKSPACE_FILE_BYTES = 1024 * 1024;
 
@@ -153,9 +153,9 @@ export async function readClawWorkspaceActionSource(params: {
 
 function persistWorkspaceFile(
   record: PersistedClawWorkspaceFile,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WorkspaceDatabase>(db)
@@ -168,9 +168,9 @@ function persistWorkspaceFile(
 function readWorkspaceFile(
   agentId: string,
   targetPath: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): PersistedClawWorkspaceFile | undefined {
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const row = executeSqliteQueryTakeFirstSync(
       db,
       selectWorkspaceFiles(db)
@@ -210,9 +210,9 @@ function sameWorkspaceFileOwner(
 function updateWorkspaceFileStatus(
   record: PersistedClawWorkspaceFile,
   expectedStatuses: PersistedClawWorkspaceFile["status"][],
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const result = executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WorkspaceDatabase>(db)
@@ -232,9 +232,9 @@ function updateWorkspaceFileStatus(
 
 export function upsertClawWorkspaceFile(
   record: PersistedClawWorkspaceFile,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WorkspaceDatabase>(db)
@@ -259,9 +259,9 @@ export function upsertClawWorkspaceFile(
 export function deleteClawWorkspaceFileRecord(
   agentId: string,
   path: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WorkspaceDatabase>(db)
@@ -278,9 +278,9 @@ function workspaceFileActions(plan: ClawAddPlan): ClawAddPlanAction[] {
 
 export function readClawWorkspaceFiles(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PersistedClawWorkspaceFile[] {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   if (options.readOnly && !tableExists(db, "claw_workspace_files")) {
     return [];
   }
@@ -301,9 +301,9 @@ export function readClawWorkspaceFiles(
 }
 
 export function readAllClawWorkspaceFiles(
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): PersistedClawWorkspaceFile[] {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   if (!tableExists(db, "claw_workspace_files")) {
     return [];
   }
@@ -321,7 +321,7 @@ export function readAllClawWorkspaceFiles(
 
 export async function createClawWorkspaceFiles(
   plan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: CarapaceStateDatabaseOptions & { nowMs?: number } = {},
 ): Promise<PersistedClawWorkspaceFile[]> {
   const actions = workspaceFileActions(plan);
   if (actions.length === 0) {

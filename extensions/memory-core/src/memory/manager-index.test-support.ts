@@ -1,17 +1,17 @@
 import { mkdirSync, rmSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { EmbeddingInput } from "openclaw/plugin-sdk/embedding-providers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { clearEmbeddingProviders as clearRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import type { EmbeddingInput } from "carapace/plugin-sdk/embedding-providers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { clearEmbeddingProviders as clearRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 import {
   configureMemoryCoreDreamingStateForTests,
@@ -381,18 +381,18 @@ export function createManagerIndexFixture(deps: {
   let root = "";
   let workspace = "";
   let memory = "";
-  const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+  const originalStateDir = process.env.CARAPACE_STATE_DIR;
   const managers = new Set<MemoryIndexManager>();
 
   const setStateDir = (stateDir: string): void => {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", stateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", stateDir);
   };
 
   const restoreStateDir = (): void => {
     if (originalStateDir === undefined) {
-      Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+      Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
     } else {
-      Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalStateDir);
+      Reflect.set(process.env, "CARAPACE_STATE_DIR", originalStateDir);
     }
   };
 
@@ -451,7 +451,7 @@ export function createManagerIndexFixture(deps: {
         list: [{ id: "main", default: true }],
       },
       models: params.providerAliases ? { providers: params.providerAliases } : undefined,
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
   const requireManager = (
     result: ManagerResult,
@@ -508,7 +508,7 @@ export function createManagerIndexFixture(deps: {
           role: message.role,
           timestamp: message.timestamp,
           content: [{ type: "text", text: message.content }],
-          ...(message.senderIsOwner ? { __openclaw: { senderIsOwner: true } } : {}),
+          ...(message.senderIsOwner ? { __carapace: { senderIsOwner: true } } : {}),
         },
       });
     }
@@ -531,7 +531,7 @@ export function createManagerIndexFixture(deps: {
 
   beforeAll(async () => {
     const rawRoot = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-mem-fixtures-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-mem-fixtures-"),
     );
     root = await fs.realpath(rawRoot);
     workspace = path.join(root, "workspace");
@@ -549,8 +549,8 @@ export function createManagerIndexFixture(deps: {
     vi.useRealTimers();
     await Promise.all(Array.from(managers).map((manager) => manager.close()));
     await deps.closeAllMemorySearchManagers();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetMemoryCoreDreamingStateForTests();
     clearRegistry();
     managers.clear();

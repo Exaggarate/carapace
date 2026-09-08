@@ -12,7 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { basename, dirname, join, posix, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   isScannable,
   scanSource,
@@ -97,29 +97,29 @@ const PACKAGE_SCAN_CONCURRENCY = 4;
 const CANONICAL_NPM_PACKAGE_NAME = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/u;
 
 const RELEASE_2026_9_1_REQUIRED_REVIEWED_SOURCE_FINDING_COUNTS = new Map<string, number>([
-  ["@openclaw/acpx:dangerous-exec:src/codex-auth-bridge.ts", 1],
-  ["@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.mjs", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport-stdio.ts", 1],
-  ["@openclaw/codex:dangerous-exec:src/doctor.ts", 1],
-  ["@openclaw/discord:dangerous-exec:src/voice/audio.ts", 1],
-  ["@openclaw/imessage:dangerous-exec:src/client.ts", 1],
-  ["@openclaw/llama-cpp-provider:dangerous-exec:src/llama-server-install.ts", 1],
-  ["@openclaw/mxc-sandbox:dangerous-exec:src/readiness.ts", 2],
-  ["@openclaw/raft:dangerous-exec:src/gateway.ts", 1],
-  ["@openclaw/signal:dangerous-exec:src/daemon.ts", 1],
-  ["@openclaw/voice-call:dangerous-exec:src/tunnel.ts", 1],
+  ["@carapace/acpx:dangerous-exec:src/codex-auth-bridge.ts", 1],
+  ["@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.mjs", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport-stdio.ts", 1],
+  ["@carapace/codex:dangerous-exec:src/doctor.ts", 1],
+  ["@carapace/discord:dangerous-exec:src/voice/audio.ts", 1],
+  ["@carapace/imessage:dangerous-exec:src/client.ts", 1],
+  ["@carapace/llama-cpp-provider:dangerous-exec:src/llama-server-install.ts", 1],
+  ["@carapace/mxc-sandbox:dangerous-exec:src/readiness.ts", 2],
+  ["@carapace/raft:dangerous-exec:src/gateway.ts", 1],
+  ["@carapace/signal:dangerous-exec:src/daemon.ts", 1],
+  ["@carapace/voice-call:dangerous-exec:src/tunnel.ts", 1],
 ]);
 
 const RELEASE_2026_9_2_REQUIRED_REVIEWED_SOURCE_FINDING_COUNTS = new Map<string, number>([
   ...RELEASE_2026_9_1_REQUIRED_REVIEWED_SOURCE_FINDING_COUNTS,
-  ["@openclaw/llama-cpp-provider:dangerous-exec:src/hardware.ts", 1],
+  ["@carapace/llama-cpp-provider:dangerous-exec:src/hardware.ts", 1],
 ]);
 
 // The bounded async Codex version probe no longer produces this syntactic finding.
 // Keep shipped inventories intact; a new direct call must be reviewed again.
 const CURRENT_REQUIRED_REVIEWED_SOURCE_FINDING_COUNTS = new Map(
   [...RELEASE_2026_9_2_REQUIRED_REVIEWED_SOURCE_FINDING_COUNTS].filter(
-    ([key]) => key !== "@openclaw/codex:dangerous-exec:src/doctor.ts",
+    ([key]) => key !== "@carapace/codex:dangerous-exec:src/doctor.ts",
   ),
 );
 
@@ -137,36 +137,36 @@ type PluginSecurityInventoryPolicy = {
 const CURRENT_REVIEWED_RELEASE_LAYOUT = {
   id: "current",
   findings: new Map<string, number>([
-    ["@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/sandbox-child.ts", 1],
-    ["@openclaw/codex:dangerous-exec:src/app-server/transport-process-snapshot.ts", 1],
+    ["@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/sandbox-child.ts", 1],
+    ["@carapace/codex:dangerous-exec:src/app-server/transport-process-snapshot.ts", 1],
   ]),
 };
 
 const CURRENT_OPTIONAL_REVIEWED_PACKED_FINDING_COUNTS = new Map<string, number>([
-  ["@openclaw/acpx:dangerous-exec:dist/mcp-proxy.mjs", 1],
-  ["@openclaw/acpx:dangerous-exec:dist/service-<hash>.js", 1],
-  ["@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts", 3],
-  ["@openclaw/codex:dangerous-exec:dist/api.js", 1],
-  ["@openclaw/codex:dangerous-exec:dist/dynamic-tools-<hash>.js", 2],
-  ["@openclaw/codex:dangerous-exec:dist/session-catalog-<hash>.js", 1],
-  ["@openclaw/codex:dangerous-exec:dist/transport-stdio-<hash>.js", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/attempt-startup-retry.test.ts", 6],
-  ["@openclaw/codex:dangerous-exec:src/app-server/run-attempt-one-shot-cleanup.test.ts", 3],
-  ["@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server.http.test.ts", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport-orphan.test-helper.ts", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport-orphan.test.ts", 3],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport-process-snapshot.test.ts", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport-startup.test.ts", 2],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport.process.test.ts", 10],
-  ["@openclaw/diagnostics-prometheus:dangerous-exec:src/install-runtime.e2e.test.ts", 2],
-  ["@openclaw/google-meet:dangerous-exec:src/cli-artifacts.test.ts", 1],
-  ["@openclaw/google-meet:dangerous-exec:src/realtime.process.test.ts", 1],
-  ["@openclaw/imessage:dangerous-exec:src/client.test.ts", 3],
-  ["@openclaw/llama-cpp-provider:dangerous-exec:dist/index.js", 1],
-  ["@openclaw/memory-lancedb:dangerous-exec:memory-lancedb.concurrent.test.ts", 1],
-  ["@openclaw/opencode-go-provider:env-harvesting:opencode-go.live.test.ts", 1],
-  ["@openclaw/slack:dynamic-code-execution:dist/outbound-payload.test-harness-<hash>.js", 1],
-  ["@openclaw/voice-call:dangerous-exec:dist/runtime-entry-<hash>.js", 1],
+  ["@carapace/acpx:dangerous-exec:dist/mcp-proxy.mjs", 1],
+  ["@carapace/acpx:dangerous-exec:dist/service-<hash>.js", 1],
+  ["@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts", 3],
+  ["@carapace/codex:dangerous-exec:dist/api.js", 1],
+  ["@carapace/codex:dangerous-exec:dist/dynamic-tools-<hash>.js", 2],
+  ["@carapace/codex:dangerous-exec:dist/session-catalog-<hash>.js", 1],
+  ["@carapace/codex:dangerous-exec:dist/transport-stdio-<hash>.js", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/attempt-startup-retry.test.ts", 6],
+  ["@carapace/codex:dangerous-exec:src/app-server/run-attempt-one-shot-cleanup.test.ts", 3],
+  ["@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server.http.test.ts", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport-orphan.test-helper.ts", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport-orphan.test.ts", 3],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport-process-snapshot.test.ts", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport-startup.test.ts", 2],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport.process.test.ts", 10],
+  ["@carapace/diagnostics-prometheus:dangerous-exec:src/install-runtime.e2e.test.ts", 2],
+  ["@carapace/google-meet:dangerous-exec:src/cli-artifacts.test.ts", 1],
+  ["@carapace/google-meet:dangerous-exec:src/realtime.process.test.ts", 1],
+  ["@carapace/imessage:dangerous-exec:src/client.test.ts", 3],
+  ["@carapace/llama-cpp-provider:dangerous-exec:dist/index.js", 1],
+  ["@carapace/memory-lancedb:dangerous-exec:memory-lancedb.concurrent.test.ts", 1],
+  ["@carapace/opencode-go-provider:env-harvesting:opencode-go.live.test.ts", 1],
+  ["@carapace/slack:dynamic-code-execution:dist/outbound-payload.test-harness-<hash>.js", 1],
+  ["@carapace/voice-call:dangerous-exec:dist/runtime-entry-<hash>.js", 1],
 ]);
 
 const CURRENT_SECURITY_INVENTORY_POLICY: PluginSecurityInventoryPolicy = {
@@ -176,47 +176,47 @@ const CURRENT_SECURITY_INVENTORY_POLICY: PluginSecurityInventoryPolicy = {
 };
 
 const FROZEN_RELEASE_REQUIRED_REVIEWED_SOURCE_FINDING_COUNTS = new Map<string, number>([
-  ["@openclaw/acpx:dangerous-exec:src/codex-auth-bridge.ts", 1],
-  ["@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.mjs", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/transport-stdio.ts", 1],
-  ["@openclaw/codex:dangerous-exec:src/node-cli-sessions.ts", 1],
-  ["@openclaw/discord:dangerous-exec:src/voice/audio.ts", 1],
-  ["@openclaw/google-meet:dangerous-exec:src/node-host.ts", 3],
-  ["@openclaw/google-meet:dangerous-exec:src/realtime.ts", 2],
-  ["@openclaw/matrix:dangerous-exec:src/matrix/deps.ts", 1],
-  ["@openclaw/raft:dangerous-exec:src/gateway.ts", 1],
-  ["@openclaw/signal:dangerous-exec:src/daemon.ts", 1],
-  ["@openclaw/voice-call:dangerous-exec:src/tunnel.ts", 4],
-  ["@openclaw/voice-call:dangerous-exec:src/webhook/tailscale.ts", 1],
+  ["@carapace/acpx:dangerous-exec:src/codex-auth-bridge.ts", 1],
+  ["@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.mjs", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/transport-stdio.ts", 1],
+  ["@carapace/codex:dangerous-exec:src/node-cli-sessions.ts", 1],
+  ["@carapace/discord:dangerous-exec:src/voice/audio.ts", 1],
+  ["@carapace/google-meet:dangerous-exec:src/node-host.ts", 3],
+  ["@carapace/google-meet:dangerous-exec:src/realtime.ts", 2],
+  ["@carapace/matrix:dangerous-exec:src/matrix/deps.ts", 1],
+  ["@carapace/raft:dangerous-exec:src/gateway.ts", 1],
+  ["@carapace/signal:dangerous-exec:src/daemon.ts", 1],
+  ["@carapace/voice-call:dangerous-exec:src/tunnel.ts", 4],
+  ["@carapace/voice-call:dangerous-exec:src/webhook/tailscale.ts", 1],
 ]);
 
 const FROZEN_RELEASE_OPTIONAL_REVIEWED_PACKED_FINDING_COUNTS = new Map<string, number>([
-  ["@openclaw/acpx:dangerous-exec:dist/mcp-proxy.mjs", 1],
-  ["@openclaw/acpx:dangerous-exec:dist/service-<hash>.js", 1],
-  ["@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts", 1],
-  ["@openclaw/codex:dangerous-exec:dist/client-<hash>.js", 1],
-  ["@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server.http.test.ts", 1],
-  ["@openclaw/google-meet:dangerous-exec:dist/index.js", 1],
-  ["@openclaw/google-meet:dangerous-exec:src/realtime.process.test.ts", 1],
-  ["@openclaw/openshell-sandbox:dangerous-exec:src/backend.e2e.test.ts", 1],
-  ["@openclaw/openshell-sandbox:dangerous-exec:src/openshell-core.test.ts", 2],
-  ["@openclaw/slack:dynamic-code-execution:dist/outbound-payload.test-harness-<hash>.js", 1],
-  ["@openclaw/voice-call:dangerous-exec:dist/runtime-entry-<hash>.js", 1],
+  ["@carapace/acpx:dangerous-exec:dist/mcp-proxy.mjs", 1],
+  ["@carapace/acpx:dangerous-exec:dist/service-<hash>.js", 1],
+  ["@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts", 1],
+  ["@carapace/codex:dangerous-exec:dist/client-<hash>.js", 1],
+  ["@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server.http.test.ts", 1],
+  ["@carapace/google-meet:dangerous-exec:dist/index.js", 1],
+  ["@carapace/google-meet:dangerous-exec:src/realtime.process.test.ts", 1],
+  ["@carapace/openshell-sandbox:dangerous-exec:src/backend.e2e.test.ts", 1],
+  ["@carapace/openshell-sandbox:dangerous-exec:src/openshell-core.test.ts", 2],
+  ["@carapace/slack:dynamic-code-execution:dist/outbound-payload.test-harness-<hash>.js", 1],
+  ["@carapace/voice-call:dangerous-exec:dist/runtime-entry-<hash>.js", 1],
 ]);
 
 const FROZEN_EXTENDED_STABLE_2026_7_33_OPTIONAL_REVIEWED_PACKED_FINDING_COUNTS = new Map(
   FROZEN_RELEASE_OPTIONAL_REVIEWED_PACKED_FINDING_COUNTS,
 );
 FROZEN_EXTENDED_STABLE_2026_7_33_OPTIONAL_REVIEWED_PACKED_FINDING_COUNTS.set(
-  "@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts",
+  "@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts",
   3,
 );
 
 const FROZEN_EXTENDED_STABLE_2026_6_33_LAYOUT = {
   id: "extended-stable-2026.6.33",
   findings: new Map<string, number>([
-    ["@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/http.ts", 1],
-    ["@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/processes.ts", 1],
+    ["@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/http.ts", 1],
+    ["@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/processes.ts", 1],
   ]),
 };
 
@@ -433,9 +433,9 @@ export async function listPublishablePluginPackages(
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
       name?: unknown;
       version?: unknown;
-      openclaw?: { release?: { publishToNpm?: unknown } };
+      carapace?: { release?: { publishToNpm?: unknown } };
     };
-    if (packageJson.openclaw?.release?.publishToNpm !== true) {
+    if (packageJson.carapace?.release?.publishToNpm !== true) {
       return [];
     }
     const packageName = assertCanonicalNpmPackageName(packageJson.name, packageFile);
@@ -806,7 +806,7 @@ export function stageScannerRelevantPluginTarballFiles(tarballPath: string): {
   stageDir: string;
   totalBytes: number;
 } {
-  const stageDir = mkdtempSync(join(tmpdir(), "openclaw-plugin-npm-scan-"));
+  const stageDir = mkdtempSync(join(tmpdir(), "carapace-plugin-npm-scan-"));
   let directlyScannedFileCount = 0;
   const directlyScannedFindings: SkillScanFinding[] = [];
   let fileCount = 0;
@@ -1193,7 +1193,7 @@ function sanitizePackageScanError(plugin: PluginNpmSecurityArtifact, error: unkn
     message = message.replaceAll(path, replacement);
   }
   message = message
-    .replaceAll(/\/(?:private\/)?tmp\/openclaw-plugin-npm-scan-[^/\s:]+/gu, "<scanner-stage>")
+    .replaceAll(/\/(?:private\/)?tmp\/carapace-plugin-npm-scan-[^/\s:]+/gu, "<scanner-stage>")
     .replaceAll(/(^|[\s:(])\/[^ \t\n\r:,)\]}]+/gu, "$1<path>");
   return `${plugin.packageName}: package scan failed: ${message}`;
 }

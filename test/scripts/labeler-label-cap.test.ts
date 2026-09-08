@@ -75,7 +75,7 @@ function labelFixture(labelNames: string[], addError?: Error, execute = executeS
   const run = () =>
     execute(
       {
-        repo: { owner: "openclaw", repo: "openclaw" },
+        repo: { owner: "carapace", repo: "carapace" },
         payload: { pull_request: { number: 1, user: { login: "contributor" } } },
       },
       core,
@@ -165,7 +165,7 @@ describe("label cap tolerance", () => {
     const core = { warning: vi.fn() };
     const addLabels = vi.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(capError);
     const github = { rest: { issues: { addLabels } } };
-    const request = { github, core, owner: "openclaw", repo: "openclaw", issueNumber: 7 };
+    const request = { github, core, owner: "carapace", repo: "carapace", issueNumber: 7 };
 
     await expect(addLabelsWithinCap({ ...request, labels: ["maintainer"] })).resolves.toBe(true);
     expect(core.warning).not.toHaveBeenCalled();

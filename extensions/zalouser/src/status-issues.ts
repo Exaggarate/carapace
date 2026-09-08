@@ -2,15 +2,15 @@
 import type {
   ChannelAccountSnapshot,
   ChannelStatusIssue,
-} from "openclaw/plugin-sdk/channel-contract";
+} from "carapace/plugin-sdk/channel-contract";
 import {
   coerceStatusIssueAccountId,
   readStatusIssueFields,
-} from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/extension-shared";
 import {
   standardDmPolicyOpenIssue,
   standardNotConfiguredIssue,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 
 const ZALOUSER_STATUS_FIELDS = [
   "accountId",
@@ -42,7 +42,7 @@ export function collectZalouserStatusIssues(
           channel: "zalouser",
           accountId,
           message: "Not authenticated (no saved Zalo session).",
-          fix: "Run: openclaw channels login --channel zalouser",
+          fix: "Run: carapace channels login --channel zalouser",
         }),
       );
       continue;

@@ -2,10 +2,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { filterMemorySearchHitsBySessionVisibility } from "@openclaw/memory-core/api.js";
-import type { MemoryReadResult } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { filterMemorySearchHitsBySessionVisibility } from "@carapace/memory-core/api.js";
+import type { MemoryReadResult } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 import { compileMemoryWikiVault } from "./compile.js";
 import type { MemoryWikiPluginConfig } from "./config.js";
 import { renderWikiMarkdown } from "./markdown.js";
@@ -28,23 +28,23 @@ const {
   }),
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-host-search", () => ({
+vi.mock("carapace/plugin-sdk/memory-host-search", () => ({
   getActiveMemorySearchManager: getActiveMemorySearchManagerMock,
 }));
 
-vi.mock("@openclaw/memory-core/api.js", { spy: true });
+vi.mock("@carapace/memory-core/api.js", { spy: true });
 
-vi.mock("openclaw/plugin-sdk/agent-scope-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-scope-runtime", () => ({
   resolveSessionAgentIdStrict: resolveSessionAgentIdMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-host-core", () => ({
+vi.mock("carapace/plugin-sdk/memory-host-core", () => ({
   resolveDefaultAgentId: resolveDefaultAgentIdMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/session-transcript-hit", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-transcript-hit", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-hit")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-transcript-hit")>();
   return {
     ...actual,
     loadCombinedSessionStoreForGateway: loadCombinedSessionStoreForGatewayMock,
@@ -108,15 +108,15 @@ async function createQueryVault(options?: {
   });
 }
 
-function createAppConfig(): OpenClawConfig {
+function createAppConfig(): CarapaceConfig {
   return {
     agents: {
       list: [{ id: "main", default: true }],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function createSessionVisibilityAppConfig(): OpenClawConfig {
+function createSessionVisibilityAppConfig(): CarapaceConfig {
   return {
     agents: {
       defaults: { sandbox: { sessionToolsVisibility: "all" } },
@@ -125,14 +125,14 @@ function createSessionVisibilityAppConfig(): OpenClawConfig {
     tools: {
       sessions: { visibility: "self" },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function createAgentSessionVisibilityAppConfig(): OpenClawConfig {
+function createAgentSessionVisibilityAppConfig(): CarapaceConfig {
   return {
     agents: { list: [{ id: "main", default: true }, { id: "secondary" }] },
     tools: { sessions: { visibility: "agent" } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function mockSessionTranscriptStore() {
@@ -142,12 +142,12 @@ function mockSessionTranscriptStore() {
       "agent:main:child-session": {
         sessionId: "child-session",
         updatedAt: 1,
-        sessionFile: "/tmp/openclaw/child-session.jsonl",
+        sessionFile: "/tmp/carapace/child-session.jsonl",
       },
       "agent:main:sibling-session": {
         sessionId: "sibling-session",
         updatedAt: 2,
-        sessionFile: "/tmp/openclaw/sibling-session.jsonl",
+        sessionFile: "/tmp/carapace/sibling-session.jsonl",
       },
     },
   });
@@ -316,10 +316,10 @@ describe("searchMemoryWiki", () => {
           "Alpha body.",
           "",
           "## Related",
-          "<!-- openclaw:wiki:related:start -->",
+          "<!-- carapace:wiki:related:start -->",
           "### Related Pages",
           "- [Needle Person](entities/needle-person.md)",
-          "<!-- openclaw:wiki:related:end -->",
+          "<!-- carapace:wiki:related:end -->",
           "",
         ].join("\n"),
       }),
@@ -362,11 +362,11 @@ describe("searchMemoryWiki", () => {
             title: "Marker Only",
           },
           body: [
-            "<!-- openclaw:wiki:generated:start -->",
-            "<!-- openclaw:wiki:generated:end -->",
-            "<!-- openclaw:human:start -->",
-            "<!-- openclaw:human:end -->",
-            "<!-- openclaw:wiki:raw-source -->",
+            "<!-- carapace:wiki:generated:start -->",
+            "<!-- carapace:wiki:generated:end -->",
+            "<!-- carapace:human:start -->",
+            "<!-- carapace:human:end -->",
+            "<!-- carapace:wiki:raw-source -->",
             "",
           ].join("\n"),
         }),
@@ -379,7 +379,7 @@ describe("searchMemoryWiki", () => {
             pageType: "entity",
             id: "entity.evidence",
             title: "Evidence Page",
-            description: "openclaw release evidence",
+            description: "carapace release evidence",
             claims: [
               {
                 id: "claim.evidence",
@@ -391,11 +391,11 @@ describe("searchMemoryWiki", () => {
             ],
           },
           body: [
-            "<!-- openclaw:human:start -->",
+            "<!-- carapace:human:start -->",
             "# Evidence Page",
             "",
             "Readable release evidence summary.",
-            "<!-- openclaw:human:end -->",
+            "<!-- carapace:human:end -->",
             "",
           ].join("\n"),
         }),
@@ -412,12 +412,12 @@ describe("searchMemoryWiki", () => {
           body: [
             "# Marker Heavy",
             "",
-            "<!-- openclaw:wiki:generated:start -->",
-            "openclaw body reference",
-            "<!-- openclaw:wiki:generated:end -->",
-            "<!-- openclaw:human:start -->",
-            "<!-- openclaw:human:end -->",
-            "<!-- openclaw:wiki:raw-source -->",
+            "<!-- carapace:wiki:generated:start -->",
+            "carapace body reference",
+            "<!-- carapace:wiki:generated:end -->",
+            "<!-- carapace:human:start -->",
+            "<!-- carapace:human:end -->",
+            "<!-- carapace:wiki:raw-source -->",
             "",
           ].join("\n"),
         }),
@@ -431,7 +431,7 @@ describe("searchMemoryWiki", () => {
             id: "entity.clean",
             title: "Clean",
           },
-          body: "# Clean\n\nopenclaw openclaw body reference\n",
+          body: "# Clean\n\ncarapace carapace body reference\n",
         }),
         "utf8",
       ),
@@ -439,23 +439,23 @@ describe("searchMemoryWiki", () => {
 
     const evidenceResults = await searchMemoryWiki({
       config,
-      query: "openclaw release",
+      query: "carapace release",
       maxResults: 10,
     });
     expect(evidenceResults.map((result) => result.path)).toEqual(["entities/evidence.md"]);
     expect(evidenceResults[0]?.snippet).toBe("Readable release evidence summary.");
 
-    const openClawResults = await searchMemoryWiki({
+    const carapaceResults = await searchMemoryWiki({
       config,
-      query: "openclaw",
+      query: "carapace",
       maxResults: 10,
     });
-    const paths = openClawResults.map((result) => result.path);
+    const paths = carapaceResults.map((result) => result.path);
     expect(paths).not.toContain("entities/marker-only.md");
     expect(
-      openClawResults.find((result) => result.path === "entities/clean.md")?.score,
+      carapaceResults.find((result) => result.path === "entities/clean.md")?.score,
     ).toBeGreaterThan(
-      openClawResults.find((result) => result.path === "entities/marker-heavy.md")?.score ?? 0,
+      carapaceResults.find((result) => result.path === "entities/marker-heavy.md")?.score ?? 0,
     );
   });
 
@@ -475,9 +475,9 @@ describe("searchMemoryWiki", () => {
           body: [
             "# Managed Content",
             "",
-            "<!-- openclaw:wiki:generated:start -->",
+            "<!-- carapace:wiki:generated:start -->",
             "Cobalt content remains searchable.",
-            "<!-- openclaw:wiki:generated:end -->",
+            "<!-- carapace:wiki:generated:end -->",
             "",
           ].join("\n"),
         }),
@@ -494,7 +494,7 @@ describe("searchMemoryWiki", () => {
           body: [
             "# Inline Marker",
             "",
-            "The literal <!-- openclaw:wiki:generated:start --> inline-needle stays searchable.",
+            "The literal <!-- carapace:wiki:generated:start --> inline-needle stays searchable.",
             "",
           ].join("\n"),
         }),
@@ -508,7 +508,7 @@ describe("searchMemoryWiki", () => {
 
     const inlineResults = await searchMemoryWiki({ config, query: "inline-needle" });
     expect(inlineResults.map((result) => result.path)).toEqual(["entities/inline-marker.md"]);
-    expect(inlineResults[0]?.snippet).toContain("<!-- openclaw:wiki:generated:start -->");
+    expect(inlineResults[0]?.snippet).toContain("<!-- carapace:wiki:generated:start -->");
   });
 
   it("matches pages when all query terms appear without an exact phrase", async () => {
@@ -528,7 +528,7 @@ describe("searchMemoryWiki", () => {
           "# Maintainer: Brad Groux",
           "",
           "## Agent Card",
-          "- Maintainer lane: CEO; Microsoft-facing OpenClaw maintainer",
+          "- Maintainer lane: CEO; Microsoft-facing Carapace maintainer",
           "",
           "## AI Notes",
           "- Main sample theme is Microsoft ecosystem adoption: Teams, M365, Azure, Foundry, tenants, and pilots.",
@@ -977,7 +977,7 @@ describe("searchMemoryWiki", () => {
         search: { backend: "shared", corpus: "all" },
       },
     });
-    // Partial manager as registered by @mem0/openclaw-mem0 <= 1.0.14.
+    // Partial manager as registered by @mem0/carapace-mem0 <= 1.0.14.
     const partialManager = {
       status: vi.fn().mockReturnValue({ backend: "builtin", provider: "builtin" }),
       probeEmbeddingAvailability: vi.fn().mockResolvedValue({ ok: true }),
@@ -1244,7 +1244,7 @@ describe("searchMemoryWiki", () => {
         "agent:secondary:visible-session": {
           sessionId: "visible-session",
           updatedAt: 1,
-          sessionFile: "/tmp/openclaw/visible-session.jsonl",
+          sessionFile: "/tmp/carapace/visible-session.jsonl",
         },
       },
     });
@@ -1365,14 +1365,14 @@ describe("searchMemoryWiki", () => {
       agents: {
         list: [{ id: "main", default: true }, { id: "secondary" }],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadCombinedSessionStoreForGatewayMock.mockReturnValue({
       storePath: "(test)",
       store: {
         global: {
           sessionId: "visible-session",
           updatedAt: 1,
-          sessionFile: "/tmp/openclaw/visible-session.jsonl",
+          sessionFile: "/tmp/carapace/visible-session.jsonl",
         },
       },
     });
@@ -1559,7 +1559,7 @@ describe("searchMemoryWiki", () => {
         "agent:secondary:main": {
           sessionId: "main",
           updatedAt: 1,
-          sessionFile: "/tmp/openclaw/main.jsonl",
+          sessionFile: "/tmp/carapace/main.jsonl",
         },
       },
     });
@@ -1609,7 +1609,7 @@ describe("searchMemoryWiki", () => {
         "agent:other:visible-session": {
           sessionId: "visible-session",
           updatedAt: 1,
-          sessionFile: "/tmp/openclaw/visible-session.jsonl",
+          sessionFile: "/tmp/carapace/visible-session.jsonl",
         },
       },
     });

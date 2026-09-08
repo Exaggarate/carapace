@@ -2,13 +2,13 @@
 import type {
   ChannelDeliveryStreamingConfig,
   MessageReceipt,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { ReplyToMode } from "carapace/plugin-sdk/config-contracts";
 import type {
   DmConfig,
   DmPolicy,
   GroupPolicy,
-  OpenClawConfig,
+  CarapaceConfig,
   SecretInput,
 } from "../runtime-api.js";
 
@@ -95,7 +95,7 @@ export type CoreConfig = {
   channels?: {
     "nextcloud-talk"?: NextcloudTalkConfig;
   };
-  gateway?: OpenClawConfig["gateway"];
+  gateway?: CarapaceConfig["gateway"];
   [key: string]: unknown;
 };
 

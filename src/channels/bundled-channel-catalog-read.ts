@@ -4,10 +4,10 @@
  * Loads channel metadata from generated package catalogs and bundled plugin package manifests.
  */
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import { resolveBundledPluginsDir } from "../plugins/bundled-dir.js";
 import type { PluginPackageChannel } from "../plugins/manifest.js";
 import { BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES } from "../plugins/official-external-plugin-bundled-catalogs.js";
@@ -19,7 +19,7 @@ import { getPluginCache } from "../plugins/plugin-cache.js";
 import type { BundledChannelCatalogEntry } from "./bundled-channel-catalog.types.js";
 
 type ChannelCatalogEntryLike = {
-  openclaw?: {
+  carapace?: {
     channel?: PluginPackageChannel;
   };
 };
@@ -27,12 +27,12 @@ type ChannelCatalogEntryLike = {
 const OFFICIAL_CHANNEL_CATALOG_RELATIVE_PATH = path.join("dist", "channel-catalog.json");
 
 function listPackageRoots(): string[] {
-  // Source checkouts and packaged installs can resolve OpenClaw from different roots; scan both
+  // Source checkouts and packaged installs can resolve Carapace from different roots; scan both
   // once so channel metadata works in dev, linked packages, and published CLI layouts.
   return uniqueStrings(
     [
-      resolveOpenClawPackageRootSync({ cwd: process.cwd() }),
-      resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url }),
+      resolveCarapacePackageRootSync({ cwd: process.cwd() }),
+      resolveCarapacePackageRootSync({ moduleUrl: import.meta.url }),
     ].filter((entry): entry is string => Boolean(entry)),
   );
 }
@@ -79,14 +79,14 @@ function readOfficialCatalogFileSync(): ChannelCatalogEntryLike[] {
 function isChannelCatalogEntryLike(
   entry: ChannelCatalogEntryLike | PluginPackageChannel,
 ): entry is ChannelCatalogEntryLike {
-  return "openclaw" in entry;
+  return "carapace" in entry;
 }
 
 function toBundledChannelEntry(
   entry: ChannelCatalogEntryLike | PluginPackageChannel,
 ): BundledChannelCatalogEntry | null {
   const channel: PluginPackageChannel | undefined = isChannelCatalogEntryLike(entry)
-    ? entry.openclaw?.channel
+    ? entry.carapace?.channel
     : entry;
   const id = normalizeOptionalLowercaseString(channel?.id);
   if (!id || !channel) {

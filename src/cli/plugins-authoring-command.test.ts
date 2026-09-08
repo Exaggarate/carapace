@@ -3,7 +3,7 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { publicPluginSdkSubpaths } from "../../scripts/lib/plugin-sdk-entries.mjs";
@@ -81,7 +81,7 @@ function writeSourceToolPluginProject(params: {
       {
         name: params.packageName,
         type: "module",
-        openclaw: { extensions: ["./src/index.ts"] },
+        carapace: { extensions: ["./src/index.ts"] },
       },
       null,
       2,
@@ -90,7 +90,7 @@ function writeSourceToolPluginProject(params: {
   const entryPath = path.join(sourceDir, "index.ts");
   fs.writeFileSync(
     entryPath,
-    `import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+    `import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 
 export default defineToolPlugin({
   id: ${JSON.stringify(params.pluginId)},
@@ -112,11 +112,11 @@ export default defineToolPlugin({
 
 describe("plugin authoring commands", () => {
   beforeAll(async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-source-warm-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-source-warm-"));
     try {
       const entryPath = writeSourceToolPluginProject({
         tmpDir,
-        packageName: "openclaw-plugin-source-warm",
+        packageName: "carapace-plugin-source-warm",
         pluginId: "source-warm",
         toolName: "source_warm_echo",
       });
@@ -214,14 +214,14 @@ describe("plugin authoring commands", () => {
         metadata,
         entry: "./src/index.ts",
         manifest,
-        packageManifest: { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } },
+        packageManifest: { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } },
       }),
     ).toEqual([]);
   });
 
   it("drops stale manifest-owned tool metadata when no generated metadata remains", () => {
     const metadata = createDemoMetadata();
-    const packageManifest = { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } };
+    const packageManifest = { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } };
     const manifest = buildToolPluginManifest({
       metadata,
       packageManifest,
@@ -250,13 +250,13 @@ describe("plugin authoring commands", () => {
       buildToolPluginPackageManifest({
         packageManifest: {
           name: "demo",
-          openclaw: { setupEntry: "./setup.ts", extensions: ["./src/other.ts"] },
+          carapace: { setupEntry: "./setup.ts", extensions: ["./src/other.ts"] },
         },
         entry: "./src/index.ts",
       }),
     ).toEqual({
       name: "demo",
-      openclaw: {
+      carapace: {
         setupEntry: "./setup.ts",
         extensions: ["./src/other.ts", "./src/index.ts"],
       },
@@ -265,7 +265,7 @@ describe("plugin authoring commands", () => {
 
   it("validates manifest tools and package entry metadata", () => {
     const metadata = createDemoMetadata();
-    const packageManifest = { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } };
+    const packageManifest = { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } };
 
     expect(
       validateToolPluginProject({
@@ -278,10 +278,10 @@ describe("plugin authoring commands", () => {
   });
 
   it("emits a stable JSON validation result without human output", async () => {
-    const tmpDir = tempDirs.make("openclaw-plugin-valid-json-");
+    const tmpDir = tempDirs.make("carapace-plugin-valid-json-");
     const entryPath = writeSourceToolPluginProject({
       tmpDir,
-      packageName: "openclaw-plugin-valid-json",
+      packageName: "carapace-plugin-valid-json",
       pluginId: "valid-json",
       toolName: "valid_json_echo",
     });
@@ -305,7 +305,7 @@ describe("plugin authoring commands", () => {
   });
 
   it("keeps validation errors on stderr and sanitizes JSON paths", async () => {
-    const homeDir = tempDirs.make("openclaw-plugin-invalid-json-home-");
+    const homeDir = tempDirs.make("carapace-plugin-invalid-json-home-");
     const rootDir = path.join(homeDir, "plugins", "invalid-json");
     fs.mkdirSync(rootDir, { recursive: true });
     fs.writeFileSync(path.join(rootDir, "package.json"), "{}\n");
@@ -318,7 +318,7 @@ describe("plugin authoring commands", () => {
 
     try {
       await expect(
-        withEnvAsync({ OPENCLAW_HOME: homeDir }, async () => {
+        withEnvAsync({ CARAPACE_HOME: homeDir }, async () => {
           await runPluginsValidateCommand({ root: rootDir, json: true });
         }),
       ).rejects.toThrow("expected runtime exit 1");
@@ -326,11 +326,11 @@ describe("plugin authoring commands", () => {
       expect(writeJson).toHaveBeenCalledWith({
         valid: false,
         errors: [
-          "plugin manifest not found: $OPENCLAW_HOME/plugins/invalid-json/openclaw.plugin.json",
+          "plugin manifest not found: $CARAPACE_HOME/plugins/invalid-json/carapace.plugin.json",
         ],
       });
       expect(error).toHaveBeenCalledWith(
-        `plugin manifest not found: ${rootDir}/openclaw.plugin.json`,
+        `plugin manifest not found: ${rootDir}/carapace.plugin.json`,
       );
       expect(log).not.toHaveBeenCalled();
       expect(exit).toHaveBeenCalledWith(1, { resetStream: process.stderr });
@@ -345,16 +345,16 @@ describe("plugin authoring commands", () => {
   it.each(["validate", "build --check"] as const)(
     "accepts reordered JSON object keys without rewriting files in %s",
     async (command) => {
-      const tmpDir = tempDirs.make("openclaw-plugin-reordered-json-");
+      const tmpDir = tempDirs.make("carapace-plugin-reordered-json-");
       const entryPath = writeSourceToolPluginProject({
         tmpDir,
-        packageName: "openclaw-plugin-reordered-json",
+        packageName: "carapace-plugin-reordered-json",
         pluginId: "reordered-json",
         toolName: "reordered_json_echo",
       });
       await runPluginsBuildCommand({ root: tmpDir, entry: entryPath });
 
-      const manifestPath = path.join(tmpDir, "openclaw.plugin.json");
+      const manifestPath = path.join(tmpDir, "carapace.plugin.json");
       const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Record<string, unknown>;
       const configSchema = manifest.configSchema as Record<string, unknown>;
       fs.writeFileSync(
@@ -408,7 +408,7 @@ describe("plugin authoring commands", () => {
       name: "demo_extra",
     };
     const metadataWithTools = { ...metadata, tools: [...metadata.tools, extraTool] };
-    const packageManifest = { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } };
+    const packageManifest = { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } };
     const generated = buildToolPluginManifest({ metadata: metadataWithTools, packageManifest });
     const manifest = {
       ...generated,
@@ -422,7 +422,7 @@ describe("plugin authoring commands", () => {
         manifest,
         packageManifest,
       }),
-    ).toEqual(["openclaw.plugin.json generated metadata is stale. Run openclaw plugins build."]);
+    ).toEqual(["carapace.plugin.json generated metadata is stale. Run carapace plugins build."]);
   });
 
   it("projects undefined TypeBox options into the persisted manifest shape", () => {
@@ -452,7 +452,7 @@ describe("plugin authoring commands", () => {
     expect(Object.hasOwn(runtimeSchema, "description")).toBe(true);
     expect(Object.hasOwn(runtimeProperties.value as object, "description")).toBe(true);
 
-    const packageManifest = { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } };
+    const packageManifest = { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } };
     const manifest = buildToolPluginManifest({ metadata, packageManifest });
     const persistedSchema = manifest.configSchema as Record<string, unknown>;
     const persistedProperties = persistedSchema.properties as Record<string, unknown>;
@@ -489,7 +489,7 @@ describe("plugin authoring commands", () => {
     },
   ])("compares $label in generated schemas", ({ expected, actual, stale }) => {
     const metadata = createDemoMetadata();
-    const packageManifest = { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } };
+    const packageManifest = { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } };
     const metadataWithSchema = {
       ...metadata,
       configSchema: { type: "object", properties: JSON.parse(expected) as Record<string, unknown> },
@@ -509,14 +509,14 @@ describe("plugin authoring commands", () => {
       }),
     ).toEqual(
       stale
-        ? ["openclaw.plugin.json generated metadata is stale. Run openclaw plugins build."]
+        ? ["carapace.plugin.json generated metadata is stale. Run carapace plugins build."]
         : [],
     );
   });
 
   it("still rejects a changed generated config schema", () => {
     const metadata = createDemoMetadata();
-    const packageManifest = { version: "1.2.3", openclaw: { extensions: ["./src/index.ts"] } };
+    const packageManifest = { version: "1.2.3", carapace: { extensions: ["./src/index.ts"] } };
     const generated = buildToolPluginManifest({ metadata, packageManifest });
     const manifest = {
       ...generated,
@@ -533,14 +533,14 @@ describe("plugin authoring commands", () => {
         manifest,
         packageManifest,
       }),
-    ).toEqual(["openclaw.plugin.json generated metadata is stale. Run openclaw plugins build."]);
+    ).toEqual(["carapace.plugin.json generated metadata is stale. Run carapace plugins build."]);
   });
 
   it("rejects a missing generated manifest without changing package metadata", async () => {
-    const tmpDir = tempDirs.make("openclaw-plugin-missing-generated-manifest-");
+    const tmpDir = tempDirs.make("carapace-plugin-missing-generated-manifest-");
     const entryPath = writeSourceToolPluginProject({
       tmpDir,
-      packageName: "openclaw-plugin-missing-generated-manifest",
+      packageName: "carapace-plugin-missing-generated-manifest",
       pluginId: "missing-generated-manifest",
       toolName: "missing_generated_manifest_echo",
     });
@@ -556,10 +556,10 @@ describe("plugin authoring commands", () => {
         runPluginsBuildCommand({ root: tmpDir, entry: entryPath, check: true }),
       ).rejects.toThrow("runtime exit 1");
       expect(error).toHaveBeenCalledWith(
-        "Generated plugin metadata is out of date. Run openclaw plugins build.",
+        "Generated plugin metadata is out of date. Run carapace plugins build.",
       );
       expect(fs.readFileSync(packagePath, "utf8")).toBe(packageBefore);
-      expect(fs.existsSync(path.join(tmpDir, "openclaw.plugin.json"))).toBe(false);
+      expect(fs.existsSync(path.join(tmpDir, "carapace.plugin.json"))).toBe(false);
     } finally {
       exit.mockRestore();
       error.mockRestore();
@@ -578,17 +578,17 @@ describe("plugin authoring commands", () => {
           configSchema: {},
           contracts: { tools: ["other_tool"] },
         },
-        packageManifest: { openclaw: { extensions: ["./src/index.ts"] } },
+        packageManifest: { carapace: { extensions: ["./src/index.ts"] } },
       }),
     ).toEqual([
-      "openclaw.plugin.json generated metadata is stale. Run openclaw plugins build.",
-      "openclaw.plugin.json contracts.tools is missing: demo_echo",
-      "openclaw.plugin.json contracts.tools has no matching defineToolPlugin tool: other_tool",
+      "carapace.plugin.json generated metadata is stale. Run carapace plugins build.",
+      "carapace.plugin.json contracts.tools is missing: demo_echo",
+      "carapace.plugin.json contracts.tools has no matching defineToolPlugin tool: other_tool",
     ]);
   });
 
   it("reports missing entries with an author-facing path", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-missing-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-missing-"));
 
     await expect(
       loadToolPlugin({ rootDir: tmpDir, entryPath: path.join(tmpDir, "dist/index.js") }),
@@ -596,11 +596,11 @@ describe("plugin authoring commands", () => {
   });
 
   it("throws a user-friendly error when package.json is malformed JSON", async () => {
-    const tmpDir = tempDirs.make("openclaw-plugin-bad-json-");
+    const tmpDir = tempDirs.make("carapace-plugin-bad-json-");
     const packagePath = path.join(tmpDir, "package.json");
     const entryPath = writeSourceToolPluginProject({
       tmpDir,
-      packageName: "openclaw-plugin-bad-json",
+      packageName: "carapace-plugin-bad-json",
       pluginId: "bad-json",
       toolName: "bad_json_echo",
     });
@@ -611,11 +611,11 @@ describe("plugin authoring commands", () => {
     );
   });
 
-  it("loads source entries that import the OpenClaw plugin SDK package subpath", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-source-"));
+  it("loads source entries that import the Carapace plugin SDK package subpath", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-source-"));
     const entryPath = writeSourceToolPluginProject({
       tmpDir,
-      packageName: "openclaw-plugin-source-demo",
+      packageName: "carapace-plugin-source-demo",
       pluginId: "source-demo",
       toolName: "source_echo",
     });
@@ -630,11 +630,11 @@ describe("plugin authoring commands", () => {
   });
 
   it("finishes a build from an absolute root after the launch directory is removed", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-deleted-cwd-build-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-deleted-cwd-build-"));
     const packagePath = path.join(tmpDir, "package.json");
     const entryPath = writeSourceToolPluginProject({
       tmpDir,
-      packageName: "openclaw-plugin-deleted-cwd-build",
+      packageName: "carapace-plugin-deleted-cwd-build",
       pluginId: "deleted-cwd-build",
       toolName: "deleted_cwd_echo",
     });
@@ -659,8 +659,8 @@ describe("plugin authoring commands", () => {
     try {
       await runPluginsBuildCommand({ root: tmpDir, entry: entryPath });
 
-      expect(fs.existsSync(path.join(tmpDir, "openclaw.plugin.json"))).toBe(true);
-      expect(log).toHaveBeenCalledWith(`Wrote ${path.join(tmpDir, "openclaw.plugin.json")}`);
+      expect(fs.existsSync(path.join(tmpDir, "carapace.plugin.json"))).toBe(true);
+      expect(log).toHaveBeenCalledWith(`Wrote ${path.join(tmpDir, "carapace.plugin.json")}`);
       expect(log).toHaveBeenCalledWith(`Updated ${packagePath}`);
       expect(cwdRemoved).toBe(true);
     } finally {
@@ -672,12 +672,12 @@ describe("plugin authoring commands", () => {
   });
 
   it("builds and checks metadata through a symlink project root", async () => {
-    const tmpDir = tempDirs.make("openclaw-plugin-symlink-root-");
+    const tmpDir = tempDirs.make("carapace-plugin-symlink-root-");
     const projectDir = path.join(tmpDir, "project");
     fs.mkdirSync(projectDir);
     writeSourceToolPluginProject({
       tmpDir: projectDir,
-      packageName: "openclaw-plugin-symlink-root",
+      packageName: "carapace-plugin-symlink-root",
       pluginId: "symlink-root",
       toolName: "symlink_root_echo",
     });
@@ -691,10 +691,10 @@ describe("plugin authoring commands", () => {
       expect(
         JSON.parse(fs.readFileSync(path.join(projectDir, "package.json"), "utf8")),
       ).toMatchObject({
-        openclaw: { extensions: ["./src/index.ts"] },
+        carapace: { extensions: ["./src/index.ts"] },
       });
       expect(
-        JSON.parse(fs.readFileSync(path.join(projectDir, "openclaw.plugin.json"), "utf8")),
+        JSON.parse(fs.readFileSync(path.join(projectDir, "carapace.plugin.json"), "utf8")),
       ).toMatchObject({
         id: "symlink-root",
         contracts: { tools: ["symlink_root_echo"] },
@@ -709,11 +709,11 @@ describe("plugin authoring commands", () => {
   it.each(["write", "rename"] as const)(
     "keeps the project intact when package publication fails during %s",
     async (failure) => {
-      const tmpDir = tempDirs.make("openclaw-plugin-build-failure-");
+      const tmpDir = tempDirs.make("carapace-plugin-build-failure-");
       const packagePath = path.join(tmpDir, "package.json");
       const entryPath = writeSourceToolPluginProject({
         tmpDir,
-        packageName: "openclaw-plugin-build-failure",
+        packageName: "carapace-plugin-build-failure",
         pluginId: "build-failure",
         toolName: "build_failure_echo",
       });
@@ -778,7 +778,7 @@ describe("plugin authoring commands", () => {
   );
 
   it("finishes init with an absolute directory after the launch directory is removed", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-deleted-cwd-init-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-deleted-cwd-init-"));
     const projectDir = path.join(tmpDir, "demo");
     const log = vi.spyOn(defaultRuntime, "log").mockImplementation(() => {});
     const cwd = vi.spyOn(process, "cwd").mockImplementation(() => {
@@ -798,7 +798,7 @@ describe("plugin authoring commands", () => {
   });
 
   it("scaffolds a dist-entry tool plugin project", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-init-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-init-"));
     const projectDir = path.join(tmpDir, "stock-quotes");
 
     await runPluginsInitCommand("stock-quotes", {
@@ -816,30 +816,30 @@ describe("plugin authoring commands", () => {
         typebox: "^1.1.38",
       },
       peerDependencies: {
-        openclaw: ">=2026.5.17",
+        carapace: ">=2026.5.17",
       },
       devDependencies: {
-        openclaw: "latest",
+        carapace: "latest",
         typescript: "^5.9.0",
         vitest: "^3.2.0",
       },
       scripts: {
-        "plugin:build": "npm run build && openclaw plugins build --entry ./dist/index.js",
-        "plugin:validate": "npm run build && openclaw plugins validate --entry ./dist/index.js",
+        "plugin:build": "npm run build && carapace plugins build --entry ./dist/index.js",
+        "plugin:validate": "npm run build && carapace plugins validate --entry ./dist/index.js",
         test: "vitest run --config ./vitest.config.ts",
       },
-      openclaw: {
+      carapace: {
         extensions: ["./dist/index.js"],
         compat: {
           pluginApi: ">=2026.5.17",
         },
         build: {
-          openclawVersion: VERSION,
+          carapaceVersion: VERSION,
         },
       },
     });
     expect(
-      JSON.parse(fs.readFileSync(path.join(projectDir, "openclaw.plugin.json"), "utf8")),
+      JSON.parse(fs.readFileSync(path.join(projectDir, "carapace.plugin.json"), "utf8")),
     ).toMatchObject({
       id: "stock-quotes",
       name: 'Stock "Quotes"',
@@ -859,7 +859,7 @@ describe("plugin authoring commands", () => {
   });
 
   it("scaffolds a provider plugin project with ClawHub validation and release metadata", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-provider-init-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-provider-init-"));
     const projectDir = path.join(tmpDir, "plugin-init-test");
 
     await runPluginsInitCommand("plugin-init-test", {
@@ -872,25 +872,25 @@ describe("plugin authoring commands", () => {
       fs.readFileSync(path.join(projectDir, "package.json"), "utf8"),
     );
     expect(packageManifest).toMatchObject({
-      name: "openclaw-plugin-plugin-init-test",
+      name: "carapace-plugin-plugin-init-test",
       scripts: {
         build: "tsc -p tsconfig.json",
         test: "vitest run --config ./vitest.config.ts",
         validate: "npm run build && clawhub package validate . --out .clawhub-validation",
       },
       peerDependencies: {
-        openclaw: `>=${VERSION}`,
+        carapace: `>=${VERSION}`,
       },
       devDependencies: {
         clawhub: "latest",
-        openclaw: "latest",
+        carapace: "latest",
         typescript: "^5.9.0",
         vitest: "^3.2.0",
       },
-      openclaw: {
+      carapace: {
         extensions: ["./dist/index.js"],
         install: {
-          clawhubSpec: "clawhub:openclaw-plugin-plugin-init-test",
+          clawhubSpec: "clawhub:carapace-plugin-plugin-init-test",
           defaultChoice: "clawhub",
           minHostVersion: `>=${VERSION}`,
         },
@@ -898,7 +898,7 @@ describe("plugin authoring commands", () => {
           pluginApi: `>=${VERSION}`,
         },
         build: {
-          openclawVersion: VERSION,
+          carapaceVersion: VERSION,
         },
         release: {
           publishToClawHub: true,
@@ -909,7 +909,7 @@ describe("plugin authoring commands", () => {
     expect(packageManifest.scripts).not.toHaveProperty("plugin:validate");
 
     const manifest = JSON.parse(
-      fs.readFileSync(path.join(projectDir, "openclaw.plugin.json"), "utf8"),
+      fs.readFileSync(path.join(projectDir, "carapace.plugin.json"), "utf8"),
     );
     expect(manifest).toMatchObject({
       id: "plugin-init-test",
@@ -934,12 +934,12 @@ describe("plugin authoring commands", () => {
     const indexSource = fs.readFileSync(path.join(projectDir, "src/index.ts"), "utf8");
     expect(indexSource).toContain("definePluginEntry");
     expect(indexSource).toContain("api.registerProvider");
-    for (const [, subpath] of indexSource.matchAll(/from "openclaw\/plugin-sdk\/([^"]+)"/g)) {
+    for (const [, subpath] of indexSource.matchAll(/from "carapace\/plugin-sdk\/([^"]+)"/g)) {
       expect(publicPluginSdkSubpaths).toContain(subpath);
     }
 
     expect(fs.readFileSync(path.join(projectDir, "src/index.test.ts"), "utf8")).toContain(
-      "OpenClawPluginApi",
+      "CarapacePluginApi",
     );
     expect(fs.readFileSync(path.join(projectDir, "vitest.config.ts"), "utf8")).toContain(
       'include: ["src/**/*.test.ts"]',
@@ -958,7 +958,7 @@ describe("plugin authoring commands", () => {
     expect(workflow).not.toContain("secrets: inherit");
     expect(workflow).toContain("workflow_dispatch:");
     expect(workflow).toContain(
-      "openclaw/clawhub/.github/workflows/package-publish.yml@9d49df109d4ad3dc8a6ecf05d26b39f46d294721",
+      "carapace/clawhub/.github/workflows/package-publish.yml@9d49df109d4ad3dc8a6ecf05d26b39f46d294721",
     );
   });
 });

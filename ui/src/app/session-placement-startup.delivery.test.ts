@@ -204,7 +204,7 @@ describe("application placement delivery recovery", () => {
                 {
                   role: evidence === "assistant" ? "assistant" : "user",
                   content: [{ type: "text", text: "fix the cloud task" }],
-                  __openclaw: {
+                  __carapace: {
                     idempotencyKey: evidence === "same-text" ? "other:user" : "message-stable:user",
                   },
                 },
@@ -220,7 +220,7 @@ describe("application placement delivery recovery", () => {
                     message: {
                       role: "user",
                       content: "fix the cloud task",
-                      __openclaw: { id: "pending:accepted-initial-input" },
+                      __carapace: { id: "pending:accepted-initial-input" },
                     },
                   },
                 ]
@@ -335,7 +335,7 @@ describe("application placement delivery recovery", () => {
         }
         expect(startup.get(input.recovery.sessionKey)).toBeNull();
         history.resolve({
-          messages: [{ role: "user", __openclaw: { idempotencyKey: "message-stable:user" } }],
+          messages: [{ role: "user", __carapace: { idempotencyKey: "message-stable:user" } }],
         });
         await flushStartupMicrotasks();
         expect(

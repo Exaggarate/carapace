@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { modelsHandlers } from "../gateway/server-methods/models.js";
 import type { GatewayRequestContext, RespondFn } from "../gateway/server-methods/types.js";
 import { registerGatewayModelCatalogPrivateAccess } from "../gateway/server-model-catalog-auth.js";
@@ -29,7 +29,7 @@ const { makeTempDir, retireAfterTest } = usePreparedCatalogWorkerFixtures();
 
 describe("prepared model catalog worker plugin scope", () => {
   it("keeps catalog contributors on the models.list route without importing unrelated plugins", async () => {
-    const root = makeTempDir("openclaw-model-catalog-scope-worker-");
+    const root = makeTempDir("carapace-model-catalog-scope-worker-");
     const stateDir = path.join(root, "state");
     const agentDir = path.join(stateDir, "agents", "main", "agent");
     const workspaceDir = path.join(root, "workspace");
@@ -58,12 +58,12 @@ describe("prepared model catalog worker plugin scope", () => {
           [UNRELATED_PLUGIN_ID]: { enabled: true },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const env = {
       ...process.env,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_WORKER_CATALOG_MARKER: marker,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_WORKER_CATALOG_MARKER: marker,
       [UNRELATED_PLUGIN_WORKER_MARKER_ENV]: unrelatedMarker,
       [REF_ONLY_API_ENV]: "ref-only-api-secret-not-real",
       [REF_ONLY_TOKEN_ENV]: "ref-only-token-secret-not-real",

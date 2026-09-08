@@ -75,8 +75,8 @@ describe("diagnostics-otel gateway runtime", () => {
           "qa-channel": {
             enabled: true,
             baseUrl,
-            botUserId: "openclaw",
-            botDisplayName: "OpenClaw QA",
+            botUserId: "carapace",
+            botDisplayName: "Carapace QA",
             allowFrom: ["*"],
             pollTimeoutMs: 250,
           },
@@ -84,7 +84,7 @@ describe("diagnostics-otel gateway runtime", () => {
         messages: {
           visibleReplies: "automatic" as const,
           groupChat: {
-            mentionPatterns: ["\\b@?openclaw\\b"],
+            mentionPatterns: ["\\b@?carapace\\b"],
             visibleReplies: "automatic" as const,
           },
         },
@@ -264,10 +264,10 @@ describe("diagnostics-otel gateway runtime", () => {
         () => {
           const toolError = activeReceiver.capturedSpans.find(
             (span) =>
-              span.name === "openclaw.tool.execution" &&
+              span.name === "carapace.tool.execution" &&
               span.statusCode === 2 &&
-              span.attributes["openclaw.toolName"] === "read" &&
-              Boolean(span.attributes["openclaw.errorCategory"]),
+              span.attributes["carapace.toolName"] === "read" &&
+              Boolean(span.attributes["carapace.errorCategory"]),
           );
           if (!toolError?.traceId) {
             return undefined;
@@ -275,16 +275,16 @@ describe("diagnostics-otel gateway runtime", () => {
           const sameTrace = activeReceiver.capturedSpans.filter(
             (span) => span.traceId === toolError.traceId,
           );
-          const runs = sameTrace.filter((span) => span.name === "openclaw.run");
-          const harnesses = sameTrace.filter((span) => span.name === "openclaw.harness.run");
-          const modelCalls = sameTrace.filter((span) => span.name === "openclaw.model.call");
+          const runs = sameTrace.filter((span) => span.name === "carapace.run");
+          const harnesses = sameTrace.filter((span) => span.name === "carapace.harness.run");
+          const modelCalls = sameTrace.filter((span) => span.name === "carapace.model.call");
           // QA-channel inbound replies use the channel-owned direct callback, not
           // deliver-core; the outbound bus receipt above is the delivery proof.
           const terminal = sameTrace.find(
             (span) =>
-              span.name === "openclaw.message.processed" &&
-              span.attributes["openclaw.channel"] === "qa-channel" &&
-              span.attributes["openclaw.outcome"] === "completed",
+              span.name === "carapace.message.processed" &&
+              span.attributes["carapace.channel"] === "qa-channel" &&
+              span.attributes["carapace.outcome"] === "completed",
           );
           return runs.length >= 1 && harnesses.length >= 1 && modelCalls.length >= 2 && terminal
             ? { harnesses, modelCalls, runs, sameTrace, terminal, toolError }
@@ -306,20 +306,20 @@ describe("diagnostics-otel gateway runtime", () => {
         expect(expectResolvedParent(harness, failureSpansById)).toBe(failureEvidence.terminal);
       }
       for (const run of failureEvidence.runs) {
-        expect(expectResolvedParent(run, failureSpansById).name).toBe("openclaw.harness.run");
+        expect(expectResolvedParent(run, failureSpansById).name).toBe("carapace.harness.run");
       }
       for (const modelCall of failureEvidence.modelCalls) {
-        expect(expectResolvedParent(modelCall, failureSpansById).name).toBe("openclaw.run");
+        expect(expectResolvedParent(modelCall, failureSpansById).name).toBe("carapace.run");
       }
       expect(expectResolvedParent(failureEvidence.toolError, failureSpansById).name).toBe(
-        "openclaw.run",
+        "carapace.run",
       );
 
       const successEvidence = activeReceiver.capturedSpans.find(
         (span) =>
-          span.name === "openclaw.tool.execution" &&
+          span.name === "carapace.tool.execution" &&
           span.statusCode !== 2 &&
-          span.attributes["openclaw.toolName"] === "read" &&
+          span.attributes["carapace.toolName"] === "read" &&
           span.traceId !== failureEvidence.toolError.traceId,
       );
       expect(successEvidence).toBeTruthy();
@@ -328,13 +328,13 @@ describe("diagnostics-otel gateway runtime", () => {
       );
       const successTerminal = successTrace.find(
         (span) =>
-          span.name === "openclaw.message.processed" &&
-          span.attributes["openclaw.channel"] === "qa-channel" &&
-          span.attributes["openclaw.outcome"] === "completed",
+          span.name === "carapace.message.processed" &&
+          span.attributes["carapace.channel"] === "qa-channel" &&
+          span.attributes["carapace.outcome"] === "completed",
       );
-      const successHarnesses = successTrace.filter((span) => span.name === "openclaw.harness.run");
-      const successRuns = successTrace.filter((span) => span.name === "openclaw.run");
-      const successModelCalls = successTrace.filter((span) => span.name === "openclaw.model.call");
+      const successHarnesses = successTrace.filter((span) => span.name === "carapace.harness.run");
+      const successRuns = successTrace.filter((span) => span.name === "carapace.run");
+      const successModelCalls = successTrace.filter((span) => span.name === "carapace.model.call");
       expect(successTerminal).toBeDefined();
       expect(successHarnesses.length).toBeGreaterThanOrEqual(1);
       expect(successRuns.length).toBeGreaterThanOrEqual(1);
@@ -345,12 +345,12 @@ describe("diagnostics-otel gateway runtime", () => {
         expect(expectResolvedParent(harness, successSpansById)).toBe(successTerminal);
       }
       for (const run of successRuns) {
-        expect(expectResolvedParent(run, successSpansById).name).toBe("openclaw.harness.run");
+        expect(expectResolvedParent(run, successSpansById).name).toBe("carapace.harness.run");
       }
       for (const modelCall of successModelCalls) {
-        expect(expectResolvedParent(modelCall, successSpansById).name).toBe("openclaw.run");
+        expect(expectResolvedParent(modelCall, successSpansById).name).toBe("carapace.run");
       }
-      expect(expectResolvedParent(successEvidence!, successSpansById).name).toBe("openclaw.run");
+      expect(expectResolvedParent(successEvidence!, successSpansById).name).toBe("carapace.run");
 
       const llmTaskConversation = { id: "qa-plugin-usage", kind: "direct" as const };
       const llmTaskSpanCursor = activeReceiver.capturedSpans.length;
@@ -383,49 +383,49 @@ describe("diagnostics-otel gateway runtime", () => {
         () =>
           activeReceiver.capturedSpans.find(
             (span) =>
-              span.name === "openclaw.model.usage" &&
-              span.attributes["openclaw.plugin"] === "llm-task",
+              span.name === "carapace.model.usage" &&
+              span.attributes["carapace.plugin"] === "llm-task",
           ),
         45_000,
         () => activeReceiver.capturedSpans,
       );
       expect(llmTaskUsage.attributes).toMatchObject({
-        "openclaw.tokens.input": 64,
-        "openclaw.tokens.output": 24,
-        "openclaw.tokens.total": 88,
+        "carapace.tokens.input": 64,
+        "carapace.tokens.output": 24,
+        "carapace.tokens.total": 88,
       });
       expect(
         activeReceiver.capturedSpans
           .slice(llmTaskSpanCursor)
           .filter(
             (span) =>
-              span.name === "openclaw.model.usage" &&
-              span.attributes["openclaw.channel"] === "unknown" &&
-              span.attributes["openclaw.tokens.input"] === 64 &&
-              span.attributes["openclaw.tokens.output"] === 24 &&
-              span.attributes["openclaw.tokens.total"] === 88,
+              span.name === "carapace.model.usage" &&
+              span.attributes["carapace.channel"] === "unknown" &&
+              span.attributes["carapace.tokens.input"] === 64 &&
+              span.attributes["carapace.tokens.output"] === 24 &&
+              span.attributes["carapace.tokens.total"] === 88,
           )
-          .map((span) => span.attributes["openclaw.plugin"]),
+          .map((span) => span.attributes["carapace.plugin"]),
       ).toEqual(["llm-task"]);
       const attributedUsageSpans = activeReceiver.capturedSpans.filter(
-        (span) => span.attributes["openclaw.plugin"] !== undefined,
+        (span) => span.attributes["carapace.plugin"] !== undefined,
       );
       expect(
         attributedUsageSpans.map((span) => ({
           name: span.name,
-          pluginId: span.attributes["openclaw.plugin"],
+          pluginId: span.attributes["carapace.plugin"],
         })),
-      ).toEqual([{ name: "openclaw.model.usage", pluginId: "llm-task" }]);
+      ).toEqual([{ name: "carapace.model.usage", pluginId: "llm-task" }]);
 
       const exportedBodies = Object.values(activeReceiver.capturedBodyText).flat().join("\n");
       expect(exportedBodies).not.toContain("qa-plugin-usage-secret-sentinel");
       console.info(
         `[otel-gateway-runtime] plugin usage proof ${JSON.stringify({
           spanName: llmTaskUsage.name,
-          pluginId: llmTaskUsage.attributes["openclaw.plugin"],
-          inputTokens: llmTaskUsage.attributes["openclaw.tokens.input"],
-          outputTokens: llmTaskUsage.attributes["openclaw.tokens.output"],
-          totalTokens: llmTaskUsage.attributes["openclaw.tokens.total"],
+          pluginId: llmTaskUsage.attributes["carapace.plugin"],
+          inputTokens: llmTaskUsage.attributes["carapace.tokens.input"],
+          outputTokens: llmTaskUsage.attributes["carapace.tokens.output"],
+          totalTokens: llmTaskUsage.attributes["carapace.tokens.total"],
           attributedUsageSpanCount: attributedUsageSpans.length,
           requestContentPresent: exportedBodies.includes("qa-plugin-usage-secret-sentinel"),
         })}`,

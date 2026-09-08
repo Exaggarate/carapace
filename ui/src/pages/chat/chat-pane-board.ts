@@ -178,7 +178,7 @@ export abstract class ChatPaneBoard extends ChatPaneHistory {
       board.available &&
       this.state &&
       isSidebarSlotVisible(this.state.sidebarLayout, "dashboard") &&
-      !customElements.get("openclaw-board-view")
+      !customElements.get("carapace-board-view")
     ) {
       void ensureBoardViewElement().then((loaded) => {
         if (loaded) {

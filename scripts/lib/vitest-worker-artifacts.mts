@@ -36,8 +36,8 @@ export const vitestWorkerDeclarationEntries = {
   "node-host/config-runtime.test-support": "src/node-host/config-runtime.test-support.ts",
   "skills/library/persistence-runtime.test-support":
     "src/skills/library/persistence-runtime.test-support.ts",
-  "state/openclaw-state-lease-runtime.test-support":
-    "src/state/openclaw-state-lease-runtime.test-support.ts",
+  "state/carapace-state-lease-runtime.test-support":
+    "src/state/carapace-state-lease-runtime.test-support.ts",
   "tui/tui-pty-runtime-test-support": "src/tui/tui-pty-runtime-test-support.ts",
 };
 
@@ -59,8 +59,8 @@ const declarations = new Map(
     entry,
   ]),
 );
-export const VITEST_WORKER_PREPARE_REQUEST = "openclaw:prepare-test-subprocesses";
-export const VITEST_WORKER_PREPARE_REPLY = "openclaw:test-subprocesses-prepared";
+export const VITEST_WORKER_PREPARE_REQUEST = "carapace:prepare-test-subprocesses";
+export const VITEST_WORKER_PREPARE_REPLY = "carapace:test-subprocesses-prepared";
 
 export async function verifyVitestWorkerArtifacts(
   directory: string,

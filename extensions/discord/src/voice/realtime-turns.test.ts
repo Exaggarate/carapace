@@ -1,5 +1,5 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { RealtimeVoiceAgentControlResult } from "openclaw/plugin-sdk/realtime-voice";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { RealtimeVoiceAgentControlResult } from "carapace/plugin-sdk/realtime-voice";
 import type { MockCallSource } from "./manager.e2e.test-support.js";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 
@@ -174,7 +174,7 @@ defineDiscordVoiceTests(
         sessionId: "embedded-active",
         active: true,
         aborted: true,
-        message: "Cancelled the active OpenClaw run.",
+        message: "Cancelled the active Carapace run.",
         speak: true,
         show: true,
         suppress: false,
@@ -191,17 +191,17 @@ defineDiscordVoiceTests(
         }),
       );
       expect(agentCommandMock).not.toHaveBeenCalled();
-      await vi.waitFor(() => expectUserMessageIncludes("Cancelled the active OpenClaw run."));
+      await vi.waitFor(() => expectUserMessageIncludes("Cancelled the active Carapace run."));
       expect(realtimeSessionMock.handleBargeIn).not.toHaveBeenCalled();
       expect(textToSpeechMock).not.toHaveBeenCalledWith(
-        expect.objectContaining({ text: "Cancelled the active OpenClaw run." }),
+        expect.objectContaining({ text: "Cancelled the active Carapace run." }),
       );
 
       const stopCallsAfterControl = player.stop.mock.calls.length;
-      bridgeParams?.onTranscript?.("assistant", "Cancelled the active OpenClaw run.", true);
+      bridgeParams?.onTranscript?.("assistant", "Cancelled the active Carapace run.", true);
       expect(player.stop).toHaveBeenCalledTimes(stopCallsAfterControl);
       bridgeParams?.audioSink?.sendAudio(Buffer.alloc(24_000));
-      bridgeParams?.onTranscript?.("assistant", "Cancelled the active OpenClaw run.", true);
+      bridgeParams?.onTranscript?.("assistant", "Cancelled the active Carapace run.", true);
       expect(player.stop).toHaveBeenCalledTimes(stopCallsAfterControl + 1);
     });
 
@@ -225,7 +225,7 @@ defineDiscordVoiceTests(
         userId: "u-alice",
       });
       const guestBridge = lastRealtimeBridgeParams();
-      guestBridge.onTranscript?.("user", "OpenClaw, cancel that", true);
+      guestBridge.onTranscript?.("user", "Carapace, cancel that", true);
       await vi.waitFor(() => expect(controlRealtimeVoiceAgentRunMock).toHaveBeenCalledTimes(1));
 
       beginSpeakerTurn(entry, {
@@ -233,7 +233,7 @@ defineDiscordVoiceTests(
         speakerLabel: "Bob",
         userId: "u-bob",
       });
-      lastRealtimeBridgeParams().onTranscript?.("user", "OpenClaw, stop that", true);
+      lastRealtimeBridgeParams().onTranscript?.("user", "Carapace, stop that", true);
       await vi.waitFor(() => expect(agentCommandMock).toHaveBeenCalledTimes(1));
 
       resolveGuestControl?.({
@@ -243,7 +243,7 @@ defineDiscordVoiceTests(
         active: false,
         queued: false,
         reason: "no_active_run",
-        message: "There is no active OpenClaw run to cancel.",
+        message: "There is no active Carapace run to cancel.",
         speak: true,
         show: true,
         suppress: false,
@@ -488,7 +488,7 @@ defineDiscordVoiceTests(
       },
       {
         name: "name inside a long transcript",
-        chunks: ["ordinary discussion ".repeat(30), `OpenClaw, ${"x".repeat(230)}`],
+        chunks: ["ordinary discussion ".repeat(30), `Carapace, ${"x".repeat(230)}`],
       },
     ])("does not acknowledge $name that the final wake gate rejects", async ({ chunks }) => {
       const { entry, bridgeParams } = await createWakeNameFixture();
@@ -656,7 +656,7 @@ defineDiscordVoiceTests(
             {
               itemId: "item-old",
               callId: "call-old",
-              name: "openclaw_agent_consult",
+              name: "carapace_agent_consult",
               args: { question: "same question" },
             },
             realtimeSessionMock,
@@ -693,7 +693,7 @@ defineDiscordVoiceTests(
             {
               itemId: "item-fresh",
               callId: "call-fresh",
-              name: "openclaw_agent_consult",
+              name: "carapace_agent_consult",
               args: { question: "same question" },
             },
             freshSource.session,
@@ -760,20 +760,20 @@ defineDiscordVoiceTests(
       expectUserMessageIncludes("wake answer");
     });
 
-    it("accepts OpenClaw as a default wake name before realtime agent-proxy consults", async () => {
-      agentCommandMock.mockResolvedValueOnce({ payloads: [{ text: "openclaw wake answer" }] });
+    it("accepts Carapace as a default wake name before realtime agent-proxy consults", async () => {
+      agentCommandMock.mockResolvedValueOnce({ payloads: [{ text: "carapace wake answer" }] });
       const { entry, bridgeParams } = await createWakeNameFixture();
 
       beginSpeakerTurn(entry);
-      await emitFinalRealtimeUserTranscript(bridgeParams, "OpenClaw, how is it going");
+      await emitFinalRealtimeUserTranscript(bridgeParams, "Carapace, how is it going");
 
       expect(controlRealtimeVoiceAgentRunMock).toHaveBeenCalledWith({
         sessionKey: "discord:g1:c1",
         text: "how is it going",
       });
       expect(lastAgentCommandArgs().message).toContain("how is it going");
-      expect(lastAgentCommandArgs().message).not.toContain("OpenClaw");
-      expectUserMessageIncludes("openclaw wake answer");
+      expect(lastAgentCommandArgs().message).not.toContain("Carapace");
+      expectUserMessageIncludes("carapace wake answer");
     });
 
     it("ignores default agent wake names longer than two words", async () => {
@@ -786,10 +786,10 @@ defineDiscordVoiceTests(
       expect(agentCommandMock).not.toHaveBeenCalled();
 
       beginSpeakerTurn(entry);
-      await emitFinalRealtimeUserTranscript(bridgeParams, "OpenClaw, fallback still wakes");
+      await emitFinalRealtimeUserTranscript(bridgeParams, "Carapace, fallback still wakes");
 
       expect(lastAgentCommandArgs().message).toContain("fallback still wakes");
-      expect(lastAgentCommandArgs().message).not.toContain("OpenClaw");
+      expect(lastAgentCommandArgs().message).not.toContain("Carapace");
       expectUserMessageIncludes("fallback wake answer");
     });
 
@@ -892,7 +892,7 @@ defineDiscordVoiceTests(
       await emitFinalRealtimeUserTranscript(bridgeParams, "Claw Bot Helper, ship it");
 
       beginSpeakerTurn(entry);
-      await emitFinalRealtimeUserTranscript(bridgeParams, "OpenClaw, ship it");
+      await emitFinalRealtimeUserTranscript(bridgeParams, "Carapace, ship it");
 
       expect(agentCommandMock).not.toHaveBeenCalled();
     });
@@ -983,7 +983,7 @@ defineDiscordVoiceTests(
 
       expect(lastAgentCommandArgs().message).toBe("What?");
       expect(lastAgentCommandArgs().message).not.toContain("consultPolicy");
-      expect(lastAgentCommandArgs().message).not.toContain("openclaw_agent_consult");
+      expect(lastAgentCommandArgs().message).not.toContain("carapace_agent_consult");
       expectUserMessageIncludes("Could you repeat that?");
     });
   },

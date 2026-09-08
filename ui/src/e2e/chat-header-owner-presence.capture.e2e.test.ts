@@ -15,7 +15,7 @@ suite.define(() => {
     async (face) => {
       const outputDir = createControlUiE2eArtifactDir(
         "chat-header-owner-presence",
-        process.env.OPENCLAW_CHAT_HEADER_CAPTURE_OUTPUT_DIR,
+        process.env.CARAPACE_CHAT_HEADER_CAPTURE_OUTPUT_DIR,
       );
       await suite.withPage(
         {

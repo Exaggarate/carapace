@@ -140,8 +140,8 @@ describe("forwarded source-session grouping", () => {
     { provenance: { kind: "inter_session", sourceTool: "sessions_send" } },
   ])("clears stale human reply attribution at a forwarded boundary %o", (attribution) => {
     const groups = cachedGroups([
-      { role: "user", content: "Alice's question", __openclaw: { senderId: "alice" } },
-      { role: "user", content: "Bob's question", __openclaw: { senderId: "bob" } },
+      { role: "user", content: "Alice's question", __carapace: { senderId: "alice" } },
+      { role: "user", content: "Bob's question", __carapace: { senderId: "bob" } },
       { role: "assistant", content: "Answer for Bob" },
       {
         role: "assistant",

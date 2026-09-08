@@ -1,10 +1,10 @@
 import {
   decodeNodePtyResumeParams,
   decodeNodePtyStartParams,
-  type OpenClawPluginNodeHostCommandIo,
+  type CarapacePluginNodeHostCommandIo,
   runNodePtyCommand,
   validateClaudeSessionId,
-} from "openclaw/plugin-sdk/node-host";
+} from "carapace/plugin-sdk/node-host";
 import { isExactClaudeSessionCursor } from "./session-catalog-cursor.js";
 import { resolveClaudeTerminalExecutable } from "./session-catalog-executable.js";
 import { isResumableClaudeSource } from "./session-catalog-shared.js";
@@ -64,7 +64,7 @@ export async function readClaudeSession(paramsJSON?: string | null): Promise<str
 
 export async function resumeClaudeSession(
   paramsJSON: string | null | undefined,
-  io: OpenClawPluginNodeHostCommandIo | undefined,
+  io: CarapacePluginNodeHostCommandIo | undefined,
 ): Promise<string> {
   if (!io) {
     throw new Error("Claude terminal command requires duplex transport");
@@ -92,7 +92,7 @@ export async function resumeClaudeSession(
 
 export async function startClaudeSession(
   paramsJSON: string | null | undefined,
-  io: OpenClawPluginNodeHostCommandIo | undefined,
+  io: CarapacePluginNodeHostCommandIo | undefined,
 ): Promise<string> {
   if (!io) {
     throw new Error("Claude terminal command requires duplex transport");

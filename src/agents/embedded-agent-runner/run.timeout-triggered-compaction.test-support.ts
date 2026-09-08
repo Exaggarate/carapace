@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { AgentHarness } from "../harness/types.js";
 import { makeAttemptResult, makeCompactionSuccess } from "./run.overflow-compaction.fixture.js";
 import {
@@ -42,7 +42,7 @@ type CompactParams = {
 };
 
 describe("runEmbeddedAgent timeout recovery composition", () => {
-  let fixture: Pick<OpenClawTestState, "cleanup"> | undefined;
+  let fixture: Pick<CarapaceTestState, "cleanup"> | undefined;
 
   beforeAll(async () => {
     runEmbeddedAgent = await loadSharedRunIntegrationHarness();
@@ -184,8 +184,8 @@ describe("runEmbeddedAgent timeout recovery composition", () => {
   });
 
   it("leaves timeout recovery to a forced unlocked Codex compaction owner", async () => {
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    const state = await createOpenClawTestState({ label: "run.timeout-triggered-compaction" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    const state = await createCarapaceTestState({ label: "run.timeout-triggered-compaction" });
     fixture = state;
     const { clearAgentHarnesses, registerAgentHarness } = await import("../harness/registry.js");
     const pluginRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async () =>
@@ -260,8 +260,8 @@ describe("runEmbeddedAgent timeout recovery composition", () => {
   });
 
   it("lets one silent idle timeout retry before the normal timeout surface", async () => {
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    const state = await createOpenClawTestState({ label: "run.timeout-triggered-compaction" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    const state = await createCarapaceTestState({ label: "run.timeout-triggered-compaction" });
     fixture = state;
     mockedRunEmbeddedAttempt
       .mockResolvedValueOnce(

@@ -463,6 +463,6 @@ async function runSnapshotWorker(): Promise<void> {
   }
 }
 
-if (process.argv[2] === "--openclaw-state-snapshot") {
+if (process.argv[2] === "--carapace-state-snapshot") {
   void runSnapshotWorker();
 }

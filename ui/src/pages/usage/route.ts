@@ -95,6 +95,6 @@ export const page = definePage({
     import("./usage-page.ts").then(() => ({
       header: true,
       render: (data: UsageRouteData | undefined) =>
-        html`<openclaw-usage-page .routeData=${data}></openclaw-usage-page>`,
+        html`<carapace-usage-page .routeData=${data}></carapace-usage-page>`,
     })),
 });

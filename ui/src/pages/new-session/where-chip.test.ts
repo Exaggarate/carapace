@@ -216,11 +216,11 @@ describe("Where chip", () => {
         {
           code: "update-required",
           action: "update-and-reconnect",
-          updateCommand: "openclaw update",
-          headlessReconnectCommand: "openclaw node restart",
+          updateCommand: "carapace update",
+          headlessReconnectCommand: "carapace node restart",
         } as const,
       ],
-      reason: /openclaw update.*openclaw node restart/i,
+      reason: /carapace update.*carapace node restart/i,
     },
   ])("disables automatic selection with an actionable reason when $name", ({ issues, reason }) => {
     const state = resolveWhereChip({

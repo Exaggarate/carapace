@@ -6,7 +6,7 @@ import { discoverStaticExtensionAssets } from "./static-extension-assets.mts";
 
 type PluginRuntimeAssetPlan = {
   packageDir: string;
-  packageJson: { openclaw?: { assetScripts?: { build?: unknown } } };
+  packageJson: { carapace?: { assetScripts?: { build?: unknown } } };
   pluginDir: string;
 };
 
@@ -15,7 +15,7 @@ type PluginStaticAssetPlan = Pick<PluginRuntimeAssetPlan, "pluginDir"> & {
 };
 
 function resolvePackageAssetBuildCommand(packageJson: PluginRuntimeAssetPlan["packageJson"]) {
-  const command = packageJson?.openclaw?.assetScripts?.build;
+  const command = packageJson?.carapace?.assetScripts?.build;
   return typeof command === "string" && command.trim() ? command.trim() : null;
 }
 

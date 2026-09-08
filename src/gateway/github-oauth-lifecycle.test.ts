@@ -18,7 +18,7 @@ import {
   GitHubAccountMismatchError,
   resolveConfiguredGitHubToolIdentity,
 } from "../agents/github-tool-identity.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GitHubToolIdentityConfig } from "../config/types.tools.js";
 import { writeHiddenGitHubSecretRecord } from "../secrets/store/secret-store.js";
 import {
@@ -26,7 +26,7 @@ import {
   removeAgentDeletionJournal,
 } from "../state/agent-deletion-journal.js";
 import { recordAgentProvenance } from "../state/agent-provenance.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 
 const mocks = vi.hoisted(() => ({
   assertCli: vi.fn(),
@@ -110,7 +110,7 @@ const TOKENS = {
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-let currentConfig: OpenClawConfig;
+let currentConfig: CarapaceConfig;
 let stateDir: string;
 let installedTokens: string[];
 let refreshedTokens: string[];
@@ -139,7 +139,7 @@ function identity(profileId: string, options: { oauth?: boolean; author?: boolea
 function configForScope(
   scope: GitHubIdentityScope,
   selected?: GitHubToolIdentityConfig,
-): OpenClawConfig {
+): CarapaceConfig {
   return scope === "system"
     ? { tools: selected ? { github: selected } : {}, agents: { entries: { main: {} } } }
     : {
@@ -195,7 +195,7 @@ function statusResult(scope: GitHubIdentityScope): ToolsGitHubStatusResult {
 }
 
 function createLifecycle(
-  options: { getPersistedConfig?: () => OpenClawConfig } = {},
+  options: { getPersistedConfig?: () => CarapaceConfig } = {},
 ): GitHubOAuthLifecycle {
   const lifecycle = createGitHubOAuthLifecycle({
     getConfig: () => currentConfig,
@@ -239,9 +239,9 @@ function oauthRecord(
 }
 
 beforeEach(() => {
-  closeOpenClawStateDatabaseForTest();
-  stateDir = tempDirs.make("openclaw-github-oauth-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  closeCarapaceStateDatabaseForTest();
+  stateDir = tempDirs.make("carapace-github-oauth-");
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
   currentConfig = configForScope("system");
@@ -288,7 +288,7 @@ beforeEach(() => {
 afterEach(async () => {
   await Promise.allSettled(lifecycleInstances.map(async (lifecycle) => await lifecycle.stop()));
   vi.useRealTimers();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 

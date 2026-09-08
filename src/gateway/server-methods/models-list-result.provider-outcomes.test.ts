@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { markPreparedModelCatalogFull } from "../../agents/prepared-model-runtime.full-catalog.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import {
   type PreparedGatewayModelCatalogSnapshot,
@@ -48,7 +48,7 @@ describe("models.list provider catalog outcomes", () => {
       const config = {
         ...(providers ? { models: { providers } } : {}),
         agents: { defaults: { models: { "ollama/qwen3.5": {} } } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const model = {
         id: "qwen3.5",
         name: "Qwen 3.5",
@@ -88,7 +88,7 @@ describe("models.list provider catalog outcomes", () => {
   );
 
   it("preserves an auth rejection when no usable models are visible", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const snapshot = {
       agentId: "main",
       agentDir: "/tmp/models-list-provider-outcomes-agent",
@@ -150,7 +150,7 @@ describe("models.list provider catalog outcomes", () => {
           models: { "openai/*": {}, "openai/gpt-5.6-sol": {} },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const model = {
       id: "gpt-5.6-sol",
       name: "GPT-5.6 Sol",
@@ -232,7 +232,7 @@ describe("models.list provider catalog outcomes", () => {
           models: { "openai/*": {}, "openai/gpt-5.6-sol": {} },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const model = {
       id: "gpt-5.6-sol",
       name: "GPT-5.6 Sol",
@@ -320,7 +320,7 @@ describe("models.list provider catalog outcomes", () => {
   ] as const)("projects $name", async ({ evaluation, expected }) => {
     const config = {
       agents: { defaults: { models: { "custom/test-model": {} } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const model = { id: "test-model", name: "Test Model", provider: "custom" };
     const snapshot = markPreparedModelCatalogFull({ entries: [model], routeVariants: [model] });
     const projector = createGatewayAgentModelCatalogProjector({

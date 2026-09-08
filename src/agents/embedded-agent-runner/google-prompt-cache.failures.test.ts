@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import { once } from "node:events";
 import { createServer } from "node:http";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import { describe, expect, it, vi } from "vitest";
 import { SessionTranscriptWriterClaimReboundError } from "../../config/sessions/transcript-write-context.js";
 import { attachModelProviderRequestTransport } from "../provider-request-config.js";
@@ -60,7 +60,7 @@ function readyEntry(params: {
     parentId: null,
     timestamp: new Date(now - 5_000).toISOString(),
     type: "custom",
-    customType: "openclaw.google-prompt-cache",
+    customType: "carapace.google-prompt-cache",
     data: {
       status: "ready",
       timestamp: now - 5_000,
@@ -82,7 +82,7 @@ function failedEntry(retryAfter: number): SessionCustomEntry {
     parentId: null,
     timestamp: new Date(NOW - 5_000).toISOString(),
     type: "custom",
-    customType: "openclaw.google-prompt-cache",
+    customType: "carapace.google-prompt-cache",
     data: {
       status: "failed",
       timestamp: NOW - 5_000,

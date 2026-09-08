@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test-support.js";
 import { DEFAULT_UPLOAD_DIR } from "./paths.js";
@@ -21,7 +21,7 @@ import { executeActViaPlaywright } from "./pw-tools-core.interactions.execution.
 import { snapshotRoleViaPlaywright } from "./pw-tools-core.snapshot.js";
 import { getFreePort } from "./test-port.js";
 
-const runChromiumProof = process.env.OPENCLAW_BROWSER_DOWNLOAD_E2E === "1";
+const runChromiumProof = process.env.CARAPACE_BROWSER_DOWNLOAD_E2E === "1";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function listen(server: Server): Promise<number> {
@@ -72,7 +72,7 @@ describe.runIf(runChromiumProof)("managed Chromium action and download cancellat
   }
 
   async function createActionPages(html: string[]) {
-    const rootDir = tempDirs.make("openclaw-action-cancel-");
+    const rootDir = tempDirs.make("carapace-action-cancel-");
     const cdpPort = await getFreePort();
     const context = await getPlaywrightCore().chromium.launchPersistentContext(
       path.join(rootDir, "profile"),
@@ -314,7 +314,7 @@ describe.runIf(runChromiumProof)("managed Chromium action and download cancellat
   it.each(["caller abort", "invalid output directory"])(
     "cancels a streaming download after %s without publishing output",
     async (failure) => {
-      const rootDir = tempDirs.make("openclaw-download-stream-cancel-");
+      const rootDir = tempDirs.make("carapace-download-stream-cancel-");
       cleanup.push(async () => await fs.rm(rootDir, { recursive: true, force: true }));
       let closeDownloadResponse: (() => void) | undefined;
       let responseClosed = false;
@@ -415,7 +415,7 @@ describe.runIf(runChromiumProof)("managed Chromium action and download cancellat
   );
 
   it("does not let a cancelled waiter capture and write a later download", async () => {
-    const rootDir = tempDirs.make("openclaw-download-cancel-");
+    const rootDir = tempDirs.make("carapace-download-cancel-");
     cleanup.push(async () => await fs.rm(rootDir, { recursive: true, force: true }));
 
     const abandonedPayload = Buffer.from("abandoned-click-download\n");

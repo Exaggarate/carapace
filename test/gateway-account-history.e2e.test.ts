@@ -8,7 +8,7 @@ import {
 } from "../extensions/qa-lab/api.js";
 import { listConversations } from "../src/config/sessions/conversation-registry.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
-import { createOpenClawTestInstance } from "./helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./helpers/carapace-test-instance.js";
 
 async function runAccountHistoryProof(compactionMode: "client" | "server-endpoint") {
   const model = await startQaMockOpenAiServer({ modelRefs: ["history-proof/history-proof"] });
@@ -93,7 +93,7 @@ async function runAccountHistoryProof(compactionMode: "client" | "server-endpoin
   await new Promise<void>((resolve) => transport.listen(0, "127.0.0.1", resolve));
   const address = transport.address();
   if (!address || typeof address === "string") throw new Error("Telegram fixture did not bind");
-  const instance = await createOpenClawTestInstance({
+  const instance = await createCarapaceTestInstance({
     name: "account-history",
     config: {
       plugins: { slots: { memory: "none" } },
@@ -103,7 +103,7 @@ async function runAccountHistoryProof(compactionMode: "client" | "server-endpoin
           model: { primary: "history-proof/history-proof" },
           models: {
             "history-proof/history-proof": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               ...(compactionMode === "server-endpoint"
                 ? { params: { responsesCompactEndpoint: true } }
                 : {}),
@@ -175,9 +175,9 @@ async function runAccountHistoryProof(compactionMode: "client" | "server-endpoin
       },
     },
     env: {
-      OPENCLAW_SKIP_CHANNELS: undefined,
-      OPENCLAW_SKIP_PROVIDERS: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_SKIP_CHANNELS: undefined,
+      CARAPACE_SKIP_PROVIDERS: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
       TELEGRAM_BOT_TOKEN: undefined,
     },
   });
@@ -230,7 +230,7 @@ async function runAccountHistoryProof(compactionMode: "client" | "server-endpoin
     expect(session).toBeDefined();
     const conversation = listConversations({
       agentId: "main",
-      storePath: path.join(instance.state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(instance.state.agentDir("main"), "carapace-agent.sqlite"),
     }).find(
       (entry) =>
         entry.sessionKey === key &&

@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withEnv } from "../test-utils/env.js";
 import { resolvePrivateSqliteSnapshotStagingRoot } from "./sqlite-private-directory.js";
-import * as tmpOpenClawDir from "./tmp-openclaw-dir.js";
+import * as tmpCarapaceDir from "./tmp-carapace-dir.js";
 
 describe("private SQLite snapshot staging root", () => {
   afterEach(() => {
@@ -45,7 +45,7 @@ describe("private SQLite snapshot staging root", () => {
     ({ xdgCacheHome, localAppData, expectedRoot }) => {
       vi.spyOn(process, "platform", "get").mockReturnValue("win32");
       const resolveTempRoot = vi
-        .spyOn(tmpOpenClawDir, "resolvePreferredOpenClawTmpDir")
+        .spyOn(tmpCarapaceDir, "resolvePreferredCarapaceTmpDir")
         .mockImplementation((options) => options?.preferredDir ?? "");
 
       withEnv(
@@ -56,7 +56,7 @@ describe("private SQLite snapshot staging root", () => {
         },
         () => {
           expect(resolvePrivateSqliteSnapshotStagingRoot()).toBe(
-            path.join(expectedRoot, "openclaw"),
+            path.join(expectedRoot, "carapace"),
           );
         },
       );

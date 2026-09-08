@@ -1,6 +1,6 @@
 // Imessage plugin module implements approval reaction poller behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asDateTimestampMs, asPositiveFiniteNumber } from "openclaw/plugin-sdk/number-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { asDateTimestampMs, asPositiveFiniteNumber } from "carapace/plugin-sdk/number-runtime";
 import type { IMessageApprovalGatewayRuntime } from "./approval-gateway-types.js";
 import {
   listPendingIMessageApprovalReactionPollTargets,
@@ -184,7 +184,7 @@ function bindObservedConversation(params: {
 
 export async function pollPendingIMessageApprovalReactions(params: {
   client: IMessageRpcClient;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   allowRecentChatDiscovery?: boolean;
   gatewayRuntime?: IMessageApprovalGatewayRuntime;

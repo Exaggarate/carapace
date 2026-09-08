@@ -83,7 +83,7 @@ describe("dashboard archive maintenance ordering", () => {
     const store = { [dashboardKey]: entry(Date.now() - 31 * DAY_MS) };
 
     await applyFileBackedSessionStoreMaintenance({
-      storePath: "/tmp/openclaw-sessions/sessions.json",
+      storePath: "/tmp/carapace-sessions/sessions.json",
       store,
       maintenanceConfig: resolveMaintenanceConfigFromInput({
         pruneAfter: "30d",
@@ -102,7 +102,7 @@ describe("dashboard archive maintenance ordering", () => {
     const store = { [dashboardKey]: entry(Date.now() - 10 * DAY_MS) };
 
     await applyFileBackedSessionStoreMaintenance({
-      storePath: "/tmp/openclaw-sessions/sessions.json",
+      storePath: "/tmp/carapace-sessions/sessions.json",
       store,
       maintenanceConfig: resolveMaintenanceConfigFromInput({
         mode: "warn",

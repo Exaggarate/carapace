@@ -5,8 +5,8 @@ import {
   loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   call,
   dismissPendingTaskSuggestions,
@@ -28,14 +28,14 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await dismissPendingTaskSuggestions();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("session-first task suggestion acceptance", () => {
   it.each(["plain folder", "unavailable Git metadata"])(
     "starts a follow-up without worktree setup: %s",
     async (scenario) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async ({ workspaceDir }) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async ({ workspaceDir }) => {
         const cwd = await fs.realpath(workspaceDir);
         const gitMarker = path.join(cwd, ".git");
         const brokenGit = "gitdir: /missing/follow-up-repository\n";

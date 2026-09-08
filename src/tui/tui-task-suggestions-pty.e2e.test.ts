@@ -15,10 +15,10 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 it.each(["accept", "dismiss"])(
   "does not reopen a task during pending %s after returning to its session",
   async (action) => {
-    const tempDir = tempDirs.make("openclaw-tui-task-action-");
+    const tempDir = tempDirs.make("carapace-tui-task-action-");
     const releasePath = path.join(tempDir, "release");
     const fixture = await startTuiFixture({
-      env: { OPENCLAW_TUI_PTY_TASK_RELEASE_PATH: releasePath },
+      env: { CARAPACE_TUI_PTY_TASK_RELEASE_PATH: releasePath },
     });
     try {
       await fixture.run.waitForOutput("local ready", STARTUP_TIMEOUT_MS);

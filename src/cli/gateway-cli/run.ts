@@ -1,11 +1,11 @@
 // Gateway run option resolution and local server startup command implementation.
 import fs from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { triageAfterFailure } from "../../commands/triage-failure.js";
 import type {
   ConfigFileSnapshot,
@@ -20,7 +20,7 @@ import {
   isInvalidConfigError,
 } from "../../config/io.invalid-config.js";
 import { CONFIG_PATH, normalizeStateDirEnv, resolveGatewayPort } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { hasConfiguredSecretInput } from "../../config/types.secrets.js";
 import { GATEWAY_SERVICE_RUNTIME_PID_ENV } from "../../daemon/constants.js";
 import {
@@ -137,7 +137,7 @@ function extractGatewayMiskeys(parsed: unknown): {
 }
 
 function createGatewayCliStartupTrace() {
-  const enabled = isTruthyEnvValue(process.env.OPENCLAW_GATEWAY_STARTUP_TRACE);
+  const enabled = isTruthyEnvValue(process.env.CARAPACE_GATEWAY_STARTUP_TRACE);
   const started = performance.now();
   let last = started;
   const emit = (name: string, durationMs: number, totalMs: number) => {
@@ -194,7 +194,7 @@ function createGatewayCliStartupTrace() {
 
 function warnInlinePasswordFlag() {
   defaultRuntime.error(
-    "Warning: --password can be exposed via process listings. Prefer --password-file or OPENCLAW_GATEWAY_PASSWORD.",
+    "Warning: --password can be exposed via process listings. Prefer --password-file or CARAPACE_GATEWAY_PASSWORD.",
   );
 }
 
@@ -251,7 +251,7 @@ async function readGatewayStartupConfig(params: {
   lowerPrecedenceEnv: Readonly<Record<string, string>>;
   startupTrace: ReturnType<typeof createGatewayCliStartupTrace>;
 }): Promise<{
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   snapshot: ConfigFileSnapshot | null;
   startupConfigSnapshotRead?: ReadConfigFileSnapshotWithPluginMetadataResult;
 }> {
@@ -284,7 +284,7 @@ type GatewayRunShellEnvFallbackPlan =
     };
 
 async function resolveGatewayRunShellEnvFallbackPlan(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<GatewayRunShellEnvFallbackPlan> {
   const { createConfigRuntimeEnv } = await import("../../config/env-vars.js");
   const {
@@ -462,7 +462,7 @@ async function probeGatewayHealthz(params: {
   return isGatewayHealthzResponse(result?.statusCode, result?.body ?? "");
 }
 
-function createConfiguredGatewayHealthProbe(cfg: OpenClawConfig) {
+function createConfiguredGatewayHealthProbe(cfg: CarapaceConfig) {
   const probe = createConfiguredGatewayLocalProbe(cfg);
   return async (params: { host: string; port: number }): Promise<boolean> => {
     const result = await probe.requestHttp({
@@ -567,7 +567,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
   const { clearGatewayRunConfigEnvironment } = await import("./pre-bootstrap.js");
   clearGatewayRunConfigEnvironment();
   installQaParentWatchdog();
-  const isDevProfile = normalizeOptionalLowercaseString(process.env.OPENCLAW_PROFILE) === "dev";
+  const isDevProfile = normalizeOptionalLowercaseString(process.env.CARAPACE_PROFILE) === "dev";
   const devMode = Boolean(opts.dev) || isDevProfile;
   // Gateways inherit the launching shell, so suppress ambient channel credentials unless the
   // operator explicitly allows them for this run.
@@ -580,7 +580,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
   setVerbose(Boolean(opts.verbose));
   if (opts.cliBackendLogs || opts.claudeCliLogs) {
     setConsoleSubsystemFilter(["agent/cli-backend"]);
-    process.env.OPENCLAW_CLI_BACKEND_LOG_OUTPUT = "1";
+    process.env.CARAPACE_CLI_BACKEND_LOG_OUTPUT = "1";
   }
   const wsLogRaw = (opts.compact ? "compact" : opts.wsLog) as string | undefined;
   const wsLogStyle: GatewayWsLogStyle =
@@ -597,11 +597,11 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
   setGatewayWsLogStyle(wsLogStyle);
 
   if (opts.rawStream) {
-    process.env.OPENCLAW_RAW_STREAM = "1";
+    process.env.CARAPACE_RAW_STREAM = "1";
   }
   const rawStreamPath = toOptionString(opts.rawStreamPath);
   if (rawStreamPath) {
-    process.env.OPENCLAW_RAW_STREAM_PATH = rawStreamPath;
+    process.env.CARAPACE_RAW_STREAM_PATH = rawStreamPath;
   }
 
   const startupTrace = createGatewayCliStartupTrace();
@@ -682,7 +682,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
     ) {
       return;
     }
-    const finalConfigEnteredServiceMode = Boolean(process.env.OPENCLAW_SERVICE_MARKER?.trim());
+    const finalConfigEnteredServiceMode = Boolean(process.env.CARAPACE_SERVICE_MARKER?.trim());
     const clearRejectedFinalConfigEnv = () => {
       clearGatewayRunConfigEnvironment();
       if (finalConfigEnteredServiceMode) {
@@ -705,7 +705,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
       return;
     }
   }
-  if (process.env.OPENCLAW_SERVICE_MARKER?.trim()) {
+  if (process.env.CARAPACE_SERVICE_MARKER?.trim()) {
     process.env[GATEWAY_SERVICE_RUNTIME_PID_ENV] = String(process.pid);
   }
   await hooks.refreshManagedProxy?.(cfg.proxy);
@@ -734,7 +734,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
     return;
   }
   const bindExplicitRaw = bindExplicitRawStr as GatewayBindMode | undefined;
-  if (process.env.OPENCLAW_SERVICE_MARKER?.trim()) {
+  if (process.env.CARAPACE_SERVICE_MARKER?.trim()) {
     const { cleanStaleGatewayProcessesSync } = await import("../../infra/restart-stale-pids.js");
     const stale = cleanStaleGatewayProcessesSync(port, {
       protectedPid: inheritedGatewayServicePid,
@@ -828,7 +828,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
       }
     } catch (err) {
       defaultRuntime.error(
-        `Could not free port ${port}: ${formatErrorMessage(err)}. Run ${formatCliCommand("openclaw gateway status --deep")} to inspect the listener.`,
+        `Could not free port ${port}: ${formatErrorMessage(err)}. Run ${formatCliCommand("carapace gateway status --deep")} to inspect the listener.`,
       );
       defaultRuntime.exit(1);
       return;
@@ -837,7 +837,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
   if (opts.token) {
     const token = toOptionString(opts.token);
     if (token) {
-      process.env.OPENCLAW_GATEWAY_TOKEN = token;
+      process.env.CARAPACE_GATEWAY_TOKEN = token;
     }
   }
   const authModeRaw = toOptionString(opts.auth);
@@ -945,7 +945,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
     defaultRuntime.error(
       [
         "Gateway auth is set to password, but no password is configured.",
-        "Set gateway.auth.password (or OPENCLAW_GATEWAY_PASSWORD), or pass --password.",
+        "Set gateway.auth.password (or CARAPACE_GATEWAY_PASSWORD), or pass --password.",
         ...authHints,
       ]
         .filter(Boolean)
@@ -973,10 +973,10 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
         ...(isContainerEnvironment()
           ? [
               "Container environment detected \u2014 the gateway defaults to bind=auto (0.0.0.0) for port-forwarding compatibility.",
-              "Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD, or pass --token/--password to start with auth.",
+              "Set CARAPACE_GATEWAY_TOKEN or CARAPACE_GATEWAY_PASSWORD, or pass --token/--password to start with auth.",
             ]
           : [
-              "Set gateway.auth.token/password (or OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD) or pass --token/--password.",
+              "Set gateway.auth.token/password (or CARAPACE_GATEWAY_TOKEN/CARAPACE_GATEWAY_PASSWORD) or pass --token/--password.",
             ]),
         ...authHints,
       ]
@@ -992,8 +992,8 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
   startupTrace.mark("cli.gateway-loop");
   let startupConfigSnapshotReadForNextStart = startupConfigSnapshotRead;
   const envSidecarStartupMode =
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS)
+    isTruthyEnvValue(process.env.CARAPACE_SKIP_CHANNELS) ||
+    isTruthyEnvValue(process.env.CARAPACE_SKIP_PROVIDERS)
       ? "defer"
       : "start";
   let crashLoopDecision: GatewayCrashLoopBreakerDecision | undefined;
@@ -1021,7 +1021,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
     // Unconfirmed startup cleanup retains its generation; never overlap it with a fixer.
     // Supervised retries reuse the persisted breaker transition to avoid agent storms.
     if (
-      (supervisor || process.env.OPENCLAW_SERVICE_MARKER) &&
+      (supervisor || process.env.CARAPACE_SERVICE_MARKER) &&
       !crashLoopDecision?.shouldWriteStabilityBundle
     ) {
       return;
@@ -1152,7 +1152,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
     if (isGatewayLockError(err)) {
       const errMessage = formatErrorMessage(err);
       defaultRuntime.error(
-        `Gateway failed to start: ${errMessage}\nIf the gateway is supervised, stop it with: ${formatCliCommand("openclaw gateway stop")}`,
+        `Gateway failed to start: ${errMessage}\nIf the gateway is supervised, stop it with: ${formatCliCommand("carapace gateway stop")}`,
       );
       try {
         const [{ formatPortDiagnostics }, { inspectPortUsage }] = await Promise.all([
@@ -1181,7 +1181,7 @@ async function runGatewayCommandOnce(opts: GatewayRunOpts, hooks: GatewayRunRunt
       throw err;
     }
     defaultRuntime.error(
-      `Gateway failed to start: ${formatErrorMessage(err)}. Run ${formatCliCommand("openclaw gateway status --deep")} for diagnostics.`,
+      `Gateway failed to start: ${formatErrorMessage(err)}. Run ${formatCliCommand("carapace gateway status --deep")} for diagnostics.`,
     );
     await triageStartupFailure(err);
     defaultRuntime.exit(resolveGatewayStartupFailureExitCode(err));
@@ -1234,6 +1234,6 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.gatewayRunTestApi")] = testing;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.gatewayRunTestApi")] = testing;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

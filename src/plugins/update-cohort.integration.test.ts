@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { withServer } from "../plugin-sdk/test-helpers/http-test-server.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -15,7 +15,7 @@ describe("plugin release cohort real synchronization", () => {
   it.each([false, true])(
     "checks current payloads after a dev switch (missing npm sibling: %s)",
     async (missingSibling) => {
-      const root = fs.realpathSync(makeTrackedTempDir("openclaw-cohort-dev", tempDirs));
+      const root = fs.realpathSync(makeTrackedTempDir("carapace-cohort-dev", tempDirs));
       const bundledRoot = path.join(root, "bundled");
       const bundledPath = path.join(bundledRoot, "cohort");
       const oldPath = path.join(root, "removed-npm-package");
@@ -25,11 +25,11 @@ describe("plugin release cohort real synchronization", () => {
         JSON.stringify({
           name: "@example/cohort",
           version: "1.0.0",
-          openclaw: { extensions: ["./index.js"] },
+          carapace: { extensions: ["./index.js"] },
         }),
       );
       fs.writeFileSync(
-        path.join(bundledPath, "openclaw.plugin.json"),
+        path.join(bundledPath, "carapace.plugin.json"),
         JSON.stringify({
           id: "cohort",
           configSchema: { type: "object" },
@@ -48,7 +48,7 @@ describe("plugin release cohort real synchronization", () => {
           : {}),
         cohort: { source: "npm", spec: "@example/cohort", installPath: oldPath },
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           installs: records,
           entries: {
@@ -67,8 +67,8 @@ describe("plugin release cohort real synchronization", () => {
         async (registry) => {
           const env = {
             HOME: root,
-            OPENCLAW_STATE_DIR: path.join(root, "state"),
-            OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+            CARAPACE_STATE_DIR: path.join(root, "state"),
+            CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
             NPM_CONFIG_REGISTRY: registry,
             npm_config_registry: registry,
             NPM_CONFIG_CACHE: path.join(root, "npm-cache"),

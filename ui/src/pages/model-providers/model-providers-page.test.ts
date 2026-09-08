@@ -39,7 +39,7 @@ describe("ModelProvidersPage agent scope", () => {
         return originalRequest(method);
       });
       const page = document.createElement(
-        "openclaw-model-providers-page",
+        "carapace-model-providers-page",
       ) as ModelProvidersPageTestElement;
       page.context = context;
       page.routeData = createEmptyModelProvidersRouteData(context);
@@ -84,7 +84,7 @@ describe("ModelProvidersPage agent scope", () => {
       vi.spyOn(document, "hasFocus").mockReturnValue(true);
       vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
       const page = document.createElement(
-        "openclaw-model-providers-page",
+        "carapace-model-providers-page",
       ) as ModelProvidersPageTestElement;
       page.context = context;
       page.routeData = createEmptyModelProvidersRouteData(context);
@@ -226,9 +226,9 @@ describe("ModelProvidersPage agent scope", () => {
   it("switches application ownership from the concrete agent picker", async () => {
     const { agentSelection, context } = createHarness("main");
     const page = appendPage(context);
-    await waitForFast(() => expect(page.querySelector("openclaw-agent-select")).not.toBeNull());
+    await waitForFast(() => expect(page.querySelector("carapace-agent-select")).not.toBeNull());
 
-    page.querySelector<AgentSelectElement>("openclaw-agent-select")?.onSelect("writer");
+    page.querySelector<AgentSelectElement>("carapace-agent-select")?.onSelect("writer");
 
     expect(agentSelection.set).toHaveBeenCalledWith("writer");
     expect(agentSelection.setScope).not.toHaveBeenCalled();
@@ -241,7 +241,7 @@ describe("ModelProvidersPage agent scope", () => {
 
     const link = page.querySelector<HTMLAnchorElement>(".page-subtitle a");
     expect(link?.textContent?.trim()).toBe("Learn more");
-    expect(link?.href).toBe("https://docs.openclaw.ai/concepts/model-providers");
+    expect(link?.href).toBe("https://github.com/Exaggarate/carapace");
   });
 
   it("opens model setup from the Configure Models action", async () => {
@@ -593,7 +593,7 @@ describe("ModelProvidersPage agent scope", () => {
 
   it("ignores logout completion after switching away from and back to the selected agent", async () => {
     const { agentSelection, context, notifySelection, request } = createHarness("main");
-    const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+    const toast = document.body.appendChild(document.createElement("carapace-toast-host"));
     const page = appendPage(context);
     await waitForFast(() => expect(page.data?.config).toEqual({}));
     request.mockClear();
@@ -716,7 +716,7 @@ describe("ModelProvidersPage agent scope", () => {
     snapshot.hello = {
       auth: { role: "operator", scopes: ["operator.admin"] },
     } as typeof snapshot.hello;
-    const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+    const toast = document.body.appendChild(document.createElement("carapace-toast-host"));
     const page = appendPage(context);
     await waitForFast(() => expect(page.data?.config).toEqual({}));
     page.data = {
@@ -757,7 +757,7 @@ describe("ModelProvidersPage agent scope", () => {
 
   it("ignores logout completion when route data changes the selected agent", async () => {
     const { agentSelection, context, request, snapshot } = createHarness("main");
-    const toast = document.body.appendChild(document.createElement("openclaw-toast-host"));
+    const toast = document.body.appendChild(document.createElement("carapace-toast-host"));
     const page = appendPage(context);
     await waitForFast(() => expect(page.data?.config).toEqual({}));
     request.mockClear();
@@ -948,7 +948,7 @@ describe("ModelProvidersPage agent scope", () => {
     const { context, request, snapshot } = createHarness("writer");
     const staleData = { ...EMPTY_MODEL_PROVIDERS_DATA, updatedAt: 1 };
     const page = document.createElement(
-      "openclaw-model-providers-page",
+      "carapace-model-providers-page",
     ) as ModelProvidersPageTestElement;
     page.context = context;
     page.routeData = {

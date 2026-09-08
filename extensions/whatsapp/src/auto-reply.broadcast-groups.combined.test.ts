@@ -1,7 +1,7 @@
 // Whatsapp tests cover auto reply.broadcast groups.combined plugin behavior.
 import "./test-helpers.js";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import {
   monitorWebChannelWithCapture,
@@ -33,7 +33,7 @@ describe("broadcast groups", () => {
       broadcast: {
         "+1000": ["alfred", "missing"],
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
     const { seen, resolver } = await sendWebDirectInboundAndCollectSessionKeys();
 
@@ -54,7 +54,7 @@ describe("broadcast groups", () => {
         strategy: "sequential",
         "+1000": ["alfred", "baerbel"],
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
     const { seen, resolver } = await sendWebDirectInboundAndCollectSessionKeys();
 
@@ -72,7 +72,7 @@ describe("broadcast groups", () => {
         list: [{ id: "alfred" }, { id: "baerbel" }],
       },
       bindings: [{ agentId: "alfred", match: { channel: "whatsapp", accountId: "default" } }],
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const phases = [
       { strategy: "sequential", recipients: ["alfred"] },
       { strategy: "parallel", recipients: ["alfred", "baerbel"] },
@@ -84,13 +84,13 @@ describe("broadcast groups", () => {
       setLoadConfigMock({
         ...base,
         broadcast: { strategy: phase.strategy, "+1000": [...phase.recipients] },
-      } satisfies OpenClawConfig);
+      } satisfies CarapaceConfig);
     let active = 0;
     let peak = 0;
     let gate = createDeferred<void>();
     const seen: Array<{ agent: string; strategy?: string }> = [];
     const resolver = vi.fn(
-      async (ctx: { SessionKey?: unknown }, _opts: unknown, cfg: OpenClawConfig) => {
+      async (ctx: { SessionKey?: unknown }, _opts: unknown, cfg: CarapaceConfig) => {
         seen.push({
           agent: String(ctx.SessionKey).split(":")[1] ?? "",
           strategy: cfg.broadcast?.strategy,
@@ -156,7 +156,7 @@ describe("broadcast groups", () => {
         strategy: "sequential",
         "123@g.us": ["alfred", "baerbel"],
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
     const resolver = vi.fn().mockResolvedValue({ text: "ok" });
 
@@ -246,7 +246,7 @@ describe("broadcast groups", () => {
         strategy: "sequential",
         "123@g.us": ["alfred", "baerbel"],
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
     const seen: string[] = [];
     const resolver = vi.fn(async (ctx: { SessionKey?: unknown }) => {
@@ -289,7 +289,7 @@ describe("broadcast groups", () => {
         strategy: "parallel",
         "+1000": ["alfred", "baerbel"],
       },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
     const { sendMedia, reply, sendComposing } = createWebInboundDeliverySpies();
 

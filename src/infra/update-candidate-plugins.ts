@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { parsePluginInstallRecordMap } from "../config/plugin-install-record-map.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { INSTALLED_PLUGIN_INDEX_STATE_KEY } from "../plugins/installed-plugin-index-row.js";
 import type { ConfigMachineStateDatabase } from "../state/config-machine-state.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import { resolvePathViaExistingAncestorSync } from "./boundary-path.js";
 import { sameFileIdentity } from "./fs-safe-advanced.js";
 import { resolveUserPath } from "./home-dir.js";
@@ -43,7 +43,7 @@ async function resolvePluginFilePackageRoot(file: string): Promise<string> {
 
 /** Materialize plugin-owned files before the candidate can repair its private generation. */
 export async function projectUpdateCandidatePlugins(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   stateDir: string;
   targetStateDir: string;
   candidateRoot: string;
@@ -51,7 +51,7 @@ export async function projectUpdateCandidatePlugins(params: {
 }): Promise<Record<string, string>> {
   const sourceRoot = path.resolve(params.stateDir);
   const targetStateDir = resolvePathViaExistingAncestorSync(path.resolve(params.targetStateDir));
-  const shared = path.join(targetStateDir, "state", "openclaw.sqlite");
+  const shared = path.join(targetStateDir, "state", "carapace.sqlite");
   let value: Record<string, unknown> | undefined;
   let records: Record<string, PluginInstallRecord> = params.config.plugins?.installs ?? {};
   if (

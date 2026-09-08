@@ -4,8 +4,8 @@ import fs from "node:fs";
 import { isDirectRunUrl } from "./lib/direct-run.mjs";
 
 const SWIFT_CONTRACT_PATH =
-  "apps/shared/OpenClawKit/Sources/OpenClawNativeState/OpenClawNativeStateSQLite.swift";
-const TYPESCRIPT_CONTRACT_PATH = "src/state/openclaw-state-db-contract.ts";
+  "apps/shared/CarapaceKit/Sources/CarapaceNativeState/CarapaceNativeStateSQLite.swift";
+const TYPESCRIPT_CONTRACT_PATH = "src/state/carapace-state-db-contract.ts";
 
 function extractSingleVersion(source, pattern, label) {
   const matches = [...source.matchAll(pattern)];
@@ -23,8 +23,8 @@ export function compareNativeStateSchemaVersions({ swiftSource, typescriptSource
   );
   const typescriptVersion = extractSingleVersion(
     typescriptSource,
-    /^export const OPENCLAW_STATE_SCHEMA_VERSION = (\d+);\s*$/gmu,
-    "TypeScript OPENCLAW_STATE_SCHEMA_VERSION",
+    /^export const CARAPACE_STATE_SCHEMA_VERSION = (\d+);\s*$/gmu,
+    "TypeScript CARAPACE_STATE_SCHEMA_VERSION",
   );
   if (swiftVersion !== typescriptVersion) {
     throw new Error(

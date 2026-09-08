@@ -34,7 +34,7 @@ export function createNodeWorkerBundleTransferService(options: ArtifactTransferO
           ...(params.bundlePrewarm ? { bundlePrewarm: params.bundlePrewarm } : {}),
           build: {
             bundleHash: params.artifact.bundleHash,
-            openclawVersion: params.artifact.openclawVersion,
+            carapaceVersion: params.artifact.carapaceVersion,
             protocolFeatures: [...params.artifact.protocolFeatures],
           },
           archive: {

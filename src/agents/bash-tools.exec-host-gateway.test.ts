@@ -57,11 +57,11 @@ import {
 } from "../process/gateway-work-admission.js";
 import { createProcessSupervisor } from "../process/supervisor/supervisor.js";
 import type { ProcessSupervisor } from "../process/supervisor/types.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { resetProcessRegistryForTests } from "./bash-process-registry.test-support.js";
 import type {
   ExecApprovalFollowupFactory,
@@ -829,7 +829,7 @@ describe("processGatewayAllowlist", () => {
       });
       buildEnforcedShellCommandMock.mockReturnValue({ ok: true, command: enforcedCommand });
       const approvedCwd = fs.realpathSync(
-        fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-cwd-approved-")),
+        fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-cwd-approved-")),
       );
       const movedCwd = `${approvedCwd}-moved`;
       try {
@@ -1323,7 +1323,7 @@ describe("processGatewayAllowlist", () => {
   });
 
   it("reviews and executes the same PATH-resolved executable", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-auto-review-path-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-auto-review-path-"));
     const shadowGit = path.join(tempDir, "git");
     fs.copyFileSync(process.execPath, shadowGit);
     fs.chmodSync(shadowGit, 0o755);
@@ -2071,7 +2071,7 @@ describe("processGatewayAllowlist", () => {
   );
 
   it("fails closed before approval when the executable cannot be resolved", async () => {
-    const command = "openclaw-definitely-missing-executable --version";
+    const command = "carapace-definitely-missing-executable --version";
     const { resolvedPath } = await configurePlanBackedCommand({ command });
     expect(resolvedPath).toBeUndefined();
 
@@ -2193,7 +2193,7 @@ describe("processGatewayAllowlist", () => {
     });
 
     const result = await runGatewayAllowlist({
-      command: "openclaw config set security.audit.suppressions '[]'",
+      command: "carapace config set security.audit.suppressions '[]'",
       security: "full",
       ask: "on-miss",
     });
@@ -2212,7 +2212,7 @@ describe("processGatewayAllowlist", () => {
     });
 
     const result = await runGatewayAllowlist({
-      command: "openclaw config set security.audit.suppressions '[]'",
+      command: "carapace config set security.audit.suppressions '[]'",
       security: "full",
       ask: "on-miss",
       autoReview: true,
@@ -2234,7 +2234,7 @@ describe("processGatewayAllowlist", () => {
     });
 
     await runGatewayAllowlist({
-      command: "openclaw config set security.audit.suppressions '[]'",
+      command: "carapace config set security.audit.suppressions '[]'",
       security: "full",
       ask: "off",
     });
@@ -2248,7 +2248,7 @@ describe("processGatewayAllowlist", () => {
       analysisOk: true,
       allowlistSatisfied: true,
       segments: [
-        { resolution: null, argv: ["openclaw", "config", "get", "security.audit.suppressions"] },
+        { resolution: null, argv: ["carapace", "config", "get", "security.audit.suppressions"] },
       ],
       segmentAllowlistEntries: [],
       segmentSatisfiedBy: [null],
@@ -2261,7 +2261,7 @@ describe("processGatewayAllowlist", () => {
     });
 
     await runGatewayAllowlist({
-      command: "openclaw config get security.audit.suppressions",
+      command: "carapace config get security.audit.suppressions",
       security: "full",
       ask: "on-miss",
     });
@@ -2277,7 +2277,7 @@ describe("processGatewayAllowlist", () => {
       segments: [
         {
           resolution: null,
-          argv: ["openclaw", "--profile", "rescue", "config", "get", "security.audit.suppressions"],
+          argv: ["carapace", "--profile", "rescue", "config", "get", "security.audit.suppressions"],
         },
       ],
       segmentAllowlistEntries: [],
@@ -2291,7 +2291,7 @@ describe("processGatewayAllowlist", () => {
     });
 
     await runGatewayAllowlist({
-      command: "openclaw --profile rescue config get security.audit.suppressions",
+      command: "carapace --profile rescue config get security.audit.suppressions",
       security: "full",
       ask: "on-miss",
     });
@@ -2305,10 +2305,10 @@ describe("processGatewayAllowlist", () => {
       analysisOk: true,
       allowlistSatisfied: true,
       segments: [
-        { resolution: null, argv: ["openclaw", "config", "get", "security.audit.suppressions"] },
+        { resolution: null, argv: ["carapace", "config", "get", "security.audit.suppressions"] },
         {
           resolution: null,
-          argv: ["openclaw", "config", "set", "security.audit.suppressions", "[]"],
+          argv: ["carapace", "config", "set", "security.audit.suppressions", "[]"],
         },
       ],
       segmentAllowlistEntries: [],
@@ -2322,7 +2322,7 @@ describe("processGatewayAllowlist", () => {
 
     const result = await runGatewayAllowlist({
       command:
-        "openclaw config get security.audit.suppressions; openclaw config set security.audit.suppressions '[]'",
+        "carapace config get security.audit.suppressions; carapace config set security.audit.suppressions '[]'",
       security: "full",
       ask: "on-miss",
     });
@@ -2337,7 +2337,7 @@ describe("processGatewayAllowlist", () => {
       analysisOk: true,
       allowlistSatisfied: false,
       segments: [
-        { resolution: null, argv: ["openclaw", "config", "get", "security.audit.suppressions"] },
+        { resolution: null, argv: ["carapace", "config", "get", "security.audit.suppressions"] },
       ],
       segmentAllowlistEntries: [],
     });
@@ -2350,7 +2350,7 @@ describe("processGatewayAllowlist", () => {
 
     const result = await runGatewayAllowlist({
       command:
-        "openclaw config get security.audit.suppressions; openclaw config set security.audit.suppressions '[]'",
+        "carapace config get security.audit.suppressions; carapace config set security.audit.suppressions '[]'",
       security: "full",
       ask: "on-miss",
     });
@@ -2366,14 +2366,14 @@ describe("processGatewayAllowlist", () => {
       allowlistSatisfied: false,
       segments: [
         {
-          raw: "openclaw config get security.audit.suppressions",
+          raw: "carapace config get security.audit.suppressions",
           resolution: null,
-          argv: ["openclaw", "config", "get", "security.audit.suppressions"],
+          argv: ["carapace", "config", "get", "security.audit.suppressions"],
         },
         {
-          raw: "openclaw config patch --stdin <<'EOF'",
+          raw: "carapace config patch --stdin <<'EOF'",
           resolution: null,
-          argv: ["openclaw", "config", "patch", "--stdin"],
+          argv: ["carapace", "config", "patch", "--stdin"],
         },
       ],
       segmentAllowlistEntries: [],
@@ -2386,7 +2386,7 @@ describe("processGatewayAllowlist", () => {
     });
 
     const result = await runGatewayAllowlist({
-      command: `openclaw config get security.audit.suppressions; openclaw config patch --stdin <<'EOF'
+      command: `carapace config get security.audit.suppressions; carapace config patch --stdin <<'EOF'
 {"security":{"audit":{"suppressions":[]}}}
 EOF`,
       security: "full",
@@ -2481,11 +2481,11 @@ EOF`,
       durationMs: 12,
       timedOut: false,
       aggregated: JSON.stringify({
-        path: "/tmp/openclaw-diagnostics.zip",
+        path: "/tmp/carapace-diagnostics.zip",
         bytes: 1234,
         manifest: {
           generatedAt: "2026-04-28T20:58:29.311Z",
-          openclawVersion: "2026.4.27",
+          carapaceVersion: "2026.4.27",
           contents: [
             { path: "diagnostics.json", bytes: 100 },
             { path: "summary.md", bytes: 200 },
@@ -2510,13 +2510,13 @@ EOF`,
         "Codex diagnostics sent to OpenAI servers:",
         "Session 1",
         "Channel: telegram",
-        "OpenClaw session id: `session-1`",
+        "Carapace session id: `session-1`",
         "Codex thread id: `thread-1`",
       ].join("\n"),
     );
 
     const result = await runGatewayAllowlist({
-      command: "openclaw gateway diagnostics export --json",
+      command: "carapace gateway diagnostics export --json",
       trigger: "diagnostics",
       approvalFollowupMode: "direct",
       approvalFollowup,
@@ -2533,7 +2533,7 @@ EOF`,
     expect(followupTarget?.direct).toBe(true);
     const followupText = requireSentFollowupText(0);
     expect(followupText).toContain("Diagnostics export created.");
-    expect(followupText).toContain("Path: /tmp/openclaw-diagnostics.zip");
+    expect(followupText).toContain("Path: /tmp/carapace-diagnostics.zip");
     expect(followupText).toContain("Contents (2 files):");
     expect(followupText).toContain("OpenAI Codex harness:");
     expect(followupText).toContain("Codex diagnostics sent to OpenAI servers:");
@@ -2563,10 +2563,10 @@ EOF`,
     });
 
     const result = await runGatewayAllowlist({
-      command: "openclaw sessions export-trajectory --json",
+      command: "carapace sessions export-trajectory --json",
       approvalFollowupMode: "agent",
       sessionId: "approval-session",
-      sessionStore: "/tmp/openclaw-sessions.json",
+      sessionStore: "/tmp/carapace-sessions.json",
       turnSourceChannel: "webchat",
     });
 
@@ -2577,7 +2577,7 @@ EOF`,
     expect(requireBuildFollowupTargetInput(0)).toMatchObject({
       direct: false,
       expectedSessionId: "approval-session",
-      sessionStore: "/tmp/openclaw-sessions.json",
+      sessionStore: "/tmp/carapace-sessions.json",
     });
     expect(requireSentFollowupTarget(0)?.direct).toBe(false);
     expect(requireSentFollowupText(0)).toContain("done");
@@ -2689,10 +2689,10 @@ EOF`,
     });
 
     const result = await runGatewayAllowlist({
-      command: "openclaw sessions export-trajectory --json",
+      command: "carapace sessions export-trajectory --json",
       approvalFollowupMode: "agent",
       sessionId: "approval-session",
-      sessionStore: "/tmp/openclaw-sessions.json",
+      sessionStore: "/tmp/carapace-sessions.json",
       turnSourceChannel: "webchat",
     });
 
@@ -3019,7 +3019,7 @@ EOF`,
     { name: "denies drift", mutate: true },
     { name: "runs unchanged bytes", mutate: false },
   ])("re-prompts durable detached gateway script approvals: $name", async ({ mutate }) => {
-    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-script-binding-"));
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-script-binding-"));
     const script = path.join(workdir, "script.sh");
     const command = "sh script.sh";
     try {
@@ -3847,7 +3847,7 @@ EOF`,
   });
 
   describe("cron standing grants", () => {
-    const CRON_STORE_KEY = "/tmp/openclaw-exec-host-cron-store";
+    const CRON_STORE_KEY = "/tmp/carapace-exec-host-cron-store";
     const grantCommand = "run-nightly-backup --verbose";
     const grantTempDirs: string[] = [];
     let stateDirBackup: string | undefined;
@@ -3856,14 +3856,14 @@ EOF`,
     let unregisterCronSource: (() => void) | undefined;
 
     beforeEach(() => {
-      hadStateDirBackup = "OPENCLAW_STATE_DIR" in process.env;
-      stateDirBackup = process.env.OPENCLAW_STATE_DIR;
+      hadStateDirBackup = "CARAPACE_STATE_DIR" in process.env;
+      stateDirBackup = process.env.CARAPACE_STATE_DIR;
       const stateDir = fs.realpathSync(
-        fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cron-grant-state-")),
+        fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cron-grant-state-")),
       );
       grantTempDirs.push(stateDir);
-      process.env.OPENCLAW_STATE_DIR = stateDir;
-      workdir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cron-grant-cwd-")));
+      process.env.CARAPACE_STATE_DIR = stateDir;
+      workdir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cron-grant-cwd-")));
       grantTempDirs.push(workdir);
       // Grants are consulted only when policy would otherwise prompt, before
       // any JSON allowlist digest can satisfy the command.
@@ -3880,11 +3880,11 @@ EOF`,
     afterEach(() => {
       unregisterCronSource?.();
       unregisterCronSource = undefined;
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       if (hadStateDirBackup) {
-        process.env.OPENCLAW_STATE_DIR = stateDirBackup;
+        process.env.CARAPACE_STATE_DIR = stateDirBackup;
       } else {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       }
       for (const dir of grantTempDirs.splice(0)) {
         fs.rmSync(dir, { recursive: true, force: true });
@@ -3896,7 +3896,7 @@ EOF`,
     }
 
     function seedCronJobRow(): string {
-      const database = openOpenClawStateDatabase(databaseOptions());
+      const database = openCarapaceStateDatabase(databaseOptions());
       // SAFETY: minimal valid cron job shape for the storage codec round-trip.
       const job = {
         id: "job-1",
@@ -3972,9 +3972,9 @@ EOF`,
     }
 
     function readGrantUseCounts(): number[] {
-      const database = openOpenClawStateDatabase(databaseOptions());
+      const database = openCarapaceStateDatabase(databaseOptions());
       const stateDb = getNodeSqliteKysely<
-        Pick<OpenClawStateKyselyDatabase, "operator_approval_standing_grants">
+        Pick<CarapaceStateKyselyDatabase, "operator_approval_standing_grants">
       >(database.db);
       return executeSqliteQuerySync(
         database.db,
@@ -4034,7 +4034,7 @@ EOF`,
       expect(result.revalidateBeforeExecution).toBeDefined();
       // Revoke the parent approval between consult and spawn: the closure
       // must deny instead of executing on the stale authority.
-      const database = openOpenClawStateDatabase(databaseOptions());
+      const database = openCarapaceStateDatabase(databaseOptions());
       // sqlite-allow-raw -- test-only reversal of the minting approval row.
       database.db
         .prepare("update operator_approvals set status = 'denied', decision = 'deny'")

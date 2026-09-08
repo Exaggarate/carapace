@@ -5,7 +5,7 @@ import { vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
 
-export const INSTANCE_BINDING_PROBE_KEY = Symbol.for("openclaw.test.gatewayInstanceBindingProbe");
+export const INSTANCE_BINDING_PROBE_KEY = Symbol.for("carapace.test.gatewayInstanceBindingProbe");
 export const INSTANCE_BINDING_PROBE_METHOD = "instanceBinding.probe";
 
 export type InstanceBindingProbeResult = {
@@ -114,12 +114,12 @@ export async function writeInstanceBindingProbePlugin(bundledRoot: string): Prom
       name: "instance-binding-probe",
       type: "commonjs",
       main: "index.js",
-      openclaw: { extensions: ["./index.js"] },
-      peerDependencies: { openclaw: ">=2026.1.1" },
+      carapace: { extensions: ["./index.js"] },
+      peerDependencies: { carapace: ">=2026.1.1" },
     })}\n`,
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify({
       id: "instance-binding-probe",
       name: "Startup plugin",
@@ -132,7 +132,7 @@ export async function writeInstanceBindingProbePlugin(bundledRoot: string): Prom
     `module.exports = {
   id: "instance-binding-probe",
   register(api) {
-    const coordinator = globalThis[Symbol.for("openclaw.test.gatewayInstanceBindingProbe")];
+    const coordinator = globalThis[Symbol.for("carapace.test.gatewayInstanceBindingProbe")];
     const registryId = coordinator.nextRegistryId++;
     coordinator.runtimes.push(api.runtime);
     if (coordinator.serviceStopFailure) {
@@ -179,12 +179,12 @@ export async function writeChannelBindingProbePlugin(
       name: "instance-binding-channels",
       type: "commonjs",
       main: "index.js",
-      openclaw: { extensions: ["./index.js"] },
-      peerDependencies: { openclaw: ">=2026.1.1" },
+      carapace: { extensions: ["./index.js"] },
+      peerDependencies: { carapace: ">=2026.1.1" },
     }),
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "instance-binding-channels",
       channels: channelIds,
@@ -197,7 +197,7 @@ export async function writeChannelBindingProbePlugin(
     `module.exports = {
   id: "instance-binding-channels",
   register(api) {
-    const coordinator = globalThis[Symbol.for("openclaw.test.gatewayInstanceBindingProbe")];
+    const coordinator = globalThis[Symbol.for("carapace.test.gatewayInstanceBindingProbe")];
     const proof = coordinator.channelProof;
     const runtimeId = coordinator.identify(api.runtime);
     for (const channelId of coordinator.channelIds ?? ${JSON.stringify(CHANNEL_BINDING_IDS)}) {

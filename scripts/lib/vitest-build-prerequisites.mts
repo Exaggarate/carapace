@@ -195,12 +195,12 @@ export async function prepareVitestRuntime(
     bin: process.execPath,
     args: ["scripts/run-node.mjs", "--version"],
     cwd: path.resolve(import.meta.dirname, "../.."),
-    env: { ...env, ...(mode === "private-qa" ? { OPENCLAW_BUILD_PRIVATE_QA: "1" } : {}) },
+    env: { ...env, ...(mode === "private-qa" ? { CARAPACE_BUILD_PRIVATE_QA: "1" } : {}) },
   });
 }
 
 export function isE2eBuildSkipped(env: NodeJS.ProcessEnv) {
-  return env.OPENCLAW_E2E_SKIP_BUILD === "1" || env.OPENCLAW_E2E_USE_PREBUILT_DIST === "1";
+  return env.CARAPACE_E2E_SKIP_BUILD === "1" || env.CARAPACE_E2E_USE_PREBUILT_DIST === "1";
 }
 
 export async function prepareE2eVitestRuntime(env: NodeJS.ProcessEnv) {
@@ -214,7 +214,7 @@ export async function prepareE2eVitestRuntime(env: NodeJS.ProcessEnv) {
     env,
   );
   // Only successful preparation may tell readers to reuse this shared generation.
-  return { OPENCLAW_E2E_USE_PREBUILT_DIST: "1" };
+  return { CARAPACE_E2E_USE_PREBUILT_DIST: "1" };
 }
 
 function runE2eSetupCommand(args: string[], env: NodeJS.ProcessEnv): Promise<number> {
@@ -253,8 +253,8 @@ export async function runE2eGlobalSetup(
       args: ["scripts/run-node.mjs", "--version"],
       env: {
         ...env,
-        OPENCLAW_BUILD_PRIVATE_QA: "1",
-        OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "0",
+        CARAPACE_BUILD_PRIVATE_QA: "1",
+        CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "0",
       },
     },
     {
@@ -433,7 +433,7 @@ export function resolveVitestCliEntry({
       const wrappedError: NodeJS.ErrnoException = new Error(
         resolveMissingVitestDependencyMessage(baseDir, fsImpl),
       );
-      wrappedError.code = "OPENCLAW_MISSING_VITEST";
+      wrappedError.code = "CARAPACE_MISSING_VITEST";
       throw wrappedError;
     }
     throw error;

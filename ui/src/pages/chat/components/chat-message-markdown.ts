@@ -1,5 +1,5 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { CHAT_PENDING_INPUT_MESSAGE_PREFIX } from "../../../../../packages/gateway-protocol/src/schema/chat-history-constants.js";
 import { renderCopyAsMarkdownButton } from "../../../components/copy-button.ts";
@@ -46,7 +46,7 @@ export function resolveMessageActionDetails(params: {
 }): MessageActionDetails | null {
   const { message, messageId: renderMessageId, canFetchFullMessage, onReply, senderLabel } = params;
   const record = message as Record<string, unknown>;
-  const transcriptMeta = asNullableRecord(record["__openclaw"]);
+  const transcriptMeta = asNullableRecord(record["__carapace"]);
   const messageId =
     typeof transcriptMeta?.id === "string"
       ? transcriptMeta.id
@@ -57,7 +57,7 @@ export function resolveMessageActionDetails(params: {
   const role = normalizeRoleForGrouping(normalizedMessage.role);
   const pendingInput = messageId?.startsWith(CHAT_PENDING_INPUT_MESSAGE_PREFIX) === true;
   const previewMarkdown = resolveMessageDisplayMarkdown(message, normalizedMessage);
-  // The Gateway records every display-cap truncation as __openclaw.truncated, so
+  // The Gateway records every display-cap truncation as __carapace.truncated, so
   // that marker is the whole contract: sniffing the in-band sentinel would fetch
   // for any reply that merely contains the text. Pending user inputs share the
   // same read-only expansion, without becoming transcript reply/rewind targets.
@@ -65,7 +65,7 @@ export function resolveMessageActionDetails(params: {
     (role === "assistant" || pendingInput) &&
     canFetchFullMessage &&
     messageId &&
-    !record.openclawMessageToolMirror &&
+    !record.carapaceMessageToolMirror &&
     transcriptMeta?.truncated === true
       ? { messageId, state: params.getAssistantMessageExpansion?.(messageId) }
       : undefined;
@@ -119,7 +119,7 @@ export function renderReplyButton(
   onReply: (target: MessageReplyTarget) => void,
 ) {
   return html`
-    <openclaw-tooltip .content=${t("chat.messages.reply")}>
+    <carapace-tooltip .content=${t("chat.messages.reply")}>
       <button
         class="chat-reply-btn"
         type="button"
@@ -128,6 +128,6 @@ export function renderReplyButton(
       >
         ${icons.messageSquare}
       </button>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }

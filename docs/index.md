@@ -1,22 +1,22 @@
 ---
-summary: "OpenClaw is an open-source AI assistant that runs on your own hardware and meets you in every chat app you already use."
+summary: "Carapace is an open-source AI assistant that runs on your own hardware and meets you in every chat app you already use."
 read_when:
-  - Introducing OpenClaw to newcomers
-title: "OpenClaw"
+  - Introducing Carapace to newcomers
+title: "Carapace"
 ---
 
-# OpenClaw 🦞
+# Carapace 🦞
 
 <p align="center">
     <img
-        src="/assets/openclaw-hero-light.png"
-        alt="OpenClaw"
+        src="/assets/carapace-hero-light.png"
+        alt="Carapace"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-hero-dark.png"
-        alt="OpenClaw"
+        src="/assets/carapace-hero-dark.png"
+        alt="Carapace"
         width="500"
         class="hidden dark:block"
     />
@@ -27,15 +27,15 @@ title: "OpenClaw"
 <p align="center">
   <strong>Your AI assistant, on your own hardware, in every chat app you already use.</strong><br />
   One Gateway. Any model. Any device. No hosted service in the middle.<br />
-  Developed in the open by the <a href="https://openclaw.org">OpenClaw Foundation</a>, an independent 501(c)(3). No paid tier, no telemetry by default beyond a <a href="/gateway/telemetry">version check</a> you can turn off, no lab owns it.
+  Developed in the open by the <a href="https://github.com/Exaggarate/carapace">Carapace Foundation</a>, an independent 501(c)(3). No paid tier, no telemetry by default beyond a <a href="/gateway/telemetry">version check</a> you can turn off, no lab owns it.
 </p>
 
 <Columns>
   <Card title="Get Started" href="/start/getting-started" icon="rocket">
-    Install OpenClaw and bring up the Gateway in minutes.
+    Install Carapace and bring up the Gateway in minutes.
   </Card>
   <Card title="Run Onboarding" href="/start/wizard" icon="list-checks">
-    Guided setup with `openclaw onboard` and pairing flows.
+    Guided setup with `carapace onboard` and pairing flows.
   </Card>
   <Card title="Connect a Channel" href="/channels" icon="message-circle">
     Link Discord, Signal, Telegram, WhatsApp, and more to chat from anywhere.
@@ -86,9 +86,9 @@ these hub links to reach the same top-level docs areas from the page body.
   </Card>
 </Columns>
 
-## What is OpenClaw?
+## What is Carapace?
 
-OpenClaw is a **self-hosted gateway** that connects your favorite chat apps — Discord, Google Chat, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp, Zalo, and more via channel plugins — to AI coding agents. You run a single Gateway process on your own machine (or a server), and it becomes the bridge between your messaging apps and an always-available AI assistant.
+Carapace is a **self-hosted gateway** that connects your favorite chat apps — Discord, Google Chat, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp, Zalo, and more via channel plugins — to AI coding agents. You run a single Gateway process on your own machine (or a server), and it becomes the bridge between your messaging apps and an always-available AI assistant.
 
 **Who is it for?** Developers, power users, and teams who want an AI assistant they can message from anywhere — without giving up control of their data or relying on a hosted service. The same gateway runs as a personal assistant on one laptop or as a shared [team deployment](/start/teams); configuration is the only difference.
 
@@ -99,7 +99,7 @@ OpenClaw is a **self-hosted gateway** that connects your favorite chat apps — 
 - **Agent-native**: built for coding agents with tool use, sessions, memory, and multi-agent routing
 - **Open source**: MIT licensed, community-driven
 
-The full architecture case — a trusted gateway, untrusted execution, deterministic policy, and how one product spans personal and team use — is in [Why OpenClaw](/start/why-openclaw).
+The full architecture case — a trusted gateway, untrusted execution, deterministic policy, and how one product spans personal and team use — is in [Why Carapace](/start/why-carapace).
 
 **What do you need?** Node 26 (recommended), or another supported release: Node 24.16+ or Node 26.1+. You also need an API key from your chosen provider and 5 minutes. For best quality and security, use the strongest latest-generation model available.
 
@@ -108,7 +108,7 @@ The full architecture case — a trusted gateway, untrusted execution, determini
 ```mermaid
 flowchart LR
   A["Chat apps + plugins"] --> B["Gateway"]
-  B --> C["OpenClaw agent"]
+  B --> C["Carapace agent"]
   B --> D["CLI"]
   B --> E["Web Control UI"]
   B --> F["macOS app"]
@@ -143,21 +143,21 @@ The Gateway is the single source of truth for sessions, routing, and channel con
 ## Quick start
 
 <Steps>
-  <Step title="Install OpenClaw">
+  <Step title="Install Carapace">
     <Tabs>
       <Tab title="macOS / Linux / WSL2">
         ```bash
-        curl -fsSL https://openclaw.ai/install.sh | bash
+        curl -fsSL https://github.com/Exaggarate/carapace | bash
         ```
       </Tab>
       <Tab title="Windows (PowerShell)">
         ```powershell
-        iwr -useb https://openclaw.ai/install.ps1 | iex
+        iwr -useb https://github.com/Exaggarate/carapace | iex
         ```
       </Tab>
     </Tabs>
 
-    The installer detects your OS, installs Node if needed, installs OpenClaw,
+    The installer detects your OS, installs Node if needed, installs Carapace,
     and then starts onboarding. Other install methods (npm, pnpm, bun, Docker,
     Nix, from source) are on the [Install](/install) page.
 
@@ -166,7 +166,7 @@ The Gateway is the single source of truth for sessions, routing, and channel con
     Onboarding offers **Quick start** and **Custom setup**. Quick start reuses
     detected AI access, verifies it with a real completion, and opens the web
     dashboard with a Gateway in the foreground. Custom setup walks the full
-    guided flow. `openclaw onboard --classic` opens the classic step-by-step
+    guided flow. `carapace onboard --classic` opens the classic step-by-step
     wizard instead.
 
   </Step>
@@ -175,7 +175,7 @@ The Gateway is the single source of truth for sessions, routing, and channel con
     install the background service:
 
     ```bash
-    openclaw gateway install
+    carapace gateway install
     ```
 
   </Step>
@@ -183,7 +183,7 @@ The Gateway is the single source of truth for sessions, routing, and channel con
     Open the Control UI in your browser and send a message:
 
     ```bash
-    openclaw dashboard
+    carapace dashboard
     ```
 
     Or connect a channel ([Telegram](/channels/telegram) is fastest) and chat from your phone.
@@ -201,14 +201,14 @@ Open the browser Control UI after the Gateway starts.
 - Remote access: [Web surfaces](/web) and [Tailscale](/gateway/tailscale)
 
 <p align="center">
-  <img src="/whatsapp-openclaw.jpg" alt="OpenClaw" width="420" />
+  <img src="/whatsapp-carapace.jpg" alt="Carapace" width="420" />
 </p>
 
 ## Configuration (optional)
 
-Config lives at `~/.openclaw/openclaw.json`.
+Config lives at `~/.carapace/carapace.json`.
 
-- If you **do nothing**, OpenClaw uses the bundled OpenClaw agent runtime; DMs share the agent's main session, and each group chat gets its own session.
+- If you **do nothing**, Carapace uses the bundled Carapace agent runtime; DMs share the agent's main session, and each group chat gets its own session.
 - If you want to lock it down, start with `channels.whatsapp.allowFrom` and (for groups) mention rules.
 
 Example:
@@ -221,7 +221,7 @@ Example:
       groups: { "*": { requireMention: true } },
     },
   },
-  messages: { groupChat: { mentionPatterns: ["@openclaw"] } },
+  messages: { groupChat: { mentionPatterns: ["@carapace"] } },
 }
 ```
 

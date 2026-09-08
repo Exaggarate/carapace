@@ -80,7 +80,7 @@ describe("Control UI Vite config", () => {
       resolveControlUiBuildInfo({
         env: {
           GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T12:34:56Z",
+          CARAPACE_BUILD_TIMESTAMP: "2026-07-10T12:34:56Z",
         },
         readGitCommit,
         readGitCommitTimestamp,
@@ -174,8 +174,8 @@ describe("Control UI Vite config", () => {
     expect(
       resolveControlUiBuildInfo({
         env: {
-          OPENCLAW_CONTROL_UI_RELEASE_BUILD: "1",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
+          CARAPACE_CONTROL_UI_RELEASE_BUILD: "1",
+          CARAPACE_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
         },
         readGitCommit: () => "a".repeat(40),
         readGitCommitTimestamp: () => null,
@@ -196,11 +196,11 @@ describe("Control UI Vite config", () => {
   it("rejects malformed release-build identity", () => {
     expect(() =>
       resolveControlUiBuildInfo({
-        env: { OPENCLAW_CONTROL_UI_RELEASE_BUILD: "true" },
+        env: { CARAPACE_CONTROL_UI_RELEASE_BUILD: "true" },
         readGitCommit: () => null,
         readPackageVersion: () => "2026.7.10",
       }),
-    ).toThrow("OPENCLAW_CONTROL_UI_RELEASE_BUILD must be 1 when set");
+    ).toThrow("CARAPACE_CONTROL_UI_RELEASE_BUILD must be 1 when set");
   });
 
   it("uses checked-out Git instead of unverified GitHub workflow context", () => {
@@ -323,8 +323,8 @@ describe("Control UI Vite config", () => {
     expect(
       resolveControlUiBuildInfo({
         env: {
-          OPENCLAW_VERSION: "latest",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
+          CARAPACE_VERSION: "latest",
+          CARAPACE_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
         },
         readGitCommit: () => "a".repeat(40),
         readPackageVersion: () => "2026.7.10",
@@ -336,8 +336,8 @@ describe("Control UI Vite config", () => {
     expect(
       resolveControlUiBuildInfo({
         env: {
-          OPENCLAW_CONTROL_UI_BUILD_ID: "   ",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
+          CARAPACE_CONTROL_UI_BUILD_ID: "   ",
+          CARAPACE_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
         },
         readGitCommit: () => "a".repeat(40),
         readPackageVersion: () => "2026.7.10",
@@ -358,15 +358,15 @@ describe("Control UI Vite config", () => {
 
     expect(() =>
       resolveControlUiBuildInfo({
-        env: { OPENCLAW_BUILD_TIMESTAMP: "2026-07-10 12:34:56" },
+        env: { CARAPACE_BUILD_TIMESTAMP: "2026-07-10 12:34:56" },
         readGitCommit: () => "a".repeat(40),
         readPackageVersion: () => "2026.7.10",
       }),
-    ).toThrow("OPENCLAW_BUILD_TIMESTAMP must be a valid UTC ISO-8601 timestamp ending in Z");
+    ).toThrow("CARAPACE_BUILD_TIMESTAMP must be a valid UTC ISO-8601 timestamp ending in Z");
   });
 
   it("resolves root tsconfig package aliases for source imports", () => {
-    expect(findStringAlias("@openclaw/net-policy/ip")?.replacement).toBe(
+    expect(findStringAlias("@carapace/net-policy/ip")?.replacement).toBe(
       path.join(repoRoot, "packages/net-policy/src/ip.ts"),
     );
   });
@@ -374,37 +374,37 @@ describe("Control UI Vite config", () => {
   it("resolves Control UI dev-server source aliases for internal packages", () => {
     const aliases = resolveSourcePackageAliasesForVite();
     expect(
-      aliases.find((alias) => alias.find === "@openclaw/normalization-core/agent-id"),
+      aliases.find((alias) => alias.find === "@carapace/normalization-core/agent-id"),
     )?.toEqual({
-      find: "@openclaw/normalization-core/agent-id",
+      find: "@carapace/normalization-core/agent-id",
       replacement: path.join(repoRoot, "packages/normalization-core/src/agent-id.ts"),
     });
     expect(
-      aliases.find((alias) => alias.find === "@openclaw/normalization-core/json-schema"),
+      aliases.find((alias) => alias.find === "@carapace/normalization-core/json-schema"),
     )?.toEqual({
-      find: "@openclaw/normalization-core/json-schema",
+      find: "@carapace/normalization-core/json-schema",
       replacement: path.join(repoRoot, "packages/normalization-core/src/json-schema.ts"),
     });
     expect(
-      aliases.find((alias) => alias.find === "@openclaw/normalization-core/string-coerce"),
+      aliases.find((alias) => alias.find === "@carapace/normalization-core/string-coerce"),
     )?.toEqual({
-      find: "@openclaw/normalization-core/string-coerce",
+      find: "@carapace/normalization-core/string-coerce",
       replacement: path.join(repoRoot, "packages/normalization-core/src/string-coerce.ts"),
     });
     expect(
-      aliases.find((alias) => alias.find === "@openclaw/normalization-core/phone-presentation"),
+      aliases.find((alias) => alias.find === "@carapace/normalization-core/phone-presentation"),
     )?.toEqual({
-      find: "@openclaw/normalization-core/phone-presentation",
+      find: "@carapace/normalization-core/phone-presentation",
       replacement: path.join(repoRoot, "packages/normalization-core/src/phone-presentation.ts"),
     });
     const resultAliasIndex = aliases.findIndex(
-      (alias) => alias.find === "@openclaw/normalization-core/result",
+      (alias) => alias.find === "@carapace/normalization-core/result",
     );
     const rootAliasIndex = aliases.findIndex(
-      (alias) => alias.find === "@openclaw/normalization-core",
+      (alias) => alias.find === "@carapace/normalization-core",
     );
     expect(aliases[resultAliasIndex]).toEqual({
-      find: "@openclaw/normalization-core/result",
+      find: "@carapace/normalization-core/result",
       replacement: path.join(repoRoot, "packages/normalization-core/src/result.ts"),
     });
     expect(resultAliasIndex).toBeGreaterThanOrEqual(0);
@@ -430,24 +430,24 @@ describe("Control UI Vite config", () => {
 
   it("keeps specific tsconfig aliases ahead of broad package aliases", () => {
     const aliases = resolveTsconfigPathAliasesForVite();
-    const netPolicyIpIndex = aliases.findIndex((alias) => alias.find === "@openclaw/net-policy/ip");
+    const netPolicyIpIndex = aliases.findIndex((alias) => alias.find === "@carapace/net-policy/ip");
     const netPolicyPackageIndex = aliases.findIndex(
-      (alias) => alias.find === "@openclaw/net-policy",
+      (alias) => alias.find === "@carapace/net-policy",
     );
     const netPolicyWildcardIndex = aliases.findIndex(
       (alias) =>
         alias.find instanceof RegExp && alias.replacement.includes("packages/net-policy/src/$1"),
     );
-    const broadOpenClawWildcardIndex = aliases.findIndex(
+    const broadCarapaceWildcardIndex = aliases.findIndex(
       (alias) => alias.find instanceof RegExp && alias.replacement.includes("extensions/$1"),
     );
 
     expect(netPolicyIpIndex).toBeGreaterThanOrEqual(0);
     expect(netPolicyWildcardIndex).toBeGreaterThanOrEqual(0);
     expect(netPolicyPackageIndex).toBeGreaterThanOrEqual(0);
-    expect(broadOpenClawWildcardIndex).toBeGreaterThanOrEqual(0);
+    expect(broadCarapaceWildcardIndex).toBeGreaterThanOrEqual(0);
     expect(netPolicyIpIndex).toBeLessThan(netPolicyPackageIndex);
-    expect(netPolicyWildcardIndex).toBeLessThan(broadOpenClawWildcardIndex);
+    expect(netPolicyWildcardIndex).toBeLessThan(broadCarapaceWildcardIndex);
   });
 
   it("uses a browser-safe redactor for shared tool display imports", async () => {
@@ -513,7 +513,7 @@ describe("Control UI Vite config", () => {
     if (!resolveId || !load) {
       throw new Error("Expected locale module resolver and loader");
     }
-    const id = "virtual:openclaw-control-ui-locale/fr";
+    const id = "virtual:carapace-control-ui-locale/fr";
     const resolved = await resolveId.call({} as never, id, undefined, {} as never);
     expect(resolved).toBe(`\0${id}`);
     expect(
@@ -548,7 +548,7 @@ describe("Control UI Vite config", () => {
     if (!load) {
       throw new Error("Expected locale module loader");
     }
-    const id = "\0virtual:openclaw-control-ui-locale/fr";
+    const id = "\0virtual:carapace-control-ui-locale/fr";
     const addWatchFile = vi.fn();
 
     await fsMocks.existsSync.withImplementation(
@@ -613,7 +613,7 @@ describe("Control UI Vite config", () => {
           async () => {
             const result = await load.call(
               { addWatchFile: vi.fn() } as never,
-              "\0virtual:openclaw-control-ui-locale/fr",
+              "\0virtual:carapace-control-ui-locale/fr",
               {} as never,
             );
             if (typeof result !== "string") {

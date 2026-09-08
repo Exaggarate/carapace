@@ -13,11 +13,11 @@ const actionText = (action) => {
 };
 
 const routeBoardAction = async (action) => {
-  const api = globalThis.openclaw;
+  const api = globalThis.carapace;
   if (!api?.state?.emit) {
     return false;
   }
-  if (globalThis.openclawA2UIBoot?.actionTier === "prompt" && api.prompt?.send) {
+  if (globalThis.carapaceA2UIBoot?.actionTier === "prompt" && api.prompt?.send) {
     await api.prompt.send(actionText(action));
   } else {
     await api.state.emit({ eventType: "a2ui.action", action });
@@ -25,7 +25,7 @@ const routeBoardAction = async (action) => {
   return true;
 };
 
-class OpenClawA2UIV09Host extends LitElement {
+class CarapaceA2UIV09Host extends LitElement {
   static properties = { surfaces: { state: true }, error: { state: true } };
 
   static styles = css`
@@ -74,12 +74,12 @@ class OpenClawA2UIV09Host extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    globalThis.openclawA2UI = {
+    globalThis.carapaceA2UI = {
       applyMessages: (messages) => this.applyMessages(messages),
       reset: () => this.reset(),
       getSurfaces: () => this.surfaces.map(([id]) => id),
     };
-    const bootMessages = globalThis.openclawA2UIBoot?.messages;
+    const bootMessages = globalThis.carapaceA2UIBoot?.messages;
     if (Array.isArray(bootMessages)) {
       this.applyMessages(bootMessages);
     }
@@ -129,6 +129,6 @@ class OpenClawA2UIV09Host extends LitElement {
   }
 }
 
-if (!customElements.get("openclaw-a2ui-host")) {
-  customElements.define("openclaw-a2ui-host", OpenClawA2UIV09Host);
+if (!customElements.get("carapace-a2ui-host")) {
+  customElements.define("carapace-a2ui-host", CarapaceA2UIV09Host);
 }

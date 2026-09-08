@@ -1,9 +1,9 @@
 // Qa Lab API module exposes the plugin public contract.
 export type { Command } from "commander";
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-export { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-export { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
-export type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+export type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+export { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+export { callGatewayFromCli } from "carapace/plugin-sdk/gateway-runtime";
+export type { PluginRuntime } from "carapace/plugin-sdk/runtime-store";
 export { defaultQaRuntimeModelForMode } from "./model-selection.runtime.js";
 export {
   buildQaTarget,
@@ -21,7 +21,7 @@ export {
   searchQaBusMessages,
   sendQaBusMessage,
   setQaChannelRuntime,
-} from "openclaw/plugin-sdk/qa-channel";
+} from "carapace/plugin-sdk/qa-channel";
 export type {
   QaBusAttachment,
   QaBusConversation,
@@ -42,4 +42,4 @@ export type {
   QaBusThread,
   QaBusToolCall,
   QaBusWaitForInput,
-} from "openclaw/plugin-sdk/qa-channel-protocol";
+} from "carapace/plugin-sdk/qa-channel-protocol";

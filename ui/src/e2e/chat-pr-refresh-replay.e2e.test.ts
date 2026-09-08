@@ -61,11 +61,11 @@ describe("PR refresh replay through the Control UI", () => {
       const key = await waitForWatchedSessionKey(gateway);
       const pullRequest = {
         number: 111532,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch: "fixture/review-refresh",
         title: "Synthetic review refresh proof",
-        url: "https://github.com/openclaw/openclaw/pull/111532",
+        url: "https://github.com/Exaggarate/carapace/pull/111532",
         state: "open",
       };
       const snapshot = async (state: string) => {

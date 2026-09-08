@@ -8,7 +8,7 @@ import {
   mockSystemAccountHome,
 } from "../../daemon/service.test-helpers.js";
 import { openNodeSqliteDatabase } from "../../infra/node-sqlite.js";
-import * as openClawTmp from "../../infra/tmp-openclaw-dir.js";
+import * as carapaceTmp from "../../infra/tmp-carapace-dir.js";
 import { CONTROL_PLANE_UPDATE_SENTINEL_META_ENV } from "../../infra/update-control-plane-sentinel.js";
 import { createManagedHandoffLeaseStore } from "../../infra/update-managed-service-handoff-lease.js";
 import { makeTempWorkspace } from "../../test-helpers/workspace.js";
@@ -42,21 +42,21 @@ beforeEach(() => mockSystemAccountHome());
 afterEach(() => vi.restoreAllMocks());
 
 async function withServiceHome(run: (home: string) => Promise<void>): Promise<void> {
-  const home = await makeTempWorkspace("openclaw-update-service-");
+  const home = await makeTempWorkspace("carapace-update-service-");
   try {
     await withEnvAsync(
       {
         HOME: home,
         USERPROFILE: home,
         APPDATA: path.join(home, "AppData"),
-        OPENCLAW_GATEWAY_PORT: undefined,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: undefined,
-        OPENCLAW_CONFIG_PATH: undefined,
-        OPENCLAW_PROFILE: undefined,
-        OPENCLAW_SUPERVISOR_MODE: undefined,
-        OPENCLAW_SERVICE_MARKER: undefined,
-        OPENCLAW_SERVICE_KIND: undefined,
+        CARAPACE_GATEWAY_PORT: undefined,
+        CARAPACE_HOME: undefined,
+        CARAPACE_STATE_DIR: undefined,
+        CARAPACE_CONFIG_PATH: undefined,
+        CARAPACE_PROFILE: undefined,
+        CARAPACE_SUPERVISOR_MODE: undefined,
+        CARAPACE_SERVICE_MARKER: undefined,
+        CARAPACE_SERVICE_KIND: undefined,
       },
       () => run(home),
     );
@@ -157,7 +157,7 @@ it.each(nativeOfflineCases)(
       });
       const service = createMockGatewayService({
         readCommand: async () => ({
-          programArguments: [process.execPath, path.join(process.cwd(), "openclaw.mjs"), "gateway"],
+          programArguments: [process.execPath, path.join(process.cwd(), "carapace.mjs"), "gateway"],
           environment: { HOME: home },
         }),
         readRuntime:
@@ -208,7 +208,7 @@ it
   withServiceHome(async (home) => {
     const root = await fs.realpath(process.cwd());
     const metaPath = path.join(home, "handoff-meta.json");
-    vi.spyOn(openClawTmp, "resolvePreferredOpenClawTmpDir").mockReturnValue(home);
+    vi.spyOn(carapaceTmp, "resolvePreferredCarapaceTmpDir").mockReturnValue(home);
     await fs.writeFile(
       metaPath,
       JSON.stringify({
@@ -245,14 +245,14 @@ it
     }
     await withEnvAsync(
       {
-        OPENCLAW_UPDATE_RUN_HANDOFF: scenario === "missing marker" ? undefined : "1",
+        CARAPACE_UPDATE_RUN_HANDOFF: scenario === "missing marker" ? undefined : "1",
         [CONTROL_PLANE_UPDATE_SENTINEL_META_ENV]:
           scenario === "missing metadata" ? undefined : metaPath,
       },
       async () => {
         const service = createMockGatewayService({
           readCommand: async () => ({
-            programArguments: [process.execPath, path.join(root, "openclaw.mjs"), "gateway"],
+            programArguments: [process.execPath, path.join(root, "carapace.mjs"), "gateway"],
             environment: { HOME: home },
           }),
           readRuntime: async () => ({ status: "running", pid: process.ppid }),

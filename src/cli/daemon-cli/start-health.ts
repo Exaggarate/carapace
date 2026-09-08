@@ -1,5 +1,5 @@
 import { resolveGatewayStartupTiming } from "../../commands/gateway-startup-timing.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayService } from "../../daemon/service.js";
 import { formatCliCommand } from "../command-format.js";
 import {
@@ -12,7 +12,7 @@ import {
 export async function verifyGatewayStartReadiness(params: {
   expectedPort?: number;
   fail: (message: string, hints?: string[]) => void;
-  resolveContext: () => Promise<{ config?: OpenClawConfig; env: NodeJS.ProcessEnv; port: number }>;
+  resolveContext: () => Promise<{ config?: CarapaceConfig; env: NodeJS.ProcessEnv; port: number }>;
   service: GatewayService;
   warnings: string[];
 }): Promise<void> {
@@ -49,6 +49,6 @@ export async function verifyGatewayStartReadiness(params: {
   );
   params.fail(
     `Gateway start timed out after ${Math.round(deadlineMs / 1000)}s waiting for /healthz and /readyz.`,
-    [formatCliCommand("openclaw gateway status --deep"), formatCliCommand("openclaw doctor")],
+    [formatCliCommand("carapace gateway status --deep"), formatCliCommand("carapace doctor")],
   );
 }

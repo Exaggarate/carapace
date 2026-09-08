@@ -7,15 +7,15 @@ title: "Linux Node plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
 Desktop notifications, camera capture, and location for Linux node hosts.
 
 ## Distribution
 
-- Package: `@openclaw/linux-node`
-- Install route: included in OpenClaw
+- Package: `@carapace/linux-node`
+- Install route: included in Carapace
 
 ## Surface
 

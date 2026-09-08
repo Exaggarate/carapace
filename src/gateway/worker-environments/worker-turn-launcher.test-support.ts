@@ -11,14 +11,14 @@ import { clearRuntimeConfigSnapshot } from "../../config/io.js";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { resetAgentEventsForTest } from "../../infra/agent-events.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import type { WorkerComputerLaunchDescriptor } from "../../worker/launch-descriptor.js";
 import type { MintedWorkerCredential } from "./credential.js";
 import { measureNodeWorkerLaunchBytes } from "./node-launch-adapter.js";
@@ -54,8 +54,8 @@ export const measureLaunchTurn: WorkerTurnTunnelHandle["measureLaunchTurn"] = (p
     descriptor: plan,
   });
 
-let testState: OpenClawTestState;
-let database: OpenClawStateDatabase;
+let testState: CarapaceTestState;
+let database: CarapaceStateDatabase;
 let cleanupAdmissionSink: (() => void) | undefined;
 
 export let root: string;
@@ -69,12 +69,12 @@ export let sessionTarget: {
 };
 
 export async function setupWorkerTurnLauncherTest(): Promise<void> {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     label: "worker-turn",
     layout: "state-only",
   });
   root = testState.root;
-  database = openOpenClawStateDatabase({ env: testState.env });
+  database = openCarapaceStateDatabase({ env: testState.env });
   placements = createWorkerSessionPlacementStore({ database });
   sessionTarget = {
     agentId: "main",
@@ -94,7 +94,7 @@ export async function cleanupWorkerTurnLauncherTest(): Promise<void> {
   cleanupAdmissionSink?.();
   cleanupAdmissionSink = undefined;
   clearRuntimeConfigSnapshot();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetAgentEventsForTest();
   await testState.cleanup();
 }
@@ -222,7 +222,7 @@ export function attachedEnvironment(): WorkerTurnEnvironmentRecord {
     sharedHost: false,
     bootstrapReceipt: {
       bundleHash: BUNDLE_HASH,
-      openclawVersion: "2026.7.2",
+      carapaceVersion: "2026.7.2",
       protocolFeatures: [WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE],
       installKind: "bundle",
     },
@@ -260,7 +260,7 @@ export function browserEnvironment(): WorkerTurnEnvironmentRecord {
       apps: [
         {
           id: "browser",
-          executablePath: "/usr/local/bin/openclaw-worker-browser",
+          executablePath: "/usr/local/bin/carapace-worker-browser",
           cdpPort: 9222,
         },
       ],
@@ -331,7 +331,7 @@ export function turn(runId = "run-worker-turn", executionIdentity = false) {
     agents: {
       defaults: {
         models: {
-          "openai/gpt-test": { agentRuntime: { id: "openclaw" } },
+          "openai/gpt-test": { agentRuntime: { id: "carapace" } },
         },
       },
     },

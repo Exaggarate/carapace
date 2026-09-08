@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { parseTeamReportsConfig, resolveTeamReportsConfig } from "./src/config.js";
 import { registerTeamReportsGatewayMethods } from "./src/gateway-methods.js";
 import { createTeamReportsHttpHandler } from "./src/http.js";

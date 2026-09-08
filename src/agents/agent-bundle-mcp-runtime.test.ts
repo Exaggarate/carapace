@@ -8,8 +8,8 @@ import type { DatabaseSync } from "node:sqlite";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { CallToolResult, ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
-import { expectDefined } from "@openclaw/normalization-core";
-import { materializeRequesterScopedMcpToolsForHarnessRun } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { materializeRequesterScopedMcpToolsForHarnessRun } from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred, withTestTimeout } from "../../test/helpers/promise.js";
 import {
@@ -93,7 +93,7 @@ async function startRequesterScopedMcpProofServer(): Promise<{
   session: { current?: string; closed?: string };
   close: () => Promise<void>;
 }> {
-  const server = new McpServer({ name: "openclaw-requester-proof", version: "1.0.0" });
+  const server = new McpServer({ name: "carapace-requester-proof", version: "1.0.0" });
   const session: { current?: string; closed?: string } = {};
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: randomUUID,
@@ -2559,7 +2559,7 @@ process.on("SIGINT", shutdown);`,
       expect(catalog.tools.map((tool) => tool.toolName)).toEqual(["structured-1", "structured-2"]);
       expect(
         catalog.policyTools
-          ?.filter((tool) => tool.excludedFromOpenClawCatalog)
+          ?.filter((tool) => tool.excludedFromCarapaceCatalog)
           .map((tool) => tool.toolName),
       ).toEqual(["task_only-1", "task_only-2"]);
       await expect(runtime.callTool("paged", "structured-1", {})).rejects.toThrow(
@@ -4757,7 +4757,7 @@ describe("requester-scoped MCP connection resolution", () => {
                 toolName: "delete",
                 inputSchema: { type: "object", properties: {} },
                 fallbackDescription: "delete",
-                excludedFromOpenClawCatalog: true,
+                excludedFromCarapaceCatalog: true,
               },
             ],
           }),

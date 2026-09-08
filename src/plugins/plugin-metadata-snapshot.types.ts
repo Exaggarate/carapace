@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginDiscoveryResult } from "./discovery.types.js";
 import type { InstalledPluginIndex } from "./installed-plugin-index-types.js";
 import type { PluginManifestRecord, PluginManifestRegistry } from "./manifest-registry.types.js";
@@ -83,7 +83,7 @@ export type PluginMetadataRegistryView = Pick<
 export type PluginMetadataManifestView = Pick<PluginMetadataSnapshot, "index" | "plugins">;
 
 export type LoadPluginMetadataSnapshotParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   stateDir?: string;
   env?: NodeJS.ProcessEnv;

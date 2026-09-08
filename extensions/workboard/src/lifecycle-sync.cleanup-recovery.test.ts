@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { WorkboardExecution } from "@openclaw/workboard-contract";
+import type { WorkboardExecution } from "@carapace/workboard-contract";
 import { describe, expect, it, vi } from "vitest";
 import { createWorkboardLifecycleService, syncWorkboardSubagentEnded } from "./lifecycle-sync.js";
 import { createWorkboardSqliteStores } from "./sqlite-store.js";
@@ -57,7 +57,7 @@ async function createManagedCard(
     workspace: {
       kind: "worktree",
       path: options.managedPath ?? MANAGED_PATH,
-      branch: "openclaw/wb-card",
+      branch: "carapace/wb-card",
       sourcePath: SOURCE_PATH,
       sourceBranch: "main",
     },
@@ -82,7 +82,7 @@ const context = { logger: { warn: vi.fn() } } as never;
 
 describe("Workboard managed-worktree cleanup recovery", () => {
   it("retries cleanup after a hook failure and process restart", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-cleanup-recovery-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-cleanup-recovery-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const initial = openStore(dbPath);
     const card = await createManagedCard(initial.store);
@@ -139,7 +139,7 @@ describe("Workboard managed-worktree cleanup recovery", () => {
   });
 
   it("cleans a freshly reconciled terminal worktree in the initial restart sweep", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-cleanup-fresh-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-cleanup-fresh-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const initial = openStore(dbPath);
     const card = await createManagedCard(initial.store);
@@ -172,7 +172,7 @@ describe("Workboard managed-worktree cleanup recovery", () => {
   });
 
   it("persists a retained worktree obligation and retries it after restart", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-cleanup-retained-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-cleanup-retained-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const managedPath = path.join(dir, "managed-worktree");
     fs.mkdirSync(managedPath);
@@ -228,7 +228,7 @@ describe("Workboard managed-worktree cleanup recovery", () => {
   });
 
   it("cleans a blocked pre-start worktree without an execution association", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-cleanup-blocked-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-cleanup-blocked-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const initial = openStore(dbPath);
     const card = await createManagedCard(initial.store, {
@@ -265,7 +265,7 @@ describe("Workboard managed-worktree cleanup recovery", () => {
   });
 
   it("does not clean a matched card after a newer running attempt wins the race", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-cleanup-race-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-cleanup-race-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const initial = openStore(dbPath);
     const card = await createManagedCard(initial.store);

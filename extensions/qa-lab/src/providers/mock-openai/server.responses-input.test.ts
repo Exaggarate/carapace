@@ -40,11 +40,11 @@ describe("mock Responses input text", () => {
         {
           role: "user",
           content: [
-            "OpenClaw runtime event.",
+            "Carapace runtime event.",
             "This context is runtime-generated, not user-authored. Keep internal details private.",
-            "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
             "Runtime: synthetic metadata.",
-            "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
           ].join("\n"),
         },
         { role: "user", content: [{ type: "input_text", text: "Continue." }] },

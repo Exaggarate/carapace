@@ -26,12 +26,12 @@ import { isRecord } from "./lib/record-shared.mjs";
 import { resolveReleaseTagPackageIdentity } from "./lib/release-version.mjs";
 import { runReleaseToolingGh } from "./release-tooling-identity.mjs";
 
-export const NPM_PACKAGE_PRODUCER_WORKFLOW = ".github/workflows/openclaw-npm-preflight.yml";
-export const PREPARED_NPM_BUNDLE_SCHEMA = "openclaw.prepared-npm-bundle/v1";
-export const QUALIFIED_NPM_PREFLIGHT_SCHEMA = "openclaw.qualified-npm-preflight/v1";
-export const NPM_SOURCE_CHECK_SCHEMA = "openclaw.npm-source-check/v1";
-export const NPM_QUALIFICATION_PROOF_SCHEMA = "openclaw.npm-qualification-proof/v1";
-const PACKAGE_MANIFEST_SCHEMA = "openclaw.npm-package-bundle/v1";
+export const NPM_PACKAGE_PRODUCER_WORKFLOW = ".github/workflows/carapace-npm-preflight.yml";
+export const PREPARED_NPM_BUNDLE_SCHEMA = "carapace.prepared-npm-bundle/v1";
+export const QUALIFIED_NPM_PREFLIGHT_SCHEMA = "carapace.qualified-npm-preflight/v1";
+export const NPM_SOURCE_CHECK_SCHEMA = "carapace.npm-source-check/v1";
+export const NPM_QUALIFICATION_PROOF_SCHEMA = "carapace.npm-qualification-proof/v1";
+const PACKAGE_MANIFEST_SCHEMA = "carapace.npm-package-bundle/v1";
 const PREPARE_JOB_NAME = "Prepare publishable npm package";
 const VERIFY_JOB_NAME = "Qualify prepared npm package";
 const SOURCE_JOB_NAME = "Check npm release source";
@@ -41,7 +41,7 @@ const QUALIFICATION_JOB_NAMES = {
   contents: "Check npm package contents",
 };
 const CALLER_WORKFLOWS = new Set([
-  ".github/workflows/openclaw-npm-release.yml",
+  ".github/workflows/carapace-npm-release.yml",
   ".github/workflows/full-release-validation.yml",
   ".github/workflows/full-release-candidate.yml",
   ".github/workflows/full-release-artifacts.yml",
@@ -192,7 +192,7 @@ export function validatePreparedNpmBundleDescriptor({
   validateProducer(producer, { repository, toolingSha, jobName: PREPARE_JOB_NAME });
   if (
     !isRecord(pkg) ||
-    pkg.name !== "openclaw" ||
+    pkg.name !== "carapace" ||
     typeof pkg.version !== "string" ||
     !pkg.version
   ) {
@@ -214,7 +214,7 @@ export function validatePreparedNpmBundleDescriptor({
   validateArtifact(
     artifact,
     producer,
-    `openclaw-npm-package-${producer.runId}-${producer.runAttempt}`,
+    `carapace-npm-package-${producer.runId}-${producer.runAttempt}`,
   );
   return descriptor;
 }
@@ -377,7 +377,7 @@ export function verifyPreparedNpmBundleFiles({ descriptor, files }) {
   same(manifest.corePackageTarballs, descriptor.corePackages, "Core package inventory");
   same(
     manifest.dependencyTarballs,
-    descriptor.corePackages.filter((entry) => entry.packageName === "@openclaw/ai"),
+    descriptor.corePackages.filter((entry) => entry.packageName === "@carapace/ai"),
     "Root dependency inventory",
   );
   for (const entry of packageInventory(descriptor)) {
@@ -564,7 +564,7 @@ async function verifyNpmQualificationProof({
   validateArtifact(
     proof.artifact,
     proof.producer,
-    `openclaw-npm-${kind}-proof-${proof.producer.runId}-${proof.producer.runAttempt}`,
+    `carapace-npm-${kind}-proof-${proof.producer.runId}-${proof.producer.runAttempt}`,
   );
   if (
     !Array.isArray(proof.files) ||
@@ -664,9 +664,9 @@ export function prepareNpmPackageBundle({
     execFileSync("pnpm", ["--dir", directory, "pack", "--pack-destination", destination], {
       env: {
         ...process.env,
-        OPENCLAW_PREPACK_PREPARED: "1",
+        CARAPACE_PREPACK_PREPARED: "1",
         ...(/^[a-f0-9]{40}$/u.test(releaseRef)
-          ? { OPENCLAW_PREPACK_ALLOW_UNRELEASED_CHANGELOG: "1" }
+          ? { CARAPACE_PREPACK_ALLOW_UNRELEASED_CHANGELOG: "1" }
           : {}),
       },
       stdio: "inherit",
@@ -729,7 +729,7 @@ export function prepareNpmPackageBundle({
       }
     } else if (
       !existsSync(join(directory, "package.json")) ||
-      readJson(join(directory, "package.json")).openclaw?.release?.publishToNpm !== true
+      readJson(join(directory, "package.json")).carapace?.release?.publishToNpm !== true
     ) {
       return [];
     }
@@ -738,7 +738,7 @@ export function prepareNpmPackageBundle({
     }
     return [pack(directory, packageName)];
   });
-  const packed = pack(sourceDir, "openclaw");
+  const packed = pack(sourceDir, "carapace");
   const manifest = {
     schema: PACKAGE_MANIFEST_SCHEMA,
     producer,
@@ -747,7 +747,7 @@ export function prepareNpmPackageBundle({
     npmDistTag,
     ...packed,
     corePackageTarballs,
-    dependencyTarballs: corePackageTarballs.filter((entry) => entry.packageName === "@openclaw/ai"),
+    dependencyTarballs: corePackageTarballs.filter((entry) => entry.packageName === "@carapace/ai"),
   };
   writeJson(join(outputDir, "package-bundle.json"), manifest);
   return manifest;

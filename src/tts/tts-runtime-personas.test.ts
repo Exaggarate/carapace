@@ -7,7 +7,7 @@ import {
   prepareSecretsRuntimeSnapshot,
 } from "../secrets/runtime.js";
 import { discoverConfigSecretTargetsByIds } from "../secrets/target-registry.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   clearRuntimeConfigSnapshot,
   createMockSpeechProvider,
@@ -27,7 +27,7 @@ import {
   synthesizeSpeech,
   textToSpeechTelephony,
   transcodeAudioBufferMock,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ReplyPayload,
   type SpeechTelephonySynthesisRequest,
 } from "./tts-runtime.test-support.js";
@@ -45,7 +45,7 @@ describe("TTS runtime persona behavior", () => {
   });
 
   it("selects persona preferred provider before config fallback", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tts: {
         enabled: true,
         provider: "other",
@@ -64,7 +64,7 @@ describe("TTS runtime persona behavior", () => {
       },
     };
     const config = resolveTtsConfig(cfg);
-    const prefsPath = "/tmp/openclaw-speech-core-persona-provider.json";
+    const prefsPath = "/tmp/carapace-speech-core-persona-provider.json";
 
     expect(getTtsPersona(config, prefsPath)?.id).toBe("alfred");
     expect(getTtsProvider(config, prefsPath)).toBe("mock");
@@ -78,13 +78,13 @@ describe("TTS runtime persona behavior", () => {
         },
       }),
     ]);
-    const prefsPath = "/tmp/openclaw-speech-core-invalid-provider.json";
+    const prefsPath = "/tmp/carapace-speech-core-invalid-provider.json";
     setTtsMachinePrefsPathResolver(() => prefsPath);
     const cfg = {
       tts: {
         providers: { broken: {} },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const config = resolveTtsConfig(cfg);
 
     expect(isTtsProviderConfigured(config, "broken", cfg)).toBe(false);
@@ -92,8 +92,8 @@ describe("TTS runtime persona behavior", () => {
   });
 
   it("merges active persona provider binding into synthesis config", async () => {
-    setTtsMachinePrefsPathResolver(() => "/tmp/openclaw-speech-core-persona-merge.json");
-    const cfg: OpenClawConfig = {
+    setTtsMachinePrefsPathResolver(() => "/tmp/carapace-speech-core-persona-merge.json");
+    const cfg: CarapaceConfig = {
       tts: {
         enabled: true,
         provider: "mock",
@@ -150,7 +150,7 @@ describe("TTS runtime persona behavior", () => {
   it.each(["base", "global", "agent"] as const)(
     "materializes %s TTS SecretRefs before selected-persona synthesis",
     async (scope) => {
-      await withOpenClawTestState({ label: "tts-persona-secrets" }, async (state) => {
+      await withCarapaceTestState({ label: "tts-persona-secrets" }, async (state) => {
         const personaRef = {
           source: "env",
           provider: "default",
@@ -168,7 +168,7 @@ describe("TTS runtime persona behavior", () => {
             },
           },
         };
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           plugins: { enabled: false },
           tts: {
             auto: "off",
@@ -234,14 +234,14 @@ describe("TTS runtime persona behavior", () => {
   );
 
   it("keeps a missing persona SecretRef unavailable before any synthesis request", async () => {
-    await withOpenClawTestState({ label: "tts-persona-unavailable" }, async (state) => {
+    await withCarapaceTestState({ label: "tts-persona-unavailable" }, async (state) => {
       await import("./tts.js");
       const ref = {
         source: "env",
         provider: "default",
         id: "TEST_TTS_MISSING_PERSONA_KEY",
       } as const;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         plugins: { enabled: false },
         tts: {
           provider: "mock",
@@ -512,7 +512,7 @@ describe("TTS runtime per-agent config", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const resolved = resolveTtsConfig(cfg, "reader");
 
@@ -572,7 +572,7 @@ describe("TTS runtime per-agent config", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     let mediaDir: string | undefined;
     try {
@@ -619,7 +619,7 @@ describe("TTS runtime per-agent config", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const resolved = resolveTtsConfig(cfg, "reader");
 

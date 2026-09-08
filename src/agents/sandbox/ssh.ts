@@ -13,7 +13,7 @@ import { resolveRootPath } from "../../infra/boundary-path.js";
 import { toErrorObject } from "../../infra/errors.js";
 import { normalizeEnvVarKey } from "../../infra/host-env-security.js";
 import { parseSshTarget } from "../../infra/ssh-tunnel.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import { isPlainCommandExitFailure, spawnCommand } from "../../process/exec.js";
 import { resolveUserPath } from "../../utils.js";
 import type { SandboxBackendCommandResult } from "./backend-handle.types.js";
@@ -319,7 +319,7 @@ function createSshSandboxExecCleanup(session: SshSandboxSession, remoteDir: stri
         "/bin/sh",
         "-c",
         'rm -rf -- "$1"',
-        "openclaw-sandbox-exec-cleanup",
+        "carapace-sandbox-exec-cleanup",
         remoteDir,
       ]),
       allowFailure: true,
@@ -353,7 +353,7 @@ export async function prepareSshSandboxExec(params: {
       );
     }
   }
-  const remoteDir = `/tmp/openclaw-sandbox-exec-${randomUUID()}`;
+  const remoteDir = `/tmp/carapace-sandbox-exec-${randomUUID()}`;
   const remoteScript = `${remoteDir}/exec.sh`;
   const script = [
     "#!/bin/sh",
@@ -371,7 +371,7 @@ export async function prepareSshSandboxExec(params: {
         "/bin/sh",
         "-c",
         'umask 077 && mkdir -- "$1" && cat > "$1/exec.sh" && chmod 700 "$1/exec.sh"',
-        "openclaw-sandbox-exec-stage",
+        "carapace-sandbox-exec-stage",
         remoteDir,
       ]),
       stdin: script,
@@ -438,7 +438,7 @@ export function buildRemoteWorkdirValidationCommand(params: {
     "/bin/sh",
     "-c",
     VALIDATE_REMOTE_WORKDIR_SCRIPT,
-    "openclaw-validate-workdir",
+    "carapace-validate-workdir",
     params.workdir,
     params.root,
   ]);
@@ -673,7 +673,7 @@ export async function createSshSandboxSessionFromSettings(
 
   return await createSshSandboxSession(
     settings.command.trim() || "ssh",
-    "openclaw-sandbox",
+    "carapace-sandbox",
     async (configDir) => {
       // Inline secret material is written into the temp config dir with strict
       // permissions so ssh can consume it without exposing values in argv/env.
@@ -695,7 +695,7 @@ export async function createSshSandboxSessionFromSettings(
       assertSshConfigLineValue(certificateFile, "certificateFile");
       assertSshConfigLineValue(knownHostsFile, "knownHostsFile");
       const lines = [
-        "Host openclaw-sandbox",
+        "Host carapace-sandbox",
         `  HostName ${parsed.host}`,
         `  Port ${parsed.port}`,
         "  BatchMode yes",
@@ -828,7 +828,7 @@ export async function uploadDirectoryToSshTarget(params: {
     "/bin/sh",
     "-c",
     `${ENSURE_REMOTE_REAL_DIRECTORY_SCRIPT}\ntar -xf - -C "$1"`,
-    "openclaw-sandbox-upload",
+    "carapace-sandbox-upload",
     params.remoteDir,
     params.remoteRootDir ?? params.remoteDir,
   ]);
@@ -970,7 +970,7 @@ function parseSshConfigHost(configText: string): string | null {
 }
 
 function resolveSshTmpRoot(): string {
-  return path.resolve(resolvePreferredOpenClawTmpDir() ?? os.tmpdir());
+  return path.resolve(resolvePreferredCarapaceTmpDir() ?? os.tmpdir());
 }
 
 async function createSshSandboxSession(
@@ -978,7 +978,7 @@ async function createSshSandboxSession(
   host: string,
   buildConfigText: (configDir: string) => string | Promise<string>,
 ): Promise<SshSandboxSession> {
-  const configDir = await fs.mkdtemp(path.join(resolveSshTmpRoot(), "openclaw-sandbox-ssh-"));
+  const configDir = await fs.mkdtemp(path.join(resolveSshTmpRoot(), "carapace-sandbox-ssh-"));
   const configPath = path.join(configDir, "config");
   try {
     await writePrivateFile(configPath, await buildConfigText(configDir));

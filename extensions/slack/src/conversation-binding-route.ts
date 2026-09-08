@@ -1,18 +1,18 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   resolveConfiguredBindingRoute,
   resolveRuntimeConversationBindingRoute,
   type RuntimeConversationBindingRouteResult,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import type { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/conversation-runtime";
+import type { resolveAgentRoute } from "carapace/plugin-sdk/routing";
 import { parseSlackTarget, type SlackTargetKind } from "./targets.js";
 
-type SlackRouteBinding = NonNullable<OpenClawConfig["bindings"]>[number];
+type SlackRouteBinding = NonNullable<CarapaceConfig["bindings"]>[number];
 type SlackRouteBindingPeer = NonNullable<SlackRouteBinding["match"]["peer"]>;
 
 const slackRouteBindingConfigCache = new WeakMap<
-  OpenClawConfig,
-  { bindingsRef: OpenClawConfig["bindings"]; normalizedCfg: OpenClawConfig }
+  CarapaceConfig,
+  { bindingsRef: CarapaceConfig["bindings"]; normalizedCfg: CarapaceConfig }
 >();
 
 function slackTargetDefaultKindForPeer(kind: SlackRouteBindingPeer["kind"]): SlackTargetKind {
@@ -53,7 +53,7 @@ function normalizeSlackRouteBindingPeer(peer: SlackRouteBindingPeer): SlackRoute
   return normalizedId === peer.id ? peer : { ...peer, id: normalizedId };
 }
 
-export function normalizeSlackRouteBindingConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function normalizeSlackRouteBindingConfig(cfg: CarapaceConfig): CarapaceConfig {
   const bindings = cfg.bindings;
   const cached = slackRouteBindingConfigCache.get(cfg);
   if (cached && cached.bindingsRef === bindings) {
@@ -64,7 +64,7 @@ export function normalizeSlackRouteBindingConfig(cfg: OpenClawConfig): OpenClawC
   }
 
   let changed = false;
-  const normalizedBindings: NonNullable<OpenClawConfig["bindings"]> = bindings.map((binding) => {
+  const normalizedBindings: NonNullable<CarapaceConfig["bindings"]> = bindings.map((binding) => {
     if (binding.type === "acp" || binding.match.channel.trim().toLowerCase() !== "slack") {
       return binding;
     }
@@ -86,13 +86,13 @@ export function normalizeSlackRouteBindingConfig(cfg: OpenClawConfig): OpenClawC
     };
   });
 
-  const normalizedCfg: OpenClawConfig = changed ? { ...cfg, bindings: normalizedBindings } : cfg;
+  const normalizedCfg: CarapaceConfig = changed ? { ...cfg, bindings: normalizedBindings } : cfg;
   slackRouteBindingConfigCache.set(cfg, { bindingsRef: bindings, normalizedCfg });
   return normalizedCfg;
 }
 
 export function resolveSlackConversationBindingRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   route: ReturnType<typeof resolveAgentRoute>;
   accountId: string;
   baseConversationId: string;

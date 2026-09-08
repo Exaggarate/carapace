@@ -3,12 +3,12 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import { isDeepStrictEqual } from "node:util";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { parseDurationMs } from "../cli/parse-duration.js";
 import { patchSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { heartbeatTaskDeclarationKey, isHeartbeatTaskCronJob } from "../cron/heartbeat-task.js";
 import { cronSchedulingInputsEqual } from "../cron/schedule-identity.js";
 import {
@@ -32,9 +32,9 @@ import { resolveHeartbeatAgents, resolveHeartbeatIntervalMs } from "../infra/hea
 import { resolveHeartbeatSession } from "../infra/heartbeat-runner-session.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { shortenHomePath } from "../utils.js";
 import { analyzeLegacyHeartbeatTasks, type LegacyHeartbeatTask } from "./heartbeat-task-legacy.js";
 
@@ -42,7 +42,7 @@ const HEARTBEAT_TASK_MIGRATION_CHECK_ID = "core/doctor/heartbeat-task-cron-migra
 
 type HeartbeatTaskMigrationResult = { changes: string[]; warnings: string[] };
 
-function resolveHeartbeatTaskMigrationAgents(cfg: OpenClawConfig) {
+function resolveHeartbeatTaskMigrationAgents(cfg: CarapaceConfig) {
   return resolveHeartbeatAgents(cfg).filter(
     (agent) => resolveHeartbeatIntervalMs(cfg, undefined, agent.heartbeat) !== null,
   );
@@ -92,13 +92,13 @@ function migrationFinding(params: {
     path: params.storePath,
     target: params.agentId,
     requirement: params.requirement,
-    fixHint: `Run ${formatCliCommand("openclaw doctor --fix")} to convert heartbeat tasks into automations.`,
+    fixHint: `Run ${formatCliCommand("carapace doctor --fix")} to convert heartbeat tasks into automations.`,
   };
 }
 
 /** Reports task blocks still owned by heartbeat scratch without changing them. */
 export async function collectHeartbeatTaskMigrationFindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<readonly HealthFinding[]> {
   const storePath = resolveCronJobsStorePathFromConfig(cfg, env);
@@ -178,7 +178,7 @@ function taskJobInput(params: {
     ),
     displayName: truncateUtf16Safe(`Heartbeat task: ${params.task.name}`, 200),
     name: params.task.name,
-    description: "Migrated from heartbeat monitor scratch by openclaw doctor.",
+    description: "Migrated from heartbeat monitor scratch by carapace doctor.",
     agentId: params.agentId,
     enabled: true,
     schedule: {
@@ -282,7 +282,7 @@ async function loadCronPlanningSnapshot(
   storePath: string,
   env: NodeJS.ProcessEnv,
 ): Promise<CronPlanningSnapshot> {
-  const rows = loadCronRows(openOpenClawStateDatabase({ env }).db, cronStoreKey(storePath));
+  const rows = loadCronRows(openCarapaceStateDatabase({ env }).db, cronStoreKey(storePath));
   const sortOrderByJobId = new Map(rows.map((row) => [row.job_id, row.sort_order] as const));
   return {
     jobs: loadedCronStoreFromRows(rows).store.jobs,
@@ -321,7 +321,7 @@ function commitAgentTaskMigration(params: {
   plan: AgentTaskMigrationPlan;
 }): MigrationCommitResult {
   const storeKey = cronStoreKey(params.storePath);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       if (
         readScratchRevision(db, storeKey, params.plan.monitorJobId) !== params.plan.scratchRevision
@@ -412,7 +412,7 @@ async function clearLegacyTaskTimestamps(params: {
 
 /** Converts valid scratch tasks and removes their source block in one SQLite transaction. */
 export async function maybeMigrateHeartbeatTasksToCron(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   shouldRepair: boolean;
   env?: NodeJS.ProcessEnv;
   nowMs?: number;

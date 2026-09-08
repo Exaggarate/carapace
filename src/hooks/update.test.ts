@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   copyPackageDirInstallTransactionRequest,
   installPackageDir,
@@ -13,11 +13,11 @@ import {
   type PluginInstallTransaction,
 } from "../plugins/install-transaction.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import type { HookNpmIntegrityDriftParams, installHooksFromNpmSpec } from "./install.js";
 import { readHookInstalls, recordHookInstall } from "./installs.js";
@@ -58,7 +58,7 @@ function createHookInstallConfig(params: {
   spec: string;
   integrity?: string;
   installPath?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   recordHookInstall({
     hookId: params.hookId,
     source: "npm",
@@ -72,30 +72,30 @@ function createHookInstallConfig(params: {
 const tempDirs = createTrackedTempDirs();
 
 async function createInstalledHookPackDir(version: string): Promise<string> {
-  const dir = await tempDirs.make("openclaw-hook-pack-");
+  const dir = await tempDirs.make("carapace-hook-pack-");
   await fs.writeFile(
     path.join(dir, "package.json"),
-    JSON.stringify({ name: "@openclaw/demo-hooks", version }),
+    JSON.stringify({ name: "@carapace/demo-hooks", version }),
   );
   return dir;
 }
 
 describe("updateNpmInstalledHookPacks", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
     installHooksFromNpmSpecMock.mockReset();
-    state = await createOpenClawTestState({ label: "hook-update" });
+    state = await createCarapaceTestState({ label: "hook-update" });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await state.cleanup();
     await tempDirs.cleanup();
   });
 
   it("refuses mutation without both the retained lease and compensation sink", async () => {
-    const config = createHookInstallConfig({ hookId: "demo-hooks", spec: "@openclaw/demo-hooks" });
+    const config = createHookInstallConfig({ hookId: "demo-hooks", spec: "@carapace/demo-hooks" });
     await expect(updateNpmInstalledHookPacks({ config })).rejects.toThrow(
       "hook update lifecycle lease",
     );
@@ -120,14 +120,14 @@ describe("updateNpmInstalledHookPacks", () => {
           actualIntegrity: "sha512-new",
           resolution: {
             integrity: "sha512-new",
-            resolvedSpec: "@openclaw/demo-hooks@1.0.0",
+            resolvedSpec: "@carapace/demo-hooks@1.0.0",
             version: "1.0.0",
           },
         });
         if (proceed === false) {
           return {
             ok: false,
-            error: "aborted: npm package integrity drift detected for @openclaw/demo-hooks@1.0.0",
+            error: "aborted: npm package integrity drift detected for @carapace/demo-hooks@1.0.0",
           };
         }
         return {
@@ -142,7 +142,7 @@ describe("updateNpmInstalledHookPacks", () => {
 
     const config = createHookInstallConfig({
       hookId: "demo-hooks",
-      spec: "@openclaw/demo-hooks@1.0.0",
+      spec: "@carapace/demo-hooks@1.0.0",
       integrity: "sha512-old",
     });
     const result = await runHookUpdate({
@@ -152,7 +152,7 @@ describe("updateNpmInstalledHookPacks", () => {
     });
 
     expect(warn).toHaveBeenCalledWith(
-      'Integrity drift for hook pack "demo-hooks" (@openclaw/demo-hooks@1.0.0): expected sha512-old, got sha512-new',
+      'Integrity drift for hook pack "demo-hooks" (@carapace/demo-hooks@1.0.0): expected sha512-old, got sha512-new',
     );
     expect(result.changed).toBe(false);
     expect(result.config).toBe(config);
@@ -161,7 +161,7 @@ describe("updateNpmInstalledHookPacks", () => {
         hookId: "demo-hooks",
         status: "error",
         message:
-          'Failed to update hook pack "demo-hooks": aborted: npm package integrity drift detected for @openclaw/demo-hooks@1.0.0',
+          'Failed to update hook pack "demo-hooks": aborted: npm package integrity drift detected for @carapace/demo-hooks@1.0.0',
       },
     ]);
   });
@@ -174,9 +174,9 @@ describe("updateNpmInstalledHookPacks", () => {
       targetDir: "/tmp/hooks/demo-hooks",
       version: "1.2.3",
       npmResolution: {
-        name: "@openclaw/demo-hooks",
+        name: "@carapace/demo-hooks",
         version: "1.2.3",
-        resolvedSpec: "@openclaw/demo-hooks@1.2.3",
+        resolvedSpec: "@carapace/demo-hooks@1.2.3",
         integrity: "sha512-new",
         shasum: "abc123",
         resolvedAt: "2026-05-11T20:00:00.000Z",
@@ -185,7 +185,7 @@ describe("updateNpmInstalledHookPacks", () => {
 
     const config = createHookInstallConfig({
       hookId: "demo-hooks",
-      spec: "@openclaw/demo-hooks",
+      spec: "@carapace/demo-hooks",
     });
     const result = await runHookUpdate({
       config,
@@ -202,12 +202,12 @@ describe("updateNpmInstalledHookPacks", () => {
     expect(result.changed).toBe(true);
     expect(readHookInstalls()["demo-hooks"]).toEqual({
       source: "npm",
-      spec: "@openclaw/demo-hooks",
+      spec: "@carapace/demo-hooks",
       installPath: "/tmp/hooks/demo-hooks",
       version: "1.2.3",
-      resolvedName: "@openclaw/demo-hooks",
+      resolvedName: "@carapace/demo-hooks",
       resolvedVersion: "1.2.3",
-      resolvedSpec: "@openclaw/demo-hooks@1.2.3",
+      resolvedSpec: "@carapace/demo-hooks@1.2.3",
       integrity: "sha512-new",
       shasum: "abc123",
       resolvedAt: "2026-05-11T20:00:00.000Z",
@@ -233,7 +233,7 @@ describe("updateNpmInstalledHookPacks", () => {
 
       const config = createHookInstallConfig({
         hookId: "demo-hooks",
-        spec: "@openclaw/demo-hooks",
+        spec: "@carapace/demo-hooks",
         installPath,
       });
       const result = await runHookUpdate({ config, hookIds: ["demo-hooks"], dryRun });
@@ -255,7 +255,7 @@ describe("updateNpmInstalledHookPacks", () => {
     const sourceDir = await createInstalledHookPackDir("2.0.0");
     const config = createHookInstallConfig({
       hookId: "demo-hooks",
-      spec: "@openclaw/demo-hooks",
+      spec: "@carapace/demo-hooks",
       installPath,
     });
     const previousInstalls = readHookInstalls();

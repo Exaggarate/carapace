@@ -14,10 +14,10 @@ import {
 describe("Control UI asset retention", () => {
   it("verifies retained assets through one bounded scratch buffer", async () => {
     const fixture = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-retention-io-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-retention-io-")),
     );
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(fixture, "state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(fixture, "state") }, async () => {
         const retainedPaths = new Set<string>();
         let expectedBytes = 0;
         let root = "";
@@ -144,7 +144,7 @@ describe("Control UI asset retention", () => {
       const alias = path.join(root, "alias");
       await fs.symlink(root, alias, "dir");
       const build = await writeRetentionBuild(path.join(root, "build"), "current");
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(alias, "state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(alias, "state") }, async () => {
         const owner = createControlUiAssetRetention(build.root);
         await owner.prepare();
         expect(owner.resolveAsset(build.assetPath)?.rootRealPath).toBe(

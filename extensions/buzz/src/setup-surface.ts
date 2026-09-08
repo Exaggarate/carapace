@@ -1,13 +1,13 @@
 import { isIP } from "node:net";
 import { generateSecretKey, nip19 } from "nostr-tools";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   patchTopLevelChannelConfigSection,
   promptAccountId,
   runSingleChannelSecretStep,
   type ChannelSetupWizardAdapter,
   type SecretInput,
-} from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/setup";
 import { waitForBuzzRoomAccess } from "./room-access-wait.js";
 import { discoverBuzzRooms, type BuzzDiscoveredRoom } from "./room-discovery.js";
 import { patchBuzzAccountConfig } from "./setup-core.js";
@@ -104,7 +104,7 @@ async function resolveRelayUrl(params: {
 }
 
 async function resolveSetupCredential(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   field: "privateKey" | "authTag";
 }): Promise<string | undefined> {
@@ -112,7 +112,7 @@ async function resolveSetupCredential(params: {
   // Setup receives authored config, not the Gateway's materialized secret snapshot.
   // Resolve through the canonical provider without replacing the saved reference.
   const { resolveConfiguredSecretInputWithFallback } =
-    await import("openclaw/plugin-sdk/secret-input-runtime");
+    await import("carapace/plugin-sdk/secret-input-runtime");
   const resolved = await resolveConfiguredSecretInputWithFallback({
     config: params.cfg,
     env: process.env,
@@ -133,14 +133,14 @@ async function resolveSetupCredential(params: {
 }
 
 async function resolvePrivateKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   prompter: BuzzSetupPrompter;
   secretInputMode?: "plaintext" | "ref";
   generate: typeof generateSecretKey;
   generatedPrivateKeys: WeakMap<BuzzSetupPrompter, Map<string, string>>;
   runSecretStep: typeof runSingleChannelSecretStep;
-}): Promise<{ cfg: OpenClawConfig; resolvedPrivateKey: string }> {
+}): Promise<{ cfg: CarapaceConfig; resolvedPrivateKey: string }> {
   const { allowEnv } = resolveBuzzAccountConfig(params);
   const currentPrivateKey = await resolveSetupCredential({ ...params, field: "privateKey" });
   if (currentPrivateKey) {
@@ -260,10 +260,10 @@ async function noteBuzzAccessInstructions(params: {
       "Run as the existing human room owner/admin:",
       `buzz channels add-member --channel <ROOM_UUID> --pubkey ${params.publicKey} --role bot`,
       "",
-      "OpenClaw is waiting for Buzz to confirm the Bot role automatically.",
+      "Carapace is waiting for Buzz to confirm the Bot role automatically.",
       "Local `just dev` needs no separate community-member step.",
       `Closed relay only: first run buzz-admin add-member --pubkey ${params.publicKey} --role member.`,
-      "Never paste that human private key into OpenClaw.",
+      "Never paste that human private key into Carapace.",
     ].join("\n"),
     "Buzz room access required",
   );

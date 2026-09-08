@@ -2,9 +2,9 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { runEmbeddedAgent } from "../../agents/embedded-agent.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { withFullRuntimeReplyConfig } from "./get-reply-fast-path.js";
 import { getReplyFromConfig } from "./get-reply.js";
 import { finalizeInboundContext } from "./inbound-context.js";
@@ -17,16 +17,16 @@ vi.mock("../../agents/embedded-agent.js", async (importOriginal) => ({
   })),
 }));
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 afterEach(async () => {
   await state?.cleanup();
   vi.clearAllMocks();
 });
 
 it.each([" ", "\n"])("runs a task after text exec policy separated by %j", async (separator) => {
-  state = await createOpenClawTestState({
+  state = await createCarapaceTestState({
     label: "text-directive-reply",
-    env: { OPENCLAW_TEST_FAST: "0" },
+    env: { CARAPACE_TEST_FAST: "0" },
   });
   const cfg = withFullRuntimeReplyConfig({
     agents: {
@@ -34,7 +34,7 @@ it.each([" ", "\n"])("runs a task after text exec policy separated by %j", async
         workspace: state.workspaceDir,
         skipBootstrap: true,
         model: { primary: "mock-openai/gpt-5.6-luna" },
-        models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "openclaw" } } },
+        models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "carapace" } } },
       },
     },
     plugins: { enabled: false },

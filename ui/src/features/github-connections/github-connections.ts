@@ -17,7 +17,7 @@ import {
 } from "../../components/settings-ui.ts";
 import { t } from "../../i18n/index.ts";
 import { currentConfigObject } from "../../lib/config/config-state-model.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PROFILE_SETTINGS_TARGET_IDS } from "../../pages/config/settings-targets.ts";
 import { GitHubIdentityController } from "./github-identity-controller.ts";
 import {
@@ -29,7 +29,7 @@ import {
 } from "./github-identity-view.ts";
 
 /** Profile credentials have their own read-scoped lifecycle, independent of users.self edits. */
-export class GitHubConnections extends OpenClawLightDomElement {
+export class GitHubConnections extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: false })
   private context!: ApplicationContext;
   @state() private purpose: "personal" | "system" = "personal";
@@ -405,6 +405,6 @@ export class GitHubConnections extends OpenClawLightDomElement {
     </div>`;
   }
 }
-if (!customElements.get("openclaw-github-connections")) {
-  customElements.define("openclaw-github-connections", GitHubConnections);
+if (!customElements.get("carapace-github-connections")) {
+  customElements.define("carapace-github-connections", GitHubConnections);
 }

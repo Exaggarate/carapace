@@ -13,7 +13,7 @@ const writerPath = path.join(repoRoot, "scripts/write-package-dist-inventory.ts"
 const loaderUrl = pathToFileURL(createRequire(import.meta.url).resolve("tsx")).href;
 
 function withPackageFixture(run: (packageRoot: string) => void) {
-  withTempDirSync({ prefix: "openclaw-path-alias-inventory-" }, (packageRoot) => {
+  withTempDirSync({ prefix: "carapace-path-alias-inventory-" }, (packageRoot) => {
     fs.mkdirSync(path.join(packageRoot, "dist"));
     fs.writeFileSync(path.join(packageRoot, "package.json"), '{"type":"module"}\n');
     fs.writeFileSync(path.join(packageRoot, "dist/entry.js"), "export {};\n");

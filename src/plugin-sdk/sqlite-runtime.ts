@@ -3,14 +3,14 @@
 export type { Generated, Selectable } from "kysely";
 
 export {
-  borrowOpenClawAgentDatabase,
-  ensureOpenClawAgentDatabaseSchema,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
-export { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-export { assertOpenClawAgentDatabaseForMaintenance } from "../state/openclaw-agent-db-maintenance.js";
-export { ensureOpenClawAgentStandingIntentsSchema } from "../state/openclaw-agent-standing-intents-schema.js";
+  borrowCarapaceAgentDatabase,
+  ensureCarapaceAgentDatabaseSchema,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
+export { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+export { assertCarapaceAgentDatabaseForMaintenance } from "../state/carapace-agent-db-maintenance.js";
+export { ensureCarapaceAgentStandingIntentsSchema } from "../state/carapace-agent-standing-intents-schema.js";
 export {
   compileSqliteQueryBindings,
   executeSqliteQuerySync,
@@ -25,4 +25,4 @@ export {
   runSqliteImmediateTransaction,
   runSqliteImmediateTransactionSync,
 } from "../infra/sqlite-transaction.js";
-export { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+export { tableExists } from "../state/carapace-state-db-schema-helpers.js";

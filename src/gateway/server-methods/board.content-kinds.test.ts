@@ -33,14 +33,14 @@ function registeredWidgetRegistry() {
       source: string;
       resourceUrls: Readonly<Record<string, string>>;
     }) =>
-      `<main>${source}</main><script src="${resourceUrls["/__openclaw__/diagram/app.js"]}"></script>`,
+      `<main>${source}</main><script src="${resourceUrls["/__carapace__/diagram/app.js"]}"></script>`,
   );
   createPluginBoardWidgetContentKindRegistrar(registry)(record, {
     kind: "diagram",
     label: "Diagram",
     resources: {
       surface: "diagram",
-      paths: ["/__openclaw__/diagram/app.js"],
+      paths: ["/__carapace__/diagram/app.js"],
     },
     validateSource,
     composeDocument,
@@ -64,7 +64,7 @@ describe("board registered widget content kinds", () => {
       {
         connect: {} as never,
         pluginSurfaceUrls: {
-          diagram: "https://gateway.test/__openclaw__/cap/diagram-token",
+          diagram: "https://gateway.test/__carapace__/cap/diagram-token",
         },
       },
     );
@@ -111,7 +111,7 @@ describe("board registered widget content kinds", () => {
         contentOwner: "registered",
         registeredContentKind: "diagram",
         kindLabel: "Diagram",
-        frameUrl: expect.stringContaining("/__openclaw__/board/"),
+        frameUrl: expect.stringContaining("/__carapace__/board/"),
         sandboxUrl: expect.stringContaining("/mcp-app-sandbox"),
       });
       const authorized = resolveAuthorizedBoardWidgetView(store, widget.viewTicket!, {
@@ -119,7 +119,7 @@ describe("board registered widget content kinds", () => {
       });
       expect(authorized.document.html).toContain("<main>diagram:second</main>");
       expect(authorized.document.html).toContain(
-        "https://gateway.test/__openclaw__/cap/diagram-token/__openclaw__/diagram/app.js",
+        "https://gateway.test/__carapace__/cap/diagram-token/__carapace__/diagram/app.js",
       );
       expect(composeDocument).toHaveBeenCalledOnce();
     } finally {
@@ -165,7 +165,7 @@ describe("board registered widget content kinds", () => {
         {
           connect: {} as never,
           pluginSurfaceUrls: {
-            diagram: "https://gateway.test/__openclaw__/cap/diagram-token",
+            diagram: "https://gateway.test/__carapace__/cap/diagram-token",
           },
         },
       );

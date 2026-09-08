@@ -1,10 +1,10 @@
 // Covers provider plugin registration and runtime composition.
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { PluginAutoEnableResult } from "../config/plugin-auto-enable.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { CarapacePackageManifest } from "./manifest.js";
 import type { PluginMetadataSnapshot } from "./plugin-metadata-snapshot.types.js";
 import type { PluginRegistrySnapshot } from "./plugin-registry.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
@@ -13,7 +13,7 @@ import type { ProviderPlugin } from "./types.js";
 type ResolveRuntimePluginRegistry = typeof import("./loader.js").resolveRuntimePluginRegistry;
 type ResolveCompatibleRuntimePluginRegistry =
   typeof import("./loader.js").resolveCompatibleRuntimePluginRegistry;
-type LoadOpenClawPlugins = typeof import("./loader.js").loadOpenClawPlugins;
+type LoadCarapacePlugins = typeof import("./loader.js").loadCarapacePlugins;
 type IsPluginRegistryLoadInFlight = typeof import("./loader.js").isPluginRegistryLoadInFlight;
 type LoadPluginManifestRegistry =
   typeof import("./manifest-registry.js").loadPluginManifestRegistryCore;
@@ -25,7 +25,7 @@ type SetActivePluginRegistry = typeof import("./runtime.js").setActivePluginRegi
 
 const resolveRuntimePluginRegistryMock = vi.fn<ResolveRuntimePluginRegistry>();
 const resolveCompatibleRuntimePluginRegistryMock = vi.fn<ResolveCompatibleRuntimePluginRegistry>();
-const loadOpenClawPluginsMock = vi.fn<LoadOpenClawPlugins>();
+const loadCarapacePluginsMock = vi.fn<LoadCarapacePlugins>();
 const isPluginRegistryLoadInFlightMock = vi.fn<IsPluginRegistryLoadInFlight>((_options) => false);
 const loadPluginManifestRegistryMock = vi.fn<LoadPluginManifestRegistry>();
 const loadPluginMetadataSnapshotMock = vi.fn<LoadPluginMetadataSnapshot>();
@@ -60,7 +60,7 @@ type ManifestProviderPluginFixture = {
   contracts?: PluginManifestRecord["contracts"];
   modelCatalog?: PluginManifestRecord["modelCatalog"];
   providerAuthAliases?: PluginManifestRecord["providerAuthAliases"];
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
 };
 
 function createManifestProviderPlugin(params: ManifestProviderPluginFixture): PluginManifestRecord {
@@ -82,7 +82,7 @@ function createManifestProviderPlugin(params: ManifestProviderPluginFixture): Pl
     origin: params.origin ?? "bundled",
     rootDir: `/tmp/${params.id}`,
     source: params.origin ?? "bundled",
-    manifestPath: `/tmp/${params.id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/${params.id}/carapace.plugin.json`,
   };
 }
 
@@ -345,7 +345,7 @@ function expectLastSetupRegistryCall(params: {
     entries?: Record<string, { enabled?: boolean }>;
   };
 }) {
-  const call = getLastMockCallArg(loadOpenClawPluginsMock, "OpenClaw plugin setup loader");
+  const call = getLastMockCallArg(loadCarapacePluginsMock, "Carapace plugin setup loader");
   const options = expectRecordFields(call, {
     ...(params.onlyPluginIds !== undefined ? { onlyPluginIds: params.onlyPluginIds } : {}),
     ...(params.activate !== undefined ? { activate: params.activate } : {}),
@@ -375,7 +375,7 @@ function expectLastSetupRegistryLoad(params?: {
   env?: NodeJS.ProcessEnv;
   onlyPluginIds?: readonly string[];
 }) {
-  const call = getLastMockCallArg(loadOpenClawPluginsMock, "OpenClaw plugin setup loader");
+  const call = getLastMockCallArg(loadCarapacePluginsMock, "Carapace plugin setup loader");
   expectRecordFields(call, {
     cache: false,
     activate: false,
@@ -397,7 +397,7 @@ function getLastResolvedPluginConfig() {
 
 function getLastSetupLoadedPluginConfig() {
   const call = expectRecordFields(
-    getLastMockCallArg(loadOpenClawPluginsMock, "OpenClaw plugin setup loader"),
+    getLastMockCallArg(loadCarapacePluginsMock, "Carapace plugin setup loader"),
     {},
   );
   return (call.config ?? undefined) as
@@ -411,10 +411,10 @@ function getLastSetupLoadedPluginConfig() {
 }
 
 function createAutoEnabledProviderConfig() {
-  const rawConfig: OpenClawConfig = {
+  const rawConfig: CarapaceConfig = {
     plugins: {},
   };
-  const autoEnabledConfig: OpenClawConfig = {
+  const autoEnabledConfig: CarapaceConfig = {
     ...rawConfig,
     plugins: {
       entries: {
@@ -460,8 +460,8 @@ describe("resolvePluginProviders", () => {
       diagnostics: [],
     });
     vi.doMock("./loader.js", () => ({
-      loadOpenClawPlugins: (...args: Parameters<LoadOpenClawPlugins>) =>
-        loadOpenClawPluginsMock(...args),
+      loadCarapacePlugins: (...args: Parameters<LoadCarapacePlugins>) =>
+        loadCarapacePluginsMock(...args),
       isPluginRegistryLoadInFlight: (...args: Parameters<IsPluginRegistryLoadInFlight>) =>
         isPluginRegistryLoadInFlightMock(...args),
       resolveCompatibleRuntimePluginRegistry: (
@@ -584,7 +584,7 @@ describe("resolvePluginProviders", () => {
     expect(
       await resolvePersonalAccountAuthMethod({}, "personal-provider", "host-import"),
     ).toBeUndefined();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("does not treat cli backend ids as provider owners", () => {
@@ -800,7 +800,7 @@ describe("resolvePluginProviders", () => {
     setActivePluginRegistry(createEmptyPluginRegistry());
     resolveRuntimePluginRegistryMock.mockReset();
     resolveCompatibleRuntimePluginRegistryMock.mockReset();
-    loadOpenClawPluginsMock.mockReset();
+    loadCarapacePluginsMock.mockReset();
     isPluginRegistryLoadInFlightMock.mockReset();
     isPluginRegistryLoadInFlightMock.mockReturnValue(false);
     loadPluginMetadataSnapshotMock.mockReset();
@@ -818,11 +818,11 @@ describe("resolvePluginProviders", () => {
     const registry = createEmptyPluginRegistry();
     registry.providers.push({ pluginId: "google", provider, source: "bundled" });
     resolveRuntimePluginRegistryMock.mockReturnValue(registry);
-    loadOpenClawPluginsMock.mockReturnValue(registry);
+    loadCarapacePluginsMock.mockReturnValue(registry);
     loadPluginManifestRegistryMock.mockReset();
     applyPluginAutoEnableMock.mockReset();
     applyPluginAutoEnableMock.mockImplementation((params): PluginAutoEnableResult => ({
-      config: params.config ?? ({} as OpenClawConfig),
+      config: params.config ?? ({} as CarapaceConfig),
       changes: [],
       autoEnabledReasons: {},
     }));
@@ -856,7 +856,7 @@ describe("resolvePluginProviders", () => {
   });
 
   it("forwards an explicit env to plugin loading", () => {
-    const env = { OPENCLAW_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { CARAPACE_HOME: "/srv/carapace-home" } as NodeJS.ProcessEnv;
 
     const providers = resolvePluginProviders({
       workspaceDir: "/workspace/explicit",
@@ -1115,7 +1115,7 @@ describe("resolvePluginProviders", () => {
       includeUntrustedWorkspacePlugins: false,
     });
 
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("loads provider plugins from the auto-enabled config snapshot", () => {
@@ -1238,7 +1238,7 @@ describe("resolvePluginProviders", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       providerRefs: ["ollama-spark"],
       activate: true,
     });
@@ -1395,7 +1395,7 @@ describe("resolvePluginProviders", () => {
       mode: "setup",
     });
 
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("does not override explicitly disabled setup owners", () => {
@@ -1420,7 +1420,7 @@ describe("resolvePluginProviders", () => {
       mode: "setup",
     });
 
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("filters explicit setup owners through the untrusted workspace discovery gate", () => {
@@ -1442,7 +1442,7 @@ describe("resolvePluginProviders", () => {
     });
 
     expect(providers).toStrictEqual([]);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("does not auto-activate untrusted workspace runtime owners when requested", () => {

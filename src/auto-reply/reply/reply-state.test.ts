@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import type { SessionEntry } from "../../config/sessions.js";
 import {
@@ -59,7 +59,7 @@ async function loadStoredEntry(storePath: string, sessionKey: string): Promise<S
 }
 
 async function createCompactionSessionFixture(entry: SessionEntry) {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compact-"));
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compact-"));
   tempDirs.push(tmp);
   const storePath = path.join(tmp, "sessions.json");
   const sessionKey = "main";
@@ -568,7 +568,7 @@ describe("incrementCompactionCount", () => {
   });
 
   it("persists incognito compaction metadata only in the scoped store", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-incognito-compact-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-incognito-compact-"));
     tempDirs.push(tmp);
     const durableStorePath = path.join(tmp, "sessions.json");
     const sessionKey = "agent:main:dashboard:incognito-compaction";

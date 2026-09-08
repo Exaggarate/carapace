@@ -16,13 +16,13 @@ describe("buildImportUrl", () => {
   });
 
   it("returns bare URL for bundled hooks (no query string)", () => {
-    const url = buildImportUrl(immutableHandlerPath, "openclaw-bundled");
+    const url = buildImportUrl(immutableHandlerPath, "carapace-bundled");
     expect(url).not.toContain("?t=");
     expect(url).toMatch(/^file:\/\//);
   });
 
   it("appends file-metadata cache buster for workspace hooks", () => {
-    const url = buildImportUrl(immutableHandlerPath, "openclaw-workspace");
+    const url = buildImportUrl(immutableHandlerPath, "carapace-workspace");
     expect(url).toMatch(/\?t=[\d.]+&c=[\d.]+&s=\d+/);
 
     const { ctimeMs, mtimeMs, size } = fs.statSync(immutableHandlerPath);
@@ -32,24 +32,24 @@ describe("buildImportUrl", () => {
   });
 
   it("appends file-metadata cache buster for managed hooks", () => {
-    const url = buildImportUrl(immutableHandlerPath, "openclaw-managed");
+    const url = buildImportUrl(immutableHandlerPath, "carapace-managed");
     expect(url).toMatch(/\?t=[\d.]+&c=[\d.]+&s=\d+/);
   });
 
   it("appends file-metadata cache buster for plugin hooks", () => {
-    const url = buildImportUrl(immutableHandlerPath, "openclaw-plugin");
+    const url = buildImportUrl(immutableHandlerPath, "carapace-plugin");
     expect(url).toMatch(/\?t=[\d.]+&c=[\d.]+&s=\d+/);
   });
 
   it("returns same URL for bundled hooks across calls (cacheable)", () => {
-    const url1 = buildImportUrl(immutableHandlerPath, "openclaw-bundled");
-    const url2 = buildImportUrl(immutableHandlerPath, "openclaw-bundled");
+    const url1 = buildImportUrl(immutableHandlerPath, "carapace-bundled");
+    const url2 = buildImportUrl(immutableHandlerPath, "carapace-bundled");
     expect(url1).toBe(url2);
   });
 
   it("returns same URL for workspace hooks when file is unchanged", () => {
-    const url1 = buildImportUrl(immutableHandlerPath, "openclaw-workspace");
-    const url2 = buildImportUrl(immutableHandlerPath, "openclaw-workspace");
+    const url1 = buildImportUrl(immutableHandlerPath, "carapace-workspace");
+    const url2 = buildImportUrl(immutableHandlerPath, "carapace-workspace");
     expect(url1).toBe(url2);
   });
 
@@ -63,7 +63,7 @@ describe("buildImportUrl", () => {
     const cleanTime = new Date(Math.floor(Date.now() / 1000) * 1000);
     fs.utimesSync(tmpFile, cleanTime, cleanTime);
     const initialStat = fs.statSync(tmpFile);
-    const initialUrl = buildImportUrl(tmpFile, "openclaw-workspace");
+    const initialUrl = buildImportUrl(tmpFile, "carapace-workspace");
     const initialHandler = (await import(/* @vite-ignore */ initialUrl)).default as () => string;
     expect(initialHandler()).toBe("before");
 
@@ -79,13 +79,13 @@ describe("buildImportUrl", () => {
     const editedStat = fs.statSync(tmpFile);
     expect(editedStat.size).toBe(initialStat.size);
     expect(editedStat.mtimeMs).toBe(initialStat.mtimeMs);
-    const editedUrl = buildImportUrl(tmpFile, "openclaw-workspace");
+    const editedUrl = buildImportUrl(tmpFile, "carapace-workspace");
     const editedHandler = (await import(/* @vite-ignore */ editedUrl)).default as () => string;
     expect(editedHandler()).toBe("after!");
   });
 
   it("falls back to Date.now() when file does not exist", () => {
-    const url = buildImportUrl(path.join(fixtureRoot, "missing-handler.js"), "openclaw-workspace");
+    const url = buildImportUrl(path.join(fixtureRoot, "missing-handler.js"), "carapace-workspace");
     expect(url).toMatch(/\?t=\d+/);
   });
 });

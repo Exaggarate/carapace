@@ -1,16 +1,16 @@
 // Coverage for resolving models through provider hooks while discovery is skipped.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { guardModelFixtureAuth, guardModelFixtureWorkspace } from "./model.fixture.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let auth: ReturnType<typeof guardModelFixtureAuth>;
 let workspace: ReturnType<typeof guardModelFixtureWorkspace>;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "skip-agent-discovery" });
+  state = await createCarapaceTestState({ label: "skip-agent-discovery" });
   auth = guardModelFixtureAuth(state.root);
   workspace = guardModelFixtureWorkspace(state.root);
 });

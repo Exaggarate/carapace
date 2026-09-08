@@ -1,7 +1,7 @@
 // Imported by register.test.ts to keep its mocked suite in one Vitest module graph.
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
-import { runDoctorLintChecks, type OpenClawConfig } from "openclaw/plugin-sdk/health";
+import { runDoctorLintChecks, type CarapaceConfig } from "carapace/plugin-sdk/health";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { collectPolicyEvidence } from "../policy-state.js";
 import {
@@ -27,7 +27,7 @@ function writeModelPolicyFixture(providers: object): Promise<string> {
   return writePolicyFixture({ models: { providers } });
 }
 
-async function runModelPolicyFixture(providers: object, cfg: OpenClawConfig) {
+async function runModelPolicyFixture(providers: object, cfg: CarapaceConfig) {
   return runPolicyDoctorLint(ctx(await writeModelPolicyFixture(providers), cfg));
 }
 
@@ -55,7 +55,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         ],
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writePolicyFixture({
       scopes: {
         reviewer: {
@@ -91,7 +91,7 @@ describe("registerPolicyDoctorChecks", () => {
           reviewer: { tools: { deny: ["exec"] } },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const configPath = await writePolicyFixture({
       scopes: {
         reviewer: {
@@ -124,7 +124,7 @@ describe("registerPolicyDoctorChecks", () => {
       agents: {
         list: [{ id: "reviewer" }],
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writePolicyFixture({
       scopes: {
         reviewer: {
@@ -150,7 +150,7 @@ describe("registerPolicyDoctorChecks", () => {
     expect(result.remainingFindings).toEqual([
       expect.objectContaining({
         checkId: "policy/tools-required-deny-missing",
-        ocPath: "oc://openclaw.config/tools/deny",
+        ocPath: "oc://carapace.config/tools/deny",
         requirement: "oc://policy.jsonc/scopes/reviewer/tools/denyTools",
       }),
     ]);
@@ -168,7 +168,7 @@ describe("registerPolicyDoctorChecks", () => {
     const cfg = {
       ...cfgWithPolicy(),
       channels: { telegram: { enabled: false } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writePolicyFixture(
       {
         channels: {
@@ -197,7 +197,7 @@ describe("registerPolicyDoctorChecks", () => {
       mcp: { servers: { untrusted: { command: "uvx", args: ["untrusted-mcp"] } } },
       models: { providers: { openrouter: {} } },
       browser: { ssrfPolicy: { dangerouslyAllowPrivateNetwork: true } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writePolicyFixture({
       channels: {},
       mcp: {},
@@ -250,7 +250,7 @@ describe("registerPolicyDoctorChecks", () => {
   });
 
   it("reports invalid requireMetadata entries against a configured policy path", async () => {
-    const configPath = join(workspaceDir, "openclaw.jsonc");
+    const configPath = join(workspaceDir, "carapace.jsonc");
     await fs.writeFile(configPath, "{}", "utf-8");
     await fs.writeFile(
       join(workspaceDir, "workspace.policy.jsonc"),
@@ -322,7 +322,7 @@ describe("registerPolicyDoctorChecks", () => {
         checkId: "policy/tools-md-migration-required",
         severity: "error",
         message:
-          "TOOLS.md contains unmigrated governed tool declarations; run `openclaw doctor --fix` to migrate them into the AGENTS.md `## Tools` section before policy evaluation can pass.",
+          "TOOLS.md contains unmigrated governed tool declarations; run `carapace doctor --fix` to migrate them into the AGENTS.md `## Tools` section before policy evaluation can pass.",
         path: "TOOLS.md",
       }),
     ]);
@@ -515,20 +515,20 @@ describe("registerPolicyDoctorChecks", () => {
           model: "openrouter/openai/gpt-5.5",
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ deny: ["openrouter"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-denied-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/models/providers/openrouter",
+        ocPath: "oc://carapace.config/models/providers/openrouter",
         requirement: "oc://policy.jsonc/models/providers/deny",
       }),
       expect.objectContaining({
         checkId: "policy/models-denied-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/agents/defaults/model",
+        ocPath: "oc://carapace.config/agents/defaults/model",
         requirement: "oc://policy.jsonc/models/providers/deny",
       }),
     ]);
@@ -547,14 +547,14 @@ describe("registerPolicyDoctorChecks", () => {
           model: "OpenRouter/openai/gpt-5.5",
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ deny: ["openrouter", "amazon-bedrock"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-denied-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/agents/defaults/model",
+        ocPath: "oc://carapace.config/agents/defaults/model",
         requirement: "oc://policy.jsonc/models/providers/deny",
       }),
     ]);
@@ -573,14 +573,14 @@ describe("registerPolicyDoctorChecks", () => {
           model: "OpenRouter/openai/gpt-5.5",
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ allow: ["openrouter", "amazon-bedrock"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-unapproved-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/models/providers/aws-bedrock",
+        ocPath: "oc://carapace.config/models/providers/aws-bedrock",
         requirement: "oc://policy.jsonc/models/providers/allow",
       }),
     ]);
@@ -597,14 +597,14 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ allow: ["openai"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-unapproved-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/agents/defaults/model/fallbacks/#0",
+        ocPath: "oc://carapace.config/agents/defaults/model/fallbacks/#0",
         requirement: "oc://policy.jsonc/models/providers/allow",
       }),
     ]);
@@ -620,14 +620,14 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ allow: ["openai"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-unapproved-provider",
         severity: "error",
-        ocPath: 'oc://openclaw.config/agents/defaults/models/"openrouter/*"',
+        ocPath: 'oc://carapace.config/agents/defaults/models/"openrouter/*"',
         requirement: "oc://policy.jsonc/models/providers/allow",
       }),
     ]);
@@ -646,14 +646,14 @@ describe("registerPolicyDoctorChecks", () => {
           },
         ],
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ allow: ["openai"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-unapproved-provider",
         severity: "error",
-        ocPath: 'oc://openclaw.config/agents/list/#0/models/"openrouter/*"',
+        ocPath: 'oc://carapace.config/agents/list/#0/models/"openrouter/*"',
         requirement: "oc://policy.jsonc/models/providers/allow",
       }),
     ]);
@@ -667,14 +667,14 @@ describe("registerPolicyDoctorChecks", () => {
           anthropic: {},
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await runModelPolicyFixture({ allow: ["openai"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-unapproved-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/models/providers/anthropic",
+        ocPath: "oc://carapace.config/models/providers/anthropic",
         requirement: "oc://policy.jsonc/models/providers/allow",
       }),
     ]);
@@ -691,14 +691,14 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const result = await runModelPolicyFixture({ allow: ["openai"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-unapproved-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/agents/defaults/subagents/model",
+        ocPath: "oc://carapace.config/agents/defaults/subagents/model",
         requirement: "oc://policy.jsonc/models/providers/allow",
       }),
     ]);
@@ -715,14 +715,14 @@ describe("registerPolicyDoctorChecks", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const result = await runModelPolicyFixture({ deny: ["openrouter"] }, cfg);
 
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/models-denied-provider",
         severity: "error",
-        ocPath: "oc://openclaw.config/agents/list/#0/model/primary",
+        ocPath: "oc://carapace.config/agents/list/#0/model/primary",
         requirement: "oc://policy.jsonc/models/providers/deny",
       }),
     ]);
@@ -750,7 +750,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeMcpPolicyFixture({ deny: ["untrusted"] });
 
     const result = await runPolicyDoctorLint(ctx(configPath, cfg));
@@ -759,7 +759,7 @@ describe("registerPolicyDoctorChecks", () => {
       expect.objectContaining({
         checkId: "policy/mcp-denied-server",
         severity: "error",
-        ocPath: "oc://openclaw.config/mcp/servers/untrusted",
+        ocPath: "oc://carapace.config/mcp/servers/untrusted",
         requirement: "oc://policy.jsonc/mcp/servers/deny",
       }),
     ]);
@@ -776,7 +776,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeMcpPolicyFixture({ deny: ["DocsServer"] });
 
     const result = await runPolicyDoctorLint(ctx(configPath, cfg));
@@ -785,7 +785,7 @@ describe("registerPolicyDoctorChecks", () => {
       expect.objectContaining({
         checkId: "policy/mcp-denied-server",
         severity: "error",
-        ocPath: "oc://openclaw.config/mcp/servers/DocsServer",
+        ocPath: "oc://carapace.config/mcp/servers/DocsServer",
         requirement: "oc://policy.jsonc/mcp/servers/deny",
       }),
     ]);
@@ -806,7 +806,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeMcpPolicyFixture({ allow: ["docs"] });
 
     const result = await runPolicyDoctorLint(ctx(configPath, cfg));
@@ -815,7 +815,7 @@ describe("registerPolicyDoctorChecks", () => {
       expect.objectContaining({
         checkId: "policy/mcp-unapproved-server",
         severity: "error",
-        ocPath: "oc://openclaw.config/mcp/servers/remote",
+        ocPath: "oc://carapace.config/mcp/servers/remote",
         requirement: "oc://policy.jsonc/mcp/servers/allow",
       }),
     ]);
@@ -832,7 +832,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeMcpPolicyFixture({ allow: ["DocsServer"] });
 
     const result = await runPolicyDoctorLint(ctx(configPath, cfg));
@@ -874,7 +874,7 @@ describe("registerPolicyDoctorChecks", () => {
     expect(server).toEqual(
       expect.objectContaining({
         id: "Outlook Graph",
-        source: 'oc://openclaw.config/mcp/servers/"Outlook Graph"',
+        source: 'oc://carapace.config/mcp/servers/"Outlook Graph"',
       }),
     );
   });
@@ -887,7 +887,7 @@ describe("registerPolicyDoctorChecks", () => {
           openrouter: {},
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writeMcpPolicyFixture({ allow: ["docs"] });
 
     const result = await runPolicyDoctorLint(ctx(configPath, cfg));
@@ -909,7 +909,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       session: { requireDmScope: "per-channel-peer" },
       channels: {
@@ -927,25 +927,25 @@ describe("registerPolicyDoctorChecks", () => {
         expect.objectContaining({
           checkId: "policy/ingress-dm-scope-unapproved",
           severity: "error",
-          ocPath: "oc://openclaw.config/session/dmScope",
+          ocPath: "oc://carapace.config/session/dmScope",
           requirement: "oc://policy.jsonc/ingress/session/requireDmScope",
         }),
         expect.objectContaining({
           checkId: "policy/ingress-dm-policy-unapproved",
           severity: "error",
-          ocPath: "oc://openclaw.config/channels/telegram/dmPolicy",
+          ocPath: "oc://carapace.config/channels/telegram/dmPolicy",
           requirement: "oc://policy.jsonc/ingress/channels/allowDmPolicies",
         }),
         expect.objectContaining({
           checkId: "policy/ingress-open-groups-denied",
           severity: "error",
-          ocPath: "oc://openclaw.config/channels/telegram/groupPolicy",
+          ocPath: "oc://carapace.config/channels/telegram/groupPolicy",
           requirement: "oc://policy.jsonc/ingress/channels/denyOpenGroups",
         }),
         expect.objectContaining({
           checkId: "policy/ingress-group-mention-required",
           severity: "error",
-          ocPath: "oc://openclaw.config/channels/telegram/groups/ops/requireMention",
+          ocPath: "oc://carapace.config/channels/telegram/groups/ops/requireMention",
           requirement: "oc://policy.jsonc/ingress/channels/requireMentionInGroups",
         }),
       ]),
@@ -956,7 +956,7 @@ describe("registerPolicyDoctorChecks", () => {
     const cfg = {
       ...cfgWithPolicy(),
       session: { dmScope: "Per-Channel-Peer" },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       session: { requireDmScope: "per-channel-peer" },
     });
@@ -985,7 +985,7 @@ describe("registerPolicyDoctorChecks", () => {
           requireMention: false,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writePolicyFixture({
       ingress: {
         session: { requireDmScope: "per-channel-peer" },
@@ -1039,7 +1039,7 @@ describe("registerPolicyDoctorChecks", () => {
           requireMention: false,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writePolicyFixture({
       scopes: {
         telegramIngress: {
@@ -1092,7 +1092,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       channels: {
         denyOpenGroups: true,
@@ -1107,7 +1107,7 @@ describe("registerPolicyDoctorChecks", () => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "channelGroupPolicy",
-          source: "oc://openclaw.config/channels/telegram/groupPolicy",
+          source: "oc://carapace.config/channels/telegram/groupPolicy",
           value: "open",
         }),
       ]),
@@ -1134,7 +1134,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       channels: {
         requireMentionInGroups: true,
@@ -1148,7 +1148,7 @@ describe("registerPolicyDoctorChecks", () => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "channelRequireMention",
-          source: 'oc://openclaw.config/channels/telegram/groups/"*"/requireMention',
+          source: 'oc://carapace.config/channels/telegram/groups/"*"/requireMention',
           value: true,
         }),
       ]),
@@ -1171,7 +1171,7 @@ describe("registerPolicyDoctorChecks", () => {
           requireMention: true,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       channels: {
         denyOpenGroups: true,
@@ -1187,7 +1187,7 @@ describe("registerPolicyDoctorChecks", () => {
           channel: "signal",
           explicit: false,
           kind: "channelGroupPolicy",
-          source: "oc://openclaw.config/channels/signal/groupPolicy",
+          source: "oc://carapace.config/channels/signal/groupPolicy",
           value: "allowlist",
         }),
       ]),
@@ -1209,7 +1209,7 @@ describe("registerPolicyDoctorChecks", () => {
           groupPolicy: "allowlist",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       channels: {
         allowDmPolicies: ["disabled"],
@@ -1224,7 +1224,7 @@ describe("registerPolicyDoctorChecks", () => {
         expect.objectContaining({
           channel: "slack",
           kind: "channelDmPolicy",
-          source: "oc://openclaw.config/channels/slack/dm/enabled",
+          source: "oc://carapace.config/channels/slack/dm/enabled",
           value: "disabled",
         }),
       ]),
@@ -1312,21 +1312,21 @@ describe("registerPolicyDoctorChecks", () => {
       expect.arrayContaining([
         expect.objectContaining({
           source:
-            "oc://openclaw.config/channels/discord/guilds/ops/channels/releases/requireMention",
+            "oc://carapace.config/channels/discord/guilds/ops/channels/releases/requireMention",
           value: false,
         }),
         expect.objectContaining({
           source:
-            "oc://openclaw.config/channels/msteams/teams/engineering/channels/general/requireMention",
+            "oc://carapace.config/channels/msteams/teams/engineering/channels/general/requireMention",
           value: false,
         }),
         expect.objectContaining({
-          source: "oc://openclaw.config/channels/matrix/rooms/standup/requireMention",
+          source: "oc://carapace.config/channels/matrix/rooms/standup/requireMention",
           value: false,
         }),
         expect.objectContaining({
           source:
-            "oc://openclaw.config/channels/telegram/groups/ops/topics/incidents/requireMention",
+            "oc://carapace.config/channels/telegram/groups/ops/topics/incidents/requireMention",
           value: false,
         }),
       ]),
@@ -1340,7 +1340,7 @@ describe("registerPolicyDoctorChecks", () => {
       channels: {
         qqbot: {},
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       session: { requireDmScope: "per-channel-peer" },
       channels: {
@@ -1355,7 +1355,7 @@ describe("registerPolicyDoctorChecks", () => {
     expect(result.findings).toEqual([
       expect.objectContaining({
         checkId: "policy/ingress-open-groups-denied",
-        ocPath: "oc://openclaw.config/channels/qqbot/groupPolicy",
+        ocPath: "oc://carapace.config/channels/qqbot/groupPolicy",
       }),
     ]);
   });
@@ -1372,7 +1372,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       channels: {
         allowDmPolicies: ["pairing"],
@@ -1388,12 +1388,12 @@ describe("registerPolicyDoctorChecks", () => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "channelGroupPolicy",
-          source: "oc://openclaw.config/channels/telegram/groups",
+          source: "oc://carapace.config/channels/telegram/groups",
           value: "allowlist",
         }),
         expect.objectContaining({
           kind: "channelRequireMention",
-          source: "oc://openclaw.config/channels/telegram/requireMention",
+          source: "oc://carapace.config/channels/telegram/requireMention",
           value: true,
         }),
       ]),
@@ -1413,7 +1413,7 @@ describe("registerPolicyDoctorChecks", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const configPath = await writeIngressPolicyFixture({
       channels: {
         denyOpenGroups: true,
@@ -1428,7 +1428,7 @@ describe("registerPolicyDoctorChecks", () => {
         expect.objectContaining({
           channel: "slack",
           kind: "channelGroupPolicy",
-          source: "oc://openclaw.config/channels/slack/groupPolicy",
+          source: "oc://carapace.config/channels/slack/groupPolicy",
           value: "open",
         }),
       ]),
@@ -1437,7 +1437,7 @@ describe("registerPolicyDoctorChecks", () => {
       expect.arrayContaining([
         expect.objectContaining({
           checkId: "policy/ingress-open-groups-denied",
-          ocPath: "oc://openclaw.config/channels/slack/groupPolicy",
+          ocPath: "oc://carapace.config/channels/slack/groupPolicy",
         }),
       ]),
     );

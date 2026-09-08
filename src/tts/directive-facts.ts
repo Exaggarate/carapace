@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { AssistantDeliveryTtsFacts } from "../llm/types.js";
 import { replaceOutsideCodeRegions } from "../utils/directive-tags.js";
 

@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveAuthProfileSecretOwnerId } from "../secrets/runtime-auth-profile-owner.js";
@@ -45,7 +45,7 @@ export async function prepareProviderDiscoveryAuth(
     resolveProviderApiKey: ProviderApiKeyResolver;
     resolveProviderAuth: ProviderAuthResolver;
   },
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ) {
   const profiles = new Map<string, () => string>();
   for (const [profileId, credential] of Object.entries(authStore.profiles)) {
@@ -123,7 +123,7 @@ export async function prepareProviderCatalogOAuthAuth(
     isActive: () => boolean;
     onPreparationFailure: (profileIds: readonly string[]) => void;
   },
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ) {
   const failedProfileIds: string[] = [];
   let preparedProfile: { profileId: string; apiKey: string } | undefined;

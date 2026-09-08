@@ -3,15 +3,15 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import {
   resolveStateDir,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   MEMORY_CHUNKING_VERSION,
   type MemorySource,
   type MemorySyncParams,
   type MemorySyncProgressUpdate,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { MemoryIndexDatabase } from "./manager-database-context.js";
 import {
   MEMORY_INDEX_PROVENANCE_VERSION,
@@ -48,8 +48,8 @@ type MemorySessionTranscriptUpdate = {
   };
 };
 
-const originalStartupStateDir = process.env.OPENCLAW_STATE_DIR;
-const originalStartupConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+const originalStartupStateDir = process.env.CARAPACE_STATE_DIR;
+const originalStartupConfigPath = process.env.CARAPACE_CONFIG_PATH;
 let transcriptUpdateListener: ((update: MemorySessionTranscriptUpdate) => void) | undefined;
 
 /** Clears the module-owned listener between tests; ESM bindings cannot be reassigned by importers. */
@@ -94,23 +94,23 @@ function createStartupHarnessDatabase(sourceRows: SourceStateRow[]): DatabaseSyn
   return db;
 }
 export function setStartupStateDir(stateDir: string): void {
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", stateDir);
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", stateDir);
 }
 
 export function setStartupConfigPath(configPath: string): void {
-  Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", configPath);
+  Reflect.set(process.env, "CARAPACE_CONFIG_PATH", configPath);
 }
 
 export function restoreStartupEnv(): void {
   if (originalStartupStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalStartupStateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", originalStartupStateDir);
   }
   if (originalStartupConfigPath === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_CONFIG_PATH");
+    Reflect.deleteProperty(process.env, "CARAPACE_CONFIG_PATH");
   } else {
-    Reflect.set(process.env, "OPENCLAW_CONFIG_PATH", originalStartupConfigPath);
+    Reflect.set(process.env, "CARAPACE_CONFIG_PATH", originalStartupConfigPath);
   }
 }
 
@@ -119,9 +119,9 @@ export function emitSessionTranscriptUpdate(update: MemorySessionTranscriptUpdat
 }
 
 export class SessionStartupCatchupHarness extends MemoryManagerSyncOps {
-  protected readonly cfg = {} as OpenClawConfig;
+  protected readonly cfg = {} as CarapaceConfig;
   protected readonly agentId = "main";
-  protected readonly workspaceDir = "/tmp/openclaw-test-workspace";
+  protected readonly workspaceDir = "/tmp/carapace-test-workspace";
   protected readonly settings = {
     chunking: {
       overlap: 0,

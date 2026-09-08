@@ -1,7 +1,7 @@
 /** Authorized tree and admin subagent kill orchestration. */
 import { resolveSubagentLabel } from "../../../auto-reply/reply/subagents-utils.js";
 import { loadExactSessionEntryReadOnly } from "../../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   getAgentEventLifecycleGeneration,
   isAgentEventLifecycleGenerationCurrent,
@@ -54,7 +54,7 @@ type KillTree = KillBinding & {
 };
 
 type KillSelection = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runs: Iterable<SubagentRunRecord>;
   assertCurrent?: () => void;
   ownsRoot?: (entry: SubagentRunRecord) => boolean;
@@ -258,7 +258,7 @@ async function withSubagentKillScope<T>(
 }
 
 async function killLatestSubagentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   tree: KillTree;
   scope: KillScope;
   suppressTaskDelivery?: boolean;
@@ -353,7 +353,7 @@ function collectKillErrors(trees: KillTree[], unlabeledRoot?: KillTree) {
 }
 
 type KillTraversal = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   scope: KillScope;
   suppressTaskDelivery?: boolean;
 };
@@ -439,7 +439,7 @@ async function killSubagentRoot(params: Parameters<typeof killLatestSubagentRun>
 
 /** Kills every currently controlled child run and its descendants. */
 export async function killAllControlledSubagentRuns(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   controller: ResolvedSubagentController;
   runs: SubagentRunRecord[];
   suppressTaskDelivery?: boolean;
@@ -460,7 +460,7 @@ export async function killAllControlledSubagentRuns(params: {
 
 /** Lifecycle cleanup owns both the completion requester and its separately scoped controller. */
 export async function killSessionSubagentRuns(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   assertCurrent?: () => void;

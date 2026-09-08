@@ -1,6 +1,6 @@
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
 import {
   patchLiveQaGatewayConfig,
   readLiveQaGatewayConfig,
@@ -26,7 +26,7 @@ type FlowPreparationInput = Parameters<NonNullable<AdapterDefinition["prepareFlo
 export type SlackQaScenarioEnvironment = {
   channelId: string;
   configureScenario: (implementation: SlackQaScenarioImplementation) => Promise<{
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     primaryModel: string;
     run: SlackQaScenarioRun;
   }>;
@@ -103,7 +103,7 @@ export function createSlackQaScenarioEnvironment(params: {
             assertSlackCodexApprovalModelSupported(primaryModel);
           }
           const snapshot = await readLiveQaGatewayConfig(input.gateway);
-          const cfg = buildSlackQaConfig(snapshot.config as OpenClawConfig, {
+          const cfg = buildSlackQaConfig(snapshot.config as CarapaceConfig, {
             channelId: params.channelId,
             driverBotUserId: params.driverBotUserId,
             overrides: implementation.configOverrides,

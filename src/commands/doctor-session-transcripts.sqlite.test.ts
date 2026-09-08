@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PreparedPostSessionPluginMigration } from "../infra/state-migrations.types.js";
 
@@ -129,7 +129,7 @@ describe("doctor session transcript repair", () => {
           await params.run({ assertCurrent() {} }),
       );
     root = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-transcripts-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-transcripts-")),
     );
   });
 
@@ -152,7 +152,7 @@ describe("doctor session transcript repair", () => {
         validatedTranscriptEvents: 0,
       },
     });
-    const env = { ...process.env, OPENCLAW_STATE_DIR: root };
+    const env = { ...process.env, CARAPACE_STATE_DIR: root };
     const cfg = {};
 
     await noteSessionTranscriptHealth({
@@ -277,7 +277,7 @@ describe("doctor session transcript repair", () => {
     try {
       await noteSessionTranscriptHealth({
         cfg: {},
-        env: { ...process.env, OPENCLAW_STATE_DIR: root },
+        env: { ...process.env, CARAPACE_STATE_DIR: root },
         sessionDirs: [sessionsDir],
         sessionSqlite: true,
         shouldRepair: true,
@@ -319,7 +319,7 @@ describe("doctor session transcript repair", () => {
 
     await noteSessionTranscriptHealth({
       cfg: {},
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       sessionDirs: [sessionsDir],
       sessionSqlite: true,
       shouldRepair: true,
@@ -331,7 +331,7 @@ describe("doctor session transcript repair", () => {
     );
     expect(note).toHaveBeenCalledWith(
       expect.stringContaining(
-        'shrinking the on-disk database requires "openclaw doctor --session-sqlite compact --session-sqlite-all-agents"',
+        'shrinking the on-disk database requires "carapace doctor --session-sqlite compact --session-sqlite-all-agents"',
       ),
       "Session SQLite",
     );
@@ -352,7 +352,7 @@ describe("doctor session transcript repair", () => {
         validatedTranscriptEvents: 0,
       },
     });
-    const env = { ...process.env, OPENCLAW_STATE_DIR: root };
+    const env = { ...process.env, CARAPACE_STATE_DIR: root };
     const cfg = {};
 
     await noteSessionTranscriptHealth({
@@ -378,7 +378,7 @@ describe("doctor session transcript repair", () => {
     });
     expect(note).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Inspect with "openclaw doctor --session-sqlite dry-run --session-sqlite-all-agents".',
+        'Inspect with "carapace doctor --session-sqlite dry-run --session-sqlite-all-agents".',
       ),
       "Session SQLite",
     );
@@ -401,13 +401,13 @@ describe("doctor session transcript repair", () => {
     });
     runPostSessionPluginDoctorStateRepairs.mockResolvedValueOnce({
       changes: ["Removed 2 orphaned plugin session bindings"],
-      warnings: ["Plugin lifecycle ownership unavailable; rerun openclaw doctor --fix"],
+      warnings: ["Plugin lifecycle ownership unavailable; rerun carapace doctor --fix"],
     });
 
     const receipts: unknown[] = [];
     const receipt = await noteSessionTranscriptHealth({
       cfg: {},
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       sessionDirs: [sessionsDir],
       sessionSqlite: true,
       shouldRepair: true,
@@ -427,7 +427,7 @@ describe("doctor session transcript repair", () => {
       "Plugin session repair",
     );
     expect(note).toHaveBeenCalledWith(
-      expect.stringContaining("rerun openclaw doctor --fix"),
+      expect.stringContaining("rerun carapace doctor --fix"),
       "Plugin session repair",
     );
   });
@@ -448,7 +448,7 @@ describe("doctor session transcript repair", () => {
     };
     const params = {
       cfg: {},
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       sessionSqlite: true,
       shouldRepair: true,
       postSessionPluginMigration: preparedPostSessionPluginMigration,
@@ -484,7 +484,7 @@ describe("doctor session transcript repair", () => {
 
     const receipt = await noteSessionTranscriptHealth({
       cfg: {},
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       sessionSqlite: true,
       shouldRepair: true,
       postSessionPluginMigration: preparedPostSessionPluginMigration,
@@ -507,7 +507,7 @@ describe("doctor session transcript repair", () => {
 
     const receipt = await noteSessionTranscriptHealth({
       cfg: {},
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       sessionSqlite: true,
       shouldRepair: false,
       postSessionPluginMigration: preparedPostSessionPluginMigration,
@@ -539,7 +539,7 @@ describe("doctor session transcript repair", () => {
       const receipts: unknown[] = [];
       const receipt = await noteSessionTranscriptHealth({
         cfg: { plugins: { enabled: false } },
-        env: { ...process.env, OPENCLAW_STATE_DIR: root },
+        env: { ...process.env, CARAPACE_STATE_DIR: root },
         sessionSqlite: true,
         shouldRepair,
         postSessionPluginMigration: { step, plannedActions: [] },
@@ -557,7 +557,7 @@ describe("doctor session transcript repair", () => {
 
     await noteSessionTranscriptHealth({
       cfg: { plugins: { entries: { external: { enabled: true } } } },
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       sessionSqlite: true,
       shouldRepair: true,
       postSessionPluginMigrationPlanBound: true,
@@ -569,7 +569,7 @@ describe("doctor session transcript repair", () => {
   });
 
   it("skips session SQLite import when the Gateway owns the state lock", async () => {
-    const env = { ...process.env, OPENCLAW_STATE_DIR: root };
+    const env = { ...process.env, CARAPACE_STATE_DIR: root };
     withDoctorSqliteMaintenanceLock.mockRejectedValueOnce(
       new DoctorSqliteMaintenanceLockUnavailableError(
         "session SQLite import",
@@ -594,7 +594,7 @@ describe("doctor session transcript repair", () => {
       "Session SQLite",
     );
     expect(note).toHaveBeenCalledWith(
-      expect.stringContaining('run "openclaw doctor --fix" for session-store maintenance'),
+      expect.stringContaining('run "carapace doctor --fix" for session-store maintenance'),
       "Session SQLite",
     );
   });
@@ -606,7 +606,7 @@ describe("doctor session transcript repair", () => {
     await expect(
       noteSessionTranscriptHealth({
         cfg: {},
-        env: { ...process.env, OPENCLAW_STATE_DIR: root },
+        env: { ...process.env, CARAPACE_STATE_DIR: root },
         sessionSqlite: true,
         shouldRepair: true,
         postSessionPluginMigration: preparedPostSessionPluginMigration,

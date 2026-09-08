@@ -9,7 +9,7 @@ import {
 } from "../../config/io.read-helpers.js";
 import { withConfigMutationLock } from "../../config/mutate.js";
 import { resolveStateDir } from "../../config/paths.js";
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import type { PackageUpdateTransaction } from "../../infra/package-update-steps.js";
 import { replaceFileAtomic } from "../../infra/replace-file.js";
@@ -22,8 +22,8 @@ import {
 import { NativePackageRollbackError } from "../../infra/update-native-package-stage.js";
 import { recordUpdateRunStep } from "../../infra/update-run-ledger.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { confirmGatewayReachable } from "../daemon-cli/restart-health-probe.js";
 import type { UpdateCommandOptions } from "./shared.js";
 import {
@@ -49,8 +49,8 @@ export async function rollbackFailedUpdate(params: {
   packageTransaction?: PackageUpdateTransaction;
   rollbackBlockedReason?: "state-migrated-no-rollback" | "rollback-state-unverified";
   schemaVersions?: UpdateStateSchemaVersion[];
-  candidateSchemaVersions?: OpenClawSchemaVersions;
-  previousSchemaVersions?: OpenClawSchemaVersions;
+  candidateSchemaVersions?: CarapaceSchemaVersions;
+  previousSchemaVersions?: CarapaceSchemaVersions;
   previousVerified?: boolean;
   configSnapshot: ConfigFileSnapshot;
   activationConfig?: UpdateConfigSnapshot;
@@ -100,7 +100,7 @@ export async function rollbackFailedUpdate(params: {
       root: result.root ?? null,
       nodeRunner: params.nodeRunner,
     });
-    const sharedPath = resolveOpenClawStateSqlitePath(env);
+    const sharedPath = resolveCarapaceStateSqlitePath(env);
     if (
       baseline === undefined ||
       !updateStateSchemaVersionsMatch(baseline, current, {

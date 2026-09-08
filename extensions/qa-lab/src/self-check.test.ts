@@ -50,14 +50,14 @@ describe("resolveQaSelfCheckOutputPath", () => {
   it("keeps explicit output paths untouched", () => {
     expect(
       resolveQaSelfCheckOutputPath({
-        repoRoot: "/tmp/openclaw-repo",
+        repoRoot: "/tmp/carapace-repo",
         outputPath: "/tmp/custom/self-check.md",
       }),
     ).toBe("/tmp/custom/self-check.md");
   });
 
   it("anchors default self-check reports under unique files in the provided repo root", () => {
-    const repoRoot = path.resolve("/tmp/openclaw-repo");
+    const repoRoot = path.resolve("/tmp/carapace-repo");
     const firstPath = resolveQaSelfCheckOutputPath({ repoRoot });
     const secondPath = resolveQaSelfCheckOutputPath({ repoRoot });
 

@@ -1,13 +1,13 @@
 // File Transfer plugin module implements node invoke policy behavior.
 import crypto from "node:crypto";
-import { ARCHIVE_LIMIT_ERROR_CODE, ArchiveLimitError } from "openclaw/plugin-sdk/archive";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { ARCHIVE_LIMIT_ERROR_CODE, ArchiveLimitError } from "carapace/plugin-sdk/archive";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import type {
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyContext,
-  OpenClawPluginNodeInvokePolicyResult,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+  CarapacePluginNodeInvokePolicy,
+  CarapacePluginNodeInvokePolicyContext,
+  CarapacePluginNodeInvokePolicyResult,
+} from "carapace/plugin-sdk/plugin-entry";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { appendFileTransferAudit, type FileTransferAuditOp } from "./audit.js";
 import { inspectDirFetchArchive } from "./dir-fetch-archive.js";
 import { DIR_FETCH_MAX_ENTRIES } from "./dir-fetch-limits.js";
@@ -106,8 +106,8 @@ async function verifyDirFetchArchive(
 }
 
 async function handleFileTransferInvoke(
-  ctx: OpenClawPluginNodeInvokePolicyContext,
-): Promise<OpenClawPluginNodeInvokePolicyResult> {
+  ctx: CarapacePluginNodeInvokePolicyContext,
+): Promise<CarapacePluginNodeInvokePolicyResult> {
   if (!FILE_TRANSFER_NODE_INVOKE_COMMANDS.includes(ctx.command as FileTransferCommand)) {
     return { ok: false, code: "UNSUPPORTED_COMMAND", message: "unsupported file-transfer command" };
   }
@@ -381,7 +381,7 @@ async function handleFileTransferInvoke(
     : result;
 }
 
-export function createFileTransferNodeInvokePolicy(): OpenClawPluginNodeInvokePolicy {
+export function createFileTransferNodeInvokePolicy(): CarapacePluginNodeInvokePolicy {
   return {
     commands: [...FILE_TRANSFER_NODE_INVOKE_COMMANDS],
     handle: handleFileTransferInvoke,

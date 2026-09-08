@@ -2,8 +2,8 @@
 import {
   getRequiredHookHandler,
   registerHookHandlersForTest,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 type ThreadBindingRecord = {
@@ -25,7 +25,7 @@ vi.mock("./monitor/thread-bindings.js", () => ({
   unbindThreadBindingsBySessionKey: hookMocks.unbindThreadBindingsBySessionKey,
 }));
 function registerHandlersForTest() {
-  return registerHookHandlersForTest<OpenClawPluginApi>({
+  return registerHookHandlersForTest<CarapacePluginApi>({
     config: {},
     register: registerDiscordSubagentHooks,
   });

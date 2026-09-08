@@ -1,7 +1,7 @@
 // Resolves model suppression metadata declared by plugin manifests.
-import { buildModelCatalogMergeKey } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { buildModelCatalogMergeKey } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   planManifestModelCatalogSuppressions,
   type ManifestModelCatalogSuppressionEntry,
@@ -21,7 +21,7 @@ type PreparedManifestSuppression = {
 };
 
 function listManifestModelCatalogSuppressions(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   snapshot: PluginMetadataSnapshot;
 }): readonly ManifestModelCatalogSuppressionEntry[] {
   const snapshot = params.snapshot;
@@ -66,7 +66,7 @@ function normalizeSuppressionHost(host: string): string {
 
 function resolveConfiguredProviderValue(params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): { api?: string; baseUrl?: string } | undefined {
   const providers = params.config?.models?.providers;
   if (!providers) {
@@ -88,7 +88,7 @@ function manifestSuppressionMatchesConditions(params: {
   suppression: PreparedManifestSuppression;
   provider: string;
   baseUrl?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): boolean {
   const { entry, allowedApis, allowedHosts } = params.suppression;
   const when = entry.when;
@@ -128,7 +128,7 @@ function manifestSuppressionMatchesConditions(params: {
 }
 
 export function buildManifestBuiltInModelSuppressionResolver(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;
@@ -193,7 +193,7 @@ export function buildManifestBuiltInModelSuppressionResolver(params: {
         provider,
         modelId,
         reason: suppression.retirement
-          ? `${suppression.reason ?? "This model has retired."} Run \`openclaw doctor --fix\` to ${suppression.retirement.replacedBy ? `replace it with ${suppression.retirement.replacedBy}` : "clear the retired override and use the default model"}.`
+          ? `${suppression.reason ?? "This model has retired."} Run \`carapace doctor --fix\` to ${suppression.retirement.replacedBy ? `replace it with ${suppression.retirement.replacedBy}` : "clear the retired override and use the default model"}.`
           : suppression.reason,
       }),
       ...(suppression.retirement ? { retirement: suppression.retirement } : {}),

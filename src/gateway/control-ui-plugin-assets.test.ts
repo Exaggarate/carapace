@@ -48,7 +48,7 @@ function activateFixture(origin: PluginRecord["origin"] = "bundled") {
     controlUi: { entry: "dist/control-ui/index.js", styles: ["dist/control-ui/theme.css"] },
   });
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: record.id,
       configSchema: { type: "object", additionalProperties: false },
@@ -178,7 +178,7 @@ describe("native Control UI browser assets", () => {
 
   it.each(
     [AUTH_NONE, AUTH_TOKEN].flatMap((auth) =>
-      ["", "/openclaw"].map((basePath) => ({ auth, basePath })),
+      ["", "/carapace"].map((basePath) => ({ auth, basePath })),
     ),
   )(
     "reports and enforces native asset authentication for $auth.mode Gateways at '$basePath'",
@@ -190,7 +190,7 @@ describe("native Control UI browser assets", () => {
         run: async () => {
           activateFixture();
           const entry = (await listControlUiPluginCatalog()).plugins[0]!;
-          const assetPath = `${basePath}/__openclaw__/plugins/control-ui/native-ui/`;
+          const assetPath = `${basePath}/__carapace__/plugins/control-ui/native-ui/`;
           expect(entry.entryUrl).toBe(`${assetPath}${entry.revision}/index.js`);
           expect(entry.styles).toEqual([`${assetPath}${entry.revision}/theme.css`]);
           const server = createTestGatewayServer({
@@ -516,7 +516,7 @@ describe("native Control UI browser assets", () => {
     fs.mkdirSync(nextDirectory);
     fs.writeFileSync(path.join(nextDirectory, "index.js"), "export default { version: 2 };");
     fs.writeFileSync(
-      path.join(fixture.rootDir, "openclaw.plugin.json"),
+      path.join(fixture.rootDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "native-ui",
         configSchema: { type: "object" },

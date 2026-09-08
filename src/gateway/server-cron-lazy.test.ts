@@ -3,7 +3,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CliDeps } from "../cli/deps.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayCronServiceContract } from "./server-cron-contract.js";
 import type { GatewayCronState } from "./server-cron.js";
 
@@ -38,10 +38,10 @@ describe("createLazyGatewayCronState", () => {
   });
 
   it("resolves its default store path from the prepared env", () => {
-    const stateRoot = "/tmp/openclaw-candidate-state";
+    const stateRoot = "/tmp/carapace-candidate-state";
     const lazy = createLazyGatewayCronState({
       ...createParams(),
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateRoot },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateRoot },
     });
 
     expect(lazy.storePath).toBe(`${stateRoot}/cron/jobs.json`);
@@ -49,11 +49,11 @@ describe("createLazyGatewayCronState", () => {
   });
 
   it("respects a configured legacy cron store partition", () => {
-    const customStore = "/tmp/openclaw-custom-cron/jobs.json";
+    const customStore = "/tmp/carapace-custom-cron/jobs.json";
     const params = createParams();
     const lazy = createLazyGatewayCronState({
       ...params,
-      cfg: { ...params.cfg, cron: { store: customStore } } as unknown as OpenClawConfig,
+      cfg: { ...params.cfg, cron: { store: customStore } } as unknown as CarapaceConfig,
     });
 
     expect(lazy.storePath).toBe(customStore);
@@ -277,7 +277,7 @@ describe("createLazyGatewayCronState", () => {
   });
 
   it("preserves the startup cron enabled flag without loading cron runtime", () => {
-    vi.stubEnv("OPENCLAW_SKIP_CRON", "1");
+    vi.stubEnv("CARAPACE_SKIP_CRON", "1");
 
     const lazy = createLazyGatewayCronState(createParams());
 
@@ -432,11 +432,11 @@ describe("createLazyGatewayCronState", () => {
   });
 });
 
-function createParams(overrides: Partial<OpenClawConfig> = {}) {
+function createParams(overrides: Partial<CarapaceConfig> = {}) {
   return {
     cfg: {
       ...overrides,
-    } as OpenClawConfig,
+    } as CarapaceConfig,
     deps: {} as CliDeps,
     broadcast: vi.fn(),
   };
@@ -445,7 +445,7 @@ function createParams(overrides: Partial<OpenClawConfig> = {}) {
 function createCronState(cron: GatewayCronServiceContract): GatewayCronState {
   return {
     cron,
-    storePath: "/tmp/openclaw-cron.json",
+    storePath: "/tmp/carapace-cron.json",
     cronEnabled: true,
     reconcileExitWatchers: vi.fn(async () => {}),
     reconcileStreamWatchers: vi.fn(async () => {}),

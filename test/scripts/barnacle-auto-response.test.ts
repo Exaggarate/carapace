@@ -1,6 +1,6 @@
 // Barnacle Auto Response tests cover barnacle auto response script behavior.
 import { readFileSync } from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   candidateLabels,
@@ -58,8 +58,8 @@ function barnacleContext(
 ) {
   return {
     repo: {
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "carapace",
+      repo: "carapace",
     },
     payload: {
       action: options.action ?? "opened",
@@ -87,8 +87,8 @@ function barnacleIssueContext(
 ) {
   return {
     repo: {
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "carapace",
+      repo: "carapace",
     },
     payload: {
       action: options.action ?? "opened",
@@ -96,7 +96,7 @@ function barnacleIssueContext(
       sender: options.sender,
       issue: {
         number: 456,
-        title: "OpenClaw issue",
+        title: "Carapace issue",
         body: "",
         author_association: "CONTRIBUTOR",
         user: {
@@ -213,8 +213,8 @@ function barnacleGithub(
 
 function expectedIssueUpdate(issue_number: number, state: string) {
   return {
-    owner: "openclaw",
-    repo: "openclaw",
+    owner: "carapace",
+    repo: "carapace",
     issue_number,
     state,
   };
@@ -222,8 +222,8 @@ function expectedIssueUpdate(issue_number: number, state: string) {
 
 function expectedRemoveLabel(issue_number: number, name: string) {
   return {
-    owner: "openclaw",
-    repo: "openclaw",
+    owner: "carapace",
+    repo: "carapace",
     issue_number,
     name,
   };
@@ -231,8 +231,8 @@ function expectedRemoveLabel(issue_number: number, name: string) {
 
 function expectedAddLabels(issue_number: number, labels: string[]) {
   return {
-    owner: "openclaw",
-    repo: "openclaw",
+    owner: "carapace",
+    repo: "carapace",
     issue_number,
     labels,
   };
@@ -339,7 +339,7 @@ describe("barnacle-auto-response", () => {
         {
           action: "labeled",
           label: { name: "r: skill" },
-          sender: { login: "openclaw-barnacle[bot]", type: "Bot" },
+          sender: { login: "carapace-barnacle[bot]", type: "Bot" },
         },
       ),
       core: {
@@ -380,7 +380,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, ["r: skill"], {
         action: "labeled",
         label: { name: "r: skill" },
-        sender: { login: "openclaw-barnacle[bot]", type: "Bot" },
+        sender: { login: "carapace-barnacle[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,
@@ -523,7 +523,7 @@ describe("barnacle-auto-response", () => {
       pr(
         "Fix duplicate plugin auto-enable entries",
         [
-          "- Problem: openclaw doctor --fix adds duplicate installed plugin entries",
+          "- Problem: carapace doctor --fix adds duplicate installed plugin entries",
           "- Why it matters: users get noisy config churn",
           "- What changed: respect manifest-provided channel auto-loads",
           "",
@@ -705,13 +705,13 @@ describe("barnacle-auto-response", () => {
 
   it("does not close automation PRs for the active PR limit", async () => {
     for (const automationPullRequest of [
-      { head: { ref: "clawsweeper/openclaw-openclaw-73880" }, login: "app/openclaw-clawsweeper" },
-      { headRefName: "clawsweeper/openclaw-openclaw-73880", login: "app/openclaw-clawsweeper" },
+      { head: { ref: "clawsweeper/carapace-carapace-73880" }, login: "app/carapace-clawsweeper" },
+      { headRefName: "clawsweeper/carapace-carapace-73880", login: "app/carapace-clawsweeper" },
       {
         head: { ref: "clownfish/ghcrawl-156993-autonomous-smoke" },
-        login: "app/openclaw-clownfish",
+        login: "app/carapace-clownfish",
       },
-      { headRefName: "clownfish/ghcrawl-156993-autonomous-smoke", login: "app/openclaw-clownfish" },
+      { headRefName: "clownfish/ghcrawl-156993-autonomous-smoke", login: "app/carapace-clownfish" },
     ]) {
       const { calls, github } = barnacleGithub([]);
       const { login, ...pullRequest } = automationPullRequest;
@@ -1097,7 +1097,7 @@ describe("barnacle-auto-response", () => {
         {
           action: "labeled",
           label: { name: PROOF_SUFFICIENT_LABEL },
-          sender: { login: "openclaw-clawsweeper[bot]", type: "Bot" },
+          sender: { login: "carapace-clawsweeper[bot]", type: "Bot" },
         },
       ),
       core: {
@@ -1116,7 +1116,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, [PROOF_SUFFICIENT_LABEL], {
         action: "labeled",
         label: { name: "status: ready for maintainer look" },
-        sender: { login: "openclaw-clawsweeper[bot]", type: "Bot" },
+        sender: { login: "carapace-clawsweeper[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,
@@ -1158,7 +1158,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, [PROOF_SUFFICIENT_LABEL, candidateLabels.needsPrContext], {
         action: "labeled",
         label: { name: "status: ready for maintainer look" },
-        sender: { login: "openclaw-clawsweeper[bot]", type: "Bot" },
+        sender: { login: "carapace-clawsweeper[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,
@@ -1179,7 +1179,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, [PROOF_SUFFICIENT_LABEL], {
         action: "labeled",
         label: { name: PROOF_SUFFICIENT_LABEL },
-        sender: { login: "openclaw-clawsweeper[bot]", type: "Bot" },
+        sender: { login: "carapace-clawsweeper[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,
@@ -1192,7 +1192,7 @@ describe("barnacle-auto-response", () => {
   });
 
   it("actions manually applied candidate labels", async () => {
-    const { calls, github } = barnacleGithub([file("extensions/example/openclaw.plugin.json")]);
+    const { calls, github } = barnacleGithub([file("extensions/example/carapace.plugin.json")]);
 
     await runBarnacleAutoResponse({
       github,
@@ -1234,14 +1234,14 @@ describe("barnacle-auto-response", () => {
   });
 
   it("keeps bot-applied candidate labels passive", async () => {
-    const { calls, github } = barnacleGithub([file("extensions/example/openclaw.plugin.json")]);
+    const { calls, github } = barnacleGithub([file("extensions/example/carapace.plugin.json")]);
 
     await runBarnacleAutoResponse({
       github,
       context: barnacleContext({}, [candidateLabels.externalPluginCandidate], {
         action: "labeled",
         label: { name: candidateLabels.externalPluginCandidate },
-        sender: { login: "openclaw-bot[bot]", type: "Bot" },
+        sender: { login: "carapace-bot[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,

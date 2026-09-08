@@ -1,1 +1,1 @@
-export { default as uk } from "virtual:openclaw-control-ui-locale/uk";
+export { default as uk } from "virtual:carapace-control-ui-locale/uk";

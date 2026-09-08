@@ -3,7 +3,7 @@
  *
  * Owner ids are rendered raw; no config or secret is required.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const MAX_OWNER_PROMPT_SENDERS = 16;
 export const MAX_OWNER_PROMPT_CONTENT_BYTES = 980;
@@ -20,7 +20,7 @@ function exceedsOwnerPromptContentBudget(ownerNumbers: string[]): boolean {
 }
 
 type OwnerDisplaySecretResolution = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   generatedSecret?: string;
 };
 
@@ -61,7 +61,7 @@ export function resolveOwnerPromptNumbers(params: {
  * Returns updated config and generated secret when autofill was needed.
  */
 export function ensureOwnerDisplaySecret(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   _generateSecret?: () => string,
 ): OwnerDisplaySecretResolution {
   return { config };

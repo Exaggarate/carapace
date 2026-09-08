@@ -1,7 +1,7 @@
 // Doctor skills tests cover skill install checks, status summaries, and repair guidance.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmptyInstallChecks } from "../cli/requirements-test-fixtures.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SkillStatusEntry, SkillStatusReport } from "../skills/discovery/status.js";
 import { createDoctorPrompter, type DoctorPrompter } from "./doctor-prompter.js";
 import {
@@ -109,7 +109,7 @@ describe("doctor skills", () => {
       expectedEnabled: true,
     },
   ])("honors skill-repair authority for $mode", async ({ update, available, expectedEnabled }) => {
-    vi.stubEnv("OPENCLAW_UPDATE_IN_PROGRESS", update ? "1" : undefined);
+    vi.stubEnv("CARAPACE_UPDATE_IN_PROGRESS", update ? "1" : undefined);
     mocks.buildWorkspaceSkillStatus.mockReturnValue(
       createReport([
         createSkill({
@@ -125,7 +125,7 @@ describe("doctor skills", () => {
         }),
       ]),
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       skills: { entries: { "optional-tool": { enabled: true, env: { EXISTING: "1" } } } },
     };
 
@@ -191,8 +191,8 @@ describe("doctor skills", () => {
     expect(typeof body === "string" ? body.split("\n") : []).toEqual([
       "2 allowed skills are not usable in this environment (missing binaries, env vars, or config).",
       "- calendar, places",
-      "Disable unused skills: openclaw doctor --fix",
-      "Inspect details: openclaw skills check --agent <id> or openclaw skills info <name> --agent <id>",
+      "Disable unused skills: carapace doctor --fix",
+      "Inspect details: carapace skills check --agent <id> or carapace skills info <name> --agent <id>",
     ]);
   });
 
@@ -240,7 +240,7 @@ describe("doctor skills", () => {
   });
 
   it("does not offer a global disable when another agent can use the skill", async () => {
-    vi.stubEnv("OPENCLAW_UPDATE_IN_PROGRESS", undefined);
+    vi.stubEnv("CARAPACE_UPDATE_IN_PROGRESS", undefined);
     mocks.note.mockClear();
     mocks.buildWorkspaceSkillStatus.mockClear();
     const healthy = createSkill({ name: "shared", skillKey: "shared" });
@@ -253,7 +253,7 @@ describe("doctor skills", () => {
     mocks.buildWorkspaceSkillStatus.mockImplementation((_workspaceDir, { agentId }) =>
       createReport(agentId === "secondary" ? [missing] : [healthy], agentId),
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         list: [
           { id: "main", default: true, workspace: "/tmp/main" },
@@ -277,7 +277,7 @@ describe("doctor skills", () => {
   });
 
   it("disables unavailable skills through skills.entries without dropping existing config", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       skills: {
         entries: {
           gog: { env: { EXISTING: "1" } },

@@ -1,11 +1,11 @@
 // Covers plugin gateway auth bypass caching across metadata lifecycle resets.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { getCachedPluginGatewayAuthBypassPaths } from "./server-http-plugin-auth.js";
 
 const resolveBypassPaths = vi.hoisted(() =>
-  vi.fn<(params: { channelId: string; cfg: OpenClawConfig }) => Promise<string[]>>(),
+  vi.fn<(params: { channelId: string; cfg: CarapaceConfig }) => Promise<string[]>>(),
 );
 
 vi.mock("../channels/plugins/gateway-auth-bypass.js", () => ({
@@ -19,7 +19,7 @@ describe("getCachedPluginGatewayAuthBypassPaths", () => {
   });
 
   it("caches resolved bypass paths per config identity", async () => {
-    const config: OpenClawConfig = { channels: { telegram: {} } };
+    const config: CarapaceConfig = { channels: { telegram: {} } };
     resolveBypassPaths.mockResolvedValue(["/telegram/webhook"]);
 
     await expect(getCachedPluginGatewayAuthBypassPaths(config)).resolves.toEqual(
@@ -30,7 +30,7 @@ describe("getCachedPluginGatewayAuthBypassPaths", () => {
   });
 
   it("drops cached bypass paths on a metadata lifecycle reset despite stable config identity", async () => {
-    const config: OpenClawConfig = { channels: { telegram: {} } };
+    const config: CarapaceConfig = { channels: { telegram: {} } };
     resolveBypassPaths.mockResolvedValueOnce(["/telegram/old-bypass"]);
     await expect(getCachedPluginGatewayAuthBypassPaths(config)).resolves.toEqual(
       new Set(["/telegram/old-bypass"]),
@@ -47,7 +47,7 @@ describe("getCachedPluginGatewayAuthBypassPaths", () => {
   });
 
   it("retries after a failed resolution instead of caching the rejection", async () => {
-    const config: OpenClawConfig = { channels: { telegram: {} } };
+    const config: CarapaceConfig = { channels: { telegram: {} } };
     resolveBypassPaths.mockRejectedValueOnce(new Error("resolution failed"));
     await expect(getCachedPluginGatewayAuthBypassPaths(config)).rejects.toThrow(
       "resolution failed",
@@ -60,7 +60,7 @@ describe("getCachedPluginGatewayAuthBypassPaths", () => {
   });
 
   it("keeps the fresh generation cached when a stale failed resolution settles late", async () => {
-    const config: OpenClawConfig = { channels: { telegram: {} } };
+    const config: CarapaceConfig = { channels: { telegram: {} } };
     let rejectStale: (error: Error) => void = () => {};
     resolveBypassPaths.mockReturnValueOnce(
       new Promise<string[]>((_resolve, reject) => {

@@ -36,21 +36,21 @@ export async function writeTemporaryBundleMcpJson(
   };
 }
 
-export function withOpenClawMcpCaptureHeader(
+export function withCarapaceMcpCaptureHeader(
   config: Record<string, unknown>,
   captureKey: string,
   missingServerError?: string,
 ): Record<string, unknown> {
   const mcpServers = isRecord(config.mcpServers) ? config.mcpServers : {};
-  const openclaw = isRecord(mcpServers.openclaw) ? mcpServers.openclaw : undefined;
-  if (!openclaw && missingServerError) {
+  const carapace = isRecord(mcpServers.carapace) ? mcpServers.carapace : undefined;
+  if (!carapace && missingServerError) {
     throw new Error(missingServerError);
   }
   return applyMergePatch(config, {
     mcpServers: {
-      openclaw: {
+      carapace: {
         headers: {
-          "x-openclaw-cli-capture-key": captureKey,
+          "x-carapace-cli-capture-key": captureKey,
         },
       },
     },

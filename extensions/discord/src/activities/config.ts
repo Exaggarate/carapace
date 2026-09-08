@@ -1,5 +1,5 @@
-import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString as readNonEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { normalizeOptionalString as readNonEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type DiscordActivitiesConfigResolution =
   | {

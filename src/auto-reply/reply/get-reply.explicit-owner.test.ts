@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, expect, it, vi } from "vitest";
 import { resolvePromptBuildHookResult } from "../../agents/embedded-agent-runner/run/attempt-prompt-helpers.js";
 import { runEmbeddedAgent } from "../../agents/embedded-agent.js";
@@ -13,9 +13,9 @@ import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import * as pluginRuntime from "../../plugins/runtime.js";
 import { createPluginRecord } from "../../plugins/status.test-helpers.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { withFullRuntimeReplyConfig } from "./get-reply-fast-path.js";
 import { getReplyFromConfig } from "./get-reply.js";
 import { finalizeInboundContext } from "./inbound-context.js";
@@ -28,7 +28,7 @@ vi.mock("../../agents/embedded-agent.js", async (importOriginal) => ({
   })),
 }));
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 afterEach(async () => {
   await state?.cleanup();
   vi.clearAllMocks();
@@ -36,9 +36,9 @@ afterEach(async () => {
 });
 
 async function createExplicitOwnerConfig() {
-  state = await createOpenClawTestState({
+  state = await createCarapaceTestState({
     label: "explicit-reply",
-    env: { OPENCLAW_TEST_FAST: "0" },
+    env: { CARAPACE_TEST_FAST: "0" },
   });
   const cfg = withFullRuntimeReplyConfig({
     agents: {
@@ -51,7 +51,7 @@ async function createExplicitOwnerConfig() {
         workspace: state.workspaceDir,
         skipBootstrap: true,
         model: { primary: "mock-openai/gpt-5.6-luna" },
-        models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "openclaw" } } },
+        models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "carapace" } } },
       },
     },
     plugins: { enabled: false },

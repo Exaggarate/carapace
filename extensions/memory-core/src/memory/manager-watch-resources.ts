@@ -1,8 +1,8 @@
 // Memory Core owns memory watcher resources and their degraded lifecycle.
 import fsSync from "node:fs";
-import { getFileWatchCapacityCode } from "openclaw/plugin-sdk/file-access-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { formatCliCommand } from "openclaw/plugin-sdk/setup-tools";
+import { getFileWatchCapacityCode } from "carapace/plugin-sdk/file-access-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { formatCliCommand } from "carapace/plugin-sdk/setup-tools";
 import { MemoryManagerSyncBase } from "./manager-sync-base.js";
 import {
   countChokidarWatchedEntries,
@@ -61,13 +61,13 @@ export abstract class MemoryManagerWatchResources extends MemoryManagerSyncBase 
 
   protected warnIfMemoryWatchPressure(count: number, unit: MemoryWatchPressureUnit): void {
     const reindexCommand = formatCliCommand(
-      `openclaw memory index --force --agent ${this.agentId}`,
+      `carapace memory index --force --agent ${this.agentId}`,
     );
     warnIfMemoryWatchPressureHigh(
       this.memoryWatchPressureWarning,
       count,
       unit,
-      "Large memory folders or extraPaths can make OpenClaw run out of file watchers or open files.",
+      "Large memory folders or extraPaths can make Carapace run out of file watchers or open files.",
       `Remove unnecessary memory.search.extraPaths entries or narrow their directory roots, including per-agent entries; otherwise review the host's file-watch/open-file limits. After changes, restart the Gateway. To refresh the affected index, run in the Gateway's environment: ${reindexCommand}.`,
       (message) => log.warn(message),
     );

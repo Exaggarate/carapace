@@ -2,10 +2,10 @@
  * Resolves user-message boundaries and transcript policy for an attempt.
  * It may assume normalized attempt and session inputs are ready.
  */
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { formatContextJsonBlock } from "../../../auto-reply/reply/channel-prompt-context.js";
 import { markInboundContextLabel } from "../../../auto-reply/reply/inbound-context-marker.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "../../../plugins/provider-runtime-model.types.js";
 import {
   hasInterSessionUserProvenance,
@@ -208,11 +208,11 @@ type PersistedSender = {
 };
 
 function readPersistedSender(message: AgentMessage): PersistedSender | undefined {
-  const openclaw = Reflect.get(message, "__openclaw");
-  if (!openclaw || typeof openclaw !== "object" || Array.isArray(openclaw)) {
+  const carapace = Reflect.get(message, "__carapace");
+  if (!carapace || typeof carapace !== "object" || Array.isArray(carapace)) {
     return undefined;
   }
-  const meta = openclaw as Record<string, unknown>;
+  const meta = carapace as Record<string, unknown>;
   const sender = {
     id: normalizePersistedSenderValue(meta["senderId"]),
     name: normalizePersistedSenderValue(meta["senderName"]),
@@ -411,7 +411,7 @@ export function resolveAttemptTranscriptPolicy(params: {
   runtimePlanModelContext: AttemptRuntimeModelContext;
   provider: string;
   modelId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): TranscriptPolicy {
   return (

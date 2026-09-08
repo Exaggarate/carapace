@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildHermesMigrationProvider } from "./provider.js";
 import { makeConfigRuntime, makeContext, writeFile } from "./test/provider-helpers.js";
@@ -14,8 +14,8 @@ let workspace: TempWorkspace;
 describe("Hermes skill activation policy migration", () => {
   beforeEach(async () => {
     workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-hermes-skills-policy-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-hermes-skills-policy-",
     });
   });
 

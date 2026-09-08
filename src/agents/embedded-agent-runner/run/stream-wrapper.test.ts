@@ -1,4 +1,4 @@
-import type { AssistantMessageEvent } from "@openclaw/llm-core";
+import type { AssistantMessageEvent } from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import type { MutableAssistantMessageEventStream } from "../../stream-compat.js";

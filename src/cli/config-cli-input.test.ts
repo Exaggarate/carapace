@@ -14,7 +14,7 @@ async function withPatchFile<T>(
   contents: string,
   run: (patchPath: string) => Promise<T>,
 ): Promise<T> {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-cli-input-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-cli-input-"));
   const patchPath = path.join(tempDir, "patch.json5");
   fs.writeFileSync(patchPath, contents, "utf8");
   try {

@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   runDoctorSessionSqlite: vi.fn(),
   submitGithubIssue: vi.fn(),
   withDoctorSqliteMaintenanceLock: vi.fn(),
-  resolveInstalledPluginIndexStorePath: vi.fn(() => "/tmp/openclaw-installed-plugins.json"),
+  resolveInstalledPluginIndexStorePath: vi.fn(() => "/tmp/carapace-installed-plugins.json"),
 }));
 
 vi.mock("./doctor-post-upgrade.js", () => ({
@@ -42,9 +42,9 @@ vi.mock("../infra/github-issue.js", () => ({
     ...input,
     browserFallback: {
       status: "available",
-      url: "https://github.com/openclaw/openclaw/issues/new?title=run-1",
+      url: "https://github.com/Exaggarate/carapace/issues/new?title=run-1",
     },
-    marker: `openclaw-report:${"a".repeat(64)}`,
+    marker: `carapace-report:${"a".repeat(64)}`,
   }),
   reconcileGithubIssue: mocks.reconcileGithubIssue,
   submitGithubIssue: mocks.submitGithubIssue,
@@ -245,9 +245,9 @@ describe("doctorCommand", () => {
     };
     mocks.runDoctorSessionSqlite.mockResolvedValueOnce(report);
     const runtime = createDoctorRuntime();
-    const stateDir = path.resolve(process.env.OPENCLAW_STATE_DIR ?? ".openclaw");
+    const stateDir = path.resolve(process.env.CARAPACE_STATE_DIR ?? ".carapace");
     const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
-    const sqlitePath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+    const sqlitePath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
 
     await expect(
       doctorCommand(runtime, {
@@ -301,7 +301,7 @@ describe("doctorCommand", () => {
       },
       integrityCheck: "ok",
       mode: "compact",
-      path: "/tmp/openclaw/state/openclaw.sqlite",
+      path: "/tmp/carapace/state/carapace.sqlite",
       reclaimedBytes: 12_288,
       skipped: false,
     };
@@ -331,7 +331,7 @@ describe("doctorCommand", () => {
     mocks.runDoctorSessionSqlite.mockResolvedValueOnce(report);
     mocks.submitGithubIssue.mockResolvedValueOnce({
       status: "created",
-      url: "https://github.com/openclaw/openclaw/issues/123",
+      url: "https://github.com/Exaggarate/carapace/issues/123",
     });
     const runtime = createDoctorRuntime();
 
@@ -347,13 +347,13 @@ describe("doctorCommand", () => {
       body: supportIssue.body,
       browserFallback: {
         status: "available",
-        url: "https://github.com/openclaw/openclaw/issues/new?title=run-1",
+        url: "https://github.com/Exaggarate/carapace/issues/new?title=run-1",
       },
-      marker: `openclaw-report:${"a".repeat(64)}`,
+      marker: `carapace-report:${"a".repeat(64)}`,
       title: supportIssue.title,
     });
     expect(runtime.log).toHaveBeenCalledWith(
-      "session-sqlite recover: created GitHub issue https://github.com/openclaw/openclaw/issues/123",
+      "session-sqlite recover: created GitHub issue https://github.com/Exaggarate/carapace/issues/123",
     );
     expect(mocks.clearSessionSqliteMigrationGithubIssueClaim).not.toHaveBeenCalled();
     expect(runtime.exit).toHaveBeenCalledWith(0);
@@ -366,7 +366,7 @@ describe("doctorCommand", () => {
     };
     const report = createRecoveryReport(supportIssue);
     const persisted = {
-      marker: `openclaw-report:${"a".repeat(64)}`,
+      marker: `carapace-report:${"a".repeat(64)}`,
       status: "attempted",
       title: supportIssue.title,
     } as const;
@@ -402,7 +402,7 @@ describe("doctorCommand", () => {
     {
       claim: {
         issue: {
-          marker: `openclaw-report:${"b".repeat(64)}`,
+          marker: `carapace-report:${"b".repeat(64)}`,
           status: "attempted" as const,
           title: "Session SQLite migration recovery report (run-1)",
         },
@@ -442,7 +442,7 @@ describe("doctorCommand", () => {
 
   it("opens a sanitized fallback without logging its body or query URL", async () => {
     const fallbackUrl =
-      "https://github.com/openclaw/openclaw/issues/new?title=run-1&body=private-report-text";
+      "https://github.com/Exaggarate/carapace/issues/new?title=run-1&body=private-report-text";
     const supportIssue = {
       body: "private-report-text",
       title: "Session SQLite migration recovery report (run-1)",
@@ -479,14 +479,14 @@ describe("doctorCommand", () => {
 
   it("retains the receipt after an indeterminate browser handoff", async () => {
     const fallbackUrl =
-      "https://github.com/openclaw/openclaw/issues/new?title=run-1&body=private-report-text";
+      "https://github.com/Exaggarate/carapace/issues/new?title=run-1&body=private-report-text";
     const supportIssue = {
       body: "private-report-text",
       title: "Session SQLite migration recovery report (run-1)",
     };
     const report = createRecoveryReport(supportIssue);
     const persisted = {
-      marker: `openclaw-report:${"a".repeat(64)}`,
+      marker: `carapace-report:${"a".repeat(64)}`,
       status: "attempted",
       title: supportIssue.title,
     } as const;
@@ -541,7 +541,7 @@ describe("doctorCommand", () => {
     mocks.submitGithubIssue.mockResolvedValueOnce({
       reason: "transport-unavailable",
       status: "browser-fallback",
-      url: "https://github.com/openclaw/openclaw/issues/new?title=run-1&body=private-report-text",
+      url: "https://github.com/Exaggarate/carapace/issues/new?title=run-1&body=private-report-text",
     });
     mocks.detectBrowserOpenSupport.mockResolvedValueOnce({ ok: false, reason: "no-display" });
     const runtime = createDoctorRuntime();
@@ -557,7 +557,7 @@ describe("doctorCommand", () => {
     expect(mocks.openUrl).not.toHaveBeenCalled();
     expect(mocks.clearSessionSqliteMigrationGithubIssueClaim).toHaveBeenCalledWith(
       "/tmp/run-1.json",
-      `openclaw-report:${"a".repeat(64)}`,
+      `carapace-report:${"a".repeat(64)}`,
       expect.objectContaining({ assertCurrent: expect.any(Function) }),
     );
     expect(runtime.log.mock.calls.flat().join("\n")).toContain(
@@ -590,14 +590,14 @@ describe("doctorCommand", () => {
     expect(mocks.openUrl).not.toHaveBeenCalled();
     expect(mocks.clearSessionSqliteMigrationGithubIssueClaim).toHaveBeenCalledWith(
       "/tmp/run-1.json",
-      `openclaw-report:${"a".repeat(64)}`,
+      `carapace-report:${"a".repeat(64)}`,
       expect.objectContaining({ assertCurrent: expect.any(Function) }),
     );
     expect(supportIssue.body).toContain("private-report-text");
     const output = runtime.log.mock.calls.flat().join("\n");
     expect(output).toContain("too large for a safe browser fallback");
     expect(output).not.toContain("private-report-text");
-    expect(output).not.toContain("openclaw ");
+    expect(output).not.toContain("carapace ");
     expect((supportIssue as { github?: unknown }).github).toEqual({
       message:
         "GitHub issue creation is unavailable, and this report is too large for a safe browser fallback.",
@@ -664,7 +664,7 @@ describe("doctorCommand", () => {
     ).rejects.toThrow("exit:0");
 
     expect(mocks.promptYesNo).toHaveBeenCalledWith(
-      "Create a GitHub issue in openclaw/openclaw with the sanitized recovery report?",
+      "Create a GitHub issue in carapace/carapace with the sanitized recovery report?",
       false,
     );
     expect(mocks.submitGithubIssue).not.toHaveBeenCalled();

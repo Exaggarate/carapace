@@ -1,4 +1,4 @@
-import { buildControlUiFocusPath } from "@openclaw/session-url-contract";
+import { buildControlUiFocusPath } from "@carapace/session-url-contract";
 import { html, nothing } from "lit";
 import "./chat-outbox-recovery.ts";
 import type { SessionObserverDigest } from "../../../../packages/gateway-protocol/src/index.js";
@@ -105,7 +105,7 @@ export abstract class ChatPaneLayoutRender extends ChatPaneBrowserAnnotationRend
           : undefined,
       );
     }
-    const recovery = html`<openclaw-chat-outbox-recovery
+    const recovery = html`<carapace-chat-outbox-recovery
       .host=${state}
       .identity=${JSON.stringify([
         state.settings.gatewayUrl,
@@ -116,7 +116,7 @@ export abstract class ChatPaneLayoutRender extends ChatPaneBrowserAnnotationRend
         this.chatState.restoreComposer();
         state.requestUpdate?.();
       }}
-    ></openclaw-chat-outbox-recovery>`;
+    ></carapace-chat-outbox-recovery>`;
     const chat = renderChat({
       ...chatProps,
       presented: this.active && this.presented,
@@ -232,12 +232,12 @@ export abstract class ChatPaneLayoutRender extends ChatPaneBrowserAnnotationRend
             chatProps.placementStartup,
             sidebarLayout,
             panelDefinitions,
-          )}<openclaw-plugin-contributions
+          )}<carapace-plugin-contributions
             .kind=${"session-header"}
             .sessionKey=${state.sessionKey}
             .agentId=${currentAgentId}
             .presented=${this.visuallyPresented}
-          ></openclaw-plugin-contributions>`;
+          ></carapace-plugin-contributions>`;
     const content = renderSidebarRegion({
       availableWidth: this.paneWidth,
       availableSlots,

@@ -3,28 +3,28 @@ import type { ConversationRecallContext } from "../agents/conversation-recall.ty
 import type { ToolFsPolicy } from "../agents/tool-fs-policy.types.js";
 import type { AnyAgentTool } from "../agents/tools/common.js";
 import type { ConversationReadInvocationOrigin } from "../channels/plugins/conversation-read-origin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { HookEntry } from "../hooks/types.js";
 import type { DeliveryContext } from "../utils/delivery-context.types.js";
 
-export type OpenClawPluginActiveModelContext = {
+export type CarapacePluginActiveModelContext = {
   provider?: string;
   modelId?: string;
   modelRef?: string;
 };
 
 /** Current-turn outbound delivery capability bound to the host-selected route and media policy. */
-export type OpenClawPluginToolDelivery = {
+export type CarapacePluginToolDelivery = {
   send: (params: { text?: string; mediaUrl?: string }) => Promise<void>;
 };
 
 /** Trusted execution context passed to plugin-owned agent tool factories. */
-export type OpenClawPluginToolContext = {
-  config?: OpenClawConfig;
+export type CarapacePluginToolContext = {
+  config?: CarapaceConfig;
   /** Active runtime-resolved config snapshot when one is available. */
-  runtimeConfig?: OpenClawConfig;
+  runtimeConfig?: CarapaceConfig;
   /** Returns the latest runtime-resolved config snapshot for long-lived tool definitions. */
-  getRuntimeConfig?: () => OpenClawConfig | undefined;
+  getRuntimeConfig?: () => CarapaceConfig | undefined;
   /** Effective filesystem policy for the active tool run. */
   fsPolicy?: ToolFsPolicy;
   workspaceDir?: string;
@@ -42,9 +42,9 @@ export type OpenClawPluginToolContext = {
   /**
    * Runtime-supplied active model metadata for informational use, diagnostics,
    * and plugin-owned policy decisions. This is not a security boundary against
-   * the local operator, installed plugin code, or a modified OpenClaw runtime.
+   * the local operator, installed plugin code, or a modified Carapace runtime.
    */
-  activeModel?: OpenClawPluginActiveModelContext;
+  activeModel?: CarapacePluginActiveModelContext;
   browser?: {
     sandboxBridgeUrl?: string;
     allowHostControl?: boolean;
@@ -58,7 +58,7 @@ export type OpenClawPluginToolContext = {
   /** Trusted ambient delivery route for the active agent/session. */
   deliveryContext?: DeliveryContext;
   /** Host-bound current-route delivery. Retained copies fail after the owning turn closes. */
-  delivery?: OpenClawPluginToolDelivery;
+  delivery?: CarapacePluginToolDelivery;
   /** Trusted platform-native conversation id for the active inbound turn. */
   nativeChannelId?: string;
   /** Trusted sender id from inbound context (runtime-provided, not tool args). */
@@ -78,17 +78,17 @@ export type OpenClawPluginToolContext = {
   oneShotCliRun?: boolean;
 };
 
-export type OpenClawPluginToolFactory = (
-  ctx: OpenClawPluginToolContext,
+export type CarapacePluginToolFactory = (
+  ctx: CarapacePluginToolContext,
 ) => AnyAgentTool | AnyAgentTool[] | null | undefined;
 
-export type OpenClawPluginToolOptions = {
+export type CarapacePluginToolOptions = {
   name?: string;
   names?: string[];
   optional?: boolean;
 };
 
-export type OpenClawPluginHookOptions = {
+export type CarapacePluginHookOptions = {
   entry?: HookEntry;
   name?: string;
   description?: string;

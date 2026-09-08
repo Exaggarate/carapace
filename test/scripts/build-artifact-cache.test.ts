@@ -207,7 +207,7 @@ describe("native owner content records", () => {
       JSON.stringify({ layoutVersion: 5, nodeLinker: "hoisted", prunedAt, storeDir });
     f.write(
       "node_modules/.modules.yaml",
-      manifest("/workspace/.cache/openclaw-pnpm-store/v11", "producer"),
+      manifest("/workspace/.cache/carapace-pnpm-store/v11", "producer"),
     );
     f.write(
       "node_modules/fixture-package/package.json",
@@ -386,7 +386,7 @@ describe("native owner content records", () => {
     ["CI helper", ".ci-harness", "cache/metadata-v1.3/registry.example/package.json"],
     [
       "pnpm store",
-      ".cache/openclaw-pnpm-store",
+      ".cache/carapace-pnpm-store",
       "cache/metadata-v1.3/registry.example/package.json",
     ],
     ["Vitest cache", ".cache/vitest", "default/_metadata.json"],

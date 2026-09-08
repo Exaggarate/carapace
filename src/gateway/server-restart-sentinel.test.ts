@@ -2,7 +2,7 @@
 // session/channel context used when the gateway resumes an interrupted run.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSolidPngBuffer } from "../../test/helpers/image-fixtures.js";
 import type { RuntimeContextFragment } from "../agents/internal-runtime-context.js";
@@ -22,9 +22,9 @@ import {
 import { renderUpdateRunNotice, renderUpdateRunReport } from "../infra/update-run-report.js";
 import { onInternalSessionTranscriptUpdate } from "../sessions/transcript-events.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 import { resolveRuntimeServiceVersion } from "../version.js";
 import { createTranscriptUpdateBroadcastHandler } from "./server-session-events.js";
@@ -206,7 +206,7 @@ const mocks = vi.hoisted(() => {
     drainPendingSessionDelivery: vi.fn<DrainPendingSessionDeliveryMock>(),
     recoverPendingSessionDeliveries: vi.fn<RecoverPendingSessionDeliveriesMock>(),
     resolveAgentConfig: vi.fn(() => undefined),
-    resolveAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-test-workspace"),
+    resolveAgentWorkspaceDir: vi.fn(() => "/tmp/carapace-test-workspace"),
     resolveDefaultAgentId: vi.fn(() => "main"),
     recordInboundSessionAndDispatchReply: vi.fn(
       async (_params: RecordInboundSessionAndDispatchReplyParams) => {},
@@ -624,7 +624,7 @@ function mockRestartContinuation(
   } as Awaited<ReturnType<typeof mocks.readRestartSentinel>>);
 }
 
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 describe("scheduleRestartSentinelWake", () => {
   const expectedGeneratedMediaContext: RuntimeContextFragment[] = [
@@ -641,7 +641,7 @@ describe("scheduleRestartSentinelWake", () => {
   });
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       label: "gateway-restart-sentinel",
       layout: "state-only",
     });
@@ -884,7 +884,7 @@ describe("scheduleRestartSentinelWake", () => {
           ts: 123,
           sessionKey: "agent:main:main",
           stats: { runId: record.runId },
-          doctorHint: "Run openclaw --profile work doctor --non-interactive.",
+          doctorHint: "Run carapace --profile work doctor --non-interactive.",
         },
       });
 
@@ -897,7 +897,7 @@ describe("scheduleRestartSentinelWake", () => {
         serviceRunning: true,
         runningVersion: resolveRuntimeServiceVersion(),
         noticeDelivered: true,
-        doctorHint: "Run openclaw --profile work doctor --non-interactive.",
+        doctorHint: "Run carapace --profile work doctor --non-interactive.",
       });
       if (terminal) {
         expect(result.finishedAtMs).toBe(existing.finishedAtMs);
@@ -1116,7 +1116,7 @@ describe("scheduleRestartSentinelWake", () => {
         const finishedRun = updateRun ? getUpdateRun(updateRun.runId) : undefined;
         const report = finishedRun
           ? renderUpdateRunReport(finishedRun).markdown
-          : "✅ OpenClaw updated.";
+          : "✅ Carapace updated.";
         if (updateRun) {
           expect.soft(finishedRun?.verification.noticeDelivered).toBe(true);
           expect.soft(mocks.enqueueSessionDelivery).not.toHaveBeenCalled();
@@ -1213,17 +1213,17 @@ describe("scheduleRestartSentinelWake", () => {
   );
 
   it.each([
-    { kind: "update", status: "ok", notice: "✅ OpenClaw updated." },
+    { kind: "update", status: "ok", notice: "✅ Carapace updated." },
     {
       kind: "update",
       status: "skipped",
-      notice: "ℹ️ OpenClaw update skipped: already-current.",
+      notice: "ℹ️ Carapace update skipped: already-current.",
     },
     {
       kind: "update",
       status: "error",
       notice:
-        "⚠️ OpenClaw update failed: verification failed.\nRun openclaw triage to diagnose and repair the failed update.",
+        "⚠️ Carapace update failed: verification failed.\nRun carapace triage to diagnose and repair the failed update.",
     },
     {
       kind: "restart",
@@ -2178,20 +2178,20 @@ describe("scheduleRestartSentinelWake", () => {
       message?: {
         role?: string;
         content?: Array<Record<string, unknown>>;
-        openclawDisplayContent?: Array<Record<string, unknown>>;
+        carapaceDisplayContent?: Array<Record<string, unknown>>;
       };
     };
     expect(messageEvent.message).toMatchObject({
       role: "assistant",
       content: [],
-      openclawDisplayContent: [
+      carapaceDisplayContent: [
         expect.objectContaining({ type: "image", artifactId: expect.any(String) }),
       ],
     });
-    expect(messageEvent.message?.openclawDisplayContent).not.toEqual([
+    expect(messageEvent.message?.carapaceDisplayContent).not.toEqual([
       { type: "text", text: path.basename(mediaPath) },
     ]);
-    const imageBlock = messageEvent.message?.openclawDisplayContent?.[0];
+    const imageBlock = messageEvent.message?.carapaceDisplayContent?.[0];
     const artifactId = imageBlock?.artifactId;
     expect(artifactId).toBeTypeOf("string");
     const parsedArtifact = managedMediaActual.parseManagedOutgoingArtifactId(String(artifactId));
@@ -3409,10 +3409,10 @@ describe("scheduleRestartSentinelWake", () => {
           deliveryContext: undefined,
           threadId: undefined,
           message: null,
-          doctorHint: "Run openclaw doctor --non-interactive",
+          doctorHint: "Run carapace doctor --non-interactive",
           stats: {
             mode: kind === "config-patch" ? "config.patch" : "config.apply",
-            root: "/tmp/openclaw.json",
+            root: "/tmp/carapace.json",
             requiresRestart: true,
           },
         },
@@ -3508,7 +3508,7 @@ describe("scheduleRestartSentinelWake", () => {
           to: "123",
           accountId: "bot",
           threadId: "7",
-          payloads: [{ text: "✅ OpenClaw updated." }],
+          payloads: [{ text: "✅ Carapace updated." }],
         }),
       );
       const eventOptions = mocks.enqueueSystemEvent.mock.calls[0]?.[1];

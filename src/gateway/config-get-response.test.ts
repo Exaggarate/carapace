@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { REDACTED_SENTINEL, restoreRedactedValues } from "../config/redact-snapshot.js";
 import { makeSnapshot } from "../config/redact-snapshot.test-helpers.js";
 import { buildRuntimeConfigSchemaFromRegistry } from "../config/runtime-schema.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 
 const mocks = vi.hoisted(() => ({
@@ -86,7 +86,7 @@ describe("config.get response cache", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const { manifestRegistry } = createPluginMetadataSnapshotFixture({
       plugins: [
         {
@@ -185,7 +185,7 @@ describe("config.get response cache", () => {
   it.each(["core", "plus"])(
     "redacts retained owner credentials from every snapshot projection with %s selected",
     async (owner) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           entries: { core: { enabled: owner === "core" }, plus: { enabled: owner === "plus" } },
         },
@@ -226,8 +226,8 @@ describe("config.get response cache", () => {
         expect(response[field]).toMatchObject({
           channels: {
             proofchat: {
-              core: "__OPENCLAW_REDACTED__",
-              plus: "__OPENCLAW_REDACTED__",
+              core: "__CARAPACE_REDACTED__",
+              plus: "__CARAPACE_REDACTED__",
               visible: "public-setting",
             },
           },

@@ -27,7 +27,7 @@ import {
 } from "./tool-result-char-estimator.js";
 import { truncateToolResultMessage, truncateToolResultText } from "./tool-result-truncation.js";
 
-const TRANSCRIPT_PROMPT_TEXT_KEY = "__openclawTranscriptPromptText";
+const TRANSCRIPT_PROMPT_TEXT_KEY = "__carapaceTranscriptPromptText";
 
 type GuardableTransformContext = (
   messages: AgentMessage[],

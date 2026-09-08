@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { attachPluginInstallOwnerMigrations } from "./install-transaction.js";
 import { recordInstalledPluginIndexInstallOwner } from "./installed-plugin-index-install-owner.js";
@@ -38,7 +38,7 @@ function pluginRecord(params: {
   return recordInstalledPluginIndexInstallOwner(
     {
       pluginId: params.pluginId,
-      manifestPath: `${params.rootDir}/openclaw.plugin.json`,
+      manifestPath: `${params.rootDir}/carapace.plugin.json`,
       manifestHash: params.pluginId,
       source: `${params.rootDir}/index.js`,
       rootDir: params.rootDir,
@@ -105,13 +105,13 @@ describe("plugin release cohort package reconciliation", () => {
         typeof import("./installed-plugin-index.js")
       >("./installed-plugin-index.js");
       loadInstalledPluginIndexMock.mockImplementation(loadInstalledPluginIndex);
-      const root = fs.realpathSync(makeTrackedTempDir("openclaw-cohort", tempDirs));
+      const root = fs.realpathSync(makeTrackedTempDir("carapace-cohort", tempDirs));
       const installPath = path.join(root, "package");
       const env = {
         ...process.env,
         HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
       };
       const writePayload = (pluginId: string) => {
         fs.mkdirSync(installPath, { recursive: true });
@@ -120,11 +120,11 @@ describe("plugin release cohort package reconciliation", () => {
           JSON.stringify({
             name: "@example/cohort",
             version: "1.0.0",
-            openclaw: { extensions: ["./index.js"] },
+            carapace: { extensions: ["./index.js"] },
           }),
         );
         fs.writeFileSync(
-          path.join(installPath, "openclaw.plugin.json"),
+          path.join(installPath, "carapace.plugin.json"),
           JSON.stringify({ id: pluginId, configSchema: { type: "object" } }),
         );
         fs.writeFileSync(path.join(installPath, "index.js"), "module.exports = {};\n");
@@ -140,7 +140,7 @@ describe("plugin release cohort package reconciliation", () => {
           installs: records,
           entries: { "retired-child": { enabled: true }, unrelated: { enabled: false } },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       if (state === "missing") {
         collectMissingPluginInstallPayloadsMock.mockResolvedValueOnce([
           { pluginId: "cohort", installPath, reason: "missing-package-dir" },
@@ -180,23 +180,23 @@ describe("plugin release cohort package reconciliation", () => {
 
   it("removes the legacy load path after a successful post-core owner migration", async () => {
     const legacyRoot = "/plugins/qqbot-legacy";
-    const canonicalRoot = "/plugins/openclaw-qqbot";
+    const canonicalRoot = "/plugins/carapace-qqbot";
     const legacyRecords = {
       qqbot: {
         source: "npm",
-        spec: "@openclaw/qqbot@1.9.0",
+        spec: "@carapace/qqbot@1.9.0",
         installPath: legacyRoot,
       },
-      "openclaw-qqbot": {
+      "carapace-qqbot": {
         source: "npm",
-        spec: "@tencent-connect/openclaw-qqbot@2.0.1",
+        spec: "@tencent-connect/carapace-qqbot@2.0.1",
         installPath: canonicalRoot,
       },
     } satisfies Record<string, PluginInstallRecord>;
     const canonicalRecords = {
-      "openclaw-qqbot": {
+      "carapace-qqbot": {
         source: "npm",
-        spec: "@tencent-connect/openclaw-qqbot@2.0.3",
+        spec: "@tencent-connect/carapace-qqbot@2.0.3",
         installPath: canonicalRoot,
       },
     } satisfies Record<string, PluginInstallRecord>;
@@ -206,11 +206,11 @@ describe("plugin release cohort package reconciliation", () => {
         load: { paths: [legacyRoot, `${legacyRoot}/index.js`, "/plugins/unrelated.js"] },
         installs: legacyRecords,
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const updatedConfig = {
       ...config,
       plugins: { ...config.plugins, installs: canonicalRecords },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     loadInstalledPluginIndexMock
       .mockReturnValueOnce(
         installedIndex({
@@ -222,8 +222,8 @@ describe("plugin release cohort package reconciliation", () => {
         installedIndex({
           records: canonicalRecords,
           plugin: pluginRecord({
-            pluginId: "openclaw-qqbot",
-            installOwner: "openclaw-qqbot",
+            pluginId: "carapace-qqbot",
+            installOwner: "carapace-qqbot",
             rootDir: canonicalRoot,
           }),
         }),
@@ -231,7 +231,7 @@ describe("plugin release cohort package reconciliation", () => {
     updateNpmInstalledPluginsMock.mockResolvedValueOnce(
       attachPluginInstallOwnerMigrations(
         { config: updatedConfig, changed: true, outcomes: [] },
-        { qqbot: "openclaw-qqbot" },
+        { qqbot: "carapace-qqbot" },
       ),
     );
 

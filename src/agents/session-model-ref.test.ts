@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSessionModelIdentityRef, resolveSessionModelRef } from "./session-model-ref.js";
 
-function modelConfig(primary: string, models?: Record<string, object>): OpenClawConfig {
+function modelConfig(primary: string, models?: Record<string, object>): CarapaceConfig {
   return {
     agents: {
       defaults: { model: { primary }, ...(models ? { models } : {}) },
       list: [{ id: "main", default: true }],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("resolveSessionModelRef", () => {
@@ -72,7 +72,7 @@ describe("resolveSessionModelRef", () => {
 });
 
 describe("resolveSessionModelIdentityRef", () => {
-  const resolveLegacyIdentityRef = (cfg: OpenClawConfig, modelProvider?: string) =>
+  const resolveLegacyIdentityRef = (cfg: CarapaceConfig, modelProvider?: string) =>
     resolveSessionModelIdentityRef(cfg, {
       sessionId: "legacy-session",
       updatedAt: Date.now(),
@@ -105,7 +105,7 @@ describe("resolveSessionModelIdentityRef", () => {
           models: [{ id: "qwen-max" }],
         },
       },
-    } as unknown as OpenClawConfig["models"];
+    } as unknown as CarapaceConfig["models"];
 
     expect(
       resolveSessionModelIdentityRef(cfg, {
@@ -137,7 +137,7 @@ describe("resolveSessionModelIdentityRef", () => {
           models: [{ id: "qwen-max" }],
         },
       },
-    } as unknown as OpenClawConfig["models"];
+    } as unknown as CarapaceConfig["models"];
 
     expect(
       resolveSessionModelIdentityRef(cfg, {

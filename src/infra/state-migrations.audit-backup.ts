@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { CONFIG_AUDIT_SCOPE } from "../config/io.audit.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
 import { SYSTEM_AGENT_AUDIT_SCOPE } from "../system-agent/audit.js";
 import { root as createFsSafeRoot } from "./fs-safe.js";
 import {
@@ -125,8 +125,8 @@ export function createLegacyAuditDatabaseWitness(database: DatabaseSync): string
 
 async function readLegacyAuditDatabaseWitness(stateDir: string): Promise<string> {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => createLegacyAuditDatabaseWitness(db), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => createLegacyAuditDatabaseWitness(db), {
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     }) ?? createHash("sha256").digest("hex")
   );
 }

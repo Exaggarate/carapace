@@ -1,18 +1,18 @@
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { upsertTaskWithDeliveryStateToSqlite } from "../tasks/task-registry.store.sqlite.js";
 import type { TaskRecord } from "../tasks/task-registry.types.js";
 
 export function clearTaskRegistrySqliteForTests(ownerKind: "task" | "flow"): void {
   try {
-    runOpenClawStateWriteTransaction(({ db }) => {
-      const kysely = getNodeSqliteKysely<OpenClawStateDatabase>(db);
+    runCarapaceStateWriteTransaction(({ db }) => {
+      const kysely = getNodeSqliteKysely<CarapaceStateDatabase>(db);
       if (ownerKind === "task") {
         executeSqliteQuerySync(db, kysely.deleteFrom("task_delivery_state"));
         executeSqliteQuerySync(db, kysely.deleteFrom("task_runs"));
@@ -35,12 +35,12 @@ export function clearTaskRegistrySqliteForTests(ownerKind: "task" | "flow"): voi
       error,
     });
   } finally {
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
   }
 }
 
 export function seedTaskRegistryRowsForTests(tasks: Iterable<TaskRecord>): void {
-  runOpenClawStateWriteTransaction(() => {
+  runCarapaceStateWriteTransaction(() => {
     for (const task of tasks) {
       upsertTaskWithDeliveryStateToSqlite({ task });
     }

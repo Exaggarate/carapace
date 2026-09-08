@@ -2,7 +2,7 @@ import {
   createAssistantMessageEventStream,
   type AssistantMessage,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   onInternalDiagnosticEvent,
@@ -10,7 +10,7 @@ import {
 } from "../../../infra/diagnostic-events.js";
 import { readNestedToolActivity } from "../../../sessions/nested-tool-activity.js";
 import { wrapToolWithBeforeToolCallHook } from "../../agent-tools.before-tool-call.js";
-import type { createOpenClawCodingTools } from "../../agent-tools.js";
+import type { createCarapaceCodingTools } from "../../agent-tools.js";
 import { Agent, type AgentEvent, type AgentTool } from "../../runtime/index.js";
 import { getInternalToolExecutionPreparer } from "../../runtime/internal-hooks.js";
 import { SessionManager } from "../../sessions/session-manager.js";
@@ -51,7 +51,7 @@ function catalogProbeTools() {
 }
 
 function requireAttemptCatalogRef(): ToolSearchCatalogRef {
-  const options = hoisted.createOpenClawCodingToolsMock.mock.calls.at(-1)?.[0] as
+  const options = hoisted.createCarapaceCodingToolsMock.mock.calls.at(-1)?.[0] as
     | { toolSearchCatalogRef?: ToolSearchCatalogRef }
     | undefined;
   if (!options?.toolSearchCatalogRef) {
@@ -109,7 +109,7 @@ describe("runEmbeddedAttempt tool-search catalog cleanup", () => {
       native.prepareBeforeToolCallParams = prepare;
       const source = wrapToolWithBeforeToolCallHook(native);
       expect(getInternalToolExecutionPreparer(source)).toBeDefined();
-      hoisted.createOpenClawCodingToolsMock.mockReturnValue([source]);
+      hoisted.createCarapaceCodingToolsMock.mockReturnValue([source]);
       const outcomes: Extract<AgentEvent, { type: "tool_execution_end" }>[] = [];
       await createContextEngineAttemptRunner({
         contextEngine: createContextEngineBootstrapAndAssemble(),
@@ -289,8 +289,8 @@ describe("runEmbeddedAttempt tool-search catalog cleanup", () => {
         }
       });
       const cleanup = vi.fn(async (_reason: string) => {});
-      hoisted.createOpenClawCodingToolsMock.mockImplementation((options) => {
-        const toolOptions = options as NonNullable<Parameters<typeof createOpenClawCodingTools>[0]>;
+      hoisted.createCarapaceCodingToolsMock.mockImplementation((options) => {
+        const toolOptions = options as NonNullable<Parameters<typeof createCarapaceCodingTools>[0]>;
         toolOptions.registerRunCleanup?.(cleanup);
         return catalogProbeTools();
       });

@@ -1,6 +1,6 @@
 // Voice Call plugin module handles cli command input and output.
 import { format } from "node:util";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
 
 export function writeCliLine(...values: unknown[]): void {
   process.stdout.write(`${format(...values)}\n`);

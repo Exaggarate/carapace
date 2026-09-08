@@ -64,7 +64,7 @@ it.each(["config.changed", "chat.metadata.changed"])(
     } as unknown as ChatPageHost;
     const messages = state.chatMessages;
     const queue = state.chatQueue;
-    const shell = document.createElement("openclaw-app-shell") as unknown as ChatMetadataShell;
+    const shell = document.createElement("carapace-app-shell") as unknown as ChatMetadataShell;
     shell.runtime = {
       context: {
         gateway: { snapshot: { client, phase: "connected" } },
@@ -137,7 +137,7 @@ it("invalidates chat metadata on config changes and same-client disconnects", ()
       refresh: vi.fn(async () => null),
     },
   } as unknown as ApplicationContext;
-  const shell = document.createElement("openclaw-app-shell") as unknown as ChatMetadataShell;
+  const shell = document.createElement("carapace-app-shell") as unknown as ChatMetadataShell;
   shell.runtime = { context };
 
   shell.synchronizeGateway(connected);
@@ -179,7 +179,7 @@ it.each(["config.changed", "chat.metadata.changed", "same-client reconnect"])(
         refresh: vi.fn(async () => null),
       },
     } as unknown as ApplicationContext;
-    const shell = document.createElement("openclaw-app-shell") as unknown as ChatMetadataShell;
+    const shell = document.createElement("carapace-app-shell") as unknown as ChatMetadataShell;
     shell.runtime = { context };
     shell.synchronizeGateway(connected);
     const before = loadModelAuthStatus(client, { agentId: "main" });

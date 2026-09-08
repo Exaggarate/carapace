@@ -1,6 +1,6 @@
 // Qa Lab tests cover scenario flow runner plugin behavior.
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { describe, expect, it } from "vitest";
 import { createQaBusState } from "./bus-state.js";
 import { QaSuiteScenarioSkipError } from "./errors.js";
@@ -226,11 +226,11 @@ function createPlanningEvidenceFixture(
       },
     };
   }
-  if (scenario.execution.runtime === "openclaw" && artifactFile) {
+  if (scenario.execution.runtime === "carapace" && artifactFile) {
     return {
       scenario,
       outboundText: `Built ${artifactFile}`,
-      failureMessage: "missing OpenClaw progress_card signal",
+      failureMessage: "missing Carapace progress_card signal",
       currentSummary: {
         eventCursor: 9,
         successfulToolCallCounts: { progress_card: 1 },

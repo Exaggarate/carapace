@@ -56,7 +56,7 @@ describe("getAgentLocalStatuses", () => {
       defaultId: "alpha",
       ownership: "sole",
       selectionRequired: false,
-      agents: [{ id: "alpha", sessionsPath: "/tmp/alpha/openclaw-agent.alpha.sqlite" }],
+      agents: [{ id: "alpha", sessionsPath: "/tmp/alpha/carapace-agent.alpha.sqlite" }],
     });
   });
 });

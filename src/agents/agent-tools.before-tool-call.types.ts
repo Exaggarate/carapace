@@ -3,8 +3,8 @@
  * Kept separate from the facade so implementation modules do not import back
  * through the barrel that re-exports them.
  */
-import type { ToolLoopWarning } from "@openclaw/agent-core";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { ToolLoopWarning } from "@carapace/agent-core";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ToolLoopDetectionConfig } from "../config/types.tools.js";
 import type { DiagnosticToolTerminalReason } from "../infra/diagnostic-events.js";
 import type { DiagnosticTraceContext } from "../infra/diagnostic-trace-context.js";
@@ -32,7 +32,7 @@ export type ToolOutcomeObserver = (observation: ToolOutcomeObservation) => void;
 
 export type HookContext = {
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   /** Tool execution cwd for host-derived path facts. */
   cwd?: string;
   /** Host workspace used to resolve relative tool params for diagnostics only. */

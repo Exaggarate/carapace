@@ -1,5 +1,5 @@
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { isMeaningfulMediaFact, readPersistedMediaFacts } from "../media/media-facts.js";
 import { isRelativeAssistantMediaReference, splitMediaFromOutput } from "../media/parse.js";
 import { normalizeInputProvenance } from "../sessions/input-provenance.js";
@@ -34,7 +34,7 @@ export function takeAssistantManagedMediaUrlsForDisplay(
   entry: Record<string, unknown>,
   role: string,
 ): { changed: boolean; urls: string[] } {
-  const delivery = role === "assistant" ? readRecord(entry.openclawDelivery) : undefined;
+  const delivery = role === "assistant" ? readRecord(entry.carapaceDelivery) : undefined;
   const urls = Array.isArray(delivery?.mediaUrls)
     ? delivery.mediaUrls.filter((url): url is string => typeof url === "string")
     : [];
@@ -44,9 +44,9 @@ export function takeAssistantManagedMediaUrlsForDisplay(
   const projectedDelivery = { ...delivery };
   delete projectedDelivery.mediaUrls;
   if (Object.keys(projectedDelivery).length > 0) {
-    entry.openclawDelivery = projectedDelivery;
+    entry.carapaceDelivery = projectedDelivery;
   } else {
-    delete entry.openclawDelivery;
+    delete entry.carapaceDelivery;
   }
   return { changed: true, urls };
 }

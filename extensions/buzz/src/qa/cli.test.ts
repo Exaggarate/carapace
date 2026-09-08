@@ -1,13 +1,13 @@
 import { Command } from "commander";
-import type { LiveTransportQaSuiteCommandOptions } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { LiveTransportQaSuiteCommandOptions } from "carapace/plugin-sdk/qa-runner-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const runLiveTransportQaSuiteCommand = vi.hoisted(() =>
   vi.fn<(params: LiveTransportQaSuiteCommandOptions) => Promise<void>>(async () => {}),
 );
 
-vi.mock("openclaw/plugin-sdk/qa-runner-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/qa-runner-runtime")>()),
+vi.mock("carapace/plugin-sdk/qa-runner-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/qa-runner-runtime")>()),
   runLiveTransportQaSuiteCommand,
 }));
 
@@ -28,7 +28,7 @@ describe("Buzz QA CLI", () => {
 
     await qa.parseAsync([
       "node",
-      "openclaw",
+      "carapace",
       "buzz",
       "--provider-mode",
       "mock-openai",
@@ -59,7 +59,7 @@ describe("Buzz QA CLI", () => {
 
     await qa.parseAsync([
       "node",
-      "openclaw",
+      "carapace",
       "buzz",
       "--credential-file",
       "/secure/buzz-qa.json",

@@ -3,14 +3,14 @@ import { createHash } from "node:crypto";
 import {
   loadAuthProfileStoreWithoutExternalProfiles,
   resolveAuthStorePathForDisplay,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import {
   createMigrationItem,
   markMigrationItemConflict,
   markMigrationItemError,
   markMigrationItemSkipped,
-} from "openclaw/plugin-sdk/migration";
-import type { MigrationItem, MigrationProviderContext } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/migration";
+import type { MigrationItem, MigrationProviderContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   buildOpenAICodexCredentialExtra,
   buildOauthProviderAuthResult,
@@ -20,14 +20,14 @@ import {
   updateAuthProfileStoreWithLock,
   type AuthProfileStore,
   type OAuthCredential,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ProviderAuthResult,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/provider-auth";
 import {
   applyAgentDefaultModelPrimary,
   resolveAgentModelPrimaryValue,
-} from "openclaw/plugin-sdk/provider-onboard";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-onboard";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   applyAuthProfileConfigWithConflictCheck,
   hasAuthProfileConfigConflict,
@@ -56,7 +56,7 @@ const OPENAI_CODEX_DEFAULT_MODEL = "openai/gpt-5.6-sol";
 const HERMES_AUTH_DISPLAY_NAME = "Hermes import";
 
 type AgentDefaultModelConfigs = NonNullable<
-  NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]>["models"]
+  NonNullable<NonNullable<CarapaceConfig["agents"]>["defaults"]>["models"]
 >;
 type AgentDefaultModelConfigEntry = AgentDefaultModelConfigs[string];
 
@@ -163,9 +163,9 @@ function mergeModelConfigEntry(
 }
 
 function applyOAuthModelConfigsToConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   result: ProviderAuthResult,
-): OpenClawConfig {
+): CarapaceConfig {
   const patchModels = readProviderAuthModelConfigs(result);
   const existingModels = cfg.agents?.defaults?.models ?? {};
   const models: AgentDefaultModelConfigs = result.replaceDefaultModels

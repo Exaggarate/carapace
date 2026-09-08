@@ -2,38 +2,38 @@
 set -euo pipefail
 trap "" PIPE
 export TERM=xterm-256color
-source scripts/lib/openclaw-e2e-instance.sh
-OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY="${OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY:-0}"
-if [ "$OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
-  openclaw_e2e_eval_test_state_from_b64 "${OPENCLAW_TEST_STATE_FUNCTION_B64:?missing OPENCLAW_TEST_STATE_FUNCTION_B64}"
+source scripts/lib/carapace-e2e-instance.sh
+CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY="${CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY:-0}"
+if [ "$CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
+  carapace_e2e_eval_test_state_from_b64 "${CARAPACE_TEST_STATE_FUNCTION_B64:?missing CARAPACE_TEST_STATE_FUNCTION_B64}"
 fi
 ONBOARD_FLAGS="${ONBOARD_FLAGS:---flow quickstart --auth-choice skip --skip-channels --skip-skills --skip-daemon --skip-ui}"
-if [ -z "${OPENCLAW_ENTRY:-}" ] && [ "$OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
-  OPENCLAW_ENTRY="$(openclaw_e2e_resolve_entrypoint)"
+if [ -z "${CARAPACE_ENTRY:-}" ] && [ "$CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
+  CARAPACE_ENTRY="$(carapace_e2e_resolve_entrypoint)"
 fi
-export OPENCLAW_ENTRY
-ONBOARD_TMP_ROOT="${OPENCLAW_ONBOARD_E2E_TMPDIR:-${TMPDIR:-/tmp}}"
+export CARAPACE_ENTRY
+ONBOARD_TMP_ROOT="${CARAPACE_ONBOARD_E2E_TMPDIR:-${TMPDIR:-/tmp}}"
 ONBOARD_TMP_ROOT="${ONBOARD_TMP_ROOT%/}"
 [ -n "$ONBOARD_TMP_ROOT" ] || ONBOARD_TMP_ROOT="/tmp"
 mkdir -p "$ONBOARD_TMP_ROOT"
-ONBOARD_TMP_DIR="$(mktemp -d "$ONBOARD_TMP_ROOT/openclaw-onboard.XXXXXX")"
-OPENCLAW_E2E_LOG_DIR="$ONBOARD_TMP_DIR/logs"
+ONBOARD_TMP_DIR="$(mktemp -d "$ONBOARD_TMP_ROOT/carapace-onboard.XXXXXX")"
+CARAPACE_E2E_LOG_DIR="$ONBOARD_TMP_DIR/logs"
 GATEWAY_LOG_PATH="$ONBOARD_TMP_DIR/gateway-e2e.log"
-export OPENCLAW_E2E_LOG_DIR
+export CARAPACE_E2E_LOG_DIR
 export GATEWAY_LOG_PATH
-mkdir -p "$OPENCLAW_E2E_LOG_DIR"
+mkdir -p "$CARAPACE_E2E_LOG_DIR"
 cleanup_onboard_artifacts() {
-  openclaw_e2e_stop_process "${GATEWAY_PID:-}"
-  openclaw_e2e_stop_process "${mock_openai_pid:-}"
+  carapace_e2e_stop_process "${GATEWAY_PID:-}"
+  carapace_e2e_stop_process "${mock_openai_pid:-}"
   rm -rf "$ONBOARD_TMP_DIR"
 }
-if [ "$OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
+if [ "$CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
   trap cleanup_onboard_artifacts EXIT
 fi
 
 # Provide a minimal trash shim to avoid noisy "missing trash" logs in containers.
-if [ "$OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
-  openclaw_e2e_install_trash_shim
+if [ "$CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
+  carapace_e2e_install_trash_shim
 fi
 
 send() {
@@ -102,16 +102,16 @@ wait_for_skills_prompt_or_ready() {
 }
 
 start_gateway() {
-  GATEWAY_PID="$(openclaw_e2e_start_gateway "$OPENCLAW_ENTRY" 18789 "$GATEWAY_LOG_PATH")"
+  GATEWAY_PID="$(carapace_e2e_start_gateway "$CARAPACE_ENTRY" 18789 "$GATEWAY_LOG_PATH")"
 }
 
 wait_for_gateway() {
   local wait_attempts
-  wait_attempts="$(openclaw_e2e_read_positive_int_env OPENCLAW_ONBOARD_GATEWAY_WAIT_ATTEMPTS 20)" || return $?
-  local wait_interval_s="${OPENCLAW_ONBOARD_GATEWAY_WAIT_INTERVAL_S:-1}"
+  wait_attempts="$(carapace_e2e_read_positive_int_env CARAPACE_ONBOARD_GATEWAY_WAIT_ATTEMPTS 20)" || return $?
+  local wait_interval_s="${CARAPACE_ONBOARD_GATEWAY_WAIT_INTERVAL_S:-1}"
   local saw_listening_log="false"
   for _ in $(seq 1 "$wait_attempts"); do
-    if openclaw_e2e_probe_tcp 127.0.0.1 18789 500 >/dev/null 2>&1; then
+    if carapace_e2e_probe_tcp 127.0.0.1 18789 500 >/dev/null 2>&1; then
       return 0
     fi
     if [ -f "$GATEWAY_LOG_PATH" ] && grep -E -q "listening on ws://[^ ]+:18789" "$GATEWAY_LOG_PATH"; then
@@ -128,12 +128,12 @@ wait_for_gateway() {
 }
 
 stop_gateway() {
-  openclaw_e2e_stop_process "$1"
+  carapace_e2e_stop_process "$1"
 }
 
 cleanup_wizard_case() {
   { exec 3>&-; } 2>/dev/null || true
-  openclaw_e2e_stop_process "${wizard_pid:-}"
+  carapace_e2e_stop_process "${wizard_pid:-}"
   stop_gateway "${gw_pid:-}"
   rm -rf "${input_fifo_dir:-}"
 }
@@ -152,7 +152,7 @@ run_wizard_cmd() {
   local wizard_status=0
 
   echo "== Wizard case: $case_name =="
-  set_isolated_openclaw_env "$state_ref"
+  set_isolated_carapace_env "$state_ref"
 
   input_fifo_dir="$(mktemp -d "$ONBOARD_TMP_DIR/${case_name}.fifo.XXXXXX")"
   input_fifo="$input_fifo_dir/stdin.fifo"
@@ -160,11 +160,11 @@ run_wizard_cmd() {
     rm -rf "$input_fifo_dir"
     return 1
   fi
-  local log_path="$OPENCLAW_E2E_LOG_DIR/${case_name}.log"
+  local log_path="$CARAPACE_E2E_LOG_DIR/${case_name}.log"
   WIZARD_LOG_PATH="$log_path"
   export WIZARD_LOG_PATH
   # Run under script to keep an interactive TTY for clack prompts.
-  openclaw_e2e_run_script_with_pty "$command" "$log_path" <"$input_fifo" >/dev/null 2>&1 &
+  carapace_e2e_run_script_with_pty "$command" "$log_path" <"$input_fifo" >/dev/null 2>&1 &
   wizard_pid=$!
   if ! exec 3>"$input_fifo"; then
     cleanup_wizard_case
@@ -209,13 +209,13 @@ run_wizard_cmd() {
 assert_onboard_config() {
   local scenario="$1"
   shift
-  openclaw_e2e_assert_file "$OPENCLAW_CONFIG_PATH"
-  node scripts/e2e/lib/onboard/assert-config.mjs "$scenario" "$OPENCLAW_CONFIG_PATH" "$@"
+  carapace_e2e_assert_file "$CARAPACE_CONFIG_PATH"
+  node scripts/e2e/lib/onboard/assert-config.mjs "$scenario" "$CARAPACE_CONFIG_PATH" "$@"
 }
 
-set_isolated_openclaw_env() {
+set_isolated_carapace_env() {
   local state_ref="$1"
-  openclaw_test_state_create "$state_ref" empty
+  carapace_test_state_create "$state_ref" empty
 }
 
 send_channels_flow() {
@@ -243,7 +243,7 @@ send_skills_flow() {
 }
 
 send_guided_skip_ui_flow() {
-  wait_for_log "Help make OpenClaw better?" 120 || return $?
+  wait_for_log "Help make Carapace better?" 120 || return $?
   send $'\r' 0.8
   wait_for_log "What should we call your first agent?" 120 || return $?
   send $'\r' 0.8
@@ -258,11 +258,11 @@ send_guided_skip_ui_flow() {
 validate_guided_skip_ui_log() {
   local log_path="$1"
   local mock_request_log="$2"
-  log_contains "Hi — I'm OpenClaw. I keep this system running. Let's get you set up." || {
+  log_contains "Hi — I'm Carapace. I keep this system running. Let's get you set up." || {
     echo "Guided onboarding introduction was not rendered"
     return 1
   }
-  log_contains "OpenClaw is ready." || {
+  log_contains "Carapace is ready." || {
     echo "Guided onboarding did not reach its skip-UI completion"
     return 1
   }
@@ -288,36 +288,36 @@ run_case_guided_skip_ui() {
   local mock_port="19091"
   local mock_log="$ONBOARD_TMP_DIR/guided-skip-ui-mock-openai.log"
   local mock_request_log="$ONBOARD_TMP_DIR/guided-skip-ui-mock-requests.jsonl"
-  set_isolated_openclaw_env guided-skip-ui
-  export OPENAI_API_KEY="sk-openclaw-guided-skip-ui-e2e"
+  set_isolated_carapace_env guided-skip-ui
+  export OPENAI_API_KEY="sk-carapace-guided-skip-ui-e2e"
   node scripts/e2e/lib/onboard/write-config.mjs \
     guided-skip-ui \
-    "$OPENCLAW_CONFIG_PATH" \
-    "$OPENCLAW_TEST_WORKSPACE_DIR" \
+    "$CARAPACE_CONFIG_PATH" \
+    "$CARAPACE_TEST_WORKSPACE_DIR" \
     "$mock_port"
   mock_openai_pid="$(
-    openclaw_e2e_start_tracked_process \
+    carapace_e2e_start_tracked_process \
       "$mock_log" \
       env MOCK_PORT="$mock_port" MOCK_REQUEST_LOG="$mock_request_log" \
       node scripts/e2e/mock-openai-server.mjs
   )"
-  openclaw_e2e_wait_mock_openai "$mock_port"
+  carapace_e2e_wait_mock_openai "$mock_port"
 
   run_wizard_cmd \
     guided-skip-ui \
     "$HOME" \
-    "node \"$OPENCLAW_ENTRY\" onboard --skip-ui" \
+    "node \"$CARAPACE_ENTRY\" onboard --skip-ui" \
     send_guided_skip_ui_flow
 
   validate_guided_skip_ui_log "$WIZARD_LOG_PATH" "$mock_request_log"
   echo "QA_ASSERT cli.guided-onboarding pass"
-  openclaw_e2e_stop_process "$mock_openai_pid"
+  carapace_e2e_stop_process "$mock_openai_pid"
   mock_openai_pid=""
 }
 
 run_case_local_basic() {
-  set_isolated_openclaw_env local-basic
-  openclaw_e2e_run_logged local-basic node "$OPENCLAW_ENTRY" onboard \
+  set_isolated_carapace_env local-basic
+  carapace_e2e_run_logged local-basic node "$CARAPACE_ENTRY" onboard \
     --non-interactive \
     --accept-risk \
     --flow quickstart \
@@ -328,15 +328,15 @@ run_case_local_basic() {
     --skip-ui \
     --skip-health
 
-  validate_local_basic_log "$OPENCLAW_E2E_LAST_LOG_PATH"
+  validate_local_basic_log "$CARAPACE_E2E_LAST_LOG_PATH"
 
   # Assert config + workspace scaffolding.
-  workspace_dir="$OPENCLAW_STATE_DIR/workspace"
-  sessions_dir="$OPENCLAW_STATE_DIR/agents/main/sessions"
+  workspace_dir="$CARAPACE_STATE_DIR/workspace"
+  sessions_dir="$CARAPACE_STATE_DIR/agents/main/sessions"
 
-  openclaw_e2e_assert_dir "$sessions_dir"
+  carapace_e2e_assert_dir "$sessions_dir"
   for file in AGENTS.md BOOTSTRAP.md IDENTITY.md SOUL.md USER.md; do
-    openclaw_e2e_assert_file "$workspace_dir/$file"
+    carapace_e2e_assert_file "$workspace_dir/$file"
   done
 
   assert_onboard_config local-basic "$workspace_dir"
@@ -344,11 +344,11 @@ run_case_local_basic() {
 }
 
 run_case_local_auth_refs() {
-  set_isolated_openclaw_env local-auth-refs
-  export OPENAI_API_KEY="sk-openclaw-onboard-auth-ref-e2e"
-  export OPENCLAW_GATEWAY_TOKEN="openclaw-onboard-gateway-ref-e2e"
+  set_isolated_carapace_env local-auth-refs
+  export OPENAI_API_KEY="sk-carapace-onboard-auth-ref-e2e"
+  export CARAPACE_GATEWAY_TOKEN="carapace-onboard-gateway-ref-e2e"
 
-  openclaw_e2e_run_logged local-auth-refs node "$OPENCLAW_ENTRY" onboard \
+  carapace_e2e_run_logged local-auth-refs node "$CARAPACE_ENTRY" onboard \
     --non-interactive \
     --accept-risk \
     --flow quickstart \
@@ -356,7 +356,7 @@ run_case_local_auth_refs() {
     --auth-choice openai-api-key \
     --secret-input-mode ref \
     --gateway-auth token \
-    --gateway-token-ref-env OPENCLAW_GATEWAY_TOKEN \
+    --gateway-token-ref-env CARAPACE_GATEWAY_TOKEN \
     --skip-channels \
     --skip-skills \
     --skip-daemon \
@@ -371,16 +371,16 @@ run_case_local_auth_refs() {
 }
 
 run_case_local_password() {
-  set_isolated_openclaw_env local-password
+  set_isolated_carapace_env local-password
 
-  openclaw_e2e_run_logged local-password node "$OPENCLAW_ENTRY" onboard \
+  carapace_e2e_run_logged local-password node "$CARAPACE_ENTRY" onboard \
     --non-interactive \
     --accept-risk \
     --flow quickstart \
     --mode local \
     --auth-choice skip \
     --gateway-auth password \
-    --gateway-password "openclaw-onboard-password-e2e" \
+    --gateway-password "carapace-onboard-password-e2e" \
     --skip-channels \
     --skip-skills \
     --skip-daemon \
@@ -392,10 +392,10 @@ run_case_local_password() {
 }
 
 run_case_multi_agent() {
-  set_isolated_openclaw_env multi-agent
-  node scripts/e2e/lib/onboard/write-config.mjs multi-agent "$OPENCLAW_CONFIG_PATH"
+  set_isolated_carapace_env multi-agent
+  node scripts/e2e/lib/onboard/write-config.mjs multi-agent "$CARAPACE_CONFIG_PATH"
 
-  openclaw_e2e_run_logged multi-agent node "$OPENCLAW_ENTRY" onboard \
+  carapace_e2e_run_logged multi-agent node "$CARAPACE_ENTRY" onboard \
     --non-interactive \
     --accept-risk \
     --flow quickstart \
@@ -412,9 +412,9 @@ run_case_multi_agent() {
 }
 
 run_case_remote_non_interactive() {
-  set_isolated_openclaw_env remote-non-interactive
+  set_isolated_carapace_env remote-non-interactive
   # Smoke test non-interactive remote config write.
-  openclaw_e2e_run_logged remote-non-interactive node "$OPENCLAW_ENTRY" onboard --non-interactive --accept-risk \
+  carapace_e2e_run_logged remote-non-interactive node "$CARAPACE_ENTRY" onboard --non-interactive --accept-risk \
     --mode remote \
     --remote-url ws://gateway.local:18789 \
     --remote-token remote-token \
@@ -426,10 +426,10 @@ run_case_remote_non_interactive() {
 }
 
 run_case_reset() {
-  set_isolated_openclaw_env reset-config
-  node scripts/e2e/lib/onboard/write-config.mjs reset "$OPENCLAW_CONFIG_PATH"
+  set_isolated_carapace_env reset-config
+  node scripts/e2e/lib/onboard/write-config.mjs reset "$CARAPACE_CONFIG_PATH"
 
-  openclaw_e2e_run_logged reset-config node "$OPENCLAW_ENTRY" onboard \
+  carapace_e2e_run_logged reset-config node "$CARAPACE_ENTRY" onboard \
     --non-interactive \
     --accept-risk \
     --flow quickstart \
@@ -447,18 +447,18 @@ run_case_reset() {
 
 run_case_channels() {
   # Channels-only configure flow.
-  run_wizard_cmd channels channels "node \"$OPENCLAW_ENTRY\" configure --section channels" send_channels_flow
+  run_wizard_cmd channels channels "node \"$CARAPACE_ENTRY\" configure --section channels" send_channels_flow
 
   assert_onboard_config channels
 }
 
 run_case_skills() {
   local home_dir
-  set_isolated_openclaw_env skills
+  set_isolated_carapace_env skills
   home_dir="$HOME"
-  node scripts/e2e/lib/onboard/write-config.mjs skills "$OPENCLAW_CONFIG_PATH"
+  node scripts/e2e/lib/onboard/write-config.mjs skills "$CARAPACE_CONFIG_PATH"
 
-  run_wizard_cmd skills "$home_dir" "node \"$OPENCLAW_ENTRY\" configure --section skills" send_skills_flow
+  run_wizard_cmd skills "$home_dir" "node \"$CARAPACE_ENTRY\" configure --section skills" send_skills_flow
 
   assert_onboard_config skills
   echo "QA_ASSERT cli.targeted-reconfiguration.skills pass"
@@ -466,11 +466,11 @@ run_case_skills() {
 
 validate_local_basic_log() {
   local log_path="$1"
-  openclaw_e2e_assert_log_not_contains "$log_path" "systemctl --user unavailable"
+  carapace_e2e_assert_log_not_contains "$log_path" "systemctl --user unavailable"
 }
 
 run_selected_cases() {
-  local selected_cases="${OPENCLAW_ONBOARD_E2E_CASES:-guided-skip-ui,local-basic,multi-agent,remote-non-interactive,reset,channels,skills}"
+  local selected_cases="${CARAPACE_ONBOARD_E2E_CASES:-guided-skip-ui,local-basic,multi-agent,remote-non-interactive,reset,channels,skills}"
   local case_name
   local -a cases=()
   IFS="," read -r -a cases <<<"$selected_cases"
@@ -493,6 +493,6 @@ run_selected_cases() {
   done
 }
 
-if [ "$OPENCLAW_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
+if [ "$CARAPACE_ONBOARD_SCENARIO_SOURCE_ONLY" != "1" ]; then
   run_selected_cases
 fi

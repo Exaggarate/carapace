@@ -4,8 +4,8 @@
  * This keeps setup deterministic when users provide API-key flags without also
  * passing `--auth`, including plugin-defined provider auth flags.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveProviderOnboardAuthFlags } from "../../../plugins/provider-auth-choices.js";
 import type { AuthChoice, OnboardOptions } from "../../onboard-types.js";
 
@@ -29,7 +29,7 @@ function hasStringValue(value: unknown): boolean {
 export function inferAuthChoiceFromFlags(
   opts: OnboardOptions,
   params?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
   },

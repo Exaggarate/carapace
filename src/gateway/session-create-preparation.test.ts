@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { loadSessionEntry, replaceSessionEntrySync } from "../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createGatewaySession } from "./session-create-service.js";
 
 describe("Gateway creation preparation", () => {
   it("retains the full adopted target while checking sibling labels", async () => {
-    await withOpenClawTestState({ label: "gateway-create-snapshot" }, async () => {
+    await withCarapaceTestState({ label: "gateway-create-snapshot" }, async () => {
       const create = (key: string, label: string) =>
         createGatewaySession({
           cfg: {},

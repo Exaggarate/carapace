@@ -5,8 +5,8 @@ import { getBridgeAuthForPort } from "./bridge-auth-registry.js";
 import { startBrowserBridgeServer, stopBrowserBridgeServer } from "./bridge-server.js";
 import type { ResolvedBrowserConfig } from "./config.js";
 import {
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_CARAPACE_BROWSER_COLOR,
+  DEFAULT_CARAPACE_BROWSER_PROFILE_NAME,
 } from "./constants.js";
 import { isBrowserRuntimeRunning } from "./server-context.lifecycle.js";
 
@@ -33,16 +33,16 @@ function buildResolvedConfig(): ResolvedBrowserConfig {
     localLaunchTimeoutMs: 15_000,
     localCdpReadyTimeoutMs: 8_000,
     extraArgs: [],
-    color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+    color: DEFAULT_CARAPACE_BROWSER_COLOR,
     executablePath: undefined,
     headless: true,
     noSandbox: false,
     attachOnly: true,
-    defaultProfile: DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+    defaultProfile: DEFAULT_CARAPACE_BROWSER_PROFILE_NAME,
     profiles: {
-      [DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]: {
+      [DEFAULT_CARAPACE_BROWSER_PROFILE_NAME]: {
         cdpPort: 1,
-        color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+        color: DEFAULT_CARAPACE_BROWSER_COLOR,
       },
     },
   } as unknown as ResolvedBrowserConfig;
@@ -81,10 +81,10 @@ describe("startBrowserBridgeServer auth", () => {
     await expectAuthFlow({ authToken: "secret-token" }, { Authorization: "Bearer secret-token" });
   });
 
-  it("accepts x-openclaw-password when authPassword is set", async () => {
+  it("accepts x-carapace-password when authPassword is set", async () => {
     await expectAuthFlow(
       { authPassword: "secret-password" },
-      { "x-openclaw-password": "secret-password" },
+      { "x-carapace-password": "secret-password" },
     );
   });
 
@@ -134,7 +134,7 @@ describe("startBrowserBridgeServer auth", () => {
       .mockResolvedValue(undefined);
     bridge.state.extensionRelays = new Map([
       [
-        "openclaw",
+        "carapace",
         {
           port: 18_799,
           token: "relay-token",

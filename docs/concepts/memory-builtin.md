@@ -25,7 +25,7 @@ started.
 
 Native sqlite-vec queries run in a separate, read-only process so a slow query
 does not block the Gateway event loop. Cancelling a search terminates its query
-process; OpenClaw does not retry that native query on the Gateway thread.
+process; Carapace does not retry that native query on the Gateway thread.
 
 If semantic retrieval reaches the 15-second tool deadline after keyword matches
 from memory files are ready, `memory_search` returns those matches with a
@@ -57,7 +57,7 @@ To force local GGUF embeddings, install and configure the official llama.cpp
 provider, then point `local.modelPath` at a GGUF file:
 
 ```bash
-openclaw plugins install @openclaw/llama-cpp-provider
+carapace plugins install @carapace/llama-cpp-provider
 ```
 
 ```json5
@@ -67,7 +67,7 @@ openclaw plugins install @openclaw/llama-cpp-provider
       provider: "local",
       fallback: "none",
       local: {
-        modelPath: "~/.openclaw/models/llama.cpp/hf_ggml-org_embeddinggemma-300m-qat-Q8_0.gguf",
+        modelPath: "~/.carapace/models/llama.cpp/hf_ggml-org_embeddinggemma-300m-qat-Q8_0.gguf",
       },
     },
   },
@@ -83,7 +83,7 @@ openclaw plugins install @openclaw/llama-cpp-provider
 | Gemini            | `gemini`            | Supports multimodal (image + audio) |
 | GitHub Copilot    | `github-copilot`    | Uses your Copilot subscription      |
 | LM Studio         | `lmstudio`          | Local/self-hosted                   |
-| Local             | `local`             | OpenClaw-managed llama.cpp server   |
+| Local             | `local`             | Carapace-managed llama.cpp server   |
 | Mistral           | `mistral`           |                                     |
 | Ollama            | `ollama`            | Local/self-hosted                   |
 | OpenAI            | `openai`            | Default: `text-embedding-3-small`   |
@@ -94,9 +94,9 @@ Set `memory.search.provider` to switch away from OpenAI.
 
 ## How indexing works
 
-OpenClaw indexes `MEMORY.md`, an existing root `USER.md`, and `memory/*.md` into
+Carapace indexes `MEMORY.md`, an existing root `USER.md`, and `memory/*.md` into
 chunks (400 tokens with 80-token overlap by default) and stores them in a
-per-agent SQLite database. OpenClaw does not create `USER.md` automatically.
+per-agent SQLite database. Carapace does not create `USER.md` automatically.
 
 Each chunk can carry nullable importance and trigger metadata. Null values are
 neutral, so older indexes remain usable. Search combines hybrid relevance,
@@ -112,7 +112,7 @@ which support selective deletion after promotion. For coverage and limits, see
 [Memory provenance and deletion](/concepts/memory-provenance).
 
 - **Index location:** the owning agent database at
-  `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+  `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite`
 - **Storage maintenance:** SQLite WAL sidecars are bounded with periodic and
   shutdown checkpoints.
 - **File watching:** changes to memory files trigger a debounced reindex
@@ -120,9 +120,9 @@ which support selective deletion after promotion. For coverage and limits, see
 - **Index compatibility:** changing the embedding provider, model, settings,
   configured sources, or scope can pause search until you explicitly rebuild.
   See [provider selection](/reference/memory-config#provider-selection).
-- **Reindex on demand:** `openclaw memory index --force --agent <id>`
+- **Reindex on demand:** `carapace memory index --force --agent <id>`
 
-When the index identity reports an OpenClaw chunking-implementation change,
+When the index identity reports an Carapace chunking-implementation change,
 a normal or CLI search rebuilds it before returning results. The rebuild uses
 the agent's current embedding settings; status inspection remains read-only.
 
@@ -153,7 +153,7 @@ Other agent state, including sessions and transcripts in the same database,
 is retained. Use the [memory index command](/cli/memory#memory-index) for
 memory-only repair.
 
-`openclaw memory status` reports stored chunk text and JSON embedding bytes
+`carapace memory status` reports stored chunk text and JSON embedding bytes
 for each source (`sourceCounts[].chunkBytes` in JSON). These are payload sizes,
 not total disk usage: embedding cache, FTS/vector tables, SQLite overhead, and
 WAL/free pages are excluded.
@@ -173,7 +173,7 @@ You can also index Markdown files outside the workspace with
 QMD has been removed; builtin is the only memory engine. After upgrading, run:
 
 ```bash
-openclaw doctor --fix
+carapace doctor --fix
 ```
 
 Doctor removes the retired `memory.backend`, `memory.qmd`, and
@@ -186,7 +186,7 @@ cross-conversation recall. Retained session-reset transcripts remain in the
 agent's sessions directory and are indexed from those original artifacts.
 
 When Memory Core finds a retired per-agent QMD workspace under
-`~/.openclaw/agents/<agentId>/qmd/`, Doctor also offers to remove its derived
+`~/.carapace/agents/<agentId>/qmd/`, Doctor also offers to remove its derived
 indexes, model downloads, collection metadata, and session exports.
 
 Canonical memory remains in `MEMORY.md`, `USER.md`, `memory/*.md`, and the
@@ -228,25 +228,25 @@ with automatic user modeling.
 
 ## Troubleshooting
 
-**Memory search disabled?** Check `openclaw memory status`. If no provider is
+**Memory search disabled?** Check `carapace memory status`. If no provider is
 detected, set one explicitly or add an API key.
 
 **Local provider not detected?** Run interactive llama.cpp setup once, confirm
 the local path exists, and run:
 
 ```bash
-openclaw memory status --deep --agent main
-openclaw memory index --force --agent main
+carapace memory status --deep --agent main
+carapace memory index --force --agent main
 ```
 
 Both standalone CLI commands and the Gateway use the same `local` provider id.
 Set `memory.search.provider: "local"` when you want local embeddings.
 
-**Stale results?** Run `openclaw memory index --force` to rebuild. The watcher
+**Stale results?** Run `carapace memory index --force` to rebuild. The watcher
 may miss changes in rare edge cases.
 
-**sqlite-vec not loading?** OpenClaw falls back to in-process cosine
-similarity automatically. `openclaw memory status --deep` reports the local
+**sqlite-vec not loading?** Carapace falls back to in-process cosine
+similarity automatically. `carapace memory status --deep` reports the local
 vector store separately from the embedding provider, so `Vector store:
 unavailable` points at sqlite-vec loading while `Embeddings: unavailable`
 points at provider/auth or model readiness. Check logs for the specific load
@@ -258,13 +258,13 @@ To rebuild after stale results or an embedding-provider change, select the
 affected agent explicitly:
 
 ```bash
-openclaw memory status --agent <agent-id> --deep
-openclaw memory index --agent <agent-id> --force --verbose
-openclaw memory status --agent <agent-id> --deep
+carapace memory status --agent <agent-id> --deep
+carapace memory index --agent <agent-id> --force --verbose
+carapace memory status --agent <agent-id> --deep
 ```
 
 <Warning>
-The index shares `openclaw-agent.sqlite` with canonical sessions, transcripts,
+The index shares `carapace-agent.sqlite` with canonical sessions, transcripts,
 and other durable agent state. Never delete that database or its `-wal`, `-shm`,
 or `-journal` sidecars to reset memory. Memory indexing cannot reconstruct
 conversation history lost this way.
@@ -274,8 +274,8 @@ To discard the derived index and embedding cache before rebuilding, use
 [`memory reset`](/cli/memory#memory-reset):
 
 ```bash
-openclaw memory reset --agent <agent-id>
-openclaw memory index --agent <agent-id>
+carapace memory reset --agent <agent-id>
+carapace memory index --agent <agent-id>
 ```
 
 Reset asks for confirmation; add `--yes` for non-interactive use. It clears only
@@ -294,7 +294,7 @@ the [restore workflow](/install/backups#restore-a-full-archive).
 
 ### Reclaim disk space
 
-Start with `openclaw memory status --agent <agent-id> --json`. Compare the
+Start with `carapace memory status --agent <agent-id> --json`. Compare the
 database and WAL sizes, reusable bytes, retained embedding-cache payload, and
 per-source chunk payloads. Reusable bytes are pages already free inside SQLite;
 they are not additional data. Cache and chunk payloads exclude indexes and
@@ -306,10 +306,10 @@ stop other writers. Keep them stopped through reset and compaction so background
 indexing cannot refill the cache between commands:
 
 ```bash
-openclaw memory reset --agent <agent-id> --yes
-openclaw doctor --session-sqlite compact --session-sqlite-agent <agent-id>
-openclaw memory index --agent <agent-id>
-openclaw memory status --agent <agent-id>
+carapace memory reset --agent <agent-id> --yes
+carapace doctor --session-sqlite compact --session-sqlite-agent <agent-id>
+carapace memory index --agent <agent-id>
+carapace memory status --agent <agent-id>
 ```
 
 If only unused pages need reclaiming, skip reset and preserve the existing index.

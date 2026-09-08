@@ -146,7 +146,7 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
   const producerSha = "a".repeat(40);
   const producerRef = "release-publish/aaaaaaaaaaaa-1";
   const producer: AuthorizedBetaFocusedProducerIdentity = {
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     runId: "123",
     runAttempt: 1,
     workflowPath: ".github/workflows/authorized-beta-focused-validation.yml",
@@ -215,13 +215,13 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
     ),
     historicalRun(
       historical.releaseChecksRunId,
-      `OpenClaw Release Checks ${historicalTitle}-release-checks`,
-      ".github/workflows/openclaw-release-checks.yml",
+      `Carapace Release Checks ${historicalTitle}-release-checks`,
+      ".github/workflows/carapace-release-checks.yml",
     ),
     historicalRun(
       historical.performanceRunId,
-      `OpenClaw Performance ${historicalTitle}`,
-      ".github/workflows/openclaw-performance.yml",
+      `Carapace Performance ${historicalTitle}`,
+      ".github/workflows/carapace-performance.yml",
       "failure",
     ),
     focusedRun(focused.ciRunId, "CI beta3-slack-proof-e347223a", ".github/workflows/ci.yml"),
@@ -234,7 +234,7 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
   ];
   const jobs = [
     createJob(historical.ciFailedJobId, historical.ciRunId, "check-lint", "failure"),
-    createJob(historical.ciAggregateJobId, historical.ciRunId, "openclaw/ci-gate", "failure"),
+    createJob(historical.ciAggregateJobId, historical.ciRunId, "carapace/ci-gate", "failure"),
     createJob(
       historical.pluginFailedJobId,
       historical.pluginRunId,
@@ -256,7 +256,7 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
     createJob(
       historical.performanceFailedJobId,
       historical.performanceRunId,
-      "OpenClaw source performance probes",
+      "Carapace source performance probes",
       "failure",
     ),
     createJob(focused.ciSuccessJobId, focused.ciRunId, "check-lint", "success"),
@@ -290,7 +290,7 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
     ],
   };
   const evidence: AuthorizedBetaFocusedEvidence = {
-    schema: "openclaw.authorized-beta-focused-evidence.v1",
+    schema: "carapace.authorized-beta-focused-evidence.v1",
     mode: "authorized-beta-focused-v1",
     policySha256: digestAuthorizedBetaFocusedPolicy(policy),
     releaseTag: policy.releaseTag,
@@ -320,10 +320,10 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
   writeFileSync(join(trustedRoot, "authorized-beta-focused-policy.json"), JSON.stringify(policy));
   writeFileSync(artifactPath, JSON.stringify(evidence));
   const apiResponses = [
-    ...runs.map((run) => [`repos/openclaw/openclaw/actions/runs/${run.id}`, run] as const),
-    ...jobs.map((job) => [`repos/openclaw/openclaw/actions/jobs/${job.id}`, job] as const),
+    ...runs.map((run) => [`repos/carapace/carapace/actions/runs/${run.id}`, run] as const),
+    ...jobs.map((job) => [`repos/carapace/carapace/actions/jobs/${job.id}`, job] as const),
     [
-      `repos/openclaw/openclaw/git/ref/tags/${producerRef}`,
+      `repos/carapace/carapace/git/ref/tags/${producerRef}`,
       { object: { type: "commit", sha: producerSha } },
     ] as const,
   ];
@@ -340,7 +340,7 @@ function runFocusedValidatorLogProbe(outcome: "flagged" | "legacy" | "unrelated"
       'if [ "$command" = api ] && [ "${route%/logs}" != "$route" ]; then',
       '  if [ "$1" = --allow-escape-sequences ]; then',
       `    printf '["api","%s","--allow-escape-sequences"]\\n' "$route" >> '${callsPath}'`,
-      `    if [ "$route" = 'repos/openclaw/openclaw/actions/jobs/${focused.ciTargetLogJobId}/logs' ] && [ '${outcome}' != flagged ]; then`,
+      `    if [ "$route" = 'repos/carapace/carapace/actions/jobs/${focused.ciTargetLogJobId}/logs' ] && [ '${outcome}' != flagged ]; then`,
       `      if [ '${outcome}' = legacy ]; then`,
       "        printf 'unknown flag: --allow-escape-sequences\\r\\n\\r\\nUsage: gh api <endpoint> [flags]\\r\\n' >&2",
       "      else",
@@ -493,7 +493,7 @@ function resolveFocusedProducer(
     readFileSync(
       isDockerBoundary
         ? ".github/workflows/docker-release.yml"
-        : ".github/workflows/openclaw-release-publish.yml",
+        : ".github/workflows/carapace-release-publish.yml",
       "utf8",
     ),
   ) as ParsedWorkflow;
@@ -549,7 +549,7 @@ function resolveFocusedProducer(
         FOCUSED_RELEASE_EVIDENCE_RUN_ATTEMPT: "2",
         FOCUSED_RELEASE_EVIDENCE_RUN_ID: "123",
         GITHUB_OUTPUT: outputPath,
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         MOCK_RUN_JSON: JSON.stringify(run),
         MOCK_TAG_JSON: JSON.stringify(tag),
         MOCK_TAG_MISSING: String(options.missingTag ?? false),
@@ -596,7 +596,7 @@ describe("authorized beta focused evidence", () => {
     },
     {
       name: "wrong producer workflow path",
-      options: { run: { path: ".github/workflows/openclaw-release-publish.yml" } },
+      options: { run: { path: ".github/workflows/carapace-release-publish.yml" } },
     },
     { name: "wrong producer workflow name", options: { run: { name: "Other Validation" } } },
     { name: "wrong producer event", options: { run: { event: "push" } } },
@@ -792,11 +792,11 @@ describe("authorized beta focused evidence", () => {
     const { calls, policy, result } = runFocusedValidatorLogProbe(outcome);
     const ciLogArgs = [
       "api",
-      `repos/openclaw/openclaw/actions/jobs/${policy.focusedProof.ciTargetLogJobId}/logs`,
+      `repos/carapace/carapace/actions/jobs/${policy.focusedProof.ciTargetLogJobId}/logs`,
     ];
     const pluginLogArgs = [
       "api",
-      `repos/openclaw/openclaw/actions/jobs/${policy.focusedProof.pluginTargetLogJobId}/logs`,
+      `repos/carapace/carapace/actions/jobs/${policy.focusedProof.pluginTargetLogJobId}/logs`,
     ];
     const flaggedCiLogArgs = [...ciLogArgs, "--allow-escape-sequences"];
     const flaggedPluginLogArgs = [...pluginLogArgs, "--allow-escape-sequences"];
@@ -921,7 +921,7 @@ describe("authorized beta focused evidence", () => {
     {
       name: "wrong policy mode",
       policy: {
-        schema: "openclaw.authorized-beta-focused-policy.v1",
+        schema: "carapace.authorized-beta-focused-policy.v1",
         mode: "other",
         candidateSha: "a".repeat(40),
       },
@@ -929,14 +929,14 @@ describe("authorized beta focused evidence", () => {
     {
       name: "missing candidate",
       policy: {
-        schema: "openclaw.authorized-beta-focused-policy.v1",
+        schema: "carapace.authorized-beta-focused-policy.v1",
         mode: "authorized-beta-focused-v1",
       },
     },
     {
       name: "short candidate",
       policy: {
-        schema: "openclaw.authorized-beta-focused-policy.v1",
+        schema: "carapace.authorized-beta-focused-policy.v1",
         mode: "authorized-beta-focused-v1",
         candidateSha: "abc",
       },
@@ -944,7 +944,7 @@ describe("authorized beta focused evidence", () => {
     {
       name: "uppercase candidate",
       policy: {
-        schema: "openclaw.authorized-beta-focused-policy.v1",
+        schema: "carapace.authorized-beta-focused-policy.v1",
         mode: "authorized-beta-focused-v1",
         candidateSha: "A".repeat(40),
       },
@@ -1101,9 +1101,9 @@ describe("authorized beta focused evidence", () => {
       [
         `import { digestAuthorizedBetaFocusedPolicy, readAuthorizedBetaFocusedPolicy, validateAuthorizedBetaFocusedArtifactShape } from ${JSON.stringify(pathToFileURL(validatorPath).href)};`,
         `const policy = readAuthorizedBetaFocusedPolicy();`,
-        `const producer = { repository: "openclaw/openclaw", runId: "123", runAttempt: 1, workflowPath: ".github/workflows/authorized-beta-focused-validation.yml", workflowFullRef: "refs/tags/release-publish/aaaaaaaaaaaa-1", workflowRef: "release-publish/aaaaaaaaaaaa-1", workflowSha: "a".repeat(40) };`,
+        `const producer = { repository: "carapace/carapace", runId: "123", runAttempt: 1, workflowPath: ".github/workflows/authorized-beta-focused-validation.yml", workflowFullRef: "refs/tags/release-publish/aaaaaaaaaaaa-1", workflowRef: "release-publish/aaaaaaaaaaaa-1", workflowSha: "a".repeat(40) };`,
         `const inventory = { eligibilityPlanDigest: policy.eligibilityPlanDigest, ...policy.inventory };`,
-        `const evidence = { schema: "openclaw.authorized-beta-focused-evidence.v1", mode: policy.mode, policySha256: digestAuthorizedBetaFocusedPolicy(policy), releaseTag: policy.releaseTag, candidate: { sha: policy.candidateSha, parentSha: policy.baseCandidateSha, treeSha: policy.candidateTreeSha, packageProjectionSha256: policy.packageProjectionSha256, changedPaths: policy.changedPaths }, producer, historical: { frvRunId: policy.historicalFrv.runId, frvRunAttempt: policy.historicalFrv.runAttempt, releaseChecksRunId: policy.historicalFrv.releaseChecksRunId, performanceRunId: policy.historicalFrv.performanceRunId }, focused: { ciRunId: policy.focusedProof.ciRunId, ciJobId: policy.focusedProof.ciSuccessJobId, pluginRunId: policy.focusedProof.pluginRunId, pluginJobId: policy.focusedProof.pluginSuccessJobId, reviewedHeadSha: policy.reviewedHeadSha }, inventory };`,
+        `const evidence = { schema: "carapace.authorized-beta-focused-evidence.v1", mode: policy.mode, policySha256: digestAuthorizedBetaFocusedPolicy(policy), releaseTag: policy.releaseTag, candidate: { sha: policy.candidateSha, parentSha: policy.baseCandidateSha, treeSha: policy.candidateTreeSha, packageProjectionSha256: policy.packageProjectionSha256, changedPaths: policy.changedPaths }, producer, historical: { frvRunId: policy.historicalFrv.runId, frvRunAttempt: policy.historicalFrv.runAttempt, releaseChecksRunId: policy.historicalFrv.releaseChecksRunId, performanceRunId: policy.historicalFrv.performanceRunId }, focused: { ciRunId: policy.focusedProof.ciRunId, ciJobId: policy.focusedProof.ciSuccessJobId, pluginRunId: policy.focusedProof.pluginRunId, pluginJobId: policy.focusedProof.pluginSuccessJobId, reviewedHeadSha: policy.reviewedHeadSha }, inventory };`,
         `validateAuthorizedBetaFocusedArtifactShape(evidence, policy, producer, inventory);`,
         `process.stdout.write("verified");`,
       ].join("\n"),
@@ -1120,7 +1120,7 @@ describe("authorized beta focused evidence", () => {
   it("accepts the exact artifact shape and rejects inventory drift", () => {
     const policy = readAuthorizedBetaFocusedPolicy();
     const producer: AuthorizedBetaFocusedProducerIdentity = {
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runId: "123",
       runAttempt: 1,
       workflowPath: ".github/workflows/authorized-beta-focused-validation.yml",
@@ -1133,7 +1133,7 @@ describe("authorized beta focused evidence", () => {
       ...policy.inventory,
     };
     const evidence = {
-      schema: "openclaw.authorized-beta-focused-evidence.v1",
+      schema: "carapace.authorized-beta-focused-evidence.v1",
       mode: "authorized-beta-focused-v1",
       policySha256: digestAuthorizedBetaFocusedPolicy(policy),
       releaseTag: policy.releaseTag,
@@ -1196,8 +1196,8 @@ describe("authorized beta focused evidence", () => {
 
     const workflows = new Map<string, ParsedWorkflow>();
     for (const path of [
-      ".github/workflows/openclaw-release-publish.yml",
-      ".github/workflows/openclaw-npm-release.yml",
+      ".github/workflows/carapace-release-publish.yml",
+      ".github/workflows/carapace-npm-release.yml",
     ]) {
       const workflow = parse(readFileSync(path, "utf8")) as ParsedWorkflow;
       workflows.set(path, workflow);
@@ -1219,7 +1219,7 @@ describe("authorized beta focused evidence", () => {
       const source = readFileSync(path, "utf8");
       expect(source).toContain("Verify focused release evidence");
       expect(source).toContain("gh attestation verify");
-      const signerSha = path.endsWith("openclaw-release-publish.yml")
+      const signerSha = path.endsWith("carapace-release-publish.yml")
         ? "PRODUCER_WORKFLOW_SHA"
         : "WORKFLOW_SHA";
       expect(source).toContain(`--signer-digest "\${${signerSha}}"`);
@@ -1234,8 +1234,8 @@ describe("authorized beta focused evidence", () => {
     expect(parentSource).toContain(
       "${process.env.RELEASE_VALIDATION_LABEL}: https://github.com/${process.env.RELEASE_REPO}/actions/runs/${process.env.RELEASE_VALIDATION_RUN_ID}",
     );
-    const parentWorkflow = workflows.get(".github/workflows/openclaw-release-publish.yml");
-    const npmWorkflow = workflows.get(".github/workflows/openclaw-npm-release.yml");
+    const parentWorkflow = workflows.get(".github/workflows/carapace-release-publish.yml");
+    const npmWorkflow = workflows.get(".github/workflows/carapace-npm-release.yml");
     if (!parentWorkflow || !npmWorkflow) {
       throw new Error("release workflows missing");
     }
@@ -1288,13 +1288,13 @@ describe("authorized beta focused evidence", () => {
     expect(publishStepNames.indexOf("Verify focused release evidence after approval")).toBeLessThan(
       publishStepNames.indexOf("Setup Node environment"),
     );
-    const npmSteps = npmWorkflow.jobs?.publish_openclaw_npm?.steps ?? [];
+    const npmSteps = npmWorkflow.jobs?.publish_carapace_npm?.steps ?? [];
     const npmStepNames = npmSteps.map((step) => step.name);
     expect(npmStepNames.indexOf("Setup Node environment")).toBeLessThan(
       npmStepNames.indexOf("Verify focused release evidence"),
     );
     expect(
-      namedStep(npmWorkflow, "publish_openclaw_npm", "Checkout trusted validation verifier").with,
+      namedStep(npmWorkflow, "publish_carapace_npm", "Checkout trusted validation verifier").with,
     ).toMatchObject({ "sparse-checkout": "scripts" });
     const validatorSource = readFileSync(
       "scripts/validate-authorized-beta-focused-evidence.mts",

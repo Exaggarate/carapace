@@ -8,7 +8,7 @@ describe("resolveNonInteractiveWorkspaceDir", () => {
   let root: string;
 
   beforeEach(async () => {
-    const createdRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-onboard-workspace-"));
+    const createdRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-onboard-workspace-"));
     root = await fs.realpath(createdRoot);
   });
 
@@ -18,51 +18,51 @@ describe("resolveNonInteractiveWorkspaceDir", () => {
 
   it("keeps the existing default workspace for the default state directory", () => {
     const home = path.join(root, "home");
-    const defaultWorkspaceDir = path.join(home, ".openclaw", "workspace");
+    const defaultWorkspaceDir = path.join(home, ".carapace", "workspace");
     const resolved = resolveNonInteractiveWorkspaceDir({
       opts: {},
       baseConfig: {},
       defaultWorkspaceDir,
       env: {
         HOME: home,
-        OPENCLAW_HOME: home,
-        OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
+        CARAPACE_HOME: home,
+        CARAPACE_STATE_DIR: path.join(home, ".carapace"),
       },
     });
 
     expect(resolved).toBe(defaultWorkspaceDir);
   });
 
-  it("preserves OPENCLAW_WORKSPACE_DIR with a non-default state directory", () => {
+  it("preserves CARAPACE_WORKSPACE_DIR with a non-default state directory", () => {
     const home = path.join(root, "home");
     const workspaceOverride = path.join(root, "explicit-workspace");
     const resolved = resolveNonInteractiveWorkspaceDir({
       opts: {},
       baseConfig: {},
-      defaultWorkspaceDir: path.join(home, ".openclaw", "workspace"),
+      defaultWorkspaceDir: path.join(home, ".carapace", "workspace"),
       env: {
         HOME: home,
-        OPENCLAW_HOME: home,
-        OPENCLAW_STATE_DIR: path.join(root, "scratch-state"),
-        OPENCLAW_WORKSPACE_DIR: workspaceOverride,
+        CARAPACE_HOME: home,
+        CARAPACE_STATE_DIR: path.join(root, "scratch-state"),
+        CARAPACE_WORKSPACE_DIR: workspaceOverride,
       },
     });
 
     expect(resolved).toBe(workspaceOverride);
   });
 
-  it("ignores a blank OPENCLAW_WORKSPACE_DIR", () => {
+  it("ignores a blank CARAPACE_WORKSPACE_DIR", () => {
     const home = path.join(root, "home");
     const stateDir = path.join(root, "scratch-state");
     const resolved = resolveNonInteractiveWorkspaceDir({
       opts: {},
       baseConfig: {},
-      defaultWorkspaceDir: path.join(home, ".openclaw", "workspace"),
+      defaultWorkspaceDir: path.join(home, ".carapace", "workspace"),
       env: {
         HOME: home,
-        OPENCLAW_HOME: home,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_WORKSPACE_DIR: "   ",
+        CARAPACE_HOME: home,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_WORKSPACE_DIR: "   ",
       },
     });
 
@@ -75,11 +75,11 @@ describe("resolveNonInteractiveWorkspaceDir", () => {
     const resolved = resolveNonInteractiveWorkspaceDir({
       opts: { workspace: "   " },
       baseConfig: { agents: { defaults: { workspace: "\t" } } },
-      defaultWorkspaceDir: path.join(home, ".openclaw", "workspace"),
+      defaultWorkspaceDir: path.join(home, ".carapace", "workspace"),
       env: {
         HOME: home,
-        OPENCLAW_HOME: home,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_HOME: home,
+        CARAPACE_STATE_DIR: stateDir,
       },
     });
 

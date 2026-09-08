@@ -10,7 +10,7 @@ sidebarTitle: "Control UI"
 The Control UI is a small **Vite + Lit** single-page app served by the Gateway:
 
 - default: `http://<host>:18789/`
-- optional prefix: set `gateway.controlUi.basePath` (e.g. `/openclaw`)
+- optional prefix: set `gateway.controlUi.basePath` (e.g. `/carapace`)
 
 `gateway.controlUi.enabled` hot-applies. Disable it to stop serving dashboard
 pages and assets while bots and existing Gateway connections keep running.
@@ -23,16 +23,16 @@ It speaks **directly to the Gateway WebSocket** on the same port.
 
 While the initial connection or a route loads, shimmer placeholders reserve the chat layout. They respect your theme and reduced-motion preference; Gateway startup progress remains visible when available.
 
-Closed Terminal, Browser, Desktop, and Home/Ask OpenClaw panels initialize when you open them rather than during initial navigation. Panels saved as open still restore after a reload.
+Closed Terminal, Browser, Desktop, and Home/Ask Carapace panels initialize when you open them rather than during initial navigation. Panels saved as open still restore after a reload.
 
 ## Quick open (local)
 
 If the Gateway is running on the same computer, open [http://127.0.0.1:18789/](http://127.0.0.1:18789/) (or [http://localhost:18789/](http://localhost:18789/)).
 
-If the page fails to load, start the Gateway first: `openclaw gateway`.
+If the page fails to load, start the Gateway first: `carapace gateway`.
 
 <Note>
-On native Windows LAN binds, Windows Firewall or organization-managed Group Policy can still block the advertised LAN URL even when `127.0.0.1` works on the Gateway host. Run `openclaw gateway status --deep` on the Windows host; it reports likely-blocked ports, profile mismatches, and local firewall rules that policy may ignore.
+On native Windows LAN binds, Windows Firewall or organization-managed Group Policy can still block the advertised LAN URL even when `127.0.0.1` works on the Gateway host. Run `carapace gateway status --deep` on the Windows host; it reports likely-blocked ports, profile mismatches, and local firewall rules that policy may ignore.
 </Note>
 
 Auth is supplied during the WebSocket handshake via:
@@ -45,16 +45,16 @@ Auth is supplied during the WebSocket handshake via:
 
 Gateway auth runs before device pairing. A direct loopback connection does not bypass token or password auth. The login screen and **Settings → Gateway** use one **Gateway secret** field: paste the token or type the password. After a successful connection, the UI keeps the secret in session storage for the current browser tab and Gateway origin only when the Gateway reports token auth. Passwords stay in memory and are never persisted. After pairing, the browser can use its stored per-device token on later connections.
 
-If you paste a setup code from **Devices → Pair device → Copy setup code** into **Gateway secret**, the UI shows an inline hint before you connect. Paste that code into **Settings → Gateway** in the OpenClaw mobile app. For the Control UI, run `openclaw gateway auth-token --show` in an interactive terminal on the Gateway host and paste the shared token instead. If a connection with a setup code is rejected for a token or password mismatch, the login screen repeats this guidance.
+If you paste a setup code from **Devices → Pair device → Copy setup code** into **Gateway secret**, the UI shows an inline hint before you connect. Paste that code into **Settings → Gateway** in the Carapace mobile app. For the Control UI, run `carapace gateway auth-token --show` in an interactive terminal on the Gateway host and paste the shared token instead. If a connection with a setup code is rejected for a token or password mismatch, the login screen repeats this guidance.
 
-Local onboarding generates a Gateway secret in token mode by default, without a token/password picker, and preserves existing password mode. Use `--gateway-auth password` or `--gateway-password <value>` for explicit password setup; Tailscale Funnel requires password mode. If the Gateway starts in token mode without a configured token, it generates an ephemeral runtime token for that process instead. The runtime token is not written to config, so it cannot be recovered and a loopback browser without that token is rejected. Run `openclaw doctor --generate-gateway-token`, restart the Gateway, then run `openclaw gateway auth-token --show` in an interactive terminal and paste the output into **Gateway secret**.
+Local onboarding generates a Gateway secret in token mode by default, without a token/password picker, and preserves existing password mode. Use `--gateway-auth password` or `--gateway-password <value>` for explicit password setup; Tailscale Funnel requires password mode. If the Gateway starts in token mode without a configured token, it generates an ephemeral runtime token for that process instead. The runtime token is not written to config, so it cannot be recovered and a loopback browser without that token is rejected. Run `carapace doctor --generate-gateway-token`, restart the Gateway, then run `carapace gateway auth-token --show` in an interactive terminal and paste the output into **Gateway secret**.
 
 ## What each page covers
 
 - [Connect and pair](/web/control-ui/connect-and-pair) — pair a browser or phone, reach the UI over Tailscale, and fix a blank page.
 - [Sessions and sidebar](/web/control-ui/sessions-and-sidebar) — sidebar zones, session menus, and the New session page.
 - [Chat](/web/control-ui/chat) — composer controls, the session rail, transcript rendering, and hosted embeds.
-- [Panels and docks](/web/control-ui/panels) — Ask OpenClaw, the Home dock, the operator terminal, and the browser panel.
+- [Panels and docks](/web/control-ui/panels) — Ask Carapace, the Home dock, the operator terminal, and the browser panel.
 - [Settings](/web/control-ui/settings) — identity, appearance, plugins, updates, MCP, activity, and meetings.
 - [Feature and RPC reference](/web/control-ui/feature-reference) — every capability with the Gateway RPC behind it.
 - [Offline and reconnect](/web/control-ui/offline-and-reconnect) — what survives a dropped connection.
@@ -112,7 +112,7 @@ Every section heading from the previous single-page version keeps its anchor her
 - <a id="debug-logs-update" />[debug logs update](/web/control-ui/feature-reference#debug-logs-update)
 - <a id="automations-panel-notes" />[automations panel notes](/web/control-ui/feature-reference#automations-panel-notes)
 - <a id="connection-loss-and-reconnect" />[Connection loss and reconnect](/web/control-ui/offline-and-reconnect#connection-loss-and-reconnect)
-- <a id="openclaw-system-care" />[OpenClaw system care](/web/control-ui/panels#openclaw-system-care)
+- <a id="carapace-system-care" />[Carapace system care](/web/control-ui/panels#carapace-system-care)
 - <a id="home-dock" />[Home dock](/web/control-ui/panels#home-dock)
 - <a id="operator-terminal" />[Operator terminal](/web/control-ui/panels#operator-terminal)
 - <a id="browser-panel" />[Browser panel](/web/control-ui/panels#browser-panel)
@@ -129,7 +129,7 @@ Every section heading from the previous single-page version keeps its anchor her
 - <a id="session-colors" />[Session colors](/web/control-ui/sessions-and-sidebar#session-colors)
 - <a id="new-session-page" />[New session page](/web/control-ui/sessions-and-sidebar#new-session-page)
 - <a id="start-a-native-coding-cli" />[Start a native coding CLI](/web/control-ui/sessions-and-sidebar#start-a-native-coding-cli)
-- <a id="openclaw-chat-workspace-startup" />[OpenClaw Chat workspace startup](/web/control-ui/sessions-and-sidebar#openclaw-chat-workspace-startup)
+- <a id="carapace-chat-workspace-startup" />[Carapace Chat workspace startup](/web/control-ui/sessions-and-sidebar#carapace-chat-workspace-startup)
 - <a id="environment-identity" />[Environment identity](/web/control-ui/settings#environment-identity)
 - <a id="community-invitation" />[Community invitation](/web/control-ui/settings#community-invitation)
 - <a id="personal-identity" />[Personal identity](/web/control-ui/settings#personal-identity)

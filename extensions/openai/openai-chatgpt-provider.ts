@@ -1,28 +1,28 @@
 // Openai provider module implements model/runtime integration.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import type {
   ProviderAuthContext,
   ProviderAuthMethod,
   ProviderAuthResult,
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { OAuthCredential } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/plugin-entry";
+import type { OAuthCredential } from "carapace/plugin-sdk/provider-auth";
 import {
   buildManifestModelProviderConfig,
   DEFAULT_CONTEXT_TOKENS,
   normalizeProviderId,
-} from "openclaw/plugin-sdk/provider-model-metadata";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-metadata";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 import {
   CODEX_CLI_PROFILE_ID,
   resolveOpenAICodexAuthIdentity,
-} from "openclaw/plugin-sdk/provider-oauth-runtime";
+} from "carapace/plugin-sdk/provider-oauth-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   readStringValue,
   uniqueValues,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isOpenAIApiBaseUrl,
   isOpenAICodexBaseUrl,
@@ -41,7 +41,7 @@ import {
   OPENAI_GPT_56_VARIANT_MODEL_IDS as OPENAI_CODEX_GPT_56_MODEL_IDS,
   OPENAI_GPT_6_ASTRA_MODEL_ID,
 } from "./model-route-contract.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import {
   buildOpenAIResponsesProviderHooks,
   buildOpenAISyntheticCatalogEntry,
@@ -165,7 +165,7 @@ function matchesOpenAICodexImageCapableModel(modelId: string, modelName?: string
  * Restore native `["text", "image"]` input capability on resolved Codex rows
  * for known image-capable modern model IDs (GPT-5.4 through GPT-5.6).
  * Persisted/configured model rows can omit the `input` field
- * entirely when they were written by older OpenClaw versions. When that row wins
+ * entirely when they were written by older Carapace versions. When that row wins
  * the catalog merge, `modelSupportsInput(entry, "image")` returns false and the
  * gateway's `chat.send` handler offloads inbound images as `media://inbound/<id>`
  * claim-check URIs instead of inlining them.
@@ -505,7 +505,7 @@ type OpenAICodexOAuthContext = ProviderAuthContext & {
 async function runOpenAICodexOAuth(ctx: OpenAICodexOAuthContext) {
   const [{ loginOpenAICodexOAuth }, { buildOauthProviderAuthResult }] = await Promise.all([
     import("./openai-chatgpt-oauth.runtime.js"),
-    import("openclaw/plugin-sdk/provider-auth-result"),
+    import("carapace/plugin-sdk/provider-auth-result"),
   ]);
   const creds = await loginOpenAICodexOAuth({
     prompter: ctx.prompter,
@@ -545,7 +545,7 @@ async function runOpenAICodexDeviceCode(ctx: ProviderAuthContext) {
   try {
     const [{ loginOpenAICodexDeviceCode }, { buildOauthProviderAuthResult }] = await Promise.all([
       import("./openai-chatgpt-device-code.js"),
-      import("openclaw/plugin-sdk/provider-auth-result"),
+      import("carapace/plugin-sdk/provider-auth-result"),
     ]);
     const creds = await loginOpenAICodexDeviceCode({
       ...(ctx.signal ? { signal: ctx.signal } : {}),
@@ -616,7 +616,7 @@ async function runOpenAICodexDeviceCode(ctx: ProviderAuthContext) {
     spin.stop("OpenAI device code failed");
     ctx.runtime.error(formatErrorMessage(error));
     await ctx.prompter.note(
-      "Trouble with device code login? See https://docs.openclaw.ai/start/faq",
+      "Trouble with device code login? See https://github.com/Exaggarate/carapace",
       "OAuth help",
     );
     throw error;
@@ -627,7 +627,7 @@ function buildOpenAICodexAuthDoctorHint(ctx: { profileId?: string }) {
   if (ctx.profileId !== CODEX_CLI_PROFILE_ID) {
     return undefined;
   }
-  return "Deprecated profile. Run `openclaw models auth login --provider openai` or `openclaw configure`.";
+  return "Deprecated profile. Run `carapace models auth login --provider openai` or `carapace configure`.";
 }
 
 export function buildOpenAIChatGPTAuthMethodRuns(): Readonly<

@@ -100,7 +100,7 @@ function renderFileCopyButton(action: FileCopyAction, controls?: FileViewControl
           : "chat.detailPanel.copyContents",
   );
   return html`
-    <openclaw-tooltip .content=${label}>
+    <carapace-tooltip .content=${label}>
       <button
         class="btn btn--sm sidebar-file-view__action ${feedback === "copied" ? "copied" : ""}"
         type="button"
@@ -109,7 +109,7 @@ function renderFileCopyButton(action: FileCopyAction, controls?: FileViewControl
       >
         ${feedback === "copied" ? icons.check : icons.copy}
       </button>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 
@@ -155,7 +155,7 @@ export function renderSidebarFile(
                           ${
                             content.edit
                               ? html`
-                                  <openclaw-tooltip .content=${t("chat.detailPanel.editFile")}>
+                                  <carapace-tooltip .content=${t("chat.detailPanel.editFile")}>
                                     <button
                                       class="btn btn--sm sidebar-file-view__action"
                                       type="button"
@@ -165,11 +165,11 @@ export function renderSidebarFile(
                                     >
                                       ${icons.edit}
                                     </button>
-                                  </openclaw-tooltip>
+                                  </carapace-tooltip>
                                 `
                               : nothing
                           }
-                          <openclaw-tooltip .content=${t("chat.detailPanel.searchInFile")}>
+                          <carapace-tooltip .content=${t("chat.detailPanel.searchInFile")}>
                             <button
                               class="btn btn--sm sidebar-file-view__action"
                               type="button"
@@ -179,11 +179,11 @@ export function renderSidebarFile(
                             >
                               ${icons.search}
                             </button>
-                          </openclaw-tooltip>
+                          </carapace-tooltip>
                           ${
                             controls.onReveal
                               ? html`
-                                  <openclaw-tooltip .content=${t("chat.detailPanel.showInFiles")}>
+                                  <carapace-tooltip .content=${t("chat.detailPanel.showInFiles")}>
                                     <button
                                       class="btn btn--sm sidebar-file-view__action"
                                       type="button"
@@ -192,7 +192,7 @@ export function renderSidebarFile(
                                     >
                                       ${icons.folder}
                                     </button>
-                                  </openclaw-tooltip>
+                                  </carapace-tooltip>
                                 `
                               : nothing
                           }

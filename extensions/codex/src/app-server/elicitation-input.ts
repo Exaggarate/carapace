@@ -1,4 +1,4 @@
-import { agentHarnessStructuredInput as structuredInput } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { agentHarnessStructuredInput as structuredInput } from "carapace/plugin-sdk/agent-harness-runtime";
 
 type StructuredInputCompileResult = ReturnType<typeof structuredInput.compileForm>;
 
@@ -20,7 +20,7 @@ export function compileCodexOrdinaryElicitation(params: {
       kind: "compiled",
       input: {
         kind: "unsupported",
-        message: "OpenClaw declined an MCP elicitation with invalid turn correlation.",
+        message: "Carapace declined an MCP elicitation with invalid turn correlation.",
       },
     };
   }
@@ -42,7 +42,7 @@ export function compileCodexOrdinaryElicitation(params: {
       kind: "compiled",
       input: {
         kind: "unsupported",
-        message: `OpenClaw does not support MCP elicitation mode ${JSON.stringify(mode ?? "unknown")}.`,
+        message: `Carapace does not support MCP elicitation mode ${JSON.stringify(mode ?? "unknown")}.`,
       },
     };
   }

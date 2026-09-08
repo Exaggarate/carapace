@@ -1,6 +1,6 @@
 import Contacts
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 final class ContactsService: ContactsServicing {
     private let authorizationStatus: @Sendable () -> CNAuthorizationStatus
@@ -28,7 +28,7 @@ final class ContactsService: ContactsServicing {
         ]
     }
 
-    func search(params: OpenClawContactsSearchParams) async throws -> OpenClawContactsSearchPayload {
+    func search(params: CarapaceContactsSearchParams) async throws -> CarapaceContactsSearchPayload {
         let store = try self.authorizedStore()
 
         let limit = max(1, min(params.limit ?? 25, 200))
@@ -50,10 +50,10 @@ final class ContactsService: ContactsServicing {
         let sliced = Array(contacts.prefix(limit))
         let payload = sliced.map { Self.payload(from: $0) }
 
-        return OpenClawContactsSearchPayload(contacts: payload)
+        return CarapaceContactsSearchPayload(contacts: payload)
     }
 
-    func add(params: OpenClawContactsAddParams) async throws -> OpenClawContactsAddPayload {
+    func add(params: CarapaceContactsAddParams) async throws -> CarapaceContactsAddPayload {
         let store = try self.authorizedStore()
 
         let givenName = params.givenName?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -78,7 +78,7 @@ final class ContactsService: ContactsServicing {
                 phoneNumbers: phoneNumbers,
                 emails: emails)
             {
-                return OpenClawContactsAddPayload(contact: Self.payload(from: existing))
+                return CarapaceContactsAddPayload(contact: Self.payload(from: existing))
             }
         }
 
@@ -108,7 +108,7 @@ final class ContactsService: ContactsServicing {
             contact
         }
 
-        return OpenClawContactsAddPayload(contact: Self.payload(from: persisted))
+        return CarapaceContactsAddPayload(contact: Self.payload(from: persisted))
     }
 
     private static func ensureAuthorization(status: CNAuthorizationStatus) -> Bool {
@@ -200,8 +200,8 @@ final class ContactsService: ContactsServicing {
         return normalized.isEmpty ? trimmed : normalized
     }
 
-    private static func payload(from contact: CNContact) -> OpenClawContactPayload {
-        OpenClawContactPayload(
+    private static func payload(from contact: CNContact) -> CarapaceContactPayload {
+        CarapaceContactPayload(
             identifier: contact.identifier,
             displayName: CNContactFormatter.string(from: contact, style: .fullName)
                 ?? "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines),

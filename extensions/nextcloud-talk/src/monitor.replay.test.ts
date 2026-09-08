@@ -1,6 +1,6 @@
 // Nextcloud Talk tests cover monitor.replay plugin behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createMockIncomingRequest, postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { createMockIncomingRequest, postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { createNextcloudTalkWebhookServer as createRawNextcloudTalkWebhookServer } from "./monitor.js";
 import { createSignedCreateMessageRequest } from "./monitor.test-fixtures.js";

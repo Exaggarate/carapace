@@ -33,7 +33,7 @@ suite.define(() => {
   ])(
     "settles a $name without repeatedly loading the reply preview",
     async ({ artifact, response }) => {
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-reply-preview-recovery", artifactRoot)
         : undefined;
@@ -52,7 +52,7 @@ suite.define(() => {
             role: "user",
             content: [{ type: "text", text: "Follow up on the earlier answer." }],
             timestamp: 1_800_000_000_000,
-            __openclaw: { id: "reply-message", seq: 101, replyToId: "older-answer" },
+            __carapace: { id: "reply-message", seq: 101, replyToId: "older-answer" },
           },
         ],
         methodResponses: { "chat.message.get": response },
@@ -115,7 +115,7 @@ suite.define(() => {
         role: "assistant",
         content: [{ type: "text", text: "The current original answer." }],
         timestamp: 1_800_000_000_000,
-        __openclaw: { id: "reconnect-source", seq: 1 },
+        __carapace: { id: "reconnect-source", seq: 1 },
       };
       // Deep enough that the source's page sits beyond the upward-prefetch
       // reach; the refresh must come from chat.message.get, not a loaded row.
@@ -124,7 +124,7 @@ suite.define(() => {
         role: "user",
         content: [{ type: "text", text: "A follow-up question after reconnect." }],
         timestamp: 1_800_000_000_001 + interveningCount,
-        __openclaw: {
+        __carapace: {
           id: "reconnect-reply",
           seq: interveningCount + 2,
           replyToId: "reconnect-source",
@@ -135,7 +135,7 @@ suite.define(() => {
           role: index % 2 === 0 ? "assistant" : "user",
           content: [{ type: "text", text: `Conversation entry ${index + 2}.` }],
           timestamp: 1_800_000_000_001 + index,
-          __openclaw: { id: `intervening-${index}`, seq: index + 2 },
+          __carapace: { id: `intervening-${index}`, seq: index + 2 },
         })),
         reply,
       ];

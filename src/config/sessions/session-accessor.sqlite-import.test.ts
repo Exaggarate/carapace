@@ -3,11 +3,11 @@ import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { createTranscriptEventReader } from "../../commands/doctor-session-sqlite-readers.js";
 import * as sqliteDirectories from "../../infra/sqlite-private-directory.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { listSessionBranches } from "./session-accessor.js";
 import { loadExactSessionEntry } from "./session-accessor.sqlite-entry.js";
 import {
@@ -19,7 +19,7 @@ import {
   loadTranscriptEventsSync,
 } from "./session-accessor.sqlite-read.js";
 
-function target(state: OpenClawTestState, id: string) {
+function target(state: CarapaceTestState, id: string) {
   return {
     agentId: "main",
     env: state.env,
@@ -41,7 +41,7 @@ function observeStages() {
   const allocation = vi.spyOn(sqliteDirectories, "createPrivateSqliteTempDirectorySync");
   return () =>
     allocation.mock.results.flatMap((result, index) =>
-      result.type === "return" && allocation.mock.calls[index]?.[1] === "openclaw-session-import-"
+      result.type === "return" && allocation.mock.calls[index]?.[1] === "carapace-session-import-"
         ? [result.value]
         : [],
     );
@@ -50,7 +50,7 @@ function observeStages() {
 it.each(["prepare", "append", "commit"])(
   "leaves canonical rows unchanged and removes private staging after %s failure",
   async (phase) => {
-    await withOpenClawTestState({ label: "import-rollback" }, async (state) => {
+    await withCarapaceTestState({ label: "import-rollback" }, async (state) => {
       const first = target(state, "first");
       const second = target(state, "second");
       await importSqliteSessionRows({
@@ -59,7 +59,7 @@ it.each(["prepare", "append", "commit"])(
           append(message);
         },
       });
-      const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       const before = database.db.prepare("SELECT * FROM transcript_events").all();
       const entriesBefore = database.db.prepare("SELECT * FROM session_nodes").all();
       const stages = observeStages();
@@ -116,7 +116,7 @@ it.each(["prepare", "append", "commit"])(
 );
 
 it("revalidates an earlier source after later batch readers finish", async () => {
-  await withOpenClawTestState({ label: "import-source-change" }, async (state) => {
+  await withCarapaceTestState({ label: "import-source-change" }, async (state) => {
     const first = target(state, "first");
     const filename = await state.writeText(
       "source.jsonl",
@@ -140,7 +140,7 @@ it("revalidates an earlier source after later batch readers finish", async () =>
 });
 
 it("deduplicates existing and incoming bytes and identities, preserves aliases, and reruns idempotently", async () => {
-  await withOpenClawTestState({ label: "import-dedupe" }, async (state) => {
+  await withCarapaceTestState({ label: "import-dedupe" }, async (state) => {
     const params = {
       ...target(state, "dedupe"),
       sessionKey: "agent:main:ALIAS",
@@ -167,7 +167,7 @@ it("deduplicates existing and incoming bytes and identities, preserves aliases, 
     };
     const stages = observeStages();
     await importSqliteSessionRows({ ...params, readTranscriptEvents: (append) => append(first) });
-    const db = openOpenClawAgentDatabase({ agentId: "main", env: state.env }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main", env: state.env }).db;
     db.prepare("UPDATE session_windows SET created_at = 7 WHERE session_id = ?").run(
       params.entry.sessionId,
     );
@@ -207,7 +207,7 @@ it("deduplicates existing and incoming bytes and identities, preserves aliases, 
 });
 
 it("hands off exact SQLite bytes, duplicate IDs, timestamps and owner without append normalization", async () => {
-  await withOpenClawTestState({ label: "import-exact" }, async (state) => {
+  await withCarapaceTestState({ label: "import-exact" }, async (state) => {
     const params = target(state, "exact");
     const owner = { actor: { type: "human" as const, id: "owner" }, assignedAt: 40 };
     const firstMessage = { ...message, timestamp: "2026-08-30T00:00:01.000Z" };
@@ -227,7 +227,7 @@ it("hands off exact SQLite bytes, duplicate IDs, timestamps and owner without ap
       readExactTranscriptRows: (append) => rows.forEach(append),
       transcriptMtimeMs: 50,
     });
-    const db = openOpenClawAgentDatabase({ agentId: "main", env: state.env }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main", env: state.env }).db;
     expect(
       db
         .prepare(
@@ -267,7 +267,7 @@ it("hands off exact SQLite bytes, duplicate IDs, timestamps and owner without ap
 });
 
 it("rejects batches spanning implicit agent stores before reading sources", async () => {
-  await withOpenClawTestState({ label: "import-store-boundary" }, async (state) => {
+  await withCarapaceTestState({ label: "import-store-boundary" }, async (state) => {
     const read = vi.fn();
     await expect(
       importSqliteSessionRowsBatch(
@@ -288,7 +288,7 @@ it.each(["implicit", "leaf", "root", "opaque"])(
   "repairs an original-only prompt rewrite branch in staging (leaf control=%s)",
   async (mode) => {
     const leafControl = mode !== "implicit";
-    await withOpenClawTestState({ label: "import-branch-repair" }, async (state) => {
+    await withCarapaceTestState({ label: "import-branch-repair" }, async (state) => {
       const scope = target(state, "repair");
       const events = [
         {
@@ -305,7 +305,7 @@ it.each(["implicit", "leaf", "root", "opaque"])(
           message: {
             role: "user",
             content:
-              "hello\n\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nretired context\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+              "hello\n\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nretired context\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
           },
         },
         {
@@ -380,7 +380,7 @@ it.each([
     },
   },
 ])("repairs an identical repeated $kind event and reruns idempotently", async ({ repeated }) => {
-  await withOpenClawTestState({ label: "import-identical-replay" }, async (state) => {
+  await withCarapaceTestState({ label: "import-identical-replay" }, async (state) => {
     const scope = target(state, "identical-replay");
     const events = [
       {
@@ -430,7 +430,7 @@ it.each([
       recovery: { complete: true, events: 3, repaired: true },
       transcriptEvents: 0,
     });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
     expect(
       database.db
         .prepare(

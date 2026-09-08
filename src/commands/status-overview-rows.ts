@@ -1,4 +1,4 @@
-// Builds overview table rows for `openclaw status` and `openclaw status --all`.
+// Builds overview table rows for `carapace status` and `carapace status --all`.
 // The row builders combine scan surfaces with health/session summaries while keeping rendering elsewhere.
 
 import { formatCliCommand } from "../cli/command-format.js";
@@ -77,7 +77,7 @@ function buildStatusDegradationRows(
   return rows;
 }
 
-/** Builds the default `openclaw status` overview rows from scan, health, memory, and session inputs. */
+/** Builds the default `carapace status` overview rows from scan, health, memory, and session inputs. */
 export function buildStatusCommandOverviewRows(
   params: {
     env: NodeJS.ProcessEnv;
@@ -151,7 +151,7 @@ export function buildStatusCommandOverviewRows(
   });
   const updatesDisabled =
     params.surface.cfg.update?.checkOnStart === false ||
-    isTruthyEnvValue(params.env.OPENCLAW_NO_AUTO_UPDATE) ||
+    isTruthyEnvValue(params.env.CARAPACE_NO_AUTO_UPDATE) ||
     resolveIsNixMode(params.env);
   const doNotTrack = params.env.DO_NOT_TRACK?.trim().toLowerCase();
   const telemetryValue = updatesDisabled
@@ -252,7 +252,7 @@ export function buildStatusAllOverviewRows(params: {
     ],
     middleRows: [
       ...(params.updateRows ?? []),
-      { Item: "Security", Value: `Run: ${formatCliCommand("openclaw security audit --deep")}` },
+      { Item: "Security", Value: `Run: ${formatCliCommand("carapace security audit --deep")}` },
       ...buildStatusDegradationRows(params.summary),
     ],
     agentsValue: buildStatusAllAgentsValue({

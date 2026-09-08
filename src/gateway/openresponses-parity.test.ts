@@ -52,7 +52,7 @@ describe("OpenResponses aggregate behavior", () => {
       status: "completed",
     }),
   ])("accepts supported output metadata on replay: $type", (item) => {
-    const body = { model: "openclaw", input: [item] };
+    const body = { model: "carapace", input: [item] };
     expect(CreateResponseBodySchema.safeParse(body).success).toBe(true);
     for (const extra of [{ unexpected: true }, { status: "invented" }]) {
       expect(

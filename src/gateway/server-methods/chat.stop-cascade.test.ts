@@ -138,7 +138,7 @@ it.each(
           expect.objectContaining({
             message: expect.objectContaining({
               content: [{ type: "text", text: "partial parent reply" }],
-              openclawAbort: expect.objectContaining({
+              carapaceAbort: expect.objectContaining({
                 aborted: true,
                 origin: "stop-command",
                 runId: "parent",

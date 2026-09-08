@@ -5,14 +5,14 @@ import path from "node:path";
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { verifyChannelMessageAdapterCapabilityProofs } from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-inbound";
+import { verifyChannelMessageAdapterCapabilityProofs } from "carapace/plugin-sdk/channel-outbound";
 import {
   adaptMessagePresentationForChannel,
   renderMessagePresentationFallbackText,
   type MessagePresentation,
   type MessagePresentationAction,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClawdbotConfig, ReplyPayload } from "../runtime-api.js";
 import {
@@ -56,7 +56,7 @@ const resolvePinnedHostnameWithPolicyMock = vi.hoisted(() =>
   }),
 );
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
@@ -227,7 +227,7 @@ afterAll(() => {
   vi.doUnmock("./client.js");
   vi.doUnmock("./drive.js");
   vi.doUnmock("./comment-reaction.js");
-  vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+  vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
   vi.resetModules();
 });
 
@@ -396,7 +396,7 @@ describe("feishuOutbound.sendText local-image auto-convert", () => {
   });
 
   async function createTmpImage(ext = ".png"): Promise<{ dir: string; file: string }> {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-feishu-outbound-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-feishu-outbound-"));
     const file = path.join(dir, `sample${ext}`);
     await fs.writeFile(file, "image-data");
     return { dir, file };
@@ -804,7 +804,7 @@ describe("feishuOutbound.sendPayload native cards", () => {
   });
 
   async function createTmpImage(ext = ".png"): Promise<{ dir: string; file: string }> {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-feishu-payload-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-feishu-payload-"));
     const file = path.join(dir, `sample${ext}`);
     await fs.writeFile(file, "image-data");
     return { dir, file };
@@ -2572,8 +2572,8 @@ describe("feishuOutbound comment-thread routing", () => {
   });
 
   it.each([
-    ["local path", path.join(os.tmpdir(), "openclaw-feishu-comment-local-voice.mp3")],
-    ["loopback URL", "http://127.0.0.1:3000/tmp/openclaw-voice.mp3"],
+    ["local path", path.join(os.tmpdir(), "carapace-feishu-comment-local-voice.mp3")],
+    ["loopback URL", "http://127.0.0.1:3000/tmp/carapace-voice.mp3"],
   ])("does not leak a %s in comment-thread media fallbacks", async (_label, mediaUrl) => {
     const result = await feishuOutbound.sendMedia?.({
       cfg: emptyConfig,
@@ -3364,13 +3364,13 @@ describe("feishuOutbound.sendMedia replyToId forwarding", () => {
   });
 
   it.each([
-    ["local path", path.join(os.tmpdir(), "openclaw-feishu-local-voice.mp3")],
-    ["file URL", "file:///tmp/openclaw-feishu-local-voice.mp3"],
-    ["relative path", "./outbound/openclaw-feishu-local-voice.mp3"],
-    ["loopback URL", "http://127.0.0.1:3000/tmp/openclaw-voice.mp3"],
-    ["localhost URL", "https://localhost/tmp/openclaw-voice.mp3"],
-    ["private-DNS URL", "https://files.example.test/openclaw-voice.mp3"],
-    ["credentialed URL", "https://user@example.com/openclaw-voice.mp3"],
+    ["local path", path.join(os.tmpdir(), "carapace-feishu-local-voice.mp3")],
+    ["file URL", "file:///tmp/carapace-feishu-local-voice.mp3"],
+    ["relative path", "./outbound/carapace-feishu-local-voice.mp3"],
+    ["loopback URL", "http://127.0.0.1:3000/tmp/carapace-voice.mp3"],
+    ["localhost URL", "https://localhost/tmp/carapace-voice.mp3"],
+    ["private-DNS URL", "https://files.example.test/carapace-voice.mp3"],
+    ["credentialed URL", "https://user@example.com/carapace-voice.mp3"],
     ["control-character URL", "https://example.com/\nhttp://127.0.0.1/private"],
   ])("does not leak a %s in the upload failure fallback", async (_label, mediaUrl) => {
     sendMediaFeishuMock.mockRejectedValueOnce(new Error("upload failed"));
@@ -3513,7 +3513,7 @@ describe("feishuOutbound.sendMedia replyToId forwarding", () => {
       text: "see attachment",
       // A private/local media URL cannot be resolved to a public reference, so
       // the fallback renders the generic "Media upload failed" text.
-      mediaUrl: path.join(os.tmpdir(), "openclaw-feishu-fallback-not-requested.png"),
+      mediaUrl: path.join(os.tmpdir(), "carapace-feishu-fallback-not-requested.png"),
       accountId: "main",
     });
 
@@ -3572,7 +3572,7 @@ describe("feishuOutbound.sendMedia replyToId forwarding", () => {
         text: "see attachment",
         // A private/local media URL cannot be resolved to a public reference,
         // so the fallback renders the generic "Media upload failed" text.
-        mediaUrl: path.join(os.tmpdir(), "openclaw-feishu-fallback-no-marker.png"),
+        mediaUrl: path.join(os.tmpdir(), "carapace-feishu-fallback-no-marker.png"),
       },
     });
 

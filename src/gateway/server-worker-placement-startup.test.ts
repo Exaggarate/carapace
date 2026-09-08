@@ -646,7 +646,7 @@ describe("worker placement startup recovery authority", () => {
     const events: string[] = [];
     const controller = new AbortController();
     const identity = {
-      scope: "/tmp/openclaw-worker-placement-session.sqlite",
+      scope: "/tmp/carapace-worker-placement-session.sqlite",
       identities: [request.sessionKey, request.sessionId],
     };
     const admission = await beginSessionWorkAdmission({
@@ -672,7 +672,7 @@ describe("worker placement startup recovery authority", () => {
       .finally(() => admission.release());
     await vi.waitFor(() => expect(events).toEqual(["recovery:/gateway/workspace"]));
     const contender = runExclusiveSessionLifecycleMutation({
-      scope: "/tmp/openclaw-worker-placement-session.sqlite",
+      scope: "/tmp/carapace-worker-placement-session.sqlite",
       identities: [
         request.sessionKey,
         "agent:main:move-source",

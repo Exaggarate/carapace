@@ -7,7 +7,7 @@ const user = {
   role: "user",
   content: "Run the task",
   timestamp: 1,
-  __openclaw: { id: "user", seq: 1, transcriptPosition: { source: "snapshot", rawSeq: 0 } },
+  __carapace: { id: "user", seq: 1, transcriptPosition: { source: "snapshot", rawSeq: 0 } },
 };
 
 function completedCall(
@@ -24,7 +24,7 @@ function completedCall(
       { type: "toolCall", id, name, arguments: {} },
       { type: "toolResult", toolCallId: id, name, content: [{ type: "text", text: "done" }] },
     ],
-    __openclaw: {
+    __carapace: {
       id,
       seq: rawSeq + 1,
       transcriptPosition: {
@@ -78,9 +78,9 @@ describe("durable nested activity composition", () => {
     const wait = completedCall("wait", "wait", 4);
     const live = {
       ...first,
-      __openclaw: undefined,
-      __openclawToolStreamLive: true,
-      __openclawToolStreamResultReceived: true,
+      __carapace: undefined,
+      __carapaceToolStreamLive: true,
+      __carapaceToolStreamResultReceived: true,
       timestamp: 0,
     };
     expect(renderedToolIds([user, exec, wait, first], [live])).toEqual(["exec", "first", "wait"]);
@@ -114,8 +114,8 @@ describe("durable nested activity composition", () => {
       toolMessages: children.map((child) => ({
         role: child.role,
         runId: child.runId,
-        __openclawToolStreamLive: true,
-        __openclawToolStreamResultReceived: false,
+        __carapaceToolStreamLive: true,
+        __carapaceToolStreamResultReceived: false,
         timestamp: 0,
         content: structuredClone(child.content.filter((block) => block.type === "toolCall")),
       })),
@@ -162,9 +162,9 @@ describe("durable nested activity composition", () => {
     const first = completedCall("first", "read", 5, { afterRawSeq: 5, startOrder: 0 });
     const live = {
       ...first,
-      __openclaw: undefined,
-      __openclawToolStreamLive: true,
-      __openclawToolStreamResultReceived: true,
+      __carapace: undefined,
+      __carapaceToolStreamLive: true,
+      __carapaceToolStreamResultReceived: true,
       timestamp: 0,
     };
     expect(renderedToolIds([user, exec, wait, first], [live])).toEqual(["first", "exec", "wait"]);

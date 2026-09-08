@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { listAgentEntries } from "../agents/agent-scope.js";
 import { normalizeAuthProfileCredential } from "../agents/auth-profiles/credential-normalize.js";
 import { loadPersistedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
 import { updateAuthProfileStoreWithLock } from "../agents/auth-profiles/store-runtime.js";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { enablePluginInConfig } from "../plugins/enable.js";
@@ -25,9 +25,9 @@ export async function cleanupSetupInferenceTempDir(params: {
 }): Promise<void> {
   try {
     const disposeDatabase =
-      params.deps.disposeOpenClawAgentDatabaseByPath ??
-      (await import("../state/openclaw-agent-db.js")).disposeOpenClawAgentDatabaseByPath;
-    disposeDatabase(path.join(params.tempDir, "agent", "openclaw-agent.sqlite"));
+      params.deps.disposeCarapaceAgentDatabaseByPath ??
+      (await import("../state/carapace-agent-db.js")).disposeCarapaceAgentDatabaseByPath;
+    disposeDatabase(path.join(params.tempDir, "agent", "carapace-agent.sqlite"));
   } catch {
     // Windows cannot remove an open SQLite file. Keep cleanup nonfatal, but
     // always try the directory removal so callers do not retain probe secrets.
@@ -84,7 +84,7 @@ export async function retainUnownedCodexInstall(params: {
     const marked = await markRetained({
       packageDir: params.record.installPath,
       pluginId: "codex",
-      reason: "openclaw-inference-activation-not-committed",
+      reason: "carapace-inference-activation-not-committed",
     });
     if (!marked) {
       setupInferenceLog.warn("Could not retain the uncommitted Codex runtime package generation.");
@@ -175,11 +175,11 @@ function mergePatchConflicts(base: unknown, current: unknown, patch: unknown): b
 }
 
 export function applyManualAuthConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   manualAuth: NonNullable<SetupInferenceTestPlan["manualAuth"]>,
-  currentSourceConfig: OpenClawConfig,
+  currentSourceConfig: CarapaceConfig,
   enablePlugin: typeof enablePluginInConfig = enablePluginInConfig,
-): OpenClawConfig {
+): CarapaceConfig {
   let enabledConfig = config;
   if (manualAuth.pluginId) {
     const enableResult = enablePlugin(config, manualAuth.pluginId);
@@ -197,7 +197,7 @@ export function applyManualAuthConfig(
       "Provider configuration changed during the live inference test, so the verified credential was not saved. Review the current provider settings and retry.",
     );
   }
-  return applyMergePatch(enabledConfig, manualAuth.configPatch) as OpenClawConfig;
+  return applyMergePatch(enabledConfig, manualAuth.configPatch) as CarapaceConfig;
 }
 
 export type ManualAuthPersistenceReceipt = {
@@ -236,7 +236,7 @@ function modelSelectionReferencesProfile(value: unknown, profileIds: ReadonlySet
 }
 
 export function configReferencesManualAuthProfiles(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   receipt: ManualAuthPersistenceReceipt,
 ): boolean {
   const profileIds = new Set(receipt.profiles.map((profile) => profile.profileId));
@@ -295,7 +295,7 @@ export async function persistManualAuthProfiles(params: {
   profiles: ProviderAuthResult["profiles"];
   agentDir: string;
   deps: ActivateSetupInferenceDeps;
-  secretStorage?: { config: OpenClawConfig; env?: NodeJS.ProcessEnv };
+  secretStorage?: { config: CarapaceConfig; env?: NodeJS.ProcessEnv };
 }): Promise<ManualAuthPersistenceResult> {
   const prepared = params.secretStorage
     ? prepareProviderAuthProfilesForPersistence({

@@ -1,12 +1,12 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import type { AuthProfileCredential } from "../agents/auth-profiles/types.js";
 import { upsertAuthProfileWithLock } from "../agents/auth-profiles/upsert-with-lock.js";
 import { CUSTOM_LOCAL_AUTH_MARKER, isNonSecretApiKeyMarker } from "../agents/model-auth-markers.js";
@@ -16,10 +16,10 @@ import {
   SELF_HOSTED_DEFAULT_COST,
   SELF_HOSTED_DEFAULT_MAX_TOKENS,
 } from "../agents/self-hosted-provider-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeOptionalSecretInput } from "../utils/normalize-secret-input.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
-import { listOpenClawPluginManifestMetadata } from "./manifest-metadata-scan.js";
+import { listCarapacePluginManifestMetadata } from "./manifest-metadata-scan.js";
 import { applyAuthProfileConfig } from "./provider-auth-helpers.js";
 import type {
   ProviderAuthMethodNonInteractiveContext,
@@ -34,7 +34,7 @@ export {
   SELF_HOSTED_DEFAULT_MAX_TOKENS,
 } from "../agents/self-hosted-provider-defaults.js";
 
-export function applyProviderDefaultModel(cfg: OpenClawConfig, modelRef: string): OpenClawConfig {
+export function applyProviderDefaultModel(cfg: CarapaceConfig, modelRef: string): CarapaceConfig {
   const existingModel = cfg.agents?.defaults?.model;
   const fallbacks =
     existingModel && typeof existingModel === "object" && "fallbacks" in existingModel
@@ -57,7 +57,7 @@ export function applyProviderDefaultModel(cfg: OpenClawConfig, modelRef: string)
 }
 
 function buildOpenAICompatibleSelfHostedProviderConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId: string;
   baseUrl: string;
   providerApiKey: string;
@@ -66,7 +66,7 @@ function buildOpenAICompatibleSelfHostedProviderConfig(params: {
   reasoning?: boolean;
   contextWindow?: number;
   maxTokens?: number;
-}): { config: OpenClawConfig; modelRef: string; profileId: string } {
+}): { config: CarapaceConfig; modelRef: string; profileId: string } {
   const modelRef = `${params.providerId}/${params.modelId}`;
   const profileId = `${params.providerId}:default`;
   return {
@@ -102,7 +102,7 @@ function buildOpenAICompatibleSelfHostedProviderConfig(params: {
 }
 
 type OpenAICompatibleSelfHostedProviderSetupParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: WizardPrompter;
   providerId: string;
   providerLabel: string;
@@ -224,7 +224,7 @@ function isProviderOwnedSyntheticAuthMarker(
     normalizeProviderId(provider) === normalizedProvider;
   const normalizedValue = resolved.key.trim();
   // A marker is only a keyless capability when its provider's own plugin declares it.
-  return listOpenClawPluginManifestMetadata().some(
+  return listCarapacePluginManifestMetadata().some(
     ({ origin, manifest }) =>
       origin === "bundled" &&
       normalizeTrimmedStringList(manifest.providers).some(matchesProvider) &&
@@ -245,7 +245,7 @@ export async function configureOpenAICompatibleSelfHostedProviderNonInteractive(
   reasoning?: boolean;
   contextWindow?: number;
   maxTokens?: number;
-}): Promise<OpenClawConfig | null> {
+}): Promise<CarapaceConfig | null> {
   const baseUrl = (
     normalizeOptionalSecretInput(params.ctx.opts.customBaseUrl) ?? params.defaultBaseUrl
   ).replace(/\/+$/, "");

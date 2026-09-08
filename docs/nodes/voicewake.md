@@ -14,7 +14,7 @@ Wake words are **one global list owned by the Gateway** — there are no per-nod
 
 ## Storage
 
-Wake words and routing rules live in the Gateway state database, `~/.openclaw/state/openclaw.sqlite` by default (override with `OPENCLAW_STATE_DIR`), under the `config_machine_state` keys `voicewake.triggers` and `voicewake.routing`. Legacy `settings/voicewake.json` and `settings/voicewake-routing.json` are `openclaw doctor --fix` migration inputs only — runtime never reads them.
+Wake words and routing rules live in the Gateway state database, `~/.carapace/state/carapace.sqlite` by default (override with `CARAPACE_STATE_DIR`), under the `config_machine_state` keys `voicewake.triggers` and `voicewake.routing`. Legacy `settings/voicewake.json` and `settings/voicewake-routing.json` are `carapace doctor --fix` migration inputs only — runtime never reads them.
 
 ## Protocol
 
@@ -25,7 +25,7 @@ Wake words and routing rules live in the Gateway state database, `~/.openclaw/st
 | `voicewake.get` | none                     | `{ triggers: string[] }` |
 | `voicewake.set` | `{ triggers: string[] }` | `{ triggers: string[] }` |
 
-`voicewake.set` normalizes input: trims whitespace, drops empty entries, keeps at most 32 triggers, and truncates each to 64 UTF-16 code units without splitting surrogate pairs. An empty result falls back to the built-in defaults (`openclaw`, `claude`, `computer`).
+`voicewake.set` normalizes input: trims whitespace, drops empty entries, keeps at most 32 triggers, and truncates each to 64 UTF-16 code units without splitting surrogate pairs. An empty result falls back to the built-in defaults (`carapace`, `claude`, `computer`).
 
 ### Routing (trigger to target)
 

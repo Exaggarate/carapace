@@ -8,7 +8,7 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   authStoreMocks,
   clearSessionAuthProfileOverride,
@@ -35,7 +35,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: "openrouter",
         agentDir,
         sessionEntry,
@@ -80,7 +80,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: " ZAI ",
         agentDir,
         sessionEntry,
@@ -130,7 +130,7 @@ describe("resolveSessionAuthProfileOverride", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         provider: "amazon-bedrock",
         agentDir,
         sessionEntry,
@@ -188,7 +188,7 @@ describe("resolveSessionAuthProfileOverride", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         provider: "amazon-bedrock",
         agentDir,
         sessionEntry,
@@ -236,7 +236,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: "openai",
         agentDir,
         sessionEntry,
@@ -279,7 +279,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: "openai",
         agentDir,
         sessionEntry,
@@ -321,7 +321,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: "openai",
         agentDir,
         sessionEntry,
@@ -368,7 +368,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: "openai",
         agentDir,
         sessionEntry,
@@ -419,7 +419,7 @@ describe("resolveSessionAuthProfileOverride", () => {
       const sessionStore = { "agent:main:main": sessionEntry };
 
       const resolved = await resolveSession({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         provider: "openai",
         agentDir,
         sessionEntry,

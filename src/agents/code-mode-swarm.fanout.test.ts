@@ -44,7 +44,7 @@ describe("Swarm pipeline backpressure", () => {
           kind: "exec",
           source,
           config,
-          catalog: [{ callableName: "progress", name: "progress", source: "openclaw" }],
+          catalog: [{ callableName: "progress", name: "progress", source: "carapace" }],
           apiFiles: [],
           namespaces: [],
           swarmEnabled: true,

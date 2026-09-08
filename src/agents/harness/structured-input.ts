@@ -74,20 +74,20 @@ export function compileStructuredInputForm(params: {
   const properties = schema ? ownRecord(schema, "properties") : undefined;
   if (!schema || ownString(schema, "type") !== "object" || !properties) {
     return unsupported(
-      `OpenClaw cannot show this ${protocol} form because its schema is not an object with properties.`,
+      `Carapace cannot show this ${protocol} form because its schema is not an object with properties.`,
     );
   }
   if (!structuredInputEntries(schema, MAX_SCHEMA_KEYS)) {
-    return unsupported(`OpenClaw declined an over-limit ${protocol} form schema.`);
+    return unsupported(`Carapace declined an over-limit ${protocol} form schema.`);
   }
   const propertyEntries = structuredInputEntries(properties, MAX_FORM_FIELDS);
   if (!propertyEntries) {
     return unsupported(
-      `OpenClaw supports at most ${MAX_FORM_FIELDS} fields in one ${protocol} form.`,
+      `Carapace supports at most ${MAX_FORM_FIELDS} fields in one ${protocol} form.`,
     );
   }
   if (propertyEntries.length === 0 && options.allowEmptyForm !== true) {
-    return unsupported(`OpenClaw cannot show an empty ${protocol} form.`);
+    return unsupported(`Carapace cannot show an empty ${protocol} form.`);
   }
   const required = readRequired(schema, properties, protocol);
   if (typeof required === "string") {
@@ -96,7 +96,7 @@ export function compileStructuredInputForm(params: {
   const intro = readStructuredInputText(params.message ?? params.fallbackMessage, MAX_MESSAGE_TEXT);
   if (!intro) {
     return unsupported(
-      `OpenClaw declined ${protocol} form display text that is invalid or over-limit.`,
+      `Carapace declined ${protocol} form display text that is invalid or over-limit.`,
     );
   }
 
@@ -114,14 +114,14 @@ export function compileStructuredInputForm(params: {
     if (fieldMetadata.otherAnswer) {
       const target = fieldMetadata.otherQuestionId;
       if (!target || otherFields.has(target)) {
-        return unsupported(`OpenClaw declined invalid ${protocol} Other-field metadata.`);
+        return unsupported(`Carapace declined invalid ${protocol} Other-field metadata.`);
       }
       otherFields.set(target, { fieldId, secret: fieldMetadata.secret });
     }
   }
   for (const target of otherFields.keys()) {
     if (!Object.hasOwn(properties, target)) {
-      return unsupported(`OpenClaw declined ${protocol} Other-field metadata without its target.`);
+      return unsupported(`Carapace declined ${protocol} Other-field metadata without its target.`);
     }
   }
 
@@ -153,7 +153,7 @@ export function compileStructuredInputForm(params: {
     fields.push(field);
   }
   if (fields.length === 0 && propertyEntries.length > 0) {
-    return unsupported(`OpenClaw cannot show a ${protocol} form containing only synthetic fields.`);
+    return unsupported(`Carapace cannot show a ${protocol} form containing only synthetic fields.`);
   }
   return { kind: "ready", plan: { kind: "form", intro, fields } };
 }
@@ -181,23 +181,23 @@ export function compileStructuredInputUrl(params: {
     !message
   ) {
     return unsupported(
-      `OpenClaw declined an invalid or over-limit ${params.protocolName} elicitation URL.`,
+      `Carapace declined an invalid or over-limit ${params.protocolName} elicitation URL.`,
     );
   }
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
-    return unsupported(`OpenClaw declined an invalid ${params.protocolName} elicitation URL.`);
+    return unsupported(`Carapace declined an invalid ${params.protocolName} elicitation URL.`);
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     return unsupported(
-      `OpenClaw only presents http or https ${params.protocolName} elicitation URLs.`,
+      `Carapace only presents http or https ${params.protocolName} elicitation URLs.`,
     );
   }
   if (parsed.username || parsed.password) {
     return unsupported(
-      `OpenClaw does not present ${params.protocolName} elicitation URLs containing credentials.`,
+      `Carapace does not present ${params.protocolName} elicitation URLs containing credentials.`,
     );
   }
   return {
@@ -229,12 +229,12 @@ function readRequired(
     return new Set();
   }
   if (!Array.isArray(value) || value.length > MAX_FORM_FIELDS) {
-    return `OpenClaw declined a ${protocol} form with an invalid required list.`;
+    return `Carapace declined a ${protocol} form with an invalid required list.`;
   }
   const required = new Set<string>();
   for (const entry of value) {
     if (typeof entry !== "string" || !Object.hasOwn(properties, entry)) {
-      return `OpenClaw declined a ${protocol} form with an invalid required field.`;
+      return `Carapace declined a ${protocol} form with an invalid required field.`;
     }
     required.add(entry);
   }

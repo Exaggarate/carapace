@@ -3,11 +3,11 @@ import path from "node:path";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { resolveConfigWidePluginMetadataSnapshot } from "../config/io.plugin-metadata.js";
 import type { ConfigReplaceInput } from "../config/mutate.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { setGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import { getGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
 import { resolvePluginInstallDir } from "./install-paths.js";
@@ -51,7 +51,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(roots);
   vi.unstubAllEnvs();
 });
@@ -63,10 +63,10 @@ it("refreshes an externally changed install ledger before publishing management 
   mkdirSafeDir(pluginRoot);
   mkdirSafeDir(loadPath);
   const fixture = createColdPluginFixture({ rootDir: pluginRoot, pluginId: "external-candidate" });
-  vi.stubEnv("OPENCLAW_HOME", path.join(root, "home"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
-  vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-  const config: OpenClawConfig = { plugins: { load: { paths: [loadPath] } } };
+  vi.stubEnv("CARAPACE_HOME", path.join(root, "home"));
+  vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
+  vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+  const config: CarapaceConfig = { plugins: { load: { paths: [loadPath] } } };
   await writePersistedInstalledPluginIndex(
     loadInstalledPluginIndex({ config, env: process.env, candidates: [], installRecords: {} }),
   );
@@ -81,7 +81,7 @@ it("refreshes an externally changed install ledger before publishing management 
   ).toBe(false);
 
   // Simulate a separate CLI process committing without this process's cache notifications.
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     db.prepare(
       "UPDATE config_machine_state SET value_json = json_set(value_json, '$.index.installRecords', json(?)) WHERE state_key = 'plugins.installedIndex'",
     ).run(
@@ -111,9 +111,9 @@ it("removes an npm-pack plugin from management inventory without replacing Gatew
     pluginId: "tgz-visible",
     packageName,
   });
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-  vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-  let config: OpenClawConfig = {
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+  let config: CarapaceConfig = {
     plugins: { entries: { [fixture.pluginId]: { enabled: true } } },
   };
   const installRecord = {
@@ -128,11 +128,11 @@ it("removes an npm-pack plugin from management inventory without replacing Gatew
     snapshot: {
       valid: true,
       parsed: config,
-      path: path.join(stateDir, "openclaw.json"),
+      path: path.join(stateDir, "carapace.json"),
       sourceConfig: config,
       hash: "base-hash",
     },
-    writeOptions: { expectedConfigPath: path.join(stateDir, "openclaw.json") },
+    writeOptions: { expectedConfigPath: path.join(stateDir, "carapace.json") },
   }));
   configIo.write.mockImplementation(async (params: ConfigReplaceInput) => {
     config = params.sourceConfig ?? params.nextConfig;
@@ -175,7 +175,7 @@ it.each([undefined, "main"])(
     const root = makeTrackedTempDir("managed-workspace-inventory", roots);
     const mainWorkspace = path.join(root, "main");
     const secondaryWorkspace = path.join(root, "secondary");
-    const pluginRoot = path.join(secondaryWorkspace, ".openclaw", "extensions", "workspace-memory");
+    const pluginRoot = path.join(secondaryWorkspace, ".carapace", "extensions", "workspace-memory");
     mkdirSafeDir(pluginRoot);
     const fixture = createColdPluginFixture({
       rootDir: pluginRoot,
@@ -188,10 +188,10 @@ it.each([undefined, "main"])(
         providerAuthChoices: [],
       },
     });
-    vi.stubEnv("OPENCLAW_HOME", path.join(root, "home"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
-    vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    let config: OpenClawConfig = {
+    vi.stubEnv("CARAPACE_HOME", path.join(root, "home"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
+    vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    let config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         ...(systemAgentId ? { defaults: { systemAgent: { agentId: systemAgentId } } } : {}),
@@ -207,14 +207,14 @@ it.each([undefined, "main"])(
         valid: true,
         parsed: config,
         sourceConfig: config,
-        path: path.join(root, "openclaw.json"),
+        path: path.join(root, "carapace.json"),
         hash: "base-hash",
       },
-      writeOptions: { expectedConfigPath: path.join(root, "openclaw.json") },
+      writeOptions: { expectedConfigPath: path.join(root, "carapace.json") },
     }));
     configIo.write.mockImplementation(async (params: ConfigReplaceInput) => {
       config = params.sourceConfig ?? params.nextConfig;
-      const configPath = path.join(root, "openclaw.json");
+      const configPath = path.join(root, "carapace.json");
       fs.writeFileSync(configPath, JSON.stringify(config));
       return { path: configPath, nextConfig: config };
     });
@@ -248,7 +248,7 @@ it.each(["cli", "management"] as const)(
   async (caller) => {
     const root = makeTrackedTempDir("managed-consent-env", roots);
     const pluginRoot = path.join(root, "plugin");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     mkdirSafeDir(pluginRoot);
     const fixture = createColdPluginFixture({
       rootDir: pluginRoot,
@@ -259,13 +259,13 @@ it.each(["cli", "management"] as const)(
       fixture.runtimeSource,
       'module.exports = { id: "consent-env", register() {} };',
     );
-    vi.stubEnv("OPENCLAW_HOME", path.join(root, "home"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-    vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    vi.stubEnv("OPENCLAW_TEST_CONSENT_PREFIX", "before-consent");
-    const config: OpenClawConfig = {
-      messages: { responsePrefix: "${OPENCLAW_TEST_CONSENT_PREFIX}" },
+    vi.stubEnv("CARAPACE_HOME", path.join(root, "home"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
+    vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+    vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    vi.stubEnv("CARAPACE_TEST_CONSENT_PREFIX", "before-consent");
+    const config: CarapaceConfig = {
+      messages: { responsePrefix: "${CARAPACE_TEST_CONSENT_PREFIX}" },
       plugins: {
         load: { paths: [pluginRoot] },
         entries: { [fixture.pluginId]: { enabled: false } },
@@ -294,7 +294,7 @@ it.each(["cli", "management"] as const)(
       onCapabilityConsent: async (review) => {
         consentCalls += 1;
         await Promise.resolve();
-        vi.stubEnv("OPENCLAW_TEST_CONSENT_PREFIX", "after-consent");
+        vi.stubEnv("CARAPACE_TEST_CONSENT_PREFIX", "after-consent");
         expect(fs.readFileSync(configPath, "utf8")).toBe(raw);
         return { reviewToken: review.reviewToken };
       },
@@ -302,7 +302,7 @@ it.each(["cli", "management"] as const)(
     expect(consentCalls).toBe(1);
     expect(result.status).toBe("committed");
     expect(JSON.parse(fs.readFileSync(configPath, "utf8"))).toMatchObject({
-      messages: { responsePrefix: "${OPENCLAW_TEST_CONSENT_PREFIX}" },
+      messages: { responsePrefix: "${CARAPACE_TEST_CONSENT_PREFIX}" },
       plugins: { entries: { [fixture.pluginId]: { enabled: true } } },
     });
     const fresh = await actual.readConfigFileSnapshot();

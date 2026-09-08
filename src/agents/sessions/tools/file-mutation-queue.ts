@@ -8,11 +8,11 @@ import { resolveIdentityPathViaExistingAncestorSync } from "../../../infra/bound
 import { resolveGlobalMap, resolveGlobalSingleton } from "../../../shared/global-singleton.js";
 
 const fileMutationTails = resolveGlobalMap<string, Promise<void>>(
-  Symbol.for("openclaw.fileMutationTails"),
+  Symbol.for("carapace.fileMutationTails"),
   "close-only",
 );
 const keyAdmissions = resolveGlobalSingleton(
-  Symbol.for("openclaw.fileMutationKeyAdmissions"),
+  Symbol.for("carapace.fileMutationKeyAdmissions"),
   () => ({ fallbackScope: {}, tails: new WeakMap<object, Promise<void>>() }),
 );
 

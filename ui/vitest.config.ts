@@ -25,19 +25,19 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const workspaceSourceAliases = [
   {
-    find: "@openclaw/gateway-client/browser",
+    find: "@carapace/gateway-client/browser",
     replacement: path.resolve(repoRoot, "packages/gateway-client/src/browser.ts"),
   },
   {
-    find: "@openclaw/gateway-client/scope-upgrade",
+    find: "@carapace/gateway-client/scope-upgrade",
     replacement: path.resolve(repoRoot, "packages/gateway-client/src/scope-upgrade.ts"),
   },
   {
-    find: /^@openclaw\/gateway-protocol\/(.+)$/u,
+    find: /^@carapace\/gateway-protocol\/(.+)$/u,
     replacement: path.resolve(repoRoot, "packages/gateway-protocol/src/$1.ts"),
   },
   {
-    find: /^@openclaw\/(gateway-protocol|retry)$/u,
+    find: /^@carapace\/(gateway-protocol|retry)$/u,
     replacement: path.resolve(repoRoot, "packages/$1/src/index.ts"),
   },
   {
@@ -45,65 +45,65 @@ const workspaceSourceAliases = [
     replacement: path.resolve(here, "src/lib/browser-redact.ts"),
   },
   ...sharedVitestConfig.resolve.alias.filter(
-    (alias) => typeof alias.find === "string" && alias.find.startsWith("openclaw/plugin-sdk/"),
+    (alias) => typeof alias.find === "string" && alias.find.startsWith("carapace/plugin-sdk/"),
   ),
   {
-    find: /^@openclaw\/model-catalog-core\/(.+)$/u,
+    find: /^@carapace\/model-catalog-core\/(.+)$/u,
     replacement: path.resolve(repoRoot, "packages/model-catalog-core/src/$1.ts"),
   },
   {
-    find: "@openclaw/model-catalog-core",
+    find: "@carapace/model-catalog-core",
     replacement: path.resolve(repoRoot, "packages/model-catalog-core/src/index.ts"),
   },
   {
-    find: /^@openclaw\/normalization-core\/(.+)$/u,
+    find: /^@carapace\/normalization-core\/(.+)$/u,
     replacement: path.resolve(repoRoot, "packages/normalization-core/src/$1"),
   },
   {
-    find: "@openclaw/normalization-core",
+    find: "@carapace/normalization-core",
     replacement: path.resolve(repoRoot, "packages/normalization-core/src/index.ts"),
   },
   {
-    find: /^@openclaw\/media-core\/(.+)$/u,
+    find: /^@carapace\/media-core\/(.+)$/u,
     replacement: path.resolve(repoRoot, "packages/media-core/src/$1"),
   },
   {
-    find: "@openclaw/media-core",
+    find: "@carapace/media-core",
     replacement: path.resolve(repoRoot, "packages/media-core/src/index.ts"),
   },
   {
-    find: "@openclaw/session-url-contract/parse",
+    find: "@carapace/session-url-contract/parse",
     replacement: path.resolve(repoRoot, "packages/session-url-contract/src/parse.ts"),
   },
   {
-    find: "@openclaw/session-url-contract/share-build",
+    find: "@carapace/session-url-contract/share-build",
     replacement: path.resolve(repoRoot, "packages/session-url-contract/src/share-build.ts"),
   },
   {
-    find: "@openclaw/session-url-contract/public-share",
+    find: "@carapace/session-url-contract/public-share",
     replacement: path.resolve(repoRoot, "packages/session-url-contract/src/public-share.ts"),
   },
   {
-    find: "@openclaw/session-url-contract",
+    find: "@carapace/session-url-contract",
     replacement: path.resolve(repoRoot, "packages/session-url-contract/src/index.ts"),
   },
   {
-    find: "@openclaw/workboard-contract",
+    find: "@carapace/workboard-contract",
     replacement: path.resolve(repoRoot, "packages/workboard-contract/src/index.ts"),
   },
   {
-    find: /^@openclaw\/net-policy\/(.+)$/u,
+    find: /^@carapace\/net-policy\/(.+)$/u,
     replacement: path.resolve(repoRoot, "packages/net-policy/src/$1"),
   },
   {
-    find: "@openclaw/net-policy",
+    find: "@carapace/net-policy",
     replacement: path.resolve(repoRoot, "packages/net-policy/src/index.ts"),
   },
 ];
 function includeUiTests(patterns: string[], env = process.env): string[] {
   const selected = intersectIncludePatterns(
     patterns.map((pattern) => path.posix.normalize(`ui/${pattern}`)),
-    loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env),
+    loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env),
   );
   return selected ? selected.map((pattern) => path.posix.relative("ui", pattern)) : patterns;
 }

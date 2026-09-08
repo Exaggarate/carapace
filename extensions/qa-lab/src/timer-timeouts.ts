@@ -4,7 +4,7 @@ import {
   clampPositiveTimerTimeoutMs,
   MAX_TIMER_TIMEOUT_MS,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 
 export function resolveQaGatewayTimeoutWithGraceMs(
   timeoutMs: unknown,

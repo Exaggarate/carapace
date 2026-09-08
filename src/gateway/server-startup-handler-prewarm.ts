@@ -1,5 +1,5 @@
 import { listAgentIds } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { SIDEBAR_SESSION_ROSTER_LIMIT } from "../shared/session-list-limits.js";
 import { scheduleGatewayIdleTask, type GatewayIdleTaskHandle } from "./server-idle-task.js";
@@ -16,7 +16,7 @@ type GatewayHandlerPrewarmItem = {
   load: () => Promise<unknown>;
 };
 
-async function prewarmGatewaySessionListData(cfg: OpenClawConfig, agentId: string): Promise<void> {
+async function prewarmGatewaySessionListData(cfg: CarapaceConfig, agentId: string): Promise<void> {
   const [{ loadCombinedSessionStoreForGatewayCore }, { listSessionsFromStoreAsync }] =
     await Promise.all([
       import("../config/sessions/combined-store-gateway.js"),
@@ -41,7 +41,7 @@ async function prewarmGatewaySessionListData(cfg: OpenClawConfig, agentId: strin
 }
 
 function dashboardDataPrewarmItems(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   log: { info?: (msg: string) => void },
 ): GatewayHandlerPrewarmItem[] {
   const agentIds = listAgentIds(cfg);
@@ -88,7 +88,7 @@ function dashboardDataPrewarmItems(
 }
 
 export function scheduleGatewayHandlerPrewarm(params: {
-  cfgAtStart: OpenClawConfig;
+  cfgAtStart: CarapaceConfig;
   startupTrace?: StartupTrace;
   log: { info?: (msg: string) => void; warn: (msg: string) => void };
   items?: readonly GatewayHandlerPrewarmItem[];

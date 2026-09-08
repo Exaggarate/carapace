@@ -1,7 +1,7 @@
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
+} from "carapace/plugin-sdk/memory-host-core";
 import { beforeEach, expect, it } from "vitest";
 import { resetMemoryToolMockState, setMemorySearchImpl } from "./memory-tool-manager.test-mocks.js";
 import { testing } from "./tools.js";

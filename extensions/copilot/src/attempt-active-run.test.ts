@@ -1,11 +1,11 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { controlRealtimeVoiceAgentRun } from "openclaw/plugin-sdk/realtime-voice";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { controlRealtimeVoiceAgentRun } from "carapace/plugin-sdk/realtime-voice";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerCopilotActiveRun } from "./attempt-active-run.js";
 import type { AttemptTranscriptJournal } from "./attempt-transcript-journal.js";
@@ -25,8 +25,8 @@ const harnessMocks = vi.hoisted(() => ({
   setActiveEmbeddedRun: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>();
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>();
   return {
     ...actual,
     cancelPendingAgentQuestionForSession: harnessMocks.cancelPendingAgentQuestionForSession,
@@ -126,8 +126,8 @@ describe("registerCopilotActiveRun", () => {
 
   it("refuses scoped controls before the real V1 handle while preserving unscoped injection", async () => {
     const runtime = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/agent-harness-runtime")
-    >("openclaw/plugin-sdk/agent-harness-runtime");
+      typeof import("carapace/plugin-sdk/agent-harness-runtime")
+    >("carapace/plugin-sdk/agent-harness-runtime");
     const { handle, send } = registerTestRun();
     const queue = vi.spyOn(handle.messageInjection, "queueMessage");
     const claim = vi.spyOn(handle, "claimPendingUserInputAnswer");
@@ -194,7 +194,7 @@ describe("registerCopilotActiveRun", () => {
         content: "Hi @Taylor",
         timestamp: 1,
         provenance: { kind: "external_user" as const },
-        __openclaw: { humanMentions: mentions },
+        __carapace: { humanMentions: mentions },
       };
       const steeringRecorder = {
         ...recorder,
@@ -290,7 +290,7 @@ describe("registerCopilotActiveRun", () => {
         role: "user",
         content: message.content,
         provenance,
-        __openclaw: { humanMentions: mentions },
+        __carapace: { humanMentions: mentions },
         idempotencyKey: "copilot-sdk:sdk-session:steer-1",
       });
       expect(steeringRecorder.markRuntimePersisted).toHaveBeenCalledExactlyOnceWith(

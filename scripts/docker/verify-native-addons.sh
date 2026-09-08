@@ -7,7 +7,7 @@ node scripts/docker/verify-fs-safe-native.mjs --package-root /app --mode require
 # Matrix's downloader can exit successfully after a transient CDN failure.
 # Check both fresh installs, including the build target used by live tests.
 # Do not hardcode pnpm virtual-store paths: peer hashes can change them.
-if grep -qx 'matrix' /tmp/openclaw-selected-plugin-dirs; then
+if grep -qx 'matrix' /tmp/carapace-selected-plugin-dirs; then
   echo "==> Verifying matrix-sdk-crypto native addon..."
   for attempt in 1 2 3 4 5; do
     if find /app/node_modules -name "matrix-sdk-crypto*.node" 2>/dev/null | grep -q .; then

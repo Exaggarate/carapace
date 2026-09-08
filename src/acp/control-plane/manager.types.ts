@@ -9,14 +9,14 @@ import type {
   AcpRuntimeSessionMode,
   AcpRuntimeStatus,
   AcpRuntimeTurnAttachment,
-} from "@openclaw/acp-core/runtime/types";
+} from "@carapace/acp-core/runtime/types";
 import type {
   SessionAcpIdentity,
   AcpSessionRuntimeOptions,
   SessionAcpMeta,
   SessionEntry,
 } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { AcpRuntimeError } from "../runtime/errors.js";
 import { getAcpRuntimeBackend, requireAcpRuntimeBackend } from "../runtime/registry.js";
 import {
@@ -52,7 +52,7 @@ export type AcpSessionResolution =
 export type AcpInitializeSessionInput = {
   /** Ephemeral source authority; rechecked after queued work and before publication. */
   assertActive?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   agent: string;
@@ -70,7 +70,7 @@ export type AcpTurnAttachment = AcpRuntimeTurnAttachment;
 export type AcpRunTurnInput = {
   /** Private admitted execution context supplied by the owning host ingress. */
   admittedRunContext: import("../../agents/admitted-run-context.js").AdmittedRunContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   provenance: "human" | "agent" | "system";
@@ -93,7 +93,7 @@ type AcpTurnLifecycleEvent = {
 
 /** Input for closing, resetting, or cleaning up an ACP session. */
 export type AcpCloseSessionInput = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   reason: string;
@@ -176,7 +176,7 @@ export type AcpSessionManagerDeps = {
 
 export type WriteManagerSessionMeta = (params: {
   assertCommitAllowed?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   mutate: (
@@ -189,13 +189,13 @@ export type WriteManagerSessionMeta = (params: {
 }) => Promise<SessionEntry | null>;
 
 export type ResolveManagerSession = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
 }) => AcpSessionResolution;
 
 export type EnsureManagerRuntimeHandle = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   meta: SessionAcpMeta;
@@ -203,7 +203,7 @@ export type EnsureManagerRuntimeHandle = (params: {
 }) => Promise<{ runtime: AcpRuntime; handle: AcpRuntimeHandle; meta: SessionAcpMeta }>;
 
 export type ReconcileManagerRuntimeSessionIdentifiers = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   runtime: AcpRuntime;
@@ -218,7 +218,7 @@ export type ReconcileManagerRuntimeSessionIdentifiers = (params: {
 }>;
 
 export type SetManagerSessionState = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   state: SessionAcpMeta["state"];

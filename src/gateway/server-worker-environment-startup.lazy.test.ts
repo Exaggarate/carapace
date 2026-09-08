@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { createDesktopSessionRegistry } from "./desktop/session-registry.js";
 import type { WorkerConnectionIdentity } from "./worker-environments/connection-identity.js";
@@ -43,15 +43,15 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   mocks.executeSessionTool = undefined;
   vi.clearAllMocks();
 });
 
 describe("gateway worker session-tool startup", () => {
   it("creates one executor on concurrent first use", async () => {
-    const stateDir = tempDirs.make("openclaw-worker-session-tool-lazy-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-worker-session-tool-lazy-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const startup = await loadGatewayWorkerEnvironmentStartupState();
       const registry = createEmptyPluginRegistry();
       await createGatewayWorkerEnvironmentRuntime({

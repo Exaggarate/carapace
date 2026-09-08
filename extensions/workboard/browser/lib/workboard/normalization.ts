@@ -1,4 +1,4 @@
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeTaskSummary } from "../tasks/task-summary.ts";
 import {
   normalizeEvents,

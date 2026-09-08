@@ -1,7 +1,7 @@
 ---
-summary: "Run the OpenClaw Gateway on ChromeOS inside a Crostini Linux container"
+summary: "Run the Carapace Gateway on ChromeOS inside a Crostini Linux container"
 read_when:
-  - Installing OpenClaw on a Chromebook or ChromeOS device
+  - Installing Carapace on a Chromebook or ChromeOS device
   - Debugging missing provider keys or a Gateway that is gone after a reboot
 title: "ChromeOS"
 ---
@@ -32,19 +32,19 @@ Run every command below inside that Terminal.
 1. Install via the installer script (it installs a supported Node for you):
 
    ```bash
-   curl -fsSL https://openclaw.ai/install.sh | bash
+   curl -fsSL https://github.com/Exaggarate/carapace | bash
    ```
 
 2. Onboard and install the service:
 
    ```bash
-   openclaw onboard --install-daemon
+   carapace onboard --install-daemon
    ```
 
 3. Confirm the Gateway is running:
 
    ```bash
-   openclaw gateway status
+   carapace gateway status
    ```
 
 Full server guidance lives in the [Linux guide](/platforms/linux) and the
@@ -53,9 +53,9 @@ Full server guidance lives in the [Linux guide](/platforms/linux) and the
 ## Prefer the native install over Docker
 
 On a single user Chromebook, use the native npm install (the installer script,
-or `npm i -g openclaw@latest --allow-scripts=openclaw` on npm 12 or npm
+or `npm i -g carapace@latest --allow-scripts=carapace` on npm 12 or npm
 11.16+) rather than [Docker](/install/docker). On npm 11.15 and earlier, omit
-`--allow-scripts=openclaw`.
+`--allow-scripts=carapace`.
 
 Docker works inside Crostini, but Docker in Crostini adds friction: if you use
 the Claude Code CLI as your model runtime, it has to be installed and logged in
@@ -65,13 +65,13 @@ filesystem directly, so a Docker image rebuild cannot wipe it.
 
 ## Node version
 
-The Node version available in a Crostini container may be below OpenClaw's
-minimum. OpenClaw requires Node 24.16+ or Node 26.1+; Node 26
+The Node version available in a Crostini container may be below Carapace's
+minimum. Carapace requires Node 24.16+ or Node 26.1+; Node 26
 is the recommended default. The installer script detects a missing or
 unsupported Node version and provisions a supported release automatically.
 
-If you installed Node yourself before OpenClaw, upgrade it **before** installing
-OpenClaw:
+If you installed Node yourself before Carapace, upgrade it **before** installing
+Carapace:
 
 ```bash
 node -v
@@ -84,7 +84,7 @@ See [Node install guidance](/install/node) for the supported versions.
 The Gateway runs as a **systemd user service**, so an `export VAR=...` in an
 interactive Terminal is not inherited by the already-installed service.
 
-Put provider keys in `~/.openclaw/.env` instead, one per line:
+Put provider keys in `~/.carapace/.env` instead, one per line:
 
 ```bash
 DEEPSEEK_API_KEY=your-key-here
@@ -93,7 +93,7 @@ DEEPSEEK_API_KEY=your-key-here
 Then restart so the service picks them up:
 
 ```bash
-openclaw gateway restart
+carapace gateway restart
 ```
 
 See [Environment variables](/help/environment) for the full precedence and
@@ -107,7 +107,7 @@ Do not treat Crostini as an always-on host. After a ChromeOS reboot, open the
 Then verify the service:
 
 ```bash
-openclaw gateway status
+carapace gateway status
 ```
 
 ## Related

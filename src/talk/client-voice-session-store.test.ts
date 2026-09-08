@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createTempHomeEnv } from "../test-utils/temp-home.js";
 import {
   parseStoredVoiceSessionRecord,
@@ -32,16 +32,16 @@ function storedRecord(transcriptFailureKeys: unknown): string {
 
 describe("client voice session store", () => {
   it("preserves cache custody columns across rejected updates and a successful retry", async () => {
-    const home = await createTempHomeEnv("openclaw-voice-store-");
+    const home = await createTempHomeEnv("carapace-voice-store-");
     const scope = "talk-client-voice-sessions";
     try {
-      const database = openOpenClawAgentDatabase({ agentId: "main" });
+      const database = openCarapaceAgentDatabase({ agentId: "main" });
       const original = parseStoredVoiceSessionRecord(storedRecord([]));
       if (!original) {
         throw new Error("expected a valid voice record");
       }
       const write = (updatedAt: number) =>
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (owner) => writeVoiceSessionRecordInTransaction(owner, { ...original, updatedAt }),
           { agentId: "main" },
         );
@@ -74,8 +74,8 @@ describe("client voice session store", () => {
         updatedAt: 3,
       });
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       await home.restore();
     }
   });

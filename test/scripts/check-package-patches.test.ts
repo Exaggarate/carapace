@@ -39,7 +39,7 @@ function git(cwd: string, args: string[]) {
 }
 
 function makeRepo() {
-  const dir = makeTempRepoRoot(tempDirs, "openclaw-package-patches-");
+  const dir = makeTempRepoRoot(tempDirs, "carapace-package-patches-");
   git(dir, ["init", "-q", "--initial-branch=main"]);
   writeJsonFile(path.join(dir, "package.json"), { name: "fixture" });
   writeFileSync(path.join(dir, "pnpm-workspace.yaml"), "packages:\n  - .\n", "utf8");

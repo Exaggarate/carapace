@@ -1,12 +1,12 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  OpenClawStateLeaseError,
-  withOpenClawStateLease,
-  type OpenClawStateLeaseContext,
-} from "../state/openclaw-state-lease.js";
+  CarapaceStateLeaseError,
+  withCarapaceStateLease,
+  type CarapaceStateLeaseContext,
+} from "../state/carapace-state-lease.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 
 const PLUGIN_LIFECYCLE_LEASE_SCOPE = "core:plugin-lifecycle";
@@ -14,7 +14,7 @@ const PLUGIN_LIFECYCLE_LEASE_KEY = "global";
 const DEFAULT_PLUGIN_LIFECYCLE_LEASE_MS = 5 * 60_000;
 const DEFAULT_PLUGIN_LIFECYCLE_WAIT_MS = 10 * 60_000;
 
-export type PluginLifecycleLeaseContext = OpenClawStateLeaseContext & {
+export type PluginLifecycleLeaseContext = CarapaceStateLeaseContext & {
   databasePath: string;
 };
 
@@ -24,7 +24,7 @@ type ActivePluginLifecycleLease = {
 };
 
 type PluginLifecycleLeaseOptions = Pick<
-  OpenClawStateDatabaseOptions,
+  CarapaceStateDatabaseOptions,
   "env" | "path" | "database"
 > & {
   signal?: AbortSignal;
@@ -36,7 +36,7 @@ const activePluginLifecycleLease = new AsyncLocalStorage<ActivePluginLifecycleLe
 
 function resolveLifecycleLeaseEnv(env: NodeJS.ProcessEnv | undefined): NodeJS.ProcessEnv {
   const requested = env ?? process.env;
-  if (!process.env.VITEST || requested.VITEST || requested.OPENCLAW_STATE_DIR) {
+  if (!process.env.VITEST || requested.VITEST || requested.CARAPACE_STATE_DIR) {
     return requested;
   }
   return {
@@ -66,13 +66,13 @@ export async function withPluginLifecycleLease<T>(
 
   const env = resolveLifecycleLeaseEnv(options.env);
   const databasePath = path.resolve(
-    options.database?.path ?? options.path ?? resolveOpenClawStateSqlitePath(env),
+    options.database?.path ?? options.path ?? resolveCarapaceStateSqlitePath(env),
   );
   if (active) {
     if (active.databasePath !== databasePath) {
-      throw new OpenClawStateLeaseError(
+      throw new CarapaceStateLeaseError(
         "nested plugin lifecycle lease cannot switch the shared state database",
-        { code: "OPENCLAW_STATE_LEASE_INVALID_INPUT" },
+        { code: "CARAPACE_STATE_LEASE_INVALID_INPUT" },
       );
     }
     options.signal?.throwIfAborted();
@@ -80,7 +80,7 @@ export async function withPluginLifecycleLease<T>(
     return await run(active.lease);
   }
 
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: PLUGIN_LIFECYCLE_LEASE_SCOPE,
       key: PLUGIN_LIFECYCLE_LEASE_KEY,

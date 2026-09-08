@@ -5,7 +5,7 @@ import type { PluginManifestRegistry } from "./manifest-registry.js";
 const mocks = vi.hoisted(() => {
   const loadManifestRegistry = vi.fn();
   return {
-    discoverOpenClawPlugins: vi.fn(() => ({ candidates: [], diagnostics: [] })),
+    discoverCarapacePlugins: vi.fn(() => ({ candidates: [], diagnostics: [] })),
     findBundledPluginMetadataById: vi.fn(),
     loadBundledManifestRegistry: vi.fn(),
     loadPluginManifestRegistryForInstalledIndex: loadManifestRegistry,
@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("./discovery.js", () => ({
-  discoverOpenClawPlugins: mocks.discoverOpenClawPlugins,
+  discoverCarapacePlugins: mocks.discoverCarapacePlugins,
 }));
 
 vi.mock("./bundled-plugin-metadata.js", () => ({
@@ -54,7 +54,7 @@ function createPluginRecord(
 ): PluginManifestRecord {
   return {
     rootDir: `/tmp/${overrides.id}`,
-    manifestPath: `/tmp/${overrides.id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/${overrides.id}/carapace.plugin.json`,
     channelConfigs: undefined,
     configUiHints: undefined,
     configSchema: undefined,
@@ -79,7 +79,7 @@ function createPluginRecord(
     skills: [],
     settingsFiles: undefined,
     hooks: [],
-    source: `/tmp/${overrides.id}/openclaw.plugin.json`,
+    source: `/tmp/${overrides.id}/carapace.plugin.json`,
     setupSource: undefined,
     channelCatalogMeta: undefined,
     ...overrides,
@@ -88,8 +88,8 @@ function createPluginRecord(
 
 describe("resolvePluginConfigContractsById", () => {
   beforeEach(() => {
-    mocks.discoverOpenClawPlugins.mockReset();
-    mocks.discoverOpenClawPlugins.mockReturnValue({ candidates: [], diagnostics: [] });
+    mocks.discoverCarapacePlugins.mockReset();
+    mocks.discoverCarapacePlugins.mockReturnValue({ candidates: [], diagnostics: [] });
     mocks.findBundledPluginMetadataById.mockReset();
     mocks.loadBundledManifestRegistry.mockReset();
     mocks.loadBundledManifestRegistry.mockReturnValue(createRegistry([]));
@@ -136,7 +136,7 @@ describe("resolvePluginConfigContractsById", () => {
       ]),
     );
     expect(mocks.loadPluginManifestRegistryForPluginRegistry).not.toHaveBeenCalled();
-    expect(mocks.discoverOpenClawPlugins).not.toHaveBeenCalled();
+    expect(mocks.discoverCarapacePlugins).not.toHaveBeenCalled();
     expect(mocks.loadBundledManifestRegistry).not.toHaveBeenCalled();
     expect(mocks.findBundledPluginMetadataById).not.toHaveBeenCalled();
   });

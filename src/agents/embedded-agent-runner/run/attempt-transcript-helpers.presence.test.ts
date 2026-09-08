@@ -3,12 +3,12 @@ import { DatabaseSync } from "node:sqlite";
 import { expect, it, vi } from "vitest";
 import { replaceSessionEntrySync } from "../../../config/sessions/session-accessor.sqlite-entry.js";
 import { replaceTranscriptEventsSync } from "../../../config/sessions/session-accessor.sqlite-transcript-write.js";
-import { openOpenClawAgentDatabase } from "../../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import { resolveExistingAttemptTranscriptState } from "./attempt-transcript-helpers.js";
 
 it("checks bootstrap history without decoding canonical message payloads", async () => {
-  await withOpenClawTestState({ label: "bootstrap-presence" }, async (state) => {
+  await withCarapaceTestState({ label: "bootstrap-presence" }, async (state) => {
     const sessionTarget = {
       agentId: "main",
       sessionId: "bootstrap-presence",
@@ -46,7 +46,7 @@ it("checks bootstrap history without decoding canonical message payloads", async
 });
 
 it("keeps one presence snapshot while another connection classifies a message", async () => {
-  await withOpenClawTestState({ label: "bootstrap-presence-snapshot" }, async (state) => {
+  await withCarapaceTestState({ label: "bootstrap-presence-snapshot" }, async (state) => {
     const sessionTarget = {
       agentId: "main",
       sessionId: "bootstrap-presence-snapshot",
@@ -57,7 +57,7 @@ it("keeps one presence snapshot while another connection classifies a message", 
     replaceTranscriptEventsSync(sessionTarget, [
       { type: "message", id: "user", message: { role: "user", content: "present throughout" } },
     ]);
-    const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
     const writer = new DatabaseSync(database.path);
     writer
       .prepare("UPDATE transcript_event_identities SET event_type = NULL WHERE session_id = ?")
@@ -121,7 +121,7 @@ it.each([
 ] as const)(
   "preserves bootstrap presence for unclassified %s",
   async (_name, raw, expected, identityId?: string) => {
-    await withOpenClawTestState({ label: "bootstrap-raw-presence" }, async (state) => {
+    await withCarapaceTestState({ label: "bootstrap-raw-presence" }, async (state) => {
       const sessionTarget = {
         agentId: "main",
         sessionId: "bootstrap-raw-presence",
@@ -130,7 +130,7 @@ it.each([
       };
       replaceSessionEntrySync(sessionTarget, { sessionId: sessionTarget.sessionId, updatedAt: 1 });
       // Imported or malformed raw rows can lack the optional identity projection.
-      const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       database.db
         .prepare(
           "INSERT INTO transcript_events (session_id, seq, event_json, created_at) VALUES (?, 0, ?, 1)",

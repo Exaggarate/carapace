@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 // Onboard auth tests cover provider auth setup, credential persistence, and auth-profile state.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createAuthTestLifecycle,
@@ -10,7 +10,7 @@ import {
 } from "../../test/helpers/auth-wizard.js";
 import { ensureAuthProfileStore } from "../agents/auth-profiles/store-runtime.js";
 import { resolveProviderIdForAuth } from "../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { OAuthCredentials } from "../llm/utils/oauth/types.js";
 import {
   applyAuthProfileConfig,
@@ -31,7 +31,7 @@ const providerEnvVarsById = vi.hoisted((): Record<string, readonly string[]> => 
 
 vi.mock("../config/paths.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../config/paths.js")>()),
-  resolveStateDir: () => process.env.OPENCLAW_STATE_DIR ?? "/tmp/openclaw-state",
+  resolveStateDir: () => process.env.CARAPACE_STATE_DIR ?? "/tmp/carapace-state",
 }));
 
 vi.mock("../agents/provider-auth-aliases.js", () => ({
@@ -72,9 +72,9 @@ function readEffectiveAuthProfiles(agentDir: string) {
 
 describe("writeOAuthCredentials", () => {
   const lifecycle = createAuthTestLifecycle([
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_AGENT_DIR",
-    "OPENCLAW_OAUTH_DIR",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_AGENT_DIR",
+    "CARAPACE_OAUTH_DIR",
   ]);
 
   afterEach(async () => {
@@ -82,7 +82,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("persists OAuth credentials under the default agent SQLite store", async () => {
-    const env = await setupAuthTestEnv("openclaw-oauth-");
+    const env = await setupAuthTestEnv("carapace-oauth-");
     lifecycle.track(env);
     const defaultAgentDir = path.join(env.stateDir, "agents", "main", "agent");
 
@@ -109,7 +109,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("persists primary and main OAuth rows while later siblings inherit", async () => {
-    const env = await setupAuthTestEnv("openclaw-oauth-sync-");
+    const env = await setupAuthTestEnv("carapace-oauth-sync-");
     lifecycle.track(env);
     const tempStateDir = env.stateDir;
 
@@ -120,7 +120,7 @@ describe("writeOAuthCredentials", () => {
     await fs.mkdir(kidAgentDir, { recursive: true });
     await fs.mkdir(workerAgentDir, { recursive: true });
 
-    setTestEnvValue("OPENCLAW_AGENT_DIR", kidAgentDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", kidAgentDir);
 
     const creds = {
       refresh: "refresh-sync",
@@ -153,7 +153,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("writes OAuth credentials only to target dir by default", async () => {
-    const env = await setupAuthTestEnv("openclaw-oauth-nosync-");
+    const env = await setupAuthTestEnv("carapace-oauth-nosync-");
     lifecycle.track(env);
     const tempStateDir = env.stateDir;
 
@@ -162,7 +162,7 @@ describe("writeOAuthCredentials", () => {
     await fs.mkdir(mainAgentDir, { recursive: true });
     await fs.mkdir(kidAgentDir, { recursive: true });
 
-    setTestEnvValue("OPENCLAW_AGENT_DIR", kidAgentDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", kidAgentDir);
 
     const creds = {
       refresh: "refresh-kid",
@@ -183,12 +183,12 @@ describe("writeOAuthCredentials", () => {
     );
   });
 
-  it("syncs siblings from explicit agentDir outside OPENCLAW_STATE_DIR", async () => {
-    const env = await setupAuthTestEnv("openclaw-oauth-external-");
+  it("syncs siblings from explicit agentDir outside CARAPACE_STATE_DIR", async () => {
+    const env = await setupAuthTestEnv("carapace-oauth-external-");
     lifecycle.track(env);
     const tempStateDir = env.stateDir;
 
-    // Create standard-layout agents tree *outside* OPENCLAW_STATE_DIR
+    // Create standard-layout agents tree *outside* CARAPACE_STATE_DIR
     const externalRoot = path.join(tempStateDir, "external", "agents");
     const extMain = path.join(externalRoot, "main", "agent");
     const extKid = path.join(externalRoot, "kid", "agent");
@@ -229,8 +229,8 @@ describe("writeOAuthCredentials", () => {
 
 describe("upsertApiKeyProfile secret refs", () => {
   const lifecycle = createAuthTestLifecycle([
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_AGENT_DIR",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_AGENT_DIR",
     "MOONSHOT_API_KEY",
     "OPENAI_API_KEY",
     "CLOUDFLARE_AI_GATEWAY_API_KEY",
@@ -267,7 +267,7 @@ describe("upsertApiKeyProfile secret refs", () => {
   }
 
   it("handles plaintext, ref mode, and inline env-ref provider keys", async () => {
-    const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-");
+    const env = await setupAuthTestEnv("carapace-onboard-auth-credentials-");
     lifecycle.track(env);
     process.env.MOONSHOT_API_KEY = "sk-moonshot-env"; // pragma: allowlist secret
     process.env.OPENAI_API_KEY = "sk-openai-env"; // pragma: allowlist secret
@@ -332,7 +332,7 @@ describe("upsertApiKeyProfile secret refs", () => {
   });
 
   it("stores provider-specific env refs and metadata in ref mode", async () => {
-    const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-provider-ref-");
+    const env = await setupAuthTestEnv("carapace-onboard-auth-credentials-provider-ref-");
     lifecycle.track(env);
     process.env.CLOUDFLARE_AI_GATEWAY_API_KEY = "cf-secret"; // pragma: allowlist secret
     process.env.VOLCANO_ENGINE_API_KEY = "volcengine-secret"; // pragma: allowlist secret
@@ -391,14 +391,14 @@ describe("upsertApiKeyProfile secret refs", () => {
 });
 
 describe("upsertApiKeyProfile", () => {
-  const lifecycle = createAuthTestLifecycle(["OPENCLAW_STATE_DIR", "OPENCLAW_AGENT_DIR"]);
+  const lifecycle = createAuthTestLifecycle(["CARAPACE_STATE_DIR", "CARAPACE_AGENT_DIR"]);
 
   afterEach(async () => {
     await lifecycle.cleanup();
   });
 
   it("writes to the default agent dir", async () => {
-    const env = await setupAuthTestEnv("openclaw-minimax-", { agentSubdir: "custom-agent" });
+    const env = await setupAuthTestEnv("carapace-minimax-", { agentSubdir: "custom-agent" });
     lifecycle.track(env);
     const defaultAgentDir = path.join(env.stateDir, "agents", "main", "agent");
 
@@ -422,7 +422,7 @@ describe("upsertApiKeyProfile", () => {
 describe("applyAuthProfileConfig", () => {
   const configOnlyCases: {
     name: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     preferProfileFirst?: boolean;
   }[] = [
     { name: "first profile", cfg: {} },

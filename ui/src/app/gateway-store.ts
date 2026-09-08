@@ -3,8 +3,8 @@ import {
   isRetryableGatewayStartupUnavailableError,
   readControlUiBuildMismatchId,
   resolveSafeTimeoutDelayMs,
-} from "@openclaw/gateway-client/browser";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/gateway-client/browser";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   isGatewayRestartUnavailableError,
   isGatewaySuspendUnavailableError,
@@ -438,7 +438,7 @@ export function createApplicationGateway(
         : undefined,
       bootstrapProfile: nextConnection.bootstrapProfile,
       password: nextConnection.password.trim() ? nextConnection.password : undefined,
-      clientName: options.clientOptions?.clientName ?? "openclaw-control-ui",
+      clientName: options.clientOptions?.clientName ?? "carapace-control-ui",
       clientVersion: CONTROL_UI_BUILD_INFO.version ?? "dev",
       clientBuildId: CONTROL_UI_BUILD_INFO.buildId,
       platform: options.clientOptions?.platform,

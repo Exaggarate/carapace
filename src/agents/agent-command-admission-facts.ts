@@ -30,7 +30,7 @@ export function attachAgentCommandRecoveryAdmissionFacts(ingress: object): void 
     invoker: {
       state: "present",
       kind: "system",
-      rawPrincipalRef: "openclaw.main-session-recovery",
+      rawPrincipalRef: "carapace.main-session-recovery",
     },
     assurance: [
       {

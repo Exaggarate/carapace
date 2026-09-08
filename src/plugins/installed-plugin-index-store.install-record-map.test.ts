@@ -6,9 +6,9 @@ import {
 } from "../config/plugin-install-record-map.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { readPersistedInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-record-reader.js";
 import { writePersistedInstalledPluginIndex } from "./installed-plugin-index-store-write.js";
 import {
@@ -23,12 +23,12 @@ const tempDirs: string[] = [];
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function makeStateDir(): string {
-  return makeTrackedTempDir("openclaw-installed-plugin-index-record-map", tempDirs);
+  return makeTrackedTempDir("carapace-installed-plugin-index-record-map", tempDirs);
 }
 
 function createIndex(installRecords: InstalledPluginIndex["installRecords"]): InstalledPluginIndex {
@@ -49,7 +49,7 @@ function readInstallRecordRow(stateDir: string): {
   value_json: string;
   updated_at_ms: number | bigint;
 } {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) =>
       db
         .prepare(
@@ -58,7 +58,7 @@ function readInstallRecordRow(stateDir: string): {
             WHERE state_key = 'plugins.installedIndex'`,
         )
         .get() as { value_json: string; updated_at_ms: number | bigint },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+    { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
   );
 }
 
@@ -73,14 +73,14 @@ describe("installed plugin index install-record persistence", () => {
     async ({ order, validIndex }) => {
       const stateDir = makeStateDir();
       await withPluginLifecycleLease(
-        { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+        { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
         async () => {
           expect(readPersistedInstalledPluginIndexInstallRecordsSync({ stateDir })).toBeNull();
           expect(readPersistedInstalledPluginIndexSync({ stateDir })).toBeNull();
           const records = { demo: { source: "npm" as const, spec: "demo@1.0.0" } };
           await writePersistedInstalledPluginIndex(createIndex(records), { stateDir });
           if (!validIndex) {
-            runOpenClawStateWriteTransaction(
+            runCarapaceStateWriteTransaction(
               ({ db }) => {
                 db.prepare(
                   `UPDATE config_machine_state
@@ -88,7 +88,7 @@ describe("installed plugin index install-record persistence", () => {
                 WHERE state_key = 'plugins.installedIndex'`,
                 ).run();
               },
-              { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+              { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
             );
           }
           const { StatementSync } = requireNodeSqlite();

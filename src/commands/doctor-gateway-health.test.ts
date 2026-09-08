@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayClientRequestError } from "../../packages/gateway-client/src/index.js";
 import { retainGatewayResponsePayload } from "../../packages/gateway-client/src/protocol-request.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { GatewayTransportError } from "../gateway/transport-error.js";
 import {
   GATEWAY_HEALTH_CREDENTIALS_REQUIRED_MESSAGE,
@@ -56,7 +56,7 @@ vi.mock("./health.js", () => ({
 import { checkGatewayHealth, probeGatewayMemoryStatus } from "./doctor-gateway-health.js";
 
 describe("checkGatewayHealth", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
 
   beforeEach(() => {
     callGateway.mockReset();
@@ -80,8 +80,8 @@ describe("checkGatewayHealth", () => {
   it.each([false, true])(
     "reports live paths when status RPC rejection is %s",
     async (rejectStatus) => {
-      vi.stubEnv("OPENCLAW_STATE_DIR", "/tmp/doctor-cli-state");
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", "/tmp/doctor-cli-state/openclaw.json");
+      vi.stubEnv("CARAPACE_STATE_DIR", "/tmp/doctor-cli-state");
+      vi.stubEnv("CARAPACE_CONFIG_PATH", "/tmp/doctor-cli-state/carapace.json");
       callGateway.mockImplementation(
         async (options: {
           method?: string;
@@ -91,7 +91,7 @@ describe("checkGatewayHealth", () => {
             options.onHelloOk?.({
               snapshot: {
                 stateDir: "/tmp/doctor-gateway-state",
-                configPath: "/tmp/doctor-gateway-state/openclaw.json",
+                configPath: "/tmp/doctor-gateway-state/carapace.json",
               },
             });
             if (rejectStatus) {
@@ -104,7 +104,7 @@ describe("checkGatewayHealth", () => {
       const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
 
       await expect(
-        checkGatewayHealth({ runtime: runtime as never, cfg: {} as OpenClawConfig }),
+        checkGatewayHealth({ runtime: runtime as never, cfg: {} as CarapaceConfig }),
       ).resolves.toMatchObject({ authenticated: !rejectStatus, healthOk: !rejectStatus });
 
       expect(note).toHaveBeenCalledWith(
@@ -145,19 +145,19 @@ describe("checkGatewayHealth", () => {
       config: cfg,
     });
     expect(runtime.error).not.toHaveBeenCalled();
-    expect(note.mock.calls.map(([, title]) => title)).not.toContain("OpenClaw version mismatch");
+    expect(note.mock.calls.map(([, title]) => title)).not.toContain("Carapace version mismatch");
   });
 
   it.each([
-    { OPENCLAW_STATE_DIR: "/tmp/doctor-service-state" },
+    { CARAPACE_STATE_DIR: "/tmp/doctor-service-state" },
     { HOME: "/tmp/doctor-service-home" },
   ])("reports the offline service state directory from %j", async (environment) => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", "/tmp/doctor-cli-state");
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", "/tmp/doctor-cli-state/openclaw.json");
-    vi.stubEnv("OPENCLAW_HOME", "/tmp/doctor-cli-home");
+    vi.stubEnv("CARAPACE_STATE_DIR", "/tmp/doctor-cli-state");
+    vi.stubEnv("CARAPACE_CONFIG_PATH", "/tmp/doctor-cli-state/carapace.json");
+    vi.stubEnv("CARAPACE_HOME", "/tmp/doctor-cli-home");
     callGateway.mockRejectedValueOnce(new Error("ECONNREFUSED"));
     readServiceCommand.mockResolvedValueOnce({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environment,
     });
     const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
@@ -173,11 +173,11 @@ describe("checkGatewayHealth", () => {
     expect(warning).toContain("CLI and installed Gateway service use different");
     expect(warning).toContain("doctor-cli-state");
     expect(warning).toContain(
-      environment.OPENCLAW_STATE_DIR ? "doctor-service-state" : "doctor-service-home",
+      environment.CARAPACE_STATE_DIR ? "doctor-service-state" : "doctor-service-home",
     );
-    expect(warning).toContain("openclaw gateway install --force");
+    expect(warning).toContain("carapace gateway install --force");
     expect(readServiceCommand).toHaveBeenCalledWith(
-      expect.not.objectContaining({ OPENCLAW_STATE_DIR: expect.anything() }),
+      expect.not.objectContaining({ CARAPACE_STATE_DIR: expect.anything() }),
       expect.objectContaining({ requireEffective: true }),
     );
   });
@@ -219,7 +219,7 @@ describe("checkGatewayHealth", () => {
       url: TEST_GATEWAY_URL,
     },
     { name: "missing remote URL", config: { gateway: { mode: "remote" } }, url: TEST_GATEWAY_URL },
-  ] satisfies Array<{ name: string; config: OpenClawConfig; url: string }>)(
+  ] satisfies Array<{ name: string; config: CarapaceConfig; url: string }>)(
     "does not use a local service to diagnose $name",
     async ({ config, url }) => {
       buildGatewayConnectionDetails.mockReturnValue({ url });
@@ -235,7 +235,7 @@ describe("checkGatewayHealth", () => {
   );
 
   it("reports startup migration warnings without marking the gateway unhealthy", async () => {
-    const startupMigrationWarning = 'Retained legacy state. Run "openclaw doctor --fix".';
+    const startupMigrationWarning = 'Retained legacy state. Run "carapace doctor --fix".';
     callGateway.mockResolvedValueOnce({ startupMigrationWarning }).mockResolvedValue({});
     const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
     await expect(checkGatewayHealth({ runtime, cfg })).resolves.toMatchObject({ healthOk: true });
@@ -284,7 +284,7 @@ describe("checkGatewayHealth", () => {
     expect(note).toHaveBeenCalledWith(
       [
         "Channel status probe failed: channel probe timed out",
-        "Retry: openclaw channels status --probe",
+        "Retry: carapace channels status --probe",
       ].join("\n"),
       "Channel warnings",
     );
@@ -327,7 +327,7 @@ describe("checkGatewayHealth", () => {
     const [message, title] = note.mock.calls.at(-1) ?? [];
     expect(title).toBe("Telemetry exporters");
     expect(message).toContain("Exporter diagnostics failed: exporter probe failed");
-    expect(message).toContain("Retry: openclaw gateway stability --type telemetry.exporter");
+    expect(message).toContain("Retry: carapace gateway stability --type telemetry.exporter");
     expect(message).not.toContain(token);
     expect(message).not.toContain("\u001B");
     expect(message.split("\n")).toHaveLength(2);
@@ -347,14 +347,14 @@ describe("checkGatewayHealth", () => {
     });
 
     const mismatchNotes = note.mock.calls
-      .filter(([, title]) => title === "OpenClaw version mismatch")
+      .filter(([, title]) => title === "Carapace version mismatch")
       .map(([message]) => String(message));
     const mismatchOutput = mismatchNotes.join("\n");
-    expect(mismatchOutput).toContain("the running Gateway is OpenClaw 2026.4.23");
+    expect(mismatchOutput).toContain("the running Gateway is Carapace 2026.4.23");
     expect(mismatchOutput).not.toContain("That usually means");
-    expect(mismatchOutput).toContain("Check `openclaw --version`, `which openclaw`");
+    expect(mismatchOutput).toContain("Check `carapace --version`, `which carapace`");
     expect(mismatchOutput).toContain(
-      "If this mismatch is unexpected, update PATH so `openclaw` points to the version you want",
+      "If this mismatch is unexpected, update PATH so `carapace` points to the version you want",
     );
   });
 
@@ -418,11 +418,11 @@ describe("checkGatewayHealth", () => {
     expect(note).toHaveBeenCalledWith(
       [
         "- cold account:discord:ops (channels.discord.accounts.ops.token): secret resolution failed",
-        "  Retry: openclaw secrets reload",
+        "  Retry: carapace secrets reload",
         "- stale capability:tts (tts.providers.elevenlabs.apiKey): secret provider policy denied resolution",
-        "  Retry: openclaw secrets reload",
+        "  Retry: carapace secrets reload",
         "- cold capability:web-fetch:firecrawl (plugins.entries.firecrawl.config.webFetch.apiKey): resolved secret value was invalid",
-        "  Retry: openclaw secrets reload",
+        "  Retry: carapace secrets reload",
       ].join("\n"),
       "Secret runtime degradation",
     );
@@ -628,7 +628,7 @@ describe("checkGatewayHealth", () => {
 });
 
 describe("probeGatewayMemoryStatus", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
 
   beforeEach(() => {
     callGateway.mockReset();
@@ -698,7 +698,7 @@ describe("probeGatewayMemoryStatus", () => {
         ok: false,
         checked: false,
         error:
-          "memory embedding readiness not checked; run `openclaw memory status --deep` to probe",
+          "memory embedding readiness not checked; run `carapace memory status --deep` to probe",
       },
     });
 

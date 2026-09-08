@@ -5,7 +5,7 @@ import type { Duplex } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const getPluginRuntimeGatewayRequestScopeMock = vi.fn();
-vi.mock("openclaw/plugin-sdk/plugin-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-runtime", () => ({
   getPluginRuntimeGatewayRequestScope: () => getPluginRuntimeGatewayRequestScopeMock(),
 }));
 
@@ -111,13 +111,13 @@ function relayReq(
   headers: Record<string, string> = {},
 ): IncomingMessage {
   return req(url, {
-    "sec-websocket-protocol": `openclaw-extension-relay, openclaw-extension-token.${token}`,
+    "sec-websocket-protocol": `carapace-extension-relay, carapace-extension-token.${token}`,
     ...headers,
   });
 }
 
 function v2Req(url = "/browser/extension"): IncomingMessage {
-  return req(url, { "sec-websocket-protocol": "openclaw-extension-relay.v2" });
+  return req(url, { "sec-websocket-protocol": "carapace-extension-relay.v2" });
 }
 
 function stateWithExtensionProfile() {
@@ -361,7 +361,7 @@ describe("handleGatewayExtensionUpgrade", () => {
     const mixed = fakeSocket();
     await handleGatewayExtensionUpgrade(
       req("/browser/extension", {
-        "sec-websocket-protocol": `openclaw-extension-relay.v2, openclaw-extension-relay, openclaw-extension-token.${TOKEN}`,
+        "sec-websocket-protocol": `carapace-extension-relay.v2, carapace-extension-relay, carapace-extension-token.${TOKEN}`,
       }),
       mixed.socket,
       Buffer.alloc(0),

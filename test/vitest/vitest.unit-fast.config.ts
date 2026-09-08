@@ -17,7 +17,7 @@ export function createUnitFastVitestConfig(
   options: { argv?: string[]; runner?: string } = {},
 ) {
   const sharedTest = sharedVitestConfig.test ?? {};
-  const selectedPatterns = loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+  const selectedPatterns = loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env);
   const timerTestFiles = new Set(getUnitFastTimerTestFiles(selectedPatterns));
   const isolatedTestFiles = new Set(getUnitFastIsolatedTestFiles(selectedPatterns));
   const unitFastTestFiles = getUnitFastTestFiles(selectedPatterns).filter(

@@ -1,13 +1,13 @@
 import fs from "node:fs";
 // Resolves agent-specific config and workspace directories.
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { listAgentEntries, resolveAgentConfig } from "../agents/agent-scope-config.js";
 import { isPathCaseInsensitive } from "../infra/path-case.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { resolveUserPath } from "../utils.js";
 import { resolveStateDir } from "./paths.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 type DuplicateAgentDir = {
   agentDir: string;
@@ -64,7 +64,7 @@ function canonicalizeAgentDir(agentDir: string): string {
   return isPathCaseInsensitive(resolved) ? normalizeLowercaseStringOrEmpty(resolved) : resolved;
 }
 
-function collectReferencedAgentIds(cfg: OpenClawConfig): string[] {
+function collectReferencedAgentIds(cfg: CarapaceConfig): string[] {
   const ids = new Set<string>();
 
   const agents = listAgentEntries(cfg);
@@ -93,7 +93,7 @@ function collectReferencedAgentIds(cfg: OpenClawConfig): string[] {
 }
 
 function resolveEffectiveAgentDir(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   deps?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
 ): string {
@@ -110,7 +110,7 @@ function resolveEffectiveAgentDir(
 
 /** Finds agent ids whose effective agentDir would share auth/session state. */
 export function findDuplicateAgentDirs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
 ): DuplicateAgentDir[] {
   const byDir = new Map<string, { agentDir: string; agentIds: string[] }>();
@@ -139,7 +139,7 @@ export function formatDuplicateAgentDirError(dups: DuplicateAgentDir[]): string 
     ...dups.map((d) => `- ${d.agentDir}: ${d.agentIds.map((id) => `"${id}"`).join(", ")}`),
     "",
     "Fix: remove the shared agents.entries.*.agentDir override (or give each agent its own directory).",
-    "Auth profiles live in each agent's SQLite store, so a shared agentDir is not how credentials are shared: give each agent its own directory and either leave its store empty to inherit the main agent's profiles, or log it in with `openclaw models auth login`.",
+    "Auth profiles live in each agent's SQLite store, so a shared agentDir is not how credentials are shared: give each agent its own directory and either leave its store empty to inherit the main agent's profiles, or log it in with `carapace models auth login`.",
   ];
   return lines.join("\n");
 }

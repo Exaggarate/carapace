@@ -1,4 +1,4 @@
-import { streamSimple, type Model } from "openclaw/plugin-sdk/llm";
+import { streamSimple, type Model } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { resolveXaiTransport } from "./provider-routing.js";
 import { applyXaiRuntimeModelCompat } from "./runtime-model-compat.js";

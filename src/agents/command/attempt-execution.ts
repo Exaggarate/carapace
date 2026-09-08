@@ -1,13 +1,13 @@
 /**
  * Orchestrates one agent attempt across embedded, CLI, and ACP runtimes.
  */
-import type { AcpRuntimeEvent } from "@openclaw/acp-core/runtime/types";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AcpRuntimeEvent } from "@carapace/acp-core/runtime/types";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   type FastMode,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { sanitizeForLog } from "../../../packages/terminal-core/src/ansi.js";
 import { ACP_TURN_TIMEOUT_DETAIL_CODE } from "../../acp/control-plane/manager.turn-timeout.js";
 import { formatAcpErrorChain } from "../../acp/runtime/errors.js";
@@ -30,7 +30,7 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import type { PrepareAssistantTranscriptMessage } from "../../config/sessions/transcript-assistant-delivery.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   injectTimestamp,
   timestampOptsFromConfig,
@@ -234,7 +234,7 @@ type PersistTextTurnTranscriptParams = {
   sessionAgentId: string;
   threadId?: string | number;
   sessionCwd: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   skipAssistantTurn?: boolean;
   assistant: {
     api: string;
@@ -276,7 +276,7 @@ function resolveProfileAuthFromStore(params: { agentDir: string; profileId: stri
 }
 
 function resolveHarnessAuthProfileSelection(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir: string;
   workspaceDir: string;
   provider: string;
@@ -504,7 +504,7 @@ export async function persistAcpTurnTranscript(params: {
   sessionAgentId: string;
   threadId?: string | number;
   sessionCwd: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<PersistTextTurnTranscriptResult> {
   const outcome = classifyAgentRunTerminalOutcome(params.terminalOutcome);
   return await persistTextTurnTranscript({
@@ -512,7 +512,7 @@ export async function persistAcpTurnTranscript(params: {
     ...(params.userInput ? { userMessage: buildPersistedUserTurnMessage(params.userInput) } : {}),
     assistant: {
       api: "openai-responses",
-      provider: "openclaw",
+      provider: "carapace",
       model: "acp-runtime",
       stopReason: outcome === "success" ? "stop" : outcome === "failure" ? "error" : "aborted",
     },
@@ -533,7 +533,7 @@ export async function persistCliTurnTranscript(params: {
   sessionAgentId: string;
   threadId?: string | number;
   sessionCwd: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   skipUserTurn?: boolean;
   skipAssistantTurn?: boolean;
 }): Promise<PersistTextTurnTranscriptResult> {
@@ -569,7 +569,7 @@ export function runAgentAttempt(params: {
   modelThinkingCapability?: RunEmbeddedAgentInternalParams["modelThinkingCapability"];
   configuredAuthProfileId?: string;
   originalProvider: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionEntry: SessionEntry | undefined;
   agentHarnessRuntimeOverride?: string;
   sessionId: string;
@@ -760,7 +760,7 @@ export function runAgentAttempt(params: {
   );
   const bootstrapPromptWarningSignature =
     bootstrapPromptWarningSignaturesSeen[bootstrapPromptWarningSignaturesSeen.length - 1];
-  const requestedAgentHarnessId = isRawModelRun ? "openclaw" : undefined;
+  const requestedAgentHarnessId = isRawModelRun ? "carapace" : undefined;
   const sessionRuntimeOverride = isRawModelRun ? undefined : params.agentHarnessRuntimeOverride;
   const pinnedHarnessId = isRawModelRun
     ? undefined
@@ -844,7 +844,7 @@ export function runAgentAttempt(params: {
       agentId: params.sessionAgentId,
     });
   const agentHarnessPolicy = isRawModelRun
-    ? ({ runtime: "openclaw", runtimeSource: "model" } as const)
+    ? ({ runtime: "carapace", runtimeSource: "model" } as const)
     : sessionRuntimeOverride
       ? ({ runtime: sessionRuntimeOverride, runtimeSource: "model" } as const)
       : resolveAvailableAgentHarnessPolicy({
@@ -905,8 +905,8 @@ export function runAgentAttempt(params: {
   const embeddedAgentHarnessOverride =
     requestedAgentHarnessId ??
     sessionRuntimeOverride ??
-    (agentHarnessPolicy.runtime === "openclaw" && agentHarnessPolicy.runtimeSource !== "implicit"
-      ? "openclaw"
+    (agentHarnessPolicy.runtime === "carapace" && agentHarnessPolicy.runtimeSource !== "implicit"
+      ? "carapace"
       : undefined);
   if (!isRawModelRun && isCliExecutionProvider) {
     const expectedLifecycleRevision = params.sessionEntry?.lifecycleRevision;
@@ -1024,7 +1024,7 @@ export function runAgentAttempt(params: {
           // The store is already cleared above, so no stale --resume can leak to a
           // later turn. Still return the bound id as the reuse candidate: prepare
           // re-detects the missing transcript, keeps useResume=false, and arms
-          // raw-transcript reseed from prior OpenClaw history. Returning undefined
+          // raw-transcript reseed from prior Carapace history. Returning undefined
           // strips the candidate and starves reseed, losing warm-stdin continuity.
           return cliSessionBinding;
         };

@@ -41,7 +41,7 @@ function mountPane(
   if (!snapshotStore) {
     vi.spyOn(store, "read").mockReturnValue(read.promise);
   }
-  const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+  const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
   panes.push(pane);
   vi.spyOn(pane, "requestUpdate").mockImplementation(() => undefined);
   vi.spyOn(pane, "performUpdate").mockImplementation(() => undefined);

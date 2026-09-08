@@ -1,7 +1,7 @@
-// Resolves OpenClaw update channels from config, tags, and versions.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+// Resolves Carapace update channels from config, tags, and versions.
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { parse as parseSemver } from "semver";
-import { compareOpenClawReleaseVersions } from "./npm-registry-spec.js";
+import { compareCarapaceReleaseVersions } from "./npm-registry-spec.js";
 import { compareValidSemver, normalizeLegacyDotBetaVersion } from "./semver.js";
 
 /** Release stream used to choose registry tags and update policy defaults. */
@@ -16,13 +16,13 @@ export const DEFAULT_GIT_CHANNEL: UpdateChannel = "dev";
 /** Machine-readable validation failure when a tag override conflicts with the exact extended-stable contract. */
 export const EXTENDED_STABLE_TAG_UNSUPPORTED_REASON = "extended-stable-tag-unsupported";
 /**
- * Env var carrying the *effective* update channel into `openclaw update finalize`
+ * Env var carrying the *effective* update channel into `carapace update finalize`
  * (e.g. the git/dev channel a source update actually ran on) without making it a
  * *requested* channel. Convergence uses it as a fallback; it is never persisted
  * to `update.channel`. Mirrors the CLI post-core resume's effective/requested
- * channel split (`OPENCLAW_UPDATE_POST_CORE_CHANNEL` vs `…_REQUESTED_CHANNEL`).
+ * channel split (`CARAPACE_UPDATE_POST_CORE_CHANNEL` vs `…_REQUESTED_CHANNEL`).
  */
-export const UPDATE_EFFECTIVE_CHANNEL_ENV = "OPENCLAW_UPDATE_EFFECTIVE_CHANNEL";
+export const UPDATE_EFFECTIVE_CHANNEL_ENV = "CARAPACE_UPDATE_EFFECTIVE_CHANNEL";
 /** Git branch that represents the development update stream. */
 export const DEV_BRANCH = "main";
 
@@ -51,7 +51,7 @@ export function normalizeUpdateChannel(value?: string | null): UpdateChannel | n
   return null;
 }
 
-/** Maps an OpenClaw update channel to the npm dist-tag used for package lookups. */
+/** Maps an Carapace update channel to the npm dist-tag used for package lookups. */
 export function channelToNpmTag(channel: UpdateChannel): string {
   if (channel === "extended-stable") {
     return "extended-stable";
@@ -77,7 +77,7 @@ export function selectNpmChannelVersion<T extends { version: string | null }>(
     return latest;
   }
   const comparison =
-    compareOpenClawReleaseVersions(beta.version, latest.version) ??
+    compareCarapaceReleaseVersions(beta.version, latest.version) ??
     compareValidSemver(
       normalizeLegacyDotBetaVersion(beta.version),
       normalizeLegacyDotBetaVersion(latest.version),

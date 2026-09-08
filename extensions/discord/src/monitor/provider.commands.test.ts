@@ -1,14 +1,14 @@
-import { listNativeCommandSpecsForConfig as listRealNativeCommandSpecsForConfig } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { NativeCommandSpec } from "openclaw/plugin-sdk/native-command-registry";
-import { registerPluginCommand } from "openclaw/plugin-sdk/plugin-runtime";
+import { listNativeCommandSpecsForConfig as listRealNativeCommandSpecsForConfig } from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { NativeCommandSpec } from "carapace/plugin-sdk/native-command-registry";
+import { registerPluginCommand } from "carapace/plugin-sdk/plugin-runtime";
 import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { danger, warn, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { danger, warn, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { discordSetupPlugin } from "../channel.setup.js";
 import { DISCORD_VOICE_COMMAND_SPEC } from "../voice/command.js";
@@ -17,7 +17,7 @@ import { resolveDiscordProviderCommandSpecs } from "./provider.commands.js";
 type ResolverParams = Parameters<typeof resolveDiscordProviderCommandSpecs>[0];
 type SkillCommands = ReturnType<NonNullable<ResolverParams["listSkillCommandsForAgents"]>>;
 
-const cfg: OpenClawConfig = {};
+const cfg: CarapaceConfig = {};
 const skillCommands = [
   { name: "skill-only", skillName: "Skill Only", description: "Skill only" },
   { name: "extra-skill", skillName: "Extra Skill", description: "Extra skill" },
@@ -43,7 +43,7 @@ function createResolverHarness(
   const listSkillCommandsForAgents = vi.fn(() => configuredSkillCommands);
   const listNativeCommandSpecsForConfig = vi.fn(
     (
-      _config: OpenClawConfig,
+      _config: CarapaceConfig,
       listOptions?: Parameters<NonNullable<ResolverParams["listNativeCommandSpecsForConfig"]>>[1],
     ): NativeCommandSpec[] => [
       ...nativeCommandSpecs,
@@ -227,7 +227,7 @@ describe("resolveDiscordProviderCommandSpecs", () => {
       skillName: "Voice Skill",
       description: "Skill voice",
     };
-    const config: OpenClawConfig = { commands: { native: true, nativeSkills: true } };
+    const config: CarapaceConfig = { commands: { native: true, nativeSkills: true } };
     const rawPrimary = listRealNativeCommandSpecsForConfig(config, {
       provider: "discord",
       skillCommands: [voiceSkill],

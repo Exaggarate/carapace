@@ -1,20 +1,20 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "carapace/plugin-sdk/channel-setup";
 // Feishu plugin module implements setup core behavior.
 import {
   DEFAULT_ACCOUNT_ID,
   patchTopLevelChannelConfigSection,
   setSetupChannelEnabled,
   type ChannelSetupAdapter,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/setup";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/setup";
 import { resolveDefaultFeishuAccountId } from "./accounts.js";
 import type { FeishuConfig } from "./types.js";
 
 export function setFeishuNamedAccountEnabled(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   enabled: boolean,
-): OpenClawConfig {
+): CarapaceConfig {
   const feishuCfg = cfg.channels?.feishu as FeishuConfig | undefined;
   return patchTopLevelChannelConfigSection({
     cfg,

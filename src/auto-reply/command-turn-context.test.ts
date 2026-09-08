@@ -1,6 +1,6 @@
 /** Tests command-turn context normalization and source/kind conversions. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createCommandTurnContext,
   isAuthorizedTextSlashCommandTurn,
@@ -11,7 +11,7 @@ import {
 } from "./command-turn-context.js";
 import { isExplicitCommandTurnContext } from "./command-turn-detection.js";
 
-const emptyConfig = {} as const satisfies OpenClawConfig;
+const emptyConfig = {} as const satisfies CarapaceConfig;
 
 describe("resolveCommandTurnContext", () => {
   it("derives native command turns from legacy context fields", () => {
@@ -125,8 +125,8 @@ describe("resolveCommandTurnContext", () => {
             body: "/reset",
           },
           CommandAuthorized: true,
-          Body: "/reset@openclaw",
-          RawBody: "/reset@openclaw",
+          Body: "/reset@carapace",
+          RawBody: "/reset@carapace",
           CommandBody: "/reset",
         },
         emptyConfig,
@@ -142,13 +142,13 @@ describe("resolveCommandTurnContext", () => {
             kind: "normal",
             source: "message",
             authorized: false,
-            body: "/reset@openclaw",
+            body: "/reset@carapace",
           },
           CommandAuthorized: true,
-          Body: "/reset@openclaw",
-          RawBody: "/reset@openclaw",
-          CommandBody: "/reset@openclaw",
-          BotUsername: "openclaw",
+          Body: "/reset@carapace",
+          RawBody: "/reset@carapace",
+          CommandBody: "/reset@carapace",
+          BotUsername: "carapace",
         },
         emptyConfig,
       ),

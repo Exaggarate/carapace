@@ -6,18 +6,18 @@ import {
   createPluginStateSyncKeyedStoreForTests,
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import {
   listSessionEntries,
   normalizeSessionDeliveryState,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import { setZalouserRuntime } from "./src/runtime.js";
@@ -56,16 +56,16 @@ describe("zalouser doctor state migration", () => {
 
   beforeEach(async () => {
     resetPluginStateStoreForTests();
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-doctor-"));
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-doctor-"));
     storePath = path.join(stateDir, "sessions.json");
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   });
 
   afterEach(async () => {
     // Session migrations open per-agent databases under the temporary state dir, and
     // resetPluginStateStoreForTests only releases plugin state plus shared state, so the
     // cached agent handles must be closed here or Windows fails the removal with EBUSY.
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
@@ -168,7 +168,7 @@ describe("zalouser doctor state migration", () => {
     ).resolves.toBeNull();
     for (const agentId of ["main", "worker-1"]) {
       await expect(
-        fs.access(path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite")),
+        fs.access(path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite")),
       ).rejects.toThrow();
     }
   });

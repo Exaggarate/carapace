@@ -1,6 +1,6 @@
-import { safeParseJsonRecord } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { hasNonEmptyString } from "@openclaw/normalization-core/string-coerce";
+import { safeParseJsonRecord } from "@carapace/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { hasNonEmptyString } from "@carapace/normalization-core/string-coerce";
 import { resolveMessageReceiptPrimaryId } from "../channels/message/receipt.js";
 import type { MessageReceipt } from "../channels/message/types.js";
 import type { MessageActionResult } from "../infra/outbound/message-action-contracts.js";

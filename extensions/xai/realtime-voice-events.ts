@@ -2,8 +2,8 @@ import {
   canonicalizeBase64,
   normalizeRealtimeVoiceResponseOutcome,
   type RealtimeVoiceSessionConnection,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/realtime-voice-provider";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   XAI_REALTIME_ACTIVE_RESPONSE_ERROR_PREFIX,
   XAI_REALTIME_NO_ACTIVE_RESPONSE_CANCEL_ERROR,

@@ -9,7 +9,7 @@ type ResourceContext = {
   assertCurrent: () => void;
 };
 const resources = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionSkillResources"),
+  Symbol.for("carapace.sessionSkillResources"),
   () => new AsyncLocalStorage<ResourceContext>(),
 );
 

@@ -1,11 +1,11 @@
-import { createTestPluginApi, type TestPluginApiInput } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi, type TestPluginApiInput } from "carapace/plugin-sdk/plugin-test-api";
 import {
   buildManifestModelProviderConfig,
   type ProviderCatalogContext,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/provider-catalog-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const bundledProvider = {
   baseUrl: "https://router.huggingface.co/v1",

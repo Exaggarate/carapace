@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveOpenAICodexAuthIdentity } from "openclaw/plugin-sdk/provider-oauth-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveOpenAICodexAuthIdentity } from "carapace/plugin-sdk/provider-oauth-runtime";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import type { OpenAIQuicksilverAuth } from "./realtime-quicksilver-wire.js";
 
 export async function resolveOpenAIChatGptSubscriptionAuth(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentDir?: string;
   },
   { resolveProviderAuthProfileApiKey }: OpenAIRealtimeHost,

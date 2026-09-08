@@ -1,4 +1,4 @@
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
 
 export const LMSTUDIO_OPENAI_COMPAT_ENABLED_REASONING_EFFORTS = [
   "minimal",

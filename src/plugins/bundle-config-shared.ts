@@ -1,6 +1,6 @@
 // Shares bundled plugin config merge behavior across setup and runtime code.
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { matchRootFileOpenFailure, type RootFileOpenFailure } from "../infra/boundary-file-read.js";
 import { isRecord } from "../utils.js";
 import { normalizePluginsConfig, resolveEffectivePluginActivationState } from "./config-state.js";
@@ -90,7 +90,7 @@ export function inspectBundleServerRuntimeSupport<TConfig>(params: {
 
 export function loadEnabledBundleConfig<TConfig, TDiagnostic>(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   createEmptyConfig: () => TConfig;
   loadBundleConfig: (params: {

@@ -2,13 +2,13 @@
  * Extension relay CDP bridge.
  *
  * Presents a CDP browser endpoint (compatible with Playwright connectOverCDP)
- * on one side and the OpenClaw Chrome extension's chrome.debugger transport on
+ * on one side and the Carapace Chrome extension's chrome.debugger transport on
  * the other. The bridge owns all Target.* synthesis so the extension stays a
  * thin forwarder — the old assets/chrome-extension put this logic in an
  * untestable MV3 service worker, which is why it rotted and was removed.
  */
 import { addAbortListener, once } from "node:events";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { resolveCreateTargetParams } from "./create-target-params.js";
 import {
@@ -28,9 +28,9 @@ const EXTENSION_COMMAND_TIMEOUT_MS = 15_000;
 const EXTENSION_PING_INTERVAL_MS = 20_000;
 
 /** Synthetic targetId for the emulated browser target. */
-const BROWSER_TARGET_ID = "openclaw-extension-relay";
+const BROWSER_TARGET_ID = "carapace-extension-relay";
 /** Playwright requires every attached page target to identify its browser context. */
-const BROWSER_CONTEXT_ID = "openclaw-extension-context";
+const BROWSER_CONTEXT_ID = "carapace-extension-context";
 
 /** Minimal socket seam so tests can drive the bridge without real WebSockets. */
 type BridgeSocket = {
@@ -383,7 +383,7 @@ export class ExtensionRelayBridge {
 
   private sendToExtension(msg: RelayToExtensionMessage): void {
     if (!this.extension) {
-      throw new Error("OpenClaw Chrome extension is not connected to the relay");
+      throw new Error("Carapace Chrome extension is not connected to the relay");
     }
     this.extension.socket.send(JSON.stringify(msg));
   }
@@ -469,7 +469,7 @@ export class ExtensionRelayBridge {
     const tab = this.tabs.get(tabId);
     const extension = this.extension;
     if (!tab) {
-      throw new Error(`tab ${tabId} is not available to OpenClaw`);
+      throw new Error(`tab ${tabId} is not available to Carapace`);
     }
     // A pending claimant keeps the physical acquisition alive through announcement.
     // Use a distinct token even for concurrent acquisitions by the same client.
@@ -498,7 +498,7 @@ export class ExtensionRelayBridge {
     const extension = this.extension;
     const tab = this.tabs.get(tabId);
     if (!tab) {
-      throw new Error(`tab ${tabId} is not available to OpenClaw`);
+      throw new Error(`tab ${tabId} is not available to Carapace`);
     }
     if (tab.retiring) {
       await tab.retiring;
@@ -531,7 +531,7 @@ export class ExtensionRelayBridge {
         }
         throw new Error("Extension did not return a native target identity");
       }
-      const sessionId = `openclaw-tab-${tabId}-${this.nextSessionOrdinal++}`;
+      const sessionId = `carapace-tab-${tabId}-${this.nextSessionOrdinal++}`;
       const attached = { targetId, sessionId };
       // Identity check, not just presence: the tab could have lost and regained
       // access under the same tabId while this attach was in flight, replacing
@@ -1028,7 +1028,7 @@ export class ExtensionRelayBridge {
         this.respond(client, request, {
           protocolVersion: "1.3",
           product: identity?.browserVersion ?? "Chrome/unknown",
-          revision: "openclaw-extension-relay",
+          revision: "carapace-extension-relay",
           userAgent: identity?.userAgent ?? "unknown",
           jsVersion: "",
         });
@@ -1054,7 +1054,7 @@ export class ExtensionRelayBridge {
             targetInfo: {
               targetId: BROWSER_TARGET_ID,
               type: "browser",
-              title: "OpenClaw Extension Relay",
+              title: "Carapace Extension Relay",
               url: "",
               attached: true,
               canAccessOpener: false,
@@ -1086,7 +1086,7 @@ export class ExtensionRelayBridge {
         return;
       }
       case "Target.attachToBrowserTarget": {
-        const sessionId = `openclaw-browser-${this.nextSessionOrdinal++}`;
+        const sessionId = `carapace-browser-${this.nextSessionOrdinal++}`;
         this.browserSessions.set(sessionId, client);
         this.respond(client, request, { sessionId });
         return;
@@ -1138,7 +1138,7 @@ export class ExtensionRelayBridge {
           ) {
             throw new Error("Target attachment retired");
           }
-          const sessionId = `openclaw-tab-${found.tabId}-${this.nextSessionOrdinal++}`;
+          const sessionId = `carapace-tab-${found.tabId}-${this.nextSessionOrdinal++}`;
           this.sessions.announce(
             client,
             sessionId,
@@ -1226,7 +1226,7 @@ export class ExtensionRelayBridge {
         this.respondError(
           client,
           request,
-          "The OpenClaw extension relay drives the user's real browser profile; isolated browser contexts are not supported.",
+          "The Carapace extension relay drives the user's real browser profile; isolated browser contexts are not supported.",
         );
         return;
       }

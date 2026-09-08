@@ -29,8 +29,8 @@ concurrency:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   NODE_VERSION: "24.x"
-  OPENCLAW_BUILD_PRIVATE_QA: "1"
-  OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1"
+  CARAPACE_BUILD_PRIVATE_QA: "1"
+  CARAPACE_ENABLE_PRIVATE_QA_CLI: "1"
 
 jobs:
   authorize_actor:
@@ -42,8 +42,8 @@ jobs:
           github.event_name == 'issue_comment' &&
           github.event.issue.pull_request &&
           (
-            contains(github.event.comment.body, '@openclaw-mantis') ||
-            contains(github.event.comment.body, '/openclaw-mantis')
+            contains(github.event.comment.body, '@carapace-mantis') ||
+            contains(github.event.comment.body, '/carapace-mantis')
           )
         )
       }}
@@ -127,7 +127,7 @@ jobs:
           fetch-depth: 0
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Setup Node environment
         uses: ./.github/actions/setup-node-env
@@ -151,7 +151,7 @@ jobs:
           set -euo pipefail
           install_dir="${RUNNER_TEMP}/crabbox"
           mkdir -p "$install_dir" "$HOME/.local/bin"
-          python3 -I -S "$CI_GIT_OWNER" --git 120 clone --depth 1 https://github.com/openclaw/crabbox.git "$install_dir/src"
+          python3 -I -S "$CI_GIT_OWNER" --git 120 clone --depth 1 https://github.com/Exaggarate/carapace/crabbox.git "$install_dir/src"
           go build -C "$install_dir/src" -o "$HOME/.local/bin/crabbox" ./cmd/crabbox
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/crabbox" --version
@@ -183,13 +183,13 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
           CRABBOX_COORDINATOR: ${{ secrets.CRABBOX_COORDINATOR }}
           CRABBOX_COORDINATOR_TOKEN: ${{ secrets.CRABBOX_COORDINATOR_TOKEN }}
-          OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR: ${{ secrets.OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR }}
-          OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN: ${{ secrets.OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}
+          CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR: ${{ secrets.CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR }}
+          CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN: ${{ secrets.CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}
           CRABBOX_ACCESS_CLIENT_ID: ${{ secrets.CRABBOX_ACCESS_CLIENT_ID }}
           CRABBOX_ACCESS_CLIENT_SECRET: ${{ secrets.CRABBOX_ACCESS_CLIENT_SECRET }}
         run: |
@@ -203,13 +203,13 @@ jobs:
             fi
           }
 
-          CRABBOX_COORDINATOR="${CRABBOX_COORDINATOR:-${OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR:-}}"
-          CRABBOX_COORDINATOR_TOKEN="${CRABBOX_COORDINATOR_TOKEN:-${OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN:-}}"
+          CRABBOX_COORDINATOR="${CRABBOX_COORDINATOR:-${CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR:-}}"
+          CRABBOX_COORDINATOR_TOKEN="${CRABBOX_COORDINATOR_TOKEN:-${CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN:-}}"
           export CRABBOX_COORDINATOR CRABBOX_COORDINATOR_TOKEN
 
           require_var OPENAI_API_KEY
-          require_var OPENCLAW_QA_CONVEX_SITE_URL
-          require_var OPENCLAW_QA_CONVEX_SECRET_CI
+          require_var CARAPACE_QA_CONVEX_SITE_URL
+          require_var CARAPACE_QA_CONVEX_SECRET_CI
           require_var CRABBOX_COORDINATOR_TOKEN
 
           root=".artifacts/qa-e2e/mantis/discord-status-reactions"
@@ -221,7 +221,7 @@ jobs:
             local lane="$1"
             local repo_root="$worktree_root/$lane"
             local output_dir=".artifacts/qa-e2e/mantis/discord-status-reactions/$lane"
-            pnpm openclaw qa discord \
+            pnpm carapace qa discord \
               --repo-root "$repo_root" \
               --output-dir "$output_dir" \
               --provider-mode live-frontier \
@@ -273,7 +273,7 @@ jobs:
               exit 1
             fi
             local args=(
-              openclaw qa mantis desktop-browser-smoke
+              carapace qa mantis desktop-browser-smoke
               --html-file "$html_file"
               --output-dir "$desktop_dir"
               --provider hetzner
@@ -440,9 +440,9 @@ jobs:
           GH_TOKEN: ${{ steps.mantis_app_token.outputs.token }}
           ARTIFACT_URL: ${{ steps.upload_artifact.outputs.artifact-url }}
           MANTIS_ARTIFACT_R2_ACCESS_KEY_ID: ${{ secrets.MANTIS_ARTIFACT_R2_ACCESS_KEY_ID }}
-          MANTIS_ARTIFACT_R2_BUCKET: openclaw-crabbox-artifacts
+          MANTIS_ARTIFACT_R2_BUCKET: carapace-crabbox-artifacts
           MANTIS_ARTIFACT_R2_ENDPOINT: ${{ vars.MANTIS_ARTIFACT_R2_ENDPOINT }}
-          MANTIS_ARTIFACT_R2_PUBLIC_BASE_URL: https://artifacts.openclaw.ai
+          MANTIS_ARTIFACT_R2_PUBLIC_BASE_URL: https://github.com/Exaggarate/carapace
           MANTIS_ARTIFACT_R2_REGION: auto
           MANTIS_ARTIFACT_R2_SECRET_ACCESS_KEY: ${{ secrets.MANTIS_ARTIFACT_R2_SECRET_ACCESS_KEY }}
           REQUEST_SOURCE: ${{ needs.resolve_request.outputs.request_source }}

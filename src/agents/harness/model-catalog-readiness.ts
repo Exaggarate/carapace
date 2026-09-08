@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { stripSelfProviderModelPrefix } from "@openclaw/model-catalog-core/provider-model-id-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { stripSelfProviderModelPrefix } from "@carapace/model-catalog-core/provider-model-id-normalization";
 import {
   resolveMergedModelProviderConfig,
   createModelProviderRouteOverrideResolver,
@@ -36,7 +36,7 @@ export function createAgentHarnessCatalogEvaluator(
       config: params.config,
       agentId: params.agentId,
     }).runtime;
-    if (runtime === "auto" || runtime === "openclaw") {
+    if (runtime === "auto" || runtime === "carapace") {
       return host;
     }
     const provider = normalizeProviderId(entry.provider);

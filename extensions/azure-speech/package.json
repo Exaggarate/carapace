@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/azure-speech",
+  "name": "@carapace/azure-speech",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw Azure Speech plugin",
+  "description": "Carapace Azure Speech plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

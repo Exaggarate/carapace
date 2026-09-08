@@ -1,6 +1,6 @@
-import { asNullableRecord as recordOrNull } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString as stringValue } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asNullableRecord as recordOrNull } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString as stringValue } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { GatewaySessionRow, SessionRunStatus, SessionsListResult } from "../../api/types.ts";
 import { formatUiExternalText } from "../format-error.ts";
 import { isSessionRunActive } from "../session-run-state.ts";

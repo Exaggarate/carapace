@@ -6,9 +6,9 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf8Prefix } from "openclaw/plugin-sdk/text-utility-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf8Prefix } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   assertBrowserProxyFileBytesWithinLimits,
   assertBrowserProxyFileCountWithinLimit,
@@ -22,8 +22,8 @@ import { DEFAULT_UPLOAD_DIR, resolveExistingUploadPaths } from "./browser/paths.
 const logger = createSubsystemLogger("browser");
 const BROWSER_PROXY_UPLOAD_ROOT_NAME = ".proxy-uploads";
 const BROWSER_PROXY_UPLOAD_PREFIX = "upload-";
-const BROWSER_PROXY_UPLOAD_MARKER_NAME = ".openclaw-browser-proxy-upload-v1";
-const BROWSER_PROXY_UPLOAD_MARKER_CONTENT = "openclaw-browser-proxy-upload-v1\n";
+const BROWSER_PROXY_UPLOAD_MARKER_NAME = ".carapace-browser-proxy-upload-v1";
+const BROWSER_PROXY_UPLOAD_MARKER_CONTENT = "carapace-browser-proxy-upload-v1\n";
 const BROWSER_PROXY_UPLOAD_RETENTION_MS = 24 * 60 * 60 * 1000;
 const BROWSER_PROXY_UPLOAD_CLEANUP_RETRY_MS = 60 * 60 * 1000;
 const BROWSER_PROXY_UPLOAD_MAX_RETAINED_BYTES = 256 * 1024 * 1024;

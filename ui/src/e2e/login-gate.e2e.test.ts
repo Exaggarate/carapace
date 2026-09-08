@@ -17,7 +17,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI responsive login gate E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 let RECOVERY_ARTIFACT_DIR: string;
 
@@ -58,7 +58,7 @@ suite.define(() => {
     const context = await suite.browser.newContext({ viewport: { height: 900, width: 1280 } });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      sessionStorage.setItem("openclaw.controlUi.staleChunkReloadBuildId", "replacement-build");
+      sessionStorage.setItem("carapace.controlUi.staleChunkReloadBuildId", "replacement-build");
     });
     const gateway = await installMockGateway(page, { deferredMethods: ["connect"] });
 
@@ -89,7 +89,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase;
@@ -97,7 +97,7 @@ suite.define(() => {
         )
         .toBe("reload-required");
       await page.getByRole("button", { name: /Server updated/u }).waitFor();
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+      expect(await page.locator("carapace-login-gate").count()).toBe(0);
     } finally {
       await closeContext(context);
     }
@@ -110,8 +110,8 @@ suite.define(() => {
 
     try {
       await page.goto(new URL("settings/connection", suite.server.baseUrl).href);
-      await page.locator("openclaw-app-shell").waitFor();
-      await page.locator("openclaw-connection-page .content-header").waitFor();
+      await page.locator("carapace-app-shell").waitFor();
+      await page.locator("carapace-connection-page .content-header").waitFor();
       await gateway.deferNext("connect");
       await gateway.closeLatest(1012, "test reconnect");
 
@@ -121,7 +121,7 @@ suite.define(() => {
         "Changes to settings are disabled while the Gateway is reconnecting.",
       );
       expect(await notice.locator("svg").count()).toBe(1);
-      const outlet = page.locator("openclaw-router-outlet");
+      const outlet = page.locator("carapace-router-outlet");
       expect(await outlet.getAttribute("inert")).not.toBeNull();
       expect(await outlet.getAttribute("aria-disabled")).toBe("true");
       const bounds = await page.evaluate(() => {
@@ -131,7 +131,7 @@ suite.define(() => {
         const navRect = document.querySelector(".shell-nav")?.getBoundingClientRect();
         const mainRect = document.querySelector("#control-ui-main")?.getBoundingClientRect();
         const headerRect = document
-          .querySelector("openclaw-connection-page .content-header")
+          .querySelector("carapace-connection-page .content-header")
           ?.getBoundingClientRect();
         return {
           headerTop: headerRect?.top,
@@ -174,7 +174,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase;
@@ -188,7 +188,7 @@ suite.define(() => {
 
       expect(await page.locator(".connection-action-block").count()).toBe(0);
       expect(await page.locator("#control-ui-main").getAttribute("inert")).toBeNull();
-      const outlet = page.locator("openclaw-router-outlet");
+      const outlet = page.locator("carapace-router-outlet");
       expect(await outlet.getAttribute("inert")).toBeNull();
       expect(await outlet.getAttribute("aria-disabled")).toBeNull();
       expect(await header.isVisible()).toBe(true);
@@ -222,7 +222,7 @@ suite.define(() => {
 
     try {
       await page.goto(new URL("settings/connection", suite.server.baseUrl).href);
-      await page.locator("openclaw-app-shell").waitFor();
+      await page.locator("carapace-app-shell").waitFor();
       await gateway.deferNext("connect");
       await gateway.closeLatest(1012, "test reconnect");
 
@@ -397,15 +397,15 @@ suite.define(() => {
       expect(
         await failure.getByRole("button", { name: "Check now", exact: true }).isEnabled(),
       ).toBe(true);
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
 
       await gateway.deferNext("connect");
       await gateway.rejectDeferred("connect", pairingError);
       await gateway.waitForRequest("connect", { after: 2 });
       expect(await failure.isVisible()).toBe(true);
       await gateway.resolveDeferred("connect");
-      await page.locator("openclaw-app-shell").waitFor();
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+      await page.locator("carapace-app-shell").waitFor();
+      expect(await page.locator("carapace-login-gate").count()).toBe(0);
     } finally {
       await closeContext(context);
     }
@@ -432,12 +432,12 @@ suite.define(() => {
       await failure.waitFor({ timeout: 10_000 });
       const command = failure
         .locator(".login-gate__command")
-        .filter({ hasText: "openclaw gateway auth-token --show" });
+        .filter({ hasText: "carapace gateway auth-token --show" });
       await command.click();
 
       await expect
         .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-        .toBe("openclaw gateway auth-token --show");
+        .toBe("carapace gateway auth-token --show");
       expect(await command.locator(".chat-copy-btn").getAttribute("aria-label")).toBe("Copied!");
     } finally {
       await closeContext(context);
@@ -448,8 +448,8 @@ suite.define(() => {
     const context = await suite.browser.newContext({ viewport: { height: 900, width: 1280 } });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      window.addEventListener("openclaw-control-ui-rendered", () => {
-        const key = "openclaw.control-ui-e2e.render-count";
+      window.addEventListener("carapace-control-ui-rendered", () => {
+        const key = "carapace.control-ui-e2e.render-count";
         const count = Number.parseInt(sessionStorage.getItem(key) ?? "0", 10);
         sessionStorage.setItem(key, String(count + 1));
       });
@@ -471,12 +471,12 @@ suite.define(() => {
       await page.clock.runFor(12_001);
 
       expect(await authRequired.isVisible()).toBe(true);
-      expect(await page.locator("#openclaw-mount-fallback").isHidden()).toBe(true);
+      expect(await page.locator("#carapace-mount-fallback").isHidden()).toBe(true);
       expect((await page.locator("body").getAttribute("class")) ?? "").not.toContain(
-        "openclaw-mount-fallback-active",
+        "carapace-mount-fallback-active",
       );
       expect(
-        await page.evaluate(() => sessionStorage.getItem("openclaw.control-ui-e2e.render-count")),
+        await page.evaluate(() => sessionStorage.getItem("carapace.control-ui-e2e.render-count")),
       ).toBe("1");
     } finally {
       await closeContext(context);

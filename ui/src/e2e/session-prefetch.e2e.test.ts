@@ -63,7 +63,7 @@ suite.define(() => {
         .toBeGreaterThan(before);
       await expect
         .poll(() =>
-          page.locator(`openclaw-app-sidebar [data-session-key="${workKey}"]`).textContent(),
+          page.locator(`carapace-app-sidebar [data-session-key="${workKey}"]`).textContent(),
         )
         .toContain("Workspace updated");
       await gateway.resolveDeferred("chat.history", reportHistory);
@@ -78,7 +78,7 @@ suite.define(() => {
       await gateway.deferNext("chat.history", { sessionKey: reportKey });
       await gateway.deferNext("chat.startup", { sessionKey: reportKey });
       await page
-        .locator(`openclaw-app-sidebar [data-session-key="${reportKey}"] a`)
+        .locator(`carapace-app-sidebar [data-session-key="${reportKey}"] a`)
         .first()
         .click();
       try {

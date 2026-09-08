@@ -2,7 +2,7 @@
  * Tests for command gateway methods and command registry responses.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Value } from "typebox/value";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChatCommandDefinition } from "../../auto-reply/commands-registry.types.js";

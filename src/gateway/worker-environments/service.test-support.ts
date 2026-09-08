@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import type {
   WorkerDesktopEndpoint,
   WorkerNodeEnrollment,
@@ -11,10 +11,10 @@ import type {
   WorkerSshEndpoint,
 } from "../../plugins/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { WorkerInstallationArtifact } from "./bundle.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
 import { hashWorkerCredential } from "./credential.js";
@@ -39,7 +39,7 @@ export type WorkerEnvironmentServiceError = Error & { code: string };
 export const SSH_ENDPOINT: WorkerSshEndpoint = {
   host: "worker.example.test",
   port: 22,
-  user: "openclaw",
+  user: "carapace",
   hostKey: HOST_KEY,
   keyRef: { source: "file", provider: "worker-keys", id: "/development-key" },
 };
@@ -50,25 +50,25 @@ export const DESKTOP: WorkerDesktopEndpoint = {
   apps: [
     {
       id: "browser",
-      executablePath: "/usr/local/bin/openclaw-worker-browser",
+      executablePath: "/usr/local/bin/carapace-worker-browser",
       cdpPort: 9222,
     },
-    { id: "terminal", executablePath: "/usr/local/bin/openclaw-worker-terminal" },
+    { id: "terminal", executablePath: "/usr/local/bin/carapace-worker-terminal" },
   ],
 };
 export const BUNDLE_HASH = "a".repeat(64);
 export const NODE_BOOTSTRAP: WorkerNodeEnrollment["nodeBootstrap"] = {
-  url: `https://gateway.example.test/__openclaw__/worker-bootstrap/artifacts/${"b".repeat(64)}`,
+  url: `https://gateway.example.test/__carapace__/worker-bootstrap/artifacts/${"b".repeat(64)}`,
   token: "t".repeat(43),
   sha256: "b".repeat(64),
   bytes: 1,
-  openclawVersion: "2026.8.1",
+  carapaceVersion: "2026.8.1",
   enabledPluginIds: ["runtime-plugin"],
 };
 export const BUNDLE_ARTIFACT: Extract<WorkerInstallationArtifact, { install: "bundle" }> = {
   install: "bundle",
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.7.2",
+  carapaceVersion: "2026.7.2",
   protocolFeatures: [],
   tarballBytes: 1,
   tarballSha256: "b".repeat(64),
@@ -77,14 +77,14 @@ export const BUNDLE_ARTIFACT: Extract<WorkerInstallationArtifact, { install: "bu
 export const NPM_ARTIFACT: WorkerInstallationArtifact = {
   install: "npm",
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.7.2",
+  carapaceVersion: "2026.7.2",
   packageIntegrity: `sha512-${Buffer.alloc(64).toString("base64")}`,
   protocolFeatures: [],
-  packageSpec: "openclaw@2026.7.2",
+  packageSpec: "carapace@2026.7.2",
 };
 export const BOOTSTRAP_RECEIPT = {
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.7.2",
+  carapaceVersion: "2026.7.2",
   protocolFeatures: [],
 };
 export const CREDENTIAL = ["worker", "credential", "fixture"].join("-");
@@ -105,10 +105,10 @@ type LiveOpts = Partial<Pick<LiveEventRequest, "lastAckedSeq" | "runEpoch" | "ru
 
 export const testState = {} as {
   root: string;
-  stateDb: OpenClawStateDatabase;
+  stateDb: CarapaceStateDatabase;
   store: WorkerEnvironmentStore;
   service: WorkerEnvironmentService | undefined;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   nowMs: number;
   providersEnabled: boolean;
   prepareInstallation: WorkerEnvironmentServiceOptions["prepareInstallation"];
@@ -118,10 +118,10 @@ export const testState = {} as {
 export function setupWorkerEnvironmentServiceSuite() {
   beforeEach(async () => {
     testState.root = await fs.mkdtemp(
-      path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-service-"),
+      path.join(await fs.realpath(os.tmpdir()), "carapace-worker-service-"),
     );
-    testState.stateDb = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: testState.root },
+    testState.stateDb = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: testState.root },
     });
     testState.nowMs = 1_000;
     testState.providersEnabled = true;
@@ -145,7 +145,7 @@ export function setupWorkerEnvironmentServiceSuite() {
     );
     testState.bootstrapWorker = vi.fn(async ({ installation }) => ({
       bundleHash: installation.bundleHash,
-      openclawVersion: installation.openclawVersion,
+      carapaceVersion: installation.carapaceVersion,
       protocolFeatures: [...installation.protocolFeatures],
     }));
   });
@@ -154,7 +154,7 @@ export function setupWorkerEnvironmentServiceSuite() {
     // Shutdown may schedule cleanup after a test leaves fake timers installed.
     vi.useRealTimers();
     await testState.service?.stop();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(testState.root, { recursive: true, force: true });
   });
 }
@@ -169,9 +169,9 @@ export function getDevelopmentProfile() {
 export async function reopenWorkerEnvironmentStore() {
   await testState.service?.stop();
   testState.service = undefined;
-  closeOpenClawStateDatabaseForTest();
-  testState.stateDb = openOpenClawStateDatabase({
-    env: { OPENCLAW_STATE_DIR: testState.root },
+  closeCarapaceStateDatabaseForTest();
+  testState.stateDb = openCarapaceStateDatabase({
+    env: { CARAPACE_STATE_DIR: testState.root },
   });
   testState.store = createWorkerEnvironmentStore({
     database: testState.stateDb,

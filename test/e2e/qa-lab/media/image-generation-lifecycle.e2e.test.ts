@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createQaBusState,
@@ -105,9 +105,9 @@ async function startControlledImageProvider() {
 }
 
 function configureImageProvider(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   imageProviderBaseUrl: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const openAiProvider = config.models?.providers?.openai;
   if (!openAiProvider) {
     throw new Error("openai image provider is missing from QA gateway config");

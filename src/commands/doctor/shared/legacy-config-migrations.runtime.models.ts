@@ -21,7 +21,7 @@ const LEGACY_DEFAULT_MODEL_MIGRATION = defineLegacyConfigMigration({
   legacyRules: [
     {
       path: ["defaultModel"],
-      message: 'defaultModel moved to agents.defaults.model. Run "openclaw doctor --fix".',
+      message: 'defaultModel moved to agents.defaults.model. Run "carapace doctor --fix".',
     },
   ],
   apply: (raw, changes) => {
@@ -50,7 +50,7 @@ export const LEGACY_CONFIG_MIGRATIONS_RUNTIME_MODELS = [
       {
         path: ["models", "pricing"],
         message:
-          'models.pricing is retired because pricing ships with the hosted catalog; run "openclaw doctor --fix" to remove it.',
+          'models.pricing is retired because pricing ships with the hosted catalog; run "carapace doctor --fix" to remove it.',
       },
     ],
     apply: (raw, changes) => {
@@ -75,13 +75,13 @@ export const LEGACY_CONFIG_MIGRATIONS_RUNTIME_MODELS = [
       {
         path: ["models", "providers"],
         message:
-          'models.providers.codex and models.providers.openai-codex are legacy; run "openclaw doctor --fix" to move them to models.providers.openai.',
+          'models.providers.codex and models.providers.openai-codex are legacy; run "carapace doctor --fix" to move them to models.providers.openai.',
         match: (value, root) => codex.hasAutoFixableLegacyOpenAICodexProvider(value, root),
       },
       {
         path: ["models", "providers"],
         message:
-          'openai-codex-responses is legacy; run "openclaw doctor --fix" to use openai-chatgpt-responses.',
+          'openai-codex-responses is legacy; run "carapace doctor --fix" to use openai-chatgpt-responses.',
         match: (value) => {
           const providers = getRecord(value);
           return providers
@@ -126,7 +126,7 @@ export const LEGACY_CONFIG_MIGRATIONS_RUNTIME_MODELS = [
       {
         path: ["agents", "defaults", "models"],
         message:
-          'Legacy agents.defaults.models restricts model overrides; run "openclaw doctor --fix" to migrate valid refs to agents.defaults.modelPolicy.allow.',
+          'Legacy agents.defaults.models restricts model overrides; run "carapace doctor --fix" to migrate valid refs to agents.defaults.modelPolicy.allow.',
         match: (_value, root) => refs.collectLegacyDefaultModelAllowRefs(root) !== null,
       },
       {

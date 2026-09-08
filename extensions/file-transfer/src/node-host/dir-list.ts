@@ -1,6 +1,6 @@
 // File Transfer plugin module implements dir list behavior.
 import path from "node:path";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
 import { mimeFromExtension } from "../shared/mime.js";
 import type { PathBinding } from "../shared/path-binding.js";
 import { listCanonicalDirectory } from "./dir-list-worker.js";

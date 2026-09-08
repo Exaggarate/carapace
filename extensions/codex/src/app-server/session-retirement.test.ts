@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { legacyCodexConversationBindingId } from "../conversation-binding-data.js";
 import {

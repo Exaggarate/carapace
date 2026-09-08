@@ -1,6 +1,6 @@
 // Builds provider-aware auth-choice options and grouped onboarding menus.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveProviderSetupFlowContributions } from "../flows/provider-flow.js";
 import {
   compareProviderAuthChoiceGroups,
@@ -38,7 +38,7 @@ export function compareAuthChoiceGroups(a: AuthChoiceGroup, b: AuthChoiceGroup):
 }
 
 function resolveProviderChoiceOptions(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): AuthChoiceOption[] {
@@ -81,7 +81,7 @@ function resolveProviderChoiceOptions(params?: {
  */
 export function formatAuthChoiceChoicesForCli(params?: {
   includeSkip?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): string {
@@ -99,7 +99,7 @@ export function formatAuthChoiceChoicesForCli(params?: {
 function buildAuthChoiceOptions(params: {
   includeSkip: boolean;
   assistantVisibleOnly?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): AuthChoiceOption[] {
@@ -132,7 +132,7 @@ function buildAuthChoiceOptions(params: {
 export function buildAuthChoiceGroups(params: {
   includeSkip: boolean;
   assistantVisibleOnly?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): {

@@ -1,7 +1,7 @@
 // Full embedded-runner stream wrapper chain around the real Codex Responses
 // provider with a mocked WebSocket, proving the idle watchdog polices provider
 // silence in the shapes seen live (fresh, cached, and consumer-parked streams).
-import { defaultLlmRuntime } from "@openclaw/ai/internal/runtime";
+import { defaultLlmRuntime } from "@carapace/ai/internal/runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   closeOpenAICodexWebSocketSessions,
@@ -215,7 +215,7 @@ describe("codex websocket idle watchdog through the embedded runner chain", () =
         onIdleTimeout,
         codeMode,
       });
-      expect(strategy).toBe("openclaw-native-codex-responses");
+      expect(strategy).toBe("carapace-native-codex-responses");
       expect([idleTimeoutMs, firstEventTimeoutMs]).toEqual([120_000, 120_000]);
 
       const consumed = consumeLikeAgentCore(streamFn, runAbort.signal);

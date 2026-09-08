@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type { TranscriptEvent } from "./session-accessor.sqlite-contract.js";
 import {
   collectSessionEntryLookupKeys,
@@ -127,7 +127,7 @@ async function applySqliteCompactionCheckpointSessionOperation(
     ...(operation.storePath ? { storePath: operation.storePath } : {}),
   });
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const committed = runOpenClawAgentWriteTransaction((database) => {
+    const committed = runCarapaceAgentWriteTransaction((database) => {
       const identityKeys = uniqueStrings([
         ...collectSessionEntryLookupKeys(database, sourceKey),
         ...collectSessionEntryLookupKeys(database, targetKey),
@@ -156,7 +156,7 @@ async function applySqliteCompactionCheckpointSessionOperation(
 }
 
 function applySqliteCompactionCheckpointSessionOperationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedSqliteScope,
   operation: SqliteCompactionCheckpointSessionOperation,
   sourceKey: string,
@@ -216,7 +216,7 @@ function applySqliteCompactionCheckpointSessionOperationInTransaction(
 }
 
 function forkSqliteCheckpointTranscriptInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedSqliteScope,
   params: {
     checkpoint: SessionCompactionCheckpoint;
@@ -331,7 +331,7 @@ function resolveSqliteCheckpointTranscriptForkSources(
 }
 
 function readSqliteTranscriptRowsForFork(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   source: { sessionId: string; leafId?: string },
 ): { status: "created"; events: TranscriptEvent[] } | { status: "missing-boundary" | "failed" } {
   const boundarySeq = source.leafId

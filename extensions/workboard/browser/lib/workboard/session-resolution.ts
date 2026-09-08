@@ -1,9 +1,9 @@
-import type { BoardGetParams } from "@openclaw/gateway-protocol";
+import type { BoardGetParams } from "@carapace/gateway-protocol";
 import type {
   ControlUiHost,
   ControlUiSessionListResult,
   ControlUiSessionListSubscription,
-} from "openclaw/plugin-sdk/control-ui";
+} from "carapace/plugin-sdk/control-ui";
 import type { GatewaySessionRow } from "../../api/types.ts";
 import { formatUiError } from "../format-error.ts";
 import { normalizeSessionKeyForUiComparison } from "../sessions/session-key.ts";

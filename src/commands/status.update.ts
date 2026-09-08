@@ -1,8 +1,8 @@
-// Update status helpers for `openclaw status`.
+// Update status helpers for `carapace status`.
 // Wraps registry/git update checks and formats compact update rows/hints.
 
 import { formatCliCommand } from "../cli/command-format.js";
-import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRoot } from "../infra/carapace-root.js";
 import {
   normalizeUpdateChannel,
   resolveEffectiveUpdateChannel,
@@ -38,7 +38,7 @@ export async function getUpdateCheckResult(params: {
   updateConfigChannel?: string | null;
 }): Promise<UpdateCheckResult> {
   const configChannel = normalizeUpdateChannel(params.updateConfigChannel);
-  const root = await resolveOpenClawPackageRoot({
+  const root = await resolveCarapacePackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -100,7 +100,7 @@ export function formatUpdateAvailableHint(update: UpdateCheckResult): string | n
     details.push(`npm ${availability.latestVersion}`);
   }
   const suffix = details.length > 0 ? ` (${details.join(" · ")})` : "";
-  return `Update available${suffix}. Run: ${formatCliCommand("openclaw update")}`;
+  return `Update available${suffix}. Run: ${formatCliCommand("carapace update")}`;
 }
 
 /** Formats a compact one-line update summary for overview rows. */

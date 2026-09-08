@@ -71,7 +71,7 @@ async function writeExportHtmlBuildFixture(rootDir: string): Promise<void> {
 
 describe("runtime postbuild static assets", () => {
   it("copies bundled hook metadata without replacing compiled handlers", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-hooks-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-hooks-");
     const sourceHookDir = path.join(rootDir, "src", "hooks", "bundled", "session-memory");
     const distHookDir = path.join(rootDir, "dist", "bundled", "session-memory");
     await fs.mkdir(sourceHookDir, { recursive: true });
@@ -81,7 +81,7 @@ describe("runtime postbuild static assets", () => {
 
     runRuntimePostBuild({
       rootDir,
-      env: { OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" },
+      env: { CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" },
       timings: false,
     });
 
@@ -112,7 +112,7 @@ describe("runtime postbuild static assets", () => {
     expect(payload.outputs).toEqual([
       "dist/extensions/acpx/mcp-command-line.mjs",
       "dist/extensions/acpx/mcp-proxy.mjs",
-      "dist/extensions/crabbox/assets/openclaw-worker-wallpaper.png",
+      "dist/extensions/crabbox/assets/carapace-worker-wallpaper.png",
       "dist/extensions/onepassword/onepassword-op-path.js",
       "dist/extensions/onepassword/onepassword-secret-id.js",
       "dist/extensions/onepassword/onepassword-secret-ref-resolver.js",
@@ -125,18 +125,18 @@ describe("runtime postbuild static assets", () => {
     expect(payload.sources).not.toContain("extensions/diffs/assets/viewer-runtime.js");
     expect(payload.sources).not.toContain("extensions/discord/assets/embedded-app-sdk.mjs");
     expect(payload.packageOutputs).toContain("dist/extensions/discord/assets/embedded-app-sdk.mjs");
-    expect(payload.sources).toContain("extensions/crabbox/assets/openclaw-worker-wallpaper.png");
+    expect(payload.sources).toContain("extensions/crabbox/assets/carapace-worker-wallpaper.png");
   });
 
   it("discovers static assets from plugin package metadata", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const packageDir = path.join(rootDir, "extensions", "demo");
     await fs.mkdir(packageDir, { recursive: true });
     await fs.writeFile(
       path.join(packageDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/demo",
-        openclaw: {
+        name: "@carapace/demo",
+        carapace: {
           build: {
             staticAssets: [
               {
@@ -161,12 +161,12 @@ describe("runtime postbuild static assets", () => {
 
   it.each([
     { name: "top-level array", packageJson: [] },
-    { name: "array openclaw section", packageJson: { openclaw: [] } },
-    { name: "array build section", packageJson: { openclaw: { build: [] } } },
+    { name: "array carapace section", packageJson: { carapace: [] } },
+    { name: "array build section", packageJson: { carapace: { build: [] } } },
     {
       name: "non-record asset entries",
       packageJson: {
-        openclaw: {
+        carapace: {
           build: {
             staticAssets: [[], "asset", null, { source: 42, output: [] }],
           },
@@ -174,7 +174,7 @@ describe("runtime postbuild static assets", () => {
       },
     },
   ])("ignores malformed $name metadata", async ({ packageJson }) => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-malformed-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-malformed-");
     const packageDir = path.join(rootDir, "extensions", "demo");
     await fs.mkdir(packageDir, { recursive: true });
     await fs.writeFile(path.join(packageDir, "package.json"), JSON.stringify(packageJson), "utf8");
@@ -187,18 +187,18 @@ describe("runtime postbuild static assets", () => {
     { name: "isolated external build", params: { includeExternalPlugins: true }, included: true },
     {
       name: "Docker-selected build",
-      params: { env: { OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: "external-demo" } },
+      params: { env: { CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: "external-demo" } },
       included: true,
     },
   ])("$name handles external plugin assets", async ({ params, included }) => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const packageDir = path.join(rootDir, "extensions", "external-demo");
     await fs.mkdir(packageDir, { recursive: true });
     await fs.writeFile(
       path.join(packageDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/external-demo",
-        openclaw: {
+        name: "@carapace/external-demo",
+        carapace: {
           build: {
             bundledDist: false,
             staticAssets: [
@@ -227,7 +227,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("copies declared static assets into root and package dist", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const src = "extensions/acpx/src/runtime-internals/mcp-proxy.mjs";
     const dest = "dist/extensions/acpx/mcp-proxy.mjs";
     const sourcePath = path.join(rootDir, src);
@@ -253,7 +253,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("stages copied static assets byte-for-byte during the same postbuild run", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const source = "extensions/diffs/assets/viewer-runtime.js";
     const output = "assets/viewer-runtime.js";
     const distAsset = "dist/extensions/diffs/assets/viewer-runtime.js";
@@ -263,8 +263,8 @@ describe("runtime postbuild static assets", () => {
     await fs.writeFile(
       path.join(rootDir, "extensions", "diffs", "package.json"),
       JSON.stringify({
-        name: "@openclaw/diffs",
-        openclaw: {
+        name: "@carapace/diffs",
+        carapace: {
           extensions: ["./index.ts"],
           build: {
             staticAssets: [{ source: `./${output}`, output }],
@@ -274,7 +274,7 @@ describe("runtime postbuild static assets", () => {
       "utf8",
     );
     await fs.writeFile(
-      path.join(rootDir, "extensions", "diffs", "openclaw.plugin.json"),
+      path.join(rootDir, "extensions", "diffs", "carapace.plugin.json"),
       '{"id":"diffs"}\n',
       "utf8",
     );
@@ -296,7 +296,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes every phase beneath the cwd-only caller root", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-cwd-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-cwd-");
     const sentinelDest = path.join(
       "dist",
       `runtime-postbuild-cwd-only-${path.basename(rootDir)}.js`,
@@ -310,8 +310,8 @@ describe("runtime postbuild static assets", () => {
         chunks: [{ dest: sentinelDest, contents: "selected root only\n" }],
         cwd: rootDir,
         env: {
-          OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0",
-          OPENCLAW_CONTROL_UI_BUILD_ID: "source-runtime-build",
+          CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0",
+          CARAPACE_CONTROL_UI_BUILD_ID: "source-runtime-build",
         },
         timings: false,
       };
@@ -345,14 +345,14 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("uses rootDir ahead of conflicting cwd and repoRoot for every phase", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-root-");
-    const cwd = createTempDir("openclaw-runtime-postbuild-rejected-cwd-");
-    const repoRoot = createTempDir("openclaw-runtime-postbuild-rejected-repo-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-root-");
+    const cwd = createTempDir("carapace-runtime-postbuild-rejected-cwd-");
+    const repoRoot = createTempDir("carapace-runtime-postbuild-rejected-repo-");
     await writeExportHtmlBuildFixture(rootDir);
 
     runRuntimePostBuild({
       cwd,
-      env: { OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" },
+      env: { CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" },
       repoRoot,
       rootDir,
       timings: false,
@@ -372,7 +372,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("validates every postbuild root before running any phase", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-roots-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-roots-");
     const distFile = path.join(rootDir, "dist", "keep.js");
     const targetDir = path.join(rootDir, "gateway-runtime");
     await fs.mkdir(path.dirname(distFile), { recursive: true });
@@ -394,7 +394,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("preserves restored dist static assets when plugin sources are absent", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const output = "assets/viewer-runtime.js";
     const distPluginDir = path.join(rootDir, "dist", "extensions", "diffs");
     const runtimeAsset = path.join(rootDir, "dist-runtime", "extensions", "diffs", output);
@@ -402,15 +402,15 @@ describe("runtime postbuild static assets", () => {
     await fs.mkdir(path.join(distPluginDir, "assets"), { recursive: true });
     await fs.writeFile(path.join(distPluginDir, "index.js"), "export default {};\n", "utf8");
     await fs.writeFile(
-      path.join(distPluginDir, "openclaw.plugin.json"),
+      path.join(distPluginDir, "carapace.plugin.json"),
       '{"id":"diffs"}\n',
       "utf8",
     );
     await fs.writeFile(
       path.join(distPluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/diffs",
-        openclaw: {
+        name: "@carapace/diffs",
+        carapace: {
           extensions: ["./index.js"],
           build: {
             staticAssets: [{ source: `./${output}`, output }],
@@ -432,7 +432,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("can skip static asset copies for minimal runtime builds", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const warn = vi.fn();
     const output = "assets/viewer-runtime.js";
 
@@ -440,8 +440,8 @@ describe("runtime postbuild static assets", () => {
     await fs.writeFile(
       path.join(rootDir, "extensions", "diffs", "package.json"),
       JSON.stringify({
-        name: "@openclaw/diffs",
-        openclaw: {
+        name: "@carapace/diffs",
+        carapace: {
           extensions: ["./index.ts"],
           build: {
             staticAssets: [{ source: `./${output}`, output }],
@@ -455,7 +455,7 @@ describe("runtime postbuild static assets", () => {
       cwd: rootDir,
       repoRoot: rootDir,
       rootDir,
-      env: { OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" },
+      env: { CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS: "0" },
       timings: false,
       warn,
     });
@@ -465,7 +465,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("skips runtime overlay asset copies when the runtime extension root is absent", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     await fs.mkdir(path.join(rootDir, "extensions", "demo", "assets"), { recursive: true });
     await fs.writeFile(
       path.join(rootDir, "extensions", "demo", "assets", "viewer.js"),
@@ -487,7 +487,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("ignores runtime overlay static assets outside dist extensions", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     await fs.mkdir(path.join(rootDir, "dist-runtime", "extensions"), { recursive: true });
     await fs.mkdir(path.join(rootDir, "extensions", "demo", "assets"), { recursive: true });
     await fs.writeFile(
@@ -510,7 +510,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("warns when a runtime overlay static asset source is missing", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const warn = vi.fn();
     await fs.mkdir(path.join(rootDir, "dist-runtime", "extensions"), { recursive: true });
 
@@ -534,7 +534,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("warns when a declared static asset is missing", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const warn = vi.fn();
 
     copyStaticExtensionAssets({
@@ -549,7 +549,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes stable aliases for hashed root runtime modules", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -592,7 +592,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("refuses to rewrite stable aliases through a symlinked dist root", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-symlink-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-symlink-");
     const targetDir = path.join(rootDir, "gateway-dist");
     await fs.mkdir(targetDir, { recursive: true });
     const hashedFile = path.join(targetDir, "runtime-model-auth.runtime-XyZ987.js");
@@ -608,7 +608,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("forwards default exports through stable and legacy aliases", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(path.join(rootDir, "package.json"), '{"type":"module"}\n', "utf8");
@@ -662,7 +662,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("does not write ambiguous stable aliases for colliding root runtime chunks", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -687,7 +687,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes a stable plugin install runtime alias when install runtimes collide", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -715,7 +715,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("keeps stable aliases when one colliding root runtime chunk re-exports the implementation", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -737,7 +737,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("ignores legacy wrappers to the stable runtime alias when choosing the implementation", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -768,7 +768,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it.each(["js", "mjs"])("rewrites mixed runtime imports in a %s importer", async (extension) => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -808,7 +808,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("keeps text-transform runtime imports hashed after the stable alias export surface grew", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -842,7 +842,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("rewrites gateway shutdown imports to stable runtime aliases", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -872,7 +872,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("rewrites reply-dispatch imports to the stable provider dispatcher runtime alias", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -904,7 +904,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("keeps hashed imports when a stable runtime alias would collide", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -939,7 +939,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("rewrites plugin install runtime imports to stable aliases when install runtimes collide", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -980,7 +980,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("leaves stable alias files pointing at their hashed runtime chunks", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -1002,7 +1002,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes compatibility aliases for previous release runtime chunk names", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -1073,7 +1073,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes compatibility aliases for previous text-transform runtime chunk names", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(distDir, { recursive: true });
     await fs.writeFile(
@@ -1093,7 +1093,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes compatibility aliases for previous gateway shutdown chunk names", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(path.join(distDir, "plugins"), { recursive: true });
     await fs.mkdir(distDir, { recursive: true });
@@ -1122,7 +1122,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes compatibility aliases for previous tool and ACP manager chunk names", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
     const distDir = path.join(rootDir, "dist");
     await fs.mkdir(path.join(distDir, "acp", "control-plane"), { recursive: true });
     await fs.mkdir(path.join(distDir, "web-fetch"), { recursive: true });
@@ -1148,7 +1148,7 @@ describe("runtime postbuild static assets", () => {
   });
 
   it("writes legacy CLI exit compatibility chunks", async () => {
-    const rootDir = createTempDir("openclaw-runtime-postbuild-");
+    const rootDir = createTempDir("carapace-runtime-postbuild-");
 
     writeLegacyCliExitCompatChunks({ rootDir });
 
@@ -1162,7 +1162,7 @@ describe("runtime postbuild static assets", () => {
   it.each(["shared-Y6bNiw2w.js", "shared-DTaQo6Hi.js", "shared-DFJEouXv.js"])(
     "preserves the old updater node-runner ABI through %s",
     async (chunk) => {
-      const rootDir = createTempDir("openclaw-runtime-postbuild-");
+      const rootDir = createTempDir("carapace-runtime-postbuild-");
 
       writeLegacyCliExitCompatChunks({ rootDir });
 

@@ -1,5 +1,5 @@
 // Root-owned integration combines shared delivery with public plugin surfaces.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { googlechatPlugin } from "../extensions/googlechat/api.js";
 import { ircPlugin } from "../extensions/irc/api.js";
@@ -7,7 +7,7 @@ import { telegramOutbound } from "../extensions/telegram/api.js";
 import { whatsappPlugin } from "../extensions/whatsapp/api.js";
 import { createDirectTextMediaOutbound } from "../src/channels/plugins/outbound/direct-text-media.js";
 import type { ChannelOutboundAdapter } from "../src/channels/plugins/types.adapters.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { deliverOutboundPayloadsCore } from "../src/infra/outbound/deliver-core.js";
 import { prepareOutboundPayloadBatch } from "../src/infra/outbound/deliver-prepare.js";
 import { createEmptyPluginRegistry } from "../src/plugins/registry.js";
@@ -60,7 +60,7 @@ describe("HTML sanitization through outbound delivery", () => {
         chatId: "12345",
       }));
       const channel = mode === "direct text/media" ? "imessage" : "telegram";
-      const cfg: OpenClawConfig =
+      const cfg: CarapaceConfig =
         mode === "rich Telegram" ? { channels: { telegram: { richMessages: true } } } : {};
       const outbound =
         channel === "telegram"
@@ -123,7 +123,7 @@ describe("HTML sanitization through outbound delivery", () => {
         ]),
       );
       const params = {
-        cfg: {} satisfies OpenClawConfig,
+        cfg: {} satisfies CarapaceConfig,
         channel,
         to: "12345",
         payloads: [{ text: "<https://example.com/a.pdf|Manual>" }],
@@ -166,7 +166,7 @@ describe("HTML sanitization through outbound delivery", () => {
         ]),
       );
       const params = {
-        cfg: {} satisfies OpenClawConfig,
+        cfg: {} satisfies CarapaceConfig,
         channel,
         to: "12345",
         payloads: [{ text: "<https://example.com/a.pdf|Manual>" }],

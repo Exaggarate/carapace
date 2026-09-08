@@ -1,7 +1,7 @@
 import {
   applyOpenAIResponsesPayloadPolicy,
   resolveOpenAIResponsesPayloadPolicy,
-} from "@openclaw/ai/transports";
+} from "@carapace/ai/transports";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createReplyOperation } from "../../../auto-reply/reply/reply-run-registry.js";
 import { prepareReplyToolAuthority } from "../../../auto-reply/reply/reply-tool-authority.js";
@@ -12,11 +12,11 @@ import {
   patchSessionEntryCore,
   replaceSessionEntry,
 } from "../../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../test-utils/carapace-test-state.js";
 import { prepareSystemAgentRunAdmission } from "../../admitted-run-context.js";
 import { registerAgentHarness } from "../../harness/registry.js";
 import { withPreparedEmbeddedRunToolAuthority } from "../../harness/tool-authority.runtime.js";
@@ -45,7 +45,7 @@ vi.mock("../../harness/runtime-plugin.js", () => ({
   ensureSelectedAgentHarnessPlugin: async () => undefined,
 }));
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 afterEach(async () => {
   resetModelGenerationFixtureState();
   for (const state of states.splice(0).toReversed()) {
@@ -54,10 +54,10 @@ afterEach(async () => {
 });
 
 async function createFixture(
-  config: OpenClawConfig = {},
+  config: CarapaceConfig = {},
   nativeOwner?: AgentHarness["resolveSessionRuntimeOwnership"],
 ) {
-  const state = await createOpenClawTestState({ label: "model-ownership" });
+  const state = await createCarapaceTestState({ label: "model-ownership" });
   states.push(state);
   const generation = createModelGenerationFixture({
     label: "ownership",
@@ -79,7 +79,7 @@ async function createFixture(
       provider !== "openai"
         ? { supported: false }
         : modelProvider?.requestTransportOverrides === "present"
-          ? { supported: false, fallbackRuntime: "openclaw" }
+          ? { supported: false, fallbackRuntime: "carapace" }
           : { supported: true },
     ...(nativeOwner ? { resolveSessionRuntimeOwnership: nativeOwner } : {}),
     runAttempt: vi.fn<AgentHarness["runAttempt"]>(),
@@ -192,7 +192,7 @@ describe("model chat and native model ownership", () => {
   it("keeps model and plugin ownership across usage writes and subsequent turns", async () => {
     const fixture = await createFixture();
     const sessionStore = { [fixture.target.sessionKey]: fixture.entry };
-    for (const observation of [undefined, "codex", "openclaw"]) {
+    for (const observation of [undefined, "codex", "carapace"]) {
       if (observation) {
         await persistSessionUsageUpdate({
           ...fixture.target,
@@ -255,7 +255,7 @@ describe("model chat and native model ownership", () => {
       (runtime) => {
         const snapshot = runtime.snapshot();
         expect(runtime.nativeModelOwned).toBe(false);
-        expect(snapshot.agentHarness.id).toBe("openclaw");
+        expect(snapshot.agentHarness.id).toBe("carapace");
         expect(snapshot.lastProfileId).toBe("openai:fixture");
         expect(snapshot.contextTokenBudget).toBe(65_536);
         expect(snapshot.effectiveModel.baseUrl).toBe("https://api.openai.com/v1");
@@ -281,7 +281,7 @@ describe("model chat and native model ownership", () => {
   it.each(["openai", "anthropic"])(
     "keeps a supervised connection independent of outer %s model/auth config on both turns",
     async (provider) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           defaults: {
             models: {

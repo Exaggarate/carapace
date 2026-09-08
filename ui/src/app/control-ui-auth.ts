@@ -1,4 +1,4 @@
-import { normalizeUniqueTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 
 type ControlUiAuthSource = {
   hello?: { auth?: { deviceToken?: string | null } | null } | null;

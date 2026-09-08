@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { PreparedAgentCredentialModes } from "../../agents/agent-auth-credential-modes.js";
 import type { AuthProfileStore } from "../../agents/auth-profiles/types.js";
 import { readSessionRuntimeOwnership } from "../../agents/harness/session-runtime-ownership.js";
@@ -6,7 +6,7 @@ import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../../agents/model
 import { getPreparedModelRuntimeAuthMaterializations } from "../../agents/prepared-model-runtime-auth.js";
 import type { PreparedModelRuntimeSnapshot } from "../../agents/prepared-model-runtime.js";
 import { resolveSessionModelRef } from "../../agents/session-model-ref.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ChatMetadataReadParams, ChatMetadataResult } from "./chat-metadata-contract.js";
 import type { GatewayRequestContext } from "./types.js";
 
@@ -83,7 +83,7 @@ export async function prepareChatMetadataModelProjection(params: {
 export function projectChatSessionMetadata(
   readParams: ChatMetadataReadParams,
   metadata: ChatMetadataResult,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): ChatMetadataResult {
   const ownership = readSessionRuntimeOwnership({ ...readParams, config });
   if (ownership?.auth !== "native" || !metadata.models) {

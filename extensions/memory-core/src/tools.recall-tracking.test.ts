@@ -1,9 +1,9 @@
 // Memory Core tests cover tools.recall tracking plugin behavior.
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
+} from "carapace/plugin-sdk/memory-host-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetMemoryToolMockState, setMemorySearchImpl } from "./memory-tool-manager.test-mocks.js";
 import { createMemorySearchToolOrThrow } from "./tools.test-helpers.js";

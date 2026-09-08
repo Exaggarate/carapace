@@ -18,10 +18,10 @@ describe("readBundledDiscoveryModeMemoized", () => {
 
   it("observes a machine-state write after the memo is cleared", async () => {
     const stateDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bundled-discovery-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bundled-discovery-")),
     );
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     try {
       clearBundledDiscoveryModeMemo();
       // Pre-migration read caches the absent mode.
@@ -43,22 +43,22 @@ describe("readBundledDiscoveryModeMemoized", () => {
     // (agent execution, doctor lint) alternating in one process must each see
     // their own root's mode without explicit clears.
     const compatRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bd-compat-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bd-compat-")),
     );
     const plainRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bd-plain-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bd-plain-")),
     );
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     try {
-      setTestEnvValue("OPENCLAW_STATE_DIR", compatRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", compatRoot);
       writeConfigMachineState("plugins.bundledDiscovery", "compat");
       clearBundledDiscoveryModeMemo();
       expect(readBundledDiscoveryModeMemoized()).toBe("compat");
 
-      setTestEnvValue("OPENCLAW_STATE_DIR", plainRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", plainRoot);
       expect(readBundledDiscoveryModeMemoized()).toBeUndefined();
 
-      setTestEnvValue("OPENCLAW_STATE_DIR", compatRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", compatRoot);
       expect(readBundledDiscoveryModeMemoized()).toBe("compat");
     } finally {
       envSnapshot.restore();
@@ -73,20 +73,20 @@ describe("readBundledDiscoveryModeMemoized", () => {
     // must be readable even when the process root has no mode, and the
     // process-root read must stay strict.
     const compatRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bd-caller-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bd-caller-")),
     );
     const plainRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bd-process-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bd-process-")),
     );
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     try {
-      setTestEnvValue("OPENCLAW_STATE_DIR", compatRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", compatRoot);
       writeConfigMachineState("plugins.bundledDiscovery", "compat");
       // Process root has no recorded mode.
-      setTestEnvValue("OPENCLAW_STATE_DIR", plainRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", plainRoot);
       clearBundledDiscoveryModeMemo();
 
-      const callerEnv = { ...process.env, OPENCLAW_STATE_DIR: compatRoot };
+      const callerEnv = { ...process.env, CARAPACE_STATE_DIR: compatRoot };
       expect(readBundledDiscoveryModeMemoized(callerEnv)).toBe("compat");
       expect(readBundledDiscoveryModeMemoized()).toBeUndefined();
       // Alternating scopes stay correct: the memo re-keys per resolved root.

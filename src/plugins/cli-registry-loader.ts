@@ -1,12 +1,12 @@
 /** Loads plugin CLI registrations lazily for the command tree and plugin-owned subcommands. */
-import { stableStringify } from "@openclaw/normalization-core/stable-stringify";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { stableStringify } from "@carapace/normalization-core/stable-stringify";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { collectUniqueCommandDescriptors } from "../cli/program/command-descriptor-utils.js";
 import { cloneEnvWithPlatformSemantics } from "../config/config-env-vars.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveManifestActivationPluginIds } from "./activation-planner.js";
 import { resolvePluginActivationSourceConfig } from "./activation-source-config.js";
@@ -14,7 +14,7 @@ import { createPluginCliGatewayNodesRuntime } from "./cli-gateway-nodes-runtime.
 import { resolvePluginControlPlaneWorkspace } from "./control-plane-workspace.js";
 import { getCurrentPluginMetadataSnapshotState } from "./current-plugin-metadata-state.js";
 import type { PluginLoadOptions } from "./loader.js";
-import { loadOpenClawPluginCliRegistry, loadPluginRegistryHandle } from "./loader.js";
+import { loadCarapacePluginCliRegistry, loadPluginRegistryHandle } from "./loader.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 import {
   resolvePluginMetadataEnvFingerprint,
@@ -29,8 +29,8 @@ import {
 } from "./runtime/load-context.js";
 import { resolvePluginRuntimeLoadContext } from "./runtime/load-context.resolve.js";
 import type {
-  OpenClawPluginCliContext,
-  OpenClawPluginCliRootCommandDescriptor,
+  CarapacePluginCliContext,
+  CarapacePluginCliRootCommandDescriptor,
   PluginLogger,
 } from "./types.js";
 
@@ -38,7 +38,7 @@ export type PluginCliLoaderOptions = Pick<PluginLoadOptions, "pluginSdkResolutio
 
 /** Public CLI loader options passed from command bootstrap surfaces. */
 export type PluginCliPublicLoadParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   loaderOptions?: PluginCliLoaderOptions;
   logger?: PluginLogger;
@@ -49,9 +49,9 @@ export type PluginCliPublicLoadParams = {
 export type PluginCliCommandGroupEntry = {
   pluginId: string;
   parentPath: readonly string[];
-  placeholders: readonly OpenClawPluginCliRootCommandDescriptor[];
+  placeholders: readonly CarapacePluginCliRootCommandDescriptor[];
   names: readonly string[];
-  register: (program: OpenClawPluginCliContext["program"]) => Promise<void>;
+  register: (program: CarapacePluginCliContext["program"]) => Promise<void>;
 };
 
 const log = createSubsystemLogger("plugins/cli-registry-loader");
@@ -272,7 +272,7 @@ async function loadPluginCliMetadataRegistryWithContext(
   );
   prepared.assertCurrent();
   const registry = await (prepared.metadataRegistry ??= prepared.withCache(() =>
-    loadOpenClawPluginCliRegistry(
+    loadCarapacePluginCliRegistry(
       buildPluginRuntimeLoadOptions(prepared.context, {
         ...loaderOptions,
         // The prepared record owns reuse; process caching can retain another generation's registrars.
@@ -320,7 +320,7 @@ async function loadPluginCliCommandRegistryWithContext(params: {
 
 function buildPluginCliCommandGroupEntries(params: {
   registry: PluginRegistry;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir: string | undefined;
   logger: PluginLogger;
   assertCurrent: () => void;
@@ -349,7 +349,7 @@ function buildPluginCliCommandGroupEntries(params: {
 
 export async function loadPluginCliDescriptors(
   params: PluginCliPublicLoadParams,
-): Promise<OpenClawPluginCliRootCommandDescriptor[]> {
+): Promise<CarapacePluginCliRootCommandDescriptor[]> {
   try {
     const prepared = resolvePreparedPluginCliLoad(params);
     const registry = await loadPluginCliMetadataRegistryWithContext(

@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { redactQaGatewayDebugText } from "./gateway-log-redaction.js";
 import type { QaSuiteScenarioResult } from "./suite-types.js";
 

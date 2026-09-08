@@ -3,13 +3,13 @@
 // memory, and must never re-seed roots that already hold content.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { SandboxBackendHandle } from "openclaw/plugin-sdk/sandbox";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { SandboxBackendHandle } from "carapace/plugin-sdk/sandbox";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createOpenShellSandboxBackendFactory } from "./backend.js";
 import { resolveOpenShellPluginConfig } from "./config.js";
@@ -26,8 +26,8 @@ const cliMocks = vi.hoisted(() => ({
   createOpenShellSshSession: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/sandbox", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/sandbox")>();
+vi.mock("carapace/plugin-sdk/sandbox", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/sandbox")>();
   return {
     ...actual,
     runSshSandboxCommand: sdkMocks.runSshSandboxCommand,
@@ -52,14 +52,14 @@ async function createAdoptedRemoteBackend(params: {
   skillsWorkspaceDir?: string;
 }) {
   const workspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
-    prefix: "openclaw-openshell-remote-seed-",
+    rootDir: resolvePreferredCarapaceTmpDir(),
+    prefix: "carapace-openshell-remote-seed-",
   });
   tempWorkspaces.push(workspace);
   await fs.writeFile(path.join(workspace.dir, "seed.txt"), "seed", "utf8");
   cliMocks.createOpenShellSshSession.mockResolvedValue({
     command: "ssh",
-    configPath: "/tmp/openclaw-openshell-test-ssh-config",
+    configPath: "/tmp/carapace-openshell-test-ssh-config",
     host: "openshell-test",
   });
   // `sandbox get` succeeds: the sandbox was created by a previous gateway
@@ -177,8 +177,8 @@ describe("openshell remote-mode seed across gateway restart", () => {
 
   it("refreshes materialized skills once per handle, not between remote operations", async () => {
     const skillsWorkspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-openshell-remote-skills-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-openshell-remote-skills-",
     });
     tempWorkspaces.push(skillsWorkspace);
     await fs.mkdir(path.join(skillsWorkspace.dir, "skills", "demo"), { recursive: true });

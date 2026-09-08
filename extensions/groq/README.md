@@ -1,12 +1,12 @@
-# OpenClaw Groq Provider
+# Carapace Groq Provider
 
-Official OpenClaw provider plugin for Groq.
+Official Carapace provider plugin for Groq.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/groq-provider
-openclaw gateway restart
+carapace plugins install @carapace/groq-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/groq> for setup and configuration.
+See <../../docs/providers/groq.md> for setup and configuration.

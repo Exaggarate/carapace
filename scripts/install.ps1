@@ -1,6 +1,6 @@
-# OpenClaw Installer for Windows
-# Usage: powershell -c "irm https://openclaw.ai/install.ps1 | iex"
-#        powershell -c "& ([scriptblock]::Create((irm https://openclaw.ai/install.ps1))) -Tag beta -NoOnboard -DryRun"
+# Carapace Installer for Windows
+# Usage: powershell -c "irm https://github.com/Exaggarate/carapace | iex"
+#        powershell -c "& ([scriptblock]::Create((irm https://github.com/Exaggarate/carapace))) -Tag beta -NoOnboard -DryRun"
 
 [CmdletBinding(PositionalBinding = $false)]
 param(
@@ -20,11 +20,11 @@ if ($Help) {
     @"
 Usage:
   powershell -File install.ps1 [options]
-  & ([scriptblock]::Create((irm https://openclaw.ai/install.ps1))) [options]
+  & ([scriptblock]::Create((irm https://github.com/Exaggarate/carapace))) [options]
 
 Options:
   -InstallMethod npm|git  Install method (default: npm)
-  -Tag <tag|version>      OpenClaw version or dist-tag (default: latest)
+  -Tag <tag|version>      Carapace version or dist-tag (default: latest)
   -GitDir <path>          Git checkout directory
   -NoOnboard              Skip onboarding
   -NoGitUpdate            Skip git pull
@@ -118,7 +118,7 @@ function Complete-Install {
         exit $script:InstallExitCode
     }
 
-    throw "OpenClaw installation failed with exit code $($script:InstallExitCode)."
+    throw "Carapace installation failed with exit code $($script:InstallExitCode)."
 }
 
 function Resolve-InstallerTempDirectory {
@@ -206,40 +206,40 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
 }
 
 if (-not $PSBoundParameters.ContainsKey("InstallMethod")) {
-    if (-not [string]::IsNullOrWhiteSpace($env:OPENCLAW_INSTALL_METHOD)) {
-        $InstallMethod = $env:OPENCLAW_INSTALL_METHOD
+    if (-not [string]::IsNullOrWhiteSpace($env:CARAPACE_INSTALL_METHOD)) {
+        $InstallMethod = $env:CARAPACE_INSTALL_METHOD
     }
 }
 if (-not $PSBoundParameters.ContainsKey("GitDir")) {
-    if (-not [string]::IsNullOrWhiteSpace($env:OPENCLAW_GIT_DIR)) {
-        $GitDir = $env:OPENCLAW_GIT_DIR
+    if (-not [string]::IsNullOrWhiteSpace($env:CARAPACE_GIT_DIR)) {
+        $GitDir = $env:CARAPACE_GIT_DIR
     }
 }
 if (-not $PSBoundParameters.ContainsKey("NoOnboard")) {
-    if ($env:OPENCLAW_NO_ONBOARD -eq "1") {
+    if ($env:CARAPACE_NO_ONBOARD -eq "1") {
         $NoOnboard = $true
     }
 }
 if (-not $PSBoundParameters.ContainsKey("NoGitUpdate")) {
-    if ($env:OPENCLAW_GIT_UPDATE -eq "0") {
+    if ($env:CARAPACE_GIT_UPDATE -eq "0") {
         $NoGitUpdate = $true
     }
 }
 if (-not $PSBoundParameters.ContainsKey("DryRun")) {
-    if ($env:OPENCLAW_DRY_RUN -eq "1") {
+    if ($env:CARAPACE_DRY_RUN -eq "1") {
         $DryRun = $true
     }
 }
 
 if ([string]::IsNullOrWhiteSpace($GitDir)) {
     $userHome = [Environment]::GetFolderPath("UserProfile")
-    $GitDir = (Join-Path $userHome "openclaw")
+    $GitDir = (Join-Path $userHome "carapace")
 }
 
 Initialize-InstallerTempDirectory
 
 Write-Host ""
-Write-Host "  OpenClaw Installer" -ForegroundColor Cyan
+Write-Host "  Carapace Installer" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "[OK] Windows detected" -ForegroundColor Green
 
@@ -250,7 +250,7 @@ function Test-NodeVersionSupported {
     if ([string]::IsNullOrWhiteSpace($Version)) {
         return $false
     }
-    # This standalone installer runs before OpenClaw exists on disk. Mirror the
+    # This standalone installer runs before Carapace exists on disk. Mirror the
     # release grammar in node-version.mjs; parity cases guard this boundary.
     $versionMatch = [regex]::Match(
         $Version,
@@ -371,7 +371,7 @@ function Get-WindowsPortableArchitecture {
     return "x64"
 }
 
-function Get-OpenClawDepsRoot {
+function Get-CarapaceDepsRoot {
     $localAppData = $env:LOCALAPPDATA
     if ([string]::IsNullOrWhiteSpace($localAppData)) {
         $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
@@ -379,11 +379,11 @@ function Get-OpenClawDepsRoot {
     if ([string]::IsNullOrWhiteSpace($localAppData)) {
         $localAppData = Join-Path ([Environment]::GetFolderPath("UserProfile")) "AppData\Local"
     }
-    return (Join-Path $localAppData "OpenClaw\deps")
+    return (Join-Path $localAppData "Carapace\deps")
 }
 
 function Get-PortableNodeRoot {
-    return (Join-Path (Get-OpenClawDepsRoot) "portable-node")
+    return (Join-Path (Get-CarapaceDepsRoot) "portable-node")
 }
 
 function Get-PortableNodeCommandPath {
@@ -413,7 +413,7 @@ function Ensure-PortableNodeOnUserPath {
 
     $nodeDir = Split-Path -Parent $nodeExe
     if (Add-ToUserPath $nodeDir) {
-        Write-Host "[!] Added $nodeDir to user PATH (restart terminal if node or openclaw is not found)" -ForegroundColor Yellow
+        Write-Host "[!] Added $nodeDir to user PATH (restart terminal if node or carapace is not found)" -ForegroundColor Yellow
     }
 }
 
@@ -619,10 +619,10 @@ function Install-Node {
     return $false
 }
 
-# Check for existing OpenClaw installation
-function Check-ExistingOpenClaw {
-    if (Get-OpenClawCommandPath) {
-        Write-Host "[*] Existing OpenClaw installation detected" -ForegroundColor Yellow
+# Check for existing Carapace installation
+function Check-ExistingCarapace {
+    if (Get-CarapaceCommandPath) {
+        Write-Host "[*] Existing Carapace installation detected" -ForegroundColor Yellow
         return $true
     }
     return $false
@@ -718,7 +718,7 @@ function Add-ToUserPath {
 }
 
 function Get-PortableGitRoot {
-    return (Join-Path (Get-OpenClawDepsRoot) "portable-git")
+    return (Join-Path (Get-CarapaceDepsRoot) "portable-git")
 }
 
 function Get-PortableGitCommandPath {
@@ -782,7 +782,7 @@ function Ensure-PortableGitOnUserPath {
 function Resolve-PortableGitDownload {
     $releaseApi = "https://api.github.com/repos/git-for-windows/git/releases/latest"
     $headers = @{
-        "User-Agent" = "openclaw-installer"
+        "User-Agent" = "carapace-installer"
         "Accept" = "application/vnd.github+json"
     }
     $requestTimeouts = Get-WebRequestTimeoutParameters -CommandName "Invoke-RestMethod" -LegacyTimeoutSec 30
@@ -828,7 +828,7 @@ function Install-PortableGit {
     $download = Resolve-PortableGitDownload
     $portableRoot = Get-PortableGitRoot
     $portableParent = Split-Path -Parent $portableRoot
-    $tempName = "openclaw-portable-git-" + [guid]::NewGuid().ToString("N")
+    $tempName = "carapace-portable-git-" + [guid]::NewGuid().ToString("N")
     $tmpZip = Join-Path $script:InstallerTempDirectory ($tempName + ".zip")
     $tmpExtract = Join-Path $script:InstallerTempDirectory $tempName
 
@@ -882,7 +882,7 @@ function Ensure-Git {
     }
 
     Write-Host ""
-    Write-Host "Error: Git is required to install OpenClaw." -ForegroundColor Red
+    Write-Host "Error: Git is required to install Carapace." -ForegroundColor Red
     Write-Host "Auto-bootstrap of user-local Git did not succeed." -ForegroundColor Yellow
     Write-Host "Install Git for Windows manually, then re-run this installer:" -ForegroundColor Yellow
     Write-Host "  https://git-scm.com/download/win" -ForegroundColor Cyan
@@ -898,52 +898,52 @@ function Test-GitFilterSupport {
     }
 }
 
-function Get-OpenClawCommandPath {
-    $openclawCmd = Get-Command openclaw.cmd -ErrorAction SilentlyContinue
-    if ($openclawCmd -and $openclawCmd.Source) {
-        return $openclawCmd.Source
+function Get-CarapaceCommandPath {
+    $carapaceCmd = Get-Command carapace.cmd -ErrorAction SilentlyContinue
+    if ($carapaceCmd -and $carapaceCmd.Source) {
+        return $carapaceCmd.Source
     }
 
-    $openclaw = Get-Command openclaw -ErrorAction SilentlyContinue
-    if ($openclaw -and $openclaw.Source) {
-        return $openclaw.Source
+    $carapace = Get-Command carapace -ErrorAction SilentlyContinue
+    if ($carapace -and $carapace.Source) {
+        return $carapace.Source
     }
 
     return $null
 }
 
-function Invoke-OpenClawCommand {
+function Invoke-CarapaceCommand {
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
         [string[]]$Arguments
     )
 
-    $commandPath = Get-OpenClawCommandPath
+    $commandPath = Get-CarapaceCommandPath
     if (-not $commandPath) {
-        throw "openclaw command not found on PATH."
+        throw "carapace command not found on PATH."
     }
 
     & $commandPath @Arguments
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
-        throw "openclaw $($Arguments -join ' ') failed with exit code $exitCode."
+        throw "carapace $($Arguments -join ' ') failed with exit code $exitCode."
     }
 }
 
-function Invoke-InteractiveOpenClawCommand {
+function Invoke-InteractiveCarapaceCommand {
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
         [string[]]$Arguments
     )
 
-    $commandPath = Get-OpenClawCommandPath
+    $commandPath = Get-CarapaceCommandPath
     if (-not $commandPath) {
-        throw "openclaw command not found on PATH."
+        throw "carapace command not found on PATH."
     }
 
     $process = Start-Process -FilePath $commandPath -ArgumentList $Arguments -NoNewWindow -Wait -PassThru
     if ($process.ExitCode -ne 0) {
-        throw "openclaw $($Arguments -join ' ') failed with exit code $($process.ExitCode)."
+        throw "carapace $($Arguments -join ' ') failed with exit code $($process.ExitCode)."
     }
 }
 
@@ -1042,8 +1042,8 @@ function Get-NpmGlobalBinCandidates {
     return $candidates | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
 }
 
-function Ensure-OpenClawOnPath {
-    if (Get-OpenClawCommandPath) {
+function Ensure-CarapaceOnPath {
+    if (Get-CarapaceCommandPath) {
         return $true
     }
 
@@ -1056,7 +1056,7 @@ function Ensure-OpenClawOnPath {
 
     $npmBins = Get-NpmGlobalBinCandidates -NpmPrefix $npmPrefix
     foreach ($npmBin in $npmBins) {
-        if (-not (Test-Path (Join-Path $npmBin "openclaw.cmd"))) {
+        if (-not (Test-Path (Join-Path $npmBin "carapace.cmd"))) {
             continue
         }
 
@@ -1066,7 +1066,7 @@ function Ensure-OpenClawOnPath {
         return $true
     }
 
-    Write-Host "[!] openclaw is not on PATH yet." -ForegroundColor Yellow
+    Write-Host "[!] carapace is not on PATH yet." -ForegroundColor Yellow
     Write-Host "Restart PowerShell or add the npm global install folder to PATH." -ForegroundColor Yellow
     if ($npmBins.Count -gt 0) {
         Write-Host "Expected path (one of):" -ForegroundColor Gray
@@ -1179,7 +1179,7 @@ function Ensure-Pnpm {
     return $pnpmCommand
 }
 
-# Install OpenClaw
+# Install Carapace
 function Resolve-LocalNpmPackagePath {
     param([string]$PackagePath)
 
@@ -1226,7 +1226,7 @@ function Resolve-LocalNpmPackageInstallSpec {
     }
 }
 
-function Resolve-NpmOpenClawInstallSpec {
+function Resolve-NpmCarapaceInstallSpec {
     param(
         [string]$PackageName,
         [string]$RequestedTag
@@ -1251,7 +1251,7 @@ function Resolve-NpmOpenClawInstallSpec {
     return "$PackageName@$trimmedTag"
 }
 
-function Test-OpenClawSourcePackageInstallSpec {
+function Test-CarapaceSourcePackageInstallSpec {
     param([string]$RequestedTag)
 
     if ([string]::IsNullOrWhiteSpace($RequestedTag)) {
@@ -1259,14 +1259,14 @@ function Test-OpenClawSourcePackageInstallSpec {
     }
 
     $normalizedTag = $RequestedTag.Trim().ToLowerInvariant()
-    if ($normalizedTag.StartsWith("openclaw@")) {
-        $normalizedTag = $normalizedTag.Substring("openclaw@".Length)
+    if ($normalizedTag.StartsWith("carapace@")) {
+        $normalizedTag = $normalizedTag.Substring("carapace@".Length)
     }
 
     if ($normalizedTag -eq "main") {
         return $true
     }
-    if ($normalizedTag -match '^github:openclaw/openclaw($|[#/])') {
+    if ($normalizedTag -match '^github:carapace/carapace($|[#/])') {
         return $true
     }
 
@@ -1274,10 +1274,10 @@ function Test-OpenClawSourcePackageInstallSpec {
         $normalizedTag = $normalizedTag.Substring("git+".Length)
     }
     return (
-        $normalizedTag -match '^https?://github\.com/openclaw/openclaw(\.git)?($|[?#])' -or
-        $normalizedTag -match '^ssh://git@github\.com[:/]openclaw/openclaw(\.git)?($|[?#])' -or
-        $normalizedTag -match '^git://github\.com/openclaw/openclaw(\.git)?($|[?#])' -or
-        $normalizedTag -match '^git@github\.com:openclaw/openclaw(\.git)?($|[?#])'
+        $normalizedTag -match '^https?://github\.com/carapace/carapace(\.git)?($|[?#])' -or
+        $normalizedTag -match '^ssh://git@github\.com[:/]carapace/carapace(\.git)?($|[?#])' -or
+        $normalizedTag -match '^git://github\.com/carapace/carapace(\.git)?($|[?#])' -or
+        $normalizedTag -match '^git@github\.com:carapace/carapace(\.git)?($|[?#])'
     )
 }
 
@@ -1475,9 +1475,9 @@ const fail = (message) => { process.stderr.write(`${message}\n`); process.exit(1
 if (!parsed) fail("Unable to determine npm version; no package changes were made.");
 if (+parsed[1] < 12 && (+parsed[1] !== 11 || +parsed[2] < 16)) process.exit(0);
 const normalized = spec.trim();
-const unaliased = normalized.toLowerCase().startsWith("openclaw@") ? normalized.slice(9).trim() : normalized;
+const unaliased = normalized.toLowerCase().startsWith("carapace@") ? normalized.slice(9).trim() : normalized;
 const explicit = (value) => /\.(?:tgz|tar\.gz)$/i.test(value) || value.includes("://") || value.includes("#") || /^(?:file|github|git\+(?:ssh|https|http|file)|npm):/i.test(value);
-let identity = !normalized || explicit(normalized) || explicit(unaliased) || /^\.{1,2}(?:[\\/]|$)/.test(unaliased) || path.isAbsolute(normalized) || path.isAbsolute(unaliased) ? unaliased : "openclaw";
+let identity = !normalized || explicit(normalized) || explicit(unaliased) || /^\.{1,2}(?:[\\/]|$)/.test(unaliased) || path.isAbsolute(normalized) || path.isAbsolute(unaliased) ? unaliased : "carapace";
 const alias = /^npm:/i.test(identity);
 if (alias) identity = /^npm:(@[^/]+\/[^@]+|[^@]+?)(?:@.*)?$/i.exec(identity)?.[1] ?? "";
 const filePrefix = /^file:/i.test(identity) ? "file:" : "";
@@ -1529,13 +1529,13 @@ function Test-NpmLifecycleCompleted {
     if ([string]::IsNullOrWhiteSpace($npmRoot)) {
         return $false
     }
-    $entryPath = Join-Path $npmRoot "openclaw\dist\entry.js"
-    $pendingPath = Join-Path $npmRoot "openclaw\.openclaw-lifecycle-pending"
-    $legacyGuardPath = Join-Path $npmRoot "openclaw\dist\openclaw-install-guard"
+    $entryPath = Join-Path $npmRoot "carapace\dist\entry.js"
+    $pendingPath = Join-Path $npmRoot "carapace\.carapace-lifecycle-pending"
+    $legacyGuardPath = Join-Path $npmRoot "carapace\dist\carapace-install-guard"
     return (Test-Path -LiteralPath $entryPath -PathType Leaf) -and -not (Test-Path -LiteralPath $pendingPath) -and -not (Test-Path -LiteralPath $legacyGuardPath)
 }
 
-function Format-OpenClawGitWrapper {
+function Format-CarapaceGitWrapper {
     param([string]$EntryPath)
     return "@echo off`r`nnode `"$EntryPath`" %*`r`n"
 }
@@ -1547,7 +1547,7 @@ function Publish-TextFileAtomically {
     )
     $directory = Split-Path -Parent $Path
     New-Item -ItemType Directory -Force -Path $directory | Out-Null
-    $temporaryPath = Join-Path $directory (".openclaw-wrapper-" + [guid]::NewGuid().ToString("N") + ".cmd")
+    $temporaryPath = Join-Path $directory (".carapace-wrapper-" + [guid]::NewGuid().ToString("N") + ".cmd")
     $encoding = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText($temporaryPath, $Contents, $encoding)
     try {
@@ -1563,12 +1563,12 @@ function Publish-TextFileAtomically {
     }
 }
 
-function Install-OpenClaw {
+function Install-Carapace {
     if ([string]::IsNullOrWhiteSpace($Tag)) {
         $Tag = "latest"
     }
-    if (Test-OpenClawSourcePackageInstallSpec -RequestedTag $Tag) {
-        Write-Host "Error: npm installs do not support OpenClaw GitHub source targets like '$Tag'." -ForegroundColor Red
+    if (Test-CarapaceSourcePackageInstallSpec -RequestedTag $Tag) {
+        Write-Host "Error: npm installs do not support Carapace GitHub source targets like '$Tag'." -ForegroundColor Red
         Write-Host "Use -InstallMethod git -Tag main for the moving main checkout, or use latest, beta, an exact version, or a built .tgz package." -ForegroundColor Yellow
         return $false
     }
@@ -1576,16 +1576,16 @@ function Install-OpenClaw {
         return $false
     }
 
-    # Use openclaw package for beta, openclaw for stable
-    $packageName = "openclaw"
+    # Use carapace package for beta, carapace for stable
+    $packageName = "carapace"
     if ($Tag -eq "beta" -or $Tag -match "^beta\.") {
-        $packageName = "openclaw"
+        $packageName = "carapace"
     }
-    $installSpec = Resolve-NpmOpenClawInstallSpec -PackageName $packageName -RequestedTag $Tag
+    $installSpec = Resolve-NpmCarapaceInstallSpec -PackageName $packageName -RequestedTag $Tag
     $npmCommand = Get-NpmCommandPath
     $npmCwd = Get-WindowsCommandSafeDirectory
     $lifecycleArgument = Get-NpmLifecycleAllowArgument -NpmCommand $npmCommand -InstallSpec $installSpec -NpmCwd $npmCwd
-    Write-Host "[*] Installing OpenClaw ($installSpec)..." -ForegroundColor Yellow
+    Write-Host "[*] Installing Carapace ($installSpec)..." -ForegroundColor Yellow
     $freshnessArgs = @("--min-release-age=0")
     $minReleaseAge = (Invoke-NpmCommand -CommandPath $npmCommand -WorkingDirectory $npmCwd -Arguments @("config", "get", "min-release-age", "--global") 2>$null)
     $minReleaseAgeStatus = $LASTEXITCODE
@@ -1629,13 +1629,13 @@ function Install-OpenClaw {
                 Write-Host "  https://git-scm.com/download/win" -ForegroundColor Cyan
             } else {
                 Write-Host "Re-run with verbose output to see the full error:" -ForegroundColor Yellow
-                Write-Host '  powershell -c "irm https://openclaw.ai/install.ps1 | iex"' -ForegroundColor Cyan
+                Write-Host '  powershell -c "irm https://github.com/Exaggarate/carapace | iex"' -ForegroundColor Cyan
             }
             Write-NpmInstallFailureDetails -Output $npmOutput -CacheRoots $npmDebugLogRoots
             return $false
         }
         if (-not (Test-NpmLifecycleCompleted -NpmCommand $npmCommand -NpmCwd $npmCwd)) {
-            Write-Host "[!] npm install did not produce a usable OpenClaw package; lifecycle scripts may not have completed." -ForegroundColor Red
+            Write-Host "[!] npm install did not produce a usable Carapace package; lifecycle scripts may not have completed." -ForegroundColor Red
             return $false
         }
     } finally {
@@ -1646,11 +1646,11 @@ function Install-OpenClaw {
         $env:NPM_CONFIG_BEFORE = $prevBefore
         $env:NPM_CONFIG_MIN_RELEASE_AGE = $prevMinReleaseAge
     }
-    Write-Host "[OK] OpenClaw installed" -ForegroundColor Green
+    Write-Host "[OK] Carapace installed" -ForegroundColor Green
     return $true
 }
 
-# Install OpenClaw from GitHub
+# Install Carapace from GitHub
 function Assert-GitCheckoutHasCommit {
     param([string]$RepoDir)
 
@@ -1707,7 +1707,7 @@ function New-TransactionalGitCheckout {
     $preserveRepoDir = (Test-Path -LiteralPath $RepoDir -PathType Container) -and
         @(Get-ChildItem -LiteralPath $RepoDir -Force).Count -eq 0
     $stagingParent = if ($preserveRepoDir) { $RepoDir } else { $parentDir }
-    $stagingDir = Join-Path $stagingParent (".openclaw-clone-" + [guid]::NewGuid().ToString("N"))
+    $stagingDir = Join-Path $stagingParent (".carapace-clone-" + [guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Path $stagingDir | Out-Null
     $retainStaging = $false
 
@@ -1766,7 +1766,7 @@ function New-TransactionalGitCheckout {
     }
 }
 
-function Install-OpenClawFromGit {
+function Install-CarapaceFromGit {
     param(
         [string]$RepoDir,
         [switch]$SkipUpdate
@@ -1776,8 +1776,8 @@ function Install-OpenClawFromGit {
     }
 
     $RepoDir = Resolve-GitCheckoutPath -RepoDir $RepoDir
-    $repoUrl = "https://github.com/openclaw/openclaw.git"
-    Write-Host "[*] Installing OpenClaw from GitHub ($repoUrl)..." -ForegroundColor Yellow
+    $repoUrl = "https://github.com/Exaggarate/carapace.git"
+    Write-Host "[*] Installing Carapace from GitHub ($repoUrl)..." -ForegroundColor Yellow
 
     Assert-GitCheckoutHasCommit -RepoDir $RepoDir
     if (-not (Test-Path $RepoDir) -or @(Get-ChildItem -LiteralPath $RepoDir -Force).Count -eq 0) {
@@ -1806,7 +1806,7 @@ function Install-OpenClawFromGit {
     $prevPnpmVerifyDepsBeforeRun = $env:PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN
     $prevPnpmSideEffectsCache = $env:PNPM_CONFIG_SIDE_EFFECTS_CACHE
     $prevNodeOptions = $env:NODE_OPTIONS
-    $pnpmInstallDirectory = Join-Path $script:InstallerTempDirectory ("openclaw-pnpm-" + [Guid]::NewGuid().ToString("N"))
+    $pnpmInstallDirectory = Join-Path $script:InstallerTempDirectory ("carapace-pnpm-" + [Guid]::NewGuid().ToString("N"))
     $previousPnpmContext = foreach ($name in @("PATH", "COREPACK_ENABLE_DOWNLOAD_PROMPT", "NPM_CONFIG_WORKSPACE_DIR", "npm_config_workspace_dir", "PNPM_CONFIG_LOCKFILE_DIR", "pnpm_config_lockfile_dir")) {
         [PSCustomObject]@{ Name = $name; Value = [Environment]::GetEnvironmentVariable($name, "Process") }
     }
@@ -1887,7 +1887,7 @@ function Install-OpenClawFromGit {
 
     $entryPath = Join-Path $RepoDir "dist\\entry.js"
     if (-not (Test-Path $entryPath)) {
-        Write-Host "[!] OpenClaw build did not produce $entryPath" -ForegroundColor Red
+        Write-Host "[!] Carapace build did not produce $entryPath" -ForegroundColor Red
         return $false
     }
 
@@ -1900,16 +1900,16 @@ function Install-OpenClawFromGit {
         Write-Host "[!] Git replacement failed CLI verification" -ForegroundColor Red
         return $false
     }
-    $cmdPath = Join-Path $binDir "openclaw.cmd"
-    $cmdContents = Format-OpenClawGitWrapper -EntryPath $entryPath
+    $cmdPath = Join-Path $binDir "carapace.cmd"
+    $cmdContents = Format-CarapaceGitWrapper -EntryPath $entryPath
     Publish-TextFileAtomically -Path $cmdPath -Contents $cmdContents
 
     if (Add-ToUserPath $binDir) {
         Write-Host "[!] Added $binDir to user PATH (restart terminal if command not found)" -ForegroundColor Yellow
     }
 
-    Write-Host "[OK] OpenClaw wrapper installed to $cmdPath" -ForegroundColor Green
-    Write-Host "[i] Manual builds need the checkout-pinned pnpm launcher; installer bootstrap is temporary: https://docs.openclaw.ai/install/installer#source-build-toolchain" -ForegroundColor Gray
+    Write-Host "[OK] Carapace wrapper installed to $cmdPath" -ForegroundColor Green
+    Write-Host "[i] Manual builds need the checkout-pinned pnpm launcher; installer bootstrap is temporary: https://github.com/Exaggarate/carapace#source-build-toolchain" -ForegroundColor Gray
     return $true
 }
 
@@ -1917,7 +1917,7 @@ function Install-OpenClawFromGit {
 function Run-Doctor {
     Write-Host "[*] Running doctor to migrate settings..." -ForegroundColor Yellow
     try {
-        Invoke-OpenClawCommand doctor --fix --non-interactive
+        Invoke-CarapaceCommand doctor --fix --non-interactive
         Write-Host "[OK] Migration complete" -ForegroundColor Green
         return $true
     } catch {
@@ -1928,7 +1928,7 @@ function Run-Doctor {
 
 function Test-GatewayServiceLoaded {
     try {
-        $statusJson = (Invoke-OpenClawCommand daemon status --json 2>$null)
+        $statusJson = (Invoke-CarapaceCommand daemon status --json 2>$null)
         if ([string]::IsNullOrWhiteSpace($statusJson)) {
             return $false
         }
@@ -1943,7 +1943,7 @@ function Test-GatewayServiceLoaded {
 }
 
 function Refresh-GatewayServiceIfLoaded {
-    if (-not (Get-OpenClawCommandPath)) {
+    if (-not (Get-CarapaceCommandPath)) {
         return
     }
     if (-not (Test-GatewayServiceLoaded)) {
@@ -1952,27 +1952,27 @@ function Refresh-GatewayServiceIfLoaded {
 
     Write-Host "[*] Refreshing loaded gateway service..." -ForegroundColor Yellow
     try {
-        Invoke-OpenClawCommand gateway install --force | Out-Null
+        Invoke-CarapaceCommand gateway install --force | Out-Null
     } catch {
         Write-Host "[!] Gateway service refresh failed; continuing." -ForegroundColor Yellow
         return
     }
 
     try {
-        Invoke-OpenClawCommand gateway restart | Out-Null
-        Invoke-OpenClawCommand gateway status --json | Out-Null
+        Invoke-CarapaceCommand gateway restart | Out-Null
+        Invoke-CarapaceCommand gateway status --json | Out-Null
         Write-Host "[OK] Gateway service refreshed" -ForegroundColor Green
     } catch {
-        Write-Host "[!] Gateway service restart failed; continuing. Run: openclaw gateway restart" -ForegroundColor Yellow
+        Write-Host "[!] Gateway service restart failed; continuing. Run: carapace gateway restart" -ForegroundColor Yellow
     }
 }
 
 function Get-LegacyRepoDir {
-    if (-not [string]::IsNullOrWhiteSpace($env:OPENCLAW_GIT_DIR)) {
-        return $env:OPENCLAW_GIT_DIR
+    if (-not [string]::IsNullOrWhiteSpace($env:CARAPACE_GIT_DIR)) {
+        return $env:CARAPACE_GIT_DIR
     }
     $userHome = [Environment]::GetFolderPath("UserProfile")
-    return (Join-Path $userHome "openclaw")
+    return (Join-Path $userHome "carapace")
 }
 
 function Remove-LegacySubmodule {
@@ -1990,14 +1990,14 @@ function Remove-LegacySubmodule {
 }
 
 function Test-PreviousGitWrapper {
-    $wrapper = Join-Path (Join-Path $env:USERPROFILE ".local\bin") "openclaw.cmd"
+    $wrapper = Join-Path (Join-Path $env:USERPROFILE ".local\bin") "carapace.cmd"
     if (-not (Test-Path -LiteralPath $wrapper -PathType Leaf)) { return $false }
     return ([System.IO.File]::ReadAllText($wrapper) -match '^@echo off\r?\nnode ".+[\\/]dist[\\/]entry\.js" %\*\r?\n?$')
 }
 
 function Remove-PreviousGitWrapper {
     if (Test-PreviousGitWrapper) {
-        $wrapper = Join-Path (Join-Path $env:USERPROFILE ".local\bin") "openclaw.cmd"
+        $wrapper = Join-Path (Join-Path $env:USERPROFILE ".local\bin") "carapace.cmd"
         Remove-Item -LiteralPath $wrapper -Force
         Write-Host "[OK] Previous git wrapper retired" -ForegroundColor Green
     }
@@ -2008,18 +2008,18 @@ function Remove-PreviousNpmOwner {
     $npmCommand = Get-NpmCommandPath
     $rootOutput = @(Invoke-NpmCommand -CommandPath $npmCommand -Arguments @("root", "-g") 2>$null)
     if ($LASTEXITCODE -ne 0 -or $rootOutput.Count -eq 0) { throw "Could not resolve the previous npm owner." }
-    $packageRoot = Join-Path $rootOutput[-1].ToString().Trim() "openclaw"
+    $packageRoot = Join-Path $rootOutput[-1].ToString().Trim() "carapace"
     $packageJson = Join-Path $packageRoot "package.json"
     if (-not (Test-Path -LiteralPath $packageJson)) { return }
     $package = Get-Content -LiteralPath $packageJson -Raw | ConvertFrom-Json
-    if ($package.name -ne "openclaw") { throw "Refusing to retire a package whose identity is not openclaw." }
+    if ($package.name -ne "carapace") { throw "Refusing to retire a package whose identity is not carapace." }
     $prefixOutput = @(Invoke-NpmCommand -CommandPath $npmCommand -Arguments @("config", "get", "prefix") 2>$null)
-    $npmShim = if ($prefixOutput.Count -gt 0) { Join-Path $prefixOutput[-1].ToString().Trim() "openclaw.cmd" } else { $null }
+    $npmShim = if ($prefixOutput.Count -gt 0) { Join-Path $prefixOutput[-1].ToString().Trim() "carapace.cmd" } else { $null }
     if ($npmShim -and [System.IO.Path]::GetFullPath($npmShim) -eq [System.IO.Path]::GetFullPath($GitWrapper)) {
         Remove-Item -LiteralPath $packageRoot -Recurse -Force
     } else {
-        Invoke-NpmCommand -CommandPath $npmCommand -Arguments @("uninstall", "-g", "openclaw") | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "npm could not retire the previous OpenClaw package." }
+        Invoke-NpmCommand -CommandPath $npmCommand -Arguments @("uninstall", "-g", "carapace") | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "npm could not retire the previous Carapace package." }
     }
     Write-Host "[OK] Previous npm install retired" -ForegroundColor Green
 }
@@ -2029,12 +2029,12 @@ function Start-NpmShimBackup {
         [string]$Path,
         [string]$ExpectedLauncher
     )
-    $backupPath = Join-Path (Split-Path -Parent $Path) (".openclaw-shim-backup-" + [guid]::NewGuid().ToString("N"))
+    $backupPath = Join-Path (Split-Path -Parent $Path) (".carapace-shim-backup-" + [guid]::NewGuid().ToString("N"))
     [System.IO.File]::Move($Path, $backupPath)
     return [pscustomobject]@{ Path = $Path; BackupPath = $backupPath; ExpectedLauncher = $ExpectedLauncher }
 }
 
-function Test-NpmOpenClawCmdShim {
+function Test-NpmCarapaceCmdShim {
     param(
         [string]$Path,
         [string]$ExpectedLauncher
@@ -2054,7 +2054,7 @@ function Restore-NpmShimBackup {
     param([object]$Backup)
     if (-not $Backup -or -not (Test-Path -LiteralPath $Backup.BackupPath -PathType Leaf)) { return }
     if (Test-Path -LiteralPath $Backup.Path) {
-        if (-not (Test-NpmOpenClawCmdShim -Path $Backup.Path -ExpectedLauncher $Backup.ExpectedLauncher)) {
+        if (-not (Test-NpmCarapaceCmdShim -Path $Backup.Path -ExpectedLauncher $Backup.ExpectedLauncher)) {
             throw "Refusing to replace an unrelated file while restoring $($Backup.Path)."
         }
         Remove-Item -LiteralPath $Backup.Path -Force
@@ -2095,7 +2095,7 @@ function Main {
     }
 
     # Check for existing installation
-    $isUpgrade = Check-ExistingOpenClaw
+    $isUpgrade = Check-ExistingCarapace
 
     # Step 1: Node.js
     if (-not (Check-Node)) {
@@ -2116,24 +2116,24 @@ function Main {
 
     $finalGitDir = $null
 
-    # Step 2: OpenClaw
+    # Step 2: Carapace
     if ($InstallMethod -eq "git") {
         $hadNpmOwner = $false
         try {
             $npmCommand = Get-NpmCommandPath
             if ($npmCommand) {
-                Invoke-NpmCommand -CommandPath $npmCommand -Arguments @("list", "-g", "openclaw") 2>$null | Out-Null
+                Invoke-NpmCommand -CommandPath $npmCommand -Arguments @("list", "-g", "carapace") 2>$null | Out-Null
                 $hadNpmOwner = ($LASTEXITCODE -eq 0)
             }
         } catch { }
         $finalGitDir = $GitDir
-        $gitInstallResults = @(Install-OpenClawFromGit -RepoDir $GitDir -SkipUpdate:$NoGitUpdate)
+        $gitInstallResults = @(Install-CarapaceFromGit -RepoDir $GitDir -SkipUpdate:$NoGitUpdate)
         if (-not (Test-BooleanSuccessResult -Results $gitInstallResults)) {
             Fail-Install
             return
         }
         if ($hadNpmOwner) {
-            Remove-PreviousNpmOwner -GitWrapper (Join-Path (Join-Path $env:USERPROFILE ".local\bin") "openclaw.cmd")
+            Remove-PreviousNpmOwner -GitWrapper (Join-Path (Join-Path $env:USERPROFILE ".local\bin") "carapace.cmd")
         }
     } else {
         $hadGitWrapper = Test-PreviousGitWrapper
@@ -2143,24 +2143,24 @@ function Main {
             $npmCwd = Get-WindowsCommandSafeDirectory
             $prefixOutput = @(Invoke-NpmCommand -CommandPath $npmCommand -WorkingDirectory $npmCwd -Arguments @("config", "get", "prefix") 2>$null)
             $npmPrefix = if ($prefixOutput.Count -gt 0) { $prefixOutput[-1].ToString().Trim() } else { $null }
-            $previousGitWrapper = Join-Path (Join-Path $env:USERPROFILE ".local\bin") "openclaw.cmd"
+            $previousGitWrapper = Join-Path (Join-Path $env:USERPROFILE ".local\bin") "carapace.cmd"
             if ($hadGitWrapper) {
                 foreach ($npmBin in (Get-NpmGlobalBinCandidates -NpmPrefix $npmPrefix)) {
-                    $candidate = Join-Path $npmBin "openclaw.cmd"
+                    $candidate = Join-Path $npmBin "carapace.cmd"
                     if ([string]::Equals([System.IO.Path]::GetFullPath($candidate), [System.IO.Path]::GetFullPath($previousGitWrapper), [System.StringComparison]::OrdinalIgnoreCase)) {
                         $rootOutput = @(Invoke-NpmCommand -CommandPath $npmCommand -WorkingDirectory $npmCwd -Arguments @("root", "-g") 2>$null)
                         if ($LASTEXITCODE -ne 0 -or $rootOutput.Count -eq 0) {
                             Fail-Install
                             return
                         }
-                        $expectedNpmLauncher = Join-Path $rootOutput[-1].ToString().Trim() "openclaw\openclaw.mjs"
+                        $expectedNpmLauncher = Join-Path $rootOutput[-1].ToString().Trim() "carapace\carapace.mjs"
                         $npmShimBackup = Start-NpmShimBackup -Path $previousGitWrapper -ExpectedLauncher $expectedNpmLauncher
                         break
                     }
                 }
             }
 
-            $npmInstallResults = @(Install-OpenClaw)
+            $npmInstallResults = @(Install-Carapace)
             if (-not (Test-BooleanSuccessResult -Results $npmInstallResults)) {
                 Fail-Install
                 return
@@ -2169,7 +2169,7 @@ function Main {
                 $npmCandidate = if ($npmShimBackup) { $npmShimBackup.Path } else {
                     $candidatePath = $null
                     foreach ($npmBin in (Get-NpmGlobalBinCandidates -NpmPrefix $npmPrefix)) {
-                        $candidate = Join-Path $npmBin "openclaw.cmd"
+                        $candidate = Join-Path $npmBin "carapace.cmd"
                         if (Test-Path -LiteralPath $candidate -PathType Leaf) { $candidatePath = $candidate; break }
                     }
                     $candidatePath
@@ -2194,9 +2194,9 @@ function Main {
         }
     }
 
-    if (-not (Ensure-OpenClawOnPath)) {
-        Write-Host "Install completed, but OpenClaw is not on PATH yet." -ForegroundColor Yellow
-        Write-Host "Open a new terminal, then run: openclaw doctor" -ForegroundColor Cyan
+    if (-not (Ensure-CarapaceOnPath)) {
+        Write-Host "Install completed, but Carapace is not on PATH yet." -ForegroundColor Yellow
+        Write-Host "Open a new terminal, then run: carapace doctor" -ForegroundColor Cyan
         return
     }
 
@@ -2213,15 +2213,15 @@ function Main {
 
     $installedVersion = $null
     try {
-        $installedVersion = (Invoke-OpenClawCommand --version 2>$null).Trim()
+        $installedVersion = (Invoke-CarapaceCommand --version 2>$null).Trim()
     } catch {
         $installedVersion = $null
     }
     if (-not $installedVersion) {
         try {
             $npmList = Invoke-NpmCommand -Arguments @("list", "-g", "--depth", "0", "--json") 2>$null | ConvertFrom-Json
-            if ($npmList -and $npmList.dependencies -and $npmList.dependencies.openclaw -and $npmList.dependencies.openclaw.version) {
-                $installedVersion = $npmList.dependencies.openclaw.version
+            if ($npmList -and $npmList.dependencies -and $npmList.dependencies.carapace -and $npmList.dependencies.carapace.version) {
+                $installedVersion = $npmList.dependencies.carapace.version
             }
         } catch {
             $installedVersion = $null
@@ -2230,9 +2230,9 @@ function Main {
 
     Write-Host ""
     if ($installedVersion) {
-        Write-Host "OpenClaw installed successfully ($installedVersion)!" -ForegroundColor Green
+        Write-Host "Carapace installed successfully ($installedVersion)!" -ForegroundColor Green
     } else {
-        Write-Host "OpenClaw installed successfully!" -ForegroundColor Green
+        Write-Host "Carapace installed successfully!" -ForegroundColor Green
     }
     Write-Host ""
     if ($isUpgrade) {
@@ -2279,7 +2279,7 @@ function Main {
 
     if ($InstallMethod -eq "git") {
         Write-Host "Source checkout: $finalGitDir" -ForegroundColor Cyan
-        Write-Host "Wrapper: $env:USERPROFILE\\.local\\bin\\openclaw.cmd" -ForegroundColor Cyan
+        Write-Host "Wrapper: $env:USERPROFILE\\.local\\bin\\carapace.cmd" -ForegroundColor Cyan
         Write-Host ""
     }
 
@@ -2288,12 +2288,12 @@ function Main {
     } else {
         if ($NoOnboard) {
             Write-Host "Skipping onboard (requested). Run " -NoNewline
-            Write-Host "openclaw onboard" -ForegroundColor Cyan -NoNewline
+            Write-Host "carapace onboard" -ForegroundColor Cyan -NoNewline
             Write-Host " later."
         } else {
             Write-Host "Starting setup..." -ForegroundColor Cyan
             Write-Host ""
-            Invoke-InteractiveOpenClawCommand onboard
+            Invoke-InteractiveCarapaceCommand onboard
         }
     }
 

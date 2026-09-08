@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { listGitWorktrees } from "./git.js";
 import { ManagedWorktreeService, SNAPSHOT_RETENTION_MS } from "./service.js";
 
@@ -27,24 +27,24 @@ describe("ManagedWorktreeService orphan reconciliation", () => {
 
   beforeEach(async () => {
     root = await fs.mkdtemp(
-      path.join(await fs.realpath(os.tmpdir()), "openclaw-worktree-orphans-"),
+      path.join(await fs.realpath(os.tmpdir()), "carapace-worktree-orphans-"),
     );
     repo = path.join(root, "repo");
     stateDir = path.join(root, "state");
     await fs.mkdir(repo, { recursive: true });
     await fs.mkdir(stateDir, { recursive: true });
     await git(repo, "init", "-b", "main");
-    await git(repo, "config", "user.name", "OpenClaw Test");
-    await git(repo, "config", "user.email", "openclaw-test@example.invalid");
+    await git(repo, "config", "user.name", "Carapace Test");
+    await git(repo, "config", "user.email", "carapace-test@example.invalid");
     await fs.writeFile(path.join(repo, "README.md"), "base\n");
     await git(repo, "add", "README.md");
     await git(repo, "commit", "-m", "initial");
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     service = new ManagedWorktreeService({ env });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -130,7 +130,7 @@ describe("ManagedWorktreeService orphan reconciliation", () => {
     const target = path.join(fingerprint, "a-broken-checkout");
     const debris = path.join(fingerprint, "z-plain-debris");
     await fs.mkdir(path.join(target, "payload"), { recursive: true });
-    await fs.writeFile(path.join(target, ".git"), "gitdir: /missing/openclaw-worktree-control\n");
+    await fs.writeFile(path.join(target, ".git"), "gitdir: /missing/carapace-worktree-control\n");
     await fs.writeFile(path.join(target, "payload", "keep.txt"), "uncertain\n");
     await fs.mkdir(debris, { recursive: true });
     await fs.writeFile(path.join(debris, "remove.txt"), "debris\n");
@@ -153,7 +153,7 @@ describe("ManagedWorktreeService orphan reconciliation", () => {
       const linkedStateDir = path.join(root, "linked-state");
       await fs.mkdir(realStateDir);
       await fs.symlink(realStateDir, linkedStateDir, "dir");
-      env = { ...process.env, OPENCLAW_STATE_DIR: linkedStateDir };
+      env = { ...process.env, CARAPACE_STATE_DIR: linkedStateDir };
       service = new ManagedWorktreeService({ env });
       const target = path.join(realStateDir, "worktrees", "fingerprint", "nested-via-symlink");
       await addRegisteredWorktree(target, "committed");

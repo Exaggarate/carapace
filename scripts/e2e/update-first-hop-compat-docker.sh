@@ -6,22 +6,22 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
-if [ "${OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP:-0}" != "1" ]; then
-  echo "blocked destructive package self-update; set OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP=1 to run" >&2
+if [ "${CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP:-0}" != "1" ]; then
+  echo "blocked destructive package self-update; set CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP=1 to run" >&2
   exit 2
 fi
 
 IMAGE_NAME="$(
   docker_e2e_resolve_image \
-    "openclaw-update-first-hop-compat-e2e" \
-    OPENCLAW_UPDATE_FIRST_HOP_E2E_IMAGE
+    "carapace-update-first-hop-compat-e2e" \
+    CARAPACE_UPDATE_FIRST_HOP_E2E_IMAGE
 )"
-SKIP_BUILD="${OPENCLAW_UPDATE_FIRST_HOP_E2E_SKIP_BUILD:-0}"
-DOCKER_RUN_TIMEOUT="${OPENCLAW_UPDATE_FIRST_HOP_DOCKER_RUN_TIMEOUT:-1200s}"
-ARTIFACT_DIR="${OPENCLAW_UPDATE_FIRST_HOP_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/update-first-hop-compat}"
-SOURCE_PACKAGE="${OPENCLAW_UPDATE_FIRST_HOP_SOURCE_PACKAGE_TGZ:-}"
-EXPECTED_MISSING_CHUNK="${OPENCLAW_UPDATE_FIRST_HOP_EXPECTED_MISSING_CHUNK:-shared-Y6bNiw2w.js}"
-FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-update-first-hop.XXXXXX")"
+SKIP_BUILD="${CARAPACE_UPDATE_FIRST_HOP_E2E_SKIP_BUILD:-0}"
+DOCKER_RUN_TIMEOUT="${CARAPACE_UPDATE_FIRST_HOP_DOCKER_RUN_TIMEOUT:-1200s}"
+ARTIFACT_DIR="${CARAPACE_UPDATE_FIRST_HOP_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/update-first-hop-compat}"
+SOURCE_PACKAGE="${CARAPACE_UPDATE_FIRST_HOP_SOURCE_PACKAGE_TGZ:-}"
+EXPECTED_MISSING_CHUNK="${CARAPACE_UPDATE_FIRST_HOP_EXPECTED_MISSING_CHUNK:-shared-Y6bNiw2w.js}"
+FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/carapace-update-first-hop.XXXXXX")"
 PACKAGE_TGZ=""
 
 cleanup() {
@@ -37,7 +37,7 @@ mkdir -p "$ARTIFACT_DIR" "$FIXTURE_ROOT/source" "$FIXTURE_ROOT/packages"
 chmod -R a+rwX "$ARTIFACT_DIR" || true
 
 if [ -z "$SOURCE_PACKAGE" ]; then
-  npm pack openclaw@2026.8.2 \
+  npm pack carapace@2026.8.2 \
     --ignore-scripts \
     --json \
     --min-release-age=0 \
@@ -60,9 +60,9 @@ fi
 PACKAGE_TGZ="$(
   docker_e2e_prepare_package_tgz \
     update-first-hop-compat \
-    "${OPENCLAW_UPDATE_FIRST_HOP_CANDIDATE_PACKAGE_TGZ:-}"
+    "${CARAPACE_UPDATE_FIRST_HOP_CANDIDATE_PACKAGE_TGZ:-}"
 )"
-docker_e2e_package_mount_args "$PACKAGE_TGZ" /tmp/openclaw-update-first-hop-candidate.tgz
+docker_e2e_package_mount_args "$PACKAGE_TGZ" /tmp/carapace-update-first-hop-candidate.tgz
 
 mkdir -p "$FIXTURE_ROOT/packages/negative" "$FIXTURE_ROOT/packages/future"
 tar -xzf "$PACKAGE_TGZ" -C "$FIXTURE_ROOT/packages/negative"
@@ -100,14 +100,14 @@ docker_e2e_build_or_reuse \
 
 echo "Running packaged updater first-hop compatibility Docker E2E..."
 docker_e2e_run_with_harness \
-  -e OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP=1 \
-  -e OPENCLAW_UPDATE_FIRST_HOP_ARTIFACT_DIR=/tmp/openclaw-update-first-hop-artifacts \
-  -e OPENCLAW_UPDATE_FIRST_HOP_EXPECTED_MISSING_CHUNK="$EXPECTED_MISSING_CHUNK" \
-  -v "$ARTIFACT_DIR:/tmp/openclaw-update-first-hop-artifacts" \
-  -v "$(docker_e2e_abs_path "$SOURCE_PACKAGE"):/tmp/openclaw-update-first-hop-source.tgz:ro" \
+  -e CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP=1 \
+  -e CARAPACE_UPDATE_FIRST_HOP_ARTIFACT_DIR=/tmp/carapace-update-first-hop-artifacts \
+  -e CARAPACE_UPDATE_FIRST_HOP_EXPECTED_MISSING_CHUNK="$EXPECTED_MISSING_CHUNK" \
+  -v "$ARTIFACT_DIR:/tmp/carapace-update-first-hop-artifacts" \
+  -v "$(docker_e2e_abs_path "$SOURCE_PACKAGE"):/tmp/carapace-update-first-hop-source.tgz:ro" \
   "${DOCKER_E2E_PACKAGE_ARGS[@]}" \
-  -v "$FIXTURE_ROOT/negative.tgz:/tmp/openclaw-update-first-hop-negative.tgz:ro" \
-  -v "$FIXTURE_ROOT/future.tgz:/tmp/openclaw-update-first-hop-future.tgz:ro" \
+  -v "$FIXTURE_ROOT/negative.tgz:/tmp/carapace-update-first-hop-negative.tgz:ro" \
+  -v "$FIXTURE_ROOT/future.tgz:/tmp/carapace-update-first-hop-future.tgz:ro" \
   "$IMAGE_NAME" \
   timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" \
   bash scripts/e2e/lib/upgrade-survivor/update-first-hop-compat.sh

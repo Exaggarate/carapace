@@ -30,13 +30,13 @@ import { sandboxListCommand, sandboxRecreateCommand } from "./sandbox.js";
 const NOW = Date.now();
 
 function createContainer(overrides: Partial<SandboxContainerInfo> = {}): SandboxContainerInfo {
-  const containerName = overrides.containerName ?? "openclaw-sandbox-test";
+  const containerName = overrides.containerName ?? "carapace-sandbox-test";
   return {
     containerName,
     backendId: "docker",
     runtimeLabel: containerName,
     sessionKey: "test-session",
-    image: "openclaw/sandbox:latest",
+    image: "carapace/sandbox:latest",
     configLabelKind: "Image",
     imageMatch: true,
     running: true,
@@ -48,9 +48,9 @@ function createContainer(overrides: Partial<SandboxContainerInfo> = {}): Sandbox
 
 function createBrowser(overrides: Partial<SandboxBrowserInfo> = {}): SandboxBrowserInfo {
   return {
-    containerName: "openclaw-browser-test",
+    containerName: "carapace-browser-test",
     sessionKey: "test-session",
-    image: "openclaw/browser:latest",
+    image: "carapace/browser:latest",
     imageMatch: true,
     running: true,
     createdAtMs: NOW - 3600000,
@@ -116,9 +116,9 @@ describe("sandboxListCommand", () => {
       expectLogContains(runtime, container1.containerName);
       expectLogContains(runtime, container2.containerName);
       expect(runtime.log).toHaveBeenCalledWith("    Status:  🟢 running");
-      expect(runtime.log).toHaveBeenCalledWith("    Image:   openclaw/sandbox:latest ✓");
+      expect(runtime.log).toHaveBeenCalledWith("    Image:   carapace/sandbox:latest ✓");
       expect(runtime.log).toHaveBeenCalledWith("    Status:  ⚫ stopped");
-      expect(runtime.log).toHaveBeenCalledWith("    Image:   openclaw/sandbox:latest ⚠️  mismatch");
+      expect(runtime.log).toHaveBeenCalledWith("    Image:   carapace/sandbox:latest ⚠️  mismatch");
       expectLogContains(runtime, "Total");
     });
 

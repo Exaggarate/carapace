@@ -1,8 +1,8 @@
 // Telegram plugin module implements bot message dispatch behavior.
-export { getSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-export { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-export { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
-export { resolveChunkMode } from "openclaw/plugin-sdk/reply-dispatch-runtime";
+export { getSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+export { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+export { getAgentScopedMediaLocalRoots } from "carapace/plugin-sdk/media-runtime";
+export { resolveChunkMode } from "carapace/plugin-sdk/reply-dispatch-runtime";
 export {
   generateTelegramTopicLabel as generateTopicLabel,
   resolveAutoTopicLabelConfig,

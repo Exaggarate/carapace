@@ -1,6 +1,6 @@
 // Telegram plugin module implements bot updates behavior.
 import type { Message } from "grammy/types";
-import { createDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
+import { createDedupeCache } from "carapace/plugin-sdk/dedupe-runtime";
 import type { TelegramAmbientTranscriptWatermark } from "./bot-message-context.types.js";
 import type { TelegramContext } from "./bot/types.js";
 

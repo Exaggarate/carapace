@@ -1,12 +1,12 @@
 /**
  * Collects configured native harness runtime ids from model provider config.
  */
-import { listModelRefsFromConfigValue } from "@openclaw/model-catalog-core/configured-model-refs";
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { listModelRefsFromConfigValue } from "@carapace/model-catalog-core/configured-model-refs";
+import { parseModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isRecord } from "../utils.js";
 import {
-  OPENCLAW_AGENT_RUNTIME_ID,
+  CARAPACE_AGENT_RUNTIME_ID,
   isDefaultAgentRuntimeId,
   normalizeOptionalAgentRuntimeId,
 } from "./agent-runtime-id.js";
@@ -14,7 +14,7 @@ import { listAgentEntries, withAgentRosterFactsBatch } from "./agent-scope-confi
 import { resolveAgentHarnessPolicy } from "./harness/policy.js";
 
 // Harness runtime discovery feeds plugin preloading/setup. Only plugin runtimes
-// are selectable here; built-in OpenClaw/default runtime ids are excluded.
+// are selectable here; built-in Carapace/default runtime ids are excluded.
 function normalizeConfiguredRuntimeId(value: unknown): string | undefined {
   return normalizeOptionalAgentRuntimeId(value);
 }
@@ -23,7 +23,7 @@ function isSelectablePluginRuntime(runtime: string | undefined): runtime is stri
   return (
     Boolean(runtime) &&
     !isDefaultAgentRuntimeId(runtime) &&
-    normalizeOptionalAgentRuntimeId(runtime) !== OPENCLAW_AGENT_RUNTIME_ID
+    normalizeOptionalAgentRuntimeId(runtime) !== CARAPACE_AGENT_RUNTIME_ID
   );
 }
 
@@ -39,7 +39,7 @@ function parseConfiguredModelRef(
 }
 
 export function resolveConfiguredModelHarnessRuntime(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   includeImplicitRuntimePreferences: boolean;
   modelRef: string;
   agentId?: string;
@@ -61,7 +61,7 @@ export function resolveConfiguredModelHarnessRuntime(params: {
   return isSelectablePluginRuntime(runtime) ? runtime : undefined;
 }
 
-function pushConfiguredModelRuntimeIds(config: OpenClawConfig, runtimes: Set<string>): void {
+function pushConfiguredModelRuntimeIds(config: CarapaceConfig, runtimes: Set<string>): void {
   for (const providerConfig of Object.values(config.models?.providers ?? {})) {
     const providerRuntime = normalizeConfiguredRuntimeId(providerConfig?.agentRuntime?.id);
     if (isSelectablePluginRuntime(providerRuntime)) {
@@ -98,7 +98,7 @@ function pushConfiguredModelRuntimeIds(config: OpenClawConfig, runtimes: Set<str
 }
 
 function pushConfiguredAgentModelRuntimeIds(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   runtimes: Set<string>,
   includeImplicitRuntimePreferences: boolean,
 ): void {
@@ -143,7 +143,7 @@ export type ConfiguredAgentHarnessRuntimeOptions = {
 
 /** Lists configured plugin harness runtime ids referenced by agent/model config. */
 export function collectConfiguredAgentHarnessRuntimes(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: ConfiguredAgentHarnessRuntimeOptions = {},
 ): string[] {
   // Roster facts are memoized for the whole batch: per-reference policy

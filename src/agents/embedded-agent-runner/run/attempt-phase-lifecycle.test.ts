@@ -8,7 +8,7 @@ import {
 } from "../../../config/sessions/session-accessor.js";
 import { createNestedToolActivity } from "../../../sessions/nested-tool-activity.js";
 import { createUserTurnTranscriptRecorder } from "../../../sessions/user-turn-transcript.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../state/carapace-agent-db.js";
 import { FULL_BOOTSTRAP_COMPLETED_CUSTOM_TYPE } from "../../bootstrap-files.js";
 import { installSessionToolResultGuard } from "../../session-tool-result-guard.js";
 import { SessionManager } from "../../sessions/session-manager.js";
@@ -46,7 +46,7 @@ describe("embedded attempt phase lifecycle state", () => {
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("re-reads compaction timeout state after the retry wait", async () => {
@@ -311,7 +311,7 @@ describe("embedded attempt phase lifecycle state", () => {
   it.each(["complete", "missing admission", "missing terminal"] as const)(
     "handles %s candidate anchors without skipping later lifecycle work",
     async (boundary) => {
-      const dir = tempDirs.make("openclaw-attempt-terminal-anchor-");
+      const dir = tempDirs.make("carapace-attempt-terminal-anchor-");
       const target = {
         agentId: "main",
         sessionId: "session-1",
@@ -522,7 +522,7 @@ describe("embedded attempt phase lifecycle state", () => {
   it.each(["blocked writes", "interrupted tool result"] as const)(
     "selects review evidence after the pre-turn boundary with %s",
     async (tail) => {
-      const dir = tempDirs.make("openclaw-attempt-review-boundary-");
+      const dir = tempDirs.make("carapace-attempt-review-boundary-");
       const target = {
         agentId: "main",
         sessionId: "review-boundary",

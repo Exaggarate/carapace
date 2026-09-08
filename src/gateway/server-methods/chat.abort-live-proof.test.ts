@@ -7,8 +7,8 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../../config/config.js";
 import { loadTranscriptEvents } from "../../config/sessions/session-accessor.js";
 import { clearSessionStoreCacheForTest } from "../../config/sessions/store-writer-state.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../../test-utils/env.js";
 import { loadSessionEntry } from "../session-utils.js";
 import { disconnectGatewayClient, startGatewayWithClient } from "../test-helpers.e2e.js";
@@ -16,17 +16,17 @@ import { buildMockOpenAiResponsesProvider } from "../test-openai-responses-model
 
 const envKeys = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 const REPLY_TEXT = "PR132123_COMMITTED_REPLY";
@@ -57,8 +57,8 @@ function assistantRows(events: readonly unknown[]): Array<Record<string, unknown
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
@@ -76,10 +76,10 @@ describe("late abort real Gateway proof", () => {
       let gateway: Awaited<ReturnType<typeof startGatewayWithClient>> | undefined;
 
       try {
-        const tempHome = tempDirs.make("openclaw-pr132123-proof-");
-        const stateDir = path.join(tempHome, ".openclaw");
+        const tempHome = tempDirs.make("carapace-pr132123-proof-");
+        const stateDir = path.join(tempHome, ".carapace");
         const workspaceDir = path.join(tempHome, "workspace");
-        const configPath = path.join(stateDir, "openclaw.json");
+        const configPath = path.join(stateDir, "carapace.json");
         const bundledPluginsDir = path.join(tempHome, "bundled-plugins");
         const pluginDir = path.join(tempHome, "after-turn-gate");
         await Promise.all([
@@ -90,17 +90,17 @@ describe("late abort real Gateway proof", () => {
         ]);
         for (const [key, value] of Object.entries({
           HOME: tempHome,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_GATEWAY_TOKEN: "pr132123-proof-token",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_GATEWAY_TOKEN: "pr132123-proof-token",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         })) {
           setTestEnvValue(key, value);
         }
@@ -155,7 +155,7 @@ describe("late abort real Gateway proof", () => {
         const provider = buildMockOpenAiResponsesProvider(`${providerBaseUrl}/v1`);
         await Promise.all([
           fs.writeFile(
-            path.join(pluginDir, "openclaw.plugin.json"),
+            path.join(pluginDir, "carapace.plugin.json"),
             `${JSON.stringify({
               id: CONTEXT_ENGINE_ID,
               name: "PR 132123 After-Turn Gate",
@@ -258,7 +258,7 @@ describe("late abort real Gateway proof", () => {
           (message) => assistantText(message) === REPLY_TEXT,
         );
         expect(beforeRows).toHaveLength(1);
-        expect((beforeRows[0]?.["__openclaw"] as { runId?: string } | undefined)?.runId).toBe(
+        expect((beforeRows[0]?.["__carapace"] as { runId?: string } | undefined)?.runId).toBe(
           started.runId,
         );
 
@@ -271,7 +271,7 @@ describe("late abort real Gateway proof", () => {
           (message) => assistantText(message) === REPLY_TEXT,
         );
         expect(afterRows).toHaveLength(1);
-        expect(afterRows.filter((message) => message.openclawAbort)).toHaveLength(0);
+        expect(afterRows.filter((message) => message.carapaceAbort)).toHaveLength(0);
 
         releaseAfterTurn.resolve();
         const terminal = await gateway.client.request<{ status?: string }>(
@@ -282,8 +282,8 @@ describe("late abort real Gateway proof", () => {
         await disconnectGatewayClient(gateway.client);
         await gateway.server.close();
         gateway = undefined;
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
         clearSessionStoreCacheForTest();
         const reopenedRows = assistantRows(await loadTranscriptEvents(transcriptScope)).filter(
           (message) => assistantText(message) === REPLY_TEXT,
@@ -300,9 +300,9 @@ describe("late abort real Gateway proof", () => {
           abortedReplyEvents: replyEventStates.filter((state) => state === "aborted").length,
           finalReplyEvents: replyEventStates.filter((state) => state === "final").length,
           durableRowsAfterAbort: afterRows.length,
-          abortMarkedRowsAfterAbort: afterRows.filter((message) => message.openclawAbort).length,
+          abortMarkedRowsAfterAbort: afterRows.filter((message) => message.carapaceAbort).length,
           reopenedRows: reopenedRows.length,
-          reopenedAbortMarkedRows: reopenedRows.filter((message) => message.openclawAbort).length,
+          reopenedAbortMarkedRows: reopenedRows.filter((message) => message.carapaceAbort).length,
         };
         console.info(`LATE_ABORT_VERDICT ${JSON.stringify(verdict)}`);
         expect(verdict).toMatchObject({
@@ -334,8 +334,8 @@ describe("late abort real Gateway proof", () => {
         clearRuntimeConfigSnapshot();
         clearConfigCache();
         clearSessionStoreCacheForTest();
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );

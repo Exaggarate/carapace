@@ -1,5 +1,5 @@
-// Duckduckgo plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Duckduckgo plugin entrypoint registers its Carapace integration.
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 import { createDuckDuckGoWebSearchProvider } from "./src/ddg-search-provider.js";
 
 export default definePluginEntry({

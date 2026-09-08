@@ -1,6 +1,6 @@
 #!/usr/bin/env -S pnpm tsx
 import { spawn } from "node:child_process";
-// Npm Update Smoke script supports OpenClaw repository automation.
+// Npm Update Smoke script supports Carapace repository automation.
 import { randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { copyFile, readFile, rm } from "node:fs/promises";
@@ -10,9 +10,9 @@ import {
   addTimerTimeoutGraceMs,
   clampTimerTimeoutMs,
   finiteSecondsToTimerSafeMilliseconds,
-} from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import prettyMilliseconds from "pretty-ms";
 import { stripLeadingPackageManagerSeparator } from "../../lib/arg-utils.mts";
 import { resolveProviderConfig } from "../../lib/cross-os-release-checks/config.ts";
@@ -20,10 +20,10 @@ import {
   die,
   ensureValue,
   extractPackageJsonFromTgz,
-  extractLastOpenClawVersionFromLog,
+  extractLastCarapaceVersionFromLog,
   isLikelyMacosDesktopHome,
   makeTempDir,
-  packOpenClaw,
+  packCarapace,
   packageBuildCommitFromTgz,
   parseMacosDsclUserHomeLine,
   parsePlatformList,
@@ -32,7 +32,7 @@ import {
   repoRoot,
   resolveHostIp,
   resolveLatestVersion,
-  resolveOpenClawRegistryVersion,
+  resolveCarapaceRegistryVersion,
   resolveProviderAuth,
   resolveWindowsProviderAuth,
   run,
@@ -164,7 +164,7 @@ let cachedFreshLaneTimeoutKillGraceMs: number | undefined;
 
 function resolveUpdateTimeouts(): UpdateTimeouts {
   return (cachedUpdateTimeouts ??= (() => {
-    const seconds = readPositiveIntEnv("OPENCLAW_PARALLELS_NPM_UPDATE_TIMEOUT_S", 2700);
+    const seconds = readPositiveIntEnv("CARAPACE_PARALLELS_NPM_UPDATE_TIMEOUT_S", 2700);
     const timeoutMs = resolveSecondsTimerMs(seconds);
     return {
       seconds,
@@ -176,7 +176,7 @@ function resolveUpdateTimeouts(): UpdateTimeouts {
 
 function resolveFreshLaneTimeoutKillGraceMs(): number {
   return (cachedFreshLaneTimeoutKillGraceMs ??= readPositiveIntEnv(
-    "OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_KILL_GRACE_MS",
+    "CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_KILL_GRACE_MS",
     2_000,
   ));
 }
@@ -187,7 +187,7 @@ let loggedExitCleanupInstalled = false;
 export function freshLaneTimeoutMs(platform: Platform): number {
   const defaultSeconds = platform === "windows" ? 90 * 60 : 75 * 60;
   return resolveSecondsTimerMs(
-    readPositiveIntEnv("OPENCLAW_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S", defaultSeconds),
+    readPositiveIntEnv("CARAPACE_PARALLELS_NPM_UPDATE_FRESH_TIMEOUT_S", defaultSeconds),
   );
 }
 
@@ -401,8 +401,8 @@ function usage(): string {
   return `Usage: bash scripts/e2e/parallels-npm-update-smoke.sh [options]
 
 Options:
-  --package-spec <npm-spec>  Baseline npm package spec. Default: openclaw@latest
-  --update-target <target>    Target passed to guest 'openclaw update --tag'.
+  --package-spec <npm-spec>  Baseline npm package spec. Default: carapace@latest
+  --update-target <target>    Target passed to guest 'carapace update --tag'.
                              Default: host-served tgz packed from current checkout.
   --target-tarball <path>     Host-serve this prepared tgz for update and fresh install.
   --dependency-tarball <path> Companion package tgz required by the target. Repeatable.
@@ -574,16 +574,16 @@ function readHarnessCheckoutVersion(): string {
   return typeof pkg.version === "string" ? pkg.version : "";
 }
 
-function openClawVersionFamily(version: string): string {
+function carapaceVersionFamily(version: string): string {
   return /^(\d{4}\.\d{1,2}\.\d{1,2})(?:[-.]|$)/u.exec(version.trim())?.[1] ?? "";
 }
 
-function parseOpenClawPackageSpecVersion(spec: string): string {
+function parseCarapacePackageSpecVersion(spec: string): string {
   const value = spec.trim();
   if (!value) {
     return "";
   }
-  return resolveOpenClawRegistryVersion(value) || "";
+  return resolveCarapaceRegistryVersion(value) || "";
 }
 
 export function parseRegistryPackageMetadata(raw: string): {
@@ -670,8 +670,8 @@ export class NpmUpdateSmoke {
 
   async run(): Promise<void> {
     this.startedAt = Date.now();
-    this.runDir = await this.makeRunTempDir("openclaw-parallels-npm-update.");
-    this.tgzDir = await this.makeRunTempDir("openclaw-parallels-npm-update-tgz.");
+    this.runDir = await this.makeRunTempDir("carapace-parallels-npm-update.");
+    this.tgzDir = await this.makeRunTempDir("carapace-parallels-npm-update-tgz.");
     try {
       await this.runSteps();
     } finally {
@@ -686,7 +686,7 @@ export class NpmUpdateSmoke {
 
   protected async runSteps(): Promise<void> {
     this.latestVersion = resolveLatestVersion();
-    this.packageSpec = this.options.packageSpec || `openclaw@${this.latestVersion}`;
+    this.packageSpec = this.options.packageSpec || `carapace@${this.latestVersion}`;
     this.currentHead = run("git", ["rev-parse", "HEAD"], { quiet: true }).stdout.trim();
     this.currentHeadShort = run("git", ["rev-parse", "--short=7", "HEAD"], {
       quiet: true,
@@ -713,7 +713,7 @@ export class NpmUpdateSmoke {
     await this.runFreshBaselines();
 
     await this.prepareUpdateTarget();
-    say(`Run same-guest openclaw update to ${this.updateTargetEffective}`);
+    say(`Run same-guest carapace update to ${this.updateTargetEffective}`);
     await this.runSameGuestUpdates();
 
     if (this.freshTargetSpec) {
@@ -741,7 +741,7 @@ export class NpmUpdateSmoke {
     if (this.options.platforms.has("linux")) {
       jobs.push(
         this.spawnFresh("Linux", "linux", ["--vm", this.linuxVm], {
-          OPENCLAW_PARALLELS_LINUX_DISABLE_BONJOUR: "1",
+          CARAPACE_PARALLELS_LINUX_DISABLE_BONJOUR: "1",
         }),
       );
     }
@@ -781,7 +781,7 @@ export class NpmUpdateSmoke {
           "linux",
           ["--vm", this.linuxVm],
           {
-            OPENCLAW_PARALLELS_LINUX_DISABLE_BONJOUR: "1",
+            CARAPACE_PARALLELS_LINUX_DISABLE_BONJOUR: "1",
           },
           this.freshTargetSpec,
           "fresh-target",
@@ -934,7 +934,7 @@ export class NpmUpdateSmoke {
       if (!providerConfig) {
         die(`missing release smoke configuration for provider: ${this.options.provider}`);
       }
-      this.artifact = await packOpenClaw({
+      this.artifact = await packCarapace({
         destination: this.tgzDir,
         requireControlUi: true,
         requiredCompanionPackages: providerConfig.requiredCompanionPackages,
@@ -943,7 +943,7 @@ export class NpmUpdateSmoke {
       this.updateTargetEffective = this.options.updateTarget;
       this.updateExpectedNeedle = this.isExplicitPackageTarget(this.updateTargetEffective)
         ? ""
-        : resolveOpenClawRegistryVersion(this.updateTargetEffective) || this.updateTargetEffective;
+        : resolveCarapaceRegistryVersion(this.updateTargetEffective) || this.updateTargetEffective;
       const metadata = this.resolveRegistryPackageMetadata(this.updateTargetEffective);
       this.updateTargetPackageVersion = metadata.version;
       this.updateTargetBuildCommit =
@@ -967,7 +967,7 @@ export class NpmUpdateSmoke {
       : this.updateTargetTarball;
     if (this.targetTarballPath) {
       this.freshTargetSpec = this.targetRegistryUrl
-        ? `openclaw@${this.updateTargetPackageVersion}`
+        ? `carapace@${this.updateTargetPackageVersion}`
         : this.updateTargetTarball;
     }
     this.updateExpectedNeedle = this.targetTarballPath
@@ -1014,7 +1014,7 @@ export class NpmUpdateSmoke {
     if (this.isExplicitPackageTarget(target)) {
       return { gitHead: "", tarball: "", version: "" };
     }
-    const spec = target.startsWith("openclaw@") ? target : `openclaw@${target}`;
+    const spec = target.startsWith("carapace@") ? target : `carapace@${target}`;
     const output = run("npm", ["view", spec, "version", "dist.tarball", "gitHead", "--json"], {
       check: false,
       quiet: true,
@@ -1176,7 +1176,7 @@ export class NpmUpdateSmoke {
     const scriptPath = this.writeGuestScript(
       this.macosVm,
       script,
-      "openclaw-parallels-npm-update-macos",
+      "carapace-parallels-npm-update-macos",
       { execArgs: macosUpdateExec.execArgs, mode: "700", runCommand: runMacosHostCommand },
     );
     runMacosHostCommand(
@@ -1328,7 +1328,7 @@ export class NpmUpdateSmoke {
     const scriptPath = this.writeGuestScript(
       this.linuxVm,
       script,
-      "openclaw-parallels-npm-update-linux",
+      "carapace-parallels-npm-update-linux",
     );
     try {
       const status = await this.runStreamingToJobLog(
@@ -1338,7 +1338,7 @@ export class NpmUpdateSmoke {
           this.linuxVm,
           "/usr/bin/env",
           "HOME=/root",
-          "OPENCLAW_ALLOW_ROOT=1",
+          "CARAPACE_ALLOW_ROOT=1",
           "PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/snap/bin",
           "bash",
           scriptPath,
@@ -1501,11 +1501,11 @@ export class NpmUpdateSmoke {
     ) {
       return;
     }
-    const baseline = resolveOpenClawRegistryVersion(this.packageSpec);
-    const target = resolveOpenClawRegistryVersion(this.options.updateTarget);
+    const baseline = resolveCarapaceRegistryVersion(this.packageSpec);
+    const target = resolveCarapaceRegistryVersion(this.options.updateTarget);
     if (baseline && target && baseline === target) {
       die(
-        `--update-target ${this.options.updateTarget} resolves to openclaw@${target}, same as baseline ${this.packageSpec}; publish or choose a newer --update-target before running VM update coverage`,
+        `--update-target ${this.options.updateTarget} resolves to carapace@${target}, same as baseline ${this.packageSpec}; publish or choose a newer --update-target before running VM update coverage`,
       );
     }
   }
@@ -1518,7 +1518,7 @@ export class NpmUpdateSmoke {
   }
 
   private async extractLastVersion(logPath: string): Promise<string> {
-    return await extractLastOpenClawVersionFromLog(logPath);
+    return await extractLastCarapaceVersionFromLog(logPath);
   }
 
   private dumpLogTail(logPath: string): void {
@@ -1567,7 +1567,7 @@ export class NpmUpdateSmoke {
           }>(tarballPath, "package/package.json");
           const name = dependencyPackage.name ?? "";
           const version = dependencyPackage.version ?? "";
-          if (!name || !version || name === "openclaw") {
+          if (!name || !version || name === "carapace") {
             throw new Error(`dependency tarball has invalid package metadata: ${tarballPath}`);
           }
           if (targetPackageJson.dependencies?.[name] !== version) {
@@ -1590,7 +1590,7 @@ export class NpmUpdateSmoke {
           }>(tarballPath, "package/package.json");
           const name = registryPackage.name ?? "";
           const version = registryPackage.version ?? "";
-          if (!name || !version || name === "openclaw") {
+          if (!name || !version || name === "carapace") {
             throw new Error(`registry package tarball has invalid metadata: ${tarballPath}`);
           }
           if (version !== this.targetTarballVersion) {
@@ -1618,50 +1618,50 @@ export class NpmUpdateSmoke {
       return;
     }
     if (this.options.betaValidation) {
-      const version = resolveOpenClawRegistryVersion(this.options.betaValidation);
+      const version = resolveCarapaceRegistryVersion(this.options.betaValidation);
       if (!version) {
         die(`could not resolve beta validation target: ${this.options.betaValidation}`);
       }
       this.options.updateTarget = version;
-      this.options.freshTargetSpec = `openclaw@${version}`;
-      say(`Beta validation target: openclaw@${version}`);
+      this.options.freshTargetSpec = `carapace@${version}`;
+      say(`Beta validation target: carapace@${version}`);
     } else if (
       this.options.updateTarget &&
       this.options.updateTarget !== "local-main" &&
       !this.isExplicitPackageTarget(this.options.updateTarget)
     ) {
-      const version = resolveOpenClawRegistryVersion(this.options.updateTarget);
+      const version = resolveCarapaceRegistryVersion(this.options.updateTarget);
       if (version) {
         this.options.updateTarget = version;
       }
     }
 
     if (this.options.freshTargetSpec) {
-      const version = resolveOpenClawRegistryVersion(this.options.freshTargetSpec);
-      this.freshTargetSpec = version ? `openclaw@${version}` : this.options.freshTargetSpec;
+      const version = resolveCarapaceRegistryVersion(this.options.freshTargetSpec);
+      this.freshTargetSpec = version ? `carapace@${version}` : this.options.freshTargetSpec;
     }
   }
 
   private assertPublishedTargetMatchesHarnessCheckout(): void {
-    if (process.env.OPENCLAW_PARALLELS_ALLOW_HARNESS_TARGET_MISMATCH === "1") {
+    if (process.env.CARAPACE_PARALLELS_ALLOW_HARNESS_TARGET_MISMATCH === "1") {
       return;
     }
     const candidateVersion =
       this.targetTarballVersion ||
       (this.freshTargetSpec
-        ? parseOpenClawPackageSpecVersion(this.freshTargetSpec)
-        : parseOpenClawPackageSpecVersion(this.options.updateTarget));
-    const targetFamily = openClawVersionFamily(candidateVersion);
+        ? parseCarapacePackageSpecVersion(this.freshTargetSpec)
+        : parseCarapacePackageSpecVersion(this.options.updateTarget));
+    const targetFamily = carapaceVersionFamily(candidateVersion);
     if (!targetFamily) {
       return;
     }
     this.harnessTargetFamily = targetFamily;
-    const checkoutFamily = openClawVersionFamily(this.harnessCheckoutVersion);
+    const checkoutFamily = carapaceVersionFamily(this.harnessCheckoutVersion);
     if (checkoutFamily === targetFamily) {
       return;
     }
     die(
-      `refusing to run Parallels ${candidateVersion} target with harness checkout ${this.harnessCheckoutVersion || "unknown"}; checkout the matching release branch or set OPENCLAW_PARALLELS_ALLOW_HARNESS_TARGET_MISMATCH=1 for an intentional cross-version harness run`,
+      `refusing to run Parallels ${candidateVersion} target with harness checkout ${this.harnessCheckoutVersion || "unknown"}; checkout the matching release branch or set CARAPACE_PARALLELS_ALLOW_HARNESS_TARGET_MISMATCH=1 for an intentional cross-version harness run`,
     );
   }
 

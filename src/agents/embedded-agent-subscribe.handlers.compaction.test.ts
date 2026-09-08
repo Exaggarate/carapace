@@ -138,7 +138,7 @@ describe("reconcileSessionStoreCompactionCountAfterSuccess", () => {
   it("raises the stored compaction count to the observed value", async () => {
     // Store count can lag the in-memory count after async writes; reconciliation
     // moves it forward without double-counting.
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-reconcile-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-reconcile-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     await seedSessionStore({
@@ -160,7 +160,7 @@ describe("reconcileSessionStoreCompactionCountAfterSuccess", () => {
   });
 
   it("does not double count when the store is already at or above the observed value", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-idempotent-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-idempotent-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     await seedSessionStore({
@@ -184,7 +184,7 @@ describe("reconcileSessionStoreCompactionCountAfterSuccess", () => {
 
 describe("compaction lifecycle logging", () => {
   it("logs lifecycle events at info level for gateway watch visibility", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-log-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-log-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     await seedSessionStore({
@@ -228,7 +228,7 @@ describe("compaction lifecycle logging", () => {
   });
 
   it("logs a benign manual skip at info", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-incomplete-log-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-incomplete-log-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     await seedSessionStore({
@@ -279,7 +279,7 @@ describe("compaction lifecycle logging", () => {
   it("warns with classified, bounded metadata for failed compaction", () => {
     const warn = vi.fn();
     const ctx = createCompactionContext({
-      storePath: path.join(os.tmpdir(), "openclaw-compaction-failed-log", "sessions.json"),
+      storePath: path.join(os.tmpdir(), "carapace-compaction-failed-log", "sessions.json"),
       sessionKey: "main",
       initialCount: 0,
       warn,
@@ -306,7 +306,7 @@ describe("compaction lifecycle logging", () => {
   });
 
   it("defaults an unknown synthetic compaction start to threshold logs", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-legacy-log-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-legacy-log-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     await seedSessionStore({
@@ -377,7 +377,7 @@ describe("handleCompactionEnd", () => {
     },
   ] as const)("preserves local compaction facts under $name", async (testCase) => {
     const { options, expectedCount, expectedEventCount } = testCase;
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-handler-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-handler-"));
     const storePath = path.join(tmp, "sessions.json");
     const agentId = "test-agent";
     const runId = `run-compaction-owner-${randomUUID()}`;
@@ -453,7 +453,7 @@ describe("handleCompactionEnd", () => {
         usage: freshUsage,
       }),
     ] as AgentMessage[];
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-usage-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-usage-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     const ctx = createCompactionContext({
@@ -487,7 +487,7 @@ describe("handleCompactionEnd", () => {
           usage: liveUsage,
         }),
       ] as AgentMessage[];
-      const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-usage-keep-"));
+      const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-usage-keep-"));
       const storePath = path.join(tmp, "sessions.json");
       const ctx = createCompactionContext({
         storePath,
@@ -524,7 +524,7 @@ describe("handleCompactionEnd", () => {
         usage: freshUsage,
       }),
     ] as AgentMessage[];
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-summary-first-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-summary-first-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     const ctx = createCompactionContext({
@@ -556,7 +556,7 @@ describe("handleCompactionEnd", () => {
         usage: freshUsage,
       }),
     ] as AgentMessage[];
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-legacy-usage-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-legacy-usage-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     const ctx = createCompactionContext({
@@ -588,7 +588,7 @@ describe("handleCompactionEnd", () => {
         usage: secondUsage,
       }),
     ] as AgentMessage[];
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-no-summary-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-no-summary-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     const ctx = createCompactionContext({
@@ -616,7 +616,7 @@ describe("handleCompactionEnd", () => {
       }),
       makeCompactionSummaryMessage(2_000),
     ] as AgentMessage[];
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-timestamp-fresh-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-timestamp-fresh-"));
     const storePath = path.join(tmp, "sessions.json");
     const sessionKey = "main";
     const ctx = createCompactionContext({

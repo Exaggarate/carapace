@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/feishu",
+  "name": "@carapace/feishu",
   "version": "2026.9.2",
-  "description": "OpenClaw Feishu/Lark channel plugin for chats and workplace tools (community maintained by @m1heng).",
+  "description": "Carapace Feishu/Lark channel plugin for chats and workplace tools (community maintained by @m1heng).",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -16,18 +16,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -61,7 +61,7 @@
       }
     },
     "install": {
-      "npmSpec": "@openclaw/feishu",
+      "npmSpec": "@carapace/feishu",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.5.29"
     },
@@ -70,7 +70,7 @@
     },
     "build": {
       "bundledDist": false,
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "publishToClawHub": true,

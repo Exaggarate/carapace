@@ -1,8 +1,8 @@
 // Memory Core tests cover embeddings plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { EmbeddingProviderAdapter } from "openclaw/plugin-sdk/embedding-providers";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { MemoryEmbeddingProviderAdapter } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { EmbeddingProviderAdapter } from "carapace/plugin-sdk/embedding-providers";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { MemoryEmbeddingProviderAdapter } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createEmbeddingProvider,
@@ -14,16 +14,16 @@ import {
 const mockEmbeddingRegistry = vi.hoisted(() => ({
   genericAdapters: [] as EmbeddingProviderAdapter[],
   adapters: [] as MemoryEmbeddingProviderAdapter[],
-  genericLookupConfigs: [] as Array<OpenClawConfig | undefined>,
+  genericLookupConfigs: [] as Array<CarapaceConfig | undefined>,
   acquireLocalService: vi.fn(async () => undefined),
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-embeddings", () => ({
+vi.mock("carapace/plugin-sdk/memory-core-host-engine-embeddings", () => ({
   DEFAULT_LOCAL_MODEL: "nomic-embed-text",
   createLocalEmbeddingProvider: async () => {
     throw new Error("local embedding provider is not used by these tests");
   },
-  getMemoryEmbeddingProvider: (id: string, config?: OpenClawConfig) => {
+  getMemoryEmbeddingProvider: (id: string, config?: CarapaceConfig) => {
     const memoryAdapter = mockEmbeddingRegistry.adapters.find((adapter) => adapter.id === id);
     if (memoryAdapter) {
       return memoryAdapter;
@@ -64,8 +64,8 @@ function createOptions(
           "voyage",
         ],
       },
-    } as OpenClawConfig,
-    agentDir: "/tmp/openclaw-agent",
+    } as CarapaceConfig,
+    agentDir: "/tmp/carapace-agent",
     provider,
     fallback: "none",
     model: "",
@@ -246,7 +246,7 @@ describe("createEmbeddingProvider", () => {
       const config = {
         ...primaryOptions.config,
         models: { providers: { [fallback]: fallbackProviderConfig } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const local = { modelPath: "/tmp/synthetic-memory-model.gguf", contextSize: 2048 };
 
       const result = await createEmbeddingProvider({
@@ -419,7 +419,7 @@ describe("createEmbeddingProvider", () => {
 
   it("reports the llama.cpp plugin install command when local is unregistered", async () => {
     await expect(createEmbeddingProvider(createOptions("local"))).rejects.toThrow(
-      "openclaw plugins install @openclaw/llama-cpp-provider",
+      "carapace plugins install @carapace/llama-cpp-provider",
     );
   });
 

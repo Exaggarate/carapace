@@ -35,18 +35,18 @@ beforeEach(() => {
   capture.note.mockClear();
   capture.load.mockReset().mockImplementation(() => capture.surface);
   const home = dirs.make("doctor-browser-flow-");
-  const configDir = path.join(home, ".openclaw");
+  const configDir = path.join(home, ".carapace");
   const extensionDir = path.join(configDir, "browser", "chrome-extension");
   const profileRoot = path.join(home, "Library", "Application Support", "Google", "Chrome");
   fs.mkdirSync(extensionDir, { recursive: true });
-  fs.writeFileSync(path.join(extensionDir, ".openclaw-owned.json"), '{"v":1}');
+  fs.writeFileSync(path.join(extensionDir, ".carapace-owned.json"), '{"v":1}');
   fs.mkdirSync(path.join(profileRoot, "Default"), { recursive: true });
   for (const name of ["Preferences", "Secure Preferences"]) {
     fs.writeFileSync(path.join(profileRoot, "Default", name), "{}");
   }
   vi.spyOn(os, "homedir").mockReturnValue(home);
   vi.stubEnv("HOME", home);
-  vi.stubEnv("OPENCLAW_STATE_DIR", configDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", configDir);
   accesses = [];
   const deny = (target: unknown) => {
     if (
@@ -99,8 +99,8 @@ beforeEach(() => {
     prompter: createDoctorPrompter({ runtime, options }),
     configResult: { cfg },
     sourceConfigValid: true,
-    configPath: path.join(configDir, "openclaw.json"),
-    env: { HOME: home, OPENCLAW_STATE_DIR: configDir },
+    configPath: path.join(configDir, "carapace.json"),
+    env: { HOME: home, CARAPACE_STATE_DIR: configDir },
   };
 });
 

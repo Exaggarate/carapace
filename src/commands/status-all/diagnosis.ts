@@ -1,8 +1,8 @@
-// Appends the read-only diagnosis section for `openclaw status --all`.
+// Appends the read-only diagnosis section for `carapace status --all`.
 // Every line that can include logs, config, or connection details is redacted before display.
 
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../../packages/terminal-core/src/safe-text.js";
 import type { ProgressReporter } from "../../cli/progress.js";
 import { formatConfigIssueLine } from "../../config/issue-format.js";
@@ -276,7 +276,7 @@ export async function appendStatusAllDiagnosis(params: {
       const gatewayPidCount = countGatewayListenerPids(params.portUsage);
       if (gatewayPidCount > 1) {
         lines.push(
-          `  ${muted(`${gatewayPidCount} OpenClaw gateway processes appear to be listening on port ${params.port}; stop stale gateway processes before trusting channel health.`)}`,
+          `  ${muted(`${gatewayPidCount} Carapace gateway processes appear to be listening on port ${params.port}; stop stale gateway processes before trusting channel health.`)}`,
         );
       }
       for (const line of formatPortDiagnostics(params.portUsage)) {
@@ -287,7 +287,7 @@ export async function appendStatusAllDiagnosis(params: {
         `  ${muted("Detected dual-stack loopback listeners (127.0.0.1 + ::1) for one gateway process.")}`,
       );
     } else if (expectedGatewayListeners) {
-      lines.push(`  ${muted("Detected OpenClaw Gateway listener on the configured port.")}`);
+      lines.push(`  ${muted("Detected Carapace Gateway listener on the configured port.")}`);
     }
   }
 
@@ -365,7 +365,7 @@ export async function appendStatusAllDiagnosis(params: {
       emitUnavailableDiagnostics({
         label: "Telemetry exporters",
         detail: `Exporter diagnostics failed: ${params.exporterDiagnostics.error}`,
-        retry: "openclaw gateway stability --type telemetry.exporter",
+        retry: "carapace gateway stability --type telemetry.exporter",
       });
     }
   }
@@ -413,7 +413,7 @@ export async function appendStatusAllDiagnosis(params: {
       emitUnavailableDiagnostics({
         label: "Inbound delivery telemetry",
         detail: "Delivery diagnostics returned an invalid response.",
-        retry: "openclaw gateway stability",
+        retry: "carapace gateway stability",
       });
     }
   } else if (
@@ -424,7 +424,7 @@ export async function appendStatusAllDiagnosis(params: {
     emitUnavailableDiagnostics({
       label: "Inbound delivery telemetry",
       detail: `Delivery diagnostics failed: ${params.deliveryDiagnostics.error}`,
-      retry: "openclaw gateway stability",
+      retry: "carapace gateway stability",
     });
   }
 
@@ -517,6 +517,6 @@ export async function appendStatusAllDiagnosis(params: {
 
   lines.push("");
   lines.push(muted("Pasteable debug report. Auth tokens redacted."));
-  lines.push("Troubleshooting: https://docs.openclaw.ai/troubleshooting");
+  lines.push("Troubleshooting: https://github.com/Exaggarate/carapace");
   lines.push("");
 }

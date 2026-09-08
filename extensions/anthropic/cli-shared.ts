@@ -1,4 +1,4 @@
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
 /**
  * Shared Claude CLI backend normalization for args, thinking, and isolated runs.
  */
@@ -6,10 +6,10 @@ import type {
   CliBackendConfig,
   CliBackendNormalizeConfigContext,
   CliBackendResolveExecutionArgsContext,
-} from "openclaw/plugin-sdk/cli-backend";
-import { resolveExecModePolicy } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import { requiresClaudeMandatoryAdaptiveThinking } from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/cli-backend";
+import { resolveExecModePolicy } from "carapace/plugin-sdk/exec-approvals-runtime";
+import { requiresClaudeMandatoryAdaptiveThinking } from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { CLAUDE_CLI_BACKEND_ID } from "./cli-constants.js";
 export {
   CLAUDE_CLI_BACKEND_ID,
@@ -54,7 +54,7 @@ const CLAUDE_BYPASS_PERMISSION_MODE = "bypassPermissions";
 const CLAUDE_DEFAULT_PERMISSION_MODE = "default";
 const CLAUDE_NO_TOOLS_VALUE = "";
 const CLAUDE_DENY_MCP_TOOLS_VALUE = "mcp__*";
-const OPENCLAW_MCP_TOOL_PREFIX = "mcp__openclaw__";
+const CARAPACE_MCP_TOOL_PREFIX = "mcp__carapace__";
 const CLAUDE_RESTRICTED_SETTINGS =
   '{"disableAllHooks":true,"enabledPlugins":{},"autoMemoryEnabled":false,"claudeMdExcludes":["**/CLAUDE.md","**/CLAUDE.local.md","**/.claude/rules/**"]}';
 
@@ -69,7 +69,7 @@ export function isClaudeCliProvider(providerId: string): boolean {
   return normalizeOptionalLowercaseString(providerId) === CLAUDE_CLI_BACKEND_ID;
 }
 
-/** Map OpenClaw's effective context budget to Claude Code's native compactor. */
+/** Map Carapace's effective context budget to Claude Code's native compactor. */
 export function resolveClaudeCliAutoCompactEnv(
   contextTokenBudget: number | undefined,
 ): Record<string, string> | undefined {
@@ -86,12 +86,12 @@ export function resolveClaudeCliAutoCompactEnv(
 }
 
 /**
- * Map OpenClaw's fixed thinking levels to Claude Code's per-process budget.
+ * Map Carapace's fixed thinking levels to Claude Code's per-process budget.
  *
  * Claude Code 2.x reads MAX_THINKING_TOKENS for print-mode runs and a positive
  * integer requests that fixed token budget. Mandatory-adaptive models ignore
  * that projection, so they retain adaptive thinking and use --effort instead.
- * These fixed budgets match OpenClaw's canonical provider defaults in
+ * These fixed budgets match Carapace's canonical provider defaults in
  * packages/ai/src/providers/simple-options.ts.
  */
 export function resolveClaudeCliThinkingEnv(
@@ -148,7 +148,7 @@ export function supportsClaudeDynamicSystemPromptSections(
   return true;
 }
 
-function isOpenClawRequestedYolo(context?: CliBackendNormalizeConfigContext): boolean {
+function isCarapaceRequestedYolo(context?: CliBackendNormalizeConfigContext): boolean {
   const agentExec = context?.agentId
     ? resolveAgentConfig(context.config ?? {}, context.agentId)?.tools?.exec
     : undefined;
@@ -443,16 +443,16 @@ function resolveClaudeCliRestrictedExecutionArgs(
     CLAUDE_TOOLS_ARG,
     availability.native.join(","),
   );
-  if (availability.openClaw.length > 0) {
+  if (availability.carapace.length > 0) {
     normalized.push(
       CLAUDE_ALLOWED_TOOLS_ARG,
-      availability.openClaw.map((toolName) => `${OPENCLAW_MCP_TOOL_PREFIX}${toolName}`).join(","),
+      availability.carapace.map((toolName) => `${CARAPACE_MCP_TOOL_PREFIX}${toolName}`).join(","),
     );
   }
   const denials = [
     ...new Set([
       ...preservedDenials.map((entry) => entry.trim()).filter(Boolean),
-      ...(availability.openClaw.length === 0 ? [CLAUDE_DENY_MCP_TOOLS_VALUE] : []),
+      ...(availability.carapace.length === 0 ? [CLAUDE_DENY_MCP_TOOLS_VALUE] : []),
     ]),
   ].toSorted();
   if (denials.length > 0) {
@@ -497,7 +497,7 @@ export function normalizeClaudeBackendConfig(
 ): CliBackendConfig {
   const output = config.output ?? "jsonl";
   const input = config.input ?? "stdin";
-  const permissionMode = isOpenClawRequestedYolo(context)
+  const permissionMode = isCarapaceRequestedYolo(context)
     ? CLAUDE_BYPASS_PERMISSION_MODE
     : undefined;
   return {

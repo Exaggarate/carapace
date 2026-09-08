@@ -1,20 +1,20 @@
 // Anthropic tests cover live model discovery request auth.
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogContext } from "carapace/plugin-sdk/provider-catalog-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildAnthropicProvider } from "./register.runtime.js";
 
 const guardedFetchCalls = vi.hoisted(
   () =>
     [] as Array<
-      Parameters<typeof import("openclaw/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard>[0]
+      Parameters<typeof import("carapace/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard>[0]
     >,
 );
 
 const discoveryRows = vi.hoisted(() => ({ value: [] as unknown[] }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     fetchWithSsrFGuard: (params: Parameters<typeof actual.fetchWithSsrFGuard>[0]) => {

@@ -1,7 +1,7 @@
 ---
 name: taskflow
 description: "Run approval-gated workflows with durable TaskFlow state; distinguish workflow execution from linking real detached tasks."
-metadata: { "openclaw": { "emoji": "🪝" } }
+metadata: { "carapace": { "emoji": "🪝" } }
 ---
 
 # TaskFlow
@@ -46,6 +46,6 @@ Persist explicit acceptance state in `stateJson` for terminal-outcome workflows.
 
 TaskFlow records persist in SQLite. Controllers must reload the latest record and explicitly resume; arbitrary JavaScript and in-flight work are not replayed. Lobster approval pauses are not listeners for Slack replies. Keep persisted state to bounded IDs, route summaries and cursors, not full messages or histories.
 
-Plugin authors use `api.runtime.tasks.managedFlows`; `flows` and `runs` provide owner-scoped lookups. `runTask` links an **already launched, authoritative** ACP/subagent execution with matching owner and canonical run/session IDs; it never launches one. Do not invent IDs, timestamps or backing records. See the [plugin launch/link contract](https://docs.openclaw.ai/plugins/sdk-runtime) and [Task Flow](https://docs.openclaw.ai/automation/taskflow).
+Plugin authors use `api.runtime.tasks.managedFlows`; `flows` and `runs` provide owner-scoped lookups. `runTask` links an **already launched, authoritative** ACP/subagent execution with matching owner and canonical run/session IDs; it never launches one. Do not invent IDs, timestamps or backing records. See the [plugin launch/link contract](../../docs/plugins/sdk-runtime.md) and [Task Flow](../../docs/automation/taskflow.md).
 
-For inbox routing and real-adapter requirements, read `skills/taskflow-inbox-triage/SKILL.md`. For tool setup, see [Lobster](https://docs.openclaw.ai/tools/lobster).
+For inbox routing and real-adapter requirements, read `skills/taskflow-inbox-triage/SKILL.md`. For tool setup, see [Lobster](../../docs/tools/lobster.md).

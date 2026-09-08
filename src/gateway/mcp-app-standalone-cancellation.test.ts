@@ -49,7 +49,7 @@ describe("MCP App standalone request cancellation", () => {
     });
     const controller = new AbortController();
     const response = fetch(
-      `http://127.0.0.1:${(server.address() as AddressInfo).port}/__openclaw__/mcp-app/view`,
+      `http://127.0.0.1:${(server.address() as AddressInfo).port}/__carapace__/mcp-app/view`,
       {
         method: "POST",
         signal: controller.signal,
@@ -126,7 +126,7 @@ describe("MCP App standalone request cancellation", () => {
         server.listen(0, "127.0.0.1", resolve);
       });
       const client = requestHttp(
-        `http://127.0.0.1:${(server.address() as AddressInfo).port}/__openclaw__/mcp-app/view`,
+        `http://127.0.0.1:${(server.address() as AddressInfo).port}/__carapace__/mcp-app/view`,
         {
           method: "POST",
           headers: { Authorization: `MCP-App ${ticket}`, "Content-Type": "application/json" },
@@ -258,7 +258,7 @@ describe("MCP App standalone request cancellation", () => {
       secret,
     }).ticket;
     const pending = request({
-      url: "/__openclaw__/mcp-app/view",
+      url: "/__carapace__/mcp-app/view",
       method: "POST",
       authorization: `MCP-App ${ticket}`,
       body: { method: "tools/list", params: {} },

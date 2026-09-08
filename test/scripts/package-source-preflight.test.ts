@@ -21,10 +21,10 @@ const changelog = `# Changelog
 
 function rootManifest(overrides: Record<string, unknown> = {}) {
   return JSON.stringify({
-    name: "openclaw",
+    name: "carapace",
     version: "2026.8.1",
     dependencies: {
-      "@openclaw/ai": "workspace:*",
+      "@carapace/ai": "workspace:*",
       openai: "6.49.0",
     },
     ...overrides,
@@ -33,7 +33,7 @@ function rootManifest(overrides: Record<string, unknown> = {}) {
 
 function aiManifest(overrides: Record<string, unknown> = {}) {
   return JSON.stringify({
-    name: "@openclaw/ai",
+    name: "@carapace/ai",
     version: "2026.8.1",
     dependencies: {
       openai: "6.49.0",
@@ -75,7 +75,7 @@ function workflowStep(workflow: Workflow, job: string, name: string): WorkflowSt
 }
 
 function runSourceRequirement(step: WorkflowStep, env: Record<string, string>) {
-  const tempDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-package-source-workflow-"));
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "carapace-package-source-workflow-"));
   const outputPath = path.join(tempDir, "output");
   try {
     const result = spawnSync("bash", ["--noprofile", "--norc", "-c", step.run ?? ""], {
@@ -95,9 +95,9 @@ function runSourceRequirement(step: WorkflowStep, env: Record<string, string>) {
 }
 
 function runLiveArtifactTupleValidation(packageEnv: Record<string, string>) {
-  const workflow = readWorkflow(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml");
+  const workflow = readWorkflow(".github/workflows/carapace-live-and-e2e-checks-reusable.yml");
   const step = workflowStep(workflow, "validate_selected_ref", "Validate selected ref");
-  const tempDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-live-artifact-tuple-"));
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "carapace-live-artifact-tuple-"));
   const fakeBin = path.join(tempDir, "bin");
   const outputPath = path.join(tempDir, "output");
   const summaryPath = path.join(tempDir, "summary");
@@ -135,7 +135,7 @@ exit 64
         GITHUB_STEP_SUMMARY: summaryPath,
         INPUT_REF: "main",
         PATH: `${fakeBin}:${process.env.PATH}`,
-        PROVIDED_BARE_IMAGE: "ghcr.io/openclaw/openclaw:test",
+        PROVIDED_BARE_IMAGE: "ghcr.io/carapace/carapace:test",
         SELECTED_SHA: selectedSha,
         SHARED_IMAGE_POLICY: "existing-only",
         TRUSTED_WORKFLOW_SHA: selectedSha,
@@ -161,19 +161,19 @@ exit 64
 }
 
 function runLiveSourcePackageBuildAndValidation(packageEnv: Record<string, string>) {
-  const workflow = readWorkflow(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml");
+  const workflow = readWorkflow(".github/workflows/carapace-live-and-e2e-checks-reusable.yml");
   const pack = workflowStep(
     workflow,
     "prepare_docker_e2e_image",
-    "Pack OpenClaw package for Docker E2E",
+    "Pack Carapace package for Docker E2E",
   );
   const validate = workflowStep(
     workflow,
     "prepare_docker_e2e_image",
-    "Validate OpenClaw Docker E2E package",
+    "Validate Carapace Docker E2E package",
   );
   const artifactTuple = runLiveArtifactTupleValidation(packageEnv);
-  const tempDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-live-source-package-"));
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "carapace-live-source-package-"));
   const fakeBin = path.join(tempDir, "bin");
   const callsPath = path.join(tempDir, "calls");
   const outputPath = path.join(tempDir, "output");
@@ -185,7 +185,7 @@ function runLiveSourcePackageBuildAndValidation(packageEnv: Record<string, strin
     `#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\\n' "$*" >> "$CALLS_PATH"
-if [[ "$1" == "scripts/package-openclaw-for-docker.mjs" ]]; then
+if [[ "$1" == "scripts/package-carapace-for-docker.mjs" ]]; then
   shift
   output_dir=""
   output_name=""
@@ -198,7 +198,7 @@ if [[ "$1" == "scripts/package-openclaw-for-docker.mjs" ]]; then
   done
   fixture="$(mktemp -d)"
   mkdir -p "$fixture/package/dist" "$output_dir"
-  printf '%s\\n' '{"name":"openclaw","version":"2026.8.1"}' > "$fixture/package/package.json"
+  printf '%s\\n' '{"name":"carapace","version":"2026.8.1"}' > "$fixture/package/package.json"
   printf '{"commit":"%s"}\\n' "$SELECTED_SHA" > "$fixture/package/dist/build-info.json"
   tar -czf "$output_dir/$output_name" -C "$fixture" package
   rm -rf "$fixture"
@@ -281,9 +281,9 @@ function runReleaseInputCapture(params: {
   candidateArtifactJson?: string;
   releasePackageSpec?: string;
 }) {
-  const workflow = readWorkflow(".github/workflows/openclaw-release-checks.yml");
+  const workflow = readWorkflow(".github/workflows/carapace-release-checks.yml");
   const step = workflowStep(workflow, "resolve_target", "Capture selected inputs");
-  const tempDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-release-inputs-"));
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "carapace-release-inputs-"));
   const outputPath = path.join(tempDir, "output");
   const stepEnv = Object.fromEntries(Object.keys(step.env ?? {}).map((name) => [name, ""]));
   try {
@@ -378,7 +378,7 @@ describe("package source preflight", () => {
     ).toThrow("packages/ai/package.json version must match package.json");
   });
 
-  it("rejects @openclaw/ai dependency drift before packing", () => {
+  it("rejects @carapace/ai dependency drift before packing", () => {
     expect(() =>
       validatePackageSource({
         aiManifestContent: aiManifest({
@@ -403,7 +403,7 @@ describe("package source preflight", () => {
           private: "0.0.0-private",
           workspace: "4.5.6",
         },
-        bundledPackageLabel: "packed @openclaw/ai",
+        bundledPackageLabel: "packed @carapace/ai",
         rootDependencies: {
           exact: "1.2.3",
           workspace: "workspace:4.5.6",
@@ -417,14 +417,14 @@ describe("package source preflight", () => {
     expect(() =>
       validateBundledPackageDependencyAlignment({
         bundledDependencies: { invalid: 123 },
-        bundledPackageLabel: "packed @openclaw/ai",
+        bundledPackageLabel: "packed @carapace/ai",
         rootDependencies: { invalid: "123" },
       }),
-    ).toThrow("packed @openclaw/ai dependency invalid must declare a string version");
+    ).toThrow("packed @carapace/ai dependency invalid must declare a string version");
     expect(() =>
       validateBundledPackageDependencyAlignment({
         bundledDependencies: { invalid: "1.2.3" },
-        bundledPackageLabel: "packed @openclaw/ai",
+        bundledPackageLabel: "packed @carapace/ai",
         rootDependencies: { invalid: 123 },
       }),
     ).toThrow("root package.json dependency invalid must declare a string version");
@@ -447,7 +447,7 @@ describe("package source preflight", () => {
     );
   });
 
-  it("preserves historical sources from before the @openclaw/ai workspace split", () => {
+  it("preserves historical sources from before the @carapace/ai workspace split", () => {
     expect(
       validatePackageSource({
         aiManifestContent: null,
@@ -476,7 +476,7 @@ describe("package source preflight", () => {
   });
 
   it("normalizes release-check package mode and guards the source resolver", () => {
-    const workflow = readWorkflow(".github/workflows/openclaw-release-checks.yml");
+    const workflow = readWorkflow(".github/workflows/carapace-release-checks.yml");
     const steps = workflow.jobs.prepare_release_package!.steps;
     const preflightIndex = steps.findIndex(
       (step) => step.name === "Validate release package source metadata",
@@ -507,10 +507,10 @@ describe("package source preflight", () => {
       package_mode: "source",
       release_package_spec: "",
     });
-    expect(runReleaseInputCapture({ releasePackageSpec: "openclaw@beta" })).toMatchObject({
+    expect(runReleaseInputCapture({ releasePackageSpec: "carapace@beta" })).toMatchObject({
       candidate_artifact_json: "",
       package_mode: "published",
-      release_package_spec: "openclaw@beta",
+      release_package_spec: "carapace@beta",
     });
     expect(runReleaseInputCapture({ candidateArtifactJson: " \t " })).toMatchObject({
       candidate_artifact_json: "",
@@ -548,13 +548,13 @@ describe("package source preflight", () => {
       source:
         "${{ needs.resolve_target.outputs.package_acceptance_package_spec != '' && 'npm' || 'artifact' }}",
     });
-    const workflowSource = readFileSync(".github/workflows/openclaw-release-checks.yml", "utf8");
+    const workflowSource = readFileSync(".github/workflows/carapace-release-checks.yml", "utf8");
     expect(workflowSource.match(/\$\{\{ inputs\.candidate_artifact_json \}\}/gu)).toHaveLength(1);
     expect(workflowSource.match(/\$\{\{ inputs\.release_package_spec \}\}/gu)).toHaveLength(1);
   });
 
   it("guards prepare-only source before harness setup and skips no-package lane setup", () => {
-    const workflow = readWorkflow(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml");
+    const workflow = readWorkflow(".github/workflows/carapace-live-and-e2e-checks-reusable.yml");
     const steps = workflow.jobs.prepare_docker_e2e_image!.steps;
     const sourceRequirement = workflowStep(
       workflow,
@@ -580,7 +580,7 @@ describe("package source preflight", () => {
     const pack = workflowStep(
       workflow,
       "prepare_docker_e2e_image",
-      "Pack OpenClaw package for Docker E2E",
+      "Pack Carapace package for Docker E2E",
     );
 
     expect(
@@ -670,15 +670,15 @@ describe("package source preflight", () => {
     expect(result.buildResult.status, result.buildResult.stderr).toBe(0);
     expect(result.validationResult.status, result.validationResult.stderr).toBe(0);
     expect(result.calls).toEqual([
-      expect.stringContaining("scripts/package-openclaw-for-docker.mjs"),
+      expect.stringContaining("scripts/package-carapace-for-docker.mjs"),
     ]);
     expect(result.output).toMatchObject({
-      file_name: "openclaw-current.tgz",
+      file_name: "carapace-current.tgz",
       source_sha: "a".repeat(40),
       version: "2026.8.1",
     });
 
-    const workflow = readWorkflow(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml");
+    const workflow = readWorkflow(".github/workflows/carapace-live-and-e2e-checks-reusable.yml");
     const prepared = workflow.jobs.prepare_docker_e2e_image!;
     expect(prepared.outputs).toMatchObject({
       package_artifact_id:
@@ -693,7 +693,7 @@ describe("package source preflight", () => {
       "validate_docker_lanes",
       "validate_docker_openwebui",
     ]) {
-      expect(workflow.jobs[jobId]!.env?.OPENCLAW_DOCKER_E2E_PACKAGE_ARTIFACT_NAME).toBe(
+      expect(workflow.jobs[jobId]!.env?.CARAPACE_DOCKER_E2E_PACKAGE_ARTIFACT_NAME).toBe(
         reportArtifactName,
       );
     }
@@ -717,7 +717,7 @@ describe("package source preflight", () => {
     const noPackageArtifactName =
       result.artifactTuple.output.package_artifact_present === "true" ? whitespace : "";
     expect(noPackageArtifactName).toBe("");
-    const reportDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-live-source-report-"));
+    const reportDir = mkdtempSync(path.join(os.tmpdir(), "carapace-live-source-report-"));
     try {
       await writeRunSummary(
         reportDir,
@@ -727,8 +727,8 @@ describe("package source preflight", () => {
           status: "failed",
         },
         {
-          OPENCLAW_DOCKER_E2E_PACKAGE_ARTIFACT_NAME: noPackageArtifactName || "docker-e2e-package",
-          OPENCLAW_DOCKER_E2E_SELECTED_SHA: "a".repeat(40),
+          CARAPACE_DOCKER_E2E_PACKAGE_ARTIFACT_NAME: noPackageArtifactName || "docker-e2e-package",
+          CARAPACE_DOCKER_E2E_SELECTED_SHA: "a".repeat(40),
         },
       );
       const summary = JSON.parse(readFileSync(path.join(reportDir, "summary.json"), "utf8"));
@@ -758,20 +758,20 @@ describe("package source preflight", () => {
   });
 
   it("guards npm source producers with trusted tooling before Node setup", () => {
-    const workflow = readWorkflow(".github/workflows/openclaw-npm-preflight.yml");
-    const steps = workflow.jobs.prepare_openclaw_npm!.steps;
+    const workflow = readWorkflow(".github/workflows/carapace-npm-preflight.yml");
+    const steps = workflow.jobs.prepare_carapace_npm!.steps;
     const checkout = workflowStep(
       workflow,
-      "prepare_openclaw_npm",
+      "prepare_carapace_npm",
       "Checkout trusted package source preflight",
     );
     const preflight = workflowStep(
       workflow,
-      "prepare_openclaw_npm",
+      "prepare_carapace_npm",
       "Validate npm package source metadata",
     );
-    const setup = workflowStep(workflow, "prepare_openclaw_npm", "Setup Node environment");
-    const build = workflowStep(workflow, "prepare_openclaw_npm", "Build");
+    const setup = workflowStep(workflow, "prepare_carapace_npm", "Setup Node environment");
+    const build = workflowStep(workflow, "prepare_carapace_npm", "Build");
 
     expect(checkout.with).toMatchObject({
       ref: "${{ github.workflow_sha }}",

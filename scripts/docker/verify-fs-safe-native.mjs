@@ -29,7 +29,7 @@ function parseArgs(argv) {
   return { mode, packageRoot: fs.realpathSync(packageRoot) };
 }
 
-const fsSafeNativeContract = process.env.OPENCLAW_FS_SAFE_NATIVE_CONTRACT ?? "required";
+const fsSafeNativeContract = process.env.CARAPACE_FS_SAFE_NATIVE_CONTRACT ?? "required";
 if (fsSafeNativeContract === "not-applicable") {
   console.log(
     "Skipping fs-safe native proof: selected source has the published pre-native contract.",
@@ -63,7 +63,7 @@ const { configureFsSafeNative } = await import(pathToFileURL(configPath).href);
 const { sha256File } = await import(pathToFileURL(durabilityPath).href);
 configureFsSafeNative({ mode: mode === "require" ? "require" : "off" });
 
-const temporaryRoot = await fsPromises.mkdtemp(path.join(os.tmpdir(), "openclaw-fs-safe-proof-"));
+const temporaryRoot = await fsPromises.mkdtemp(path.join(os.tmpdir(), "carapace-fs-safe-proof-"));
 try {
   const fixture = path.join(temporaryRoot, "fixture.txt");
   await fsPromises.writeFile(fixture, "fs-safe native package proof");

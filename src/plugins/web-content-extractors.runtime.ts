@@ -1,12 +1,12 @@
 // Runtime bridge for web content extractors supplied by plugins.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveEnabledBundledManifestContractPlugins } from "./bundled-manifest-contract-plugins.js";
 import { sortPluginEntriesForAutoDetect } from "./plugin-entry-order.js";
 import { loadBundledWebContentExtractorEntriesFromDir } from "./web-content-extractor-public-artifacts.js";
 import type { PluginWebContentExtractorEntry } from "./web-content-extractor-types.js";
 
 export function resolvePluginWebContentExtractors(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   onlyPluginIds?: readonly string[];

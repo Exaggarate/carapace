@@ -18,7 +18,7 @@ type ToolSearchTestApi = {
 
 function getTestApi(): ToolSearchTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.toolSearchTestApi")
+    Symbol.for("carapace.toolSearchTestApi")
   ] as ToolSearchTestApi;
 }
 

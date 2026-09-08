@@ -4,15 +4,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { AGENT_DATABASE_MAINTENANCE_LEASE } from "../state/openclaw-agent-db-lease.js";
+import { AGENT_DATABASE_MAINTENANCE_LEASE } from "../state/carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { noteDoctorAgentMemorySchemaHealth } from "./doctor-agent-memory-schema.js";
 
 const tempDirs: string[] = [];
@@ -22,10 +22,10 @@ function createRegisteredAgentDatabase(): {
   env: NodeJS.ProcessEnv;
 } {
   const stateDir = makeTempDir(tempDirs, "doctor-agent-memory-schema-");
-  const env = { OPENCLAW_STATE_DIR: stateDir };
-  const databasePath = openOpenClawAgentDatabase({ agentId: "worker-1", env }).path;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  const env = { CARAPACE_STATE_DIR: stateDir };
+  const databasePath = openCarapaceAgentDatabase({ agentId: "worker-1", env }).path;
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   return { databasePath, env };
 }
 
@@ -88,8 +88,8 @@ function readMemoryChunkTableSql(databasePath: string): string {
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 });
 
@@ -185,11 +185,11 @@ describe("doctor agent memory schema repair", () => {
   it("leaves a later runtime admission untouched after the first repair loses maintenance", async () => {
     const { databasePath, env } = createRegisteredAgentDatabase();
     const laterOptions = { agentId: "worker-2", env };
-    const laterPath = openOpenClawAgentDatabase(laterOptions).path;
-    closeOpenClawAgentDatabasesForTest();
+    const laterPath = openCarapaceAgentDatabase(laterOptions).path;
+    closeCarapaceAgentDatabasesForTest();
     recreateUnreleasedInlineMemoryMetadata(databasePath);
     recreateUnreleasedInlineMemoryMetadata(laterPath);
-    const agentDatabase = await import("../state/openclaw-agent-db.js");
+    const agentDatabase = await import("../state/carapace-agent-db.js");
     const integrityWorker = await import("../infra/sqlite-integrity-worker.js");
     const sqlite = await import("../infra/node-sqlite.js");
     const startAdmission = createDeferred();
@@ -197,7 +197,7 @@ describe("doctor agent memory schema repair", () => {
     const releaseAdmission = createDeferred();
     // Register outside the old maintenance ALS scope: this is a new runtime owner.
     const newerAdmission = startAdmission.promise.then(() =>
-      agentDatabase.withOpenClawAgentDatabaseAsync(laterOptions, (database) =>
+      agentDatabase.withCarapaceAgentDatabaseAsync(laterOptions, (database) =>
         database.db.prepare("SELECT id, text FROM memory_index_chunks").all(),
       ),
     );
@@ -223,13 +223,13 @@ describe("doctor agent memory schema repair", () => {
         }
         return open(pathname, options);
       });
-    const close = vi.spyOn(agentDatabase, "closeOpenClawAgentDatabaseByPath");
-    const migrate = agentDatabase.migrateOpenClawAgentDatabaseForMaintenance;
+    const close = vi.spyOn(agentDatabase, "closeCarapaceAgentDatabaseByPath");
+    const migrate = agentDatabase.migrateCarapaceAgentDatabaseForMaintenance;
     const repair = vi
-      .spyOn(agentDatabase, "migrateOpenClawAgentDatabaseForMaintenance")
+      .spyOn(agentDatabase, "migrateCarapaceAgentDatabaseForMaintenance")
       .mockImplementationOnce(async (options, maintenance) => {
         await migrate(options, maintenance);
-        const removed = openOpenClawStateDatabase({ env })
+        const removed = openCarapaceStateDatabase({ env })
           .db.prepare("DELETE FROM state_leases WHERE scope = ? AND lease_key = ?")
           .run(AGENT_DATABASE_MAINTENANCE_LEASE.scope, AGENT_DATABASE_MAINTENANCE_LEASE.key);
         expect(removed.changes).toBe(1);

@@ -4,7 +4,7 @@ import { property } from "lit/decorators.js";
 import { applicationContext, type ApplicationGatewaySnapshot } from "../../app/context.ts";
 import "../../components/tooltip.ts";
 import { sessionNavigationTarget } from "../../lib/sessions/route-navigation.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { canCallWorkshopAdminMethod } from "./access.ts";
 import {
@@ -33,7 +33,7 @@ import {
 } from "./source-scope.ts";
 import { loadSkillWorkshopMode } from "./storage.ts";
 
-class SkillWorkshopPage extends OpenClawLightDomElement {
+class SkillWorkshopPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: SkillWorkshopPageContext;
   @property({ attribute: false }) data?: SkillWorkshopRouteData;
@@ -442,6 +442,6 @@ class SkillWorkshopPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-skill-workshop-page")) {
-  customElements.define("openclaw-skill-workshop-page", SkillWorkshopPage);
+if (!customElements.get("carapace-skill-workshop-page")) {
+  customElements.define("carapace-skill-workshop-page", SkillWorkshopPage);
 }

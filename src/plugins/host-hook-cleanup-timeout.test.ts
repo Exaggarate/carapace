@@ -1,5 +1,5 @@
 /** Verifies host hook cleanup timeout behavior and cancellation reporting. */
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withPluginHostCleanupTimeout } from "./host-hook-cleanup-timeout.js";
 

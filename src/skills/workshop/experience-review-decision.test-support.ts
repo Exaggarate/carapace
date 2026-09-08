@@ -1,5 +1,5 @@
-import type { AgentMessage } from "@openclaw/agent-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AgentMessage } from "@carapace/agent-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { expect } from "vitest";
 import type { readSkillReviewOutcomes } from "./collection-review-state.js";
 import { readExperienceReviewMessageText } from "./experience-review-message-text.test-support.js";

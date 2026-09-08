@@ -291,9 +291,9 @@ describe("handleMessageUpdate text signatures", () => {
   it.each([
     "openai-responses",
     "openai-chatgpt-responses",
-    "openclaw-openai-responses-transport",
-    "openclaw-openai-chatgpt-responses-transport",
-    "openclaw-azure-openai-responses-transport",
+    "carapace-openai-responses-transport",
+    "carapace-openai-chatgpt-responses-transport",
+    "carapace-azure-openai-responses-transport",
   ])("streams %s commentary with one complete-preamble boundary", async (api) => {
     const onAgentEvent = vi.fn();
     const context = createMessageUpdateContext({ onAgentEvent });

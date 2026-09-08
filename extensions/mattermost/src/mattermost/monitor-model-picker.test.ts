@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   runDetachedWebhookWork: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/webhook-request-guards", () => ({
+vi.mock("carapace/plugin-sdk/webhook-request-guards", () => ({
   runDetachedWebhookWork: mocks.runDetachedWebhookWork,
 }));
 

@@ -2,8 +2,8 @@
 // page, because native window.confirm/window.prompt silently answer in webviews with no
 // dialog bridge and would end the action with no outcome and no recorded reason.
 import { getPublicKeyAsync, hashes, signAsync, utils } from "@noble/ed25519";
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type {
   ExecApprovalsNodeSnapshot as GatewayExecApprovalsNodeSnapshot,
   ExecApprovalsSnapshot as GatewayExecApprovalsSnapshot,
@@ -144,9 +144,9 @@ type DeviceIdentity = {
   privateKey: string;
 };
 
-const LEGACY_DEVICE_AUTH_STORAGE_KEY = "openclaw.device.auth.v1";
+const LEGACY_DEVICE_AUTH_STORAGE_KEY = "carapace.device.auth.v1";
 const DEVICE_AUTH_STORAGE_KEY_PREFIX = `${LEGACY_DEVICE_AUTH_STORAGE_KEY}:`;
-const DEVICE_IDENTITY_STORAGE_KEY = "openclaw-device-identity-v1";
+const DEVICE_IDENTITY_STORAGE_KEY = "carapace-device-identity-v1";
 
 export function createInitialDevicesState(
   snapshot: Partial<NodesGatewaySnapshot> = {},

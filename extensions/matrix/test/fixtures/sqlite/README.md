@@ -1,6 +1,6 @@
 # Matrix SQLite fixtures
 
-`matrix-account-v2026.7.1.sqlite.gz.base64` is an account-scoped state database made with OpenClaw
+`matrix-account-v2026.7.1.sqlite.gz.base64` is an account-scoped state database made with Carapace
 2026.7.1 at commit `2d2ddc43d0dcf71f31283d780f9fe9ff4cc04fe4`.
 
 The database started from the repository's released 2026.7.1 shared-state fixture. The 2026.7.1

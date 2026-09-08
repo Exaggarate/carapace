@@ -1,11 +1,11 @@
 import http from "node:http";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   createPluginRuntimeMock,
   createPluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCanonicalForkFixtureForTest } from "../extensions/codex/test-api.js";
 import {
@@ -30,7 +30,7 @@ import {
   replaceTranscriptEvents,
 } from "../src/config/sessions/session-accessor.js";
 import { writeSessionEntry } from "../src/config/sessions/session-accessor.sqlite-entry-store.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { sessionRewindHandlers } from "../src/gateway/server-methods/sessions-rewind.js";
 import type { GatewayRequestContext } from "../src/gateway/server-methods/types.js";
 import { createWorkerSessionPlacementStore } from "../src/gateway/worker-environments/placement-store.js";
@@ -58,8 +58,8 @@ import { resolvePluginRuntimeLoadContext } from "../src/plugins/runtime/load-con
 import { createRuntimeAgent } from "../src/plugins/runtime/runtime-agent.js";
 import { createPluginRecord } from "../src/plugins/status.test-helpers.js";
 import type {
-  OpenClawPluginDefinition,
-  OpenClawPluginMcpServerConnectionResolver,
+  CarapacePluginDefinition,
+  CarapacePluginMcpServerConnectionResolver,
 } from "../src/plugins/types.js";
 import {
   listSessionStateEventsSince,
@@ -72,8 +72,8 @@ import {
   createUserTurnTranscriptRecorder,
   type UserTurnTranscriptRecorder,
 } from "../src/sessions/user-turn-transcript.js";
-import { runOpenClawAgentWriteTransaction } from "../src/state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../src/test-utils/openclaw-test-state.js";
+import { runCarapaceAgentWriteTransaction } from "../src/state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../src/test-utils/carapace-test-state.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -101,7 +101,7 @@ function expectPolicyHandoff(
         content: [
           {
             type: "input_text",
-            text: expect.stringContaining(body || "current OpenClaw generic policy is empty"),
+            text: expect.stringContaining(body || "current Carapace generic policy is empty"),
           },
         ],
       },
@@ -126,11 +126,11 @@ async function withFixture(
     desktopGenerationFingerprint?: string;
     senderIsOwner?: boolean;
     transcript?: { display?: false; excludeFromContext?: true };
-    mcpResolver?: OpenClawPluginMcpServerConnectionResolver;
+    mcpResolver?: CarapacePluginMcpServerConnectionResolver;
   } = {},
 ) {
-  await withOpenClawTestState({ label: "canonical-descendant" }, async (state) => {
-    const config: OpenClawConfig = {
+  await withCarapaceTestState({ label: "canonical-descendant" }, async (state) => {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         defaults: { model: { primary: "openai/gpt-5.5" } },
@@ -347,7 +347,7 @@ async function withFixture(
               preferBuiltPluginArtifacts: false,
             }),
           );
-          const plugin: OpenClawPluginDefinition = (
+          const plugin: CarapacePluginDefinition = (
             await import(pathToFileURL(artifact.source).href)
           ).default;
           expect(plugin.id).toBe(pluginId);
@@ -458,7 +458,7 @@ async function withFixture(
                 loadSessionEntry({ sessionKey: key, storePath: fixture.storePath }),
                 "revoked owner",
               );
-              runOpenClawAgentWriteTransaction(
+              runCarapaceAgentWriteTransaction(
                 (database) =>
                   writeSessionEntry(database, key, {
                     ...entry,
@@ -522,7 +522,7 @@ describe("canonical descendant lifecycle through real owners", () => {
           calls.findIndex((call) => call.method === "turn/start"),
         );
         expect(
-          admissions.at(-1)?.recorder.getPersistedMessage?.()?.["__openclaw"]?.mirrorIdentity,
+          admissions.at(-1)?.recorder.getPersistedMessage?.()?.["__carapace"]?.mirrorIdentity,
         ).toMatch(/:prompt$/);
       }
       expect(
@@ -558,7 +558,7 @@ describe("canonical descendant lifecycle through real owners", () => {
         expect(fixture.bindingStore.read(fixture.identity(source.sessionKey))).toEqual(before);
         expect(fixture.native.threads.get(binding.threadId)?.thread.turns).toEqual(history);
         expect(
-          admissions.at(-1)?.recorder.getPersistedMessage?.()?.["__openclaw"],
+          admissions.at(-1)?.recorder.getPersistedMessage?.()?.["__carapace"],
         ).not.toHaveProperty("mirrorIdentity");
         const lastClient = calls.find((call) => call.method === "thread/inject_items")?.client;
         // A separately admitted cold run may reassert once on a new physical client.
@@ -795,8 +795,8 @@ describe("canonical descendant lifecycle through real owners", () => {
         "first admission",
       );
       const recorded = await loadTranscriptEvents(target);
-      const nativeMeta = (recorded.at(-1) as { message: { __openclaw: Record<string, unknown> } })
-        .message["__openclaw"];
+      const nativeMeta = (recorded.at(-1) as { message: { __carapace: Record<string, unknown> } })
+        .message["__carapace"];
       // Model the observed pre-fix stored shape, not an inferred native-to-local mapping.
       await replaceTranscriptEvents(
         target,
@@ -810,7 +810,7 @@ describe("canonical descendant lifecycle through real owners", () => {
               role: "assistant",
               content: [{ type: "text", text: "matching reply" }],
               timestamp: 234,
-              __openclaw: {
+              __carapace: {
                 mirrorIdentity: String(nativeMeta.mirrorIdentity).replace(":prompt", ":reply"),
                 runId: nativeMeta.runId,
               },
@@ -824,7 +824,7 @@ describe("canonical descendant lifecycle through real owners", () => {
         "later admission",
       );
       expect(
-        admissions.at(-1)?.recorder.getPersistedMessage?.()?.["__openclaw"]?.mirrorIdentity,
+        admissions.at(-1)?.recorder.getPersistedMessage?.()?.["__carapace"]?.mirrorIdentity,
       ).toBeDefined();
       const before = await loadTranscriptEvents(target);
       const calls = fixture.native.calls.filter((call) => call.method === "thread/fork").length;
@@ -879,17 +879,17 @@ describe("canonical descendant lifecycle through real owners", () => {
         const after = await loadTranscriptEvents(target);
         const added = after.at(-1) as {
           id: string;
-          message: { __openclaw?: Record<string, unknown> };
+          message: { __carapace?: Record<string, unknown> };
         };
         expect(added.id).toBe(admission.entryId);
-        expect(added.message["__openclaw"]).toMatchObject({
+        expect(added.message["__carapace"]).toMatchObject({
           mirrorOrigin: "codex-app-server",
           mirrorIdentity: expect.stringMatching(/:prompt$/),
           upstreamUserText: text,
           mirrorSourceFingerprint: expect.any(String),
         });
         const original = before.at(-1) as typeof added;
-        const meta = { ...added.message["__openclaw"] };
+        const meta = { ...added.message["__carapace"] };
         for (const key of [
           "mirrorIdentity",
           "upstreamUserText",
@@ -899,7 +899,7 @@ describe("canonical descendant lifecycle through real owners", () => {
         ]) {
           delete meta[key];
         }
-        expect({ ...added, message: { ...added.message, __openclaw: meta } }).toEqual(original);
+        expect({ ...added, message: { ...added.message, __carapace: meta } }).toEqual(original);
         expect(after.slice(0, -1)).toEqual(before.slice(0, -1));
         expect(recorder.getPersistedMessage?.()).toEqual(added.message);
         expect(await readCodexSessionTranscriptEventsBeforeAdmission(target, admission)).toEqual(
@@ -1679,7 +1679,7 @@ describe("canonical descendant lifecycle through real owners", () => {
                 content: [{ type: "text", text: "local display only" }],
                 ...(blocked
                   ? {
-                      __openclaw: {
+                      __carapace: {
                         beforeAgentRunBlocked: {
                           blockedBy: "before_agent_run",
                           blockedAt: Date.now(),

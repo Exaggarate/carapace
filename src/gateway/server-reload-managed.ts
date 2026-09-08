@@ -3,7 +3,7 @@ import {
   refreshPreparedModelRuntimeSnapshots,
 } from "../agents/prepared-model-runtime.js";
 import { copyConfigResolutionFacts } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { applyLoggingConfig } from "../logging/logger.js";
 import { runWithGatewayIndependentRootWorkAdmission } from "../process/gateway-work-admission.js";
 import { getActiveSecretsRuntimeSnapshotRevisionState } from "../secrets/runtime-state.js";
@@ -67,10 +67,10 @@ export function startManagedGatewayConfigReloader(
   }
 
   const prepareRuntimeCandidate = (
-    runtimeConfig: OpenClawConfig,
-    sourceConfig: OpenClawConfig,
+    runtimeConfig: CarapaceConfig,
+    sourceConfig: CarapaceConfig,
     ownership?: GatewayConfigReloadTransactionOwnership,
-  ): OpenClawConfig => {
+  ): CarapaceConfig => {
     const canonicalConfig = restoreCanonicalSecretRefs(runtimeConfig, sourceConfig);
     copyConfigResolutionFacts(sourceConfig, canonicalConfig);
     const candidateConfig = ownership?.reapplyRuntimeOverlays(canonicalConfig) ?? canonicalConfig;
@@ -78,7 +78,7 @@ export function startManagedGatewayConfigReloader(
     copyConfigResolutionFacts(candidateConfig, prepared);
     return prepared;
   };
-  const applyRuntimeConfigOverrides = (config: OpenClawConfig): OpenClawConfig => {
+  const applyRuntimeConfigOverrides = (config: CarapaceConfig): CarapaceConfig => {
     const applied = params.applyRuntimeConfigOverrides?.(config) ?? config;
     copyConfigResolutionFacts(config, applied);
     return applied;
@@ -87,7 +87,7 @@ export function startManagedGatewayConfigReloader(
     params.restartRecoveryAvailable !== false && params.requestRecoveryRestart !== undefined;
 
   const tryPrepareRuntimeSecrets = async (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     transactionOwnership: GatewayConfigReloadTransactionOwnership,
     activationParams: RuntimeSecretsPreflightParams,
   ): Promise<CurrentRuntimeSecretsPreparation | null> => {
@@ -160,16 +160,16 @@ export function startManagedGatewayConfigReloader(
       }
     },
     assertRestartReady: () =>
-      import("../state/openclaw-database-preflight.js").then(({ assertOpenClawDatabasesReady }) =>
-        assertOpenClawDatabasesReady({ env: process.env, operation: "gateway-restart" }),
+      import("../state/carapace-database-preflight.js").then(({ assertCarapaceDatabasesReady }) =>
+        assertCarapaceDatabasesReady({ env: process.env, operation: "gateway-restart" }),
       ),
     restartRecoveryAvailable,
   });
   const runManagedRestart = async (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     transactionOwnership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: CarapaceConfig,
     restartOptions?: GatewayRestartRequestOptions,
     beforeRestartRequest?: () => Promise<void>,
   ) => {
@@ -187,7 +187,7 @@ export function startManagedGatewayConfigReloader(
           previousRequired: string | undefined | null;
           previousCurrent: string | undefined;
           nextGeneration: string | undefined;
-          runtimeConfig: OpenClawConfig;
+          runtimeConfig: CarapaceConfig;
         }
       | undefined;
     try {
@@ -318,7 +318,7 @@ export function startManagedGatewayConfigReloader(
     applyHotReload,
   });
 
-  let lastCommittedRuntimeConfig: OpenClawConfig | undefined;
+  let lastCommittedRuntimeConfig: CarapaceConfig | undefined;
   const configReloader = startGatewayConfigReloader({
     initialConfig: params.initialConfig,
     initialCompareConfig: params.initialCompareConfig,

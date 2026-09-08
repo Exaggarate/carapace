@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import {
   readWorkspaceSkillFile,
@@ -108,7 +108,7 @@ export async function proposeCreateSkill(
       skillKey: target.skillKey,
       skillDir: target.skillDir,
       skillFile: target.skillFile,
-      source: "openclaw-workshop",
+      source: "carapace-workshop",
     },
   });
 }
@@ -191,7 +191,7 @@ export async function proposeUpdateSkill(
       skillKey: target.skillKey,
       skillDir: target.baseDir,
       skillFile: target.skillFile,
-      source: "openclaw-workshop",
+      source: "carapace-workshop",
       currentContentHash: hashSkillProposalContent(currentContent),
     },
   });

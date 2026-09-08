@@ -2,7 +2,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { resolveSkillsPrompt } from "../loading/workspace-skill-prompt.js";
 import { writeSkill } from "../test-support/e2e-test-helpers.js";
 import { writePluginWithSkill } from "../test-support/skill-plugin-fixtures.test-support.js";
@@ -10,19 +10,19 @@ import { resolveEmbeddedRunSkillEntries } from "./embedded-run-entries.js";
 import { resolveReusableWorkspaceSkillSnapshot } from "./session-snapshot.js";
 
 const tempDirs = createTempDirTracker();
-const originalBundledDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+const originalBundledDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
 
 function restoreBundledPluginsDir() {
   if (originalBundledDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
     return;
   }
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledDir;
+  process.env.CARAPACE_BUNDLED_PLUGINS_DIR = originalBundledDir;
 }
 
 async function setupBundledDiffsPlugin() {
-  const bundledPluginsDir = tempDirs.make("openclaw-bundled-");
-  const workspaceDir = tempDirs.make("openclaw-workspace-");
+  const bundledPluginsDir = tempDirs.make("carapace-bundled-");
+  const workspaceDir = tempDirs.make("carapace-workspace-");
   const pluginRoot = path.join(bundledPluginsDir, "diffs");
 
   await writePluginWithSkill({
@@ -35,9 +35,9 @@ async function setupBundledDiffsPlugin() {
   return { bundledPluginsDir, workspaceDir };
 }
 
-async function resolveBundledDiffsSkillEntries(config?: OpenClawConfig) {
+async function resolveBundledDiffsSkillEntries(config?: CarapaceConfig) {
   const { bundledPluginsDir, workspaceDir } = await setupBundledDiffsPlugin();
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+  process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
 
   return resolveEmbeddedRunSkillEntries({ workspaceDir, ...(config ? { config } : {}) });
 }
@@ -49,8 +49,8 @@ afterEach(() => {
 
 describe("resolveEmbeddedRunSkillEntries (integration)", () => {
   it("matches snapshot skill roots when a snapshot-less run uses a different execution directory", async () => {
-    const agentWorkspaceDir = tempDirs.make("openclaw-agent-workspace-");
-    const executionWorkspaceDir = tempDirs.make("openclaw-execution-workspace-");
+    const agentWorkspaceDir = tempDirs.make("carapace-agent-workspace-");
+    const executionWorkspaceDir = tempDirs.make("carapace-execution-workspace-");
     const executionSkillsDir = path.join(executionWorkspaceDir, "skills");
     for (const [workspaceDir, name, description] of [
       [agentWorkspaceDir, "fallback-agent", "Agent only"],
@@ -95,8 +95,8 @@ describe("resolveEmbeddedRunSkillEntries (integration)", () => {
   });
 
   it("keeps agent skills ahead of execution skills in a constrained fallback prompt", async () => {
-    const agentWorkspaceDir = tempDirs.make("openclaw-agent-workspace-");
-    const executionWorkspaceDir = tempDirs.make("openclaw-execution-workspace-");
+    const agentWorkspaceDir = tempDirs.make("carapace-agent-workspace-");
+    const executionWorkspaceDir = tempDirs.make("carapace-execution-workspace-");
     const executionSkillsDir = path.join(executionWorkspaceDir, "skills");
     const agentSkillName = "z-agent-priority";
     const executionSkillName = "a-execution-priority";
@@ -110,7 +110,7 @@ describe("resolveEmbeddedRunSkillEntries (integration)", () => {
       name: executionSkillName,
       description: "Execution priority",
     });
-    const config: OpenClawConfig = { skills: { limits: { maxSkillsInPrompt: 1 } } };
+    const config: CarapaceConfig = { skills: { limits: { maxSkillsInPrompt: 1 } } };
     const snapshotPrompt = resolveReusableWorkspaceSkillSnapshot({
       workspaceDir: agentWorkspaceDir,
       executionSkillsDir,
@@ -138,7 +138,7 @@ describe("resolveEmbeddedRunSkillEntries (integration)", () => {
   });
 
   it("loads bundled diffs skill when explicitly enabled in config", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           diffs: { enabled: true },

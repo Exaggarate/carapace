@@ -10,19 +10,19 @@ export type {
   ChannelPlugin,
   ChatType,
   HistoryEntry,
-  OpenClawConfig,
-  OpenClawPluginApi,
+  CarapaceConfig,
+  CarapacePluginApi,
   PluginRuntime,
-} from "openclaw/plugin-sdk/core";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-export type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-export type { ModelsProviderData } from "openclaw/plugin-sdk/models-provider-runtime";
+} from "carapace/plugin-sdk/core";
+export type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+export type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+export type { ModelsProviderData } from "carapace/plugin-sdk/models-provider-runtime";
 export type {
   BlockStreamingCoalesceConfig,
   ContextVisibilityMode,
   DmPolicy,
   GroupPolicy,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/config-contracts";
 export {
   DEFAULT_ACCOUNT_ID,
   buildChannelConfigSchema,
@@ -30,31 +30,31 @@ export {
   parseStrictPositiveInteger,
   resolveClientIp,
   isTrustedProxyAddress,
-} from "openclaw/plugin-sdk/core";
-export { buildComputedAccountStatusSnapshot } from "openclaw/plugin-sdk/channel-status";
-export { createAccountStatusSink } from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/core";
+export { buildComputedAccountStatusSnapshot } from "carapace/plugin-sdk/channel-status";
+export { createAccountStatusSink } from "carapace/plugin-sdk/channel-outbound";
 export {
   listSkillCommandsForAgents,
   resolveControlCommandGate,
   resolveStoredModelOverride,
-} from "openclaw/plugin-sdk/command-auth-native";
-export { buildPreparedModelsProviderData } from "openclaw/plugin-sdk/models-provider-runtime";
+} from "carapace/plugin-sdk/command-auth-native";
+export { buildPreparedModelsProviderData } from "carapace/plugin-sdk/models-provider-runtime";
 export {
   GROUP_POLICY_BLOCKED_LABEL,
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
-export { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-export { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-export { formatInboundFromLabel } from "openclaw/plugin-sdk/channel-inbound";
-export { logInboundDrop } from "openclaw/plugin-sdk/channel-inbound";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-export { createChannelMessageReplyPipeline } from "openclaw/plugin-sdk/channel-outbound";
-export { logTypingFailure } from "openclaw/plugin-sdk/channel-feedback";
-export { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-export { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
-export { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/runtime-group-policy";
+export { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
+export { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+export { formatInboundFromLabel } from "carapace/plugin-sdk/channel-inbound";
+export { logInboundDrop } from "carapace/plugin-sdk/channel-inbound";
+export { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
+export { createChannelMessageReplyPipeline } from "carapace/plugin-sdk/channel-outbound";
+export { logTypingFailure } from "carapace/plugin-sdk/channel-feedback";
+export { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
+export { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
+export { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 // Legacy map-helper exports stay for older plugin consumers. New message-turn
 // code should use createChannelHistoryWindow.
 export {
@@ -63,20 +63,20 @@ export {
   buildPendingHistoryContextFromMap,
   clearHistoryEntriesIfEnabled,
   recordPendingHistoryEntryIfEnabled,
-} from "openclaw/plugin-sdk/reply-history";
-export { normalizeAccountId, resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
-export { resolveAllowlistMatchSimple } from "openclaw/plugin-sdk/allow-from";
-export { registerPluginHttpRoute } from "openclaw/plugin-sdk/webhook-targets";
+} from "carapace/plugin-sdk/reply-history";
+export { normalizeAccountId, resolveThreadSessionKeys } from "carapace/plugin-sdk/routing";
+export { resolveAllowlistMatchSimple } from "carapace/plugin-sdk/allow-from";
+export { registerPluginHttpRoute } from "carapace/plugin-sdk/webhook-targets";
 export {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 export {
   applyAccountNameToChannelSection,
   applySetupAccountConfigPatch,
   migrateBaseNameToDefaultAccount,
-} from "openclaw/plugin-sdk/setup";
-export { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
-export { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
-export { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/setup";
+export { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
+export { getAgentScopedMediaLocalRoots } from "carapace/plugin-sdk/media-runtime";
+export { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
 export { setMattermostRuntime } from "./src/runtime.js";

@@ -2,10 +2,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   appendTranscriptEvent,
   loadTranscriptEventsSync,
@@ -34,18 +34,18 @@ describe("SQLite transcript context accounting", () => {
   };
 
   beforeEach(() => {
-    const stateDir = tempDirs.make("openclaw-context-accounting-");
+    const stateDir = tempDirs.make("carapace-context-accounting-");
     scope = {
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       sessionId: "context-accounting-test",
       sessionKey: "agent:main:context-accounting-test",
     };
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it.each(["append", "rebuild"])(
@@ -85,7 +85,7 @@ describe("SQLite transcript context accounting", () => {
       });
 
       if (mode === "rebuild") {
-        openOpenClawAgentDatabase(scope)
+        openCarapaceAgentDatabase(scope)
           .db.prepare(
             "UPDATE session_transcript_active_events SET context_eligible = NULL WHERE session_id = ?",
           )

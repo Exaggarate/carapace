@@ -1,7 +1,7 @@
 // Builds model picker choices and endpoint labels for model directives.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { findNormalizedProviderValue, normalizeProviderId } from "../../agents/model-selection.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 /** Catalog entry shown by the model picker directive UI. */
 export type ModelPickerCatalogEntry = {
@@ -13,7 +13,7 @@ export type ModelPickerCatalogEntry = {
 /** Resolves optional endpoint/API labels for a provider in picker details. */
 export function resolveProviderEndpointLabel(
   provider: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): { endpoint?: string; api?: string } {
   const normalized = normalizeProviderId(provider);
   const providers = (cfg.models?.providers ?? {}) as Record<

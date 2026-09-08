@@ -6,20 +6,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import { expect } from "vitest";
-import type { OpenClawConfig } from "../../../../config/config.js";
+import type { CarapaceConfig } from "../../../../config/config.js";
 import {
   getSessionBindingService,
   type SessionBindingRecord,
 } from "../../../../infra/outbound/session-binding-service.js";
 import type { SessionBindingCapabilities } from "../../../../infra/outbound/session-binding.types.js";
-import { resolvePreferredOpenClawTmpDir } from "../../../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../../../infra/tmp-carapace-dir.js";
 import type { OpenKeyedStoreOptions } from "../../../../plugin-sdk/plugin-state-runtime.js";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
 } from "../../../../plugin-sdk/plugin-state-test-runtime.js";
 import { setActivePluginRegistry } from "../../../../plugins/runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../../state/carapace-state-db.js";
 import { loadBundledPluginFacade } from "../../../../test-utils/bundled-plugin-public-surface.js";
 import { createTestRegistry } from "../../../../test-utils/channel-plugins.js";
 import { getChannelPlugin } from "../../registry.js";
@@ -44,7 +44,7 @@ const contractApiPromises = new Map<string, Promise<Record<string, unknown>>>();
 
 async function createContractChannelConversationBindingManager(params: {
   channelId: Parameters<typeof getChannelPlugin>[0];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): Promise<{ stop: () => void | Promise<void> } | null> {
   const createManager = getChannelPlugin(params.channelId)?.conversationBindings?.createManager;
@@ -54,7 +54,7 @@ async function createContractChannelConversationBindingManager(params: {
 }
 
 const matrixSessionBindingStateDir = fs.mkdtempSync(
-  path.join(resolvePreferredOpenClawTmpDir(), "openclaw-matrix-session-binding-contract-"),
+  path.join(resolvePreferredCarapaceTmpDir(), "carapace-matrix-session-binding-contract-"),
 );
 const matrixSessionBindingAuth = {
   accountId: "ops",
@@ -155,7 +155,7 @@ async function createContractMatrixThreadBindingManager() {
 
 const baseSessionBindingCfg = {
   session: { mainKey: "main", scope: "per-sender" },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 type ChannelConversationBindingManagerFactory = NonNullable<
   NonNullable<ChannelPlugin["conversationBindings"]>["createManager"]
@@ -176,7 +176,7 @@ type DiscordContractApi = {
 type FeishuContractApi = {
   createFeishuThreadBindingManager: (params: {
     accountId?: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
   }) => ChannelConversationBindingManager;
 };
 
@@ -445,7 +445,7 @@ const sessionBindingContractEntries = {
     stopManager: stopIMessageSessionBindingManager,
     restartBindingManager: async () => {
       await stopIMessageSessionBindingManager();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await ensureIMessageSessionBindingManager();
     },
   }),

@@ -41,9 +41,9 @@ vi.mock("node:child_process", async (importOriginal) => ({
   spawnSync: native.scheduler,
 }));
 
-const label = "ai.openclaw.gateway";
+const label = "ai.carapace.gateway";
 const programArguments = ["node", "gateway.js"];
-const environment = { HOME: "/service-home", OPENCLAW_STATE_DIR: "/service-state" };
+const environment = { HOME: "/service-home", CARAPACE_STATE_DIR: "/service-state" };
 const renderPlist = (args: string[]) => {
   const contents = buildLaunchAgentPlist({
     label,
@@ -83,8 +83,8 @@ describe("native service command inspection", () => {
   let env: GatewayServiceEnv;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-command-"));
-    env = { HOME: root, USERPROFILE: root, OPENCLAW_LAUNCHD_LABEL: label };
+    root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-command-"));
+    env = { HOME: root, USERPROFILE: root, CARAPACE_LAUNCHD_LABEL: label };
     native.launchctl.mockReset().mockResolvedValue({
       code: 113,
       termination: "exit",
@@ -183,11 +183,11 @@ describe("native service command inspection", () => {
   it.each([
     "set MALFORMED",
     "set =invalid",
-    'set "OPENCLAW_STATE_DIR=%USERPROFILE%\\.openclaw"',
-    'set "OPENCLAW_STATE_DIR=%~dp0state"',
-    'set "OPENCLAW_STATE_DIR=!USERPROFILE!\\.openclaw"',
-    'set "OPENCLAW_STATE_DIR=C:\\literal^^caret"',
-    "set OPENCLAW_STATE_DIR=C:\\first & echo second",
+    'set "CARAPACE_STATE_DIR=%USERPROFILE%\\.carapace"',
+    'set "CARAPACE_STATE_DIR=%~dp0state"',
+    'set "CARAPACE_STATE_DIR=!USERPROFILE!\\.carapace"',
+    'set "CARAPACE_STATE_DIR=C:\\literal^^caret"',
+    "set CARAPACE_STATE_DIR=C:\\first & echo second",
     "set /a HOME=1",
     "set /p HOME=prompt",
   ])("rejects an unresolved Windows assignment in strict mode: %s", async (line) => {
@@ -210,7 +210,7 @@ describe("native service command inspection", () => {
         "@echo off",
         "set HOME=/literal-home",
         "set home=/effective-home",
-        'set "OPENCLAW_STATE_DIR=C:\\literal%%USERPROFILE%% & (state)"',
+        'set "CARAPACE_STATE_DIR=C:\\literal%%USERPROFILE%% & (state)"',
         'set "NODE_OPTIONS="',
         'set "QUOTED=  literal spaces  "',
         "set UNQUOTED=  literal spaces  ",
@@ -222,7 +222,7 @@ describe("native service command inspection", () => {
       programArguments,
       environment: {
         HOME: "/effective-home",
-        OPENCLAW_STATE_DIR: "C:\\literal%USERPROFILE% & (state)",
+        CARAPACE_STATE_DIR: "C:\\literal%USERPROFILE% & (state)",
         NODE_OPTIONS: "",
         QUOTED: "  literal spaces  ",
         UNQUOTED: "  literal spaces  ",
@@ -284,7 +284,7 @@ describe("native service command inspection", () => {
       const expectedEnvFile = resolveLaunchAgentEnvFilePath(env, label);
       const recordedEnvFile = path.join(root, "other", "service-env", `${label}.env`);
       const recordedWrapper = path.join(root, "other", "service-env", `${label}-env-wrapper.sh`);
-      await writeFile(expectedEnvFile, "export OPENCLAW_STATE_DIR='/recovered-state'\n");
+      await writeFile(expectedEnvFile, "export CARAPACE_STATE_DIR='/recovered-state'\n");
       if (failure === "unreadable") {
         await fs.mkdir(recordedEnvFile, { recursive: true });
       }
@@ -299,7 +299,7 @@ describe("native service command inspection", () => {
       );
       await expect(readLaunchAgentProgramArguments(env)).resolves.toMatchObject({
         programArguments,
-        environment: { OPENCLAW_STATE_DIR: "/recovered-state" },
+        environment: { CARAPACE_STATE_DIR: "/recovered-state" },
       });
       await expect(
         readLaunchAgentProgramArguments(env, { requireEffective: true }),
@@ -313,7 +313,7 @@ describe("native service command inspection", () => {
       const envFile = resolveLaunchAgentEnvFilePath(env, label);
       await writeFile(
         envFile,
-        `export OPENCLAW_STATE_DIR='/recorded-state'\nexport NODE_OPTIONS=''\nexport QUOTE=${quoteLaunchAgentEnvironmentValue(literal)}\n`,
+        `export CARAPACE_STATE_DIR='/recorded-state'\nexport NODE_OPTIONS=''\nexport QUOTE=${quoteLaunchAgentEnvironmentValue(literal)}\n`,
       );
       await writeFile(
         resolveLaunchAgentPlistPath(env),
@@ -328,16 +328,16 @@ describe("native service command inspection", () => {
         readLaunchAgentProgramArguments(env, { requireEffective: true }),
       ).resolves.toMatchObject({
         programArguments,
-        environment: { OPENCLAW_STATE_DIR: "/recorded-state", NODE_OPTIONS: "", QUOTE: literal },
+        environment: { CARAPACE_STATE_DIR: "/recorded-state", NODE_OPTIONS: "", QUOTE: literal },
       });
     },
   );
 
   it.each([
     "echo unsupported-command",
-    "export OPENCLAW_STATE_DIR='unterminated",
-    "export OPENCLAW_STATE_DIR=$(printf unsupported)",
-    "export OPENCLAW_STATE_DIR='/partial'; echo unsupported-command",
+    "export CARAPACE_STATE_DIR='unterminated",
+    "export CARAPACE_STATE_DIR=$(printf unsupported)",
+    "export CARAPACE_STATE_DIR='/partial'; echo unsupported-command",
   ])("rejects unsupported generated environment syntax: %s", async (line) => {
     const envFile = resolveLaunchAgentEnvFilePath(env, label);
     await writeFile(envFile, `export HOME='/partial-home'\n${line}\n`);

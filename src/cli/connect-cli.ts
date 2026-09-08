@@ -81,7 +81,7 @@ async function fetchJoinPayload(
   try {
     const guarded = await fetchWithSsrFGuard({
       url: target.toString(),
-      auditContext: "openclaw-connect-join",
+      auditContext: "carapace-connect-join",
       maxRedirects: 0,
       requireHttps: target.protocol === "https:",
       timeoutMs: JOIN_FETCH_TIMEOUT_MS,
@@ -270,7 +270,7 @@ async function runConnectCommand(
 export function registerConnectCli(program: Command): void {
   program
     .command("connect")
-    .description("Connect this machine to an OpenClaw Gateway as a node")
+    .description("Connect this machine to an Carapace Gateway as a node")
     .argument("[target]", "oc-pair URL, setup code, or HTTPS Gateway join URL")
     .option("--service", "Install and run the node host as an OS service", false)
     .option("--ephemeral", "Run as an environment-managed disposable session host", false)
@@ -285,16 +285,16 @@ export function registerConnectCli(program: Command): void {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw connect oc-pair://<setup-code>", "Connect in the foreground."],
+          ["carapace connect oc-pair://<setup-code>", "Connect in the foreground."],
           [
-            "openclaw connect https://gateway.example/j/<code> --service",
+            "carapace connect https://gateway.example/j/<code> --service",
             "Install the node host service.",
           ],
           [
-            "openclaw connect https://gateway.example/j/<code> --service --session-host",
+            "carapace connect https://gateway.example/j/<code> --service --session-host",
             "Install a worker-session host service.",
           ],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/connect", "docs.openclaw.ai/cli/connect")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/connect", "github.com/Exaggarate/carapace")}\n`,
     )
     .action(async (target: string | undefined, opts: ConnectCommandOptions) => {
       try {

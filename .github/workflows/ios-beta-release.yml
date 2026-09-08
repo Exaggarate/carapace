@@ -100,7 +100,7 @@ jobs:
     timeout-minutes: 120
     environment: ios-beta-release
     concurrency:
-      group: ios-beta-release-openclaw
+      group: ios-beta-release-carapace
       cancel-in-progress: false
     env:
       BUILD_TIMESTAMP: ${{ needs.authorize.outputs.build_timestamp }}
@@ -152,7 +152,7 @@ jobs:
         with:
           app-id: "2729701"
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: openclaw
+          owner: carapace
           repositories: apps-signing
           permission-contents: read
 
@@ -171,7 +171,7 @@ jobs:
       - name: Checkout encrypted iOS signing assets
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/apps-signing
+          repository: carapace/apps-signing
           ref: main
           path: apps/ios/build/release-signing/apps-signing
           token: ${{ steps.apps-signing-token.outputs.token }}
@@ -181,7 +181,7 @@ jobs:
         run: |
           set -euo pipefail
           signing_repo="file://${GITHUB_WORKSPACE}/apps/ios/build/release-signing/apps-signing/"
-          git config --global url."${signing_repo}".insteadOf git@github.com:openclaw/apps-signing.git
+          git config --global url."${signing_repo}".insteadOf git@github.com:carapace/apps-signing.git
 
       - name: Setup Node environment
         uses: ./.github/actions/setup-node-env
@@ -224,7 +224,7 @@ jobs:
       - name: Install pinned Swift build tools
         run: |
           set -euo pipefail
-          swift_tools_dir="${RUNNER_TEMP}/openclaw-swift-tools"
+          swift_tools_dir="${RUNNER_TEMP}/carapace-swift-tools"
           ./scripts/install-xcodegen.sh "$swift_tools_dir"
           ./scripts/install-swift-tools.sh "$swift_tools_dir"
           echo "$swift_tools_dir" >> "$GITHUB_PATH"
@@ -264,11 +264,11 @@ jobs:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           GIT_COMMIT: ${{ env.RELEASE_TARGET_SHA }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          OPENCLAW_BUILD_TIMESTAMP: ${{ env.BUILD_TIMESTAMP }}
-          OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST: ${{ needs.authorize.outputs.receipt_digest }}
-          OPENCLAW_MOBILE_RELEASE_INTENT_PATH: ${{ runner.temp }}/mobile-release-intent-ios/intent.json
-          OPENCLAW_MOBILE_RELEASE_REF_MODE: intent
-          OPENCLAW_MOBILE_RELEASE_TARGET_REF: ${{ needs.authorize.outputs.target_ref }}
+          CARAPACE_BUILD_TIMESTAMP: ${{ env.BUILD_TIMESTAMP }}
+          CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST: ${{ needs.authorize.outputs.receipt_digest }}
+          CARAPACE_MOBILE_RELEASE_INTENT_PATH: ${{ runner.temp }}/mobile-release-intent-ios/intent.json
+          CARAPACE_MOBILE_RELEASE_REF_MODE: intent
+          CARAPACE_MOBILE_RELEASE_TARGET_REF: ${{ needs.authorize.outputs.target_ref }}
           TESTFLIGHT_INTERNAL_GROUP: ${{ vars.TESTFLIGHT_INTERNAL_GROUP }}
         run: |
           set -euo pipefail
@@ -325,7 +325,7 @@ jobs:
     timeout-minutes: 20
     environment: ios-beta-release
     concurrency:
-      group: ios-beta-release-openclaw
+      group: ios-beta-release-carapace
       cancel-in-progress: false
     steps:
       - name: Checkout trusted mobile release recorder

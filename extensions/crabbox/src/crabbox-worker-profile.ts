@@ -5,8 +5,8 @@ import {
   WorkerProviderError,
   type WorkerMachineOption,
   type WorkerProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeOptionalString as nonEmptyString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { normalizeOptionalString as nonEmptyString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { CRABBOX_HEARTBEAT_TIMEOUT_MS } from "./crabbox-worker-timeouts.js";
 
 export { nonEmptyString };
@@ -25,7 +25,7 @@ const PROFILE_KEYS = new Set([
 const GO_DURATION_PATTERN = /^\+?(?:(?:\d+(?:\.\d*)?|\.\d+)(?:ns|us|µs|μs|ms|s|m|h))+$/u;
 const GO_DURATION_TOKEN_PATTERN = /(\d+(?:\.\d*)?|\.\d+)(ns|us|µs|μs|ms|s|m|h)/gu;
 const MAX_GO_DURATION_NANOSECONDS = 9_223_372_036_854_775_807n;
-const CRABBOX_LEASE_ID_DOMAIN = "openclaw:crabbox-worker-lease-id:v1\0";
+const CRABBOX_LEASE_ID_DOMAIN = "carapace:crabbox-worker-lease-id:v1\0";
 const LEGACY_PROVISION_OPERATION_ID_PATTERN = /^provision:[a-f0-9]{64}$/u;
 const DURATION_UNIT_NANOSECONDS: Readonly<Record<string, bigint>> = {
   h: 3_600_000_000_000n,
@@ -391,7 +391,7 @@ function binaryCandidates(base: string, platform: NodeJS.Platform): string[] {
 export function resolveCrabboxBinary(params: {
   explicit?: string;
   isExecutable?: IsExecutable;
-  openclawRoot: string;
+  carapaceRoot: string;
   pathEnv?: string;
   platform?: NodeJS.Platform;
 }): string {
@@ -404,7 +404,7 @@ export function resolveCrabboxBinary(params: {
 export function findCrabboxBinary(params: {
   explicit?: string;
   isExecutable?: IsExecutable;
-  openclawRoot: string;
+  carapaceRoot: string;
   pathEnv?: string;
   platform?: NodeJS.Platform;
 }): string | undefined {
@@ -414,7 +414,7 @@ export function findCrabboxBinary(params: {
   if (params.explicit) {
     return isExecutable(params.explicit) ? params.explicit : undefined;
   }
-  const siblingBase = path.resolve(params.openclawRoot, "../crabbox/bin/crabbox");
+  const siblingBase = path.resolve(params.carapaceRoot, "../crabbox/bin/crabbox");
   for (const candidate of binaryCandidates(siblingBase, platform)) {
     if (isExecutable(candidate)) {
       return candidate;
@@ -436,7 +436,7 @@ export function findCrabboxBinary(params: {
   return undefined;
 }
 
-export function resolveOpenClawRoot(pluginRoot: string | undefined): string {
+export function resolveCarapaceRoot(pluginRoot: string | undefined): string {
   if (!pluginRoot) {
     return process.cwd();
   }
@@ -452,7 +452,7 @@ export function resolveOpenClawRoot(pluginRoot: string | undefined): string {
 }
 
 export function operationSlug(operationId: string): string {
-  return `openclaw-${createHash("sha256").update(operationId).digest("hex").slice(0, 32)}`;
+  return `carapace-${createHash("sha256").update(operationId).digest("hex").slice(0, 32)}`;
 }
 
 export function operationLeaseId(operationId: string): string {

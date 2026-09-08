@@ -14,9 +14,9 @@ Channel receive paths follow one flow:
 platform event -> inbound facts/context -> agent reply -> message delivery
 ```
 
-Use `openclaw/plugin-sdk/channel-inbound` for inbound event normalization,
+Use `carapace/plugin-sdk/channel-inbound` for inbound event normalization,
 formatting, roots, and orchestration. Use
-`openclaw/plugin-sdk/channel-outbound` for native send, receipt, durable
+`carapace/plugin-sdk/channel-outbound` for native send, receipt, durable
 delivery, and live preview behavior.
 
 ## Core helpers
@@ -26,7 +26,7 @@ import {
   buildChannelInboundEventContext,
   runChannelInboundEvent,
   dispatchChannelInboundReply,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 ```
 
 - `buildChannelInboundEventContext(...)`: projects normalized channel facts
@@ -56,7 +56,7 @@ keys; evicted keys can log again. Omit `onceKey` for per-message logging. Keep
 message bodies and sender details out of default-level diagnostics.
 
 For a group-setting hint, use `resolveChannelGroupsConfigPath({ cfg, channel, accountId, groups })`
-from `openclaw/plugin-sdk/channel-policy`. Pass the exact groups map selected by
+from `carapace/plugin-sdk/channel-policy`. Pass the exact groups map selected by
 the channel owner, without cloning it: `resolveChannelGroups(cfg, channel, accountId)`
 for shared group-policy resolution, or the resolved account's map for a plugin
 with its own inheritance rules. This identifies the authored root or account map
@@ -129,7 +129,7 @@ source directly.
 ## Receive acknowledgment policy
 
 `createMessageReceiveContext(...)`, exported from
-`openclaw/plugin-sdk/channel-outbound`, tracks acknowledgment state for one
+`carapace/plugin-sdk/channel-outbound`, tracks acknowledgment state for one
 inbound event. Its `ackPolicy` selects the stage accepted by `shouldAckAfter(...)`:
 
 | Policy                 | Acknowledgment boundary                                                   |
@@ -165,7 +165,7 @@ entering the provider funnel; it is mutually exclusive with `deliver` and
 compatibility boundary and keeps its caller-provided dispatcher ownership.
 
 Low-level `createReplyDispatcher(...)` callbacks from
-`openclaw/plugin-sdk/reply-runtime` may return `ambiguous: true` when a send may
+`carapace/plugin-sdk/reply-runtime` may return `ambiguous: true` when a send may
 have completed but its outcome is unconfirmed. Core records existing `unknown`
 custody and `failedAfterSend` receipt counts, suppressing duplicate fallbacks
 without attesting observed delivery. A settled `suppression` with reason
@@ -223,12 +223,12 @@ surrounding whitespace.
 
 Reject `deliver` or `finalization` when native delivery fails. If no provider
 send was attempted, throw `PlatformMessageNotDispatchedError` from
-`openclaw/plugin-sdk/error-runtime`; core suppresses a false `message_sent`
+`carapace/plugin-sdk/error-runtime`; core suppresses a false `message_sent`
 event. If a native send became visible before a later operation failed,
 preserve the visible subset on the error:
 
 ```ts
-import { createChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { createChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 
 throw createChannelPartialDeliveryError(cause, {
   visibleReplySent: true,

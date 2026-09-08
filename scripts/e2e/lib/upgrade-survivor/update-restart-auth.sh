@@ -5,8 +5,8 @@ install_update_restart_systemctl_shim() {
   local manager_env
   manager_env="$(node <<'MANAGER_ENV'
 const keys = [
-  "CI", "OPENCLAW_NO_ONBOARD", "OPENCLAW_NO_PROMPT", "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_SKIP_CHANNELS", "OPENCLAW_DISABLE_BONJOUR",
+  "CI", "CARAPACE_NO_ONBOARD", "CARAPACE_NO_PROMPT", "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_SKIP_CHANNELS", "CARAPACE_DISABLE_BONJOUR",
 ];
 const captured = Object.fromEntries(keys.map((key) => [key, process.env[key] ?? null]));
 const registry = process.env.NPM_CONFIG_REGISTRY || process.env.npm_config_registry || null;
@@ -25,9 +25,9 @@ BUSCTL
   # Capture endpoint identity once; projected native clients cannot carry fixture-only env.
   {
     printf '#!/usr/bin/env bash\nset -euo pipefail\n'
-    printf 'log_file=%q\n' "${OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG:-$shim_dir/systemctl-shim.log}"
-    printf 'pid_file=%q\n' "${OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE:-$shim_dir/systemctl-shim.pid}"
-    printf 'daemon_log=%q\n' "${OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG:-$shim_dir/systemctl-shim-gateway.log}"
+    printf 'log_file=%q\n' "${CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG:-$shim_dir/systemctl-shim.log}"
+    printf 'pid_file=%q\n' "${CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE:-$shim_dir/systemctl-shim.pid}"
+    printf 'daemon_log=%q\n' "${CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG:-$shim_dir/systemctl-shim-gateway.log}"
     printf 'manager_env=%q\n' "$manager_env"
     cat <<'SHIM'
 supervisor_script="${pid_file}.supervisor.mjs"
@@ -61,7 +61,7 @@ done
 command="${filtered[0]:-status}"
 unit_name="${filtered[1]:-}"
 if [ "${#filtered[@]}" -gt 2 ] ||
-  { [ -n "$unit_name" ] && [ "$unit_name" != openclaw-gateway.service ] && [ "$unit_name" != openclaw.service ]; }; then
+  { [ -n "$unit_name" ] && [ "$unit_name" != carapace-gateway.service ] && [ "$unit_name" != carapace.service ]; }; then
   echo "systemctl shim unsupported unit or arguments: $*" >&2
   exit 1
 fi
@@ -95,7 +95,7 @@ stop_gateway() {
 }
 
 unit_path() {
-  printf '%s/.config/systemd/user/openclaw-gateway.service\n' "${HOME:?missing HOME}"
+  printf '%s/.config/systemd/user/carapace-gateway.service\n' "${HOME:?missing HOME}"
 }
 
 start_gateway() {
@@ -107,29 +107,29 @@ start_gateway() {
 import fs from "node:fs";
 import { spawn } from "node:child_process";
 
-const command = process.env.OPENCLAW_SYSTEMCTL_SHIM_EXEC_START;
-const daemonLog = process.env.OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG;
+const command = process.env.CARAPACE_SYSTEMCTL_SHIM_EXEC_START;
+const daemonLog = process.env.CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG;
 if (!command || !daemonLog) {
   process.exit(2);
 }
 
 const output = fs.openSync(daemonLog, "a");
 const childEnv = { ...process.env };
-delete childEnv.OPENCLAW_SYSTEMCTL_SHIM_EXEC_START;
-delete childEnv.OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG;
-const managerEnv = JSON.parse(childEnv.OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV);
-delete childEnv.OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV;
+delete childEnv.CARAPACE_SYSTEMCTL_SHIM_EXEC_START;
+delete childEnv.CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG;
+const managerEnv = JSON.parse(childEnv.CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV);
+delete childEnv.CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV;
 for (const [key, value] of Object.entries(managerEnv)) {
   delete childEnv[key];
   if (value !== null) childEnv[key] = value;
 }
 // systemd does not pass transient systemctl-caller update state into the service.
 for (const key of Object.keys(childEnv)) {
-  if (key.startsWith("OPENCLAW_UPDATE_")) {
+  if (key.startsWith("CARAPACE_UPDATE_")) {
     delete childEnv[key];
   }
 }
-delete childEnv.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+delete childEnv.CARAPACE_COMPATIBILITY_HOST_VERSION;
 const restartDelayMs = 5_000;
 const restartWindowMs = 60_000;
 const restartBurst = 5;
@@ -258,9 +258,9 @@ start();
 SUPERVISOR
   # The manager must outlive the calling terminal, just like systemd. nohup alone
   # leaves Node in that terminal session and can strand its detached gateway.
-  OPENCLAW_SYSTEMCTL_SHIM_EXEC_START="$exec_start" \
-    OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG="$daemon_log" \
-    OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV="$manager_env" \
+  CARAPACE_SYSTEMCTL_SHIM_EXEC_START="$exec_start" \
+    CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG="$daemon_log" \
+    CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV="$manager_env" \
     node --input-type=module - "$supervisor_script" "$pid_file" "${daemon_log}.bootstrap.log" <<'START_SUPERVISOR'
 import fs from "node:fs";
 import { spawn } from "node:child_process";
@@ -290,42 +290,42 @@ case "$command" in
     exit 0
     ;;
   enable | disable | reset-failed)
-    [ "$system_scope" = 0 ] && [ "$unit_name" = openclaw-gateway.service ] || exit 1
+    [ "$system_scope" = 0 ] && [ "$unit_name" = carapace-gateway.service ] || exit 1
     [ -f "$(unit_path)" ] || exit 1
     if [ "$command" = enable ]; then
       mkdir -p "$(dirname "$(unit_path)")/default.target.wants"
-      ln -sf ../openclaw-gateway.service "$(dirname "$(unit_path)")/default.target.wants/openclaw-gateway.service"
+      ln -sf ../carapace-gateway.service "$(dirname "$(unit_path)")/default.target.wants/carapace-gateway.service"
     elif [ "$command" = disable ]; then
       stop_gateway
-      rm -f "$(dirname "$(unit_path)")/default.target.wants/openclaw-gateway.service"
+      rm -f "$(dirname "$(unit_path)")/default.target.wants/carapace-gateway.service"
     fi
     exit 0
     ;;
   status)
     [ "$system_scope" = 0 ] || exit 1
     [ -z "$unit_name" ] && exit 0
-    [ "$unit_name" = openclaw-gateway.service ] && is_running && exit 0
+    [ "$unit_name" = carapace-gateway.service ] && is_running && exit 0
     exit 3
     ;;
   stop)
-    [ "$system_scope" = 0 ] && [ "$unit_name" = openclaw-gateway.service ] || exit 1
+    [ "$system_scope" = 0 ] && [ "$unit_name" = carapace-gateway.service ] || exit 1
     stop_gateway
     exit 0
     ;;
   restart | start)
-    [ "$system_scope" = 0 ] && [ "$unit_name" = openclaw-gateway.service ] || exit 1
+    [ "$system_scope" = 0 ] && [ "$unit_name" = carapace-gateway.service ] || exit 1
     stop_gateway
     start_gateway
     exit 0
     ;;
   is-enabled)
-    [ "$system_scope" = 0 ] && [ "$unit_name" = openclaw-gateway.service ] &&
-      [ -f "$(unit_path)" ] && [ -L "$(dirname "$(unit_path)")/default.target.wants/openclaw-gateway.service" ] && exit 0
+    [ "$system_scope" = 0 ] && [ "$unit_name" = carapace-gateway.service ] &&
+      [ -f "$(unit_path)" ] && [ -L "$(dirname "$(unit_path)")/default.target.wants/carapace-gateway.service" ] && exit 0
     printf 'disabled\n'
     exit 1
     ;;
   is-active)
-    [ "$system_scope" = 0 ] && [ "$unit_name" = openclaw-gateway.service ] || exit 1
+    [ "$system_scope" = 0 ] && [ "$unit_name" = carapace-gateway.service ] || exit 1
     is_running && exit 0
     exit 3
     ;;
@@ -347,7 +347,7 @@ case "$command" in
       esac
       exit 0
     fi
-    [ "$unit_name" = openclaw-gateway.service ] || exit 1
+    [ "$unit_name" = carapace-gateway.service ] || exit 1
     # The published 2026.8.1 reader omits LoadState; current maintenance requires it.
     # Keep both exact query contracts and reject unimplemented manager properties.
     [ "${property/Id,LoadState,/Id,}" = 'Id,ActiveState,SubState,Result,NRestarts,StartLimitBurst,MainPID,ExecMainStatus,ExecMainCode,KillMode,TasksCurrent,MemoryCurrent' ] || {
@@ -388,11 +388,11 @@ SHIM
 
 assert_update_restart_service_replaced() {
   local previous_pid="$1" previous_log_lines="$2" current_pid
-  current_pid="$(cat "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")"
+  current_pid="$(cat "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")"
   if [ "$current_pid" = "$previous_pid" ] ||
-    ! systemctl --user is-active --quiet openclaw-gateway.service ||
-    ! tail -n +"$((previous_log_lines + 1))" "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG" |
-      grep -Fx -- '--user restart openclaw-gateway.service' >/dev/null; then
+    ! systemctl --user is-active --quiet carapace-gateway.service ||
+    ! tail -n +"$((previous_log_lines + 1))" "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG" |
+      grep -Fx -- '--user restart carapace-gateway.service' >/dev/null; then
     echo "Update did not replace the managed gateway supervisor through restart." >&2
     return 1
   fi
@@ -400,8 +400,8 @@ assert_update_restart_service_replaced() {
 }
 
 write_update_restart_service_auth_env() {
-  mkdir -p "$OPENCLAW_STATE_DIR"
-  local dotenv_path="$OPENCLAW_STATE_DIR/.env"
+  mkdir -p "$CARAPACE_STATE_DIR"
+  local dotenv_path="$CARAPACE_STATE_DIR/.env"
   local tmp_path="$dotenv_path.tmp.$$"
   if [ -f "$dotenv_path" ]; then
     grep -v '^GATEWAY_AUTH_TOKEN_REF=' "$dotenv_path" >"$tmp_path" || true
@@ -410,25 +410,25 @@ write_update_restart_service_auth_env() {
   fi
   printf 'GATEWAY_AUTH_TOKEN_REF=%s\n' "$GATEWAY_AUTH_TOKEN_REF" >>"$tmp_path"
   mv "$tmp_path" "$dotenv_path"
-  printf 'GATEWAY_AUTH_TOKEN_REF=%s\n' "$GATEWAY_AUTH_TOKEN_REF" >"$OPENCLAW_STATE_DIR/gateway.systemd.env"
+  printf 'GATEWAY_AUTH_TOKEN_REF=%s\n' "$GATEWAY_AUTH_TOKEN_REF" >"$CARAPACE_STATE_DIR/gateway.systemd.env"
 }
 
 migrate_update_restart_probe_device_auth() {
   local doctor_log="$1" command_timeout="$2"
   # Current-install setup repairs state under parked, plugin-disabled config.
   # The published-upgrade path leaves its migration specimens to the candidate.
-  openclaw_e2e_maybe_timeout \
+  carapace_e2e_maybe_timeout \
     "$command_timeout" \
     env \
-    OPENCLAW_UPDATE_IN_PROGRESS=1 \
-    OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=1 \
-    OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=1 \
-    openclaw doctor --fix --non-interactive >"$doctor_log" 2>&1
+    CARAPACE_UPDATE_IN_PROGRESS=1 \
+    CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=1 \
+    CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=1 \
+    carapace doctor --fix --non-interactive >"$doctor_log" 2>&1
 }
 
 assert_update_restart_probe_inactive() {
   local active_status=0
-  systemctl --user is-active --quiet openclaw-gateway.service || active_status=$?
+  systemctl --user is-active --quiet carapace-gateway.service || active_status=$?
   # This fixture's manager returns 3 only for an observed inactive service.
   # Neither active nor unknown may authorize config restoration or a prepared start.
   [ "$active_status" -eq 3 ] && return 0
@@ -439,18 +439,18 @@ assert_update_restart_probe_inactive() {
 
 stop_update_restart_probe_gateway() {
   local command_timeout="$1" stop_status=0
-  local stop_log="${OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG}.stop"
-  openclaw_e2e_maybe_timeout "$command_timeout" systemctl --user stop openclaw-gateway.service >"$stop_log" 2>&1 || stop_status=$?
+  local stop_log="${CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG}.stop"
+  carapace_e2e_maybe_timeout "$command_timeout" systemctl --user stop carapace-gateway.service >"$stop_log" 2>&1 || stop_status=$?
   if [ "$stop_status" -eq 0 ]; then
     assert_update_restart_probe_inactive >>"$stop_log" 2>&1 || stop_status=$?
   fi
-  if [ "$stop_status" -eq 0 ] && openclaw_e2e_probe_tcp 127.0.0.1 18789 400; then
+  if [ "$stop_status" -eq 0 ] && carapace_e2e_probe_tcp 127.0.0.1 18789 400; then
     echo "Baseline gateway listener is still open after service stop." >>"$stop_log"
     stop_status=1
   fi
   if [ "$stop_status" -ne 0 ]; then
     echo "gateway service shutdown could not be verified; preserving authored config snapshot" >&2
-    openclaw_e2e_print_log "$stop_log" >&2
+    carapace_e2e_print_log "$stop_log" >&2
     return "$stop_status"
   fi
   gateway_pid=""
@@ -471,39 +471,39 @@ const hash = (file, optional = false) => {
   }
 };
 process.stdout.write(JSON.stringify({
-  unit: hash(path.join(process.env.HOME, ".config/systemd/user/openclaw-gateway.service")),
-  dotenv: hash(path.join(process.env.OPENCLAW_STATE_DIR, ".env")),
-  serviceEnv: hash(path.join(process.env.OPENCLAW_STATE_DIR, "gateway.systemd.env"), true),
+  unit: hash(path.join(process.env.HOME, ".config/systemd/user/carapace-gateway.service")),
+  dotenv: hash(path.join(process.env.CARAPACE_STATE_DIR, ".env")),
+  serviceEnv: hash(path.join(process.env.CARAPACE_STATE_DIR, "gateway.systemd.env"), true),
 }) + "\n");
 NODE
 }
 
 run_update_restart_probe_gateway() {
   local action="$1" port="$2" command_timeout="$3" readiness_mode="${4:-strict}"
-  local log_file="$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG"
+  local log_file="$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG"
   local result_out="${log_file}.${action}.out" result_err="${log_file}.${action}.err"
   local readiness_log="${log_file}.${action}.readiness.log"
-  local command=(systemctl --user start openclaw-gateway.service)
+  local command=(systemctl --user start carapace-gateway.service)
   if [ "$action" = install ]; then
-    command=(env -u OPENCLAW_GATEWAY_TOKEN -u OPENCLAW_GATEWAY_PASSWORD openclaw gateway install --force --json)
-    result_out="$OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON"
-    result_err="$OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR"
+    command=(env -u CARAPACE_GATEWAY_TOKEN -u CARAPACE_GATEWAY_PASSWORD carapace gateway install --force --json)
+    result_out="$CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON"
+    result_err="$CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR"
   else
     assert_update_restart_probe_inactive || return "$?"
     hash_update_restart_service_definition >"${log_file}.start-definition-before.json" || return "$?"
     cp "$log_file" "${log_file}.before-start" || return "$?"
   fi
   local start_epoch ready_epoch budget service_status=0
-  budget="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)" || return "$?"
+  budget="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)" || return "$?"
   start_epoch="$(node -e "process.stdout.write(String(Date.now()))")" || return "$?"
   : >"$log_file" || return "$?"
   # Install and start both use the existing manager, which alone publishes the PID.
   # Starting the repaired candidate must not reinstall its unit or replace auth state.
-  openclaw_e2e_maybe_timeout "$command_timeout" "${command[@]}" >"$result_out" 2>"$result_err" || service_status=$?
+  carapace_e2e_maybe_timeout "$command_timeout" "${command[@]}" >"$result_out" 2>"$result_err" || service_status=$?
   if [ "$service_status" -ne 0 ]; then
     echo "gateway service $action failed" >&2
-    openclaw_e2e_print_log "$result_err" >&2
-    openclaw_e2e_print_log "$result_out" >&2
+    carapace_e2e_print_log "$result_err" >&2
+    carapace_e2e_print_log "$result_out" >&2
     return "$service_status"
   fi
   if [ "$action" = start ]; then
@@ -513,17 +513,17 @@ run_update_restart_probe_gateway() {
       return 1
     fi
   fi
-  gateway_pid="$(cat "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")" || return "$?"
-  openclaw_e2e_wait_gateway_ready "$gateway_pid" "$log_file" 360 "$port" "$readiness_mode" >"$readiness_log" 2>&1 || service_status=$?
+  gateway_pid="$(cat "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")" || return "$?"
+  carapace_e2e_wait_gateway_ready "$gateway_pid" "$log_file" 360 "$port" "$readiness_mode" >"$readiness_log" 2>&1 || service_status=$?
   if [ "$service_status" -ne 0 ]; then
-    openclaw_e2e_print_log "$readiness_log" >&2
+    carapace_e2e_print_log "$readiness_log" >&2
     return "$service_status"
   fi
   ready_epoch="$(node -e "process.stdout.write(String(Date.now()))")" || return "$?"
   start_seconds=$(((ready_epoch - start_epoch + 999) / 1000))
   if [ "$start_seconds" -gt "$budget" ]; then
     echo "gateway startup exceeded survivor budget: ${start_seconds}s > ${budget}s" >&2
-    openclaw_e2e_print_log "$log_file" >&2
+    carapace_e2e_print_log "$log_file" >&2
     return 1
   fi
 }
@@ -531,10 +531,10 @@ run_update_restart_probe_gateway() {
 prepare_update_restart_probe_current_install() {
   local port="$1"
   local log_file="$2"
-  local command_timeout="${OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"
+  local command_timeout="${CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"
   local doctor_log="${log_file}.doctor"
   local authored_config="${log_file}.authored-config"
-  local parking_helper="${OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER:-scripts/e2e/lib/upgrade-survivor/config-parking.mjs}"
+  local parking_helper="${CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER:-scripts/e2e/lib/upgrade-survivor/config-parking.mjs}"
   local failure_stage=""
   local probe_status=0
   local restore_status=0
@@ -542,14 +542,14 @@ prepare_update_restart_probe_current_install() {
   echo "Preparing candidate-auth gateway for automatic update restart."
   install_update_restart_systemctl_shim
   # Use the managed service token; setup may already own a canonical device identity.
-  # Service installation persists OPENCLAW_CONFIG_PATH, so isolate the canonical file in place.
+  # Service installation persists CARAPACE_CONFIG_PATH, so isolate the canonical file in place.
   # Keep reload off until the manager owns the installed service and its descendants.
   node "$parking_helper" \
-    park-restart-probe "$OPENCLAW_CONFIG_PATH" "$authored_config" "$port" || probe_status=$?
+    park-restart-probe "$CARAPACE_CONFIG_PATH" "$authored_config" "$port" || probe_status=$?
   if [ "$probe_status" -ne 0 ]; then
     echo "failed to park authored config for candidate restart probe" >&2
     if [ -e "$authored_config" ]; then
-      node "$parking_helper" restore "$OPENCLAW_CONFIG_PATH" "$authored_config" ||
+      node "$parking_helper" restore "$CARAPACE_CONFIG_PATH" "$authored_config" ||
         restore_status=$?
     fi
     if [ "$restore_status" -ne 0 ]; then
@@ -563,7 +563,7 @@ prepare_update_restart_probe_current_install() {
     }
   if [ "$probe_status" -ne 0 ]; then
     echo "candidate setup Doctor failed" >&2
-    openclaw_e2e_print_log "$doctor_log" >&2
+    carapace_e2e_print_log "$doctor_log" >&2
   fi
   if [ "$probe_status" -eq 0 ]; then
     write_update_restart_service_auth_env || {
@@ -577,7 +577,7 @@ prepare_update_restart_probe_current_install() {
   if [ "$failure_stage" = "service-env" ]; then
     echo "failed to write candidate restart service environment" >&2
   fi
-  node "$parking_helper" restore "$OPENCLAW_CONFIG_PATH" "$authored_config" || restore_status=$?
+  node "$parking_helper" restore "$CARAPACE_CONFIG_PATH" "$authored_config" || restore_status=$?
   if [ "$restore_status" -ne 0 ]; then
     echo "failed to restore authored config after candidate restart probe" >&2
     return "$restore_status"

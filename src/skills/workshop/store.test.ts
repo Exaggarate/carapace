@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { requireNodeSqlite } from "../../infra/node-sqlite.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createSkillProposalEvent } from "./plugin-hooks.js";
 import { listSkillProposalEvents, listSkillProposals, proposeCreateSkill } from "./service.js";
 import { parseSkillProposalEvaluation } from "./store-record.js";
@@ -18,13 +18,13 @@ import {
 } from "./store-sqlite-transition.js";
 import { updateSkillProposalRecord } from "./store.js";
 
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 const workshopConfig = {};
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workshop-store-",
+    prefix: "carapace-workshop-store-",
   });
 });
 
@@ -69,8 +69,8 @@ describe("Skill Workshop SQLite store", () => {
   });
 
   it("lazily ensures additive tables without changing the schema version", async () => {
-    const databasePath = openOpenClawStateDatabase().path;
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = openCarapaceStateDatabase().path;
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const existing = new DatabaseSync(databasePath);
     existing.exec(`
@@ -81,7 +81,7 @@ describe("Skill Workshop SQLite store", () => {
     `);
     existing.close();
 
-    const reopened = openOpenClawStateDatabase();
+    const reopened = openCarapaceStateDatabase();
     expect(
       reopened.db
         .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
@@ -118,7 +118,7 @@ describe("Skill Workshop SQLite store", () => {
         .get("claim_released_time"),
     ).toBeUndefined();
     expect(reopened.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
   });
 
@@ -245,7 +245,7 @@ describe("Skill Workshop SQLite store", () => {
       description: "Reject silent audit data loss",
       content: "# Oversized Stored Event\n",
     });
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare(
         "UPDATE skill_workshop_proposal_events SET payload_json = ? WHERE proposal_id = ?",
       )

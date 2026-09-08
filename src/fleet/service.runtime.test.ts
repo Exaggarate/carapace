@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { cellAuthSecretDir, cellOwnerId } from "./cell-profile.js";
 import type { FleetContainerInspectResult, FleetContainerRuntime } from "./containers.runtime.js";
@@ -20,10 +20,10 @@ function createFleetService(options: FleetServiceOptions = {}) {
 
 function fleetLabels(tenant = "acme", attemptId = TEST_ATTEMPT_ID): Record<string, string> {
   return {
-    "openclaw.fleet.tenant": tenant,
-    "openclaw.fleet.owner": cellOwnerId(path.join(root, "fleet", "cells", tenant)),
-    "openclaw.fleet.attempt": attemptId,
-    "openclaw.fleet.env-keys": "FEATURE",
+    "carapace.fleet.tenant": tenant,
+    "carapace.fleet.owner": cellOwnerId(path.join(root, "fleet", "cells", tenant)),
+    "carapace.fleet.attempt": attemptId,
+    "carapace.fleet.env-keys": "FEATURE",
   };
 }
 
@@ -38,7 +38,7 @@ function runningInspection(
     labels: fleetLabels(),
     environment: {
       HOME: "/home/node",
-      OPENCLAW_GATEWAY_TOKEN: "old-token",
+      CARAPACE_GATEWAY_TOKEN: "old-token",
       FEATURE: "enabled",
       NODE_VERSION: "old-image-default",
     },
@@ -88,7 +88,7 @@ function createContainerMock(
         running: start,
         labels: {
           ...fleetLabels(profile.tenantId, profile.attemptId),
-          "openclaw.fleet.env-keys": profile.userEnvironmentKeys.toSorted().join(","),
+          "carapace.fleet.env-keys": profile.userEnvironmentKeys.toSorted().join(","),
         },
         environment: { ...profile.environment },
         containerId: `container-${profile.attemptId}`,
@@ -162,11 +162,11 @@ function createContainerMock(
 describe("fleet service", () => {
   let env: NodeJS.ProcessEnv;
 
-  const tempRoot = createSuiteTempRootTracker({ prefix: "openclaw-fleet-service-" });
+  const tempRoot = createSuiteTempRootTracker({ prefix: "carapace-fleet-service-" });
 
   beforeEach(async () => {
     root = await tempRoot.setup();
-    env = { ...process.env, OPENCLAW_STATE_DIR: root };
+    env = { ...process.env, CARAPACE_STATE_DIR: root };
     vi.stubGlobal(
       "fetch",
       vi.fn<typeof fetch>(async () => new Response(null, { status: 200 })),
@@ -174,7 +174,7 @@ describe("fleet service", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllGlobals();
     await tempRoot.cleanup();
   });
@@ -195,9 +195,9 @@ describe("fleet service", () => {
 
     expect(result).toEqual({
       tenant: "acme",
-      containerName: "openclaw-cell-acme",
+      containerName: "carapace-cell-acme",
       port: 19_100,
-      image: "ghcr.io/openclaw/openclaw:latest",
+      image: "ghcr.io/carapace/carapace:latest",
       runtime: "docker",
       started: true,
       token: "gw-token",
@@ -211,16 +211,16 @@ describe("fleet service", () => {
     expect(start).toBe(false);
     expect(containers.createNetwork).toHaveBeenCalledWith(
       "docker",
-      "openclaw-cell-acme-net",
+      "carapace-cell-acme-net",
       {
-        "openclaw.fleet.tenant": "acme",
-        "openclaw.fleet.owner": cellOwnerId(path.join(root, "fleet", "cells", "acme")),
-        "openclaw.fleet.attempt": expect.stringMatching(/^[a-f0-9]{32}$/u),
+        "carapace.fleet.tenant": "acme",
+        "carapace.fleet.owner": cellOwnerId(path.join(root, "fleet", "cells", "acme")),
+        "carapace.fleet.attempt": expect.stringMatching(/^[a-f0-9]{32}$/u),
       },
       { internal: false },
     );
-    expect(containers.start).toHaveBeenCalledWith("docker", "openclaw-cell-acme");
-    expect(profile?.networkName).toBe("openclaw-cell-acme-net");
+    expect(containers.start).toHaveBeenCalledWith("docker", "carapace-cell-acme");
+    expect(profile?.networkName).toBe("carapace-cell-acme-net");
     expect(containers.createNetwork.mock.invocationCallOrder[0] ?? -1).toBeLessThan(
       containers.run.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
     );
@@ -228,13 +228,13 @@ describe("fleet service", () => {
       containers.start.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
     );
     expect(profile?.environment).toMatchObject({
-      OPENCLAW_GATEWAY_TOKEN: "gw-token",
+      CARAPACE_GATEWAY_TOKEN: "gw-token",
       FEATURE: "a=b",
     });
     expect(profile?.userEnvironmentKeys).toEqual(["FEATURE"]);
 
     const dataDir = path.join(root, "fleet", "cells", "acme");
-    const config = JSON.parse(await fs.readFile(path.join(dataDir, "openclaw.json"), "utf8")) as {
+    const config = JSON.parse(await fs.readFile(path.join(dataDir, "carapace.json"), "utf8")) as {
       gateway?: {
         mode?: string;
         bind?: string;
@@ -301,7 +301,7 @@ describe("fleet service", () => {
     });
 
     await expect(service.create({ tenant: "sick", gatewayToken: "token" })).rejects.toThrow(
-      "Fleet cell sick was created but did not become healthy within 60s; inspect it with `openclaw fleet status sick` or `openclaw fleet logs sick`, or remove it with `openclaw fleet rm sick --force`.",
+      "Fleet cell sick was created but did not become healthy within 60s; inspect it with `carapace fleet status sick` or `carapace fleet logs sick`, or remove it with `carapace fleet rm sick --force`.",
     );
 
     expect(getFleetCell(env, "sick")).toBeDefined();
@@ -404,7 +404,7 @@ describe("fleet service", () => {
     expect(containers.run.mock.calls[0]?.[0]).toMatchObject({ diskSize: "10g" });
     expect(containers.createNetwork).toHaveBeenCalledWith(
       "podman",
-      "openclaw-cell-acme-net",
+      "carapace-cell-acme-net",
       expect.any(Object),
       { internal: true },
     );
@@ -548,7 +548,7 @@ describe("fleet service", () => {
 
     await expect(service.lifecycle("acme", action)).resolves.toEqual({ tenant: "acme", action });
 
-    expect(containers[action]).toHaveBeenCalledWith("docker", "openclaw-cell-acme");
+    expect(containers[action]).toHaveBeenCalledWith("docker", "carapace-cell-acme");
   });
 
   it("pins logs to the inspected container generation after proving ownership", async () => {
@@ -605,13 +605,13 @@ describe("fleet service", () => {
       name: "generated previous default",
       cache: "/home/node/.cache",
       keys: "FEATURE",
-      expectedCache: "/home/node/.openclaw/cache",
+      expectedCache: "/home/node/.carapace/cache",
     },
     {
       name: "explicit matching default",
-      cache: "/home/node/.openclaw/cache",
+      cache: "/home/node/.carapace/cache",
       keys: "FEATURE,XDG_CACHE_HOME",
-      expectedCache: "/home/node/.openclaw/cache",
+      expectedCache: "/home/node/.carapace/cache",
     },
     {
       name: "explicit previous default",
@@ -634,8 +634,8 @@ describe("fleet service", () => {
     // HostConfig.StorageOpt; the label is the cross-runtime carrier.
     const diskLabels = {
       ...fleetLabels(),
-      "openclaw.fleet.disk-limit": "10g",
-      "openclaw.fleet.env-keys": keys,
+      "carapace.fleet.disk-limit": "10g",
+      "carapace.fleet.env-keys": keys,
     };
     const upgradedEnvironment = {
       ...runningInspection().environment,
@@ -650,42 +650,42 @@ describe("fleet service", () => {
       )
       .mockResolvedValueOnce(runningInspection({ labels: fleetLabels("acme", NEXT_ATTEMPT_ID) }));
 
-    const result = await service.upgrade("acme", "ghcr.io/openclaw/openclaw:v2");
+    const result = await service.upgrade("acme", "ghcr.io/carapace/carapace:v2");
 
     expect(result).toEqual({
       tenant: "acme",
       action: "upgrade",
-      image: "ghcr.io/openclaw/openclaw:v2",
+      image: "ghcr.io/carapace/carapace:v2",
     });
-    expect(containers.pull).toHaveBeenCalledWith("docker", "ghcr.io/openclaw/openclaw:v2");
-    expect(containers.stop).toHaveBeenCalledWith("docker", "openclaw-cell-acme");
-    expect(containers.remove).toHaveBeenCalledWith("docker", "openclaw-cell-acme", false);
-    expect(containers.inspectNetwork).toHaveBeenCalledWith("docker", "openclaw-cell-acme-net");
+    expect(containers.pull).toHaveBeenCalledWith("docker", "ghcr.io/carapace/carapace:v2");
+    expect(containers.stop).toHaveBeenCalledWith("docker", "carapace-cell-acme");
+    expect(containers.remove).toHaveBeenCalledWith("docker", "carapace-cell-acme", false);
+    expect(containers.inspectNetwork).toHaveBeenCalledWith("docker", "carapace-cell-acme-net");
     const [profile, start] = containers.run.mock.calls[0] ?? [];
     expect(start).toBe(true);
     expect(profile).toMatchObject({
-      image: "ghcr.io/openclaw/openclaw:v2",
+      image: "ghcr.io/carapace/carapace:v2",
       hostPort: 19_100,
       memory: "2147483648",
       cpus: "2",
       pidsLimit: 512,
       diskSize: "10g",
-      networkName: "openclaw-cell-acme-net",
+      networkName: "carapace-cell-acme-net",
       environment: {
         HOME: "/home/node",
-        OPENCLAW_GATEWAY_TOKEN: "old-token",
+        CARAPACE_GATEWAY_TOKEN: "old-token",
         FEATURE: "enabled",
         XDG_CACHE_HOME: expectedCache,
       },
       userEnvironmentKeys: keys.split(","),
     });
     expect(profile?.environment).not.toHaveProperty("NODE_VERSION");
-    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/openclaw/openclaw:v2");
+    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/carapace/carapace:v2");
   });
 
   it("passes digest-pinned images verbatim to create and upgrade", async () => {
     const containers = createContainerMock();
-    const digest = `ghcr.io/openclaw/openclaw@sha256:${"a".repeat(64)}`;
+    const digest = `ghcr.io/carapace/carapace@sha256:${"a".repeat(64)}`;
     const service = createFleetService({
       env,
       containers: containers.runtime,
@@ -719,7 +719,7 @@ describe("fleet service", () => {
 
     expect(containers.run).toHaveBeenCalledTimes(2);
     expect(containers.run.mock.calls[1]?.[0].image).toBe("sha256:old-image-id");
-    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/openclaw/openclaw:latest");
+    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/carapace/carapace:latest");
   });
 
   it("restarts the old cell when removal fails after stop", async () => {
@@ -735,8 +735,8 @@ describe("fleet service", () => {
 
     await expect(service.upgrade("acme")).rejects.toThrow(/previous container was restored/iu);
 
-    expect(containers.stop).toHaveBeenCalledWith("docker", "openclaw-cell-acme");
-    expect(containers.start).toHaveBeenCalledWith("docker", "openclaw-cell-acme");
+    expect(containers.stop).toHaveBeenCalledWith("docker", "carapace-cell-acme");
+    expect(containers.start).toHaveBeenCalledWith("docker", "carapace-cell-acme");
     expect(containers.run).not.toHaveBeenCalled();
   });
 
@@ -764,9 +764,9 @@ describe("fleet service", () => {
 
     expect(containers.run).toHaveBeenCalledTimes(2);
     expect(containers.run.mock.calls[1]?.[0].image).toBe("sha256:old-image-id");
-    expect(containers.remove).toHaveBeenCalledWith("docker", "openclaw-cell-acme", true);
+    expect(containers.remove).toHaveBeenCalledWith("docker", "carapace-cell-acme", true);
     expect(containers.removeNetwork).not.toHaveBeenCalled();
-    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/openclaw/openclaw:latest");
+    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/carapace/carapace:latest");
   });
 
   it("restores the previous cell when the replacement container is not running", async () => {
@@ -793,7 +793,7 @@ describe("fleet service", () => {
 
     expect(containers.run).toHaveBeenCalledTimes(2);
     expect(containers.run.mock.calls[1]?.[0].image).toBe("sha256:old-image-id");
-    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/openclaw/openclaw:latest");
+    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/carapace/carapace:latest");
   });
 
   it("restores the previous cell when the replacement crashes after starting", async () => {
@@ -827,7 +827,7 @@ describe("fleet service", () => {
 
     expect(containers.run).toHaveBeenCalledTimes(2);
     expect(containers.run.mock.calls[1]?.[0].image).toBe("sha256:old-image-id");
-    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/openclaw/openclaw:latest");
+    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/carapace/carapace:latest");
   });
 
   it("restores the previous cell when the replacement never becomes healthy", async () => {
@@ -858,7 +858,7 @@ describe("fleet service", () => {
 
     expect(containers.run).toHaveBeenCalledTimes(2);
     expect(containers.run.mock.calls[1]?.[0].image).toBe("sha256:old-image-id");
-    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/openclaw/openclaw:latest");
+    expect(getFleetCell(env, "acme")?.image).toBe("ghcr.io/carapace/carapace:latest");
   });
 
   it("refuses upgrade before pull or removal when the inspected token is missing", async () => {
@@ -884,7 +884,7 @@ describe("fleet service", () => {
       kind: "ok",
       labels: fleetLabels(),
       attachedContainers: [
-        { id: "cell-id", name: "openclaw-cell-acme" },
+        { id: "cell-id", name: "carapace-cell-acme" },
         { id: "peer-id", name: "unexpected-peer" },
       ],
       internal: false,
@@ -941,7 +941,7 @@ describe("fleet service", () => {
       /already allocated/iu,
     );
 
-    expect(containers.remove).toHaveBeenCalledWith("docker", "openclaw-cell-acme", true);
+    expect(containers.remove).toHaveBeenCalledWith("docker", "carapace-cell-acme", true);
     expect(getFleetCell(env, "acme")).toBeUndefined();
   });
 
@@ -985,7 +985,7 @@ describe("fleet service", () => {
     );
 
     expect(containers.run).not.toHaveBeenCalled();
-    expect(containers.removeNetwork).toHaveBeenCalledWith("docker", "openclaw-cell-acme-net");
+    expect(containers.removeNetwork).toHaveBeenCalledWith("docker", "carapace-cell-acme-net");
     expect(getFleetCell(env, "acme")).toBeUndefined();
   });
 
@@ -1040,7 +1040,7 @@ describe("fleet service", () => {
       /reservation changed/iu,
     );
 
-    expect(containers.remove).toHaveBeenCalledWith("docker", "openclaw-cell-acme", true);
+    expect(containers.remove).toHaveBeenCalledWith("docker", "carapace-cell-acme", true);
     expect(containers.start).not.toHaveBeenCalled();
     expect(getFleetCell(env, "acme")).toBeUndefined();
   });
@@ -1082,7 +1082,7 @@ describe("fleet service", () => {
       runningInspection({
         labels: {
           ...fleetLabels(),
-          "openclaw.fleet.owner": "11111111111111111111111111111111",
+          "carapace.fleet.owner": "11111111111111111111111111111111",
         },
       }),
     );
